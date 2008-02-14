@@ -20,7 +20,27 @@
 	echo "<SCRIPT type='text/javascript'>
 			<!--
 				function picture_popup(tuote_tunnus, maxwidth, totalheight, tuoteno) {
-					window.open('$PHP_SELF?tuoteno='+tuoteno+'&ohje=off&toiminto=avaa_kuva&tunnus='+tuote_tunnus+'&laji=tuotekuva', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=0,top = 0, width='+maxwidth+', height='+totalheight);
+					var myWidth = 0, myHeight = 0;
+					if (typeof(window.innerWidth ) == 'number') {
+						//Non-IE
+						myWidth = window.innerWidth;
+						myHeight = window.innerHeight;
+					} else if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
+						//IE 6+ in 'standards compliant mode'
+						myWidth = document.documentElement.clientWidth;
+						myHeight = document.documentElement.clientHeight;
+					} else if (document.body && (document.body.clientWidth || document.body.clientHeight)) {
+						//IE 4 compatible
+						myWidth = document.body.clientWidth;
+						myHeight = document.body.clientHeight;
+					}
+
+					if (maxwidth == '0' && totalheight == '0') {
+						window.open('yhteensopivuus.php?ohje=off&toiminto=avaa_kuva&tunnus='+tuote_tunnus+'&laji=tuotekuva', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=0,top = 0, width='+myWidth+', height='+myHeight);			
+					}
+					else {
+						window.open('$PHP_SELF?tuoteno='+tuoteno+'&ohje=off&toiminto=avaa_kuva&tunnus='+tuote_tunnus+'&laji=tuotekuva', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=0,top = 0, width='+maxwidth+', height='+totalheight);
+					}
 				}
 			//-->
 			</SCRIPT>";
@@ -64,11 +84,24 @@
 
 		$kuvares = mysql_query($query) or pupe_error($query);
 
-		echo "<table border='0' cellspacing='5' width='$maxwidth'>";
+		echo "<table border='0' cellspacing='5' align='center'";
+		if ($maxwidth) {
+			echo "width='$maxwidth'";
+		}
+		echo ">";
 		while ($kuvarow = mysql_fetch_array($kuvares)) {
+			echo "<tr><td class='back' align='center' valign='top'>";
+
 			$tuotekuvausrow = mysql_fetch_array($tuotekuvausres);
-			echo "<tr><td class='back' align='center' valign='top'><img src='".$palvelin2."view.php?id=$kuvarow[tunnus]'></td></tr>";
-			echo "<tr><td class='back' align='center' valign='top'>$tuotekuvausrow[kuvaus]</td></tr>";
+			
+			if ($kuvarow["filetype"] == "application/pdf") {
+				echo "<a href='view.php?id=$kuvarow[tunnus]' target='_top'>".t("Avaa pdf")."</a></td></tr>";
+			}
+			else {
+				echo "<img src='view.php?id=$kuvarow[tunnus]'></td></tr>";
+			}
+
+			echo "<tr><td class='back' align='center' valign='top'>$kuvarow[selite]</td></tr>";
 			echo "<tr><td class='back'><br></td></tr>";
 		}
 		echo "</table>";
@@ -1131,23 +1164,52 @@
 			}
 
 			unset($images_exist);
+			unset($pdf_exist);
+			unset($filetype);
 			
-			$query = "	SELECT MAX(image_width) AS max_width, SUM(image_height) AS total_height, count(liitostunnus) AS kpl
-			 			FROM liitetiedostot 
-						WHERE yhtio='$kukarow[yhtio]' 
-						AND liitos='tuote' 
-						AND liitostunnus='$row[tunnus]'";
-			$kuvares = mysql_query($query) or pupe_error($query);
-			$apurow = mysql_fetch_array($kuvares);
-			$maxwidth = $apurow["max_width"] + 30;
-			$totalheight = $apurow["total_height"] + 40;
+			$filetype_query = "	SELECT * FROM liitetiedostot WHERE yhtio='{$kukarow['yhtio']}' and liitos='tuote' AND liitostunnus='{$row['tunnus']}'";
+			$filetype_result = mysql_query($filetype_query) or pupe_error($filetype_query);
+			
+			$filetype_row = mysql_fetch_array($filetype_result);
 
-			if ($apurow["kpl"] > 0) {
-				$images_exist = 1;
+			if (mysql_num_rows($filetype_result) > 0) {
+				if (in_array("image/jpeg", $filetype_row) or in_array("image/jpg", $filetype_row) or in_array("image/gif", $filetype_row) or in_array("image/png", $filetype_row)) {						
+					list ($prefix, $filetype) = explode("/", $filetype_row["filetype"]);				
+					$filetype = strtolower($filetype);
+
+					if ($filetype == "jpeg" or $filetype == "jpg" or $filetype == "gif" or $filetype == "png") {
+						$query = "	SELECT MAX(image_width) AS max_width, SUM(image_height) AS total_height, count(liitostunnus) AS kpl
+						 			FROM liitetiedostot 
+									WHERE yhtio='$kukarow[yhtio]' 
+									AND liitos='tuote' 
+									AND liitostunnus='$row[tunnus]'";
+						$kuvares = mysql_query($query) or pupe_error($query);
+
+						$apurow = mysql_fetch_array($kuvares);
+						$maxwidth = $apurow["max_width"] + 30;
+						$totalheight = $apurow["total_height"] + 60;
+					
+						if ($apurow["kpl"] > 0) {
+							$images_exist = 1;
+						}
+					}
+				}
+				else if (in_array("application/pdf", $filetype_row)) {
+					$maxwidth = 0;
+					$totalheight = 0;
+					$pdf_exist = 1;
+				}
 			}
-
-			if ($lisatiedot != "" and isset($images_exist)) {
-				echo "<td valign='top' class='back'><input type='button' value='".t("Kuva")."' onClick=\"javascript:picture_popup('$row[tunnus]', '$maxwidth', '$totalheight', '$row[tuoteno]')\"></td>";
+				
+			if ($lisatiedot != "" and (isset($images_exist) or isset($pdf_exist))) {
+				echo "<td class='back'><input type='button' style='width: 55px; height: 20px' value='";
+				if ($pdf_exist) {
+					echo t("Pdf");
+				}
+				else {
+					echo t("Kuva");
+				}
+				echo "' onClick=\"javascript:picture_popup('$row[tunnus]', '$maxwidth', '$totalheight', '$row[tuoteno]')\"></td>";				
 			}
 
 			echo "</tr>";

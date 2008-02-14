@@ -128,14 +128,16 @@ if (isset($tee)) {
 		$i=0;
 		while ($trow=mysql_fetch_array ($result)) {
 			$tilirivi[$i] 	= $trow;
-			$sorttaus[$i] 	= $trow['summa'];
+			$sorttaus[$i] 	= abs($trow['summa']);
 			$i++;
 		}
 		
 		$vastis = $sorttaus;
 		
-		foreach ($sorttaus as $key => $summa) {
-						
+		foreach ($sorttaus as $key) {
+			
+			$summa = $tilirivi[$key]["summa"];
+			
 			//	Onko arrayssa vastasummaa?
 			$v = array_search($summa*-1, $vastis);
 			if($v > 0) {

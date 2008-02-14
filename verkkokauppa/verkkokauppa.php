@@ -605,6 +605,8 @@ if($tee == "jatkatilausta") {
 		$result = mysql_query($query) or pupe_error($query);
 		
 		echo "<font class='message'>".t("Aktivoitiin tilaus %s", $kieli, $tilaus)."</font><br>";
+		
+		$tee = "tilatut";
 	}
 }
 
@@ -877,14 +879,10 @@ if($tee == "tilatut") {
 		$laskurow = mysql_fetch_array($result);
 		
 		$ulos = "<font class='head'>".t("Tilauksen %s tuotteet", $kieli, $kukarow["kesken"])." </font><br>";
-		if($osasto == "" and $try == "") {
-		$ulos .= "<a href='verkkokauppa.php'>";
+		if($osasto != "" and $try != "") {
+			$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\">".t("Takaisin selaimelle")."</a>&nbsp;&nbsp;";
 		}
-		else {
-		$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\">";
-		}
-		$ulos .= "Takaisin selaimelle</a>&nbsp;&nbsp;";
-
+		
 		$query = "	SELECT count(*) rivei
 					FROM tilausrivi 
 					WHERE yhtio = '{$kukarow["yhtio"]}' and otunnus = '{$kukarow["kesken"]}' and tyyppi = 'L'";

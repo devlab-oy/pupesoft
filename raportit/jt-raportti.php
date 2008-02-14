@@ -43,13 +43,13 @@
 			}
 			else if ($toimrow["toim_automaattinen_jtraportti"] == "vk") {
 				// ajetaan joka sunnuntai
-				if (date('N') != 4) {
+				if (date('N') != 7) {
 					continue;
 				}
 			}
 			else if ($toimrow["toim_automaattinen_jtraportti"] == "kk") {
 				// ajetaan kuun 1. pv
-				if (date('j') != 14) {
+				if (date('j') != 1) {
 					continue;
 				}
 			}

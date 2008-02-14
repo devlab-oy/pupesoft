@@ -1,6 +1,6 @@
 <?php
 
-$kieli = strtolower($asiakasrow["kieli"]);
+$kukarow["kieli"] = $kieli = strtolower($asiakasrow["kieli"]);
 
 $p["height"] 		= 10;
 $p["font"] 			= "Times-Roman";
@@ -25,7 +25,7 @@ $rectparam["width"] = 0.3;
 //muutamat funktiot...
 if (!function_exists('alku')) {
 	function alku ($pdf) {
-		global $kukarow, $yhtiorow, $rectparam, $p, $asiakasrow, $pz;
+		global $kukarow, $yhtiorow, $rectparam, $p, $asiakasrow, $pz, $toimrow;
 		
 		$page = $pdf->new_page("a4");
 		
@@ -34,10 +34,19 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(30, 795, $asiakasrow["postino"]." ".$asiakasrow["postitp"], 	$page, $p);
 		$pdf->draw_text(30, 785, $asiakasrow["maa"], 		$page, $p);
 		
-		$pdf->draw_text(30, 760, $yhtiorow["nimi"], 	$page, $p);
-		$pdf->draw_text(30, 750, $yhtiorow["osoite"], 	$page, $p);
-		$pdf->draw_text(30, 740, $yhtiorow["postino"]." ".$yhtiorow["postitp"], 	$page, $p);
-		$pdf->draw_text(30, 730, $yhtiorow["maa"], 		$page, $p);
+		if ($toimrow["nimi"] != "") {
+			// haetaan toimipaikan tiedot jos ne löytyvät, muuten laitetaan yhtiön tiedot
+			$pdf->draw_text(30, 760, $toimrow["nimi"], 	$page, $p);
+			$pdf->draw_text(30, 750, $toimrow["osoite"], 	$page, $p);
+			$pdf->draw_text(30, 740, $toimrow["postino"]." ".$toimrow["postitp"], 	$page, $p);
+			$pdf->draw_text(30, 730, $toimrow["maa"], 		$page, $p);
+		}
+		else {
+			$pdf->draw_text(30, 760, $yhtiorow["nimi"], 	$page, $p);
+			$pdf->draw_text(30, 750, $yhtiorow["osoite"], 	$page, $p);
+			$pdf->draw_text(30, 740, $yhtiorow["postino"]." ".$yhtiorow["postitp"], 	$page, $p);
+			$pdf->draw_text(30, 730, $yhtiorow["maa"], 		$page, $p);
+		}
 
 		$title = t("JÄLKITOIMITUSRAPORTTI");
 		$title = str_replace(array("ä", "ö", "å"), array("Ä", "Ö", "Å"), $title);

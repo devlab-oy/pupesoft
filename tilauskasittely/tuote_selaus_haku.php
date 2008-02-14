@@ -69,7 +69,7 @@
 	}
 	
 	if ($toiminto == "avaa_kuva") {
-
+/*
 		$query = "	SELECT *
 					FROM tuote
 					WHERE yhtio='$kukarow[yhtio]'
@@ -80,6 +80,13 @@
 		 			FROM liitetiedostot 
 					WHERE yhtio='$kukarow[yhtio]' 
 					AND liitos='tuote' 
+					AND liitostunnus='$tunnus'";
+*/
+		$query = "	SELECT tunnus, selite, filetype
+		 			FROM liitetiedostot 
+					WHERE yhtio='$kukarow[yhtio]' 
+					AND liitos='tuote' 
+					AND kayttotarkoitus != 'thumb'
 					AND liitostunnus='$tunnus'";
 
 		$kuvares = mysql_query($query) or pupe_error($query);
@@ -92,7 +99,7 @@
 		while ($kuvarow = mysql_fetch_array($kuvares)) {
 			echo "<tr><td class='back' align='center' valign='top'>";
 
-			$tuotekuvausrow = mysql_fetch_array($tuotekuvausres);
+//			$tuotekuvausrow = mysql_fetch_array($tuotekuvausres);
 			
 			if ($kuvarow["filetype"] == "application/pdf") {
 				echo "<a href='view.php?id=$kuvarow[tunnus]' target='_top'>".t("Avaa pdf")."</a></td></tr>";
@@ -1201,7 +1208,7 @@
 				}
 			}
 				
-			if ($lisatiedot != "" and (isset($images_exist) or isset($pdf_exist))) {
+			if (isset($images_exist) or isset($pdf_exist)) {
 				echo "<td class='back'><input type='button' style='width: 55px; height: 20px' value='";
 				if ($pdf_exist) {
 					echo t("Pdf");

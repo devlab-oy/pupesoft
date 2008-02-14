@@ -1702,23 +1702,39 @@ if ($tee == '') {
 
 			echo "<th align='left'>".t("Toimitustapa").":</th>";
 
-			$extralisa = "";
 			if ($kukarow["extranet"] != "") {
-				$extralisa = " and (extranet = 'K' or selite = '$laskurow[toimitustapa]') ";
+				$query = "	SELECT * FROM (
+								(SELECT toimitustapa.tunnus, toimitustapa.selite, toimitustapa.jarjestys
+								FROM toimitustapa
+								WHERE toimitustapa.yhtio = '$kukarow[yhtio]' and (toimitustapa.extranet = 'K' or toimitustapa.selite = '$extra_asiakas[toimitustapa]')
+								and (toimitustapa.sallitut_maat = '' or toimitustapa.sallitut_maat like '%$laskurow[toim_maa]%'))
+								UNION
+								(SELECT toimitustapa.tunnus, toimitustapa.selite, toimitustapa.jarjestys
+								FROM toimitustapa
+								JOIN asiakkaan_avainsanat ON toimitustapa.yhtio = asiakkaan_avainsanat.yhtio and toimitustapa.selite = asiakkaan_avainsanat.avainsana and asiakkaan_avainsanat.laji = 'toimitustapa' and asiakkaan_avainsanat.liitostunnus = '$laskurow[liitostunnus]'
+								WHERE toimitustapa.yhtio = '$kukarow[yhtio]'
+								and (toimitustapa.sallitut_maat = '' or toimitustapa.sallitut_maat like '%$laskurow[toim_maa]%'))
+							) AS yhd_tt
+							GROUP BY 1
+							ORDER BY 3,2";
 			}
 			else {
-				$extralisa = " and (extranet = '' or selite = '$laskurow[toimitustapa]') ";
+				$query = "	SELECT tunnus, selite
+							FROM toimitustapa
+							WHERE yhtio = '$kukarow[yhtio]' and (extranet = '' or selite = '$laskurow[toimitustapa]')
+							and (sallitut_maat = '' or sallitut_maat like '%$laskurow[toim_maa]%')
+							ORDER BY jarjestys,selite";
 			}
 
-			$query = "	SELECT tunnus, selite
-						FROM toimitustapa
-						WHERE yhtio = '$kukarow[yhtio]' $extralisa
-						and (sallitut_maat = '' or sallitut_maat like '%$laskurow[toim_maa]%')
-						ORDER BY jarjestys,selite";
 			$tresult = mysql_query($query) or pupe_error($query);
 
 			echo "<td><select name='toimitustapa' onchange='submit()' $state>";
-
+			
+			if ($kukarow["extranet"] != "" and mysql_num_rows($tresult) == 0) {
+				echo t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."<br><br>";
+				exit;
+			}
+			
 			while($row = mysql_fetch_array($tresult)) {
 				$sel = "";
 				if ($row["selite"] == $laskurow["toimitustapa"]) {

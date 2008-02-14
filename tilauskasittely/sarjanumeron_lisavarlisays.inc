@@ -151,15 +151,6 @@
 									require ("lisaarivi.inc");
 								}
 								
-								$query = "	UPDATE tilausrivin_lisatiedot
-											SET 
-											positio				= 'Tehdaslisävaruste',
-											muutospvm			= now(),
-											muuttaja			= '$kukarow[kuka]'
-											WHERE yhtio			 = '$kukarow[yhtio]'
-											and tilausrivitunnus = '$lisatty_tun'";
-								$result = mysql_query($query) or pupe_error($query);
-
 								echo "<font class='message'>Lisättiin $kpl kpl tuotetta $tuoteno.</font><br>";
 							}
 						}

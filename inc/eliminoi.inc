@@ -128,15 +128,14 @@ if (isset($tee)) {
 		$i=0;
 		while ($trow=mysql_fetch_array ($result)) {
 			$tilirivi[$i] 	= $trow;
+			$vastis[$i]		= $trow["summa"];
 			$sorttaus[$i] 	= abs($trow['summa']);
 			$i++;
 		}
 		
-		$vastis = $sorttaus;
-		
-		foreach ($sorttaus as $key) {
+		foreach ($tilirivi as $key => $t) {
 			
-			$summa = $tilirivi[$key]["summa"];
+			$summa = $t["summa"];
 			
 			//	Onko arrayssa vastasummaa?
 			$v = array_search($summa*-1, $vastis);
@@ -148,8 +147,9 @@ if (isset($tee)) {
 		}
 
 		echo sizeof($valitut) . " eliminointia tehtiin!<br>";
-
-		for ($key=0; $key<sizeof($sorttaus); $key++) {
+		asort($sorttaus);
+		
+		foreach($sorttaus as $key => $crap) {
 
 			$class = "";
 

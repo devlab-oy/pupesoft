@@ -893,8 +893,8 @@ if($tee == "tilatut") {
 		
 		if($row["rivei"] > 0) {
 			$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilaa')\"; onclick=\"return confirm('".t("Oletko varma, että haluat lähettää tilauksen eteenpäin?")."'); \">Tilaa tuotteet</a>&nbsp;&nbsp;";
-			$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistakori&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\" onclick=\"return confirm('".t("Oletko varma, että haluat mitätöidä tilauksen?")."'); \">Mitätöi tilaus</a>";
 		}		
+		$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistakori&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\" onclick=\"return confirm('".t("Oletko varma, että haluat mitätöidä tilauksen?")."'); \">Mitätöi tilaus</a>";
 
 		$ulos .= "<br><br>";
 
@@ -911,6 +911,8 @@ if($tee == "asiakastiedot") {
 	<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=asiakastiedot', false, true);\">".t("Asiakastiedot")."</a>
 	&nbsp;&nbsp;
 	<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria', false, true);\">".t("Tilaushistoria")."</a>
+	&nbsp;&nbsp;
+	<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&hakutapa=tila&tilaustila=kesken', false, true);\">".t("Keskeneräiset")."</a>
 	<br><br><br>";
 	
 	if($nayta == "") $nayta = "asiakastiedot";
@@ -972,13 +974,21 @@ if($tee == "asiakastiedot") {
 
 
 		if($hakutapa != "") {
-			if(strlen($tilaushaku)>2) {
+			if(strlen($tilaushaku)>2 or $tilaustila != "") {
 				$where = "";
 				if($hakutapa == "viitteet") {
 					$where = "concat_ws('###', viesti, comments, sisviesti2, sisviesti1, asiakkaan_tilausnumero) like ('%".mysql_real_escape_string($tilaushaku)."%')";
 				}
 				elseif($hakutapa == "toimitusosoite") {
 					$where = "concat_ws('###', toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp) like ('%".mysql_real_escape_string($tilaushaku)."%')";
+				}
+				elseif($hakutapa == "tila") {
+					if($tilaustila == "kesken") {
+						$where = " lasku.tila='N'";
+					}
+					else {
+						$where = "";
+					}
 				}
 				
 				if($where != "") {
@@ -1006,11 +1016,19 @@ if($tee == "asiakastiedot") {
 									<td class='back'></td>
 								<tr>";
 						while($laskurow=mysql_fetch_array($result)) {
+							
+							$monista = $jatka = "";
 							if($laskurow["laskunro"] > 0) {
 								$monista = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=monistalasku&laskunro=$laskurow[laskunro]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat monistaa tilauksen?\\n\\nOlemassaoleva tilaus poistetaan.")."')\">".t("Monista")."</a>";
 							}
-							else {
-								$monista = "";
+							
+							if($laskurow["tila"] == "N") {
+								if($laskurow["tunnus"] != $kukarow["kesken"]) {
+									$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=jatkatilausta&tilaus=$laskurow[tunnus]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat jatkaa tilausta %s?", $kieli, $laskurow["tunnus"])."')\">".t("Aktivoi")."</a>";
+								}
+								else {
+									$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=tilatut', false, true);\">".t("Akviivinen")."</a>";
+								}							
 							}
 							
 							echo "	<tr>
@@ -1019,7 +1037,7 @@ if($tee == "asiakastiedot") {
 										<td>{$laskurow["laskutettu"]}</td>														
 										<td>{$laskurow[viesti]}</td>
 										<td>".number_format($laskurow["summa"], 2, ',', ' ')."</td>
-										<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=$hakutapa&tilaushaku=$tilaushaku&tilaus=$laskurow[tunnus]', false, true);\">".t("Näytä")."</a>$monista</td>
+										<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=$hakutapa&tilaushaku=$tilaushaku&tilaus=$laskurow[tunnus]', false, true);\">".t("Näytä")."</a> $jatka $monista</td>
 									</tr>";
 							
 							if($tilaus == $laskurow["tunnus"]) {
@@ -1126,7 +1144,7 @@ if($tee == "asiakastiedot") {
 								$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=jatkatilausta&tilaus=$laskurow[tunnus]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat jatkaa tilausta %s?", $kieli, $laskurow["tunnus"])."')\">".t("Aktivoi")."</a>";
 							}
 							else {
-								$jatka = "<font class='message'>".t("Akviivinen")."</font>";
+								$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=tilatut', false, true);\">".t("Akviivinen")."</a>";
 							}
 						}
 						

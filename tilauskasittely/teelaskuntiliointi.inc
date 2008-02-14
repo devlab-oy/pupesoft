@@ -5,31 +5,25 @@
 $tulos_ulos_tiliointi = "";
 
 //Tehtaan tiliointiaineisto suoraan sql:lla
-$query = "	SELECT tilausrivi.alv alv,
-			if(tuote.tilino != '', tuote.tilino, asiakas.tilino) as tilino,
-			if(tuote.tilino_eu != '', tuote.tilino_eu, asiakas.tilino) as tilino_eu,
-			if(tuote.tilino_ei_eu != '', tuote.tilino_ei_eu, asiakas.tilino) as tilino_ei_eu,
-			if(tuote.kustp != '', tuote.kustp, asiakas.kustannuspaikka) as kustp,
-			if(tuote.kohde != '', tuote.kohde, asiakas.kohde) as kohde ,
-			if(tuote.projekti != '', tuote.projekti, asiakas.projekti) as projekti,
-			tuotteen_alv.tilino alvtilino,
-			tuotteen_alv.kustp alvkustp,
-			tuotteen_alv.kohde alvkohde,
-			tuotteen_alv.projekti alvprojekti,
-			yhtion_toimipaikat.toim_alv yhtioalvtilino,
-			yhtion_toimipaikat.tilino yhtiotilino,
-			yhtion_toimipaikat.kustp yhtiokustp,
-			yhtion_toimipaikat.kohde yhtiokohde,
-			yhtion_toimipaikat.projekti yhtioprojekti,
-			yhtion_toimipaikat.vat_numero vat_numero,
+$query = "	SELECT tilausrivi.alv alv,			
+			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.tilino, '') != '', 		tuotteen_alv.tilino, 		if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.tilino, '') != '', 		yhtion_toimipaikat.tilino, 			if(ifnull(tuote.tilino, '') != '', 			tuote.tilino,	 	if(ifnull(asiakas.tilino, '') != '', 			asiakas.tilino, 			if(ifnull(yhtion_toimipaikat.tilino, '') != '', 		yhtion_toimipaikat.tilino, 			yhtio.myynti))))) tilino, 
+			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.tilino_eu, '') != '', 	tuotteen_alv.tilino_eu, 	if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.tilino_eu, '') != '', 		yhtion_toimipaikat.tilino_eu, 		if(ifnull(tuote.tilino_eu, '') != '', 		tuote.tilino_eu, 	if(ifnull(asiakas.tilino_eu, '') != '', 		asiakas.tilino_eu, 			if(ifnull(yhtion_toimipaikat.tilino_eu, '') != '', 		yhtion_toimipaikat.tilino_eu, 		yhtio.myynti_eu))))) tilino_eu, 
+			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.tilino_ei_eu, '') != '', tuotteen_alv.tilino_ei_eu, 	if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.tilino_ei_eu, '') != '', 	yhtion_toimipaikat.tilino_ei_eu, 	if(ifnull(tuote.tilino_ei_eu, '') != '',	tuote.tilino_ei_eu, if(ifnull(asiakas.tilino_ei_eu, '') != '', 		asiakas.tilino_ei_eu, 		if(ifnull(yhtion_toimipaikat.tilino_ei_eu, '') != '', 	yhtion_toimipaikat.tilino_ei_eu, 	yhtio.myynti_ei_eu))))) tilino_ei_eu, 
+			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.kustp, '') != '', 		tuotteen_alv.kustp, 		if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.kustp, '') != '', 			yhtion_toimipaikat.kustp, 			if(ifnull(tuote.kustp, '') != '', 			tuote.kustp, 		if(ifnull(asiakas.kustannuspaikka, '') != '', 	asiakas.kustannuspaikka, 	if(ifnull(yhtion_toimipaikat.kustp, '') != '', 			yhtion_toimipaikat.kustp, 			''))))) kustp, 
+			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.kohde, '') != '', 		tuotteen_alv.kohde, 		if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.kohde, '') != '', 			yhtion_toimipaikat.kohde, 			if(ifnull(tuote.kohde, '') != '', 			tuote.kohde, 		if(ifnull(asiakas.kohde, '') != '', 			asiakas.kohde, 				if(ifnull(yhtion_toimipaikat.kohde, '') != '', 			yhtion_toimipaikat.kohde, 			''))))) kohde, 
+			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.projekti, '') != '', 	tuotteen_alv.projekti, 		if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.projekti, '') != '', 		yhtion_toimipaikat.projekti, 		if(ifnull(tuote.projekti, '') != '', 		tuote.projekti, 	if(ifnull(asiakas.projekti, '') != '', 			asiakas.projekti, 			if(ifnull(yhtion_toimipaikat.projekti, '') != '', 		yhtion_toimipaikat.projekti, 		''))))) projekti, 			
+			if(ifnull(yhtion_toimipaikat.toim_alv, '') != '', yhtion_toimipaikat.toim_alv, yhtio.alv) alvtilino,						
+			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.tilino_marginaali, '') != '', 	tuotteen_alv.tilino_marginaali, if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.tilino_marginaali, '') != '', 	yhtion_toimipaikat.tilino_marginaali, 	if(ifnull(tuote.tilino_marginaali, '') != '', 	tuote.tilino_marginaali, 	if(ifnull(asiakas.tilino_marginaali, '') != '', asiakas.tilino_marginaali, 	if(ifnull(yhtion_toimipaikat.tilino_marginaali, '') != '', 	yhtion_toimipaikat.tilino_marginaali, 	yhtio.myynti_marginaali))))) myynti_marginaali, 
+			if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(tuotteen_alv.tilino_osto_marginaali, '') != '', 		tuotteen_alv.tilino_osto_marginaali, 	if(ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ifnull(yhtion_toimipaikat.tilino_osto_marginaali, '') != '', 	yhtion_toimipaikat.tilino_osto_marginaali, 	if(ifnull(tuote.tilino_osto_marginaali, '') != '', 	tuote.tilino_osto_marginaali,	 	if(ifnull(asiakas.tilino_osto_marginaali, '') != '', 	asiakas.tilino_osto_marginaali, 	if(ifnull(yhtion_toimipaikat.tilino_osto_marginaali, '') != '', 	yhtion_toimipaikat.tilino_osto_marginaali, 	yhtio.osto_marginaali))))) osto_marginaali, 			
 			if(tilausrivi.alv >= 500 and tilausrivi.kpl < 0 and tilausrivin_lisatiedot.osto_vai_hyvitys = 'O', 'KYLLA', 'EI') marginaaliostot,
-			if(tilausrivi.alv >= 500 and tilausrivi.kpl > 0 and tilausrivin_lisatiedot.osto_vai_hyvitys = 'H', 'KYLLA', 'EI') marginaalihyvitys,			
+			if(tilausrivi.alv >= 500 and tilausrivi.kpl > 0 and tilausrivin_lisatiedot.osto_vai_hyvitys = 'H', 'KYLLA', 'EI') marginaalihyvitys,
 			sum(tilausrivi.rivihinta) summa,
 			sum(tilausrivi.kate) kate,
-			sum(if(tuote.ei_saldoa='', tilausrivi.rivihinta-tilausrivi.kate,0)) varmuutos,
+			sum(if(tuote.ei_saldoa = '', tilausrivi.rivihinta-tilausrivi.kate, 0)) varmuutos,
 			GROUP_CONCAT(tilausrivi.tunnus SEPARATOR ',') tunnukset			
 			FROM tilausrivi
 			JOIN lasku on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
+			LEFT JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
 			LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)			
 			LEFT JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)
 			LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio and tuotteen_alv.tuoteno = tilausrivi.tuoteno and tuotteen_alv.maa = '$lasku[maa]' and tuotteen_alv.maa != '')
@@ -38,7 +32,7 @@ $query = "	SELECT tilausrivi.alv alv,
 			WHERE tilausrivi.uusiotunnus = '$lasku[tunnus]'
 			and tilausrivi.tyyppi		 = 'L'
 			and tilausrivi.yhtio		 = '$kukarow[yhtio]'
-			GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19";
+			GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12";
 $xresult = mysql_query($query) or pupe_error($query);
 
 $onkoalvia = ""; // apumuuttuja, että tiedetään onko alvillista
@@ -61,18 +55,18 @@ else {
 		$tilino			= 0;
 		$tilino_eu		= 0;
 		$tilino_ei_eu	= 0;
-		$kustp			= 0;
-		$kohde			= 0;
-		$projekti		= 0;
+		
+		
+		// kustannuspaikkaa, kohde ja projekti
+		$kustp 		= $xrow["kustp"];
+		$kohde 		= $xrow["kohde"];
+		$projekti 	= $xrow["projekti"];
+		
 
 		// Valitaan myyntitili, jos rivillä on alv yli 500 niin kyseessä on marginaalimyyntiä
 		if ($xrow["alv"] >= 500 and $xrow["marginaaliostot"] == "EI" and $xrow["marginaalihyvitys"] == "EI") {
 			// Valitaan myyntitili, tässä on marginaalimyyntiä
-			$selite 	= "Marginaaliverolasku/Myynti ". $lasku['nimi']." ".$lasku['nimitark'];
-
-			$tilino 		= (int) $yhtiorow['myynti_marginaali'];
-			$tilino_eu 		= (int) $yhtiorow['myynti_marginaali'];
-			$tilino_ei_eu	= (int) $yhtiorow['myynti_marginaali'];
+			$selite = "Marginaaliverolasku/Myynti ". $lasku['nimi']." ".$lasku['nimitark'];
 
 			//Tilioidaan veroton osuus marginaalimyynnistä
 			$tiliointisumma = $xrow['summa'] - $xrow['kate'];
@@ -81,7 +75,7 @@ else {
 			$query = "	INSERT into tiliointi set
 						yhtio 		= '$kukarow[yhtio]',
 						ltunnus 	= '$tunnus',
-						tilino 		= '$tilino',
+						tilino 		= '$xrow[myynti_marginaali]',
 						kustp 		= '$xrow[kustp]',
 						kohde 		= '$xrow[kohde]',
 						projekti	= '$xrow[projekti]',
@@ -99,112 +93,43 @@ else {
 			//Sitten pitää vielä tilioidä itse marginaali joka on normaalia verollista myyntiä
 			$selite 		= "Marginaaliverolasku/Marginaali ". $lasku['nimi']." ".$lasku['nimitark'];
 			
-			//Myyntimarginaali
-			$tiliointisumma = $xrow['kate'];
-			$lukko			= "1";
-
-			//Poistetaan 500 yksikköä alvista
-			$xrow['alv'] = $xrow['alv'] - 500;
-
-			$alv = round($tiliointisumma - ($tiliointisumma / (1+ $xrow['alv'] / 100)), 2);
+			$tilino 		= (int) $xrow['tilino'];
+			$tilino_eu 		= (int) $xrow['tilino_eu'];
+			$tilino_ei_eu 	= (int) $xrow['tilino_ei_eu'];
+			
+			$tiliointisumma = $xrow['kate']; //Myynnin marginaali			
+			$lukko			= "1";			
+			$xrow['alv'] 	= $xrow['alv'] - 500; //Poistetaan 500 yksikköä alvista
+			$alv 			= round($tiliointisumma - ($tiliointisumma / (1+ $xrow['alv'] / 100)), 2);
 			$tiliointisumma -= $alv;
 		}
 		elseif ($xrow["alv"] >= 500 and ($xrow["marginaaliostot"] == "KYLLA" or $xrow["marginaalihyvitys"] == "KYLLA")) {
 			// Valitaan ostotili, tässä on marginaaliostoa
 			$selite 		= "Marginaaliverolasku/Osto ". $lasku['nimi']." ".$lasku['nimitark'];
 
-			$tilino 		= (int) $yhtiorow['osto_marginaali'];
-			$tilino_eu 		= (int) $yhtiorow['osto_marginaali'];
-			$tilino_ei_eu	= (int) $yhtiorow['osto_marginaali'];
+			$tilino 		= (int) $xrow['osto_marginaali'];
+			$tilino_eu 		= (int) $xrow['osto_marginaali'];
+			$tilino_ei_eu	= (int) $xrow['osto_marginaali'];
 
 			$tiliointisumma 	= $xrow['summa'];
 			$xrow["varmuutos"] 	= $xrow["summa"];
-
-			$xrow["alv"] 	= 0;
-			$alv 		 	= 0;
+			$xrow["alv"] 		= 0;
+			$alv 		 		= 0;
 		}
 		else {
-
 			// Valitaan myyntitili, tässä on normaalimyyntiä
-			$selite 	= "Lasku ". $lasku['nimi']." ".$lasku['nimitark'];
+			$selite 		= "Lasku ". $lasku['nimi']." ".$lasku['nimitark'];
 
-			// jos meillä on toimipaikan VAT-numero niin sen tiliöintisäännöt menee kaiken ohi
-			if ($xrow["vat_numero"] != "") {
-
-				// kokeillaan tuotteen alv-liitoksen tiliöintisääntöjä
-				$tilino 	= (int) $xrow['alvtilino'];
-				$kustp		= (int) $xrow["alvkustp"];
-				$kohde 		= (int) $xrow["alvkohde"];
-				$projekti	= (int) $xrow["alvprojekti"];
-
-				// sitten toimipaikan tiliöintisääntöjä
-				if ($tilino == 0) {
-					$tilino = (int) $xrow['yhtiotilino'];
-				}
-				if ($kustp == 0) {
-					$kustp = (int) $xrow["yhtiokustp"];
-				}
-				if ($kohde == 0) {
-					$kohde = (int) $xrow["yhtiokohde"];
-				}
-				if ($projekti == 0) {
-					$projekti = (int) $xrow["yhtioprojekti"];
-				}
-
-			}
-
-			// sitten tuotteen tiliöintisääntöjä
-			if ($tilino == 0) {
-				$tilino = (int) $xrow['tilino'];
-			}
-			if ($tilino_eu == 0) {
-				$tilino_eu = (int) $xrow['tilino_eu'];
-			}
-			if ($tilino_ei_eu == 0) {
-				$tilino_ei_eu = (int) $xrow['tilino_ei_eu'];
-			}
-
+			$tilino 		= (int) $xrow['tilino'];
+			$tilino_eu 		= (int) $xrow['tilino_eu'];
+			$tilino_ei_eu 	= (int) $xrow['tilino_ei_eu'];
+		
 			$tiliointisumma = $xrow['summa'];
-			$alv = round($xrow['alv'] / 100 * $tiliointisumma, 2);
+			$alv 			= round($xrow['alv'] / 100 * $tiliointisumma, 2);
 		}
 
-		// sitten katellaan taas toimipaikan tiliöintisääntöjä
-		if ($tilino == 0) {
-			$tilino = (int) $xrow['yhtiotilino'];
-		}
-		if ($kustp == 0) {
-			$kustp = (int) $xrow["yhtiokustp"];
-		}
-		if ($kohde == 0) {
-			$kohde = (int) $xrow["yhtiokohde"];
-		}
-		if ($projekti == 0) {
-			$projekti = (int) $xrow["yhtioprojekti"];
-		}
 
-		// jos ei vieläkään löydy otetaan tilit yhtiöltä
-		if ($tilino == 0) {
-			$tilino = $yhtiorow['myynti'];
-		}
-		if ($tilino_eu == 0) {
-			$tilino_eu = $yhtiorow['myynti_eu'];
-		}
-		if ($tilino_ei_eu == 0) {
-			$tilino_ei_eu = $yhtiorow['myynti_ei_eu'];
-		}
-
-		// jos kustannuspaikkaa, kohdetta ja projektia ei ole annettu otetaan ne tuotteelta
-		if ($kustp == 0) {
-			$kustp = $xrow["kustp"];
-		}
-		if ($kohde == 0) {
-			$kohde = $xrow["kohde"];
-		}
-		if ($projekti == 0) {
-			$projekti = $xrow["projekti"];
-		}
-
-		// valitaan myyntitili vienin mukaan
+		// Valitaan myyntitili vienin mukaan
 		if ($lasku['vienti'] == 'E') $tilino = $tilino_eu;
 		if ($lasku['vienti'] == 'K') $tilino = $tilino_ei_eu;
 
@@ -231,21 +156,13 @@ else {
 
 			//Tiliöidaan ALV, jos sitä on
 			if ($xrow['alv'] > 0) {
-				
+								
 				$onkoalvia = "kylla"; // apumuuttuja, että tiedetään alempana, että tehtiin alvikirjauksia
-
-				// jos yhtiön toimipaikka löytyy, otetaan alvtilinumero tämän takaa jos se löytyy 
-				if ($lasku["yhtio_toimipaikka"] != '' and $xrow["yhtioalvtilino"] != '') {
-					$alvitilino = $xrow["yhtioalvtilino"];
-				}
-				else {
-					$alvitilino = $yhtiorow["alv"];
-				}
 					
 				$query = "	INSERT into tiliointi set
 							yhtio 		= '$kukarow[yhtio]',
 							ltunnus 	= '$tunnus',
-							tilino 		= '$alvitilino',
+							tilino 		= '$xrow[alvtilino]',
 							kustp 		= '',
 							kohde 		= '',
 							projekti 	= '',
@@ -318,7 +235,7 @@ else {
 						laadittu 	= now()";
 			$laskutusres = mysql_query($query) or pupe_error($query);
 		}
-	} // end while
+	}
 
 	// Kirjataan myyntisaamiset tai kassa
 	if ($mehtorow['kateinen'] != '') {

@@ -334,14 +334,14 @@ if(!function_exists("menu")) {
 		}
 		elseif($try == "") {
 			$val = "<table class='menu'>";
-			$query = "	SELECT distinct try, selitetark trynimi, hinnastoon
+			$query = "	SELECT distinct try, selitetark trynimi
 			 			FROM tuote
 						JOIN avainsana ON tuote.yhtio = avainsana.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY'
 						WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try != '' and status != 'P' and hinnastoon IN ('W', 'V') and tuotemerkki != ''
 						ORDER BY selitetark";
 			$tryres = mysql_query($query) or pupe_error($query);
 			while($tryrow = mysql_fetch_array($tryres)) {
-				
+
 				//	Oletuksena pimitet‰‰n kaikki..
 				$ok = 0;
 				

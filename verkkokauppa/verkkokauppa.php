@@ -602,7 +602,9 @@ if($tee == "jatkatilausta") {
 	if((int) $tilaus > 0) {
 		$kukarow["kesken"] = $tilaus;
 		$query = "	UPDATE kuka SET kesken = '$tilaus' WHERE yhtio ='{$kukarow["yhtio"]}' and kuka = '{$kukarow["kuka"]}'";
-		$result = mysql_query($query) or pupe_error($query);			
+		$result = mysql_query($query) or pupe_error($query);
+		
+		echo "<font class='message'>".t("Aktivoitiin tilaus %s", $kieli, $tilaus)."</font><br>";
 	}
 }
 
@@ -611,6 +613,8 @@ if($tee == "keskeytatilaus") {
 		$kukarow["kesken"] = 0;
 		$query = "	UPDATE kuka SET kesken = 0 WHERE yhtio ='{$kukarow["yhtio"]}' and kuka = '{$kukarow["kuka"]}'";
 		$result = mysql_query($query) or pupe_error($query);			
+		
+		echo "<font class='message'>".t("Jätettiin tilaus %s kesken", $kieli, $tilaus)."</font><br>";
 	}
 }
 
@@ -886,7 +890,9 @@ if($tee == "tilatut") {
 					WHERE yhtio = '{$kukarow["yhtio"]}' and otunnus = '{$kukarow["kesken"]}' and tyyppi = 'L'";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
-
+		
+		$ulos .= " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=keskeytatilaus&tilaus=$laskurow[tunnus]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat jättää tilauksen %s kesken?", $kieli, $laskurow["tunnus"])."')\">".t("Jätä kesken")."</a>&nbsp;&nbsp;";
+		
 		if($row["rivei"] > 0) {
 			$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilaa')\"; onclick=\"return confirm('".t("Oletko varma, että haluat lähettää tilauksen eteenpäin?")."'); \">Tilaa tuotteet</a>&nbsp;&nbsp;";
 			$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistakori&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\" onclick=\"return confirm('".t("Oletko varma, että haluat mitätöidä tilauksen?")."'); \">Mitätöi tilaus</a>";
@@ -1118,11 +1124,11 @@ if($tee == "asiakastiedot") {
 							$monista = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=monistalasku&laskunro=$laskurow[laskunro]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat monistaa tilauksen?")."')\">".t("Monista")."</a>";
 						}
 						if($laskurow["tila"] == "N") {
-							if($laskurow["tunnus"] == $kukarow["kesken"]) {
-								$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=keskeytatilaus&tilaus=$laskurow[tunnus]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat jättää tilauksen %s kesken?", $kieli, $laskurow["tunnus"])."')\">".t("Jätä kesken")."</a>";
+							if($laskurow["tunnus"] != $kukarow["kesken"]) {
+								$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=jatkatilausta&tilaus=$laskurow[tunnus]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat jatkaa tilausta %s?", $kieli, $laskurow["tunnus"])."')\">".t("Aktivoi")."</a>";
 							}
 							else {
-								$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=jatkatilausta&tilaus=$laskurow[tunnus]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat jatkaa tilausta %s?", $kieli, $laskurow["tunnus"])."')\">".t("Aktivoi")."</a>";
+								$jatka = "<font class='message'>".t("Akviivinen")."</font>";
 							}
 						}
 						

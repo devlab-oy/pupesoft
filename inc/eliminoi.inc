@@ -127,23 +127,24 @@ if (isset($tee)) {
 		$summamiinus = 0.0;
 		$i=0;
 		while ($trow=mysql_fetch_array ($result)) {
-			$tilirivi[$i] = $trow;
-			$sorttaus[$i] = abs($trow['summa']);
+			$tilirivi[$i] 	= $trow;
+			$sorttaus[$i] 	= $trow['summa'];
 			$i++;
 		}
-
-		asort($sorttaus);
-
-		foreach ($sorttaus as $key => $val) {
-			if ($edellinen == (-1*$tilirivi[$key]['summa'])) {
-				if (!isset($valitut[$edellinenkey])) {
-					$valitut[$key] = $key;
-					$valitut[$edellinenkey] = $edellinenkey;
-				}
+		
+		$vastis = $sorttaus;
+		
+		foreach ($sorttaus as $key => $summa) {
+						
+			//	Onko arrayssa vastasummaa?
+			$v = array_search($summa*-1, $vastis);
+			if($v > 0) {
+				$valitut[$v] = $v;
+				$valitut[$key] = $v;				
+				unset($vastis[$v]);
 			}
-			$edellinen = $tilirivi[$key]['summa'];
-			$edellinenkey = $key;
 		}
+
 		echo sizeof($valitut) . " eliminointia tehtiin!<br>";
 
 		for ($key=0; $key<sizeof($sorttaus); $key++) {

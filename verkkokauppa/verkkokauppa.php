@@ -592,25 +592,25 @@ if($tee == "monistalasku") {
 		}
 	}
 	
-	$utunnus = monistalasku($laskunro);
-	
-	if($utunnus!==false) {
-		
-		//	Merkataan olemassaoleva tilaus poistetuksia, mutta ei kuitenkana poistetan mittään
-		if($kukarow["kesken"] > 0) {
-			$query = "	UPDATE lasku SET tila = 'D', alatila = 'L' WHERE yhtio ='{$kukarow["yhtio"]}' and tunnus = '{$kukarow["kesken"]}'";
-			$result = mysql_query($query) or pupe_error($query);				
-			
-			$query = "	UPDATE tilausrivi SET tyyppi = 'D' WHERE yhtio ='{$kukarow["yhtio"]}' and otunnus = '{$kukarow["kesken"]}'";
-			$result = mysql_query($query) or pupe_error($query);							
-		}
-		
-		$kukarow["kesken"] = $utunnus;
-		$query = "	UPDATE kuka SET kesken = '$utunnus' WHERE yhtio ='{$kukarow["yhtio"]}' and kuka = '{$kukarow["kuka"]}'";
-		$result = mysql_query($query) or pupe_error($query);	
-	}
-	else {
+	$tilaus = monistalasku($laskunro);
+	if($tilaus===false) {
 		echo "<font class='error'>".t("Tilauksen monistaminen epäonnistui")."!!</font><br>";
+	}
+}
+
+if($tee == "jatkatilausta") {
+	if((int) $tilaus > 0) {
+		$kukarow["kesken"] = $tilaus;
+		$query = "	UPDATE kuka SET kesken = '$tilaus' WHERE yhtio ='{$kukarow["yhtio"]}' and kuka = '{$kukarow["kuka"]}'";
+		$result = mysql_query($query) or pupe_error($query);			
+	}
+}
+
+if($tee == "keskeytatilaus") {
+	if((int) $tilaus > 0) {
+		$kukarow["kesken"] = 0;
+		$query = "	UPDATE kuka SET kesken = 0 WHERE yhtio ='{$kukarow["yhtio"]}' and kuka = '{$kukarow["kuka"]}'";
+		$result = mysql_query($query) or pupe_error($query);			
 	}
 }
 
@@ -1015,7 +1015,7 @@ if($tee == "asiakastiedot") {
 										<td>{$laskurow["laskutettu"]}</td>														
 										<td>{$laskurow[viesti]}</td>
 										<td>".number_format($laskurow["summa"], 2, ',', ' ')."</td>
-										<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=$hakutapa&tilaushaku=$tilaushaku&tilaus=$laskurow[tunnus]', false, true);\">".t("Avaa")."</a>$monista</td>
+										<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=$hakutapa&tilaushaku=$tilaushaku&tilaus=$laskurow[tunnus]', false, true);\">".t("Näytä")."</a>$monista</td>
 									</tr>";
 							
 							if($tilaus == $laskurow["tunnus"]) {
@@ -1113,11 +1113,17 @@ if($tee == "asiakastiedot") {
 										</tr>";
 						}
 						
+						$monista = $jatka ="";
 						if($laskurow["laskunro"] > 0) {
-							$monista = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=monistalasku&laskunro=$laskurow[laskunro]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat monistaa tilauksen?\\n\\nOlemassaoleva tilaus poistetaan.")."')\">".t("Monista")."</a>";
+							$monista = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=monistalasku&laskunro=$laskurow[laskunro]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat monistaa tilauksen?")."')\">".t("Monista")."</a>";
 						}
-						else {
-							$monista = "";
+						if($laskurow["tila"] == "N") {
+							if($laskurow["tunnus"] == $kukarow["kesken"]) {
+								$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=keskeytatilaus&tilaus=$laskurow[tunnus]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat jättää tilauksen %s kesken?", $kieli, $laskurow["tunnus"])."')\">".t("Jätä kesken")."</a>";
+							}
+							else {
+								$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=jatkatilausta&tilaus=$laskurow[tunnus]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat jatkaa tilausta %s?", $kieli, $laskurow["tunnus"])."')\">".t("Aktivoi")."</a>";
+							}
 						}
 						
 						$tilaukset[$tila] .= "	<tr>
@@ -1125,7 +1131,7 @@ if($tee == "asiakastiedot") {
 													<td>{$laskurow["aika"]}</td>
 													<td>{$laskurow[viesti]}</td>
 													<td>".number_format($laskurow["summa"], 2, ',', ' ')."</td>
-													<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=$tila&tilaus=$laskurow[tunnus]', false, true);\">".t("Avaa")."</a> $monista</td>
+													<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=$tila&tilaus=$laskurow[tunnus]', false, true);\">".t("Näytä")."</a> $jatka $monista</td>
 												</tr>$lisa";
 					}				
 				}			

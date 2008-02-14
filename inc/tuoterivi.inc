@@ -43,6 +43,7 @@
 			$ulos .= "<option value=''>".t("Normaali / Valmiste")."</option>";
 			$ulos .= "<option value='R' $sel[R]>".t("Raaka-aine")."</option>";
 			$ulos .= "<option value='K' $sel[K]>".t("Palvelu")."</option>";
+			$ulos .= "<option value='M' $sel[M]>".t("Muu/Informatiivinen")."</option>";
 		}
 		$ulos .= "</select></td>";
 

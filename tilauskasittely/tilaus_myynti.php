@@ -4166,8 +4166,7 @@ if ($tee == '') {
 								<input type='hidden' name='toim' 			value = '$toim'>
 								<input type='hidden' name='lopetus' 		value = '$lopetus'>
 								<input type='hidden' name='projektilla' 	value = '$projektilla'>
-								<input type='hidden' name='lisavarusteita' 	value = 'ON'>
-								<input type='hidden' name='perheid' 		value = '$row[perheid]'>
+								<input type='hidden' name='lisavarusteita' 	value = 'ON'>								
 								<input type='hidden' name='perheid2' 		value = '$row[tunnus]'>";
 
 						$lislask = 0;

@@ -772,7 +772,7 @@
 
 								// jos ollaan laittamassa muuta tuotetta kun mit‰ tilattiin, lis‰t‰‰n rivikommentti
 								if (strtoupper($myy_tuoteno[$indeksi]) != strtoupper($alkupera_trow["tuoteno"]) and $myy_tyyppi[$indeksi] == "NORMAALI") {
-									$kommentti .= " ".t("Korvaa tuotteen")." $alkupera_trow[tuoteno]";
+									$kommentti .= " ".t("HUOM! Korvaa tuotteen")." $alkupera_trow[tuoteno]";
 
 									// oletetaan, ett‰ meill‰ on $edi_tyyppi muuttuja viritetty editilaus_in.inc failista
 									if ((int) $rivinumero != 0 and $edi_tyyppi != "" and $korvaavan_isaa_myyty == 1) {

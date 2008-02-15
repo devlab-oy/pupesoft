@@ -564,7 +564,7 @@
 					if ($mukaan == "ytunnus" and $osoitetarrat == "") {
 						if ($group!="") $group .= ",asiakas.tunnus";
 						else $group  .= "asiakas.tunnus";
-						$select .= "concat_ws(' ',asiakas.ytunnus,if(asiakas.toim_ovttunnus='',NULL,asiakas.toim_ovttunnus)) ytunnus, concat_ws('<br>',concat_ws(' ',asiakas.nimi,asiakas.nimitark),if(asiakas.toim_nimi='' and asiakas.nimi!=asiakas.toim_nimi,NULL,concat_ws(' ',asiakas.toim_nimi,asiakas.toim_nimitark))) nimi, ";
+						$select .= "concat_ws('<br>',asiakas.ytunnus,if(asiakas.toim_ovttunnus='',NULL,asiakas.toim_ovttunnus)) ytunnus, concat_ws('<br>',concat_ws(' ',asiakas.nimi,asiakas.nimitark),if(asiakas.toim_nimi!='' and asiakas.nimi!=asiakas.toim_nimi,concat_ws(' ',asiakas.toim_nimi,asiakas.toim_nimitark),NULL)) nimi, concat_ws('<br>',asiakas.postitp,if(asiakas.toim_postitp!='' and asiakas.postitp!=asiakas.toim_postitp,asiakas.toim_postitp,NULL)) postitp, ";
 						$order  .= "asiakas.ytunnus,";
 						$gluku++;
 					}

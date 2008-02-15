@@ -42,6 +42,10 @@ $xrkpl 		= array();
 $rkpl 		= array();
 $xrivino 	= array();
 $rrivino	= array();
+$xriviviite = array();
+$riviviite	= array();
+$xriviaika = array();
+$riviaika	= array();
 
 if (sizeof($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
@@ -60,6 +64,13 @@ if (sizeof($tuotetiedot) > 0) {
 		$xrivino[$i] 	= $tuotetieto->xpath('Group29/RFF[@eC506.1153="CR"]/@eC506.1154');
 		$rrivino[$i]	= $xrivino[$i][0];
 
+		//	viite (EuroCard)
+		$xriviviite[$i] = $tuotetieto->xpath('Group29/RFF[@eC506.1153="VN"]/@eC506.1154');
+		$riviviite[$i]	= $xriviviite[$i][0];
+		
+		//	Tapahtumapäivä
+		$xriviaika[$i] = $tuotetieto->xpath('DTM[@eC507.2005="11"]/@eC507.2380');
+		$riviaika[$i]	= $xriviaika[$i][0];
 
 		// jotkut toimittajat lähettää laskutetun summan 47 segmentissä eikä 12 niinku kuuluis
 		if ((float) $rkpl[$i] == 0) {

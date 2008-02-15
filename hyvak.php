@@ -412,7 +412,7 @@
 			$query = "select * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 			$toimires = mysql_query($query) or pupe_error($query);
 			$toimirow = mysql_fetch_array($toimires);
-
+			
 			//	P‰ivitet‰‰n tapvm ja viesti laskulle
 			$viesti = t("Matkalasku").date("d").".".date("m").".".date("Y");
 			$query = " update lasku set tapvm=now(), erpcm=DATE_ADD(now(), INTERVAL {$toimirow["oletus_erapvm"]} DAY), viesti ='$viesti' where yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
@@ -1263,11 +1263,15 @@
 
 			// Onko tiliˆinti ok?
 			echo "<table><tr>";
-			if ($ok == 1) {
-				echo "<td class='back'><form action = '$PHP_SELF' method='post'>
-							<input type='hidden' name = 'tunnus' value='$tunnus'>
-							<input type='hidden' name = 'tee' value='H'>
-							<input type='Submit' value='".t("Hyv‰ksy tiliˆinti ja lasku")."'>
+			
+			$query = "select tunnus from toimi where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]' and laskun_erittely != ''";
+			$toimires = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($toimires)==1) {
+				echo "<td class='back'><form action = 'matkalasku.php' method='get'>
+							<input type='hidden' name = 'tilausnumero' value='$tunnus'>
+							<input type='hidden' name = 'tee' value='ERITTELE'>
+							<input type='hidden' name = 'lopetus' value='".urlencode("hyvak.php?tunnus={$laskurow["tunnus"]}")."'>						
+							<input type='Submit' value='".t("Kululaskun erittely")."'>
 							</form></td>";
 			}
 			
@@ -1279,7 +1283,15 @@
 							<input type='Submit' value='".t("Tarkastele matkalaskua")."'>
 							</form></td>";				
 			}
-
+			
+			if ($ok == 1) {
+				echo "<td class='back'><form action = '$PHP_SELF' method='post'>
+							<input type='hidden' name = 'tunnus' value='$tunnus'>
+							<input type='hidden' name = 'tee' value='H'>
+							<input type='Submit' value='".t("Hyv‰ksy tiliˆinti ja lasku")."'>
+							</form></td>";
+			}
+			
 			// N‰ytet‰‰n alv-erittely, jos on useita kantoja.
 			if ($naytalisa != '') {
 				$query = "	SELECT vero, sum(summa) veroton, round(sum(summa*vero/100),2) 'veron m‰‰r‰', round(sum(summa*(1+vero/100)),2) verollinen from tiliointi

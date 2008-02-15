@@ -362,6 +362,21 @@
 		$jatko = 0;
 	}
 	
+	if (mysql_field_name($result, $i) == "laskun_erittely") {
+
+		$selo = $sels = "";
+		if ($trow[$i] == 'S') $sels = "selected";
+		else $selo = "selected";
+		
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value='' $selo>Ostolaskua ei voi eritellä</option>";
+		$ulos .= "<option value='S' $sels>Ostolaskun voi eritellä</option>";
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
+	}
+	
+
 	
 	if (mysql_field_name($result, $i) == "tyyppi") {
 

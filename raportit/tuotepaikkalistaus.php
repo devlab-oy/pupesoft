@@ -116,14 +116,16 @@
 				fclose($fh);
 
 				if ($komento["Tuotepaikkalistaus"] != '') {
+					exec("a2ps -o ".$filenimi.".ps --no-header --columns=1 -r --chars-per-line=75 --margin=0 --borders=0 $filenimi");
 					// itse print komento...
-					$line = exec("$komento[Tuotepaikkalistaus] ".$filenimi);
+					$line = exec("$komento[Tuotepaikkalistaus] ".$filenimi, $output);
 				}
 				
 				echo "<font class='message'>".t("Tuotepaikkalistaus tulostuu")."!</font><br><br>";
 
 				//poistetaan tmp file samantien kuleksimasta...
 				system("rm -f $filenimi");
+				system("rm -f ".$filenimi.".ps");
 				$tee = "";
 			}
 		}

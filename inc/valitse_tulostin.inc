@@ -39,7 +39,8 @@
 		<input type='hidden' name='prosmuutos' value='$prosmuutos'>
 		<input type='hidden' name='kplmuutos' value='$kplmuutos'>
 		<input type='hidden' name='tuotemerkki' value='$tuotemerkki'>
-		<input type='hidden' name='rajaus' value='$rajaus'>		
+		<input type='hidden' name='rajaus' value='$rajaus'>
+		<input type='hidden' name='jarjestys' value='$jarjestys'>
 		";
 		
 		if ($nappikeikalle == 'menossa') {

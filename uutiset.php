@@ -478,7 +478,7 @@ if ($tee == '') {
 						$isizelogo[0] = round($lisatietorow["image_width"]*$kerroin);
 						$isizelogo[1] = round($lisatietorow["image_height"]*$kerroin);
 																		
-						passthru("/usr/bin/convert -resize ".$isizelogo[0]."x".$isizelogo[1]." -quality 80 +profile * ".$nimi1." ".$nimi2, $palautus);
+						passthru("/usr/bin/convert -resize ".$isizelogo[0]."x".$isizelogo[1]." -quality 80 +profile \"*\" ".$nimi1." ".$nimi2, $palautus);
 						
 						// Tallennetaa skeilattu kuva						
 						$ltsc = tallenna_liite($nimi2, "kalenteri", 0, $lisatietorow["selite"], '', $lisatietorow["tunnus"]);

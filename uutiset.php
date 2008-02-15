@@ -463,7 +463,7 @@ if ($tee == '') {
 				if (mysql_num_rows($lisatietores) > 0) {
 					$lisatietorow = mysql_fetch_array($lisatietores);
 					
-					if ($lisatietorow["image_width"] > 130) {
+					if ($lisatietorow["image_width"] > 130 or $lisatietorow["image_width"] == 0) {
 						// Tehd‰‰n nyt t‰h‰n t‰llanen convert juttu niin k‰ytt‰j‰ien megakokoiset kuvat eiv‰t j‰‰ niin isoina kantaan
 						$nimi1 = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
@@ -472,13 +472,8 @@ if ($tee == '') {
 						fclose($fh);
 
 						$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".jpg";
-												
-						$kerroin = 130/$lisatietorow["image_width"];
-						
-						$isizelogo[0] = round($lisatietorow["image_width"]*$kerroin);
-						$isizelogo[1] = round($lisatietorow["image_height"]*$kerroin);
-																		
-						passthru("/usr/bin/convert -resize ".$isizelogo[0]."x".$isizelogo[1]." -quality 80 +profile \"*\" ".$nimi1." ".$nimi2, $palautus);
+																														
+						passthru("/usr/bin/convert -resize 130x -quality 80 +profile \"*\" ".$nimi1." ".$nimi2, $palautus);
 						
 						// Tallennetaa skeilattu kuva						
 						$ltsc = tallenna_liite($nimi2, "kalenteri", 0, $lisatietorow["selite"], '', $lisatietorow["tunnus"]);

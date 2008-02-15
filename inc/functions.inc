@@ -3653,6 +3653,15 @@ if(!function_exists("enable_ajax")) {
 			if (http.readyState == 4) {
 				var response = http.responseText;
 				document.getElementById(id).innerHTML = response;
+				
+				var container = document.getElementById(id);
+				var allNewScripts = container.getElementsByTagName('script');
+				c=allNewScripts.length-1;
+				if(c>1) {
+					for (x=0;x<=c;x++) {
+						eval(allNewScripts[x].innerHTML);
+					}
+				}
 			}
 		}
 		
@@ -4095,11 +4104,40 @@ function popUp(e, oi, offsetX, offsetY, html) {
 		}
 
 		// relatiivinen sijainti
-		if(!offsetY) offsetY=-10;
-		if(!offsetX) offsetX=-10;
+		if(e.type=="keyup") {
+			if(!offsetY) offsetY=-10;
+			if(!offsetX) offsetX=-10;
 
-		var y = getMouseY(e)-(offsetY);
-		var x = getMouseX(e)-(offsetX);
+			kohde=e.target;
+			var y = 0;
+			while( kohde != null ) {
+				var l = kohde.offsetTop;
+				if(l > 0) {
+					y += l;
+				}
+				kohde = kohde.offsetParent;
+			}
+
+			kohde=e.target;
+			var x = 0;
+			while( kohde != null ) {
+				var l = kohde.offsetLeft;
+				if(l > 0) {
+					x += l;
+				}
+				kohde = kohde.offsetParent;
+			}
+		}
+		else {
+			if(!offsetY) offsetY=-10;
+			if(!offsetX) offsetX=-10;
+
+			var y = getMouseY(e);
+			var x = getMouseX(e);
+		}
+		
+		var y = y-(offsetY);
+		var x = x-(offsetX);
 		
 		var de = document.getElementById(oi);
 		var ds = de.style;
@@ -4524,6 +4562,81 @@ if(!function_exists("decodeURI")) {
 	}	
 }
 
+if(!function_exists("muistiin")) {
+	function muistiin ($muisti, $nimi, $muistettava, $exclude="") {
+		global $kukarow;
+
+		if($muisti == "" or $nimi == "" or !is_array($muistettava)) {
+			return false;
+		}
+		
+		if(!is_array($exclude)) {
+			$exclude = array();
+		}
+
+		//	Poistetaan vanha kysely sekä tmpquery
+		$query = "	DELETE 
+					FROM muisti
+					WHERE yhtio='$kukarow[yhtio]' and haku = '$muisti' and kuka = '$kukarow[kuka]' and nimi = '$nimi'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		foreach($muistettava as $key => $value) {
+
+			if(!in_array($key, $exclude)) {
+
+				//	Koitetaan arpoa pari speciaalia datatyyppiä
+				$array = "";							
+				if(is_array($value)) {
+					$value = serialize($value);
+					$array = "X";
+				}
+
+				$query = "	INSERT INTO muisti SET
+								yhtio		= '$kukarow[yhtio]',
+								kuka		= '$kukarow[kuka]',
+								haku		= '$muisti',
+								nimi		= '$nimi',
+								var			= '$key',
+								value		= '".mysql_real_escape_string($value)."',
+								array 		= '$array',
+								luontiaika	= now(),
+								laatija		= '$kukarow[kuka]',
+								muokattu	= now(),
+								muokannut	= '$kukarow[kuka]'";
+				$result = mysql_query($query) or pupe_error($query);				
+			}
+		}
+		
+		return true;
+	}
+}
+
+if(!function_exists("muistista")) {
+	function muistista ($muisti, $nimi) {
+		global $kukarow;
+		
+		$query = "	SELECT *
+					FROM muisti
+					WHERE yhtio='$kukarow[yhtio]' and haku = '$muisti' and kuka = '$kukarow[kuka]' and nimi = '$nimi'";
+		$result = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($result)>0) {
+			$retval = array();
+			while($row = mysql_fetch_array($result)) {
+
+				if($row["array"] != "") {
+					$retval[$row["var"]] = unserialize($row["value"]);
+				}
+				else {
+					$retval[$row["var"]] = stripslashes($row["value"]);
+				}
+			}
+			return $retval;
+		}
+		
+		return false;
+	}
+}
+
 if(!function_exists("aja_kysely")) {
 	function aja_kysely() {
 		global $kukarow, $hakukysely, $aja_kysely, $uusi_kysely, $tallenna_muutokset, $poista_kysely, $_POST;
@@ -4932,4 +5045,208 @@ if (! function_exists('hae_liite')) {
 	}
 }
 
+if(!function_exists("nayta_asiakashaku")) {
+	function nayta_asiakashaku($liitostunnus, $formi, $vars="") {
+		global $kukarow;
+		
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($result) == 1) {
+			$asiakasrow = mysql_fetch_array($result);
+							
+			$disabled 	= "DISABLED";
+			$nimi 		= $asiakasrow["nimi"]." ".$asiakasrow["nimitark"];
+			
+		}
+		else {
+			$disabled 	= "";
+			$nimi 		= "";
+			$id			= "";
+		}
+
+		return "<input type='hidden' id='liitos' name='liitostunnus'><input type='text' id='haku' value='$nimi' name='haku' size='50' onkeyup=\"popUp(event, 'asiakashaku', '0', '-20', '{$_SERVER["SCRIPT_NAME"]}?tee=ASIAKASHAKU&formi=$formi&url={$_SERVER["SCRIPT_NAME"]}&haku='+this.value);\" $disabled>&nbsp;&nbsp;<a href=\"javascript: document.getElementById('haku').disabled=false; document.getElementById('haku').value='';\">".t("Vaihda asiakasta")."</a>";
+	}
+}
+
+if(!function_exists("tee_asiakashaku")) {
+	function tee_asiakashaku($ytunnus, $asiakasid=0, $formi, $div) {
+		global $yhtiorow, $kukarow;
+				
+		if (trim($konserni) != '') {
+			$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
+			$result = mysql_query($query) or pupe_error($query);
+			$konsyhtiot = "";
+
+			while ($row = mysql_fetch_array($result)) {
+				$konsyhtiot .= " '".$row["yhtio"]."' ,";
+			}
+			$konsyhtiot = " yhtio in (".substr($konsyhtiot, 0, -1).") ";
+		}
+		else {
+			$konsyhtiot = " yhtio = '$kukarow[yhtio]' ";
+		}
+
+		$ytunnus = addslashes(trim($ytunnus));
+		$limit   = 300; // montako riviä on maksimi
+		$monta   = 0;
+
+		//	Jos käyttäjällä on valittu piirejä niin sallitaan vain ko. piirin/piirien hakeminen
+		if($kukarow["piirit"] != "") {
+			$asiakasrajaus = "and piiri IN ($kukarow[piirit])";
+		}
+		else {
+			$asiakasrajaus="";
+		}
+		if($div == "") $div = "ajax_menu";
+		
+		if (is_numeric($asiakasid) and $asiakasid > 0) {
+			$query	= "	SELECT *
+						FROM asiakas
+						WHERE $konsyhtiot and tunnus='$asiakasid' $asiakasrajaus";
+			$result = mysql_query($query) or pupe_error($query);
+			$monta  = mysql_num_rows($result);
+		}
+		elseif (strlen($ytunnus) >= 3) {
+			if (substr($ytunnus,0,1) == "£") {
+				// jos eka merkki £ etsitään laskun tunnuksella
+				// eka merkki pois alusta
+				$ytunnus = substr($ytunnus, 1);
+
+				$query  = "	select *, concat('£', tunnus) tunnus, concat('£', tunnus) ytunnus, ytunnus spec_ytunnus, liitostunnus spec_tunnus
+							FROM lasku
+							WHERE $konsyhtiot and tunnus='$ytunnus'";
+				$result = mysql_query($query) or pupe_error($query);
+				$monta  = mysql_num_rows($result);
+			}
+
+			if (substr($ytunnus,0,1) == "*") {
+				// jos eka merkki on * etsitään laskuilta asiakastietoja
+
+				// eka merkki pois alusta
+				$ytunnus = substr($ytunnus, 1);
+
+				// kokeillaan ihan asiakkaan nimellä laskulta
+				$query	= "	SELECT nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, concat('£',max(tunnus)) ytunnus, concat('£',max(tunnus)) tunnus, yhtio
+							FROM lasku use index (asiakasnimi)
+							WHERE $konsyhtiot and tila != 'D' and match (nimi) against ('$ytunnus*' IN BOOLEAN MODE)
+							group by 1,2,3,4,5 order by 1";
+				$result = mysql_query($query) or pupe_error($query);
+				$monta  = mysql_num_rows($result);
+
+				if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
+			}
+
+			if ($monta == 0  and substr($ytunnus,0,1) == "#") {
+				// jos eka merkki on # etsitään toimitusnimen perusteella
+
+				// eka merkki pois alusta
+				$ytunnus = substr($ytunnus, 1);
+
+				// kokeillaan ihan asiakkaan nimellä laskulta
+				$query	= "	SELECT toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, nimi, nimitark, osoite, postino, postitp, concat('£',max(tunnus)) ytunnus, concat('£',max(tunnus)) tunnus, yhtio
+							FROM lasku use index (asiakastoim_nimi)
+							WHERE $konsyhtiot and tila != 'D' and match (toim_nimi) against ('$ytunnus*' IN BOOLEAN MODE)
+							group by 1,2,3,4,5 order by 1";
+				$result = mysql_query($query) or pupe_error($query);
+				$monta  = mysql_num_rows($result);
+
+				if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
+			}
+
+
+			if ($toim == "TYOMAARAYS") {
+				$query = "	SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, lasku.yhtio
+							FROM lasku
+							JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
+							WHERE lasku.yhtio='$kukarow[yhtio]'						
+							and lasku.tila in ('A','L','N')
+							and tyomaarays.rekno = '$ytunnus'
+							group by 1,2,3,4,5 order by 1
+							LIMIT 50";
+				$result = mysql_query($query) or pupe_error($query);
+				$monta  = mysql_num_rows($result);
+
+				if ($monta == 0) {
+					$query = "	SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, lasku.yhtio
+								FROM lasku
+								JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
+								WHERE lasku.yhtio='$kukarow[yhtio]'						
+								and lasku.tila in ('A','L','N')
+								and tyomaarays.valmnro = '$ytunnus'
+								group by 1,2,3,4,5 order by 1
+								LIMIT 50";
+					$result = mysql_query($query) or pupe_error($query);
+					$monta  = mysql_num_rows($result);
+				}
+			}
+
+			if ($monta == 0) {
+				// exactihaku
+				$query	= "	(SELECT * FROM asiakas use index (ytunnus_index) WHERE $konsyhtiot and ytunnus = '$ytunnus' and ytunnus!='' and laji != 'P' $asiakasrajaus)
+							UNION
+							(SELECT * FROM asiakas use index (asno_index) WHERE $konsyhtiot and asiakasnro = '$ytunnus' and asiakasnro!=0 and laji != 'P' $asiakasrajaus)
+							UNION
+							(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus = '$ytunnus' and ovttunnus!='' and laji != 'P' $asiakasrajaus)
+							UNION
+							(SELECT * FROM asiakas use index (toim_ovttunnus_index) WHERE $konsyhtiot and toim_ovttunnus = '$ytunnus' and toim_ovttunnus!='' and laji != 'P' $asiakasrajaus)
+							ORDER BY nimi";
+				$result = mysql_query($query) or pupe_error($query);
+				$monta  = mysql_num_rows($result);
+			}
+
+			if ($monta == 0) {
+				// kokeillaan ytunnuksen alulla
+				$query	= "	SELECT *
+							FROM asiakas use index (ytunnus_index)
+							WHERE $konsyhtiot 
+							and ytunnus like '$ytunnus%' 
+							and ytunnus!=''
+							and laji != 'P'
+							$asiakasrajaus
+							ORDER BY asiakas.nimi";
+				$result = mysql_query($query) or pupe_error($query);
+				$monta  = mysql_num_rows($result);
+			}
+
+			if ($monta == 0 and is_string($ytunnus)) {
+				// arvailuhaku
+				$query	= "	(SELECT * FROM asiakas use index (asiakasnimi) WHERE $konsyhtiot and nimi like '%$ytunnus%' and nimi!='' and laji != 'P' $asiakasrajaus)
+							UNION
+							(SELECT * FROM asiakas use index (asiakasnimitark) WHERE $konsyhtiot and nimitark like '%$ytunnus%' and nimitark!='' and laji != 'P' $asiakasrajaus)
+							UNION
+							(SELECT * FROM asiakas use index (asiakastoim_nimi) WHERE $konsyhtiot and toim_nimi like '%$ytunnus%' and toim_nimi!='' and laji != 'P' $asiakasrajaus)
+							UNION
+							(SELECT * FROM asiakas use index (asiakastoim_nimitark) WHERE $konsyhtiot and toim_nimitark like '%$ytunnus%' and toim_nimitark!='' and laji != 'P' $asiakasrajaus)
+							UNION
+							(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus like '%$ytunnus%' and ovttunnus!='' and laji != 'P' $asiakasrajaus)
+							UNION
+							(SELECT * FROM asiakas WHERE $konsyhtiot and postitp like '%$ytunnus%' and postitp!='' and laji != 'P' $asiakasrajaus)
+							ORDER BY nimi";
+				$result = mysql_query($query) or pupe_error($query);
+				$monta  = mysql_num_rows($result);
+			}
+		}
+		
+		if($monta > 0 and $monta < 200) {
+			echo "<table>
+					<caption>Valitse asiakas formi $formi</caption>
+					<tr>
+						<th style='border: 1px solid;'>".t("Asiakas")."</th><th style='border: 1px solid;'>".t("Toimitusosoite")."</th><td></td>
+					</tr>";
+			while($row = mysql_fetch_array($result)) {
+				//ajaxPost('$formi', '$urli?' , '$div', false, true);
+				echo "
+					<tr class='aktiivi'>
+						<td style='border: 1px solid;'>$row[nimi] $row[nimitark]</td>
+						<td style='border: 1px solid;'>$row[toim_nimi] $row[toim_nimitark]</td>
+						<td><a href='' onclick=\"document.getElementById('liitos').value='$row[tunnus]'; asval=document.getElementById('asiakashaku'); asval.innerHTML=''; asval.style.display='none'; ajaxPost('$formi', '$urli?from=asiakasvalinta' , '$div', false, true); return false;\">".t("Valitse")."</a></td>
+					</tr>";
+			}
+			
+			echo "</table>";
+		}
+	} 
+}
 ?>

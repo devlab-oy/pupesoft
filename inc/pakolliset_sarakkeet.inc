@@ -181,6 +181,10 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				$wherelliset = array("TYYPPI", "LUOKKA");
 				break;
+			case "liitetiedostot" :
+				$pakolliset = array("LIITOS", "LIITOSTUNNUS", "KAYTTOTARKOITUS", "FILENAME");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM", "DATA", "IMAGE_BITS", "IMAGE_CHANNELS", "IMAGE_HEIGHT", "IMAGE_WIDTH", "FILETYPE", "FILESIZE");
+				break;
 			default :
 				$pakolliset = array("TUNTEMATON_TAULU");
 				$kielletyt = array();

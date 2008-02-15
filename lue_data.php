@@ -916,6 +916,7 @@ else {
 					<option value='etaisyydet'>".t("Etäisyydet varastosta")."</option>
 					<option value='hinnasto'>".t("Hinnasto")."</option>
 					<option value='kalenteri'>".t("Kalenteritietoja")."</option>
+					<option value='liitetiedostot'>".t("Liitetiedostot")."</option>
 					<option value='maksuehto'>".t("Maksuehto")."</option>
 					<option value='perusalennus'>".t("Perusalennukset")."</option>
 					<option value='rahtimaksut'>".t("Rahtimaksut")."</option>

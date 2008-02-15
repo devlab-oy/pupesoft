@@ -54,12 +54,12 @@ if ($tee == 'LISAA') {
 		$liitostunnus = 0;
 		
 		$retval = tarkasta_liite("userfile");
+		
 		if($retval !== true) {
 			echo $retval;
 		}
 		else {
-			$liitostunnus = tallenna_liite("userfile", "kalenteri", 0, $selite);
-			$kuva = $liitostunnus;
+			$kuva = tallenna_liite("userfile", "kalenteri", 0, $selite);
 		}
 
 		$uutinen = nl2br(strip_tags($uutinen, '<a>'));
@@ -319,7 +319,7 @@ if ($tee == "PRINTTAA") {
 		//-->
 		</script>";
 
-	$query = "	select *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
+	$query = "	SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
 				from kalenteri
 				left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
 				where tyyppi='$tyyppi'
@@ -422,10 +422,17 @@ if ($tee == '') {
 		$ehto = "kalenteri.yhtio='$kukarow[yhtio]'";
 	}
 
-	$query = "	select *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
+	if ($kukarow['kieli'] == $yhtiorow['kieli']) {
+		$lisa = " and (kalenteri.kieli = '$kukarow[kieli]' or kalenteri.kieli = '') ";
+	}
+	else {
+		$lisa = " and kalenteri.kieli = '$kukarow[kieli]' ";
+	}
+	
+	$query = "	SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
 				from kalenteri
 				left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
-				where tyyppi='$tyyppi' and $ehto
+				where tyyppi='$tyyppi' $lisa and $ehto
 				order by kokopaiva desc, pvmalku desc, kalenteri.tunnus desc
 				$limit";
 	$result = mysql_query($query) or pupe_error($query);
@@ -447,17 +454,58 @@ if ($tee == '') {
 			$kuva = "";
 
 			if ($uutinen["kentta03"] != "") {
-				$kuva = "<img src='view.php?id=$uutinen[kentta03]' width='130'>";
-			}
+												
+				$query  = "	SELECT *
+							from liitetiedostot
+							where tunnus = '$uutinen[kentta03]'";
+				$lisatietores = mysql_query($query) or pupe_error($query);
 
-			if ($yhtiorow["logo"] != '' and $kuva == '') {
+				if (mysql_num_rows($lisatietores) > 0) {
+					$lisatietorow = mysql_fetch_array($lisatietores);
+					
+					if ($lisatietorow["image_width"] > 130) {
+						// Tehd‰‰n nyt t‰h‰n t‰llanen convert juttu niin k‰ytt‰j‰ien megakokoiset kuvat eiv‰t j‰‰ niin isoina kantaan
+						$nimi1 = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+
+						$fh = fopen($nimi1, "w");
+						if (fwrite($fh, $lisatietorow["data"]) === FALSE) die("Kirjoitus ep‰onnistui $nimi1");
+						fclose($fh);
+
+						$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+												
+						$kerroin = 130/$lisatietorow["image_width"];
+						
+						$isizelogo[0] = round($lisatietorow["image_width"]*$kerroin);
+						$isizelogo[1] = round($lisatietorow["image_height"]*$kerroin);
+																		
+						passthru("/usr/bin/convert -resize ".$isizelogo[0]."x".$isizelogo[1]." -quality 80 +profile * ".$nimi1." ".$nimi2, $palautus);
+						
+						// Tallennetaa skeilattu kuva						
+						$ltsc = tallenna_liite($nimi2, "kalenteri", 0, $lisatietorow["selite"], '', $lisatietorow["tunnus"]);
+						
+						//dellataan tmp filet kuleksimasta
+						system("rm -f $nimi1 $nimi2");
+						
+						$kuva = "<img src='view.php?id=$uutinen[kentta03]' width='130'>";
+					}
+					else {
+						$kuva = "<img src='view.php?id=$uutinen[kentta03]' width='130'>";
+					}																							
+				}																																				
+			}
+			
+			if((int)$yhtiorow["logo"] > 0 and $kuva == '') {
+				$liite = hae_liite($yhtiorow["logo"], "Yllapito", "array");
+								
+				$kuva = "<img src='view.php?id=$liite[tunnus]' width='130'>";
+			}
+			elseif(file_exists($yhtiorow["logo"]) and $kuva == '') {
 				$kuva = "<img src='$yhtiorow[logo]' width='130'>";
 			}
 
 			if ($kuva == '') {
 				$kuva = "<img src='http://www.pupesoft.com/pupesoft.gif' width='130'>";
 			}
-
 
 			if ($uutinen['nimi'] == "") {
 				$uutinen['nimi'] = $uutinen['toimittaja'];

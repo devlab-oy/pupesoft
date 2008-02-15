@@ -4845,22 +4845,25 @@ if (! function_exists('tallenna_liite')) {
 		global $kukarow, $yhtiorow, $_FILES, $kieli;
 		
 		$file = array();
+		
 		if(is_array($_FILES[$userfile])) {
 			$file = $_FILES[$userfile];
 		}
 		elseif(file_exists($userfile)) {
-			
-			//	experimentaalia
 			$a = getimagesize($userfile);
+
 			$file["name"] 		= basename($userfile);
 			$file["type"] 		= $a["mime"];
-			$file["tmp_name"] 	= basename($userfile);;
-			$file["size"] 		= filesize($userfile);
+			$file["tmp_name"] 	= $userfile;			
 			$file["error"] 		= 0;
+			$file["size"] 		= filesize($userfile);
+			
+			$_FILES[$userfile] = $file;
 		}
 
 		$tark = tarkasta_liite($userfile);
-		if($tark !== true or $file["error"] == 4) {
+		
+		if($tark !== true or $file["error"] == 4) {	
 			return false;
 		}					
 		
@@ -4882,6 +4885,7 @@ if (! function_exists('tallenna_liite')) {
 		
 		//	Onko meillä jokin kuvatyyppi?
 		list($type, $crap) = explode("/", $filetype);
+		
 		if($type == "image") {
 			$size = getimagesize($file["tmp_name"], $imageinfo);
 			$image_width 	= $size[0];
@@ -5033,8 +5037,10 @@ if (! function_exists('hae_liite')) {
 		
 		$query = "select * from liitetiedostot where tunnus='$tunnus' and liitos = '$liitos'";
 		$liiteres = mysql_query($query) or pupe_error($query);
+		
 		if (mysql_num_rows($liiteres) > 0) {
 			$liiterow = mysql_fetch_array($liiteres);
+			
 			if($palautus != "") {
 				return $liiterow;
 			}

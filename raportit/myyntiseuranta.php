@@ -492,7 +492,7 @@
 
 				$apu = array();
 
-				foreach ($jarjestys as $arvo) {
+				foreach ($jarjestys as $ind => $arvo) {					
 					if (trim($arvo) != "") $apu[] = $arvo;
 				}
 
@@ -506,67 +506,61 @@
 				$apu = array();
 
 				foreach ($jarjestys as $i => $arvo) {
-					if ($ruksit[$i] != "") $apu[$i] = $ruksit[$i];
-				}
-
-				if ($asiakasnro != "") {
-					if ($group!="") $group .= ",asiakas.asiakasnro";
-					else $group .= "asiakas.asiakasnro";
-					$select .= "asiakas.asiakasnro, ";
-					$order  .= "asiakas.asiakasnro,";
-					$gluku++;
-				}
-
-				if ($mul_oasiakasosasto != "") {
-					if ($group!="") $group .= ",asiakas.osasto";
-					else $group .= "asiakas.osasto";
-					$select .= "asiakas.osasto asos, ";
-					$order  .= "asiakas.osasto+0,";
-					$gluku++;
-				}
-
-				if ($mul_asiakasryhma != "") {
-					if ($group!="") $group .= ",asiakas.ryhma";
-					else $group .= "asiakas.ryhma";
-					$select .= "asiakas.ryhma asry, ";
-					$order  .= "asiakas.ryhma+0,";
-					$gluku++;
-				}
-
-				if ($mul_osasto  != "") {
-					if ($group!="") $group .= ",tuote.osasto";
-					else $group .= "tuote.osasto";
-					$select .= "tuote.osasto tuos, ";
-					$order  .= "tuote.osasto+0,";
-					$gluku++;
-				}
-
-				if ($mul_try != "") {
-					if ($group!="") $group .= ",tuote.try";
-					else $group .= "tuote.try";
-					$select .= "tuote.try 'tuoteryhm‰', ";
-					$order  .= "tuote.try+0,";
-					$gluku++;
-				}
-
-				if ($mul_piiri != "") {
-					if ($group!="") $group .= ",asiakas.piiri";
-					else $group .= "asiakas.piiri";
-					$select .= "asiakas.piiri aspiiri, ";
-					$order  .= "asiakas.piiri+0,";
-					$gluku++;
-				}
-				
-				if ($mul_kustp != "") {
-					if ($group!="") $group .= ",kustpaikka";
-					else $group  .= "kustpaikka";
-					$select .= "if(tuote.kustp != '',tuote.kustp,asiakas.kustannuspaikka) as kustpaikka, ";
-					$order  .= "kustpaikka,";
-					$gluku++;
+					if ($ruksit[$i] != "") {
+						$apu[$i] = $ruksit[$i];
+					}
 				}
 
 				foreach ($apu as $i => $mukaan) {
+					
+					if ($mukaan == "asiakasosasto") {
+						if ($group!="") $group .= ",asiakas.osasto";
+						else $group .= "asiakas.osasto";
+						$select .= "asiakas.osasto asos, ";
+						$order  .= "asiakas.osasto,";
+						$gluku++;
+					}
 
+					if ($mukaan == "asiakasryhma") {
+						if ($group!="") $group .= ",asiakas.ryhma";
+						else $group .= "asiakas.ryhma";
+						$select .= "asiakas.ryhma asry, ";
+						$order  .= "asiakas.ryhma,";
+						$gluku++;
+					}
+
+					if ($mukaan == "osasto") {
+						if ($group!="") $group .= ",tuote.osasto";
+						else $group .= "tuote.osasto";
+						$select .= "tuote.osasto tuos, ";
+						$order  .= "tuote.osasto,";
+						$gluku++;
+					}
+
+					if ($mukaan == "tuoteryhma") {
+						if ($group!="") $group .= ",tuote.try";
+						else $group .= "tuote.try";
+						$select .= "tuote.try 'tuoteryhm‰', ";
+						$order  .= "tuote.try,";
+						$gluku++;
+					}
+
+					if ($mukaan == "piiri") {
+						if ($group!="") $group .= ",asiakas.piiri";
+						else $group .= "asiakas.piiri";
+						$select .= "asiakas.piiri aspiiri, ";
+						$order  .= "asiakas.piiri,";
+						$gluku++;
+					}
+
+					if ($mukaan == "kustannuspaikka") {
+						if ($group!="") $group .= ",kustpaikka";
+						else $group  .= "kustpaikka";
+						$select .= "if(tuote.kustp != '',tuote.kustp,asiakas.kustannuspaikka) as kustpaikka, ";
+						$order  .= "kustpaikka,";
+						$gluku++;
+					}					
+					
 					if ($mukaan == "ytunnus" and $osoitetarrat == "") {
 						if ($group!="") $group .= ",asiakas.tunnus";
 						else $group  .= "asiakas.tunnus";
@@ -582,17 +576,10 @@
 						$gluku++;
 					}
 					
-					if ($mukaan == "asiakasnro" and $osoitetarrat == "") {
-						if ($group!="") $group .= ",asiakas.tunnus";
-						else $group  .= "asiakas.tunnus";
-						$select .= "concat_ws(' ',asiakas.asiakasnro, asiakas.ytunnus,if(asiakas.toim_ovttunnus='',NULL,asiakas.toim_ovttunnus)) ytunnus, concat_ws('<br>',concat_ws(' ',asiakas.nimi,asiakas.nimitark),if(asiakas.toim_nimi='' and asiakas.nimi!=asiakas.toim_nimi,NULL,concat_ws(' ',asiakas.toim_nimi,asiakas.toim_nimitark))) nimi, ";
-						$order  .= "asiakas.asiakasnro,";
-						$gluku++;
-					}
-					elseif ($mukaan == "ytunnus" and $osoitetarrat != "") {
-						if ($group!="") $group .= ",asiakas.tunnus";
-						else $group  .= "asiakas.tunnus";
-						$select .= "asiakas.asiakasnro, asiakas.tunnus astunnus, concat_ws(' ',asiakas.ytunnus,asiakas.toim_ovttunnus,asiakas.toim_nimi) ytunnus, ";
+					if ($mukaan == "asiakasnro") {
+						if ($group!="") $group .= ",asiakas.asiakasnro";
+						else $group .= "asiakas.asiakasnro";
+						$select .= "asiakas.asiakasnro, ";
 						$order  .= "asiakas.asiakasnro,";
 						$gluku++;
 					}
@@ -725,7 +712,14 @@
 						}
 					}
 				}
-
+				
+				if ($order != "") {
+					$order = substr($order,0,-1);
+				}
+				else {
+					$order = "1";
+				}
+				
 				if ($tilrivikomm != "") {
 					if ($group!="") $group .= ",tilausrivi.tunnus";
 					else $group  .= "tilausrivi.tunnus";
@@ -764,7 +758,7 @@
 				}
 
 				if ($toimittaja != "") {
-					$query = "select tuoteno from tuotteen_toimittajat where yhtio in ($yhtio) and toimittaja='$toimittaja'";
+					$query = "SELECT tuoteno from tuotteen_toimittajat where yhtio in ($yhtio) and toimittaja='$toimittaja'";
 					$result = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($result) > 0) {
@@ -781,7 +775,7 @@
 				}
 
 				if ($asiakas != "") {
-					$query = "select group_concat(tunnus) from asiakas where yhtio in ($yhtio) and ytunnus = '$asiakas' $asiakasrajaus";
+					$query = "SELECT group_concat(tunnus) from asiakas where yhtio in ($yhtio) and ytunnus = '$asiakas' $asiakasrajaus";
 					$result = mysql_query($query) or pupe_error($query);
 					$asiakasrow = mysql_fetch_array($result);
 
@@ -794,7 +788,7 @@
 					}
 				}
 				else if ($asiakasnro != "") {
-					$query = "select group_concat(tunnus) from asiakas where yhtio in ($yhtio) and asiakasnro = '$asiakasnro' $asiakasrajaus";
+					$query = "SELECT group_concat(tunnus) from asiakas where yhtio in ($yhtio) and asiakasnro = '$asiakasnro' $asiakasrajaus";
 					$result = mysql_query($query) or pupe_error($query);
 					$asiakasrow = mysql_fetch_array($result);
 
@@ -945,7 +939,7 @@
 
 				$query .= "	$lisa
 							group by $group
-							order by $order 1";
+							order by $order";
 
 				// ja sitten ajetaan itte query
 				if ($query != "") {
@@ -1526,6 +1520,14 @@
 			else {
 				echo "<input type='hidden' name='yhtiot[]' value='$kukarow[yhtio]'>";
 			}
+			
+			
+			if ($ruksit[10]  != '') 	$ruk10chk  	= "CHECKED";
+			if ($ruksit[20]  != '') 	$ruk20chk  	= "CHECKED";
+			if ($ruksit[30]  != '') 	$ruk30chk  	= "CHECKED";
+			if ($ruksit[40]  != '') 	$ruk40chk  	= "CHECKED";
+			if ($ruksit[50]  != '') 	$ruk50chk 	= "CHECKED";
+			if ($ruksit[55]  != '') 	$ruk55chk 	= "CHECKED";
 
 			echo "<table>";
 			echo "<tr>";			
@@ -1541,7 +1543,7 @@
 						FROM avainsana
 						".avain('join','ASOSASTO_')."
 						WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASOSASTO'
-						ORDER BY avainsana.selite+0";
+						ORDER BY avainsana.selite";
 			$res2  = mysql_query($query) or die($query);
 
 			echo "<select name='mul_oasiakasosasto[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -1574,7 +1576,7 @@
 						FROM avainsana
 						".avain('join','ASRYHMA_')."
 						WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASRYHMA'
-						ORDER BY avainsana.selite+0";
+						ORDER BY avainsana.selite";
 			$res2  = mysql_query($query) or die($query);
 
 			echo "<select name='mul_asiakasryhma[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -1634,7 +1636,12 @@
 
 			echo "</select>";
 			echo "</td>";
-			echo "</tr></table><br>\n";
+			echo "</tr>";
+			echo "<tr>";			
+			echo "<th>".t("Prio").":<input type='text' name='jarjestys[10]' size='2' value='$jarjestys[10]'> ".t("Asiakasosastoittain")."<input type='checkbox' name='ruksit[10]' value='asiakasosasto' $ruk10chk></th>";
+			echo "<th>".t("Prio").":<input type='text' name='jarjestys[20]' size='2' value='$jarjestys[20]'> ".t("Asiakasryhmitt‰in")."<input type='checkbox' name='ruksit[20]' value='asiakasryhma' $ruk20chk></th>";
+			echo "<th>".t("Prio").":<input type='text' name='jarjestys[30]' size='2' value='$jarjestys[30]'> ".t("Aiakaspiireitt‰in")."<input type='checkbox' name='ruksit[30]' value='piiri' $ruk30chk></th></tr>";			
+			echo "</table><br>\n";
 
 
 
@@ -1647,7 +1654,7 @@
 			echo "<td valign='top'>";
 
 			// n‰ytet‰‰n soveltuvat osastot
-			$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' order by avainsana.selite+0";
+			$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' order by avainsana.selite";
 			$res2  = mysql_query($query) or die($query);
 
 			echo "<select name='mul_osasto[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -1681,7 +1688,7 @@
 						FROM avainsana ".avain('join','TRY_')." 
 						WHERE avainsana.yhtio='$kukarow[yhtio]' 
 						and avainsana.laji='TRY' 
-						order by avainsana.selite+0";
+						order by avainsana.selite";
 			$res2  = mysql_query($query) or die($query);
 
 			echo "<select name='mul_try[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -1708,6 +1715,11 @@
 			echo "</select>";
 			echo "</td>";			
 			echo "</tr>";
+			
+			echo "<tr>";			
+			echo "<th>".t("Prio").":<input type='text' name='jarjestys[40]' size='2' value='$jarjestys[40]'> ".t("Osastoittain")."<input type='checkbox' name='ruksit[40]' value='osasto' $ruk40chk></th>";
+			echo "<th>".t("Prio").":<input type='text' name='jarjestys[50]' size='2' value='$jarjestys[50]'> ".t("Tuoteryhmitt‰in")."<input type='checkbox' name='ruksit[50]' value='tuoteryhma' $ruk50chk></th></tr>";
+			
 			echo "</table><br>\n";
 			
 			
@@ -1751,22 +1763,24 @@
 			
 			echo "</td>";
 			echo "</tr>";
+			
+			echo "<tr>";			
+			echo "<th>".t("Prio").":<input type='text' name='jarjestys[55]' size='2' value='$jarjestys[55]'> ".t("Kustannuspaikoittain")."<input type='checkbox' name='ruksit[55]' value='kustannuspaikka' $ruk55chk></th></tr>";
 			echo "</table><br>\n";
 			
 			// lis‰rajaukset n‰kym‰..
-			if ($ruksit[1]  != '') 		$ruk1chk  	= "CHECKED";
-			if ($ruksit[2]  != '') 		$ruk2chk  	= "CHECKED";
-			if ($ruksit[3]  != '') 		$ruk3chk  	= "CHECKED";
-			if ($ruksit[4]  != '') 		$ruk4chk  	= "CHECKED";
-			if ($ruksit[5]  != '') 		$ruk5chk  	= "CHECKED";
-			if ($ruksit[6]  != '') 		$ruk6chk  	= "CHECKED";
-			if ($ruksit[7]  != '') 		$ruk7chk  	= "CHECKED";
-			if ($ruksit[8]  != '') 		$ruk8chk  	= "CHECKED";
-			if ($ruksit[9]  != '') 		$ruk9chk  	= "CHECKED";
-			if ($ruksit[10] != '') 		$ruk10chk 	= "CHECKED";
-			if ($ruksit[11] != '')		$ruk11chk 	= "CHECKED";			
-			if ($ruksit[12] != '')		$ruk12chk 	= "CHECKED";
-			if ($ruksit[13] != '')		$ruk13chk 	= "CHECKED";
+			if ($ruksit[60]  != '') 	$ruk60chk  	= "CHECKED";
+			if ($ruksit[70]  != '') 	$ruk70chk  	= "CHECKED";
+			if ($ruksit[80]  != '') 	$ruk80chk  	= "CHECKED";
+			if ($ruksit[90]  != '') 	$ruk90chk  	= "CHECKED";
+			if ($ruksit[100]  != '') 	$ruk100chk 	= "CHECKED";
+			if ($ruksit[110]  != '') 	$ruk110chk 	= "CHECKED";
+			if ($ruksit[120]  != '') 	$ruk120chk 	= "CHECKED";
+			if ($ruksit[130]  != '') 	$ruk130chk 	= "CHECKED";
+			if ($ruksit[140]  != '') 	$ruk140chk 	= "CHECKED";
+			if ($ruksit[150] != '') 	$ruk150chk 	= "CHECKED";
+			if ($ruksit[160] != '')		$ruk160chk 	= "CHECKED";			
+		
 			if ($nimitykset != '')   	$nimchk   	= "CHECKED";
 			if ($kateprossat != '')  	$katchk   	= "CHECKED";
 			if ($osoitetarrat != '') 	$tarchk   	= "CHECKED";
@@ -1788,70 +1802,70 @@
 				<tr>
 				<tr>
 				<th>".t("Listaa y-tunnuksella")."</th>
-				<td><input type='text' name='jarjestys[1]' size='2' value='$jarjestys[1]'></td>
-				<td><input type='checkbox' name='ruksit[1]' value='ytunnus' $ruk1chk></td>
+				<td><input type='text' name='jarjestys[60]' size='2' value='$jarjestys[60]'></td>
+				<td><input type='checkbox' name='ruksit[60]' value='ytunnus' $ruk60chk></td>
 				<td><input type='text' name='ytunnus' value='$ytunnus'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa asiakasnumerolla")."</th>
-				<td><input type='text' name='jarjestys[2]' size='2' value='$jarjestys[2]'></td>
-				<td><input type='checkbox' name='ruksit[2]' value='asiakasnro' $ruk2chk></td>
+				<td><input type='text' name='jarjestys[70]' size='2' value='$jarjestys[70]'></td>
+				<td><input type='checkbox' name='ruksit[70]' value='asiakasnro' $ruk70chk></td>
 				<td><input type='text' name='asiakasnro' value='$asiakasnro'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa tuotteittain")."</th>
-				<td><input type='text' name='jarjestys[3]' size='2' value='$jarjestys[3]'></td>
-				<td><input type='checkbox' name='ruksit[3]' value='tuote' $ruk3chk></td>
-				<td><input type='text' name='rajaus[3]' value='$rajaus[3]'></td>
+				<td><input type='text' name='jarjestys[80]' size='2' value='$jarjestys[80]'></td>
+				<td><input type='checkbox' name='ruksit[80]' value='tuote' $ruk80chk></td>
+				<td><input type='text' name='rajaus[80]' value='$rajaus[80]'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa tuotemyyjitt‰in")."</th>
-				<td><input type='text' name='jarjestys[5]' size='2' value='$jarjestys[5]'></td>
-				<td><input type='checkbox' name='ruksit[5]' value='tuotemyyja' $ruk5chk></td>
-				<td><input type='text' name='rajaus[5]' value='$rajaus[5]'></td>
+				<td><input type='text' name='jarjestys[90]' size='2' value='$jarjestys[90]'></td>
+				<td><input type='checkbox' name='ruksit[90]' value='tuotemyyja' $ruk90chk></td>
+				<td><input type='text' name='rajaus[90]' value='$rajaus[90]'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa asiakasmyyjitt‰in")."</th>
-				<td><input type='text' name='jarjestys[6]' size='2' value='$jarjestys[6]'></td>
-				<td><input type='checkbox' name='ruksit[6]' value='asiakasmyyja' $ruk6chk></td>
-				<td><input type='text' name='rajaus[6]' value='$rajaus[6]'></td>
+				<td><input type='text' name='jarjestys[100]' size='2' value='$jarjestys[100]'></td>
+				<td><input type='checkbox' name='ruksit[100]' value='asiakasmyyja' $ruk100chk></td>
+				<td><input type='text' name='rajaus[100]' value='$rajaus[100]'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa tuoteostajittain")."</th>
-				<td><input type='text' name='jarjestys[7]' size='2' value='$jarjestys[7]'></td>
-				<td><input type='checkbox' name='ruksit[7]' value='tuoteostaja' $ruk7chk></td>
-				<td><input type='text' name='rajaus[7]' value='$rajaus[7]'></td>
+				<td><input type='text' name='jarjestys[110]' size='2' value='$jarjestys[110]'></td>
+				<td><input type='checkbox' name='ruksit[110]' value='tuoteostaja' $ruk110chk></td>
+				<td><input type='text' name='rajaus[110]' value='$rajaus[110]'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa maittain")."</th>
-				<td><input type='text' name='jarjestys[8]' size='2' value='$jarjestys[8]'></td>
-				<td><input type='checkbox' name='ruksit[8]' value='maa' $ruk8chk></td>
-				<td><input type='text' name='rajaus[8]' value='$rajaus[8]'></td>
+				<td><input type='text' name='jarjestys[120]' size='2' value='$jarjestys[120]'></td>
+				<td><input type='checkbox' name='ruksit[120]' value='maa' $ruk120chk></td>
+				<td><input type='text' name='rajaus[120]' value='$rajaus[120]'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa merkeitt‰in")."</th>
-				<td><input type='text' name='jarjestys[9]' size='2' value='$jarjestys[9]'></td>
-				<td><input type='checkbox' name='ruksit[9]' value='merkki' $ruk9chk></td>
-				<td><input type='text' name='rajaus[9]' value='$rajaus[9]'></td>
+				<td><input type='text' name='jarjestys[130]' size='2' value='$jarjestys[130]'></td>
+				<td><input type='checkbox' name='ruksit[130]' value='merkki' $ruk130chk></td>
+				<td><input type='text' name='rajaus[130]' value='$rajaus[130]'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa toimittajittain")."</th>
-				<td><input type='text' name='jarjestys[10]' size='2' value='$jarjestys[10]'></td>
-				<td><input type='checkbox' name='ruksit[10]' value='toimittaja' $ruk10chk></td>
+				<td><input type='text' name='jarjestys[140]' size='2' value='$jarjestys[140]'></td>
+				<td><input type='checkbox' name='ruksit[140]' value='toimittaja' $ruk140chk></td>
 				<td><input type='text' name='toimittaja' value='$toimittaja'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa tilaustyypeitt‰in")."</th>
-				<td><input type='text' name='jarjestys[11]' size='2' value='$jarjestys[11]'></td>
-				<td><input type='checkbox' name='ruksit[11]' value='tilaustyyppi' $ruk11chk></td>
-				<td><input type='text' name='rajaus[11]' value='$rajaus[11]'></td>
+				<td><input type='text' name='jarjestys[150]' size='2' value='$jarjestys[150]'></td>
+				<td><input type='checkbox' name='ruksit[150]' value='tilaustyyppi' $ruk150chk></td>
+				<td><input type='text' name='rajaus[150]' value='$rajaus[150]'></td>
 				<td class='back'>".t("(Toimii vain jos ajat raporttia tilauksista)")."</td>
 				</tr>
 				<tr>
 				<th>".t("Listaa myyjitt‰in")."</th>
-				<td><input type='text' name='jarjestys[12]' size='2' value='$jarjestys[12]'></td>
-				<td><input type='checkbox' name='ruksit[12]' value='myyja' $ruk12chk></td>
-				<td><input type='text' name='rajaus[12]' value='$rajaus[12]'></td>
+				<td><input type='text' name='jarjestys[160]' size='2' value='$jarjestys[160]'></td>
+				<td><input type='checkbox' name='ruksit[160]' value='myyja' $ruk160chk></td>
+				<td><input type='text' name='rajaus[160]' value='$rajaus[160]'></td>
 				</tr>
 				<tr>
 				<td class='back'><br></td>

@@ -102,7 +102,7 @@ function korjaa_ostovelka($ltunnus) {
 }
 
 function erittele_rivit($tilausnumero) {
-	global $kukarow, $yhtiorow;
+	global $kukarow, $yhtiorow, $verkkolaskuvirheet_ok;
 	
 	$query = "	SELECT *
 				FROM lasku
@@ -136,10 +136,10 @@ function erittele_rivit($tilausnumero) {
 				WHERE yhtio='$kukarow[yhtio]' and ltunnus = '$tilausnumero'";
 	$result = mysql_query($query) or pupe_error($query);	
 	
-	$file = "/Users/tuomas/{$laskurow["ebid"]}";
-	echo $file;
+	$file = $verkkolaskuvirheet_ok."/{$laskurow["ebid"]}";
+
 	if(file_exists($file)) {
-		echo "TEST";
+
 		// luetaan file muuttujaan
 		$xmlstr = file_get_contents($file);
 
@@ -147,7 +147,7 @@ function erittele_rivit($tilausnumero) {
 			echo ("Tiedosto $file luku ep‰onnistui!\n");
 			return ("Tiedosto $file luku ep‰onnistui!");
 		}
-		echo "<pre>";
+
 		// luetaan sis‰‰n xml
 		$xml = simplexml_load_string($xmlstr);
 		
@@ -268,8 +268,6 @@ function erittele_rivit($tilausnumero) {
 		}
 		
 		return $korkosumma;
-		
-		echo "</pre>";
 	}
 	else {
 		return false;

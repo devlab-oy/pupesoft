@@ -5231,7 +5231,7 @@ if(!function_exists("tee_asiakashaku")) {
 		
 		if($monta > 0 and $monta < 200) {
 			echo "<table>
-					<caption>Valitse asiakas formi $formi</caption>
+					<caption>Valitse asiakas</caption>
 					<tr>
 						<th style='border: 1px solid;'>".t("Asiakas")."</th><th style='border: 1px solid;'>".t("Toimitusosoite")."</th><td></td>
 					</tr>";

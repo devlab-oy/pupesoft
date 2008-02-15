@@ -1394,9 +1394,9 @@
 		if(!is_array($kalenteri)) {
 			die("OHO! Kalenterin meni rikki!");
 		}
-		echo "LIITTAA";
+
 		$id = tallenna_liite("userfile", "kalenteri", $ktunnus, $selite, $kayttotarkoitus);
-		echo $id;
+
 		$kaletee = "LISAA_LIITE";
 		
 		//die("<script LANGUAGE='JavaScript'>sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false); pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none';</script></body></html>");		

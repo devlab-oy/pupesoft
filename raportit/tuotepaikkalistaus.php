@@ -70,7 +70,7 @@
 				//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 				list($usec, $sec) = explode(' ', microtime());
 				mt_srand((float) $sec + ((float) $usec * 100000));
-				$filenimi = "/tmp/Tuotepaikkalistaus-".md5(uniqid(mt_rand(), true)).".txt";
+				$filenimi = "/tmp/tpl-".md5(uniqid(mt_rand(), true)).".txt";
 				$fh = fopen($filenimi, "w+");
 
 				$pp = date('d');

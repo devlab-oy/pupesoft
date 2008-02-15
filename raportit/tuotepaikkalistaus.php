@@ -116,7 +116,7 @@
 				fclose($fh);
 
 				if ($komento["Tuotepaikkalistaus"] != '') {
-					exec("a2ps -o ".$filenimi.".ps --no-header --columns=1 -R --medium=A4 --chars-per-line=95 --margin=0 --borders=0 $filenimi");
+					exec("a2ps -o ".$filenimi.".ps --no-header --columns=1 -R --medium=A4 --chars-per-line=80 --margin=0 --borders=0 $filenimi");
 					// itse print komento...
 					$line = exec("$komento[Tuotepaikkalistaus] ".$filenimi.".ps", $output);
 				}

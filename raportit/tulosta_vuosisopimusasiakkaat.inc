@@ -22,7 +22,7 @@ $lask = 1;
 $sivu = 1;
 
 function alku () {
-	global $pdf, $row, $yhtiorow, $kukarow, $asrow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $pvm;
+	global $pdf, $row, $yhtiorow, $kukarow, $asrow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $pvm, $alkuvv, $alkukk, $alkupp, $loppuvv, $loppukk, $loppupp;
 
 	// jos ollaan syötetty poikkeava päivä, käytetään sitä
 	if ($pvm != '') {
@@ -37,6 +37,8 @@ function alku () {
 		$vvv = date("Y") - 1;
 		$now = date("Y-m-d");
 	}
+	
+	
 
 	$firstpage = $pdf->new_page("a4");
 
@@ -59,7 +61,11 @@ function alku () {
 	$pdf->draw_text(300, 687, "Kunnioittaen,",					$firstpage, $norm);
 	$pdf->draw_text(300, 677, $yhtiorow["nimi"],				$firstpage, $norm);
 	
-	//otsikkotiedot	
+	//aika
+	$pdf->draw_text(300,  610, "Rajaus: ",			$firstpage, $pieni);	
+	$pdf->draw_text(350,  610, tv1dateconv("$alkuvv-$alkukk-$alkupp")." - ".tv1dateconv("$loppuvv-$loppukk-$loppupp"),			$firstpage, $pieni);
+	
+	//otsikkotiedot
 	$pdf->draw_text(30,  600, "Tuoteryhmä",			$firstpage, $pieni);
 	$pdf->draw_text(300, 600, "Kpl $vvv",			$firstpage, $pieni);
 	$pdf->draw_text(350, 600, "Kpl $vvt",			$firstpage, $pieni);
@@ -71,7 +77,7 @@ function alku () {
 }
 
 function rivi ($firstpage) {
-	global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $sumkpled, $sumkplva, $sumed, $sumva, $kukarow;
+	global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $sumkpled, $sumkplva, $sumed, $sumva, $kukarow, $yhtiorow;
 
 	if ($lask >= 37) {
 		// rivejä on tarpeeks, tehään uus headeri
@@ -96,8 +102,8 @@ function rivi ($firstpage) {
 	$pdf->draw_text(55,  $kala, $tryro["selitetark"],$firstpage, $norm);	
 	$pdf->draw_text(300, $kala, $row["kpled"], 		$firstpage, $norm);
 	$pdf->draw_text(350, $kala, $row["kplva"], 		$firstpage, $norm);
-	$pdf->draw_text(425, $kala, $row["ed"],			$firstpage, $norm);
-	$pdf->draw_text(475, $kala, $row["va"], 		$firstpage, $norm);
+	$pdf->draw_text(425, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["ed"]),			$firstpage, $norm);
+	$pdf->draw_text(475, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["va"]), 		$firstpage, $norm);
 	$pdf->draw_text(550, $kala, $indexi,	 		$firstpage, $norm);
 	$kala = $kala - 15;
 		

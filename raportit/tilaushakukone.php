@@ -9,7 +9,7 @@ enable_ajax();
 
 //echo "<pre>".print_r($_REQUEST, true)."</pre>";
 if($tee == "ASIAKASHAKU") {
-	tee_asiakashaku($haku, $asiakasid, $formi);
+	tee_asiakashaku($haku, $formi);
 }
 
 if($toim == "TARJOUSHAKUKONE") {

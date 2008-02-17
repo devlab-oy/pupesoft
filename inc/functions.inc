@@ -5077,7 +5077,7 @@ if(!function_exists("nayta_asiakashaku")) {
 }
 
 if(!function_exists("tee_asiakashaku")) {
-	function tee_asiakashaku($ytunnus, $asiakasid=0, $formi, $div) {
+	function tee_asiakashaku($ytunnus, $formi, $div="") {
 		global $yhtiorow, $kukarow;
 				
 		if (trim($konserni) != '') {

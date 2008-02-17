@@ -1193,6 +1193,15 @@
 		}
 		$tavat .= "</select>";
 		
+		//	Jos meillä on käyttöliittymästä syötetty aika
+		if($tapp != "" and $takk != "" and $tavv != "") {
+			$tapvm = mktime($tahh, $tamm, 0, $takk, $tapp, $tavv);
+		}
+
+		if($lopp != "" and $lokk != "" and $lovv != "") {
+			$lopvm = mktime($lohh, $lomm, 0, $lokk, $lopp, $lovv);
+		}
+		
 		if($tapvm == "") {
 			$tapvm = time();
 		}
@@ -1206,7 +1215,7 @@
 		$klo_loppu 		= "<input type = 'text' name='lohh' value = '".date("H", $lopvm)."' size = '3'>:<input type = 'text' name='lomm' value = '".date("i", $lopvm)."' size = '3'>";
 		$paiva_loppu	= "<input type = 'text' name='lopp' value = '".date("d", $lopvm)."' size = '3'><input type = 'text' name='lokk' value = '".date("m", $lopvm)."' size = '3'><input type = 'text' name='lovv' value = '".date("Y", $lopvm)."' size = '5'>";		
 		
-		if($otunnus > 0 or $tarjous > 0) {
+		if($otunnus > 0 or $tarjous > 0 or $ktunnus>0) {
 			$asiakas = "<input type='hidden' name='liitostunnus' value='$liitostunnus'>$asiakasrow[nimi] $asiakasrow[nimitark]";
 		} 
 		else {
@@ -1349,7 +1358,8 @@
 				<input type = 'hidden' name='ktunnus' value = '$ktunnus'>
 				<input type = 'hidden' name='toim' value = '$toim'>
 				<input type = 'hidden' name='ohje' value = 'off'>
-				<input type = 'hidden' name='ohje' value = 'off'>
+				<input type = 'hidden' name='tapvm' value = '$tapvm'>
+				<input type = 'hidden' name='lopvm' value = '$lopvm'>				
 				".url_params($kalenteri, "POST")."			
 				<input type = 'hidden' name='kaletee' value = 'TALLENNA_KALENTERITAPAHTUMA'>
 				<table>

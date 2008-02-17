@@ -5072,7 +5072,7 @@ if(!function_exists("nayta_asiakashaku")) {
 			$id			= "";
 		}
 
-		return "<input type='hidden' id='liitos' name='liitostunnus'><input type='text' id='haku' value='$nimi' name='haku' size='50' onkeyup=\"popUp(event, 'asiakashaku', '0', '-20', '{$_SERVER["SCRIPT_NAME"]}?tee=ASIAKASHAKU&formi=$formi&url={$_SERVER["SCRIPT_NAME"]}&haku='+this.value);\" $disabled>&nbsp;&nbsp;<a href=\"javascript: document.getElementById('haku').disabled=false; document.getElementById('haku').value='';\">".t("Vaihda asiakasta")."</a>";
+		return "<input type='hidden' id='liitos' name='liitostunnus'><input type='text' id='haku' value='$nimi' name='haku' size='50' onkeyup=\"popUp(event, 'asiakashaku', '0', '-20', '{$_SERVER["SCRIPT_NAME"]}?tee=ASIAKASHAKU&formi=$formi&url={$_SERVER["SCRIPT_NAME"]}&haku='+this.value);\" $disabled>&nbsp;&nbsp;<a href='#' onclick=\"document.getElementById('haku').disabled=false; document.getElementById('haku').value=''; return false;\">".t("Vaihda asiakasta")."</a>";
 	}
 }
 

@@ -1532,11 +1532,11 @@ if ($tee == "MUOKKAA") {
 				
 				//	Aina kun perhe vaihtuu voidaan n‰ytt‰‰ nappulat!
 				if (($row["perhe"] != $edperhe) and 
-				$row["tuoteno"] != "" and 
-				(
-					(($laskurow["hyvaksyja_nyt"] == $kukarow["kuka"] and $kukarow["taso"] == 2) or 
-					($laskurow["hyvak1"] == $kukarow["kuka"] and $laskurow["h1time"] == '0000-00-00 00:00:00'))
-				)) {
+					$row["tuoteno"] != "" and 
+					(
+						(($laskurow["hyvaksyja_nyt"] == $kukarow["kuka"] and $kukarow["taso"] == 2) or 
+						($laskurow["hyvak1"] == $kukarow["kuka"] and $laskurow["h1time"] == '0000-00-00 00:00:00'))
+					)) {
 					echo "<td class='back'><div style='float:left;'><form action = '$PHP_SELF' method='post' autocomplete='off'>";
 					echo "<input type='hidden' name='tee' value='$tee'>";
 					echo "<input type='hidden' name='lopetus' value='$lopetus'>";

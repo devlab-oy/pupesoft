@@ -700,6 +700,8 @@
 						$vahvistettu = " (".t("Vahvistettu").")";
 					}
 					
+					$yhteensa[$tyyppi] += $jtrow["kpl"];
+
 					if($jtrow["varasto"] != "") {
 						$tyyppi = $tyyppi." - ".$jtrow["varasto"];
 					}
@@ -714,7 +716,6 @@
 							<td align='right'>$merkki".abs($jtrow["kpl"])."</td>
 							<td align='right'>".sprintf('%.2f', $myyta)."</td>
 							</tr>";
-					$yhteensa[$tyyppi] += $jtrow["kpl"];
 				}
 
 				echo "<tr><td class='back'>&nbsp;</td></tr>";

@@ -640,8 +640,6 @@
 								}
 							}
 						}
-						
-						echo "<pre>kalenteri".print_r($tpos, true)."</pre><br>";
 					}
 
 					if(date("Ymd", $aikastr) == date("Ymd")) {

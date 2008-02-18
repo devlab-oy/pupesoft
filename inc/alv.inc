@@ -270,7 +270,8 @@
 			$verolisa = " concat_ws(' ',vero, if(lasku.tila='U','".t("ulos")."','".t("sis‰‰n")."')) vero ";
 		}
 		
-		$query = "	SELECT if(lasku.maa='', '$yhtiorow[maa]', lasku.maa) Maa, if(lasku.valkoodi='', '$yhtiorow[valkoodi]', lasku.valkoodi) Valuutta, $verolisa, tiliointi.tilino, tili.nimi, 
+		$query = "	SELECT if(lasku.maa='', '$yhtiorow[maa]', lasku.maa) Maa, 
+					if(lasku.valkoodi='', '$yhtiorow[valkoodi]', lasku.valkoodi) Valuutta, $verolisa, tiliointi.tilino, tili.nimi, 
 					round(sum(tiliointi.summa * (1+tiliointi.vero/100)),2) Bruttosumma,
 					round(sum(tiliointi.summa * tiliointi.vero/100),2) Verot, 
 					round(sum(tiliointi.summa/if(lasku.vienti_kurssi=0,1,lasku.vienti_kurssi) * (1+vero/100)),2) Bruttosumma_valuutassa,
@@ -304,7 +305,11 @@
 		while ($trow = mysql_fetch_array ($result)) {
 						
 			if (isset($edvero) and ($edvero != $trow["vero"] or $edmaa != $trow["Maa"])) { // Vaihtuiko verokanta?
-				echo "<tr><td colspan='6' align='right'>".t("Yhteens‰").":</td><td align = 'right'>$verosum</td><td colspan='2'></td><td align = 'right'>$kplsum</td></tr>";
+				echo "<tr>
+						<td colspan='6' align='right'>".t("Yhteens‰").":</td>
+						<td align = 'right'>".sprintf('%.2f', $verosum)."</td>
+						<td colspan='2'></td>
+						<td align = 'right'>$kplsum</td></tr>";
 				
 				$verosum 	= 0.0;
 				$kplsum 	= 0.0;				
@@ -340,8 +345,8 @@
 			$edmaa 	= $trow["Maa"];
 		}
 		
-		echo "<tr><td colspan='6' align='right'>".t("Yhteens‰").":</td><td align = 'right'>$verosum</td><td colspan='2'></td><td align = 'right'>$kplsum</td></tr>";
-		echo "<tr><td colspan='6' align='right'>".t("Kaikki yhteens‰").":</td><td align = 'right'>$verotot</td><td colspan='2'></td><td align = 'right'>$kpltot</td></tr>";
+		echo "<tr><td colspan='6' align='right'>".t("Yhteens‰").":</td><td align = 'right'>".sprintf('%.2f', $verosum)."</td><td colspan='2'></td><td align = 'right'>$kplsum</td></tr>";
+		echo "<tr><td colspan='6' align='right'>".t("Kaikki yhteens‰").":</td><td align = 'right'>".sprintf('%.2f', $verotot)."</td><td colspan='2'></td><td align = 'right'>$kpltot</td></tr>";
 		echo "</table><br>";
 	}
 

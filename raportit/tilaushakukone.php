@@ -259,8 +259,10 @@ if($tee == "NAYTA") {
 		$kalenteri["nakyma"]			= "TAPAHTUMALISTAUS";	
 		$kalenteri["sallittu_nakyma"]	= "";	
 		$kalenteri["laskutilat"]		= $laskutilat;
+		$kalenteri["otunnus"]			= $tarjous;		
 		$kalenteri["kalenteri_kuka"]	= array($kukarow["kuka"]);
-		$kalenteri["kalenteri_jako"]	= "kaikki";
+		$kalenteri["kalenteri_ketka"]	= array("myyjat","keraajat", "projektipaallikot");	
+		$kalenteri["kalenteri_jako"]	= array("tilaus");
 		
 		alusta_kalenteri($kalenteri);
 	}

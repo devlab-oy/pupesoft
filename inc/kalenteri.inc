@@ -236,9 +236,6 @@
 			if($lisaakalekuka != "") {
 				if(!in_array($lisaakalekuka, $kalenteri["kalenteri_kuka"])) {
 					$kalenteri["kalenteri_kuka"][] = $lisaakalekuka;
-					if(!muistiin("kalenteri", "kalenteri", $kalenteri)) {
-						die("OHO! Kalenterin käyttönotto ei nyt vaan onnistu!");
-					}
 				}
 			}
 
@@ -247,35 +244,102 @@
 				
 				if($i !== false) {
 					unset($kalenteri["kalenteri_kuka"][$i]);
-					if(!muistiin("kalenteri", "kalenteri", $kalenteri)) {
-						die("OHO! Kalenterin käyttönotto ei nyt vaan onnistu!");
-					}
 				}
 			}
 			
-			//	Tämä on meidän basic kalenterikysely omista kalentereista
-			if($kalenteri["kalenteri_jako"] != "") {
-				$q = "	
-					SELECT 'kalenteri' laji, tyyppi laji_tark, UNIX_TIMESTAMP(date(pvmalku)) aika,  luontiaika, DATEDIFF(pvmloppu, pvmalku) vali, laatija, tunnus
-					FROM kalenteri
-					WHERE yhtio = '$kukarow[yhtio]' and kuka IN ('".implode("','", $kalenteri["kalenteri_kuka"])."') and tyyppi = 'kalenteri'";
+			$kukalisa = ""; 
+			//	Rajataan listaa keiden kalenteria katsotaan
+			if(is_array($kalenteri["kalenteri_ketka"])) {
+				foreach($kalenteri["kalenteri_ketka"] as $kj) {
+					if($kukalisa == "") {
+						$kukalisa = " and (";
+					}
+					else {
+						$kukalisa .= " or ";
+					}
 					
+					if($kj == "myyjat") {
+						$kukalisa .= "kuka.myyja > 0";
+					}
+					elseif($kj == "keraajat") {
+						$kukalisa .= "kuka.keraajanro > 0";
+					}
+					elseif($kj == "projektipaallikot") {
+						$kukalisa .= "kuka.asema = 'PP'";
+					}
+					else {
+						echo "Tällästä kalenteri_ketka:a ei tunneta '$kj'<br>";
+					}
+				}
+				
+				$kukalisa .= ")";
+				$kalenteri["kukalisa"] = $kukalisa;
+			}
+			else {
+				$kalenteri["kukalisa"] = "";
+			}
+			
+			$kalelisa = "";
+			//	Millaiset kalenterit jaetaan?
+			if(is_array($kalenteri["kalenteri_jako"])) {
+				foreach($kalenteri["kalenteri_jako"] as $kj) {
+					if($kalelisa == "") {
+						$kalelisa = " and (";
+					}
+					else {
+						$kalelisa .= " or ";
+					}
+					
+					if($kj == "tilaus") {
+						$kalelisa .= "kalenteri.otunnus = {$kalenteri["otunnus"]}";
+					}
+					elseif($kj == "asiakas"){
+						$kalelisa .= "kalenteri.liitostunnus = {$kalenteri["liitostunnus"]}";
+					}
+					else {
+						echo "Tällästä kalenteri_jako:a ei tunneta '$kj'<br>";
+					}
+				}
+
+				$kalelisa .= ")";
+				$kalenteri["kalelisa"] = $kalelisa;
+			}
+			else {
+				$kalenteri["kalelisa"] = "";
+			}
+			
+			
+			//	Painetaan nämä taas muistin syövereihin jotta ei dementia iske
+			if(!muistiin("kalenteri", "kalenteri", $kalenteri)) {
+				die("OHO! Kalenterin käyttönotto ei nyt vaan onnistu!");
+			}
+			
+			//	Kalenteri_kuka on meidän masteri, näytetäänkö kalenterit vai ei
+			if(is_array($kalenteri["kalenteri_kuka"])) {
+				
+				//	Tämä on meidän basic kalenterikysely omista kalentereista
+				$q = "	
+					SELECT 'kalenteri' laji, tyyppi laji_tark, UNIX_TIMESTAMP(date(pvmalku)) aika,  kalenteri.luontiaika, DATEDIFF(pvmloppu, pvmalku) vali, kalenteri.laatija, kalenteri.tunnus
+					FROM kalenteri
+					JOIN kuka ON kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka $kukalisa
+					WHERE kalenteri.yhtio = '$kukarow[yhtio]' and kalenteri.kuka IN ('".implode("','", $kalenteri["kalenteri_kuka"])."') and kalenteri.tyyppi = 'kalenteri' $kalelisa";
+				
 				if($query != "") {
-					$query = "	
-								(
+					$query = "	(
 									$q
 								)
-								$query
-								";
+									$query";
 				}
-				else{
+				else {
 					$query = $q;
 				}
 			}
-						
+			
+			
 			/*	Haetaan kaikki kalenterimerkinnät */
 			$query .= "	ORDER BY 3, 4";
 			$result = mysql_query($query) or pupe_error($query);
+			//echo $query."<br>";
 			$data=array();
 			while($row=mysql_fetch_array($result)) {
 				if(!isset($data["tiedot"]["alkustr"])) {
@@ -340,36 +404,38 @@
 				//echo "tallennetaan: <pre>".print_r($kalenteri, true)."</pre>";
 			}
 			
-			if($kalenteri["kalenteri_jako"] != "") {
+			if(is_array($kalenteri["kalenteri_kuka"])) {
 				$kalejako = "
 					<table border='1'>
 						<caption>".t("Käyttäjät")."</caption>";
 						
 				$lisa = "";
-				if($kalenteri["kalenteri_jako"] == "kaikki") {
-					
-				}
 				
 				$query = " 	SELECT *
 							FROM kuka
-							WHERE yhtio='$kukarow[yhtio]' $lisa
+							WHERE yhtio='$kukarow[yhtio]' {$kalenteri["kukalisa"]}
 							ORDER BY kuka IN('{$kukarow["kuka"]}') DESC, nimi ";
 				$result = mysql_query($query) or pupe_error($query);
 				if(mysql_num_rows($result)>0) {
 					while($row = mysql_fetch_array($result)) {
-
-						if(in_array($row["kuka"], $kalenteri["kalenteri_kuka"])) {
+						
+						$kalejako .= "<tr>";
+						
+						//	Omaa kalenteria ei saa sulkea koska se kadottaisi koko kalenterimenun..
+						if($row["kuka"] == $kukarow["kuka"]) {
 							$kalejako .= "
-							<tr>
-								<td><div style='float: left;'><font class='info'>{$row["nimi"]}</font></div><div style='float: right;'><input type='checkbox' name='' onclick=\"sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&poistakalekuka=$row[kuka]".url_params($kalenteri)."', '$kalenteri[div]', false);\" checked></div></td>
-							<tr>";							
+								<td><div style='float: left;'><font class='info'>{$row["nimi"]}</font></div></td>";
+						}
+						elseif(in_array($row["kuka"], $kalenteri["kalenteri_kuka"])) {
+							$kalejako .= "
+								<td><div style='float: left;'><font class='info'>{$row["nimi"]}</font></div><div style='float: right;'><input type='checkbox' name='' onclick=\"sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&poistakalekuka=$row[kuka]".url_params($kalenteri)."', '$kalenteri[div]', false);\" checked></div></td>";
 						}
 						else {
 							$kalejako .= "
-							<tr>
-								<td><div style='float: left;'><font class='info'>{$row["nimi"]}</font></div><div style='float: right;'><input type='checkbox' name='' onclick=\"sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&lisaakalekuka=$row[kuka]".url_params($kalenteri)."', '$kalenteri[div]', false);\"></div></td>
-							<tr>";
+								<td><div style='float: left;'><font class='info'>{$row["nimi"]}</font></div><div style='float: right;'><input type='checkbox' name='' onclick=\"sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&lisaakalekuka=$row[kuka]".url_params($kalenteri)."', '$kalenteri[div]', false);\"></div></td>";
 						}
+						
+						$kalejako .= "</tr>";
 					}
 				}
 				

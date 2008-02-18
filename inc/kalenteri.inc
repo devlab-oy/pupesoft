@@ -291,7 +291,15 @@
 					}
 					
 					if($kj == "tilaus") {
-						$kalelisa .= "kalenteri.otunnus = {$kalenteri["otunnus"]}";
+						//	Meid‰n pit‰‰ tarkistaa onko t‰m‰ nippu!
+						$abuq = "	SELECT GROUP_CONCAT(tunnus) nippu
+									FROM lasku
+									WHERE yhtio='$kukarow[yhtio]' and tunnusnippu = '{$kalenteri["otunnus"]}' and tila in ({$kalenteri["laskutilat"]})";
+						$res = mysql_query($abuq) or pupe_error($abuq);
+						$row = mysql_fetch_array($res);
+						if($row["nippu"] == "") $row["nippu"] = $kalenteri["otunnus"];
+						
+						$kalelisa .= "kalenteri.otunnus IN ({$row["nippu"]})";
 					}
 					elseif($kj == "asiakas"){
 						$kalelisa .= "kalenteri.liitostunnus = {$kalenteri["liitostunnus"]}";

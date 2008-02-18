@@ -257,11 +257,11 @@ if($tee == "NAYTA") {
 		$kalenteri["URL"] 				= "tilaushakukone.php";
 		$kalenteri["url_params"]		= array("toim", "setti", "tarjous", "tee");
 		$kalenteri["nakyma"]			= "TAPAHTUMALISTAUS";	
-		$kalenteri["sallittu_nakyma"]	= "";	
+		$kalenteri["sallittu_nakyma"]	= "";
 		$kalenteri["laskutilat"]		= $laskutilat;
-		$kalenteri["otunnus"]			= $tarjous;		
+		$kalenteri["otunnus"]			= $tarjous;
 		$kalenteri["kalenteri_kuka"]	= array($kukarow["kuka"]);
-		$kalenteri["kalenteri_ketka"]	= array("myyjat","keraajat", "projektipaallikot");	
+		$kalenteri["kalenteri_ketka"]	= array("myyjat","keraajat", "projektipaallikot");
 		$kalenteri["kalenteri_jako"]	= array("tilaus");
 		
 		alusta_kalenteri($kalenteri);
@@ -802,8 +802,7 @@ if($tee == "") {
 		
 		if($setti == "viikkis") {
 			$alatila_tilaus		= array("A", "B", "C", "D", "E", "V", "J", "F", "T", "U");
-
-//			$alatila_projekti	= array("", "A", "B");						
+			$alatila_projekti	= array("", "A", "B");						
 			$hakupalkki 		= "OHI";
 			$hakukysely			= "";
 		}

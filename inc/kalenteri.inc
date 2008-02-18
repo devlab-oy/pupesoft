@@ -369,7 +369,7 @@
 					}
 
 					//	Liitetään lisää tapahtumia..
-					if($kalerow["vali"] > 1) {
+					if($kalerow["vali"] >= 1) {
 						for($i=1;$i<=$kalerow["vali"]; $i++) {
 							$data["lista"][strtotime("+$i days", $aika)][] = &$kalerow;
 						}
@@ -640,6 +640,8 @@
 								}
 							}
 						}
+						
+						echo "<pre>kalenteri".print_r($tpos, true)."</pre><br>";
 					}
 
 					if(date("Ymd", $aikastr) == date("Ymd")) {
@@ -658,7 +660,6 @@
 						foreach($data["lista"][$aikastr] as $row) {
 							if($row["vali"] >= 1) {
 								if($row["aika"] == $aikastr) {
-									//if($ulos != "") $ulos .= "<hr>";
 									
 									$tcolor[$row["tunnus"]] = color_code(count($tcolor)*13+55, 100);
 

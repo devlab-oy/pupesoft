@@ -646,6 +646,8 @@
 						<th>".t("Myytävissä")."</th>
 						</tr>";
 
+				$yhteensa 	= array();
+
 				while ($jtrow = mysql_fetch_array($jtresult)) {
 
 					$tyyppi 	= "";
@@ -712,6 +714,12 @@
 							<td align='right'>$merkki".abs($jtrow["kpl"])."</td>
 							<td align='right'>".sprintf('%.2f', $myyta)."</td>
 							</tr>";
+					$yhteensa[$tyyppi] += $jtrow["kpl"];
+				}
+
+				echo "<tr><td class='back'>&nbsp;</td></tr>";
+				foreach($yhteensa as $type => $kappale) {
+					echo "<tr><th colspan='1'>".t("$type yhteensä")."</th><td>$kappale</td></tr>";
 				}
 
 				echo "</table>";

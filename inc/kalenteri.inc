@@ -131,10 +131,10 @@
 				$row = mysql_fetch_array($res);
 				
 				if($row["kuka"] == $kukarow["kuka"] or $row["laatija"] == $kukarow["kuka"]) {
-					$row["viesti"] = "<a onclick=\"popUp(event, 'ajax_menu', '50', '20', '$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=$lajitark&ktunnus=$tunnus".url_params($kalenteri)."'); return false;\" class='puhdas'>{$row["viesti"]}</a>";
+					$row["viesti"] = "<a onclick=\"popUp(event, 'ajax_menu', '50', '20', '$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=$lajitark&ktunnus=$tunnus".url_params($kalenteri)."'); return false;\" class='kale'>{$row["viesti"]}</a>";
 				}
 				else {
-					$row["viesti"] = "<a onclick=\"alert('Voit muokata vain omaa kalenteriasi'); return false;\" class='puhdas'>{$row["viesti"]}</a>";
+					$row["viesti"] = "<a onclick=\"alert('Voit muokata vain omaa kalenteriasi'); return false;\" class='kale'>{$row["viesti"]}</a>";
 				}
 			}
 			elseif($laji == "lasku") {
@@ -144,7 +144,8 @@
 							WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnus='$tunnus'";
 				$res = mysql_query($query) or pupe_error($query);
 				$row = mysql_fetch_array($res);
-
+				
+				$viesti = "";
 				if($row["tila"] == "T") {
 					$atoim = "TARJOUS";
 					if($lajitark == "alku") {
@@ -178,8 +179,9 @@
 						$viesti = $lajitark;
 					}
 				}
-				
-				$row["viesti"] .= " <a href='#' onclick=\"popUp(event, 'toimitus', '300', '-20', '../raportit/asiakkaantilaukset.php?tee=NAYTA&toim=$atoim&h&tunnus=$row[tunnus]'); return false;\" class='puhdas'>$viesti ".$row["tunnus"]." ".$row["comments"]."</a>";
+
+				list($viesti, $poppari) = lyhytviesti($row["tunnus"]." ".$viesti."\nviite: {$row["viesti"]}\n\n{$row["comments"]}", strlen($row["tunnus"]));
+				$row["viesti"] = " <a href='#' onclick=\"popUp(event, 'toimitus', '300', '-20', '../raportit/asiakkaantilaukset.php?tee=NAYTA&toim=$atoim&h&tunnus=$row[tunnus]'); return false;\" class='kale' $poppari>$viesti</a>";
 				
 			}
 			elseif($laji == "liite") {
@@ -625,6 +627,19 @@
 								</tr>
 								<tr>
 									<td class='back' align = 'left'><font class='info'>".date("W", $aikastr)."</font></td>";
+									
+						//	Rullataas kerran l‰pi niin tiedet‰‰n maksimit ja minimit tapahtumam‰‰rille joka auttaa positioinnissa
+						$tpos=array();
+						$tcolor = array();
+						for($y=0;$y<$leveys;$y++) {
+							if(is_array($data["lista"][strtotime("+$y days", $aikastr)])) {
+								foreach($data["lista"][strtotime("+$y days", $aikastr)] as $row) {
+									if($row["vali"] >= 1 and !isset($tpos[$row["tunnus"]])) {
+										$tpos[$row["tunnus"]] = (int) count($tpos)+1;
+									}
+								}
+							}
+						}
 					}
 
 					if(date("Ymd", $aikastr) == date("Ymd")) {
@@ -636,42 +651,78 @@
 
 					if(is_array($data["lista"][$aikastr])) {
 
-						$ulos = $viesti = "";
+						$ulos = array();
+						$viesti = "";
+						
+						//	Haetaan ensin useampip‰iv‰iset tapahtumat
 						foreach($data["lista"][$aikastr] as $row) {
-							if($row["aika"] == $aikastr) {
-								if($ulos != "") $ulos .= "<hr>";
+							if($row["vali"] >= 1) {
+								if($row["aika"] == $aikastr) {
+									//if($ulos != "") $ulos .= "<hr>";
+									
+									$tcolor[$row["tunnus"]] = color_code(count($tcolor)*13+55, 100);
+
+									$poppari="";
+									$lisatiedot = hae_lisatiedot($row["laji"], $row["laji_tark"], $row["tunnus"]);	
+									if($row["laji"] == "kalenteri") {
+
+										list($viesti, $poppari) = lyhytviesti($lisatiedot["viesti"], 25);
+									}
+									else {
+										$viesti = $lisatiedot["viesti"];
+									}
+
+									$ulos[$tpos[$row["tunnus"]]] .= "<div style='height: 15; width; 100%; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";' $poppari>$viesti</div>";									
+								}
+								else {
+									$ulos[$tpos[$row["tunnus"]]] .= "<div style='height: 15; width; 100%; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";' $poppari></div>";
+								}
+							}
+						}
+						
+						$u = "";
+						//	Haetaan sitten t‰m‰np‰iv‰n tapahtumat
+						foreach($data["lista"][$aikastr] as $row) {
+							if($row["aika"] == $aikastr and $row["vali"] < 1) {
+								if($u != "") $u .= "<hr>";
 
 								$lisatiedot = hae_lisatiedot($row["laji"], $row["laji_tark"], $row["tunnus"]);	
 								if($row["laji"] == "kalenteri") {
 
-									if($row["vali"] > 1) {
-										$lisatiedot["viesti"] .= "<br><br>".t("%s p‰‰ttyy: %s", $kieli, $lisatiedot["tapa_nimi"], date("d.m.Y h:i"));
-									}
 									list($viesti, $poppari) = lyhytviesti($lisatiedot["viesti"], 25);
 									if($poppari != "") {
-										$ulos .= "<div $poppari>$viesti</div>";
+										$u .= "<div $poppari>$viesti</div>";
 									}
 									else {
-										$ulos .= $viesti;
+										$u .= $viesti;
 									}
 								}
 								else {
-									$ulos .= $lisatiedot["viesti"];
+									$u .= $lisatiedot["viesti"];
 								}
+								
+								$ulos[]=$u;
 							}
 						}
 					}
 					else {
-						$ulos = "&nbsp;";
+						$ulos = array("&nbsp;");
 					}
-								
+					
+
+					
+					//	Tarkastetaan viel‰ ett‰ kaikki slotit on t‰ynn‰
+					foreach($tpos as $t) {
+						if($ulos[$t] == "") $ulos[$t] = "<div style='height: 15; width; 100%; text-align: left; background-color: inherit;'>&nbsp;</div>";
+					}
+					ksort($ulos);					
 					$menu = array();
 					$menu[] = array("TEKSTI" => "Lis‰‰ kalenteriisi", 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri));
 					$menu[] = array("TEKSTI" => "Lis‰‰ muistutus", 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri));
 					$menu[] = array("TEKSTI" => "Lis‰‰ asiakasmuistio", 	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&&tapvm=$aikastr".url_params($kalenteri));
 															
 					$kale .= "	<td width='100' height = '$height' NOWRAP style='border-style: solid; border-width: 1px; background-color: $color;'>
-									<div style='float: right;'>".tee_menu($menu, "<font class='info'>".date("d.m.", $aikastr)."</font>")."</div>$ulos
+									<div style='text-align: right;'>".tee_menu($menu, "<font class='kaleinfo'>".date("d.m.", $aikastr)."</font>")."</div>".implode("", $ulos)."
 								</td>";
 
 				}			
@@ -775,7 +826,7 @@
 				$paivanimi=array("ma", "ti", "ke", "to", "pe", "la", "su");
 				for($i=0;$i<$days;$i++) {
 					$kale .= "
-					<th width='$w'>".t($paivanimi[$i])." <div style='float: right;'><font class='info'>".date("d.m.", $paivat[$i])."</font></div></th>";					
+					<th width='$w'>".t($paivanimi[$i])." <div style='float: right;'><font class='kaleinfo'>".date("d.m.", $paivat[$i])."</font></div></th>";					
 				}
 				$kale .= "
 				</tr>";
@@ -861,7 +912,7 @@
 					
 					$kale .= "
 							<tr>
-								<td class='back' align = 'left'><font class='info'>$h:$m</font></td>";
+								<td class='back' align = 'left'><font class='kaleinfo'>$h:$m</font></td>";
 					
 					
 					for($i=0;$i<$days;$i++) {
@@ -905,13 +956,13 @@
 						else {
 							$ulos = array("");
 						}
-						
+												
 						$menu = array();
 						$menu[] = array("TEKSTI" => "Lis‰‰ kalenteriin", 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri));
 						$menu[] = array("TEKSTI" => "Lis‰‰ muistutus", 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri));
 						$menu[] = array("TEKSTI" => "Lis‰‰ asiakasmuistio", 	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$aikastr".url_params($kalenteri));
 
-						$kale .= "<div style='position: relative; float: right; width: {$w}px; text-align: right; z-index: 1;'>".tee_menu($menu, "<font class='info'>Lis‰‰</font>")."</div>".implode("",$ulos);
+						$kale .= "<div style='width: {$w}px; text-align: right; z-index: 1;'>".tee_menu($menu, "<font class='kaleinfo'>Lis‰‰</font>")."</div>".implode("",$ulos);
 						$kale .= "</td>";
 					}			
 					
@@ -1064,7 +1115,7 @@
 						kuka     		= '$kuka',
 						tyyppi   		= '$tyyppi',
 						pvmalku  		= '$tapvm',
-						pvmloppu  		= '$lopvm',					
+						pvmloppu  		= '$lopvm',
 						otunnus  		= '$otunnus',
 						kuittaus  		= '$kuittaus',
 						kentta01 		= '$viesti'";

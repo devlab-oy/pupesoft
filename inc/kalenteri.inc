@@ -678,7 +678,6 @@
 				krsort($data["lista"]);
 				
 				foreach($data["lista"] as $aika => $tapahtumat) {
-					echo "IIK";
 					$rivei = 0;
 					foreach($tapahtumat as $tapahtuma) {
 						if($tapahtuma["aika"] == $aika) {

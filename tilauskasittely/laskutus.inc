@@ -78,7 +78,7 @@ else {
 			$hinta					= $trow["hinta"] * (1 - $trow["ale"] / 100);														//Kappalehinta alennuksineen
 
 			$rivihinta				= round((float) $hinta * $trow["varattu"], $yhtiorow["hintapyoristys"]);									//Rivihinta alennuksineen
-			$rivihinta_valuutassa	= round((float) laskuval($hinta * $trow["varattu"], $orow["vienti_kurssi"], $yhtiorow["hintapyoristys"]));	//Rivihinta alennuksineen valuutassa
+			$rivihinta_valuutassa	= round((float) laskuval($hinta * $trow["varattu"], $orow["vienti_kurssi"]), $yhtiorow["hintapyoristys"]);	//Rivihinta alennuksineen valuutassa
 
 			// kumuloidaan loppusummia
 			$loppusumma 			+= $rivihinta;																						//Kumuloidaan verollinen loppusumma
@@ -86,7 +86,7 @@ else {
 			$arvosumma				+= $rivihinta;																						//Kumuloidaan veroton loppusumma
 			$arvosumma_valuutassa	+= $rivihinta_valuutassa;																			//Kumuloidaan veroton loppusumma valuutassa
 
-			$hinta_valuutassa	    = round((float) laskuval($hinta, $orow["vienti_kurssi"], $yhtiorow["hintapyoristys"]));						//Kappalehinta alennuksineen valuutassa
+			$hinta_valuutassa	    = round((float) laskuval($hinta, $orow["vienti_kurssi"]), $yhtiorow["hintapyoristys"]);						//Kappalehinta alennuksineen valuutassa
 			$hinta 					= round((float) $hinta, $yhtiorow["hintapyoristys"]);														//Kappalehinta alennuksineen
 		}
 		// Myyntihinnat sisältävät arvonlisäveron
@@ -110,15 +110,15 @@ else {
 			$hinta 					= $trow["hinta"] * (1 - $trow["ale"] / 100);																						//Veroton kappalehinta alennuksineen
 
 			$rivihinta				= round((float) $hinta * $trow["varattu"], $yhtiorow["hintapyoristys"]);																	//Veroton kappalehinta alennuksineen
-			$rivihinta_valuutassa	= round((float) laskuval($hinta * $trow["varattu"], $orow["vienti_kurssi"], $yhtiorow["hintapyoristys"]));									//Veroton kappalehinta alennuksineen valuutassa
+			$rivihinta_valuutassa	= round((float) laskuval($hinta * $trow["varattu"], $orow["vienti_kurssi"]), $yhtiorow["hintapyoristys"]);									//Veroton kappalehinta alennuksineen valuutassa
 
 			// kumuloidaan loppusummia
 			$loppusumma			 	+= round((float) $hinta * $trow["varattu"] * (1 + ($trow["alv"] / 100)), $yhtiorow["hintapyoristys"]);									    //Kumuloidaan verollinen loppusumma valuutassa
-			$loppusumma_valuutassa	+= round((float) laskuval($hinta * $trow["varattu"] * (1 + ($trow["alv"] / 100)), $orow["vienti_kurssi"], $yhtiorow["hintapyoristys"]));	//Kumuloidaan verollinen loppusumma
+			$loppusumma_valuutassa	+= round((float) laskuval($hinta * $trow["varattu"] * (1 + ($trow["alv"] / 100)), $orow["vienti_kurssi"]), $yhtiorow["hintapyoristys"]);	//Kumuloidaan verollinen loppusumma
 			$arvosumma				+= $rivihinta;                                                                                                                      //Kumuloidaan veroton loppusumma
 			$arvosumma_valuutassa	+= $rivihinta_valuutassa;                                                                                                           //Kumuloidaan veroton loppusumma valuutassa
 
-			$hinta_valuutassa		= round((float) laskuval($hinta, $orow["vienti_kurssi"], $yhtiorow["hintapyoristys"]));														//Veroton kappalehinta alennuksineen valuutassa
+			$hinta_valuutassa		= round((float) laskuval($hinta, $orow["vienti_kurssi"]), $yhtiorow["hintapyoristys"]);														//Veroton kappalehinta alennuksineen valuutassa
 			$hinta					= round((float) $hinta, $yhtiorow["hintapyoristys"]);																						//Veroton kappalehinta alennuksineen
 		}
 
@@ -430,6 +430,7 @@ else {
 		$kassa_loppusumma_valuutassa 	= "";
 	}
 
+
 	$pyorerotus				= 0;
 	$pyorerotus_valuutassa	= 0;
 	$loppusumma 			= round((float) $loppusumma, 2);
@@ -461,13 +462,14 @@ else {
 	if (abs($orow["hinta"] - $loppusumma) <= 0.5 and trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
 		$pyorerotus = $loppusumma - $orow["hinta"];
 	}
+
 	// käsin syötetty summa johon lasku pyöristetään valuutassa
 	if (abs($orow["hinta"] - $loppusumma_valuutassa) <= 0.5 and trim(strtoupper($orow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 		$pyorerotus_valuutassa = $loppusumma_valuutassa - $orow["hinta"];
 	}
 
 	// jos halutaan pyöristää laskun loppusumma lähimpään tasalukuun
-	if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o') {
+	if ($yhtiorow["laskunsummapyoristys"] != '' or $asrow["laskunsummapyoristys"] != '') {
 		// kotivaluutassa
 		if (trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
 			$pyorerotus = $loppusumma - round((float) $loppusumma, 0);

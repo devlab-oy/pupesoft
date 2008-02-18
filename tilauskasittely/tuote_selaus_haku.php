@@ -102,10 +102,10 @@
 //			$tuotekuvausrow = mysql_fetch_array($tuotekuvausres);
 			
 			if ($kuvarow["filetype"] == "application/pdf") {
-				echo "<a href='view.php?id=$kuvarow[tunnus]' target='_top'>".t("Avaa pdf")."</a></td></tr>";
+				echo "<a href='".$palvelin2."view.php?id=$kuvarow[tunnus]' target='_top'>".t("Avaa pdf")."</a></td></tr>";
 			}
 			else {
-				echo "<img src='view.php?id=$kuvarow[tunnus]'></td></tr>";
+				echo "<img src='".$palvelin2."view.php?id=$kuvarow[tunnus]'></td></tr>";
 			}
 
 			echo "<tr><td class='back' align='center' valign='top'>$kuvarow[selite]</td></tr>";

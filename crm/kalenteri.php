@@ -785,12 +785,27 @@ while ($kello_nyt != '18:00') {
 			while ($row=mysql_fetch_array($result)) {						
 				
 				$kesto=($row['kesto']/60)/30; //kuinka monta solua t‰m‰ itemi kest‰‰
-								
+				
+				$yhtio_query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
+				$yhtio_result = mysql_query($yhtio_query) or pupe_error($yhtio_query);
+				$konsernitx = "";
+
+				while ($konserni_row = mysql_fetch_array($yhtio_result)) {	
+					$konsernitx .= " '".$konserni_row["yhtio"]."' ,";
+				}
+				
+				if ($konserni != '') {
+					$where = " and yhtio in (".substr($konsernitx, 0, -1).") ";
+				}
+				else {
+					$where = " and yhtio='$row[yhtio]'";
+				}
+				
 				//haetaan asiakkaan tiedot
 				$query = "	select * 
 							from asiakas 
 							where tunnus = '$row[liitostunnus]'
-							and yhtio = '$row[yhtio]'";
+							$where";
 				$asres = mysql_query($query) or pupe_error($query);
 				$asiak = mysql_fetch_array($asres);			
 				

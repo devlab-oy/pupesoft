@@ -84,8 +84,23 @@ if (mysql_num_rows($tarrares) == 1) {
 		$sivu = str_replace($from, $to, $sivu);											// Tehdään käännös
 
 		$sivu = escapeshellarg($sivu);
-		$line = exec(" echo \"$sivu\" | $komento");
+		
+		//keksitään uudelle failille joku varmasti uniikki nimi:
+		list($usec, $sec) = explode(' ', microtime());
+		mt_srand((float) $sec + ((float) $usec * 100000));
+		$filenimi = "/tmp/CRM-Osoitetarrat-".md5(uniqid(mt_rand(), true)).".txt";
+		$fh = fopen($filenimi, "w+");
+		
+		fwrite($fh,$sivu);
+		
+		fclose($fh);
+		
+		$line = exec("$komento $filenimi");
+		
+		//$line = exec(" echo \"$sivu\" | $komento");
 		//echo "<pre>$sivu</pre><br>";
+		
+		system("rm -f $filenimi");
 		
 	}
 	else {
@@ -95,4 +110,5 @@ if (mysql_num_rows($tarrares) == 1) {
 else {
 	echo "<font class='error'>".t("Tuotetta")." $tuoteno ".t("ei löydy järjestelmästä")."!!!<br></font>";
 }
+
 ?>

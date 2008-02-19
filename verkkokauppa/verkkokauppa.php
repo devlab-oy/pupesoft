@@ -395,11 +395,52 @@ if(!function_exists("menu")) {
 			$val = "<table class='menu'>";
 			$query = "	SELECT distinct tuotemerkki
 			 			FROM tuote
-						WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try = '$try' and status != 'P' and hinnastoon = 'W' and tuotemerkki != ''
+						WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try = '$try' and status != 'P' and hinnastoon IN ('W', 'V') and tuotemerkki != ''
 						ORDER BY tuotemerkki";
 			$meres = mysql_query($query) or pupe_error($query);
 			while($merow = mysql_fetch_array($meres)) {
-				$val .=  "<tr class='aktiivi'><td class='sisennys1'></td><td class='sisennys2'></td><td><a class = 'menu' id='{$osasto}_{$try}_{$merow["tuotemerkki"]}_P' href='javascript:sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemerkki={$merow["tuotemerkki"]}\", \"\", true);'>{$merow["tuotemerkki"]}</a></td></tr>";
+				
+				//	Oletuksena pimitetään kaikki..
+				$ok = 0;
+				
+				//	Tarkastetaan onko täällä sopivia tuotteita
+				$query = "	SELECT *
+				 			FROM tuote
+							WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try = '$try' and tuotemerkki = '{$merow["tuotemerkki"]}'and status != 'P' and hinnastoon IN ('W', 'V') and tuotemerkki != ''";
+				$res = mysql_query($query) or pupe_error($query);
+				while($trow = mysql_fetch_array($res) and $ok == 0) {
+					
+					//	Tarkastetaan asiakashinta
+					if($trow["hinnastoon"] == "V") {
+						if(!is_array($asiakasrow)) {
+							$query    = "	SELECT * 
+											FROM asiakas
+											WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+							$asres = mysql_query($query);
+							$asiakasrow = mysql_fetch_array($asres);
+						}
+
+						$hinnat = alehinta(array(
+									"valkoodi" => "EUR", 
+									"maa" => $yhtiorow["maa"], 
+									"vienti_kurssi" => 1, 
+									"liitostunnus" => $asiakasrow["tunnus"], 
+									"ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste");
+						if 	(($kukarow["naytetaan_tuotteet"] == "A" or $trow["hinnastoon"] == "V") and ($hinnat["hintaperuste"]<2 or $hinnat["hintaperuste"] > 12)) {
+							continue;
+						}
+						else {
+							$ok = 1;
+						}
+					}
+					else {
+						$ok = 1;
+					}
+				}
+				
+				if($ok == 1) {
+					$val .=  "<tr class='aktiivi'><td class='sisennys1'></td><td class='sisennys2'></td><td><a class = 'menu' id='{$osasto}_{$try}_{$merow["tuotemerkki"]}_P' href='javascript:sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemerkki={$merow["tuotemerkki"]}\", \"\", true);'>{$merow["tuotemerkki"]}</a></td></tr>";
+				}
 			}
 			$val .= "</table>";
 		}

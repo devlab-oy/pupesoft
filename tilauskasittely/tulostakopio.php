@@ -1667,7 +1667,8 @@
 							while ($row = mysql_fetch_array($riresult)) {
 								$row['kommentti'] = t("Toimitetaan erikseen").". ".$row['kommentti'];
 								$row['rivihinta'] = 0;
-								rivi($page[$sivu, $lah_tyyppi]);						
+								
+								rivi($page[$sivu], $lah_tyyppi);						
 							}
 						}
 					}

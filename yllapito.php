@@ -116,6 +116,7 @@
 
 	// Jotain p‰ivitet‰‰n tietokontaan
 	if ($upd == 1) {
+
 		// Luodaan puskuri, jotta saadaan taulukot kuntoon
 		$query = "	SELECT *
 					FROM $toim
@@ -138,7 +139,7 @@
 
 				$t[$i] = sprintf('%04d', $tvv[$i])."-".sprintf('%02d', $tkk[$i])."-".sprintf('%02d', $tpp[$i]);
 
-				if(!checkdate($tkk[$i],$tpp[$i],$tvv[$i]) and ($tkk[$i]!= 0 or $tpp[$i] != 0)) {
+				if(!@checkdate($tkk[$i],$tpp[$i],$tvv[$i]) and ($tkk[$i]!= 0 or $tpp[$i] != 0)) {
 					$virhe[$i] = t("Virheellinen p‰iv‰m‰‰r‰");
 					$errori = 1;
 				}
@@ -163,7 +164,7 @@
 			$tiedostopaate = "";
 
 			$funktio = $toim."tarkista";
-			
+
 			if(!function_exists($funktio)) {
 				require("inc/$funktio.inc");
 			}
@@ -241,8 +242,9 @@
 
 				$query .= " where tunnus = $tunnus";
 			}
+
 			$result = mysql_query($query) or pupe_error($query);
-						
+
 			if ($tunnus == '') {
 				$tunnus = mysql_insert_id();
 				$wanha = "";
@@ -251,7 +253,7 @@
 				//	Javalla tieto ett‰ t‰t‰ muokattiin..
 				$wanha = "P_";
 			}
-			
+
 			if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "asiakas") {
 
 				$query = "	SELECT *
@@ -259,19 +261,19 @@
 							WHERE tunnus = '$tunnus'
 							and yhtio 	 = '$kukarow[yhtio]'";
 				$otsikres = mysql_query($query) or pupe_error($query);
-				
+
 				if (mysql_num_rows($otsikres) == 1) {
 					$otsikrow = mysql_fetch_array($otsikres);
-				
+
 					$query = "	SELECT tunnus
 								FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
 								WHERE yhtio 		= '$kukarow[yhtio]'
 								and ((tila in ('N','L') and alatila in ('','A','B','C')) or (tila = 'T' and alatila in ('','A')))
 								and liitostunnus	= $otsikrow[tunnus]
 								and tapvm			= '0000-00-00'";
-					$laskuores = mysql_query($query) or pupe_error($query); 
-					
-					while ($laskuorow = mysql_fetch_array($laskuores)) {					
+					$laskuores = mysql_query($query) or pupe_error($query);
+
+					while ($laskuorow = mysql_fetch_array($laskuores)) {
 						$query = "	UPDATE lasku
 									SET ytunnus			= '$otsikrow[ytunnus]',
 									ovttunnus			= '$otsikrow[ovttunnus]',
@@ -292,7 +294,7 @@
 									WHERE yhtio 		= '$kukarow[yhtio]'
 									and tunnus			= '$laskuorow[tunnus]'";
 						$updaresult = mysql_query($query) or pupe_error($query);
-						
+
 						$query = "	UPDATE laskun_lisatiedot
 									SET kolm_ovttunnus	= '$otsikrow[kolm_ovttunnus]',
 									kolm_nimi   		= '$otsikrow[kolm_nimi]',
@@ -304,17 +306,16 @@
 									WHERE yhtio 		= '$kukarow[yhtio]'
 									and otunnus			= '$laskuorow[tunnus]'";
 						$updaresult = mysql_query($query) or pupe_error($query);
-						
+
 					}
 				}
-			}						
-			
+			}
 
 			//	T‰m‰ funktio tekee myˆs oikeustarkistukset!
 			synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
 
 			// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
-			if ($lopetus != '') {
+			if ($lopetus != '' and isset($yllapitonappi)) {
 				// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
 				$lopetus = str_replace('////','?', $lopetus);
 				$lopetus = str_replace('//','&',  $lopetus);
@@ -344,6 +345,7 @@
 				echo "<SCRIPT LANGUAGE=JAVASCRIPT>suljeYllapito('$wanha$suljeYllapito','$tunnus','$tunnus - $aburow[kohde]');</SCRIPT>";
 				exit;
 			}
+
 			if(substr($suljeYllapito, 0, 17) == "asiakkaan_positio") {
 				$query = "SELECT positio from asiakkaan_positio where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
@@ -352,6 +354,7 @@
 				echo "<SCRIPT LANGUAGE=JAVASCRIPT>suljeYllapito('$wanha$suljeYllapito','$tunnus','$tunnus - $aburow[positio]');</SCRIPT>";
 				exit;
 			}
+
 			if(substr($suljeYllapito, 0, 22) == "yhteyshenkilo_tekninen"  or substr($suljeYllapito, 0, 25) == "yhteyshenkilo_kaupallinen") {
 				$query = "SELECT nimi from yhteyshenkilo where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
@@ -360,7 +363,6 @@
 				echo "<SCRIPT LANGUAGE=JAVASCRIPT>suljeYllapito('$wanha$suljeYllapito','$tunnus','$aburow[nimi]');</SCRIPT>";
 				exit;
 			}
-
 
 			$uusi = 0;
 
@@ -661,13 +663,46 @@
 		if ($toim == "asiakas") {
 			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ja p‰ivit‰ tiedot myˆs avoimille tilauksille'>";
 		}
-				
+
 		if($lukossa == "ON") {
 			echo "<input type='hidden' name='lukossa' value = '$lukossa'>";
 			echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type = 'submit' name='paluunappi' value = '".t("Palaa avainsanoihin")."'>";
 		}
 
+
+		echo "</td>";
+
+		echo "<td class='back' valign='top'>";
+
+		if ($errori == '' and $toim == "sarjanumeron_lisatiedot") {
+			@include ("inc/arviokortti.inc");
+		}
+
+		// Yll‰pito.php:n formi kiinni vasta t‰ss‰
 		echo "</form>";
+
+		if ($errori == '' and $toim == "tuote" and $laji != "V") {
+			require ("inc/tuotteen_toimittajat.inc");
+		}
+
+		if ($errori == '' and $uusi != 1 and $toim == "yhtio") {
+			require ("inc/yhtion_toimipaikat.inc");
+		}
+
+		if ($errori == '' and ($toim == "toimi" or $toim == "asiakas")) {
+			require ("inc/toimittajan_yhteyshenkilo.inc");
+
+			if ($toim == "asiakas") {
+				include ("inc/asiakkaan_avainsanat.inc");
+			}
+		}
+
+		if ($errori == '' and ($toim == "sarjanumeron_lisatiedot" or $toim == "tuote")) {
+			require ("inc/liitaliitetiedostot.inc");
+		}
+
+		echo "</td></tr>";
+		echo "</table>";
 
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
 		if ($toim == "avainsana" or
@@ -706,31 +741,6 @@
 				}
 			}
 		}
-
-		echo "</td><td class='back' valign='top'>";
-
-		if ($errori == '' and $toim == "tuote" and $laji != "V") {
-			require ("inc/tuotteen_toimittajat.inc");
-		}
-
-		if ($errori == '' and $uusi != 1 and $toim == "yhtio") {
-			require ("inc/yhtion_toimipaikat.inc");
-		}
-		
-		if ($errori == '' and ($toim == "toimi" or $toim == "asiakas")) {
-			require ("inc/toimittajan_yhteyshenkilo.inc");
-			
-			if ($toim == "asiakas") {
-				include ("inc/asiakkaan_avainsanat.inc");
-			}
-		}
-
-		if ($errori == '' and ($toim == "sarjanumeron_lisatiedot" or $toim == "tuote")) {
-			require ("inc/liitaliitetiedostot.inc");
-		}
-
-		echo "</td></tr></table>";
-
 	}
 	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit") {
 		echo "<br>

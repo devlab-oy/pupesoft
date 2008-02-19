@@ -1048,7 +1048,8 @@
 								$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 											FROM avainsana
 											".avain('join','ASOSASTO_')."
-											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASOSASTO' and avainsana.selite='$row[$i]' limit 1";
+											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASOSASTO' and avainsana.selite='$row[$i]' 
+											limit 1";
 								$osre = mysql_query($query) or pupe_error($query);
 								if (mysql_num_rows($osre) == 1) {
 									$osrow = mysql_fetch_array($osre);
@@ -1061,7 +1062,8 @@
 								$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 											FROM avainsana
 											".avain('join','ASRYHMA_')."
-											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASRYHMA' and avainsana.selite='$row[$i]' limit 1";
+											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASRYHMA' and avainsana.selite='$row[$i]' 
+											limit 1";
 								$osre = mysql_query($query) or pupe_error($query);
 								if (mysql_num_rows($osre) == 1) {
 									$osrow = mysql_fetch_array($osre);
@@ -1074,7 +1076,8 @@
 								$query = "	SELECT avainsana.selite, ".avain('select')."
 											FROM avainsana
 											".avain('join','OSASTO_')."
-											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='OSASTO' and avainsana.selite='$row[$i]' limit 1";
+											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='OSASTO' and avainsana.selite='$row[$i]' 
+											limit 1";
 								$osre = mysql_query($query) or pupe_error($query);
 								if (mysql_num_rows($osre) == 1) {
 									$osrow = mysql_fetch_array($osre);
@@ -1087,7 +1090,8 @@
 								$query = "	SELECT avainsana.selite, ".avain('select')."
 											FROM avainsana
 											".avain('join','TRY_')."
-											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='TRY' and avainsana.selite='$row[$i]' limit 1";
+											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='TRY' and avainsana.selite='$row[$i]' 
+											limit 1";
 								$osre = mysql_query($query) or pupe_error($query);
 								if (mysql_num_rows($osre) == 1) {
 									$osrow = mysql_fetch_array($osre);
@@ -1543,7 +1547,7 @@
 						FROM avainsana
 						".avain('join','ASOSASTO_')."
 						WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASOSASTO'
-						ORDER BY avainsana.selite";
+						ORDER BY avainsana.jarjestys, avainsana.selite";
 			$res2  = mysql_query($query) or die($query);
 
 			echo "<select name='mul_oasiakasosasto[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -1576,7 +1580,7 @@
 						FROM avainsana
 						".avain('join','ASRYHMA_')."
 						WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASRYHMA'
-						ORDER BY avainsana.selite";
+						ORDER BY avainsana.jarjestys, avainsana.selite";
 			$res2  = mysql_query($query) or die($query);
 
 			echo "<select name='mul_asiakasryhma[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -1610,7 +1614,7 @@
 						WHERE yhtio='$kukarow[yhtio]' and
 						laji='piiri'
 						$asiakasrajaus_avainsana
-						order by jarjestys";
+						order by jarjestys, selite";
 			$res2  = mysql_query($query) or die($query);
 
 			echo "<select name='mul_piiri[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -1654,7 +1658,10 @@
 			echo "<td valign='top'>";
 
 			// n‰ytet‰‰n soveltuvat osastot
-			$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' order by avainsana.selite";
+			$query = "	SELECT avainsana.selite, ".avain('select')." 
+						FROM avainsana ".avain('join','OSASTO_')." 
+						WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' 
+						order by avainsana.jarjestys, avainsana.selite";
 			$res2  = mysql_query($query) or die($query);
 
 			echo "<select name='mul_osasto[]' multiple='TRUE' size='10' style='width:100%;'>";
@@ -1688,7 +1695,7 @@
 						FROM avainsana ".avain('join','TRY_')." 
 						WHERE avainsana.yhtio='$kukarow[yhtio]' 
 						and avainsana.laji='TRY' 
-						order by avainsana.selite";
+						order by avainsana.jarjestys, avainsana.selite";
 			$res2  = mysql_query($query) or die($query);
 
 			echo "<select name='mul_try[]' multiple='TRUE' size='10' style='width:100%;'>";

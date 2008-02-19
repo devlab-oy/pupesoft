@@ -111,13 +111,16 @@ if (!function_exists('alku')) {
 		}
 		
 		if ($tyyppi == "TILAUSVAHVISTUS") {
-			$pdf->draw_text(310,815, t("Tilausvahvistus", $kieli), 	$thispage, $iso);
+			$pdf->draw_text(310,815, t("Tilausvahvistus", $kieli), 		$thispage, $iso);
+		}
+		elseif ($tyyppi == "SIIRTOLISTA") {
+			$pdf->draw_text(310,815, t("Lähete/Siirtolista", $kieli), 	$thispage, $iso);
 		}
 		else {
-			$pdf->draw_text(310,815, t("Lähete", $kieli), 			$thispage, $iso);		
+			$pdf->draw_text(310,815, t("Lähete", $kieli), 				$thispage, $iso);		
 		}
 		
-		$pdf->draw_text(310, 803, t("Sivu", $kieli), 				$thispage, $norm);
+		$pdf->draw_text(310, 803, t("Sivu", $kieli), 					$thispage, $norm);
 		
 		//Vasen sarake
 		//$pdf->draw_rectangle(737, 20,  674, 300, $thispage, $rectparam);
@@ -434,13 +437,16 @@ if (!function_exists('uusi_sivu')) {
 		}
 		
 		if ($tyyppi == "TILAUSVAHVISTUS") {
-			$pdf->draw_text(310,815, t("Tilausvahvistus", $kieli), 	$thispage, $iso);
+			$pdf->draw_text(310,815, t("Tilausvahvistus", $kieli), 		$thispage, $iso);
+		}
+		elseif ($tyyppi == "SIIRTOLISTA") {
+			$pdf->draw_text(310,815, t("Lähete/Siirtolista", $kieli), 	$thispage, $iso);
 		}
 		else {
-			$pdf->draw_text(310,815, t("Lähete", $kieli), 			$thispage, $iso);		
+			$pdf->draw_text(310,815, t("Lähete", $kieli), 				$thispage, $iso);		
 		}
 		
-		$pdf->draw_text(310, 803, t("Sivu", $kieli), 				$thispage, $norm);
+		$pdf->draw_text(310, 803, t("Sivu", $kieli), 					$thispage, $norm);
 	
 		//Oikea sarake
 		$pdf->draw_rectangle(800, 300, 779, 580, $thispage, $rectparam);
@@ -850,14 +856,17 @@ if (!function_exists('rivi')) {
 		}
 		
 		//Haetan sarjanumeron tiedot
-		if ($row["varattu"]+$row["kpl"] < 0){
+		if ($tyyppi == "SIIRTOLISTA") {
+			$sarjanutunnus = "siirtorivitunnus";		
+		}
+		elseif ($row["varattu"]+$row["kpl"] < 0){
 			$sarjanutunnus = "ostorivitunnus";
 		}
 		else {
 			$sarjanutunnus = "myyntirivitunnus";
 		}
-
-		$query = "	select distinct sarjanumero
+		
+		$query = "	SELECT distinct sarjanumero
 					from sarjanumeroseuranta
 					where yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$row[tuoteno]'

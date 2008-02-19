@@ -1022,12 +1022,21 @@
 
 							$sivu  = 1;
 							$total = 0;
+							$save_tyyppi =	$tyyppi;
+							
+							if ($laskurow["tila"] == "G") {
+								$lah_tyyppi = "SIIRTOLISTA";
+							}
+							else {
+								$lah_tyyppi = "";
+							}
 
 							// Aloitellaan lähetteen teko
-							$page[$sivu] = alku();
+							$page[$sivu] = alku($lah_tyyppi);
 
 							while ($row = mysql_fetch_array($riresult)) {
-								rivi($page[$sivu]);
+								rivi($page[$sivu], $lah_tyyppi);
+								
 								$total+= $row["rivihinta"];
 							}
 							
@@ -1041,11 +1050,8 @@
 								$perheresult = mysql_query($query) or pupe_error($query);			
 								$tunrow = mysql_fetch_array($perheresult);						
 
-
-
-
 								//generoidaan lähetteelle ja keräyslistalle rivinumerot
-								if ($tunrow[tunnukset] != "") {
+								if ($tunrow["tunnukset"] != "") {
 									$query = "  SELECT tilausrivi.*,
 												round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 												round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
@@ -1063,7 +1069,7 @@
 									while ($row = mysql_fetch_array($riresult)) {
 										$row['kommentti'] = t("Toimitetaan erikseen").". ".$row['kommentti'];
 										$row['rivihinta'] = 0;
-										rivi($page[$sivu]);						
+										rivi($page[$sivu], $lah_tyyppi);						
 									}
 								}
 							}
@@ -1098,7 +1104,7 @@
 								$komento .= " -#$lahetekpl ";
 							}
 
-							print_pdf($komento);
+							print_pdf($komento);							
 						}
 					}
 

@@ -487,7 +487,7 @@
 		}
 		if ($toim == "LAHETE" or $toim == "PAKKALISTA") {
 			//myyntitilaus. Tulostetaan lähete.
-			$where1 .= " lasku.tila in ('L','N','V') ";
+			$where1 .= " lasku.tila in ('L','N','V','G') ";
 
 			if ($ytunnus{0} == '£') {
 				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -1619,12 +1619,19 @@
 
 					$sivu  = 1;
 					$total = 0;
+					
+					if ($laskurow["tila"] == "G") {
+						$lah_tyyppi = "SIIRTOLISTA";
+					}
+					else {
+						$lah_tyyppi = "";
+					}
 
 					// Aloitellaan lähetteen teko
-					$page[$sivu] = alku();
+					$page[$sivu] = alku($lah_tyyppi);
 
 					while ($row = mysql_fetch_array($riresult)) {
-						rivi($page[$sivu]);
+						rivi($page[$sivu], $lah_tyyppi);
 						$total+= $row["rivihinta"];
 					}
 					
@@ -1660,7 +1667,7 @@
 							while ($row = mysql_fetch_array($riresult)) {
 								$row['kommentti'] = t("Toimitetaan erikseen").". ".$row['kommentti'];
 								$row['rivihinta'] = 0;
-								rivi($page[$sivu]);						
+								rivi($page[$sivu, $lah_tyyppi]);						
 							}
 						}
 					}

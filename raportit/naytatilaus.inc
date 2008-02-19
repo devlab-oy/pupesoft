@@ -470,7 +470,10 @@
 			}
 		}
 		else {	
-			if ($prow["uusiotunnus"] > 0 and $prow["osto_vai_hyvitys"] == '' and $prow["varattu"] + $prow["kpl"] < 0) {
+			if ($laskurow["tila"] == "G") {
+				$sarjanutunnus = "siirtorivitunnus";
+			}
+			elseif ($prow["uusiotunnus"] > 0 and $prow["osto_vai_hyvitys"] == '' and $prow["varattu"] + $prow["kpl"] < 0) {
 				$sarjanutunnus = "myyntirivitunnus";
 			}
 			elseif ($prow["varattu"] + $prow["kpl"] < 0) {
@@ -480,7 +483,7 @@
 				$sarjanutunnus = "myyntirivitunnus";
 			}
 		}
-		
+
 		$query = "	SELECT distinct sarjanumero
 					from sarjanumeroseuranta
 					where yhtio = '$kukarow[yhtio]'

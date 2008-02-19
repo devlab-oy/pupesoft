@@ -414,7 +414,7 @@
 					}
 				}
 
-				// Tulostetaan keraäyslista
+				// Tulostetaan keräyslista
 				require_once ("tulosta_lahete_kerayslista.inc");
 				
 				//hatetaan asiakkaan tiedot

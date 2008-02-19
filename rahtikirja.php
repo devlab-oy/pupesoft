@@ -515,11 +515,19 @@
 					$sivu  = 1;
 					$total = 0;
 					
+					if ($laskurow["tila"] == "G") {
+						$lah_tyyppi = "SIIRTOLISTA";
+					}
+					else {
+						$lah_tyyppi = "";
+					}
+					
 					// Aloitellaan lähetteen teko
-					$page[$sivu] = alku();
+					$page[$sivu] = alku($lah_tyyppi);
 
 					while ($row = mysql_fetch_array($riresult)) {
-						rivi($page[$sivu]);
+						rivi($page[$sivu], $lah_tyyppi);
+						
 						$total+= $row["rivihinta"];
 					}
 					

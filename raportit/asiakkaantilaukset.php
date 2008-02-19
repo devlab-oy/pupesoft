@@ -296,7 +296,7 @@
 			$jarj = "ORDER BY $jarj";
 		}
 		else {
-			$jarj = "ORDER BY 2 desc";
+			$jarj = "ORDER BY 2 desc, 1 asc";
 		}
 		
 		if ($toim == 'OSTO') {
@@ -398,14 +398,74 @@
 
 				echo "<tr class='aktiivi'>";
 				
-				for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
+				// Laatikot laskujen ymp‰rille
+				if ($row["laskunro"] > 0 and $row["laskunro"] != $edlaskunro) {
+					$query = "	SELECT count(*)
+								FROM lasku
+								WHERE yhtio = '$kukarow[yhtio]'
+								and laskunro = '$row[laskunro]'
+								and tila in ('U','L')";
+					$pkres = mysql_query($query) or pupe_error($query);
+					$pkrow = mysql_fetch_array($pkres);
+
+					$pknum 		= $pkrow[0];
+					$borderlask = $pkrow[0];
+				}
+				elseif($row["laskunro"] == 0) {
+					$borderlask		= 1;
+					$pknum			= 1;
+					$pkrow[0] 		= 1;
+				}
+								
+				$lask--;
+				$classlisa = "";
+
+				if($borderlask == 1 and $pkrow[0] == 1 and $pknum == 1) {
+					$classalku	= " style='border-left: 1px solid; border-top: 1px solid; border-bottom: 1px solid;' ";
+					$classloppu = " style='border-top: 1px solid; border-bottom: 1px solid; border-right: 1px solid;' ";
+					$class 		= " style=' border-top: 1px solid; border-bottom: 1px solid;' ";
+
+					$borderlask--;
+				}
+				elseif($borderlask == $pkrow[0] and $pkrow[0] > 0) {
+					$classalku	= " style='border-left: 1px solid; border-top: 1px solid;' ";
+					$classloppu = " style='border-top: 1px solid; border-right: 1px solid;' ";
+					$class 		= " style='border-top: 1px solid;' ";
+
+					$borderlask--;
+				}
+				elseif($borderlask == 1) {
+					$classalku	= " style='border-left: 1px solid; border-bottom: 1px solid;' ";
+					$classloppu	= " style='border-right: 1px solid; border-bottom: 1px solid;' ";
+					$class 		= " style='border-bottom: 1px solid;' ";
+
+					$borderlask--;
+				}
+				elseif($borderlask > 0 and $borderlask < $pknum) {
+					$classalku	= " style='border-left: 1px solid;' ";
+					$classloppu	= " style='border-right: 1px solid;' ";
+					$class 		= " ";
+
+					$borderlask--;
+				}
+				
+				if ($row["tila"] == "U" or $row["laskunro"] == 0) {
+					echo "<$ero valign='top' $classalku></$ero>";
+				}
+				else {
+					echo "<$ero valign='top' $classalku>$row[0]</$ero>";	
+				}
+				
+				for ($i=1; $i<mysql_num_fields($result)-2; $i++) {					
 					if (mysql_field_name($result,$i) == 'toimaika') {
-						echo "<$ero valign='top'>".tv1dateconv($row[$i])."</$ero>";
+						echo "<$ero valign='top' $class>".tv1dateconv($row[$i])."</$ero>";
+					}
+					elseif (is_numeric($row[$i])) {
+						echo "<$ero valign='top' nowrap align='right' $class>$row[$i]</$ero>";
 					}
 					else {
-						echo "<$ero valign='top'>$row[$i]</$ero>";						
+						echo "<$ero valign='top' $class>$row[$i]</$ero>";						
 					}
-
 				}
 
 				$laskutyyppi	= $row["tila"];
@@ -414,9 +474,9 @@
 				//tehd‰‰n selv‰kielinen tila/alatila
 				require "../inc/laskutyyppi.inc";
 
-				echo "<$ero valign='top'>".t($laskutyyppi)." ".t($alatila)."</$ero>";
+				echo "<$ero valign='top' $classloppu>".t($laskutyyppi)." ".t($alatila)."</$ero>";
 
-				echo "<form method='post' action='$PHP_SELF'><td class='back'>
+				echo "<form method='post' action='$PHP_SELF'><td class='back' valign='top'>
 						<input type='hidden' name='tee' value='NAYTATILAUS'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='asiakasid' value='$asiakasid'>
@@ -450,6 +510,8 @@
 						<input type='submit' value='".t("N‰yt‰ tilaus")."'></td></form>";
 
 				echo "</tr>";
+				
+				$edlaskunro = $row["laskunro"];
 			}
 			echo "</table>";
 		}

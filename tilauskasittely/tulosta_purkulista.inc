@@ -86,11 +86,10 @@
 			$pdf->draw_text(155, 520, t("Tuotekoodi", $kieli),			$firstpage, $pieni);
 			$pdf->draw_text(280, 520, t("Nimitys", $kieli),				$firstpage, $pieni);
 			$pdf->draw_text(440, 520, t("Paikka(o.saldo)", $kieli),		$firstpage, $pieni);
-			$pdf->draw_text(520, 520, t("Yksikkö", $kieli),				$firstpage, $pieni);
-			$pdf->draw_text(570, 520, t("Määrä", $kieli),				$firstpage, $pieni);
-			$pdf->draw_text(620, 520, t("Kerroin", $kieli),				$firstpage, $pieni);
-			$pdf->draw_text(675, 520, t("Toim.Määrä", $kieli),			$firstpage, $pieni);
-			$pdf->draw_text(750, 520, t("Ostotilaus", $kieli),			$firstpage, $pieni);
+			$pdf->draw_text(600, 520, t("Määrä", $kieli),				$firstpage, $pieni);
+			$pdf->draw_text(650, 520, t("Kerroin", $kieli),				$firstpage, $pieni);
+			$pdf->draw_text(705, 520, t("Toim.Määrä", $kieli),			$firstpage, $pieni);
+			$pdf->draw_text(770, 520, t("Yksikkö", $kieli),				$firstpage, $pieni);
 
 			$pdf->draw_rectangle(530, 20, 10, 808, $firstpage, $rectparam);
 
@@ -153,6 +152,7 @@
 		$mitkalisa = "";
 	}
 
+	
 	$query = "	SELECT tuotteen_toimittajat.toim_tuoteno, tuote.tuoteno, hyllyalue, hyllynro, hyllyvali, tuote.sarjanumeroseuranta,
 				hyllytaso, tilausrivi.yksikko, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta, if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) tuotekerroin,
 				round(if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(tilausrivi.varattu+tilausrivi.kpl),2) toimmaara, 
@@ -165,6 +165,8 @@
 				and tilausrivi.yhtio='$kukarow[yhtio]'
 				$mitkalisa
 				ORDER BY sorttauskentta, tilausrivi.tunnus";
+	
+	
 	$result = mysql_query($query) or pupe_error($query);
 				
 	$kala 		= 500;
@@ -233,6 +235,7 @@
 		$x[0] = 20;
 		$x[1] = 808;
 		$y[0] = $y[1] = $kala + 15 - 4;
+		
 
 		if (($perheid == 0 or $perheid != $row["perheid2"]) and isset($perheid)) {
 			$pdf->draw_line($x, $y, $firstpage, $rectparam);
@@ -250,20 +253,20 @@
 		}
 		
 		$pdf->draw_text(440, $kala, $row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
-		$pdf->draw_text(520, $kala, $row["yksikko"], 					$firstpage, $p);
-		
-				
+						
 		$oikpos = $pdf->strlen((float) $row["varattu"], $p);
-		$pdf->draw_text(590-$oikpos, $kala, (float) $row["varattu"], 	$firstpage, $p);
+		$pdf->draw_text(620-$oikpos, $kala, (float) $row["varattu"], 	$firstpage, $p);
+		
 		
 		$oikpos = $pdf->strlen((float) $row["tuotekerroin"], $p);
-		$pdf->draw_text(645-$oikpos, $kala, (float) $row["tuotekerroin"], 	$firstpage, $p);
+		$pdf->draw_text(675-$oikpos, $kala, (float) $row["tuotekerroin"], 	$firstpage, $p);
+	
 						
 		$oikpos = $pdf->strlen((float) $row["toimmaara"], $p);
-		$pdf->draw_text(715-$oikpos, $kala, (float) $row["toimmaara"], 	$firstpage, $p);
+		$pdf->draw_text(745-$oikpos, $kala, (float) $row["toimmaara"], 	$firstpage, $p);
 		
+		$pdf->draw_text(770, $kala, $row["yksikko"], 					$firstpage, $p);
 		
-		$pdf->draw_text(750, $kala, $row["otunnus"], 					$firstpage, $p);
 		
 		$kala = $kala - 15 - $lisaa;
 		
@@ -305,7 +308,7 @@
 			$pohja = $pdf->draw_paragraph($kala+$p["height"]+5, 160, 5, 440, $row["kommentti"],	$firstpage, $p);						
 			$kala = $pohja - 15;
 		}
-		
+		$kala -= 15;
 		
 		$sumarum += $row["varattu"];
 		$total   += $row["hinta"];

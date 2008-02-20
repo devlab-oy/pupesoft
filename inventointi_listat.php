@@ -279,23 +279,22 @@
 			$listaaika = date("Y-m-d H:i:s");	
 				
 			$ots  = t("Inventointilista")." $kutsu  Listanumero: $listanro   $pp.$kk.$vv - $kello\n$yhtiorow[nimi]\n\n";
-			$ots .= sprintf ('%-14.14s', 	t("Paikka"));
+			$ots .= sprintf ('%-28.14s', 	t("Paikka"));
 			$ots .= sprintf ('%-21.21s', 	t("Tuoteno"));
 			$ots .= sprintf ('%-21.21s', 	t("Toim.Tuoteno"));
-			$ots .= sprintf ('%-30.30s', 	t("Nimitys"));
+			$ots .= sprintf ('%-40.38s', 	t("Nimitys"));
 			
 			if ($naytasaldo != '') {
 				$rivinleveys += 10;
 				$ots .= sprintf ('%-10.10s',t("Hyllyss‰"));
-				$katkoviiva = '----------';
+				$katkoviiva = '__________';
 			}
 			
 			$ots .= sprintf ('%-7.7s',		t("M‰‰r‰"));
 			$ots .= sprintf ('%-9.9s', 		t("Yksikkˆ"));
-			$ots .= sprintf ('%-20.20s', 	t("Inv.pvm"));
-			$ots .= sprintf ('%8.8s',	 	t("Tikpl"));
+			$ots .= sprintf ('%-8.8s',	 	t("Tikpl"));
 			$ots .= "\n";
-			$ots .= "---------------------------------------------------------------------------------------------------------------------------------------$katkoviiva\n\n";
+			$ots .= "_______________________________________________________________________________________________________________________________________$katkoviiva\n\n";
 			fwrite($fh, $ots);
 			$ots = chr(12).$ots;
 						
@@ -318,32 +317,53 @@
 					$munresult = mysql_query($query) or pupe_error($query);
 				}
 								
-				if ($rivit >= 25) {
+				if ($rivit >= 17) {
 					fwrite($fh, $ots);
 					$rivit = 1;				
 				}
 				
 				if ($naytasaldo != '') {
-					//Haetaan ker‰tty m‰‰r‰
-					$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,
-								ifnull(sum(tilausrivi.varattu),0) ennpois
-								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-								WHERE yhtio 	= '$kukarow[yhtio]'
-								and tyyppi 	   in ('L','G','V')
-								and tuoteno		= '$tuoterow[tuoteno]' 
-								and varattu    <> '0'
-								and laskutettu 	= '' 
-								and hyllyalue	= '$tuoterow[hyllyalue]' 
-								and hyllynro 	= '$tuoterow[hyllynro]'
-								and hyllyvali 	= '$tuoterow[hyllyvali]'
-								and hyllytaso 	= '$tuoterow[hyllytaso]'";																					
-					$hylresult = mysql_query($query) or pupe_error($query);					
-					$hylrow = mysql_fetch_array($hylresult);		
+										
+					//katotaan mihin varastooon tilausrivill‰ tuotepaikka kuuluu
+					$rivipaikka = kuuluukovarastoon($tuoterow["hyllyalue"], $tuoterow["hyllynro"]);
 					
-					$hyllyssa = $tuoterow['saldo']-$hylrow['keratty'];
+					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
+								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
+								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
+								varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
+					 			FROM tuote
+								JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
+								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+								and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+								and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+								and varastopaikat.tunnus = '$rivipaikka'
+								WHERE tuote.yhtio = '$kukarow[yhtio]'
+								and tuote.tuoteno = '$tuoterow[tuoteno]'
+								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
+								
+					$sresult = mysql_query($query) or pupe_error($query);
+
+					$rivipaikkahyllyssa = 0;
+					$rivivarastohyllyssa = 0;
+
+					if (mysql_num_rows($sresult) > 0) {
+						while ($saldorow = mysql_fetch_array ($sresult)) {
+							
+							list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', '', $saldorow["era"]);
+
+							if ($saldorow['hyllyalue'] == $tuoterow['hyllyalue'] and $saldorow['hyllynro'] == $tuoterow['hyllynro'] and $saldorow['hyllyvali'] == $tuoterow['hyllyvali'] and $saldorow['hyllytaso'] == $tuoterow['hyllytaso']){
+								$rivipaikkahyllyssa  += $hyllyssa;
+							}
+
+							$rivivarastohyllyssa += $hyllyssa;
+						}
+					}
+					
+					
 				}
 				else {
-					$hyllyssa = '';
+					$rivipaikkahyllyssa = 0;
+					$rivivarastohyllyssa = 0;
 				}
 				
 				//katsotaan onko tuotetta tilauksessa
@@ -357,20 +377,25 @@
 					$tuoterow["inventointiaika"] = t("Ei inventoitu");
 				}
 
-				$prn  = sprintf ('%-14.14s', 	$tuoterow["varastopaikka"]);
+				$prn  = sprintf ('%-28.14s', 	$tuoterow["varastopaikka"]);
 				$prn .= sprintf ('%-21.21s', 	$tuoterow["tuoteno"]);
 				$prn .= sprintf ('%-21.21s', 	$tuoterow["toim_tuoteno"]);
-				$prn .= sprintf ('%-30.30s', 	asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']));
-				
-				if ($naytasaldo != '') {
-					$prn .= sprintf ('%-10.10s', 		$hyllyssa);
+				$prn .= sprintf ('%-40.38s', 	asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']));
+				if ($naytasaldo != '') {					
+					if ($rivipaikkahyllyssa != $rivivarastohyllyssa) {
+						$prn .= sprintf ('%-10.10s', $rivipaikkahyllyssa."(".$rivivarastohyllyssa.")");
+					}
+					else {
+						$prn .= sprintf ('%-10.10s', $rivipaikkahyllyssa);				
+					}					
 				}
 				
 				$prn .= sprintf ('%-7.7s', 		"_____");
 				$prn .= sprintf ('%-9.9s', 		$tuoterow["yksikko"]);
-				$prn .= sprintf ('%-20.20s', 	$tuoterow["inventointiaika"]);
-				$prn .= sprintf ('%8.8s', 	$prow["varattu"]);
+				$prn .= sprintf ('%-8.8d', 	$prow["varattu"]);
 				$prn .= "\n\n";
+				$prn .= "_______________________________________________________________________________________________________________________________________$katkoviiva\n";
+				
 				fwrite($fh, $prn);
 				$rivit++;
 			}
@@ -384,9 +409,9 @@
 				
 				system("ps2pdf ".$filenimi.".ps ".$filenimi.".pdf");
 				
-				$liite = $filenimi.".pdf";
+				$liite = $filenimi.".pdf";				
 				$kutsu = "Inventointilista";
-				
+								
 				require("inc/sahkoposti.inc");				
 			}
 			elseif ($komento["Inventointi"] != '') {

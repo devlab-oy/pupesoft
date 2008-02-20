@@ -37,11 +37,6 @@
 		$content .= "Content-Disposition: inline; filename=\"".$kutsu.".pdf\"\n\n";
 	}
 
-	if ($viestisisalto != '') {
-		$content .= "--$bound\n";
-		$content .= $viestisisalto;
-	}
-
 	$handle  = fopen($liite, "r");
 	$sisalto = fread($handle, filesize($liite));
 	fclose($handle);

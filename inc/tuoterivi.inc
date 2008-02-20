@@ -355,7 +355,7 @@
 
 	if (mysql_field_name($result, $i) == "ostajanro") {
 
-		$query = "select distinct myyja, nimi from kuka where yhtio='$kukarow[yhtio]' and myyja>0 order by myyja";
+		$query = "SELECT distinct myyja, nimi from kuka where yhtio='$kukarow[yhtio]' and myyja>0 order by myyja";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>";

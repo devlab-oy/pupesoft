@@ -690,14 +690,14 @@ if ($ytunnus!='') {
 			if($yhdistetty == "") {
 				$ulos  .= "<tr>";
 				foreach($otsik as $o) {
-					$ulos .= "<th>".ucfirst($o)."</th>";
+					$ulos .= "<th>".t(ucfirst($o))."</th>";
 				}
 				$ulos  .= "</tr>";				
 			}
 
 			if(isset($workbook_ale) and $yhdistetty == "") {
 				foreach($otsik_spread as $key => $value) {
-					$worksheet->write($excelrivi, $key, ucfirst($value), $format_bold);
+					$worksheet->write($excelrivi, $key, t(ucfirst($value)), $format_bold);
 				}
 				$excelrivi++;
 			}									
@@ -845,7 +845,7 @@ if ($ytunnus!='') {
 			// Duusataan otsikot
 			if(isset($workbook_ale) and $yhdistetty == "") {
 				foreach($otsik_spread as $key => $value) {
-					$worksheet->write($excelrivi, $key, ucfirst($value), $format_bold);
+					$worksheet->write($excelrivi, $key, t(ucfirst($value)), $format_bold);
 				}
 				$excelrivi++;
 			}									
@@ -853,7 +853,7 @@ if ($ytunnus!='') {
 			if($hdistetty == "") {
 				$ashin  .= "<tr>";
 				foreach($otsik as $o) {
-					$ashin .= "<th>".ucfirst($o)."</th>";
+					$ashin .= "<th>".t(ucfirst($o))."</th>";
 				}
 				$ashin  .= "</tr>";				
 			}
@@ -969,14 +969,14 @@ if ($ytunnus!='') {
 			// Duusataan otsikot
 			if(isset($workbook_ale)) {
 				foreach($otsik_spread as $key => $value) {
-					$worksheet->write($excelrivi, $key, ucfirst($value), $format_bold);
+					$worksheet->write($excelrivi, $key, t(ucfirst($value)), $format_bold);
 				}
 				$excelrivi++;
 			}									
 
 			$yhdistetty  .= "<tr>";
 			foreach($otsik as $o) {
-				$yhdistetty .= "<th>".ucfirst($o)."</th>";
+				$yhdistetty .= "<th>".t(ucfirst($o))."</th>";
 			}
 			$yhdistetty  .= "</tr>";				
 						

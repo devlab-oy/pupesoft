@@ -449,7 +449,7 @@
 					$borderlask--;
 				}
 				
-				if ($row["tila"] == "U" or $row["laskunro"] == 0) {
+				if ($row["tila"] == "U") {
 					echo "<$ero valign='top' $classalku></$ero>";
 				}
 				else {

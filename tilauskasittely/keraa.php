@@ -1067,7 +1067,13 @@
 									$riresult = mysql_query($query) or pupe_error($query);
 
 									while ($row = mysql_fetch_array($riresult)) {
-										$row['kommentti'] = t("Toimitetaan erikseen").". ".$row['kommentti'];
+										if ($row['toimitettu'] == '') {
+											$row['kommentti'] = t("Toimitetaan erikseen").". ".$row['kommentti'];											
+										}
+										else {
+											$row['kommentti'] = t("Toimitettu erikseen").". ".$row['kommentti'];				
+										}
+
 										$row['rivihinta'] = 0;
 										rivi($page[$sivu], $lah_tyyppi);						
 									}
@@ -1385,22 +1391,32 @@
 		//päivitä kerätyt formi
 		$formi="rivit";
 		$kentta="keraajanro";
-
-		//haetaan kaikki tälle klöntille kuuluvat otsikot
-		$query = "	SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ',') tunnukset
-					FROM lasku
-					WHERE yhtio		= '$kukarow[yhtio]'
-					and kerayslista	= '$id'
-					and kerayslista != 0
-					and tila		in ($tila)
-					$tilaustyyppi
-					HAVING tunnukset is not null";
-		$toimresult = mysql_query($query) or pupe_error($query);
-
-		//jos rivejä löytyy niin tiedetään, että tämä on keräysklöntti
-		if (mysql_num_rows($toimresult) > 0) {
-			$toimrow = mysql_fetch_array($toimresult);
-			$tilausnumeroita = $toimrow["tunnukset"];
+		
+		$query = "SELECT kerayslista from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
+		$testresult = mysql_query($query) or pupe_error($query);
+		$testrow = mysql_fetch_array($testresult);
+		
+		
+		if ($testrow['kerayslista'] > 0) {
+			//haetaan kaikki tälle klöntille kuuluvat otsikot
+			$query = "	SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ',') tunnukset
+						FROM lasku
+						WHERE yhtio		= '$kukarow[yhtio]'
+						and kerayslista	= '$id'
+						and kerayslista != 0
+						and tila		in ($tila)
+						$tilaustyyppi
+						HAVING tunnukset is not null";
+			$toimresult = mysql_query($query) or pupe_error($query);
+			
+			//jos rivejä löytyy niin tiedetään, että tämä on keräysklöntti
+			if (mysql_num_rows($toimresult) > 0) {
+				$toimrow = mysql_fetch_array($toimresult);
+				$tilausnumeroita = $toimrow["tunnukset"];
+			}
+			else {
+				$tilausnumeroita = $id;
+			}
 		}
 		else {
 			$tilausnumeroita = $id;

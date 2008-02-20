@@ -2,7 +2,7 @@
 
 if(!function_exists("asiakastarkista")) {
 	function asiakastarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $ytunnus_select, $asiakasnro_select;
+		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $ytunnus_select, $asiakasnro_select, $toim;
 		
 		static $asiak_laji, $ytunnus_tunnus, $ytunnus, $ovttunnus, $apuverkkotunnus;
 		
@@ -70,14 +70,19 @@ if(!function_exists("asiakastarkista")) {
 
 				if (mysql_num_rows($sresult) > 0) {
 					$srowapu = mysql_fetch_array($sresult);
-
-					$tarkyhtio = $srowapu["yhtiot"];
+					
+					if ($srowapu["yhtiot"] != '') {
+						$tarkyhtio = $srowapu["yhtiot"];
+					}
+					else {
+						$tarkyhtio = "'$kukarow[yhtio]'";
+					}
 				}
 				else {
 					$tarkyhtio = "'$kukarow[yhtio]'";
 				}
 
-				$query   = "select tunnus from asiakas where yhtio in ($tarkyhtio) and asiakasnro='$asiakasnro_select' and tunnus != '$tunnus'";
+				$query   = "SELECT tunnus from asiakas where yhtio in ($tarkyhtio) and asiakasnro='$asiakasnro_select' and tunnus != '$tunnus'";
 				$sresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sresult) > 0) {

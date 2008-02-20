@@ -267,7 +267,7 @@
 		}
 		else {
 			$apu_asiakasnumero = $vrrow["asiakasnro"];
-			$apu_asiakasnro++;
+			$apu_asiakasnumero++;
 		}
 
 		for ($monta = 0; $monta < 5;) {

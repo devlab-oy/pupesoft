@@ -1301,6 +1301,10 @@ if (!function_exists('loppu')) {
 			}
 
 			$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
+			
+			if ($laskurow["vienti"] != "") {
+				$uytunnus = strtoupper($y_maa).$uytunnus;
+			}			
 		}
 		else {
 			$uytunnus = $y_vatnumero;

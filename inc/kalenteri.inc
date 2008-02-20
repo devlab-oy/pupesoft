@@ -1082,6 +1082,9 @@
 					$lopvm .= " $lohh:$lomm:00";
 				}
 			}
+			else {
+				$lopvm = "";
+			}
 			
 			$viesti = utf8_decode($viesti);
 
@@ -1124,31 +1127,99 @@
 			if($jakelu != "") {
 
 				//	Haetaan kaikki listata
-				$query = "	SELECT group_concat(distinct(concat(nimi,' <',eposti,'>'))) eposti, group_concat(nimi SEPARATOR ', ') nimi, count(*) osotteita
+				$query = "	SELECT nimi, eposti
 							FROM kuka
 							WHERE yhtio = '$kukarow[yhtio]' and kuka IN ('".str_replace(",","','", implode(",", $jakelu))."') and eposti != ''
 							GROUP BY yhtio";
 				$jres = mysql_query($query) or pupe_error($query);
 				if(mysql_num_rows($jres)>0) {
-					$jrow = mysql_fetch_array($jres);
-
+					$to = "";
+					while($jrow = mysql_fetch_array($jres)) {
+						if($to != "") $to .= ", ";
+						$to .= "=?iso-8859-1?Q?".imap_8bit($jrow["nimi"])."?= <{$jrow["eposti"]}>";
+					}
+					
+					
+					//	melkosta..
+					if(preg_match_all("//"))
 					$header  = "From: <$yhtiorow[postittaja_email]>\n";
 					$header .= "MIME-Version: 1.0\n" ;
 					$content .= "Content-Type: text/plain; charset=\"iso-8859-1\"\n";
+					
+					if($tyyppi == "kalenteri") {
+						$subject = t("Kalenteritapahtuma");
+					}
+					else {
+						$subject = t($tyyppi);
+					}
 
-					$subject = t("Tarjousseurannan pikaviesti käyttäjältä %s", $kieli, $kukarow["nimi"]);
+					if($otunnus > 0) {
+						$query = "	SELECT nimi, lasku.tunnusnippu, asiakkaan_kohde.kohde, laskun_lisatiedot.seuranta
+									FROM lasku
+									LEFT JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
+									LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde
+									WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnus='$otunnus'";
+						$kres = mysql_query($query) or pupe_error($query);
+						if(mysql_num_rows($kres) > 0) {
+							$krow = mysql_fetch_array($kres);
 
+							$subject .= " / {$krow["tunnusnippu"]} {$krow["seuranta"]} - {$krow["nimi"]}";
+							if($krow["kohde"] != "") {
+								$subject .= " - {$krow["kohde"]}";
+							}
+						}
+					}
+					elseif($liitostunnus > 0){
+						$query = "	SELECT nimi
+									FROM asiakas
+									WHERE yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
+						$kres = mysql_query($query) or pupe_error($query);
+						if(mysql_num_rows($kres) > 0) {
+							$krow = mysql_fetch_array($kres);
+
+							$subject .= " / {$krow["nimi"]}";
+						}
+					}
+					
+					$subject .= " / ".t("Käyttäjältä")." {$kukarow["nimi"]}";
+					
+					if($tyyppi == "kalenteri") {
+						$query = "	SELECT selitetark
+									FROM avainsana
+									WHERE yhtio='{$kukarow["yhtio"]}' and laji = 'KALETAPA' and selite='$tapa'";
+						$ares = mysql_query($query) or pupe_error($query);
+						$arow = mysql_fetch_array($ares);
+
+						$msg = "Tyyppi: ".t("Kalenterimerkintä")."\n";
+						$msg .= "Tapa: $arow[selitetark]\n";
+						
+					}
+					else {
+						$msg = "Tyyppi: ".t($tyyppi)."\n";
+					}
+					
+					$msg .= "Tapahtuma-aika: ";
+					$msg .= "$tapp.$takk.$tavv";
+					if($tahh != "" and $tamm != "") {
+						$msg .= " klo. $tahh:$tamm";
+					}
+					if($lopp != "" and $lokk != "" and $lovv != "") {
+						$msg .= " - $lopp.$lokk.$lovv";
+						if($lohh != "" and $lomm != "") {
+							$msg .= " klo. $lohh:$lomm";
+						}
+					}
+					$msg .=  "\n";
+					
 					$query = "	SELECT *
 								FROM lasku
 								WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$otunnus'";
 					$abures = mysql_query($query) or pupe_error($query);
 					$aburow = mysql_fetch_array($abures);
-
-					$msg = " Viesti koskee tarjousta:\n$aburow[tunnusnippu] - $aburow[nimi] $aburow[nimitark]\n\n";
-					$msg .= "Viesti:\n$viesti\n\n";
-
-					if(mail($jrow["eposti"], $subject, $msg, $header, " -f $yhtiorow[postittaja_email]")) {
-						if($jrow["osoitteita"] > 1) {
+					
+					$msg .= "\n$viesti\n";
+					if(mail($to, "=?iso-8859-1?Q?".imap_8bit($subject)."?=", $msg, $header, " -f $yhtiorow[postittaja_email]")) {
+						if(mysql_num_rows($jres) > 1) {
 							echo "<font class='message'>".t("Sähköpostin lähetettiin käyttäjille %s", $kieli, $jrow["nimi"])."</font>";
 						}
 						else {

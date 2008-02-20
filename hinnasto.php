@@ -266,7 +266,7 @@ while($srow = mysql_fetch_array ($sresult)) {
 	}
 	echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
 }
-echo "</select></td><th>tai syötä käsin</th><td><input type='text' name='try2' value='$try' size='15'></td></tr>";
+echo "</select></td><th>".t("tai syötä käsin")."</th><td><input type='text' name='try2' value='$try' size='15'></td></tr>";
 
 if (empty($kukarow['extranet'])) {
 	$query = "	SELECT distinct tuotemerkki

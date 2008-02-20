@@ -839,24 +839,23 @@ if($tee == "") {
 				$taulu2			= "tilaus";								
 			}
 			
-			echo "
+			echo "	<font class='message'>".t("Anna hakuparametrit").":</font>
 					<form method='post' id='tiedot_form'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='hakupalkki' value='mini'>
-					<table>
-					<caption style='text-align: left;'>Anna hakuparametrit</caption>";
+					<table width='600px'>";
 			
 			if($toim == "TARJOUSHAKUKONE") {
-				echo "
+				echo "	
 						<tr>
-							<th>".t("Seuranta")."</th><th>".t("Laatija")."</th><th>".t("Tila")."</th><th>".t("Vienti")."</th><th>".t("Maa")."</th>
+							<th>".t("Seuranta")."</th><th>".t("Laatija")."</th><th>".t("Myyj‰")."</th>
 						</tr>
 						<tr>";
 			}
 			elseif($toim == "TILAUSHAKUKONE") {
 				echo "
 						<tr>
-							<th>".t("Seuranta")."</th><th>".t("Laatija")."</th><th>".t("Tilauksen tila")."</th><th>".t("Projektin tila")."</th><th>".t("Vienti")."</th><th>".t("Maa")."</th>
+							<th>".t("Seuranta")."</th><th>".t("Laatija")."</th><th>".t("Myyj‰")."</th>
 						</tr>
 						<tr>";
 			}
@@ -876,15 +875,18 @@ if($tee == "") {
 				}
 				echo "		<option value='$row[0]' $sel>$row[1]</option>";
 			}
+			
 			echo "			<option value='TYHJA'>".t("Seuranta puuttuu")."</option>
 							</select>
+							<br>
+							".t("Seurannottain").": <input type='checkbox' name='group[laskun_lisatiedot.seuranta]' value='checked' {$group["laskun_lisatiedot.seuranta"]}> prio: <input type='text' name='prio[laskun_lisatiedot.seuranta]' value='{$prio["laskun_lisatiedot.seuranta"]}' size='2'>
 						</td>";
 
 
 			$query = "	SELECT distinct(kuka) kuka, kuka.nimi nimi
 						FROM lasku
 						JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka = lasku.laatija
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'T'";
+						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila IN ($laskutilat)";
 			$abures = mysql_query($query) or pupe_error($query);
 
 			echo "		<td>
@@ -897,7 +899,50 @@ if($tee == "") {
 				echo "		<option value='$row[0]' $sel>$row[1]</option>";
 			}
 			echo "			</select>
+							<br>
+							".t("Laatijoittain").": <input type='checkbox' name='group[lasku.laatija]' value='checked' {$group["lasku.laatija"]}> prio: <input type='text' name='prio[lasku.laatija]' value='{$prio["lasku.laatija"]}' size='2'>
+			
 						</td>";
+
+			$query = "	SELECT distinct(lasku.myyja) myyja, kuka.nimi
+						FROM lasku
+						JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.tunnus = lasku.myyja
+						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila IN ($laskutilat)";
+			$abures = mysql_query($query) or pupe_error($query);
+			echo "		<td>
+							<select name='myyja[]' multiple='TRUE' size='8'>";
+			while($row = mysql_fetch_array($abures)) {
+				$sel = "";
+				if (array_search($row[0], $myyja) !== false) {
+					$sel = 'selected';
+				}
+				echo "		<option value='$row[0]' $sel>$row[1]</option>";
+			}
+			echo "			</select>
+							<br>
+							".t("Myyjitt‰in").": <input type='checkbox' name='group[lasku.myyja]' value='checked' {$group["lasku.myyja"]}> prio: <input type='text' name='prio[lasku.myyja]' value='{$prio["lasku.myyja"]}' size='2'>
+						</td>
+						</tr>
+						</table>
+						<br>
+						<table width='600px'>";
+
+
+			if($toim == "TARJOUSHAKUKONE") {
+				echo "
+						<tr>
+							<th>".t("Tila")."</th><th>".t("Vienti")."</th><th>".t("Maa")."</th>
+						</tr>
+						<tr>";
+			}
+			elseif($toim == "TILAUSHAKUKONE") {
+				echo "
+						<tr>
+							<th>".t("Tilauksen tila")."</th><th>".t("Projektin tila")."</th><th>".t("Vienti")."</th><th>".t("Maa")."</th>
+						</tr>
+						<tr>";
+			}
+
 
 			if($toim == "TARJOUSHAKUKONE") {
 				$sel =  array();
@@ -1168,11 +1213,11 @@ if($tee == "") {
 									$lisat = "";
 									if($toim == "TARJOUSHAKUKONE") {
 										
-										$lisat = "	<option value='tilaus' {$sel["tilaus"]}>".t("Tilaus")."</option>
+										$lisat = "	<option value='tunnus' {$sel["tunnus"]}>".t("Tarjous")."</option>
 													<option value='lasku.nimi' {$sel["lasku.nimi"]}>".t("Asiakas")."</option>";
 									} 
 									elseif($toim == "TILAUSHAKUKONE") {
-										$lisat = "	<option value='tilaus' {$sel["tilaus"]}>".t("Tilaus")."</option>
+										$lisat = "	<option value='tunnus' {$sel["tunnus"]}>".t("Tilaus")."</option>
 													<option value='lasku.nimi' {$sel["lasku.nimi"]}>".t("Asiakas")."</option>";
 									}
 									
@@ -1183,7 +1228,8 @@ if($tee == "") {
 												$lisat
 												<option value='seuranta' {$sel["seuranta"]}>".t("Seuranta")."</option>
 												<option value='laskun_lisatiedot.asiakkaan_kohde' {$sel["laskun_lisatiedot.asiakkaan_kohde"]}>".t("Kohde")."</option>
-												<option value='lasku.laatija' {$sel["lasku.laatija"]}>".t("Laatija")."</option>																																	
+												<option value='lasku.laatija' {$sel["lasku.laatija"]}>".t("Laatija")."</option>
+												<option value='lasku.myyja' {$sel["lasku.myyja"]}>".t("Myyja")."</option>																																			
 												<option value='summa_' {$sel["summa_"]}>".t("Summa")."</option>
 												<option value='pva' {$sel["pva"]}>".t("Voimassa")."</option>
 												<option value='maa' {$sel["maa"]}>".t("Maa")."</option>
@@ -1226,6 +1272,10 @@ if($tee == "") {
 		
 		if(count($laatija) > 0) {
 			$lasku_rajaus .= " and lasku.laatija IN ('".implode("','", $laatija)."')";
+		}
+
+		if(count($myyja) > 0) {
+			$lasku_rajaus .= " and lasku.myyja IN ('".implode("','", $myyja)."')";
 		}
 
 		if(count($alatila) > 0) {
@@ -1319,6 +1369,33 @@ if($tee == "") {
 		$lkm_rajaus = "LIMIT $lkm";
 	}
 	
+	if(count($group)>0) {
+		
+		//	Oreder by m‰‰r‰t‰‰n t‰‰ll‰ aina
+		$order = array();
+		$jarj = array();
+		
+		//	sortataan..
+		for($i=0;$i<count($prio);$i++) {
+			$v = current($prio);
+			if($v == 0) $prio[key($prio)]=max($prio)+1;
+			next($prio);
+		}
+		
+		$g = array();
+		
+		foreach($group as $gk => $gv) {
+			$g[$prio[$gk]] = $gk;
+			$jarj[] = $gk;
+		}
+		
+		//	sortataan n‰‰ arrayt
+		ksort($g);
+		krsort($jarj);
+		
+		$group_by = "GROUP BY ".implode(", ", $g)."";
+	}
+	
 	$order = "ORDER BY ";
 	if(is_array($jarj)) {
 		foreach($jarj as $key => $jarj) {
@@ -1339,8 +1416,7 @@ if($tee == "") {
 	elseif($toim == "TILAUSHAKUKONE") {
 		$order .= "lasku.tunnus DESC";
 	}
-	
-	
+		
 	if($viimeisin_kaletapahtuma == "OK") {
 		$viimeisin_kaletapahtuma = ", (	SELECT max(pvmalku)
 			FROM kalenteri
@@ -1352,53 +1428,79 @@ if($tee == "") {
 	$summa = "sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))";
 	if($toim == "TARJOUSHAKUKONE") {
 		//	Haetaan kaikki Tarjousotsikot
-		$query = "	SELECT 	lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws('<br>',versio.nimi, versio.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, 
-							(
-								SELECT $summa
-								FROM tilausrivi
-								WHERE tilausrivi.yhtio=versio.yhtio and tilausrivi.otunnus=versio.tunnus and tyyppi != 'D'
-							) summa_, 
-							if(versio.alatila IN ('', 'A'), DATEDIFF(versio.luontiaika, date_sub(now(), INTERVAL laskun_lisatiedot.tarjouksen_voimaika day)), '') pva, 
-							lasku.tila,
-							
-							lasku.alatila
+		$summa = "
+		(
+			SELECT $summa
+			FROM tilausrivi
+			WHERE tilausrivi.yhtio=versio.yhtio and tilausrivi.otunnus=versio.tunnus and tyyppi != 'D'
+		)";
+		
+	
+		//	Olemme gruupanneet jotain
+		if(count($group)>0) {
+			$q = "";
+			foreach($g as $k) {
+				if($k == "lasku.myyja") {
+					$k = "myyja.nimi myyja";
+					$myyja_join = "	LEFT JOIN kuka myyja ON myyja.yhtio=lasku.yhtio and myyja.tunnus=lasku.myyja";
+				}
+				
+				$q .= "$k, ";
+			}
+			
+			$q .= "sum($summa) Yhteens‰, count(*) Kpl, ";
+			$c = count($group)+2;
+		}
+		else {
+			$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws('<br>',versio.nimi, versio.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, $summa Yhteens‰, if(versio.alatila IN ('', 'A'), DATEDIFF(versio.luontiaika, date_sub(now(), INTERVAL laskun_lisatiedot.tarjouksen_voimaika day)), '') pva, lasku.tila, lasku.alatila,";
+			$c = 7;			
+		}
+		
+		
+		$query = "	SELECT 	$q
+							lasku.tunnus
 							$viimeisin_kaletapahtuma
 					FROM lasku
 					JOIN lasku versio ON versio.yhtio = lasku.yhtio and versio.tunnus = if(lasku.tunnusnippu>0,(select max(l.tunnus) from lasku l where l.yhtio = lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu),lasku.tunnus) $versio_rajaus
 					JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = versio.yhtio and laskun_lisatiedot.otunnus=versio.tunnus $lisatiedot_rajaus
 					LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde
+					$myyja_join
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila IN ($laskutilat) and lasku.tunnus = lasku.tunnusnippu
 					$lasku_rajaus
 					$having_rajaus
+					$group_by
 					$order
 					$lkm_rajaus";
-		$c = 7;			
 	}
 	elseif($toim == "TILAUSHAKUKONE") {
 		//	Haetaan kaikki Tilausotsikot
 		$query = "	SELECT 	lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws('<br>',lasku.nimi, lasku.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, 
-							(
+							sum((
 								SELECT sum(tilausrivi.hinta * if('o' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))
 							 	FROM lasku l
 							 	JOIN tilausrivi ON tilausrivi.yhtio=l.yhtio and tilausrivi.otunnus=l.tunnus and tyyppi != 'D' and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'
 							
 							 	WHERE lasku.yhtio=lasku.yhtio and tunnusnippu=lasku.tunnusnippu and lasku.tila IN ('R','L','N')
-							) summa_, lasku.tila,
+							)) summa_, lasku.tila,
 							  
-							lasku.alatila $viimeisin_kaletapahtuma
+							lasku.alatila,
+							lasku.tunnus
+							$viimeisin_kaletapahtuma
 					FROM lasku
 					JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus $lisatiedot_rajaus
 					LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde
+					$myyja_join
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila IN ($laskutilat) and lasku.tunnus = lasku.tunnusnippu
 					$lasku_rajaus
 					$having_rajaus
+					$group_by
 					$order
 					$lkm_rajaus";
 		$c = 6;
 	}
-	//echo $query;
+	//echo $query."<br>";
 	
 	$laskures = mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($laskures)>0) {
@@ -1407,7 +1509,7 @@ if($tee == "") {
 				<table border='0' cellpadding='2' cellspacing='1' width = '1000'>
 					<tr>";
 				
-				for($i=0;$i<=$c; $i++) {
+				for($i=0;$i<$c; $i++) {
 					$o = trim(str_replace("_", " ", mysql_field_name($laskures, $i)));					
 					echo "<th>$o</th>";
 				}
@@ -1418,7 +1520,7 @@ if($tee == "") {
 		while($laskurow = mysql_fetch_array($laskures)) {
 			
 			echo "<tr  class='aktiivi'>";
-			for($i=0;$i<=$c; $i++) {
+			for($i=0;$i<$c; $i++) {
 				
 				if(mysql_field_name($laskures, $i) == "pva") {
 					if($laskurow["pva"] > 5) {
@@ -1447,18 +1549,22 @@ if($tee == "") {
 					echo "<td>$laskurow[$i]</td>";
 				}
 				
-				if(mysql_field_name($laskures, $i) == "summa_") {
+				if(mysql_field_name($laskures, $i) == "Yhteens‰") {
 					$colspan = $i;
 					$gt += $laskurow[$i];
 				}
 			}
 			
 			
-			echo "					
-					<td class='back'><a id = 'kasittele_$laskurow[tarjous]' href=\"javascript: sndReq('tarjouskalenteri_$laskurow[tarjous]', 'tilaushakukone.php?ohje=off&toim=$toim&setti=$setti&tee=NAYTA&nakyma=TAPAHTUMALISTAUS&tarjous=$laskurow[tarjous]', 'kasittele_$laskurow[tarjous]', true);\">K‰sittele</a></td>
-				</tr>";
+			if(count($group)==0) {
+				echo "					
+						<td class='back'><a id = 'kasittele_$laskurow[tunnus]' href=\"javascript: sndReq('tarjouskalenteri_$laskurow[tunnus]', 'tilaushakukone.php?ohje=off&toim=$toim&setti=$setti&tee=NAYTA&nakyma=TAPAHTUMALISTAUS&tarjous=$laskurow[tunnus]', 'kasittele_$laskurow[tunnus]', true);\">K‰sittele</a></td>";
+			}
+			else {
+				echo "</tr>";
+			}
 
-			echo "<tr><td class='back' colspan = '8'><div id='tarjouskalenteri_$laskurow[tarjous]'></div></td></tr>";
+			echo "<tr><td class='back' colspan = '8'><div id='tarjouskalenteri_$laskurow[tunnus]'></div></td></tr>";
 		}
 		
 		echo "<tr><td colspan='$colspan' class='back'></td><td class='back' align = 'right'><font class='message'>".number_format($gt, 2, ',', ' ')."</font></td></tr>";

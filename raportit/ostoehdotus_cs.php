@@ -445,7 +445,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 	echo "<tr>";
 	
 	if ($useampi_yhtio > 1) {
-		echo "<th valign='top'>Yhtiö</th>";
+		echo "<th valign='top'>".t("Yhtiö")."</th>";
 	}
 	
 	echo "<th valign='top'>".t("Tuoteno")."<br>".t("Nimitys")."</th>";
@@ -583,14 +583,18 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			$ostoehdotus = 0;
 		}
 		
-		if ($ostoehdotus > 0) {
+		if ($ostoehdotus > 0 or $naytakaikkituotteet != '') {
 			echo "<tr>";
 		
 			if ($useampi_yhtio > 1) {
-				echo "<td>$row[yhtio]</td>";
+				echo "<td valign='top' $btl>$row[yhtio]</td>";
+				echo "<td valign='top' $bt><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
 			}
-		
-			echo "<td valign='top' $btl>$row[tuoteno]</td>";
+			else {
+				echo "<td valign='top' $btl><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
+			}
+			
+			
 			//echo "<td valign='top' $bt  align='right'></td>";
 			echo "<td valign='top' $bt  align='right'>".(float) $row["varmuus_varasto"]."</td>";
 			echo "<td valign='top' $bt  align='right'>".(float) $saldot."</td>";
@@ -601,12 +605,16 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			echo "</tr>";
 		
 			echo "<tr>";
-		
+			
 			if ($useampi_yhtio > 1) {
-				echo "<td>$row[yhtio]</td>";
+				echo "<td valign='top' $bbl>$row[yhtio]</td>";
+				echo "<td valign='top' $bb>$row[nimitys]</td>";
+			}
+			else {
+				echo "<td valign='top' $bbl>$row[nimitys]</td>";
 			}
 		
-			echo "<td valign='top' $bbl>$row[nimitys]</td>";
+			
 			//echo "<td valign='top' $bb align='right'>".(float) $kiertonopeus_tavoite[$row["abcluokka"]]."</td>";
 			echo "<td valign='top' $bb align='right'>".(float) $row["halytysraja"]."</td>";
 			echo "<td valign='top' $bb></td>";
@@ -634,12 +642,12 @@ echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
 
 echo "<tr><th>".t("Osasto")."</th><td colspan='3'>";
 
-$query = "	SELECT distinct avainsana.selite, group_concat(".avain('selectcon')." SEPARATOR ' / ') selitetark
+$query = "	SELECT distinct avainsana.selite, group_concat(distinct ".avain('selectcon')." SEPARATOR ' / ') selitetark
 			FROM avainsana
 			".avain('join','OSASTO_')."
 			WHERE avainsana.yhtio in ($yhtiot) and avainsana.laji='OSASTO'
 			GROUP BY avainsana.selite
-			ORDER BY avainsana.selite+0";
+			ORDER BY avainsana.jarjestys, avainsana.selite";
 $sresult = mysql_query($query) or pupe_error($query);
 
 echo "<select name='osasto'>";
@@ -658,12 +666,12 @@ echo "</td></tr>
 		<tr><th>".t("Tuoteryhmä")."</th><td colspan='3'>";
 
 //Tehdään osasto & tuoteryhmä pop-upit
-$query = "	SELECT distinct avainsana.selite, group_concat(".avain('selectcon')." SEPARATOR ' / ') selitetark
+$query = "	SELECT distinct avainsana.selite, group_concat(distinct ".avain('selectcon')." SEPARATOR ' / ') selitetark
 			FROM avainsana
 			".avain('join','TRY_')."
 			WHERE avainsana.yhtio in ($yhtiot) and avainsana.laji = 'TRY'
 			GROUP BY avainsana.selite
-			ORDER BY avainsana.selite+0";
+			ORDER BY avainsana.jarjestys, avainsana.selite";
 $sresult = mysql_query($query) or pupe_error($query);
 
 echo "<select name='tuoryh'>";
@@ -824,6 +832,12 @@ $chk = "";
 if ($eihinnastoon != "") $chk = "checked";
 echo "<tr><th>".t("Älä näytä tuotteita joita ei näytetä hinnastossa")."</th><td colspan='3'><input type='checkbox' name='eihinnastoon' $chk></td></tr>";
 
+$chk = "";
+if ($naytakaikkituotteet != "") $chk = "checked";
+echo "<tr><th>".t("Näytä myös tuotteet joiden ostoehdotus on nolla")."</th><td colspan='3'><input type='checkbox' name='naytakaikkituotteet' $chk></td></tr>";
+
+
+
 if ($abcrajaus != "") {
 	echo "<tr><td class='back'><br></td></tr>";
 	echo "<tr><th colspan='4'>".t("ABC-rajaus")." $ryhmanimet[$abcrajaus]</th></tr>";
@@ -867,7 +881,7 @@ if (mysql_num_rows($presult) > 0) {
 		}
 
 		if ($vlask == 0) {
-			echo "<tr><th rowspan='".mysql_num_rows($presult)."'>Huomioi yhtiön saldot, myynnit ja ostot:</th>";
+			echo "<tr><th valign='top' rowspan='".mysql_num_rows($presult)."'>Huomioi yhtiön saldot, myynnit ja ostot:</th>";
 		}
 		else {
 			echo "<tr>";
@@ -916,7 +930,7 @@ if (mysql_num_rows($vtresult) > 1) {
 		}
 
 		if ($vlask == 0) {
-			echo "<tr><th rowspan='".mysql_num_rows($vtresult)."'>".t("Huomioi saldot, myynnit ja ostot maittain:")."</th>";
+			echo "<tr><th valign='top' rowspan='".mysql_num_rows($vtresult)."'>".t("Huomioi saldot, myynnit ja ostot maittain:")."</th>";
 		}
 		else {
 			echo "<tr>";
@@ -951,7 +965,7 @@ if (mysql_num_rows($vtresult) > 1) {
 		}
 
 		if ($vlask == 0) {
-			echo "<tr><th rowspan='".mysql_num_rows($vtresult)."'>".t("Huomioi saldot, myynnit ja ostot varastoittain:")."</th>";
+			echo "<tr><th valign='top' rowspan='".mysql_num_rows($vtresult)."'>".t("Huomioi saldot, myynnit ja ostot varastoittain:")."</th>";
 		}
 		else {
 			echo "<tr>";

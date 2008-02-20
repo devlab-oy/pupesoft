@@ -1019,6 +1019,8 @@ if($tee == "") {
 							<option value='E' {$sel["E"]}>".t("Eu")."</option>
 							<option value='K' {$sel["K"]}>".t("Ei-Eu")."</option>
 							</select>
+							<br>
+							".t("Vienneittäin").": <input type='checkbox' name='group[lasku.vienti]' value='checked' {$group["lasku.vienti"]}> prio: <input type='text' name='prio[lasku.vienti]' value='{$prio["lasku.vienti"]}' size='2'>
 						</td>";
 
 
@@ -1041,6 +1043,8 @@ if($tee == "") {
 							<select name='maa[]' multiple='TRUE' size='8'>
 							$maat
 							</select>
+							<br>
+							".t("Maittain").": <input type='checkbox' name='group[lasku.maa]' value='checked' {$group["lasku.maa"]}> prio: <input type='text' name='prio[lasku.maa]' value='{$prio["lasku.maa"]}' size='2'>
 						</td>";
 						
 			echo "	</tr>
@@ -1443,6 +1447,9 @@ if($tee == "") {
 				if($k == "lasku.myyja") {
 					$k = "myyja.nimi myyja";
 					$myyja_join = "	LEFT JOIN kuka myyja ON myyja.yhtio=lasku.yhtio and myyja.tunnus=lasku.myyja";
+				}
+				elseif($k == "lasku.vienti") {
+					$k = "if(lasku.vienti='E', '".t("Eurooppa")."', if(lasku.vienti='K', '".t("Kaukomaat")."', 'Kotimaa')) vienti";
 				}
 				
 				$q .= "$k, ";

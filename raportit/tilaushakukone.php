@@ -879,7 +879,7 @@ if($tee == "") {
 			echo "			<option value='TYHJA'>".t("Seuranta puuttuu")."</option>
 							</select>
 							<br>
-							".t("Seurannottain").": <input type='checkbox' name='group[laskun_lisatiedot.seuranta]' value='checked' {$group["laskun_lisatiedot.seuranta"]}> prio: <input type='text' name='prio[laskun_lisatiedot.seuranta]' value='{$prio["laskun_lisatiedot.seuranta"]}' size='2'>
+							".t("Seurannoittain").": <input type='checkbox' name='group[laskun_lisatiedot.seuranta]' value='checked' {$group["laskun_lisatiedot.seuranta"]}> prio: <input type='text' name='prio[laskun_lisatiedot.seuranta]' value='{$prio["laskun_lisatiedot.seuranta"]}' size='2'>
 						</td>";
 
 

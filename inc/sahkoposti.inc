@@ -21,7 +21,6 @@
 
 	$content .= "--$bound\n";
 
-
 	if ($ctype == "TEXT") {
 		$content .= "Content-Type: text/plain; name=\"".$kutsu."\"\n" ;
 		$content .= "Content-Transfer-Encoding: base64\n" ;
@@ -38,6 +37,10 @@
 		$content .= "Content-Disposition: inline; filename=\"".$kutsu.".pdf\"\n\n";
 	}
 
+	if ($viestisisalto != '') {
+		$content .= "--$bound\n";
+		$content .= $viestisisalto;
+	}
 
 	$handle  = fopen($liite, "r");
 	$sisalto = fread($handle, filesize($liite));

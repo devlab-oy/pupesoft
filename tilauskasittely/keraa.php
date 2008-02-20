@@ -1247,7 +1247,7 @@
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
 		echo "<option value='NORMAA' $sela>".t("Näytä normaalitilaukset")."</option>";
 		echo "<option value='ENNAKK' $selb>".t("Näytä ennakkotilausket")."</option>";
-		echo "<option value='JTTILA' $selc>".t("Näytä jt-tilausket")."</option>";
+		echo "<option value='JTTILA' $selc>".t("Näytä jt-tilaukset")."</option>";
 
 		echo "</select></td></tr>";
 

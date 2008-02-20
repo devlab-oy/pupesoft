@@ -578,6 +578,10 @@ if ($tila == '') {
 	
 	$alku = (int) $alku;
 	
+	if ($alku < 0) {
+		$alku = 0;
+	}
+	
 	if ($nayta_kohdistetut == "jees") {
 		$limit = "";
 		$lisa2 = " and tilausrivi.uusiotunnus in ('$otunnus') ";

@@ -34,9 +34,18 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$asrow = mysql_fetch_array($result);
 		
-		// katotaan miten halutaan sortattavan
-		$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+		// katotaan miten halutaan sortattavan		
+		if ($toim != "REKLAMAATIO") {
+			$sorttaus = "lahetteen_jarjestys";
+			$sortlisa = "ORDER BY tuotetyyppi, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+		}
+		else {
+			$sorttaus = "kerayslistan_jarjestys";
+			$sortlisa = "ORDER BY sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";					
+		}
 		
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow[$sorttaus]);
+				
 		//työmääräyksen rivit
 		$query = "  SELECT tilausrivi.*,
 					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
@@ -50,7 +59,7 @@
 					and tilausrivi.yhtio 	= '$kukarow[yhtio]'
 					and tilausrivi.yhtio 	= tuote.yhtio
 					and tilausrivi.tuoteno  = tuote.tuoteno
-					ORDER BY tuotetyyppi, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+					$sortlisa";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$tilausnumeroita = $otunnus;

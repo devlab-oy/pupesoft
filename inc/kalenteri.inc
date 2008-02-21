@@ -269,6 +269,16 @@
 					elseif($kj == "projektipaallikot") {
 						$kukalisa .= "kuka.asema = 'PP'";
 					}
+					elseif($kj == "kaikki") {
+						//Haetaan kaikki käyttäjät joilla on kalenteri käytössä
+						$kq = "	SELECT GROUP_CONCAT(distinct kuka.kuka SEPARATOR '\',\'') kukat
+									FROM kuka
+									JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php'
+									GROUP BY kuka.yhtio";
+						$result = mysql_query($kq) or pupe_error($kq);
+						$row = mysql_fetch_array($result);
+						$kukalisa .= "kuka.kuka IN ('{$row["kukat"]}')";
+					}
 					else {
 						echo "Tällästä kalenteri_ketka:a ei tunneta '$kj'<br>";
 					}

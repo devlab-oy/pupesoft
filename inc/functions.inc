@@ -5077,8 +5077,8 @@ if(!function_exists("nayta_asiakashaku")) {
 }
 
 if(!function_exists("tee_asiakashaku")) {
-	function tee_asiakashaku($ytunnus, $formi, $div="") {
-		global $yhtiorow, $kukarow;
+	function tee_asiakashaku($ytunnus, $formi, $lopetus="", $div="") {
+		global $yhtiorow, $kukarow, $palvelin2;
 				
 		if (trim($konserni) != '') {
 			$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
@@ -5234,11 +5234,12 @@ if(!function_exists("tee_asiakashaku")) {
 				$monta  = mysql_num_rows($result);
 			}
 		}
+
+		echo "<table>
+				<caption>Valitse asiakas</caption>";
 		
 		if($monta > 0 and $monta < 200) {
-			echo "<table>
-					<caption>Valitse asiakas</caption>
-					<tr>
+			echo "	<tr>
 						<th style='border: 1px solid;'>".t("Asiakas")."</th><th style='border: 1px solid;'>".t("Toimitusosoite")."</th><td></td>
 					</tr>";
 			while($row = mysql_fetch_array($result)) {
@@ -5247,12 +5248,49 @@ if(!function_exists("tee_asiakashaku")) {
 					<tr class='aktiivi'>
 						<td style='border: 1px solid;'>$row[nimi] $row[nimitark]</td>
 						<td style='border: 1px solid;'>$row[toim_nimi] $row[toim_nimitark]</td>
-						<td><a href='' onclick=\"document.getElementById('liitos').value='$row[tunnus]'; asval=document.getElementById('asiakashaku'); asval.innerHTML=''; asval.style.display='none'; ajaxPost('$formi', '$urli?from=asiakasvalinta' , '$div', false, true); return false;\">".t("Valitse")."</a></td>
+						<td><a href='' onclick=\"document.getElementById('liitos').value='$row[tunnus]'; document.getElementById('haku').disabled='true'; asval=document.getElementById('asiakashaku'); asval.innerHTML=''; asval.style.display='none'; ajaxPost('$formi', '$urli?from=asiakasvalinta' , '$div', false, true); return false;\">".t("Valitse")."</a></td>
 					</tr>";
-			}
-			
-			echo "</table>";
+			}			
 		}
+		
+		//	Tsekataan josko saataisiin perustaa uusi asiakas?
+		if($lopetus != "") {
+			echo "	<tr>
+						<td class='back'><font class='message'>".t("Eikö löydy")."?</font></td>
+					</tr>";
+			
+			$query = "	SELECT yhtio
+						FROM oikeu
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and kuka	= '$kukarow[kuka]'
+						and nimi	= 'yllapito.php'
+						and alanimi = 'asiakas'
+						and paivitys != ''
+						LIMIT 1";
+			$oikeures = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($oikeures) > 0) {
+				echo "	<tr>
+							<td class='back'><a href='{$palvelin2}yllapito.php?laji=Y&uusi=1&toim=asiakas&lopetus=$lopetus'>".t(" Perusta uusi yritysasiakas")."</a></td>
+						</tr>";
+			}
+
+			$query = "	SELECT yhtio
+						FROM oikeu
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and kuka	= '$kukarow[kuka]'
+						and nimi	= 'yllapito.php'
+						and alanimi = 'asiakas!!!VAHITTAISMYYNTI!!!true&laji=H'
+						and paivitys != ''
+						LIMIT 1";
+			$oikeures = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($oikeures) > 0) {
+				echo "	<tr>
+							<td class='back'><a href='{$palvelin2}yllapito.php?laji=H&uusi=1&toim=asiakas&lopetus=$lopetus'>".t(" Perusta uusi henkilöasiakas")."</a></td>
+						</tr>";
+			}			
+		}
+		
+		echo "	</table>";
 	} 
 }
 ?>

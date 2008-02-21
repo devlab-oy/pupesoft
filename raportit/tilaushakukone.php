@@ -1390,13 +1390,13 @@ if($tee == "") {
 		
 		foreach($group as $gk => $gv) {
 			$g[$prio[$gk]] = $gk;
-			$jarj[] = $gk;
+			$jarj[$prio[$gk]] = $gk;
 		}
 		
 		//	sortataan n‰‰ arrayt
 		ksort($g);
-		krsort($jarj);
-		
+		ksort($jarj);
+
 		$group_by = "GROUP BY ".implode(", ", $g)."";
 	}
 	
@@ -1429,43 +1429,57 @@ if($tee == "") {
 	}
 	else $viimeisin_kaletapahtuma = "";
 	
-	$summa = "sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))";
+	//	J‰sennell‰‰n.. 
 	if($toim == "TARJOUSHAKUKONE") {
-		//	Haetaan kaikki Tarjousotsikot
 		$summa = "
 		(
-			SELECT $summa
+			SELECT sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))
 			FROM tilausrivi
 			WHERE tilausrivi.yhtio=versio.yhtio and tilausrivi.otunnus=versio.tunnus and tyyppi != 'D'
 		)";
+	}
+	elseif($toim == "TILAUSHAKUKONE") {
+		$summa = "(
+			SELECT sum(tilausrivi.hinta * if('o' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))
+		 	FROM lasku l
+		 	JOIN tilausrivi ON tilausrivi.yhtio=l.yhtio and tilausrivi.otunnus=l.tunnus and tyyppi != 'D' and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'
 		
+		 	WHERE lasku.yhtio=lasku.yhtio and tunnusnippu=lasku.tunnusnippu and lasku.tila IN ('R','L','N')
+		)";
+	}
 	
-		//	Olemme gruupanneet jotain
-		if(count($group)>0) {
-			$q = "";
-			foreach($g as $k) {
-				if($k == "lasku.myyja") {
-					$k = "myyja.nimi myyja";
-					$myyja_join = "	LEFT JOIN kuka myyja ON myyja.yhtio=lasku.yhtio and myyja.tunnus=lasku.myyja";
-				}
-				elseif($k == "lasku.vienti") {
-					$k = "if(lasku.vienti='E', '".t("Eurooppa")."', if(lasku.vienti='K', '".t("Kaukomaat")."', 'Kotimaa')) vienti";
-				}
-				
-				$q .= "$k, ";
+	//	Grouppaus toimii aina samalla kaavalla
+	if(count($group)>0) {
+
+		$q = "";
+		foreach($g as $k) {
+			if($k == "lasku.myyja") {
+				$k = "myyja.nimi myyja";
+				$myyja_join = "	LEFT JOIN kuka myyja ON myyja.yhtio=lasku.yhtio and myyja.tunnus=lasku.myyja";
+			}
+			elseif($k == "lasku.vienti") {
+				$k = "if(lasku.vienti='E', '".t("Eurooppa")."', if(lasku.vienti='K', '".t("Kaukomaat")."', 'Kotimaa')) vienti";
 			}
 			
-			$q .= "sum($summa) Yhteens‰, count(*) Kpl, ";
-			$c = count($group)+2;
-		}
-		else {
-			$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws('<br>',versio.nimi, versio.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, $summa Yhteens‰, if(versio.alatila IN ('', 'A'), DATEDIFF(versio.luontiaika, date_sub(now(), INTERVAL laskun_lisatiedot.tarjouksen_voimaika day)), '') pva, lasku.tila, lasku.alatila,";
-			$c = 7;			
+			$q .= "$k, ";
 		}
 		
-		
+		$q .= "sum($summa) Yhteens‰, count(*) Kpl, ";
+		$c = count($group);
+	}
+	elseif($toim == "TARJOUSHAKUKONE") {
+		$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws('<br>',versio.nimi, versio.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, $summa Yhteens‰, if(versio.alatila IN ('', 'A'), DATEDIFF(versio.luontiaika, date_sub(now(), INTERVAL laskun_lisatiedot.tarjouksen_voimaika day)), '') pva,";
+		$c = 6;
+	}
+	elseif($toim == "TILAUSHAKUKONE") {
+		$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws('<br>',lasku.nimi, lasku.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, summa Yhteens‰, ";
+		$c = 6;		
+	}
+	
+	//	T‰ss‰ kasataan kysely kasaan
+	if($toim == "TARJOUSHAKUKONE") {
 		$query = "	SELECT 	$q
-							lasku.tunnus
+							lasku.tila, lasku.alatila, lasku.tunnus
 							$viimeisin_kaletapahtuma
 					FROM lasku
 					JOIN lasku versio ON versio.yhtio = lasku.yhtio and versio.tunnus = if(lasku.tunnusnippu>0,(select max(l.tunnus) from lasku l where l.yhtio = lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu),lasku.tunnus) $versio_rajaus
@@ -1482,17 +1496,8 @@ if($tee == "") {
 	}
 	elseif($toim == "TILAUSHAKUKONE") {
 		//	Haetaan kaikki Tilausotsikot
-		$query = "	SELECT 	lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws('<br>',lasku.nimi, lasku.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, 
-							sum((
-								SELECT sum(tilausrivi.hinta * if('o' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))
-							 	FROM lasku l
-							 	JOIN tilausrivi ON tilausrivi.yhtio=l.yhtio and tilausrivi.otunnus=l.tunnus and tyyppi != 'D' and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'
-							
-							 	WHERE lasku.yhtio=lasku.yhtio and tunnusnippu=lasku.tunnusnippu and lasku.tila IN ('R','L','N')
-							)) summa_, lasku.tila,
-							  
-							lasku.alatila,
-							lasku.tunnus
+		$query = "	SELECT 	$q
+							lasku.tila, lasku.alatila, lasku.tunnus
 							$viimeisin_kaletapahtuma
 					FROM lasku
 					JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus $lisatiedot_rajaus
@@ -1505,7 +1510,6 @@ if($tee == "") {
 					$group_by
 					$order
 					$lkm_rajaus";
-		$c = 6;
 	}
 	//echo $query."<br>";
 	
@@ -1516,7 +1520,7 @@ if($tee == "") {
 				<table border='0' cellpadding='2' cellspacing='1' width = '1000'>
 					<tr>";
 				
-				for($i=0;$i<$c; $i++) {
+				for($i=0;$i<=$c; $i++) {
 					$o = trim(str_replace("_", " ", mysql_field_name($laskures, $i)));					
 					echo "<th>$o</th>";
 				}
@@ -1527,7 +1531,7 @@ if($tee == "") {
 		while($laskurow = mysql_fetch_array($laskures)) {
 			
 			echo "<tr  class='aktiivi'>";
-			for($i=0;$i<$c; $i++) {
+			for($i=0;$i<=$c; $i++) {
 				
 				if(mysql_field_name($laskures, $i) == "pva") {
 					if($laskurow["pva"] > 5) {

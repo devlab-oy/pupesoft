@@ -120,7 +120,11 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 		$result = mysql_query($query) or die ("P‰ivitys ep‰onnistui sis‰‰nkirjautumisessa");
 
 		$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH)); // 12 tuntia voimassa
-
+		
+		if (!is_numeric($ostoskori)) {
+			$ostoskori = 1;
+		}
+		
 		if ($bool === FALSE) {
 			die ("Sis‰‰nkirjaus ep‰onnistui!");
 		}

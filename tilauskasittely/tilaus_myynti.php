@@ -689,6 +689,10 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 	$query = "DELETE from maksupositio WHERE yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and uusiotunnus=0";
 	$result = mysql_query($query) or pupe_error($query);
 
+	// Poistetaan maksupositio pointteri
+	$query = "UPDATE maksupositio set uusiotunnus = 0 where yhtio = '$kukarow[yhtio]' and uusiotunnus = '$kukarow[kesken]'";
+	$result = mysql_query($query) or pupe_error($query);
+	
 	//Poistetaan rahtikrijat
 	$query = "DELETE from rahtikirjat WHERE yhtio='$kukarow[yhtio]' and otsikkonro='$kukarow[kesken]'";
 	$result = mysql_query($query) or pupe_error($query);

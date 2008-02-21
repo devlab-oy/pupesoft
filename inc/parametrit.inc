@@ -314,7 +314,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			header("Content-Length: ".strlen($file));
 		}
 	}
-	elseif ($phpnimi != 'index.php') {
+	elseif ($phpnimi != 'index.php' and $phpnimi != 'futursoft.php') {
 
 		if ($verkkokauppa != "" and $yhtiorow['css_verkkokauppa'] != "") {
 			$css = $yhtiorow['css_verkkokauppa'];

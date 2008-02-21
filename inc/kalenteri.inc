@@ -1194,14 +1194,8 @@
 					$subject .= " / ".t("Käyttäjältä")." {$kukarow["nimi"]}";
 					
 					if($tyyppi == "kalenteri") {
-						$query = "	SELECT selitetark
-									FROM avainsana
-									WHERE yhtio='{$kukarow["yhtio"]}' and laji = 'KALETAPA' and selite='$tapa'";
-						$ares = mysql_query($query) or pupe_error($query);
-						$arow = mysql_fetch_array($ares);
-
 						$msg = "Tyyppi: ".t("Kalenterimerkintä")."\n";
-						$msg .= "Tapa: $arow[selitetark]\n";
+						$msg .= "Tapa: $tapa\n";
 						
 					}
 					else {
@@ -1381,21 +1375,21 @@
 			$asiakasrow = mysql_fetch_array($result);			
 		}
 		
-		$query = "	SELECT selite, selitetark
+		$query = "	SELECT selitetark
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = 'KALETAPA'
 					ORDER BY selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$tavat = "<select name='tapa'>";
 		while($taparow = mysql_fetch_array($vresult)) {
-			if($tapa == $taparow["selite"]) {
+			if($tapa == $taparow["selitetark"]) {
 				$sel = "SELECTED";
 			}
 			else {
 				$sel = "";
 			}
 			
-			$tavat .= "<option value='$taparow[selite]' $sel>$taparow[selitetark]</option>";
+			$tavat .= "<option value='$taparow[selitetark]' $sel>$taparow[selitetark]</option>";
 		}
 		$tavat .= "</select>";
 		

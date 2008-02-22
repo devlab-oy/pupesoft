@@ -542,7 +542,7 @@ if ($tuoteno != '') {
 
 			// Päivitetään korjattava tapahtuma
 			$query = "	UPDATE tapahtuma
-						SET kplhinta = '$uusihinta', selite = concat(selite, '$selite_txt')
+						SET kplhinta = '$uusihinta', hinta = '$uusihinta', selite = concat(selite, '$selite_txt')
 						WHERE yhtio = '$kukarow[yhtio]'
 						and laji in ('tulo','valmistus')
 						and laadittu >= '$yhtiorow[tilikausi_alku]'

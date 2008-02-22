@@ -1163,7 +1163,7 @@
 					}
 
 					if($otunnus > 0) {
-						$query = "	SELECT nimi, lasku.tunnusnippu, asiakkaan_kohde.kohde, laskun_lisatiedot.seuranta
+						$query = "	SELECT nimi, nimitark, lasku.tunnusnippu, asiakkaan_kohde.kohde, laskun_lisatiedot.seuranta
 									FROM lasku
 									LEFT JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
 									LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde
@@ -1172,14 +1172,14 @@
 						if(mysql_num_rows($kres) > 0) {
 							$krow = mysql_fetch_array($kres);
 
-							$subject .= " / {$krow["tunnusnippu"]} {$krow["seuranta"]} - {$krow["nimi"]}";
+							$subject .= " / {$krow["tunnusnippu"]} {$krow["seuranta"]} - {$krow["nimi"]} {$krow["nimitark"]}";
 							if($krow["kohde"] != "") {
 								$subject .= " - {$krow["kohde"]}";
 							}
 						}
 					}
 					elseif($liitostunnus > 0){
-						$query = "	SELECT nimi
+						$query = "	SELECT nimi, nimitark
 									FROM asiakas
 									WHERE yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
 						$kres = mysql_query($query) or pupe_error($query);
@@ -1190,7 +1190,7 @@
 						}
 					}
 					
-					$subject .= " / ".t("Käyttäjältä")." {$kukarow["nimi"]}";
+					$subject .= " / ".t("Käyttäjältä")." {$kukarow["nimi"]} {$kukarow["nimitark"]}";
 					
 					if($tyyppi == "kalenteri") {
 						$msg = "Tyyppi: ".t("Kalenterimerkintä")."\n";

@@ -154,6 +154,44 @@
 								$insres2 = mysql_query($kysely) or pupe_error($kysely);
 								$insid   = mysql_insert_id();
 								
+								//Haetaan alkuper‰isen ostorivin tapahtuma
+								$query = "	SELECT *
+											FROM tapahtuma 
+											WHERE yhtio 	= '$kukarow[yhtio]' 
+											and rivitunnus  = '$ostokokorow[tunnus]'";
+								$tapares = mysql_query($query) or pupe_error($query);					
+																
+								if (mysql_num_rows($tapares) == 1) {	
+									$taparow = mysql_fetch_array($tapares);
+															
+									// V‰hennet‰‰n alkuper‰isen ostorivin tapahtuman m‰‰r‰‰ yhdell‰
+									$query = "	UPDATE tapahtuma 
+												SET kpl=kpl-$maara
+												WHERE yhtio 	= '$kukarow[yhtio]' 
+												and rivitunnus  = '$ostokokorow[tunnus]'";
+									$insres2 = mysql_query($query) or pupe_error($query);
+																																														
+									//Kopioidaan tapahtuma
+									$kysely = "	INSERT INTO tapahtuma SET ";
+
+									for($i=0; $i < mysql_num_fields($tapares)-1; $i++) { // Ei monisteta tunnusta														
+										switch (mysql_field_name($tapares,$i)) {
+											case 'kpl':
+												$kysely .= mysql_field_name($tapares,$i)."='$maara',";
+												break;
+											case 'rivitunnus':
+												$kysely .= mysql_field_name($tapares,$i)."='$insid',";
+												break;
+											default:
+												$kysely .= mysql_field_name($tapares,$i)."='".$taparow[$i]."',";
+										}
+									}
+
+									$kysely  = substr($kysely, 0, -1);
+									$insres2 = mysql_query($kysely) or pupe_error($kysely);									
+								}
+								
+								// Laitetaan perheidt kuntoon
 								if ($ostokokorow["tunnus"] == $ostokokorow["perheid2"] or $ostokokorow["perheid2"] == $perheid2) {
 									if ($ostokokorow["tunnus"] == $ostokokorow["perheid2"]) {
 										$uusi_perheid2 	= $insid;

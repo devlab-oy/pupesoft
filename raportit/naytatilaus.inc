@@ -388,9 +388,9 @@
 					concat_ws('/', round(tilkpl,4), round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
 					concat_ws('/', round(varattu,4),round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tulossa sis/ulk', 
 					kpl,
-					round(hinta, '$yhtiorow[hintapyoristys]') hinta, ale, 
-					round((varattu+kpl)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),'$yhtiorow[hintapyoristys]') rivihinta, 
-					tilausrivi.alv, tilausrivi.kommentti, tilausrivi.tunnus,
+					round(hinta*if($laskurow[vienti_kurssi]=0, 1, $laskurow[vienti_kurssi]), '$yhtiorow[hintapyoristys]') hinta, ale, 
+					if(rivihinta != 0, round(rivihinta, '$yhtiorow[hintapyoristys]'), round((varattu+kpl)*hinta*if($laskurow[vienti_kurssi]=0, 1, $laskurow[vienti_kurssi])*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),'$yhtiorow[hintapyoristys]')) rivihinta, 
+					if(tilausrivi.alv<500, tilausrivi.alv, 'M.V.') alv, tilausrivi.kommentti, tilausrivi.tunnus,
 					'dummy' osto_vai_hyvitys, tilausrivi.uusiotunnus,
 					$sorttauskentta
 					FROM tilausrivi
@@ -407,9 +407,9 @@
 					concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilausrivi.tuoteno, tilkpl,
 					if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu+tilausrivi.kpl, 0) kpl,
 					if(tilausrivi.var in ('J','S'), tilausrivi.jt $lisavarattu, 0) jt,
-					round(hinta, '$yhtiorow[hintapyoristys]') hinta, ale, var V, netto N, 					
-					round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
-					alv, kerattyaika, keratty keraaja, toimaika, tilausrivi.kommentti, tilausrivi.tunnus,
+					round(hinta*if($laskurow[vienti_kurssi]=0, 1, $laskurow[vienti_kurssi]), '$yhtiorow[hintapyoristys]') hinta, ale, var V, netto N, 					
+					if(rivihinta != 0, round(rivihinta, '$yhtiorow[hintapyoristys]'), round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),'$yhtiorow[hintapyoristys]')) rivihinta,
+					if(tilausrivi.alv<500, tilausrivi.alv, 'M.V.') alv, kerattyaika, keratty keraaja, toimaika, tilausrivi.kommentti, tilausrivi.tunnus,
 					tilausrivin_lisatiedot.osto_vai_hyvitys, tilausrivi.uusiotunnus,
 					$sorttauskentta
 					FROM tilausrivi
@@ -445,7 +445,7 @@
 			if (mysql_field_name($presult,$i) == 'kerattyaika' or mysql_field_name($presult,$i) == 'toimaika') {
 				echo "<td>".tv1dateconv($prow[$i],"pitka")."</td>";
 			}
-			elseif (mysql_field_name($presult,$i) == 'kpl' or mysql_field_name($presult,$i) == 'tilkpl' or mysql_field_name($presult,$i) == 'jt' or mysql_field_name($presult,$i) == 'ale' or mysql_field_name($presult,$i) == 'alv') {
+			elseif (mysql_field_name($presult,$i) == 'kpl' or mysql_field_name($presult,$i) == 'tilkpl' or mysql_field_name($presult,$i) == 'jt' or mysql_field_name($presult,$i) == 'ale') {
 				echo "<td align='right'>".($prow[$i]*1)."</td>";
 			}
 			elseif (mysql_field_name($presult,$i) == 'tuoteno') {

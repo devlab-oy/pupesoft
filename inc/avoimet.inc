@@ -333,13 +333,13 @@
 		}
 		elseif (substr($laji,0,1) == 'M') {
 
-			$lisa1 = "";
-			$lisa2 = "";
-			$lisa3 = "";
+			$lisa1 = ""; // lasku rajauksia
+			$lisa2 = ""; // suoritus rajauksia
+			$lisa3 = ""; // asiakas rajauksia
 
 			if ($asiakasid != '')  {
-				$lisa1 = " and liitostunnus='$asiakasid' ";
-				$lisa2 = " and asiakas_tunnus='$asiakasid' ";
+				$lisa1 .= " and liitostunnus='$asiakasid' ";
+				$lisa2 .= " and asiakas_tunnus='$asiakasid' ";
 				$indeksi = " use index (yhtio_tila_liitostunnus_tapvm)";
 			}
 			else {
@@ -347,12 +347,27 @@
 			}
 
 			if ($maksuehto != '') {
-				$lisa3 = " and lasku.maksuehto = '$maksuehto' ";
+				$lisa1 .= " and lasku.maksuehto = '$maksuehto' ";
 			}
 
 			$maa = '';
 			if (isset($_POST['maa']) and $_POST['maa'] != '') {
 				$maa = " and lasku.maa = '{$_POST['maa']}'";
+			}
+			
+			if ($lasku_ytunnus != "") {
+				$lisa1 .= "and lasku.ytunnus like '%$lasku_ytunnus%'";
+				$lisa3 .= "and asiakas.ytunnus like '%$lasku_ytunnus%'";
+			}
+
+			if ($lasku_nimi != "") {
+				$lisa1 .= "and lasku.nimi like '%$lasku_nimi%'";
+				$lisa2 .= "and suoritus.nimi_maksaja like '%$lasku_nimi%'";
+				$lisa3 .= "and asiakas.nimi like '%$lasku_nimi%'";
+			}
+
+			if ($lasku_laskunro != "") {
+				$lisa1 .= "and lasku.laskunro like '%$lasku_laskunro%'";
 			}
 
 			$tili = 0;
@@ -381,7 +396,6 @@
 						and lasku.tila			= 'U'
 						and lasku.alatila		= 'X'
 						$lisa1
-						$lisa3
 						$valkoodi
 						$maa
 						GROUP BY lasku.tunnus
@@ -396,20 +410,34 @@
 			if ($toimittajaid == '') {
 				echo "<font class='message'>".t("Yrityksellä")." $yhtiorow[nimi] ".t("oli")." ".tv1dateconv($pvm)." ".t("seuraavat avoimet")." $lista:</font><br>";
 			}
-
+			
 			echo "<table>";
+			echo "<form method='post' action='?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=$ojarj'>";
 			echo "<tr>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.ytunnus'>".t("Ytunnus")."</a></th>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.nimi'>".t("Nimi")."</a></th>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.laskunro'>".t("Laskunro")."</a></th>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.tapvm'>".t("Pvm")."</a></th>";
+			echo "	<th>
+						<a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.ytunnus&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro'>".t("Ytunnus")."</a>
+						<br><input type='text' name='lasku_ytunnus' value='$lasku_ytunnus'>
+					</th>";
+			echo "	<th>
+						<a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.nimi&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro'>".t("Nimi")."</a>
+						<br><input type='text' name='lasku_nimi' value='$lasku_nimi'>
+					</th>";
+			echo "	<th>
+						<a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.laskunro&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro'>".t("Laskunro")."</a>
+						<br><input type='text' name='lasku_laskunro' value='$lasku_laskunro'>
+					</th>";
+			echo "	<th>
+						<a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.tapvm&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro'>".t("Pvm")."</a>
+						
+					</th>";
 			echo "<th>".t("Maksupäivä")."</th>";
 			echo "<th>".t("Eräpäivä")."</th>";
 			echo "<th>".t("Laskun summa")."</th>";
 			echo "<th>".t("Avoin saldo")."</th>";
 			echo "<th>".t("Val")."</th>";
 			echo "</tr>";
-
+			echo "</form>";
+			
 			$summa = array(); // tässä kirjanpidosta osasuoritukset poistettuna
 			$summatotal = 0;  // ässä koko höskä kotivaluutassa
 
@@ -462,7 +490,7 @@
 						suoritus.valkoodi
 				  		FROM suoritus
 						LEFT JOIN tiliointi ON (tiliointi.tunnus = suoritus.ltunnus and tiliointi.korjattu = '')
-				  		LEFT JOIN asiakas ON (suoritus.yhtio = asiakas.yhtio and suoritus.asiakas_tunnus = asiakas.tunnus)
+				  		LEFT JOIN asiakas ON (suoritus.yhtio = asiakas.yhtio and suoritus.asiakas_tunnus = asiakas.tunnus $lisa3)
 				  		WHERE suoritus.yhtio = '$kukarow[yhtio]'
 						and kirjpvm <= '$pvm'
 						and kohdpvm  = '0000-00-00'

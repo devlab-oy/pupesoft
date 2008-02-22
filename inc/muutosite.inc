@@ -1,4 +1,4 @@
-o<?php
+<?php
 
 require_once ("inc/tilinumero.inc");
 
@@ -6,21 +6,26 @@ function erottele ($pvm) {
 	$paluu['pp'] = substr($pvm,-2);
 	$paluu['kk'] = substr($pvm,5,2);
 	$paluu['vv'] = substr($pvm,0,4);
+	
 	return $paluu;
 }
 
 function kopioitiliointi ($tunnus, $viivaaja) {
-//Tehdään kopio tiliöinnistä $tunnus
-//Jos $viivaajassa on jotain tehdään uusi vienti yliviivattuna
+	//Tehdään kopio tiliöinnistä $tunnus
+	//Jos $viivaajassa on jotain tehdään uusi vienti yliviivattuna
 	global $kukarow;
+	
 	$query = "SELECT * FROM tiliointi WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
+	
 	if (mysql_num_rows($result) != 1) {
 		echo "Tiliöintirivi kateissa Systeemivirhe!";
 		exit;
 	}
+	
 	$tiliointirow = mysql_fetch_array ($result);
 	$query = "INSERT into tiliointi set ";
+	
 	for ($i=0; $i<mysql_num_fields($result); $i++) {
 		if (mysql_field_name($result, $i) != 'tunnus') {
 			if ($viivaaja != '') {
@@ -53,7 +58,6 @@ if (mysql_num_rows($result) != 1) {
 }
 $trow = mysql_fetch_array($result);
 
-//echo "'$tee', '$tila', '$tunnus'<br>";
 //Poistetaan suoraveloitus
 if ($tila == 'A') {	
 	$query = "	UPDATE lasku SET 
@@ -175,6 +179,7 @@ if ($kukarow['taso'] != 1) {
 		}
 
 		$pvm = date("Y-m-d", mktime (0,0,0,$kk,$pp,$vv));
+		
 		if ($pvm < $yhtiorow['tilikausi_alku']) {
 			echo "<font class='error'>".t("Tapahtumapvm ei ole kuluvalla tilikaudella")." $pvm</font><br>";
 			$tee = 'E';
@@ -196,15 +201,18 @@ if ($kukarow['taso'] != 1) {
 
 		$query = "LOCK table tiliointi WRITE";
 		$result = mysql_query($query) or pupe_error($query);
+		
 		$query = "SELECT tunnus FROM tiliointi WHERE ltunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tapvm = '$trow[tapvm]' and korjattu=''";
-
 		$result = mysql_query($query) or pupe_error($query);
+		
 		while ($xrow=mysql_fetch_array ($result)) {
 			kopioitiliointi($xrow['tunnus'], $kukarow['kuka']);
 		}
-		$query = "UPDATE tiliointi SET tapvm = '$vv-$kk-$pp', laadittu=now(), laatija='$kukarow[kuka]'
+		
+		$query = "	UPDATE tiliointi SET tapvm = '$vv-$kk-$pp', laadittu=now(), laatija='$kukarow[kuka]'
 					WHERE ltunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tapvm = '$trow[tapvm]' and korjattu=''";
 		$result = mysql_query($query) or pupe_error($query);
+		
 		$query = "UNLOCK table";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -688,6 +696,7 @@ if ($tila == '') {
 
 		if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
 			$pvm=erottele($trow['tapvm']);
+			
 			echo "<form action = '$PHP_SELF' method='post'>
 				<input type = 'hidden' name='tila' value='P'>
 				<input type = 'hidden' name='tee' value='M'>
@@ -700,7 +709,6 @@ if ($tila == '') {
 		}
 	}
 	else {
-//		if (($trow['h1time'] == '') && ($trow['h2time'] == '') && ($trow['h3time'] == '') && ($trow['h4time'] == '')) { // Lasku on hyväksymättä
 		if (($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) and ($kukarow['taso'] !=1 )) {
 			$pvm = erottele($trow['tapvm']);
 			echo "<form action = '$PHP_SELF' method='post'>
@@ -713,7 +721,6 @@ if ($tila == '') {
 					<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'>
 					<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
 		}
-//		}
 
 		// Lasku on maksamatta tai suoraveloitus
 		if (($trow['tila'] < 'N') or ($trow['suoraveloitus']!='')) {

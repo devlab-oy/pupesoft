@@ -435,6 +435,7 @@
 			echo "<th>".t("Laskun summa")."</th>";
 			echo "<th>".t("Avoin saldo")."</th>";
 			echo "<th>".t("Val")."</th>";
+			echo "<td class='back'><input type='submit' value='Hae'></th>";
 			echo "</tr>";
 			echo "</form>";
 			

@@ -1139,16 +1139,15 @@
 				//	Haetaan kaikki listata
 				$query = "	SELECT nimi, eposti
 							FROM kuka
-							WHERE yhtio = '$kukarow[yhtio]' and kuka IN ('".str_replace(",","','", implode(",", $jakelu))."') and eposti != ''
-							GROUP BY yhtio";
+							WHERE yhtio = '$kukarow[yhtio]' and kuka IN ('".str_replace(",","','", implode(",", $jakelu))."') and eposti != ''";
 				$jres = mysql_query($query) or pupe_error($query);
+				echo $query;
 				if(mysql_num_rows($jres)>0) {
 					$to = "";
 					while($jrow = mysql_fetch_array($jres)) {
 						if($to != "") $to .= ", ";
 						$to .= "=?iso-8859-1?Q?".imap_8bit($jrow["nimi"])."?= <{$jrow["eposti"]}>";
 					}
-					
 					
 					//	melkosta..
 					if(preg_match_all("//"))

@@ -32,9 +32,9 @@
 		$content .= "Content-Disposition: inline; filename=\"".$kutsu."\"\n\n";
 	}
 	elseif ($ctype == "excel") {
-		$content .= "Content-Type: application/excel; name=\"".$liite."\"\n" ;
+		$content .= "Content-Type: application/excel; name=\"".basename($liite)."\"\n" ;
 		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: inline; filename=\"".$liite."\"\n\n";
+		$content .= "Content-Disposition: inline; filename=\"".basename($liite)."\"\n\n";
 	}
 	else {
 		$content .= "Content-Type: application/pdf; name=\"".$kutsu.".pdf\"\n" ;

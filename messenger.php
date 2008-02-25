@@ -68,7 +68,7 @@
 		$sel3 = "selected";
 	}
 
-	$query = "	SELECT messenger.tunnus, messenger.viesti, (SELECT nimi FROM kuka WHERE kuka.yhtio $konsyhtiot AND kuka.kuka = messenger.vastaanottaja LIMIT 1) vastaanottaja, kuka.nimi, messenger.luontiaika
+	$query = "	SELECT messenger.tunnus, messenger.status, messenger.viesti, (SELECT nimi FROM kuka WHERE kuka.yhtio $konsyhtiot AND kuka.kuka = messenger.vastaanottaja LIMIT 1) vastaanottaja, kuka.nimi, messenger.luontiaika
 				FROM messenger
 				JOIN kuka ON (kuka.yhtio=messenger.yhtio AND kuka.kuka=messenger.kuka)
 				WHERE messenger.yhtio $konsyhtiot AND messenger.$kuka='$kukarow[kuka]' AND extranet='' LIMIT $kpl";
@@ -94,17 +94,22 @@
 						$y = $y * 2;
 					}
 
- 	echo "		</select> viimeisintä 
+ 	echo "		</select> ".t("viimeisintä")." 
 				<select name='kuka' onChange='javascript:submit()'>
 					<option value='vastaanotettua' $sel2>".t("vastaanotettua")."</option>
 					<option value='lähetettyä' $sel3>".t("lähetettyä")."</option>
 				</select>
-			viestiä:
+			".t("viestiä").":
 			</form><br><br>";
 
 	while ($row = mysql_fetch_array($result)) {
 		
 		echo "<div id='$row[tunnus]'>";
+		
+		if ($row["status"] == "") {
+			echo "<font color='red'>".t("Kuitattu")."</font> ";
+		}
+		
 		echo "<font class='info'>";
 
 		if ($kuka == "vastaanottaja") {

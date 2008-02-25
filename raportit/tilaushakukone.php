@@ -1,11 +1,23 @@
 <?php
+
+if (isset($_POST["tee"])) {
+	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+	if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+}
 	
 //parametrit
-require('../inc/parametrit.inc');
+if (strpos($_SERVER['SCRIPT_NAME'], "tilaushakukone.php")  !== FALSE) {
+	require('../inc/parametrit.inc');
+	js_popup();
+	js_showhide();
+	enable_ajax();
+}
 
-js_popup();
-js_showhide();
-enable_ajax();
+if (isset($tee) and $tee == "lataa_tiedosto") {
+	readfile("/tmp/".$tmpfilenimi);
+	exit;
+}
+
 
 //echo "<pre>".print_r($_REQUEST, true)."</pre>";
 if($tee == "ASIAKASHAKU") {
@@ -800,6 +812,23 @@ if($tee == "NAYTA") {
 if($tee == "") {
 	if($toim == "TARJOUSHAKUKONE" or $toim == "TILAUSHAKUKONE") {
 		
+		if($excel == "YES") {
+			if(include_once('Spreadsheet/Excel/Writer.php')) {
+
+				//keksitään failille joku varmasti uniikki nimi:
+				$excelnimi = "Tilausraportti_".date("d-m-Y")."_".mt_rand(0,9999).".xls";
+
+				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+				$workbook->setVersion(8);
+				$worksheet =& $workbook->addWorksheet('Raportti');
+
+				$format_bold =& $workbook->addFormat();
+				$format_bold->setBold();
+
+				$excelrivi = 0;		
+			}	
+		}
+		
 		if($setti == "viikkis") {
 			$alatila_tilaus		= array("A", "B", "C", "D", "E", "V", "J", "F", "T", "U");
 			$alatila_projekti	= array("", "A", "B");						
@@ -1249,6 +1278,15 @@ if($tee == "") {
 								</table>							
 							</td>
 						</tr>
+						<tr>
+							<td class='back' colspan = '6'><br>
+								<table>
+								<caption style='text-align: center;'>Muut valinnat</caption>
+								<tr>
+									<th>".t("Tallenna excel").":</th><td><input type='checkbox' name='excel' value='YES'></td>
+								</tr>
+								</table>
+							</td>
 						<tr><td class='back' colspan = '6'><br>".nayta_kyselyt($hakukysely)."<br></td></tr>
 						<tr><td class='back'><input type = 'submit' value='".t("Aja kysely")."'></td></tr>
 					</table>
@@ -1468,11 +1506,11 @@ if($tee == "") {
 		$c = count($group);
 	}
 	elseif($toim == "TARJOUSHAKUKONE") {
-		$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws('<br>',versio.nimi, versio.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, $summa Yhteensä, if(versio.alatila IN ('', 'A'), DATEDIFF(versio.luontiaika, date_sub(now(), INTERVAL laskun_lisatiedot.tarjouksen_voimaika day)), '') pva,";
+		$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws(' ',versio.nimi, versio.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, $summa Yhteensä, if(versio.alatila IN ('', 'A'), DATEDIFF(versio.luontiaika, date_sub(now(), INTERVAL laskun_lisatiedot.tarjouksen_voimaika day)), '') pva,";
 		$c = 6;
 	}
 	elseif($toim == "TILAUSHAKUKONE") {
-		$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws('<br>',lasku.nimi, lasku.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, summa Yhteensä, ";
+		$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws(' ',lasku.nimi, lasku.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, summa Yhteensä, ";
 		$c = 6;		
 	}
 	
@@ -1511,7 +1549,7 @@ if($tee == "") {
 					$order
 					$lkm_rajaus";
 	}
-	//echo $query."<br>";
+	echo $query."<br>";
 	
 	$laskures = mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($laskures)>0) {
@@ -1523,8 +1561,16 @@ if($tee == "") {
 				for($i=0;$i<=$c; $i++) {
 					$o = trim(str_replace("_", " ", mysql_field_name($laskures, $i)));					
 					echo "<th>$o</th>";
+					
+					if(isset($workbook)) {
+						$worksheet->write($excelrivi, $i, ucfirst(t($o)), $format_bold);
+					}
 				}
-
+				
+				if(isset($workbook)) {
+					$excelrivi++;
+				}
+								
 				echo "
 					</tr>";
 		$gt = 0;
@@ -1545,6 +1591,10 @@ if($tee == "") {
 					}
 					
 					echo "<td><font style='color:$color;'>$laskurow[pva]</font></td>";
+
+					if(isset($workbook)) {
+						$worksheet->write($excelrivi, $i, $laskurow["pva"]);
+					}
 				}
 				elseif(mysql_field_name($laskures, $i) == "tila") {
 					$laskutyyppi = $laskurow["tila"];
@@ -1552,20 +1602,34 @@ if($tee == "") {
 					require "inc/laskutyyppi.inc";
 					
 					echo "<td>".t($laskutyyppi)." ".t($alatila)."</td>";
+
+					if(isset($workbook)) {
+						$worksheet->write($excelrivi, $i, t($laskutyyppi)." ".t($alatila));
+					}
 				}
-				elseif(mysql_field_type($laskures, $i) == "real") {
+				elseif(mysql_field_type($laskures, $i) == "real") {					
 					echo "<td align = 'right'>".number_format($laskurow[$i], 2, ',', ' ')."</td>";
+					
+					if(isset($workbook)) {
+						$worksheet->write($excelrivi, $i, number_format($laskurow[$i], 2, ',', ' '));
+					}
 				}
-				else {
+				else {					
 					echo "<td>$laskurow[$i]</td>";
+					
+					if(isset($workbook)) {
+						$worksheet->write($excelrivi, $i, $laskurow[$i]);
+					}
 				}
 				
 				if(mysql_field_name($laskures, $i) == "Yhteensä") {
 					$colspan = $i;
 					$gt += $laskurow[$i];
 				}
+				
 			}
 			
+			$excelrivi++;
 			
 			if(count($group)==0) {
 				echo "					
@@ -1580,6 +1644,20 @@ if($tee == "") {
 		
 		echo "<tr><td colspan='$colspan' class='back'></td><td class='back' align = 'right'><font class='message'>".number_format($gt, 2, ',', ' ')."</font></td></tr>";
 		echo "</table></div>";
+		
+		if(isset($workbook) and $excelrivi>0) {
+			// We need to explicitly close the workbook
+			$workbook->close();
+
+			echo "<table>";
+			echo "<tr><th>".t("Tallenna tulos").":</th>";
+			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+			echo "<input type='hidden' name='kaunisnimi' value='".ucfirst($excelnimi)."'>";
+			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+			echo "</table><br>";
+		}
 		
 		//	Jos meillä on tarjous halutaan se varmaan aktivoida?
 		if($tarjous > 0) {

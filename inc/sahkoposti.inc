@@ -31,6 +31,11 @@
 		$content .= "Content-Transfer-Encoding: base64\n" ;
 		$content .= "Content-Disposition: inline; filename=\"".$kutsu."\"\n\n";
 	}
+	elseif ($ctype == "excel") {
+		$content .= "Content-Type: application/excel; name=\"".$liite."\"\n" ;
+		$content .= "Content-Transfer-Encoding: base64\n" ;
+		$content .= "Content-Disposition: inline; filename=\"".$liite."\"\n\n";
+	}
 	else {
 		$content .= "Content-Type: application/pdf; name=\"".$kutsu.".pdf\"\n" ;
 		$content .= "Content-Transfer-Encoding: base64\n" ;

@@ -142,9 +142,9 @@ else {
 
 			// Lasketaan tilausrivin arvo ja kate
 			if 		($turow['epakurantti100pvm'] != '0000-00-00') $turow['kehahin'] = 0;
-			elseif	($turow['epakurantti75pvm'] != '0000-00-00') $turow['kehahin'] = $turow['kehahin'] * 0.25;
-			elseif 	($turow['epakurantti50pvm'] != '0000-00-00') $turow['kehahin'] = $turow['kehahin'] * 0.5;
-			elseif 	($turow['epakurantti25pvm'] != '0000-00-00') $turow['kehahin'] = $turow['kehahin'] * 0.75;
+			elseif	($turow['epakurantti75pvm'] != '0000-00-00') $turow['kehahin'] = round($turow['kehahin'] * 0.25, 6);
+			elseif 	($turow['epakurantti50pvm'] != '0000-00-00') $turow['kehahin'] = round($turow['kehahin'] * 0.5,  6);
+			elseif 	($turow['epakurantti25pvm'] != '0000-00-00') $turow['kehahin'] = round($turow['kehahin'] * 0.75, 6);
 
 			//Paivitetaan tuotteen saldo jos saldoa on varattu
 			if ($turow['ei_saldoa'] == '' and $trow['varattu'] != 0) {

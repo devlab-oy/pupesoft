@@ -296,8 +296,8 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 						tuoteno = '$tuoterow[tuoteno]',
 						laji    = 'Epäkurantti',
 						kpl     = '$tuoterow[saldo]',
-						hinta   = '$tuoterow[kehahin]',
-						kplhinta= '$tuoterow[kehahin]',
+						hinta   = round('$tuoterow[kehahin]', 6),
+						kplhinta= round('$tuoterow[kehahin]', 6),
 						selite  = '$tee. ".t("Keskihankintahinta").": $tuoterow[kehahin] ".t("Saldo").": $tuoterow[saldo] -> $muutos',
 						laatija    = '$kukarow[kuka]',
 						laadittu = now()";

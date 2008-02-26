@@ -3,7 +3,7 @@
 	//k‰ytet‰‰n tilausriveill‰ olevia tuotteita
 	$query = "	SELECT tilausrivi.*, if(varattu!=0, varattu, kpl) varattu, 
 				trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, 
-				tuote.ei_saldoa, tuote.kehahin
+				tuote.ei_saldoa, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm
 				FROM tilausrivi
 				JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -33,6 +33,11 @@
 		
 		if (mysql_num_rows($tuoteresult) == 0) {
 			// Raaka-aine list‰tty j‰lkik‰teen tehd‰‰n tapahtuma
+			if 		($perherow['epakurantti100pvm'] != '0000-00-00') $perherow['kehahin'] = 0;
+			elseif 	($perherow['epakurantti75pvm'] != '0000-00-00')  $perherow['kehahin'] = round($perherow['kehahin'] * 0.25, 6);
+			elseif 	($perherow['epakurantti50pvm'] != '0000-00-00')  $perherow['kehahin'] = round($perherow['kehahin'] * 0.5,  6);
+			elseif 	($perherow['epakurantti25pvm'] != '0000-00-00')  $perherow['kehahin'] = round($perherow['kehahin'] * 0.75, 6);
+			
 			$query = "	INSERT into tapahtuma set
 						yhtio    	= '$kukarow[yhtio]',
 						tuoteno  	= '$perherow[tuoteno]',

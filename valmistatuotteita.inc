@@ -25,7 +25,7 @@ if ($tee =='UV') {
 				and tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
 				ORDER by tilausrivi.tuoteno";
 	$uvresult = mysql_query($query) or pupe_error($query);
-	
+
 	if(mysql_num_rows($uvresult) > 0) {
 		$useavalmiste = "ON";
 	}
@@ -110,9 +110,9 @@ if ($tee =='UV') {
 			if ($perherow["ei_saldoa"] == "") {
 
 				unset($tuoteresult);
-				
+
 				$varataankpl = 0;
-				
+
 				//N‰in paljon haluamme k‰ytt‰‰ raaka-ainetta
 				if ($valmistetaan == "TILAUKSELTA") {
 					if ($kulukpllat[$perherow["tunnus"]] != 0) {
@@ -120,12 +120,12 @@ if ($tee =='UV') {
 					}
 					else {
 						$varataankpl = $perherow['varattu'] * $akerroin;
-					}					
+					}
 				}
 				else {
 					$varataankpl = $perherow['kerroin'] * $isavarattu;
 				}
-								
+
 				if ($perherow["paikka"] != '') {
 					//k‰ytet‰‰n tilausrivill‰ olevaa paikkaa
 					$query = "	SELECT  saldo, ei_saldoa, tuote.tuoteno
@@ -244,7 +244,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 		if(mysql_num_rows($tuoteresult) == 0) {
 			//sittenh‰n tuote on saldoton
-			$query = "	SELECT tuote.kehahin, tuote.ei_saldoa, tuote.yksikko, 
+			$query = "	SELECT tuote.kehahin, tuote.ei_saldoa, tuote.yksikko,
 						tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm
 						FROM tuote
 						WHERE tuote.tuoteno = '$perherow[tuoteno]'
@@ -261,19 +261,19 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 			}
 			else {
 				$kpl = $perherow['varattu'] * str_replace(',','.',$akerroin);
-			}					
+			}
 		}
 		else {
 			$kpl = $perherow['kerroin'] * str_replace(',','.',$isavarattu);
 		}
-		
+
 		$kpl = str_replace(',','.',$kpl);
-		
+
 		if 		($tuoterow['epakurantti100pvm'] != '0000-00-00') $tuoterow['kehahin'] = 0;
-		elseif 	($tuoterow['epakurantti75pvm'] != '0000-00-00')  $tuoterow['kehahin'] = $tuoterow['kehahin'] * 0.25;
-		elseif 	($tuoterow['epakurantti50pvm'] != '0000-00-00')  $tuoterow['kehahin'] = $tuoterow['kehahin'] * 0.5;
-		elseif 	($tuoterow['epakurantti25pvm'] != '0000-00-00')  $tuoterow['kehahin'] = $tuoterow['kehahin'] * 0.75;
-				
+		elseif 	($tuoterow['epakurantti75pvm'] != '0000-00-00')  $tuoterow['kehahin'] = round($tuoterow['kehahin'] * 0.25, 6);
+		elseif 	($tuoterow['epakurantti50pvm'] != '0000-00-00')  $tuoterow['kehahin'] = round($tuoterow['kehahin'] * 0.5,  6);
+		elseif 	($tuoterow['epakurantti25pvm'] != '0000-00-00')  $tuoterow['kehahin'] = round($tuoterow['kehahin'] * 0.75, 6);
+
 		$arvo = $tuoterow['kehahin'] * $kpl;
 		$uusiarvo += $arvo;
 
@@ -318,8 +318,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 			$upparesult = mysql_query($query) or pupe_error($query);
 		}
 	}
-	
-	
+
+
 	if (!function_exists("valmista_isa")) {
 		function valmista_isa($isarow, $tilrivirow, $isavarattu, $isatuoteno, $uusiarvo, $kaikenkaikkiaan) {
 			global $yhtiorow, $kukarow, $laskurow, $valmistettavat, $valmistetaan, $jaljella_tot;
@@ -352,8 +352,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 			$result = mysql_query($query) or pupe_error($query);
 
 			$query = "	UPDATE tuote
-						SET kehahin	= $kehahin, 
-						vihahin		= round($uusiarvo/$isavarattu, 2), 
+						SET kehahin	= $kehahin,
+						vihahin		= round($uusiarvo/$isavarattu, 2),
 						vihapvm		= now()
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$isatuoteno'";
@@ -406,7 +406,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 						$insresult = mysql_query($query) or pupe_error($query);
 						$valmistettavat .= ",".mysql_insert_id();
 					}
-			
+
 					//luodaan toimitettu valmisterivi
 					$query = "	INSERT into tilausrivi set
 								laatija			= '$kukarow[kuka]',
@@ -439,7 +439,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 								hyllynro 		= '$tilrivirow[hyllynro]',
 								hyllytaso 		= '$tilrivirow[hyllytaso]',
 								hyllyvali 		= '$tilrivirow[hyllyvali]'";
-					$insresult = mysql_query($query) or pupe_error($query);			
+					$insresult = mysql_query($query) or pupe_error($query);
 					$valmistettavat .= ",".mysql_insert_id();
 
 					$jaljella = round($tilrivirow["varattu"] - $isavarattu, 2);
@@ -462,22 +462,22 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 	}
 
 
-	
-	// Tehd‰‰n uusi tuote $uusiarvo on k‰ytettyjen raaka-aineiden arvo. 
+
+	// Tehd‰‰n uusi tuote $uusiarvo on k‰ytettyjen raaka-aineiden arvo.
 	if ($useavalmiste == "ON") {
-		
+
 		// Katsotaan eka paljonko kaikenkaikkiaan syntyy valmisteita
 		$kaikenkaikkiaan = $isavarattu;
-		
+
 		while ($uvrow = mysql_fetch_array($uvresult)) {
 			$kaikenkaikkiaan += $uvrow["varattu"];
 		}
-		
+
 		mysql_data_seek($uvresult, 0);
-		
+
 		// Valmistetaan ensimm‰inen is‰
 		valmista_isa($isarow, $tilrivirow, $isavarattu, $isatuoteno, $uusiarvo, $kaikenkaikkiaan);
-		
+
 		while ($uvrow = mysql_fetch_array($uvresult)) {
 			if ($uvrow["paikka"] != '') {
 				//k‰ytet‰‰n rivill‰ olevaa paikkaa
@@ -517,16 +517,16 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 			if(mysql_num_rows($tuoteresult) != 1) {
 				echo "<font class='error'>$uvrow[tuoteno] ".t("Varastopaikkaa ei lˆydy")."</font><br>";
 			}
-			
+
 			$uvisarow = mysql_fetch_array($tuoteresult);
-			
+
 			valmista_isa($uvisarow, $uvrow, $uvrow["varattu"], $uvrow["tuoteno"], $uusiarvo, $kaikenkaikkiaan);
 		}
 	}
 	else {
 		valmista_isa($isarow, $tilrivirow, $isavarattu, $isatuoteno, $uusiarvo, $isavarattu);
 	}
-	
+
 	echo "<br>";
 }
 

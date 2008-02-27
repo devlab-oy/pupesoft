@@ -393,7 +393,7 @@
 							if ($group!="") $group .= ",tuote.tuoteno, tuote.nimitys";
 							else $group  .= "tuote.tuoteno, tuote.nimitys";
 							$select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, ";
-							$order  .= "tuote.tuoteno, ";
+							$order  .= "tuote.tuoteno,";
 							$gluku++;
 						}
 						if ($sarjanumerot != '') {
@@ -725,7 +725,7 @@
 				$query .= "	$lisa
 							group by $group
 							order by $order";
-
+				
 				// ja sitten ajetaan itte query
 				if ($query != "") {
 

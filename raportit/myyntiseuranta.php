@@ -725,7 +725,7 @@
 				$query .= "	$lisa
 							group by $group
 							order by $order";
-				
+
 				// ja sitten ajetaan itte query
 				if ($query != "") {
 
@@ -1256,8 +1256,8 @@
 
 			echo "<td><select name='ajotapa'>";
 			echo "<option value='lasku'  		$chk1>".t("Laskuista")."</option>";
-			echo "<option value='tilaus' 		$chk2>".t("Tilauksista")."</option>";
-			echo "<option value='tilausjaauki'	$chk3>".t("Tilauksista, avoimet huomioiden")."</option>";
+			echo "<option value='tilaus' 		$chk2>".t("Laskutetuista tilauksista")."</option>";
+			echo "<option value='tilausjaauki'	$chk3>".t("Laskutetuista sekä avoimista tilauksista")."</option>";
 			echo "</select></td>";
 
 			echo "</tr>";

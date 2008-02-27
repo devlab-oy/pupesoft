@@ -60,19 +60,22 @@ if ($Xtunnukset2 != "") {
 				tullinimike.su, 
 				tuote.tullinimike1, 
 				tuote.tullikohtelu, 
-				tuotteen_toimittajat.alkuperamaa, 
+				(SELECT alkuperamaa from tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa != '$yhtiorow[maa]' LIMIT 1) alkuperamaa,
 				sum(tilausrivi.rivihinta) summa, 
 				sum(tilausrivi.kpl) kpl,
 				round(sum((tilausrivi.rivihinta/$laskurow[summa])*$Xkilot),0) paino
 				FROM tilausrivi
 				JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno 
 				LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]'
-				LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
 				WHERE tilausrivi.uusiotunnus='$uusiotunnus' 
 				and tilausrivi.yhtio = '$kukarow[yhtio]' 
 				and tilausrivi.tyyppi = 'L'
 				and tilausrivi.kpl<>0
-				GROUP BY 1,2,3,4,5";	
+				GROUP BY tuote.tuoteno, 
+				tullinimike.su, 
+				tuote.tullinimike1, 
+				tuote.tullikohtelu, 
+				alkuperamaa";	
 	$Xriviresult = mysql_query($Xquery) or pupe_error($Xquery);
 
 	if (mysql_num_rows($Xriviresult) < 1) {

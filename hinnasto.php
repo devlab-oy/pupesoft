@@ -49,7 +49,10 @@ if ($tee != '') {
 			}
 		}
 		$where1 = substr($where1,0,-1);
-		$where1 = " osasto in (".$where1.") ";
+		if ($where1 != '') {
+			$where1 = " osasto in (".$where1.") ";
+		}
+		
     }
 
 
@@ -75,7 +78,10 @@ if ($tee != '') {
 			}
 		}
 		$where2 = substr($where2,0,-1);
-		$where2 = " try in (".$where2.") ";
+		if ($where2 != '') {
+			$where2 = " try in (".$where2.") ";
+		}
+		
 	}
 
 	if (strlen($where1) > 0) {

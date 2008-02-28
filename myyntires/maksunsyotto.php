@@ -129,7 +129,7 @@ if ($tee == "SYOTTO") {
 
 	// Myyntisaamiset
 	$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite, lukko)
-				VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(),'$tapvm','$ltunnus','$myyntisaamiset', $omasumma * -1,'Käsin syötetty suoritus','1')";
+				VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(),'$tapvm','$ltunnus','$myyntisaamiset', $omasumma * -1,'Käsin syötetty suoritus $asiakas_nimi $selite','1')";
 
 	if (!($result = mysql_query($query))) {
 		$result = mysql_query($unlockquery);
@@ -139,7 +139,7 @@ if ($tee == "SYOTTO") {
 
 	// Kassatili
 	$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite, aputunnus, lukko, kustp)
-				VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(),'$tapvm','$ltunnus','$kassatili','$omasumma','Käsin syötetty suoritus','$ttunnus', '1','$kustannuspaikka')";
+				VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(),'$tapvm','$ltunnus','$kassatili','$omasumma','Käsin syötetty suoritus $asiakas_nimi $selite','$ttunnus', '1','$kustannuspaikka')";
 	mysql_query($query) or pupe_error($query);
 
 	// Näin kaikki tiliöinnit ovat kauniisti linkitetty toisiinsa. (Kuten alv-vienti)

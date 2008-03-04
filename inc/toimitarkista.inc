@@ -122,7 +122,11 @@ if(!function_exists("toimitarkista")) {
 					$t[$i] = "0037". sprintf("%08.0f",$tmp_ytunnus);
 				}
 
-				$query   = "select ytunnus, tunnus from toimi where yhtio='$kukarow[yhtio]' and ovttunnus='$t[$i]'";
+				$query   = "SELECT ytunnus, tunnus 
+							from toimi 
+							where yhtio		= '$kukarow[yhtio]' 
+							and ovttunnus	= '$t[$i]'
+							and tyyppi 	   != 'P'";
 				$sresult = mysql_query($query) or pupe_error($query);
 
 				if ($tunnus == "") { // ollaan lis‰‰m‰ss‰ uutta

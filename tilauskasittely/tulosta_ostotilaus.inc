@@ -17,7 +17,7 @@
 	if ($komento['Ostotilaus'] == 'edi') {
 
 		// haetaan toimittajan tiedot
-		$query    = "select * from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$laskurow[ytunnus]'";
+		$query    = "SELECT * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 		$toimires = mysql_query($query) or pupe_error($query);
 		$toimirow = mysql_fetch_array($toimires);
 

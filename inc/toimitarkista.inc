@@ -164,7 +164,7 @@ if(!function_exists("toimitarkista")) {
 			$toimtyyppi = $t[$i]; // otetaan t‰‰ talteen
 
 			// Jos toimittaja merkataan poistetuksi niin unohdetaan kaikki errortsekit...
-			if ($toimtyyppi == "P") {						
+			if ($toimtyyppi == "P" or $toimtyyppi == "PP") {						
 				unset($virhe);
 			}
 		}

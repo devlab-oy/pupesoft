@@ -2,9 +2,9 @@
 
 if(!function_exists("toimitarkista")) {
 	function toimitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-		global $kukarow, $yhtiorow, $alias_set, $ulosarray;
+		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $toimtyyppi;
 		
-		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $toimtyyppi;
+		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi;
 		
 		if ((mysql_field_name($result, $i) == "nimi") or (mysql_field_name($result, $i) == "maa") or (mysql_field_name($result, $i) == "ytunnus") or (mysql_field_name($result, $i) == "oletus_hyvak1")) {
 			if (trim($t[$i]) == '') {
@@ -162,12 +162,6 @@ if(!function_exists("toimitarkista")) {
 
 		if (mysql_field_name($result, $i) == "tyyppi") {
 			$toimtyyppi = $t[$i]; // otetaan t‰‰ talteen
-
-			// Jos toimittaja merkataan poistetuksi niin unohdetaan kaikki errortsekit...
-			if ($toimtyyppi == "P" or $toimtyyppi == "PP") {						
-				unset($virhe);
-				$errori = "";				
-			}
 		}
 
 		if (mysql_field_name($result, $i) == "tyyppi_tieto") {

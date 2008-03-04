@@ -2,9 +2,9 @@
 
 if(!function_exists("asiakastarkista")) {
 	function asiakastarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $ytunnus_select, $asiakasnro_select, $toim;
+		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $ytunnus_select, $asiakasnro_select, $toim, $asiak_laji;
 		
-		static $asiak_laji, $ytunnus_tunnus, $ytunnus, $ovttunnus, $apuverkkotunnus;
+		static $ytunnus_tunnus, $ytunnus, $ovttunnus, $apuverkkotunnus;
 		
 		if (mysql_field_name($result, $i) == "laji") {
 			$asiak_laji = $t[$i];

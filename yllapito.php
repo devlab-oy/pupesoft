@@ -187,7 +187,12 @@
 			}
 		}
 
-		if ($errori != '') {
+		// Jos toimittaja/asiakas merkataan poistetuksi niin unohdetaan kaikki errortsekit...
+		if (($toimtyyppi == "P" or $toimtyyppi == "PP" or $asiak_laji == "P") and $errori != '') {						
+			unset($virhe);
+			$errori = "";				
+		}
+		elseif ($errori != '') {
 			echo "<font class='error'>".t("Jossain oli jokin virhe! Ei voitu paivitt‰‰!")."</font>";
 		}
 

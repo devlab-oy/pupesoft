@@ -777,7 +777,7 @@
 
 								$kale .= "<th>$tapahtuma[laji_tark]<div style='float: right;'><font class='info'>$tapahtuma[laatija]@$tapahtuma[luontiaika]</font></div></th></tr>";
 								
-								$kale .= "<tr><td>$viesti</td></tr>";
+								$kale .= "<tr><td>".nl2br($viesti)."</td></tr>";
 								$kale .= "<tr><td class='back' height='10'></td></tr>";
 							}
 						}						

@@ -832,6 +832,9 @@ if ($tee == "VALMIS" and $kateinen != '' and ($kukarow['kassamyyja'] != '' or $k
 			exit;
 		}
 		else {
+			
+			$maksuehtorow = mysql_fetch_array($maksuehtores);
+			
 			echo "<form action='' method='post'>";
 			echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
 			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
@@ -898,8 +901,8 @@ if ($tee == "VALMIS" and $kateinen != '' and ($kukarow['kassamyyja'] != '' or $k
 		exit;
 	}
 } 
-elseif ($tee == "VALMIS" and $kassamyyja_kesken == 'ei' and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $kukarow['extranet'] == '') {
-	
+
+if ($tee == "VALMIS" and $kassamyyja_kesken == 'ei' and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $kukarow['extranet'] == '') {
 	$query_maksuehto = "UPDATE lasku 
 						SET maksuehto 	= '$maksutapa', 
 						kassalipas 		= '$kertakassa' 

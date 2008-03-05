@@ -632,6 +632,29 @@
 						$nimires = mysql_query($query) or pupe_error($query);					
 					}
 				}
+				
+				if ($tunnuskentta == 'ostorivitunnus' and $from == "kohdista") {
+					//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
+				   	$query = "	SELECT tilausrivi.tunnus
+				   				FROM tilausrivin_lisatiedot
+				   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+								JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+				   				WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
+				   				and tilausrivin_lisatiedot.tilausrivilinkki  = '$rivirow[tunnus]'";
+					$varastoon_result = mysql_query($query) or pupe_error($query);
+
+					if ($varastoon_row = mysql_fetch_array($varastoon_result)) {
+						//Liitetään asiaakkaan tilausrivi tähän ostoriviin
+						$query = "	UPDATE sarjanumeroseuranta
+									SET myyntirivitunnus = '$varastoon_row[tunnus]',
+									muuttaja	= '$kukarow[kuka]',
+									muutospvm	= now()
+									WHERE yhtio	= '$kukarow[yhtio]'
+									and tunnus	= '$sarjatun'
+									and myyntirivitunnus = 0";
+						$sarjares = mysql_query($query) or pupe_error($query);						
+					}
+				}
 
 				//Tutkitaan lisävarusteita
 				if ($tunnuskentta == 'myyntirivitunnus' and $from != "riviosto" and $from != "kohdista") {

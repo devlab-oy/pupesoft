@@ -428,6 +428,7 @@
 					<input type = 'hidden' name = 'uusi' value = '1'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
 					<input type = 'hidden' name = 'limit' value = '$limit'>
+					<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 					<input type = 'hidden' name = 'laji' value = '$laji'>
 					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
 		}
@@ -436,44 +437,71 @@
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
 					<input type = 'hidden' name = 'limit' value = 'NO'>
+					<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 					<input type = 'hidden' name = 'laji' value = '$laji'>
 					<input type = 'submit' value = '".t("N‰yt‰ kaikki")."'></form>";
 		}
+		
+		echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
+				<input type = 'hidden' name = 'toim' value = '$aputoim'>
+				<input type = 'hidden' name = 'limit' value = '$limit'>
+				<input type = 'hidden' name = 'nayta_poistetut' value = 'YES'>
+				<input type = 'hidden' name = 'laji' value = '$laji'>
+				<input type = 'submit' value = '".t("N‰yt‰ poistetut")."'></form>";
 
 		echo "	<br><br><table><tr class='aktiivi'>
 				<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
 				<input type = 'hidden' name = 'limit' value = '$limit'>
+				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>";
 
-		for ($i = 1; $i < mysql_num_fields($result); $i++) {
-			echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&ojarj=".mysql_field_name($result,$i).$ulisa."&limit=$limit&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
+		for ($i = 1; $i < mysql_num_fields($result); $i++) {			
+			if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {		
+				echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&ojarj=".mysql_field_name($result,$i).$ulisa."&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
 
-			if 	(mysql_field_len($result,$i)>10) $size='15';
-			elseif	(mysql_field_len($result,$i)<5)  $size='5';
-			else	$size='10';
+				if 	(mysql_field_len($result,$i)>10) $size='15';
+				elseif	(mysql_field_len($result,$i)<5)  $size='5';
+				else	$size='10';
 
-			// jos meid‰n kentt‰ ei ole subselect niin tehd‰‰n hakukentt‰
-			if (strpos(strtoupper($array[$i]), "SELECT") === FALSE) {
-				echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+				// jos meid‰n kentt‰ ei ole subselect niin tehd‰‰n hakukentt‰
+				if (strpos(strtoupper($array[$i]), "SELECT") === FALSE) {
+					echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+				}
+				echo "</th>";
 			}
-			echo "</th>";
 		}
 
 		echo "<td class='back' valign='bottom'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></form>";
 		echo "</tr>";
 
-		while ($trow=mysql_fetch_array ($result)) {
+		while ($trow = mysql_fetch_array($result)) {
 			echo "<tr class='aktiivi'>";
-			for ($i=1; $i<mysql_num_fields($result); $i++) {
-				if ($i == 1) {
-					if (trim($trow[1]) == '') $trow[1] = "".t("*tyhj‰*")."";
-					echo "<td valign='top'><a href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&laji=$laji'>$trow[1]</a></td>";
-				}
-				else {
-					echo "<td valign='top'>$trow[$i]</td>";
+						
+			if (($toim == "asiakas" and $trow["HIDDEN_laji"] == "P") or
+				($toim == "toimi" and $trow["HIDDEN_tyyppi"] == "P") or
+				($toim == "tuote" and $trow["HIDDEN_status"] == "P")) {
+					
+				$fontlisa1 = "<font style='text-decoration: line-through'>";
+				$fontlisa2 = "</font>";
+			}
+			else {
+				$fontlisa1 = "";
+				$fontlisa2 = "";
+			}
+			
+			for ($i=1; $i < mysql_num_fields($result); $i++) {
+				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
+					if ($i == 1) {
+						if (trim($trow[1]) == '') $trow[1] = "".t("*tyhj‰*")."";
+						echo "<td valign='top'><a href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>$trow[1]</a></td>";
+					}
+					else {
+						echo "<td valign='top'>$fontlisa1 $trow[$i] $fontlisa2</td>";
+					}
 				}
 			}
+			
 			echo "</tr>";
 		}
 		echo "</table>";
@@ -488,6 +516,7 @@
 		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa' name='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data'>";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 		echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
+		echo "<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>";
 		echo "<input type = 'hidden' name = 'laji' value = '$laji'>";
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
@@ -736,6 +765,7 @@
 						<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post' onSubmit = 'return verify()' enctype='multipart/form-data'>
 						<input type = 'hidden' name = 'toim' value = '$aputoim'>
 						<input type = 'hidden' name = 'limit' value = '$limit'>
+						<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 						<input type = 'hidden' name = 'laji' value = '$laji'>
 						<input type = 'hidden' name = 'tunnus' value = '$tunnus'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -752,6 +782,7 @@
 				<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
 				<input type = 'hidden' name = 'limit' value = '$limit'>
+				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>
 				<input type = 'hidden' name = 'uusi' value = '1'>
 				<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";

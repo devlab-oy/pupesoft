@@ -1,6 +1,6 @@
 <?php
 
-	$kentat = 'tunnus, tuoteno, nimitys, myyntihinta';
+	$kentat = "tunnus, tuoteno, nimitys, round(myyntihinta, $yhtiorow[hintapyoristys]) myyntihinta, status HIDDEN_status";
 	$jarjestys = 'tuoteno';
 	
 	if ($laji == "V") {
@@ -10,6 +10,13 @@
 	else {
 		$otsikko = 'Tuotteet';
 		$rajauslisa = " and tuote.tuotetyyppi NOT IN ('A','B') ";
+	}
+	
+	if ($nayta_poistetut == "") {
+		$rajauslisa .= " and tuote.status != 'P' ";
+	}
+	else {
+		$rajauslisa	.= "";
 	}
 	
 ?>

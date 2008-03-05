@@ -1,7 +1,7 @@
 <?php
 	
 	$otsikko 	= 'Asiakkaat';
-	$kentat 	= "tunnus, ytunnus, concat_ws('<br>', nimi, toim_nimi) 'Nimi/Toim_nimi', concat_ws('<br>', postitp, toim_postitp) 'Postitp/Toim_postitp', concat_ws('<br>', ovttunnus, toim_ovttunnus) 'Ovttunnus/Toim_ovttunnus' ";
+	$kentat 	= "tunnus, ytunnus, concat_ws('<br>', nimi, toim_nimi) 'Nimi/Toim_nimi', concat_ws('<br>', postitp, toim_postitp) 'Postitp/Toim_postitp', concat_ws('<br>', ovttunnus, toim_ovttunnus) 'Ovttunnus/Toim_ovttunnus', laji HIDDEN_laji ";
 	$hakukentat = "tunnus, ytunnus, nimi/toim_nimi, postitp/toim_postitp, ovttunnus/toim_ovttunnus";
 	$jarjestys 	= 'selaus, nimi';
 	
@@ -16,9 +16,12 @@
 		$rajauslisa = " and asiakas.laji = 'P' ";
 	}
 	else {
-		$rajauslisa	= "";
+		if ($nayta_poistetut == "") {
+			$rajauslisa = " and asiakas.laji != 'P' ";
+		}
+		else {
+			$rajauslisa	= "";
+		}
 	}
-	
-	
 	
 ?>

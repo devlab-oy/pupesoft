@@ -848,12 +848,19 @@ if ($tee == "VALMIS" and $kateinen != '' and ($kukarow['kassamyyja'] != '' or $k
 		echo "</table>";
 	}
 	elseif ($kassamyyja_kesken == 'ei' and $seka == 'X') {
+		$query_maksuehto = " SELECT *
+							 FROM maksuehto
+							 WHERE yhtio='$kukarow[yhtio]' and kateinen != '' and kaytossa = '' and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$laskurow[maa]%')";
+		$maksuehtores = mysql_query($query_maksuehto) or pupe_error($query_maksuehto);
+		
+		$maksuehtorow = mysql_fetch_array($maksuehtores);
 
 		echo "<table><form action='' name='laskuri' method='post'>";
 
 		echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 		echo "<input type='hidden' name='tee' value='VALMIS'>";
+		echo "<input type='hidden' name='maksutapa' value='$maksuehtorow[tunnus]'>";
 		echo "<input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>";
 		echo "<input type='hidden' name='kateinen' value='$kateinen'>";		
 		echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";

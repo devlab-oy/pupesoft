@@ -10,7 +10,15 @@ if($vain_monista == ""){
 		$tee = "ETSILASKU";
 	}	
 	
-	echo "<font class='head'>".t("Monista lasku")."</font><hr>";
+	if ($toim == 'SOPIMUS') {
+		echo "<font class='head'>".t("Monista sopimus")."</font><hr>";
+	}
+	elseif ($toim == 'TARJOUS') {
+		echo "<font class='head'>".t("Monista tarjous")."</font><hr>";
+	}
+	else {
+		echo "<font class='head'>".t("Monista lasku")."</font><hr>";
+	}
 }
 
 if ($tee == '') {
@@ -89,7 +97,16 @@ if ($tee == "ETSILASKU") {
 		$laresult = mysql_query($query) or pupe_error($query);
 		$larow = mysql_fetch_array($laresult);
 
-		if ($toim != 'SOPIMUS') {
+		if ($toim == 'SOPIMUS') {
+			$where 	= " tila = '0' and tunnus = '$otunnus' ";
+			$use 	= " ";
+			
+		}
+		elseif ($toim == 'TARJOUS') {
+			$where 	= " tila = 'T' and tunnus = '$otunnus' ";
+			$use 	= " ";	
+		}
+		else {
 			if ($larow["laskunro"] > 0) {
 				$where 	= " tila = 'U' and laskunro = '$larow[laskunro]' ";
 				$use 	= " use index (lasno_index) ";
@@ -99,23 +116,24 @@ if ($tee == "ETSILASKU") {
 				$use 	= " ";
 			}
 		}
-		else {
-			$where 	= " tila = '0' and tunnus = '$otunnus' ";
-			$use 	= " ";
-		}
 	}
 	else {
-		if ($toim != 'SOPIMUS') {
+		if ($toim == 'SOPIMUS') {
+			$where = "	tila = '0'
+						and lasku.liitostunnus = '$asiakasid' ";
+			$use 	= " ";		
+		}
+		elseif ($toim == 'TARJOUS') {
+			$where = "	tila = 'T'
+						and lasku.liitostunnus = '$asiakasid' ";
+			$use 	= " ";
+		}
+		else {
 			$where = "	tila = 'U'
 						and lasku.liitostunnus = '$asiakasid'
 						and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
 						and lasku.tapvm <='$vvl-$kkl-$ppl 23:59:59' ";
-			$use 	= " use index (yhtio_tila_liitostunnus_tapvm) ";
-		}
-		else {
-			$where = "	tila = '0'
-						and lasku.liitostunnus = '$asiakasid' ";
-			$use 	= " ";
+			$use 	= " use index (yhtio_tila_liitostunnus_tapvm) ";	
 		}
 	}
 
@@ -139,9 +157,8 @@ if ($tee == "ETSILASKU") {
 
 		echo "<th>".t("Monista")."</th>";
 		
-		if ($toim != 'SOPIMUS') {
+		if ($toim == '') {
 			echo "<th>".t("Hyvitä")."</th>";
-
 			echo "<th>".t("Korjaa alvit")."</th>";
 			echo "<th>".t("Suoraan laskutukseen")."</th>";
 		}
@@ -183,7 +200,7 @@ if ($tee == "ETSILASKU") {
 			}
 			echo "<$ero><input type='radio' name='monistettavat[$row[tilaus]]' value='MONISTA' $sel></$ero>";
 
-			if ($toim != 'SOPIMUS') {
+			if ($toim == '') {
 				$sel = "";
 				if ($monistettavat[$row["tilaus"]] == 'HYVITA') {
 					$sel = "CHECKED";
@@ -256,11 +273,14 @@ if ($tee=='MONISTA') {
 				echo t("Kopioidaan")." ";
 		}
 		
-		if ($toim != 'SOPIMUS') {
-			echo "$kklkm ".t("lasku(a)").".<br><br>";
+		if ($toim == 'SOPIMUS') {
+			echo "$kklkm ".t("sopimus(ta)").".<br><br>";
+		}
+		elseif ($toim == 'TARJOUS') {
+			echo "$kklkm ".t("tarjous(ta)").".<br><br>";
 		}
 		else {
-			echo "$kklkm ".t("sopimus(ta)").".<br><br>";
+			echo "$kklkm ".t("lasku(a)").".<br><br>";
 		}
 
 		for($monta=1; $monta <= $kklkm; $monta++) {
@@ -295,6 +315,9 @@ if ($tee=='MONISTA') {
 					case 'tila':
 						if ($toim == 'SOPIMUS') {
 							$values .= ", '0'";
+						}
+						elseif ($toim == 'TARJOUS') {
+							$values .= ", 'T'";
 						}
 						else {
 							$values .= ", 'N'";
@@ -441,6 +464,9 @@ if ($tee=='MONISTA') {
 			if ($toim == 'SOPIMUS') {
 				echo t("Uusi sopimusnumero on")." $utunnus<br><br>";
 			}
+			elseif ($toim == 'TARJOUS') {
+				echo t("Uusi tarjousnumero on")." $utunnus<br><br>";
+			}
 			else {
 				echo t("Uusi tilausnumero on")." $utunnus<br><br>";
 			}
@@ -474,6 +500,9 @@ if ($tee=='MONISTA') {
 			}
 			
 			if ($toim == 'SOPIMUS') {
+				$query = "SELECT * from tilausrivi where otunnus='$lasku' and yhtio ='$kukarow[yhtio]'";
+			}
+			elseif ($toim == 'TARJOUS') {
 				$query = "SELECT * from tilausrivi where otunnus='$lasku' and yhtio ='$kukarow[yhtio]'";
 			}
 			else {
@@ -544,6 +573,9 @@ if ($tee=='MONISTA') {
 							if ($toim == 'SOPIMUS') {
 								$rvalues .= ", '$rivirow[kommentti]'";
 							}
+							elseif ($toim == 'TARJOUS') {
+								$rvalues .= ", '$rivirow[kommentti]'";
+							}
 							else {
 								$rvalues .= ", ''";
 							}
@@ -564,6 +596,10 @@ if ($tee=='MONISTA') {
 									$rvalues .= ", '$rivirow[varattu]'";
 									$uusikpl = $rivirow["varattu"];
 								}
+								elseif ($toim == 'TARJOUS') {
+									$rvalues .= ", '$rivirow[varattu]'";
+									$uusikpl = $rivirow["varattu"];
+								}
 								else {
 									$rvalues .= ", '$rivirow[kpl]'";
 									$uusikpl = $rivirow["kpl"];	
@@ -576,6 +612,9 @@ if ($tee=='MONISTA') {
 							}
 							else {
 								if ($toim == 'SOPIMUS') {
+									$rvalues .= ", '$rivirow[tilkpl]'";
+								}
+								elseif ($toim == 'TARJOUS') {
 									$rvalues .= ", '$rivirow[tilkpl]'";
 								}
 								else {
@@ -823,7 +862,7 @@ if ($tee == '' and $vain_monista == "") {
 	echo "<tr><th>".t("Asiakkaan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
 	echo "<tr><th>".t("Tilausnumero")."</th><td class='back'></td><td><input type='text' size='10' name='otunnus'></td></tr>";
 	
-	if ($toim != 'SOPIMUS') {
+	if ($toim == '') {
 		echo "<tr><th>".t("Laskunumero")."</th><td class='back'></td><td><input type='text' size='10' name='laskunro'></td></tr>";		
 	}
 
@@ -831,7 +870,8 @@ if ($tee == '' and $vain_monista == "") {
 
 	echo "<br><input type='submit' value='".t("Jatka")."'>";
 	echo "</form>";
-	if ($toim != 'SOPIMUS') {
+	
+	if ($toim == '') {
 		echo "<form action = '$PHP_SELF' method = 'post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tee' value='mikrotila'>";

@@ -110,10 +110,16 @@
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and alatila = ''";
 				$eresult = mysql_query($query) or pupe_error($query);
 			}
-			elseif ($toim == "OSTOSUPER") {
-				$query = "	SELECT *
-							FROM lasku
-							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and alatila = 'A'";
+			elseif ($toim == "OSTOSUPER") {		
+				$query = "	SELECT lasku.*
+							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
+							JOIN lasku use index (primary) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila = 'A' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]')
+							WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
+							and tilausrivi.tyyppi 			= 'O'
+							and tilausrivi.laskutettuaika 	= '0000-00-00'
+							and tilausrivi.uusiotunnus 		= 0
+							GROUP by lasku.tunnus
+							ORDER by lasku.tunnus";
 				$eresult = mysql_query($query) or pupe_error($query);
 			}
 			elseif ($toim == "ENNAKKO") {
@@ -736,46 +742,44 @@
 
 			$miinus = 3;
 		}
-		elseif ($toim == 'OSTOSUPER') {
-			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus,
-							(SELECT count(*) 
-							FROM tilausrivi AS aputilausrivi 
-							WHERE aputilausrivi.yhtio = lasku.yhtio 
-							AND aputilausrivi.otunnus = lasku.tunnus 
-							AND aputilausrivi.uusiotunnus > 0
-							AND aputilausrivi.kpl <> 0 
-							AND aputilausrivi.tyyppi = 'O') varastokpl
-						FROM tilausrivi use index (yhtio_tyyppi_kerattyaika),
-						lasku use index (primary)
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tilausrivi.tyyppi = 'O'
-						and tilausrivi.uusiotunnus = 0
-						and tilausrivi.kerattyaika = '0000-00-00 00:00:00'
-						and lasku.yhtio = tilausrivi.yhtio
-						and lasku.tunnus = tilausrivi.otunnus
-						and lasku.tila = 'O'
-						and lasku.alatila != ''
-						$haku
-						GROUP by 1
-						ORDER by lasku.luontiaika desc
-						$rajaus";
-			$miinus = 4;
-		}
 		elseif ($toim == 'OSTO') {
 			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus,
 							(SELECT count(*) 
-							FROM tilausrivi AS aputilausrivi 
+							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)  
 							WHERE aputilausrivi.yhtio = lasku.yhtio 
 							AND aputilausrivi.otunnus = lasku.tunnus 
 							AND aputilausrivi.uusiotunnus > 0
 							AND aputilausrivi.kpl <> 0 
 							AND aputilausrivi.tyyppi = 'O') varastokpl
 						FROM lasku use index (tila_index)
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='O' and alatila=''
+						WHERE lasku.yhtio = '$kukarow[yhtio]' 
+						and lasku.tila		= 'O' 
+						and lasku.alatila	= ''
 						$haku
 						ORDER by lasku.luontiaika desc
 						$rajaus";
 			$miinus = 3;
+		}
+		elseif ($toim == 'OSTOSUPER') {
+			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus,
+							(SELECT count(*) 
+							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)  
+							WHERE aputilausrivi.yhtio = tilausrivi.yhtio 
+							AND aputilausrivi.otunnus = tilausrivi.otunnus 
+							AND aputilausrivi.uusiotunnus > 0
+							AND aputilausrivi.kpl <> 0 
+							AND aputilausrivi.tyyppi = 'O') varastokpl
+						FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
+						JOIN lasku use index (primary) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != ''
+						WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
+						and tilausrivi.tyyppi 			= 'O'
+						and tilausrivi.laskutettuaika 	= '0000-00-00'
+						and tilausrivi.uusiotunnus 		= 0
+						$haku
+						GROUP by lasku.tunnus
+						ORDER by lasku.luontiaika desc
+						$rajaus";
+			$miinus = 4;
 		}
 		elseif ($toim == 'PROJEKTI') {
 			$query = "	SELECT if(lasku.tunnusnippu > 0, lasku.tunnusnippu, lasku.tunnus) tilaus, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, tunnusnippu

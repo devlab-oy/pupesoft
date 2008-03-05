@@ -109,6 +109,7 @@
 			}
 			else {
 				$poppari = "";
+				$viesti = nl2br($viesti);
 			}
 			
 			return array($viesti, $poppari);

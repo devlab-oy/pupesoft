@@ -71,7 +71,7 @@
 	$query = "	SELECT messenger.tunnus, messenger.status, messenger.viesti, (SELECT nimi FROM kuka WHERE kuka.yhtio $konsyhtiot AND kuka.kuka = messenger.vastaanottaja LIMIT 1) vastaanottaja, kuka.nimi, messenger.luontiaika
 				FROM messenger
 				JOIN kuka ON (kuka.yhtio=messenger.yhtio AND kuka.kuka=messenger.kuka)
-				WHERE messenger.yhtio $konsyhtiot AND messenger.$kuka='$kukarow[kuka]' AND extranet='' LIMIT $kpl";
+				WHERE messenger.yhtio $konsyhtiot AND messenger.$kuka='$kukarow[kuka]' AND extranet='' ORDER BY messenger.luontiaika DESC LIMIT $kpl";
 	$result = mysql_query($query) or pupe_error($query);
 	
 	echo "<br>Näytä ";

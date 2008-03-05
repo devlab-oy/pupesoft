@@ -315,8 +315,8 @@
 			echo "<table>";
 
 			//1
-			echo "<tr><th>".t("Tuotenumero")."</th><th>".t("Yksikkö")."</th><th>".t("Eankoodi")."</th><th colspan='2'>".t("Nimitys")."</th><th>".t("Hinnastoon")."</th>";
-			echo "<tr><td>$tuoterow[tuoteno]</td><td>$tuoterow[yksikko]</td><td>$tuoterow[eankoodi]</td><td colspan='2'>".substr(asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']),0,100)."</td><td>$tuoterow[hinnastoon]</td></tr>";
+			echo "<tr><th>".t("Tuotenumero")."<br>".t("Tuotemerkki")."</th><th>".t("Yksikkö")."</th><th>".t("Eankoodi")."</th><th colspan='2'>".t("Nimitys")."</th><th>".t("Hinnastoon")."</th>";
+			echo "<tr><td>$tuoterow[tuoteno]<br>$tuoterow[tuotemerkki]</td><td>$tuoterow[yksikko]</td><td>$tuoterow[eankoodi]</td><td colspan='2'>".substr(asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']),0,100)."</td><td>$tuoterow[hinnastoon]</td></tr>";
 
 			//2
 			echo "<tr><th>".t("Osasto/try")."</th><th>".t("Toimittaja")."</th><th>".t("Aleryhmä")."</th><th>".t("Tähti")."</th><th>".t("Perusalennus")."</th><th>".t("VAK")."</th></tr>";

@@ -1471,4 +1471,19 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "haejaselaa_konsernisaldot") {
+		
+		$ulos = "<td><select name='$nimi'>";
+		
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+		
+		$ulos .= "<option value = ''>".t("Konserniyhtiöiden saldoja EI näytetä Hae ja Selaa-ohjelmassa")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Konserniyhtiöiden saldot näytetään Hae ja Selaa-ohjelmassa")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

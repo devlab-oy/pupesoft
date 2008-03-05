@@ -69,19 +69,6 @@
 	}
 	
 	if ($toiminto == "avaa_kuva") {
-/*
-		$query = "	SELECT *
-					FROM tuote
-					WHERE yhtio='$kukarow[yhtio]'
-					AND tuoteno='$tuoteno'";
-		$tuotekuvausres = mysql_query($query) or pupe_error($query);
-
-		$query = "	SELECT tunnus
-		 			FROM liitetiedostot 
-					WHERE yhtio='$kukarow[yhtio]' 
-					AND liitos='tuote' 
-					AND liitostunnus='$tunnus'";
-*/
 		$query = "	SELECT tunnus, selite, filetype
 		 			FROM liitetiedostot 
 					WHERE yhtio='$kukarow[yhtio]' 
@@ -96,10 +83,9 @@
 			echo "width='$maxwidth'";
 		}
 		echo ">";
+		
 		while ($kuvarow = mysql_fetch_array($kuvares)) {
 			echo "<tr><td class='back' align='center' valign='top'>";
-
-//			$tuotekuvausrow = mysql_fetch_array($tuotekuvausres);
 			
 			if ($kuvarow["filetype"] == "application/pdf") {
 				echo "<a href='".$palvelin2."view.php?id=$kuvarow[tunnus]' target='_top'>".t("Avaa pdf")."</a></td></tr>";
@@ -560,6 +546,25 @@
 		exit;
 	}
 	
+	
+	// Halutaanko saldot koko konsernista?
+	$query = "	SELECT *
+				FROM yhtio
+				WHERE konserni='$yhtiorow[konserni]' and konserni != ''";
+	$result = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($result) > 0 and $yhtiorow["haejaselaa_konsernisaldot"] == "K") {
+		$yhtiot = array();
+
+		while ($row = mysql_fetch_array($result)) {
+			$yhtiot[] = $row["yhtio"];
+		}
+	}
+	else {
+		$yhtiot = array();
+		$yhtiot[] = $kukarow["yhtio"];
+	}
+	
 	$query = "	SELECT 
 				ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi='P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
 				ifnull((SELECT id FROM korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) korvaavat,
@@ -778,7 +783,7 @@
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
 							LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus						
-							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+							WHERE sarjanumeroseuranta.yhtio in ('".implode("','", $yhtiot)."')
 							and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
 							and sarjanumeroseuranta.myyntirivitunnus != -1
 							and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.tyyppi='T')
@@ -795,11 +800,19 @@
 						$nimitys .= "<table width='100%' valign='top'>";
 
 						while ($sarjarow = mysql_fetch_array($sarjares)) {
-							if($sarjarow["nimitys"] != "") {
-								$nimitys .= "<tr><td valign='top'>$nimilask $sarjarow[nimitys]</td></tr>";
+							
+							if ($sarjarow["yhtio"] != $kukarow["yhtio"]) {
+								$ylisa = " ($sarjarow[yhtio]) ";
 							}
 							else {
-								$nimitys .= "<tr><td valign='top'>$nimilask $row[nimitys]</td></tr>";
+								$ylisa = "";
+							}
+							
+							if($sarjarow["nimitys"] != "") {
+								$nimitys .= "<tr><td valign='top'>$nimilask $sarjarow[nimitys] $ylisa</td></tr>";
+							}
+							else {
+								$nimitys .= "<tr><td valign='top'>$nimilask $row[nimitys] $ylisa</td></tr>";
 							}
 							$nimilask++;
 						}
@@ -1019,7 +1032,7 @@
 					
 					$nimilask++;
 
-					if ($kukarow["kesken"] != 0 or is_numeric($ostoskori)) {
+					if ($sarjarow["yhtio"] == $kukarow["yhtio"] and ($kukarow["kesken"] != 0 or is_numeric($ostoskori))) {
 						echo "<td valign='top' class='$vari' nowrap>";
 						echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
 						echo "<input type='hidden' name='tilsarjatunnus[$yht_i]' value = '$sarjarow[tunnus]'>";
@@ -1095,7 +1108,7 @@
 								and sarjanumeroseuranta.hyllytaso = tuotepaikat.hyllytaso
 								and sarjanumeroseuranta.myyntirivitunnus = 0
 								and sarjanumeroseuranta.era_kpl != 0
-								WHERE tuote.yhtio = '$kukarow[yhtio]'
+								WHERE tuote.yhtio in ('".implode("','", $yhtiot)."')
 								and tuote.tuoteno = '$row[tuoteno]'
 								GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
 								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";		
@@ -1111,7 +1124,7 @@
 								$sallitut_maat_lisa
 								and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 								and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-								WHERE tuote.yhtio = '$kukarow[yhtio]'
+								WHERE tuote.yhtio in ('".implode("','", $yhtiot)."')
 								and tuote.tuoteno = '$row[tuoteno]'
 								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 				}

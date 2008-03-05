@@ -492,7 +492,7 @@ if (!function_exists("saldo_myytavissa")) {
 						$tuoteno 	= $superrow["toim_tuoteno"];
 					}
 					else {
-						return array(0, 0, 0, FALSE);
+						$yhtiolisa	= $yhtio;
 					}
 				}
 				elseif($yhtio == $kukarow["yhtio"]) {

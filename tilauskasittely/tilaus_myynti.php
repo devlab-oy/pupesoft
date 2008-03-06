@@ -3966,7 +3966,7 @@ if ($tee == '') {
 								while($sarjarow = mysql_fetch_array($sarjares)) {
 
 									// Haetaan hyvitettävien myyntirivien kautta alkuperäiset ostorivit
-									$query  = "	select tilausrivi.rivihinta/tilausrivi.kpl ostohinta
+									$query  = "	SELECT tilausrivi.rivihinta/tilausrivi.kpl ostohinta
 												FROM sarjanumeroseuranta
 												JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
 												WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]'

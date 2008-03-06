@@ -38,11 +38,12 @@
 			elseif 	($perherow['epakurantti50pvm'] != '0000-00-00')  $perherow['kehahin'] = round($perherow['kehahin'] * 0.5,  6);
 			elseif 	($perherow['epakurantti25pvm'] != '0000-00-00')  $perherow['kehahin'] = round($perherow['kehahin'] * 0.75, 6);
 			
+			// Kpl nolla koska homma korjataan $kaantopisteen_saldomuutos-homman kautta
 			$query = "	INSERT into tapahtuma set
 						yhtio    	= '$kukarow[yhtio]',
 						tuoteno  	= '$perherow[tuoteno]',
 						laji     	= 'kulutus',
-						kpl      	=  round($perherow[varattu]*-1 ,2),
+						kpl      	=  0,
 						kplhinta 	= '$perherow[kehahin]',
 						hinta    	= '$perherow[kehahin]',
 						rivitunnus	= '$perherow[tunnus]',
@@ -51,7 +52,7 @@
 						laadittu 	= now()";
 			$tapahtumaresult = mysql_query($query) or pupe_error($query);
 			$tapahtumaid = mysql_insert_id();
-						
+									
 			$query = "	SELECT *
 						FROM tapahtuma
 						WHERE yhtio = '$kukarow[yhtio]'

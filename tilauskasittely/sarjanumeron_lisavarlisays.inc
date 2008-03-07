@@ -106,7 +106,7 @@
 							$perheid2		 = $myyrow["perheid2"];
 			
 							//Tutkitaan viel‰ ettei t‰m‰ lis‰varuste ole jo t‰n tuotteen alla
-							$query = "	SELECT tunnus
+							$query = "	SELECT tunnus, tilkpl, varattu, jt, var
 										FROM tilausrivi use index (yhtio_perheid2) 
 										WHERE yhtio  = '$kukarow[yhtio]' 
 										and tuoteno  = '$tuoteno'
@@ -159,14 +159,22 @@
 								echo "<font class='message'>Lis‰ttiin $kpl kpl tuotetta $tuoteno.</font><br>";
 							}
 							else {
-								// p‰ivitet‰‰n varmuuden vuoksi tehdaslis‰varusteen paikaksi sama kuin veneen paikka
+								// p‰ivitet‰‰n varmuuden vuoksi tehdaslis‰varusteen paikaksi sama kuin veneen paikka ja poistetaan JT-status jos rivi on JT-ss‰
 								$tarkrow = mysql_fetch_array($tarkres);
+
+								if ($tarkrow["var"] == "J") {
+									$Ulisa = " , varattu = jt, jt = 0, var='' ";
+								}
+								else {
+									$Ulisa = "";
+								}
 
 								$query = "	UPDATE tilausrivi
 											SET hyllyalue	= '$sarjarow[hyllyalue]',
 											hyllynro		= '$sarjarow[hyllynro]',
 											hyllyvali		= '$sarjarow[hyllyvali]',
 											hyllytaso		= '$sarjarow[hyllytaso]'
+											$Ulisa
 											WHERE yhtio	= '$kukarow[yhtio]' 
 											and tunnus 	= '$tarkrow[tunnus]'";
 								$tarkres = mysql_query($query) or pupe_error($query);

@@ -2433,6 +2433,10 @@ if ($tee == '') {
 				if ($tilausrivi["tunnus"] != $tilausrivi["perheid"] and $tilausrivi["perheid"] != 0) {
 					$perheid = $tilausrivi["perheid"];
 				}
+				
+				if ($hyllyalue != '' and $paikka == "") {
+					$paikka		= $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
+				}
 
 				$tila		= "MUUTA";
 			}

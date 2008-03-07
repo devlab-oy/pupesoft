@@ -3592,10 +3592,9 @@ if ($tee == '') {
 									
 						//valitaan näytetävä lippu varaston tai yhtiön maanperusteella
 						if ($selpaikkamaa != '' and $yhtiorow['varastopaikan_lippu'] != '') {										
-											echo "<img src='../pics/flag_icons/gif/".strtolower($selpaikkamaa).".gif'>";
-									}	
-									
-									
+							echo "<img src='../pics/flag_icons/gif/".strtolower($selpaikkamaa).".gif'>";
+						}	
+																								
 						echo "<form action='$PHP_SELF' method='post' name='paikat'>
 										<input type='hidden' name='toim' 			value = '$toim'>
 										<input type='hidden' name='lopetus' 		value='$lopetus'>
@@ -3609,12 +3608,10 @@ if ($tee == '') {
 										<input type='hidden' name='tapa' 			value = 'VAIHDA'>
 										$paikat
 									</form>
-								</td>";
-								
+								</td>";	
 					}
 					else {
-						
-						
+												
 						if ($varow['maa'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
 							echo "<td $class align='left' valign='top'><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font>";
 						}
@@ -4113,23 +4110,19 @@ if ($tee == '') {
 								</form>";
 					}
 
-					if ($row["var"] == "J" and ($laskurow["alatila"] == "T" or $laskurow["alatila"] == "U")) {
-						list( , , $jtapu_myytavissa) = saldo_myytavissa($countrow["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
-
-						if($jtapu_myytavissa >= $kpl_ruudulle) {
-							echo "<form action='$PHP_SELF' method='post' name='toimita'>
-									<input type='hidden' name='toim' 			value = '$toim'>
-									<input type='hidden' name='lopetus' 		value = '$lopetus'>
-									<input type='hidden' name='projektilla' 	value = '$projektilla'>
-									<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
-									<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
-									<input type='hidden' name='rivilaadittu'	value = '$row[laadittu]'>
-									<input type='hidden' name='menutila' 		value = '$menutila'>
-									<input type='hidden' name='tila' 			value = 'MUUTA'>
-									<input type='hidden' name='tapa' 			value = 'POISJTSTA'>
-									<input type='Submit' value='".t("Toimita")."'>
-									</form> ";
-						}
+					if ($row["var"] == "J" and $selpaikkamyytavissa >= $kpl_ruudulle) {					
+						echo "<form action='$PHP_SELF' method='post' name='toimita'>
+								<input type='hidden' name='toim' 			value = '$toim'>
+								<input type='hidden' name='lopetus' 		value = '$lopetus'>
+								<input type='hidden' name='projektilla' 	value = '$projektilla'>
+								<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+								<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+								<input type='hidden' name='rivilaadittu'	value = '$row[laadittu]'>
+								<input type='hidden' name='menutila' 		value = '$menutila'>
+								<input type='hidden' name='tila' 			value = 'MUUTA'>
+								<input type='hidden' name='tapa' 			value = 'POISJTSTA'>
+								<input type='Submit' value='".t("Toimita")."'>
+								</form> ";
 					}
 
 					if ($row["var"] == "P" and $saako_jalkitoimittaa == 0 and $laskurow["jtkielto"] == "") {

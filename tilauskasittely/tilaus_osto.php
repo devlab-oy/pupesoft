@@ -759,7 +759,7 @@
 						$query = "	SELECT count(*), count(*)
 									FROM tilausrivi use index (yhtio_otunnus)
 									WHERE yhtio = '$kukarow[yhtio]'
-									$tunnuslisa
+									and otunnus = '$kukarow[kesken]'
 									$pklisa
 									and tyyppi != 'D'";
 						$pkres = mysql_query($query) or pupe_error($query);

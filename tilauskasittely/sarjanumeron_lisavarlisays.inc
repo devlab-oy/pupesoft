@@ -4,7 +4,7 @@
 		function lisavarlisays ($sarjatun, $lisatty_tun) {
 			global $kukarow, $yhtiorow;
 			
-			$query 	= "	select *
+			$query 	= "	SELECT *
 						from lasku
 						where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 			$result  	= mysql_query($query) or pupe_error($query);
@@ -34,7 +34,12 @@
 				$query = "	SELECT tilausrivi.tuoteno, round(tilausrivi.kpl/$ostorow[kpl],2) kpl, round(tilausrivi.tilkpl/$ostorow[kpl],2) tilkpl, 
 							tilausrivi.tilkpl sistyomaarayskpl, tilausrivi.var, tilausrivi.tyyppi, 
 							concat_ws('#', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka, 
-							tilausrivin_lisatiedot.sistyomaarays_sarjatunnus, tilausrivi.perheid2
+							tilausrivi.hyllyalue, 
+							tilausrivi.hyllynro, 
+							tilausrivi.hyllyvali, 
+							tilausrivi.hyllytaso,
+							tilausrivin_lisatiedot.sistyomaarays_sarjatunnus, 
+							tilausrivi.perheid2
 							FROM tilausrivi use index (yhtio_perheid2)
 							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 							WHERE tilausrivi.yhtio  = '$kukarow[yhtio]' 
@@ -69,7 +74,7 @@
 					while ($sarjarow = mysql_fetch_array($sarjares1)) {
 
 						// haetaan tuotteen tiedot
-						$query = "	select *
+						$query = "	SELECT *
 									from tuote
 									where yhtio = '$kukarow[yhtio]'
 									and tuoteno = '$sarjarow[tuoteno]'";
@@ -153,7 +158,20 @@
 								
 								echo "<font class='message'>Lis‰ttiin $kpl kpl tuotetta $tuoteno.</font><br>";
 							}
-						}
+							else {
+								// p‰ivitet‰‰n varmuuden vuoksi tehdaslis‰varusteen paikaksi sama kuin veneen paikka
+								$tarkrow = mysql_fetch_array($tarkres);
+
+								$query = "	UPDATE tilausrivi
+											SET hyllyalue	= '$sarjarow[hyllyalue]',
+											hyllynro		= '$sarjarow[hyllynro]',
+											hyllyvali		= '$sarjarow[hyllyvali]',
+											hyllytaso		= '$sarjarow[hyllytaso]'
+											WHERE yhtio	= '$kukarow[yhtio]' 
+											and tunnus 	= '$tarkrow[tunnus]'";
+								$tarkres = mysql_query($query) or pupe_error($query);
+							}
+						}						
 					}
 					
 					echo "<br><br>";

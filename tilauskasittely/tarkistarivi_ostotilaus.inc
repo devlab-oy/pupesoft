@@ -46,7 +46,7 @@
 	}
 
 
-	if ((float) $prow["hinta"] == 0 and (float) $trow['ostohinta'] == 0 and $riviok == 0) {
+	if ((float) $prow["hinta"] == 0 and (float) $trow['ostohinta'] == 0 and $riviok == 0 and $prow["var2"] != "OK") {
 		$varaosavirhe .= t("HUOM: Tuotteelta puuttuu ostohinta")."!<br>";
 		$riviok++;
 		$tilausok++;

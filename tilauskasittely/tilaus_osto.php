@@ -268,6 +268,17 @@
 			$tilausnumero 		= 0;
 			$tee 				= '';
 		}
+		
+		//Kuitataan OK-var riville
+		if ($tee == "OOKOOAA") {
+			$query = "	UPDATE tilausrivi
+						SET var2 = 'OK'
+						WHERE tunnus = '$rivitunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			$tee 		= "Y";
+			$rivitunnus = "";
+		}
 
 
 		// Olemassaolevaa rivi‰ muutetaan, joten poistetaan se ja annetaan perustettavaksi
@@ -345,11 +356,10 @@
 
 		if ($tee == "LISLISAV") {
 			//P‰ivitet‰‰n is‰n perheid jotta voidaan lis‰t‰ lis‰‰ lis‰varusteita
-			$query = "	update tilausrivi set
-						perheid2	= 0
+			$query = "	UPDATE tilausrivi use index (primary)
+						set perheid2 = -1
 						where yhtio = '$kukarow[yhtio]'
-						and tunnus 	= '$rivitunnus'
-						LIMIT 1";
+						and tunnus 	= '$rivitunnus'";
 			$updres = mysql_query($query) or pupe_error($query);
 			$tee = "Y";
 		}
@@ -501,7 +511,6 @@
 		if ($tee == 'mikrotila' or $tee == 'file') {
 			require('mikrotilaus_ostotilaus.inc');
 		}
-
 
 		// Jee meill‰ on otsikko!
 		if ($tee == 'Y') {
@@ -692,6 +701,7 @@
 						tilausrivi.alv, toimaika, kerayspvm, uusiotunnus, tilausrivi.tunnus, tilausrivi.perheid2, tilausrivi.hinta, tilausrivi.ale, tilausrivi.varattu varattukpl, tilausrivi.kommentti,
 						$sorttauskentta,
 						tilausrivi.var,
+						tilausrivi.var2,
 						tilausrivi.jaksotettu
 						FROM tilausrivi
 						LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
@@ -762,13 +772,18 @@
 										and tuoteperhe.isatuoteno 	= '$prow[tuoteno]'
 										and tuoteperhe.tyyppi 		= 'L'";
 							$lisaresult = mysql_query($query) or pupe_error($query);
+							
 							$lisays = mysql_num_rows($lisaresult)+1;
 						}
 						else {
 							$lisays = 0;
 						}
-
+						
 						$pkrow[1] += $lisays;
+						
+						if ($prow["perheid2"] == -1) {
+							$pkrow[1]++;	
+						}
 
 						$pknum = $pkrow[0] + $pkrow[1];
 						$borderlask = $pkrow[1];
@@ -832,11 +847,11 @@
 						$sarjares = mysql_query($query) or pupe_error($query);
 						$sarjarow = mysql_fetch_array($sarjares);
 
-						if ($sarjatarkrow["kpl"] == abs($prow["varattukpl"])) {
-							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$prow[tuoteno]&ostorivitunnus=$prow[tunnus]&from=riviosto' style='color:00FF00'>sarjanro OK</font></a>)";
+						if ($sarjarow["kpl"] == abs($prow["varattukpl"])) {
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$prow[tuoteno]&ostorivitunnus=$prow[tunnus]&from=riviosto' style='color:00FF00'>".t("S:nro ok")."</font></a>)";
 						}
 						else {
-							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$prow[tuoteno]&ostorivitunnus=$prow[tunnus]&from=riviosto'>sarjanro</a>)";
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$prow[tuoteno]&ostorivitunnus=$prow[tunnus]&from=riviosto'>".t("S:nro")."</a>)";
 						}						
 					}
 
@@ -856,20 +871,32 @@
 						// Tarkistetaan tilausrivi
 						require("tarkistarivi_ostotilaus.inc");
 
-						echo "	<form action='$PHP_SELF' method='post'>
-								<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-								<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-								<td valign='top' class='back' nowrap>
-								<input type='hidden' name='rivitunnus' value = '$prow[tunnus]'>
-								<input type='hidden' name='menutila' value = '$menutila'>
-								<input type='hidden' name='tee' value = 'PV'>
+						echo "	<td valign='top' class='back' nowrap>
+								<form action='$PHP_SELF' method='post'>
+								<input type='hidden' name='tilausnumero' 	value='$tilausnumero'>
+								<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>								
+								<input type='hidden' name='rivitunnus' 		value = '$prow[tunnus]'>
+								<input type='hidden' name='menutila' 		value = '$menutila'>
+								<input type='hidden' name='tee' 			value = 'PV'>
 								<input type='Submit' value='".t("Muuta")."'>
 								</td></form>";
+																			
+						if ($saako_hyvaksya > 0) {
+							echo "<td valign='top' class='back'>
+									<form action='$PHP_SELF' method='post'>
+									<input type='hidden' name='tilausnumero' 	value='$tilausnumero'>
+									<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>								
+									<input type='hidden' name='rivitunnus' 		value = '$prow[tunnus]'>
+									<input type='hidden' name='menutila' 		value = '$menutila'>
+									<input type='hidden' name='tee' 			value = 'OOKOOAA'>
+									<input type='Submit' value='".t("Hyv‰ksy")."'>
+									</form></td> ";
+						}
 
 						if ($varaosavirhe != '') {
 							echo "<td valign='top' class='back'>$varaosavirhe</td>";
 						}
-
+							
 						if ($varaosavirhe == "") {
 							//Tutkitaan tuotteiden lis‰varusteita
 							$query  = "	SELECT *
@@ -881,7 +908,7 @@
 										order by tuoteperhe.tuoteno";
 							$lisaresult = mysql_query($query) or pupe_error($query);
 
-							if (mysql_num_rows($lisaresult) > 0 and $prow["perheid2"] == 0) {
+							if (mysql_num_rows($lisaresult) > 0 and $prow["perheid2"] == -1) {
 
 								echo "</tr>";
 
@@ -895,17 +922,19 @@
 
 								if ($alv=='') $alv=$laskurow['alv'];
 								$lask = 0;
-
+								$borderlask--;
+								
 								while ($xprow = mysql_fetch_array($lisaresult)) {
-									echo "<tr><td class='back'></td><td class='spec'>".asana('nimitys_',$xprow['tuoteno'],$xprow['nimitys'])."</td><td></td>";
+									echo "<tr><td class='spec'>".asana('nimitys_',$xprow['tuoteno'],$xprow['nimitys'])."</td><td></td>";
 									echo "<td><input type='hidden' name='tuoteno_array[$xprow[tuoteno]]' value='$xprow[tuoteno]'>$xprow[tuoteno]</td>";
 									echo "<td></td>";
 									echo "<td><input type='text' name='kpl_array[$xprow[tuoteno]]' size='5' maxlength='5'></td>
 											<td><input type='text' name='hinta_array[$xprow[tuoteno]]' size='5' maxlength='12'></td>
 											<td><input type='text' name='ale_array[$xprow[tuoteno]]' size='5' maxlength='6'></td>
 											<td>".alv_popup_oletus('alv',$alv)."</td>
-											<td></td>";
+											<td style='border-right: 1px solid;'></td>";
 									$lask++;
+									$borderlask--;
 
 									if ($lask == mysql_num_rows($lisaresult)) {
 										echo "<td class='back'><input type='submit' value='".t("Lis‰‰")."'></td>";
@@ -914,7 +943,7 @@
 									echo "</tr>";
 								}
 							}
-							elseif(mysql_num_rows($lisaresult) > 0 and $prow["perheid2"] == $prow["tunnus"]) {
+							elseif(mysql_num_rows($lisaresult) > 0 and $prow["perheid2"] != -1) {
 								echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off'>
 										<input type='hidden' name='tilausnumero' 	value='$tilausnumero'>
 										<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
@@ -951,7 +980,7 @@
 						$kommclass1 = "";
 						$kommclass2 = "";
 					}
-					
+										
 					if($prow["jaksotettu"] == 1) {
 						echo "<td $kommclass2><font style = 'color: #00FF00;'>".t("Vahvistettu toimitusaika").": ".tv1dateconv($prow["toimaika"])."</font></td>";
 					}
@@ -963,10 +992,6 @@
 						else {
 							echo "<td $kommclass2>".t("Toimitusaika").": ".tv1dateconv($prow["toimaika"])."</td>";
 						}
-						
-
-					//	echo "<td $kommclass2>".t("Toimitusaika").": ".tv1dateconv($prow["toimaika"])."</td>";
-
 					}
 					
 					if (trim($prow["kommentti"]) != "") {

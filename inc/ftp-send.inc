@@ -79,17 +79,17 @@ else {
 		$rivi .= "\n";
 		$rivi .= "$syy\n";
 
-		$boob = mail($yhtiorow['admin_email'], "".t("Tiedostonsiirto epäonnistui")."!", $rivi, "From: $yhtiorow[postittaja_email]\n", "-f $yhtiorow[postittaja_email]");
+		$boob = mail($yhtiorow['alert_email'], "".t("Tiedostonsiirto epäonnistui")."!", $rivi, "From: $yhtiorow[postittaja_email]\n", "-f $yhtiorow[postittaja_email]");
 
 		if ($boob===FALSE) {
 			$tulos_ulos_ftp .= "<font class='error'>\n";
-			$tulos_ulos_ftp .= "".t("Tiedostonsiirto epäonnistui! Ja meilin lähettäminen")." $yhtiorow[admin_email] ".t("epäonnistui myös! Perkele!")."\n";
+			$tulos_ulos_ftp .= "".t("Tiedostonsiirto epäonnistui! Ja meilin lähettäminen")." $yhtiorow[alert_email] ".t("epäonnistui myös! Perkele!")."\n";
 			$tulos_ulos_ftp .= "</font><br>\n";
 
 			$tulos_ulos_ftp .= "<br><pre>$rivi</pre><br>\n";
 		}
 		else {
-			$tulos_ulos_ftp .= "<font class='error'>FAILED! (".t("lähetettiin sähköposti")." $yhtiorow[admin_email])</font><br>\n";
+			$tulos_ulos_ftp .= "<font class='error'>FAILED! (".t("lähetettiin sähköposti")." $yhtiorow[alert_email])</font><br>\n";
 		}
 	}
 	elseif ($palautus_pyynto != "") {
@@ -101,7 +101,7 @@ else {
 		$rivi .= "\n";
 		$rivi .= "\n";
 
-		$silari = mail($yhtiorow['admin_email'], "".t("Tiedostonsiirto onnistui")."!", $rivi, "From: $yhtiorow[postittaja_email]\n", "-f $yhtiorow[postittaja_email]");
+		$silari = mail($yhtiorow['alert_email'], "".t("Tiedostonsiirto onnistui")."!", $rivi, "From: $yhtiorow[postittaja_email]\n", "-f $yhtiorow[postittaja_email]");
 	}
 }
 

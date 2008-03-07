@@ -603,7 +603,7 @@
 
 			$bound = uniqid(time()."_") ;
 
-			$header  = "From: <$yhtiorow[admin_email]>\n";
+			$header  = "From: <$yhtiorow[postittaja_email]>\n";
 			$header .= "MIME-Version: 1.0\n";
 			$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n";
 
@@ -630,7 +630,7 @@
 				$to = 'ascii.intrastat@tulli.fi'; 			// tämä on tullin virallinen osoite
 				//$to = 'test.ascii.intrastat@tulli.fi'; 	// tämä on tullin testiosoite
 
-				mail($to, "", $content, $header, "-f $yhtiorow[admin_email]");
+				mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
 				echo "<font class='message'>".t("Tiedot lähetettiin tulliin").".</font><br><br>";
 			}
 			else {
@@ -657,11 +657,11 @@
 			// katotaan lähetetäänkö meili käyttäjälle
 			if (($lahetys == "mina" or $lahetys == "mole") and $kukarow["eposti"] != "") {
 				// jä lähetetään käyttäjälle
-				mail($kukarow["eposti"], "$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", $content, $header, "-f $yhtiorow[admin_email]");
+				mail($kukarow["eposti"], "$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", $content, $header, "-f $yhtiorow[postittaja_email]");
 			}
 
 			// ja aina adminille
-			mail($yhtiorow["admin_email"], "$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", $content, $header, "-f $yhtiorow[admin_email]");
+			mail($yhtiorow["postittaja_email"], "$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", $content, $header, "-f $yhtiorow[postittaja_email]");
 
 		}
 		else {

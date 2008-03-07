@@ -67,7 +67,7 @@
 		}
 		
 		//lähetetään meili myös yhtiön adminille
-		mail($yhtiorow["admin_email"], $subjekti, $content, $header, "-f $yhtiorow[postittaja_email]");
+		mail($yhtiorow["alert_email"], $subjekti, $content, $header, "-f $yhtiorow[postittaja_email]");
 		
 		//echotaan rudulle jos kyseessä ei ole batch-ajo
 		if ($tulos_ulos == "") {

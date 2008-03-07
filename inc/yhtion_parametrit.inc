@@ -1,5 +1,5 @@
 <?php
 	$otsikko = 'Yhtiön parametrit';
-	$kentat = 'tunnus, yhtio, admin_email';
+	$kentat = 'tunnus, yhtio, alert_email';
 	$jarjestys = 'yhtio';
 ?>

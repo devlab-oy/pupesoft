@@ -6,7 +6,9 @@ if(!function_exists("yhtion_parametrittarkista")) {
 		
 		static $tmp_lasku_polku_http;
 		
-		if (mysql_field_name($result, $i) == "admin_email") {
+		if (mysql_field_name($result, $i) == "admin_email" or
+			mysql_field_name($result, $i) == "alert_email" or
+			mysql_field_name($result, $i) == "postittaja_email") {
 
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu!");

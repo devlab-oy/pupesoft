@@ -103,13 +103,13 @@
 
 			if (!isset($yhtiorow)) {
 				// ei löydetty VASTAANOTTAVAA yhtiötä, lähetetään meili kaikille tän serverin admineille!
-				$query = "select distinct admin_email, postittaja_email from yhtion_parametrit where admin_email != '' and postittaja_email != ''";
+				$query = "select distinct alert_email, postittaja_email from yhtion_parametrit where alert_email != '' and postittaja_email != ''";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 				$return .= "Laskun vastaanottajaa ei löytynyt ovt-tunnuksella '$yhtio' eikä verkkotunnuksella '$verkkotunnus_vas'!\n";
 
 				while ($yhtiorow = mysql_fetch_array($result)) {
-					mail($yhtiorow['admin_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[admin_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[alert_email]>\n", "-f $yhtiorow[postittaja_email]");
 				}
 
 				return ($return);
@@ -199,7 +199,7 @@
 
 			if ($ok == 0) {
 				$return .= "Emme löytäneet toimittajaa ytunnus: '$ytunnus' nimi: '$laskuttajan_nimi' yhtiöltä: $yhtiorow[nimi] '$yhtio'\n";
-				mail($yhtiorow['admin_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+				mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 				return ($return);
 
 			}
@@ -299,7 +299,7 @@
 
 				if (mysql_num_rows($avainresult) != 1) {
 					$return .= "Yrityksen $yhtio oletus ALV% puuttuu tai niitä on monta!\n";
-					mail($yhtiorow['admin_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 				else {
@@ -344,7 +344,7 @@
 			$val = checkdate($erk, $erp, $erv);
 			if (!$val) {
 				$return .= "Virheellinen eräpvm $erv-$erk-$erp\n";
-				mail($yhtiorow['admin_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+				mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 				return ($return);
 			}
 
@@ -360,13 +360,13 @@
 				$val = checkdate($kak, $kap, $kav);
 				if (!$val) {
 					$return .= "Virheellinen kassaeräpvm '$kav-$kak-$kap' kassaale '$kassaale'\n";
-					mail($yhtiorow['admin_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 				else {
 					if ($kassaale == 0) {
 						$return .= "Kassapvm on, mutta kassa-ale puuttu\n";
-						mail($yhtiorow['admin_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+						mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 						return ($return);
 					}
 				}
@@ -376,7 +376,7 @@
 
 			if ($summa == 0.0) {
 				$return .= "Laskulta puuttuu summa!\n";
-				mail($yhtiorow['admin_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+				mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 				return ($return);
 			}
 
@@ -384,14 +384,14 @@
 				require ("inc/tarkistaviite.inc");
 				if ($ok == 0) {
 					$return .= "Viite on väärin!\n";
-					mail($yhtiorow['admin_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 					return ($return);
 				}
 			}
 
 			if (strlen($viite) > 0 and strlen($viesti) > 0) {
 				$return .= "Viitettä ja viestiä ei voi antaa yhtaikaa!\n";
-				mail($yhtiorow['admin_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+				mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 				return ($return);
 			}
 
@@ -400,7 +400,7 @@
 
 			if (mysql_num_rows($result) != 1) {
 				$return .= "Valuuttaa $valkoodi ei löytynytkään!\n";
-				mail($yhtiorow['admin_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+				mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 				return ($return);
 			}
 
@@ -808,9 +808,9 @@
 			// päästiin onnillisesti loppuun
 	    	$sub = "$yhtiorow[nimi] vastaanotti laskun $verkapunimi:lta";
 	    	$meili = "Verkkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLaskunro: $laskun_numero\nPäivä: $laskun_paiva\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
-		    $tulos = mail($yhtiorow['admin_email'], $sub, $meili, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		    $tulos = mail($yhtiorow['alert_email'], $sub, $meili, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
-			if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[admin_email]<br>";
+			if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[alert_email]<br>";
 			return 0;
 		}
 	}

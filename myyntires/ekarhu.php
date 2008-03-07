@@ -151,7 +151,7 @@
 	xml_add("Paper", 								substr($asirow['chn'], 0, 1), 	$toot);
 	xml_add("Einvoice", 							substr($asirow['chn'], 1, 1), 	$toot);
 	xml_add("Edi", 									substr($asirow['chn'], 2, 1), 	$toot);
-	xml_add("Email", 								$yhtiorow['admin_email'], 		$toot);
+	xml_add("Email", 								$yhtiorow['alert_email'], 		$toot);
 	
 	fputs($toot, "</CHN>\n");
 	fputs($toot, "<SellerPartyInformation>\n");

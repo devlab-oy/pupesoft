@@ -1549,7 +1549,7 @@ if($tee == "") {
 					$order
 					$lkm_rajaus";
 	}
-	echo $query."<br>";
+	//echo $query."<br>";
 	
 	$laskures = mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($laskures)>0) {

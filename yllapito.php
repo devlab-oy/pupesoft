@@ -15,6 +15,46 @@
 	if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 		require ("inc/parametrit.inc");
 	}
+	
+	if(!function_exists("vaihtoehdot")) {
+		function vaihtoehdot($i, $taulu, $value, $text, $selected, $opts="") {
+			global  $yhtiorow, $kukarow;
+
+			if($opts["where"] != "") {
+				$where = " and ".$opts["where"];
+			}
+
+			if($opts["perustauusi"] != "") {
+				$pretext = t("Valitse jo perustettu listalta").":<br>";
+				$posttext = "<br><br>".t("Tai perusta uusi").":<br><input type='text' name='t[{$i}_uusi]' value=''>";
+			}
+
+			$ulos = "$pretext<select name='t[$i]'>
+						<option value=''>".t("Ei valintaa")."</option>";
+
+
+			$query = "	SELECT distinct $value value, $text text
+						FROM $taulu
+						WHERE yhtio='$kukarow[yhtio]' and ($value != '' or $text != '') $where";
+			$result = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($result)>0) {
+				while($row = mysql_fetch_array($result)) {
+					if($selected == $row["value"]) {
+						$sel = "SELECTED";
+					}
+					else {
+						$sel = "";
+					}
+
+					$ulos .= "<option value='$row[value]' $sel>$row[text]</option>\n\t";
+				}
+			}
+
+			$ulos .= "</select>$posttext";
+
+			return $ulos;
+		}
+	}
 
 	//Jotta määritelty rajattu näkymä olisi myös käyttöoikeudellisesti tiukka
 	$aputoim = $toim;
@@ -126,6 +166,10 @@
 
 		//	Tehdään muuttujista linkit jolla luomme otsikolliset avaimet!
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
+			if($t["{$i}_uusi"] != "") {
+				$t[$i] = $t["{$i}_uusi"];
+			}
+			
 			$t[mysql_field_name($result, $i)] = &$t[$i];
 		}
 

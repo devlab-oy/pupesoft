@@ -3652,8 +3652,43 @@ if(!function_exists("enable_ajax")) {
 		function handleResponse() {
 			if (http.readyState == 4) {
 				var response = http.responseText;
-				document.getElementById(id).innerHTML = response;
+				if(response.substr(0, 10) == "TABLE-ROW:") {
+					
+					//	Meidän rivi ja sen solut
+					response=response.substr(9);
+					var patt=/(<td[^>]*>.*?<\/td>)|(<tr[^>]*>)/gm;
+					newRowElements=response.match(patt);
+					
+					var row='';
+					for (var x = 0; x < newRowElements.length; x++) {
+						
+						//	Vaihdellaan riviä
+						if(newRowElements[x].match(/<tr[^>]*>/)) {
+							y=0;
+							if(row=='') {
+								row=document.getElementById(id);
+								rowElements=row.cells;
+							}
+							else {
+								row=row.parentNode.rows[(row.rowIndex+1)];
+								rowElements=row.cells;
+							}
+						}
+						else if (newRowElements[x].match(/<td[^>]*>/)){
+							element=newRowElements[x].substr(newRowElements[x].indexOf(">")+1);
+							element=element.substr(0, (element.length-5));
 
+							rowElements[y].innerHTML=element;
+							
+							y++;
+						}
+					}
+				}
+				else {
+
+					document.getElementById(id).innerHTML = response;
+				}
+				
 				var container = document.getElementById(id);
 				var allNewScripts = container.getElementsByTagName('script');
 				c=allNewScripts.length-1;
@@ -3691,7 +3726,7 @@ if(!function_exists("enable_ajax")) {
 		}
 
 		this.visible = function() {
-			document.getElementById(id).style.display = 'block';
+			document.getElementById(id).style.display = '';
 		}
 	}
 
@@ -3748,7 +3783,7 @@ if(!function_exists("enable_ajax")) {
 	function ajaxPost(formID, urli , minne, href, load, unToggle, method) {
 
 		obj = document.getElementById(formID);
-		getstr = "";
+		getstr = "sourceCharset=UTF-8&";
 
  		for (i=0; i<obj.length; i++) {
 			if (obj.elements[i].tagName == "INPUT" && obj.elements[i].value != "") {
@@ -3991,27 +4026,72 @@ if (!function_exists("js_showhide")) {
 <SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
 <!--
 
-function showhide(layer_ref) {
+function showhide(layer_ref, type) {
 
-	var state = document.getElementById(layer_ref).style.display;
-	if (state == 'block') {
-		state = 'none';
+	
+	if(type=='byName') {
+		var e = document.getElementsByName(layer_ref);
+		
+		for(i=0;i<=e.length-1;i++) {	
+			if (e[i].style.display != 'none') {
+				e[i].style.display = 'none';
+			}
+			else {
+				e[i].style.display = '';
+			}
+		}		
 	}
 	else {
-		state = 'block';
-	}
 
-	if (document.all) { //IS IE 4 or 5 (or 6 beta)
-		eval( "document.all." + layer_ref + ".style.display = state");
-	}
-	if (document.layers) { //IS NETSCAPE 4 or below
-		document.layers[layer_ref].display = state;
-	}
-	if (document.getElementById &&!document.all) {
-		hza = document.getElementById(layer_ref);
-		hza.style.display = state;
+		var state = document.getElementById(layer_ref).style.display;
+		if (state != 'none') {
+			state = 'none';
+		}
+		else {
+			state = '';
+		}
+
+		if (document.all) { //IS IE 4 or 5 (or 6 beta)
+			eval( "document.all." + layer_ref + ".style.display = state");
+		}
+		if (document.layers) { //IS NETSCAPE 4 or below
+			document.layers[layer_ref].display = state;
+		}
+		if (document.getElementById &&!document.all) {
+			hza = document.getElementById(layer_ref);
+			hza.style.display = state;
+		}
 	}
 }
+
+function show(layer_ref, type) {
+
+	
+	if(type=='byName') {
+		var e = document.getElementsByName(layer_ref);
+		
+		for(i=0;i<=e.length-1;i++) {	
+			e[i].style.display = '';
+		}		
+	}
+	else {
+
+		var state = document.getElementById(layer_ref).style.display;
+		state = '';
+		
+		if (document.all) { //IS IE 4 or 5 (or 6 beta)
+			eval( "document.all." + layer_ref + ".style.display = state");
+		}
+		if (document.layers) { //IS NETSCAPE 4 or below
+			document.layers[layer_ref].display = state;
+		}
+		if (document.getElementById &&!document.all) {
+			hza = document.getElementById(layer_ref);
+			hza.style.display = state;
+		}
+	}
+}
+
 
 //-->
 </script>
@@ -5248,7 +5328,7 @@ if(!function_exists("tee_asiakashaku")) {
 					<tr class='aktiivi'>
 						<td style='border: 1px solid;'>$row[nimi] $row[nimitark]</td>
 						<td style='border: 1px solid;'>$row[toim_nimi] $row[toim_nimitark]</td>
-						<td><a href='' onclick=\"document.getElementById('liitos').value='$row[tunnus]'; document.getElementById('haku').disabled='true'; asval=document.getElementById('asiakashaku'); asval.innerHTML=''; asval.style.display='none'; ajaxPost('$formi', '$urli?from=asiakasvalinta' , '$div', false, true); return false;\">".t("Valitse")."</a></td>
+						<td><a href='' onclick=\"document.getElementById('liitos').value='$row[tunnus]'; document.getElementById('haku').value='$row[nimi] $row[nimitark]'; document.getElementById('haku').disabled='true'; asval=document.getElementById('asiakashaku'); asval.innerHTML=''; asval.style.display='none'; ajaxPost('$formi', '$urli?from=asiakasvalinta' , '$div', false, true); return false;\">".t("Valitse")."</a></td>
 					</tr>";
 			}
 		}

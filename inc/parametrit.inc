@@ -9,15 +9,26 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(_
 
 foreach ($_GET as $key => $value) {
 	//$_GET[$key] = addslashes(trim($_GET[$key]));
-	$_GET[$key] = str_replace($serc, $repl, $_GET[$key]);
-	${$key} = str_replace($serc, $repl, $_GET[$key]);
+	if($_REQUEST["sourceCharset"] != "") {
+		${$key} = iconv($_REQUEST["sourceCharset"], "latin1", str_replace($serc, $repl, $_GET[$key]));
+	}
+	else {
+		${$key} = str_replace($serc, $repl, $_GET[$key]);
+	}
 }
 
 // poistetaan hipsuja ja trimmataan kaikki post muuttujat!
 foreach ($_POST as $key => $value) {
 	//$_POST[$key] = addslashes(trim($_POST[$key]));
 	$_POST[$key] = str_replace($serc, $repl, $_POST[$key]);
-	${$key} = str_replace($serc, $repl, $_POST[$key]);
+	
+	
+	if($_REQUEST["sourceCharset"] != "") {
+		${$key} = iconv($_REQUEST["sourceCharset"], "latin1", str_replace($serc, $repl, $_POST[$key]));
+	}
+	else {
+		${$key} = str_replace($serc, $repl, $_POST[$key]);
+	}
 }
 
 $PHP_SELF = $_SERVER["SCRIPT_NAME"];

@@ -248,6 +248,14 @@
 
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
 					if (isset($t[$i])) {
+						
+						if(is_array($_FILES["liite_$i"])) {
+							$id = tallenna_liite("liite_$i", "Yllapito", 0, "Yhtio", "$toim.".mysql_field_name($result,$i), $t[$i]);
+							if($id !== false) {
+								$t[$i] = $id;
+							}
+						}
+						
 						if(mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
 
 						$query .= ", ". mysql_field_name($result,$i)."='".$t[$i]."' ";

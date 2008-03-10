@@ -235,6 +235,7 @@
 		$selpaikkamaa	= "";
 		$kotipaikatlask = 0;
 		$omapaikatraja 	= 2;
+		$selpaikkamyytavissa = 0;
 
 		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $row["var"] != 'V' and $toim != "SIIRTOTYOMAARAYS") {
 			// Katsotaan onko tälle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
@@ -363,16 +364,17 @@
 
 							$selpaikka = "$alkurow[hyllyalue] $alkurow[hyllynro] $alkurow[hyllyvali] $alkurow[hyllytaso]";
 							$selpaikkamaa = $alkurow['varastomaa'];
+							$selpaikkamyytavissa = $myytavissa;
 						}
 						elseif (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") and $sarjarow["era"] == $alkurow["era"] and !in_array($row["var"], array("P","S")) and $alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]) {
 							$sel = "SELECTED";
 
 							$selpaikka = "$alkurow[hyllyalue] $alkurow[hyllynro] $alkurow[hyllyvali] $alkurow[hyllytaso]";
 							$selpaikkamaa = $alkurow['varastomaa'];
+							$selpaikkamyytavissa = $myytavissa;
 
 							if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") {
-								$selpaikka .= " $alkurow[era]";
-								
+								$selpaikka .= " $alkurow[era]";								
 							}
 						}
 
@@ -449,12 +451,14 @@
 
 						$selpaikka = "$krow[nimi] --> ".t("tilaa")." ".t("varastoon");
 						$selpaikkamaa = "";
+						$selpaikkamyytavissa = 0;
 					}
 					else {
 						$sel2 = "SELECTED";
 
 						$selpaikka = "$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle");
 						$selpaikkamaa = "";
+						$selpaikkamyytavissa = 0;
 					}
 				}
 

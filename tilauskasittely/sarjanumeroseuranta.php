@@ -702,11 +702,7 @@
 	}
 
 	if ($myyntitilaus_haku != "") {
-		
-		if ($myyntitilaus_haku == -1) {
-			$lisa .= " and sarjanumeroseuranta.myyntirivitunnus = -1 ";
-		}
-		elseif (is_numeric($myyntitilaus_haku)) {
+		if (is_numeric($myyntitilaus_haku)) {
 			if ($myyntitilaus_haku == 0) {
 				$lisa .= " and (lasku_myynti.tunnus is null or lasku_myynti.tila = 'T') and sarjanumeroseuranta.myyntirivitunnus != -1 ";
 			}
@@ -730,6 +726,9 @@
 	if ($sarjanumero_haku != "") {
 		$lisa .= " and sarjanumeroseuranta.sarjanumero like '%$sarjanumero_haku%' ";
 	}
+	else {
+		$lisa .= " and sarjanumeroseuranta.myyntirivitunnus != -1 ";
+	}
 
 	if ($varasto_haku != "") {
 		$lisa .= " and varastopaikat.nimitys like '%$varasto_haku%' ";
@@ -742,28 +741,29 @@
 	if ($nimitys_haku != "") {
 		$lisa2 = " HAVING nimitys like '%$nimitys_haku%' ";
 	}
+	
+	
+	$query	= "	SELECT sarjanumeroseuranta.*,
+				if(sarjanumeroseuranta.lisatieto = '', if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), concat(if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
+				lasku_osto.tunnus									osto_tunnus,
+				lasku_osto.nimi										osto_nimi,
+				lasku_myynti.tunnus									myynti_tunnus,
+				lasku_myynti.nimi									myynti_nimi,
+				lasku_myynti.tila									myynti_tila,
+				(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
+				tilausrivi_osto.perheid2							osto_perheid2,
+				tilausrivi_osto.tunnus								osto_rivitunnus,
+				tilausrivi_osto.uusiotunnus							osto_uusiotunnus,
+				tilausrivi_osto.laskutettuaika						osto_laskaika,
+				tilausrivi_myynti.laskutettuaika					myynti_laskaika,
+				DATEDIFF(now(), tilausrivi_osto.laskutettuaika)		varpvm,
+				(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
+				varastopaikat.nimitys								varastonimi,
+				concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka";
 
-	if ((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi == "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA") and $hyvitysrivi != "ON")) {
+	if ((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi == "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "KERAA" or $from == "KORJAA") and $hyvitysrivi != "ON")) {
 		//Myydään sarjanumeroita
-		$query	= "	SELECT sarjanumeroseuranta.*,
-					if(sarjanumeroseuranta.lisatieto = '', if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), concat(if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
-					lasku_osto.tunnus									osto_tunnus,
-					lasku_osto.nimi										osto_nimi,
-					lasku_myynti.tunnus									myynti_tunnus,
-					lasku_myynti.nimi									myynti_nimi,
-					lasku_myynti.tila									myynti_tila,
-					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
-					tilausrivi_osto.perheid2							osto_perheid2,
-					tilausrivi_osto.tunnus								osto_rivitunnus,
-					tilausrivi_osto.uusiotunnus							osto_uusiotunnus,
-					tilausrivi_osto.laskutettuaika						osto_laskaika,
-					tilausrivi_myynti.laskutettuaika					myynti_laskaika,
-					DATEDIFF(now(), tilausrivi_osto.laskutettuaika)		varpvm,
-					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
-					varastopaikat.nimitys								varastonimi,
-					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka,
-					era_kpl
-					FROM sarjanumeroseuranta use index (yhtio_myyntirivi)
+		$query .= "	FROM sarjanumeroseuranta use index (yhtio_myyntirivi)
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 					LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
 					LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
@@ -781,32 +781,41 @@
 					ORDER BY sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus";
 		$sarjaresiso = mysql_query($query) or pupe_error($query);
 	}
+	elseif ($from == "SIIRTOTYOMAARAYS") {
+		//Sisäinen työmääräys sarjanumeroita
+		$query .= "	,
+					tilausrivin_lisatiedot.osto_vai_hyvitys
+					FROM sarjanumeroseuranta use index (yhtio_myyntirivi)
+					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+					LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi_osto.yhtio=tilausrivin_lisatiedot.yhtio   and tilausrivi_osto.tunnus=tilausrivin_lisatiedot.tilausrivitunnus
+					LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+					LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.otunnus
+					LEFT JOIN tuote ON tuote.yhtio=sarjanumeroseuranta.yhtio and tuote.tuoteno = sarjanumeroseuranta.tuoteno
+					LEFT JOIN varastopaikat ON sarjanumeroseuranta.yhtio = varastopaikat.yhtio
+					and concat(rpad(upper(varastopaikat.alkuhyllyalue)  ,5,'0'),lpad(upper(varastopaikat.alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
+					and concat(rpad(upper(varastopaikat.loppuhyllyalue) ,5,'0'),lpad(upper(varastopaikat.loppuhyllynro) ,5,'0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
+					WHERE
+					sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+					and sarjanumeroseuranta.tuoteno = '$rivirow[tuoteno]'
+					and (sarjanumeroseuranta.siirtorivitunnus in (0, $rivitunnus))
+					and (tilausrivi_myynti.laskutettuaika is null or tilausrivi_myynti.laskutettuaika = '0000-00-00' or (tilausrivi_myynti.laskutettuaika > '0000-00-00' and (tilausrivi_myynti.laskutettuaika <= '$yhtiorow[tilikausi_loppu]' and  tilausrivi_myynti.laskutettuaika >= '$yhtiorow[tilikausi_alku]')))
+					$lisa
+					$lisa2
+					ORDER BY sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus";
+		$sarjaresiso = mysql_query($query) or pupe_error($query);		
+	}
 	elseif((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA") and $hyvitysrivi == "ON")) {
 		// Ostetaan sarjanumeroita
-		$query	= "	SELECT sarjanumeroseuranta.*,
-					min(sarjanumeroseuranta.tunnus) tunnus,
-					if(sarjanumeroseuranta.lisatieto = '', if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), concat(if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys, if(sarjanumeroseuranta.lisatieto = '', tuote.nimitys, concat(tuote.nimitys, '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
-					lasku_osto.tunnus									osto_tunnus,
-					lasku_osto.nimi										osto_nimi,
-					lasku_myynti.tunnus									myynti_tunnus,
-					lasku_myynti.nimi									myynti_nimi,
-					lasku_myynti.tila									myynti_tila,
-					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
-					tilausrivi_osto.perheid2							osto_perheid2,
-					tilausrivi_osto.tunnus								osto_rivitunnus,
-					tilausrivi_osto.uusiotunnus							osto_uusiotunnus,
-					tilausrivi_osto.laskutettuaika						osto_laskaika,
-					tilausrivi_myynti.laskutettuaika					myynti_laskaika,
-					DATEDIFF(now(), tilausrivi_osto.laskutettuaika)		varpvm,
-					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
-					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka,
-					era_kpl
-					FROM sarjanumeroseuranta use index (yhtio_ostorivi)
+		$query .= "	FROM sarjanumeroseuranta use index (yhtio_ostorivi)
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 					LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
 					LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
 					LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.otunnus
 					LEFT JOIN tuote ON tuote.yhtio=sarjanumeroseuranta.yhtio and tuote.tuoteno = sarjanumeroseuranta.tuoteno					
+					LEFT JOIN varastopaikat ON sarjanumeroseuranta.yhtio = varastopaikat.yhtio
+					and concat(rpad(upper(varastopaikat.alkuhyllyalue)  ,5,'0'),lpad(upper(varastopaikat.alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
+					and concat(rpad(upper(varastopaikat.loppuhyllyalue) ,5,'0'),lpad(upper(varastopaikat.loppuhyllynro) ,5,'0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))					
 					WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 					and sarjanumeroseuranta.tuoteno = '$rivirow[tuoteno]'
 					and sarjanumeroseuranta.ostorivitunnus in (0, $rivitunnus)
@@ -825,30 +834,15 @@
 	}
 	elseif($from == "INVENTOINTI") {
 		// Inventoidaan
-		$query	= "	SELECT sarjanumeroseuranta.*,
-					min(sarjanumeroseuranta.tunnus) tunnus,
-					if(sarjanumeroseuranta.lisatieto = '', if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), concat(if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys, if(sarjanumeroseuranta.lisatieto = '', tuote.nimitys, concat(tuote.nimitys, '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
-					lasku_osto.tunnus									osto_tunnus,
-					lasku_osto.nimi										osto_nimi,
-					lasku_myynti.tunnus									myynti_tunnus,
-					lasku_myynti.nimi									myynti_nimi,
-					lasku_myynti.tila									myynti_tila,
-					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
-					tilausrivi_osto.perheid2							osto_perheid2,
-					tilausrivi_osto.tunnus								osto_rivitunnus,
-					tilausrivi_osto.uusiotunnus							osto_uusiotunnus,
-					tilausrivi_osto.laskutettuaika						osto_laskaika,
-					tilausrivi_myynti.laskutettuaika					myynti_laskaika,
-					DATEDIFF(now(), tilausrivi_osto.laskutettuaika)		varpvm,
-					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
-					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka,
-					era_kpl
-					FROM sarjanumeroseuranta use index (yhtio_ostorivi)
+		$query .= "	FROM sarjanumeroseuranta use index (yhtio_ostorivi)
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 					LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
 					LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
 					LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.otunnus
 					LEFT JOIN tuote ON tuote.yhtio=sarjanumeroseuranta.yhtio and tuote.tuoteno = sarjanumeroseuranta.tuoteno					
+					LEFT JOIN varastopaikat ON sarjanumeroseuranta.yhtio = varastopaikat.yhtio
+					and concat(rpad(upper(varastopaikat.alkuhyllyalue)  ,5,'0'),lpad(upper(varastopaikat.alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
+					and concat(rpad(upper(varastopaikat.loppuhyllyalue) ,5,'0'),lpad(upper(varastopaikat.loppuhyllynro) ,5,'0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))					
 					WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 					and sarjanumeroseuranta.tuoteno = '$rivirow[tuoteno]'
 					and sarjanumeroseuranta.ostorivitunnus in (0, $rivitunnus)
@@ -861,25 +855,7 @@
 	}
 	elseif ($lisa != "" or $lisa2 != "") {
 		// Listataan
-		$query	= "	SELECT sarjanumeroseuranta.*,
-					if(sarjanumeroseuranta.lisatieto = '', if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), concat(if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
-					lasku_osto.tunnus									osto_tunnus,
-					lasku_osto.nimi										osto_nimi,
-					lasku_myynti.tunnus									myynti_tunnus,
-					lasku_myynti.nimi									myynti_nimi,
-					lasku_myynti.tila									myynti_tila,
-					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
-					tilausrivi_osto.perheid2							osto_perheid2,
-					tilausrivi_osto.tunnus								osto_rivitunnus,
-					tilausrivi_osto.uusiotunnus							osto_uusiotunnus,
-					tilausrivi_osto.laskutettuaika						osto_laskaika,
-					tilausrivi_myynti.laskutettuaika					myynti_laskaika,
-					DATEDIFF(now(), tilausrivi_osto.laskutettuaika)		varpvm,
-					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
-					varastopaikat.nimitys								varastonimi,
-					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka,
-					era_kpl
-					FROM sarjanumeroseuranta
+		$query .= "	FROM sarjanumeroseuranta
 					LEFT JOIN tuote use index (tuoteno_index) ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 					LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -981,7 +957,7 @@
 			$sarjarow["nimitys"] = str_replace("\n", "<br>", $sarjarow["nimitys"]);
 
 			//katsotaan onko sarjanumerolle liitetty kulukeikka
-			$query  = "	select *
+			$query  = "	SELECT *
 						from lasku
 						where yhtio		 = '$kukarow[yhtio]'
 						and tila		 = 'K'
@@ -1041,8 +1017,6 @@
 			echo "<td colspan='2' valign='top'><a href='../raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$ostuns'>$ostuns $sarjarow[osto_nimi]</a><br>";
 			
 			if (($sarjarow["siirtorivitunnus"] > 0 and $tunnuskentta!= 'siirtorivitunnus') or ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"]!=$sarjarow["osto_rivitunnus"])) {
-				$fnlina1 = "<font class='message'>(Varattu lisävarusteena tuotteelle: ";
-				$fnlina2 = ")</font>";
 			
 				if ($sarjarow["osto_perheid2"] > 0) {
 					$ztun = $sarjarow["osto_perheid2"];
@@ -1051,7 +1025,7 @@
 					$ztun = $sarjarow["siirtorivitunnus"];		
 				}
 			
-				$query = "	SELECT tilausrivi.tuoteno, sarjanumeroseuranta.sarjanumero 
+				$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, sarjanumeroseuranta.sarjanumero 
 							FROM tilausrivi 
 							LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
 							WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.tunnus='$ztun'";
@@ -1059,8 +1033,16 @@
 				$siirow = mysql_fetch_array($siires);
 			
 				$sarjarow["myynti_tunnus"] = 0;
-				$sarjarow["myynti_nimi"] = $siirow["tuoteno"]." ".$siirow["sarjanumero"];
-		
+				
+				if ($siirow["tunnus"] != $ztun) {
+					$fnlina1 = "<font class='message'>(".t("Varattu lisävarusteena tuotteelle").": ";
+					$fnlina2 = ")</font>";
+					$sarjarow["myynti_nimi"] = $siirow["tuoteno"]." ".$siirow["sarjanumero"];
+				}
+				else {
+					$fnlina1 = "<font class='message'>".t("Sisäisellä työmääräyksellä");
+					$fnlina2 = "</font>";
+				}
 			}
 			elseif ($sarjarow["myynti_tila"] == 'T') {
 				$fnlina1 = "<font class='message'>(".t("Tarjous").": ";
@@ -1082,6 +1064,7 @@
 				echo "$fnlina1 $sarjarow[myynti_nimi] $fnlina2</td>";
 			}
 
+			
 			if (($sarjarow[$tunnuskentta] == 0 or $sarjarow["myynti_tila"] == 'T' or $sarjarow[$tunnuskentta] == $rivitunnus) and $rivitunnus != '') {
 				$chk = "";
 				if ($sarjarow[$tunnuskentta] == $rivitunnus) {
@@ -1117,15 +1100,15 @@
 				echo "<a href='$PHP_SELF?toiminto=MUOKKAA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku&muut_siirrettavat=$muut_siirrettavat'>".t("Muokkaa")."</a>";
 			}
 		
-			if ($sarjarow['ostorivitunnus'] > 0 and $from == "") {
+			if ($sarjarow['ostorivitunnus'] > 0 and ($from == "" or $from == "SIIRTOTYOMAARAYS") and ($sarjarow["myynti_laskaika"] == "0000-00-00" or $sarjarow["myynti_laskaika"] == "" or ($sarjarow['myynti_laskaika'] <= $yhtiorow["tilikausi_loppu"] and $sarjarow['myynti_laskaika'] >= $yhtiorow["tilikausi_alku"]))) {
 				if ($keikkarow["tunnus"] > 0) {
 					$keikkalisa = "&otunnus=$keikkarow[tunnus]";
 				}
 				else {
 					$keikkalisa = "&luouusikeikka=OK&liitostunnus=$sarjarow[tunnus]";
 				}
-
-				echo "<br><a href='$PHP_SELF?toiminto=kululaskut$keikkalisa'>".t("Liitä kululasku")."</a>";
+				
+				echo "<br><a href='$PHP_SELF?toiminto=kululaskut$keikkalisa&lopetus=$PHP_SELF////$tunnuskentta=$rivitunnus//from=$from//aputoim=$aputoim//otunnus=$otunnus//sarjanumero_haku=$sarjanumero_haku//tuoteno_haku=$tuoteno_haku//nimitys_haku=$nimitys_haku//varasto_haku=$varasto_haku//ostotilaus_haku=$ostotilaus_haku//myyntitilaus_haku=$myyntitilaus_haku//lisatieto_haku=$lisatieto_haku//muut_siirrettavat=$muut_siirrettavat'>".t("Liitä kululasku")."</a>";
 			}
 
 			if ($sarjanumeronLisatiedot == "OK") {

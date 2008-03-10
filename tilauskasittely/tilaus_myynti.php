@@ -4270,7 +4270,7 @@ if ($tee == '') {
 						$cspan -= 6;
 					}
 					
-					if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
+					if ($toim == "SIIRTOLISTA") {
 						$cspan -= 7;
 					}
 
@@ -4288,16 +4288,19 @@ if ($tee == '') {
 
 					if ($borderlask == 0 and $pknum > 1) {
 						$kommclass1 = " style='border-bottom: 1px solid; border-right: 1px solid;'";
+						$kommclass2 = " style='border-bottom: 1px solid;'";
 					}
 					elseif($pknum > 0) {
 						$kommclass1 = " style='border-right: 1px solid;'";
+						$kommclass2 = " ";
 					}
 					else {
 						$kommclass1 = "";
+						$kommclass2 = " ";
 					}
 
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-						echo "<td>&nbsp;</td>";
+						echo "<td $kommclass2>&nbsp;</td>";
 					}
 
 					echo "<td $kommclass1 colspan='$cspan' valign='top'>".t("Kommentti").":<br><font class='message'>".str_replace("\n", "<br>", $row["kommentti"])."</font></td>";
@@ -4307,7 +4310,7 @@ if ($tee == '') {
 			}
 
 			if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA" and $toim != "SIIRTOTYOMAARAYS") {
-				//Laskeskellaan tilauksen loppusummaa
+				// Laskeskellaan tilauksen loppusummaa
 				$alvquery = "	SELECT if(isnull(varastopaikat.maa) or varastopaikat.maa='', '$yhtiorow[maa]', varastopaikat.maa) maa, group_concat(tilausrivi.tunnus) rivit
 								FROM tilausrivi
 								LEFT JOIN varastopaikat ON varastopaikat.yhtio = if(tilausrivi.var='S', if((SELECT tyyppi_tieto FROM toimi WHERE yhtio = tilausrivi.yhtio and tunnus = tilausrivi.tilaajanrivinro)!='', (SELECT tyyppi_tieto FROM toimi WHERE yhtio = tilausrivi.yhtio and tunnus = tilausrivi.tilaajanrivinro), tilausrivi.yhtio), tilausrivi.yhtio)

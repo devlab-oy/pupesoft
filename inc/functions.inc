@@ -1973,6 +1973,133 @@ if (!function_exists("synkronoi")) {
 	}
 }
 
+if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
+	function jalkilaskentafunktiolle_ostohinta ($otunnus, $rivitunnus) {
+		global $yhtiorow, $kukarow;
+
+		// haetaan keikan otsikko laskurowhun
+		$query  = "	SELECT * 
+					from lasku 
+					where tunnus = '$otunnus' 
+					and yhtio	 = '$kukarow[yhtio]' 
+					and alatila	 = 'X'";
+		$result = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($result) == 1) {
+			$laskurow = mysql_fetch_array($result);
+
+			
+			if ($laskurow["tila"] == "U") {
+				// Tavara on ostettu sis‰‰n myyntilaskulla
+				$query = "	SELECT round(tilausrivi.rivihinta/tilausrivi.kpl, 2) ohinta	
+							FROM tilausrivi
+							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
+							and tilausrivi.tunnus = $rivitunnus";
+				$presult = mysql_query($query) or pupe_error($query);
+				$tilrivirow = mysql_fetch_array($presult);								
+				
+				return $tilrivirow["ohinta"];
+			}
+			else {
+				// Tavara on ostettu sis‰‰n keikalla
+			
+			
+				// Virallinen laskenta, haetaan ihan kaikki rivit uudestaan (varattu=0) kaikki pit‰‰ olla viety varastoon jo ennen t‰t‰..
+				$query = "	SELECT tilausrivi.*, tilausrivi.kpl varattu
+							FROM tilausrivi
+							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
+							JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
+							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
+							and tilausrivi.varattu = 0
+							and tilausrivi.yhtio = '$kukarow[yhtio]'
+							and	tilausrivi.tyyppi = 'O'
+							and tilausrivi.tunnus = $rivitunnus
+							ORDER BY tuotteen_toimittajat.toim_tuoteno";
+				$presult = mysql_query($query) or pupe_error($query);
+
+				// Laskun valuttakurssi
+				if ($laskurow["maksu_kurssi"] == 0) {	//t‰m‰ olisi huonompi juttu, mut ei mik‰‰n stopperi
+					$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"];
+				}
+
+				// Tsekataan viel‰
+				if ($laskurow["maksu_kurssi"] == 0) {	//t‰m‰ olisi huonompi juttu, mut ei mik‰‰n stopperi
+					$laskurow["maksu_kurssi"] = 1;
+				}
+
+				// jos erikoisale niin otetaan sit‰ kanssa huomioon
+				if ($laskurow['erikoisale'] <> 0) {
+					$erikoisale = 1 - ($laskurow['erikoisale']/100);
+				}
+				else {
+					$erikoisale = 1;
+				}
+
+				// Jos lasketaan virallista varastonarvoa, otetaan keikan summa huomioon (kululaskujen yhteenlaskettu summa OLETUSVALUUTASSA on laskurow.saldo_maksettu)
+				$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['maksu_kurssi'], 2);
+
+				while ($tilrivirow = mysql_fetch_array($presult)) {
+
+					$query  = "	SELECT *
+								from tuote
+								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]' and tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+								where tuote.yhtio	= '$kukarow[yhtio]'
+								and tuote.tuoteno	= '$tilrivirow[tuoteno]'";
+					$tuores = mysql_query($query) or pupe_error($query);
+					$tuorow = mysql_fetch_array($tuores);
+
+					if ($tuorow['tuotekerroin'] <= 0) $tuorow['tuotekerroin'] = 1;
+
+					// jos kysess‰ on kotimainen vaihto-omaisuuslasku, pit‰‰ lis‰t‰ tuotteen hintaan alvi
+					if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
+						$alvit = 1 + $tuorow["alv"] / 100;
+					}
+					else {
+						$alvit = 1;
+					}
+
+					if ($laskurow['summa'] != 0) {
+						$osuus   = round($erikoisale*$tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin'],2)/$laskurow['summa'];	// kuinka paljon t‰m‰ rivi on koko tilauksesta
+						$rahtios = $osuus*$rahtikulut;	// lasketaan sama osuus rahtikuluista t‰lle riville
+					}
+					else {
+						$rahtios = 0;
+					}
+
+					if ($tilrivirow['varattu'] < 0) {
+						$rahtios = $rahtios * -1;
+					}
+
+					$ohinta  = round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['maksu_kurssi']*$tilrivirow['varattu']+$rahtios,6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
+
+					$tulliprossa = "";
+
+					if ($tilrivirow["var"] == "" and $laskurow["maa"] != $yhtiorow["maa"]) {
+						// lis‰t‰‰n tulli
+						require ("taric_veroperusteet.inc");
+
+						$ohinta = $ohinta * (1+($tulliprossa/100));
+					}
+
+					// lis‰t‰‰n riville extra kulu, jos sellanen oli annettu
+					if ($tilrivirow["kate"] != 0) {
+						$ohinta = $ohinta + $tilrivirow['kate'];
+					}
+
+					$rivihin = round($ohinta,$yhtiorow['hintapyoristys']);	// tilausrivin rivihinta talteen
+					$ohinta  = round($ohinta / $tilrivirow['varattu'],6); 	// yhden tuotteen hinta kaikkine kuluineen
+
+					return $ohinta;
+				}
+			}
+		}
+		else {
+			return FALSE;
+		}				
+	}
+}
+
+
 if (!function_exists("jalkilaskentafunktio")) {
 	function jalkilaskentafunktio ($tuoteno, $pvm, $uusihinta, $rivitunnus) {
 		global $yhtiorow, $kukarow;

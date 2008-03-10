@@ -3,7 +3,7 @@
 // tehd‰‰n lock file, ettei voi kerralla ajaa kuin yks per firma
 file_put_contents("/tmp/$kukarow[yhtio]-keikka.lock", "$otunnus");
 
-$query  = "select * from lasku where tunnus='$otunnus' and yhtio='$kukarow[yhtio]' and tila='K' and alatila=''";
+$query  = "SELECT * from lasku where tunnus='$otunnus' and yhtio='$kukarow[yhtio]' and tila='K' and alatila=''";
 $result = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($result) == 1) {
@@ -124,7 +124,6 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 		$result = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
 	
-
 		require ("varastoon.inc");
 
 		echo "<form action='$PHP_SELF' method='post'>";

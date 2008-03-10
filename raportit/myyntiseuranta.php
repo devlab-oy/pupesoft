@@ -747,7 +747,7 @@
 
 				if ($query != "") {
 					if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
-						if(include('Spreadsheet/Excel/Writer.php')) {
+						if(@include('Spreadsheet/Excel/Writer.php')) {
 
 							//keksit‰‰n failille joku varmasti uniikki nimi:
 							list($usec, $sec) = explode(' ', microtime());

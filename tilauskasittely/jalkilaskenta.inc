@@ -582,6 +582,8 @@ if ($tuoteno != '') {
 
 						$uusihinta = $uusisarjahin;
 					}
+					
+					$uusikehahin = $uusihinta;
 
 					// Korjaus
 					if ($jalkilaskenta_debug >= 1) echo "<font class='message'>Korjataan in-out hintoja! Laskuja (1) Uusi hinta: $uusihinta $rivirow[uusiotunnus]</font><br>";

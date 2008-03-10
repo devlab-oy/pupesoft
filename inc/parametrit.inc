@@ -9,6 +9,7 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(_
 
 foreach ($_GET as $key => $value) {
 	//$_GET[$key] = addslashes(trim($_GET[$key]));
+	$_GET[$key] = str_replace($serc, $repl, $_GET[$key]);
 	if($_REQUEST["sourceCharset"] != "") {
 		${$key} = iconv($_REQUEST["sourceCharset"], "latin1", str_replace($serc, $repl, $_GET[$key]));
 	}
@@ -21,8 +22,6 @@ foreach ($_GET as $key => $value) {
 foreach ($_POST as $key => $value) {
 	//$_POST[$key] = addslashes(trim($_POST[$key]));
 	$_POST[$key] = str_replace($serc, $repl, $_POST[$key]);
-	
-	
 	if($_REQUEST["sourceCharset"] != "") {
 		${$key} = iconv($_REQUEST["sourceCharset"], "latin1", str_replace($serc, $repl, $_POST[$key]));
 	}
@@ -131,11 +130,11 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 		$result = mysql_query($query) or die ("P‰ivitys ep‰onnistui sis‰‰nkirjautumisessa");
 
 		$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH)); // 12 tuntia voimassa
-		
+
 		if (!is_numeric($ostoskori)) {
 			$ostoskori = 1;
 		}
-		
+
 		if ($bool === FALSE) {
 			die ("Sis‰‰nkirjaus ep‰onnistui!");
 		}
@@ -355,11 +354,11 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		if(!headers_sent()) {
 			header("Content-Type: text/html; charset=$charset");
 		}
-		
+
 		if($verkkokauppa != "") {
 			echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
 		}
-		
+
 		echo "<html>";
 		echo "<head>";
 		echo "<META Http-Equiv='Cache-Control' Content='no-cache'>";

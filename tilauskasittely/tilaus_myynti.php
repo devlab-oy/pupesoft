@@ -547,7 +547,7 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS" and $muokkauslukko ==
 }
 
 // Laskutetaan myyntitili
-if ($kukarow["extranet"] == "" and $tee == "LASKUTAMYYNTITILI" and $muokkauslukko == "") {
+if ($kukarow["extranet"] == "" and $tee == "LASKUTAMYYNTITILI") {
 	$tilatapa = "LASKUTA";
 	require ("laskuta_myyntitilirivi.inc");
 }

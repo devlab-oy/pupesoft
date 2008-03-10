@@ -538,7 +538,7 @@ if ($tuoteno != '') {
 						and tunnus = '$rivitunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			$selite_txt = ", Jälkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")";
+			$selite_txt = ",<br>Jälkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")";
 
 			// Päivitetään korjattava tapahtuma
 			$query = "	UPDATE tapahtuma
@@ -599,9 +599,12 @@ if ($tuoteno != '') {
 					if ($jalkilaskenta_debug > 1) echo "$query<br>";
 					$upresu = mysql_query($query) or pupe_error($query);
 				}
+				else {
+					if ($jalkilaskenta_debug >= 1) echo "<font class='message'>Ei korjattavaa (tuotetta ei ole myyty)! Uusi hinta: $uusihinta $rivirow[uusiotunnus]</font><br>";
+				}
 			}
 		}
-		else {
+		else {			
 			echo "<font class='error'>".t("Tilausriviä tai hintaa ei löydy")."</font><br>";
 			$jlerror=1;
 		}
@@ -723,7 +726,7 @@ if ($tuoteno != '') {
 
 				if ($jlerror == 0) {
 					// Päivitetään korjattava tapahtuma
-					$selite_txt = ", Jälkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")";
+					$selite_txt = ",<br>Jälkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")";
 					$query = "UPDATE tapahtuma SET kplhinta = '$uusihinta', selite = concat(selite, '$selite_txt') WHERE tunnus = '$tapahtuma[tunnus]' and laadittu >= '$yhtiorow[tilikausi_alku]'";
 					$result = mysql_query($query) or pupe_error($query);
 
@@ -833,7 +836,7 @@ if ($tuoteno != '') {
 									if ($jalkilaskenta_debug >= 1) echo "<font class='message'>Korjattiin tiliöinti! ".t("Inventoitu").": $trow[tuoteno] @ $trow[laadittu]</font><br>";
 
 									// haetaan varastotiliöinti
-									$query = "select * from tiliointi WHERE yhtio='$kukarow[yhtio]' and ltunnus='$invrow[tunnus]' and tilino='$yhtiorow[varasto]' and korjattu=''";
+									$query = "SELECT * from tiliointi WHERE yhtio='$kukarow[yhtio]' and ltunnus='$invrow[tunnus]' and tilino='$yhtiorow[varasto]' and korjattu=''";
 									if ($jalkilaskenta_debug > 1) echo "$query<br>";
 									$invupd = mysql_query($query) or pupe_error($query);
 									$invrow = mysql_fetch_array($invupd);

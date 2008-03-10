@@ -839,17 +839,17 @@ if($tee == "tallenna_osoite") {
 		$kalakori = mysql_fetch_array($result);
 
 		$query = "	UPDATE lasku SET
-						toim_nimi 		= '".utf8_decode($toim_nimi)."',
-						toim_nimitark 	= '".utf8_decode($toim_nimitark)."',
-						toim_osoite 	= '".utf8_decode($toim_osoite)."',
-						toim_postino 	= '".utf8_decode($toim_postino)."',
-						toim_postitp 	= '".utf8_decode($toim_postitp)."',
-						tilausyhteyshenkilo		= '".utf8_decode($tilausyhteyshenkilo)."',
-						asiakkaan_tilausnumero	= '".utf8_decode($asiakkaan_tilausnumero)."',
-						kohde			= '".utf8_decode($kohde)."',
-						viesti			= '".utf8_decode($viesti)."',
-						comments		= '".utf8_decode($comments)."',
-						toimaika		= '$toimvv-$toimkk-$toimpp'
+						toim_nimi 				= '$toim_nimi',
+						toim_nimitark 			= '$toim_nimitark',
+						toim_osoite 			= '$toim_osoite',
+						toim_postino 			= '$toim_postino',
+						toim_postitp 			= '$toim_postitp',
+						tilausyhteyshenkilo		= '$tilausyhteyshenkilo',
+						asiakkaan_tilausnumero	= '$asiakkaan_tilausnumero',
+						kohde					= '$kohde',
+						viesti					= '$viesti',
+						comments				= '$comments',
+						toimaika				= '$toimvv-$toimkk-$toimpp'
 					WHERE yhtio = '{$kukarow["yhtio"]}' and tila = 'N' and tunnus = '$kukarow[kesken]' LIMIT 1";
 		$result = mysql_query($query) or pupe_error($query);
 		

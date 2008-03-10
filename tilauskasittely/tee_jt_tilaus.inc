@@ -160,6 +160,7 @@
 								toimitusehto	= '$otsikkorivi[toimitusehto]' and
 								valkoodi 		= '$otsikkorivi[valkoodi]' and
 								vienti_kurssi	= '$otsikkorivi[vienti_kurssi]' and
+								erikoisale		= '$otsikkorivi[erikoisale]' and
 								eilahetetta		= '$isarivirow[suoraan_laskutukseen]' and
 								tunnusnippu		= '$otsikkorivi[tunnusnippu]'
 								$erpcmlisa1";

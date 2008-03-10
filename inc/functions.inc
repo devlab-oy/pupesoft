@@ -1982,13 +1982,12 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 					from lasku 
 					where tunnus = '$otunnus' 
 					and yhtio	 = '$kukarow[yhtio]' 
-					and alatila	 = 'X'";
+					and ((tila='K' and alatila = 'X') or (tila='U' and alatila = 'X') or (tila='K' and alatila = 'I'))";
 		$result = mysql_query($query) or pupe_error($query);
-		
+				
 		if (mysql_num_rows($result) == 1) {
 			$laskurow = mysql_fetch_array($result);
 
-			
 			if ($laskurow["tila"] == "U") {
 				// Tavara on ostettu sis‰‰n myyntilaskulla
 				$query = "	SELECT round(tilausrivi.rivihinta/tilausrivi.kpl, 2) ohinta	
@@ -1996,6 +1995,17 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
 							and tilausrivi.tunnus = $rivitunnus";
 				$presult = mysql_query($query) or pupe_error($query);
+				$tilrivirow = mysql_fetch_array($presult);								
+				
+				return $tilrivirow["ohinta"];
+			}
+			elseif ($laskurow["tila"] == "K" and $laskurow["alatila"] == "I") {
+				// Tavara on ostettu sis‰‰n myyntilaskulla
+				$query = "	SELECT round(tilausrivi.rivihinta/tilausrivi.kpl, 2) ohinta	
+							FROM tilausrivi
+							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
+							and tilausrivi.tunnus = $rivitunnus";
+				$presult = mysql_query($query) or pupe_error($query);				
 				$tilrivirow = mysql_fetch_array($presult);								
 				
 				return $tilrivirow["ohinta"];
@@ -2008,13 +2018,12 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 				$query = "	SELECT tilausrivi.*, tilausrivi.kpl varattu
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
-							JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
+							LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
 							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
 							and tilausrivi.varattu = 0
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
 							and	tilausrivi.tyyppi = 'O'
-							and tilausrivi.tunnus = $rivitunnus
-							ORDER BY tuotteen_toimittajat.toim_tuoteno";
+							and tilausrivi.tunnus = $rivitunnus";
 				$presult = mysql_query($query) or pupe_error($query);
 
 				// Laskun valuttakurssi
@@ -2042,7 +2051,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 
 					$query  = "	SELECT *
 								from tuote
-								JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]' and tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+								LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]' and tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
 								where tuote.yhtio	= '$kukarow[yhtio]'
 								and tuote.tuoteno	= '$tilrivirow[tuoteno]'";
 					$tuores = mysql_query($query) or pupe_error($query);
@@ -2076,7 +2085,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 
 					if ($tilrivirow["var"] == "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 						// lis‰t‰‰n tulli
-						require ("taric_veroperusteet.inc");
+						require ("tilauskasittely/taric_veroperusteet.inc");
 
 						$ohinta = $ohinta * (1+($tulliprossa/100));
 					}
@@ -2087,7 +2096,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 					}
 
 					$rivihin = round($ohinta,$yhtiorow['hintapyoristys']);	// tilausrivin rivihinta talteen
-					$ohinta  = round($ohinta / $tilrivirow['varattu'],6); 	// yhden tuotteen hinta kaikkine kuluineen
+					$ohinta  = round($ohinta / $tilrivirow['varattu'],2); 	// yhden tuotteen hinta kaikkine kuluineen
 
 					return $ohinta;
 				}

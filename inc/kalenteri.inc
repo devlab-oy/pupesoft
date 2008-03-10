@@ -1097,7 +1097,7 @@
 				$lopvm = "";
 			}
 			
-			$viesti = utf8_decode($viesti);
+			$viesti = $viesti;
 
 			$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
 			$result = mysql_query($query) or pupe_error($query);

@@ -22,16 +22,19 @@
 				$sarjarow = mysql_fetch_array($sarjares);
 						
 				// Ostorivi
-				$query = "	SELECT if(kpl!=0, kpl, tilkpl) kpl
+				$query = "	SELECT if(kpl!=0, kpl, if(varattu!=0, varattu, tilkpl)) kpl
 							FROM tilausrivi 
 							WHERE yhtio  = '$kukarow[yhtio]' 
 							and tunnus   = '$sarjarow[perheid2]'
 							and perheid2!= 0";
 				$sarjares = mysql_query($query) or pupe_error($query);
 				$ostorow = mysql_fetch_array($sarjares);
-								
+												
 				// Haetaan muut lisävarusteet
-				$query = "	SELECT tilausrivi.tuoteno, round(tilausrivi.kpl/$ostorow[kpl],2) kpl, round(tilausrivi.tilkpl/$ostorow[kpl],2) tilkpl, 
+				$query = "	SELECT tilausrivi.tuoteno, 
+							round(tilausrivi.kpl/$ostorow[kpl],2) kpl, 
+							round(tilausrivi.varattu/$ostorow[kpl],2) varattu, 
+							round(tilausrivi.tilkpl/$ostorow[kpl],2) tilkpl, 
 							tilausrivi.tilkpl sistyomaarayskpl, tilausrivi.var, tilausrivi.tyyppi, 
 							concat_ws('#', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka, 
 							tilausrivi.hyllyalue, 
@@ -94,7 +97,12 @@
 								$var		 = "";
 							}
 							elseif ($sarjarow["var"] != 'P') {
-								$kpl		 = $sarjarow["kpl"];
+								if ($sarjarow["kpl"] != 0) {
+									$kpl	 = $sarjarow["kpl"];
+								}
+								else {
+									$kpl	 = $sarjarow["varattu"];
+								}
 								$var		 = "";
 							}
 							else {
@@ -121,11 +129,23 @@
 								$netto 		     = "";
 								$ale 		     = "";
 								$alv		     = "";	
-								$paikka			 = $sarjarow["paikka"];
+								
+								if ($sarjarow["paikka"] != "###") {
+									$paikka		 = $sarjarow["paikka"];
+								}
+							
 								$varasto 	     = "";
 								$rivitunnus		 = "";
 								$korvaavakielto	 = "";
-								$varataan_saldoa = "";
+								
+								//Ennakkotilauksen, Tarjoukset ja Ylläpitosopimukset eivät varaa saldoa
+								if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
+									$varataan_saldoa = "EI";
+								}
+								else {
+									$varataan_saldoa = "";
+								}
+								
 								$perheid 		 = 0;
 								
 								// Jos lisävaruste on pultattu kiinni laitteeseen sisäisellä työmääräyksellä

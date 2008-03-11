@@ -4697,12 +4697,40 @@ if ($tee == '') {
 
 						if (file_exists("tulosta_tarjous.inc") and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI")) {
 							echo "<option value='TARJOUS'>Tarjous</option>";
+							
+							$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='tilauskasittely/tulostakopio.php' and alanimi='TARJOUS!!!VL' LIMIT 1";
+							$tarkres = mysql_query($query) or pupe_error($query);
+							
+							if (mysql_num_rows($tarkres) > 0) {
+								echo "<option value='TARJOUS!!!VL'>Tarjous VL</option>";
+							}
+							
+							$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='tilauskasittely/tulostakopio.php' and alanimi='TARJOUS!!!BR' LIMIT 1";
+							$tarkres = mysql_query($query) or pupe_error($query);
+							
+							if (mysql_num_rows($tarkres) > 0) {
+								echo "<option value='TARJOUS!!!BR'>Tarjous BR</option>";
+							}																					
 						}
 						if (file_exists("tulosta_tilausvahvistus_pdf.inc")) {
 							echo "<option value='TILAUSVAHVISTUS'>Tilausvahvistus</option>";
 						}
 						if (file_exists("tulosta_myyntisopimus.inc")) {
 							echo "<option value='MYYNTISOPIMUS'>Myyntisopimus</option>";
+							
+							$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='tilauskasittely/tulostakopio.php' and alanimi='MYYNTISOPIMUS!!!VL' LIMIT 1";
+							$tarkres = mysql_query($query) or pupe_error($query);
+							
+							if (mysql_num_rows($tarkres) > 0) {
+								echo "<option value='MYYNTISOPIMUS!!!VL'>Myyntisopimus VL</option>";
+							}
+							
+							$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='tilauskasittely/tulostakopio.php' and alanimi='MYYNTISOPIMUS!!!BR' LIMIT 1";
+							$tarkres = mysql_query($query) or pupe_error($query);
+							
+							if (mysql_num_rows($tarkres) > 0) {
+								echo "<option value='MYYNTISOPIMUS!!!BR'>Myyntisopimus BR</option>";
+							}
 						}
 						if (file_exists("tulosta_osamaksusoppari.inc")) {
 							echo "<option value='OSAMAKSUSOPIMUS'>Osamaksusopimus</option>";

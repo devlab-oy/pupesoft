@@ -81,10 +81,10 @@
 	if ($toim == "TILAUSVAHVISTUS") {
 		$fuse = t("Tilausvahvistus");
 	}
-	if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL") {
+	if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR") {
 		$fuse = t("Tarjous");
 	}
-	if ($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL") {
+	if ($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR") {
 		$fuse = t("Myyntisopimus");
 	}
 	if ($toim == "OSAMAKSUSOPIMUS") {
@@ -311,7 +311,7 @@
 			if (!isset($ppa))
 				$ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 		}
-		elseif ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
+		elseif ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR" or $toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
 			//Näissä kaupoissa voi kestää vähän kauemmin
 			if (!isset($kka))
 				$kka = date("m",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
@@ -612,7 +612,7 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
-		if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
+		if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR" or $toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
 			// Tulostellaan venemyyntiin liittyviä osia
 			$where1 .= " lasku.tila in ('L','T','N') ";
 
@@ -952,13 +952,13 @@
 				$komento["Tilausvahvistus"] .= " -# $kappaleet ";
 			}
 		}
-		if (($toim == "TARJOUS"  or $toim == "TARJOUS!!!VL") and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
+		if (($toim == "TARJOUS"  or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR") and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
 			$tulostimet[0] = 'Tarjous';
 			if ($kappaleet > 0) {
 				$komento["Tarjous"] .= " -# $kappaleet ";
 			}
 		}
-		if (($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL") and $komento["Myyntisopimus"] != 'email') {
+		if (($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR") and $komento["Myyntisopimus"] != 'email') {
 			$tulostimet[0] = 'Myyntisopimus';
 			if ($kappaleet > 0) {
 				$komento["Myyntisopimus"] .= " -# $kappaleet ";
@@ -1303,7 +1303,7 @@
 				$tee = '';
 			}
 
-			if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL") {
+			if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR") {
 				$otunnus = $laskurow["tunnus"];
 				list ($toimalku, $hinnat) = explode("!!!", $toim);
 
@@ -1314,7 +1314,7 @@
 				$tee = '';
 			}
 
-			if ($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL") {
+			if ($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR") {
 
 				$otunnus = $laskurow["tunnus"];
 				list ($toimalku, $hinnat) = explode("!!!", $toim);

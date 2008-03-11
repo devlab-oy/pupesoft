@@ -16,6 +16,10 @@
 			$kori_polku .= "?toim=".$toim."&ostoskori=".$ostoskori;
 		}		
 	}
+	
+	if (function_exists("js_popup")) {
+		echo js_popup(-100);
+	}
 
 	echo "<SCRIPT type='text/javascript'>
 			<!--
@@ -256,8 +260,8 @@
 	}
 
 
-	$kentat	= "tuote.tuoteno,toim_tuoteno,tuote.nimitys,tuote.osasto,tuote.try,tuote.tuotemerkki";
-	$nimet	= "Tuotenumero,Toim tuoteno,Nimitys,Osasto,Tuoteryhmä,Tuotemerkki";
+	$kentat	= "tuote.tuoteno,toim_tuoteno,tuote.nimitys,tuote.osasto,tuote.try,tuote.tuotemerkki,orig_tuoteno";
+	$nimet	= "Tuotenumero,Toim tuoteno,Nimitys,Osasto,Tuoteryhmä,Tuotemerkki,Alkuperäisnumero";
 
 	$jarjestys = "tuote.tuoteno";
 
@@ -327,6 +331,30 @@
 		elseif (strlen($haku[$i]) > 0 && $i == 2) {
 			$lisa .= " and ".$array[$i]." like '%".$haku[$i]."%'";
 			$ulisa .= "&haku[".$i."]=".$haku[$i];
+		}
+		elseif (strlen($haku[$i]) > 0 && $i == 6) {
+						
+			$query	= "	SELECT distinct tuoteno
+						FROM tuotteen_orginaalit
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and orig_tuoteno like '%".$haku[$i]."%'
+						LIMIT 500";
+			$pres = mysql_query($query) or pupe_error($query);
+			
+			$origtuotteet = "";
+			
+			while($prow = mysql_fetch_array($pres)) {
+				$origtuotteet .= "'".$prow["tuoteno"]."',";
+			}
+			
+			$origtuotteet = substr($origtuotteet, 0, -1);
+			
+			if ($origtuotteet != "") {
+				$lisa .= " and tuote.tuoteno in ($origtuotteet) ";		
+			}
+			
+			$ulisa .= "&haku[".$i."]=".$haku[$i];
+			
 		}
 		elseif (strlen($haku[$i]) > 0) {
 			$lisa .= " and ".$array[$i]."='".$haku[$i]."'";
@@ -413,7 +441,15 @@
 	if (isset($vierow) and $vierow["maa"] != "") {
 		$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
 	}
-
+	
+	
+	$query	= "	SELECT count(*) maara
+				FROM tuotteen_orginaalit
+				WHERE yhtio = '$kukarow[yhtio]'";
+	$orginaaleja_res = mysql_query($query) or pupe_error($query);
+	$orginaaleja = mysql_fetch_array($orginaaleja_res);
+	
+	
 	echo "<table><tr>
 			<form action = '$PHP_SELF?toim_kutsu=$toim_kutsu' method = 'post'>";
 	echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
@@ -424,7 +460,14 @@
 
 	echo "<th nowrap valign='top'>
 		<a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[0]$ulisa'>".t("$arraynimet[0]")."</a><br>
-		<a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[1]$ulisa'>".t("$arraynimet[1]")."</a></th>";
+		<a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[1]$ulisa'>".t("$arraynimet[1]")."</a><br>";
+	
+	if ($orginaaleja["maara"] > 0) {
+		echo "<a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[6]$ulisa'>".t("$arraynimet[6]")."</a>";
+	}
+	
+	
+	echo "</th>";
 
 	echo "<th nowrap valign='top'><br><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[2]$ulisa'>".t("$arraynimet[2]")."</a></th>";
 
@@ -434,6 +477,7 @@
 
 	echo "<th nowrap valign='top'>";
 	echo "<a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[5]$ulisa'>".t("$arraynimet[5]")."</a>";
+	
 
 	if ($kukarow["extranet"] == "") {
 		echo "<br><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[5]$ulisa'>".t("Näytä poistuvat")." / ".t("lisätiedot")."</a>";
@@ -446,6 +490,11 @@
 	echo "<td nowrap valign='top'>";
 	echo "<input type='text' size='10' name = 'haku[0]' value = '$haku[0]'><br>";
 	echo "<input type='text' size='10' name = 'haku[1]' value = '$haku[1]'>";
+	
+	if ($orginaaleja["maara"] > 0) {
+		echo "<br><input type='text' size='10' name = 'haku[6]' value = '$haku[6]'>";
+	}
+		
 	echo "</td>";
 
 	echo "<td nowrap valign='top'>";
@@ -521,7 +570,9 @@
 	}
 
 	echo "</select><br>";
-
+	
+	
+	
 	if ($kukarow["extranet"] == "") {
 		//echo t("Poistuvat")."<input type='checkbox' name='poistuvat' value='X' $kohtapoischeck>";
 		echo t("Poistetut").": <input type='checkbox' name='poistetut' $poischeck> ";
@@ -582,7 +633,7 @@
 				(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 				tuote.sarjanumeroseuranta,
 				tuote.status,
-				(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno) saldo				
+				(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno) saldo
 				FROM tuote use index (tuoteno, nimitys)
 				WHERE tuote.yhtio = '$kukarow[yhtio]'
 				$kieltolisa
@@ -592,7 +643,7 @@
 				ORDER BY tuote.tuoteno
 				LIMIT 500";
 	$result = mysql_query($query) or pupe_error($query);
-			
+
 	if (mysql_num_rows($result) > 0) {
 		
 		$rows = array();

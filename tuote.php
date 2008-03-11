@@ -2,6 +2,10 @@
 	
 	require("inc/parametrit.inc");
 
+	if (function_exists("js_popup")) {
+		echo js_popup(-100);
+	}
+
 	if ($tee == 'NAYTATILAUS') {
 		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 		require ("raportit/naytatilaus.inc");
@@ -316,8 +320,44 @@
 
 			//1
 			echo "<tr><th>".t("Tuotenumero")."<br>".t("Tuotemerkki")."</th><th>".t("Yksikkö")."</th><th>".t("Eankoodi")."</th><th colspan='2'>".t("Nimitys")."</th><th>".t("Hinnastoon")."</th>";
-			echo "<tr><td>$tuoterow[tuoteno]<br>$tuoterow[tuotemerkki]</td><td>$tuoterow[yksikko]</td><td>$tuoterow[eankoodi]</td><td colspan='2'>".substr(asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']),0,100)."</td><td>$tuoterow[hinnastoon]</td></tr>";
+			
+			echo "<tr><td>$tuoterow[tuoteno]";
+			//haetaan orginaalit			
+			$query = "	SELECT * 
+						from tuotteen_orginaalit 
+						where yhtio = '$kukarow[yhtio]' 
+						and tuoteno = '$tuoterow[tuoteno]'";
+			$origresult = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($origresult) > 0) {					
+				
+				$i = 0;
+				
+				$divit = "<div id='$tuoterow[tuoteno]' class='popup'>";
+				$divit .= "<table><tr><td valign='top'><table>";
+				$divit .= "<tr><td class='back' valign='top' align='center'>".t("Alkuperäisnumero")."</td><td class='back' valign='top' align='center'>".t("Hinta")."</td><td class='back' valign='top' align='center'>".t("Merkki")."</td></tr>";
+				
+				while ($origrow = mysql_fetch_array($origresult)) {
+					++$i;
+					if ($i == 20) {
+						$divit .= "</table></td><td valign='top'><table>";
+						$divit .= "<tr><td class='back' valign='top' align='center'>".t("Alkuperäisnumero")."</td><td class='back' valign='top' align='center'>".t("Hinta")."</td><td class='back' valign='top' align='center'>".t("Merkki")."</td></tr>";
+						$i = 1;
+					}
+					$divit .= "<tr><td class='back' valign='top'>$origrow[orig_tuoteno]</td><td class='back' valign='top' align='right'>$origrow[orig_hinta]</td><td class='back' valign='top'>$origrow[merkki]</td></tr>";
+				}
+				
+				$divit .= "</table></td></tr>";
 
+				$divit .= "</table>";
+				$divit .= "</div>";
+
+				echo "&nbsp;&nbsp;<a src='#' onmouseover=\"popUp(event, '$tuoterow[tuoteno]');\" onmouseout=\"popUp(event, '$tuoterow[tuoteno]');\"><img src='pics/lullacons/info.png' height='13'></a>";
+				
+			}
+					
+			echo "<br>$tuoterow[tuotemerkki]</td><td>$tuoterow[yksikko]</td><td>$tuoterow[eankoodi]</td><td colspan='2'>".substr(asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']),0,100)."</td><td>$tuoterow[hinnastoon]</td></tr>";
+			
 			//2
 			echo "<tr><th>".t("Osasto/try")."</th><th>".t("Toimittaja")."</th><th>".t("Aleryhmä")."</th><th>".t("Tähti")."</th><th>".t("Perusalennus")."</th><th>".t("VAK")."</th></tr>";
 			echo "<td>$tuoterow[osasto]/$tuoterow[try]</td><td>$tuoterow[toimittaja]</td>
@@ -420,7 +460,7 @@
 			}
 
 			echo "<tr></table><br>";
-
+			
 			// Varastosaldot ja paikat
 			echo "<font class='message'>".t("Varastopaikat")."</font><hr>";			
 			echo "<table>";
@@ -1323,6 +1363,7 @@
 				}
 			}
 			echo "</table>";
+			echo $divit;
 		}
 		else {
 			echo "<font class='message'>".t("Yhtään tuotetta ei löytynyt")."!<br></font>";

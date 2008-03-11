@@ -1510,7 +1510,7 @@ if($tee == "") {
 		$c = 6;
 	}
 	elseif($toim == "TILAUSHAKUKONE") {
-		$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws(' ',lasku.nimi, lasku.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, summa Yhteensä, ";
+		$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws(' ',lasku.nimi, lasku.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, $summa Yhteensä, ";
 		$c = 6;		
 	}
 	

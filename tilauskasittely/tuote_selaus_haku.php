@@ -442,12 +442,16 @@
 		$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
 	}
 	
-	
-	$query	= "	SELECT count(*) maara
-				FROM tuotteen_orginaalit
-				WHERE yhtio = '$kukarow[yhtio]'";
-	$orginaaleja_res = mysql_query($query) or pupe_error($query);
-	$orginaaleja = mysql_fetch_array($orginaaleja_res);
+	if (table_exists("tuotteen_orginaalit")) {
+		$query	= "	SELECT count(*) maara
+					FROM tuotteen_orginaalit
+					WHERE yhtio = '$kukarow[yhtio]'";
+		$orginaaleja_res = mysql_query($query) or pupe_error($query);
+		$orginaaleja = mysql_fetch_array($orginaaleja_res);
+	}
+	else {
+		$orginaaleja = array();
+	}
 	
 	
 	echo "<table><tr>

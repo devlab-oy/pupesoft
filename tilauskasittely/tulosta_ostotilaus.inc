@@ -123,7 +123,7 @@
 						}
 						$h-=$pdf->ln(0.5);
 						//	Sitten yhteyshenkilöitä
-						foreach(array("viite", "lisätiedot") as $key) {
+						foreach(array("viite") as $key) {
 							if($laskurow[$key] != "") {
 								$pdf->write($h, 1, $s[0], 0, t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B");
 								$h-=$pdf->ln();					
@@ -309,8 +309,9 @@
 						//	Maksusopimus
 						$pdf->write($h, 1, 0, 0, t("LISÄTIEDOT", $kieli), "norm", "L", "B");
 						$h-=$pdf->ln(1.25);
-						$pdf->write($h, 4, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
-						$h-=$pdf->ln(4);			
+						$nb=$pdf->countParagraphHeight($laskurow["sisviesti1"], "norm")+2;
+						$pdf->write($h, $nb, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
+						$h-=$pdf->ln($nb);
 					}
 
 					//	Maksusopimus

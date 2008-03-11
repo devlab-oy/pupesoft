@@ -152,6 +152,7 @@ echo "
 <!--
 	A				{color: #c0c0c0; text-decoration:none;}
 	A:hover			{color: #ff0000; text-decoration:none;}
+	IMG				{padding:10pt;}
 	BODY			{background:#fff;}
 	FONT.info		{font-size:8pt;  font-family:Lucida,Verdana,Helvetica,Arial; color: #c0c0c0;}
 	FONT.head		{font-size:15pt; font-family:Lucida,Verdana,Helvetica,Arial; color: #666699; font-weight:bold; letter-spacing: .05em;}
@@ -163,7 +164,7 @@ echo "
 -->
 </style>
 
-<table width='550' border='0'>
+<table border='0'>
 <tr>
 <td valign='top'><br>";
 

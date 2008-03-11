@@ -98,10 +98,20 @@ else {
 		// Jyvitetään riveille uusihinta ja tallennetaan syötetty summa lasku.hinta-kenttään
 		// huomioidaan hyvitysrivit ja ei muuteta niitten hintoja
 
-		$boob_jyva = 0;
+		$boob_jyva = 0;		
+		
+		if (abs(($plus_summa + $nega_summa) - $jysum) <= 0.5) {
+			// jos jyvityssumma on alle 0.5 euroa loppusummasta niin ei muuteta rivien hintoja päivitetään vaan jysumma laskun hintakenttään
+			//  Päivitetään laskulle hinta-kenttään syötetty summa
+			$query	= "UPDATE lasku SET hinta = '$jysum' WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]'";
+			$result	= mysql_query($query) or pupe_error($query);
 
-		// jos jyvityssumma on miinusta ja meillä on hivitysrivejä, kosketaan vain hyvitysriveihin
-		if ($jysum < 0 and $nega_summa != 0) {
+			$laskurow["hinta"] = $jysum;
+			
+			$boob_jyva = 1;	
+		}
+		elseif ($jysum < 0 and $nega_summa != 0) {
+			// jos jyvityssumma on miinusta ja meillä on hyvitysrivejä, kosketaan vain hyvitysriveihin
 			$halu_summa = $jysum - $plus_summa;
 			$jypro = $halu_summa / $nega_summa;
 
@@ -151,7 +161,6 @@ else {
 
 			$laskurow["hinta"] = $jysum;
 		}
-
 	}
 }
 

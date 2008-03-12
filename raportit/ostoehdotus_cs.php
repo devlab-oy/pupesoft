@@ -574,7 +574,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			$ostoehdotus = 0;
 		}
 
-		if ($ostoehdotus > 0 or $naytakaikkituotteet != '') {
+		if (($ostoehdotus > 0 or $naytakaikkituotteet != '') and ($naytavainmyydyt == '' or $vku+$enp != 0)) {
 			echo "<tr>";
 
 			if ($useampi_yhtio > 1) {
@@ -852,6 +852,10 @@ echo "<tr><th>".t("Älä näytä tuotteita joita ei näytetä hinnastossa")."</th><td 
 $chk = "";
 if ($naytakaikkituotteet != "") $chk = "checked";
 echo "<tr><th>".t("Näytä myös tuotteet joiden ostoehdotus on nolla")."</th><td colspan='3'><input type='checkbox' name='naytakaikkituotteet' $chk></td></tr>";
+
+$chk = "";
+if ($naytavainmyydyt != "") $chk = "checked";
+echo "<tr><th>".t("Näytä vain tuotteet joilla on myyntiä")."</th><td colspan='3'><input type='checkbox' name='naytavainmyydyt' $chk></td></tr>";
 
 
 

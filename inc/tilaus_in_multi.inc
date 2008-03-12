@@ -12,16 +12,17 @@ while (!feof ($fd)) {
 	$rivi	  	= str_replace($poista,"",$rivi);
 	$rivi	  	= explode("\t", trim($rivi));
 
-	$ytunnus	= trim($rivi[0]);
-	$tuoteno	= trim($rivi[1]);
-	$kpl	  	= str_replace(",", ".", $rivi[2]);
-	$alv 		= str_replace(",", ".", $rivi[3]);
-	$toimaika 	= $rivi[4];
-	$hinta		= str_replace(",", ".", $rivi[5]);
-	$ale	  	= str_replace(",", ".", $rivi[6]);
-	$netto 	  	= strtoupper(trim($rivi[7]));
-	$var  		= strtoupper(trim($rivi[8]));
-	$kommentti	= trim($rivi[9]);
+	$ytunnus		= trim($rivi[0]);
+	$toim_ovttunnus	= trim($rivi[1]);
+	$tuoteno		= trim($rivi[2]);
+	$kpl	  		= str_replace(",", ".", $rivi[3]);
+	$alv 			= str_replace(",", ".", $rivi[4]);
+	$toimaika 		= $rivi[5];
+	$hinta			= str_replace(",", ".", $rivi[6]);
+	$ale	  		= str_replace(",", ".", $rivi[7]);
+	$netto 	  		= strtoupper(trim($rivi[8]));
+	$var  			= strtoupper(trim($rivi[9]));
+	$kommentti		= trim($rivi[10]);
 
 	if ($ytunnus != "" and $tuoteno != "") {
 
@@ -36,22 +37,30 @@ while (!feof ($fd)) {
 			$kukarow['kesken'] 	= 0;
 			$tilausnumero 		= 0;
 
+			if ($toim_ovttunnus != '') {
+				$toim_lis = " and toim_ovttunnus='$toim_ovttunnus' ";
+			}
+			else {
+				$toim_lis = "";
+			}
+
 			$query = "	SELECT tunnus 
  						FROM asiakas
- 						WHERE yhtio = '$kukarow[yhtio]' and 
- 						ytunnus = '$ytunnus' 
+ 						WHERE yhtio = '$kukarow[yhtio]' 
+						and ytunnus = '$ytunnus' 
+						$toim_lis
  						ORDER BY tunnus
  						LIMIT 1";
  			$result = mysql_query($query) or die($query);
  
  			if (mysql_num_rows($result) == 0) {
- 				die ("virheellinen asiakasnumero tiedostossa! $ytunnus");
+ 				die ("virheellinen asiakasnumero tiedostossa! ytunnus ='$ytunnus' $toim_lis");
  			}
  			$arow = mysql_fetch_array($result);
  			
 			// Luodaan uusi myyntitilausotsikko
  			require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
-
+						
 			$id = luo_myyntitilausotsikko($arow["tunnus"]);
  		
  			echo "Tehtiin tilaus $id asiakkaalle $ytunnus<br>";

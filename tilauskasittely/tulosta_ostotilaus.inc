@@ -971,6 +971,7 @@
 						join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 						WHERE tilausrivi.otunnus = '$otunnus'
 						and tilausrivi.yhtio	 = '$kukarow[yhtio]'
+						and tilausrivi.tyyppi	!= 'D'
 						ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
 			$result = mysql_query($query) or pupe_error($query);
 			

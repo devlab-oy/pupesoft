@@ -1024,7 +1024,7 @@
 				}
 			}
 
-			echo "<td valign='top' class='$vari' align='right' $classmidl>$myyntihinta";
+			echo "<td valign='top' class='$vari' align='right' $classmidl nowrap>$myyntihinta";
 			
 			if ($lisatiedot != "" and $kukarow["extranet"] == "") {
 				echo "<br>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["nettohinta"])." $yhtiorow[valkoodi]";

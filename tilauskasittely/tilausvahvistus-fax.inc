@@ -51,7 +51,7 @@ else {
 	$krow = mysql_fetch_array($kresult);
 
 	if (mysql_num_rows($tilvahresult) > 0) {
-		$ulos  = "FAX: ".$tilvahasiakas['fax']."\n";
+		$ulos  = "FAX: ".ereg_replace("[^0-9]", "", $tilvahasiakas['fax'])."\n";
 
 		if ($laskurow["tilaustyyppi"] == 'E') {
 			$ulos .= sprintf("%-50.s",$yhtiorow['nimi'])								.t("Tilausvahvistus Ennakkomyynti", $kieli)."\n";

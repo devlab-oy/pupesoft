@@ -289,7 +289,7 @@
 			unset($jatka);
 		}
 	}
-	elseif (isset($_FILES['userfile']['error']) and $_FILES['userfile']['error'] != 4) {
+	elseif (isset($_FILES['userfile']['error']) and $_FILES['userfile']['error'] != 0 and $_FILES['userfile']['error'] != 4) {
 		// nelonen tarkoittaa, ettei mit‰‰n file‰ uploadattu.. eli jos on joku muu errori niin ei p‰‰stet‰ eteenp‰in
 		if ($_FILES['userfile']['error'] == 1) {
 			$errormsg .=  "<font class='error'>".t("Liitetiedosto on liian suuri")."! (php: (".ini_get("upload_max_filesize")."))</font><br>";
@@ -299,7 +299,7 @@
 		}
 		unset($jatka);
 	}			
-
+	
 	if (isset($jatka) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		$data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
 

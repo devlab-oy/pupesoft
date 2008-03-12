@@ -756,6 +756,10 @@
 		}
 
 		echo "<th>".t("Myyt‰viss‰")."</th>";
+		
+		if ($lisatiedot != "" and $kukarow["extranet"] == "") {
+			echo "<th>".t("Hyllyss‰")."</th>";
+		}
 
         if ($kukarow["kesken"] != 0 or is_numeric($ostoskori)) {
 			echo "<th></th>";
@@ -1188,7 +1192,7 @@
 				echo "<td valign='top' $classrigh>";
 
 				if (mysql_num_rows($varresult) > 0) {
-
+					$hyllylisa = "";
 					echo "<table width='100%'>";
 
 					// katotaan jos meill‰ on tuotteita varaamassa saldoa joiden varastopaikkaa ei en‰‰ ole olemassa...
@@ -1219,11 +1223,30 @@
 									<td class='$vari' nowrap>$saldorow[nimitys] $saldorow[tyyppi]</td>
 									<td class='$vari' align='right' nowrap>".sprintf("%.2f", $myytavissa)." $row[yksikko]</td>
 									</tr>";
+						
+							if ($lisatiedot != "" and $kukarow["extranet"] == "") {
+								$hyllylisa .= "	<tr>												
+												<td class='$vari' align='right' nowrap>".sprintf("%.2f", $hyllyssa)."</td>
+												</tr>";
+							}						
 						}
 					}
 					echo "</table></td>";
 				}
 				echo "</td>";
+				
+				
+				if ($lisatiedot != "" and $kukarow["extranet"] == "") {
+					echo "<td valign='top' $classrigh>";
+
+					if (mysql_num_rows($varresult) > 0 and $hyllylisa != "") {
+												
+						echo "<table width='100%'>";
+						echo "$hyllylisa";
+						echo "</table></td>";
+					}
+					echo "</td>";
+				}
 			}
 
 			if (($row["sarjanumeroseuranta"] == "" or $row["sarjanumeroseuranta"] == "E"  or $row["sarjanumeroseuranta"] == "F") and ($kukarow["kesken"] != 0 or is_numeric($ostoskori))) {

@@ -2433,10 +2433,6 @@ if ($tee == '') {
 				if ($tilausrivi["tunnus"] != $tilausrivi["perheid"] and $tilausrivi["perheid"] != 0) {
 					$perheid = $tilausrivi["perheid"];
 				}
-				
-				if ($hyllyalue != '' and $paikka == "") {
-					$paikka		= $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
-				}
 
 				$tila		= "MUUTA";
 			}
@@ -2464,10 +2460,6 @@ if ($tee == '') {
 				//Jos lasta muokataan, niin s‰ilytet‰‰n sen perheid
 				if ($tilausrivi["tunnus"] != $tilausrivi["perheid"] and $tilausrivi["perheid"] != 0) {
 					$perheid = $tilausrivi["perheid"];
-				}
-
-				if ($hyllyalue != '') {
-					$paikka		= $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
 				}
 
 				$tila		= "";

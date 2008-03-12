@@ -1160,7 +1160,7 @@
 			$puu_var[]		= $var;
 		}
 
-		if ($laskurow['tila'] != 'O') {
+		if ($laskurow['tila'] != 'O' and $paikka == "" and $perheid == "" and $perhekielto == "") {
 			$query = "	SELECT tuoteperhe.*
 						FROM tuoteperhe, tuote
 						WHERE tuoteperhe.yhtio = tuote.yhtio

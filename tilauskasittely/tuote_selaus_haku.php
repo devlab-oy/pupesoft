@@ -738,22 +738,32 @@
 		echo "<table>";
 
 		echo "<tr>";
-		echo "<th>".t("Tuoteno")."</th>";
-		echo "<th>".t("Nimitys")."</th>";
 
+		echo "<th>".t("Tuoteno");
+		
 		if ($lisatiedot != "") {
-			echo "<th>".t("Toim Tuoteno")."</th>";
+			echo "<br>".t("Toim Tuoteno");
 		}
-
-		echo "<th>".t("Osasto")."</th>";
-		echo "<th>".t("Try")."</th>";
-		echo "<th>".t("Hinta")."</th>";
-		echo "<th>".t("Aleryhmä")."</th>";
+		
+		echo "</th>";	
+		
+		echo "<th>".t("Nimitys")."</th>";
+		echo "<th>".t("Osasto")."<br>".t("Try")."</th>";					
+		echo "<th>".t("Hinta");
+		
+		if ($lisatiedot != "" and $kukarow["extranet"] == "") {
+			echo "<br>".t("Nettohinta");
+		}
+		
+		
+		
+		echo "<th>".t("Aleryhmä");
 
 		if ($lisatiedot != "" and $kukarow["extranet"] == "") {
-			echo "<th>".t("Nettohinta")."</th>";
-			echo "<th>".t("Status")."</th>";
+			echo "<br>".t("Status");
 		}
+		
+		echo "</th>";
 
 		echo "<th>".t("Myytävissä")."</th>";
 		
@@ -929,20 +939,20 @@
 			}
 			
 			if ($kukarow["extranet"] != "") {
-				echo "<td valign='top' class='$vari' $classleft>$lisakala $row[tuoteno] $linkkilisa</td>";
+				echo "<td valign='top' class='$vari' $classleft>$lisakala $row[tuoteno] $linkkilisa ";
 			}
 			else {
-				echo "<td valign='top' class='$vari' $classleft><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z'>$lisakala $row[tuoteno]</a>$linkkilisa</td>";
+				echo "<td valign='top' class='$vari' $classleft><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z'>$lisakala $row[tuoteno]</a>$linkkilisa ";
 			}
 			
-			echo "<td valign='top' class='$vari' $classmidl>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
-
 			if ($lisatiedot != "") {
-				echo "<td valign='top' class='$vari' $classmidl>$row[toim_tuoteno]</td>";
+				echo "<br>$row[toim_tuoteno]";
 			}
-
-			echo "<td valign='top' class='$vari' $classmidl>$row[osasto]</td>";
-			echo "<td valign='top' class='$vari' $classmidl>$row[try]</td>";
+			
+			echo "</td>";
+			
+			echo "<td valign='top' class='$vari' $classmidl>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
+			echo "<td valign='top' class='$vari' $classmidl>$row[osasto]<br>$row[try]</td>";
 
 			$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["myyntihinta"]). " $yhtiorow[valkoodi]";
 
@@ -1014,13 +1024,21 @@
 				}
 			}
 
-			echo "<td valign='top' class='$vari' align='right' $classmidl>$myyntihinta</td>";
-			echo "<td valign='top' class='$vari' $classmidl>$row[aleryhma]</td>";
+			echo "<td valign='top' class='$vari' align='right' $classmidl>$myyntihinta";
+			
+			if ($lisatiedot != "" and $kukarow["extranet"] == "") {
+				echo "<br>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["nettohinta"])." $yhtiorow[valkoodi]";
+			}
+			
+			echo "</td>";
+			
+			echo "<td valign='top' class='$vari' $classmidl>$row[aleryhma]";
 
 			if ($lisatiedot != "" and $kukarow["extranet"] == "") {
-				echo "<td valign='top' class='$vari' $classmidl>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["nettohinta"])."</td>";
-				echo "<td valign='top' class='$vari' $classmidl>$row[status]</td>";
+				echo "<br>$row[status]";
 			}
+
+			echo "</td>";
 
 			$edtuoteno = $row["korvaavat"];
 

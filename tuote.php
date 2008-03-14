@@ -795,18 +795,18 @@
 				$taavuosi = date('Y');
 
 				$query = "	SELECT
-							sum(if(laskutettuaika >= date_sub(now(),interval 30 day), rivihinta,0))	summa30,
-							sum(if(laskutettuaika >= date_sub(now(),interval 30 day), kate,0))  	kate30,
-							sum(if(laskutettuaika >= date_sub(now(),interval 30 day), kpl,0))  		kpl30,
-							sum(if(laskutettuaika >= date_sub(now(),interval 90 day), rivihinta,0))	summa90,
-							sum(if(laskutettuaika >= date_sub(now(),interval 90 day), kate,0))		kate90,
-							sum(if(laskutettuaika >= date_sub(now(),interval 90 day), kpl,0))		kpl90,
-							sum(if(YEAR(laskutettuaika) = '$taavuosi', rivihinta,0))	summaVA,
-							sum(if(YEAR(laskutettuaika) = '$taavuosi', kate,0))		kateVA,
-							sum(if(YEAR(laskutettuaika) = '$taavuosi', kpl,0))		kplVA,
-							sum(if(YEAR(laskutettuaika) = '$edvuosi', rivihinta,0))	summaEDV,
-							sum(if(YEAR(laskutettuaika) = '$edvuosi', kate,0))		kateEDV,
-							sum(if(YEAR(laskutettuaika) = '$edvuosi', kpl,0))		kplEDV
+							round(sum(if(laskutettuaika >= date_sub(now(),interval 30 day), rivihinta,0)), $yhtiorow[hintapyoristys])	summa30,
+							round(sum(if(laskutettuaika >= date_sub(now(),interval 30 day), kate,0)), $yhtiorow[hintapyoristys])  		kate30,
+							sum(if(laskutettuaika >= date_sub(now(),interval 30 day), kpl,0))  											kpl30,
+							round(sum(if(laskutettuaika >= date_sub(now(),interval 90 day), rivihinta,0)), $yhtiorow[hintapyoristys])	summa90,
+							round(sum(if(laskutettuaika >= date_sub(now(),interval 90 day), kate,0)), $yhtiorow[hintapyoristys])		kate90,
+							sum(if(laskutettuaika >= date_sub(now(),interval 90 day), kpl,0))											kpl90,
+							round(sum(if(YEAR(laskutettuaika) = '$taavuosi', rivihinta,0)), $yhtiorow[hintapyoristys])	summaVA,
+							round(sum(if(YEAR(laskutettuaika) = '$taavuosi', kate,0)), $yhtiorow[hintapyoristys])		kateVA,
+							sum(if(YEAR(laskutettuaika) = '$taavuosi', kpl,0))											kplVA,
+							round(sum(if(YEAR(laskutettuaika) = '$edvuosi', rivihinta,0)), $yhtiorow[hintapyoristys])	summaEDV,
+							round(sum(if(YEAR(laskutettuaika) = '$edvuosi', kate,0)), $yhtiorow[hintapyoristys])		kateEDV,
+							sum(if(YEAR(laskutettuaika) = '$edvuosi', kpl,0))											kplEDV
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 							WHERE yhtio='$kukarow[yhtio]'
 							and tyyppi='L'
@@ -920,6 +920,7 @@
 					$ppk = date("t");
 					$alku="$vv-".sprintf("%02s",$kk)."-01 00:00:00";
 					$ed=($vv-1)."-".sprintf("%02s",$kk)."-01 00:00:00";
+					
 					if($select_summa=="") {
 						$select_summa .= "	SUM(IF(toimitettuaika>='$alku' and toimitettuaika<=DATE_ADD('$alku', interval 1 month) and tyyppi='L', kpl, NULL)) kpl_myynti_$kk
 											, SUM(IF(toimitettuaika>='$alku' and toimitettuaika<=DATE_ADD('$alku', interval 1 month) and tyyppi='V', kpl, NULL)) kpl_valmistus_asiakkaalle_$kk

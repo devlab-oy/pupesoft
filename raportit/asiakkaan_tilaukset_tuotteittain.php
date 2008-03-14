@@ -18,7 +18,7 @@
 	if ($toim == 'OSTO') {
 		echo "<font class='head'>".t("Tilatut tuotteet").":</font><hr>";
 	}
-	
+
 	if (isset($muutparametrit) and $muutparametrit != '') {
 		$muut = explode('/',$muutparametrit);
 
@@ -38,9 +38,9 @@
 	}
 
 	if ($ytunnus != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
-		
+
 		$muutparametrit = $vva."/".$kka."/".$ppa."/".$vvl."/".$kkl."/".$ppl."/".$tuoteno;
-		
+
 		if ($toim == 'MYYNTI') {
 			require ("../inc/asiakashaku.inc");
 		}
@@ -48,17 +48,17 @@
 			require ("../inc/kevyt_toimittajahaku.inc");
 		}
 	}
-	
+
 	if ($tuoteno != '') {
 		require ('inc/tuotehaku.inc');
 	}
-	
-	
+
+
 	//Etsi-kentt‰
 	echo "<br><table><form action = '$PHP_SELF' method='post'>
 			<input type='hidden' name='toim' value='$toim'>
 			<input type='hidden' name='tee' value='ETSI'>";
-			
+
 	if ($kka == '')
 		$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 	if ($vva == '')
@@ -82,15 +82,21 @@
 
 	if ($toim == 'OSTO' and $pvmtapa == 'toimaika') {
 		$pvmtapa = "toimaika";
-		$pvm_select2 = "SELECTED";
 		$pvm_select1 = "";
-	} else if ($toim == 'OSTO') {
+		$pvm_select2 = "SELECTED";
+	}
+	elseif ($toim == 'MYYNTI' and $pvmtapa == 'laskutettu') {
+		$pvmtapa = "laskutettuaika";
+		$pvm_select1 = "";
+		$pvm_select2 = "SELECTED";
+	}
+	else {
 		$pvmtapa = "laadittu";
 		$pvm_select1 = "SELECTED";
 		$pvm_select2 = "";
 	}
 
-	
+
 	if (((int) $asiakasid > 0 or (int) $toimittajaid > 0)) {
 		if ($toim == 'MYYNTI') {
 			echo "<td colspan='3'>$asiakasrow[nimi] $asiakasrow[nimitark]<input type='hidden' name='asiakasid' value='$asiakasid'></td></tr>";
@@ -102,18 +108,18 @@
 	else {
 		echo "<td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='20'></td></tr>";
 	}
-	
-	
+
+
 	echo "	<tr><th>".t("Syˆt‰ tuotenumero").":</th>
 			<td colspan='3'>";
-	
+
 	if (isset($tuoteno) and trim($ulos) != '') {
 		echo $ulos;
-	} 
+	}
 	else {
 		echo "<input type='text' name='tuoteno' value='$tuoteno' size='20'>";
 	}
-			
+
 	echo "</td></tr>";
 
 	echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
@@ -124,21 +130,27 @@
 			<td><input type='text' name='ppl' value='$ppl' size='3'></td>
 			<td><input type='text' name='kkl' value='$kkl' size='3'></td>
 			<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
-			
+
 			if ($toim == 'OSTO') {
-			echo "</tr><tr><th>".t("Valitse p‰iv‰m‰‰r‰n tyyppi")."</th>
-				<td colspan='3'><select name='pvmtapa'>
-					<option value='laadittu' $pvm_select1>".t("Tilauksen laatimisp‰iv‰m‰‰r‰")."</option>
-					<option value='toimaika' $pvm_select2>".t("Tilauksen toivottu toimitusp‰iv‰m‰‰r‰")."</option>
-				</select></td>";
+				echo "</tr><tr><th>".t("Valitse p‰iv‰m‰‰r‰n tyyppi")."</th>
+					<td colspan='3'><select name='pvmtapa'>
+						<option value='laadittu' $pvm_select1>".t("Tilauksen laatimisp‰iv‰m‰‰r‰")."</option>
+						<option value='toimaika' $pvm_select2>".t("Tilauksen toivottu toimitusp‰iv‰m‰‰r‰")."</option>
+					</select></td>";
 			}
-			
+			else {
+				echo "</tr><tr><th>".t("Valitse p‰iv‰m‰‰r‰n tyyppi")."</th>
+					<td colspan='3'><select name='pvmtapa'>
+						<option value='laadittu' $pvm_select1>".t("Tilauksen laatimisp‰iv‰m‰‰r‰")."</option>
+						<option value='laskutettu' $pvm_select2>".t("Tilauksen laskutusp‰iv‰m‰‰r‰")."</option>
+					</select></td>";
+			}
+
 	echo "<td class='back'><input type='submit' value='".t("Etsi")."'></td></tr></form></table>";
 
 	if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
-		
-		if(include('Spreadsheet/Excel/Writer.php')) {
 
+		if(@include('Spreadsheet/Excel/Writer.php')) {
 			//keksit‰‰n failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
 			mt_srand((float) $sec + ((float) $usec * 100000));
@@ -156,7 +168,7 @@
 
 			$excelrivi = 0;
 		}
-			
+
 		if ($jarj != '') {
 			$jarj = "ORDER BY $jarj";
 		}
@@ -165,15 +177,15 @@
 		}
 
 
-		if ($toim == 'OSTO') {			
-			$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, ytunnus, 
-						if(nimi!=toim_nimi and toim_nimi!='', concat(nimi,'<br>(',toim_nimi,')'), nimi) nimi, 
-						if(postitp!=toim_postitp and toim_postitp!='', concat(postitp,'<br>(',toim_postitp,')'), postitp) postitp, 
-						tuoteno, REPLACE(kpl+varattu,'.',',') kpl, 
-						REPLACE(tilausrivi.hinta,'.',',') hinta, 
-						REPLACE(rivihinta,'.',',') rivihinta, 
-						lasku.toimaika, 
-						tilausrivi.laskutettuaika tuloutettu, 
+		if ($toim == 'OSTO') {
+			$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, ytunnus,
+						if(nimi!=toim_nimi and toim_nimi!='', concat(nimi,'<br>(',toim_nimi,')'), nimi) nimi,
+						if(postitp!=toim_postitp and toim_postitp!='', concat(postitp,'<br>(',toim_postitp,')'), postitp) postitp,
+						tuoteno, REPLACE(kpl+varattu,'.',',') kpl,
+						REPLACE(tilausrivi.hinta,'.',',') hinta,
+						REPLACE(rivihinta,'.',',') rivihinta,
+						lasku.toimaika,
+						tilausrivi.laskutettuaika tuloutettu,
 						lasku.tila, lasku.alatila
 						FROM tilausrivi, lasku
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -185,15 +197,15 @@
 						and tilausrivi.$pvmtapa <='$vvl-$kkl-$ppl 23:59:59'
 						and lasku.tunnus=tilausrivi.otunnus ";
 		}
-		else {			
-			$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, laskunro, ytunnus, 
+		else {
+			$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, laskunro, ytunnus,
 						if(nimi!=toim_nimi and toim_nimi!='', concat(nimi,'<br>(',toim_nimi,')'), nimi) nimi,
-						if(postitp!=toim_postitp and toim_postitp!='', concat(postitp,'<br>(',toim_postitp,')'), postitp) postitp, 
-						tuoteno, (kpl+varattu) kpl, 
-						tilausrivi.hinta hinta, 
-						rivihinta rivihinta, 
-						lasku.toimaika, 
-						lasku.lahetepvm, 
+						if(postitp!=toim_postitp and toim_postitp!='', concat(postitp,'<br>(',toim_postitp,')'), postitp) postitp,
+						tuoteno, (kpl+varattu) kpl,
+						tilausrivi.hinta hinta,
+						rivihinta rivihinta,
+						lasku.toimaika,
+						lasku.lahetepvm,
 						lasku.tila, lasku.alatila
 						FROM tilausrivi, lasku
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -201,11 +213,11 @@
 						and lasku.tunnus=tilausrivi.otunnus
 						and lasku.tila in ('L','N','U')
 						and tilausrivi.tyyppi = 'L'
-						and tilausrivi.laadittu >='$vva-$kka-$ppa 00:00:00'
-						and tilausrivi.laadittu <='$vvl-$kkl-$ppl 23:59:59'
+						and tilausrivi.$pvmtapa >='$vva-$kka-$ppa 00:00:00'
+						and tilausrivi.$pvmtapa <='$vvl-$kkl-$ppl 23:59:59'
 						and lasku.tunnus=tilausrivi.otunnus ";
 		}
-		
+
 		if ($tuoteno != '') {
 			$query .= " and tilausrivi.tuoteno='$tuoteno' ";
 		}
@@ -217,51 +229,51 @@
 			$query .= " and lasku.liitostunnus = '$toimittajaid' ";
 		}
 
-		$query .= "$jarj";		
+		$query .= "$jarj";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {
 
 			echo "<br><table border='0' cellpadding='2' cellspacing='1'>";
 			echo "<tr>";
-			
+
 			for ($i=1; $i < mysql_num_fields($result)-2; $i++) {
 				if ($toim == 'OSTO' and $pvmtapa == 'toimaika') {
 					$pvmtapa_url = "&pvmtapa=toimaika";
 				}
 				echo "<th align='left'><a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&tuoteno=$tuoteno&ytunnus=$ytunnus&asiakasid=$asiakasid&jarj=".mysql_field_name($result,$i)."$pvmtapa_url'>".t(mysql_field_name($result,$i))."</a></th>";
-				
+
 				if(isset($workbook)) {
 					$worksheet->write($excelrivi, ($i-1), ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 				}
 			}
-			
+
 			if ($toim != "OSTO") {
 				echo "<th align='left'>".t("Tyyppi")."</th>";
-				
+
 				if(isset($workbook)) {
 					$worksheet->write($excelrivi, $i, t("Tyyppi"), $format_bold);
 				}
 			}
-			
+
 			if(isset($workbook)) {
 				$excelrivi++;
 			}
-			
+
 			echo "</tr>";
 
 			$kplsumma = 0;
 			$rivihintasumma = 0;
-			
+
 			while ($row = mysql_fetch_array($result)) {
-				
+
 				$excelsarake = 0;
-				
+
 				$ero = "td";
 				if ($tunnus == $row['tilaus']) $ero="th";
 
 				echo "<tr class='aktiivi'>";
-				
+
 				for ($i=1; $i<mysql_num_fields($result)-2; $i++) {
 					if (mysql_field_name($result,$i) == 'kpl' or mysql_field_name($result,$i) == 'hinta' or mysql_field_name($result,$i) == 'rivihinta') {
 						echo "<$ero valign='top' align='right'>".str_replace(".", ",", $row[$i])."</$ero>";
@@ -277,7 +289,7 @@
 					else {
 						echo "<$ero valign='top'>$row[$i]</$ero>";
 					}
-					
+
 					if(isset($workbook)) {
 						if (mysql_field_name($result,$i) == 'kpl' or mysql_field_name($result,$i) == 'hinta' or mysql_field_name($result,$i) == 'rivihinta') {
 							$worksheet->writeNumber($excelrivi, $excelsarake, $row[$i], $format_num);
@@ -288,24 +300,24 @@
 						$excelsarake++;
 					}
 				}
-				
+
 				$kplsumma += $row["kpl"];
 				$rivihintasumma += $row["rivihinta"];
 
 				if ($toim != "OSTO") {
 					$laskutyyppi=$row["tila"];
 					$alatila=$row["alatila"];
-					
+
 					//tehd‰‰n selv‰kielinen tila/alatila
 					require "../inc/laskutyyppi.inc";
-                	
+
 					echo "<$ero valign='top'>".t("$laskutyyppi")." ".t("$alatila")."</$ero>";
-					
+
 					if(isset($workbook)) {
 						$worksheet->write($excelrivi, $i, t("$laskutyyppi")." ".t("$alatila"));
 					}
 				}
-				
+
 				echo "<form method='post' action='$PHP_SELF'><td class='back' valign='top'>
 						<input type='hidden' name='tee' value='NAYTATILAUS'>
 						<input type='hidden' name='toim' value='$toim'>
@@ -322,22 +334,22 @@
 						<input type='submit' value='".t("N‰yt‰ tilaus")."'></td></form>";
 
 				echo "</tr>";
-				
+
 				if(isset($workbook)) {
 					$excelrivi++;
 				}
 			}
-			
+
 			if ($toim == "OSTO") {
-				$csp = 5;	
+				$csp = 5;
 			}
 			else {
 				$csp = 6;
 			}
-			
+
 			echo "<tr><td colspan='$csp'>".t("Yhteens‰").":</td><td>".sprintf('%01.2f', $kplsumma)."</td><td></td><td>".sprintf('%01.2f', $rivihintasumma)."</td></tr>";
 			echo "</table>";
-			
+
 			if(isset($workbook)) {
 				if($toim == "OSTO") {
 					$worksheet->writeFormula($excelrivi, 5, "=sum(F2:F$excelrivi)");
@@ -350,26 +362,26 @@
 					$worksheet->writeFormula($excelrivi, 8, "=sum(I2:I$excelrivi)");
 				}
 				$workbook->close();
-				
+
 				echo "<br><table>";
 				echo "<tr><th>".t("Tallenna tulos").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				
+
 				if($toim == "MYYNTI") {
 					echo "<input type='hidden' name='kaunisnimi' value='Asiakkaan_tuoteostot-$ytunnus.xls'>";
 				}
 				else {
 					echo "<input type='hidden' name='kaunisnimi' value='Toimittajalta_tilatut-$ytunnus.xls'>";
 				}
-				
+
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table>";
-							
-			}	
+
+			}
 		}
-		
+
 		else {
 			echo t("Ei ostettuja tuotteita")."...<br><br>";
 		}

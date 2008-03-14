@@ -89,7 +89,7 @@
 
 
 		//Haetaan käteislaskut
-		$query = "	SELECT if(lasku.kassalipas='', 'Muut', lasku.kassalipas) kassa, if(ifnull(avainsana.selitetark, '') ='', 'Muut', avainsana.selitetark) kassanimi, tiliointi.tilino,
+		$query = "	SELECT distinct if(lasku.kassalipas='', 'Muut', lasku.kassalipas) kassa, if(ifnull(avainsana.selitetark, '') ='', 'Muut', avainsana.selitetark) kassanimi, tiliointi.tilino,
 					lasku.nimi, lasku.ytunnus, lasku.laskunro, lasku.tunnus, lasku.summa, lasku.laskutettu, lasku.tapvm
 					FROM lasku use index (yhtio_tila_tapvm)
 					JOIN maksuehto ON (maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen != '')

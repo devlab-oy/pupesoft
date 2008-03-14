@@ -85,21 +85,26 @@
 			$query  = substr($query, 0 ,-2);
 			
 			if ($kustannuspaikka != '') {
-				$kustp = "	JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and (tuote.kustp='$kustannuspaikka' or asiakas.kustannuspaikka='$kustannuspaikka')) ";
+				$kustp1 = "	JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno) ";
+			
+				$kustp2 = "	and (tuote.kustp='$kustannuspaikka' or asiakas.kustannuspaikka='$kustannuspaikka') ";
+			}
+			else {
+				$kustp1 = " ";
+				$kustp2 = " ";	
 			}
 			
 			$query .= "	FROM lasku use index (yhtio_tila_tapvm) 
-						JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
-						$kustp
+						JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='L')
+						$kustp1
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila in ('L','N')
 						and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
-						and ((lasku.tapvm = '0000-00-00') or (lasku.tapvm >= '$vva-$kka-$ppa' and lasku.tapvm <= '$vvl-$kkl-$ppl') or (lasku.tapvm >= '$vvaa-$kka-$ppa' and lasku.tapvm <= '$vvll-$kkl-$ppl'))";
+						and ((lasku.tapvm = '0000-00-00') or (lasku.tapvm >= '$vva-$kka-$ppa' and lasku.tapvm <= '$vvl-$kkl-$ppl') or (lasku.tapvm >= '$vvaa-$kka-$ppa' and lasku.tapvm <= '$vvll-$kkl-$ppl'))
+						$kustp2";
 			$result = mysql_query($query) or pupe_error($query);
-			
-			//echo "<pre>$query</pre>";
-						
+									
 			if (strpos($_SERVER['SCRIPT_NAME'], "tilauskanta_laskutus.php") !== FALSE) {
 				if(@include('Spreadsheet/Excel/Writer.php')) {
 

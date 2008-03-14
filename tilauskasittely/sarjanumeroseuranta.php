@@ -1035,15 +1035,9 @@
 			
 				$sarjarow["myynti_tunnus"] = 0;
 				
-				if ($siirow["tunnus"] != $ztun) {
-					$fnlina1 = "<font class='message'>(".t("Varattu lisävarusteena tuotteelle").": ";
-					$fnlina2 = ")</font>";
-					$sarjarow["myynti_nimi"] = $siirow["tuoteno"]." ".$siirow["sarjanumero"];
-				}
-				else {
-					$fnlina1 = "<font class='message'>".t("Sisäisellä työmääräyksellä");
-					$fnlina2 = "</font>";
-				}
+				$fnlina1 = "<font class='message'>(".t("Varattu lisävarusteena tuotteelle").": ";
+				$fnlina2 = ")</font>";
+				$sarjarow["myynti_nimi"] = $siirow["tuoteno"]." ".$siirow["sarjanumero"];
 			}
 			elseif ($sarjarow["myynti_tila"] == 'T') {
 				$fnlina1 = "<font class='message'>(".t("Tarjous").": ";

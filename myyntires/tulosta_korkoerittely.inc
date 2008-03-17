@@ -188,7 +188,7 @@
 				l.laskunro, t.tapvm mapvm, l.tapvm tapvm, l.tunnus, l.viikorkopros, to_days(t.tapvm) - to_days(l.erpcm) as ika,
 				round(l.viikorkopros * t.summa * -1 * (to_days(t.tapvm)-to_days(l.erpcm)) / 36500,2) as korkosumma, l.maksuehto
 				FROM lasku l use index (PRIMARY)
-				join tiliointi t use index (tositerivit_index) on (t.yhtio = l.yhtio and t.tilino = '$yhtiorow[myyntisaamiset]' and t.tapvm > l.erpcm and l.tunnus = t.ltunnus)
+				join tiliointi t use index (tositerivit_index) on (t.yhtio = l.yhtio and t.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and t.tapvm > l.erpcm and l.tunnus = t.ltunnus)
 				LEFT JOIN maksuehto me on (me.yhtio=l.yhtio and me.tunnus=l.maksuehto)
 				WHERE l.tunnus in ($xquery)
 				and l.yhtio = '$kukarow[yhtio]'

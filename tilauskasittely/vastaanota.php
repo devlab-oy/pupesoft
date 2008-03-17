@@ -522,10 +522,34 @@
 						and lasku.yhtio						= '$kukarow[yhtio]'
 						and lasku.tila						= 'G'";
 			$result = mysql_query($query) or pupe_error($query);
-			$id = 0;
+			
+			
 		}
 	}
-
+	
+	//Tulostetaan vastaanotetut listaus
+	if ($tee == "OK" and $id != '0' and $toim != "MYYNTITILI") {
+		
+		$query  = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$id'";
+		$result = mysql_query($query) or pupe_error($query);
+		$laskurow = mysql_fetch_array($result);
+		
+		$query = "select komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$listaus'";
+		$komres = mysql_query($query) or pupe_error($query);
+		$komrow = mysql_fetch_array($komres);
+		$komento["Vastaanotetut"] = $komrow['komento'];
+	
+		$otunnus = $laskurow["tunnus"];
+		$mista = 'vastaanota';
+		
+		
+		require('tulosta_purkulista.inc');
+		$id = 0;
+	}
+	elseif ($tee == "OK" and $id != '0' and $toim == "MYYNTITILI") {
+		$id = 0;
+	}
+	
 	if ($id == '') $id = 0;
 
 	// meill‰ ei ole valittua tilausta
@@ -537,8 +561,8 @@
 		// tehd‰‰n etsi valinta
 		echo "<table><form action='$PHP_SELF' name='find' method='post'><tr><th>".t("Etsi siirtolistaa").":</th>
 		<td><input type='text' name='etsi'></td>";
+		echo "<input type='hidden' name='toim' value='$toim'>"; 
 		echo "<tr><th>Varasto</th><td><select name='varasto'>";
-		
 		echo "<option value=''>" . t('Kaikki varastot') . "</option>";
 		
 		$query  = "SELECT tunnus, nimitys, maa FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
@@ -548,7 +572,7 @@
 		{
 			$sel='';
 			if ($varow['tunnus'] == $varasto) $sel = 'selected';
-
+						
 			$varastomaa = '';
 			if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
 				$varastomaa = strtoupper($varow['maa']);
@@ -589,7 +613,7 @@
 		if (isset($_POST['varasto']) and !empty($_POST['varasto'])) {
 			$varasto = ' AND lasku.clearing=' . (int) $_POST['varasto'];
 		}
-		
+				
 		$maa = '';
 		if (isset($_POST['maa']) and !empty($_POST['maa'])) {
 			$varasto = " AND varastopaikat.maa='" . mysql_real_escape_string($_POST['maa']) . "'";
@@ -966,11 +990,11 @@
 		echo "</table><br>";
 
 		if ($toim != "MYYNTITILI") {
-
+			echo "<table><tr><td>";
 			echo t("Kirjoitin johon tuotetarrat tulostetaan")."<br>";
 			$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]'";
 			$kires = mysql_query($query) or pupe_error($query);
-			echo "<td><select name='kirjoitin'>";
+			echo "<select name='kirjoitin'>";
 			echo "<option value='$kirow[tunnus]'>".t("Ei kirjoitinta")."</option>";
 
 			while ($kirow=mysql_fetch_array($kires)) {
@@ -980,7 +1004,23 @@
 				echo "<option value='$kirow[tunnus]' $select>$kirow[kirjoitin]</option>";
 			}
 
+			echo "</select></td><td>";
+			
+			echo t("Kirjoitin johon vastaanotetut listaus tulostetaan")."<br>";
+			
+			mysql_data_seek($kires, 0);
+			echo "<select name='listaus'>";
+			echo "<option value='$kirow[tunnus]'>".t("Ei kirjoitinta")."</option>";
+
+			while ($kirow=mysql_fetch_array($kires)) {
+				if ($kirow['tunnus']==$listaus) $select='SELECTED';
+				else $select = '';
+
+				echo "<option value='$kirow[tunnus]' $select>$kirow[kirjoitin]</option>";
+			}
+
 			echo "</select></td>";
+			echo "</table>";
 		}
 		echo "<br><br><input type='submit' name='Laheta' value='".t("Valitse")."'>";
 		echo "</form>";

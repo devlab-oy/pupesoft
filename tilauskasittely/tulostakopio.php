@@ -39,6 +39,9 @@
 	if ($toim == "PURKU") {
 		$fuse = t("Purkulista");
 	}
+	if ($toim == "VASTAANOTETUT") {
+		$fuse = t("Vastaanotetut");
+	}
 	if ($toim == "TARIFFI") {
 		$fuse = t("Tariffilista");
 	}
@@ -166,7 +169,7 @@
 		$muutparametrit = $vva."/".$kka."/".$ppa."/".$vvl."/".$kkl."/".$ppl;
 		
 		if ($ytunnus != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
-			if ($toim == 'OSTO' or $toim == 'PURKU' or $toim == 'TARIFFI' or $toim == 'TUOTETARRA') {
+			if ($toim == 'OSTO' or $toim == 'PURKU' or $toim == 'TARIFFI' or $toim == 'TUOTETARRA' or $toim == 'VASTAANOTETUT') {
 				require ("../inc/kevyt_toimittajahaku.inc");
 			}
 			else {
@@ -255,7 +258,7 @@
 		}
 		else {
 			if (((int) $asiakasid > 0 or (int) $toimittajaid > 0)) {
-				if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA") {
+				if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA" or $toim == 'VASTAANOTETUT') {
 					echo "<th>".t("Toimittajan nimi")."</th><td colspan='3'>$toimittajarow[nimi]<input type='hidden' name='toimittajaid' value='$toimittajaid'></td>";
 					
 					if($kukarow["extranet"] == "") {
@@ -275,7 +278,7 @@
 				}
 			}
 			else {
-				if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA") {
+				if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA" or $toim == 'VASTAANOTETUT') {
 					echo "<th>".t("Toimittajan nimi")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='15'></td></tr>";
 				}
 				else {
@@ -378,6 +381,16 @@
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
+			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			$use = " use index (yhtio_tila_luontiaika) ";
+		}
+		if ($toim == "VASTAANOTETUT") {
+			
+			$where1 = " lasku.tila = 'G' and alatila in ('V','X') ";
+			
+			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+						
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
@@ -863,6 +876,12 @@
 				$komento["Purkulista"] .= " -# $kappaleet ";
 			}
 		}
+		if ($toim == "VASTAANOTETUT") {
+			$tulostimet[0] = 'Vastaanotetut';
+			if ($kappaleet > 0 and $komento["Vastaanotetut"] != 'email') {
+				$komento["Vastaanotetut"] .= " -# $kappaleet ";
+			}
+		}
 		if ($toim == "TARIFFI") {
 			$tulostimet[0] = 'Tariffilista';
 			if ($kappaleet > 0 and $komento["Tariffilista"] != 'email') {
@@ -1048,6 +1067,13 @@
 			if ($toim == "PURKU") {
 				$otunnus = $laskurow["tunnus"];
 				$mista = 'tulostakopio';
+				require('tulosta_purkulista.inc');
+				$tee = '';
+			}
+			
+			if ($toim == "VASTAANOTETUT") {
+				$otunnus = $laskurow["tunnus"];
+				$mista = 'vastaanota';
 				require('tulosta_purkulista.inc');
 				$tee = '';
 			}

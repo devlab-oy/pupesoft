@@ -103,6 +103,10 @@
 								kplhinta	= '0',
 								hinta 		= '0',
 								laji 		= 'poistettupaikka',
+								hyllyalue	= '$hyllyalue[$poistetaan]',
+								hyllynro 	= '$hyllynro[$poistetaan]',
+								hyllyvali	= '$hyllyvali[$poistetaan]',
+								hyllytaso	= '$hyllytaso[$poistetaan]',
 								selite 		= '".t("Poistettiin tuotepaikka")." $hyllyalue[$poistetaan] $hyllynro[$poistetaan] $hyllyvali[$poistetaan] $hyllytaso[$poistetaan]',
 								laatija 	= '$kukarow[kuka]',
 								laadittu 	= now()";
@@ -397,6 +401,10 @@
 								kplhinta	= '0',
 								hinta 		= '0',
 								laji 		= 'uusipaikka',
+								hyllyalue	= '$minnerow[hyllyalue]',
+								hyllynro 	= '$minnerow[hyllynro]',
+								hyllyvali	= '$minnerow[hyllyvali]',
+								hyllytaso	= '$minnerow[hyllytaso]',
 								selite 		= '".t("Lisättiin tuotepaikka")." $minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso]',
 								laatija 	= '$kukarow[kuka]',
 								laadittu 	= now()";
@@ -462,24 +470,34 @@
 						
 			$minne_texti = $minnerow['hyllyalue']." ".$minnerow['hyllynro']." ".$minnerow['hyllyvali']." ".$minnerow['hyllytaso'];
 			$mista_texti = $mistarow['hyllyalue']." ".$mistarow['hyllynro']." ".$mistarow['hyllyvali']." ".$mistarow['hyllytaso'];
-		
+			
 			$query = "	INSERT into tapahtuma set
 						yhtio 		= '$kukarow[yhtio]',
 						tuoteno 	= '$tuotteet[$iii]',
 						kpl 		= $kappaleet[$iii] * -1,
 						hinta 		= '0',
 						laji 		= 'siirto',
+						hyllyalue	= '$mistarow[hyllyalue]',
+						hyllynro 	= '$mistarow[hyllynro]',
+						hyllyvali	= '$mistarow[hyllyvali]',
+						hyllytaso	= '$mistarow[hyllytaso]',
+						rivitunnus	= '$tun',
 						selite 		= '".t("Paikasta")." $mista_texti ".t("vähennettiin")." $kappaleet[$iii]',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
 			$result = mysql_query($query) or pupe_error($query);
-		
+			
 			$query = "	INSERT into tapahtuma set
 						yhtio 		= '$kukarow[yhtio]',
 						tuoteno 	= '$tuotteet[$iii]',
 						kpl 		= '$kappaleet[$iii]',
 						hinta 		= '0',
 						laji 		= 'siirto',
+						hyllyalue	= '$minnerow[hyllyalue]',
+						hyllynro 	= '$minnerow[hyllynro]',
+						hyllyvali	= '$minnerow[hyllyvali]',
+						hyllytaso	= '$minnerow[hyllytaso]',
+						rivitunnus	= '$tun',
 						selite 		= '".t("Paikalle")." $minne_texti ".t("lisättiin")." $kappaleet[$iii]',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
@@ -579,6 +597,10 @@
 							kplhinta	= '0',
 							hinta 		= '0',
 							laji 		= 'uusipaikka',
+							hyllyalue	= '$ahyllyalue',
+							hyllynro 	= '$ahyllynro',
+							hyllyvali	= '$ahyllyvali',
+							hyllytaso	= '$ahyllytaso',
 							selite 		= '".t("Lisättiin tuotepaikka")." $ahyllyalue $ahyllynro $ahyllyvali $ahyllytaso',
 							laatija 	= '$kukarow[kuka]',
 							laadittu 	= now()";

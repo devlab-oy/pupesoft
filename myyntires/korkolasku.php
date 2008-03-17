@@ -83,7 +83,7 @@ if ($tee == "ALOITAKOROTUS") {
 						and lasku.olmapvm	= '0000-00-00'
 						$asiakaslisa
 						$konslisa
-						HAVING ika > $min_myoh and korkosumma2 > 0 and (maksuehto.jv is null or maksuehto.jv = '')
+						HAVING ika > $min_myoh and korkosumma2 != 0 and (maksuehto.jv is null or maksuehto.jv = '')
 						ORDER BY asiakas.ytunnus) as laskut
 				JOIN asiakas ON (lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus)
 				JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')

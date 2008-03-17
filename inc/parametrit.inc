@@ -10,7 +10,7 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(_
 foreach ($_GET as $key => $value) {
 	//$_GET[$key] = addslashes(trim($_GET[$key]));
 	$_GET[$key] = str_replace($serc, $repl, $_GET[$key]);
-	if($_REQUEST["sourceCharset"] != "") {
+	if(isset($_REQUEST["sourceCharset"]) and $_REQUEST["sourceCharset"] != "") {
 		${$key} = iconv($_REQUEST["sourceCharset"], "latin1", str_replace($serc, $repl, $_GET[$key]));
 	}
 	else {
@@ -22,7 +22,7 @@ foreach ($_GET as $key => $value) {
 foreach ($_POST as $key => $value) {
 	//$_POST[$key] = addslashes(trim($_POST[$key]));
 	$_POST[$key] = str_replace($serc, $repl, $_POST[$key]);
-	if($_REQUEST["sourceCharset"] != "") {
+	if(isset($_REQUEST["sourceCharset"]) and $_REQUEST["sourceCharset"] != "") {
 		${$key} = iconv($_REQUEST["sourceCharset"], "latin1", str_replace($serc, $repl, $_POST[$key]));
 	}
 	else {
@@ -375,7 +375,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";
 		echo "</head>";
 
-		if($suljeYllapito!="") {
+		if(isset($suljeYllapito) and $suljeYllapito != "") {
 			$body_js="onblur='window.close();'";
 		}
 		else {
@@ -405,11 +405,11 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			echo "<div align='right'><a target='_blank' href='$hreffi'>".t("OHJE")."</a><br></div>";
 
 		}
-		elseif($_GET["sulje"] != "") {
+		elseif(isset($_GET["sulje"]) and $_GET["sulje"] != "") {
 			echo "<div><a href='#' onclick=\"divi=document.getElementById('{$_GET["sulje"]}'); divi.innerHTML=''; divi.style.display='none'; return false;\"><font style='color: red;'>x</font></a><br></div>";
 		}
 
-		if ($tee == "message_luettu") {
+		if (isset($tee) and $tee == "message_luettu") {
 			$query = "UPDATE messenger SET status='' WHERE vastaanottaja='$kukarow[kuka]' AND tunnus='$message_tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			exit;

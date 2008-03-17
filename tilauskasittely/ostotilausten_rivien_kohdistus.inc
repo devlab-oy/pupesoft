@@ -243,6 +243,7 @@ if ($tee == 'TI' or $tee == "Y") {
 
 	$multi = "";
 	require("../inc/tuotehaku.inc");
+	$prow["tuoteno"] = $tuoteno;
 
 	require('tarkistarivi_ostotilaus.inc');
 

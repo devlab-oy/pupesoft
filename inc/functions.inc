@@ -3833,6 +3833,16 @@ if(!function_exists("enable_ajax")) {
 						eval(allNewScripts[x].innerHTML);
 					}
 				}
+				
+				//	Jos p‰ivitet‰‰n togglegrouppaus
+				if(href) {
+					document.getElementById(href).href = 'javascript:toggleGroup("' + id + '");';
+					toggeled.push(id);
+				}
+				
+				//	Varmistetaan n‰kyvyys
+				document.getElementById(id).style.display = '';
+				
 			}
 		}
 
@@ -3847,11 +3857,6 @@ if(!function_exists("enable_ajax")) {
 			http.send(null);
 		}
 
-		this.chgHref = function() {
-			document.getElementById(href).href = 'javascript:toggleGroup("' + id + '");';
-			toggeled.push(id);
-		}
-
 		this.unToggle = function() {
 			unToggle(id);
 			document.getElementById(href).href = document.getElementById(href).href+' unToggle("' + id + '");';
@@ -3861,9 +3866,6 @@ if(!function_exists("enable_ajax")) {
 			document.getElementById(id).innerHTML = "<div style='filter:alpha(opacity=30); -moz-opacity:0.3; opacity: 0.3; position: absolute; width: 100%; height: 100%; top: 0; left: 0; background-color: #0c0c0c;' z-index: 100><img style='position: absolute; top: 50%; left: 50%;' src='<?php echo $imgUrl; ?>'></div>";
 		}
 
-		this.visible = function() {
-			document.getElementById(id).style.display = '';
-		}
 	}
 
 	function sndReq(div, urli, href, load, unToggle, method, data) {
@@ -3874,11 +3876,6 @@ if(!function_exists("enable_ajax")) {
 		//	N‰ytet‰‰n latausanimaatio
 		if(load) {
 			ai.showLoader();
-		}
-
-		//	Jos p‰ivitet‰‰n togglegrouppaus
-		if(href) {
-			ai.chgHref();
 		}
 
 		if(unToggle) {
@@ -3892,9 +3889,6 @@ if(!function_exists("enable_ajax")) {
 		else {
 			ai.doGet();
 		}
-
-		//	Varmistetaan n‰kyvyys
-		ai.visible();
 
 	}
 

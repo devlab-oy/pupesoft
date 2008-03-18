@@ -115,6 +115,9 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 					$row = mysql_fetch_array($result);
 
 					if ($row["oletus_ohjelma"] != "") {
+						$row["oletus_ohjelma"] = str_replace("##", "?toim=", $row["oletus_ohjelma"]);
+						
+						
 						$palvelin2 .= "?go=$row[oletus_ohjelma]";
 					}
 

@@ -2625,6 +2625,9 @@ if ($tee == '') {
 		}
 
 		foreach($tuoteno_array as $tuoteno) {
+
+			$tuoteno = trim($tuoteno);
+			
 			$query	= "	SELECT *
 						from tuote
 						where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";

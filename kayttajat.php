@@ -768,7 +768,7 @@
 				echo "<tr><th align='left'>".t("Oletusohjelma").":</th><td><select name='oletus_ohjelma'>";
 				echo "<option value=''>".t("Ei oletusta")."</option>";
 
-				$query  = "SELECT distinct concat_ws('##',nimi,alanimi) nimi, nimitys, sovellus FROM oikeu WHERE yhtio='$kukarow[yhtio]' and kuka='$krow[kuka]' ORDER by sovellus, nimitys";
+				$query  = "SELECT distinct concat_ws('##',sovellus,nimi,alanimi) nimi, nimitys, sovellus FROM oikeu WHERE yhtio='$kukarow[yhtio]' and kuka='$krow[kuka]' ORDER by sovellus, nimitys";
 				$vares = mysql_query($query) or pupe_error($query);
 
 				while ($varow = mysql_fetch_array($vares)) {

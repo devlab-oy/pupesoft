@@ -500,13 +500,13 @@ if ($tee=='MONISTA') {
 			}
 			
 			if ($toim == 'SOPIMUS') {
-				$query = "SELECT * from tilausrivi where otunnus='$lasku' and yhtio ='$kukarow[yhtio]'";
+				$query = "SELECT * from tilausrivi where otunnus='$lasku' and yhtio ='$kukarow[yhtio]' ORDER BY tunnus";
 			}
 			elseif ($toim == 'TARJOUS') {
-				$query = "SELECT * from tilausrivi where otunnus='$lasku' and yhtio ='$kukarow[yhtio]'";
+				$query = "SELECT * from tilausrivi where otunnus='$lasku' and yhtio ='$kukarow[yhtio]' ORDER BY tunnus";
 			}
 			else {
-				$query = "SELECT * from tilausrivi where uusiotunnus='$lasku' and kpl<>0 and tyyppi = 'L' and yhtio ='$kukarow[yhtio]'";
+				$query = "SELECT * from tilausrivi where uusiotunnus='$lasku' and kpl<>0 and tyyppi = 'L' and yhtio ='$kukarow[yhtio]' ORDER BY tunnus";
 			}
 			
 			$rivires = mysql_query($query) or pupe_error($query);

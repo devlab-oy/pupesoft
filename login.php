@@ -115,10 +115,14 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 					$row = mysql_fetch_array($result);
 
 					if ($row["oletus_ohjelma"] != "") {
-						$row["oletus_ohjelma"] = str_replace("##", "?toim=", $row["oletus_ohjelma"]);
 						
+						$oletus_ohjelman_osat = explode("##", $row["oletus_ohjelma"]);
+												
+						$palvelin2 .= "?goso=$oletus_ohjelman_osat[0]&go=$oletus_ohjelman_osat[1]";
 						
-						$palvelin2 .= "?go=$row[oletus_ohjelma]";
+						if ($oletus_ohjelman_osat[2] != "") {
+							$palvelin2 .= "?toim=$oletus_ohjelman_osat[2]";
+						}											
 					}
 
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";

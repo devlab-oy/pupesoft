@@ -73,17 +73,8 @@ $result = mysql_query($query) or pupe_error($query);
 if (mysql_num_rows($result) > 1) {
 
 	// jos ollaan tulossa loginista, valitaan oletussovellus...
-	if (isset($go) and $go != "") {
-		$query = "	SELECT sovellus
-					FROM oikeu use index (oikeudet_index) 
-					WHERE yhtio = '$kukarow[yhtio]' and 
-					kuka = '$kukarow[kuka]' and 
-					nimi = '$go' 
-					ORDER BY sovellus, jarjestys 
-					LIMIT 1";
-		$gores = mysql_query($query) or pupe_error($query);
-		$gorow = mysql_fetch_array($gores);
-		$sovellus = $gorow["sovellus"];
+	if (isset($goso) and $goso != "") {
+		$sovellus = $goso;
 	}
 
 	echo "	<form action='$PHP_SELF' name='vaihdaSovellus' method='POST'>
@@ -170,7 +161,15 @@ while ($orow = mysql_fetch_array($result)) {
 	else {
 		// normaali menuitem
 		echo "<tr><td class='back'><a class='menu' href='$mrow[nimi]";
-		if ($mrow['alanimi'] != '') echo "?toim=$mrow[alanimi]";
+		
+		if ($mrow['alanimi'] != '') {
+			echo "?toim=$mrow[alanimi]";
+		
+			if ($mrow['alanimi'] == "FUTURSOFT") {
+				echo "&ostoskori=$ostoskori";
+			}
+		}
+		
 		echo "' target='main'>".t("$mrow[nimitys]")."</a></td></tr>";
 	}
 

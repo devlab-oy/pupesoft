@@ -10,8 +10,18 @@ if ($go == '') {
 	else 						$go		= "";	
 }
 
-$go2 = $go; // ei laiteta tervetuloa.phptä oletukseksi indexvassiin
-if ($go == '') $go = 'tervetuloa.php';
+if(isset($_POST['goso'])) 		$goso	= $_POST['goso'];
+else 							$goso	= "";
+
+if ($goso == '') {
+	if(isset($_GET['goso'])) 	$goso	= $_GET['goso'];
+	else 						$goso	= "";	
+}
+
+if ($go == '') { 
+	$go		= 'tervetuloa.php';
+	$goso	= "";
+}
 
 $colwidth = '180';
 
@@ -38,7 +48,7 @@ echo "	<meta http-equiv='Pragma' content='no-cache'>
 		</noscript>
 		<frameset cols='$colwidth,*' border='0' frameborder='no'>
 		<frameset rows='*,1' border='0' frameborder='no'>
-		<frame noresize src='indexvas.php?go=$go2' name='menu'>
+		<frame noresize src='indexvas.php?goso=$goso' name='menu'>
 		<frame noresize src='' name='alamenu' id='alamenuFrame'>
 		</frameset> 
 		<frame src='$go' name='main'>

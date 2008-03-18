@@ -494,7 +494,7 @@ if ($tee == '') {
 								
 				$kuva = "<img src='view.php?id=$liite[tunnus]' width='130'>";
 			}
-			elseif(fopen($yhtiorow["logo"], "r") and $kuva == '') {
+			elseif(@fopen($yhtiorow["logo"], "r") and $kuva == '') {
 				$kuva = "<img src='$yhtiorow[logo]' width='130'>";
 			}
 			elseif(file_exists($yhtiorow["logo"]) and $kuva == '') {

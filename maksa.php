@@ -1,6 +1,7 @@
 <?php
 	require ("inc/parametrit.inc");
-
+	require ("inc/tilinumero.inc");
+	
 	echo "<font class='head'>".t("Laskujen maksatus")."</font><hr>";
 	
 	if (count($_POST) == 0) {
@@ -63,11 +64,10 @@
 
 		$query = "	SELECT valuu.kurssi, round($maksettava * valuu.kurssi,2) summa, maksuaika, olmapvm, tilinumero, maa, kapvm, erpcm,
 					ultilno, swift, pankki1, pankki2, pankki3, pankki4, valkoodi
-					FROM lasku, valuu
-					WHERE lasku.tunnus = '$tunnus' and
-					lasku.valkoodi = valuu.nimi and
-					valuu.yhtio = '$kukarow[yhtio]' and
-					lasku.yhtio = '$kukarow[yhtio]'";
+					FROM lasku
+					JOIN valuu ON (valuu.yhtio = lasku.yhtio and valuu.nimi = lasku.valkoodi)
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and
+					lasku.tunnus = '$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {
@@ -98,28 +98,33 @@
 
 		//Kotimainen hyvityslasku --> vastaava m‰‰r‰ rahaa on oltava veloituspuolella
 		if ($trow['summa'] < 0 and $eipankkiin == '')  {
+
 			if (strtoupper($trow['maa']) == 'FI') {
-				$query = "	SELECT sum(if(alatila='K', summa - kasumma, summa)) summa
+				$query = "	SELECT sum(if(alatila = 'K', summa - kasumma, summa)) summa
 							FROM lasku
-							WHERE yhtio='$kukarow[yhtio]' and tila='P' and olmapvm = '$trow[olmapvm]' and
-							maksu_tili = '$tili' and maa = 'FI' and tilinumero='$trow[tilinumero]'";
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tila = 'P' 
+							and olmapvm = '$trow[olmapvm]' 
+							and maksu_tili = '$tili' 
+							and maa = 'FI' 
+							and tilinumero = '$trow[tilinumero]'";
 			}
 			else {
-				$query = " SELECT sum(if(alatila='K', summa - kasumma, summa)) summa
-									FROM lasku
-									WHERE yhtio='$kukarow[yhtio]'
-									and tila='P'
-									and olmapvm = '$trow[olmapvm]'
-									and maksu_tili = '$tili'
-									and maa <> 'FI'
-									and valkoodi = '$trow[valkoodi]'
-									and ultilno = '$trow[ultilno]'
-									and swift = '$trow[swift]'
-									and pankki1 = '$trow[pankki1]'
-									and pankki2 = '$trow[pankki2]'
-									and pankki3 = '$trow[pankki3]'
-									and pankki4 = '$trow[pankki4]'
-									and maksaja = '$kukarow[kuka]'";
+				$query = "	SELECT sum(if(alatila='K', summa - kasumma, summa)) summa
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tila = 'P'
+							and olmapvm = '$trow[olmapvm]'
+							and maksu_tili = '$tili'
+							and maa <> 'FI'
+							and valkoodi = '$trow[valkoodi]'
+							and ultilno = '$trow[ultilno]'
+							and swift = '$trow[swift]'
+							and pankki1 = '$trow[pankki1]'
+							and pankki2 = '$trow[pankki2]'
+							and pankki3 = '$trow[pankki3]'
+							and pankki4 = '$trow[pankki4]'
+							and maksaja = '$kukarow[kuka]'";
 			}
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -130,7 +135,7 @@
 				exit;
 			}
 
-			$veloitusrow=mysql_fetch_array ($result);
+			$veloitusrow = mysql_fetch_array($result);
 
 			if (strtoupper($trow['maa']) == 'FI') {
 				if ($veloitusrow['summa'] + $trow['summa'] < 0) {
@@ -759,7 +764,7 @@
 					round((lasku.summa - lasku.kasumma) * valuu.kurssi,2) ykasumma,
 					round(lasku.summa * valuu.kurssi,2) ysumma,
 					lasku.ebid, lasku.tunnus, lasku.olmapvm,
-					if(lasku.maa='$yhtiorow[maa]',lasku.tilinumero, lasku.ultilno) tilinumero,
+					if(lasku.maa='$yhtiorow[maa]', lasku.tilinumero, lasku.ultilno) tilinumero,
 					h1time,
 					h2time,
 					h3time,
@@ -768,7 +773,8 @@
 					if(alatila='k','*','') kale, 
 					lasku.tunnus peru,
 					yriti.tilino,
-					yriti.nimi tilinimi
+					yriti.nimi tilinimi,
+					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus
 					FROM lasku, valuu, yriti
 					WHERE lasku.yhtio = '$kukarow[yhtio]' 
 					and valuu.yhtio = lasku.yhtio
@@ -788,6 +794,7 @@
 			echo "<br>".t("Pankkiin l‰htev‰t maksut")."<hr>";
 			echo "<table><tr>";
 			echo "<th valign='top'>".t("Nimi")."</th>";
+			echo "<th valign='top'>".t("Tilinumero")."</th>";
 			echo "<th valign='top'>".t("Kapvm")."<br>".t("Er‰pvm")."<br>".t("Maksupvm")."</th>";
 			echo "<th valign='top'>".t("Summa")."<br>".t("kassa-alella")."</th>";
 			echo "<th valign='top'>".t("Summa")."</th>";
@@ -814,6 +821,7 @@
 				else {
 					echo "<td valign='top'><a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'>$trow[nimi]</a></td>";
 				}
+				echo "<td valign='top'>".tilinumero_print($trow["tilinumero"])."</td>";
 				
 				echo "<td valign='top'>".tv1dateconv($trow['kapvm'])."<br>".tv1dateconv($trow['erpcm'])."<br>".tv1dateconv($trow['olmapvm'])."</td>";				
 				
@@ -844,7 +852,7 @@
 				}
 
 				echo "</td>";
-				echo "<td valign='top'>$trow[tilinimi]<br>$trow[tilino]</td>";
+				echo "<td valign='top'>$trow[tilinimi]<br>".tilinumero_print($trow["tilino"])."</td>";
 				echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
 				
 				if ($trow["kale"] != "") {
@@ -908,7 +916,8 @@
 					h2time,
 					h3time,
 					h4time,
-					h5time
+					h5time,
+					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus
 					FROM lasku use index (yhtio_tila_mapvm)
 					JOIN valuu ON lasku.yhtio=valuu.yhtio and lasku.valkoodi = valuu.nimi
 					WHERE lasku.yhtio = '$kukarow[yhtio]'					
@@ -937,6 +946,7 @@
 				
 			echo "<br><br><table><tr>";
 			echo "<th valign='top'>".t("Nimi")."</th>";
+			echo "<th valign='top'>".t("Tilinumero")."</th>";
 			echo "<th valign='top'>".t("Kapvm")."<br>".t("Er‰pvm")."</th>";
 			echo "<th valign='top'>".t("Summa")."<br>".t("kassa-alella")."</th>";
 			echo "<th valign='top'>".t("Summa")."</th>";
@@ -960,12 +970,12 @@
 				echo "<td valign='top'><a name='$trow[tunnus]'>";
 				
 				if ($hyvitysrow[0] > 0) {
-					echo "<a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'><font class='error'>$trow[nimi]</font></a>";
+					echo "<a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'><font class='error'>$trow[nimi]</font></a></td>";
 				}
 				else {
-					echo "<a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'>$trow[nimi]</a>";
+					echo "<a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'>$trow[nimi]</a></td>";
 				}
-				echo "</td>";
+				echo "<td valign='top'>".tilinumero_print($trow["tilinumero"])."</td>";
 				
 				echo "<td valign='top'>".tv1dateconv($trow['kapvm'])."<br>".tv1dateconv($trow['erpcm'])."</td>";				
 				

@@ -126,7 +126,7 @@
 			
 			if ($row["kommentti"] != '') {
 				$kala -= 1;
-				$pala = $pdf_tarjous->draw_paragraph(mm_pt($kala), mm_pt(15), mm_pt(12), mm_pt(195),  $row["kommentti"],		$page_tarjous, $kymppi_helvetica); // top, left, bottom, right
+				$pala = $pdf_tarjous->draw_paragraph(mm_pt($kala), mm_pt(15), mm_pt(12), mm_pt(195),  $row["kommentti"], $page_tarjous, $kymppi_helvetica); // top, left, bottom, right
 				$kala = pt_mm($pala);
 			}
 			
@@ -144,13 +144,14 @@
 			
 			$hintaa = $row["hinta"]*$row["tilkpl"]*(1-$row["ale"]/100);
 			
-			$hintab = str_pad("$hintaa $yhtiorow[valkoodi]", 15, " ", STR_PAD_LEFT);
+			$hintab = "$hintaa $yhtiorow[valkoodi]";
 			
 			if ($hintaa == 0) {
-				$hintab = str_pad("Tuotekehitys", 15, " ", STR_PAD_LEFT);
+				$hintab = "Tuotekehitys";
 			}
 			
-			$pdf_tarjous->draw_text(mm_pt(170), mm_pt($kala), $hintab,		$page_tarjous, $kymppi_helvetica);
+			$oikpos = $pdf_tarjous->strlen($hintab, $kymppi_helvetica);							
+			$pdf_tarjous->draw_text(mm_pt(192)-$oikpos, mm_pt($kala), $hintab, $page_tarjous, $kymppi_helvetica);
 	
 			$kala -= $rivinkorkeus+3;
 
@@ -178,11 +179,10 @@
 					$arvo = sprintf("%.2f",$laskurow["hinta"]);
 				}
 				
-				$pdf_tarjous->draw_text(mm_pt(172), mm_pt(93), sprintf('%10s', $arvo)." ".$yhtiorow["valkoodi"], 			$page_tarjous, $kymppi_helvetica);
-
-
+				$oikpos = $pdf_tarjous->strlen($arvo." ".$yhtiorow["valkoodi"], $kymppi_helvetica);				
+				$pdf_tarjous->draw_text(mm_pt(192)-$oikpos, mm_pt(85), $arvo." ".$yhtiorow["valkoodi"],  $page_tarjous, $kymppi_helvetica);
 	
-				$pdf_tarjous->draw_text(mm_pt(15),  mm_pt(93),  t("Tarjoamme teille ylläolevan tarjouksen kohteet hintaan:", $kieli), 	$page_tarjous, $kymppi_helvetica);
+				$pdf_tarjous->draw_text(mm_pt(15),  mm_pt(85),  t("Tarjoamme teille ylläolevan tarjouksen kohteet hintaan:", $kieli), 	$page_tarjous, $kymppi_helvetica);
 				
 
 				if ($laskurow['viesti'] != '') {
@@ -341,7 +341,7 @@
 				
 			}
 			
-			function printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $lask, $kala, $kieli, $sivu, $page_tarjous, $total) {
+			function printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $kala, $kieli, $sivu, $page_tarjous, $total) {
 				global $yhtiorow, $kukarow;
 
 				//Tehään tästä taas array tän funktion siäiseen käyttöön jotta saamme sivunvaihdot toimimaan
@@ -374,44 +374,24 @@
 					
 					while ($row = mysql_fetch_array($riresult)) {
 						//jos on paljon rivejä tehdään uusi otsikko...
-						if ($tarvitaanuus != '') {
-							loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous2[$sivu], 0);
-
+						if ($kala <= 50) {
 							$sivu++;
-							$lask = 0;
 							$kala = 200;
-							$tarvitaanuus = "";
 
 							$page_tarjous2[$sivu] = alku_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous);
 						}
 						
-						elseif ($kala <= 100) {
-							$tarvitaanuus = 'NYT';
-						}
-						
 						list($page_tarjous2[$sivu], $kala) = rivi_tarjous($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous2[$sivu], $row);
-						$lask++;
+
 						$total += $row["rivihinta"];
 					}
-					
-					if ($tarvitaanuus != '') {
-						loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous2[$sivu], 0);
-
-						$sivu++;
-						$lask = 0;
-						$kala = 200;
-						$tarvitaanuus = "";
-
-						$page_tarjous2[$sivu] = alku_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous);
-					}
 				}
-				return array ($page_tarjous2[$sivu], $lask, $kala, $sivu, $total);
+				return array ($page_tarjous2[$sivu], $kala, $sivu, $total);
 			}
 
 
 			//oletuksia
 			$kala 			= 200;
-			$lask 			= 0;
 			$total 			= 0;
 			$sivu 			= 1;
 
@@ -425,13 +405,18 @@
  
  			$page_tarjous[$sivu] = alku_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous);
 			
-			list ($page_tarjous[$sivu], $lask, $kala, $sivu, $total) = printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $lask, $kala, $kieli, $sivu, $page_tarjous[$sivu], $total);
+			list ($page_tarjous[$sivu], $kala, $sivu, $total) = printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $kala, $kieli, $sivu, $page_tarjous[$sivu], $total);
+			
+			if ($kala <= 100) {
+				$sivu++;
+				$kala = 200;
 
-			$lask--;
+				$page_tarjous[$sivu] = alku_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous);
+			}
 			
 			// Lopputekstit
-			loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous[1], 1, $total);
-
+			loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous[$sivu], 1, $total);
+			
 			// Tulostetaan sivu
 			print_pdf_tarjous ($pdf_tarjous, $komento, $tee);
 

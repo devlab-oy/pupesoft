@@ -95,7 +95,7 @@
 		$rahdinmaksajan_nr 	= "";
 	}
 
-	if (file_exists('PEAR.php')) {
+	if (@include_once('PEAR.php')) {
 		require_once("viivakoodi/Barcode.php");
 	}
 
@@ -158,7 +158,7 @@
 		//tehd‰‰n JJFI viivakoodi
 		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
-		if (function_exists("imagejpeg")) {
+		if (class_exists("Image_Barcode")) {
 			imagejpeg(Image_Barcode::draw($viiva2, 'code128', 'jpg', false, 3, 170), $nimi);
 
 			$fh = fopen($nimi, "r");

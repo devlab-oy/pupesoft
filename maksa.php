@@ -765,7 +765,10 @@
 					h3time,
 					h4time,
 					h5time,
-					if(alatila='k','*','') kale, lasku.tunnus peru
+					if(alatila='k','*','') kale, 
+					lasku.tunnus peru,
+					yriti.tilino,
+					yriti.nimi tilinimi
 					FROM lasku, valuu, yriti
 					WHERE lasku.yhtio = '$kukarow[yhtio]' 
 					and valuu.yhtio = lasku.yhtio
@@ -788,6 +791,7 @@
 			echo "<th valign='top'>".t("Kapvm")."<br>".t("Eräpvm")."<br>".t("Maksupvm")."</th>";
 			echo "<th valign='top'>".t("Summa")."<br>".t("kassa-alella")."</th>";
 			echo "<th valign='top'>".t("Summa")."</th>";
+			echo "<th valign='top'>".t("Maksutili")."</th>";
 			echo "<th valign='top'>".t("Ebid")."</th>";
 			echo "<th valign='top'>".t("Kassa-ale")."</th>";
 			echo "<th valign='top'>".t("Maksatus")."</th></tr>";
@@ -838,8 +842,9 @@
 				else {
 					$valsumma[$trow["valkoodi"]] += $trow["summa"];	
 				}
-			
+
 				echo "</td>";
+				echo "<td valign='top'>$trow[tilinimi]<br>$trow[tilino]</td>";
 				echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
 				
 				if ($trow["kale"] != "") {

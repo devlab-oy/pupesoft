@@ -705,11 +705,11 @@ if (!function_exists('loppu_tarjous')) {
 	function loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $tots, $total_uudet=0, $total_vanhat=0) {
 		global $kukarow, $yhtiorow, $boldi, $pieni, $norm, $rectparam;
 		
-		if ($tots == 1 and $summa != 0) {
+		if ($tots == 1 and $total_uudet != 0) {
 			$pdf_tarjous->draw_text(mm_pt(15),  140,  t("Tarjoamme teille ylläolevan tarjouksen kohteet hintaan:", $kieli),   $page_tarjous, $boldi);
 									
-			$oikpos = $pdf_tarjous->strlen(sprintf("%.2f",$summa)." ".$laskurow["valkoodi"], $boldi);					
-			$pdf_tarjous->draw_text(575-$oikpos, 140, sprintf("%.2f",$summa)." ".$laskurow["valkoodi"], $page_tarjous, $boldi);
+			$oikpos = $pdf_tarjous->strlen(sprintf("%.2f",$total_uudet)." ".$laskurow["valkoodi"], $boldi);					
+			$pdf_tarjous->draw_text(575-$oikpos, 140, sprintf("%.2f",$total_uudet)." ".$laskurow["valkoodi"], $page_tarjous, $boldi);
 		}
 		
 		if ($yhtiorow['alv_kasittely'] != '') {
@@ -878,8 +878,8 @@ if (!function_exists('tulosta_tarjous')) {
 			$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
 			$query = "	SELECT tilausrivi.*, 
-						round($hinta_riv * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2) rivihinta,
-						round($hinta_riv * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl),2) bruttorivihinta,							
+						round($hinta_riv * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2) rivihinta,
+						round($hinta_riv * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl),2) bruttorivihinta,							
 						tilausrivin_lisatiedot.positio,
 						$sorttauskentta
 						FROM tilausrivi

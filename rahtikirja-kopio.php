@@ -61,7 +61,7 @@
 		// haetaan kaikki distinct rahtikirjat..
 		$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
-					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja
+					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja, lasku.laskunro
 					FROM rahtikirjat
 					JOIN lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio
 					LEFT JOIN maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
@@ -206,6 +206,36 @@
 				$vres = mysql_query($query) or pupe_error($query);
 				while ($vak = mysql_fetch_array($vres)) $vakit[] = $vak[0];
 
+				// näitä tarvitaan vain JV-keiseissa, mutta pitää nollata tietty joka luupilla
+				$lasno		= "";
+				$viite		= "";
+				$summa		= "";
+				$jvtext		= "";
+				$jvhinta	= "";
+				$yhteensa	= "";
+				$aputeksti	= "";
+				$rahinta 	= "";
+
+				// jos kyseessä on jälkivaatimus
+				if ($rakir_row['jv'] != '') {
+					$query = "	SELECT * 
+								FROM lasku 
+								WHERE yhtio = '$kukarow[yhtio]' 
+								and laskunro = '$rakir_row[laskunro]'
+								and tila = 'U'
+								and alatila = 'X'";
+					$apujvlaskures = mysql_query($query) or pupe_error($query);
+					$apujvlaskurow = mysql_fetch_array($apujvlaskures);
+
+					$lasno		= $apujvlaskurow["laskunro"];
+					$viite		= $apujvlaskurow["viite"];
+					$summa		= $apujvlaskurow["summa"];
+					$jvtext		= "";
+					$jvhinta	= "";
+					$yhteensa	= $apujvlaskurow["summa"];
+					$aputeksti = t("JÄLKIVAATIMUS");
+					$rahinta 	= "";
+				}
 
 				// nyt on kaikki tiedot rahtikirjaa varten haettu..
 				//

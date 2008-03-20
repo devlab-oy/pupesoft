@@ -310,12 +310,12 @@ if(!function_exists("menu")) {
 							<td class='back'><form id = 'tuotehaku' name='tuotehaku'  action = \"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, true);\" method = 'post'>
 							<input type = 'text' size='15' name = 'tuotehaku'></form><br>
 							<a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, true);\">".t("Nimityksellä")."</a><br>
-														<a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, true);\">".t("Sähkönumerolla")."</a><br>
+														<a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla', 'selain', false, true);\">".t("Sähkönumerolla")."</a><br>
 							<a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla', 'selain', false, true);\">".t("Tuotekoodilla")."</a><br>
 								$toimlisa
 							</td>
 						</tr>
-					</table></td></tr>";
+					</table><hr></td></tr>";
 			
 			$query = "	SELECT selite osasto, selitetark nimi
 			 			FROM avainsana
@@ -439,7 +439,7 @@ if(!function_exists("menu")) {
 				}
 				
 				if($ok == 1) {
-					$val .=  "<tr class='aktiivi'><td class='sisennys1'></td><td class='sisennys2'></td><td><a class = 'menu' id='{$osasto}_{$try}_{$merow["tuotemerkki"]}_P' href='javascript:sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemerkki={$merow["tuotemerkki"]}\", \"\", true);'>{$merow["tuotemerkki"]}</a></td></tr>";
+					$val .=  "<tr class='aktiivi'><td class='sisennys1'></td><td class='sisennys2'></td><td><a class = 'menu' id='{$osasto}_{$try}_{$merow["tuotemerkki"]}_P' href='javascript:sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=".utf8_encode($merow["tuotemerkki"])."\", \"\", true);'>{$merow["tuotemerkki"]}</a></td></tr>";
 				}
 			}
 			$val .= "</table>";
@@ -541,13 +541,13 @@ if(!function_exists("uutiset")) {
 				<table class='uutinen'>";
 				
 			if($linkki != "") {
-				$val .= "<tr><td class='back'>$linkki</td></tr>";
+				$val .= "<tr><td></td><td class='back'>$linkki</td><td></td></tr>";
 			}
 
 			while($row = mysql_fetch_array($result)) {
 			$val .= "<tr><td class='back'>";
 			if($row["kentta03"] > 0) {
-				$val .= "<div id='kuva'><img class='uutinen' src='view.php?id=$row[kentta03]'></div>";
+				$val .= "<td><img class='uutinen' src='view.php?id=$row[kentta03]'></td><td>";
 			}
 			
 			$search = "/#{2}([^#]+)#{2}(([^#]+)#{2}){0,1}/";
@@ -683,7 +683,7 @@ if($tee == "tuotteen_lisatiedot") {
 	}
 	else {
 		$row["tekstit"] = $row["lyhytkuvaus"]."\n<br>".$row["kuvaus"];
-		$row["tekstit"] = preg_replace("/(.*)/", "<font class='head'>\$1</font>", $row["tekstit"], 1);
+		//$row["tekstit"] = preg_replace("/(.*)/", "<font class='head'>\$1</font>", $row["tekstit"], 1);
 	}
 
 	if($row["tekstit"] != "") {
@@ -1342,7 +1342,7 @@ if($tee == "") {
 	else {
 		$login_screen = "
 			<button onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot', false, true);\">".t("Asiakastiedot")."</button>
-			&nbsp;&nbsp;
+			&nbsp;Tervetuloa, ".$kukarow["nimi"]."&nbsp;
 			<button onclick=\"javascript:document.location='".$palvelin2."logout.php?location=".$palvelin2."verkkokauppa.php';\">".t("Kirjaudu ulos")."</button>";
 	}
 	
@@ -1350,8 +1350,7 @@ if($tee == "") {
 					<div class='login' id='login'>$login_screen</div>
 					<div class='menu' id='menu'>".menu()."</div>
 					<div class='selain' id='selain'>".uutiset()."</div>
-					<div class='mainos' id='mainos'></div>
-				</body>
+					</body>
 			</html>";
 
 	if(file_exists("verkkokauppa.template")) {

@@ -605,7 +605,7 @@
 				if($valiotsikko == "OK") {
 
 					echo "<tr>";
-					echo "<th>".t("Tuoteno")."</th>";
+					echo "<th style='width: 85px'>".t("Tuoteno")."</th>";
 					echo "<th>".t("Nimitys")."</th>";
 
 					if ($lisatiedot != "") {
@@ -768,7 +768,7 @@
 				<a id='$row[tuoteno]_P' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P\")'>{$row["tuoteno"]}</a>$toimlisa
 				</td>";
 				
-				echo "<td valign='top' class='$vari'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";				
+				echo "<td valign='top' class='$vari'><a id='$row[tuoteno]_P' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P\")'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</a></td>";				
 			}
 			
 			//	Extranetkäyttäjille voidaan näyttää myös se heidän asiakashinta..

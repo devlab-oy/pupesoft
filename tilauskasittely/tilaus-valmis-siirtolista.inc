@@ -98,56 +98,60 @@
 
 				$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 
-				$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
+				$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
 				$varaston_res = mysql_query($query) or pupe_error($query);
 				$varaston_row = mysql_fetch_array($varaston_res);
 
-				$ultilno = '';
+				$ultilno = tarvitaanko_intrastat($varaston_row["maa"], $laskurow["toim_maa"]);
 
-				// katotaan pit‰‰kˆ tilaukselle tehd‰ intrastat
-				// varasto pit‰‰ lˆyty‰, toimitusosoitteen maa ja varastonmaa pit‰‰ lˆyty‰ ja kauppatapahtuman_luonnetta ei saa olla annettu viel‰
-				if (mysql_num_rows($varaston_res) == 1 and $laskurow["toim_maa"] != "" and $varaston_row["maa"] != "") {
+				$laskurow["maa_maara"] = $laskurow["toim_maa"];
+				$laskurow["maa_lahetys"] = $varaston_row["maa"];
 
-					$query = "select distinct koodi from maat where koodi in ('$laskurow[toim_maa]','$varaston_row[maa]') and eu = 'ON'";
-					$euapuresult = mysql_query($query) or pupe_error($query);
+				if ($ultilno == '-1') {
+					// vienti-ilmoitus
+					// katotaan onko jotain oletuksia varaston takaa
+					$query = "SELECT * FROM varastopaikat WHERE yhtio = '$kukarow[yhtio]' AND tunnus in ('$clearing', '$varasto') AND maa = '$yhtiorow[maa]'";
+					$result_intra = mysql_query($query) or pupe_error($query);
+					$intrarow = mysql_fetch_array($result_intra);
 
-					// kummatkin maat pit‰‰ olla EU:ssa
-					if (mysql_num_rows($euapuresult) == 2) {
+					$laskurow["aktiivinen_kuljetus"] 				= $intrarow["aktiivinen_kuljetus"];
+					$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $intrarow["aktiivinen_kuljetus_kansallisuus"];
+					$laskurow["bruttopaino"] 						= $intrarow["bruttopaino"];
+					$laskurow["kauppatapahtuman_luonne"] 			= $intrarow["kauppatapahtuman_luonne"];
+					$laskurow["kontti"]								= $intrarow["kontti"];
+					$laskurow["kuljetusmuoto"]						= $intrarow["kuljetusmuoto"];
+					$laskurow["lisattava_era"] 						= $intrarow["lisattava_era"];
+					$laskurow["poistumistoimipaikka"] 				= $intrarow["poistumistoimipaikka"];
+					$laskurow["poistumistoimipaikka_koodi"] 		= $intrarow["poistumistoimipaikka_koodi"];
+					$laskurow["sisamaan_kuljetus"]					= $intrarow["sisamaan_kuljetus"];
+					$laskurow["sisamaan_kuljetusmuoto"]  			= $intrarow["sisamaan_kuljetusmuoto"];
+					$laskurow["sisamaan_kuljetus_kansallisuus"]		= $intrarow["sisamaan_kuljetus_kansallisuus"];
+					$laskurow["vahennettava_era"] 					= $intrarow["vahennettava_era"];
+				}
+				elseif ($ultilno == '-2') {
+					// tuonti-ilmoitus
+					// katotaan onko jotain oletuksia toimitustavan takana
+					$query  = "SELECT * FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' AND selite = '$laskurow[toimitustapa]'";
+					$toiresult = mysql_query($query) or pupe_error($query);
+					$aputoimirow = mysql_fetch_array($toiresult);
 
-						if ($laskurow["toim_maa"] == $varaston_row["maa"]) {
-							$laskurow["kauppatapahtuman_luonne"] = '999'; // intrastattia ei l‰hetet‰ tulliin kun varasto ja toimitusosoite on samassa maassa
-							$ultilno = '';
-						}
-						elseif ($varaston_row["maa"] == $yhtiorow["maa"]) {
-							$ultilno = '-1'; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
-						}
-						elseif ($laskurow["toim_maa"] == $yhtiorow["maa"]) {
-							$ultilno = '-2'; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
-
-							// katotaan onko toimitustavalle jotain intrastat oletuksia
-							$query  = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
-							$toiresult = mysql_query($query) or pupe_error($query);
-							$aputoimirow = mysql_fetch_array($toiresult);
-
-							$laskurow["kauppatapahtuman_luonne"] 			= $aputoimirow["kauppatapahtuman_luonne"];
-							$laskurow["kuljetusmuoto"]						= $aputoimirow["kuljetusmuoto"];
-							$laskurow["sisamaan_kuljetus"]					= $aputoimirow["sisamaan_kuljetus"];
-							$laskurow["sisamaan_kuljetusmuoto"]  			= $aputoimirow["sisamaan_kuljetusmuoto"];
-							$laskurow["sisamaan_kuljetus_kansallisuus"]		= $aputoimirow["sisamaan_kuljetus_kansallisuus"];
-							$laskurow["kontti"]								= $aputoimirow["kontti"];
-							$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
-							$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
-							$laskurow["poistumistoimipaikka"] 				= $aputoimirow["poistumistoimipaikka"];
-							$laskurow["poistumistoimipaikka_koodi"] 		= $aputoimirow["poistumistoimipaikka_koodi"];
-							$laskurow["bruttopaino"] 						= $aputoimirow["bruttopaino"];
-							$laskurow["lisattava_era"] 						= $aputoimirow["lisattava_era"];
-							$laskurow["vahennettava_era"] 					= $aputoimirow["vahennettava_era"];
-							$laskurow["maa_maara"] 							= $aputoimirow["maa_maara"];
-							$laskurow["maa_lahetys"] 						= $varaston_row["maa"];
-						}
-
-					}
-
+					$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
+					$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
+					$laskurow["bruttopaino"] 						= $aputoimirow["bruttopaino"];
+					$laskurow["kauppatapahtuman_luonne"] 			= $aputoimirow["kauppatapahtuman_luonne"];
+					$laskurow["kontti"]								= $aputoimirow["kontti"];
+					$laskurow["kuljetusmuoto"]						= $aputoimirow["kuljetusmuoto"];
+					$laskurow["lisattava_era"] 						= $aputoimirow["lisattava_era"];
+					$laskurow["poistumistoimipaikka"] 				= $aputoimirow["poistumistoimipaikka"];
+					$laskurow["poistumistoimipaikka_koodi"] 		= $aputoimirow["poistumistoimipaikka_koodi"];
+					$laskurow["sisamaan_kuljetus"]					= $aputoimirow["sisamaan_kuljetus"];
+					$laskurow["sisamaan_kuljetusmuoto"]  			= $aputoimirow["sisamaan_kuljetusmuoto"];
+					$laskurow["sisamaan_kuljetus_kansallisuus"]		= $aputoimirow["sisamaan_kuljetus_kansallisuus"];
+					$laskurow["vahennettava_era"] 					= $aputoimirow["vahennettava_era"];
+				}
+				elseif ($varaston_row["maa"] == $laskurow["toim_maa"]) {
+					// intrastattia ei l‰hetet‰ tulliin kun varasto ja toimitusosoite on samassa maassa
+					$laskurow["kauppatapahtuman_luonne"] = '999';
 				}
 
 				//varaasto vaihtuu, splitataan tilaus, paitsi jos kyseess‰ on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
@@ -221,15 +225,15 @@
 							kuljetusmuoto			= '$laskurow[kuljetusmuoto]',
 							kauppatapahtuman_luonne	= '$laskurow[kauppatapahtuman_luonne]',
 							ultilno					= '$ultilno',
-							maa_maara				= '$laskurow[maa_maara]'";
-
+							maa_maara				= '$laskurow[maa_maara]',
+							maa_lahetys				= '$laskurow[maa_lahetys]'";
 					$uusires = mysql_query($query) or pupe_error($query);
 					$laskurow['tunnus'] = (string) mysql_insert_id();
 					$tvs_tilausnumerot[] = $laskurow["tunnus"];
 				}
-				elseif ($laskurow["varasto"] == 0) {
+				else {
 					//p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu
-					$query  ="	update lasku set
+					$query  ="	UPDATE lasku SET
 								varasto 							= '$varasto',
 								ultilno 							= '$ultilno',
 								maa_maara							= '$laskurow[maa_maara]',
@@ -416,17 +420,17 @@
 
 				// Tulostetaan ker‰yslista
 				require_once ("tulosta_lahete_kerayslista.inc");
-				
+
 				//hatetaan asiakkaan tiedot
 				$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 							FROM asiakas
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$riresult = mysql_query($query) or pupe_error($query);
 				$asrow = mysql_fetch_array($riresult);
-				
-				
+
+
 				$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
-				
+
 				// Ker‰yslistan rivit
 				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 					$query = " 	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys,
@@ -452,7 +456,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				$tilausnumeroita = $laskurow["tunnus"];
-				
+
 				//generoidaan rivinumerot
 				$rivinumerot = array();
 
@@ -470,14 +474,14 @@
 
 				$sivu  = 1;
 				$paino = 0;
-				
+
 				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 					$tyyppi = "";
 				}
 				else {
 					$tyyppi = "SIIRTOLISTA";
 				}
-				
+
 				// Aloitellaan l‰hetteen teko
 				$page[$sivu] = alku_kerayslista($tyyppi);
 
@@ -486,7 +490,7 @@
 				}
 
 				loppu_kerayslista($page[$sivu], 1);
-				
+
 				//tulostetaan failit ja valitaan sopivat printterit
 				if ($laskurow["varasto"] == '') {
 					$query = "	select *
@@ -522,18 +526,18 @@
 
 				//tulostetaan sivu
 				print_pdf_kerayslista($komento);
-				
+
 				if ($returnvalue != 0) {
 					echo "<font class='error'>$komento".t("Ker‰yslistan tulostus ep‰onnistui")."! ".t("Tilaus $laskurow[tunnus]")." ".t("siirrettiin tulostusjonoon").".
 							".t("K‰y tulostamassa l‰hete")." <a href='lahetteen_tulostusjono.php'>".t("tulostusjonosta")."</a>.</font><br>";
 					$virheellinen = "X"; //Merkataan ep‰onnistuneeksi
 				}
-				
+
 				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
-					
+
 					$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
-					
-					$query = " 	SELECT *, 
+
+					$query = " 	SELECT *,
 								$sorttauskentta
 								FROM tilausrivi use index (yhtio_otunnus)
 								WHERE otunnus = '$laskurow[tunnus]'
@@ -575,7 +579,7 @@
 					loppu_valm($page[$sivu], 1);
 					print_pdf_valm($komento);
 				}
-				
+
 				// jos meill‰ oli l‰hetteen tulostusongelmia
 				if ($virheellinen == 'X') {
 					// merkataan l‰hete tulostusjonoon
@@ -616,7 +620,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 			}
 		}
-		
+
 		// ollaan k‰sitelty projektin osatoimitus joten palataan tunnusnipun otsikolle..
 		if($kukarow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and $projektilla > 0) {
 
@@ -631,6 +635,6 @@
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$PHP_SELF?toim=PROJEKTI&valitsetoimitus=$tilausnumero'>";
 				die();
 			}
-		}			
+		}
 	}
 ?>

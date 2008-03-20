@@ -1978,42 +1978,42 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 		global $yhtiorow, $kukarow;
 
 		// haetaan keikan otsikko laskurowhun
-		$query  = "	SELECT * 
-					from lasku 
-					where tunnus = '$otunnus' 
-					and yhtio	 = '$kukarow[yhtio]' 
+		$query  = "	SELECT *
+					from lasku
+					where tunnus = '$otunnus'
+					and yhtio	 = '$kukarow[yhtio]'
 					and ((tila='K' and alatila = 'X') or (tila='U' and alatila = 'X') or (tila='K' and alatila = 'I'))";
 		$result = mysql_query($query) or pupe_error($query);
-				
+
 		if (mysql_num_rows($result) == 1) {
 			$laskurow = mysql_fetch_array($result);
 
 			if ($laskurow["tila"] == "U") {
 				// Tavara on ostettu sis‰‰n myyntilaskulla
-				$query = "	SELECT round(tilausrivi.rivihinta/tilausrivi.kpl, 2) ohinta	
+				$query = "	SELECT round(tilausrivi.rivihinta/tilausrivi.kpl, 2) ohinta
 							FROM tilausrivi
 							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
 							and tilausrivi.tunnus = $rivitunnus";
 				$presult = mysql_query($query) or pupe_error($query);
-				$tilrivirow = mysql_fetch_array($presult);								
-				
+				$tilrivirow = mysql_fetch_array($presult);
+
 				return $tilrivirow["ohinta"];
 			}
 			elseif ($laskurow["tila"] == "K" and $laskurow["alatila"] == "I") {
 				// Tavara on ostettu sis‰‰n myyntilaskulla
-				$query = "	SELECT round(tilausrivi.rivihinta/tilausrivi.kpl, 2) ohinta	
+				$query = "	SELECT round(tilausrivi.rivihinta/tilausrivi.kpl, 2) ohinta
 							FROM tilausrivi
 							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
 							and tilausrivi.tunnus = $rivitunnus";
-				$presult = mysql_query($query) or pupe_error($query);				
-				$tilrivirow = mysql_fetch_array($presult);								
-				
+				$presult = mysql_query($query) or pupe_error($query);
+				$tilrivirow = mysql_fetch_array($presult);
+
 				return $tilrivirow["ohinta"];
 			}
 			else {
 				// Tavara on ostettu sis‰‰n keikalla
-			
-			
+
+
 				// Virallinen laskenta, haetaan ihan kaikki rivit uudestaan (varattu=0) kaikki pit‰‰ olla viety varastoon jo ennen t‰t‰..
 				$query = "	SELECT tilausrivi.*, tilausrivi.kpl varattu
 							FROM tilausrivi
@@ -2104,7 +2104,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 		}
 		else {
 			return FALSE;
-		}				
+		}
 	}
 }
 
@@ -3789,15 +3789,15 @@ if(!function_exists("enable_ajax")) {
 			if (http.readyState == 4) {
 				var response = http.responseText;
 				if(response.substr(0, 10) == "TABLE-ROW:") {
-					
+
 					//	Meid‰n rivi ja sen solut
 					response=response.substr(9);
 					var patt=/(<td[^>]*>.*?<\/td>)|(<tr[^>]*>)/gm;
 					newRowElements=response.match(patt);
-					
+
 					var row='';
 					for (var x = 0; x < newRowElements.length; x++) {
-						
+
 						//	Vaihdellaan rivi‰
 						if(newRowElements[x].match(/<tr[^>]*>/)) {
 							y=0;
@@ -3815,7 +3815,7 @@ if(!function_exists("enable_ajax")) {
 							element=element.substr(0, (element.length-5));
 
 							rowElements[y].innerHTML=element;
-							
+
 							y++;
 						}
 					}
@@ -3824,7 +3824,7 @@ if(!function_exists("enable_ajax")) {
 
 					document.getElementById(id).innerHTML = response;
 				}
-				
+
 				var container = document.getElementById(id);
 				var allNewScripts = container.getElementsByTagName('script');
 				c=allNewScripts.length-1;
@@ -3833,16 +3833,16 @@ if(!function_exists("enable_ajax")) {
 						eval(allNewScripts[x].innerHTML);
 					}
 				}
-				
+
 				//	Jos p‰ivitet‰‰n togglegrouppaus
 				if(href) {
 					document.getElementById(href).href = 'javascript:toggleGroup("' + id + '");';
 					toggeled.push(id);
 				}
-				
+
 				//	Varmistetaan n‰kyvyys
 				document.getElementById(id).style.display = '';
-				
+
 			}
 		}
 
@@ -4158,18 +4158,18 @@ if (!function_exists("js_showhide")) {
 
 function showhide(layer_ref, type) {
 
-	
+
 	if(type=='byName') {
 		var e = document.getElementsByName(layer_ref);
-		
-		for(i=0;i<=e.length-1;i++) {	
+
+		for(i=0;i<=e.length-1;i++) {
 			if (e[i].style.display != 'none') {
 				e[i].style.display = 'none';
 			}
 			else {
 				e[i].style.display = '';
 			}
-		}		
+		}
 	}
 	else {
 
@@ -4196,19 +4196,19 @@ function showhide(layer_ref, type) {
 
 function show(layer_ref, type) {
 
-	
+
 	if(type=='byName') {
 		var e = document.getElementsByName(layer_ref);
-		
-		for(i=0;i<=e.length-1;i++) {	
+
+		for(i=0;i<=e.length-1;i++) {
 			e[i].style.display = '';
-		}		
+		}
 	}
 	else {
 
 		var state = document.getElementById(layer_ref).style.display;
 		state = '';
-		
+
 		if (document.all) { //IS IE 4 or 5 (or 6 beta)
 			eval( "document.all." + layer_ref + ".style.display = state");
 		}
@@ -5283,6 +5283,43 @@ if(!function_exists("nayta_asiakashaku")) {
 		}
 
 		return "<input type='hidden' id='liitos' name='liitostunnus'><input type='text' id='haku' value='$nimi' name='haku' size='50' onkeyup=\"popUp(event, 'asiakashaku', '0', '-20', '{$_SERVER["SCRIPT_NAME"]}?tee=ASIAKASHAKU&formi=$formi&url={$_SERVER["SCRIPT_NAME"]}&haku='+this.value);\" $disabled>&nbsp;&nbsp;<a href='#' onclick=\"document.getElementById('haku').disabled=false; document.getElementById('haku').value=''; return false;\">".t("Vaihda asiakasta")."</a>";
+	}
+}
+
+
+if(!function_exists("tarvitaanko_intrastat")) {
+	function tarvitaanko_intrastat($maa_lahetys, $maa_maara) {
+
+		// otetaan sis‰‰n l‰hetysmaan ja m‰‰r‰maan maakoodi
+
+		// palautetaan:
+		// tyhj‰‰ = ei tarvita intrastatata
+		// -1 = kuuluu vienti-ilmoitukseen
+		// -2 = kuuluu tuonti-ilmoitukseen
+
+		global $yhtiorow;
+
+		$maa_lahetys = strtoupper(trim($maa_lahetys));
+		$maa_maara = strtoupper(trim($maa_maara));
+		$yhtiorow_maa = strtoupper($yhtiorow["maa"]);
+		$ultilno = "";
+
+		// kokeillaan arpoa intrastat k‰sittely‰, molemmat maat pit‰‰ olla EU maita
+		if ($maa_lahetys != "" and $maa_maara != "") {
+			$query = "SELECT DISTINCT koodi FROM maat WHERE koodi in ('$maa_lahetys','$maa_maara') AND eu = 'ON'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 2) {
+				if ($maa_lahetys == $yhtiorow_maa and $maa_maara != $yhtiorow_maa) {
+					$ultilno = "-1"; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
+				}
+				elseif ($maa_maara == $yhtiorow_maa and $maa_lahetys != $yhtiorow_maa) {
+					$ultilno = "-2"; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
+				}
+			}
+		}
+
+		return $ultilno;
 	}
 }
 

@@ -71,7 +71,7 @@ if ($laskurow["tilaustyyppi"] == 'E') {
 
 		if ($tilvakir = mysql_fetch_array($tilvares)) {
 			$komento["Tilausvahvistus"] = $tilvakir["komento"];
-			
+
 			require_once ("tulosta_tilausvahvistus_pdf.inc");
 		}
 	}
@@ -393,7 +393,7 @@ else {
 
 						list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-						$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) 
+						$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
 									values  (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
 						$addtil = mysql_query($query) or pupe_error($query);
 
@@ -407,7 +407,7 @@ else {
 
 							list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-							$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) 
+							$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
 										values (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
 							$addtil = mysql_query($query) or pupe_error($query);
 
@@ -550,14 +550,14 @@ else {
 			$query = "SELECT jv from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$maehrowx = mysql_fetch_array($result);
-			
+
 			if($yhtiorow["splittauskielto"] == "K") {
 				$sorttaus = "kerayspvm, sorttauskentta";
 			}
 			else {
 				$sorttaus = "sorttauskentta";
 			}
-			
+
 			//haetaan kaikkien tilausrivien varastopaikat
 			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,  tilausrivi.kerayspvm, tilausrivi.toimaika,
 						concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
@@ -576,71 +576,77 @@ else {
 
 			//mihin varastoon l‰hete kuuluu. aluksi x
 			$varasto = $edvarasto = $kerayspvm = $edkerayspvm = "x";
-			 
+
 			while ($row = mysql_fetch_array($result)) {
 
 				$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
-								
-				$query = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
+
+				$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
 				$varaston_res = mysql_query($query) or pupe_error($query);
 				$varaston_row = mysql_fetch_array($varaston_res);
 
-				$ultilno = '';
+				$ultilno = tarvitaanko_intrastat($varaston_row["maa"], $laskurow["toim_maa"]);
 
-				// katotaan pit‰‰kˆ tilaukselle tehd‰ intrastat
-				// varasto pit‰‰ lˆyty‰, toimitusosoitteen maa ja varastonmaa pit‰‰ lˆyty‰ ja kauppatapahtuman_luonnetta ei saa olla annettu viel‰
-				if (mysql_num_rows($varaston_res) == 1 and $laskurow["toim_maa"] != "" and $varaston_row["maa"] != "") {
+				$laskurow["maa_maara"] = $laskurow["toim_maa"];
+				$laskurow["maa_lahetys"] = $varaston_row["maa"];
 
-					$query = "SELECT distinct koodi from maat where koodi in ('$laskurow[toim_maa]','$varaston_row[maa]') and eu = 'ON'";
-					$euapuresult = mysql_query($query) or pupe_error($query);
+				if ($ultilno == '-1') {
+					// vienti-ilmoitus
+					// katotaan onko jotain oletuksia asiakkaan takaa
+					$query  = "SELECT * from asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
+					$toiresult = mysql_query($query) or pupe_error($query);
+					$aputoimirow = mysql_fetch_array($toiresult);
 
-					// kummatkin maat pit‰‰ olla EU:ssa
-					if (mysql_num_rows($euapuresult) == 2) {
-
-						if ($laskurow["toim_maa"] == $varaston_row["maa"]) {
-							$laskurow["kauppatapahtuman_luonne"] = '999'; // intrastattia ei l‰hetet‰ tulliin kun varasto ja toimitusosoite on samassa maassa
-							$ultilno = '';
-						}
-						elseif ($varaston_row["maa"] == $yhtiorow["maa"]) {
-							$ultilno = '-1'; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
-						}
-						elseif ($laskurow["toim_maa"] == $yhtiorow["maa"]) {
-							$ultilno = '-2'; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
-
-							// katotaan onko toimitustavalle jotain intrastat oletuksia
-							$query  = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
-							$toiresult = mysql_query($query) or pupe_error($query);
-							$aputoimirow = mysql_fetch_array($toiresult);
-
-							$laskurow["kauppatapahtuman_luonne"] 			= $aputoimirow["kauppatapahtuman_luonne"];
-							$laskurow["kuljetusmuoto"]						= $aputoimirow["kuljetusmuoto"];
-							$laskurow["sisamaan_kuljetus"]					= $aputoimirow["sisamaan_kuljetus"];
-							$laskurow["sisamaan_kuljetusmuoto"]  			= $aputoimirow["sisamaan_kuljetusmuoto"];
-							$laskurow["sisamaan_kuljetus_kansallisuus"]		= $aputoimirow["sisamaan_kuljetus_kansallisuus"];
-							$laskurow["kontti"]								= $aputoimirow["kontti"];
-							$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
-							$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
-							$laskurow["poistumistoimipaikka"] 				= $aputoimirow["poistumistoimipaikka"];
-							$laskurow["poistumistoimipaikka_koodi"] 		= $aputoimirow["poistumistoimipaikka_koodi"];
-							$laskurow["bruttopaino"] 						= $aputoimirow["bruttopaino"];
-							$laskurow["lisattava_era"] 						= $aputoimirow["lisattava_era"];
-							$laskurow["vahennettava_era"] 					= $aputoimirow["vahennettava_era"];
-							$laskurow["maa_maara"] 							= $aputoimirow["maa_maara"];
-							$laskurow["maa_lahetys"] 						= $varaston_row["maa"];
-						}
-					}
+					$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
+					$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
+					$laskurow["bruttopaino"] 						= $aputoimirow["bruttopaino"];
+					$laskurow["kauppatapahtuman_luonne"] 			= $aputoimirow["kauppatapahtuman_luonne"];
+					$laskurow["kontti"]								= $aputoimirow["kontti"];
+					$laskurow["kuljetusmuoto"]						= $aputoimirow["kuljetusmuoto"];
+					$laskurow["lisattava_era"] 						= $aputoimirow["lisattava_era"];
+					$laskurow["poistumistoimipaikka"] 				= $aputoimirow["poistumistoimipaikka"];
+					$laskurow["poistumistoimipaikka_koodi"] 		= $aputoimirow["poistumistoimipaikka_koodi"];
+					$laskurow["sisamaan_kuljetus"]					= $aputoimirow["sisamaan_kuljetus"];
+					$laskurow["sisamaan_kuljetusmuoto"]  			= $aputoimirow["sisamaan_kuljetusmuoto"];
+					$laskurow["sisamaan_kuljetus_kansallisuus"]		= $aputoimirow["sisamaan_kuljetus_kansallisuus"];
+					$laskurow["vahennettava_era"] 					= $aputoimirow["vahennettava_era"];	
 				}
-										
-				//varasto vaihtuu, splitataan tilaus, paitsi jos kyseess‰ on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu				
+				elseif ($ultilno == '-2') {
+					// tuonti-ilmoitus
+					// katotaan onko jotain oletuksia toimitustavan takana
+					$query  = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
+					$toiresult = mysql_query($query) or pupe_error($query);
+					$aputoimirow = mysql_fetch_array($toiresult);
+
+					$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
+					$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
+					$laskurow["bruttopaino"] 						= $aputoimirow["bruttopaino"];
+					$laskurow["kauppatapahtuman_luonne"] 			= $aputoimirow["kauppatapahtuman_luonne"];
+					$laskurow["kontti"]								= $aputoimirow["kontti"];
+					$laskurow["kuljetusmuoto"]						= $aputoimirow["kuljetusmuoto"];
+					$laskurow["lisattava_era"] 						= $aputoimirow["lisattava_era"];
+					$laskurow["poistumistoimipaikka"] 				= $aputoimirow["poistumistoimipaikka"];
+					$laskurow["poistumistoimipaikka_koodi"] 		= $aputoimirow["poistumistoimipaikka_koodi"];
+					$laskurow["sisamaan_kuljetus"]					= $aputoimirow["sisamaan_kuljetus"];
+					$laskurow["sisamaan_kuljetusmuoto"]  			= $aputoimirow["sisamaan_kuljetusmuoto"];
+					$laskurow["sisamaan_kuljetus_kansallisuus"]		= $aputoimirow["sisamaan_kuljetus_kansallisuus"];
+					$laskurow["vahennettava_era"] 					= $aputoimirow["vahennettava_era"];
+				}
+				elseif ($varaston_row["maa"] == $laskurow["toim_maa"]) {
+					// intrastattia ei l‰hetet‰ tulliin kun varasto ja toimitusosoite on samassa maassa
+					$laskurow["kauppatapahtuman_luonne"] = '999';
+				}
+
+				//varasto vaihtuu, splitataan tilaus, paitsi jos kyseess‰ on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
 				if ((($varasto != $edvarasto and $edvarasto != 'x') and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") or ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K")) {
-					
-					// Meid‰n on p‰ivitett‰v‰ tunnusnippu	
+
+					// Meid‰n on p‰ivitett‰v‰ tunnusnippu
 					if($yhtiorow["splittauskielto"] == "K" and $laskurow["tunnusnippu"] == 0) {
 						$query = "UPDATE lasku set tunnusnippu = tunnus where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]' and tunnusnippu = 0";
 						$upresult = mysql_query($query) or pupe_error($query);
 						$laskurow["tunnusnippu"] = $laskurow["tunnus"];
 					}
-														
+
 					// Tehd‰‰n uusi otsikko
 					$query = "	INSERT into lasku SET
 								yhtio_nimi							= '$laskurow[yhtio_nimi]',
@@ -731,7 +737,7 @@ else {
 					$laskurow['tunnus'] = (string) mysql_insert_id();
 					$tilausnumerot[] = $laskurow["tunnus"];
 				}
-				elseif ($laskurow["varasto"] == 0) {
+				else {
 					//p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu
 					$query = "	UPDATE lasku set
 								varasto 							= '$varasto',
@@ -751,7 +757,7 @@ else {
 								bruttopaino 						= '$laskurow[bruttopaino]',
 								lisattava_era 						= '$laskurow[lisattava_era]',
 								vahennettava_era 					= '$laskurow[vahennettava_era]'
-								where yhtio ='$kukarow[yhtio]' 
+								where yhtio ='$kukarow[yhtio]'
 								and tunnus = '$laskurow[tunnus]'";
 					$varresult = mysql_query($query) or pupe_error($query);
 
@@ -773,40 +779,40 @@ else {
 
 			// Jos tilaus splittaantui moneen osaan
 			if(count($tilausnumerot) > 1) {
-				foreach ($tilausnumerot as $tilausnumero) {	
+				foreach ($tilausnumerot as $tilausnumero) {
 					$upviesti = t("Tilaus jakaantunut")." ".count($tilausnumerot)." ".t("tilaukseksi")."!";
 
-					$query = "	UPDATE lasku set sisviesti2 = concat_ws(' ', sisviesti2, '$upviesti') 
+					$query = "	UPDATE lasku set sisviesti2 = concat_ws(' ', sisviesti2, '$upviesti')
 								where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
 					$upresult = mysql_query($query) or pupe_error($query);
 				}
 			}
-			
+
 			// Laitetaan splittien toim ja kerpvm ‰t kuntoon / viikkojutut on pakko nollata splitille
 			if($yhtiorow["splittauskielto"] == "K" and count($tilausnumerot) > 1) {
 				foreach ($tilausnumerot as $tilausnumero) {
-					
-					$query = "	SELECT min(kerayspvm) kerayspvm, min(toimaika) toimaika 
-					 			from tilausrivi 
+
+					$query = "	SELECT min(kerayspvm) kerayspvm, min(toimaika) toimaika
+					 			from tilausrivi
 								where yhtio='$kukarow[yhtio]' and otunnus='$tilausnumero'";
 					$result = mysql_query($query) or pupe_error($query);
 					$toimaikatilrirow = mysql_fetch_array($result);
-										
+
 					$query = "	SELECT kerayspvm, toimaika
-								from lasku 
+								from lasku
 								where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
 					$result = mysql_query($query) or pupe_error($query);
 					$toimaikalaskurow = mysql_fetch_array($result);
-													
+
 					if ($toimaikatilrirow["kerayspvm"] != substr($toimaikalaskurow["kerayspvm"],0,10) or $toimaikatilrirow["toimaika"] != $toimaikalaskurow["toimaika"]) {
-						$query = "	UPDATE lasku 
-									set kerayspvm 	= '$toimaikatilrirow[kerayspvm]', 
-									toimaika		= '$toimaikatilrirow[toimaika]', 
-									keraysvko		= '', 
-									toimvko			= '' 
+						$query = "	UPDATE lasku
+									set kerayspvm 	= '$toimaikatilrirow[kerayspvm]',
+									toimaika		= '$toimaikatilrirow[toimaika]',
+									keraysvko		= '',
+									toimvko			= ''
 									where yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero'";
-						$upresult = mysql_query($query) or pupe_error($query);						
-					}									
+						$upresult = mysql_query($query) or pupe_error($query);
+					}
 				}
 			}
 
@@ -858,14 +864,14 @@ else {
 				}
 
 				///* T‰ss‰ katotaan onko l‰hetteell‰ tosiaan mit‰‰n ker‰tt‰v‰‰ *///
-				
+
 				//	Ja rullataan kaikki tilaukset l‰pi
 				foreach ($tilausnumerot as $tilausnumero) {
 					//luetaan laskun tiedot uudestaan t‰ss‰, per splitti
 					$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
 					$result = mysql_query($query) or pupe_error($query);
 					$laskurow = mysql_fetch_array($result);
-					
+
 					$kutsuja = "tilaus-valmis.inc";
 
 					require("tilaus-valmis-valitsetila.inc");
@@ -923,7 +929,7 @@ else {
 					$kutsuja = "tilaus-valmis.inc";
 
 					require("tilaus-valmis-valitsetila.inc");
-				}				
+				}
 			}
 		}
 	} // end jos yksikin rivi ker‰tty else haara

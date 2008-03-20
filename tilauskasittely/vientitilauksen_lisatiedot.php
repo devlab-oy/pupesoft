@@ -17,7 +17,6 @@
 		$sisamaan_kuljetus_kansallisuus = strtoupper($sisamaan_kuljetus_kansallisuus);
 		$maa_maara = strtoupper($maa_maara);
 
-
 		$otunnukset = explode(',',$otunnus);
 
 		foreach($otunnukset as $otun) {
@@ -27,8 +26,19 @@
 			$result   = mysql_query($query) or pupe_error($query);
 			$rahtirow = mysql_fetch_array ($result);
 
+			$query = "SELECT varasto from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$otun'";
+			$laskun_res = mysql_query($query) or pupe_error($query);
+			$laskun_row = mysql_fetch_array($laskun_res);
+
+			$query = "SELECT maa from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$laskun_row[varasto]'";
+			$varaston_res = mysql_query($query) or pupe_error($query);
+			$varaston_row = mysql_fetch_array($varaston_res);
+
+			$ultilno = tarvitaanko_intrastat($varaston_row["maa"], $maa_maara);
+
 			$query = "	UPDATE lasku
 						SET maa_maara 					= '$maa_maara',
+						maa_lahetys						= '$varaston_row[maa]',
 						kauppatapahtuman_luonne 		= '$kauppatapahtuman_luonne',
 						kuljetusmuoto 					= '$kuljetusmuoto',
 						sisamaan_kuljetus 				= '$sisamaan_kuljetus',
@@ -41,8 +51,9 @@
 						poistumistoimipaikka_koodi 		= '$poistumistoimipaikka_koodi',
 						bruttopaino 					= '$rahtirow[kilot]',
 						lisattava_era 					= '$lisattava_era',
-						vahennettava_era 				= '$vahennettava_era'
-						WHERE tunnus = '$otun' and yhtio='$kukarow[yhtio]'";
+						vahennettava_era 				= '$vahennettava_era',
+						ultilno							= '$ultilno'
+						WHERE tunnus = '$otun' and yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			//p‰ivitet‰‰n alatila vain jos tilaus ei viel‰ ole laskutettu
@@ -50,8 +61,6 @@
 						SET alatila = 'E'
 						WHERE tunnus = '$otun' and tila='L' and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
-
-
 		}
 
 		$tee = '';

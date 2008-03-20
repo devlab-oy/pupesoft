@@ -32,27 +32,7 @@ if ($tee == "update") {
 	$rahti_huolinta = str_replace ( ",", ".", $rahti_huolinta);
 	$erikoisale 	= str_replace ( ",", ".", $erikoisale);
 	$toimaika 		= $vv."-".$kk."-".$pp;
-	$ultilno 		= $laskurow["ultilno"];
-
-	// kokeillaan arpoa intrastat k‰sittely‰, molemmat maat pit‰‰ olla EU maita
-	if ($maa_lahetys != "" and $maa_maara != "") {
-
-		$query = "select distinct koodi from maat where koodi in ('$maa_lahetys','$maa_maara') and eu = 'ON'";
-		$result = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($result) == 2) {
-			if ($maa_lahetys == $yhtiorow["maa"] and $maa_maara != $yhtiorow["maa"]) {
-				$ultilno = "-1"; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
-			}
-			elseif ($maa_maara == $yhtiorow["maa"] and $maa_lahetys != $yhtiorow["maa"]) {
-				$ultilno = "-2"; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
-			}
-			else {
-				$ultilno = "";
-			}
-		}
-
-	}
+	$ultilno 		= tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 
 	$query = "	UPDATE lasku
 				SET maa_lahetys = '$maa_lahetys',
@@ -69,7 +49,7 @@ if ($tee == "update") {
 				kohdistettu = '$kohdistettu',
 				comments = '$kommentti',
 				ultilno = '$ultilno'
-				WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
+				WHERE tunnus = '$otunnus' and yhtio = '$kukarow[yhtio]'";
 
 	$result = mysql_query($query) or pupe_error($query);
 

@@ -596,16 +596,6 @@
 					<input type='hidden' name='ylatila' 						 value = '$ylatila'>
 					<input type='hidden' name='alatila' 						 value = '$alatila'>
 					<input type='hidden' name='otsikolta' 						 value = 'YES'>
-					<input type='hidden' name='poistumistoimipaikka_koodi'       value = '$srow[poistumistoimipaikka_koodi]'>
-					<input type='hidden' name='kuljetusmuoto'                    value = '$srow[kuljetusmuoto]'>
-					<input type='hidden' name='kauppatapahtuman_luonne'          value = '$srow[kauppatapahtuman_luonne]'>
-					<input type='hidden' name='aktiivinen_kuljetus_kansallisuus' value = '$srow[aktiivinen_kuljetus_kansallisuus]'>
-					<input type='hidden' name='aktiivinen_kuljetus'              value = '$srow[aktiivinen_kuljetus]'>
-					<input type='hidden' name='kontti'                           value = '$srow[kontti]'>
-					<input type='hidden' name='sisamaan_kuljetusmuoto'           value = '$srow[sisamaan_kuljetusmuoto]'>
-					<input type='hidden' name='sisamaan_kuljetus_kansallisuus'   value = '$srow[sisamaan_kuljetus_kansallisuus]'>
-					<input type='hidden' name='sisamaan_kuljetus'                value = '$srow[sisamaan_kuljetus]'>
-					<input type='hidden' name='maa_maara'                        value = '$srow[maa_maara]'>
 					<input type='hidden' name='laskutusvkopv' 					 value = '$srow[laskutusvkopv]'>
 					<input type='hidden' name='ovttunnus' 						 value = '$srow[ovttunnus]'>
 					<input type='hidden' name='toim_ovttunnus' 					 value = '$srow[toim_ovttunnus]'>
@@ -2431,20 +2421,10 @@
 					osatoimitus							= '$osatoimitus',
 					sisviesti1 							= '$sisviesti1',
 					sisviesti2							= '$sisviesti2',
-					poistumistoimipaikka_koodi			= '$poistumistoimipaikka_koodi',
-					kuljetusmuoto						= '$kuljetusmuoto',
-					kauppatapahtuman_luonne				= '$kauppatapahtuman_luonne',
-					aktiivinen_kuljetus_kansallisuus	= '$aktiivinen_kuljetus_kansallisuus',
-					aktiivinen_kuljetus					= '$aktiivinen_kuljetus',
-					kontti								= '$kontti',
-					sisamaan_kuljetusmuoto				= '$sisamaan_kuljetusmuoto',
-					sisamaan_kuljetus_kansallisuus		= '$sisamaan_kuljetus_kansallisuus',
-					sisamaan_kuljetus					= '$sisamaan_kuljetus',
 					tunnusnippu							= '$tunnusnippu',
 					jaksotettu							= '$jaksotettu',
 					splittauskielto						= '$splittauskielto',
-					jtkielto							= '$jtkielto',
-					maa_maara							= '$maa_maara'";
+					jtkielto							= '$jtkielto'";
 
 		if ($toim == "MYYNTITILI") {
 			if ($ylatila=='') {

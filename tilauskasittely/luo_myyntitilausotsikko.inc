@@ -27,16 +27,6 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$tpostitp 		   	   	   			= $asiakasrow["toim_postitp"];
 			$toim_maa 		   	   	   			= $asiakasrow["toim_maa"];
 			$verkkotunnus 	   	   	   			= $asiakasrow["verkkotunnus"];
-			$poistumistoimipaikka_koodi			= $asiakasrow["poistumistoimipaikka_koodi"];
-			$kuljetusmuoto                    	= $asiakasrow["kuljetusmuoto"];
-			$kauppatapahtuman_luonne          	= $asiakasrow["kauppatapahtuman_luonne"];
-			$aktiivinen_kuljetus_kansallisuus 	= $asiakasrow["aktiivinen_kuljetus_kansallisuus"];
-			$aktiivinen_kuljetus              	= $asiakasrow["aktiivinen_kuljetus"];
-			$kontti                           	= $asiakasrow["kontti"];
-			$sisamaan_kuljetusmuoto           	= $asiakasrow["sisamaan_kuljetusmuoto"];
-			$sisamaan_kuljetus_kansallisuus   	= $asiakasrow["sisamaan_kuljetus_kansallisuus"];
-			$sisamaan_kuljetus                	= $asiakasrow["sisamaan_kuljetus"];
-			$maa_maara                        	= $asiakasrow["maa_maara"];
 
 			if ($asiakasrow["spec_ytunnus"] != '') {
 				$ytunnus 				= $asiakasrow["spec_ytunnus"];

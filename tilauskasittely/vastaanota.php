@@ -450,7 +450,7 @@
 								and tuote.yhtio				= tilausrivi.yhtio
 								and tuote.tuoteno			= tilausrivi.tuoteno";
 					$result = mysql_query($query) or pupe_error($query);
-				
+
 					//Irrotetaan sarjanumerot
 					if ($tilausrivirow["sarjanumeroseuranta"] != "") {
 						$query = "	UPDATE sarjanumeroseuranta
@@ -459,7 +459,7 @@
 									and yhtio					= '$kukarow[yhtio]'";
 						$sarjares = mysql_query($query) or pupe_error($query);
 					}
-				
+
 				}
 				if ($tee == "X") {
 					// Summataan virhecountteria
@@ -472,49 +472,15 @@
 
 		if ($virheita == 0) {
 
-			//p‰ivitet‰‰n otsikko vastaanotetuksia ja tapvmm‰‰n p‰iv‰
+			//p‰ivitet‰‰n otsikko vastaanotetuksi ja tapvmm‰‰n p‰iv‰
 			$query  = "select sum(rivihinta) rivihinta from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$id' and tyyppi='G'";
 			$result = mysql_query($query) or pupe_error($query);
 			$apusummarow = mysql_fetch_array($result);
-
-			// katotaan onko toimitustavalle jotain intrastat oletuksia
-			$query  = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$id'";
-			$result = mysql_query($query) or pupe_error($query);
-			$apulaskurow = mysql_fetch_array($result);
-
-			// katotaan onko toimitustavalle jotain intrastat oletuksia
-			$query  = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$apulaskurow[toimitustapa]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$aputoimirow = mysql_fetch_array($result);
-
-			// clearing on kohdevarasto
-			$query  = "select maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$apulaskurow[clearing]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$apuvararow = mysql_fetch_array($result);
-			$maa_maara = $apuvararow["maa"];
-
-			// varasto on l‰hdevarasto
-			$query  = "select maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$apulaskurow[varasto]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$apuvararow = mysql_fetch_array($result);
-			$maa_lahetys = $apuvararow["maa"];
 
 			$query = "	UPDATE lasku
 						SET alatila							= 'V',
 						tapvm								= now(),
 						summa								= '$apusummarow[rivihinta]',
-						maa_maara							= '$maa_maara',
-						maa_lahetys							= '$maa_lahetys',
-						kauppatapahtuman_luonne 			= '$aputoimirow[kauppatapahtuman_luonne]',
-						kuljetusmuoto						= '$aputoimirow[kuljetusmuoto]',
-						sisamaan_kuljetus					= '$aputoimirow[sisamaan_kuljetus]',
-						sisamaan_kuljetusmuoto  			= '$aputoimirow[sisamaan_kuljetusmuoto]',
-						sisamaan_kuljetus_kansallisuus		= '$aputoimirow[sisamaan_kuljetus_kansallisuus]',
-						kontti								= '$aputoimirow[kontti]',
-						aktiivinen_kuljetus 				= '$aputoimirow[aktiivinen_kuljetus]',
-						aktiivinen_kuljetus_kansallisuus	= '$aputoimirow[aktiivinen_kuljetus_kansallisuus]',
-						poistumistoimipaikka 				= '$aputoimirow[poistumistoimipaikka]',
-						poistumistoimipaikka_koodi 			= '$aputoimirow[poistumistoimipaikka_koodi]',
 						bruttopaino 						= '$aputoimirow[bruttopaino]',
 						lisattava_era 						= '$aputoimirow[lisattava_era]',
 						vahennettava_era 					= '$aputoimirow[vahennettava_era]'
@@ -522,34 +488,32 @@
 						and lasku.yhtio						= '$kukarow[yhtio]'
 						and lasku.tila						= 'G'";
 			$result = mysql_query($query) or pupe_error($query);
-			
-			
 		}
 	}
-	
+
 	//Tulostetaan vastaanotetut listaus
 	if ($tee == "OK" and $id != '0' and $toim != "MYYNTITILI") {
-		
+
 		$query  = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$id'";
 		$result = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
-		
+
 		$query = "select komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$listaus'";
 		$komres = mysql_query($query) or pupe_error($query);
 		$komrow = mysql_fetch_array($komres);
 		$komento["Vastaanotetut"] = $komrow['komento'];
-	
+
 		$otunnus = $laskurow["tunnus"];
 		$mista = 'vastaanota';
-		
-		
+
+
 		require('tulosta_purkulista.inc');
 		$id = 0;
 	}
 	elseif ($tee == "OK" and $id != '0' and $toim == "MYYNTITILI") {
 		$id = 0;
 	}
-	
+
 	if ($id == '') $id = 0;
 
 	// meill‰ ei ole valittua tilausta
@@ -561,10 +525,10 @@
 		// tehd‰‰n etsi valinta
 		echo "<table><form action='$PHP_SELF' name='find' method='post'><tr><th>".t("Etsi siirtolistaa").":</th>
 		<td><input type='text' name='etsi'></td>";
-		echo "<input type='hidden' name='toim' value='$toim'>"; 
+		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<tr><th>Varasto</th><td><select name='varasto'>";
 		echo "<option value=''>" . t('Kaikki varastot') . "</option>";
-		
+
 		$query  = "SELECT tunnus, nimitys, maa FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
 		$vares = mysql_query($query) or pupe_error($query);
 
@@ -572,7 +536,7 @@
 		{
 			$sel='';
 			if ($varow['tunnus'] == $varasto) $sel = 'selected';
-						
+
 			$varastomaa = '';
 			if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
 				$varastomaa = strtoupper($varow['maa']);
@@ -582,7 +546,7 @@
 		}
 
 		echo "</select></td></tr>";
-		
+
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
 					WHERE nimi != ''
@@ -591,13 +555,13 @@
 		echo "<tr><th>" . t('Maa') . "</th><td><select name='maa'>";
 
 		echo "<option value=''>" . t('Kaikki maat') . "</option>";
-		
+
 		while ($maarow = mysql_fetch_array($vresult)) {
 			$sel = ($maarow['koodi'] == $_POST['maa']) ? 'selected' : '';
-			
+
 			echo "<option value='{$maarow['koodi']}' $sel>{$maarow['nimi']}</option>";
 		}
-		
+
 		echo "</select></td><td class='back'><input type='Submit' value='".t("Etsi")."'></td></tr></form>";
 
 		$haku = '';
@@ -608,19 +572,19 @@
 		if ($toim == "MYYNTITILI") {
 			$myytili = " and tilaustyyppi='M' ";
 		}
-		
+
 		$varasto = '';
 		if (isset($_POST['varasto']) and !empty($_POST['varasto'])) {
 			$varasto = ' AND lasku.clearing=' . (int) $_POST['varasto'];
 		}
-				
+
 		$maa = '';
 		if (isset($_POST['maa']) and !empty($_POST['maa'])) {
 			$varasto = " AND varastopaikat.maa='" . mysql_real_escape_string($_POST['maa']) . "'";
 		}
-		
-		$query = "	select distinct otunnus, count(rahtikirjat.tunnus) rtunnuksia, ultilno
-					from tilausrivi
+
+		$query = "	SELECT otunnus, count(rahtikirjat.tunnus) rtunnuksia
+					FROM tilausrivi
 					JOIN lasku on lasku.yhtio=tilausrivi.yhtio
 						and lasku.tunnus=tilausrivi.otunnus
 						and lasku.tila='G'
@@ -631,10 +595,10 @@
 					and toimitettu=''
 					and keratty!=''
 					$varasto
-					GROUP BY 1
-					HAVING ultilno not in ('-1','-2') or rtunnuksia > 0";
+					GROUP BY otunnus
+					HAVING rtunnuksia > 0";
 		$tilre = mysql_query($query) or pupe_error($query);
-		
+
 		while ($tilrow = mysql_fetch_array($tilre)) {
 
 			if ($toim == "MYYNTITILI") {
@@ -1005,9 +969,9 @@
 			}
 
 			echo "</select></td><td>";
-			
+
 			echo t("Kirjoitin johon vastaanotetut listaus tulostetaan")."<br>";
-			
+
 			mysql_data_seek($kires, 0);
 			echo "<select name='listaus'>";
 			echo "<option value='$kirow[tunnus]'>".t("Ei kirjoitinta")."</option>";

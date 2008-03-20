@@ -92,50 +92,120 @@
 		}
 	}
 
-	if(!function_exists("lyhytviesti")) {
-		function lyhytviesti ($viesti, $mitta) {
+	if(!function_exists("kaletyyppi")) {
+		function kaletyyppi ($tyyppi) {
 			
-			if(strlen(strip_tags($viesti))>$mitta) {
-				$id=uniqid();
-				$viesti = "
-				<div id='$id' class='popup'>
-					<table width='300'>
-						<tr>
-							<td>".nl2br($viesti)."</td>
-						</tr>
-					</table>
-				</div>".str_replace(strip_tags($viesti), substr(strip_tags($viesti), 0, $mitta), $viesti)."...";	
-				$poppari = "onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\"";
+			static $kaletyypit;
+			
+			if(!is_array($kaletyyppi)) {
+				$kaletyyppi = array(	"kalenteri"	=> "Kalenteri",
+										"Memo" 		=> "Asiakasmuistio",
+										"Muistutus" => "Muistutus",
+									);
+				
+			}
+
+			return $kaletyyppi[$tyyppi];
+		}
+	}
+	
+	if(!function_exists("lyhytviesti")) {
+		function lyhytviesti (&$viesti, $viestipituus, $otsikko="", $popup_otsikko="") {
+			
+			if($popup_otsikko!="") {
+				$popup_otsikko.="<hr>";
+			}
+			
+			//$viesti = nl2br($viesti); 
+			
+			$id=uniqid();
+			$div = "
+			<div id='$id' class='popup'>
+				<table width='500'>
+					<tr>
+						<td>
+						$popup_otsikko
+						".nl2br($viesti)."
+						</td>
+					</tr>
+				</table>
+			</div>";	
+			
+			$poppari = "onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\"";
+			
+			if($viestipituus == 0) {
+				$viesti = "$div<div $poppari>$otsikko</div>";
+			}
+			elseif(strlen(strip_tags($viesti))>$viestipituus ) {
+				$viesti = "$div<div $poppari>$otsikko".str_replace(strip_tags($viesti), substr(strip_tags($viesti), 0, $viestipituus), $viesti)."..</div>";
 			}
 			else {
-				$poppari = "";
-				$viesti = nl2br($viesti);
+				$viesti = "$div<div $poppari>$otsikko$viesti</div>";
 			}
-			
-			return array($viesti, $poppari);
 		}
 	}
 	
 	if(!function_exists("hae_lisatiedot")) {
-		function hae_lisatiedot($laji, $lajitark, $tunnus) {
+		function hae_lisatiedot($laji, $lajitark, $tunnus, $viestipituus="") {
 			global $kukarow, $kalenteri;
 			
 			if($laji == "kalenteri") {
-				$query = "	SELECT kalenteri.*, if(kentta01='', '***', kentta01) viesti,
+				$query = "	SELECT kalenteri.*, if(kentta01='', '***', kentta01) viesti, kalenteri.tyyppi,
 									UNIX_TIMESTAMP(pvmalku) pvmalku, 
 									UNIX_TIMESTAMP(pvmloppu) pvmloppu,
-									avainsana.selitetark tapa_nimi
+									avainsana.selitetark tyyppi_nimi,
+									asiakas.nimi asiakas
 							FROM kalenteri
 							LEFT JOIN avainsana ON avainsana.yhtio=kalenteri.yhtio and avainsana.laji='KALETAPA' and avainsana.selite=kalenteri.tapa
+							LEFT JOIN asiakas ON asiakas.yhtio=kalenteri.yhtio and asiakas.tunnus=kalenteri.liitostunnus
 							WHERE kalenteri.yhtio='$kukarow[yhtio]' and kalenteri.tunnus='$tunnus'";
 				$res = mysql_query($query) or pupe_error($query);
 				$row = mysql_fetch_array($res);
+				//var_dump($kalenteri);
+				$otsikko = kaletyyppi($row["tyyppi"]);
+				
+				
+				if($row["tyyppi"] == "kalenteri") {
+					$popup_otsikko = "<table>";
+					if($row["asiakas"] != "") {
+						$popup_otsikko .= "<tr><th class=''>".t("Asiakas").":</th><td class=''>$row[asiakas]</td></tr>";
+					}
+					
+					$popup_otsikko .= "<tr><th class=''>".t("Tapa").":</th><td class=''>$row[tapa]</td></tr>";
+					$popup_otsikko .= "<tr><th class=''>".t("Alkaa").":</th><td class=''>".date("d.m.Y h:i", $row["pvmalku"])."</td></tr>";
+					$popup_otsikko .= "<tr><th class=''>".t("Päättyy").":</th><td class=''>".date("d.m.Y h:i", $row["pvmloppu"])."</td></tr>";
+					
+					$popup_otsikko .= "</table>";
+				}
+				elseif($row["tyyppi"] == "Memo") {
+					$popup_otsikko = "<table>";
+					$popup_otsikko .= "<tr><th class=''>".t("Asiakas").":</th><td class=''>$row[asiakas]</td></tr>";
+					$popup_otsikko .= "<tr><th class=''>".t("Päiväys").":</th><td class=''>".date("d.m.Y", $row["pvmalku"])."</td></tr>";
+					
+					$popup_otsikko .= "</table>";
+					
+				}
+				
+				$popup_otsikko = "	<div style='text-align: right;'>
+										<font class='info'>$row[laatija]@$row[luontiaika]</font>
+									</div>
+									$popup_otsikko";
+				
+				$otsikko = "<div style='font-weight: bold;'>$otsikko</div>";
+				
+				
+				$row["viesti"] = "<font class='info'>{$row["viesti"]}</font>";
+				
+				if($viestipituus!="") {
+					lyhytviesti($row["viesti"], $viestipituus, $otsikko, $popup_otsikko);
+				}
+				
 				
 				if($row["kuka"] == $kukarow["kuka"] or $row["laatija"] == $kukarow["kuka"]) {
-					$row["viesti"] = "<a onclick=\"popUp(event, 'ajax_menu', '50', '20', '$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=$lajitark&ktunnus=$tunnus".url_params($kalenteri)."'); return false;\" class='kale'>{$row["viesti"]}</a>";
+					$row["viesti"] = "<a onclick=\"popUp(event, 'ajax_menu', '50', '20', '$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=$lajitark&ktunnus=$tunnus".url_params($kalenteri)."'); return false;\" class='kale'>$row[viesti]</a>";
 				}
 				else {
-					$row["viesti"] = "<a onclick=\"alert('Voit muokata vain omaa kalenteriasi'); return false;\" class='kale'>{$row["viesti"]}</a>";
+					$row["viesti"] = "<a onclick=\"alert('Voit muokata vain omaa kalenteriasi'); return false;\" class='kale'>$row[viesti]</a>";
 				}
 			}
 			elseif($laji == "lasku") {
@@ -180,8 +250,9 @@
 						$viesti = $lajitark;
 					}
 				}
-
-				list($viesti, $poppari) = lyhytviesti($row["tunnus"]." ".$viesti."\nviite: {$row["viesti"]}\n\n{$row["comments"]}", strlen($row["tunnus"]));
+				
+				
+				//list($viesti, $poppari) = lyhytviesti($row["tunnus"]." ".$viesti."\nviite: {$row["viesti"]}\n\n{$row["comments"]}", strlen($row["tunnus"]));
 				$row["viesti"] = " <a href='#' onclick=\"popUp(event, 'toimitus', '300', '-20', '../raportit/asiakkaantilaukset.php?tee=NAYTA&toim=$atoim&h&tunnus=$row[tunnus]'); return false;\" class='kale' $poppari>$viesti</a>";
 				
 			}
@@ -205,7 +276,7 @@
 			return purge($row);
 		}	 
 	}
-
+	
 	if(!function_exists("alusta_kalenteri")) {
 		function alusta_kalenteri($kalenteri) {
 			
@@ -217,50 +288,19 @@
 				$kalenteri["url_params"][$varval] = $GLOBALS[$varval];
 			}
 			$kalenteri["url_params"] = purge($kalenteri["url_params"]);
-
-			if($kalenteri["div"] == "") die("Kalenterin DIV puuttuu");
-
-			//	Aloitetaan kalenteri, tallennetaan sen parametrit muistiin..
-			if(!muistiin("kalenteri", "kalenteri", $kalenteri)) {
-				die("OHO! Kalenterin käyttönotto ei nyt vaan onnistu!");
-			}
-		} 
-	}
-	
-	if(!function_exists("kalequery")) {
-		function kalequery($query) {
-			global $kukarow, $lisaakalekuka, $poistakalekuka;
-			
-			$kalenteri = muistista("kalenteri", "kalenteri");
-			if(!is_array($kalenteri)) {
-				die("OHO! Kalenterin meni rikki!");
-			}
-			
-			if($lisaakalekuka != "") {
-				if(!in_array($lisaakalekuka, $kalenteri["kalenteri_kuka"])) {
-					$kalenteri["kalenteri_kuka"][] = $lisaakalekuka;
-				}
-			}
-
-			if($poistakalekuka != "") {
-				$i = array_search($poistakalekuka, $kalenteri["kalenteri_kuka"]);
-				
-				if($i !== false) {
-					unset($kalenteri["kalenteri_kuka"][$i]);
-				}
-			}
-			
-			$kukalisa = ""; 
+						
 			//	Rajataan listaa keiden kalenteria katsotaan
 			if(is_array($kalenteri["kalenteri_ketka"])) {
-				foreach($kalenteri["kalenteri_ketka"] as $kj) {
+				$k=$kalenteri["kalenteri_ketka"]; 
+				$kalenteri["kalenteri_ketka"] = array();
+				foreach($k as $kj) {
 					if($kukalisa == "") {
 						$kukalisa = " and (";
 					}
 					else {
 						$kukalisa .= " or ";
 					}
-					
+
 					if($kj == "myyjat") {
 						$kukalisa .= "kuka.myyja > 0";
 					}
@@ -270,37 +310,35 @@
 					elseif($kj == "projektipaallikot") {
 						$kukalisa .= "kuka.asema = 'PP'";
 					}
-					elseif($kj == "kaikki") {
+					if($kj == "kaikki") {
 						//Haetaan kaikki käyttäjät joilla on kalenteri käytössä
-						$kq = "	SELECT GROUP_CONCAT(distinct kuka.kuka SEPARATOR '\',\'') kukat
+						$query = "	SELECT DISTINCT kuka.kuka
 									FROM kuka
-									JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php'
-									GROUP BY kuka.yhtio";
-						$result = mysql_query($kq) or pupe_error($kq);
-						$row = mysql_fetch_array($result);
-						$kukalisa .= "kuka.kuka IN ('{$row["kukat"]}')";
+									JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php'";
+					}
+					
+					if($query != "") {
+						$result = mysql_query($query) or pupe_error($query);
+
+						while($row = mysql_fetch_array($result)) {
+							$kalenteri["kalenteri_ketka"][] = $row["kuka"];
+						}
 					}
 					else {
+						$kalenteri["kalenteri_ketka"] = "";
 						echo "Tällästä kalenteri_ketka:a ei tunneta '$kj'<br>";
 					}
 				}
-				
-				$kukalisa .= ")";
-				$kalenteri["kukalisa"] = $kukalisa;
-			}
-			else {
-				$kalenteri["kukalisa"] = "";
 			}
 			
-			$kalelisa = "";
 			//	Millaiset kalenterit jaetaan?
 			if(is_array($kalenteri["kalenteri_jako"])) {
 				foreach($kalenteri["kalenteri_jako"] as $kj) {
-					if($kalelisa == "") {
-						$kalelisa = " and (";
+					if($kalenteri_jako == "") {
+						$kalenteri_jako = " and (";
 					}
 					else {
-						$kalelisa .= " or ";
+						$kalenteri_jako .= " or ";
 					}
 					
 					if($kj == "tilaus") {
@@ -312,39 +350,81 @@
 						$row = mysql_fetch_array($res);
 						if($row["nippu"] == "") $row["nippu"] = $kalenteri["otunnus"];
 						
-						$kalelisa .= "kalenteri.otunnus IN ({$row["nippu"]})";
+						$kalenteri_jako .= "kalenteri.otunnus IN ({$row["nippu"]})";
 					}
 					elseif($kj == "asiakas"){
-						$kalelisa .= "kalenteri.liitostunnus = {$kalenteri["liitostunnus"]}";
+						$kalenteri_jako .= "kalenteri.liitostunnus = {$kalenteri["liitostunnus"]}";
 					}
 					else {
 						echo "Tällästä kalenteri_jako:a ei tunneta '$kj'<br>";
 					}
 				}
 
-				$kalelisa .= ")";
-				$kalenteri["kalelisa"] = $kalelisa;
-			}
-			else {
-				$kalenteri["kalelisa"] = "";
+				$kalenteri_jako .= ")";
+				$kalenteri["kalenteri_jako"] = $kalenteri_jako;
 			}
 			
+			if($kalenteri["div"] == "") die("Kalenterin DIV puuttuu");
+			
+			//	Aloitetaan kalenteri, tallennetaan sen parametrit muistiin..
+			if(!muistiin("kalenteri", "kalenteri", $kalenteri)) {
+				die("OHO! Kalenterin käyttönotto ei nyt vaan onnistu!");
+			}
+		} 
+	}
+	
+	if(!function_exists("kalequery")) {
+		function kalequery($query) {
+			global $kukarow, $kalelisaa, $kalepoisto;
+			
+			$kalenteri = muistista("kalenteri", "kalenteri");
+			if(!is_array($kalenteri)) {
+				die("OHO! Kalenterin meni rikki!");
+			}
+			
+			//	Lisätään arvoja kalenteriin
+			if(count($kalelisaa)>0) {
+				foreach($kalelisaa as $key => $val) {
+					if(!in_array($val, $kalenteri[$key])) {
+						$kalenteri[$key][] = $val;
+					}
+				}
+			}
+
+			//	Poistetaan arvoja kalenterista
+			if(count($kalepoisto)>0) {
+				foreach($kalepoisto as $key => $val) {
+
+					$i = array_search($val, $kalenteri[$key]);
+					
+					if($i !== false) {
+						unset($kalenteri[$key][$i]);
+					}
+				}
+			}
+						
 			
 			//	Painetaan nämä taas muistin syövereihin jotta ei dementia iske
 			if(!muistiin("kalenteri", "kalenteri", $kalenteri)) {
 				die("OHO! Kalenterin käyttönotto ei nyt vaan onnistu!");
 			}
 			
+			if(!is_array($kalenteri["kalenteri_nayta_kuka"]) and is_array($kalenteri["kalenteri_ketka"])) {
+				$kalenteri["kalenteri_nayta_kuka"] = array();
+			}
+			if(!is_array($kalenteri["kalenteri_nayta_tyyppi"]) and is_array($kalenteri["kalenteri_tyypit"])) {
+				$kalenteri["kalenteri_nayta_tyyppi"] = array();
+			}
+			
 			//	Kalenteri_kuka on meidän masteri, näytetäänkö kalenterit vai ei
-			if(is_array($kalenteri["kalenteri_kuka"])) {
+			if(is_array($kalenteri["kalenteri_nayta_kuka"]) or is_array($kalenteri["kalenteri_nayta_tyyppi"])) {
 				
 				//	Tämä on meidän basic kalenterikysely omista kalentereista
 				$q = "	
-					SELECT 'kalenteri' laji, tyyppi laji_tark, UNIX_TIMESTAMP(date(pvmalku)) aika,  kalenteri.luontiaika, DATEDIFF(pvmloppu, pvmalku) vali, kalenteri.laatija, kalenteri.tunnus
+					SELECT 'kalenteri' laji, kalenteri.tyyppi laji_tark, UNIX_TIMESTAMP(date(pvmalku)) aika,  kalenteri.luontiaika, DATEDIFF(pvmloppu, pvmalku) vali, kalenteri.laatija, kalenteri.tunnus
 					FROM kalenteri
-					JOIN kuka ON kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka $kukalisa
-					WHERE kalenteri.yhtio = '$kukarow[yhtio]' and kalenteri.kuka IN ('".implode("','", $kalenteri["kalenteri_kuka"])."') and kalenteri.tyyppi = 'kalenteri' $kalelisa";
-				
+					JOIN kuka ON kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka and kuka.kuka IN ('".implode("','", $kalenteri["kalenteri_ketka"])."')
+					WHERE kalenteri.yhtio = '$kukarow[yhtio]' and kalenteri.kuka IN ('".implode("','", $kalenteri["kalenteri_nayta_kuka"])."') and kalenteri.tyyppi IN ('".implode("','", $kalenteri["kalenteri_nayta_tyyppi"])."') $kalenteri[kalenteri_jako]";
 				if($query != "") {
 					$query = "	(
 									$q
@@ -354,6 +434,9 @@
 				else {
 					$query = $q;
 				}
+			}
+			else {
+				echo "KIVI";
 			}
 			
 			
@@ -425,35 +508,33 @@
 				//echo "tallennetaan: <pre>".print_r($kalenteri, true)."</pre>";
 			}
 			
-			if(is_array($kalenteri["kalenteri_kuka"])) {
+			
+			$kalejako = "";
+			if(is_array($kalenteri["kalenteri_nayta_kuka"])) {
 				$kalejako = "
-					<table border='1'>
+					<table border='1' width='140'>
 						<caption>".t("Käyttäjät")."</caption>";
 						
 				$lisa = "";
 				
 				$query = " 	SELECT *
 							FROM kuka
-							WHERE yhtio='$kukarow[yhtio]' {$kalenteri["kukalisa"]}
+							WHERE yhtio='$kukarow[yhtio]' and kuka IN ('".implode("','", $kalenteri["kalenteri_ketka"])."')
 							ORDER BY kuka IN('{$kukarow["kuka"]}') DESC, nimi ";
 				$result = mysql_query($query) or pupe_error($query);
+				
 				if(mysql_num_rows($result)>0) {
 					while($row = mysql_fetch_array($result)) {
 						
 						$kalejako .= "<tr>";
 						
-						//	Omaa kalenteria ei saa sulkea koska se kadottaisi koko kalenterimenun..
-						if($row["kuka"] == $kukarow["kuka"]) {
+						if(in_array($row["kuka"], $kalenteri["kalenteri_nayta_kuka"])) {
 							$kalejako .= "
-								<td><div style='float: left;'><font class='info'>{$row["nimi"]}</font></div></td>";
-						}
-						elseif(in_array($row["kuka"], $kalenteri["kalenteri_kuka"])) {
-							$kalejako .= "
-								<td><div style='float: left;'><font class='info'>{$row["nimi"]}</font></div><div style='float: right;'><input type='checkbox' name='' onclick=\"sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&poistakalekuka=$row[kuka]".url_params($kalenteri)."', '$kalenteri[div]', false);\" checked></div></td>";
+								<td><div style='float: left;'><font class='info'>{$row["nimi"]}</font></div><div style='float: right;'><input type='checkbox' name='' onclick=\"sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kalepoisto[kalenteri_nayta_kuka]=$row[kuka]".url_params($kalenteri)."', '$kalenteri[div]', false);\" checked></div></td>";
 						}
 						else {
 							$kalejako .= "
-								<td><div style='float: left;'><font class='info'>{$row["nimi"]}</font></div><div style='float: right;'><input type='checkbox' name='' onclick=\"sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&lisaakalekuka=$row[kuka]".url_params($kalenteri)."', '$kalenteri[div]', false);\"></div></td>";
+								<td><div style='float: left;'><font class='info'>{$row["nimi"]}</font></div><div style='float: right;'><input type='checkbox' name='' onclick=\"sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kalelisaa[kalenteri_nayta_kuka]=$row[kuka]".url_params($kalenteri)."', '$kalenteri[div]', false);\"></div></td>";
 						}
 						
 						$kalejako .= "</tr>";
@@ -463,6 +544,33 @@
 				$kalejako .= "</table>";
 							
 			}
+			
+			if(count($kalenteri["kalenteri_tyypit"])>0) {
+				$kalejako .= "
+					<br>
+					<table border='1' width='140'>
+						<caption>".t("Näytä merkinnät")."</caption>";
+
+					foreach($kalenteri["kalenteri_tyypit"] as $tyyppi) {
+						
+						$kalejako .= "<tr>";
+						
+						if(in_array($tyyppi, $kalenteri["kalenteri_nayta_tyyppi"])) {
+							$kalejako .= "
+								<td><div style='float: left;'><font class='info'>".kaletyyppi($tyyppi)."</font></div><div style='float: right;'><input type='checkbox' name='' onclick=\"sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kalepoisto[kalenteri_nayta_tyyppi]=$tyyppi".url_params($kalenteri)."', '$kalenteri[div]', false);\" checked></div></td>";
+						}
+						else {
+							$kalejako .= "
+								<td><div style='float: left;'><font class='info'>".kaletyyppi($tyyppi)."</font></div><div style='float: right;'><input type='checkbox' name='' onclick=\"sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kalelisaa[kalenteri_nayta_tyyppi]=$tyyppi".url_params($kalenteri)."', '$kalenteri[div]', false);\"></div></td>";
+						}
+						
+						$kalejako .= "</tr>";
+					}
+
+					$kalejako .= "
+					</table>";
+			}
+					
 			
 			//	Piirretään header
 			
@@ -673,19 +781,12 @@
 									$tcolor[$row["tunnus"]] = color_code(count($tcolor)*13+55, 100);
 
 									$poppari="";
-									$lisatiedot = hae_lisatiedot($row["laji"], $row["laji_tark"], $row["tunnus"]);	
-									if($row["laji"] == "kalenteri") {
-
-										list($viesti, $poppari) = lyhytviesti($lisatiedot["viesti"], 25);
-									}
-									else {
-										$viesti = $lisatiedot["viesti"];
-									}
-
-									$ulos[$tpos[$row["tunnus"]]] .= "<div style='height: 15; width; 100%; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";' $poppari>$viesti</div>";									
+									$lisatiedot = hae_lisatiedot($row["laji"], $row["laji_tark"], $row["tunnus"], 0);	
+									
+									$ulos[$tpos[$row["tunnus"]]] .= "<div style='height: 15; width; 100%; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";'>{$lisatiedot["viesti"]}</div>";
 								}
 								else {
-									$ulos[$tpos[$row["tunnus"]]] .= "<div style='height: 15; width; 100%; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";' $poppari></div>";
+									$ulos[$tpos[$row["tunnus"]]] .= "<div style='height: 15; width; 100%; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";'></div>";
 								}
 							}
 						}
@@ -696,20 +797,9 @@
 							if($row["aika"] == $aikastr and $row["vali"] < 1) {
 								if($u != "") $u .= "<hr>";
 
-								$lisatiedot = hae_lisatiedot($row["laji"], $row["laji_tark"], $row["tunnus"]);	
-								if($row["laji"] == "kalenteri") {
+								$lisatiedot = hae_lisatiedot($row["laji"], $row["laji_tark"], $row["tunnus"], 20);	
 
-									list($viesti, $poppari) = lyhytviesti($lisatiedot["viesti"], 25);
-									if($poppari != "") {
-										$u .= "<div $poppari>$viesti</div>";
-									}
-									else {
-										$u .= $viesti;
-									}
-								}
-								else {
-									$u .= $lisatiedot["viesti"];
-								}
+								$u .= $lisatiedot["viesti"];
 								
 								$ulos[]=$u;
 							}
@@ -742,7 +832,10 @@
 						<div style='float: left; position: relative; left: 20px;'>$kalejako</div>";
 			}
 			elseif($nakyma == "TAPAHTUMALISTAUS") {
-				$kale .= "<table width='600'>";
+				
+				$kale .= "	<div style='width: 750px;'>
+							<div style='float: right; position: relative; left: 20px;'>$kalejako</div>
+							<table width = '600' align='left'>";
 				
 				krsort($data["lista"]);
 				
@@ -772,7 +865,7 @@
 								$viesti = $lisatiedot["viesti"];
 								
 								if($tapahtuma["laji"] == "kalenteri" and $tapahtuma["vali"] > 1) {
-									$viesti .= "<br><br>".t("%s päättyy: %s", $kieli, $lisatiedot["tapa_nimi"], date("d.m.Y h:i"));
+									$viesti .= "<br><br>".t("%s päättyy: %s", $kieli, $lisatiedot["tyyppi_nimi"], date("d.m.Y h:i"));
 								}
 
 								$kale .= "<th>$tapahtuma[laji_tark]<div style='float: right;'><font class='info'>$tapahtuma[laatija]@$tapahtuma[luontiaika]</font></div></th></tr>";
@@ -784,7 +877,8 @@
 					}
 				}
 
-				$kale .= "</table>";
+				$kale .= "</table>
+						</div>";
 			}
 			elseif(in_array($nakyma, array("VIIKKONAKYMA", "PAIVANAKYMA"))) {
 								
@@ -1135,14 +1229,13 @@
 			$query .= $kysely.$where;
 			$result = mysql_query($query) or pupe_error($query);
 
-			if($jakelu != "") {
+			if(count($jakelu)) {
 
 				//	Haetaan kaikki listata
 				$query = "	SELECT nimi, eposti
 							FROM kuka
 							WHERE yhtio = '$kukarow[yhtio]' and kuka IN ('".str_replace(",","','", implode(",", $jakelu))."') and eposti != ''";
 				$jres = mysql_query($query) or pupe_error($query);
-				echo $query;
 				if(mysql_num_rows($jres)>0) {
 					$to = "";
 					while($jrow = mysql_fetch_array($jres)) {

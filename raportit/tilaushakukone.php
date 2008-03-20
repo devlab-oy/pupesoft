@@ -8,14 +8,17 @@ if (isset($_POST["tee"])) {
 //parametrit
 if (strpos($_SERVER['SCRIPT_NAME'], "tilaushakukone.php")  !== FALSE) {
 	require('../inc/parametrit.inc');
-	js_popup();
-	js_showhide();
-	enable_ajax();
 }
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
 	readfile("/tmp/".$tmpfilenimi);
 	exit;
+}
+
+if (strpos($_SERVER['SCRIPT_NAME'], "tilaushakukone.php")  !== FALSE) {
+	js_popup();
+	js_showhide();
+	enable_ajax();
 }
 
 
@@ -272,10 +275,15 @@ if($tee == "NAYTA") {
 		$kalenteri["sallittu_nakyma"]	= "";
 		$kalenteri["laskutilat"]		= $laskutilat;
 		$kalenteri["otunnus"]			= $tarjous;
-		$kalenteri["kalenteri_kuka"]	= array($kukarow["kuka"]);
-		$kalenteri["kalenteri_ketka"]	= array("myyjat","keraajat", "projektipaallikot");
-		$kalenteri["kalenteri_jako"]	= array("tilaus");
 		
+		$kalenteri["kalenteri_ketka"]		= array("kaikki");
+		$kalenteri["kalenteri_nayta_kuka"]	= array($kukarow["kuka"]);
+		
+		$kalenteri["kalenteri_tyypit"]		= array("kalenteri", "Memo", "Muistutus");
+		$kalenteri["kalenteri_nayta_tyyppi"]= array("kalenteri");
+		
+		$kalenteri["kalenteri_jako"]	= array("tilaus");
+				
 		alusta_kalenteri($kalenteri);
 	}
 	
@@ -813,20 +821,38 @@ if($tee == "") {
 	if($toim == "TARJOUSHAKUKONE" or $toim == "TILAUSHAKUKONE") {
 		
 		if($excel == "YES") {
-			if(include_once('Spreadsheet/Excel/Writer.php')) {
-
-				//keksit‰‰n failille joku varmasti uniikki nimi:
+			if(!isset($workbook)) {
+				include_once('Spreadsheet/Excel/Writer.php');
 				$excelnimi = "Tilausraportti_".date("d-m-Y")."_".mt_rand(0,9999).".xls";
 
 				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
 				$workbook->setVersion(8);
-				$worksheet =& $workbook->addWorksheet('Raportti');
+				
+				$format_otsikko =& $workbook->addFormat();
+				$format_otsikko->setBold();
+				
+				$workbook->setCustomColor(21, 83, 255, 83);
+				$format_valisumma =& $workbook->addFormat();
+				$format_valisumma->setFgColor(21);
+				
+				$workbook->setCustomColor(20, 255, 255, 121);
+				$format_rivi =& $workbook->addFormat();
+				$format_rivi->setFgColor(20);
+				
+				$format_loppusumma =& $workbook->addFormat();
+				$format_loppusumma->setFgColor(21);
+				$format_loppusumma->setBold(1000);
+				
+			}
+			
+			if(!isset($worksheetName)) {
+				$worksheetName = "Raportti";
+			}
+			
+			$worksheet =& $workbook->addWorksheet($worksheetName);
 
-				$format_bold =& $workbook->addFormat();
-				$format_bold->setBold();
-
-				$excelrivi = 0;		
-			}	
+			$excelrivi = 0;		
+			
 		}
 		
 		if($setti == "viikkis") {
@@ -1413,11 +1439,7 @@ if($tee == "") {
 	
 	if(count($group)>0) {
 		
-		//	Oreder by m‰‰r‰t‰‰n t‰‰ll‰ aina
-		$order = array();
-		$jarj = array();
-		
-		//	sortataan..
+		//	sortataan prioriteettien mukaan..
 		for($i=0;$i<count($prio);$i++) {
 			$v = current($prio);
 			if($v == 0) $prio[key($prio)]=max($prio)+1;
@@ -1428,35 +1450,36 @@ if($tee == "") {
 		
 		foreach($group as $gk => $gv) {
 			$g[$prio[$gk]] = $gk;
-			$jarj[$prio[$gk]] = $gk;
 		}
 		
 		//	sortataan n‰‰ arrayt
 		ksort($g);
-		ksort($jarj);
 
-		$group_by = "GROUP BY ".implode(", ", $g)."";
+		$group_by = "GROUP BY ".implode(", ", $g)." WITH ROLLUP";
+		
+		$order = "";
 	}
-	
-	$order = "ORDER BY ";
-	if(is_array($jarj)) {
-		foreach($jarj as $key => $jarj) {
-			if($jarj != "") {
-				if(in_array($jarj, array("pva", "summa_"))) {
-					$order .= "$jarj+0 ".$suunta[$key].", ";
+	else {
+		$order = "ORDER BY ";
+		if(is_array($jarj)) {
+			foreach($jarj as $key => $jarj) {
+				if($jarj != "") {
+					if(in_array($jarj, array("pva", "summa_"))) {
+						$order .= "$jarj+0 ".$suunta[$key].", ";
+					}
+					else {
+						$order .= "$jarj ".$suunta[$key].", ";
+					}
 				}
-				else {
-					$order .= "$jarj ".$suunta[$key].", ";
-				}
-			}
-		}		
-	}
-	
-	if($toim == "TARJOUSHAKUKONE") {
-		$order .= "lasku.tunnus ASC";
-	}
-	elseif($toim == "TILAUSHAKUKONE") {
-		$order .= "lasku.tunnus DESC";
+			}		
+		}
+		
+		if($toim == "TARJOUSHAKUKONE") {
+			$order .= "lasku.tunnus ASC";
+		}
+		elseif($toim == "TILAUSHAKUKONE") {
+			$order .= "lasku.tunnus DESC";
+		}
 	}
 		
 	if($viimeisin_kaletapahtuma == "OK") {
@@ -1555,7 +1578,7 @@ if($tee == "") {
 	if(mysql_num_rows($laskures)>0) {
 		
 		echo "	<div id='main'>
-				<table border='0' cellpadding='2' cellspacing='1' width = '1000'>
+				<table border='0' cellpadding='2' cellspacing='1'>
 					<tr>";
 				
 				for($i=0;$i<=$c; $i++) {
@@ -1563,7 +1586,7 @@ if($tee == "") {
 					echo "<th>$o</th>";
 					
 					if(isset($workbook)) {
-						$worksheet->write($excelrivi, $i, ucfirst(t($o)), $format_bold);
+						$worksheet->write($excelrivi, $i, ucfirst(t($o)), $format_otsikko);
 					}
 				}
 				
@@ -1574,59 +1597,121 @@ if($tee == "") {
 				echo "
 					</tr>";
 		$gt = 0;
+		$ed=array();
+		
 		while($laskurow = mysql_fetch_array($laskures)) {
 			
 			echo "<tr  class='aktiivi'>";
+			$summarivi = 0;
 			for($i=0;$i<=$c; $i++) {
 				
-				if(mysql_field_name($laskures, $i) == "pva") {
-					if($laskurow["pva"] > 5) {
-						$color = "green"; 
-					}
-					elseif($laskurow["pva"] > 0) {
-						$color = "orange"; 
+				if(is_null($laskurow[$i]) and isset($ed[$i]) and $group_by != ""){
+					if($i == 0) {
+						echo "<td align='right' class='tumma'>".t("Kaikki yhteens‰").":</td>";
+
+						if(isset($workbook)) {
+							$worksheet->write($excelrivi, $i, t("Kaikki yhteens‰"), $format_loppusumma);
+						}
 					}
 					else {
-						$color = "red"; 				
-					}
-					
-					echo "<td><font style='color:$color;'>$laskurow[pva]</font></td>";
+						echo "<td align='right' class='tumma'>".$laskurow[($i-1)]." ".t("yhteens‰").":</td>";
 
-					if(isset($workbook)) {
-						$worksheet->write($excelrivi, $i, $laskurow["pva"]);
+						if(isset($workbook)) {
+							$worksheet->write($excelrivi, $i, $laskurow[($i-1)]." ".t("yhteens‰"), $format_valisumma);
+						}						
 					}
-				}
-				elseif(mysql_field_name($laskures, $i) == "tila") {
-					$laskutyyppi = $laskurow["tila"];
-					$alatila	 = $laskurow["alatila"];
-					require "inc/laskutyyppi.inc";
 					
-					echo "<td>".t($laskutyyppi)." ".t($alatila)."</td>";
+					$extraTR = 1;
+					$summarivi = 1;
+				}
+				elseif($ed[$i] != $laskurow[$i] or mysql_field_name($laskures, $i) == "Yhteens‰") {
+					
+					
+					if($summarivi == 1) {
+						$class = "tumma";
+						$format = $format_valisumma;
+					}
+					else {
+						$class = "";
+						$format = $format_rivi;						
+					}
+					
+					//	T‰m‰ gruuppi pit‰‰ nollata myˆs seruaavilla sarakkeilla..
+					for($z=$i;$z<=$c; $z++) {
+						$ed[$z] = "alibabadubadaba";
+					}
+					
+					if(mysql_field_name($laskures, $i) == "pva") {
+						if($laskurow["pva"] > 5) {
+							$color = "green"; 
+						}
+						elseif($laskurow["pva"] > 0) {
+							$color = "orange"; 
+						}
+						else {
+							$color = "red"; 				
+						}
 
-					if(isset($workbook)) {
-						$worksheet->write($excelrivi, $i, t($laskutyyppi)." ".t($alatila));
+						echo "<td><font style='color:$color;' class='$class'>$laskurow[pva]</font></td>";
+
+						if(isset($workbook)) {
+							$worksheet->write($excelrivi, $i, $laskurow["pva"], $format);
+						}
+					}
+					elseif(mysql_field_name($laskures, $i) == "tila") {
+						$laskutyyppi = $laskurow["tila"];
+						$alatila	 = $laskurow["alatila"];
+						require "inc/laskutyyppi.inc";
+
+						echo "<td class='$class'>".t($laskutyyppi)." ".t($alatila)."</td>";
+
+						if(isset($workbook)) {
+							$worksheet->write($excelrivi, $i, t($laskutyyppi)." ".t($alatila), $format);
+						}
+					}
+					elseif(mysql_field_type($laskures, $i) == "real") {
+						echo "<td align = 'right' class='$class'>".number_format($laskurow[$i], 2, ',', ' ')."</td>";
+
+						if(isset($workbook)) {
+							$worksheet->write($excelrivi, $i, number_format($laskurow[$i], 2, ',', ' '), $format);
+						}
+					}
+					elseif(mysql_field_name($laskures, $i) == "maa") {
+						
+						echo "<td class='$class'>".maa($laskurow[$i])."</td>";
+
+						if(isset($workbook)) {
+							$worksheet->write($excelrivi, $i, maa($laskurow[$i]), $format);
+						}
+					}
+					else {
+						echo "<td class='$class'>$laskurow[$i]</td>";
+
+						if(isset($workbook)) {
+							$worksheet->write($excelrivi, $i, $laskurow[$i], $format);
+						}
 					}
 				}
-				elseif(mysql_field_type($laskures, $i) == "real") {					
-					echo "<td align = 'right'>".number_format($laskurow[$i], 2, ',', ' ')."</td>";
-					
-					if(isset($workbook)) {
-						$worksheet->write($excelrivi, $i, number_format($laskurow[$i], 2, ',', ' '));
+				else {
+					if($summarivi == 1) {
+						$class = "tumma";
+						if(isset($workbook)) {
+							$worksheet->write($excelrivi, $i, "", $format_valisumma);
+						}
 					}
-				}
-				else {					
-					echo "<td>$laskurow[$i]</td>";
-					
-					if(isset($workbook)) {
-						$worksheet->write($excelrivi, $i, $laskurow[$i]);
+					else {
+						$class = "";
 					}
+					
+					echo "<td class='$class'>&nbsp;</td>";					
 				}
 				
-				if(mysql_field_name($laskures, $i) == "Yhteens‰") {
+				if(mysql_field_name($laskures, $i) == "Yhteens‰" and $summarivi == 0) {
 					$colspan = $i;
 					$gt += $laskurow[$i];
 				}
 				
+				$ed[$i] = $laskurow[$i];
 			}
 			
 			$excelrivi++;
@@ -1638,16 +1723,33 @@ if($tee == "") {
 			else {
 				echo "</tr>";
 			}
+			
+			if($group_by == "") {
+				echo "<tr><td class='back' colspan = '8'><div id='tarjouskalenteri_$laskurow[tunnus]'></div></td></tr>";
+			}	
+			
+			if($extraTR == 1) {
+				echo "<tr><td class='back' colspan = '8'>&nbsp;</td></tr>";
 
-			echo "<tr><td class='back' colspan = '8'><div id='tarjouskalenteri_$laskurow[tunnus]'></div></td></tr>";
+				if(isset($workbook)) {
+					$excelrivi++;
+				}
+				
+				$extraTR = 0;
+			}
+		}
+
+		if($group_by == "") {
+			echo "<tr><td colspan='$colspan' class='back'></td><td class='back' align = 'right'><font class='message'>".number_format($gt, 2, ',', ' ')."</font></td></tr>";
 		}
 		
-		echo "<tr><td colspan='$colspan' class='back'></td><td class='back' align = 'right'><font class='message'>".number_format($gt, 2, ',', ' ')."</font></td></tr>";
 		echo "</table></div>";
 		
 		if(isset($workbook) and $excelrivi>0) {
 			// We need to explicitly close the workbook
-			$workbook->close();
+			if(!isset($worksheetName)) {
+				$workbook->close();
+			}
 
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna tulos").":</th>";

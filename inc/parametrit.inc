@@ -7,11 +7,25 @@ $repl = array("", "", "", "", "", "");
 // otetaan includepath aina rootista
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)));
 
+
+if(!function_exists("iconv_array")) {
+	function iconv_array($key, &$item) {
+		global $_REQUEST, $serc, $repl;
+		iconv($_REQUEST["sourceCharset"], "latin1", str_replace($serc, $repl, $item));
+	}
+}
+
 foreach ($_GET as $key => $value) {
 	//$_GET[$key] = addslashes(trim($_GET[$key]));
 	$_GET[$key] = str_replace($serc, $repl, $_GET[$key]);
 	if(isset($_REQUEST["sourceCharset"]) and $_REQUEST["sourceCharset"] != "") {
-		${$key} = iconv($_REQUEST["sourceCharset"], "latin1", str_replace($serc, $repl, $_GET[$key]));
+		if(is_array($_GET[$key])) {
+			array_walk_recursive($_GET[$key], "iconv_array");
+			${$key} = $_GET[$key];
+		}
+		else {
+			${$key} = iconv($_REQUEST["sourceCharset"], "latin1", str_replace($serc, $repl, $_GET[$key]));
+		}
 	}
 	else {
 		${$key} = str_replace($serc, $repl, $_GET[$key]);
@@ -23,7 +37,13 @@ foreach ($_POST as $key => $value) {
 	//$_POST[$key] = addslashes(trim($_POST[$key]));
 	$_POST[$key] = str_replace($serc, $repl, $_POST[$key]);
 	if(isset($_REQUEST["sourceCharset"]) and $_REQUEST["sourceCharset"] != "") {
-		${$key} = iconv($_REQUEST["sourceCharset"], "latin1", str_replace($serc, $repl, $_POST[$key]));
+		if(is_array($_POST[$key])) {
+			array_walk_recursive($_POST[$key], "iconv_array");
+			${$key} = $_POST[$key];
+		}
+		else {
+			${$key} = iconv($_REQUEST["sourceCharset"], "latin1", str_replace($serc, $repl, $_POST[$key]));
+		}
 	}
 	else {
 		${$key} = str_replace($serc, $repl, $_POST[$key]);

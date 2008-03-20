@@ -34,8 +34,11 @@
 			}
 		}
 	}
-	
-	echo "<br><font class='info'><br>$aika</font>";
-	echo "</body></html>";
+
+	if($ei_kelloa == "") {
+		echo "<br><font class='info'><br>$aika</font>";
+		echo "</body></html>";
+		
+	}
 
 ?>

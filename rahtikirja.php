@@ -57,7 +57,7 @@
 				$lavametri[$i]	= str_replace(',', '.', $lavametri[$i]);
 
 				// lis‰t‰‰n rahtikirjatiedot (laitetaan poikkeava kentt‰‰n -9 niin tiedet‰‰n ett‰ esisyˆtetty)
-				$query  = "insert into rahtikirjat
+				$query  = "INSERT INTO rahtikirjat
 							(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,viesti,yhtio) values
 							('-9','$otsikkonro','$kilot[$i]','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$viesti','$kukarow[yhtio]')";
 				$result = mysql_query($query) or pupe_error($query);
@@ -237,29 +237,42 @@
 						//T‰ss‰ otetaan kaikkien tilausten tunnukset joille syˆtet‰‰n rahtikirjan tiedot
 						$tilaukset = explode(',', $tunnukset);
 
-						foreach ($tilaukset as $otsikkonro) {
-							$query  = "INSERT into rahtikirjat
-										(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,viesti,yhtio) values
-										('','$rakirno','$kilot[$i]','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$viesti','$kukarow[yhtio]')";
-							$result = mysql_query($query) or pupe_error($query);
+						// katotaan ollaanko syˆtetty useampia kiloja
+						$kiloja = explode('/', $kilot[$i]);
 
-							if ($kollit[$i]=='') 	$kollit[$i]		= 0;
-							if ($kilot[$i]=='') 	$kilot[$i]		= 0;
-							if ($lavametri[$i]=='') $lavametri[$i]	= 0;
-							if ($kuutiot[$i]=='')	$kuutiot[$i]	= 0;
+						// jos ollaan annettu kauttaviivalla, niin oletetaan, ett‰ kolleja on niin monta kuin kilojakin syˆtetty
+						if (count($kiloja) > 1) {
+							$kollit[$i] = 1;
+						}
+
+						foreach ($tilaukset as $otsikkonro) {
+
+							foreach ($kiloja as $yksikilo) {
+								if ($yksikilo != '') {
+									$query  = "	INSERT into rahtikirjat
+												(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,viesti,yhtio) VALUES
+												('','$rakirno','$yksikilo','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$viesti','$kukarow[yhtio]')";
+									$result = mysql_query($query) or pupe_error($query);
+								}
+							}
+
+							if ($kollit[$i] == '')		$kollit[$i]		= 0;
+							if ($kilot[$i] == '')		$kilot[$i]		= 0;
+							if ($lavametri[$i] == '')	$lavametri[$i]	= 0;
+							if ($kuutiot[$i] == '')		$kuutiot[$i]	= 0;
 
 							//	Lis‰t‰‰n myˆs pakkauksen veloitus, mik‰li sellainen on annettu
 							$query = "	SELECT avainsana.*
 										FROM avainsana
-										JOIN tuote ON tuote.yhtio=avainsana.yhtio and tuote.tuoteno=avainsana.selitetark_2
-										WHERE avainsana.yhtio='$kukarow[yhtio]'
-										and avainsana.laji='pakkaus'
-										and avainsana.selite='$pakkaus[$i]'
-										and selitetark='$pakkauskuvaus[$i]'
+										JOIN tuote ON tuote.yhtio = avainsana.yhtio and tuote.tuoteno = avainsana.selitetark_2
+										WHERE avainsana.yhtio = '$kukarow[yhtio]'
+										and avainsana.laji = 'pakkaus'
+										and avainsana.selite = '$pakkaus[$i]'
+										and selitetark = '$pakkauskuvaus[$i]'
 										and tuoteno != ''";
 							$pakres = mysql_query($query) or pupe_error($query);
 
-							if(mysql_num_rows($pakres) == 1) {
+							if (mysql_num_rows($pakres) == 1) {
 								$pakrow = mysql_fetch_array($pakres);
 
 								lisaarivi($otsikkonro, $pakrow["selitetark_2"], $kollit[$i]);
@@ -269,19 +282,20 @@
 								echo "<tr><td>$pakkauskuvaus[$i]</td><td>$pakkaus[$i]</td><td>$pakkauskuvaustark[$i]</td><td align='right'>$kollit[$i] kll</td><td align='right'>$kilot[$i] kg</td><td align='right'>$kuutiot[$i] m&sup3;</td><td align='right'>$lavametri[$i] m</td></tr>";
 							}
 
-							// Vain ekalle tilaukselle lis‰t‰‰n kilot
+							// Vain ekalle tilaukselle lis‰t‰‰n tiedot
 							$kollit[$i]		= 0;
 							$kilot[$i] 		= 0;
 							$lavametri[$i] 	= 0;
 							$kuutiot[$i] 	= 0;
+							$kiloja			= array(0);
 
 							$apu++;
 						}
 
 					}
 
-					//menn‰‰n valitsemaan seuraavaa
-					$id=0;
+					// menn‰‰n valitsemaan seuraavaa
+					$id = 0;
 				}
 			}
 
@@ -414,11 +428,10 @@
 				}
 
 				//haetaan l‰hetteen tulostuskomento
-				$query   = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+				$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
 				$kirres  = mysql_query($query) or pupe_error($query);
 				$kirrow  = mysql_fetch_array($kirres);
 				$komento = $kirrow['komento'];
-
 
 				if ($valittu_oslapp_tulostin == "oletukselle") {
 					$apuprintteri = $prirow['printteri3']; // osoitelappuprintteri
@@ -428,7 +441,7 @@
 				}
 
 				//haetaan osoitelapun tulostuskomento
-				$query  = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+				$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
 				$kirres = mysql_query($query) or pupe_error($query);
 				$kirrow = mysql_fetch_array($kirres);
 				$oslapp = $kirrow['komento'];
@@ -1367,10 +1380,10 @@
 			echo "<tr>
 			<td><input type='hidden' name='pakkaus[$i]' value='$row[selite]'>
 				<input type='hidden' name='pakkauskuvaus[$i]' value='$row[selitetark]'>
-			    <input type='text' size='3' value='$kollit[$i]' name='kollit[$i]'></td>
-			<td><input type='text' size='3' value='$kilot[$i]' name='kilot[$i]'></td>
-			<td><input type='text' size='3' value='$kuutiot[$i]' name='kuutiot[$i]'></td>
-			<td><input type='text' size='3' value='$lavametri[$i]' name='lavametri[$i]'></td>
+			    <input type='text' size='4' value='$kollit[$i]' name='kollit[$i]'></td>
+			<td><input type='text' size='7' value='$kilot[$i]' name='kilot[$i]'></td>
+			<td><input type='text' size='7' value='$kuutiot[$i]' name='kuutiot[$i]'></td>
+			<td><input type='text' size='7' value='$lavametri[$i]' name='lavametri[$i]'></td>
 			<td>$row[selite]</td>
 			<td>$row[selitetark]</td>";
 

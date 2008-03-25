@@ -2,7 +2,7 @@
 
 //jos on laitettu kollikenttään 0 niin ei yritetä luoda pdf:fää
 if ($kollityht > 0) {
-	
+
 	// tarvitaan tilauksen tunnus muutujassa $tunnus
 	// printterin komento muuttujassa $oslapp
 	// $kukarow[yhtio] jostain saadaan yhtio
@@ -43,7 +43,7 @@ if ($kollityht > 0) {
 			$summa   = 0; // summa nolla tietty
 
 			// loopataan luvut oikeelta vasemmalle
-			for ($i = 16; $i >= 0; $i--) { 
+			for ($i = 16; $i >= 0; $i--) {
 				$summa += $kerroin * (ord($sscc{$i})-48); // lisätään summaan ko. luku * kerroin (tää hanskaa kirjaimet )
 				$kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
 			}
@@ -60,10 +60,15 @@ if ($kollityht > 0) {
 	//PDF:n luonti ja defaultit
 	define (__TRACE_ENABLED__, false);
 	define (__DEBUG_ENABLED__, false);
-	require_once("barcode/barcode.php");
-	require_once("barcode/debug.php");
-	require_once("barcode/c39object.php");
-	require_once("barcode/c128aobject.php");
+
+	// jos php-gd on installoitu niin loidataab barcode library
+	if (in_array("gd", get_loaded_extensions())) {
+		require_once("barcode/barcode.php");
+		require_once("barcode/debug.php");
+		require_once("barcode/c39object.php");
+		require_once("barcode/c128aobject.php");
+	}
+
 	require_once("pdflib/phppdflib.class.php");
 
 	//PDF parametrit
@@ -95,15 +100,15 @@ if ($kollityht > 0) {
 	$tulostakolli = $kollityht;
 
 	for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
-	
+
 		// tehdään SSCC :
-		// (00) 
-		// 1 
+		// (00)
+		// 1
 		// ytunnus (8)
 		// lähetenro (6)
 		// kollityht (2)
 		// tarkiste (1)
-	
+
 		//$prefix = "(00)"; // tää on turha
 		$sscc = 1;
 		$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
@@ -111,13 +116,13 @@ if ($kollityht > 0) {
 		$sscc .= sprintf('%02.02d', $tulostuskpl);
 		$loppu = tarkiste($sscc);
 		$sscc = $sscc.$loppu;
-	
+
 		// tehdään pdf:n uusi sivu
 		$firstpage = $pdf->new_page("420x590");
-	
+
 		//DPD-LOGOGO
 		if (file_exists("pics/dpd_logo.jpg")) {
-		
+
 			$filename = "pics/dpd_logo.jpg";
 
 			$fh = fopen($filename, "r");
@@ -153,97 +158,101 @@ if ($kollityht > 0) {
 		$style   |= ($stretchtext== "on"  ) ? BCS_STRETCH_TEXT   : 0;
 		$style   |= ($negative   == "on"  ) ? BCS_REVERSE_COLOR  : 0;
 
-		//luodaan viivakoodiolio kuljetusohjeelle = postino
-		$obj = "";
-		$obj = new c39object($width, $height, $style, $laskurow['toim_postino']);
+		if (class_exists("c39object")) {
 
-		if ($obj) {
-			$obj->SetFont($font);
-			$obj->DrawObject($xres);
+			//luodaan viivakoodiolio kuljetusohjeelle = postino
+			$obj = "";
+			$obj = new c39object($width, $height, $style, $laskurow['toim_postino']);
 
-			//flushataan barcode ja saadaam filenimi johon se tallennettiin
-			$nimi1 = $obj->FlushObject();
+			if ($obj) {
+				$obj->SetFont($font);
+				$obj->DrawObject($xres);
 
-			//keksitään uudelle failille joku varmasti uniikki nimi:
-			$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
+				//flushataan barcode ja saadaam filenimi johon se tallennettiin
+				$nimi1 = $obj->FlushObject();
 
-			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
+				//keksitään uudelle failille joku varmasti uniikki nimi:
+				$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
 
-			$fh = fopen($nimi2, "r");
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
+				passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 
-			if(!$image) {
-				echo "image create error";
+				$fh = fopen($nimi2, "r");
+				$data = fread($fh, filesize($nimi2));
+				fclose($fh);
+				$image = $pdf->png_embed($data);
+
+				if(!$image) {
+					echo "image create error";
+				}
+				// piirretään viivakoodi paprulle
+				$pdf->image_place($image, mm_pt(80), mm_pt(30), $firstpage); // Y, X
+				$pdf->draw_text(mm_pt(4), mm_pt(75), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
+				unset($obj);
+
+				//dellataan tmp filet kuleksimasta
+				system("rm -f $nimi1 $nimi2");
 			}
-			// piirretään viivakoodi paprulle
-			$pdf->image_place($image, mm_pt(80), mm_pt(30), $firstpage); // Y, X
-			$pdf->draw_text(mm_pt(4), mm_pt(75), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
-			unset($obj);
-
-			//dellataan tmp filet kuleksimasta
-			system("rm -f $nimi1 $nimi2");
-		}
-		else {
-			echo "object create error";
-		}
-
-		//Duusataan SSCC
-		$output      = "png";
-		$width       = "500";
-		$height      = "50";
-		$xres        = "1";
-		$font        = "2";
-		$drawtext    = "off";
-		$border      = "on";
-		$stretchtext = "off";
-		$style    = BCS_ALIGN_CENTER;
-		$style   |= ($output     == "png" ) ? BCS_IMAGE_PNG      : 0;
-		$style   |= ($output     == "jpeg") ? BCS_IMAGE_JPEG     : 0;
-		$style   |= ($border     == "on"  ) ? BCS_BORDER         : 0;
-		$style   |= ($drawtext   == "on"  ) ? BCS_DRAW_TEXT      : 0;
-		$style   |= ($stretchtext== "on"  ) ? BCS_STRETCH_TEXT   : 0;
-		$style   |= ($negative   == "on"  ) ? BCS_REVERSE_COLOR  : 0;
-
-		//luodaan viivakoodiolio kuljetusohjeelle = postino
-		$obj = "";
-		$obj = new c128aobject($width, $height, $style, $sscc);
-
-		if ($obj) {
-			$obj->SetFont($font);
-			$obj->DrawObject($xres);
-
-			//flushataan barcode ja saadaam filenimi johon se tallennettiin
-			$nimi1 = $obj->FlushObject();
-
-			//keksitään uudelle failille joku varmasti uniikki nimi:
-			$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
-
-			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-
-			$fh = fopen($nimi2, "r");
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
-
-			if(!$image) {
-				echo "image create error 2";
+			else {
+				echo "object create error";
 			}
 
-			//tehää tästä vielä kaunis kattella
-			$sscc = substr($sscc,0,4)." ".substr($sscc,4,1)." ".substr($sscc,5,8)." ".substr($sscc,13,8)." ".substr($sscc,21,1);
+			//Duusataan SSCC
+			$output      = "png";
+			$width       = "500";
+			$height      = "50";
+			$xres        = "1";
+			$font        = "2";
+			$drawtext    = "off";
+			$border      = "on";
+			$stretchtext = "off";
+			$style    = BCS_ALIGN_CENTER;
+			$style   |= ($output     == "png" ) ? BCS_IMAGE_PNG      : 0;
+			$style   |= ($output     == "jpeg") ? BCS_IMAGE_JPEG     : 0;
+			$style   |= ($border     == "on"  ) ? BCS_BORDER         : 0;
+			$style   |= ($drawtext   == "on"  ) ? BCS_DRAW_TEXT      : 0;
+			$style   |= ($stretchtext== "on"  ) ? BCS_STRETCH_TEXT   : 0;
+			$style   |= ($negative   == "on"  ) ? BCS_REVERSE_COLOR  : 0;
 
-			// piirretään viivakoodi paprulle
-			$pdf->image_place($image, mm_pt(10), mm_pt(-15), $firstpage); // Y, X
-			$pdf->draw_text(mm_pt(4), mm_pt(5), "Kolli - Item ID.: $sscc", $firstpage, $otsik);
-			unset($obj);
+			//luodaan viivakoodiolio kuljetusohjeelle = postino
+			$obj = "";
+			$obj = new c128aobject($width, $height, $style, $sscc);
 
-			//dellataan tmp filet kuleksimasta
-			system("rm -f $nimi1 $nimi2");
-		}
-		else {
-			echo "object create error 2";
+			if ($obj) {
+				$obj->SetFont($font);
+				$obj->DrawObject($xres);
+
+				//flushataan barcode ja saadaam filenimi johon se tallennettiin
+				$nimi1 = $obj->FlushObject();
+
+				//keksitään uudelle failille joku varmasti uniikki nimi:
+				$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
+
+				passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
+
+				$fh = fopen($nimi2, "r");
+				$data = fread($fh, filesize($nimi2));
+				fclose($fh);
+				$image = $pdf->png_embed($data);
+
+				if(!$image) {
+					echo "image create error 2";
+				}
+
+				//tehää tästä vielä kaunis kattella
+				$sscc = substr($sscc,0,4)." ".substr($sscc,4,1)." ".substr($sscc,5,8)." ".substr($sscc,13,8)." ".substr($sscc,21,1);
+
+				// piirretään viivakoodi paprulle
+				$pdf->image_place($image, mm_pt(10), mm_pt(-15), $firstpage); // Y, X
+				$pdf->draw_text(mm_pt(4), mm_pt(5), "Kolli - Item ID.: $sscc", $firstpage, $otsik);
+				unset($obj);
+
+				//dellataan tmp filet kuleksimasta
+				system("rm -f $nimi1 $nimi2");
+			}
+			else {
+				echo "object create error 2";
+			}
+
 		}
 
 		// sitten aletaan piirtämään itse PDF sisältöä
@@ -285,16 +294,16 @@ if ($kollityht > 0) {
 		$pdf->draw_text(mm_pt(15),	mm_pt(135), $laskurow['toim_nimitark'],						$firstpage, $kirj);
 		$pdf->draw_text(mm_pt(15),	mm_pt(130), $laskurow['toim_osoite'],						$firstpage, $kirj);
 		$pdf->draw_text(mm_pt(15),	mm_pt(123), $laskurow['toim_postino']." ".$laskurow['toim_postitp'],	$firstpage, $iso);
-	
+
 		$query = "	select *
 					from maat
 					where koodi = '$laskurow[toim_maa]'";
 		$tempr = mysql_query($query) or pupe_error($query);
 		$maarow = mysql_fetch_array($tempr);
-	
+
 		$pdf->draw_text(mm_pt(15),	mm_pt(116), substr($maarow['nimi'],5),								$firstpage, $iso);
-	
-	
+
+
 		$query = "	select *
 					from asiakas
 					where yhtio = '$kukarow[yhtio]'

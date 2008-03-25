@@ -86,7 +86,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 			case "tuotteen_avainsanat" :
-				$pakolliset = array("TUOTENO","LAJI","SELITE");
+				$pakolliset = array("TUOTENO", "LAJI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 			case "kalenteri" :

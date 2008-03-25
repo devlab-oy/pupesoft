@@ -3766,7 +3766,7 @@ if(!function_exists("enable_ajax")) {
 
 <SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
 <!--
-	var toggeled = Array();
+	var toggled = Array();
 	function AJAXInteraction(urli, id, data, href) {
 
 		var http = createRequestObject();
@@ -3837,7 +3837,7 @@ if(!function_exists("enable_ajax")) {
 				//	Jos päivitetään togglegrouppaus
 				if(href) {
 					document.getElementById(href).href = 'javascript:toggleGroup("' + id + '");';
-					toggeled.push(id);
+					toggled.push(id);
 				}
 
 				//	Varmistetaan näkyvyys
@@ -3893,9 +3893,12 @@ if(!function_exists("enable_ajax")) {
 	}
 
 	function unToggle(id) {
-		for (x in toggeled) {
-			if(toggeled[x] != id) {
-				document.getElementById(toggeled[x]).style.display = 'none';
+		for (x in toggled) {
+			if(toggled[x] != id) {
+				if(document.getElementById(toggled[x])) {
+					document.getElementById(toggled[x]).style.display = 'none';
+				}
+				delete toggled[x];
 			}
 		}
 	}

@@ -624,7 +624,7 @@
 						echo "<th>".t("Status")."</th>";
 					}
 					if($verkkokauppa == "" or $kukarow["kuka"] != "www") {
-						echo "<th style='text-align: right'>".t("Myytävissä")."</th>";
+						echo "<th style='text-align: center'>".t("Myytävissä")."</th>";
 					}
 
 			        if ($kukarow["kesken"] != 0 or is_numeric($ostoskori)) {
@@ -765,10 +765,10 @@
 				else $toimlisa = "";
 				
 				echo "<td valign='top' class='$vari'>
-				<a id='$row[tuoteno]_P' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P\")'>{$row["tuoteno"]}</a>$toimlisa
+				<a id='$row[tuoteno]_P2' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P2\")'>{$row["tuoteno"]}</a>$toimlisa
 				</td>";
 				
-				echo "<td valign='top' class='$vari'><a id='$row[tuoteno]_P' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P\")'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</a></td>";				
+				echo "<td valign='top' class='$vari'><a id='$row[tuoteno]_P3' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P3\")'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</a></td>";				
 			}
 			
 			//	Extranetkäyttäjille voidaan näyttää myös se heidän asiakashinta..

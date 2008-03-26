@@ -15,8 +15,8 @@ if(!function_exists("toimitustapatarkista")) {
 		if ((mysql_field_name($result, $i)=="tulostustapa") and ($t[$i]!='')) {
 			// otetaan arvo talteen
 			$aputulostustapa = $t[$i];
-			if ($t[$i]!='H' and $t[$i]!='E' and $t[$i]!='K' and $t[$i]!='L') {
-				$virhe[$i] = "".t("Syötä H = hetitulostus , E = erätulostus tai K = koonti-hetitulostus tai K = koonti-erätulostus!")."";
+			if ($t[$i]!='H' and $t[$i]!='E' and $t[$i]!='K' and $t[$i]!='L' and $t[$i]!='X') {
+				$virhe[$i] = t("Virheellinen tulostustapa")."!";
 			}
 		}
 

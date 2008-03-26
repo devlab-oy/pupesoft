@@ -83,6 +83,7 @@
 				<option value='H' $sel[H]>".t("Hetitulostus")."</option>
 				<option value='K' $sel[K]>".t("Koonti-hetitulostus")."</option>
 				<option value='L' $sel[L]>".t("Koonti-erätulostus")."</option>
+				<option value='X' $sel[X]>".t("Rahtikirjansyöttö ja -tulostus ohitetaan")."</option>
 				</select></td>";
 			$jatko = 0;
 	}

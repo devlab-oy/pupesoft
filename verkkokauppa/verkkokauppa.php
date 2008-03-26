@@ -439,7 +439,7 @@ if(!function_exists("menu")) {
 				}
 				
 				if($ok == 1) {
-					$val .=  "<tr class='aktiivi'><td class='sisennys1'></td><td class='sisennys2'></td><td><a class = 'menu' id='{$osasto}_{$try}_{$merow["tuotemerkki"]}_P' href='javascript:sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=".htmlentities($merow["tuotemerkki"], ENT_QUOTES, "UTF-8")."\", \"\", true);'>{$merow["tuotemerkki"]}</a></td></tr>";
+					$val .=  "<tr class='aktiivi'><td class='sisennys1'></td><td class='sisennys2'></td><td><a class = 'menu' id='{$osasto}_{$try}_{$merow["tuotemerkki"]}_P' href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=".base64_encode($merow["tuotemerkki"])."', '', true);\">{$merow["tuotemerkki"]}</a></td></tr>";
 				}
 			}
 			$val .= "</table>";
@@ -1291,6 +1291,9 @@ if($tee == "selaa") {
 	$poistetut 	= "";
 	$poistuvat 	= "";
 	$lisatiedot	= "";
+	
+	$tuotemerkki = base64_decode($tuotemerkki);
+	
 	if($tuotemerkki != "") {
 		$ojarj		= "sorttauskentta, tuote_wrapper.tuotemerkki IN ('$tuotemerkki') DESC";
 	}

@@ -110,6 +110,7 @@
 							WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='pakkaus'";
 				$pakres = mysql_query($query) or pupe_error($query);
 				$pakrow = mysql_fetch_array($pakres);
+				
 				if($pakrow["veloitukset"]!="") {
 					$query = "DELETE from tilausrivi where yhtio='{$kukarow["yhtio"]}' and otunnus='$otsikkonro' and tuoteno IN ({$pakrow["veloitukset"]})";
 					$delres = mysql_query($query) or pupe_error($query);
@@ -991,7 +992,7 @@
 		$yy = date("Y",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 
 		// n‰ytet‰‰n tilauksia jota voisi muokata, tila L alatila B tai E tai sitetn alatila D jos toimitustapa on HETI
-		$query = "	select lasku.tunnus 'tilaus', lasku.nimi asiakas, concat_ws(' ', lasku.toimitustapa, vienti, ' ', varastopaikat.nimitys) toimitustapa, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, lasku.laatija, rahtikirjat.rahtikirjanro rakirno, sum(kilot) kilot, sum(kollit) kollit, sum(kuutiot) kuutiot, sum(lavametri) lavametri
+		$query = "	SELECT lasku.tunnus 'tilaus', lasku.nimi asiakas, concat_ws(' ', lasku.toimitustapa, vienti, ' ', varastopaikat.nimitys) toimitustapa, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, lasku.laatija, rahtikirjat.rahtikirjanro rakirno, sum(kilot) kilot, sum(kollit) kollit, sum(kuutiot) kuutiot, sum(lavametri) lavametri
 					from lasku use index (tila_index),
 					toimitustapa use index (selite_index),
 					rahtikirjat use index (otsikko_index),
@@ -1120,7 +1121,11 @@
 		echo "<tr><th align='left'>".t("Vienti")."</th><td>$vientit</td>";
 
 		// haetaan kaikki toimitustavat
-		$query  = "SELECT * FROM toimitustapa WHERE yhtio='$kukarow[yhtio]' order by jarjestys,selite";
+		$query  = "	SELECT * 
+					FROM toimitustapa 
+					WHERE yhtio='$kukarow[yhtio]' 
+					and tulostustapa != 'X'
+					order by jarjestys,selite";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<th align='left'>".t("Toimitustapa")."</th><td>\n";
@@ -1239,7 +1244,9 @@
 		else {
 			echo "<th></th><td></td>";
 		}
-
+		
+		echo "</tr>";
+		
 		$query = "	SELECT GROUP_CONCAT(distinct if(viesti!='',viesti,NULL) separator '. ') viesti
 					from rahtikirjat use index (otsikko_index)
 					where yhtio			= '$kukarow[yhtio]'
@@ -1249,9 +1256,7 @@
 
 		$viestirarrow = mysql_fetch_array($viestirar);
 
-		echo "<th>Kuljetusohje</th><td><textarea name='viesti'>$viestirarrow[viesti]</textarea></td>";
-
-		echo "</tr>";
+		echo "<tr><th>".t("Kuljetusohje")."</th><td><textarea name='viesti' cols='30' rows='3'>$viestirarrow[viesti]</textarea></td><th></th><td></td></tr>";
 
 		// jos meill‰ on hetitulostettava j‰lkivaatimus-tilaus niin (annetaan mahdollisuus tulostaa) TULOSTETAAN lasku heti
 		if ((strtoupper($tulostustapa) == 'H' or strtoupper($tulostustapa) == 'K') and $marow["jv"] != "") {

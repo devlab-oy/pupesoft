@@ -583,20 +583,20 @@
 			$varasto = " AND varastopaikat.maa='" . mysql_real_escape_string($_POST['maa']) . "'";
 		}
 
-		$query = "	SELECT otunnus, count(rahtikirjat.tunnus) rtunnuksia
+		$query = "	SELECT otunnus, count(rahtikirjat.tunnus) rtunnuksia, ultilno
 					FROM tilausrivi
 					JOIN lasku on lasku.yhtio=tilausrivi.yhtio
 						and lasku.tunnus=tilausrivi.otunnus
-						and lasku.tila='G'
+						and lasku.tila = 'G'
 						and lasku.alatila in ('B','C','D')
 					LEFT JOIN rahtikirjat use index (otsikko_index) ON rahtikirjat.otsikkonro=lasku.tunnus and rahtikirjat.yhtio=lasku.yhtio
 					LEFT JOIN varastopaikat ON lasku.clearing=varastopaikat.tunnus
-					where tilausrivi.yhtio='$kukarow[yhtio]'
-					and toimitettu=''
-					and keratty!=''
+					where tilausrivi.yhtio = '$kukarow[yhtio]'
+					and toimitettu = ''
+					and keratty != ''
 					$varasto
 					GROUP BY otunnus
-					HAVING rtunnuksia > 0";
+					HAVING ultilno not in ('-1','-2') or rtunnuksia > 0";
 		$tilre = mysql_query($query) or pupe_error($query);
 
 		while ($tilrow = mysql_fetch_array($tilre)) {

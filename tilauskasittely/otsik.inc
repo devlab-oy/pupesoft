@@ -1958,7 +1958,14 @@
 			}
 
 			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")." + ".t("tarjous")."</td></tr>";
-			echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")."</td></tr>";
+			
+			if ($srow["myynti_kommentti1"] != "") {
+				echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[myynti_kommentti1] $srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")."</td></tr>";
+			}
+			else {
+				echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")."</td></tr>";
+			}
+			
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>".t("keräyslista")." + ".t("valmistus")."</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>".t("lasku")."</td></tr>";
 			echo "</table><br>";

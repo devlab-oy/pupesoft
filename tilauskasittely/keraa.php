@@ -835,13 +835,29 @@
 		if ($tee == 'P') {
 			if ($keraamaton > 0) {
 				// Jos tilauksella oli yhtään keräämätöntä riviä
-				$query  = "	UPDATE lasku
-							set alatila = 'C'
-							where yhtio = '$kukarow[yhtio]'
-							and tunnus in ($tilausnumeroita)
-							and tila in ($tila)
-							and alatila = 'A'";
-				$result = mysql_query($query) or pupe_error($query);
+				$query = "	SELECT lasku.tunnus, lasku.vienti, lasku.tila, toimitustapa.rahtikirja, toimitustapa.tulostustapa
+							FROM lasku
+							LEFT JOIN toimitustapa ON lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite and toimitustapa.nouto=''							
+							where lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.tunnus in ($tilausnumeroita)
+							and lasku.tila in ($tila)
+							and lasku.alatila = 'A'";
+				$lasresult = mysql_query($query) or pupe_error($query);
+
+				while($laskurow = mysql_fetch_array($lasresult)) {
+					if ($laskurow["tila"] == 'L' and $laskurow["vienti"] == '' and $laskurow["tulostustapa"] == "X") {
+						$alatilak = "D";
+					}
+					else {
+						$alatilak = "C";
+					}
+					
+					$query  = "	UPDATE lasku
+								set alatila = '$alatilak'
+								where yhtio = '$kukarow[yhtio]'
+								and tunnus  = '$laskurow[tunnus]'";
+					$result = mysql_query($query) or pupe_error($query);					
+				}
 
 				// Tutkitaan vielä aivan lopuksi mihin tilaan me laitetaan tämä otsikko
 				// Keräysvaiheessahan tilausrivit muuttuvat ja tarkastamme nyt tilanteen uudestaan
@@ -874,14 +890,14 @@
 
 					//tulostetaan faili ja valitaan sopivat printterit
 					if ($laskurow["varasto"] == '') {
-						$query = "	select *
+						$query = "	SELECT *
 									from varastopaikat
 									where yhtio='$kukarow[yhtio]'
 									order by alkuhyllyalue,alkuhyllynro
 									limit 1";
 					}
 					else {
-						$query = "	select *
+						$query = "	SELECT *
 									from varastopaikat
 									where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
 									order by alkuhyllyalue,alkuhyllynro";

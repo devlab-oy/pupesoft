@@ -132,7 +132,8 @@
 				</form>";
 		echo "</td></tr></table>";
 	}
-	elseif ($kukarow["kesken"] != 0 and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "T" or $laskurow["tila"] == "A" or $laskurow["tila"] == "S")) {
+	//$kukarow["kesken"] != 0 and 
+	elseif ($kukarow["kuka"] != "" and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "T" or $laskurow["tila"] == "A" or $laskurow["tila"] == "S")) {
 
 		if ($kukarow["extranet"] != "") {
 			$toim_kutsu = "EXTRANET";
@@ -147,7 +148,8 @@
 	}
 
 	// Tarkistetaan tilausrivi
-	if ($tee == 'TI' and ($kukarow["kesken"] != 0 or is_numeric($ostoskori))) {
+	//and ($kukarow["kesken"] != 0 
+	if ($tee == 'TI' or is_numeric($ostoskori)) {
 
 		if (is_numeric($ostoskori)) {
 			$kori = check_ostoskori($ostoskori,$kukarow["oletus_asiakas"]);
@@ -155,87 +157,100 @@
 		}
 
 		// haetaan avoimen tilauksen otsikko
-		$query    = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
-		$laskures = mysql_query($query);
-
-		if (mysql_num_rows($laskures) == 0) {
-			echo "<font class='error'>Sinulla ei ole avointa tilausta!</font><br>";
+		if ($kukarow["kesken"] != 0) {
+			$query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+			$laskures = mysql_query($query);
 		}
 		else {
-
-			// tilauksen tiedot
-			$laskurow = mysql_fetch_array($laskures);
-
-			if (is_numeric($ostoskori)) {
-				echo "<font class='message'>Lisätään tuotteita ostoskoriin $ostoskori.</font><br>";
+			// Luodaan uusi myyntitilausotsikko
+			if ($kukarow["extranet"] == "") {
+				require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
+				$tilausnumero = luo_myyntitilausotsikko(0);
+				$kukarow["kesken"] = $tilausnumero;
+				$kaytiin_otsikolla = "NOJOO!";
 			}
 			else {
-				echo "<font class='message'>Lisätään tuotteita tilaukselle $kukarow[kesken].</font><br>";
+				require_once("luo_myyntitilausotsikko.inc");
+				$tilausnumero = luo_myyntitilausotsikko($kukarow["oletus_asiakas"]);
+				$kukarow["kesken"] = $tilausnumero;
+				$kaytiin_otsikolla = "NOJOO!";
 			}
+		}
 
-			// Käydään läpi formin kaikki rivit
-			foreach ($tilkpl as $yht_i => $kpl) {
+		if ($kukarow["kesken"] != 0 and $laskures != '') {
+			// tilauksen tiedot
+			$laskurow = mysql_fetch_array($laskures);
+		}
 
-				if ((float) $kpl > 0 or ($kukarow["extranet"] == "" and (float) $kpl < 0)) {
+		if (is_numeric($ostoskori)) {
+			echo "<font class='message'>Lisätään tuotteita ostoskoriin $ostoskori.</font><br>";
+		}
+		else {
+			echo "<font class='message'>Lisätään tuotteita tilaukselle $kukarow[kesken].</font><br>";
+		}
 
-					// haetaan tuotteen tiedot
-					$query    = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tiltuoteno[$yht_i]'";
-					$tuoteres = mysql_query($query);
+		// Käydään läpi formin kaikki rivit
+		foreach ($tilkpl as $yht_i => $kpl) {
 
-					if (mysql_num_rows($tuoteres) == 0) {
-						echo "<font class='error'>Tuotetta $tiltuoteno[$yht_i] ei löydy!</font><br>";
+			if ((float) $kpl > 0 or ($kukarow["extranet"] == "" and (float) $kpl < 0)) {
+
+				// haetaan tuotteen tiedot
+				$query    = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tiltuoteno[$yht_i]'";
+				$tuoteres = mysql_query($query);
+
+				if (mysql_num_rows($tuoteres) == 0) {
+					echo "<font class='error'>Tuotetta $tiltuoteno[$yht_i] ei löydy!</font><br>";
+				}
+				else {
+					// tuote löytyi ok, lisätään rivi
+					$trow = mysql_fetch_array($tuoteres);
+
+					$ytunnus         = $laskurow["ytunnus"];
+					$kpl             = (float) $kpl;
+					$tuoteno         = $trow["tuoteno"];
+					$toimaika 	     = $laskurow["toimaika"];
+					$kerayspvm	     = $laskurow["kerayspvm"];
+					$hinta 		     = "";
+					$netto 		     = "";
+					$ale 		     = "";
+					$alv		     = "";
+					$var			 = "";
+					$varasto 	     = "";
+					$rivitunnus		 = "";
+					$korvaavakielto	 = "";
+					$varataan_saldoa = "";
+					$myy_sarjatunnus = $tilsarjatunnus[$yht_i];
+
+					if ($tilpaikka[$yht_i] != '') {
+						$paikka	= $tilpaikka[$yht_i];
 					}
 					else {
-						// tuote löytyi ok, lisätään rivi
-						$trow = mysql_fetch_array($tuoteres);
+						$paikka	= "";
+					}
 
-						$ytunnus         = $laskurow["ytunnus"];
-						$kpl             = (float) $kpl;
-						$tuoteno         = $trow["tuoteno"];
-						$toimaika 	     = $laskurow["toimaika"];
-						$kerayspvm	     = $laskurow["kerayspvm"];
-						$hinta 		     = "";
-						$netto 		     = "";
-						$ale 		     = "";
-						$alv		     = "";
-						$var			 = "";
-						$varasto 	     = "";
-						$rivitunnus		 = "";
-						$korvaavakielto	 = "";
-						$varataan_saldoa = "";
-						$myy_sarjatunnus = $tilsarjatunnus[$yht_i];
+					// jos meillä on ostoskori muuttujassa numero, niin halutaan lisätä tuotteita siihen ostoskoriin
+					if (is_numeric($ostoskori)) {
+						lisaa_ostoskoriin ($ostoskori, $laskurow["liitostunnus"], $tuoteno, $kpl);
+						$kukarow["kesken"] = "";
+					}
+					elseif (file_exists("../tilauskasittely/lisaarivi.inc")) {
+						require ("../tilauskasittely/lisaarivi.inc");
+					}
+					else {
+						require ("lisaarivi.inc");
+					}
 
-						if ($tilpaikka[$yht_i] != '') {
-							$paikka	= $tilpaikka[$yht_i];
-						}
-						else {
-							$paikka	= "";
-						}
+					echo "<font class='message'>Lisättiin $kpl kpl tuotetta $trow[tuoteno].</font><br>";
 
-						// jos meillä on ostoskori muuttujassa numero, niin halutaan lisätä tuotteita siihen ostoskoriin
-						if (is_numeric($ostoskori)) {
-							lisaa_ostoskoriin ($ostoskori, $laskurow["liitostunnus"], $tuoteno, $kpl);
-							$kukarow["kesken"] = "";
-						}
-						elseif (file_exists("../tilauskasittely/lisaarivi.inc")) {
-							require ("../tilauskasittely/lisaarivi.inc");
-						}
-						else {
-							require ("lisaarivi.inc");
-						}
+					//Hanskataan sarjanumerollisten tuotteiden lisävarusteet
+					if ($tilsarjatunnus[$yht_i] > 0 and $lisatty_tun > 0) {
+						require("sarjanumeron_lisavarlisays.inc");
 
-						echo "<font class='message'>Lisättiin $kpl kpl tuotetta $trow[tuoteno].</font><br>";
-
-						//Hanskataan sarjanumerollisten tuotteiden lisävarusteet
-						if ($tilsarjatunnus[$yht_i] > 0 and $lisatty_tun > 0) {
-							require("sarjanumeron_lisavarlisays.inc");
-
-							lisavarlisays($tilsarjatunnus[$yht_i], $lisatty_tun);
-						}
-					} // tuote ok else
-				} // end kpl > 0
-			} // end foreach
-		} // end tuotelöytyi else
+						lisavarlisays($tilsarjatunnus[$yht_i], $lisatty_tun);
+					}
+				} // tuote ok else
+			} // end kpl > 0
+		} // end foreach
 
 		echo "<br>";
 
@@ -1122,7 +1137,8 @@
 				}
 				echo "</table>";
 
-				if ($kukarow["kesken"] != 0 or is_numeric($ostoskori)) {
+				//$kukarow["kesken"] != 0
+				if ($kukarow["kuka"] != "" or is_numeric($ostoskori)) {
 					echo "<td valign='top' align='right' class='$vari' nowrap>";
 					if ($toim == "FUTURSOFT") {
 						echo "<input type='hidden' name='toim' value = '$toim'>";
@@ -1267,7 +1283,8 @@
 				}
 			}
 
-			if (($row["sarjanumeroseuranta"] == "" or $row["sarjanumeroseuranta"] == "E"  or $row["sarjanumeroseuranta"] == "F") and ($kukarow["kesken"] != 0 or is_numeric($ostoskori))) {
+			//$kukarow["kesken"] != 0
+			if (($row["sarjanumeroseuranta"] == "" or $row["sarjanumeroseuranta"] == "E"  or $row["sarjanumeroseuranta"] == "F") and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
 				echo "<td valign='top' align='right' class='$vari' nowrap>";
 				if ($toim == "FUTURSOFT") {
 					echo "<input type='hidden' name='toim' value = '$toim'>";

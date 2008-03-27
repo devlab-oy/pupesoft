@@ -124,7 +124,6 @@
 			$ulos .= "<optgroup label='".t("Yhtiön avainsanat")."'>";
 			$ulos .= "<option value='TV' {$avain_sel['TV']}>								".t("Tilausvahvistus")."</option>";
 			$ulos .= "<option value='LAHETETYYPPI' {$avain_sel['LAHETETYYPPI']}>			".t("Lähetetyyppi")."</option>";
-			$ulos .= "<option value='KASSA' {$avain_sel['KASSA']}>							".t("Kassa")."</option>";
 			$ulos .= "<option value='KALETAPA' {$avain_sel['KALETAPA']}>					".t("CRM yhteydenottotapa")."</option>";
 			$ulos .= "<option value='MYSQLALIAS' {$avain_sel['MYSQLALIAS']}>				".t("Tietokantasarakkeen nimialias")."</option>";
 			$ulos .= "<option value='T' {$avain_sel[T]}>									".t("Toimitustapa")."</option>";
@@ -323,27 +322,6 @@
 
 		$ulos .= "</select></td>";
 		$jatko = 0;
-	}
-	
-	if (mysql_field_name($result, $i) == "selitetark_2" and $avain_sel["KASSA"] == "SELECTED") {
-	
-		if ($ulosarray[$i] != '') {
-			$ulos=$ulosarray[$i];
-			$jatko = 0;
-		}
-		else {
-			$ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
-			$query = "	SELECT nimi
-						FROM tili
-						WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
-			$vresult = mysql_query($query) or pupe_error($query);
-		
-			if (mysql_num_rows($vresult) == 1) {
-				$vrow=mysql_fetch_array($vresult);
-				$ulos .= " " . $vrow[nimi] . "</td>";
-				$jatko = 0;
-			}
-		}
 	}
 	
 	if ($avain_sel["KARHUVIESTI"] == "SELECTED" and (mysql_field_name($result, $i) == "selite" or mysql_field_name($result, $i) == "selitetark_2" or mysql_field_name($result, $i) == "selitetark_3")) {

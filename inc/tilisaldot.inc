@@ -2,13 +2,13 @@
 	
 	$MONTH_ARRAY = array(1=>t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kesäkuu'),t('Heinäkuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
 	
+	if ($tee == '1' and !isset($ajarappari)) {
+		$tee = "";
+	}
+	
+	
 	if ($tee == '1') {
 		if ($tilino != '') {
-			if ($alvk == 0) {
-				echo "<font class='error'>".t("Osaan laskea päiväsaldot vain tietyltä kaudelta")."</font><br>";
-				$tee = '';
-			}
-
 			$query = "	SELECT nimi
 						FROM tili
 						WHERE yhtio='$kukarow[yhtio]' and tilino = '$tilino'";
@@ -40,11 +40,19 @@
 			echo "<font class='error'>".t("Tuntematon tilikausi")."</font>";
 			exit;
 		}
+		
+		$lisa = "";
+		$wher = "";
 
-		if ($alvk != "") {
-			echo "<font class='message'>".t("Vain kuukausi").": ".$MONTH_ARRAY[($alvk*1)]."</font><br>";
-
-			$lisa	= " sum(if(Month(tapvm)='$alvk', 1, 0)) Vientejä, sum(if(Month(tapvm)='$alvk', summa, 0)) Saldo";						
+		if ($alvk != "") {						
+			$alvy = (int) substr($alvk, 0, 4);
+			$alvm = (int) substr($alvk, 4, 2);
+			$alvd = date("d", mktime(0, 0, 0, $alvm+1, 0, $alvy));
+			
+			echo "<font class='message'>".t("Vain kuukausi").": $alvy - ".$MONTH_ARRAY[$alvm]."</font><br>";
+			
+			$lisa = " sum(if(tapvm>='$alvy-$alvm-01' and tapvm<='$alvy-$alvm-$alvd', 1, 0)) Vientejä, sum(if(tapvm>='$alvy-$alvm-01' and tapvm<='$alvy-$alvm-$alvd', summa, 0)) Saldo";
+			$wher = " and tapvm <= '$alvy-$alvm-$alvd'";						
 		}
 		else {
 			$lisa	= " count(*) Vientejä, sum(summa) Saldo";
@@ -66,6 +74,7 @@
 					and tiliointi.korjattu=''
 					and tapvm >= '$tilikausirow[tilikausi_alku]'
 					and tapvm <= '$tilikausirow[tilikausi_loppu]'
+					$wher
 					$tilinolisa2
 					GROUP BY $tilinolisa1 tiliointi.tilino
 					ORDER BY $tilinolisa1 tiliointi.tilino";
@@ -115,7 +124,6 @@
 			$summa  += $trow['Kumulatiivinen'];
 			$summa2 += $trow['Saldo'];
 			
-			
 			if ($tilino == '' or $trow['Vientejä'] > 0) {
 				echo "<tr>";
 			
@@ -134,6 +142,7 @@
 				}
 				else {
 					echo "<td align='right'>$trow[Kumulatiivinen]</td>";
+					$summa3 = $summa;
 				}
 			
 				if(isset($workbook)) {
@@ -163,8 +172,14 @@
 		echo "<tr>";
 		
 		if ($tilino != '') {
-			echo "<td class='tumma' colspan='4'><strong>".t("Summa").":</strong></td><td align='right' class='tumma'>".round($summa2,2)."</td><td align='right' class='tumma'>".round($summa3,2)."</td></tr>";
+			$cspan = 4;
 		}
+		else {
+			$cspan = 3;
+		}
+		
+		echo "<td class='tumma' colspan='$cspan'><strong>".t("Summa").":</strong></td><td align='right' class='tumma'>".round($summa2,2)."</td><td align='right' class='tumma'>".round($summa3,2)."</td></tr>";
+
 				
 		echo "</table><br>";
 	}
@@ -186,39 +201,47 @@
 					ORDER BY tilikausi_alku desc";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		echo "<td><select name='tkausi'>";
-
+		echo "<td><select name='tkausi' onchange='submit();'>";
+				
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow["tunnus"]) {
-				$sel = "selected";
+			
+			if (!isset($savrow)) {
+				$savrow	= $vrow;
 			}
+			
+			if ($tkausi == $vrow["tunnus"]) {
+				$sel 	= "selected";				
+				$savrow	= $vrow;
+			}
+			
 			echo "<option value = '$vrow[tunnus]' $sel>".tv1dateconv($vrow["tilikausi_alku"])." - ".tv1dateconv($vrow["tilikausi_loppu"]);
 		}
 		echo "</select></td></tr>";
 
+		$alku = str_replace("-", "", substr($savrow["tilikausi_alku"], 0, 7));
+		$lopp = str_replace("-", "", substr($savrow["tilikausi_loppu"], 0, 7));
+				
 		echo "<tr><th>".t("Valitse kuukausi")."</th>
 				<td><select name='alvk'>
-				<option value=''>".t("Koko tilikausi")."</option>
-				<option value = '01'>".$MONTH_ARRAY["1"]."</option>
-				<option value = '02'>".$MONTH_ARRAY["2"]."</option>
-				<option value = '03'>".$MONTH_ARRAY["3"]."</option>
-				<option value = '04'>".$MONTH_ARRAY["4"]."</option>
-				<option value = '05'>".$MONTH_ARRAY["5"]."</option>
-				<option value = '06'>".$MONTH_ARRAY["6"]."</option>
-				<option value = '07'>".$MONTH_ARRAY["7"]."</option>
-				<option value = '08'>".$MONTH_ARRAY["8"]."</option>
-				<option value = '09'>".$MONTH_ARRAY["9"]."</option>
-				<option value = '10'>".$MONTH_ARRAY["10"]."</option>
-				<option value = '11'>".$MONTH_ARRAY["11"]."</option>
-				<option value = '12'>".$MONTH_ARRAY["12"]."</option>
-				</select>
+				<option value=''>".t("Koko tilikausi")."</option>";
+
+		for ($a=$alku; $a<=$lopp; $a++) {
+			if (substr($a, -2) == "13") {
+				$a+=88;				
+			}
+			
+			echo "<option value = '$a'>".substr($a, 0, 4)." - ".$MONTH_ARRAY[(int) substr($a, -2)]."</option>";
+		}
+
+	
+		echo "	</select>
 				</td></tr>
 				<tr><th>".t("per päivä tilistä")."</th>
 				<td><input type = 'text' name = 'tilino'></td></tr>
 				<tr><th>".t("Tee Excel")."</th>
 				<td><input type = 'checkbox' name = 'excel'  value = 'YES'></td></tr>
-				<tr><th><input type = 'submit' value = '".t("Näytä")."'></th><td></td></tr></table></form>";
+				<tr><th><input type = 'submit' name='ajarappari' value = '".t("Näytä")."'></th><td></td></tr></table></form>";
 	}
 
 ?>

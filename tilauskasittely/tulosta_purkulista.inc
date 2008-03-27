@@ -216,13 +216,23 @@
 		$mitkalisa = "";
 	}
 
-	if ($mista == "vastaanota") {
+	if ($mista == "vastaanota" and $vainlistaus == '') {
 		$query = "	SELECT tuote.tuoteno, tuote.sarjanumeroseuranta, tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso,
 					tilausrivi.yksikko, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta, 					
 					tuote.nimitys, tilausrivi.perheid2, tilausrivi.kommentti, tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue trhyllyalue, tilausrivi.hyllynro trhyllynro, tilausrivi.hyllyvali trhyllyvali, tilausrivi.hyllytaso trhyllytaso
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
 					JOIN tapahtuma ON tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus and tapahtuma.kpl > 0 and laji = 'siirto'
+					WHERE tilausrivi.otunnus = '$otunnus'
+					and tilausrivi.yhtio='$kukarow[yhtio]'
+					ORDER BY tilausrivi.tunnus";
+	}
+	elseif ($mista == "vastaanota" and $vainlistaus != '') {
+		$query = "	SELECT tuote.tuoteno, tuote.sarjanumeroseuranta,
+					tilausrivi.yksikko, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta, 					
+					tuote.nimitys, tilausrivi.perheid2, tilausrivi.kommentti, tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue trhyllyalue, tilausrivi.hyllynro trhyllynro, tilausrivi.hyllyvali trhyllyvali, tilausrivi.hyllytaso trhyllytaso
+					FROM tilausrivi
+					JOIN tuote USING (yhtio, tuoteno)
 					WHERE tilausrivi.otunnus = '$otunnus'
 					and tilausrivi.yhtio='$kukarow[yhtio]'
 					ORDER BY tilausrivi.tunnus";
@@ -342,7 +352,14 @@
 		
 		if ($mista == "vastaanota") {
 			$pdf->draw_text(315, $kala, $row["trhyllyalue"]." ".$row["trhyllynro"]." ".$row["trhyllyvali"]." ".$row["trhyllytaso"],		$firstpage, $p);
-			$pdf->draw_text(475, $kala, $row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"],		$firstpage, $p);
+			
+			if ($vainlistaus != '') {
+				$pdf->draw_text(475, $kala, $t1[$row[tunnus]]." ".$t2[$row[tunnus]]." ".$t3[$row[tunnus]]." ".$t4[$row[tunnus]],		$firstpage, $p);
+			}
+			else {
+				$pdf->draw_text(475, $kala, $row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"],		$firstpage, $p);
+			}
+			
 		}
 		else {
 			$pdf->draw_text(440, $kala, $row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);

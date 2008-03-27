@@ -158,7 +158,7 @@
 		}
 	}
 
-	if ($tee == 'paikat') {
+	if ($tee == 'paikat' and $vainlistaus == '') {
 
 		$virheita = 0;
 
@@ -492,7 +492,7 @@
 	}
 
 	//Tulostetaan vastaanotetut listaus
-	if ($tee == "OK" and $id != '0' and $toim != "MYYNTITILI") {
+	if (($tee == "OK" or $tee == "paikat") and $id != '0' and $toim != "MYYNTITILI") {
 
 		$query  = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$id'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -513,7 +513,7 @@
 	elseif ($tee == "OK" and $id != '0' and $toim == "MYYNTITILI") {
 		$id = 0;
 	}
-
+	
 	if ($id == '') $id = 0;
 
 	// meillä ei ole valittua tilausta
@@ -943,6 +943,7 @@
 					$echk = "CHECKED";
 				}
 				echo "<td align='center'><input type='checkbox' name='eancheck[$rivirow[tunnus]]' $echk></td>";
+				
 			}
 
 			echo"</tr>";
@@ -981,12 +982,16 @@
 				echo "<option value='$kirow[tunnus]' $select>$kirow[kirjoitin]</option>";
 			}
 
-			echo "</select></td>";
+			echo "</select></td><td>";
+			
+			echo t("Vain listaus")."<br>";
+			echo "<input type='checkbox' name='vainlistaus'></td>";
 			echo "</table>";
 		}
 		echo "<br><br><input type='submit' name='Laheta' value='".t("Valitse")."'>";
 		echo "</form>";
-
+		
+		
 	}
 
 	require ("../inc/footer.inc");

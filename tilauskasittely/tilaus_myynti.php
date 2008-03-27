@@ -791,7 +791,7 @@ if (isset($tyhjenna)) {
 	$rivinumero = '';
 }
 
-if ($tee == "VALMIS" and $kateinen != '' and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $kukarow['extranet'] == '') {
+if ($tee == "VALMIS" and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") and $kateinen != '' and ($kukarow["kassamyyja"] != '' or (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kertakassa != '')) and $kukarow['extranet'] == '') {
 
 	if ($kassamyyja_kesken != 'ei' and !isset($seka)) {
 
@@ -909,7 +909,10 @@ if ($tee == "VALMIS" and $kateinen != '' and ($kukarow['kassamyyja'] != '' or $k
 	}
 } 
 
-if ($tee == "VALMIS" and $kassamyyja_kesken == 'ei' and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $kukarow['extranet'] == '') {
+if ($tee == "VALMIS" and $kassamyyja_kesken == 'ei' and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kukarow['extranet'] == '') {
+
+	if ($kertakassa == "") $kertakassa = $kukarow["kassamyyja"];
+
 	$query_maksuehto = "UPDATE lasku 
 						SET maksuehto 	= '$maksutapa', 
 						kassalipas 		= '$kertakassa' 
@@ -1154,7 +1157,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			$aika=date("d.m.y @ G:i:s", time());
 			echo "<font class='message'>$otsikko $kukarow[kesken] ".t("valmis")."! ($aika) $kaikkiyhteensa $laskurow[valkoodi]</font><br><br>";
 
-			if (($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $kateinen != '' and $kukarow['extranet'] == '') {
+			if (($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kateinen != '' and $kukarow['extranet'] == '') {
 				echo "	<script type='text/javascript' language='JavaScript'>
 						<!--
 							function update_summa(kaikkiyhteensa) {
@@ -1172,7 +1175,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 				
 				if (!isset($kateismaksu['kateinen']) or $kateismaksu['kateinen'] == '') {
 					$yhteensa_teksti = t("Yhteensä");
-				} else {
+				} 
+				else {
 					$yhteensa_teksti = t("Käteinen");
 					$kaikkiyhteensa = $kateismaksu['kateinen'];
 				}
@@ -5027,22 +5031,22 @@ if ($tee == '') {
 					echo "<input type='hidden' name='toimitetaan_ulkomaailta' value='NO'>";
 				}
 
-				if ($kukarow["extranet"] == "" and $kateinen == 'X' and ($kukarow["kassamyyja"] != '' or ($kukarow["dynaaminen_kassamyynti"] != "" or ($kukarow["dynaaminen_kassamyynti"] == "" and $yhtiorow["dynaaminen_kassamyynti"] != "")))) {
+				if ($kukarow["extranet"] == "" and $kateinen == 'X' and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")) {
 
-					if ($kukarow["dynaaminen_kassamyynti"] != "" or ($kukarow["dynaaminen_kassamyynti"] == "" and $yhtiorow["dynaaminen_kassamyynti"] != "")) {
+					if (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kukarow["kassamyyja"] == "") {
 						echo "</tr><tr><td class='back'>".t("Kassalipas").": <select name='kertakassa'><option value=''>".t("Ei kassaan")."</option>";
 
-						$query  = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' AND laji='KASSA' ORDER BY selite";
+						$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' ORDER BY nimi";
 						$vares = mysql_query($query) or pupe_error($query);
 
 						while ($varow = mysql_fetch_array($vares)) {
 							$sel='';
 							
-							if ($varow['selite'] == $laskurow["kassalipas"]) {
+							if ($varow["tunnus"] == $laskurow["kassalipas"]) {
 								$sel = 'selected';
 							}
 							
-							echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
+							echo "<option value='$varow[tunnus]' $sel>$varow[nimi]</option>";
 						}
 
 						echo "</select></td></tr>";

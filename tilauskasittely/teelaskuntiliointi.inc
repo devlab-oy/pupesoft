@@ -240,35 +240,52 @@ else {
 	// Kirjataan myyntisaamiset tai kassa
 	if ($mehtorow['kateinen'] != '') {
 
-		$query = "	SELECT *
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' AND selite = '$lasku[kassalipas]' AND laji = 'KASSA'";
+		$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' and tunnus = '$lasku[kassalipas]'";
+		echo "<br>$query<br>";
+		
 		$kateisresult = mysql_query($query) or pupe_error($query);
 		$kateisrow = mysql_fetch_array($kateisresult);
 		
-		$myysaatili = $yhtiorow['kassa'];
+		$myysaatili = "";
 
 		$myysaa_kateinen = array();
-		$myysaa_kateinen['kateinen'] 		= $yhtiorow['kassa'];
-		$myysaa_kateinen['pankkikortti'] 	= $yhtiorow['pankkikortti'];
-		$myysaa_kateinen['luottokortti'] 	= $yhtiorow['luottokortti'];
-
-		// Jos maksu on käteinen ja avainsanojen takaa löytyy käteismaksutili, niin avainsanojen takaa löytyvä tili ylikirjoittaa yhtiön takaa löytyvän käteismaksutilin
-		if (strtolower($mehtorow['kateinen']) == "p" and $kateisrow['selitetark_2'] != '') { 
-			$myysaatili = $kateisrow['selitetark_2'];
-			$myysaa_kateinen['kateinen'] = $kateisrow['selitetark_2'];
-		}
 		
+		if (mysql_num_rows($kateisresult) == 1) {
+			$myysaa_kateinen['kateinen'] 		= $kateisrow['kassa'];
+			$myysaa_kateinen['pankkikortti'] 	= $kateisrow['pankkikortti'];
+			$myysaa_kateinen['luottokortti'] 	= $kateisrow['luottokortti'];
+		}
+		else {
+			$myysaa_kateinen['kateinen'] 		= $yhtiorow['kassa'];
+			$myysaa_kateinen['pankkikortti'] 	= $yhtiorow['pankkikortti'];
+			$myysaa_kateinen['luottokortti'] 	= $yhtiorow['luottokortti'];
+		}
+
 		if ($mehtorow['kateinen'] == "n") {
-			$myysaatili = $yhtiorow['pankkikortti'];
+			if ($kateisrow["pankkikortti"] != "") {
+				$myysaatili = $kateisrow["pankkikortti"];
+			}
+			else {
+				$myysaatili = $yhtiorow['pankkikortti'];
+			}
 		}
 		
 		if ($mehtorow['kateinen'] == "o") {
-			$myysaatili = $yhtiorow['luottokortti'];
+			if ($kateisrow["luottokortti"] != "") {
+				$myysaatili = $kateisrow["luottokortti"];
+			}
+			else {
+				$myysaatili = $yhtiorow['luottokortti'];
+			}
 		}
 		
 		if ($myysaatili == "") {
-			$myysaatili = $yhtiorow['kassa'];
+			if ($kateisrow["kassa"] != "") {
+				$myysaatili = $kateisrow["kassa"];
+			}
+			else {
+				$myysaatili = $yhtiorow['kassa'];
+			}
 		}
 
 		$apusumma = $loppusumma;
@@ -315,9 +332,15 @@ else {
 
 		$loppusumma = 0;
 
+		echo "<pre>";
+		var_dump($kateismaksu);
+		echo "</pre>";
+
 		foreach ($kateismaksu as $tili => $arvo) {			
-			if ((float) $arvo != 0) {
-				$arvo = str_replace(",",".",$arvo);
+	
+			$arvo = str_replace(",",".",$arvo);
+	
+			if ((float) $arvo != 0) {	
 				$query = "	INSERT into tiliointi set
 							yhtio 		= '$kukarow[yhtio]',
 							ltunnus 	= '$tunnus',

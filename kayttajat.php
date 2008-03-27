@@ -633,13 +633,13 @@
 				echo "<tr><th align='left'>".t("Kassamyyjä").":</td>";
 				echo "<td><select name='kassamyyja'><option value=''>".t("Ei kassamyyjä")."</option>";
 
-				$query  = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='KASSA' order by selite";
+				$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' ORDER BY nimi";
 				$vares = mysql_query($query) or pupe_error($query);
 
 				while ($varow = mysql_fetch_array($vares)) {
 					$sel='';
-					if ($varow['selite']==$krow["kassamyyja"]) $sel = 'selected';
-					echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
+					if ($varow['tunnus']==$krow["kassamyyja"]) $sel = 'selected';
+					echo "<option value='$varow[tunnus]' $sel>$varow[nimi]</option>";
 				}
 
 				echo "</select></td></tr>";

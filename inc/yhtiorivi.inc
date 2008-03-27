@@ -81,6 +81,8 @@
 	if ((mysql_field_name($result, $i) == "kassa") or
 		(mysql_field_name($result, $i) == "pankkikortti") or
 		(mysql_field_name($result, $i) == "luottokortti") or
+		(mysql_field_name($result, $i) == "kassaerotus") or
+		(mysql_field_name($result, $i) == "kateistilitys") or
 		(mysql_field_name($result, $i) == "myynti") or
 		(mysql_field_name($result, $i) == "myynti_eu") or
 		(mysql_field_name($result, $i) == "myynti_ei_eu") or
@@ -106,6 +108,7 @@
 		(mysql_field_name($result, $i) == "selvittelytili") or
 		(mysql_field_name($result, $i) == "raaka_ainevarasto") or
 		(mysql_field_name($result, $i) == "raaka_ainevarastonmuutos") or
+		(mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or
 		(mysql_field_name($result, $i) == "konsernisaamiset") or
 		(mysql_field_name($result, $i) == "konsernivelat") or
 		(mysql_field_name($result, $i) == "konserniostovelat") or

@@ -32,6 +32,74 @@
 
 	// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si myyntihaarassa
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
+	
+	
+	if(!function_exists("tuoteperhe_reku")) {
+		function tuoteperhe_reku($esiisatuoteno, $isatuoteno, $tuoteperhe, $kaikkituotteet) {
+			global $kukarow, $perhelisa, $kieltolisa, $lisaarivi_debug;
+		
+			//Haetaan tuoteperheen lapset ja lis‰t‰‰n ne $tuoteperhe ja $kaikkituotteet arraysiin
+			$query = "	SELECT tuoteperhe.*
+						FROM tuoteperhe, tuote
+						WHERE tuoteperhe.yhtio = tuote.yhtio
+						and tuoteperhe.tuoteno = tuote.tuoteno
+						and isatuoteno = '$isatuoteno'
+						and tuoteperhe.yhtio = '$kukarow[yhtio]'
+						$perhelisa
+						$kieltolisa
+						ORDER by tuoteno";
+			$perheresult = mysql_query($query) or pupe_error($query);
+
+			while ($perherow = mysql_fetch_array($perheresult)) {
+
+				$perherow["tuoteno"] = strtoupper($perherow["tuoteno"]);
+
+				if ($lisaarivi_debug==1) echo "Tuoteperheen lapsi: $perherow[tuoteno]<br>";
+
+				//T‰t‰ tuoteperhett‰ halutaan myyd‰
+				if (!in_array($perherow["tuoteno"], $tuoteperhe)) $tuoteperhe[] = $perherow["tuoteno"]; // lis‰t‰‰n tuoteno arrayseen
+				if (!in_array($perherow["tuoteno"], $kaikkituotteet)) $kaikkituotteet[] = $perherow["tuoteno"]; // lis‰t‰‰n tuoteno arrayseen
+			}
+
+			return array($tuoteperhe, $kaikkituotteet);
+		}
+	}
+	
+	if(!function_exists("tuoteperhe_reku2")) {
+		function tuoteperhe_reku2($tuoteno, $isat_array, $kaikki_array) {
+			global $kukarow, $perhelisa, $kieltolisa, $lisaarivi_debug;
+		
+			$perhearray = array();
+			$tuoteno 	= strtoupper($tuoteno);
+		
+			if (in_array($tuoteno, $isat_array)) {
+				//echo "FUULI! TEET IKUISEN LUUPIN!!!!!!!!<br>";
+			}
+			else {
+				$isat_array[] = $tuoteno;
+			
+				//Haetaan tuoteperheen lapset ja lis‰t‰‰n ne $isa_array arrayseen
+				$query = "	SELECT tuoteperhe.*
+							FROM tuoteperhe, tuote
+							WHERE tuoteperhe.yhtio 		= tuote.yhtio
+							and tuoteperhe.tuoteno 		= tuote.tuoteno
+							and tuoteperhe.isatuoteno 	= '$tuoteno'
+							and tuoteperhe.yhtio 		= '$kukarow[yhtio]'
+							$perhelisa
+							$kieltolisa
+							ORDER by tuoteno";
+				$perheresult = mysql_query($query) or pupe_error($query);
+
+				while($perherow = mysql_fetch_assoc($perheresult)) {			
+					$perherow["tuoteno"] = strtoupper($perherow["tuoteno"]);
+
+					$kaikki_array[]	= $perherow["tuoteno"]; // lis‰t‰‰n tuoteno arrayseen
+					$perhearray[]	= $perherow;
+				}
+			}
+			return array($perhearray, $isat_array, $kaikki_array);
+		}
+	}
 
 	//Jos saamme vain yksi valittu varasto, niin tehd‰‰n siit‰ yhteensopiva array
 	if (!is_array($varasto) and (int) $varasto > 0) {
@@ -189,7 +257,7 @@
 		$suoratoimeikiitos = "ei";
 	}
 
-	$perhelisa  = "";
+	$perhelisa = "";
 
 	//Haetaan myˆs tuoteperheet tai reseptit, t‰ss‰ parametrit niille.
 	if ($laskurow['tila'] == 'V' and $var != "W") {
@@ -305,34 +373,27 @@
 		// Tai jos muokataan tuoteperheen lasta ei menn‰ uudestaan t‰h‰n haaraan
 		if ($paikka == "" and $perheid == "" and $perhekielto == "") {
 			foreach($kaikkituotteet as $isatuoteno) {
-				$query = "	SELECT tuoteperhe.*
-							FROM tuoteperhe, tuote
-							WHERE tuoteperhe.yhtio = tuote.yhtio
-							and tuoteperhe.tuoteno = tuote.tuoteno
-							and isatuoteno = '$isatuoteno'
-							and tuoteperhe.yhtio = '$kukarow[yhtio]'
-							$perhelisa
-							$kieltolisa
-							ORDER by tuoteno";
-				$perheresult = mysql_query($query) or pupe_error($query);
+				$riikoko = 1;
+				$isa_array[] = $isatuoteno;
 
-				if (mysql_num_rows($perheresult) > 0) {
-					while ($perherow = mysql_fetch_array($perheresult)) {
+				for($isa=0; $isa < $riikoko; $isa++) {
+					list($tuoteperhe, $kaikkituotteet) = tuoteperhe_reku($isatuoteno, $isa_array[$isa], $tuoteperhe, $kaikkituotteet);
 
-						if ($lisaarivi_debug==1) echo "Tuoteperheen lapsi: $perherow[tuoteno]<br>";
-
-						//T‰t‰ tuoteperhett‰ halutaan myyd‰
-						if (!in_array(strtoupper($perherow["tuoteno"]), $tuoteperhe)) $tuoteperhe[]=strtoupper($perherow["tuoteno"]); // lis‰t‰‰n tuoteno arrayseen
-						if (!in_array(strtoupper($perherow["tuoteno"]), $kaikkituotteet)) $kaikkituotteet[]=strtoupper($perherow["tuoteno"]); // lis‰t‰‰n tuoteno arrayseen
-					}
-				}
-				elseif($laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V' and $rivityyppi == "V") {
-					// Asiakkaallevalmistuskeissi, resepit‰ ei lˆydu joten teemme t‰st‰ myyntirivin
-					$rivityyppi = 'L'; // Myyntitilausrivi
+					// Ollaanko rekursiivisia vai ei
+					if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y" and ($laskurow['tila'] != 'V' or $var == "W")) {
+						$isa_array 	= array_merge($isa_array, $tuoteperhe);
+						$isa_array 	= array_unique($isa_array);
+						$riikoko 	= count($isa_array);
+					}										
+				}				
+				
+				if(count($tuoteperhe) == 0 and $laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V' and $rivityyppi == "V") {
+					// Asiakkaallevalmistuskeissi, resepit‰ ei lˆydy joten teemme t‰st‰ myyntirivin
+					$rivityyppi = 'L'; // Myyntitilausrivi					
 				}
 			}
 		}
-
+	
 		//Kaikkien arrayden indeksien ‰iti
 		$i = 0;
 
@@ -660,12 +721,12 @@
 					}
 				}
 			}
-
+			
 			foreach ($myy_tuoteno as $i => $tuoteno) {
 				//T‰ss‰ loopataan vain is‰/normaleja tuotteita
 
 				if ($lisaarivi_debug==1) echo "Loopataan $tuoteno<br>";
-
+				
 				if ($myy_tyyppi[$i] == "NORMAALI") {
 					// jos ei olla viel‰ toimitettu kaikkea, niin lis‰t‰‰n tilausrivi
 					if ($toimittamatta > 0) {
@@ -678,33 +739,34 @@
 
 						$myy_kpl_myyty[$i] += $myy_kpl[$i];
 
-						// status on lis‰t‰‰n is‰ ja perhe jos virheit‰ ei tule
+						// Status on lis‰t‰‰n is‰ ja perhe jos virheit‰ ei tule
 						$perheok 	= 0;
 
-						//Is‰ halutaan nyt ainakin myyd‰
+						// Is‰ halutaan nyt ainakin myyd‰
 						$myynama 	= array();
 						$myynama[] 	= $i;
 
 						if (count($tuoteperhe) > 0) {
-							//riitt‰‰kˆ lasten saldot
-							$query = "	SELECT tuoteperhe.*
-										FROM tuoteperhe, tuote
-										WHERE tuoteperhe.yhtio = tuote.yhtio
-										and tuoteperhe.tuoteno = tuote.tuoteno
-										and isatuoteno = '$tuoteno'
-										and tuoteperhe.yhtio = '$kukarow[yhtio]'
-										$perhelisa
-										$perhelisa2
-										$kieltolisa
-										ORDER by tuoteno";
-							$perheresult = mysql_query($query) or pupe_error($query);
+							
+							$riikoko 		= 1;
+							$isat_array 	= array();
+							$kaikki_array 	= array($tuoteno);
+							$perhearray 	= array();
 
-							while($perherow = mysql_fetch_array($perheresult)) {
+							for($isa=0; $isa < $riikoko; $isa++) {
+								list($perherow, $isat_array, $kaikki_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array);								
+								$perhearray	= array_merge($perhearray, $perherow);
+								
+								if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y" and ($laskurow['tila'] != 'V' or $var == "W")) {
+									$riikoko = count($kaikki_array);
+								}
+							}
+
+							foreach($perhearray as $perherow) {
 
 								$lapsitoimittamatta = $perherow["kerroin"]*$myy_kpl[$i];
 
 								foreach ($myy_tuoteno as $j => $lapsituoteno) {
-
 									if(strtoupper($lapsituoteno) == strtoupper($perherow["tuoteno"]) and $myy_tyyppi[$j] == "LAPSITUOTE") {
 
 										// laitetaan lasten kertoimet kuntoon
@@ -836,7 +898,7 @@
 								if ($trow["tilausrivi_kommentti"] != "" and (int) $rivitunnus == 0) {
 									$kommentti = $trow["tilausrivi_kommentti"]."\n".$kommentti;
 								}
-								
+
 								// jos meill‰ on vanha laadittuaikaa, niin k‰ytet‰‰ sit‰
 								if ($rivilaadittu != "" and (int) $rivitunnus != 0) {
 									$vanharivilaadittu = "'$rivilaadittu'";
@@ -1161,19 +1223,23 @@
 		}
 
 		if ($laskurow['tila'] != 'O' and $paikka == "" and $perheid == "" and $perhekielto == "") {
-			$query = "	SELECT tuoteperhe.*
-						FROM tuoteperhe, tuote
-						WHERE tuoteperhe.yhtio = tuote.yhtio
-						and tuoteperhe.tuoteno = tuote.tuoteno
-						and isatuoteno = '$alkupera_trow[tuoteno]'
-						and tuoteperhe.yhtio = '$kukarow[yhtio]'
-						$perhelisa
-						$perhelisa2
-						$kieltolisa
-						ORDER by tuoteno";
-			$perheresult = mysql_query($query) or pupe_error($query);
+			
+			$riikoko 		= 1;
+			$isat_array 	= array();
+			$kaikki_array 	= array($alkupera_trow["tuoteno"]);
+			$perhearray 	= array();
 
-			while ($perherow = mysql_fetch_array($perheresult)) {
+			for($isa=0; $isa < $riikoko; $isa++) {
+				list($perherow, $isat_array, $kaikki_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array);								
+				$perhearray	= array_merge($perhearray, $perherow);
+				
+				// Ollaanko rekursiivisia vai ei
+				if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y" and ($laskurow['tila'] != 'V' or $var == "W")) {
+					$riikoko = count($kaikki_array);
+				}
+			}
+
+			foreach ($perhearray as $perherow) {
 				$puu_tuoteno[]	= $perherow["tuoteno"];
 				$puu_kpl[] 		= $toimittamatta*$perherow["kerroin"];
 				$puu_hintake[]	= $perherow["hintakerroin"];
@@ -1499,7 +1565,7 @@
 			else {
 				$vanharivilaadittu = "now()";
 			}
-			
+
 			// lis‰t‰‰n puuterivi
 			$query = "	INSERT into tilausrivi set
 						hyllyalue   = '$p_hyllyalue',

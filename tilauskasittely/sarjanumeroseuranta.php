@@ -741,8 +741,7 @@
 	if ($nimitys_haku != "") {
 		$lisa2 = " HAVING nimitys like '%$nimitys_haku%' ";
 	}
-	
-	
+		
 	$query	= "	SELECT sarjanumeroseuranta.*,
 				if(sarjanumeroseuranta.lisatieto = '', if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), concat(if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
 				lasku_osto.tunnus									osto_tunnus,
@@ -761,7 +760,7 @@
 				varastopaikat.nimitys								varastonimi,
 				concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka";
 
-	if ((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi == "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "KERAA" or $from == "KORJAA") and $hyvitysrivi != "ON")) {
+	if ((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi == "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or ($from == "KERAA" and $aputoim == "") or $from == "KORJAA") and $hyvitysrivi != "ON")) {
 		//Myydään sarjanumeroita
 		$query .= "	FROM sarjanumeroseuranta
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -781,7 +780,31 @@
 					ORDER BY sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus";
 		$sarjaresiso = mysql_query($query) or pupe_error($query);
 	}
-	elseif ($from == "SIIRTOTYOMAARAYS") {
+	elseif (($from == "KERAA" and $aputoim == "SIIRTOLISTA") or $from == "SIIRTOLISTA") {
+		//Sisäinen työmääräys sarjanumeroita
+		$query .= "	,
+					tilausrivin_lisatiedot.osto_vai_hyvitys
+					FROM sarjanumeroseuranta
+					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+					LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi_osto.yhtio=tilausrivin_lisatiedot.yhtio   and tilausrivi_osto.tunnus=tilausrivin_lisatiedot.tilausrivitunnus
+					LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+					LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.otunnus
+					LEFT JOIN tuote ON tuote.yhtio=sarjanumeroseuranta.yhtio and tuote.tuoteno = sarjanumeroseuranta.tuoteno
+					LEFT JOIN varastopaikat ON sarjanumeroseuranta.yhtio = varastopaikat.yhtio
+					and concat(rpad(upper(varastopaikat.alkuhyllyalue)  ,5,'0'),lpad(upper(varastopaikat.alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
+					and concat(rpad(upper(varastopaikat.loppuhyllyalue) ,5,'0'),lpad(upper(varastopaikat.loppuhyllynro) ,5,'0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
+					WHERE
+					sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+					and sarjanumeroseuranta.tuoteno = '$rivirow[tuoteno]'
+					and (sarjanumeroseuranta.myyntirivitunnus in (0, $rivitunnus) or lasku_myynti.tila='T')
+					and sarjanumeroseuranta.siirtorivitunnus in (0, $rivitunnus)
+					$lisa
+					$lisa2
+					ORDER BY sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus";
+		$sarjaresiso = mysql_query($query) or pupe_error($query);		
+	}
+	elseif (($from == "KERAA" and $aputoim == "SIIRTOTYOMAARAYS") or $from == "SIIRTOTYOMAARAYS") {
 		//Sisäinen työmääräys sarjanumeroita
 		$query .= "	,
 					tilausrivin_lisatiedot.osto_vai_hyvitys

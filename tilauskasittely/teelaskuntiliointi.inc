@@ -241,7 +241,6 @@ else {
 	if ($mehtorow['kateinen'] != '') {
 
 		$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' and tunnus = '$lasku[kassalipas]'";
-		echo "<br>$query<br>";
 		
 		$kateisresult = mysql_query($query) or pupe_error($query);
 		$kateisrow = mysql_fetch_array($kateisresult);
@@ -331,10 +330,6 @@ else {
 	if (isset($kateismaksu)) {
 
 		$loppusumma = 0;
-
-		echo "<pre>";
-		var_dump($kateismaksu);
-		echo "</pre>";
 
 		foreach ($kateismaksu as $tili => $arvo) {			
 	

@@ -2360,7 +2360,13 @@
 			$toimvv = $kervv;
 			$toimvko = $keraysvko;
 		}
-
+		
+		if ($toim == "PIKATILAUS") {			
+			if ($myynti_kommentti != '') {
+				$comments = $myynti_kommentti;
+			}		
+		}
+		
 		$query .= "	lasku SET
 					yhtio_nimi							= '$yhtionimi',
 					yhtio_osoite						= '$yhtioosoite',

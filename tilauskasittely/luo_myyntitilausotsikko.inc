@@ -92,6 +92,10 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$ketjutus 			= $asiakasrow["ketjutus"];
 			$valkoodi 			= $asiakasrow["valkoodi"];
 			$sisviesti1			= $asiakasrow["sisviesti1"];
+			
+			if ($toim == "PIKATILAUS") {
+				$myynti_kommentti	= $asiakasrow["myynti_kommentti1"];
+			}			
 
 			if (trim($asiakasrow["toimitusehto"]) != "") {
 				$yhtiorow['oletus_toimitusehto'] = $asiakasrow["toimitusehto"];

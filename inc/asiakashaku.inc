@@ -21,6 +21,16 @@ $ytunnus = addslashes(trim($ytunnus));
 $limit   = 300; // montako riviä on maksimi
 $monta   = 0;
 
+
+if ($myos_poistetut != "") {
+	$lajilisa = "";
+}
+else {
+	$lajilisa = " and laji != 'P' ";
+}
+
+
+
 //	Jos käyttäjällä on valittu piirejä niin sallitaan vain ko. piirin/piirien hakeminen
 if($kukarow["piirit"] != "")	 {
 	$asiakasrajaus = "and piiri IN ($kukarow[piirit])";
@@ -111,13 +121,13 @@ elseif ($ytunnus != '') {
 
 	if ($monta == 0) {
 		// exactihaku
-		$query	= "	(SELECT * FROM asiakas use index (ytunnus_index) WHERE $konsyhtiot and ytunnus = '$ytunnus' and ytunnus!='' and laji != 'P' $asiakasrajaus)
+		$query	= "	(SELECT * FROM asiakas use index (ytunnus_index) WHERE $konsyhtiot and ytunnus = '$ytunnus' and ytunnus!='' $lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (asno_index) WHERE $konsyhtiot and asiakasnro = '$ytunnus' and asiakasnro!=0 and laji != 'P' $asiakasrajaus)
+					(SELECT * FROM asiakas use index (asno_index) WHERE $konsyhtiot and asiakasnro = '$ytunnus' and asiakasnro!=0 $lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus = '$ytunnus' and ovttunnus!='' and laji != 'P' $asiakasrajaus)
+					(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus = '$ytunnus' and ovttunnus!='' $lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (toim_ovttunnus_index) WHERE $konsyhtiot and toim_ovttunnus = '$ytunnus' and toim_ovttunnus!='' and laji != 'P' $asiakasrajaus)
+					(SELECT * FROM asiakas use index (toim_ovttunnus_index) WHERE $konsyhtiot and toim_ovttunnus = '$ytunnus' and toim_ovttunnus!='' $lajilisa $asiakasrajaus)
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
@@ -130,7 +140,7 @@ elseif ($ytunnus != '') {
 					WHERE $konsyhtiot 
 					and ytunnus like '$ytunnus%' 
 					and ytunnus!=''
-					and laji != 'P'
+					$lajilisa
 					$asiakasrajaus
 					ORDER BY asiakas.nimi";
 		$result = mysql_query($query) or pupe_error($query);
@@ -139,17 +149,17 @@ elseif ($ytunnus != '') {
 
 	if ($monta == 0 and is_string($ytunnus)) {
 		// arvailuhaku
-		$query	= "	(SELECT * FROM asiakas use index (asiakasnimi) WHERE $konsyhtiot and nimi like '%$ytunnus%' and nimi!='' and laji != 'P' $asiakasrajaus)
+		$query	= "	(SELECT * FROM asiakas use index (asiakasnimi) WHERE $konsyhtiot and nimi like '%$ytunnus%' and nimi!='' $lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (asiakasnimitark) WHERE $konsyhtiot and nimitark like '%$ytunnus%' and nimitark!='' and laji != 'P' $asiakasrajaus)
+					(SELECT * FROM asiakas use index (asiakasnimitark) WHERE $konsyhtiot and nimitark like '%$ytunnus%' and nimitark!='' $lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (asiakastoim_nimi) WHERE $konsyhtiot and toim_nimi like '%$ytunnus%' and toim_nimi!='' and laji != 'P' $asiakasrajaus)
+					(SELECT * FROM asiakas use index (asiakastoim_nimi) WHERE $konsyhtiot and toim_nimi like '%$ytunnus%' and toim_nimi!='' $lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (asiakastoim_nimitark) WHERE $konsyhtiot and toim_nimitark like '%$ytunnus%' and toim_nimitark!='' and laji != 'P' $asiakasrajaus)
+					(SELECT * FROM asiakas use index (asiakastoim_nimitark) WHERE $konsyhtiot and toim_nimitark like '%$ytunnus%' and toim_nimitark!='' $lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus like '%$ytunnus%' and ovttunnus!='' and laji != 'P' $asiakasrajaus)
+					(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus like '%$ytunnus%' and ovttunnus!='' $lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas WHERE $konsyhtiot and postitp like '%$ytunnus%' and postitp!='' and laji != 'P' $asiakasrajaus)
+					(SELECT * FROM asiakas WHERE $konsyhtiot and postitp like '%$ytunnus%' and postitp!='' $lajilisa $asiakasrajaus)
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
@@ -165,24 +175,58 @@ elseif ($asiakasnro != '') {
 
 if ($monta == 0) {
 	if ($ytunnus) {
-		echo "<font class='error'>".t("Asiakas")." '$ytunnus' ".t("ei löydy")."!</font><br>";
-		$ytunnus = "";
+		echo "<font class='error'>".t("Asiakas")." '$ytunnus' ".t("ei löydy")."!</font> ";
 	}
-	else if ($asiakasnro) {
-		echo "<font class='error'>".t("Asiakas")." '$asiakasnro' ".t("ei löydy")."!</font><br>";
-		$asiakasnro = "";
+	elseif ($asiakasnro) {
+		echo "<font class='error'>".t("Asiakas")." '$asiakasnro' ".t("ei löydy")."!</font> ";
 	}
+	
+	if (($ytunnus or $asiakasnro) and strpos($PHP_SELF, "tilaus_myynti") === FALSE) {	
+		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='myos_poistetut'  value='TRUE'>";
+		echo "<input type='hidden' name='tee' 			  value='$tee'>";
+		echo "<input type='hidden' name='konserni'		  value='$konserni'>";
+		echo "<input type='hidden' name='toim' 			  value='$toim'>";
+		echo "<input type='hidden' name='tilausnumero' 	  value='$tilausnumero'>";
+		echo "<input type='hidden' name='from' 	  		  value='$from'>";
+		echo "<input type='hidden' name='tila' 			  value='$tila'>";
+		echo "<input type='hidden' name='muutparametrit'  value='$muutparametrit'>";
+		echo "<input type='hidden' name='ytunnus'  		  value='$ytunnus'>";
+		echo "<input type='hidden' name='asiakasnro'      value='$asiakasnro'>";
+		echo "<input type='hidden' name='toimittajaid'	  value='$toimittajaid'>";
+		echo "<input type='hidden' name='asiakasyhtio'    value='$asiakas[yhtio]'>";
+		echo "<input type='hidden' name='alatila'		  value='$alatila'>";
+		echo "<input type='hidden' name='ylatila'  		  value='$ylatila'>";
+		echo "<input type='hidden' name='lopetus' 		  value='$lopetus'>";
+		echo "<input type='hidden' name='myyja' 		  value='$myyja'>";
+		echo "<input type='hidden' name='myyjanro' 		  value='$myyjanro'>";
+		echo "<input type='hidden' name='tuoteno' 		  value='$tuoteno'>";
+		echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
+	
+		if (is_array($varastosta)) {
+			foreach ($varastosta as $varatunnu) {
+				echo "<input type='hidden' name='varastosta[$varatunnu]' value='$varatunnu'>";
+			}
+		}
+	
+		echo "<input type='submit' value='".t("Etsi möys poistettuja asiakkaita")."'>";
+		echo "</form>";
+	}
+	
+	echo "<br><br>";
+	$ytunnus = "";
+	$asiakasnro = "";
 }
 
 if ($monta == 1) {
-	$asiakasrow  = mysql_fetch_array($result);
-	$ytunnus     = $asiakasrow['ytunnus'];
+	$asiakasrow	= mysql_fetch_array($result);
+	$ytunnus	= $asiakasrow['ytunnus'];
 	
 	if ($asiakasnro != "") {
 		$asiakasnro  = $asiakasrow['asiakasnro'];
 	}
 	
-	$asiakasid   = $asiakasrow['tunnus'];
+	$asiakasid = $asiakasrow['tunnus'];
 }
 
 if ($monta > 1 and $monta <= $limit) {
@@ -299,6 +343,38 @@ if ($monta > 1 and $monta <= $limit) {
 	
 	if ($kutsuja != "yllapito.php") {
 		echo "</table><br>";
+		
+		if (($ytunnus or $asiakasnro) and strpos($PHP_SELF, "tilaus_myynti") === FALSE) {	
+			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<input type='hidden' name='myos_poistetut'  value='TRUE'>";
+			echo "<input type='hidden' name='tee' 			  value='$tee'>";
+			echo "<input type='hidden' name='konserni'		  value='$konserni'>";
+			echo "<input type='hidden' name='toim' 			  value='$toim'>";
+			echo "<input type='hidden' name='tilausnumero' 	  value='$tilausnumero'>";
+			echo "<input type='hidden' name='from' 	  		  value='$from'>";
+			echo "<input type='hidden' name='tila' 			  value='$tila'>";
+			echo "<input type='hidden' name='muutparametrit'  value='$muutparametrit'>";
+			echo "<input type='hidden' name='ytunnus'  		  value='$ytunnus'>";
+			echo "<input type='hidden' name='asiakasnro'      value='$asiakasnro'>";
+			echo "<input type='hidden' name='toimittajaid'	  value='$toimittajaid'>";
+			echo "<input type='hidden' name='asiakasyhtio'    value='$asiakas[yhtio]'>";
+			echo "<input type='hidden' name='alatila'		  value='$alatila'>";
+			echo "<input type='hidden' name='ylatila'  		  value='$ylatila'>";
+			echo "<input type='hidden' name='lopetus' 		  value='$lopetus'>";
+			echo "<input type='hidden' name='myyja' 		  value='$myyja'>";
+			echo "<input type='hidden' name='myyjanro' 		  value='$myyjanro'>";
+			echo "<input type='hidden' name='tuoteno' 		  value='$tuoteno'>";
+			echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
+
+			if (is_array($varastosta)) {
+				foreach ($varastosta as $varatunnu) {
+					echo "<input type='hidden' name='varastosta[$varatunnu]' value='$varatunnu'>";
+				}
+			}
+
+			echo "<input type='submit' value='".t("Etsi möys poistettuja asiakkaita")."'>";
+			echo "</form><br>";
+		}
 	}
 	
 	$ytunnus = "";

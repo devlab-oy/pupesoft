@@ -1050,6 +1050,27 @@
 		$jatko = 0;
 	}
 	
+	if (mysql_field_name($result, $i) == "rekursiiviset_tuoteperheet") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		elseif ($trow[$i] == "Y") {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value=''  $sel1>".t("Tuoteperheiss‰ vain yksi taso")."</option>";
+		$ulos .= "<option value='Y' $sel2>".t("Tuoteperheet k‰sitell‰‰n rekursiivisesti")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
 	if (mysql_field_name($result, $i) == "valmistustapa") {
 
 		$ulos = "<td><select name='$nimi'>";

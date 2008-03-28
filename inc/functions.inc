@@ -351,12 +351,35 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 		$asires = mysql_query($query) or pupe_error($query);
 		$asirow = mysql_fetch_array($asires);
 
-		$query = " 	SELECT distinct tuote.tuoteno, tuoteperhe.kerroin
-					from tuoteperhe
-					join tuote on tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno and ei_saldoa = ''
-					where tuoteperhe.yhtio = '$yhtio' and isatuoteno = '$tuoteno' and tyyppi in ('','P')";
-		$isiresult = mysql_query($query) or pupe_error($query);
+		if (!function_exists("tuoteperhe_myytavissa_reku")) {
+			function tuoteperhe_myytavissa_reku($yhtio, $tuoteno, $tuotteet, $tuotteet_str, $isat_array, $kaikki_array) {
+				if (in_array($tuoteno, $isat_array)) {
+					//echo "FUULI! TEET IKUISEN LUUPIN!!!!!!!!<br>";
+				}
+				else {
+					$isat_array[] = $tuoteno;
+									
+					$query = " 	SELECT distinct tuote.tuoteno, tuoteperhe.kerroin, tuote.ei_saldoa
+								from tuoteperhe
+								join tuote on tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno
+								where tuoteperhe.yhtio = '$yhtio' 
+								and isatuoteno = '$tuoteno' 
+								and tyyppi in ('','P')";
+					$isiresult = mysql_query($query) or pupe_error($query);
 
+					while ($isirow = mysql_fetch_array($isiresult)) {						
+						if ($isirow["ei_saldoa"] == "") {
+							$tuotteet[$isirow["tuoteno"]] = $isirow["kerroin"];
+							$tuotteet_str 				 .= "'".$isirow["tuoteno"]."',";
+						}
+						$kaikki_array[] = $isirow["tuoteno"];
+					}
+				}
+				
+				return array($isat_array, $kaikki_array, $tuotteet, $tuotteet_str);
+			}
+		}
+			
 		$tuotteet = array();
 
 		if ($asirow["ei_saldoa"] == "") {
@@ -366,10 +389,17 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 		else {
 			$tuotteet_str 		= "";
 		}
+		
+		$riikoko 		= 1;
+		$isat_array 	= array();
+		$kaikki_array 	= array($tuoteno);
 
-		while ($isirow = mysql_fetch_array($isiresult)) {
-			$tuotteet[$isirow["tuoteno"]] = $isirow["kerroin"];
-			$tuotteet_str 				 .= "'".$isirow["tuoteno"]."',";
+		for($isa=0; $isa < $riikoko; $isa++) {
+			list($isat_array, $kaikki_array, $tuotteet, $tuotteet_str) = tuoteperhe_myytavissa_reku($yhtio, $kaikki_array[$isa], $tuotteet, $tuotteet_str, $isat_array, $kaikki_array);								
+						
+			if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y") {
+				$riikoko = count($kaikki_array);
+			}
 		}
 
 		$tuotteet_str = substr($tuotteet_str, 0, -1);
@@ -3517,7 +3547,7 @@ if(!function_exists("sarjanumeron_ostohinta")) {
 			$otsores = mysql_query($query) or pupe_error($query);
 			$ostorow = mysql_fetch_array($otsores);
 
-			$ostorivit = $ostorow["tunnukset"];
+			$ostorivit = $ostorow["tunnukset"];			
 		}
 		else {
 			$ostorivit = $arvo;
@@ -3525,8 +3555,9 @@ if(!function_exists("sarjanumeron_ostohinta")) {
 
 		if($ostorivit != '') {
 			$query = "	SELECT
-						round(if(tilausrivi.kpl!=0, tilausrivi.rivihinta/tilausrivi.kpl, 0), 2) ostosumma,
-						round(tilausrivi.hinta * (1-(tilausrivi.ale/100)), 2) ostosumma_eiloppulaskettu
+						round(sum(if(tilausrivi.kpl!=0, tilausrivi.rivihinta/tilausrivi.kpl, 0)), 2) ostosumma,
+						round(sum(tilausrivi.hinta * (1-(tilausrivi.ale/100))), 2) ostosumma_eiloppulaskettu,
+						sum(tilausrivi.kpl) ostokpl
 						FROM tilausrivi
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tunnus  IN ($ostorivit)";
@@ -3743,6 +3774,48 @@ if(!function_exists("paivita_toimitukset")) {
 		}
 
 		return true;
+	}
+}
+
+if(!function_exists("tulosta_ytunnus")) {
+	function tulosta_ytunnus($ytunnus, $maa="", $vienti="") {
+		global $yhtiorow, $kukarow;
+		
+		if ($maa == "") {
+			$maa = $yhtiorow["maa"];
+		}
+
+		//jos on suomalainen yritys tehdään ytunnus nätiks
+		if (strtoupper($maa) == 'FI') {
+			//muutetaan ytunnus takas oikean näköseks
+			$ytunpit = 8-strlen($ytunnus);
+
+			if ($ytunpit > 0) {
+				$uytunnus = $ytunnus;
+				
+				while ($ytunpit > 0) {
+				    $uytunnus = "0".$uytunnus; $ytunpit--;
+				}
+			}
+			else {
+				$uytunnus = $ytunnus;
+			}
+
+			$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
+			
+			if ($vienti != "") {
+				$uytunnus = strtoupper($maa).$uytunnus;
+			}			
+		}
+		else {
+			if (substr(trim(strtoupper($ytunnus)),0,2) != strtoupper($maa) and trim(strtoupper($maa)) != trim(strtoupper($yhtiorow["maa"])) and trim(strtoupper($maa)) != "") {
+				$ytunnus = strtoupper($maa)."-".$ytunnus;
+			}
+			
+			$uytunnus = $ytunnus;
+		}
+		
+		return $uytunnus;
 	}
 }
 

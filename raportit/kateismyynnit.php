@@ -86,7 +86,7 @@
 		echo "<font class='error'>".t("Valitse kassalipas")."!</font><br>";
 		$tee = '';
 	}
-	
+
 	// Jos t‰sm‰ys on p‰‰ll‰ ja tilitett‰vien sarakkeiden m‰‰r‰ on jotain muuta kuin v‰lilt‰ 1-9 -> error
 	if ($tasmays != '' and ((int)$tilityskpl < 1 or (int)$tilityskpl > 9)) {
 		echo "<font class='error'>".t("Tilitysten m‰‰r‰ pit‰‰ olla v‰lilt‰ 1 - 9")."!</font><br>";
@@ -98,22 +98,22 @@
 		echo "<font class='error'>".t("Syˆt‰ p‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</font><br>";
 		$tee = '';
 	}
-	
+
 	if ($tasmays != '' and $katsuori != '') {
 		echo "<font class='error'>".t("Sin‰ et osaa viel‰ t‰sm‰ytt‰‰ k‰teissuorituksia.")."</font><br>";
 		$tee = '';
 	}
-	
+
 	if ($tasmays != '' and count($kassakone) > 0) {
 		$kassat_temp = "";
-		
+
 		foreach($kassakone as $var) {
 			$kassat_temp .= "'".$var."',";
 		}
 		$kassat_temp = substr($kassat_temp,0,-1);
 
 		$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' and tunnus in ($kassat_temp) and kassa != '' and pankkikortti != '' and luottokortti != '' and kateistilitys != '' and kassaerotus != ''";
-		$result = mysql_query($query) or pupe_error($query);			
+		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != count($kassakone)) {
 			echo "<font class='error'>".t("Ei voida t‰sm‰ytt‰‰. Kassalippaan pakollisia tietoja puuttuu").".</font><br>";
@@ -330,7 +330,7 @@
 			}
 		}
 
-		$myyntisaamiset_tilit = "'{$yhtiorow['kassa']}', '{$yhtiorow['pankkikortti']}', '{$yhtiorow['luottokortti']}',";
+		$myyntisaamiset_tilit = "'{$yhtiorow['kassa']}','{$yhtiorow['pankkikortti']}','{$yhtiorow['luottokortti']}',";
 
 		if (count($kassakone) > 0) {
 			$kassat_temp = "";
@@ -341,8 +341,8 @@
 
 			$kassat_temp = substr($kassat_temp,0,-1);
 
-			$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' and tunnus in ($kassat_temp) and kassa != '' and pankkikortti != '' and luottokortti != '' and kateistilitys != '' and kassaerotus != ''";
-			$result = mysql_query($query) or pupe_error($query);			
+			$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' and tunnus in ($kassat_temp)";
+			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) == count($kassakone)) {
 				while ($row = mysql_fetch_array($result)) {
@@ -357,8 +357,12 @@
 					}
 				}
 			}
+			else {
+				die("virhe");
+			}
+
 		}
-		
+
 		$myyntisaamiset_tilit = substr($myyntisaamiset_tilit, 0, -1);
 
 		//jos monta kassalipasta niin tungetaan t‰m‰ queryyn.
@@ -374,7 +378,7 @@
 		}
 
 		//Haetaan k‰teislaskut
-		$query = "	SELECT 
+		$query = "	SELECT
 					$selecti
 					if(lasku.kassalipas = '', 'Muut', lasku.kassalipas) kassa,
 					if(ifnull(kassalipas.nimi, '') = '', 'Muut', kassalipas.nimi) kassanimi,
@@ -456,7 +460,7 @@
 							echo "<td align='center' style='width:100px'>".strtoupper(t("Tilitys"))." $yyyy</td>";
 						}
 					}
-				
+
 				echo "<td align='center' style='width:100px'>".strtoupper(t("Myynti"))."</td><td align='center' style='width:100px'>".strtoupper(t("Erotus"))."</td></tr>";
 				echo "";
 				echo "</tr></table>";
@@ -512,7 +516,7 @@
 					if ($row["tyyppi"] == 'Luottokortti') {
 						$luottokortti = true;
 					}
-					
+
 					if (substr($row["tyyppi"], 0, 8) == 'Kateinen') {
 
 						if ($edkassa != $row["kassa"] or ($kateinen != $row["tilino"] and $kateinen != '')) {
@@ -527,7 +531,7 @@
 								elseif ($kateinen != '') {
 									$tilinumero["kateinen"] = $kateinen;
 								}
-								
+
 								$solu = "kateinen";
 
 								echo "</table><table width='100%'>";
@@ -579,15 +583,15 @@
 						$kateismaksuyhteensa += $row["tilsumma"];
 						$yhteensa += $row["tilsumma"];
 						$kassayhteensa += $row["tilsumma"];
-					
+
 						$kateinen    = $row["tilino"];
 						$edkassa 	 = $row["kassa"];
 						$edkassanimi = $row["kassanimi"];
 						$edkateismaksu = $kateismaksu;
 					}
-					
+
 				}
-				
+
 				if ($edkassa != '') {
 
 					if (substr($kateismaksu, 0, 8) == 'Kateinen') {
@@ -622,7 +626,7 @@
 						$i++;
 					}
 				}
-				
+
 				if (count($kassakone) > 1) {
 					echo "<tr><td>&nbsp;</td></tr>";
 				}
@@ -679,7 +683,7 @@
 					$kassalippaat[$edkassanimi] = $edkassanimi;
 
 					echo "</table><table width='100%'>";
-					echo "<tr><input type='hidden' name='maksutapa$i' value='$solu#$tilinumero[pankkikortti]#"; 
+					echo "<tr><input type='hidden' name='maksutapa$i' value='$solu#$tilinumero[pankkikortti]#";
 						if (count($kassakone) > 1) {
 							foreach ($kassalippaat as $key => $lipas) {
 								if (reset($kassalippaat) == $lipas) {
@@ -1064,7 +1068,7 @@
 					var kassa = 0;
 
 			 		for (i=0; i<obj.length; i++) {
-						//kala = kala+'\\n '+i+'. NIMI: '+obj.elements[i].id+' VALUE: '+obj.elements[i].value; 
+						//kala = kala+'\\n '+i+'. NIMI: '+obj.elements[i].id+' VALUE: '+obj.elements[i].value;
 
 						if (obj.elements[i].id.substring(0,8) == ('kateinen') && !isNaN(obj.elements[i].id.substring(13,14))) {
 							if (pointer != obj.elements[i].id.substring(13,14)) {

@@ -3,6 +3,12 @@
 
 	echo "<font class='head'>".t("Toimita tilaus").":</font><hr>";
 
+	if ($tee == 'maksu') {
+		if ($seka == '') {
+			$tee == 'P';
+		}
+	}
+
 	if($tee=='P') {
 
 		// jos kyseessä ei ole nouto tai noutajan nimi on annettu, voidaan merkata tilaus toimitetuksi..
@@ -17,7 +23,7 @@
 						and tyyppi = 'L'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			$query = "UPDATE lasku set alatila='D', noutaja='$noutaja', kassalipas='$kassalipas' where tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
+			$query = "UPDATE lasku set alatila='D', noutaja='$noutaja', kassalipas='$kassalipas', maksuehto='$maksutapa' where tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			// jos kyseessä on käteismyyntiä, tulostetaaan käteislasku
@@ -127,10 +133,10 @@
 
 
 	if($id != '0') {
-		$query = "	SELECT concat_ws(' ',lasku.nimi, nimitark) nimi,  
+		$query = "	SELECT *, concat_ws(' ',lasku.nimi, nimitark) nimi,  
 					lasku.osoite, concat_ws(' ', lasku.postino, lasku.postitp) postitp, 
 					toim_osoite, concat_ws(' ', toim_postino, toim_postitp) toim_postitp,
-					teksti 'maksuehto', lasku.toimitustapa, kateinen, lasku.tunnus
+					lasku.tunnus laskutunnus
 					FROM lasku, maksuehto
 					WHERE lasku.tunnus='$id' and lasku.yhtio='$kukarow[yhtio]' and tila='L' and (alatila='C' or alatila='B')
 					and maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto";
@@ -144,15 +150,25 @@
 		$row    = mysql_fetch_array($result);
 
 		echo "<table>";
-		echo "<tr><th>" . t("Tilaus") ."</th><td>$row[tunnus]</td></tr>";	
+		echo "<tr><th>" . t("Tilaus") ."</th><td>$row[laskutunnus]</td></tr>";	
 		echo "<tr><th>" . t("Asiakas") ."</th><td>$row[nimi]<br>$row[toim_nimi]</td></tr>";
 		echo "<tr><th>" . t("Laskutusosoite") ."</th><td>$row[osoite], $row[postitp]</td></tr>";
 		echo "<tr><th>" . t("Toimitusosoite") ."</th><td>$row[toim_osoite], $row[toim_postitp]</td></tr>";
-		echo "<tr><th>" . t("Maksuehto") ."</th><td>$row[maksuehto]</td></tr>";	
+		echo "<tr><th>" . t("Maksuehto") ."</th><td>$row[teksti]</td></tr>";	
 		echo "<tr><th>" . t("Toimitustapa") ."</th><td>$row[toimitustapa]</td></tr>";		
 		echo "</table><br><br>";
 
-		$query = "	SELECT concat_ws(' ',hyllyalue, hyllynro, hyllytaso, hyllyvali) varastopaikka, concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno, varattu, concat_ws('@',keratty,kerattyaika) keratty, tilausrivi.tunnus, var
+		if ($row["valkoodi"] != '' and trim(strtoupper($row["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $row["vienti_kurssi"] != 0) {
+			$hinta_riv = "(tilausrivi.hinta/$row[vienti_kurssi])";
+		}
+		else {
+			$hinta_riv = "tilausrivi.hinta";
+		}
+
+		$lisa = " 	$hinta_riv / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$row[erikoisale]-(tilausrivi.ale*$row[erikoisale]/100))/100)) rivihinta, 
+					(tilausrivi.varattu+tilausrivi.kpl) kpl ";
+
+		$query = "	SELECT concat_ws(' ',hyllyalue, hyllynro, hyllytaso, hyllyvali) varastopaikka, concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno, varattu, concat_ws('@',keratty,kerattyaika) keratty, tilausrivi.tunnus, var, $lisa
 					FROM tilausrivi, tuote
 					WHERE tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and var!='J' and otunnus = '$id' and tilausrivi.yhtio='$kukarow[yhtio]'
 					ORDER BY varastopaikka";
@@ -192,20 +208,62 @@
 
 		if ($toita['nouto'] != '' and $row['kateinen'] != '') {
 
-			echo "<table><tr><th>Valitse kassalipas</th><td>";
+			echo "<table><tr><th>".t("Valitse kassalipas")."</th><td>";
 
-			$query = "SELECT * FROM avainsana WHERE yhtio='{$kukarow['yhtio']}' AND laji='KASSA'";
+			$query = "SELECT * FROM kassalipas WHERE yhtio='{$kukarow['yhtio']}'";
 			$kassares = mysql_query($query) or pupe_error($query);
-
+			
 			echo "<input type='hidden' name='noutaja' value=''>";
 			echo "<select name='kassalipas'>";
-			echo "<option value=''>Ei kassalipasta</option>";
+			echo "<option value=''>".t("Ei kassalipasta")."</option>";
+
+			$sel = "";
 						
 			while ($kassarow = mysql_fetch_array($kassares)) {
-				echo "<option value='{$kassarow['selite']}'>{$kassarow['selitetark']}</option>";
+				if ($kassalipas == $kassarow["tunnus"]) {
+					$sel = "selected";
+				}
+				
+				echo "<option value='{$kassarow['tunnus']}' $sel>{$kassarow['nimi']}</option>";
+				
+				$sel = "";
 			}
 			echo "</select>";
-			echo "</td></tr></table><br>";
+			echo "</td></tr>";
+
+			$query_maksuehto = "SELECT *
+								FROM maksuehto
+								WHERE yhtio='$kukarow[yhtio]' 
+								and kateinen != '' 
+								and kaytossa = '' 
+								and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$row[maa]%') 
+								ORDER BY tunnus";
+			$maksuehtores = mysql_query($query_maksuehto) or pupe_error($query_maksuehto);
+
+			if (mysql_num_rows($maksuehtores) > 1) {
+				echo "<table><tr><th>".t("Maksutapa")."</th><td>";
+
+				echo "<select name='maksutapa'>";
+
+				while ($maksuehtorow = mysql_fetch_array($maksuehtores)) {
+					
+					$sel = "";
+					
+					if ($maksuehtorow["tunnus"] == $row["maksuehto"]) {
+						$sel = "selected";
+					}
+					echo "<option value='$maksuehtorow[tunnus]' $sel>{$maksuehtorow['teksti']} {$maksuehtorow['kassa_teksti']}</option>";
+				}
+
+				echo "</select>";
+				echo "</td></tr></table>";
+				
+			}
+			else {
+				$maksuehtorow = mysql_fetch_array($maksuehtores);
+				echo "<input type='hidden' name='maksutapa' value='$maksuehtorow[tunnus]'>";
+			}
+			echo "</table><br>";
 		}
 		
 		if ($toita['nouto']!='' and $row['kateinen']=='') {

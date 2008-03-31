@@ -318,7 +318,9 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 		if ($yhtio == "") {
 			$yhtio = $kukarow["yhtio"];
 		}
-
+		
+		$varasto = (int) $varasto;
+		
 		$valinta1 = ""; // varaston tyyppi
 		$valinta3 = "";
 
@@ -343,6 +345,12 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 			$valinta1 = " and varastopaikat.tyyppi = '' ";
 			$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
 		}
+		
+		// Katotaan halutaanko saldo vaan jostain tietystä varastosta (varastopaikat.tunnus), silloin unohdetaan edellä annettu tyyppi kokonaan
+		if ($varasto != 0) {
+			$valinta1 = " and varastopaikat.tunnus = '$varasto' ";
+			$valinta3 = " HAVING varastopaikat.tyyppi is not null ";			
+		}
 
 		$query = " 	SELECT *
 					from tuote
@@ -352,7 +360,7 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 		$asirow = mysql_fetch_array($asires);
 
 		if (!function_exists("tuoteperhe_myytavissa_reku")) {
-			function tuoteperhe_myytavissa_reku($yhtio, $tuoteno, $tuotteet, $tuotteet_str, $isat_array, $kaikki_array) {
+			function tuoteperhe_myytavissa_reku($yhtio, $tuoteno, $tuotteet, $tuotteet_str, $isat_array, $kaikki_array, $kerroin_array) {
 				if (in_array($tuoteno, $isat_array)) {
 					//echo "FUULI! TEET IKUISEN LUUPIN!!!!!!!!<br>";
 				}
@@ -368,15 +376,41 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 					$isiresult = mysql_query($query) or pupe_error($query);
 
 					while ($isirow = mysql_fetch_array($isiresult)) {						
+						
+						$kaikki_array[]  = $isirow["tuoteno"];
+						$kerroin_array[] = $tuoteno."#!¡!#".$isirow["kerroin"];
+							
+						$mikaisa = $isirow["tuoteno"];
+						$tmp_kaikki_array = $kaikki_array;
+						$tmp_kerroin_array = $kerroin_array;
+
+						krsort($tmp_kaikki_array);
+						krsort($tmp_kerroin_array);
+
+						$isirow["kerroin"] = 1;
+
+						// Lasketaan kerroin rekursiivisesti taaksepäin
+						foreach($tmp_kerroin_array as $ke_ind => $ke_kerr) {
+							list($ker_isa, $ke_ker) = explode("#!¡!#", $ke_kerr);
+
+							if ($ke_ker <= 0) {
+								$ke_ker = 1;
+							}
+
+							if ($mikaisa == $tmp_kaikki_array[$ke_ind]) {																							
+								$mikaisa = $ker_isa;
+								$isirow["kerroin"] *= $ke_ker;
+							}												
+						}
+						
 						if ($isirow["ei_saldoa"] == "") {
 							$tuotteet[$isirow["tuoteno"]] = $isirow["kerroin"];
 							$tuotteet_str 				 .= "'".$isirow["tuoteno"]."',";
-						}
-						$kaikki_array[] = $isirow["tuoteno"];
+						}															
 					}
 				}
 				
-				return array($isat_array, $kaikki_array, $tuotteet, $tuotteet_str);
+				return array($isat_array, $kaikki_array, $tuotteet, $tuotteet_str, $kerroin_array);
 			}
 		}
 			
@@ -393,9 +427,10 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 		$riikoko 		= 1;
 		$isat_array 	= array();
 		$kaikki_array 	= array($tuoteno);
+		$kerroin_array 	= array($tuoteno."#!¡!#1");
 
 		for($isa=0; $isa < $riikoko; $isa++) {
-			list($isat_array, $kaikki_array, $tuotteet, $tuotteet_str) = tuoteperhe_myytavissa_reku($yhtio, $kaikki_array[$isa], $tuotteet, $tuotteet_str, $isat_array, $kaikki_array);								
+			list($isat_array, $kaikki_array, $tuotteet, $tuotteet_str, $kerroin_array) = tuoteperhe_myytavissa_reku($yhtio, $kaikki_array[$isa], $tuotteet, $tuotteet_str, $isat_array, $kaikki_array, $kerroin_array);								
 						
 			if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y") {
 				$riikoko = count($kaikki_array);
@@ -442,8 +477,8 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 		}
 
 		if ($summaus == "KAIKKI") {
-			arsort($perhe_myytavissa);
-			$varasto_myytavissa[] = array_pop($perhe_myytavissa);
+			arsort($perhe_myytavissa);			
+			$varasto_myytavissa["KAIKKI"] = array_pop($perhe_myytavissa);
 		}
 
 		return($varasto_myytavissa);

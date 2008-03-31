@@ -845,6 +845,7 @@
 				$lasresult = mysql_query($query) or pupe_error($query);
 
 				while($laskurow = mysql_fetch_array($lasresult)) {
+					
 					if ($laskurow["tila"] == 'L' and $laskurow["vienti"] == '' and $laskurow["tulostustapa"] == "X") {
 						$alatilak = "D";
 					}
@@ -883,7 +884,7 @@
 							FROM lasku
 							WHERE tunnus in ($tilausnumeroita)
 							and yhtio = '$kukarow[yhtio]'
-							and alatila = 'C'";
+							and alatila in ('C','D')";
 				$lasresult = mysql_query($query) or pupe_error($query);
 
 				while($laskurow = mysql_fetch_array($lasresult)) {
@@ -923,7 +924,7 @@
 						}
 
 						//haetaan lähetteen tulostuskomento
-						$query   = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+						$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
 						$kirres  = mysql_query($query) or pupe_error($query);
 						$kirrow  = mysql_fetch_array($kirres);
 						$komento = $kirrow['komento'];
@@ -937,7 +938,7 @@
 						}
 
 						//haetaan osoitelapun tulostuskomento
-						$query  = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+						$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
 						$kirres = mysql_query($query) or pupe_error($query);
 						$kirrow = mysql_fetch_array($kirres);
 						$oslapp = $kirrow['komento'];

@@ -3591,7 +3591,7 @@ if ($tee == '') {
 				elseif ($muokkauslukko_rivi == "" and $kukarow['extranet'] == '' and $trow["ei_saldoa"] == "") {
 					if ($paikat != '') {
 					
-						echo "	<td $class align='left' valign='top'>";
+						echo "	<td $class align='left' valign='top' nowrap>";
 									
 						//valitaan näytetävä lippu varaston tai yhtiön maanperusteella
 						if ($selpaikkamaa != '' and $yhtiorow['varastopaikan_lippu'] != '') {										

@@ -23,7 +23,18 @@
 						and tyyppi = 'L'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			$query = "UPDATE lasku set alatila='D', noutaja='$noutaja', kassalipas='$kassalipas', maksuehto='$maksutapa' where tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
+			if (isset($vaihdakateista) and $vaihdakateista == "KYLLA") {
+				$katlisa = ", kassalipas = '$kassalipas', maksuehto = '$maksutapa'";
+			}
+			else {
+				$katlisa = "";
+			}
+
+			$query = "	UPDATE lasku 
+						set alatila = 'D', 
+						noutaja = '$noutaja'
+						$katlisa
+						WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			// jos kyseessä on käteismyyntiä, tulostetaaan käteislasku
@@ -214,6 +225,7 @@
 			$kassares = mysql_query($query) or pupe_error($query);
 			
 			echo "<input type='hidden' name='noutaja' value=''>";
+			echo "<input type='hidden' name='vaihdakateista' value='KYLLA'>";
 			echo "<select name='kassalipas'>";
 			echo "<option value=''>".t("Ei kassalipasta")."</option>";
 

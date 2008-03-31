@@ -50,7 +50,7 @@
 	}
 
 
-	if ($tee=='TOIMITA') {
+	if ($tee == 'TOIMITA') {
 
 		//käydään kaikki ruksatut tilaukset läpi
 		if (sizeof($tunnus) != 0) {
@@ -84,9 +84,17 @@
 						and tyyppi='L'";
 			$result = mysql_query($query) or pupe_error($query);
 
+			if (isset($vaihdakateista) and $vaihdakateista == "KYLLA") {
+				$katlisa = ", kassalipas = '$kassalipas', maksuehto = '$maksutapa'";
+			}
+			else {
+				$katlisa = "";
+			}
+			
 			//ja päivitetään laskujen otsikot laskutusjonoon
-			$query = "	update lasku
-						set alatila='D'
+			$query = "	UPDATE lasku
+						set alatila = 'D'
+						$katlisa
 						where tunnus in ($laskutettavat)
 						and yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -196,6 +204,9 @@
 					GROUP BY lasku.tunnus
 					ORDER BY lasku.tunnus";
 		$res   = mysql_query($query) or pupe_error($query);
+
+		$kateinen = "";
+		$maa = "";
 
  		// Tehdään valinta
 		if (mysql_num_rows($res) > 0) {
@@ -325,9 +336,13 @@
 
 			while ($row = mysql_fetch_array($res)) {
 
-				$query = "	select sum(if(varattu>0,1,0)) veloitus, sum(if(varattu<0,1,0)) hyvitys, sum(if(hinta*varattu*(1-ale/100)=0 and var!='P' and var!='J',1,0)) nollarivi
-							from tilausrivi
-							where yhtio = '$kukarow[yhtio]'
+				// jos yksikin on käteinen niin kaikki on käteistä (se hoidetaan jo ylhäällä)
+				if ($row["kateinen"] != "") $kateinen = "X";
+				if ($row["maa"] != "") $maa = $row["maa"];
+				
+				$query = "	SELECT sum(if(varattu>0,1,0)) veloitus, sum(if(varattu<0,1,0)) hyvitys, sum(if(hinta*varattu*(1-ale/100)=0 and var!='P' and var!='J',1,0)) nollarivi
+							FROM tilausrivi
+							WHERE yhtio = '$kukarow[yhtio]'
 							and otunnus = '$row[tunnus]'
 							and tyyppi  = 'L'";
 				$hyvre = mysql_query($query) or pupe_error($query);
@@ -419,7 +434,6 @@
 					echo "<td>".t("Ei positioita")."</td>";
 				}
 
-
 				if ($hyvrow["nollarivi"] > 0) {
 					echo "<td class='back'>&nbsp;<font class='error'>".t("Huom! Tilauksella on nollahintaisia rivejä!")."</font></td>";
 				}
@@ -429,6 +443,66 @@
 			echo "</table><br>";
 
 			echo "<table>";
+
+			if ($kateinen == 'X') {
+
+				echo "<tr><th>".t("Valitse kassalipas")."</th><td colspan='3'>";
+				echo "<input type='hidden' name='vaihdakateista' value='KYLLA'>";
+
+				$query = "SELECT * FROM kassalipas WHERE yhtio='{$kukarow['yhtio']}'";
+				$kassares = mysql_query($query) or pupe_error($query);
+
+				echo "<select name='kassalipas'>";
+				echo "<option value=''>".t("Ei kassalipasta")."</option>";
+
+				$sel = "";
+
+				while ($kassarow = mysql_fetch_array($kassares)) {
+					if ($kassalipas == $kassarow["tunnus"]) {
+						$sel = "selected";
+					}
+
+					echo "<option value='{$kassarow['tunnus']}' $sel>{$kassarow['nimi']}</option>";
+
+					$sel = "";
+				}
+				echo "</select>";
+				echo "</td></tr>";
+
+				$query_maksuehto = "SELECT *
+									FROM maksuehto
+									WHERE yhtio='$kukarow[yhtio]' 
+									and kateinen != '' 
+									and kaytossa = '' 
+									and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$maa%') 
+									ORDER BY tunnus";
+				$maksuehtores = mysql_query($query_maksuehto) or pupe_error($query_maksuehto);
+
+				if (mysql_num_rows($maksuehtores) > 1) {
+					echo "<tr><th>".t("Maksutapa")."</th><td colspan='3'>";
+
+					echo "<select name='maksutapa'>";
+
+					while ($maksuehtorow = mysql_fetch_array($maksuehtores)) {
+
+						$sel = "";
+
+						if ($maksuehtorow["tunnus"] == $row["maksuehto"]) {
+							$sel = "selected";
+						}
+						echo "<option value='$maksuehtorow[tunnus]' $sel>{$maksuehtorow['teksti']} {$maksuehtorow['kassa_teksti']}</option>";
+					}
+
+					echo "</select>";
+					echo "</td></tr>";
+
+				}
+				else {
+					$maksuehtorow = mysql_fetch_array($maksuehtores);
+					echo "<input type='hidden' name='maksutapa' value='$maksuehtorow[tunnus]'>";
+				}
+			}
+			
 
 			///* Haetaan asiakkaan kieli *///
 			$query = "	SELECT kieli
@@ -575,7 +649,7 @@
 					GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
 							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
-							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn
+							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa
 					ORDER BY lasku.ytunnus, lasku.nimi";
 		$tilre = mysql_query($query) or pupe_error($query);
 

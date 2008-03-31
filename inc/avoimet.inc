@@ -49,9 +49,9 @@
 		$kuu  = date("n");
 
 		// poimitaan erikseen edellisen kuun viimeisen p‰iv‰n vv,kk,pp raportin oletusp‰iv‰m‰‰r‰ksi
-//		if (!isset($vv)) $vv = date("Y",mktime(0,0,0,$kuu-1,1,$year));
-//		if (!isset($kk)) $kk = date("n",mktime(0,0,0,$kuu-1,1,$year));
-//		if (!isset($pp)) $pp = date("j",mktime(0,0,0,$kuu,0,$year));
+		// if (!isset($vv)) $vv = date("Y",mktime(0,0,0,$kuu-1,1,$year));
+		// if (!isset($kk)) $kk = date("n",mktime(0,0,0,$kuu-1,1,$year));
+		// if (!isset($pp)) $pp = date("j",mktime(0,0,0,$kuu,0,$year));
 
 		if (!isset($vv)) $vv = date("Y");
 		if (!isset($kk)) $kk = date("n");
@@ -73,12 +73,14 @@
 				<tr>
 				<th>".t("Mitk‰ laskut listataan:")."</th>
 				<td colspan = '3'><select name='laji'>
-				<option value='M'  $sel[M]>".t("myyntilaskut")."</option>
-				<option value='MF' $sel[MF]>".t("myyntilaskut factoring")."</option>
-				<option value='MK' $sel[MK]>".t("myyntilaskut konserni")."</option>
-				<option value='MA' $sel[MA]>".t("myyntilaskut+factoring+konserni")."</option>
-				<option value='O'  $sel[O]>".t("ostolaskut")."</option>
-				<option value='OK' $sel[OK]>".t("ostolaskut konserni")."</option>
+				<option value='M'   $sel[M]>".t("myyntisaamiset")."</option>
+				<option value='MF'  $sel[MF]>".t("factoringmyyntisaamiset")."</option>
+				<option value='MK'  $sel[MK]>".t("konsernimyyntisaamiset")."</option>
+				<option value='MMK' $sel[MMK]>".t("myyntisaamiset + konsernimyyntisaamiset")."</option>
+				<option value='MA'  $sel[MA]>".t("myyntisaamiset + factoringmyyntisaamiset + konsernimyyntisaamiset")."</option>
+				<option value='O'   $sel[O]>".t("ostovelat")."</option>
+				<option value='OK'  $sel[OK]>".t("konserniostovelat")."</option>
+				<option value='OOK' $sel[OOK]>".t("ostovelat + konserniostovelat")."</option>
 				</select></td>
 				</tr>";
 
@@ -180,7 +182,6 @@
 	}
 
 	if ($tee != '') {
-
 		switch ($laji) {
 			case 'M' :
 				$lista = t("myyntisaamiset");
@@ -191,11 +192,20 @@
 			case 'MK' :
 				$lista = t("konsernimyyntisaamiset");
 				break;
+			case 'MMK' :
+				$lista = t("myyntisaamiset + konsernimyyntisaamiset");
+				break;
+			case 'MA' :
+				$lista = t("myyntisaamiset + factoringmyyntisaamiset + konsernimyyntisaamiset");
+				break;
 			case 'O' :
 				$lista = t("ostovelat");
 				break;
 			case 'OK' :
 				$lista = t("konserniostovelat");
+				break;
+			case 'OOK' :
+				$lista = t("ostovelat + konserniostovelat");
 				break;
 		}
 
@@ -225,16 +235,17 @@
 			else {
 				$indeksi = " use index (yhtio_tila_tapvm)";
 			}
-
-			if ($laji == 'OK') 	$tili=$yhtiorow['konserniostovelat'];
-			else 				$tili=$yhtiorow['ostovelat'];
+			
+			if ($laji == 'OOK') 	$tili = "'".$yhtiorow['ostovelat']."','".$yhtiorow['konserniostovelat']."'";
+			elseif ($laji == 'OK') 	$tili = "'".$yhtiorow['konserniostovelat']."'";
+			else 					$tili = "'".$yhtiorow['ostovelat']."'";
 
 			$query = "	SELECT lasku.liitostunnus, lasku.*, concat_ws(' ', viite, viesti) maksutieto, tiliointi.summa * -1 avoinsaldo
 						FROM lasku use index (yhtio_tila_tapvm)
 						JOIN tiliointi use index (tositerivit_index) ON lasku.yhtio=tiliointi.yhtio
 						and lasku.tunnus	= tiliointi.ltunnus
 						and lasku.tapvm		= tiliointi.tapvm
-						and tilino			= '$tili'
+						and tilino		   IN ($tili)
 						and korjattu		= ''
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and (mapvm > '$pvm' or mapvm = '0000-00-00')
@@ -309,11 +320,11 @@
 			}
 
 	        $query = "	SELECT sum(summa) saldo FROM tiliointi
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE yhtio	 = '$kukarow[yhtio]'
 						and korjattu = ''
-						and tapvm >= '$yhtiorow[tilikausi_alku]'
-						and tapvm <= '$pvm'
-						and tilino = '$tili'";
+						and tapvm	>= '$yhtiorow[tilikausi_alku]'
+						and tapvm	<= '$pvm'
+						and tilino	IN ($tili)";
 			$result = mysql_query($query) or pupe_error($query);
 			$trow = mysql_fetch_array ($result);
 
@@ -371,10 +382,11 @@
 			}
 
 			$tili = 0;
-
+			
 			if ($laji == 'MK') 		$tili = "'$yhtiorow[konsernimyyntisaamiset]'";
 			elseif ($laji == 'MF') 	$tili = "'$yhtiorow[factoringsaamiset]'";
 			elseif ($laji == 'MA') 	$tili = "'$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]'";
+			elseif ($laji == 'MMK') $tili = "'$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]'";
 			else 					$tili = "'$yhtiorow[myyntisaamiset]'";
 
 			$query = "	SELECT lasku.*,

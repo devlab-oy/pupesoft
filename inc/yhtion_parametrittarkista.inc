@@ -61,20 +61,6 @@ if(!function_exists("yhtion_parametrittarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "pankki_polku" or
-		    mysql_field_name($result, $i) == "lasku_polku_abs") {
-
-			// jos polussa on @-merkki niin hyväksytään se aina.. hehe
-			if (trim($t[$i]) != "" and strpos(trim($t[$i]), "@") === FALSE) {
-				if (!is_writable(trim($t[$i]))) {
-					$virhe[$i] = t("Virheellinen polku tai kirjoitusoikeus puuttuu!");
-				}
-			}
-			if (trim($t[$i]) != ''  and $tmp_lasku_polku_http == '' and mysql_field_name($result, $i) == "lasku_polku_abs") {
-				$virhe[$i] .= t("Jos täytät tämän kentän, niin täytä myös lasku_polku_http-kenttä");
-			}
-		}
-
 		if (mysql_field_name($result, $i) == "syncronoi") {
 
 			if($t[$i]!="") {

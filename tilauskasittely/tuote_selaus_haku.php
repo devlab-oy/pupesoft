@@ -207,6 +207,7 @@
 
 					$ytunnus         = $laskurow["ytunnus"];
 					$kpl             = (float) $kpl;
+					$kpl_echo 		 = (float) $kpl;
 					$tuoteno         = $trow["tuoteno"];
 					$toimaika 	     = $laskurow["toimaika"];
 					$kerayspvm	     = $laskurow["kerayspvm"];
@@ -227,7 +228,7 @@
 					else {
 						$paikka	= "";
 					}
-
+					
 					// jos meillä on ostoskori muuttujassa numero, niin halutaan lisätä tuotteita siihen ostoskoriin
 					if (is_numeric($ostoskori)) {
 						lisaa_ostoskoriin ($ostoskori, $laskurow["liitostunnus"], $tuoteno, $kpl);
@@ -240,7 +241,7 @@
 						require ("lisaarivi.inc");
 					}
 
-					echo "<font class='message'>Lisättiin $kpl kpl tuotetta $trow[tuoteno].</font><br>";
+					echo "<font class='message'>".t("Lisättiin")." $kpl_echo ".t("kpl")." ".t("tuotetta")." $tiltuoteno[$yht_i].</font><br>";
 
 					//Hanskataan sarjanumerollisten tuotteiden lisävarusteet
 					if ($tilsarjatunnus[$yht_i] > 0 and $lisatty_tun > 0) {
@@ -707,37 +708,64 @@
 			else {
 				$rows[$mrow["tuoteno"]] = $mrow;
 
+				if(!function_exists("tuoteselaushaku_tuoteperhe")) {
+					function tuoteselaushaku_tuoteperhe($esiisatuoteno, $tuoteno, $isat_array, $kaikki_array, $rows) {
+						global $kukarow, $kieltolisa, $poislisa;
+						
+						if (in_array($tuoteno, $isat_array)) {
+							//echo "FUULI! TEET IKUISEN LUUPIN!!!!!!!!<br>";
+						}
+						else {
+							$isat_array[] = $tuoteno;
+
+							$query = "	SELECT
+			 							'$esiisatuoteno' tuoteperhe,
+										tuote.tuoteno korvaavat,
+										tuote.tuoteno,
+										tuote.nimitys,
+										tuote.osasto,
+										tuote.try,
+										tuote.myyntihinta,
+										tuote.nettohinta,
+										tuote.aleryhma,
+										tuote.status,
+										tuote.ei_saldoa,
+										tuote.yksikko,
+										tuote.tunnus,
+										(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
+										tuote.sarjanumeroseuranta,
+										tuote.status,
+										(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno) saldo
+										FROM tuoteperhe
+										JOIN tuote ON tuote.yhtio=tuoteperhe.yhtio and tuote.tuoteno=tuoteperhe.tuoteno
+										WHERE tuoteperhe.yhtio 	  = '$kukarow[yhtio]'
+										and tuoteperhe.isatuoteno = '$tuoteno'
+										$kieltolisa
+										$poislisa
+										ORDER BY tuoteperhe.tuoteno";
+							$kores = mysql_query($query) or pupe_error($query);
+
+							while ($krow = mysql_fetch_array($kores)) {
+								$rows[$krow["tuoteperhe"].$krow["tuoteno"]] = $krow;
+								$kaikki_array[]	= $krow["tuoteno"];
+							}
+						}
+						
+						return array($isat_array, $kaikki_array, $rows);
+					}																			
+				}
+			
 				if($mrow["tuoteperhe"] == $mrow["tuoteno"]) {
+					$riikoko 		= 1;
+					$isat_array 	= array();
+					$kaikki_array 	= array($mrow["tuoteno"]);
 
-					$query = "	SELECT
-	 							'$mrow[tuoteno]' tuoteperhe,
-								tuote.tuoteno korvaavat,
-								tuote.tuoteno,
-								tuote.nimitys,
-								tuote.osasto,
-								tuote.try,
-								tuote.myyntihinta,
-								tuote.nettohinta,
-								tuote.aleryhma,
-								tuote.status,
-								tuote.ei_saldoa,
-								tuote.yksikko,
-								tuote.tunnus,
-								(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
-								tuote.sarjanumeroseuranta,
-								tuote.status,
-								(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno) saldo
-								FROM tuoteperhe
-								JOIN tuote ON tuote.yhtio=tuoteperhe.yhtio and tuote.tuoteno=tuoteperhe.tuoteno
-								WHERE tuoteperhe.yhtio 	  = '$kukarow[yhtio]'
-								and tuoteperhe.isatuoteno = '$mrow[tuoteperhe]'
-								$kieltolisa
-								$poislisa
-								ORDER BY tuoteperhe.tuoteno";
-					$kores = mysql_query($query) or pupe_error($query);
-
-					while ($krow = mysql_fetch_array($kores)) {
-						$rows[$krow["tuoteperhe"].$krow["tuoteno"]] = $krow;
+					for($isa=0; $isa < $riikoko; $isa++) {
+						list($isat_array, $kaikki_array, $rows) = tuoteselaushaku_tuoteperhe($mrow["tuoteno"], $kaikki_array[$isa], $isat_array, $kaikki_array, $rows);								
+						
+						if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y") {
+							$riikoko = count($kaikki_array);
+						}
 					}
 				}
 			}
@@ -1335,7 +1363,8 @@
 			}
 
 			if (isset($images_exist) or isset($pdf_exist)) {
-				echo "<td class='back'><input type='button' style='width: 55px; height: 20px' value='";
+				echo "<td class='back' valign='top'><input type='button' style='width: 55px; height: 20px' value='";
+				
 				if ($pdf_exist) {
 					echo t("Pdf");
 				}

@@ -82,8 +82,7 @@ if (!function_exists('alku_tarjous')) {
 		else {
 			$pdf_tarjous->draw_text(30, 815, $yhtiorow["nimi"], 	$page_tarjous, $norm);
 			$pdf_tarjous->draw_text(30, 805, $yhtiorow["osoite"], 	$page_tarjous, $norm);
-			$pdf_tarjous->draw_text(30, 795, $yhtiorow["postino"], 	$page_tarjous, $norm);
-			$pdf_tarjous->draw_text(60, 795, $yhtiorow["postitp"], 	$page_tarjous, $norm);
+			$pdf_tarjous->draw_text(30, 795, $yhtiorow["postino"]." ".$yhtiorow["postitp"], 	$page_tarjous, $norm);
 			$pdf_tarjous->draw_text(30, 785, $yhtiorow["maa"], 		$page_tarjous, $norm);
 		}
 		

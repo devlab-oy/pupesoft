@@ -175,6 +175,22 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "tarjouksen_tuotepaikat") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos .= "<option value = ''>".t("Tarjouksella tuotepaikat käytössä");
+		$ulos .= "<option value = 'X' $sel[X]>".t("Tarjouksella ei vielä valita tuotepaikkoja");		
+
+		
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "rahti_hinnoittelu") {
 

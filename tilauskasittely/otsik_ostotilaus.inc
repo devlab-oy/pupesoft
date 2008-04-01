@@ -112,7 +112,7 @@
 				<tr><td></td><td><input type='text' name='nimitark' size='35' maxlength='31'  value='$srow[nimitark]'></td></tr>
 				<tr><td valign='top'>".t("Osoite").": </td><td><input type='text' name='osoite' size='35' maxlength='31' value='$srow[osoite]'></td></tr>
 				<tr>
-			  	<td valign='top'>".t("Postitp").": </td><td><input type='text' name='postino' size='6' maxlength='6' value='$srow[postino]'>
+			  	<td valign='top'>".t("Postitp").": </td><td><input type='text' name='postino' size='7' maxlength='15' value='$srow[postino]'>
 			  	<input type='text' name='postitp' size='21' maxlength='20' value='$srow[postitp]'>
 			  	<input type='hidden' name='maa' value='$srow[maa]'>";
 		
@@ -132,7 +132,7 @@
 			echo "<tr><td valign='top'> ".t("Nimi").": </td><td><input type='text' name='tnimi' size='35' maxlength='31' value='$srow[toim_nimi]'></td></tr>";
 			echo "<tr><td> </td><td><input type='text' name='tnimitark' size='35' maxlength='31'  value='$srow[toim_nimitark]'></td></tr>";
 			echo "<tr><td valign='top'>".t("Osoite").": </td><td><input type='text' name='tosoite' size='35' maxlength='31' value='$srow[toim_osoite]'></td></tr>";
-			echo "<tr><td valign='top'>".t("Postitp").": </td><td><input type='text' name='tpostino' size='8' maxlength='8' value='$srow[toim_postino]'>";
+			echo "<tr><td valign='top'>".t("Postitp").": </td><td><input type='text' name='tpostino' size='8' maxlength='15' value='$srow[toim_postino]'>";
 			echo "<input type='text' name='tpostitp' size='21' maxlength='20' value='$srow[toim_postitp]'></td></tr>";
 			echo "<input type='hidden' name='tmaa' value='$srow[toim_maa]'>";
 			echo "</table>";

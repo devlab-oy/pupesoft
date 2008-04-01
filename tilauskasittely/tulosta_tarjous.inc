@@ -695,10 +695,15 @@ if (!function_exists('loppu_tarjous')) {
 		
 			$pdf_tarjous->draw_text(mm_pt(15),  110,"Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $page_tarjous, $norm);
 			$pdf_tarjous->draw_text(mm_pt(15),  100, "Maksuehtomme on ".trim($laskurow["maksuehto"]).".", $page_tarjous, $norm);
+			
+			$tvva = date("Y",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
+			$tkka = date("m",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
+			$tppa = date("d",mktime(0, 0, 0, substr($laskurow["muutospvm"],5,2), substr($laskurow["muutospvm"],8,2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"],0,4)));
+			
+			$voimassa = tv1dateconv($tvva."-".$tkka."-".$tppa);			
+			
 			$pdf_tarjous->draw_text(mm_pt(15),  90,  t("Tarjous on voimassa", $kieli)." ".$voimassa." ". t("saakka", $kieli).".", $page_tarjous, $norm);
-		
-			$pdf_tarjous->draw_text(mm_pt(15),  75, "Toivomme tarjouksemme kiinnostavan teitä ja johtavan tilaukseen.", $page_tarjous, $boldi);
-		
+			$pdf_tarjous->draw_text(mm_pt(15),  75, "Toivomme tarjouksemme kiinnostavan teitä ja johtavan tilaukseen.", $page_tarjous, $boldi);		
 			$pdf_tarjous->draw_text(mm_pt(15),  60, "Kunnioittavasti,", $page_tarjous, $boldi);
 		
 			$query  = "	SELECT *

@@ -403,9 +403,8 @@ if (!function_exists('tarjous_rivi_otsikot')) {
 		
 		if (str_replace("perhe_", "", $tarjoustyyppi) == "") {
 			$pdf_tarjous->draw_text(25,  $kala+15, "#",							$page_tarjous, $norm);
-			$pdf_tarjous->draw_text(45,  $kala+15, t("Tuotenumero", $kieli),	$page_tarjous, $norm);
-			$pdf_tarjous->draw_text(190, $kala+15, t("Tuotenimi", $kieli),		$page_tarjous, $norm);
-			$pdf_tarjous->draw_text(390, $kala+15, t("Tilattu", $kieli),		$page_tarjous, $norm);
+			$pdf_tarjous->draw_text(45,  $kala+15, t("Tuotenumero/Tuotenimi", $kieli),	$page_tarjous, $norm);
+			$pdf_tarjous->draw_text(380, $kala+15, t("Tilattu", $kieli),		$page_tarjous, $norm);
 			$pdf_tarjous->draw_text(430, $kala+15, t("Yks.hinta", $kieli),		$page_tarjous, $norm);
 			$pdf_tarjous->draw_text(478, $kala+15, t("Alennus", $kieli),		$page_tarjous, $norm);
 			$pdf_tarjous->draw_text(530, $kala+15, t("Rivihinta", $kieli),		$page_tarjous, $norm);
@@ -639,7 +638,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 	function tarjous_rivi_hinta_ale($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous, $sarjanutunnus, $selite, $row, $hinnat, $lask, $sivu) {
 		global $yhtiorow, $kukarow, $norm, $pieni;
 		
-		$rivinkorkeus = 15;
+		$rivinkorkeus = 12;
 	
 		if (trim($row["perhe_kommentti"]) != '') {
 			$pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 45, 60, 300, $row["perhe_kommentti"],	$page_tarjous, $norm);						
@@ -650,7 +649,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 		$pdf_tarjous->draw_text(45,  $kala, $row["tuoteno"],										$page_tarjous, $norm);
 				
 		$oikpos = $pdf_tarjous->strlen($row["varattu"], $norm);
-		$pdf_tarjous->draw_text(415-$oikpos, $kala, $row["varattu"], 								$page_tarjous, $norm);
+		$pdf_tarjous->draw_text(405-$oikpos, $kala, $row["varattu"], 								$page_tarjous, $norm);
 				
 		$oikpos = $pdf_tarjous->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"]), $norm);
 		$pdf_tarjous->draw_text(470-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"]), 				$page_tarjous, $norm);
@@ -661,16 +660,13 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 		$oikpos = $pdf_tarjous->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
 		$pdf_tarjous->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), 			$page_tarjous, $norm);
 				
-		if ($pdf_tarjous->strlen($row["nimitys"], $norm) >= 135) {
-			$kala = $kala - $rivinkorkeus;
-		}
-		
-		$pdf_tarjous->draw_text(190, $kala, $row["nimitys"], 										$page_tarjous, $norm);
+		$kala = $kala - $rivinkorkeus;		
+		$pdf_tarjous->draw_text(45, $kala, $row["nimitys"], 										$page_tarjous, $norm);
 		
 		$kala = $kala - $rivinkorkeus;
 		
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"]+5, 45, 60, 300, $row["kommentti"],	$page_tarjous, $norm);						
+			$pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"]+2, 45, 60, 300, $row["kommentti"],	$page_tarjous, $norm);						
 			$kala = $pohja - $rivinkorkeus;
 		}
 		

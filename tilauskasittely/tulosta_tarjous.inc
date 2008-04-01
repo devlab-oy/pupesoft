@@ -590,29 +590,9 @@ if (!function_exists('rivi_tarjous')) {
 		}
 		
 		$row["tilkpl"] 	= ($row["tilkpl"]*1);
-		$row["varattu"] = ($row["varattu"]*1);
+		$row["varattu"] = ($row["kpl"]+$row["varattu"]+$row["jt"])." ".strtolower($row["yksikko"]);
 		$row["kpl"] 	= ($row["kpl"]*1);
 		$kpl_rivilla 	= ($row["kpl"]+$row["varattu"]+$row["jt"]);
-		
-		if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
-			$row['varattu'] = ($row['varattu']+$row['kpl'])." ".strtolower($row["yksikko"]);
-			$row['varattu_viivakoodi'] = $kpl_rivilla;
-		}
-		else {	
-			if ($row["var"] == 'J') { // jälkitoimitus
-				$row['varattu'] = t("**JT**", $kieli);
-				$row['varattu_viivakoodi'] = 0;
-			}
-			elseif ($row["var"] == 'P') { // puute
-				$row['varattu'] = t("PUUTE", $kieli);
-				$row['varattu_viivakoodi'] = 0;
-			}
-			else {
-				$row["varattu"] = "";
-				$row["kpl"] 	= "";
-				$row['varattu_viivakoodi'] = 0;
-			}
-		}
 		
 		//Haetan sarjanumeron tiedot
 		if ($row["varattu"]+$row["kpl"] < 0){

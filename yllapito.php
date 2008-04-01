@@ -546,7 +546,7 @@
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 					if ($i == 1) {
 						if (trim($trow[1]) == '') $trow[1] = "".t("*tyhj‰*")."";
-						echo "<td valign='top'><a href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>$trow[1]</a></td>";
+						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>$trow[1]</a></td>";
 					}
 					else {
 						echo "<td valign='top'>$fontlisa1 $trow[$i] $fontlisa2</td>";
@@ -565,7 +565,7 @@
 			echo "<b>".t("Sinulla ei ole oikeuksia p‰ivitt‰‰ t‰t‰ tietoa")."</b><br>";
 		}
 
-		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa' name='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data'>";
+		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa#$tunnus' name='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data'>";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 		echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
 		echo "<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>";

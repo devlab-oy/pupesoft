@@ -406,7 +406,7 @@ if (!function_exists('tarjous_rivi_otsikot')) {
 			$pdf_tarjous->draw_text(45,  $kala+15, t("Tuotenumero", $kieli),	$page_tarjous, $norm);
 			$pdf_tarjous->draw_text(190, $kala+15, t("Tuotenimi", $kieli),		$page_tarjous, $norm);
 			$pdf_tarjous->draw_text(390, $kala+15, t("Tilattu", $kieli),		$page_tarjous, $norm);
-			$pdf_tarjous->draw_text(425, $kala+15, t("Yks.hinta", $kieli),		$page_tarjous, $norm);
+			$pdf_tarjous->draw_text(430, $kala+15, t("Yks.hinta", $kieli),		$page_tarjous, $norm);
 			$pdf_tarjous->draw_text(478, $kala+15, t("Alennus", $kieli),		$page_tarjous, $norm);
 			$pdf_tarjous->draw_text(530, $kala+15, t("Rivihinta", $kieli),		$page_tarjous, $norm);
 		}
@@ -673,7 +673,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 		$pdf_tarjous->draw_text(415-$oikpos, $kala, $row["varattu"], 								$page_tarjous, $norm);
 				
 		$oikpos = $pdf_tarjous->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"]), $norm);
-		$pdf_tarjous->draw_text(465-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"]), 				$page_tarjous, $norm);
+		$pdf_tarjous->draw_text(470-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"]), 				$page_tarjous, $norm);
 				
 		$oikpos = $pdf_tarjous->strlen(($row["ale"]*1)."%", $norm);
 		$pdf_tarjous->draw_text(515-$oikpos, $kala, ($row["ale"]*1)."%", 							$page_tarjous, $norm);

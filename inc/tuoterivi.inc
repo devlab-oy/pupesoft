@@ -202,7 +202,7 @@
 
 	if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
-		$ulos = "<td><select name='$nimi' Style=\"width: 270px; font-size: 8pt; padding: 0\">";
+		$ulos = "<td><select name='$nimi'>";
 
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
@@ -212,6 +212,7 @@
 		$ulos .= "<option value = 'E' $sel[E]>".t("Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")."</option>";
 		$ulos .= "<option value = 'F' $sel[F]>".t("Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo")."</option>";
 		$ulos .= "<option value = 'T' $sel[T]>".t("Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo")."</option>";
+		$ulos .= "<option value = 'U' $sel[U]>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

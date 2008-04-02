@@ -1030,7 +1030,7 @@
 									$toimittamatta -= $myy_kpl[$indeksi];
 								}
 
-								if ($trow["sarjanumeroseuranta"] == "S" and $myy_tyyppi[$indeksi] == "NORMAALI" and $myy_sarjatunnus != '') {
+								if (($trow["sarjanumeroseuranta"] == "S" or $trow["sarjanumeroseuranta"] == "T" or $trow["sarjanumeroseuranta"] == "U" or $trow["sarjanumeroseuranta"] == "V") and $myy_tyyppi[$indeksi] == "NORMAALI" and $myy_sarjatunnus != '') {
 									if ($varattu > 0) {
 										$tunken = "myyntirivitunnus";
 									}

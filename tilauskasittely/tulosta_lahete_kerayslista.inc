@@ -799,14 +799,15 @@ if (!function_exists('rivi_kerayslista')) {
 		   		$sarjares = mysql_query($query) or pupe_error($query);
 		   		
 				while ($sarjarow = mysql_fetch_array($sarjares)) {
-					if ($row["sarjanumeroseuranta"] == "S") {
-						$row["kommentti"] .= " \n".t("S:nro").": ".$sarjarow["sarjanumero"];		
-					}
-					elseif ($row["sarjanumeroseuranta"] == "E") {
+					
+					if ($row["sarjanumeroseuranta"] == "E") {
 						$row["kommentti"] .= " \n".t("Erä").": ".$sarjarow["sarjanumero"];	
 					}
 					elseif ($row["sarjanumeroseuranta"] == "F") {
 						$row["kommentti"] .= " \n".t("Erä").": ".$sarjarow["sarjanumero"]." ".t("Parasta ennen").": ".tv1dateconv($sarjarow["parasta_ennen"]);	
+					}
+					else {
+						$row["kommentti"] .= " \n".t("S:nro").": ".$sarjarow["sarjanumero"];		
 					}
 				}
 			}

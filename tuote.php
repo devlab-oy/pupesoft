@@ -193,7 +193,7 @@
 			}
 					
 			// Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu))
-			if ($tuoterow["sarjanumeroseuranta"] == "S") {
+			if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
 				$query	= "	SELECT sarjanumeroseuranta.tunnus
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -1093,7 +1093,7 @@
 				echo "<td class='tumma' title='$muutos'>".number_format($gt, 2, ',', ' ')."</td><tr></table><br><br>";
 			}
 
-			if ($tuoterow["sarjanumeroseuranta"] == "S") {
+			if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
 				
 				echo "<font class='message'>".t("Sarjanumerot")."</font><hr>";
 				

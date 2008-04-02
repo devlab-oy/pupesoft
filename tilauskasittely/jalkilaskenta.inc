@@ -518,7 +518,7 @@ if ($tuoteno != '') {
 	$result = mysql_query($query) or pupe_error($query);
 	$tuote = mysql_fetch_array($result);
 
-	if (mysql_num_rows($result) == 1 and $tuote["sarjanumeroseuranta"] == "S") {
+	if (mysql_num_rows($result) == 1 and ($tuote["sarjanumeroseuranta"] == "S" or $tuote["sarjanumeroseuranta"] == "U")) {
 		//Tähän haaraan mennään jos tuotteella on sarjanumeroseurantaa ja varastonarvo lasketaan suoraan osto ja myyntiriveiltä
 		if ($jalkilaskenta_debug >= 1) echo "Tuotenumero $tuoteno on sarjanumeroseurannassa<br>";
 

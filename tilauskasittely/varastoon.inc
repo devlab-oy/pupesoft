@@ -244,7 +244,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	$ohinta  = round($ohinta / $tilrivirow['varattu'],6); // yhden tuotteen hinta kaikkine kuluineen
 
 	//Keskihankintahintaa yll‰pidet‰‰n vain jos tuotteella ei ole sarjanumeroseurantaa tai marginaaliverostusta
-	if ($tuorow["sarjanumeroseuranta"] == "S") {
+	if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
 		//Laitetaan kehahintamuuttujaan t‰m‰n keikan ostohinta jotta tapahtumat n‰ytt‰isiv‰t fiksuja lukuja
 		$kehahin = $ohinta;
 	}
@@ -286,7 +286,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 					WHERE yhtio='$kukarow[yhtio]' and tunnus='$tilrivirow[tunnus]'";
 		$resultxxx = mysql_query($query) or pupe_error($query);
 
-		if ($tuorow["sarjanumeroseuranta"] == "S") {
+		if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
 			$kehalis = "";
 		}
 		else {
@@ -504,7 +504,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 						<td align='right' valign='top'>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $ohinta*$tilrivirow['varattu']) . " $kuluteksti</td>";
 
 
-	if ($tuorow["sarjanumeroseuranta"] == "S") {
+	if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
 		$varastoon_msg .= "	<td align='right'></td>";
 	}
 	else {

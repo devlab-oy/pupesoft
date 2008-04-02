@@ -26,8 +26,10 @@
  	// Nyt me selataan
 	if ((substr($tuoteno,0,1) == '*' or substr($tuoteno,-1) == '*') and trim(strlen($tuoteno)) > 2) {
 
-		$lisa1 = '';
-		$ulos  = '';
+		$lisa1 		= "";
+		$ulos  		= "";
+		$poislisa	= "";
+		$kieltolisa	= "";
 
 		// jos eka merkki on tähti etsitään teksteistä
 		if (substr($tuoteno,0,1) == '*') {
@@ -77,40 +79,45 @@
 			}
 		}
 		
-		if ($kukarow["kesken"] > 0) {
-			$query  = "	SELECT if(toim_maa != '', toim_maa, maa) maa
-						FROM lasku
-						WHERE yhtio	= '$kukarow[yhtio]'
-						and tunnus  = '$kukarow[kesken]'";
-			$vieres = mysql_query($query) or pupe_error($query);
-			$vierow = mysql_fetch_array($vieres);
-		}
-		elseif($verkkokauppa != "") {
-			$vierow = array();
-
-			if ($maa != "") {
-				$vierow["maa"] = $maa;
-			}
-			else {
-				$vierow["maa"] = $yhtiorow["maa"];
-			}
-		}
-		elseif($kukarow["extranet"] != "") {
-			$query  = "	SELECT if(toim_maa != '', toim_maa, maa) maa
-						FROM asiakas
-						WHERE yhtio	= '$kukarow[yhtio]'
-						and tunnus  = '$kukarow[oletus_asiakas]'";
-			$vieres = mysql_query($query) or pupe_error($query);
-			$vierow = mysql_fetch_array($vieres);
-		}
-
-		if (isset($vierow) and $vierow["maa"] != "") {
-			$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
-		}
-		
 		if ($kutsuja == "tuoteperhe.php") {
 			$perhelisa = ", IF((SELECT tuoteperhe.isatuoteno FROM tuoteperhe WHERE tuoteperhe.yhtio=tuote_wrapper.yhtio and tuoteperhe.isatuoteno=tuote_wrapper.tuoteno and tuoteperhe.tyyppi = '$hakutyyppi' LIMIT 1) IS NULL, 'pois', 'mukaan') rajaus";
 			$perhelisa2 = "HAVING rajaus='mukaan'";
+		}
+		
+		if($kaikkituhaku != "KYLLA") {
+			
+			$poislisa = " HAVING (tuote.status not in ('P','X') or saldo > 0) ";
+		
+			if ($kukarow["kesken"] > 0) {
+				$query  = "	SELECT if(toim_maa != '', toim_maa, maa) maa
+							FROM lasku
+							WHERE yhtio	= '$kukarow[yhtio]'
+							and tunnus  = '$kukarow[kesken]'";
+				$vieres = mysql_query($query) or pupe_error($query);
+				$vierow = mysql_fetch_array($vieres);
+			}
+			elseif($verkkokauppa != "") {
+				$vierow = array();
+
+				if ($maa != "") {
+					$vierow["maa"] = $maa;
+				}
+				else {
+					$vierow["maa"] = $yhtiorow["maa"];
+				}
+			}
+			elseif($kukarow["extranet"] != "") {
+				$query  = "	SELECT if(toim_maa != '', toim_maa, maa) maa
+							FROM asiakas
+							WHERE yhtio	= '$kukarow[yhtio]'
+							and tunnus  = '$kukarow[oletus_asiakas]'";
+				$vieres = mysql_query($query) or pupe_error($query);
+				$vierow = mysql_fetch_array($vieres);
+			}
+
+			if (isset($vierow) and $vierow["maa"] != "") {
+				$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
+			}
 		}
 
 		// Poistettuja tuotteita ei näytetä paitsi jos niillä on saldoa
@@ -138,11 +145,11 @@
 					WHERE tuote.$yhtiot
 					$kieltolisa
 					$lisa1
-					HAVING (tuote.status not in ('P','X') or saldo > 0)
+					$poislisa
 					ORDER BY tuote.tuoteno
 					LIMIT 201";
 		$thresult = mysql_query($query) or pupe_error($query);
-		
+
 		$rows = array();
 		
 		if (mysql_num_rows($thresult) > 0) {
@@ -175,7 +182,7 @@
 								WHERE korvaavat.yhtio = '$mrow[yhtio]'
 								and korvaavat.id = '$mrow[korvaavat]'
 								$kieltolisa
-								HAVING (tuote.status not in ('P','X') or saldo > 0)
+								$poislisa
 								ORDER BY korvaavat.jarjestys, korvaavat.tuoteno";
 					$kores = mysql_query($query) or pupe_error($query);
 
@@ -206,14 +213,14 @@
 			$tee 			= 'Y';
 		}
 		elseif (count($rows) == 1) {
-			$trow = $rows;
+			$trow = array_pop($rows);
 			
 			if($konsernihaku == "KYLLA") {
 				$tuoteno = $trow['tuoteno']."####$trow[yhtio]";
 			}
 			else {
 				$tuoteno = $trow['tuoteno'];
-			}
+			}			
 		}
 		elseif (count($rows) != 1) {
 

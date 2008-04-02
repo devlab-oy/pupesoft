@@ -146,6 +146,7 @@
 						$id2 = mysql_insert_id();
 					}
 				}
+				
 				$query = "	SELECT tunnus
 							FROM tuote
 							WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
@@ -183,6 +184,7 @@
 
 	if ($tee == 'HAKU') {
 		$konsernihaku = "KYLLA";
+		$kaikkituhaku = "KYLLA";
 		
 		if (strpos($tuoteno, '*') === FALSE) {
 			$tuoteno = $tuoteno."*";

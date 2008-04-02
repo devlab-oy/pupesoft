@@ -3713,7 +3713,7 @@ if ($tee == '') {
 				}
 
 				// Näytetäänkö sarjanumerolinkki
-				if (($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or (($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F") and $row["varattu"] < 0)) and $row["var"] != 'P' and $row["var"] != 'T' and $row["var"] != 'U') {
+				if (($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V" or (($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F") and $row["varattu"] < 0)) and $row["var"] != 'P' and $row["var"] != 'T' and $row["var"] != 'U') {
 
 					if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
 						$tunken1 = "siirtorivitunnus";
@@ -3728,7 +3728,7 @@ if ($tee == '') {
 						$tunken2 = "myyntirivitunnus";
 					}
 
-					if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U") {
+					if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V") {
 						$query = "	SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
 									FROM sarjanumeroseuranta
 									where yhtio	 = '$kukarow[yhtio]'
@@ -3945,7 +3945,7 @@ if ($tee == '') {
 						// Tän rivin kate
 						$kate = 0;
 
-						if ($kukarow['extranet'] == '' and $row["sarjanumeroseuranta"] == "S") {
+						if ($kukarow['extranet'] == '' and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U")) {
 
 							if ($kpl > 0) {
 								//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on myyntiä

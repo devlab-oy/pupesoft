@@ -1152,6 +1152,7 @@
 
 					$nimilask++;
 
+					// and $oikeurow["paivitys"] == 1
 					if ($sarjarow["yhtio"] == $kukarow["yhtio"] and ($kukarow["kesken"] != 0 or is_numeric($ostoskori))) {
 						echo "<td valign='top' class='$vari' nowrap>";
 						echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
@@ -1165,8 +1166,8 @@
 				}
 				echo "</table>";
 
-				//$kukarow["kesken"] != 0
-				if ($kukarow["kuka"] != "" or is_numeric($ostoskori)) {
+				//$kukarow["kesken"] != 0 and $oikeurow["paivitys"] == 1
+				if (($kukarow["kuka"] != "") or is_numeric($ostoskori)) {
 					echo "<td valign='top' align='right' class='$vari' nowrap>";
 					if ($toim == "FUTURSOFT") {
 						echo "<input type='hidden' name='toim' value = '$toim'>";
@@ -1312,7 +1313,7 @@
 			}
 
 			//$kukarow["kesken"] != 0
-			if (($row["sarjanumeroseuranta"] == "" or $row["sarjanumeroseuranta"] == "E"  or $row["sarjanumeroseuranta"] == "F") and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
+			if (($row["sarjanumeroseuranta"] == "" or $row["sarjanumeroseuranta"] == "E"  or $row["sarjanumeroseuranta"] == "F")  and $oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
 				echo "<td valign='top' align='right' class='$vari' nowrap>";
 				if ($toim == "FUTURSOFT") {
 					echo "<input type='hidden' name='toim' value = '$toim'>";

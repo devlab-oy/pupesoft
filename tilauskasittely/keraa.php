@@ -130,7 +130,7 @@
 					$tunken = "myyntirivitunnus";
 				}
 			
-				if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "T") {
+				if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "T" or $toimrow["sarjanumeroseuranta"] == "U" or $toimrow["sarjanumeroseuranta"] == "V") {
 					$query = "	SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
 								FROM sarjanumeroseuranta
 								WHERE yhtio = '$kukarow[yhtio]'
@@ -1626,7 +1626,7 @@
 						echo "<input type='hidden' name='kerivi[]' value='$row[tunnus]'>";
 					}
 
-					if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T") {
+					if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V") {
 
 						if ($toim == 'SIIRTOTYOMAARAYS' or $toim == 'SIIRTOLISTA') {
 							$tunken1 = "siirtorivitunnus";

@@ -928,10 +928,10 @@
 
 
 			if ($toim != 'extranet') {
-				$query = "	SELECT *
+				$query = "	SELECT selite, if (selite!=selitetark, concat_ws(' - ', selite, selitetark), selite) selitetark
 							FROM avainsana
 							WHERE yhtio='$kukarow[yhtio]' and laji='PIIRI'
-							ORDER BY jarjestys";
+							ORDER BY jarjestys, selite+0";
 				$pres = mysql_query($query) or pupe_error($query);
 
 				$piirit = explode(',', $krow["piirit"]);
@@ -947,7 +947,7 @@
 						$chk = "CHECKED";
 					}
 
-					echo "<input type='checkbox' name='piiri[]' value='$prow[selite]' $chk>$prow[selite] - $prow[selitetark]<br>";
+					echo "<input type='checkbox' name='piiri[]' value='$prow[selite]' $chk>$prow[selitetark]<br>";
 
 				}
 				echo "</td></tr>";

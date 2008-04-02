@@ -700,6 +700,11 @@ if ($tee == 'E' or $tee == 'F') {
 
 	}
 	else {
+		// kommentti näkyviin
+		if ($trow["comments"] != '') {
+			echo "<tr><th>".t("Kommentti")."</th><td>$trow[comments]</td></tr>";
+		}
+
 		// Muu tosite
 		echo "<tr><td>".t("Muu tosite")."</td>";
 

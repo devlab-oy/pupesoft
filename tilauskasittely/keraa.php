@@ -493,6 +493,11 @@
 									$query .= ", varattu = '".$maara[$apui]."'";
 
 									if($poikkeama_kasittely[$apui] != "") {
+										
+										if ($poikkeama_kasittely[$apui] != "MI") {
+											$query .= ", tilkpl = '".$maara[$apui]."'";
+										}
+										
 										$rotunnus	= $tilrivirow['otunnus'];
 										$rtyyppi	= $tilrivirow['tyyppi'];
 										$rtilkpl 	= round($tilrivirow['varattu']-$maara[$apui],2);
@@ -501,7 +506,7 @@
 										$rvar		= $tilrivirow['var'];
 										$keratty	= "''";
 										$kerattyaik	= "''";
-										$rkomm 		= $tilrivirow['kommentti'];										
+										$rkomm 		= $tilrivirow['kommentti'];								
 									}
 								}
 								else {

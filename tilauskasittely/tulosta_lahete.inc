@@ -91,8 +91,7 @@ if (!function_exists('alku')) {
 		else {
 			$pdf->draw_text(30, 815, $yhtiorow["nimi"], 	$thispage, $norm);
 			$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$thispage, $norm);
-			$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$thispage, $norm);
-			$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$thispage, $norm);
+			$pdf->draw_text(30, 795, $yhtiorow["postino"]." ".$yhtiorow["postitp"], 	$thispage, $norm);
 			$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$thispage, $norm);
 		}
 		
@@ -417,8 +416,7 @@ if (!function_exists('uusi_sivu')) {
 		else {
 			$pdf->draw_text(30, 815, $yhtiorow["nimi"], 	$thispage, $norm);
 			$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$thispage, $norm);
-			$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$thispage, $norm);
-			$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$thispage, $norm);
+			$pdf->draw_text(30, 795, $yhtiorow["postino"]." ".$yhtiorow["postitp"], 	$thispage, $norm);
 			$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$thispage, $norm);
 		}
 		
@@ -744,7 +742,8 @@ if (!function_exists('rivi')) {
 		
 		//hatetaan tuotteen myyntihinta
 		$query = "	SELECT round(if(isnull(hinnasto.hinta) or hinnasto.hinta='', round(tuote.myyntihinta/if('$laskurow[vienti_kurssi]'=0,1,'$laskurow[vienti_kurssi]'),'$yhtiorow[hintapyoristys]'), hinnasto.hinta) / (1+(if('$yhtiorow[alv_kasittely]'='',0,tuote.alv)/100)), '$yhtiorow[hintapyoristys]') myyntihinta,
-       				tuote.aleryhma
+       				tuote.aleryhma,
+					tuote.sarjanumeroseuranta
                     FROM tuote
                     LEFT JOIN hinnasto on tuote.yhtio = hinnasto.yhtio and tuote.tuoteno = hinnasto.tuoteno and hinnasto.valkoodi = '$laskurow[valkoodi]'
                     WHERE tuote.tuoteno='$row[tuoteno]' and tuote.yhtio='$kukarow[yhtio]'";
@@ -878,7 +877,12 @@ if (!function_exists('rivi')) {
 			$row["kommentti"] .= "\n";
 		}
 		while($sarjarow = mysql_fetch_array($sarjares)) {
-			$row["kommentti"] .= t("S:nro").": $sarjarow[sarjanumero]\n";
+			if($asrow1["sarjanumeroseuranta"] == "E" or $asrow1["sarjanumeroseuranta"] == "F") {
+				$row["kommentti"] .= t("E:nro").": $sarjarow[sarjanumero]\n";
+			}
+			else {
+				$row["kommentti"] .= t("S:nro").": $sarjarow[sarjanumero]\n";
+			}
 		}
 
 		// Mahtuuko rivi tälle sivulle

@@ -1,6 +1,5 @@
 <?php
 
-
 echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 			function submit_tallenna(){
 				document.paaformi.action='$PHP_SELF';
@@ -30,7 +29,7 @@ if ($kukarow["kesken"] == 0 or $kukarow["kesken"] != $laskurow["tunnus"]) {
 				WHERE yhtio = '$kukarow[yhtio]' AND
 				kuka = '$kukarow[kuka]' AND
 				session = '$session'";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = mysql_query($query) or pupe_error($query);	
 }
 
 // katsotaan onko t‰lle keikalle jo liitetty vaihto-omaisuuslaskuja (kotimaa, eu tai ei-eu)
@@ -144,11 +143,11 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TY' and $tee != 'TI') {
 	echo t("Muuta rivi‰").":<br>";
 
 	//pidet‰‰n kaikki muuttujat tallessa
-	$muut_siirrettavat = $alku."/".$nayta_kohdistetut."/".$ojarj."/".$nayta_kaikki."/".$suoratoimitukset."/".$toimittajaid;
+	$muut_siirrettavat = $alku."!°!".$nayta_kohdistetut."!°!".$ojarj."!°!".$nayta_kaikki."!°!".$suoratoimitukset."!°!".$toimittajaid;
 
 	for($i = 0; $i < 10; $i++) {
 		if ($haku[$i] != '') {
-			$muut_siirrettavat .= "/$i#".$haku[$i];
+			$muut_siirrettavat .= "!°!$i#".$haku[$i];
 		}
 	}
 
@@ -163,11 +162,11 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TY' and $tee != 'TI') {
 //Lis‰t‰‰n sarjanumeroita
 if ($tila == "sarjanumerot") {
 	//pidet‰‰n kaikki muuttujat tallessa
-	$muut_siirrettavat = $alku."/".$nayta_kohdistetut."/".$ojarj."/".$nayta_kaikki."/".$suoratoimitukset."/".$toimittajaid;
+	$muut_siirrettavat = $alku."!°!".$nayta_kohdistetut."!°!".$ojarj."!°!".$nayta_kaikki."!°!".$suoratoimitukset."!°!".$toimittajaid;
 
 	for($i = 0; $i < 10; $i++) {
 		if ($haku[$i] != '') {
-			$muut_siirrettavat .= "/$i#".$haku[$i];
+			$muut_siirrettavat .= "!°!$i#".$haku[$i];
 		}
 	}
 
@@ -194,13 +193,13 @@ if ($tila == 'uusirivi') {
 
 	echo t("Tee uusi rivi").":<br>";
 
-	//pidet‰‰n kaikki muuttujat tallessa
-	$muut_siirrettavat = $alku."/".$nayta_kohdistetut."/".$ojarj."/".$nayta_kaikki."/".$suoratoimitukset."/".$toimittajaid;
+	//pidet‰‰n kaikki muuttujat tallessa	
+	$muut_siirrettavat = $alku."!°!".$nayta_kohdistetut."!°!".$ojarj."!°!".$nayta_kaikki."!°!".$suoratoimitukset."!°!".$toimittajaid;
 
 	if(is_array($haku)) {
 		foreach($haku as $i => $hakusana) {
 			if ($haku[$i] != '') {
-				$muut_siirrettavat .= "/$i#".$haku[$i];
+				$muut_siirrettavat .= "!°!$i#".$haku[$i];
 			}
 		}
 	}
@@ -282,7 +281,7 @@ if ($tee == 'TY') {
 
 //korjataan siirrett‰v‰t muuttujat taas talteen
 if (isset($muut_siirrettavat)) {
-	$muut = explode('/',$muut_siirrettavat);
+	$muut = explode('!°!',$muut_siirrettavat);
 
 	$alku 				= $muut[0];
 	$nayta_kohdistetut 	= $muut[1];
@@ -336,12 +335,22 @@ if ($tila == 'tee_kohdistus') {
 	}
 	$tila = '';
 
+	// katotaan ollaanko muutettunimityksi‰ ja p‰ivitet‰‰n ne
+	if(is_array($rivi_nimitys)) {
+		foreach ($rivi_nimitys as $tunnus => $nimitys) {
+			$query  = "UPDATE tilausrivi set nimitys='$nimitys' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			// Tehd‰‰n automaattinen sarjanumerointi
+		}
+	}
+
 	// katotaan ollaanko muutettu hintaa tai kappaleita ja p‰ivitet‰‰n ne
 	if(is_array($rivi_hinta)) {
 		foreach ($rivi_hinta as $tunnus => $hinta) {
 			$hinta  = str_replace(",",".", $hinta);
-			$query  = "update tilausrivi set hinta='$hinta' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and hinta<>'$hinta'";
-			$result = mysql_query($query) or pupe_error($query);
+			$query  = "UPDATE tilausrivi set hinta='$hinta' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and hinta<>'$hinta'";
+			$result = mysql_query($query) or pupe_error($query);												
 		}
 	}
 
@@ -349,7 +358,7 @@ if ($tila == 'tee_kohdistus') {
 	if(is_array($rivi_ale)) {
 		foreach ($rivi_ale as $tunnus => $ale) {
 			$ale  = str_replace(",",".", $ale);
-			$query  = "update tilausrivi set ale='$ale' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and ale<>'$ale'";
+			$query  = "UPDATE tilausrivi set ale='$ale' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and ale<>'$ale'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 	}
@@ -358,7 +367,7 @@ if ($tila == 'tee_kohdistus') {
 		// katotaan ollaanko muutettu kuluhintaa tai kappaleita ja p‰ivitet‰‰n ne
 		foreach ($rivi_kuluhinta as $tunnus => $kulu) {
 			$kulu   = str_replace(",",".", $kulu);
-			$query  = "update tilausrivi set kate='$kulu' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and kate<>'$kulu'";
+			$query  = "UPDATE tilausrivi set kate='$kulu' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and kate<>'$kulu'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 	}
@@ -519,7 +528,7 @@ if ($tila == '') {
 	$kentat_array = array(	"tilausrivi.otunnus otunnus",
 							"tilausrivi.tuoteno tuoteno",
 							"GROUP_CONCAT(DISTINCT tuotteen_toimittajat.toim_tuoteno ORDER BY toim_tuoteno SEPARATOR ',') toim_tuoteno",
-							"tuote.nimitys nimitys",
+							"tilausrivi.nimitys nimitys",
 							"tilausrivi.varattu+tilausrivi.kpl siskpl",
 							"round((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),4) ulkkpl",
 							"tilausrivi.hinta hinta",
@@ -817,7 +826,7 @@ if ($tila == '') {
 
 	$viimenen_sivu = mysql_num_rows($result)+$alku-50;
 
-	echo 	"<td class='back' colspan='12' align='center'>
+	echo "	<td class='back' colspan='12' align='center'>
 			<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=0&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj=$ojarj$ulisa&suoratoimitukset=$suoratoimitukset'><<<</a>
 			&nbsp;&nbsp;
 			<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$edellinen&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa'><< ".t("Edellinen sivu")."</a>
@@ -1060,7 +1069,7 @@ if ($tila == '') {
 				$tunind = "yhtio_ostorivi";
 			}
 
-			if ($sarjarow["sarjanumeroseuranta"] == "S" or $sarjarow["sarjanumeroseuranta"] == "T") {
+			if ($sarjarow["sarjanumeroseuranta"] == "S" or $sarjarow["sarjanumeroseuranta"] == "U" or $sarjarow["sarjanumeroseuranta"] == "V") {
 				$query = "	SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
 							FROM sarjanumeroseuranta
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -1082,20 +1091,24 @@ if ($tila == '') {
 			}
 						
 			$sarjares = mysql_query($query) or pupe_error($query);
-			$sarjarow = mysql_fetch_array($sarjares);
+			$sarjarow2 = mysql_fetch_array($sarjares);
 
-			if ($sarjarow["kpl"] == abs($rivirow["siskpl"])) {
-				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa#$sarjarow[sarjanumero]' style='color:00FF00'>$snro_ok</font></a>)";
+			if ($sarjarow2["kpl"] == abs($rivirow["siskpl"])) {
+				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa#$sarjarow2[sarjanumero]' style='color:00FF00'>$snro_ok</font></a>)";
 			}
 			else {
-				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa#$sarjarow[sarjanumero]' style='color:DD0000'>$snro</a>)";
+				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa#$sarjarow2[sarjanumero]' style='color:DD0000'>$snro</a>)";
 			}
 		}
 		echo "</$td>";
 
-
 		if ($kukarow["resoluutio"] == 'I') {
-			echo "<$td $class valign='top'>".asana('nimitys_',$rivirow['tuoteno'],$rivirow['nimitys'])."</$td>";
+			if ($sarjarow["sarjanumeroseuranta"] == "U") { 
+				echo "<$td $class valign='top'><input size='15' type='text' name='rivi_nimitys[$rivirow[rivitunnus]]' value='$rivirow[nimitys]'></$td>";
+			}
+			else {
+				echo "<$td $class valign='top'>".asana('nimitys_',$rivirow['tuoteno'],$rivirow['nimitys'])."</$td>";
+			}
 		}
 
 		// jos rivi‰ ei ole viel‰ viety varastoon, voidaan muuttaa kappaleita

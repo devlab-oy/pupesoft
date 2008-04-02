@@ -186,25 +186,23 @@ if ($tee == 'I') {
 				$tee = 'E';
 			}
 			else {
-				$newer = strftime("%Y-%m-%d", mktime(0,0,0,$tpk,$tpp+$err,$tpv));
-				$erp = substr($newer, 8, 2);
-				$erk = substr($newer, 5, 2);
-				$erv = substr($newer, 0, 4);
+				$erp = date("d", mktime(0, 0, 0, $tpk, $tpp+$err, $tpv));
+				$erk = date("m", mktime(0, 0, 0, $tpk, $tpp+$err, $tpv));
+				$erv = date("Y", mktime(0, 0, 0, $tpk, $tpp+$err, $tpv));
 				$err = 0;
 			}
 		}
 
 		if ($kar > 0) {
-				if ($kap > 0) {
+			if ($kap > 0) {
 				$errormsg .= "<font class='error'>".t("Kaksi kassa-alepvm‰‰")."</font><br>";
 				$tee = 'E';
 			}
 			else {
-				$newer = strftime("%Y-%m-%d", mktime(0,0,0,$tpk,$tpp+$kar,$tpv));
-				$kap = substr($newer, 8, 2);
-				$kak = substr($newer, 5, 2);
-				$kav = substr($newer, 0, 4);
-				$kar = 0;
+				$kap = date("d", mktime(0, 0, 0, $tpk, $tpp+$kar, $tpv));
+				$kak = date("m", mktime(0, 0, 0, $tpk, $tpp+$kar, $tpv));
+				$kav = date("Y", mktime(0, 0, 0, $tpk, $tpp+$kar, $tpv));				
+				$kar = 0;				
 			}
 		}
 	}
@@ -747,7 +745,8 @@ if ($tee == 'P' or $tee == 'E') {
 			<td>".t("Viite")."</td><td><input type='text'  maxlength='20' size='25' name='viite' value='$viite'>
 		</tr>
 		<tr>
-			<td>".t("Kassaer‰pvm")."</td><td><input type='text' name='kap' maxlength='2' size=2>
+			<td>".t("Kassaer‰pvm")."</td><td>
+			<input type='text' name='kap' maxlength='2' size=2 value='$kap'>
 			<input type='text' name='kak' maxlength='2' size=2 value='$kak'>
 			<input type='text' name='kav' maxlength='4' size=4 value='$kav'> ".t("ppkkvvvv tai")."
 			<input type='text' name='kar' maxlength='3' size=2 value='$kar'> ".t("p‰iv‰‰")."

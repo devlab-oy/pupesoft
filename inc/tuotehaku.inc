@@ -189,12 +189,12 @@
 					$ekakorva = "";
 
 					while ($krow = mysql_fetch_array($kores)) {
-						if ($ekakorva == "") $ekakorva = $krow["tuoteno"];
+						if ($ekakorva == "") $ekakorva = $krow["yhtio"].$krow["tuoteno"];
 						if(!isset($rows[$ekakorva.$krow["tuoteno"]])) $rows[$ekakorva.$krow["tuoteno"]] = $krow;
 					}
 				}
 				else {
-					$rows[$mrow["tuoteno"]] = $mrow;					
+					$rows[$mrow["yhtio"].$mrow["tuoteno"]] = $mrow;					
 				}
 			}
 		}
@@ -248,7 +248,7 @@
 
 				$lisakala1 = "";
 
-				if ($trow["korvaavat"] == $edtuoteno) {
+				if ($trow["yhtio"].$trow["korvaavat"] == $edtuoteno) {
 					$lisakala1 = "* ";
 				}
 
@@ -289,7 +289,7 @@
 
 				$ulos .= "<option value='$trow[tuoteno]$lisakala3'>$lisakala2 $lisakala1 $trow[tuoteno] ".asana('nimitys_',$trow['tuoteno'],$trow['nimitys'])." ($kokonaismyytavissa)</option>";
 
-				$edtuoteno = $trow["korvaavat"];
+				$edtuoteno = $trow["yhtio"].$trow["korvaavat"];
 			}
 
 			if ($kutsuja != "yllapito.php") {

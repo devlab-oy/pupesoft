@@ -126,7 +126,7 @@ if (!function_exists("tsekit")) {
 				$tunken = "ostorivitunnus";
 			}
 	
-			if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "T") {
+			if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "U" or $toimrow["sarjanumeroseuranta"] == "V") {
 				$query = "	SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
 							FROM sarjanumeroseuranta
 							WHERE yhtio = '$kukarow[yhtio]'

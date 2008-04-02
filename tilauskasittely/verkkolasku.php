@@ -355,7 +355,7 @@
 							$tunken = "myyntirivitunnus";
 						}
 
-						if ($srow1["sarjanumeroseuranta"] == "S" or $srow1["sarjanumeroseuranta"] == "T") {
+						if ($srow1["sarjanumeroseuranta"] == "S" or $srow1["sarjanumeroseuranta"] == "T" or $srow1["sarjanumeroseuranta"] == "U" or $srow1["sarjanumeroseuranta"] == "V") {
 							$query = "	SELECT count(distinct sarjanumero) kpl
 										FROM sarjanumeroseuranta
 										WHERE yhtio = '$kukarow[yhtio]'
@@ -390,7 +390,7 @@
 							}
 						}
 
-						if ($srow1["sarjanumeroseuranta"] == "S" and $srow1["varattu"] < 0 and $srow1["osto_vai_hyvitys"] == "") {
+						if (($srow1["sarjanumeroseuranta"] == "S" or $srow1["sarjanumeroseuranta"] == "U") and $srow1["varattu"] < 0 and $srow1["osto_vai_hyvitys"] == "") {
 							//Jos tuotteella on sarjanumero ja kyseessä on HYVITYSTÄ
 
 							//Tähän hyvitysriviin liitetyt sarjanumerot

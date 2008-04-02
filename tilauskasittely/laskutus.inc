@@ -253,7 +253,7 @@ else {
 			}
 
 			// lasketaan kate
-			if ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] == "S" and $trow["varattu"] > 0) {
+			if ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "U") and $trow["varattu"] > 0) {
 				//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
 				$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $trow["tunnus"]);
 
@@ -266,7 +266,7 @@ else {
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "laskutus";
 			}
-			elseif ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] == "S" and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "O") {
+			elseif ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "U") and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "O") {
 				//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on OSTOA
 
 				// Kate = 0
@@ -276,7 +276,7 @@ else {
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "tulo";
 			}
-			elseif ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] == "S" and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "") {
+			elseif ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "U") and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "") {
 				//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on HYVITYSTƒ
 
 				//T‰h‰n hyvitysriviin liitetyt sarjanumerot

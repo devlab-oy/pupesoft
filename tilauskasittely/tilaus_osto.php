@@ -1030,7 +1030,7 @@
 						<input type='hidden' name='otunnus' value='$tilausnumero'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>						
 						<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-						<input type='hidden' name='toim' value='OSTO'>
+						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='nimitykset' value='JOO'>
 						<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//lopetus=$lopetus//tee='>
 						<input type='submit' name='NAYTATILAUS' value='".t("Näytä")."'>

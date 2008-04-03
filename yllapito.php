@@ -549,7 +549,15 @@
 						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>$trow[1]</a></td>";
 					}
 					else {
-						echo "<td valign='top'>$fontlisa1 $trow[$i] $fontlisa2</td>";
+						if (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int') {
+							echo "<td valign='top' align='right'>$fontlisa1 $trow[$i] $fontlisa2</td>";
+						}
+						elseif (mysql_field_type($result,$i) == 'date') {
+							echo "<td valign='top'>$fontlisa1 ".tv1dateconv($trow[$i])." $fontlisa2</td>";	
+						}
+						else {
+							echo "<td valign='top'>$fontlisa1 $trow[$i] $fontlisa2</td>";
+						}
 					}
 				}
 			}

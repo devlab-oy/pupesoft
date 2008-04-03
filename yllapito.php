@@ -565,7 +565,7 @@
 			echo "<b>".t("Sinulla ei ole oikeuksia p‰ivitt‰‰ t‰t‰ tietoa")."</b><br>";
 		}
 
-		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa#$tunnus' name='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data'>";
+		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa#$tunnus' name='mainform' id='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data'>";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 		echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
 		echo "<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>";

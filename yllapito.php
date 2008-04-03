@@ -593,9 +593,18 @@
 				$trow[$i] = $t[$i];
 			}
 
-			if 	(mysql_field_len($result,$i)>10) 	$size='35';
-			elseif	(mysql_field_len($result,$i)<5)	$size='5';
-			else	$size='10';
+			if (strlen($trow[$i]) > 35) {
+				$size = strlen($trow[$i])+2;
+			}
+			elseif (mysql_field_len($result,$i)>10) {
+				$size = '35';
+			}
+			elseif (mysql_field_len($result,$i)<5) {
+				$size = '5';
+			}
+			else {
+				$size = '10';
+			}
 
 			$maxsize = mysql_field_len($result,$i); // Jotta tätä voidaan muuttaa
 

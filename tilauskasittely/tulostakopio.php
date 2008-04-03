@@ -36,6 +36,9 @@
 	if ($toim == "OSTO") {
 		$fuse = t("Ostotilaus");
 	}
+	if ($toim == "HAAMU") {
+		$fuse = t("Ostotilaus haamu");
+	}
 	if ($toim == "PURKU") {
 		$fuse = t("Purkulista");
 	}
@@ -169,7 +172,7 @@
 		$muutparametrit = $vva."/".$kka."/".$ppa."/".$vvl."/".$kkl."/".$ppl;
 		
 		if ($ytunnus != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
-			if ($toim == 'OSTO' or $toim == 'PURKU' or $toim == 'TARIFFI' or $toim == 'TUOTETARRA' or $toim == 'VASTAANOTETUT') {
+			if ($toim == 'OSTO' or $toim == 'PURKU' or $toim == 'TARIFFI' or $toim == 'TUOTETARRA' or $toim == 'VASTAANOTETUT' or $toim == 'HAAMU') {
 				require ("../inc/kevyt_toimittajahaku.inc");
 			}
 			else {
@@ -258,7 +261,7 @@
 		}
 		else {
 			if (((int) $asiakasid > 0 or (int) $toimittajaid > 0)) {
-				if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA" or $toim == 'VASTAANOTETUT') {
+				if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA" or $toim == 'VASTAANOTETUT' or $toim == "HAAMU") {
 					echo "<th>".t("Toimittajan nimi")."</th><td colspan='3'>$toimittajarow[nimi]<input type='hidden' name='toimittajaid' value='$toimittajaid'></td>";
 					
 					if($kukarow["extranet"] == "") {
@@ -278,7 +281,7 @@
 				}
 			}
 			else {
-				if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA" or $toim == 'VASTAANOTETUT') {
+				if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA" or $toim == 'VASTAANOTETUT' or $toim == "HAAMU") {
 					echo "<th>".t("Toimittajan nimi")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='15'></td></tr>";
 				}
 				else {
@@ -363,6 +366,18 @@
 		if ($toim == "OSTO") {
 			//ostotilaus kyseessä, ainoa paperi joka voidaan tulostaa on itse tilaus
 			$where1 .= " lasku.tila = 'O' ";
+
+			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
+			
+			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+
+			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			$use = " use index (yhtio_tila_luontiaika) ";
+		}
+		if ($toim == "HAAMU") {
+			//ostotilaus kyseessä, ainoa paperi joka voidaan tulostaa on itse tilaus
+			$where1 .= " lasku.tila = 'D' and lasku.tilaustyyppi = 'O' ";
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 			
@@ -709,6 +724,13 @@
 		if ($jarj != ''){
 			$jarj = "ORDER BY $jarj";
 		}
+		
+		if ($toim != "HAAMU") {
+			$where4 = " and lasku.tila != 'D' ";
+		}
+		else {
+			$where4 = "";
+		}
 
 		// Etsitään muutettavaa tilausta
 		$query = "  SELECT 
@@ -728,7 +750,7 @@
 					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
 					WHERE $where1 $where2 $where3
 					and lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tila != 'D'
+					$where4
 					$jarj";
 		$result = mysql_query($query) or pupe_error($query);
 		
@@ -864,7 +886,7 @@
 	if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
 		//valitaan tulostin heti alkuun, jos se ei ole vielä valittu
-		if ($toim == "OSTO") {
+		if ($toim == "OSTO" or $toim == "HAAMU") {
 			$tulostimet[0] = 'Ostotilaus';
 			if ($kappaleet > 0 and $komento["Ostotilaus"] != 'email') {
 				$komento["Ostotilaus"] .= " -# $kappaleet ";
@@ -1060,6 +1082,13 @@
 
 			if ($toim == "OSTO") {
 				$otunnus = $laskurow["tunnus"];
+				require('tulosta_ostotilaus.inc');
+				$tee = '';
+			}
+			
+			if ($toim == "HAAMU") {
+				$otunnus = $laskurow["tunnus"];
+				$mista = 'tulostakopio';
 				require('tulosta_ostotilaus.inc');
 				$tee = '';
 			}

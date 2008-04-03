@@ -28,7 +28,8 @@
 			<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>
 			<input type='hidden' name='rivinotunnus' value = '$rivinotunnus'>
 			<input type='hidden' name='osto_sarjatunnus' value = '$osto_sarjatunnus'>
-			<input type='hidden' name='rivinvar' value = '$var'>";
+			<input type='hidden' name='rivinvar' value = '$var'>
+			<input type='hidden' name='toim' value = '$toim'>";
 
 	if($ulos != '') { // Nyt me selataan
 		// Meilla on kaikki valmiina $ulos:ssa
@@ -66,9 +67,16 @@
 
 	
 	echo "<tr>
-			<th align='left'>".t("Toimitusaika")."</th>
-			<th colspan='6' align='left'>".t("Kommentti")."</th>
-			<td class='back'></td>
+			<th align='left'>".t("Toimitusaika")."</th>";
+	
+	if ($toim == "HAAMU") {
+		echo "<th colspan='6' align='left'>".t("Nimitys")."</th>";
+	}
+	else {
+		echo "<th colspan='6' align='left'>".t("Kommentti")."</th>";
+	}
+			
+	echo "<td class='back'></td>
 			</tr>";
 
 
@@ -102,6 +110,7 @@
 			<input type='hidden' name='muuta' value = '$muuta'>
 			<input type='hidden' name='otunnus' value = '$otunnus'>
 			<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>
+			<input type='hidden' name='toim' value = '$toim'>
 			<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Tyhjennä")."'></td></form></tr>";
 
 	echo "</table><br>";

@@ -8,7 +8,7 @@
 	$sresult = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($sresult);
 
-	if ($laskurow['tila'] != 'O') {
+	if ($laskurow['tila'] != 'O' and $laskurow['tila'] != 'D' and $laskurow['tilaustyyppi'] != 'O') {
 		$tulosta_ostotilaus_ulos .= t("Kesken oleva tilaus ei ole ostotilaus");
 		exit;
 	}
@@ -744,7 +744,7 @@
 			
 			if (!function_exists('rivi')) {
 				function rivi($thispage) {
-					global $pdf, $laskurow, $row, $yhtiorow, $kukarow, $sivu, $page, $rectparam, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kieli, $kala, $nimitykset, $rivinumerot;
+					global $pdf, $laskurow, $row, $yhtiorow, $kukarow, $sivu, $page, $rectparam, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kieli, $kala, $nimitykset, $rivinumerot, $toim;
 					
 					// viivat rivien väliin...
 					$x[0] = 20;
@@ -778,9 +778,17 @@
 						$row["yksikko"] = $rarrow["toim_yksikko"];
 					}
 
-					$pdf->draw_text(25,  $kala, $rivinumerot[$row["tunnus"]],							$thispage, $pieni);					
-					$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],									$thispage, $norm);
-					$pdf->draw_text(170, $kala, "(".$row["tuoteno"].")",								$thispage, $norm);
+					$pdf->draw_text(25,  $kala, $rivinumerot[$row["tunnus"]],							$thispage, $pieni);	
+					
+					if ($toim == "HAAMU") {
+						//$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],									$thispage, $norm);
+						$pdf->draw_text(45, $kala, $row["tuoteno"],								$thispage, $norm);
+					}				
+					else {
+						$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],									$thispage, $norm);
+						$pdf->draw_text(170, $kala, "(".$row["tuoteno"].")",								$thispage, $norm);
+					}
+					
 					$pdf->draw_text(300, $kala, tv1dateconv($row["toimaika"]),							$thispage, $norm);
 					
 					$oikpos = $pdf->strlen(($row["varattu"]*1)." ".$row["yksikko"], $norm);					
@@ -961,18 +969,41 @@
 			
 			// katotaan miten halutaan sortattavan
 			$sorttauskentta = generoi_sorttauskentta($yhtiorow["ostotilauksen_jarjestys"]);
-
-			$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
-						tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, 
-						substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika,
-						$sorttauskentta
-						FROM tilausrivi
-						join tuote USING (yhtio, tuoteno)
-						join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-						WHERE tilausrivi.otunnus = '$otunnus'
-						and tilausrivi.yhtio	 = '$kukarow[yhtio]'
-						and tilausrivi.tyyppi	!= 'D'
-						ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
+			
+			if ($mista == "tulostakopio") {
+				$haamulisa = " and tilausrivi.tyyppi = 'D'";
+				
+			}
+			else {
+				$haamulisa = " and tilausrivi.tyyppi != 'D'";
+				
+			}
+			
+			if ($toim != "HAAMU") {
+				$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
+							tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, 
+							substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika,
+							$sorttauskentta
+							FROM tilausrivi
+							join tuote USING (yhtio, tuoteno)
+							join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+							WHERE tilausrivi.otunnus = '$otunnus'
+							and tilausrivi.yhtio	 = '$kukarow[yhtio]'
+							and tilausrivi.tyyppi	!= 'D'
+							ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
+			}
+			else {
+				$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu,
+							tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, 
+							substring(tilausrivi.kommentti,1,80) nimitys, tilausrivi.yksikko, tilausrivi.toimaika
+							FROM tilausrivi
+							WHERE tilausrivi.otunnus = '$otunnus'
+							and tilausrivi.yhtio	 = '$kukarow[yhtio]'
+							$haamulisa
+							ORDER BY tilausrivi.tunnus";
+				
+			}
+			
 			$result = mysql_query($query) or pupe_error($query);
 			
 			//generoidaan rivinumerot

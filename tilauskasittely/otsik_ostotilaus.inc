@@ -104,7 +104,8 @@
 				<input type='hidden' name='maa' value='$srow[maa]'>
 				<input type='hidden' name='liitostunnus' value='$srow[liitostunnus]'>
 				<input type='hidden' name='ylatila' value='$ylatila'>
-				<input type='hidden' name='alatila' value='$alatila'>";
+				<input type='hidden' name='alatila' value='$alatila'>
+				<input type='hidden' name='toim' value='$toim'>";
 				
 		echo "<table>
 				<tr><th colspan='2' align='left' valign='top'>&nbsp;".t("Toimittajan tiedot").":</td></tr>

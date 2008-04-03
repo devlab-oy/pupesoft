@@ -45,7 +45,7 @@
 		$vvaa = $vva - '1';
 		$vvll = $vvl - '1';
 
-		$query = "	select yhtio.nimi yhtio, piiri,
+		$query = "	SELECT yhtio.nimi yhtio, asiakas.piiri piiri,
 					sum(if(tapvm >= '$vva-$kka-$ppa'  and tapvm <= '$vvl-$kkl-$ppl', arvo,0)) myyntinyt,
 					sum(if(tapvm >= '$vvaa-$kka-$ppa' and tapvm <= '$vvll-$kkl-$ppl',arvo,0)) myyntied,
 					round(sum(if(tapvm >= '$vva-$kka-$ppa'  and tapvm <= '$vvl-$kkl-$ppl', arvo,0)) /

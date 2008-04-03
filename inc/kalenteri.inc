@@ -576,6 +576,13 @@
 			
 			$menu = array();
 			$menu[]	= array("VALI" => "Toiminnot");	
+			if(is_array($data["tiedot"]["menut"]["toiminnot"])) {
+
+				foreach($data["tiedot"]["menut"]["toiminnot"] as $a) {
+					$menu[] = $a;
+				}
+			}
+			
 			$menu[] = array("TEKSTI" => "Lis‰‰ Kalenteritapahtuma", "HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$kaleaika".url_params($kalenteri));
 			$menu[] = array("TEKSTI" => "Lis‰‰ Asiakasmuistio",		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$kaleaika".url_params($kalenteri));
 			$menu[] = array("TEKSTI" => "Lis‰‰ Muistutus",			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$kaleaika".url_params($kalenteri));						
@@ -596,8 +603,11 @@
 			$palkki[] = tee_menu($menu, "<font class='message'>".t("Vaihda n‰kym‰‰")."</font>");
 			
 			if(is_array($data["tiedot"]["menut"])) {
-				foreach($data["tiedot"]["menut"] as $val) {
-					$palkki[] = $val;
+				foreach($data["tiedot"]["menut"] as $key => $val) {
+					//	T‰m‰ on oma valikko vain jos sen indexi on numero
+					if(is_numeric($key)) {
+						$palkki[] = $val;
+					}
 				}
 			}
 			/*

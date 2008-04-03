@@ -224,6 +224,19 @@ if($tee == "HYLKAATARJOUS") {
 	$hakupalkki = "OHI";
 }
 
+if($tee == "MERKKAAPROJEKTIVALMIIKSI") {
+
+	//	Suljetaan projekti
+	$query = "	UPDATE lasku SET alatila='B'
+				WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tarjous' and tila = 'R'";
+	$updres = mysql_query($query) or pupe_error($query);
+
+	echo "<font class='message'>".t("Kuitattiin projekti '%s' valmiiksi", $kieli, $tarjous)."</font><br>";
+
+	$tee 		= "";
+	$aja_kysely	= "tmpquery";
+}
+
 if($tee == "SULJEPROJEKTI") {
 	$query = "	SELECT lasku.tunnus, projekti
 				FROM lasku
@@ -241,17 +254,16 @@ if($tee == "SULJEPROJEKTI") {
 		$query = "update kustannuspaikka set kaytossa='' where yhtio = '$kukarow[yhtio]' and tunnus='$aburow[projekti]'";
 		$updres = mysql_query($query) or pupe_error($query);
 
-		echo "<font class='message'>".t("Suljettiin projekti '$tarjous'")."</font><br>";
+		echo "<font class='message'>".t("Suljettiin projekti '%s'", $kieli, $tarjous)."</font><br>";
 	}
 	else {
-		echo "<font class='error'>".t("VIRHE!!! Tilaus '$tarjous' ei ole projekti tai se on v‰‰r‰ss‰ tilassa")."</font><br>";
+		echo "<font class='error'>".t("VIRHE!!! Tilaus '%s' ei ole projekti tai se on v‰‰r‰ss‰ tilassa", $kieli, $tarjous)."</font><br>";
 	}
 
 	$tee 		= "";
 	$tarjous 	= "";
 	$aja_kysely	= "tmpquery";
 }
-
 require('inc/kalenteri.inc');		
 
 if($tee == "NAYTA") {
@@ -793,7 +805,34 @@ if($tee == "NAYTA") {
 			$edkt = $row["kayttotarkoitus"];
 		}		
 	}
+	
+	$saa_sulkea="";
+	//	Projektit pit‰‰ voida sulke
+	if($laskurow["tila"] == "R" and $setti == "viikkis") {
+		$query = "	SELECT tunnus
+					FROM lasku
+					WHERE yhtio 		= '$kukarow[yhtio]'
+					and tunnusnippu 	= '$tarjous' and tila='U' and mapvm='0000-00-00'";
+		$tarkres = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($tarkres)==0) {
+			$query = "	SELECT tunnus
+						FROM lasku
+						WHERE yhtio 		= '$kukarow[yhtio]'
+						and tunnusnippu 	= '$tarjous' and tila='U'";
+			$tarkres = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($tarkres)>0) {
+				$saa_sulkea="OK";
+			}
+		}
 
+		if($saa_sulkea=="OK") {
+			$data["tiedot"]["menut"]["toiminnot"][] = array("TEKSTI" => "Sulje projekti", "HREF" => "tilaushakukone.php?toim=$toim&setti=$setti&tarjous=$tarjous&tee=SULJEPROJEKTI", "TARGET" => "page");
+		}
+		elseif(in_array($laskurow["alatila"], array("","A"))) {
+			$data["tiedot"]["menut"]["toiminnot"][] = array("TEKSTI" => "Kuittaa valmiiksi", "HREF" => "tilaushakukone.php?toim=$toim&setti=$setti&tarjous=$tarjous&tee=MERKKAAPROJEKTIVALMIIKSI&hakupalkki=OHI&aja_kysely=tmpquery", "TARGET" => "page");
+		}
+	}
+	
 	$menu[]	= array("VALI" => "Toiminnot");
 	$menu[] = array("TEKSTI" => "Muokkaa liitteit‰", "HREF" => "../liitetiedostot.php?liitos=lasku&id=$tarjous&lopetus=".urlencode("raportit/tilaushakukone.php?toim=$toim&setti=$setti&hakukysely=$hakukysely&hakupalkki=OHI&aja_kysely=tmpquery&tarjous=$tarjous"), "TARGET" => "page");
 	

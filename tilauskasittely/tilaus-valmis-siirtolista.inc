@@ -226,7 +226,8 @@
 							kauppatapahtuman_luonne	= '$laskurow[kauppatapahtuman_luonne]',
 							ultilno					= '$ultilno',
 							maa_maara				= '$laskurow[maa_maara]',
-							maa_lahetys				= '$laskurow[maa_lahetys]'";
+							maa_lahetys				= '$laskurow[maa_lahetys]',
+							piiri 					= '$laskurow[piiri]'";
 					$uusires = mysql_query($query) or pupe_error($query);
 					$laskurow['tunnus'] = (string) mysql_insert_id();
 					$tvs_tilausnumerot[] = $laskurow["tunnus"];

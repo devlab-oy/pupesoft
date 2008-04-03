@@ -732,7 +732,8 @@ else {
 								bruttopaino 						= '$laskurow[bruttopaino]',
 								lisattava_era 						= '$laskurow[lisattava_era]',
 								vahennettava_era 					= '$laskurow[vahennettava_era]',
-								ultilno								= '$ultilno'";
+								ultilno								= '$ultilno',
+								piiri 								= '$laskurow[piiri]'";
 					$uusires = mysql_query($query) or pupe_error($query);
 					$laskurow['tunnus'] = (string) mysql_insert_id();
 					$tilausnumerot[] = $laskurow["tunnus"];

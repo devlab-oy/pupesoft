@@ -885,10 +885,10 @@
 	}
 
 	if (mysql_field_name($result, $i) == "piiri") {
-		$query = "	SELECT *
+		$query = "	SELECT selite, if (selite!=selitetark, concat_ws(' - ', selite, selitetark), selite) selitetark
 					FROM avainsana
 					WHERE yhtio='$kukarow[yhtio]' and laji = 'PIIRI'
-					ORDER BY jarjestys";
+					ORDER BY jarjestys, selite+0";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>";
@@ -899,7 +899,7 @@
 			if ($trow[$i] == $vrow['selite']) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
+			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
 		}
 
 		$ulos .= "</select></td>";

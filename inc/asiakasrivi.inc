@@ -1,6 +1,5 @@
 <?php
 
-
 	$ulos = "";
 	$jatko = 1; // oletetaan normaali käsittely
 	$tyyppi = 1; // oletetaan rivin näkyvyys
@@ -212,134 +211,49 @@
 	}
 
 	if (mysql_field_name($result, $i) == "asiakasnro") {
+		$ulos  = "<td>";
+		$ulos .= "<div id='asiakasnumero_etsi'>";
 
-		if ($yhtiorow["automaattinen_asiakasnumerointi"] != '' and $trow[$i] == '') {
-			$as_sel = "SELECTED";
-		}
-
-		$ulos = "<td><input type='text' name='$nimi' value='$trow[$i]'>";
-
-		$ulos .= "<select name='asiakasnro_select'>";
-		
-		$ulos .= "<option value = ''></option>";
-
-		//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
-		$query = "	SELECT *
-					FROM yhtio 
-					JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
-					where konserni = '$yhtiorow[konserni]' 
-					and synkronoi like '%$toim%'";
-		$vresult = mysql_query($query) or pupe_error($query);
-		
-		if (mysql_num_rows($vresult) > 0) {
-			// haetaan konsernifirmat
-			$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
-						FROM yhtio 
-						JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
-						where konserni = '$yhtiorow[konserni]' 
-						and synkronoi like '%$toim%'";
-			$vresult = mysql_query($query) or pupe_error($query);
-			$srowapu = mysql_fetch_array($vresult);
-			$tarkyhtio = $srowapu["yhtiot"];
-		}
-		else {
-			$tarkyhtio = "'$kukarow[yhtio]'";
-		}
-
-		if ($yhtiorow["asiakasnumeroinnin_aloituskohta"] != '' and $yhtiorow["automaattinen_asiakasnumerointi"] != '') {
-			$aloituskohta = " AND asiakasnro >= {$yhtiorow["asiakasnumeroinnin_aloituskohta"]}";
-			$selecti = "asiakasnro+0";
-		}
-		else {
-			$aloituskohta = "";
-			$selecti = "MAX(asiakasnro)+0 asiakasnro";
-		}
-
-		$query = "	SELECT $selecti
-					FROM asiakas USE INDEX (asno_index)
-					WHERE yhtio IN ($tarkyhtio) $aloituskohta";
-		$vresult = mysql_query($query) or pupe_error($query);
-		
-		$vrrow = mysql_fetch_array($vresult);
-
-		if ($yhtiorow["asiakasnumeroinnin_aloituskohta"] != '' and $yhtiorow["automaattinen_asiakasnumerointi"] != '') {
-			$apu_asiakasnumero = $yhtiorow["asiakasnumeroinnin_aloituskohta"];
-		}
-		else {
-			$apu_asiakasnumero = $vrrow["asiakasnro"];
-			$apu_asiakasnumero++;
-		}
-
-		for ($monta = 0; $monta < 5;) {
-
-			$query = "	SELECT asiakasnro
-						FROM asiakas USE INDEX (asno_index)
-						WHERE yhtio IN ($tarkyhtio)
-						AND asiakasnro='$apu_asiakasnumero'";
-			$vresult = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($vresult) == 0) {
-				$ulos .= "<option value = '$apu_asiakasnumero' $as_sel>$apu_asiakasnumero</option>";
-				$monta++;
-				$as_sel = "";
+		if ($yhtiorow["automaattinen_asiakasnumerointi"] != "" and $trow[$i] == "") {
+			if ($yhtiorow["asiakasnumeroinnin_aloituskohta"] != "") {
+				$apu_asiakasnumero = $yhtiorow["asiakasnumeroinnin_aloituskohta"];
+			}
+			else {
+				$apu_asiakasnumero = 0;
 			}
 
-			$apu_asiakasnumero++;
+			while (!isset($vresult) or mysql_num_rows($vresult) >= 1) {
+				$apu_asiakasnumero++;
+				$query = "	SELECT asiakasnro
+							FROM asiakas USE INDEX (asno_index)
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND asiakasnro = '$apu_asiakasnumero'";
+				$vresult = mysql_query($query) or pupe_error($query);
+			}
+			
+			$trow[$i] = $apu_asiakasnumero;
 		}
 
-		$ulos .= "</select></td>";
+		$ulos .= "<input type='text' name='$nimi' id='$nimi' value='$trow[$i]'>";
+		$ulos .= "<input type='button' name='etsi_vapasno' id='etsi_vapasno' value='".t("Etsi seuraava vapaa asiakasnumero")."' onClick='javascript:document.getElementById(\"etsi_vapasno\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapasno\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=asiakasnro&ohje=off&pointer=$i\", \"asiakasnumero_etsi\", false, false)'>";
+		$ulos .= "</div>";
+		$ulos .= "</td>";
 		$jatko = 0;
 	}
 
 	if (mysql_field_name($result, $i) == "ytunnus") {
 
-		$ulos = "<td><input type='text' name='$nimi' value='$trow[$i]'>";
+		$ulos = "<td>";
+		$ulos .= "<div id='ytunnus_etsi'>";
+		$ulos .= "<input type='text' name='$nimi' value='$trow[$i]'>";
 
 		if ($alias_set == "VAHITTAISMYYNTI") {
-
-			$ulos .= "<select name='ytunnus_select'>";
-			$ulos .= "<option value = ''></option>";
-
-			$apu_asiakasnumero = 1;
-
-			//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
-			$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
-						FROM yhtio 
-						JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
-						where konserni	 = '$yhtiorow[konserni]' 
-						and synkronoi like '%$toim%'";
-			$vresult = mysql_query($query) or pupe_error($query);			
-			$srowapu = mysql_fetch_array($vresult);
-			
-			if ($srowapu["yhtiot"] != "") {
-				$tarkyhtio = $srowapu["yhtiot"];
-			}
-			else {
-				$tarkyhtio = "'$kukarow[yhtio]'";
-			}
-
-			for ($monta = 0; $monta < 5;) {
-
-				$query = "	SELECT ytunnus
-							FROM asiakas USE INDEX (ytunnus_index)
-							WHERE yhtio in ($tarkyhtio)
-							and ytunnus = '$apu_asiakasnumero'";
-				$vresult = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($vresult) == 0) {
-					$ulos .= "<option value = '$apu_asiakasnumero'>$apu_asiakasnumero</option>";
-					$monta++;
-				}
-
-				$apu_asiakasnumero++;
-
-			}
-
-			$ulos .= "</select>";
+			$ulos .= "<input type='button' name='etsi_vapytunnus' id='etsi_vapytunnus' value='".t("Etsi seuraava vapaa ytunnus")."' onClick='javascript:document.getElementById(\"etsi_vapytunnus\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapytunnus\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=ytunnus&ohje=off&pointer=$i\", \"ytunnus_etsi\", false, false)'>";
 		}
 
+		$ulos .= "</div>";
 		$ulos .= "</td>";
-		$ulos.= "<td class='back'>".t("Voit tarkistaa ytunnuksen")." <a target='YTJ' href='http://ec.europa.eu/taxation_customs/vies/lang.do?fromWhichPage=vieshome&selectedLanguage=".strtoupper($kukarow["kieli"])."'>".t("täältä")."</td>";
+		$ulos .= "<td class='back'>".t("Voit tarkistaa ytunnuksen")." <a target='YTJ' href='http://ec.europa.eu/taxation_customs/vies/lang.do?fromWhichPage=vieshome&selectedLanguage=".strtoupper($kukarow["kieli"])."'>".t("täältä")."</td>";
 		$jatko = 0;
 	}
 

@@ -325,7 +325,7 @@
 	echo "<form action = '$PHP_SELF#$tunnus' method='post'><input type='hidden' name=tee value='E'>
 		<input type='hidden' name=tunnus value = '$tunnus'>";
 
-	echo t('Näytä poistetut');
+	echo t('Näytä poistetut');	
 
 	if ($viivatut == 'on') $viivatut='checked';
 	else $viivatut='';
@@ -336,6 +336,54 @@
 	if ($viivatut != '') echo "<td></td>";
 
 	if (!isset($seutunnus)) echo "<td></td>";
+	
+	echo "</tr>";
+	
+	echo "<tr>";
+	
+	$query = "	SELECT liitostunnus, tilaustyyppi
+				FROM lasku
+				WHERE yhtio = '{$kukarow["yhtio"]}' and tunnus = '$tunnus'";
+	$lasres = mysql_query($query) or pupe_error($query);
+	$laskurow = mysql_fetch_array($lasres);
+		
+	//	Saadaanko muokata superina?
+	$query = "	SELECT yhtio
+				FROM oikeu
+				WHERE yhtio	= '$kukarow[yhtio]'
+				and kuka	= '$kukarow[kuka]'
+				and nimi	= 'matkalasku.php'
+				and alanimi = 'SUPER'";
+	$oires = mysql_query($query) or pupe_error($query);
+	if(mysql_num_rows($oires) > 0) {
+		$su = "SUPER";
+	}
+	else {
+		$su = "";
+	}
+	
+	$query = "select tunnus from toimi where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]' and laskun_erittely != ''";
+	$toimires = mysql_query($query) or pupe_error($query);
+	if(mysql_num_rows($toimires)==1) {
+		echo "	<td class='back'><form action = 'matkalasku.php' method='get'>
+					<input type='hidden' name = 'tilausnumero' value='$tunnus'>
+					<input type='hidden' name = 'tee' value='MUOKKAA'>					
+					<input type='hidden' name = 'toim' value='$su'>
+					<input type='hidden' name = 'lopetus' value='".urlencode("muutosite.php?tee=E&tunnus=$tunnus")."'>						
+					<input type='Submit' value='".t("Kululaskun erittely")."'>
+					</form>
+				</td>";
+	}
+
+	if($laskurow["tilaustyyppi"] == "M") {
+		echo "<td class='back'><form action = 'matkalasku.php' method='post'>
+					<input type='hidden' name = 'tilausnumero' value='$tunnus'>
+					<input type='hidden' name = 'tee' value='MUOKKAA'>
+					<input type='hidden' name = 'toim' value='$su'>
+					<input type='hidden' name = 'lopetus' value='".urlencode("muutosite.php?tee=E&tunnus=$tunnus")."'>
+					<input type='Submit' value='".t("Tarkastele matkalaskua")."'>
+					</form></td>";				
+	}
 	
 	echo "</tr>";
 	echo "</table><br><br>";

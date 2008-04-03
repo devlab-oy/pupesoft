@@ -27,6 +27,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$tpostitp 		   	   	   			= $asiakasrow["toim_postitp"];
 			$toim_maa 		   	   	   			= $asiakasrow["toim_maa"];
 			$verkkotunnus 	   	   	   			= $asiakasrow["verkkotunnus"];
+			$piiri 								= $asiakasrow["piiri"];
 
 			if ($asiakasrow["spec_ytunnus"] != '') {
 				$ytunnus 				= $asiakasrow["spec_ytunnus"];

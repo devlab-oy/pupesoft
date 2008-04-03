@@ -608,6 +608,7 @@
 					echo  "
 								<form name='myyntimenu' action = '$PHP_SELF' method='post' autocomplete='off'>
 									<input type='hidden' name='toiminto' value='$toiminto'>
+									<input type='hidden' name='toim' value='$toim'>									
 									<input type='hidden' name='tee' value = 'Y'>
 									<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 									<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>

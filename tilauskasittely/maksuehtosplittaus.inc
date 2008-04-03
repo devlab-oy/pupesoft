@@ -164,6 +164,7 @@
 						asiakkaan_tilausnumero				= '$laskurow[asiakkaan_tilausnumero]',
 						kohde								= '$laskurow[kohde]',
 						sisviesti1							= '$laskurow[sisviesti1]',
+						piiri 								= '$laskurow[piiri]',
 						alatila								= 'D',
 						tila								= 'L'";
 			$uusires = mysql_query($query) or pupe_error($query);

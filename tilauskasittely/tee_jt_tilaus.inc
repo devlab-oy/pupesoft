@@ -162,7 +162,8 @@
 								vienti_kurssi	= '$otsikkorivi[vienti_kurssi]' and
 								erikoisale		= '$otsikkorivi[erikoisale]' and
 								eilahetetta		= '$isarivirow[suoraan_laskutukseen]' and
-								tunnusnippu		= '$otsikkorivi[tunnusnippu]'
+								tunnusnippu		= '$otsikkorivi[tunnusnippu]' and
+								piiri			= '$otsikkorivi[piiri]'
 								$erpcmlisa1";
 					$stresult = mysql_query($query) or pupe_error($query);
 				}

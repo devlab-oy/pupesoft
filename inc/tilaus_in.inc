@@ -1,8 +1,9 @@
 <?php
+
 echo "<pre>";
 if (!$fd = fopen($filename, "r")) die("Filen '$filename' avaus epäonnistui!");
 
-$toimpvm = date(Y)."-".date(n)."-".date(j);
+$toimpvm = date("Y")."-".date("n")."-".date("j");
 
 if ($tyyppi == 'yct') {
 	echo t("Uusi tilaus")."<br>";
@@ -72,6 +73,7 @@ if ($tyyppi == 'yct') {
 					toim_ovttunnus 	= '$asiakasrow[toim_ovttunnus]',
 					chn				= '$asiakasrow[chn]',
 					liitostunnus	= '$asiakasrow[tunnus]',
+					piiri			= '$asiakasrow[piiri]',
 					yhtio 			= '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$id = mysql_insert_id();
@@ -288,45 +290,46 @@ while ((!feof ($fd)) and ($error!=1)) {
 				$tpostitp = $asiakasrow['postitp'];
 				$toim_maa = $asiakasrow['maa'];
 	
-				$query = "INSERT into lasku SET
-					yhtio_nimi = '$yhtiorow[nimi]',
-					yhtio_osoite = '$yhtiorow[osoite]',
-					yhtio_postino = '$yhtiorow[postino]',
-					yhtio_postitp = '$yhtiorow[postitp]',
-					yhtio_maa = '$yhtiorow[maa]',
-					yhtio_ovttunnus	= '$yhtiorow[ovttunnus]',
-					yhtio_kotipaikka = '$yhtiorow[kotipaikka]',
-					laatija = '$kukarow[kuka]',
-					luontiaika=NOW(),
-					ytunnus= '$asiakasrow[ytunnus]',
-					nimi = '$asiakasrow[nimi]',
-					nimitark = '$asiakasrow[nimitark]',
-					osoite = '$asiakasrow[osoite]',
-					postino = '$asiakasrow[postino]',
-					postitp = '$asiakasrow[postitp]',
-					maa = '$asiakasrow[maa]',
-					toim_nimi = '$tnimi',
-					toim_nimitark = '$tnimitark',
-					toim_osoite = '$tosoite',
-					toim_postino = '$tpostino',
-					toim_postitp = '$tpostitp',
-					toim_maa = '$toim_maa',
-					verkkotunnus='$asiakasrow[verkkotunnus]',
-					tila = 'L',
-					alatila = 'A',
-					toimaika = '$toimpvm',
-					kerayspvm = '$toimpvm',
-					maksuehto = '$asiakasrow[maksuehto]',
-					toimitustapa = '$asiakasrow[toimitustapa]',
-					myyja = '$kukarow[tunnus]',
-					alv = '',
-					comments = '$comments',
-					ovttunnus = '$asiakasrow[ovttunnus]',
-					toim_ovttunnus = '$asiakasrow[toim_ovttunnus]',
-					liitostunnus='$asiakasrow[tunnus]',
-					viesti = '$viesti',
-					chn='$asiakasrow[chn]',
-					yhtio = '$kukarow[yhtio]'";
+				$query = "	INSERT into lasku SET
+							yhtio_nimi 			= '$yhtiorow[nimi]',
+							yhtio_osoite 		= '$yhtiorow[osoite]',
+							yhtio_postino 		= '$yhtiorow[postino]',
+							yhtio_postitp 		= '$yhtiorow[postitp]',
+							yhtio_maa 			= '$yhtiorow[maa]',
+							yhtio_ovttunnus		= '$yhtiorow[ovttunnus]',
+							yhtio_kotipaikka	= '$yhtiorow[kotipaikka]',
+							laatija 			= '$kukarow[kuka]',
+							luontiaika			= NOW(),
+							ytunnus				= '$asiakasrow[ytunnus]',
+							nimi 				= '$asiakasrow[nimi]',
+							nimitark 			= '$asiakasrow[nimitark]',
+							osoite 				= '$asiakasrow[osoite]',
+							postino 			= '$asiakasrow[postino]',
+							postitp 			= '$asiakasrow[postitp]',
+							maa 				= '$asiakasrow[maa]',
+							toim_nimi	 		= '$tnimi',
+							toim_nimitark 		= '$tnimitark',
+							toim_osoite 		= '$tosoite',
+							toim_postino 		= '$tpostino',
+							toim_postitp 		= '$tpostitp',
+							toim_maa 			= '$toim_maa',
+							verkkotunnus		= '$asiakasrow[verkkotunnus]',
+							tila 				= 'L',
+							alatila				= 'A',
+							toimaika 			= '$toimpvm',
+							kerayspvm 			= '$toimpvm',
+							maksuehto 			= '$asiakasrow[maksuehto]',
+							toimitustapa 		= '$asiakasrow[toimitustapa]',
+							myyja 				= '$kukarow[tunnus]',
+							alv 				= '',
+							comments 			= '$comments',
+							ovttunnus 			= '$asiakasrow[ovttunnus]',
+							toim_ovttunnus 		= '$asiakasrow[toim_ovttunnus]',
+							liitostunnus		= '$asiakasrow[tunnus]',
+							viesti 				= '$viesti',
+							chn					= '$asiakasrow[chn]',
+							piiri				= '$asiakasrow[piiri]',
+							yhtio 				= '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$id = mysql_insert_id();
 				echo "".t("nro")." $id ";
@@ -411,45 +414,46 @@ while ((!feof ($fd)) and ($error!=1)) {
 				$tpostitp = $asiakasrow['postitp'];
 				$toim_maa = $asiakasrow['maa'];
 	
-				$query = "INSERT into lasku SET
-					yhtio_nimi							= '$yhtiorow[nimi]',
-					yhtio_osoite						= '$yhtiorow[osoite]',
-					yhtio_postino						= '$yhtiorow[postino]',
-					yhtio_postitp						= '$yhtiorow[postitp]',
-					yhtio_maa							= '$yhtiorow[maa]',
-					yhtio_ovttunnus						= '$yhtiorow[ovttunnus]',
-					yhtio_kotipaikka					= '$yhtiorow[kotipaikka]',				
-					laatija = '$kukarow[kuka]',
-					luontiaika=NOW(),
-					ytunnus= '$asiakasrow[ytunnus]',
-					nimi = '$asiakasrow[nimi]',
-					nimitark = '$asiakasrow[nimitark]',
-					osoite = '$asiakasrow[osoite]',
-					postino = '$asiakasrow[postino]',
-					postitp = '$asiakasrow[postitp]',
-					maa = '$asiakasrow[maa]',
-					toim_nimi = '$tnimi',
-					toim_nimitark = '$tnimitark',
-					toim_osoite = '$tosoite',
-					toim_postino = '$tpostino',
-					toim_postitp = '$tpostitp',
-					toim_maa = '$toim_maa',
-					verkkotunnus='$asiakasrow[verkkotunnus]',
-					tila = 'L',
-					alatila = 'A',
-					toimaika = '$toimpvm',
-					kerayspvm = '$toimpvm',
-					maksuehto = '$asiakasrow[maksuehto]',
-					toimitustapa = '$asiakasrow[toimitustapa]',
-					myyja = '$kukarow[tunnus]',
-					alv = '',
-					comments = '$comments',
-					ovttunnus = '$asiakasrow[ovttunnus]',
-					toim_ovttunnus = '$asiakasrow[toim_ovttunnus]',
-					viesti = '$viesti',
-					liitostunnus='$asiakasrow[tunnus]',
-					chn='$asiakasrow[chn]',
-					yhtio = '$kukarow[yhtio]'";
+				$query = "	INSERT into lasku SET
+							yhtio_nimi			= '$yhtiorow[nimi]',
+							yhtio_osoite		= '$yhtiorow[osoite]',
+							yhtio_postino		= '$yhtiorow[postino]',
+							yhtio_postitp		= '$yhtiorow[postitp]',
+							yhtio_maa			= '$yhtiorow[maa]',
+							yhtio_ovttunnus		= '$yhtiorow[ovttunnus]',
+							yhtio_kotipaikka	= '$yhtiorow[kotipaikka]',				
+							laatija 			= '$kukarow[kuka]',
+							luontiaika			= NOW(),
+							ytunnus				= '$asiakasrow[ytunnus]',
+							nimi 				= '$asiakasrow[nimi]',
+							nimitark 			= '$asiakasrow[nimitark]',
+							osoite 				= '$asiakasrow[osoite]',
+							postino 			= '$asiakasrow[postino]',
+							postitp 			= '$asiakasrow[postitp]',
+							maa 				= '$asiakasrow[maa]',
+							toim_nimi 			= '$tnimi',
+							toim_nimitark 		= '$tnimitark',
+							toim_osoite 		= '$tosoite',
+							toim_postino 		= '$tpostino',
+							toim_postitp 		= '$tpostitp',
+							toim_maa 			= '$toim_maa',
+							verkkotunnus		= '$asiakasrow[verkkotunnus]',
+							tila 				= 'L',
+							alatila 			= 'A',
+							toimaika 			= '$toimpvm',
+							kerayspvm 			= '$toimpvm',
+							maksuehto 			= '$asiakasrow[maksuehto]',
+							toimitustapa 		= '$asiakasrow[toimitustapa]',
+							myyja 				= '$kukarow[tunnus]',
+							alv 				= '',
+							comments 			= '$comments',
+							ovttunnus 			= '$asiakasrow[ovttunnus]',
+							toim_ovttunnus 		= '$asiakasrow[toim_ovttunnus]',
+							viesti 				= '$viesti',
+							liitostunnus		= '$asiakasrow[tunnus]',
+							chn					= '$asiakasrow[chn]',
+							piiri				= '$asiakasrow[piiri]',
+							yhtio 				= '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$id = mysql_insert_id();
 				echo "".t("nro")." $id ";
@@ -547,7 +551,7 @@ if (($tyyppi == 'yct') and ($id != '')) {
 			
 			$content .= "--$bound\r\n";
 			
-			$boob = mail($mailiosoite, "".t("tarveraportti")."".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			$boob = mail($mailiosoite, t("tarveraportti")." ".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
 		}
 	}
 }
@@ -555,4 +559,5 @@ if ($error==1) echo "<font class='error'>".t("Käsittelyssä tapahtui virhe")."</f
 
 fclose ($fd);
 echo "</pre>";
+
 ?>

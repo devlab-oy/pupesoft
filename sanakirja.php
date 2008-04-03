@@ -138,7 +138,7 @@ if (sizeof($kieli) > 0) {
 		$query .= ")";
 	}
 
-	$query .= " ORDER BY fi ";
+	$query .= " ORDER BY luontiaika desc,fi ";
 
 	$result = mysql_query($query) or pupe_error($query);
 

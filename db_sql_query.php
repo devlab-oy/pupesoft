@@ -20,6 +20,12 @@
 		
 		echo "<font class='head'>".t("SQL-raportti").":</font><hr>";
 		
+		if ($rtee == "AJA" and isset($ruks_pakolliset)) {
+			require("inc/pakolliset_sarakkeet.inc");
+			list($pakolliset, $kielletyt, $wherelliset) = pakolliset_sarakkeet($table);
+			$ruksaa = array_merge($pakolliset,$wherelliset);
+		}
+		
 		// T‰ss‰ luodaan uusi raporttiprofiili
 		if ($rtee == "AJA" and $uusirappari != '' and $kysely == "") {
 
@@ -108,8 +114,8 @@
 					$order .= ", $kentta";
 				}
 			}	
-					
-			$sqlhaku = "SELECT ".implode(",", $kentat)." 
+			
+			$sqlhaku = "SELECT $toimintosarake ".implode(",", $kentat)." 
 						FROM $table 
 						WHERE yhtio='$kukarow[yhtio]' 
 						$where
@@ -228,7 +234,11 @@
 
 			echo "</td></tr>";
 			echo "</table><br><br>";
-				
+			
+			echo "<table>";
+			echo "<tr><td>".t("Ruksaa sis‰‰nluvussa pakolliset kent‰t").":</td><td><input type='submit' name='ruks_pakolliset' value='".t("Ruksaa")."'></td></tr>";	
+			echo "</table><br><br>";
+			
 			echo "<table>";
 			echo "<tr><th>Kentt‰</th><th>Valitse</th><th>Operaattori</th><th>Rajaus</th><th>J‰rjestys</th></tr>";
 
@@ -267,6 +277,9 @@
 				if ($kentat[$row[0]] == $row[0]) {
 					$chk = "CHECKED";
 				}
+				elseif (is_array($ruksaa) and count($ruksaa) > 0 and in_array(strtoupper($row[0]),$ruksaa)) {
+					$chk = "CHECKED";
+				}
 				else {
 					$chk = "";
 				}
@@ -300,7 +313,7 @@
 			}
 		
 			echo "</table>";
-			echo "<input type='submit' value='".t("Suorita")."'>";
+			echo "<br><input type='submit' value='".t("Suorita")."'>";
 			echo "</form>";
 		}
 

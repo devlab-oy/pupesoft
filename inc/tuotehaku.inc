@@ -1,7 +1,7 @@
 <?php
 
 
-	if (substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and $yhtiorow["automaattinen_tuotehaku"] != '') {
+	if (substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and substr($tuoteno,0,1) != '?' and substr($tuoteno,0,1) != '#' and $yhtiorow["automaattinen_tuotehaku"] != '') {
 		$query = "	SELECT *
 					FROM tuote
 					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
@@ -24,29 +24,45 @@
 	}
 
  	// Nyt me selataan
-	if ((substr($tuoteno,0,1) == '*' or substr($tuoteno,-1) == '*') and trim(strlen($tuoteno)) > 2) {
+	if ((substr($tuoteno,0,1) == '*' or substr($tuoteno,-1) == '*' or substr($tuoteno,0,1) == '?') and trim(strlen($tuoteno)) > 2) {
 
 		$lisa1 		= "";
 		$ulos  		= "";
 		$poislisa	= "";
 		$kieltolisa	= "";
 
-		// jos eka merkki on t‰hti etsit‰‰n teksteist‰
-		if (substr($tuoteno,0,1) == '*') {
+		if (substr($tuoteno,0,1) == '?') {
+			// Toimittajan tuotenumero
+			
+			$query = "SELECT * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and toim_tuoteno='".substr($tuoteno,1)."'";
+			$tresult = mysql_query($query) or pupe_error($query);
+			
+			while ($toimirivi = mysql_fetch_array($tresult)) {
+				$lisa1 .= "'$toimirivi[tuoteno]',";
+			}
 
-			$tuoteno = substr($tuoteno,1);
+			if ($lisa1 != "") {
+				$lisa1 = "and tuoteno in (".substr($lisa1,0,-1).")"; // vika pilkku pois
+			}
+		}
+		elseif (substr($tuoteno, -2) == '**') {
+			// Tuoteryhm‰
+			$lisa1 = " and tuote.try = '$tuoteno' ";
+		}
+		elseif (substr($tuoteno,0,1) == '*') {
+			// Jos eka merkki on t‰hti etsit‰‰n teksteist‰
+			$tuoteno = substr($tuoteno, 1);
 			$sanat = split(" ", $tuoteno);
 
 			foreach ($sanat as $sana) {
 				$lisa1 .= " and concat_ws(' ', tuote.nimitys, tuote.lyhytkuvaus, tuote.tuotemerkki) like '%" . trim($sana) . "%' ";
 			}
 		}
-
-		// jos vika merkki on t‰hti niin etsit‰‰n osittainen tuotenumero
-		if (substr($tuoteno,-1) == '*') {
+		elseif (substr($tuoteno,-1) == '*') {
+			// Jos vika merkki on t‰hti niin etsit‰‰n osittainen tuotenumero
 			$tuoteno = substr($tuoteno,0,-1);
 			
-			$lisa1 = "and tuote.tuoteno like '" . $tuoteno . "%'";
+			$lisa1 = " and tuote.tuoteno like '" . $tuoteno . "%' ";
 		}
 		
 		$yhtiot 	= "";
@@ -298,7 +314,7 @@
 			}
 		}
 	}
-	elseif ((substr($tuoteno,0,1) == '*' or substr($tuoteno,-1) == '*') and trim(strlen($tuoteno)) < 3) {
+	elseif ((substr($tuoteno,0,1) == '*' or substr($tuoteno,-1) == '*' or substr($tuoteno,0,1) == '?') and trim(strlen($tuoteno)) < 3) {
 		$kentta			= 'tuoteno';
 		$varaosavirhe 	= t("VIRHE: Hakusana pit‰‰ sis‰lt‰‰ t‰hden(*) lis‰ksi v‰hint‰‰n kaksi(2) merkki‰")."!<br>";
 		$tuoteno		= '';
@@ -309,31 +325,10 @@
 
 		///* Viivakoodinlukija-special *///
 		///* Konffaa lukija n‰in: prefiksiksi #-merkki ja suffiksiksi RETURN*///
-		///* Toimittajan tuotenumerospecial* myˆs t‰‰ll‰///
+		if (substr($tuoteno,0,1) == '#') {
 
-		if (substr($tuoteno,0,1) == '#' or substr($tuoteno,0,1) == '?') {
-
-			$lisa1 = '';
-
- 			///* Toimittajan tuotenumerospecial*///
-			if (substr($tuoteno,0,1) == '?') {
-
-				$query = "SELECT * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and toim_tuoteno='".substr($tuoteno,1)."'";
-				$tresult = mysql_query($query) or pupe_error($query);
-
-				while ($toimirivi = mysql_fetch_array($tresult)) {
-					$lisa1 .= "'$toimirivi[tuoteno]',";
-				}
-
-				if ($lisa1 != "") {
-					$lisa1 = "and tuoteno in (".substr($lisa1,0,-1).")"; // vika pilkku pois
-				}
-			}
-
-			if (substr($tuoteno,0,1) == '#') {
-				$lisa1 = "and eankoodi='".substr($tuoteno,1)."'";
-			}
-
+			$lisa1 = "and eankoodi='".substr($tuoteno,1)."'";
+			
 			$query = "	SELECT tuoteno
 						FROM tuote
 						WHERE yhtio = '$kukarow[yhtio]' $lisa1";

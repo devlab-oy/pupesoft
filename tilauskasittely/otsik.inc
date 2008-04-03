@@ -542,9 +542,9 @@
 		echo "<table>";
 		echo "<tr><td>";
 
-		echo "<table cellpadding='1' cellspacing='1'>";
+		echo "<table>";
 		echo "<tr>
-				<th colspan='2' align='left' valign='top'>&nbsp;".t("Laskutusosoite").":</td></tr>";
+				<th colspan='2' align='left' valign='top'>".t("Laskutusosoite").":</td></tr>";
 		echo "<tr>
 				<td valign='top'>".t("Nimi").": </td>
 				<td><input type='text' name='nimi' size='35' value='$srow[nimi]'></td></tr>";
@@ -613,9 +613,9 @@
 					<input type='hidden' name='liitostunnus' 					 value = '$srow[liitostunnus]'>";
 
 			echo "<td valign='top'>";
-			echo "<table cellpadding='1' cellspacing='1'>";
+			echo "<table>";
 			echo "<tr>
-					<th colspan='2' align='left' valign='top'>&nbsp; ".t("Toimitusosoite").":</td></tr>";
+					<th colspan='2' align='left' valign='top'>".t("Toimitusosoite").":</td></tr>";
 			echo "<tr>
 					<td valign='top'> ".t("Nimi").": </td>
 					<td><input type='text' name='tnimi' size='35' value='$srow[toim_nimi]'></td></tr>";
@@ -633,7 +633,7 @@
 
 			if($yhtiorow['laskutyyppi'] == 3) {
 				echo "<td valign='top'>";
-				echo "<table cellpadding='1' cellspacing='1'>";
+				echo "<table>";
 				echo "<tr>
 						<th colspan='2' align='left' valign='top'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";
 				echo "<tr>
@@ -684,7 +684,7 @@
 			if ($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") {
 				echo "<table>";
 				echo "<tr><td>";
-					echo "<table cellpadding='1' cellspacing='1'>";
+					echo "<table>";
 					echo "<tr>
 							<th colspan='2' align='left' valign='top'>&nbsp; ".t("Rinnakkaisostaja").":</th></tr>";
 					echo "<tr>
@@ -701,7 +701,7 @@
 							<td><input type='text' name='kolm_postino' size='6' value='$srow[kolm_postino]'> <input type='text' name='kolm_postitp' size='21' value='$srow[kolm_postitp]'></td></tr>";
 					echo "</table>";
 				echo "</td><td>";
-					echo "<table cellpadding='1' cellspacing='1'>";
+					echo "<table>";
 					echo "<tr>
 							<td valign='top'> ".t("Sähköpostiosoite").": </td>
 							<td>$srow[email]</td></tr>";
@@ -720,9 +720,7 @@
 					echo "</table>";
 				echo "</td></tr></table><br>";
 			}
-
-
-
+			
 			echo "<table>";
 
 			if ($toim == "TYOMAARAYS") {
@@ -792,6 +790,7 @@
 				}
 				echo "</select></td>";
 			}
+			
 			echo "<td>".t("Erikoisalennus").":</td>
 				<td><input type='text' name='erikoisale' value='$srow[erikoisale]'></td>
 				</tr>";
@@ -916,9 +915,9 @@
 			}
 
 			if ($kukarow['kesken'] == 0) {
-				$toimpp = $kerpp = date(j);
-				$toimkk = $kerkk = date(n);
-				$toimvv = $kervv = date(Y);
+				$toimpp = $kerpp = date("j");
+				$toimkk = $kerkk = date("n");
+				$toimvv = $kervv = date("Y");
 			}
 			else {
 				list($toimvv, $toimkk, $toimpp) = split('-', $srow["toimaika"]);
@@ -1211,6 +1210,7 @@
 				//	Fiksataan HTML
 				echo "<td></td><td></td></tr>";
 			}
+			
 			if ($toim == "TYOMAARAYS") {
 				echo "<tr><td>".t("Tilaustyyppi").":</td>";
 
@@ -1386,9 +1386,8 @@
 			echo "</td>";
 			echo "<td>".t("Suoraan laskutukseen").":</td><td><input type='checkbox' name='eilahe' $eilah></td>";
 			echo "</tr>";
+			
 			echo "<tr>";
-
-
 			echo "<td>".t("Toimitusehto").":</td><td>";
 
 			$query = "	SELECT selite, if(selitetark_2 != '', concat(concat(' (',selitetark_2,') -'), selitetark), if(selitetark!='',concat('- ',selitetark), ''))
@@ -1419,6 +1418,7 @@
 						WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO' and selite = '$srow[toimitusehto]'
 						ORDER BY jarjestys, selite";
 			$tresult = mysql_query($query) or pupe_error($query);
+		
 			if (mysql_num_rows($tresult) == 0 and $kasitoimehto == "") {
 				$kasitoimehto = $srow["toimitusehto"];
 			}
@@ -1486,7 +1486,29 @@
 
 			echo "<td>".t("Tilausta ei osatoimiteta").":</td><td><input type='checkbox' name='osatoimitus' $osath></td></tr>";
 
-			echo "<tr><td></td><td></td><td>".t("Ei jälkitoimituksia").":</td><td><input type='checkbox' value='o' name='jtkielto' $jtki></td></tr>";
+			echo "<tr><td>".t("Asiakkaan piiri").":</td><td>";
+			
+			$query = "	SELECT selite, if (selite!=selitetark, concat_ws(' - ', selite, selitetark), selite) selitetark
+						FROM avainsana
+						WHERE yhtio='$kukarow[yhtio]' and laji='PIIRI'
+						ORDER BY jarjestys, selite+0";
+			$pres = mysql_query($query) or pupe_error($query);
+
+			echo "<select name='piiri'>";
+			
+			while ($prow = mysql_fetch_array($pres)) {
+				$chk = "";
+
+				if($prow["selite"] == $srow["piiri"]) {
+					$chk = "SELECTED";
+				}
+
+				echo "<option value='$prow[selite]' $chk>$prow[selitetark]</option>";
+
+			}
+			echo "</select>";
+			
+			echo "</td><td>".t("Ei jälkitoimituksia").":</td><td><input type='checkbox' value='o' name='jtkielto' $jtki></td></tr>";
 
 			if($yhtiorow["tilauksen_seuranta"] == "K") {
 				//seuranta
@@ -2437,7 +2459,8 @@
 					tunnusnippu							= '$tunnusnippu',
 					jaksotettu							= '$jaksotettu',
 					splittauskielto						= '$splittauskielto',
-					jtkielto							= '$jtkielto'";
+					jtkielto							= '$jtkielto',
+					piiri 								= '$piiri'";
 
 		if ($toim == "MYYNTITILI") {
 			if ($ylatila=='') {

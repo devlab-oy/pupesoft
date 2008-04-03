@@ -41,7 +41,7 @@
 
 			if (!function_exists('tulosta_ostotilaus')) {
 				function tulosta_ostotilaus ($otunnus, $komento, $kieli = "", $tee) {
-					global $yhtiorow, $kukarow, $fonts, $tulosta_ostotilaus_ulos;
+					global $yhtiorow, $kukarow, $fonts, $tulosta_ostotilaus_ulos, $toim;
 
 					// Haetaan laskun tiedot
 					$query = "	SELECT lasku.*, lasku.tunnus tunnus, lasku.nimi nimi, lasku.luontiaika p‰iv‰ys, lasku.tunnusnippu projekti, lasku.tunnus tilaus, lasku.tunnus toimitus, viesti viite, comments lis‰tiedot,
@@ -95,7 +95,7 @@
 					//	Aloituskorkeus		
 
 					function alku ($pdf, $laskurow, $kieli) {
-						global $yhtiorow;
+						global $yhtiorow, $toim;
 
 						//	Tehd‰‰n uusi sivu
 						$pdf->addPage("a4");
@@ -196,15 +196,26 @@
 					$pdf=alku($pdf, $laskurow,$kieli);
 					$h = 190;
 
+					if($toim == "HAAMU" or $mista == "tulostakopio") {
+						$nimitykset = "'SAATANA' toim_tuoteno, tilausrivi.nimitys toim_nimitys,";
+						$tyyppi = "";
+						$j = "LEFT ";
+					}
+					else {
+						$nimitykset = "toim_tuoteno, toim_nimitys,";
+						$tyyppi = "and tilausrivi.tyyppi != 'D'";
+						$j = "";
+					}
+
 					//	K‰sitell‰‰n tilausrivit
-					$query = "	SELECT toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu, toimaika,
+					$query = "	SELECT $nimitykset tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu, toimaika,
 								tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, kommentti
 								FROM tilausrivi
-								join tuote USING (yhtio, tuoteno)
-								join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+								$j join tuote USING (yhtio, tuoteno)
+								$j join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 								WHERE tilausrivi.otunnus = '$otunnus'
 								and tilausrivi.yhtio='$kukarow[yhtio]'
-								and tyyppi != 'D'
+								$tyyppi
 								ORDER BY tilausrivi.toimaika, toim_tuoteno";
 					$grand_total=0;
 					$riresult = mysql_query($query) or pupe_error($query);

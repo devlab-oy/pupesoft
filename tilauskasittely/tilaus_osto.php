@@ -329,6 +329,7 @@
 			
 			$hinta 			= $tilausrivirow["hinta"];
 			$tuoteno 		= $tilausrivirow["tuoteno"];
+			$tuotenimitys	= $tilausrivirow["nimitys"];	
 			$kpl 			= $tilausrivirow["tilkpl"];
 			$ale 			= $tilausrivirow["ale"];
 			$toimaika 		= $tilausrivirow["toimaika"];
@@ -1018,42 +1019,29 @@
 						}
 					}
 					
-					if (trim($prow["kommentti"]) != "" and $toim != "HAAMU") {						
-							echo "<td colspan='8' $kommclass1>".t("Kommentti").": $prow[kommentti]</td></tr>";						
-					}
-					else {
-						echo "<td colspan='8' $kommclass1></td></tr>";
-					}
+					echo "<td colspan='8' $kommclass1>".t("Kommentti").": $prow[kommentti]</td></tr>";
 				}
 			}
 
-			if ($toim != "HAAMU") {
-				echo "	<tr>
-						<th colspan='2' nowrap>".t("Näytä ostotilaus").":</th>
-						<td colspan='2' nowrap>
-						<form name='valmis' action='tulostakopio.php' method='post' name='tulostakopio'>
-							<input type='hidden' name='otunnus' value='$tilausnumero'>
-							<input type='hidden' name='tilausnumero' value='$tilausnumero'>						
-							<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-							<input type='hidden' name='toim' value='OSTO'>
-							<input type='hidden' name='nimitykset' value='JOO'>
-							<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//lopetus=$lopetus//tee='>
-							<input type='submit' name='NAYTATILAUS' value='".t("Näytä")."'>
-							<input type='submit' name='TULOSTA' value='".t("Tulosta")."'>
-						</form>
-					</td>
-					<td class='back' colspan='2'></td>
+			echo "	<tr>
+					<th colspan='2' nowrap>".t("Näytä ostotilaus").":</th>
+					<td colspan='2' nowrap>
+					<form name='valmis' action='tulostakopio.php' method='post' name='tulostakopio'>
+						<input type='hidden' name='otunnus' value='$tilausnumero'>
+						<input type='hidden' name='tilausnumero' value='$tilausnumero'>						
+						<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
+						<input type='hidden' name='toim' value='OSTO'>
+						<input type='hidden' name='nimitykset' value='JOO'>
+						<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//lopetus=$lopetus//tee='>
+						<input type='submit' name='NAYTATILAUS' value='".t("Näytä")."'>
+						<input type='submit' name='TULOSTA' value='".t("Tulosta")."'>
+					</form>
+				</td>
+				<td class='back' colspan='2'></td>
 
-					<td colspan='3' class='spec'>Tilauksen arvo:</td>
-					<td align='right' class='spec'>".sprintf("%.2f",$yhteensa)."</td>
-					</tr>";
-			}
-			else {
-				echo "	<tr><td class='back' colspan='6'></td>
-						<td colspan='3' class='spec'>Tilauksen arvo:</td>
-						<td align='right' class='spec'>".sprintf("%.2f",$yhteensa)."</td>
-						</tr>";
-			}
+				<td colspan='3' class='spec'>Tilauksen arvo:</td>
+				<td align='right' class='spec'>".sprintf("%.2f",$yhteensa)."</td>
+				</tr>";
 			
 			echo "</table>";
 

@@ -65,16 +65,16 @@
 	echo " $varaosavirhe</td>";
 	echo "<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Lis‰‰")."'></td></tr>";
 
+	if ($toim == "HAAMU") {
+		echo "	<tr><th align='left' colspan='7'>".t("Nimitys")."</th></tr>
+				<tr><td align='left' colspan='7'><input type = 'text' name='tuotenimitys' value='$tuotenimitys' size = '70'></td></tr>";
+
+	}
 	
 	echo "<tr>
 			<th align='left'>".t("Toimitusaika")."</th>";
 	
-	if ($toim == "HAAMU") {
-		echo "<th colspan='6' align='left'>".t("Nimitys")."</th>";
-	}
-	else {
-		echo "<th colspan='6' align='left'>".t("Kommentti")."</th>";
-	}
+	echo "<th colspan='6' align='left'>".t("Kommentti")."</th>";
 			
 	echo "<td class='back'></td>
 			</tr>";
@@ -94,12 +94,12 @@
 		$toimvva = substr($toimaika, 0, 4);
 		$toimppa = substr($toimaika, 8, 2);
 	}
-
+	
 	echo "<tr>
 			<td><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>
-			<td colspan='6'><input type='text' size='50' name='kommentti' value = '$kommentti'></td>
-			</form>";
-
+			<td colspan='6'><textarea name='kommentti' cols='50'>$kommentti</textarea></td>
+		</tr>
+		</form>";
 
 	//Tyhjennet‰‰n kent‰t
 	echo "	<form action = '$PHP_SELF' method='post' autocomplete='off'>

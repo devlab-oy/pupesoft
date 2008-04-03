@@ -436,7 +436,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		}
 
 		// Messenger-viestit (X = ei luettu)
-		if (basename($phpnimi) != 'indexvas.php') {
+		if (basename($phpnimi) != 'indexvas.php' and $_GET["ohje"] == "off") {
 			$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
 			$result = mysql_query($query) or pupe_error($query);
 			$konserni_yhtiot = "";

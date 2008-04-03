@@ -313,7 +313,8 @@ $query = "	INSERT into lasku SET
 			sisviesti1							= '$sisviestit1',
 			alatila								= '',
 			tunnusnippu							= '$lasrow[tunnusnippu]',
-			tila								= 'U'";
+			tila								= 'U',
+			piiri 								= '$lasrow[piiri]'";
 $uusiotsikko = mysql_query($query) or pupe_error($query);
 
 // otetaan uuden otsikon tunnus talteen

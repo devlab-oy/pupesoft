@@ -110,6 +110,7 @@
 					viikorkopros 	= '0',
 					laatija 		= '$kukarow[kuka]',
 					liitostunnus    = '$asrow[tunnus]',
+					piiri			= '$asrow[piiri]',
 					olmapvm			= NOW(),
 					luontiaika		= NOW()";
 		$result = mysql_query($query) or pupe_error($query);

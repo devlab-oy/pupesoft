@@ -222,19 +222,20 @@
 
 
 	if (mysql_field_name($result, $i) == "aleryhma") {
-		$query = "	SELECT tunnus, ryhma, concat_ws(' - ', ryhma, selite) ryhma, alennus
+		$query = "	SELECT ryhma, if (ryhma!=selite, concat_ws(' - ', ryhma, selite), ryhma) selitetark
 					FROM perusalennus
 					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY ryhma";
 		$vresult = mysql_query($query) or pupe_error($query);
+		
 		$ulos = "<td><select name='$nimi'>";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow[1]) {
+			if ($trow[$i] == $vrow["ryhma"]) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '$vrow[1]' $sel>$vrow[2]</option>";
+			$ulos .= "<option value = '$vrow[ryhma]' $sel>$vrow[selitetark]</option>";
 		}
 		$ulos .= "</select></td>";
 		$jatko = 0;

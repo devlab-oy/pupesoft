@@ -636,7 +636,8 @@ while (!feof ($fd)) {
 							aktiivinen_kuljetus					= '$suunnistus',
 							kuljetusmuoto						= '$arow[kuljetusmuoto]',
 							kauppatapahtuman_luonne				= '$arow[kauppatapahtuman_luonne]',
-							maa_maara							= '$arow[maa_maara]'";
+							maa_maara							= '$arow[maa_maara]',
+							piiri								= '$arow[piiri]'";
 				$result = mysql_query($query) or die($query);
 				$id = mysql_insert_id();
 				$edi_ulos .= t("Tilausnumero")." $id\n\n";

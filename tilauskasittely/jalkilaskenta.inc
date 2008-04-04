@@ -623,7 +623,7 @@ if ($tuoteno != '') {
 
 		//taaksepäin yhteensopivuuden vuoksi kokeillaan vielä näin jos ei rivitunnuksella löydy
 		if (mysql_num_rows($result) == 0) {
-			echo "<font class='error'>".t("Tarkkaa kääntöpisteen tapahtumaa ei löytynyt! Käytetään päivän ensimmäistä tuloa")." $pvm.</font><br>";
+			echo "<font class='error'>".t("Tarkkaa kääntöpisteen tapahtumaa ei löytynyt! Käytetään päivän ensimmäistä tuloa")." $rivitunnus @ $pvm.</font><br>";
 
 			$query = "SELECT * FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and left(laadittu,10)='$pvm' and laji in ('tulo','valmistus') limit 1";
 			$result = mysql_query($query) or pupe_error($query);

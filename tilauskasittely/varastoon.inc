@@ -62,6 +62,7 @@ if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" an
 				JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
 				WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
 				and tilausrivi.varattu = 0
+				and tilausrivi.kpl != 0
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and	tilausrivi.tyyppi = 'O'
 				ORDER BY tuotteen_toimittajat.toim_tuoteno";

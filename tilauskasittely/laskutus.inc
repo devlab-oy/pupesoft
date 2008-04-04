@@ -206,6 +206,7 @@ else {
 				///* Päivitetään saldo tilausrivin osoittamalla paikalla *///
 				$query = "	UPDATE tuotepaikat
 							SET saldo = saldo-$trow[varattu],
+							saldo_varattu = saldo_varattu - if($trow[tunnus] != $trow[perheid2] and $trow[perheid2]>0, $trow[varattu], 0),
 							saldoaika = now()
 							WHERE yhtio   = '$kukarow[yhtio]'
 							and tuoteno   = '$trow[tuoteno]'
@@ -221,6 +222,7 @@ else {
 					///* Päivitetään saldo tuotteen oletuspaikalla jos tilausrivillä ei ollut sopivaa paikkaa *///
 					$query = "	UPDATE tuotepaikat
 								SET saldo = saldo-$trow[varattu],
+								saldo_varattu = saldo_varattu - if($trow[tunnus] != $trow[perheid2] and $trow[perheid2]>0, $trow[varattu], 0),
 								saldoaika = now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno	= '$trow[tuoteno]'
@@ -234,6 +236,7 @@ else {
 						///* Päivitetään saldo jollekin sopivalle paikalle jos oletuspaikkaa ei löytynyt *///
 						$query = "	UPDATE tuotepaikat
 									SET saldo = saldo-$trow[varattu],
+									saldo_varattu = saldo_varattu - if($trow[tunnus] != $trow[perheid2] and $trow[perheid2]>0, $trow[varattu], 0),
 									saldoaika = now(),
 									oletus = 'X'
 									WHERE yhtio = '$kukarow[yhtio]'

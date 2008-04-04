@@ -809,24 +809,23 @@ if($tee == "NAYTA") {
 	$saa_sulkea="";
 	//	Projektit pitää voida sulke
 	if($laskurow["tila"] == "R" and $setti == "viikkis") {
-		$query = "	SELECT tunnus
-					FROM lasku
-					WHERE yhtio 		= '$kukarow[yhtio]'
-					and tunnusnippu 	= '$tarjous' and tila='U' and mapvm='0000-00-00'";
-		$tarkres = mysql_query($query) or pupe_error($query);
-		if(mysql_num_rows($tarkres)==0) {
+
+		if($laskurow["alatila"] == "B") {
 			$query = "	SELECT tunnus
 						FROM lasku
 						WHERE yhtio 		= '$kukarow[yhtio]'
-						and tunnusnippu 	= '$tarjous' and tila='U'";
+						and tunnusnippu 	= '$tarjous' and tila='U' and mapvm='0000-00-00'";
 			$tarkres = mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($tarkres)>0) {
-				$saa_sulkea="OK";
+			if(mysql_num_rows($tarkres)==0) {
+				$query = "	SELECT tunnus
+							FROM lasku
+							WHERE yhtio 		= '$kukarow[yhtio]'
+							and tunnusnippu 	= '$tarjous' and tila='U'";
+				$tarkres = mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($tarkres)>0) {
+					$data["tiedot"]["menut"]["toiminnot"][] = array("TEKSTI" => "Sulje projekti", "HREF" => "tilaushakukone.php?toim=$toim&setti=$setti&tarjous=$tarjous&tee=SULJEPROJEKTI", "TARGET" => "page");
+				}
 			}
-		}
-
-		if($saa_sulkea=="OK") {
-			$data["tiedot"]["menut"]["toiminnot"][] = array("TEKSTI" => "Sulje projekti", "HREF" => "tilaushakukone.php?toim=$toim&setti=$setti&tarjous=$tarjous&tee=SULJEPROJEKTI", "TARGET" => "page");
 		}
 		elseif(in_array($laskurow["alatila"], array("","A"))) {
 			$data["tiedot"]["menut"]["toiminnot"][] = array("TEKSTI" => "Kuittaa valmiiksi", "HREF" => "tilaushakukone.php?toim=$toim&setti=$setti&tarjous=$tarjous&tee=MERKKAAPROJEKTIVALMIIKSI&hakupalkki=OHI&aja_kysely=tmpquery", "TARGET" => "page");

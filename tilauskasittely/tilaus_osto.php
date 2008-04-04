@@ -567,7 +567,7 @@
 			echo "</table><br>";
 
 			//anntetaan mahdollisuus syottaa uusi/muokata tilausrivi/korjata virhelliset rivit
-			if(file_exists("ostomenu.inc")){
+			if(file_exists("ostomenu.inc") and $toim != "HAAMU"){
 
 				/*
 					sama kuin myyntimenut @ tilaus_myynti.php

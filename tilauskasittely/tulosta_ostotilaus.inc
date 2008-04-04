@@ -197,29 +197,31 @@
 					$h = 190;
 
 					if($toim == "HAAMU" or $mista == "tulostakopio") {
-						$nimitykset = "tilausrivi.tuoteno toim_tuoteno, tilausrivi.nimitys toim_nimitys,";
-						$tyyppi = "";
-						$j = "LEFT ";
+						//	Käsitellään tilausrivit
+						$query = "	SELECT tilausrivi.tuoteno toim_tuoteno, tilausrivi.nimitys toim_nimitys, round(tilausrivi.varattu,2) varattu, toimaika,
+									tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, kommentti
+									FROM tilausrivi
+									WHERE tilausrivi.otunnus = '$otunnus'
+									and tilausrivi.yhtio='$kukarow[yhtio]'
+									ORDER BY tilausrivi.toimaika, toim_tuoteno";
 					}
 					else {
-						$nimitykset = "toim_tuoteno, toim_nimitys,";
-						$tyyppi = "and tilausrivi.tyyppi != 'D'";
-						$j = "";
+
+						//	Käsitellään tilausrivit
+						$query = "	SELECT toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu, toimaika,
+									tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, kommentti
+									FROM tilausrivi
+									JOIN tuote USING (yhtio, tuoteno)
+									JOIN tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+									WHERE tilausrivi.otunnus = '$otunnus'
+									and tilausrivi.yhtio='$kukarow[yhtio]'
+									and tilausrivi.tyyppi != 'D'
+									ORDER BY tilausrivi.toimaika, toim_tuoteno";
+						
 					}
-
-					//	Käsitellään tilausrivit
-					$query = "	SELECT $nimitykset tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu, toimaika,
-								tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, kommentti
-								FROM tilausrivi
-								$j join tuote USING (yhtio, tuoteno)
-								$j join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-								WHERE tilausrivi.otunnus = '$otunnus'
-								and tilausrivi.yhtio='$kukarow[yhtio]'
-								$tyyppi
-								ORDER BY tilausrivi.toimaika, toim_tuoteno";
-					$grand_total=0;
 					$riresult = mysql_query($query) or pupe_error($query);
-
+					$grand_total=0;
+					
 					if(mysql_num_rows($riresult)>0) {
 
 						if($h < 40) {

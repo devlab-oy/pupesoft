@@ -325,7 +325,7 @@
 					$query = "	SELECT tunnus
 								FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
 								WHERE yhtio 		= '$kukarow[yhtio]'
-								and ((tila in ('N','L') and alatila in ('','A','B','C')) or (tila = 'T' and alatila in ('','A')))
+								and ((tila in ('N','L','R') and alatila in ('','A','B','C')) or (tila = 'T' and alatila in ('','A')))
 								and liitostunnus	= $otsikrow[tunnus]
 								and tapvm			= '0000-00-00'";
 					$laskuores = mysql_query($query) or pupe_error($query);

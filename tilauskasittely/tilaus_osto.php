@@ -1022,7 +1022,13 @@
 					echo "<td colspan='8' $kommclass1>".t("Kommentti").": $prow[kommentti]</td></tr>";
 				}
 			}
-
+			
+			if($toim == "HAAMU") {
+				$kopiotoim = "HAAMU";
+			}
+			else {
+				$kopiotoim = "OSTO";
+			}
 			echo "	<tr>
 					<th colspan='2' nowrap>".t("Näytä ostotilaus").":</th>
 					<td colspan='2' nowrap>
@@ -1030,7 +1036,7 @@
 						<input type='hidden' name='otunnus' value='$tilausnumero'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>						
 						<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-						<input type='hidden' name='toim' value='$toim'>
+						<input type='hidden' name='toim' value='$kopiotoim'>
 						<input type='hidden' name='nimitykset' value='JOO'>
 						<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//lopetus=$lopetus//tee='>
 						<input type='submit' name='NAYTATILAUS' value='".t("Näytä")."'>

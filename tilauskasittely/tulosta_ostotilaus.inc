@@ -197,7 +197,7 @@
 					$h = 190;
 
 					if($toim == "HAAMU" or $mista == "tulostakopio") {
-						$nimitykset = "tilausrivi.nimitys toim_tuoteno, tilausrivi.nimitys toim_nimitys,";
+						$nimitykset = "tilausrivi.tuoteno toim_tuoteno, tilausrivi.nimitys toim_nimitys,";
 						$tyyppi = "";
 						$j = "LEFT ";
 					}

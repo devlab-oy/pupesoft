@@ -359,7 +359,13 @@
 									kolm_osoite  		= '$otsikrow[kolm_osoite]',
 									kolm_postino  		= '$otsikrow[kolm_postino]',
 									kolm_postitp 		= '$otsikrow[kolm_postitp]',
-									kolm_maa    		= '$otsikrow[kolm_maa]'
+									kolm_maa    		= '$otsikrow[kolm_maa]',
+									laskutus_nimi   	= '$otsikrow[laskutus_nimi]',
+									laskutus_nimitark	= '$otsikrow[laskutus_nimitark]',
+									laskutus_osoite  	= '$otsikrow[laskutus_osoite]',
+									laskutus_postino  	= '$otsikrow[laskutus_postino]',
+									laskutus_postitp 	= '$otsikrow[laskutus_postitp]',
+									laskutus_maa    	= '$otsikrow[laskutus_maa]'									
 									WHERE yhtio 		= '$kukarow[yhtio]'
 									and otunnus			= '$laskuorow[tunnus]'";
 						$updaresult = mysql_query($query) or pupe_error($query);
@@ -372,7 +378,8 @@
 			synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
 
 			// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
-			if ($lopetus != '' and isset($yllapitonappi)) {
+			if ($lopetus != '' and (isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset))) {
+
 				// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
 				$lopetus = str_replace('////','?', $lopetus);
 				$lopetus = str_replace('//','&',  $lopetus);

@@ -5070,7 +5070,7 @@ if ($tee == '') {
 						echo "</select></td></tr>";
 					}
 
-					echo "<tr><td class='back'>Tulostuspaikka: <select name='valittu_kopio_tulostin'>";
+					echo "<tr><td class='back'>".t("Kuittikopion tulostuspaikka").": <select name='valittu_kopio_tulostin'>";
 					echo "<option value=''>".t("Oletus")."</option>";
 
 					$querykieli = "	SELECT *

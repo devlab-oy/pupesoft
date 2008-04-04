@@ -875,15 +875,15 @@ if ($ytunnus!='') {
 							JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and ytunnus = '$asiakasrow[ytunnus]' and ytunnus!=''
+							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakashinta.ytunnus = '$asiakasrow[ytunnus]' and asiakashinta.ytunnus!='' and asiakashinta.tuoteno!=''
 								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						)
 						UNION
 						(
 							SELECT '2' prio,
 								hinta,
-								tuote.tuoteno,
-								tuote.nimitys tuoteno_nimi,
+								'' tuoteno,
+								'' tuoteno_nimi,
 								asiakas_ryhma asiakasryhmä,
 								avainsana.selitetark asiakasryhmä_nimi,
 								asiakashinta.ryhma alennusryhmä,
@@ -892,10 +892,9 @@ if ($ytunnus!='') {
 								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
 								'ytunnus aleryhmä' tyyppi
 							FROM asiakashinta
-							JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.ryhma=tuote.aleryhma
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and ytunnus = '$asiakasrow[ytunnus]' and ytunnus!=''
+							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakashinta.ytunnus = '$asiakasrow[ytunnus]' and asiakashinta.ytunnus!='' and asiakashinta.ryhma!=''
 								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))							
 						)
 						UNION
@@ -915,15 +914,15 @@ if ($ytunnus!='') {
 							JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma!=''
+							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakashinta.asiakas_ryhma = '$asiakasrow[ryhma]' and asiakashinta.asiakas_ryhma!='' and asiakashinta.tuoteno!=''
 								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))							
 						)
 						UNION
 						(
 							SELECT '4' prio,
 								hinta,
-								tuote.tuoteno,
-								tuote.nimitys tuoteno_nimi,
+								'' tuoteno,
+								'' tuoteno_nimi,
 								asiakas_ryhma asiakasryhmä,
 								avainsana.selitetark asiakasryhmä_nimi,
 								asiakashinta.ryhma alennusryhmä,
@@ -932,10 +931,9 @@ if ($ytunnus!='') {
 								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
 								'asiakasryhmä aleryhmä' tyyppi
 							FROM asiakashinta
-							JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.ryhma=tuote.aleryhma
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma!=''
+							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakashinta.asiakas_ryhma = '$asiakasrow[ryhma]' and asiakashinta.asiakas_ryhma!='' and asiakashinta.ryhma!=''
 								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))							
 						)
 						ORDER BY alennusryhmä, tuoteno, prio, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)";

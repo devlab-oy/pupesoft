@@ -193,7 +193,7 @@ if ($ytunnus!='') {
 // jos meill‰ on onnistuneesti valittu asiakas
 if ($ytunnus!='') {
 	if($tee != "eposti") {
-		if(include('Spreadsheet/Excel/Writer.php')) {
+		if(@include('Spreadsheet/Excel/Writer.php')) {
 			//keksit‰‰n failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
 			mt_srand((float) $sec + ((float) $usec * 100000));
@@ -862,7 +862,7 @@ if ($ytunnus!='') {
 						(
 							SELECT '1' prio,
 								hinta,
-								asiakashinta.tuoteno,
+								tuote.tuoteno,
 								tuote.nimitys tuoteno_nimi,
 								asiakas_ryhma asiakasryhm‰,
 								avainsana.selitetark asiakasryhm‰_nimi,
@@ -870,9 +870,9 @@ if ($ytunnus!='') {
 								perusalennus.selite alennusryhm‰_nimi,
 								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
 								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
-								'asiakashinta' tyyppi
+								'ytunnus tuote' tyyppi
 							FROM asiakashinta
-							LEFT JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
+							JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and ytunnus = '$asiakasrow[ytunnus]' and ytunnus!=''
@@ -882,7 +882,7 @@ if ($ytunnus!='') {
 						(
 							SELECT '2' prio,
 								hinta,
-								asiakashinta.tuoteno,
+								tuote.tuoteno,
 								tuote.nimitys tuoteno_nimi,
 								asiakas_ryhma asiakasryhm‰,
 								avainsana.selitetark asiakasryhm‰_nimi,
@@ -890,54 +890,97 @@ if ($ytunnus!='') {
 								perusalennus.selite alennusryhm‰_nimi,
 								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
 								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
-								'asiakasryhm‰hinta' tyyppi
+								'ytunnus aleryhm‰' tyyppi
 							FROM asiakashinta
-							LEFT JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
+							JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.ryhma=tuote.aleryhma
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and ytunnus = '$asiakasrow[ytunnus]' and ytunnus!=''
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))							
+						)
+						UNION
+						(
+							SELECT '3' prio,
+								hinta,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhm‰,
+								avainsana.selitetark asiakasryhm‰_nimi,
+								asiakashinta.ryhma alennusryhm‰,
+								perusalennus.selite alennusryhm‰_nimi,
+								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'asiakasryhm‰ tuote' tyyppi
+							FROM asiakashinta
+							JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma!=''
 								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))							
 						)
-						ORDER BY alennusryhm‰, tuoteno, prio";
+						UNION
+						(
+							SELECT '4' prio,
+								hinta,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhm‰,
+								avainsana.selitetark asiakasryhm‰_nimi,
+								asiakashinta.ryhma alennusryhm‰,
+								perusalennus.selite alennusryhm‰_nimi,
+								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'asiakasryhm‰ aleryhm‰' tyyppi
+							FROM asiakashinta
+							JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.ryhma=tuote.aleryhma
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
+							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma!=''
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))							
+						)
+						ORDER BY alennusryhm‰, tuoteno, prio, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)";
 			$asres = mysql_query($query) or pupe_error($query);
 
 			while ($asrow = mysql_fetch_array($asres)) {
 				
 				//	Suodatetaan extranetk‰ytt‰jilta muut hinnat
-				if((($kukarow["extranet"] != "" or $tee == "eposti" or $yhdistetty != "" or $rajattunakyma == "JOO") and ($edryhma != $asrow["alennusryhm‰"] or $edtuoteno != $asrow["tuoteno"])) or ($kukarow["extranet"] == "" and $tee != "eposti" and $yhdistetty == "" or $rajattunakyma != "JOO") ) {
-					$edryhma 	= $asrow["alennusryhm‰"];
-					$edtuoteno 	= $asrow["tuoteno"];
-					
-					if(isset($workbook_ale) and $yhdistetty == "") {
-						foreach($otsik_spread as $key => $value) {
-							$worksheet->write($excelrivi, $key, $asrow[$value]);
-						}
-						$excelrivi++;
-					}									
+				if(($kukarow["extranet"] != "" or $tee == "eposti" or $yhdistetty != "" or $rajattunakyma == "JOO") or ($kukarow["extranet"] == "" and $tee != "eposti" and $yhdistetty == "" or $rajattunakyma != "JOO") ) {
+					if ($edryhma != $asrow["alennusryhm‰"] or $edtuoteno != $asrow["tuoteno"] or $edasryhma != $asrow["asiakasryhm‰"]) {
+						$edryhma 	= $asrow["alennusryhm‰"];
+						$edtuoteno 	= $asrow["tuoteno"];
+						$edasryhma  = $asrow["asiakasryhm‰"];
 
-					$dada = array();
-					$ashin .= "<tr>";
-					foreach($otsik as $o) {
+						if(isset($workbook_ale) and $yhdistetty == "") {
+							foreach($otsik_spread as $key => $value) {
+								$worksheet->write($excelrivi, $key, $asrow[$value]);
+							}
+							$excelrivi++;
+						}									
+
+						$dada = array();
+						$ashin .= "<tr>";
+						foreach($otsik as $o) {
 						
-						if($yhdistetty != "") {
-							$dada[$o] = $asrow[$o];
-						}
-						else {
-							//	Kaunistetaan ulostusta..
-							if($asrow[$o."_nimi"] != "") {
-								$arvo = $asrow[$o]." - ".$asrow[$o."_nimi"];
+							if($yhdistetty != "") {
+								$dada[$o] = $asrow[$o];
 							}
 							else {
-								$arvo = $asrow[$o];							
-							}
+								//	Kaunistetaan ulostusta..
+								if($asrow[$o."_nimi"] != "") {
+									$arvo = $asrow[$o]." - ".$asrow[$o."_nimi"];
+								}
+								else {
+									$arvo = $asrow[$o];							
+								}
 
-							$ashin .= "<td><font class='info'>$arvo<font></td>";	
+								$ashin .= "<td><font class='info'>$arvo<font></td>";	
+							}
 						}
-					}
-					$ashin .= "</tr>";						
+						$ashin .= "</tr>";						
 					
-					if($yhdistetty != "") {
-						$yhdistetty_array[] = $dada;
+						if($yhdistetty != "") {
+							$yhdistetty_array[] = $dada;
+						}
 					}
 				}
 			}

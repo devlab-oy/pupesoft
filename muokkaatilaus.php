@@ -876,7 +876,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 0) {
-		
+
 			if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 				if(@include('Spreadsheet/Excel/Writer.php')) {
 		
@@ -897,6 +897,9 @@
 			}
 			echo "<table border='0' cellpadding='2' cellspacing='1'>";
 
+			// scripti balloonien tekemiseen
+			js_popup();
+		
 			echo "<tr>";
 
 			for ($i=0; $i < mysql_num_fields($result)-$miinus; $i++) {
@@ -981,10 +984,27 @@
 							
 							echo "<td valign='top'>".tv1dateconv($aa,"pitka")."<br>".tv1dateconv($bb,"pitka")."</td>";
 						}
+						elseif (mysql_field_name($result,$i) == "tilaus") {
+							
+							$query_comments = "SELECT comments from lasku where yhtio='$kukarow[yhtio]' and tunnus=$row[$i]";
+							$result_comments = mysql_query($query_comments) or pupe_error($query_comments);
+
+							$row_comments = mysql_fetch_array($result_comments);
+
+							if (mysql_num_rows($result_comments) == 1 and $row_comments["comments"] != "") {
+								echo "<div id='kommentti$row[$i]' class='popup' style='width: 500px;'>";
+								echo "$row_comments[comments]";
+								echo "</div>";
+								echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'kommentti$row[$i]')\" onmouseover=\"popUp(event,'kommentti$row[$i]')\">$row[$i]</a></td>";
+							}
+							else {
+								echo "<td valign='top'>$row[$i]</td>";
+							}
+						}
 						else {
 							echo "<td valign='top'>$row[$i]</td>";
 						}
-					
+
 						if(isset($workbook)) {
 							if (mysql_field_type($result,$i) == 'real') {
 								$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));

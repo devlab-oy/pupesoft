@@ -130,7 +130,6 @@
 							round(tilausrivi.rivihinta/tilausrivi.kpl,2) rivihinta, 
 							round(tilausrivi.kate/tilausrivi.kpl,2) kate, 
 							round(ostorivi.kate/abs(ostorivi.kpl),2) osto_kate,
-							round(ostorivi.rivihinta/ostorivi.kpl,2) ostohinta,
 							ostorivi.tunnus ostotunnus, 
 							if(ostorivi.tyyppi='O', ostorivi.uusiotunnus, ostorivi.otunnus) ostotilaus, 
 							sarjanumeroseuranta.sarjanumero sarjanumero, sarjanumeroseuranta.tunnus sarjatunnus,
@@ -156,7 +155,6 @@
 							round(myyntirivi.rivihinta/myyntirivi.kpl,2) rivihinta, 
 							round(myyntirivi.kate/myyntirivi.kpl,2) kate, 
 							round(tilausrivi.kate/abs(tilausrivi.kpl),2) osto_kate, 
-							round(tilausrivi.rivihinta/tilausrivi.kpl,2) ostohinta,
 							tilausrivi.tunnus ostotunnus, 
 							if(tilausrivi.tyyppi='O', tilausrivi.uusiotunnus, tilausrivi.otunnus) ostotilaus, 
 							sarjanumeroseuranta.sarjanumero sarjanumero, sarjanumeroseuranta.tunnus sarjatunnus,
@@ -182,81 +180,22 @@
 				
 			while ($vrow = mysql_fetch_array($vresult)) {	
 				
-				$keikkahinta = 0;
-				
-				// Katsotaan onko sarjanumerolle liitetty kulukeikka
-				if ($vrow["myyntitunnus"] > 0) {
-					$query  = "	select lasku.laskunro
-								FROM sarjanumeroseuranta
-								JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.liitostunnus=sarjanumeroseuranta.tunnus and lasku.ytunnus=sarjanumeroseuranta.tunnus and lasku.tila = 'K' and lasku.alatila = 'S'
-								WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]'
-								and sarjanumeroseuranta.myyntirivitunnus = '$vrow[myyntitunnus]'";
-					$keikkares = mysql_query($query) or pupe_error($query);
-
-					while($kulukeikkarow = mysql_fetch_array($keikkares)) {					
-						// Haetaan kaikki keikkaan liitettyjen laskujen summa
-						$query = "	SELECT round(sum(arvo*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
-									FROM lasku
-									WHERE yhtio		= '$kukarow[yhtio]'
-									and tila 		= 'K'
-									and laskunro 	= '$kulukeikkarow[laskunro]'
-									and vanhatunnus <> 0
-									and vienti in ('B','E','H')";
-						$result = mysql_query($query) or pupe_error($query);
-						$kulukulurow = mysql_fetch_array($result);
-
-						$keikkahinta	+= $kulukulurow["kulusumma"];
-					}
-				}
-				
+				// Sarjanumeron ostohinta
+				$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $vrow["myyntitunnus"]);
+							
 				echo "<tr>
 						<td valign='top'><a name='$vrow[ostotunnus]'><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[otunnus]'>$vrow[otunnus]</a><br><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[ostotilaus]'>$vrow[ostotilaus]</a></td>
 						<td valign='top'><a href='../tuote.php?tee=Z&tuoteno=$vrow[tuoteno]'>$vrow[tuoteno]</a></td>
 						<td valign='top'>$vrow[nimitys]<br><font class='message'>$vrow[viesti]</font></td>
-						<td valign='top' align='right'>$vrow[rivihinta]<br>";
-						
-				if ((float) $vrow["ostohinta"] == 0 and $vrow["kehahin"] > 0) {
-					echo "<font style='color: 00FF00;'>$vrow[kehahin]</font>";
+						<td valign='top' align='right'>$vrow[rivihinta]<br>".sprintf('%.2f', $ostohinta)."</td>";
+				
+																														
+				
+				if ($vrow["myyntitunnus"] > 0 and abs(round($vrow["rivihinta"]-$ostohinta,2) - $vrow["kate"]) > 0.01) {
+					echo "<td valign='top' align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$ostohinta)."</font><br>";
 				}
-				else {
-					echo "$vrow[ostohinta]";			
-					if ($keikkahinta != 0) echo "<br>".sprintf('%.2f', $keikkahinta);
-				}
-				
-				echo "</td>";
-																							
-				$vrow["ostohinta"] = sprintf('%.2f', $keikkahinta+$vrow["ostohinta"]);
-
-				if ($vrow["myyntitunnus"] > 0 and abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] == 1) {
-					echo "<td valign='top' align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font><br>";
-				}
-				elseif ($vrow["myyntitunnus"] > 0 and abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] > 1) {
-					//Haetaan nyt tämän myyntirivin kaikki ostorivit
-					$query = "	SELECT ostorivitunnus
-								FROM sarjanumeroseuranta
-								WHERE yhtio 			= '$kukarow[yhtio]'
-								and tuoteno				= '$vrow[tuoteno]'
-								and myyntirivitunnus	= '$vrow[myyntitunnus]'
-								and ostorivitunnus		> 0";
-					$ostosarjares = mysql_query($query) or pupe_error($query);
-				
-					$uusisarjahin = 0;
-				
-					while($ostosarjarow = mysql_fetch_array($ostosarjares)) {
-						$query = "	SELECT tilausrivi.rivihinta/tilausrivi.kpl hinta
-									FROM tilausrivi
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus = '$ostosarjarow[ostorivitunnus]'
-									and laskutettuaika != '0000-00-00'
-									and kpl > 0";
-						$hinrivires = mysql_query($query) or pupe_error($query);
-						$hinrivirow = mysql_fetch_array($hinrivires);
-						
-						$uusisarjahin += $hinrivirow["hinta"];					
-					}
-				
-					$uusisarjahin = round($uusisarjahin/$vrow["kpl"],2);
-				
+				/*
+				elseif ($vrow["myyntitunnus"] > 0 and abs(round($vrow["rivihinta"]-$ostohinta,2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] > 1) {			
 					if (round($vrow["rivihinta"]-$uusisarjahin,2) != $vrow["kate"]) {
 						echo "<td valign='top' align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font><br>";
 					}
@@ -264,6 +203,7 @@
 						echo "<td valign='top' align='right' nowrap>$vrow[kate]<br>";
 					}
 				}
+				*/
 				elseif ($vrow["myyntitunnus"] > 0 and $vrow["kate"] < 0) {
 					echo "<td valign='top' align='right' nowrap><font style='color: red;'>$vrow[kate]</font><br>";
 				}

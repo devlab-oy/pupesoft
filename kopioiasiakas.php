@@ -13,9 +13,13 @@
 
 		// Tarkistetaan
 		$errori = '';
+		require "inc/asiakastarkista.inc";
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
-			require "inc/asiakastarkista.inc";
-		}
+			asiakastarkista (&$t, $i, $result, $tunnus, &$virhe, $trow);
+			if($virhe[$i] != "") {
+				$errori = 1;
+			}
+		}		
 
 		if ($errori != '') {
 			echo "<font class='error'>".t("Jossain oli jokin virhe! Ei voitu paivittaa!")."</font>";

@@ -49,6 +49,99 @@
 		$tee = "VALITSE";
 	}
 
+	if ($tee == 'TOIMITA' and $maksutapa == 'seka') {
+
+		echo "<table><form action='' name='laskuri' method='post'>";
+
+		//k‰yd‰‰n kaikki ruksatut tilaukset l‰pi
+		if (sizeof($tunnus) != 0) {
+			$laskutettavat = "";
+			foreach ($tunnus as $tun) {
+				echo "<input type='hidden' name='tunnus[]' value='$tun'>";
+				$laskutettavat .= "'$tun',";
+			}
+			$laskutettavat = substr($laskutettavat,0,-1); // vika pilkku pois
+		}
+
+		$query_rivi = "	SELECT lasku.valkoodi, lasku.maksuehto, lasku.hinta,
+						sum(round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),$yhtiorow[hintapyoristys])) loppusumma
+						FROM tilausrivi
+						JOIN lasku ON (lasku.yhtio=tilausrivi.yhtio AND lasku.tunnus=tilausrivi.otunnus)
+						WHERE var != 'J' and otunnus in ($laskutettavat) and tilausrivi.yhtio='$kukarow[yhtio]'
+						GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
+								lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
+								lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
+								lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi";
+		$result = mysql_query($query_rivi) or pupe_error($query_rivi);
+		$laskurow = mysql_fetch_array($result);
+
+		$query = "	SELECT laskunsummapyoristys
+					FROM asiakas
+					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+		$asres = mysql_query($query) or pupe_error($query);
+		$asrow = mysql_fetch_array($asres);
+
+		$summa = $laskurow["loppusumma"];
+		
+		//K‰sin syˆtetty summa johon lasku pyˆristet‰‰n
+		if (abs($laskurow["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {
+			$summa = sprintf("%.2f",$laskurow["hinta"]);
+		}
+
+		//Jos laskun loppusumma pyˆristet‰‰n l‰himp‰‰n tasalukuun
+		if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o') {
+			$summa = sprintf("%.2f",round($summa ,0));
+		}
+
+		$loppusumma = $summa;
+		$valkoodi = $laskurow["valkoodi"];
+		
+		echo "<input type='hidden' name='tee' value='TOIMITA'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='kassalipas' value='$kassalipas'>";
+		echo "<input type='hidden' name='vaihdakateista' value='KYLLA'>";
+		echo "<input type='hidden' name='maksutapa' value='$laskurow[maksuehto]'>";
+
+		echo "	<script type='text/javascript' language='JavaScript'>
+				<!--
+					function update_summa(rivihinta) {
+
+						kateinen = Number(document.getElementById('kateismaksu').value.replace(\",\",\".\"));
+						pankki = Number(document.getElementById('pankkikortti').value.replace(\",\",\".\"));
+						luotto = Number(document.getElementById('luottokortti').value.replace(\",\",\".\"));
+
+						summa = rivihinta - (kateinen + pankki + luotto);
+						
+						summa = Math.round(summa*100)/100;
+						
+						if (summa == 0 && (document.getElementById('kateismaksu').value != '' || document.getElementById('pankkikortti').value != '' || document.getElementById('luottokortti').value != '')) {
+							summa = 0.00;
+							document.getElementById('hyvaksy_nappi').disabled = false;
+						} else {
+							document.getElementById('hyvaksy_nappi').disabled = true;							
+						}
+						
+						document.getElementById('loppusumma').innerHTML = '<b>' + summa.toFixed(2) + '</b>'; 
+					}
+				-->
+				</script>";
+
+		echo "<tr><th>".t("Laskun loppusumma")."</th><td align='right'>$loppusumma</td><td>$valkoodi</td></tr>";
+		
+		echo "<tr><td>".t("K‰teisell‰")."</td><td><input type='text' name='kateismaksu[kateinen]' id='kateismaksu' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td><td>$valkoodi</td></tr>";
+		echo "<tr><td>".t("Pankkikortilla")."</td><td><input type='text' name='kateismaksu[pankkikortti]' id='pankkikortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td><td>$valkoodi</td></tr>";
+		echo "<tr><td>".t("Luottokortilla")."</td><td><input type='text' name='kateismaksu[luottokortti]' id='luottokortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td><td>$valkoodi</td></tr>";
+
+		echo "<tr><th>".t("Erotus")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$valkoodi</td></tr>";
+		echo "<tr><td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyv‰ksy")."' disabled></td></tr>";
+
+		echo "</form><br><br>";
+
+		$formi = "laskuri";
+		$kentta = "kateismaksu";
+
+		exit;
+	}
 
 	if ($tee == 'TOIMITA') {
 
@@ -339,7 +432,7 @@
 				// jos yksikin on k‰teinen niin kaikki on k‰teist‰ (se hoidetaan jo ylh‰‰ll‰)
 				if ($row["kateinen"] != "") $kateinen = "X";
 				if ($row["maa"] != "") $maa = $row["maa"];
-				
+
 				$query = "	SELECT sum(if(varattu>0,1,0)) veloitus, sum(if(varattu<0,1,0)) hyvitys, sum(if(hinta*varattu*(1-ale/100)=0 and var!='P' and var!='J',1,0)) nollarivi
 							FROM tilausrivi
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -493,6 +586,7 @@
 						echo "<option value='$maksuehtorow[tunnus]' $sel>{$maksuehtorow['teksti']} {$maksuehtorow['kassa_teksti']}</option>";
 					}
 
+					echo "<option value='seka'>Seka</option>";
 					echo "</select>";
 					echo "</td></tr>";
 
@@ -649,7 +743,7 @@
 					GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti,
 							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
-							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa
+							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi
 					ORDER BY lasku.ytunnus, lasku.nimi";
 		$tilre = mysql_query($query) or pupe_error($query);
 

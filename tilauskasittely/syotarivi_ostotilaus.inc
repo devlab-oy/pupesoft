@@ -29,7 +29,8 @@
 			<input type='hidden' name='rivinotunnus' value = '$rivinotunnus'>
 			<input type='hidden' name='osto_sarjatunnus' value = '$osto_sarjatunnus'>
 			<input type='hidden' name='rivinvar' value = '$var'>
-			<input type='hidden' name='toim' value = '$toim'>";
+			<input type='hidden' name='toim' value = '$toim'>
+			<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>";
 
 	if($ulos != '') { // Nyt me selataan
 		// Meilla on kaikki valmiina $ulos:ssa
@@ -111,6 +112,7 @@
 			<input type='hidden' name='otunnus' value = '$otunnus'>
 			<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>
 			<input type='hidden' name='toim' value = '$toim'>
+			<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>
 			<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Tyhjennä")."'></td></form></tr>";
 
 	echo "</table><br>";

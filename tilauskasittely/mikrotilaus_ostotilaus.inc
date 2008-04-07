@@ -99,6 +99,7 @@ if ($tee == "file") {
 
 		echo "<br><br>";
 		$tee = "Y";
+		$ei_aikatarkistusta = "JOO";
 	}
 	else {
 		$tee = "Y";
@@ -112,7 +113,8 @@ if ($tee == 'mikrotila') {
 			<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 			<input type='hidden' name='lopetus' value='$lopetus'>
 			<input type='hidden' name='tee' value='file'>
-
+			<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>
+			
 			<font class='message'>".t("Tiedostomuoto").":</font><br><br>
 
 			<table border='0' cellpadding='3' cellspacing='2'>

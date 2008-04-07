@@ -549,6 +549,7 @@
 				<input type='hidden' name='tee' value='MUUOTAOSTIKKOA'>
 				<input type='hidden' name='tila' value='Muuta'>
 				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>
 				<td class='back'><input type='Submit' value='".t("Muuta otsikkoa")."'></td></form></tr>";
 
 			echo "<tr><th>".t("Tila")."</th><th>".t("Toimaika")."</th><th>".t("Tilausnumero")."</th<th>".t("Valuutta")."</th><td class='back'></td></tr>";
@@ -561,6 +562,7 @@
 				<input type='hidden' name='tee' value='mikrotila'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
+				<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>
 				<input type='Submit' value='".t("Lue tilausrivit tiedostosta")."'></form>
 				</td></tr>
 				<tr><th>".t("Fakta")."</th><td colspan='3'>$faktarow[fakta]&nbsp;</td></tr>";
@@ -903,6 +905,7 @@
 								<input type='hidden' name='menutila' 		value = '$menutila'>
 								<input type='hidden' name='toim' 			value = '$toim'>
 								<input type='hidden' name='tee' 			value = 'PV'>
+								<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>
 								<input type='Submit' value='".t("Muuta")."'>
 								</td></form>";
 																			
@@ -1038,7 +1041,7 @@
 						<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
 						<input type='hidden' name='toim' value='$kopiotoim'>
 						<input type='hidden' name='nimitykset' value='JOO'>
-						<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//lopetus=$lopetus//tee='>
+						<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//lopetus=$lopetus//ei_aikatarkistusta=$ei_aikatarkistusta//tee='>
 						<input type='submit' name='NAYTATILAUS' value='".t("Näytä")."'>
 						<input type='submit' name='TULOSTA' value='".t("Tulosta")."'>
 					</form>
@@ -1066,6 +1069,7 @@
 					echo "	<td class='back' align='left'>
 							<form action = '$PHP_SELF' method='post'>
 								<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+								<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>
 								<input type='hidden' name='tee' value='vahvista'><input type='Submit' value='".t("Vahvista toimitus")."'>
 							</form></td>";
 				}

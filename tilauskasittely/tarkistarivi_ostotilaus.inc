@@ -4,7 +4,7 @@
 	$saako_hyvaksya = 0;
 	$varaosavirhe = "";
 
-	$query = "	SELECT *, tuote.tunnus tuotetunnus
+	$query = "	SELECT *
 				FROM tuote
 				LEFT JOIN tuotteen_toimittajat ON tuote.yhtio	= tuotteen_toimittajat.yhtio and tuote.tuoteno	= tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 				LEFT JOIN toimi ON tuote.yhtio = toimi.yhtio and toimi.tunnus = '$laskurow[liitostunnus]'
@@ -21,11 +21,6 @@
 
 	if ($trow["toimittaja"] == "" and $toim_tarkistus!= "EI" and $riviok == 0) {
 		$varaosavirhe .= t("VIRHE: Tuotetta ei voi tilata tältä toimittajalta")."!<br>";
-		
-		if (strpos($PHP_SELF, "keikka") !== FALSE) {
-			$varaosavirhe .= "<a href='".$palvelin2."yllapito.php?toim=tuote&tunnus=$trow[tuotetunnus]&lopetus=$PHP_SELF////tila=uusirivi//toiminto=$toiminto//tuoteno=$prow[tuoteno]//kpl=$kpl//muut_siirrettavat=$muut_siirrettavat//toiminto=$toiminto//tee=$tee//tilausnumero=$tilausnumero//toim_nimitykset=$toim_nimitykset//rivitunnus=$rivitunnus//menutila=$menutila//perheid2=$perheid2//muuta=$muuta//otunnus=$otunnus//rivinotunnus=$rivinotunnus//osto_sarjatunnus=$osto_sarjatunnus//rivinvar=$var'>".t("Muuta tuotteen tietoja")."</a>";
-		}
-			
 		$riviok++;
 		$tilausok++;
 	}
@@ -122,7 +117,8 @@
 								<input type='hidden' name='paivitaostohinta' value='ON'>
 								<input type='hidden' name='paiv_hinta' value='$prow[hinta]'>
 								<input type='hidden' name='paiv_tuoteno' value='$prow[tuoteno]'>
-								<input type='hidden' name='paiv_rivitunnus' value='$prow[tunnus]'>";
+								<input type='hidden' name='paiv_rivitunnus' value='$prow[tunnus]'>
+								<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>";
 
 			if ($toiminto == "kohdista") {
 				$varaosavirhe .= "<input type='hidden' name='tuoteno' value='$tuoteno'>";
@@ -141,7 +137,7 @@
 	}
 	
 	//toimitusajan päivitys toimittajan toimitusaikaan
-	if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($trow["oletus_toimaika"] != 0 and $trow["oletus_toimaika"] != '')) and $riviok == 0 and strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== FALSE and ($yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '1' or $yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '2')) {	
+	if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($trow["oletus_toimaika"] != 0 and $trow["oletus_toimaika"] != '')) and $riviok == 0 and strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== FALSE and ($yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '1' or $yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '2') and $ei_aikatarkistusta != "JOO") {	
 		
 		if ($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') {
 			$ehdotus_pvm = date('Y-m-d',time() + $trow["toimitusaika"] * 24 * 60 * 60);

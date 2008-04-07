@@ -105,7 +105,8 @@
 				<input type='hidden' name='liitostunnus' value='$srow[liitostunnus]'>
 				<input type='hidden' name='ylatila' value='$ylatila'>
 				<input type='hidden' name='alatila' value='$alatila'>
-				<input type='hidden' name='toim' value='$toim'>";
+				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>";
 				
 		echo "<table>
 				<tr><th colspan='2' align='left' valign='top'>&nbsp;".t("Toimittajan tiedot").":</td></tr>
@@ -314,6 +315,7 @@
 			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+			echo "<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>";
 			echo "<td class='back'><input type='submit' ACCESSKEY='A' value='".t("Vaihda toimittaja")."'></td></form>";
 					
 		}

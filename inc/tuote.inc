@@ -1,6 +1,8 @@
 <?php
 
-	$kentat = "tunnus, tuoteno, nimitys, round(myyntihinta, $yhtiorow[hintapyoristys]) myyntihinta, status HIDDEN_status";
+	$kentat = "tunnus, tuoteno, nimitys, round(myyntihinta,$yhtiorow[hintapyoristys]) myyntihinta, status HIDDEN_status";
+	$hakukentat = "tunnus, tuoteno, nimitys,myyntihinta";
+	
 	$jarjestys = 'tuoteno';
 	
 	if ($laji == "V") {

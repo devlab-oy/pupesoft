@@ -1161,7 +1161,7 @@ if ($tee == "MUOKKAA") {
 					$valinta="";
 					if (mysql_num_rows($tres)>0){
 						
-						if($perheid2 > 0) {
+						if($rivitunnus > 0) {
 							$onchange = "document.getElementById('tuoteno').value=this.value; document.getElementById('kuivat').value='JOO'; document.getElementById('lisaarivi').submit(); return false;";
 						}
 						else {

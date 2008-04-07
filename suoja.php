@@ -98,20 +98,21 @@
 
 	echo "<font class='message'>".t("Käyttäjän")." $selkukarow[nimi] ".t("käyttöoikeudet")." ($yhtiorow[nimi])</font><hr>";
 
-	echo "<table cellpadding='1' cellspacing='2'>
+	echo "<table>
 			<form action='$PHP_SELF' method='post'>
 			<input type='hidden' name='toim' value='$toim'>
 			<input type='hidden' name='sovellus' value='$sovellus'>
 
 			<tr>
-				<th>Valitse käyttäjä:</th>
+				<th>".t("Valitse käyttäjä").":</th>
 				<td><select name='selkuka' onchange='submit()'>";
-		if ($toim == "" or $selkukarow["kuka"] != "") {	
-			echo "<option selected value='$selkukarow[tunnus]'>$selkukarow[nimi] ($selkukarow[kuka])</option>";
-		}
-		else if ($toim == "extranet" and $selkukarow["kuka"] == "") {
-			echo "<option selected value=''>".t("Valitse käyttäjä")."</option>";			
-		}
+		
+	if ($toim == "" or $selkukarow["kuka"] != "") {	
+		echo "<option selected value='$selkukarow[tunnus]'>$selkukarow[nimi] ($selkukarow[kuka])</option>";
+	}
+	else if ($toim == "extranet" and $selkukarow["kuka"] == "") {
+		echo "<option selected value=''>".t("Valitse käyttäjä")."</option>";			
+	}
 
 	if ($toim == "extranet" and $selkukarow["tunnus"] != "") {
 		$query = "SELECT *

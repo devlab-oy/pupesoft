@@ -195,7 +195,7 @@
 
 					while($kulukeikkarow = mysql_fetch_array($keikkares)) {					
 						// Haetaan kaikki keikkaan liitettyjen laskujen summa
-						$query = "	SELECT round(sum(summa*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
+						$query = "	SELECT round(sum(arvo*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
 									FROM lasku
 									WHERE yhtio		= '$kukarow[yhtio]'
 									and tila 		= 'K'

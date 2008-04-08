@@ -9,6 +9,10 @@
 		require("inc/parametrit.inc");
 	}
 
+	if ($tee == 'MITATOI_TARJOUS') {
+		unset($tee);
+	}
+
 	if (isset($tee)) {
 		if ($tee == "lataa_tiedosto") {
 			readfile("/tmp/".$tmpfilenimi);	
@@ -16,6 +20,15 @@
 		}
 	}
 	else {
+
+		echo "	<script type='text/javascript' language='JavaScript'>
+				<!--
+					function verify() {
+						msg = '".t("Oletko varma?")."';
+						return confirm(msg);
+					}
+				-->
+				</script>";
 			
 		$toim = strtoupper($toim);
 
@@ -68,7 +81,20 @@
 			$otsikko = t("myyntitilausta");
 			$toim = "";
 		}
-		
+
+		if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER") and $tee == '' and $kukarow["kesken"] != 0 and $tilausnumero != "") {
+			$query_tarjous = "	UPDATE 	lasku 
+								SET		alatila = tila, 
+								 		tila = 'D', 
+										muutospvm = now(), 
+										comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." now()')
+								WHERE	yhtio = '$kukarow[yhtio]'
+								AND		tunnus = $tilausnumero";
+			$result_tarjous = mysql_query($query_tarjous) or pupe_error($query_tarjous);
+			
+			echo "<font class='message'>".t("Mitätöitiin lasku")." $tilausnumero</font><br><br>";
+		}
+
 		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 			
 			echo "<font class='head'>".t("Muokkaa")." $otsikko<hr></font>";
@@ -1178,6 +1204,16 @@
 
 					echo "<td class='back'><input type='submit' name='$aputoim1' value='$lisa1'></td>";
 					echo "</form>";
+
+					if ($toim == "TARJOUS" or $toim == "TARJOUSSUPER" and $kukarow["kesken"] != 0) {
+						echo "<form method='post' action='muokkaatilaus.php' onSubmit='return verify();'>";
+						echo "<input type='hidden' name='toim' value='$toim'>";
+						echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS'>";
+						echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
+						echo "<td class='back'><input type='submit' name='$aputoim1' value='".t("Mitätöi")."'></td>";
+						echo "</form>";
+					}
+
 					echo "</tr>";
 				}
 			}

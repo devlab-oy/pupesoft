@@ -366,7 +366,7 @@
 					LEFT JOIN laskun_lisatiedot ON lasku.yhtio = laskun_lisatiedot.yhtio and otunnus=lasku.tunnus
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and (tila =  'R' and alatila IN ('', 'A') or (tila IN ('N','L') and alatila != 'X' $lajilisa)) and (tunnusnippu = lasku.tunnus or tunnusnippu = 0)
-					ORDER BY tunnusnippu";
+					ORDER BY seuranta, tunnusnippu";
 		$result = mysql_query($query) or pupe_error($query);
 
 		while($row = mysql_fetch_array($result)) {

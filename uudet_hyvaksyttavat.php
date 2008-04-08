@@ -40,36 +40,69 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 	}
 
 
-	$query = "	SELECT concat_ws(' ',lasku.nimi, nimitark) nimi, tapvm, erpcm, round(summa * valuu.kurssi,2) summa, kuka.eposti
+	$query = "	SELECT concat_ws(' ',lasku.nimi, nimitark) nimi, tapvm, erpcm, round(summa * valuu.kurssi,2) summa, kuka.eposti, lasku.hyvaksyja_nyt,
+					UNIX_TIMESTAMP(lasku.luontiaika) luontiaika,
+					UNIX_TIMESTAMP(h1time) h1time,
+					UNIX_TIMESTAMP(h2time) h12ime,
+					UNIX_TIMESTAMP(h3time) h13ime,
+					UNIX_TIMESTAMP(h4time) h14ime,
+					UNIX_TIMESTAMP(h5time) h5time,
+					lasku.hyvak1 hyvak1,
+					lasku.hyvak2 hyvak2,
+					lasku.hyvak3 hyvak3,
+					lasku.hyvak4 hyvak4,
+					lasku.hyvak5 hyvak5
 				FROM lasku
 				LEFT JOIN valuu ON valuu.yhtio=lasku.yhtio and lasku.valkoodi=valuu.nimi
 				JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.hyvaksyja_nyt=kuka.kuka and kuka.eposti <> ''
-				WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tila = 'H' and lasku.luontiaika > DATE_SUB(now(), INTERVAL $ajalta DAY)
+				WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tila = 'H'
 				ORDER BY kuka.eposti, tapvm";
 	$result = mysql_query($query) or pupe_error($query);
-
+	
 	while ($trow=mysql_fetch_array($result)) {
-		$laskuja++;
 		
-		if ($trow['eposti'] != $veposti) {
-			if ($veposti != '') {
-				$meili = t("Sinulla on seuraavat uudet laskut hyväksyttävänä").":\n\n" . $meili;
-				$tulos = mail($veposti, t("Uudet hyväksyttävät laskusi")."", $meili, "From: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"] . ">\nReply-To: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"] . ">\n", "-f $yhtiorow[postittaja_email]");
-				$maara++;
+		$muistuta = 0;
+		//	Kandeeko tästä muistuttaa?
+		for($i=1;$i<=5;$i++) {
+			if($trow["hyvak$i"] == $trow["hyvaksyja_nyt"]) {
+				//	Verrataan luontiaikaan..
+				if($i == 1) {
+					if($trow["luontiaika"]>=strtotime("-$ajalta days")) {
+						$muistuta = 1;
+					}
+				}
+				//	Verrataan edelliseen hyväksyntään
+				else {
+					$e = $i-1;
+					if($trow["h{$e}time"]>=strtotime("-$ajalta days")) {
+						$muistuta = 1;
+					}
+				}
 			}
-			$meili = '';
-			$veposti = $trow['eposti'];
 		}
+		
+		if($muistuta == 1) {
 
-		$meili .= "Laskuttaja: " . $trow['nimi'] . "\n";
-		$meili .= "Laskutuspäivä: " . $trow['tapvm'] . "\n";
-		$meili .= "Eräpäivä: " . $trow['erpcm'] . "\n";
-		$meili .= "Summa: " .$yhtiorow["valkoodi"]." ".$trow['summa'] . "\n\n";
+			$trow['eposti'] = "tuomas.koponen@mailem.fi";
+			
+			if ($trow['eposti'] != $veposti) {
+				if ($veposti != '') {
+					$meili = t("Sinulla on seuraavat uudet laskut hyväksyttävänä").":\n\n" . $meili;
+					$tulos = mail($veposti, t("Uudet hyväksyttävät laskusi")."", $meili, "From: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"] . ">\nReply-To: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"] . ">\n", "-f $yhtiorow[postittaja_email]");
+				}
+				$meili = '';
+				$veposti = $trow['eposti'];
+			}
+
+			$meili .= "Laskuttaja: " . $trow['nimi'] . "\n";
+			$meili .= "Laskutuspäivä: " . $trow['tapvm'] . "\n";
+			$meili .= "Eräpäivä: " . $trow['erpcm'] . "\n";
+			$meili .= "Summa: " .$yhtiorow["valkoodi"]." ".$trow['summa'] . "\n\n";
+		}
 	}
 	if ($meili != '') {
 		$meili = t("Sinulla on seuraavat uudet laskut hyväksyttävänä").":\n\n" . $meili;
 		$tulos = mail($veposti, t("Uudet hyväksyttävät laskusi")."", $meili, "From: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"] . ">\nReply-To: " . $yhtiorow["nimi"] . "<" . $yhtiorow["alert_email"] . ">\n", "-f $yhtiorow[postittaja_email]");
-		$maara++;
 	}
 }
 else {

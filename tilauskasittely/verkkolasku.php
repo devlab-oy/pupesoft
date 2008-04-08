@@ -757,7 +757,7 @@
 				$query  = "	SELECT ytunnus, nimi, nimitark, osoite, postino, postitp, maksuehto, erpcm, vienti,
 							lisattava_era, vahennettava_era, maa_maara, kuljetusmuoto, kauppatapahtuman_luonne,
 							sisamaan_kuljetus, aktiivinen_kuljetus, kontti, aktiivinen_kuljetus_kansallisuus,
-							sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn,
+							sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn, maa, valkoodi, 
 							count(*) yht, group_concat(tunnus) tunnukset
 							FROM lasku
 							WHERE yhtio		= '$kukarow[yhtio]'
@@ -769,11 +769,11 @@
 							GROUP BY ytunnus, nimi, nimitark, osoite, postino, postitp, maksuehto, erpcm, vienti,
 							lisattava_era, vahennettava_era, maa_maara, kuljetusmuoto, kauppatapahtuman_luonne,
 							sisamaan_kuljetus, aktiivinen_kuljetus, kontti, aktiivinen_kuljetus_kansallisuus,
-							sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn
+							sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn, maa, valkoodi
 							ORDER BY ytunnus, nimi, nimitark, osoite, postino, postitp, maksuehto, erpcm, vienti,
 							lisattava_era, vahennettava_era, maa_maara, kuljetusmuoto, kauppatapahtuman_luonne,
 							sisamaan_kuljetus, aktiivinen_kuljetus, kontti, aktiivinen_kuljetus_kansallisuus,
-							sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn";
+							sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn, maa, valkoodi";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if ($silent == "") {

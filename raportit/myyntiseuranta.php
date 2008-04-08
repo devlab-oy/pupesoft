@@ -330,11 +330,19 @@
 						$gluku++;
 					}
 
-					if ($mukaan == "piiri") {
+					if ($mukaan == "piiri" and $piirivalinta == "asiakas") {
 						if ($group!="") $group .= ",asiakas.piiri";
 						else $group .= "asiakas.piiri";
 						$select .= "asiakas.piiri aspiiri, ";
 						$order  .= "asiakas.piiri,";
+						$gluku++;
+					}
+					
+					if ($mukaan == "piiri" and $piirivalinta == "lasku") {
+						if ($group!="") $group .= ",lasku.piiri";
+						else $group .= "lasku.piiri";
+						$select .= "lasku.piiri aspiiri, ";
+						$order  .= "lasku.piiri,";
 						$gluku++;
 					}
 
@@ -534,7 +542,13 @@
 
 				if (is_array($mul_piiri) and count($mul_piiri) > 0) {
 					$sel_piiri = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_piiri))."')";
-					$lisa .= " and asiakas.piiri in $sel_piiri ";
+					
+					if ($piirivalinta == "asiakas") {
+						$lisa .= " and asiakas.piiri in $sel_piiri ";
+					}
+					else {
+						$lisa .= " and lasku.piiri in $sel_piiri ";
+					}
 				}
 
 				if (is_array($mul_kustp) and count($mul_kustp) > 0) {
@@ -1318,6 +1332,13 @@
 			if ($ruksit[40]  != '') 	$ruk40chk  	= "CHECKED";
 			if ($ruksit[50]  != '') 	$ruk50chk 	= "CHECKED";
 			if ($ruksit[55]  != '') 	$ruk55chk 	= "CHECKED";
+			
+			if ($piirivalinta == 'lasku' or $piirivalinta == '') {
+				$laskuvalintachk  	= "CHECKED";
+			}
+			else {
+				$asiakasvalintachk  = "CHECKED";
+			}
 
 			echo "<table>";
 			echo "<tr>";
@@ -1430,7 +1451,9 @@
 			echo "<tr>";
 			echo "<th>".t("Prio").": <input type='text' name='jarjestys[10]' size='2' value='$jarjestys[10]'> ".t("Asiakasosastoittain")." <input type='checkbox' name='ruksit[10]' value='asiakasosasto' $ruk10chk></th>";
 			echo "<th>".t("Prio").": <input type='text' name='jarjestys[20]' size='2' value='$jarjestys[20]'> ".t("Asiakasryhmittäin")." <input type='checkbox' name='ruksit[20]' value='asiakasryhma' $ruk20chk></th>";
-			echo "<th>".t("Prio").": <input type='text' name='jarjestys[30]' size='2' value='$jarjestys[30]'> ".t("Aiakaspiireittäin")." <input type='checkbox' name='ruksit[30]' value='piiri' $ruk30chk></th></tr>";
+			echo "<th>".t("Prio").": <input type='text' name='jarjestys[30]' size='2' value='$jarjestys[30]'> ".t("Aiakaspiireittäin")." <input type='checkbox' name='ruksit[30]' value='piiri' $ruk30chk></th><tr>";
+			echo "<th colspan='2'></th><th>".t("Piiri")." <input type='radio' name='piirivalinta' value='lasku' $laskuvalintachk>".t("Laskuilta");
+			echo "<input type='radio' name='piirivalinta' value='asiakas' $asiakasvalintachk>".t("Asiakkailta")."</th></tr>";
 			echo "</table><br>\n";
 
 

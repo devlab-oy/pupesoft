@@ -82,9 +82,7 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 		}
 		
 		if($muistuta == 1) {
-
-			$trow['eposti'] = "tuomas.koponen@mailem.fi";
-			
+						
 			if ($trow['eposti'] != $veposti) {
 				if ($veposti != '') {
 					$meili = t("Sinulla on seuraavat uudet laskut hyväksyttävänä").":\n\n" . $meili;

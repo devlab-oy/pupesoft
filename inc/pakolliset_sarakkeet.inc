@@ -1,8 +1,8 @@
 <?php
-	
+
 /*
 	Ylläpidetään taulujen pakollisia saraketietoja
-	
+
 	list($pakolliset, $kielletyt, $wherelliset)=pakolliset_sarakkeet($table);
 */
 
@@ -10,7 +10,7 @@
 if (!function_exists("pakolliset_sarakkeet")) {
 	function pakolliset_sarakkeet($table) {
 		global $yhtiorow;
-		
+
 		switch ($table) {
 			case "tuote" :
 				$pakolliset = array("TUOTENO");
@@ -24,16 +24,16 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "asiakas" :
 				//	Tämä estää syncronoinnin muilla kuin suomalaisilla toimittajilla..
 				if (strtoupper($yhtiorow['maa']) == 'FI') {
-					
+
 					$pakolliset = array("YTUNNUS");
-					
-					if ($yhtiorow['asiakkaan_tarkenne'] == '') {						
+
+					if ($yhtiorow['asiakkaan_tarkenne'] == '') {
 						$wherelliset = array("YTUNNUS", "OVTTUNNUS", "TOIM_OVTTUNNUS");
 					}
 					else {
 						$wherelliset = array("YTUNNUS", "ASIAKASNRO");
 					}
-					
+
 				}
 				else {
 					$pakolliset = array("YTUNNUS");
@@ -105,12 +105,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("MERKKI","MALLI","MALLITARKENNE","KORITYYPPI","CC","MOOTTORITYYPPI","POLTTOAINE","SYLINTERIMAARA","SYLINTERINHALKAISIJA","TEHO_KW","TEHO_HV","ALKUKK","ALKUVUOSI","LOPPUKK","LOPPUVUOSI","LISATIEDOT","AUTODATA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				$wherelliset = array("MERKKI","MALLI","MALLITARKENNE","KORITYYPPI","CC","MOOTTORITYYPPI","POLTTOAINE","SYLINTERIMAARA","SYLINTERINHALKAISIJA","TEHO_KW","TEHO_HV","ALKUKK","ALKUVUOSI","LOPPUKK","LOPPUVUOSI","LISATIEDOT","AUTODATA");
-				break;			
+				break;
 			case "yhteensopivuus_mp" :
 				$pakolliset  = array("TYYPPI","MERKKI","CC","MALLI","VM");
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				$wherelliset = array("TYYPPI","MERKKI","CC","MALLI","VM");
-				break;					
+				break;
 			case "yhteensopivuus_tuote" :
 				$pakolliset  = array("TYYPPI","ATUNNUS","TUOTENO");
 				$kielletyt   = array("LAATIJA","LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
@@ -141,7 +141,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "tuotteen_toimittajat" :
 				$pakolliset = array("TUOTENO","TOIMITTAJA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
-				$wherelliset = array("TUOTENO","TOIMITTAJA");				
+				$wherelliset = array("TUOTENO","TOIMITTAJA");
 				break;
 			case "kuka" :
 				$pakolliset = array("KUKA");
@@ -199,7 +199,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 		}
 
 		return array($pakolliset, $kielletyt, $wherelliset, $eiyhtiota);
-	}	
+	}
 }
 
 ?>

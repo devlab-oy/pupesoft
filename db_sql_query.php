@@ -23,7 +23,13 @@
 		if ($rtee == "AJA" and isset($ruks_pakolliset)) {
 			require("inc/pakolliset_sarakkeet.inc");
 			list($pakolliset, $kielletyt, $wherelliset) = pakolliset_sarakkeet($table);
-			$ruksaa = array_merge($pakolliset,$wherelliset);
+			
+			if (!is_array($wherelliset)) {
+				$ruksaa = $pakolliset;
+			}
+			else {
+				$ruksaa = array_merge($pakolliset,$wherelliset);
+			}
 		}
 		
 		// Tässä luodaan uusi raporttiprofiili

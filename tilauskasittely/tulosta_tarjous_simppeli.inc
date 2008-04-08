@@ -293,7 +293,7 @@ if (!function_exists('tulosta_tarjous')) {
 						}
 						$h-=$pdf->ln(1.25);
 						if($row["kommentti"] != "") {
-							$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[1]-5))+2;
+							$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[1]-5));
 							$pdf->write($h, $nb, 5, $s[1], $row["kommentti"], "snadi", "L", "I");	
 							$h-=$pdf->ln($nb+0.25);
 						}
@@ -367,7 +367,7 @@ if (!function_exists('tulosta_tarjous')) {
 			//	Maksusopimus
 			$pdf->write($h, 1, 0, 0, t("LISÄTIEDOT", $kieli), "norm", "L", "B");
 			$h-=$pdf->ln(2.25);
-			$nb=$pdf->countParagraphHeight($laskurow["sisviesti1"], "norm")+2;
+			$nb=$pdf->countParagraphHeight($laskurow["sisviesti1"], "norm");
 			$pdf->write($h, $nb, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
 			$h-=$pdf->ln($nb+0.5);
 		}

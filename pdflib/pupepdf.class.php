@@ -14,17 +14,17 @@ class PDF extends pdffile {
 		$this->currentPage["oid"] = $oid;
 	}
 
-	function countParagraphHeight($txt, $font, $w=0) {
+	function countParagraphHeight($txt, $font, $sW=0) {
 		global $fonts;
 		
-		if($w>0) {
+		if($sW>0) {
 			$w=mm_pt($w);
 		}
-		elseif($w<0) {
-			$w=$this->currentPage["width"]-$this->currentPage["margin-left"]-$this->currentPage["margin-right"]+mm_pt($w);
+		elseif($sW<0) {
+			$sW=$this->currentPage["width"]-$this->currentPage["margin-left"]-$this->currentPage["margin-right"]+mm_pt($w);
 		}
 		else {
-			$w=$this->currentPage["width"]-$this->currentPage["margin-left"]-$this->currentPage["margin-right"];
+			$sW=$this->currentPage["width"]-$this->currentPage["margin-left"]-$this->currentPage["margin-right"];
 		}
 		
 		// Poistetaan kaikki roskat
@@ -37,7 +37,7 @@ class PDF extends pdffile {
 		foreach(preg_split("/([\s\n])+/U",$txt, -1, PREG_SPLIT_DELIM_CAPTURE) as $osa) {
 			if($i=0) {
 				$stringw+=$this->strlen($osa,$fonts[$font]);
-				if($stringw>$w) {
+				if($stringw>$sW) {
 					$riveja++;
 					$stringw=0;
 				}
@@ -50,7 +50,7 @@ class PDF extends pdffile {
 				}
 				else {
 					$stringw+=$this->strlen($osa,$fonts[$font]);
-					if($stringw>$w) {
+					if($stringw>$sW) {
 						$riveja++;
 						$stringw=0;
 					}

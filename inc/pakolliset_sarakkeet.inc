@@ -24,8 +24,16 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "asiakas" :
 				//	T‰m‰ est‰‰ syncronoinnin muilla kuin suomalaisilla toimittajilla..
 				if (strtoupper($yhtiorow['maa']) == 'FI') {
+					
 					$pakolliset = array("YTUNNUS");
-					$wherelliset = array("YTUNNUS", "OVTTUNNUS", "TOIM_OVTTUNNUS");
+					
+					if ($yhtiorow['asiakkaan_tarkenne'] == '') {						
+						$wherelliset = array("YTUNNUS", "OVTTUNNUS", "TOIM_OVTTUNNUS");
+					}
+					else {
+						$wherelliset = array("YTUNNUS", "ASIAKASNRO");
+					}
+					
 				}
 				else {
 					$pakolliset = array("YTUNNUS");

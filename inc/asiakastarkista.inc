@@ -90,15 +90,39 @@ if(!function_exists("asiakastarkista")) {
 				}
 				else {
 					$t[$i] = $asiakasnro_select;
+				}								
+			}
+			
+			if ($yhtiorow['asiakkaan_tarkenne'] != '') {
+				
+				if ($asiakasnro_select != '') {
+					$asiakas_numero = $asiakasnro_select;
+				}
+				else {
+					$asiakas_numero = $t[$i];
+				}
+				
+				$query   = "select tunnus from asiakas where yhtio = '$kukarow[yhtio]' and ytunnus='$ytunnus' and asiakasnro='$asiakas_numero' and tunnus != '$tunnus'";
+				$sresult = mysql_query($query) or pupe_error($query);
+				
+				if (mysql_num_rows($sresult) > 0) {
+					
+					if ($alias_set == "VAHITTAISMYYNTI") {
+						$virhe[$i] .= t("Samalla tiedoilla on useita asiakkaita! Lisää tarkenne Asiakasnumeroon/Henkilötunnukseen.");
+					}
+					else {
+						$virhe[$i] .= t("Samalla tiedoilla on useita asiakkaita! Lisää tarkenne Ytunnukseen/Asiakasnumeroon.");
+					}
 				}
 			}
+		
 		}
 
 		if (mysql_field_name($result, $i) == "ovttunnus") {
 			$ovttunnus = $t[$i];	
 		}
 
-		if (mysql_field_name($result, $i) == "toim_ovttunnus") {
+		if (mysql_field_name($result, $i) == "toim_ovttunnus" and $yhtiorow['asiakkaan_tarkenne'] == '') {
 
 			$query   = "select tunnus from asiakas where yhtio = '$kukarow[yhtio]' and ytunnus='$ytunnus' and ovttunnus='$ovttunnus' and toim_ovttunnus='$t[$i]' and tunnus != '$tunnus'";
 			$sresult = mysql_query($query) or pupe_error($query);

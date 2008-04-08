@@ -1495,6 +1495,21 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "asiakkaan_tarkenne") {
+		
+		$ulos = "<td><select name='$nimi'>";
+		
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+		
+		$ulos .= "<option value = '' $sel>".t("Ovttunnus")."</option>";
+		$ulos .= "<option value = 'A' $sel[A]>".t("Asiakasnro")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "tuotteen_oletuspaikka") {
 		

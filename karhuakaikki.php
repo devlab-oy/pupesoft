@@ -23,7 +23,7 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 	
 	$query    = "select * from yhtio where yhtio='$kukarow[yhtio]'";
 	$yhtiores = mysql_query($query) or pupe_error($query);
-	if(mysql_num_rows($yhtiores) == 0) die("Frimaa ei löyry!\n");
+	if(mysql_num_rows($yhtiores) == 0) die("Firmaa ei löyry!\n");
 	$yhtiorow = mysql_fetch_array($yhtiores);
 
 	$query = "	SELECT *

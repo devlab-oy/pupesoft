@@ -245,15 +245,19 @@
 
 		$ulos = "<td>";
 		$ulos .= "<div id='ytunnus_etsi'>";
-		$ulos .= "<input type='text' name='$nimi' value='$trow[$i]'>";
+		$ulos .= "<input type='text' name='$nimi' id='$nimi' value='$trow[$i]'>";
 
 		if ($alias_set == "VAHITTAISMYYNTI") {
-			$ulos .= "<input type='button' name='etsi_vapytunnus' id='etsi_vapytunnus' value='".t("Etsi seuraava vapaa ytunnus")."' onClick='javascript:document.getElementById(\"etsi_vapytunnus\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapytunnus\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=ytunnus&ohje=off&pointer=$i\", \"ytunnus_etsi\", false, false)'>";
+			$ulos .= "<input type='button' name='etsi_vapytunnus' id='etsi_vapytunnus' value='".t("Etsi seuraava vapaa asiakasnumero")."' onClick='javascript:document.getElementById(\"etsi_vapytunnus\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapytunnus\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=ytunnus&ohje=off&pointer=$i\", \"ytunnus_etsi\", false, false)'>";			
 		}
 
 		$ulos .= "</div>";
 		$ulos .= "</td>";
-		$ulos .= "<td class='back'>".t("Voit tarkistaa ytunnuksen")." <a target='YTJ' href='http://ec.europa.eu/taxation_customs/vies/lang.do?fromWhichPage=vieshome&selectedLanguage=".strtoupper($kukarow["kieli"])."'>".t("t‰‰lt‰")."</td>";
+		
+		if ($alias_set != "VAHITTAISMYYNTI") {
+			$ulos .= "<td class='back'>".t("Voit tarkistaa ytunnuksen")." <a target='YTJ' href='http://ec.europa.eu/taxation_customs/vies/lang.do?fromWhichPage=vieshome&selectedLanguage=".strtoupper($kukarow["kieli"])."'>".t("t‰‰lt‰")."</td>";
+		}
+		
 		$jatko = 0;
 	}
 

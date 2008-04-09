@@ -57,8 +57,16 @@
 	enable_ajax();
 	
 	$otsikko 	= 'Asiakkaat';
-	$kentat 	= "tunnus, ytunnus, concat_ws('<br>', concat_ws(' ',nimi,nimitark), concat_ws(' ',toim_nimi,toim_nimitark)) 'Nimi/Toim_nimi', concat_ws('<br>', postitp, toim_postitp) 'Postitp/Toim_postitp', concat_ws('<br>', ovttunnus, toim_ovttunnus) 'Ovttunnus/Toim_ovttunnus', laji HIDDEN_laji ";
-	$hakukentat = "tunnus, ytunnus, nimi/toim_nimi, postitp/toim_postitp, ovttunnus/toim_ovttunnus";
+	
+	if ($yhtiorow["asiakkaan_tarkenne"] == "A") {
+		$kentat 	= "tunnus, ytunnus, concat_ws('<br>', concat_ws(' ',nimi,nimitark), concat_ws(' ',toim_nimi,toim_nimitark)) 'Nimi/Toim_nimi', concat_ws('<br>', postitp, toim_postitp) 'Postitp/Toim_postitp', asiakasnro 'Asiakasnumero', laji HIDDEN_laji ";
+		$hakukentat = "tunnus, ytunnus, nimi/toim_nimi, postitp/toim_postitp, asiakasnro";
+	}
+	else {
+		$kentat 	= "tunnus, ytunnus, concat_ws('<br>', concat_ws(' ',nimi,nimitark), concat_ws(' ',toim_nimi,toim_nimitark)) 'Nimi/Toim_nimi', concat_ws('<br>', postitp, toim_postitp) 'Postitp/Toim_postitp', concat_ws('<br>', ovttunnus, toim_ovttunnus) 'Ovttunnus/Toim_ovttunnus', laji HIDDEN_laji ";
+		$hakukentat = "tunnus, ytunnus, nimi/toim_nimi, postitp/toim_postitp, ovttunnus/toim_ovttunnus";
+	}
+	
 	$jarjestys 	= 'selaus, nimi';
 
 

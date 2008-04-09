@@ -3870,16 +3870,30 @@ if(!function_exists("enable_ajax")) {
 		http.onreadystatechange = handleResponse;
 
 		function createRequestObject() {
-			var ro;
-			var browser = navigator.appName;
-
-			if (browser == "Microsoft Internet Explorer") {
-				ro = new ActiveXObject("Microsoft.XMLHTTP");
+			
+			var xmlHttp;
+			
+			try {
+				// Firefox, Opera 8.0+, Safari
+				xmlHttp=new XMLHttpRequest();  
 			}
-			else {
-				ro = new XMLHttpRequest();
+			catch (e) {
+				// Internet Explorer
+				try {
+					xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+				}
+				catch (e) {
+					try {
+						xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+					}
+					catch (e) {
+						alert("Your browser does not support AJAX!");
+						return false;
+					}
+				}
 			}
-			return ro;
+			
+			return xmlHttp;
 		}
 
 		function handleResponse() {
@@ -4057,7 +4071,6 @@ if(!function_exists("enable_ajax")) {
 
 //-->
 </script>
-
 <?php
 	}
 }

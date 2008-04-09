@@ -4,7 +4,7 @@ if(!function_exists("asiakasalennustarkista")) {
 	function asiakasalennustarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $alasveto;
 		
-		static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chalkupvm, $chloppupvm;
+		static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chalkupvm, $chloppupvm, $chastunn;
 		
 		if (mysql_field_name($result, $i) == "tunnus") {
 			$tunnus = $t[$i];
@@ -43,6 +43,37 @@ if(!function_exists("asiakasalennustarkista")) {
 					else {
 						$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");	
 					}	
+				}
+			}	
+		}
+		
+		if (mysql_field_name($result, $i) == "asiakas") {
+			$chastunn = $t[$i];
+
+			if ($chastunn != '') {
+				$query	= "	SELECT *
+							FROM asiakas
+							WHERE yhtio='$kukarow[yhtio]' and tunnus='$chastunn'";
+				$result = mysql_query($query) or pupe_error($query);
+				
+				if (mysql_num_rows($result) != 1) {
+				
+					$ytunnus 		= $chastunn;
+					$kutsuja 		= "yllapito.php";
+					$ulos2 			= "";				
+					require("asiakashaku.inc");
+
+					if ($ulos != "" and $ytunnus == "") {
+						$alasveto[$i] = "<select name='t[$i]'>".$ulos2."</select>";
+						$virhe[$i]    = t("Valitse asiakas!");
+					}
+					elseif ($ytunnus != "") {
+						$t[$i]  = $asiakasid;
+						$virhe[$i] = t("Asiakas löytyi!");
+					}	
+					else {
+						$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");	
+					}
 				}
 			}	
 		}
@@ -95,27 +126,30 @@ if(!function_exists("asiakasalennustarkista")) {
 							WHERE yhtio='$kukarow[yhtio]' and ryhma = '$t[$i]'";
 				$sresult = mysql_query($query) or pupe_error($query);
 				if (mysql_num_rows($sresult) != 1) {
-					$virhe[$i] = "".t("Aleryhmä puuttuu tai sitä ei löydy!")."";
+					$virhe[$i] = t("Aleryhmä puuttuu tai sitä ei löydy!");
 				}
 			}
 		}
 
+		$rajlask = 0;
+		if ($chasiakas_ryhma != '') $rajlask++;
+		if ($chytunnus != '') $rajlask++;
+		if ($chastunn != '') $rajlask++;
 
-
-		if ($chasiakas_ryhma != '' and $chytunnus != '' and mysql_field_name($result, $i) == 'asiakas_ryhma') {
-			$virhe[$i] = "".t("Et voi syöttää sekä asiakasta että asiakkaan ryhmää!")."";
+		if ($rajlask > 1 and mysql_field_name($result, $i) == 'asiakas_ryhma') {
+			$virhe[$i] = t("Et voi syöttää sekä asiakasta että asiakkaan ryhmää!");
 		}
 
 		if ($chryhma != '' and $chtuoteno != '' and mysql_field_name($result, $i) == 'ryhma') {
-			$virhe[$i] = "".t("Et voi syöttää sekä tuotenumeroa että ryhmää!")."";
+			$virhe[$i] = t("Et voi syöttää sekä tuotenumeroa että ryhmää!");
 		}
 
-		if ($chasiakas_ryhma == '' and $chytunnus == '' and mysql_field_name($result, $i) == 'asiakas_ryhma') {
-			$virhe[$i] = "".t("Sinun on annettava joko asiakas tai asiakkaan ryhmä!")."";
+		if ($chasiakas_ryhma == '' and $chytunnus == '' and $chastunn == '' and mysql_field_name($result, $i) == 'asiakas_ryhma') {
+			$virhe[$i] = t("Sinun on annettava joko asiakas tai asiakkaan ryhmä!");
 		}
 
 		if ($chryhma == '' and $chtuoteno == '' and mysql_field_name($result, $i) == 'ryhma') {
-			$virhe[$i] = "".t("Sinun on annettava joko tuote tai ryhmä!")."";
+			$virhe[$i] = t("Sinun on annettava joko tuote tai ryhmä!");
 		}
 
 

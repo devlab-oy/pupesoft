@@ -36,8 +36,9 @@ if($kukarow["piirit"] != "")	 {
 	$asiakasrajaus = "and piiri IN ($kukarow[piirit])";
 }
 else {
-	$asiakasrajaus="";
+	$asiakasrajaus = "";
 }
+
 if (is_numeric($asiakasid) and $asiakasid > 0) {
 	$query	= "	SELECT *
 				FROM asiakas
@@ -51,7 +52,7 @@ elseif ($ytunnus != '') {
 		// eka merkki pois alusta
 		$ytunnus = substr($ytunnus, 1);
 
-		$query  = "	select *, concat('£', tunnus) tunnus, concat('£', tunnus) ytunnus, ytunnus spec_ytunnus, liitostunnus spec_tunnus
+		$query  = "	SELECT *, concat('£', tunnus) tunnus, concat('£', tunnus) ytunnus, ytunnus spec_ytunnus, liitostunnus spec_tunnus
 					FROM lasku
 					WHERE $konsyhtiot and tunnus='$ytunnus'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -181,7 +182,7 @@ if ($monta == 0) {
 		echo "<font class='error'>".t("Asiakas")." '$asiakasnro' ".t("ei löydy")."!</font> ";
 	}
 	
-	if (($ytunnus or $asiakasnro) and strpos($PHP_SELF, "tilaus_myynti") === FALSE) {	
+	if (($ytunnus or $asiakasnro) and strpos($PHP_SELF, "tilaus_myynti") === FALSE and $kutsuja != "yllapito.php") {	
 		echo "<form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='myos_poistetut'  value='TRUE'>";
 		echo "<input type='hidden' name='tee' 			  value='$tee'>";
@@ -331,13 +332,14 @@ if ($monta > 1 and $monta <= $limit) {
 			// jos mikätahansa on eri ja mikätahansa on erisuurta ku tyhjää.. tää on varmaan huomenna daily WTF:ssä.. :)
 			if (($asiakas['toim_nimi'] != $asiakas["nimi"] or $asiakas['toim_osoite'] != $asiakas["osoite"] or $asiakas['toim_postino'] != $asiakas["postino"] or $asiakas['toim_postitp'] != $asiakas["postitp"]) and
 				($asiakas['toim_nimi'] != "" or $asiakas['toim_osoite'] != "" or $asiakas['toim_postino'] != "" or $asiakas['toim_postitp'] != "")) {
-				$brnim     = ', '.$asiakas['toim_nimi'];
+				$brnim     = ', '.$asiakas['toim_nimi']." ".$asiakas['toim_nimitark'];
 				$bros      = ' '.$asiakas['toim_osoite'];
 				$brpostino = ' '.$asiakas['toim_postino'];
 				$brpostitp = ' '.$asiakas['toim_postitp'];
 			}
 			
-			$ulos .= "<option value='$asiakas[ytunnus]'>$asiakas[ytunnus] $asiakas[nimi] $asiakas[osoite] $asiakas[postino] $asiakas[postitp] $brnim $bros $brpostitp $brpostitp</option>";
+			$ulos  .= "<option value='$asiakas[ytunnus]'>$asiakas[ytunnus] $asiakas[nimi] $asiakas[osoite] $asiakas[postino] $asiakas[postitp] $brnim $bros $brpostitp $brpostitp</option>";
+			$ulos2 .= "<option value='$asiakas[tunnus]'>$asiakas[ytunnus] $asiakas[nimi] $asiakas[nimitark] $asiakas[osoite] $asiakas[postino] $asiakas[postitp] $brnim $bros $brpostitp $brpostitp</option>";
 		}
 	}
 	

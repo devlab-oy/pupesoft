@@ -1564,18 +1564,51 @@
 			if ($yhtiorow['laskutuskielto'] != 0) {
 				echo "<td>".t("Laskutuskieltoon").":</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
 			}
-			else{
+			else {
 				echo "<td></td><td></td>";
 			}
 
 			echo "</tr>";
+			echo "<tr>";
+			
+			if ($toim == "TARJOUS") {
+
+				echo "<td>",t("Tarjouksen voimassaoloaika"),":</td><td>";
+
+				if ($srow["olmapvm"] != "" and $srow["olmapvm"] != "0000-00-00") {
+					list($voimaika_vv, $voimaika_kk, $voimaika_pp) = explode("-",$srow["olmapvm"]);
+				}
+				else {
+					
+					if ($yhtiorow["tarjouksen_voimaika"] != "") {
+						$voimaika_query = "	SELECT tarjouksen_voimaika 
+											FROM yhtion_parametrit 
+											WHERE yhtio = '{$kukarow["yhtio"]}'";
+						$voimaika_result = mysql_query($voimaika_query) or pupe_error($voimaika_query);
+						$voimaika_row = mysql_fetch_array($voimaika_result);
+						
+						$add_days = "+{$voimaika_row["tarjouksen_voimaika"]} day";
+					}
+					else {
+						$add_days = "now";
+					}
+
+					list($voimaika_pp, $voimaika_kk, $voimaika_vv) = explode("-",date("j-n-Y",strtotime($add_days)));
+				}
+
+				echo "	<input type='text' name='voimaika_pp' value='$voimaika_pp' size='3'>
+						<input type='text' name='voimaika_kk' value='$voimaika_kk' size='3'>
+						<input type='text' name='voimaika_vv' value='$voimaika_vv' size='6'>
+						</td>";
+			}
+			else {
+				echo "<td></td><td></td>";
+			}
 
 			if ($yhtiorow["splittauskielto"] == "E") {
 				$laskkielto = "";
 				if (($yhtiorow["splittauskielto"] != '' and !isset($srow["splittauskielto"])) or $srow["splittauskielto"] != '') $laskkielto = 'CHECKED';
 
-				echo "<tr>";
-				echo "<td></td><td></td>";
 				echo "<td>".t("Splittauskielto").":</td><td><input type='checkbox' value='E' name='splittauskielto' $laskkielto></td>";
 				echo "</tr>";
 			}
@@ -2382,7 +2415,13 @@
 			$toimvv = $kervv;
 			$toimvko = $keraysvko;
 		}
-		
+
+		if (($voimaika_vv == "" or !is_numeric($voimaika_vv)) or ($voimaika_kk == "" or !is_numeric($voimaika_kk)) or ($voimaika_pp == "" or !is_numeric($voimaika_pp))) {
+			$voimaika_vv = "0000";
+			$voimaika_kk = "00";
+			$voimaika_pp = "00";
+		}
+
 		if ($toim == "PIKATILAUS") {			
 			if ($myynti_kommentti != '') {
 				$comments = $myynti_kommentti;
@@ -2460,7 +2499,8 @@
 					jaksotettu							= '$jaksotettu',
 					splittauskielto						= '$splittauskielto',
 					jtkielto							= '$jtkielto',
-					piiri 								= '$piiri'";
+					piiri 								= '$piiri',
+					olmapvm								= '$voimaika_vv-$voimaika_kk-$voimaika_pp'";
 
 		if ($toim == "MYYNTITILI") {
 			if ($ylatila=='') {

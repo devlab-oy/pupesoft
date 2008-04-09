@@ -672,8 +672,8 @@
 		}
 		elseif ($toim == "TARJOUS") {
 			$query = "	SELECT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,						
-						if(date_add(lasku.muutospvm, interval $yhtiorow[tarjouksen_voimaika] day) >= now(), '<font style=\'color:00FF00;\'>Voimassa</font>', '<font style=\'color:FF0000;\'>Er‰‰ntynyt</font>') voimassa,
-						DATEDIFF(lasku.luontiaika, date_sub(now(), INTERVAL $yhtiorow[tarjouksen_voimaika] day)) pva,
+						if(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, interval $yhtiorow[tarjouksen_voimaika] day)) >= now(), '<font style=\'color:00FF00;\'>Voimassa</font>', '<font style=\'color:FF0000;\'>Er‰‰ntynyt</font>') voimassa,
+						if(lasku.olmapvm != '0000-00-00', DATEDIFF(lasku.olmapvm, lasku.luontiaika), DATEDIFF(lasku.muutospvm, date_sub(now(), INTERVAL $yhtiorow[tarjouksen_voimaika] day))) pva,
 						if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija,
 						$toimaikalisa alatila, tila, lasku.tunnus, tunnusnippu
 						FROM lasku use index (tila_index)
@@ -701,8 +701,8 @@
 		}
 		elseif ($toim == "TARJOUSSUPER") {
 			$query = "	SELECT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,						
-						if(date_add(lasku.muutospvm, interval $yhtiorow[tarjouksen_voimaika] day) >= now(), '<font style=\'color:00FF00;\'>Voimassa</font>', '<font style=\'color:FF0000;\'>Er‰‰ntynyt</font>') voimassa,
-						DATEDIFF(lasku.luontiaika, date_sub(now(), INTERVAL $yhtiorow[tarjouksen_voimaika] day)) pva,
+						if(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, interval $yhtiorow[tarjouksen_voimaika] day)) >= now(), '<font style=\'color:00FF00;\'>Voimassa</font>', '<font style=\'color:FF0000;\'>Er‰‰ntynyt</font>') voimassa,
+						if(lasku.olmapvm != '0000-00-00', DATEDIFF(lasku.olmapvm, lasku.luontiaika), DATEDIFF(lasku.muutospvm, date_sub(now(), INTERVAL $yhtiorow[tarjouksen_voimaika] day))) pva,
 						if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija,
 						$toimaikalisa alatila, tila, lasku.tunnus, tunnusnippu
 						FROM lasku use index (tila_index)

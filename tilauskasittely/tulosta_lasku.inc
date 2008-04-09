@@ -312,7 +312,7 @@ if (!function_exists('alku')) {
 					FROM tyomaarays
 					WHERE tyomaarays.yhtio = '$kukarow[yhtio]'
 					and tyomaarays.otunnus in ($tyomrow[otunnus])";
-		$tyomres = mysql_query($squery) or pupe_error($query);	
+		$tyomres = mysql_query($squery) or pupe_error($squery);	
 		
 		while ($tyomrow = mysql_fetch_array($tyomres)) {
 			

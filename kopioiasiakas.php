@@ -1,5 +1,7 @@
 <?php
 	require "inc/parametrit.inc";
+	require "inc/asiakas.inc";
+	
 	echo "<font class='head'>".t("Kopioi asiakas").":</font><hr>";
 	
 	if ($tee == "write") {

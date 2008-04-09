@@ -34,6 +34,10 @@ $ashinaleas 	= 0;
 $ashinaletuo	= 0;
 $indeksi		= array();
 $indeksi_where	= array();
+$ityyppi 		= array();
+$ikenpituus		= array();
+$ttype			= array();
+$tlength		= array();
 
 if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
@@ -81,10 +85,18 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	$query = "SHOW COLUMNS FROM $table";
 	$fres  = mysql_query($query) or pupe_error($query);
 
-	while ($row=mysql_fetch_array($fres)) {
+	while ($row = mysql_fetch_array($fres)) {
 		//pushataan arrayseen kaikki sarakenimet ja tietuetyypit
-		$trows[] = strtoupper($row[0]);
-		$ttype[] = $row[1];
+		$trows[] 	= strtoupper($row[0]);
+		$ttype[]	= $row[1];
+
+		$tlengthpit = ereg_replace("[^0-9,]", "", $row[1]);
+		
+		if (strpos($tlengthpit, ",") !== FALSE) {
+			$tlengthpit = substr($tlengthpit, 0, strpos($tlengthpit, ",")+1)+1;	
+		}
+			
+		$tlength[]	= $tlengthpit;
 	}
 
 	//määrittelee onko tämä taulu sellanen jossa ei ole yhtiö-saraketta
@@ -115,7 +127,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					//sarakkeen positio tiedostossa
 					$pos2 = array_search($column, $otsikot);
 
-					$ityyppi[$pos2]=$ttype[$pos1];
+					$ityyppi[$pos2]		= $ttype[$pos1];
+					$ikenpituus[$pos2]	= $tlength[$pos1];
 				}
 
 				// yhtio ja tunnus kenttiä ei saa koskaan muokata...
@@ -325,7 +338,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
 				if (mysql_num_rows($fresult) != 0 ) {
 					if ($table != 'asiakasalennus' and $table != 'asiakashinta') {
-						echo "<font class='error'>".t("Rivi on jo olemassa, ei voida perustaa uutta!")."</font><br>$valinta<br>";
+						echo "<font class='error'>".t("VIRHE:")." ".t("Rivi on jo olemassa, ei voida perustaa uutta!")."</font> $valinta<br>";
 						$tila = 'ohita';
 					}
 				}
@@ -373,6 +386,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					if(substr($ityyppi[$r],0,7) == "decimal" or substr($ityyppi[$r],0,4) == "real") {
 						//korvataan decimal kenttien pilkut pisteillä...
 						$rivi[$r] = str_replace(",",".",$rivi[$r]);
+					}
+					
+					if ((int) $ikenpituus[$r] > 0 and strlen($rivi[$r]) > $ikenpituus[$r]) {
+						echo "<font class='error'>".t("VIRHE").": ".$otsikot[$r]." ".t("kentässä on liian pitkä tieto")."!</font> $rivi[$r]: ".strlen($rivi[$r])." > ".$ikenpituus[$r]."!<br>";
+						$hylkaa++; // ei päivitetä tätä riviä
 					}
 
 					// tehdään riville oikeellisuustsekkejä

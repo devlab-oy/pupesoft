@@ -134,7 +134,13 @@
 	
 	if($tee == ''){
 		
-		$kentat = 'tunnus, nimi, nimitark, postitp, ytunnus, ovttunnus';
+		if ($yhtiorow["asiakkaan_tarkenne"] == "A") {
+			$kentat = 'tunnus, nimi, nimitark, postitp, ytunnus, asiakasnro';	
+		}
+		else {
+			$kentat = 'tunnus, nimi, nimitark, postitp, ytunnus, ovttunnus';	
+		}
+
 		$jarjestys = 'selaus, nimi';
 		
 		$array = split(",", $kentat);

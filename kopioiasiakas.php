@@ -135,7 +135,7 @@
 	if($tee == ''){
 		
 		if ($yhtiorow["asiakkaan_tarkenne"] == "A") {
-			$kentat = 'tunnus, nimi, nimitark, postitp, ytunnus, asiakasnro';	
+			$kentat = 'tunnus, nimi, nimitark, postitp, ytunnus, asiakasnro, ovttunnus';	
 		}
 		else {
 			$kentat = 'tunnus, nimi, nimitark, postitp, ytunnus, ovttunnus';	

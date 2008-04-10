@@ -487,7 +487,7 @@
 					and lasku.tila = 'U' and lasku.alatila = 'X'
 					$lisa
 					$kassat
-					ORDER BY kassa, kassanimi, tyyppi";
+					ORDER BY kassa, kassanimi, tyyppi, lasku.tapvm, lasku.laskunro";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$i = 1;

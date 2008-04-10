@@ -931,6 +931,7 @@ else {
 					<option value='autodata'>".t("Autodatatiedot")."</option>
 					<option value='autodata_tuote'>".t("Autodata tuotetiedot")."</option>
 					<option value='avainsana'>".t("Avainsanat")."</option>
+					<option value='budjetti'>".t("Budjetti")."</option>
 					<option value='etaisyydet'>".t("Etäisyydet varastosta")."</option>
 					<option value='hinnasto'>".t("Hinnasto")."</option>
 					<option value='kalenteri'>".t("Kalenteritietoja")."</option>

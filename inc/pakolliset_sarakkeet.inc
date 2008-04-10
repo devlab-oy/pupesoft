@@ -21,6 +21,11 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("TUOTENO","HYLLYALUE","HYLLYNRO","HYLLYVALI","HYLLYTASO","OLETUS");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
+			case "budjetti" :
+				$pakolliset = array("KAUSI","TASO","SUMMA");
+				$wherelliset = array("KAUSI","TASO","SUMMA", "KUSTANNUSPAIKKA", "KOHDE", "PROJEKTI");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				break;
 			case "asiakas" :
 				//	T‰m‰ est‰‰ syncronoinnin muilla kuin suomalaisilla toimittajilla..
 				if (strtoupper($yhtiorow['maa']) == 'FI') {

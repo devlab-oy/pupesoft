@@ -676,10 +676,13 @@ if ($tila == '') {
 	}
 
 	if ($laskunsumma == 0 and $valittusumma <> 0) { // jos ollaan saatu kohdistus nollaan ja ollaan valittu jotain
-		$ok = " color:#00FF00;";
+		//$ok = " color:#00FF00;";
+		$ok = "<font class='ok'>";
+		$okend = "</font>";
 	}
 	else {
 		$ok = "";
+		$okend = "";
 	}
 
 	// jos kululaskua ei ole viel‰ liitetty, oletetaan ett‰ k‰ytet‰‰n toimittajan oletus valuuttaa
@@ -736,7 +739,7 @@ if ($tila == '') {
 	</tr>
 	<tr>
 		<th>".t("Erikoisalennus")."</th><td>$laskurow[erikoisale]</td>
-		<th>".t("Kohdistettu summa (riv/kpl)")."</th><td style='text-align:right;$ok'> $valittusumma $kulurow[valkoodi] ($kappaleetrow[rivit]/".(float) $kappaleetrow['kappaleet'].")</td>
+		<th>".t("Kohdistettu summa (riv/kpl)")."</th><td style='text-align:right'>$ok $valittusumma $kulurow[valkoodi] ($kappaleetrow[rivit]/".(float) $kappaleetrow['kappaleet'].")$okend</td>
 		<th>".t("N‰yt‰ kaikki yhdell‰ sivulla").":</th><td><INPUT type='checkbox' $chk3 name='nayta_kaikki' value='kaikki' onclick='submit()'></td>
 	</tr>";
 
@@ -755,7 +758,7 @@ if ($tila == '') {
 
  	echo "<td>$alku - $loppu  ".t("Sivu").": $sivu</td>";
 
-	echo "<th>".t("J‰ljell‰")."</th><td style='text-align:right;$ok'> $laskunsumma $kulurow[valkoodi]</td>";
+	echo "<th>".t("J‰ljell‰")."</th><td style='text-align:right'>$ok $laskunsumma $kulurow[valkoodi]$okend</td>";
 
 	echo "<th>".t("N‰yt‰ vain suoratoimitukset").":</th><td><INPUT type='checkbox' $chk6 name='suoratoimitukset' value='vaan' onclick='submit()'></td>";
 	echo "</form>";

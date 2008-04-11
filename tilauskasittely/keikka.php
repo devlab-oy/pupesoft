@@ -70,7 +70,7 @@ if (!function_exists("tsekit")) {
 
 		if ($eipaikkoja == 0 and $kplyhteensa > 0) {
 			$varok=1;
-			$varastopaikat = "<font style='color:#00FF00;'>".t("ok")."</font>";
+			$varastopaikat = "<font class='ok'>".t("ok")."</font>";
 		}
 		else {
 			$varok=0;
@@ -89,7 +89,7 @@ if (!function_exists("tsekit")) {
 
 		if (mysql_num_rows($okres)==0) {
 			$lisok=1;
-			$lisatiedot = "<font style='color:#00FF00;'>".t("ok")."</font>";
+			$lisatiedot = "<font class='ok'>".t("ok")."</font>";
 		}
 		else {
 			$lisok=0;
@@ -99,7 +99,7 @@ if (!function_exists("tsekit")) {
 		// katotaan onko kohdistus tehty pennilleen
 		if ($row["kohdistettu"] == 'K') {
 			$kohok=1;
-			$kohdistus = "<font style='color:#00FF00;'>".t("ok")."</font>";
+			$kohdistus = "<font class='ok'>".t("ok")."</font>";
 		}
 		else {
 			$kohok=0;
@@ -152,7 +152,7 @@ if (!function_exists("tsekit")) {
 		// pit‰‰ olla yht‰monta sarjanumeroa liitettyn‰ kun kamaa viety varastoon			
 		if ($sarjanrook == 1) {
 			$sarjanrook	= 1;
-			$sarjanrot	= "<font style='color:#00FF00;'>".t("ok")."</font>";
+			$sarjanrot	= "<font class='ok'>".t("ok")."</font>";
 		}
 		else {
 			$sarjanrook	= 0; // ei ole kaikilla tuotteilla sarjanumeroa

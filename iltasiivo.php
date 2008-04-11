@@ -19,6 +19,21 @@
 		if (mysql_num_rows($yhtiores) == 1) {
 			$yhtiorow = mysql_fetch_array($yhtiores);
 			$aja = 'run';
+			
+			$query = "	SELECT *
+						FROM yhtion_parametrit
+						WHERE yhtio='$yhtiorow[yhtio]'";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_parametritrow = mysql_fetch_array($result);
+
+				// lisätään kaikki yhtiorow arrayseen
+				foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
+					$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
+				}
+			}
+			
 		}
 		else {
 			die ("Yhtiö $kukarow[yhtio] ei löydy!");
@@ -77,9 +92,9 @@
 
 		if ($laskuri > 0) $iltasiivo .= "Poistettiin $laskuri poistetun tuotteen tuoteliitosta.\n";
 		$laskuri = 0;
-
+		$laskuri2 = 0;
 		// poistetaan kaikki JT-otsikot jolla ei ole enää rivejä ja extranet tilaukset joilla ei ole rivejä ja tietenkin myös ennakkootsikot joilla ei ole rivejä.
-		$query = "	select tilausrivi.tunnus, lasku.tunnus laskutunnus, lasku.tila
+		$query = "	select tilausrivi.tunnus, lasku.tunnus laskutunnus, lasku.tila, lasku.tunnusnippu
 					from lasku
 					left join tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					where lasku.yhtio = '$kukarow[yhtio]' and
@@ -90,16 +105,28 @@
 		while ($row = mysql_fetch_array($result)) {
 			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php (1)")."<br>";
 			
-			$query = "update lasku set alatila='$row[tila]', tila='D',  comments = '$komm' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[laskutunnus]'";
-			$deler = mysql_query($query) or die($query);
+			//	Jos kyseessä on tunnusnippupaketti, halutaan säilyttää linkki tästä tehtyihin tilauksiin, tilaus merkataan vain toimitetuksi
+			if($row["tunnusnippu"] > 0) {
+				$query = "update lasku set tila = 'L', alatila='X' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[laskutunnus]'";
+				$deler = mysql_query($query) or die($query);
+				$laskuri2 ++;
+			}
+			else {
+				$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php (1)")."<br>";
+
+				$query = "update lasku set alatila='$row[tila]', tila='D',  comments = '$komm' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[laskutunnus]'";
+				$deler = mysql_query($query) or die($query);
+				$laskuri ++;
+			}
 			
 			//poistetaan TIETENKIN kukarow[kesken] ettei voi syöttää extranetissä rivejä tälle
 			$query = "update kuka set kesken = '' where yhtio = '$kukarow[yhtio]' and kesken = '$row[laskutunnus]'";
 			$deler = mysql_query($query) or die($query);
-			$laskuri ++;
+			
 		}
 
 		if ($laskuri > 0) $iltasiivo .= "Poistettiin $laskuri rivitöntä tilausta.\n";
+		if ($laskuri2 > 0) $iltasiivo .= "Merkattiin toimitetuksi $laskuri2 rivitöntä tilausta.\n";
 		
 		// tässä tehdään isittömistä perheistä ei-perheitä ja myös perheistä joissa ei ole lapsia eli nollataan perheid
 		$lask = 0;
@@ -179,11 +206,19 @@
 		}
 		
 		if ($iltasiivo != "") {
+			
 			echo "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]\n\n";
 			echo $iltasiivo;
 			echo "\n";
+			
+			if($iltasiivo_email == 1) {
+				$header 	= "From: <$yhtiorow[postittaja_email]>\n";
+				$header 	.= "MIME-Version: 1.0\n" ;
+				$subject 	= "Iltasiivo yhtiölle $argv[1]";
+				
+				mail($yhtiorow["admin_email"], "Iltasiivo yhtiolle '{$yhtiorow["yhtio"]}'", $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
+			}
 		}
-
 	}
 
 	if (trim($argv[1]) == '') {

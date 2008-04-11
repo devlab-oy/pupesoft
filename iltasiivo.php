@@ -214,7 +214,7 @@
 			if($iltasiivo_email == 1) {
 				$header 	= "From: <$yhtiorow[postittaja_email]>\n";
 				$header 	.= "MIME-Version: 1.0\n" ;
-				$subject 	= "Iltasiivo yhtiölle $argv[1]";
+				$subject 	= "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]";
 				
 				mail($yhtiorow["admin_email"], "Iltasiivo yhtiolle '{$yhtiorow["yhtio"]}'", $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
 			}

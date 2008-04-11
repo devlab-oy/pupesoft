@@ -555,7 +555,7 @@
 					else {
 						echo "3";
 					}
-				echo "' align='left' class='tumma'>$row[kassanimi] ".t("pohjakassa").":</td>";
+				echo "' align='left' class='tumma'>$row[kassanimi] ".t("alkukassa").":</td>";
 				echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='pohjakassa$i' name='pohjakassa$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 				if ($tilityskpl > 1) {
 					$y = $i;

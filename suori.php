@@ -430,15 +430,23 @@
 			if ($trow['valkoodi'] != $yhtiorow['valkoodi'])
 					echo "<input type='text' name='summa' value='$summa' size=8>";
 
-			echo "</td>
-				<td><INPUT TYPE='checkbox' NAME='selvittely' CHECKED></td>
-				<td>
-					<input type='hidden' name='mav' value = '$mav'>
-					<input type='hidden' name='mak' value = '$mak'>
-					<input type='hidden' name='map' value = '$map'>
-					<input type='hidden' name='mtili' value = $mtili>
-					<input type='hidden' name='tunnus' value = $trow[tunnus]>
-					<input type='Submit' value='".t("Suorita")."'></td></tr></form>";
+			
+			if ($yhtiorow['tilikausi_alku'] <= $trow["tapvm"]) {			
+				echo "</td>
+					<td><INPUT TYPE='checkbox' NAME='selvittely' CHECKED></td>
+					<td>
+						<input type='hidden' name='mav' value = '$mav'>
+						<input type='hidden' name='mak' value = '$mak'>
+						<input type='hidden' name='map' value = '$map'>
+						<input type='hidden' name='mtili' value = $mtili>
+						<input type='hidden' name='tunnus' value = $trow[tunnus]>
+						<input type='Submit' value='".t("Suorita")."'></td></tr></form>";
+			}
+			else {
+				echo "</td><td></td><td>";
+				echo "<font class='error'>".t("Tilikausi lukittu")."</font></td></tr></form>";
+			}
+			
 		}
 		echo "</table>";
 	}

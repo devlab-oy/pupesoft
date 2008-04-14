@@ -896,15 +896,21 @@ if ($tila == 'suorituksenvalinta') {
 		echo "<input type='hidden' name='asiakas_nimi' value='$asiakas_nimi'>";
 
 		$r=1;
-		while ($suoritus=mysql_fetch_array ($result)) {
+		while ($suoritus=mysql_fetch_array ($result)) {			
+			
+			if ($yhtiorow['tilikausi_alku'] <= $suoritus['kirjpvm']) {			
+				echo "<tr class='aktiivi'><td>";
+				echo "<input type='radio' name='suoritus_tunnus' value='$suoritus[tunnus]' ";
 
-			echo "<tr class='aktiivi'><td>
-			<input type='radio' name='suoritus_tunnus' value='$suoritus[tunnus]' ";
+				if (mysql_num_rows($result)==$r) echo "checked";
+				$r++;
 
-			if (mysql_num_rows($result)==$r) echo "checked";
-			$r++;
-
-			echo "></td>";
+				echo "></td>";
+			}
+			else {
+				echo "<tr class='aktiivi'><td><font class='error'>".t("Tilikausi lukittu")."</font></td>";
+			}
+			
 
 			for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
 				echo "<td>$suoritus[$i]</td>";

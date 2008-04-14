@@ -258,6 +258,7 @@ if ($tee == "") {
 	//***************** NYKYISET
 	if ($sort == "pyytaja")				$sort = "order by pyytaja,";
 	elseif ($sort == "projekti")		$sort = "order by projekti,";
+	elseif ($sort == "luontiaika")		$sort = "order by luontiaika_short,";
 	elseif ($sort == "kesto_arvio")		$sort = "order by kesto_arvio,";
 	elseif ($sort == "kuvaus")			$sort = "order by kuvaus,";
 	elseif ($sort == "deadline")		$sort = "order by deadline,";

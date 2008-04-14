@@ -66,7 +66,7 @@
 											hyllyalue   	= '$hyllyalue',
 											hyllynro    	= '$hyllynro',
 											hyllyvali   	= '$hyllyvali',
-											hyllytaso   	= '$hyllytaso'
+											hyllytaso   	= '$hyllytaso',
 											luontiaika		= now(),
 											laatija			= '$kukarow[kuka]',
 											muutospvm		= now(),

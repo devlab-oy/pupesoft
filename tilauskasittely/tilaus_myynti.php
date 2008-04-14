@@ -811,7 +811,9 @@ if ($tee == "VALMIS" and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") and $k
 				echo "<input type='hidden' name='maksutapa' value='$maksuehtorow[tunnus]'>";
 				echo "<input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>";
 				echo "<input type='hidden' name='kateinen' value='$kateinen'>";
+				echo "<input type='hidden' name='valittu_kopio_tulostin' value='$valittu_kopio_tulostin'>";
 				echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
+				echo "<input type='hidden' name='toim' value='$toim'>";
 				echo "<td><input type='submit' value='{$maksuehtorow['teksti']} {$maksuehtorow['kassa_teksti']}'></td>";
 				echo "</form>";
 			}
@@ -822,6 +824,7 @@ if ($tee == "VALMIS" and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") and $k
 			echo "<input type='hidden' name='tee' value='VALMIS'>";
 			echo "<input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>";
 			echo "<input type='hidden' name='seka' value='X'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='kateinen' value='$kateinen'>";
 			echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
 			echo "<td><input type='submit' value='Seka'></td>";
@@ -842,6 +845,7 @@ if ($tee == "VALMIS" and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") and $k
 			echo "<input type='hidden' name='maksutapa' value='$maksuehtorow[tunnus]'>";
 			echo "<input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>";
 			echo "<input type='hidden' name='kateinen' value='$kateinen'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
 			echo "</form></tr>";
 		}
@@ -862,10 +866,12 @@ if ($tee == "VALMIS" and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") and $k
 		echo "<input type='hidden' name='tee' value='VALMIS'>";
 		echo "<input type='hidden' name='maksutapa' value='$maksuehtorow[tunnus]'>";
 		echo "<input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>";
+		echo "<input type='hidden' name='valittu_kopio_tulostin' value='$valittu_kopio_tulostin'>";
 		echo "<input type='hidden' name='kateinen' value='$kateinen'>";		
 		echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='seka' id='seka' value='X'>";
-
+		
 		echo "	<script type='text/javascript' language='JavaScript'>
 				<!--
 					function update_summa(kaikkiyhteensa) {
@@ -5071,7 +5077,7 @@ if ($tee == '') {
 					}
 
 					echo "<tr><td class='back'>".t("Kuittikopion tulostuspaikka").": <select name='valittu_kopio_tulostin'>";
-					echo "<option value=''>".t("Oletus")."</option>";
+					echo "<option value=''>".t("Ei tulosteta")."</option>";
 
 					$querykieli = "	SELECT *
 									from kirjoittimet

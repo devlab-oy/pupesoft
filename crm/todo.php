@@ -254,7 +254,7 @@ if ($tee == "") {
 
 	</table>
 	</form><br></div>";
-	
+
 	//***************** NYKYISET
 	if ($sort == "pyytaja")				$sort = "order by pyytaja,";
 	elseif ($sort == "projekti")		$sort = "order by projekti,";
@@ -264,7 +264,7 @@ if ($tee == "") {
 	elseif ($sort == "tunnus")			$sort = "order by tunnus,";
 	elseif ($sort == "kuvaus")			$sort = "order by kuvaus,";
 	elseif ($sort == "tekija")			$sort = "order by tekija,";
-	else 								$sort = "order by "; 
+	else 								$sort = "order by ";
 
 	$sort .= "prioriteetti,deadline,tunnus,kesto_arvio desc,aika,projekti";
 
@@ -286,6 +286,9 @@ if ($tee == "") {
 	if ($deadline_haku != "") {
 		$lisa .= " and deadline like '%$deadline_haku%' ";
 	}
+	if ($luonti_haku != "") {
+		$lisa .= " and todo.luontiaika like '%$luonti_haku%' ";
+	}
 	if ($prioriteetti_haku != "") {
 		$lisa .= " and prioriteetti = '$prioriteetti_haku' ";
 	}
@@ -301,7 +304,7 @@ if ($tee == "") {
 	if ($asiakas_valittu != "") {
 		$lisa .= " and todo.asiakas = '$asiakas_valittu'";
 	}
-	
+
 	$query  = "	SELECT kuka.*, count(distinct todo.tunnus) kpl, ifnull(sum(kesto_arvio),0) aika
 				FROM kuka
 				LEFT JOIN todo on (todo.yhtio = kuka.yhtio and todo.tekija = kuka.tunnus and todo.kuittaus = '')
@@ -316,7 +319,7 @@ if ($tee == "") {
 	echo "<option value=''>Kaikki</option>";
 
 	$sel = "";
-	if ($tekija_valittu == "0") $sel = "SELECTED";	
+	if ($tekija_valittu == "0") $sel = "SELECTED";
 	echo "<option value='0' $sel>Ei tekij‰‰</option>";
 
 	while ($asiakas = mysql_fetch_array($result)) {
@@ -335,7 +338,7 @@ if ($tee == "") {
 	echo "<option value=''>Kaikki asiakkaat</option>";
 
 	$sel = "";
-	if ($asiakas_valittu == "0") $sel = "SELECTED";	
+	if ($asiakas_valittu == "0") $sel = "SELECTED";
 	echo "<option value='0' $sel>Ei asiakasta</option>";
 
 	while ($asiakas = mysql_fetch_array($result)) {
@@ -348,7 +351,7 @@ if ($tee == "") {
 
 
 	//***************** VANHAT
-	$query = "	SELECT kuka.nimi, todo.*, if(deadline='0000-00-00', '9999-99-99', deadline) deadline, asiakas.nimi asiakasnimi, todo.tunnus
+	$query = "	SELECT kuka.nimi, todo.*, left(todo.luontiaika, 10) luontiaika_short, if(deadline='0000-00-00', '9999-99-99', deadline) deadline, asiakas.nimi asiakasnimi, todo.tunnus
 				FROM todo
 				LEFT JOIN kuka on (kuka.yhtio = todo.yhtio and todo.tekija = kuka.tunnus)
 				LEFT JOIN asiakas on (asiakas.yhtio = todo.yhtio and todo.asiakas = asiakas.tunnus)
@@ -371,6 +374,7 @@ if ($tee == "") {
 			<th>kuvaus</th>
 			<th>pyyt‰j‰</th>
 			<th>projekti</th>
+			<th>lis‰tty</th>
 			<th>prio</th>
 			<th>aika-arvio</th>
 			<th>aika-tot.</th>
@@ -397,6 +401,7 @@ if ($tee == "") {
 			echo "<td width='550'>$rivi[kuvaus]</td>";
 			echo "<td>$rivi[asiakasnimi] $rivi[pyytaja]</td>";
 			echo "<td>$rivi[projekti]</td>";
+			echo "<td>$rivi[luontiaika_short]</td>";
 			echo "<td>$rivi[prioriteetti]</td>";
 			echo "<td>$rivi[kesto_arvio]</td>";
 			echo "<td>$rivi[kesto_toteutunut]</td>";
@@ -406,20 +411,8 @@ if ($tee == "") {
 	}
 
 	echo "</table><br></div>";
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	$query = "	SELECT kuka.nimi, todo.*, if(deadline='0000-00-00', '9999-99-99', deadline) deadline, asiakas.nimi asiakasnimi, todo.tunnus
+
+	$query = "	SELECT kuka.nimi, todo.*, left(todo.luontiaika, 10) luontiaika_short, if(deadline='0000-00-00', '9999-99-99', deadline) deadline, asiakas.nimi asiakasnimi, todo.tunnus
 				FROM todo
 				LEFT JOIN kuka on (kuka.yhtio = todo.yhtio and todo.tekija = kuka.tunnus)
 				LEFT JOIN asiakas on (asiakas.yhtio = todo.yhtio and todo.asiakas = asiakas.tunnus)
@@ -435,14 +428,15 @@ if ($tee == "") {
 	echo "<table width='1000' cellpadding='2'>";
 
 	echo "<tr>
-		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=tunnus&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>#</a></th>
-		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=kuvaus&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>kuvaus</a></th>
-		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=pyytaja&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>pyyt‰j‰</a></th>
-		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=tekija&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>tekij‰</a></th>
-		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=projekti&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>projekti</a></th>
-		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=kesto_arvio&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>aika-arvio</a></th>
-		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=deadline&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>deadline</a></th>
-		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=prioriteetti&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>prio</a></th>
+		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=tunnus&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>#</a></th>
+		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=kuvaus&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>kuvaus</a></th>
+		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=pyytaja&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>pyyt‰j‰</a></th>
+		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=tekija&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>tekij‰</a></th>
+		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=projekti&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>projekti</a></th>
+		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=luontiaika&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>lis‰tty</a></th>
+		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=kesto_arvio&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>aika-arvio</a></th>
+		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=deadline&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>deadline</a></th>
+		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=prioriteetti&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>prio</a></th>
 		<th>kuittaus</th>
 	</tr>";
 
@@ -457,6 +451,7 @@ if ($tee == "") {
 	echo "<td><input type='text' size='10' name='pyytaja_haku' 		value='$pyytaja_haku'></td>";
 	echo "<td><input type='text' size='10' name='tekija_haku' 		value='$tekija_haku'></td>";
 	echo "<td><input type='text' size='10' name='projekti_haku' 	value='$projekti_haku'></td>";
+	echo "<td><input type='text' size='10' name='luonti_haku' 		value='$luonti_haku'></td>";
 	echo "<td><input type='text' size='10' name='aika_haku' 		value='$aika_haku'></td>";
 	echo "<td><input type='text' size='10' name='deadline_haku' 	value='$deadline_haku'></td>";
 	echo "<td><input type='text' size='10' name='prioriteetti_haku'	value='$prioriteetti_haku'></td>";
@@ -498,6 +493,7 @@ if ($tee == "") {
 		echo "<td>$rivi[asiakasnimi] $rivi[pyytaja]</td>";
 		echo "<td>$rivi[nimi]</td>";
 		echo "<td>$rivi[projekti]</td>";
+        echo "<td>$rivi[luontiaika_short]</td>";
         echo "<td>$rivi[kesto_arvio]</td>";
         echo "<td>$rivi[deadline]</td>";
         echo "<td>$rivi[prioriteetti]</td>";
@@ -507,7 +503,7 @@ if ($tee == "") {
 		echo "</tr>\n";
 	}
 
-	echo "<tr><th colspan='5'>Aika-arvio yhteens‰</th><th colspan='4'>$tunnit h = ".round($tunnit/8,0)." pv</th></tr>";
+	echo "<tr><th colspan='6'>Aika-arvio yhteens‰</th><th colspan='4'>$tunnit h = ".round($tunnit/8,0)." pv</th></tr>";
 
 	echo "</table>";
 

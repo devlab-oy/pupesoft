@@ -175,6 +175,10 @@
 				$kukarow["kesken"] = $tilausnumero;
 				$kaytiin_otsikolla = "NOJOO!";
 			}
+			
+			// haetaan avoimen tilauksen otsikko
+			$query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+			$laskures = mysql_query($query);
 		}
 
 		if ($kukarow["kesken"] != 0 and $laskures != '') {

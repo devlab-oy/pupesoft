@@ -303,6 +303,8 @@
 			$query = "SELECT * FROM kassalipas WHERE yhtio='{$kukarow['yhtio']}'";
 			$kassares = mysql_query($query) or pupe_error($query);
 			
+			$sel = "";
+
 			echo "<input type='hidden' name='noutaja' value=''>";
 			echo "<input type='hidden' name='rivihinta' value='$rivihinta'";
 			echo "<input type='hidden' name='valkoodi' value='$row[valkoodi]'";
@@ -311,10 +313,12 @@
 			echo "<select name='kassalipas'>";
 			echo "<option value=''>".t("Ei kassalipasta")."</option>";
 
-			$sel = "";
 						
 			while ($kassarow = mysql_fetch_array($kassares)) {
-				if ($kassalipas == $kassarow["tunnus"]) {
+				if ($kukarow["kassamyyja"] == $kassarow["tunnus"]) {
+					$sel = "selected";
+				}
+				elseif ($kassalipas == $kassarow["tunnus"]) {
 					$sel = "selected";
 				}
 				

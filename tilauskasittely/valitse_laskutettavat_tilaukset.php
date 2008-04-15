@@ -551,7 +551,10 @@
 				$sel = "";
 
 				while ($kassarow = mysql_fetch_array($kassares)) {
-					if ($kassalipas == $kassarow["tunnus"]) {
+					if ($kukarow["kassamyyja"] == $kassarow["tunnus"]) {
+						$sel = "selected";
+					}
+					elseif ($kassalipas == $kassarow["tunnus"]) {
 						$sel = "selected";
 					}
 

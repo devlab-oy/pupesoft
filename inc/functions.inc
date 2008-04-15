@@ -493,18 +493,12 @@ if (!function_exists("saldo_myytavissa")) {
 		global $kukarow, $yhtiorow;
 
 		//Speciaalitapaus jossa JT-rivit varaavat saldoa
-		if ($tyyppi == "JTSPEC") {
+		$varaako_jt_saldoa = "";
 
-			if ($yhtiorow["varaako_jt_saldoa"] != "") {
-				$varaako_jt_saldoa = " and tilausrivi.var != 'J' ";
-			}
-			else {
-				$varaako_jt_saldoa = "";
-			}
-
+		if ($tyyppi == "JTSPEC" and $yhtiorow["varaako_jt_saldoa"] != "") {
+			$varaako_jt_saldoa = " and tilausrivi.var != 'J' ";
 			$tyyppi = "";
 		}
-
 
 		$varasto = (int) $varasto;
 
@@ -623,6 +617,7 @@ if (!function_exists("saldo_myytavissa")) {
 				$valinta1 .= " (varastopaikat.sallitut_maat like '%$maa%' or varastopaikat.sallitut_maat = '') and ";
 			}
 
+			$kerayslisa = "";
 			if ($pvm != '') {
 				$kerayslisa = " and tilausrivi.kerayspvm <= '$pvm' ";
 			}

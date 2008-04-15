@@ -803,9 +803,13 @@
 	}
 
 	if (mysql_field_name($result, $i) == "piiri") {
+		if ($prospekti == 'TRUE') {
+			$piirilisa = " and selitetark_2 = 'rajattu' ";
+		}
+		
 		$query = "	SELECT selite, if (selite!=selitetark, concat_ws(' - ', selite, selitetark), selite) selitetark
 					FROM avainsana
-					WHERE yhtio='$kukarow[yhtio]' and laji = 'PIIRI'
+					WHERE yhtio='$kukarow[yhtio]' and laji = 'PIIRI' $piirilisa
 					ORDER BY jarjestys, selite+0";
 		$vresult = mysql_query($query) or pupe_error($query);
 

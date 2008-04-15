@@ -63,13 +63,32 @@
 
 	// Tutkitaan vähän alias_settejä ja rajattua näkymää
 	$al_lisa = " and selitetark_2 = '' ";
-
+	
+	$prospekti		 = "";
+	$prospektlisa	 = "";
+	
 	if ($alias_set != '') {
-		if ($rajattu_nakyma != '') {
-			$al_lisa = " and selitetark_2 = '$alias_set' ";
+		if (strtoupper($rajattu_nakyma) == 'PROSPEKTI' and $toim == 'asiakas') {
+			$prospekti = "TRUE"; 
+			$apupuquery = "SELECT selite FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = 'PIIRI' and selitetark_2 = 'rajattu'";
+			$apupuresult = mysql_query($apupuquery) or pupe_error($apupuquery);
+			
+			$prospektpiirit	 = "";
+			
+			if (mysql_num_rows($apupuresult) > 0) {
+				while ($apupurow = mysql_fetch_array($apupuresult)) {
+					$prospektpiirit .= "$apupurow[selite],";
+				}
+				$prospektlisa = " and asiakas.piiri in ('".str_replace(',','\',\'',substr($prospektpiirit,0,-1))."') ";
+			}
 		}
 		else {
-			$al_lisa = " and (selitetark_2 = '$alias_set' or selitetark_2 = '') ";
+			if ($rajattu_nakyma != '') {
+				$al_lisa = " and selitetark_2 = '$alias_set' ";
+			}
+			else {
+				$al_lisa = " and (selitetark_2 = '$alias_set' or selitetark_2 = '') ";
+			}
 		}
 	}
 
@@ -478,7 +497,7 @@
 			$limiitti = "";
 		}
 
-		$query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa";
+		$query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa";
         $query .= "$ryhma ORDER BY $jarjestys $limiitti";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -507,7 +526,7 @@
 				<input type = 'hidden' name = 'nayta_poistetut' value = 'YES'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>
 				<input type = 'submit' value = '".t("Näytä poistetut")."'></form>";
-
+			
 		echo "	<br><br><table><tr class='aktiivi'>
 				<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>

@@ -21,6 +21,16 @@ $ytunnus = addslashes(trim($ytunnus));
 $limit   = 300; // montako riviä on maksimi
 $monta   = 0;
 
+$prospektlisa = "";
+
+$apupuquery = "SELECT selite FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = 'PIIRI' and selitetark_2 = 'rajattu'";
+$apupuresult = mysql_query($apupuquery) or pupe_error($apupuquery);
+if (mysql_num_rows($apupuresult) > 0) {
+	while ($apupurow = mysql_fetch_array($apupuresult)) {
+		$prospektpiirit .= "$apupurow[selite],";
+	}
+	$prospektlisa = " and asiakas.piiri not in ('".str_replace(',','\',\'',substr($prospektpiirit,0,-1))."') ";
+}
 
 if ($myos_poistetut != "") {
 	$lajilisa = "";
@@ -29,15 +39,18 @@ else {
 	$lajilisa = " and laji != 'P' ";
 }
 
-
-
 //	Jos käyttäjällä on valittu piirejä niin sallitaan vain ko. piirin/piirien hakeminen
 if($kukarow["piirit"] != "")	 {
-	$asiakasrajaus = "and piiri IN ($kukarow[piirit])";
+	$asiakasrajaus = " and piiri IN ($kukarow[piirit]) ";
 }
 else {
 	$asiakasrajaus = "";
 }
+
+if ($prospektlisa != "" and !in_array($kutsuja,array("asiakasemo.php","kalenteri.php"))) {
+	$asiakasrajaus .= $prospektlisa;
+}
+
 
 if (is_numeric($asiakasid) and $asiakasid > 0) {
 	$query	= "	SELECT *

@@ -112,6 +112,8 @@ if($tee == 'LISAA') {
 		}
 
 		echo "<br><font class='message'>".t("Valitse asiakas").":</font><br><br>";
+		
+		$kutsuja = 'kalenteri.php';
 		require ("../inc/asiakashaku.inc");
 
 		if ($ytunnus == '') {

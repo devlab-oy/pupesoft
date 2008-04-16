@@ -288,7 +288,7 @@
 							$kilot[$i] 		= 0;
 							$lavametri[$i] 	= 0;
 							$kuutiot[$i] 	= 0;
-							$kiloja			= array(0);
+							$kiloja			= array("0");
 
 							$apu++;
 						}

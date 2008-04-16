@@ -147,11 +147,21 @@
 					require("tilauskasittely/lisaarivi.inc");
 
 					//	Merkataan tämä rivi kerätyksi ja toimitetuksi..
-					$query = "	UPDATE tilausrivi set
-								kerattyaika	= now(),
-								keratty		= '{$kukarow["kuka"]}'
-								where yhtio = '$kukarow[yhtio]' and tunnus='{$lisatyt_rivit1[0]}'";
-					$updres = mysql_query($query) or pupe_error($query);
+					
+					if ($lisatyt_rivit1[0] != '') {
+						$lisatty_rivitunnus = $lisatyt_rivit1[0];
+					}
+					else {
+						$lisatty_rivitunnus = $lisatyt_rivit2[0];
+					}
+					
+					if ($lisatty_rivitunnus != '') {
+						$query = "	UPDATE tilausrivi set
+									kerattyaika	= now(),
+									keratty		= '{$kukarow["kuka"]}'
+									where yhtio = '$kukarow[yhtio]' and tunnus='{$lisatyt_rivit1[0]}'";
+						$updres = mysql_query($query) or pupe_error($query);
+					}
 				}
 			}
 
@@ -170,7 +180,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = '$tila'
 						$alatilassa
-						and lasku. tunnus in ($tunnukset)
+						and lasku.tunnus in ($tunnukset)
 						HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ((toimitustapa.nouto is null or toimitustapa.nouto='') or lasku.vienti!='')";
 			$tilre = mysql_query($query) or pupe_error($query);
 

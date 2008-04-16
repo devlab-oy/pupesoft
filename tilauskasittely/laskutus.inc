@@ -462,15 +462,17 @@ else {
 	$asrow = mysql_fetch_array($asres);
 
 	// käsin syötetty summa johon lasku pyöristetään kotivaluutassa
-	if (abs($orow["hinta"] - $loppusumma) <= 0.5 and trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
-		$pyorerotus = $loppusumma - $orow["hinta"];
-	}
+	if ($orow["hinta"] <> 0) {
+		if (abs($orow["hinta"] - $loppusumma) <= 0.5 and trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
+			$pyorerotus = $loppusumma - $orow["hinta"];
+		}
 
-	// käsin syötetty summa johon lasku pyöristetään valuutassa
-	if (abs($orow["hinta"] - $loppusumma_valuutassa) <= 0.5 and trim(strtoupper($orow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-		$pyorerotus_valuutassa = $loppusumma_valuutassa - $orow["hinta"];
+		// käsin syötetty summa johon lasku pyöristetään valuutassa
+		if (abs($orow["hinta"] - $loppusumma_valuutassa) <= 0.5 and trim(strtoupper($orow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+			$pyorerotus_valuutassa = $loppusumma_valuutassa - $orow["hinta"];
+		}
 	}
-
+	
 	// jos halutaan pyöristää laskun loppusumma lähimpään tasalukuun
 	if ($yhtiorow["laskunsummapyoristys"] != '' or $asrow["laskunsummapyoristys"] != '') {
 		// kotivaluutassa

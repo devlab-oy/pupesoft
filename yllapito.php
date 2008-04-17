@@ -790,7 +790,7 @@
 		echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
 
 		if ($toim == "asiakas") {
-			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ja päivitä tiedot myös avoimille tilauksille'>";
+			//echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ja päivitä tiedot myös avoimille tilauksille'>";
 		}
 
 		if($lukossa == "ON") {

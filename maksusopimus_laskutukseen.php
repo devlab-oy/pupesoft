@@ -23,7 +23,7 @@
 			if ($debug==1) echo t("Perusotsikko löytyi")." $laskurow[nimi]<br>";
 
 
-			// Onko supimuksella vielä jotain ennakkolaskutettavaa
+			// Onko sopimuksella vielä jotain ennakkolaskutettavaa
 			$query = "	SELECT yhtio
 						FROM maksupositio
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -163,12 +163,12 @@
 
 			if ($debug==1) echo t("Perustin laskun")." $laskurow[nimi] $id<br>";
 
-			//Lasketaan maksusopimuksen arvo verokannoittain jotta voidaan laskuttaa ennakot oikeissa alveissa
+			// Lasketaan maksusopimuksen arvo verokannoittain jotta voidaan laskuttaa ennakot oikeissa alveissa
 			// ja lisätään ennakkolaskutusrivi laskulle, vain jaksotetut rivit!
 			$query = "	SELECT
 						sum(if(tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) jaksotettavaa
 						FROM lasku
-						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.jaksotettu=lasku.jaksotettu
+						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.jaksotettu=lasku.jaksotettu
 						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
 						and lasku.jaksotettu  	= '$tunnus'
 						GROUP by lasku.jaksotettu";
@@ -179,7 +179,7 @@
 						sum(if(tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) summa,
 						if(tilausrivi.alv>=500, 0, tilausrivi.alv) alv
 						FROM lasku
-						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.jaksotettu=lasku.jaksotettu
+						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.jaksotettu=lasku.jaksotettu
 						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
 						and lasku.jaksotettu  	= '$tunnus'
 						GROUP BY lasku.jaksotettu, alv";
@@ -187,9 +187,10 @@
 			$tot = 0;
 			
 			//	Lasku voi mennä myös kaukomaille, joten haetaan tämän asiakkaan kieli..
-			$query = "select kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+			$query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 			$kielires = mysql_query($query) or pupe_error($query);
 			$kielirow = mysql_fetch_array($kielires);
+			
 			if($kielirow["kieli"] == "") {
 				$kielirow["kieli"]="fi";
 			}
@@ -216,7 +217,7 @@
 					// $summa on verollinen tai veroton riippuen yhtiön myyntihinnoista
 					$summa = $row["summa"]/$sumrow["jaksotettavaa"] * $posrow["summa"];
 
-					$query  = "	insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values  
+					$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values  
 								('$summa', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now())";
 					$addtil = mysql_query($query) or pupe_error($query);
 
@@ -229,7 +230,7 @@
 			}
 
 			// Päivitetään positiolle tämän laskun tunnus
-			$query = "update maksupositio set uusiotunnus='$id' where tunnus='$posrow[tunnus]'";
+			$query = "UPDATE maksupositio set uusiotunnus='$id' where tunnus='$posrow[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			// merkataan tässä vaiheessa luotu ennakkomaksu-tilaus toimitetuksi
@@ -240,7 +241,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			// ja päivitetään luotu ennakkomaksu-tilaus laskutusjonoon
-			$query = "	update lasku
+			$query = "	UPDATE lasku
 						set tila='L', alatila='D'
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus = '$id'";
@@ -344,10 +345,11 @@
 						GROUP BY alv";
 			$sresult = mysql_query($query) or pupe_error($query);
 			
-			//	Haetaan asiakkaan kieli niin hekin ymmärätävät..
-			$query = "select kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+			//	Haetaan asiakkaan kieli niin hekin ymmärtävät..
+			$query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 			$kielires = mysql_query($query) or pupe_error($query);
 			$kielirow = mysql_fetch_array($kielires);
+			
 			if($kielirow["kieli"] == "") {
 				$kielirow["kieli"]="fi";
 			}
@@ -361,7 +363,7 @@
 
 			while($row = mysql_fetch_array($sresult)) {
 				
-				$query  = "	insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, laatija, laadittu)
+				$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, laatija, laadittu)
 							values  ('$row[laskutettu]', 'N', '-1', '-1', '$vikatunnus', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now(), '$kukarow[kuka]', now(), '$kukarow[kuka]', now())";
 				$addtil = mysql_query($query) or pupe_error($query);
 
@@ -369,7 +371,7 @@
 			}
 
 			// Päivitetään positiolle laskutustunnus
-			$query = "update maksupositio set uusiotunnus='$vikatunnus' where tunnus = '$posrow[tunnus]'";
+			$query = "UPDATE maksupositio set uusiotunnus='$vikatunnus' where tunnus = '$posrow[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if ($posrow["erpcm"] != "0000-00-00" and $posrow["erpcm"] != "") {

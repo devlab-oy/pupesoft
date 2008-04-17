@@ -411,7 +411,7 @@
 		}
 		if ($toim == "TARIFFI") {
 			//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa tariffilista
-			$where1 .= " lasku.tila in ('H','Y','M','P','Q') and lasku.kohdistettu in ('K','X') ";
+			$where1 .= " lasku.tila = 'K' and lasku.kohdistettu in ('K','X') ";
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 			
@@ -434,7 +434,7 @@
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 		if ($toim == "SIIRTOLISTA") {
-			//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa tariffilista
+			//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa siirtolista
 			$where1 .= " lasku.tila = 'G' ";
 
 			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'

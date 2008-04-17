@@ -205,7 +205,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(430, 708, t("Asiaa hoitaa", $kieli), 	$thispage, $pieni);
 
 		//etsitään myyjän nimi
-		$query  = "	select nimi
+		$query  = "	SELECT nimi
 					from kuka
 					where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
 		$myyresult = mysql_query($query) or pupe_error($query);
@@ -216,23 +216,15 @@ if (!function_exists('alku')) {
 		$pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(695, 420, 674, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 687, t("Asiakkaan Y-tunnus", $kieli), 	$thispage, $pieni);
+		$pdf->draw_text(310, 677, tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]), $thispage, $norm);
 
-		if (substr(trim(strtoupper($laskurow["ytunnus"])),0,2) != strtoupper($laskurow["maa"]) and
-			trim(strtoupper($laskurow["maa"])) != trim(strtoupper($yhtiorow["maa"])) and
-			trim(strtoupper($laskurow["maa"])) != "") {
-
-			$laskurow["ytunnus"] = strtoupper($laskurow["maa"])."-".$laskurow["ytunnus"];
-		}
-
-		$pdf->draw_text(310, 677, $laskurow["ytunnus"], 			$thispage, $norm);
 		$pdf->draw_text(430, 687, t("Asiakasnumero", $kieli), 		$thispage, $pieni);
 
-
 		if(trim($asiakasrow["asiakasnro"]) != "") {
-			$pdf->draw_text(430, 677, $asiakasrow["asiakasnro"], 		$thispage, $norm);
+			$pdf->draw_text(430, 677, $asiakasrow["asiakasnro"], 	$thispage, $norm);
 		}
 		else {
-			$pdf->draw_text(430, 677, $laskurow["ytunnus"], 			$thispage, $norm);
+			$pdf->draw_text(430, 677, $laskurow["ytunnus"], 		$thispage, $norm);
 		}
 
 		$pdf->draw_rectangle(674, 300, 653, 580, $thispage, $rectparam);
@@ -308,32 +300,34 @@ if (!function_exists('alku')) {
 		$tyomres = mysql_query($query) or pupe_error($query);	
 		$tyomrow = mysql_fetch_array($tyomres);
 		
-		$squery = "	SELECT tyomaarays.*
-					FROM tyomaarays
-					WHERE tyomaarays.yhtio = '$kukarow[yhtio]'
-					and tyomaarays.otunnus in ($tyomrow[otunnus])";
-		$tyomres = mysql_query($squery) or pupe_error($squery);	
+		if ($tyomrow["otunnus"] != "") {
+			$squery = "	SELECT tyomaarays.*
+						FROM tyomaarays
+						WHERE tyomaarays.yhtio = '$kukarow[yhtio]'
+						and tyomaarays.otunnus in ($tyomrow[otunnus])";
+			$tyomres = mysql_query($squery) or pupe_error($squery);	
 		
-		while ($tyomrow = mysql_fetch_array($tyomres)) {
+			while ($tyomrow = mysql_fetch_array($tyomres)) {
 			
-			$query = "	SELECT selitetark_2
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]' 
-						and laji = 'sarjanumeron_li' 
-						and selite = 'MERKKI'
-						and selitetark = '$tyomrow[merkki]'
-						LIMIT 1";
-			$merkkires = mysql_query($query) or pupe_error($query);
+				$query = "	SELECT selitetark_2
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and laji = 'sarjanumeron_li' 
+							and selite = 'MERKKI'
+							and selitetark = '$tyomrow[merkki]'
+							LIMIT 1";
+				$merkkires = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($merkkires) > 0) {
-				$merkkirow = mysql_fetch_array($merkkires);					
-				$tyomrow["merkki"] = $merkkirow["selitetark_2"];	
-			}
+				if (mysql_num_rows($merkkires) > 0) {
+					$merkkirow = mysql_fetch_array($merkkires);					
+					$tyomrow["merkki"] = $merkkirow["selitetark_2"];	
+				}
 										
-			$komm .= "\n".t("Työmääräys", $kieli). ":###$tyomrow[otunnus]";
-			if ($tyomrow["valmnro"] != "") $komm .= "\n".t("Sarjanumero", $kieli). ":###$tyomrow[valmnro]";
-			if ($tyomrow["merkki"] != "") $komm .= "\n".t("Merkki", $kieli). ":###$tyomrow[merkki]";
-			if ($tyomrow["mallivari"] != "") $komm .= "\n".t("Malli", $kieli). ":###$tyomrow[mallivari]";
+				$komm .= "\n".t("Työmääräys", $kieli). ":###$tyomrow[otunnus]";
+				if ($tyomrow["valmnro"] != "") $komm .= "\n".t("Sarjanumero", $kieli). ":###$tyomrow[valmnro]";
+				if ($tyomrow["merkki"] != "") $komm .= "\n".t("Merkki", $kieli). ":###$tyomrow[merkki]";
+				if ($tyomrow["mallivari"] != "") $komm .= "\n".t("Malli", $kieli). ":###$tyomrow[mallivari]";
+			}
 		}
 
 		if ($yhtiorow["laskutyyppi"] == 1 or $yhtiorow["laskutyyppi"] == 4) {
@@ -1007,7 +1001,7 @@ if (!function_exists('rivi_perhe')) {
 if (!function_exists('loppu')) {
 	function loppu ($thispage, $vikasivu = "") {
 
-		global $yhtiorow, $kukarow, $toim, $pdf, $page, $sivu, $laskurow, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $masrow, $boldi, $uytunnus, $ytunpit, $pieni_boldi, $kateistyyppi;
+		global $yhtiorow, $kukarow, $toim, $pdf, $page, $sivu, $laskurow, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $masrow, $boldi, $pieni_boldi, $kateistyyppi;
 
 		if($vikasivu != "") {
 			for ($pp=1; $pp<=$sivu; $pp++) {				
@@ -1285,37 +1279,12 @@ if (!function_exists('loppu')) {
 		$pdf->draw_text(217, 35, t("Sähköposti", $kieli).":",	$thispage, $pieni);
 		$pdf->draw_text(257, 35, $y_email,						$thispage, $pieni);
 
-		//jos on suomalainen yritys tehdään ytunnus nätiks
-		if (strtoupper($y_maa) == 'FI') {
-			//muutetaan ytunnus takas oikean näköseks
-			$ytunpit = 8-strlen($y_vatnumero);
-
-			if ($ytunpit > 0) {
-				$uytunnus = $y_vatnumero;
-				while ($ytunpit > 0) {
-				    $uytunnus = "0".$uytunnus; $ytunpit--;
-				}
-			}
-			else {
-				$uytunnus = $y_vatnumero;
-			}
-
-			$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
-			
-			if ($laskurow["vienti"] != "") {
-				$uytunnus = strtoupper($y_maa).$uytunnus;
-			}			
-		}
-		else {
-			$uytunnus = $y_vatnumero;
-		}
-
-		$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",			$thispage, $pieni);
-		$pdf->draw_text(444, 55, $uytunnus,							$thispage, $pieni);
-		$pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",		$thispage, $pieni);
-		$pdf->draw_text(444, 45, $y_kotipaikka,						$thispage, $pieni);
-		$pdf->draw_text(404, 35, t("Enn.per.rek", $kieli),			$thispage, $pieni);
-		$pdf->draw_text(404, 25, t("Alv.rek", $kieli),				$thispage, $pieni);
+		$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",										$thispage, $pieni);
+		$pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]),	$thispage, $pieni);
+		$pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",									$thispage, $pieni);
+		$pdf->draw_text(444, 45, $y_kotipaikka,													$thispage, $pieni);
+		$pdf->draw_text(404, 35, t("Enn.per.rek", $kieli),										$thispage, $pieni);
+		$pdf->draw_text(404, 25, t("Alv.rek", $kieli),											$thispage, $pieni);
 	}
 }
 

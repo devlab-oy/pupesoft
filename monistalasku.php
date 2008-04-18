@@ -16,15 +16,43 @@ if($vain_monista == ""){
 	elseif ($toim == 'TARJOUS') {
 		echo "<font class='head'>".t("Monista tarjous")."</font><hr>";
 	}
+	elseif ($toim == 'TYOMAARAYS') {
+		echo "<font class='head'>".t("Monista työmääräys")."</font><hr>";
+	}
 	else {
 		echo "<font class='head'>".t("Monista lasku")."</font><hr>";
 	}
+}
+
+if ($toim == 'TYOMAARAYS') {
+	// Halutaanko saldot koko konsernista?
+	$query = "	SELECT *
+				FROM yhtio
+				WHERE konserni='$yhtiorow[konserni]' and konserni != ''";
+	$result = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($result) > 0) {
+		$yhtiot = array();
+
+		while ($row = mysql_fetch_array($result)) {
+			$yhtiot[] = $row["yhtio"];
+		}
+	}
+	else {
+		$yhtiot = array();
+		$yhtiot[] = $kukarow["yhtio"];
+	}
+}
+else {
+	$yhtiot = array();
+	$yhtiot[] = $kukarow["yhtio"];	
 }
 
 if ($tee == '') {
 	if ($ytunnus != '') {
 		require ("inc/asiakashaku.inc");
 	}
+	
 	if ($ytunnus != '') {
 		$tee = "ETSILASKU";
 	}
@@ -93,7 +121,8 @@ if ($tee == "ETSILASKU") {
 		//katotaan löytyykö lasku ja sen kaikki tilaukset
 		$query = "  SELECT laskunro
 					FROM lasku
-					WHERE tunnus = '$otunnus' and lasku.yhtio = '$kukarow[yhtio]'";
+					WHERE tunnus = '$otunnus' 
+					and yhtio = '$kukarow[yhtio]'";
 		$laresult = mysql_query($query) or pupe_error($query);
 		$larow = mysql_fetch_array($laresult);
 
@@ -105,6 +134,10 @@ if ($tee == "ETSILASKU") {
 		elseif ($toim == 'TARJOUS') {
 			$where 	= " tila = 'T' and tunnus = '$otunnus' ";
 			$use 	= " ";	
+		}
+		elseif ($toim == 'TYOMAARAYS') {
+			$where 	= " tila in ('N','L','A') and tunnus = '$otunnus' ";
+			$use 	= " ";
 		}
 		else {
 			if ($larow["laskunro"] > 0) {
@@ -128,6 +161,11 @@ if ($tee == "ETSILASKU") {
 						and lasku.liitostunnus = '$asiakasid' ";
 			$use 	= " ";
 		}
+		elseif ($toim == 'TYOMAARAYS') {
+			$where 	= " tila in ('N','L','A') 
+						and lasku.liitostunnus = '$asiakasid' ";
+			$use 	= " ";
+		}
 		else {
 			$where = "	tila = 'U'
 						and lasku.liitostunnus = '$asiakasid'
@@ -138,9 +176,9 @@ if ($tee == "ETSILASKU") {
 	}
 
 	// Etsitään muutettavaa tilausta
-	$query = "	SELECT lasku.tunnus 'tilaus', laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, summa, tapvm, laatija, tila, alatila
+	$query = "	SELECT yhtio, tunnus 'tilaus', laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, summa, tapvm, laatija, tila, alatila
 				FROM lasku $use
-				WHERE $where and lasku.yhtio = '$kukarow[yhtio]'
+				WHERE $where and lasku.yhtio in ('".implode("','", $yhtiot)."')
 				ORDER BY tapvm, lasku.tunnus desc";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -217,7 +255,7 @@ if ($tee == "ETSILASKU") {
 				$query = "	SELECT tuote.sarjanumeroseuranta
 							FROM tilausrivi
 							JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno and tuote.sarjanumeroseuranta!=''
-							WHERE tilausrivi.yhtio='$kukarow[yhtio]'
+							WHERE tilausrivi.yhtio='$row[yhtio]'
 							and tilausrivi.uusiotunnus='$row[tilaus]'";
 				$res = mysql_query($query) or pupe_error($query);
 
@@ -232,7 +270,6 @@ if ($tee == "ETSILASKU") {
 					echo "<$ero></$ero>";
 				}
 			}
-
 			
 			echo "<$ero><a href='$PHP_SELF?tunnus=$row[tilaus]&tunnukset=$tunnukset&asiakasid=$asiakasid&otunnus=$otunnus&laskunro=$laskunro&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tee=NAYTATILAUS&toim=$toim'>".t("Näytä")."</a></$ero>";
 			echo "</tr>";
@@ -246,7 +283,7 @@ if ($tee == "ETSILASKU") {
 	}
 }
 
-if ($tee=='MONISTA') {
+if ($tee == 'MONISTA') {
 
 	// $tunnus joka on array joss on monistettavat laskut
 	// $kklkm kopioiden määrä
@@ -279,19 +316,24 @@ if ($tee=='MONISTA') {
 		elseif ($toim == 'TARJOUS') {
 			echo "$kklkm ".t("tarjous(ta)").".<br><br>";
 		}
+		elseif ($toim == 'TYOMAARAYS') {
+			echo "$kklkm ".t("työmääräys(tä)").".<br><br>";
+		}
 		else {
 			echo "$kklkm ".t("lasku(a)").".<br><br>";
 		}
 
 		for($monta=1; $monta <= $kklkm; $monta++) {
 
-			$query = "SELECT * FROM lasku WHERE tunnus='$lasku' and yhtio ='$kukarow[yhtio]'";
-
+			$query = "	SELECT * 
+						FROM lasku 
+						WHERE tunnus = '$lasku' 
+						and yhtio in ('".implode("','", $yhtiot)."')";
 			$monistares = mysql_query($query) or pupe_error($query);
 			$monistarow = mysql_fetch_array($monistares);
 
-			$fields = mysql_field_name($monistares,0);
-			$values = "'".$monistarow[0]."'";
+			$fields = "yhtio";
+			$values = "'$kukarow[yhtio]'";
 			
 			// Ei monisteta tunnusta
 			for($i=1; $i < mysql_num_fields($monistares)-1; $i++) {
@@ -299,6 +341,41 @@ if ($tee=='MONISTA') {
 				$fields .= ", ".mysql_field_name($monistares,$i);
 
 				switch (mysql_field_name($monistares,$i)) {
+					case 'ytunnus':
+					case 'liitostunnus':
+					case 'nimi':
+					case 'nimitark':
+					case 'osoite':
+					case 'postino':
+					case 'postitp':
+					case 'toim_nimi':
+					case 'toim_nimitark':
+					case 'toim_osoite':
+					case 'toim_postino':
+					case 'toim_postitp':
+					case 'yhtio_nimi':	   
+					case 'yhtio_osoite':	   
+					case 'yhtio_postino':   
+					case 'yhtio_postitp':	   
+					case 'yhtio_maa':		   
+					case 'yhtio_ovttunnus':
+					case 'yhtio_kotipaikka': 
+					case 'yhtio_toimipaikka':
+					case 'verkkotunnus':
+					case 'maksuehto':
+					case 'myyja':	
+					case 'kassalipas':
+					case 'ovttunnus':
+					case 'toim_ovttunnus':
+					case 'maa':
+					case 'toim_maa':
+						if ($kukarow["yhtio"] != $monistarow["yhtio"]) {
+							$values .= ", ''";
+						}
+						else {
+							$values .= ", '".$monistarow[$i]."'";
+						}
+					break;
 					case 'kerayspvm':
 					case 'toimaika':
 					case 'luontiaika':
@@ -319,10 +396,18 @@ if ($tee=='MONISTA') {
 						elseif ($toim == 'TARJOUS') {
 							$values .= ", 'T'";
 						}
+						elseif ($toim == 'TYOMAARAYS') {
+							$values .= ", 'A'";
+						}
 						else {
 							$values .= ", 'N'";
 						}
 						break;
+					case 'tilaustyyppi':
+						if ($toim == 'TYOMAARAYS') {
+							$values .= ", 'A'";
+							break;
+						}
 					case 'tunnus':
 					case 'tapvm':
 					case 'kapvm':
@@ -387,7 +472,7 @@ if ($tee=='MONISTA') {
 						if ($alvik == "on") {
 							$squery = "	SELECT *
 										FROM asiakas
-										WHERE yhtio='$kukarow[yhtio]' and tunnus = '$monistarow[liitostunnus]'";
+										WHERE yhtio='$monistarow[yhtio]' and tunnus = '$monistarow[liitostunnus]'";
 							$asiakres = mysql_query($squery) or pupe_error($squery);
 							$asiakrow = mysql_fetch_array($asiakres);
 
@@ -443,7 +528,7 @@ if ($tee=='MONISTA') {
 						else {
 							$vquery = "	SELECT kurssi
 										FROM valuu
-										WHERE yhtio = '$kukarow[yhtio]'
+										WHERE yhtio = '$monistarow[yhtio]'
 										and nimi	= '$monistarow[valkoodi]'";
 							$vresult = mysql_query($vquery) or pupe_error($vquery);
 							$valrow = mysql_fetch_array($vresult);
@@ -464,22 +549,21 @@ if ($tee=='MONISTA') {
 			if ($toim == 'SOPIMUS') {
 				echo t("Uusi sopimusnumero on")." $utunnus<br><br>";
 			}
-			elseif ($toim == 'TARJOUS') {
-				echo t("Uusi tarjousnumero on")." $utunnus<br><br>";
-			}
 			else {
 				echo t("Uusi tilausnumero on")." $utunnus<br><br>";
 			}
 			
 			//Kopioidaan otsikon lisatiedot
-			$query = "SELECT * FROM laskun_lisatiedot WHERE otunnus='$lasku' and yhtio ='$kukarow[yhtio]'";
+			$query = "	SELECT * 
+						FROM laskun_lisatiedot 
+						WHERE otunnus='$lasku' and yhtio ='$monistarow[yhtio]'";
 			$monistalisres = mysql_query($query) or pupe_error($query);
 			
 			if (mysql_num_rows($monistalisres) > 0) {
 				$monistalisrow = mysql_fetch_array($monistalisres);
 
-				$fields = mysql_field_name($monistalisres,0);
-				$values = "'".$monistalisrow[0]."'";
+				$fields = "yhtio";
+				$values = "'$kukarow[yhtio]'";
 
 				// Ei monisteta tunnusta
 				for($i=1; $i < mysql_num_fields($monistalisres)-1; $i++) { 
@@ -499,16 +583,41 @@ if ($tee=='MONISTA') {
 				$insres2 = mysql_query($kysely) or pupe_error($kysely);
 			}
 			
-			if ($toim == 'SOPIMUS') {
-				$query = "SELECT * from tilausrivi where otunnus='$lasku' and yhtio ='$kukarow[yhtio]' ORDER BY tunnus";
-			}
-			elseif ($toim == 'TARJOUS') {
-				$query = "SELECT * from tilausrivi where otunnus='$lasku' and yhtio ='$kukarow[yhtio]' ORDER BY tunnus";
-			}
-			else {
-				$query = "SELECT * from tilausrivi where uusiotunnus='$lasku' and kpl<>0 and tyyppi = 'L' and yhtio ='$kukarow[yhtio]' ORDER BY tunnus";
+			if ($toim == 'TYOMAARAYS') {
+				//Kopioidaan otsikon työmääräystiedot
+				$query = "	SELECT * 
+							FROM tyomaarays 
+							WHERE otunnus	= '$lasku' 
+							and yhtio 		= '$monistarow[yhtio]'";
+				$monistalisres = mysql_query($query) or pupe_error($query);
+				$monistalisrow = mysql_fetch_array($monistalisres);
+
+				$fields = "yhtio";
+				$values = "'$kukarow[yhtio]'";
+
+				for($i=1; $i < mysql_num_fields($monistalisres); $i++) { 
+
+					$fields .= ", ".mysql_field_name($monistalisres,$i);
+
+					switch (mysql_field_name($monistalisres,$i)) {
+						case 'otunnus':
+							$values .= ", '$utunnus'";
+							break;
+						default:
+							$values .= ", '".$monistalisrow[$i]."'";
+					}
+				}
+
+				$kysely  = "INSERT into tyomaarays ($fields) VALUES ($values)";
+				$insres2 = mysql_query($kysely) or pupe_error($kysely);			
 			}
 			
+			if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS') {
+				$query = "SELECT * from tilausrivi where otunnus='$lasku' and yhtio ='$monistarow[yhtio]' ORDER BY tunnus";
+			}
+			else {
+				$query = "SELECT * from tilausrivi where uusiotunnus='$lasku' and kpl<>0 and tyyppi = 'L' and yhtio ='$monistarow[yhtio]' ORDER BY tunnus";
+			}
 			$rivires = mysql_query($query) or pupe_error($query);
 
 			while ($rivirow = mysql_fetch_array($rivires)) {
@@ -517,7 +626,7 @@ if ($tee=='MONISTA') {
 
 				$pquery = "	SELECT tunnus
 							FROM tuotepaikat
-							WHERE yhtio =	'$kukarow[yhtio]'
+							WHERE yhtio =	'$monistarow[yhtio]'
 							and tuoteno =	'$rivirow[tuoteno]'
 							and hyllyalue =	'$rivirow[hyllyalue]'
 							and hyllynro =	'$rivirow[hyllynro]'
@@ -529,7 +638,7 @@ if ($tee=='MONISTA') {
 				if (mysql_num_rows($presult) == 0) {
 					$p2query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
 								FROM tuotepaikat
-								WHERE yhtio = '$kukarow[yhtio]'
+								WHERE yhtio = '$monistarow[yhtio]'
 								and tuoteno = '$rivirow[tuoteno]'
 								and oletus != ''
 								LIMIT 1";
@@ -541,8 +650,8 @@ if ($tee=='MONISTA') {
 					}
 				}
 
-				$rfields = mysql_field_name($rivires,0);
-				$rvalues = "'".$monistarow[0]."'";
+				$rfields = "yhtio";
+				$rvalues = "'$kukarow[yhtio]'";
 
 				for($i=1; $i < mysql_num_fields($rivires)-1; $i++) { // Ei tunnusta
 
@@ -570,10 +679,7 @@ if ($tee=='MONISTA') {
 							$rvalues .= ", ''";
 							break;						
 						case 'kommentti':
-							if ($toim == 'SOPIMUS') {
-								$rvalues .= ", '$rivirow[kommentti]'";
-							}
-							elseif ($toim == 'TARJOUS') {
+							if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS') {
 								$rvalues .= ", '$rivirow[kommentti]'";
 							}
 							else {
@@ -592,11 +698,7 @@ if ($tee=='MONISTA') {
 								$uusikpl = $rivirow["kpl"] * -1;
 							}
 							else {
-								if ($toim == 'SOPIMUS') {
-									$rvalues .= ", '$rivirow[varattu]'";
-									$uusikpl = $rivirow["varattu"];
-								}
-								elseif ($toim == 'TARJOUS') {
+								if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS') {
 									$rvalues .= ", '$rivirow[varattu]'";
 									$uusikpl = $rivirow["varattu"];
 								}
@@ -611,10 +713,7 @@ if ($tee=='MONISTA') {
 								$rvalues .= ", $rivirow[kpl] * -1";
 							}
 							else {
-								if ($toim == 'SOPIMUS') {
-									$rvalues .= ", '$rivirow[tilkpl]'";
-								}
-								elseif ($toim == 'TARJOUS') {
+								if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS') {
 									$rvalues .= ", '$rivirow[tilkpl]'";
 								}
 								else {
@@ -666,7 +765,8 @@ if ($tee=='MONISTA') {
 				//Kopioidaan tilausrivin lisatiedot
 				$query = "	SELECT *
 							FROM tilausrivin_lisatiedot
-							WHERE tilausrivitunnus = '$rivirow[tunnus]' and yhtio = '$kukarow[yhtio]'";
+							WHERE tilausrivitunnus = '$rivirow[tunnus]' 
+							and yhtio = '$monistarow[yhtio]'";
 				$monistares2 = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($monistares2) > 0) {
@@ -711,9 +811,8 @@ if ($tee=='MONISTA') {
 					$insres2 = mysql_query($kysely) or pupe_error($kysely);					
 				}
 				
-				
-				//Kopsataan sarjanumerot kuntoon jos tilauskella oli sellaisia
-				if ($kumpi == 'HYVITA') {
+				// Kopsataan sarjanumerot kuntoon jos tilauskella oli sellaisia
+				if ($kumpi == 'HYVITA' and $kukarow["yhtio"] == $monistarow["yhtio"]) {
 					if ($rivirow["kpl"] > 0) {
 						$tunken = "myyntirivitunnus";
 					}
@@ -723,7 +822,9 @@ if ($tee=='MONISTA') {
 
 					$query = "	SELECT * 
 								FROM sarjanumeroseuranta 
-								WHERE yhtio='$kukarow[yhtio]' and tuoteno='$rivirow[tuoteno]' and $tunken='$rivirow[tunnus]'";
+								WHERE yhtio ='$kukarow[yhtio]' 
+								and tuoteno ='$rivirow[tuoteno]' 
+								and $tunken ='$rivirow[tunnus]'";
 					$sarjares = mysql_query($query) or pupe_error($query);
 										
 					while($sarjarow = mysql_fetch_array($sarjares)) {
@@ -776,7 +877,10 @@ if ($tee=='MONISTA') {
 				//tehdään alvikorjaus jos käyttäjä on pyytänyt sitä
 				if ($alvik == "on" and $rivirow["hinta"] != 0) {
 
-					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$rivirow[tuoteno]'";
+					$query = "	SELECT * 
+								from tuote 
+								where yhtio = '$monistarow[yhtio]' 
+								and tuoteno = '$rivirow[tuoteno]'";
 					$tres  = mysql_query($query) or pupe_error($query);
 					$trow  = mysql_fetch_array($tres);
 
@@ -795,7 +899,11 @@ if ($tee=='MONISTA') {
 					if ($vanhahinta != $uusihinta) {
 						echo t("Korjataan hinta").": $vanhahinta --> $uusihinta<br>";
 
-						$query = "UPDATE tilausrivi set hinta='$uusihinta', alv='$alv' where yhtio='$kukarow[yhtio]' and otunnus='$utunnus' and tunnus='$insid'";
+						$query = "	UPDATE tilausrivi 
+									set hinta='$uusihinta', alv='$alv' 
+									where yhtio	= '$kukarow[yhtio]' 
+									and otunnus	= '$utunnus' 
+									and tunnus	= '$insid'";
 						$tres  = mysql_query($query) or pupe_error($query);
 					}
 				}

@@ -412,7 +412,11 @@
 
 				$lopetus .= "yllapidossa=$toim&yllapidontunnus=$tunnus";
 
-				if (strpos($lopetus, "tilaus_myynti.php") !== FALSE and $toim == "asiakas") {
+				
+				if (isset($paivita_myos_avoimet_tilaukset)) {
+					$lopetus.= "&tiedot_laskulta=YES";
+				}
+				elseif (strpos($lopetus, "tilaus_myynti.php") !== FALSE and $toim == "asiakas") {
 					$lopetus.= "&asiakasid=$tunnus";
 				}
 
@@ -789,8 +793,8 @@
 
 		echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
 
-		if ($toim == "asiakas") {
-			//echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ja päivitä tiedot myös avoimille tilauksille'>";
+		if ($toim == "asiakas" and $uusi != 1) {
+			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ja päivitä tiedot myös avoimille tilauksille'>";
 		}
 
 		if($lukossa == "ON") {

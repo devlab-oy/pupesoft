@@ -585,7 +585,7 @@ if (!function_exists('uusi_sivu')) {
 }
 
 if (!function_exists('rivi_otsikot')) {
-	function rivi_otsikot ($thispage, $tuotetyyppi) {
+	function rivi_otsikot ($thispage, $tuotetyyppi, $tyyppi='') {
 		global $pdf, $kieli, $lahetetyyppi, $norm, $boldi, $rectparam, $kala, $yhtiorow;
 		
 		$pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
@@ -597,19 +597,17 @@ if (!function_exists('rivi_otsikot')) {
 			$pdf->draw_text(25,  $kala+35, t("Varaosat ja tarvikkeet", $kieli),		$thispage, $boldi);
 		}
 		
-		if ($yhtiorow["tyomaaraystyyppi"] == "") {
+		if ($tyyppi == "") {
 
 			$pdf->draw_rectangle($kala+30, 20,  $kala+10, 40,  	$thispage, $rectparam);
-			$pdf->draw_rectangle($kala+30, 40,  $kala+10, 180, 	$thispage, $rectparam);
-			$pdf->draw_rectangle($kala+30, 180, $kala+10, 320, 	$thispage, $rectparam);
+			$pdf->draw_rectangle($kala+30, 40,  $kala+10, 320, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 320, $kala+10, 370, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 370, $kala+10, 420, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 420, $kala+10, 470, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 470, $kala+10, 520, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 520, $kala+10, 580, 	$thispage, $rectparam);
 			$pdf->draw_text(25,  $kala+15, "#",							$thispage, $norm);
-			$pdf->draw_text(45,  $kala+15, t("Tuotenumero", $kieli),	$thispage, $norm);
-			$pdf->draw_text(190, $kala+15, t("Tuotenimi", $kieli),		$thispage, $norm);
+			$pdf->draw_text(45,  $kala+15, t("Tuotenumero/Tuotenimi", $kieli),	$thispage, $norm);
 			$pdf->draw_text(330, $kala+15, t("Tilattu", $kieli),		$thispage, $norm);
 			$pdf->draw_text(375, $kala+15, t("Toimitus", $kieli),		$thispage, $norm);
 			$pdf->draw_text(425, $kala+15, t("Yks.hinta", $kieli),		$thispage, $norm);
@@ -670,7 +668,7 @@ if (!function_exists('rivi')) {
 		
 		if ($row["tuotetyyppi"] != $edtuotetyyppi or $uudehko == "ON") {
 			$kala -= $rivinkorkeus*2;
-			rivi_otsikot($thispage, $row["tuotetyyppi"]);
+			rivi_otsikot($thispage, $row["tuotetyyppi"], $tyyppi);
 		}
 
 		$edtuotetyyppi = $row["tuotetyyppi"];
@@ -758,7 +756,7 @@ if (!function_exists('rivi')) {
 		}
 		
 		
-		if ($yhtiorow["tyomaaraystyyppi"] == "") {			
+		if ($tyyppi == "") {			
 			$pdf->draw_text(45,  $kala, $row["tuoteno"],										$thispage, $norm);
 			
 			$oikpos = $pdf->strlen($row["tilkpl"]." ".strtolower($row["yksikko"]), $norm);
@@ -776,18 +774,15 @@ if (!function_exists('rivi')) {
 			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
 			$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), 			$thispage, $norm);
 			
-			if ($pdf->strlen($row["nimitys"], $norm) >= 135) {
-				$kala = $kala - $rivinkorkeus;
-			}
-
-			$pdf->draw_text(190, $kala, $row["nimitys"], 										$thispage, $norm);
+			$kala = $kala - $rivinkorkeus + 5;
+			$pdf->draw_text(45, $kala, $row["nimitys"], 										$thispage, $norm);
 		}
 		else {	
 			$pdf->draw_text(42,  $kala, $varastopaikka,											$thispage, $norm);
 			$pdf->draw_text(125,  $kala, $row["tuoteno"],										$thispage, $norm);
 
-			$oikpos = $pdf->strlen($row['varattu']+$row['kpl']." ".$row["yksikko"], $norm);
-			$pdf->draw_text(575-$oikpos, $kala, $row['varattu']+$row['kpl']." ".$row["yksikko"],$thispage, $norm);
+			$oikpos = $pdf->strlen($row['tilkpl']." ".$row["yksikko"], $norm);
+			$pdf->draw_text(575-$oikpos, $kala, $row['tilkpl']." ".$row["yksikko"],$thispage, $norm);
 
 			$kala = $kala - $rivinkorkeus + 5;
 
@@ -829,7 +824,7 @@ if (!function_exists('rivi')) {
 		// Trimmataan uudestaan
 		$row["kommentti"] = trim($row["kommentti"]);
 
-		if ($yhtiorow["tyomaaraystyyppi"] == "") {			
+		if ($tyyppi == "") {			
 			if ($row["kommentti"] != '') {
 				$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 45, 80, 580, $row["kommentti"],	$thispage, $norm);						
 				$kala = $pohja - $rivinkorkeus;

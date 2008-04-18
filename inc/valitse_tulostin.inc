@@ -40,18 +40,19 @@
 		<input type='hidden' name='kplmuutos' value='$kplmuutos'>
 		<input type='hidden' name='tuotemerkki' value='$tuotemerkki'>
 		<input type='hidden' name='rajaus' value='$rajaus'>
-		<input type='hidden' name='jarjestys' value='$jarjestys'>
-		";
-		
+		<input type='hidden' name='jarjestys' value='$jarjestys'>";
+
 		if ($nappikeikalle == 'menossa') {
 			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
 		}
 
 	echo "<table>";
+
 	if ($toim == "LASKU") {
 		echo "<tr><td>".t("Tulosta laskusta käteiskuitti")."</td><td><input type='checkbox' name='kateiskuitti'></td></tr>";
 		echo "<tr><td>".t("Tulosta kassa-alet")."</td><td><input type='checkbox' name='kassaalet'></td></tr>";
 	}
+
 	if ($toim == "OSTO" or $tulostimet[0] == "Ostotilaus") {
 		echo "<tr><td>".t("Tulosta nimitykset ostotilaukselle")."</td><td><input type='checkbox' name='nimitykset'></td></tr>";
 		$mista = 'toimi';
@@ -60,12 +61,12 @@
         $mista = 'asiakas';
     }
 	echo "<tr><td>".t("Kpl")."</td><td><input type='text' name='kappaleet' size='3'></td></tr>";
-	
+
 	echo "<tr><td>".t("Valitse kieli")."</td>";
 
 	///* Haetaan asiakkaan kieli *///
 	if ($otunnus != '' or $laskunro != '') {
-		
+
 		$querykieli = "	SELECT ytunnus
 						FROM lasku WHERE";
 
@@ -81,12 +82,12 @@
 			}
 		}
 		else {
-			$querykieli .= " and tunnus='$kukarow[kesken]' ";	
+			$querykieli .= " and tunnus='$kukarow[kesken]' ";
 		}
-		
+
 		$querykieli .= " AND yhtio ='$kukarow[yhtio]'";
 		$resultkieli = mysql_query($querykieli) or pupe_error($querykieli);
-				
+
 		$asrow = mysql_fetch_array($resultkieli);
 
 		$querykieli = "	SELECT kieli, email
@@ -136,11 +137,11 @@
 		echo "<td><select name='komento[$tulostin]'>";
 		echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 		echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
-		
+
 		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS') and $asrow['email'] != '') {
 			echo "<option value='asiakasemail:$asrow[email]'>".t("Asiakkaan sähköpostiin")." $asrow[email]</option>";
 		}
-		
+
 		$querykieli = "	select *
 					from kirjoittimet
 					where yhtio='$kukarow[yhtio]'
@@ -160,6 +161,19 @@
 		echo "</select></td>";
 		echo "</tr>";
 
+		if ($tulostin == 'Työmääräys') {
+
+			if ($yhtiorow["tyomaaraystyyppi"] == "") {
+				$seltt = "CHECKED";
+			}
+			else {
+				$seltp = "CHECKED";
+			}
+
+			echo "<tr><td rowspan='2'>".t("Työmääräystyyppi")."</td><td><input type='radio' name='tyomtyyppi' value='N' $seltt> ".t("näytetään hinnat")."</td></tr>";
+			echo "<tr><td><input type='radio' name='tyomtyyppi' value='P' $seltp> ".t("hintoja ei näytetä")."</td></tr>";
+		}
+
 		if ($tulostin == 'Purkulista') {
 			echo "<tr><td rowspan='3'>".t("Järjestele purkulista")."</td><td><input type='radio' name='sorttaus' value='tuote'> ".t("tuotenumeron mukaan")."</td></tr>";
 			echo "<tr><td><input type='radio' name='sorttaus' value='toim_tuote' CHECKED> ".t("toimittajan tuotenumeron mukaan")."</td></tr>";
@@ -175,7 +189,7 @@
 
 
 	echo "</table><br><input type='submit' value='".t("Tulosta")."'></form>";
-	
+
 	//lopetetaan tähän, muuten esim rivit.inc nollaa kukarow[kesken] muuttujan ja moni muukin asia toimisi kovin heikosti...
 	require("footer.inc");
 	exit;

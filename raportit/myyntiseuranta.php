@@ -971,7 +971,7 @@
 							// kateprossa
 							if (mysql_field_name($result, $i) == "kateprosnyt") {
 								if ($row["myyntinyt"] != 0) {
-									$row[$i] = round($row["katenyt"] / $row["myyntinyt"] * 100, 2);
+									$row[$i] = round($row["katenyt"] / abs($row["myyntinyt"]) * 100, 2);
 								}
 								else {
 									$row[$i] = 0;
@@ -981,7 +981,7 @@
 							// kateprossa
 							if (mysql_field_name($result, $i) == "kateprosed") {
 								if ($row["myyntied"] != 0) {
-									$row[$i] = round($row["kateed"] / $row["myyntied"] * 100, 2);
+									$row[$i] = round($row["kateed"] / abs($row["myyntied"]) * 100, 2);
 								}
 								else {
 									$row[$i] = 0;
@@ -1055,10 +1055,10 @@
 									}
 
 									if ($vnim == "kateprosnyt") {
-										if ($valisummat["myyntinyt"] <> 0) 		$vsum = round($valisummat["katenyt"] / $valisummat["myyntinyt"] * 100, 2);
+										if ($valisummat["myyntinyt"] <> 0) 		$vsum = round($valisummat["katenyt"] / abs($valisummat["myyntinyt"]) * 100, 2);
 									}
 									if ($vnim == "kateprosed") {
-										if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["kateed"] / $valisummat["myyntied"] * 100, 2);
+										if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["kateed"] / abs($valisummat["myyntied"]) * 100, 2);
 									}
 									if ($vnim == "myyntiind") {
 										if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["myyntinyt"] / $valisummat["myyntied"],2);
@@ -1153,10 +1153,10 @@
 							}
 
 							if ($vnim == "kateprosnyt") {
-								if ($valisummat["myyntinyt"] <> 0) 		$vsum = round($valisummat["katenyt"] / $valisummat["myyntinyt"] * 100, 2);
+								if ($valisummat["myyntinyt"] <> 0) 		$vsum = round($valisummat["katenyt"] / abs($valisummat["myyntinyt"]) * 100, 2);
 							}
 							if ($vnim == "kateprosed") {
-								if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["kateed"] / $valisummat["myyntied"] * 100, 2);
+								if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["kateed"] / abs($valisummat["myyntied"]) * 100, 2);
 							}
 							if ($vnim == "myyntiind") {
 								if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["myyntinyt"] / $valisummat["myyntied"],2);
@@ -1191,10 +1191,10 @@
 						}
 
 						if ($vnim == "kateprosnyt") {
-							if ($totsummat["myyntinyt"] <> 0) 		$vsum = round($totsummat["katenyt"] / $totsummat["myyntinyt"] * 100, 2);
+							if ($totsummat["myyntinyt"] <> 0) 		$vsum = round($totsummat["katenyt"] / abs($totsummat["myyntinyt"]) * 100, 2);
 						}
 						if ($vnim == "kateprosed") {
-							if ($totsummat["myyntied"] <> 0) 		$vsum = round($totsummat["kateed"] / $totsummat["myyntied"] * 100, 2);
+							if ($totsummat["myyntied"] <> 0) 		$vsum = round($totsummat["kateed"] / abs($totsummat["myyntied"]) * 100, 2);
 						}
 						if ($vnim == "myyntiind") {
 							if ($totsummat["myyntied"] <> 0) 		$vsum = round($totsummat["myyntinyt"] / $totsummat["myyntied"],2);

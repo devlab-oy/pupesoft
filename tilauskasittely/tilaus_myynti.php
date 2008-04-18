@@ -3973,6 +3973,9 @@ if ($tee == '') {
 								if ($kotisumma_alviton != 0) {
 									$kate = sprintf('%.2f',100*($kotisumma_alviton - ($ostohinta * $kpl))/$kotisumma_alviton)."%";
 								}
+								elseif (($ostohinta * $kpl) != 0) {
+									$kate = "-100.00%";
+								}
 							}
 							elseif ($kpl < 0 and $row["osto_vai_hyvitys"] == "O") {
 								//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on OSTOA
@@ -4014,15 +4017,26 @@ if ($tee == '') {
 
 								// Kate = Hinta - Alkuperäinen ostohinta
 								if ($kotisumma_alviton != 0) {
-									$kate = sprintf('%.2f',100 * ($kotisumma_alviton*-1 - $ostohinta)/$kotisumma_alviton)."%";
+									$kate = sprintf('%.2f',100 * ($kotisumma_alviton * -1 - $ostohinta)/$kotisumma_alviton)."%";
+								}
+								else {
+									$kate = "100.00%";
 								}
 							}
 							else {
 								$kate = "N/A";
 							}
 						}
-						elseif ($kukarow['extranet'] == '' and $kotisumma_alviton != 0) {
-							$kate = sprintf('%.2f',100*($kotisumma_alviton - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"])))/$kotisumma_alviton)."%";
+						elseif ($kukarow['extranet'] == '') {
+							if ($kotisumma_alviton != 0) {
+								$kate = sprintf('%.2f',100*($kotisumma_alviton - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"])))/$kotisumma_alviton)."%";
+							}
+							elseif (kehahin($row["tuoteno"]) != 0 and ($row["varattu"]+$row["jt"]) > 0) {
+								$kate = "-100.00%";
+							}
+							elseif (kehahin($row["tuoteno"]) != 0 and ($row["varattu"]+$row["jt"]) < 0) {
+								$kate = "100.00%";
+							}														
 						}
 
 						echo "<td $class align='right' valign='top' nowrap>$kate</td>";

@@ -47,7 +47,13 @@
 					continue;
 				}
 			}
-			else if ($toimrow["toim_automaattinen_jtraportti"] == "kk") {
+			else if ($toimrow["toim_automaattinen_jtraportti"] == "2vk") {
+				// ajetaan joka toinen viikko
+				if (date('N') != 15) {
+					continue;
+				}
+			}
+			else if ($toimrow["toim_automaattinen_jtraportti"] == "kk" or $toimrow["toim_automaattinen_jtraportti"] == "2vk") {
 				// ajetaan kuun 1. pv
 				if (date('j') != 1) {
 					continue;

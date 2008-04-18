@@ -254,6 +254,7 @@
 		echo "<option value = ''>".t("Ei")."</option>";
 		echo "<option value = 'pv' $selecti[pv]>".t("Päivittäin")."</option>";
 		echo "<option value = 'vk' $selecti[vk]>".t("Viikottain")."</option>";
+		echo "<option value = '2vk' $selecti[2vk]>".t("Joka toinen viikko")."</option>";
 		echo "<option value = 'kk' $selecti[kk]>".t("Kuukausittain")."</option>";
 		echo "</select></td></tr>";
 		

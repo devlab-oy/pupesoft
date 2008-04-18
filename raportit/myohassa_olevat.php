@@ -53,7 +53,7 @@
 					JOIN tuote ON lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tila = 'L'
+					and lasku.tila IN ('L','N')
 					and lasku.alatila != 'X'
 					and lasku.toimaika <= '$myovv-$myokk-$myopp' 
 					$tryrajaus

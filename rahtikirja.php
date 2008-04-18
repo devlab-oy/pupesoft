@@ -259,12 +259,10 @@
 						foreach ($tilaukset as $otsikkonro) {
 
 							foreach ($kiloja as $yksikilo) {
-								if ($yksikilo != '' or $kollit[$i] != '') {
-									$query  = "	INSERT into rahtikirjat
-												(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,viesti,yhtio) VALUES
-												('','$rakirno','$yksikilo','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$viesti','$kukarow[yhtio]')";
-									$result = mysql_query($query) or pupe_error($query);
-								}
+								$query  = "	INSERT into rahtikirjat
+											(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,viesti,yhtio) VALUES
+											('','$rakirno','$yksikilo','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$viesti','$kukarow[yhtio]')";
+								$result = mysql_query($query) or pupe_error($query);
 							}
 
 							if ($kollit[$i] == '')		$kollit[$i]		= 0;

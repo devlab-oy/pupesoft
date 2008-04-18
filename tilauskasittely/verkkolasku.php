@@ -317,7 +317,35 @@
 			$res   = mysql_query($query) or pupe_error($query);
 
 			while ($laskurow = mysql_fetch_array($res)) {
+				
+				
+				// Tsekataan ettei lipsahda JT-rivejä laskutukseen jos osaotoimitus on kielletty
+				if ($yhtiorow["varaako_jt_saldoa"] != "") {
+					$lisavarattu = " + tilausrivi.varattu";
+				}
+				else {
+					$lisavarattu = "";
+				}
 
+				$query = "	SELECT sum(if(tilausrivi.var in ('J','S') and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet
+							FROM tilausrivi
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							and tilausrivi.otunnus = '$laskurow[tunnus]'
+							and tilausrivi.tyyppi  = 'L'
+							and tilausrivi.var in ('J','S')";
+				$sarjares1 = mysql_query($query) or pupe_error($query);
+				$srow1 = mysql_fetch_array($sarjares1);
+				
+				if ($srow1["jteet"] > 0 and $laskurow["osatoimitus"] != '') {
+					// Jos tilauksella oli yksikin jt-rivi ja osatoimitus on kielletty
+					$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+
+					if ($silent == "" or $silent == "VIENTI") {
+						$tulos_ulos_sarjanumerot .= sprintf(t("Tilauksella %s oli JT-rivejä ja osatoimitusta ei tehdä, eli se jätettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."<br>\n";
+					}
+				}
+				
+				// Tsekataan vähän alveja ja sarjanumerojuttuja
 				$query = "	SELECT tuote.sarjanumeroseuranta, tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys, tilausrivi.alv
 							FROM tilausrivi use index (yhtio_otunnus)
 							JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno

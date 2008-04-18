@@ -242,9 +242,19 @@
 		echo "<td>$laskurow[rahti_huolinta]</td>";
 	}
 
-
 	$komm = "";
-
+	
+	if ($laskurow['myyja'] > 0) {
+		//etsit‰‰n myyj‰n nimi
+		$query  = "	SELECT nimi
+					from kuka
+					where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
+		$myyresult = mysql_query($query) or pupe_error($query);
+		$myyrow = mysql_fetch_array($myyresult);
+		
+		$komm .= "\n".t("Myyj‰").":###".$myyrow['nimi'];
+	}
+	
 	if (trim($laskurow['tilausyhteyshenkilo']) != '') {
 		$komm .= "\n".t("Tilaaja").":###".$laskurow['tilausyhteyshenkilo'];
 	}

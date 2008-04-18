@@ -1484,7 +1484,17 @@
 
 				$sivu  = 1;
 				$paino = 0;
-
+				
+				if ($tyomtyyppi == "P") {
+					$tyyppi = "P";
+				}
+				elseif($tyomtyyppi == "N") {
+					$tyyppi = "";
+				}
+				else {
+					$tyyppi = $yhtiorow["tyomaaraystyyppi"];
+				}
+				
 				// Aloitellaan lähetteen teko
 				$page[$sivu] = alku($tyyppi);
 

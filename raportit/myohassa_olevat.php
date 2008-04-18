@@ -14,6 +14,14 @@
 		
 	if ($tee == "HAE") {
 		
+		if ($suunta == '' or $suunta == "DESC") {
+			$suunta = "ASC";
+		}
+		else {
+			$suunta = "DESC";
+		}
+		
+		
 		echo "<table><tr>";
 		echo "<th>".t("Ytunnus")."</th>";
 		echo "<th>".t("Asiakas")."</th>";
@@ -25,7 +33,7 @@
 		echo "<th>".t("Yksikkö")."</th>";
 		echo "<th>".t("Arvo")."</th>";
 		echo "<th>".t("Myytävissä")."</th>";
-		echo "<th>".t("Toimitusaika")."</th>";
+		echo "<th><a href='?tee=HAE&haku=toimaika&suunta=$suunta&tunnus=$tunnus&myovv=$myovv&myokk=$myokk&myopp=$myopp&tuoteryhma=$tuoteryhma&kustannuspaikka=$kustannuspaikka'>".t("Toimitusaika")."</a></th>";
 		echo "<th>".t("Tila")."</th>";
 		echo "</tr>";
 		
@@ -58,7 +66,8 @@
 					and lasku.toimaika <= '$myovv-$myokk-$myopp' 
 					$tryrajaus
 					$kusrajaus
-					group by 1,2,3,4,5,6,8,10,11,12"; 
+					group by 1,2,3,4,5,6,8,10,11,12 
+					ORDER BY lasku.toimaika $suunta";
 		$result = mysql_query($query) or pupe_error($query);
 		
 		while ($tulrow = mysql_fetch_array($result)) {
@@ -91,7 +100,14 @@
 				echo "<td>$myytavissa</td>";
 			}
 			echo "<td>".tv1dateconv($tulrow[toimaika])."</td>";
-			echo "<td>".t($laskutyyppi)."<br>".t($alatila)."</td>";
+			
+			if ($tulrow['tila'] == "L" and $tulrow['alatila'] == "D") {
+				echo "<td><font class='OK'>".t($laskutyyppi)."<br>".t($alatila)."</font></td>";
+			}
+			else {
+				echo "<td>".t($laskutyyppi)."<br>".t($alatila)."</td>";
+			}
+			
 			echo "</tr>";
 		}
 		

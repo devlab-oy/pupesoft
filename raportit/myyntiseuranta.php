@@ -851,7 +851,12 @@
 
 						// echotaan kenttien sisältö
 						for ($i=0; $i < mysql_num_fields($result); $i++) {
-
+							
+							// jos kyseessa on tuote
+							if (mysql_field_name($result, $i) == "tuoteno") {
+								$row[$i] = "<a href='../tuote.php?tee=Z&tuoteno=$row[$i]'>$row[$i]</a>";
+							}							
+							
 							// jos kyseessa on asiakasosasto, haetaan sen nimi
 							if (mysql_field_name($result, $i) == "asos") {
 								$query = "	SELECT distinct avainsana.selite, ".avain('select')."

@@ -82,6 +82,16 @@
 		$sivu  = 1;
 		$paino = 0;
 		
+		if ($tyomtyyppi == "P") {
+			$tyyppi = "P";
+		}
+		elseif($tyomtyyppi == "N") {
+			$tyyppi = "";
+		}
+		else {
+			$tyyppi = $yhtiorow["tyomaaraystyyppi"];
+		}
+		
 		if ($toim == "SIIRTOTYOMAARAYS") {
 			$tyyppi = "SISAINEN";
 		}

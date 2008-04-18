@@ -133,13 +133,12 @@ if (!function_exists('print_pdf')) {
 		//keksitään uudelle failille joku varmasti uniikki nimi:
 		list($usec, $sec) = explode(' ', microtime());
 		mt_srand((float) $sec + ((float) $usec * 100000));
-		$pdffilenimi = "/tmp/jtraportti-".md5(uniqid(mt_rand(), true)).".pdf";
-	
+		$pdffilenimi = "/tmp/".{$yhtiorow["yhtio"]}."-".t("jtraportti")."-".md5(uniqid(mt_rand(), true)).".pdf";
+
 		//kirjoitetaan pdf faili levylle..
 		$fh = fopen($pdffilenimi, "w");
 		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
 		fclose($fh);			
-	
 
 		$komento = 'email';
 		$kukarow = array();

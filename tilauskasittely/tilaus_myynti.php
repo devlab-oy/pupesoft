@@ -264,6 +264,13 @@ $hinta	= str_replace(',','.',$hinta);
 $ale 	= str_replace(',','.',$ale);
 $kpl 	= str_replace(',','.',$kpl);
 
+
+//Ei olla pikatilauksella, mutta ollaan jostain syyst‰ kuitenkin ilman asiakasta ja halutaan nyt liitt‰‰ se
+if (isset($liitaasiakasnappi) and $kukarow["extranet"] == "") {
+	$tee  = "OTSIK";
+	$tila = "vaihdaasiakas";
+}
+
 // asiakasnumero on annettu, etsit‰‰n tietokannasta...
 if ($tee == "" and (($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0) or ($kukarow["extranet"] == "" and ($syotetty_ytunnus != '' or $asiakasid != '')))) {
 
@@ -2022,15 +2029,20 @@ if ($tee == '') {
 		if ($kukarow["myyja"] != 0) {
 			$my = $kukarow["myyja"];
 		}
-
-		echo "<tr>$jarjlisa
-			<th align='left'>".t("Asiakas")."</th>
-			<td><input type='text' size='10' maxlength='10' name='syotetty_ytunnus' value='$yt'></td>
-			</tr>";
-		echo "<tr>$jarjlisa
-			<th align='left'>".t("Myyj‰nro")."</th>
-			<td><input type='text' size='10' maxlength='10' name='myyjanro' value='$my'></td>
-			</tr>";
+		
+		if ($toim == "PIKATILAUS") {
+			echo "<tr>$jarjlisa
+				<th align='left'>".t("Asiakas")."</th>
+				<td><input type='text' size='10' maxlength='10' name='syotetty_ytunnus' value='$yt'></td>
+				</tr>";
+			echo "<tr>$jarjlisa
+				<th align='left'>".t("Myyj‰nro")."</th>
+				<td><input type='text' size='10' maxlength='10' name='myyjanro' value='$my'></td>
+				</tr>";
+		}
+		else {
+			echo "<td class='back'><input type='submit' name='liitaasiakasnappi' value='".t("Liit‰ asiakas")."'></td></tr>";
+		}
 	}
 
 	echo "</table>";

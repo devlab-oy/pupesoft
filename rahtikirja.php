@@ -259,7 +259,7 @@
 						foreach ($tilaukset as $otsikkonro) {
 
 							foreach ($kiloja as $yksikilo) {
-								if ($yksikilo != '') {
+								if ($yksikilo != '' or $kollit[$i] != '') {
 									$query  = "	INSERT into rahtikirjat
 												(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,viesti,yhtio) VALUES
 												('','$rakirno','$yksikilo','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$viesti','$kukarow[yhtio]')";

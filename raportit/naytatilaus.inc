@@ -671,10 +671,10 @@
 			}
 
 			if($kukarow['extranet'] == '' and $row["toimitettuaika"] != '0000-00-00 00:00:00') {
-				$row['kommentti'] .= "<br><font class='info'>".t("Toimitettu").": ".tv1dateconv($row["toimitettuaika"], "P")."</font>";
+				$row['kommentti'] .= "<br><font class='info'>".t("Toimitettu").": $row[toimitettu] ".tv1dateconv($row["toimitettuaika"], "P")."</font>";
 			}
 			if($kukarow['extranet'] == '' and $row["kerattyaika"] != '0000-00-00 00:00:00') {
-				$row['kommentti'] .= "<br><font class='info'>".t("Kerätty").": $row[keraaja] ".tv1dateconv($row["kerattyaika"], "P")."</font>";
+				$row['kommentti'] .= "<br><font class='info'>".t("Kerätty").": $row[keratty] ".tv1dateconv($row["kerattyaika"], "P")."</font>";
 			}
 
 			if ($laskurow["tilaustyyppi"] == "A") {

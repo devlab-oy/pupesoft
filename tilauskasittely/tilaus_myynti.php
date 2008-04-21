@@ -710,13 +710,14 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 	$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 	$result = mysql_query($query) or pupe_error($query);
 
-	if($kukarow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and $toim != "TARJOUS" and $toim != "PROJEKTI") {
+	if($kukarow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and ($toim != "TARJOUS" or ($toim == "TARJOUS" and $laskurow["tunnusnippu"] != $laskurow["tunnus"])) and $toim != "PROJEKTI") {
 
 		$aika = date("d.m.y @ G:i:s", time());
 
-		echo "<font class='message'>".t("Osatoimitus")." ($aika) $kukarow[kesken] ".t("mitätöity")."!</font><br><br>";
-
 		if($projektilla > 0 and ($laskurow["tunnusnippu"] > 0 and $laskurow["tunnusnippu"] != $laskurow["tunnus"])) {
+			
+			echo "<font class='message'>".t("Osatoimitus")." ($aika) $kukarow[kesken] ".t("mitätöity")."!</font><br><br>";
+			
 			$tilausnumero = $laskurow["tunnusnippu"];
 
 			//	Hypätään takaisin otsikolle
@@ -731,6 +732,25 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 
 			exit;
 		}
+		elseif($toim == "TARJOUS" and $laskurow["tunnusnippu"] > 0) {
+			
+			echo "<font class='message'>".t("Tarjous")." ($aika) $kukarow[kesken] ".t("mitätöity")."!</font><br><br>";
+			
+			$tilausnumero = $laskurow["tunnusnippu"];
+
+			//	Hypätään takaisin otsikolle
+			echo "<font class='info'>".t("Palataan tarjoukselle odota hetki..")."</font><br>";
+			
+			$query = "	SELECT tunnus
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnusnippu]' and tila = 'T' and alatila != 'X'";
+			$result = mysql_query($query) or pupe_error($query);
+			$row = mysql_fetch_array($result);
+			
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$PHP_SELF?toim=PROJEKTI&valitsetoimitus=$row[tunnus]'>";
+
+			exit;
+		}
 		else {
 			$tee				= '';
 			$tilausnumero		= '';
@@ -741,7 +761,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 	else {
 
 		if ($kukarow["extranet"] == "") {
-			echo "<font class='message'>".t("Tilaus")." $kukarow[kesken] ".t("mitätöity")."!</font><br><br>";
+			echo "<font class='message'>".t("$otsikko")." $kukarow[kesken] ".t("mitätöity")."!</font><br><br>";
 		}
 
 		$tee				= '';

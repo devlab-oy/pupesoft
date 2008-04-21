@@ -34,7 +34,7 @@ function korjaa_ostovelka($ltunnus) {
 	$laskurow=mysql_fetch_array($result);
 	
 	if($laskurow["tila"] != "H") {
-		echo "Lasku on jo hyväksytty, laskun summaa ja osovelkatiliöintiä ei enää muutetta!<br>";
+		echo "<font class='message'>Lasku on jo hyväksytty, laskun summaa ja osovelkatiliöintiä ei enää muutetta!</font><br>";
 		return true;
 	}
 	
@@ -280,12 +280,23 @@ function erittele_rivit($tilausnumero) {
 	}
 }
 
+if($tee == "UUDELLEENKASITTELE" and $toim == "SUPER") {
+	
+	echo "<font class='message'>".t("Poistetaan vanhat tiliöinnit ja laskut")."</font><br>";
+	$query = "	DELETE
+				FROM tilausrivi
+				WHERE yhtio='$kukarow[yhtio]' and otunnus='$tilausnumero' and tyyppi = 'M'";
+	$result=mysql_query($query) or pupe_error($query);
+
+	$tee = "ERITTELE";
+}
+
 if($tee == "ERITTELE") {
 
 	//	Onko tässä jo jotain tilausrivejä?
 	$query = "	SELECT tunnus
 				FROM tilausrivi
-				WHERE yhtio='$kukarow[yhtio]' and otunnus='$tilausnumero' and tyyppi != 'D'
+				WHERE yhtio='$kukarow[yhtio]' and otunnus='$tilausnumero' and tyyppi = 'M'
 				LIMIT 1";
 	$result=mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($result) == 0) {
@@ -847,13 +858,31 @@ if ($tee == "MUOKKAA") {
 								$vero=0;
 							}
 							else {
-							$vero = $trow["alv"];
-						}
+								$vero = $trow["alv"];
+							}
 						}
 						else {
 							$vero = 0;
 						}
+						
+						//	Otetaan korvaava tilinumero
+						if($tilino == "" or $toim != "SUPER") {
+							$tilino = $trow["tilino"];
+						}
+						
+						if($hardcoded_alv == 1) {
 
+							$query  = "	SELECT oletusalv
+										FROM tili
+										WHERE yhtio = '$kukarow[yhtio]'
+										and tilino = '$tilino'";
+							$verores = mysql_query($query) or pupe_error($query);
+							$verorow = mysql_fetch_array($verores);
+							$vero = $verorow[0];
+							
+							if($vero == 99) $vero = 0;
+						}
+						
 						$query = "	INSERT into tilausrivi set
 									hyllyalue   = '0',
 									hyllynro    = '0',
@@ -938,22 +967,11 @@ if ($tee == "MUOKKAA") {
 					echo "<font class='message'>".t("HUOM! tiliöidään poikkeavalle tilille '$tilino'<br>");
 					$trow["tilino"] = $tilino;					
 				}
-				
-				//	Jos meillä on haardkoodattu verokäytäntö haetaan se meidän ALV sieltä tilinumerolta!
-				if($hardcoded_alv == 1) {
-					$query  = "	SELECT oletusalv
-								FROM tili
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tilino = '{$trow["tilino"]}'";
-					$verores = mysql_query($query) or pupe_error($query);
-					$verorow = mysql_fetch_array($verorow);
-					$vero = $verorow[0];
-				}
-				
+								
 				$query = "INSERT into tiliointi set
 								yhtio ='$kukarow[yhtio]',
 								ltunnus = '$tilausnumero',
-								tilino = '{$trow["tilino"]}',
+								tilino = '{$tilino}',
 								kustp = '$kustp',
 								kohde = '$kohde',
 								projekti = '$projekti',
@@ -1242,7 +1260,11 @@ if ($tee == "MUOKKAA") {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
 			echo "<input type='hidden' name='perheid2' value='$perheid2'>";			
 			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-
+			
+			if($rivitunnus > 0) {
+				echo "<font class='error'>HUOM! Jos et lisää riviä se poistetaan erittelystä/matkalaskusta</font>";
+			}
+			
 			echo "<table><tr>";
 			
 			if($tapa != "MUOKKAA" and $perheid2>0) {
@@ -1397,7 +1419,7 @@ if ($tee == "MUOKKAA") {
 			
 			if ($toim == "SUPER") {
 				echo "<tr><th colspan='$cols'>".t("Poikkeava tilinumero, oletus on")." '$trow[tilino]'</th></tr>";
-				if($tilino == $trow[tilino]) {
+				if($tilino == $trow[tilino] or $kuivat == "JOO") {
 					$tilino	= "";
 				}
 				
@@ -1690,6 +1712,17 @@ if ($tee == "MUOKKAA") {
 					echo "<form name='palaa' action='$PHP_SELF' method='post'>
 					<td class='back' colspan='2' align='right'><input type='submit' value='".t("Palaa")."'></td></form></tr></table>";
 				}
+			}
+			
+			if($toim == "SUPER") {
+				echo "<form action = '$PHP_SELF' method='post' autocomplete='off' onsubmit=\"return confirm('".t("Oletko varma, että haluat käsitellä kululaskun uudestaan.\\n\\nLaskun uudelleenkäsittely poistaa kaikki erittelyrivit ja tiliöinnit.\\n\\nTietoja EI VOI PALAUTTAA.")."')\">";
+				echo "<input type='hidden' name='tee' value='UUDELLEENKASITTELE'>";
+				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+				echo "<input type='hidden' name='toim' value='$toim'>";					
+				echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+				echo "<td class='back'><input type = 'submit' value='".t("Uudelleenkäsittele lasku")."'></td>";
+				echo "</form>";
+
 			}
 		}
 		else {

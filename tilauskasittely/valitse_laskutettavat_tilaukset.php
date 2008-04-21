@@ -28,7 +28,7 @@
 	elseif ($toim == "VIENTI") {
 		echo "<font class='head'>".t("Tulosta vientilaskuja").":</font><hr>";
 
-		$alatilat = " 	and lasku.alatila in ('E') ";
+		$alatilat = " 	and lasku.alatila in ('E','D') ";
 		$vientilisa = " and lasku.vienti != '' ";
  		$muutlisa = "	and tilausrivi.laskutettu = '' ";
 	}

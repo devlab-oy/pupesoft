@@ -1419,7 +1419,7 @@ if ($tee == "MUOKKAA") {
 			
 			if ($toim == "SUPER") {
 				echo "<tr><th colspan='$cols'>".t("Poikkeava tilinumero, oletus on")." '$trow[tilino]'</th></tr>";
-				if($tilino == $trow[tilino] or $kuivat == "JOO") {
+				if($tilino == $trow[tilino] or $kuivat == "JOO" or $kulupoiminta == "JOO") {
 					$tilino	= "";
 				}
 				
@@ -1597,6 +1597,7 @@ if ($tee == "MUOKKAA") {
 								<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 								<input type='hidden' name='tapa' value='MUOKKAA'>
 								<input type='hidden' name='vaihda_tyyppi' value='B'>
+								<input type='hidden' name='kulupoiminta' value='JOO'>
 								<input type='hidden' name='rivitunnus' value='{$row["perhe"]}'>
 								$valinta
 							</form></td>";

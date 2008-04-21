@@ -184,6 +184,10 @@ function erittele_rivit($tilausnumero) {
 					if($riviaika[$i] != "") {
 						$kommentti .= "Tapahtuma-aika: ".preg_replace("/([0-9]{4})([0-9]{2})([0-9]{2})/", "\$3.\$2. \$1", $riviaika[$i]);
 					}
+
+					if($riviaika[$i] != "") {
+						$kommentti .= "Tapahtuma-aika: ".preg_replace("/([0-9]{4})([0-9]{2})([0-9]{2})/", "\$3.\$2. \$1", $riviaika[$i]);
+					}
 					
 					$kommentti .= "<br>Tapahtuman selite: $info[$i]";
 					if(preg_match("/([A-Z]{3})\s*([0-9\.,]*)/", $riviviite[$i], $match)) {
@@ -1457,7 +1461,9 @@ if ($tee == "MUOKKAA") {
 					concat_ws('/',kustp.nimi,kohde.nimi,projekti.nimi) kustannuspaikka, 
 					if(tilausrivi.perheid=0, tilausrivi.tunnus,
 					(select max(tunnus) from tilausrivi t use index(yhtio_otunnus) where tilausrivi.yhtio = t.yhtio and tilausrivi.otunnus = t.otunnus and tilausrivi.perheid=t.perheid and tilausrivi.tyyppi=t.tyyppi)) viimonen,
-					if(tilausrivi.perheid=0, tilausrivi.tunnus, tilausrivi.perheid) perhe
+					if(tilausrivi.perheid=0, tilausrivi.tunnus, tilausrivi.perheid) perhe,
+					tiliointi.tilino tilino,
+					tilausrivin_lisatiedot.kulun_kohdemaa, kulun_kohdemaa
 					FROM tilausrivi use index(yhtio_otunnus)
 					LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus
@@ -1524,13 +1530,20 @@ if ($tee == "MUOKKAA") {
 					$border["t"]["r"] .= $b;
 
 					
-					$query = "	SELECT count(*), sum(if(perheid=0 or perheid=tilausrivi.tunnus,1,0)), sum(if(kommentti !='' and (perheid = 0 or perheid=tilausrivi.tunnus),1,0)) kommentteja, sum(if(tuotetyyppi='A' and (perheid = 0 or perheid=tilausrivi.tunnus),1,0)) aikoja
+					$query = "	SELECT count(*), sum(if(perheid=0 or perheid=tilausrivi.tunnus,1,0)), sum(if(kommentti !='' and (perheid = 0 or perheid=tilausrivi.tunnus),1,0)) kommentteja, sum(if(tuotetyyppi='A' and (perheid = 0 or perheid=tilausrivi.tunnus),0,0)) aikoja
 								FROM tilausrivi
 								LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and otunnus = $tilausnumero and perheid2 = $row[perheid2] and tilausrivi.tyyppi = 'M'";
 					$abures = mysql_query($query) or pupe_error($query);
 					$aburow = mysql_fetch_array($abures);
-					$valeja = $aburow[0]+$aburow[1]+$aburow[2]+$aburow[3]+$aburow[4]-1;
+					if($toim == "SUPER") {
+						$v = 1;
+					}
+					else {
+						$v = 0;
+					}
+					
+					$valeja = $aburow[0]+$aburow[1]+$aburow[2]+$aburow[3]+$aburow[4]+$v;
 					$rivei = $aburow[0];
 					$tapahtumia++;
 
@@ -1665,14 +1678,30 @@ if ($tee == "MUOKKAA") {
 								
 				//	Kommentit aina vain perheen loppuun!
 				if ($row["tunnus"] == $row["viimonen"]) {
+					
+					if($row["tuotetyyppi"] != "A") {
+						echo "<tr><th>".t("kohdemaa").":</th><td colspan='4' style=\"font-style: italic; border-right: 1px solid;\">".maa($row[kulun_kohdemaa])."</td></tr>";
+					}
+
+					if($toim == "SUPER") {
+						$query = "	SELECT nimi
+									FROM tili
+									WHERE yhtio = '{$kukarow["yhtio"]}' and tilino = '$row[tilino]'";
+						$tilires=mysql_query($query) or pupe_error($query);
+						$tilirow = mysql_fetch_array($tilires);
+						echo "<tr><th>".t("Tilino").":</th><td colspan='4' style=\"font-style: italic; border-right: 1px solid;\">$row[tilino] {$tilirow["nimi"]}</td></tr>";
+					}					
+					
 					if($row["kommentti"] != "") {
 						echo "<tr><th style='".$border["k"]["m"]."'>".t("Kommentti").":</th><td colspan='4' style=\"font-style: italic; ".$border["k"]["r"]."\">$row[kommentti]</td></tr>";
-					}				
+					}
+															
 					if($row["tuotetyyppi"] == "A") {
 						echo "<tr><th style='".$border["a"]["m"]."'>".t("Ajalla").":</th><td colspan='4' style=\"font-style: italic; ".$border["a"]["r"]."\">$row[ajalla]</td></tr>";
 					}
 				}
-								
+				
+				
 				$summa+=$row["rivihinta"];
 				$edperhe = $row["perhe"];
 				$edperheid2 = $row["perheid2"];
@@ -1714,17 +1743,6 @@ if ($tee == "MUOKKAA") {
 					<td class='back' colspan='2' align='right'><input type='submit' value='".t("Palaa")."'></td></form></tr></table>";
 				}
 			}
-			
-			if($toim == "SUPER") {
-				echo "<form action = '$PHP_SELF' method='post' autocomplete='off' onsubmit=\"return confirm('".t("Oletko varma, että haluat käsitellä kululaskun uudestaan.\\n\\nLaskun uudelleenkäsittely poistaa kaikki erittelyrivit ja tiliöinnit.\\n\\nTietoja EI VOI PALAUTTAA.")."')\">";
-				echo "<input type='hidden' name='tee' value='UUDELLEENKASITTELE'>";
-				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-				echo "<input type='hidden' name='toim' value='$toim'>";					
-				echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-				echo "<td class='back'><input type = 'submit' value='".t("Uudelleenkäsittele lasku")."'></td>";
-				echo "</form>";
-
-			}
 		}
 		else {
 			echo "	<tr><td class='back'><br></td></tr>
@@ -1741,6 +1759,18 @@ if ($tee == "MUOKKAA") {
 				<td class='back' colspan='2' align='right'><input type='submit' value='".t("Palaa")."'></td></form></tr></table>";
 			}
 		}
+		
+		if($toim == "SUPER") {
+			echo "<form action = '$PHP_SELF' method='post' autocomplete='off' onsubmit=\"return confirm('".t("Oletko varma, että haluat käsitellä kululaskun uudestaan.\\n\\nLaskun uudelleenkäsittely poistaa kaikki erittelyrivit ja tiliöinnit.\\n\\nTietoja EI VOI PALAUTTAA.")."')\">";
+			echo "<input type='hidden' name='tee' value='UUDELLEENKASITTELE'>";
+			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";					
+			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+			echo "<td class='back' colspan='4'><input type = 'submit' value='".t("Uudelleenkäsittele lasku")."'></td>";
+			echo "</form>";
+
+		}
+		
 	}
 
 	if ($id>0) {

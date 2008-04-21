@@ -1258,6 +1258,15 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
 					where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 	$result  	= mysql_query($query) or pupe_error($query);
 	$laskurow   = mysql_fetch_array($result);
+	
+	if($yhtiorow["tilauksen_kohteet"] == "K") {
+		$query 	= "	SELECT *
+					from laskun_lisatiedot
+					where otunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
+		$result  	= mysql_query($query) or pupe_error($query);
+		$lasklisatied_row  = mysql_fetch_array($result);
+	}
+	
 
 	$kaytiin_otsikolla = "NOJOO!";
 }

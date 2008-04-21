@@ -1530,20 +1530,20 @@ if ($tee == "MUOKKAA") {
 					$border["t"]["r"] .= $b;
 
 					
-					$query = "	SELECT count(*), sum(if(perheid=0 or perheid=tilausrivi.tunnus,1,0)), sum(if(kommentti !='' and (perheid = 0 or perheid=tilausrivi.tunnus),1,0)) kommentteja, sum(if(tuotetyyppi='A' and (perheid = 0 or perheid=tilausrivi.tunnus),0,0)) aikoja
+					$query = "	SELECT count(*), sum(if(perheid=0 or perheid=tilausrivi.tunnus,1,0)) isia, sum(if(kommentti !='' and (perheid = 0 or perheid=tilausrivi.tunnus),1,0)) kommentteja, sum(if(tuotetyyppi='A' and (perheid = 0 or perheid=tilausrivi.tunnus),0,0)) aikoja
 								FROM tilausrivi
 								LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and otunnus = $tilausnumero and perheid2 = $row[perheid2] and tilausrivi.tyyppi = 'M'";
 					$abures = mysql_query($query) or pupe_error($query);
 					$aburow = mysql_fetch_array($abures);
 					if($toim == "SUPER") {
-						$v = 1;
+						$v = 3;
 					}
 					else {
-						$v = 0;
+						$v = 1;
 					}
 					
-					$valeja = $aburow[0]+$aburow[1]+$aburow[2]+$aburow[3]+$aburow[4]+$v;
+					$valeja = ($aburow[0]*$v)+$aburow[1]+$aburow[2]+$aburow[3]+$aburow[4]-1;
 					$rivei = $aburow[0];
 					$tapahtumia++;
 

@@ -962,7 +962,7 @@ if ($tila == 'kohdistaminen') {
 				and suoritus.tunnus = '$suoritus_tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 	$suoritus = mysql_fetch_array($result);
-
+	
 	$asiakas_tunnus 	= $suoritus['asiakas_tunnus'];
 	$suoritus_summa		= $suoritus['summa'];
 	$suoritus_tunnus 	= $suoritus['tunnus'];
@@ -1188,7 +1188,12 @@ if ($tila == 'kohdistaminen') {
 	echo "<tr><th>".t("Kirjaa erotus kassa-aleen")."</th><td><input type='checkbox' name='pyoristys_virhe_ok' value='1' $pyocheck></td>";
 	echo "<th>".t("Osasuorita lasku")."</th><td><input type='checkbox' name='osasuoritus' value='1' $osacheck onclick='javascript:osasuo(this)'></td></tr>";
 	echo "</table>";
-	echo "<br><input type='submit' value='".t("Kohdista")."'>";
+	if ($yhtiorow['tilikausi_alku'] <= $suoritus['kirjpvm']) {
+		echo "<br><input type='submit' value='".t("Kohdista")."'>";
+	}	
+	else {
+		echo "<br><font class='error'>".t("Tilikausi lukittu")."</font>";
+	}
 	echo "</form>\n";
 
 	echo "<script language='JavaScript'><!--

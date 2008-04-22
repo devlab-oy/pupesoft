@@ -216,12 +216,12 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	else {
 		$rahtios = 0;
 	}
-	
+
 	if ($tilrivirow['varattu'] < 0) {
 		$rahtios = $rahtios * -1;
 	}
 
-	$ohinta  = round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['maksu_kurssi']*$tilrivirow['varattu']+$rahtios,6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
+	$ohinta  = abs(round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['maksu_kurssi']*$tilrivirow['varattu']+$rahtios, 6)); // tuotteen ABS rivihinta rahteineen OLETUSVALUUTASSA
 
 	$tulliprossa = "";
 	$tv_nimrow	 = "";
@@ -236,13 +236,13 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 	// lisätään riville extra kulu, jos sellanen oli annettu
 	if ($tilrivirow["kate"] != 0) {
-		$kuluteksti = "(".round($ohinta,6)." + $tilrivirow[kate])";
+		$kuluteksti = "($ohinta + $tilrivirow[kate])";
 		$ohinta = $ohinta + $tilrivirow['kate'];
 	}
 	else $kuluteksti = "";
 
-	$rivihin = round($ohinta,$yhtiorow['hintapyoristys']);	// tilausrivin rivihinta talteen
-	$ohinta  = round($ohinta / $tilrivirow['varattu'],6); // yhden tuotteen hinta kaikkine kuluineen
+	$rivihin = round($ohinta, $yhtiorow['hintapyoristys']);	// tilausrivin rivihinta talteen
+	$ohinta  = round($ohinta / $tilrivirow['varattu'], 6); // yhden tuotteen hinta kaikkine kuluineen
 
 	//Keskihankintahintaa ylläpidetään vain jos tuotteella ei ole sarjanumeroseurantaa tai marginaaliverostusta
 	if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
@@ -303,7 +303,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$result = mysql_query($query) or pupe_error($query);
 
 		if ($tuorow["sarjanumeroseuranta"] == "E" or $tuorow["sarjanumeroseuranta"] == "F") {
-			
+
 			$query = "	SELECT era_kpl, tunnus
 						FROM sarjanumeroseuranta
 						WHERE yhtio 		 = '$kukarow[yhtio]'
@@ -311,18 +311,18 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 						and ostorivitunnus 	 = '$tilrivirow[tunnus]'
 						and myyntirivitunnus = 0";
 			$sarjares = mysql_query($query) or pupe_error($query);
-			
+
 			while($sarjarow = mysql_fetch_array($sarjares)) {
 				if ($sarjarow["era_kpl"] < 0) {
 					$query = "	UPDATE sarjanumeroseuranta
 								SET era_kpl = 0
-								WHERE yhtio = '$kukarow[yhtio]' 
+								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus 	= $sarjarow[tunnus]";
 					$lisa_res = mysql_query($query) or pupe_error($query);
 				}
-			}									
+			}
 		}
-		
+
 		// muuten tässä ollaan sitten viemässä kamaa ihan oikeesti saldoille.. tehdään siihen liittyvät hommat.
 		$uusikehahin = "";
 
@@ -568,7 +568,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 			$query   = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$llrow[vanhatunnus]'";
 			$llres   = mysql_query($query) or pupe_error($query);
 			$kulurow = mysql_fetch_array($llres);
-			
+
 			// tehdään vielä kirjapitoa...
 			// päivitetään tilaus saapuneeksi varastoon kirjanpitoon
 			$query = "	SELECT tunnus, summa

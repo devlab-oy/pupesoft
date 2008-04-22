@@ -267,12 +267,13 @@ if (!function_exists('tulosta_tarjous')) {
 					}
 					
 					//	Perheiden väliin laitetaan yksi extraväli..
-					if(isset($edperhe) and $edperhe != $row["perheid"]) {
-						$h-=$pdf->ln(1);
-						unset($edperhe);
-					}
 					
 					if($row["perheid"]==0 or $row["perheid"]==$row["tunnus"]) {
+	
+						if(isset($edperhe)) {
+							$h-=$pdf->ln(1);
+						}
+						$edperhe=1;
 						
 						//	Jos meillä on isätuote fiksataan yksikköhinta
 						if($row["perheid"]==$row["tunnus"]) {
@@ -322,17 +323,9 @@ if (!function_exists('tulosta_tarjous')) {
 								$h-=$pdf->ln();
 							}
 						}
-						
-						$edperhe=$row["perheid"];
 					}
 				}
 				
-				//	Perheiden väliin laitetaan yksi extraväli..
-				if(isset($edperhe) and $edperhe != $row["perheid"]) {
-					$h-=$pdf->ln(1);
-					unset($edperhe);
-				}
-
 				if($laskurow["rivihintoja_ei_nayteta"] == "" and $key != "Optio") {
 					$pdf->write($h, 1, $s[0], $s[3], t(ucfirst(strtolower($key))." yhteensä",$kieli).": ", "norm", "R", "B");				
 					$pdf->write($h, 1, $s[3], 0, money_format('%!i',$summa), "norm", "R", "B");

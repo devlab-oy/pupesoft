@@ -18,7 +18,7 @@ class PDF extends pdffile {
 		global $fonts;
 		
 		if($sW>0) {
-			$w=mm_pt($w);
+			$sW=mm_pt($sW);
 		}
 		elseif($sW<0) {
 			$sW=$this->currentPage["width"]-$this->currentPage["margin-left"]-$this->currentPage["margin-right"]+mm_pt($w);

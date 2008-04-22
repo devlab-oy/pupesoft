@@ -430,8 +430,8 @@
 			if ($trow['valkoodi'] != $yhtiorow['valkoodi'])
 					echo "<input type='text' name='summa' value='$summa' size=8>";
 
-			
-			if ($yhtiorow['tilikausi_alku'] <= $trow["tapvm"]) {			
+			$kmaksupvm = $mav."-".$mak."-".$map;
+			if ($yhtiorow['tilikausi_alku'] <= $kmaksupvm) {			
 				echo "</td>
 					<td><INPUT TYPE='checkbox' NAME='selvittely' CHECKED></td>
 					<td>

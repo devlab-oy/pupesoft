@@ -194,7 +194,7 @@ if (!function_exists('tulosta_lasku')) {
 						$pdf->writeToTemplate($h, 1, 0, $s[1], t("Laskutusosoite", $kieli).":", "norm", "L", "B", $tid);
 						$h-=$pdf->ln();
 						foreach(array("laskutus_nimi", "laskutus_nimitark", "laskutus_osoite", "laskutus_postiosoite", "laskutus_maa") as $key) {
-							if($key == "maa") {
+							if($key == "laskutus_maa") {
 								$pdf->writeToTemplate($h, 1, 0, $s[0], strtoupper(maa($laskurow[$key], $kieli)), "norm", "L", "", $tid);
 							}
 							else {

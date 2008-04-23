@@ -5,7 +5,7 @@
 
 		if (!function_exists('tulosta_tilausvahvistus')) {
 			function tulosta_tilausvahvistus ($otunnus, $komento, $kieli = "", $tee = "") {
-				global $yhtiorow, $kukarow, $fonts;
+				global $yhtiorow, $kukarow, $fonts, $h;
 
 				// Haetaan laskun tiedot
 				$query = "	SELECT lasku.*, laskun_lisatiedot.*, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.luontiaika päiväys, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, lasku.tunnus toimitus, viesti asiakkaan_viite, sisviesti1 lisätiedot, lasku.ytunnus asiakkaan_VAT,
@@ -47,7 +47,7 @@
 				//	Aloituskorkeus
 				if (!function_exists('alku')) {
 					function alku ($pdf, $laskurow, $kieli, $riviotsikot="") {
-						global $yhtiorow, $kukarow, $fonts, $tid;
+						global $yhtiorow, $kukarow, $fonts, $tid, $h;
 
 						if(!is_object($pdf)) {
 							//	Aloitellaan piirtelyä
@@ -142,7 +142,7 @@
 								$pdf->writeToTemplate($h, 1, 0, $s[1], t("Laskutusosoite", $kieli).":", "norm", "L", "B", $tid);
 								$h-=$pdf->ln();
 								foreach(array("laskutus_nimi", "laskutus_nimitark", "laskutus_osoite", "laskutus_postiosoite", "laskutus_maa") as $key) {
-									if($key == "maa") {
+									if($key == "laskutus_maa") {
 										$pdf->writeToTemplate($h, 1, 0, $s[0], strtoupper(maa($laskurow[$key], $kieli)), "norm", "L", "", $tid);
 									}
 									else {
@@ -223,17 +223,18 @@
 							}
 						}
 
+						if($laskurow["laskutus_nimi"] != "") {
+							$h=160;
+						}
+						else {
+							$h=180;
+						}
+						
 						return $pdf;
 					}
 				}
 
 				$pdf=alku($pdf, $laskurow,$kieli, "OK");
-				if($laskurow["laskutus_nimi"] != "") {
-					$h=160;
-				}
-				else {
-					$h=180;
-				}
 
 				if($laskurow["tila"] == "R") {
 					$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
@@ -297,8 +298,7 @@
 						}
 
 						if($h < 20) {
-							$pdf = alku($pdf, $laskurow,$kieli, "OK");
-							$h = 190;
+							//$pdf = alku($pdf, $laskurow,$kieli, "OK");
 						}
 
 						//	Perheiden väliin laitetaan yksi extraväli..
@@ -352,7 +352,7 @@
 						}
 
 						if($row["kommentti"] != "") {
-							$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-5)+1);
+							$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-5));
 							$pdf->write($h, $nb, 5+$offset, $s[0], $row["kommentti"], $style_komm, "L", "I");
 							$h-=$pdf->ln($nb);
 						}
@@ -391,7 +391,8 @@
 							$grand_total+=$row["rivihinta"];
 						}
 					}
-					$h-=$pdf->ln(3);
+					
+					$h-=$pdf->ln();
 				}
 
 				$pdf->write($h, 1, $s[0], $s[2], t("Tilaus yhteensä alv 0%",$kieli).": ", "norm", "R", "B");
@@ -400,7 +401,6 @@
 
 				if($h < 60) {
 					$pdf = alku($pdf, $laskurow,$kieli);
-					$h = 190;
 				}
 
 				//	Todella speciaali tapaus
@@ -435,7 +435,6 @@
 					//	Koitetaan arpoa mahtuuko tämä samalle sivulle, vai ei..
 					if($h < (mysql_num_rows($result)*$pdf->ln(2.75) + 10)) {
 						$pdf = alku($pdf, $laskurow,$kieli);
-						$h = 190;
 					}
 
 					//	Maksusopimus
@@ -460,7 +459,6 @@
 					//	Katosotaan, että tämä mahtuu samalle sivulle
 					if($h < 50) {
 						$pdf = alku($pdf, $laskurow,$kieli);
-						$h = 190;
 					}
 
 					//	Maksusopimus

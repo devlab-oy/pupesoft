@@ -13,7 +13,7 @@
 //	$laskuri = 1;
 	
 	while ($yrow = mysql_fetch_array($yhtio_result)) {
-		$query = "SELECT * FROM yhtio WHERE yhtio='{$yrow['yhtio']}'";
+		$query = "SELECT * FROM yhtio WHERE yhtio='$yrow[yhtio]'";
 		$result = mysql_query($query) or die($query);
 
 		if (mysql_num_rows($result) == 1) {
@@ -34,7 +34,7 @@
 			}			
 		}
 
-		$toimquery = "SELECT * FROM yhtion_toimipaikat WHERE yhtio='{$yhtiorow['yhtio']}' AND toim_automaattinen_jtraportti != ''";
+		$toimquery = "SELECT * FROM yhtion_toimipaikat WHERE yhtio='$yhtiorow[yhtio]' AND toim_automaattinen_jtraportti != ''";
 		$toimresult = mysql_query($toimquery) or die ("Kysely ei onnistu yhtio $query");
 	
 		while ($toimrow = mysql_fetch_array($toimresult)) {
@@ -74,15 +74,14 @@
 			}
 
 			$liitostunnus_query = "	SELECT DISTINCT lasku.liitostunnus FROM tilausrivi
-									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-									WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
+									JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.yhtio_toimipaikka = $toimrow[tunnus])
+									WHERE tilausrivi.yhtio = '$yhtiorow[yhtio]'
 									AND tilausrivi.tyyppi 			= 'L'
 									AND tilausrivi.var 				= 'J'
 									AND tilausrivi.keratty 			= ''
 									AND tilausrivi.uusiotunnus 		= 0
 									AND tilausrivi.kpl 				= 0
-									AND tilausrivi.jt $lisavarattu	> 0
-									AND lasku.yhtio_toimipaikka = $toimrow[tunnus]";
+									AND tilausrivi.jt $lisavarattu	> 0";
 			$liitostunnus_result = mysql_query($liitostunnus_query) or die($liitostunnus_query);
 
 			while ($liitostunnus_row = mysql_fetch_array($liitostunnus_result)) {
@@ -95,15 +94,14 @@
 
 					$jtquery = "	SELECT tilausrivi.nimitys, tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.laadittu, tilausrivi.tilkpl
 									FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-									JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.osatoimitus = '' AND lasku.liitostunnus = '{$asiakasrow['tunnus']}')
-									WHERE tilausrivi.yhtio 	= '{$yhtiorow['yhtio']}'
+									JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.yhtio_toimipaikka = $toimrow[tunnus] and lasku.tunnus = tilausrivi.otunnus and lasku.osatoimitus = '' AND lasku.liitostunnus = '{$asiakasrow['tunnus']}')
+									WHERE tilausrivi.yhtio 	= '$yhtiorow[yhtio]'
 									AND tilausrivi.tyyppi 			= 'L'
 									AND tilausrivi.var 				= 'J'
 									AND tilausrivi.keratty 			= ''
 									AND tilausrivi.uusiotunnus 		= 0
 									AND tilausrivi.kpl 				= 0
 									AND tilausrivi.jt $lisavarattu	> 0
-									AND lasku.yhtio_toimipaikka 	= $toimrow[tunnus]
 									ORDER BY tilausrivi.otunnus";
 
 					$jtresult = mysql_query($jtquery) or pupe_error($jtquery);

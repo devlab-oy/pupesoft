@@ -1,11 +1,4 @@
 <?php
-	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
-	if ($tasmays == '') {
-		$useslave = 1;
-	}
-	else {
-		$useslave = 0;
-	}
 	
 	require('../inc/parametrit.inc');
 

@@ -1,6 +1,12 @@
 <?php
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
-	$useslave = 1;
+	if ($tasmays == '') {
+		$useslave = 1;
+	}
+	else {
+		$useslave = 0;
+	}
+	
 	require('../inc/parametrit.inc');
 
 	echo "<font class='head'>".t("Käteismyynnit")." $myy:</font><hr>";

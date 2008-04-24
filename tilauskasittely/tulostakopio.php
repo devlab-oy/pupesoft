@@ -60,6 +60,9 @@
 	if ($toim == "TUOTETARRA") {
 		$fuse = t("Tuotetarra");
 	}
+	if ($toim == "TILAUSTUOTETARRA") {
+		$fuse = t("Toimituksen tuotetarrat");
+	}
 	if ($toim == "TYOMAARAYS") {
 		$fuse = t("Työmääräys");
 	}
@@ -424,6 +427,18 @@
 		if ($toim == "TUOTETARRA") {
 			//Ostolasku, tuotetarrat. Tälle oliolle voidaan tulostaa tuotetarroja
 			$where1 .= " lasku.tila in ('H','Y','M','P','Q') and lasku.kohdistettu in ('K','X') ";
+
+			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
+			
+			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+
+			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			$use = " use index (yhtio_tila_luontiaika) ";
+		}
+		if ($toim == "TILAUSTUOTETARRA") {
+			//Ostolasku, tuotetarrat. Tälle oliolle voidaan tulostaa tuotetarroja
+			$where1 .= " lasku.tila in ('L','V','W','N')";
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 			
@@ -922,6 +937,12 @@
 				$komento["Tuotetarrat"] .= " -# $kappaleet ";
 			}
 		}
+		if ($toim == "TILAUSTUOTETARRA") {
+			$tulostimet[0] = 'Toimituksen tuotetarrat';
+			if ($kappaleet > 0 and $komento["Toimituksen tuotetarrat"] != 'email') {
+				$komento["Toimituksen tuotetarrat"] .= " -# $kappaleet ";
+			}
+		}
 		if ($toim == "SIIRTOLISTA") {
 			$tulostimet[0] = 'Siirtolista';
 			if ($kappaleet > 0 and $komento["Siirtolista"] != 'email') {
@@ -1110,6 +1131,12 @@
 			if ($toim == "TUOTETARRA") {
 				$otunnus = $laskurow["tunnus"];
 				require('tulosta_tuotetarrat.inc');
+				$tee = '';
+			}
+
+			if ($toim == "TILAUSTUOTETARRA") {
+				$otunnus = $laskurow["tunnus"];
+				require('tulosta_tilaustuotetarrat.inc');
 				$tee = '';
 			}
 

@@ -1,9 +1,5 @@
 <?php
 
-
-	// käytetään slavea
-	$useslave = 1;
-
 	if (isset($_POST["tee"])) {
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
@@ -23,6 +19,10 @@
 		if(!aja_kysely()) {
 			unset($_POST);
 		}
+
+		// käytetään slavea
+		$useslave = 1;
+		require ("inc/connect.inc");
 
 		if(count($_POST) > 0) {
 			if(!function_exists("vararvo")) {

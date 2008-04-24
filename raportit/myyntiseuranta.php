@@ -1012,11 +1012,19 @@
 								foreach($sarjat as $sarja) {
 									list($s,$k) = explode("#", $sarja);
 
-									if ($k < 0) {
-										$tunken = "ostorivitunnus";
+									
+									$query = "	SELECT osto_vai_hyvitys
+												FROM tilausrivin_lisatiedot
+												WHERE yhtio in ($yhtio)
+												and tilausrivitunnus = '$s'";
+									$rilires = mysql_query($query) or pupe_error($query);
+									$rilirow = mysql_fetch_array($rilires);
+									
+									if ($k > 0 or ($k < 0 and $rilirow["osto_vai_hyvitys"] == "")) {
+										$tunken = "myyntirivitunnus";										
 									}
 									else {
-										$tunken = "myyntirivitunnus";
+										$tunken = "ostorivitunnus";
 									}
 
 									$query = "	SELECT sarjanumero

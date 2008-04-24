@@ -447,7 +447,7 @@
 					echo "<td align='right'>".($prow[$i]*1)."</td>";
 				}
 				elseif (is_numeric($prow[$i])) {
-					echo "<td align='right'>$prow[$i]</td>";
+					echo "<td align='right' nowrap>$prow[$i]</td>";
 				}
 				else {
 					echo "<td>$prow[$i]</td>";
@@ -952,27 +952,27 @@
 			$bruttorivi		= $row["hinta"] * $kpl;
 
 			if ($kukarow['hinnat'] == 1) {
-				echo "<td $class align='right' valign='top'>$myyntihinta</td>";
+				echo "<td $class align='right' valign='top' nowrap>$myyntihinta</td>";
 			}
 			else {
 				if ($myyntihinta != $row["hinta"]) $myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $myyntihinta)." (".sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]).")";
 				else $myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $myyntihinta);
 
-				echo "<td $class align='right' valign='top'>$myyntihinta</td>";
-				echo "<td $class align='right' valign='top'>".($row["ale"] * 1)."</td>";
-				echo "<td $class align='right' valign='top'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"])."</td>";
+				echo "<td $class align='right' valign='top' nowrap>$myyntihinta</td>";
+				echo "<td $class align='right' valign='top' nowrap>".($row["ale"] * 1)."</td>";
+				echo "<td $class align='right' valign='top' nowrap>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"])."</td>";
 			}
 
 			if ($kukarow['hinnat'] == 1) {
-				echo "<td $class align='right' valign='top'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $bruttorivi)."</td>";
+				echo "<td $class align='right' valign='top' nowrap>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $bruttorivi)."</td>";
 			}
 			else {
 				if ($yhtiorow["alv_kasittely"] == "") {
 					//verolliset hinnat
-					echo "<td $class align='right' valign='top'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["summa"])."</td>";
+					echo "<td $class align='right' valign='top' nowrap>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["summa"])."</td>";
 				}
 				else {
-					echo "<td $class align='right' valign='top'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["arvo"])."</td>";
+					echo "<td $class align='right' valign='top' nowrap>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["arvo"])."</td>";
 				}
 			}
 
@@ -1149,7 +1149,7 @@
 			$colspan--;
 		}
 
-		echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Veroton yhteensä").":</td><td class='back' align='right'>".sprintf('%.2f',$arvo_yht)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
+		echo "<tr><td class='back' colspan='$colspan' align='right' nowrap>".t("Veroton yhteensä").":</td><td class='back' align='right'>".sprintf('%.2f',$arvo_yht)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
 
 
 		// Haetaan kaikki alvikannat riveiltä
@@ -1192,10 +1192,10 @@
 				$alvi = ($alvrow["alv"]*1)."%";
 			}
 
-			echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."):</td><td align='right' class='back'>".sprintf('%.2f', $arow["alvrivihinta"])."</td><td class='back'>$alvi</td></tr>";
+			echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."):</td><td align='right' class='back nowrap'>".sprintf('%.2f', $arow["alvrivihinta"])."</td><td class='back'>$alvi</td></tr>";
 		}
 
-		echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Verollinen yhteensä").":</td><td class='back' align='right'>".sprintf('%.2f',$summa_yht)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
+		echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Verollinen yhteensä").":</td><td class='back' align='right' nowrap>".sprintf('%.2f',$summa_yht)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
 
 		if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 
@@ -1206,12 +1206,12 @@
 				$ykate = round(abs($kate_yht / $rihin_yht * 100), 2);
 			}
 					
-			echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Kate yhteensä").":</td><td class='back' align='right'>".sprintf('%.2f',$ykate)."</td><td class='back'>%</td></tr>";
+			echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Kate yhteensä").":</td><td class='back' align='right' nowrap>".sprintf('%.2f',$ykate)."</td><td class='back'>%</td></tr>";
 		}
 
 		if($ennaa_yht != 0) {
 			echo "<tr><td class='back'><br></td></tr>";
-			echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Ennakkolaskutus").":</td><td class='back' align='right'>".sprintf('%.2f',$ennaa_yht)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
+			echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Ennakkolaskutus").":</td><td class='back' align='right' nowrap>".sprintf('%.2f',$ennaa_yht)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
 
 			//Haetaan kaikki alvikannat riveiltä
 			$alvquery = "	SELECT distinct alv
@@ -1253,10 +1253,10 @@
 					$alvi = ($alvrow["alv"]*1)."%";
 				}
 
-				echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."):</td><td align='right' class='back'>".sprintf('%.2f', $arow["alvrivihinta"])."</td><td class='back'>$alvi</td></tr>";
+				echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."):</td><td align='right' class='back' nowrap>".sprintf('%.2f', $arow["alvrivihinta"])."</td><td class='back'>$alvi</td></tr>";
 			}
 
-			echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Yhteensä").":</td><td align='right' class='back'>".sprintf('%.2f',$ennas_yht)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
+			echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Yhteensä").":</td><td align='right' class='back' nowrap>".sprintf('%.2f',$ennas_yht)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
 		}
 
 		echo "</table>";

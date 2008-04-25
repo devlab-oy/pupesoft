@@ -2171,7 +2171,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 
 if (!function_exists("jalkilaskentafunktio")) {
 	function jalkilaskentafunktio ($tuoteno, $pvm, $uusihinta, $rivitunnus) {
-		global $yhtiorow, $kukarow;
+		global $yhtiorow, $kukarow, $jalkilaskenta_debug_text;
 
 		/*
 		$tuoteno 	= korjattava tuote

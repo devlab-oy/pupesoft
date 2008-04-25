@@ -23,6 +23,7 @@ echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 		</script>";
 
 $varastoon_msg  = "";
+$jalkilaskenta_debug_text = "";
 
 if ($tee == "") {
 	$varastoon_msg .= "<form action='$PHP_SELF' method='post'>";
@@ -65,7 +66,7 @@ if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" an
 				and tilausrivi.kpl != 0
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and	tilausrivi.tyyppi = 'O'
-				ORDER BY tuotteen_toimittajat.toim_tuoteno";
+				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.kpl DESC";
 }
 elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 	// tavallinen laskenta.. VARATTU PITƒƒ OLLA > 0 ja netto-kentt‰ tyhj‰!
@@ -79,7 +80,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'O'
 				and tilausrivi.netto = ''
-				ORDER BY tuotteen_toimittajat.toim_tuoteno";
+				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.varattu DESC";
 }
 elseif ($toiminto == "kalkyyli" and $tee == "") {
 	// N‰ytet‰‰n ruudulla
@@ -91,7 +92,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 				and tilausrivi.varattu <> 0
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'O'
-				ORDER BY tuotteen_toimittajat.toim_tuoteno";
+				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.varattu DESC";
 }
 $presult = mysql_query($query) or pupe_error($query);
 
@@ -221,7 +222,8 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$rahtios = $rahtios * -1;
 	}
 
-	$ohinta  = abs(round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['maksu_kurssi']*$tilrivirow['varattu']+$rahtios, 6)); // tuotteen ABS rivihinta rahteineen OLETUSVALUUTASSA
+	// t‰m‰ on miinusta hyvitysrivill‰
+	$ohinta = round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['maksu_kurssi']*$tilrivirow['varattu']+$rahtios, 6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
 
 	$tulliprossa = "";
 	$tv_nimrow	 = "";
@@ -242,6 +244,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	else $kuluteksti = "";
 
 	$rivihin = round($ohinta, $yhtiorow['hintapyoristys']);	// tilausrivin rivihinta talteen
+	// t‰m‰ muuttaa hinnan plussaksi hyvityskeikalla (jolloin kehahin matikka menee oikein)
 	$ohinta  = round($ohinta / $tilrivirow['varattu'], 6); // yhden tuotteen hinta kaikkine kuluineen
 
 	//Keskihankintahintaa yll‰pidet‰‰n vain jos tuotteella ei ole sarjanumeroseurantaa tai marginaaliverostusta
@@ -252,12 +255,13 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	else {
 		if ($salrow['saldo'] + $tilrivirow['varattu'] > 0 and $salrow['saldo'] > 0) {
 			// kehahin matikka, tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen ett‰ edes tehd‰‰n matikkaa
-			if ($debug >= 1) $varastoon_msg .= "<font class='message'>Tuote: $tuorow[tuoteno] Matikka: kehahin = ($salrow[saldo] * $tuorow[kehahin] + $ohinta * $tilrivirow[varattu]) / ($salrow[saldo] + $tilrivirow[varattu])</font><br>";
-			$kehahin = round(($salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu']) / ($salrow['saldo'] + $tilrivirow['varattu']),6);
+			$kehahin = round(($salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu']) / ($salrow['saldo'] + $tilrivirow['varattu']), 6);
+			if ($debug >= 1) $varastoon_msg .= "<font class='message'>Tuote: $tuorow[tuoteno] Matikka: ($salrow[saldo] * $tuorow[kehahin] + $ohinta * $tilrivirow[varattu]) / ($salrow[saldo] + $tilrivirow[varattu]) = $kehahin</font><br>";
 		}
 		else {
 			// Jos j‰‰d‰‰n saldossa t‰m‰nkin tulon j‰lkeen miinukselle tai nollille, laitetaan kehahin suoraan t‰m‰n keikan hinnasta
-			$kehahin = round($ohinta,6);
+			$kehahin = round($ohinta, 6);
+			if ($debug >= 1) $varastoon_msg .= "<font class='message'>Tuote: $tuorow[tuoteno] Saldo j‰i nollaan tai miinukselle. Kehahin = ostohinta = $kehahin</font><br>";
 		}
 	}
 
@@ -537,7 +541,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	}
 }
 
-echo $varastoon_msg."<br>";
+echo "<br>".$varastoon_msg."<br>".$jalkilaskenta_debug_text."<br>";
 
 // jos kyseess‰ on ihan virallinen varastonarvonlaskenta, tehd‰‰n n‰in
 if ($toiminto == "kaikkiok" and $tee == "varma") {

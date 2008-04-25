@@ -1,5 +1,7 @@
 <?php
 
+$useslave = 1;
+
 if (file_exists("inc/connect.inc")) {
 	require ("inc/connect.inc");
 }
@@ -37,7 +39,7 @@ else {
 */
 $id = (int) $_GET["id"];
 
-$query = "select * from liitetiedostot where tunnus='$id'";
+$query = "SELECT * FROM liitetiedostot where tunnus = '$id'";
 $liiteres = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($liiteres) > 0) {

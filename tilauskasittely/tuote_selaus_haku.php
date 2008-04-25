@@ -43,7 +43,7 @@
 						window.open('$PHP_SELF?tuoteno='+tuoteno+'&ohje=off&toiminto=avaa_kuva&tunnus='+tuote_tunnus+'&laji=tuotekuva', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=0,top = 0, width='+myWidth+', height='+myHeight);
 					}
 					else {
-						window.open('$PHP_SELF?tuoteno='+tuoteno+'&ohje=off&toiminto=avaa_kuva&tunnus='+tuote_tunnus+'&laji=tuotekuva', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=0,top = 0, width='+maxwidth+', height='+totalheight);
+						window.open('$PHP_SELF?tuoteno='+tuoteno+'&ohje=off&toiminto=avaa_kuva&&maxi='+maxwidth+'&tunnus='+tuote_tunnus+'&laji=tuotekuva', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=0,top = 0, width='+maxwidth+', height='+totalheight);
 					}
 				}
 			//-->
@@ -95,7 +95,10 @@
 				echo "<a href='".$palvelin2."view.php?id=$kuvarow[tunnus]' target='_top'>".t("Avaa pdf")."</a></td></tr>";
 			}
 			else {
-				echo "<img src='".$palvelin2."view.php?id=$kuvarow[tunnus]'></td></tr>";
+				if ($maxi > 0) {
+					$maxi = "width = '$maxi' ";
+				}
+				echo "<img $maxi src='".$palvelin2."view.php?id=$kuvarow[tunnus]'></td></tr>";
 			}
 
 			echo "<tr><td class='back' align='center' valign='top'>$kuvarow[selite]</td></tr>";
@@ -1349,6 +1352,9 @@
 
 						$apurow = mysql_fetch_array($kuvares);
 						$maxwidth = $apurow["max_width"] + 30;
+						if ($maxwidth > 640) {
+							$maxwidth = 640;
+						}
 						$totalheight = $apurow["total_height"] + 60;
 
 						if ($apurow["kpl"] > 0) {

@@ -176,6 +176,7 @@
 	$tuoteperhe				= array(); 				// Tuoteperheiden lapset menevät tänne
 	$kaikkituotteet			= array();  			// tähän arrayseen lisätään kaikki tuotteet ketjusta
 	$kaikkituotteet[]		= strtoupper($tuoteno); // ekaksi lisätään ketjuun kysytty tuote
+	$isa_array 				= array();
 	$var					= strtoupper($var); 	// varri isoks
 	$netto					= strtoupper($netto); 	// netto isoks
 	$toimittamatta			= $kpl;					//Näin paljon ollaan toimittamassa
@@ -192,6 +193,7 @@
 	$myy_hintakerr  = array();
 	$myy_alekerroi  = array();
 	$myy_era  		= array();
+	$myy_tyyppi		= array();
 	$myy_lapsi_ein 	= array();
 	$lisatyt_rivit1 = array();
 	$lisatyt_rivit2 = array();

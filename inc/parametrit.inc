@@ -303,10 +303,6 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 	// haetaan jotain tarpeellisia funktioita mukaan..
 	require ("functions.inc");
 
-	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
-	require("connect.inc");
-
-
 	if (isset($nayta_pdf) and $nayta_pdf == 1) {
 		header("Content-Type: application/pdf");
 		header('Content-Disposition: inline; filename="pupesoft.pdf"');
@@ -467,6 +463,9 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		}
 	}
 
-
+	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
+	require("connect.inc");
+	
 }
+
 ?>

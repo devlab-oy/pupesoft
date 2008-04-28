@@ -10,6 +10,17 @@
 	$tres	= mysql_query($tquery) or pupe_error($tquery);
 	$trow 	= mysql_fetch_array($tres); // haetaan tuotteen tiedot..
 
+	$korvquery = "select * from korvaavat where yhtio='$row[yhtio]' and tuoteno='$row[tuoteno]'";
+	$korvres = mysql_query($korvquery) or pupe_error($korvquery);
+	$korvrow = mysql_fetch_array($korvres);
+	
+	if (mysql_num_rows($korvres) > 0 and $row["var2"] != "OK" and $yhtiorow["korvaavat_hyvaksynta"] != "") {
+		$varaosavirhe .= t("HUOM: tämä on korvaava tuote, haluatko hyväksyä?")."<br>";
+		$riviok++;
+		$tilausok++;
+		$saako_hyvaksya++;
+	}
+
 	if (mysql_num_rows($tres) == 0) {
 		$varaosavirhe .= t("VIRHE: Tuotetta ei löydy!")."<br>";
 		$riviok++;

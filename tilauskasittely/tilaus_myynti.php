@@ -2193,7 +2193,7 @@ if ($tee == '') {
 	}
 
 	//Kuitataan OK-var riville
-	if ($kukarow["extranet"] == "" and $tila == "OOKOOAA") {
+	if (($kukarow["extranet"] == "" or $yhtiorow["korvaavat_hyvaksynta"] != "") and $tila == "OOKOOAA") {
 		$query = "	UPDATE tilausrivi
 					SET var2 = 'OK'
 					WHERE tunnus = '$rivitunnus'";
@@ -2202,7 +2202,7 @@ if ($tee == '') {
 		$tapa 		= "";
 		$rivitunnus = "";
 	}
-
+	
 	if ($kukarow["extranet"] == "" and $tila == "LISATIETOJA_RIVILLE_OSTO_VAI_HYVITYS") {
 		$query = "	UPDATE tilausrivin_lisatiedot
 					SET osto_vai_hyvitys 	= '$osto_vai_hyvitys',

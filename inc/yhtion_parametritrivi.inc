@@ -1453,6 +1453,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "korvaavat_hyvaksynta") {
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value='' $sel>".t("Ei")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Kyllä")."</option>";
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "monikayttajakalenteri") {
 		
 		$ulos = "<td><select name='$nimi'>";

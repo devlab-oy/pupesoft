@@ -788,15 +788,29 @@ if ($tuoteno != '') {
 
 								if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Tulo. $trow[kpl] kappaletta. Saldo ennen tuloa: $uusisaldo Kehahin ennen tuloa: $uusikehahin Sort: Asc</font><br>";
 
-								// kehahin matikka. lasketaan uusi kehahin jos päädytään plussalle ja lähdetään plussalta
-								if ($uusisaldo + $trow['kpl'] > 0 and $uusisaldo > 0 and ($uusikehahin * $uusisaldo + $trow['kplhinta'] * $trow['kpl']) > 0) {
-									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>JÄLKILASKENTA: Uusi kehahin (Matikka): ($uusikehahin * $uusisaldo + $trow[kplhinta] * $trow[kpl]) / ($uusisaldo + $trow[kpl])";
-									$uusikehahin = round(($uusikehahin * $uusisaldo + $trow['kplhinta'] * $trow['kpl']) / ($uusisaldo + $trow['kpl']),6);
-									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= " = $uusikehahin</font><br>";
+								// kehahin matikka. lasketaan uusi kehahin jos jakolaskun molemmat puolet on plussalla
+								if ($uusisaldo + $trow['kpl'] > 0 and $uusikehahin * $uusisaldo + $trow['kplhinta'] * $trow['kpl'] > 0) {
+
+									if ($jalkilaskenta_debug >= 1) {
+										$jalkilaskenta_debug_text .= "<font class='message'>JÄLKILASKENTA: Uusi kehahin (Matikka): ($uusikehahin * $uusisaldo + $trow[kplhinta] * $trow[kpl]) / ($uusisaldo + $trow[kpl])";
+									}
+
+									$uusikehahin = round(($uusikehahin * $uusisaldo + $trow['kplhinta'] * $trow['kpl']) / ($uusisaldo + $trow['kpl']), 6);
+
+									if ($jalkilaskenta_debug >= 1) {
+										$jalkilaskenta_debug_text .= " = $uusikehahin</font><br>";
+									}
+
 								}
 								else {
-									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>JÄLKILASKENTA: Uusi kehahin (Ei matikkaa): uusikehahin = ostohinta = $trow[kplhinta]</font><br>";
-									$uusikehahin = $trow['kplhinta'];
+									// jos meillä on tulo ja kappaleet on miinusta niin silloin keharikin pitää olla miinusta!
+									if ($trow["kpl"] < 0) {
+										$uusikehahin = $trow['kplhinta'] * -1;
+									}
+									else {
+										$uusikehahin = $trow['kplhinta'];
+									}
+									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>JÄLKILASKENTA: Uusi kehahin (Ei matikkaa): uusikehahin = ostohinta = $uusikehahin</font><br>";
 								}
 
 								// otetaan tämä päivä laskennan alkupäiväksi

@@ -158,7 +158,9 @@ if (!function_exists("t")) {
 
 if (!function_exists("maa")) {
 	function maa($code, $kieli="") {
-
+		// tarvitaan yhtiörowta, kukarowta ja tieto slaven:n käytöstä
+		global $yhtiorow, $kukarow, $useslave, $link, $verkkokauppa;
+		
 		$query = sprintf("SELECT nimi FROM maat where koodi = '%s' LIMIT 1", mysql_real_escape_string(substr($code, 0 ,2)));
 		$res = mysql_query($query) or pupe_error($query);
 		$maa = mysql_fetch_array($res);
@@ -5508,6 +5510,52 @@ if(!function_exists("nayta_asiakashaku")) {
 	}
 }
 
+/*
+if(!function_exists("ake_log")) {
+	function ake_log($rekkari) {
+		global $kukarow, $useslave;
+		
+		echo "#1 JOTAIN...$useslave<br>";
+		
+		
+		$tulislave = $useslave;
+		if ($useslave != 0) {
+			// EI käytetä slavea
+			$useslave = 0;
+			// otetaan tietokanta connect uudestaan
+			if (file_exists("connect.inc")) {
+				require ("connect.inc");
+			}
+			else {
+				require ("inc/connect.inc");
+			}
+		}
+		
+		echo "#2 JOTAIN...$useslave<br>";
+		
+		$query = "	INSERT into ake_log SET
+					yhtio	= '$kukarow[yhtio]',
+				  	kuka	= '$kukarow[kuka]',
+				  	rekno	= '$rekkari',
+				  	aika	= now()";
+		$result = mysql_query($query) or pupe_error($query);
+		
+		if ($tulislave != 0) {
+			$useslave = $tulislave;
+			// otetaan tietokanta connect uudestaan
+			if (file_exists("connect.inc")) {
+				require ("connect.inc");
+			}
+			else {
+				require ("inc/connect.inc");
+			}
+		}
+		
+		echo "#3 JOTAIN...$useslave<br>";
+		
+	}
+}
+*/
 
 if(!function_exists("tarvitaanko_intrastat")) {
 	function tarvitaanko_intrastat($maa_lahetys, $maa_maara) {

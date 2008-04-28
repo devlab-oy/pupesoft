@@ -1011,6 +1011,7 @@
 												toimittajan_tunnus	= '$toimittajan_tunnus',
 												ei_nayteta 			= '$myy_lapsi_ein[$indeksi]',
 												tilausrivitunnus	= '$lisatty_tun',
+												vanha_otunnus		= '$kukarow[kesken]',
 												jarjestys			= '$jarjestys',
 												luontiaika			= now(),
 												laatija 			= '$kukarow[kuka]'";
@@ -1671,6 +1672,7 @@
 							toimittajan_tunnus	= '$toimittajan_tunnus',
 							tilausrivitunnus	= '$lisatty_tun',
 							jarjestys			= '$jarjestys',
+							vanha_otunnus		= '$kukarow[kesken]',
 							ei_nayteta			= '$puu_ein[$i]',
 							luontiaika			= now(),
 							laatija 			= '$kukarow[kuka]'";

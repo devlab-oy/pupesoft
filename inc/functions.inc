@@ -502,7 +502,7 @@ if (!function_exists("saldo_myytavissa")) {
 
 		$varasto = (int) $varasto;
 
-		$query  = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+		$query  = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
 		$result = mysql_query($query) or die($query.mysql_error());
 		$tuote  = mysql_fetch_array($result);
 
@@ -529,7 +529,7 @@ if (!function_exists("saldo_myytavissa")) {
 
 				if (in_array($yhtio, $yhtiot) and $yhtio != $kukarow["yhtio"]) {
 					// Jos yhtiö on joku konserniyhtiöistä niin tutkitaan suoratoimitus juttuja
-					$query = "	select tyyppi_tieto, liitostunnus, toim_tuoteno
+					$query = "	SELECT tyyppi_tieto, liitostunnus, toim_tuoteno
 								from tuotteen_toimittajat, toimi
 								where tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 								and tuotteen_toimittajat.tuoteno = '$tuoteno'

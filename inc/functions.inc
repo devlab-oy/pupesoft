@@ -5762,4 +5762,42 @@ if(!function_exists("tee_asiakashaku")) {
 		echo "	</table>";
 	}
 }
+
+
+if(!function_exists("sendSMS")) {
+	function sendSMS($smsnumero, $smsviesti) {
+		global $sms_palvelin, $sms_user, $sms_pass;
+
+		if($sms_palvelin != "" and $sms_user != "" and $sms_pass != "" and $smsnumero != "" and $smsviesti != "") {
+			
+			$smsviesti = urlencode($smsviesti);
+
+			$retval = file_get_contents("$sms_palvelin?user=$sms_user&pass=$sms_pass&numero=$smsnumero&viesti=$smsviesti");
+			$smsviesti = urldecode($smsviesti);
+
+			if(trim($retval) == "0") {
+				echo "<font class='info'>SMS-viesti lähetetty numeroon $smsnumero</font><br>";
+			}
+		}
+	}	
+}
+
+
+if(!function_exists("on_puhelinnumero")) {
+	function on_puhelinnumero($numero) {
+		
+		//	Stripataan vähän turhia merkkejä
+		$checkno = preg_replace("/[\r\n\s\t\(\)\{\}\-]/", "", $numero);
+		
+		//	Jos meille jäi vain numeroita se on varmaan aika oikein
+		if(preg_replace("/[+0-9]/", "", $checkno) == "" and strlen($checkno)>0) {
+			return $checkno;
+		}
+		else {
+			return false;
+		}
+	}
+}
+
+
 ?>

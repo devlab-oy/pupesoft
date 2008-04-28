@@ -177,6 +177,69 @@
 			else {
 				require("tilaus-valmis.inc");
 			}
+			
+			
+			//	Katsotaan toimitettiinko jotain mist‰ meid‰n tulee laittaa viesti‰
+			if($sms_jt == "kaikki_toimitettu") {
+				
+				//	Haetaan kaikki alkuper‰iset tilaukset joilla ei ole en‰‰ mit‰‰n j‰lkk‰riss‰
+				$query = "	SELECT tilausrivin_lisatiedot.vanha_otunnus, sum(alkup_tilaus.jt) jt
+							FROM tilausrivi
+							JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus
+							LEFT JOIN tilausrivi alkup_tilaus ON alkup_tilaus.yhtio=tilausrivin_lisatiedot.yhtio and alkup_tilaus.otunnus=tilausrivin_lisatiedot.vanha_otunnus
+							WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.otunnus='$laskurow[tunnus]'
+							GROUP BY tilausrivin_lisatiedot.vanha_otunnus
+							HAVING jt = 0 or jt IS NULL";
+				$result = mysql_query($query) or pupe_error($query);
+				
+				while ($row = mysql_fetch_array($result)) {
+					
+					$smsviesti = "Tilauksenne $row[vanha_otunnus] on valmis noudettavaksi.";
+					$smsnumero = "";
+					
+					//	Jos mist‰‰n ei ole tullut numeroa koitetaan arvata se (t‰ll‰hetkell‰ se ei tule mist‰‰n...)
+					if($smsnumero == "") {
+						
+						//	Haetaan sen orginaalilaskun tiedot, koska siell‰ ne on ainakin oikein
+						$query = "	SELECT lasku.liitostunnus, lasku.nimitark, maksuehto.kateinen
+									FROM lasku
+									LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and maksuehto.tunnus=lasku.maksuehto
+									WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnus='$row[vanha_otunnus]'";
+						$result = mysql_query($query) or pupe_error($query);
+						$vanhalaskurow = mysql_fetch_array($result);
+
+						//	Oletyksena asiakkaan on gsm-numero						
+						if($smsnumero == "") {
+							
+							$query = "	SELECT gsm
+										FROM asiakas
+										WHERE yhtio='$kukarow[yhtio]' and tunnus='$vanhalaskurow[liitostunnus]'";
+							$result = mysql_query($query) or pupe_error($query);
+							$asrow = mysql_fetch_array($result);
+
+							$n = on_puhelinnumero($asrow["gsm"]);
+							if($n != "") {
+								$smsnumero = $n;
+							}
+						}
+
+						//	Jos meill‰ on k‰teismyynti voidaan otsikon nimitarkenteessa sis‰llytt‰‰ puhelinnumero
+						if($smsnumero == "" and $vanhalaskurow["kateinen"] != "" and $vanhalaskurow["nimitark"] != "") {
+
+							// jos t‰m‰ oli numero
+							$n = on_puhelinnumero($vanhalaskurow["nimitark"]);
+							if($n != "") {
+								$smsnumero = $n;
+							}
+						}
+						
+						//	Ja l‰hetet‰‰n itse SMS
+						if($smsnumero!="") {
+							sendSMS($smsnumero, $smsviesti, $smsliitos);
+						}
+					}
+				}
+			}			
 		}
 		$tee = '';
 	}

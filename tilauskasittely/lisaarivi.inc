@@ -379,9 +379,11 @@
 					}
 					else {
 						//Yritet‰‰n myyd‰ korvaava tuote
-						if ($krmyytavissa > 0) {
-							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])"); // lis‰t‰‰n tuoteno kommenttin
-						}
+//						if ($krmyytavissa > 0) {
+//							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])"); // lis‰t‰‰n tuoteno kommenttin
+//						}
+
+						$korvattiin_korvaavalla = "HIIOHEI!";
 
 						if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) $kaikkituotteet[]=strtoupper($krow2["tuoteno"]); // lis‰t‰‰n tuoteno arrayseen
 					}

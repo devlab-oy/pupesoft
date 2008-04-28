@@ -194,7 +194,7 @@
 				
 				while ($row = mysql_fetch_array($result)) {
 					
-					$smsviesti = "Tilauksenne $row[vanha_otunnus] on valmis noudettavaksi.";
+					$smsviesti = "Tilauksenne $row[vanha_otunnus] on valmis noudettavaksi. - $yhtiorow[nimi]";
 					$smsnumero = "";
 					
 					//	Jos mist‰‰n ei ole tullut numeroa koitetaan arvata se (t‰ll‰hetkell‰ se ei tule mist‰‰n...)

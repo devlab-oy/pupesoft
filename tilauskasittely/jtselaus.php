@@ -7,7 +7,7 @@
 		else {
 			require ("parametrit.inc");
 		}
-		
+
 		if ($toim == "ENNAKKO") {
 			echo "<font class='head'>".t("Ennakkotilausrivit")."</font><hr>";
 		}
@@ -40,7 +40,7 @@
 
 			$asiakasno 		= $asiakas["ytunnus"];
 			$asiakasid		= $asiakas["tunnus"];
-			
+
 			if ($asiakas["toim_nimi"] == "") {
 				$asiakasmaa = $asiakas["maa"];
 			}
@@ -50,7 +50,7 @@
 
 			$jarj	 		= "tuoteno";
 			$tuotenumero	= "";
-			$tilaus			= "";			
+			$tilaus			= "";
 			$toimi			= "";
 			$superit		= "";
 			$tilaus_on_jo	= "KYLLA";
@@ -77,7 +77,7 @@
 			die("Tilausta ei löydy!");
 		}
 	}
-	
+
 	// Haetaan tee_jt_tilaus-funktio
 	require ("tee_jt_tilaus.inc");
 
@@ -114,7 +114,7 @@
 					$mista = 'jtrivit_tilaukselle.inc';
 					require("laskealetuudestaan.inc");
 				}
-				
+
 				// Toimitetaan jtrivit
 				tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka, $tilaus_on_jo, $varastosta);
 			}
@@ -236,17 +236,17 @@
 			exit;
 		}
 		$trow = mysql_fetch_array($result);
-		
+
 		$query = "	DELETE from tilausrivi
 					WHERE tunnus = '$jt_rivitunnus' and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		$query = "	SELECT *
 					FROM tuote
 					WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$trow[tuoteno]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$tuoterow = mysql_fetch_array($result);
-		
+
 		$query  = "	SELECT *
 					from lasku
 					WHERE yhtio='$kukarow[yhtio]' and tunnus = '$trow[otunnus]'";
@@ -254,26 +254,26 @@
 		$laskurow = mysql_fetch_array($result);
 
 		$tuoteno 		= $trow["tuoteno"];
-		
+
 		if ($toim == "ENNAKKO") {
 			$kpl 		= $trow["varattu"];
 		}
-		else {			
+		else {
 			if ($yhtiorow["varaako_jt_saldoa"] == "") {
 				$kpl 	= $trow["jt"];
 			}
 			else {
 				$kpl 	= $trow["jt"]+$trow["varattu"];
-			}			
+			}
 		}
-		
+
 		// Tutkitaan onko tämä myyty ulkomaan alvilla
 		list(,,,$tsek_alehinta_alv,) = alehinta($laskurow, $tuoterow, $kpl, '', '', '');
-		
+
 		if ($tsek_alehinta_alv > 0) {
 			$tuoterow["alv"] = $tsek_alehinta_alv;
 		}
-		
+
 		if ($tuoterow["alv"] != $trow["alv"] and $yhtiorow["alv_kasittely"] == "" and $trow["alv"] < 500) {
 			$hinta 		= sprintf("%.".$yhtiorow['hintapyoristys']."f",round($trow["hinta"] / (1+$trow['alv']/100) * (1+$tuoterow['alv']/100), $yhtiorow['hintapyoristys']));
 		}
@@ -309,7 +309,7 @@
 		echo "<input type='hidden' name='superit' value='$superit'>";
 		echo "<input type='hidden' name='suorana' value='$suorana'>";
 		echo "<input type='hidden' name='tuotenumero' value='$tuotenumero'>";
-		echo "<input type='hidden' name='tilaus' value='$tilaus'>";		
+		echo "<input type='hidden' name='tilaus' value='$tilaus'>";
 		echo "<input type='hidden' name='rivinotunnus' value='$rivinotunnus'>";
 		echo "<input type='hidden' name='maa' value='$maa'>";
 
@@ -461,7 +461,7 @@
 		if ($tilaus != '') {
 			$tilausrivilisa .= " and tilausrivi.otunnus = '$tilaus' ";
 		}
-		
+
 		if ($vain_rivit != '') {
 			$tilausrivilisa .= " and tilausrivi.tunnus in ($vain_rivit) ";
 		}
@@ -517,7 +517,7 @@
 		else {
 			$lisavarattu = "";
 		}
-		
+
 		if ($yhtiorow["saldo_kasittely"] == "T") {
 			$saldoaikalisa = date("Y-m-d");
 		}
@@ -561,9 +561,9 @@
 							$tilausrivilisa
 							$order
 							$limit";
-			}			
+			}
 			$isaresult = mysql_query($query) or pupe_error($query);
-									
+
 			if (mysql_num_rows($isaresult) > 0) {
 
 				$jt_rivilaskuri = 0;
@@ -705,7 +705,11 @@
 
 						if ($jtrow["ei_saldoa"] == "") {
 							foreach ($varastosta as $vara) {
-								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa);
+
+								$jt_saldopvm = "";
+								if ($yhtiorow["saldo_kasittely"] != "") $jt_saldopvm = date("Y-m-d");
+
+								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
 								$kokonaismyytavissa += $myytavissa;
 							}
 
@@ -751,13 +755,13 @@
 								if ($tilaus_on_jo == "") {
 									echo "<th valign='top'>".t("Ytunnus")."<br>".t("Nimi")."<br>".t("Toim_Nimi")."</th>";
 								}
-								
+
 								if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
 									echo "<th valign='top'>".t("Tilausnro")."<br>".t("Viesti.")."</th>";
 								}
 
 								echo "<th valign='top'>".t("JT")."<br>".t("Hinta")."<br>".t("Ale")."</th>";
-								
+
 								if(count($suoravarasto) > 0 or $suorana != "") {
 									echo "<th valign='top'>".t("Status")."<br>".t("Suoratoimittaja")."<br>".t("Toimaika")."</th>";
 								}
@@ -799,7 +803,7 @@
 										echo "<input type='hidden' name='superit' value='$superit'>";
 										echo "<input type='hidden' name='suorana' value='$suorana'>";
 										echo "<input type='hidden' name='tuotenumero' value='$tuotenumero'>";
-										echo "<input type='hidden' name='tilaus' value='$tilaus'>";										
+										echo "<input type='hidden' name='tilaus' value='$tilaus'>";
 
 										if(count($suoravarasto)>0) {
 											foreach($suoravarasto as $key => $value) {
@@ -940,7 +944,7 @@
 
 									echo "$jtrow[toim_nimi]</td>";
 								}
-								
+
 								if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
 									echo "<td valign='top' $class>$jtrow[otunnus]<br>$jtrow[viesti]</td>";
 								}
@@ -981,17 +985,17 @@
 								if (strtotime($jtrow['ttoimaika']) == strtotime($jtrow['ltoimaika'])) {
 									unset($toimvko);
 									unset($toimpva);
-									
+
 									if ($jtrow['toimvko'] > 0 and $jtrow['toimvko'] != 7) {
 										$toimvko = date("W", strtotime($jtrow['ltoimaika']));
 										$toimpva = date("N", strtotime($jtrow['ltoimaika']));
-									} 
+									}
 									else if ($jtrow['toimvko'] > 0 and $jtrow['toimvko'] == 7) {
 										$toimvko = date("W", strtotime($jtrow['ltoimaika']));
 									}
-									
+
 									$toimaika = $jtrow['ltoimaika'];
-								} 
+								}
 								else {
 									unset($toimvko);
 									unset($toimpva);
@@ -1000,25 +1004,25 @@
 
 								// Riittää kaikille
 								if (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "")  and $perheok==0) {
-									
+
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
 									if ($kukarow["extranet"] == "" and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen')) {
-										
+
 										if ($from_varastoon_inc == "editilaus_in.inc") {
 											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";
 										}
 										else {
 											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!</font><br>";
-										}																				
-										
+										}
+
 										// Pomitaan tämä rivi/perhe
 										$loput[$tunnukset] 	= "KAIKKI";
 										$kpl[$tunnukset] 	= 0;
 										$tunnusarray 		= explode(',', $tunnukset);
-																				
+
 										// Toimitetaan jtrivit
 										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka, $tilaus_on_jo, $varastosta);
-										
+
 										$jt_rivilaskuri++;
 									}
 									else {
@@ -1026,20 +1030,20 @@
 
 										if ($kukarow["extranet"] == "") {
 											echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:green;'>".t("Riittää kaikille")."!</font><br>";
-											
+
 											if (!isset($toimpva) and $toimvko > 0) {
 												echo t("Viikko")." $toimvko";
-											} 
+											}
 											elseif ($toimvko > 0 and isset($toimpva)) {
 												echo t("Viikko")." $toimvko";
 												if (isset($toimpva)) {
 													echo " ($DAY_ARRAY[$toimpva])";
 												}
-											} 
+											}
 											else {
 												echo tv1dateconv($toimaika);
 											}
-											
+
 											echo "</td>";
 											echo "<td valign='top' align='center' $class>".t("K")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI'></td>";
 											echo "<td valign='top' align='center' $class><input type='text' name='kpl[$tunnukset]' size='4'></td>";
@@ -1061,45 +1065,45 @@
 													<td valign='top' align='center' $classlisa>".t("Älä tee mitään")."<input type='radio' name='loput[$tunnukset]' value=''></td>";
 
 										}
-										
+
 										$jt_rivilaskuri++;
-									}															
+									}
 								}
 								// Riittää tälle riville mutta ei kaikille
 								elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa >= $jtrow["jt"] and $perheok==0) {
-									
+
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
 									if ($kukarow["extranet"] == "" and $automaaginen == 'tosi_automaaginen') {
-										
+
 										if ($from_varastoon_inc == "editilaus_in.inc") {
 											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";
 										}
 										else {
 											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!</font><br>";
 										}
-										
+
 										// Pomitaan tämä rivi/perhe
 										$loput[$tunnukset] 	= "KAIKKI";
 										$kpl[$tunnukset] 	= 0;
 										$tunnusarray 		= explode(',', $tunnukset);
-																				
+
 										// Toimitetaan jtrivit
 										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka, $tilaus_on_jo, $varastosta);
-										
-										$jt_rivilaskuri++;										
+
+										$jt_rivilaskuri++;
 									}
 									elseif($automaaginen == "") {
 										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:yellowgreen;'>".t("Ei riitä kaikille")."!</font><br>";
-										
+
 										if (!isset($toimpva) and $toimvko > 0) {
 											echo t("Viikko")." $toimvko";
-										} 
+										}
 										else if ($toimvko > 0 and isset($toimpva)) {
 											echo t("Viikko")." $toimvko";
 											if (isset($toimpva)) {
 												echo " ($DAY_ARRAY[$toimpva])";
 											}
-										} 
+										}
 										else {
 											echo tv1dateconv($toimaika);
 										}
@@ -1110,7 +1114,7 @@
 												<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA'></td>
 												<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA'></td>
 												<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
-									
+
 										$jt_rivilaskuri++;
 									}
 								}
@@ -1136,23 +1140,23 @@
 									echo "<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA'></td>";
 									echo "<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA'></td>";
 									echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
-									
+
 									$jt_rivilaskuri++;
 								}
 								// Ei riitä koko riville
 								elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa > 0 and $perheok==0) {
 									if ($automaaginen == '') {
 										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:orange;'>".t("Ei riitä koko riville")."!</font><br>";
-										
+
 										if (!isset($toimpva) and $toimvko > 0) {
 											echo t("Viikko")." $toimvko";
-										} 
+										}
 										else if ($toimvko > 0 and isset($toimpva)) {
 											echo t("Viikko")." $toimvko";
 											if (isset($toimpva)) {
 												echo " ($DAY_ARRAY[$toimpva])";
 											}
-										} 
+										}
 										else {
 											echo tv1dateconv($toimaika);
 										}
@@ -1163,7 +1167,7 @@
 												<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA'></td>
 												<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA'></td>
 												<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
-												
+
 										$jt_rivilaskuri++;
 									}
 								}
@@ -1171,16 +1175,16 @@
 								else {
 									if ($automaaginen == '') {
 										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:red;'>".t("Riviä ei voida toimittaa")."!</font><br>";
-											
+
 										if (!isset($toimpva) and $toimvko > 0) {
 											echo t("Viikko")." $toimvko";
-										} 
+										}
 										else if ($toimvko > 0 and isset($toimpva)) {
 											echo t("Viikko")." $toimvko";
 											if (isset($toimpva)) {
 												echo " ($DAY_ARRAY[$toimpva])";
 											}
-										} 
+										}
 										else {
 											echo tv1dateconv($toimaika);
 										}
@@ -1199,14 +1203,14 @@
 													<td valign='top' align='center' $class>".t("Mitätöi")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>
 													<td valign='top' align='center' $classlisa>".t("Älä tee mitään")."<input type='radio' name='loput[$tunnukset]' value=''></td>";
 										}
-										
+
 										$jt_rivilaskuri++;
 									}
 								}
-								
+
 							}
 							else {
-								echo "<td valign='top' align='center' $classlisa>&nbsp;</td>";	
+								echo "<td valign='top' align='center' $classlisa>&nbsp;</td>";
 							}
 
 							if ($automaaginen == '') {
@@ -1285,11 +1289,11 @@
 
 										echo "$perherow[toim_nimi]</td>";
 									}
-									
+
 									if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
 										echo "<td valign='top' $class>$perherow[otunnus]<br>$perherow[viesti]</td>";
 									}
-									
+
 									if ($kukarow["extranet"] == "") {
 										echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$perherow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&superit=$superit&suorana=$suorana&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>$perherow[jt]</a><br>";
 									}
@@ -1298,19 +1302,19 @@
 									}
 
 									echo sprintf("%.".$yhtiorow['hintapyoristys']."f", $perherow["hinta"])."<br>$perherow[ale]%</td>";
-									
+
 									if ($oikeurow['paivitys'] == '1') {
 										echo "<td valign='top' $class>$kokonaismyytavissa $perherow[yksikko]<br></font>";
-										
+
 										if (!isset($toimpva) and $toimvko > 0) {
 											echo t("Viikko")." $toimvko";
-										} 
+										}
 										else if ($toimvko > 0 and isset($toimpva)) {
 											echo t("Viikko")." $toimvko";
 											if (isset($toimpva)) {
 												echo " ($DAY_ARRAY[$toimpva])";
 											}
-										} 
+										}
 										else {
 											echo tv1dateconv($toimaika);
 										}
@@ -1330,7 +1334,7 @@
 										}
 									}
 									else {
-										echo "<td valign='top' align='center' $classlisa>&nbsp;</td>";	
+										echo "<td valign='top' align='center' $classlisa>&nbsp;</td>";
 									}
 									echo "</tr>";
 								}
@@ -1342,12 +1346,12 @@
 				}
 
 				if ($automaaginen == '' and $jt_rivilaskuri > 0) {
-					
+
 					if ($oikeurow['paivitys'] == '1') {
 						echo "<tr><td colspan='8' class='back'></td><td colspan='3' class='back' align='right'><input type='submit' value='".t("Poimi")."'></td></tr>";
 						echo "</form>";
 					}
-					
+
 					echo "</table>";
 					echo "<br>";
 				}
@@ -1357,7 +1361,7 @@
 					}
 					else {
 						echo t("Yhtään JT-riviä ei löytynyt")."!<br>";
-					}										
+					}
 				}
 			}
 			else {
@@ -1393,13 +1397,13 @@
 				if ($varastosta[$vrow["tunnus"]] == $vrow["tunnus"]) {
 					$sel = 'CHECKED';
 				}
-				
+
 				$huomio = "";
-				
+
 				if ($vrow['tyyppi'] == 'E') {
 					$huomio = "<td class='back'><font class='error'>".t("HUOM!!! Erikoisvarasto!")."</font></td>";
 				}
-				
+
 				echo "<tr><th>$vrow[nimitys]</th><td><input type='checkbox' name='varastosta[$vrow[tunnus]]' value='$vrow[tunnus]' $sel></td>$huomio</tr>";
 		}
 
@@ -1417,7 +1421,7 @@
 					and toimi.oletus_vienti in ('C','F','I')
 					ORDER BY tyyppi_tieto";
 		$superjtres  = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($superjtres) > 0) {
 
 			//	Piilotetaan tämä jos meillä on jo jotain suoravarastoja valittuna (tämä toiminto depracoituu enivei)
@@ -1425,7 +1429,7 @@
 			if ($suorana != '' and count($suoravarasto)==0) $sel = 'CHECKED';
 			echo "<tr><td class='back'><br></td></tr><tr><td class='back'><font class='message'>".t("Toimita suoratoimituksena varastosta:")."</font></td></tr>";
 			echo "<tr><th>".t("Toimita kaikista varastoista (manuaalivalinta)")."</th><td><input type='checkbox' name='suorana' value='suora' $sel></td></tr>";
-			
+
 			while($superjtrow=mysql_fetch_array($superjtres)) {
 				if (array_search($superjtrow["tunnus"], (array) $suoravarasto)!== false) {
 					$sel = "checked";
@@ -1438,7 +1442,7 @@
 			}
 
 		}
-		
+
 		echo "</table>";
 
 
@@ -1456,7 +1460,7 @@
 					<option value='tuoteno' {$sel["tuoteno"]}>".t("Tuotteittain")."</option>
 					<option value='ytunnus' {$sel["ytunnus"]}>".t("Asiakkaittain")."</option>
 					<option value='luontiaika' {$sel["luontiaika"]}>".t("Tilausajankohdan mukaan")."</option>
-					<option value='toimaika' {$sel["toimaika"]}>".t("Toimitusajankohdan mukaan")."</option>					
+					<option value='toimaika' {$sel["toimaika"]}>".t("Toimitusajankohdan mukaan")."</option>
 					</select>
 				</td>
 			</tr>";

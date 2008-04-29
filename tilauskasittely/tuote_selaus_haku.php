@@ -475,8 +475,8 @@
 		$orginaaleja = array();
 	}
 	
-	if (file_exists('../tilauskasittely/sarjanumeron_lisatiedot_popup.inc')) {
-		require("../tilauskasittely/sarjanumeron_lisatiedot_popup.inc");			
+	if (file_exists('sarjanumeron_lisatiedot_popup.inc')) {
+		require("sarjanumeron_lisatiedot_popup.inc");			
 	}
 
 	echo "<table><tr>

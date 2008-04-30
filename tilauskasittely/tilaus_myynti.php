@@ -855,6 +855,18 @@ if ($tee == "VALMIS" and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") and $k
 			echo "<input type='hidden' name='kateinen' value='$kateinen'>";
 			echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
 			echo "<td><input type='submit' value='Seka'></td>";
+			echo "</form>";
+
+			echo "<form action='' method='post'>";	
+			echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
+			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+			echo "<input type='hidden' name='tee' value='VALMIS'>";
+			echo "<input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
+			echo "<input type='hidden' name='kateinen' value='$kateinen'>";
+			echo "<input type='hidden' name='kateisohitus' value='X'>";
+			echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
+			echo "<td><input type='submit' value='Ohitus'></td>";			
 			echo "</form></tr>";
 
 			echo "</table>";
@@ -942,7 +954,7 @@ if ($tee == "VALMIS" and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") and $k
 	}
 } 
 
-if ($tee == "VALMIS" and $kassamyyja_kesken == 'ei' and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kukarow['extranet'] == '') {
+if ($tee == "VALMIS" and $kassamyyja_kesken == 'ei' and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kukarow['extranet'] == '' and $kateisohitus == "") {
 
 	if ($kertakassa == "") $kertakassa = $kukarow["kassamyyja"];
 
@@ -1190,7 +1202,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			$aika=date("d.m.y @ G:i:s", time());
 			echo "<font class='message'>$otsikko $kukarow[kesken] ".t("valmis")."! ($aika) $kaikkiyhteensa $laskurow[valkoodi]</font><br><br>";
 
-			if (($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kateinen != '' and $kukarow['extranet'] == '') {
+			if (($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kateinen != '' and $kukarow['extranet'] == '' and $kateisohitus == "") {
 				echo "	<script type='text/javascript' language='JavaScript'>
 						<!--
 							function update_summa(kaikkiyhteensa) {

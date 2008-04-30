@@ -419,7 +419,7 @@ else {
 		}
 
 		//jos on kassamyyntiä ja se on käteistä niin tulostetaan lasku heti ilman lähetettä
-		if (($kateinen == 'X' and ($kukarow["kassamyyja"] != '' or $kertakassa != "") and $laskurow["vienti"] == '') or ($korkolasku == 'kylla')) {
+		if (($kateinen == 'X' and $kateisohitus == "" and ($kukarow["kassamyyja"] != '' or $kertakassa != "") and $laskurow["vienti"] == '') or ($korkolasku == 'kylla')) {
 			$query = "	UPDATE tilausrivi
 						SET toimitettu = '$kukarow[kuka]',
 						toimitettuaika = now()
@@ -452,7 +452,7 @@ else {
 			require ("tilauskasittely/verkkolasku.php");
 		}
 		// jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi ja toimitetuksi ja laitetaan alatila D
-		elseif ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') {
+		elseif ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '' and $kateisohitus == "") {
 			if ($kateinen == 'X' or $itsetulostus == "X" or $laskurow["vienti"] != '') {
 				// jos kyseessä on käteismyyntiä tai vientiä, merkataan tilaukset kerätyksi mutta ei toimitetuksi ja alatila C/B
 				// myös jos maksuehtolla on itsetulostustäppä trigattuna niin laitetaan se tähän haaraan

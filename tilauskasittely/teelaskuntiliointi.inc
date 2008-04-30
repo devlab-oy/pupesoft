@@ -173,7 +173,7 @@ else {
 							lukko 		= '1',
 							laatija 	= '$kukarow[kuka]',
 							laadittu 	= now(),
-							aputunnus	= $isa";
+							aputunnus	= '$isa'";
 				$laskutusres = mysql_query($query) or pupe_error($query);				
 			}
 		}

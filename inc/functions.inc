@@ -87,8 +87,10 @@ if (!function_exists("t")) {
 
 		require("salasanat.php");
 
+		$useslave = (int) $useslave;
+
 		if (isset($slavedb)) {
-			if ($slavedb[$useslave]=='') $useslave = 0;
+			if ($slavedb[$useslave] == '') $useslave = 0;
 		}
 		else {
 			$useslave = 0;
@@ -160,7 +162,7 @@ if (!function_exists("maa")) {
 	function maa($code, $kieli="") {
 		// tarvitaan yhtiörowta, kukarowta ja tieto slaven:n käytöstä
 		global $yhtiorow, $kukarow, $useslave, $link, $verkkokauppa;
-		
+
 		$query = sprintf("SELECT nimi FROM maat where koodi = '%s' LIMIT 1", mysql_real_escape_string(substr($code, 0 ,2)));
 		$res = mysql_query($query) or pupe_error($query);
 		$maa = mysql_fetch_array($res);
@@ -5514,10 +5516,10 @@ if(!function_exists("nayta_asiakashaku")) {
 if(!function_exists("ake_log")) {
 	function ake_log($rekkari) {
 		global $kukarow, $useslave;
-		
+
 		echo "#1 JOTAIN...$useslave<br>";
-		
-		
+
+
 		$tulislave = $useslave;
 		if ($useslave != 0) {
 			// EI käytetä slavea
@@ -5530,16 +5532,16 @@ if(!function_exists("ake_log")) {
 				require ("inc/connect.inc");
 			}
 		}
-		
+
 		echo "#2 JOTAIN...$useslave<br>";
-		
+
 		$query = "	INSERT into ake_log SET
 					yhtio	= '$kukarow[yhtio]',
 				  	kuka	= '$kukarow[kuka]',
 				  	rekno	= '$rekkari',
 				  	aika	= now()";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		if ($tulislave != 0) {
 			$useslave = $tulislave;
 			// otetaan tietokanta connect uudestaan
@@ -5550,9 +5552,9 @@ if(!function_exists("ake_log")) {
 				require ("inc/connect.inc");
 			}
 		}
-		
+
 		echo "#3 JOTAIN...$useslave<br>";
-		
+
 	}
 }
 */
@@ -5817,7 +5819,7 @@ if(!function_exists("sendSMS")) {
 		global $sms_palvelin, $sms_user, $sms_pass;
 
 		if($sms_palvelin != "" and $sms_user != "" and $sms_pass != "" and $smsnumero != "" and $smsviesti != "") {
-			
+
 			$smsviesti = urlencode($smsviesti);
 
 			$retval = file_get_contents("$sms_palvelin?user=$sms_user&pass=$sms_pass&numero=$smsnumero&viesti=$smsviesti");
@@ -5827,16 +5829,16 @@ if(!function_exists("sendSMS")) {
 				echo "<font class='info'>SMS-viesti lähetetty numeroon $smsnumero</font><br>";
 			}
 		}
-	}	
+	}
 }
 
 
 if(!function_exists("on_puhelinnumero")) {
 	function on_puhelinnumero($numero) {
-		
+
 		//	Stripataan vähän turhia merkkejä
 		$checkno = preg_replace("/[\r\n\s\t\(\)\{\}\-]/", "", $numero);
-		
+
 		//	Jos meille jäi vain numeroita se on varmaan aika oikein
 		if(preg_replace("/[+0-9]/", "", $checkno) == "" and strlen($checkno)>0) {
 			return $checkno;

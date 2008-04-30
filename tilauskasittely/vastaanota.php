@@ -172,7 +172,7 @@
 
 			$t1[$tun] = strtoupper($t1[$tun]);
 
-			$query = "	SELECT tilausrivi.tuoteno, tuote.ei_saldoa
+			$query = "	SELECT tilausrivi.tuoteno, tuote.ei_saldoa, tilausrivi.tunnus
 						FROM tilausrivi
 						JOIN tuote on tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 						WHERE tilausrivi.tunnus='$tun'
@@ -459,6 +459,17 @@
 									and yhtio					= '$kukarow[yhtio]'";
 						$sarjares = mysql_query($query) or pupe_error($query);
 					}
+					
+					if ($toim == "MYYNTITILI") {
+						$uprquery = "UPDATE tilausrivi SET 
+									hyllyalue 	= '$t1[$tun]', 
+									hyllynro 	= '$t2[$tun]', 
+									hyllyvali 	= '$t3[$tun]', 
+									hyllytaso 	= '$t4[$tun]' 
+									WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tun'";
+						$uprresult = mysql_query($uprquery) or pupe_error($uprquery);
+					}
+					
 
 				}
 				if ($tee == "X") {

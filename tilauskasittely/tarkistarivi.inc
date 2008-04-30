@@ -340,10 +340,7 @@
 
 			while($alkurow = mysql_fetch_array($omavarastores)) {
 
-				if ($alkurow["hyllyalue"] != "!!M" and
-					($alkurow["varastotyyppi"] != "E" or
-					$laskurow["varasto"] == $alkurow["varasto"] or
-					($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]))) {
+				if ($alkurow["hyllyalue"] != "!!M" and ($alkurow["varastotyyppi"] != "E" or $laskurow["varasto"] == $alkurow["varasto"] or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]))) {
 
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 					
@@ -487,8 +484,11 @@
 			$paikat = "<option value='' $sel>".t("Jätä puutteeksi")."</option>".$paikat;
 		}
 
-		if ($paikat != "" and $paikatlask > 1) {
+		if ($paikat != "" and $paikatlask > 1 and $row["hyllyalue"] != "!!M") {
 			$paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
+		}
+		elseif ($row["hyllyalue"] == "!!M") {
+			$paikat = " $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";
 		}
 		else {
 			$paikat = "";

@@ -157,7 +157,7 @@
 		
 		// Kopsataan valitut rivit uudelle myyntitilaukselle
 		require("tilauksesta_myyntitilaus.inc");
-		$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], $tilrivilisa, $syot_varasto, $syot_var);
+		$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], $tilrivilisa, $syot_varasto, $syot_var, "", "KOPIOIDAANPAIKAT");
 		
 		echo "$tilauksesta_myyntitilaus<br><br>";
 									

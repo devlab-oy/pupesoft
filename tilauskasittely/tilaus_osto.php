@@ -227,10 +227,10 @@
 						 			oletus      = '$oletus',
 				   		 			saldo       = '0',
 				   		 			saldoaika   = now(),
-									hyllyalue 	= '$ostotilausrivit[hyllyalue]', 
-									hyllynro 	= '$ostotilausrivit[hyllynro]', 
-									hyllytaso 	= '$ostotilausrivit[hyllytaso]', 
-									hyllyvali 	= '$ostotilausrivit[hyllyvali]'";
+									hyllyalue 	= '$hyllyrow[alkuhyllyalue]', 
+									hyllynro 	= '$hyllyrow[alkuhyllynro]', 
+									hyllytaso 	= '0', 
+									hyllyvali 	= '0'";
 						$updres = mysql_query($query) or pupe_error($query);
 
 						// tehd‰‰n tapahtuma
@@ -241,21 +241,21 @@
 									kplhinta	= '0',
 									hinta 		= '0',
 									laji 		= 'uusipaikka',
-									hyllyalue 	= '$ostotilausrivit[hyllyalue]', 
-									hyllynro 	= '$ostotilausrivit[hyllynro]', 
-									hyllytaso 	= '$ostotilausrivit[hyllytaso]', 
-									hyllyvali 	= '$ostotilausrivit[hyllyvali]',
-									selite 		= '".t("Lis‰ttiin tuotepaikka")." $ostotilausrivit[hyllyalue] $ostotilausrivit[hyllynro] $ostotilausrivit[hyllytaso] $ostotilausrivit[hyllyvali]',
+									hyllyalue 	= '$hyllyrow[alkuhyllyalue]', 
+									hyllynro 	= '$hyllyrow[alkuhyllynro]', 
+									hyllytaso 	= '0', 
+									hyllyvali 	= '0',
+									selite 		= '".t("Lis‰ttiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
 									laatija 	= '$kukarow[kuka]',
 									laadittu 	= now()";
 						$updres = mysql_query($query) or pupe_error($query);
 
 						// p‰ivitet‰‰n tilausrivi
 						$query = "	UPDATE tilausrivi set
-									hyllyalue 	= '$ostotilausrivit[hyllyalue]', 
-									hyllynro 	= '$ostotilausrivit[hyllynro]', 
-									hyllytaso 	= '$ostotilausrivit[hyllytaso]', 
-									hyllyvali 	= '$ostotilausrivit[hyllyvali]'
+									hyllyalue 	= '$hyllyrow[alkuhyllyalue]', 
+									hyllynro 	= '$hyllyrow[alkuhyllynro]', 
+									hyllytaso 	= '0', 
+									hyllyvali 	= '0'
 									where yhtio = '$kukarow[yhtio]' and
 									tunnus = '$ostotilausrivit[tunnus]'";
 						$updres = mysql_query($query) or pupe_error($query);

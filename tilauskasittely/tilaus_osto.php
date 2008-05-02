@@ -218,7 +218,7 @@
 							$oletus = '';
 						}
 
-			   			echo "<font class='error'>".t("Tehtiin uusi varastopaikka")." $ostotilausrivit[tuoteno]: $ostotilausrivit[hyllyalue] $ostotilausrivit[hyllynro] $ostotilausrivit[hyllytaso] $ostotilausrivit[hyllyvali]</font><br>";
+			   			echo "<font class='error'>".t("Tehtiin uusi varastopaikka")." $ostotilausrivit[tuoteno]: $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0</font><br>";
 
 						// lis‰t‰‰n paikka
 						$query = "	INSERT INTO tuotepaikat set

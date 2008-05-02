@@ -849,7 +849,7 @@
 		
 		foreach($rows as $ind => $row) {
 			// Sarjanumerollisille tuotteille haetaan nimitys ostopuolen tilausriviltä
-			if ($row["sarjanumeroseuranta"] == "S") {
+			if ($row["sarjanumeroseuranta"] == "S" and ($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"])) {
 				$query	= "	SELECT sarjanumeroseuranta.*, tilausrivi_osto.nimitys nimitys, tilausrivi_myynti.tyyppi, lasku_myynti.nimi myynimi, lasku_myynti.tunnus myytunnus
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -1146,8 +1146,7 @@
 					echo "<td valign='top' class='green' $classrigh>".t("Saldoton")."</td>";
 				}
 			}
-			elseif ($row["sarjanumeroseuranta"] == "S") {
-				
+			elseif ($row["sarjanumeroseuranta"] == "S" and ($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"])) {				
 				if ($kukarow["extranet"] != "") {
 					echo "<td valign='top' class='$vari' $classrigh>$row[sarjanumero] ";
 				}
@@ -1167,22 +1166,6 @@
 				if ($lisatiedot != "" and $kukarow["extranet"] == "") {
 					echo "<td class='$vari' $classrigh></td>";
 				}
-				
-				if ($kukarow["kuka"] != "" or is_numeric($ostoskori)) {
-					echo "<td valign='top' align='right' class='$vari' nowrap>";
-					
-					if ($toim == "FUTURSOFT") {
-						echo "<input type='hidden' name='toim' value = '$toim'>";
-					}
-					
-					echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
-					echo "<input type='text' size='3' name='tilkpl[$yht_i]'> ";
-					echo "<input type='submit' value = '".t("Lisää")."'>";
-					echo "</td>";
-					$yht_i++;
-				}
-
-				echo "</td>";
 			}
 			elseif ($kukarow["extranet"] != "") {
 
@@ -1315,12 +1298,13 @@
 				}
 			}
 
-			//$kukarow["kesken"] != 0
-			if (($row["sarjanumeroseuranta"] == "" or $row["sarjanumeroseuranta"] == "E"  or $row["sarjanumeroseuranta"] == "F")  and $oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
+			if ($oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
 				echo "<td valign='top' align='right' class='$vari' nowrap>";
+				
 				if ($toim == "FUTURSOFT") {
 					echo "<input type='hidden' name='toim' value = '$toim'>";
 				}
+				
 				echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
 				echo "<input type='text' size='3' name='tilkpl[$yht_i]'> ";
 				echo "<input type='submit' value = '".t("Lisää")."'>";
@@ -1387,12 +1371,10 @@
 				list($kommentit, $text_output, $kuvalisa_bin, $ostohinta, $tuotemyyntihinta) = sarjanumeronlisatiedot_popup($row["sarjatunnus"], $row["sarjayhtio"], '', '', '100%', '');
 				
 				if ($lisatiedot != "") {
-					echo "<tr><td colspan='8'>$kommentit</td></tr>";
-					echo "<tr><td colspan='8' class='back'><br></td></tr>";	
+					echo "<tr><td colspan='7'>$kommentit</td></tr>";
 				}
 				else {
-					echo "<tr><td colspan='7'>$kommentit</td></tr>";
-					echo "<tr><td colspan='7' class='back'><br></td></tr>";	
+					echo "<tr><td colspan='6'>$kommentit</td></tr>";
 				}								
 			}									
 		}

@@ -630,7 +630,12 @@ if ($tila == '') {
 				tilausrivi.perheid2,
 				tilausrivi.kpl varastossa_kpl,
 				tilausrivi.tunnus rivitunnus,
-				tilausrivi.uusiotunnus
+				tilausrivi.uusiotunnus,
+				concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu',
+				round((varattu+jt)*tilausrivi.hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(tilausrivi.ale/100)),'$yhtiorow[hintapyoristys]') rivihinta,
+				tuote.kehahin keskihinta,
+				tuotteen_toimittajat.ostohinta,
+				tuotteen_toimittajat.valuutta
 				FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
 				JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro $lisa2
 				JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
@@ -1045,9 +1050,18 @@ if ($tila == '') {
 		echo "<$td $class valign='top'>$rivirow[otunnus]</$td>";
 		echo "<$td $class valign='top' nowrap>";
 
+		// tehd‰‰n pop-up divi jos keikalla on kommentti...
 		// jos rivi‰ ei ole viel‰ viety varastoon niin rivi‰ voi muokata
 		if ($rivirow["varastossa_kpl"] == 0) {
-			echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=muokkaa_rivi'>$rivirow[tuoteno]</a>";
+			list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($rivirow["tuoteno"]);
+			echo "<div id='$rivirow[rivitunnus]' class='popup' style='width: 400px;'>";
+			echo "<ul>";
+			echo "<li>".t("Saldo").": $saldo ".t("kpl")."</li><li>".t("Hyllyss‰").": $hyllyssa ".t("kpl")."</li><li>".t("Myyt‰viss‰").": $myytavissa ".t("kpl")."</li>";
+			echo "<li>".t("Tilattu").": $rivirow[tilattu] ".t("kpl")."</li><li>".t("Varattu").": $rivirow[varattu] ".t("kpl")."</li>";
+			echo "<li>".t("Keskihinta").": $rivirow[keskihinta] $rivirow[valuutta]</li><li>".t("Ostohinta").": $rivirow[ostohinta] $rivirow[valuutta]</li>";
+			echo "</ul>";
+			echo "</div>";
+			echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=muokkaa_rivi' onmouseout=\"popUp(event,'$rivirow[rivitunnus]')\" onmouseover=\"popUp(event,'$rivirow[rivitunnus]')\">$rivirow[tuoteno]</a>";
 		}
 		else {
 			echo "$rivirow[tuoteno]";

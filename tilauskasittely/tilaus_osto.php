@@ -1,6 +1,9 @@
 <?php
 
 	require('../inc/parametrit.inc');
+
+	// scripti balloonien tekemiseen
+	js_popup();
 	
 	// jos ei olla postattu mit‰‰n, niin halutaan varmaan tehd‰ kokonaan uusi tilaus..
 	if (count($_POST) == 0 and $from == "") {
@@ -163,14 +166,15 @@
 			// katotaan ollaanko haluttu optimoida johonki varastoon
 			if ($laskurow["varasto"] != 0) {
 
-				$query = "select * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and tyyppi='O'";
+				$query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and tyyppi='O'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				// k‰yd‰‰n l‰pi kaikki tilausrivit
 				while ($ostotilausrivit = mysql_fetch_array($result)) {
 
 					// k‰yd‰‰n l‰pi kaikki tuotteen varastopaikat
-					$query = "	select *, concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+					$query = "	SELECT *, concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
+								hyllyalue, hyllynro, hyllytaso, hyllyvali
 					 			from tuotepaikat
 								where yhtio='$kukarow[yhtio]' and tuoteno='$ostotilausrivit[tuoteno]'
 								order by sorttauskentta";
@@ -184,7 +188,7 @@
 						if (kuuluukovarastoon($tuopairow["hyllyalue"], $tuopairow["hyllynro"], $laskurow["varasto"]) != 0) {
 
 							// jos kuului niin p‰ivitet‰‰n info tilausriville
-							$query = "	update tilausrivi set
+							$query = "	UPDATE tilausrivi set
 										hyllyalue = '$tuopairow[hyllyalue]',
 										hyllynro  = '$tuopairow[hyllynro]',
 										hyllytaso = '$tuopairow[hyllytaso]',
@@ -202,7 +206,7 @@
 					if ($kuuluu == 0) {
 
 						// haetaan halutun varaston tiedot
-						$query = "select alkuhyllyalue, alkuhyllynro from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'";
+						$query = "SELECT alkuhyllyalue, alkuhyllynro from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'";
 						$hyllyres = mysql_query($query) or pupe_error($query);
 						$hyllyrow =  mysql_fetch_array($hyllyres);
 
@@ -214,7 +218,7 @@
 							$oletus = '';
 						}
 
-			   			echo "<font class='error'>".t("Tehtiin uusi varastopaikka")." $ostotilausrivit[tuoteno]: $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0</font><br>";
+			   			echo "<font class='error'>".t("Tehtiin uusi varastopaikka")." $ostotilausrivit[tuoteno]: $ostotilausrivit[hyllyalue] $ostotilausrivit[hyllynro] $ostotilausrivit[hyllytaso] $ostotilausrivit[hyllyvali]</font><br>";
 
 						// lis‰t‰‰n paikka
 						$query = "	INSERT INTO tuotepaikat set
@@ -223,10 +227,10 @@
 						 			oletus      = '$oletus',
 				   		 			saldo       = '0',
 				   		 			saldoaika   = now(),
-									hyllyalue   = '$hyllyrow[alkuhyllyalue]',
-									hyllynro    = '$hyllyrow[alkuhyllynro]',
-									hyllytaso   = '0',
-									hyllyvali   = '0'";
+									hyllyalue 	= '$ostotilausrivit[hyllyalue]', 
+									hyllynro 	= '$ostotilausrivit[hyllynro]', 
+									hyllytaso 	= '$ostotilausrivit[hyllytaso]', 
+									hyllyvali 	= '$ostotilausrivit[hyllyvali]'";
 						$updres = mysql_query($query) or pupe_error($query);
 
 						// tehd‰‰n tapahtuma
@@ -237,17 +241,21 @@
 									kplhinta	= '0',
 									hinta 		= '0',
 									laji 		= 'uusipaikka',
-									selite 		= '".t("Lis‰ttiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
+									hyllyalue 	= '$ostotilausrivit[hyllyalue]', 
+									hyllynro 	= '$ostotilausrivit[hyllynro]', 
+									hyllytaso 	= '$ostotilausrivit[hyllytaso]', 
+									hyllyvali 	= '$ostotilausrivit[hyllyvali]',
+									selite 		= '".t("Lis‰ttiin tuotepaikka")." $ostotilausrivit[hyllyalue] $ostotilausrivit[hyllynro] $ostotilausrivit[hyllytaso] $ostotilausrivit[hyllyvali]',
 									laatija 	= '$kukarow[kuka]',
 									laadittu 	= now()";
 						$updres = mysql_query($query) or pupe_error($query);
 
 						// p‰ivitet‰‰n tilausrivi
-						$query = "	update tilausrivi set
-									hyllyalue = '$hyllyrow[alkuhyllyalue]',
-									hyllynro  = '$hyllyrow[alkuhyllynro]',
-									hyllytaso = '0',
-									hyllyvali = '0'
+						$query = "	UPDATE tilausrivi set
+									hyllyalue 	= '$ostotilausrivit[hyllyalue]', 
+									hyllynro 	= '$ostotilausrivit[hyllynro]', 
+									hyllytaso 	= '$ostotilausrivit[hyllytaso]', 
+									hyllyvali 	= '$ostotilausrivit[hyllyvali]'
 									where yhtio = '$kukarow[yhtio]' and
 									tunnus = '$ostotilausrivit[tunnus]'";
 						$updres = mysql_query($query) or pupe_error($query);
@@ -719,7 +727,10 @@
 						$sorttauskentta,
 						tilausrivi.var,
 						tilausrivi.var2,
-						tilausrivi.jaksotettu
+						tilausrivi.jaksotettu,
+						tuote.kehahin keskihinta,
+						tuotteen_toimittajat.ostohinta,
+						tuotteen_toimittajat.valuutta
 						FROM tilausrivi
 						LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 						LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
@@ -861,7 +872,21 @@
 					$sarjares = mysql_query($query) or pupe_error($query);
 					$sarjarow = mysql_fetch_array($sarjares);
 
-					echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a>";
+					// tehd‰‰n pop-up divi jos keikalla on kommentti...
+					if ($prow["tunnus"] != "") {
+						list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($prow["tuoteno"]);
+						echo "<div id='$prow[tunnus]' class='popup' style='width: 400px;'>";
+						echo "<ul>";
+						echo "<li>".t("Saldo").": $saldo ".t("kpl")."</li><li>".t("Hyllyss‰").": $hyllyssa ".t("kpl")."</li><li>".t("Myyt‰viss‰").": $myytavissa ".t("kpl")."</li>";
+						echo "<li>".t("Tilattu").": $prow[tilattu] ".t("kpl")."</li><li>".t("Varattu").": $prow[varattukpl] ".t("kpl")."</li>";
+						echo "<li>".t("Keskihinta").": $prow[keskihinta] $prow[valuutta]</li><li>".t("Ostohinta").": $prow[ostohinta] $prow[valuutta]</li>";
+						echo "</ul>";
+						echo "</div>";
+						echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]' onmouseout=\"popUp(event,'$prow[tunnus]')\" onmouseover=\"popUp(event,'$prow[tunnus]')\">$prow[tuoteno]</a>";
+					}
+					else {
+						echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a>";
+					}
 
 					if ($sarjarow["sarjanumeroseuranta"] != "") {
 						$query = "	SELECT count(*) kpl 

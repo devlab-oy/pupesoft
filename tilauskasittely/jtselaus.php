@@ -178,6 +178,8 @@
 				require("tilaus-valmis.inc");
 			}
 			
+			//	Tätä kutsutaan joskus funktiosta eikä sms_jt_muuttujaa kuitenkaan muisteta laittaa globaaliksi. Koitetaan silloin hakea se GLOBALS:st
+			if($sms_jt=="") $sms_jt == $GLOBALS["sms_jt"];
 			
 			//	Katsotaan toimitettiinko jotain mistä meidän tulee laittaa viestiä
 			if($sms_jt == "kaikki_toimitettu") {

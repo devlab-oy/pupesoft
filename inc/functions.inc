@@ -96,11 +96,6 @@ if (!function_exists("t")) {
 			$useslave = 0;
 		}
 
-		if ($useslave > 0 or $indeksi != 'fi') { //Voi olla, että käytämme slavea ja INSERT ei siis onnistu (insert vain jos ei fi)
-			$link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
-			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 1)!");
-		}
-
 		if (trim($kieli) != '') {
 			$indeksi = trim(strtolower($kieli));
 		}
@@ -109,6 +104,11 @@ if (!function_exists("t")) {
 		}
 		else {
 			$indeksi = "fi";
+		}
+
+		if ($useslave > 0 or $indeksi != 'fi') { // Voi olla, että käytämme slavea ja INSERT ei siis onnistu (insert vain jos ei fi)
+			$link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
+			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 1)!");
 		}
 
 		if ($indeksi != 'fi') {

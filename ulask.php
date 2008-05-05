@@ -307,6 +307,16 @@ if ($tee == 'I') {
 			}
 		}
 	}
+	
+	if ((is_array($trow) and strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) or (!is_array($trow) and $tyyppi == strtoupper($yhtiorow['maa']))) {
+		$ohjeitapankille='';
+	}
+	else {
+		if (strlen($ohjeitapankille) > 350) {
+			$errormsg .= "<font class='error'>".t("Ohjeita pankille-kentän pituus 350 ylittyi")."</font><br>";
+			$tee = 'E';
+		}
+	}
 
  	// Käydään tiliöinnit läpi
 	for ($i=1; $i<$maara; $i++) {
@@ -621,7 +631,12 @@ if ($tee == 'P' or $tee == 'E') {
 				while ($vikatlaskutrow = mysql_fetch_array($vikatlaskutres)) {
 					echo "<tr>";
 					for ($i=0; $i<mysql_num_fields($vikatlaskutres); $i++) {
-						echo "<td>$vikatlaskutrow[$i]</td>";
+						if (mysql_field_name($vikatlaskutres,$i) == 'tapvm') {
+							echo "<td>".tv1dateconv($vikatlaskutrow[$i])."</td>";
+						}
+						else {
+							echo "<td>$vikatlaskutrow[$i]</td>";
+						}
 					}
 					echo "</tr>";
 				}
@@ -716,7 +731,7 @@ if ($tee == 'P' or $tee == 'E') {
 	echo "<td><input type='text' name='summa' value='$summa'>";
 
 	//Tehdään valuuttapopup, jos ulkomainen toimittaja muuten kirjoitetaan vain $yhtiorow[valkoodi]
-	if (strtoupper($trow['maa']) != strtoupper($yhtiorow['maa'])) {
+	if ((is_array($trow) and strtoupper($trow['maa']) != strtoupper($yhtiorow['maa'])) or (!is_array($trow) and $tyyppi != strtoupper($yhtiorow['maa']))) {
 
 		$query = "SELECT nimi
 					FROM valuu
@@ -758,11 +773,20 @@ if ($tee == 'P' or $tee == 'E') {
 		</tr>
 		<tr>
 			<td>".t("Viesti")."</td><td><input type='text' maxlength='70' size='60' name='viesti' value='$viesti'></td>
-		</tr>";
+		</tr>
 
-		echo "<tr>
+		<tr>
 			<td>".t("Kommentti")."</td><td><input type='text' name='komm' size='60' value='$komm'></td>
 		</tr>";
+		
+		if ((is_array($trow) and strtoupper($trow['maa']) != strtoupper($yhtiorow['maa'])) or (!is_array($trow) and $tyyppi != strtoupper($yhtiorow['maa']))) {
+		
+			echo "
+			<tr>
+				<td>".t("Ohjeita pankille")."</td><td><textarea name='ohjeitapankille' rows='2' cols='35'>$ohjeitapankille</textarea></td>
+			</tr>";
+		
+		}
 
 /*
 		echo "<tr>
@@ -1147,7 +1171,8 @@ if ($tee == 'I') {
 			hyvaksynnanmuutos = '$ohyvaksynnanmuutos',
 			suoraveloitus = '$osuoraveloitus',
 			luontiaika = now(),
-			comments = '$komm'";
+			comments = '$komm',
+			sisviesti1 = '$ohjeitapankille'";
 
 // Poistin nämä toistaiseksi insertistä
 //			sisviesti1 = '$sis1',
@@ -1600,8 +1625,9 @@ if (strlen($tee) == 0) {
 		<td><select name='maara'><option value ='2'>1
 		<option value ='4'>3
 		<option value ='8'>7
-		<option value ='16'>15</select></td>
-		<option value ='31'>30</select></td>
+		<option value ='16'>15
+		<option value ='31'>30
+		</select></td>
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
 	echo "<tr><td><form action = '$PHP_SELF?tee=Y' method='post'>".t("Perusta lasku toimittajan Y-tunnuksen/nimen perusteella")."</td>
@@ -1610,7 +1636,9 @@ if (strlen($tee) == 0) {
 		<td><select name='maara'><option value ='2'>1
 		<option value ='4'>3
 		<option value ='8'>7
-		<option value ='16'>15</select></td>
+		<option value ='16'>15
+		<option value ='31'>30
+		</select></td>
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
 	echo "<td><form action = '$PHP_SELF?tee=P' method='post'>".t("Perusta lasku ilman toimittajatietoja")."</td>
@@ -1623,7 +1651,9 @@ if (strlen($tee) == 0) {
 		<td><select name='maara'><option value ='2'>1
 		<option value ='4'>3
 		<option value ='8'>7
-		<option value ='16'>15</select></td>
+		<option value ='16'>15
+		<option value ='31'>30
+		</select></td>
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
 	if ($toimittajaid > 0) {
@@ -1642,7 +1672,9 @@ if (strlen($tee) == 0) {
 			<td><select name='maara'><option value ='2'>1
 			<option value ='4'>3
 			<option value ='8'>7
-			<option value ='16'>15</select></td>
+			<option value ='16'>15
+			<option value ='31'>30
+			</select></td>
 			<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></table></form>";
 		}
 	}

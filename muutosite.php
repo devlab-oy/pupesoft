@@ -505,7 +505,7 @@ if ($tee == 'E' or $tee == 'F') {
 					concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak4), lasku.hyvak4), if(h4time='0000-00-00 00:00:00', null, h4time)) Hyväksyjä4,
 					concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak5), lasku.hyvak5), if(h5time='0000-00-00 00:00:00', null, h5time)) Hyväksyjä5,
 					concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.maksaja), lasku.maksaja), maksuaika) Maksaja,
-					tilinumero, concat_ws(' ', viite, viesti) Maksutieto,
+					tilinumero, concat_ws(' ', viite, viesti, sisviesti1) Maksutieto,
 					maa, ultilno, pankki1, pankki2, pankki3, pankki4, swift, clearing, maksutyyppi,
 					ebid,
 					toim_osoite, '' toim_osoitetark, toim_postino, toim_postitp, toim_maa, alatila, vienti, comments, yriti.nimi maksajanpankkitili, lasku.laskunro

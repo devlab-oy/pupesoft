@@ -1208,8 +1208,22 @@
 			if ($tapahtumalaji == "Epäkurantti") 		$sel7="SELECTED";
 			if ($tapahtumalaji == "poistettupaikka") 	$sel8="SELECTED";
 			if ($tapahtumalaji == "uusipaikka") 		$sel9="SELECTED";
+			
+			if ($tilalehinta != '') {
+				$check = "CHECKED";
+			}
+			else {
+				$check = "";
+			}
 
-			echo "</th><th colspan='4'>".t("Tapahtumalaji").": ";
+			echo "</th><th colspan='";
+				if ($tilalehinta != '') {
+					echo 5;
+				}
+				else {
+					echo 4;
+				}
+			echo "'>".t("Tapahtumalaji").": ";
 			echo "<select name='tapahtumalaji' onchange='submit();'>'";
 			echo "<option value=''>".t("Näytä kaikki")."</option>";
 			echo "<option value='laskutus' $sel1>".t("Laskutukset")."</option>";
@@ -1222,7 +1236,8 @@
 			echo "<option value='poistettupaikka' $sel8>".t("Poistetut tuotepaikat")."</option>";
 			echo "<option value='uusipaikka' $sel9>".t("Perustetut tuotepaikat")."</option>";
 			echo "</select>";
-			echo "</th>";
+			echo t("Näytä tilausrivin hinta ja ale").": <input type='checkbox' name='tilalehinta' id='tilalehinta' $check onClick='javascript:submit();'></th>";
+			echo "</tr>";
 
 			echo "<tr>";
 			echo "<th>".t("Käyttäjä@Pvm")."</th>";
@@ -1233,6 +1248,9 @@
 			echo "<th>".t("Kate")."</th>";
 			echo "<th>".t("Arvo")."</th>";
 			echo "<th>".t("Var.Arvo")."</th>";
+			if ($tilalehinta != '') {
+				echo "<th>".t("Hinta / Ale / Rivihinta")."</th>";
+			}
 			echo "<th>".t("Selite")."";
 
 			echo "</th></form>";
@@ -1263,7 +1281,8 @@
 						round(100*tilausrivi.kate/tilausrivi.rivihinta, 2) katepros,						
 						tilausrivi.tunnus trivitunn,
 						tilausrivin_lisatiedot.osto_vai_hyvitys,
-						lasku2.tunnus lasku2tunnus																
+						lasku2.tunnus lasku2tunnus,
+						concat_ws(' / ', round(tilausrivi.hinta, $yhtiorow[hintapyoristys]), concat(tilausrivi.ale, ' %'), round(tilausrivi.rivihinta, $yhtiorow[hintapyoristys])) tilalehinta
 						FROM tapahtuma use index (yhtio_tuote_laadittu)
 						LEFT JOIN tilausrivi use index (primary) ON tilausrivi.yhtio=tapahtuma.yhtio and tilausrivi.tunnus=tapahtuma.rivitunnus
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)						
@@ -1320,6 +1339,11 @@
 					
 					echo "<td nowrap align='right' valign='top'>".sprintf('%.2f', $prow["arvo"])."</td>";
 					echo "<td nowrap align='right' valign='top'>".sprintf('%.2f', $vararvo_nyt)."</td>";
+					
+					if ($tilalehinta != '') {
+						echo "<td nowrap align='right' valign='top'>$prow[tilalehinta]</td>";
+					}
+					
 					echo "<td valign='top'>$prow[selite]";
 					
 					if ($prow["laji"] == "tulo" and $prow["lasku2tunnus"] != "") {

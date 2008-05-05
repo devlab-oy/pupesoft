@@ -781,11 +781,11 @@
 
 		if (trim($laskurow["viite"]) != "" or trim($laskurow["viesti"]) != "") {
 			echo "<tr>";
-			echo "<th colspan='3'>".t("Viite / Viesti")."</th>";
+			echo "<th colspan='3'>".t("Viite / Viesti / Ohjeita pankille")."</th>";
 			echo "</tr>";
 
 			echo "<tr>";
-			echo "<td colspan='3'>$laskurow[viite] $laskurow[viesti]</td>";
+			echo "<td colspan='3'>$laskurow[viite] $laskurow[viesti] $laskurow[sisviesti1]</td>";
 			echo "</tr>";
 		}
 

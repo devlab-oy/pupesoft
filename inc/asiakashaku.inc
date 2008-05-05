@@ -41,7 +41,7 @@ else {
 
 //	Jos käyttäjällä on valittu piirejä niin sallitaan vain ko. piirin/piirien hakeminen
 if($kukarow["piirit"] != "")	 {
-	$asiakasrajaus = " and lasku.piiri IN ($kukarow[piirit]) ";
+	$asiakasrajaus = " and asiakas.piiri IN ($kukarow[piirit]) ";
 }
 else {
 	$asiakasrajaus = "";

@@ -160,7 +160,7 @@
 					group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
 					group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '<br>') tuotekerroin,
 					group_concat(distinct tuotteen_toimittajat.alkuperamaa order by tuotteen_toimittajat.tunnus) alkuperamaa,
-					group_concat(distinct concat_ws(' ',tuotteen_toimittajat.ostohinta,upper(tuotteen_toimittajat.valuutta), '/',tuotteen_toimittajat.alennus, '%') order by tuotteen_toimittajat.tunnus separator '<br>') ostohinta
+					group_concat(distinct concat_ws(' ',round(tuotteen_toimittajat.ostohinta,'$yhtiorow[hintapyoristys]'),upper(tuotteen_toimittajat.valuutta), '/',tuotteen_toimittajat.alennus, '%') order by tuotteen_toimittajat.tunnus separator '<br>') ostohinta
 					FROM tuote
 					LEFT JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
 					LEFT JOIN toimi on (toimi.yhtio = tuote.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
@@ -376,7 +376,7 @@
 						<td valign='top' align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["nettohinta"])."/".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["myymalahinta"])."</td>
 						<td valign='top' align='right'>";
 						if ($tuoterow[ostohinta][0] != '/') {
-							echo sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["ostohinta"]);
+							echo $tuoterow["ostohinta"];
 						}
 						
 						echo"</td><td valign='top' align='right'>$tuoterow[kehahin]</td>

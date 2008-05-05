@@ -265,7 +265,7 @@
 	}
 
 	// Jos täsmäys on päällä ja ei olla annettu päivämäärää -> error
-	if ($tasmays != '' and ($vv == '' or $kk == '' or $pp == '')) {
+	if ($tasmays != '' and ($vv == '' or $kk == '' or $pp == '') and !checkdate($kk, $pp, $vv)) {
 		echo "<font class='error'>".t("Syötä päivämäärä (pp-kk-vvvv)")."</font><br>";
 		$tee = '';
 	}
@@ -372,7 +372,7 @@
 				list ($maksutapa_devnull, $tilino, $kassalipas) = explode("#", $arvo);
 
 				// Haetaan kassalipastiedot tietokannasta
-				$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND pankkikortti = $tilino";
+				$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND pankkikortti = '$tilino'";
 				$result = mysql_query($query) or pupe_error($query);
 				$kassalipasrow = mysql_fetch_array($result);
 
@@ -384,7 +384,7 @@
 				list ($maksutapa_devnull, $tilino, $kassalipas) = explode("#", $arvo);
 
 				// Haetaan kassalipastiedot tietokannasta
-				$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND luottokortti = $tilino";
+				$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND luottokortti = '$tilino'";
 				$result = mysql_query($query) or pupe_error($query);
 				$kassalipasrow = mysql_fetch_array($result);
 
@@ -396,7 +396,12 @@
 				list ($maksutapa_devnull, $tilino, $kassalipas) = explode("#", $arvo);
 
 				// Haetaan kassalipastiedot tietokannasta
-				$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND kassa = $tilino AND nimi = '$kassalipas'";
+				if ($tilino == "") {
+					$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND nimi = '$kassalipas'";
+				}
+				else {
+					$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' AND tunnus IN ($ktunnukset) AND kassa = '$tilino' AND nimi = '$kassalipas'";
+				}
 				$result = mysql_query($query) or pupe_error($query);
 				$kassalipasrow = mysql_fetch_array($result);
 
@@ -865,7 +870,7 @@
 								}
 
 								echo "'";
-								echo "' class='tumma'>$kateismaksu ".t("yhteensä").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("Näytä / Piilota")."</a></td>";
+								echo "' class='tumma'>$edkassanimi $kateismaksu ".t("yhteensä").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("Näytä / Piilota")."</a></td>";
 								echo "<input type='hidden' name='maksutapa$i' id='maksutapa$i' value='$solu#$tilinumero[kateinen]#$edkassanimi'>";
 								echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 
@@ -1018,7 +1023,7 @@
 							else {
 								echo "9";
 							}
-						echo "' class='tumma'>$kateismaksu ".t("yhteensä").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("Näytä / Piilota")."</a></td>";
+						echo "' class='tumma'>$edkassanimi $kateismaksu ".t("yhteensä").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("Näytä / Piilota")."</a></td>";
 						echo "<input type='hidden' name='maksutapa$i' value='$solu#$tilinumero[kateinen]#$edkassanimi'>";
 						echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 						if ($tilityskpl > 1) {

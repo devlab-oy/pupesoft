@@ -246,13 +246,24 @@
 	
 	if ($laskurow['myyja'] > 0) {
 		//etsit‰‰n myyj‰n nimi
-		$query  = "	SELECT nimi
+		$query  = "	SELECT nimi, kuka
 					from kuka
 					where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
 		$myyresult = mysql_query($query) or pupe_error($query);
 		$myyrow = mysql_fetch_array($myyresult);
 		
 		$komm .= "\n".t("Myyj‰").":###".$myyrow['nimi'];
+	}
+	
+	if ($myyrow['kuka'] != $laskurow['laatija']) {
+		//etsit‰‰n laatijan nimi
+		$query  = "	SELECT nimi
+					from kuka
+					where kuka='$laskurow[laatija]' and yhtio='$kukarow[yhtio]'";
+		$laaresult = mysql_query($query) or pupe_error($query);
+		$laarow = mysql_fetch_array($laaresult);
+
+		$komm .= "\n".t("Laatija").":###".$laarow['nimi'];
 	}
 	
 	if (trim($laskurow['tilausyhteyshenkilo']) != '') {

@@ -201,14 +201,14 @@ if (!function_exists('alku_kerayslista')) {
 		$pdf->draw_text(310, 729, t("Myyjä", $kieli), 		$thispage, $pieni);
 		
 		//etsitään myyjän nimi
-		$query  = "	select nimi
+		$query  = "	select nimi, kuka
 					from kuka
 					where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
 		$myyresult = mysql_query($query) or pupe_error($query);
 		$myyrow = mysql_fetch_array($myyresult);
 
 		$pdf->draw_text(310, 719, $myyrow["nimi"], 										$thispage, $norm);
-		
+
 		$pdf->draw_text(430, 729, t("Tilauspvm", $kieli),							 	$thispage, $pieni);
 		$pdf->draw_text(430, 719, tv1dateconv($laskurow["luontiaika"], "pitka"), 		$thispage, $norm);
 
@@ -234,8 +234,22 @@ if (!function_exists('alku_kerayslista')) {
 		$pdf->draw_text(310, 656, $maksuehto, 					$thispage, $norm);
 
 		$pdf->draw_rectangle(653, 300, 632, 580, $thispage, $rectparam);
-		$pdf->draw_text(310, 645, t("", $kieli), $thispage, $pieni);
-		$pdf->draw_text(310, 635, $laskurow[""], $thispage, $norm);
+
+		if ($myyrow['kuka'] != $laskurow['laatija']) {
+			//etsitään laatijan nimi
+			$query  = "	SELECT nimi
+						from kuka
+						where kuka='$laskurow[laatija]' and yhtio='$kukarow[yhtio]'";
+			$laaresult = mysql_query($query) or pupe_error($query);
+			$laarow = mysql_fetch_array($laaresult);
+
+			$pdf->draw_text(310, 645, t("Laatija", $kieli), $thispage, $pieni);
+			$pdf->draw_text(310, 635, $laarow["nimi"], $thispage, $norm);
+		}
+		else {
+			$pdf->draw_text(310, 645, t("", $kieli), $thispage, $pieni);
+			$pdf->draw_text(310, 635, $laskurow[""], $thispage, $norm);
+		}
 
 		$pdf->draw_rectangle(632, 300, 611, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 624, t("", $kieli), 	$thispage, $pieni);

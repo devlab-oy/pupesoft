@@ -334,6 +334,10 @@ if($silent == "") {
 			$sel2 = "SELECTED";
 			$sel1 = "";
 		}
+		elseif (!isset($listaustapa)) {
+			$sel1 = "SELECTED";
+			$sel2 = "";
+		}
 		else {
 			$sel1 = "";
 			$sel2 = "";
@@ -364,6 +368,10 @@ if($silent == "") {
 	}
 
 	if ($tee == "haku") {
+
+		if (!isset($listaustapa)) {
+			$listaustapa = "liittamattomat";
+		}
 
 		$lisa = ""; // no hacking
 

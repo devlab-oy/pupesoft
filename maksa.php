@@ -63,7 +63,7 @@
 		}
 
 		$query = "	SELECT valuu.kurssi, round($maksettava * valuu.kurssi,2) summa, maksuaika, olmapvm, tilinumero, maa, kapvm, erpcm,
-					ultilno, swift, pankki1, pankki2, pankki3, pankki4, valkoodi
+					ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1, valkoodi
 					FROM lasku
 					JOIN valuu ON (valuu.yhtio = lasku.yhtio and valuu.nimi = lasku.valkoodi)
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -124,6 +124,7 @@
 							and pankki2 = '$trow[pankki2]'
 							and pankki3 = '$trow[pankki3]'
 							and pankki4 = '$trow[pankki4]'
+							and sisviesti1 = '$trow[sisviesti1]'
 							and maksaja = '$kukarow[kuka]'";
 			}
 			$result = mysql_query($query) or pupe_error($query);
@@ -431,6 +432,7 @@
 								and pankki2 = '$trow[pankki2]'
 								and pankki3 = '$trow[pankki3]'
 								and pankki4 = '$trow[pankki4]'
+								and sisviesti1 = '$trow[sisviesti1]'
 								and maksaja = '$kukarow[kuka]'
 								and tunnus != '$lasku'";
 				}

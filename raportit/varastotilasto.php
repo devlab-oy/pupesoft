@@ -73,9 +73,7 @@
 							(	SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = '' or tilausrivin_lisatiedot.osto_vai_hyvitys is null, kpl, 0)) 
 								FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
 								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-								WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl') myynti_ed
-							
-							
+								WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl') myynti_ed	
 							FROM tuote
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
 							$lisa
@@ -196,7 +194,14 @@
 							}
 
 							// hoidetaan pisteet piluiksi!!
-							if (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int' or substr(mysql_field_name($result, $i),0 ,4) == 'kate')) {
+							if (is_numeric($row[$i]) and $row[$i] == 0 and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
+								if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top' align='right'></td>";
+
+								if(isset($workbook)) {
+									$worksheet->writeNumber($excelrivi, $i, "");
+								}
+							}
+							elseif (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
 								if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
 
 								if(isset($workbook)) {

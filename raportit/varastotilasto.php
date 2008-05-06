@@ -194,11 +194,11 @@
 							}
 
 							// hoidetaan pisteet piluiksi!!
-							if (is_numeric($row[$i]) and $row[$i] == 0 and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
-								if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top' align='right'></td>";
+							if (is_numeric($row[$i]) and $row[$i] == 0) {
+								if (mysql_num_rows($result) <= $rivilimitti) echo "<td></td>";
 
 								if(isset($workbook)) {
-									$worksheet->writeNumber($excelrivi, $i, "");
+									$worksheet->writeString($excelrivi, $i, "");
 								}
 							}
 							elseif (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {

@@ -3194,7 +3194,6 @@ if (!function_exists("alehinta")) {
 				}
 			}
 
-
 			// 15. tuote.nettohinta (tuotteen nettohinta)
 			if ($hinta == 0 and $netto != 'E' and $trow['nettohinta'] > 0) {
 
@@ -3275,7 +3274,7 @@ if (!function_exists("alehinta")) {
 			$hinta = $hinta_xxx;
 		}
 		elseif(substr($ale,-1) == "-") {
-			$aleperuste = 3;
+			$aleperuste = 2;
 
 			// 2. käyttäjän syöttämä EURO-määräinen alennus
 			$hinta_xxx = $hinta - substr($ale,0,-1);

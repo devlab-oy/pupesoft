@@ -18,9 +18,23 @@
 		$useslave = 1;
 		require ("inc/connect.inc");
 
-		if(count($_POST) > 0) {
+		if(count($_POST) > 0 and isset($go)) {
+			
+				if (count($yhtiot) == 0) {
+					$yhtio = $kukarow["yhtio"];
+				}
+				else {
+					$yhtio  = "";
+					
+					foreach ($yhtiot as $apukala) {
+						$yhtio .= "'$apukala',";
+					}
+					
+					$yhtio = substr($yhtio,0,-1);
+				}
 			
 				$lisa = "";
+				$lisa2 = "";
 
 				if (is_array($mul_osasto) and count($mul_osasto) > 0) {
 					$sel_osasto = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_osasto))."')";
@@ -32,50 +46,67 @@
 					$lisa .= " and tuote.try in $sel_tuoteryhma ";
 				}
 				
+				if ($nollapiilo != '') {	
+					$lisa2 = " HAVING (saldo+varattu+tulossa+ostot+myynti+myynti_ed <> 0) ";
+				}
+				
+				if ($poispiilo != '') {	
+					if ($lisa2 == "") {
+						$lisa2 = " HAVING (status not in ('P','X') or saldo > 0)";
+					}
+					else {
+						$lisa2 .= " and (status not in ('P','X') or saldo > 0)";
+					}
+				}
+				
+				
 				$vvaa = $vva - '1';
 				$vvll = $vvl - '1';
 
 				$query = "	SELECT
+							tuote.status,
 							tuote.tuoteno, 
 							tuote.nimitys, 
-							(	SELECT sum(saldo) 
-								FROM tuotepaikat 
-								WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno) saldo,
+							ifnull(sum((SELECT sum(saldo) 
+										FROM tuotepaikat 
+										WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno)), 0) saldo,
 
-							(	SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = '' or tilausrivin_lisatiedot.osto_vai_hyvitys is null, varattu, 0)) 
-								FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu)
-								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-								WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.varattu <> 0) varattu,
+							ifnull(sum((SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = '' or tilausrivin_lisatiedot.osto_vai_hyvitys is null, varattu, 0)) 
+										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu)
+										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
+										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.varattu <> 0)), 0) varattu,
 
-							(	SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = 'O' or tilausrivin_lisatiedot.osto_vai_hyvitys = 'H', varattu * -1, 0))
-								FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu)
-								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-								WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.varattu < 0) + 
-							(	SELECT sum(varattu) 
-								FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu) 
-								WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'O' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.varattu > 0) tulossa,
+							ifnull(sum((SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = 'O' or tilausrivin_lisatiedot.osto_vai_hyvitys = 'H', varattu * -1, 0))
+										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu)
+										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
+										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.varattu < 0) + 
+									(	SELECT sum(varattu) 
+										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu) 
+										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'O' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.varattu > 0)), 0) tulossa,
 							
-							(	SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = 'O' or tilausrivin_lisatiedot.osto_vai_hyvitys = 'H', kpl * -1, 0))
-								FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
-								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-								WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl' and tilausrivi.kpl < 0) + 
-							(	SELECT sum(kpl) 
-								FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika) 
-								WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'O' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl') ostot,
+							ifnull(sum((SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = 'O' or tilausrivin_lisatiedot.osto_vai_hyvitys = 'H', kpl * -1, 0))
+										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
+										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
+										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl' and tilausrivi.kpl < 0) + 
+									(	SELECT sum(kpl) 
+										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika) 
+										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'O' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl')), 0) ostot,
 							
-							(	SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = '' or tilausrivin_lisatiedot.osto_vai_hyvitys is null, kpl, 0)) 
-								FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
-								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-								WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl') myynti,
+							ifnull(sum((SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = '' or tilausrivin_lisatiedot.osto_vai_hyvitys is null, kpl, 0)) 
+										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
+										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
+										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl')), 0) myynti,
 							
-							(	SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = '' or tilausrivin_lisatiedot.osto_vai_hyvitys is null, kpl, 0)) 
-								FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
-								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-								WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl') myynti_ed	
+							ifnull(sum((SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = '' or tilausrivin_lisatiedot.osto_vai_hyvitys is null, kpl, 0)) 
+										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
+										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
+										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl')), 0) myynti_ed	
 							FROM tuote
-							WHERE tuote.yhtio = '$kukarow[yhtio]'
+							WHERE tuote.yhtio in ($yhtio)
 							$lisa
-							ORDER BY 1,2,3,4";
+							GROUP BY 1,2,3
+							$lisa2
+							ORDER BY 2,3";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$rivilimitti = 1000;
@@ -129,12 +160,12 @@
 					if (mysql_num_rows($result) <= $rivilimitti) echo "<table><tr>";
 
 					// echotaan kenttien nimet
-					for ($i=0; $i < mysql_num_fields($result); $i++) {
+					for ($i=1; $i < mysql_num_fields($result); $i++) {
 						if (mysql_num_rows($result) <= $rivilimitti) echo "<th>".t(mysql_field_name($result,$i))."</th>";
 					}
 
 					if(isset($workbook)) {
-						for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+						for ($i=1; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 						$excelrivi++;
 					}
 
@@ -155,7 +186,7 @@
 						if (mysql_num_rows($result) <= $rivilimitti) echo "<tr>";
 
 						// echotaan kenttien sisältö
-						for ($i=0; $i < mysql_num_fields($result); $i++) {
+						for ($i=1; $i < mysql_num_fields($result); $i++) {
 							
 							// jos kyseessa on tuote
 							if (mysql_field_name($result, $i) == "tuoteno") {
@@ -168,7 +199,7 @@
 								$query = "	SELECT avainsana.selite, ".avain('select')."
 											FROM avainsana
 											".avain('join','OSASTO_')."
- 											WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='OSASTO' and avainsana.selite='$row[$i]'
+ 											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='OSASTO' and avainsana.selite='$row[$i]'
 											limit 1";
 								$osre = mysql_query($query) or pupe_error($query);
 								if (mysql_num_rows($osre) == 1) {
@@ -182,7 +213,7 @@
 								$query = "	SELECT avainsana.selite, ".avain('select')."
 											FROM avainsana
 											".avain('join','TRY_')."
-											WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='TRY' and avainsana.selite='$row[$i]'
+											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='TRY' and avainsana.selite='$row[$i]'
 											limit 1";
 								$osre = mysql_query($query) or pupe_error($query);
 								if (mysql_num_rows($osre) == 1) {
@@ -254,6 +285,35 @@
 			echo "<br>\n\n\n";
 			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<input type='hidden' name='tee' value='go'>";
+
+			$query = "	SELECT *
+						FROM yhtio
+						WHERE konserni='$yhtiorow[konserni]' and konserni != ''";
+			$result = mysql_query($query) or pupe_error($query);
+
+			// voidaan valita listaukseen useita konserniyhtiöitä, jos käyttäjällä on "PÄIVITYS" oikeus tähän raporttiin
+			if (mysql_num_rows($result) > 0 and $oikeurow['paivitys'] != "") {
+				echo "<table>";
+				echo "<tr>";
+				echo "<th>".t("Valitse yhtiö")."</th>";
+
+				if (!isset($yhtiot)) $yhtiot = array();
+
+				while ($row = mysql_fetch_array($result)) {
+					$sel = "";
+
+					if ($kukarow["yhtio"] == $row["yhtio"] and count($yhtiot) == 0) $sel = "CHECKED";
+					if (in_array($row["yhtio"], $yhtiot)) $sel = "CHECKED";
+
+					echo "<td><input type='checkbox' name='yhtiot[]' onchange='submit()' value='$row[yhtio]' $sel>$row[nimi]</td>";
+				}
+
+				echo "</tr>";
+				echo "</table><br>";
+			}
+			else {
+				echo "<input type='hidden' name='yhtiot[]' value='$kukarow[yhtio]'>";
+			}
 
 			echo "<table><tr>";
 
@@ -330,6 +390,21 @@
 			echo "</tr>";
 			echo "</table><br>\n";
 			
+			if ($nollapiilo != '')	$nollapiilochk	= "CHECKED";
+			if ($poispiilo != '')	$poispiilochk	= "CHECKED";
+			
+			echo "<table>
+				<tr>
+				<tr>
+				<th>".t("Piilota nollarivit")."</th>
+				<td><input type='checkbox' name='nollapiilo' $nollapiilochk></td>
+				</tr>
+				<tr>
+				<th>".t("Piilota poistetut tuotteet")."</th>
+				<td><input type='checkbox' name='poispiilo' $poispiilochk></td>
+				</tr>
+				</table><br>";
+			
 			// päivämäärärajaus
 			echo "<table>";
 			echo "<tr>
@@ -346,7 +421,7 @@
 			echo "</table><br>";
 			
 			echo "<br>";
-			echo "<input type='submit' value='".t("Aja raportti")."'>";
+			echo "<input type='submit' name ='go' value='".t("Aja raportti")."'>";
 			echo "</form>";
 		}
 

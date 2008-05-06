@@ -724,11 +724,10 @@ if (!function_exists('loppu_tarjous')) {
 			else {
 				$myyrow = $kukarow;
 			}
-		
-			$pdf_tarjous->draw_text(mm_pt(15),  50, $myyrow["nimi"].",    Puh:".$myyrow["puhno"].",    Email:".$myyrow["eposti"], $page_tarjous, $boldi);
+			
+			$pdf_tarjous->draw_text(mm_pt(15),  47, $yhtiorow["nimi"].",    ".$yhtiorow["osoite"]."    ".$yhtiorow["postino"]."    ".$yhtiorow["postitp"].",    Puh:".$yhtiorow["puhelin"].",    Email:".$yhtiorow["email"], $page_tarjous, $boldi);
+			$pdf_tarjous->draw_text(mm_pt(15),  35, $myyrow["nimi"].",    Puh:".$myyrow["puhno"].",    Email:".$myyrow["eposti"], $page_tarjous, $boldi);
 		}
-		
-		$pdf_tarjous->draw_text(mm_pt(15),  25, $yhtiorow["nimi"].",    ".$yhtiorow["osoite"]."    ".$yhtiorow["postino"]."    ".$yhtiorow["postitp"].",    Puh:".$yhtiorow["puhelin"].",    Email:".$yhtiorow["email"], $page_tarjous, $boldi);
 		
 		if ($tots != 1) {
 			$pdf_tarjous->draw_text(530, 45, t("Jatkuu", $kieli)."...", $page_tarjous, $boldi);

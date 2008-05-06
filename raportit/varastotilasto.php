@@ -36,8 +36,6 @@
 				$vvll = $vvl - '1';
 
 				$query = "	SELECT
-							tuote.osasto, 
-							tuote.try tuoteryhmä,
 							tuote.tuoteno, 
 							tuote.nimitys, 
 							(	SELECT sum(saldo) 

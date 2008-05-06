@@ -663,8 +663,9 @@
 			// Tilausrivit tälle tuotteelle
 			$query = "	SELECT if(asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
 						if(tilausrivi.tyyppi!='O' and tilausrivi.tyyppi!='W', tilausrivi.kerayspvm, tilausrivi.toimaika) pvm,
-						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tilaustyyppi, tilausrivi.var, lasku2.laskunro as keikkanro, tilausrivi.jaksotettu
+						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tilaustyyppi, tilausrivi.var, lasku2.laskunro as keikkanro, tilausrivi.jaksotettu, tilausrivin_lisatiedot.osto_vai_hyvitys
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 						LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
 						LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
@@ -729,12 +730,24 @@
 						$tyyppi = t("Jälkitoimitus");
 						$merkki = "-";
 					}
+					elseif($jtrow["tyyppi"] == "L" and $jtrow["kpl"] > 0 and $jtrow["osto_vai_hyvitys"] == "H") {
+						// Marginaalioston hyvitys
+						$tyyppi = t("Käytetyn tavaran hyvitys");
+						$merkki = "-";
+					}
 					elseif($jtrow["tyyppi"] == "L" and $jtrow["kpl"] > 0) {
+						// Normimyynti
 						$tyyppi = t("Myynti");
 						$merkki = "-";
 					}
-					elseif($jtrow["tyyppi"] == "L" and $jtrow["kpl"] < 0) {
+					elseif($jtrow["tyyppi"] == "L" and $jtrow["kpl"] < 0 and $jtrow["osto_vai_hyvitys"] != "O") {
+						// Normihyvitys
 						$tyyppi = t("Hyvitys");
+						$merkki = "+";
+					}
+					elseif($jtrow["tyyppi"] == "L" and $jtrow["kpl"] < 0 and $jtrow["osto_vai_hyvitys"] == "O") {
+						// Marginaaliosto
+						$tyyppi = t("Käytetyn tavaran osto");
 						$merkki = "+";
 					}
 					elseif(($jtrow["tyyppi"] == "W" or $jtrow["tyyppi"] == "M") and $jtrow["tilaustyyppi"] == "W") {
@@ -770,7 +783,7 @@
 
 				echo "<tr><td class='back'>&nbsp;</td></tr>";
 				foreach($yhteensa as $type => $kappale) {
-					echo "<tr><th colspan='1'>".t("$type yhteensä")."</th><td>$kappale</td></tr>";
+					echo "<tr><th colspan='1'>".t("$type yhteensä")."</th><td align='right'>$kappale</td></tr>";
 				}
 
 				echo "</table>";

@@ -211,7 +211,7 @@ if ($tee == "poista") {
 	$tee = "";
 }
 
-if($silent == "") {
+if ($silent == "") {
 	if ($toiminto == "kululaskut") {
 
 		// katotaan onko liitettyjä laskuja
@@ -312,19 +312,9 @@ if($silent == "") {
 		echo "<option value='N'>".t("nimellä")."</option>";
 		echo "<option value='V'>".t("viitteellä")."</option>";
 		echo "</SELECT></th>";
-		echo "<td><input type='text' name='haku'></td>";
+		echo "<td><input type='text' name='haku' value='$haku'></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
 		echo "</tr>";
-
-		echo "</form>";
-
-		echo "<form name='haku_liitettavissa' action='$PHP_SELF' method='post' autocomplete='off'>";
-		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-		echo "<input type='hidden' name='toiminto' value='kululaskut'>";
-		echo "<input type='hidden' name='tee' value='haku'>";
-		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
-		echo "<input type='hidden' name='laskunro' value='$laskurow[laskunro]'>";
 
 		if ($listaustapa == "liittamattomat") {
 			$sel1 = "SELECTED";
@@ -345,7 +335,7 @@ if($silent == "") {
 
 		echo "<tr>";
 		echo "<th align='left'>".t("Näytä laskut")."</th>";
-		echo "<th align='left'><select name='listaustapa''>";
+		echo "<th align='left'><select name='listaustapa'>";
 		echo "<option value=''>".t("Näytä kaikki")."</option>";
 		echo "<option value='liittamattomat' $sel1>".t("Näytä vain liittämättömät")."</option>";
 		echo "<option value='liitetyt' $sel2>".t("Näytä vain liitetyt")."</option>";
@@ -367,6 +357,8 @@ if($silent == "") {
 		$tee = "haku";
 	}
 
+
+
 	if ($tee == "haku") {
 
 		if (!isset($listaustapa)) {
@@ -374,18 +366,23 @@ if($silent == "") {
 		}
 
 		$lisa = ""; // no hacking
+		$haku = mysql_real_escape_string(trim($haku));
 
+		if ($haku == "") {
+			$hakutapa = "";
+		}
+		
 		//	Haetaan oletuksena nimen alulla!!
 		if ($hakutapa == "S") {
 			$haku = (float) str_replace(",",".",$haku); // pilkut pisteiksi
-			$lisa = "and summa='$haku'";
+			$lisa = " and summa = '$haku'";
 		}
 
-		if ($hakutapa == "N") $lisa = "and nimi like '%$haku%'";
-		if ($hakutapa == "V") $lisa = "and viite='$haku'";
+		if ($hakutapa == "N") $lisa = " and nimi like '%$haku%'";
+		if ($hakutapa == "V") $lisa = " and viite = '$haku'";
 
 		if ($hakutapa == "" or $hakutapa != "N") {
-			$lisa .= "and ytunnus = '$laskurow[ytunnus]'";
+			$lisa .= " and ytunnus = '$laskurow[ytunnus]'";
 		}
 
 		// katsotaan aluksi, ollaanko tähän keikkaan liitetty jo vaihto-omaisuuslasku

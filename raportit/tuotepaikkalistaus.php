@@ -55,8 +55,7 @@
 								JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio=tuotepaikat.yhtio AND tuote.tuoteno=tuotepaikat.tuoteno)
 								WHERE tuotepaikat.yhtio='{$kukarow['yhtio']}'
 								$wherelisa
-								$jarj
-								LIMIT 50";
+								$jarj";
 		$tuotepaikka_result = mysql_query($tuotepaikka_query) or pupe_error($tuotepaikka_query);
 
 		if (mysql_num_rows($tuotepaikka_result) == 0) {

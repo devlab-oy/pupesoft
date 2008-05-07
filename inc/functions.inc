@@ -105,10 +105,12 @@ if (!function_exists("t")) {
 		else {
 			$indeksi = "fi";
 		}
-
-		if ($useslave > 0 or $indeksi != 'fi') { // Voi olla, että käytämme slavea ja INSERT ei siis onnistu (insert vain jos ei fi)
+		
+		// Voi olla, että käytämme slavea ja INSERT ei siis onnistu (insert vain jos ei fi)
+		if ($useslave > 0 or $indeksi != 'fi') { 
+			unset($link);
 			$link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
-			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 1)!");
+			mysql_select_db ($dbkanta,$link) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 1)!");
 		}
 
 		if ($indeksi != 'fi') {
@@ -129,7 +131,7 @@ if (!function_exists("t")) {
 						$stringi = $sanakirjarow["fi"];
 					}
 				}
-
+				
 				//Päivitetään aikaleima
 				if ($verkkokauppa == "") {
 					$sanakirjaqueryupd  = "UPDATE sanakirja SET aikaleima=now(), kysytty=kysytty+1 WHERE tunnus='$sanakirjarow[tunnus]'";
@@ -143,6 +145,7 @@ if (!function_exists("t")) {
 		}
 
 		if ($useslave > 0) { //Palautetaan slave käyttöön
+			unset($link);
 			$link = mysql_connect ($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
 			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 2)!");
 		}

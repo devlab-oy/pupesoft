@@ -579,6 +579,7 @@
 				FROM tuote use index (yhtio_tuotemerkki)
 				WHERE yhtio='$kukarow[yhtio]'
 				and tuotemerkki != ''
+				$extra_poislisa
 				$kieltolisa
 				ORDER BY tuotemerkki";
 	$sresult = mysql_query($query) or pupe_error($query);

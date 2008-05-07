@@ -381,9 +381,9 @@ if ($silent == "") {
 		if ($hakutapa == "N") $lisa = " and nimi like '%$haku%'";
 		if ($hakutapa == "V") $lisa = " and viite = '$haku'";
 
-		if ($hakutapa == "" or $hakutapa != "N") {
-			$lisa .= " and ytunnus = '$laskurow[ytunnus]'";
-		}
+//		if ($hakutapa == "" or $hakutapa != "N") {
+//			$lisa .= " and ytunnus = '$laskurow[ytunnus]'";
+//		}
 
 		// katsotaan aluksi, ollaanko tähän keikkaan liitetty jo vaihto-omaisuuslasku
 		$query  = "	SELECT *

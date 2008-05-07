@@ -367,6 +367,7 @@
 
 	if ($laskurow["tila"] == 'U' or $laskurow["tila"] == 'K') {
 		$where = " tilausrivi.uusiotunnus = '$tunnus' ";
+		$pkusei = " use index (uusiotunnus_index) ";
 	}
 	elseif ($laskurow["tila"] == 'R') {
 		$query = "	SELECT group_concat(tunnus) tunnukset
@@ -728,15 +729,21 @@
 
 				if (($row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U")) or $row["perheid2"] == -1) {
 					$pklisa = " and (tilausrivi.perheid = '$row[tunnus]' or tilausrivi.perheid2 = '$row[tunnus]')";
-					$pkusei = " use index (yhtio_otunnus) ";
+					if ($pkusei == '') {
+						$pkusei = " use index (yhtio_otunnus) ";
+					}					
 				}
 				elseif ($row["perheid"] == 0) {
 					$pklisa = " and tilausrivi.perheid2 = '$row[perheid2]'";
-					$pkusei = " use index (yhtio_perheid2)";
+					if ($pkusei == '') {
+						$pkusei = " use index (yhtio_perheid2)";
+					}
 				}
 				else {
 					$pklisa = " and (tilausrivi.perheid = '$row[perheid]' or tilausrivi.perheid2 = '$row[perheid]')";
-					$pkusei = " use index (yhtio_otunnus) ";
+					if ($pkusei == '') {
+						$pkusei = " use index (yhtio_otunnus) ";
+					}
 				}
 
 				$pkquery = "SELECT sum(if(tilausrivi.kommentti != '' or tuote.sarjanumeroseuranta!='' or ('$kukarow[extranet]' = '' and (tilausrivi.toimitettuaika!='0000-00-00 00:00:00' or tilausrivi.kerattyaika!='0000-00-00 00:00:00')), 1, 0)), count(*)

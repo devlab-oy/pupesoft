@@ -347,8 +347,15 @@ if ($kollityht > 0) {
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 	fclose($fh);
 
-	//itse print komento...
-	$line = exec("$kirjoitin $pdffilenimi");
+	if ($kirjoitin == "email") {
+		$liite = $pdffilenimi;
+		$kutsu = "PDF-rahtikirja";
+		require("inc/sahkoposti.inc");
+	}
+	else {
+		//itse print komento...
+		$line = exec("$kirjoitin $pdffilenimi");
+	}
 
 	//poistetaan tmp file samantien kuleksimasta...
 	system("rm -f $pdffilenimi");

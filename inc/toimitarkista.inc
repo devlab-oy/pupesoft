@@ -116,7 +116,8 @@ if(!function_exists("toimitarkista")) {
 		}
 		
 		if (mysql_field_name($result, $i) == "ohjeitapankille") {
-			if ($tmp_maakoodi=='FI') {
+		
+			if ($tmp_maakoodi=='FI' and strlen($t[$i]) != '') {
 				$virhe[$i] = t("Käytössä vain ulkomaisille toimittajille");
 			}
 			else {

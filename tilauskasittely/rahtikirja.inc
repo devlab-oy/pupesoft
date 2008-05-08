@@ -81,6 +81,12 @@ else {
 $sivu = str_replace($from, $to, $sivu);	// Tehdään käännös
 
 $sivu = escapeshellarg($sivu);
-$line = exec(" echo \"$sivu\" | $kirjoitin");
+
+if ($kirjoitin == "email") {
+	echo t("Rahtikirjaa ei voida tulostaa sähköpostiin")."<br>";
+}
+else {
+	$line = exec(" echo \"$sivu\" | $kirjoitin");
+}
 
 ?>

@@ -375,13 +375,15 @@
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 	fclose($fh);
 	
-	//tulostetaan PDF
-	$line = exec("$kirjoitin $pdffilenimi");
-	
-	//väliaikaisesti myös emailiin
-	//$liite = $pdffilenimi;
-	//$kutsu = "PDF-rahtikirja";
-	//require("inc/sahkoposti.inc");
+	if ($kirjoitin == "email") {
+		$liite = $pdffilenimi;
+		$kutsu = "PDF-rahtikirja";
+		require("inc/sahkoposti.inc");
+	}
+	else {
+		//itse print komento...
+		$line = exec("$kirjoitin $pdffilenimi");
+	}
 	
 	//poistetaan tmp file samantien kuleksimasta...
 	system("rm -f $pdffilenimi");		

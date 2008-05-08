@@ -349,7 +349,13 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 ".chr(12);
 
 	$sivu = escapeshellarg($sivu);
-	$line = exec(" echo \"$sivu\" | $kirjoitin");
+
+	if ($kirjoitin == "email") {
+		echo t("Rahtikirjaa ei voida tulostaa s‰hkˆpostiin")."<br>";
+	}
+	else {
+		$line = exec(" echo \"$sivu\" | $kirjoitin");
+	}
 
 	//l‰hetet‰‰n postin edisanoma
 	if ($tulostakopio == "") {

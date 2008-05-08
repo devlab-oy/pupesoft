@@ -75,9 +75,10 @@ if (isset($tuoteno) and $tuoteno != '') {
 	//tarvitaan multiple select boksin tekoon
 	$kutsuja = "varastojen_halytysraja.php";
 	$multi = "multiple";
+	
 	require 'inc/tuotehaku.inc';
 	
-	if (empty($trow)) {
+	if ($tee == 'Y') {
 		$tee = '';
 	}
 }
@@ -280,6 +281,9 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	echo "<th>".t("Puute")."</th>";
 	echo "<th>".t("Kok.Saldo")."<br>".t("Var.Saldo")."</th>";
 	echo "<th>".t("Kok.Myynti")."<br>".t("Var.Myynti")."</th>";
+	if ($maittain != "") {
+		echo "<th>".t("Myynti")."<br>".t("maittain")."</th>";
+	}	
 	echo "<th>".t("H‰lytysraja")."</th>";
 	echo "<th>".t("Tilausm‰‰r‰")."</th>";
 	echo "<th>".t("H‰lyehdotus")."</th>";
@@ -305,7 +309,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		}
 
 		// tutkaillaan myynti
-		// tutkaillaan myynti
+		// tutkaillaan myynti		
 		$query = "	SELECT
 					sum(if (laadittu >= '$vva1-$kka1-$ppa1' and laadittu <= '$vvl1-$kkl1-$ppl1' and var='P', tilkpl,0)) puutekpl1,
    					sum(if (laadittu >= '$vva2-$kka2-$ppa2' and laadittu <= '$vvl2-$kkl2-$ppl2' and var='P', tilkpl,0)) puutekpl2,
@@ -331,7 +335,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
    					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
    					and tyyppi = 'L'
    					and tuoteno = '$row[tuoteno]'
-   					and ((laskutettuaika >= '$apvm' and laskutettuaika <= '$lpvm') or laskutettuaika = '0000-00-00')";
+   					and ((laskutettuaika >= '$apvm' and laskutettuaika <= '$lpvm') or laskutettuaika = '0000-00-00')";				
 		$result   = mysql_query($query) or pupe_error($query);
 		$summarow = mysql_fetch_array($result);
 
@@ -348,6 +352,28 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 
 		echo "<td align='right'><a class='menu' onmouseout=\"popUp(event,'$row[paikkatunnus]')\" onmouseover=\"popUp(event,'$row[paikkatunnus]')\">$summarow[kpl1]</a><br>";
 		echo "<a class='menu' onmouseout=\"popUp(event,'$row[paikkatunnus]')\" onmouseover=\"popUp(event,'$row[paikkatunnus]')\">$summarow[varastonkpl1]</a></td>";
+		
+		//Haetaan mihin maahan tuote on toimitettu 
+		if ($maittain != "") {
+			$query = "  SELECT lasku.toim_maa, sum(if(tilausrivi.laskutettuaika >= '$vva1-$kka1-$ppa1' and tilausrivi.laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,tilausrivi.kpl,0)) maakpl 
+						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+						JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+   						and tilausrivi.tyyppi = 'L'
+   						and tilausrivi.tuoteno = '$row[tuoteno]'
+						and ((tilausrivi.laskutettuaika >= '$apvm' and tilausrivi.laskutettuaika <= '$lpvm') or tilausrivi.laskutettuaika = '0000-00-00')
+						group by lasku.toim_maa";
+			$result   = mysql_query($query) or pupe_error($query);
+		
+			echo "<td align='right'>";		
+			while ($maarow = mysql_fetch_array($result)) {
+				if ($maarow[toim_maa] != '' and $maarow[maakpl] != 0) {
+					echo "$maarow[toim_maa] $maarow[maakpl]<br>";
+				}
+			
+			}
+			echo "</td>";
+		}
 		
 		// t‰ss‰ lasketaan ehdotettava h‰lytysraja: lasketaan p‰iv‰n myynti ja kerrotaan haluituilla p‰ivill‰
 		$halyehdotus = ceil($summarow["varastonkpl1"] / $erorow["ero"] * $tarve);
@@ -613,7 +639,9 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	if ($ehdotettavat != "") $chk = "checked";
 	echo "<tr><th>".t("N‰yt‰ vain ostettavaksi ehdotettavat rivit")."</th><td colspan='3'><input type='checkbox' name='ehdotettavat' $chk></td></tr>";
 
-
+	$chk = "";
+	if ($maittain != "") $chk = "checked";
+	echo "<tr><th>".t("N‰yt‰ myynti maittain")."</th><td colspan='3'><input type='checkbox' name='maittain' $chk></td></tr>";
 	echo "</table>";
 
 	echo "<br><table>";

@@ -83,16 +83,24 @@
 		//tuonti vai vienti
 		if ($tapa == "tuonti") {
 			$where1 = " and (lasku.vienti = 'F' or lasku.ultilno = '-2') ";
-			$where2 = " and lasku.ultilno = '-2' ";
+			$where2 = " and lasku.vienti != 'K' and lasku.ultilno = '-2' ";
 			$where3 = " and lasku.ultilno = '-2' ";
+			$maalisa = " and lasku.maa_maara = '$kayttajan_valinta_maa' and lasku.maa_lahetys != '$kayttajan_valinta_maa'";
 		}
 		else {
 			$tapa = "vienti";
 			$where1 = " and lasku.ultilno = '-1' ";
-			$where2 = " and (lasku.vienti = 'E' or lasku.ultilno = '-1') ";
+			$where2 = " and lasku.vienti != 'K' and (lasku.vienti = 'E' or lasku.ultilno = '-1') ";
 			$where3 = " and lasku.ultilno = '-1' ";
+			$maalisa = " and lasku.maa_maara != '$kayttajan_valinta_maa' and lasku.maa_lahetys = '$kayttajan_valinta_maa'";
 		}
 
+		if ($kayttajan_valinta_maa != '') {
+			$where1 .= $maalisa;
+			$where2 .= $maalisa;
+			$where3 .= $maalisa;
+		}
+		
 		if ($lisavar == "S") {
 			$lisavarlisa = "  and (tilausrivi.perheid2=0 or tilausrivi.perheid2=tilausrivi.tunnus) ";
 		}
@@ -166,7 +174,6 @@
 					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
 					WHERE lasku.tila = 'L'
 					and lasku.alatila = 'X'
-					and lasku.vienti != 'K'
 					$where2
 					and lasku.kauppatapahtuman_luonne != '999'
 					and lasku.yhtio = '$kukarow[yhtio]'
@@ -474,7 +481,7 @@
 				$ulos .= "<tr class='aktiivi'>";
 
 				if ($vaintullinimike != "") {
-					$ulos .= "<td valign='top'><a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$row[kaikkitunnukset]&vaintullinimike=$vaintullinimike&lopetus=$lopetus//vaintullinimike=$vaintullinimike'>$row[laskunro]</a></td>";
+					$ulos .= "<td valign='top'><a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$row[kaikkitunnukset]&vaintullinimike=$vaintullinimike&lopetus=$lopetus//vaintullinimike=$vaintullinimike//kayttajan_valinta_maa=$kayttajan_valinta_maa'>$row[laskunro]</a></td>";
 				}
 				else {
 					$ulos .= "<td valign='top'>".$row["laskunro"]."</td>";
@@ -482,7 +489,7 @@
 
 				$ulos .= "<td valign='top'>".$row["tuoteno"]."</td>";
 				$ulos .= "<td valign='top'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
-	 			$ulos .= "<td valign='top'><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&vaintullinimike=$row[tullinimike1]'>$row[tullinimike1]</></td>";	//Tullinimike CN
+	 			$ulos .= "<td valign='top'><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&kayttajan_valinta_maa=$kayttajan_valinta_maa&vaintullinimike=$row[tullinimike1]'>$row[tullinimike1]</></td>";	//Tullinimike CN
 				$ulos .= "<td valign='top'>".$row["kauppatapahtuman_luonne"]."</td>";
 				$ulos .= "<td valign='top'>".$row["alkuperamaa"]."</td>";
 				$ulos .= "<td valign='top'>".$row["maa_lahetys"]."</td>";
@@ -576,9 +583,9 @@
 				$worksheet->write($excelrivi, 13, $totkpl, $format_bold);
 			}
 		}
-
+		
 		// ei virheitä .. ja halutaan lähettää jotain meilejä
-		if ($virhe == 0 and $lahetys != "nope") {
+		if ($virhe == 0 and $lahetys != "nope" and $kayttajan_valinta_maa == '') {
 
 			//PGP-encryptaus labeli
 			$label  = '';
@@ -687,7 +694,7 @@
 			}
 			echo "<font class='error'>".t("Aineistoa EI lähetetty minnekään").".</font><br><br>";
 		}
-
+		
 		// echotaan oikea taulukko ruudulle
 		if ($outputti == "tilasto") {
 			echo "$tilastoarvot";
@@ -744,8 +751,38 @@
 				<option value='tuonti' $sel2[tuonti]>".t("Tuonti-ilmoitus")."</option>
 				</select>
 			</td>
-		</tr>
-		<tr>
+		</tr>";
+
+	$query = "SELECT tunnus from yhtion_toimipaikat where yhtio = '$kukarow[yhtio]' and vat_numero != ''";
+	$vresult = mysql_query($query) or pupe_error($query);
+	
+	if (mysql_num_rows($vresult) > 0) {
+		echo "<tr>
+				<th>".t("Valitse poikkeava ilmoitusmaa")."</th>
+				<td>
+					<select name='kayttajan_valinta_maa'>";
+					echo "<option value='' $sel>".t("Ei valintaa")."</option>";
+				
+					$query = "	SELECT distinct koodi, nimi
+								FROM maat
+								where nimi != '' and eu != '' and koodi != '$yhtiorow[maa]'
+								ORDER BY koodi";
+					$vresult = mysql_query($query) or pupe_error($query);
+				
+					while ($row = mysql_fetch_array($vresult)) {
+						$sel = '';
+						if ($row[0] == $kayttajan_valinta_maa) {
+							$sel = 'selected';
+						}
+						echo "<option value='$row[0]' $sel>$row[1]</option>";
+					}				
+				
+		echo "		</select>
+				</td>
+			</tr>";
+	}
+	
+	echo "<tr>
 			<th>".t("Syötä kausi (kk-vvvv)")."</th>
 			<td>
 				<input type='text' name='kk' value='$kk' size='3'>

@@ -297,7 +297,7 @@ if(!function_exists("menu")) {
 			$toimlisa = "";
 		}
 
-		if($osasto == "") {
+		if ($osasto == "") {
 			$val 		=  "<table id='rootMenu' class='menu' style='visibility: hidden;'>
 								<tr class='aktiivi'>
 									<td class='back'><a href='verkkokauppa.php'>".t("Etusivulle")."</a><br><a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=yhteystiedot', false, true);\">".t("Yhteystiedot")."</a></td>
@@ -332,7 +332,7 @@ if(!function_exists("menu")) {
 			$val .= "</table><script>setTimeout(\"document.getElementById('rootMenu').style.visibility='visible';\", 250)</script>";
 
 		}
-		elseif($try == "") {
+		elseif ($try == "") {
 			$val = "<table class='menu'>";
 			$query = "	SELECT distinct try, selitetark trynimi
 			 			FROM tuote
@@ -340,7 +340,8 @@ if(!function_exists("menu")) {
 						WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try != '' and status != 'P' and hinnastoon IN ('W', 'V') and tuotemerkki != ''
 						ORDER BY selitetark";
 			$tryres = mysql_query($query) or pupe_error($query);
-			while($tryrow = mysql_fetch_array($tryres)) {
+
+			while ($tryrow = mysql_fetch_array($tryres)) {
 
 				//	Oletuksena pimitetään kaikki..
 				$ok = 0;
@@ -348,13 +349,15 @@ if(!function_exists("menu")) {
 				//	Tarkastetaan onko täällä sopivia tuotteita
 				$query = "	SELECT *
 				 			FROM tuote
-							WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try = '{$tryrow["try"]}' and status != 'P' and hinnastoon IN ('W', 'V') and tuotemerkki != ''";
+							WHERE tuote.yhtio = '$kukarow[yhtio]' and osasto = '$osasto' and try = '$tryrow[try]' and status != 'P' and hinnastoon IN ('W', 'V') and tuotemerkki != ''";
 				$res = mysql_query($query) or pupe_error($query);
-				while($trow = mysql_fetch_array($res) and $ok == 0) {
 
-					//	Tarkastetaan asiakashinta
-					if($trow["hinnastoon"] == "V") {
-						if(!is_array($asiakasrow)) {
+				while ($trow = mysql_fetch_array($res) and $ok == 0) {
+
+					//	JOS asiakkaalle näytetään vain tuotteet jossa on asiakasale/hinta tai jos tuote näkyy verkkokaupassa vain jos asiakkaalla on asiakasale/hinta
+					if ($trow["hinnastoon"] == "V" or $kukarow["naytetaan_tuotteet"] == "A") {
+
+						if (!is_array($asiakasrow)) {
 							$query    = "	SELECT *
 											FROM asiakas
 											WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
@@ -369,23 +372,21 @@ if(!function_exists("menu")) {
 									"liitostunnus" => $asiakasrow["tunnus"],
 									"ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
 
-						// EI NÄYTETÄ TUOTETTA
-						// JOS asiakkaalle näytetään vain tuotteet jossa on asiakasale/hinta tai jos tuote näkyy verkkokaupassa vain jos asiakkaalla on asiakasale/hinta
-						// AND hintaperuste on käsisyötetty tai tulee hinnastosta
-						// AND aleperuste on käsinsyötetty tai tuotteella on vain perusalennus
-						if (($kukarow["naytetaan_tuotteet"] == "A" or $trow["hinnastoon"] == "V") and ($hinnat["hintaperuste"] < 2 or $hinnat["hintaperuste"] > 12) and ($hinnat["aleperuste"] < 5 or $hinnat["aleperuste"] > 8)) {
-							continue;
-						}
-						else {
+						if ($hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 12) {
 							$ok = 1;
 						}
+						if ($hinnat["aleperuste"] >= 5 or $hinnat["aleperuste"] <= 8) {
+							$ok = 1;
+						}
+
 					}
 					else {
 						$ok = 1;
 					}
+
 				}
 
-				if($ok == 1) {
+				if ($ok == 1) {
 					$target		= "{$osasto}_{$tryrow["try"]}_P";
 					$parent		= "{$osasto}_{$tryrow["try"]}_T";
 					$href 		= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto=$osasto&try={$tryrow["try"]}\", \"$parent\", true); sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try={$tryrow["try"]}&tuotemerkki=\", \"\", true);";
@@ -411,13 +412,15 @@ if(!function_exists("menu")) {
 				//	Tarkastetaan onko täällä sopivia tuotteita
 				$query = "	SELECT *
 				 			FROM tuote
-							WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try = '$try' and tuotemerkki = '{$merow["tuotemerkki"]}'and status != 'P' and hinnastoon IN ('W', 'V') and tuotemerkki != ''";
+							WHERE tuote.yhtio = '$kukarow[yhtio]' and osasto = '$osasto' and try = '$try' and tuotemerkki = '$merow[tuotemerkki]'and status != 'P' and hinnastoon IN ('W', 'V') and tuotemerkki != ''";
 				$res = mysql_query($query) or pupe_error($query);
-				while($trow = mysql_fetch_array($res) and $ok == 0) {
 
-					//	Tarkastetaan asiakashinta
-					if($trow["hinnastoon"] == "V") {
-						if(!is_array($asiakasrow)) {
+				while ($trow = mysql_fetch_array($res) and $ok == 0) {
+
+					//	JOS asiakkaalle näytetään vain tuotteet jossa on asiakasale/hinta tai jos tuote näkyy verkkokaupassa vain jos asiakkaalla on asiakasale/hinta
+					if ($trow["hinnastoon"] == "V" or $kukarow["naytetaan_tuotteet"] == "A") {
+
+						if (!is_array($asiakasrow)) {
 							$query    = "	SELECT *
 											FROM asiakas
 											WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
@@ -432,25 +435,24 @@ if(!function_exists("menu")) {
 									"liitostunnus" => $asiakasrow["tunnus"],
 									"ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
 
-						// EI NÄYTETÄ TUOTETTA
-						// JOS asiakkaalle näytetään vain tuotteet jossa on asiakasale/hinta tai jos tuote näkyy verkkokaupassa vain jos asiakkaalla on asiakasale/hinta
-						// AND hintaperuste on käsisyötetty tai tulee hinnastosta
-						// AND aleperuste on käsinsyötetty tai tuotteella on vain perusalennus
-						if (($kukarow["naytetaan_tuotteet"] == "A" or $trow["hinnastoon"] == "V") and ($hinnat["hintaperuste"] < 2 or $hinnat["hintaperuste"] > 12) and ($hinnat["aleperuste"] < 5 or $hinnat["aleperuste"] > 8)) {
-							continue;
-						}
-						else {
+						if ($hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 12) {
 							$ok = 1;
 						}
+						if ($hinnat["aleperuste"] >= 5 or $hinnat["aleperuste"] <= 8) {
+							$ok = 1;
+						}
+
 					}
 					else {
 						$ok = 1;
 					}
+
 				}
 
-				if($ok == 1) {
+				if ($ok == 1) {
 					$val .=  "<tr class='aktiivi'><td class='sisennys1'></td><td class='sisennys2'></td><td><a class = 'menu' id='{$osasto}_{$try}_{$merow["tuotemerkki"]}_P' href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=".base64_encode($merow["tuotemerkki"])."', '', true);\">{$merow["tuotemerkki"]}</a></td></tr>";
 				}
+
 			}
 			$val .= "</table>";
 		}

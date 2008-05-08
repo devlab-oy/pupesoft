@@ -114,6 +114,19 @@ if(!function_exists("toimitarkista")) {
 			}
 			$tmp_ytunnus=$t[$i];
 		}
+		
+		if (mysql_field_name($result, $i) == "ohjeitapankille") {
+			if ($tmp_maakoodi=='FI') {
+				$virhe[$i] = t("Käytössä vain ulkomaisille toimittajille");
+			}
+			else {
+				$t[$i]=trim($t[$i]);
+				if (strlen($t[$i]) > 350) {
+					$virhe[$i] = t("Maksimipituus on 350 merkkiä");
+				}
+			}
+		}
+			
 
 		if (mysql_field_name($result, $i) == "ovttunnus") {
 			if ($tmp_maakoodi=='FI') {

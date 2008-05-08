@@ -348,6 +348,11 @@
 		$jatko = 0;
 	}
 	
+	if (mysql_field_name($result, $i) == "ohjeitapankille") {
+		$ulos = "<td><textarea cols='35' rows='7' name='$nimi'>$trow[$i]</textarea></td>";
+		$jatko = 0;
+	}
+	
 	if (mysql_field_name($result, $i) == "automaatti_toimitus") {
 
 		$selo = $sels = "";

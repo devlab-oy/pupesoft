@@ -41,7 +41,7 @@
 					round(sum(if(lasku.tila != 'U', -1*summa*valuu.kurssi, 0)),2) osto
 					FROM lasku
 					LEFT JOIN valuu ON valuu.yhtio = lasku.yhtio and lasku.valkoodi = valuu.nimi
-					WHERE lasku.yhtio in ($yhtio) and lasku.tila in ('H','M','P','Q','U')
+					WHERE lasku.yhtio in ($yhtio) and lasku.tila in ('H','M','P','Q','U') and mapvm = '0000-00-00'
 					GROUP BY 1
 					HAVING myynti<>0 or osto<>0";
 		$result = mysql_query($query) or pupe_error($query);

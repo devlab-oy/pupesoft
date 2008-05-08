@@ -77,7 +77,7 @@ if (isset($tuoteno) and $tuoteno != '') {
 	$multi = "multiple";
 	require 'inc/tuotehaku.inc';
 	
-	if (empty($trow)) {
+	if ($tee == 'Y') {
 		$tee = '';
 	}
 }

@@ -547,6 +547,7 @@ if ($tee == 'P' or $tee == 'E') {
 			$osuoraveloitus		= $trow['oletus_suoraveloitus'];
 			$ohyvaksynnanmuutos	= $trow['oletus_hyvaksynnanmuutos'];
 			$vienti				= $trow['oletus_vienti'];
+			$ohjeitapankille    = $trow['ohjeitapankille'];
 		}
 
 		// Tehd‰‰n konversio checkboxseja varten

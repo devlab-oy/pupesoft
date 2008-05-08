@@ -52,7 +52,7 @@
 	echo "<font class='head'>".t("Intrastat-ilmoitukset")."</font><hr>";
 
 	if ($tee == "tulosta") {
-		
+
 		if($excel != "") {
 			if(include('Spreadsheet/Excel/Writer.php')) {
 
@@ -69,9 +69,9 @@
 				$format_bold->setBold();
 
 				$excelrivi = 0;
-			}			
+			}
 		}
-		
+
 		// tehd‰‰n kauniiseen muotoon annetun kauden eka ja vika pvm
 		$vva = date("Y",mktime(0, 0, 0, $kk, 1, $vv));
 		$kka = date("m",mktime(0, 0, 0, $kk, 1, $vv));
@@ -92,12 +92,12 @@
 			$where2 = " and (lasku.vienti = 'E' or lasku.ultilno = '-1') ";
 			$where3 = " and lasku.ultilno = '-1' ";
 		}
-		
+
 		if ($lisavar == "S") {
 			$lisavarlisa = "  and (tilausrivi.perheid2=0 or tilausrivi.perheid2=tilausrivi.tunnus) ";
 		}
 		else {
-			$lisavarlisa = "";	
+			$lisavarlisa = "";
 		}
 
 		if ($vaintullinimike != "") {
@@ -106,9 +106,9 @@
 		}
 		else {
 			$vainnimikelisa = "";
-			$vainnimikegroup = "";			
+			$vainnimikegroup = "";
 		}
-		
+
 		// t‰ss‰ tulee sitten nimiketietueet unionilla
 		$query = "	(SELECT
 					tuote.tullinimike1,
@@ -159,7 +159,7 @@
 					group_concat(lasku.tunnus) as kaikkitunnukset,
 					group_concat(distinct tilausrivi.perheid2) as perheid2set,
 					group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet,
-					'Lasku' as tapa					
+					'Lasku' as tapa
 					FROM lasku use index (yhtio_tila_tapvm)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
 					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
@@ -208,7 +208,7 @@
 
 					ORDER BY laskunro, tuoteno ";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		$nim     = "";
 		$lask    = 1;
 		$arvoyht = 0;
@@ -231,7 +231,7 @@
 				<th>".t("2-paljous m‰‰r‰")."</th>
 				<th>".t("Laskutusarvo")."</th>
 				</tr>";
-				
+
 				if(isset($workbook)) {
 					$worksheet->write($excelrivi, 1, "Tullinimike", $format_bold);
 					$worksheet->write($excelrivi, 2, "Alkuper‰maa", $format_bold);
@@ -247,8 +247,8 @@
 					$worksheet->write($excelrivi, 12, "Laskutusarvo", $format_bold);
 
 					$excelrivi++;
-				}			
-				
+				}
+
 		}
 		else {
 			// tehd‰‰n kaunista ruutukamaa
@@ -273,8 +273,8 @@
 			}
 
 			$ulos .= "<th>".t("Virhe")."</th>";
-			$ulos .= "</tr>";			
-			
+			$ulos .= "</tr>";
+
 			if(isset($workbook)) {
 				$worksheet->write($excelrivi, 1, "Laskunro", $format_bold);
 				$worksheet->write($excelrivi, 2, "Tuoteno", $format_bold);
@@ -288,12 +288,12 @@
 				$worksheet->write($excelrivi, 10, "Rivihinta", $format_bold);
 				$worksheet->write($excelrivi, 11, "Paino", $format_bold);
 				$worksheet->write($excelrivi, 12, "2. paljous", $format_bold);
-				$worksheet->write($excelrivi, 13, "Kpl", $format_bold);			
+				$worksheet->write($excelrivi, 13, "Kpl", $format_bold);
 				if($lisavar == "S") {
 					$worksheet->write($excelrivi, 12, "Tehdaslis‰varusteet", $format_bold);
 				}
 				$excelrivi++;
-			}			
+			}
 		}
 
 		// 1. L‰hett‰j‰tietue
@@ -337,7 +337,7 @@
 
 			if ($row["perheid2set"] != "0" and $lisavar == "S") {
 				$query  = "	SELECT ";
-				
+
 				if ($row["tapa"] != "Keikka") {
 					$query .= "	if (round(sum((tilausrivi.kpl * tilausrivi.hinta * lasku.vienti_kurssi *
 								(SELECT if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno LIMIT 1)
@@ -357,7 +357,7 @@
 				}
 
 				$query .= "	FROM tilausrivi use index (yhtio_perheid2)
-							JOIN lasku ON tilausrivi.otunnus = lasku.tunnus and tilausrivi.yhtio = lasku.yhtio 
+							JOIN lasku ON tilausrivi.otunnus = lasku.tunnus and tilausrivi.yhtio = lasku.yhtio
 							JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.kpl > 0
@@ -366,11 +366,11 @@
 							and tilausrivi.perheid2 in ($row[perheid2set])";
 				$lisavarres = mysql_query($query) or pupe_error($query);
 				$lisavarrow = mysql_fetch_array($lisavarres);
-				
+
 				$row["paino"] 		+= $lisavarrow["paino"];
 				$row["rivihinta"] 	+= $lisavarrow["rivihinta"];
 			}
-				
+
 			// 3. Nimiketietue
 			$nim .= sprintf ('%-3.3s', 		"NIM");																								//tietuetunnus
 			$nim .= sprintf ('%05d', 		$lask);																								//j‰rjestysnumero
@@ -407,7 +407,7 @@
 
 			$nim .= sprintf ('%010d', 		$row["rivihinta"]);																					//nimikkeen laskutusarvo
 			$nim .= "\r\n";
-			
+
 			if($outputti == "tilasto") {
 				// tehd‰‰n tilastoarvolistausta
 				$tilastoarvot .= "<tr>";
@@ -441,45 +441,45 @@
 
 				$tilastoarvot .= "<td>$row[rivihinta]</td>";																						//nimikkeen laskutusarvo
 				$tilastoarvot .= "</tr>";
-				
+
 				if(isset($workbook)) {
 					$worksheet->write($excelrivi, 1, $lask);
 					$worksheet->write($excelrivi, 2, $row["tullinimike1"]);
 
 					if ($tapa == "tuonti") {
 						$worksheet->write($excelrivi, 3, $row["alkuperamaa"]);
-						$worksheet->write($excelrivi, 4, $row["maa_lahetys"]);						
+						$worksheet->write($excelrivi, 4, $row["maa_lahetys"]);
 					}
 					else {
 						$worksheet->write($excelrivi, 5, $row["maa_maara"]);
 
 					}
-					
+
 					$worksheet->write($excelrivi, 6, $row["kuljetusmuoto"]);
 					$worksheet->write($excelrivi, 7, $row["kauppatapahtuman_luonne"]);
 					$worksheet->write($excelrivi, 8, $row["rivihinta"]);
 					$worksheet->write($excelrivi, 9, $row["paino"]);
 					if ($row["su"] != '') {
 						$worksheet->write($excelrivi, 10, $row["su"]);
-						$worksheet->write($excelrivi, 11, $row["kpl"]);						
+						$worksheet->write($excelrivi, 11, $row["kpl"]);
 					}
 					$worksheet->write($excelrivi, 12, $row["rivihinta"]);
 
 					$excelrivi++;
-				}			
-				
+				}
+
 			}
 			else {
 				// tehd‰‰n kaunista ruutukamaa
 				$ulos .= "<tr class='aktiivi'>";
-				
+
 				if ($vaintullinimike != "") {
 					$ulos .= "<td valign='top'><a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$row[kaikkitunnukset]&vaintullinimike=$vaintullinimike&lopetus=$lopetus//vaintullinimike=$vaintullinimike'>$row[laskunro]</a></td>";
 				}
 				else {
 					$ulos .= "<td valign='top'>".$row["laskunro"]."</td>";
 				}
-				
+
 				$ulos .= "<td valign='top'>".$row["tuoteno"]."</td>";
 				$ulos .= "<td valign='top'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
 	 			$ulos .= "<td valign='top'><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&vaintullinimike=$row[tullinimike1]'>$row[tullinimike1]</></td>";	//Tullinimike CN
@@ -504,7 +504,7 @@
 
 				$ulos .= "<td valign='top'><font class='error'>".$virhetxt."</font></td>";
 				$ulos .= "</tr>";
-				
+
 				if(isset($workbook)) {
 					$worksheet->write($excelrivi, 1, $row["laskunro"]);
 					$worksheet->write($excelrivi, 2, $row["tuoteno"]);
@@ -518,7 +518,7 @@
 					$worksheet->write($excelrivi, 10, $row["rivihinta"]);
 					$worksheet->write($excelrivi, 11, $row["paino"]);
 					$worksheet->write($excelrivi, 12, $row["su"]);
-					$worksheet->write($excelrivi, 13, $row["kpl"]);			
+					$worksheet->write($excelrivi, 13, $row["kpl"]);
 					if($lisavar == "S") {
 						$worksheet->write($excelrivi, 12, $lisavarrow["paino"]."kg/".$lisavarrow["rivihinta"]."eur");
 					}
@@ -539,7 +539,7 @@
 		$sum .= sprintf ('%018d', 		$lask-1);																								//nimikkeiden lukum‰‰r‰
 		$sum .= sprintf ('%018d', 		$arvoyht);																								//laskutusarvo yhteens‰
 		$sum .= "\r\n";
-		
+
 		if($outputti == "tilasto") {
 			// tehd‰‰n tilaustoarvolistausta
 			$tilastoarvot .= "<tr>";
@@ -566,15 +566,15 @@
 			if ($lisavar == "S") {
 				$ulos .= "<th></th>";
 			}
-			
+
 			$ulos .= "</tr>";
-			$ulos .= "</table>";			
-			
+			$ulos .= "</table>";
+
 			if(isset($workbook)) {
 				$worksheet->write($excelrivi, 10, $totsumma, $format_bold);
 				$worksheet->write($excelrivi, 11, $bruttopaino, $format_bold);
-				$worksheet->write($excelrivi, 13, $totkpl, $format_bold);			
-			}						
+				$worksheet->write($excelrivi, 13, $totkpl, $format_bold);
+			}
 		}
 
 		// ei virheit‰ .. ja halutaan l‰hett‰‰ jotain meilej‰
@@ -590,7 +590,10 @@
 			$label .= "koko aineiston vienti-, verotus- tai laskutusarvo: $arvoyht\r\n";
 
 			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>"; 				// t‰m‰ on tullin virallinen avain
-			//$recipient = "pgp-testkey Customs Finland <test.ascii.intra@tulli.fi>"; 	// t‰m‰ on tullin testiavain
+
+			if ($lahetys == "test") {
+				$recipient = "pgp-testkey Customs Finland <test.ascii.intra@tulli.fi>"; 	// t‰m‰ on tullin testiavain
+			}
 
 			$message = '';
 			$message = $label;
@@ -600,7 +603,10 @@
 
 			//PGP-encryptaus atktietue
 			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>"; 				// t‰m‰ on tullin virallinen avain
-			// $recipient = "pgp-testkey Customs Finland <test.ascii.intra@tulli.fi>"; 	// t‰m‰ on tullin testiavain
+
+			if ($lahetys == "test") {
+				$recipient = "pgp-testkey Customs Finland <test.ascii.intra@tulli.fi>"; 	// t‰m‰ on tullin testiavain
+			}
 
 			$message = '';
 			$message = $lah.$ots.$nim.$sum;
@@ -634,11 +640,15 @@
 
 			if ($lahetys == "tuli" or $lahetys == "mole") {
 				// l‰hetet‰‰n meili tulliin
-				$to = 'ascii.intrastat@tulli.fi'; 			// t‰m‰ on tullin virallinen osoite
-				//$to = 'test.ascii.intrastat@tulli.fi'; 	// t‰m‰ on tullin testiosoite
-
+				$to = 'ascii.intrastat@tulli.fi';			// t‰m‰ on tullin virallinen osoite
 				mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
 				echo "<font class='message'>".t("Tiedot l‰hetettiin tulliin").".</font><br><br>";
+			}
+			elseif ($lahetys == "test") {
+				// l‰hetet‰‰n TESTI meili tulliin
+				$to = 'test.ascii.intrastat@tulli.fi';		// t‰m‰ on tullin testiosoite
+				mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
+				echo "<font class='message'>".t("Testitiedosto l‰hetettiin tullin testipalvelimelle").".</font><br><br>";
 			}
 			else {
 				echo "<font class='message'>".t("Tietoja EI l‰hetetty tulliin").".</font><br><br>";
@@ -662,7 +672,7 @@
 			$content .= "--$bound\n";
 
 			// katotaan l‰hetet‰‰nkˆ meili k‰ytt‰j‰lle
-			if (($lahetys == "mina" or $lahetys == "mole") and $kukarow["eposti"] != "") {
+			if (($lahetys == "mina" or $lahetys == "mole" or $lahetys == "test") and $kukarow["eposti"] != "") {
 				// j‰ l‰hetet‰‰n k‰ytt‰j‰lle
 				mail($kukarow["eposti"], "$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", $content, $header, "-f $yhtiorow[postittaja_email]");
 			}
@@ -712,14 +722,14 @@
 	$sel2[$tapa]     = "SELECTED";
 	$sel3[$lahetys]  = "SELECTED";
 	$sel4[$lisavar]  = "SELECTED";
-	
+
 	if($excel != "") {
 		$echecked = "checked";
 	}
 	else {
 		$echecked = "";
 	}
-	
+
 	echo "<br>
 
 	<form method='post' action='$PHP_SELF'>
@@ -759,6 +769,7 @@
 			<option value='mina' $sel3[mina]>".t("L‰het‰ aineisto vain minulle")."</option>
 			<option value='tuli' $sel3[tuli]>".t("L‰het‰ aineisto vain tulliin")."</option>
 			<option value='mole' $sel3[mole]>".t("L‰het‰ aineisto tulliin sek‰ minulle")."</option>
+			<option value='test' $sel3[test]>".t("L‰het‰ testiaineisto tullin testipalvelimelle")."</option>
 			</select>
 		</tr>
 		<tr>

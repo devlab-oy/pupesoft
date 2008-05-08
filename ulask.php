@@ -201,8 +201,8 @@ if ($tee == 'I') {
 			else {
 				$kap = date("d", mktime(0, 0, 0, $tpk, $tpp+$kar, $tpv));
 				$kak = date("m", mktime(0, 0, 0, $tpk, $tpp+$kar, $tpv));
-				$kav = date("Y", mktime(0, 0, 0, $tpk, $tpp+$kar, $tpv));				
-				$kar = 0;				
+				$kav = date("Y", mktime(0, 0, 0, $tpk, $tpp+$kar, $tpv));
+				$kar = 0;
 			}
 		}
 	}
@@ -247,8 +247,8 @@ if ($tee == 'I') {
 			}
 		}
 	}
-	
-	// tämä poistuu nyt, pitää pystyä syöttämään nollalasku. its the laaawwww! 
+
+	// tämä poistuu nyt, pitää pystyä syöttämään nollalasku. its the laaawwww!
 	/*if ($summa == 0) {
 		$errormsg .= "<font class='error'>".t("Laskulta puuttuu summa")."</font><br>";
 		$tee = 'E';
@@ -307,7 +307,7 @@ if ($tee == 'I') {
 			}
 		}
 	}
-	
+
 	if ((is_array($trow) and strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) or (!is_array($trow) and $tyyppi == strtoupper($yhtiorow['maa']))) {
 		$ohjeitapankille='';
 	}
@@ -505,7 +505,7 @@ if ($tee == 'P' or $tee == 'E') {
 						if (5 < dateTallaHet.getDate()) {
 							var msg = '".t("Oletko varma, että haluat päivätä laskun menneisyyteen")."?';
 							return confirm(msg);
-						}												
+						}
 					}
 					else if (vv == dateTallaHet.getFullYear()) {
 						if (kk < dateTallaHet.getMonth() && 5 < dateTallaHet.getDate()) {
@@ -553,11 +553,16 @@ if ($tee == 'P' or $tee == 'E') {
 		if ($osuoraveloitus != '') $osuoraveloitus = 'checked';
 		if ($ohyvaksynnanmuutos != '') $ohyvaksynnanmuutos = 'checked';
 
+		$fakta = "";
+		if (trim($trow["fakta"]) != "") {
+			$fakta = "<br><br><font class='message'>$trow[fakta]</font>";
+		}
+
 		echo "<table><tr><td valign='top'>";
 		echo "<table>";
 		echo "<tr><th colspan='2'>".t("Toimittaja")."</th></tr>";
 		echo "<tr><td colspan='2'>$trow[nimi] $trow[nimitark] ($trow[ytunnus])</td></tr>";
-		echo "<tr><td colspan='2'>$trow[osoite] $trow[osoitetark], $trow[maa]-$trow[postino] $trow[postitp], $trow[maa]</td></tr>";
+		echo "<tr><td colspan='2'>$trow[osoite] $trow[osoitetark], $trow[maa]-$trow[postino] $trow[postitp], $trow[maa] $fakta</td></tr>";
 		echo "<tr><td><form action='yllapito.php?toim=toimi&tunnus=$toimittajaid&lopetus=ulask.php////tee=$tee//toimittajaid=$toimittajaid//maara=$maara' method='post'>";
 		echo "<input type = 'submit' value = '".t("Muuta toimittajan tietoja")."'></form>";
 		echo "</td></tr></table>";
@@ -778,14 +783,14 @@ if ($tee == 'P' or $tee == 'E') {
 		<tr>
 			<td>".t("Kommentti")."</td><td><input type='text' name='komm' size='60' value='$komm'></td>
 		</tr>";
-		
+
 		if ((is_array($trow) and strtoupper($trow['maa']) != strtoupper($yhtiorow['maa'])) or (!is_array($trow) and $tyyppi != strtoupper($yhtiorow['maa']))) {
-		
+
 			echo "
 			<tr>
 				<td>".t("Ohjeita pankille")."</td><td><textarea name='ohjeitapankille' rows='2' cols='35'>$ohjeitapankille</textarea></td>
 			</tr>";
-		
+
 		}
 
 /*
@@ -1407,7 +1412,7 @@ if ($tee == 'I') {
 		else {
 		 	// Tämä on vain suoraveloitus
 			if ($tila == 'M') {
-				echo " ".t('ilman oletuspankkitiliä').".</font><br>";				
+				echo " ".t('ilman oletuspankkitiliä').".</font><br>";
 				$query = "UPDATE lasku set tila = 'Q' WHERE tunnus = '$tunnus'";
 				$xresult = mysql_query($query) or pupe_error($query);
 				echo "<font class='message'>".t('Lasku merkittiin odottamaan suoritusta')."</font><br>";

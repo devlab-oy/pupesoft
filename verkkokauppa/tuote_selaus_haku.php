@@ -530,7 +530,7 @@
 			$query    = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
 			$tuoteres = mysql_query($query);
 			$trow = mysql_fetch_array($tuoteres);
-			$hinnat = alehinta($laskurow, $trow, 1, '', '', '', "hinta,hintaperuste,aleperuste,aperuste");
+			$hinnat = alehinta($laskurow, $trow, 1, '', '', '', "hinta,hintaperuste,aleperuste,aperuste,ale");
 
 			if 	(($kukarow["naytetaan_tuotteet"] == "A" or $trow["hinnastoon"] == "V") and ($hinnat["hintaperuste"] < 2 or $hinnat["hintaperuste"] > 12) and ($hinnat["aleperuste"] < 5 or $hinnat["aleperuste"] > 8)) {
 				continue;
@@ -776,7 +776,7 @@
 			if($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www")) {
 				if($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
 					// haetaan tuotteen tiedot
-					$myyntihinta = number_format($hinnat["hinta"] * (1-($ale/100)), 2, ',', ' ')." {$laskurow["valkoodi"]}";
+					$myyntihinta = number_format($hinnat["hinta"] * (1-($hinnat["ale"]/100)), 2, ',', ' ')." {$laskurow["valkoodi"]}";
 				}
 				elseif ($kukarow["extranet"] != "") {
 

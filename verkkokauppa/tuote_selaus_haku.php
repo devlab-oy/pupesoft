@@ -1,6 +1,6 @@
 <?php
-		
-	if (strpos($_SERVER['SCRIPT_NAME'], "tuote_selaus_haku.php")  !== FALSE or 
+
+	if (strpos($_SERVER['SCRIPT_NAME'], "tuote_selaus_haku.php")  !== FALSE or
 		strpos($_SERVER['SCRIPT_NAME'], "verkkokauppa.php")  !== FALSE) {
 		if (file_exists("../inc/parametrit.inc")) {
 			require ("../inc/parametrit.inc");
@@ -22,11 +22,11 @@
 	$query    = "select * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 	$result   = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($result);
-	
+
 	//	Hoidetaan ensin asymmentrinen tiedonsiirto!
 	// Tarkistetaan tilausrivi
 	if ($tee == 'TI' and ($kukarow["kesken"] != 0 or is_numeric($ostoskori))) {
-			
+
 		if (is_numeric($ostoskori)) {
 			$kori = check_ostoskori($ostoskori,$kukarow["oletus_asiakas"]);
 			$kukarow["kesken"] = $kori["tunnus"];
@@ -82,19 +82,19 @@
 						$korvaavakielto	 = "";
 						$varataan_saldoa = "";
 						$myy_sarjatunnus = $tilsarjatunnus[$yht_i];
-						
+
 						if ($tilpaikka[$yht_i] != '') {
 							$paikka	= $tilpaikka[$yht_i];
 						}
 						else {
 							$paikka	= "";
 						}
-						
+
 						//	Runkataan puute_jt_oletus
 						if($verkkokauppa != "" and $yhtiorow["puute_jt_oletus"] == "") {
 							$yhtiorow["puute_jt_oletus"] = "J";
 						}
-						
+
 						// jos meill‰ on ostoskori muuttujassa numero, niin halutaan lis‰t‰ tuotteita siihen ostoskoriin
 						if (is_numeric($ostoskori)) {
 							lisaa_ostoskoriin ($ostoskori, $laskurow["liitostunnus"], $tuoteno, $kpl);
@@ -142,9 +142,9 @@
 
 	if ($verkkokauppa == "") {
 		echo "<font class='head'>".t("Etsi ja selaa tuotteita").":</font><hr>";
-		
-		echo "<div id='returnMsg'></div><br";	
-			
+
+		echo "<div id='returnMsg'></div><br";
+
 		if (is_numeric($ostoskori)) {
 			echo "<table><tr><td class='back'>";
 			echo "	<form method='post' action='$kori_polku'>
@@ -214,7 +214,7 @@
 				return $val;
 			}
 		}
-		
+
 		echo tilaukset_linkki();
 	}
 
@@ -270,12 +270,12 @@
 			$ulisa .= "&haku[".$i."]=".$haku[$i];
 		}
 	}
-	
+
 	//	Verkkokaupassa selataan vain verkkokauppatuotteita
 	if($verkkokauppa != "") {
 		$lisa .= " and hinnastoon IN ('W','V') and tuotemerkki != ''";
 	}
-	
+
 	if (strlen($ojarj) > 0) {
 		$ojarj = urldecode($ojarj);
 		$jarjestys = $ojarj;
@@ -289,7 +289,7 @@
 		$poislisa  = " and status != 'P' ";
 		$poischeck = "";
 	}
-	
+
 	if ($poistuvat != "" or (! isset($submit) and $yhtiorow['poistuvat_tuotteet'] == 'X')) {
 		$kohtapoislisa  = "";
 		$kohtapoischeck = "CHECKED";
@@ -325,7 +325,7 @@
 
 	//$yhtiot = "yhtio in (".$prow["yhtiot"].")";
 	//$konsyhtiot = explode(",", str_replace("'","", $prow["yhtiot"]));
-	
+
 	if($verkkokauppa == "") {
 		echo "<table><tr>
 				<form action = '$PHP_SELF?toim_kutsu=$toim_kutsu' method = 'post'>";
@@ -446,7 +446,7 @@
 
 
 		echo "<td class='back' valign='bottom' nowrap><input type='Submit' name='submit' value = '".t("Etsi")."'></td></form></tr>";
-		echo "</div><br>";		
+		echo "</div><br>";
 	}
 
 	// Ei listata mit‰‰n jos k‰ytt‰j‰ ei ole tehnyt mit‰‰n rajauksia
@@ -494,8 +494,8 @@
 				ORDER BY $jarjestys";
 	$result = mysql_query($query) or pupe_error($query);
 
-	if (mysql_num_rows($result) > 0) {		
-		
+	if (mysql_num_rows($result) > 0) {
+
 		//Sarjanumeroiden lis‰tietoja varten
 		if (file_exists("sarjanumeron_lisatiedot_popup.inc")) {
 			require("sarjanumeron_lisatiedot_popup.inc");
@@ -504,7 +504,7 @@
 		if (function_exists("js_popup")) {
 			echo js_popup(50);
 		}
-				
+
 		echo "<form id = 'lisaa' action=\"javascript:ajaxPost('lisaa', 'tuote_selaus_haku.php?', 'selain', false, true);\" name='lisaa' method='post'>";
 		echo "<input type='hidden' name='haku[0]' value = '$haku[0]'>";
 		echo "<input type='hidden' name='haku[1]' value = '$haku[1]'>";
@@ -512,55 +512,55 @@
 		echo "<input type='hidden' name='haku[3]' value = '$haku[3]'>";
 		echo "<input type='hidden' name='haku[4]' value = '$haku[4]'>";
 		echo "<input type='hidden' name='haku[5]' value = '$haku[5]'>";
-		echo "<input type='hidden' name='ojarj'   value = '".urlencode($ojarj)."'>";		
+		echo "<input type='hidden' name='ojarj'   value = '".urlencode($ojarj)."'>";
 		echo "<input type='hidden' name='tee' value = 'TI'>";
 		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 		echo "<table>";
 
-		
+
 		$divit = "";
 		$valiotsikko = "OK";
 		$edtuoteno = $edtry = $edosasto = $edtuotemerkki = "DUMMYDADA";
 		$yht_i = 0; // t‰‰ on mei‰n indeksi
-		
+
 		while ($row = mysql_fetch_array($result)) {
-			
+
 			//	Onko t‰m‰ sallittu rivi verkkokaupassa?
 			$query    = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
 			$tuoteres = mysql_query($query);
 			$trow = mysql_fetch_array($tuoteres);
 			$hinnat = alehinta($laskurow, $trow, 1, '', '', '', "hinta,hintaperuste,aleperuste,aperuste");
 
-			if 	(($kukarow["naytetaan_tuotteet"] == "A" or $trow["hinnastoon"] == "V") and ($hinnat["hintaperuste"]<2 or $hinnat["hintaperuste"] > 12)) {
+			if 	(($kukarow["naytetaan_tuotteet"] == "A" or $trow["hinnastoon"] == "V") and ($hinnat["hintaperuste"] < 2 or $hinnat["hintaperuste"] > 12) and ($hinnat["aleperuste"] < 5 or $hinnat["aleperuste"] > 8)) {
 				continue;
 			}
-			
+
 			if($edtuoteno != $row["sorttauskentta"]) {
 				if($verkkokauppa != "") {
-					
+
 					//	Werkkokauppa aloitetaan aina ryhm‰ tai osasto kent‰ll‰ joka on myˆs otsikko!
 					if($edtuoteno == "DUMMYDADA") {
 						$o["laji"] 	= "try";
 						$o["class"] = "head";
-						$o["style"]	= "style='text-align: center'";						
+						$o["style"]	= "style='text-align: left'";
 						$otsikot[] = $o;
 					}
-										
+
 					//	Merkki on tyhj‰, se vaatii myˆs v‰liotsikon
 					if(strtolower($edtuotemerkki) != strtolower($row["tuotemerkki"])) {
 						$o["laji"] 	= "merkki";
 						$o["class"] = "message";
-						$o["style"]	= "style='text-align: left'";						
-						$otsikot[] = $o;	
-					
-						$valiotsikko = "OK";						
+						$o["style"]	= "style='text-align: left'";
+						$otsikot[] = $o;
+
+						$valiotsikko = "OK";
 					}
 				}
 				else {
 					$class="message";
 				}
-				
+
 				if(count($otsikot) > 0) {
 					foreach($otsikot as $o) {
 						if($o["laji"] == "try") {
@@ -574,7 +574,7 @@
 								echo "<tr><td class = 'back' colspan = '7' $o[style]><font class='$o[class]'>".t("Lajittelemattomat")."</font></td></tr>";
 							}
 							else {
-								echo "<tr><td class = 'back' colspan = '7' $o[style]><font class='$o[class]'>{$tryrow["nimi"]}</font></td></tr>";	
+								echo "<tr><td class = 'back' colspan = '7' $o[style]><font class='$o[class]'>{$tryrow["nimi"]}</font></td></tr>";
 							}
 						}
 						elseif($o["laji"] == "merkki") {
@@ -591,32 +591,32 @@
 										WHERE yhtio='{$kukarow["yhtio"]}' and laji = 'OSASTO' and selite = '{$row["osasto"]}' LIMIT 1";
 							$ores = mysql_query($query) or pupe_error($query);
 							$orow = mysql_fetch_array($ores);
-							
+
 							if($orow["nimi"] == "") {
 								echo "<tr><td class = 'back' colspan = '7' $o[style]><br><br><font class='$o[class]'>".t("Muut")."</font></td></tr>";
 							}
 							else {
 								echo "<tr><td class = 'back' colspan = '7' $o[style]><br><br><font class='$o[class]'>{$orow["nimi"]}</font></td></tr>";
 							}
-						}					
-					}					
+						}
+					}
 				}
-				
+
 				if($valiotsikko == "OK") {
 
 					echo "<tr>";
-					echo "<th style='width: 85px'>".t("Tuoteno")."</th>";
+					echo "<th>".t("Tuoteno")."</th>";
 					echo "<th>".t("Nimitys")."</th>";
 
 					if ($lisatiedot != "") {
 						echo "<th>".t("Toim Tuoteno")."</th>";
 					}
-					
+
 					if($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www")) {
 						echo "<th style='text-align: right'>".t("Hinta")."</th>";
 						if($verkkokauppa == "") {
-							echo "<th>".t("Aleryhm‰")."</th>";				
-						}					
+							echo "<th>".t("Aleryhm‰")."</th>";
+						}
 					}
 
 					if ($verkkokauppa == "" and $lisatiedot != "" and $kukarow["extranet"] == "") {
@@ -634,11 +634,11 @@
 				}
 
 				unset($otsikot);
-				$edosasto 	= $row["osasto"];				
+				$edosasto 	= $row["osasto"];
 				$edtry 			= $row["try"];
 				$edtuotemerkki 	= $row["tuotemerkki"];
 				$valiotsikko	= "";
-				
+
 			}
 
 			echo "<tr class='aktiivi'>";
@@ -669,14 +669,14 @@
 							and (tilausrivi_myynti.tunnus is null)
 							and tilausrivi_osto.laskutettuaika != '0000-00-00'";
 				$sarjares = mysql_query($query) or pupe_error($query);
-				
+
 				// Sarjanumerollisille tuotteille haetaan nimitys ostopuolen tilausrivilt‰
 				if ($row["sarjanumeroseuranta"] == "S") {
 					$nimitys = "";
-				
+
 					if(mysql_num_rows($sarjares) > 0) {
 						$nimitys .= "<table width='100%' valign='top'>";
-						
+
 						$edsarjanimitys = "DUMMYDADA";
 						while ($sarjarow = mysql_fetch_array($sarjares)) {
 							if($edsarjanimitys != $sarjarow["nimitys"]) {
@@ -685,41 +685,41 @@
 								}
 								else {
 									$nimitys .= "<tr><td valign='top'>$row[nimitys]</td></tr>";
-								}								
+								}
 							}
-							
+
 							$edsarjanimitys = $sarjarow["nimitys"];
 						}
-					
+
 						$nimitys .= "</table>";
-					
+
 						$row["nimitys"] = $nimitys;
 					}
-				}				
+				}
 			}
-			
+
 			if(!isset($originaalit)) {
 				$orginaaalit = table_exists("tuotteen_orginaalit");
 			}
-			
+
 			$linkkilisa = "";
-			
+
 			//	Liitet‰‰n originaalitietoja
 			if($orginaaalit === true) {
 				$id = md5(uniqid());
-				
-				$query = "	SELECT * 
+
+				$query = "	SELECT *
 							FROM tuotteen_orginaalit
 							WHERE yhtio = '{$kukarow["yhtio"]}' and tuoteno = '{$row["tuoteno"]}'";
 				$orgres = mysql_query($query) or pupe_error($query);
-				
+
 				if(mysql_num_rows($orgres)>0) {
 					$linkkilisa = "<div id='$id' class='popup' style=\"width: 300px\">
 					<table width='300px' align='center'>
 					<caption><font class='head'>Tuotteen originaalit</font></caption>
 					<tr>
 						<th>".t("Tuotenumero")."</th>
-						<th>".t("Merkki")."</th>						
+						<th>".t("Merkki")."</th>
 						<th>".t("Hinta")."</th>
 					</tr>";
 
@@ -728,21 +728,21 @@
 						$linkkilisa .= "<tr>
 								<td>{$orgrow["orig_tuoteno"]}</td>
 								<td>{$orgrow["merkki"]}</td>
-								<td>{$orgrow["orig_hinta"]}</td>								
+								<td>{$orgrow["orig_hinta"]}</td>
 							</tr>";
 					}
-					
+
 					$linkkilisa .= "</div></div>";
-					
+
 					if($kukarow["extranet"] != "") {
 						$linkkilisa .= "&nbsp;&nbsp;<a src='#' onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\"><img src='pics/lullacons/info.png' height='13'></a>";
 					}
 					else {
 						$linkkilisa .= "&nbsp;&nbsp;<a src='#' onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\"><img src='../pics/lullacons/info.png' height='13'></a>";
 					}
-				}				
+				}
 			}
-			
+
 			$tuottee_lisatiedot = "href='javascript:sndReq(\"{$orow["osasto"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$orow["osasto"]}_P\", true)'";
 
 			if($verkkokauppa == "") {
@@ -756,26 +756,26 @@
 
 				if ($lisatiedot != "") {
 					echo "<td valign='top' class='$vari'>$row[toim_tuoteno]</td>";
-				}				
+				}
 			}
 			else {
 				if($row["toim_tuoteno"] != "" and $kukarow["kuka"] != "www") {
 					$toimlisa = "<br><a id='$row[tuoteno]_P' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P\")'>{$row["toim_tuoteno"]}</a>";
 				}
 				else $toimlisa = "";
-				
-				echo "<td valign='top' class='$vari'>
+
+				echo "<td valign='top' class='$vari' id='tno'>
 				<a id='$row[tuoteno]_P2' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P2\")'>{$row["tuoteno"]}</a>$toimlisa
 				</td>";
-				
-				echo "<td valign='top' class='$vari'><a id='$row[tuoteno]_P3' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P3\")'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</a></td>";				
+
+				echo "<td valign='top' class='$vari'><a id='$row[tuoteno]_P3' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P3\")'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</a></td>";
 			}
-			
+
 			//	Extranetk‰ytt‰jille voidaan n‰ytt‰‰ myˆs se heid‰n asiakashinta..
 			// jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa
 			if($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www")) {
 				if($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
-					// haetaan tuotteen tiedot					
+					// haetaan tuotteen tiedot
 					$myyntihinta = number_format($hinnat["hinta"] * (1-($ale/100)), 2, ',', ' ')." {$laskurow["valkoodi"]}";
 				}
 				elseif ($kukarow["extranet"] != "") {
@@ -812,7 +812,7 @@
 						}
 					}
 					else {
-						$myyntihinta = number_format($row["myyntihinta"], 2, ',', ' '). " $yhtiorow[valkoodi]";	
+						$myyntihinta = number_format($row["myyntihinta"], 2, ',', ' '). " $yhtiorow[valkoodi]";
 					}
 				}
 				else {
@@ -844,12 +844,12 @@
 					}
 				}
 
-				echo "<td valign='top' class='$vari' align='right'>$myyntihinta</td>";				
+				echo "<td valign='top' class='$vari' align='right'>$myyntihinta</td>";
 			}
 
 			if($verkkokauppa == "") {
 				echo "<td valign='top' class='$vari'>$row[aleryhma]</td>";
-			}			
+			}
 
 			if ($verkkokauppa == "" and $lisatiedot != "" and $kukarow["extranet"] == "") {
 				echo "<td valign='top' class='$vari'>$row[nettohinta]</td>";
@@ -857,9 +857,9 @@
 			}
 
 			$edtuoteno = $row["sorttauskentta"];
-			
+
 			//	Kirjautumatta ei sallita saldocheckej‰!
-			//echo $kukarow["kuka"]." |†".$verkkokauppa;		
+			//echo $kukarow["kuka"]." |†".$verkkokauppa;
 			if($verkkokauppa != "" and $kukarow["kuka"] != "www") {
 				if($verkkokauppa != "") {
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, $kukarow["yhtio"]);
@@ -870,10 +870,10 @@
 					else {
 						$color = "red";
 					}
-					
+
 					$toimlisa = "";
-					
-					if((int)$myytavissa <= 0) {
+
+					//if((int)$myytavissa <= 0) {
 						//	Arvotaan milloin kamaa on tulossa.. copypaste tuote.php
 						$query = "	SELECT lasku.nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl, tilausrivi.yksikko,
 									date_format(if(tilausrivi.tyyppi!='O' and tilausrivi.tyyppi!='W', tilausrivi.kerayspvm, tilausrivi.toimaika), '%d.%m.%Y') pvm,
@@ -891,26 +891,31 @@
 									ORDER BY pvm
 									LIMIT 1";
 						$jtresult = mysql_query($query) or pupe_error($query);
-						
+
 						if(mysql_num_rows($jtresult)>0) {
 							$jtrow = mysql_fetch_array($jtresult);
-							$toimlisa = "<br><font class='info'>$jtrow[kpl]$jtrow[yksikko] $jtrow[pvm]</font>";
+							$toimlisa = "<font class='info'>$jtrow[kpl]$jtrow[yksikko] $jtrow[pvm]</font>";
 						}
-						else {
-							
+						elseif((int) $myytavissa <= 0) {
+
 							$query = "	SELECT toimitusaika
 										FROM tuotteen_toimittajat
 										WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$row[tuoteno]' and toimitusaika>0
 										LIMIT 1";
 							$jtresult = mysql_query($query) or pupe_error($query);
-							
+
 							if(mysql_num_rows($jtresult)>0) {
 								$jtrow = mysql_fetch_array($jtresult);
-								$toimlisa = "<br><font class='info'>".t("toimitusaika: %s p‰iv‰‰", $kieli, $jtrow["toimitusaika"])."</font>";
+								$toimlisa = "<font class='info'>".t("ta: %s pv.", $kieli, $jtrow["toimitusaika"])."</font>";
 							}
 						}
+					//}
+					if((int)$myytavissa > 0) {
+					echo "<td valign='top' class='$color' align = 'right'>". (int) $myytavissa."<br>$toimlisa</td>";
 					}
-					echo "<td valign='top' class='$color' align = 'right'>". (int) $myytavissa."$toimlisa</td>";
+					else {
+						echo "<td valign='top' class='$color' align ='right'>$toimlisa</td>";
+					}
 				}
 				elseif ($row['ei_saldoa'] != '' and $kukarow["extranet"] == "") {
 						echo "<td valign='top' class='green'>".t("Saldoton")."</td>";
@@ -1009,7 +1014,7 @@
 
 					// K‰yd‰‰n l‰pi tuotepaikat
 					if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F") {
-						$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
+						$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 									tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 									sarjanumeroseuranta.sarjanumero era,
 									concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
@@ -1020,7 +1025,7 @@
 									$sallitut_maat_lisa
 									and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 									and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-									JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio 
+									JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
 									and sarjanumeroseuranta.tuoteno = tuote.tuoteno
 									and sarjanumeroseuranta.hyllyalue = tuotepaikat.hyllyalue
 									and sarjanumeroseuranta.hyllynro  = tuotepaikat.hyllynro
@@ -1031,10 +1036,10 @@
 									WHERE tuote.$yhtiot
 									and tuote.tuoteno = '$row[tuoteno]'
 									GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
-									ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";		
+									ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 					}
 					else {
-						$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
+						$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 									tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 									concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
 									varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
@@ -1089,7 +1094,7 @@
 						echo "</div></td>";
 					}
 					echo "</td>";
-				}				
+				}
 			}
 
 			if (($row["sarjanumeroseuranta"] == "" or $row["sarjanumeroseuranta"] == "E"  or $row["sarjanumeroseuranta"] == "F" or $kukarow["extranet"] != "") and ($kukarow["kesken"] != 0 or is_numeric($ostoskori))) {
@@ -1102,7 +1107,7 @@
 			}
 
 			echo "</tr><tr><td colspan='6' class='back'><div id='$row[tuoteno]_T'></div></td></tr>";
-			
+
 		}
 		echo "</table>";
 		echo "</form>";

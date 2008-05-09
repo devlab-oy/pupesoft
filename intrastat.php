@@ -80,27 +80,39 @@
 		$kkl = date("m",mktime(0, 0, 0, $kk+1, 0, $vv));
 		$ppl = date("d",mktime(0, 0, 0, $kk+1, 0, $vv));
 
+		$query = "	SELECT distinct koodi, nimi
+					FROM maat
+					where nimi != '' and eu != ''
+					ORDER BY koodi";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		$eumaat = "";
+		while ($row = mysql_fetch_array($vresult)) {
+			$eumaat .= "'$row[koodi]',";
+		}
+		$eumaat = substr($eumaat, 0, -1);
+
 		//tuonti vai vienti
 		if ($tapa == "tuonti") {
 			$where1 = " and (lasku.vienti = 'F' or lasku.ultilno = '-2') ";
 			$where2 = " and lasku.vienti != 'K' and lasku.ultilno = '-2' ";
 			$where3 = " and lasku.ultilno = '-2' ";
-			$maalisa = " and lasku.maa_maara = '$kayttajan_valinta_maa' and lasku.maa_lahetys != '$kayttajan_valinta_maa'";
+			$maalisa = " and lasku.maa_maara = '$kayttajan_valinta_maa' and lasku.maa_lahetys in ($eumaat) and lasku.maa_lahetys != '$kayttajan_valinta_maa'";
 		}
 		else {
 			$tapa = "vienti";
 			$where1 = " and lasku.ultilno = '-1' ";
 			$where2 = " and lasku.vienti != 'K' and (lasku.vienti = 'E' or lasku.ultilno = '-1') ";
 			$where3 = " and lasku.ultilno = '-1' ";
-			$maalisa = " and lasku.maa_maara != '$kayttajan_valinta_maa' and lasku.maa_lahetys = '$kayttajan_valinta_maa'";
+			$maalisa = " and lasku.maa_maara in ($eumaat) and lasku.maa_maara != '$kayttajan_valinta_maa' and lasku.maa_lahetys = '$kayttajan_valinta_maa'";
 		}
 
 		if ($kayttajan_valinta_maa != '') {
-			$where1 .= $maalisa;
-			$where2 .= $maalisa;
-			$where3 .= $maalisa;
+			$where1 = $maalisa;
+			$where2 = $maalisa;
+			$where3 = $maalisa;
 		}
-		
+
 		if ($lisavar == "S") {
 			$lisavarlisa = "  and (tilausrivi.perheid2=0 or tilausrivi.perheid2=tilausrivi.tunnus) ";
 		}
@@ -339,8 +351,10 @@
 
 		while ($row = mysql_fetch_array($result)) {
 
-			// tehd‰‰n tarkistukset
-			require ("inc/intrastat_tarkistukset.inc");
+			// tehd‰‰n tarkistukset	vai jos EI OLE k‰ytt‰j‰n valitsemaa maata
+			if ($kayttajan_valinta_maa == "") {
+				require ("inc/intrastat_tarkistukset.inc");
+			}
 
 			if ($row["perheid2set"] != "0" and $lisavar == "S") {
 				$query  = "	SELECT ";
@@ -583,7 +597,7 @@
 				$worksheet->write($excelrivi, 13, $totkpl, $format_bold);
 			}
 		}
-		
+
 		// ei virheit‰ .. ja halutaan l‰hett‰‰ jotain meilej‰
 		if ($virhe == 0 and $lahetys != "nope" and $kayttajan_valinta_maa == '') {
 
@@ -694,7 +708,11 @@
 			}
 			echo "<font class='error'>".t("Aineistoa EI l‰hetetty minnek‰‰n").".</font><br><br>";
 		}
-		
+
+		if ($kayttajan_valinta_maa != "") {
+			echo "<font class='error'>".t("Poikkeava ilmoitusmaa valittu, mit‰‰n oikeellisuustarkistuksia ei tehty")."!</font><br><br>";
+		}
+
 		// echotaan oikea taulukko ruudulle
 		if ($outputti == "tilasto") {
 			echo "$tilastoarvot";
@@ -755,33 +773,33 @@
 
 	$query = "SELECT tunnus from yhtion_toimipaikat where yhtio = '$kukarow[yhtio]' and vat_numero != ''";
 	$vresult = mysql_query($query) or pupe_error($query);
-	
+
 	if (mysql_num_rows($vresult) > 0) {
 		echo "<tr>
 				<th>".t("Valitse poikkeava ilmoitusmaa")."</th>
 				<td>
 					<select name='kayttajan_valinta_maa'>";
 					echo "<option value='' $sel>".t("Ei valintaa")."</option>";
-				
+
 					$query = "	SELECT distinct koodi, nimi
 								FROM maat
 								where nimi != '' and eu != '' and koodi != '$yhtiorow[maa]'
 								ORDER BY koodi";
 					$vresult = mysql_query($query) or pupe_error($query);
-				
+
 					while ($row = mysql_fetch_array($vresult)) {
 						$sel = '';
 						if ($row[0] == $kayttajan_valinta_maa) {
 							$sel = 'selected';
 						}
 						echo "<option value='$row[0]' $sel>$row[1]</option>";
-					}				
-				
+					}
+
 		echo "		</select>
 				</td>
 			</tr>";
 	}
-	
+
 	echo "<tr>
 			<th>".t("Syˆt‰ kausi (kk-vvvv)")."</th>
 			<td>

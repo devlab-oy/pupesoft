@@ -92,25 +92,20 @@
 		}
 		$eumaat = substr($eumaat, 0, -1);
 
-		//tuonti vai vienti
+		if ($kayttajan_valinta_maa != "") {
+			$maa = $kayttajan_valinta_maa;
+		}
+		else {
+			$maa = $yhtiorow["maa"];
+		}
+
+		// tuonti vai vienti
 		if ($tapa == "tuonti") {
-			$where1 = " and (lasku.vienti = 'F' or lasku.ultilno = '-2') ";
-			$where2 = " and lasku.vienti != 'K' and lasku.ultilno = '-2' ";
-			$where3 = " and lasku.ultilno = '-2' ";
-			$maalisa = " and lasku.maa_maara = '$kayttajan_valinta_maa' and lasku.maa_lahetys in ($eumaat) and lasku.maa_lahetys != '$kayttajan_valinta_maa'";
+			$maalisa = "maamaara = '$maa' and maalahetys in ($eumaat) and maalahetys != '$maa'";
 		}
 		else {
 			$tapa = "vienti";
-			$where1 = " and lasku.ultilno = '-1' ";
-			$where2 = " and lasku.vienti != 'K' and (lasku.vienti = 'E' or lasku.ultilno = '-1') ";
-			$where3 = " and lasku.ultilno = '-1' ";
-			$maalisa = " and lasku.maa_maara in ($eumaat) and lasku.maa_maara != '$kayttajan_valinta_maa' and lasku.maa_lahetys = '$kayttajan_valinta_maa'";
-		}
-
-		if ($kayttajan_valinta_maa != '') {
-			$where1 = $maalisa;
-			$where2 = $maalisa;
-			$where3 = $maalisa;
+			$maalisa = "maalahetys = '$maa' and maamaara in ($eumaat) and maamaara != '$maa'";
 		}
 
 		if ($lisavar == "S") {
@@ -132,9 +127,9 @@
 		// t‰ss‰ tulee sitten nimiketietueet unionilla
 		$query = "	(SELECT
 					tuote.tullinimike1,
-					lasku.maa_lahetys,
+					if(lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+					if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 					(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
-					lasku.maa_maara,
 					lasku.laskunro,
 					tuote.tuoteno,
 					lasku.kauppatapahtuman_luonne,
@@ -151,23 +146,24 @@
 					JOIN tilausrivi use index (uusiotunnus_index) ON tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
 					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
 					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
+					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
 					WHERE lasku.kohdistettu = 'X'
 					and lasku.tila = 'K'
 					and lasku.vanhatunnus = 0
-					$where1
 					and lasku.kauppatapahtuman_luonne != '999'
 					and lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.mapvm >= '$vva-$kka-$ppa'
 					and lasku.mapvm <= '$vvl-$kkl-$ppl'
-					GROUP BY $vainnimikegroup tuote.tullinimike1, lasku.maa_lahetys, alkuperamaa, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne)
+					GROUP BY $vainnimikegroup tuote.tullinimike1, maalahetys, alkuperamaa, maamaara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne
+					HAVING $maalisa)
 
 					UNION
 
 					(SELECT
 					tuote.tullinimike1,
-					lasku.maa_lahetys,
+					if(lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+					if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 					(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
-					lasku.maa_maara,
 					lasku.laskunro,
 					tuote.tuoteno,
 					lasku.kauppatapahtuman_luonne,
@@ -184,22 +180,23 @@
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
 					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
 					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
+					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
 					WHERE lasku.tila = 'L'
 					and lasku.alatila = 'X'
-					$where2
 					and lasku.kauppatapahtuman_luonne != '999'
 					and lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tapvm >= '$vva-$kka-$ppa'
 					and lasku.tapvm <= '$vvl-$kkl-$ppl'
-					GROUP BY $vainnimikegroup tuote.tullinimike1, lasku.maa_lahetys, alkuperamaa, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne)
+					GROUP BY $vainnimikegroup tuote.tullinimike1, maalahetys, alkuperamaa, maamaara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne
+					HAVING $maalisa)
 
 					UNION
 
 					(SELECT
 					tuote.tullinimike1,
-					lasku.maa_lahetys,
+					if(lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+					if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 					(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
-					lasku.maa_maara,
 					lasku.tunnus laskunro,
 					tuote.tuoteno,
 					lasku.kauppatapahtuman_luonne,
@@ -216,16 +213,17 @@
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
 					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
 					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
+					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
 					WHERE lasku.tila = 'G'
 					and lasku.alatila = 'V'
-					$where3
 					and lasku.kauppatapahtuman_luonne != '999'
 					and lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tapvm >= '$vva-$kka-$ppa'
 					and lasku.tapvm <= '$vvl-$kkl-$ppl'
-					GROUP BY $vainnimikegroup tuote.tullinimike1, lasku.maa_lahetys, alkuperamaa, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne)
+					GROUP BY $vainnimikegroup tuote.tullinimike1, maalahetys, alkuperamaa, maamaara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne
+					HAVING $maalisa)
 
-					ORDER BY laskunro, tuoteno ";
+					ORDER BY tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$nim     = "";
@@ -400,13 +398,13 @@
 
 			if ($tapa == "tuonti") {
 				$nim .= sprintf ('%-2.2s', 	$row["alkuperamaa"]);																				//alkuper‰maa
-				$nim .= sprintf ('%-2.2s', 	$row["maa_lahetys"]);																				//l‰hetysmaa
+				$nim .= sprintf ('%-2.2s', 	$row["maalahetys"]);																				//l‰hetysmaa
 				$nim .= sprintf ('%-2.2s', 	"");
 			}
 			else {
 				$nim .= sprintf ('%-2.2s', 	"");
 				$nim .= sprintf ('%-2.2s', 	"");
-				$nim .= sprintf ('%-2.2s', 	$row["maa_maara"]);																					//m‰‰r‰maa
+				$nim .= sprintf ('%-2.2s', 	$row["maamaara"]);																					//m‰‰r‰maa
 			}
 
 			$nim .= sprintf ('%-1.1s', 		$row["kuljetusmuoto"]);																				//kuljetusmuoto
@@ -437,13 +435,13 @@
 
 				if ($tapa == "tuonti") {
 					$tilastoarvot .= "<td>$row[alkuperamaa]</td>";																					//alkuper‰maa
-					$tilastoarvot .= "<td>$row[maa_lahetys]</td>";																					//l‰hetysmaa
+					$tilastoarvot .= "<td>$row[maalahetys]</td>";																					//l‰hetysmaa
 					$tilastoarvot .= "<td></td>";
 				}
 				else {
 					$tilastoarvot .= "<td></td>";
 					$tilastoarvot .= "<td></td>";
-					$tilastoarvot .= "<td>$row[maa_maara]</td>";																					//m‰‰r‰maa
+					$tilastoarvot .= "<td>$row[maamaara]</td>";																					//m‰‰r‰maa
 				}
 
 				$tilastoarvot .= "<td>$row[kuljetusmuoto]</td>";																					//kuljetusmuoto
@@ -469,10 +467,10 @@
 
 					if ($tapa == "tuonti") {
 						$worksheet->write($excelrivi, 3, $row["alkuperamaa"]);
-						$worksheet->write($excelrivi, 4, $row["maa_lahetys"]);
+						$worksheet->write($excelrivi, 4, $row["maalahetys"]);
 					}
 					else {
-						$worksheet->write($excelrivi, 5, $row["maa_maara"]);
+						$worksheet->write($excelrivi, 5, $row["maamaara"]);
 
 					}
 
@@ -506,8 +504,8 @@
 	 			$ulos .= "<td valign='top'><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&kayttajan_valinta_maa=$kayttajan_valinta_maa&vaintullinimike=$row[tullinimike1]'>$row[tullinimike1]</></td>";	//Tullinimike CN
 				$ulos .= "<td valign='top'>".$row["kauppatapahtuman_luonne"]."</td>";
 				$ulos .= "<td valign='top'>".$row["alkuperamaa"]."</td>";
-				$ulos .= "<td valign='top'>".$row["maa_lahetys"]."</td>";
-				$ulos .= "<td valign='top'>".$row["maa_maara"]."</td>";
+				$ulos .= "<td valign='top'>".$row["maalahetys"]."</td>";
+				$ulos .= "<td valign='top'>".$row["maamaara"]."</td>";
 				$ulos .= "<td valign='top'>".$row["kuljetusmuoto"]."</td>";
 				$ulos .= "<td valign='top' align='right'>".$row["rivihinta"]."</td>";
 				$ulos .= "<td valign='top' align='right'>".$row["paino"]."</td>";
@@ -533,8 +531,8 @@
 					$worksheet->write($excelrivi, 4, $row["tullinimike1"]);
 					$worksheet->write($excelrivi, 5, $row["kauppatapahtuman_luonne"]);
 					$worksheet->write($excelrivi, 6, $row["alkuperamaa"]);
-					$worksheet->write($excelrivi, 7, $row["maa_lahetys"]);
-					$worksheet->write($excelrivi, 8, $row["maa_maara"]);
+					$worksheet->write($excelrivi, 7, $row["maalahetys"]);
+					$worksheet->write($excelrivi, 8, $row["maamaara"]);
 					$worksheet->write($excelrivi, 9, $row["kuljetusmuoto"]);
 					$worksheet->write($excelrivi, 10, $row["rivihinta"]);
 					$worksheet->write($excelrivi, 11, $row["paino"]);

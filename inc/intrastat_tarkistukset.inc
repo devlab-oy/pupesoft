@@ -63,7 +63,13 @@ while ($intrtuorow = mysql_fetch_array($intrtuores)) {
 }
 
 // käydään läpi kaikki laskut
-$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($row[kaikkitunnukset])";
+$query = "	SELECT lasku.*,
+			if(lasku.maa_lahetys = '', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+			if(lasku.maa_maara = '', lasku.toim_maa, lasku.maa_maara) maamaara
+ 			FROM lasku
+			LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
+			WHERE lasku.yhtio = '$kukarow[yhtio]'
+			and lasku.tunnus in ($row[kaikkitunnukset])";
 $intrlasres = mysql_query($query) or pupe_error($query);
 
 while ($intrlasrow = mysql_fetch_array($intrlasres)) {
@@ -100,18 +106,18 @@ while ($intrlasrow = mysql_fetch_array($intrlasres)) {
 	// tuontispecific tarkistuksia
 	if ($tapa == 'tuonti' or $tapa == 'tuontivienti') {
 
-		if ($intrlasrow["maa_lahetys"] == '') {
+		if ($intrlasrow["maalahetys"] == '') {
 			$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa puuttuu")."!<br>";
 			$virhe++;
 		}
-		elseif ($intrlasrow["maa_lahetys"] == $yhtiorow["maa"]) {
+		elseif ($intrlasrow["maalahetys"] == $yhtiorow["maa"]) {
 			$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa ei voi olla sama kuin yhtiön kotimaa")."!<br>";
 			$virhe++;
 		}
 		else {
 			$query = "	SELECT distinct koodi, eu
 						FROM maat
-						WHERE koodi='$intrlasrow[maa_lahetys]'";
+						WHERE koodi='$intrlasrow[maalahetys]'";
 			$maaresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($maaresult) == 0) {
@@ -132,18 +138,18 @@ while ($intrlasrow = mysql_fetch_array($intrlasres)) {
 	// vientispecifig tarkistuksia
 	if ($tapa == 'vienti' or $tapa == 'vientituonti') {
 
-		if ($intrlasrow["maa_maara"] == '') {
+		if ($intrlasrow["maamaara"] == '') {
 			$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Määrämaa puuttuu")."!<br>";
 			$virhe++;
 		}
-		elseif ($intrlasrow["maa_maara"] == $yhtiorow["maa"]) {
+		elseif ($intrlasrow["maamaara"] == $yhtiorow["maa"]) {
 			$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Määrämaa ei voi olla sama kuin yhtiön kotimaa")."!<br>";
 			$virhe++;
 		}
 		else {
 			$query = "	SELECT distinct koodi, eu
 						FROM maat
-						WHERE koodi='$intrlasrow[maa_maara]'";
+						WHERE koodi='$intrlasrow[maamaara]'";
 			$maaresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($maaresult) == 0) {

@@ -83,7 +83,7 @@ if (!function_exists("tsekit")) {
 					where lasku.yhtio='$kukarow[yhtio]'
 					and tunnus='$row[tunnus]'
 					and maa != '$yhtiorow[maa]'
-					and (maa_lahetys = '' or bruttopaino = '' or kauppatapahtuman_luonne <= 0 or kuljetusmuoto = '' or toimaika = '0000-00-00')
+					and (maa_maara = '' or maa_lahetys = '' or bruttopaino = '' or kauppatapahtuman_luonne <= 0 or kuljetusmuoto = '' or toimaika = '0000-00-00')
 					and kauppatapahtuman_luonne != '999'";
 		$okres = mysql_query($query) or pupe_error($query);
 

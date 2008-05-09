@@ -9,13 +9,12 @@
 
 		// haetaan kaikki sampo factoroidut laskut jota ei ole viel‰ liitetty mihink‰‰n siirtolistalle
 		$query = "	SELECT count(*) kpl, sum(arvo) arvo, sum(summa) summa
-					FROM lasku USE INDEX (yhtio_tila_mapvm)
+					FROM lasku USE INDEX (factoring)
 					JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.factoring = 'SAMPO')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					lasku.tila = 'U' and
 					lasku.alatila = 'X' and
 					lasku.summa != 0 and
-					lasku.mapvm = '0000-00-00' and
 					lasku.factoringsiirtonumero = '' and
 					lasku.valkoodi = '$yhtiorow[valkoodi]'";
 		$result = mysql_query ($query) or pupe_error($query);
@@ -88,13 +87,12 @@
 
 		// haetaan kaikki sampo factoroidut laskut jota ei ole viel‰ liitetty mihink‰‰n siirtolistalle
 		$query = "	SELECT ifnull(group_concat(lasku.tunnus),0) tunnukset
-					FROM lasku USE INDEX (yhtio_tila_mapvm)
+					FROM lasku USE INDEX (factoring)
 					JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.factoring = 'SAMPO')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					lasku.tila = 'U' and
 					lasku.alatila = 'X' and
 					lasku.summa != 0 and
-					lasku.mapvm = '0000-00-00' and
 					lasku.factoringsiirtonumero = '$numero' and
 					lasku.valkoodi = '$yhtiorow[valkoodi]'
 					order by laskunro";

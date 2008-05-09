@@ -1755,9 +1755,9 @@
 										and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 										ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
 							$riresult = mysql_query($query) or pupe_error($query);
-					
+							
 							while ($row = mysql_fetch_array($riresult)) {
-								$row['kommentti'] = t("Toimitetaan erikseen").". ".$row['kommentti'];
+								$row['kommentti'] = "*******".t("Toimitetaan erikseen").".******* ".$row['kommentti'];
 								$row['rivihinta'] = 0;
 								
 								rivi($page[$sivu], $lah_tyyppi);						

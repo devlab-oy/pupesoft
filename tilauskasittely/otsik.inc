@@ -88,6 +88,43 @@
 		}
 	}
 
+	if (isset($jatka) and $maksuehto == "") {
+		echo "<font class='error'>".t("VIRHE: Maksuehtoa ei löydy kyseiselle maalle").".<br>".t("Tarkista laskutusosoitteen maa")."!</font><br>";
+		$tee = "OTSIK";
+		$tila = "";
+		unset($jatka);
+	}
+	elseif (isset($jatka) and $maksuehto != "") {
+		// haetaan maksuehdon tiedot tarkastuksia varten
+		$tarkistus_apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
+		$tarkistus_meapu = mysql_query($tarkistus_apuqu) or pupe_error($tarkistus_apuqu);
+		
+		if (mysql_num_rows($tarkistus_meapu) == 0) {
+			echo "<font class='error'>".t("VIRHE: Maksuehtoa ei löydy kyseiselle maalle").".<br>".t("Tarkista laskutusosoitteen maa")."!</font><br>";
+			$tee = "OTSIK";
+			$tila = "";
+			unset($jatka);
+		}
+	}
+
+	if (isset($jatka) and $toimitustapa == "") {
+		echo "<font class='error'>".t("VIRHE: Toimitustapaa ei löydy kyseiselle maalle").".<br>".t("Tarkista toimitusosoitteen maa")."!</font><br>";
+		$tee = "OTSIK";
+		$tila = "";
+		unset($jatka);
+	}
+	elseif (isset($jatka) and $toimitustapa != "") {
+		$query = "SELECT tunnus FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) == 0) {
+			echo "<font class='error'>".t("VIRHE: Toimitustapaa ei löydy kyseiselle maalle").".<br>".t("Tarkista toimitusosoitteen maa")."!</font><br>";
+			$tee = "OTSIK";
+			$tila = "";
+			unset($jatka);
+		}
+	}
+
 	if (isset($jatka) and $asiakasid == "" and $override_ytunnus_check != 'YES') {
 		echo "<font class='error'>".t("VIRHE: Tilaukselta puuttuu Y-tunnus").":</font><br>";
 
@@ -558,8 +595,30 @@
 		echo "<tr>
 				<td valign='top'>".t("Postitp").": </td>
 				<td><input type='text' name='postino' size='10' value='$srow[postino]'> <input type='text' name='postitp' size='21' value='$srow[postitp]'></td></tr>";
-				
-		if ($srow["liitostunnus"] > 0) {		
+
+		if ($srow["liitostunnus"] > 0) {
+			$query = "	SELECT distinct koodi, nimi
+						FROM maat
+						WHERE nimi != ''
+						ORDER BY koodi";
+			$vresult = mysql_query($query) or pupe_error($query);
+	
+			echo "<tr><td valign='top'> ".t("Maa").": </td>
+					<td><select name='maa' style='width: 250px;' onChange='javascript:submit();'>";
+
+			while ($vrow=mysql_fetch_array($vresult)) {
+				$sel="";
+				if (strtoupper($srow["maa"]) == strtoupper($vrow[0])) {
+					$sel = "selected";
+				}
+				elseif ($srow["maa"] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
+					$sel = "selected";
+				}
+				echo "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
+			}
+
+			echo "</select></td></tr>";
+
 			$query  = "	SELECT laji
 						FROM asiakas
 						WHERE yhtio='$kukarow[yhtio]' and tunnus='$srow[liitostunnus]'";
@@ -603,14 +662,16 @@
 					<input type='hidden' name='chn' 							 value = '$srow[chn]'>
 					<input type='hidden' name='verkkotunnus' 					 value = '$srow[verkkotunnus]'>
 					<input type='hidden' name='ytunnus' 						 value = '$srow[ytunnus]'>
-					<input type='hidden' name='maa' 							 value = '$srow[maa]'>
-					<input type='hidden' name='toim_maa' 						 value = '$srow[toim_maa]'>
 					<input type='hidden' name='kolm_maa' 						 value = '$srow[kolm_maa]'>
 					<input type='hidden' name='tunnusnippu' 					 value = '$srow[tunnusnippu]'>
 					<input type='hidden' name='projekti'						 value = '$srow[projekti]'>
 					<input type='hidden' name='jaksotettu'	 					 value = '$srow[jaksotettu]'>
 					<input type='hidden' name='tunnusnippu_tarjous' 			 value = '$srow[tunnusnippu_tarjous]'>
 					<input type='hidden' name='liitostunnus' 					 value = '$srow[liitostunnus]'>";
+
+// 					<input type='hidden' name='toim_maa' 						 value = '$srow[toim_maa]'>
+//					<input type='hidden' name='maa' 							 value = '$srow[maa]'>
+
 
 			echo "<td valign='top'>";
 			echo "<table>";
@@ -628,6 +689,29 @@
 			echo "<tr>
 					<td valign='top'>".t("Postitp").": </td>
 					<td><input type='text' name='tpostino' size='10' value='$srow[toim_postino]'> <input type='text' name='tpostitp' size='21' value='$srow[toim_postitp]'></td></tr>";
+
+			$query = "	SELECT distinct koodi, nimi
+						FROM maat
+						WHERE nimi != ''
+						ORDER BY koodi";
+			$vresult = mysql_query($query) or pupe_error($query);
+
+			echo "<tr><td valign='top'> ".t("Maa").": </td>
+					<td><select name='toim_maa' style='width: 250px;' onChange='javascript:submit();'>";
+
+			while ($vrow=mysql_fetch_array($vresult)) {
+				$sel="";
+				if (strtoupper($srow["toim_maa"]) == strtoupper($vrow[0])) {
+					$sel = "selected";
+				}
+				elseif ($srow["toim_maa"] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
+					$sel = "selected";
+				}
+				echo "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
+			}
+
+			echo "</select></td></tr>";
+
 			echo "</table>";
 			echo "</td>";
 

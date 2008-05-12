@@ -3,9 +3,14 @@
 require ("inc/parametrit.inc");
 
 if (!isset($tee) or $tee == '') {
+
+	if (file_exists("tervetuloa_".$kukarow["yhtio"].".inc")) {
+		require("tervetuloa_".$kukarow["yhtio"].".inc");
+	}
+
 	echo "<table>";
 	echo "<tr>";
-	
+
 	///* Uutiset *///
 	echo "<tr><td class='back' valign='top'>";
 	$toim = "";

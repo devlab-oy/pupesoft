@@ -1,7 +1,7 @@
 <?php
 
 	//	print "<pre>";
-	
+
 	$ulos = "LUM210";
 	$ulos .= sprintf ('%-35.35s', $laskunimi1);
 	$ulos .= sprintf ('%-35.35s', $laskunimi2);
@@ -23,7 +23,7 @@
 	$ulos .= "J";									//oletus: saajalta v‰hennet‰‰n kulut kotimaassa
 	$ulos .= sprintf ('%34s', ' '); 				//T‰m‰n alussa voi olla er‰pvm muodossa ppkkvvvv
 	$ulos .= sprintf ('%14.14s', $yritystilino);	//veloitustili
-	$ulos .= sprintf ('%-3.3s', strtoupper($laskuyritivaluutta));	
+	$ulos .= sprintf ('%-3.3s', strtoupper($laskuyritivaluutta));
 	$ulos .= sprintf ('%35s', ' ');
 	$ulos .= "1";									//valuuttakoodi
 	$ulos .= "   ";									//varalla
@@ -32,4 +32,28 @@
 	//print "</pre>";
 
 	fputs($toot,$ulos . "\r\n");
+
+	// Jos meill‰ on ohjeita pankille, niin lis‰t‰‰n maksutietueen lis‰tietue
+	if (trim($ohjeitapankille) != '') {
+
+		//print "<pre>";
+
+		$ulos = "LUM2L0";
+		$ulos .= sprintf ('%011d', '0');
+		$ulos .= sprintf ('%020d', '0');
+		$ulos .= sprintf ('%-350.350s', trim($ohjeitapankille));
+		$ulos .= sprintf ('%-50.50s', ' ');
+		$ulos .= sprintf ('%-11.11s', ' ');
+		$ulos .= sprintf ('%-70.70s', ' ');
+		$ulos .= sprintf ('%-14.14s', ' ');
+		$ulos .= sprintf ('%-8.8s', ' ');
+		$ulos .= sprintf ('%015d', '0');
+		$ulos .= sprintf ('%014d', '0');
+		$ulos .= sprintf ('%-31.31s', ' ');
+
+		//print strlen($ulos) . "/" . $ulos;
+		//print "</pre>";
+
+		fputs($toot,$ulos . "\r\n");
+	}
 ?>

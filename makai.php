@@ -47,11 +47,11 @@
 
 			while ($row = mysql_fetch_array($result)) {
 				$pankkitili = $row["tilino"];
-				
+
 				if (is_numeric(substr($row["tilino"], 0, 1))) {
 					require("inc/pankkitilinoikeellisuus.php");
 				}
-				
+
 				if ($pankkitili == "") {
 					echo "<font class='error'>Pankkitili $row[nimi], '$row[tilino]' on virheellinen</font><br>";
 					exit;
@@ -429,7 +429,7 @@
 				echo "<tr><th>".t("Maksutili")."<td>$pvmrow[ytilino]</td></tr><tr><th>".t("Laskujen valuutta")."</th><td>$pvmrow[valkoodi]</td></tr>";
 
 				//Maksetaan hyvityslaskut alta pois, jos niitä on
-				$query = "SELECT maksu_tili, valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sum(if(alatila='K', summa-kasumma, summa)) summa
+				$query = "SELECT maksu_tili, valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1, sum(if(alatila='K', summa-kasumma, summa)) summa
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and tila = 'P'
@@ -438,7 +438,7 @@
 							and summa < 0
 							and maksu_tili = '$pvmrow[maksu_tili]'
 							and valkoodi = '$pvmrow[valkoodi]'
-							GROUP BY maksu_tili, valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4";
+							GROUP BY maksu_tili, valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1";
 				$hyvitysresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($hyvitysresult) > 0 ) {
@@ -474,7 +474,8 @@
 							and pankki2 = '$hyvitysrow[pankki2]'
 							and pankki3 = '$hyvitysrow[pankki3]'
 							and pankki4 = '$hyvitysrow[pankki4]'
-							GROUP BY maksu_tili, lasku.valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4";
+							and sisviesti1 = '$hyvitysrow[sisviesti1]'
+							GROUP BY maksu_tili, lasku.valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1";
 						$maksuresult = mysql_query($query) or pupe_error($query);
 						if (mysql_num_rows($maksuresult) > 0 ) {
 
@@ -522,6 +523,7 @@
 								$laskupankki4  	= $laskurow["pankki4"];
 								$laskuswift 	= $laskurow["swift"];
 								$laskuyritivaluutta  = $laskurow["yritivalkoodi"];
+								$ohjeitapankille = $laskurow["sisviesti1"];
 
 								if ($kotimaa == "FI") {
 									require("inc/lum2rivi.inc");
@@ -547,6 +549,7 @@
 										and pankki2 = '$hyvitysrow[pankki2]'
 										and pankki3 = '$hyvitysrow[pankki3]'
 										and pankki4 = '$hyvitysrow[pankki4]'
+										and sisviesti1 = '$hyvitysrow[sisviesti1]'
 									    ORDER BY yhtio, tila";
 							$result = mysql_query($query) or pupe_error($query);
 
@@ -562,7 +565,7 @@
 							left(concat_ws(' ', osoite, osoitetark),45) osoite,
 							left(concat_ws(' ', postino, postitp),45) postitp,
 							summa, lasku.valkoodi, viite, viesti,
-							ultilno, lasku.tunnus, sisviesti2,
+							ultilno, lasku.tunnus, sisviesti2, sisviesti1,
 							yriti.tilino ytilino, yriti.nimi tilinimi,
 							maa, pankki1, pankki2, pankki3, pankki4,
 							swift, alatila, kasumma, kurssi, ytunnus, yriti.valkoodi yritivalkoodi
@@ -607,6 +610,7 @@
 						$laskupankki4  	= $laskurow["pankki4"];
 						$laskuswift 	= $laskurow["swift"];
 						$laskuyritivaluutta  = $laskurow["yritivalkoodi"];
+						$ohjeitapankille = $laskurow["sisviesti1"];
 
 						//haetaan tämän tilin tiedot
 						if ($kotimaa == "FI") {

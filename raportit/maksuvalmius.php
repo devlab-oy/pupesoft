@@ -2,13 +2,46 @@
 
 	require("../inc/parametrit.inc");
 
-	print "<font class='head'>Maksuvalmius</font><hr>";
+	print "<font class='head'>".t("Maksuvalmius")."</font><hr>";
+
+	if ($aika == 'pv') {
+		$sel1 = 'SELECTED';
+	}
+	if ($aika == 'vi') {
+		$sel2 = "SELECTED";
+	}
+	if ($aika == 'kk') {
+		$sel3 = "SELECTED";
+	}
+	
+	if ($konserni != '') {
+		$sel4 = "CHECKED";
+	}
+
+	echo "<form action = '$PHP_SELF' method='post'>
+			<input type = 'hidden' name = 'tee' value = '1'>
+			<table>
+			<tr>
+			<th>".t("Maksuvalmius")."</th>
+			<td><select name='aika'>
+				<option value = 'pv' $sel1>".t("Päivä")."
+				<option value = 'vi' $sel2>".t("Viikko")."
+				<option value = 'kk' $sel3>".t("Kuukausi")."
+			</select></td>
+			</tr>
+			<tr>
+			<th>".t("Konserni")."</th>
+			<td><input type = 'checkbox' name = 'konserni' $sel4></td>
+			<td class='back'><input type = 'submit' value = '".t("Näytä")."'></td>
+			</tr>
+			</table>
+			</form>";
 
 	if ($tee == "1") {
 		
 		if ($konserni == 'on') {
 			// haetaan konsernin kaikki yhtiot ja tehdään mysql lauseke
-			$query = "select yhtio from yhtio where konserni='$yhtiorow[konserni]' and konserni != ''";
+			$query = "SELECT yhtio from yhtio where konserni='$yhtiorow[konserni]' and konserni != ''";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$yhtio = "";
@@ -21,33 +54,70 @@
 			if ($yhtio == "") {
 				$yhtio = "'$kukarow[yhtio]'";
 			}
+			
+			// Tehdään alkusiivous!
+			$query = "	SELECT konserni
+						FROM yhtio
+						WHERE yhtio = '$kukarow[yhtio]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 1) {
+				$trow = mysql_fetch_array($result);
+				//echo "Konserni on '$trow[konserni]'<br>";
+			}
+			else {
+				echo t("Yhtiöitä löytyi monta tai ei lainkaan! Virhe!")."";
+				exit;
+			}
+
+			$query = "	SELECT yhtio, konserni, nimi
+						FROM yhtio
+						WHERE konserni = '$yhtiorow[konserni]' and konserni != ''";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) < 2) {
+				echo t("Pyysit konserninäkökulmaa, mutta yritys ei ole konsernin osa").".<br>";
+				exit;
+			}
+			else {
+				echo "<table><tr><th>".t("Konserniyritykset").":</th></tr>";
+
+				while ($yrow = mysql_fetch_array ($result)) {
+					echo "<tr><td>$yrow[nimi]</td></tr>";
+				}
+
+				echo "</table><br>";
+			}
 		}
 		else {
 			$yhtio = "'$kukarow[yhtio]'";
 		}
 
 		// pvm grouppaus hässässäkkä
-		$tapa = "if(lasku.tila='U',if(kapvm > now(),kapvm,erpcm),olmapvm) olmapvm";
+		$tapa = "if(lasku.tila = 'K', DATE_ADD(tilausrivi.toimaika, INTERVAL ifnull(toimi.oletus_erapvm,0) DAY), if(lasku.tila in ('H','M','P','Q','U'), if(kapvm > now(),kapvm,erpcm),olmapvm)) olmapvm";
 
 		if ($aika == 'vi') {
-			$tapa = "YEARWEEK(if(lasku.tila='U',if(kapvm > now(),kapvm,erpcm),olmapvm),1) olmapvm";
+			$tapa = "YEARWEEK(if(lasku.tila = 'K', DATE_ADD(tilausrivi.toimaika, INTERVAL ifnull(toimi.oletus_erapvm,0) DAY), if(lasku.tila in ('H','M','P','Q','U'), if(kapvm > now(),kapvm,erpcm),olmapvm)),1) olmapvm";
 		}
 		if ($aika == 'kk') {
-			$tapa = "left(if(lasku.tila='U',if(kapvm > now(),kapvm,erpcm),olmapvm),7) olmapvm";
+			$tapa = "left(if(lasku.tila = 'K', DATE_ADD(tilausrivi.toimaika, INTERVAL ifnull(toimi.oletus_erapvm,0) DAY), if(lasku.tila in ('H','M','P','Q','U'), if(kapvm > now(),kapvm,erpcm),olmapvm)),7) olmapvm";
 		}
 
 		$query = "	SELECT $tapa,
-					sum(if(lasku.tila = 'U' and mapvm = '0000-00-00', summa, 0)) myynti,
-					round(sum(if(lasku.tila != 'U', -1*summa*valuu.kurssi, 0)),2) osto
+					sum(if(lasku.tila = 'U' and mapvm = '0000-00-00', lasku.summa, 0)) myynti,
+					round(sum(if(lasku.tila != 'U' and lasku.tila != 'K', -1*lasku.summa*valuu.kurssi, 0)),2) osto,
+					sum(if(lasku.tila = 'K', tilausrivi.hinta, 0)) summa
 					FROM lasku
-					LEFT JOIN valuu ON valuu.yhtio = lasku.yhtio and lasku.valkoodi = valuu.nimi
-					WHERE lasku.yhtio in ($yhtio) and lasku.tila in ('H','M','P','Q','U') and mapvm = '0000-00-00'
+					LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O' and tilausrivi.toimaika != '0000-00-00')
+					LEFT JOIN toimi ON (toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus)
+					LEFT JOIN valuu ON (valuu.yhtio = lasku.yhtio and lasku.valkoodi = valuu.nimi)
+					WHERE lasku.yhtio in ($yhtio) and ((lasku.tila in ('H','M','P','Q','U') and (alatila != 'X' or tila='U')) or (lasku.vanhatunnus = 0 and lasku.tila='K')) and lasku.mapvm = '0000-00-00'
 					GROUP BY 1
-					HAVING myynti<>0 or osto<>0";
+					HAVING myynti<>0 or osto<>0 or summa<>0";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table>";
-		echo "<tr><th>Pvm</th><th>Myyntireskontra</th><th>Ostoreskontra</th><th>Yhteensä</th><th>Kumulatiivinen</th></tr>";
+		echo "<tr><th>".t("Pvm")."</th><th>".t("Myyntireskontra")."</th><th>".t("Ostoreskontra")."</th><th>".t("Yhteensä")."</th><th>".t("Kumulatiivinen")."</th><th>".t("Ostotilauksen arvo")."</th></tr>";
 
 		$kumu = 0;
 		
@@ -69,30 +139,11 @@
 			}
 			echo "<td align='right'>".sprintf("%.2f", $yht)."</td>";
 			echo "<td align='right'>".sprintf("%.2f", $kumu)."</td>";
+			echo "<td>".sprintf("%.2f", $rivi['summa'])."</td>";
 			echo "</tr>";
 		}
 
 		echo "</table>";		
-	}
-	else {
-		echo "<form action = '$PHP_SELF' method='post'>
-				<input type = 'hidden' name = 'tee' value = '1'>
-				<table>
-				<tr>
-				<th>".t("Maksuvalmius")."</th>
-				<td><select name='aika'>
-					<option value = 'pv'>".t("Päivä")."
-					<option value = 'vi'>".t("Viikko")."
-					<option value = 'kk'>".t("Kuukausi")."
-				</select></td>
-				</tr>
-				<tr>
-				<th>".t("Konserni")."</th>
-				<td><input type = 'checkbox' name = 'konserni'></td>
-				<td class='back'><input type = 'submit' value = '".t("Näytä")."'></td>
-				</tr>
-				</table>
-				</form>";
 	}
 	
 	require("../inc/footer.inc");

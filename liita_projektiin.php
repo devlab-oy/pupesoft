@@ -17,12 +17,12 @@ echo "<font class='head'>".t("Liitä tilaus projektiin")."</font><hr><br><br>";
 
 if($tee=="KORJAA" or $tee=="LIITA") {
 	//	tarkastetaan että tunnusnippu on edelleen ok
-	$query = "	SELECT nimi, nimitark, tila, alatila, tunnusnippu, tunnus from lasku where yhtio='$kukarow[yhtio]' and tila IN ('R') and tunnusnippu>0 and tunnus='$tunnusnippu'";
+	$query = "	SELECT nimi, nimitark, tila, alatila, tunnusnippu, tunnus from lasku where yhtio='$kukarow[yhtio]' and tila IN ('R', 'L','N') and tunnusnippu>0 and tunnus='$tunnusnippu'";
 	$result = mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($result)>0) {
 		$laskurow=mysql_fetch_array($result);
 		
-		$query = "	SELECT nimi, nimitark, tila, alatila, tunnusnippu, tunnus from lasku where yhtio='$kukarow[yhtio]' and tila IN ('L','G','E','V','W','N','T') and tunnus='$tunnus' and tunnusnippu<>tunnus";
+		$query = "	SELECT nimi, nimitark, tila, alatila, tunnusnippu, tunnus from lasku where yhtio='$kukarow[yhtio]' and tila IN ('L','G','E','V','W','N','T') and tunnus='$tunnus'";
 		$res = mysql_query($query) or pupe_error($query);
 		if(mysql_num_rows($res)>0) {
 			$row=mysql_fetch_array($res);
@@ -101,7 +101,7 @@ if($tee=="KORJAA" or $tee=="LIITA") {
 }
 
 if($tee == "HAE") {
-	$query = "	SELECT nimi, nimitark, tila, alatila, tunnusnippu, tunnus from lasku where yhtio='$kukarow[yhtio]' and tila IN ('R') and tunnus='$tunnusnippu'";
+	$query = "	SELECT nimi, nimitark, tila, alatila, tunnusnippu, tunnus from lasku where yhtio='$kukarow[yhtio]' and tila IN ('R', 'L','N') and tunnus='$tunnusnippu'";
 	$result = mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($result)>0) {
 		$laskurow=mysql_fetch_array($result);

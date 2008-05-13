@@ -1306,12 +1306,24 @@ if (!function_exists("avain")) {
 
 			if ($laji == 'join') {
 				if ($joini != '') {
-					$returni = " LEFT JOIN avainsana AS a on ".$joinaa.".yhtio = a.yhtio and ".$joinaa.".".trim($returni)." = a.selite and a.laji = '".$joini.$kieli."' ";
+					if ($joini == 'Y_') {
+						$joini = 'Y';
+						$returni = " LEFT JOIN avainsana AS a on ".$joinaa.".yhtio = a.yhtio and ".$joinaa.".".trim($returni)." = a.selite and a.laji = '".$joini."' and a.kieli = '$kieli'";
+					}
+					else {
+						$returni = " LEFT JOIN avainsana AS a on ".$joinaa.".yhtio = a.yhtio and ".$joinaa.".".trim($returni)." = a.selite and a.laji = '".$joini.$kieli."' ";
+					}
 				}
 			}
 			elseif ($laji == 'join2') {
 				if ($joini != '') {
-					$returni = " LEFT JOIN avainsana AS b on ".$joinaa.".yhtio = b.yhtio and ".$joinaa.".".trim($returni)." = b.selite and b.laji = '".$joini.$kieli."' ";
+					if ($joini == 'Y_') {
+						$joini = 'Y';
+						$returni = " LEFT JOIN avainsana AS b on ".$joinaa.".yhtio = b.yhtio and ".$joinaa.".".trim($returni)." = b.selite and b.laji = '".$joini."' and b.kieli = '$kieli'";
+					}
+					else {
+						$returni = " LEFT JOIN avainsana AS b on ".$joinaa.".yhtio = b.yhtio and ".$joinaa.".".trim($returni)." = b.selite and b.laji = '".$joini.$kieli."' ";
+					}
 				}
 			}
 			elseif ($laji == 'select') {

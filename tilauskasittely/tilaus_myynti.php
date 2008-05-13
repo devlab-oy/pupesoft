@@ -1050,8 +1050,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 					FROM oikeu
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and kuka	= '$kukarow[kuka]'
-					and nimi	= 'tilauskasittely/tarjousseuranta.php'
-					and alanimi = ''";
+					and nimi	= 'raportit/tilaushakukone.php'
+					and alanimi = 'TARJOUSHAKUKONE'";
 		$result = mysql_query($query) or pupe_error($query);
 		
 		if(mysql_num_rows($result) == 0) {

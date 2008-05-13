@@ -38,10 +38,12 @@
 
 		//print "<pre>";
 
+		$ohjeitapankille = str_replace("\n", "", trim($ohjeitapankille));
+
 		$ulos = "LUM2L0";
 		$ulos .= sprintf ('%011d', '0');
 		$ulos .= sprintf ('%020d', '0');
-		$ulos .= sprintf ('%-350.350s', trim($ohjeitapankille));
+		$ulos .= sprintf ('%-350.350s', $ohjeitapankille);
 		$ulos .= sprintf ('%-50.50s', ' ');
 		$ulos .= sprintf ('%-11.11s', ' ');
 		$ulos .= sprintf ('%-70.70s', ' ');
@@ -56,4 +58,5 @@
 
 		fputs($toot,$ulos . "\r\n");
 	}
+
 ?>

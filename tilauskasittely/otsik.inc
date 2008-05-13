@@ -87,41 +87,44 @@
 			$tila = 'EI_NAYTETA';
 		}
 	}
-
-	if (isset($jatka) and $maksuehto == "") {
-		echo "<font class='error'>".t("VIRHE: Maksuehtoa ei löydy kyseiselle maalle").".<br>".t("Tarkista laskutusosoitteen maa")."!</font><br>";
-		$tee = "OTSIK";
-		$tila = "";
-		unset($jatka);
-	}
-	elseif (isset($jatka) and $maksuehto != "") {
-		// haetaan maksuehdon tiedot tarkastuksia varten
-		$tarkistus_apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
-		$tarkistus_meapu = mysql_query($tarkistus_apuqu) or pupe_error($tarkistus_apuqu);
-		
-		if (mysql_num_rows($tarkistus_meapu) == 0) {
+	
+	
+	if (isset($jatka) and $asiakasid != "") {
+		if ($maksuehto == "") {
 			echo "<font class='error'>".t("VIRHE: Maksuehtoa ei löydy kyseiselle maalle").".<br>".t("Tarkista laskutusosoitteen maa")."!</font><br>";
 			$tee = "OTSIK";
 			$tila = "";
 			unset($jatka);
 		}
-	}
+		elseif ($maksuehto != "") {
+			// haetaan maksuehdon tiedot tarkastuksia varten
+			$tarkistus_apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
+			$tarkistus_meapu = mysql_query($tarkistus_apuqu) or pupe_error($tarkistus_apuqu);
 
-	if (isset($jatka) and $toimitustapa == "") {
-		echo "<font class='error'>".t("VIRHE: Toimitustapaa ei löydy kyseiselle maalle").".<br>".t("Tarkista toimitusosoitteen maa")."!</font><br>";
-		$tee = "OTSIK";
-		$tila = "";
-		unset($jatka);
-	}
-	elseif (isset($jatka) and $toimitustapa != "") {
-		$query = "SELECT tunnus FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
-		$result = mysql_query($query) or pupe_error($query);
+			if (mysql_num_rows($tarkistus_meapu) == 0) {
+				echo "<font class='error'>".t("VIRHE: Maksuehtoa ei löydy kyseiselle maalle").".<br>".t("Tarkista laskutusosoitteen maa")."!</font><br>";
+				$tee = "OTSIK";
+				$tila = "";
+				unset($jatka);
+			}
+		}
 
-		if (mysql_num_rows($result) == 0) {
+		if ($toimitustapa == "") {
 			echo "<font class='error'>".t("VIRHE: Toimitustapaa ei löydy kyseiselle maalle").".<br>".t("Tarkista toimitusosoitteen maa")."!</font><br>";
 			$tee = "OTSIK";
 			$tila = "";
 			unset($jatka);
+		}
+		elseif ($toimitustapa != "") {
+			$query = "SELECT tunnus FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 0) {
+				echo "<font class='error'>".t("VIRHE: Toimitustapaa ei löydy kyseiselle maalle").".<br>".t("Tarkista toimitusosoitteen maa")."!</font><br>";
+				$tee = "OTSIK";
+				$tila = "";
+				unset($jatka);
+			}
 		}
 	}
 

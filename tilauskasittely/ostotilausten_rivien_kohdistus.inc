@@ -1054,14 +1054,14 @@ if ($tila == '') {
 		// jos riviä ei ole vielä viety varastoon niin riviä voi muokata
 		if ($rivirow["varastossa_kpl"] == 0) {
 			list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($rivirow["tuoteno"]);
-			echo "<div id='$rivirow[rivitunnus]' class='popup' style='width: 400px;'>";
+			echo "<div id='tuoteno_$rivirow[rivitunnus]' class='popup' style='width: 400px;'>";
 			echo "<ul>";
 			echo "<li>".t("Saldo").": $saldo ".t("kpl")."</li><li>".t("Hyllyssä").": $hyllyssa ".t("kpl")."</li><li>".t("Myytävissä").": $myytavissa ".t("kpl")."</li>";
 			echo "<li>".t("Tilattu").": $rivirow[tilattu] ".t("kpl")."</li><li>".t("Varattu").": $rivirow[varattu] ".t("kpl")."</li>";
 			echo "<li>".t("Keskihinta").": $rivirow[keskihinta] $rivirow[valuutta]</li><li>".t("Ostohinta").": $rivirow[ostohinta] $rivirow[valuutta]</li>";
 			echo "</ul>";
 			echo "</div>";
-			echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=muokkaa_rivi' onmouseout=\"popUp(event,'$rivirow[rivitunnus]')\" onmouseover=\"popUp(event,'$rivirow[rivitunnus]')\">$rivirow[tuoteno]</a>";
+			echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=muokkaa_rivi' onmouseout=\"popUp(event,'tuoteno_$rivirow[rivitunnus]')\" onmouseover=\"popUp(event,'tuoteno_$rivirow[rivitunnus]')\">$rivirow[tuoteno]</a>";
 		}
 		else {
 			echo "$rivirow[tuoteno]";

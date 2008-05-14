@@ -19,6 +19,9 @@ if($vain_monista == ""){
 	elseif ($toim == 'TYOMAARAYS') {
 		echo "<font class='head'>".t("Monista työmääräys")."</font><hr>";
 	}
+	elseif ($toim == 'TILAUS') {
+		echo "<font class='head'>".t("Monista tilaus")."</font><hr>";
+	}
 	else {
 		echo "<font class='head'>".t("Monista lasku")."</font><hr>";
 	}
@@ -139,6 +142,10 @@ if ($tee == "ETSILASKU") {
 			$where 	= " tila in ('N','L','A') and tunnus = '$otunnus' ";
 			$use 	= " ";
 		}
+		elseif ($toim == 'TILAUS') {
+			$where 	= " tila in ('N','L') and tunnus = '$otunnus' ";
+			$use 	= " ";
+		}
 		else {
 			if ($larow["laskunro"] > 0) {
 				$where 	= " tila = 'U' and laskunro = '$larow[laskunro]' ";
@@ -166,6 +173,11 @@ if ($tee == "ETSILASKU") {
 						and lasku.liitostunnus = '$asiakasid' ";
 			$use 	= " ";
 		}
+		elseif ($toim == 'TILAUS') {
+			$where 	= " tila in ('N','L') 
+						and lasku.liitostunnus = '$asiakasid' ";
+			$use 	= " ";
+		}
 		else {
 			$where = "	tila = 'U'
 						and lasku.liitostunnus = '$asiakasid'
@@ -179,7 +191,7 @@ if ($tee == "ETSILASKU") {
 	$query = "	SELECT yhtio, tunnus 'tilaus', laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, summa, tapvm, laatija, tila, alatila
 				FROM lasku $use
 				WHERE $where and lasku.yhtio in ('".implode("','", $yhtiot)."')
-				ORDER BY tapvm, lasku.tunnus desc";
+				ORDER BY tapvm, lasku.tunnus desc LIMIT 100";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {
@@ -236,7 +248,12 @@ if ($tee == "ETSILASKU") {
 			if ($monistettavat[$row["tilaus"]] == 'MONISTA') {
 				$sel = "CHECKED";
 			}
-			echo "<$ero><input type='radio' name='monistettavat[$row[tilaus]]' value='MONISTA' $sel></$ero>";
+			if ($toim == 'TILAUS') {
+				echo "<$ero><input type='checkbox' name='monistettavat[$row[tilaus]]' value='MONISTA' $sel></$ero>";
+			}
+			else {
+				echo "<$ero><input type='radio' name='monistettavat[$row[tilaus]]' value='MONISTA' $sel></$ero>";
+			}
 
 			if ($toim == '') {
 				$sel = "";
@@ -318,6 +335,9 @@ if ($tee == 'MONISTA') {
 		}
 		elseif ($toim == 'TYOMAARAYS') {
 			echo "$kklkm ".t("työmääräys(tä)").".<br><br>";
+		}
+		elseif ($toim == 'TILAUS') {
+			echo "$kklkm ".t("tilaus(ta)").".<br><br>";
 		}
 		else {
 			echo "$kklkm ".t("lasku(a)").".<br><br>";
@@ -612,7 +632,7 @@ if ($tee == 'MONISTA') {
 				$insres2 = mysql_query($kysely) or pupe_error($kysely);			
 			}
 			
-			if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS') {
+			if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS') {
 				$query = "SELECT * from tilausrivi where otunnus='$lasku' and yhtio ='$monistarow[yhtio]' ORDER BY tunnus";
 			}
 			else {
@@ -679,7 +699,7 @@ if ($tee == 'MONISTA') {
 							$rvalues .= ", ''";
 							break;						
 						case 'kommentti':
-							if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS') {
+							if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS') {
 								$rvalues .= ", '$rivirow[kommentti]'";
 							}
 							else {
@@ -698,7 +718,7 @@ if ($tee == 'MONISTA') {
 								$uusikpl = $rivirow["kpl"] * -1;
 							}
 							else {
-								if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS') {
+								if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS') {
 									$rvalues .= ", '$rivirow[varattu]'";
 									$uusikpl = $rivirow["varattu"];
 								}
@@ -713,7 +733,7 @@ if ($tee == 'MONISTA') {
 								$rvalues .= ", $rivirow[kpl] * -1";
 							}
 							else {
-								if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS') {
+								if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS') {
 									$rvalues .= ", '$rivirow[tilkpl]'";
 								}
 								else {

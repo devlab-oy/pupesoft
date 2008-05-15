@@ -32,6 +32,7 @@
 		<input type='hidden' name='lhyllytaso' value='$lhyllytaso'>
 		<input type='hidden' name='naytasaldo' value='$naytasaldo'>
 		<input type='hidden' name='toimittaja' value='$toimittaja'>
+		<input type='hidden' name='asiakasid' value='$asiakasid'>
 		<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 		<input type='hidden' name='saldot' value='$saldot'>
 		<input type='hidden' name='toimas' value='$toimas'>

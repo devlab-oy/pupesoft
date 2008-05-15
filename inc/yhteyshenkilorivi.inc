@@ -7,13 +7,12 @@
 		$tyyppi = 0;
 	}
 	
-	
-	if($popparista) {
+	if($popparista or $ajax_menu_yp != "") {
 		if (mysql_field_name($result, $i) == "liitostunnus") {
 			if ($liitostunnus != ''){
 				$trow[$i] = $liitostunnus;
 			}
-			$tyyppi = 3;
+			$tyyppi = 4;
 		}
 	}
 	else {

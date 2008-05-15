@@ -4065,10 +4065,12 @@ if(!function_exists("enable_ajax")) {
 
 				var container = document.getElementById(id);
 				var allNewScripts = container.getElementsByTagName('script');
-				c=allNewScripts.length-1;
-				if(c>1) {
+				c=allNewScripts.length;
+				if(c>0) {
 					for (x=0;x<=c;x++) {
-						eval(allNewScripts[x].innerHTML);
+						if(allNewScripts[x]) {
+							eval(allNewScripts[x].innerHTML);
+						}
 					}
 				}
 
@@ -4192,7 +4194,11 @@ if(!function_exists("enable_ajax")) {
 				getstr += obj.elements[i].name + "=" + encodeURI(obj.elements[i].value) + "&";
 			}
 		}
-
+		
+		if(method=="") {
+			method="post";
+		}
+		
 		sndReq(minne, urli, href, load, unToggle, method, getstr);
 	}
 
@@ -4288,8 +4294,15 @@ function yllapito(url, tag, submitOnSelect) {
 		}
 	}
 }
-function suljeYllapito(sID,value,text) {
-
+function suljeYllapito(sID,value,text, fromDiv) {
+	
+	if(fromDiv) {
+		ref=document;
+	}
+	else {
+		ref=window.opener.document;
+	}
+	
 	//	Wanhaa on muokattu, submittoidaan formi tarvittaessa..
 	if(sID.substring(0,2)=='P_') {
 		sID=sID.substr(2);
@@ -4302,11 +4315,6 @@ function suljeYllapito(sID,value,text) {
 				sel.options[i].text=text;
 			}
 		}
-
-		if(sID=='asiakkaan_positio') {
-			window.opener.document.forms[sID].submit();
-		}
-		window.close();
 	}
 	else {
 
@@ -4318,10 +4326,10 @@ function suljeYllapito(sID,value,text) {
 		//	Jos päivitettiin yhteyshenkilöitä meidän pitää listätä ne kaikkiin valikkoihin..
 		sela='EI'
 		if(sID=='yhteyshenkilo_kaupallinen') {
-			sela=window.opener.document.getElementById('yhteyshenkilo_tekninen');
+			sela=ref.getElementById('yhteyshenkilo_tekninen');
 		}
 		else if (sID=='yhteyshenkilo_tekninen') {
-			sela=window.opener.document.getElementById('yhteyshenkilo_kaupallinen');
+			sela=ref.getElementById('yhteyshenkilo_kaupallinen');
 		}
 
 		if(sela!='EI') {
@@ -4337,7 +4345,7 @@ function suljeYllapito(sID,value,text) {
 			}
 		}
 
-		sel=window.opener.document.getElementById(sID);
+		sel=ref.getElementById(sID);
 
 		try {
 			sel.add(newOpt, sel.options[1]);
@@ -4348,38 +4356,16 @@ function suljeYllapito(sID,value,text) {
 
 		//	Valitaan uusi arvo
 		sel.selectedIndex=1;
+		
+		if(fromDiv) {
+			pop=ref.getElementById('ajax_menu_yp'); 
+			pop.style.display='none';
+			pop.innerHTML='';
+		}
+		else {
+			window.close();
+		}
 
-
-
-		window.close();
-
-	}
-}
-//-->
-</script>
-<?php
-	}
-}
-
-if(!function_exists("js_toimehtoTarkenne")) {
-	function js_toimehtoTarkenne() {
-?>
-<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
-<!--
-function toimehtoTarkenne(toimehto) {
-	tehto=document.getElementById(toimehto);
-	tehtoLisa=document.getElementById(toimehto+'Lisa');
-
-	teksti=tehto.options[tehto.selectedIndex].text;
-	arvo=tehto.options[tehto.selectedIndex].value;
-
-	i=teksti.indexOf("-");
-	if(i>0) {
-		tarkenne=teksti.substr((i+1));
-		tehtoLisa.value=tarkenne;
-	}
-	else {
-		tehtoLisa.value='';
 	}
 }
 //-->

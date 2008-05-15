@@ -423,7 +423,11 @@
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
 				exit;
 			}
-
+			
+			if($ajax_menu_yp != "") {
+				$suljeYllapito = $ajax_menu_yp;
+			}
+			
 			if(substr($suljeYllapito, 0, 15) == "asiakkaan_kohde") {
 				$query = "SELECT kohde from asiakkaan_kohde where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
@@ -442,13 +446,12 @@
 				exit;
 			}
 
-			if(substr($suljeYllapito, 0, 22) == "yhteyshenkilo_tekninen"  or substr($suljeYllapito, 0, 25) == "yhteyshenkilo_kaupallinen") {
+			if(substr($suljeYllapito, 0, 22) == "yhteyshenkilo_tekninen" or substr($suljeYllapito, 0, 25) == "yhteyshenkilo_kaupallinen"  or $suljeYllapito == "yhteyshenkilo") {
 				$query = "SELECT nimi from yhteyshenkilo where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 				$aburow = mysql_fetch_array($result);
 				js_yllapito();
-				echo "<SCRIPT LANGUAGE=JAVASCRIPT>suljeYllapito('$wanha$suljeYllapito','$tunnus','$aburow[nimi]');</SCRIPT>";
-				exit;
+				die("<script LANGUAGE='JavaScript'>suljeYllapito('$wanha$suljeYllapito','$tunnus','$aburow[nimi]', '$ajax_menu_yp');</script></body></html>");
 			}
 
 			$uusi = 0;
@@ -509,6 +512,7 @@
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type = 'hidden' name = 'uusi' value = '1'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
+					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 					<input type = 'hidden' name = 'limit' value = '$limit'>
 					<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 					<input type = 'hidden' name = 'laji' value = '$laji'>
@@ -518,6 +522,7 @@
 		if (mysql_num_rows($result) >= 350) {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
+					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 					<input type = 'hidden' name = 'limit' value = 'NO'>
 					<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 					<input type = 'hidden' name = 'laji' value = '$laji'>
@@ -526,6 +531,7 @@
 		
 		echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
+				<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 				<input type = 'hidden' name = 'limit' value = '$limit'>
 				<input type = 'hidden' name = 'nayta_poistetut' value = 'YES'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>
@@ -534,6 +540,7 @@
 		echo "	<br><br><table><tr class='aktiivi'>
 				<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
+				<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 				<input type = 'hidden' name = 'limit' value = '$limit'>
 				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>";
@@ -602,9 +609,14 @@
 		if ($oikeurow['paivitys'] != 1) {
 			echo "<b>".t("Sinulla ei ole oikeuksia p‰ivitt‰‰ t‰t‰ tietoa")."</b><br>";
 		}
-
-		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa#$tunnus' name='mainform' id='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data'>";
+		
+		if($ajax_menu_yp!="") {
+			$ajax_post="ajaxPost('mainform', '{$palvelin2}yllapito.php?ojarj=$ojarj$ulisa#$tunnus' , 'ajax_menu_yp'); return false;";
+		}
+		
+		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa#$tunnus' name='mainform' id='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data' onSubmit=\"$ajax_post\">";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
+		echo "<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>";
 		echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
 		echo "<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>";
 		echo "<input type = 'hidden' name = 'laji' value = '$laji'>";
@@ -790,8 +802,13 @@
 		else {
 			$nimi = t("P‰ivit‰ $otsikko_nappi");
 		}
-
-		echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
+		
+		if($ajax_menu_yp!="") {
+			echo "<br><input type = 'submit' name='yllapitonappi' value = 'AJAX' onClick=\"$ajax_post\">";
+		}
+		else {
+			echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
+		}
 
 		if ($toim == "asiakas" and $uusi != 1) {
 			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ja p‰ivit‰ tiedot myˆs avoimille tilauksille'>";
@@ -865,6 +882,7 @@
 					echo "<br><br>
 						<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post' onSubmit = 'return verify()' enctype='multipart/form-data'>
 						<input type = 'hidden' name = 'toim' value = '$aputoim'>
+						<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 						<input type = 'hidden' name = 'limit' value = '$limit'>
 						<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 						<input type = 'hidden' name = 'laji' value = '$laji'>
@@ -882,6 +900,7 @@
 		echo "<br>
 				<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
+				<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 				<input type = 'hidden' name = 'limit' value = '$limit'>
 				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>

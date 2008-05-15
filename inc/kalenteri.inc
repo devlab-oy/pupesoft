@@ -4,6 +4,29 @@
 		Melko geneerisiä kalenterifunktioita
 	*/
 
+	?>
+	<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+
+	function selectPopper(event, url, id) {
+
+		select=document.getElementById(id);
+
+		url=url+'&ajax_menu_yp='+id;
+
+		proceed=false;
+		if(select.options[select.selectedIndex].value == "uusi") {
+			url=url+'&uusi=1';
+			proceed=true;
+		}
+		
+		if(proceed!==false) {
+			popUp(event, 'ajax_menu_yp', '10', '-10', url);	
+		}
+	}
+
+	</SCRIPT>
+	<?php
+	
 
 	if (!function_exists("tee_menu")) {
 				
@@ -166,33 +189,30 @@
 				//var_dump($kalenteri);
 				$otsikko = kaletyyppi($row["tyyppi"]);
 				
+
+				$popup_otsikko = "<table>";
+				if($row["asiakas"] != "") {
+					$popup_otsikko .= "<tr><th class=''>".t("Asiakas").":</th><td class=''>$row[asiakas]</td></tr>";
+				}
+				if($row["yhteyshenkilo"] != "") {
+					$popup_otsikko .= "<tr><th class=''>".t("Yhteyshenkilö").":</th><td class=''>$row[yhteyshenkilo]</td></tr>";
+				}
 				
 				if($row["tyyppi"] == "kalenteri") {
-					$popup_otsikko = "<table>";
-					if($row["asiakas"] != "") {
-						$popup_otsikko .= "<tr><th class=''>".t("Asiakas").":</th><td class=''>$row[asiakas]</td></tr>";
-					}
-					if($row["yhteyshenkilo"] != "") {
-						$popup_otsikko .= "<tr><th class=''>".t("Yhteyshenkilö").":</th><td class=''>$row[yhteyshenkilo]</td></tr>";
-					}
-					
 					$popup_otsikko .= "<tr><th class=''>".t("Tapa").":</th><td class=''>$row[tapa]</td></tr>";
 					$popup_otsikko .= "<tr><th class=''>".t("Alkaa").":</th><td class=''>".date("d.m.Y h:i", $row["pvmalku"])."</td></tr>";
 					$popup_otsikko .= "<tr><th class=''>".t("Päättyy").":</th><td class=''>".date("d.m.Y h:i", $row["pvmloppu"])."</td></tr>";
-					
-					$popup_otsikko .= "</table>";
 				}
 				elseif($row["tyyppi"] == "Memo") {
 					$popup_otsikko = "<table>";
 					$popup_otsikko .= "<tr><th class=''>".t("Asiakas").":</th><td class=''>$row[asiakas]</td></tr>";
-					if($row["yhteyshenkilo"] != "") {
-						$popup_otsikko .= "<tr><th class=''>".t("Yhteyshenkilö").":</th><td class=''>$row[yhteyshenkilo]</td></tr>";
-					}
-					$popup_otsikko .= "<tr><th class=''>".t("Päiväys").":</th><td class=''>".date("d.m.Y", $row["pvmalku"])."</td></tr>";
-					
-					$popup_otsikko .= "</table>";
 					
 				}
+				elseif($row["tyyppi"] == "Memo") {
+					$popup_otsikko .= "<tr><th class=''>".t("Päivälle").":</th><td class=''>".date("d.m.Y", $row["pvmalku"])."</td></tr>";
+				}
+				
+				$popup_otsikko .= "</table>";
 				
 				$popup_otsikko = "	<div style='text-align: right;'>
 										<font class='info'>$row[laatija]@$row[luontiaika]</font>
@@ -816,7 +836,7 @@
 							if($row["aika"] == $aikastr and $row["vali"] < 1) {
 								if($u != "") $u .= "<hr>";
 
-								$lisatiedot = hae_lisatiedot($row["laji"], $row["laji_tark"], $row["tunnus"], 20);	
+								$lisatiedot = hae_lisatiedot($row["laji"], $row["laji_tark"], $row["tunnus"], 10);	
 
 								$u .= $lisatiedot["viesti"];
 							}
@@ -1521,7 +1541,7 @@
 					WHERE yhtio='$kukarow[yhtio]' and liitostunnus = '{$asiakasrow["tunnus"]}' and tyyppi = 'A'";
 		$result = mysql_query($query) or pupe_error($query);
 		if(mysql_num_rows($result) > 0) {
-			$yhdata = "<select name='yhteyshenkilo'>
+			$yhdata = "<select name='yhteyshenkilo' id='yhteyshenkilo' onchange=\"selectPopper(event, '../yllapito.php?toim=yhteyshenkilo&liitostunnus={$asiakasrow["tunnus"]}&yhtyyppi=asiakas', this.id);\">
 								<option value=''>".t("Ei yhteyshenkilöä")."</option>";
 			
 			while ($yhteyshenkilorow = mysql_fetch_array($result)) {
@@ -1532,6 +1552,10 @@
 				
 				$yhdata .= "<option value='{$yhteyshenkilorow["tunnus"]}' $sel>{$yhteyshenkilorow["nimi"]}</option>";
 			}
+			
+			$yhdata .= "	<optgroup label='".t("Toiminnot")."'>
+						<option value='uusi'>Luo uusi yhteyshenkilö</option>
+					</optgroup>";
 			
 			$yhdata .= "</select>";
 		}
@@ -1580,7 +1604,7 @@
 			$header = "<select name='kuka'><option value=''>".t("Valitse henkilö")."</option>";
 			$query = "	SELECT *
 						FROM kuka
-						WHERE yhtio = '$kukarow[yhtio]' and myyja > 0";
+						WHERE yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 			while($row = mysql_fetch_array($result)) {
 				if($row["kuka"] == $kuka) $sel = "selected";

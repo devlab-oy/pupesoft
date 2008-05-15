@@ -4195,7 +4195,7 @@ if(!function_exists("enable_ajax")) {
 			}
 		}
 		
-		if(method=="") {
+		if(method==undefined) {
 			method="post";
 		}
 		

@@ -804,7 +804,7 @@
 		}
 		
 		if($ajax_menu_yp!="") {
-			echo "<br><input type = 'submit' name='yllapitonappi' value = 'AJAX' onClick=\"$ajax_post\">";
+			echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi' onClick=\"$ajax_post\">";
 		}
 		else {
 			echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";

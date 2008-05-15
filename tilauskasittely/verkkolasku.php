@@ -719,14 +719,16 @@
 							$otunnus	= $laskurow['tunnus'];
 							$hinta		= $rahti["rahtihinta"]; // rahtihinta
 							$nimitys	= "$pvm $laskurow[toimitustapa]";
-							$kommentti  = "Rahtikirja: $rahtikirjanrot";
+							$kommentti  = "".t("Rahtikirja").": $rahtikirjanrot";
+							
+							
+							list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
+							list($rahinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
 
-							list($rahinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
-
-							$query  = "	INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-										values ('$rahinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
+							$query  = "	INSERT INTO tilausrivi (hinta, ale, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
+										values ('$rahinta', '$lis_ale', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
 							$addtil = mysql_query($query) or pupe_error($query);
-
+							
 							if ($silent == "") {
 								$tulos_ulos .= "<tr><td>".t("Lisättiin rahtikulut")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td>$rahti[rahtihinta]</td><td>$yhtiorow[valkoodi]</td><td>$pakka[kilot] kg</td></tr>\n";
 							}

@@ -481,9 +481,10 @@
 					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
 					$rhire = mysql_query($query) or pupe_error($query);
 					$trow  = mysql_fetch_array($rhire);
-										
-					list($hinta, $alv) = alv($row, $trow, $rahti["rahtihinta"], '', '');
-
+					
+					list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($row, $trow, '1', 'N', $rahti["rahtihinta"], 0);
+					list($hinta, $alv) = alv($row, $trow, $lis_hinta, '', $alehinta_alv);
+					
 					if ($row["kohdistettu"] == "K") {
 						$rahti_hinta = "(" . (float) $hinta ." $row[valkoodi])";
 					}

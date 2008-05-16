@@ -80,7 +80,7 @@
 			$g = floor($g);
 
 			// filter: alpha(opacity=60);-moz-opacity:.60;opacity:.60;
-			return "rgba($r,$g, 0, 0.25);";
+			return "rgba($r,$g, 0, 0.4);";
 		}
 	}
 
@@ -205,11 +205,6 @@
 					$popup_otsikko .= "<tr><th class=''>".t("Alkaa").":</th><td class=''>".date("d.m.Y h:i", $row["pvmalku"])."</td></tr>";
 					$popup_otsikko .= "<tr><th class=''>".t("P‰‰ttyy").":</th><td class=''>".date("d.m.Y h:i", $row["pvmloppu"])."</td></tr>";
 				}
-				elseif($row["tyyppi"] == "Memo") {
-					$popup_otsikko = "<table>";
-					$popup_otsikko .= "<tr><th class=''>".t("Asiakas").":</th><td class=''>$row[asiakas]</td></tr>";
-					
-				}
 				elseif($row["tyyppi"] == "Muistutus") {
 					$popup_otsikko .= "<tr><th class=''>".t("P‰iv‰lle").":</th><td class=''>".date("d.m.Y", $row["pvmalku"])."</td></tr>";
 				}
@@ -238,7 +233,7 @@
 					$row["viesti"] = "<a onclick=\"popUp(event, 'ajax_menu', '350', '-10', '$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=$lajitark&ktunnus=$tunnus".url_params($kalenteri)."'); return false;\" class='kale'>$row[viesti]</a>";
 				}
 				elseif(in_array($row["tyyppi"], array("Muistutus"))) {
-					$row["viesti"] = "<a onclick=\"sndReq('ajax_menu', '$kalenteri[URL]?ohje=off&kaletee=ANNAKUITTAUS&ktunnus={$row["tunnus"]}".url_params($kalenteri)."', false, false); return false;\">{$row["viesti"]}</a>";
+					$row["viesti"] = "<a onclick=\"popUp(event, 'toimitus', '300', '-20', '$kalenteri[URL]?ohje=off&kaletee=ANNAKUITTAUS&ktunnus={$row["tunnus"]}".url_params($kalenteri)."'); return false;\">{$row["viesti"]}</a>";
 				}
 				else {
 					$row["viesti"] = "<a onclick=\"alert('Voit muokata vain omaa kalenteriasi'); return false;\" class='kale'>$row[viesti]</a>";
@@ -1248,8 +1243,8 @@
 						kuittaus = '$kuittaus'
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$ktunnus'";
 		$updres = mysql_query($query) or pupe_error($query);
-		
-		die("<script LANGUAGE='JavaScript'>pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none'; sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false);</script></body></html>");
+
+		die("<script LANGUAGE='JavaScript'>sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false); pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none';</script></body></html>");
 	}
 	
 	//	Skipataan aina takaisin kalenteritapahtumaan
@@ -1440,7 +1435,7 @@
 				}
 			}
 
-			die("<script LANGUAGE='JavaScript'>pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none'; sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false);</script></body></html>");
+			die("<script LANGUAGE='JavaScript'>sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false); pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none';</script></body></html>");
 		}
 		else {
 			$kaletee = "KALENTERITAPAHTUMA";
@@ -1456,7 +1451,7 @@
 		$query = " DELETE FROM kalenteri WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$ktunnus'";
 		$updres = mysql_query($query) or pupe_error($query);	
 		
-		die("<script LANGUAGE='JavaScript'>pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none'; sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false);</script></body></html>");
+		die("<script LANGUAGE='JavaScript'>sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false); pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none';</script></body></html>");
 	}
 	
 	if($kaletee == "KALENTERITAPAHTUMA") {
@@ -1861,7 +1856,7 @@
 
 		$kaletee = "LISAA_LIITE";
 		
-		//die("<script LANGUAGE='JavaScript'>pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none'; sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false);</script></body></html>");		
+		//die("<script LANGUAGE='JavaScript'>sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false); pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none';</script></body></html>");		
 	}
 
 	if($kaletee == "POISTA_LIITE") {
@@ -1874,7 +1869,7 @@
 		$updres = mysql_query($query) or pupe_error($query);	
 		$kaletee = "LISAA_LIITE";
 		
-		//die("<script LANGUAGE='JavaScript'>pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none'; sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false);</script></body></html>");		
+		//die("<script LANGUAGE='JavaScript'>sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false); pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none';</script></body></html>");		
 	}
 	
 	if($kaletee == "LISAA_LIITE") {

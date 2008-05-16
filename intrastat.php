@@ -124,106 +124,121 @@
 			$vainnimikegroup = "";
 		}
 
+		$query = "";
 		// tässä tulee sitten nimiketietueet unionilla
-		$query = "	(SELECT
-					tuote.tullinimike1,
-					if(lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-					if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
-					(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
-					lasku.laskunro,
-					tuote.tuoteno,
-					lasku.kauppatapahtuman_luonne,
-					lasku.kuljetusmuoto,
-					round(sum(tilausrivi.kpl),0) kpl,
-					tullinimike.su_vientiilmo su,
-					if(round(sum(tilausrivi.rivihinta / lasku.summa * lasku.bruttopaino), 0) > 0.5, round(sum(tilausrivi.rivihinta / lasku.summa * lasku.bruttopaino), 0), 1) as paino,
-					if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
-					group_concat(lasku.tunnus) as kaikkitunnukset,
-					group_concat(distinct tilausrivi.perheid2) as perheid2set,
-					group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet,
-					'Keikka' as tapa
-					FROM lasku use index (yhtio_tila_mapvm)
-					JOIN tilausrivi use index (uusiotunnus_index) ON tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
-					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
-					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
-					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
-					WHERE lasku.kohdistettu = 'X'
-					and lasku.tila = 'K'
-					and lasku.vanhatunnus = 0
-					and lasku.kauppatapahtuman_luonne != '999'
-					and lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.mapvm >= '$vva-$kka-$ppa'
-					and lasku.mapvm <= '$vvl-$kkl-$ppl'
-					GROUP BY $vainnimikegroup tuote.tullinimike1, maalahetys, alkuperamaa, maamaara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne
-					HAVING $maalisa)
+		if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "keikka") {
+			$query = "	(SELECT
+						tuote.tullinimike1,
+						if(lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+						if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
+						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
+						lasku.laskunro,
+						tuote.tuoteno,
+						lasku.kauppatapahtuman_luonne,
+						lasku.kuljetusmuoto,
+						round(sum(tilausrivi.kpl),0) kpl,
+						tullinimike.su_vientiilmo su,
+						if(round(sum(tilausrivi.rivihinta / lasku.summa * lasku.bruttopaino), 0) > 0.5, round(sum(tilausrivi.rivihinta / lasku.summa * lasku.bruttopaino), 0), 1) as paino,
+						if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
+						group_concat(lasku.tunnus) as kaikkitunnukset,
+						group_concat(distinct tilausrivi.perheid2) as perheid2set,
+						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet,
+						'Keikka' as tapa
+						FROM lasku use index (yhtio_tila_mapvm)
+						JOIN tilausrivi use index (uusiotunnus_index) ON tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
+						JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
+						LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
+						LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
+						WHERE lasku.kohdistettu = 'X'
+						and lasku.tila = 'K'
+						and lasku.vanhatunnus = 0
+						and lasku.kauppatapahtuman_luonne != '999'
+						and lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.mapvm >= '$vva-$kka-$ppa'
+						and lasku.mapvm <= '$vvl-$kkl-$ppl'
+						GROUP BY $vainnimikegroup tuote.tullinimike1, maalahetys, alkuperamaa, maamaara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne
+						HAVING $maalisa)";
+		}
+		
 
-					UNION
+		if ($tapahtumalaji == "kaikki") {
+			$query .= "	UNION";
+		}
+		
+		if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "lasku") {
+			$query .= "	(SELECT
+						tuote.tullinimike1,
+						if(lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+						if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
+						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
+						lasku.laskunro,
+						tuote.tuoteno,
+						lasku.kauppatapahtuman_luonne,
+						lasku.kuljetusmuoto,
+						round(sum(tilausrivi.kpl),0) kpl,
+						tullinimike.su_vientiilmo su,
+						if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
+						if(round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
+						group_concat(lasku.tunnus) as kaikkitunnukset,
+						group_concat(distinct tilausrivi.perheid2) as perheid2set,
+						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet,
+						'Lasku' as tapa
+						FROM lasku use index (yhtio_tila_tapvm)
+						JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
+						JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
+						LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
+						LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
+						WHERE lasku.tila = 'L'
+						and lasku.alatila = 'X'
+						and lasku.kauppatapahtuman_luonne != '999'
+						and lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tapvm >= '$vva-$kka-$ppa'
+						and lasku.tapvm <= '$vvl-$kkl-$ppl'
+						GROUP BY $vainnimikegroup tuote.tullinimike1, maalahetys, alkuperamaa, maamaara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne
+						HAVING $maalisa)";
+		}
+		
 
-					(SELECT
-					tuote.tullinimike1,
-					if(lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-					if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
-					(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
-					lasku.laskunro,
-					tuote.tuoteno,
-					lasku.kauppatapahtuman_luonne,
-					lasku.kuljetusmuoto,
-					round(sum(tilausrivi.kpl),0) kpl,
-					tullinimike.su_vientiilmo su,
-					if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
-					if(round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
-					group_concat(lasku.tunnus) as kaikkitunnukset,
-					group_concat(distinct tilausrivi.perheid2) as perheid2set,
-					group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet,
-					'Lasku' as tapa
-					FROM lasku use index (yhtio_tila_tapvm)
-					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
-					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
-					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
-					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
-					WHERE lasku.tila = 'L'
-					and lasku.alatila = 'X'
-					and lasku.kauppatapahtuman_luonne != '999'
-					and lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tapvm >= '$vva-$kka-$ppa'
-					and lasku.tapvm <= '$vvl-$kkl-$ppl'
-					GROUP BY $vainnimikegroup tuote.tullinimike1, maalahetys, alkuperamaa, maamaara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne
-					HAVING $maalisa)
+		if ($tapahtumalaji == "kaikki") {
+			$query .= "	UNION";
+		}
+		
 
-					UNION
+		if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "siirtolista") {
+			$query .= "	(SELECT
+						tuote.tullinimike1,
+						if(lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+						if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
+						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
+						lasku.tunnus laskunro,
+						tuote.tuoteno,
+						lasku.kauppatapahtuman_luonne,
+						lasku.kuljetusmuoto,
+						round(sum(tilausrivi.kpl),0) kpl,
+						tullinimike.su_vientiilmo su,
+						if(count(tilausrivi.tunnus) = count(if(tuote.tuotemassa > 0,1,0)),if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) = 0,1,round(sum(tilausrivi.kpl*tuote.tuotemassa),0)),if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1))) paino,
+						if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
+						group_concat(lasku.tunnus) as kaikkitunnukset,
+						group_concat(distinct tilausrivi.perheid2) as perheid2set,
+						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet,
+						'Siirtolista' as tapa
+						FROM lasku use index (yhtio_tila_tapvm)
+						JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
+						JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
+						LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
+						LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
+						WHERE lasku.tila = 'G'
+						and lasku.alatila = 'V'
+						and lasku.kauppatapahtuman_luonne != '999'
+						and lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tapvm >= '$vva-$kka-$ppa'
+						and lasku.tapvm <= '$vvl-$kkl-$ppl'
+						GROUP BY $vainnimikegroup tuote.tullinimike1, maalahetys, alkuperamaa, maamaara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne
+						HAVING $maalisa)";
+		}
+		
 
-					(SELECT
-					tuote.tullinimike1,
-					if(lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-					if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
-					(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
-					lasku.tunnus laskunro,
-					tuote.tuoteno,
-					lasku.kauppatapahtuman_luonne,
-					lasku.kuljetusmuoto,
-					round(sum(tilausrivi.kpl),0) kpl,
-					tullinimike.su_vientiilmo su,
-					if(count(tilausrivi.tunnus) = count(if(tuote.tuotemassa > 0,1,0)),if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) = 0,1,round(sum(tilausrivi.kpl*tuote.tuotemassa),0)),if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1))) paino,
-					if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
-					group_concat(lasku.tunnus) as kaikkitunnukset,
-					group_concat(distinct tilausrivi.perheid2) as perheid2set,
-					group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet,
-					'Siirtolista' as tapa
-					FROM lasku use index (yhtio_tila_tapvm)
-					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
-					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
-					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
-					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
-					WHERE lasku.tila = 'G'
-					and lasku.alatila = 'V'
-					and lasku.kauppatapahtuman_luonne != '999'
-					and lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tapvm >= '$vva-$kka-$ppa'
-					and lasku.tapvm <= '$vvl-$kkl-$ppl'
-					GROUP BY $vainnimikegroup tuote.tullinimike1, maalahetys, alkuperamaa, maamaara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne
-					HAVING $maalisa)
-
-					ORDER BY tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno";
+		$query .= "	ORDER BY tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$nim     = "";
@@ -597,7 +612,7 @@
 		}
 
 		// ei virheitä .. ja halutaan lähettää jotain meilejä
-		if ($virhe == 0 and $lahetys != "nope" and $kayttajan_valinta_maa == '') {
+		if ($virhe == 0 and $lahetys != "nope" and $kayttajan_valinta_maa == '' and $tapahtumalaji == "kaikki") {
 
 			//PGP-encryptaus labeli
 			$label  = '';
@@ -745,6 +760,7 @@
 	$sel2[$tapa]     = "SELECTED";
 	$sel3[$lahetys]  = "SELECTED";
 	$sel4[$lisavar]  = "SELECTED";
+	$sel5[$tapahtumalaji] = "SELECTED";
 
 	if($excel != "") {
 		$echecked = "checked";
@@ -839,6 +855,14 @@
 			<input type='checkbox' name='excel' $echecked>
 			</select>
 		</tr>
+			<th>".t("Valitse tapahtumalaji")."</th>
+			<td>
+			<select name='tapahtumalaji'>
+			<option value='kaikki' 		$sel5[kaikki]>".t("Kaikki")."</option>
+			<option value='keikka' 		$sel5[keikka]>".t("Keikka")."</option>
+			<option value='lasku'		$sel5[lasku]>".t("Lasku")."</option>
+			<option value='siirtolista' $sel5[siirtolista]>".t("Siirtolista")."</option>
+			</select>
 	</table>
 
 	<br>

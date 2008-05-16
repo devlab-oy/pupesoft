@@ -382,8 +382,7 @@
 				
 				echo "<tr><td>$isatuoteno - $isarow[nimitys]</td></tr></table><br>";
 				
-				
-				$query = "SELECT fakta, fakta2, ei_nayteta, omasivu FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' ORDER BY isatuoteno, tuoteno LIMIT 1";
+				$query = "SELECT ei_nayteta FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' and ei_nayteta != '' ORDER BY isatuoteno, tuoteno LIMIT 1";
 				$ressu = mysql_query($query) or pupe_error($query);
 				$faktarow = mysql_fetch_array($ressu);
 				
@@ -407,7 +406,11 @@
 						<option value='' $sel1>".t("Kaikki rivit n‰yet‰‰n")."</option>
 						<option value='E' $sel2>".t("Lapsirivej‰ ei n‰ytet‰")."</option>
 						</select></td>";
-
+				
+				$query = "SELECT omasivu FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' and omasivu != '' ORDER BY isatuoteno, tuoteno LIMIT 1";
+				$ressu = mysql_query($query) or pupe_error($query);
+				$faktarow = mysql_fetch_array($ressu);
+				
 				if($toim == "RESEPTI") {
 					if($faktarow["omasivu"] != "") {
 						$sel1 = "";
@@ -418,7 +421,7 @@
 						$sel2 = "";	
 					}
 					
-					echo "faktarow".$faktarow["omasivu"];
+					//echo "faktarow".$faktarow["omasivu"];
 					
 					echo "<tr><th>".t("Reseptin tulostus").": </th></tr>";
 					echo "<tr><td>";
@@ -429,7 +432,7 @@
 				}
 				
 				echo "</table><br>";
-		
+				
 				echo "<form action='$PHP_SELF' method='post'>
 						<input type='hidden' name='toim' value='$toim'>
 				  		<input type='hidden' name='tee' value='TALLENNAFAKTA'>
@@ -450,9 +453,18 @@
 					echo "<th>".t("Reseptin faktat").": </th></tr>";
 				}
 				
+				$query = "SELECT fakta FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' and fakta != '' ORDER BY isatuoteno, tuoteno LIMIT 1";
+				$ressu = mysql_query($query) or pupe_error($query);
+				$faktarow = mysql_fetch_array($ressu);
+				
 				echo "<td><textarea cols='35' rows='7' name='fakta'>$faktarow[fakta]</textarea></td>";
 				
 				if($toim == "RESEPTI") {
+					
+					$query = "SELECT fakta2 FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' and fakta2 != '' ORDER BY isatuoteno, tuoteno LIMIT 1";
+					$ressu = mysql_query($query) or pupe_error($query);
+					$faktarow = mysql_fetch_array($ressu);
+					
 					echo "</tr><tr>";
 					echo "<th>".t("Yhdist‰misen lis‰tiedot").": </th></tr>";
 					echo "<td><textarea cols='35' rows='4' name='fakta2'>$faktarow[fakta2]</textarea></td>";

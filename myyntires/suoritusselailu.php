@@ -123,7 +123,9 @@
 					concat_ws(' ',tili.tilino, tili.nimi) vastatili,
 					asiakas_tunnus,
 					tili.tilino ttilino,
-					yriti.oletus_selvittelytili
+					yriti.oletus_selvittelytili,
+					tiliointi.summa * -1 kotisumma,
+					suoritus.valkoodi
 					FROM suoritus
 					LEFT JOIN tiliointi ON (tiliointi.yhtio = suoritus.yhtio AND tiliointi.tunnus = suoritus.ltunnus AND tiliointi.korjattu = '')
 					LEFT JOIN tili ON (tili.yhtio = suoritus.yhtio and tili.tilino = tiliointi.tilino)
@@ -152,7 +154,11 @@
 			echo "<tr>";
 			echo "<td>$suoritus[tilino]<br>$suoritus[vastatili]</td>";
 			echo "<td valign='top'>$suoritus[nimi_maksaja]</td>";
-			echo "<td valign='top'>$suoritus[summa]</td>";
+			echo "<td valign='top'>$suoritus[summa] $suoritus[valkoodi]";
+			if (strtoupper($suoritus['valkoodi']) != strtoupper($yhtiorow['valkoodi'])) {
+				echo "<br>$suoritus[kotisumma] $yhtiorow[valkoodi]";
+			}
+			echo "</td>";
 			echo "<td valign='top'>".tv1dateconv($suoritus["maksupvm"])."</td>";
 			echo "<td valign='top'>".tv1dateconv($suoritus["kirjpvm"])."</td>";
 			echo "</tr>";
@@ -375,7 +381,8 @@
 					asiakas.toim_nimitark,
 					asiakas.toim_osoite,
 					asiakas.toim_postitp,	
-					tiliointi.tilino ttilino	
+					tiliointi.tilino ttilino,
+					tiliointi.ltunnus tltunnus	
 					FROM suoritus
 					LEFT JOIN asiakas ON (asiakas.yhtio = suoritus.yhtio AND asiakas.tunnus = suoritus.asiakas_tunnus)
 					LEFT JOIN tiliointi ON (tiliointi.yhtio = suoritus.yhtio and tiliointi.tunnus = suoritus.ltunnus)
@@ -439,7 +446,7 @@
 			echo "<td valign='top'>".tilinumero_print($maksurow["tilino"])."</td>";
 
 			echo "<td valign='top'>$maksurow[viite]<br>$maksurow[viesti]</td>";
-			echo "<td valign='top'>$maksurow[ttilino]</td>";
+			echo "<td valign='top'><a href='../muutosite.php?tee=E&tunnus=$maksurow[tltunnus]'>$maksurow[ttilino]</a></td>";
 
 			
 

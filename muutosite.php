@@ -508,7 +508,7 @@ if ($tee == 'E' or $tee == 'F') {
 					tilinumero, concat_ws(' ', viite, viesti, sisviesti1) Maksutieto,
 					maa, ultilno, pankki1, pankki2, pankki3, pankki4, swift, clearing, maksutyyppi,
 					ebid,
-					toim_osoite, '' toim_osoitetark, toim_postino, toim_postitp, toim_maa, alatila, vienti, comments, yriti.nimi maksajanpankkitili, lasku.laskunro
+					toim_osoite, '' toim_osoitetark, toim_postino, toim_postitp, toim_maa, alatila, vienti, comments, yriti.nimi maksajanpankkitili, lasku.laskunro, saldo_maksettu, saldo_maksettu_valuutassa
 					FROM lasku
 					LEFT JOIN yriti ON lasku.yhtio=yriti.yhtio and maksu_tili=yriti.tunnus
 					LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka 
@@ -692,10 +692,24 @@ if ($tee == 'E' or $tee == 'F') {
 			}
 		}
 		// en jaksa mietti‰ indeksilukuja perkele!
-		if ($trow["comments"] != '')
-			echo "<tr><th>".t("Kommentti")."</th><td>$trow[comments]</td></tr>";
-
-		// tehd‰‰n lasku linkki
+		if ($trow["comments"] != '' or $trow['saldo_maksettu'] != 0) {
+			echo "<tr><th>".t("Kommentti")."</th><td>$trow[comments]";
+			if ($trow['saldo_maksettu'] != 0) {
+				if ($trow["comments"] != '') echo "<br>";
+				echo t("Laskusta avoinna");
+				echo " ";
+				echo $trow['summa'] - $trow['saldo_maksettu'];
+				if ($trow['valkoodi'] != $yhriorow['valkoodi']) {
+					echo " (";
+					echo $trow['saldo_valuutassa'] - $trow['saldo_maksettu_valuutassa'];
+					echo $trow['valkoodi'];
+					echo ")";
+				}
+			}
+			echo "</td></tr>";
+		}
+		
+		// tehd‰‰n laskulinkki
 		echo "<tr><th>".t("Laskun kuva")."</th><td>".ebid($tunnus) ."</td></tr>";
 
 	}

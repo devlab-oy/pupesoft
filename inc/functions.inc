@@ -2442,8 +2442,8 @@ if (!function_exists("alehinta")) {
 
 		// Tulokset on:
 		// $hinta (hinta)
-		// $ale (aleprosentti)
 		// $netto onko hinta nettohinta vai ei
+		// $ale (aleprosentti)
 		// $aperuste (selkokielinen teksti mihin p‰‰dyttiin)
 		// $alehinta_alv jos on joku erikoialv t‰lle hinnaston tuotteelle
 		// $alehinta_val hinnan valuutta

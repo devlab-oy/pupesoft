@@ -13,6 +13,11 @@ else 							$uusi1		= "";
 if(isset($_POST['uusi2'])) 		$uusi2		= $_POST['uusi2'];
 else 							$uusi2		= "";
 
+//	Laitetaan loginiinkin aina oikea charset
+if(!headers_sent()) {
+	header("Content-Type: text/html; charset=iso-8859-1");
+}
+
 require ("inc/functions.inc");
 
 if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin

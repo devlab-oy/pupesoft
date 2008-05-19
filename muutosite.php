@@ -699,7 +699,7 @@ if ($tee == 'E' or $tee == 'F') {
 				echo t("Laskusta avoinna");
 				echo " ";
 				echo $trow['summa'] - $trow['saldo_maksettu'];
-				if ($trow['valkoodi'] != $yhriorow['valkoodi']) {
+				if ($trow['valkoodi'] != $yhtiorow['valkoodi']) {
 					echo " (";
 					echo $trow['saldo_valuutassa'] - $trow['saldo_maksettu_valuutassa'];
 					echo $trow['valkoodi'];

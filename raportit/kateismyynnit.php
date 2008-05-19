@@ -1687,12 +1687,17 @@
 								}
 							}
 							else if (obj.elements[i].id.substring(0,12) == ('luottokortti') && (!isNaN(obj.elements[i].id.substring(17,19)) || !isNaN(obj.elements[i].id.substring(17,18)))) {
-								if (pointer != obj.elements[i].id.substring(17,18)) {
+								if (pointer != obj.elements[i].id.substring(17,19) || pointer != obj.elements[i].id.substring(17,18)) {
 									solut = 0;
 								}
 
 								if (obj.elements[i].value != '') {
-									pointer = obj.elements[i].id.substring(17,18);
+									if (!isNaN(obj.elements[i].id.substring(17,19))) {
+										pointer = obj.elements[i].id.substring(17,19);
+									}
+									else if (!isNaN(obj.elements[i].id.substring(17,18))) {
+										pointer = obj.elements[i].id.substring(17,18);
+									}
 
 									if (document.getElementById('luottokortti erotus'+pointer).innerHTML != '') {
 										erotus = Number(document.getElementById('luottokortti erotus'+pointer).innerHTML.replace(\",\",\".\"));

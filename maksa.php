@@ -776,7 +776,7 @@
 					lasku.tunnus peru,
 					yriti.tilino,
 					yriti.nimi tilinimi,
-					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus
+					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus, lasku.viite, lasku.viesti
 					FROM lasku, valuu, yriti
 					WHERE lasku.yhtio = '$kukarow[yhtio]' 
 					and valuu.yhtio = lasku.yhtio
@@ -801,6 +801,7 @@
 			echo "<th valign='top'>".t("Summa")."<br>".t("kassa-alella")."</th>";
 			echo "<th valign='top'>".t("Summa")."</th>";
 			echo "<th valign='top'>".t("Maksutili")."</th>";
+			echo "<th valign='top'>".t("Viite")."<br>".t("Viesti")."</th>";
 			echo "<th valign='top'>".t("Ebid")."</th>";
 			echo "<th valign='top'>".t("Kassa-ale")."</th>";
 			echo "<th valign='top'>".t("Maksatus")."</th></tr>";
@@ -855,6 +856,7 @@
 
 				echo "</td>";
 				echo "<td valign='top'>$trow[tilinimi]<br>".tilinumero_print($trow["tilino"])."</td>";
+				echo "<td valign='top'>$trow[viite]<br>$trow[viesti]</td>";
 				echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
 				
 				if ($trow["kale"] != "") {
@@ -919,7 +921,7 @@
 					h3time,
 					h4time,
 					h5time,
-					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus
+					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus, lasku.viesti, lasku.comments, lasku.viite
 					FROM lasku use index (yhtio_tila_mapvm)
 					JOIN valuu ON lasku.yhtio=valuu.yhtio and lasku.valkoodi = valuu.nimi
 					WHERE lasku.yhtio = '$kukarow[yhtio]'					
@@ -952,6 +954,7 @@
 			echo "<th valign='top'>".t("Kapvm")."<br>".t("Eräpvm")."</th>";
 			echo "<th valign='top'>".t("Summa")."<br>".t("kassa-alella")."</th>";
 			echo "<th valign='top'>".t("Summa")."</th>";
+			echo "<th valign='top'>".t("Viite")."<br>".t("Viesti")."</th>";
 			echo "<th valign='top'>".t("Ebid")."</th>";
 			echo "<th valign='top'>".t("Maksatus")."</th></tr>";
 			
@@ -1008,6 +1011,9 @@
 				}
 			
 				echo "</td>";
+				
+				echo "<td valign='top'>$trow[viite]<br>$trow[viesti]</td>";
+				
 				echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
 					
 				// Ok, mutta onko meillä varaa makssa kyseinen lasku???

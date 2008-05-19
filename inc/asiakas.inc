@@ -87,5 +87,28 @@
 			$rajauslisa	= "";
 		}
 	}
-
+	
+	$prospekti		 = "";
+	$prospektlisa	 = "";
+	
+	$apupuquery = "SELECT selite FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = 'PIIRI' and selitetark_2 = 'rajattu'";
+	$apupuresult = mysql_query($apupuquery) or pupe_error($apupuquery);
+	
+	if (strtoupper($rajattu_nakyma) == 'PROSPEKTI') {
+		$prospekti = "TRUE"; 
+		$apupuquery = "SELECT selite FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = 'PIIRI' and selitetark_2 = 'rajattu'";
+		$apupuresult = mysql_query($apupuquery) or pupe_error($apupuquery);
+		
+		$prospektpiirit	 = "";		
+	}
+	else {
+		if (mysql_num_rows($apupuresult) > 0) {
+			while ($apupurow = mysql_fetch_array($apupuresult)) {
+				$prospektpiirit .= "$apupurow[selite],";
+			}
+			$prospektlisa = " and asiakas.piiri NOT IN ('".str_replace(',','\',\'',substr($prospektpiirit,0,-1))."') ";
+		}
+	}
+	
+	
 ?>

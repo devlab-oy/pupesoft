@@ -254,7 +254,7 @@
 	echo "<td class='back'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></form></tr>\n\n";
 	
 	while ($trow=mysql_fetch_array ($result)) {
-		echo "<tr>";
+		echo "<tr class='aktiivi'>";
 		for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
 			if ($i == 1) {
 				if (trim($trow[1]) == '') $trow[1] = "".t("*tyhjä*")."";

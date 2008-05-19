@@ -765,6 +765,7 @@
 				
 				$row = mysql_fetch_array($result);
 
+				echo "<input type='hidden' id='rivipointer$i' name='rivipointer$i' value=''>";
 				echo "<input type='hidden' name='tyyppi_pohjakassa$i' id='tyyppi_pohjakassa$i' value='$row[kassanimi]'>";
 				echo "<tr><td colspan='";
 					if ($tilityskpl > 1) {
@@ -859,7 +860,6 @@
 								$solu = "kateinen";
 
 								echo "</table><table width='100%'>";
-								echo "<input type='hidden' id='rivipointer$i' name='rivipointer$i' value=''>";
 								echo "<tr>";
 								echo "<td colspan='";
 
@@ -949,6 +949,7 @@
 
 						if ($edkassa != $row["kassa"] and $edkassa != '') {
 							echo "<tr><td>&nbsp;</td></tr>";
+							echo "<input type='hidden' id='rivipointer$i' name='rivipointer$i' value=''>";
 							echo "<input type='hidden' name='tyyppi_pohjakassa$i' id='tyyppi_pohjakassa$i' value='$row[kassanimi]'>";
 							echo "<tr><td colspan='";
 								if ($tilityskpl > 1) {
@@ -1017,7 +1018,6 @@
 						$kassalipas_tunnus[$edkassanimi] = $edktunnus;
 
 						echo "</table><table width='100%'>";
-						echo "<input type='hidden' id='rivipointer$i' name='rivipointer$i' value=''>";
 						echo "<tr><td colspan='";
 							if ($tilityskpl > 1) {
 								echo $tilityskpl+6;
@@ -1561,6 +1561,7 @@
 					var solut = 0;
 					var erotus = 0;
 					var edpointer = 1;
+					var edpointer2 = 1;
 					var pointer = 1;
 					var pointer2 = 1;
 					var kala = '';
@@ -1576,18 +1577,22 @@
 						//kala = kala+'\\n '+i+'. NIMI: '+obj.elements[i].id+' VALUE: '+obj.elements[i].value;
 
 						if (obj.elements[i].id.substring(0,11) == ('rivipointer')) {
-							edpointer = pointer;
 							var len = obj.elements[i].id.length;
+
+							edpointer = pointer;
+							edpointer2 = pointer2;
+
 							pointer = obj.elements[i].id.substring(11,len);
+							pointer2 = obj.elements[i].id.substring(11,len);
 						}
 
-						if (obj.elements[i].id.substring(0,10) == ('pohjakassa') && !isNaN(obj.elements[i].id.substring(10,11))) {
+						if (obj.elements[i].id.substring(0,10) == ('pohjakassa')) {
 							if (obj.elements[i].value != '' && obj.elements[i].value != null) {
-								if (obj.elements[i].id.substring(10,11) != pointer2) {
+								if (pointer2 != edpointer2) {
+									edpointer2 = pointer2;
 									loppukas = 0;
 								}
 
-								pointer2 = obj.elements[i].id.substring(10,11);
 								loppukas += Number(obj.elements[i].value.replace(\",\",\".\"));
 								document.getElementById('kassalippaan_loppukassa'+pointer2).value = loppukas.toFixed(2);
 
@@ -1596,9 +1601,8 @@
 								yht_alku += Number(obj.elements[i].value.replace(\",\",\".\"));
 							}
 						}
-						else if (obj.elements[i].id.substring(0,23) == ('kassalippaan_loppukassa') && !isNaN(obj.elements[i].id.substring(23,24))) {
+						else if (obj.elements[i].id.substring(0,23) == ('kassalippaan_loppukassa')) {
 							if (obj.elements[i].value != '' && obj.elements[i].value != null) {
-								pointer2 = obj.elements[i].id.substring(23,24);
 								document.getElementById('yht_lopkas'+pointer).value = Number(obj.elements[i].value.replace(\",\",\".\"));
 								yht_loppu += Number(obj.elements[i].value.replace(\",\",\".\"));
 							}
@@ -1608,7 +1612,6 @@
 								summa -= Number(obj.elements[i].value.replace(\",\",\".\"));
 								yht_kattil += Number(obj.elements[i].value.replace(\",\",\".\"));
 
-								pointer = obj.elements[i].id.substring(13,14);
 								loppukas -= Number(obj.elements[i].value.replace(\",\",\".\"));
 								document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
 							}
@@ -1621,7 +1624,6 @@
 							summa -= Number(obj.elements[i].value.replace(\",\",\".\"));
 							yht_katot += Number(obj.elements[i].value.replace(\",\",\".\"));
 
-							pointer = obj.elements[i].id.substring(10,11);
 							loppukas -= Number(obj.elements[i].value.replace(\",\",\".\"));
 							document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
 						}
@@ -1632,8 +1634,6 @@
 							}
 
 							if (obj.elements[i].value != '') {
-								pointer = obj.elements[i].id.substring(13,14);
-
 								if (document.getElementById('kateinen erotus'+pointer).innerHTML !== null && document.getElementById('kateinen erotus'+pointer).innerHTML != '') {
 									erotus = Number(document.getElementById('kateinen erotus'+pointer).innerHTML.replace(\",\",\".\"));
 									document.getElementById('erotus'+pointer).value = erotus;
@@ -1674,8 +1674,6 @@
 							}
 
 							if (obj.elements[i].value != '') {
-								pointer = obj.elements[i].id.substring(17,18);
-
 								if (document.getElementById('pankkikortti erotus'+pointer).innerHTML != '') {
 									erotus = Number(document.getElementById('pankkikortti erotus'+pointer).innerHTML.replace(\",\",\".\"));
 									document.getElementById('erotus'+pointer).value = Number(document.getElementById('pankkikortti erotus'+pointer).innerHTML.replace(\",\",\".\"));

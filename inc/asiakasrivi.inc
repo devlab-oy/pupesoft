@@ -7,7 +7,7 @@
 	if ($i == 0) { //yhtiötä ei näytetä
 		$tyyppi = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "tilino" or
 		mysql_field_name($result, $i) == "tilino_eu" or
 		mysql_field_name($result, $i) == "tilino_ei_eu" or
@@ -31,7 +31,7 @@
 			}
 		}
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kustannuspaikka") { //kustannuspaikat
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -39,7 +39,7 @@
 					tyyppi = 'K'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
-		
+
 		$sel="";
 		if (trim($trow[$i]) == "") {
 			$sel = "selected";
@@ -72,7 +72,7 @@
 			$sel = "selected";
 		}
 		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei kohdetta")."";
-		
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['tunnus']) {
@@ -141,11 +141,11 @@
 		$sel  = '';
 		$sel1 = '';
 		$sel2 = '';
-		
+
 		if(!isset($trow[$i])) {
 			$trow[$i] = $laji;
 		}
-		
+
 		if (strtoupper($trow[$i]) == 'H') {
 			$sel1 = "SELECTED";
 		}
@@ -155,7 +155,7 @@
 		else {
 			$sel = "SELECTED";
 		}
-		
+
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value = '' $sel>".t("Yritys")."</option>";
 		$ulos .= "<option value = 'H' $sel1>".t("Yksityishenkilö")."</option>";
@@ -231,7 +231,7 @@
 							AND asiakasnro = '$apu_asiakasnumero'";
 				$vresult = mysql_query($query) or pupe_error($query);
 			}
-			
+
 			$trow[$i] = $apu_asiakasnumero;
 		}
 
@@ -249,16 +249,16 @@
 		$ulos .= "<input type='text' name='$nimi' id='$nimi' value='$trow[$i]'>";
 
 		if ($alias_set == "VAHITTAISMYYNTI") {
-			$ulos .= "<input type='button' name='etsi_vapytunnus' id='etsi_vapytunnus' value='".t("Etsi seuraava vapaa asiakasnumero")."' onClick='javascript:document.getElementById(\"etsi_vapytunnus\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapytunnus\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=ytunnus&ohje=off&pointer=$i\", \"ytunnus_etsi\", false, false)'>";			
+			$ulos .= "<input type='button' name='etsi_vapytunnus' id='etsi_vapytunnus' value='".t("Etsi seuraava vapaa asiakasnumero")."' onClick='javascript:document.getElementById(\"etsi_vapytunnus\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapytunnus\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=ytunnus&ohje=off&pointer=$i\", \"ytunnus_etsi\", false, false)'>";
 		}
 
 		$ulos .= "</div>";
 		$ulos .= "</td>";
-		
+
 		if ($alias_set != "VAHITTAISMYYNTI") {
 			$ulos .= "<td class='back'>".t("Voit tarkistaa ytunnuksen")." <a target='YTJ' href='http://ec.europa.eu/taxation_customs/vies/lang.do?fromWhichPage=vieshome&selectedLanguage=".strtoupper($kukarow["kieli"])."'>".t("täältä")."</td>";
 		}
-		
+
 		$jatko = 0;
 	}
 
@@ -367,9 +367,9 @@
 		mysql_field_name($result, $i) == "laskutus_nimitark" or
 		mysql_field_name($result, $i) == "laskutus_osoite" or
 		mysql_field_name($result, $i) == "laskutus_postino" or
-		mysql_field_name($result, $i) == "laskutus_postitp" or	
+		mysql_field_name($result, $i) == "laskutus_postitp" or
 		mysql_field_name($result, $i) == "laskutus_maa") {
-			
+
 		if($yhtiorow['laskutyyppi'] == 3) {
 			if (mysql_field_name($result, $i) == "laskutus_maa") {
 				$query = "	SELECT distinct koodi, nimi
@@ -394,11 +394,11 @@
 
 				$ulos .= "</select></td>";
 				$jatko = 0;
-			}	
+			}
 		}
 		else {
 			$tyyppi = 0;
-		}	
+		}
 	}
 
 	if (mysql_field_name($result, $i) == "toimitustapa") {
@@ -510,15 +510,15 @@
 			$ulos .= "</select></td>";
 			$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "tilausvahvistus_yhteyshenkilolle") {
-		
-				
+
+
 		if ($trow[$i] == "K") {
 			$sel = "SELECTED";
 		}
-		
-		
+
+
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value='' >".t("Ei lähetetä")."</option>";
 		$ulos .= "<option value='K' $sel>".t("Lähetetään")."</option>";
@@ -528,14 +528,14 @@
 
 	if (mysql_field_name($result, $i) == "kerayspoikkeama") {
 			$sel			= array();
-			
+
 			if ($trow[$i] == "") {
 				$sel[$yhtiorow["kerayspoikkeamaviestin_lahetys"]] = " selected";
 			}
 			else {
 				$sel[$trow[$i]]	= " selected";
 			}
-			
+
 			$ulos = "<td>
 				<select name='$nimi'>
 				<option value='0' $sel[0]>".t("Lähetetään asiakkaalle ja myyjälle")."</option>
@@ -567,7 +567,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "jtkielto") {
 
 		$sela = $selb = '';
@@ -584,7 +584,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "jtrivit") {
 			$sel		= array();
 			$pv			= $trow[$i];
@@ -807,7 +807,7 @@
 		if ($prospekti == 'TRUE') {
 			$piirilisa = " and selitetark_2 = 'rajattu' ";
 		}
-		
+
 		$query = "	SELECT selite, if (selite!=selitetark, concat_ws(' - ', selite, selitetark), selite) selitetark
 					FROM avainsana
 					WHERE yhtio='$kukarow[yhtio]' and laji = 'PIIRI' $piirilisa

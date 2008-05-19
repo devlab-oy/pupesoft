@@ -1686,7 +1686,7 @@
 									document.getElementById('soluerotus'+pointer).value = solusumma.toFixed(2);
 								}
 							}
-							else if (obj.elements[i].id.substring(0,12) == ('luottokortti') && !isNaN(obj.elements[i].id.substring(17,18))) {
+							else if (obj.elements[i].id.substring(0,12) == ('luottokortti') && (!isNaN(obj.elements[i].id.substring(17,19)) || !isNaN(obj.elements[i].id.substring(17,18)))) {
 								if (pointer != obj.elements[i].id.substring(17,18)) {
 									solut = 0;
 								}

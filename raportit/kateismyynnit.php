@@ -859,6 +859,7 @@
 								$solu = "kateinen";
 
 								echo "</table><table width='100%'>";
+								echo "<input type='hidden' id='rivipointer$i' name='rivipointer$i' value=''>";
 								echo "<tr>";
 								echo "<td colspan='";
 
@@ -1016,6 +1017,7 @@
 						$kassalipas_tunnus[$edkassanimi] = $edktunnus;
 
 						echo "</table><table width='100%'>";
+						echo "<input type='hidden' id='rivipointer$i' name='rivipointer$i' value=''>";
 						echo "<tr><td colspan='";
 							if ($tilityskpl > 1) {
 								echo $tilityskpl+6;
@@ -1156,6 +1158,7 @@
 					$kassalipas_tunnus[$edkassanimi] = $edktunnus;
 
 					echo "</table><table width='100%'>";
+					echo "<input type='hidden' id='rivipointer$i' name='rivipointer$i' value=''>";
 					echo "<tr><input type='hidden' name='maksutapa$i' value='$solu#$tilinumero[pankkikortti]#";
 						if (count($kassakone) > 1) {
 							foreach ($kassalippaat as $key => $lipas) {
@@ -1241,6 +1244,7 @@
 					$kassalipas_tunnus[$edkassanimi] = $edktunnus;
 
 					echo "</table><table width='100%'>";
+					echo "<input type='hidden' id='rivipointer$i' name='rivipointer$i' value=''>";
 					echo "<tr>";
 					echo "<input type='hidden' name='maksutapa$i' value='$solu#$tilinumero[luottokortti]#";
 						if (count($kassakone) > 1) {
@@ -1556,6 +1560,7 @@
 					var solusumma = 0;
 					var solut = 0;
 					var erotus = 0;
+					var edpointer = 1;
 					var pointer = 1;
 					var pointer2 = 1;
 					var kala = '';
@@ -1568,178 +1573,178 @@
 					var yht_loppu = 0;
 
 			 		for (i=0; i<obj.length; i++) {
-						if (obj.elements[i].value != '' && obj.elements[i].value != null) {
-							//kala = kala+'\\n '+i+'. NIMI: '+obj.elements[i].id+' VALUE: '+obj.elements[i].value;
+						//kala = kala+'\\n '+i+'. NIMI: '+obj.elements[i].id+' VALUE: '+obj.elements[i].value;
 
-							if (obj.elements[i].id.substring(0,10) == ('pohjakassa') && !isNaN(obj.elements[i].id.substring(10,11))) {
-								if (obj.elements[i].value != '' && obj.elements[i].value != null) {
-									if (obj.elements[i].id.substring(10,11) != pointer2) {
-										loppukas = 0;
-									}
+						if (obj.elements[i].id.substring(0,11) == ('rivipointer')) {
+							edpointer = pointer;
+							var len = obj.elements[i].id.length;
+							pointer = obj.elements[i].id.substring(11,len);
+						}
 
-									pointer2 = obj.elements[i].id.substring(10,11);
-									loppukas += Number(obj.elements[i].value.replace(\",\",\".\"));
-									document.getElementById('kassalippaan_loppukassa'+pointer2).value = loppukas.toFixed(2);
-
-									summa += Number(obj.elements[i].value.replace(\",\",\".\"));
-									temp += Number(obj.elements[i].value.replace(\",\",\".\"));
-									yht_alku += Number(obj.elements[i].value.replace(\",\",\".\"));
+						if (obj.elements[i].id.substring(0,10) == ('pohjakassa') && !isNaN(obj.elements[i].id.substring(10,11))) {
+							if (obj.elements[i].value != '' && obj.elements[i].value != null) {
+								if (obj.elements[i].id.substring(10,11) != pointer2) {
+									loppukas = 0;
 								}
-							}
-							else if (obj.elements[i].id.substring(0,23) == ('kassalippaan_loppukassa') && !isNaN(obj.elements[i].id.substring(23,24))) {
-								if (obj.elements[i].value != '' && obj.elements[i].value != null) {
-									pointer2 = obj.elements[i].id.substring(23,24);
-									document.getElementById('yht_lopkas'+pointer).value = Number(obj.elements[i].value.replace(\",\",\".\"));
-									yht_loppu += Number(obj.elements[i].value.replace(\",\",\".\"));
-								}
-							}
-							else if (obj.elements[i].id.substring(0,13) == ('kateistilitys') && !isNaN(obj.elements[i].id.substring(13,14))) {
-								if (obj.elements[i].value != '') {
-									summa -= Number(obj.elements[i].value.replace(\",\",\".\"));
-									yht_kattil += Number(obj.elements[i].value.replace(\",\",\".\"));
 
-									pointer = obj.elements[i].id.substring(13,14);
-									loppukas -= Number(obj.elements[i].value.replace(\",\",\".\"));
-									document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
-								}
+								pointer2 = obj.elements[i].id.substring(10,11);
+								loppukas += Number(obj.elements[i].value.replace(\",\",\".\"));
+								document.getElementById('kassalippaan_loppukassa'+pointer2).value = loppukas.toFixed(2);
+
+								summa += Number(obj.elements[i].value.replace(\",\",\".\"));
+								temp += Number(obj.elements[i].value.replace(\",\",\".\"));
+								yht_alku += Number(obj.elements[i].value.replace(\",\",\".\"));
 							}
-							else if (obj.elements[i].value != '' && obj.elements[i].id == 'kaikkiyhteensa') {
-								temp_value = Number(obj.elements[i].value.replace(\",\",\".\"));
-								obj.elements[i].value = temp_value.toFixed(2);
+						}
+						else if (obj.elements[i].id.substring(0,23) == ('kassalippaan_loppukassa') && !isNaN(obj.elements[i].id.substring(23,24))) {
+							if (obj.elements[i].value != '' && obj.elements[i].value != null) {
+								pointer2 = obj.elements[i].id.substring(23,24);
+								document.getElementById('yht_lopkas'+pointer).value = Number(obj.elements[i].value.replace(\",\",\".\"));
+								yht_loppu += Number(obj.elements[i].value.replace(\",\",\".\"));
 							}
-							else if (obj.elements[i].value != '' && obj.elements[i].id.substring(0,10) == ('kateisotto')) {
+						}
+						else if (obj.elements[i].id.substring(0,13) == ('kateistilitys') && !isNaN(obj.elements[i].id.substring(13,14))) {
+							if (obj.elements[i].value != '') {
 								summa -= Number(obj.elements[i].value.replace(\",\",\".\"));
-								yht_katot += Number(obj.elements[i].value.replace(\",\",\".\"));
+								yht_kattil += Number(obj.elements[i].value.replace(\",\",\".\"));
 
-								pointer = obj.elements[i].id.substring(10,11);
+								pointer = obj.elements[i].id.substring(13,14);
 								loppukas -= Number(obj.elements[i].value.replace(\",\",\".\"));
 								document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
 							}
-							else if (obj.elements[i].id.substring(0,8) == ('kateinen') && !isNaN(obj.elements[i].id.substring(13,14))) {
-								if (pointer != obj.elements[i].id.substring(13,14)) {
-									solut = 0;
-								}
-
-								if (obj.elements[i].value != '') {
-									pointer = obj.elements[i].id.substring(13,14);
-
-									if (document.getElementById('kateinen erotus'+pointer).innerHTML !== null && document.getElementById('kateinen erotus'+pointer).innerHTML != '') {
-										erotus = Number(document.getElementById('kateinen erotus'+pointer).innerHTML.replace(\",\",\".\"));
-										document.getElementById('erotus'+pointer).value = erotus;
-									}
-									else {
-										erotus = 0;
-									}
-
-									solut += Number(obj.elements[i].value.replace(\",\",\".\"));
-									kassa = Number(obj.elements[i].value.replace(\",\",\".\"));
-
-									solusumma = solut.toFixed(2) - erotus.toFixed(2);
-
-									kassa = Number(kassa.toFixed(2));
-									yht_kat += kassa;
-									summa += kassa;
-									temp += kassa;
-
-									loppukas += Number(obj.elements[i].value.replace(\",\",\".\"));
-									document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
-
-									document.getElementById('kateinen soluerotus'+pointer).value = solusumma.toFixed(2);
-
-									if (solusumma.toFixed(2) == 0.00) {
-										document.getElementById('kateinen soluerotus'+pointer).style.color = 'darkgreen';
-									}
-									else {
-										document.getElementById('kateinen soluerotus'+pointer).style.color = '#FF5555';
-									}
-
-									document.getElementById('soluerotus'+pointer).value = solusumma.toFixed(2);
-								}
-							}
-							else if (obj.elements[i].id.substring(0,12) == ('pankkikortti') && !isNaN(obj.elements[i].id.substring(17,18))) {
-								if (pointer != obj.elements[i].id.substring(17,18)) {
-									solut = 0;
-								}
-
-								if (obj.elements[i].value != '') {
-									pointer = obj.elements[i].id.substring(17,18);
-
-									if (document.getElementById('pankkikortti erotus'+pointer).innerHTML != '') {
-										erotus = Number(document.getElementById('pankkikortti erotus'+pointer).innerHTML.replace(\",\",\".\"));
-										document.getElementById('erotus'+pointer).value = Number(document.getElementById('pankkikortti erotus'+pointer).innerHTML.replace(\",\",\".\"));
-									}
-									else {
-										erotus = 0;
-									}
-
-									solut += Number(obj.elements[i].value.replace(\",\",\".\"));
-									solusumma = solut - erotus;
-									document.getElementById('pankkikortti soluerotus'+pointer).value = solusumma.toFixed(2);
-
-									if (solusumma.toFixed(2) == 0.00) {
-										document.getElementById('pankkikortti soluerotus'+pointer).style.color = 'darkgreen';
-									}
-									else {
-										document.getElementById('pankkikortti soluerotus'+pointer).style.color = '#FF5555';
-									}
-
-									document.getElementById('soluerotus'+pointer).value = solusumma.toFixed(2);
-								}
-							}
-							else if (obj.elements[i].id.substring(0,12) == ('luottokortti') && (!isNaN(obj.elements[i].id.substring(17,19)) || !isNaN(obj.elements[i].id.substring(17,18)))) {
-								if (pointer != obj.elements[i].id.substring(17,19) || pointer != obj.elements[i].id.substring(17,18)) {
-									solut = 0;
-								}
-
-								if (obj.elements[i].value != '') {
-									if (!isNaN(obj.elements[i].id.substring(17,19))) {
-										pointer = obj.elements[i].id.substring(17,19);
-									}
-									else if (!isNaN(obj.elements[i].id.substring(17,18))) {
-										pointer = obj.elements[i].id.substring(17,18);
-									}
-
-									if (document.getElementById('luottokortti erotus'+pointer).innerHTML != '') {
-										erotus = Number(document.getElementById('luottokortti erotus'+pointer).innerHTML.replace(\",\",\".\"));
-										document.getElementById('erotus'+pointer).value = Number(document.getElementById('luottokortti erotus'+pointer).innerHTML.replace(\",\",\".\"));
-									}
-									else {
-										erotus = 0;
-									}
-
-									solut += Number(obj.elements[i].value.replace(\",\",\".\"));
-									solusumma = solut - erotus;
-									document.getElementById('luottokortti soluerotus'+pointer).value = solusumma.toFixed(2);
-
-									if (solusumma.toFixed(2) == 0.00) {
-										document.getElementById('luottokortti soluerotus'+pointer).style.color = 'darkgreen';
-									}
-									else {
-										document.getElementById('luottokortti soluerotus'+pointer).style.color = '#FF5555';
-									}
-
-									document.getElementById('soluerotus'+pointer).value = solusumma.toFixed(2);
-								}
-							}
-
-							summa = Math.round(summa*100)/100;
-							temp = Math.round(temp*100)/100;
-							document.getElementById('kaikkiyhteensa').value = temp.toFixed(2);
-							document.getElementById('yht_alkukassa').value = yht_alku.toFixed(2);
-							document.getElementById('yht_kateinen').value = yht_kat.toFixed(2);
-							document.getElementById('yht_kateisotto').value = yht_katot.toFixed(2);
-							document.getElementById('yht_kateistilitys').value = yht_kattil.toFixed(2);
-							document.getElementById('yht_loppukassa').value = yht_loppu.toFixed(2);
-							document.getElementById('loppukassa').value = summa.toFixed(2);
-							document.getElementById('loppukassa2').value = summa.toFixed(2);
-
-							document.getElementById('yht_alkukas').value = yht_alku.toFixed(2);
-							document.getElementById('yht_kat').value = yht_kat.toFixed(2);
-							document.getElementById('yht_katot').value = yht_katot.toFixed(2);
-							document.getElementById('yht_kattil').value = yht_kattil.toFixed(2);
 						}
+						else if (obj.elements[i].value != '' && obj.elements[i].id == 'kaikkiyhteensa') {
+							temp_value = Number(obj.elements[i].value.replace(\",\",\".\"));
+							obj.elements[i].value = temp_value.toFixed(2);
+						}
+						else if (obj.elements[i].value != '' && obj.elements[i].id.substring(0,10) == ('kateisotto')) {
+							summa -= Number(obj.elements[i].value.replace(\",\",\".\"));
+							yht_katot += Number(obj.elements[i].value.replace(\",\",\".\"));
+
+							pointer = obj.elements[i].id.substring(10,11);
+							loppukas -= Number(obj.elements[i].value.replace(\",\",\".\"));
+							document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
+						}
+						else if (obj.elements[i].id.substring(0,8) == ('kateinen') && !isNaN(obj.elements[i].id.substring(13,14))) {
+							if (pointer != edpointer) {
+								edpointer = pointer;
+								solut = 0;
+							}
+
+							if (obj.elements[i].value != '') {
+								pointer = obj.elements[i].id.substring(13,14);
+
+								if (document.getElementById('kateinen erotus'+pointer).innerHTML !== null && document.getElementById('kateinen erotus'+pointer).innerHTML != '') {
+									erotus = Number(document.getElementById('kateinen erotus'+pointer).innerHTML.replace(\",\",\".\"));
+									document.getElementById('erotus'+pointer).value = erotus;
+								}
+								else {
+									erotus = 0;
+								}
+
+								solut += Number(obj.elements[i].value.replace(\",\",\".\"));
+								kassa = Number(obj.elements[i].value.replace(\",\",\".\"));
+
+								solusumma = solut.toFixed(2) - erotus.toFixed(2);
+
+								kassa = Number(kassa.toFixed(2));
+								yht_kat += kassa;
+								summa += kassa;
+								temp += kassa;
+
+								loppukas += Number(obj.elements[i].value.replace(\",\",\".\"));
+								document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
+
+								document.getElementById('kateinen soluerotus'+pointer).value = solusumma.toFixed(2);
+
+								if (solusumma.toFixed(2) == 0.00) {
+									document.getElementById('kateinen soluerotus'+pointer).style.color = 'darkgreen';
+								}
+								else {
+									document.getElementById('kateinen soluerotus'+pointer).style.color = '#FF5555';
+								}
+
+								document.getElementById('soluerotus'+pointer).value = solusumma.toFixed(2);
+							}
+						}
+						else if (obj.elements[i].id.substring(0,12) == ('pankkikortti') && !isNaN(obj.elements[i].id.substring(17,18))) {
+							if (pointer != edpointer) {
+								edpointer = pointer;
+								solut = 0;
+							}
+
+							if (obj.elements[i].value != '') {
+								pointer = obj.elements[i].id.substring(17,18);
+
+								if (document.getElementById('pankkikortti erotus'+pointer).innerHTML != '') {
+									erotus = Number(document.getElementById('pankkikortti erotus'+pointer).innerHTML.replace(\",\",\".\"));
+									document.getElementById('erotus'+pointer).value = Number(document.getElementById('pankkikortti erotus'+pointer).innerHTML.replace(\",\",\".\"));
+								}
+								else {
+									erotus = 0;
+								}
+
+								solut += Number(obj.elements[i].value.replace(\",\",\".\"));
+								solusumma = solut - erotus;
+								document.getElementById('pankkikortti soluerotus'+pointer).value = solusumma.toFixed(2);
+
+								if (solusumma.toFixed(2) == 0.00) {
+									document.getElementById('pankkikortti soluerotus'+pointer).style.color = 'darkgreen';
+								}
+								else {
+									document.getElementById('pankkikortti soluerotus'+pointer).style.color = '#FF5555';
+								}
+
+								document.getElementById('soluerotus'+pointer).value = solusumma.toFixed(2);
+							}
+						}
+						else if (obj.elements[i].id.substring(0,12) == ('luottokortti') && !isNaN(obj.elements[i].id.substring(17,18))) {
+							if (pointer != edpointer) {
+								edpointer = pointer;
+								solut = 0;
+							}
+
+							if (obj.elements[i].value != '') {
+								if (document.getElementById('luottokortti erotus'+pointer).innerHTML != '') {
+									erotus = Number(document.getElementById('luottokortti erotus'+pointer).innerHTML.replace(\",\",\".\"));
+									document.getElementById('erotus'+pointer).value = Number(document.getElementById('luottokortti erotus'+pointer).innerHTML.replace(\",\",\".\"));
+								}
+								else {
+									erotus = 0;
+								}
+
+								solut += Number(obj.elements[i].value.replace(\",\",\".\"));
+								
+								solusumma = solut - erotus;
+								document.getElementById('luottokortti soluerotus'+pointer).value = solusumma.toFixed(2);
+
+								if (solusumma.toFixed(2) == 0.00) {
+									document.getElementById('luottokortti soluerotus'+pointer).style.color = 'darkgreen';
+								}
+								else {
+									document.getElementById('luottokortti soluerotus'+pointer).style.color = '#FF5555';
+								}
+								document.getElementById('soluerotus'+pointer).value = solusumma.toFixed(2);
+							}
+						}
+
+						summa = Math.round(summa*100)/100;
+						temp = Math.round(temp*100)/100;
+						document.getElementById('kaikkiyhteensa').value = temp.toFixed(2);
+						document.getElementById('yht_alkukassa').value = yht_alku.toFixed(2);
+						document.getElementById('yht_kateinen').value = yht_kat.toFixed(2);
+						document.getElementById('yht_kateisotto').value = yht_katot.toFixed(2);
+						document.getElementById('yht_kateistilitys').value = yht_kattil.toFixed(2);
+						document.getElementById('yht_loppukassa').value = yht_loppu.toFixed(2);
+						document.getElementById('loppukassa').value = summa.toFixed(2);
+						document.getElementById('loppukassa2').value = summa.toFixed(2);
+
+						document.getElementById('yht_alkukas').value = yht_alku.toFixed(2);
+						document.getElementById('yht_kat').value = yht_kat.toFixed(2);
+						document.getElementById('yht_katot').value = yht_katot.toFixed(2);
+						document.getElementById('yht_kattil').value = yht_kattil.toFixed(2);
 					}
-					//alert(kala);
+//					alert(kala);
 				}
 
 				function toggleGroup(id) {

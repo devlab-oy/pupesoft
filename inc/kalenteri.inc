@@ -440,7 +440,7 @@
 									WHERE yhtio='$kukarow[yhtio]' and tunnusnippu = '{$kalenteri["tunnusnippu"]}' and tila in ('R','L','N','T')";
 						$res = mysql_query($abuq) or pupe_error($abuq);
 						$row = mysql_fetch_array($res);
-						echo $abuq;
+
 						if($row["nippu"] == "") $row["nippu"] = $kalenteri["otunnus"];
 						
 						$kalenteri_jako .= "kalenteri.otunnus IN ({$row["nippu"]})";

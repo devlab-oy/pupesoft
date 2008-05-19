@@ -174,6 +174,7 @@
 			$ulos .= "<option value='JAKELULISTA' {$avain_sel['JAKELULISTA']}>				".t("Email jakelulista")."</option>";
 			$ulos .= "<option value='LUETTELO' {$avain_sel['LUETTELO']}>					".t("Luettelotyyppi")."</option>";
 			$ulos .= "<option value='TRIVITYYPPI' {$avain_sel['TRIVITYYPPI']}>				".t("Tilausrivin tyyppi")."</option>";
+			$ulos .= "<option value='LASKUTUS_SAATE' {$avain_sel['LASKUTUS_SAATE']}>		".t("Laskun sähköpostisaatekirje asiakkaalle")."</option>";
 			$ulos .= "</optgroup>";
 			
 			$ulos .= "</select></td>";
@@ -336,7 +337,12 @@
 		$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
 		$jatko = 0;
 	}
-	
+
+	if (mysql_field_name($result, $i) == "selitetark_2" and $avain_sel['LASKUTUS_SAATE'] == "SELECTED") {
+		$ulos = "<td><textarea rows=30 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "selite" and $avain_sel['TYOM_TYOLINJA'] == "SELECTED") {
 
 		$query = "	SELECT selite, selitetark

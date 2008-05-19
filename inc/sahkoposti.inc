@@ -8,6 +8,8 @@
 
 	$varaposti = '';
 
+	$subject = "$yhtiorow[nimi] - $kutsu";
+
 	if (substr($komento,0,12) == 'asiakasemail') {
 		$varaposti = $kukarow['eposti'];
 		$kukarow['eposti'] = substr($komento,12);
@@ -19,6 +21,16 @@
 	$header .= "MIME-Version: 1.0\n" ;
 	$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
+	if ($content_body != "" and $laskurow["chn"] == 666) {
+		if ($content_subject != "") {
+			$subject = $content_subject;
+		}
+		$content .= "--$bound\n";
+		$content .= "Content-type: text/plain; charset=iso-8859-1\n";
+		$content .= "Content-Transfer-Encoding: quoted-printable\n\n";
+		$content .= "$content_body\n\n";
+	}
+	
 	$content .= "--$bound\n";
 
 	if ($ctype == "TEXT") {
@@ -49,7 +61,7 @@
 	$content .= chunk_split(base64_encode($sisalto));
 	$content .= "\n" ;
 	
-	$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - $kutsu", $content, $header, "-f $yhtiorow[postittaja_email]");
+	$boob = mail($kukarow["eposti"],  "$subject", $content, $header, "-f $yhtiorow[postittaja_email]");
 
 	if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $kukarow[eposti]<br>";
 

@@ -600,7 +600,26 @@
 					echo "<input type='hidden' name='maksutapa' value='$maksuehtorow[tunnus]'>";
 				}
 			}
-			
+
+			if ($laskurow["chn"] == "666") {
+				$query = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' AND laji='LASKUTUS_SAATE'";
+				$result = mysql_query($query) or pupe_error($query);
+
+				$sel_saate = "";
+
+				echo "<tr><th>".t("Valitse saatekirje").":</th>";
+				echo "<td colspan='3'><select name='saatekirje'>";
+				echo "<option value=''>".t("Ei saatetta")."</option>";
+
+				while ($saaterow = mysql_fetch_array($result)) {
+					if ($sel_saate == $saaterow["tunnus"]) {
+						$sel_saate = " selected";
+					}
+					echo "<option value='$saaterow[tunnus]'$sel_saate>$saaterow[selite]</option>";
+				}
+
+				echo "</select></td></tr>";
+			}
 
 			///* Haetaan asiakkaan kieli *///
 			$query = "	SELECT kieli

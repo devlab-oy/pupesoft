@@ -4,7 +4,7 @@ if(!function_exists("asiakastarkista")) {
 	function asiakastarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $ytunnus_select, $asiakasnro_select, $toim, $asiak_laji;
 		
-		static $ytunnus_tunnus, $ytunnus, $ovttunnus, $apuverkkotunnus;
+		static $ytunnus_tunnus, $ytunnus, $ovttunnus, $apuverkkotunnus, $apuverkkotunnusi, $apulasku_email, $apulasku_emaili;
 		
 		if (mysql_field_name($result, $i) == "laji") {
 			$asiak_laji = $t[$i];
@@ -143,6 +143,12 @@ if(!function_exists("asiakastarkista")) {
 			$apuverkkotunnusi = $i;
 		}
 
+		if (mysql_field_name($result, $i) == "lasku_email") {
+			// lasku_email tulee datassa ennen CHN kenttää, joten otetaan tämä talteen
+			$apulasku_email  = trim($t[$i]);
+			$apulasku_emaili = $i;
+		}
+
 		if ((mysql_field_name($result, $i) == "tilino" or
 			mysql_field_name($result, $i) == "tilino_eu" or
 			mysql_field_name($result, $i) == "tilino_ei_eu" or
@@ -187,14 +193,23 @@ if(!function_exists("asiakastarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "chn") {
-			// jos ollaan valittu jotain muuta kuin PAPERI niin verkkotunnus pitää syöttää!
-			if (isset($t[$i]) and trim($t[$i]) != '100' and $apuverkkotunnus == "") {
-				$virhe[$i] = "".t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhjä! Laskutus ei onnistu")."!";
-				$virhe[$apuverkkotunnusi] = "".t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhjä! Laskutus ei onnistu")."!";
+			if (isset($t[$i]) and trim($t[$i]) != '') {
+				// jos ollaan valittu sähköposti niin lasku_email pitää syöttää!
+				if (trim($t[$i]) == '666' and $apulasku_email == "") {
+					$virhe[$i] = "".t("Olet valinnut laskutustavaksi sähköpostin ja lasku_email on tyhjä! Laskutus ei onnistu")."!";
+					$virhe[$apulasku_emaili] = "".t("Olet valinnut laskutustavaksi sähköpostin ja lasku_email on tyhjä! Laskutus ei onnistu")."!";
+				}
+
+				// jos ollaan valittu jotain muuta kuin PAPERI tai EMAIL niin verkkotunnus pitää syöttää!				
+				if (trim($t[$i]) != '666' and trim($t[$i]) != '100' and $apuverkkotunnus == "") {
+					$virhe[$i] = "".t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhjä! Laskutus ei onnistu")."!";
+					$virhe[$apuverkkotunnusi] = "".t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhjä! Laskutus ei onnistu")."!";
+				}
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "email" and trim($t[$i]) != '') {
+		if ((mysql_field_name($result, $i) == "email" or mysql_field_name($result, $i) == "lasku_email") and trim($t[$i]) != '') {
+			
 			// katotaan löytyykö email osoitteen domain...
 			list($nimi, $domain) = split("@", trim($t[$i]));
 

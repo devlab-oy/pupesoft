@@ -286,10 +286,18 @@ if($tee == "NAYTA") {
 		$kalenteri["nakyma"]			= "TAPAHTUMALISTAUS";	
 		$kalenteri["sallittu_nakyma"]	= "";
 		$kalenteri["laskutilat"]		= $laskutilat;
-		$kalenteri["otunnus"]			= $tarjous;
+		$kalenteri["tunnusnippu"]		= $tarjous;
 		
 		$kalenteri["kalenteri_ketka"]		= array("kaikki");
 		$kalenteri["kalenteri_nayta_kuka"]	= array($kukarow["kuka"]);
+
+		if($toim == "TARJOUSHAKUKONE") {
+			$kalenteri["kalenteri_nayta_tilausdata"]	= array("tarjous", "tarjouskontaktointi");
+		}		
+		else {
+			$kalenteri["kalenteri_tilausdata"]			= array("tilaus", "toimitus", "kerays", "laskutus");
+			$kalenteri["kalenteri_nayta_tilausdata"]	= array("tilaus", "laskutus", "toimitus");
+		}
 		
 		$kalenteri["kalenteri_tyypit"]		= array("kalenteri", "Memo", "Muistutus");
 		$kalenteri["kalenteri_nayta_tyyppi"]= array("kalenteri");
@@ -346,101 +354,8 @@ if($tee == "NAYTA") {
 	$select2 	= "	kalenteri.laatija	laatija, kalenteri.tunnus	tunnus";
 
 	$qlisa = "";
-
-	//	Järjestetään kaikki meidän tapahtumat
-	if($laji == "TARJOUS") {
-		$qlisa = "
-		UNION
-		/*	Uusi tarjous/versio avattu	*/	
-		(	
-			SELECT 'lasku' laji, 'alku' laji_tark, UNIX_TIMESTAMP(date(luontiaika)) aika, luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
-			FROM lasku
-			WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tarjous]' and tila IN ($laskutilat)
-		)
-		UNION					
-		/*	Eka kontakti	*/	
-		(	
-			SELECT 'kontakti_oletettu' laji, 'kontakti_1' laji_tark, UNIX_TIMESTAMP(date(date_add(luontiaika, INTERVAL 14 DAY))) aika, luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
-			FROM lasku
-			WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]' and tila IN ($laskutilat)
-		)					
-		UNION
-		/*	Toka kontakti	*/	
-		(	
-			SELECT 'kontakti_oletettu' laji, 'kontakti_2' laji_tark, UNIX_TIMESTAMP(date(date_add(luontiaika, INTERVAL 45 DAY))) aika, luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
-			FROM lasku
-			WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]' and tila IN ($laskutilat)
-		)					
-		UNION					
-		/*	Viimeinen voitelu	*/	
-		(	
-			SELECT 'kontakti_oletettu' laji, 'kontakti_3' laji_tark, UNIX_TIMESTAMP(date(date_add(luontiaika, INTERVAL 76 DAY))) aika, luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
-			FROM lasku
-			WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]' and tila IN ($laskutilat)
-		)
-		UNION
-		/*	Haetaan kaikki kontaktoinnit */
-		(
-			SELECT 'kontakti' laji, tyyppi laji_tark, UNIX_TIMESTAMP(date(pvmalku)) aika,  luontiaika, '1' vali, kalenteri.laatija laatija, kalenteri.tunnus tunnus
-			FROM kalenteri
-			WHERE yhtio = '$kukarow[yhtio]' and otunnus IN ($laskurow[versiot]) and tyyppi = 'kontakti_1'
-		)
-		UNION
-		(
-			SELECT 'kontakti' laji, tyyppi laji_tark, UNIX_TIMESTAMP(date(pvmalku)) aika,  luontiaika, '1' vali, kalenteri.laatija laatija, kalenteri.tunnus tunnus
-			FROM kalenteri
-			WHERE yhtio = '$kukarow[yhtio]' and otunnus IN ($laskurow[versiot]) and tyyppi = 'kontakti_2'
-		)
-		UNION
-		(
-			SELECT 'kontakti' laji, tyyppi laji_tark, UNIX_TIMESTAMP(date(pvmalku)) aika,  luontiaika, '1' vali, kalenteri.laatija laatija, kalenteri.tunnus tunnus
-			FROM kalenteri
-			WHERE yhtio = '$kukarow[yhtio]' and otunnus IN ($laskurow[versiot]) and tyyppi = 'kontakti_3'
-		)
-		";
-	}
-	elseif($laji == "TILAUS") {
-		$qlisa = "
-		UNION
-		/*	Toimitus Avattu	*/	
-		(	
-			SELECT 'lasku' laji, 'perustettu' laji_tark, UNIX_TIMESTAMP(date(luontiaika)) aika, luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
-			FROM lasku
-			WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tarjous]' and tila IN ($laskutilat) and tila NOT IN ('R')
-		)		
-		UNION
-		/*	Toimitus keräykseen	*/	
-		(	
-			SELECT 'lasku' laji, 'keräys' laji_tark, UNIX_TIMESTAMP(date(kerayspvm)) aika, luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
-			FROM lasku
-			WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tarjous]' and laskutettu = 0 and tila IN ($laskutilat) and tila NOT IN ('R')
-		)
-		UNION
-		/*	Toimitus toimitettavana	*/	
-		(	
-			SELECT 'lasku' laji, 'toimitus' laji_tark, UNIX_TIMESTAMP(date(toimaika)) aika, luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
-			FROM lasku
-			WHERE lasku.yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tarjous]' and laskutettu = 0 and tila IN ($laskutilat) and tila NOT IN ('R')
-		)
-		UNION
-		/*	Toimitus laskutettu	*/	
-		(	
-			SELECT 'lasku' laji, 'laskutus' laji_tark, UNIX_TIMESTAMP(date(laskutettu)) aika, luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
-			FROM lasku
-			WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tarjous]' and laskunro > 0 and tila = 'U'
-			GROUP BY laskunro
-		)
-		";
-	}
 	
-	$qlisa .= "
-		UNION
-		(
-			SELECT 'kalenteri' laji, tyyppi laji_tark, UNIX_TIMESTAMP(date(pvmalku)) aika,  luontiaika, DATEDIFF(pvmloppu, pvmalku) vali, laatija, tunnus
-			FROM kalenteri
-			WHERE yhtio = '$kukarow[yhtio]' and otunnus IN ({$laskurow["versiot"]}) and tyyppi IN ('Memo', 'Muistutus')	
-		)";
-	$data = kalequery($qlisa);
+	$data = kalequery();
 		
 	//	Pudotetaan pois ne jo kontaktoidut tapaukset
 	foreach($dada as $aika => $t) {
@@ -457,66 +372,6 @@ if($tee == "NAYTA") {
 	else {
 		$fontclass = "";
 	}
-	/*	
-		Luodaan lisää tietoa arrayhin
-
-	foreach($data["lista"] as $aika => &$t) {
-		foreach($t as $k => &$kalerow) {
-			
-			//	Jos tämä on kopioitu aika..
-			if($kalerow["aika"] != $aika) {
-				continue;
-			}
-						
-			//	Liitetään lisää tapahtumia..
-			if($kalerow["vali"] > 1) {
-				for($i=1;$i<=$kalerow["vali"]; $i++) {
-					$data["lista"][strtotime("+$i days", $aika)][] = &$kalerow;
-				}
-			}
-			
-			if($kalerow["laji"] == "kontakti_oletettu") {
-				
-				$kalerow["otsikko"] = "Kontaktointi";
-				
-				if($kontaktit[$kalerow["laji_tark"]] != "ON") {
-					$query = "	SELECT datediff('".date("Y-m-d", $kalerow["aika"])."', now())";
-					$abures = mysql_query($query) or pupe_error($query);
-					$aburow = mysql_fetch_array($abures);
-
-					if($aburow[0] > 10){
-						$color = "green";
-						$teksti = "Tällä nyt ei oo viel kiirus..";
-					}
-					elseif($aburow[0] >= 5){
-						$color = "blue";
-						$teksti = "Asiakkaan taustat jo selvitetty..?";
-					}
-					elseif($aburow[0] >= 1){
-						$color = "orange";
-						$teksti = "Numero pitäis olla jo valittu..!";
-					}
-					elseif($aburow[0] >= -1){
-						$color = "orange";
-						$teksti = "Pitäis olla jo!";
-					}
-					else {
-						$color = "red";
-						$teksti = "!#!#!#!!!!!!!#!#!#!#!#!1 13 !";
-					}
-
-					$kalerow["ulos"] .= "<font style='color: $color;'>".t($teksti)."</font><div style='text-align: right;'<a href='#' onclick=\"popUp(event, 'ajax_menu', '50', '20', 'tilaushakukone.php?tarjous=$tarjous&toim=$toim&setti=$setti&nakyma=$nakyma&tee=KALENTERITAPAHTUMA&tyyppi=$kalerow[laji_tark]&otunnus=$laskurow[tunnus]&pvm=".date("Y-m-d", $kalerow["aika"])."&liitostunnus=$laskurow[liitostunnus]'); return false;\"><font class='$fontclass'>".t("Kuittaa suoritetuksi")."</font></a><div>";
-				}
-				else {
-					$kalerow["laji"] = "SKIPPAA";
-				}
-			}
-		}
-	}
-	*/
-
-	//echo "<pre>".print_r($data, true)."</pre>";
-	//echo "<pre>".print_r($kontaktit, true)."</pre>";
 		
 	// Haetaan kalenterimerkinnät
 	$query = "	SELECT count(*) tapahtumia

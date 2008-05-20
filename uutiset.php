@@ -49,7 +49,7 @@ else {
 
 if ($tee == 'LISAA') {
 
-	if (strlen($otsikko) > 0 and strlen($uutinen) > 0) {
+	if (strlen($otsikko) > 0 and strlen($uutinen) > 0 and count($lang) > 0) {
 
 		$liitostunnus = 0;
 		
@@ -67,42 +67,44 @@ if ($tee == 'LISAA') {
 
 		// ollaanko valittu konsernitasoinen uutinen
 		if ($konserni != '') $konserni = $yhtiorow['konserni'];
+		
+		for ($i=0; $i < count($lang); $i++) { 
+				
+			if ($tunnus != 0) {
+				$query = "	UPDATE kalenteri SET ";
+				$postquery = " WHERE tunnus = '$tunnus' ";
+			}
+			else {
+				$query = "	INSERT INTO kalenteri
+							SET
+							kuka 		= '$kukarow[kuka]',
+							tapa 		= '$tyyppi',
+							tyyppi 		= '$tyyppi',
+							yhtio 		= '$kukarow[yhtio]',
+							pvmalku 	= now(), 
+							luontiaika	= now(),";
+					$postquery = "";
+			}
 
-		if ($tunnus != 0) {
-			$query = "	UPDATE kalenteri SET ";
-			$postquery = " WHERE tunnus = '$tunnus' ";
-		}
-		else {
-			$query = "	INSERT INTO kalenteri
-						SET
-						kuka 		= '$kukarow[kuka]',
-						tapa 		= '$tyyppi',
-						tyyppi 		= '$tyyppi',
-						yhtio 		= '$kukarow[yhtio]',
-						pvmalku 	= now(), 
-						luontiaika	= now(),";
-			$postquery = "";
-		}
-
-		$query .= "	kentta01 	= '$otsikko',
-					kentta02 	= '$uutinen',
-					kentta03 	= '$kuva',
-					kentta09 	= '$kentta09',
-					kentta10 	= '$kentta10',										
-					konserni 	= '$konserni',
-					kieli 		= '$lang',
-					kokopaiva	= '$kokopaiva',
-					kuittaus	= '$lukittu'";
-		$query .= $postquery;
-		$result = mysql_query($query) or pupe_error($query);
-		$katunnus = mysql_insert_id();
-
-		if ($liitostunnus != 0) {
-			// päivitetään kuvalle vielä linkki toiseensuuntaa
-			$query = "update liitetiedostot set liitostunnus='$katunnus' where tunnus='$liitostunnus'";
+			$query .= "	kentta01 	= '$otsikko',
+						kentta02 	= '$uutinen',
+						kentta03 	= '$kuva',
+						kentta09 	= '$kentta09',
+						kentta10 	= '$kentta10',										
+						konserni 	= '$konserni',
+						kieli 		= '$lang[$i]',
+						kokopaiva	= '$kokopaiva',
+						kuittaus	= '$lukittu'";
+			$query .= $postquery;
 			$result = mysql_query($query) or pupe_error($query);
-		}
+			$katunnus = mysql_insert_id();
 
+			if ($liitostunnus != 0) {
+				// päivitetään kuvalle vielä linkki toiseensuuntaa
+				$query = "update liitetiedostot set liitostunnus='$katunnus' where tunnus='$liitostunnus'";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+		}
 		$tee = "";
 	}
 	else {
@@ -188,25 +190,42 @@ if ($tee == "SYOTA") {
 			<td>$rivi[pvmalku]</td>
 		 </tr>";
 
-	echo "<tr><th>".t("Kieli").":&nbsp;</th><td><select name='lang'>";
+	echo "<tr><th>".t("Kieli").":&nbsp;</th><td>";
+	
 
 	$query  = "show columns from sanakirja";
 	$fields =  mysql_query($query);
 
+	if (!isset($lang)) $lang = array();
+
 	while ($apurow = mysql_fetch_array($fields)) {
 		$sel = "";
-		if ($rivi["kieli"] == $apurow[0] or ($rivi["kieli"] == "" and $apurow[0] == $yhtiorow["kieli"])) {
-			$sel = "selected";
-		}
-		if ($apurow[0] != "tunnus" and $apurow[0] != "aikaleima" and $apurow[0] != "kysytty") {
+				
+		if ($tunnus == 0 and $apurow[0] != "tunnus" and $apurow[0] != "aikaleima" and $apurow[0] != "kysytty" and $apurow[0] != "laatija" and $apurow[0] != "luontiaika" and $apurow[0] != "muutospvm" and $apurow[0] != "muuttaja" and $apurow[0] != "synkronoi") {
+			if ($rivi["kieli"] == $apurow[0] or ($rivi["kieli"] == "" and $apurow[0] == $yhtiorow["kieli"]) and count($lang) == 0) $sel = "CHECKED";
+			if (in_array($apurow[0], $lang)) $sel = "CHECKED";
+					
 			$query = "select distinct nimi from maat where koodi='$apurow[0]'";
 			$maare = mysql_query($query);
 			$maaro = mysql_fetch_array($maare);
 			$maa   = strtolower($maaro["nimi"]);
 			if ($maa=="") $maa = $apurow[0];
-			echo "<option value='$apurow[0]' $sel>".t($maa)."</option>";
+			echo "<input type='checkbox' name='lang[]' value='$apurow[0]' $sel>".t($maa)."<br>";
+		}
+		elseif($tunnus > 0 and $apurow[0] != "tunnus" and $apurow[0] != "aikaleima" and $apurow[0] != "kysytty" and $apurow[0] != "laatija" and $apurow[0] != "luontiaika" and $apurow[0] != "muutospvm" and $apurow[0] != "muuttaja" and $apurow[0] != "synkronoi") {
+			if ($rivi["kieli"] == $apurow[0]) {
+				$sel = "CHECKED";
+			}
+			
+			$query = "select distinct nimi from maat where koodi='$apurow[0]'";
+			$maare = mysql_query($query);
+			$maaro = mysql_fetch_array($maare);
+			$maa   = strtolower($maaro["nimi"]);
+			if ($maa=="") $maa = $apurow[0];
+			echo "<input type='radio' name='lang[]' value='$apurow[0]' $sel>".t($maa)."<br>";
 		}
 	}
+	echo "</td>";
 	
 	if($toim == "VERKKOKAUPPA") {
 		echo "<tr>

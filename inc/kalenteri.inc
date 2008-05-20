@@ -1133,6 +1133,8 @@
 									$viesti .= "<br><br>".t("%s päättyy: %s", $kieli, $lisatiedot["tyyppi_nimi"], date("d.m.Y h:i"));
 								}
 								
+								$extra = "";
+								
 								if($lisatiedot["tunnusnippu"]>0) {
 									$extra = $lisatiedot["tunnusnippu"]."&nbsp;&ndash;&nbsp;";
 								}

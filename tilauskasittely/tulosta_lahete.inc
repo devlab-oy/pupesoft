@@ -133,11 +133,11 @@ if (!function_exists('alku')) {
 
 		//$pdf->draw_rectangle(674, 20,  611, 300, $thispage, $rectparam);
 		$pdf->draw_text(50, 656, t("Toimitusosoite", $kieli), 	$thispage, $pieni);
-		$pdf->draw_text(50, 644, $laskurow["toim_nimi"], 		$thispage, $norm);
-		$pdf->draw_text(50, 634, $laskurow["toim_nimitark"], 	$thispage, $norm);
-		$pdf->draw_text(50, 624, $laskurow["toim_osoite"],	 	$thispage, $norm);
-		$pdf->draw_text(50, 614, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $thispage, $norm);
-		$pdf->draw_text(50, 604, $laskurow["toim_maa"], 		$thispage, $norm);
+		$pdf->draw_text(50, 644, $laskurow["toim_nimi"], 		$thispage, $boldi);
+		$pdf->draw_text(50, 634, $laskurow["toim_nimitark"], 	$thispage, $boldi);
+		$pdf->draw_text(50, 624, $laskurow["toim_osoite"],	 	$thispage, $boldi);
+		$pdf->draw_text(50, 614, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $thispage, $boldi);
+		$pdf->draw_text(50, 604, $laskurow["toim_maa"], 		$thispage, $boldi);
 
 
 		//Oikea sarake
@@ -223,7 +223,7 @@ if (!function_exists('alku')) {
 
 		$pdf->draw_rectangle(737, 300, 716, 420, $thispage, $rectparam);
 		$pdf->draw_text(310, 729, t("Toimitustapa", $kieli), 		$thispage, $pieni);
-		$pdf->draw_text(310, 719, $laskurow["toimitustapa"],	 	$thispage, $norm);
+		$pdf->draw_text(310, 719, $laskurow["toimitustapa"],	 	$thispage, $boldi);
 
 		//etsitään rahtisopimusnumero
 		$query = "SELECT rahtisopimus from rahtisopimukset where ytunnus = '$laskurow[ytunnus]' and toimitustapa = '$laskurow[toimitustapa]'";
@@ -250,7 +250,7 @@ if (!function_exists('alku')) {
 			$masrow = mysql_fetch_array($masresult);
 
 			$pdf->draw_text(310, 687, t("Maksuehto", $kieli), 							$thispage, $pieni);
-			$pdf->draw_text(310, 677, $masrow["teksti"]." ".$masrow["kassa_teksti"], 	$thispage, $norm);
+			$pdf->draw_text(310, 677, $masrow["teksti"]." ".$masrow["kassa_teksti"], 	$thispage, $boldi);
 		}
 
 		$pdf->draw_rectangle(674, 300, 653, 580, $thispage, $rectparam);

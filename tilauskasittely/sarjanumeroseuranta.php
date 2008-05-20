@@ -1042,14 +1042,14 @@
 
 			if (($sarjarow["siirtorivitunnus"] > 0 and $tunnuskentta != 'siirtorivitunnus') or ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"])) {
 
-				if ($sarjarow["osto_perheid2"] > 0) {
+				if ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"]) {
 					$ztun = $sarjarow["osto_perheid2"];
 				}
 				else {
 					$ztun = $sarjarow["siirtorivitunnus"];
 				}
 
-				$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, sarjanumeroseuranta.sarjanumero
+				$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, sarjanumeroseuranta.sarjanumero, tyyppi, otunnus
 							FROM tilausrivi
 							LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
 							WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.tunnus='$ztun'";
@@ -1058,19 +1058,17 @@
 
 				$sarjarow["myynti_tunnus"] = 0;
 
-				$fnlina1 = "<font class='message'>(".t("Varattu lisävarusteena tuotteelle").": ";
-				$fnlina2 = ")</font>";
-				$sarjarow["myynti_nimi"] = $siirow["tuoteno"]." ".$siirow["sarjanumero"];
-
-				// jos tämä on jollain siirtolistalla
-				if ($sarjarow["siirtorivitunnus"] > 0 and $tunnuskentta != 'siirtorivitunnus') {
-					$query = "SELECT otunnus from tilausrivi where yhtio = '$kukarow[yhtio]' and tunnus = '$sarjarow[siirtorivitunnus]'";
-					$sii2res = mysql_query($query) or pupe_error($query);
-					$sii2row = mysql_fetch_array($sii2res);
-
+				if ($siirow["tyyppi"] == "O") {
+					// pultattu kiinni johonkin
+					$fnlina1 = "<font class='message'>(".t("Varattu lisävarusteena tuotteelle").": ";
+					$fnlina2 = ")</font>";
+					$sarjarow["myynti_nimi"] = $siirow["tuoteno"]." ".$siirow["sarjanumero"];
+				}
+				else {
+					// jos tämä on jollain siirtolistalla
 					$fnlina1 = "<font class='message'>(".t("Kesken siirtolistalla").": ";
 					$fnlina2 = ")</font>";
-					$sarjarow["myynti_nimi"] = $sii2row["otunnus"];
+					$sarjarow["myynti_nimi"] = $siirow["otunnus"];
 				}
 
 			}

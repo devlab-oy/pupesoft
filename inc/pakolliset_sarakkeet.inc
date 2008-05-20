@@ -33,7 +33,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 					$pakolliset = array("YTUNNUS");
 
 					if ($yhtiorow['asiakkaan_tarkenne'] == '') {
-						$wherelliset = array("YTUNNUS", "OVTTUNNUS", "TOIM_OVTTUNNUS");
+						$wherelliset = array("YTUNNUS", "OVTTUNNUS");
 					}
 					else {
 						$wherelliset = array("YTUNNUS", "ASIAKASNRO");

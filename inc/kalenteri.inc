@@ -190,13 +190,15 @@
 			$tunnus		= $krow["tunnus"];
 			
 			if($laji == "kalenteri" or substr($laji, 0, 8) == "kontakti") {
-				$query = "	SELECT kalenteri.*, lasku.*, if(kentta01='', '***', kentta01) viesti, kalenteri.tyyppi,
+				$query = "	SELECT  lasku.*, kalenteri.*, if(kentta01='', '***', kentta01) viesti, kalenteri.tyyppi,
 									UNIX_TIMESTAMP(pvmalku) pvmalku, 
 									UNIX_TIMESTAMP(pvmloppu) pvmloppu,
 									avainsana.selitetark tyyppi_nimi,
 									DATEDIFF(pvmalku, now()) paivia_jaljella, 
 									asiakas.nimi asiakas,
 									yhteyshenkilo.nimi yhteyshenkilo,
+									kalenteri.luontiaika,
+									kalenteri.laatija,
 									kalenteri.tunnus
 							FROM kalenteri
 							LEFT JOIN avainsana ON avainsana.yhtio=kalenteri.yhtio and avainsana.laji='KALETAPA' and avainsana.selite=kalenteri.tapa

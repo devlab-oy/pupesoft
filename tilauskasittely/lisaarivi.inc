@@ -1576,7 +1576,7 @@
 			$trow["tuoteno"] = strtoupper($trow["tuoteno"]);
 
 			// jos olemme saaneet tuotenimityksen syotarivist‰ ja sallimme nimityksen muutoksen
-			if (($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" or $toim == "HAAMU") and trim($tuotenimitys != "")) {
+			if (($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" or $toim == "HAAMU" or $trow["tuoteno"] == "99") and trim($tuotenimitys != "")) {
 				// lis‰t‰‰n saatu nimitys kaikille tuotteille
 				$trow["nimitys"] = addslashes($tuotenimitys);				
 			}

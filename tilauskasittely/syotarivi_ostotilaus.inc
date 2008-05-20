@@ -66,7 +66,7 @@
 	echo " $varaosavirhe</td>";
 	echo "<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Lisää")."'></td></tr>";
 
-	if ($toim == "HAAMU") {
+	if ($toim == "HAAMU" or $tuoteno == "99") {
 		echo "	<tr><th align='left' colspan='7'>".t("Nimitys")."</th></tr>
 				<tr><td align='left' colspan='7'><input type = 'text' name='tuotenimitys' value='$tuotenimitys' size = '70'></td></tr>";
 

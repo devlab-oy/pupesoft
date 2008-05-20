@@ -995,7 +995,7 @@
 			if ($toim != "HAAMU") {
 				$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
 							tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, 
-							substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika,
+							substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys,
 							$sorttauskentta
 							FROM tilausrivi
 							join tuote USING (yhtio, tuoteno)
@@ -1052,6 +1052,10 @@
 			$page[$sivu] = alku();
 
 			while ($row = mysql_fetch_array($result)) {
+				if ($row["tuoteno"] == "99" and $row["rivinimitys"] != "") {
+					$row["nimitys"] = $row["rivinimitys"];
+				}
+				
 				rivi($page[$sivu]);
 				$total += $row["rivihinta"];
 			}

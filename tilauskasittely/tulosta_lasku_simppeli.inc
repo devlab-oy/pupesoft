@@ -166,25 +166,26 @@ if (!function_exists('tulosta_lasku')) {
 
 					foreach($kentat as $key) {
 						$pdf->writeToTemplate($h, 1, $s[0], $s[1], t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
-						if($key == "päiväys") {							
+						if($key == "päiväys" or $key == "toimituspvm") {							
 							$pdf->writeToTemplate($h, 1, $s[1]+2, 0, strftime("%x",strtotime($laskurow[$key])), "norm", "L", "", $tid);
+							$h-=$pdf->ln();
 
 						}
-						elseif($laskurow[$key]!="") {
+						elseif(trim($laskurow[$key])!="") {
 							$pdf->writeToTemplate($h, 1, $s[1]+2, 0, $laskurow[$key], "norm", "L", "", $tid);
+							$h-=$pdf->ln();
 						}
-						$h-=$pdf->ln();
 					}
 					$h-=$pdf->ln(0.5);
 
 					//	Sitten yhteyshenkilöitä
 					foreach(array("asiakkaan_tilausnumero", "asiakkaan_viite", "toimittajan_yhteyshenkilö", "asiakkaan_yhteyshenkilö", "asiakkaan_kaupallinen_käsittelijä") as $key) {
-						if($laskurow[$key] != "" or $key == "asiakkaan_viite") {
+						if(trim($laskurow[$key]) != "") {
 							$pdf->writeToTemplate($h, 1, $s[0], 0, t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
 							$h-=$pdf->ln();					
 							$nb=$pdf->countParagraphHeight($laskurow[$key], "norm", (-1*($s[0]-5)));										
 							$pdf->writeToTemplate($h, $nb, $s[0], 0, $laskurow[$key], "norm", "L", "", $tid);
-							$h-=$pdf->ln($nb);					
+							$h-=$pdf->ln($nb)+0.25;
 						}
 					}
 
@@ -260,7 +261,9 @@ if (!function_exists('tulosta_lasku')) {
 					else {
 						$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tilaus", $kieli)."/".t("Kommentti", $kieli), "norm", "L", "B", $tid2);
 					}
-					$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Toimituspvm", $kieli), "norm", "R", "B", $tid2);
+					if($laskurow["toimituspvm"] == "useita") {
+						$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Toimituspvm", $kieli), "norm", "R", "B", $tid2);
+					}					
 					if($laskurow["rivihintoja_ei_nayteta"] == "") {
 						if($alenaytetaan=="OK") {
 							$pdf->writeToTemplate($h, 1, $s[1], $s[2], t("Ale", $kieli), "norm", "R", "B", $tid2);				
@@ -436,7 +439,7 @@ if (!function_exists('tulosta_lasku')) {
 					$rivi="lapsi";
 				}
 				$pdf->write($h, 1, $offset, $s[0], $row["tuoteno"]." ".$row["nimitys"], $style_rivi, "L", "");
-				$pdf->write($h, 1, $s[0], $s[1], $row["kpl"]." ".ta($kieli, "Y", $row["yksikko"]), $style_rivi, "R", "");
+				$pdf->write($h, 1, $s[0], $s[1], round($row["kpl"], 2)." ".ta($kieli, "Y", $row["yksikko"]), $style_rivi, "R", "");
 				
 				if($rivi=="isa") {
 					if($laskurow["rivihintoja_ei_nayteta"] == "") {
@@ -452,7 +455,7 @@ if (!function_exists('tulosta_lasku')) {
 					}
 					$h-=$pdf->ln();
 
-					if (substr($row["toimitettuaika"],0,10) != "0000-00-00") {
+					if (substr($row["toimitettuaika"],0,10) != "0000-00-00" and $laskurow["toimituspvm"] == "useita") {
 						$pdf->write($h, 1, $s[0], $s[1], strftime("%x",strtotime($row["toimitettuaika"])), $style_rivi2, "R", "I");
 					}
 
@@ -617,7 +620,7 @@ if (!function_exists('tulosta_lasku')) {
 			$arow = mysql_fetch_array($aresult);
 			
 			if($arow["alvrivihinta"] <> 0) {
-				$pdf->write($h, 1, 0, $s[0], t("Arvonlisävero", $kieli)." ($arow[rivihinta])", "norm", "R", "");
+				$pdf->write($h, 1, 0, $s[0], t("Arvonlisävero", $kieli)." (".money_format("%i", $arow[rivihinta]).")", "norm", "R", "");
 
 				if ($alvrow["alv"] >= 500) {
 					$pdf->write($h, 1, $s[0], $s[1], "M.V.", "norm", "R", "");							

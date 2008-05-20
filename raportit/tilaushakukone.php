@@ -315,7 +315,7 @@ if($tee == "NAYTA") {
 							date_format(lasku.luontiaika, '%d.%m. %Y') avattu,
 						versio.tunnus tunnus, versio.luontiaika,
 							concat_ws(' ',versio.nimi, versio.nimitark) asiakas, 
-							DATEDIFF(versio.luontiaika, date_sub(now(), INTERVAL laskun_lisatiedot.tarjouksen_voimaika day)) pva, 
+							DATEDIFF(versio.luontiaika, date_sub(now(), INTERVAL lasku.olmapvm day)) pva, 
 							date_format(versio.luontiaika, '%d.%m. %Y') avattu_versio,
 							date_format((select min(kerayspvm) from lasku l where l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu and l.tila IN ($laskutilat) and alatila != 'X'), '%d.%m. %Y') seuraava,
 							datediff((select min(kerayspvm) from lasku l where l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu and l.tila IN ($laskutilat) and alatila != 'X'), now()) seuraava_aika,							
@@ -1422,7 +1422,7 @@ if($tee == "") {
 		$c = count($group);
 	}
 	elseif($toim == "TARJOUSHAKUKONE") {
-		$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws(' ',versio.nimi, versio.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, $summa Yhteensä, if(versio.alatila IN ('', 'A'), DATEDIFF(versio.luontiaika, date_sub(now(), INTERVAL laskun_lisatiedot.tarjouksen_voimaika day)), '') pva,";
+		$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws(' ',versio.nimi, versio.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, $summa Yhteensä, if(versio.alatila IN ('', 'A'), DATEDIFF(versio.luontiaika, date_sub(now(), INTERVAL lasku.olmapvm day)), '') pva,";
 		$c = 6;
 	}
 	elseif($toim == "TILAUSHAKUKONE") {

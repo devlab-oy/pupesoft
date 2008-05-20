@@ -529,11 +529,15 @@
 				if ($krow["taso"] == "2") {
 					$sel2 = "SELECTED";
 				}
+				if ($krow["taso"] == "3") {
+					$sel3 = "SELECTED";
+				}
 				echo "<tr><th align='left'>".t("Taso").":</th>";
 
 				echo "<td><select name='taso'>";
 				echo "<option value='1' $sel1>".t("Taso 1 Tehotilaaja, tilaukset menee suoraan tomitukseen")."</option>";
 				echo "<option value='2' $sel2>".t("Taso 2 Aloittelijatilaaja, tilaukset hyv‰ksytet‰‰n ennen toimitusta")."</option>";
+				echo "<option value='3' $sel3>".t("Taso 3 Tehotilaaja, tilaukset menee suoraan tomitukseen MAISTA RIIPPUMATTA")."</option>";
 				echo "</select></td></tr>";
 			}
 

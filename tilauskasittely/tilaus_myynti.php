@@ -1090,7 +1090,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 	// Myyntitilaus valmis
 	else {
 		//Jos käyttäjä on extranettaaja ja hän ostellut tuotteita useista eri maista niin laitetaan tilaus holdiin
-		if ($kukarow["extranet"] != "" and $toimitetaan_ulkomaailta == "YES") {
+		if ($kukarow["extranet"] != "" and $toimitetaan_ulkomaailta == "YES" and $kukarow["taso"] != 3) {
 			$kukarow["taso"] = 2;
 		}
 

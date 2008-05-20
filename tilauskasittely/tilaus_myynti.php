@@ -2197,8 +2197,6 @@ if ($tee == '') {
 			<br>";
 	}
 
-
-
 	if($kukarow["extranet"] == "" and $toim == "TYOMAARAYS") {
 		$tee_tyomaarays = "MAARAAIKAISHUOLLOT";
 		//require('../tyomaarays/tyomaarays.inc');
@@ -2690,7 +2688,7 @@ if ($tee == '') {
 		foreach($tuoteno_array as $tuoteno) {
 
 			$tuoteno = trim($tuoteno);
-			
+
 			$query	= "	SELECT *
 						from tuote
 						where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
@@ -3131,6 +3129,30 @@ if ($tee == '') {
 			}
 			else {
 				$saldoaikalisa = "";
+			}
+
+			$vakquery = "	SELECT group_concat(DISTINCT tuote.tuoteno) vaktuotteet
+							FROM tilausrivi
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi != '')
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							AND tilausrivi.otunnus = '$laskurow[tunnus]'
+							AND tilausrivi.tyyppi = 'L'
+							LIMIT 1";
+			$vakresult = mysql_query($vakquery) or pupe_error($vakquery);
+			$vakrow = mysql_fetch_array($vakresult);
+
+			if ($vakrow["vaktuotteet"] != "") {
+				$vak_toim_query = "	SELECT tunnus
+									FROM toimitustapa
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND selite = '$laskurow[toimitustapa]'
+									AND vak_kielto != ''";
+				$vak_toim_result = mysql_query($vak_toim_query) or pupe_error($vak_toim_query);
+
+				if (mysql_num_rows($vak_toim_result) > 0) {
+					echo "<font class='error'>".t("VIRHE: Tämä toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br><br>";
+					$tilausok++;
+				}
 			}
 
 			echo "<br><table>";

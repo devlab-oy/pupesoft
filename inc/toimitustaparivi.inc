@@ -231,4 +231,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "vak_kielto") {
+
+		$sel = $sela = '';
+		if ($trow[$i] != '') {
+			$sel = 'selected';
+		}
+		else {
+			$sela = 'selected';
+		}
+		
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value='' $sela>".t("Ei")."</option>";
+		$ulos .= "<option value='K' $sel>".t("Kyllä")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 ?>

@@ -56,7 +56,7 @@ $query = "	SELECT versio.*, if(versio.tunnusnippu>0, versio.tunnusnippu, versio.
 				laskun_lisatiedot.seuranta, laskun_lisatiedot.yhteyshenkilo_tekninen, 
 				asiakkaan_kohde.kohde asiakkaan_kohde,
 				DATEDIFF(now(), versio.luontiaika) kulunut,
-				DATEDIFF(versio.luontiaika, date_sub(now(), INTERVAL laskun_lisatiedot.tarjouksen_voimaika day)) pva
+				DATEDIFF(versio.luontiaika, versio.olmapvm) pva
 			FROM lasku
 			JOIN lasku versio ON versio.yhtio=lasku.yhtio and versio.tunnus=if(lasku.tunnusnippu>0,(select max(l.tunnus) from lasku l where l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu and l.tila='T'), lasku.tunnus)
 			LEFT JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = versio.yhtio and laskun_lisatiedot.otunnus=versio.tunnus			

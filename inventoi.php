@@ -166,13 +166,13 @@
 							// PERUSTETAAN tuotepaikka
 
 							// katotaa löytyykö tuote
-							$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+							$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
 							$result = mysql_query($query) or pupe_error($query);
 
 							if (mysql_num_rows($result) == 1) {
 
 								// katotaan onko tuotteella jo oletuspaikka
-								$query = "select * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and oletus!=''";
+								$query = "SELECT * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and oletus!=''";
 								$result = mysql_query($query) or pupe_error($query);
 
 								if (mysql_num_rows($result) > 0) {
@@ -182,7 +182,7 @@
 									$oletus = "X";
 								}
 
-								$query = "insert into tuotepaikat set
+								$query = "INSERT into tuotepaikat set
 											yhtio     = '$kukarow[yhtio]',
 											tuoteno	  = '$tuoteno',
 											hyllyalue = '$hyllyalue',
@@ -199,6 +199,10 @@
 											kplhinta	= '0',
 											hinta 		= '0',
 											laji 		= 'uusipaikka',
+											hyllyalue 	= '$hyllyalue',
+											hyllynro 	= '$hyllynro',
+											hyllyvali 	= '$hyllyvali',
+											hyllytaso 	= '$hyllytaso',
 											selite 		= '".t("Inventoidessa lisättiin tuotepaikka")." $hyllyalue $hyllynro $hyllyvali $hyllytaso',
 											laatija 	= '$kukarow[kuka]',
 											laadittu 	= now()";
@@ -397,13 +401,17 @@
 
 							///* Tehdään tapahtuma *///
 							$query = "	INSERT into tapahtuma set
-										yhtio   = '$kukarow[yhtio]',
-										tuoteno = '$row[tuoteno]',
-										laji    = 'Inventointi',
-										kpl     = '$erotus',
-										kplhinta= '$row[kehahin]',
-										hinta   = '$row[kehahin]',
-										selite  = ";
+										yhtio   	= '$kukarow[yhtio]',
+										tuoteno 	= '$row[tuoteno]',
+										laji    	= 'Inventointi',
+										kpl     	= '$erotus',
+										kplhinta	= '$row[kehahin]',
+										hinta   	= '$row[kehahin]',
+										hyllyalue	= '$hyllyalue',
+										hyllynro 	= '$hyllynro',
+										hyllyvali 	= '$hyllyvali',
+										hyllytaso 	= '$hyllytaso',
+										selite  	= ";
 
 							if ($erotus > 0) {
 								$query .= " '".t("Saldoa")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("lisättiin")." $erotus ".t("kappaleella. Saldo nyt")." $cursaldo. $lisaselite',";
@@ -589,7 +597,6 @@
 			$tee = "INVENTOI";
 		}
 	}
-
 
 	if ($tee == 'INVENTOI') {
 
@@ -871,7 +878,6 @@
 		$lista 	= "";
 		$tee 	= "";
 	}
-
 
 	if ($tee == '') {
 

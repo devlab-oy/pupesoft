@@ -3,7 +3,8 @@
 	//käytetään tilausriveillä olevia tuotteita
 	$query = "	SELECT tilausrivi.*, if(varattu!=0, varattu, kpl) varattu, 
 				trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, 
-				tuote.ei_saldoa, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm
+				tuote.ei_saldoa, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm,
+				tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso
 				FROM tilausrivi
 				JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -47,6 +48,10 @@
 						kplhinta 	= '$perherow[kehahin]',
 						hinta    	= '$perherow[kehahin]',
 						rivitunnus	= '$perherow[tunnus]',
+						hyllyalue	= '$perherow[hyllyalue]',
+						hyllynro	= '$perherow[hyllynro]',
+						hyllyvali	= '$perherow[hyllyvali]',
+						hyllytaso	= '$perherow[hyllytaso]',
 						selite   	= '".t("Käytettiin tuotteen")." $tilrivirow[tuoteno] ".t("valmistamiseen")." ".t("työmääräyksellä")." $tilrivirow[otunnus]',
 						laatija  	= '$kukarow[kuka]',
 						laadittu 	= now()";

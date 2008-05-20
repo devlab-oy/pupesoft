@@ -133,6 +133,10 @@ if ($tee == "valmis") {
 											hinta		= '0',
 											kplhinta	= '0',
 											laji 		= 'uusipaikka',
+											hyllyalue	= '".$t1[$tilausrivirow["tunnus"]]."',
+											hyllynro	= '".$t2[$tilausrivirow["tunnus"]]."',
+											hyllyvali	= '".$t3[$tilausrivirow["tunnus"]]."',
+											hyllytaso	= '".$t4[$tilausrivirow["tunnus"]]."',
 											selite		= '".t("Saavutettaessa lis‰ttiin tuotepaikka")." ".$t1[$tilausrivirow["tunnus"]]." ".$t2[$tilausrivirow["tunnus"]]." ".$t3[$tilausrivirow["tunnus"]]." ".$t4[$tilausrivirow["tunnus"]]."',
 											laatija 	= '$kukarow[kuka]',
 											laadittu	= now()";
@@ -141,7 +145,7 @@ if ($tee == "valmis") {
 								echo "<font class='message'>".t("Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("perustetaan uusi paikka")." ".$t1[$tilausrivirow["tunnus"]]."-".$t2[$tilausrivirow["tunnus"]]."-".$t3[$tilausrivirow["tunnus"]]."-".$t4[$tilausrivirow["tunnus"]]."</font><br>";
 							}
 							else {
-								echo "<font class='message'>".t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("annettu paikka")." ".$t1[$tilausrivirow["tunnus"]]."-".$t2[$tilausrivirow["tunnus"]]."-".$t3[$tilausrivirow["tunnus"]]."-".$t4[$tunnus]." ".t("ei kuulu mihink‰‰n varastoon, ei voitu perustaa!!!")."</font><br>";
+								echo "<font class='message'>".t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("annettu paikka")." ".$t1[$tilausrivirow["tunnus"]]."-".$t2[$tilausrivirow["tunnus"]]."-".$t3[$tilausrivirow["tunnus"]]."-".$t4[$tilausrivirow["tunnus"]]." ".t("ei kuulu mihink‰‰n varastoon, ei voitu perustaa!!!")."</font><br>";
 								$virheita++;
 							}
 						}

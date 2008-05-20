@@ -10,7 +10,7 @@
 		$siirrettavat = array();
 
 		if ($kohdevarasto == $lahdevarasto) {
-			echo "".t("Kohdevarasto ei voi olla sama kuin lähdevarasto")."!<br>";
+			echo "<font class='error'>".t("Kohdevarasto ei voi olla sama kuin lähdevarasto")."!</font><br>";
 			$virhe++;
 		}
 		else {
@@ -22,7 +22,7 @@
 				$lahderow = mysql_fetch_array($result);
 			}
 			else {
-				echo "".t("Et valinnut lähdevarastoa")."!<br>";
+				echo "<font class='error'>".t("Et valinnut lähdevarastoa")."!</font><br>";
 				$virhe++;
 			}
 			if ($kohdevarasto != '') {
@@ -33,7 +33,7 @@
 				$kohderow = mysql_fetch_array($result);
 			}
 			else {
-				echo "".t("Et valinnut kohdevarastoa")."!<br>";
+				echo "<font class='error'>".t("Et valinnut kohdevarastoa")."!</font><br>";
 				$virhe++;
 			}
 		}
@@ -55,14 +55,14 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) == 0) {
-				echo "".t("Turvapaikkaa")." $hyllyalue $hyllynro $hyllyvali $hyllytaso ".t("ei ole missään varastossa")."!<br>";
+				echo "<font class='error'>".t("Turvapaikkaa")." $hyllyalue $hyllynro $hyllyvali $hyllytaso ".t("ei ole missään varastossa")."!</font><br>";
 				$virhe++;
 			}
 			else {
 				$varastorow = mysql_fetch_array($result);
 
 				if ($varastorow["tunnus"] != $kohdevarasto) {
-					echo "".t("Turvapaikka ei sijaitse kohdevarastossa")."!<br>";
+					echo "<font class='error'>".t("Turvapaikka ei sijaitse kohdevarastossa")."!</font><br>";
 					$virhe++;
 				}
 			}
@@ -118,7 +118,7 @@
 						$lahde = 0;
 
 						if (mysql_num_rows($result) == 0) {
-							echo "".t("Tuotteella")." $tuoteno ".t("ei ollut yhtään sopivaa varastopaikkaa lähdevarastossa")."!<br>";
+							echo "<font class='error'>".t("Tuotteella")." $tuoteno ".t("ei ollut yhtään sopivaa varastopaikkaa lähdevarastossa")."!</font><br>";
 							$virhe++;
 						}
 						else {
@@ -146,12 +146,12 @@
 										$siirrettavat[] = "$tuoteno##$maara##$lahdepaikat[hyllyalue]##$lahdepaikat[hyllynro]##$lahdepaikat[hyllyvali]##$lahdepaikat[hyllytaso]##$hyllyalue##$hyllynro##$hyllyvali##$hyllytaso##TURVAPAIKKA";
 									}
 									else {
-										echo "".t("Siirrettävä määrä tuotteella")." $tuoteno ".t("puuttui tai se oli nolla")."!<br>";
+										echo "<font class='error'>".t("Siirrettävä määrä tuotteella")." $tuoteno ".t("puuttui tai se oli nolla")."!</font><br>";
 										$virhe++;
 									}
 								}
 								else {
-									echo "".t("Tuotteella")." $tuoteno ".t("ei ollut yhtään sopivaa varastopaikkaa kohdevarastossa")."!<br>";
+									echo "<font class='error'>".t("Tuotteella")." $tuoteno ".t("ei ollut yhtään sopivaa varastopaikkaa kohdevarastossa")."!</font><br>";
 									$virhe++;
 								}
 							}
@@ -162,14 +162,14 @@
 									$siirrettavat[] = "$tuoteno##$maara##$lahdepaikat[hyllyalue]##$lahdepaikat[hyllynro]##$lahdepaikat[hyllyvali]##$lahdepaikat[hyllytaso]##$kohdepaikat[hyllyalue]##$kohdepaikat[hyllynro]##$kohdepaikat[hyllyvali]##$kohdepaikat[hyllytaso]##KOHDEPAIKKA";
 								}
 								else {
-									echo "".t("Siirrettävä määrä tuotteella")." $tuoteno ".t("puuttui tai se oli nolla")."!<br>";
+									echo "<font class='error'>".t("Siirrettävä määrä tuotteella")." $tuoteno ".t("puuttui tai se oli nolla")."!</font><br>";
 									$virhe++;
 								}
 							}
 						}
 					}
 					else {
-						echo "".t("Tuotetta")." $tuoteno ".t("ei löytynyt kannasta, tai sitä löytyi enemmän kuin yksi")."!<br>";
+						echo "<font class='error'>".t("Tuotetta")." $tuoteno ".t("ei löytynyt kannasta, tai sitä löytyi enemmän kuin yksi")."!</font><br>";
 						$virhe++;
 					}
 				}
@@ -233,6 +233,10 @@
 									kpl = $maara * -1,
 									hinta = '0',
 									laji = 'siirto',
+									hyllyalue =  '$lhyllyalue',
+									hyllynro = '$lhyllynro',
+									hyllyvali = '$lhyllyvali',
+									hyllytaso = '$lhyllytaso',
 									selite = '".t("Paikasta")." $lhyllyalue $lhyllynro $lhyllyvali $lhyllytaso ".t("vähennettiin")." $maara',
 									laatija = '$kukarow[kuka]',
 									laadittu = now()";
@@ -244,6 +248,10 @@
 									kpl = '$maara',
 									hinta = '0',
 									laji = 'siirto',
+									hyllyalue =  '$khyllyalue',
+									hyllynro = '$khyllynro',
+									hyllyvali = '$khyllyvali',
+									hyllytaso = '$khyllytaso',
 									selite = '".t("Paikalle")." $khyllyalue $khyllynro $khyllyvali $khyllytaso ".t("lisättiin")." $maara',
 									laatija = '$kukarow[kuka]',
 									laadittu = now()";
@@ -258,14 +266,28 @@
 				$result = mysql_query($query) or pupe_error($query);
 			}
 			else {
-				echo "<br>".t("Materiaalissasi oli virheitä! Korjaa ensin kaikki virheet, vasta sitten saldojen siirto onnistuu")."!<br>";
+				echo "<br><font class='error'>".t("Materiaalissasi oli virheitä! Korjaa ensin kaikki virheet, vasta sitten saldojen siirto onnistuu")."!</font><br>";
+				$tee = "";
 			}
 			echo "<br>".t("Tiedostossa oli")." $lask ".t("riviä")."!<br>";
+		}
+		else {
+			echo "<font class='error'>".t("Luettavaa tiedostoa ei löytynyt")."!</font><br>";
+			$tee = "";
 		}
 	}
 
 	if ($tee == '') {
 		// Tällä ollaan, jos olemme syöttämässä tiedostoa ja muuta
+
+		echo	"<font class='message'>".t("Tiedostomuoto").":</font><br>
+
+				<table border='0' cellpadding='3' cellspacing='2'>
+				<tr><th colspan='2'>".t("Tabulaattorilla eroteltu tekstitiedosto").".</th></tr>
+				<tr><td>".t("Tuoteno")."</td><td>".t("Määrä")."</td></tr>
+				</table>
+				<br>";
+
 		echo "<form name = 'valinta' action = '$PHP_SELF' enctype='multipart/form-data' method='post'>
 				<input type='hidden' name='tee' value='M'>
 				<table>";
@@ -318,5 +340,6 @@
 				<input type = 'submit' value = '".t("Lähetä")."'>
 				</form>";
 	}
+
 	require "inc/footer.inc";
 ?>

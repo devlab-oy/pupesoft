@@ -48,7 +48,8 @@
 						
 							if (abs($ero) != 0) {
 							
-								$query = "	SELECT tilausrivi_osto.tunnus, tilausrivi_osto.alv, tilausrivi_osto.tyyppi, round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, tilausrivi_osto.kpl
+								$query = "	SELECT tilausrivi_osto.tunnus, tilausrivi_osto.alv, tilausrivi_osto.tyyppi, round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, tilausrivi_osto.kpl,
+											tilausrivi_myynti.hyllyalue, tilausrivi_myynti.hyllynro, tilausrivi_myynti.hyllyvali, tilausrivi_myynti.hyllytaso
 											FROM sarjanumeroseuranta
 											LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 											LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -98,6 +99,10 @@
 												kpl     = '$tkpl',
 												hinta   = '$tero',
 												kplhinta= '$tero',
+												hyllyalue = '$sarjarow[hyllyalue]',
+												hyllynro = '$sarjarow[hyllynro]',
+												hyllyvali = '$sarjarow[hyllyvali]',
+												hyllytaso = '$sarjarow[hyllytaso]',
 												selite  = '".t("Varastonarvon muutos").": $edarvo -> $uuarvo. $lisaselite',
 												laatija    = '$kukarow[kuka]',
 												laadittu = now()";

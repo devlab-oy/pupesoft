@@ -38,7 +38,8 @@ if ($tee =='UV') {
 
 	if ($varastopaikka != '') {
 		//k‰ytet‰‰n rivill‰ olevaa paikkaa
-		$query = "	SELECT  saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus
+		$query = "	SELECT  saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus,
+					tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
 					FROM tuote, tuotepaikat
 					WHERE tuote.yhtio=tuotepaikat.yhtio
 					and tuote.tuoteno=tuotepaikat.tuoteno
@@ -49,7 +50,8 @@ if ($tee =='UV') {
 
 		if(mysql_num_rows($tuoteresult) != 1) {
 			//jos ei lˆytynyt yksiselitteist‰ rivi‰ yritet‰‰n oletuspaikkaa
-			$query = "	SELECT  saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus
+			$query = "	SELECT  saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus,
+						tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
 						FROM tuote, tuotepaikat
 						WHERE tuote.yhtio=tuotepaikat.yhtio
 						and tuote.tuoteno=tuotepaikat.tuoteno
@@ -61,7 +63,8 @@ if ($tee =='UV') {
 	}
 	else {
 		//k‰ytet‰‰n oletuspaikkaa
-		$query = "	SELECT  saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus
+		$query = "	SELECT  saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus,
+					tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
 					FROM tuote, tuotepaikat
 					WHERE tuote.yhtio=tuotepaikat.yhtio
 					and tuote.tuoteno=tuotepaikat.tuoteno
@@ -207,7 +210,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 		if ($perherow["paikka"] != '') {
 			$query = "	SELECT saldo, kehahin, ei_saldoa, yksikko, tuotepaikat.tunnus tunnus,
-						tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm
+						tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm, 
+						tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
 						FROM tuote, tuotepaikat
 						WHERE tuote.yhtio = tuotepaikat.yhtio
 						and tuote.tuoteno = tuotepaikat.tuoteno
@@ -219,7 +223,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 			if(mysql_num_rows($tuoteresult) != 1) {
 				//jos ei lˆytynyt yksiselitteist‰ rivi‰ yritet‰‰n oletuspaikkaa
 				$query = "	SELECT saldo, kehahin, ei_saldoa, yksikko, tuotepaikat.tunnus tunnus,
-							tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm
+							tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm,
+							tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
 							FROM tuote, tuotepaikat
 							WHERE tuote.yhtio = tuotepaikat.yhtio
 							and tuote.tuoteno = tuotepaikat.tuoteno
@@ -232,7 +237,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 		else {
 			//K‰ytet‰‰n oletuspaikkaa
 			$query = "	SELECT saldo, kehahin, ei_saldoa, yksikko, tuotepaikat.tunnus tunnus,
-						tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm
+						tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm,
+						tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
 						FROM tuote, tuotepaikat
 						WHERE tuote.yhtio = tuotepaikat.yhtio
 						and tuote.tuoteno = tuotepaikat.tuoteno
@@ -286,6 +292,10 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 					kplhinta 	= '$tuoterow[kehahin]',
 					hinta    	= '$tuoterow[kehahin]',
 					rivitunnus	= '$perherow[tunnus]',
+					hyllyalue 	= '$tuoterow[hyllyalue]', 
+					hyllynro 	= '$tuoterow[hyllynro]', 
+					hyllytaso 	= '$tuoterow[hyllytaso]', 
+					hyllyvali 	= '$tuoterow[hyllyvali]',
 					selite   	= '".t("K‰ytettiin tuotteen")." $isatuoteno ".t("valmistamiseen")." ".t("tyˆm‰‰r‰yksell‰")." $tilrivirow[otunnus]',
 					laatija  	= '$kukarow[kuka]',
 					laadittu 	= now()";
@@ -346,6 +356,10 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 						kpl     	= '$isavarattu',
 						kplhinta	=  round($uusiarvo/$isavarattu, 6),
 						hinta   	= '$kehahin',
+						hyllyalue 	= '$isarow[hyllyalue]', 
+						hyllynro 	= '$isarow[hyllynro]', 
+						hyllytaso 	= '$isarow[hyllytaso]', 
+						hyllyvali 	= '$isarow[hyllyvali]',
 						selite  	= '".t("Valmistettiin tuotetta tyˆm‰‰r‰yksell‰")." $tilrivirow[otunnus] ($isarow[kehahin] --> $kehahin)',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
@@ -481,7 +495,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 		while ($uvrow = mysql_fetch_array($uvresult)) {
 			if ($uvrow["paikka"] != '') {
 				//k‰ytet‰‰n rivill‰ olevaa paikkaa
-				$query = "	SELECT  saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus
+				$query = "	SELECT saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus,
+							tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
 							FROM tuote, tuotepaikat
 							WHERE tuote.yhtio=tuotepaikat.yhtio
 							and tuote.tuoteno=tuotepaikat.tuoteno
@@ -492,7 +507,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 				if(mysql_num_rows($tuoteresult) != 1) {
 					//jos ei lˆytynyt yksiselitteist‰ rivi‰ yritet‰‰n oletuspaikkaa
-					$query = "	SELECT  saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus
+					$query = "	SELECT saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus,
+								tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
 								FROM tuote, tuotepaikat
 								WHERE tuote.yhtio=tuotepaikat.yhtio
 								and tuote.tuoteno=tuotepaikat.tuoteno
@@ -504,7 +520,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 			}
 			else {
 				//k‰ytet‰‰n oletuspaikkaa
-				$query = "	SELECT  saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus
+				$query = "	SELECT saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus,
+							tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso			
 							FROM tuote, tuotepaikat
 							WHERE tuote.yhtio=tuotepaikat.yhtio
 							and tuote.tuoteno=tuotepaikat.tuoteno

@@ -29,6 +29,10 @@
 							kpl 		= '0',
 							kplhinta	= '0',
 							hinta 		= '0',
+							hyllyalue 	= '$tuoterow[hyllyalue]', 
+							hyllynro 	= '$tuoterow[hyllynro]', 
+							hyllytaso 	= '$tuoterow[hyllytaso]', 
+							hyllyvali 	= '$tuoterow[hyllyvali]',
 							laji 		= 'poistettupaikka',
 							selite 		= '".t("Poistettiin tuotepaikka")." $tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]',
 							laatija 	= '$kukarow[kuka]',
@@ -60,7 +64,7 @@
 	
 	if ($tee == 'CLEANRIKKINAISET') {
 		
-		$query = "	SELECT tuoteno, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, min(tunnus) mintunnus, group_concat(tunnus order by tunnus) tunnukset, count(*) lukumaara, sum(saldo) saldo
+		$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, min(tunnus) mintunnus, group_concat(tunnus order by tunnus) tunnukset, count(*) lukumaara, sum(saldo) saldo
 					FROM tuotepaikat 
 					WHERE yhtio='$kukarow[yhtio]' 
 					GROUP BY tuoteno, paikka
@@ -97,6 +101,10 @@
 							kpl 		= '0',
 							kplhinta	= '0',
 							hinta 		= '0',
+							hyllyalue 	= '$lrow[hyllyalue]', 
+							hyllynro 	= '$lrow[hyllynro]', 
+							hyllytaso 	= '$lrow[hyllytaso]', 
+							hyllyvali 	= '$lrow[hyllyvali]',
 							laji 		= 'poistettupaikka',
 							selite 		= '".t("Poistettiin tuotepaikka")." $lrow[paikka]',
 							laatija 	= '$kukarow[kuka]',

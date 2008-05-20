@@ -216,6 +216,10 @@
 										kplhinta	= '0',
 										hinta 		= '0',
 										laji 		= 'uusipaikka',
+										hyllyalue   = '$hyllyrow[alkuhyllyalue]',
+										hyllynro    = '$hyllyrow[alkuhyllynro]',
+										hyllytaso   = '0',
+										hyllyvali   = '0',
 										selite 		= '".t("Lisättiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
 										laatija 	= '$kukarow[kuka]',
 										laadittu 	= now()";

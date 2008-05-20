@@ -58,12 +58,21 @@ if ($tee == "liita") {
 	$result = mysql_query($query) or pupe_error($query);
 	$oslasrow = mysql_fetch_array($result);
 
+	// jos meillä on hyvityslasku niin haetaan vaan negatiivisiä alvikirjauksia (en tiedä ollenkaan onko tämä futureprooof) :(
+	if ($oslasrow["summa"] < 0) {
+		$alvilisa = "and summa < 0";
+	}
+	else {
+		$alvilisa = "and summa > 0";
+	}
+	
 	// Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
 	$query = "	SELECT sum(summa) summa
 				from tiliointi
 				where yhtio	= '$kukarow[yhtio]'
 				and ltunnus	= '$oslasrow[tunnus]'
 				and tilino  = '$yhtiorow[alv]'
+				$alvilisa
 				and korjattu = ''";
 	$alvires = mysql_query($query) or pupe_error($query);
 	$alvirow = mysql_fetch_array($alvires);
@@ -434,12 +443,21 @@ if ($silent == "") {
 
 			while($llrow = mysql_fetch_array($result)) {
 
+				// jos meillä on hyvityslasku niin haetaan vaan negatiivisiä alvikirjauksia (en tiedä ollenkaan onko tämä futureprooof) :(
+				if ($llrow["summa"] < 0) {
+					$alvilisa = "and summa < 0";
+				}
+				else {
+					$alvilisa = "and summa > 0";
+				}
+				
 				//Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
 				$query = "	SELECT sum(summa) summa
 							from tiliointi
 							where yhtio	= '$kukarow[yhtio]'
 							and ltunnus	= '$llrow[tunnus]'
 							and tilino  = '$yhtiorow[alv]'
+							$alvilisa
 							and korjattu = ''";
 				$alvires = mysql_query($query) or pupe_error($query);
 				$alvirow = mysql_fetch_array($alvires);

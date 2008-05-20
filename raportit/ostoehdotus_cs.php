@@ -574,7 +574,15 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			$ostoehdotus = 0;
 		}
 
-		if (($ostoehdotus > 0 or $naytakaikkituotteet != '') and ($naytavainmyydyt == '' or $vku+$enp != 0)) {
+		if ($eivarastoivattilaus == '' and $ostot+$enp == 0 and $row["ei_varastoida_clean"] != '') {
+			$naytetaan = "nope";
+		}
+		else {
+			$naytetaan = "juu";
+		}
+		
+
+		if (($ostoehdotus > 0 or $naytakaikkituotteet != '') and ($naytavainmyydyt == '' or $vku+$enp != 0) and $naytetaan == "juu") {
 			echo "<tr>";
 
 			if ($useampi_yhtio > 1) {
@@ -590,7 +598,12 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			echo "<td valign='top' $bt  align='right'>".(float) $row["varmuus_varasto"]."</td>";
 			echo "<td valign='top' $bt  align='right'>".(float) $saldot."</td>";
 			echo "<td valign='top' $bt  align='right'>".(float) $ostot."</td>";
-			echo "<td valign='top' $bt  align='right'><font style='color: 00FF00;'>$ostoehdotus</font></td>";
+			if ($toimirow["pakkauskoko"] != 0) {
+				echo "<td valign='top' $bt  align='right'><font style='color: 00FF00;'>".ceil($ostoehdotus)."</font></td>";
+			}
+			else {
+				echo "<td valign='top' $bt  align='right'><font style='color: 00FF00;'>$ostoehdotus</font></td>";
+			}			
 			echo "<td valign='top' $bt  align='right'>".(float) $toimirow["pakkauskoko"]."</td>";
 			echo "<td valign='top' $btr align='right'>".(float) $toimirow["toimitusaika"]." ".t("pva")."</td>";
 			echo "</tr>";
@@ -857,6 +870,9 @@ $chk = "";
 if ($naytavainmyydyt != "") $chk = "checked";
 echo "<tr><th>".t("Näytä vain tuotteet joilla on myyntiä")."</th><td colspan='3'><input type='checkbox' name='naytavainmyydyt' $chk></td></tr>";
 
+$chk = "";
+if ($eivarastoivattilaus != "") $chk = "checked";
+echo "<tr><th>".t("Näytä myös ei varastoitavat tuotteet joilla ei ole tilauksia")."</th><td colspan='3'><input type='checkbox' name='eivarastoivattilaus' $chk></td></tr>";
 
 
 if ($abcrajaus != "") {

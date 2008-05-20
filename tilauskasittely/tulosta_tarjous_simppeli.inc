@@ -10,7 +10,7 @@ if (!function_exists('tulosta_tarjous')) {
 		$vquery="select count(*) from lasku l where l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu and l.tunnus<=lasku.tunnus and l.tila='T'";
 		$query = "	SELECT lasku.*, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.luontiaika päiväys, laskun_lisatiedot.asiakkaan_kohde, laskun_lisatiedot.rivihintoja_ei_nayteta, viesti asiakkaan_viite,
 					if(tunnusnippu>0,concat(lasku.tunnusnippu,'/',($vquery)),lasku.tunnus) tarjous,
-					date_add(lasku.luontiaika, INTERVAL $yhtiorow[tarjouksen_voimaika] DAY) voimassa, 
+					if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, interval $yhtiorow[tarjouksen_voimaika] day)) voimassa, 
 					concat_ws(' ', postino, postitp) postiosoite,
 					yhteyshenkilo_tekninen.nimi asiakkaan_yhteyshenkilö,
 					laskun_lisatiedot.saate saate
@@ -362,7 +362,7 @@ if (!function_exists('tulosta_tarjous')) {
 			$h-=$pdf->ln(2.25);
 			$nb=$pdf->countParagraphHeight($laskurow["sisviesti1"], "norm");
 			$pdf->write($h, $nb, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
-			$h-=$pdf->ln($nb+0.5);
+			$h-=$pdf->ln($nb+3);
 		}
 
 		if($h < 60) {

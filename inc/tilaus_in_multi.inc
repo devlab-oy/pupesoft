@@ -23,11 +23,14 @@ while (!feof ($fd)) {
 	$netto 	  		= strtoupper(trim($rivi[8]));
 	$var  			= strtoupper(trim($rivi[9]));
 	$kommentti		= trim($rivi[10]);
+	
 
+	$tarkytunnus = $ytunnus.$toim_ovttunnus;
+	
 	if ($ytunnus != "" and $tuoteno != "") {
 
  		// asiakas vaihtuu, uusi otsikko
- 		if ($ytunnus != $edytunnus) {
+ 		if ($tarkytunnus != $edytunnus) {
  
  			$query = "	UPDATE kuka
 						SET kesken=0
@@ -87,7 +90,7 @@ while (!feof ($fd)) {
  			require ("lisaarivi.inc");
  		}
 
- 		$edytunnus = $ytunnus;
+ 		$edytunnus = $tarkytunnus;
 
 	}
 

@@ -92,9 +92,9 @@
 	$prospektlisa	 = "";
 
 	$apupuquery = "SELECT selite FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = 'PIIRI' and selitetark_2 = 'rajattu'";
-	$apupuresult = mysql_query($apupuquery) or pupe_error($apupuquery);
 	
 	if (strtoupper($rajattu_nakyma) == 'PROSPEKTI') {
+		$apupuresult = mysql_query($apupuquery) or pupe_error($apupuquery);
 		$prospekti = "TRUE"; 
 		
 		if (mysql_num_rows($apupuresult) > 0) {
@@ -109,11 +109,13 @@
 			$prospektlisa .= "') ";
 		}
 	}
-	elseif(strtoupper($rajattu_nakyma) == 'VAINASIAKKAAT') {
+	elseif($laji == 'ASIAKAS') {
+		$apupuresult = mysql_query($apupuquery) or pupe_error($apupuquery);
+		
 		if (mysql_num_rows($apupuresult) > 0) {
 			while ($apupurow = mysql_fetch_array($apupuresult)) {
 				if($prospektlisa == "") {
-					$prospektlisa = " and asiakas.piiri not in ('".$apupurow["selite"]."'";
+					$prospektlisa = " and asiakas.piiri not in ('".$apupurow["selite"];
 				}
 				else {
 					$prospektlisa .= "', '".$apupurow["selite"];

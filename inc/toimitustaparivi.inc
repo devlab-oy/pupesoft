@@ -97,8 +97,8 @@
 			$sel2 = 'SELECTED';
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''  $sel1>".t("Ei n‰ytet‰")."</option>";
-		$ulos .= "<option value='K' $sel2>".t("N‰ytet‰‰n")."</option>";
+		$ulos .= "<option value=''  $sel1>".t("Toimitustapa n‰ytet‰‰n vain myynniss‰")."</option>";
+		$ulos .= "<option value='K' $sel2>".t("Toimitustapa n‰ytet‰‰n vain extranetiss‰")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

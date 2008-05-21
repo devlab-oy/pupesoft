@@ -483,16 +483,16 @@
 
 
 				//	Allekirjoituspohjat
-				if($h < 37) {
+				if($h < 35) {
 					$pdf = alku($pdf, $laskurow,$kieli);
-					$h = 37;
+					$h = 35;
 				}
 				else {
-					$h = 37;
+					$h = 35;
 				}
 
 				$pdf->write($h, 1, 0, 0, t("Parhain terveisin",$kieli), "norm", "L", "");
-				$h-=$pdf->ln(2);
+				$h-=$pdf->ln(1.25);
 
 				$pdf->write($h, 1, 0, 0, $kukarow["nimi"], "norm", "L", "B");
 				$h-=$pdf->ln();

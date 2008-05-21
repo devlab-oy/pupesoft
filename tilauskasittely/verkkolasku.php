@@ -781,6 +781,13 @@
 					$tulos_ulos .= t("Laskutettiin")." $laskutetttu ".t("tilausta").".";
 				}
 
+				if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T') {
+					$ketjutus_group = ", toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa ";										
+				}
+				else {
+					$ketjutus_group = "";
+				}
+				
 				//ketjutetaan laskut...
 				$ketjut = array();
 
@@ -801,6 +808,7 @@
 							lisattava_era, vahennettava_era, maa_maara, kuljetusmuoto, kauppatapahtuman_luonne,
 							sisamaan_kuljetus, aktiivinen_kuljetus, kontti, aktiivinen_kuljetus_kansallisuus,
 							sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn, maa, valkoodi
+							$ketjutus_group
 							ORDER BY ytunnus, nimi, nimitark, osoite, postino, postitp, maksuehto, erpcm, vienti,
 							lisattava_era, vahennettava_era, maa_maara, kuljetusmuoto, kauppatapahtuman_luonne,
 							sisamaan_kuljetus, aktiivinen_kuljetus, kontti, aktiivinen_kuljetus_kansallisuus,

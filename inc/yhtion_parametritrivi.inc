@@ -108,6 +108,27 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "koontilaskut_yhdistetaan") {
+		$sel1 = "";
+		$sel2 = "";
+
+		$ulos = "<td><select name='$nimi'>";
+
+		if ($trow[$i] == '') {
+			$sel1 = "selected";
+		}
+		if ($trow[$i] == 'T') {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value = '' $sel1>".t("Asiakkaan laskutusosoitteella");
+		$ulos .= "<option value = 'T' $sel2>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella");		
+				
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "tilausvahvistustyyppi") {
 

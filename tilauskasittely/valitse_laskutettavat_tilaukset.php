@@ -738,7 +738,14 @@
 		$haku='';
 		if (is_string($etsi))  $haku="and lasku.nimi LIKE '%$etsi%'";
 		if (is_numeric($etsi)) $haku="and lasku.tunnus='$etsi'";
-
+		
+		if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T') {
+			$ketjutus_group = ", lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa ";										
+		}
+		else {
+			$ketjutus_group = "";
+		}
+		
 		// GROUP BY pit‰‰‰ olla sama kun verkkolasku.php:ss‰ rivill‰†536
 		$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
 					lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
@@ -767,6 +774,7 @@
 							lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
 							lasku.sisamaan_kuljetus, lasku.aktiivinen_kuljetus, lasku.kontti, lasku.aktiivinen_kuljetus_kansallisuus,
 							lasku.sisamaan_kuljetusmuoto, lasku.poistumistoimipaikka, lasku.poistumistoimipaikka_koodi, lasku.chn, lasku.maa, lasku.valkoodi
+							$ketjutus_group
 					ORDER BY lasku.ytunnus, lasku.nimi";
 		$tilre = mysql_query($query) or pupe_error($query);
 

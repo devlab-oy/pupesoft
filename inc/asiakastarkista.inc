@@ -4,7 +4,7 @@ if(!function_exists("asiakastarkista")) {
 	function asiakastarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $ytunnus_select, $asiakasnro_select, $toim, $asiak_laji;
 		
-		static $ytunnus_tunnus, $ytunnus, $ovttunnus, $apuverkkotunnus, $apuverkkotunnusi, $apulasku_email, $apulasku_emaili;
+		static $ytunnus_tunnus, $ytunnus, $ovttunnus, $apuverkkotunnus, $apuverkkotunnusi, $apulasku_email, $apulasku_emaili, $apu_maa, $apu_toim_maa;
 		
 		if (mysql_field_name($result, $i) == "laji") {
 			$asiak_laji = $t[$i];
@@ -226,7 +226,7 @@ if(!function_exists("asiakastarkista")) {
 		if (mysql_field_name($result, $i) == "maksuehto" and $t[$i] > 0) {
 
 			$query   = "select tunnus from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$t[$i]'
-						and (sallitut_maat = '' or sallitut_maat like '%$trow[maa]%')";
+						and (sallitut_maat = '' or sallitut_maat like '%$apu_maa%')";
 			$sresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($sresult) == 0) {
@@ -237,7 +237,7 @@ if(!function_exists("asiakastarkista")) {
 		if (mysql_field_name($result, $i) == "toimitustapa" and trim($t[$i]) != '') {
 
 			$query   = "select tunnus from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$t[$i]'
-						and (sallitut_maat = '' or sallitut_maat like '%$trow[toim_maa]%')";
+						and (sallitut_maat = '' or sallitut_maat like '%$apu_toim_maa%')";
 			$sresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($sresult) == 0) {
@@ -245,7 +245,14 @@ if(!function_exists("asiakastarkista")) {
 			}
 		}
 
+		if (mysql_field_name($result, $i) == "toim_maa") {	
+			$apu_toim_maa = $t[$i];
+		}
+		
 		if (mysql_field_name($result, $i) == "maa") {
+			
+			$apu_maa = $t[$i];
+			
 			if (strtoupper($t[$i]) == 'FI' and ($yhtiorow["ytunnus_tarkistukset"] == "" or $yhtiorow["ytunnus_tarkistukset"] == "A")) {
 				require ("tarkistaytunnus.inc");
 

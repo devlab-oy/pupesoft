@@ -209,7 +209,7 @@ if (!function_exists('tulosta_tarjous')) {
 			if($key == "Ylläpito") {
 				$pdf->write($h, 1, $s[1], $s[3], t("Tarjous yhteensä alv 0%",$kieli).": ", "norm", "R", "B");
 				$pdf->write($h, 1, $s[3], 0, money_format('%i',$grand_total), "norm", "R", "B");
-				$h-=$pdf->ln(3);
+				$h-=$pdf->ln(2);
 			}
 			
 			$query .= " ORDER BY otunnus, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
@@ -338,7 +338,7 @@ if (!function_exists('tulosta_tarjous')) {
 					$pdf->write($h, 1, $s[3], 0, money_format('%!i',$summa), "norm", "R", "B");
 				}
 				$grand_total+=$summa;
-				$h-=$pdf->ln(3);
+				$h-=$pdf->ln(2);
 				
 			}			
 		}

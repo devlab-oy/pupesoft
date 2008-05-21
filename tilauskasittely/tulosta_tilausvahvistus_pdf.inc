@@ -403,7 +403,7 @@
 
 				$pdf->write($h, 1, $s[0], $s[2], t("Tilaus yhteensä alv 0%",$kieli).": ", "norm", "R", "B");
 				$pdf->write($h, 1, $s[2], 0, money_format('%i',$grand_total), "norm", "R", "B");
-				$h-=$pdf->ln(3);
+				$h-=$pdf->ln(2);
 
 				if($h < 60) {
 					$pdf = alku($pdf, $laskurow,$kieli);

@@ -1668,13 +1668,7 @@
 				else {
 					
 					if ($yhtiorow["tarjouksen_voimaika"] != "") {
-						$voimaika_query = "	SELECT tarjouksen_voimaika 
-											FROM yhtion_parametrit 
-											WHERE yhtio = '{$kukarow["yhtio"]}'";
-						$voimaika_result = mysql_query($voimaika_query) or pupe_error($voimaika_query);
-						$voimaika_row = mysql_fetch_array($voimaika_result);
-						
-						$add_days = "+{$voimaika_row["tarjouksen_voimaika"]} day";
+						$add_days = "+{$yhtiorow["tarjouksen_voimaika"]} day";
 					}
 					else {
 						$add_days = "now";

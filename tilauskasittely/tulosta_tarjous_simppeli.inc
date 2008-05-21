@@ -12,6 +12,7 @@ if (!function_exists('tulosta_tarjous')) {
 					if(tunnusnippu>0,concat(lasku.tunnusnippu,'/',($vquery)),lasku.tunnus) tarjous,
 					if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, interval $yhtiorow[tarjouksen_voimaika] day)) voimassa, 
 					concat_ws(' ', postino, postitp) postiosoite,
+					concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
 					yhteyshenkilo_tekninen.nimi asiakkaan_yhteyshenkilö,
 					laskun_lisatiedot.saate saate
 					FROM lasku

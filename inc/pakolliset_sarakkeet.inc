@@ -8,7 +8,7 @@
 
 // m‰‰ritell‰‰n pakolliset sarakkeet
 if (!function_exists("pakolliset_sarakkeet")) {
-	function pakolliset_sarakkeet($table) {
+	function pakolliset_sarakkeet($table, $otsikot="") {
 		global $yhtiorow;
 
 		switch ($table) {
@@ -81,7 +81,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 			case "yhteyshenkilo" :
-				$pakolliset = array("LIITOSTUNNUS","TYYPPI","NIMI");
+				if(in_array("YTUNNUS", $otsikot) and !in_array("LIITOSTUNNUS", $otsikot)) {
+					$pakolliset = array("TYYPPI","NIMI");
+				}
+				else {
+					$pakolliset = array("LIITOSTUNNUS","TYYPPI","NIMI");
+				}
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 			case "avainsana" :

@@ -601,7 +601,7 @@
 				}
 			}
 
-			if ($laskurow["chn"] == "666") {
+			if ($ekarow["chn"] == "666") {
 				$query = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' AND laji='LASKUTUS_SAATE'";
 				$result = mysql_query($query) or pupe_error($query);
 

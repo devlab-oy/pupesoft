@@ -1607,7 +1607,7 @@
 							if (in_array($laskurow["laskunro"], $tulostettavat_email)) {	
 								// generoidaan laskun saatekirje, joka haetaan avainsanoista
 								include_once("inc/generoi_laskun_saate.inc");
-								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje);
+								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $kieli);
 
 								// lähetetään meili
 								$kutsu = "lasku $lasku";

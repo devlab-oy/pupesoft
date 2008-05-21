@@ -244,22 +244,35 @@ class PDF extends pdffile {
 
 	function placeImageToTemplate($top, $width, $imageFile, $template="") {
 						
-		$filedata = file_get_contents($imageFile);
+		if(!is_array($imageFile)) {
+			$filedata = file_get_contents($imageFile);
+		}
+		else {
+			$filedata = &$imageFile["data"];
+		}
+
 		if($filedata != "") {
-			if(strpos($imageFile, ".png")) {
+			if(strpos($imageFile, ".png") or $imageFile["filetype"] == "image/png") {
 				$image = $this->png_embed($filedata);
 			}
-			elseif(strpos($imageFile, ".jpg")) {
+			elseif(strpos($imageFile, ".jpg") or $imageFile["filetype"] == "image/jpeg") {
 				$image = $this->jfif_embed($filedata);
 			}
 			
 			if($image!="") {
-				
 				$top = mm_pt($top);
 				$left = mm_pt($width);
-				$size  = getimagesize($imageFile);
-				$height=$size[1];
-				$width=$size[0];
+				
+				if(!is_array($imageFile)) {
+					$size  	= getimagesize($imageFile);
+					$height	= $size[1];
+					$width	= $size[0];
+				}
+				else {
+					$height	= $imageFile["image_height"];
+					$width	= $imageFile["image_width"];
+				}
+				
 				$bottom = $top - $height;
 				
 				$this->template->image($template, $left, $bottom, $width, $height, $image);

@@ -396,8 +396,15 @@ if ($tee == 'MONISTA') {
 							$values .= ", '".$monistarow[$i]."'";
 						}
 					break;
-					case 'kerayspvm':
 					case 'toimaika':
+						if ($kumpi == 'HYVITA') {
+							$values .= ", '$monistarow[$i]'";
+						}
+						else {
+							$values .= ", now()";
+						}
+						break;
+					case 'kerayspvm':
 					case 'luontiaika':
 						$values .= ", now()";
 						break;

@@ -220,6 +220,13 @@
 					$popup_otsikko .= "<tr><th class=''>".t("Yhteyshenkilö").":</th><td class=''>$row[yhteyshenkilo]</td></tr>";
 				}
 				
+				if($row["tila"] == "T" and $row["tunnusnippu"] > 0) {
+					$popup_otsikko .= "<tr><th class=''>".t("Tarjous").":</th><td class=''>{$row["tunnusnippu"]}</td></tr>";
+				}
+				elseif(in_array($row["tila"], array("L", "U", "R")) and $row["tunnusnippu"] > 0) {
+					$popup_otsikko .= "<tr><th class=''>".t("Tilaus").":</th><td class=''>{$row["tunnusnippu"]}</td></tr>";
+				}
+				
 				if($lajitark == "kalenteri") {
 					$popup_otsikko .= "<tr><th class=''>".t("Tapa").":</th><td class=''>$row[tapa]</td></tr>";
 					$popup_otsikko .= "<tr><th class=''>".t("Alkaa").":</th><td class=''>".date("d.m.Y h:i", $row["pvmalku"])."</td></tr>";
@@ -249,7 +256,6 @@
 					$res = mysql_query($abuq) or pupe_error($abuq);
 					$row = mysql_fetch_array($res);
 
-					$popup_otsikko .= "<tr><th class=''>".t("Tarjous").":</th><td class=''>{$row["tunnusnippu"]}</td></tr>";
 					$popup_otsikko .= "<tr><th class=''>".t("Päivälle").":</th><td class=''>".date("d.m.Y", $row["pvmalku"])."</td></tr>";
 					
 					if($lajitark == "kontakti_1") {
@@ -1706,8 +1712,17 @@
 				$otunnus 		= $krow["otunnus"];
 				$yhteyshenkilo 	= $krow["henkilo"];
 				$tapa 			= $krow["tapa"];							
+				
+				$query = "	SELECT count(*)
+							FROM liitetiedostot
+							WHERE liitostunnus='$ktunnus' AND liitos='kalenteri'";
+				$abures = mysql_query($query) or pupe_error($query);
+				$abur = mysql_fetch_array($abures);
+				if($abur[0] > 0) {
+					$llisa = "({$abur[0]})";
+				}
 				$poistanappi 	= "<a href='#' onclick=\"sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaletee=POISTA_KALENTERITAPAHTUMA&ktunnus=$ktunnus".url_params($kalenteri)."', false, false); pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none'; return false;\">Poista</a>";
-				$liitanappi 	= "<a href='#' onclick=\"sndReq('ajax_menu', '$kalenteri[URL]?ohje=off&kaletee=LISAA_LIITE&ktunnus=$ktunnus".url_params($kalenteri)."', false, false); return false;\">Liitteet</a>";
+				$liitanappi 	= "<a href='#' onclick=\"sndReq('ajax_menu', '$kalenteri[URL]?ohje=off&kaletee=LISAA_LIITE&ktunnus=$ktunnus".url_params($kalenteri)."', false, false); return false;\">".t("Liitteet")." $llisa</a>";
 			}
 		}
 		else {

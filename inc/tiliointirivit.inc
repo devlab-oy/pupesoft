@@ -317,7 +317,14 @@
 		echo "<tr><td>$yhtok</td><td></td><td>" . round($yhtsum,2) . "</td>";
 	}
 	else {
-		echo "<tr><td>$yhtok</td><td></td><td>" . round($yhtsum,2) . "</td><td></td>";
+		echo "<tr><td>$yhtok</td><td></td><td>";
+		if (round($yhtsum,2) == 0) {
+			echo abs(round($yhtsum,2));
+		}
+		else {
+			echo round($yhtsum,2);
+		}
+		echo "</td><td></td>";
 	}
 	
 	echo "<td>";

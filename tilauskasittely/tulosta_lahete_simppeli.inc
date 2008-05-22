@@ -114,16 +114,18 @@ if (!function_exists('tulosta_lahete')) {
 					static $tid;
 					$tid=$pdf->template->create();
 													
-					$h=280;
+					$h=282;
+							
 					//	Liitetään kuva
 					if( (int) $yhtiorow["lasku_logo"] > 0) {
 						$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
 						$data = $liite["data"];
-						$pdf->placeImageToTemplate($h,0,$liite, $tid);
+						$pdf->placeImageToTemplate($h,0,$liite, $tid, "57x100");
+
 						unset($liite);
 					}
 					elseif(file_exists($yhtiorow["lasku_logo"])) {
-						$pdf->placeImageToTemplate($h,0,$yhtiorow["lasku_logo"], $tid);
+						$pdf->placeImageToTemplate($h,0,$yhtiorow["lasku_logo"], $tid, "57x100");
 					}
 
 					$pdf->writeToTemplate($h, 1, 0, 0, t($otsikko, $kieli), "BIG", "C", "B", $tid);

@@ -8,6 +8,28 @@ class PDF extends pdffile {
 		return round($pointseja * 0.3527777778,2);
 	}
 
+	function scaleImage($value, $limit) {
+		
+		list($height, $width) = explode("x", $value);
+		list($maxHeight, $maxWidth) = explode("x", $limit);
+		
+		$scale = array();
+		$scale["h"] = 1;
+		$scale["w"] = 1;
+		
+		if($height > $maxHeight) {
+			$scale["h"] = $maxHeight/$height;
+		}
+		if($value > $limit) {
+			$scale["w"] = $maxWidth/$width;
+		}
+		
+		$s = min($scale);
+				
+		return array(($height * $s), ($width * $s));
+	}
+
+
 	function addPage($size) {
 		$oid = $this->new_page($size);
 		$this->currentPage=current($this->objects);
@@ -242,8 +264,8 @@ class PDF extends pdffile {
 		}
 	}
 
-	function placeImageToTemplate($top, $width, $imageFile, $template="") {
-						
+	function placeImageToTemplate($top, $width, $imageFile, $template, $maxSize="") {
+				
 		if(!is_array($imageFile)) {
 			$filedata = file_get_contents($imageFile);
 		}
@@ -273,8 +295,12 @@ class PDF extends pdffile {
 					$width	= $imageFile["image_width"];
 				}
 				
-				$bottom = $top - $height;
+				if($maxSize>0) {
+					list($height, $width) = $this->scaleImage("{$height}x{$width}", $maxSize);
+				}
 				
+				$bottom = $top - $height;
+								
 				$this->template->image($template, $left, $bottom, $width, $height, $image);
 			}
 			else {

@@ -5774,43 +5774,35 @@ if(!function_exists("tee_asiakashaku")) {
 
 		//	Tsekataan josko saataisiin perustaa uusi asiakas?
 		if($lopetus != "") {
-			echo "	<tr>
-						<td class='back'><font class='message'>".t("Eikö löydy")."?</font></td>
-					</tr>";
-
-			$query = "	SELECT yhtio
+			
+			$query = "	SELECT yhtio, alanimi, nimitys
 						FROM oikeu
 						WHERE yhtio	= '$kukarow[yhtio]'
 						and kuka	= '$kukarow[kuka]'
 						and nimi	= 'yllapito.php'
-						and alanimi = 'asiakas'
-						and paivitys != ''
-						LIMIT 1";
+						and (alanimi = 'asiakas' or alanimi LIKE ('asiakas!%')  or alanimi LIKE ('asiakas&%'))
+						and paivitys != ''";
 			$oikeures = mysql_query($query) or pupe_error($query);
+			echo $query;
 			if(mysql_num_rows($oikeures) > 0) {
 				echo "	<tr>
-							<td class='back'><a href='{$palvelin2}yllapito.php?laji=Y&uusi=1&toim=asiakas&lopetus=$lopetus'>".t(" Perusta uusi yritysasiakas")."</a></td>
+							<td class='back' colspan='3'><br><font class='message'>".t("Eikö löydy? Perusta täältä uusi!")."</font></td>
 						</tr>";
-			}
-
-			$query = "	SELECT yhtio
-						FROM oikeu
-						WHERE yhtio	= '$kukarow[yhtio]'
-						and kuka	= '$kukarow[kuka]'
-						and nimi	= 'yllapito.php'
-						and alanimi = 'asiakas!!!VAHITTAISMYYNTI!!!true&laji=H'
-						and paivitys != ''
-						LIMIT 1";
-			$oikeures = mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($oikeures) > 0) {
+				
 				echo "	<tr>
-							<td class='back'><a href='{$palvelin2}yllapito.php?laji=H&uusi=1&toim=asiakas&lopetus=$lopetus'>".t(" Perusta uusi henkilöasiakas")."</a></td>
+							<td class='back' colspan='3'>";
+				
+				while($orow = mysql_fetch_array($oikeures)) {
+					echo "		<a href='{$palvelin2}yllapito.php?laji=Y&uusi=1&toim=$orow[alanimi]&lopetus=$lopetus'>".t($orow["nimitys"])."</a>&nbsp;&nbsp;";
+				}
+				
+				echo "		</td>
 						</tr>";
 			}
 		}
-
-		echo "	</table>";
 	}
+	
+	echo "	</table>";
 }
 
 

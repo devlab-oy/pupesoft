@@ -443,13 +443,13 @@
 							lukko    = '',
 							selite   = '$kassalipas $maksutapa";
 
-				// Jos kentt‰ on erotus niin lis‰t‰‰n selitteeseen "erotus"
-				if (stristr($kentta, "erotus")) {
-					$query .= " ".t("erotus")."',";
-				}
 				// Jos kentt‰ on soluerotus niin lis‰t‰‰n selitteeseen "kassaero"
-				elseif (stristr($kentta, "soluerotus")) {
+				if (stristr($kentta, "soluerotus")) {
 					$query .= " ".t("kassaero")."',";
+				}
+				// Jos kentt‰ on erotus niin lis‰t‰‰n selitteeseen "erotus"
+				elseif (stristr($kentta, "erotus")) {
+					$query .= " ".t("erotus")."',";
 				}
 				else {
 					$query .= "',";
@@ -1574,6 +1574,10 @@
 					var yht_loppu = 0;
 
 			 		for (i=0; i<obj.length; i++) {
+						if (obj.elements[i].value == '') {
+							obj.elements[i].value = 0;
+						}
+
 						//kala = kala+'\\n '+i+'. NIMI: '+obj.elements[i].id+' VALUE: '+obj.elements[i].value;
 
 						if (obj.elements[i].id.substring(0,11) == ('rivipointer')) {
@@ -1741,7 +1745,13 @@
 						document.getElementById('yht_kat').value = yht_kat.toFixed(2);
 						document.getElementById('yht_katot').value = yht_katot.toFixed(2);
 						document.getElementById('yht_kattil').value = yht_kattil.toFixed(2);
+					
+						if (obj.elements[i].value == 0) {
+							obj.elements[i].value = '';
+						}
+					
 					}
+										
 //					alert(kala);
 				}
 

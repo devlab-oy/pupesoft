@@ -926,7 +926,7 @@
 								}
 
 								if ($trow["tilausrivi_kommentti"] != "" and (int) $rivitunnus == 0) {
-									$kommentti = $trow["tilausrivi_kommentti"]."\n".$kommentti;
+									$kommentti = trim($trow["tilausrivi_kommentti"]."\n".$kommentti);
 								}
 
 								// jos meill‰ on vanha laadittuaikaa, niin k‰ytet‰‰ sit‰

@@ -5783,7 +5783,6 @@ if(!function_exists("tee_asiakashaku")) {
 						and (alanimi = 'asiakas' or alanimi LIKE ('asiakas!%')  or alanimi LIKE ('asiakas&%'))
 						and paivitys != ''";
 			$oikeures = mysql_query($query) or pupe_error($query);
-			echo $query;
 			if(mysql_num_rows($oikeures) > 0) {
 				echo "	<tr>
 							<td class='back' colspan='3'><br><font class='message'>".t("Eikö löydy? Perusta täältä uusi!")."</font></td>

@@ -5799,9 +5799,9 @@ if(!function_exists("tee_asiakashaku")) {
 						</tr>";
 			}
 		}
+
+		echo "	</table>";
 	}
-	
-	echo "	</table>";
 }
 
 

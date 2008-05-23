@@ -35,11 +35,12 @@ Contact author at: barcode@mribti.com
     
     
   class C128CObject extends BarcodeObject {
-   var $mCharSet, $mChars;
-   function C128CObject($Width, $Height, $Style, $Value)
+   var $mCharSet, $mChars, $mFNC;
+   function C128CObject($Width, $Height, $Style, $Value, $fnc = '')
    {
-     $this->BarcodeObject($Width, $Height, $Style);
-	 $this->mValue   = $Value;
+		 $this->BarcodeObject($Width, $Height, $Style);
+		 $this->mFNC  	 = $fnc;
+		 $this->mValue   = $Value;
          $this->mChars   = array
           (
             "00", "01", "02", "03", "04", "05", "06", "07", "08", "09",
@@ -198,19 +199,19 @@ Contact author at: barcode@mribti.com
 	   }
 	 $ret = 0;
 
-         for ($i=0;$i<$len;$i++) {
-	  if ((ord($this->mValue[$i])<48) || (ord($this->mValue[$i])>57)) {
-                $this->mError = "Code-128C is numeric only";
-			return false;
-		 }
-	 }
-
-	 if (($len%2) != 0) {
-            $this->mError = "The length of barcode value must be even.  You must pad the number with zeros.";
-            __DEBUG__("GetSize: failed C128-C requiremente");
-		return false;
-		}		 
-
+      	 for ($i=0;$i<$len;$i++) {
+      	  if ((ord($this->mValue[$i])<48) || (ord($this->mValue[$i])>57)) {
+      	                 $this->mError = "Code-128C is numeric only";
+      	 			return false;
+      	 		 }
+      	 }
+      	 
+      	 if (($len%2) != 0) {
+      	             $this->mError = "The length of barcode value must be even.  You must pad the number with zeros.";
+      	             	__DEBUG__("GetSize: failed C128-C requiremente");
+      	 		return false;
+      	 		}		 
+      
         for ($i=0;$i<$len;$i+=2) {
           $id = $this->GetCharIndex($this->mValue[$i].$this->mValue[$i+1]);
           $cset = $this->mCharSet[$id];
@@ -232,17 +233,34 @@ Contact author at: barcode@mribti.com
 	  return $StartSize + $ret + $CheckSize + $StopSize;
    }
    
-   function GetCheckCharValue()
-   {
-     $len = strlen($this->mValue);
-         $sum = 105; // 'C' type;
-         $m = 0;
-         for ($i=0;$i<$len;$i+=2) {
-          $m++;
-          $sum +=  $this->GetCharIndex($this->mValue[$i].$this->mValue[$i+1]) * $m;
-	 }
-	 $check  = $sum % 103;
- 	 return $this->mCharSet[$check];
+	function GetCheckCharValue() {
+   		$len = strlen($this->mValue);
+       	//echo "LEN=$len<br>";
+       	
+		$sum = 105; // 'C' type;
+		//echo "SUM=$sum<br>";
+		
+	    $m = 0;
+		//echo "M=$m<br>";
+		
+		if ($this->mFNC == 'FNC1') {
+			$m++;
+      		$sum += 102 * 1;
+			//echo "#$i M=$m SUM=$sum<br>";
+		}
+		
+	    for ($i=0;$i<$len;$i+=2) {
+	      	$m++;
+	      	$sum +=  $this->GetCharIndex($this->mValue[$i].$this->mValue[$i+1]) * $m;
+			//echo "#$i M=$m SUM=$sum<br>";
+			
+		}
+		
+		$check  = $sum % 103;
+		$setcheck = $this->mCharSet[$check];
+		//echo "#CHECK=$check($sum % 103) CHAR=$setcheck<br>";
+		
+	 	return $this->mCharSet[$check];
     }
    
    function DrawStart($DrawPos, $yPos, $ySize, $xres)
@@ -253,9 +271,9 @@ Contact author at: barcode@mribti.com
 	  $this->DrawSingleBar($DrawPos, BCD_DEFAULT_MAR_Y1, $this->GetBarSize('1', $xres) , $ySize);
 	  $DrawPos += $this->GetBarSize('1', $xres);
 	  $DrawPos += $this->GetBarSize('2', $xres);
-          $this->DrawSingleBar($DrawPos, BCD_DEFAULT_MAR_Y1, $this->GetBarSize('3', $xres) , $ySize);
-          $DrawPos += $this->GetBarSize('3', $xres);
-          $DrawPos += $this->GetBarSize('2', $xres);
+      $this->DrawSingleBar($DrawPos, BCD_DEFAULT_MAR_Y1, $this->GetBarSize('3', $xres) , $ySize);
+      $DrawPos += $this->GetBarSize('3', $xres);
+      $DrawPos += $this->GetBarSize('2', $xres);
 	  return $DrawPos;
    }
    
@@ -322,6 +340,19 @@ Contact author at: barcode@mribti.com
 									
 	 $cPos = 0;	  		                 
 	 $DrawPos = $this->DrawStart($sPos, BCD_DEFAULT_MAR_Y1 , $ysize, $xres); 
+	 
+	 if ($this->mFNC == 'FNC1') {
+	 	$this->DrawSingleBar($DrawPos, BCD_DEFAULT_MAR_Y1, $this->GetBarSize(4, $xres) , $ysize);
+	    $DrawPos += $this->GetBarSize(4, $xres);
+	    $DrawPos += $this->GetBarSize(1, $xres);
+	    $this->DrawSingleBar($DrawPos, BCD_DEFAULT_MAR_Y1, $this->GetBarSize(1, $xres) , $ysize);
+	    $DrawPos += $this->GetBarSize(1, $xres);
+	    $DrawPos += $this->GetBarSize(1, $xres);
+	    $this->DrawSingleBar($DrawPos, BCD_DEFAULT_MAR_Y1, $this->GetBarSize(3, $xres) , $ysize);
+	    $DrawPos += $this->GetBarSize(3, $xres);
+	    $DrawPos += $this->GetBarSize(1, $xres);
+	 }     		
+
 	 do {      			     
         $c     = $this->GetCharIndex($this->mValue[$cPos].$this->mValue[$cPos+1]);
 		$cset  = $this->mCharSet[$c];       		

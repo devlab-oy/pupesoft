@@ -175,8 +175,13 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 		if ($oslappkpl > 0) {
 			$oslapp .= " -#$oslappkpl ";
 		}
-								
-		require ("tilauskasittely/osoitelappu_pdf.inc");
+		
+		if ($toitarow['osoitelappu'] == 'intrade') {
+			require('tilauskasittely/osoitelappu_intrade_pdf.inc');
+		}
+		else {
+			require ("tilauskasittely/osoitelappu_pdf.inc");							
+		}
 	}
 	
 	$asiakasid = false;

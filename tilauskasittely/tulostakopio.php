@@ -1908,7 +1908,18 @@
 				$tilausnumeroita = $toimrow["tunnukset"];
 
 				if ($oslapp != '' or $tee == 'NAYTATILAUS') {
-					require('osoitelappu_pdf.inc');
+					
+					$query = "SELECT osoitelappu FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
+					$oslares = mysql_query($query) or pupe_error($query);
+					$oslarow = mysql_fetch_array($oslares);
+					
+					if ($oslarow['osoitelappu'] == 'intrade') {
+						require('osoitelappu_intrade_pdf.inc');
+					}
+					else {
+						require ("osoitelappu_pdf.inc");
+						
+					}
 				}
 				$tee = '';
 			}

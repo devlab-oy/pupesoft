@@ -1157,12 +1157,22 @@
 					// Tulostetaan osoitelappu
 					if ($valittu_oslapp_tulostin != "" and $oslapp != '' and $oslappkpl > 0) {
 						$tunnus = $laskurow["tunnus"];
-
+						
 						if ($oslappkpl > 1) {
 							$oslapp .= " -#$oslappkpl ";
 						}
+						
+						$query = "SELECT osoitelappu FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
+						$oslares = mysql_query($query) or pupe_error($query);
+						$oslarow = mysql_fetch_array($oslares);
+						
+						if ($oslarow['osoitelappu'] == 'intrade') {
+							require('osoitelappu_intrade_pdf.inc');
+						}
+						else {
+							require ("osoitelappu_pdf.inc");							
+						}
 
-						require ("osoitelappu_pdf.inc");
 					}
 
 					echo "<br><br>";

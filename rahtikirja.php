@@ -607,21 +607,30 @@
 				}
 
 				$tiedot = "";
-
-				require ("tilauskasittely/osoitelappu_pdf.inc");
-
+				
 				$query = "	SELECT *
 							FROM toimitustapa
 							WHERE yhtio = '$kukarow[yhtio]' AND selite = '$laskurow[toimitustapa]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$toimitustaparow = mysql_fetch_array($result);
-
+				
+				if ($toimitustaparow['osoitelappu'] == 'intrade') {
+					require('tilauskasittely/osoitelappu_intrade_pdf.inc');
+				}
+				else {
+					require ("tilauskasittely/osoitelappu_pdf.inc");							
+				}
+				
 				if (($toimitustaparow["tulostustapa"] == "L" or $toimitustaparow["tulostustapa"] == "K") and $toimitustaparow["toim_nimi"] != '') {
 
 					$tiedot = "toimitusta";
 
-					require ("tilauskasittely/osoitelappu_pdf.inc");
-
+					if ($toimitustaparow['osoitelappu'] == 'intrade') {
+						require('tilauskasittely/osoitelappu_intrade_pdf.inc');
+					}
+					else {
+						require ("tilauskasittely/osoitelappu_pdf.inc");							
+					}
 				}
 			}
 

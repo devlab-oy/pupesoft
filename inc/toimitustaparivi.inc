@@ -123,6 +123,21 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "osoitelappu") {
+		$sel1='';
+		$sel2='';
+		if ($trow[$i]=='')
+			$sel1 = 'SELECTED';
+		else
+			$sel2 = 'SELECTED';
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value='' 		  $sel1>".t("Normaali")."</option>";
+		$ulos .= "<option value='intrade' $sel2>".t("Intrade")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "sisamaan_kuljetusmuoto" or mysql_field_name($result, $i) == "kuljetusmuoto") {
 

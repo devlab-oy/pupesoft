@@ -642,8 +642,19 @@ if (!function_exists('rivi_original')) {
 		// Ensimmäinen rivi piirretty
 		$kala = $kala - 10;
 
+		$yks_query = "	SELECT DISTINCT avainsana.selitetark
+						FROM avainsana
+						".avain('join','Y_', $kieli)."
+						WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'Y' and avainsana.selite like '%$row[yksikko]%' and avainsana.kieli='$kieli'";
+		$yks_result = mysql_query($yks_query) or pupe_error($yks_query);
+
 		//Yksikkö
-		$pdf->draw_text(340, $kala, $row["yksikko"],									$thispage, $pieni);
+		if ($yks_row = mysql_fetch_array($yks_result)) {
+			$pdf->draw_text(340, $kala, $yks_row["selitetark"],									$thispage, $pieni);
+		}
+		else {
+			$pdf->draw_text(340, $kala, $row["yksikko"],									$thispage, $pieni);
+		}
 
 		//Toimitusaika
 		if (substr($row["toimitettuaika"],0,10) != "0000-00-00") {

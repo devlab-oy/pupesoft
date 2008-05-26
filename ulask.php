@@ -846,7 +846,7 @@ if ($tee == 'P' or $tee == 'E') {
 		echo "<td>".t("Kuva jo tallessa")."!<input name='kuva' type='hidden' value = '$kuva'></td>";
 	}
 	else {
-		echo "<input type='hidden' name='MAX_FILE_SIZE' value='8000000'>";
+		echo "<input type='hidden' name='MAX_FILE_SIZE' value='50000000'>";
 		echo "<td><input name='userfile' type='file'></td>";
 	}
 

@@ -647,6 +647,7 @@
 			echo "<option value='en' $sel[en]>".t("Englanti")."</option>";
 			echo "<option value='de' $sel[de]>".t("Saksa")."</option>";
 			echo "<option value='dk' $sel[dk]>".t("Tanska")."</option>";
+			echo "<option value='ee' $sel[ee]>".t("Eesti")."</option>";
 			echo "</select></td></tr>";
 
 			echo "<tr><th>".t("Tulosta lasku").":</th><td colspan='3'><select name='valittu_tulostin'>";

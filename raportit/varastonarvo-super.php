@@ -166,19 +166,19 @@
 				$excelsarake = 0;
 
 				if ($summaustaso == "P") {
-					$worksheet->writeString($excelrivi, $excelsarake, t("Varasto"), 	$format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, t("Varasto"), 		$format_bold);
 					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllyalue"), $format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllyalue"), 		$format_bold);
 					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllynro"), 	$format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllynro"), 		$format_bold);
 					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllyvali"), $format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllyvali"), 		$format_bold);
 					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllytaso"), $format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllytaso"), 		$format_bold);
 					$excelsarake++;
 				}
 				elseif (!empty($varastot)) {
-					$worksheet->writeString($excelrivi, $excelsarake, t("Varastot"), 	$format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, t("Varastot"), 		$format_bold);
 					$excelsarake++;
 				}
 
@@ -187,22 +187,24 @@
 					$excelsarake++;
 				}
 
-				$worksheet->writeString($excelrivi, $excelsarake, t("Osasto"), 		$format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Osasto"), 				$format_bold);
 				$excelsarake++;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhmä"), 	$format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhmä"), 			$format_bold);
 				$excelsarake++;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Tuoteno"), 		$format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Tuoteno"), 			$format_bold);
 				$excelsarake++;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"), 		$format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"), 			$format_bold);
 				$excelsarake++;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Saldo"), 		$format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Saldo"), 				$format_bold);
 				$excelsarake++;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Kehahin"), 		$format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Kehahin"), 			$format_bold);
 				$excelsarake++;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Varastonarvo"), 	$format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Varastonarvo"), 		$format_bold);
 				$excelsarake++;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Kiertonopeus 12kk"), $format_bold);
-
+				$worksheet->writeString($excelrivi, $excelsarake, t("Kiertonopeus 12kk"), 	$format_bold);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, t("Viimeisin laskutus"), 	$format_bold);
+				
 				$excelrivi++;
 				$excelsarake = 0;
 			}
@@ -362,7 +364,7 @@
 					}
 					else {
 						// haetaan tuotteen myydyt kappaleet
-						$query  = "	SELECT ifnull(sum(kpl),0) kpl
+						$query  = "	SELECT ifnull(sum(kpl),0) kpl, max(laskutettuaika) laskutettuaika
 									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 									WHERE yhtio='$kukarow[yhtio]' and tyyppi='L' and tuoteno='$row[tuoteno]' and laskutettuaika <= '$vv-$kk-$pp' and laskutettuaika >= date_sub('$vv-$kk-$pp', INTERVAL 12 month)";
 						$xmyyres = mysql_query($query) or pupe_error($query);
@@ -383,7 +385,7 @@
 							$kierto = 0;
 						}
 					}
-
+					
 					if(isset($workbook)) {
 						if ($summaustaso == "P") {
 							$rivipaikka = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
@@ -434,7 +436,10 @@
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$muutoshinta));
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kierto));
+						$excelsarake++;						
+						$worksheet->writeNumber($excelrivi, $excelsarake, tv1dateconv($xmyyrow["laskutettuaika"]));
 						$excelsarake++;
+
 						$worksheet->writeString($excelrivi, $excelsarake, $kehalisa);
 
 						$excelrivi++;

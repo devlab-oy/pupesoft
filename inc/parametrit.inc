@@ -6,7 +6,6 @@ $repl = array("", "", "", "", "", "");
 
 // otetaan includepath aina rootista
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)));
-ini_set("post_max_size", "52M");
 
 if(!function_exists("iconv_array")) {
 	function iconv_array($key, &$item) {

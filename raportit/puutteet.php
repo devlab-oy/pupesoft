@@ -400,6 +400,7 @@
 				$excelsarake = 0;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteensä").":");
 				$excelsarake++;
+				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",sprintf("%.2f",$ospuutekpl)));
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",sprintf("%.2f",$ospuute)));
@@ -425,6 +426,7 @@
 			if(isset($workbook)) {
 				$excelsarake = 0;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Kaikki yhteensä").":");
+				$excelsarake++;
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",sprintf("%.2f",$puutekplyht)));
 				$excelsarake++;

@@ -1134,9 +1134,10 @@
 
 				if (mysql_num_rows($sarjares) > 0) {
 					echo "<table>";
-					echo "<tr><th colspan='3'>".t("Varasto").":</th></tr>";
+					echo "<tr><th colspan='4'>".t("Varasto").":</th></tr>";
 					echo "<tr><th>".t("Nimitys")."</th>";
 					echo "<th>".t("Sarjanumero")."</th>";
+					echo "<th>".t("Varastopaikka")."</th>";
 					echo "<th>".t("Ostohinta")."</th></tr>";
 
 					while($sarjarow = mysql_fetch_array($sarjares)) {

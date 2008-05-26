@@ -31,9 +31,9 @@
 		$kutsu = "";
 		
 		//hakulause, tämä on samam kaikilla vaihtoehdolilla  ja gorup by lauyse joka on sama kaikilla
-		$select  = " tuote.tuoteno, group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo,
+		$select  = " tuote.tuoteno, tuote.sarjanumeroseuranta, group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo,
 		concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta";		
-		$groupby = " tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, varastopaikka, inventointiaika, tuotepaikat.saldo ";
+		$groupby = " tuote.tuoteno, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, varastopaikka, inventointiaika, tuotepaikat.saldo ";
 		
 		if(($try != '' and $osasto != '') or ($ahyllyalue != '' and $lhyllyalue != '') or ($toimittaja != '') or ($tuotemerkki != '')) {
 			///* Inventoidaan *///
@@ -301,6 +301,7 @@
 			$rivit = 1;
 			
 			while($tuoterow = mysql_fetch_array($saldoresult)) {
+				
 				// Joskus halutaan vain tulostaa lista, mutta ei oikeasti invata tuotteita
 				if ($ei_inventointi == "") {
 					//päivitetään tuotepaikan listanumero ja listaaika
@@ -327,7 +328,8 @@
 					//katotaan mihin varastooon tilausrivillä tuotepaikka kuuluu
 					$rivipaikka = kuuluukovarastoon($tuoterow["hyllyalue"], $tuoterow["hyllynro"]);
 					
-					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
+					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, 
+								varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
 								varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
@@ -381,6 +383,7 @@
 				$prn .= sprintf ('%-21.21s', 	$tuoterow["tuoteno"]);
 				$prn .= sprintf ('%-21.21s', 	$tuoterow["toim_tuoteno"]);
 				$prn .= sprintf ('%-40.38s', 	asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']));
+				
 				if ($naytasaldo != '') {					
 					if ($rivipaikkahyllyssa != $rivivarastohyllyssa) {
 						$prn .= sprintf ('%-10.10s', $rivipaikkahyllyssa."(".$rivivarastohyllyssa.")");
@@ -390,11 +393,51 @@
 					}					
 				}
 				
-				$prn .= sprintf ('%-7.7s', 		"_____");
-				$prn .= sprintf ('%-9.9s', 		$tuoterow["yksikko"]);
+				$prn .= sprintf ('%-7.7s', 	"_____");
+				$prn .= sprintf ('%-9.9s', 	$tuoterow["yksikko"]);
 				$prn .= sprintf ('%-8.8d', 	$prow["varattu"]);
+				
+				if ($tuoterow["sarjanumeroseuranta"] != "") {
+					$query = "	SELECT sarjanumeroseuranta.sarjanumero, tilausrivi_osto.nimitys, sarjanumeroseuranta.tunnus, round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, era_kpl
+								FROM sarjanumeroseuranta
+								LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+								LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+								WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]'
+								and sarjanumeroseuranta.tuoteno		= '$tuoterow[tuoteno]'
+								and sarjanumeroseuranta.myyntirivitunnus	!= -1
+								and (	(sarjanumeroseuranta.hyllyalue		= '$tuoterow[hyllyalue]'
+										 and sarjanumeroseuranta.hyllynro 	= '$tuoterow[hyllynro]'
+										 and sarjanumeroseuranta.hyllyvali 	= '$tuoterow[hyllyvali]'
+										 and sarjanumeroseuranta.hyllytaso 	= '$tuoterow[hyllytaso]')
+									 or ('$tuoterow[oletus]' != '' and
+										(	SELECT tunnus
+											FROM tuotepaikat tt
+											WHERE sarjanumeroseuranta.yhtio = tt.yhtio and sarjanumeroseuranta.tuoteno = tt.tuoteno and sarjanumeroseuranta.hyllyalue = tt.hyllyalue
+											and sarjanumeroseuranta.hyllynro = tt.hyllynro and sarjanumeroseuranta.hyllyvali = tt.hyllyvali and sarjanumeroseuranta.hyllytaso = tt.hyllytaso) is null))
+								and ((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and tilausrivi_osto.laskutettuaika != '0000-00-00')
+								ORDER BY sarjanumero";
+					$sarjares = mysql_query($query) or pupe_error($query);
+									
+					if (mysql_num_rows($sarjares) > 0) {
+						while ($sarjarow = mysql_fetch_array($sarjares)) {
+							
+							$prn .= "\n";
+
+							$prn .= sprintf ('%-28.28s', "");
+							$prn .= sprintf ('%-42.42s', $sarjarow["sarjanumero"]);
+							$prn .= sprintf ('%-40.38s', $sarjarow["nimitys"]);
+																																			
+							if ($rivit >= 17) {
+								fwrite($fh, $ots);
+								$rivit = 1;				
+							}
+						}
+					}
+				}
+				
 				$prn .= "\n\n";
 				$prn .= "_______________________________________________________________________________________________________________________________________$katkoviiva\n";
+				
 				
 				fwrite($fh, $prn);
 				$rivit++;

@@ -437,7 +437,7 @@
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kierto));
 						$excelsarake++;						
-						$worksheet->writeNumber($excelrivi, $excelsarake, tv1dateconv($xmyyrow["laskutettuaika"]));
+						$worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($xmyyrow["laskutettuaika"]));
 						$excelsarake++;
 
 						$worksheet->writeString($excelrivi, $excelsarake, $kehalisa);

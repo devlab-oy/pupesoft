@@ -12,8 +12,8 @@
 
 		$kori_polku = "ostoskori.php";
 
-		if ($toim == "FUTURSOFT") {
-			$kori_polku .= "?toim=".$toim."&ostoskori=".$ostoskori;
+		if ($tultiin == "futur") {
+			$kori_polku .= "?ostoskori=".$ostoskori."&tultiin=".$tultiin;
 		}
 	}
 
@@ -152,7 +152,7 @@
 
 	// Tarkistetaan tilausrivi
 	//and ($kukarow["kesken"] != 0 
-	if ($tee == 'TI' or is_numeric($ostoskori)) {
+	if (($tee == 'TI' or is_numeric($ostoskori)) and isset($tilkpl)) {
 
 		if (is_numeric($ostoskori)) {
 			$kori = check_ostoskori($ostoskori,$kukarow["oletus_asiakas"]);
@@ -195,7 +195,7 @@
 		else {
 			echo "<font class='message'>Lis‰t‰‰n tuotteita tilaukselle $kukarow[kesken].</font><br>";
 		}
-
+		
 		// K‰yd‰‰n l‰pi formin kaikki rivit
 		foreach ($tilkpl as $yht_i => $kpl) {
 
@@ -483,8 +483,8 @@
 			<form action = '$PHP_SELF?toim_kutsu=$toim_kutsu' method = 'post'>";
 	echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 	
-	if ($toim == "FUTURSOFT") {
-		echo "<input type='hidden' name='toim' value = '$toim'>";
+	if ($tultiin == "futur") {
+		echo " <input type='hidden' name='tultiin' value='$tultiin'>";
 	}
 
 	echo "<th nowrap valign='top'>
@@ -842,8 +842,8 @@
 		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 		
-		if ($toim == "FUTURSOFT") {
-			echo "<input type='hidden' name='toim' value = '$toim'>";
+		if ($tultiin == "futur") {
+			echo " <input type='hidden' name='tultiin' value='$tultiin'>";
 		}
 		
 		$alask = 0;
@@ -1302,8 +1302,8 @@
 			if ($oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
 				echo "<td valign='top' align='right' class='$vari' nowrap>";
 				
-				if ($toim == "FUTURSOFT") {
-					echo "<input type='hidden' name='toim' value = '$toim'>";
+				if ($tultiin == "futur") {
+					echo " <input type='hidden' name='tultiin' value='$tultiin'>";
 				}
 				
 				echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";

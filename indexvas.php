@@ -56,7 +56,13 @@ echo "$kukarow[nimi]<br><br>";
 if (!isset($menu)) $menu = array();
 
 if ($kukarow["extranet"] != "") {
-	$extralisa = " and sovellus='extranet' ";
+	if ($tultiin == "futur") {
+		$extralisa = " and sovellus='Futursoft' ";
+	}
+	else {
+		$extralisa = " and sovellus='extranet' ";
+	}
+	
 }
 else {
 	$extralisa = " ";
@@ -73,8 +79,17 @@ $result = mysql_query($query) or pupe_error($query);
 if (mysql_num_rows($result) > 1) {
 
 	// jos ollaan tulossa loginista, valitaan oletussovellus...
-	if (isset($goso) and $goso != "") {
-		$sovellus = $goso;
+	if (isset($go) and $go != "") {
+		$query = "	SELECT sovellus
+					FROM oikeu use index (oikeudet_index) 
+					WHERE yhtio = '$kukarow[yhtio]' and 
+					kuka = '$kukarow[kuka]' and 
+					nimi = '$go' 
+					ORDER BY sovellus, jarjestys 
+					LIMIT 1";
+		$gores = mysql_query($query) or pupe_error($query);
+		$gorow = mysql_fetch_array($gores);
+		$sovellus = $gorow["sovellus"];
 	}
 
 	echo "	<form action='$PHP_SELF' name='vaihdaSovellus' method='POST'>
@@ -115,6 +130,7 @@ echo "<tr><td class='back'><a class='menu' href='logout.php' target='main'>".t("
 
 // Mitä käyttäjä saa tehdä?
 // Valitaan ensin vain ylätaso jarjestys2='0'
+
 $query = "	SELECT nimi, jarjestys
 			FROM oikeu use index (sovellus_index)
 			WHERE yhtio		= '$kukarow[yhtio]' 
@@ -125,18 +141,21 @@ $query = "	SELECT nimi, jarjestys
 			ORDER BY jarjestys";
 $result = mysql_query($query) or pupe_error($query);
 
-while ($orow = mysql_fetch_array($result)) {
 
+while ($orow = mysql_fetch_array($result)) {
+	
 	// tutkitaan onko meillä alamenuja
 	$query = "SELECT nimi, nimitys, alanimi
-			FROM oikeu use index (sovellus_index)
-			WHERE yhtio		= '$kukarow[yhtio]' 
-			and kuka		= '$kukarow[kuka]' 
-			and sovellus	= '$sovellus' 
-			and jarjestys	= '$orow[jarjestys]'
-			and hidden		= ''
-			ORDER BY jarjestys, jarjestys2";
+			  FROM oikeu use index (sovellus_index)
+			  WHERE yhtio		= '$kukarow[yhtio]' 
+			  and kuka		= '$kukarow[kuka]' 
+			  and sovellus	= '$sovellus' 
+			  and jarjestys	= '$orow[jarjestys]'
+			  and hidden		= ''
+			  ORDER BY jarjestys, jarjestys2";
 	$xresult = mysql_query($query) or pupe_error($query);
+	
+	
 	$mrow = mysql_fetch_array($xresult);
 
 	// alamenuja löytyy, eli tämä on menu
@@ -162,14 +181,17 @@ while ($orow = mysql_fetch_array($result)) {
 		// normaali menuitem
 		echo "<tr><td class='back'><a class='menu' href='$mrow[nimi]";
 		
-		if ($mrow['alanimi'] != '') {
-			echo "?toim=$mrow[alanimi]";
-		
-			if ($mrow['alanimi'] == "FUTURSOFT") {
-				echo "&ostoskori=$ostoskori";
-			}
-		}
-		
+		if ($mrow['alanimi'] != '') {				
+				echo "?toim=$mrow[alanimi]";	
+				
+				if ($tultiin == "futur") {
+					echo "&ostoskori=$ostoskori&tultiin=$tultiin";
+				}						
+		}	
+		elseif ($mrow['alanimi'] == '' and $tultiin == "futur") {
+			echo "?ostoskori=$ostoskori&tultiin=$tultiin";
+		}	
+			
 		echo "' target='main'>".t("$mrow[nimitys]")."</a></td></tr>";
 	}
 

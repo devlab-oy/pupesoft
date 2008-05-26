@@ -6,9 +6,12 @@ if ($_POST["pyytaja"] == "yhteensopivuus") {
 	$_POST["pyytaja"] = "yhteensopivuus.php";
 	$pyytajadir = "";
 }
-else {
+elseif($_POST["pyytaja"] == "haejaselaa" or $_POST["pyytaja"] == "tuote_selaus_haku") {
 	$_POST["pyytaja"] = "tuote_selaus_haku.php";
 	$pyytajadir = "tilauskasittely/";
+}
+else {
+	$eipaluuta = "YES";
 }
 
 if (file_exists("inc/parametrit.inc")) {
@@ -19,11 +22,10 @@ if (file_exists("inc/parametrit.inc")) {
 else {
 	require ("parametrit.inc");
 	$post_myynti = $pyytaja;
-	
-	
-	if ($toim == "FUTURSOFT") {
-		$post_myynti .= "?toim=".$toim."&ostoskori=".$ostoskori;
-	}
+		
+	if ($tultiin == "futur") {
+		$post_myynti .= "?toim=".$futur_toim."&ostoskori=".$ostoskori."&tultiin=".$tultiin;
+	}	
 	
 	$pyytaja = substr($pyytaja,0,-4);
 }
@@ -153,10 +155,14 @@ if ($tee == "") {
 	echo "<font class='head'>".t("Ostoskorisi")."</font><hr>";
 
 	echo "<table><tr>";
-	echo "	<form method='post' action='$post_myynti'>
-			<input type='hidden' name='ostoskori' value='$ostoskori'>
-			<td class='back'><input type='submit' value='".t("Palaa selaimeen")."'></td>
-			</form>";
+	
+	if ($eipaluuta != "YES") {
+		echo "	<form method='post' action='$post_myynti'>
+				<input type='hidden' name='ostoskori' value='$ostoskori'>
+				<td class='back'><input type='submit' value='".t("Palaa selaimeen")."'></td>
+				</form>";
+	}
+	
 
 	if ($ostoskori != '') {
 		$query = "	select lasku.tunnus
@@ -213,6 +219,8 @@ if ($tee == "") {
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='pyytaja' value='$pyytaja'>
 					<input type='hidden' name='ostoskori' value='$ostoskori[alatila]'>
+					<input type='hidden' name='tultiin' value='$tultiin'>
+					<input type='hidden' name='futur_toim' value='$futur_toim'>
 					<input type='submit' value='".t("Tyhjennä ostoskori")."'>";
 			echo "</th>";
 			echo "</form>";
@@ -249,6 +257,8 @@ if ($tee == "") {
 						<input type='hidden' name='pyytaja' value='$pyytaja'>
 						<input type='hidden' name='ostoskori' value='$ostoskori[alatila]'>
 						<input type='hidden' name='rivitunnus' value='$koririvi[tunnus]'>
+						<input type='hidden' name='tultiin' value='$tultiin'>
+						<input type='hidden' name='futur_toim' value='$futur_toim'>
 						<input type='submit' value='".t("Poista")."'>";
 				echo "</td>";
 				echo "</form>";

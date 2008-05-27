@@ -189,6 +189,7 @@ if ($tee == "SYOTTO") {
 
 	// takasin jonnekin
 	if ($jatko != t("Tallenna suoritus")) {
+		echo "<br>";
 		$oikeus = 1;
 		$tila = "kohdistaminen";
 		$PHP_SELF = 'manuaalinen_suoritusten_kohdistus.php';
@@ -457,8 +458,8 @@ if ($ytunnus != '' and $tee == "") {
 	</tr>
 	</table>
 	<br>
-	<input type='submit' name='jatko' value='".t("Tallenna suoritus")."'>
 	<input type='submit' name='jatko' value='".t("Tallenna suoritus ja siirry kohdistukseen")."'>
+	<input type='submit' name='jatko' value='".t("Tallenna suoritus")."'>
 	</form>";
 
 	$formi = "formi";

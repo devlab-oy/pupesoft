@@ -1120,11 +1120,12 @@
 				echo "<font class='message'>".t("Sarjanumerot")."</font><hr>";
 				
 				$query	= "	SELECT sarjanumeroseuranta.*, tilausrivi_osto.tunnus, if(tilausrivi_osto.rivihinta=0 and tilausrivi_osto.tyyppi='L', tilausrivi_osto.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi_osto.alv<500, (1+tilausrivi_osto.alv/100), 1) * if(tilausrivi_osto.netto='N', (1-tilausrivi_osto.ale/100), (1-(tilausrivi_osto.ale+lasku_osto.erikoisale-(tilausrivi_osto.ale*lasku_osto.erikoisale/100))/100)), if(tilausrivi_osto.rivihinta!=0 and tilausrivi_osto.kpl!=0, tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 0)) ostosumma,
-							tilausrivi_osto.nimitys nimitys
+							tilausrivi_osto.nimitys nimitys, lasku_myynti.nimi myynimi
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
 							LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
+							LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
 							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 							and sarjanumeroseuranta.tuoteno = '$tuoterow[tuoteno]'
 							and sarjanumeroseuranta.myyntirivitunnus != -1
@@ -1134,14 +1135,15 @@
 
 				if (mysql_num_rows($sarjares) > 0) {
 					echo "<table>";
-					echo "<tr><th colspan='4'>".t("Varasto").":</th></tr>";
+					echo "<tr><th colspan='5'>".t("Varasto").":</th></tr>";
 					echo "<tr><th>".t("Nimitys")."</th>";
 					echo "<th>".t("Sarjanumero")."</th>";
 					echo "<th>".t("Varastopaikka")."</th>";
-					echo "<th>".t("Ostohinta")."</th></tr>";
+					echo "<th>".t("Ostohinta")."</th>";
+					echo "<th>".t("Varattu asiakaalle")."</th></tr>";
 
 					while($sarjarow = mysql_fetch_array($sarjares)) {
-						echo "<tr><td>$sarjarow[nimitys]</td><td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$tuoterow[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td><td>$sarjarow[hyllyalue] $sarjarow[hyllynro] $sarjarow[hyllyvali] $sarjarow[hyllytaso]</td><td align='right'>".sprintf('%.2f', $sarjarow["ostosumma"])."</td></tr>";
+						echo "<tr><td>$sarjarow[nimitys]</td><td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$tuoterow[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td><td>$sarjarow[hyllyalue] $sarjarow[hyllynro] $sarjarow[hyllyvali] $sarjarow[hyllytaso]</td><td align='right'>".sprintf('%.2f', $sarjarow["ostosumma"])."</td><td>$sarjarow[myynimi]</td></tr>";
 					}
 
 					echo "</table><br>";

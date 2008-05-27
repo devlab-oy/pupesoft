@@ -390,8 +390,9 @@ else {
 						$hinta		 = $hirow["rahtihinta"]; // rahtihinta
 						$trow["alv"] = $laskurow["alv"];
 						$nimitys	 = $laskurow["toimitustapa"];
-
-						list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
+						
+						list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
+						list($hinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
 
 						$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
 									values  (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";

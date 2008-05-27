@@ -471,11 +471,18 @@
 			$minne_texti = $minnerow['hyllyalue']." ".$minnerow['hyllynro']." ".$minnerow['hyllyvali']." ".$minnerow['hyllytaso'];
 			$mista_texti = $mistarow['hyllyalue']." ".$mistarow['hyllynro']." ".$mistarow['hyllyvali']." ".$mistarow['hyllytaso'];
 			
+			$kehahin_query = "	SELECT kehahin 
+								FROM tuote
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$tuotteet[$iii]'";
+			$kehahin_result = mysql_query($kehahin_query) or pupe_error($kehahin_query);
+			$kehahin_row = mysql_fetch_array($kehahin_result);
+			
 			$query = "	INSERT into tapahtuma set
 						yhtio 		= '$kukarow[yhtio]',
 						tuoteno 	= '$tuotteet[$iii]',
 						kpl 		= $kappaleet[$iii] * -1,
-						hinta 		= '0',
+						hinta 		= '$kehahin_row[kehahin]',
 						laji 		= 'siirto',
 						hyllyalue	= '$mistarow[hyllyalue]',
 						hyllynro 	= '$mistarow[hyllynro]',
@@ -491,7 +498,7 @@
 						yhtio 		= '$kukarow[yhtio]',
 						tuoteno 	= '$tuotteet[$iii]',
 						kpl 		= '$kappaleet[$iii]',
-						hinta 		= '0',
+						hinta 		= '$kehahin_row[kehahin]',
 						laji 		= 'siirto',
 						hyllyalue	= '$minnerow[hyllyalue]',
 						hyllynro 	= '$minnerow[hyllynro]',

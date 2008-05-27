@@ -330,6 +330,13 @@
 								else {
 									$minnerow  = mysql_fetch_array($sarjares);
 								}
+
+								$kehahin_query = "	SELECT kehahin 
+													FROM tuote
+													WHERE yhtio = '$kukarow[yhtio]'
+													and tuoteno = '$lisarow[tuoteno]'";
+								$kehahin_result = mysql_query($kehahin_query) or pupe_error($kehahin_query);
+								$kehahin_row = mysql_fetch_array($kehahin_result);
 								
 								// V‰hennet‰‰n
 								$query = "	UPDATE tuotepaikat 
@@ -347,7 +354,7 @@
 											yhtio 		= '$kukarow[yhtio]',
 											tuoteno 	= '$lisarow[tuoteno]',
 											kpl 		= $lisarow[varattu] * -1,
-											hinta 		= '0',
+											hinta 		= '$kehahin_row[kehahin]',
 											laji 		= 'siirto',
 											hyllyalue	= '$lisarow[hyllyalue]',
 											hyllynro	= '$lisarow[hyllynro]',
@@ -374,7 +381,7 @@
 											yhtio 		= '$kukarow[yhtio]',
 											tuoteno 	= '$lisarow[tuoteno]',
 											kpl 		= $lisarow[varattu],
-											hinta 		= '0',
+											hinta 		= '$kehahin_row[kehahin]',
 											laji 		= 'siirto',
 											hyllyalue 	= '$minnerow[hyllyalue]',
 											hyllynro  	= '$minnerow[hyllynro]',

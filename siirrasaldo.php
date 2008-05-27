@@ -227,11 +227,18 @@
 						$result = mysql_query($query) or pupe_error($query);
 					}
 
+					$kehahin_query = "	SELECT kehahin 
+										FROM tuote
+										WHERE yhtio = '$kukarow[yhtio]'
+										and tuoteno = '$tuoteno'";
+					$kehahin_result = mysql_query($kehahin_query) or pupe_error($kehahin_query);
+					$kehahin_row = mysql_fetch_array($kehahin_result);
+					
 					$query = "	INSERT into tapahtuma set
 									yhtio ='$kukarow[yhtio]',
 									tuoteno = '$tuoteno',
 									kpl = $maara * -1,
-									hinta = '0',
+									hinta = '$kehahin_row[kehahin]',
 									laji = 'siirto',
 									hyllyalue =  '$lhyllyalue',
 									hyllynro = '$lhyllynro',
@@ -246,7 +253,7 @@
 									yhtio ='$kukarow[yhtio]',
 									tuoteno = '$tuoteno',
 									kpl = '$maara',
-									hinta = '0',
+									hinta = '$kehahin_row[kehahin]',
 									laji = 'siirto',
 									hyllyalue =  '$khyllyalue',
 									hyllynro = '$khyllynro',

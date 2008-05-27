@@ -594,7 +594,7 @@ if ($tuoteno != '') {
 								SET hinta = '$uusihinta'
 								WHERE yhtio = '$kukarow[yhtio]'
 								and rivitunnus = '$sarjarow[myyntirivitunnus]'
-								and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi')
+								and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi', 'siirto')
 								and laadittu >= '$yhtiorow[tilikausi_alku]'";
 					if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 					$upresu = mysql_query($query) or pupe_error($query);
@@ -926,7 +926,7 @@ if ($tuoteno != '') {
 
 								// päivitetään hinta vain jos hinta on eri
 								if ($trow["hinta"] != $uusikehahin) {
-									$query = "UPDATE tapahtuma SET hinta = '$uusikehahin' $kulutuslisa WHERE tunnus = '$trow[tunnus]' and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi', 'kulutus') and laadittu >= '$yhtiorow[tilikausi_alku]'";
+									$query = "UPDATE tapahtuma SET hinta = '$uusikehahin' $kulutuslisa WHERE tunnus = '$trow[tunnus]' and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi', 'kulutus', 'siirto') and laadittu >= '$yhtiorow[tilikausi_alku]'";
 									if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 									$upresu = mysql_query($query) or pupe_error($query);
 								}

@@ -320,7 +320,7 @@
 			$lisa1 = "and tilausrivi.tyyppi = 'L' and tilausrivi.kpl < 0";
 			$lisa3 = "having sarjanumero is not null";
 			
-			superlistaus ("osto", $lisa1, $lisa2, $lisa3, "JOO");
+			superlistaus ("myynti", $lisa1, $lisa2, $lisa3, "JOO");
 		}
 
 		if ($jarjestys_5 != "") {

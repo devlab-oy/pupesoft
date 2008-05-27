@@ -86,15 +86,22 @@
 
 			if(isset($workbook)) {
 				$worksheet->writeString($excelrivi, 0, t("Osasto"));
+				$excelsarake++;
 				$worksheet->writeString($excelrivi, 1, t("Tuoteryhmä"));
-				$excelsarake = 2;
+				$excelsarake++;
 				if ($try != '') {
-					$worksheet->writeString($excelrivi, $excelsarake, t("Ytunnus")."\n".t("Asiakas"));
+					$worksheet->writeString($excelrivi, $excelsarake, t("Ytunnus"));
 					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Tuotenumero")."\n".t("Nimitys"));
+					$worksheet->writeString($excelrivi, $excelsarake, t("Asiakas"));
+					$excelsarake++;
+					$worksheet->writeString($excelrivi, $excelsarake, t("Tuotenumero"));
+					$excelsarake++;
+					$worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"));
 					$excelsarake++;
 				}
-				$worksheet->writeString($excelrivi, $excelsarake, t("Puute kpl")."\n".t("Puute")." $yhtiorow[valkoodi]");
+				$worksheet->writeString($excelrivi, $excelsarake, t("Puute kpl"));
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, t("Puute")." $yhtiorow[valkoodi]");
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Myynti")." $yhtiorow[valkoodi]");
 				$excelsarake++;
@@ -115,7 +122,9 @@
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, t("Status"));
 					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Toimittaja")."\n".t("Toimittajan tuoteno"));
+					$worksheet->writeString($excelrivi, $excelsarake, t("Toimittaja"));
+					$excelsarake++;
+					$worksheet->writeString($excelrivi, $excelsarake, t("Toimittajan tuoteno"));
 					$excelsarake++;
 				}
 			}
@@ -177,7 +186,9 @@
 					$worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteensä").":");
 					$excelsarake++;
 					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",sprintf("%.2f",$ospuutekpl))."\n".str_replace(".",",",sprintf("%.2f",$ospuute)));
+					$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",sprintf("%.2f",$ospuutekpl)));
+					$excelsarake++;
+					$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",sprintf("%.2f",$ospuute)));
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",sprintf("%.2f",$osmyynti)));
 					$excelsarake++;
@@ -244,7 +255,9 @@
 				<td style='text-align:right; vertical-align:top' class='$vari'>".str_replace(".",",",sprintf("%.2f",$puutepros))."</td>";
 
 			if(isset($workbook)) {
-				$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",(float)$row['puutekpl'])."\n".str_replace(".",",",$row['puuteeur']));
+				$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",(float)$row['puutekpl']));
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",$row['puuteeur']));
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",$row['myyeur']));
 				$excelsarake++;
@@ -362,8 +375,10 @@
 					$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["status"]);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["toimittaja"]);
+					$excelsarake++;
 					if ($tuoterow["toim_tuoteno"]) {
-						$worksheet->writeString($excelrivi, $excelsarake, "\n($tuoterow[toim_tuoteno])");
+						$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["toim_tuoteno"]);
+						$excelsarake++;
 					}
 					$excelsarake = 0;
 				}

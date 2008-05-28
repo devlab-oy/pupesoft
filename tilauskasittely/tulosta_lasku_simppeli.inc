@@ -4,7 +4,7 @@ require_once('pdflib/pupepdf.class.php');
 
 if (!function_exists('tulosta_lasku')) {
 	function tulosta_lasku ($otunnus, $komento, $kieli = "", $toim, $tee) {
-		global $yhtiorow, $kukarow, $fonts, $tulos_ulos, $_SERVER;
+		global $yhtiorow, $kukarow, $fonts, $tulos_ulos, $_SERVER, $tid, $h;
 		
 		//	Tarkastetaan tila...
 		$query = "select tila from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
@@ -94,7 +94,7 @@ if (!function_exists('tulosta_lasku')) {
 		
 		if (!function_exists('alku')) {
 			function alku ($pdf, $laskurow, $toim, $otsikko, $kieli, $riviotsikot="") {
-				global $yhtiorow, $kukarow, $fonts;
+				global $yhtiorow, $kukarow, $fonts, $tid, $h;
 
 				if(!is_object($pdf)) {
 
@@ -296,19 +296,20 @@ if (!function_exists('tulosta_lasku')) {
 						$pdf->placeTemplate($tid);
 					}
 				}
-
+				
+				if($laskurow["laskutus_nimi"] != "") {
+					$h=160;
+				}
+				else {
+					$h=180;
+				}
+				
 				return $pdf;
 			}			
 		}
-		
+
 		$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli, "JOO");
-		if($laskurow["laskutus_nimi"] != "") {
-			$h=160;
-		}
-		else {
-			$h=170;
-		}
-		
+
 		if ($toim == 'PROFORMA') {
 			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
 				$hinta_riv = "(tilausrivi.hinta/$laskurow[vienti_kurssi])";
@@ -379,7 +380,6 @@ if (!function_exists('tulosta_lasku')) {
 
 				if($h < 20) {
 					$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli, "JOO");
-					$h = 190;
 				}
 				
 				$query = "	SELECT vienti_kurssi 
@@ -659,7 +659,6 @@ if (!function_exists('tulosta_lasku')) {
 		// dynamiikkaa
 		if($h < 50) {
 			$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli);
-			$h = 190;
 		}
 
 		if($laskurow["sisviesti1"] != "") {
@@ -673,7 +672,6 @@ if (!function_exists('tulosta_lasku')) {
 			
 		if($h < 50) {
 			$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli);
-			$h = 190;			
 		}
 
 		$h = 50;

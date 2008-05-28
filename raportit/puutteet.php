@@ -92,7 +92,7 @@
 				if ($try != '') {
 					$worksheet->writeString($excelrivi, $excelsarake, t("Ytunnus"));
 					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, t("Asiakas"));
+					$worksheet->writeString($excelrivi, $excelsarake, t("Asiakasnro"));
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, t("Tuotenumero"));
 					$excelsarake++;
@@ -135,7 +135,7 @@
 				<th>".t("Osasto")."</th>
 				<th>	".t("Tuoteryhmä")."</th>";
 		if ($try != '') {
-			echo "<th>".t("Ytunnus")."<br>".t("Asiakas")."</th>";
+			echo "<th>".t("Ytunnus")."<br>".t("Asiakasnro")."</th>";
 			echo "<th nowrap>".t("Tuotenumero")."<br>".t("Nimitys")."</th>";
 		}
 
@@ -244,7 +244,11 @@
 				if(isset($workbook)) {
 					$worksheet->writeString($excelrivi, $excelsarake, $row["try"]);
 					$excelsarake++;
+					$worksheet->writeString($excelrivi, $excelsarake, $row["ytunnus"]);
+					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, $row["asiakasnro"]);
+					$excelsarake++;
+					$worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"]);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, asana('nimitys_',$row['tuoteno'],$row['nimitys']));
 					$excelsarake++;
@@ -310,23 +314,25 @@
 				}
 
 				///* Korvaavat tuotteet *///
-				$query  = "select * from korvaavat where tuoteno='$row[tuoteno]' and yhtio='$kukarow[yhtio]'";
+				$query  = "SELECT * from korvaavat where tuoteno='$row[tuoteno]' and yhtio='$kukarow[yhtio]'";
 				$korvaresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($korvaresult) > 0) {
 					// tuote löytyi, joten haetaan sen id...
 					$korvarow = mysql_fetch_array($korvaresult);
 
-					$query = "select * from korvaavat where id='$korvarow[id]' and tuoteno<>'$row[tuoteno]' and yhtio='$kukarow[yhtio]' order by jarjestys, tuoteno";
+					$query = "SELECT * from korvaavat where id='$korvarow[id]' and tuoteno<>'$row[tuoteno]' and yhtio='$kukarow[yhtio]' order by jarjestys, tuoteno";
 					$korva2result = mysql_query($query) or pupe_error($query);
 
 					echo "<td class='$vari' style='vertical-align:top'>";
+
+					$korvaavat_temp = "";
 
 					if (mysql_num_rows($korva2result) > 0) {
 						while ($krow2row = mysql_fetch_array($korva2result)) {
 							//hateaan vielä korvaaville niiden saldot.
 							//saldot per varastopaikka
-							$query = "select sum(saldo) alkusaldo from tuotepaikat where tuoteno='$krow2row[tuoteno]' and yhtio='$kukarow[yhtio]'";
+							$query = "SELECT sum(saldo) alkusaldo from tuotepaikat where tuoteno='$krow2row[tuoteno]' and yhtio='$kukarow[yhtio]'";
 							$alkuresult = mysql_query($query) or pupe_error($query);
 							$alkurow = mysql_fetch_array($alkuresult);
 
@@ -341,13 +347,17 @@
 
 							echo "$krow2row[tuoteno] ($vapaana)<br>";
 
-							if(isset($workbook)) {
-								$worksheet->writeString($excelrivi, $excelsarake, $krow2row["tuoteno"]." ($vapaana)\n");
-								$excelsarake++;
-							}
+							$korvaavat_temp .= "$krow2row[tuoteno] ($vapaana) ";
+
 						}
 					}
+
+					if(isset($workbook)) {
+						$worksheet->writeString($excelrivi, $excelsarake, $korvaavat_temp);
+					}
+
 					echo "</td>";
+					$excelsarake++;
 				}
 				else {
 					echo "<td class='$vari' style='vertical-align:top'>".t("Ei korvaavia")."!</td>";

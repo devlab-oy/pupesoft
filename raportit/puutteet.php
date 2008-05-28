@@ -347,10 +347,12 @@
 
 							echo "$krow2row[tuoteno] ($vapaana)<br>";
 
-							$korvaavat_temp .= "$krow2row[tuoteno] ($vapaana) ";
+							$korvaavat_temp .= "$krow2row[tuoteno] ($vapaana), ";
 
 						}
 					}
+
+					$korvaavat_temp = substr($korvaavat_temp, 0, -2);
 
 					if(isset($workbook)) {
 						$worksheet->writeString($excelrivi, $excelsarake, $korvaavat_temp);

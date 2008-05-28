@@ -446,7 +446,7 @@
 				// tehd‰‰n tilastoarvolistausta
 				$tilastoarvot .= "<tr>";
 				$tilastoarvot .= "<td>$lask</td>";																									//j‰rjestysnumero
-				$tilastoarvot .= "<td><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&vaintullinimike=$row[tullinimike1]'>$row[tullinimike1]</></td>";	//Tullinimike CN
+				$tilastoarvot .= "<td><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&vaintullinimike=$row[tullinimike1]&tapahtumalaji=$tapahtumalaji'>$row[tullinimike1]</></td>";	//Tullinimike CN
 
 				if ($tapa == "tuonti") {
 					$tilastoarvot .= "<td>$row[alkuperamaa]</td>";																					//alkuper‰maa
@@ -508,7 +508,7 @@
 				$ulos .= "<tr class='aktiivi'>";
 
 				if ($vaintullinimike != "") {
-					$ulos .= "<td valign='top'><a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$row[kaikkitunnukset]&vaintullinimike=$vaintullinimike&lopetus=$lopetus//vaintullinimike=$vaintullinimike//kayttajan_valinta_maa=$kayttajan_valinta_maa'>$row[laskunro]</a></td>";
+					$ulos .= "<td valign='top'><a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$row[kaikkitunnukset]&vaintullinimike=$vaintullinimike&lopetus=$lopetus//vaintullinimike=$vaintullinimike//kayttajan_valinta_maa=$kayttajan_valinta_maa&tapahtumalaji=$tapahtumalaji'>$row[laskunro]</a></td>";
 				}
 				else {
 					$ulos .= "<td valign='top'>".$row["laskunro"]."</td>";
@@ -516,7 +516,7 @@
 
 				$ulos .= "<td valign='top'>".$row["tuoteno"]."</td>";
 				$ulos .= "<td valign='top'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
-	 			$ulos .= "<td valign='top'><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&kayttajan_valinta_maa=$kayttajan_valinta_maa&vaintullinimike=$row[tullinimike1]'>$row[tullinimike1]</></td>";	//Tullinimike CN
+	 			$ulos .= "<td valign='top'><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&kayttajan_valinta_maa=$kayttajan_valinta_maa&vaintullinimike=$row[tullinimike1]&tapahtumalaji=$tapahtumalaji'>$row[tullinimike1]</></td>";	//Tullinimike CN
 				$ulos .= "<td valign='top'>".$row["kauppatapahtuman_luonne"]."</td>";
 				$ulos .= "<td valign='top'>".$row["alkuperamaa"]."</td>";
 				$ulos .= "<td valign='top'>".$row["maalahetys"]."</td>";

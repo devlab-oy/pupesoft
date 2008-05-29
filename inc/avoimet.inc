@@ -25,6 +25,19 @@
 		if ($pvm != date("Y-m-d")) {
 			$onkotanaan = "NO";
 		}
+		// Löytyykö oikea tilikausi?
+		
+		$query = "SELECT * FROM tilikaudet
+			WHERE yhtio = '$kukarow[yhtio]' and '$pvm' >= tilikausi_alku and '$pvm' <= tilikausi_loppu";
+		$result = mysql_query($query) or pupe_error($query);
+		if (mysql_num_rows($result) != 1) {
+			echo "<font class='error'>".t("Päivämäärälle ei löydy tilikautta")."</font><br>";
+			$tee = '';			
+		}
+		else {
+			$tilikausirow = mysql_fetch_array($result);
+		}
+		
 	}
 
 	// Valitaan asiakas, jos sitä ei tiedetä
@@ -319,10 +332,10 @@
 				}
 			}
 
-	        $query = "	SELECT sum(summa) saldo FROM tiliointi
+	        	$query = "SELECT sum(summa) saldo FROM tiliointi
 						WHERE yhtio	 = '$kukarow[yhtio]'
 						and korjattu = ''
-						and tapvm	>= '$yhtiorow[tilikausi_alku]'
+						and tapvm	>= '$tilikausirow[tilikausi_alku]'
 						and tapvm	<= '$pvm'
 						and tilino	IN ($tili)";
 			$result = mysql_query($query) or pupe_error($query);
@@ -589,12 +602,12 @@
 							FROM tiliointi
 							WHERE yhtio = '$kukarow[yhtio]'
 							and korjattu = ''
-							and tapvm >= '$yhtiorow[tilikausi_alku]'
+							and tapvm >= '$tilikausirow[tilikausi_alku]'
 							and tapvm <= '$pvm'
 							and tilino in ($tili)";
 				$result = mysql_query($query) or pupe_error($query);
 				$trow = mysql_fetch_array ($result);
-
+echo "$query";
 				$trow["saldo"] 	= sprintf("%.2f", $trow["saldo"]);
 				$erotus 		= $summatotal + $suoritussummatotal - $trow["saldo"];
 				$erotus 		= sprintf("%.2f", $erotus);

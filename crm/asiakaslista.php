@@ -179,7 +179,7 @@
 			$excelsarake = 0;
 			for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
 				if(isset($workbook)) {
-					$worksheet->write($excelrivi, $excelsarake, $trow[$i], $format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, $trow[$i], $format_bold);
 					$excelsarake++;					
 				}
 			}

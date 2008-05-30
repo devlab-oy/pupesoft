@@ -374,56 +374,59 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
 		}
 
-		echo "<html>";
-		echo "<head>";
-		echo "<META Http-Equiv='Cache-Control' Content='no-cache'>";
-		echo "<META Http-Equiv='Pragma' Content='no-cache'>";
-		echo "<META Http-Equiv='Expires' Content='0'>";
-		echo "<meta http-equiv='Content-Type' content='text/html; charset=$charset'>";
+		if ($_GET["no_head"] != "yes") {
 
-		if ($_GET["no_css"] != "yes") {
-			echo "<style type='text/css'>";
-			echo $css;
-			echo "</style>";
-		}
+			echo "<html>";
+			echo "<head>";
+			echo "<META Http-Equiv='Cache-Control' Content='no-cache'>";
+			echo "<META Http-Equiv='Pragma' Content='no-cache'>";
+			echo "<META Http-Equiv='Expires' Content='0'>";
+			echo "<meta http-equiv='Content-Type' content='text/html; charset=$charset'>";
 
-		echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";
-		echo "</head>";
+			if ($_GET["no_css"] != "yes") {
+				echo "<style type='text/css'>";
+				echo $css;
+				echo "</style>";
+			}
 
-		if(isset($suljeYllapito) and $suljeYllapito != "") {
-			$body_js="onblur='window.close();'";
-		}
-		else {
-			$body_js="";
-		}
-		echo "<body $body_js>";
+			echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";
+			echo "</head>";
 
-		if (basename($phpnimi) != 'indexvas.php' and $_GET["ohje"] != "off") {
-			if (isset($toim) and $toim != '') {
-				if (basename($phpnimi) == 'varauskalenteri.php') {
-					$urltoim = "";
-				}
-				else {
-					$urltoim = "/".$toim;
-				}
+			if(isset($suljeYllapito) and $suljeYllapito != "") {
+				$body_js="onblur='window.close();'";
 			}
 			else {
-				$urltoim = "";
+				$body_js="";
+			}
+			echo "<body $body_js>";
+
+			if (basename($phpnimi) != 'indexvas.php' and $_GET["ohje"] != "off") {
+				if (isset($toim) and $toim != '') {
+					if (basename($phpnimi) == 'varauskalenteri.php') {
+						$urltoim = "";
+					}
+					else {
+						$urltoim = "/".$toim;
+					}
+				}
+				else {
+					$urltoim = "";
+				}
+
+				if (basename($phpnimi) == 'tervetuloa.php' and $kukarow['extranet'] != '') {
+					$urltoim = "/EXTRANET";
+				}
+
+				$hreffi = "http://www.pupesoft.com/trac/wiki/$kukarow[kieli]/".basename($phpnimi).$urltoim;
+
+				echo "<div align='right'><a target='_blank' href='$hreffi'>".t("OHJE")."</a><br></div>";
+			}
+			elseif(isset($_GET["sulje"]) and $_GET["sulje"] != "") {
+				echo "<div><a href='#' onclick=\"divi=document.getElementById('{$_GET["sulje"]}'); divi.innerHTML=''; divi.style.display='none'; return false;\"><font style='color: red;'>x</font></a><br></div>";
 			}
 
-			if (basename($phpnimi) == 'tervetuloa.php' and $kukarow['extranet'] != '') {
-				$urltoim = "/EXTRANET";
-			}
-
-			$hreffi = "http://www.pupesoft.com/trac/wiki/$kukarow[kieli]/".basename($phpnimi).$urltoim;
-
-			echo "<div align='right'><a target='_blank' href='$hreffi'>".t("OHJE")."</a><br></div>";
-
 		}
-		elseif(isset($_GET["sulje"]) and $_GET["sulje"] != "") {
-			echo "<div><a href='#' onclick=\"divi=document.getElementById('{$_GET["sulje"]}'); divi.innerHTML=''; divi.style.display='none'; return false;\"><font style='color: red;'>x</font></a><br></div>";
-		}
-
+		
 		if (isset($tee) and $tee == "message_luettu") {
 			$query = "UPDATE messenger SET status='' WHERE vastaanottaja='$kukarow[kuka]' AND tunnus='$message_tunnus'";
 			$result = mysql_query($query) or pupe_error($query);

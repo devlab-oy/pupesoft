@@ -23,7 +23,7 @@
 							and lasku.tunnus  = '$otunnus'";
 				$result = mysql_query($query) or pupe_error($query);
 				$laskurow = mysql_fetch_array($result);
-
+				
 				$ennakkolisa = "";
 				if($yhtiorow["ennakkomaksu_tuotenumero"] != '') {
 					$ennakkolisa = " and tilausrivi.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]' ";
@@ -275,7 +275,7 @@
 							$hinta_riv hinta, tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.asiakkaan_positio, tilausrivin_lisatiedot.ei_nayteta, ei_saldoa, $sorttauskentta
 							FROM tilausrivi
 							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-							JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila in ('R','L','N','E')
+							JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila in ('R','L','N','E','0')
 							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 							WHERE tilausrivi.otunnus IN ($tunnukset) 
 							and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
@@ -283,7 +283,6 @@
 							and tilausrivi.tyyppi!='D'
 							$ennakkolisa
 							ORDER BY otunnus, sorttauskentta";
-
 				$grand_total=0;
 				$riresult = mysql_query($query) or pupe_error($query);
 				if(mysql_num_rows($riresult)>0) {
@@ -359,8 +358,10 @@
 						}
 
 						if($row["kommentti"] != "") {
-							$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-5));
-							$pdf->write($h, $nb, 5+$offset, $s[0], $row["kommentti"], $style_komm, "L", "I");
+							$from = array("%se", "%ed");
+							$to = array("seuraava kausi", "edeltävä kausi"); 
+							$nb=$pdf->countParagraphHeight(str_replace($from, $to, $row["kommentti"]), "snadi", ($s[0]-5));
+							$pdf->write($h, $nb, 5+$offset, $s[0], str_replace($from, $to, $row["kommentti"]), $style_komm, "L", "I");
 							$h-=$pdf->ln($nb);
 						}
 
@@ -429,9 +430,22 @@
 					$h-=$pdf->ln(1.25);
 					$nb=$pdf->countParagraphHeight($laskurow["sisviesti1"], "norm");
 					$pdf->write($h, $nb, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
-					$h-=$pdf->ln($nb);
+					$h-=$pdf->ln($nb+2);
 				}
-
+				
+				if($laskurow["tilaustyyppi"] == "0") {
+					$pdf->write($h, 1, 0, 0, t("LASKUTUSJAKSOT", $kieli), "norm", "L", "B");
+					$h-=$pdf->ln(1.25);
+					$kk = explode(",", $laskurow["sopimus_kk"]);
+					$pp = explode(",", $laskurow["sopimus_pp"]);
+					
+					if(count($kk) == 12) {
+						$pdf->write($h, 1, 0, 0, t("Kuukausittain %s. päivä.", $kieli, implode(", ", $pp)), "norm", "L", "");
+						$h-=$pdf->ln();
+					}
+					$h-=$pdf->ln(2);
+				}
+				
 				$query = "	SELECT maksupositio.*, round(osuus,0) osuus, maksuehto.teksti
 							FROM maksupositio
 							LEFT JOIN maksuehto on maksuehto.yhtio=maksupositio.yhtio and maksuehto.tunnus=maksupositio.maksuehto

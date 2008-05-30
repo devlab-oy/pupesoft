@@ -93,46 +93,133 @@
 	if ($tee == 'laheta' or $tee == 'lahetalista') {
 		
 		if ($tee == "lahetalista") {
-			$liite = "paikka\tytunnus\tnimi\tnimitark\tosoite\tpostino\tpostitp\tmaa\ttoim_nimi\ttoim_nimitark\ttoim_osoite\ttoim_postino\ttoim_postitp\ttoim_maa\tpuhelin\tfax\temail\tosasto\tpiiri\tryhma\tfakta\ttoimitustapa\n";
+			if (@include('Spreadsheet/Excel/Writer.php')) {
+				//keksitään failille joku varmasti uniikki nimi:
+				list($usec, $sec) = explode(' ', microtime());
+				mt_srand((float) $sec + ((float) $usec * 100000));
+				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+
+				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+				$workbook->setVersion(8);
+				$worksheet =& $workbook->addWorksheet('Sheet 1');
+
+				$format_bold =& $workbook->addFormat();
+				$format_bold->setBold();
+
+				$excelrivi = 0;
+
+				if(isset($workbook)) {
+					$excelsarake = 0;
+
+					for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
+						if(isset($workbook)) {
+							$worksheet->write($excelrivi, $excelsarake, t(mysql_field_name($result,$i)) , $format_bold);
+							$excelsarake++;					
+						}
+					}
+					
+					
+					$excelsarake = 0;
+					$excelrivi++;					
+					
+				}
+			}
 		}
 		else {
-			$liite = "postitp\tpostino\tytunnus\tyhtio\tasiakasnro\tnimi\tpvm\tkampanjat\tpvm käyty\tkm\tlähtö\tpaluu\tpvraha\tkommentit\n";
+			if (@include('Spreadsheet/Excel/Writer.php')) {
+				//keksitään failille joku varmasti uniikki nimi:
+				list($usec, $sec) = explode(' ', microtime());
+				mt_srand((float) $sec + ((float) $usec * 100000));
+				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+
+				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+				$workbook->setVersion(8);
+				$worksheet =& $workbook->addWorksheet('Sheet 1');
+
+				$format_bold =& $workbook->addFormat();
+				$format_bold->setBold();
+
+				$excelrivi = 0;
+
+				if(isset($workbook)) {
+					$excelsarake = 0;
+					
+					for ($i=1; $i<mysql_num_fields($result); $i++) {
+						//$liite .= $trow[$i]."\t";
+						if(isset($workbook)) {
+							$worksheet->write($excelrivi, $excelsarake, t(mysql_field_name($result,$i)) , $format_bold);
+							$excelsarake++;					
+						}
+					}					
+					
+					$worksheet->write($excelrivi, $excelsarake, t("pvm") , $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("kampanjat") , $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("pvm käyty") , $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("km") , $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("lähtö") , $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("paluu") , $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("pvraha") , $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("kommentti") , $format_bold);
+					
+					
+					$excelsarake = 0;
+					$excelrivi++;					
+					
+				}
+			}
 		}
 		while ($trow=mysql_fetch_array ($result)) {
+			$excelsarake = 0;
 			for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
-				$liite .= $trow[$i]."\t";
+				if(isset($workbook)) {
+					$worksheet->write($excelrivi, $excelsarake, $trow[$i], $format_bold);
+					$excelsarake++;					
+				}
 			}
-			$liite .= "\n";
+			$excelrivi++;
 		}
-						
-		$bound = uniqid(time()."_") ;
 		
+		if(isset($workbook)) {
+			// We need to explicitly close the workbook
+			$workbook->close();
+		}
+		
+		$liite = "/tmp/".$excelnimi;
+		
+		$bound = uniqid(time()."_") ;
+
 		$header  = "From: <$yhtiorow[postittaja_email]>\n";
 		$header .= "MIME-Version: 1.0\n" ;
 		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 		
 		$content = "--$bound\n" ;
-		
-		$content .= "Content-Type: text/plain; charset=\"iso-8859-1\"\n";
-		$content .= "Content-Transfer-Encoding: quoted-printable\n\n";
-		$content .= "\n\n"; 
-		
-		$content .= "--$bound\n" ;
-					
-		$content .= "Content-Type: application/vnd.ms-excel\n" ;
+
+		$content .= "Content-Type: application/excel; name=\"".basename($liite)."\"\n" ;
 		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: attachment; filename=\"".$tiednimi."\"\n\n";
-		$content .= chunk_split(base64_encode($liite));
-		$content .= "\n";
-					
-		$to = $kukarow['eposti'];
+		$content .= "Content-Disposition: inline; filename=\"".basename($tiednimi)."\"\n\n";
+
+		$handle  = fopen($liite, "r");
+		$sisalto = fread($handle, filesize($liite));
+		fclose($handle);
+
+		$content .= chunk_split(base64_encode($sisalto));
+		$content .= "\n" ;
+		
+				
 		
 		if ($tee == "lahetalista") {
-			mail($to, "Asiakkaiden tiedot", $content, $header, "-f $yhtiorow[postittaja_email]");
+			mail($kukarow['eposti'], "Asiakkaiden tiedot", $content, $header, "-f $yhtiorow[postittaja_email]");			
 			echo "<br><br><font class='message'>".t("Asiakkaiden tiedot sähköpostiisi")."!</font>$tiednimi<br><br><br>";
 		}
 		else {
-			mail($to, "Viikkosunnitelmapohja", $content, $header, "-f $yhtiorow[postittaja_email]");
+			mail($kukarow['eposti'], "Viikkosunnitelmapohja", $content, $header, "-f $yhtiorow[postittaja_email]");
 			echo "<br><br><font class='message'>".t("Suunnitelmapohja lähetetty sähköpostiisi")."!</font><br><br><br>";
 		}
 		

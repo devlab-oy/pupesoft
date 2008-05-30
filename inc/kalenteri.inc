@@ -1719,7 +1719,8 @@
 				$kuka 			= $krow["kuka"];
 				$otunnus 		= $krow["otunnus"];
 				$yhteyshenkilo 	= $krow["henkilo"];
-				$tapa 			= $krow["tapa"];							
+				$tapa 			= $krow["tapa"];
+				$kentta10		= $krow["kentta10"];
 				
 				$query = "	SELECT count(*)
 							FROM liitetiedostot
@@ -2014,7 +2015,17 @@
 					$otsikko = "Lis‰‰ kalenteritapahtuma";
 				}
 			}
-						
+			
+			if($kentta10 == "M") {
+				$kalenteriin = "<input type='checkbox' name='kalenteriin' value='M' CHECKED>";
+			}
+			elseif($kentta10 > 0) {
+				$kalenteriin = "<input type='checkbox' name='kalenteriin' value='$kentta10' CHECKED DISABLED>";
+			}
+			else {
+				$kalenteriin = "<input type='checkbox' name='kalenteriin' value='M'>";
+			}
+			
 			$header = "<table>
 						<tr>
 							<th colspan='2'>".t("Asiakas")."</th>
@@ -2042,7 +2053,7 @@
 						</tr>
 						<tr>
 							<td>$paiva_alku $klo_alku</td>
-							<td>$paiva_loppu $klo_loppu <input type='checkbox' name='kalenteriin' value='M'></td>
+							<td>$paiva_loppu $klo_loppu $kalenteriin</td>
 						</tr>
 						</table>";
 		}

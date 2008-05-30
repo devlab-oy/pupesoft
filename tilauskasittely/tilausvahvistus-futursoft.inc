@@ -15,7 +15,7 @@ if (!file_exists($tilvahvfilenimi)) {
 	if (!$toot = fopen($tilvahvfilenimi, "w")) die("TILAUSVAHVISTUS: Tiedoston luonti ei onnistu!");
 
 	$query = "SELECT tilausrivi.tunnus, eankoodi,
-			tilausrivi.tuoteno, varattu, toimaika, kommentti, tilkpl, tilausrivi.alv, tilausrivi.nimitys, tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro
+			tilausrivi.tuoteno, if(var='j',0,varattu) varattu, if(var='j',jt+varattu,0) jt, toimaika, kommentti, tilkpl, tilausrivi.alv, tilausrivi.nimitys, tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro
 			FROM tilausrivi
 			LEFT JOIN tuote USING (yhtio, tuoteno)
 			WHERE otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]'
@@ -69,6 +69,7 @@ if (!file_exists($tilvahvfilenimi)) {
 			$ulos .= "TILVAHVRIV.TVR_TUOTEKOODI:" . $tvtilausrivirow['tuoteno'] . "\n";
 			$ulos .= "TILVAHVRIV.TVR_TILATTUKPL:" . $tvtilausrivirow['tilkpl'] . "\n";
 			$ulos .= "TILVAHVRIV.TVR_TOIMKPL:"    . $tvtilausrivirow['varattu'] . "\n";
+			$ulos .= "TILVAHVRIV.TVR_JT:"    	  . $tvtilausrivirow['jt'] . "\n";
 			$ulos .= "TILVAHVRIV.TVR_OVH:"        . $tvtilausrivirow['hinta'] . "\n";
 
 			$hinta = round($tvtilausrivirow['hinta'] * (1 - $tvtilausrivirow['ale'] / 100),2);

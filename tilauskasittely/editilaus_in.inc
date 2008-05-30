@@ -98,6 +98,7 @@ $edi_sarjanumero = "";
 $edi_hinta       = "";
 $korvaavakielto  = "";
 $perhekielto     = "";
+$sallitaanjt	 = "";
 
 // fiilataan parametrej‰ joita tarvitaan require fileiss‰
 $tulos_ulos = "edi"; // t‰‰ on ftp-send.inciss‰
@@ -738,7 +739,16 @@ while (!feof ($fd)) {
 
 			$edi_ulos .= t("tilattiin")." $kpl ".t("kpl").". ";
 			break;
-
+		case 'OSTOTILRIV.OTR_SALLITAANJR' :
+			// Sallitaan JT-Rivit  
+			if ($tieto == '1') {
+				$sallitaanjt = '1';
+			}
+			else {
+				$sallitaanjt = '0';
+			}
+			
+			break;
 		case 'OLIN__END' :
 		case '*RE  OSTOTILRIV' :
 
@@ -780,6 +790,11 @@ while (!feof ($fd)) {
 					}
 
 					$kutsuja = "EDITILAUS";
+					
+					//jos meill‰ on t‰pp‰ p‰‰ll‰, ett‰ asiakas haluaa kamat j‰lkitoimitukseen
+					if ($sallitaanjt == '1') {
+						$var = "J";
+					}
 
 					require ("lisaarivi.inc");
 
@@ -846,7 +861,7 @@ while (!feof ($fd)) {
 			$edi_hinta       = "";
 			$korvaavakielto  = "";
 			$perhekielto     = "";
-
+			$sallitaanjt	 = "";
 			break;
 
 		case 'OMSG__END' :

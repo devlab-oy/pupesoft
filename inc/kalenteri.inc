@@ -125,6 +125,7 @@
 				$kaleotsikko = array(	"kalenteri"		=> "Kalenteri",
 										"Memo" 			=> "Asiakasmuistio",
 										"Muistutus" 	=> "Muistutus",
+										"Merkinta" 		=> "Merkint‰",
 										"tilaus"		=> "Tilaus/Projekti",
 										"tarjous" 		=> "Tarjous",
 										"toimitus" 		=> "L‰hetys",
@@ -864,7 +865,7 @@
 				$kalejako .= "
 					<br>
 					<table border='1' width='140'>
-						<caption>".t("N‰yt‰ merkinn‰t")."</caption>";
+						<caption>".t("N‰yt‰ merkint‰")."</caption>";
 
 					foreach($kalenteri["kalenteri_tyypit"] as $tyyppi) {
 						
@@ -927,6 +928,7 @@
 			$menu[] = array("TEKSTI" => "Lis‰‰ Kalenteritapahtuma", "HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
 			$menu[] = array("TEKSTI" => "Lis‰‰ Asiakasmuistio",		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
 			$menu[] = array("TEKSTI" => "Lis‰‰ Muistutus",			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+			$menu[] = array("TEKSTI" => "Lis‰‰ Merkint‰",			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Merkinta&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
 			
 			$palkki[] = tee_menu($menu, "<font class='message'>".t("Toiminnot")."</font>");
 
@@ -1507,6 +1509,11 @@
 			echo "<font class='error'>viesti puuttuu!</font><br>";
 			$ok = 0;			
 		}		
+		
+		//	Siirret‰‰n kalenteriin
+		if($kalenteriin != "") {
+			$kentta10 = "M";	
+		}		
 	
 		if($ok == 1) {
 			
@@ -1562,7 +1569,8 @@
 						pvmloppu  		= '$lopvm',
 						otunnus  		= '$otunnus',
 						kuittaus  		= '$kuittaus',
-						kentta01 		= '$viesti'";
+						kentta01 		= '$viesti',
+						kentta10 		= '$kentta10'";
 			$query .= $kysely.$where;
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -1624,7 +1632,7 @@
 					$subject .= " / ".t("K‰ytt‰j‰lt‰")." {$kukarow["nimi"]} {$kukarow["nimitark"]}";
 					
 					if($tyyppi == "kalenteri") {
-						$msg = "Tyyppi: ".t("Kalenterimerkint‰")."\n";
+						$msg = "Tyyppi: ".t("Kalenteritapahtuma")."\n";
 						$msg .= "Tapa: $tapa\n";
 						
 					}
@@ -1816,9 +1824,18 @@
 			$asiakasrow = mysql_fetch_array($result);			
 		}
 		
+		//	Tavat ja Merkinn‰t
+		if($tyyppi == "Merkinta") {
+			$laji = "KALEME";
+			$tapaotsikko == t("Merkint‰");
+		}
+		else {
+			$laji = "KALETAPA";
+			$tapaotsikko == t("Kalenteritapahtuma");			
+		}
 		$query = "	SELECT selitetark
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'KALETAPA'
+					WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji'
 					ORDER BY selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$tavat = "<select name='tapa'>";
@@ -1979,13 +1996,23 @@
 						</table>";
 			
 		}
-		elseif($tyyppi == "kalenteri") {
-
-			if($muokkaus) {
-				$otsikko = "Muokkaa kalenteritapahtumaa";
+		elseif($tyyppi == "kalenteri" or $tyyppi == "Merkinta") {
+			
+			if($tyyppi == "Merkinta") {
+				if($muokkaus) {
+					$otsikko = "Muokkaa meerkint‰‰";
+				}
+				else {
+					$otsikko = "Lis‰‰ merkint‰";
+				}
 			}
 			else {
-				$otsikko = "Lis‰‰ kalenteritapahtuma";
+				if($muokkaus) {
+					$otsikko = "Muokkaa kalenteritapahtumaa";
+				}
+				else {
+					$otsikko = "Lis‰‰ kalenteritapahtuma";
+				}
 			}
 						
 			$header = "<table>
@@ -2002,7 +2029,7 @@
 							<td colspan='2'>$yhdata</td>
 						</tr>						
 						<tr>
-							<th>".t("Tapa")."</th>
+							<th>$tapaotsikko</th>
 							<th>".t("Valitse toimitus")."</th>
 						</tr>			
 						<tr>
@@ -2015,7 +2042,7 @@
 						</tr>
 						<tr>
 							<td>$paiva_alku $klo_alku</td>
-							<td>$paiva_loppu $klo_loppu</td>
+							<td>$paiva_loppu $klo_loppu <input type='checkbox' name='kalenteriin' value='M'></td>
 						</tr>
 						</table>";
 		}

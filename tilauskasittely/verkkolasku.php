@@ -625,7 +625,6 @@
 					}
 				}
 
-
 				// Lasketaan rahtikulut vain jos ne eiv‰t ole laskettu jo tilausvaiheessa.
 				if ($yhtiorow["rahti_hinnoittelu"] == "") {
 
@@ -639,6 +638,7 @@
 								FROM lasku, rahtikirjat, maksuehto
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
 								and lasku.tunnus in ($tunnukset)
+								and lasku.rahtivapaa = ''
 								and lasku.kohdistettu = 'K'
 								and lasku.yhtio = rahtikirjat.yhtio
 								and lasku.tunnus = rahtikirjat.otsikkonro
@@ -1523,6 +1523,20 @@
 						$laresult = mysql_query($query) or pupe_error($query);
 						$laskurow = mysql_fetch_array($laresult);
 
+						$asiakas_apu_query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+						$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
+
+						if (mysql_num_rows($asiakas_apu_res) == 1) {
+							$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
+						}
+						else {
+							$asiakas_apu_row = array();
+						}
+
+						if ($kieli == "") {
+							$kieli = $asiakas_apu_row["kieli"];
+						}
+						
 						// jos ei ole valittuna mit‰‰n tulostinta eik‰ haluta l‰hett‰‰ t‰t‰ laskua meillill‰k‰‰n skipataan looppi
 						if ($yhtiorow['lasku_tulostin'] == 0 and $valittu_tulostin == "" and !in_array($laskurow["laskunro"], $tulostettavat_email)) {
 							continue;

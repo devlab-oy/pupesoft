@@ -399,15 +399,16 @@
 			//otetaan eka rivi ja käytetään sitä otsikoiden tulostamiseen
 			$ekarow = mysql_fetch_array($res);
 
-			if ($ekarow["chn"] == '100') $ekarow["chn"] = t("Paperilasku");
-			if ($ekarow["chn"] == '010') $ekarow["chn"] = t("eInvoice");
-			if ($ekarow["chn"] == '020') $ekarow["chn"] = t("Vienti eInvoice");
-			if ($ekarow["chn"] == '111') $ekarow["chn"] = t("Elma EDI-inhouse");
+			if ($ekarow["chn"] == '100') $toimitusselite = t("Paperilasku");
+			if ($ekarow["chn"] == '010') $toimitusselite = t("eInvoice");
+			if ($ekarow["chn"] == '020') $toimitusselite = t("Vienti eInvoice");
+			if ($ekarow["chn"] == '111') $toimitusselite = t("Elma EDI-inhouse");
+			if ($ekarow["chn"] == '666') $toimitusselite = t("Sähköpostiin");
 
 			echo "<tr><th>".t("Laskutus:")."</th><th>".t("Nimi")."</th><th>".t("Osoite")."</th><th>".t("Postino")."</th><th>".t("Postitp")."</th><th>".t("Maa")."</th><tr>";
 			echo "<tr><td>$ekarow[ytunnus]</td><td>$ekarow[nimi]</td><td>$ekarow[osoite]</td><td>$ekarow[postino]</td><td>$ekarow[postitp]</td><td>$ekarow[maa]</td></tr>";
 			echo "<tr><th>".t("Toimitus:")."</th><th>".t("Nimi")."</th><th>".t("Osoite")."</th><th>".t("Postino")."</th><th>".t("Postitp")."</th><th>".t("Maa")."</th><tr>";
-			echo "<tr><td>$ekarow[chn]</td><td>$ekarow[toim_nimi]</td><td>$ekarow[toim_osoite]</td><td>$ekarow[toim_postino]</td><td>$ekarow[toim_postitp]</td><td>$ekarow[toim_maa]</td></tr>";
+			echo "<tr><td>$toimitusselite</td><td>$ekarow[toim_nimi]</td><td>$ekarow[toim_osoite]</td><td>$ekarow[toim_postino]</td><td>$ekarow[toim_postitp]</td><td>$ekarow[toim_maa]</td></tr>";
 			echo "</table><br>";
 
 			mysql_data_seek($res,0);
@@ -462,7 +463,7 @@
 
 				$rahti_hinta = "";
 
-				if ($yhtiorow["rahti_hinnoittelu"] == "") {
+				if ($yhtiorow["rahti_hinnoittelu"] == "" and $row["rahtivapaa"] == "") {
 
 					$query = "SELECT sum(kilot) kilot FROM rahtikirjat WHERE yhtio='$kukarow[yhtio]' and otsikkonro = '$row[tunnus]'";
 					$pakre = mysql_query($query) or pupe_error($query);
@@ -601,26 +602,6 @@
 				}
 			}
 
-			if ($ekarow["chn"] == "666") {
-				$query = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' AND laji='LASKUTUS_SAATE'";
-				$result = mysql_query($query) or pupe_error($query);
-
-				$sel_saate = "";
-
-				echo "<tr><th>".t("Valitse saatekirje").":</th>";
-				echo "<td colspan='3'><select name='saatekirje'>";
-				echo "<option value=''>".t("Ei saatetta")."</option>";
-
-				while ($saaterow = mysql_fetch_array($result)) {
-					if ($sel_saate == $saaterow["tunnus"]) {
-						$sel_saate = " selected";
-					}
-					echo "<option value='$saaterow[tunnus]'$sel_saate>$saaterow[selite]</option>";
-				}
-
-				echo "</select></td></tr>";
-			}
-
 			///* Haetaan asiakkaan kieli *///
 			$query = "	SELECT kieli
 						FROM asiakas
@@ -650,9 +631,32 @@
 			echo "<option value='ee' $sel[ee]>".t("Eesti")."</option>";
 			echo "</select></td></tr>";
 
+			// Haetaan laskutussaate jos chn on sähköposti
+			if ($ekarow["chn"] == "666") {
+				$query = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' AND laji='LASKUTUS_SAATE' AND kieli='$asrow[kieli]'";
+				$result = mysql_query($query) or pupe_error($query);
+
+				$sel_saate = "";
+
+				echo "<tr><th>".t("Valitse saatekirje").":</th>";
+				echo "<td colspan='3'><select name='saatekirje'>";
+				echo "<option value=''>".t("Ei saatetta")."</option>";
+
+				while ($saaterow = mysql_fetch_array($result)) {
+					if (strtolower($saaterow["kieli"]) == strtolower($asrow["kieli"])) {
+						$sel_saate = " selected";
+					}
+					elseif ($saatekirje == $saaterow["tunnus"]) {
+						$sel_saate = " selected";
+					}
+					echo "<option value='$saaterow[tunnus]'$sel_saate>$saaterow[selite]</option>";
+				}
+
+				echo "</select></td></tr>";
+			}
+
 			echo "<tr><th>".t("Tulosta lasku").":</th><td colspan='3'><select name='valittu_tulostin'>";
 			echo "<option value=''>".t("Ei kirjoitinta")."</option>";
-
 
 			//tulostetaan faili ja valitaan sopivat printterit
 			if ($ekarow["varasto"] == 0) {

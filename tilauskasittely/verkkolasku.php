@@ -1620,6 +1620,10 @@
 								// l‰hetet‰‰n meili
 								$kutsu = "lasku $lasku";
 								$liite = $pdffilenimi;
+
+								// l‰hetet‰‰n cc aina postittaja osoitteeseen
+								$sahkoposti_cc = $yhtiorow["postittaja_email"];
+
 								include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
 							}
 							else {

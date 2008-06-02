@@ -18,6 +18,11 @@
 	$bound = uniqid(time()."_") ;
 
 	$header  = "From: <$yhtiorow[postittaja_email]>\n";
+
+	if ($sahkoposti_cc != "") {
+		$header .= "Cc: $sahkoposti_cc\n";
+	}
+
 	$header .= "MIME-Version: 1.0\n" ;
 	$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
@@ -30,7 +35,7 @@
 		$content .= "Content-Transfer-Encoding: quoted-printable\n\n";
 		$content .= "$content_body\n\n";
 	}
-	
+
 	$content .= "--$bound\n";
 
 	if ($ctype == "TEXT") {
@@ -60,7 +65,7 @@
 
 	$content .= chunk_split(base64_encode($sisalto));
 	$content .= "\n" ;
-	
+
 	$boob = mail($kukarow["eposti"],  "$subject", $content, $header, "-f $yhtiorow[postittaja_email]");
 
 	if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $kukarow[eposti]<br>";

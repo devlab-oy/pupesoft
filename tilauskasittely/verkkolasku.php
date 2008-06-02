@@ -1583,7 +1583,28 @@
 
 						if ($yhtiorow['laskutyyppi'] == 3) {
 							require_once ("tulosta_lasku_simppeli.inc");
-							tulosta_lasku($otunnus, $komento[ucfirst(strtolower($toim))], $kieli, $toim, $tee);
+							if (in_array($laskurow["laskunro"], $tulostettavat_email) and $valittu_tulostin == "") {	
+								include_once("inc/generoi_laskun_saate.inc");
+								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $kieli);
+								
+								//	Falseback oma maili
+								if($komento == "") $komento = "email";
+								
+								//	Kaapataan output..
+								ob_start();
+								tulosta_lasku($laskurow["tunnus"], $komento, $kieli, "", "", $content_subject, $content_body);
+								$tulos_ulos .= ob_get_contents();
+								ob_end_clean();
+							}
+							else {
+								$querykieli = "	select *
+												from kirjoittimet
+												where yhtio='$kukarow[yhtio]' and tunnus='$yhtiorow[lasku_tulostin]'";
+								$kires = mysql_query($querykieli) or pupe_error($querykieli);
+								$kirow = mysql_fetch_array($kires);
+								
+								tulosta_lasku($laskurow["tunnus"], $kirow["komento"], $kieli, $toim, $tee);
+							}
 						}
 						else {
 							require_once("tulosta_lasku.inc");

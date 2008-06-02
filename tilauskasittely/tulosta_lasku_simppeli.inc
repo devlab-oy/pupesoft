@@ -3,7 +3,7 @@
 require_once('pdflib/pupepdf.class.php');
 
 if (!function_exists('tulosta_lasku')) {
-	function tulosta_lasku ($otunnus, $komento, $kieli = "", $toim, $tee) {
+	function tulosta_lasku ($otunnus, $komento, $kieli = "", $toim, $tee, $content_subject="", $content_body="") {
 		global $yhtiorow, $kukarow, $fonts, $tulos_ulos, $_SERVER, $tid, $h;
 		
 		//	Tarkastetaan tila...
@@ -934,9 +934,25 @@ if (!function_exists('tulosta_lasku')) {
 		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdf_laskufilenimi");
 		fclose($fh);
 		
-		//	Jos ollaan verkkolaskumoduulissa tulostus hoidetaan toisella tapaa
-		if(!strpos($_SERVER["SCRIPT_NAME"], "tulostakopio.php") and !strpos($_SERVER["SCRIPT_NAME"], "tulostasisaiset.php")) {
-			//haetaan varaston tiedot
+		if ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
+			$liite = $pdf_laskufilenimi;
+			$kutsu = ucfirst(strtolower($otsikko))." $laskurow[laskunro]";
+			
+			echo t(ucfirst(strtolower($otsikko))." l‰hetet‰‰n osoitteeseen $kukarow[eposti]")."...<br>";
+
+			if ($kukarow["extranet"] == '') {
+				require("../inc/sahkoposti.inc");
+			}
+			else {
+				require("sahkoposti.inc");
+			}
+		}
+		elseif ($tee == 'NAYTATILAUS') {
+			//Tyˆnnet‰‰n tuo pdf vaan putkeen!
+			echo file_get_contents($pdf_laskufilenimi);
+		}
+		elseif ($komento != '' and $komento != 'edi') {
+			
 			if ($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA") {
 				if ($varasto != 0) {
 					$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto' order by alkuhyllyalue,alkuhyllynro";
@@ -946,90 +962,30 @@ if (!function_exists('tulosta_lasku')) {
 				}
 				$prires= mysql_query($query) or pupe_error($query);
 				$prirow= mysql_fetch_array($prires);
-				$yhtiorow['lasku_tulostin'] = $prirow["printteri5"];
+				$komento = $prirow["printteri5"];
 
 				$tulos_ulos .= t("Lasku tulostuu varastoon").": $prirow[nimitys]<br>\n";
 			}
-
+			
+			//	Haetaan kirjoittimen nimi..
 			$querykieli = "	select *
 							from kirjoittimet
-							where yhtio='$kukarow[yhtio]' and tunnus='$yhtiorow[lasku_tulostin]'";
+							where yhtio='$kukarow[yhtio]' and komento='$komento'";
 			$kires = mysql_query($querykieli) or pupe_error($querykieli);
-			$kirow = mysql_fetch_array($kires);
-
-			$tulos_ulos .= t("Lasku tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
-
-			if ($kirow["komento"] != "email") {
-				// itse print komento...
-				$line = exec("$kirow[komento] $pdf_laskufilenimi");
-			}
-			elseif ($kukarow["eposti"] != '') {
-				// l‰hetet‰‰n meili
-				$kutsu = ucfirst(strtolower($otsikko))." $laskurow[laskunro]";	
-				$liite = $pdf_laskufilenimi;
-				include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
-			}
-
-			if ($valittu_kopio_tulostin != '') {
-				$querykieli = "	select *
-								from kirjoittimet
-								where yhtio='$kukarow[yhtio]' and tunnus='$valittu_kopio_tulostin'";
-				$kires = mysql_query($querykieli) or pupe_error($querykieli);
+			
+			if(mysql_num_rows($kires) > 0) {
 				$kirow = mysql_fetch_array($kires);
-
-				$tulos_ulos .= t("Laskukopio tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
-
-				if ($kirow["komento"] != "email") {
-					// itse print komento...
-					$line = exec("$kirow[komento] $pdf_laskufilenimi");
-				}
-				elseif ($kukarow["eposti"] != '') {
-					// l‰hetet‰‰n meili
-					$kutsu = ucfirst(strtolower($otsikko))." $laskurow[laskunro]";
-					$liite = $pdf_laskufilenimi;
-					include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
-				}
-			}
-		}
-		else {
-			if ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
-				$liite = $pdf_laskufilenimi;
-				$kutsu = ucfirst(strtolower($otsikko))." $laskurow[laskunro]";
+				echo t("Lasku tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";						
 				
-				echo t(ucfirst(strtolower($otsikko))." l‰hetet‰‰n osoitteeseen $kukarow[eposti]")."...<br>";
-
-				if ($kukarow["extranet"] == '') {
-					require("../inc/sahkoposti.inc");
-				}
-				else {
-					require("sahkoposti.inc");
-				}
+				echo t("Lasku tulostuu")."...<br>";
+				unset($returnvalue);
+				$line = exec("$komento $pdf_laskufilenimi", $output, $returnvalue);
 			}
-			elseif ($tee == 'NAYTATILAUS') {
-				//Tyˆnnet‰‰n tuo pdf vaan putkeen!
-				echo file_get_contents($pdf_laskufilenimi);
+			
+			if(mysql_num_rows($result) == 0 or $returnvalue!=0) {
+				echo "<font class='error'>".t("Laskun tulostus ep‰onnistui")."!!!</font><br>\n";	
 			}
-			elseif ($komento != '' and $komento != 'edi') {
-				//	Haetaan kirjoittimen nimi..
-				$querykieli = "	select *
-								from kirjoittimet
-								where yhtio='$kukarow[yhtio]' and komento='$komento'";
-				$kires = mysql_query($querykieli) or pupe_error($querykieli);
-				
-				if(mysql_num_rows($kires) > 0) {
-					$kirow = mysql_fetch_array($kires);
-					echo t("Lasku tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";						
-					
-					echo t("Lasku tulostuu")."...<br>";
-					unset($returnvalue);
-					$line = exec("$komento $pdf_laskufilenimi", $output, $returnvalue);
-				}
-				
-				if(mysql_num_rows($result) == 0 or $returnvalue!=0) {
-					echo "<font class='error'>".t("Laskun tulostus ep‰onnistui")."!!!</font><br>\n";	
-				}
-			}			
-		}
+		}			
 
 		//poistetaan tmp file samantien kuleksimasta...
 		system("rm -f $pdf_laskufilenimi");				

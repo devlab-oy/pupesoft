@@ -633,23 +633,15 @@
 
 			// Haetaan laskutussaate jos chn on sähköposti
 			if ($ekarow["chn"] == "666") {
-				$query = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' AND laji='LASKUTUS_SAATE' AND kieli='$asrow[kieli]'";
+				$query = "SELECT * FROM avainsana WHERE yhtio = '$kukarow[yhtio]' AND laji = 'LASKUTUS_SAATE' AND kieli = '$asrow[kieli]'";
 				$result = mysql_query($query) or pupe_error($query);
-
-				$sel_saate = "";
 
 				echo "<tr><th>".t("Valitse saatekirje").":</th>";
 				echo "<td colspan='3'><select name='saatekirje'>";
 				echo "<option value=''>".t("Ei saatetta")."</option>";
 
 				while ($saaterow = mysql_fetch_array($result)) {
-					if (strtolower($saaterow["kieli"]) == strtolower($asrow["kieli"])) {
-						$sel_saate = " selected";
-					}
-					elseif ($saatekirje == $saaterow["tunnus"]) {
-						$sel_saate = " selected";
-					}
-					echo "<option value='$saaterow[tunnus]'$sel_saate>$saaterow[selite]</option>";
+					echo "<option value='$saaterow[tunnus]'>$saaterow[selite]</option>";
 				}
 
 				echo "</select></td></tr>";

@@ -29,7 +29,8 @@
 
 				$query = "	update lasku set
 							tila    = 'N',
-							alatila = ''
+							alatila = '',
+							viite 	= ''
 							where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 

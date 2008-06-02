@@ -152,7 +152,7 @@ else {
 				if ($turow["sarjanumeroseuranta"] == "E" or $turow["sarjanumeroseuranta"] == "F") {
 					if ($trow["varattu"] > 0) {
 
-						$query = "	SELECT ostorivitunnus, myyntirivitunnus
+						$query = "	SELECT ostorivitunnus, myyntirivitunnus, sarjanumero
 									FROM sarjanumeroseuranta
 									WHERE yhtio			 = '$kukarow[yhtio]'
 									and tuoteno			 = '$trow[tuoteno]'
@@ -169,6 +169,7 @@ else {
 										and tuoteno				= '$trow[tuoteno]'
 										and ostorivitunnus 		= '$lisa_row[ostorivitunnus]'
 										and myyntirivitunnus 	= 0
+										and sarjanumero 		= '$lisa_row[sarjanumero]'
 										LIMIT 1";
 							$lisa_res = mysql_query($query) or pupe_error($query);
 
@@ -189,6 +190,7 @@ else {
 										and tuoteno				= '$trow[tuoteno]'
 										and ostorivitunnus 		= '$trow[tunnus]'
 										and myyntirivitunnus 	= 0
+										and sarjanumero			= '$lisa_row[sarjanumero]'
 										LIMIT 1";
 							$lisa_res = mysql_query($query) or pupe_error($query);
 

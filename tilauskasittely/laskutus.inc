@@ -309,29 +309,44 @@ else {
 								ORDER BY sarjanumeroseuranta.tunnus DESC
 								LIMIT 1";
 					$sarjares1 = mysql_query($query) or pupe_error($query);
-					$sarjarow1 = mysql_fetch_array($sarjares1);
 					
-					$ostohinta += sarjanumeron_ostohinta("tunnus", $sarjarow1["tunnus"]);
-
-					// Tehdään sarjanumerotauluun uusi vapaa sarjanumero-olio
-					$query = "	UPDATE sarjanumeroseuranta
-								SET myyntirivitunnus=ostorivitunnus, ostorivitunnus='$sarjarow1[ostorivitunnus]'
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tunnus 	= '$sarjarow[tunnus]'";
-					$sarjares1 = mysql_query($query) or pupe_error($query);
-
-					//Jos nyt hyvitettävä sarjanumero onkin jo myyty eteenpäin.
-					if ($sarjarow["myyntirivitunnus"] > 0) {
-						$myritu = $sarjarow["myyntirivitunnus"];
+					if (mysql_num_rows($sarjares1) == 0) {
+						// Jos sarjanumeroa ei ikinä olla ostettu, mutta se on myyty miinukselle ja nyt halutaan perua kaupat (Tarkistukset tehty verkkolasku.phpssä)												
+						// Jätetään tästä treissi
+						$query = "	UPDATE tilausrivi
+									SET var2 = 'EIOST'
+									WHERE tunnus = $trow[tunnus]
+									and yhtio = '$kukarow[yhtio]'";
+						$sarjaupdres = mysql_query($query) or pupe_error($query);
+						
+						$ostohinta += 0;					
 					}
 					else {
-						$myritu = 0;
-					}
+						// Normikeissi jossa sarjanumero on ostettu ja nyt kaupat hyvitetään 
+						$sarjarow1 = mysql_fetch_array($sarjares1);
+						
+						$ostohinta += sarjanumeron_ostohinta("tunnus", $sarjarow1["tunnus"]);
+						
+						// Tehdään sarjanumerotauluun uusi vapaa sarjanumero-olio
+						$query = "	UPDATE sarjanumeroseuranta
+									SET myyntirivitunnus=ostorivitunnus, ostorivitunnus='$sarjarow1[ostorivitunnus]'
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus 	= '$sarjarow[tunnus]'";
+						$sarjares1 = mysql_query($query) or pupe_error($query);
 
-					$query = "	INSERT into sarjanumeroseuranta
-								(yhtio, tuoteno, sarjanumero, lisatieto, ostorivitunnus, myyntirivitunnus, kaytetty, laatija, luontiaika, takuu_alku, takuu_loppu, hyllyalue, hyllynro, hyllyvali, hyllytaso)
-								VALUES ('$kukarow[yhtio]','$sarjarow[tuoteno]','$sarjarow[sarjanumero]','$sarjarow[lisatieto]','$sarjarow1[ostorivitunnus]','$myritu','$sarjarow1[kaytetty]','$kukarow[kuka]',now(),'$sarjarow1[takuu_alku]','$sarjarow1[takuu_loppu]', '$sarjarow[hyllyalue]', '$sarjarow[hyllynro]', '$sarjarow[hyllyvali]', '$sarjarow[hyllytaso]')";
-					$sarjares1 = mysql_query($query) or pupe_error($query);
+						//Jos nyt hyvitettävä sarjanumero onkin jo myyty eteenpäin.
+						if ($sarjarow["myyntirivitunnus"] > 0) {
+							$myritu = $sarjarow["myyntirivitunnus"];
+						}
+						else {
+							$myritu = 0;
+						}
+
+						$query = "	INSERT into sarjanumeroseuranta
+									(yhtio, tuoteno, sarjanumero, lisatieto, ostorivitunnus, myyntirivitunnus, kaytetty, laatija, luontiaika, takuu_alku, takuu_loppu, hyllyalue, hyllynro, hyllyvali, hyllytaso)
+									VALUES ('$kukarow[yhtio]','$sarjarow[tuoteno]','$sarjarow[sarjanumero]','$sarjarow[lisatieto]','$sarjarow1[ostorivitunnus]','$myritu','$sarjarow1[kaytetty]','$kukarow[kuka]',now(),'$sarjarow1[takuu_alku]','$sarjarow1[takuu_loppu]', '$sarjarow[hyllyalue]', '$sarjarow[hyllynro]', '$sarjarow[hyllyvali]', '$sarjarow[hyllytaso]')";
+						$sarjares1 = mysql_query($query) or pupe_error($query);
+					}						
 				}
 
 				// Kate = Hinta - Alkuperäinen ostohinta

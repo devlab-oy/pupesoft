@@ -643,6 +643,9 @@
 				if ($laskurow["tila"] == "G") {
 					$sarjanutunnus = "siirtorivitunnus";
 				}
+				elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and $row["var2"] == "EIOST") {
+					$sarjanutunnus = "ostorivitunnus";
+				}
 				elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0) {
 					$sarjanutunnus = "myyntirivitunnus";
 				}

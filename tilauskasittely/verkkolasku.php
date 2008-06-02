@@ -447,11 +447,26 @@
 								$sarjares12 = mysql_query($query) or pupe_error($query);
 
 								if (mysql_num_rows($sarjares12) == 0) {
-									$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+									// Jos sarjanumeroa ei ikinä olla ostettu, mutta se on myyty ja nyt halutaan perua kaupat
+									$query  = "	SELECT sarjanumeroseuranta.tunnus
+												FROM sarjanumeroseuranta
+												JOIN tilausrivi t2 use index (PRIMARY) ON t2.yhtio=sarjanumeroseuranta.yhtio and t2.tunnus=sarjanumeroseuranta.ostorivitunnus
+												JOIN tilausrivi t3 use index (PRIMARY) ON t3.yhtio=sarjanumeroseuranta.yhtio and t3.tunnus=sarjanumeroseuranta.myyntirivitunnus and t3.uusiotunnus>0
+												WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]'
+												and sarjanumeroseuranta.tuoteno 	= '$srow1[tuoteno]'
+												and sarjanumeroseuranta.sarjanumero = '$sarjarowx[sarjanumero]'
+												and sarjanumeroseuranta.kaytetty 	= '$sarjarowx[kaytetty]'
+												and sarjanumeroseuranta.myyntirivitunnus > 0
+												and sarjanumeroseuranta.ostorivitunnus   > 0";
+									$sarjares12 = mysql_query($query) or pupe_error($query);
+									
+									if (mysql_num_rows($sarjares12) != 1) {
+										$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
 
-									if ($silent == "" or $silent == "VIENTI") {
-										$tulos_ulos_sarjanumerot .= t("Hyvitettävää riviä ei löydy, ei voida laskuttaa").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
-									}
+										if ($silent == "" or $silent == "VIENTI") {
+											$tulos_ulos_sarjanumerot .= t("Hyvitettävää riviä ei löydy, ei voida laskuttaa").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
+										}
+									}																											
 								}
 							}
 						}

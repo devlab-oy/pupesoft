@@ -31,6 +31,7 @@
 					$lisa			
 					and tilausrivi.laskutettuaika >= '$yhtiorow[tilikausi_alku]' 
 					and tilausrivi.laskutettuaika <= '$yhtiorow[tilikausi_loppu]'
+					and tilausrivi.var2 != 'EIOST'
 					ORDER BY tilausrivi.laskutettuaika";
 		$korjaaresult = mysql_query($query) or pupe_error($query);
 		
@@ -74,7 +75,7 @@
 					round(ostorivi.rivihinta/ostorivi.kpl,2) r2						
 					FROM tilausrivi
 					JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus)
-					JOIN tilausrivi ostorivi ON (sarjanumeroseuranta.yhtio=ostorivi.yhtio and sarjanumeroseuranta.ostorivitunnus=ostorivi.tunnus and ostorivi.laskutettuaika != '0000-00-00')
+					JOIN tilausrivi ostorivi ON (sarjanumeroseuranta.yhtio=ostorivi.yhtio and sarjanumeroseuranta.ostorivitunnus=ostorivi.tunnus and ostorivi.laskutettuaika != '0000-00-00' and ostorivi.var2 != 'EIOST')
 					JOIN lasku on tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and lasku.alatila='X'
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.kpl != 0

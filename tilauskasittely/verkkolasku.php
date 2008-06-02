@@ -318,8 +318,8 @@
 			$res   = mysql_query($query) or pupe_error($query);
 
 			while ($laskurow = mysql_fetch_array($res)) {
-				
-				
+
+
 				// Tsekataan ettei lipsahda JT-rivejä laskutukseen jos osaotoimitus on kielletty
 				if ($yhtiorow["varaako_jt_saldoa"] != "") {
 					$lisavarattu = " + tilausrivi.varattu";
@@ -336,7 +336,7 @@
 							and tilausrivi.var in ('J','S')";
 				$sarjares1 = mysql_query($query) or pupe_error($query);
 				$srow1 = mysql_fetch_array($sarjares1);
-				
+
 				if ($srow1["jteet"] > 0 and $laskurow["osatoimitus"] != '') {
 					// Jos tilauksella oli yksikin jt-rivi ja osatoimitus on kielletty
 					$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
@@ -345,7 +345,7 @@
 						$tulos_ulos_sarjanumerot .= sprintf(t("Tilauksella %s oli JT-rivejä ja osatoimitusta ei tehdä, eli se jätettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."<br>\n";
 					}
 				}
-				
+
 				// Tsekataan vähän alveja ja sarjanumerojuttuja
 				$query = "	SELECT tuote.sarjanumeroseuranta, tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys, tilausrivi.alv
 							FROM tilausrivi use index (yhtio_otunnus)
@@ -721,15 +721,15 @@
 							$hinta		= $rahti["rahtihinta"]; // rahtihinta
 							$nimitys	= "$pvm $laskurow[toimitustapa]";
 							$kommentti  = "".t("Rahtikirja").": $rahtikirjanrot";
-							
-							
+
+
 							list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
 							list($rahinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
 
 							$query  = "	INSERT INTO tilausrivi (hinta, ale, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
 										values ('$rahinta', '$lis_ale', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
 							$addtil = mysql_query($query) or pupe_error($query);
-							
+
 							if ($silent == "") {
 								$tulos_ulos .= "<tr><td>".t("Lisättiin rahtikulut")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td>$rahti[rahtihinta]</td><td>$yhtiorow[valkoodi]</td><td>$pakka[kilot] kg</td></tr>\n";
 							}
@@ -782,12 +782,12 @@
 				}
 
 				if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T') {
-					$ketjutus_group = ", toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa ";										
+					$ketjutus_group = ", toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa ";
 				}
 				else {
 					$ketjutus_group = "";
 				}
-				
+
 				//ketjutetaan laskut...
 				$ketjut = array();
 
@@ -795,7 +795,7 @@
 				$query  = "	SELECT ytunnus, nimi, nimitark, osoite, postino, postitp, maksuehto, erpcm, vienti,
 							lisattava_era, vahennettava_era, maa_maara, kuljetusmuoto, kauppatapahtuman_luonne,
 							sisamaan_kuljetus, aktiivinen_kuljetus, kontti, aktiivinen_kuljetus_kansallisuus,
-							sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn, maa, valkoodi, 
+							sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn, maa, valkoodi,
 							count(*) yht, group_concat(tunnus) tunnukset
 							FROM lasku
 							WHERE yhtio		= '$kukarow[yhtio]'
@@ -1392,19 +1392,23 @@
 							$tulostettavat[] = $lasrow["laskunro"];
 							$lask++;
 						}
-						elseif ($lasrow["vienti"] != '' or $masrow["itsetulostus"] != '') {
+						elseif ($lasrow["vienti"] != '' or $masrow["itsetulostus"] != '' or $lasrow["chn"] == "666") {
 							if ($silent == "" or $silent == "VIENTI") {
-								$tulos_ulos .= "<br>\n".t("Tämä lasku tulostetaan omalle tulostimelle")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
+								if ($lasrow["chn"] != "666") {
+									$tulos_ulos .= "<br>\n".t("Tämä lasku tulostetaan omalle tulostimelle")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
+								}
+								else {
+									$tulos_ulos .= "<br>\n".t("Tämä lasku lähetetään suoraan asiakkaan sähköpostiin")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
+								}
+							}
+
+							// halutaan lähettää lasku suoraan asiakkaalle sähköpostilla..
+							if ($lasrow["chn"] == "666") {
+								$tulostettavat_email[] = $lasrow["laskunro"];
 							}
 
 							// Halutaan tulostaa itse
 							$tulostettavat[] = $lasrow["laskunro"];
-							$lask++;
-						}
-						elseif ($lasrow["chn"] == "666") {
-							// halutaan lähettää lasku suoraan asiakkaalle sähköpostilla..
-							$tulostettavat[] = $lasrow["laskunro"];
-							$tulostettavat_email[] = $lasrow["laskunro"];
 							$lask++;
 						}
 						elseif($silent == "") {
@@ -1536,7 +1540,7 @@
 						if ($kieli == "") {
 							$kieli = $asiakas_apu_row["kieli"];
 						}
-						
+
 						// jos ei ole valittuna mitään tulostinta eikä haluta lähettää tätä laskua meillilläkään skipataan looppi
 						if ($yhtiorow['lasku_tulostin'] == 0 and $valittu_tulostin == "" and !in_array($laskurow["laskunro"], $tulostettavat_email)) {
 							continue;
@@ -1589,7 +1593,7 @@
 
 							unset($pdf);
 							unset($page);
-							
+
 							// aloitellaan laskun teko
 							$page[$sivu] = alku();
 
@@ -1626,7 +1630,7 @@
 							fclose($fh);
 
 							// jos tämä haluttiin suoraan asiakkaalle sähköpostiin
-							if (in_array($laskurow["laskunro"], $tulostettavat_email)) {	
+							if (in_array($laskurow["laskunro"], $tulostettavat_email)) {
 								// generoidaan laskun saatekirje, joka haetaan avainsanoista
 								include_once("inc/generoi_laskun_saate.inc");
 								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $kieli);
@@ -1655,11 +1659,11 @@
 
 									if ($silent == "") $tulos_ulos .= t("Lasku tulostuu varastoon").": $prirow[nimitys]<br>\n";
 								}
-							
+
 								if (isset($valittu_tulostin)) {
 									$yhtiorow[lasku_tulostin] = $valittu_tulostin;
 								}
-							
+
 								$querykieli = "	select *
 												from kirjoittimet
 												where yhtio='$kukarow[yhtio]' and tunnus='$yhtiorow[lasku_tulostin]'";

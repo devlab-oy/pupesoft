@@ -103,16 +103,17 @@
 				$salisa = "";
 			}
 
-			$query = "	SELECT sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa, sum(summa) summa_valuutassa
+			$query = "	SELECT valkoodi, sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa, sum(summa) summa_valuutassa 
 						FROM suoritus
 						WHERE yhtio='$kukarow[yhtio]'
 						and ltunnus<>0
 						and asiakas_tunnus in ($tunnukset)
-						$salisa";
-			$result = mysql_query($query) or pupe_error($query);
-			$kaato = mysql_fetch_array($result);
+						and summa != 0
+						$salisa
+						group by 1";
+			$kaatoresult = mysql_query($query) or pupe_error($query);
 
-			$query = "	SELECT count(tunnus) as maara,
+			$query = "	SELECT valkoodi, count(tunnus) as maara,
 						sum(if(mapvm = '0000-00-00',1,0)) avoinmaara,
 						sum(if(erpcm < now() and mapvm = '0000-00-00',1,0)) eraantynytmaara,
 						sum(summa-saldo_maksettu) as summa,
@@ -133,67 +134,139 @@
 						and liitostunnus in ($tunnukset)
 						$salisa
 						and tapvm > '0000-00-00'
-						and mapvm = '0000-00-00'";
+						and mapvm = '0000-00-00'
+						group by 1";
 			$result = mysql_query($query) or pupe_error($query);
-			$kok = mysql_fetch_array($result);
-
+			
+			if (mysql_num_rows($kaatoresult) > 1) { 
+				$riveja = mysql_num_rows($kaatoresult) + 1;
+			}
+			else {
+				$riveja = 1;
+				if (mysql_num_rows($kaatoresult) != 0) {
+					$kaato = mysql_fetch_array($kaatoresult);
+					mysql_data_seek($kaatoresult,0);
+				
+					if (strtoupper($yhtiorow['valkoodi']) != strtoupper($kaato['valkoodi'])) {
+						$riveja = 2;
+					}
+				}
+			}
+				
 			echo "<table>
 				<tr>
-				<th><a href='../crm/asiakasmemo.php?ytunnus=$ytunnus'>$asiakasrow[nimi]</a></td>
-				<td>".t("Kaatotilillä")."</td>
-				<td></td>";
-
-			if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
-				echo "<td align='right'>$kaato[summa_valuutassa]</td>";
+				<th rowspan='$riveja'><a href='../crm/asiakasmemo.php?ytunnus=$ytunnus'>$asiakasrow[nimi]</a></td>
+				<td rowspan='$riveja'>".t("Kaatotilillä")."</td>";
+				
+			if (mysql_num_rows($kaatoresult) > 1) { // Valuuttasummia
+				$kotisumma = 0;
+				while ($kaato = mysql_fetch_array($kaatoresult)) {
+					echo "<td align='right'>$kaato[summa_valuutassa]</td><td>$kaato[valkoodi]</td></tr><tr>";
+					$kotisumma += $kaato['summa'];
+				}
+				echo "<td align='right'>$kotisumma</td><td>$yhtiorow[valkoodi]</td></tr>";
 			}
 			else {
-				echo "<td align='right'>$kaato[summa]</td>";
+				$kaato = mysql_fetch_array($kaatoresult);
+				if ($riveja == 2) {
+					echo "<td align='right'>$kaato[summa_valuutassa]</td><td>$kaato[valkoodi]</td></tr>";
+					echo "<tr><td align='right'>$kaato[summa]</td><td>$yhtiorow[valkoodi]</td></tr>";
+				}
+				else {
+					echo "<td align='right'>$kaato[summa]</td>";
+				}
 			}
 
-			echo "</tr>
-				<tr>
-				<th>$ytunnus</td>
-				<td>".t("Myöhässä olevia laskuja yhteensä")."</td>
-				<td align='right'>$kok[eraantynytmaara] kpl</td>";
 
-			if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
-				echo "<td align='right'>$kok[eraantynytsumma_valuutassa]</td>";
-			}
-			else {
-				echo "<td align='right'>$kok[eraantynytsumma]</td>";
-			}
 
-			echo "</tr>
-				<tr>
-				<th>$asiakasrow[osoite]</td>
-				<td>".t("Avoimia laskuja yhteensä")."</td>
-				<td align='right'>$kok[avoinmaara] kpl</td>";
-
-			if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
-				echo "<td align='right'>$kok[avoinsumma_valuutassa]</td>";
+			if (mysql_num_rows($result) > 1) { 
+				$riveja = mysql_num_rows($result) + 1;
 			}
 			else {
-				echo "<td align='right'>$kok[avoinsumma]</td>";
+				$riveja = 1;
+				if (mysql_num_rows($result) != 0) {
+					$kok = mysql_fetch_array($result);
+					mysql_data_seek($result,0);
+					
+					if (strtoupper($yhtiorow['valkoodi']) != strtoupper($kok['valkoodi'])) {
+						$riveja = 2;
+					}
+				}
+			}
+				
+			echo "
+				<tr>
+				<th rowspan='$riveja'>$ytunnus</td>
+				<td rowspan='$riveja'>".t("Myöhässä olevia laskuja yhteensä")."</td>";
+
+			if (mysql_num_rows($result) > 1) { // Valuuttasummia
+				$kotisumma = 0;
+				while ($kok = mysql_fetch_array($result)) {
+					echo "<td align='right'>$kok[eraantynytsumma_valuutassa]</td><td>$kok[valkoodi]</td>";
+					$kotisumma += $kok['eraanytnytsumma'];
+				}
+				echo "<td align='right'>$kotisumma</td><td>$yhtiorow[valkoodi]</td>";
+			}
+			else {
+				$kok = mysql_fetch_array($result);
+				if ($riveja == 2) {
+					echo "<td align='right'>$kok[eraantynytsumma_valuutassa]</td><td>$kok[valkoodi]</td></tr>";
+					echo "<tr><td align='right'>$kok[eraantynytsumma]</td><td>$yhtiorow[valkoodi]</td></tr>";
+				}
+				else {
+					echo "<td align='right'>$kok[eraantynytsumma]</td></tr>";
+				}
 			}
 
-			echo "</tr>
+			mysql_data_seek($result,0);
+			echo "
 				<tr>
+				<th rowspan='$riveja'>$asiakasrow[osoite]</td>
+				<td rowspan='$riveja'>".t("Avoimia laskuja yhteensä")."</td>";
+
+			if (mysql_num_rows($result) > 1) { // Valuuttasummia
+				$kotisumma = 0;
+				while ($kok = mysql_fetch_array($result)) {
+					echo "<td align='right'>$kok[avoinsumma_valuutassa]</td><td>$kok[valkoodi]</td>";
+					$kotisumma += $kok['avoinsumma'];
+				}
+				echo "<td align='right'>$kotisumma</td><td>$yhtiorow[valkoodi]</td>";
+			}
+			else {
+				$kok = mysql_fetch_array($result);
+				if ($riveja == 2) {
+					echo "<td align='right'>$kok[avoinsumma_valuutassa]</td><td>$kok[valkoodi]</td></tr>";
+					echo "<tr><td align='right'>$kok[avoinsumma]</td><td>$yhtiorow[valkoodi]</td></tr>";
+				}
+				else { 
+					echo "<td align='right'>$kok[avoinsumma]</td></tr>";
+				}
+			}
+			
+/*			mysql_data_seek($result,0);
+			echo "<tr>
 				<th>$asiakasrow[postino] $asiakasrow[postitp]</td>
-				<td>".t("Laskuja yhteensä")."</td>
-				<td align='right'>$kok[maara] kpl</td>";
+				<td>".t("Laskuja yhteensä")."</td>";
 
-			if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
-				echo "<td align='right'>$kok[summa_valuutassa]</td>";
+			if (mysql_num_rows($result) > 1) { // Valuuttasummia
+				$kotisumma = 0;
+				while ($kok = mysql_fetch_array($result)) {
+					echo "<td align='right'>$kok[summa_valuutassa]</td><td>$kok[valkoodi]</td>";
+					$kotisumma += $kok['summa'];
+				}
+				echo "<td align='right'>$kotisumma</td><td>$yhtiorow[valkoodi]</td>";
 			}
 			else {
-				echo "<td align='right'>$kok[summa]</td>";
+				$kok = mysql_fetch_array($result);
+				echo "<td align='right'>$kok[summa]</td></tr>";
 			}
+*/
 
-			echo "</tr>
-				<tr>
-				<th></th><td><a href='../raportit/asiakasinfo.php?ytunnus=$ytunnus'>".t("Asiakkaan myyntitiedot")."</a></td>
-				<td></td>
-				<td></td>
+			echo "<tr>
+				<th>$asiakasrow[postino] $asiakasrow[postitp]</td>
+				<td colspan='2'></td></tr>";
+			echo "<tr>
+				<th></th><td colspan='2'><a href='../raportit/asiakasinfo.php?ytunnus=$ytunnus'>".t("Asiakkaan myyntitiedot")."</a></td>
 				</tr>";
 
 			echo "<table><tr><td class='back'>";

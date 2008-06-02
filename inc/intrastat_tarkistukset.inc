@@ -7,7 +7,7 @@
 
 $virhetxt = "";
 $specutxt = "";
-$lopetus  = "intrastat.php////tee=tulosta//kk=$kk//vv=$vv//tapa=$tapa//outputti=$outputti//lahetys=nope";
+$lopetus  = "intrastat.php////tee=tulosta//kk=$kk//vv=$vv//tapa=$tapa//outputti=$outputti//lahetys=nope//vaintullinimike=$vaintullinimike//kayttajan_valinta_maa=$kayttajan_valinta_maa//tapahtumalaji=$tapahtumalaji";
 
 // k‰yd‰‰n l‰pi kaikki tuotteet
 $query = "	select *, (SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa

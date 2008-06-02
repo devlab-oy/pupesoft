@@ -160,7 +160,6 @@
 						HAVING $maalisa)";
 		}
 		
-
 		if ($tapahtumalaji == "kaikki") {
 			$query .= "	UNION";
 		}
@@ -198,12 +197,10 @@
 						HAVING $maalisa)";
 		}
 		
-
 		if ($tapahtumalaji == "kaikki") {
 			$query .= "	UNION";
 		}
 		
-
 		if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "siirtolista") {
 			$query .= "	(SELECT
 						tuote.tullinimike1,
@@ -237,7 +234,6 @@
 						HAVING $maalisa)";
 		}
 		
-
 		$query .= "	ORDER BY tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -508,7 +504,7 @@
 				$ulos .= "<tr class='aktiivi'>";
 
 				if ($vaintullinimike != "") {
-					$ulos .= "<td valign='top'><a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$row[kaikkitunnukset]&vaintullinimike=$vaintullinimike&lopetus=$lopetus//vaintullinimike=$vaintullinimike//kayttajan_valinta_maa=$kayttajan_valinta_maa//tapahtumalaji=$tapahtumalaji'>$row[laskunro]</a></td>";
+					$ulos .= "<td valign='top'><a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$row[kaikkitunnukset]&vaintullinimike=$vaintullinimike&kayttajan_valinta_maa=$kayttajan_valinta_maa&tapahtumalaji=$tapahtumalaji&lopetus=$lopetus//vaintullinimike=$vaintullinimike//kayttajan_valinta_maa=$kayttajan_valinta_maa//tapahtumalaji=$tapahtumalaji'>$row[laskunro]</a></td>";
 				}
 				else {
 					$ulos .= "<td valign='top'>".$row["laskunro"]."</td>";

@@ -246,14 +246,13 @@
 									and sovellus	= '$trow[sovellus]'
 									and nimi		= '$trow[nimi]'
 									and alanimi 	= '$trow[alanimi]'
-									and paivitys	= '$trow[paivitys]'
 									and nimitys		= '$trow[nimitys]'
 									and jarjestys 	= '$trow[jarjestys]'
 									and jarjestys2	= '$trow[jarjestys2]'
 									and hidden		= '$trow[hidden]'
 									and yhtio		= '$yhtio'";
 						$tarkesult = mysql_query($query) or pupe_error($query);
-
+						
 						if (mysql_num_rows($tarkesult) == 0) {
 							$query = "	INSERT into oikeu
 										SET
@@ -402,7 +401,6 @@
 									and sovellus	= '$trow[sovellus]'
 									and nimi		= '$trow[nimi]'
 									and alanimi 	= '$trow[alanimi]'
-									and paivitys	= '$trow[paivitys]'
 									and nimitys		= '$trow[nimitys]'
 									and jarjestys 	= '$trow[jarjestys]'
 									and jarjestys2	= '$trow[jarjestys2]'

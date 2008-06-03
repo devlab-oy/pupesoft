@@ -638,7 +638,7 @@
 
 											$jaljella = $row["jt"] - $luodut_kpl[$tunnus_nyt];
 
-											if ($toim == "ENNAKKO") {
+											if ($toim == "ENNAKKO" or $yhtiorow["varaako_jt_saldoa"] != "") {
 												$query = "	UPDATE tilausrivi
 															SET varattu = '$jaljella'
 															WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus_nyt' and kpl=0";

@@ -127,12 +127,12 @@
 		$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.postitp, lasku.tunnus, tilausrivi.tuoteno, tilausrivi.nimitys, sum(tilausrivi.tilkpl) myydyt, tilausrivi.yksikko,
 					sum(tilausrivi.tilkpl * tilausrivi.hinta) arvo, lasku.toimaika, lasku.tila, lasku.alatila
 					FROM lasku
-					JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+					JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.kpl = 0
 					JOIN tuote ON lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila IN ('L','N')
-					and lasku.alatila != 'X'
+					and (lasku.alatila != 'X' or tilausrivi.var='J')
 					and lasku.toimaika <= '$myovv-$myokk-$myopp' 
 					$lisa
 					group by 1,2,3,4,5,6,8,10,11,12 
@@ -148,10 +148,15 @@
 				list(,, $myytavissa_tul) = saldo_myytavissa($tulrow["tuoteno"], '', '', '', '', '', '', '', '', $myovv."-".$myokk."-".$myopp);
 			}
 			
-			
-			$laskutyyppi = $tulrow["tila"];
-			$alatila	 = $tulrow["alatila"];
-			require ("inc/laskutyyppi.inc");
+			if ($tulrow["alatila"] == 'X') {
+				$laskutyyppi = t("Jäkitoimitus");
+				$alatila	 = "";
+			}
+			else {
+				$laskutyyppi = $tulrow["tila"];
+				$alatila	 = $tulrow["alatila"];
+				require ("inc/laskutyyppi.inc");
+			}
 			
 			echo "<tr class='aktiivi'>";
 			echo "<td>$tulrow[ytunnus]</td>";

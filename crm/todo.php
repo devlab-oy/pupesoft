@@ -352,7 +352,7 @@ if ($tee == "") {
 
 
 	//***************** VANHAT
-	$query = "	SELECT kuka.nimi, todo.*, left(todo.luontiaika, 10) luontiaika_short, if(deadline='0000-00-00', '9999-99-99', deadline) deadline, asiakas.nimi asiakasnimi, todo.tunnus
+	$query = "	SELECT kuka.nimi, todo.*, left(todo.luontiaika, 10) luontiaika_short, if(deadline='0000-00-00', '9999-12-31', deadline) deadline, asiakas.nimi asiakasnimi, todo.tunnus
 				FROM todo
 				LEFT JOIN kuka on (kuka.yhtio = todo.yhtio and todo.tekija = kuka.tunnus)
 				LEFT JOIN asiakas on (asiakas.yhtio = todo.yhtio and todo.asiakas = asiakas.tunnus)
@@ -413,7 +413,7 @@ if ($tee == "") {
 
 	echo "</table><br></div>";
 
-	$query = "	SELECT kuka.nimi, todo.*, left(todo.luontiaika, 10) luontiaika_short, if(deadline='0000-00-00', '9999-99-99', deadline) deadline, asiakas.nimi asiakasnimi, todo.tunnus
+	$query = "	SELECT kuka.nimi, todo.*, left(todo.luontiaika, 10) luontiaika_short, if(deadline='0000-00-00', '9999-12-31', deadline) deadline, asiakas.nimi asiakasnimi, todo.tunnus
 				FROM todo
 				LEFT JOIN kuka on (kuka.yhtio = todo.yhtio and todo.tekija = kuka.tunnus)
 				LEFT JOIN asiakas on (asiakas.yhtio = todo.yhtio and todo.asiakas = asiakas.tunnus)
@@ -476,7 +476,7 @@ if ($tee == "") {
 			$rivi["prioriteetti"] = "tarjouspyyntö";
 		}
 
-		if ($rivi["deadline"] == '9999-99-99') {
+		if ($rivi["deadline"] == '9999-12-31') {
 			$rivi["deadline"] = "";
 		}
 

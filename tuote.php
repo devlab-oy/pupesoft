@@ -283,7 +283,7 @@
 							and valkoodi = '$hintavalrow[valkoodi]'
 							and maa = '$hintavalrow[maa]'
 							and laji = ''
-							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
 							limit 1";
 				$hintaresult = mysql_query($query) or pupe_error($query);

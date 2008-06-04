@@ -562,7 +562,7 @@ if ($ytunnus!='') {
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and osasto != 0 and try != 0 and hinnastoon != 'E' and status != 'P'
 							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus' and asiakas_ryhma='' and asiakasalennus.tuoteno!=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						)
 						UNION
 						/*	Asiakasalennus ytunnuksella	 ryhma*/	
@@ -583,7 +583,7 @@ if ($ytunnus!='') {
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							$tuotejoin
 							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus' and asiakas_ryhma='' and asiakasalennus.tuoteno=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							$tuotegroup
 						)
 						UNION
@@ -607,7 +607,7 @@ if ($ytunnus!='') {
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and osasto != 0 and try != 0 and hinnastoon != 'E' and status != 'P'
 							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma != '' and ytunnus='' and asiakasalennus.tuoteno!=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						)
 						UNION
 						/*	Asiakasalennus Ryhmällä	ryhma */
@@ -629,7 +629,7 @@ if ($ytunnus!='') {
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							$tuotejoin
 							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma != '' and ytunnus='' and asiakasalennus.tuoteno=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							$tuotegroup
 						)
 							UNION
@@ -876,7 +876,7 @@ if ($ytunnus!='') {
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakashinta.ytunnus = '$asiakasrow[ytunnus]' and asiakashinta.ytunnus!='' and asiakashinta.tuoteno!=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						)
 						UNION
 						(
@@ -895,7 +895,7 @@ if ($ytunnus!='') {
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakashinta.ytunnus = '$asiakasrow[ytunnus]' and asiakashinta.ytunnus!='' and asiakashinta.ryhma!=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))							
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))							
 						)
 						UNION
 						(
@@ -915,7 +915,7 @@ if ($ytunnus!='') {
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakashinta.asiakas_ryhma = '$asiakasrow[ryhma]' and asiakashinta.asiakas_ryhma!='' and asiakashinta.tuoteno!=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))							
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))							
 						)
 						UNION
 						(
@@ -934,7 +934,7 @@ if ($ytunnus!='') {
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakashinta.asiakas_ryhma = '$asiakasrow[ryhma]' and asiakashinta.asiakas_ryhma!='' and asiakashinta.ryhma!=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))							
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))							
 						)
 						ORDER BY alennusryhmä, tuoteno, prio, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)";
 			$asres = mysql_query($query) or pupe_error($query);

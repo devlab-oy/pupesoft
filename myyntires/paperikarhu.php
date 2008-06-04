@@ -144,15 +144,20 @@
 			$pdf->draw_rectangle(739, 320, 718, 575, $firstpage, $rectparam);
 			$pdf->draw_rectangle(739, 420, 718, 575, $firstpage, $rectparam);
 			$pdf->draw_text(330, 731, t("Eräpäivä", $kieli), $firstpage, $pieni);
+			
+			if ($yhtiorow['karhuerapvm'] > 0) {
+				$paiva	   = date("j");
+				$kuu   	   = date("n");
+				$year  	   = date("Y");
+				$seurday   = date("d",mktime(0, 0, 0, $kuu, $paiva+$yhtiorow['karhuerapvm'],  $year));
+				$seurmonth = date("m",mktime(0, 0, 0, $kuu, $paiva+$yhtiorow['karhuerapvm'],  $year));
+				$seuryear  = date("Y",mktime(0, 0, 0, $kuu, $paiva+$yhtiorow['karhuerapvm'],  $year));
 
-			$paiva	   = date("j");
-			$kuu   	   = date("n");
-			$year  	   = date("Y");
-			$seurday   = date("d",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
-			$seurmonth = date("m",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
-			$seuryear  = date("Y",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
-
-			$pdf->draw_text(330, 721, tv1dateconv($seuryear."-".$seurmonth."-".$seurday), $firstpage, $norm);
+				$pdf->draw_text(330, 721, tv1dateconv($seuryear."-".$seurmonth."-".$seurday), $firstpage, $norm);
+			}
+			else {
+				$pdf->draw_text(330, 721, t("HETI"), $firstpage, $norm);
+			}
 
 			$pdf->draw_text(430, 731, t("Puhelin", $kieli), $firstpage, $pieni);
 			$pdf->draw_text(430, 721, $yrow["puhno"], $firstpage, $norm);

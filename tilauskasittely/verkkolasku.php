@@ -319,7 +319,6 @@
 
 			while ($laskurow = mysql_fetch_array($res)) {
 
-
 				// Tsekataan ettei lipsahda JT-rivejä laskutukseen jos osaotoimitus on kielletty
 				if ($yhtiorow["varaako_jt_saldoa"] != "") {
 					$lisavarattu = " + tilausrivi.varattu";
@@ -1099,6 +1098,37 @@
 							$pankkitiedot["pankkiswift3"] =	$yhtiorow["pankkiswift3"];
 						}
 
+						$asiakas_apu_query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$lasrow[liitostunnus]'";
+						$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
+
+						if (mysql_num_rows($asiakas_apu_res) == 1) {
+							$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
+						}
+						else {
+							$asiakas_apu_row = array();
+						}
+
+						if (strtoupper($asiakas_apu_row["kieli"]) == "SE") {
+							$laskun_kieli = "SE";
+						}
+						elseif (strtoupper($asiakas_apu_row["kieli"]) == "EE") {
+							$laskun_kieli = "EE";
+						}
+						elseif ($kieli != "") {
+							$laskun_kieli = $kieli;
+						}
+						else {
+							$laskun_kieli = "";
+						}
+
+						if ($kieli == "") {
+							$kieli = $asiakas_apu_row["kieli"];
+						}
+						
+						if ($kieli == "") {
+							$kieli = $yhtiorow["kieli"];
+						}
+
 						// tässä pohditaan laitetaanko verkkolaskuputkeen
 						if (($lasrow["vienti"] == "" or ($lasrow["vienti"] == "E" and $lasrow["chn"] == "020")) and $masrow["itsetulostus"] == "" and $lasrow["sisainen"] == "" and $masrow["kateinen"] == "" and abs($lasrow["summa"]) != 0 and $lasrow["chn"] != '666') {
 
@@ -1129,29 +1159,6 @@
 							else {
 								//Hyvityslasku
 								$tyyppi='381';
-							}
-
-							$asiakas_apu_query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$lasrow[liitostunnus]'";
-							$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
-
-							if (mysql_num_rows($asiakas_apu_res) == 1) {
-								$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
-							}
-							else {
-								$asiakas_apu_row = array();
-							}
-
-							if (strtoupper($asiakas_apu_row["kieli"]) == "SE") {
-								$laskun_kieli = "SE";
-							}
-							elseif (strtoupper($asiakas_apu_row["kieli"]) == "EE") {
-								$laskun_kieli = "EE";
-							}
-							elseif ($kieli != "") {
-								$laskun_kieli = $kieli;
-							}
-							else {
-								$laskun_kieli = "";
 							}
 
 							// Laskukohtaiset kommentit kuntoon

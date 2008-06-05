@@ -494,7 +494,12 @@
 
 									if($poikkeama_kasittely[$apui] != "") {
 										
-										if ($poikkeama_kasittely[$apui] != "MI") {
+										$abuq = "SELECT sarjanumeroseuranta FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno = '$tilrivirow[tuoteno]'";
+										$abuqresult = mysql_query($abuq) or pupe_error($abuq);
+										$abuqrow = mysql_fetch_array($abuqresult);
+										
+										
+										if ($poikkeama_kasittely[$apui] != "MI" and ($abuqrow['sarjanumeroseruanta'] == 'E' or $abuqrow['sarjanumeroseruanta'] == 'F')) {
 											$query .= ", tilkpl = '".$maara[$apui]."'";
 										}
 										

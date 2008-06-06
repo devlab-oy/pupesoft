@@ -739,7 +739,7 @@ while (!feof ($fd)) {
 
 			$edi_ulos .= t("tilattiin")." $kpl ".t("kpl").". ";
 			break;
-		case 'OSTOTILRIV.OTR_SALLITAANJR' :
+		case 'OSTOTILRIV.OTR_SALLITAANJT' :
 			// Sallitaan JT-Rivit  
 			if ($tieto == '1') {
 				$sallitaanjt = '1';

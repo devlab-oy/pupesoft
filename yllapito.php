@@ -107,7 +107,7 @@
 			$uusi = '';
 			exit;
 		}
-		if ($del == 1) {
+		if ($del == 1 or $del == 2) {
 			echo "<b>".t("Sinulla ei ole oikeutta poistaa t‰t‰ tietoa")."</b><br>";
 			$del = '';
 			$tunnus = 0;
@@ -152,6 +152,25 @@
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
 			exit;
 		}
+	}
+
+	if ($del == 2) {
+		
+		if (count($poista_check) > 0) {
+			foreach ($poista_check as $poista_tunnus) {
+				$query = "	SELECT *
+							FROM $toim
+							WHERE tunnus = '$poista_tunnus'";
+				$result = mysql_query($query) or pupe_error($query);
+				$trow = mysql_fetch_array($result);
+
+				$query = "	DELETE from $toim
+							WHERE tunnus='$poista_tunnus'";
+				$result = mysql_query($query) or pupe_error($query);
+
+				synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
+			}
+		}					
 	}
 
 	// Jotain p‰ivitet‰‰n tietokontaan
@@ -478,6 +497,33 @@
 
 	// Nyt selataan
 	if ($tunnus == 0 and $uusi == 0 and $errori == '') {
+		
+		if ($toim == "asiakasalennus" or $toim == "asiakashinta") {
+			print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+				<!--
+
+				function toggleAll(toggleBox) {
+
+					var currForm = toggleBox.form;
+					var isChecked = toggleBox.checked;
+					var nimi = toggleBox.name;
+
+					for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {											
+						if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,3) == nimi) {
+							currForm.elements[elementIdx].checked = isChecked;
+						}
+					}
+				}
+
+				function verifyMulti(){
+					msg = '".t("Haluatko todella poistaa tietueet?")."';
+					return confirm(msg);
+				}
+						
+				//-->
+				</script>";
+		}
+		
 		if ($limit != "NO") {
 			$limiitti = " LIMIT 350";
 		}
@@ -541,10 +587,24 @@
 				echo "</th>";
 			}
 		}
-
+		
+		if (($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
+			echo "<th valign='top'>".t("Poista")."</th>";
+		}
+		
 		echo "<td class='back' valign='bottom'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></form>";
 		echo "</tr>";
-
+				
+		if (($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
+			echo "<tr><form action='yllapito.php?ojarj=$ojarj$ulisa' name='ruksaus' method='post' onSubmit = 'return verifyMulti()'>
+					    <input type = 'hidden' name = 'toim' value = '$aputoim'>
+						<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
+						<input type = 'hidden' name = 'limit' value = '$limit'>
+						<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
+						<input type = 'hidden' name = 'laji' value = '$laji'>
+						<input type = 'hidden' name = 'del' value = '2'></tr>";
+		}
+		
 		while ($trow = mysql_fetch_array($result)) {
 			echo "<tr class='aktiivi'>";
 						
@@ -580,8 +640,25 @@
 				}
 			}
 			
+			if (($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
+				echo "<td><input type = 'checkbox' name = 'poista_check[]' value = '{$trow[0]}'></td>";
+				
+			}
+			
 			echo "</tr>";
 		}
+		
+		if (($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
+			$span = mysql_num_fields($result)-2;
+			echo "<tr>";
+			echo "<td class='tumma'><input type = 'submit' value = '".t("Poista ruksatut tietueet")."'></td>";
+			echo "<td class='tumma' colspan='$span' align='right'>".t("Ruksaa kaikki")."</td>";
+			echo "<td class='tumma'><input type = 'checkbox' name = 'poi' onclick='toggleAll(this)'></td>";
+			echo "</tr>";	
+						
+			echo "</form>";			
+		}
+		
 		echo "</table>";
 	}
 
@@ -887,6 +964,8 @@
 				<input type = 'hidden' name = 'laji' value = '$laji'>
 				<input type = 'hidden' name = 'uusi' value = '1'>
 				<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
+		
+		
 	}
 
 	require ("inc/footer.inc");

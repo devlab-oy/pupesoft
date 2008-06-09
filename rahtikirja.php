@@ -1088,7 +1088,7 @@
 
 		echo "<font class='head'>".t("Syötä rahtikirjan tiedot")."</font><hr>";
 
-		$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$id'";
+		$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$id'";
 		$resul = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($resul) == 0) {
@@ -1189,18 +1189,13 @@
 		echo "<option value='K' $mesel>".t("Lähettäjä")."</option>";
 		echo "</select></td>";
 
-
 		//etsitään löytyykö rahtisopimusta
-		$rahtisopimus='';
-		$query = "select * from rahtisopimukset where toimitustapa='$toimitustapa' and ytunnus='$rahtihaku' and yhtio='$kukarow[yhtio]'";
-		$rares = mysql_query($query) or pupe_error($query);
+		$rsop = hae_rahtisopimusnumero($toimitustapa, $rahtihaku, $otsik["liitostunnus"]);
+		$rahtisopimus = $rsop["rahtisopimus"];
 
-		if (mysql_num_rows($rares) == 1) {
-			$rarow = mysql_fetch_array($rares);
-			$rahtisopimus = $rarow['rahtisopimus'];
+		if ($otsik['rahtisopimus'] != '') {
+			$rahtisopimus = $otsik['rahtisopimus'];
 		}
-
-		if ($otsik['rahtisopimus'] != '') $rahtisopimus = $otsik['rahtisopimus'];
 
 		//tehdään rahtisopimuksen syöttö
 		echo "<th align='left'>".t("Rahtisopimus")."</th><td><input value='$rahtisopimus' type='text' name='rahtisopimus' size='20'></td></tr>";

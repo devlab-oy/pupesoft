@@ -1,5 +1,5 @@
 <?php
 	$otsikko = 'Rahtisopimukset';
-	$kentat = 'tunnus, ytunnus, toimitustapa, rahtisopimus, selite';
+	$kentat = 'tunnus, asiakas, ytunnus, toimitustapa, rahtisopimus, selite';
 	$jarjestys = 'ytunnus,toimitustapa';
 ?>

@@ -225,10 +225,8 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 729, t("Toimitustapa", $kieli), 		$thispage, $pieni);
 		$pdf->draw_text(310, 719, $laskurow["toimitustapa"],	 	$thispage, $boldi);
 
-		//etsitään rahtisopimusnumero
-		$query = "SELECT rahtisopimus from rahtisopimukset where ytunnus = '$laskurow[ytunnus]' and toimitustapa = '$laskurow[toimitustapa]'";
-		$rahtiresult = mysql_query($query) or pupe_error($query);
-		$rahtirow = mysql_fetch_array($rahtiresult);
+		//etsitään löytyykö rahtisopimusta
+		$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
 
 		$pdf->draw_rectangle(737, 420, 716, 580, $thispage, $rectparam);
 		$pdf->draw_text(430, 729, t("Rahtisopimus", $kieli), 		$thispage, $pieni);

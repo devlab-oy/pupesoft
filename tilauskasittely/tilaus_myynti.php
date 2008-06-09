@@ -1818,14 +1818,10 @@ if ($tee == '') {
 
 
 			if ($kukarow["extranet"] == "") {
-				$query = "	SELECT *
-							FROM rahtisopimukset
-							WHERE toimitustapa = '$laskurow[toimitustapa]'
-							and  ytunnus = '$laskurow[ytunnus]'";
-				$pahsopres = mysql_query($query) or pupe_error($query);
-				$rahsoprow = mysql_fetch_array($pahsopres);
+				//etsitään löytyykö rahtisopimusta
+				$rahsoprow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
 
-				if ($rahsoprow["tunnus"] > 0) {
+				if ($rahsoprow > 0) {
 					$ylisa = "&tunnus=$rahsoprow[tunnus]";
 				}
 				else {
@@ -3150,7 +3146,8 @@ if ($tee == '') {
 				$vak_toim_result = mysql_query($vak_toim_query) or pupe_error($vak_toim_query);
 
 				if (mysql_num_rows($vak_toim_result) > 0) {
-					echo "<font class='error'>".t("VIRHE: Tämä toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br><br>";
+					echo "<font class='error'>".t("VIRHE: Tämä toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br>";
+					echo "<font class='error'>".t("Valitse uusi toimitustapa")."!</font><br><br>";
 					$tilausok++;
 				}
 			}

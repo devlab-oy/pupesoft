@@ -492,7 +492,7 @@
     	}
     }
     if (strlen($ojarj) > 0) {
-    	$jarjestys = $ojarj;
+    	$jarjestys = $ojarj." ";
     }
 
 	// Nyt selataan

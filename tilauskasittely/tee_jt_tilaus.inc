@@ -326,7 +326,8 @@
 
 					$query = "	SELECT *
 								FROM lasku
-								WHERE tunnus = '$id'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus = '$id'";
 					$aresult = mysql_query($query) or pupe_error($query);
 					$laskurow = mysql_fetch_array($aresult);
 
@@ -338,7 +339,7 @@
 					$result = mysql_query($query) or pupe_error($query);
 
 					//jos tilauksella on jo rahtikulu niin ei lis‰t‰ sit‰ uudestaan
-					if (mysql_num_rows($result) == 0) {
+					if (mysql_num_rows($result) == 0 and $laskurow["rahtivapaa"] == '') {
 
 						//lis‰t‰‰n rahtikulurivi
 						$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";

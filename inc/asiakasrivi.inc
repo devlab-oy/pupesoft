@@ -943,4 +943,31 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "rahtivapaa") {
+
+		$chk1 = '';
+		$chk2 = '';
+
+		if ($trow[$i] != '') {
+			$chk2 = 'selected';
+			$chk1 = '';
+		}
+		else {
+			$chk1 = 'selected';
+			$chk2 = '';
+		}
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''$chk1>".t("Ei")."</option>";
+		$ulos .= "<option value = 'o'$chk2>".t("Kyllä")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "rahtivapaa_alarajasumma") {
+
+		$ulos = "<td><input type='text' name='$nimi' id='$nimi' value='$trow[$i]' size='15'></td>";
+		$jatko = 0;
+	}
+
 ?>

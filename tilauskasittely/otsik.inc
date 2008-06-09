@@ -1648,14 +1648,33 @@
 
 			echo "</select></td>";
 
+			$rahtivapaaquery = "SELECT rahtivapaa FROM asiakas WHERE yhtio='$kukarow[yhtio]' AND tunnus='$asiakasid'";
+			$rahtivapaaresult = mysql_query($rahtivapaaquery) or pupe_error($rahtivapaaquery);
+
+			if (mysql_num_rows($rahtivapaaresult) > 0) {
+				$rahtivapaarow = mysql_fetch_array($rahtivapaaresult);
+				if ($rahtivapaarow["rahtivapaa"] != '') {
+					$rahtivapaa_chk = " checked";
+				}
+			}
+			else {
+				$rahtivapaa_chk = "";
+			}
+
+			echo "<td>",t("Rahtivapaa"),"</td>";
+			echo "<td><input type='checkbox' name='rahtivapaa'$rahtivapaa_chk></td>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<td></td><td></td>";
 			if ($yhtiorow['laskutuskielto'] != 0) {
 				echo "<td>".t("Laskutuskieltoon").":</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
 			}
 			else {
 				echo "<td></td><td></td>";
 			}
-
 			echo "</tr>";
+
 			echo "<tr>";
 			
 			if ($toim == "TARJOUS") {
@@ -2539,6 +2558,7 @@
 					erpcm								= '$erpcmvv-$erpcmkk-$erpcmpp',
 					maksuehto 							= '$maksuehto',
 					toimitustapa 						= '$toimitustapa',
+					rahtivapaa							= '$rahtivapaa',
 					toimitusehto 						= '$toimitusehto',
 					kohdistettu 						= '$maksaja',
 					myyja 								= '$myyja',

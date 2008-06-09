@@ -1572,4 +1572,11 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "rahtivapaa_alarajasumma") {
+
+		$ulos = "<td><input type='text' name='$nimi' id='$nimi' value='$trow[$i]' size='15'></td>";
+		$jatko = 0;
+	}
+
 ?>

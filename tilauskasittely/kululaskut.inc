@@ -78,7 +78,18 @@ if ($tee == "liita") {
 	$alvirow = mysql_fetch_array($alvires);
 
 	// Ostoreskontralaskun veroton arvo
-	$oslasrow["arvo"] = round((float) $oslasrow["summa"] - (float) $alvirow["summa"], 2);
+	$alvisumma = $alvirow["summa"];
+	
+	if (strtoupper($oslasrow["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
+		if ($oslasrow["maksu_kurssi"] != 0) {
+			$alvisumma = $alvirow["summa"] / $oslasrow["maksu_kurssi"];
+		}
+		else {
+			$alvisumma = $alvirow["summa"] / $oslasrow["vienti_kurssi"];
+		}
+	}
+	
+	$oslasrow["arvo"] = round((float) $oslasrow["summa"] - (float) $alvisumma, 2);
 
 	// Pilkut pisteiksi
 	$liitasumma = (float) str_replace(",",".",$liitasumma);
@@ -465,11 +476,20 @@ if ($silent == "") {
 				//T‰ss‰ on ostolasku verollinen summa
 				$verosumma = $llrow["summa"];
 
-				//Verojen m‰‰r‰
-				$vero = $alvirow["summa"];
+				// Ostoreskontralaskun veroton arvo
+				$alvisumma = $alvirow["summa"];
+
+				if (strtoupper($oslasrow["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
+					if ($llrow["maksu_kurssi"] != 0) {
+						$alvisumma = $alvirow["summa"] / $llrow["maksu_kurssi"];
+					}
+					else {
+						$alvisumma = $alvirow["summa"] / $llrow["vienti_kurssi"];
+					}
+				}
 
 				//Ja lopuksi viel‰ veroton summa
-				$verotonsumma = $verosumma - $vero;
+				$verotonsumma = $verosumma - $alvisumma;
 
 				$query = "	SELECT sum(arvo) arvo, GROUP_CONCAT(DISTINCT laskunro ORDER BY laskunro SEPARATOR ', ') laskunrot
 							from lasku

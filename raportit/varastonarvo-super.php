@@ -55,6 +55,7 @@
 			//-->
 			</script>";
 
+		$varastot2 = array();
 
 		if ($supertee == "RAPORTOI") {
 
@@ -162,6 +163,7 @@
 						tuote.sarjanumeroseuranta,
 						group_concat(tuotepaikat.tunnus) paikkatun,
 						group_concat(varastopaikat.nimitys) varastot,
+						varastopaikat.nimitys,
 						$saldolisa
 						FROM tuote
 						LEFT JOIN avainsana atry use index (yhtio_laji_selite) on atry.yhtio=tuote.yhtio and atry.selite=tuote.try and atry.laji='TRY'
@@ -248,16 +250,18 @@
 				$excelsarake = 0;
 			}
 
+			/*
 			if (mysql_num_rows($result) > 0) {
 				require_once ('inc/ProgressBar.class.php');
 				$bar = new ProgressBar();
 				$elements = mysql_num_rows($result); // total number of elements to process
 				$bar->initialize($elements); // print the empty bar
 			}
+			*/
 
 			while ($row = mysql_fetch_array($result)) {
 
-				$bar->increase();
+//				$bar->increase();
 				$kehahin = 0;
 
 				// Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu))
@@ -519,6 +523,9 @@
 						$excelsarake = 0;
 					}
 				}
+				
+				$varastot2[$row["nimitys"]]["netto"] += $muutoshinta;
+				$varastot2[$row["nimitys"]]["brutto"] += $bmuutoshinta;
 			}
 
 			echo "<br><br>Löytyi $lask tuotetta.<br><br>";
@@ -538,11 +545,22 @@
 			}
 
 			echo "<table>";
-			echo "<tr><th>Pvm</th><th>".t("Varastonarvo")."</th><th>".t("Bruttovarastonarvo")."</th></tr>";
+			echo "<tr><th>".t("Varasto")."</th><th>".t("Varastonarvo")."</th><th>".t("Bruttovarastonarvo")."</th></tr>";
+
+			foreach ($varastot2 AS $varasto => $arvot) {
+				echo "<tr><td>$varasto</td>";
+				foreach ($arvot AS $arvo) {
+					if ($arvo != '') {
+						echo "<td align='right'>".sprintf("%.2f",$arvo)."</td>";
+					}
+				}
+				echo "</tr>";
+			}
+
+			echo "<tr><th>".t("Pvm")."</th><th>".t("Yhteensä")."</th><th>".t("Yhteensä")."</th></tr>";
 			echo "<tr><td>$vv-$kk-$pp</td><td align='right'>".sprintf("%.2f",$varvo)."</td>";
 			echo "<td align='right'>".sprintf("%.2f",$bvarvo)."</td></tr>";
 			echo "</table><br><br>";
-
 		}
 
 		// piirrellään formi

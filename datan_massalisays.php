@@ -130,8 +130,11 @@ if ($tee == 'GO') {
 			$polku = substr($file,$alkupituus);
 	
 			list($taulu, $toiminto, $kuva) = split("/", $polku, 3);
+			
+			$path_parts = pathinfo($kuva);
+			$ext = $path_parts['extension'];
 	
-			if ($toiminto == 'kasittele') {
+			if ($toiminto == 'kasittele' and strtoupper($ext) != "PDF") {
 				if (file_exists($file)) {
 					$thumbi = konvertoi($thumbkork,$thumbleve,'thumb',$taulu,$kuva,$dirri,$file);
 					if ($thumbi != '') {
@@ -152,6 +155,7 @@ if ($tee == 'GO') {
 					continue;
 				}
 			}
+						
 		}
 		echo "<br>";
 	}
@@ -163,23 +167,29 @@ if ($tee == 'GO') {
 	
 		list($taulu, $toiminto, $kuva) = split("/", $polku, 3);
 		
+		$path_parts = pathinfo($kuva);
+		$ext = $path_parts['extension'];
+		
 		$koko = getimagesize($file);
 		$leve = $koko[0];       
 		$kork = $koko[1];
 		
-		if ($toiminto == 'thumb') {
-			if ($kork <> $thumbkork) {
+		if (strtoupper($ext) != "PDF") {
+			if ($toiminto == 'thumb') {
+				if ($kork <> $thumbkork) {
+					continue;
+				}
+			}
+			elseif ($toiminto == 'normaali') {
+				if ($kork <> $normaalikork) {
+					continue;
+				}
+			}
+			else {
 				continue;
 			}
 		}
-		elseif ($toiminto == 'normaali') {
-			if ($kork <> $normaalikork) {
-				continue;
-			}
-		}
-		else {
-			continue;
-		}
+		
 		
 		$apukuva = $kuva; 
 		
@@ -187,14 +197,17 @@ if ($tee == 'GO') {
 			die("Toistaiseksi voidaan vaan lukea tuotekuvia!");
 		}
 		
-		if ($toiminto == 'kasittele') {
-			// n‰ist‰ ollaan jo tehty uudet versiot
-			continue;
+		if (strtoupper($ext) != "PDF") {
+			if ($toiminto == 'kasittele') {
+				// n‰ist‰ ollaan jo tehty uudet versiot
+				continue;
+			}
+			elseif ($toiminto == 'alkuperainen') {
+				// toistaiseksi ei tallenneta alkuper‰isi‰
+				continue;
+			}
 		}
-		elseif ($toiminto == 'alkuperainen') {
-			// toistaiseksi ei tallenneta alkuper‰isi‰
-			continue;
-		}
+		
 		
 		unset($apuresult);
 	
@@ -277,6 +290,7 @@ if ($tee == 'GO') {
 			}
 			
 			if (mysql_num_rows($apuresult) > 0) {
+				
 				// lis‰t‰‰n file
 				while ($apurow = mysql_fetch_array($apuresult)) {
 					// poistetaan vanhat samat ja korvataan uusilla

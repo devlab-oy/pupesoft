@@ -64,16 +64,28 @@ if ($tee == "file") {
 				if (file_exists("../inc/tuotehaku.inc")) {
 					require ("../inc/tuotehaku.inc");
 				}
-
-				$query = "	SELECT *
-							FROM tuote
-							WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+				
+				if ($mikrotila_tuotenumero == "koodilla") {
+					$query = "	SELECT *
+								FROM tuote
+								WHERE eankoodi='$tuoteno' and yhtio='$kukarow[yhtio]'";
+				}
+				else {
+					$query = "	SELECT *
+								FROM tuote
+								WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+				}
+				
+				
+				
 				$rarresult = mysql_query($query) or pupe_error($query);
 
 				if(mysql_num_rows($rarresult) == 1) {
 
 					$trow = mysql_fetch_array($rarresult);
-
+					
+					$tuoteno = $trow["tuoteno"];
+					
 					if ($toimaika == '') {
 						$toimaika = $laskurow["toimaika"];
 					}
@@ -165,8 +177,13 @@ if ($tee == 'mikrotila') {
 
 	echo "
 			<th>".t("Valitse tiedosto").":</th>
-			<td><input name='userfile' type='file'></td>
-			<td class='back'><input type='submit' value='".t("Läheta")."'></td>
+			<td><input name='userfile' type='file'></td></tr><tr>
+			<th>".t("Tuotteet:")."</th>
+			<td><select name='mikrotila_tuotenumero'>
+			<option value='tuote'>".t("Tuotenumerolla")."
+			<option value='koodilla'>".t("EAN-Koodilla")."		
+			</select><td></tr><tr>
+	 		<td colspan='2' class='back'><input type='submit' value='".t("Läheta")."'></td>
 			</tr>
 			</table>
 			</form>";

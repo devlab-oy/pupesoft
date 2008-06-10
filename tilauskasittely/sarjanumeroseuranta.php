@@ -1056,13 +1056,13 @@
 				$siires = mysql_query($query) or pupe_error($query);
 				$siirow = mysql_fetch_array($siires);
 
-				$sarjarow["myynti_tunnus"] = 0;
+				//$sarjarow["myynti_tunnus"] = 0;
 
 				if ($siirow["tyyppi"] == "O") {
 					// pultattu kiinni johonkin
-					$fnlina1 = "<font class='message'>(".t("Varattu lisävarusteena tuotteelle").": ";
-					$fnlina2 = ")</font>";
-					$sarjarow["myynti_nimi"] = $siirow["tuoteno"]." ".$siirow["sarjanumero"];
+					$fnlina1 = t("<br>Varattu lisävarusteena").": ";
+					$fnlina2 = "";
+					$sarjarow["myynti_nimi"] .= "<br>".$siirow["tuoteno"]." ".$siirow["sarjanumero"];
 				}
 				else {
 					// jos tämä on jollain siirtolistalla

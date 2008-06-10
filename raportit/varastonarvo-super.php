@@ -117,11 +117,11 @@
 			// tuotteen määrä varastossa nyt
 			if ($summaustaso == "S") {
 				$saldolisa = " sum(saldo) varasto";
-				$groupsaldot = "GROUP BY tuote.tuoteno, try, osasto, tuote.tuotemerkki, tuote.nimitys, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm, tuote.sarjanumeroseuranta";
+				$groupsaldot = "GROUP BY varastopaikat.nimitys, tuote.tuoteno, try, osasto, tuote.tuotemerkki, tuote.nimitys, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm, tuote.sarjanumeroseuranta";
 			}
 			else {
 				$saldolisa = " hyllyalue, hyllynro, hyllyvali, hyllytaso, saldo varasto";
-				$groupsaldot = "GROUP BY tuote.tuoteno, try, osasto, tuote.tuotemerkki, tuote.nimitys, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm, tuote.sarjanumeroseuranta, hyllyalue, hyllynro, hyllyvali, hyllytaso, varasto";
+				$groupsaldot = "GROUP BY varastopaikat.nimitys, tuote.tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso, varasto, try, osasto, tuote.tuotemerkki, tuote.nimitys, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm, tuote.sarjanumeroseuranta";
 			}
 
 			if ($tuoteryhma == "tyhjat") {
@@ -164,6 +164,7 @@
 						group_concat(tuotepaikat.tunnus) paikkatun,
 						group_concat(varastopaikat.nimitys) varastot,
 						varastopaikat.nimitys,
+						tuote.vihapvm, 
 						$saldolisa
 						FROM tuote
 						LEFT JOIN avainsana atry use index (yhtio_laji_selite) on atry.yhtio=tuote.yhtio and atry.selite=tuote.try and atry.laji='TRY'
@@ -178,7 +179,7 @@
 						$lisa
 						$groupsaldot
 						$lisa2
-						ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
+						ORDER BY varastopaikat.nimitys, tuote.osasto, tuote.try, tuote.tuoteno";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$lask  = 0;
@@ -246,6 +247,16 @@
 				$worksheet->writeString($excelrivi, $excelsarake, t("Kiertonopeus 12kk"), 	$format_bold);
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Viimeisin laskutus"), 	$format_bold);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, t("Epäkurantti 25%"), 	$format_bold);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, t("Epäkurantti 50%"), 	$format_bold);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, t("Epäkurantti 75%"), 	$format_bold);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, t("Epäkurantti 100%"), 	$format_bold);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, t("Viimeinen hankintapäivä"), 	$format_bold);
 				$excelrivi++;
 				$excelsarake = 0;
 			}
@@ -260,6 +271,9 @@
 			*/
 
 			while ($row = mysql_fetch_array($result)) {
+
+				$muutoshinta = '';
+				$bmuutoshinta = '';
 
 //				$bar->increase();
 				$kehahin = 0;
@@ -512,9 +526,30 @@
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$bmuutoshinta));
 						$excelsarake++;
+
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kierto));
 						$excelsarake++;						
 						$worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($xmyyrow["laskutettuaika"]));
+						$excelsarake++;
+
+						if ($row['epakurantti25pvm'] != '0000-00-00') {
+							$worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti25pvm']));
+						}
+						$excelsarake++;
+						if ($row['epakurantti50pvm'] != '0000-00-00') {
+							$worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti50pvm']));
+						}
+						$excelsarake++;
+						if ($row['epakurantti75pvm'] != '0000-00-00') {
+							$worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti75pvm']));
+						}
+						$excelsarake++;
+						if ($row['epakurantti100pvm'] != '0000-00-00') {
+							$worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti100pvm']));
+						}
+						$excelsarake++;
+
+						$worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row["vihapvm"]));
 						$excelsarake++;
 
 						$worksheet->writeString($excelrivi, $excelsarake, $kehalisa);
@@ -522,10 +557,10 @@
 						$excelrivi++;
 						$excelsarake = 0;
 					}
+
+					$varastot2[$row["nimitys"]]["netto"] += $muutoshinta;
+					$varastot2[$row["nimitys"]]["brutto"] += $bmuutoshinta;
 				}
-				
-				$varastot2[$row["nimitys"]]["netto"] += $muutoshinta;
-				$varastot2[$row["nimitys"]]["brutto"] += $bmuutoshinta;
 			}
 
 			echo "<br><br>Löytyi $lask tuotetta.<br><br>";
@@ -553,11 +588,14 @@
 					if ($arvo != '') {
 						echo "<td align='right'>".sprintf("%.2f",$arvo)."</td>";
 					}
+					else {
+						echo "<td>&nbsp;</td>";
+					}
 				}
 				echo "</tr>";
 			}
 
-			echo "<tr><th>".t("Pvm")."</th><th>".t("Yhteensä")."</th><th>".t("Yhteensä")."</th></tr>";
+			echo "<tr><th>".t("Pvm")."</th><th colspan='2'>".t("Yhteensä")."</th></tr>";
 			echo "<tr><td>$vv-$kk-$pp</td><td align='right'>".sprintf("%.2f",$varvo)."</td>";
 			echo "<td align='right'>".sprintf("%.2f",$bvarvo)."</td></tr>";
 			echo "</table><br><br>";

@@ -1,5 +1,72 @@
 <?php
 
+
+function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
+	global $kukarow, $yhtiorow,$_FILES;
+	
+	// testausta varten staattinen
+	//$dirri = "kuvapankki";
+	$dirri = $yhtiorow['kuvapankki_polku'];
+	$dirri .= "/".$kukarow['yhtio'];
+	
+	
+	list($usec, $sec) = explode(" ",microtime());
+
+	$nimi      = $usec+$sec; // uniikki nimi
+	$resize    = ""; // resize komento
+	$crop      = ""; // crop komento
+	$upfileall = ""; // palautus
+	
+	$filetsu = $_FILES[$upfile1];
+	
+	$path_parts = pathinfo($filetsu["name"]);
+	$ext = strtolower($path_parts['extension']);	
+		
+	$image = getimagesize($filetsu[tmp_name],$imageinfo);	// l‰hetetty kuva
+		
+	$leve = $image[0];       
+
+	$kork = $image[1];
+		
+	if ($kork > $ykoko) {
+		// teh‰‰n pienent‰m‰ll‰
+		$upfilesgh = strtolower("/tmp/$nimi"."1.".$ext);
+	
+    	// skaalataan kuva oikenakokoiseksi
+	    exec("nice -n 20 convert -resize x$ykoko -quality 80 $filetsu[tmp_name] $upfilesgh");
+		$uusnimi = $dirri."/".$taulu."/".$type."/".$filetsu["name"];
+		
+		if (!copy($upfilesgh,$uusnimi)) {
+	    	echo "Kopiointi ep‰onnistui $upfile1<br>";
+			$upfileall = "";
+		}
+		else {
+			$upfileall .= "$uusnimi";
+		}
+		
+		$a = getimagesize($uusnimi);
+
+		$file["name"] 		= basename($uusnimi);
+		$file["type"] 		= $a["mime"];
+		$file["tmp_name"] 	= $uusnimi;
+		$file["error"] 		= 0;
+		$file["size"] 		= filesize($uusnimi);
+
+		$_FILES[$upfile1] = $file;
+	
+		// poistetaan file
+		system("rm -f $upfilesgh");
+	
+		
+	}
+	else {
+		$upfileall = "";
+	}
+	
+	return $upfileall;
+}
+
+
 	echo "<font class='head'>".t("Liitetiedostot")."</font><hr>";
 
 	if ($oikeurow['paivitys'] != '1') { // Saako p‰ivitt‰‰
@@ -51,7 +118,42 @@
 				echo $retval;
 			}
 			else {
-				tallenna_liite("userfile", $toim, $tunnus, $kuvaotsikko, $teetyyppi, 0, $liite_jarjestys);
+			
+				//	Onko meill‰ jokin kuvatyyppi?
+				list($type, $crap) = explode("/", $_FILES["userfile"]["type"]);
+				
+				$uusi_filu = "";
+				
+				//konvertoidaan kuva
+				if ($teetyyppi == "TK" and $type == "image") {	
+					$temp_file = $_FILES["userfile"];
+					
+					$uusi_filu = konvertoi(480,640,"normaali",$toim,"userfile");
+					tallenna_liite("userfile", $toim, $tunnus, $kuvaotsikko, $teetyyppi, 0, $liite_jarjestys);
+					if ($uusi_filu != "") {
+						system("rm -f \"$uusi_filu\"");
+					}
+					
+					$_FILES["userfile"] = $temp_file;
+					$uusi_filu = konvertoi(65,96,"thumb",$toim,"userfile");
+					
+					$teetyyppi = "TH";
+					tallenna_liite("userfile", $toim, $tunnus, $kuvaotsikko, $teetyyppi, 0, $liite_jarjestys);
+					if ($uusi_filu != "") {
+						system("rm -f \"$uusi_filu\"");
+					}
+				}
+				elseif ($teetyyppi == "TH" and $type == "image") {
+					$uusi_filu = konvertoi(65,96,"thumb",$toim,"userfile");
+					tallenna_liite("userfile", $toim, $tunnus, $kuvaotsikko, $teetyyppi, 0, $liite_jarjestys);
+					if ($uusi_filu != "") {
+						system("rm -f \"$uusi_filu\"");
+					}
+				}
+				else {
+					tallenna_liite("userfile", $toim, $tunnus, $kuvaotsikko, $teetyyppi, 0, $liite_jarjestys);
+				}				
+								
 			}
 			
 			$teekuva = "";

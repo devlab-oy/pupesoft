@@ -10,7 +10,7 @@
 	// $varataan_saldoa = varataanko saldoa
 	// $alv = alviprossa
 	// $varastosta = mist‰ varastosta myyd‰‰n
-	
+
 	if (!function_exists("tee_jt_tilaus")) {
 		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka = '', $tilaus_on_jo = '', $varastosta = '', $olpaikalta = '', $varataan_saldoa = '', $alv = '') {
 			global $yhtiorow, $kukarow, $toim;
@@ -21,21 +21,21 @@
 			else {
 				$lisavarattu = "";
 			}
-			
+
 			if ($loput[$tunnukset] == 'MITA') {
 				if ($toim == "ENNAKKO") {
 					$query = "	DELETE FROM tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]' 
-								and tunnus 	in ($tunnukset) 
-								and kpl		= 0 
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus 	in ($tunnukset)
+								and kpl		= 0
 								and tyyppi	= 'E'";
 				}
 				else {
 					$query = "	DELETE FROM tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]' 
-								and tunnus 	in ($tunnukset) 
-								and kpl		= 0 
-								and var		= 'J' 
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus 	in ($tunnukset)
+								and kpl		= 0
+								and var		= 'J'
 								and tyyppi in ('L','G')";
 				}
 				$tresult = mysql_query($query) or pupe_error($query);
@@ -48,7 +48,7 @@
 				if ($toim == "ENNAKKO") {
 					$query = "	SELECT tilausrivi.*, tuote.ei_saldoa, tilausrivin_lisatiedot.suoraan_laskutukseen
 								FROM tilausrivi use index (PRIMARY)
-								JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno								
+								JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.tunnus  = '$tunnusarray[0]'
@@ -59,7 +59,7 @@
 					$query = "	SELECT tilausrivi.*, tilausrivi.jt $lisavarattu jt, tuote.ei_saldoa, tilausrivin_lisatiedot.suoraan_laskutukseen
 								FROM tilausrivi use index (PRIMARY)
 								JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus								
+								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
 								WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
 								and tilausrivi.tunnus  			= '$tunnusarray[0]'
 								and tilausrivi.jt $lisavarattu	> 0
@@ -83,7 +83,7 @@
 					$query = "	SELECT *
 								FROM lasku
 								WHERE yhtio	= '$kukarow[yhtio]' and
-								tunnus		= '$kukarow[kesken]' and 
+								tunnus		= '$kukarow[kesken]' and
 								tila        in ('N', 'L', 'E', 'G')";
 					$stresult = mysql_query($query) or pupe_error($query);
 				}
@@ -305,6 +305,24 @@
 						elseif (mysql_field_name($stresult,$i)=='eilahetetta') {
 							$query .= "eilahetetta='".$isarivirow["suoraan_laskutukseen"]."',";
 						}
+						elseif (mysql_field_name($stresult,$i)=='rahtivapaa') {
+							if ($yhtiorow["jt_rahti"] == "B") {
+								// Ennakot/J‰lkitoimitukset ovat aina rahtivapaita
+								$query .= "rahtivapaa='o',";
+							}
+							elseif ($yhtiorow["jt_rahti"] == "C") {
+								// Ennakoihin/J‰lkitoimituksiin lis‰t‰‰n aina rahtikulu
+								$query .= "rahtivapaa='',";
+							}
+							elseif ($yhtiorow["jt_rahti"] == "D") {
+								// Ennakot/J‰lkitoimitukset ovat rahtivapaita, jos tilauksen arvo on yli rahtivapausrajan (tilaus-valmis.inc hoitaa rahtikulun kuntoon)
+								$query .= "rahtivapaa='',";
+							}
+							else {
+								// Ennakko/J‰lkitoimitus on rahtivapaa, jos alkuper‰inen tilaus oli rahtivapaa
+								$query .= "rahtivapaa='".$otsikkorivi[$i]."',";
+							}
+						}
 						// ja kaikki muut paitsi tunnus sellaisenaan
 						elseif (mysql_field_name($stresult,$i)!='tunnus') {
 							$query .= mysql_field_name($stresult,$i)."='".$otsikkorivi[$i]."',";
@@ -320,45 +338,47 @@
 
 				///* T‰ss‰ meill‰ on otsikko hallussa se on $id muuttujassa*///
 
-				// Jos yhtion rahtihinnoittelu tapahtuu alkuper‰isen tilausarvon mukaan, niin JT-tilauksiin ei en‰‰ laiteta rahtikulua uudestaan
-				// Eli lis‰t‰‰n rahtikulurivi-nollahintaisena
-				if ($yhtiorow["rahti_hinnoittelu"] != "") {
-
-					$query = "	SELECT *
-								FROM lasku
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND tunnus = '$id'";
-					$aresult = mysql_query($query) or pupe_error($query);
-					$laskurow = mysql_fetch_array($aresult);
-
-					$query = "	SELECT tunnus
-								from tilausrivi
-								where yhtio = '$kukarow[yhtio]'
-								and otunnus = '$laskurow[tunnus]'
-								and tuoteno = '$yhtiorow[rahti_tuotenumero]'";
-					$result = mysql_query($query) or pupe_error($query);
-
-					//jos tilauksella on jo rahtikulu niin ei lis‰t‰ sit‰ uudestaan
-					if (mysql_num_rows($result) == 0 and $laskurow["rahtivapaa"] == '') {
-
-						//lis‰t‰‰n rahtikulurivi
-						$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
-						$rhire = mysql_query($query) or pupe_error($query);
-						$trow  = mysql_fetch_array($rhire);
-
-						$hinta		= 0; // rahtihinta
-						$trow["alv"]= $laskurow["alv"];
-						$nimitys	= $laskurow["toimitustapa"];
-
-						list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
-
-						$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) 
-									values ('$hinta', 'N', '1', '1', '$laskurow[tunnus]', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
-						$addtil = mysql_query($query) or pupe_error($query);
-
-						if ($debug==1) echo t("Lis‰ttiin rahtikulu")." $otsikkorivi[nimi] $id<br>";
-					}
-				}
+// 				// Jos yhtion rahtihinnoittelu tapahtuu alkuper‰isen tilausarvon mukaan, niin JT-tilauksiin ei en‰‰ laiteta rahtikulua uudestaan
+// 				// Eli lis‰t‰‰n rahtikulurivi-nollahintaisena
+// 				if ($yhtiorow["rahti_hinnoittelu"] != "") {
+//
+// 					$query = "	SELECT *
+// 								FROM lasku
+// 								WHERE yhtio = '$kukarow[yhtio]'
+// 								AND tunnus = '$id'";
+// 					$aresult = mysql_query($query) or pupe_error($query);
+// 					$laskurow = mysql_fetch_array($aresult);
+//
+// 					$query = "	SELECT tunnus
+// 								from tilausrivi
+// 								where yhtio = '$kukarow[yhtio]'
+// 								and otunnus = '$laskurow[tunnus]'
+// 								and tuoteno = '$yhtiorow[rahti_tuotenumero]'";
+// 					$result = mysql_query($query) or pupe_error($query);
+//
+// // ($yhtiorow['jt_rahti'] == 'Y' and ($laskurow['summa'] < $asiakas_row['rahtivapaa_alarajasumma'] or $laskurow['summa'] < $yhtiorow['rahtivapaa_alarajasumma']))
+//
+// 					//jos tilauksella on jo rahtikulu niin ei lis‰t‰ sit‰ uudestaan
+// 					if (mysql_num_rows($result) == 0 and $laskurow['rahtivapaa'] == '') {
+//
+// 						//lis‰t‰‰n rahtikulurivi
+// 						$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
+// 						$rhire = mysql_query($query) or pupe_error($query);
+// 						$trow  = mysql_fetch_array($rhire);
+//
+// 						$hinta		= 0; // rahtihinta
+// 						$trow["alv"]= $laskurow["alv"];
+// 						$nimitys	= $laskurow["toimitustapa"];
+//
+// 						list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
+//
+// 						$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
+// 									values ('$hinta', 'N', '1', '1', '$laskurow[tunnus]', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
+// 						$addtil = mysql_query($query) or pupe_error($query);
+//
+// 						if ($debug==1) echo t("Lis‰ttiin rahtikulu")." $otsikkorivi[nimi] $id<br>";
+// 					}
+// 				}
 
 				// T‰ss‰ haarassa k‰ytt‰j‰ on syˆtt‰nyt jonkun kappalem‰‰r‰n
 				if ($kpl[$tunnukset] > 0 or $loput[$tunnukset] == 'KAIKKI') {
@@ -457,23 +477,23 @@
 							$perheid		 	= $lisataanrow["perheid"];
 							$perheid2		 	= $lisataanrow["perheid2"];
 							$kommentti		 	= trim($otsikkorivi['viesti']." ".$lisataanrow['kommentti']);
-							
-							$jtspec				= "JTSPEC";							
-							
+
+							$jtspec				= "JTSPEC";
+
 							// Tutkitaan onko t‰m‰ myyty ulkomaan alvilla
 							list(,,,$tsek_alehinta_alv,) = alehinta($laskurow, $trow, $kpl, '', '', '');
 
 							if ($tsek_alehinta_alv > 0) {
 								$trow["alv"] = $tsek_alehinta_alv;
 							}
-							
+
 							if ($yhtiorow["alv_kasittely"] == "" and $trow["alv"] != $lisataanrow["alv"] and $lisataanrow["alv"] < 500) {
 								$hinta 			= sprintf('%.2f',round($lisataanrow["hinta"] / (1+$lisataanrow['alv']/100) * (1+$trow["alv"]/100), $yhtiorow['hintapyoristys']));
 							}
 							else {
 								$hinta			= $lisataanrow["hinta"];
 							}
-							
+
 							if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 								$hinta 			= laskuval($hinta, $laskurow["vienti_kurssi"]);
 							}
@@ -589,7 +609,7 @@
 
 										$kysely  = substr($kysely, 0, -1);
 										$kysely .= " WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus='$lisrow[tunnus]'";
-										$insres2 = mysql_query($kysely) or pupe_error($kysely);										
+										$insres2 = mysql_query($kysely) or pupe_error($kysely);
 									}
 								}
 

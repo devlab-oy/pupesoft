@@ -125,14 +125,14 @@
 
 	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'TOIMITA') {
 		if ($toim == "ENNAKKO") {
-			$query  = "	select *
+			$query  = "	SELECT *
 						from lasku
 						where yhtio='$kukarow[yhtio]'
 						and laatija='$kukarow[kuka]'
 						and alatila='E' and tila='N'";
 		}
 		else {
-			$query  = "	select *
+			$query  = "	SELECT *
 						from lasku
 						where yhtio='$kukarow[yhtio]'
 						and laatija='$kukarow[kuka]'
@@ -176,6 +176,7 @@
 				$vanhatoim = "";
 			}
 			else {
+				$mista = "jtselaus";
 				require("tilaus-valmis.inc");
 			}
 			

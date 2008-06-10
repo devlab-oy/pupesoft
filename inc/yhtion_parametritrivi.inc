@@ -1579,4 +1579,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "jt_rahti") {
+		
+		$ulos = "<td><select name='$nimi'>";
+		
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = 'A' $sel[A]>".t("Ennakko/J‰lkitoimitus on rahtivapaa, jos alkuper‰inen tilaus oli rahtivapaa")."</option>";
+		$ulos .= "<option value = 'B' $sel[B]>".t("Ennakot/J‰lkitoimitukset ovat aina rahtivapaita")."</option>";
+		$ulos .= "<option value = 'C' $sel[C]>".t("Ennakoihin/J‰lkitoimituksiin lis‰t‰‰n aina rahtikulu")."</option>";
+		$ulos .= "<option value = 'D' $sel[D]>".t("Ennakot/J‰lkitoimitukset ovat rahtivapaita, jos tilauksen arvo on yli rahtivapausrajan")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 ?>

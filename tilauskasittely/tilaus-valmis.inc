@@ -379,19 +379,35 @@ else {
 						$hirow["rahtihinta"] = 0;
 					}
 
-					$as_que = "SELECT rahtivapaa_alarajasumma FROM asiakas WHERE yhtio='$kukarow[yhtio]' AND tunnus='$laskurow[liitostunnus]'";
-					$as_res = mysql_query($as_que) or pupe_error($as_que);
+					// jos halutaan rahtikulu, katotaan saadaanko siltikin ilmaseks jos ollaan yli rajojen
+					if ($laskurow["rahtivapaa"] == "" or ($mista == 'jtselaus' and $yhtiorow["jt_rahti"] == "D")) {
+						$as_que = "SELECT rahtivapaa_alarajasumma FROM asiakas WHERE yhtio='$kukarow[yhtio]' AND tunnus='$laskurow[liitostunnus]' and rahtivapaa_alarajasumma > 0";
+						$as_res = mysql_query($as_que) or pupe_error($as_que);
 
-					if (mysql_num_rows($as_res) > 0) {
-						$as_row = mysql_fetch_array($as_res);
+						if (mysql_num_rows($as_res) > 0) {
+							$as_row = mysql_fetch_array($as_res);
 
-						if (($kyht > $as_row["rahtivapaa_alarajasumma"] and $as_row["rahtivapaa_alarajasumma"] != 0) or ($kyht > $yhtiorow["rahtivapaa_alarajasumma"] and $yhtiorow["rahtivapaa_alarajasumma"] != 0)) {
-							$hirow = array();
-							$hirow["rahtihinta"] = 0;
+							if ($kyht > $as_row["rahtivapaa_alarajasumma"]) {
+								$hirow = array();
+								$hirow["rahtihinta"] = 0;
 							
-							$query = "UPDATE lasku SET rahtivapaa='o' WHERE yhtio='$kukarow[yhtio]' AND tunnus='$laskurow[tunnus]'";
-							$rahtivapres = mysql_query($query) or pupe_error($query);
+								$query = "UPDATE lasku SET rahtivapaa='o' WHERE yhtio='$kukarow[yhtio]' AND tunnus='$laskurow[tunnus]'";
+								$rahtivapres = mysql_query($query) or pupe_error($query);
+							}
 						}
+						else {
+							if ($kyht > $yhtiorow["rahtivapaa_alarajasumma"] and $yhtiorow["rahtivapaa_alarajasumma"] != 0) {
+								$hirow = array();
+								$hirow["rahtihinta"] = 0;
+							
+								$query = "UPDATE lasku SET rahtivapaa='o' WHERE yhtio='$kukarow[yhtio]' AND tunnus='$laskurow[tunnus]'";
+								$rahtivapres = mysql_query($query) or pupe_error($query);
+							}
+						}
+					}
+					else {
+						$hirow = array();
+						$hirow["rahtihinta"] = 0;
 					}
 
 					//lis‰t‰‰n rahtikulurivi vain jos rahtikulu on erisuuri kuin nolla, nollarivej‰ on ilmeisesti turha llis‰t‰

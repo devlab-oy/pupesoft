@@ -1200,7 +1200,7 @@
 
 			if ($historia == "") $historia=1;
 			$chk[$historia] = "SELECTED";
-
+			
 			echo "<input type='hidden' name='tee' value='Z'>";
 			echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 
@@ -1210,8 +1210,18 @@
 			echo "<th colspan='4'>".t("Näytä tapahtumat").":";
 			echo "<select name='historia' onchange='submit();'>'";
 			echo "<option value='1' $chk[1]> ".t("20 viimeisintä")."</option>";
-			echo "<option value='2' $chk[2]> ".t("Tilivuoden alusta")."</option>";
-			echo "<option value='3' $chk[3]> ".t("Edellinen tilivuosi")."</option>";
+			
+			$query = "SELECT * FROM tilikaudet WHERE yhtio = '$kukarow[yhtio]' ORDER BY tilikausi_loppu DESC";
+			$tkresult = mysql_query($query) or pupe_error($query);
+			
+			while ($tkrow = mysql_fetch_array($tkresult)) {
+				$tkchk = "";
+				if ($historia == "TK".$tkrow["tunnus"]) {
+					$tkchk = "SELECTED";
+				}
+				echo "<option value='TK".$tkrow["tunnus"]."' $tkchk> ".t("Tilikausi")." ".$tkrow["tilikausi_alku"]." --> ".$tkrow["tilikausi_loppu"]."</option>";
+			}
+			
 			echo "<option value='4' $chk[4]> ".t("Kaikki tapahtumat")."</option>";			
 			echo "</select>";
 
@@ -1273,17 +1283,17 @@
 			echo "</tr>";
 
 			//tapahtumat
-			if ($historia == '2') {
-				$maara = "";
-				$ehto  = " and tapahtuma.laadittu > '$yhtiorow[tilikausi_alku]' ";
-			}
-			elseif ($historia == '3') {
-				$maara = "";
-				$ehto  = " and tapahtuma.laadittu >= date_sub('$yhtiorow[tilikausi_alku]', interval 12 month) and tapahtuma.laadittu <= '$yhtiorow[tilikausi_alku]' ";
-			}
-			elseif ($historia == '4') {
+			if ($historia == '4') {
 				$maara = "";
 				$ehto  = "";
+			}
+			elseif (strpos($historia,'TK') !== FALSE) {
+				$query = "SELECT tilikausi_alku, tilikausi_loppu FROM tilikaudet WHERE yhtio = '$kukarow[yhtio]' and tunnus = '".substr($historia,2)."'";
+				$tkresult = mysql_query($query) or pupe_error($query);
+				$tkrow = mysql_fetch_array($tkresult);
+				
+				$maara = "";
+				$ehto  = " and tapahtuma.laadittu >= '$tkrow[tilikausi_alku]' and tapahtuma.laadittu <= '$tkrow[tilikausi_loppu]' ";
 			}
 			else {
 				$maara = "LIMIT 20";

@@ -361,7 +361,7 @@
 				$salisa = " and lasku.valkoodi='$savalkoodi' ";
 			}
 
-			$selectit = "	laskunro, tapvm, erpcm, summa-saldo_maksettu summa, summa_valuutassa-saldo_maksettu_valuutassa summa_valuutassa, kapvm, kasumma, kasumma_valuutassa, mapvm,
+			$selectit = "	laskunro, tapvm, erpcm, summa-pyoristys-saldo_maksettu summa, summa_valuutassa-pyoristys_valuutassa-saldo_maksettu_valuutassa summa_valuutassa, kapvm, kasumma, kasumma_valuutassa, mapvm,
 								TO_DAYS(mapvm) - TO_DAYS(erpcm) ika, viikorkoeur korko, olmapvm korkolaspvm, lasku.tunnus, saldo_maksettu, saldo_maksettu_valuutassa, valkoodi" ;
 
 			$query = "	SELECT

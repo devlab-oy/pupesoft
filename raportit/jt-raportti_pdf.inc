@@ -149,8 +149,8 @@ if (!function_exists('print_pdf')) {
 //		debuggaus-echo
 //		echo t("Luettelo tulostuu")."...$asiakasrow[nimi]\n";
 
-//		$kukarow["eposti"] = $asiakasrow["email"];
-		$kukarow["eposti"] = "tomi@arwidson.fi";
+		$kukarow["eposti"] = $asiakasrow["email"];
+//		$kukarow["eposti"] = "tomi@arwidson.fi";
 		require("../inc/sahkoposti.inc");
 
 		//poistetaan tmp file samantien kuleksimasta...

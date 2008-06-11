@@ -79,12 +79,12 @@ $result = mysql_query($query) or pupe_error($query);
 if (mysql_num_rows($result) > 1) {
 
 	// jos ollaan tulossa loginista, valitaan oletussovellus...
-	if (isset($go) and $go != "") {
+	if (isset($goso) and $goso != "") {
 		$query = "	SELECT sovellus
 					FROM oikeu use index (oikeudet_index) 
 					WHERE yhtio = '$kukarow[yhtio]' and 
-					kuka = '$kukarow[kuka]' and 
-					nimi = '$go' 
+					kuka = '$kukarow[kuka]' and
+					sovellus = '$goso'
 					ORDER BY sovellus, jarjestys 
 					LIMIT 1";
 		$gores = mysql_query($query) or pupe_error($query);

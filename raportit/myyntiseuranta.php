@@ -850,7 +850,7 @@
 					$query .= " ) ";
 				}
 				elseif ($ajotapa == 'tilausauki') {
-					$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U')
+					$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
 								and ((lasku.luontiaika >= '$lalku 00:00:00'  and lasku.luontiaika <= '$lloppu 23:59:59') ";
 
 					if ($piiloed == "") {
@@ -886,7 +886,10 @@
 				
 				// ja sitten ajetaan itte query
 				if ($query != "") {
-
+					
+					//echo "<pre>$query</pre><br>";
+					
+					
 					$result = mysql_query($query) or pupe_error($query);
 
 					$rivilimitti = 1000;

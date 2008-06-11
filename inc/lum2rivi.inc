@@ -38,7 +38,7 @@
 
 		//print "<pre>";
 
-		$ohjeitapankille = str_replace("\n", "", trim($ohjeitapankille));
+		$ohjeitapankille = str_replace(array("\n", "\r", "\t"), " ", trim($ohjeitapankille));
 
 		$ulos = "LUM2L0";
 		$ulos .= sprintf ('%011d', '0');

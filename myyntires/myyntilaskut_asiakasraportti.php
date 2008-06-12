@@ -2,8 +2,15 @@
 
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	$useslave = 1;
-
+	
+	if (isset($tiliote) and $tiliote==1) $nayta_pdf = 1;
+	
 	require ("../inc/parametrit.inc");
+
+	if (isset($tiliote) and $tiliote==1) {
+		require('paperitiliote.php');
+		exit;
+	}
 
 	/* visuaalinen esitys maksunopeudesta (hymynaama) */
 	/* palauttaa listan arvoja, joissa ensimmäisessä on
@@ -218,7 +225,7 @@
 				}
 			}
 
-			mysql_data_seek($result,0);
+			if (mysql_num_rows($result) > 0) mysql_data_seek($result,0);
 			echo "
 				<tr>
 				<th rowspan='$riveja'>$asiakasrow[osoite]</td>
@@ -313,8 +320,12 @@
 			//visuaalinen esitys maksunopeudesta (hymynaama)
 			list ($naama, $nopeushtml) = laskeMaksunopeus($ytunnus, $kukarow["yhtio"]);
 
-			echo "<br>$naama<br>$nopeushtml";
-			echo "</td></tr></table><br>";
+			echo "<br>$naama<br>$nopeushtml</td>";
+			echo "<form action=''><td class='back'>
+			<input type='hidden' name = 'tiliote' value='1'>
+			<input type='hidden' name = 'ytunnus' value='$ytunnus'>
+			<input type='submit' value='".t("Tulosta tiliote")."'></td></form>";
+			echo "</tr></table><br>";
 
 			//avoimet laskut
 			$kentat = 'laskunro, tapvm, erpcm, summa, kapvm, kasumma, mapvm, ika, viikorkoeur, olmapvm, tunnus';

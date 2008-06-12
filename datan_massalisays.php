@@ -134,7 +134,9 @@ if ($tee == 'GO') {
 			$path_parts = pathinfo($kuva);
 			$ext = $path_parts['extension'];
 	
-			if ($toiminto == 'kasittele' and strtoupper($ext) != "PDF") {
+			list($mtype, $crap) = explode("/", $size["mime"]);					
+	
+			if ($toiminto == 'kasittele' and $mtype == "image") {
 				if (file_exists($file)) {
 					$thumbi = konvertoi($thumbkork,$thumbleve,'thumb',$taulu,$kuva,$dirri,$file);
 					if ($thumbi != '') {
@@ -171,6 +173,7 @@ if ($tee == 'GO') {
 		$ext = $path_parts['extension'];
 		
 		$koko = getimagesize($file);
+		$filetype = $koko["mime"];
 		$leve = $koko[0];       
 		$kork = $koko[1];
 		
@@ -189,7 +192,6 @@ if ($tee == 'GO') {
 				continue;
 			}
 		}
-		
 		
 		$apukuva = $kuva; 
 		
@@ -238,14 +240,6 @@ if ($tee == 'GO') {
 		}
 		
 		if (file_exists($file)) {
-			
-			$mime = 'application/octet-stream';
-			if (strtoupper($ext) == "GIF") $mime = "image/gif";
-			if (strtoupper($ext) == "JPG") $mime = "image/jpeg";
-			if (strtoupper($ext) == "PNG") $mime = "image/png";
-			if (strtoupper($ext) == "PDF") $mime = "application/pdf";
-			
-			$filetype = $mime;
 			$filesize = filesize($file);
 			
 			$query = "show variables like 'max_allowed_packet'";
@@ -265,6 +259,7 @@ if ($tee == 'GO') {
 			}
 			
 			$size = getimagesize($file);
+			
 			list($mtype, $crap) = explode("/", $size["mime"]);					
 			if($mtype == "image") {
 				$image_width 	= $size[0];
@@ -309,10 +304,10 @@ if ($tee == 'GO') {
 					
 					$kuvaselite = "Tuotekuva";
 					
-					if ($toiminto == 'thumb') {
+					if ($toiminto == 'TH') {
 						$kuvaselite .= " pieni";
 					}
-					elseif ($toiminto == 'normaali') {
+					elseif ($toiminto == 'TK') {
 						$kuvaselite .= " normaali";
 					}
 					

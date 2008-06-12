@@ -449,7 +449,8 @@
 				$query = "	SELECT maksupositio.*, round(osuus,0) osuus, maksuehto.teksti
 							FROM maksupositio
 							LEFT JOIN maksuehto on maksuehto.yhtio=maksupositio.yhtio and maksuehto.tunnus=maksupositio.maksuehto
-							WHERE maksupositio.yhtio = '$kukarow[yhtio]' and otunnus = $laskurow[jaksotettu]";
+							WHERE maksupositio.yhtio = '$kukarow[yhtio]' and otunnus = $laskurow[jaksotettu]
+							ORDER BY maksupositio.tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 				if(mysql_num_rows($result)>0) {
 

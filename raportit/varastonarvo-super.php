@@ -163,7 +163,8 @@
 						tuote.sarjanumeroseuranta,
 						group_concat(tuotepaikat.tunnus) paikkatun,
 						group_concat(varastopaikat.nimitys) varastot,
-						varastopaikat.nimitys,
+						varastopaikat.nimitys varastonnimi,
+						tuote.nimitys,
 						tuote.vihapvm, 
 						$saldolisa
 						FROM tuote
@@ -558,8 +559,8 @@
 						$excelsarake = 0;
 					}
 
-					$varastot2[$row["nimitys"]]["netto"] += $muutoshinta;
-					$varastot2[$row["nimitys"]]["brutto"] += $bmuutoshinta;
+					$varastot2[$row["varastonnimi"]]["netto"] += $muutoshinta;
+					$varastot2[$row["varastonnimi"]]["brutto"] += $bmuutoshinta;
 				}
 			}
 

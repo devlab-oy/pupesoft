@@ -753,7 +753,7 @@ if($tee == "TUO_KALENTERISTA") {
 			$tres = mysql_query($query) or pupe_error($query);
 			if(mysql_num_rows($tres)>0) {
 				$trow = mysql_fetch_array($tres);
-				$errori=lisaa_paivaraha($tilausnumero, $trow["tuoteno"], $row["pvmalku"], $row["pvmloppu"], "Asiakas: $row[asiakas]\nTapahtuma: {$row[tapa]}", "", "", "");
+				$errori=lisaa_paivaraha($tilausnumero, $perheid, $perheid2, $trow["tuoteno"], $row["pvmalku"], $row["pvmloppu"], "Asiakas: $row[asiakas]\nTapahtuma: {$row[tapa]}", "", "", "");
 
 				if($errori == "") {
 					$query = "	UPDATE kalenteri SET
@@ -1182,61 +1182,63 @@ if ($tee == "MUOKKAA") {
 				$laskurow["tila"] == "H" and $laskurow["hyvaksyja_nyt"] == $kukarow["kuka"] or
 				($toim == "SUPER" and strtotime($laskurow["tapvm"]) > strtotime($yhtiorow["tilikausi_alku"]) and strtotime($laskurow["tapvm"]) < strtotime($yhtiorow["tilikausi_loppu"])) 
 			) {
-
-			// t‰ss‰ alotellaan koko formi.. t‰m‰ pit‰‰ kirjottaa aina
-			echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off' enctype='multipart/form-data'>
-					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-					<input type='hidden' name='tee' value='TALLENNA'>
-					<input type='hidden' name='lopetus' value='$lopetus'>
-					<input type='hidden' name='toim' value='$toim'>";
-
-			if($laskurow["tilaustyyppi"] == "M") {
-				echo "	<tr><th>".t("Viite")."</th>
-						<td><input type='text' size='30' name='viesti' value='{$laskurow["viite"]}'></td></tr>";
 				
-			}
-			else {
-				echo "	<tr><th>".t("Viite")."</th>
-						<td>{$laskurow["viite"]}</td></tr>";
-			}
-			echo "<tr>";
-			echo "<th align='left'>".t("Kuittikopiot").":</th>";
+			if($rivitunnus == "") {
+				// t‰ss‰ alotellaan koko formi.. t‰m‰ pit‰‰ kirjottaa aina
+				echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off' enctype='multipart/form-data'>
+						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+						<input type='hidden' name='tee' value='TALLENNA'>
+						<input type='hidden' name='lopetus' value='$lopetus'>
+						<input type='hidden' name='toim' value='$toim'>";
 
-			echo "<td>";
+				if($laskurow["tilaustyyppi"] == "M") {
+					echo "	<tr><th>".t("Viite")."</th>
+							<td><input type='text' size='30' name='viesti' value='{$laskurow["viite"]}'></td></tr>";
 
-			$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='$tilausnumero'";
-			$liiteres=mysql_query($query) or pupe_error($query);
-			if (mysql_num_rows($liiteres)>0) {
-				while ($liiterow=mysql_fetch_array($liiteres)) {
-					if ($laskurow["hyvaksyja_nyt"] == $kukarow["kuka"]) {
-						$lisa = "&nbsp;&nbsp;&nbsp;&nbsp;<a href='matkalasku.php?tee=$tee&tilausnumero=$tilausnumero&poistakuva={$liiterow["tunnus"]}'>*".t("poista")."*</a>";
-					}
-					else {
-						$lisa = "";
-					}
-					echo "<a href='$PHP_SELF?tee=$tee&tilausnumero=$tilausnumero&id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a>$lisa <br>\n";
 				}
+				else {
+					echo "	<tr><th>".t("Viite")."</th>
+							<td>{$laskurow["viite"]}</td></tr>";
+				}
+				echo "<tr>";
+				echo "<th align='left'>".t("Kuittikopiot").":</th>";
+
+				echo "<td>";
+
+				$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='$tilausnumero'";
+				$liiteres=mysql_query($query) or pupe_error($query);
+				if (mysql_num_rows($liiteres)>0) {
+					while ($liiterow=mysql_fetch_array($liiteres)) {
+						if ($laskurow["hyvaksyja_nyt"] == $kukarow["kuka"]) {
+							$lisa = "&nbsp;&nbsp;&nbsp;&nbsp;<a href='matkalasku.php?tee=$tee&tilausnumero=$tilausnumero&poistakuva={$liiterow["tunnus"]}'>*".t("poista")."*</a>";
+						}
+						else {
+							$lisa = "";
+						}
+						echo "<a href='$PHP_SELF?tee=$tee&tilausnumero=$tilausnumero&id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a>$lisa <br>\n";
+					}
+				}
+
+				echo "</td></tr>";
+
+				echo "	<tr>
+							<td class='back' colspan='2'><br></td>
+						</tr>
+						<tr>
+							<td class='back' colspan='2'><font class='message'>".t("Liit‰ kuittikopio")."</font></td>
+						</tr>
+
+						<tr>
+							<th>".t("Kuvan selite")."</th><th>".t("Tiedosto")."</th>
+						</tr>
+						<tr>
+							<td><input type='text' name='kuvaselite' value='$kuvaselite'></td>
+							<td><input name='userfile' type='file' onchange='submit();'></td>
+							<td class='back'><input type='submit' value='".t("Tallenna")."'</td>
+						</tr>";
+				echo "</form>
+						</table><br>";				
 			}
-
-			echo "</td></tr>";
-
-			echo "	<tr>
-						<td class='back' colspan='2'><br></td>
-					</tr>
-					<tr>
-						<td class='back' colspan='2'><font class='message'>".t("Liit‰ kuittikopio")."</font></td>
-					</tr>
-
-					<tr>
-						<th>".t("Kuvan selite")."</th><th>".t("Tiedosto")."</th>
-					</tr>
-					<tr>
-						<td><input type='text' name='kuvaselite' value='$kuvaselite'></td>
-						<td><input name='userfile' type='file' onchange='submit();'></td>
-						<td class='back'><input type='submit' value='".t("Tallenna")."'</td>
-					</tr>";
-			echo "</form>
-					</table><br>";
 
 			echo "<table>";
 			
@@ -1303,6 +1305,18 @@ if ($tee == "MUOKKAA") {
 						$valinta = "<select name='tuoteno' $extra onchange=\"$onchange\"><option value=''>".t("Lis‰‰ $tyyppi_nimi")."</option>";
 
 						while ($trow=mysql_fetch_array($tres)) {
+							
+							if($kukarow["kieli"] == "en") {
+								$query = "	SELECT selite
+											FROM tuotteen_avainsanat
+											WHERE yhtio = '$kukarow[yhtio]' and laji = 'nimitys_en' and tuoteno = '$trow[tuoteno]'";
+								$res = mysql_query($query) or pupe_error($query);
+								if(mysql_num_rows($res) > 0) {
+									$r = mysql_fetch_array($res);
+									$trow["nimitys"] = $r["selite"];
+								}					
+							}
+							
 							if ($trow["tuoteno"] == $tuoteno) {
 								$sel="selected";
 							}
@@ -1602,6 +1616,17 @@ if ($tee == "MUOKKAA") {
 			$summa=0;
 			while ($row=mysql_fetch_array($result)) {
 			
+				if($kukarow["kieli"] == "en") {
+					$query = "	SELECT selite
+								FROM tuotteen_avainsanat
+								WHERE yhtio = '$kukarow[yhtio]' and laji = 'nimitys_en' and tuoteno = '$row[tuoteno]'";
+					$res = mysql_query($query) or pupe_error($query);
+					if(mysql_num_rows($res) > 0) {
+						$r = mysql_fetch_array($res);
+						$row["nimitys"] = $r["selite"];
+					}					
+				}
+				
 				if (($row["perhe"] != $edperhe) and $eka != "joo" and $row["perheid2"] == $edperheid2) {
 					echo "<tr><td class='back' colspan = '5' height='10' style='border-right: 1px solid;'></td></tr>";
 				}
@@ -1706,7 +1731,7 @@ if ($tee == "MUOKKAA") {
 							else {
 								$sel="";
 							}
-							
+														
 							$valinta .= "<option value='$trow[tuoteno]' $sel>$trow[nimitys]</option>";
 
 						}
@@ -1858,19 +1883,15 @@ if ($tee == "MUOKKAA") {
 		else {
 			echo "	<tr><td class='back'><br></td></tr>
 					<tr>";
-			if($kuluriveja == 0) {
-				echo "	<td class='back' align='left'>
-							<form name='palaa' action='$PHP_SELF' method='post'>
-							<input type = 'hidden' name='tee' value = 'TUO_KALENTERISTA'>
-							<input type = 'hidden' name='tilausnumero' value = '$tilausnumero'>
-							<input type='submit' value='".t("Tuo kalenterista")."'>
-							</form>
-						</td>
-						<td colspan='3' class='back' align='right'></td>";
-			}
-			else {
-				echo "	<td colspan='4' class='back' align='right'></td>";					
-			}
+
+			echo "	<td class='back' align='left'>
+						<form name='palaa' action='$PHP_SELF' method='post'>
+						<input type = 'hidden' name='tee' value = 'TUO_KALENTERISTA'>
+						<input type = 'hidden' name='tilausnumero' value = '$tilausnumero'>
+						<input type='submit' value='".t("Tuo kalenterista")."'>
+						</form>
+					</td>
+					<td colspan='3' class='back' align='right'></td>";
 			
 			if($lopetus != "") {
 				echo "<form name='palaa' action='".urldecode($lopetus)."' method='post'>

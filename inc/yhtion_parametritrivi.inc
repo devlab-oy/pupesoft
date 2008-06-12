@@ -217,18 +217,15 @@
 
 		$ulos = "<td><select name='$nimi'>";
 
-		$sel1="";
-		$sel2="";
-
-		if ($trow[$i] == "") {
-			$sel1 = "selected";
+		$sel = array();
+		if ($trow[$i] == '') {
+			$trow[$i] = 'A';
 		}
-		else {
-			$sel2 = "selected";
-		}
+		$sel[$trow[$i]] = "selected";
 
-		$ulos .= "<option value='' $sel1>".t("Rahtikulu muodostuu painon perusteella")."</option>";
-		$ulos .= "<option value='o' $sel2>".t("Rahtikulu muodostuu tilauksen hinnan perusteella")."</option>";
+		$ulos .= "<option value=''  $sel[A]>".t("Rahtikulu muodostuu painon perusteella")."</option>";
+		$ulos .= "<option value='o' $sel[o]>".t("Rahtikulu muodostuu tilauksen hinnan perusteella")."</option>";
+		$ulos .= "<option value='P' $sel[P]>".t("Rahtikulu muodostuu tuotteilta löytyvien painojen mukaan automaattisesti")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

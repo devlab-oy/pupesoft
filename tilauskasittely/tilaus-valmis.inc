@@ -301,7 +301,7 @@ else {
 		//tässä käydään läpi vähän näitä rahtijuttuja
 		//jos rahtihinnoittelu tapahtuu tilauksen hinnan (alviton) perusteella niin tehdään se tässä
 		//tämä olkoon hyvä arvaus rahtihinnasta, sitä voidaan sitten myöhemmin tarkentaa
-		if ($yhtiorow["rahti_hinnoittelu"] != "") {
+		if ($yhtiorow["rahti_hinnoittelu"] == "o") {
 
 			$query = "	select tunnus
 						from tilausrivi

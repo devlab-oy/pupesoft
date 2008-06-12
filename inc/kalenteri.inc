@@ -1589,7 +1589,6 @@
 					}
 					
 					//	melkosta..
-					if(preg_match_all("//"))
 					$header  = "From: <$yhtiorow[postittaja_email]>\n";
 					$header .= "MIME-Version: 1.0\n" ;
 					$content .= "Content-Type: text/plain; charset=\"iso-8859-1\"\n";
@@ -1638,6 +1637,18 @@
 					}
 					else {
 						$msg = "Tyyppi: ".t($tyyppi)."\n";
+					}
+					
+					
+					if($henkilo > 0) {
+						$query = "	SELECT *
+									FROM yhteyshenkilo
+									WHERE yhtio='$kukarow[yhtio]' and tyyppi = 'A' and tunnus = '$henkilo'";
+						$kres = mysql_query($query) or pupe_error($query);
+						if(mysql_num_rows($kres) > 0) {
+							$krow = mysql_fetch_array($kres);
+							$msg .= "Yhteyshenkilö: {$krow["nimi"]}\n";
+						}
 					}
 					
 					$msg .= "Tapahtuma-aika: ";

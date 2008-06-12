@@ -315,7 +315,7 @@ if($tee == "NAYTA") {
 							date_format(lasku.luontiaika, '%d.%m. %Y') avattu,
 						versio.tunnus tunnus, versio.luontiaika,
 							concat_ws(' ',versio.nimi, versio.nimitark) asiakas, 
-							DATEDIFF(versio.luontiaika, date_sub(now(), INTERVAL lasku.olmapvm day)) pva, 
+							DATEDIFF(versio.olmapvm, now()) pva, 
 							date_format(versio.luontiaika, '%d.%m. %Y') avattu_versio,
 							date_format((select min(kerayspvm) from lasku l where l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu and l.tila IN ($laskutilat) and alatila != 'X'), '%d.%m. %Y') seuraava,
 							datediff((select min(kerayspvm) from lasku l where l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu and l.tila IN ($laskutilat) and alatila != 'X'), now()) seuraava_aika,							
@@ -686,8 +686,10 @@ if($tee == "NAYTA") {
 			$data["tiedot"]["menut"]["toiminnot"][] = array("TEKSTI" => "Kuittaa valmiiksi", "HREF" => "tilaushakukone.php?toim=$toim&setti=$setti&tarjous=$tarjous&tee=MERKKAAPROJEKTIVALMIIKSI&hakupalkki=OHI&aja_kysely=tmpquery", "TARGET" => "page");
 		}
 	}
+	elseif($laskurow["tila"] == "T" and in_array($laskurow["alatila"], array("", "A"))) {
+		$data["tiedot"]["menut"]["toiminnot"][] = array("TEKSTI" => "Mitätöi tarjous", "HREF" => "tilaushakukone.php?toim=$toim&setti=$setti&tarjous=$tarjous&tee=HYLKAATARJOUS", "TARGET" => "page");
+	}
 	
-	$menu[]	= array("VALI" => "Toiminnot");
 	$menu[] = array("TEKSTI" => "Muokkaa liitteitä", "HREF" => "../liitetiedostot.php?liitos=lasku&id=$tarjous&lopetus=".urlencode("raportit/tilaushakukone.php?toim=$toim&setti=$setti&hakukysely=$hakukysely&hakupalkki=OHI&aja_kysely=tmpquery&tarjous=$tarjous"), "TARGET" => "page");
 	
 	$data["tiedot"]["menut"][] = tee_menu($menu, "<font class='$class'>".t("Liitetiedostot")."</font>");
@@ -759,7 +761,7 @@ if($tee == "") {
 				$alatila		= array("A", "B", "C", "D", "E", "V", "J", "F", "T", "U");
 			}
 			elseif($toim == "TARJOUSHAKUKONE") {
-				$alatila		= array("", "B");
+				$alatila		= array("", "A");
 			}
 			$laatija			= array($kukarow["kuka"]);
 			$hakupalkki 		= "mini";
@@ -1422,7 +1424,7 @@ if($tee == "") {
 		$c = count($group);
 	}
 	elseif($toim == "TARJOUSHAKUKONE") {
-		$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws(' ',versio.nimi, versio.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, $summa Yhteensä, if(versio.alatila IN ('', 'A'), DATEDIFF(versio.luontiaika, date_sub(now(), INTERVAL lasku.olmapvm day)), '') pva,";
+		$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws(' ',versio.nimi, versio.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, $summa Yhteensä, if(versio.alatila IN ('', 'A'), DATEDIFF(versio.olmapvm, now()), '') pva,";
 		$c = 6;
 	}
 	elseif($toim == "TILAUSHAKUKONE") {

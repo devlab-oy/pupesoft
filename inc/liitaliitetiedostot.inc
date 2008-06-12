@@ -22,7 +22,7 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
 	$path_parts = pathinfo($filetsu["name"]);
 	$ext = strtolower($path_parts['extension']);	
 		
-	$image = getimagesize($filetsu[tmp_name],$imageinfo);	// lähetetty kuva
+	$image = getimagesize($filetsu["tmp_name"],$imageinfo);	// lähetetty kuva
 		
 	$leve = $image[0];       
 

@@ -21,7 +21,7 @@ if ($tila == 'K') {
 
 	$query = "	SELECT lasku.*, tiliointi.ltunnus, tiliointi.tilino, tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti
 				FROM lasku
-				JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.tapvm = lasku.tapvm 
+				JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.tapvm = lasku.tapvm and tiliointi.korjattu = ''
 				AND tiliointi.tilino NOT IN ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[alv]'))
 				WHERE lasku.yhtio		= '$kukarow[yhtio]'
 				AND lasku.mapvm			= '0000-00-00'

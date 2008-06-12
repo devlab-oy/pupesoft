@@ -370,7 +370,24 @@ if (!function_exists('tulosta_tarjous')) {
 			$h-=$pdf->ln(2.25);
 			$nb=$pdf->countParagraphHeight($laskurow["sisviesti1"], "norm");
 			$pdf->write($h, $nb, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
-			$h-=$pdf->ln($nb+3);
+			$h-=$pdf->ln($nb+2);
+		}
+
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' and laji='TV_LISATIETO' and kieli = '$kieli'";
+		$result = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($result) > 0) {
+			$lrow = mysql_fetch_array($result);
+			
+			$nb=$pdf->countParagraphHeight($lrow["selitetark"], "norm");
+			$pdf->write($h, $nb, 0, 0, $lrow["selitetark"], "norm", "L", "I");
+			$h-=$pdf->ln($nb+2);
+		}			
+
+		if($h < 40) {
+			$pdf = alku($pdf, $laskurow,$kieli);
+			$h = 210;
 		}
 
 		if($h < 60) {

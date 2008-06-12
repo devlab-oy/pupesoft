@@ -433,6 +433,18 @@
 					$h-=$pdf->ln($nb+2);
 				}
 				
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]' and laji='TV_LISATIETO' and kieli = '$kieli'";
+				$result = mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($result) > 0) {
+					$lrow = mysql_fetch_array($result);
+
+					$nb=$pdf->countParagraphHeight($lrow["selitetark"], "norm");
+					$pdf->write($h, $nb, 0, 0, $lrow["selitetark"], "norm", "L", "I");
+					$h-=$pdf->ln($nb+2);
+				}			
+				
 				if($laskurow["tilaustyyppi"] == "0") {
 					$pdf->write($h, 1, 0, 0, t("LASKUTUSJAKSOT", $kieli), "norm", "L", "B");
 					$h-=$pdf->ln(1.25);

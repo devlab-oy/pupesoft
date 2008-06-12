@@ -175,6 +175,8 @@
 			$ulos .= "<option value='LUETTELO' {$avain_sel['LUETTELO']}>					".t("Luettelotyyppi")."</option>";
 			$ulos .= "<option value='TRIVITYYPPI' {$avain_sel['TRIVITYYPPI']}>				".t("Tilausrivin tyyppi")."</option>";
 			$ulos .= "<option value='LASKUTUS_SAATE' {$avain_sel['LASKUTUS_SAATE']}>		".t("Laskun sähköpostisaatekirje asiakkaalle")."</option>";
+			$ulos .= "<option value='TV_LISATIETO' {$avain_sel['TV_LISATIETO']}>			".t("Tilausvahvistuksen lisätiedot")."</option>";
+						
 			$ulos .= "</optgroup>";
 			
 			$ulos .= "</select></td>";
@@ -184,6 +186,7 @@
 			
 			if($laji != "")	{
 				$trow[$i] = $laji;
+				$avain_sel[$trow[$i]] = "SELECTED";
 			}
 
 			$tyyppi = 3;
@@ -324,14 +327,15 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
-	if ($avain_sel["KARHUVIESTI"] == "SELECTED" and (mysql_field_name($result, $i) == "selite" or mysql_field_name($result, $i) == "selitetark_2" or mysql_field_name($result, $i) == "selitetark_3")) {
+
+	if (($avain_sel["KARHUVIESTI"] == "SELECTED" or $avain_sel["TV_LISATIETO"] == "SELECTED") and (mysql_field_name($result, $i) == "selite" or mysql_field_name($result, $i) == "selitetark_2" or mysql_field_name($result, $i) == "selitetark_3")) {
 		$tyyppi = 0;
 		$jatko  = 0;
 	}
 	
 	if ($avain_sel["KARHUVIESTI"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark" or
 		$avain_sel["OSASTO"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
+		$avain_sel["TV_LISATIETO"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark" or
 		$avain_sel["TRY"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3") {
 			
 		$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";

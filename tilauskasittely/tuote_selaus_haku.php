@@ -77,7 +77,7 @@
 		 			FROM liitetiedostot
 					WHERE yhtio='$kukarow[yhtio]'
 					AND liitos='tuote'
-					AND kayttotarkoitus != 'thumb'
+					AND kayttotarkoitus not in ('thumb','TH')
 					AND liitostunnus='$tunnus'";
 
 		$kuvares = mysql_query($query) or pupe_error($query);

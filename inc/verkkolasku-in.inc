@@ -54,8 +54,9 @@
 			}
 
 			if ($yhtio != 0) {
-				// etsitään vastaanottavaa yritystä ytunnuksella..
-				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$yhtio'";
+				// etsitään vastaanottavaa yritystä ovt-tunnuksella..
+				$yyhtio = substr($yhtio, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
+				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$yyhtio'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 				if (mysql_num_rows($result) == 1) {
@@ -82,7 +83,7 @@
 				if (mysql_num_rows($result) == 1) {
 					$paramrow = mysql_fetch_array($result);
 					// löydettiin parametreistä oikea yhtiö haetaan yhtiorow
-					$query = "select * from yhtio where yhtio = '$paramrow[yhtio]'";
+					$query = "SELECT * FROM yhtio WHERE yhtio = '$paramrow[yhtio]'";
 					$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 					if (mysql_num_rows($result) == 1) {
@@ -103,10 +104,10 @@
 
 			if (!isset($yhtiorow)) {
 				// ei löydetty VASTAANOTTAVAA yhtiötä, lähetetään meili kaikille tän serverin admineille!
-				$query = "select distinct alert_email, postittaja_email from yhtion_parametrit where alert_email != '' and postittaja_email != ''";
+				$query = "SELECT distinct alert_email, postittaja_email FROM yhtion_parametrit WHERE alert_email != '' and postittaja_email != ''";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
-				$return .= "Laskun vastaanottajaa ei löytynyt ovt-tunnuksella '$yhtio' eikä verkkotunnuksella '$verkkotunnus_vas'!\n";
+				$return .= "Laskun vastaanottajaa ei löytynyt ovt-tunnuksella '$yhtio' eikä verkkotunnuksella '$verkkotunnus_vas'! $_SERVER[SERVER_ADDR]\n";
 
 				while ($yhtiorow = mysql_fetch_array($result)) {
 					mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[alert_email]>\n", "-f $yhtiorow[postittaja_email]");

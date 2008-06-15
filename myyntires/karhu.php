@@ -231,7 +231,8 @@ if ($tee == 'KARHUA')  {
 				TO_DAYS(now())-TO_DAYS(lasku.erpcm) as ika,
 				max(karhukierros.pvm) as kpvm,
 				count(distinct karhu_lasku.ktunnus) as karhuttu,
-				if(maksuehto.jv!='', '".t("J‰lkivaatimus")."' ,'') jv, lasku.yhtio_toimipaikka, lasku.valkoodi
+				if(maksuehto.jv!='', '".t("J‰lkivaatimus")."' ,'') jv, lasku.yhtio_toimipaikka, lasku.valkoodi,
+				concat_ws(' ', lasku.viesti, lasku.comments) comments
 				FROM lasku
 				LEFT JOIN karhu_lasku on (lasku.tunnus=karhu_lasku.ltunnus)
 				LEFT JOIN karhukierros on (karhukierros.tunnus=karhu_lasku.ktunnus)
@@ -381,7 +382,8 @@ if ($tee == 'KARHUA')  {
 	echo "<th>".t("Ik‰ p‰iv‰‰")."</th>";
 	echo "<th>".t("Karhuttu")."</th>";
 	echo "<th>".t("Viimeisin karhu")."</th>";
-	echo "<th>".t("Lasku karhutaan")."</th></tr>";
+	echo "<th>".t("Lasku karhutaan")."</th>";
+	echo "<th>".t("Viesti")."</th></tr>";
 	$summmmma = 0;
 
 	$valuutat = array();
@@ -416,7 +418,9 @@ if ($tee == 'KARHUA')  {
 		else {
 			$chk = "";
 		}
-		echo "<td><input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]' $chk> $lasku[jv]</td></tr>\n";
+		echo "<td><input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]' $chk> $lasku[jv]</td>";
+		echo "<td>$lasku[comments]</td>";
+		echo "</tr>\n";
 		
 		$summmmma += $lasku["summa"];
 

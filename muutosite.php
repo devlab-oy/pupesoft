@@ -508,7 +508,7 @@ if ($tee == 'E' or $tee == 'F') {
 					tilinumero, concat_ws(' ', viite, viesti, sisviesti1) Maksutieto,
 					maa, ultilno, pankki1, pankki2, pankki3, pankki4, swift, clearing, maksutyyppi,
 					ebid,
-					toim_osoite, '' toim_osoitetark, toim_postino, toim_postitp, toim_maa, alatila, vienti, comments, yriti.nimi maksajanpankkitili, lasku.laskunro, saldo_maksettu, saldo_maksettu_valuutassa
+					toim_osoite, '' toim_osoitetark, toim_postino, toim_postitp, toim_maa, alatila, vienti, comments, yriti.nimi maksajanpankkitili, lasku.laskunro, saldo_maksettu, saldo_maksettu_valuutassa, lasku.tunnus
 					FROM lasku
 					LEFT JOIN yriti ON lasku.yhtio=yriti.yhtio and maksu_tili=yriti.tunnus
 					LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka 
@@ -651,7 +651,23 @@ if ($tee == 'E' or $tee == 'F') {
 
 		require "inc/laskutyyppi.inc";
 
-		echo "<tr><th>".t("Tila").":</th><td>".t("$laskutyyppi")." ".t("$alatila")."</td></tr>";
+		echo "<tr><th>".t("Tila").":</th><td>".t("$laskutyyppi")." ".t("$alatila");
+		
+		// Jos myyntilasku, niin onko sitä karhuttu?
+		if ($trow['tila'] == 'U') {
+			$query= "select count(*) kerrat, max(pvm) vika, min(pvm) eka 
+				from karhu_lasku
+				join karhukierros on ktunnus=tunnus
+				where ltunnus='$trow[tunnus]'
+				having kerrat > 0";
+			$karhuresult = mysql_query($query) or pupe_error($query);
+			if (mysql_num_rows($karhuresult) == 1) {
+				$karhurow = mysql_fetch_array($karhuresult);
+				echo " ";
+				printf (t("Karhuttu %s kertaa %s - %s"), $karhurow['kerrat'], tv1dateconv($karhurow['eka']), tv1dateconv($karhurow['vika']));
+			}
+		}
+		echo "</td></tr>";
 
 		// Myynnille
 		if ($trow['tila'] == 'U' or $trow['tila'] == 'L') {

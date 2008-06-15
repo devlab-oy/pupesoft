@@ -19,16 +19,16 @@ if($tee == "POISTA") {
 
 }
 
-function lisaa_paivaraha($tilausnumero, $perheid, $perheid2, $tilinumero, $tuoteno, $alku, $loppu, $kommentti, $kustp, $kohde, $projekti) {
-	return lisaa_kulurivi($tilausnumero, $perheid, $perheid2, $tilinumero, $tuoteno, $alku, $loppu, "", "", "", $kommentti, "A", $kustp, $kohde, $projekti);
+function lisaa_paivaraha($tilausnumero, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, $kommentti, $kustp, $kohde, $projekti) {
+	return lisaa_kulurivi($tilausnumero, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, "", "", "", $kommentti, "A", $kustp, $kohde, $projekti);
 }
 
-function lisaa_kulu($tilausnumero, $perheid, $perheid2, $tilinumero, $tuoteno, $kpl, $hinta, $kommentti, $maa, $kustp, $kohde, $projekti) {
-	return lisaa_kulurivi($tilausnumero, $perheid, $perheid2, $tilinumero, $tuoteno, "", "", $kpl, $hinta, $maa, $kommentti, "B", $kustp, $kohde, $projekti);
+function lisaa_kulu($tilausnumero, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $hinta, $kommentti, $maa, $kustp, $kohde, $projekti) {
+	return lisaa_kulurivi($tilausnumero, $perheid, $perheid2, $tilino, $tuoteno, "", "", $kpl, $hinta, $maa, $kommentti, "B", $kustp, $kohde, $projekti);
 }
 
 
-function lisaa_kulurivi($tilausnumero, $perheid, $perheid2, $tilinumero, $tuoteno, $alku, $loppu, $kpl, $hinta, $maa, $kommentti, $tyyppi, $kustp, $kohde, $projekti) {
+function lisaa_kulurivi($tilausnumero, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, $kpl, $hinta, $maa, $kommentti, $tyyppi, $kustp, $kohde, $projekti) {
 	global $yhtiorow, $kukarow, $toim, $hardcoded_alv;
 	
 	$query = "	select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
@@ -753,7 +753,7 @@ if($tee == "TUO_KALENTERISTA") {
 			$tres = mysql_query($query) or pupe_error($query);
 			if(mysql_num_rows($tres)>0) {
 				$trow = mysql_fetch_array($tres);
-				$errori=lisaa_paivaraha($tilausnumero, $perheid, $perheid2, $tilinumero,$trow["tuoteno"], $row["pvmalku"], $row["pvmloppu"], "Asiakas: $row[asiakas]\nTapahtuma: {$row[tapa]}", "", "", "");
+				$errori=lisaa_paivaraha($tilausnumero, $perheid, $perheid2, $tilino,$trow["tuoteno"], $row["pvmalku"], $row["pvmloppu"], "Asiakas: $row[asiakas]\nTapahtuma: {$row[tapa]}", "", "", "");
 
 				if($errori == "") {
 					$query = "	UPDATE kalenteri SET
@@ -1133,10 +1133,10 @@ if ($tee == "MUOKKAA") {
 		//	Koitetaan lisätä uusi rivi!
 		if ($tuoteno != "" and isset($lisaa) and $kuivat != "JOO") {
 			if($tyyppi == "A") {
-				$errori = lisaa_paivaraha($tilausnumero, $perheid, $perheid2, $tilinumero, $tuoteno, "$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm", "$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm", $kommentti, $kustp, $kohde, $projekti);
+				$errori = lisaa_paivaraha($tilausnumero, $perheid, $perheid2, $tilino, $tuoteno, "$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm", "$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm", $kommentti, $kustp, $kohde, $projekti);
 			}
 			else {
-				$errori = lisaa_kulu($tilausnumero, $perheid, $perheid2, $tilinumero, $tuoteno, $kpl, $hinta, $kommentti, $maa, $kustp, $kohde, $projekti);
+				$errori = lisaa_kulu($tilausnumero, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $hinta, $kommentti, $maa, $kustp, $kohde, $projekti);
 			}
 			if($errori == "") {
 				$tyhjenna = "JOO";

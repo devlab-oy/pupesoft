@@ -708,6 +708,8 @@
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
+						$seurantalisa
+						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A','X')
 						$haku
 						order by lasku.luontiaika desc

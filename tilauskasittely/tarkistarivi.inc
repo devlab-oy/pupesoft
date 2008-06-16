@@ -439,6 +439,10 @@
 					break;
 				}
 			}
+			
+			if ($row['var'] == 'P' and $trow['ei_varastoida'] != '') {
+				$varaosakommentti .= " ".t("T‰m‰ on tehdastilaustuote ja on saatavilla tilauksena")."!<br>";
+			}
 		}	
 		
 		// K‰‰yd‰‰n l‰pi tuotteen toimittajat

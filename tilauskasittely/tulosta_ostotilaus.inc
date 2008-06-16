@@ -40,7 +40,7 @@
 			require_once('pdflib/pupepdf.class.php');
 
 			if (!function_exists('tulosta_ostotilaus')) {
-				function tulosta_ostotilaus ($otunnus, $komento, $kieli = "", $tee) {
+				function tulosta_ostotilaus ($otunnus, $komento, $kieli = "", $tee = "", $oma_kutsu = "") {
 					global $yhtiorow, $kukarow, $fonts, $tulosta_ostotilaus_ulos, $toim;
 
 					// Haetaan laskun tiedot
@@ -93,104 +93,106 @@
 					$fonts["BIG"]['font']		= "Helvetica";
 
 					//	Aloituskorkeus		
+					
+					if(!function_exists("alku")) {
+						function alku ($pdf, $laskurow, $kieli) {
+							global $yhtiorow, $toim;
 
-					function alku ($pdf, $laskurow, $kieli) {
-						global $yhtiorow, $toim;
+							//	Tehd‰‰n uusi sivu
+							$pdf->addPage("a4");
+							$h=265;
 
-						//	Tehd‰‰n uusi sivu
-						$pdf->addPage("a4");
-						$h=265;
-
-						//	Liitet‰‰n kuva
-						$yhtiorow["lasku_logo"] = "../pics/RTEC_laskulogo.png";
-						if($yhtiorow["lasku_logo"] != "" and file_exists($yhtiorow["lasku_logo"])) {
-							$pdf->placeImage(260,0,$yhtiorow["lasku_logo"]);
-						}
-
-						//	Kirjoitetaan otsikko
-						$pdf->write($h, 2, 0, 0, t("OSTOTILAUS", $kieli), "BIG", "C", "B");
-
-						//	Laitetaan perustiedot oikealle		
-						$h=250;
-						$s=$pdf->teeSarakkeet(array(100,35));
-						foreach(array("tilaus", "p‰iv‰ys", "huolitsija", "toimitusehto") as $key) {
-							if($key == "p‰iv‰ys") {
-								$laskurow[$key] = strftime("%x",strtotime($laskurow[$key]));
+							//	Liitet‰‰n kuva
+							$yhtiorow["lasku_logo"] = "../pics/RTEC_laskulogo.png";
+							if($yhtiorow["lasku_logo"] != "" and file_exists($yhtiorow["lasku_logo"])) {
+								$pdf->placeImage(260,0,$yhtiorow["lasku_logo"]);
 							}
-							$pdf->write($h, 1, $s[0], $s[1], t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B");
-							$pdf->write($h, 1, $s[1]+2, 0, $laskurow[$key], "norm", "L", "");
-							$h-=$pdf->ln();					
-						}
-						$h-=$pdf->ln(0.5);
-						//	Sitten yhteyshenkilˆit‰
-						foreach(array("viite") as $key) {
-							if($laskurow[$key] != "") {
-								$pdf->write($h, 1, $s[0], 0, t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B");
+
+							//	Kirjoitetaan otsikko
+							$pdf->write($h, 2, 0, 0, t("OSTOTILAUS", $kieli), "BIG", "C", "B");
+
+							//	Laitetaan perustiedot oikealle		
+							$h=250;
+							$s=$pdf->teeSarakkeet(array(100,35));
+							foreach(array("tilaus", "p‰iv‰ys", "huolitsija", "toimitusehto") as $key) {
+								if($key == "p‰iv‰ys") {
+									$laskurow[$key] = strftime("%x",strtotime($laskurow[$key]));
+								}
+								$pdf->write($h, 1, $s[0], $s[1], t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B");
+								$pdf->write($h, 1, $s[1]+2, 0, $laskurow[$key], "norm", "L", "");
 								$h-=$pdf->ln();					
-								$pdf->write($h, 1, $s[0], 0, $laskurow[$key], "norm", "L", "");
-								$h-=$pdf->ln(1.5);
 							}
-						}
+							$h-=$pdf->ln(0.5);
+							//	Sitten yhteyshenkilˆit‰
+							foreach(array("viite") as $key) {
+								if($laskurow[$key] != "") {
+									$pdf->write($h, 1, $s[0], 0, t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B");
+									$h-=$pdf->ln();					
+									$pdf->write($h, 1, $s[0], 0, $laskurow[$key], "norm", "L", "");
+									$h-=$pdf->ln(1.5);
+								}
+							}
 
-						//	Laitetaan toimittajatiedot vasemmalle
-						$h=240;
-						$pdf->write($h, 1, 0, $s[1], t("Toimittaja", $kieli).":", "norm", "L", "B");
-						$h-=$pdf->ln();
-						foreach(array("nimi", "nimitark", "osoite", "postiosoite", "maa") as $key) {
-							if($key == "maa") {
-								$pdf->write($h, 1, 0, $s[0], t($laskurow[$key], $kieli), "norm", "L", "");
+							//	Laitetaan toimittajatiedot vasemmalle
+							$h=240;
+							$pdf->write($h, 1, 0, $s[1], t("Toimittaja", $kieli).":", "norm", "L", "B");
+							$h-=$pdf->ln();
+							foreach(array("nimi", "nimitark", "osoite", "postiosoite", "maa") as $key) {
+								if($key == "maa") {
+									$pdf->write($h, 1, 0, $s[0], t($laskurow[$key], $kieli), "norm", "L", "");
+								}
+								else {
+									$pdf->write($h, 1, 0, $s[0], $laskurow[$key], "norm", "L", "");
+								}
+								$h-=$pdf->ln();	
+							}
+							$h-=$pdf->ln(1.5);
+							$hmem=$h;
+
+							$pdf->write($h, 1, 0, $s[1], t("Toimitusosoite", $kieli).":", "norm", "L", "B");
+							$h-=$pdf->ln();
+							foreach(array("toim_nimi", "toim_nimitark", "toim_osoite", "toim_postiosoite", "toim_maa") as $key) {
+								if($key == "toim_maa") {
+									$pdf->write($h, 1, 0, $s[0], t($laskurow[$key], $kieli), "norm", "L", "");
+								}
+								else {
+									$pdf->write($h, 1, 0, $s[0], $laskurow[$key], "norm", "L", "");
+								}
+								$h-=$pdf->ln();	
+							}
+							$h-=$pdf->ln(1.5);
+
+							$h = $hmem;
+							//	Sitten viel‰ tilaajatiedot
+							$pdf->write($h, 1, $s[0], 0, t("Laskutusosoite", $kieli).":", "norm", "L", "B");
+							$h-=$pdf->ln();
+
+							if($yhtiorow["laskutus_nimi"] == "") {
+								$pdf->write($h, 1, $s[0], 0, $yhtiorow["nimi"], "norm", "L", "");
+								$h-=$pdf->ln();
+								$pdf->write($h, 1, $s[0], 0, $yhtiorow["osoite"], "norm", "L", "");
+								$h-=$pdf->ln();
+								$pdf->write($h, 1, $s[0], 0, $yhtiorow["postino"]." ".$yhtiorow["postitp"], "norm", "L", "");
+								$h-=$pdf->ln();
+								$pdf->write($h, 1, $s[0], 0, t($yhtiorow["maa"]), "norm", "L", "");
 							}
 							else {
-								$pdf->write($h, 1, 0, $s[0], $laskurow[$key], "norm", "L", "");
+								$pdf->write($h, 1, $s[0], 0, $yhtiorow["laskutus_nimi"], "norm", "L", "");
+								$h-=$pdf->ln();
+								$pdf->write($h, 1, $s[0], 0, $yhtiorow["laskutus_osoite"], "norm", "L", "");
+								$h-=$pdf->ln();
+								$pdf->write($h, 1, $s[0], 0, $yhtiorow["laskutus_postino"]." ".$yhtiorow["laskutus_postitp"], "norm", "L", "");
+								$h-=$pdf->ln();
+								$pdf->write($h, 1, $s[0], 0, t($yhtiorow["laskutus_maa"]), "norm", "L", "");							
 							}
 							$h-=$pdf->ln();	
-						}
-						$h-=$pdf->ln(1.5);
-						$hmem=$h;
-						
-						$pdf->write($h, 1, 0, $s[1], t("Toimitusosoite", $kieli).":", "norm", "L", "B");
-						$h-=$pdf->ln();
-						foreach(array("toim_nimi", "toim_nimitark", "toim_osoite", "toim_postiosoite", "toim_maa") as $key) {
-							if($key == "toim_maa") {
-								$pdf->write($h, 1, 0, $s[0], t($laskurow[$key], $kieli), "norm", "L", "");
-							}
-							else {
-								$pdf->write($h, 1, 0, $s[0], $laskurow[$key], "norm", "L", "");
-							}
-							$h-=$pdf->ln();	
-						}
-						$h-=$pdf->ln(1.5);
-						
-						$h = $hmem;
-						//	Sitten viel‰ tilaajatiedot
-						$pdf->write($h, 1, $s[0], 0, t("Laskutusosoite", $kieli).":", "norm", "L", "B");
-						$h-=$pdf->ln();
-						
-						if($yhtiorow["laskutus_nimi"] == "") {
-							$pdf->write($h, 1, $s[0], 0, $yhtiorow["nimi"], "norm", "L", "");
-							$h-=$pdf->ln();
-							$pdf->write($h, 1, $s[0], 0, $yhtiorow["osoite"], "norm", "L", "");
-							$h-=$pdf->ln();
-							$pdf->write($h, 1, $s[0], 0, $yhtiorow["postino"]." ".$yhtiorow["postitp"], "norm", "L", "");
-							$h-=$pdf->ln();
-							$pdf->write($h, 1, $s[0], 0, t($yhtiorow["maa"]), "norm", "L", "");
-						}
-						else {
-							$pdf->write($h, 1, $s[0], 0, $yhtiorow["laskutus_nimi"], "norm", "L", "");
-							$h-=$pdf->ln();
-							$pdf->write($h, 1, $s[0], 0, $yhtiorow["laskutus_osoite"], "norm", "L", "");
-							$h-=$pdf->ln();
-							$pdf->write($h, 1, $s[0], 0, $yhtiorow["laskutus_postino"]." ".$yhtiorow["laskutus_postitp"], "norm", "L", "");
-							$h-=$pdf->ln();
-							$pdf->write($h, 1, $s[0], 0, t($yhtiorow["laskutus_maa"]), "norm", "L", "");							
-						}
-						$h-=$pdf->ln();	
-																							
-						$h-=$pdf->ln(1.5);
 
-						$pdf->write($h, 1, 0, 0, t("Merkitk‰‰ tilausnumero l‰hetteeseen, laskuun sek‰ muihin dokumentteihin. Hinnat eiv‰t sis‰ll‰ arvonlis‰veroa.", $kieli), "norm", "L", "");
-						
-						return $pdf;
+							$h-=$pdf->ln(1.5);
+
+							$pdf->write($h, 1, 0, 0, t("Merkitk‰‰ tilausnumero l‰hetteeseen, laskuun sek‰ muihin dokumentteihin. Hinnat eiv‰t sis‰ll‰ arvonlis‰veroa.", $kieli), "norm", "L", "");
+
+							return $pdf;
+						}						
 					}
 
 					$pdf=alku($pdf, $laskurow,$kieli);
@@ -419,6 +421,8 @@
 						else {
 							$kutsu = "Ostotilaus $laskurow[tunnus]";				
 						}
+						
+						$kutsu .= $oma_kutsu;
 
 						$tulosta_ostotilaus_ulos .= t("Ostotilaus l‰hetet‰‰n osoitteeseen $kukarow[eposti]")."...<br>";
 
@@ -457,7 +461,7 @@
 				}
 			}
 		
-			tulosta_ostotilaus($otunnus, $komento["Ostotilaus"], $kieli = "", $tee);
+			tulosta_ostotilaus($otunnus, $komento["Ostotilaus"], $kieli = "", $tee, $oma_kutsu);
 		}
 		else {
 			//viivakoodien tulostamista varten

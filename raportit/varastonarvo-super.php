@@ -164,7 +164,6 @@
 						group_concat(tuotepaikat.tunnus) paikkatun,
 						group_concat(varastopaikat.nimitys) varastot,
 						varastopaikat.nimitys varastonnimi,
-						tuote.nimitys,
 						tuote.vihapvm, 
 						$saldolisa
 						FROM tuote

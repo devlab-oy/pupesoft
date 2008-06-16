@@ -418,7 +418,7 @@ if (!function_exists('rivi_tarjous')) {
 		//Kieliversioitu tuotteen nimitys
 		if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
 			$laji = 'nimitys_'.strtolower($kieli);
-			$query = "SELECT selite FROM tuotteen_avainsanat WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$row[tuoteno]' LIMIT 1";
+			$query = "SELECT selite FROM tuotteen_avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$row[tuoteno]' LIMIT 1";
 			$nimresult = mysql_query($query) or pupe_error($query);
 			
 			if (mysql_num_rows($nimresult)>0) {

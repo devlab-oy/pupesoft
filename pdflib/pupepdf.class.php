@@ -97,8 +97,137 @@ class PDF extends pdffile {
 		elseif($valuutta == "SEK") {
 			setlocale(LC_MONETARY, 'sv_SE');	
 		}
-		elseif($valuutta == "EUR" and $maa == "FR") {
-			setlocale(LC_MONETARY, 'fr_FR');	
+		elseif($valuutta == "JPY") {
+			setlocale(LC_MONETARY, 'ja_JP');	
+		}
+		elseif($valuutta == "DKK") {
+			setlocale(LC_MONETARY, 'da_DK');	
+		}
+		elseif($valuutta == "TRY") {
+			setlocale(LC_MONETARY, 'tr_TR');	
+		}
+		elseif($valuutta == "AUD") {
+			setlocale(LC_MONETARY, 'en_AU');	
+		}
+		elseif($valuutta == "BRL") {
+			setlocale(LC_MONETARY, 'pt_BR');	
+		}
+		elseif($valuutta == "CAD") {
+			setlocale(LC_MONETARY, 'en_CA');	
+		}
+		elseif($valuutta == "CNY" or $valuutta == "RMB") {
+			setlocale(LC_MONETARY, 'zh_CN');	
+		}
+		elseif($valuutta == "HKD") {
+			setlocale(LC_MONETARY, 'zh_HK');	
+		}
+		elseif($valuutta == "IDR") {
+			// ???
+			setlocale(LC_MONETARY, 'id_ID');	
+		}
+		elseif($valuutta == "KRW") {
+			setlocale(LC_MONETARY, 'ko_KR');	
+		}
+		elseif($valuutta == "MXN") {
+			// ???
+			setlocale(LC_MONETARY, 'mx_MX');	
+		}
+		elseif($valuutta == "MYR") {
+			// ???
+			setlocale(LC_MONETARY, 'my_MY');	
+		}
+		elseif($valuutta == "NZD") {
+			setlocale(LC_MONETARY, 'en_NZ');	
+		}
+		elseif($valuutta == "PHP") {
+			// ???
+			setlocale(LC_MONETARY, 'py_PY');	
+		}
+		elseif($valuutta == "SGD") {
+			// ???
+			setlocale(LC_MONETARY, 'sg_SG');	
+		}
+		elseif($valuutta == "THB") {
+			// ???
+			setlocale(LC_MONETARY, 'th_TH');	
+		}
+		elseif($valuutta == "RUB") {
+			setlocale(LC_MONETARY, 'ru_RU');	
+		}
+		elseif($valuutta == "HRK") {
+			setlocale(LC_MONETARY, 'hr_HR');	
+		}
+		elseif($valuutta == "NOK") {
+			setlocale(LC_MONETARY, 'no_NO');	
+		}
+		elseif($valuutta == "BGN") {
+			setlocale(LC_MONETARY, 'bg_BG');	
+		}
+		elseif($valuutta == "NOK") {
+			setlocale(LC_MONETARY, 'no_NO');	
+		}
+		elseif($valuutta == "CZK") {
+			setlocale(LC_MONETARY, 'cs_CZ');	
+		}
+		elseif($valuutta == "NOK") {
+			setlocale(LC_MONETARY, 'no_NO');	
+		}
+		elseif($valuutta == "NOK") {
+			setlocale(LC_MONETARY, 'no_NO');	
+		}
+		elseif($valuutta == "EET") {
+			setlocale(LC_MONETARY, 'et_EE');	
+		}
+		elseif($valuutta == "HUF") {
+			setlocale(LC_MONETARY, 'hu_HU');	
+		}
+		elseif($valuutta == "LTL") {
+			setlocale(LC_MONETARY, 'lt_LT');	
+		}
+		elseif($valuutta == "LVL") {
+			setlocale(LC_MONETARY, 'lv_LV');	
+		}
+		elseif($valuutta == "NOK") {
+			// ???
+			setlocale(LC_MONETARY, 'no_NO');	
+		}
+		elseif($valuutta == "PLN") {
+			setlocale(LC_MONETARY, 'pl_PL');	
+		}
+		elseif($valuutta == "RON") {
+			setlocale(LC_MONETARY, 'ro_RO');	
+		}
+		elseif($valuutta == "SKK") {
+			setlocale(LC_MONETARY, 'sk_SK');	
+		}
+		elseif($valuutta == "CHF") {
+			setlocale(LC_MONETARY, 'fr_CH');	
+		}
+		elseif($valuutta == "ISK") {
+			setlocale(LC_MONETARY, 'is_IS');	
+		}
+		elseif($valuutta == "ZAR") {
+			setlocale(LC_MONETARY, 'af_ZA');	
+		}
+		elseif($valuutta == "EUR") {
+			if($maa == "FR") {
+				setlocale(LC_MONETARY, 'fr_FR');
+			}
+			elseif($maa == "DE") {
+				setlocale(LC_MONETARY, 'de_DE');
+			}
+			elseif($maa == "IT") {
+				setlocale(LC_MONETARY, 'it_IT');
+			}
+			elseif($maa == "PT") {
+				setlocale(LC_MONETARY, 'pt_PT');
+			}
+			elseif($maa == "ES") {
+				setlocale(LC_MONETARY, 'es_ES');
+			}
+			else {
+				setlocale(LC_MONETARY, 'fi_FI');
+			}
 		}
 		else {
 			setlocale(LC_MONETARY, 'fi_FI');	

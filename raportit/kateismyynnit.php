@@ -175,7 +175,7 @@
 			}
 
 			$prn  = "\n";
-			$prn .= sprintf ('%-500.500s', 	$kommentti);
+			$prn .= sprintf ('%-5000.5000s', 	$kommentti);
 			$prn .= "\n\n";
 			$rivit++;
 			fwrite($fh, $prn);
@@ -259,8 +259,8 @@
 	}
 
 	// Jos t‰sm‰ys on p‰‰ll‰ ja tilitett‰vien sarakkeiden m‰‰r‰ on jotain muuta kuin v‰lilt‰ 1-9 -> error
-	if ($tasmays != '' and ((int)$tilityskpl < 1 or (int)$tilityskpl > 9)) {
-		echo "<font class='error'>".t("Tilitysten m‰‰r‰ pit‰‰ olla v‰lilt‰ 1 - 9")."!</font><br>";
+	if ($tasmays != '' and ((int)$tilityskpl < 1 or (int)$tilityskpl > 20)) {
+		echo "<font class='error'>".t("Sarakkeiden m‰‰r‰ pit‰‰ olla v‰lilt‰ 1 - 20")."!</font><br>";
 		$tee = '';
 	}
 
@@ -357,6 +357,11 @@
 				}
 				else if ($kentta == "yht_kattil") {
 					$comments_yht .= "K‰teistilitys yhteens‰: ";
+					$arvo = str_replace(".",",",sprintf('%.2f',$arvo));
+					$comments_yht .= "$arvo<br>";
+				}
+				else if ($kentta == "yht_kasero") {
+					$comments_yht .= "Kasserotus yhteens‰: ";
 					$arvo = str_replace(".",",",sprintf('%.2f',$arvo));
 					$comments_yht .= "$arvo<br>";
 				}
@@ -751,16 +756,15 @@
 						echo "<td>&nbsp;</td>";
 						}
 					}
-				echo "<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td align='center' style='width:100px'>".strtoupper(t("Tilitys"))." 1</td>";
+				echo "<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td align='center' style='width:100px' nowrap>".strtoupper(t("Tilitys"))." 1</td>";
 					if ($tilityskpl > 1) {
 						for ($yyy = 1; $yyy < $tilityskpl; $yyy++) {
 							$yyyy = $yyy + 1;
-							echo "<td align='center' style='width:100px'>".strtoupper(t("Tilitys"))." $yyyy</td>";
+							echo "<td align='center' style='width:100px' nowrap>".strtoupper(t("Tilitys"))." $yyyy</td>";
 						}
 					}
 
-				echo "<td align='center' style='width:100px'>".strtoupper(t("Myynti"))."</td><td align='center' style='width:100px'>".strtoupper(t("Erotus"))."</td></tr>";
-				echo "";
+				echo "<td align='center' style='width:100px' nowrap>".strtoupper(t("Myynti"))."</td><td align='center' style='width:100px' nowrap>".strtoupper(t("Erotus"))."</td></tr>";
 				echo "</tr>";
 				
 				$row = mysql_fetch_array($result);
@@ -774,14 +778,14 @@
 					else {
 						echo "3";
 					}
-				echo "' align='left' class='tumma'>$row[kassanimi] ".t("alkukassa").":</td>";
-				echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='pohjakassa$i' name='pohjakassa$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+				echo "' align='left' class='tumma' width='300px' nowrap>$row[kassanimi] ".t("alkukassa").":</td>";
+				echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='pohjakassa$i' name='pohjakassa$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 				if ($tilityskpl > 1) {
 					for ($yy = 1; $yy < $tilityskpl; $yy++) {
-						echo "<td class='tumma' style='width:100px'>&nbsp;</td>";
+						echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td>";
 					}
 				}
-				echo "<td class='tumma' style='width:100px'>&nbsp;</td><td class='tumma' style='width:100px'>&nbsp;</td></tr></table>";
+				echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td><td class='tumma' style='width:100px' nowrap>&nbsp;</td></tr></table>";
 			}
 			else {
 				echo "<table><td>";
@@ -871,20 +875,20 @@
 								}
 
 								echo "'";
-								echo "' class='tumma'>$edkassanimi $kateismaksu ".t("yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
+								echo "' class='tumma' width='300px' nowrap>$kateismaksu ".t("yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
 								echo "<input type='hidden' name='maksutapa$i' id='maksutapa$i' value='$solu#$tilinumero[kateinen]#$edkassanimi'>";
-								echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+								echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 
 								if ($tilityskpl > 1) {
 									$y = $i;
 									for ($yy = 1; $yy < $tilityskpl; $yy++) {
 										$y .= $i;
-										echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='$solu solu$y' name='solu$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+										echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu solu$y' name='solu$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 									}
 								}
 
-								echo "<td align='right' class='tumma' style='width:100px'><b><div id='$solu erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td>";
-								echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='$solu soluerotus$i' size='10' disabled></td></tr>";
+								echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td>";
+								echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu soluerotus$i' size='10' disabled></td></tr>";
 								echo "<input type='hidden' id='erotus$i' name='erotus$i' value=''>";
 								echo "<input type='hidden' id='soluerotus$i' name='soluerotus$i' value=''>";
 
@@ -895,16 +899,16 @@
 										else {
 											echo "9";
 										}
-								echo "'>$edkassanimi ".t("k‰teisotto kassasta").":</td><td class='tumma' align='center'>";
+								echo "' width='300px' nowrap>$edkassanimi ".t("k‰teisotto kassasta").":</td><td class='tumma' align='center'>";
 								echo "<input type='text' name='kateisotto$i' id='kateisotto$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 								if ($tilityskpl > 1) {
 									$y = $i;
 									for ($yy = 1; $yy < $tilityskpl; $yy++) {
 										$y .= $i;
-										echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='kateisotto$y' name='kateisotto$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+										echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateisotto$y' name='kateisotto$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 									}
 								}
-								echo "<td class='tumma' style='width:100px'>&nbsp;</td><td class='tumma' style='width:100px'>&nbsp;</td></tr>";
+								echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td><td class='tumma' style='width:100px' nowrap>&nbsp;</td></tr>";
 
 								echo "<tr><td colspan='";
 									if ($tilityskpl > 1) {
@@ -913,16 +917,16 @@
 									else {
 										echo "9";
 									}
-								echo "' align='left' class='tumma'>$edkassanimi ".t("k‰teistilitys pankkiin kassasta").":</td>";
-								echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='kateistilitys$i' name='kateistilitys$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+								echo "' align='left' class='tumma' width='300px' nowrap>$edkassanimi ".t("k‰teistilitys pankkiin kassasta").":</td>";
+								echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateistilitys$i' name='kateistilitys$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 								if ($tilityskpl > 1) {
 									$y = $i;
 									for ($yy = 1; $yy < $tilityskpl; $yy++) {
 										$y .= $i;
-										echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='kateistilitys$y' name='kateistilitys$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+										echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateistilitys$y' name='kateistilitys$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 									}
 								}
-								echo "<td class='tumma' style='width:100px'>&nbsp;</td><td class='tumma' style='width:100px'>&nbsp;</td></tr>";
+								echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td><td class='tumma' style='width:100px' nowrap>&nbsp;</td></tr>";
 
 								echo "<tr><td colspan='";
 									if ($tilityskpl > 1) {
@@ -931,17 +935,17 @@
 									else {
 										echo "9";
 									}
-								echo "' align='left' class='tumma'>$edkassanimi ".t("loppukassa").":</td>";
-								echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='kassalippaan_loppukassa$i' name='kassalippaan_loppukassa$i' size='10' disabled></td>";
+								echo "' align='left' class='tumma' width='300px' nowrap>$edkassanimi ".t("loppukassa").":</td>";
+								echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kassalippaan_loppukassa$i' name='kassalippaan_loppukassa$i' size='10' disabled></td>";
 								echo "<input type='hidden' name='yht_lopkas$i' id='yht_lopkas$i' value=''>";
 								if ($tilityskpl > 1) {
 									$y = $i;
 									for ($yy = 1; $yy < $tilityskpl; $yy++) {
 										$y .= $i;
-										echo "<td class='tumma' style='width:100px'>&nbsp;</td>";
+										echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td>";
 									}
 								}
-								echo "<td class='tumma' style='width:100px'>&nbsp;</td><td class='tumma' style='width:100px'>&nbsp;</td></tr>";
+								echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td><td class='tumma' style='width:100px' nowrap>&nbsp;</td></tr>";
 
 								$i++;
 							}
@@ -958,14 +962,14 @@
 								else {
 									echo "9";
 								}
-							echo "' align='left' class='tumma'>$row[kassanimi] ".t("alkukassa").":</td>";
-							echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='pohjakassa$i' name='pohjakassa$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+							echo "' align='left' class='tumma' width='300px' nowrap>$row[kassanimi] ".t("alkukassa").":</td>";
+							echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='pohjakassa$i' name='pohjakassa$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 							if ($tilityskpl > 1) {
 								for ($yy = 1; $yy < $tilityskpl; $yy++) {
-									echo "<td class='tumma' style='width:100px'>&nbsp;</td>";
+									echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td>";
 								}
 							}
-							echo "<td class='tumma' style='width:100px'>&nbsp;</td><td class='tumma' style='width:100px'>&nbsp;</td></tr>";
+							echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td><td class='tumma' style='width:100px' nowrap>&nbsp;</td></tr>";
 
 							echo "</table><table id='nayta$i' style='display:none;' width='100%'>";
 							echo "<tr>
@@ -1025,18 +1029,18 @@
 							else {
 								echo "9";
 							}
-						echo "' class='tumma'>$edkassanimi $kateismaksu ".t("yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
+						echo "' class='tumma' width='300px' nowrap>$kateismaksu ".t("yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
 						echo "<input type='hidden' name='maksutapa$i' value='$solu#$tilinumero[kateinen]#$edkassanimi'>";
-						echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+						echo "<td class='tumma' align='center' width='100px' nowrap><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 						if ($tilityskpl > 1) {
 							$y = $i;
 							for ($yy = 1; $yy < $tilityskpl; $yy++) {
 								$y .= $i;
-								echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='$solu solu$y' name='solu$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+								echo "<td class='tumma' align='center' width='100px' nowrap><input type='text' id='$solu solu$y' name='solu$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 							}
 						}
-						echo "<td align='right' class='tumma' style='width:100px'><b><div id='$solu erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td>";
-						echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='$solu soluerotus$i' name='soluerotus$i' size='10' disabled></td>";
+						echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td>";
+						echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu soluerotus$i' name='soluerotus$i' size='10' disabled></td>";
 						echo "</tr>";
 
 						echo "<tr><td class='tumma' colspan='";
@@ -1046,16 +1050,16 @@
 								else {
 									echo "9";
 								}
-						echo "'>$edkassanimi ".t("k‰teisotto kassasta").":</td><td class='tumma' align='center'>";
+						echo "' width='300px' nowrap>$edkassanimi ".t("k‰teisotto kassasta").":</td><td class='tumma' align='center' nowrap>";
 						echo "<input type='text' name='kateisotto$i' id='kateisotto$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 						if ($tilityskpl > 1) {
 							$y = $i;
 							for ($yy = 1; $yy < $tilityskpl; $yy++) {
 								$y .= $i;
-								echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='kateisotto$y' name='kateisotto$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+								echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateisotto$y' name='kateisotto$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 							}
 						}
-						echo "<td class='tumma' style='width:100px'>&nbsp;</td><td class='tumma' style='width:100px'>&nbsp;</td></tr>";
+						echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td><td class='tumma' style='width:100px' nowrap>&nbsp;</td></tr>";
 
 						echo "<tr><td colspan='";
 							if ($tilityskpl > 1) {
@@ -1064,16 +1068,16 @@
 							else {
 								echo "9";
 							}
-						echo "' align='left' class='tumma'>$edkassanimi ".t("k‰teistilitys pankkiin kassasta").":</td>";
-						echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='kateistilitys$i' name='kateistilitys$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+						echo "' align='left' class='tumma' width='300px' nowrap>$edkassanimi ".t("k‰teistilitys pankkiin kassasta").":</td>";
+						echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateistilitys$i' name='kateistilitys$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 						if ($tilityskpl > 1) {
 							$y = $i;
 							for ($yy = 1; $yy < $tilityskpl; $yy++) {
 								$y .= $i;
-								echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='kateistilitys$y' name='kateistilitys$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+								echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kateistilitys$y' name='kateistilitys$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 							}
 						}
-						echo "<td class='tumma' style='width:100px'>&nbsp;</td><td class='tumma' style='width:100px'>&nbsp;</td></tr>";
+						echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td><td class='tumma' style='width:100px' nowrap>&nbsp;</td></tr>";
 
 						echo "<tr><td colspan='";
 							if ($tilityskpl > 1) {
@@ -1082,17 +1086,17 @@
 							else {
 								echo "9";
 							}
-						echo "' align='left' class='tumma'>$edkassanimi ".t("loppukassa").":</td>";
-						echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='kassalippaan_loppukassa$i' name='kassalippaan_loppukassa$i' size='10' disabled></td>";
+						echo "' align='left' class='tumma' width='300px' nowrap>$edkassanimi ".t("loppukassa").":</td>";
+						echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='kassalippaan_loppukassa$i' name='kassalippaan_loppukassa$i' size='10' disabled></td>";
 						echo "<input type='hidden' name='yht_lopkas$i' id='yht_lopkas$i' value=''>";
 						if ($tilityskpl > 1) {
 							$y = $i;
 							for ($yy = 1; $yy < $tilityskpl; $yy++) {
 								$y .= $i;
-								echo "<td class='tumma' style='width:100px'>&nbsp;</td>";
+								echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td>";
 							}
 						}
-						echo "<td class='tumma' style='width:100px'>&nbsp;</td><td class='tumma' style='width:100px'>&nbsp;</td></tr>";
+						echo "<td class='tumma' style='width:100px' nowrap>&nbsp;</td><td class='tumma' style='width:100px' nowrap>&nbsp;</td></tr>";
 
 						echo "<input type='hidden' id='erotus$i' name='erotus$i' value=''>";
 						echo "<input type='hidden' id='soluerotus$i' name='soluerotus$i' value=''>";
@@ -1174,17 +1178,17 @@
 							echo "$edkassanimi";
 						}
 					echo "'>";
-					echo "<td colspan='6' class='tumma'>".t("Pankkikortti yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
-					echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+					echo "<td colspan='6' class='tumma' width='300px' nowrap>".t("Pankkikortti yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
+					echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 					if ($tilityskpl > 1) {
 						$y = $i;
 						for ($yy = 1; $yy < $tilityskpl; $yy++) {
 							$y .= $i;
-							echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='$solu solu$y' name='solu$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+							echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu solu$y' name='solu$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 						}
 					}
-					echo "<td align='right' class='tumma' style='width:100px'><b><div id='$solu erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td>";
-					echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='$solu soluerotus$i' name='soluerotus$i' size='10' disabled></td>";
+					echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td>";
+					echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu soluerotus$i' name='soluerotus$i' size='10' disabled></td>";
 					echo "<input type='hidden' id='erotus$i' name='erotus$i' value=''>";
 					echo "<input type='hidden' id='soluerotus$i' name='soluerotus$i' value=''>";
 					echo "</tr>";
@@ -1261,17 +1265,17 @@
 							echo "$edkassanimi";
 						}
 					echo "'>";
-					echo "<td colspan='6' class='tumma'>".t("Luottokortti yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
-					echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+					echo "<td colspan='6' class='tumma' width='300px' nowrap>".t("Luottokortti yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
+					echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 					if ($tilityskpl > 1) {
 						$y = $i;
 						for ($yy = 1; $yy < $tilityskpl; $yy++) {
 							$y .= $i;
-							echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='$solu solu$y' name='solu$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+							echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu solu$y' name='solu$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
 						}
 					}
-					echo "<td align='right' class='tumma' style='width:100px'><b><div id='$solu erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td>";
-					echo "<td class='tumma' align='center' style='width:100px'><input type='text' id='$solu soluerotus$i' name='soluerotus$i' size='10' disabled></td>";
+					echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td>";
+					echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu soluerotus$i' name='soluerotus$i' size='10' disabled></td>";
 					echo "<input type='hidden' id='erotus$i' name='erotus$i' value=''>";
 					echo "<input type='hidden' id='soluerotus$i' name='soluerotus$i' value=''>";
 					echo "</tr>";
@@ -1500,6 +1504,8 @@
 				echo "<input type='text' name='yht_kateisotto' id='yht_kateisotto' size='10' disabled></td></tr>";
 				echo "<tr><th colspan='3'>".t("K‰teistilitys").":</th><td class='tumma' align='right'>";
 				echo "<input type='text' name='yht_kateistilitys' id='yht_kateistilitys' size='10' disabled></td></tr>";
+				echo "<tr><th colspan='3'>".t("Kassaerotus").":</th><td class='tumma' align='right'>";
+				echo "<input type='text' name='yht_kassaerotus' id='yht_kassaerotus' size='10' disabled></td></tr>";
 				echo "<tr><th colspan='3'>".t("Loppukassa").":</th><td class='tumma' align='right'>";
 				echo "<input type='text' name='yht_loppukassa' id='yht_loppukassa' size='10' disabled></td></tr>";
 
@@ -1510,6 +1516,7 @@
 				echo "<input type='hidden' name='yht_kat' id='yht_kat' value=''>";
 				echo "<input type='hidden' name='yht_katot' id='yht_katot' value=''>";
 				echo "<input type='hidden' name='yht_kattil' id='yht_kattil' value=''>";
+				echo "<input type='hidden' name='yht_kasero' id='yht_kasero' value=''>";
 				echo "<input type='hidden' name='kassalipas_tunnus' value='".urlencode(serialize($kassalipas_tunnus))."'>";
 				echo "<input type='hidden' name='kassakone' value='".urlencode(serialize($kassakone))."'>";
 				echo "<input type='hidden' name='pp' id='pp' value='$pp'>";
@@ -1571,6 +1578,8 @@
 					var yht_kat = 0;
 					var yht_katot = 0;
 					var yht_kattil = 0;
+					var yht_kasero = 0;
+					var temp_kasero = 0;
 					var yht_loppu = 0;
 
 			 		for (i=0; i<obj.length; i++) {
@@ -1630,6 +1639,18 @@
 
 							loppukas -= Number(obj.elements[i].value.replace(\",\",\".\"));
 							document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
+						}
+						else if (obj.elements[i].value != '' && obj.elements[i].id.substring(0,19) == ('kateinen soluerotus')) {
+							temp_kasero = Number(obj.elements[i].value.replace(\",\",\".\"));
+							yht_kasero = yht_kasero + temp_kasero;
+						}
+						else if (obj.elements[i].value != '' && obj.elements[i].id.substring(0,23) == ('pankkikortti soluerotus')) {
+							temp_kasero = Number(obj.elements[i].value.replace(\",\",\".\"));
+							yht_kasero = yht_kasero + temp_kasero;
+						}
+						else if (obj.elements[i].value != '' && obj.elements[i].id.substring(0,23) == ('luottokortti soluerotus')) {
+							temp_kasero = Number(obj.elements[i].value.replace(\",\",\".\"));
+							yht_kasero = yht_kasero + temp_kasero;
 						}
 						else if (obj.elements[i].id.substring(0,8) == ('kateinen') && !isNaN(obj.elements[i].id.substring(13,14))) {
 							if (pointer != edpointer) {
@@ -1737,6 +1758,7 @@
 						document.getElementById('yht_kateinen').value = yht_kat.toFixed(2);
 						document.getElementById('yht_kateisotto').value = yht_katot.toFixed(2);
 						document.getElementById('yht_kateistilitys').value = yht_kattil.toFixed(2);
+						document.getElementById('yht_kassaerotus').value = yht_kasero.toFixed(2);
 						document.getElementById('yht_loppukassa').value = yht_loppu.toFixed(2);
 						document.getElementById('loppukassa').value = summa.toFixed(2);
 						document.getElementById('loppukassa2').value = summa.toFixed(2);
@@ -1745,8 +1767,9 @@
 						document.getElementById('yht_kat').value = yht_kat.toFixed(2);
 						document.getElementById('yht_katot').value = yht_katot.toFixed(2);
 						document.getElementById('yht_kattil').value = yht_kattil.toFixed(2);
+						document.getElementById('yht_kasero').value = yht_kasero.toFixed(2);
 					
-						if (obj.elements[i].value == 0) {
+						if (obj.elements[i].value == 0 && obj.elements[i].id.substring(0,19) != 'kateinen soluerotus' && obj.elements[i].id.substring(0,23) != 'pankkikortti soluerotus' && obj.elements[i].id.substring(0,23) != 'luottokortti soluerotus') {
 							obj.elements[i].value = '';
 						}
 					
@@ -1853,7 +1876,7 @@
 		}
 
 		echo "<tr><th>".t("T‰sm‰‰ k‰teismyynnit")."</th><td colspan='3'><input type='checkbox' id='tasmays' name='tasmays' $sel onClick='disableDates();'><br></td></tr>";
-		echo "<tr><th>".t("Tilitett‰vien sarakkeiden m‰‰r‰")."</th><td colspan='3'><input type='text' id='tilityskpl' name='tilityskpl' size='3' maxlength='1' value='$tilityskpl' autocomplete='off'><br></td></tr>";
+		echo "<tr><th>".t("Tilitett‰vien sarakkeiden m‰‰r‰")."</th><td colspan='3'><input type='text' id='tilityskpl' name='tilityskpl' size='3' maxlength='2' value='$tilityskpl' autocomplete='off'><br></td></tr>";
 		echo "<tr><th>".t("Syˆt‰ p‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
 				<td><input type='text' name='pp' id='pp' value='$pp' size='3' $dis autocomplete='off'></td>
 				<td><input type='text' name='kk' id='kk' value='$kk' size='3' $dis autocomplete='off'></td>

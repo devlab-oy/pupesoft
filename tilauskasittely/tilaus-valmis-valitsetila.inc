@@ -190,12 +190,19 @@
 							and keratty 	= ''
 							and toimitettu 	= ''";
 				$result = mysql_query($query) or pupe_error($query);
-
-				if($laskurow["vienti"] != '') {
+				
+				//	Jos on vienti‰ ja vain saldottomia niin menn‰‰n suoraan toimitetuksi
+				if($laskurow["vienti"] != '' and $rivirow["riveja"] == $rivirow["saldottomat"]) {
+					$alat = "D";
+					$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
+				}
+				elseif($laskurow["vienti"] != '') {
 					$alat = "B";
+					$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi. Viennin lis‰tiedot syˆtett‰v‰."), $laskurow["tunnus"])."</font><br><br>\n";
 				}
 				else {
 					$alat = "C";
+					$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
 				}
 
 				$query  = "	UPDATE lasku set tila='L', alatila='$alat', lahetepvm=now()
@@ -222,9 +229,9 @@
 							where tunnus = '$laskurow[tunnus]'
 							and yhtio	 = '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
+			
+				$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";	
 			}
-
-			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
 		}
 		else {
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("VIRHE: Tilausta %s ei voitu merkata valmiiksi. Aktivoi tilaus ja korjaa virheet"), $laskurow["tunnus"])."! (1)</font><br><br>\n";

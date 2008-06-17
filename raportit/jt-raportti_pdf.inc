@@ -48,7 +48,7 @@ if (!function_exists('alku')) {
 			$pdf->draw_text(30, 730, $yhtiorow["maa"], 		$page, $p);
 		}
 
-		$title = t("JÄLKITOIMITUSRAPORTTI");
+		$title = t("JÄLKITOIMITUSRAPORTTI", $kieli);
 		$title = str_replace(array("ä", "ö", "å"), array("Ä", "Ö", "Å"), $title);
 		$title_position = 360;
 

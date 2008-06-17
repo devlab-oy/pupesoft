@@ -1312,6 +1312,7 @@
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						AND tilausrivi.otunnus = '$otsik[tunnus]'
 						AND tilausrivi.tyyppi = 'L'
+						AND tilausrivi.var NOT IN ('P', 'J')
 						LIMIT 1";
 		$vakresult = mysql_query($vakquery) or pupe_error($vakquery);
 		$vakrow = mysql_fetch_array($vakresult);

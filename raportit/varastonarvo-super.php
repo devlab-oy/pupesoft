@@ -113,7 +113,7 @@
 					$tuotepaikat[$tuotepaikka_row["tunnus"]]["alku"] = $tuotepaikka_row["alku"];
 					$tuotepaikat[$tuotepaikka_row["tunnus"]]["loppu"] = $tuotepaikka_row["loppu"];
 				}
-				
+
 				$orderlisa = "varastopaikat.nimitys, tuote.osasto, tuote.try, tuote.tuoteno";
             }
 			else {
@@ -123,7 +123,12 @@
 			// tuotteen määrä varastossa nyt
 			if ($summaustaso == "S") {
 				$saldolisa = " sum(saldo) varasto";
-				$groupsaldot = "GROUP BY varastopaikat.nimitys, tuote.tuoteno, try, osasto, tuote.tuotemerkki, tuote.nimitys, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm, tuote.sarjanumeroseuranta";
+				if (!empty($varastot)) {
+					$groupsaldot = "GROUP BY varastopaikat.nimitys, tuote.tuoteno, try, osasto, tuote.tuotemerkki, tuote.nimitys, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm, tuote.sarjanumeroseuranta";
+				}
+				else {
+					$groupsaldot = "GROUP BY tuote.tuoteno, try, osasto, tuote.tuotemerkki, tuote.nimitys, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm, tuote.sarjanumeroseuranta";
+				}
 			}
 			else {
 				$saldolisa = " hyllyalue, hyllynro, hyllyvali, hyllytaso, saldo varasto";
@@ -170,7 +175,7 @@
 						group_concat(tuotepaikat.tunnus) paikkatun,
 						group_concat(DISTINCT varastopaikat.nimitys) varastot,
 						varastopaikat.nimitys varastonnimi,
-						tuote.vihapvm, 
+						tuote.vihapvm,
 						$saldolisa
 						FROM tuote
 						LEFT JOIN avainsana atry use index (yhtio_laji_selite) on atry.yhtio=tuote.yhtio and atry.selite=tuote.try and atry.laji='TRY'
@@ -480,7 +485,7 @@
 							$kierto = 0;
 						}
 					}
-					
+
 					if (isset($workbook)) {
 						if ($summaustaso == "P") {
 							$rivipaikka = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
@@ -534,7 +539,7 @@
 						$excelsarake++;
 
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kierto));
-						$excelsarake++;						
+						$excelsarake++;
 						$worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($xmyyrow["laskutettuaika"]));
 						$excelsarake++;
 

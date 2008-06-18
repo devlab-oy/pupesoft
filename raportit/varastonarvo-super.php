@@ -61,6 +61,7 @@
 
 			$lisa  = "";
 			$lisa2 = "";
+			$orderlisa = "";
 
 			if (count($mul_osasto) > 0) {
 				$sel_osasto = "('".str_replace(',','\',\'',implode(",", $mul_osasto))."')";
@@ -112,7 +113,12 @@
 					$tuotepaikat[$tuotepaikka_row["tunnus"]]["alku"] = $tuotepaikka_row["alku"];
 					$tuotepaikat[$tuotepaikka_row["tunnus"]]["loppu"] = $tuotepaikka_row["loppu"];
 				}
+				
+				$orderlisa = "varastopaikat.nimitys, tuote.osasto, tuote.try, tuote.tuoteno";
             }
+			else {
+				$orderlisa = "tuote.osasto, tuote.try, tuote.tuoteno";
+			}
 
 			// tuotteen m‰‰r‰ varastossa nyt
 			if ($summaustaso == "S") {
@@ -162,7 +168,7 @@
 						tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm,
 						tuote.sarjanumeroseuranta,
 						group_concat(tuotepaikat.tunnus) paikkatun,
-						group_concat(varastopaikat.nimitys) varastot,
+						group_concat(DISTINCT varastopaikat.nimitys) varastot,
 						varastopaikat.nimitys varastonnimi,
 						tuote.vihapvm, 
 						$saldolisa
@@ -179,7 +185,7 @@
 						$lisa
 						$groupsaldot
 						$lisa2
-						ORDER BY varastopaikat.nimitys, tuote.osasto, tuote.try, tuote.tuoteno";
+						ORDER BY $orderlisa";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$lask  = 0;

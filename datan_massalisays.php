@@ -134,6 +134,7 @@ if ($tee == 'GO') {
 			$path_parts = pathinfo($kuva);
 			$ext = $path_parts['extension'];
 
+			$size = getimagesize($file);
 			list($mtype, $crap) = explode("/", $size["mime"]);
 
 			if ($toiminto == 'kasittele' and $mtype == "image") {

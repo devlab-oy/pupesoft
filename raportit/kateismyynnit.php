@@ -325,6 +325,7 @@
 		$comments = "";
 		$comments_yht = "";
 		$tyyppi = "";
+		$kustp = "";
 
 		foreach ($_POST as $kentta => $arvo) {
 
@@ -382,6 +383,7 @@
 				$kassalipasrow = mysql_fetch_array($result);
 
 				$tilino = $kassalipasrow["pankkikortti"];
+				$kustp = "";
 			}
 			elseif (stristr($arvo, "luottokortti")) {
 				$maksutapa = t("Luottokortti");
@@ -394,6 +396,7 @@
 				$kassalipasrow = mysql_fetch_array($result);
 
 				$tilino = $kassalipasrow["luottokortti"];
+				$kustp = "";
 			}
 			elseif (stristr($arvo, "kateinen")) {
 				$maksutapa = t("Käteinen");
@@ -411,6 +414,7 @@
 				$kassalipasrow = mysql_fetch_array($result);
 
 				$tilino = $kassalipasrow["kassa"];
+				$kustp = $kassalipasrow["kustp"];
 			}
 
 			// Tarkistetaan ettei arvo ole nolla ja jos kentän nimi on joko solu tai erotus
@@ -433,8 +437,8 @@
 					$query .= "tilino   = '$tilino',";
 				}
 
-				$query .=  "kustp    = '',
-							tapvm    = '$vv-$kk-$pp',";
+				$query .=  "kustp    = '$kustp',";
+				$query .=  "tapvm    = '$vv-$kk-$pp',";
 
 				// Jos kenttä on soluerotus tai erotus niin kerrotaan arvo -1:llä
 				if (stristr($kentta, "soluerotus") or stristr($kentta, "erotus")) {
@@ -472,7 +476,7 @@
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
 							tilino   = '$kassalipasrow[kateistilitys]',
-							kustp    = '',
+							kustp    = '$kustp',
 							tapvm    = '$vv-$kk-$pp',
 							summa    = $arvo,
 							vero     = '0',
@@ -486,7 +490,7 @@
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
 							tilino   = '$kassalipasrow[kassa]',
-							kustp    = '',
+							kustp    = '$kustp',
 							tapvm    = '$vv-$kk-$pp',
 							summa    = $arvo * -1,
 							vero     = '0',
@@ -504,7 +508,7 @@
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
 							tilino   = '$kassalipasrow[kateisotto]',
-							kustp    = '',
+							kustp    = '$kustp',
 							tapvm    = '$vv-$kk-$pp',
 							summa    = $arvo,
 							vero     = '0',
@@ -518,7 +522,7 @@
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
 							tilino   = '$kassalipasrow[kassa]',
-							kustp    = '',
+							kustp    = '$kustp',
 							tapvm    = '$vv-$kk-$pp',
 							summa    = $arvo * -1,
 							vero     = '0',

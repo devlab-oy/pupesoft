@@ -1,5 +1,5 @@
 <?php
 	$otsikko = 'Kassalippaat';
-	$kentat = "tunnus, nimi, kassa, pankkikortti, luottokortti, kateistilitys, kassaerotus, kateisotto";
+	$kentat = "tunnus, nimi, kustp, kassa, pankkikortti, luottokortti, kateistilitys, kassaerotus, kateisotto";
 	$jarjestys = 'nimi';
 ?>

@@ -13,7 +13,8 @@
 		(mysql_field_name($result, $i) == "pankkikortti") or
 		(mysql_field_name($result, $i) == "luottokortti") or
 		(mysql_field_name($result, $i) == "kateistilitys") or
-		(mysql_field_name($result, $i) == "kassaerotus")) {
+		(mysql_field_name($result, $i) == "kassaerotus") or 
+		(mysql_field_name($result, $i) == "kateisotto")) {
 
 		if ($ulosarray[$i] != '') {
 			$ulos=$ulosarray[$i];
@@ -31,6 +32,31 @@
 				$ulos .= " " . $vrow[nimi] . "</td>";
 				$jatko = 0;
 			}
+		}
+	}
+
+	if (mysql_field_name($result, $i) == "kustp") {
+		if ($ulosarray[$i] != '') {
+			$ulos=$ulosarray[$i];
+			$jatko = 0;
+		}
+		else {
+			$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";	
+			$query = "	SELECT tunnus, nimi
+						FROM kustannuspaikka
+						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+						ORDER BY nimi";
+			$vresult = mysql_query($query) or pupe_error($query);
+
+			while ($vrow = mysql_fetch_array($vresult)) {
+				$sel = "";
+				if ($trow[$i] == $vrow[0]) {
+					$sel = "selected";
+				}
+				$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+			}
+			$ulos .= "</select></td>";
+			$jatko = 0;
 		}
 	}
 ?>

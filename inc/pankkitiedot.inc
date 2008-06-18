@@ -51,7 +51,7 @@ function pankkitiedot($tilino, $asiakastunnus) {
 			$pankki["tiedostonimi"] 	= "SOLOLMP.DAT";
 			break;
 		case (3) :
-			$tmp_tilino=substr($yritystilino,1,1);
+			$tmp_tilino = substr($tilino, 1, 1);
 			switch ($tmp_tilino) {
 				case (1) : //Handelsbanken
 					$pankki["rahalaitos"] 		= '  ';
@@ -84,17 +84,12 @@ function pankkitiedot($tilino, $asiakastunnus) {
 		case (5) : //osuuspankit (Op), OKO ja Okopankki
 			$pankki["rahalaitos"]		= '5 ';
 			$pankki["pankkilaitos"] 	= "Osuuspankki";
-
 			$pankki["ytunnus"]			= $ytunnus_valiviivalla;
-
 			$pankki["lum_eumaksu"] 		= "B";
-
 			$pankki["lum_et_5kentta"]	= sprintf ('%05s', $asiakastunnus);
 			$pankki["lum_st_5kentta"]	= sprintf ('%05s', $asiakastunnus);
-
 			$pankki["lmp_mt_4kentta"]	= "$tilino";
 			$pankki["lmp_st_4kentta"]	= "$tilino";
-
 			$pankki["tiedostonimi"] 	= "OKOMP.DAT";
 
 			break;

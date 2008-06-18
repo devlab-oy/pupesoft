@@ -98,8 +98,19 @@ $presult = mysql_query($query) or pupe_error($query);
 
 // lasketaan tilauksen rahtikulut
 // arvotaan illan 7 oikein, eli kurssi
-if ($laskurow["maksu_kurssi"] == 0) {	//t‰m‰ olisi huonompi juttu, mut ei mik‰‰n stopperi
-	$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"];
+// jos meill‰ on valuuttakeikka, lasketaan keskikurssi kaikille vaihto-omaisuuslaskuille
+if ($laskurow["vienti_kurssi"] != 1 or $laskurow["maksu_kurssi"] != 1) {
+	$query  = "	SELECT round(sum(summa * if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)) / sum(summa),6) vientikurssi
+				FROM lasku
+				WHERE yhtio = '$kukarow[yhtio]' 
+				and tila = 'K' 
+				and alatila in ('','S') 
+				and vanhatunnus <> 0 
+				and laskunro = '$laskurow[laskunro]' 
+				and vienti in ('C','F','I','J','K','L')";
+	$result = mysql_query($query) or pupe_error($query);
+	$kurssirow = mysql_fetch_array($result);
+	$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"] = $kurssirow["vientikurssi"];
 }
 
 // tsekataan viel‰
@@ -187,6 +198,8 @@ if ($tee != "") {
 
 while ($tilrivirow = mysql_fetch_array($presult)) {
 
+	$hankintakulut = "";
+
 	// lasketaan keskihankintahinta, tarvitaan tuotteen saldo ja tuotteen tiedot
 	$query  = "SELECT sum(saldo) saldo from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]'";
 	$salres = mysql_query($query) or pupe_error($query);
@@ -216,6 +229,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	}
 	else {
 		$rahtios = 0;
+		$osuus = 0;
 	}
 
 	if ($tilrivirow['varattu'] < 0) {
@@ -225,6 +239,8 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	// t‰m‰ on miinusta hyvitysrivill‰
 	$ohinta = round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['maksu_kurssi']*$tilrivirow['varattu']+$rahtios, 6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
 
+	$hankintakulut .= "Osuus kululaskuista: ".round($laskurow["saldo_maksettu"] * $osuus, 2)." $yhtiorow[valkoodi]<br>Osuus eturahdista: ".round($laskurow['rahti_etu'] * $laskurow['maksu_kurssi'] * $osuus, 2)." $yhtiorow[valkoodi]<br>";
+
 	$tulliprossa = "";
 	$tv_nimrow	 = "";
 
@@ -232,16 +248,23 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		// lis‰t‰‰n tulli
 		require ("taric_veroperusteet.inc");
 
+		$aputullimaara = $ohinta * ($tulliprossa/100);
 		$ohinta = $ohinta * (1+($tulliprossa/100));
 		$tv_nimrow["maara"] = $tv_nimrow["maara"] * 1; // teh‰‰n numero, ett‰ lista n‰ytt‰‰ kivemmalta
+
+		$hankintakulut .= "Tulli: ".sprintf('%.02f',$tulliprossa)." % (".sprintf('%.02f',$aputullimaara)." $yhtiorow[valkoodi])<br>";
 	}
 
 	// lis‰t‰‰n riville extra kulu, jos sellanen oli annettu
 	if ($tilrivirow["kate"] != 0) {
 		$kuluteksti = "($ohinta + $tilrivirow[kate])";
 		$ohinta = $ohinta + $tilrivirow['kate'];
+
+		$hankintakulut .= "Rivinlis‰kulu: $tilrivirow[kate] $yhtiorow[valkoodi]<br>";
 	}
-	else $kuluteksti = "";
+	else {
+		$kuluteksti = "";
+	}
 
 	$rivihin = round($ohinta, $yhtiorow['hintapyoristys']);	// tilausrivin rivihinta talteen
 	// t‰m‰ muuttaa hinnan plussaksi hyvityskeikalla (jolloin kehahin matikka menee oikein)
@@ -256,12 +279,16 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		if ($salrow['saldo'] + $tilrivirow['varattu'] > 0 and $salrow['saldo'] > 0) {
 			// kehahin matikka, tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen ett‰ edes tehd‰‰n matikkaa
 			$kehahin = round(($salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu']) / ($salrow['saldo'] + $tilrivirow['varattu']), 6);
-			if ($debug >= 1) $varastoon_msg .= "<font class='message'>Tuote: $tuorow[tuoteno] Matikka: ($salrow[saldo] * $tuorow[kehahin] + $ohinta * $tilrivirow[varattu]) / ($salrow[saldo] + $tilrivirow[varattu]) = $kehahin</font><br>";
+			if ($debug >= 1) {
+				$varastoon_msg .= "<font class='message'>Tuote: $tuorow[tuoteno] Matikka: ($salrow[saldo] * $tuorow[kehahin] + $ohinta * $tilrivirow[varattu]) / ($salrow[saldo] + $tilrivirow[varattu]) = $kehahin</font><br>";
+			}
 		}
 		else {
 			// Jos j‰‰d‰‰n saldossa t‰m‰nkin tulon j‰lkeen miinukselle tai nollille, laitetaan kehahin suoraan t‰m‰n keikan hinnasta
 			$kehahin = round($ohinta, 6);
-			if ($debug >= 1) $varastoon_msg .= "<font class='message'>Tuote: $tuorow[tuoteno] Saldo j‰i nollaan tai miinukselle. Kehahin = ostohinta = $kehahin</font><br>";
+			if ($debug >= 1) {
+				$varastoon_msg .= "<font class='message'>Tuote: $tuorow[tuoteno] Saldo j‰i nollaan tai miinukselle. Kehahin = ostohinta = $kehahin</font><br>";
+			}
 		}
 	}
 
@@ -282,6 +309,21 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$uusikehahin = jalkilaskentafunktio($tuoteno, $pvm, $uusihinta, $rivitunnus);
 
 		$uusikehahin = "-> $uusikehahin";
+
+		if ($hankintakulut != '') {
+			$query = "SELECT hankintakulut FROM tilausrivin_lisatiedot WHERE yhtio = '$kukarow[yhtio]' AND tilausrivitunnus = '$tilrivirow[tunnus]'";
+			$resxxxx = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($resxxxx) == 0) {
+				$query = "INSERT INTO tilausrivin_lisatiedot SET hankintakulut = '$hankintakulut', yhtio = '$kukarow[yhtio]', tilausrivitunnus = '$tilrivirow[tunnus]'";
+				$hankresxxx = mysql_query($query) or pupe_error($query);
+			}
+			else {
+				$query = "UPDATE tilausrivin_lisatiedot SET hankintakulut = '$hankintakulut' WHERE yhtio = '$kukarow[yhtio]' AND tilausrivitunnus = '$tilrivirow[tunnus]'";
+				$hankresxxx = mysql_query($query) or pupe_error($query);
+			}
+		}
+
 	}
 	elseif($toiminto == "kalkyyli" and $tee == "varastoon") {
 
@@ -557,8 +599,14 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 	$rivia = mysql_num_rows($presult); // kaunistelua vaan loppua varten... t‰‰ tehd‰‰n elsess‰ affected rowssilla..
 
 	// laitetaan kohdistettu X kun lasku on viety varastoon...	laitetaan MAPVM kentt‰‰n t‰m‰ p‰iv‰ niin tiedet‰‰n koska viety varastoon
-	$query = "	UPDATE lasku set kohdistettu='X', alatila='X', mapvm=now()
-				WHERE tunnus='$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'";
+	$query = "	UPDATE lasku set 
+				kohdistettu = 'X', 
+				alatila = 'X', 
+				mapvm = now(),
+				vienti_kurssi = '$laskurow[vienti_kurssi]',
+				maksu_kurssi = '$laskurow[maksu_kurssi]'
+				WHERE tunnus = '$laskurow[tunnus]' 
+				and yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	// haetaan keikan vaihto-omaisuuslaskut (kotimaa, eu tai ei-eu)

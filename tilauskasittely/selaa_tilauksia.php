@@ -160,25 +160,28 @@
 					ORDER BY luontiaika";
 
 		// päivänäkymä
-		$query2 = "	SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, if(mapvm='0000-00-00','',DATE_FORMAT(mapvm,'%d.%m.%Y')) jlaskenta,
+		$query2 = "	SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, if(lasku.mapvm='0000-00-00','',DATE_FORMAT(lasku.mapvm,'%d.%m.%Y')) jlaskenta,
 					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)),2) summa, lasku.valkoodi
 					FROM lasku use index (yhtio_tila_luontiaika)
 					JOIN tilausrivi use index (uusiotunnus_index) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					tila in ('K') and
 					vanhatunnus = 0 ";
-					if (!isset($keikkanrohaku)) {
-						$query2 .= " and luontiaika >= '$vv-$kk-$pp 00:00:00' and luontiaika <= '$vv-$kk-$pp 23:59:59' ";
-					}
+
+		if (!isset($keikkanrohaku) or $keikkanrohaku == "") {
+			$query2 .= " and lasku.luontiaika >= '$vv-$kk-$pp 00:00:00' and lasku.luontiaika <= '$vv-$kk-$pp 23:59:59' ";
+		}
+
 		$query2 .= "$etsi
 					GROUP BY lasku.tunnus
 					ORDER BY lasku.laskunro";
 
 		// tilausnäkymä
-		$query3 = "	SELECT lasku.laskunro keikka, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, tilausrivi.hinta,
-					round(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl),'$yhtiorow[hintapyoristys]') arvo, lasku.valkoodi
+		$query3 = "	SELECT lasku.laskunro keikka, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, round(tilausrivi.hinta*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi), '$yhtiorow[hintapyoristys]') hinta,
+					round(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi),'$yhtiorow[hintapyoristys]') arvo, '$yhtiorow[valkoodi]' valkoodi, round(tilausrivi.rivihinta, '$yhtiorow[hintapyoristys]') ostohinta, vienti_kurssi kurssi, tilausrivin_lisatiedot.hankintakulut
 					FROM tilausrivi use index (uusiotunnus_index)
 					JOIN lasku use index (PRIMARY) on (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.uusiotunnus)
+					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
 					uusiotunnus = '$tunnus' and
 					tyyppi!='D'

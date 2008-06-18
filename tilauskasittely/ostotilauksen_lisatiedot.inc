@@ -141,7 +141,10 @@ if ($tee == "") {
 				ORDER BY koodi";
 	$result = mysql_query($query) or pupe_error($query);
 
-	if ($laskurow["maa_maara"] == "") $laskurow["maa_maara"] = $yhtiorow["maa"];
+	if ($laskurow["maa_maara"] == "") {
+		#TODO tähän pitäisi tehdä query, joka laskee montako riviä keikalla on kohdistettuna mihinkin maahan ja valitsee sen maan johon on eniten
+		$laskurow["maa_maara"] = $yhtiorow["maa"];
+	}
 
 	while ($row = mysql_fetch_array($result)) {
 		$sel = '';
@@ -160,7 +163,7 @@ if ($tee == "") {
 		$laskurow["tuontipvm"] = $vv."-".$kk."-".$pp;
 	}
 
-	$query  = "select * from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$laskurow[ytunnus]'";
+	$query  = "SELECT * from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$laskurow[ytunnus]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$toimittaja = mysql_fetch_array($result);
 

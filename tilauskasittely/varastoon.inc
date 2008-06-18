@@ -96,8 +96,10 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 }
 $presult = mysql_query($query) or pupe_error($query);
 
-// lasketaan tilauksen rahtikulut
-// arvotaan illan 7 oikein, eli kurssi
+if ($laskurow["maksu_kurssi"] == 0) { // t‰m‰ olisi huonompi juttu, mut ei mik‰‰n stopperi
+	$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"];
+}
+
 // jos meill‰ on valuuttakeikka, lasketaan keskikurssi kaikille vaihto-omaisuuslaskuille
 if ($laskurow["vienti_kurssi"] != 1 or $laskurow["maksu_kurssi"] != 1) {
 	$query  = "	SELECT round(sum(summa * if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)) / sum(summa),6) vientikurssi
@@ -111,10 +113,6 @@ if ($laskurow["vienti_kurssi"] != 1 or $laskurow["maksu_kurssi"] != 1) {
 	$result = mysql_query($query) or pupe_error($query);
 	$kurssirow = mysql_fetch_array($result);
 	$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"] = $kurssirow["vientikurssi"];
-}
-
-if ($laskurow["maksu_kurssi"] == 0) { // t‰m‰ olisi huonompi juttu, mut ei mik‰‰n stopperi
-	$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"];
 }
 
 // tsekataan viel‰

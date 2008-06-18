@@ -113,8 +113,12 @@ if ($laskurow["vienti_kurssi"] != 1 or $laskurow["maksu_kurssi"] != 1) {
 	$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"] = $kurssirow["vientikurssi"];
 }
 
+if ($laskurow["maksu_kurssi"] == 0) { // t‰m‰ olisi huonompi juttu, mut ei mik‰‰n stopperi
+	$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"];
+}
+
 // tsekataan viel‰
-if ($laskurow["maksu_kurssi"] == 0) {	//t‰m‰ olisi huonompi juttu, mut ei mik‰‰n stopperi
+if ($laskurow["maksu_kurssi"] == 0) {
 	echo t("Kurssi uupuu! Jossain on iso ongelma ,8,1");
 	exit;
 }

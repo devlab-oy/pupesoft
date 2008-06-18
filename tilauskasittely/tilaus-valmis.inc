@@ -303,7 +303,7 @@ else {
 		//tämä olkoon hyvä arvaus rahtihinnasta, sitä voidaan sitten myöhemmin tarkentaa
 		if ($yhtiorow["rahti_hinnoittelu"] == "o") {
 
-			$query = "	select tunnus
+			$query = "	SELECT tunnus
 						from tilausrivi
 						where yhtio = '$kukarow[yhtio]'
 						and otunnus = '$laskurow[tunnus]'
@@ -313,7 +313,7 @@ else {
 			//jos tilauksella on jo rahtikulu niin ei lisätä sitä uudestaan
 			if (mysql_num_rows($result) == 0) {
 
-				$query = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
+				$query = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$torow = mysql_fetch_array($result);
 
@@ -363,6 +363,11 @@ else {
 						$kyht = $myht + $nyht;
 					}
 
+					// $kyht on KOTIVALUUTASSA, käännetään laskun valuuttaan
+					if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+						$kyht = round(laskuval($kyht, $laskurow["vienti_kurssi"]), 2);
+					}
+
 					$query = "	SELECT rahtihinta
 								from rahtimaksut
 								where yhtio		 = '$kukarow[yhtio]'
@@ -390,7 +395,7 @@ else {
 							if ($kyht > $as_row["rahtivapaa_alarajasumma"]) {
 								$hirow = array();
 								$hirow["rahtihinta"] = 0;
-							
+
 								$query = "UPDATE lasku SET rahtivapaa='o' WHERE yhtio='$kukarow[yhtio]' AND tunnus='$laskurow[tunnus]'";
 								$rahtivapres = mysql_query($query) or pupe_error($query);
 							}
@@ -399,7 +404,7 @@ else {
 							if ($kyht > $yhtiorow["rahtivapaa_alarajasumma"] and $yhtiorow["rahtivapaa_alarajasumma"] != 0) {
 								$hirow = array();
 								$hirow["rahtihinta"] = 0;
-							
+
 								$query = "UPDATE lasku SET rahtivapaa='o' WHERE yhtio='$kukarow[yhtio]' AND tunnus='$laskurow[tunnus]'";
 								$rahtivapres = mysql_query($query) or pupe_error($query);
 							}
@@ -420,7 +425,7 @@ else {
 						$hinta		 = $hirow["rahtihinta"]; // rahtihinta
 						$trow["alv"] = $laskurow["alv"];
 						$nimitys	 = $laskurow["toimitustapa"];
-						
+
 						list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
 						list($hinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
 
@@ -640,7 +645,7 @@ else {
 					$laskurow["sisamaan_kuljetus"]					= $aputoimirow["sisamaan_kuljetus"];
 					$laskurow["sisamaan_kuljetusmuoto"]  			= $aputoimirow["sisamaan_kuljetusmuoto"];
 					$laskurow["sisamaan_kuljetus_kansallisuus"]		= $aputoimirow["sisamaan_kuljetus_kansallisuus"];
-					$laskurow["vahennettava_era"] 					= $aputoimirow["vahennettava_era"];	
+					$laskurow["vahennettava_era"] 					= $aputoimirow["vahennettava_era"];
 				}
 				elseif ($ultilno == '-2') {
 					// tuonti-ilmoitus

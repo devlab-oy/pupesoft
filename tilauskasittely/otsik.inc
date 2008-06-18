@@ -42,7 +42,10 @@
 					toim_postino  		= '',
 					toim_postitp 		= '',
 					toim_maa    		= '',
-					tilausyhteyshenkilo	= ''
+					tilausyhteyshenkilo	= '',
+					laskutusvkopv		= '',
+					chn					= '',
+					verkkotunnus		= ''					
 					WHERE yhtio 		= '$kukarow[yhtio]'
 					and tunnus	 		= '$kukarow[kesken]'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -420,7 +423,7 @@
 							WHERE tunnus = '$asiakasid'";
 				$assresult = mysql_query($squery) or pupe_error($squery);
 				$assrow = mysql_fetch_array($assresult);
-
+				
 				$query = "	UPDATE lasku
 							SET liitostunnus 	= '$assrow[tunnus]',
 							ytunnus				= '$assrow[ytunnus]',
@@ -437,7 +440,11 @@
 							toim_osoite    		= '$assrow[toim_osoite]',
 							toim_postino  		= '$assrow[toim_postino]',
 							toim_postitp 		= '$assrow[toim_postitp]',
-							toim_maa    		= '$assrow[toim_maa]'
+							toim_maa    		= '$assrow[toim_maa]',
+							tilausyhteyshenkilo	= '$assrow[tilausyhteyshenkilo]',
+							laskutusvkopv		= '$assrow[laskutusvkopv]',
+							chn					= '$assrow[chn]',
+							verkkotunnus		= '$assrow[verkkotunnus]'
 							WHERE yhtio 		= '$kukarow[yhtio]'
 							and tunnus	 		= '$kukarow[kesken]'
 							and liitostunnus	= 0";

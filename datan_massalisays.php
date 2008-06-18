@@ -18,7 +18,7 @@ if (1 == 2) {
 	$polut[] = "allr/asiakas/alkuperainen";
 
 	foreach ($polut as $polku) {
-		for ($i=0; $i < 10; $i++) { 
+		for ($i=0; $i < 10; $i++) {
 				$tsydeemi = "cp ".$dirri."/jlo.png ".$dirri."/".$polku."/jlo".$i.".png";
 				system($tsydeemi);
 		}
@@ -73,27 +73,27 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$kuva,$dirri,$upfile1) {
 	$resize    = ""; // resize komento
 	$crop      = ""; // crop komento
 	$upfileall = ""; // palautus
-	
+
 	$path_parts = pathinfo($upfile1);
 	$ext = strtolower($path_parts['extension']);
-	
+
 	$image = getimagesize($upfile1);	// l‰hetetty kuva
-	
-	$leve = $image[0];       
+
+	$leve = $image[0];
 
 	$kork = $image[1];
-	
+
 	// teh‰‰n pienent‰m‰ll‰
 	$upfilesgh = strtolower("/tmp/$nimi"."1.".$ext);
-	
-	
+
+
     // skaalataan kuva oikenakokoiseksi
     exec("nice -n 20 convert -resize x$ykoko -quality 80 $upfile1 $upfilesgh");
-	
+
 	$uusnimi = $dirri."/".$taulu."/".$type."/".$kuva;
-	
+
 	copy($upfilesgh,$uusnimi);
-	
+
 	if (!copy($upfilesgh,$uusnimi)) {
 	    echo "Kopiointi ep‰onnistui $upfile1<br>";
 		$upfileall = "";
@@ -101,12 +101,12 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$kuva,$dirri,$upfile1) {
 	else {
 		$upfileall .= "$uusnimi";
 	}
-	
+
 	// poistetaan file
 	system("rm -f $upfilesgh");
-	
+
 	return $upfileall;
-	
+
 }
 
 // testausta varten staattinen
@@ -122,61 +122,67 @@ if (!is_writable($dirri)) {
 $files = listdir($dirri);
 
 if ($tee == 'GO') {
-	
+
 	if (isset($convertit) and $convertit == '1') {
 		echo "<br>K‰sitell‰‰n konvertoitavia kuvia:<br>";
-		
+
 		foreach ($files as $file) {
 			$polku = substr($file,$alkupituus);
-	
+
 			list($taulu, $toiminto, $kuva) = split("/", $polku, 3);
-			
+
 			$path_parts = pathinfo($kuva);
 			$ext = $path_parts['extension'];
-	
-			list($mtype, $crap) = explode("/", $size["mime"]);					
-	
+
+			list($mtype, $crap) = explode("/", $size["mime"]);
+
 			if ($toiminto == 'kasittele' and $mtype == "image") {
 				if (file_exists($file)) {
+
+					echo "$kuva ";
 					$thumbi = konvertoi($thumbkork,$thumbleve,'thumb',$taulu,$kuva,$dirri,$file);
+
 					if ($thumbi != '') {
-						echo "Luotiin thumbnailkuva $kuva<br>";
+						echo "luotiin thumbnailkuva. ";
 					}
-					
+
 					$normi = konvertoi($normaalikork,$normaalileve,'normaali',$taulu,$kuva,$dirri,$file);
-					
+
 					if ($normi != '') {
-						echo "Luotiin normaali kuva $kuva<br>";
+						echo "luotiin normaali kuva.";
 					}
-					
+
+					echo "<br>";
+
 					if ($normi != '' and $thumbi != '') {
 						// poistetaan orkkisfile
 						system("rm -f $file");
 					}
-					
+
 					continue;
 				}
 			}
-						
+
 		}
+
 		echo "<br>";
 	}
-	
+
 	$files = listdir($dirri);
-	
+
 	foreach ($files as $file) {
 		$polku = substr($file,$alkupituus);
-	
+
 		list($taulu, $toiminto, $kuva) = split("/", $polku, 3);
-		
+
 		$path_parts = pathinfo($kuva);
 		$ext = $path_parts['extension'];
-		
+
 		$koko = getimagesize($file);
 		$filetype = $koko["mime"];
-		$leve = $koko[0];       
+		$leve = $koko[0];
 		$kork = $koko[1];
-		
+
 		if (strtoupper($ext) != "PDF") {
 			if ($toiminto == 'thumb') {
 				if ($kork <> $thumbkork) {
@@ -192,13 +198,13 @@ if ($tee == 'GO') {
 				continue;
 			}
 		}
-		
-		$apukuva = $kuva; 
-		
+
+		$apukuva = $kuva;
+
 		if (strtolower($taulu) != 'tuote') {
 			die("Toistaiseksi voidaan vaan lukea tuotekuvia!");
 		}
-		
+
 		if (strtoupper($ext) != "PDF") {
 			if ($toiminto == 'kasittele') {
 				// n‰ist‰ ollaan jo tehty uudet versiot
@@ -209,58 +215,58 @@ if ($tee == 'GO') {
 				continue;
 			}
 		}
-		
-		
+
+
 		unset($apuresult);
-	
+
 		$path_parts = pathinfo($kuva);
 		$ext = $path_parts['extension'];
 		//echo "$ext<br>";
-	
+
 		// pit‰‰ kattoo onko nimess‰ wildkardia ta h‰ssi‰
 		if (strpos($kuva,"#") !== FALSE) {
 			// (nro)
 			$mihin = strpos($kuva,"#");
-		
+
 			$kuva = substr($kuva,0,"$mihin").".".$ext;
-		
+
 			//echo "kuva: $kuva<br>";
-		
-		
+
+
 		}
-	
+
 		if (strpos($kuva,"%") !== FALSE) {
 			// (wildkaard)
 			$mihin = strpos($kuva,"%");
 			$kuvanalku = substr($kuva,0,$mihin);
 			//echo "Alku: $kuvanalku<br>";
-		
+
 			$query = "SELECT tuoteno, tunnus FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno LIKE '$kuvanalku%'";
 			$apuresult = mysql_query($query) or pupe_error($query);
 		}
-		
+
 		if (file_exists($file)) {
 			$filesize = filesize($file);
-			
+
 			$query = "show variables like 'max_allowed_packet'";
 			$result = mysql_query($query) or pupe_error($query);
 			$paketti = mysql_fetch_array($result);
-			
+
 			//echo "Kuvan koko:$filesize ($paketti[0]) ($paketti[1])<br>";
-			
+
 			if ($filesize > $paketti[1]) {
 				echo "Kuva $kuva on liian suuri. Hyl‰t‰‰n<br>";
 				continue;
 			}
-			
+
 			if ($filesize == 0) {
 				echo "Kuva $kuva oli tyhj‰. Hyl‰t‰‰n<br>";
 				continue;
 			}
-			
+
 			$size = getimagesize($file);
-			
-			list($mtype, $crap) = explode("/", $size["mime"]);					
+
+			list($mtype, $crap) = explode("/", $size["mime"]);
 			if($mtype == "image") {
 				$image_width 	= $size[0];
 				$image_height 	= $size[1];
@@ -273,44 +279,44 @@ if ($tee == 'GO') {
 				$image_bits 	= "";
 				$image_channels	= "";
 			}
-			
+
 			$filee = fopen($file, 'r');
 			$data = addslashes(fread($filee, $filesize));
-		
+
 			if (!isset($apuresult)) {
 				$mihin = strpos($kuva,".$ext");
 				$tuoteno = substr($kuva,0,"$mihin");
 				$query = "SELECT tuoteno, tunnus FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno = '$tuoteno' LIMIT 1";
 				$apuresult = mysql_query($query) or pupe_error($query);
 			}
-			
+
 			if (mysql_num_rows($apuresult) > 0) {
-				
+
 				// lis‰t‰‰n file
 				while ($apurow = mysql_fetch_array($apuresult)) {
 					// poistetaan vanhat samat ja korvataan uusilla
-					$query =	"DELETE FROM liitetiedostot 
-								WHERE yhtio 			= '$kukarow[yhtio]' 
-								and liitos 				= '$taulu' 
-								and liitostunnus 		= '$apurow[tunnus]' 
-								and kayttotarkoitus 	= '$toiminto' 
+					$query =	"DELETE FROM liitetiedostot
+								WHERE yhtio 			= '$kukarow[yhtio]'
+								and liitos 				= '$taulu'
+								and liitostunnus 		= '$apurow[tunnus]'
+								and kayttotarkoitus 	= '$toiminto'
 								and filename			= '$apukuva'";
 					$delresult = mysql_query($query) or pupe_error($query);
 					$dellatut = mysql_affected_rows();
-					
+
 					if ($dellatut > 0) {
 						echo "Poistettiin $dellatut $kuva kuvaa<br>";
 					}
-					
+
 					$kuvaselite = "Tuotekuva";
-					
+
 					if ($toiminto == 'TH') {
 						$kuvaselite .= " pieni";
 					}
 					elseif ($toiminto == 'TK') {
 						$kuvaselite .= " normaali";
 					}
-					
+
 					$query = "	INSERT INTO liitetiedostot SET
 								yhtio    			= '$kukarow[yhtio]',
 								liitos   			= '$taulu',
@@ -320,61 +326,61 @@ if ($tee == 'GO') {
 								filename 			= '$apukuva',
 								filesize 			= '$filesize',
 								filetype 			= '$filetype',
-								image_width			= '$image_width',							
+								image_width			= '$image_width',
 								image_height		= '$image_height',
-								image_bits			= '$image_bits',							
-								image_channels		= '$image_channels',								
+								image_bits			= '$image_bits',
+								image_channels		= '$image_channels',
 								kayttotarkoitus		= '$toiminto',
 								laatija				= '$kukarow[kuka]',
 								luontiaika			= now()";
 					$insre = mysql_query($query) or pupe_error($query);
-					
+
 					echo "Lis‰ttiin $toiminto $kuva tuotteelle $apurow[tuoteno]<br>";
-					
+
 					//echo "$query<br>";
 				}
 				system("rm -f \"$file\"");
 			}
 			else {
 				echo "Tuotetta ei lˆytynyt kuvalle $kuva !!!<br>";
-				
+
 			}
-		
-			
+
+
 		}
 
 		//echo "$polku || $file ... $taulu | $toiminto @ $kuva<br><br><br>";
-	
+
 	}
 }
 
 if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
-	
+
 	if (!is_writable($dirri."/".$mitkadumpataan)) {
 		die("Kuvapankkiin/$mitkadumpataan ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
 	}
-	
+
 	$query =	"SELECT *
 				FROM liitetiedostot
 				WHERE yhtio = '$kukarow[yhtio]' and liitos = '$mitkadumpataan'";
 	$result = mysql_query($query) or pupe_error($query);
-	
+
 	$dumpattuja = 0;
 	$dellattuja = 0;
-	
+
 	while ($row = mysql_fetch_array($result)) {
 		if ($row["liitos"] == '' or $row["kayttotarkoitus"] == '' or $row["filename"] == '') {
 			continue;
 		}
-		
+
 		$kokonimi = $dirri."/".$row["liitos"]."/".$row["kayttotarkoitus"];
-		
+
 		if (!is_writable($kokonimi)) {
 			die("$kokonimi ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
 		}
-		
+
 		$kokonimi .= "/".$row["filename"];
-		
+
 		if (!file_exists($kokonimi)) {
 			$handle = fopen("$kokonimi", "x");
 
@@ -388,7 +394,7 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
 
 			$dumpattuja++;
 		}
-		
+
 		if (isset($dumppaajapoista) and $dumppaajapoista == '1') {
 			$query = "DELETE FROM liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and liitos = '$mitkadumpataan' and tunnus = '$row[tunnus]'";
 			$delresult = mysql_query($query) or pupe_error($query);
@@ -399,7 +405,7 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
 	if (isset($dumppaajapoista) and $dumppaajapoista == '1') {
 		echo "Poistettiin $dellattuja kuvaa j‰rjestelm‰st‰<br>";
 	}
-	
+
 }
 
 
@@ -413,7 +419,7 @@ foreach ($files as $file) {
 	$polku = substr($file,$alkupituus);
 
 	list($taulu, $toiminto, $kuva) = split("/", $polku, 3);
-	
+
 	if ($toiminto == 'thumb' and $kuva != '') {
 		$lukuthumbit ++;
 	}
@@ -423,7 +429,7 @@ foreach ($files as $file) {
 	if ($toiminto == 'kasittele' and $kuva != '') {
 		$lukutconvertit ++;
 	}
-	
+
 }
 
 // k‰yttˆliittym‰

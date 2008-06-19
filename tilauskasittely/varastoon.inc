@@ -101,18 +101,21 @@ if ($laskurow["maksu_kurssi"] == 0) { // t‰m‰ olisi huonompi juttu, mut ei mik‰‰
 }
 
 // jos meill‰ on valuuttakeikka, lasketaan keskikurssi kaikille vaihto-omaisuuslaskuille
-if ($laskurow["vienti_kurssi"] != 1 or $laskurow["maksu_kurssi"] != 1) {
-	$query  = "	SELECT round(sum(summa * if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)) / sum(summa),6) vientikurssi
+if ($laskurow["maksu_kurssi"] != 1) {
+	$query  = "	SELECT ifnull(round(sum(summa * if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)) / sum(summa), 6), 0) vientikurssi
 				FROM lasku
-				WHERE yhtio = '$kukarow[yhtio]' 
-				and tila = 'K' 
-				and alatila in ('','S') 
-				and vanhatunnus <> 0 
-				and laskunro = '$laskurow[laskunro]' 
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tila = 'K'
+				and alatila in ('','S')
+				and vanhatunnus <> 0
+				and laskunro = '$laskurow[laskunro]'
 				and vienti in ('C','F','I','J','K','L')";
 	$result = mysql_query($query) or pupe_error($query);
 	$kurssirow = mysql_fetch_array($result);
-	$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"] = $kurssirow["vientikurssi"];
+
+	if ($kurssirow["vientikurssi"] != 0) {
+		$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"] = $kurssirow["vientikurssi"];
+	}
 }
 
 // tsekataan viel‰
@@ -315,7 +318,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		if ($hankintakulut != '') {
 			$query = "SELECT hankintakulut FROM tilausrivin_lisatiedot WHERE yhtio = '$kukarow[yhtio]' AND tilausrivitunnus = '$tilrivirow[tunnus]'";
 			$resxxxx = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($resxxxx) == 0) {
 				$query = "INSERT INTO tilausrivin_lisatiedot SET hankintakulut = '$hankintakulut', yhtio = '$kukarow[yhtio]', tilausrivitunnus = '$tilrivirow[tunnus]'";
 				$hankresxxx = mysql_query($query) or pupe_error($query);
@@ -389,9 +392,9 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 					hinta      = '$kehahin',
 					kplhinta   = '$ohinta',
 					laji       = 'tulo',
-					hyllyalue 	= '$tilrivirow[hyllyalue]', 
-					hyllynro 	= '$tilrivirow[hyllynro]', 
-					hyllytaso 	= '$tilrivirow[hyllytaso]', 
+					hyllyalue 	= '$tilrivirow[hyllyalue]',
+					hyllynro 	= '$tilrivirow[hyllynro]',
+					hyllytaso 	= '$tilrivirow[hyllytaso]',
 					hyllyvali 	= '$tilrivirow[hyllyvali]',
 					selite     = '$laskurow[nimi] $laskurow[nimitark], ".t("Tilaus").": $tilrivirow[otunnus], ".t("Ostohinta").": $ohinta $lisavartlisa',
 					laatija    = '$kukarow[kuka]',
@@ -601,13 +604,13 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 	$rivia = mysql_num_rows($presult); // kaunistelua vaan loppua varten... t‰‰ tehd‰‰n elsess‰ affected rowssilla..
 
 	// laitetaan kohdistettu X kun lasku on viety varastoon...	laitetaan MAPVM kentt‰‰n t‰m‰ p‰iv‰ niin tiedet‰‰n koska viety varastoon
-	$query = "	UPDATE lasku set 
-				kohdistettu = 'X', 
-				alatila = 'X', 
+	$query = "	UPDATE lasku set
+				kohdistettu = 'X',
+				alatila = 'X',
 				mapvm = now(),
 				vienti_kurssi = '$laskurow[vienti_kurssi]',
 				maksu_kurssi = '$laskurow[maksu_kurssi]'
-				WHERE tunnus = '$laskurow[tunnus]' 
+				WHERE tunnus = '$laskurow[tunnus]'
 				and yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 

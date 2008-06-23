@@ -41,7 +41,7 @@
 
 			if (!function_exists('tulosta_ostotilaus')) {
 				function tulosta_ostotilaus ($otunnus, $komento, $kieli = "", $tee = "", $oma_kutsu = "") {
-					global $yhtiorow, $kukarow, $fonts, $tulosta_ostotilaus_ulos, $toim;
+					global $yhtiorow, $kukarow, $fonts, $tulosta_ostotilaus_ulos, $toim, $mista;
 
 					// Haetaan laskun tiedot
 					$query = "	SELECT lasku.*, lasku.tunnus tunnus, lasku.nimi nimi, lasku.luontiaika p‰iv‰ys, lasku.tunnusnippu projekti, lasku.tunnus tilaus, lasku.tunnus toimitus, viesti viite, comments lis‰tiedot,
@@ -198,30 +198,14 @@
 					$pdf=alku($pdf, $laskurow,$kieli);
 					$h = 190;
 
-					if($toim == "HAAMU") {
-						
+					if($toim == "HAAMU" or $mista == "tulostakopio") {
 						//	K‰sitell‰‰n tilausrivit
 						$query = "	SELECT tilausrivi.tuoteno toim_tuoteno, tilausrivi.nimitys toim_nimitys, round(tilausrivi.varattu,2) varattu, toimaika,
 									tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, kommentti
 									FROM tilausrivi
 									WHERE tilausrivi.otunnus = '$otunnus'
 									and tilausrivi.yhtio='$kukarow[yhtio]'
-									ORDER BY tilausrivi.toimaika, toim_tuoteno";
-									
-					}
-					elseif($mista == "tulostakopio") {
-						
-						//	K‰sitell‰‰n tilausrivit
-						$query = "	SELECT toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.tilkpl*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu, toimaika,
-									tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.tilkpl*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, kommentti
-									FROM tilausrivi
-									JOIN tuote USING (yhtio, tuoteno)
-									JOIN tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-									WHERE tilausrivi.otunnus = '$otunnus'
-									and tilausrivi.yhtio='$kukarow[yhtio]'
-									and tilausrivi.tyyppi != 'D'
-									ORDER BY tilausrivi.toimaika, toim_tuoteno";
-									
+									ORDER BY tilausrivi.toimaika, toim_tuoteno";				
 					}
 					else {
 
@@ -1013,17 +997,32 @@
 			}
 			
 			if ($toim != "HAAMU") {
-				$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
-							tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, 
-							substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys,
-							$sorttauskentta
-							FROM tilausrivi
-							join tuote USING (yhtio, tuoteno)
-							join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-							WHERE tilausrivi.otunnus = '$otunnus'
-							and tilausrivi.yhtio	 = '$kukarow[yhtio]'
-							and tilausrivi.tyyppi	!= 'D'
-							ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
+				if ($mista == 'tulostakopio') {
+					$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.tilkpl*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
+								tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.tilkpl*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, 
+								substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys,
+								$sorttauskentta
+								FROM tilausrivi
+								join tuote USING (yhtio, tuoteno)
+								join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+								WHERE tilausrivi.otunnus = '$otunnus'
+								and tilausrivi.yhtio	 = '$kukarow[yhtio]'
+								and tilausrivi.tyyppi	!= 'D'
+								ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
+				}
+				else {
+					$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
+								tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, 
+								substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys,
+								$sorttauskentta
+								FROM tilausrivi
+								join tuote USING (yhtio, tuoteno)
+								join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+								WHERE tilausrivi.otunnus = '$otunnus'
+								and tilausrivi.yhtio	 = '$kukarow[yhtio]'
+								and tilausrivi.tyyppi	!= 'D'
+								ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
+				}
 			}
 			else {
 				$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu,

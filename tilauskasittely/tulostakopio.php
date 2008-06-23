@@ -786,6 +786,7 @@
 						<input type='hidden' name='ppl' value='$ppl'>
 						<input type='hidden' name='kkl' value='$kkl'>
 						<input type='hidden' name='vvl' value='$vvl'>
+						<input type='hidden' name='mista' value='tulostakopio'>
 						<input type='submit' value='".t("Tulosta useita kopioita")."'></form><br>";
 			}		
 			echo "<table><tr>";
@@ -802,6 +803,7 @@
 				echo "  <form method='post' action='$PHP_SELF' autocomplete='off'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='toim' value='$toim'>
+						<input type='hidden' name='mista' value='tulostakopio'>
 						<input type='hidden' name='tee' value='TULOSTA'>";
 			}
 
@@ -856,6 +858,7 @@
 								<input type='hidden' name='ppl' value='$ppl'>
 								<input type='hidden' name='kkl' value='$kkl'>
 								<input type='hidden' name='vvl' value='$vvl'>
+								<input type='hidden' name='mista' value='tulostakopio'>
 								<input type='submit' value='".t("Näytä ruudulla")."'></form>
 								<br>";
 						}
@@ -865,6 +868,7 @@
 						<input type='hidden' name='otunnus' value='$row[tunnus]'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tee' value='NAYTATILAUS'>
+						<input type='hidden' name='mista' value='tulostakopio'>
 						<input type='submit' value='".t("Näytä pdf")."'></form>";
 						
 					if($kukarow["extranet"] == "") {	
@@ -874,6 +878,7 @@
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tee' value='TULOSTA'>
+							<input type='hidden' name='mista' value='tulostakopio'>
 							<input type='submit' value='".t("Tulosta")."'></form>";
 					}
 					

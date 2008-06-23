@@ -3015,15 +3015,16 @@ if ($tee == '') {
 			echo "<br>
 				<table>
 				<tr>$jarjlisa<th>".t("Nimitys")."</th><td align='right'>".asana('nimitys_',$tuote['tuoteno'],$tuote['nimitys'])."</td></tr>
-				<tr>$jarjlisa<th>".t("Hinta")."</th><td align='right'>$tuote[myyntihinta] $yhtiorow[valkoodi]</td></tr>
-				<tr>$jarjlisa<th>".t("Nettohinta")."</th><td align='right'>$tuote[nettohinta] $yhtiorow[valkoodi]</td></tr>";
+				<tr>$jarjlisa<th>".t("Hinta")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['myyntihinta'])." $yhtiorow[valkoodi]</td></tr>
+				<tr>$jarjlisa<th>".t("Nettohinta")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['nettohinta'])." $yhtiorow[valkoodi]</td></tr>";
 
+			
 			//haetaan viimeisin hinta millä asiakas on tuotetta ostanut
-			$query =	"SELECT tilausrivi.hinta, tilausrivi.ale, tilausrivi.otunnus FROM tilausrivi
-					   	JOIN lasku ON lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = tilausrivi.otunnus and lasku.ytunnus = '$laskurow[ytunnus]' and lasku.ovttunnus = '$laskurow[ovttunnus]'
+			$query =	"SELECT tilausrivi.hinta, tilausrivi.ale, tilausrivi.otunnus, tilausrivi.laskutettuaika FROM tilausrivi
+					   	JOIN lasku ON lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = tilausrivi.otunnus and lasku.ytunnus = '$laskurow[ytunnus]' and lasku.ovttunnus = '$laskurow[ovttunnus]' and lasku.alatila = 'X'
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi = 'L'
-						and tilausrivi.tuoteno = '$tuoteno'
+						and tilausrivi.tuoteno = '$tuoteno'						
 						ORDER BY tilausrivi.tunnus desc
 						LIMIT 1";	
 			$viimhintares = mysql_query($query) or pupe_error($query);			
@@ -3031,8 +3032,11 @@ if ($tee == '') {
 			if (mysql_num_rows($viimhintares)!=0) {
 				$viimhinta = mysql_fetch_array($viimhintares);
 				
-				echo "<tr>$jarjlisa<th>".t("Viimeisin hinta")."/".t("alennus")."</th><td align='right'>$viimhinta[hinta] $yhtiorow[valkoodi] / $viimhinta[ale]</td></tr>";
+				echo "<tr>$jarjlisa<th>".t("Viimeisin hinta")."/".t("alennus")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $viimhinta[hinta])." $yhtiorow[valkoodi] / $viimhinta[ale]</td></tr>";
 				echo "<tr>$jarjlisa<th>".t("Tilausnumero")."</th><td align='right'>$viimhinta[otunnus]</td></tr>";
+				
+				echo "<tr>$jarjlisa<th>".t("Laskutettu")."</th><td align='right'>".tv1dateconv($viimhinta[laskutettuaika])."</td></tr>";
+				
 			}		
 					
 			$query = "SELECT * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";

@@ -97,6 +97,7 @@ if ($tee == "muokkaa") {
 				<option $prio_sel[7] value='7'>7</option>
 				<option $prio_sel[8] value='8'>8</option>
 				<option $prio_sel[9] value='9'>9</option>
+				<option $prio_sel[10] value='10'>Hyväksynnässä</option>
 				</select>
 			</td>
 

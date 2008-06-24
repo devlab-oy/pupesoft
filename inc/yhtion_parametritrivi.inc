@@ -212,6 +212,23 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "tarjouksen_alv_kasittely") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos .= "<option value = ''>".t("Käytetään yhtiön alv käsittelyä")."</option>";
+		$ulos .= "<option value = 'S' $sel[S]>".t("Tuotteiden myyntihinnat sisältävät arvonlisäveron")."</option>";
+		$ulos .= "<option value = 'X' $sel[X]>".t("Tuotteiden myyntihinnat ovat arvonlisäverottomia")."</option>";
+
+		
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "rahti_hinnoittelu") {
 

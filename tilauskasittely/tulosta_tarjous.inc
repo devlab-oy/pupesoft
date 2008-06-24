@@ -496,7 +496,7 @@ if (!function_exists('rivi_tarjous')) {
 		
 		// Trimmataan uudestaan
 		$row["kommentti"] = trim($row["kommentti"]);
-		
+						
 		//hatetaan tuotteen myyntihinta
 		$query = "	SELECT round(if(isnull(hinnasto.hinta) or hinnasto.hinta='', round(tuote.myyntihinta/if('$laskurow[vienti_kurssi]'=0,1,'$laskurow[vienti_kurssi]'),'$yhtiorow[hintapyoristys]'), hinnasto.hinta) / (1+(if('$yhtiorow[alv_kasittely]'='',0,tuote.alv)/100)), '$yhtiorow[hintapyoristys]') myyntihinta,
        				tuote.aleryhma
@@ -617,7 +617,7 @@ if (!function_exists('rivi_tarjous')) {
 			if (str_replace("perhe_", "", $tarjoustyyppi) == "") {
 				// tulosta_tarjous.inc
 				if ($row["var"] != 'J' and $row["var"] != 'P') {
-					$summa += $row['rivihinta'];
+					$summa += $row['rivihinta'];					
 				}
 				else {
 					$row['rivihinta'] = 0;
@@ -683,13 +683,23 @@ if (!function_exists('loppu_tarjous')) {
 			$oikpos = $pdf_tarjous->strlen(sprintf("%.2f",$total_uudet)." ".$laskurow["valkoodi"], $boldi);					
 			$pdf_tarjous->draw_text(575-$oikpos, 140, sprintf("%.2f",$total_uudet)." ".$laskurow["valkoodi"], $page_tarjous, $boldi);
 		
-		
-			if ($yhtiorow['alv_kasittely'] != '') {
-	        	$pdf_tarjous->draw_text(mm_pt(15),  120, "Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $page_tarjous, $norm);
+			if ($yhtiorow['tarjouksen_alv_kasittely'] == '') {
+				if ($yhtiorow['alv_kasittely'] != '') {
+		        	$pdf_tarjous->draw_text(mm_pt(15),  120, "Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $page_tarjous, $norm);
+				}
+				else {
+		        	$pdf_tarjous->draw_text(mm_pt(15),  120, "Hinnat sisältävät arvonlisäveron.", $page_tarjous, $norm);
+				}
 			}
 			else {
-	        	$pdf_tarjous->draw_text(mm_pt(15),  120, "Hinnat sisältävät arvonlisäveron.", $page_tarjous, $norm);
+				if ($yhtiorow['tarjouksen_alv_kasittely'] == 'X') {
+		        	$pdf_tarjous->draw_text(mm_pt(15),  120, "Hinnat ovat nettohintoja joihin lisätään arvonlisävero.", $page_tarjous, $norm);
+				}
+				else {
+		        	$pdf_tarjous->draw_text(mm_pt(15),  120, "Hinnat sisältävät arvonlisäveron.", $page_tarjous, $norm);
+				}
 			}
+			
 		
 			$pdf_tarjous->draw_text(mm_pt(15),  110,"Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $page_tarjous, $norm);
 			$pdf_tarjous->draw_text(mm_pt(15),  100, "Maksuehtomme on ".trim($laskurow["maksuehto"]).".", $page_tarjous, $norm);
@@ -880,6 +890,16 @@ if (!function_exists('tulosta_tarjous')) {
 											
 			while ($row = mysql_fetch_array($riresult)) {
 				
+				
+				if ($yhtiorow['tarjouksen_alv_kasittely'] != '') {
+					if ($yhtiorow['alv_kasittely'] == '' and $yhtiorow['tarjouksen_alv_kasittely'] == 'X') {
+			        	$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
+					}
+					elseif ($yhtiorow['alv_kasittely'] != '' and $yhtiorow['tarjouksen_alv_kasittely'] == 'S') {
+						$row["rivihinta"] = $row["rivihinta"] * (1+$row["alv"]/100);
+					}  						
+				}
+								
 				// Mahtuuko rivi tälle sivulle
 				$kala_nyt = $kala;
 

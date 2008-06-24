@@ -246,6 +246,7 @@ if ($tee == "") {
 				<option value='7'>7</option>
 				<option value='8'>8</option>
 				<option value='9' selected>9</option>
+				<option value='10'>Hyväksynnässä</option>
 				</select>
 			</td>
 
@@ -395,6 +396,10 @@ if ($tee == "") {
 			if ($rivi["prioriteetti"] == -1) {
 				$rivi["prioriteetti"] = "tarjouspyyntö";
 			}
+			
+			if ($rivi["prioriteetti"] == 10) {
+				$rivi["prioriteetti"] = "hyväksynnässä";
+			}
 
 			$numero ++;
 
@@ -475,6 +480,10 @@ if ($tee == "") {
 
 		if ($rivi["prioriteetti"] == -1) {
 			$rivi["prioriteetti"] = "tarjouspyyntö";
+		}
+		
+		if ($rivi["prioriteetti"] == 10) {
+			$rivi["prioriteetti"] = "hyväksynnässä";
 		}
 
 		if ($rivi["deadline"] == '9999-12-31') {

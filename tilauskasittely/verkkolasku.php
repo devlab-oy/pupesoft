@@ -1114,19 +1114,14 @@
 						elseif (strtoupper($asiakas_apu_row["kieli"]) == "EE") {
 							$laskun_kieli = "EE";
 						}
+						elseif (strtoupper($asiakas_apu_row["kieli"]) == "FI") {
+							$laskun_kieli = "FI";
+						}
 						elseif ($kieli != "") {
 							$laskun_kieli = $kieli;
 						}
 						else {
-							$laskun_kieli = "";
-						}
-
-						if ($kieli == "") {
-							$kieli = $asiakas_apu_row["kieli"];
-						}
-						
-						if ($kieli == "") {
-							$kieli = $yhtiorow["kieli"];
+							$laskun_kieli = $yhtiorow["kieli"];
 						}
 
 						// t‰ss‰ pohditaan laitetaanko verkkolaskuputkeen
@@ -1559,8 +1554,11 @@
 							$asiakas_apu_row = array();
 						}
 
-						if ($kieli == "") {
-							$kieli = $asiakas_apu_row["kieli"];
+						if ($asiakas_apu_row["kieli"] != "") {
+							$laskun_kieli = $asiakas_apu_row["kieli"];
+						}
+						else {
+							$laskun_kieli = $yhtiorow["kieli"];
 						}
 
 						// jos ei ole valittuna mit‰‰n tulostinta eik‰ haluta l‰hett‰‰ t‰t‰ laskua meillill‰k‰‰n skipataan looppi
@@ -1592,14 +1590,14 @@
 							require_once ("tulosta_lasku_simppeli.inc");
 							if (in_array($laskurow["laskunro"], $tulostettavat_email) and $valittu_tulostin == "") {	
 								include_once("inc/generoi_laskun_saate.inc");
-								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $kieli);
+								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $laskun_kieli);
 								
 								//	Falseback oma maili
 								if($komento == "") $komento = "email";
 								
 								//	Kaapataan output..
 								ob_start();
-								tulosta_lasku($laskurow["tunnus"], $komento, $kieli, "", "", $content_subject, $content_body);
+								tulosta_lasku($laskurow["tunnus"], $komento, $laskun_kieli, "", "", $content_subject, $content_body);
 								$tulos_ulos .= ob_get_contents();
 								ob_end_clean();
 							}
@@ -1610,7 +1608,7 @@
 								$kires = mysql_query($querykieli) or pupe_error($querykieli);
 								$kirow = mysql_fetch_array($kires);
 								
-								tulosta_lasku($laskurow["tunnus"], $kirow["komento"], $kieli, $toim, $tee);
+								tulosta_lasku($laskurow["tunnus"], $kirow["komento"], $laskun_kieli, $toim, $tee);
 							}
 						}
 						else {
@@ -1676,7 +1674,7 @@
 							if (in_array($laskurow["laskunro"], $tulostettavat_email)) {
 								// generoidaan laskun saatekirje, joka haetaan avainsanoista
 								include_once("inc/generoi_laskun_saate.inc");
-								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $kieli);
+								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $laskun_kieli);
 
 								// l‰hetet‰‰n meili
 								$kutsu = "lasku $lasku";

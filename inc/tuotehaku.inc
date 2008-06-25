@@ -156,7 +156,7 @@
 					(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 					tuote.sarjanumeroseuranta,
 					tuote.status,
-					(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno) saldo
+					(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
 					FROM tuote use index (tuoteno, nimitys)
 					WHERE tuote.$yhtiot
 					$kieltolisa
@@ -165,7 +165,10 @@
 					ORDER BY tuote.tuoteno
 					LIMIT 201";
 		$thresult = mysql_query($query) or pupe_error($query);
-
+		
+		echo "<pre>$query</pre><br>";
+		
+		
 		$rows = array();
 		
 		if (mysql_num_rows($thresult) > 0) {
@@ -192,7 +195,7 @@
 								(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 								tuote.sarjanumeroseuranta,
 								tuote.status,
-								(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno) saldo
+								(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
 								FROM korvaavat
 								JOIN tuote ON tuote.yhtio=korvaavat.yhtio and tuote.tuoteno=korvaavat.tuoteno
 								WHERE korvaavat.yhtio = '$mrow[yhtio]'

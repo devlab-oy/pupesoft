@@ -171,7 +171,8 @@
 
 		$query = "	SELECT sum(saldo) saldo 
 					from tuotepaikat  
-					where tuoteno	= '$tuoteno' 
+					where tuoteno	= '$tuoteno'
+					and saldo		> 0 
 					and yhtio		= '$kukarow[yhtio]'";
 		$salre = mysql_query($query) or pupe_error($query);
 		$salro = mysql_fetch_array($salre);

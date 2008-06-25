@@ -166,9 +166,6 @@
 					LIMIT 201";
 		$thresult = mysql_query($query) or pupe_error($query);
 		
-		echo "<pre>$query</pre><br>";
-		
-		
 		$rows = array();
 		
 		if (mysql_num_rows($thresult) > 0) {

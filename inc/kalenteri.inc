@@ -25,6 +25,22 @@
 	}
 
 	</SCRIPT>
+
+	<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+
+	function doSelectAction (sel, event, asiakasID, kaleDIV) {
+
+		s=document.getElementById(sel);
+		if(isNaN(s.options[s.selectedIndex].value)) {
+			selectPopper(event, '../yllapito.php?toim=yhteyshenkilo&liitostunnus='+asiakasID+'&yhtyyppi=asiakas', sel);
+		}
+		else {
+			ajaxPost('yhteyshenkiloLista', 'asiakasmemo.php?kaleDIV='+kaleDIV , kaleDIV);
+		}
+	}
+
+	</SCRIPT>
+	
 	<?php
 	
 
@@ -1838,16 +1854,19 @@
 		
 		//	Tavat ja Merkinnät
 		if($tyyppi == "Merkinta") {
-			$laji = "KALEME";
-			$tapaotsikko == t("Merkintä");
+			$qlisa = "and selitetark_2 LIKE ('%merkinta%')";
+			$tapaotsikko = t("Merkintä");
+		}
+		if($tyyppi == "Memo") {
+			$qlisa = "and selitetark_2 LIKE ('%tapahtuma%')";
+			$tapaotsikko = t("Tapahtuma");
 		}
 		else {
-			$laji = "KALETAPA";
-			$tapaotsikko == t("Kalenteritapahtuma");			
+			$tapaotsikko = t("Kalenteritapahtuma");			
 		}
 		$query = "	SELECT selitetark
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji'
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'KALETAPA' $qlisa
 					ORDER BY selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$tavat = "<select name='tapa'>";
@@ -1870,9 +1889,9 @@
 					FROM yhteyshenkilo
 					WHERE yhtio='$kukarow[yhtio]' and liitostunnus = '{$asiakasrow["tunnus"]}' and tyyppi = 'A'";
 		$result = mysql_query($query) or pupe_error($query);
+		$yhdata = "<select name='yhteyshenkilo' id='yhteyshenkilo_kaletapa' onchange=\"selectPopper(event, '../yllapito.php?toim=yhteyshenkilo&liitostunnus={$asiakasrow["tunnus"]}&yhtyyppi=asiakas', 'yhteyshenkilo_kaletapa');\">
+							<option value=''>".t("Ei yhteyshenkilöä")."</option>";
 		if(mysql_num_rows($result) > 0) {
-			$yhdata = "<select name='yhteyshenkilo' id='yhteyshenkilo' onchange=\"selectPopper(event, '../yllapito.php?toim=yhteyshenkilo&liitostunnus={$asiakasrow["tunnus"]}&yhtyyppi=asiakas', this.id);\">
-								<option value=''>".t("Ei yhteyshenkilöä")."</option>";
 			
 			while ($yhteyshenkilorow = mysql_fetch_array($result)) {
 				$sel = "";
@@ -1881,17 +1900,13 @@
 				}
 				
 				$yhdata .= "<option value='{$yhteyshenkilorow["tunnus"]}' $sel>{$yhteyshenkilorow["nimi"]}</option>";
-			}
-			
-			$yhdata .= "	<optgroup label='".t("Toiminnot")."'>
-						<option value='uusi'>Luo uusi yhteyshenkilö</option>
-					</optgroup>";
-			
-			$yhdata .= "</select>";
+			}			
 		}
-		else {
-			$yhdata = "&nbsp;";
-		}
+		$yhdata .= "	<optgroup label='".t("Toiminnot")."'>
+					<option value='uusi'>Luo uusi yhteyshenkilö</option>
+				</optgroup>";
+		
+		$yhdata .= "</select>";
 		
 		//	Jos meillä on käyttöliittymästä syötetty aika
 		if($tapp != "" and $takk != "" and $tavv != "") {
@@ -1992,10 +2007,10 @@
 							<td colspan='2'>$asiakas</td>
 						</tr>						
 						<tr>
-							<th colspan='2'>".t("Yhteyshenkilö")."</th>
+							<th>".t("Yhteyshenkilö")."</th><th>$tapaotsikko</th>
 						</tr>						
 						<tr>
-							<td colspan='2'>$yhdata</td>
+							<td>$yhdata</td><td>$tavat</td>
 						</tr>						
 						<tr>
 							<th>".t("Päiväys")."</th>

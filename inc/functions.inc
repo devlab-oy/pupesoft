@@ -5077,7 +5077,6 @@ if(!function_exists("aja_kysely")) {
 	function aja_kysely() {
 		global $kukarow, $hakukysely, $aja_kysely, $uusi_kysely, $tallenna_muutokset, $poista_kysely, $_POST;
 		
-		echo "KIVI $hakukysely";
 		if(!table_exists("muisti") or $hakukysely == "") {
 			return true;
 		}

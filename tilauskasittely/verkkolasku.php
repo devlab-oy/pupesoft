@@ -1117,11 +1117,12 @@
 						elseif (strtoupper($asiakas_apu_row["kieli"]) == "FI") {
 							$laskun_kieli = "FI";
 						}
-						elseif ($kieli != "") {
-							$laskun_kieli = $kieli;
-						}
 						else {
 							$laskun_kieli = $yhtiorow["kieli"];
+						}
+						
+						if ($kieli != "") {
+							$laskun_kieli = $kieli;
 						}
 
 						// t‰ss‰ pohditaan laitetaanko verkkolaskuputkeen
@@ -1612,6 +1613,12 @@
 							}
 						}
 						else {
+						
+							$varakieli 	= $kieli;
+							if ($kieli == '') {
+								$kieli 	= $laskun_kieli;								
+							}
+
 							require_once("tulosta_lasku.inc");
 
 							// katotaan miten halutaan sortattavan
@@ -1659,7 +1666,9 @@
 							}
 
 							alvierittely ($page[$sivu]);
-
+							
+							$kieli = $varakieli;
+							
 							//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 							list($usec, $sec) = explode(' ', microtime());
 							mt_srand((float) $sec + ((float) $usec * 100000));

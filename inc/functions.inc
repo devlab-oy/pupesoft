@@ -5076,7 +5076,8 @@ if(!function_exists("muistista")) {
 if(!function_exists("aja_kysely")) {
 	function aja_kysely() {
 		global $kukarow, $hakukysely, $aja_kysely, $uusi_kysely, $tallenna_muutokset, $poista_kysely, $_POST;
-
+		
+		echo "KIVI $hakukysely";
 		if(!table_exists("muisti") or $hakukysely == "") {
 			return true;
 		}
@@ -5228,9 +5229,9 @@ if(!function_exists("aja_kysely")) {
 
 if(!function_exists("nayta_kyselyt")) {
 	function nayta_kyselyt($haku) {
-		global $kukarow, $aja_kysely;
+		global $kukarow, $aja_kysely, $hakukysely;
 
-		if(!table_exists("muisti")) {
+		if(!table_exists("muisti") or $hakukysely == "") {
 			return false;
 		}
 

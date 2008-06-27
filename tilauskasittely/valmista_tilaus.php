@@ -386,6 +386,12 @@
 					}
 					else {
 						$tee = "VALMISTA";
+						
+						while ($chkrow1 = mysql_fetch_array($chkresult1)) {
+							$valmistettavat .= $chkrow1["tunnus"].",";
+						}
+						
+						$valmistettavat = substr($valmistettavat,0,-1);
 					}
 
 					//jos rivit oli siirretty toiselta otsikolta niin siirret‰‰n ne nyt takaisin

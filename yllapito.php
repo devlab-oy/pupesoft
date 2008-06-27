@@ -446,7 +446,7 @@
 				exit;
 			}
 
-			if(substr($suljeYllapito, 0, 22) == "yhteyshenkilo_tekninen" or substr($suljeYllapito, 0, 25) == "yhteyshenkilo_kaupallinen"  or $suljeYllapito == "yhteyshenkilo") {
+			if(substr($suljeYllapito, 0, 13) == "yhteyshenkilo") {
 				$query = "SELECT nimi from yhteyshenkilo where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 				$aburow = mysql_fetch_array($result);

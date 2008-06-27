@@ -203,6 +203,18 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("LIITOS", "LIITOSTUNNUS", "KAYTTOTARKOITUS", "FILENAME");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM", "DATA", "IMAGE_BITS", "IMAGE_CHANNELS", "IMAGE_HEIGHT", "IMAGE_WIDTH", "FILETYPE", "FILESIZE");
 				break;
+			case "asiakkaan_avainsanat" :
+				if(in_array("YTUNNUS", $otsikot) and !in_array("LIITOSTUNNUS", $otsikot)) {
+					$pakolliset = array("LAJI","AVAINSANA");
+					$wherelliset = array("LAJI","AVAINSANA");
+				}
+				else {
+					$pakolliset = array("LIITOSTUNNUS","LAJI","AVAINSANA");
+					$wherelliset = array("LIITOSTUNNUS","LAJI","AVAINSANA");
+				}
+				
+				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				break;				
 			default :
 				$pakolliset = array("TUNTEMATON_TAULU");
 				$kielletyt = array();

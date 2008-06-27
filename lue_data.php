@@ -101,7 +101,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	}
 	
 	//	N‰m‰ ovat pakollisia dummysarakkeita jotka ohitetaan lopussa automaattisesti!
-	if($table == "yhteyshenkilo") {
+	if(in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat"))) {
 		$abu_sarakkeet = array("YTUNNUS");
 	}
 	
@@ -343,7 +343,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		// jos ei ole puuttuva tieto etsit‰‰n rivi‰
 		if($tila != 'ohita') {
 			
-			if ($table == 'yhteyshenkilo' and (!in_array("LIITOSTUNNUS", $otsikot) or in_array("LIITOSTUNNUS", $abu_otsikot))) {
+			if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat")) and (!in_array("LIITOSTUNNUS", $otsikot) or in_array("LIITOSTUNNUS", $abu_otsikot))) {
 				if(in_array("YTUNNUS", $otsikot)) {
 					if($rivi[array_search("TYYPPI", $otsikot)] == "T") {
 						$tpque = "	SELECT tunnus 
@@ -353,7 +353,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 									and tyyppi != 'P'";
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 					}
-					elseif($rivi[array_search("TYYPPI", $otsikot)] == "A") {
+					elseif($rivi[array_search("TYYPPI", $otsikot)] == "A" or $table == "asiakkaan_avainsanat") {
 						$tpque = "	SELECT tunnus 
 									from asiakas 
 									where yhtio	= '$kukarow[yhtio]' 
@@ -441,14 +441,26 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				}
 				
 				if ($r != $postoiminto) {
-					$rivi[$r] = trim($rivi[$r]);
+					$rivi[$r] = trim(addslashes($rivi[$r]));
 
 					if(substr($ityyppi[$r],0,7) == "decimal" or substr($ityyppi[$r],0,4) == "real") {
 						//korvataan decimal kenttien pilkut pisteill‰...
 						$rivi[$r] = str_replace(",",".",$rivi[$r]);
 					}
 					
-					if ((int) $ikenpituus[$r] > 0 and strlen($rivi[$r]) > $ikenpituus[$r]) {
+					if(substr($ityyppi[$r],0,3) == "int") {
+						if(	($ikenpituus[$r] == 1 and ($rivi[$r] > 255 or $rivi[$r] < -128)) or
+							($ikenpituus[$r] == 2 and ($rivi[$r] > 65535 or $rivi[$r] < -32768)) or
+							($ikenpituus[$r] == 3 and ($rivi[$r] > 16777215 or $rivi[$r] < -8388608)) or
+							($ikenpituus[$r] == 4 and ($rivi[$r] > 4294967295 or $rivi[$r] < -2147483648))
+							) {
+							
+							echo "<font class='error'>".t("VIRHE").": ".$otsikot[$r]." ".t("Luku on liian suuri eik‰ se mahdu kentt‰‰n")."!</font> $rivi[$r]: ".strlen($rivi[$r])." > (int) ".$ikenpituus[$r]."!<br>";
+							$hylkaa++; // ei p‰ivitet‰ t‰t‰ rivi‰							
+						} 
+						
+					}
+					elseif ((int) $ikenpituus[$r] > 0 and strlen($rivi[$r]) > $ikenpituus[$r]) {
 						echo "<font class='error'>".t("VIRHE").": ".$otsikot[$r]." ".t("kent‰ss‰ on liian pitk‰ tieto")."!</font> $rivi[$r]: ".strlen($rivi[$r])." > ".$ikenpituus[$r]."!<br>";
 						$hylkaa++; // ei p‰ivitet‰ t‰t‰ rivi‰
 					}
@@ -656,7 +668,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						}
 					}
 		
-					elseif($table == 'yhteyshenkilo' and $otsikot[$r] == 'LIITOSTUNNUS') {
+					elseif(in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat")) and $otsikot[$r] == 'LIITOSTUNNUS') {
 						
 						if($rivi[array_search("TYYPPI", $otsikot)] == "T") {
 							$tpque = "	SELECT tunnus 
@@ -666,7 +678,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 										and tyyppi != 'P'";
 							$tpres = mysql_query($tpque) or pupe_error($tpque);
 						}
-						elseif($rivi[array_search("TYYPPI", $otsikot)] == "A") {
+						elseif($rivi[array_search("TYYPPI", $otsikot)] == "A" or $table == "asiakkaan_avainsanat") {
 							$tpque = "	SELECT tunnus 
 										from asiakas 
 										where yhtio	= '$kukarow[yhtio]' 
@@ -1012,6 +1024,7 @@ else {
 					<option value='asiakasalennus'>".t("Asiakasalennukset")."</option>
 					<option value='asiakashinta'>".t("Asiakashinnat")."</option>
 					<option value='asiakaskommentti'>".t("Asiakaskommentit")."</option>
+					<option value='asiakkaan_avainsanat'>".t("Asiakkaan avainsanat")."</option>
 					<option value='autodata'>".t("Autodatatiedot")."</option>
 					<option value='autodata_tuote'>".t("Autodata tuotetiedot")."</option>
 					<option value='avainsana'>".t("Avainsanat")."</option>

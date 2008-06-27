@@ -1,10 +1,13 @@
 <?php
 	
-	$query = "SELECT selite, selitetark FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = 'asavainsana' GROUP BY 1 ORDER BY jarjestys, selitetark";
+	$query = "SELECT selite, selitetark, selitetark_2 FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = 'asavainsana' GROUP BY 1 ORDER BY jarjestys, selitetark";
 	$vresult = mysql_query($query) or pupe_error($query);
 	if (mysql_num_rows($vresult)>0) {
 		
 		if ($asavtee == 'asinsert') {
+			
+			if($tosiuussana != "" and $uussana == "") $uussana = $tosiuussana;
+			
 			if ($liitostunnus != '' and $uuslaji != '' and $uussana != '' and isset($puttoni)) {
 				$query = "	INSERT INTO asiakkaan_avainsanat SET
 							yhtio = '$kukarow[yhtio]',
@@ -52,18 +55,27 @@
 		
 		$laskuri = 0;
 		$valittu = '';
+		$vapaa = $vapaa_default = false;
 		
 		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel = "";
 			if ($uuslaji == $vrow['selite']) {
 				$sel = 'SELECTED';
 				$valittu  = $uuslaji;
+				if($vrow["selitetark_2"] == "VAPAA") {
+					$vapaa = true;
+				}
 			}
 			
 			$lajidd .= "<option value='$vrow[selite]' $sel>$vrow[selitetark]</option>";
-			
+
 			if ($laskuri == 0) {
 				$defaultti = $vrow['selite'];
+
+				if($vrow["selitetark_2"] == "VAPAA") {
+					$vapaa_default = true;
+				}
+				
 			}
 			$laskuri ++;
 			
@@ -72,22 +84,40 @@
 		
 		if ($valittu == '') {
 			$valittu = $defaultti;
+			$vapaa = $vapaa_default;
 		}
-		
-		$query = "SELECT distinct selitetark_2 FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = 'asavainsana' and selite = '$valittu'";
-		
-		if ($valittu == 'toimitustapa') {
-			$query = "SELECT distinct selite AS selitetark_2 FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' ORDER BY jarjestys, selite";
+		if($vapaa) {
+			$sanadd = "";
+			$query = "	SELECT distinct  avainsana
+						FROM asiakkaan_avainsanat
+						WHERE yhtio='$kukarow[yhtio]' and laji = '$valittu'";
+			$result = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($result)>0) {
+				$sanadd .= "<select name='uussana'>
+								<option value=''>".t("Valitse listalta tai perusta uusi")."</option>";
+				while($uusrow = mysql_fetch_array($result)) {
+					$sanadd .= "<option value='$uusrow[avainsana]'>$uusrow[avainsana]</option>\n\t";
+				}
+				$sanadd .= "</select><br>";
+			}
+
+			$sanadd .= t("Uusi").": <input type = 'text' size='24' name='tosiuussana'>";
 		}
-		
-		$sanadd = "<select name='uussana'>";
-		
-		$result = mysql_query($query) or pupe_error($query);
-		while ($row = mysql_fetch_array($result)) {
-			$sanadd .= "<option value='$row[selitetark_2]' $sel>$row[selitetark_2]</option>";
+		else {
+			$query = "SELECT distinct selitetark_2 FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = 'asavainsana' and selite = '$valittu'";
+
+			if ($valittu == 'toimitustapa') {
+				$query = "SELECT distinct selite AS selitetark_2 FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' ORDER BY jarjestys, selite";
+			}
+
+			$sanadd = "<select name='uussana'>";
+
+			$result = mysql_query($query) or pupe_error($query);
+			while ($row = mysql_fetch_array($result)) {
+				$sanadd .= "<option value='$row[selitetark_2]' $sel>$row[selitetark_2]</option>";
+			}
+			$sanadd .= "</select>";
 		}
-		$sanadd .= "</select>";
-		
 		echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 		echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
 		echo "<input type='hidden' name='asavtee' value='asinsert'>";

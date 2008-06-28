@@ -118,6 +118,7 @@
 			$ret = "";
 			//	Tehdään urliin parametrit
 			if(is_array($kalenteri["url_params"])) {
+				$kalenteri["url_params"]["kaleDIV"] = $kalenteri["div"];
 				foreach($kalenteri["url_params"] as $var => $varval) {
 					if($method != "POST") {
 						$ret .= "&$var=$varval";	

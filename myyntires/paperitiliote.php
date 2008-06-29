@@ -64,11 +64,13 @@
 		//Laskurivien otsikkotiedot
 		//eka rivi
 		$pdf->draw_text(30,  $kala, t("Laskunro", $kieli),			$firstpage, $pieni);
-		$oikpos = $pdf->strlen(t("Avoinsumma", $kieli), $pieni);
-		$pdf->draw_text(300-$oikpos, $kala, t("Avoinsumma", $kieli),		$firstpage, $pieni);
+		$pdf->draw_text(100, $kala, t("Pvm", $kieli),				$firstpage, $pieni);
+		$pdf->draw_text(180, $kala, t("Er‰pvm", $kieli),			$firstpage, $pieni);
 		$oikpos = $pdf->strlen(t("Summa", $kieli), $pieni);
-		$pdf->draw_text(380-$oikpos, $kala, t("Summa", $kieli),			$firstpage, $pieni);
-		$pdf->draw_text(440, $kala, t("Er‰pvm", $kieli),			$firstpage, $pieni);
+		$pdf->draw_text(400-$oikpos, $kala, t("Summa", $kieli),			$firstpage, $pieni);
+		$oikpos = $pdf->strlen(t("Avoinsumma", $kieli), $pieni);
+		$pdf->draw_text(480-$oikpos, $kala, t("Avoinsumma", $kieli),		$firstpage, $pieni);
+
 
 
 		$kala -= 15;
@@ -123,11 +125,11 @@
 	}
 
 	function rivi ($tyyppi, $firstpage, $summa, $row) {
-		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli;
+		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $yhtiorow;
 
 		if ($lask == 39) {
 			$sivu++;
-			loppu($firstpage,'');
+			loppu($firstpage, array());
 			$firstpage = alku();
 			$kala = 605;
 			$lask = 1;
@@ -136,28 +138,29 @@
 		if ($tyyppi==1) {
 		
 			$pdf->draw_text(30,  $kala, $row["laskunro"],				$firstpage, $norm);
-			$pdf->draw_text(160, $kala, $row["tapvm"], 				$firstpage, $norm);
-			$pdf->draw_text(220, $kala, $row["valkoodi"], 				$firstpage, $norm);
+			$pdf->draw_text(100, $kala, $row["tapvm"], 				$firstpage, $norm);
+			$pdf->draw_text(180, $kala, $row["erpcm"], 				$firstpage, $norm);
+			$pdf->draw_text(300, $kala, $row["valkoodi"], 				$firstpage, $norm);
 			if ($row['valkoodi'] == $yhtiorow['valkoodi']) {
 				$oikpos = $pdf->strlen($row["avoinsumma"], $norm);
-				$pdf->draw_text(300-$oikpos, $kala, $row["avoinsumma"], 		$firstpage, $norm);
+				$pdf->draw_text(480-$oikpos, $kala, $row["avoinsumma"], 		$firstpage, $norm);
 				$oikpos = $pdf->strlen($row["summa"], $norm);
-				$pdf->draw_text(380-$oikpos, $kala, $row["summa"],			$firstpage, $norm);
+				$pdf->draw_text(400-$oikpos, $kala, $row["summa"],			$firstpage, $norm);
 			}
 			else {
 				$oikpos = $pdf->strlen($row["avoinsummavaluutassa"], $norm);
-				$pdf->draw_text(300-$oikpos, $kala, $row["avoinsummavaluutassa"], 		$firstpage, $norm);
+				$pdf->draw_text(480-$oikpos, $kala, $row["avoinsummavaluutassa"], 		$firstpage, $norm);
 				$oikpos = $pdf->strlen($row["summa_valuutassa"], $norm);
-				$pdf->draw_text(380-$oikpos, $kala, $row["summa_valuutassa"], 			$firstpage, $norm);
+				$pdf->draw_text(400-$oikpos, $kala, $row["summa_valuutassa"], 			$firstpage, $norm);
 			}
-			$pdf->draw_text(440, $kala, $row["erpcm"], 				$firstpage, $norm);
+
 		}
 		else {
 			$pdf->draw_text(30,  $kala, t("Kohdistamaton suoritus"),		$firstpage, $norm);
-			$pdf->draw_text(160, $kala, $row["tapvm"], 		$firstpage, $norm);
-			$pdf->draw_text(220, $kala, $row["valkoodi"], 		$firstpage, $norm);
+			$pdf->draw_text(180, $kala, $row["tapvm"], 		$firstpage, $norm);
+			$pdf->draw_text(300, $kala, $row["valkoodi"], 		$firstpage, $norm);
 			$oikpos = $pdf->strlen($row["summa"], $norm);
-			$pdf->draw_text(380-$oikpos, $kala, $row["summa"], 		$firstpage, $norm);
+			$pdf->draw_text(480-$oikpos, $kala, $row["summa"], 		$firstpage, $norm);
 		}
 		$kala = $kala - 13;
 		$lask++;
@@ -165,20 +168,45 @@
 	}
 
 
-	function loppu ($firstpage, $summa) {
+	function loppu ($firstpage, $summat) {
 
-		global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kieli;
+		global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kieli, $lask, $kala;
+
+		if (sizeof($summat) > 1 and  $lask > 35) { //Valuuttaerittely ei mahdu! Rekursio! IIK!
+			$sivu++;
+			loppu($firstpage, array());
+			$firstpage = alku();
+			$kala = 605;
+			$lask = 1;
+		}
 
 		//yhteens‰rivi
 		$pdf->draw_rectangle(110, 20, 90, 580,	$firstpage, $rectparam);
 		$pdf->draw_rectangle(110, 207, 90, 580,	$firstpage, $rectparam);
 		$pdf->draw_rectangle(110, 394, 90, 580,	$firstpage, $rectparam);
 		$pdf->draw_rectangle(110, 540, 90, 580,	$firstpage, $rectparam);
-
-//		$pdf->draw_text(404, 92,  t("YHTEENSƒ", $kieli).":",	$firstpage, $norm);
-//		$pdf->draw_text(464, 92,  $summa,						$firstpage, $norm);
-//		$pdf->draw_text(550, 92,  $yhtiorow["valkoodi"],		$firstpage, $norm);
-
+		
+		if (sizeof($summat) > 1) {
+			$oikpos = $pdf->strlen("----------------", $norm);
+			$pdf->draw_text(480-$oikpos, $kala, "----------------",	$firstpage, $norm);
+			$kala = $kala - 13;
+		}
+		
+		foreach ($summat as $valuutta => $summa) {
+			if (sizeof($summat) == 1) {
+				$pdf->draw_text(404, 92,  t("YHTEENSƒ", $kieli).":",	$firstpage, $norm);
+				$pdf->draw_text(464, 92,  sprintf('%.2f', $summa),	$firstpage, $norm);
+				$pdf->draw_text(550, 92,  $valuutta,			$firstpage, $norm);
+			}
+			else {
+				$pdf->draw_text(300, $kala, $valuutta,	 		$firstpage, $norm);
+				$summa=sprintf('%.2f', $summa);
+				$oikpos = $pdf->strlen($summa, $norm);
+				$pdf->draw_text(480-$oikpos, $kala, $summa, 		$firstpage, $norm);
+				$kala = $kala - 13;
+			}
+		}
+		
 		//Pankkiyhteystiedot
 		$pdf->draw_rectangle(90, 20, 20, 580,	$firstpage, $rectparam);
 
@@ -279,18 +307,25 @@
 	$suoritusresult = mysql_query($query) or pupe_error($query);
 
 	$firstpage = alku();
+
+	$totaali = array();
 	
 	while ($row = mysql_fetch_array($result)) {
 		$firstpage=rivi(1,$firstpage,$summa,$row);
+		if ($row['valkoodi'] == $yhtiorow['valkoodi'])
+			$totaali[$row['valkoodi']] += $row['avoinsumma'];
+		else
+			$totaali[$row['valkoodi']] += $row['avoinsummavaluutassa'];
 	}
 
 	while ($row = mysql_fetch_array($suoritusresult)) {
 		$firstpage=rivi(2,$firstpage,$summa,$row);
+		$totaali[$row['valkoodi']] += $row['summa'];
 	}
 	
 	//$loppusumma = sprintf('%.2f', $summa+$kaatosumma); Multivaluutta versioon 2!!!
 
-	loppu($firstpage,$loppusumma);
+	loppu($firstpage,$totaali);
 
 	//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 	list($usec, $sec) = explode(' ', microtime());

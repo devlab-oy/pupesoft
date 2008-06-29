@@ -506,8 +506,6 @@
 				if ($maksurow["korkolaspvm"] != '0000-00-00') echo "<td align='right'>".tv1dateconv($maksurow["korkolaspvm"])."</td>";
 				else echo "<td></td>";
 
-				$summa+=$maksurow["summa"];
-
 				echo "<td align='right'>";
 				// jos rahatilejä löytyy etsitään suoritukst
 				if ($ratiro["rahatilit"] != "") {
@@ -529,9 +527,25 @@
 				echo "</td>";
 
 				echo "<td class='back'></td></tr>";
+				if ($maksurow['valkoodi'] == $yhtiorow['valkoodi'])
+					$totaali[$maksurow['valkoodi']] += $maksurow['summa'];
+				else
+					$totaali[$maksurow['valkoodi']] += $maksurow['summa_valuutassa'];
+				$summa += $maksurow['summa'];
 			}
 
-			echo "<tr><td class='back' colspan='2'></td><th>".t("Yhteensä").":</th><td class='tumma' align='right'>$summa</th></tr>";
+			echo "<tr><td class='back' colspan='2'></td><th>".t("Yhteensä").":</th><td class='tumma' align='right'>";
+			if (sizeof($totaali)==1 and isset($totaali[$yhtiorow['valkoodi']])) {
+				echo $totaali[$yhtiorow['valkoodi']];
+			}
+			else {
+				foreach ($totaali as $valuutta => $valsumma) {
+					printf("%.2f",$valsumma);
+					echo " $valuutta<br>";
+				}
+				echo "$summa $yhtiorow[valkoodi]";
+			}
+			echo "</th></tr>";
 
 			echo "</table>";
 

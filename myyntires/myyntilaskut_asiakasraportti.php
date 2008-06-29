@@ -194,7 +194,6 @@
 				if (mysql_num_rows($result) != 0) {
 					$kok = mysql_fetch_array($result);
 					mysql_data_seek($result,0);
-					
 					if (strtoupper($yhtiorow['valkoodi']) != strtoupper($kok['valkoodi'])) {
 						$riveja = 2;
 					}
@@ -209,8 +208,8 @@
 			if (mysql_num_rows($result) > 1) { // Valuuttasummia
 				$kotisumma = 0;
 				while ($kok = mysql_fetch_array($result)) {
-					echo "<td align='right'>$kok[eraantynytsumma_valuutassa]</td><td>$kok[valkoodi]</td>";
-					$kotisumma += $kok['eraanytnytsumma'];
+					echo "<td align='right'>$kok[eraantynytsumma_valuutassa]</td><td>$kok[valkoodi]</td></tr>";
+					$kotisumma += $kok['eraantynytsumma'];
 				}
 				echo "<td align='right'>$kotisumma</td><td>$yhtiorow[valkoodi]</td>";
 			}
@@ -234,7 +233,7 @@
 			if (mysql_num_rows($result) > 1) { // Valuuttasummia
 				$kotisumma = 0;
 				while ($kok = mysql_fetch_array($result)) {
-					echo "<td align='right'>$kok[avoinsumma_valuutassa]</td><td>$kok[valkoodi]</td>";
+					echo "<td align='right'>$kok[avoinsumma_valuutassa]</td><td>$kok[valkoodi]</td></tr>";
 					$kotisumma += $kok['avoinsumma'];
 				}
 				echo "<td align='right'>$kotisumma</td><td>$yhtiorow[valkoodi]</td>";

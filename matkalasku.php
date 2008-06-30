@@ -128,10 +128,10 @@ function lisaa_kulurivi($tilausnumero, $perheid, $perheid2, $tilino, $tuoteno, $
 
 			$ylitunnit=$tunnit-($paivat*24);
 
-			if ($ylitunnit > 10) {
+			if (($ylitunnit > 10 and $paivat == 0) or ($ylitunnit > 6 and $paivat > 0)) {
 				$paivat++;
 			}
-			elseif ($ylitunnit > 6 and $trow["vienti"] == "FI") {
+			elseif ((($ylitunnit > 6 and $paivat == 0) or ($ylitunnit > 2 and $paivat > 0)) and $trow["vienti"] == "FI") {
 				
 				//	Tarkastetaan että päivärahalle on puolipäiväraha
 				$query = "	select * from tuote where yhtio='$kukarow[yhtio]' and tuotetyyppi='$tyyppi' and tuoteno='P$tuoteno'";
@@ -803,7 +803,7 @@ if ($tee == "UUSI") {
 	//	tarkastetaan että käyttäjälle voidaan perustaa matkalaskuja
 	$query = "	SELECT * FROM toimi WHERE yhtio='$kukarow[yhtio]' and nimi='$kukarow[nimi]'";
 	$result = mysql_query($query) or pupe_error($query);
-
+	
 	if (mysql_num_rows($result) == 1) {
 		$trow=mysql_fetch_array($result);
 	}

@@ -2267,8 +2267,8 @@
 		// ollaan annettu toimitusviikko
 		$nyviikko = date("W");
 		$nypaiva  = date("N");
-
-		if ($toimvko != '') {
+		
+		if ($toimvko != '' and ($apuro["toimvko"] == "" or $toimvko >= $nyviikko or $toimvkopva != $vtoimvko)) {
 
 			if ($toimvko < $nyviikko) {
 				$toimvko = "+".(52 - $nyviikko) + $toimvko;
@@ -2303,8 +2303,12 @@
 			$toimpp  = date("d",strtotime($toimvko." week ".$toimvkopva." day"));
 			$toimvko = $toimvkopvat;
 		}
-
-		if ($keraysvko != '') {
+		else {
+			$toimvko = $vtoimvko;
+		}
+		
+		if ($keraysvko != '' and ($apuro["keraysvko"] == "" or $keraysvko >= $nyviikko or $keraysvkopva != $vkeraysvko)) {
+			
 			if ($keraysvko < $nyviikko) {
 				$keraysvko = "+".(52 - $nyviikko) + $keraysvko;
 			}
@@ -2338,7 +2342,10 @@
 			$kerpp  = date("d",strtotime($keraysvko." week ".$keraysvkopva." day"));
 			$keraysvko = $keraysvkopvat;
 		}
-
+		else {
+			$keraysvko = $vkeraysvko;
+		}
+		
 		if ($kukarow["kesken"] == 0) {
 			$query = "INSERT into ";
 			$postquery = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";

@@ -125,7 +125,7 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
 				$uusi_filu = "";
 				
 				//konvertoidaan kuva
-				if ($teetyyppi == "TK" and $type == "image" and $toim == 'TUOTE') {	
+				if ($teetyyppi == "TK" and $type == "image" and strtoupper($toim) == 'TUOTE') {	
 					$temp_file = $_FILES["userfile"];
 					
 					$uusi_filu = konvertoi(480,640,"normaali",$toim,"userfile");
@@ -143,7 +143,7 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
 						system("rm -f \"$uusi_filu\"");
 					}
 				}
-				elseif ($teetyyppi == "TH" and $type == "image" and $toim == 'TUOTE') {
+				elseif ($teetyyppi == "TH" and $type == "image" and strtoupper($toim) == 'TUOTE') {
 					$uusi_filu = konvertoi(65,96,"thumb",$toim,"userfile");
 					tallenna_liite("userfile", $toim, $tunnus, $kuvaotsikko, $teetyyppi, 0, $liite_jarjestys);
 					if ($uusi_filu != "") {
@@ -151,6 +151,7 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
 					}
 				}
 				else {
+					$teetyyppi = "MU";
 					tallenna_liite("userfile", $toim, $tunnus, $kuvaotsikko, $teetyyppi, 0, $liite_jarjestys);
 				}				
 								

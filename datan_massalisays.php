@@ -317,6 +317,9 @@ if ($tee == 'GO') {
 					elseif ($toiminto == 'TK') {
 						$kuvaselite .= " normaali";
 					}
+					else {
+						$toiminto = "MU";
+					}
 
 					$query = "	INSERT INTO liitetiedostot SET
 								yhtio    			= '$kukarow[yhtio]',

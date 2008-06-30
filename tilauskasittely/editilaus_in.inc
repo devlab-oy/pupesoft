@@ -654,10 +654,25 @@ while (!feof ($fd)) {
 		case 'OLINSA_NU' :
 		case 'OSTOTILRIV.OTR_TUOTEKOODI' :
 			//Tuotenumero
-
+			
 			// jos ei olla saatu tuoteinfoa aikasemmin, kokeillaan etsiä tuote tuotenumerolla
 			if ($tuoteno == "" and $tieto != "") {
+				
+				$kieltolisa = "";
+				//vientikieltotarkistus
+				if (isset($laskurow) and $laskurow["liitostunnus"] != 0) {
+					$query  = "	SELECT if(toim_maa != '', toim_maa, maa) maa
+								FROM asiakas
+								WHERE yhtio	= '$kukarow[yhtio]'
+								and tunnus  = '$laskurow[liitostunnus]'";
+					$vieres = mysql_query($query) or pupe_error($query);
+					$vierow = mysql_fetch_array($vieres);
 
+					if (isset($vierow) and $vierow["maa"] != "") {
+						$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
+					}
+				}
+				
 				if ($edi_tyyppi != "futursoft" and $yhtiorow["yhtio"] == "artr") {
 					// poistetaan jos kolmas merkki jos se on viiva
 					if (substr($tieto, 2, 1) == '-') {
@@ -668,7 +683,7 @@ while (!feof ($fd)) {
 				//Poistetaan spacet
 				$tieto = str_replace(" ", "", $tieto);
 
-				$query = "SELECT * FROM tuote WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tieto'";
+				$query = "SELECT * FROM tuote WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tieto' $kieltolisa";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 0) {
@@ -698,8 +713,23 @@ while (!feof ($fd)) {
 
 			// jos ei olla saatu tuoteinfoa aikasemmin, kokeillaan etsiä tuote EAN koodilla
 			if ($tuoteno == "" and $tieto != "") {
+			
+				$kieltolisa = "";
+				//vientikieltotarkistus
+				if (isset($laskurow) and $laskurow["liitostunnus"] != 0) {
+					$query  = "	SELECT if(toim_maa != '', toim_maa, maa) maa
+								FROM asiakas
+								WHERE yhtio	= '$kukarow[yhtio]'
+								and tunnus  = '$laskurow[liitostunnus]'";
+					$vieres = mysql_query($query) or pupe_error($query);
+					$vierow = mysql_fetch_array($vieres);
 
-				$query = "SELECT * FROM tuote USE INDEX (yhtio_eankoodi_index) WHERE yhtio='$kukarow[yhtio]' and eankoodi='$tieto'";
+					if (isset($vierow) and $vierow["maa"] != "") {
+						$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
+					}
+				}
+
+				$query = "SELECT * FROM tuote USE INDEX (yhtio_eankoodi_index) WHERE yhtio='$kukarow[yhtio]' and eankoodi='$tieto' $kieltolisa";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 0) {
@@ -753,7 +783,7 @@ while (!feof ($fd)) {
 		case '*RE  OSTOTILRIV' :
 
 			if ($editilaus_otsikko_ok == "KYLLA") {
-
+							
 		 		// jos tuote on löytynyt ok
 				if ($tuoteerror == 0) {
 

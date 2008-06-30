@@ -93,7 +93,7 @@
 
 		require ("../inc/parametrit.inc");
 	}
-
+	
 	if ($tee == "lataa_tiedosto") {
 		echo $file;
 		exit;
@@ -1613,8 +1613,11 @@
 							}
 						}
 						else {
-						
-							$varakieli 	= $kieli;
+							
+							$tulos_ulos .= "Kielivalinta: Pakotettu keili:$kieli / Asiakkaan kieli: $laskun_kieli";
+							
+							$varakieli = $kieli;
+							
 							if ($kieli == '') {
 								$kieli 	= $laskun_kieli;								
 							}
@@ -1666,6 +1669,8 @@
 							}
 
 							alvierittely ($page[$sivu]);
+
+							$tulos_ulos .= " Tulostettiin kielellä:$kieli";
 							
 							$kieli = $varakieli;
 							

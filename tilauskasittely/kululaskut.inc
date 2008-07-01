@@ -428,8 +428,7 @@ if ($silent == "") {
 					FROM lasku use index (kohdistus_index)
 					WHERE yhtio='$kukarow[yhtio]' and tila in ('H','Y','M','P','Q') and vienti in ('B','C','J','E','F','K','H','I','L')
 					$lisa
-					order by tapvm desc
-					LIMIT 50";
+					order by tapvm desc";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {

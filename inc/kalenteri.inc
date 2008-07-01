@@ -1166,6 +1166,10 @@
 								
 								$extra .= kaleotsikko($tapahtuma["laji_tark"]);
 								
+								if($lisatiedot["tapa"] != "") {
+									$extra .= "&nbsp;&ndash;&nbsp;".$lisatiedot["tapa"];
+								}
+								
 								if($lisatiedot["yhteyshenkilo"] != "") {
 									$extra .= "&nbsp;&ndash;&nbsp;".$lisatiedot["yhteyshenkilo"];
 								}
@@ -1513,6 +1517,13 @@
 			Testataaan voidaanko tallentaa
 		*/
 		
+		$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		$asrow = mysql_fetch_array($result);
+		var_dump($asrow);
+		$kieli = $asrow["kieli"];
+		
 		$ok = 1;
 		
 		//	Näille vaaditaan asiakasid
@@ -1525,13 +1536,64 @@
 		if($viesti== "") {
 			echo "<font class='error'>viesti puuttuu!</font><br>";
 			$ok = 0;			
-		}		
+		}	
+		
+		//	Tavasta tallennetaankin ihan koko rimpsu..
+		$query = "	SELECT selitetark
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' and avainsana.laji = 'KALETAPA' and selite = '$tapa'";
+		$tapares = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($tapares) == 1) {
+			$taparow = mysql_fetch_array($tapares);
+			$tapa_string = $taparow["selitetark"];
+		}
+		else {
+			echo "<font class='error'>".t("Yhteydenottotapa katosi!")."</font><br>$query";
+			$ok = 0;
+		}
+		
+		if($tapa == "yhteyshenkilon_email") {			
+			if($mail_subject == "") {
+				echo "<font class='error'>".t("Anna sähköpostille otsikko.")."</font><br>";
+				$ok = 0;
+			}
+			else {
+				$query = "	SELECT email
+							FROM yhteyshenkilo
+							WHERE yhtio = '$kukarow[yhtio]' and liitostunnus = '$liitostunnus' and tyyppi = 'A' and tunnus = '$yhteyshenkilo' and email != ''";
+				$yhres = mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($yhres) == 1) {
+					$yhrow = mysql_fetch_array($yhres);
+					$to = $yhrow["email"];
+					
+					$allekirjoitus = "\n\n".t("Parhain terveisin", $kieli)."\n$kukarow[nimi]\nmobile: $kukarow[puhno]\nemail: $kukarow[eposti]";
+					
+					if(mail($to, "=?iso-8859-1?Q?".imap_8bit($mail_subject)."?=", $viesti.$allekirjoitus, $header, " -f {$kukarow["eposti"]}")) {
+						echo "<font class='message'>".t("Sähköpostin lähetettiin yhteyshenkilölle osoitteeseen %s", $kieli, $to)."</font><br>";
+					}
+					else {
+						echo "<font class='error'>".t("Sähköpostin lähetys yhteyshenkilölle epäonnistui")."</font><br>";
+					}
+					
+					if(mail($kukarow["eposti"], "=?iso-8859-1?Q?".imap_8bit($mail_subject)."?=", "Viesti lähetetty osoitteeseen $to\n\n".$viesti.$allekirjoitus, $header, " -f {$kukarow["eposti"]}")) {
+						echo "<font class='message'>".t("Sähköpostin kopio lähetettiin sähköpostiisi", $kieli)."</font><br>";
+					}
+					else {
+						echo "<font class='error'>".t("Sähköpostin lähetys epäonnistui")."</font><br>";
+					}
+				}
+				else {
+					echo "<font class='error'>".t("Yhteyshenkilöä ei ollut valittu tai sillä ei ollut sähköpostiosoitetta!")."</font><br>";
+					$ok = 0;
+				}
+			}
+		}
 		
 		//	Siirretään kalenteriin
 		if($kalenteriin != "") {
 			$kentta10 = "M";	
 		}		
-	
+				
 		if($ok == 1) {
 			
 			$tapvm = $lopvm = "";
@@ -1552,12 +1614,6 @@
 				$lopvm = "";
 			}
 			
-			$viesti = $viesti;
-
-			$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
-			$result = mysql_query($query) or pupe_error($query);
-			$asrow = mysql_fetch_array($result);
-
 			if($ktunnus > 0) {
 				$query = "	UPDATE kalenteri SET ";
 				$where = " WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$ktunnus'";
@@ -1576,7 +1632,7 @@
 			if($kuka == "") $kuka = $kukarow["kuka"];
 
 			//Tehdään asiakasmemotapahtuma jos se on tarpeellinen
-			$kysely = "	tapa 			= '$tapa',
+			$kysely = "	tapa 			= '$tapa_string',
 						asiakas  	 	= '$asrow[ytunnus]',
 						liitostunnus	= '$liitostunnus',
 						henkilo  		= '$yhteyshenkilo',
@@ -1592,21 +1648,22 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			if(count($jakelu)) {
-
+				
+				$to = "";
 				//	Haetaan kaikki listata
 				$query = "	SELECT nimi, eposti
 							FROM kuka
 							WHERE yhtio = '$kukarow[yhtio]' and kuka IN ('".str_replace(",","','", implode(",", $jakelu))."') and eposti != ''";
 				$jres = mysql_query($query) or pupe_error($query);
 				if(mysql_num_rows($jres)>0) {
-					$to = "";
+					
 					while($jrow = mysql_fetch_array($jres)) {
 						if($to != "") $to .= ", ";
 						$to .= "=?iso-8859-1?Q?".imap_8bit($jrow["nimi"])."?= <{$jrow["eposti"]}>";
 					}
 					
 					//	melkosta..
-					$header  = "From: <$yhtiorow[postittaja_email]>\n";
+					$header  = "From: <{$kukarow["eposti"]}>\n";
 					$header .= "MIME-Version: 1.0\n" ;
 					$content .= "Content-Type: text/plain; charset=\"iso-8859-1\"\n";
 					
@@ -1649,7 +1706,7 @@
 					
 					if($tyyppi == "kalenteri") {
 						$msg = "Tyyppi: ".t("Kalenteritapahtuma")."\n";
-						$msg .= "Tapa: $tapa\n";
+						$msg .= "Tapa: $tapa_string\n";
 						
 					}
 					else {
@@ -1688,7 +1745,7 @@
 					$aburow = mysql_fetch_array($abures);
 					
 					$msg .= "\n$viesti\n";
-					if(mail($to, "=?iso-8859-1?Q?".imap_8bit($subject)."?=", $msg, $header, " -f $yhtiorow[postittaja_email]")) {
+					if(mail($to, "=?iso-8859-1?Q?".imap_8bit($subject)."?=", $msg, $header, " -f {$kukarow["eposti"]}")) {
 						if(mysql_num_rows($jres) > 1) {
 							echo "<font class='message'>".t("Sähköpostin lähetettiin käyttäjille %s", $kieli, $jrow["nimi"])."</font>";
 						}
@@ -1858,14 +1915,19 @@
 			$qlisa = "and selitetark_2 LIKE ('%merkinta%')";
 			$tapaotsikko = t("Merkintä");
 		}
-		if($tyyppi == "Memo") {
+		elseif($tyyppi == "Memo") {
 			$qlisa = "and selitetark_2 LIKE ('%tapahtuma%')";
 			$tapaotsikko = t("Tapahtuma");
+		}
+		elseif(substr($tyyppi, 0, 8) == "kontakti") {
+			$qlisa = "and selitetark_2 LIKE ('%kontakti%')";
+			$tapaotsikko = t("Kontaktitapa");			
 		}
 		else {
 			$tapaotsikko = t("Kalenteritapahtuma");			
 		}
-		$query = "	SELECT selitetark
+		
+		$query = "	SELECT selite, selitetark
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = 'KALETAPA' $qlisa
 					ORDER BY selite";
@@ -1879,7 +1941,7 @@
 				$sel = "";
 			}
 			
-			$tavat .= "<option value='$taparow[selitetark]' $sel>$taparow[selitetark]</option>";
+			$tavat .= "<option value='$taparow[selite]' $sel>$taparow[selitetark]</option>";
 		}
 		$tavat .= "</select>";
 
@@ -1938,6 +2000,7 @@
 			$asiakas = nayta_asiakashaku($liitostunnus, "kaleForm");
 		}
 		
+		$jakele = false;
 		if($tyyppi == "Muistutus") {
 
 			if($muokkaus) {
@@ -1962,6 +2025,8 @@
 			if($ktunnus>0) {
 				$kuittaanappi = "<a href='#' onclick=\"sndReq('ajax_menu', '$kalenteri[URL]?ohje=off&kaletee=ANNAKUITTAUS&ktunnus=$ktunnus".url_params($kalenteri)."', false, false); return false;\">".t("Kuittaa")."</a>";
 			}
+
+			$jakele = true;
 		}
 		elseif(substr($tyyppi, 0, 8) == "kontakti") {
 			if($otunnus == 0) echo "OHO, tunnus puuttuu!!";
@@ -1979,7 +2044,7 @@
 							<th colspan='2'>".t("Yhteyshenkilö")."</th>
 						</tr>						
 						<tr>
-							<td colspan='2'>$yhdata</td>
+							<td colspan='2'>$yhdata ".t("Kieli").": {$asiakasrow["kieli"]}</td>
 						</tr>						
 						<tr>
 							<th>".t("Tapa")."</th>
@@ -1988,6 +2053,12 @@
 						<tr>
 							<td>$tavat</td>
 							<td>$paiva_alku</td>
+						</tr>
+						<tr>
+							<th colspan='2'>".t("Sähköpostin otsikko")."</th>
+						</tr>						
+						<tr>
+							<td colspan='2'><input type = 'text' name = 'mail_subject' value = '$mail_subject' size = '57'></td>
 						</tr>						
 						</table>";
 		}
@@ -2022,7 +2093,7 @@
 							<td>$oval</td>
 						</tr>						
 						</table>";
-			
+			$jakele = true;
 		}
 		elseif($tyyppi == "kalenteri" or $tyyppi == "Merkinta") {
 			
@@ -2083,41 +2154,58 @@
 							<td>$paiva_loppu $klo_loppu $kalenteriin</td>
 						</tr>
 						</table>";
+			$jakele = true;
 		}
 		else {
 			echo "Tapahtuman tyyppi puuttuu tai se on väärä '$tyyppi'!!<br>";
 		}
 
 		$header .= " $klo";
+		
+		if($jakele) {
+			$mailit = "
+				<td class='back'>
+				<table>
+					<tr>
+						<th>".t("Lähetä sähköpostilla")."</th>
+					</tr>
+					<tr>
+						<td>
+							<select name='jakelu[]' multiple='TRUE' size='18'>
+								<optgroup label='".t("Speciaaliryhmät")."'>
+									<option value='yhteyshenkilo'>".t("Valittu yhteyshenkilö")."</option>
+								</optgroup>";
 
-		$mailit = "<select name='jakelu[]' multiple='TRUE' size='18'>
-						<option value=''>".t("Valitse jakelu")."</option>";			
-
-		$query = "	SELECT *, concat_ws(',', selitetark) selitetark
-		 			FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji='JAKELULISTA'";
-		$ares = mysql_query($query) or pupe_error($query);
-		if(mysql_num_rows($ares)>0) {
-			$mailit .= "<optgroup label='".t("Jakelulista")."'>";
-			while($arow = mysql_fetch_array($ares)) {
-				$mailit .= "<option value='{$arow["selitetark"]}'>{$arow["selite"]}</option>";
+			$query = "	SELECT *, concat_ws(',', selitetark) selitetark
+			 			FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]' and laji='JAKELULISTA'";
+			$ares = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($ares)>0) {
+				$mailit .= "<optgroup label='".t("Jakelulista")."'>";
+				while($arow = mysql_fetch_array($ares)) {
+					$mailit .= "<option value='{$arow["selitetark"]}'>{$arow["selite"]}</option>";
+				}
+				$mailit .= "</optgroup>";
 			}
-			$mailit .= "</optgroup>";
-		}
 
-		$query = "	SELECT *
-		 			FROM kuka
-					WHERE yhtio = '$kukarow[yhtio]' and eposti!=''";
-		$ares = mysql_query($query) or pupe_error($query);
-		if(mysql_num_rows($ares)>0) {
-			$mailit .= "<optgroup label='".t("Käyttäjät")."'>";
-			while($arow = mysql_fetch_array($ares)) {
-				$mailit .= "<option value='{$arow["kuka"]}'>{$arow["nimi"]}</option>";
+			$query = "	SELECT *
+			 			FROM kuka
+						WHERE yhtio = '$kukarow[yhtio]' and eposti!=''";
+			$ares = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($ares)>0) {
+				$mailit .= "<optgroup label='".t("Käyttäjät")."'>";
+				while($arow = mysql_fetch_array($ares)) {
+					$mailit .= "<option value='{$arow["kuka"]}'>{$arow["nimi"]}</option>";
+				}
+				$mailit .= "</optgroup>";
 			}
-			$mailit .= "</optgroup>";
+			$mailit .= "</select>
+					</td>
+							</tr>
+						</table>
+					</td>";
 		}
-		$mailit .= "</select>";
-				
+						
 		$otsikko = t($otsikko);
 		echo "
 			<form id = 'kaleForm' name = 'kalenteritapahtuma' onSubmit=\"ajaxPost('kaleForm', '$kalenteri[URL]?' , 'ajax_menu'); return false;\">
@@ -2134,17 +2222,8 @@
 				<input type = 'hidden' name='kaletee' value = 'TALLENNA_KALENTERITAPAHTUMA'>
 				<table>
 					<caption>$otsikko</caption>
+					$mailit
 					<tr>
-						<td class='back'>
-							<table>
-								<tr>
-									<th>".t("Lähetä sähköpostilla")."</th>
-								</tr>
-								<tr>
-									<td>$mailit</td>
-								</tr>
-							</table>
-						</td>
 						<td class='back'>
 							<table>
 								<tr>

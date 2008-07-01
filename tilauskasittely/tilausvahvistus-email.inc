@@ -14,6 +14,14 @@ $virexx = 0;
 // asiakkaan sähköpostiin
 if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 
+	$query	= "select * from yhteyshenkilo where yhtio='$kukarow[yhtio]' and liitostunnus='$laskurow[liitostunnus]' and nimi = '$laskurow[tilausyhteyshenkilo]'";
+	$yhteyshenkiloresult  = mysql_query($query) or pupe_error($query);
+	$yhteyshenkiloasiakas = mysql_fetch_array($yhteyshenkiloresult);
+	
+	if ($yhteyshenkiloasiakas['email'] != '') {
+		$tilvahasiakas['email'] = $yhteyshenkiloasiakas['email'];
+	}
+	
 	if ($tilvahasiakas['email'] == '') {
 		$tilvah_nimi = $tilvahasiakas["nimi"];
 		if ($tilvahasiakas["toim_nimi"] != "" and $tilvahasiakas["toim_nimi"] != $tilvahasiakas["nimi"]) {

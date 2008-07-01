@@ -29,11 +29,11 @@ if($tee == "ASIAKASHAKU") {
 
 if($toim == "TARJOUSHAKUKONE") {
 	$laskutilat = "'T'";
-	$hakukysely = "tarjoushakukone";
+	$hakumuisti = "tarjoushakukone";
 }
 elseif ($toim == "TILAUSHAKUKONE") {
 	$laskutilat = "'R','L','N'";
-	$hakukysely = "tilaushakukone";
+	$hakumuisti = "tilaushakukone";
 }
 
 //	Haetaan sallitut seurannat
@@ -690,7 +690,7 @@ if($tee == "NAYTA") {
 		$data["tiedot"]["menut"]["toiminnot"][] = array("TEKSTI" => "Mitätöi tarjous", "HREF" => "tilaushakukone.php?toim=$toim&setti=$setti&tarjous=$tarjous&tee=HYLKAATARJOUS", "TARGET" => "page");
 	}
 	
-	$menu[] = array("TEKSTI" => "Muokkaa liitteitä", "HREF" => "../liitetiedostot.php?liitos=lasku&id=$tarjous&lopetus=".urlencode("raportit/tilaushakukone.php?toim=$toim&setti=$setti&hakukysely=$hakukysely&hakupalkki=OHI&aja_kysely=tmpquery&tarjous=$tarjous"), "TARGET" => "page");
+	$menu[] = array("TEKSTI" => "Muokkaa liitteitä", "HREF" => "../liitetiedostot.php?liitos=lasku&id=$tarjous&lopetus=".urlencode("raportit/tilaushakukone.php?toim=$toim&setti=$setti&hakupalkki=OHI&aja_kysely=tmpquery&tarjous=$tarjous"), "TARGET" => "page");
 	
 	$data["tiedot"]["menut"][] = tee_menu($menu, "<font class='$class'>".t("Liitetiedostot")."</font>");
 	
@@ -754,7 +754,7 @@ if($tee == "") {
 			$alatila_tilaus		= array("A", "B", "C", "D", "E", "V", "J", "F", "T", "U");
 			$alatila_projekti	= array("", "A", "B");						
 			$hakupalkki 		= "OHI";
-			$hakukysely			= "";
+			$hakumuisti			= "";
 		}
 		elseif($setti == "omat") {
 			if($toim == "TILAUSHAKUKONE") {
@@ -765,7 +765,7 @@ if($tee == "") {
 			}
 			$laatija			= array($kukarow["kuka"]);
 			$hakupalkki 		= "mini";
-			$hakukysely			= "";			
+			$hakumuisti			= "";			
 		}
 		
 		aja_kysely();
@@ -1208,7 +1208,7 @@ if($tee == "") {
 								</tr>
 								</table>
 							</td>
-						<tr><td class='back' colspan = '6'><br>".nayta_kyselyt($hakukysely)."<br></td></tr>
+						<tr><td class='back' colspan = '6'><br>".nayta_kyselyt($hakumuisti)."<br></td></tr>
 						<tr><td class='back'><input type = 'submit' value='".t("Aja kysely")."'></td></tr>
 					</table>
 					<br>

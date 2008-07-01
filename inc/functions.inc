@@ -5228,9 +5228,9 @@ if(!function_exists("aja_kysely")) {
 
 if(!function_exists("nayta_kyselyt")) {
 	function nayta_kyselyt($haku) {
-		global $kukarow, $aja_kysely, $hakukysely;
+		global $kukarow, $aja_kysely;
 
-		if(!table_exists("muisti") or $hakukysely == "") {
+		if(!table_exists("muisti") or $haku == "") {
 			return false;
 		}
 

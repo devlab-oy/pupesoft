@@ -1383,6 +1383,41 @@ if (!function_exists('print_pdf')) {
 		$fh = fopen($pdffilenimi, "w");
 		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
 		fclose($fh);
+		
+		//lähetetään sähköposti asiakkaan yhteyshenkilölle
+		if ($laskurow['tilausyhteyshenkilo'] != "" and $tyyppi == "TILAUSVAHVISTUS") {
+			$liite = $pdffilenimi;
+
+
+			if ($kukarow["extranet"] == '') {
+				$query = "	SELECT yhteyshenkilo.email
+							FROM yhteyshenkilo
+							JOIN asiakas ON yhteyshenkilo.yhtio = asiakas.yhtio and asiakas.tunnus = '$laskurow[liitostunnus]'
+							WHERE yhteyshenkilo.yhtio = '$kukarow[yhtio]'
+							and yhteyshenkilo.nimi = '$laskurow[tilausyhteyshenkilo]'
+							and yhteyshenkilo.tilausyhteyshenkilo = 'o'";
+				$result = mysql_query($query) or pupe_error($query);
+
+				if(mysql_num_rows($result) > 0) {
+					$yhteysrow = mysql_fetch_array($result);
+
+					if ($yhteysrow["email"] != '') {
+						$tmp_komento = $komento;
+						$komento = "asiakasemail".$yhteysrow['email'];
+						require("../inc/sahkoposti.inc");
+						echo t("Lähetetään tilausvahvistus yhteyshenkilölle")."...<br>";
+						
+						if ($tmp_komento == 'email' or substr($tmp_komento,0,12) == 'asiakasemail') {
+							$komento = "";
+						}
+						else {
+							$komento = $tmp_komento;
+						}
+					}
+
+				}
+			}
+		}
 
 		// itse print komento...
 		if ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
@@ -1414,32 +1449,7 @@ if (!function_exists('print_pdf')) {
 			$line = exec("$komento $pdffilenimi", $output, $returnvalue);
 		}
 
-		//lähetetään sähköposti asiakkaan yhteyshenkilölle
-		if ($laskurow['tilausyhteyshenkilo'] != "" and $tyyppi == "TILAUSVAHVISTUS" and strpos(" ".$laskurow['tilausvahvistus'],'L')) {
-			$liite = $pdffilenimi;
-
-
-			if ($kukarow["extranet"] == '') {
-				$query = "	SELECT yhteyshenkilo.email
-							FROM yhteyshenkilo
-							JOIN asiakas ON yhteyshenkilo.yhtio = asiakas.yhtio and asiakas.tunnus = '$laskurow[liitostunnus]'
-							WHERE yhteyshenkilo.yhtio = '$kukarow[yhtio]'
-							and yhteyshenkilo.nimi = '$laskurow[tilausyhteyshenkilo]'
-							and yhteyshenkilo.tilausyhteyshenkilo = 'o'";
-				$result = mysql_query($query) or pupe_error($query);
-
-				if(mysql_num_rows($result) > 0) {
-					$yhteysrow = mysql_fetch_array($result);
-
-					if ($yhteysrow["email"] != '') {
-						$komento = "asiakasemail".$yhteysrow['email'];
-						require("../inc/sahkoposti.inc");
-						echo t("Lähetetään tilausvahvistus yhteyshenkilölle")."...<br>";
-					}
-
-				}
-			}
-		}
+		
 
 		//poistetaan tmp file samantien kuleksimasta...
 		system("rm -f $pdffilenimi");

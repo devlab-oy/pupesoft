@@ -825,6 +825,7 @@
 			$yhteensa = 0;
 			$kassayhteensa = 0;
 
+			$kateismaksu = "";
 			$myynti_yhteensa = 0;
 			$pankkikortti = "";
 			$luottokortti = "";
@@ -850,6 +851,8 @@
 					}
 
 					if (stristr($row["tyyppi"], 'kateinen')) {
+						
+						$solu = "kateinen";
 
 						if ($edkassa != $row["kassa"] or ($kateinen != $row["tilino"] and $kateinen != '')) {
 
@@ -864,8 +867,6 @@
 								elseif ($kateinen != '') {
 									$tilinumero["kateinen"] = $kateinen;
 								}
-
-								$solu = "kateinen";
 
 								echo "</table><table width='100%'>";
 								echo "<tr>";
@@ -1008,6 +1009,22 @@
 						$edkateismaksu = $kateismaksu;
 					}
 				}
+				
+				if ($solu != 'kateinen' and ($pankkikortti == true or $luottokortti == $true)) {
+					// jos meill‰ on vain pankkikortti ja/tai luottokorttitapahtumia eik‰ yht‰‰n k‰teist‰ niin halutaan silti n‰hd‰ kassalippaan alku- ja loppukassat yms
+					$edkassa = "halutaan kassalippaan tiedot";
+					// t‰ll‰ p‰‰st‰‰n alempaan iffiin k‰siksi
+					$kateismaksu = "kateinen";
+					mysql_data_seek($result,0);
+					$row = mysql_fetch_array($result);
+					$edkassanimi = $row["kassanimi"];
+
+					$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' AND nimi = '$row[kassanimi]'";
+					$kassalipasresult = mysql_query($query) or pupe_error($query);
+					$kassalipasrow = mysql_fetch_array($kassalipasresult);
+					$kateinen = $kassalipasrow["kassa"];
+					$row["tilino"] = $kassalipasrow["kassa"];
+				}
 
 				if ($edkassa != '') {
 
@@ -1020,31 +1037,39 @@
 							$tilinumero["kateinen"] = $kateinen;
 						}
 
+						if ($edkassa == "halutaan kassalippaan tiedot") {
+							$tilinumero["kateinen"] = $kassalipasrow["kassa"];
+						}
+
 						$solu = "kateinen";
 
 						$kassalippaat[$edkassanimi] = $edkassanimi;
 						$kassalipas_tunnus[$edkassanimi] = $edktunnus;
 
 						echo "</table><table width='100%'>";
-						echo "<tr><td colspan='";
-							if ($tilityskpl > 1) {
-								echo $tilityskpl+6;
-							}
-							else {
-								echo "9";
-							}
-						echo "' class='tumma' width='300px' nowrap>$kateismaksu ".t("yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
-						echo "<input type='hidden' name='maksutapa$i' value='$solu#$tilinumero[kateinen]#$edkassanimi'>";
-						echo "<td class='tumma' align='center' width='100px' nowrap><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
-						if ($tilityskpl > 1) {
-							$y = $i;
-							for ($yy = 1; $yy < $tilityskpl; $yy++) {
-								$y .= $i;
-								echo "<td class='tumma' align='center' width='100px' nowrap><input type='text' id='$solu solu$y' name='solu$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
-							}
+						if ($edkassa != "halutaan kassalippaan tiedot") {
+							echo "<tr><td colspan='";
+								if ($tilityskpl > 1) {
+									echo $tilityskpl+6;
+								}
+								else {
+									echo "9";
+								}
+							echo "' class='tumma' width='300px' nowrap>$kateismaksu ".t("yhteens‰").": <a href=\"javascript:toggleGroup('nayta$i')\">".t("N‰yt‰ / Piilota")."</a></td>";
 						}
-						echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td>";
-						echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu soluerotus$i' name='soluerotus$i' size='10' disabled></td>";
+						echo "<input type='hidden' name='maksutapa$i' value='$solu#$tilinumero[kateinen]#$edkassanimi'>";
+						if ($edkassa != "halutaan kassalippaan tiedot") {
+							echo "<td class='tumma' align='center' width='100px' nowrap><input type='text' id='$solu solu$i' name='solu$i' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+							if ($tilityskpl > 1) {
+								$y = $i;
+								for ($yy = 1; $yy < $tilityskpl; $yy++) {
+									$y .= $i;
+									echo "<td class='tumma' align='center' width='100px' nowrap><input type='text' id='$solu solu$y' name='solu$y' size='10' autocomplete='off' onkeyup='update_summa(\"tasmaytysform\");'></td>";
+								}
+							}
+							echo "<td align='right' class='tumma' style='width:100px' nowrap><b><div id='$solu erotus$i'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</div></b></td>";
+							echo "<td class='tumma' align='center' style='width:100px' nowrap><input type='text' id='$solu soluerotus$i' name='soluerotus$i' size='10' disabled></td>";
+						}
 						echo "</tr>";
 
 						echo "<tr><td class='tumma' colspan='";

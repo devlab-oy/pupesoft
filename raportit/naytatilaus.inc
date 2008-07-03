@@ -413,6 +413,7 @@
 					round(hinta*if($laskurow[vienti_kurssi]=0, 1, $laskurow[vienti_kurssi]), '$yhtiorow[hintapyoristys]') hinta, ale,
 					if(rivihinta != 0, round(rivihinta, '$yhtiorow[hintapyoristys]'), round((varattu+kpl)*hinta*if($laskurow[vienti_kurssi]=0, 1, $laskurow[vienti_kurssi])*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),'$yhtiorow[hintapyoristys]')) rivihinta,
 					'$laskurow[valkoodi]' valuutta,
+					tilausrivin_lisatiedot.hankintakulut,
 					tilausrivi.kommentti, tilausrivi.tunnus,
 					tilausrivi.uusiotunnus,
 					$sorttauskentta
@@ -420,6 +421,7 @@
 					JOIN tuote USING (yhtio, tuoteno)
 					".nimitys('join','tilausrivi')."
 					LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$laskurow[liitostunnus]'
+					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 					WHERE $where
 					and tilausrivi.yhtio='$kukarow[yhtio]'
 					and tyyppi='O'
@@ -433,6 +435,9 @@
 			if($nippu>0) {
 				echo "<th align='left'><a href = '$PHP_SELF?tee=NAYTATILAUS&toim=$toim&asiakasid=$asiakasid&toimittajaid=$toimittajaid&tunnus=$tunnus&nippu=$nippu&otunnus=$nippu&ojarj=$ojarj'>".t(mysql_field_name($presult,$i))."</a></th>";
 			}
+			elseif (mysql_field_name($presult, $i) == "hankintakulut") {
+				echo "<th>".t("Osuus kululaskuista")."</th><th>".t("Osuus eturahdista")."</th><th>".t("Tulli%")."</th><th>".t("Aputullim‰‰r‰")."</th><th>".t("Rivinlis‰kulu")."</th>";
+			}
 			else {
 				echo "<th align='left'><a href = '$PHP_SELF?tee=NAYTATILAUS&toim=$toim&asiakasid=$asiakasid&toimittajaid=$toimittajaid&tunnus=$tunnus&ytunnus=$ytunnus&nimi=$nimi&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&ojarj=$ojarj'>".t(mysql_field_name($presult,$i))."</a></th>";
 			}
@@ -441,6 +446,10 @@
 		echo "</tr>";
 
 		$summa = 0;
+		$osuus_kululaskuista_yhteensa = "";
+		$osuus_eturahdista_yhteensa = "";
+		$aputullimaara_yhteensa = "";
+		$rivinlisakulu_yhteensa = "";
 
 		while ($prow = mysql_fetch_array ($presult)) {
 
@@ -460,6 +469,14 @@
 				}
 				elseif (is_numeric($prow[$i])) {
 					echo "<td align='right' nowrap>$prow[$i]</td>";
+				}
+				elseif (mysql_field_name($presult, $i) == "hankintakulut") {
+					list($osuus_kululaskuista, $osuus_eturahdista, $tulliprossa, $aputullimaara, $rivinlisakulu) = explode("#", $prow[$i]);
+					echo "<td align='right'>$osuus_kululaskuista $yhtiorow[valkoodi]</td><td align='right'>$osuus_eturahdista $yhtiorow[valkoodi]</td><td align='right'>$tulliprossa %</td><td align='right'>$aputullimaara $yhtiorow[valkoodi]</td><td align='right'>$rivinlisakulu $yhtiorow[valkoodi]</td>";
+					$osuus_kululaskuista_yhteensa += $osuus_kululaskuista;
+					$osuus_eturahdista_yhteensa += $osuus_eturahdista;
+					$aputullimaara_yhteensa += $aputullimaara;
+					$rivinlisakulu_yhteensa += $rivinlisakulu;
 				}
 				else {
 					echo "<td>$prow[$i]</td>";
@@ -509,7 +526,15 @@
 			}
 		}
 
-		echo "<tr><td class='back' colspan='10' align='right'>".t("Yhteens‰").":</td><td class='back' align='right'>".sprintf('%.2f',$summa)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
+		echo "<tr><td class='back' colspan='10' align='right'>".t("Yhteens‰").":</td><td class='back' align='right'>".sprintf('%.2f',$summa)."</td><td class='back'>$laskurow[valkoodi]</td>";
+		if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "") {
+			echo "<td class='back' align='right'>".sprintf('%.02f',$osuus_kululaskuista_yhteensa)." $yhtiorow[valkoodi]</td>";
+			echo "<td class='back' align='right'>".sprintf('%.02f',$osuus_eturahdista_yhteensa)." $yhtiorow[valkoodi]</td>";
+			echo "<td class='back' align='right'>&nbsp;</td>";
+			echo "<td class='back' align='right'>".sprintf('%.02f',$aputullimaara_yhteensa)." $yhtiorow[valkoodi]</td>";
+			echo "<td class='back' align='right'>".sprintf('%.02f',$rivinlisakulu_yhteensa)." $yhtiorow[valkoodi]</td>";
+		}
+		echo "</tr>";
 	}
 	else {
 		// Myynnit ja muut myyntipuolen jutut

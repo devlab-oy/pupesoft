@@ -244,7 +244,8 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	// t‰m‰ on miinusta hyvitysrivill‰
 	$ohinta = round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['maksu_kurssi']*$tilrivirow['varattu']+$rahtios, 6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
 
-	$hankintakulut .= "Osuus kululaskuista: ".round($laskurow["saldo_maksettu"] * $osuus, 2)." $yhtiorow[valkoodi]<br>Osuus eturahdista: ".round($laskurow['rahti_etu'] * $laskurow['maksu_kurssi'] * $osuus, 2)." $yhtiorow[valkoodi]<br>";
+	// Osuus kululaskuista # Osuus eturahdista
+	$hankintakulut .= round($laskurow["saldo_maksettu"] * $osuus, 2)."#".round($laskurow['rahti_etu'] * $laskurow['maksu_kurssi'] * $osuus, 2);
 
 	$tulliprossa = "";
 	$tv_nimrow	 = "";
@@ -257,19 +258,22 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$ohinta = $ohinta * (1+($tulliprossa/100));
 		$tv_nimrow["maara"] = $tv_nimrow["maara"] * 1; // teh‰‰n numero, ett‰ lista n‰ytt‰‰ kivemmalta
 
-		$hankintakulut .= "Tulli: ".sprintf('%.02f',$tulliprossa)." % (".sprintf('%.02f',$aputullimaara)." $yhtiorow[valkoodi])<br>";
 	}
+
+	// Tulli% # Aputullim‰‰r‰
+	$hankintakulut .= "#".sprintf('%.02f',$tulliprossa)."#".sprintf('%.02f',$aputullimaara);
 
 	// lis‰t‰‰n riville extra kulu, jos sellanen oli annettu
 	if ($tilrivirow["kate"] != 0) {
 		$kuluteksti = "($ohinta + $tilrivirow[kate])";
 		$ohinta = $ohinta + $tilrivirow['kate'];
-
-		$hankintakulut .= "Rivinlis‰kulu: $tilrivirow[kate] $yhtiorow[valkoodi]<br>";
 	}
 	else {
-		$kuluteksti = "";
+//		$kuluteksti = "";
 	}
+
+	// Rivinlis‰kulu
+	$hankintakulut .= "#$tilrivirow[kate]";
 
 	$rivihin = round($ohinta, $yhtiorow['hintapyoristys']);	// tilausrivin rivihinta talteen
 	// t‰m‰ muuttaa hinnan plussaksi hyvityskeikalla (jolloin kehahin matikka menee oikein)

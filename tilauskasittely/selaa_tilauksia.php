@@ -350,7 +350,12 @@
 		echo "<tr>";
 
 		for ($i = 0; $i < mysql_num_fields($result); $i++) {
-			echo "<th>".mysql_field_name($result, $i)."</th>";
+			if (mysql_field_name($result, $i) == "hankintakulut") {
+				echo "<th>".t("Osuus kululaskuista")."</th><th>".t("Osuus eturahdista")."</th><th>".t("Tulli%")."</th><th>".t("Aputullim‰‰r‰")."</th><th>".t("Rivinlis‰kulu")."</th>";
+			}
+			else {
+				echo "<th>".mysql_field_name($result, $i)."</th>";
+			}
 		}
 
 		echo "</tr>";
@@ -358,6 +363,10 @@
 		$arvo    = 0;
 		$summa   = 0;
 		$teemita = "";
+		$osuus_kululaskuista_yhteensa = "";
+		$osuus_eturahdista_yhteensa = "";
+		$aputullimaara_yhteensa = "";
+		$rivinlisakulu_yhteensa = "";
 
 		if ($tee == "kk") {
 			$teemita = "paiva";
@@ -385,6 +394,14 @@
 				
 				if (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
 					echo "<td align='right'>$row[$i]</td>";
+				}
+				elseif (mysql_field_name($result, $i) == "hankintakulut") {
+					list($osuus_kululaskuista, $osuus_eturahdista, $tulliprossa, $aputullimaara, $rivinlisakulu) = explode("#", $row[$i]);
+					echo "<td align='right'>$osuus_kululaskuista $yhtiorow[valkoodi]</td><td align='right'>$osuus_eturahdista $yhtiorow[valkoodi]</td><td align='right'>$tulliprossa %</td><td align='right'>$aputullimaara $yhtiorow[valkoodi]</td><td align='right'>$rivinlisakulu $yhtiorow[valkoodi]</td>";
+					$osuus_kululaskuista_yhteensa += $osuus_kululaskuista;
+					$osuus_eturahdista_yhteensa += $osuus_eturahdista;
+					$aputullimaara_yhteensa += $aputullimaara;
+					$rivinlisakulu_yhteensa += $rivinlisakulu;
 				}
 				else {
 					echo "<td>$row[$i]</td>";
@@ -436,9 +453,23 @@
 		
 		if ($arvo != 0 or $summa != 0) {
 			echo "<tr>";
-			echo "<th colspan='".(mysql_num_fields($result)-2)."'>".t("Yhteens‰").": </th>";
+			$i = 2;
+			if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "") {
+				$i = 6;
+			}
+			echo "<th colspan='".(mysql_num_fields($result)-$i)."'>".t("Yhteens‰").": </th>";
 			echo "<td align='right'>".sprintf('%.02f',$summa)."</td>";
 			echo "<td align='right'>".sprintf('%.02f',$arvo)."</td>";
+			if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "") {
+				echo "<td align='right'>&nbsp;</td>";
+				echo "<td align='right'>&nbsp;</td>";
+				echo "<td align='right'>&nbsp;</td>";
+				echo "<td align='right'>".sprintf('%.02f',$osuus_kululaskuista_yhteensa)." $yhtiorow[valkoodi]</td>";
+				echo "<td align='right'>".sprintf('%.02f',$osuus_eturahdista_yhteensa)." $yhtiorow[valkoodi]</td>";
+				echo "<td align='right'>&nbsp;</td>";
+				echo "<td align='right'>".sprintf('%.02f',$aputullimaara_yhteensa)." $yhtiorow[valkoodi]</td>";
+				echo "<td align='right'>".sprintf('%.02f',$rivinlisakulu_yhteensa)." $yhtiorow[valkoodi]</td>";
+			}
 			echo "</tr>";
 		}
 

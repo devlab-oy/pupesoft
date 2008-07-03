@@ -373,7 +373,9 @@ if ($laskurow["tunnusnippu"] > 0 and $toim == "PROJEKTI") {
 }
 
 if ($kukarow["extranet"] == "" and ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") or ($toim == "PROJEKTI" and $projektilask > 0) or ($toim == "TARJOUS" and $projektilla > 0) or $laskurow["alatila"] == "X") {
-	$muokkauslukko 	= "LUKOSSA";
+	if ($laskurow["tila"] != '0') {
+		$muokkauslukko 	= "LUKOSSA";
+	}
 	$state 			= "DISABLED";
 }
 

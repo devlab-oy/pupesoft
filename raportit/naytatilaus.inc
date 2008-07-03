@@ -243,7 +243,7 @@
 	}
 
 	$komm = "";
-	
+
 	if ($laskurow['myyja'] > 0) {
 		//etsit‰‰n myyj‰n nimi
 		$query  = "	SELECT nimi, kuka
@@ -251,10 +251,10 @@
 					where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
 		$myyresult = mysql_query($query) or pupe_error($query);
 		$myyrow = mysql_fetch_array($myyresult);
-		
+
 		$komm .= "\n".t("Myyj‰").":###".$myyrow['nimi'];
 	}
-	
+
 	if ($myyrow['kuka'] != $laskurow['laatija']) {
 		//etsit‰‰n laatijan nimi
 		$query  = "	SELECT nimi
@@ -265,7 +265,7 @@
 
 		$komm .= "\n".t("Laatija").":###".$laarow['nimi'];
 	}
-	
+
 	if (trim($laskurow['tilausyhteyshenkilo']) != '') {
 		$komm .= "\n".t("Tilaaja").":###".$laskurow['tilausyhteyshenkilo'];
 	}
@@ -635,18 +635,18 @@
 		$ennas_yht		= 0;
 		$ennaa_yht		= 0;
 		$rihin_yht		= 0;
-		
+
 		while ($row = mysql_fetch_array($result)) {
 
 			if ($row["tuoteno"] == $yhtiorow["ennakkomaksu_tuotenumero"]) {
 				$ennas_yht += $row["summa"];
 				$ennaa_yht += $row["arvo"];
 			}
-			else {				
+			else {
 				if ($row["osto_vai_hyvitys"] != "O" and ($laskurow["tapvm"] == '0000-00-00' or ($row["var"] != "P" and $row["var"] != "J" and $row["var"] != "S"))) {
 					$rihin_yht += $row["rivihinta"];
 				}
-				
+
 				$arvo_yht  += $row["arvo"];
 				$summa_yht += $row["summa"];
 			}
@@ -698,9 +698,9 @@
 				}
 				else {
 					$row["kommentti"] .= "&nbsp;";
-				}	
+				}
 			}
-			
+
 			while($sarjarow = mysql_fetch_array($sarjares)) {
 				if($kukarow['extranet'] == '') {
 					$row["kommentti"] .= "# <a href='".$palvelin2."tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$row[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a><br>";
@@ -759,7 +759,7 @@
 					$pklisa = " and (tilausrivi.perheid = '$row[tunnus]' or tilausrivi.perheid2 = '$row[tunnus]')";
 					if ($pkusei == '') {
 						$pkusei = " use index (yhtio_otunnus) ";
-					}					
+					}
 				}
 				elseif ($row["perheid"] == 0) {
 					$pklisa = " and tilausrivi.perheid2 = '$row[perheid2]'";
@@ -1027,11 +1027,11 @@
 				$kate = 0;
 
 				if ($laskurow["tapvm"] != '0000-00-00') {
-					
+
 					if ($row["kpl"] == 0) {
 						$kate = "";
 					}
-					elseif ($row["rivihinta"] != 0) {												
+					elseif ($row["rivihinta"] != 0) {
 						if ($row["kate"] < 0) {
 							$kate = sprintf('%.2f', -1 * abs(100 * $row["kate"] / $row["rivihinta"]))."%";
 						}
@@ -1115,8 +1115,8 @@
 					}
 					elseif (kehahin($row["tuoteno"]) != 0) {
 						$kate = "-100.00%";
-					}			
-					
+					}
+
 					if ($row["tuoteno"] != $yhtiorow["ennakkomaksu_tuotenumero"]) $kate_yht += ($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['kpl'])));
 				}
 
@@ -1251,7 +1251,7 @@
 			else {
 				$ykate = round(abs($kate_yht / $rihin_yht * 100), 2);
 			}
-					
+
 			echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Kate yhteens‰").":</td><td class='back' align='right' nowrap>".sprintf('%.2f',$ykate)."</td><td class='back'>%</td></tr>";
 		}
 

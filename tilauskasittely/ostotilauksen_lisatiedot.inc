@@ -143,7 +143,27 @@ if ($tee == "") {
 
 	if ($laskurow["maa_maara"] == "") {
 		#TODO tähän pitäisi tehdä query, joka laskee montako riviä keikalla on kohdistettuna mihinkin maahan ja valitsee sen maan johon on eniten
-		$laskurow["maa_maara"] = $yhtiorow["maa"];
+		# JOIN tuotepaikat 
+		$query = "	SELECT varastopaikat.maa, count(*) kpl 
+					FROM lasku
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus) 
+					JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio AND varastopaikat.tunnus = lasku.varasto)
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					AND lasku.laskunro = '$laskurow[laskunro]'
+					AND lasku.tapvm = '$laskurow[tapvm]'
+					AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+					AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+					GROUP BY varastopaikat.maa 
+					ORDER BY kpl 
+					LIMIT 1";
+		$maaresult = mysql_query($query) or pupe_error($query);
+
+		if ($maarow = mysql_fetch_array($maaresult)) {
+			$laskurow["maa_maara"] = $maarow["maa"];
+		}
+		else {
+			$laskurow["maa_maara"] = $yhtiorow["maa"];
+		}
 	}
 
 	while ($row = mysql_fetch_array($result)) {

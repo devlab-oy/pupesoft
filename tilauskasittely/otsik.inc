@@ -2134,15 +2134,17 @@
 
 			echo "<table>";
 			echo "<tr><td class='back'><input type='submit' ACCESSKEY='J' name='jatka' value='".t("Jatka")."'></td></form>";
-
-			echo "<form method='post' action='$PHP_SELF' autocomplete='off'>";
-			echo "<input type='hidden' name='tee' value='OTSIK'>";
-			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-			echo "<input type='hidden' name='toim' value='$toim'>";
-			echo "<input type='hidden' name='projektilla' value='$projektilla'>";
-			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-			echo "<input type='hidden' name='tila' value='vaihdaasiakas'>";
-			echo "<td class='back'><input type='submit' ACCESSKEY='A' value='".t("Vaihda asiakas")."'></td></form>";
+			
+			if ($tilausnumero != "") {
+				echo "<form method='post' action='$PHP_SELF' autocomplete='off'>";
+				echo "<input type='hidden' name='tee' value='OTSIK'>";
+				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+				echo "<input type='hidden' name='toim' value='$toim'>";
+				echo "<input type='hidden' name='projektilla' value='$projektilla'>";
+				echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+				echo "<input type='hidden' name='tila' value='vaihdaasiakas'>";
+				echo "<td class='back'><input type='submit' ACCESSKEY='A' value='".t("Vaihda asiakas")."'></td></form>";
+			}
 
 			echo "</tr></table>";
 

@@ -227,10 +227,11 @@
 				$res = mysql_query($query) or pupe_error($query);
 				$row = mysql_fetch_array($res);
 				//var_dump($kalenteri);
-				$otsikko = kaleotsikko($row["tyyppi"]);
+				$otsikko = $row["tapa"];
 				
 
-				$popup_otsikko = "<table>";
+				$popup_otsikko = "<table>
+									<tr><th class=''>".t("Tyyppi").":</th><td class=''>".kaleotsikko($row["tyyppi"])."</td></tr>";
 				if($row["asiakas"] != "") {
 					$popup_otsikko .= "<tr><th class=''>".t("Asiakas").":</th><td class=''>$row[asiakas]</td></tr>";
 				}

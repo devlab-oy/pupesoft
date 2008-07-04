@@ -227,7 +227,7 @@
 				$res = mysql_query($query) or pupe_error($query);
 				$row = mysql_fetch_array($res);
 				//var_dump($kalenteri);
-				$otsikko = substr($row["tapa"], 0, 20);
+				$otsikko = substr($row["tapa"], 0, 14);
 				
 
 				$popup_otsikko = "<table>

@@ -1010,7 +1010,7 @@
 			}
 
 			echo "</td>";
-			echo "<td colspan='2' valign='top'>$sarjarow[tuoteno]<br>$sarjarow[nimitys]";
+			echo "<td colspan='2' valign='top'><a href='../tuote.php?tee=Z&tuoteno=$sarjarow[tuoteno]'>$sarjarow[tuoteno]</a><br>$sarjarow[nimitys]";
 
 			if ($sarjarow["takuu_alku"] != '' and $sarjarow["takuu_alku"] != '0000-00-00') {
 				echo "<br>".t("Takuu").": ".tv1dateconv($sarjarow["takuu_alku"])." - ".tv1dateconv($sarjarow["takuu_loppu"]);

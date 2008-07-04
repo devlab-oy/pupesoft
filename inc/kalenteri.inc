@@ -2223,8 +2223,8 @@
 				<input type = 'hidden' name='kaletee' value = 'TALLENNA_KALENTERITAPAHTUMA'>
 				<table>
 					<caption>$otsikko</caption>
-					$mailit
 					<tr>
+						$mailit
 						<td class='back'>
 							<table>
 								<tr>

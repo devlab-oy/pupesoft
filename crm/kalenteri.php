@@ -226,7 +226,7 @@ if ($tee == "POISTA") {
 if($tee == "SYOTA") {
 	if ($tunnus != '') {
 		$query = "	SELECT *,
-					if(asiakas=0,'',asiakas) asiakas,
+					if(asiakas='0','',asiakas) asiakas,
 					if(liitostunnus=0,'',liitostunnus) liitostunnus,
 					Year(pvmloppu) lyear,
 					Month(pvmloppu) lkuu,
@@ -238,7 +238,7 @@ if($tee == "SYOTA") {
 					and tyyppi = 'kalenteri'";
 		$res  = mysql_query($query) or pupe_error($query);
 		$irow = mysql_fetch_array($res);
-
+		
 		$viesti 	= $irow["kentta01"];
 		$kilometrit	= $irow["kentta03"];
 		$paivarahat = $irow["kentta04"];
@@ -274,6 +274,7 @@ if($tee == "SYOTA") {
 		<input type='hidden' name='paiva' value='$paiva'>
 		<input type='hidden' name='tunnus'   value='$tunnus'>
 		<input type='hidden' name='konserni' value='$konserni'>
+		<input type='hidden' name='asiakasid' value='$asiakasid'>
 
 	<table width='100%'>";
 

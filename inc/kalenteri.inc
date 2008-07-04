@@ -1931,7 +1931,7 @@
 		$query = "	SELECT selite, selitetark
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = 'KALETAPA' $qlisa
-					ORDER BY selite";
+					ORDER BY jarjestys, selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$tavat = "<select name='tapa'>";
 		while($taparow = mysql_fetch_array($vresult)) {

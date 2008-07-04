@@ -85,6 +85,7 @@ if ($monta > 1 and $monta <= $limit) {
 		echo "<input type='hidden' name='tila' value='$tila'>";
 		echo "<input type='hidden' name='maara' value='$maara'>";	
 		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='nayta_rivit' value='$nayta_rivit'>";
 		echo "<input type='hidden' name='tunnus' value='$tunnus'>";
 		echo "<input type='hidden' name='keikalla' value='$keikalla'>";		
 		echo "<input type='hidden' name='muutparametrit'  value='$muutparametrit'>";

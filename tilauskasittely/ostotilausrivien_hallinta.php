@@ -12,12 +12,58 @@
 		// N‰ytet‰‰n muuten vaan sopivia tilauksia
 		echo "<br><table>";
 		echo "<form action = '$PHP_SELF' method = 'post'>";
-		echo "<tr><td>".t("Toimittaja").": <input type='text' size='10' name='ytunnus'></td>";
-		echo "<td><input type='submit' value='".t("Etsi")."'></td></tr>";
+		echo "<tr><th>".t("Toimittaja").":</th><td><input type='text' size='10' name='ytunnus' value='$ytunnus'></td></tr>";
+		echo "<tr><th>".t("N‰yt‰").":</th>";
+
+		$select = "";
+		if ($nayta_rivit == 'vahvistamattomat') {
+			$select = "selected";
+		}
+
+		echo "<td><select name='nayta_rivit'>";
+		echo "<option value=''>".t("Kaikki avoimet rivit")."</option>";
+		echo "<option value='vahvistamattomat' $select>".t("Vain vahvistamattomia rivej‰")."</option></td>";
+		echo "<td class='back'><input type='submit' value='".t("Etsi")."'></td></tr>";
 		echo "</form>";
 		echo "</table><br>";
+
+		echo t("tai");
+		echo "<br><br>";
+
+		echo "<table>";
+		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='nayta_rivit' value='vahvistamattomat'>";
+		echo "<tr><td class='back'><input type='submit' value='".t("N‰yt‰ kaikkien toimittajien vahvistamattomat rivit")."'></td></tr>";
+		echo "</form>";
+		echo "</table>";
 	}
-	
+
+	if ($ytunnus == "" and $nayta_rivit == "vahvistamattomat") {
+		$query = "	SELECT tilausrivi.otunnus, 
+					lasku.nimi, 
+					lasku.ytunnus
+					FROM tilausrivi
+					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					AND tilausrivi.toimitettu = ''
+					AND tilausrivi.uusiotunnus = 0
+					AND tilausrivi.tyyppi = 'O'
+					GROUP BY tilausrivi.otunnus
+					ORDER BY lasku.nimi";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) > 0) {
+
+			echo "<table>";
+			echo "<th>".t("Toimittaja")."</th><th>otunnus</th>";
+
+			while ($row = mysql_fetch_array($result)) {
+				echo "<tr><td>$row[nimi]</td><td><a href='$PHP_SELF?ytunnus=$row[ytunnus]&otunnus=$row[otunnus]&toimittajaid=$toimittajaid&ojarj=$apu'>$row[otunnus]</a></td></tr>";
+			}
+
+			echo "</table>";
+		}
+	}
 	
 	if($ytunnus != '') {
 		$query = "	SELECT max(lasku.tunnus) maxtunnus, GROUP_CONCAT(distinct lasku.tunnus SEPARATOR ', ') tunnukset
@@ -116,7 +162,19 @@
 			}
 			echo "<option value='$tunnus' $sel>$tunnus</option>";
 		}						
-		echo "</select>";				
+		echo "</select></tr>";				
+
+		echo "<tr><th>".t("N‰yt‰").":</th>";
+
+		$select = "";
+		if ($nayta_rivit == 'vahvistamattomat') {
+			$select = "selected";
+		}
+
+		echo "<td><select name='nayta_rivit' onchange='submit();'>";
+		echo "<option value=''>".t("Kaikki avoimet rivit")."</option>";;
+		echo "<option value='vahvistamattomat' $select>".t("Vain vahvistamattomia rivej‰")."</option></td>";
+
 		echo "</form></td></tr></table><br>";
 								
 		echo "	<table>
@@ -205,6 +263,10 @@
 				<input type='hidden' name='tee' value = 'PAIVITARIVI'>";
 				
 		while ($prow = mysql_fetch_array ($presult)) {
+
+			if ($nayta_rivit == 'vahvistamattomat' and $prow["vahvistettu"] == 1) {
+				continue;
+			}
 
 			$yhteensa += $prow["rivihinta"];
 

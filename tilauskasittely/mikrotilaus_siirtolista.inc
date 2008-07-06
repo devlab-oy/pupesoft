@@ -18,6 +18,8 @@
 			// luetaan tiedosto alusta loppuun...
 			$rivi = fgets($file, 4096);
 			
+			$mtrivilask = 0;
+			
 			while (!feof($file)) {
 				// luetaan rivi tiedostosta..
 				$poista	  = array("\"", "'", "\\", " ");
@@ -43,14 +45,16 @@
 					$result = mysql_query($query) or pupe_error($query);
 
 					if(mysql_num_rows($result) == 1) {
-
+						
+						$mtrivilask++;	
+						
 						$trow = mysql_fetch_array($result);
 
 						$tuoteno 	= $trow["tuoteno"];
 						$toimaika 	= $laskurow["toimaika"];
 						$kerayspvm 	= $laskurow["kerayspvm"];
-						$varasto 	= $taalta;
-
+						$varasto 	= $laskurow["varasto"];
+						
 						require('lisaarivi.inc');
 
 						$tuoteno	= '';
@@ -70,6 +74,60 @@
 						echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
 					}
 				}
+				
+				if ((int) $olliriveja > 0 and $mtrivilask >= (int) $olliriveja) {
+					
+					$query = "	UPDATE lasku
+								SET alatila = 'J'
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus = '$laskurow[tunnus]'
+								and tila='G'";
+					$updresult = mysql_query($query) or pupe_error($query);
+					
+					$mtrivilask = 0;
+					
+					$jatka		= "kala";
+				
+					$query = "	UPDATE kuka SET kesken = 0 WHERE yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
+					$delresult = mysql_query($query) or pupe_error($query);
+
+					$kukarow["kesken"] = 0;
+
+					$tilausnumero 	= 0;
+					$clearing 		= $laskurow["clearing"];
+					$toimpp 		= substr($laskurow["toimaika"],  8, 2);
+					$kerpp 			= substr($laskurow["kerayspvm"], 8, 2);
+					$toimkk 		= substr($laskurow["toimaika"],  5, 2);
+					$kerkk 			= substr($laskurow["kerayspvm"], 5, 2);
+					$toimvv 		= substr($laskurow["toimaika"],  0, 4);
+					$kervv 			= substr($laskurow["kerayspvm"], 0 ,4);
+					$comments 		= $laskurow["comments"];
+					$viesti 		= $laskurow["viesti"];
+					$varasto 		= $laskurow["varasto"];
+					$toim 			= "SIIRTOLISTA";
+
+					require ("otsik_siirtolista.inc");
+
+					$query = "	SELECT *
+								FROM lasku
+								WHERE tunnus = '$kukarow[kesken]'";
+					$aresult = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($aresult) == 0) {
+						echo "<font class='message'>".t("VIRHE: Tilausta ei löydy")."!<br><br></font>";
+						exit;
+					}
+
+					$query = "SELECT nimitys from varastopaikat where yhtio='{$kukarow["yhtio"]}' and tunnus = '$varasto'";
+					$varres = mysql_query($query) or pupe_error($query);
+					$varrow = mysql_fetch_array($varres);
+					
+					echo "<br><font class='message'>".t("Tehtiin uusi siirtolista!siirtolistalle otsikko %s lähdevarasto on %s", $kieli, $kukarow["kesken"], $varrow["nimitys"])."</font><br>";
+					
+					$laskurow = mysql_fetch_array($aresult);
+				}
+				
+				
 				$rivi = fgets($file, 4096);
 			} // end while eof
 
@@ -110,12 +168,21 @@
 				<tr><th colspan='4'>".t("Tabulaattorilla eroteltu tekstitiedosto").".</th></tr>
 				<tr><td>".t("Tuoteno")."</td><td>".t("Kpl")."</td><td>".t("Kommentti")."</td><td>".t("Lähettävä varastopaikka")."</td></tr>
 				</table>
-
 				<br>
-				<table>
-				<tr>";
-
-		echo "
+				<table>";
+	
+		echo "<tr><th>".t("Rivejä per siirtolista").":</th>
+				<td>
+				<select name='olliriveja'>
+				<option value=''>".t("Kaikki rivit nykyiselle siirtolistalle")."</option>
+				<option value='25'>25 ".t("riviä per siirtolista")."</option>
+				<option value='50'>50 ".t("riviä per siirtolista")."</option>
+				<option value='75'>75 ".t("riviä per siirtolista")."</option>
+				<option value='100'>100 ".t("riviä per siirtolista")."</option>
+				</select>
+				</td></tr>";
+				
+		echo "<tr>
 				<th>".t("Valitse tiedosto").":</th>
 				<td><input name='userfile' type='file'></td>
 				<td class='back'><input type='submit' value='".t("Läheta")."'></td>

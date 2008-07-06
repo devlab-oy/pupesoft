@@ -696,8 +696,8 @@
 
 				foreach ($myy_tuoteno as $i => $tuoteno) {
 					if ($yhtiorow["puute_jt_oletus"] == "O" or
-						($trow["sarjanumeroseuranta"] != "E" and $trow["sarjanumeroseuranta"] != "F" and $myy_kpl[$i] >= $toimittamatta and $paikat[0] == $myy_hyllyalue[$i] and $paikat[1]  == $myy_hyllynro[$i] and $paikat[2] == $myy_hyllyvali[$i] and $paikat[3] == $myy_hyllytaso[$i]) or
-						(($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") and $myy_era[$i] == $paikat[4] and $myy_kpl[$i] >= $toimittamatta and $paikat[0] == $myy_hyllyalue[$i] and $paikat[1]  == $myy_hyllynro[$i] and $paikat[2] == $myy_hyllyvali[$i] and $paikat[3] == $myy_hyllytaso[$i])) {
+						($trow["sarjanumeroseuranta"] != "E" and $trow["sarjanumeroseuranta"] != "F" and ($myy_kpl[$i] >= $toimittamatta or $varataan_saldoa == "EI") and $paikat[0] == $myy_hyllyalue[$i] and $paikat[1]  == $myy_hyllynro[$i] and $paikat[2] == $myy_hyllyvali[$i] and $paikat[3] == $myy_hyllytaso[$i]) or
+						(($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") and $myy_era[$i] == $paikat[4] and ($myy_kpl[$i] >= $toimittamatta or $varataan_saldoa == "EI") and $paikat[0] == $myy_hyllyalue[$i] and $paikat[1]  == $myy_hyllynro[$i] and $paikat[2] == $myy_hyllyvali[$i] and $paikat[3] == $myy_hyllytaso[$i])) {
 
 						//Otetaan tämä
 						$myy_tuoteno   	= array();

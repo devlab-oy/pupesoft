@@ -403,7 +403,7 @@
 						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
-			$miinus = 2;
+			$miinus = 3;
 		}
 		elseif ($toim == "SIIRTOLISTASUPER") {
 			$query = "	SELECT tunnus tilaus, nimi varasto, ytunnus id, lasku.luontiaika, laatija, viesti tilausviite,$toimaikalisa alatila, tila, lasku.tunnus

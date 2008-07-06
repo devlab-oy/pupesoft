@@ -33,7 +33,7 @@
 		if ($pp == "00" or $kk == "00" or $vv == "0000") $tee = $pp = $kk = $vv = "";
 
 		// n‰it‰ k‰ytet‰‰n queryss‰
-		$sel_osasto = "";
+		$sel_osasto 	= "";
 		$sel_tuoteryhma = "";
 
 		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
@@ -91,12 +91,12 @@
 
 			if (!empty($varastot)) {
 
-				// heataa alkujaloppu
+				// Haetaan alku ja loppu
 				$tuotepaikat = array();
 				$varastontunnukset = " and varastopaikat.tunnus IN (";
 
 				foreach ($varastot as $varasto) {
-					$varastontunnukset .= "'$varasto'";
+					$varastontunnukset .= "$varasto";
 					if (count($varastot) > 1 and end($varastot) != $varasto) {
 						$varastontunnukset .= ",";
 					}
@@ -106,9 +106,10 @@
 
 				$tuotepaikka_query = " 	SELECT tunnus, concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) alku, concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) loppu
 										FROM varastopaikat
-										WHERE varastopaikat.yhtio='$kukarow[yhtio]'
+										WHERE yhtio = '$kukarow[yhtio]'
 										$varastontunnukset";
 				$tuotepaikka_result = mysql_query($tuotepaikka_query) or pupe_error($tuotepaikka_query);
+				
 				while ($tuotepaikka_row = mysql_fetch_array($tuotepaikka_result)) {
 					$tuotepaikat[$tuotepaikka_row["tunnus"]]["alku"] = $tuotepaikka_row["alku"];
 					$tuotepaikat[$tuotepaikka_row["tunnus"]]["loppu"] = $tuotepaikka_row["loppu"];
@@ -122,17 +123,11 @@
 
 			// tuotteen m‰‰r‰ varastossa nyt
 			if ($summaustaso == "S") {
-				$saldolisa = " sum(saldo) varasto";
-				if (!empty($varastot)) {
-					$groupsaldot = "GROUP BY varastopaikat.nimitys, tuote.tuoteno, try, osasto, tuote.tuotemerkki, tuote.nimitys, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm, tuote.sarjanumeroseuranta";
-				}
-				else {
-					$groupsaldot = "GROUP BY tuote.tuoteno, try, osasto, tuote.tuotemerkki, tuote.nimitys, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm, tuote.sarjanumeroseuranta";
-				}
+				$saldolisa = " sum(saldo) varasto,";
 			}
 			else {
-				$saldolisa = " hyllyalue, hyllynro, hyllyvali, hyllytaso, saldo varasto";
-				$groupsaldot = "GROUP BY varastopaikat.nimitys, tuote.tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso, varasto, try, osasto, tuote.tuotemerkki, tuote.nimitys, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm, tuote.sarjanumeroseuranta";
+				$saldolisa = " hyllyalue, hyllynro, hyllyvali, hyllytaso, saldo varasto,";
+				$groupsaldot = ",14,15,16,17,18";
 			}
 
 			if ($tuoteryhma == "tyhjat") {
@@ -166,17 +161,17 @@
 
 			// haetaan halutut tuotteet
 			$query  = "	SELECT
+						varastopaikat.nimitys varastonnimi,
 						tuote.tuoteno,
 						if(atry.selite is not null, atry.selite, 0) try,
 						if(aosa.selite is not null, aosa.selite, 0) osasto,
 						tuote.tuotemerkki, tuote.nimitys, tuote.kehahin,
 						tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm,
 						tuote.sarjanumeroseuranta,
-						group_concat(tuotepaikat.tunnus) paikkatun,
-						group_concat(DISTINCT varastopaikat.nimitys) varastot,
-						varastopaikat.nimitys varastonnimi,
 						tuote.vihapvm,
 						$saldolisa
+						group_concat(tuotepaikat.tunnus) paikkatun,
+						group_concat(DISTINCT varastopaikat.nimitys) varastot						
 						FROM tuote
 						LEFT JOIN avainsana atry use index (yhtio_laji_selite) on atry.yhtio=tuote.yhtio and atry.selite=tuote.try and atry.laji='TRY'
 						LEFT JOIN avainsana aosa use index (yhtio_laji_selite) on aosa.yhtio=tuote.yhtio and aosa.selite=tuote.osasto and aosa.laji='OSASTO'
@@ -188,13 +183,13 @@
 						and tuote.ei_saldoa = ''
 						$epakurlisa
 						$lisa
-						$groupsaldot
+						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13 $groupsaldot
 						$lisa2
 						ORDER BY $orderlisa";
 			$result = mysql_query($query) or pupe_error($query);
-
-			$lask  = 0;
-			$varvo = 0; // t‰h‰n summaillaan
+						
+			$lask   = 0;
+			$varvo  = 0; // t‰h‰n summaillaan
 			$bvarvo = 0; // bruttovarastonarvo
 
 			if(@include('Spreadsheet/Excel/Writer.php')) {
@@ -290,24 +285,62 @@
 				$kehahin = 0;
 
 				// Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilˆiden ostohinnoista (ostetut yksilˆt jotka eiv‰t viel‰ ole myyty(=laskutettu))
+				
+				///* HUOMHUOM!!  Sarjanumero-queryt eiv‰t ota huomioon jos varastonarvo lasketaan historiaan*///
+				
 				if ($row["sarjanumeroseuranta"] == "S") {
-					$query	= "	SELECT sarjanumeroseuranta.sarjanumero, tilausrivi_osto.rivihinta/tilausrivi_osto.kpl ostohinta, sarjanumeroseuranta.tunnus
-								FROM sarjanumeroseuranta
-								LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-								LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-								WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-								and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
-								and sarjanumeroseuranta.myyntirivitunnus != -1
-								and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
-								and tilausrivi_osto.laskutettuaika != '0000-00-00'";
-					$sarjares = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($sarjares) > 0) {
-						while($sarjarow = mysql_fetch_array($sarjares)) {
-							$kehahin += sarjanumeron_ostohinta("tunnus", $sarjarow["tunnus"]);
+					if (!empty($varastot)) {
+						
+						$kehavarasto = 0;
+						$kplvarasto  = 0;
+						
+						for ($i = 0; count($varastot) > $i; $i++) {
+							$query	= "	SELECT sarjanumeroseuranta.sarjanumero, tilausrivi_osto.rivihinta/tilausrivi_osto.kpl ostohinta, sarjanumeroseuranta.tunnus
+										FROM sarjanumeroseuranta
+										LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+										LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+										WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+										and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
+										and sarjanumeroseuranta.myyntirivitunnus != -1
+										and concat(rpad(upper(sarjanumeroseuranta.hyllyalue),  5, '0'),lpad(upper(sarjanumeroseuranta.hyllynro),  5, '0')) >= '".$tuotepaikat[$varastot[$i]]['alku']."'
+										and concat(rpad(upper(sarjanumeroseuranta.hyllyalue), 5, '0'),lpad(upper(sarjanumeroseuranta.hyllynro), 5, '0')) <= '".$tuotepaikat[$varastot[$i]]['loppu']."'
+										and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
+										and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+							$sarjares = mysql_query($query) or pupe_error($query);
+													
+							if (mysql_num_rows($sarjares) > 0) {
+								while($sarjarow = mysql_fetch_array($sarjares)) {
+									$kehavarasto += sarjanumeron_ostohinta("tunnus", $sarjarow["tunnus"]);
+									$kplvarasto++;
+								}
+							}
 						}
+						
+						if ($kplvarasto != 0) {
+							$kehahin = sprintf('%.6f', ($kehavarasto / $kplvarasto));
+							
+							if ($row["tuoteno"] == 'BEL-FA26MCM28ESBR3') echo $kehahin."<br>";
+						}
+					}
+					else {
+						$query	= "	SELECT sarjanumeroseuranta.sarjanumero, tilausrivi_osto.rivihinta/tilausrivi_osto.kpl ostohinta, sarjanumeroseuranta.tunnus
+									FROM sarjanumeroseuranta
+									LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+									LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+									WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+									and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
+									and sarjanumeroseuranta.myyntirivitunnus != -1
+									and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
+									and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+						$sarjares = mysql_query($query) or pupe_error($query);
+					
+						if (mysql_num_rows($sarjares) > 0) {
+							while($sarjarow = mysql_fetch_array($sarjares)) {
+								$kehahin += sarjanumeron_ostohinta("tunnus", $sarjarow["tunnus"]);
+							}
 
-						$kehahin = sprintf('%.6f', ($kehahin / mysql_num_rows($sarjares)));
+							$kehahin = sprintf('%.6f', ($kehahin / mysql_num_rows($sarjares)));
+						}
 					}
 				}
 				else {
@@ -318,15 +351,16 @@
 					if (!empty($varastot)) {
 						$mhinta = 0;
 						$mkpl = 0;
+						
 						for ($i = 0; count($varastot) > $i; $i++) {
-							// tuotteen muutos varastossa annetun p‰iv‰n j‰lkeen
+							// Tuotteen muutos varastossa annetun p‰iv‰n j‰lkeen
 							$query = "	SELECT sum(kpl * if(laji in ('tulo','valmistus'), kplhinta, hinta)) muutoshinta, sum(kpl) muutoskpl
 							 			FROM tapahtuma use index (yhtio_tuote_laadittu)
 							 			WHERE yhtio = '$kukarow[yhtio]'
 							 			and tuoteno = '$row[tuoteno]'
 							 			and laadittu > '$vv-$kk-$pp 23:59:59'
-										and concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0')) >= '{$tuotepaikat[$varastot[$i]]['alku']}'
-										and concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0')) <= '{$tuotepaikat[$varastot[$i]]['loppu']}'";
+										and concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0')) >= '".$tuotepaikat[$varastot[$i]]['alku']."'
+										and concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0')) <= '".$tuotepaikat[$varastot[$i]]['loppu']."'";
 							$mres = mysql_query($query) or pupe_error($query);
 							$mrow = mysql_fetch_array($mres);
 
@@ -349,7 +383,7 @@
 				}
 				else {
 					//$mrow["muutoshinta"]	= 0;
-					//$mrow["muutoskpl"]		= 0;
+					//$mrow["muutoskpl"]	= 0;
 					$mhinta = 0;
 					$mkpl = 0;
 
@@ -434,7 +468,8 @@
 						if (mysql_num_rows($ares) == 1) {
 							// lˆydettiin keskihankintahinta tapahtumista k‰ytet‰‰n
 							$arow = mysql_fetch_array($ares);
-							$kehasilloin = $arow["hinta"];
+							
+							$kehasilloin  = $arow["hinta"];
 							$bkehasilloin = $arow["hinta"];
 							$kehalisa = "";
 						}
@@ -453,7 +488,7 @@
 							if (mysql_num_rows($ares) == 1) {
 								// lˆydettiin keskihankintahinta tapahtumista k‰ytet‰‰n
 								$arow = mysql_fetch_array($ares);
-								$kehasilloin = $arow["hinta"];
+								$kehasilloin  = $arow["hinta"];
 								$bkehasilloin = $arow["hinta"];
 								$kehalisa = "";
 							}
@@ -568,7 +603,7 @@
 						$excelrivi++;
 						$excelsarake = 0;
 					}
-
+						
 					$varastot2[$row["varastonnimi"]]["netto"] += $muutoshinta;
 					$varastot2[$row["varastonnimi"]]["brutto"] += $bmuutoshinta;
 				}

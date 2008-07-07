@@ -176,7 +176,8 @@ define("BCD_C128_BAR_4"              ,   4);
 				ImagePng($this->mImg, $filename);
 			} else if ($this->mStyle & BCS_IMAGE_JPEG) {
 				ImageJpeg($this->mImg, $filename);
-			} else __DEBUG__("FlushObject: No output type");
+			}
+			// else __DEBUG__("FlushObject: No output type");
 		}
 		
 		function DestroyObject () {

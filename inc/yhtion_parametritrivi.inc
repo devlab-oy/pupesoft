@@ -19,12 +19,12 @@
 	if (mysql_field_name($result, $i) == "css_extranet") {
 		$ulos = "<td><textarea cols='55' rows='7' name='css_extranet'>$trow[$i]</textarea><input type='hidden' name='cssextraneti' value='$i'></td>";
 		$jatko = 0;
-	} 
+	}
 
 	if (mysql_field_name($result, $i) == "css_verkkokauppa") {
 		$ulos = "<td><textarea cols='55' rows='7' name='css_verkkokauppa'>$trow[$i]</textarea><input type='hidden' name='cssverkkokauppa' value='$i'></td>";
 		$jatko = 0;
-	} 
+	}
 
 	if (mysql_field_name($result, $i) == "verkkolasku_lah") {
 
@@ -98,17 +98,28 @@
 		$sel[$apu] = "selected";
 
 		$ulos .= "<option value = '0' $sel[0]>".t("Normaali laskupohja");
-		$ulos .= "<option value = '2' $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)");		
+		$ulos .= "<option value = '2' $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)");
 		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty laskupohja 1");
-		$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");		
-		$ulos .= "<option value = '4' $sel[4]>".t("Pelkistetty laskupohja 3");		
-
-		
+		$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");
+		$ulos .= "<option value = '4' $sel[4]>".t("Pelkistetty laskupohja 3");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
 	}
-	
+
+	if (mysql_field_name($result, $i) == "viivakoodi_laskulle") {
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Laskulle ei tulosteta viivakoodia");
+		$ulos .= "<option value = 'K' $sel[K]>".t("Laskulle tulostetaan viivakoodi");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "koontilaskut_yhdistetaan") {
 		$sel1 = "";
 		$sel2 = "";
@@ -123,8 +134,8 @@
 		}
 
 		$ulos .= "<option value = '' $sel1>".t("Asiakkaan laskutusosoitteella");
-		$ulos .= "<option value = 'T' $sel2>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella");		
-				
+		$ulos .= "<option value = 'T' $sel2>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella");
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -141,7 +152,7 @@
 		$ulos .= "<option value = '0' $sel[0]>".t("Normaali tilausvahvistuspohja");
 		$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty tilausvahvistuspohja 2 (Tuoteperheet yhdistetty)");
 
-		
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -156,14 +167,14 @@
 		$sel[$apu] = "selected";
 
 		$ulos .= "<option value = '0' $sel[0]>".t("Normaali ostotilauspohja");
-		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty ostotilauspohja");		
+		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty ostotilauspohja");
 
-		
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "ostotilaukseen_toimittajan_toimaika") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -173,14 +184,14 @@
 		$sel[$apu] = "selected";
 
 		$ulos .= "<option value = '0' $sel[0]>".t("Ei käytetä");
-		$ulos .= "<option value = '1' $sel[1]>".t("Ehdottaa toimitusaikaa");		
+		$ulos .= "<option value = '1' $sel[1]>".t("Ehdottaa toimitusaikaa");
 		$ulos .= "<option value = '2' $sel[2]>".t("Laittaa automaattisesti toimitusajan");
-		
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "tyomaaraystyyppi") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -189,14 +200,14 @@
 		$sel[$trow[$i]] = "selected";
 
 		$ulos .= "<option value = ''>".t("Normaali työmääräyspohja");
-		$ulos .= "<option value = 'P' $sel[P]>".t("Pelkistetty työmääräyspohja");		
+		$ulos .= "<option value = 'P' $sel[P]>".t("Pelkistetty työmääräyspohja");
 
-		
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "tarjouksen_tuotepaikat") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -205,14 +216,14 @@
 		$sel[$trow[$i]] = "selected";
 
 		$ulos .= "<option value = ''>".t("Tarjouksella tuotepaikat käytössä");
-		$ulos .= "<option value = 'X' $sel[X]>".t("Tarjouksella ei vielä valita tuotepaikkoja");		
+		$ulos .= "<option value = 'X' $sel[X]>".t("Tarjouksella ei vielä valita tuotepaikkoja");
 
-		
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "tarjouksen_alv_kasittely") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -224,7 +235,7 @@
 		$ulos .= "<option value = 'S' $sel[S]>".t("Tuotteiden myyntihinnat sisältävät arvonlisäveron")."</option>";
 		$ulos .= "<option value = 'X' $sel[X]>".t("Tuotteiden myyntihinnat ovat arvonlisäverottomia")."</option>";
 
-		
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -340,7 +351,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "saldo_kasittely") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -354,7 +365,7 @@
 		elseif ($trow[$i] == "T") {
 			$sel2 = "selected";
 		}
-		
+
 
 		$ulos .= "<option value = ''  $sel1>".t("Myytävissä-kpl ajasta riippumaton")."</option>";
 		$ulos .= "<option value = 'T' $sel2>".t("Myytävissä-kpl lasketaan keräyspvm:n mukaan")."</option>";
@@ -362,7 +373,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kerataanko_saldottomat") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -376,7 +387,7 @@
 		elseif ($trow[$i] == "S") {
 			$sel2 = "selected";
 		}
-		
+
 
 		$ulos .= "<option value = ''  $sel1>".t("Saldottomia tuotteita ei kerätä")."</option>";
 		$ulos .= "<option value = 'S' $sel2>".t("Saldottomat tuotteet kerätään")."</option>";
@@ -465,7 +476,7 @@
 		$ulos .= "<option value='V' $sel[V]>".t("Myyntitilaukselta voi luoda ostorivejä varastoon")."</option>";
 		$ulos .= "<option value='Z' $sel[Z]>".t("Myyntitilaukselta voi luoda ostorivejä tai ostotilaus asiakkaalle ja varastoon")."</option>";
 		$ulos .= "<option value='X' $sel[X]>".t("Myyntitilaukselta voi luoda ostorivejä tai ostotilaus varastoon")."</option>";
-		
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -480,7 +491,7 @@
 
 		$ulos .= "<option value=''>".t("Jälkitoimitusrivejä ei toimiteta eikä kohdisteta automaattisesti")."</option>";
 		$ulos .= "<option value='K' $sel[K]>".t("Jälkitoimitusrivit kohdistetaan automaattisesti varastoonviennin yhteydessä")."</option>";
-		$ulos .= "<option value='T' $sel[T]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";		
+		$ulos .= "<option value='T' $sel[T]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -591,7 +602,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "laskunsummapyoristys") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -633,7 +644,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "dynaaminen_kassamyynti") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -654,7 +665,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kerayspoikkeama_kasittely") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -669,11 +680,11 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kerayspoikkeamaviestin_lahetys") {
 
 		$ulos = "<td><select name='$nimi'>";
-		
+
 		$sel		= array();
 		$sel[$trow[$i]]	= " selected";
 
@@ -772,7 +783,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "splittauskielto") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -849,8 +860,8 @@
 
 		$jatko = 0;
 	}
-	
-	
+
+
 	if (mysql_field_name($result, $i) == "rivinumero_syotto") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -871,7 +882,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "sad_lomake_tyyppi") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -893,10 +904,10 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "lahetteen_jarjestys" or 
-		mysql_field_name($result, $i) == "laskun_jarjestys" or 
-		mysql_field_name($result, $i) == "tilauksen_jarjestys" or  
-		mysql_field_name($result, $i) == "kerayslistan_jarjestys" or 
+	if (mysql_field_name($result, $i) == "lahetteen_jarjestys" or
+		mysql_field_name($result, $i) == "laskun_jarjestys" or
+		mysql_field_name($result, $i) == "tilauksen_jarjestys" or
+		mysql_field_name($result, $i) == "kerayslistan_jarjestys" or
 		mysql_field_name($result, $i) == "valmistus_kerayslistan_jarjestys" or
 		mysql_field_name($result, $i) == "laskun_jarjestys" or
 		mysql_field_name($result, $i) == "ostotilauksen_jarjestys") {
@@ -916,25 +927,25 @@
 		$ulos .= "<option value = '7' $sel[7]>".t("Tuotenumerojärjestys");
 		$ulos .= "<option value = '8' $sel[8]>".t("Tilausjärjestys, tuoteperheet pidetään yhdessä");
 		$ulos .= "<option value = '9' $sel[9]>".t("Tilausjärjestys");
-		$ulos .= "<option value = 'M' {$sel["M"]}>".t("Käyttäjän asettama järjestys");		
-		
+		$ulos .= "<option value = 'M' {$sel["M"]}>".t("Käyttäjän asettama järjestys");
+
 		if(	mysql_field_name($result, $i) == "valmistus_kerayslistan_jarjestys" or
 			mysql_field_name($result, $i) == "kerayslistan_jarjestys") {
-			$ulos .= "<option value = 'S' {$sel["S"]}>".t("Rivit summattuina");	
+			$ulos .= "<option value = 'S' {$sel["S"]}>".t("Rivit summattuina");
 		}
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
 	}
-	
-	if (mysql_field_name($result, $i) == "lahetteen_jarjestys_suunta" or 
-		mysql_field_name($result, $i) == "laskun_jarjestys_suunta" or 
-		mysql_field_name($result, $i) == "tilauksen_jarjestys_suunta" or  
-		mysql_field_name($result, $i) == "kerayslistan_jarjestys_suunta" or 
+
+	if (mysql_field_name($result, $i) == "lahetteen_jarjestys_suunta" or
+		mysql_field_name($result, $i) == "laskun_jarjestys_suunta" or
+		mysql_field_name($result, $i) == "tilauksen_jarjestys_suunta" or
+		mysql_field_name($result, $i) == "kerayslistan_jarjestys_suunta" or
 		mysql_field_name($result, $i) == "valmistus_kerayslistan_jarjestys_suunta" or
 		mysql_field_name($result, $i) == "laskun_jarjestys_suunta" or
 		mysql_field_name($result, $i) == "ostotilauksen_jarjestys_suunta") {
-	
+
 
 		$ulos = "<td><select name='$nimi'>";
 
@@ -943,12 +954,12 @@
 
 		$ulos .= "<option value = 'ASC'  $sel[ASC]>".t("Nouseva");
 		$ulos .= "<option value = 'DESC' $sel[DESC]>".t("Laskeva");
-		
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "lahete_nouto_allekirjoitus") {
 
 		$sela = "";
@@ -960,10 +971,10 @@
 		else {
 			$sela = "selected";
 		}
-		
+
 		$ulos = "<td><select name='$nimi'>
 					<option value='' $sela>".t("Ei tulosteta allekirjoitussivua")."</option>
-					<option value='K' $selb>".t("Tulostetaan allekirjoitussivu")."</option>		
+					<option value='K' $selb>".t("Tulostetaan allekirjoitussivu")."</option>
 				</select><td>";
 
 		$jatko = 0;
@@ -980,10 +991,10 @@
 		else {
 			$sela = "selected";
 		}
-		
+
 		$ulos = "<td><select name='$nimi'>
 					<option value='' $sela>".t("Tuotteen yhdistetään normaalisti")."</option>
-					<option value='P' $selb>".t("Myös tuoteperheet koitetaan yhdistää")."</option>		
+					<option value='P' $selb>".t("Myös tuoteperheet koitetaan yhdistää")."</option>
 				</select><td>";
 
 		$jatko = 0;
@@ -1007,12 +1018,12 @@
 		else {
 			$sela = "selected";
 		}
-		
+
 		$ulos = "<td><select name='$nimi'>
 					<option value='' $sela>".t("Ei yhteyshenkilöitä")."</option>
-					<option value='K' $selb>".t("Tilaukselle saa liittää yhteyshenkilöitä")."</option>		
+					<option value='K' $selb>".t("Tilaukselle saa liittää yhteyshenkilöitä")."</option>
 				</select><td>";
-		
+
 
 		$jatko = 0;
 	}
@@ -1028,12 +1039,12 @@
 		else {
 			$sela = "selected";
 		}
-		
+
 		$ulos = "<td><select name='$nimi'>
 					<option value='' $sela>".t("Ei tilauksen seurantaluokkia")."</option>
-					<option value='K' $selb>".t("Tilaukset lajitellaan seurantaluokkiin")."</option>		
+					<option value='K' $selb>".t("Tilaukset lajitellaan seurantaluokkiin")."</option>
 				</select><td>";
-		
+
 
 		$jatko = 0;
 	}
@@ -1049,12 +1060,12 @@
 		else {
 			$sela = "selected";
 		}
-		
+
 		$ulos = "<td><select name='$nimi'>
 					<option value='' $sela>".t("Tilauksille ei liitetä kohteita")."</option>
 					<option value='K' $selb>".t("Tilaukset liitetään asiakkaan kohde ja tilausriville positio")."</option>
 				</select><td>";
-		
+
 
 		$jatko = 0;
 	}
@@ -1100,7 +1111,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "rekursiiviset_tuoteperheet") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1121,7 +1132,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "valmistustapa") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1163,7 +1174,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "vienti_erittelyn_tulostus") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1189,7 +1200,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "epakur_kehahin_paivitys") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1210,7 +1221,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "oletus_lahetekpl") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1239,7 +1250,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "oletus_oslappkpl") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1289,9 +1300,9 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "poistuvat_tuotteet") {
-		
+
 		$ulos = "<td><select name='$nimi'>";
 
 		$sel1="";
@@ -1307,14 +1318,14 @@
 		$ulos .= "<option value=''  $sel1>".t("Älä näytä poistuvia tuotteita oletuksena")."</option>";
 		$ulos .= "<option value='X' $sel2>".t("Näytä poistuvat tuotteet oletuksena")."</option>";
 		$ulos .= "</select></td>";
-		
+
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "automaattinen_tuotehaku") {
-		
+
 		$ulos = "<td><select name='$nimi'>";
-		
+
 		$sel1="";
 		$sel2="";
 
@@ -1328,12 +1339,12 @@
 		$ulos .= "<option value=''  $sel1>".t("Automaattinen tuotehaku ei käytössä")."</option>";
 		$ulos .= "<option value='X' $sel2>".t("Automaattinen tuotehaku käytössä")."</option>";
 		$ulos .= "</select></td>";
-		
-		$jatko = 0;		
+
+		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "oslapp_rakir_logo") {
-		
+
 		$ulos = "<td><select name='$nimi'>";
 
 		$sel1="";
@@ -1349,10 +1360,10 @@
 		$ulos .= "<option value=''  $sel1>".t("Logoa ei tulosteta rahtikirjaan eikä osoitelappuun")."</option>";
 		$ulos .= "<option value='X' $sel2>".t("Logo tulostetaan rahtikirjaan ja osoitelappuun")."</option>";
 		$ulos .= "</select></td>";
-		
+
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "ytunnus_tarkistukset") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1369,7 +1380,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "rahti_ja_kasittelykulut_kasin") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1384,7 +1395,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "myyntitilaus_osatoimitus") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1399,7 +1410,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "varaako_jt_saldoa") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1414,7 +1425,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "varastopaikan_lippu") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1429,7 +1440,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "myyntitilaus_asiakasmemo") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1463,7 +1474,7 @@
 	if (mysql_field_name($result, $i) == "logo" or mysql_field_name($result, $i) == "lasku_logo") {
 		$tyyppi = 5;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "korvaavan_hinta_ylaraja") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1473,7 +1484,7 @@
 		$sel[$apu] = "selected";
 
 		$ulos .= "<option value = ''>".t("Korvaava tuote myydään hinnasta riippumatta")."</option>";
-		$ulos .= "<option value = '10' $sel[10]>".sprintf(t('Korvaava tuote myydään jos se on korkeintaan %s kalliimpi'), "10%")."</option>";	
+		$ulos .= "<option value = '10' $sel[10]>".sprintf(t('Korvaava tuote myydään jos se on korkeintaan %s kalliimpi'), "10%")."</option>";
 		$ulos .= "<option value = '20' $sel[20]>".sprintf(t('Korvaava tuote myydään jos se on korkeintaan %s kalliimpi'), "20%")."</option>";
 		$ulos .= "<option value = '30' $sel[30]>".sprintf(t('Korvaava tuote myydään jos se on korkeintaan %s kalliimpi'), "30%")."</option>";
 		$ulos .= "<option value = '40' $sel[40]>".sprintf(t('Korvaava tuote myydään jos se on korkeintaan %s kalliimpi'), "40%")."</option>";
@@ -1497,18 +1508,18 @@
 		$ulos .= "<option value='' $sel>".t("Ei")."</option>";
 		$ulos .= "<option value='K' $sel[K]>".t("Kyllä")."</option>";
 		$ulos .= "</select></td>";
-		
+
 		$jatko = 0;
 	}
 
 	if (mysql_field_name($result, $i) == "monikayttajakalenteri") {
-		
+
 		$ulos = "<td><select name='$nimi'>";
-		
+
 		$sel = array();
 		$apu = $trow[$i];
 		$sel[$apu] = "SELECTED";
-		
+
 		$ulos .= "<option value = '' $sel>".t("Kyllä")."</option>";
 		$ulos .= "<option value = 'E' $sel[E]>".t("Ei")."</option>";
 		$ulos .= "</select></td>";
@@ -1517,13 +1528,13 @@
 	}
 
 	if (mysql_field_name($result, $i) == "automaattinen_asiakasnumerointi") {
-		
+
 		$ulos = "<td><select name='$nimi'>";
-		
+
 		$sel = array();
 		$apu = $trow[$i];
 		$sel[$apu] = "SELECTED";
-		
+
 		$ulos .= "<option value = ''>".t("Ei")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Kyllä")."</option>";
 		$ulos .= "</select></td>";
@@ -1532,26 +1543,26 @@
 	}
 
 	if (mysql_field_name($result, $i) == "asiakasnumeroinnin_aloituskohta") {
-		
+
 		$ulos = "<td><select name='$nimi'>";
-		
+
 		$sel = array();
 		$apu = $trow[$i];
 		$sel[$apu] = "SELECTED";
-		
+
 		$ulos = "<td><input type='text' name='$nimi' value = '$trow[$i]' size='11'></td>";
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "asiakkaan_tarkenne") {
-		
+
 		$ulos = "<td><select name='$nimi'>";
-		
+
 		$sel = array();
 		$apu = $trow[$i];
 		$sel[$apu] = "SELECTED";
-		
+
 		$ulos .= "<option value = '' $sel>".t("Ovttunnus")."</option>";
 		$ulos .= "<option value = 'A' $sel[A]>".t("Asiakasnro")."</option>";
 		$ulos .= "</select></td>";
@@ -1560,26 +1571,26 @@
 	}
 
 	if (mysql_field_name($result, $i) == "tuotteen_oletuspaikka") {
-		
+
 		$ulos = "<td><select name='$nimi'>";
-		
+
 		$sel = array();
 		$apu = $trow[$i];
 		$sel[$apu] = "SELECTED";
-		
+
 		$ulos = "<td><input type='text' name='$nimi' value = '$trow[$i]' size='25'></td>";
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "haejaselaa_konsernisaldot") {
-		
+
 		$ulos = "<td><select name='$nimi'>";
-		
+
 		$sel = array();
 		$apu = $trow[$i];
 		$sel[$apu] = "SELECTED";
-		
+
 		$ulos .= "<option value = ''>".t("Konserniyhtiöiden saldoja EI näytetä Hae ja Selaa-ohjelmassa")."</option>";
 		$ulos .= "<option value = 'K' $sel[K]>".t("Konserniyhtiöiden saldot näytetään Hae ja Selaa-ohjelmassa")."</option>";
 		$ulos .= "</select></td>";
@@ -1594,9 +1605,9 @@
 	}
 
 	if (mysql_field_name($result, $i) == "jt_rahti") {
-		
+
 		$ulos = "<td><select name='$nimi'>";
-		
+
 		$sel = array();
 		$apu = $trow[$i];
 		$sel[$apu] = "selected";

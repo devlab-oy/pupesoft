@@ -1040,7 +1040,7 @@ if (!function_exists('loppu')) {
 
 		global $yhtiorow, $kukarow, $toim, $pdf, $page, $sivu, $laskurow, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $masrow, $boldi, $pieni_boldi, $kateistyyppi;
 
-		if ($yhtiorow["viivakoodi_laskulle"] == "K") {
+		if ($yhtiorow["viivakoodi_laskulle"] == "K" and $vikasivu != "") {
 			$piirra_viivakoodi = true;
 			$barcode_korkeus = 50;
 		}

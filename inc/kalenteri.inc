@@ -20,7 +20,7 @@
 		}
 		
 		if(proceed!==false) {
-			popUp(event, 'ajax_menu_yp', '10', '-10', url);	
+			popUp(event, 'ajax_menu_yp', '100', '-10', url);	
 		}
 	}
 
@@ -1522,7 +1522,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		$asrow = mysql_fetch_array($result);
-		var_dump($asrow);
+
 		$kieli = $asrow["kieli"];
 		
 		$ok = 1;

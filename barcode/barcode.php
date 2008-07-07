@@ -168,6 +168,17 @@ define("BCD_C128_BAR_4"              ,   4);
 			return $nimi;
 		}
 
+		function SaveObject ($filename) {
+			if (($this->mStyle & BCS_BORDER)) {
+				$this->DrawBorder();
+			}				       
+			if ($this->mStyle & BCS_IMAGE_PNG) {
+				ImagePng($this->mImg, $filename);
+			} else if ($this->mStyle & BCS_IMAGE_JPEG) {
+				ImageJpeg($this->mImg, $filename);
+			} else __DEBUG__("FlushObject: No output type");
+		}
+		
 		function DestroyObject () {
 			ImageDestroy($obj->mImg);
 		}

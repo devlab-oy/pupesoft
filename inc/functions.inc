@@ -4540,7 +4540,7 @@ function popUp(e, oi, offsetX, offsetY, html) {
 		}
 
 		// relatiivinen sijainti
-		if(e.type=="keyup") {
+		if(e.type=="keyup" || e.type=="change") {
 			if(!offsetY) offsetY=-10;
 			if(!offsetX) offsetX=-10;
 

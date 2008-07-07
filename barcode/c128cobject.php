@@ -194,7 +194,7 @@ Contact author at: barcode@mribti.com
 	 
 	 if ($len == 0)  {
 	   $this->mError = "Null value";
-   	   __DEBUG__("GetRealSize: null barcode value");
+//   	   __DEBUG__("GetRealSize: null barcode value");
 	   return false;
 	   }
 	 $ret = 0;
@@ -208,7 +208,7 @@ Contact author at: barcode@mribti.com
       	 
       	 if (($len%2) != 0) {
       	             $this->mError = "The length of barcode value must be even.  You must pad the number with zeros.";
-      	             	__DEBUG__("GetSize: failed C128-C requiremente");
+//      	             	__DEBUG__("GetSize: failed C128-C requiremente");
       	 		return false;
       	 		}		 
       
@@ -312,7 +312,7 @@ Contact author at: barcode@mribti.com
     {
      $len = strlen($this->mValue);  		  
 	 if (($size = $this->GetSize($xres))==0) {
-     	__DEBUG__("GetSize: failed");
+//     	__DEBUG__("GetSize: failed");
 	    return false;
 	 }    
 	 	  

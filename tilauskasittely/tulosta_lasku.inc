@@ -1327,7 +1327,7 @@ if (!function_exists('loppu')) {
 			$xres = 1;
 
 			$obj = new C128CObject($width, $height, $style, $code);
-			$filename = "../barcode/code.jpg";
+			$filename = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
 			if ($obj) {
 				$obj->SetFont($font);
@@ -1356,6 +1356,7 @@ if (!function_exists('loppu')) {
 				$pdf->draw_text(270, 10, "Virhe viivakoodin luomisessa", $thispage, $boldi);
 			}
 
+			system("rm -f $filename");			
 		}
 	}
 }

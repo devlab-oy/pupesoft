@@ -1621,4 +1621,18 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "jt_rivien_kasittely") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Salli kaikki toiminnot")."</option>";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Estä jt-rivien mitätöiminen extranetissä")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

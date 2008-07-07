@@ -847,7 +847,9 @@
 									}
 									else {
 										echo "<th valign='top'>".t("Toimita")."</th>";
-										echo "<th valign='top'>".t("Mitätöi")."</th>";
+										if ($kukarow["extranet"] != "" and $yhtiorow["jt_rivien_kasittely"] != 'E') {
+											echo "<th valign='top'>".t("Mitätöi")."</th>";
+										}
 										echo "<th valign='top'>".t("Älä tee mitään")."</th>";
 									}
 								}
@@ -1128,8 +1130,10 @@
 												echo "<td valign='top' $class>".t("Avaa uusi tilaus jotta voit toimittaa rivin").".</td>";
 											}
 
-											echo "	<td valign='top' align='center' $class>".t("Mitätöi")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>
-													<td valign='top' align='center' $classlisa>".t("Älä tee mitään")."<input type='radio' name='loput[$tunnukset]' value=''></td>";
+											if ($yhtiorow["Jt_rivien_kasittely"] != 'E') {
+												echo "<td valign='top' align='center' $class>".t("Mitätöi")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
+											}
+											echo "<td valign='top' align='center' $classlisa>".t("Älä tee mitään")."<input type='radio' name='loput[$tunnukset]' value=''></td>";
 
 										}
 
@@ -1266,9 +1270,11 @@
 													<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
 										}
 										else {
-											echo "	<td valign='top' align='center' $class>&nbsp;</td>
-													<td valign='top' align='center' $class>".t("Mitätöi")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>
-													<td valign='top' align='center' $classlisa>".t("Älä tee mitään")."<input type='radio' name='loput[$tunnukset]' value=''></td>";
+											echo "<td valign='top' align='center' $class>&nbsp;</td>";
+											if ($kukarow["extranet"] != "" and $yhtiorow["jt_rivien_kasittely"] != 'E') {
+												echo "<td valign='top' align='center' $class>".t("Mitätöi")." $yhtiorow[jt_rivien_kasittely]<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
+											}
+											echo "<td valign='top' align='center' $classlisa>".t("Älä tee mitään")."<input type='radio' name='loput[$tunnukset]' value=''></td>";
 										}
 
 										$jt_rivilaskuri++;

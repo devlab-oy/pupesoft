@@ -563,7 +563,14 @@ if (!function_exists('rivi_original')) {
 	function rivi_original ($thispage) {
 		global $yhtiorow, $kukarow, $toim, $pdf, $page, $row, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $boldi, $kala, $laskurow;
 
-		if ($kala <= 180) {
+		if ($yhtiorow["viivakoodi_laskulle"] == "K") {
+			$barcode_korkeus = 50;
+		}
+		else {
+			$barcode_korkeus = 0;
+		}
+
+		if ($kala <= 180 + $barcode_korkeus) {
 			$sivu++;
 
 			loppu($thispage);
@@ -760,7 +767,14 @@ if (!function_exists('rivi_plain')) {
 	function rivi_plain ($thispage) {
 		global $yhtiorow, $kukarow, $toim, $pdf, $page, $row, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $boldi, $kala, $laskurow;
 
-		if ($kala <= 180) {
+		if ($yhtiorow["viivakoodi_laskulle"] == "K") {
+			$barcode_korkeus = 50;
+		}
+		else {
+			$barcode_korkeus = 0;
+		}
+
+		if ($kala <= 180 + $barcode_korkeus) {
 			$sivu++;
 
 			loppu($thispage);
@@ -844,7 +858,14 @@ if (!function_exists('rivi_plain_2')) {
 	function rivi_plain_2 ($thispage) {
 		global $yhtiorow, $kukarow, $toim, $pdf, $page, $row, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $boldi, $kala, $laskurow;
 
-		if ($kala <= 180) {
+		if ($yhtiorow["viivakoodi_laskulle"] == "K") {
+			$barcode_korkeus = 50;
+		}
+		else {
+			$barcode_korkeus = 0;
+		}
+
+		if ($kala <= 180 + $barcode_korkeus) {
 			$sivu++;
 
 			loppu($thispage);
@@ -1021,9 +1042,11 @@ if (!function_exists('loppu')) {
 
 		if ($yhtiorow["viivakoodi_laskulle"] == "K") {
 			$piirra_viivakoodi = true;
+			$barcode_korkeus = 50;
 		}
 		else {
 			$piirra_viivakoodi = false;
+			$barcode_korkeus = 0;
 		}
 
 		if($vikasivu != "") {
@@ -1037,10 +1060,6 @@ if (!function_exists('loppu')) {
 		if ($laskurow["vienti"] != "" or strtoupper($laskurow["maa"]) != strtoupper($yhtiorow["maa"])) {
 			$vientikala = 20;
 			$piirra_viivakoodi = false;
-		}
-
-		if ($piirra_viivakoodi) {
-			$barcode_korkeus = 50;
 		}
 
 		//yhteensärivi
@@ -1365,7 +1384,14 @@ if (!function_exists('alvierittely')) {
 	function alvierittely ($thispage) {
 		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $summa, $arvo, $kala, $kieli, $boldi;
 
-		if ($kala <= 200) {
+		if ($yhtiorow["viivakoodi_laskulle"] == "K") {
+			$barcode_korkeus = 50;
+		}
+		else {
+			$barcode_korkeus = 0;
+		}
+
+		if ($kala <= 200 + $barcode_korkeus) {
 			$sivu++;
 
 			loppu($thispage);

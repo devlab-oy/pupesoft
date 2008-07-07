@@ -689,8 +689,8 @@
 					WHERE tunnus = '$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
-
-		echo "<table width='100%'><tr><td class='back' valign='top'>";
+		
+		echo "<table><tr><td class='back' valign='top'>";
 		echo "<table>";
 
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {

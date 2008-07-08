@@ -248,8 +248,8 @@
 				
 				if($lajitark == "kalenteri") {
 					$popup_otsikko .= "<tr><th class=''>".t("Tapa").":</th><td class=''>$row[tapa]</td></tr>";
-					$popup_otsikko .= "<tr><th class=''>".t("Alkaa").":</th><td class=''>".date("d.m.Y h:i", $row["pvmalku"])."</td></tr>";
-					$popup_otsikko .= "<tr><th class=''>".t("P‰‰ttyy").":</th><td class=''>".date("d.m.Y h:i", $row["pvmloppu"])."</td></tr>";
+					$popup_otsikko .= "<tr><th class=''>".t("Alkaa").":</th><td class=''>".date("d.m.Y H:i", $row["pvmalku"])."</td></tr>";
+					$popup_otsikko .= "<tr><th class=''>".t("P‰‰ttyy").":</th><td class=''>".date("d.m.Y H:i", $row["pvmloppu"])."</td></tr>";
 				}
 				elseif($lajitark == "Muistutus") {
 					$popup_otsikko .= "<tr><th class=''>".t("P‰iv‰lle").":</th><td class=''>".date("d.m.Y", $row["pvmalku"])."</td></tr>";
@@ -1156,7 +1156,7 @@
 								$viesti = $lisatiedot["viesti"];
 								
 								if($tapahtuma["laji"] == "kalenteri" and $tapahtuma["vali"] > 1) {
-									$viesti .= "<br><br>".t("%s p‰‰ttyy: %s", $kieli, $lisatiedot["tyyppi_nimi"], date("d.m.Y h:i"));
+									$viesti .= "<br><br>".t("%s p‰‰ttyy: %s", $kieli, $lisatiedot["tyyppi_nimi"], date("d.m.Y H:i"));
 								}
 								
 								$extra = "";
@@ -1553,7 +1553,7 @@
 			$ok = 0;
 		}
 		
-		if($tapa == "yhteyshenkilon_email") {			
+		if($tapa == "yhteyshenkilon_email") {
 			if($mail_subject == "") {
 				echo "<font class='error'>".t("Anna s‰hkˆpostille otsikko.")."</font><br>";
 				$ok = 0;

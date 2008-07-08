@@ -3,12 +3,12 @@
 	//jos tilauksia on useita $laskurow muuttujassa on jonkun tilauksen tiedot
 
 	// katotaan ihan aluksi, että meillä on edellytykset tulostukselle...
-	$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]'";
+	$query = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]'";
 	$prires= mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($prires) != 0) {
 		$prirow= mysql_fetch_array($prires);
-		$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$prirow[printteri1]'";
+		$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$prirow[printteri1]'";
 		$kirres= mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($kirres)==0)
@@ -33,11 +33,11 @@
 	$chk_row = mysql_fetch_array($chk_result);
 
 	// Katsotaan, että tämä keräyslista ei ole jo tulostettu
-	if($chk_row["ok"] == $chk_row["kaikki"]) {
+	if ($chk_row["ok"] == $chk_row["kaikki"] and $chk_row["ok"] != 0) {
 
 		//keräyslistan tulostusta varten
 		require_once ("tulosta_lahete_kerayslista.inc");
-		
+
 		//hatetaan asiakkaan tiedot
 		$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 					FROM asiakas
@@ -52,20 +52,20 @@
 		else {
 			$lisa1 = " ";
 		}
-		
+
 		if($laskurow["tila"] == "V") {
 			$sorttaus = "valmistus_kerayslistan_jarjestys";
 			$sorttaussuunta = "valmistus_kerayslistan_jarjestys_suunta";
 		}
 		else {
 			$sorttaus = "kerayslistan_jarjestys";
-			$sorttaussuunta = "kerayslistan_jarjestys_suunta";					
+			$sorttaussuunta = "kerayslistan_jarjestys_suunta";
 		}
-		
+
 		$sorttauskentta = generoi_sorttauskentta($yhtiorow[$sorttaus]);
-		
+
 		$select_lisa = $where_lisa = "";
-		
+
 		//	 Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
 		if($yhtiorow[$sorttaus] == "S") {
 			$select_lisa = "sum(kpl) kpl, sum(tilkpl) tilkpl, sum(varattu) varattu, sum(jt) jt, '' perheid, '' perheid2, ";
@@ -118,14 +118,14 @@
 
 		//tulostetaan faili ja valitaan sopivat printterit
 		if ($laskurow["varasto"] == 0) {
-			$query = "	select *
+			$query = "	SELECT *
 						from varastopaikat
 						where yhtio='$kukarow[yhtio]'
 						order by alkuhyllyalue,alkuhyllynro
 						limit 1";
 		}
 		else {
-			$query = "	select *
+			$query = "	SELECT *
 						from varastopaikat
 						where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
 						order by alkuhyllyalue,alkuhyllynro";
@@ -160,7 +160,7 @@
 			}
 
 			//haetaan lähetteen tulostuskomento
-			$query   = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+			$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
 			$kirres  = mysql_query($query) or pupe_error($query);
 			$kirrow  = mysql_fetch_array($kirres);
 			$komento = $kirrow['komento'];
@@ -173,7 +173,7 @@
 		else {
 			$returnvalue = 1;
 		}
-		
+
 		if ($returnvalue != 0) {
 			echo "<font class='error'>Lähetteen tulostus epäonnistui! Tilaus $laskurow[tunnus] siirrettiin tulostusjonoon.
 					Käy tulostamassa lähete <a href='lahetteen_tulostusjono.php'>tulostusjonosta</a>.</font><br>";
@@ -183,7 +183,7 @@
 
 		// jos meillä oli lähetteen tulostusongelmia
 		if ($virheellinen != 'X') {
-			
+
 			//jos tilauksia on useita niin laitetaan niille yhteinen kerayslista-tunnus
 			if ($laskuja > 1) {
 				$tunnukset = explode(',', $tilausnumeroita);
@@ -193,8 +193,10 @@
 				$kerayslistatunnus = 0;
 			}
 
-			$query = "	UPDATE lasku
-						SET tila='L', lahetepvm=now(), kerayslista='$kerayslistatunnus'
+			$query = "	UPDATE lasku SET
+						tila = 'L',
+						lahetepvm = now(),
+						kerayslista = '$kerayslistatunnus'
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus in ($tilausnumeroita)";
 			$result = mysql_query($query) or pupe_error($query);
@@ -203,7 +205,7 @@
 	else {
 		echo "<font class='error'>".t("VIRHE: Lähete/Keräyslista on jo tulostettu!")."</font><br>";
 	}
-	
+
 	// poistetaan lukot
 	$query ="UNLOCK TABLES";
 	$res   = mysql_query($query) or pupe_error($query);

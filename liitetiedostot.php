@@ -4,7 +4,7 @@ require ('inc/parametrit.inc');
 
 echo "<font class='head'>".t("Liitetiedostot")."</font><hr>";
 
-if (! isset($_REQUEST['liitos']) and ! isset($_REQUEST['id'])) {
+if (!isset($_REQUEST['liitos']) and !isset($_REQUEST['id'])) {
 	echo "<form action='' method='get'>
 		<table>
 		<tr>
@@ -27,12 +27,15 @@ if (! isset($_REQUEST['liitos']) and ! isset($_REQUEST['id'])) {
 // Liitet‰‰n tiedosto?
 if (isset($_POST['tee']) and $_POST['tee'] == 'file' and isset($_REQUEST['liitos']) and isset($_REQUEST['id']) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 
+	settype($_REQUEST['id'], 'int');
+	$liiteid = mysql_real_escape_string($_REQUEST['id']);
+
 	$retval = tarkasta_liite("userfile");
 	if($retval !== true) {
 		echo $retval;
 	}
 	else {
-		tallenna_liite("userfile", mysql_real_escape_string($_REQUEST['liitos']), (int) $_REQUEST['id'], $selite, $kayttotarkoitus);
+		tallenna_liite("userfile", mysql_real_escape_string($_REQUEST['liitos']), $liiteid, $selite, $kayttotarkoitus);
 	}
 
 }
@@ -40,22 +43,29 @@ if (isset($_POST['tee']) and $_POST['tee'] == 'file' and isset($_REQUEST['liitos
 // poistetaanko liite?
 if (isset($_POST['poista']) and isset($_POST['tunnus']) and isset($_REQUEST['liitos']) and isset($_REQUEST['id'])) {
 
+	$liitetunnus = mysql_real_escape_string($_POST['tunnus']);
+
 	settype($_REQUEST['id'], 'int');
-	$query = "DELETE from liitetiedostot where tunnus='{$_POST['tunnus']}' and yhtio='{$kukarow['yhtio']}'";
+	$liiteid = mysql_real_escape_string($_REQUEST['id']);
+
+	$query = "DELETE from liitetiedostot where tunnus='$liitetunnus' and yhtio='{$kukarow['yhtio']}'";
 	mysql_query($query) or pupe_error($query);
 
-	$query = "SELECT * from lasku where tunnus=".(int) $_REQUEST['id']." and yhtio='{$kukarow['yhtio']}'";
+	$query = "SELECT * from lasku where tunnus='$liiteid' and yhtio='{$kukarow['yhtio']}'";
 	$res = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($res);
 
 	if (in_array($laskurow['tila'], array('H','M')) and $kukarow["taso"] != 3) {
-		nollaa_hyvak($_REQUEST['id']);
+		nollaa_hyvak($id);
 	}
 }
 
 if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_REQUEST['id'])) {
+
+	settype($_REQUEST['id'], 'int');
+	$liiteid = mysql_real_escape_string($_REQUEST['id']);
 	
-	$query = "SELECT * from lasku where tunnus=".(int) $_REQUEST['id']." and yhtio='{$kukarow['yhtio']}'";
+	$query = "SELECT * from lasku where tunnus='$liiteid' and yhtio='{$kukarow['yhtio']}'";
 	$res = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($res);
 	
@@ -63,8 +73,7 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 	
 	//	Oletuksena emme salli mit‰‰n!
 	$ok = false;
-	
-	
+
 	//	Ostoreskontran laskut
 	if(in_array($laskurow['tila'], array('H','Y','M','P','Q','X'))) {
 		$query = "SELECT * from oikeu where yhtio='{$kukarow['yhtio']}' and kuka='{$kukarow['kuka']}' and nimi LIKE '%ulask.php'";
@@ -104,13 +113,15 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 		echo "</table><br>";
 		
 		//	Ei sallita liitetiedoston lis‰‰mist‰ jos k‰ytt‰j‰ll‰ ei ole 3 tason natsoja ja lasku on jo maksettu ostolasku
-		if (!in_array($laskurow['tila'], array('Y','P','Q')) or $kukarow["taso"] == "3") {
+		// Alkuper‰inen: 	if (!in_array($laskurow['tila'], array('Y','P','Q')) or $kukarow["taso"] == "3") {
+
+		if (!in_array($laskurow['tila'], array('P','Q')) or $kukarow["taso"] == "3") {
 			
 			echo "<font class='message'>".t("Lis‰‰ uusi tiedosto").":</font><br>";
 			
 			echo "
 				<form method='post' name='kuva' enctype='multipart/form-data'>
-				<input type='hidden' name='id' value='".$_REQUEST['id']."'>
+				<input type='hidden' name='id' value='$liiteid'>
 				<input type='hidden' name='tee' value='file'>
 				<input type='hidden' name='liitos' value='lasku'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
@@ -133,7 +144,7 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 
 		$query = "	SELECT *, (select selitetark from avainsana a where a.yhtio = liitetiedostot.yhtio and laji = 'TIL-LITETY' and a.selite = liitetiedostot.kayttotarkoitus) kayttotarkoitus
 					FROM liitetiedostot
-					WHERE liitostunnus=".(int) $_REQUEST['id']." AND liitos='lasku' and yhtio='{$kukarow['yhtio']}'";
+					WHERE liitostunnus='$liiteid' AND liitos='lasku' and yhtio='{$kukarow['yhtio']}'";
 		$res = mysql_query($query) or pupe_error($query);
 
 		echo "<table>
@@ -171,7 +182,7 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 
 			echo "<td><a href='view.php?id={$liite['tunnus']}'>".t('N‰yt‰ liite')."</a></td>";
 
-			if (in_array($laskurow['tila'], array('H','M','X')) or $kukarow["taso"] == "3") {
+			if (in_array($laskurow['tila'], array('H','M','X')) or $kukarow["taso"] == "3" or ($laskurow['h1time'] == '0000-00-00 00:00:00' and $laskurow['h2time'] == '0000-00-00 00:00:00' and $laskurow['h3time'] == '0000-00-00 00:00:00' and $laskurow['h4time'] == '0000-00-00 00:00:00' and $laskurow['h5time'] == '0000-00-00 00:00:00')) {
 				echo "<td><form action='' method='post'>
 					<input type='hidden' name='tunnus' value='{$liite['tunnus']}'>
 					<input type='submit' name='poista' value='Poista' onclick='return confirm(\"".t('Haluatko varmasti poistaa t‰m‰n liitteen')."\");'>

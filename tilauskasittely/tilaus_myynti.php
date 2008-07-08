@@ -3002,10 +3002,18 @@ if ($tee == '') {
 	else {
 		echo "</form></table>";
 	}
-
+	
 	 // erikoisceisi, jos halutaan pieni tuotekysely tilaustaulussa...
-	if ($tuoteno != '' and $kpl == '' and $kukarow['extranet'] == '') {
-		$query	= "SELECT * from tuote where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+	if (($tuoteno != '' and $kpl == '' and $kukarow['extranet'] == '') or ($toim == "REKLAMAATIO" and $trow['tuoteno'] != '' and $kukarow['extranet'] == '')) {
+		
+		if ($toim == "REKLAMAATIO" and $tuoteno == '') {
+			$tuoteno_lisa = $trow['tuoteno'];
+		}
+		else {
+			$tuoteno_lisa = $tuoteno;
+		}
+	
+		$query	= "SELECT * from tuote where tuoteno='$tuoteno_lisa' and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result)!=0) {
@@ -3026,7 +3034,7 @@ if ($tee == '') {
 					   	JOIN lasku ON lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = tilausrivi.otunnus and lasku.ytunnus = '$laskurow[ytunnus]' and lasku.ovttunnus = '$laskurow[ovttunnus]' and lasku.alatila = 'X'
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi = 'L'
-						and tilausrivi.tuoteno = '$tuoteno'						
+						and tilausrivi.tuoteno = '$tuoteno_lisa'						
 						ORDER BY tilausrivi.tunnus desc
 						LIMIT 1";	
 			$viimhintares = mysql_query($query) or pupe_error($query);			
@@ -3041,7 +3049,7 @@ if ($tee == '') {
 				
 			}		
 					
-			$query = "SELECT * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+			$query = "SELECT * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno_lisa'";
 			$tres  = mysql_query($query) or pupe_error($query);
 
 			while ($salrow = mysql_fetch_array($tres)) {

@@ -56,7 +56,7 @@ if (isset($_POST['poista']) and isset($_POST['tunnus']) and isset($_REQUEST['lii
 	$laskurow = mysql_fetch_array($res);
 
 	if (in_array($laskurow['tila'], array('H','M')) and $kukarow["taso"] != 3) {
-		nollaa_hyvak($id);
+		nollaa_hyvak($liiteid);
 	}
 }
 

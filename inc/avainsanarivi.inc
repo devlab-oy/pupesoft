@@ -192,7 +192,23 @@
 			$tyyppi = 3;
 		}
 	}
-			
+	
+	if (mysql_field_name($result, $i) == "nakyvyys") {
+		if ($avain_sel["TRY"] == "SELECTED" or $avain_sel["OSASTO"] == "SELECTED") {
+			$sel = array();
+			$sel[$trow[$i]] = "SELECTED";
+
+			$ulos = "<td><select name = '$nimi'>";
+			$ulos .= "<option value = ''>".t("N‰ytet‰‰n verkkokaupassa")."</option>";
+			$ulos .= "<option value = 'E' $sel[E]>".t("Ei n‰ytet‰ verkkokaupassa")."</option>";
+			$ulos .= "</select></td>";
+		}
+		else {
+			$tyyppi = 0;
+		}
+		
+		$jatko = 0;
+	}		
 			
 	if (mysql_field_name($result, $i) == "kieli") {
 		

@@ -1,6 +1,9 @@
 <?php
 
-require_once("viivakoodi/Barcode.php");
+if (@include_once('PEAR.php')) {
+	require_once("viivakoodi/Barcode.php");
+}
+
 require_once("pdflib/phppdflib.class.php");
 
 $norm["height"] 		= 10;
@@ -272,19 +275,21 @@ if (!function_exists('alku_valm')) {
 				$kala = 560;
 			}
 
-			//viivakoodi
-			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+			if (class_exists("Image_Barcode")) {
+				//viivakoodi
+				$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
-			imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
+				imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
 
-			$fh = fopen($nimi, "r");
-			$data = fread($fh, filesize($nimi));
-			fclose($fh);
+				$fh = fopen($nimi, "r");
+				$data = fread($fh, filesize($nimi));
+				fclose($fh);
 
-			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, 805, 440, $thispage);
+				$image = $pdf->jfif_embed($data);
+				$pdf->image_place($image, 805, 440, $thispage);
 
-			system("rm -f $nimi");
+				system("rm -f $nimi");
+			}
 
 			rivi_otsikot_valm($thispage);
 
@@ -453,20 +458,23 @@ if (!function_exists('uusi_sivu_valm')) {
 			$kala = $pohja-30;
 		}
 		
-		//viivakoodi
-		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+
+		if (class_exists("Image_Barcode")) {
+			//viivakoodi
+			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 			
-		imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
+			imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
 
-		$fh = fopen($nimi, "r");
-		$data = fread($fh, filesize($nimi));
-		fclose($fh);
+			$fh = fopen($nimi, "r");
+			$data = fread($fh, filesize($nimi));
+			fclose($fh);
 
-		$image = $pdf->jfif_embed($data);
-		$pdf->image_place($image, 805, 440, $thispage);
+			$image = $pdf->jfif_embed($data);
+			$pdf->image_place($image, 805, 440, $thispage);
 				
-		system("rm -f $nimi");
-
+			system("rm -f $nimi");
+		}
+		
 		$kala = 705;
 		
 		rivi_otsikot_valm($thispage);

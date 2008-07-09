@@ -159,7 +159,7 @@
 					for ($i=0; $i<mysql_num_fields($result); $i++) {
 						if (mysql_field_type($result,$i) == 'real') {
 							if(isset($workbook)) {
-								$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
+								$worksheet->writeNumber($excelrivi, $i, $row[$i]);
 							}
 						}
 						else {						

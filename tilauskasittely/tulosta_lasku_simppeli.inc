@@ -670,11 +670,11 @@ if (!function_exists('tulosta_lasku')) {
 			$h-=$pdf->ln($nb);					
 		}
 			
-		if($h < 50) {
+		if($h < 70) {
 			$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli);
 		}
 
-		$h = 50;
+		$h = 70;
 		if($toim != "PROFORMA") {
 			$s=$pdf->teeSarakkeet(array(31,30,45,25,35));		
 			$pdf->write($h, 1, 0, $s[1], t("MAKSUTIEDOT", $kieli), "norm", "L", "B");
@@ -860,6 +860,28 @@ if (!function_exists('tulosta_lasku')) {
 				}				
 			}
 		}
+		
+		//	Allekirjoituspohjat
+		if($h < 35) {
+			$pdf = alku($pdf, $laskurow,$kieli);
+			$h = 35;
+		}
+		else {
+			$h = 35;
+		}
+		
+		$pdf->write($h, 1, 0, 0, t("Parhain terveisin",$kieli), "norm", "L", "");
+		$h-=$pdf->ln(1.25);
+
+		$pdf->write($h, 1, 0, 0, $kukarow["nimi"], "norm", "L", "B");
+		$h-=$pdf->ln();
+
+		$pdf->write($h, 1, 0, 20, t("mobile", $kieli), "norm", "L", "");
+		$pdf->write($h, 1, 20, 0, $kukarow["puhno"], "norm", "L", "");
+		$h-=$pdf->ln();
+
+		$pdf->write($h, 1, 0, 20, t("email", $kieli), "norm", "L", "");
+		$pdf->write($h, 1, 20, 0, $kukarow["eposti"], "norm", "L", "");
 		
 		$h = 15;		
 		$s=$pdf->teeSarakkeet(array(70,15,58,15));

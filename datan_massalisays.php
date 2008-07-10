@@ -311,10 +311,12 @@ if ($tee == 'GO') {
 
 					$kuvaselite = "Tuotekuva";
 
-					if ($toiminto == 'TH') {
+					if ($toiminto == 'thumb') {
+						$toiminto = 'TH';
 						$kuvaselite .= " pieni";
 					}
-					elseif ($toiminto == 'TK') {
+					elseif ($toiminto == 'normaali') {
+						$toiminto = 'TK';
 						$kuvaselite .= " normaali";
 					}
 					else {

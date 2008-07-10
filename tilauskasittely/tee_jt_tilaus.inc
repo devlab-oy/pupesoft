@@ -323,6 +323,25 @@
 								$query .= "rahtivapaa='".$otsikkorivi[$i]."',";
 							}
 						}
+						elseif (mysql_field_name($stresult,$i)=='maksuehto') {
+							//katsotaan onko asiakkaan maksuehto muuttunut jälkivaatimukseksi
+							
+							$maksuehto_query = "SELECT maksuehto.jv, maksuehto.tunnus 
+												FROM asiakas 
+												join maksuehto ON asiakas.yhtio = maksuehto.yhtio and asiakas.maksuehto = maksuehto.tunnus
+												where asiakas.yhtio = '$yhtiorow[yhtio]'
+												and asiakas.tunnus = '$otsikkorivi[liitostunnus]'";
+							$maksuehto_result = mysql_query($maksuehto_query) or pupe_error($query);
+							$maksuehtorow = mysql_fetch_array($maksuehto_result);
+							
+							if ($maksuehtorow['jv'] != '') {
+								$query .= "maksuehto='$maksuehtorow[tunnus]',";
+							}
+							else {
+								$query .= mysql_field_name($stresult,$i)."='".$otsikkorivi[$i]."',";
+							}
+							
+						}
 						// ja kaikki muut paitsi tunnus sellaisenaan
 						elseif (mysql_field_name($stresult,$i)!='tunnus') {
 							$query .= mysql_field_name($stresult,$i)."='".$otsikkorivi[$i]."',";

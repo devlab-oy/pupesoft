@@ -1529,8 +1529,13 @@
 		
 		//	Näille vaaditaan asiakasid
 		if($liitostunnus== 0 and in_array($tyyppi, array("Memo"))) {
-			echo "<font class='error'>$tyyppi vaatii aina asiakkaan!<br></font>";
+			echo "<font class='error'>".t("$tyyppi vaatii aina asiakkaan!")."<br></font>";
 			$ok = 0;
+		}
+		
+		if($tyyppi == "Muistutus" and $kuka == "") {
+			echo "<font class='error'>".t("Muistutuksella pitää olla 'Kuka'")."!<br></font>";
+			$ok = 0;			
 		}
 
 		//	Viestin on aina oltava
@@ -1549,7 +1554,7 @@
 			$tapa_string = $taparow["selitetark"];
 		}
 		else {
-			echo "<font class='error'>".t("Yhteydenottotapa katosi!")."</font><br>$query";
+			echo "<font class='error'>".t("Yhteydenottotapa katosi!")."</font><br>";
 			$ok = 0;
 		}
 		
@@ -1916,7 +1921,7 @@
 			$qlisa = "and selitetark_2 LIKE ('%merkinta%')";
 			$tapaotsikko = t("Merkintä");
 		}
-		elseif($tyyppi == "Memo") {
+		elseif($tyyppi == "Memo" or "Muistutus") {
 			$qlisa = "and selitetark_2 LIKE ('%tapahtuma%')";
 			$tapaotsikko = t("Tapahtuma");
 		}
@@ -2011,7 +2016,7 @@
 				$otsikko = "Lisää muistutus";
 			}
 
-			$header = "<select name='kuka'><option value=''>".t("Valitse henkilö")."</option>";
+			$valitse_kuka = "<select name='kuka'><option value=''>".t("Valitse henkilö")."</option>";
 			$query = "	SELECT *
 						FROM kuka
 						WHERE yhtio = '$kukarow[yhtio]'";
@@ -2019,10 +2024,35 @@
 			while($row = mysql_fetch_array($result)) {
 				if($row["kuka"] == $kuka) $sel = "selected";
 				else $sel = "";
-	 			$header .= "<option value='$row[kuka]' $sel>$row[nimi]</option>";
+	 			$valitse_kuka .= "<option value='$row[kuka]' $sel>$row[nimi]</option>";
 			}
-			$header .= "</select> $oval $paiva_alku";
+			$valitse_kuka .= "</select>";
 			
+			$header = "
+					<table>
+						<tr>
+							<th colspan='2'>".t("Asiakas")."</th>
+						</tr>						
+						<tr>
+							<td colspan='2'>$asiakas</td>
+						</tr>											
+						<tr>
+							<th>".t("Kuka")."</th>
+							<th>".t("Kenelle")."</th>
+						</tr>
+						<tr>
+							<td>$valitse_kuka</td>
+							<td>$yhdata</td>
+						</tr>
+						<tr>
+							<th>".t("Tapa")."</th>
+							<th>".t("Päiväys")."</th>
+						</tr>
+						<tr>
+							<td>$tavat</td>
+							<td>$paiva_alku</td>
+						</tr>
+						</table>";
 			if($ktunnus>0) {
 				$kuittaanappi = "<a href='#' onclick=\"sndReq('ajax_menu', '$kalenteri[URL]?ohje=off&kaletee=ANNAKUITTAUS&ktunnus=$ktunnus".url_params($kalenteri)."', false, false); return false;\">".t("Kuittaa")."</a>";
 			}

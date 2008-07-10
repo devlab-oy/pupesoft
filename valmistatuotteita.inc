@@ -4,16 +4,15 @@
 $isavarattu = $atil;
 $isatuoteno = $tuoteno;
 
-if ($tee =='UV') {
+if ($tee == 'UV') {
 	if ($atil <= 0) {
 		$tee = '';
 		echo "<font class='error'>".t("Anna valmistettava m‰‰r‰")."</font><br>";
 	}
 }
 
-
 // Katsotaan onko useita valmisteita?
-if ($tee =='UV') {
+if ($tee == 'UV') {
 	$query = "	SELECT tilausrivi.*, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.ei_saldoa
 				FROM tilausrivi
 				JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
@@ -31,8 +30,7 @@ if ($tee =='UV') {
 	}
 }
 
-
-if ($tee =='UV') {
+if ($tee == 'UV') {
 
 	unset($tuoteresult);
 
@@ -81,7 +79,6 @@ if ($tee =='UV') {
 	else {
 		$isarow = mysql_fetch_array($tuoteresult);
 	}
-
 
 	if ($valmistetaan == "TILAUKSELTA") {
 		//k‰ytet‰‰n tilausriveill‰ olevia tuotteita
@@ -196,7 +193,6 @@ if ($tee =='UV') {
 	echo "<br><br>";
 }
 
-
 if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 	mysql_data_seek($perheresult,0);
@@ -210,7 +206,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 		if ($perherow["paikka"] != '') {
 			$query = "	SELECT saldo, kehahin, ei_saldoa, yksikko, tuotepaikat.tunnus tunnus,
-						tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm, 
+						tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm,
 						tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
 						FROM tuote, tuotepaikat
 						WHERE tuote.yhtio = tuotepaikat.yhtio
@@ -292,9 +288,9 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 					kplhinta 	= '$tuoterow[kehahin]',
 					hinta    	= '$tuoterow[kehahin]',
 					rivitunnus	= '$perherow[tunnus]',
-					hyllyalue 	= '$tuoterow[hyllyalue]', 
-					hyllynro 	= '$tuoterow[hyllynro]', 
-					hyllytaso 	= '$tuoterow[hyllytaso]', 
+					hyllyalue 	= '$tuoterow[hyllyalue]',
+					hyllynro 	= '$tuoterow[hyllynro]',
+					hyllytaso 	= '$tuoterow[hyllytaso]',
 					hyllyvali 	= '$tuoterow[hyllyvali]',
 					selite   	= '".t("K‰ytettiin tuotteen")." $isatuoteno ".t("valmistamiseen")." ".t("tyˆm‰‰r‰yksell‰")." $tilrivirow[otunnus]',
 					laatija  	= '$kukarow[kuka]',
@@ -329,7 +325,6 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 		}
 	}
 
-
 	if (!function_exists("valmista_isa")) {
 		function valmista_isa($isarow, $tilrivirow, $isavarattu, $isatuoteno, $uusiarvo, $kaikenkaikkiaan) {
 			global $yhtiorow, $kukarow, $laskurow, $valmistettavat, $valmistetaan, $jaljella_tot;
@@ -356,9 +351,9 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 						kpl     	= '$isavarattu',
 						kplhinta	=  round($uusiarvo/$isavarattu, 6),
 						hinta   	= '$kehahin',
-						hyllyalue 	= '$isarow[hyllyalue]', 
-						hyllynro 	= '$isarow[hyllynro]', 
-						hyllytaso 	= '$isarow[hyllytaso]', 
+						hyllyalue 	= '$isarow[hyllyalue]',
+						hyllynro 	= '$isarow[hyllynro]',
+						hyllytaso 	= '$isarow[hyllytaso]',
 						hyllyvali 	= '$isarow[hyllyvali]',
 						selite  	= '".t("Valmistettiin tuotetta tyˆm‰‰r‰yksell‰")." $tilrivirow[otunnus] ($isarow[kehahin] --> $kehahin)',
 						laatija 	= '$kukarow[kuka]',
@@ -475,8 +470,6 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 		}
 	}
 
-
-
 	// Tehd‰‰n uusi tuote $uusiarvo on k‰ytettyjen raaka-aineiden arvo.
 	if ($useavalmiste == "ON") {
 
@@ -521,7 +514,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 			else {
 				//k‰ytet‰‰n oletuspaikkaa
 				$query = "	SELECT saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus,
-							tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso			
+							tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
 							FROM tuote, tuotepaikat
 							WHERE tuote.yhtio=tuotepaikat.yhtio
 							and tuote.tuoteno=tuotepaikat.tuoteno

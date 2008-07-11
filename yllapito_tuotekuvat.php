@@ -36,7 +36,7 @@
 			}
 
 			function verify() {
-				
+
 				msg = '".t("Oletko varma?")."';
 				return confirm(msg);
 			}
@@ -437,9 +437,9 @@
 		echo "<br /><br />";
 
 		if ($tee == '' and count($mul_del) > 0) {
-		
+
 			echo t('Poistettiin kuvat tuotteista: '),"<br />";
-		
+
 			foreach ($mul_del as $key => $val) {
 				list($tunnus, $ltunnus, $kayttotarkoitus) = explode('_', $val);
 
@@ -447,20 +447,20 @@
 				$kayttotarkoitus = mysql_real_escape_string($kayttotarkoitus);
 
 				echo "$tunnus ($kayttotarkoitus)<br />";
-			
-				$query = "	DELETE 
+
+				$query = "	DELETE
 							FROM liitetiedostot
-							WHERE yhtio = '$kukarow[yhtio]' 
+							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus = '$ltunnus'
-							AND liitostunnus = '$tunnus' 
+							AND liitostunnus = '$tunnus'
 							AND kayttotarkoitus = '$kayttotarkoitus'
 							AND liitos = 'tuote'
-							AND filename != '' 
+							AND filename != ''
 							AND filetype LIKE 'image/%'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
-			
-			
+
+
 		}
 
 		if ($tee == 'LISTAA') {
@@ -553,8 +553,8 @@
 						if(tuote.try is not null, tuote.try, 0) try,
 						if(tuote.osasto is not null, tuote.osasto, 0) osasto,
 						tuote.tuoteno,
-						tuote.tuotemerkki, 
-						tuote.nimitys, 
+						tuote.tuotemerkki,
+						tuote.nimitys,
 						tuote.tunnus,
 						liitetiedostot.tunnus ltunnus,
 						liitetiedostot.filename,
@@ -563,7 +563,8 @@
 						liitetiedostot.tunnus id,
 						liitetiedostot.image_height korkeus,
 						liitetiedostot.image_width leveys,
-						liitetiedostot.selite
+						liitetiedostot.selite,
+						liitetiedostot.liitos
 						FROM tuote
 						JOIN liitetiedostot USE INDEX (yhtio_liitos_liitostunnus) ON (liitetiedostot.yhtio = tuote.yhtio and liitetiedostot.liitos = 'tuote' and liitetiedostot.liitostunnus = tuote.tunnus and liitetiedostot.filename != '')
 						WHERE tuote.yhtio 	= '$kukarow[yhtio]'
@@ -609,7 +610,7 @@
 							echo t('Löytyi yhteensä')," ",mysql_num_rows($result)," ",t('riviä');
 						echo "</td>";
 					echo "</tr>";
-			
+
 					echo "<tr>";
 						echo "<th>",t('Tunnus'),"</th>";
 						echo "<th>",t('Tuoteno'),"</th>";
@@ -645,39 +646,19 @@
 						}
 					}
 
+					// Exceliä käytetään sisäänlue datassa joten on laitettava sarakkeet sen mukaisesti (kaikkea ei siis saada laittaa mukaan vaikka mieli tekisi)
 					if (isset($workbook) and $mul_exl == 'tallennetaan') {
 						$excelsarake = 0;
 
-						$worksheet->writeString($excelrivi, $excelsarake, t("Tunnus"), 				$format_bold);
-						$excelsarake++;
 						$worksheet->writeString($excelrivi, $excelsarake, t("Tuoteno"), 			$format_bold);
 						$excelsarake++;
-						$worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"), 			$format_bold);
+						$worksheet->writeString($excelrivi, $excelsarake, t("Liitostunnus"), 		$format_bold);
 						$excelsarake++;
-						$worksheet->writeString($excelrivi, $excelsarake, t("Osasto"),	 			$format_bold);
+						$worksheet->writeString($excelrivi, $excelsarake, t("Liitos"), 				$format_bold);
 						$excelsarake++;
-						$worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhma"), 			$format_bold);
+						$worksheet->writeString($excelrivi, $excelsarake, t("Filename"),	 		$format_bold);
 						$excelsarake++;
-						$worksheet->writeString($excelrivi, $excelsarake, t("Tuotemerkki"), 		$format_bold);
-						$excelsarake++;
-						$worksheet->writeString($excelrivi, $excelsarake, t("Ltunnus"), 		$format_bold);
-						$excelsarake++;
-						$worksheet->writeString($excelrivi, $excelsarake, t("Tiedostonnimi"), 		$format_bold);
-						$excelsarake++;
-
-						if (count($mul_siz) > 0) {
-							if (in_array('korkeus', $mul_siz)) {
-								$worksheet->writeString($excelrivi, $excelsarake, t("Korkeus"), 		$format_bold);
-								$excelsarake++;
-							}
-
-							if (in_array('korkeus', $mul_siz)) {
-								$worksheet->writeString($excelrivi, $excelsarake, t("Leveys"), 		$format_bold);
-								$excelsarake++;
-							}
-						}
-
-						$worksheet->writeString($excelrivi, $excelsarake, t("Käyttötarkoitus"), 		$format_bold);
+						$worksheet->writeString($excelrivi, $excelsarake, t("Kayttotarkoitus"), 		$format_bold);
 						$excelsarake++;
 						$worksheet->writeString($excelrivi, $excelsarake, t("Selite"), 		$format_bold);
 						$excelsarake++;
@@ -691,8 +672,6 @@
 							echo "<td valign='top'>",$row['tuoteno'],"</td>";
 
 							if (isset($workbook) and $mul_exl == 'tallennetaan') {
-								$worksheet->writeString($excelrivi, $excelsarake, $row['tunnus'], 		$format_bold);
-								$excelsarake++;
 								$worksheet->writeString($excelrivi, $excelsarake, $row['tuoteno'], 		$format_bold);
 								$excelsarake++;
 							}
@@ -713,11 +692,6 @@
 								echo "<td valign='top'>",$row['nimitys'],"</td>";
 							}
 
-							if (isset($workbook) and $mul_exl == 'tallennetaan') {
-								$worksheet->writeString($excelrivi, $excelsarake, $row['nimitys'], 		$format_bold);
-								$excelsarake++;
-							}
-
 							echo "<td valign='top'>",$row['osasto'],"</td>";
 							echo "<td valign='top'>",$row['try'],"</td>";
 							echo "<td valign='top'>",$row['tuotemerkki'],"</td>";
@@ -725,13 +699,9 @@
 							echo "<td valign='top'>",$row['filename'],"</td>";
 
 							if (isset($workbook) and $mul_exl == 'tallennetaan') {
-								$worksheet->writeString($excelrivi, $excelsarake, $row['osasto'], 		$format_bold);
-								$excelsarake++;
-								$worksheet->writeString($excelrivi, $excelsarake, $row['try'], 		$format_bold);
-								$excelsarake++;
-								$worksheet->writeString($excelrivi, $excelsarake, $row['tuotemerkki'], 		$format_bold);
-								$excelsarake++;
 								$worksheet->writeString($excelrivi, $excelsarake, $row['ltunnus'], 		$format_bold);
+								$excelsarake++;
+								$worksheet->writeString($excelrivi, $excelsarake, $row['liitos'], 		$format_bold);
 								$excelsarake++;
 								$worksheet->writeString($excelrivi, $excelsarake, $row['filename'], 		$format_bold);
 								$excelsarake++;
@@ -740,20 +710,10 @@
 							if (count($mul_siz) > 0) {
 								if (in_array('korkeus', $mul_siz)) {
 									echo "<td valign='top' align='right'>",$row['korkeus']," px</td>";
-
-									if (isset($workbook) and $mul_exl == 'tallennetaan') {
-										$worksheet->writeString($excelrivi, $excelsarake, $row['korkeus'], 		$format_bold);
-										$excelsarake++;
-									}
 								}
 
 								if (in_array('leveys', $mul_siz)) {
 									echo "<td valign='top' align='right'>",$row['leveys']," px</td>";
-
-									if (isset($workbook) and $mul_exl == 'tallennetaan') {
-										$worksheet->writeString($excelrivi, $excelsarake, $row['leveys'], 		$format_bold);
-										$excelsarake++;
-									}
 								}
 							}
 
@@ -787,7 +747,7 @@
 						$korkeus = 'on';
 						$colspan++;
 					}
-				
+
 					if (count($mul_siz) > 0 and in_array('leveys', $mul_siz)) {
 						$leveys = 'on';
 						$colspan++;
@@ -829,28 +789,28 @@
 							$osasto = str_replace('\')','',$osasto);
 							$osasto = str_replace('\',\'',',',$osasto);
 						}
-				
+
 						if ($sel_tuoteryhma != '') {
 							$try = $sel_tuoteryhma;
 							$try = str_replace('(\'','',$try);
 							$try = str_replace('\')','',$try);
 							$try = str_replace('\',\'',',',$try);
 						}
-				
+
 						if ($sel_tuotemerkki != '') {
 							$tmr = $sel_tuotemerkki;
 							$tmr = str_replace('(\'','',$tmr);
 							$tmr = str_replace('\')','',$tmr);
 							$tmr = str_replace('\',\'',',',$tmr);
 						}
-				
+
 						if ($sel_kayttotarkoitus != '') {
 							$kayt = $sel_kayttotarkoitus;
 							$kayt = str_replace('(\'','',$kayt);
 							$kayt = str_replace('\')','',$kayt);
 							$kayt = str_replace('\',\'',',',$kayt);
 						}
-				
+
 						if ($sel_selite != '') {
 							$sel = $sel_selite;
 							$sel = str_replace('(\'','',$sel);
@@ -889,7 +849,7 @@
 								if ($seuraava == "ok") {
 									$seuraava = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=$tuoteno&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys'>";
 								}
-						
+
 								echo "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=$tuoteno&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys'>$y</a>";
 							}
 							$limit += 50;

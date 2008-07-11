@@ -114,14 +114,44 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
 		if ($teekuva == "insert") {
 						
 			$retval = tarkasta_liite("userfile");
+			
+			//	Onko meillä jokin kuvatyyppi?
+			list($type, $crap) = explode("/", $_FILES["userfile"]["type"]);
+			
+			//tarkastetaan löytyykö kuva jo kannasta
+			if($teetyyppi == "TK" and $type == "image" and strtoupper($toim) == 'TUOTE') {
+				$kayttotarkoitus_lisa = " and kayttotarkoitus in('TK','TH') ";
+			}
+			elseif ($teetyyppi == "TH" and $type == "image" and strtoupper($toim) == 'TUOTE') {
+				$kayttotarkoitus_lisa = " and kayttotarkoitus in('TH') ";
+			}
+			else {
+				$kayttotarkoitus_lisa = " and kayttotarkoitus in('MU') ";
+			}
+			
+			$file_name = $_FILES['userfile']['name'];
+			
+			$query = "  SELECT filename, kayttotarkoitus
+						FROM liitetiedostot
+						where yhtio = '$kukarow[yhtio]'
+						and liitos = '$toim'
+						and liitostunnus	= '$tunnus'
+						$kayttotarkoitus_lisa
+						and filename = '$file_name'";
+			$result = mysql_query($query) or pupe_error($query);
+			
+			
 			if($retval !== true) {
 				echo $retval;
+				
+			}
+			elseif (mysql_num_rows($result) > 0) {				
+				$checkrow=mysql_fetch_array($result);
+				echo "<font class='error'>".t("VIRHE! Tiedosto %s %s löytyy jo tuotteelle", $kieli, $file_name, $checkrow['kayttotarkoitus']).".</font><br><br>";						
 			}
 			else {
 			
-				//	Onko meillä jokin kuvatyyppi?
-				list($type, $crap) = explode("/", $_FILES["userfile"]["type"]);
-				
+							
 				$uusi_filu = "";
 				
 				//konvertoidaan kuva

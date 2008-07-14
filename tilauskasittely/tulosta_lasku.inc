@@ -739,21 +739,21 @@ if (!function_exists('rivi_original')) {
 		//Kommentti
 		if (trim($row["kommentti"]) != '') {
 			$kommentit = explode("\n", trim($row["kommentti"]));
-			$pohja = $kala;
 
 			foreach($kommentit as $kommentti) {
-				$pdf->draw_text(35, $pohja, $row["otunnus"]."/".$kommentti, $thispage, $pieni);
-				$pohja = $pohja - 10;
+				$pdf->draw_text(35, $kala, $row["otunnus"]."/".$kommentti, $thispage, $pieni);
+				$kala = $kala - 10;
+				if ($kala <= 180 + $barcode_korkeus) {
+					$sivu++;
+					loppu($thispage);
+					$page[$sivu] = uusi_sivu();
+					$thispage    = $page[$sivu];
+				}
 			}
-			$pohja += 10;
+			$kala += 10;
 		}
 		else {
 			$pdf->draw_text(35, $kala, $row["otunnus"],	$thispage, $pieni);
-			$pohja = $kala;
-		}
-
-		if ($pohja < $kala) {
-			$kala = $pohja;
 		}
 
 		$kala = $kala - 15;
@@ -1040,7 +1040,7 @@ if (!function_exists('loppu')) {
 
 		global $yhtiorow, $kukarow, $toim, $pdf, $page, $sivu, $laskurow, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $masrow, $boldi, $pieni_boldi, $kateistyyppi;
 
-		if ($yhtiorow["viivakoodi_laskulle"] == "K" and $vikasivu != "") {
+		if ($yhtiorow["viivakoodi_laskulle"] == "K" and $vikasivu != "" and function_exists("imagecreate")) {
 			$piirra_viivakoodi = true;
 			$barcode_korkeus = 50;
 		}

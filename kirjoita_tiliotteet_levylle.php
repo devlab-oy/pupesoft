@@ -4,7 +4,7 @@
 			global $kukarow, $otsikko, $sisalto, $ote;
 
 			if (($ote != '') and ($tiliointi != 0)) {
-				$query = "SELECT tosite
+				$query = "SELECT tosite, korjattu, tapvm, ltunnus
 					  		FROM tiliointi
 					  		WHERE yhtio='$kukarow[yhtio]' and tunnus='$tiliointi'";
 				$xresult = mysql_query ($query) or die ("Kysely ei onnistu $query<br>".mysql_error());
@@ -15,13 +15,26 @@
 					$tiliointirow=mysql_fetch_array($xresult);
 					// Muutetaan tiliote --> tilioteote
 					$uotsikko = str_replace (t("Tiliote"), t("Ote tiliotteesta"), $otsikko);
-					if ($tiliointirow[0] == 0) {
-						echo "Tositetta ei ole siirretty tikoniin ja siltä puuttuu tositenro $tiliointi<br>";
-						//echo "$uotsikko $ote </table>";
-						$tyofile="/tmp/too-" . $tiliointi . ".html";
-						file_put_contents($tyofile, $uotsikko . $ote . "</table>");
+					if ($tiliointirow['tosite'] == 0) {
+						if ($tiliointirow['korjattu'] != '') { // Poistettu Yritetään löytää jokin sopiva vastaava
+							echo "Alkuperäinen tiliöinti poistettu. Etsin vastaavan<br>";
+							$query = "SELECT distinct tosite tosite
+					  			FROM tiliointi
+					  			WHERE yhtio='$kukarow[yhtio]' and ltunnus='$tiliointirow[ltunnus]'
+					  				and tapvm='$tiliointirow[tapvm]' and tosite != 0 and korjattu=''";
+							$yresult = mysql_query ($query) or die ("Kysely ei onnistu $query<br>".mysql_error());
+							if (mysql_num_rows($yresult) == 1) {
+								$tiliointirow=mysql_fetch_array($yresult);
+							}
+						}
+						if ($tiliointirow['tosite'] == 0) {
+							echo "Tositetta ei ole siirretty tikoniin ja siltä puuttuu tositenro $tiliointi<br>";
+							//echo "$uotsikko $ote </table>";
+							$tyofile="/tmp/too-" . $tiliointi . ".html";
+							file_put_contents($tyofile, $uotsikko . $ote . "</table>");
+						}
 					}
-					else {
+					if ($tiliointirow['tosite'] != 0) {
 						//echo "$uotsikko $ote </table>";
 						$tyofile="/tmp/too-" . $tiliointirow[0] . ".html";
 						file_put_contents($tyofile, $uotsikko . $ote . "</table>");

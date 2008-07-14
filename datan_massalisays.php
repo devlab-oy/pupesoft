@@ -88,19 +88,24 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$kuva,$dirri,$upfile1) {
 
 
     // skaalataan kuva oikenakokoiseksi
-    exec("nice -n 20 convert -resize x$ykoko -quality 80 $upfile1 $upfilesgh");
-
-	$uusnimi = $dirri."/".$taulu."/".$type."/".$kuva;
-
-	copy($upfilesgh,$uusnimi);
-
-	if (!copy($upfilesgh,$uusnimi)) {
-	    echo "Kopiointi epäonnistui $upfile1<br>";
-		$upfileall = "";
+    exec("nice -n 20 convert -resize x$ykoko -quality 80 $upfile1 $upfilesgh",$output,$error);
+	
+	if ($error != 0) {
+		echo "Virhe kuvan muokkauksessa<br>";
 	}
 	else {
-		$upfileall .= "$uusnimi";
-	}
+		$uusnimi = $dirri."/".$taulu."/".$type."/".$kuva;
+
+		copy($upfilesgh,$uusnimi);
+
+		if (!copy($upfilesgh,$uusnimi)) {
+		    echo "Kopiointi epäonnistui $upfile1<br>";
+			$upfileall = "";
+		}
+		else {
+			$upfileall .= "$uusnimi";
+		}
+	}	
 
 	// poistetaan file
 	system("rm -f $upfilesgh");
@@ -136,7 +141,7 @@ if ($tee == 'GO') {
 
 			$size = getimagesize($file);
 			list($mtype, $crap) = explode("/", $size["mime"]);
-
+			
 			if ($toiminto == 'kasittele' and $mtype == "image") {
 				if (file_exists($file)) {
 

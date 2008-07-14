@@ -5876,7 +5876,7 @@ if(!function_exists("hae_rahtimaksu")) {
 
 		// haetaan etäisyydet
 		$query = "	SELECT 
-					ifnull(etaisyydet.km,0) km
+					etaisyydet.km
 					FROM etaisyydet
 					JOIN varastopaikat ON (varastopaikat.yhtio = etaisyydet.yhtio AND varastopaikat.tunnus = '$laskurow[varasto]' AND varastopaikat.postino = etaisyydet.varasto_postino)
 					WHERE etaisyydet.yhtio='$kukarow[yhtio]' 
@@ -5885,11 +5885,11 @@ if(!function_exists("hae_rahtimaksu")) {
 
 		if (mysql_num_rows($varastoresult) > 0) {
 			$varastorow = mysql_fetch_array($varastoresult);
-
-			$wherelisa = "((kmalku <= '$varastorow[km]' and kmloppu >= '$varastorow[km]') or";
+			
+			$km = $varastorow['km'];
 		}
 		else {
-			$wherelisa = "";
+			$km = 0;
 		}
 
 		//haetaan tällä rahtikirjalle rahtimaksu
@@ -5899,7 +5899,7 @@ if(!function_exists("hae_rahtimaksu")) {
 					and kilotalku <= '$kilot'
 					and kilotloppu >= '$kilot'
 					and yhtio = '$kukarow[yhtio]'
-					and $wherelisa (kmalku = 0 and kmloppu = 0))
+					and ((kmalku <= '$km' and kmloppu >= '$km') or (kmalku = 0 and kmloppu = 0))
 					ORDER BY kmloppu DESC, kmalku DESC
 					LIMIT 1";
 		$rares = mysql_query($query) or pupe_error($query);

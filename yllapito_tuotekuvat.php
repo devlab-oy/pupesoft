@@ -544,7 +544,7 @@
 			}
 
 			if ($tuoteno != '') {
-				$tuoteno = trim(mysql_real_escape_string($tuoteno));
+				$tuoteno = mysql_real_escape_string(trim($tuoteno));
 				$lisa .= " and tuote.tuoteno like '$tuoteno%' ";
 			}
 

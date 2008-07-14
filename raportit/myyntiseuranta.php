@@ -286,6 +286,14 @@
 
 				$apu = array();
 
+				if (count($yhtiot) > 1) {
+					if ($group!="") $group .= ",lasku.yhtio";
+					else $group .= "lasku.yhtio";
+					$select .= "lasku.yhtio yhtio, ";
+					$order  .= "lasku.yhtio,";
+					$gluku++;
+				}
+
 				foreach ($jarjestys as $ind => $arvo) {
 					if (trim($arvo) != "") $apu[] = $arvo;
 				}
@@ -346,7 +354,7 @@
 						$order  .= "asiakas.piiri,";
 						$gluku++;
 					}
-					
+
 					if ($mukaan == "piiri" and $piirivalinta == "lasku") {
 						if ($group!="") $group .= ",lasku.piiri";
 						else $group .= "lasku.piiri";
@@ -551,7 +559,7 @@
 
 				if (is_array($mul_piiri) and count($mul_piiri) > 0) {
 					$sel_piiri = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_piiri))."')";
-					
+
 					if ($piirivalinta == "asiakas") {
 						$lisa .= " and asiakas.piiri in $sel_piiri ";
 					}
@@ -649,38 +657,39 @@
 
 						$alku  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
 						$loppu = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)));
-						
+
 						$alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)-1));
 						$loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)-1));
-						
+
+						// MYYNTI
 						if ($ajotapa == 'tilausjaauki' or $ajotapa == 'tilausauki') {
 							$query .= "sum(if(tilausrivi.laadittu >= '$alku 00:00:00'  and tilausrivi.laadittu <= '$loppu 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) '".$MONTH_ARRAY[(substr($i,4,2)*1)]." ".substr($i,0,4)." ".t("Laskuttamatta")."',";
 						}
-						
+
 						if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
 							$query .= "sum(if(tilausrivi.laadittu >= '$alku 00:00:00'  and tilausrivi.laadittu <= '$loppu 23:59:59', if(tilausrivi.rivihinta = 0,tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),tilausrivi.rivihinta),0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".substr($i,0,4)." ".t("Myynti")."',";
 						}
 						elseif($ajotapa != 'tilausauki') {
 							$query .= " sum(if(tilausrivi.laskutettuaika >= '$alku'  and tilausrivi.laskutettuaika <= '$loppu', tilausrivi.rivihinta,0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".substr($i,0,4)." ".t("Myynti")."',";
 						}
-						
+
 						if ($ajotapa == 'tilausjaauki') {
 							$query .= "sum(if(tilausrivi.laadittu >= '$alku 00:00:00'  and tilausrivi.laadittu <= '$loppu 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) + ";
 							$query .= "sum(if(tilausrivi.laskutettuaika >= '$alku'  and tilausrivi.laskutettuaika <= '$loppu', tilausrivi.rivihinta,0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".substr($i,0,4)." ".t("Myyntiyht")."', ";
 						}
-						
+
+						// MYYNTIED
 						if ($piiloed == "") {
 							if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
 								$query .= " sum(if(tilausrivi.laadittu >= '$alku_ed 00:00:00'  and tilausrivi.laadittu <= '$loppu_ed 23:59:59', if(tilausrivi.rivihinta = 0,tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),tilausrivi.rivihinta),0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".(substr($i,0,4)-1)." ".t("Myynti")."',";
 							}
 							elseif ($ajotapa == 'tilausauki') {
 								$query .= " sum(if(tilausrivi.laadittu >= '$alku_ed 00:00:00'  and tilausrivi.laadittu <= '$loppu_ed 23:59:59', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".(substr($i,0,4)-1)." ".t("Myynti")."',";
-								
+
 							}
 							else {
 								$query .= " sum(if(tilausrivi.laskutettuaika >= '$alku_ed'  and tilausrivi.laskutettuaika <= '$loppu_ed', tilausrivi.rivihinta,0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".(substr($i,0,4)-1)." ".t("Myynti")."',";
 							}
-							
 						}
 
 						$i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1,  substr($i,0,4)));
@@ -691,139 +700,159 @@
 				}
 				else {
 
-					if ($ajotapa == 'tilausjaauki' or $ajotapa == 'tilausauki') {
-						$query .= "sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.varattu+tilausrivi.jt,0)) myykpllaskuttamattanyt, ";
-					}
-					
-					if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
-						$query .= "	sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59', if(tilausrivi.kpl = 0, tilausrivi.tilkpl,tilausrivi.kpl),0)) myykplnyt, ";
-					}
-					elseif($ajotapa != 'tilausauki') {
-						$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl,0)) myykplnyt, ";
-					}
-					
-					if ($piiloed == "") {
+					//MYYNTI
+					if ($piilota_myynti == "") {
+						if ($ajotapa == 'tilausjaauki' or $ajotapa == 'tilausauki') {
+							$query .= "sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) myyntilaskuttamattanyt, ";
+						}
+
 						if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
-							$query .= "	sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59',if(tilausrivi.kpl = 0, tilausrivi.tilkpl,tilausrivi.kpl),0)) myykpled, ";
+							$query .= "	sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59', if(tilausrivi.rivihinta = 0,tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),tilausrivi.rivihinta),0)) myyntinyt, ";
 						}
-						elseif ($ajotapa == 'tilausauki') {
-							$query .= "	sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59',tilausrivi.varattu+tilausrivi.jt,0)) myykpled, ";
+						elseif($ajotapa != 'tilausauki') {
+							$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) myyntinyt, ";
 						}
-						else {
-							$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kpl,0)) myykpled, ";
-						}
-						
-					}
 
-					if ($ajotapa == 'tilausjaauki' or $ajotapa == 'tilausauki') {
-						$query .= "sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) myyntilaskuttamattanyt, ";						
-					}
+						if ($ajotapa == 'tilausjaauki') {
+							$query .= "sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) + ";
+							$query .= "sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) myyntinytyht, ";
+						}
 
-					if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
-						$query .= "	sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59', if(tilausrivi.rivihinta = 0,tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),tilausrivi.rivihinta),0)) myyntinyt, ";
-					}
-					elseif($ajotapa != 'tilausauki') {
-						$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) myyntinyt, ";
-					}
-				
-					if ($ajotapa == 'tilausjaauki') {
-						$query .= "sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) + ";
-						$query .= "sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) myyntinytyht, ";
-					}
-
-					if ($piiloed == "") {
-						if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
-							$query .= "	sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', if(tilausrivi.rivihinta = 0, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),tilausrivi.rivihinta),0)) myyntied, ";
-							$query .= "	round(sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59', if(tilausrivi.rivihinta = 0, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),tilausrivi.rivihinta),0)) / sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', if(tilausrivi.rivihinta = 0, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),tilausrivi.rivihinta),0)),2) myyntiind, ";
-						}
-						elseif ($ajotapa == 'tilausauki') {
-							$query .= "	sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) myyntied, ";
-							$query .= "	round(sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) / sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)),2) myyntiind, ";
-							
-						}
-						else {
-							$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.rivihinta,0)) myyntied, ";
-							$query .= "	round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) / sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.rivihinta,0)),2) myyntiind, ";
-						}
-						
-					}
-					
-					
-					if ($oikeurow['paivitys'] == 1) {						
-					
-						if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot' or $ajotapa == 'tilausauki') {
-							$query .= "	sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59', if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt)),0)) katenyt, ";
-						}
-						else {
-							$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate,0)) katenyt, ";
-						}
-				
+						//MYYNTIED
 						if ($piiloed == "") {
-							if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot' or $ajotapa == 'tilausauki') {
-								$query .= "	sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt)),0)) kateed, ";
-								$query .= "	round(sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59', if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt)),0)) /sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt)),0)),2) kateind, ";
+							if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
+								$query .= "	sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', if(tilausrivi.rivihinta = 0, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),tilausrivi.rivihinta),0)) myyntied, ";
+								$query .= "	round(sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59', if(tilausrivi.rivihinta = 0, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),tilausrivi.rivihinta),0)) / sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', if(tilausrivi.rivihinta = 0, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),tilausrivi.rivihinta),0)),2) myyntiind, ";
+							}
+							elseif ($ajotapa == 'tilausauki') {
+								$query .= "	sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) myyntied, ";
+								$query .= "	round(sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) / sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)),2) myyntiind, ";
+
 							}
 							else {
-								$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kate,0)) kateed, ";
-								$query .= "	round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate,0)) /sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kate,0)),2) kateind, ";
+								$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.rivihinta,0)) myyntied, ";
+								$query .= "	round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) / sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.rivihinta,0)),2) myyntiind, ";
 							}
 						}
+					}
 
-						$query .= $katelisanyt;
+					if ($oikeurow['paivitys'] == 1) {
 
-						if ($piiloed == "") {
-							$query .= $katelisaed;
-						}
-
-						if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot' or $ajotapa == 'tilausauki') {
-							$query .= "	sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59', ";
-							$query .= " if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt)) - ";
-							$query .= " ( if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(asiakas.kuluprosentti,0)/100) - ";
-							$query .= " ( if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(toimitustapa.kuluprosentti,0)/100) - ";
-							$query .= " ( if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(tuote.kuluprosentti,0)/100),0)) nettokatenyt ";
-						}
-						else {
-							$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)) nettokatenyt ";
-						}
-					
-
-						if ($piiloed == "") {
-							$query .= ", ";
-						
+						if ($piilota_nettokate == "") {
+							//NETTOKATE
 							if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot' or $ajotapa == 'tilausauki') {
-								$query .= "	sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', ";
-								$query .= " if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt)) - ";
-								$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(asiakas.kuluprosentti,0)/100) - ";
-								$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(toimitustapa.kuluprosentti,0)/100) - ";
-								$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(tuote.kuluprosentti,0)/100),0)) nettokateed, ";
-					
 								$query .= "	sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59', ";
 								$query .= " if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt)) - ";
-								$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(asiakas.kuluprosentti,0)/100) - ";
-								$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(toimitustapa.kuluprosentti,0)/100) - ";
-								$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(tuote.kuluprosentti,0)/100),0)) / ";
-								$query .= " sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', ";
-								$query .= " if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt)) - ";
-								$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(asiakas.kuluprosentti,0)/100) - ";
-								$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(toimitustapa.kuluprosentti,0)/100) - ";
-								$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(tuote.kuluprosentti,0)/100),0)) nettokateind ";
+								$query .= " ( if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(asiakas.kuluprosentti,0)/100) - ";
+								$query .= " ( if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(toimitustapa.kuluprosentti,0)/100) - ";
+								$query .= " ( if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(yhtio.kuluprosentti,0)/100) - ";
+								$query .= " ( if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(tuote.kuluprosentti,0)/100),0)) nettokatenyt, ";
 							}
 							else {
-								$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl', tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)) nettokateed, ";
-								$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)) / sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl', tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)) nettokateind ";
+								$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(yhtio.kuluprosentti,0)/100),0)) nettokatenyt, ";
 							}
-						
+
+							//NETTOKATE ED
+							if ($piiloed == "") {
+
+								if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot' or $ajotapa == 'tilausauki') {
+									$query .= "	sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', ";
+									$query .= " if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt)) - ";
+									$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(asiakas.kuluprosentti,0)/100) - ";
+									$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(toimitustapa.kuluprosentti,0)/100) - ";
+									$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(yhtio.kuluprosentti,0)/100) - ";
+									$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(tuote.kuluprosentti,0)/100),0)) nettokateed, ";
+
+									$query .= "	sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59', ";
+									$query .= " if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt)) - ";
+									$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(asiakas.kuluprosentti,0)/100) - ";
+									$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(toimitustapa.kuluprosentti,0)/100) - ";
+									$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(yhtio.kuluprosentti,0)/100) - ";
+									$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(tuote.kuluprosentti,0)/100),0)) / ";
+									$query .= " sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', ";
+									$query .= " if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt)) - ";
+									$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(asiakas.kuluprosentti,0)/100) - ";
+									$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(toimitustapa.kuluprosentti,0)/100) - ";
+									$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(yhtio.kuluprosentti,0)/100) - ";
+									$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))*IFNULL(tuote.kuluprosentti,0)/100),0)) nettokateind, ";
+								}
+								else {
+									$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl', tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(yhtio.kuluprosentti,0)/100),0)) nettokateed, ";
+									$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(yhtio.kuluprosentti,0)/100),0)) / sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl', tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(yhtio.kuluprosentti,0)/100),0)) nettokateind, ";
+								}
+							}
+						}
+
+						if ($piilota_kate == "") {
+							//KATE
+							if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot' or $ajotapa == 'tilausauki') {
+								$query .= "	sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59', if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt)),0)) katenyt, ";
+							}
+							else {
+								$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate,0)) katenyt, ";
+							}
+
+							if ($piiloed == "") {
+								if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot' or $ajotapa == 'tilausauki') {
+									$query .= "	sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt)),0)) kateed, ";
+									$query .= "	round(sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59', if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt)),0)) /sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59', if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt)),0)),2) kateind, ";
+								}
+								else {
+									$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kate,0)) kateed, ";
+									$query .= "	round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate,0)) /sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kate,0)),2) kateind, ";
+								}
+							}
+						}
+
+						//kateprossa näytetään vain jos myynti ja kate on valittu myös näytettäväksi
+						if ($piilota_myynti == "" and $piilota_kate == "") {
+							//KATEPROS
+							$query .= $katelisanyt;
+
+							//KATEPROSED
+							if ($piiloed == "") {
+								$query .= $katelisaed;
+							}
 						}
 					}
-					else {
-						// Vika pilkku ja space pois
-						$query = substr($query, 0 ,-2);						
+
+					if ($piilota_kappaleet == "") {
+						//KPL
+						if ($ajotapa == 'tilausjaauki' or $ajotapa == 'tilausauki') {
+							$query .= "sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.varattu+tilausrivi.jt,0)) myykpllaskuttamattanyt, ";
+						}
+
+						if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
+							$query .= "	sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59', if(tilausrivi.kpl = 0, tilausrivi.tilkpl,tilausrivi.kpl),0)) myykplnyt, ";
+						}
+						elseif($ajotapa != 'tilausauki') {
+							$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl,0)) myykplnyt, ";
+						}
+
+						//KPLED
+						if ($piiloed == "") {
+							if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
+								$query .= "	sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59',if(tilausrivi.kpl = 0, tilausrivi.tilkpl,tilausrivi.kpl),0)) myykpled,
+											round(sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59',if(tilausrivi.kpl = 0, tilausrivi.tilkpl,tilausrivi.kpl),0)) / sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59',if(tilausrivi.kpl = 0, tilausrivi.tilkpl,tilausrivi.kpl),0)), 2) myykplind, ";
+							}
+							elseif ($ajotapa == 'tilausauki') {
+								$query .= "	sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59',tilausrivi.varattu+tilausrivi.jt,0)) myykpled,
+											round(sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59',tilausrivi.varattu+tilausrivi.jt,0)) / sum(if(tilausrivi.laadittu >= '$vvaa-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvll-$kkl-$ppl 23:59:59',tilausrivi.varattu+tilausrivi.jt,0)),2) myykplind, ";
+							}
+							else {
+								$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kpl,0)) myykpled,
+											round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl',tilausrivi.kpl,0)) / sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kpl,0)),2) myykplind, ";
+							}
+						}
 					}
+					// Vika pilkku ja space pois
+					$query = substr($query, 0 ,-2);
 				}
 
 				$query .= $tilauslisa3;
 				$query .= "	FROM lasku use index (yhtio_tila_tapvm)
 							JOIN tilausrivi use index ($index) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.$ouusio=lasku.tunnus and tilausrivi.tyyppi=$tyyppi
+							JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
 							LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							LEFT JOIN asiakas use index (PRIMARY) ON asiakas.yhtio=lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
 							LEFT JOIN toimitustapa ON lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite
@@ -836,7 +865,7 @@
 				$lloppu = date("Y-m-d", mktime(0, 0, 0, $kkl+1, $ppl,  $vvl));
 				$lalku_ed  = date("Y-m-d", mktime(0, 0, 0, $kka-1, $ppa,  $vva-1));
 				$lloppu_ed = date("Y-m-d", mktime(0, 0, 0, $kkl+1, $ppl,  $vvl-1));
-				
+
 				if ($ajotapa == 'tilausjaauki') {
 					$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
 								and ((lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00'  and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59') or (lasku.tapvm >= '$vva-$kka-$ppa' and lasku.tapvm <= '$vvl-$kkl-$ppl') ";
@@ -891,13 +920,12 @@
 				$query .= "	$lisa
 							group by $group
 							order by $order";
-				
+
 				// ja sitten ajetaan itte query
 				if ($query != "") {
-					
+
 					//echo "<pre>$query</pre><br>";
-					
-					
+
 					$result = mysql_query($query) or pupe_error($query);
 
 					$rivilimitti = 1000;
@@ -996,12 +1024,12 @@
 
 						// echotaan kenttien sisältö
 						for ($i=0; $i < mysql_num_fields($result); $i++) {
-							
+
 							// jos kyseessa on tuote
 							if (mysql_field_name($result, $i) == "tuoteno") {
 								$row[$i] = "<a href='../tuote.php?tee=Z&tuoteno=$row[$i]'>$row[$i]</a>";
-							}							
-							
+							}
+
 							// jos kyseessa on asiakasosasto, haetaan sen nimi
 							if (mysql_field_name($result, $i) == "asos") {
 								$query = "	SELECT distinct avainsana.selite, ".avain('select')."
@@ -1157,16 +1185,16 @@
 								foreach($sarjat as $sarja) {
 									list($s,$k) = explode("#", $sarja);
 
-									
+
 									$query = "	SELECT osto_vai_hyvitys
 												FROM tilausrivin_lisatiedot
 												WHERE yhtio in ($yhtio)
 												and tilausrivitunnus = '$s'";
 									$rilires = mysql_query($query) or pupe_error($query);
 									$rilirow = mysql_fetch_array($rilires);
-									
+
 									if ($k > 0 or ($k < 0 and $rilirow["osto_vai_hyvitys"] == "")) {
-										$tunken = "myyntirivitunnus";										
+										$tunken = "myyntirivitunnus";
 									}
 									else {
 										$tunken = "ostorivitunnus";
@@ -1200,13 +1228,12 @@
 
 							// Jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
 							if ($gluku > 1 and $edluku != $row[0] and $edluku != 'x' and $piiyhteensa == '' and strpos($group, ',') !== FALSE and substr($group, 0, 13) != "tuote.tuoteno") {
-								$excelsarake = $myyntiind = $kateind = $nettokateind = 0;
+								$excelsarake = $myyntiind = $kateind = $nettokateind = $myykplind = 0;
 
 								foreach($valisummat as $vnim => $vsum) {
 									if ((string) $vsum != '') {
 										$vsum = sprintf("%.2f", $vsum);
 									}
-
 									if ($vnim == "kateprosnyt") {
 										if ($valisummat["myyntinyt"] <> 0) 		$vsum = round($valisummat["katenyt"] / abs($valisummat["myyntinyt"]) * 100, 2);
 									}
@@ -1221,6 +1248,9 @@
 									}
 									if ($vnim == "nettokateind") {
 										if ($valisummat["nettokateed"] <> 0) 	$vsum = round($valisummat["nettokatenyt"] / $valisummat["nettokateed"],2);
+									}
+									if ($vnim == "myykplind") {
+										if ($valisummat["myykpled"] <> 0)		$vsum = round($valisummat["myykplnyt"] / $valisummat["myykpled"],2);
 									}
 
 									if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
@@ -1298,13 +1328,12 @@
 
 						if (mysql_num_rows($result) <= $rivilimitti) echo "<tr>";
 
-						$excelsarake = $myyntiind = $kateind = $nettokateind = 0;
+						$excelsarake = $myyntiind = $kateind = $nettokateind = $myykplind = 0;
 
 						foreach($valisummat as $vnim => $vsum) {
 							if ((string) $vsum != '') {
 								$vsum = sprintf("%.2f", $vsum);
 							}
-
 							if ($vnim == "kateprosnyt") {
 								if ($valisummat["myyntinyt"] <> 0) 		$vsum = round($valisummat["katenyt"] / abs($valisummat["myyntinyt"]) * 100, 2);
 							}
@@ -1319,6 +1348,9 @@
 							}
 							if ($vnim == "nettokateind") {
 								if ($valisummat["nettokateed"] <> 0) 	$vsum = round($valisummat["nettokatenyt"] / $valisummat["nettokateed"],2);
+							}
+							if ($vnim == "myykplind") {
+								if ($valisummat["myykpled"] <> 0)		$vsum = round($valisummat["myykplnyt"] / $valisummat["myykpled"],2);
 							}
 
 							if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
@@ -1336,13 +1368,12 @@
 
 					if (mysql_num_rows($result) <= $rivilimitti) echo "<tr>";
 
-					$excelsarake = $myyntiind = $kateind = $nettokateind = 0;
+					$excelsarake = $myyntiind = $kateind = $nettokateind = $myykplind = 0;
 
 					foreach($totsummat as $vnim => $vsum) {
 						if ((string) $vsum != '') {
 							$vsum = sprintf("%.2f", $vsum);
 						}
-
 						if ($vnim == "kateprosnyt") {
 							if ($totsummat["myyntinyt"] <> 0) 		$vsum = round($totsummat["katenyt"] / abs($totsummat["myyntinyt"]) * 100, 2);
 						}
@@ -1357,6 +1388,9 @@
 						}
 						if ($vnim == "nettokateind") {
 							if ($totsummat["nettokateed"] <> 0) 	$vsum = round($totsummat["nettokatenyt"] / $totsummat["nettokateed"],2);
+						}
+						if ($vnim == "myykplind") {
+							if ($valisummat["myykpled"] <> 0)		$vsum = round($valisummat["myykplnyt"] / $valisummat["myykpled"],2);
 						}
 
 						if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
@@ -1512,7 +1546,7 @@
 			if ($ruksit[40]  != '') 	$ruk40chk  	= "CHECKED";
 			if ($ruksit[50]  != '') 	$ruk50chk 	= "CHECKED";
 			if ($ruksit[55]  != '') 	$ruk55chk 	= "CHECKED";
-			
+
 			if ($piirivalinta == 'lasku' or $piirivalinta == '') {
 				$laskuvalintachk  	= "CHECKED";
 			}
@@ -1765,28 +1799,31 @@
 			echo "</table><br>\n";
 
 			// lisärajaukset näkymä..
-			if ($ruksit[60]  != '') 	$ruk60chk  	= "CHECKED";
-			if ($ruksit[70]  != '') 	$ruk70chk  	= "CHECKED";
-			if ($ruksit[80]  != '') 	$ruk80chk  	= "CHECKED";
-			if ($ruksit[90]  != '') 	$ruk90chk  	= "CHECKED";
-			if ($ruksit[100]  != '') 	$ruk100chk 	= "CHECKED";
-			if ($ruksit[110]  != '') 	$ruk110chk 	= "CHECKED";
-			if ($ruksit[120]  != '') 	$ruk120chk 	= "CHECKED";
-			if ($ruksit[130]  != '') 	$ruk130chk 	= "CHECKED";
-			if ($ruksit[140]  != '') 	$ruk140chk 	= "CHECKED";
-			if ($ruksit[150] != '') 	$ruk150chk 	= "CHECKED";
-			if ($ruksit[160] != '')		$ruk160chk 	= "CHECKED";
-
-			if ($nimitykset != '')   	$nimchk   	= "CHECKED";
-			if ($kateprossat != '')  	$katchk   	= "CHECKED";
-			if ($osoitetarrat != '') 	$tarchk   	= "CHECKED";
-			if ($piiyhteensa != '')  	$piychk   	= "CHECKED";
-			if ($sarjanumerot != '')  	$sarjachk 	= "CHECKED";
-			if ($kuukausittain != '')	$kuuchk	  	= "CHECKED";
-			if ($varastonarvo != '')	$varvochk 	= "CHECKED";
-			if ($piiloed != '')			$piiloedchk = "CHECKED";
-			if ($tilrivikomm != '')		$tilrivikommchk = "CHECKED";
-			if ($vain_excel != '')		$vain_excelchk 	= "CHECKED";
+			if ($ruksit[60]  != '') 		$ruk60chk  				= "CHECKED";
+			if ($ruksit[70]  != '') 		$ruk70chk  				= "CHECKED";
+			if ($ruksit[80]  != '') 		$ruk80chk  				= "CHECKED";
+			if ($ruksit[90]  != '') 		$ruk90chk  				= "CHECKED";
+			if ($ruksit[100]  != '') 		$ruk100chk 				= "CHECKED";
+			if ($ruksit[110]  != '') 		$ruk110chk 				= "CHECKED";
+			if ($ruksit[120]  != '') 		$ruk120chk 				= "CHECKED";
+			if ($ruksit[130]  != '') 		$ruk130chk 				= "CHECKED";
+			if ($ruksit[140]  != '') 		$ruk140chk 				= "CHECKED";
+			if ($ruksit[150] != '') 		$ruk150chk 				= "CHECKED";
+			if ($ruksit[160] != '')			$ruk160chk 				= "CHECKED";
+			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
+			if ($kateprossat != '')  		$katchk   				= "CHECKED";
+			if ($osoitetarrat != '') 		$tarchk   				= "CHECKED";
+			if ($piiyhteensa != '')  		$piychk   				= "CHECKED";
+			if ($sarjanumerot != '')  		$sarjachk 				= "CHECKED";
+			if ($kuukausittain != '')		$kuuchk	  				= "CHECKED";
+			if ($varastonarvo != '')		$varvochk 				= "CHECKED";
+			if ($piiloed != '')				$piiloedchk 			= "CHECKED";
+			if ($tilrivikomm != '')			$tilrivikommchk 		= "CHECKED";
+			if ($vain_excel != '')			$vain_excelchk 			= "CHECKED";
+			if ($piilota_myynti != '')		$piilota_myynti_sel 	= "CHECKED";
+			if ($piilota_nettokate != '')	$piilota_nettokate_sel	= "CHECKED";
+			if ($piilota_kate != '')		$piilota_kate_sel 		= "CHECKED";
+			if ($piilota_kappaleet != '')	$piilota_kappaleet_sel 	= "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -1932,6 +1969,44 @@
 				<tr>
 				<td class='back'><br></td>
 				</tr>
+
+				<tr>
+				<th>".t("Piilota myynti")."</th>
+				<td><input type='checkbox' name='piilota_myynti' $piilota_myynti_sel></td>
+				<td></td>
+				</tr>
+				<tr>
+				<th>".t("Piilota nettokate")."</th>
+				<td><input type='checkbox' name='piilota_nettokate' $piilota_nettokate_sel></td>
+				<td></td>
+				</tr>
+				<tr>
+				<th>".t("Piilota kate")."</th>
+				<td><input type='checkbox' name='piilota_kate' $piilota_kate_sel></td>
+				<td></td>
+				</tr>
+				<tr>
+				<th>".t("Piilota kappaleet")."</th>
+				<td><input type='checkbox' name='piilota_kappaleet' $piilota_kappaleet_sel></td>
+				<td></td>
+				</tr>
+				<tr>
+				<th>".t("Piilota edellisen kauden sarakkeet")."</th>
+				<td><input type='checkbox' name='piiloed' $piiloedchk></td>
+				<td></td>
+				<td class='back'></td>
+				</tr>
+				<tr>
+				<th>".t("Piilota välisummat")."</th>
+				<td><input type='checkbox' name='piiyhteensa' $piychk></td>
+				<td></td>
+				</tr>
+				<tr>
+				<th>".t("Näytä kateprosentit")."</th>
+				<td><input type='checkbox' name='kateprossat' $katchk></td>
+				<td></td>
+				<td class='back'>".t("(Toimii vain jos myynti ja kate näytetään)")."</td>
+				</tr>
 				<tr>
 				<th>".t("Näytä tuotteiden nimitykset")."</th>
 				<td><input type='checkbox' name='nimitykset' $nimchk></td>
@@ -1951,30 +2026,14 @@
 				<td class='back'>".t("(Toimii vain jos listaat tuotteittain)")."</td>
 				</tr>
 				<tr>
-				<th>".t("Näytä kateprosentit")."</th>
-				<td><input type='checkbox' name='kateprossat' $katchk></td>
+				<th>".t("Näytä tilausrivin kommentti")."</th>
+				<td><input type='checkbox' name='tilrivikomm' $tilrivikommchk></td>
 				<td></td>
-				</tr>
-				<tr>
-				<th>".t("Piilota välisummat")."</th>
-				<td><input type='checkbox' name='piiyhteensa' $piychk></td>
-				<td></td>
+				<td class='back'></td>
 				</tr>
 				<tr>
 				<th>".t("Tulosta myynti kuukausittain")."</th>
 				<td><input type='checkbox' name='kuukausittain' $kuuchk></td>
-				<td></td>
-				<td class='back'></td>
-				</tr>
-				<tr>
-				<th>".t("Piilota edellisen kauden sarakkeet")."</th>
-				<td><input type='checkbox' name='piiloed' $piiloedchk></td>
-				<td></td>
-				<td class='back'></td>
-				</tr>
-				<tr>
-				<th>".t("Näytä tilausrivin kommentti")."</th>
-				<td><input type='checkbox' name='tilrivikomm' $tilrivikommchk></td>
 				<td></td>
 				<td class='back'></td>
 				</tr>

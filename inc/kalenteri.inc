@@ -35,7 +35,7 @@
 			selectPopper(event, '../yllapito.php?toim=yhteyshenkilo&liitostunnus='+asiakasID+'&yhtyyppi=asiakas', sel);
 		}
 		else {
-			ajaxPost('yhteyshenkiloLista', 'asiakasmemo.php?kaleDIV='+kaleDIV , kaleDIV);
+			ajaxPost('yhteyshenkiloLista_'+asiakasID, 'asiakasmemo.php?kaleDIV='+kaleDIV , kaleDIV);
 		}
 	}
 

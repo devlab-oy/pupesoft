@@ -368,6 +368,7 @@ else {
 						$kyht = round(laskuval($kyht, $laskurow["vienti_kurssi"]), 2);
 					}
 
+					/*
 					$query = "	SELECT rahtihinta
 								from rahtimaksut
 								where yhtio		 = '$kukarow[yhtio]'
@@ -375,6 +376,9 @@ else {
 								and kilotalku   <= '$kyht'
 								and kilotloppu  >= '$kyht'";
 					$result = mysql_query($query) or pupe_error($query);
+					*/
+
+					$result = hae_rahtimaksu($laskurow, $kyht);
 
 					if (mysql_num_rows($result) > 0) {
 						$hirow = mysql_fetch_array($result);

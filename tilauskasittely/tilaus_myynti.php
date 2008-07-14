@@ -4850,7 +4850,7 @@ if ($tee == '') {
 					$painoresult = mysql_query($query) or pupe_error($query);
 					$painorow = mysql_fetch_array($painoresult);
 
-
+					/*
 					$query = "	SELECT *
 								from rahtimaksut
 								where toimitustapa = '$laskurow[toimitustapa]'
@@ -4858,6 +4858,9 @@ if ($tee == '') {
 								and kilotloppu >= '$painorow[massa]'
 								and yhtio = '$kukarow[yhtio]'";
 					$rares = mysql_query($query) or pupe_error($query);
+					*/
+
+					$rares = hae_rahtimaksu($laskurow, $painorow['massa']);
 
 					if (mysql_num_rows($rares)==1) {
 						$rahti = mysql_fetch_array($rares);

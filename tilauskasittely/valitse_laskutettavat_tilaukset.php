@@ -469,6 +469,7 @@
 					$pakre = mysql_query($query) or pupe_error($query);
 					$pakka = mysql_fetch_array($pakre);
 
+					/*
 					//haetaan tällä rahtikirjalle rahtimaksu
 					$query = "	SELECT *
 								from rahtimaksut
@@ -477,6 +478,10 @@
 								and kilotloppu >= '$pakka[kilot]'
 								and yhtio = '$kukarow[yhtio]'";
 					$rares = mysql_query($query) or pupe_error($query);
+					$rahti = mysql_fetch_array($rares);
+					*/
+
+					$rares = hae_rahtimaksu($row, $pakka['kilot']);
 					$rahti = mysql_fetch_array($rares);
 
 					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";

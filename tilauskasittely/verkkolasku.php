@@ -276,7 +276,7 @@
 			if (!$tootedi = fopen($nimiedi, "w")) die("Filen $nimiedi luonti epäonnistui!");
 
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, tilausrivin_lisatiedot as tl2 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE";
+			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, tilausrivin_lisatiedot as tl2 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ";
 			$locre = mysql_query($query) or pupe_error($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -704,6 +704,7 @@
 						//vika pilkku pois
 						$rahtikirjanrot = substr($rahtikirjanrot,0,-1);
 
+/*
 						//haetaan tällä rahtikirjalle rahtimaksu
 						$query = "	SELECT *
 									from rahtimaksut
@@ -712,6 +713,9 @@
 									and kilotloppu >= '$pakka[kilot]'
 									and yhtio = '$kukarow[yhtio]'";
 						$rares = mysql_query($query) or pupe_error($query);
+*/
+
+						$rares = hae_rahtimaksu($laskurow, $pakka['kilot']);
 
 						if (mysql_num_rows($rares)==1 and $virhe==0) {
 							$rahti = mysql_fetch_array($rares);

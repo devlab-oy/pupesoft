@@ -5869,4 +5869,42 @@ if(!function_exists("hae_rahtisopimusnumero")) {
  		return $rarow;
 	}
 }
+
+if(!function_exists("hae_rahtimaksu")) {
+	function hae_rahtimaksu ($laskurow, $kilot) {
+		global $kukarow;
+
+		// haetaan etäisyydet
+		$query = "	SELECT 
+					ifnull(etaisyydet.km,0) km
+					FROM etaisyydet
+					JOIN varastopaikat ON (varastopaikat.yhtio = etaisyydet.yhtio AND varastopaikat.tunnus = '$laskurow[varasto]' AND varastopaikat.postino = etaisyydet.varasto_postino)
+					WHERE etaisyydet.yhtio='$kukarow[yhtio]' 
+					AND etaisyydet.postino = '$laskurow[toim_postino]'";
+		$varastoresult = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($varastoresult) > 0) {
+			$varastorow = mysql_fetch_array($varastoresult);
+
+			$wherelisa = "((kmalku <= '$varastorow[km]' and kmloppu >= '$varastorow[km]') or";
+		}
+		else {
+			$wherelisa = "";
+		}
+
+		//haetaan tällä rahtikirjalle rahtimaksu
+		$query = "	SELECT *
+					from rahtimaksut
+					where toimitustapa = '$laskurow[toimitustapa]'
+					and kilotalku <= '$kilot'
+					and kilotloppu >= '$kilot'
+					and yhtio = '$kukarow[yhtio]'
+					and $wherelisa (kmalku = 0 and kmloppu = 0))
+					ORDER BY kmloppu DESC, kmalku DESC
+					LIMIT 1";
+		$rares = mysql_query($query) or pupe_error($query);
+
+		return $rares;
+	}
+}
 ?>

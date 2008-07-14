@@ -108,8 +108,12 @@
 		}
 
 		//haetaan tällä rahtikirjalle rahtimaksu
+		/*
 		$query = "select * from rahtimaksut where toimitustapa='$toimitustapa' and kilotalku<='$kilotyht' and kilotloppu>='$kilotyht' and yhtio='$kukarow[yhtio]'";
 		$rares = mysql_query($query) or pupe_error($query);
+		*/
+
+		$rares = hae_rahtimaksu($laskurow, $kilotyht);
 
 		if (mysql_num_rows($rares)==1) {
 			$rahti = mysql_fetch_array($rares);
@@ -157,7 +161,7 @@
 	if ($laskutettu == "ei") {
 
 		// lock tables, kopsattu vientilaskutuksesta
-		$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, maksuehto READ, tullinimike READ, kuka READ, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, asiakas READ, rahtimaksut READ, avainsana READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, tuotteen_alv READ, maat READ";
+		$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, maksuehto READ, tullinimike READ, kuka READ, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, asiakas READ, rahtimaksut READ, avainsana READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, tuotteen_alv READ, maat READ, etaisyydet READ";
 		$locre = mysql_query($query) or pupe_error($query);
 
 		echo "<font class='message'>".t("Laskutetaan tilaus")."...<br></font>";

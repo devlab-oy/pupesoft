@@ -11,6 +11,7 @@
 		echo t("Kurssien lähde").": <a href='http://www.ecb.europa.eu/stats/exchange/eurofxref/html/index.en.html'>Reference rates European Central Bank</a><br><br>";
 		
 		$pvm = tv1dateconv($xml->Cube->Cube->attributes()->time);
+		$pvm_mysql = $xml->Cube->Cube->attributes()->time;
 		
 		echo "<table>";
 		echo "<tr><th>".t("Valuutta")."</th><th>".t("Kurssi")." $pvm</th><th>".t("Kurssikerroin")."</th>";
@@ -23,14 +24,24 @@
 			echo "<tr><td>$valkoodi</td><td align='right'>$kurssi</td><td align='right'>".sprintf("%.6f", (1/$kurssi))."</td>";
 				
 			if ($tee == "PAIVITA") {
-		    	$query = "	UPDATE valuu SET kurssi=round(1 / $kurssi, 6) 
+		    	$query = "	UPDATE valuu SET 
+							kurssi = round(1 / $kurssi, 6),
+							muutospvm = now(),
+							muuttaja = '$kukarow[kuka]'							
 							WHERE yhtio	= '$kukarow[yhtio]' 
 							AND nimi	= '$valkoodi'";
 				$result = mysql_query($query) or pupe_error($query);
-				
+								
 				if (mysql_affected_rows() != 0) {
 					echo "<td class='back'>".t("Kurssi päivitetty").".</td>";
 				}
+				
+				$query = "	INSERT INTO valuu_historia (kotivaluutta, valuutta, kurssi, kurssipvm)
+							VALUES ('EUR', '$valkoodi', round(1 / $kurssi, 6), '$pvm_mysql')
+				  			ON DUPLICATE KEY UPDATE
+							kurssi = round(1 / $kurssi, 6),
+							kurssipvm = '$pvm_mysql'";
+				$result = mysql_query($query) or pupe_error($query);
 			}
 			
 			echo "</tr>";
@@ -38,10 +49,15 @@
 		
 		echo "</table>";
 		
-		echo "<br><form method='post' action='$PHP_SELF'>
-				<input type='hidden' name='tee' value='PAIVITA'>
-				<input type='submit' value='".t("Päivitä kurssit")."'>
-				</form>";
+		if ($yhtiorow["valkoodi"] == "EUR") {
+			echo "<br><form method='post' action='$PHP_SELF'>
+					<input type='hidden' name='tee' value='PAIVITA'>
+					<input type='submit' value='".t("Päivitä kurssit")."'>
+					</form>";
+		}
+		else {
+			echo "<font class='error'>".t("Vain EUR kotivaluutta")."!</font><br>";
+		}
 	}
 	else {
 		echo "<font class='error'>".t("Valuuttakurssien haku epäonnistui")."!</font><br>";

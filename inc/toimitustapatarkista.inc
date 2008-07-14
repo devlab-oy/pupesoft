@@ -4,7 +4,7 @@ if(!function_exists("toimitustapatarkista")) {
 	function toimitustapatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
 		
-		static $aputulostustapa;
+		static $aputulostustapa, $apuvakkielto;
 		
 		if ((mysql_field_name($result, $i)=="rahtikirja") and ($t[$i]!='')) {
 			if (!file_exists("tilauskasittely/".$t[$i])) {
@@ -68,6 +68,22 @@ if(!function_exists("toimitustapatarkista")) {
 				$updre = mysql_query($query) or pupe_error($query);
 
 				echo "ja ".mysql_affected_rows()." ".t("tulostamatonta rahtikirjaa").".</font><br><br>";
+			}
+		}
+		
+		if ((mysql_field_name($result, $i)=="vak_kielto")) {
+			$apuvakkielto  = $t[$i];
+		}
+	
+		if ((mysql_field_name($result, $i)=="oletus_vak") and ($t[$i]!='')) {
+			$query = "SELECT oletus_vak FROM toimitustapa where yhtio = '$kukarow[yhtio]' and oletus_vak != '' and tunnus != '$tunnus'";
+			$vakki_result = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($vakki_result) > 0) {
+				$virhe[$i] = "".t("Oletus vak on jo asetettu")."!";
+			}
+			elseif ($apuvakkielto != '') {
+				$virhe[$i] = "".t("Toimitustavalla on vak kielto")."!";
 			}
 		}
 	}

@@ -899,6 +899,38 @@ while (!feof ($fd)) {
 
 			// jos meilla on otsikko voidaan laittaa sen valmiiksi
 			if ($editilaus_otsikko_ok == "KYLLA") {
+				//tarkistetaan toimitustapa vakin takia
+				$query = " 	SELECT * 
+				  			from tilausrivi 
+							join tuote on tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi != ''
+							where tilausrivi.yhtio = '$kukarow[yhtio]'
+							and tilausrivi.otunnus = '$id'";
+				$result = mysql_query($query) or die($query);
+				
+				if (mysql_num_rows($result) > 0) {
+					$query = "	SELECT vak_kielto 
+								from toimitustapa
+								where yhtio = '$kukarow[yhtio]'
+								and selite = '$laskurow[toimitustapa]'";
+					$result = mysql_query($query) or die($query);
+					$toimtapatmp = mysql_fetch_array($result);
+							
+					if ($toimtapatmp['vak_kielto'] != '') {
+						$query = "	SELECT * 
+									from toimitustapa
+									where yhtio = '$kukarow[yhtio]'
+									and oletus_vak != ''";
+						$result = mysql_query($query) or die($query);
+						
+						if (mysql_num_rows($result) > 0) {
+							$oletustoim = mysql_fetch_array($result);
+							
+							$query = "UPDATE lasku SET toimitustapa = '$oletustoim[selite]' where yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
+							$result = mysql_query($query) or die($query);
+						}
+					}			 
+				}			
+							
 
 				// Tilaus merkataan valmiiksi
 				$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' and yhtio='$kukarow[yhtio]'";

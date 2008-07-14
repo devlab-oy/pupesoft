@@ -1,8 +1,5 @@
 <?php
 
-	// käytetään slavea
-	$useslave = 1;
-
 	if ($_POST["tee"] == 'lataa_tiedosto') {
 		$lataa_tiedosto = 1;
 	}
@@ -464,6 +461,11 @@
 		}
 
 		if ($tee == 'LISTAA') {
+
+			// käytetään slavea
+			$useslave = 1;
+
+			require('inc/connect.inc');
 
 			// näitä käytetään queryssä
 			$sel_osasto 	= "";

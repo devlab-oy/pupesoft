@@ -925,6 +925,7 @@
 			$toim == "hinnasto" or
 			$toim == "rahtimaksut" or
 			$toim == "rahtisopimukset" or
+			$toim == "etaisyydet" or
 			($toim == "toimi" and $kukarow["taso"] == "3")) {
 
 			// Tehd‰‰n "poista tietue"-nappi

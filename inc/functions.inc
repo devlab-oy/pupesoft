@@ -5874,16 +5874,19 @@ if(!function_exists("hae_rahtimaksu")) {
 	function hae_rahtimaksu ($laskurow, $kilot) {
 		global $kukarow;
 
-		// haetaan et‰isyydet
+		// haetaan ensimm‰inen (pienimm‰ll‰ postinumerolla) et‰isyys
 		$query = "	SELECT 
-					etaisyydet.km
+					etaisyydet.km, etaisyydet.postino
 					FROM etaisyydet
 					JOIN varastopaikat ON (varastopaikat.yhtio = etaisyydet.yhtio AND varastopaikat.tunnus = '$laskurow[varasto]' AND varastopaikat.postino = etaisyydet.varasto_postino)
 					WHERE etaisyydet.yhtio='$kukarow[yhtio]' 
-					AND etaisyydet.postino = '$laskurow[toim_postino]'";
+					AND etaisyydet.postino <= '$laskurow[toim_postino]'
+					ORDER BY postino DESC
+					LIMIT 1";
 		$varastoresult = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($varastoresult) > 0) {
+		// jos saadaan joku kilometrim‰‰r‰ niin laitetaan se muuttujaan talteen
+		if (mysql_num_rows($varastoresult) == 1) {
 			$varastorow = mysql_fetch_array($varastoresult);
 			
 			$km = $varastorow['km'];
@@ -5892,7 +5895,7 @@ if(!function_exists("hae_rahtimaksu")) {
 			$km = 0;
 		}
 
-		//haetaan t‰ll‰ rahtikirjalle rahtimaksu
+		//haetaan t‰ll‰ rahtikirjalle rahtimaksu painon ja et‰isyyden mukaan
 		$query = "	SELECT *
 					from rahtimaksut
 					where toimitustapa = '$laskurow[toimitustapa]'

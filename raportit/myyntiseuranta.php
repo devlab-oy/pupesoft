@@ -630,6 +630,15 @@
 					$katelisaed  = "";
 				}
 
+				if ($nettokateprossat != "") {
+					$nettokatelisanyt = " 0 nettokateprosnyt, ";
+					$nettokatelisaed  = " 0 nettokateprosed, ";
+				}
+				else {
+					$nettokatelisanyt = "";
+					$nettokatelisaed  = "";
+				}
+
 				// Jos ei olla valittu mit‰‰n
 				if ($group == "") {
 					$select = "tuote.yhtio, ";
@@ -781,6 +790,18 @@
 									$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl',  tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti,0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti,0)/100),0)) / sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl', tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti,0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti,0)/100),0)) nettokateind, ";
 								}
 							}
+							
+							//nettokateprossa n‰ytet‰‰n vain jos myynti ja nettokate on valittu myˆs n‰ytett‰v‰ksi
+							if ($piilota_myynti == "" and $piilota_nettokate == "") {
+								//NETTOKATEPROS
+								$query .= $nettokatelisanyt;
+
+								//NETTOKATEPROSED
+								if ($piiloed == "") {
+									$query .= $nettokatelisaed;
+								}
+							}
+							
 						}
 
 						if ($piilota_kate == "") {
@@ -1161,6 +1182,26 @@
 								}
 							}
 
+							// nettokateprossa
+							if (mysql_field_name($result, $i) == "nettokateprosnyt") {
+								if ($row["myyntinyt"] != 0) {
+									$row[$i] = round($row["nettokatenyt"] / abs($row["myyntinyt"]) * 100, 2);
+								}
+								else {
+									$row[$i] = 0;
+								}
+							}
+
+							// nettokateprossa
+							if (mysql_field_name($result, $i) == "nettokateprosed") {
+								if ($row["myyntied"] != 0) {
+									$row[$i] = round($row["nettokateed"] / abs($row["myyntied"]) * 100, 2);
+								}
+								else {
+									$row[$i] = 0;
+								}
+							}
+
 							// kustannuspaikka
 							if (mysql_field_name($result, $i) == "kustpaikka") {
 								// n‰ytet‰‰n soveltuvat kustannuspaikka
@@ -1239,6 +1280,12 @@
 									}
 									if ($vnim == "kateprosed") {
 										if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["kateed"] / abs($valisummat["myyntied"]) * 100, 2);
+									}
+									if ($vnim == "nettokateprosnyt") {
+										if ($valisummat["myyntinyt"] <> 0) 		$vsum = round($valisummat["nettokatenyt"] / abs($valisummat["myyntinyt"]) * 100, 2);
+									}
+									if ($vnim == "nettokateprosed") {
+										if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["nettokateed"] / abs($valisummat["myyntied"]) * 100, 2);
 									}
 									if ($vnim == "myyntiind") {
 										if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["myyntinyt"] / $valisummat["myyntied"],2);
@@ -1323,6 +1370,10 @@
 						$apu -= 2;
 					}
 
+					if ($nettokateprossat != "") {
+						$apu -= 2;
+					}
+
 					// jos gruupataan enemm‰n kuin yksi taso niin tehd‰‰n v‰lisumma
 					if ($gluku > 1 and $mukaan != 'tuote' and $piiyhteensa == '') {
 
@@ -1339,6 +1390,12 @@
 							}
 							if ($vnim == "kateprosed") {
 								if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["kateed"] / abs($valisummat["myyntied"]) * 100, 2);
+							}
+							if ($vnim == "nettokateprosnyt") {
+								if ($valisummat["myyntinyt"] <> 0) 		$vsum = round($valisummat["nettokatenyt"] / abs($valisummat["myyntinyt"]) * 100, 2);
+							}
+							if ($vnim == "nettokateprosed") {
+								if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["nettokateed"] / abs($valisummat["myyntied"]) * 100, 2);
 							}
 							if ($vnim == "myyntiind") {
 								if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["myyntinyt"] / $valisummat["myyntied"],2);
@@ -1379,6 +1436,12 @@
 						}
 						if ($vnim == "kateprosed") {
 							if ($totsummat["myyntied"] <> 0) 		$vsum = round($totsummat["kateed"] / abs($totsummat["myyntied"]) * 100, 2);
+						}
+						if ($vnim == "nettokateprosnyt") {
+							if ($totsummat["myyntinyt"] <> 0) 		$vsum = round($totsummat["nettokatenyt"] / abs($totsummat["myyntinyt"]) * 100, 2);
+						}
+						if ($vnim == "nettokateprosed") {
+							if ($totsummat["myyntied"] <> 0) 		$vsum = round($totsummat["nettokateed"] / abs($totsummat["myyntied"]) * 100, 2);
 						}
 						if ($vnim == "myyntiind") {
 							if ($totsummat["myyntied"] <> 0) 		$vsum = round($totsummat["myyntinyt"] / $totsummat["myyntied"],2);
@@ -1812,6 +1875,7 @@
 			if ($ruksit[160] != '')			$ruk160chk 				= "CHECKED";
 			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
 			if ($kateprossat != '')  		$katchk   				= "CHECKED";
+			if ($nettokateprossat != '')	$nettokatchk			= "CHECKED";
 			if ($osoitetarrat != '') 		$tarchk   				= "CHECKED";
 			if ($piiyhteensa != '')  		$piychk   				= "CHECKED";
 			if ($sarjanumerot != '')  		$sarjachk 				= "CHECKED";
@@ -2000,6 +2064,12 @@
 				<th>".t("Piilota v‰lisummat")."</th>
 				<td><input type='checkbox' name='piiyhteensa' $piychk></td>
 				<td></td>
+				</tr>
+				<tr>
+				<th>".t("N‰yt‰ nettokateprosentit")."</th>
+				<td><input type='checkbox' name='nettokateprossat' $nettokatchk></td>
+				<td></td>
+				<td class='back'>".t("(Toimii vain jos myynti ja nettokate n‰ytet‰‰n)")."</td>
 				</tr>
 				<tr>
 				<th>".t("N‰yt‰ kateprosentit")."</th>

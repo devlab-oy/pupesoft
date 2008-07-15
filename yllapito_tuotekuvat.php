@@ -558,7 +558,7 @@
 						tuote.tuotemerkki,
 						tuote.nimitys,
 						tuote.tunnus,
-						liitetiedostot.tunnus ltunnus,
+						liitetiedostot.liitostunnus ltunnus,
 						liitetiedostot.filename,
 						liitetiedostot.kayttotarkoitus,
 						liitetiedostot.data,

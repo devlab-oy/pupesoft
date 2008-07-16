@@ -296,9 +296,7 @@ function lue_kurssit($file, $handle, $tyyppi = '') {
 
 		$query = "	INSERT INTO valuu_historia (kotivaluutta, valuutta, kurssi, kurssipvm)
 					VALUES ('$vastavaluutta', '$valuutta', round(1 / $kurssi, 6), '$kurssipvm')
-		  			ON DUPLICATE KEY UPDATE
-					kurssi = round(1 / $kurssi, 6),
-					kurssipvm = '$kurssipvm'";
+		  			ON DUPLICATE KEY UPDATE kurssi = round(1 / $kurssi, 6)";
 		$result = mysql_query($query) or pupe_error($query);
 
 	}

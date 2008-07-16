@@ -31,9 +31,7 @@
 
 			$query = "	INSERT INTO valuu_historia (kotivaluutta, valuutta, kurssi, kurssipvm)
 						VALUES ('EUR', '$valkoodi', round(1 / $kurssi, 6), '$pvm_mysql')
-			  			ON DUPLICATE KEY UPDATE
-						kurssi = round(1 / $kurssi, 6),
-						kurssipvm = '$pvm_mysql'";
+			  			ON DUPLICATE KEY UPDATE kurssi = round(1 / $kurssi, 6)";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 

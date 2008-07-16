@@ -876,8 +876,8 @@
 			$sel2 = "selected";
 		}
 
-		$ulos .= "<option value = '' $sel>".t("Rivinumeoita ei voi syöttää tilaukselle")."";
-		$ulos .= "<option value = 'K' $sel1>".t("Rivinumeoita voi syöttää tilaukselle")."";
+		$ulos .= "<option value = '' $sel>".t("Rivinumeroita ei voi syöttää tilaukselle")."";
+		$ulos .= "<option value = 'K' $sel1>".t("Rivinumeroita voi syöttää tilaukselle")."";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

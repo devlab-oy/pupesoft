@@ -58,7 +58,7 @@
 								$res2  = mysql_query($query) or die($query);
 
 								if (mysql_num_rows($res2) > 11) {
-									echo "<div style='height:295;overflow:auto;'>";
+									echo "<div style='height:320;overflow:auto;'>";
 								}
 
 								############### TUOTEOSASTO
@@ -102,7 +102,7 @@
 								$res2  = mysql_query($query) or die($query);
 
 								if (mysql_num_rows($res2) > 11) {
-									echo "<div style='height:295;overflow:auto;'>";
+									echo "<div style='height:320;overflow:auto;'>";
 								}
 
 								############### TUOTERYHMÄ
@@ -146,7 +146,7 @@
 								$res2  = mysql_query($query) or die($query);
 
 								if (mysql_num_rows($res2) > 11) {
-									echo "<div style='height:295;overflow:auto;'>";
+									echo "<div style='height:320;overflow:auto;'>";
 								}
 
 								############### TUOTEMERKKI

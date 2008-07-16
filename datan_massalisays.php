@@ -228,7 +228,7 @@ if ($tee == 'GO') {
 		$path_parts = pathinfo($kuva);
 		$ext = $path_parts['extension'];
 		//echo "$ext<br>";
-
+		
 		// pitää kattoo onko nimessä wildkardia ta hässiä
 		if (strpos($kuva,"#") !== FALSE) {
 			// (nro)
@@ -241,15 +241,27 @@ if ($tee == 'GO') {
 
 		}
 
+		$apuselite = "";
+		
 		if (strpos($kuva,"%") !== FALSE) {
 			// (wildkaard)
 			$mihin = strpos($kuva,"%");
 			$kuvanalku = substr($kuva,0,$mihin);
 			//echo "Alku: $kuvanalku<br>";
+			
+			//kyseessä on käyttöturvatiedot ja tuotekortti
+			if (strpos($kuva,"%ktt") !== FALSE) {
+				$apuselite = "ktt";
+			}
+			elseif (strpos($kuva,"%tko") !== FALSE) {
+				$apuselite = "tko";
+			}
 
 			$query = "SELECT tuoteno, tunnus FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno LIKE '$kuvanalku%'";
 			$apuresult = mysql_query($query) or pupe_error($query);
 		}
+		
+		
 
 		if (file_exists($file)) {
 			$filesize = filesize($file);
@@ -325,6 +337,10 @@ if ($tee == 'GO') {
 						$kuvaselite .= " normaali";
 					}
 					else {
+						if ($apuselite != "") {
+							$kuvaselite = $apuselite;
+						}
+						
 						$toiminto = "MU";
 					}
 

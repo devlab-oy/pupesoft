@@ -37,7 +37,7 @@ function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $
 	if ($login_result) {
 		$kokonimi = $dirri."/".$tiedostonnimi;
 
-
+		
 		if (!file_exists($kokonimi)) {
 			$handle = fopen("$kokonimi", "x");
 		
@@ -61,10 +61,11 @@ function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $
 						$ulos .= "\t";
 					}
 				}
-			
+				
+				$order   = array("\r\n", "\n", "\r");
 				while ($row = mysql_fetch_array($result)) {
 					for ($i=0; $i < $fields; $i++) { 
-						$ulos .= $row[$i];
+						$ulos .= str_replace($order,"<br>",$row[$i]);
 					
 						if ($i == $fields-1) {
 							$ulos .= "\n";
@@ -125,6 +126,7 @@ if ($tee == "aja") {
 					LEFT JOIN liitetiedostot on tuote.yhtio = liitetiedostot.yhtio and tuote.tunnus = liitetiedostot.liitostunnus and liitetiedostot.liitos = 'tuote' and liitetiedostot.kayttotarkoitus != 'TH'
 					LEFT JOIN tuotteen_avainsanat as ta_nimitys on tuote.yhtio = ta_nimitys.yhtio and tuote.tuoteno = ta_nimitys.tuoteno and ta_nimitys.laji = 'nimitys_se'
 					LEFT JOIN tuotteen_avainsanat as ta_kuvaus on tuote.yhtio = ta_kuvaus.yhtio and tuote.tuoteno = ta_kuvaus.tuoteno and ta_kuvaus.laji = 'kuvaus_se'
+					LEFT JOIN tuotteen_avainsanat as ta_lyhyt on tuote.yhtio = ta_lyhyt.yhtio and tuote.tuoteno = ta_lyhyt.tuoteno and ta_lyhyt.laji = 'lyhyt_se'
 					join avainsana as avtry on tuote.yhtio = avtry.yhtio and tuote.try = avtry.selite and avtry.laji = 'TRY' and avtry.nakyvyys != 'E'
 					join avainsana as avosasto on tuote.yhtio = avosasto.yhtio and tuote.osasto = avosasto.selite and avosasto.laji = 'OSASTO' and avosasto.nakyvyys != 'E'
 					WHERE tuote.yhtio = '$kyhtio'

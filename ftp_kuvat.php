@@ -1,6 +1,6 @@
 <?php
 
-function delete_dir_content($conn_id,$dir,$syy,$nodel = "") {
+function delete_dir_content($conn_id,$dir,$syy,$nodel = "",$nodelpict = "") {
 
 	ftp_pasv($conn_id, true);
 
@@ -17,9 +17,12 @@ function delete_dir_content($conn_id,$dir,$syy,$nodel = "") {
 			
 			if ($dir_test[$i][0] != "d") {
 				
-				if(!ftp_delete($conn_id,$dir."/".$content[$i])) {
-					$syy .= "Tiedoston poisto epäonnistui: ".$content[$i]."\n";
-				}	
+				if (strpos($content[$i],$nodelpict) === FALSE) {
+					if(!ftp_delete($conn_id,$dir."/".$content[$i])) {
+						$syy .= "Tiedoston poisto epäonnistui: ".$content[$i]."\n";
+					}
+				}
+				
 			}
 			else {
 				
@@ -119,7 +122,7 @@ if ($tee == "aja") {
 				die("$kokonimi ei ole määritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
 			}
 			
-			$syy .= delete_dir_content($conn_id,$ftpkuvapath,$syy,"672x");
+			$syy .= delete_dir_content($conn_id,$ftpkuvapath,$syy,"672x","kategoria");
 			
 			$counter = 0;
 				

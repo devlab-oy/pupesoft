@@ -50,9 +50,13 @@ function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $
 			
 				$ulos = "";
 			
-			
+				$temp = "";
+				$pos_lyhyt = 0;
+				$pos_lyhyt_se = 0;
 				for ($i=0; $i < $fields; $i++) { 
-					$ulos .= mysql_field_name($result, $i);
+					$temp = mysql_field_name($result, $i);
+					
+					$ulos .= $temp;
 				
 					if ($i == $fields-1) {
 						$ulos .= "\n";
@@ -60,11 +64,23 @@ function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $
 					else {
 						$ulos .= "\t";
 					}
+					
+					if ($temp == "lyhytkuvaus") {
+						$pos_lyhyt = $i;
+					}
+					elseif ($temp == "lyhytkuvaus_se") {
+						$pos_lyhyt_se = $i;
+					}
 				}
 				
 				$order   = array("\r\n", "\n", "\r");
 				while ($row = mysql_fetch_array($result)) {
 					for ($i=0; $i < $fields; $i++) { 
+						
+						if (($pos_lyhyt == $i or $pos_lyhyt_se == $i) and $pos_lyhyt != 0 and $pos_lyhyt_se != 0) {
+							$row[$i] = cut_text($row[$i],100);
+						}
+						
 						$ulos .= str_replace($order,"<br>",$row[$i]);
 					
 						if ($i == $fields-1) {
@@ -102,6 +118,59 @@ function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $
 	
 }	
 
+function cut_text($text, $chars) {
+	
+	if (strlen($text) == 0 or strlen($text) < $chars) {
+		return $text;
+	}
+	else {
+		
+		if (substr($text,$chars) == " ") {
+			return substr($text,0,$chars)."...";
+		}
+		elseif (substr($text,$chars) == ".") {
+			return substr($text,0,$chars)."..";
+		}
+		elseif (substr($text,$chars) == ",") {
+			return substr($text,0,$chars-1)."...";
+		}
+		else {
+			
+			$temptext = strrev(substr($text,0,$chars));
+			
+			$pos[0] = strpos($temptext," ");
+			$pos[1] = strpos($temptext,".");
+			$pos[2] = strpos($temptext,",");
+			
+			sort($pos);
+			$temppos = 0;
+			
+			foreach ($pos as $val) {
+				if ($val !== FALSE) {
+					$temppos = $val;
+					break;					
+				}
+			}
+			
+			$temppos += 1; 
+			
+			$text = strrev($temptext);
+			
+			if (substr($text,$chars-$temppos,1) == " ") {
+				return substr($text,0,$chars-$temppos)."...";
+			}
+			elseif (substr($text,$chars-$temppos,1) == ".") {
+				return substr($text,0,$chars-$temppos)."..";
+			}
+			elseif (substr($text,$chars-$temppos,1) == ",") {
+				return substr($text,0,$chars-1-$temppos)."...";
+			}				
+		}
+	}
+	
+	return "";
+}
+
 
 
 $syy = "";
@@ -121,7 +190,7 @@ if ($tee == "aja") {
 		}
 
 		/*tuotetieto haku*/
-		$query = "  SELECT tuote.tuoteno, tuote.try, tuote.osasto, tuote.nimitys, ta_nimitys.selite as nimitys_se, tuote.kuvaus, ta_kuvaus.selite as kuvaus_se, group_concat(liitetiedostot.filename SEPARATOR ',') as tiedostot, group_concat(liitetiedostot.selite SEPARATOR ',') as selitteet
+		$query = "  SELECT tuote.tuoteno, tuote.try, tuote.osasto, tuote.nimitys, ta_nimitys.selite as nimitys_se, tuote.kuvaus, ta_kuvaus.selite as kuvaus_se, group_concat(liitetiedostot.filename SEPARATOR ',') as tiedostot, group_concat(liitetiedostot.selite SEPARATOR ',') as selitteet, tuote.kuvaus as lyhytkuvaus, ta_kuvaus.selite as lyhytkuvaus_se
 					FROM tuote
 					LEFT JOIN liitetiedostot on tuote.yhtio = liitetiedostot.yhtio and tuote.tunnus = liitetiedostot.liitostunnus and liitetiedostot.liitos = 'tuote' and liitetiedostot.kayttotarkoitus != 'TH'
 					LEFT JOIN tuotteen_avainsanat as ta_nimitys on tuote.yhtio = ta_nimitys.yhtio and tuote.tuoteno = ta_nimitys.tuoteno and ta_nimitys.laji = 'nimitys_se'

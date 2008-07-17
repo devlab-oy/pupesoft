@@ -1,5 +1,54 @@
 <?php
 
+function delete_dir_content($conn_id,$dir,$syy,$nodel = "") {
+
+	ftp_pasv($conn_id, true);
+
+	if (substr($dir, -1) == "/") {
+		 $dir = substr($dir, 0, strlen($dir)-1);
+	}
+	
+	
+	$content = ftp_nlist($conn_id, $dir);
+	$dir_test = ftp_rawlist($conn_id, $dir);
+	
+	if ($content) {
+		for($i = 0; $i < count($content); $i++) {
+			
+			if ($dir_test[$i][0] != "d") {
+				
+				if(!ftp_delete($conn_id,$dir."/".$content[$i])) {
+					$syy .= "Tiedoston poisto epäonnistui: ".$content[$i]."\n";
+				}	
+			}
+			else {
+				
+				$subcontent = ftp_nlist($conn_id, $dir."/".$content[$i]);
+				
+				if ($content[$i] != $nodel) {
+					for ($k=0; $k < count($subcontent); $k++) { 
+						if (!ftp_delete($conn_id,$dir."/".$content[$i]."/".$subcontent[$k])) {
+							$syy .= "Tiedoston poisto epäonnistui: ".$subcontent[$k]."\n";
+						}
+						
+					}
+					
+					if (!ftp_rmdir($conn_id,$dir."/".$content[$i])) {
+						$syy .= "Kansion poisto epäonnistui: ".$content[$i]."\n";
+					}
+				}				
+			}
+
+		}
+	}
+	else {
+		$syy .= "Tiedostoja ei poistettu\n";
+	}
+	
+	return $syy;
+}
+
+
 //tarvitaan yhtiö
 if (empty($argv)) {
 	require ("inc/parametrit.inc");
@@ -69,7 +118,9 @@ if ($tee == "aja") {
 			if (!is_writable($dirri)) {
 				die("$kokonimi ei ole määritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
 			}
-		
+			
+			$syy .= delete_dir_content($conn_id,$ftpkuvapath,$syy,"672x");
+			
 			$counter = 0;
 				
 			while ($row = mysql_fetch_array($result) and $counter < 10) {
@@ -125,7 +176,7 @@ if ($tee == "aja") {
 			}	
 	
 		}
-	
+		
 		if ($conn_id) {
 			ftp_close($conn_id);
 		}

@@ -199,7 +199,7 @@
 
 	$query = "	SELECT lukko, tiliointi.tunnus, $slAsa, concat_ws('/', a.nimi, b.nimi, c.nimi),
 				tiliointi.summa, vero, concat_ws('/', tapvm, selite) selite
-				$slisa, tapvm, tiliointi.summa_valuutassa
+				$slisa, tapvm, tiliointi.summa_valuutassa, tiliointi.valkoodi
 				FROM tiliointi
 				LEFT JOIN tili ON tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
 				LEFT JOIN kustannuspaikka a ON a.yhtio = '$kukarow[yhtio]' and a.tunnus = tiliointi.kustp and a.tyyppi = 'K'
@@ -221,15 +221,15 @@
 		if ($trow['korjattu'] == '0000-00-00 00:00:00') $trow['korjattu'] = '';
 
 		echo "<tr>";
+
 		if ($viivatut == 'on') {
-			$poistasarake = 2;
+			$poistasarake = 4;
 		}
 		else {
-			$poistasarake = 1;
+			$poistasarake = 3;
 		}
 
 		for ($i=2; $i < mysql_num_fields($result)-$poistasarake; $i++) {
-
 
 			// Tämä toimii vain selaajatarkista.php:n yhteydessä
 			if (isset($seutunnus) and mysql_field_name($result,$i)=='selite') {
@@ -245,12 +245,20 @@
 				if ($viivatut == 'on' and $trow['poistettu'] != '') {
 					echo "<th>";
 				}
+				elseif (mysql_field_name($result,$i) == 'summa' or mysql_field_name($result,$i) == 'vero') {
+					echo "<td align='right'>";
+				}
 				else {
 					echo "<td>";
 				}
 			}
 
+
 			echo $trow[$i];
+			
+			if (mysql_field_name($result,$i) == 'selite' and $trow["valkoodi"] != "" and $trow["valkoodi"] != $yhtiorow["valkoodi"]) {
+				echo " ($trow[summa_valuutassa] $trow[valkoodi])";
+			}
 
 			if ($viivatut == 'on' and $trow['poistettu'] != '') {
 				echo "</th>";

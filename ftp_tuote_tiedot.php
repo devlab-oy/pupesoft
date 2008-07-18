@@ -148,10 +148,7 @@ function cut_text($text, $chars) {
 			
 			
 			sort($pos);
-			echo $pos[0]."<br>";
-			echo $pos[1]."<br>";
-			echo $pos[2]."<br>";
-									
+												
 			if (substr($text,$pos[2],1) == " ") {
 				return substr($text,0,$pos[2])."...";
 			}
@@ -161,7 +158,7 @@ function cut_text($text, $chars) {
 			elseif (substr($text,$pos[2],1) == ",") {
 				return substr($text,0,$pos[2]-1)."...";
 			}				
-			echo "moro<br>";
+			
 		}
 	}
 	

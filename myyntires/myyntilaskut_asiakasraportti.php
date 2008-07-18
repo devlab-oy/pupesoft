@@ -405,7 +405,7 @@
 						and tila 	= 'U'
 						and liitostunnus in ($tunnukset)
 						and tapvm > '0000-00-00'
-						and mapvm = '0000-00-00'";
+						$mapvmlisa";
 			$aasres = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($aasres) > 0) {
@@ -520,7 +520,13 @@
 					// listataan osasuoritukset jos maksupäivä on nollaa tai jos niitä on oli yks
 					if ($maksurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 1) {
 						while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
-							echo "$lasktilitro[summa] $yhtiorow[valkoodi] ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
+							if ($lasktilitro["valkoodi"] != $yhtiorow["valkoodi"] and $lasktilitro["valkoodi"] != "") {
+								echo "$lasktilitro[summa_valuutassa] $lasktilitro[valkoodi] ($lasktilitro[summa] $yhtiorow[valkoodi]) ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
+								
+							}
+							else {
+								echo "$lasktilitro[summa] $yhtiorow[valkoodi] ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
+							}							
 						}
 					}
 				}

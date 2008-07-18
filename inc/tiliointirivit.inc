@@ -13,7 +13,7 @@
 	else {
 		echo "<th>".t("Tili")."</th><th>".t("Tarkenne")."</th><th>".t("Summa")."</th><th>".t("Vero")."</th><th>".t("Tapvm/Selite")."</th>";
 	}
-	
+
 	if ($viivatut == 'on') {
 		echo "<th>Poistettu/Laadittu</th>";
 	}
@@ -133,17 +133,22 @@
 		}
 		else {
 			$tiliointirow = mysql_fetch_array($result);
-			
+
 			// tapahtumapäivä on vanhalla tilikaudella, ei anneta lisätä kun tälle päivälle
 			if (strtotime($tiliointirow[0]) < strtotime($yhtiorow['tilikausi_alku'])) {
 				$tiliointirow[0] = date("Y-m-d");
 			}
-			
+
 			echo " ".t("Tapvm").": $tiliointirow[0]<input type='hidden' name='tiliointipvm' value ='$tiliointirow[0]'>";
 		}
 		echo "</td>
 			<td>$ulos</td>
-			<td><input type='text' name='summa' value = '$summa' size='8'></td>";
+			<td>
+			<input type='text' name='summa' value = '$summa' size='8'>
+			<input type='hidden' name='vanhasumma' value = '$summa'>
+			<input type='hidden' name='vanhasumma_valuutassa' value = '$summa_valuutassa'>
+			<input type='hidden' name='vanhasumma_valkoodi' value = '$valkoodi'>
+			</td>";
 
 		// Jos alvit on hardkoodattu tileihin (hui, kauheaa, mutta joku niin tahtoo), niin salasanat.php:ssä
 		// on määritettävä $hardcoded_alv=1;
@@ -175,7 +180,7 @@
 		$formi = 'uusi';
 		$kentta = 'tili';
 	}
-	
+
 	$lisa='';
 	$slisa='';
 
@@ -194,7 +199,7 @@
 
 	$query = "	SELECT lukko, tiliointi.tunnus, $slAsa, concat_ws('/', a.nimi, b.nimi, c.nimi),
 				tiliointi.summa, vero, concat_ws('/', tapvm, selite) selite
-				$slisa, tapvm
+				$slisa, tapvm, tiliointi.summa_valuutassa
 				FROM tiliointi
 				LEFT JOIN tili ON tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
 				LEFT JOIN kustannuspaikka a ON a.yhtio = '$kukarow[yhtio]' and a.tunnus = tiliointi.kustp and a.tyyppi = 'K'
@@ -244,7 +249,7 @@
 					echo "<td>";
 				}
 			}
-									
+
 			echo $trow[$i];
 
 			if ($viivatut == 'on' and $trow['poistettu'] != '') {
@@ -253,13 +258,13 @@
 			else {
 				echo "</td>";
 			}
-			
+
 		}
 
 		$tilikausi_loppu = strtotime($yhtiorow['tilikausi_loppu']);
 		$tilikausi_alku = strtotime($yhtiorow['tilikausi_alku']);
 		$tiliointi_pvm = strtotime($trow['tapvm']);
-		
+
 		if (($tiliointi_pvm <= $tilikausi_loppu and $tiliointi_pvm >= $tilikausi_alku) and ($trow["lukko"] == "" or $kukarow["taso"] == 3) and $trow["poistettu"] == "" and $maara > 1 and $oikeurow["paivitys"] == 1 and ($kukarow["taso"] == 2 or $kukarow["taso"] == 3)) {
 			// Eli ei näytetä muuta-nappia, jos ei oikeuksia,
 			//jos rivi on poistettu TAI se on tiliöinnin viimeinen TAI se on lukittu,
@@ -312,7 +317,7 @@
 	if (round($yhtsum,2) == 0) {
 		$yhtok = "".t("Tiliöinti ok")."!";
 	}
-	
+
 	if (isset($seutunnus)) {
 		echo "<tr><td>$yhtok</td><td></td><td>" . round($yhtsum,2) . "</td>";
 	}
@@ -326,13 +331,13 @@
 		}
 		echo "</td><td></td>";
 	}
-	
+
 	echo "<td>";
 	// Tehdään boxi, jolla saadaan poistetut näkyviin
 	echo "<form action = '$PHP_SELF#$tunnus' method='post'><input type='hidden' name=tee value='E'>
 		<input type='hidden' name=tunnus value = '$tunnus'>";
 
-	echo t('Näytä poistetut');	
+	echo t('Näytä poistetut');
 
 	if ($viivatut == 'on') $viivatut='checked';
 	else $viivatut='';
@@ -343,17 +348,17 @@
 	if ($viivatut != '') echo "<td></td>";
 
 	if (!isset($seutunnus)) echo "<td></td>";
-	
+
 	echo "</tr>";
-	
+
 	echo "<tr>";
-	
+
 	$query = "	SELECT liitostunnus, tilaustyyppi
 				FROM lasku
 				WHERE yhtio = '{$kukarow["yhtio"]}' and tunnus = '$tunnus'";
 	$lasres = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($lasres);
-		
+
 	//	Saadaanko muokata superina?
 	$query = "	SELECT yhtio
 				FROM oikeu
@@ -368,15 +373,15 @@
 	else {
 		$su = "";
 	}
-	
+
 	$query = "select tunnus from toimi where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]' and laskun_erittely != ''";
 	$toimires = mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($toimires)==1) {
 		echo "	<td class='back'><form action = 'matkalasku.php' method='get'>
 					<input type='hidden' name = 'tilausnumero' value='$tunnus'>
-					<input type='hidden' name = 'tee' value='MUOKKAA'>					
+					<input type='hidden' name = 'tee' value='MUOKKAA'>
 					<input type='hidden' name = 'toim' value='$su'>
-					<input type='hidden' name = 'lopetus' value='".urlencode("muutosite.php?tee=E&tunnus=$tunnus")."'>						
+					<input type='hidden' name = 'lopetus' value='".urlencode("muutosite.php?tee=E&tunnus=$tunnus")."'>
 					<input type='Submit' value='".t("Kululaskun erittely")."'>
 					</form>
 				</td>";
@@ -389,9 +394,9 @@
 					<input type='hidden' name = 'toim' value='$su'>
 					<input type='hidden' name = 'lopetus' value='".urlencode("muutosite.php?tee=E&tunnus=$tunnus")."'>
 					<input type='Submit' value='".t("Tarkastele matkalaskua")."'>
-					</form></td>";				
+					</form></td>";
 	}
-	
+
 	echo "</tr>";
 	echo "</table><br><br>";
 

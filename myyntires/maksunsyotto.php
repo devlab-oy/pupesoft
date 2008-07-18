@@ -1,7 +1,7 @@
 <?php
 
 require ("../inc/parametrit.inc");
-require_once ("../inc/tilinumero.inc");
+require_once ("inc/tilinumero.inc");
 
 if ($tee != "CHECK" or $tiliote != 'Z') {
 	echo "<font class='head'>".t("Suorituksen käsinsyöttö")."</font><hr>";
@@ -85,17 +85,42 @@ if ($tee == "SYOTTO") {
 		exit;
 	}
 
-	$query = "	SELECT yriti.*, valuu.kurssi FROM yriti
-				JOIN valuu ON valuu.yhtio = yriti.yhtio and yriti.valkoodi = valuu.nimi
-				WHERE yriti.tunnus = '$tilino' AND yriti.yhtio='$kukarow[yhtio]'";
+	$query = "	SELECT yriti.*, valuu.kurssi
+				FROM yriti
+				JOIN valuu ON (valuu.yhtio = yriti.yhtio and yriti.valkoodi = valuu.nimi)				
+				WHERE yriti.yhtio = '$kukarow[yhtio]'
+				AND yriti.tunnus = '$tilino'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if ($row = mysql_fetch_array($result)) {
+
 		$tilistr        = $row["tilino"];
 		$kassatili      = $row["oletus_rahatili"];
 		$tilivaluutta	= $row["valkoodi"];
 		$tilikurssi		= $row["kurssi"];
-		$omasumma		= round($pistesumma * $tilikurssi, 2);
+		
+		if ($row["valkoodi"] != $yhtiorow['valkoodi']) {
+			// koitetaan hakea maksupäivän kurssi
+			$query = "	SELECT * 
+						FROM valuu_historia 
+						WHERE kotivaluutta = '$yhtiorow[valkoodi]'
+						AND valuutta = '$row[valkoodi]'
+						AND kurssipvm <= '$vva-$kka-$ppa'
+						LIMIT 1";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 1) {
+				$row = mysql_fetch_array($result);
+				$tilikurssi = $row["kurssi"];			
+				echo "<font class='message'>".t("Käytettiin kurssia")." $row[kurssipvm] = $tilikurssi</font><br>";
+			}
+			else {
+				echo "<font class='message'>".t("Ei löydetty maksupäivän kurssia, käyttään tämänhetkistä kurssia")." $tilikurssi</font><br>";
+			}
+		}
+		
+		//suorituksen summa kotivaluutassa
+		$omasumma = round($pistesumma * $tilikurssi, 2);
 	}
 	else {
 		echo "<font class='error'>".t("Valitun pankkitilin tiedot ovat puutteelliset, tarkista pankkitilin tiedot!")."</font>";
@@ -128,8 +153,8 @@ if ($tee == "SYOTTO") {
 	$ltunnus = mysql_insert_id($link);
 
 	// Myyntisaamiset
-	$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite, lukko)
-				VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(),'$tapvm','$ltunnus','$myyntisaamiset', $omasumma * -1,'Käsin syötetty suoritus $asiakas_nimi $selite','1')";
+	$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite, lukko)
+				VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(),'$tapvm','$ltunnus','$myyntisaamiset', $omasumma * -1, $pistesumma * -1, '$tilivaluutta', 'Käsin syötetty suoritus $asiakas_nimi $selite','1')";
 
 	if (!($result = mysql_query($query))) {
 		$result = mysql_query($unlockquery);
@@ -138,8 +163,8 @@ if ($tee == "SYOTTO") {
 	$ttunnus = mysql_insert_id($link);
 
 	// Kassatili
-	$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite, aputunnus, lukko, kustp)
-				VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(),'$tapvm','$ltunnus','$kassatili','$omasumma','Käsin syötetty suoritus $asiakas_nimi $selite','$ttunnus', '1','$kustannuspaikka')";
+	$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite, aputunnus, lukko, kustp)
+				VALUES ('$kukarow[yhtio]', '$kukarow[kuka]', now(), '$tapvm', '$ltunnus', '$kassatili', '$omasumma', '$pistesumma', '$tilivaluutta', 'Käsin syötetty suoritus $asiakas_nimi $selite', '$ttunnus', '1','$kustannuspaikka')";
 	mysql_query($query) or pupe_error($query);
 
 	// Näin kaikki tiliöinnit ovat kauniisti linkitetty toisiinsa. (Kuten alv-vienti)
@@ -157,13 +182,13 @@ if ($tee == "SYOTTO") {
 	// tulostetaan suorituksesta kuitti
 	if ($tulostakuitti != "") {
 
-		$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$asiakasid'";
+		$query = "SELECT * FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$asiakasid'";
 		$result = mysql_query($query) or pupe_error($query);
 		$asiakasrow = mysql_fetch_array($result);
 
 		$summa = $pistesumma;
 
-		require ("../tilauskasittely/tulosta_kuitti.inc");
+		require ("tilauskasittely/tulosta_kuitti.inc");
 
 		// pdffän piirto
 		$firstpage = alku();
@@ -199,7 +224,7 @@ if ($tee == "SYOTTO") {
 
 	if ($tiliote == 'Z') {
 		$tee = 'Z';
-		require('../tilioteselailu.php');
+		require('tilioteselailu.php');
 		exit;
 	}
 	else {
@@ -213,7 +238,7 @@ if ($ytunnus != '' and $tee == "ETSI") {
 
 	$laskunro = $ytunnus; // haku talteen
 
-	require ("../inc/asiakashaku.inc");
+	require ("inc/asiakashaku.inc");
 	$tee = "";
 
 	// jos ei löytynyt ytunnuksella kokeillaan laskunumerolla
@@ -229,7 +254,7 @@ if ($ytunnus != '' and $tee == "ETSI") {
 		if ($asiakas = mysql_fetch_array($result)) {
 			echo "<font class='message'>".t("Maksaja löytyi laskunumerolla")." $laskunro:</font><br>";
 			$asiakasid = $asiakas["liitostunnus"];
-			require ("../inc/asiakashaku.inc");
+			require ("inc/asiakashaku.inc");
 		}
 	}
 
@@ -442,10 +467,10 @@ if ($ytunnus != '' and $tee == "") {
 		echo "<select name='tulostakuitti'>";
 		echo "<option value=''>".t("Ei tulosteta")."</option>";
 
-		$querykieli = "	select *
-					from kirjoittimet
-					where yhtio='$kukarow[yhtio]'
-					ORDER BY kirjoitin";
+		$querykieli = "	SELECT *
+						FROM kirjoittimet
+						WHERE yhtio = '$kukarow[yhtio]'
+						ORDER BY kirjoitin";
 		$kires = mysql_query($querykieli) or pupe_error($querykieli);
 
 		while ($kirow=mysql_fetch_array($kires)) {
@@ -480,6 +505,6 @@ if ($tee == "" and $ytunnus == "") {
 	$kentta = "ytunnus";
 }
 
-require ("../inc/footer.inc");
+require ("inc/footer.inc");
 
 ?>

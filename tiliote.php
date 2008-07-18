@@ -154,10 +154,10 @@
 			echo "<font class='error'>Aineisto oli virheellinen. Sitä ei voitu tallentaa järjestelmään.</font>";
 
 			//Poistetaan aineistot tiliotedatasta
-			$query = "delete from tiliotedata where aineisto ='$aineistorow[aineisto]'";
+			$query = "DELETE FROM tiliotedata WHERE aineisto ='$aineistorow[aineisto]'";
 			$tiliotedataresult = mysql_query($query) or pupe_error($query);
 
-			$query = "unlock tables";
+			$query = "UNLOCK TABLES";
 			$tiliotedataresult = mysql_query($query) or pupe_error($query);
 
 			require("inc/footer.inc");
@@ -198,11 +198,11 @@
 		if ($xtyyppi == 1) {
 			//echo "nyt PITÄISI syntyä vastavienti<br>";
 			$tkesken = 0;
-			echo "<tr><td colspan = '6'>";
 			$maara = $vastavienti;
+			$kohdm = $vastavienti_valuutassa;
 
+			echo "<tr><td colspan = '6'>";
 			require("inc/teeselvittely.inc");
-
 			echo "</td></tr>";
 			echo "</table>";
 		}
@@ -210,9 +210,9 @@
 		if ($xtyyppi == 2) {
 			$tkesken = 0;
 			$maara = $vastavienti;
+			$kohdm = $vastavienti_valuutassa;
 
 			require("inc/teeselvittely.inc");
-
 			echo "</table>";
 		}
 
@@ -224,9 +224,11 @@
 		echo "<form enctype='multipart/form-data' name='sendfile' action='$PHP_SELF' method='post'>";
 
 		echo "<table>";
-		echo "<tr><th>Pankin aineisto:</th>
-				<td><input type='file' name='userfile'></td>
-				<td><input type='submit' value='Käsittele tiedosto'></td></tr>";
+		echo "	<tr>
+					<th>Pankin aineisto:</th>
+					<td><input type='file' name='userfile'></td>
+					<td><input type='submit' value='Käsittele tiedosto'></td>
+				</tr>";
 		echo "</table>";
 
 		echo "</form>";

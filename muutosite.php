@@ -1,5 +1,5 @@
 <?php
-	
+
 require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Tiliˆintien muutos/selailu")."</font><hr>";
@@ -23,7 +23,7 @@ if ($tee == 'M') {
 if ($tee == 'G') {
 	$query = "SELECT tapvm, tunnus
 				FROM lasku
-				WHERE yhtio = '$kukarow[yhtio]' 
+				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus > '$tunnus'
 				and tila in ('H','Y','M','P','Q','X','U')
 				ORDER by tunnus
@@ -82,24 +82,24 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						GROUP BY ltunnus
 						HAVING maara > 1";
 		}
-		
+
 		if ($tee == 'S') {
 			$query = "	SELECT lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm,
 						if(sum(ifnull(t1.summa, 0))=0,0,1)+if(sum(ifnull(t2.summa, 0))=0,0,1)+if(sum(ifnull(t3.summa, 0))=0,0,1) korjattu,
-						count(distinct t1.tilino)+count(distinct t2.tilino)+count(distinct t3.tilino) saamistilej‰ 
+						count(distinct t1.tilino)+count(distinct t2.tilino)+count(distinct t3.tilino) saamistilej‰
 						FROM lasku
-						LEFT JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu = '' and t1.tilino='$yhtiorow[myyntisaamiset]' 
+						LEFT JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu = '' and t1.tilino='$yhtiorow[myyntisaamiset]'
 						LEFT JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu = '' and t2.tilino='$yhtiorow[factoringsaamiset]'
 						LEFT JOIN tiliointi t3 ON lasku.yhtio=t3.yhtio and lasku.tunnus=t3.ltunnus and t3.korjattu = '' and t3.tilino='$yhtiorow[konsernimyyntisaamiset]'
-						WHERE lasku.yhtio	= '$kukarow[yhtio]' 
-						and lasku.tila		= 'U' 
+						WHERE lasku.yhtio	= '$kukarow[yhtio]'
+						and lasku.tila		= 'U'
 						and lasku.alatila	= 'X'
-						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]' 
+						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
 						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
 						GROUP BY 1,2,3,4,5,6
 						HAVING saamistilej‰ > 1 and korjattu > 0";
 		}
-						
+
 		if ($tee == '≈') {
 			$query = "	(SELECT distinct lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.tapvm, tr1.tuoteno, s1.sarjanumero, if(tr1.alv>=500, 'MV', tr1.alv) alv1, if(tr2.alv>=500, 'MV', tr2.alv) alv2, l2.laskunro, l2.nimi
 						FROM lasku
@@ -108,16 +108,16 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						JOIN sarjanumeroseuranta s1 ON tr1.yhtio=s1.yhtio and tr1.tunnus=s1.ostorivitunnus
 						JOIN tilausrivi tr2 ON s1.yhtio=tr2.yhtio and s1.myyntirivitunnus=tr2.tunnus
 						JOIN lasku l2 ON tr2.yhtio=l2.yhtio and tr2.uusiotunnus=l2.tunnus
-						WHERE lasku.yhtio	= '$kukarow[yhtio]' 
-						and lasku.tila		= 'U' 
+						WHERE lasku.yhtio	= '$kukarow[yhtio]'
+						and lasku.tila		= 'U'
 						and lasku.alatila	= 'X'
-						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]' 
+						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
 						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
 						HAVING (alv1 != 'MV' or alv2 != 'MV')
 						ORDER by lasku.laskunro)
-						
+
 						UNION DISTINCT
-					
+
 						(SELECT distinct l2.tunnus, l2.laskunro, l2.nimi, l2.tapvm, tr1.tuoteno, s1.sarjanumero, if(tr2.alv>=500, 'MV', tr2.alv) alv2, if(tr1.alv>=500, 'MV', tr1.alv) alv1, lasku.laskunro, lasku.nimi
 						FROM lasku
 						JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu = '' and t1.tilino='$yhtiorow[myynti_marginaali]'
@@ -125,34 +125,34 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 						JOIN sarjanumeroseuranta s1 ON tr1.yhtio=s1.yhtio and tr1.tunnus=s1.myyntirivitunnus
 						JOIN tilausrivi tr2 ON s1.yhtio=tr2.yhtio and s1.ostorivitunnus=tr2.tunnus
 						JOIN lasku l2 ON tr2.yhtio=l2.yhtio and tr2.uusiotunnus=l2.tunnus
-						WHERE lasku.yhtio	= '$kukarow[yhtio]' 
-						and lasku.tila		= 'U' 
+						WHERE lasku.yhtio	= '$kukarow[yhtio]'
+						and lasku.tila		= 'U'
 						and lasku.alatila	= 'X'
-						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]' 
+						and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'
 						and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
 						HAVING (alv1 != 'MV' or alv2 != 'MV')
 						ORDER by l2.laskunro)";
 		}
-		
+
 		if ($tee == 'ƒ') {
 			$query = "	SELECT lasku.tunnus ltunnus, lasku.ytunnus, lasku.nimi, lasku.tapvm, lasku.summa, ifnull(sum(t1.summa),0) + ifnull(sum(t2.summa),0) + ifnull(sum(t3.summa),0) ero
 						FROM lasku
 						LEFT JOIN tiliointi t1 ON (lasku.yhtio = t1.yhtio and lasku.tunnus = t1.ltunnus and t1.korjattu = '' and t1.tilino = '$yhtiorow[myyntisaamiset]')
 						LEFT JOIN tiliointi t2 ON (lasku.yhtio = t2.yhtio and lasku.tunnus = t2.ltunnus and t2.korjattu = '' and t2.tilino = '$yhtiorow[factoringsaamiset]')
 						LEFT JOIN tiliointi t3 ON (lasku.yhtio = t3.yhtio and lasku.tunnus = t3.ltunnus and t3.korjattu = '' and t3.tilino = '$yhtiorow[konsernimyyntisaamiset]')
-						WHERE lasku.yhtio = '$kukarow[yhtio]' 
-						and lasku.tila	  = 'U' 
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila	  = 'U'
 						and lasku.alatila = 'X'
 						and lasku.mapvm  != '0000-00-00'
-						and lasku.tapvm  >= '$yhtiorow[tilikausi_alku]' 
+						and lasku.tapvm  >= '$yhtiorow[tilikausi_alku]'
 						and lasku.tapvm  <= '$yhtiorow[tilikausi_loppu]'
 						GROUP BY ltunnus
 						HAVING round(sum(t1.summa),2) != 0 or round(sum(t2.summa),2) != 0 or round(sum(t3.summa),2) != 0
 						ORDER by lasku.laskunro";
 		}
-		
+
 	}
-	else { 
+	else {
 
 		$plisa = "";
 		$lisa  = "";
@@ -166,7 +166,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 		if ($tav > 0 and $tav < 1000) {
 			$tav += 2000;
 		}
-		
+
 		if ($tav != 0 and $tak != 0 and $tap != 0) {
 			$plisa = " and tapvm = '$tav-$tak-$tap' ";
 		}
@@ -179,7 +179,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 		else {
 			$plisa = " and tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]' ";
 		}
-		
+
 		if (strlen($selite) > 0) {
 			$lisa = " and selite";
 			if ($ohita == 'on') {
@@ -267,7 +267,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 				if ($i == 1) {
 					if (mysql_field_name($result,$i) == 'tapvm') {
 						$trow[$i] = tv1dateconv($trow[$i]);
-					}							
+					}
 					echo "<td><a href = '$PHP_SELF?tee=E&tunnus=$edtunnus&viivatut=$viivatut'>$trow[$i]</td>";
 				}
 				elseif (is_numeric($trow[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
@@ -289,7 +289,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 // Olemassaolevaa tiliˆinti‰ muutetaan, joten yliviivataan rivi ja annetaan perustettavaksi
 if ($tee == 'P') {
 
-	$query = "SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm, tosite
+	$query = "	SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm, tosite, summa_valuutassa, valkoodi
 				FROM tiliointi
 				WHERE tunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]' and tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -306,6 +306,8 @@ if ($tee == 'P') {
 	$kohde = $tiliointirow['kohde'];
 	$projekti = $tiliointirow['projekti'];
 	$summa = $tiliointirow['summa'];
+	$summa_valuutassa = $tiliointirow['summa_valuutassa'];
+	$valkoodi = $tiliointirow["valkoodi"];
 	$vero = $tiliointirow['vero'];
 	$selite = $tiliointirow['selite'];
 	$tiliointipvm = $tiliointirow['tapvm'];
@@ -314,18 +316,18 @@ if ($tee == 'P') {
 
 	// Etsit‰‰n kaikki tiliˆintirivit, jotka kuuluvat t‰h‰n tiliˆintiin ja lasketaan niiden summa
 	$query = "	SELECT sum(summa) FROM tiliointi
-				WHERE aputunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]' and tiliointi.korjattu='' GROUP BY aputunnus";
+				WHERE aputunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]' and tiliointi.korjattu = '' GROUP BY aputunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) != 0) {
 		$summarow = mysql_fetch_array($result);
 		$summa += $summarow[0];
-		$query = "UPDATE tiliointi SET korjattu = '$kukarow[kuka]', korjausaika = now()
+		$query = "	UPDATE tiliointi SET korjattu = '$kukarow[kuka]', korjausaika = now()
 					WHERE aputunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]' and tiliointi.korjattu=''";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
-	$query = "UPDATE tiliointi
+	$query = "	UPDATE tiliointi
 				SET korjattu = '$kukarow[kuka]', korjausaika = now()
 				WHERE tunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -511,7 +513,7 @@ if ($tee == 'E' or $tee == 'F') {
 					toim_osoite, '' toim_osoitetark, toim_postino, toim_postitp, toim_maa, alatila, vienti, comments, yriti.nimi maksajanpankkitili, lasku.laskunro, saldo_maksettu, saldo_maksettu_valuutassa, lasku.tunnus
 					FROM lasku
 					LEFT JOIN yriti ON lasku.yhtio=yriti.yhtio and maksu_tili=yriti.tunnus
-					LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka 
+					LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
 					WHERE lasku.tunnus = '$tunnus' and lasku.yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -527,7 +529,7 @@ if ($tee == 'E' or $tee == 'F') {
 
 		// jos myyntilasku
 		if ($trow["tila"] == "U" or $trow["tila"] == "L") {
-			$query = "	select maa_maara,kauppatapahtuman_luonne,
+			$query = "	SELECT maa_maara,kauppatapahtuman_luonne,
 						kuljetusmuoto,sisamaan_kuljetus,
 						sisamaan_kuljetusmuoto,sisamaan_kuljetus_kansallisuus,
 						kontti,aktiivinen_kuljetus,
@@ -540,17 +542,17 @@ if ($tee == 'E' or $tee == 'F') {
 		}
 		// muissa keiseissa varmaan sitten keikkajuttuja
 		else {
-			$query = "	select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";
+			$query = "	SELECT laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";
 			$keikres = mysql_query($query) or pupe_error($query);
 			$keekrow = mysql_fetch_array($keikres);
 
-			$query = "	select laskunro keikka, maa_lahetys 'l‰hetysmaa',
+			$query = "	SELECT laskunro keikka, maa_lahetys 'l‰hetysmaa',
 						kuljetusmuoto, kauppatapahtuman_luonne, rahti, rahti_etu, rahti_huolinta, erikoisale, bruttopaino, toimaika, comments
 						from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='' and laskunro='$keekrow[laskunro]'";
 			$keikres = mysql_query($query) or pupe_error($query);
 			$keikrow = mysql_fetch_array($keikres);
 
-			$query = "select vanhatunnus, summa, nimi from lasku where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keekrow[laskunro]' and vanhatunnus!='0' and vanhatunnus!='$tunnus'";
+			$query = "SELECT vanhatunnus, summa, nimi from lasku where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keekrow[laskunro]' and vanhatunnus!='0' and vanhatunnus!='$tunnus'";
 			$muutkeikres = mysql_query($query) or pupe_error($query);
 		}
 	}
@@ -564,8 +566,8 @@ if ($tee == 'E' or $tee == 'F') {
 	echo "<table>"; // T‰m‰ aloittaa vasemman sarakkeen
 
 
-	list($aa, $bb) = explode("@", $trow[1]);	
-	echo "<tr><th>" . t(mysql_field_name($result,1)) ."</th><td>$aa@".tv1dateconv($bb, "P")."</td></tr>";			
+	list($aa, $bb) = explode("@", $trow[1]);
+	echo "<tr><th>" . t(mysql_field_name($result,1)) ."</th><td>$aa@".tv1dateconv($bb, "P")."</td></tr>";
 
 	if ($trow[0] != 'X') {
 		// Laskut
@@ -585,17 +587,17 @@ if ($tee == 'E' or $tee == 'F') {
 				for ($i = 10; $i < 14; $i++) {
 					if ($i == 11) {
 						list($aa, $bb) = explode(" / ", $trow[$i]);
-						
-						echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>".tv1dateconv($aa)." / ".tv1dateconv($bb)."</td></tr>"; 	
+
+						echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>".tv1dateconv($aa)." / ".tv1dateconv($bb)."</td></tr>";
 					}
 					elseif ($i == 13) {
 						list($aa, $bb) = explode("@", $trow[$i]);
-						
+
 						echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$aa@".tv1dateconv($bb)."</td></tr>";
 					}
 					else {
-						echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$trow[$i]</td></tr>"; 	
-					}													
+						echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$trow[$i]</td></tr>";
+					}
 				}
 				for ($i = 32; $i < 37; $i++) {
 					echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$trow[$i]</td></tr>";
@@ -613,19 +615,19 @@ if ($tee == 'E' or $tee == 'F') {
 				for ($i = 10; $i < 19; $i++) {
 					if ($i == 11) {
 						list($aa, $bb) = explode(" / ", $trow[$i]);
-						
-						echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>".tv1dateconv($aa)." / ".tv1dateconv($bb)."</td></tr>"; 	
+
+						echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>".tv1dateconv($aa)." / ".tv1dateconv($bb)."</td></tr>";
 					}
 					elseif ($i >= 13 and $i <= 18) {
 						list($aa, $bb) = explode("@", $trow[$i]);
-						
+
 						if ($bb != "" and substr($bb,0,10) != "0000-00-00") {
 							$aa = $aa."@";
 						}
 						echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$aa".tv1dateconv($bb, "P")."</td></tr>";
 					}
 					else {
-						echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$trow[$i]</td></tr>"; 	
+						echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$trow[$i]</td></tr>";
 					}
 				}
 			}
@@ -652,10 +654,10 @@ if ($tee == 'E' or $tee == 'F') {
 		require "inc/laskutyyppi.inc";
 
 		echo "<tr><th>".t("Tila").":</th><td>".t("$laskutyyppi")." ".t("$alatila");
-		
+
 		// Jos myyntilasku, niin onko sit‰ karhuttu?
 		if ($trow['tila'] == 'U') {
-			$query= "select count(*) kerrat, max(pvm) vika, min(pvm) eka 
+			$query= "SELECT count(*) kerrat, max(pvm) vika, min(pvm) eka
 				from karhu_lasku
 				join karhukierros on ktunnus=tunnus
 				where ltunnus='$trow[tunnus]'
@@ -680,7 +682,7 @@ if ($tee == 'E' or $tee == 'F') {
 			if (strtoupper($trow[9]) != 'FI') {
 				//Lis‰t‰‰n maksaja
 				echo "<tr><th>".t("Maksaja")."</th><td>$trow[Maksaja]</td></tr>";
-					
+
 				for ($i = 21; $i < 29; $i++) {
 					if ($trow[$i] != '') {
 						echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$trow[$i]</td></tr>";
@@ -692,7 +694,7 @@ if ($tee == 'E' or $tee == 'F') {
 				for ($i = 19; $i < 22; $i++) {
 					if ($i == 19) {
 						list($aa, $bb) = explode("@", $trow[$i]);
-						
+
 						if ($bb != "" and substr($bb,0,10) != "0000-00-00") {
 							$aa = $aa."@";
 						}
@@ -724,7 +726,7 @@ if ($tee == 'E' or $tee == 'F') {
 			}
 			echo "</td></tr>";
 		}
-		
+
 		// tehd‰‰n laskulinkki
 		echo "<tr><th>".t("Laskun kuva")."</th><td>".ebid($tunnus) ."</td></tr>";
 
@@ -754,7 +756,7 @@ if ($tee == 'E' or $tee == 'F') {
 				<input type = 'submit' value = '".t("Muuta tietoja")."'>
 				</form>";
 	}
-	
+
 
 	$queryoik = "SELECT tunnus from oikeu where nimi like '%liitetiedostot.php' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 	$res = mysql_query($queryoik) or pupe_error($queryoik);
@@ -781,11 +783,11 @@ if ($tee == 'E' or $tee == 'F') {
 				<input type = 'hidden' name = 'tee' value='$tee'>
 				<input type = 'hidden' name = 'tunnus' value='$tunnus'>
 				<input type = 'submit' value = '".t("Normaalitiedot")."'></form>";
-		}		
+		}
 	}
 
-	
-	
+
+
 	if ($trow['tila'] == 'U') {
 		echo "<form action = 'tilauskasittely/tulostakopio.php' method='post'>
 			<input type='hidden' name='otunnus' value='$tunnus'>
@@ -793,11 +795,11 @@ if ($tee == 'E' or $tee == 'F') {
 			<input type='hidden' name='tee' value='NAYTATILAUS'>
 			<input type='submit' value='" . t('N‰yt‰ laskun PDF')."'></form>";
 	}
-	
+
 	echo "</tr>";
 	echo "</table></td></tr>"; //Lopetettiin viimeinen sarake
 	echo "</table>";
-	
+
 	// Tehd‰‰n nappula, jolla voidaan vaihtaa n‰kym‰ksi tilausrivit/tiliˆintirivit
 	if ($tee == 'F') {
 		$ftee = 'E';
@@ -889,42 +891,42 @@ if (strlen($tee) == 0) {
 		  	<td>".t("n‰yt‰ muutetut rivit")."</td>
 		  	<td><input type='checkbox' name='viivatut'></td>
 		  	<td><input type = 'submit' value = '".t("Etsi")."'></form></td></tr>
-		
+
 		  	<tr>
 		  	<td>".t("Etsi virhett‰")."</td>
 		  	<td>".t("n‰yt‰ tositteet, jotka eiv‰t t‰sm‰‰")."</td>
 		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=Z' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
-			
+
 			<tr>
 		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joilta puuttuu kustannuspaikka")."</td>
 		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=X' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
-		
+
 			<tr>
 		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joiden ostovelat ei t‰sm‰‰")."</td>
 		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=W' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
-		
+
 			<tr>
 		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joiden tila tuntuu v‰‰r‰lt‰")."</td>
 		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=T' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 		  	</tr>
-			
+
 			<tr>
 		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joiden myyntisaamiset ovat v‰‰rin")."</td>
 		  	<td></td>
 		  	<td><form action = '$PHP_SELF?tee=S' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 			</tr>
-			
+
 			<tr>
 		  	<td></td>
 		  	<td>".t("n‰yt‰ tositteet, joiden marginaaliverotiliˆinnit ovat v‰‰rin")."</td>

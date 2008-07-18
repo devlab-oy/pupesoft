@@ -22,6 +22,16 @@
 		$laskurow['tapvm']=$tiliointipvm;
 	}
 
+	// jos ollaan muokkaamassa tiliöintiä ja se on ollut valuutassa
+	if (isset($vanhasumma) and isset($vanhasumma_valuutassa) and isset($vanhasumma_valkoodi) and $vanhasumma != "" and $vanhasumma_valuutassa != "" and $vanhasumma_valkoodi != "") {
+		// lasketaan kurssi
+		$vanhasumma_kurssi = $vanhasumma_valuutassa / $vanhasumma;
+		// ja uudet arvot valuutassa
+		$summa_valuutassa = round($summa * $vanhasumma_kurssi, 2);
+		$alv_valuutassa = round($alv * $vanhasumma_kurssi, 2);
+		$valkoodi = $vanhasumma_valkoodi;
+	}
+
 	$query = "INSERT into tiliointi set
 					yhtio ='$kukarow[yhtio]',
 					ltunnus = '$tunnus',
@@ -31,6 +41,8 @@
 					projekti = '$projekti',
 					tapvm = '$laskurow[tapvm]',
 					summa = '$summa',
+					summa_valuutassa = '$summa_valuutassa',
+					valkoodi = '$valkoodi',
 					vero = '$vero',
 					selite = '$selite',
 					lukko = '',
@@ -50,6 +62,8 @@
 				projekti = '',
 				tapvm = '$laskurow[tapvm]',
 				summa = '$alv',
+				summa_valuutassa = '$alv_valuutassa',
+				valkoodi = '$valkoodi',
 				vero = '',
 				selite = '$selite',
 				lukko = '1',

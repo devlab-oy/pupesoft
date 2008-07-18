@@ -8,7 +8,7 @@
 	if ($tpv < 1000) $tpv += 2000;
 
 	// Onko jotain kirjattavaa (tämä toimii jopa vastaviennin tapauksessa)?
-	if (round($maara,2) != 0) {
+	if (round($maara, 2) != 0) {
 
 		// Kirjoitetaan lasku, jos sellaista ei ole vielä tehty
 		if ($laskuid == 0) {
@@ -19,7 +19,6 @@
 						tila = 'X',
 						laatija = 'tiliote',
 						luontiaika = now()";
-
 			$result = mysql_query($query) or pupe_error($query);
 			$laskuid = mysql_insert_id ($link);
 			echo "<font class='message'>*** ".t("Tositteen otsikko luotu")." ***</font><br>";
@@ -34,6 +33,8 @@
 		                kustp = '',
 		                tapvm = '$tpv-$tpk-$tpp',
 		                summa = '$vastavienti',
+						summa_valuutassa = '$vastavienti_valuutassa',
+						valkoodi = '$tilinvaluutta',
 		                vero = '0',
 		                lukko = '',
 						selite = 'Vastavienti rahatilille',
@@ -41,6 +42,7 @@
 		                laadittu = now()";
 			$result = mysql_query($query) or pupe_error($query);
 			$vastavienti = 0;
+			$vastavienti_valuutassa = 0;
 			$laskuid = 0;
 
 			echo "<font class='message'>*** ".t("Vastavienti luotu")." ($yritirow[oletus_rahatili]) ***</font><br>";
@@ -54,10 +56,10 @@
 			// Luottokunta tai vastaava jaettava
 			if ($tiliointisaantorow['tilino2'] != 0) {
 
-				$luottokuntatieto = str_replace(".", "", $luottokuntatieto);
+				$luottokuntatieto = str_replace(".", "",  $luottokuntatieto);
 				$luottokuntatieto = str_replace(",", ".", $luottokuntatieto);
-				$kanta = (float) substr($luottokuntatieto,0,strpos($luottokuntatieto, " "));
-				$palkkio = (float) trim(substr($luottokuntatieto,-1*strpos($luottokuntatieto, " ")));
+				$kanta = (float) substr($luottokuntatieto, 0, strpos($luottokuntatieto, " "));
+				$palkkio = (float) trim(substr($luottokuntatieto, -1 * strpos($luottokuntatieto, " ")));
 
 				$query = "INSERT into tiliointi set
 			                yhtio = '$yritirow[yhtio]',
@@ -66,6 +68,8 @@
 			                kustp = '$tiliointisaantorow[kustp2]',
 			                tapvm = '$tpv-$tpk-$tpp',
 			                summa = $palkkio * -1,
+							summa_valuutassa = round($palkkio * $kurssi * -1, 2),
+							valkoodi = '$tilinvaluutta',
 			                vero = '0',
 			                lukko = '',
 							selite = '$vientiselite',
@@ -80,13 +84,14 @@
 			                kustp = '$tiliointisaantorow[kustp]',
 			                tapvm = '$tpv-$tpk-$tpp',
 			                summa = $kanta * -1,
+							summa_valuutassa = round($kanta * $kurssi * -1, 2),
+							valkoodi = '$tilinvaluutta',
 			                vero = '0',
 			                lukko = '',
 							selite = '$vientiselite',
 			                laatija = 'tiliote',
 			                laadittu = now()";
 				$result = mysql_query($query) or pupe_error($query);
-
 			}
 			else {
 				$query = "INSERT into tiliointi set
@@ -96,6 +101,8 @@
 		                kustp = '$tiliointisaantorow[kustp]',
 		                tapvm = '$tpv-$tpk-$tpp',
 		                summa = $maara * -1,
+						summa_valuutassa = $kohdm * -1,
+						valkoodi = '$tilinvaluutta',
 		                vero = '0',
 		                lukko = '',
 						selite = '$vientiselite',
@@ -110,6 +117,7 @@
 
 			// Merkataan käsitellyiksi & lisätään linkki
 			$vastavienti += $maara;
+			$vastavienti_valuutassa += $kohdm;
 
 			echo "<font class='message'>*** ".t("tiliöinti luotu")." ($tiliotesaantotilino) ***</font><br>";
 		}

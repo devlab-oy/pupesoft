@@ -49,7 +49,7 @@
 			echo "<font class='error'>Tilille $account ei löytynyt yritystä.</font><br>";
 			next;
 		}
-		
+
 		if ($yritirow["valkoodi"] != "") {
 			$query = "	SELECT *
 						FROM valuu
@@ -63,7 +63,7 @@
 			}
 			else {
 				$valrow = mysql_fetch_array ($valresult);
-				
+
 				$valkoodi	= $valrow["nimi"];
 				$kurssi 	= $valrow["kurssi"];
 			}
@@ -72,7 +72,7 @@
 			$query = "SELECT valkoodi FROM yhtio WHERE yhtio = '$yritirow[yhtio]'";
 			$valresult = mysql_query($query) or pupe_error($query);
 			$valrow = mysql_fetch_array ($valresult);
-			
+
 			if ($valrow["valkoodi"] == '') {
 				echo "<font class='error'> Yhtiöllä ei ole valuuttaa!</font><br>";
 				next;
@@ -82,16 +82,16 @@
 				$kurssi 	= 1;
 			}
 		}
-		
+
 		#arkistointitunnus
 		$query = "INSERT INTO suoritus (yhtio,tilino,nimi_maksaja,viite,summa,valkoodi,kurssi,maksupvm,kirjpvm) VALUES ('$yritirow[yhtio]','$account','$payer_name','$reference',$sum,'$valkoodi','$kurssi','$payment_date','$entry_date')";
 		$result = mysql_query($query) or pupe_error($query);
 		$tiliointitunnus = mysql_insert_id();
 
-		#päivitetään suorituksen tunnnus tiliotedataan ja tiliotedata käsitellyksi	
-		$query = "	update tiliotedata
-		 			set tiliointitunnus = '$tiliointitunnus', kasitelty = now()
-					where tunnus = '$tiliotedatarow[tunnus]'";
+		#päivitetään suorituksen tunnnus tiliotedataan ja tiliotedata käsitellyksi
+		$query = "	UPDATE tiliotedata
+		 			SET tiliointitunnus = '$tiliointitunnus', kasitelty = now()
+					WHERE tunnus = '$tiliotedatarow[tunnus]'";
 		$dataupdres = mysql_query($query) or pupe_error($query);
 
 	}

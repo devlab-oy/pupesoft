@@ -75,10 +75,10 @@
 			$taso = substr($tietue, 187, 1);
 			//echo "Taso: '" . $taso . "'<br>";
 			$pvm = substr($tietue, 42, 6);
-			
+
 			if ($taso == '0') $turvapvm = $pvm; // Osuuspankki ei l‰het‰ p‰iv‰yst‰ kuin t‰‰ll‰
-			
-			if ($pvm == '000000') { 
+
+			if ($pvm == '000000') {
 				$pvm = $turvapvm;
 				echo "<td>$pvm*</td>";
 			}

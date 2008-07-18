@@ -77,9 +77,14 @@ function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $
 				while ($row = mysql_fetch_array($result)) {
 					for ($i=0; $i < $fields; $i++) { 
 						
+						if (strpos($row[$i],'"') !== FALSE) {
+							$row[$i] = str_replace('"',"",$row[$i]);
+						}
+						
 						if (($pos_lyhyt == $i or $pos_lyhyt_se == $i) and $pos_lyhyt != 0 and $pos_lyhyt_se != 0) {
 							$row[$i] = cut_text($row[$i],100);
 						}
+						
 						
 						$ulos .= str_replace($order,"<br>",$row[$i]);
 					
@@ -135,36 +140,28 @@ function cut_text($text, $chars) {
 			return substr($text,0,$chars-1)."...";
 		}
 		else {
+					
+			$text = substr($text,0,$chars);			
+			$pos[0] = strrpos($text," ");
+			$pos[1] = strrpos($text,".");
+			$pos[2] = strrpos($text,",");
 			
-			$temptext = strrev(substr($text,0,$chars));
-			
-			$pos[0] = strpos($temptext," ");
-			$pos[1] = strpos($temptext,".");
-			$pos[2] = strpos($temptext,",");
 			
 			sort($pos);
-			$temppos = 0;
-			
-			foreach ($pos as $val) {
-				if ($val !== FALSE) {
-					$temppos = $val;
-					break;					
-				}
+			echo $pos[0]."<br>";
+			echo $pos[1]."<br>";
+			echo $pos[2]."<br>";
+									
+			if (substr($text,$pos[2],1) == " ") {
+				return substr($text,0,$pos[2])."...";
 			}
-			
-			$temppos += 1; 
-			
-			$text = strrev($temptext);
-			
-			if (substr($text,$chars-$temppos,1) == " ") {
-				return substr($text,0,$chars-$temppos)."...";
+			elseif (substr($text,$pos[2],1) == ".") {
+				return substr($text,0,$pos[2])."..";
 			}
-			elseif (substr($text,$chars-$temppos,1) == ".") {
-				return substr($text,0,$chars-$temppos)."..";
-			}
-			elseif (substr($text,$chars-$temppos,1) == ",") {
-				return substr($text,0,$chars-1-$temppos)."...";
+			elseif (substr($text,$pos[2],1) == ",") {
+				return substr($text,0,$pos[2]-1)."...";
 			}				
+			echo "moro<br>";
 		}
 	}
 	
@@ -184,7 +181,7 @@ if ($tee == "aja") {
 	else {
 	
 		$dirri = "/tmp";
-					
+			
 		if (!is_writable($dirri)) {
 			die("$kokonimi ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
 		}

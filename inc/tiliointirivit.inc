@@ -256,7 +256,7 @@
 
 			echo $trow[$i];
 			
-			if (mysql_field_name($result,$i) == 'selite' and $trow["valkoodi"] != "" and $trow["valkoodi"] != $yhtiorow["valkoodi"]) {
+			if (mysql_field_name($result,$i) == 'selite' and $trow["summa_valuutassa"] != 0 and $trow["valkoodi"] != "" and $trow["valkoodi"] != $yhtiorow["valkoodi"]) {
 				echo " ($trow[summa_valuutassa] $trow[valkoodi])";
 			}
 

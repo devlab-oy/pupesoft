@@ -1358,6 +1358,36 @@ if ($tee == 'vakuutushakemus') {
 	require('vakuutushakemus.inc');
 }
 
+// siirret‰‰n tilauksella olevat tuotteet asiakkaan asiakashinnoiksi
+if ($tee == "tuotteetasiakashinnastoon") {
+
+	$query = "	SELECT * 
+				FROM tilausrivi 
+				WHERE yhtio = '$kukarow[yhtio]' 
+				AND otunnus = '$tilausnumero'
+				AND tyyppi  = 'T'
+				AND var not in ('P')";
+	$result = mysql_query($query) or pupe_error($query);
+
+	while ($tilausrivi = mysql_fetch_array($result)) {
+		$query = "	INSERT INTO asiakashinta SET
+					yhtio		= '$kukarow[yhtio]',
+					tuoteno		= '$tilausrivi[tuoteno]',
+					asiakas		= '$laskurow[liitostunnus]',
+					hinta		= round($tilausrivi[hinta] * (1 - $tilausrivi[ale] / 100) * (1 - $laskurow[erikoisale] / 100), $yhtiorow[hintapyoristys]),
+					valkoodi	= '$laskurow[valkoodi]',
+					alkupvm		= now(),
+					laatija		= '$kukarow[kuka]',
+					luontiaika	= now(),
+					muuttaja	= '$kukarow[kuka]',
+					muutospvm	= now()";
+		$insert_result = mysql_query($query) or pupe_error($query);
+
+		echo "Lis‰ttin tuote $tilausrivi[tuoteno] asiakkaan hinnastoon hinnalla ".sprintf("%.".$yhtiorow["hintapyoristys"]."f", $tilausrivi["hinta"] * (1 - $tilausrivi["ale"] / 100) * (1 - $laskurow["erikoisale"] / 100))." $laskurow[valkoodi]<br>";
+	}
+	$tee = "";
+}
+
 if ($kukarow["extranet"] == "" and $tee == 'jyvita') {
 	require("jyvita_riveille.inc");
 }
@@ -1720,6 +1750,19 @@ if ($tee == '') {
 					</td>";
 
 			}
+		}
+
+		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T")) {
+			echo "<td class='back'>
+					<form action='$PHP_SELF' method='post'>
+						<input type='hidden' name='tee' value='tuotteetasiakashinnastoon'>
+						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+						<input type='hidden' name='toim' value='$toim'>
+						<input type='hidden' name='lopetus' value='$lopetus'>
+						<input type='hidden' name='projektilla' value='$projektilla'>
+						<input type='Submit' value='".t("Siirr‰ tuotteet asiakashinnoiksi")."'>
+					</form>
+				</td>";
 		}
 
 		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") and file_exists("osamaksusoppari.inc")) {

@@ -23,7 +23,9 @@
  * @link       http://pear.php.net/package/Image_Barcode
  */
 
-require_once 'Image/Barcode.php';
+//require_once 'Image/Barcode.php';
+
+require_once "viivakoodi/Barcode.php";
 
 /**
  * Image_Barcode_ean13 class
@@ -153,8 +155,11 @@ class Image_Barcode_ean13 extends Image_Barcode
      * @todo       Check if $text is number and len=13
      *
      */
-    function &draw($text, $imgtype = 'png')
+    function &draw($text, $imgtype = 'png', $barwidth, $barcodeheight)
     {
+		$this->_barwidth = $barwidth;
+		$this->_barcodeheight = $barcodeheight;
+	
         // Calculate the barcode width
         $barcodewidth = (strlen($text)) * (7 * $this->_barwidth)
             + 3 // left

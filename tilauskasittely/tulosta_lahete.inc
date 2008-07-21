@@ -603,6 +603,22 @@ if (!function_exists('rivi_otsikot')) {
 			$pdf->draw_text(490, $kala+15, t("Tilattu", $kieli),		$thispage, $norm);
 			$pdf->draw_text(540, $kala+15, t("Toimitus", $kieli),		$thispage, $norm);
 		}
+		elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_viivakoodi_ean13.inc") {
+			// tulosta_lahete_viivakoodi_ean13.inc
+
+			$pdf->draw_rectangle($kala+30, 20,  $kala+10, 40,  	$thispage, $rectparam);
+			$pdf->draw_rectangle($kala+30, 40,  $kala+10, 180,  $thispage, $rectparam);
+			$pdf->draw_rectangle($kala+30, 180, $kala+10, 420, 	$thispage, $rectparam);
+			$pdf->draw_rectangle($kala+30, 420, $kala+10, 480, 	$thispage, $rectparam);
+			$pdf->draw_rectangle($kala+30, 480, $kala+10, 530, 	$thispage, $rectparam);
+			$pdf->draw_rectangle($kala+30, 530, $kala+10, 580, 	$thispage, $rectparam);
+			$pdf->draw_text(25,  $kala+15, "#",							$thispage, $norm);
+			$pdf->draw_text(45,  $kala+15, t("Tuotenumero", $kieli),	$thispage, $norm);
+			$pdf->draw_text(190, $kala+15, t("Tuotenimi", $kieli),		$thispage, $norm);
+			$pdf->draw_text(425, $kala+15, t("As.hinta(kpl)", $kieli),		$thispage, $norm);
+			$pdf->draw_text(490, $kala+15, t("Tilattu", $kieli),		$thispage, $norm);
+			$pdf->draw_text(540, $kala+15, t("Toimitus", $kieli),		$thispage, $norm);
+		}
 		else{
 			//tulosta_lahete_eiale_eihinta.inc
 
@@ -916,6 +932,9 @@ if (!function_exists('rivi')) {
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_asiakviivakoodi.inc") {
 				rivi_asiakviivakoodi($devnull);
 			}
+			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_viivakoodi_ean13.inc") {
+				rivi_viivakoodi_ean13($devnull);
+			}
 			else{
 				rivi_ei_ale_ei_hinta($devnull);
 			}
@@ -975,6 +994,9 @@ if (!function_exists('rivi')) {
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_asiakviivakoodi.inc") {
 				// tulosta_lahete_asiakviivakoodi.inc
 				rivi_asiakviivakoodi($thispage);
+			}
+			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_viivakoodi_ean13.inc") {
+				rivi_viivakoodi_ean13($thispage);
 			}
 			else{
 				//tulosta_lahete_eiale_eihinta.inc
@@ -1267,6 +1289,72 @@ if (!function_exists('rivi_asiakviivakoodi')) {
 
 			system("rm -f $nimi");
 		}
+	}
+}
+
+if (!function_exists('rivi_viivakoodi_ean13')) {
+	function rivi_viivakoodi_ean13($thispage) {
+		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $kukarow;
+
+		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],								$thispage, $pieni);
+
+		if (trim($row["perhe_kommentti"]) != '') {
+			$pohja = $pdf->draw_paragraph($kala+$norm["height"], 45, 60, 480, $row["perhe_kommentti"],	$thispage, $norm);
+			$kala = $pohja - $rivinkorkeus;
+		}
+
+		$pdf->draw_text(45,  $kala, $row["tuoteno"],											$thispage, $norm);
+
+		$as_hinta = $row["myyntihinta"] * (1-$row["ale"]/100);
+
+		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $as_hinta), $norm);
+		$pdf->draw_text(475-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $as_hinta), 			$thispage, $norm);
+
+		$oikpos = $pdf->strlen($row["tilkpl"]." ".strtolower($row["yksikko"]), $norm);
+		$pdf->draw_text(525-$oikpos, $kala, $row["tilkpl"]." ".strtolower($row["yksikko"]), 	$thispage, $norm);
+
+		$oikpos = $pdf->strlen($row["varattu"], $norm);
+		$pdf->draw_text(575-$oikpos, $kala, $row["varattu"], 									$thispage, $norm);
+
+		if ($pdf->strlen($row["nimitys"], $norm) >= 290) {
+			$kala = $kala - $rivinkorkeus;
+		}
+		$pdf->draw_text(190, $kala, $row["nimitys"], 											$thispage, $norm);
+
+		$kala = $kala - $rivinkorkeus;
+
+		if ($row["kommentti"] != '') {
+			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 45, 60, 580, $row["kommentti"],	$thispage, $norm);
+			$kala = $pohja - $rivinkorkeus;
+		}
+
+		// tutkitaan onko tuotteelle eankoodi
+		$eanquery = "	select eankoodi
+						from tuote
+						where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
+		$eanres = mysql_query($eanquery) or pupe_error($eanquery);
+		$eanrow = mysql_fetch_array($eanres);
+
+		
+		if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"])) {
+			//viivakoodi
+			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+
+			imagejpeg(Image_Barcode::draw($eanrow["eankoodi"], 'ean13', 'jpg', false, 1, 10, false), $nimi, 90);
+
+			$fh = fopen($nimi, "r");
+			$data = fread($fh, filesize($nimi));
+			fclose($fh);
+			
+			$kala -= 5;
+			$image = $pdf->jfif_embed($data);
+			$pdf->image_place($image, $kala-$rivinkorkeus, 320, $thispage);
+
+			system("rm -f $nimi");
+
+			$kala = $kala-$rivinkorkeus-$rivinkorkeus;
+		}
+
 	}
 }
 

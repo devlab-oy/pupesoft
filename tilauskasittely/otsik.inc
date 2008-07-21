@@ -67,19 +67,28 @@
 		$asiakasid	= '';
 		$from 		= 'vaihdaasiakas';
 	}
-
+	
 	//Jos yll‰pidossa on luotu uusi asiakas
 	if ($yllapidossa == "asiakas" and $yllapidontunnus != '') {
 		$asiakasid 	= $yllapidontunnus;
 	}
 
 	// Etsit‰‰n asiakasta
-	if ($nimi != '' and !isset($jatka) and $asiakasid == 0) {
+	if (($nimi != '' and !isset($jatka) and $asiakasid == 0 and !isset($vaihdatoim_asiakas)) or ($tnimi != '' and !isset($jatka) and isset($vaihdatoim_asiakas))) {
 
 		//tehd‰‰n asiakashaku yhteensopivuus
 		$ytunnus 	= $nimi;
-		$asiakasid	= "";
+		$muutparametrit = 0;
 		$kutsuja    = "otsik.inc";
+
+		if (isset($vaihdatoim_asiakas) and $tnimi != "") {
+			$ytunnus = $tnimi;
+			$tila = "vaihdatoim_asiakas";
+			$muutparametrit = $asiakasid;
+			$kutsuja = "";
+		}
+
+		$asiakasid	= "";
 		$ahlopetus 	= "tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO";
 		$lause 		= "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
 		
@@ -91,6 +100,29 @@
 		}
 	}
 	
+	if ($tnimi == "" and !isset($jatka) and isset($vaihdatoim_asiakas)) {
+		echo "<font class='message'>".t("Syˆt‰ hakuehto toimitusosoitteen nimi-kentt‰‰n.")."</font><br>";
+	}
+	
+	if ($tila == "vaihdatoim_asiakas" and $asiakasid != 0) {
+
+		$toim_asiakasid = $asiakasid;
+		$asiakasid = $muutparametrit;
+		$tila = "";
+
+		if ($tilausnumero != 0) {
+			$tiedot_laskulta = "YES";
+		}
+		else {
+			$tiedot_laskulta = "";
+		}
+		
+	}
+	elseif ($tila == "vaihdatoim_asiakas" and $asiakasid == 0 and $monta == 0) {
+		$toim_asiakasid = $asiakasid;
+		$asiakasid = $muutparametrit;
+		$tila = "";
+	}
 	
 	if (isset($jatka) and $asiakasid != "") {
 		if ($maksuehto == "") {
@@ -518,6 +550,36 @@
 					}
 				}
 			}
+			
+			if (isset($toim_asiakasid) and $toim_asiakasid != 0) {
+
+				$toim_asiakasid = mysql_real_escape_string($toim_asiakasid);
+				$toimasiakas_query = "SELECT * from asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$toim_asiakasid'";
+				$toimasiakas_result = mysql_query($toimasiakas_query) or pupe_error($toimasiakas_query);
+				$toimasiakas_row = mysql_fetch_array($toimasiakas_result);
+				
+				if ($toimasiakas_row["toim_nimi"] != "") {
+					$srow["toim_nimi"]		= $toimasiakas_row["toim_nimi"];
+					$srow["toim_nimitark"]	= $toimasiakas_row["toim_nimitark"];
+					$srow["toim_osoite"]	= $toimasiakas_row["toim_osoite"];
+					$srow["toim_postino"]	= $toimasiakas_row["toim_postino"];
+					$srow["toim_postitp"]	= $toimasiakas_row["toim_postitp"];
+					$srow["toim_maa"]		= $toimasiakas_row["toim_maa"];
+				}
+				else {
+					$srow["toim_nimi"]		= $toimasiakas_row["nimi"];
+					$srow["toim_nimitark"]	= $toimasiakas_row["nimitark"];
+					$srow["toim_osoite"]	= $toimasiakas_row["osoite"];
+					$srow["toim_postino"]	= $toimasiakas_row["postino"];
+					$srow["toim_postitp"]	= $toimasiakas_row["postitp"];
+					$srow["toim_maa"]		= $toimasiakas_row["maa"];					
+				}
+				
+				if ($tilausnumero == 0) {
+					echo "<font class='message'>".t("HUOM! Tilauksen oletustiedot haettu laskutusasiakkaan asiakasrekisterist‰.")."</font><br>";
+				}
+			}
+			
 		}
 
 		//Tutkitaan onko tilauksella rivej‰
@@ -2133,7 +2195,9 @@
 			echo "</table><br>";
 
 			echo "<table>";
-			echo "<tr><td class='back'><input type='submit' ACCESSKEY='J' name='jatka' value='".t("Jatka")."'></td></form>";
+			echo "<tr><td class='back'><input type='submit' ACCESSKEY='J' name='jatka' value='".t("Jatka")."'></td>";
+			echo "<td class='back'><input type='submit' name='vaihdatoim_asiakas' value='".t("Hae toimitusosoite")."'></td>";
+			echo "</form>";
 			
 			if ($tilausnumero != "") {
 				echo "<form method='post' action='$PHP_SELF' autocomplete='off'>";

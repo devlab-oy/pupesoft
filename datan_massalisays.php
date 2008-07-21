@@ -251,10 +251,10 @@ if ($tee == 'GO') {
 			
 			//kyseessä on käyttöturvatiedot ja tuotekortti
 			if (strpos($kuva,"%ktt") !== FALSE) {
-				$apuselite = "ktt";
+				$apuselite = "Käyttöturvatiedote";
 			}
 			elseif (strpos($kuva,"%tko") !== FALSE) {
-				$apuselite = "tko";
+				$apuselite = "Tuotekortti";
 			}
 
 			$query = "SELECT tuoteno, tunnus FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno LIKE '$kuvanalku%'";

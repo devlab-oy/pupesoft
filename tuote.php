@@ -1245,10 +1245,10 @@
 
 			echo "</th><th colspan='";
 				if ($tilalehinta != '') {
-					echo 5;
+					echo 6;
 				}
 				else {
-					echo 4;
+					echo 5;
 				}
 			echo "'>".t("Tapahtumalaji").": ";
 			echo "<select name='tapahtumalaji' onchange='submit();'>'";
@@ -1275,6 +1275,7 @@
 			echo "<th>".t("Kate")."</th>";
 			echo "<th>".t("Arvo")."</th>";
 			echo "<th>".t("Var.Arvo")."</th>";
+			echo "<th>".t("Var.Saldo")."</th>";
 			if ($tilalehinta != '') {
 				echo "<th>".t("Hinta / Ale / Rivihinta")."</th>";
 			}
@@ -1322,6 +1323,7 @@
 			$qresult = mysql_query($query) or pupe_error($query);
 
 			$vararvo_nyt = sprintf('%.2f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"]);
+			$saldo_nyt = $kokonaissaldo_tapahtumalle;
 
 			echo "<tr class='aktiivi'>
 					<td colspan='4'>".t("Varastonarvo nyt").":</td>
@@ -1329,12 +1331,14 @@
 					<td align='right'></td>
 					<td align='right'>$vararvo_nyt</td>
 					<td align='right'>".sprintf('%.2f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"])."</td>
+					<td align='right'>".sprintf('%.2f', $saldo_nyt)."</td>
 					<td></td>
 					</tr>";
 
 			while ($prow = mysql_fetch_array ($qresult)) {
 
 				$vararvo_nyt -= $prow["arvo"];
+				$saldo_nyt -= $prow["kpl"];
 
 				if ($tapahtumalaji == "" or strtoupper($tapahtumalaji)==strtoupper($prow["laji"])) {
 					echo "<tr class='aktiivi'>";
@@ -1366,6 +1370,7 @@
 					
 					echo "<td nowrap align='right' valign='top'>".sprintf('%.2f', $prow["arvo"])."</td>";
 					echo "<td nowrap align='right' valign='top'>".sprintf('%.2f', $vararvo_nyt)."</td>";
+					echo "<td nowrap align='right' valign='top'>".sprintf('%.2f', $saldo_nyt)."</td>";
 					
 					if ($tilalehinta != '') {
 						echo "<td nowrap align='right' valign='top'>$prow[tilalehinta]</td>";

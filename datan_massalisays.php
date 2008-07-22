@@ -312,20 +312,6 @@ if ($tee == 'GO') {
 
 				// lisätään file
 				while ($apurow = mysql_fetch_array($apuresult)) {
-					// poistetaan vanhat samat ja korvataan uusilla
-					$query =	"DELETE FROM liitetiedostot
-								WHERE yhtio 			= '$kukarow[yhtio]'
-								and liitos 				= '$taulu'
-								and liitostunnus 		= '$apurow[tunnus]'
-								and kayttotarkoitus 	= '$toiminto'
-								and filename			= '$apukuva'";
-					$delresult = mysql_query($query) or pupe_error($query);
-					$dellatut = mysql_affected_rows();
-
-					if ($dellatut > 0) {
-						echo "Poistettiin $dellatut $kuva kuvaa<br>";
-					}
-
 					$kuvaselite = "Tuotekuva";
 
 					if ($toiminto == 'thumb' or $toiminto == 'TH') {
@@ -342,7 +328,22 @@ if ($tee == 'GO') {
 						}
 						
 						$toiminto = "MU";
-					}
+					}					
+					
+					// poistetaan vanhat samat ja korvataan uusilla
+					$query =	"DELETE FROM liitetiedostot
+								WHERE yhtio 			= '$kukarow[yhtio]'
+								and liitos 				= '$taulu'
+								and liitostunnus 		= '$apurow[tunnus]'
+								and kayttotarkoitus 	= '$toiminto'
+								and filename			= '$apukuva'";
+					$delresult = mysql_query($query) or pupe_error($query);
+					$dellatut = mysql_affected_rows();
+
+					
+					if ($dellatut > 0) {
+						echo "Poistettiin $dellatut $kuva kuvaa<br>";
+					}					
 
 					$query = "	INSERT INTO liitetiedostot SET
 								yhtio    			= '$kukarow[yhtio]',

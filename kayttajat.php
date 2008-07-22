@@ -530,12 +530,18 @@
 				if ($krow["taso"] == "3") {
 					$sel3 = "SELECTED";
 				}
+				if ($krow["taso"] == "9") {
+					$sel9 = "SELECTED";
+				}
 				echo "<tr><th align='left'>".t("Taso").":</th>";
 
 				echo "<td><select name='taso'>";
 				echo "<option value='1' $sel1>".t("Taso 1 Tehotilaaja, tilaukset menee suoraan tomitukseen")."</option>";
 				echo "<option value='2' $sel2>".t("Taso 2 Aloittelijatilaaja, tilaukset hyväksytetään ennen toimitusta")."</option>";
-				echo "<option value='3' $sel3>".t("Taso 3 Tehotilaaja, tilaukset menee suoraan tomitukseen MAISTA RIIPPUMATTA")."</option>";
+				echo "<option value='3' $sel3>".t("Taso 3 Tehotilaaja, tilaukset menee suoraan toimitukseen MAISTA RIIPPUMATTA")."</option>";
+				if ($kukarow['yhtio'] == 'artr') {
+					echo "<option value='9' $sel9>".t("Taso 9 Tehotilaaja, hyväksytyt työmääräykset tilataan automaattisesti")."</option>";
+				}
 				echo "</select></td></tr>";
 			}
 

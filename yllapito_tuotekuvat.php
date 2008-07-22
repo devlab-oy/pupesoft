@@ -186,7 +186,7 @@
 							echo "<td valign='top' class='back'>";
 
 								############### TUNNUS (voidaan hakea tunnusvälillä)
-								echo "<table>";
+								echo "<table width='100%'>";
 									echo "<tr>";
 										echo "<th colspan='3'>".t("Tuotenumerohaku").":</th>";
 									echo "</tr>";

@@ -4,11 +4,13 @@
 
 	echo "<font class='head'>".t("Uusi muu tosite")."</font><hr>";
 
+	$kurssi = 1;
+
 	// Tarkistetetaan syötteet perustusta varten
 	if ($tee == 'I') {
 		$totsumma = 0;
 		$summa = str_replace ( ",", ".", $summa);
-
+		$gok  = 0;
 		$tpk += 0;
 		$tpp += 0;
 		$tpv += 0;
@@ -18,6 +20,26 @@
 		if (!$val) {
 			echo "<b>".t("Virheellinen tapahtumapvm")."</b><br>";
 			$gok = 1; //  Tositetta ei kirjoiteta kantaan vielä
+		}
+
+		if ($valkoodi != $yhtiorow["valkoodi"] and $gok == 0) {
+			// koitetaan hakea maksupäivän kurssi
+			$query = "	SELECT *
+						FROM valuu_historia
+						WHERE kotivaluutta = '$yhtiorow[valkoodi]'
+						AND valuutta = '$valkoodi'
+						AND kurssipvm <= '$tpv-$tpk-$tpp'
+						LIMIT 1";
+			$valuures = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($valuures) == 1) {
+				$valuurow = mysql_fetch_array($valuures);
+				$kurssi = $valuurow["kurssi"];
+			}
+			else {
+				echo "<font class='error'>".t("Ei löydetty sopivaa kurssia!")."</font><br>";
+				$gok = 1; //  Tositetta ei kirjoiteta kantaan vielä
+			}
 		}
 
 		// Talletetaan käyttäjän nimellä tositteen/liitteen kuva, jos sellainen tuli
@@ -33,16 +55,14 @@
 			}
 		}
 
-
 		if (is_uploaded_file($_FILES['tositefile']['tmp_name'])) {
-
 			//	ei koskaan päivitetä automaattisesti
 			$tee = "N";
-			
+
 			$retval = tarkasta_liite("tositefile", array("TXT", "CSV", "XLS"));
 			if($retval === true) {
 				list($name, $ext) = split("\.", $_FILES['tositefile']['name']);
-				
+
 				if (strtoupper($ext)=="XLS") {
 					require_once ('excel_reader/reader.php');
 
@@ -105,21 +125,21 @@
 					}
 					fclose($file);
 				}
-				
+
 				$maara = 0;
 				foreach ($excelrivi as $erivi) {
-					foreach ($erivi as $e => $eriv) {						
-						${"i".strtolower($otsikot[$e])}[$maara] = $eriv;						
+					foreach ($erivi as $e => $eriv) {
+						${"i".strtolower($otsikot[$e])}[$maara] = $eriv;
 					}
 					$maara++;
 				}
-			
+
 				//	Lisätään vielä 2 tyhjää riviä loppuun
 				$maara+=2;
-				
+
 			}
 			else {
-				
+
 				//	Liitetiedosto ei kelpaa
 				echo $retval;
 				$tee = "N";
@@ -131,14 +151,25 @@
 			$tee = "N";
 		}
 
-		$turvasumma = $summa;
-		$kuittiok 	= 0; // Onko joku vienneistä kassa-tili, jotta kuitti voidaan tulostaa
+		// turvasumma kotivaluutassa
+		$turvasumma = round($summa * $kurssi, 2);
+		// turvasumma valuutassa
+		$turvasumma_valuutassa = $summa;
+
+		$kuittiok = 0; // Onko joku vienneistä kassa-tili, jotta kuitti voidaan tulostaa
+		$isumma_valuutassa = array();
 
 		for ($i=1; $i<$maara; $i++) {
-			if ((strlen($itili[$i]) > 0) or (strlen($isumma[$i]) > 0)) { // Käsitelläänkö rivi??
+			if (strlen($itili[$i]) > 0 or strlen($isumma[$i]) > 0) { // Käsitelläänkö rivi??
 
 				$isumma[$i] = str_replace ( ",", ".", $isumma[$i]);
-				if ((strlen($selite) > 0) && (strlen($iselite[$i]) == 0)) { // Siirretään oletusselite tiliöinneille
+
+				// otetaan valuuttasumma talteen
+				$isumma_valuutassa[$i] = $isumma[$i];
+				// käännetään kotivaluuttaan
+				$isumma[$i] = round($isumma[$i] * $kurssi, 2);
+
+				if (strlen($selite) > 0 and strlen($iselite[$i]) == 0) { // Siirretään oletusselite tiliöinneille
 					$iselite[$i] = $selite;
 				}
 				if (strlen($iselite[$i]) == 0) { // Selite puuttuu
@@ -188,6 +219,11 @@
 
 		}
 
+		if (count($isumma_valuutassa) == 0) {
+			$gok=1;
+			echo "<font class='error'>".t("Et syöttänyt yhtään tiliöintiriviä")."!</font><br>";
+		}
+
 		if ($kuitti != '') {
 			if ($kassaok==0) {
 				$gok=1;
@@ -206,7 +242,7 @@
 
  		// Jossain tapahtui virhe
 		if ($gok == 1) {
-			echo "<font class='error'>".t("Jossain oli virheitä/muutoksia")."!</font><br>";
+			echo "<font class='error'>".t("Jossain oli virheitä/muutoksia")."!</font><br><br>";
 			$tee = 'N';
 		}
 
@@ -217,12 +253,12 @@
 	if ($tee == 'I') {
 
 		$query = "	INSERT into lasku set
-						yhtio = '$kukarow[yhtio]',
-						tapvm = '$tpv-$tpk-$tpp',
-						nimi = '$nimi',
-						tila = 'X',
-						laatija = '$kukarow[kuka]',
-						luontiaika = now()";
+					yhtio = '$kukarow[yhtio]',
+					tapvm = '$tpv-$tpk-$tpp',
+					nimi = '$nimi',
+					tila = 'X',
+					laatija = '$kukarow[kuka]',
+					luontiaika = now()";
 		$result = mysql_query($query) or pupe_error($query);
 
 //		echo "$query <br>";
@@ -230,31 +266,37 @@
 
 		if ($kuva) {
 			// päivitetään kuvalle vielä linkki toiseensuuntaa
-			$query = "update liitetiedostot set liitostunnus='$tunnus', selite='$selite $summa' where tunnus='$kuva'";
+			$query = "UPDATE liitetiedostot set liitostunnus='$tunnus', selite='$selite $summa' where tunnus='$kuva'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 
 		// Tehdään tiliöinnit
 		for ($i=1; $i<$maara; $i++) {
 			if (strlen($itili[$i]) > 0) {
-				$tili = $itili[$i];
-				$kustp = $ikustp[$i];
-				$kohde = $ikohde[$i];
-				$projekti = $iprojekti[$i];
-				$summa = $isumma[$i];
-				$vero = $ivero[$i];
-				$selite = $iselite[$i];
-				require "inc/teetiliointi.inc";
-				$itili[$i]='';
-				$ikustp[$i]='';
-				$ikohde[$i]='';
-				$iprojekti[$i]='';
-				$isumma[$i]='';
-				$ivero[$i]='';
-				$iselite[$i]='';
+				$tili				= $itili[$i];
+				$kustp				= $ikustp[$i];
+				$kohde				= $ikohde[$i];
+				$projekti			= $iprojekti[$i];
+				$summa				= $isumma[$i];
+				$vero				= $ivero[$i];
+				$selite 			= $iselite[$i];
+				$summa_valuutassa	= $isumma_valuutassa[$i];
+				$valkoodi 			= $valkoodi;
+
+				require("inc/teetiliointi.inc");
+
+				$itili[$i]				= '';
+				$ikustp[$i]				= '';
+				$ikohde[$i]				= '';
+				$iprojekti[$i]			= '';
+				$isumma[$i]				= '';
+				$ivero[$i]				= '';
+				$iselite[$i]			= '';
+				$isumma_valuutassa[$i]	= '';
 			}
 		}
 		if ($kuitti != '') require("inc/kuitti.inc");
+
 		$tee="";
 		$selite="";
 		$fnimi="";
@@ -262,13 +304,24 @@
 		$nimi="";
 		$kuitti="";
 		$kuva = "";
+		$turvasumma_valuutassa = "";
+		$valkoodi = "";
 
-		echo "<font class='message'>".t("Tosite luotu")."</font><br>";
+		echo "<font class='message'>".t("Tosite luotu")."!</font>";
+
+		echo "	<form action = 'muutosite.php' method='post'>
+				<input type='hidden' name='tee' value='E'>
+				<input type='hidden' name='tunnus' value='$tunnus'>
+				<input type='Submit' value='".t("Näytä tosite")."'>
+				</form><br><hr><br>";
 	}
 
 	if ($kukarow['kirjoitin'] == '') echo "<font class='message'>".t("Sinulla ei ole oletuskirjoitinta. Et voi tulostaa kuitteja")."!</font><br>";
 
 	// Tehdään haluttu määrä tiliöintirivejä
+
+	$sel = array();
+	$sel[$maara] = "selected";
 
 	echo "<form action = 'tosite.php' method='post'>
 		<input type='hidden' name='tee'value='N'>
@@ -277,17 +330,17 @@
 		<input type='hidden' name='tpv' maxlength='4' size=4 value='$tpv'>
 		<table>
 		<tr>
-		<td>".t("Tiliöintirivien määrä")."</td>
+		<th>".t("Tiliöintirivien määrä")."</th>
 		<td>
 		<select name='maara'>
-		<option value ='3'>2
-		<option value ='5'>4
-		<option value ='9'>8
-		<option value ='17'>16
-		<option value ='33'>32
-		<option value ='151'>150
+		<option $sel[3] value='3'>2</option>
+		<option $sel[5] value='5'>4</option>
+		<option $sel[9] value='9'>8</option>
+		<option $sel[17] value='17'>16</option>
+		<option $sel[33] value='33'>32</option>
+		<option $sel[151] value='151'>150</option>
 		</select>
-		</td><td><input type = 'submit' value = '".t("Perusta")."'></td>
+		</td><td class='back'><input type = 'submit' value = '".t("Perusta")."'></td>
 		</tr>
 		</table></form><br>";
 
@@ -343,7 +396,7 @@
 					dateTiliLoppu = dateTiliLoppu.getTime();
 
 					dateSyotetty = dateSyotetty.getTime();
-					
+
 					if(dateSyotetty < dateTiliAlku || dateSyotetty > dateTiliLoppu) {
 						var msg = '".t("VIRHE: Syötetty päivämäärä ei sisälly kuluvaan tilikauteen")."!';
 
@@ -354,8 +407,7 @@
 							return false;
 						}
 					}
-					
-					
+
 					if(ero >= 30) {
 						var msg = '".t("Oletko varma, että haluat päivätä laskun yli 30pv menneisyyteen")."?';
 						return confirm(msg);
@@ -364,12 +416,12 @@
 						var msg = '".t("Oletko varma, että haluat päivätä laskun yli 14pv tulevaisuuteen")."?';
 						return confirm(msg);
 					}
-										
+
 					if (vv < dateTallaHet.getFullYear()) {
 						if (5 < dateTallaHet.getDate()) {
 							var msg = '".t("Oletko varma, että haluat päivätä laskun menneisyyteen")."?';
 							return confirm(msg);
-						}												
+						}
 					}
 					else if (vv == dateTallaHet.getFullYear()) {
 						if (kk < dateTallaHet.getMonth() && 5 < dateTallaHet.getDate()) {
@@ -377,7 +429,7 @@
 							return confirm(msg);
 						}
 					}
-					
+
 
 				}
 			</SCRIPT>";
@@ -385,23 +437,49 @@
 		$formi = 'tosite';
 		$kentta = 'tpp';
 
+		echo "<br>";
 		echo "<font class='message'>Syötä tositteen otsikkotiedot:</font>";
 
-		echo "<form name = 'tosite' action = 'tosite.php' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>
-				<input type='hidden' name='tee' value='I'>
-				<input type='hidden' name='maara' value='$maara'>
-		      <table><tr>
-		      <td>".t("Tositteen päiväys")."</td>
-		      <td><input type='text' name='tpp' maxlength='2' size='2' value='$tpp'>
-			<input type='text' name='tpk' maxlength='2' size='2' value='$tpk'>
-			<input type='text' name='tpv' maxlength='4' size='4' value='$tpv'> ".t("ppkkvvvv")."</td>
-		      </tr>";
-		echo "<tr><td>".t("Summa")."</td><td><input type='text' name='summa' value='$summa'></td></tr>";
-		echo "<tr><td>".t("Nimi")."</td><td><input type='text' name='nimi' value='$nimi'>";
+		echo "<form name = 'tosite' action = 'tosite.php' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
+		echo "<input type='hidden' name='tee' value='I'>";
+		echo "<input type='hidden' name='maara' value='$maara'>";
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Tositteen päiväys")."</th>";
+		echo "<td><input type='text' name='tpp' maxlength='2' size='2' value='$tpp'>";
+		echo "<input type='text' name='tpk' maxlength='2' size='2' value='$tpk'>";
+		echo "<input type='text' name='tpv' maxlength='4' size='4' value='$tpv'> ".t("ppkkvvvv")."</td>";
+		echo "</tr>";
+		echo "<tr><th>".t("Summa")."</th><td><input type='text' name='summa' value='$turvasumma_valuutassa'>";
 
-		if ($kuitti != '') $kuitti = 'checked';
-		if ($kukarow['kirjoitin'] != '') echo " ".t("Tulosta kuitti")." <input type='checkbox' name='kuitti' $kuitti>";
+		$query = "	SELECT nimi, tunnus
+					FROM valuu
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY jarjestys";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		echo " <select name='valkoodi'>";
+
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$sel="";
+			if (($vrow['nimi'] == $yhtiorow["valkoodi"] and $valkoodi == "") or ($vrow["nimi"] == $valkoodi)) {
+				$sel = "selected";
+			}
+			echo "<option value='$vrow[nimi]' $sel>$vrow[nimi]</option>";
+		}
+
+		echo "</select>";
 		echo "</td></tr>";
+		echo "<tr><th>".t("Nimi")."</th><td><input type='text' name='nimi' value='$nimi'>";
+
+		if ($kuitti != '') {
+			$kuitti = 'checked';
+		}
+		if ($kukarow['kirjoitin'] != '') {
+			echo " ".t("Tulosta kuitti")." <input type='checkbox' name='kuitti' $kuitti>";
+		}
+		echo "</td>";
+		echo "</tr>";
 
 		if(is_readable("excel_reader/reader.php")) {
 			$excel = ".xls, ";
@@ -410,10 +488,11 @@
 			$excel = "";
 		}
 
-		echo "	<td colspan = '2'>".t("Selite")." <input type='text' name='selite' value='$selite' maxlength='150' size=60></td>
-				</tr>";
+		echo "<th>".t("Selite")."</th>";
+		echo "<td><input type='text' name='selite' value='$selite' maxlength='150' size=60></td>";
+		echo "</tr>";
 
-		echo "<tr><td>".t("Tositteen kuva/liite")."</td>";
+		echo "<tr><th>".t("Tositteen kuva/liite")."</th>";
 
 		if (strlen($kuva) > 0) {
 			echo "<td>".t("Kuva jo tallessa")."!<input name='kuva' type='hidden' value = '$kuva'></td>";
@@ -437,32 +516,36 @@
 		echo "<br><font class='message'>Tai syötä tositteen rivit käsin:</font>";
 
 
-		echo "<table>
-		      <tr><th>".t("Tili")."</th><th>".t("Tarkenne")."</th>
-		      <th>".t("Summa")."</th><th>".t("Vero")."</th></tr>";
-
 		for ($i=1; $i<$maara; $i++) {
+
+			echo "<table>";
+			echo "<tr>";
+			echo "<th width='200'>".t("Tili")."</th>";
+			echo "<th>".t("Tarkenne")."</th>";
+			echo "<th>".t("Summa")."</th>";
+			echo "<th>".t("Vero")."</th>";
+			echo "</tr>";
+
 			echo "<tr>";
 
 			if ($iulos[$i] == '') {
 				//Annetaan selväkielinen nimi
-				$tilinimi='';
+				$tilinimi = '';
 
 				if ($itili[$i] != '') {
-					$query = "SELECT nimi
+					$query = "	SELECT nimi
 								FROM tili
 								WHERE yhtio = '$kukarow[yhtio]' and tilino = '$itili[$i]'";
 					$vresult = mysql_query($query) or pupe_error($query);
-
 					if (mysql_num_rows($vresult) == 1) {
-						$vrow=mysql_fetch_array($vresult);
-						$tilinimi = $vrow['nimi'] . "<br>";
+						$vrow = mysql_fetch_array($vresult);
+						$tilinimi = "<br>".$vrow['nimi'];
 					}
 				}
-				echo "<td>$tilinimi<input type='text' name='itili[$i]' value='$itili[$i]''></td>";
+				echo "<td width='200' valign='top'><input type='text' size='13' name='itili[$i]' value='$itili[$i]''>$tilinimi</td>";
 			}
 			else {
-				echo "<td>$iulos[$i]</td>";
+				echo "<td width='200' valign='top'>$iulos[$i]</td>";
 			}
 
 			// Tehdään kustannuspaikkapopup
@@ -492,7 +575,7 @@
 			echo "<select name='ikohde[$i]'>";
 			echo "<option value =' '>".t("Ei kohdetta")."";
 
-			while ($vrow=mysql_fetch_array($vresult)) {
+			while ($vrow = mysql_fetch_array($vresult)) {
 				$sel="";
 				if ($ikohde[$i] == $vrow[0]) {
 					$sel = "selected";
@@ -508,9 +591,9 @@
 						ORDER BY nimi";
 			$vresult = mysql_query($query) or pupe_error($query);
 			echo "<select name='iprojekti[$i]'>";
-			echo "<option value =' '>".t("Ei projektia")."";
+			echo "<option value = ' '>".t("Ei projektia")."";
 
-			while ($vrow=mysql_fetch_array($vresult)) {
+			while ($vrow = mysql_fetch_array($vresult)) {
 				$sel="";
 				if ($iprojekti[$i] == $vrow[0]) {
 					$sel = "selected";
@@ -518,37 +601,59 @@
 				echo "<option value ='$vrow[0]' $sel>$vrow[1]";
 			}
 			echo "</select></td>";
+			echo "<td valign='top'><input size='13' type='text' name='isumma[$i]' value='$isumma_valuutassa[$i]'> $valkoodi<br><br>$isumma[$i]</td>";
 
-			echo "<td><input type='text' name='isumma[$i]' value='$isumma[$i]'></td>";
-
-			if ($hardcoded_alv!=1) {
-				echo "<td>" . alv_popup('ivero['.$i.']', $ivero[$i]) . "</td>";
+			if ($hardcoded_alv != 1) {
+				echo "<td valign='top'>" . alv_popup('ivero['.$i.']', $ivero[$i]) . "</td>";
 			}
 			else {
 				echo "<td></td>";
 			}
 
-			echo  "<td><font class='error'>$ivirhe[$i]</font></td>";
-
+			echo "<td class='back'><font class='error'>$ivirhe[$i]</font></td>";
 			echo "</tr>";
 
-			echo "<tr><td colspan = '5'>
-			      ".t("Selite").":<input type='text' name='iselite[$i]' value='$iselite[$i]' maxlength='150' size=60><br><br></td></tr>";
+			echo "<tr><td>".t("Selite")."</td><td colspan='3'><input type='text' name='iselite[$i]' value='$iselite[$i]' maxlength='150' size=60></td></tr>";
+
+			echo "</table><br>";
 		}
 
 		if ($gok==1) {
-			echo "<tr><td>".t("Tosite yhteensä")."</td><td>";
+			echo "<table cellpadding='2'>";
+			echo "<tr>";
+			echo "<th>".t("Tosite yhteensä")."</th>";
+			echo "<td>";
+
 			$heittotila == '';
-			if ($heittook != '') $heittotila = 'checked';
-			if (abs($totsumma) >= 0.01) echo t("Hyväksy heitto")."<input type='checkbox' name='heittook' $heittotila>";
-			echo "</td><td>";
+
+			if ($heittook != '') {
+				$heittotila = 'checked';
+			}
+
 			$totsumma = round($totsumma,2);
-			if (abs($totsumma) >= 0.01) echo "<font class='error'>$totsumma</font>";
-			else echo "$totsumma";
-			echo "</td><td></td><td></td></tr>";
+
+			if (abs($totsumma) >= 0.01) {
+				echo "<font class='error'>$totsumma</font>";
+
+				if ($valkoodi != $yhtiorow["valkoodi"]) {
+					// turvasumma kotivaluutassa
+					$totsumma_valuutassa = round($totsumma / $kurssi, 2);
+					echo " <font class='error'>($totsumma_valuutassa $valkoodi)</font>";
+				}
+
+				echo "</td><td>";
+				echo "<input type='checkbox' name='heittook' $heittotila> ".t("Hyväksy heitto");
+
+			}
+			else {
+				echo " $totsumma ".t("Tiliöinti ok!");
+			}
+			echo "</td>";
+			echo "</tr>";
+			echo "</table><br>";
 		}
 
-		echo "</table><input type='Submit' value = '".t("Tee tosite")."'></form>";
+		echo "<input type='submit' value='".t("Tee tosite")."'></form>";
 
 	}
 

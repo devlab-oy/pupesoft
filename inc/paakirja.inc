@@ -339,7 +339,7 @@
 		$lisa .= " and lasku.liitostunnus='$toimittajaid' and tila in ('H','Y','M','P','Q') ";
 	}
 
-	$query = "	SELECT $alku , kustp.nimi kustp, kohde.nimi kohde, projekti.nimi projekti, CONCAT_WS(' ', selite, lasku.nimi) selite, tiliointi.summa, vero, tiliointi.ltunnus, tiliointi.tilino xtilino
+	$query = "	SELECT $alku , kustp.nimi kustp, kohde.nimi kohde, projekti.nimi projekti, CONCAT_WS(' ', selite, lasku.nimi) selite, tiliointi.summa, vero, tiliointi.ltunnus, tiliointi.tilino xtilino, tiliointi.summa_valuutassa, tiliointi.valkoodi
 				FROM tiliointi
 				LEFT JOIN tili ON tili.tilino = tiliointi.tilino and tili.yhtio = tiliointi.yhtio
 				LEFT JOIN lasku ON lasku.tunnus = tiliointi.ltunnus
@@ -354,7 +354,7 @@
 
 	echo "<table><tr>";
 
-	for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
+	for ($i = 0; $i < mysql_num_fields($result)-4; $i++) {
 		echo "<th>" . t(mysql_field_name($result,$i)) . "</th>";
 
 		if(isset($workbook)) {
@@ -384,7 +384,7 @@
 
 		echo "<tr>";
 
-		for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
+		for ($i=0; $i<mysql_num_fields($result)-4; $i++) {
 
 			if ($i == 0) {
 				if ($edtrow[$i] == $trow[$i]) { // Vaihtuiko joku??
@@ -423,12 +423,12 @@
 					$kumsumma = $alkurow["saldo"];
 
 					//tilin alkusaldo
-					echo "<td colspan='".(mysql_num_fields($result)-2)."'></td>";
+					echo "<td colspan='".(mysql_num_fields($result)-4)."'></td>";
 					echo "<td align='right'>".sprintf("%.2f",$kumsumma)."</td></tr>";
 					echo "<tr>";
 
 					if(isset($workbook)) {
-						for ($a=0; $a<mysql_num_fields($result)-2; $a++) {
+						for ($a=0; $a<mysql_num_fields($result)-4; $a++) {
 							$worksheet->write($excelrivi, $a, "");
 						}
 						$worksheet->write($excelrivi, $a+1, $kumsumma);
@@ -467,15 +467,21 @@
 					$summa += $trow[$i];
 
 				 }
-				 else {
+				else {
 					echo "<td align = 'right' nowrap>";
 					echo str_replace(".",",",sprintf("%.2f", $trow[$i]));
 					echo "</td>";
-				 }
+				}
 
 			}
 			else {
-				if (($i == 5)) $trow[$i] = str_replace("<br>"," ",$trow[$i]);
+				if ($i == 5) {
+					$trow[$i] = str_replace("<br>"," ",$trow[$i]);
+					
+					if ($trow["valkoodi"] != $yhtiorow["valkoodi"] and $trow["valkoodi"] != "") {
+						$trow[$i] .= "($trow[summa_valuutassa] $trow[valkoodi])";
+					}
+				} 
 
 				echo "<td>$trow[$i]</td>";
 			}

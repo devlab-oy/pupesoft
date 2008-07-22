@@ -60,7 +60,7 @@ if ($tee == "") {
 
 	$query = "SELECT *
 			  FROM lasku
-			  WHERE tunnus = '$otunnus' and yhtio='$kukarow[yhtio]'";
+			  WHERE tunnus = '$otunnus' and yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array ($result);
 
@@ -142,19 +142,16 @@ if ($tee == "") {
 	$result = mysql_query($query) or pupe_error($query);
 
 	if ($laskurow["maa_maara"] == "") {
-		#TODO tähän pitäisi tehdä query, joka laskee montako riviä keikalla on kohdistettuna mihinkin maahan ja valitsee sen maan johon on eniten
-		# JOIN tuotepaikat 
 		$query = "	SELECT varastopaikat.maa, count(*) kpl 
 					FROM lasku
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus) 
-					JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio AND varastopaikat.tunnus = lasku.varasto)
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus) 
+					JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio 
+						AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+						AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')))
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					AND lasku.laskunro = '$laskurow[laskunro]'
-					AND lasku.tapvm = '$laskurow[tapvm]'
-					AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-					AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+					AND lasku.tunnus = '$laskurow[tunnus]'
 					GROUP BY varastopaikat.maa 
-					ORDER BY kpl 
+					ORDER BY kpl DESC
 					LIMIT 1";
 		$maaresult = mysql_query($query) or pupe_error($query);
 

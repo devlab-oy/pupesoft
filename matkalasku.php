@@ -1679,7 +1679,7 @@ if ($tee == "MUOKKAA") {
 						$v = 1;
 					}
 					
-					$valeja = ($aburow[0]*$v)+$aburow[1]+$aburow[2]+$aburow[3]+$aburow[4]-1;
+					$valeja = ($aburow[0]*$v)+$aburow[1]+$aburow[2]+$aburow[3]+$aburow[4]+$aburow[0]-1;
 					$rivei = $aburow[0];
 					$tapahtumia++;
 

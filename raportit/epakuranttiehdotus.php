@@ -121,7 +121,7 @@ if ($subnappi != '') {
 		$epakuranttipvm = "and epakurantti25pvm='0000-00-00' and epakurantti50pvm='0000-00-00' and epakurantti75pvm='0000-00-00' and epakurantti100pvm='0000-00-00'";
 		echo "<font class='message'>".t("25% epäkuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
 	}
-	
+
 	if ($tyyppi == 'puoli') {
 		// puoliepäkurantteja etsittäessä tuote ei saa olla puoli eikä täysiepäkurantti
 		$epakuranttipvm = "and epakurantti50pvm='0000-00-00' and epakurantti75pvm='0000-00-00' and epakurantti100pvm='0000-00-00'";
@@ -157,13 +157,19 @@ if ($subnappi != '') {
 	}
 
 	// etsitään saldolliset tuotteet
-	$query  = "	SELECT tuote.tuoteno, tuote.osasto, tuote.try, tuote.myyntihinta, tuote.nimitys, tuote.tahtituote, tuote.status, tuote.hinnastoon, round(if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25),6) kehahin, tuote.vihapvm, epakurantti25pvm, epakurantti50pvm, epakurantti75pvm,
-				(select group_concat(distinct tuotteen_toimittajat.toimittaja separator '/') from tuotteen_toimittajat where tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno) toimittaja, ifnull(sum(saldo),0) saldo
-				from tuote
-				LEFT JOIN tuotepaikat on tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
-				where tuote.yhtio='$kukarow[yhtio]' and tuote.ei_saldoa='' $epakuranttipvm $lisa
-				group by tuote.tuoteno, tuote.osasto, tuote.try, tuote.myyntihinta, tuote.nimitys, tuote.tahtituote, kehahin, tuote.vihapvm
-				having saldo > 0";
+	$query  = "	SELECT tuote.tuoteno, tuote.osasto, tuote.try, tuote.myyntihinta, tuote.nimitys, tuote.tahtituote, tuote.status, tuote.hinnastoon,
+				round(if(epakurantti75pvm = '0000-00-00', if(epakurantti50pvm = '0000-00-00', if(epakurantti25pvm = '0000-00-00', kehahin, kehahin * 0.75), kehahin * 0.5), kehahin * 0.25), 6) kehahin,
+				tuote.vihapvm, epakurantti25pvm, epakurantti50pvm, epakurantti75pvm,
+				(SELECT group_concat(distinct tuotteen_toimittajat.toimittaja separator '/') FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno) toimittaja,
+				ifnull(sum(saldo), 0) saldo
+				FROM tuote
+				LEFT JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
+				WHERE tuote.yhtio = '$kukarow[yhtio]'
+				AND tuote.ei_saldoa = ''
+				$epakuranttipvm
+				$lisa
+				GROUP BY tuote.tuoteno, tuote.osasto, tuote.try, tuote.myyntihinta, tuote.nimitys, tuote.tahtituote, kehahin, tuote.vihapvm
+				HAVING saldo > 0";
 	$result = mysql_query($query) or pupe_error($query);
 
 	echo t("Löytyi")." ".mysql_num_rows($result)." ".t("sopivaa tuotetta.. Aloitellaan laskenta.")."<br><br>";
@@ -178,8 +184,8 @@ if ($subnappi != '') {
 
 	echo "<pre>";
 	echo "".t("osasto")."\t".t("try")."\t".t("kpl")."\t".t("saldo")."\t".t("kierto")."\t".t("tahtituote")."\t".t("status")."\t".t("hinnastoon")."\t".t("eka saapuminen")."\t".t("vika saapuminen")."\t".t("hinta")."\t".t("kehahin")."\t".t("tuoteno")."\t".t("nimitys")."\t".t("toimittaja").$yhtsop;
-	
-	
+
+
 	while ($row = mysql_fetch_array($result)) {
 
 		if ($row["epakurantti75pvm"] != "0000-00-00") {
@@ -245,7 +251,7 @@ if ($subnappi != '') {
 			if (table_exists("yhteensopivuus_tuote")) {
 				$query = "SELECT count(yhteensopivuus_rekisteri.tunnus)
 				FROM yhteensopivuus_tuote, yhteensopivuus_rekisteri
-				WHERE yhteensopivuus_tuote.yhtio = yhteensopivuus_rekisteri.yhtio 
+				WHERE yhteensopivuus_tuote.yhtio = yhteensopivuus_rekisteri.yhtio
 				AND yhteensopivuus_tuote.atunnus = yhteensopivuus_rekisteri.autoid
 				AND yhteensopivuus_tuote.yhtio = '$kukarow[yhtio]'
 				AND yhteensopivuus_tuote.tuoteno = '$row[tuoteno]'";
@@ -262,9 +268,9 @@ if ($subnappi != '') {
 					echo "\t".$yhteensopivuus_row[0]."\n";
 				} else {
 					echo "\t\n";
-				}				
+				}
 			}
-			
+
 
 		} // end saapunut ennen alarajaa
 

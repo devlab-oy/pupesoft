@@ -437,7 +437,7 @@
 		}
 	}
 
-	if ($tee == "VALMISTA") {
+	if ($tee == "VALMISTA" and $valmistettavat != "") {
 		//Haetaan otsikoiden tiedot
 		$query = "	SELECT
 					GROUP_CONCAT(DISTINCT lasku.tunnus SEPARATOR ', ') 'Tilaus',
@@ -449,7 +449,15 @@
 					and lasku.tunnus=tilausrivi.otunnus
 					and lasku.yhtio=tilausrivi.yhtio";
 		$result = mysql_query($query) or pupe_error($query);
-		$row    = mysql_fetch_array($result);
+		
+		if (mysql_num_rows($result) == 0) {
+			echo "<font class='error'>Yhtään tilausta ei löytynyt</font><br>";
+			$tee = "";
+		}
+	}
+
+	if ($tee == "VALMISTA" and $valmistettavat != "") {	
+		$row = mysql_fetch_array($result);
 
 		//Päivitetään lasku niin, että se on tilassa korjataan
 		if ($toim == "KORJAA") {

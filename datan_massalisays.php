@@ -311,14 +311,14 @@ if ($tee == 'GO') {
 			if (mysql_num_rows($apuresult) > 0) {
 
 				// lis‰t‰‰n file
-				while ($apurow = mysql_fetch_array($apuresult)) {
+				while ($apurow = mysql_fetch_array($apuresult) ) {
 					$kuvaselite = "Tuotekuva";
 
-					if ($toiminto == 'thumb' or $toiminto == 'TH') {
+					if (($toiminto == 'thumb' or $toiminto == 'TH') and $apuselite == "") {
 						$toiminto = 'TH';
 						$kuvaselite .= " pieni";
 					}
-					elseif ($toiminto == 'normaali' or $toiminto = 'TK') {
+					elseif (($toiminto == 'normaali' or $toiminto = 'TK') and $apuselite == "") {
 						$toiminto = 'TK';
 						$kuvaselite .= " normaali";
 					}

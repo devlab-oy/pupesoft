@@ -63,11 +63,11 @@
 
 		if (strtoupper($row["suoritusvaluutta"]) != strtoupper($row['yhtiovaluutta'])) {
 			$alennus = round(($row["laskutettu_valuutassa"] - $row["suoritettu"]) * $row["suorituskurssi"], 2);
-			$alennus_valuutassa = $row["laskutettu_valuutassa"] - $row["suoritettu"];
+			$alennus_valuutassa = round($row["laskutettu_valuutassa"] - $row["suoritettu"], 2);
 		}
 		else {
-			$alennus = $row["laskutettu"] - $row["suoritettu"];
-			$alennus_valuutassa = $row["laskutettu"] - $row["suoritettu"];
+			$alennus = round($row["laskutettu"] - $row["suoritettu"], 2);
+			$alennus_valuutassa = round($row["laskutettu"] - $row["suoritettu"], 2);
 		}
 
 		#Katsotaan ensin, ettei tätä laskua ole jo suoritettu/maksettu

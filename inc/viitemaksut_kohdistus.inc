@@ -231,7 +231,7 @@
 										tilino 				= '$row[alennustili]',
 										summa 				= '$alennus',
 										summa_valuutassa 	= '$alennus_valuutassa',
-										valkoodi			= '$row[suoritusvaluutta]'
+										valkoodi			= '$row[suoritusvaluutta]',
 										selite 				= 'Automaattikohdistettu asiakkaan suoritus (Kassa-Alennus)'";
 							$insres = mysql_query($query) or pupe_error($query);
 							$aputunnus = mysql_insert_id();

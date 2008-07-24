@@ -739,7 +739,7 @@ if ($tee == 'P' or $tee == 'E') {
 	//Tehd‰‰n valuuttapopup, jos ulkomainen toimittaja muuten kirjoitetaan vain $yhtiorow[valkoodi]
 	if ((is_array($trow) and strtoupper($trow['maa']) != strtoupper($yhtiorow['maa'])) or (!is_array($trow) and $tyyppi != strtoupper($yhtiorow['maa']))) {
 
-		$query = "SELECT nimi
+		$query = "	SELECT nimi
 					FROM valuu
 					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY jarjestys";
@@ -752,7 +752,7 @@ if ($tee == 'P' or $tee == 'E') {
 			if ($valkoodi == $vrow['nimi']) {
 				$sel = "selected";
 			}
-			echo "<option value ='$vrow[nimi]' $sel>$vrow[nimi]";
+			echo "<option value ='$vrow[nimi]' $sel>$vrow[nimi]</option>";
 		}
 		echo "</select>";
 	}
@@ -789,7 +789,7 @@ if ($tee == 'P' or $tee == 'E') {
 
 			echo "
 			<tr>
-				<td>".t("Ohjeita pankille")."</td><td><textarea name='ohjeitapankille' rows='2' cols='35'>$ohjeitapankille</textarea></td>
+				<td>".t("Ohjeita pankille")."</td><td><textarea name='ohjeitapankille' rows='2' cols='58'>$ohjeitapankille</textarea></td>
 			</tr>";
 
 		}
@@ -836,10 +836,47 @@ if ($tee == 'P' or $tee == 'E') {
 					<option value='L' $vientil>".t("ei-EU raaka-aine")."</option>
 				</select>
 			</td>
-		</tr>
+		</tr>";
 
-		<tr>";
+	// tutkitaan ollaanko jossain toimipaikassa alv-rekisterˆity
+	$query = "	SELECT *
+				FROM yhtion_toimipaikat
+				WHERE yhtio = '$kukarow[yhtio]'
+				and maa != ''
+				and vat_numero != ''
+				and toim_alv != ''";
+	$alhire = mysql_query($query) or pupe_error($query);
 
+	// ollaan alv-rekisterˆity
+	if (mysql_num_rows($alhire) >= 1) {
+
+		if ($tilino_alv == "") {
+			$tilino_alv = $trow["tilino_alv"];
+		}
+
+		echo "<tr>";
+		echo "<td>".t("Alv tili")."</td><td>";
+		echo "<select name='tilino_alv'>";
+		echo "<option value='$yhtiorow[alv]'>$yhtiorow[alv] - $yhtiorow[nimi], $yhtiorow[kotipaikka], $yhtiorow[maa]</option>";
+
+		while ($vrow = mysql_fetch_array($alhire)) {
+			$sel = "";
+			if ($tilino_alv == $vrow['toim_alv']) {
+				$sel = "selected";
+			}
+			echo "<option value='$vrow[toim_alv]' $sel>$vrow[toim_alv] - $vrow[nimi], $vrow[kotipaikka], $vrow[maa]</option>";
+		}
+
+		echo "</select>";
+		echo "</td>";
+		echo "</tr>";
+	}
+	else {
+		$tilino_alv = $yhtiorow["alv"];
+		echo "<input type='hidden' name='tilino_alv' value='$tilino_alv'>";
+	}
+
+	echo "<tr>";
 	echo "<td>".t("Laskun kuva")."</td>";
 
 	if ($kuva) {
@@ -959,13 +996,26 @@ if ($tee == 'P' or $tee == 'E') {
 			if ($syottotyyppi=='prosentti') $syottotyyppiprosentti = 'checked';
 		}
 
-		echo "<hr><table>
-			<tr><th>".t("Tili")."</th><th>".t("Kustannuspaikka")."</th>
-			<th><input type='radio' name='syottotyyppi' value =  'summa' $syottotyyppisaldo>".t("Summa")."<input type='radio' name='syottotyyppi' value =  'prosentti' $syottotyyppiprosentti>".t("Prosentti")."</th><th>".t("Vero")."</th></tr>";
+		echo "<hr>
+			<table>
+				<tr>
+					<th>".t("Tili")."</th>
+					<th>".t("Kustannuspaikka")."</th>
+					<th><input type='radio' name='syottotyyppi' value='summa' $syottotyyppisaldo>".t("Summa")." <input type='radio' name='syottotyyppi' value='prosentti' $syottotyyppiprosentti>".t("Prosentti")."</th>
+					<th style='text-align:right;'>".t("Vero")."</th>
+				</tr>";
 
 		for ($i=1; $i<$maara; $i++) {
 
-			echo "<tr><td>";
+			echo "<tr><td valign='top'>";
+
+ 			// Tehaan kentta tai naytetaan popup
+			if ($iulos[$i] == '') {
+				echo "<input type='text' name='itili[$i]' value='$itili[$i]'>";
+			}
+			else {
+				echo "$iulos[$i]";
+			}
 
 			// Etsit‰‰n selv‰kielinen tilinnimi, jos sellainen on
 			if (strlen($itili[$i]) != 0) {
@@ -974,17 +1024,11 @@ if ($tee == 'P' or $tee == 'E') {
 
 				if (mysql_num_rows($vresult) != 0) {
 					$vrow = mysql_fetch_array($vresult);
-					echo "$vrow[nimi]<br>";
+					echo "<br>$vrow[nimi]";
 				}
 			}
 
- 			// Tehaan kentta tai naytetaan popup
-			if ($iulos[$i] == '') {
-				echo "<input type='text' name='itili[$i]' value='$itili[$i]'></td>";
-			}
-			else {
-				echo "$iulos[$i]</td>";
-			}
+			echo "</td>";
 
 			// Tehd‰‰n kustannuspaikkapopup
 			$query = "SELECT tunnus, nimi
@@ -993,7 +1037,7 @@ if ($tee == 'P' or $tee == 'E') {
 						ORDER BY nimi";
 			$vresult = mysql_query($query) or pupe_error($query);
 
-			echo "<td><select name='ikustp[$i]'>";
+			echo "<td valign='top'><select name='ikustp[$i]'>";
 			echo "<option value =' '>".t("Ei kustannuspaikkaa")."";
 
 			while ($vrow = mysql_fetch_array($vresult)) {
@@ -1045,10 +1089,14 @@ if ($tee == 'P' or $tee == 'E') {
 			}
 			echo "</select></td>";
 
-			echo "<td><input type='text' name='isumma[$i]' value='$isumma[$i]'></td>";
-			echo "<td>" . alv_popup('ivero['.$i.']', $ivero[$i]);
+			echo "<td valign='top'><input type='text' name='isumma[$i]' value='$isumma[$i]'></td>";
+			echo "<td valign='top'>" . alv_popup('ivero['.$i.']', $ivero[$i]);
 			echo "$ivirhe[$i]";
 			echo "</td></tr>";
+
+			if ($maara > 1 and $i+1 != $maara) {
+				echo "<tr><td colspan='4'><hr></td></tr>";
+			}
 		}
 
 		echo "</table>";
@@ -1314,7 +1362,7 @@ if ($tee == 'I') {
 				$query = "INSERT INTO tiliointi SET
 							yhtio 				= '$kukarow[yhtio]',
 							ltunnus 			= '$tunnus',
-							tilino 				= '$yhtiorow[alv]',
+							tilino 				= '$tilino_alv',
 							kustp 				= '',
 							kohde 				= '',
 							projekti 			= '',

@@ -7,7 +7,7 @@
 	if ($i == 0) { //yhtiötä ei näytetä
 		$tyyppi = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "tilino") {
 		if ($ulosarray[$i] != '') {
 			$ulos=$ulosarray[$i];
@@ -26,18 +26,18 @@
 			}
 		}
 	}
-	
-	if (mysql_field_name($result, $i) == "tilinumero") { //suoraveloitus suoritetaan automaattisesti 
+
+	if (mysql_field_name($result, $i) == "tilinumero") { //suoraveloitus suoritetaan automaattisesti
 		$maxsize++; //Tilaa mahdolliselle viivalle
 	}
 
-	if (mysql_field_name($result, $i) == "oletus_suoravel_pankki") { //suoraveloitus suoritetaan automaattisesti 
+	if (mysql_field_name($result, $i) == "oletus_suoravel_pankki") { //suoraveloitus suoritetaan automaattisesti
 
 		$query = "SELECT nimi, tilino, tunnus
 				FROM yriti
 				WHERE yhtio = '$kukarow[yhtio]'";
 		$vresult = mysql_query($query) or pupe_error($query);
-		
+
 		$sel="";
 		if((int)$trow[$i] == 0) {
 			$sel="selected";
@@ -62,7 +62,7 @@
 		(mysql_field_name($result, $i) == "konserniyhtio")) {
 
 		$ulos  = "<td><select name='$nimi'>";
-		
+
 		$chk1 = '';
 		$chk2 = '';
 
@@ -75,7 +75,7 @@
 
 		$ulos .= "<option value=''  $chk1>".t("Ei")."</option>";
 		$ulos .= "<option value='o' $chk2>".t("Kyllä")."</option>";
-		
+
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -111,7 +111,7 @@
 					WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja = 'o'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
-		
+
 		$sel="";
 		if (trim($trow[$i]) == "") {
 			$sel = "selected";
@@ -136,7 +136,7 @@
 					tyyppi = 'K'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
-		
+
 		$sel="";
 		if (trim($trow[$i]) == "") {
 			$sel = "selected";
@@ -169,7 +169,7 @@
 			$sel = "selected";
 		}
 		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei kohdetta")."";
-		
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['tunnus']) {
@@ -220,7 +220,7 @@
 				<option value='A' {$sel["A"]}>".t("Kotimaa")."</option>
 				<option value='B' {$sel["B"]}>".t("Kotimaa huolinta/rahti")."</option>
 				<option value='C' {$sel["C"]}>".t("Kotimaa vaihto-omaisuus")."</option>
-				<option value='J' {$sel["J"]}>".t("Kotimaa Raaka-aine")."</option>				
+				<option value='J' {$sel["J"]}>".t("Kotimaa Raaka-aine")."</option>
 				<option value='D' {$sel["D"]}>".t("EU")."</option>
 				<option value='E' {$sel["E"]}>".t("EU huolinta/rahti")."</option>
 				<option value='F' {$sel["F"]}>".t("EU vaihto-omaisuus")."</option>
@@ -228,13 +228,13 @@
 				<option value='G' {$sel["G"]}>".t("ei-EU")."</option>
 				<option value='H' {$sel["H"]}>".t("ei-EU huolinta/rahti")."</option>
 				<option value='I' {$sel["I"]}>".t("ei-EU vaihto-omaisuus")."</option>
-				<option value='L' {$sel["L"]}>".t("ei-EU Raaka-aine")."</option>				
+				<option value='L' {$sel["L"]}>".t("ei-EU Raaka-aine")."</option>
 			</select>
 			</td>";
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kauppatapahtuman_luonne") {
 
 		$query = "	SELECT avainsana.selite, ".avain('select')."
@@ -262,7 +262,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kuljetusmuoto") {
 		$query = "	SELECT avainsana.selite, ".avain('select')."
 					FROM avainsana
@@ -289,7 +289,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "maa") {
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
@@ -314,16 +314,16 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
-	if (mysql_field_name($result, $i) == "kieli") {	
-			
+
+	if (mysql_field_name($result, $i) == "kieli") {
+
 		$ulos = "<td><select name='$nimi'>";
 		$sel  = "";
 
 		$query  = "show columns from sanakirja";
-		$fields =  mysql_query($query);			
-	
-		while ($apurow = mysql_fetch_array($fields)) {				
+		$fields =  mysql_query($query);
+
+		while ($apurow = mysql_fetch_array($fields)) {
 			$sel = "";
 			if ($trow[$i] == $apurow[0]) {
 				$sel = "selected";
@@ -337,57 +337,57 @@
 				$ulos .= "<option value='$apurow[0]' $sel>".t("$maa")."</option>";
 			}
 		}
-		
+
 		$ulos .= "</select></td>";
-		
+
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "fakta") {
 		$ulos = "<td><textarea cols='55' rows='7' name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "ohjeitapankille") {
 		$ulos = "<td><textarea cols='35' rows='7' name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "automaatti_toimitus") {
 
 		$selo = $sels = "";
 		if ($trow[$i] == 'S') $sels = "selected";
 		else $selo = "selected";
-		
+
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value='' $selo>Ei automaattitoimitusta</option>";
 		$ulos .= "<option value='S' $sels>Suoratoimitukset toimitetaan automaattisesti</option>";
 		$ulos .= "</select></td>";
-		
+
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "laskun_erittely") {
 
 		$selo = $sels = "";
 		if ($trow[$i] == 'S') $sels = "selected";
 		else $selo = "selected";
-		
+
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value='' $selo>Ostolaskua ei voi eritellä</option>";
 		$ulos .= "<option value='S' $sels>Ostolaskun voi eritellä</option>";
 		$ulos .= "</select></td>";
-		
+
 		$jatko = 0;
 	}
-	
 
-	
+
+
 	if (mysql_field_name($result, $i) == "tyyppi") {
 
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
-		
+
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Normaali toimittaja")."</option>";
 		$ulos .= "<option value='O' $sel[O]>".t("Online toimittaja")."</option>";
@@ -395,12 +395,48 @@
 		$ulos .= "<option value='L' $sel[L]>".t("Kaikkien tuotteiden toimittaja")."</option>";
 		$ulos .= "<option value='K' $sel[K]>".t("Käyttäjä")."</option>";
 		$ulos .= "<option value='P' $sel[P]>".t("Poistettu / Ei käytössä")."</option>";
-		$ulos .= "<option value='PP' $sel[PP]>".t("Poistettu / Ei käytössä (Poistetaan myös kaikki Tuotteen toimittajatiedot)")."</option>";		
+		$ulos .= "<option value='PP' $sel[PP]>".t("Poistettu / Ei käytössä (Poistetaan myös kaikki Tuotteen toimittajatiedot)")."</option>";
 		$ulos .= "</select></td>";
-		
+
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tilino_alv") {
 
+		// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity
+		$query = "	SELECT *
+					FROM yhtion_toimipaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					and maa != ''
+					and vat_numero != ''
+					and toim_alv != ''";
+		$alhire = mysql_query($query) or pupe_error($query);
+
+		// ollaan alv-rekisteröity
+		if (mysql_num_rows($alhire) >= 1) {
+
+			$ulos  = "<td><select name='$nimi'>";
+			$ulos .= "<option value='$yhtiorow[alv]'>$yhtiorow[alv] - $yhtiorow[nimi], $yhtiorow[kotipaikka], $yhtiorow[maa]</option>";
+
+			while ($vrow = mysql_fetch_array($alhire)) {
+				$sel = "";
+				if ($trow[$i] == $vrow['toim_alv']) {
+					$sel = "selected";
+				}
+				$ulos .= "<option value='$vrow[toim_alv]' $sel>$vrow[toim_alv] - $vrow[nimi], $vrow[kotipaikka], $vrow[maa]</option>";
+			}
+
+			$ulos .= "</select>";
+			$ulos .= "</td>";
+			$jatko = 0;
+		}
+		else {
+			$ulos  = "<td>";
+			$ulos .= "$yhtiorow[alv]";
+			$ulos .= "<input type='hidden' name='$nimi' value=''>";
+			$ulos .= "</td>";
+			$jatko = 0;
+		}
+	}
 
 ?>

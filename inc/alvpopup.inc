@@ -14,7 +14,11 @@ if (!function_exists("alv_popup")) {
 		$lisa = "";
 
 		// tutkitaan ollaanko jossain alv-rekisteröity
-		$query = "select group_concat(concat(\"'\",maa,\"'\") SEPARATOR ',') maat from yhtion_toimipaikat where yhtio = '$kukarow[yhtio]' and maa != '' and vat_numero != ''";
+		$query = "	SELECT group_concat(concat(\"'\",maa,\"'\") SEPARATOR ',') maat
+					FROM yhtion_toimipaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					and maa != ''
+					and vat_numero != ''";
 		$alhire = mysql_query($query) or pupe_error($query);
 
 		// ollaan alv-rekisteröity, haetaan oikea ALV-kanta
@@ -30,7 +34,7 @@ if (!function_exists("alv_popup")) {
 		$query = "	SELECT distinct selite
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji in ($laji) $lisa
-					ORDER BY laji,jarjestys,selite";
+					ORDER BY selite+0, laji, jarjestys, selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($vresult) == 0) {
@@ -43,7 +47,7 @@ if (!function_exists("alv_popup")) {
 				if ($oletus == $vrow['selite']) {
 					$sel = "selected";
 				}
-				$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] %";
+				$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] %</option>";
 			}
 			$ulos .= "</select>";
 		}
@@ -72,7 +76,11 @@ if (!function_exists("alv_popup_oletus")) {
 			}
 			else {
 				// tutkitaan ollaanko siellä alv-rekisteröity
-				$query = "select * from yhtion_toimipaikat where yhtio = '$kukarow[yhtio]' and maa = '$maa' and vat_numero != ''";
+				$query = "	SELECT *
+							FROM yhtion_toimipaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND maa = '$maa'
+							AND vat_numero != ''";
 				$alhire = mysql_query($query) or pupe_error($query);
 
 				// ollaan alv-rekisteröity, haetaan oikea ALV-kanta
@@ -86,7 +94,7 @@ if (!function_exists("alv_popup_oletus")) {
 		$query = "	SELECT selite
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' $lisa
-					ORDER BY jarjestys,selite";
+					ORDER BY selite+0, jarjestys, selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($vresult) == 0) {
@@ -126,8 +134,7 @@ if (!function_exists("alv_oletus")) {
 		$ulos = 0;
 		$query = "	SELECT selite
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'alv' and selitetark != ''
-					ORDER BY jarjestys,selite";
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'alv' and selitetark != ''";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($vresult) != 1) {

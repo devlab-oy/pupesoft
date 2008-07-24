@@ -5863,7 +5863,7 @@ if(!function_exists("nayta_asiakashaku")) {
 			$id			= "";
 		}
 
-		return "<input type='hidden' id='liitos' name='liitostunnus'><input type='text' id='haku' value='$nimi' name='haku' size='50' onkeydown=\"return keyhandler(event);\" onkeyup=\"if((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) { popUp(event, 'asiakashaku', '-6', '-30', '{$_SERVER["SCRIPT_NAME"]}?tee=ASIAKASHAKU&formi=$formi&url={$_SERVER["SCRIPT_NAME"]}&haku='+this.value, 'liveSearch'); keyStrokeIndex = -1; }\" $disabled autocomplete='off'>&nbsp;&nbsp;<a href='#' onclick=\"document.getElementById('haku').disabled=false; document.getElementById('haku').value=''; return false;\" onblur=\"alert('IIK'); document.getElementById('liveSearch').style.display='none';\">".t("Vaihda asiakasta")."</a>
+		return "<input type='hidden' id='liitos' name='liitostunnus'><input type='text' id='haku' value='$nimi' name='haku' size='50' onkeydown=\"return keyhandler(event);\" onkeyup=\"if((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) { popUp(event, 'asiakashaku', '-6', '-30', '{$_SERVER["SCRIPT_NAME"]}?tee=ASIAKASHAKU&formi=$formi&url={$_SERVER["SCRIPT_NAME"]}&haku='+this.value, 'liveSearch'); keyStrokeIndex = -1; }\" $disabled autocomplete='off'>&nbsp;&nbsp;<a href='#' onclick=\"document.getElementById('haku').disabled=false; document.getElementById('haku').value=''; return false;\" onblur=\"document.getElementById('liveSearch').style.display='none';\">".t("Vaihda asiakasta")."</a>
 			<script LANGUAGE='JavaScript'>window.document.$formi.haku.focus();</script>";
 	}
 }

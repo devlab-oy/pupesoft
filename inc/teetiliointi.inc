@@ -31,6 +31,11 @@
 		$alv_valuutassa = round($alv * $vanhasumma_kurssi, 2);
 		$valkoodi = $vanhasumma_valkoodi;
 	}
+	
+	// jos ollaan saatu poikkeava alvtili k‰ytet‰‰n sit‰, varmistetaan ett‰ se ei ole tyhj‰‰ ja ett‰ on numero, jos ei niin yhtion takaa
+	if (!isset($alv_tili) or $alv_tili == "" or !is_numeric($alv_tili)) {
+		$alv_tili = $yhtiorow["alv"];
+	}
 
 	$query = "INSERT into tiliointi set
 					yhtio ='$kukarow[yhtio]',
@@ -56,7 +61,7 @@
 	        $query = "INSERT into tiliointi set
 				yhtio ='$kukarow[yhtio]',
 				ltunnus = '$tunnus',
-				tilino = '$yhtiorow[alv]',
+				tilino = '$alv_tili',
 				kustp = '',
 				kohde = '',
 				projekti = '',

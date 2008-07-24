@@ -148,6 +148,7 @@
 			<input type='hidden' name='vanhasumma' value = '$summa'>
 			<input type='hidden' name='vanhasumma_valuutassa' value = '$summa_valuutassa'>
 			<input type='hidden' name='vanhasumma_valkoodi' value = '$valkoodi'>
+			<input type='hidden' name='alv_tili' value = '$alv_tili'>
 			</td>";
 
 		// Jos alvit on hardkoodattu tileihin (hui, kauheaa, mutta joku niin tahtoo), niin salasanat.php:ssä

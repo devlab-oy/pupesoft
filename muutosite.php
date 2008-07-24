@@ -291,7 +291,10 @@ if ($tee == 'P') {
 
 	$query = "	SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm, tosite, summa_valuutassa, valkoodi
 				FROM tiliointi
-				WHERE tunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]' and tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]'";
+				WHERE tunnus = '$ptunnus' 
+				AND yhtio = '$kukarow[yhtio]' 
+				AND tapvm >= '$yhtiorow[tilikausi_alku]' 
+				AND tapvm <= '$yhtiorow[tilikausi_loppu]'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {
@@ -301,36 +304,76 @@ if ($tee == 'P') {
 
 	$tiliointirow = mysql_fetch_array($result);
 
-	$tili = $tiliointirow['tilino'];
-	$kustp = $tiliointirow['kustp'];
-	$kohde = $tiliointirow['kohde'];
-	$projekti = $tiliointirow['projekti'];
-	$summa = $tiliointirow['summa'];
-	$summa_valuutassa = $tiliointirow['summa_valuutassa'];
-	$valkoodi = $tiliointirow["valkoodi"];
-	$vero = $tiliointirow['vero'];
-	$selite = $tiliointirow['selite'];
-	$tiliointipvm = $tiliointirow['tapvm'];
-	$tositenro = $tiliointirow['tosite'];
-	$ok = 1;
+	$tili				= $tiliointirow['tilino'];
+	$kustp				= $tiliointirow['kustp'];
+	$kohde				= $tiliointirow['kohde'];
+	$projekti			= $tiliointirow['projekti'];
+	$summa				= $tiliointirow['summa'];
+	$summa_valuutassa	= $tiliointirow['summa_valuutassa'];
+	$valkoodi			= $tiliointirow["valkoodi"];
+	$vero				= $tiliointirow['vero'];
+	$selite				= $tiliointirow['selite'];
+	$tiliointipvm		= $tiliointirow['tapvm'];
+	$tositenro			= $tiliointirow['tosite'];
+	$ok					= 1;
+	$alv_tili			= $yhtiorow["alv"];
+	
+	// Katotaan voisiko meillä olla tässä joku toinen ALV tili
+	// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity ja oteteaan niiden alv tilit
+	$query = "	SELECT ifnull(group_concat(concat(\"'\",toim_alv,\"'\") SEPARATOR ','), '') toim_alv
+				FROM yhtion_toimipaikat
+				WHERE yhtio = '$kukarow[yhtio]'
+				and maa != ''
+				and vat_numero != ''
+				and toim_alv != ''";
+	$result = mysql_query($query) or pupe_error($query);
+	$tilitrow = mysql_fetch_array($result);
+	
+	// haetaan ALV tili
+	if ($tilitrow["toim_alv"] != "") {
+		$query = "	SELECT tilino
+					FROM tiliointi
+					WHERE aputunnus = '$ptunnus' 
+					AND yhtio = '$kukarow[yhtio]' 
+					AND tiliointi.korjattu = '' 
+					AND tilino in ($tilitrow[toim_alv], '$yhtiorow[alv]')";
+		$result = mysql_query($query) or pupe_error($query);
 
+		// jos löytyy yks niin homma hyvin! (else tulee yhtiön takaa tosta ylhäältä)
+		if (mysql_num_rows($result) == 1) {
+			$tilitrow = mysql_fetch_array($result);
+			$alv_tili = $tilitrow["tilino"];
+		}
+	}
+	
 	// Etsitään kaikki tiliöintirivit, jotka kuuluvat tähän tiliöintiin ja lasketaan niiden summa
-	$query = "	SELECT sum(summa) FROM tiliointi
-				WHERE aputunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]' and tiliointi.korjattu = '' GROUP BY aputunnus";
+	$query = "	SELECT sum(summa) 
+				FROM tiliointi
+				WHERE aputunnus = '$ptunnus' 
+				AND yhtio = '$kukarow[yhtio]' 
+				AND tiliointi.korjattu = '' 
+				GROUP BY aputunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) != 0) {
 		$summarow = mysql_fetch_array($result);
 		$summa += $summarow[0];
-		$query = "	UPDATE tiliointi SET korjattu = '$kukarow[kuka]', korjausaika = now()
-					WHERE aputunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]' and tiliointi.korjattu=''";
+		$query = "	UPDATE tiliointi SET 
+					korjattu = '$kukarow[kuka]', 
+					korjausaika = now()
+					WHERE aputunnus = '$ptunnus' 
+					and yhtio = '$kukarow[yhtio]' 
+					and tiliointi.korjattu = ''";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
-	$query = "	UPDATE tiliointi
-				SET korjattu = '$kukarow[kuka]', korjausaika = now()
-				WHERE tunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]'";
+	$query = "	UPDATE tiliointi SET 
+				korjattu = '$kukarow[kuka]', 
+				korjausaika = now()
+				WHERE tunnus = '$ptunnus' 
+				AND yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
+
 	$tee = 'E'; // Näytetään miltä tosite nyt näyttää
 }
 

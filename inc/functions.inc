@@ -4515,6 +4515,8 @@ function getMouseY(e) {
 	return y;
 }
 
+var popUp_timeout=0;
+
 function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 
 	if(!document.getElementById(oi)) {
@@ -4535,12 +4537,45 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 
 	if(e.type == "mouseout") {
 		var de = document.getElementById(oi);
-		document.body.removeChild(de);
+		de.style.visibility='hidden';
+		de.style.display='none';
+		if(popUp_timeout>0) {
+			clearTimeout(popUp_timeout);
+		}
+		//document.body.removeChild(de);
 	}
 	else {
 
-		if(html) {
-			sndReq(oi, html+'&ohje=off&sulje='+oi);
+		//	jos meill‰ kutsutaan html‰‰ tai on mouseover event tehd‰‰n timeoutin kautta, jotta html ehtii latautua tai ei turhaan r‰psytet‰ divi‰ jos pikkasen hipastan teksti‰.
+		if(html || e.type=="mouseover") {
+			if(!offsetY) offsetY=-10;
+			if(!offsetX) offsetX=-10;
+
+			var y = getMouseY(e);
+			var x = getMouseX(e);
+			var y = y-(offsetY);
+			var x = x-(offsetX);
+			
+			if(html) {
+				if(window.sndReq) {
+					if(styleClass == "liveSearch") {
+						sndReq(oi, html+'&ohje=off&sulje='+oi);
+					}
+					else {
+						sndReq(oi, html+'&ohje=off&sulje='+oi);
+						popUp_timeout = setTimeout("popUp('html', '"+oi+"', '"+x+"', '"+y+"');", 250);
+						return true;
+					}
+				}
+				else {
+					alert('sndReq puuttuu!');
+					return true;
+				}
+			}
+			else {
+				popUp_timeout = setTimeout("popUp('html', '"+oi+"', '"+x+"', '"+y+"');", 100);
+				return true;
+			}
 		}
 
 		// relatiivinen sijainti
@@ -4567,6 +4602,12 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 				}
 				kohde = kohde.offsetParent;
 			}
+		}
+		else if (e=="html"){
+			y = offsetY;
+			x = offsetX;
+			offsetX=0;
+			offsetY=0;
 		}
 		else {
 			if(!offsetY) offsetY=-10;
@@ -4612,10 +4653,10 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 					x -= c;
 				}
 
-				if (wh - y - eh < -5 && c > 10) {
+				if (wh - y - eh < -10 && c > 10) {
 					y -= eh + 22;
 				}
-				else if(y - scrollY + eh + 2 > wh) {
+				else if(y - scrollY + eh + 5 > wh) {
 					y -= y - scrollY + eh - wh + 20;
 				}
 

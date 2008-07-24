@@ -41,7 +41,7 @@
 			//-->
 			</script>";
 
-		echo "<font class='head'>",t("Tuotekuvien yll‰pito"),"</font><hr>";
+		echo "<font class='head'>",t("Liitetiedostojen yll‰pito"),"</font><hr>";
 
 		echo "<form action='",$PHP_SELF,"' method='post'>";
 		echo "<table>";
@@ -226,6 +226,16 @@
 									}
 
 									echo "<tr><td><input type='checkbox' name='mul_kay[]' value='tk' ",$mul_check,"></td><td nowrap>".t("Tuotekuva")."</td></tr>";
+
+									$mul_check = '';
+									if ($mul_kay != '') {
+										if (in_array('mu', $mul_kay)) {
+											$mul_check = 'CHECKED';
+										}
+									}
+
+									echo "<tr><td><input type='checkbox' name='mul_kay[]' value='mu' ",$mul_check,"></td><td nowrap>".t("Muu")."</td></tr>";
+
 								echo "</table>";
 
 							echo "</td>";
@@ -390,6 +400,15 @@
 
 									echo "<tr><td><input type='checkbox' name='mul_ext[]' value='bmp' ",$mul_check,"></td><td nowrap>".t("Bmp")."</td></tr>";
 
+									$mul_check = '';
+									if ($mul_ext != '') {
+										if (in_array('pdf', $mul_ext)) {
+											$mul_check = 'CHECKED';
+										}
+									}
+
+									echo "<tr><td><input type='checkbox' name='mul_ext[]' value='pdf' ",$mul_check,"></td><td nowrap>".t("Pdf")."</td></tr>";
+
 								echo "</table>";
 
 							echo "</td>";
@@ -465,22 +484,25 @@
 			echo t('Poistettiin kuvat tuotteista: '),"<br />";
 
 			foreach ($mul_del as $key => $val) {
-				list($tunnus, $ltunnus, $kayttotarkoitus) = explode('_', $val);
+				list($tunnus, $ltunnus, $ltiedtunnus, $kayttotarkoitus, $filetype) = explode('_', $val);
 
 				$tunnus = mysql_real_escape_string($tunnus);
+				$ltunnus = mysql_real_escape_string($ltunnus);
+				$ltiedtunnus = mysql_real_escape_string($ltiedtunnus);
 				$kayttotarkoitus = mysql_real_escape_string($kayttotarkoitus);
+				$filetype = mysql_real_escape_string($filetype);
 
-				echo "$tunnus ($kayttotarkoitus)<br />";
+				echo "$tunnus ($filetype  $kayttotarkoitus)<br />";
 
-				// AND tunnus = '$ltunnus'
 				$query = "	DELETE
 							FROM liitetiedostot
 							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus = '$ltiedtunnus'
 							AND liitostunnus = '$ltunnus'
 							AND kayttotarkoitus = '$kayttotarkoitus'
 							AND liitos = 'tuote'
 							AND filename != ''
-							AND filetype LIKE 'image/%'";
+							AND filetype = '$filetype'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 
@@ -575,11 +597,14 @@
 
 			if (count($mul_ext) > 0) {
 				$sel_ext = "('image/".str_replace(',','\',\'image/',implode(",", $mul_ext))."')";
+				if (stristr($sel_ext, 'image/pdf')) {
+					$sel_ext = str_replace('image/pdf', 'application/pdf', $sel_ext);
+				}
 				$lisa .= " and liitetiedostot.filetype in $sel_ext ";
 			}
-			else {
-				$lisa .= "  and liitetiedostot.filetype like 'image/%' ";
-			}
+//			else {
+//				$lisa .= "  and liitetiedostot.filetype like 'image/%' ";
+//			}
 
 			if ($tuoteno != '') {
 				$tuoteno = mysql_real_escape_string(trim($tuoteno));
@@ -597,8 +622,10 @@
 						tuote.nimitys,
 						tuote.tunnus,
 						tuote.status,
+						liitetiedostot.tunnus ltiedtunnus,
 						liitetiedostot.liitostunnus ltunnus,
 						liitetiedostot.filename,
+						liitetiedostot.filetype,
 						liitetiedostot.kayttotarkoitus,
 						liitetiedostot.data,
 						liitetiedostot.tunnus id,
@@ -722,7 +749,7 @@
 
 							// tehd‰‰n pop-up divi jos keikalla on kommentti...
 							if ($row['filename'] != '') {
-								if ((strtolower($row['kayttotarkoitus']) == 'tk' and $nayta_tk != 'naytetaan') or (strtolower($row['kayttotarkoitus']) == 'th' and $nayta_th != 'naytetaan')) {
+								if ((strtolower($row['kayttotarkoitus']) == 'tk' and $nayta_tk != 'naytetaan') or (strtolower($row['kayttotarkoitus']) == 'th' and $nayta_th != 'naytetaan') or (strtolower($row['kayttotarkoitus']) == 'mu')) {
 									echo "<td valign='top'>",$row['nimitys'],"</td>";
 								}
 								else {
@@ -768,7 +795,7 @@
 							echo "<td valign='top'>",$row['selite'],"</td>";
 
 							if ($mul_exl != 'tallennetaan') {
-								echo "<td valign='top'><input type='checkbox' name='mul_del[]' value='",$row['tunnus'],"_",$row['ltunnus'],"_",$row['kayttotarkoitus'],"'></td>";
+								echo "<td valign='top'><input type='checkbox' name='mul_del[]' value='",$row['tunnus'],"_",$row['ltunnus'],"_",$row['ltiedtunnus'],"_",$row['kayttotarkoitus'],"_",$row['filetype'],"'></td>";
 							}
 
 							if (isset($workbook) and $mul_exl == 'tallennetaan') {
@@ -907,7 +934,12 @@
 								echo "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=$tuoteno&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>$y</a>";
 							}
 							$limit += 50;
-							echo "&nbsp;&nbsp;";
+							if (($y % '40') == 0) {
+								echo "<br />";
+							}
+							else {
+								echo "&nbsp;&nbsp;";
+							}
 						}
 						if ($seuraava != 'ok' and $seuraava != '') {
 							echo $seuraava," ",t('Seuraava')," &gt;&gt;</a>&nbsp;&nbsp;";

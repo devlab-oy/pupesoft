@@ -472,15 +472,16 @@
 
 				echo "$tunnus ($kayttotarkoitus)<br />";
 
+				// AND tunnus = '$ltunnus'
 				$query = "	DELETE
 							FROM liitetiedostot
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND tunnus = '$ltunnus'
-							AND liitostunnus = '$tunnus'
+							AND liitostunnus = '$ltunnus'
 							AND kayttotarkoitus = '$kayttotarkoitus'
 							AND liitos = 'tuote'
 							AND filename != ''
 							AND filetype LIKE 'image/%'";
+				echo "<pre>$query</pre>";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 

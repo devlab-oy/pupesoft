@@ -422,7 +422,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 				echo "<div align='right'><a target='_blank' href='$hreffi'>".t("OHJE")."</a><br></div>";
 			}
 			elseif(isset($_GET["sulje"]) and $_GET["sulje"] != "") {
-				echo "<div><a href='#' onclick=\"divi=document.getElementById('{$_GET["sulje"]}'); divi.innerHTML=''; divi.style.display='none'; return false;\"><font style='color: red;'>x</font></a><br></div>";
+				echo "<div><a href='#' onclick=\"divi=document.getElementById('{$_GET["sulje"]}'); document.body.removeChild(divi);\"><font style='color: red;'>x</font></a><br></div>";
 			}
 
 		}

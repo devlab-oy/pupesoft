@@ -4535,10 +4535,7 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 
 	if(e.type == "mouseout") {
 		var de = document.getElementById(oi);
-		var ds = de.style;
-
-		ds.display = "none";
-		ds.visibility = "hidden";
+		document.body.removeChild(de);
 	}
 	else {
 

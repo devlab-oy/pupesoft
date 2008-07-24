@@ -4514,12 +4514,19 @@ function getMouseY(e) {
 
 	return y;
 }
-function popUp(e, oi, offsetX, offsetY, html) {
+
+function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 
 	if(!document.getElementById(oi)) {
 		var myDiv = document.createElement('div');
-
-		myDiv.setAttribute('class', 'popup');
+		
+		if(styleClass) {
+			myDiv.setAttribute('class', styleClass);
+		}
+		else {
+			myDiv.setAttribute('class', 'popup');
+		}
+		
 		myDiv.setAttribute('id', oi);
 		myDiv.setAttribute('name', oi);
 		myDiv.style.display = 'block';
@@ -4580,46 +4587,48 @@ function popUp(e, oi, offsetX, offsetY, html) {
 
 		ds.display = "block";
 		ds.visibility = "hidden";
+		
+		if(styleClass != "liveSearch") {
+			//	Detectoidaan ikkunan koko
+			var ww = window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;
+			var wh = window.innerHeight != null? window.innerHeight: document.body.clientHeight != null? document.body.clientHeight:null;
 
-		//	Detectoidaan ikkunan koko
-		var ww = window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;
-		var wh = window.innerHeight != null? window.innerHeight: document.body.clientHeight != null? document.body.clientHeight:null;
+			//	Detectoidaan div:n koko
+			if(de.clientHeight) eh = de.clientHeight;
+			else if (de.clip.height) eh = de.clip.height;
+			else eh = null;
 
-		//	Detectoidaan div:n koko
-		if(de.clientHeight) eh = de.clientHeight;
-		else if (de.clip.height) eh = de.clip.height;
-		else eh = null;
+			if(de.clientWidth) ew = de.clientWidth;
+			else if (de.clip.width) ew = de.clip.width;
+			else ew = null;
 
-		if(de.clientWidth) ew = de.clientWidth;
-		else if (de.clip.width) ew = de.clip.width;
-		else ew = null;
+			var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
+			var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
 
-		var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
-		var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
+			//	Jos saimme riittävästi tietoa voimme kalkuloida oikean position
+			if(eh != null && ew != null && x != null && y != null) {
 
-		//	Jos saimme riittävästi tietoa voimme kalkuloida oikean position
-		if(eh != null && ew != null && x != null && y != null) {
+				c=0;
+				//	Riittääkö leveys
+				if(x+ew-2>ww) {
+					c=x+ew-ww+2;
+					x -= c;
+				}
 
-			c=0;
-			//	Riittääkö leveys
-			if(x+ew-2>ww) {
-				c=x+ew-ww+2;
-				x -= c;
-			}
+				if (wh - y - eh < -5 && c > 10) {
+					y -= eh + 22;
+				}
+				else if(y - scrollY + eh + 2 > wh) {
+					y -= y - scrollY + eh - wh + 20;
+				}
 
-			if (wh - y - eh < -5 && c > 10) {
-				y -= eh + 22;
-			}
-			else if(y - scrollY + eh + 2 > wh) {
-				y -= y - scrollY + eh - wh + 20;
-			}
-
-			//	Oikea laita on kuitenkin aina tärkein!
-			if(x<2) {
-				x=2;
-			}
-			if(y<2) {
-				y=2;
+				//	Oikea laita on kuitenkin aina tärkein!
+				if(x<2) {
+					x=2;
+				}
+				if(y<2) {
+					y=2;
+				}
 			}
 		}
 
@@ -4631,6 +4640,7 @@ function popUp(e, oi, offsetX, offsetY, html) {
 
 	}
 }
+
 //-->
 </script>
 <?php

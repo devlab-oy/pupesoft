@@ -481,7 +481,6 @@
 							AND liitos = 'tuote'
 							AND filename != ''
 							AND filetype LIKE 'image/%'";
-				echo "<pre>$query</pre>";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 

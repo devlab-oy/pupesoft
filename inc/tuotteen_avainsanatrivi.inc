@@ -11,7 +11,7 @@
 
 	if (mysql_field_name($result, $i) == "laji") {
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 
 		$query = "	SELECT distinct selite, selitetark
 					FROM avainsana
@@ -28,6 +28,7 @@
 			$sel = '';
 			if ($trow[$i] == $srow[0]) {
 				$sel = "selected";
+				$avain_sel[$trow[$i]] = "SELECTED";
 			}
 			$ulos .= "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
 		}
@@ -37,6 +38,22 @@
 	
 	if (mysql_field_name($result, $i) == "tuoteno" and isset($alasveto[$i])) {
 		$ulos = "<td>".$alasveto[$i]."</td>";
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "selite" and 
+		($avain_sel["kuvaus_se"] == "SELECTED" or
+		$avain_sel["kuvaus_en"] == "SELECTED" or
+		$avain_sel["kuvaus_ru"] == "SELECTED" or
+		$avain_sel["kuvaus_ee"] == "SELECTED" or
+		$avain_sel["kuvaus_de"] == "SELECTED" or
+		$avain_sel["lyhyt_se"] == "SELECTED" or
+		$avain_sel["lyhyt_en"] == "SELECTED" or
+		$avain_sel["lyhyt_ru"] == "SELECTED" or
+		$avain_sel["lyhyt_ee"] == "SELECTED" or
+		$avain_sel["lyhyt_de"] == "SELECTED")) {
+			
+		$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
 		$jatko = 0;
 	}
 

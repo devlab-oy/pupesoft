@@ -106,6 +106,14 @@
 			$ulos .= "<option value='Y_SE' {$avain_sel['Y_SE']}>							".t("Ruotsinkielinen yksikkö")."</option>";
 			$ulos .= "<option value='S_SE' {$avain_sel['S_SE']}>							".t("Ruotsinkielinen tuotteen status")."</option>";
 			$ulos .= "<option value='SARJANUMERON_LI' {$avain_sel['SARJANUMERON_LI']}>		".t("Sarjanumeron lisätieto")."</option>";
+			$ulos .= "<option value='TRY_EN' {$avain_sel['TRY_EN']}>						".t("Englanninkielinen tuoteryhmä")."</option>";
+			$ulos .= "<option value='OSASTO_EN' {$avain_sel['OSASTO_EN']}>					".t("Englanninkielinen tuoteosasto")."</option>";
+			$ulos .= "<option value='TRY_RU' {$avain_sel['TRY_RU']}>						".t("Venäjänkielinen tuoteryhmä")."</option>";
+			$ulos .= "<option value='OSASTO_RU' {$avain_sel['OSASTO_RU']}>					".t("Venäjänkielinen tuoteosasto")."</option>";
+			$ulos .= "<option value='TRY_EE' {$avain_sel['TRY_EE']}>						".t("Vironkielinen tuoteryhmä")."</option>";
+			$ulos .= "<option value='OSASTO_EE' {$avain_sel['OSASTO_EE']}>					".t("Vironkielinen tuoteosasto")."</option>";
+			$ulos .= "<option value='TRY_DE' {$avain_sel['TRY_DE']}>						".t("Saksankielinen tuoteryhmä")."</option>";
+			$ulos .= "<option value='OSASTO_DE' {$avain_sel['OSASTO_DE']}>					".t("Saksankielinen tuoteosasto")."</option>";
 			$ulos .= "</optgroup>";
 
 			$ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";
@@ -352,7 +360,17 @@
 	if ($avain_sel["KARHUVIESTI"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark" or
 		$avain_sel["OSASTO"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
 		$avain_sel["TV_LISATIETO"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark" or
-		$avain_sel["TRY"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3") {
+		$avain_sel["TRY"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
+		$avain_sel["TRY_SE"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
+		$avain_sel["TRY_EN"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
+		$avain_sel["TRY_RU"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
+		$avain_sel["TRY_EE"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
+		$avain_sel["TRY_DE"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
+		$avain_sel["OSASTO_SE"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
+		$avain_sel["OSASTO_EN"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
+		$avain_sel["OSASTO_RU"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
+		$avain_sel["OSASTO_EE"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
+		$avain_sel["OSASTO_DE"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3") {
 			
 		$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
 		$jatko = 0;

@@ -56,4 +56,24 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "alv_taso") {
+
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
+
+		$query = "select * from taso where yhtio='$kukarow[yhtio]' and tyyppi='A' order by taso";
+		$tasoresu = mysql_query($query) or pupe_error($query);
+
+		$ulos = "<td><select name='$nimi'>\n";
+		$ulos .= "<option value = ''>Ei tasoa</option>\n";
+
+		while ($tasorow = mysql_fetch_array($tasoresu)) {
+			$tasoapu = $tasorow["taso"];
+			$ulos .= "<option value = '$tasorow[taso]' $sel[$tasoapu]>$tasorow[taso] - $tasorow[nimi]</option>\n";
+		}
+
+		$ulos .= "</select></td>\n";
+		$jatko = 0;
+	}
+
 ?>

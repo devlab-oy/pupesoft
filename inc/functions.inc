@@ -4514,76 +4514,29 @@ function getMouseY(e) {
 
 	return y;
 }
-
-var popUp_timeout=0;
-
-function popUp(e, oi, offsetX, offsetY, html, styleClass) {
+function popUp(e, oi, offsetX, offsetY, html) {
 
 	if(!document.getElementById(oi)) {
 		var myDiv = document.createElement('div');
-		
-		if(styleClass) {
-			myDiv.setAttribute('class', styleClass);
-		}
-		else {
-			myDiv.setAttribute('class', 'popup');
-		}
-		
+
+		myDiv.setAttribute('class', 'popup');
 		myDiv.setAttribute('id', oi);
-		myDiv.setAttribute('name', 'dynamic_'+oi);
+		myDiv.setAttribute('name', oi);
 		myDiv.style.display = 'block';
 		document.body.appendChild(myDiv);
 	}
 
 	if(e.type == "mouseout") {
-		
-		if(popUp_timeout>0) {
-			clearTimeout(popUp_timeout);
-		}
-		
 		var de = document.getElementById(oi);
+		var ds = de.style;
 
-		//	Jos meillä oli dynaamisesti ladattu elementti poistetaan se kokonaan..
-		if(de.name='dynamic_'+de.id) {
-			document.body.removeChild(de);
-		}
-		else {
-			de.style.visibility='hidden';
-			de.style.display='none';
-		}
+		ds.display = "none";
+		ds.visibility = "hidden";
 	}
 	else {
 
-		//	jos meillä kutsutaan htmlää tai on mouseover event tehdään timeoutin kautta, jotta html ehtii latautua tai ei turhaan räpsytetä diviä jos pikkasen hipastan tekstiä.
-		if(html || e.type=="mouseover") {
-			if(!offsetY) offsetY=-10;
-			if(!offsetX) offsetX=-10;
-
-			var y = getMouseY(e);
-			var x = getMouseX(e);
-			var y = y-(offsetY);
-			var x = x-(offsetX);
-			
-			if(html) {
-				if(window.sndReq) {
-					if(styleClass == "liveSearch") {
-						sndReq(oi, html+'&ohje=off&sulje='+oi);
-					}
-					else {
-						sndReq(oi, html+'&ohje=off&sulje='+oi);
-						popUp_timeout = setTimeout("popUp('html', '"+oi+"', '"+x+"', '"+y+"');", 250);
-						return true;
-					}
-				}
-				else {
-					alert('sndReq puuttuu!');
-					return true;
-				}
-			}
-			else {
-				popUp_timeout = setTimeout("popUp('html', '"+oi+"', '"+x+"', '"+y+"');", 100);
-				return true;
-			}
+		if(html) {
+			sndReq(oi, html+'&ohje=off&sulje='+oi);
 		}
 
 		// relatiivinen sijainti
@@ -4611,12 +4564,6 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 				kohde = kohde.offsetParent;
 			}
 		}
-		else if (e=="html"){
-			y = offsetY;
-			x = offsetX;
-			offsetX=0;
-			offsetY=0;
-		}
 		else {
 			if(!offsetY) offsetY=-10;
 			if(!offsetX) offsetX=-10;
@@ -4633,48 +4580,46 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 
 		ds.display = "block";
 		ds.visibility = "hidden";
-		
-		if(styleClass != "liveSearch") {
-			//	Detectoidaan ikkunan koko
-			var ww = window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;
-			var wh = window.innerHeight != null? window.innerHeight: document.body.clientHeight != null? document.body.clientHeight:null;
 
-			//	Detectoidaan div:n koko
-			if(de.clientHeight) eh = de.clientHeight;
-			else if (de.clip.height) eh = de.clip.height;
-			else eh = null;
+		//	Detectoidaan ikkunan koko
+		var ww = window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;
+		var wh = window.innerHeight != null? window.innerHeight: document.body.clientHeight != null? document.body.clientHeight:null;
 
-			if(de.clientWidth) ew = de.clientWidth;
-			else if (de.clip.width) ew = de.clip.width;
-			else ew = null;
+		//	Detectoidaan div:n koko
+		if(de.clientHeight) eh = de.clientHeight;
+		else if (de.clip.height) eh = de.clip.height;
+		else eh = null;
 
-			var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
-			var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
+		if(de.clientWidth) ew = de.clientWidth;
+		else if (de.clip.width) ew = de.clip.width;
+		else ew = null;
 
-			//	Jos saimme riittävästi tietoa voimme kalkuloida oikean position
-			if(eh != null && ew != null && x != null && y != null) {
+		var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
+		var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
 
-				c=0;
-				//	Riittääkö leveys
-				if(x+ew-2>ww) {
-					c=x+ew-ww+2;
-					x -= c;
-				}
+		//	Jos saimme riittävästi tietoa voimme kalkuloida oikean position
+		if(eh != null && ew != null && x != null && y != null) {
 
-				if (wh - y - eh < -10 && c > 10) {
-					y -= eh + 22;
-				}
-				else if(y - scrollY + eh + 10 > wh) {
-					y -= y - scrollY + eh - wh + 22;
-				}
+			c=0;
+			//	Riittääkö leveys
+			if(x+ew-2>ww) {
+				c=x+ew-ww+2;
+				x -= c;
+			}
 
-				//	Oikea laita on kuitenkin aina tärkein!
-				if(x<10) {
-					x=10;
-				}
-				if(y<10) {
-					y=10;
-				}
+			if (wh - y - eh < -5 && c > 10) {
+				y -= eh + 22;
+			}
+			else if(y - scrollY + eh + 2 > wh) {
+				y -= y - scrollY + eh - wh + 20;
+			}
+
+			//	Oikea laita on kuitenkin aina tärkein!
+			if(x<2) {
+				x=2;
+			}
+			if(y<2) {
+				y=2;
 			}
 		}
 
@@ -4686,7 +4631,6 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 
 	}
 }
-
 //-->
 </script>
 <?php
@@ -5543,6 +5487,31 @@ if (! function_exists('hae_liite')) {
 	}
 }
 
+if(!function_exists("nayta_asiakashaku")) {
+	function nayta_asiakashaku($liitostunnus, $formi, $vars="") {
+		global $kukarow;
+
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($result) == 1) {
+			$asiakasrow = mysql_fetch_array($result);
+
+			$disabled 	= "DISABLED";
+			$nimi 		= $asiakasrow["nimi"]." ".$asiakasrow["nimitark"];
+
+		}
+		else {
+			$disabled 	= "";
+			$nimi 		= "";
+			$id			= "";
+		}
+
+		return "<input type='hidden' id='liitos' name='liitostunnus'><input type='text' id='haku' value='$nimi' name='haku' size='50' onkeyup=\"popUp(event, 'asiakashaku', '0', '-20', '{$_SERVER["SCRIPT_NAME"]}?tee=ASIAKASHAKU&formi=$formi&url={$_SERVER["SCRIPT_NAME"]}&haku='+this.value);\" $disabled>&nbsp;&nbsp;<a href='#' onclick=\"document.getElementById('haku').disabled=false; document.getElementById('haku').value=''; return false;\">".t("Vaihda asiakasta")."</a>";
+	}
+}
+
 /*
 if(!function_exists("ake_log")) {
 	function ake_log($rekkari) {
@@ -5626,71 +5595,6 @@ if(!function_exists("tarvitaanko_intrastat")) {
 	}
 }
 
-if(!function_exists("js_liveSearch")) {
-	function js_liveSearch() {
-		
-		echo "	<SCRIPT TYPE='text/javascript' LANGUAGE='JavaScript'>
-			var keyStrokeIndex=-1;
-
-			function keyhandler(event) {
-
-				var selectOptions = document.getElementsByName('selectOptions');
-
-				if(event.keyCode == 40 || event.keyCode == 38) {
-					if(event.keyCode  == 40) {
-						previousKeyStrokeIndex=keyStrokeIndex;
-						keyStrokeIndex++;
-					}
-					else if (event.keyCode == 38){
-						previousKeyStrokeIndex=keyStrokeIndex;
-						keyStrokeIndex--;
-					}
-
-					if(keyStrokeIndex > selectOptions.length-1) {
-						keyStrokeIndex = selectOptions.length-1;
-					}
-					else if(keyStrokeIndex < 0) {
-						keyStrokeIndex = -1;
-						selectOptions[previousKeyStrokeIndex].className='liveSearchUnSelectedItem';
-					}
-					else {
-
-						if(previousKeyStrokeIndex < 0) {
-							previousKeyStrokeIndex = 0;
-						}
-
-						if(previousKeyStrokeIndex != keyStrokeIndex) {
-							selectOptions[previousKeyStrokeIndex].className='liveSearchUnSelectedItem';
-						}
-
-						selectOptions[keyStrokeIndex].className='liveSearchSelectedItem';
-					}
-				}
-				else if (event.keyCode == 13){
-
-					if(keyStrokeIndex >= 0 && keyStrokeIndex <= selectOptions.length-1) {
-						var selectValues = document.getElementsByName('selectValues');
-						eval(selectValues[keyStrokeIndex].innerHTML);
-						keyStrokeIndex=-1;
-					}
-
-					return false;				
-				}
-				else if (event.keyCode == 27){
-					selectOptions[keyStrokeIndex].className='liveSearchUnSelectedItem';
-					KeyStrokeIndex = -1;
-				}
-
-				if(keyStrokeIndex >= 0 && keyStrokeIndex <= selectOptions.length-1) {
-					selectOptions[keyStrokeIndex].className='liveSearchSelectedItem';
-				}
-			}
-
-		</SCRIPT>";
-
-	}	
-}
-
 if(!function_exists("tee_asiakashaku")) {
 	function tee_asiakashaku($ytunnus, $formi, $lopetus="", $div="") {
 		global $yhtiorow, $kukarow, $palvelin2;
@@ -5710,7 +5614,7 @@ if(!function_exists("tee_asiakashaku")) {
 		}
 
 		$ytunnus = addslashes(trim($ytunnus));
-		$limit   = 50; // montako riviä on maksimi
+		$limit   = 300; // montako riviä on maksimi
 		$monta   = 0;
 
 		//	Jos käyttäjällä on valittu piirejä niin sallitaan vain ko. piirin/piirien hakeminen
@@ -5752,8 +5656,7 @@ if(!function_exists("tee_asiakashaku")) {
 				$query	= "	SELECT nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, concat('£',max(tunnus)) ytunnus, concat('£',max(tunnus)) tunnus, yhtio
 							FROM lasku use index (asiakasnimi)
 							WHERE $konsyhtiot and tila != 'D' and match (nimi) against ('$ytunnus*' IN BOOLEAN MODE)
-							group by 1,2,3,4,5 order by 1
-							LIMIT $limit";
+							group by 1,2,3,4,5 order by 1";
 				$result = mysql_query($query) or pupe_error($query);
 				$monta  = mysql_num_rows($result);
 
@@ -5770,8 +5673,7 @@ if(!function_exists("tee_asiakashaku")) {
 				$query	= "	SELECT toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, nimi, nimitark, osoite, postino, postitp, concat('£',max(tunnus)) ytunnus, concat('£',max(tunnus)) tunnus, yhtio
 							FROM lasku use index (asiakastoim_nimi)
 							WHERE $konsyhtiot and tila != 'D' and match (toim_nimi) against ('$ytunnus*' IN BOOLEAN MODE)
-							group by 1,2,3,4,5 order by 1
-							LIMIT $limit";
+							group by 1,2,3,4,5 order by 1";
 				$result = mysql_query($query) or pupe_error($query);
 				$monta  = mysql_num_rows($result);
 
@@ -5787,7 +5689,7 @@ if(!function_exists("tee_asiakashaku")) {
 							and lasku.tila in ('A','L','N')
 							and tyomaarays.rekno = '$ytunnus'
 							group by 1,2,3,4,5 order by 1
-							LIMIT $limit";
+							LIMIT 50";
 				$result = mysql_query($query) or pupe_error($query);
 				$monta  = mysql_num_rows($result);
 
@@ -5799,7 +5701,7 @@ if(!function_exists("tee_asiakashaku")) {
 								and lasku.tila in ('A','L','N')
 								and tyomaarays.valmnro = '$ytunnus'
 								group by 1,2,3,4,5 order by 1
-								LIMIT $limit";
+								LIMIT 50";
 					$result = mysql_query($query) or pupe_error($query);
 					$monta  = mysql_num_rows($result);
 				}
@@ -5814,8 +5716,7 @@ if(!function_exists("tee_asiakashaku")) {
 							(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus = '$ytunnus' and ovttunnus!='' and laji != 'P' $asiakasrajaus)
 							UNION
 							(SELECT * FROM asiakas use index (toim_ovttunnus_index) WHERE $konsyhtiot and toim_ovttunnus = '$ytunnus' and toim_ovttunnus!='' and laji != 'P' $asiakasrajaus)
-							ORDER BY nimi
-							LIMIT $limit";
+							ORDER BY nimi";
 				$result = mysql_query($query) or pupe_error($query);
 				$monta  = mysql_num_rows($result);
 			}
@@ -5829,8 +5730,7 @@ if(!function_exists("tee_asiakashaku")) {
 							and ytunnus!=''
 							and laji != 'P'
 							$asiakasrajaus
-							ORDER BY asiakas.nimi
-							LIMIT $limit";
+							ORDER BY asiakas.nimi";
 				$result = mysql_query($query) or pupe_error($query);
 				$monta  = mysql_num_rows($result);
 			}
@@ -5848,74 +5748,62 @@ if(!function_exists("tee_asiakashaku")) {
 							(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus like '%$ytunnus%' and ovttunnus!='' and laji != 'P' $asiakasrajaus)
 							UNION
 							(SELECT * FROM asiakas WHERE $konsyhtiot and postitp like '%$ytunnus%' and postitp!='' and laji != 'P' $asiakasrajaus)
-							ORDER BY nimi
-							LIMIT $limit";
+							ORDER BY nimi";
 				$result = mysql_query($query) or pupe_error($query);
 				$monta  = mysql_num_rows($result);
 			}
 		}
-		else {
-			echo "<font class='info'>".t("Anna vähintään 3 merkkiä.")."</font>";
-		}
-		
-		if(mysql_num_rows($result) == $limit) {
-			echo "<font class='info'>".t("HUOM! osa hakutulosesta nätetään vain %s ensimmäistä", $kieli, $limit)."</font>";
-		}
-		
-		if(mysql_num_rows($result)) {
+
+		echo "<table>
+				<caption>Valitse asiakas</caption>";
+
+		if($monta > 0 and $monta < 200) {
+			echo "	<tr>
+						<th style='border: 1px solid;'>".t("Asiakas")."</th><th style='border: 1px solid;'>".t("Toimitusosoite")."</th><td></td>
+					</tr>";
 			while($row = mysql_fetch_array($result)) {
 				//ajaxPost('$formi', '$urli?' , '$div', false, true);
-				echo "	<div id='asiakas_valinta_$row[tunnus]' name='selectOptions' onmouseover=\"this.className='liveSearchSelectedItem';\" onmouseout=\"this.className='liveSearchUnSelectedItem';\" onclick=\"eval(document.getElementById('asiakas_toiminto_$row[tunnus]').innerHTML);\" class='unSelectedItem' style='width: 500px;'>
-						<table width = '100%' class='liveSearch'>
-							<tr>
-								<th width='50%' class='liveSearch'>
-									$row[nimi] $row[nimitark]
-								</th>
-								<th width='50%' class='liveSearch'>
-									$row[toim_nimi] $row[toim_nimitark]
-								</th>
-							</tr>
-							<tr>
-								<td width='50%' class='liveSearch'>
-									$row[osoite]<br>$row[postino] $row[postitp]<br>".maa($row["maa"])."
-								</td>
-								<td width='50%' class='liveSearch'>
-								$row[toim_osoite]<br>$row[toim_postino] $row[toim_postitp]<br>".maa($row["toim_maa"])."
-								</td>
-							<tr>
-						</table>	
-						</div>	
-						<div id='asiakas_toiminto_$row[tunnus]' name='selectValues' style='display: none;'>document.getElementById('liitos').value='$row[tunnus]'; document.getElementById('haku').value='$row[nimi] $row[nimitark]'; document.getElementById('haku').disabled='true'; asval=document.getElementById('asiakashaku'); asval=document.getElementById('asiakashaku'); asval.innerHTML=''; asval.style.display='none'; ajaxPost('$formi', '{$_SERVER["SCRIPT_NAME"]}?from=asiakasvalinta' , '$div', false, true);</div>";
-			}			
+				echo "
+					<tr class='aktiivi'>
+						<td style='border: 1px solid;'>$row[nimi] $row[nimitark]</td>
+						<td style='border: 1px solid;'>$row[toim_nimi] $row[toim_nimitark]</td>
+						<td><a href='' onclick=\"document.getElementById('liitos').value='$row[tunnus]'; document.getElementById('haku').value='$row[nimi] $row[nimitark]'; document.getElementById('haku').disabled='true'; asval=document.getElementById('asiakashaku'); asval.innerHTML=''; asval.style.display='none'; ajaxPost('$formi', '$urli?from=asiakasvalinta' , '$div', false, true); return false;\">".t("Valitse")."</a></td>
+					</tr>";
+			}
 		}
+
+		//	Tsekataan josko saataisiin perustaa uusi asiakas?
+		if($lopetus != "") {
+			
+			$query = "	SELECT yhtio, alanimi, nimitys
+						FROM oikeu
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and kuka	= '$kukarow[kuka]'
+						and nimi	= 'yllapito.php'
+						and (alanimi = 'asiakas' or alanimi LIKE ('asiakas!%')  or alanimi LIKE ('asiakas&%'))
+						and paivitys != ''";
+			$oikeures = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($oikeures) > 0) {
+				echo "	<tr>
+							<td class='back' colspan='3'><br><font class='message'>".t("Eikö löydy? Perusta täältä uusi!")."</font></td>
+						</tr>";
+				
+				echo "	<tr>
+							<td class='back' colspan='3'>";
+				
+				while($orow = mysql_fetch_array($oikeures)) {
+					echo "		<a href='{$palvelin2}yllapito.php?laji=Y&uusi=1&toim=$orow[alanimi]&lopetus=$lopetus'>".t($orow["nimitys"])."</a>&nbsp;&nbsp;";
+				}
+				
+				echo "		</td>
+						</tr>";
+			}
+		}
+
+		echo "	</table>";
 	}
 }
 
-if(!function_exists("nayta_asiakashaku")) {
-	function nayta_asiakashaku($liitostunnus, $formi, $vars="") {
-		global $kukarow;
-
-		$query = "	SELECT *
-					FROM asiakas
-					WHERE yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
-		$result = mysql_query($query) or pupe_error($query);
-		if(mysql_num_rows($result) == 1) {
-			$asiakasrow = mysql_fetch_array($result);
-
-			$disabled 	= "DISABLED";
-			$nimi 		= $asiakasrow["nimi"]." ".$asiakasrow["nimitark"];
-
-		}
-		else {
-			$disabled 	= "";
-			$nimi 		= "";
-			$id			= "";
-		}
-
-		return "<input type='hidden' id='liitos' name='liitostunnus'><input type='text' id='haku' value='$nimi' name='haku' size='50' onkeydown=\"return keyhandler(event);\" onkeyup=\"if((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) { popUp(event, 'asiakashaku', '-6', '-30', '{$_SERVER["SCRIPT_NAME"]}?tee=ASIAKASHAKU&formi=$formi&url={$_SERVER["SCRIPT_NAME"]}&haku='+this.value, 'liveSearch'); keyStrokeIndex = -1; }\" $disabled autocomplete='off'>&nbsp;&nbsp;<a href='#' onclick=\"document.getElementById('haku').disabled=false; document.getElementById('haku').value=''; return false;\" onblur=\"document.getElementById('liveSearch').style.display='none';\">".t("Vaihda asiakasta")."</a>
-			<script LANGUAGE='JavaScript'>window.document.$formi.haku.focus();</script>";
-	}
-}
 
 if(!function_exists("sendSMS")) {
 	function sendSMS($smsnumero, $smsviesti) {

@@ -1765,7 +1765,7 @@
 				}
 			}
 
-			die("<script LANGUAGE='JavaScript'>sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false); pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none';</script></body></html>");
+			die("<script LANGUAGE='JavaScript'>sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false); document.body.removeChild(document.getElementById('ajax_menu'))</script></body></html>");
 		}
 		else {
 			$kaletee = "KALENTERITAPAHTUMA";

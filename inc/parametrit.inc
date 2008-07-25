@@ -23,7 +23,7 @@ foreach ($_GET as $key => $value) {
 			${$key} = $_GET[$key];
 		}
 		else {
-			${$key} = iconv($_REQUEST["sourceCharset"], "latin1", str_replace($serc, $repl, $_GET[$key]));
+			${$key} = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", str_replace($serc, $repl, $_GET[$key]));
 		}
 	}
 	else {
@@ -41,7 +41,7 @@ foreach ($_POST as $key => $value) {
 			${$key} = $_POST[$key];
 		}
 		else {
-			${$key} = iconv($_REQUEST["sourceCharset"], "latin1", str_replace($serc, $repl, $_POST[$key]));
+			${$key} = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", str_replace($serc, $repl, $_POST[$key]));
 		}
 	}
 	else {

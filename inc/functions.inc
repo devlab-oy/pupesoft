@@ -4530,19 +4530,27 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 		}
 		
 		myDiv.setAttribute('id', oi);
-		myDiv.setAttribute('name', oi);
+		myDiv.setAttribute('name', 'dynamic_'+oi);
 		myDiv.style.display = 'block';
 		document.body.appendChild(myDiv);
 	}
 
 	if(e.type == "mouseout") {
-		var de = document.getElementById(oi);
-		de.style.visibility='hidden';
-		de.style.display='none';
+		
 		if(popUp_timeout>0) {
 			clearTimeout(popUp_timeout);
 		}
-		//document.body.removeChild(de);
+		
+		var de = document.getElementById(oi);
+
+		//	Jos meillä oli dynaamisesti ladattu elementti poistetaan se kokonaan..
+		if(de.name='dynamic_'+de.id) {
+			document.body.removeChild(de);
+		}
+		else {
+			de.style.visibility='hidden';
+			de.style.display='none';
+		}
 	}
 	else {
 
@@ -4656,16 +4664,16 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 				if (wh - y - eh < -10 && c > 10) {
 					y -= eh + 22;
 				}
-				else if(y - scrollY + eh + 5 > wh) {
-					y -= y - scrollY + eh - wh + 20;
+				else if(y - scrollY + eh + 10 > wh) {
+					y -= y - scrollY + eh - wh + 22;
 				}
 
 				//	Oikea laita on kuitenkin aina tärkein!
-				if(x<2) {
-					x=2;
+				if(x<10) {
+					x=10;
 				}
-				if(y<2) {
-					y=2;
+				if(y<10) {
+					y=10;
 				}
 			}
 		}

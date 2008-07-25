@@ -436,7 +436,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			for ($r=0; $r<count($otsikot); $r++) {
 				
 				//	Näitä ei koskaan lisätä
-				if(in_array($otsikot[$r], $abu_sarakkeet)) {
+				if (is_array($abu_sarakkeet) and in_array($otsikot[$r], $abu_sarakkeet)) {
 					continue;
 				}
 				

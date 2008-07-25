@@ -15,30 +15,19 @@
 			echo "<font class='head'>".t("JT rivit")."</font><hr>";
 		}
 	}
-
+	/*
 	if ($_POST['korvataanko'] == 'KORVAA') {
 		$query = "	UPDATE tilausrivi 
 					SET tuoteno = '$_POST[korvaava]' 
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tuoteno = '$_POST[korvattava]'
 					AND tunnus = '$_POST[korvattava_tilriv]'";
-		$res = mysql_query($query) or pupe_error($query);
+//		$res = mysql_query($query) or pupe_error($query);
 		$tee = 'JATKA';
+		echo "<pre>$query</pre>";
+		exit;
 	}
-
-	echo "	<script type='text/javascript' language='JavaScript'>
-			<!--
-				function update_params(KORVATTAVA, KORVAAVA, TILRIVTUNNUS) {
-					//alert(KORVATTAVA + ' ' + KORVAAVA + ' ' + TILRIVTUNNUS);
-
-					document.getElementById('korvattava_tilriv').value = TILRIVTUNNUS;
-					document.getElementById('korvattava').value = KORVATTAVA;
-					document.getElementById('korvaava').value = KORVAAVA;
-				}
-			-->
-			</script>";
-
-
+*/
 	$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
 
 	if ($tee != "JT_TILAUKSELLE" and $vainvarastosta != "") {
@@ -830,6 +819,7 @@
 
 							//Tulostetaan otsikot
 							if ($automaaginen == '' and $jt_rivilaskuri == 0) {
+								
 								echo "<table>";
 								echo "<tr>";
 								echo "<th>#</th>";
@@ -880,6 +870,21 @@
 								echo "</tr>";
 
 								if ($oikeurow['paivitys'] == '1') {
+									/*
+									echo "	<script type='text/javascript' language='JavaScript'>
+											<!--
+												function update_params(KORVATTAVA, KORVAAVA, TILRIVTUNNUS) {
+													//alert(KORVATTAVA + ' ' + KORVAAVA + ' ' + TILRIVTUNNUS);
+
+													document.getElementById('korvattava_tilriv').value = TILRIVTUNNUS;
+													document.getElementById('korvattava').value = KORVATTAVA;
+													document.getElementById('korvaava').value = KORVAAVA;
+													document.getElementById('korvataanko').value = 'KORVAA';
+												}
+											-->
+											</script>";
+									*/
+
 									echo "<form action='$PHP_SELF' method='post'>";
 									echo "<input type='hidden' name='maa' value='$maa'>";
 
@@ -1460,8 +1465,9 @@
 								unset($lapsires);
 							}
 							
+							/*
 							if ($kukarow['extranet'] == '') {
-								///* Korvaavat tuotteet *///
+								// Korvaavat tuotteet //
 								$query  = "SELECT * from korvaavat where tuoteno='$jtrow[tuoteno]' and yhtio='$kukarow[yhtio]'";
 								$korvaresult = mysql_query($query) or pupe_error($query);
 
@@ -1491,7 +1497,6 @@
 												echo "<td align='left' style='vertical-align:top'>";
 												echo "$krow2row[tuoteno] ($vapaana) <font style='color:green;'>".t("Riitt‰‰ kaikille")."!$varalisa</font><br>";
 												echo "</td><td colspan='8' align='left'><input type='button' value='Korvaa tuote $jtrow[tuoteno]' onClick='javascript:update_params(\"$jtrow[tuoteno]\", \"$krow2row[tuoteno]\", \"$jtrow[tunnus]\");javascript:submit();'></td></tr>";
-												echo "<input type='hidden' name='korvataanko' value='KORVAA'>";
 											}
 											elseif ($vapaana >= $jtrow["jt"]) {
 												echo "<tr class='aktiivi'>";
@@ -1499,7 +1504,6 @@
 												echo "<td align='left' style='vertical-align:top'>";
 												echo "$krow2row[tuoteno] ($vapaana) <font style='color:yellowgreen;'>".t("Ei riit‰ kaikille")."!$varalisa</font><br>";
 												echo "</td><td colspan='8' align='left'><input type='submit' value='Korvaa tuote $jtrow[tuoteno]' onClick='javascript:update_params(\"$jtrow[tuoteno]\", \"$krow2row[tuoteno]\", \"$jtrow[tunnus]\");javascript:submit();'></td></tr>";
-												echo "<input type='hidden' name='korvataanko' value='KORVAA'>";
 											}
 											elseif ($vapaana > 0) {
 												echo "<tr class='aktiivi'>";
@@ -1507,12 +1511,12 @@
 												echo "<td align='left' style='vertical-align:top'>";
 												echo "$krow2row[tuoteno] ($vapaana) <font style='color:orange;'>".t("Ei riit‰ koko riville")."!$varalisa</font><br>";
 												echo "</td><td colspan='8' align='left'><input type='submit' value='Korvaa tuote $jtrow[tuoteno]' onClick='javascript:update_params(\"$jtrow[tuoteno]\", \"$krow2row[tuoteno]\", \"$jtrow[tunnus]\");javascript:submit();'></td></tr>";
-												echo "<input type='hidden' name='korvataanko' value='KORVAA'>";
 											}
 										}
 									}
 								}
 							}
+							*/
 						}
 					}
 				}
@@ -1520,13 +1524,15 @@
 				if ($automaaginen == '' and $jt_rivilaskuri > 0) {
 
 					if ($oikeurow['paivitys'] == '1') {
+						
+						/*
 						echo "<input type='hidden' name='korvattava_tilriv' id='korvattava_tilriv' value=''>";
 						echo "<input type='hidden' name='korvattava' id='korvattava' value=''>";
 						echo "<input type='hidden' name='korvaava' id='korvaava' value=''>";
+						echo "<input type='hidden' name='korvataanko' id='korvataanko' value=''>";
 
 						echo "<input type='hidden' name='maa' value='$maa'>";
 
-						echo "<input type='hidden' name='toim' value='$toim'>";
 						echo "<input type='hidden' name='jarj' value='$jarj'>";
 						echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 						echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
@@ -1540,6 +1546,8 @@
 						echo "<input type='hidden' name='tuoteryhma' value='$tuoteryhma'>";
 						echo "<input type='hidden' name='tuotemerkki' value='$tuotemerkki'>";
 						echo "<input type='hidden' name='tilaus' value='$tilaus'>";
+*/
+//						echo "<input type='hidden' name='toim' value='$toim'>";
 
 						if(count($suoravarasto)>0) {
 							foreach($suoravarasto as $key => $value) {

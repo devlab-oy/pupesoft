@@ -39,7 +39,7 @@ if (!function_exists('tulosta_lasku')) {
 		$laskurow = mysql_fetch_array($result);
 
 		//	Häkki jos saldo on osittain maksettu
-		if($laskurow["mapvm"] != '0000-00-00 00:00:00') {
+		if($laskurow["mapvm"] != '0000-00-00') {
 			$laskurow["saldo_maksettu"] = $laskurow["summa"];
 			$laskurow["saldo_maksettu_valuutassa"] = $laskurow["summa_valuutassa"];
 		}

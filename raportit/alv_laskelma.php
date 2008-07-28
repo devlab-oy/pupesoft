@@ -4,7 +4,7 @@
 
    	echo "<font class='head'>".t("ALV-laskelma")."</font><hr>";
 
-	if ($tltee == "aja") {
+	if ($tee == "aja") {
 
 		// edellinen taso
 		$taso     = array();
@@ -13,8 +13,8 @@
 		$verot    = array();
 		$kappa    = array();
 
-		$startmonth	= date("Ymd",   mktime(0, 0, 0, $plvk,   1, $plvv));
-		$endmonth 	= date("Ymd",   mktime(0, 0, 0, $plvk+1,  0, $plvv));
+		$startmonth	= date("Y-m-d", mktime(0, 0, 0, $kk,   1, $vv));
+		$endmonth 	= date("Y-m-d", mktime(0, 0, 0, $kk+1, 0, $vv));
 
 		$query = "	SELECT *
 					FROM taso
@@ -106,9 +106,6 @@
 				}
 			}
 
-			$rivi  = "<tr class='aktiivi'>";
-			$rivi .= "<th nowrap>$value</th>";
-
 			$query = "	SELECT summattava_taso
 						FROM taso
 						WHERE yhtio 		 = '$kukarow[yhtio]'
@@ -125,28 +122,19 @@
 				}
 			}
 
-			// formatoidaan luku toivottuun muotoon
-			$apu = $summa[$key];
-
-			if ($apu == 0) {
-				$apu = ""; // nollat spaseiks
-			}
-			else {
-				$tulos++; // summaillaan tätä jos meillä oli rivillä arvo niin osataan tulostaa
-			}
-
+			$rivi  = "<tr class='aktiivi'>";
+			$rivi .= "<th nowrap>$value</th>";
 			$rivi .= "<th></th>";
 			$rivi .= "<th style='text-align:right;'>$summa[$key]</th>";
 			$rivi .= "<th style='text-align:right;'>$verot[$key]</th>";
 			$rivi .= "<th style='text-align:right;'>$kappa[$key]</th>";
 			$rivi .= "</tr>\n";
 
-			// jos jollain kaudella oli summa != 0 niin tulostetaan rivi
+			// jos oli summa != 0 niin tulostetaan rivi
 			if ($summa[$key] != 0 or $verot[$key] != 0 or $kappa[$key] != 0) {
 				echo $tilirivi, $rivi;
 			}
 
-			$edkey = $key;
 		}
 
 		echo "</table>";
@@ -155,29 +143,29 @@
 	// tehdään käyttöliittymä, näytetään aina
 	echo "<br>";
 	echo "<form action = 'alv_laskelma.php' method='post'>";
-	echo "<input type = 'hidden' name = 'tltee' value = 'aja'>";
+	echo "<input type = 'hidden' name = 'tee' value = 'aja'>";
 	echo "<table>";
 
-	if (!isset($plvv)) $plvv = date("Y");
-	if (!isset($plvk)) $plvk = date("n");
+	if (!isset($vv)) $vv = date("Y");
+	if (!isset($kk)) $kk = date("n");
 
 	echo "<tr>";
 	echo "<th>".t("Valitse kausi")."</th>";
 	echo "<td>";
 
 	$sel = array();
-	$sel[$plvv] = "SELECTED";
+	$sel[$vv] = "SELECTED";
 
-	echo "<select name='plvv'>";
+	echo "<select name='vv'>";
 	for ($i = date("Y"); $i >= date("Y")-4; $i--) {
 		echo "<option value='$i' $sel[$i]>$i</option>";
 	}
 	echo "</select>";
 
 	$sel = array();
-	$sel[$plvk] = "SELECTED";
+	$sel[$kk] = "SELECTED";
 
-	echo "<select name='plvk'>
+	echo "<select name='kk'>
 			<option $sel[1] value = '1'>01</option>
 			<option $sel[2] value = '2'>02</option>
 			<option $sel[3] value = '3'>03</option>

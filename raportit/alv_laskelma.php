@@ -4,6 +4,53 @@
 
    	echo "<font class='head'>".t("ALV-laskelma")."</font><hr>";
 
+	// tehdään käyttöliittymä, näytetään aina
+	echo "<form action = 'alv_laskelma.php' method='post'>";
+	echo "<input type = 'hidden' name = 'tee' value = 'aja'>";
+	echo "<table>";
+
+	if (!isset($vv)) $vv = date("Y");
+	if (!isset($kk)) $kk = date("n");
+
+	echo "<tr>";
+	echo "<th>".t("Valitse kausi")."</th>";
+	echo "<td>";
+
+	$sel = array();
+	$sel[$vv] = "SELECTED";
+
+	echo "<select name='vv'>";
+	for ($i = date("Y"); $i >= date("Y")-4; $i--) {
+		echo "<option value='$i' $sel[$i]>$i</option>";
+	}
+	echo "</select>";
+
+	$sel = array();
+	$sel[$kk] = "SELECTED";
+
+	echo "<select name='kk'>
+			<option $sel[1] value = '1'>01</option>
+			<option $sel[2] value = '2'>02</option>
+			<option $sel[3] value = '3'>03</option>
+			<option $sel[4] value = '4'>04</option>
+			<option $sel[5] value = '5'>05</option>
+			<option $sel[6] value = '6'>06</option>
+			<option $sel[7] value = '7'>07</option>
+			<option $sel[8] value = '8'>08</option>
+			<option $sel[9] value = '9'>09</option>
+			<option $sel[10] value = '10'>10</option>
+			<option $sel[11] value = '11'>11</option>
+			<option $sel[12] value = '12'>12</option>
+			</select>";
+	echo "</td>";
+	
+	echo "<td class='back'><input type = 'submit' value = '".t("Näytä")."'></td>";
+
+	echo "</tr>";
+	echo "</table>";
+
+	echo "</form><br>";
+
 	if ($tee == "aja") {
 
 		// edellinen taso
@@ -43,7 +90,7 @@
 						round(sum(tiliointi.summa * (1 + vero / 100)) * -1, 2) verollinensumma,
 						count(*) kpl
 					 	FROM tili
-						LEFT JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio AND tiliointi.tilino = tili.tilino AND tiliointi.korjattu = '' AND tiliointi.tapvm >= '$startmonth' AND tiliointi.tapvm <= '$endmonth')
+						LEFT JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio AND tiliointi.tilino = tili.tilino AND tiliointi.korjattu = '' AND tiliointi.vero != 0 AND tiliointi.tapvm >= '$startmonth' AND tiliointi.tapvm <= '$endmonth')
 						WHERE tili.yhtio = '$kukarow[yhtio]'
 						AND tili.alv_taso = '$tasorow[taso]'
 						GROUP BY tili.alv_taso";
@@ -90,6 +137,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tilino = '$tilirow[tilino]'
 							AND korjattu = ''
+							AND vero != 0
 							AND tapvm >= '$startmonth'
 							AND tapvm <= '$endmonth'
 							GROUP BY tilino, vero";
@@ -139,54 +187,6 @@
 
 		echo "</table>";
 	}
-
-	// tehdään käyttöliittymä, näytetään aina
-	echo "<br>";
-	echo "<form action = 'alv_laskelma.php' method='post'>";
-	echo "<input type = 'hidden' name = 'tee' value = 'aja'>";
-	echo "<table>";
-
-	if (!isset($vv)) $vv = date("Y");
-	if (!isset($kk)) $kk = date("n");
-
-	echo "<tr>";
-	echo "<th>".t("Valitse kausi")."</th>";
-	echo "<td>";
-
-	$sel = array();
-	$sel[$vv] = "SELECTED";
-
-	echo "<select name='vv'>";
-	for ($i = date("Y"); $i >= date("Y")-4; $i--) {
-		echo "<option value='$i' $sel[$i]>$i</option>";
-	}
-	echo "</select>";
-
-	$sel = array();
-	$sel[$kk] = "SELECTED";
-
-	echo "<select name='kk'>
-			<option $sel[1] value = '1'>01</option>
-			<option $sel[2] value = '2'>02</option>
-			<option $sel[3] value = '3'>03</option>
-			<option $sel[4] value = '4'>04</option>
-			<option $sel[5] value = '5'>05</option>
-			<option $sel[6] value = '6'>06</option>
-			<option $sel[7] value = '7'>07</option>
-			<option $sel[8] value = '8'>08</option>
-			<option $sel[9] value = '9'>09</option>
-			<option $sel[10] value = '10'>10</option>
-			<option $sel[11] value = '11'>11</option>
-			<option $sel[12] value = '12'>12</option>
-			</select>";
-	echo "</td></tr>";
-
-	echo "</table>";
-
-	echo "<br>";
-	echo "<input type = 'submit' value = '".t("Näytä")."'>";
-
-	echo "</form>";
 
 	require("inc/footer.inc");
 

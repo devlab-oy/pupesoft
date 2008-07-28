@@ -2022,7 +2022,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 			while($row = mysql_fetch_array($result)) {
-				if($row["kuka"] == $kuka) $sel = "selected";
+				if($row["kuka"] == $kuka or (!isset($kuka) and $row["kuka"] == $kukarow["kuka"])) $sel = "selected";
 				else $sel = "";
 	 			$valitse_kuka .= "<option value='$row[kuka]' $sel>$row[nimi]</option>";
 			}

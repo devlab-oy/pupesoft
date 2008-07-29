@@ -43,7 +43,7 @@
 			<option $sel[12] value = '12'>12</option>
 			</select>";
 	echo "</td>";
-	
+
 	echo "<td class='back'><input type = 'submit' value = '".t("Näytä")."'></td>";
 
 	echo "</tr>";
@@ -90,20 +90,22 @@
 						round(sum(tiliointi.summa * (1 + vero / 100)) * -1, 2) verollinensumma,
 						count(*) kpl
 					 	FROM tili
-						LEFT JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio AND tiliointi.tilino = tili.tilino AND tiliointi.korjattu = '' AND tiliointi.vero != 0 AND tiliointi.tapvm >= '$startmonth' AND tiliointi.tapvm <= '$endmonth')
+						JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio AND tiliointi.tilino = tili.tilino AND tiliointi.korjattu = '' AND tiliointi.vero != 0 AND tiliointi.tapvm >= '$startmonth' AND tiliointi.tapvm <= '$endmonth')
 						WHERE tili.yhtio = '$kukarow[yhtio]'
 						AND tili.alv_taso = '$tasorow[taso]'
+						AND tili.alv_taso != ''
 						GROUP BY tili.alv_taso";
 			$tilires = mysql_query($query) or pupe_error($query);
 
 			while ($tilirow = mysql_fetch_array ($tilires)) {
-				// summataan kausien saldot
+				// summataan tän plus pienempien tasojen saldot
 				for ($i = $tasoluku - 1; $i >= 0; $i--) {
 					$summa[$taso[$i]] += $tilirow["verollinensumma"];
 					$verot[$taso[$i]] += $tilirow["summa"];
 					$kappa[$taso[$i]] += $tilirow["kpl"];
 				}
 			}
+
 		}
 
 		echo "<table>";
@@ -125,6 +127,7 @@
 
 			$tilirivi = "";
 
+			// haetaan kaikki summat per tili
 			$query = "SELECT * FROM tili WHERE yhtio = '$kukarow[yhtio]' and alv_taso = '$key'";
 			$tilires = mysql_query($query) or pupe_error($query);
 
@@ -164,6 +167,7 @@
 
 			if ($summarow = mysql_fetch_array ($summares)) {
 				foreach(explode(",", $summarow["summattava_taso"]) as $staso) {
+					$staso = trim($staso);
 					$summa[$key] = $summa[$key] + $summa[$staso];
 					$verot[$key] = $verot[$key] + $verot[$staso];
 					$kappa[$key] = $kappa[$key] + $kappa[$staso];

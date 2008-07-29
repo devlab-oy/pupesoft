@@ -35,8 +35,19 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 				$virhe[$i] = t("Tuotenumero puuttuu!");
 			}
 		}
-
+		
 		if (mysql_field_name($result, $i) == "laji") {
+			if ($chtuoteno != '') {
+				$query = "	SELECT laji
+							FROM tuotteen_avainsanat
+							WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$chtuoteno' and laji = '$t[$i]'";
+				$sresult = mysql_query($query) or pupe_error($query);
+				
+				if (mysql_num_rows($sresult) > 0) {
+					$virhe[$i] = "".t("Tuotteella on jo tämä laji käytössä!")."";
+				}
+			}			
+			
 			if ($t[$i] == '') {
 				$virhe[$i] = "".t("Lajia ei voi jättää tyhjäksi. Skarppaa!")."";
 			}

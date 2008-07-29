@@ -5,7 +5,7 @@
 
 		if (!function_exists('tulosta_tilausvahvistus')) {
 			function tulosta_tilausvahvistus ($otunnus, $komento, $kieli = "", $tee = "") {
-				global $yhtiorow, $kukarow, $fonts, $h;
+				global $yhtiorow, $kukarow, $fonts, $h, $tilausvahvistus_tallenna;
 
 				// Haetaan laskun tiedot
 				$query = "	SELECT lasku.*, laskun_lisatiedot.*, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.luontiaika päiväys, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, lasku.tunnus toimitus, viesti asiakkaan_viite, sisviesti1 lisätiedot, lasku.ytunnus asiakkaan_VAT,
@@ -628,6 +628,17 @@
 					}
 				}
 
+				if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
+					$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".pdf";
+					//kirjoitetaan pdf faili levylle..
+					$fh_liite = fopen($tilausvahvistus_tallenna, "w");
+					if (fwrite($fh_liite, $pdf->generate()) === FALSE) die("PDF create error $tilausvahvistus_tallenna");
+					fclose($fh_liite);
+				}
+				else {
+					$tilausvahvistus_tallenna = "";
+				}
+
 				//poistetaan tmp file samantien kuleksimasta...
 				system("rm -f $pdf_tilausvahvistusfilenimi");
 			}
@@ -754,6 +765,17 @@
 		}
 
 		loppu($page[$sivu], 1);
+
+		if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
+			$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".pdf";
+			//kirjoitetaan pdf faili levylle..
+			$fh_liite = fopen($tilausvahvistus_tallenna, "w");
+			if (fwrite($fh_liite, $pdf->generate()) === FALSE) die("PDF create error $tilausvahvistus_tallenna");
+			fclose($fh_liite);
+		}
+		else {
+			$tilausvahvistus_tallenna = "";
+		}
 
 		//tulostetaan sivu
 		print_pdf($komento["Tilausvahvistus"], "TILAUSVAHVISTUS");

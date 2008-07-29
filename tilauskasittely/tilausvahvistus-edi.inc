@@ -11,7 +11,7 @@ else {
 }
 
 if (!file_exists($tilvahvfilenimi)) {
-	
+
 	if (!$toot = fopen($tilvahvfilenimi, "w")) die("TILAUSVAHVISTUS: Tiedoston luonti ei onnistu!");
 
 	$query = "SELECT tilausrivi.tunnus, eankoodi,
@@ -156,6 +156,14 @@ if (!file_exists($tilvahvfilenimi)) {
 	#	echo "<pre>".htmlentities($contents)."</pre><br><br>";
 
 	} // end rivejä löytyi
+}
+
+if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
+	$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".txt";
+	file_put_contents($tilausvahvistus_tallenna, $ulos);
+}
+else {
+	$tilausvahvistus_tallenna = "";
 }
 
 $ulos = "";

@@ -1635,4 +1635,19 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "tilausvahvistus_tallenna") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Tilausvahvistusta ei tallenneta myyntitilauksen liitetiedostoksi")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Tilausvahvistus tallennetaan myyntitilauksen liitetiedostoksi")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

@@ -17,11 +17,11 @@ if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 	$query	= "select * from yhteyshenkilo where yhtio='$kukarow[yhtio]' and liitostunnus='$laskurow[liitostunnus]' and nimi = '$laskurow[tilausyhteyshenkilo]'";
 	$yhteyshenkiloresult  = mysql_query($query) or pupe_error($query);
 	$yhteyshenkiloasiakas = mysql_fetch_array($yhteyshenkiloresult);
-	
+
 	if ($yhteyshenkiloasiakas['email'] != '') {
 		$tilvahasiakas['email'] = $yhteyshenkiloasiakas['email'];
 	}
-	
+
 	if ($tilvahasiakas['email'] == '') {
 		$tilvah_nimi = $tilvahasiakas["nimi"];
 		if ($tilvahasiakas["toim_nimi"] != "" and $tilvahasiakas["toim_nimi"] != $tilvahasiakas["nimi"]) {
@@ -63,7 +63,7 @@ if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 
 // lähetetään textimuotoinen tilausvahvistusmeili jos miellä ei ole P:kirjainta vahvistuksessa
 if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
-	
+
 	if ($yhtiorow["varaako_jt_saldoa"] != "") {
 		$lisavarattu = " + tilausrivi.varattu";
 	}
@@ -85,7 +85,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
 	$query = "	SELECT nimi, eposti
 				FROM kuka
-				WHERE yhtio = '$kukarow[yhtio]' 
+				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus  = '$laskurow[myyja]'";
 	$kresult = mysql_query($query) or pupe_error($query);
 
@@ -129,22 +129,22 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 		$ulos .= "\n";
 
 		$ulos .= t("Nro", $kieli)." ".t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."              ".t("EAN", $kieli)."          ".t("Kpl", $kieli);
-		
+
 		if ($naytatvale != 3) {
 			$ulos .= "   ".t("Hinta", $kieli)." ".t("Val", $kieli)."   ".t("Ale", $kieli);
 		}
-		
-		$ulos .= "\n";		
+
+		$ulos .= "\n";
 		$ulos .= "----------------------------------------------------------------------------------------------\n";
 
 		$rivino = 0;
 		$liite  = t("Rivino", $kieli)."\t".t("Nimitys", $kieli)."\t".t("Tuoteno", $kieli)."\t".t("Varattu", $kieli);
-		
+
 		// kaikilla muilla paitsi kolmosella näytetään nämä
 		if ($naytatvale != 3) {
 			$liite .= "\t".t("Hinta", $kieli)."\t".t("Ale", $kieli);
 		}
-		
+
 		$liite .= "\n";
 
 		while ($tvtilausrivirow=mysql_fetch_array($tilvahresult)) {
@@ -227,7 +227,14 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 				$liite .= $tvtilausrivirow['ale'];
 			}
 			$liite .= "\n";
+		}
 
+		if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
+			$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".txt";
+			file_put_contents($tilausvahvistus_tallenna, $ulos);
+		}
+		else {
+			$tilausvahvistus_tallenna = "";
 		}
 
 	} // end rivejä löytyi
@@ -265,7 +272,6 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 		$boob = mail($kukarow['eposti']		, $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli), $content, $header, "-f $yhtiorow[postittaja_email]");
 		if ($boob===FALSE) echo t("Sähköpostin lähetys epäonnistui")."!<br>";
 	}
-
 }
 
 $ulos = "";

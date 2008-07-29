@@ -45,7 +45,7 @@ else {
 
 	$query = "	SELECT nimi, eposti
 				FROM kuka
-				WHERE yhtio = '$kukarow[yhtio]' 
+				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus  = '$laskurow[myyja]'";
 	$kresult = mysql_query($query) or pupe_error($query);
 	$krow = mysql_fetch_array($kresult);
@@ -83,11 +83,11 @@ else {
 		$ulos .= "\n";
 
 		$ulos .= t("Nro", $kieli)." ".t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."              ".t("Kpl", $kieli);
-		
+
 		if ($naytatvale != 3) {
 			$ulos .= "   ".t("Hinta", $kieli)." ".t("Val", $kieli)."   ".t("Ale", $kieli);
 		}
-		
+
 		$ulos .= "\n";
 		$ulos .= "---------------------------------------------------------------------------------\n";
 
@@ -168,6 +168,14 @@ else {
 	#echo "<pre>$ulos</pre>";
 
 } // end email löytyi
+
+if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
+	$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".txt";
+	file_put_contents($tilausvahvistus_tallenna, $ulos);
+}
+else {
+	$tilausvahvistus_tallenna = "";
+}
 
 $ulos = "";
 

@@ -198,7 +198,7 @@
 					$pdf=alku($pdf, $laskurow,$kieli);
 					$h = 190;
 
-					if($toim == "HAAMU" or $mista == "tulostakopio") {
+					if($toim == "HAAMU") {
 						//	K‰sitell‰‰n tilausrivit
 						$query = "	SELECT tilausrivi.tuoteno toim_tuoteno, tilausrivi.nimitys toim_nimitys, round(tilausrivi.varattu,2) varattu, toimaika,
 									tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, kommentti

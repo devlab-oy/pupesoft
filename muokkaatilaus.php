@@ -68,6 +68,9 @@
 		elseif ($toim == "OSTO" or $toim == "OSTOSUPER") {
 			$otsikko = t("osto-tilausta");
 		}
+		elseif ($toim == "HAAMU") {
+			$otsikko = t("työ/tarvikeostoa");
+		}
 		elseif ($toim == "YLLAPITO") {
 			$otsikko = t("ylläpitosopimusta");
 		}
@@ -133,7 +136,7 @@
 			elseif ($toim == "OSTO") {
 				$query = "	SELECT *
 							FROM lasku
-							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and alatila = ''";
+							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and tilaustyyppi = '' and alatila = ''";
 				$eresult = mysql_query($query) or pupe_error($query);
 			}
 			elseif ($toim == "OSTOSUPER") {		
@@ -146,6 +149,12 @@
 							and tilausrivi.uusiotunnus 		= 0
 							GROUP by lasku.tunnus
 							ORDER by lasku.tunnus";
+				$eresult = mysql_query($query) or pupe_error($query);
+			}
+			elseif ($toim == "HAAMU") {
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and tilaustyyppi = 'O' and alatila = ''";
 				$eresult = mysql_query($query) or pupe_error($query);
 			}
 			elseif ($toim == "ENNAKKO") {
@@ -230,6 +239,13 @@
 					}
 					elseif ($toim == "OSTO" or $toim == "OSTOSUPER") {
 						$aputoim1 = "";
+						$lisa1 = t("Muokkaa");
+
+						$aputoim2 = "";
+						$lisa2 = "";
+					}
+					elseif ($toim == "HAAMU") {
+						$aputoim1 = "HAAMU";
 						$lisa1 = t("Muokkaa");
 
 						$aputoim2 = "";
@@ -783,6 +799,7 @@
 						WHERE lasku.yhtio = '$kukarow[yhtio]' 
 						and lasku.tila		= 'O' 
 						and lasku.alatila	= ''
+						and lasku.tilaustyyppi	= ''
 						$haku
 						ORDER by lasku.luontiaika desc
 						$rajaus";
@@ -803,11 +820,31 @@
 						and tilausrivi.tyyppi 			= 'O'
 						and tilausrivi.laskutettuaika 	= '0000-00-00'
 						and tilausrivi.uusiotunnus 		= 0
+						and lasku.tilaustyyppi			= ''						
 						$haku
 						GROUP by lasku.tunnus
 						ORDER by lasku.luontiaika desc
 						$rajaus";
 			$miinus = 4;
+		}
+		elseif ($toim == 'HAAMU') {
+			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus,
+							(SELECT count(*) 
+							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)  
+							WHERE aputilausrivi.yhtio = lasku.yhtio 
+							AND aputilausrivi.otunnus = lasku.tunnus 
+							AND aputilausrivi.uusiotunnus > 0
+							AND aputilausrivi.kpl <> 0 
+							AND aputilausrivi.tyyppi = 'O') varastokpl
+						FROM lasku use index (tila_index)
+						WHERE lasku.yhtio = '$kukarow[yhtio]' 
+						and lasku.tila			= 'O' 
+						and lasku.alatila		= ''
+						and lasku.tilaustyyppi	= 'O'						
+						$haku
+						ORDER by lasku.luontiaika desc
+						$rajaus";
+			$miinus = 3;
 		}
 		elseif ($toim == 'PROJEKTI') {
 			$query = "	SELECT if(lasku.tunnusnippu > 0, lasku.tunnusnippu, lasku.tunnus) tilaus, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, tunnusnippu
@@ -1189,7 +1226,7 @@
 						$javalisa = "onSubmit = 'return lahetys_verify()'";
 					}
 
-					if ($toim == "OSTO" or $toim == "OSTOSUPER") {
+					if ($toim == "OSTO" or $toim == "OSTOSUPER" or $toim == "HAAMU") {
 						echo "<form method='post' action='tilauskasittely/tilaus_osto.php' $javalisa>";
 					}
 					else {

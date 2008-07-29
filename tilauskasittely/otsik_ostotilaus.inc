@@ -52,7 +52,12 @@
 
 	
 	if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
-		echo "<font class='head'>".t("Ostotilauksen otsikko").":</font><hr><br>";
+		if($toim == "HAAMU") {
+			echo "<font class='head'>".t("Työ/tarvikeoston otsikko").":</font><hr><br>";
+		}
+		else {
+			echo "<font class='head'>".t("Ostotilauksen otsikko").":</font><hr><br>";
+		}
 
 		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='MUUOTAOSTIKKOA'>";
@@ -401,7 +406,14 @@
 
 		$crlf = array("\r","\n"); // poistetaan rivinvaihdot kommentista
 		$comments = str_replace($crlf, " ", $comments);
-
+		
+		if($toim == "HAAMU") {
+			$tilaustyyppi = "O";
+		}
+		else {
+			$tilaustyyppi = "";
+		}
+		
 		$query .= "	lasku SET
 					ytunnus				= '$ytunnus',
 					nimi 				= '$nimi',

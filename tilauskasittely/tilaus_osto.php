@@ -147,7 +147,12 @@
 			$otunnus = $kukarow["kesken"];
 
 			if (count($komento) == 0) {
-				echo "<font class='head'>".t("Ostotilaus").":</font><hr><br>";
+				if($toim == "HAAMU") {
+					echo "<font class='head'>".t("Työ/tarvikeosto").":</font><hr><br>";
+				}
+				else {
+					echo "<font class='head'>".t("Ostotilaus").":</font><hr><br>";
+				}
 
 				$tulostimet[0] = "Ostotilaus";
 				require("../inc/valitse_tulostin.inc");
@@ -535,7 +540,13 @@
 
 		// Jee meillä on otsikko!
 		if ($tee == 'Y') {
-			echo "<font class='head'>".t("Ostotilaus").":</font><hr><br>";
+			if($toim == "HAAMU") {
+				echo "<font class='head'>".t("Työ/tarvikeosto").":</font><hr><br>";
+			}
+			else {
+				echo "<font class='head'>".t("Ostotilaus").":</font><hr><br>";
+			}
+
 
 			$query = "	SELECT a.fakta, l.ytunnus
 						FROM toimi a, lasku l

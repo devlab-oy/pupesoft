@@ -380,7 +380,7 @@
 		}
 		if ($toim == "HAAMU") {
 			//ostotilaus kyseessä, ainoa paperi joka voidaan tulostaa on itse tilaus
-			$where1 .= " lasku.tila = 'D' and lasku.tilaustyyppi = 'O' ";
+			$where1 .= " lasku.tila IN ('D', 'O') and lasku.tilaustyyppi = 'O' ";
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 			

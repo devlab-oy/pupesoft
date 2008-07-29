@@ -105,9 +105,9 @@ if (!function_exists("t")) {
 		else {
 			$indeksi = "fi";
 		}
-		
+
 		// Voi olla, että käytämme slavea ja INSERT ei siis onnistu (insert vain jos ei fi)
-		if ($useslave > 0 or $indeksi != 'fi') { 
+		if ($useslave > 0 or $indeksi != 'fi') {
 			unset($link);
 			$link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
 			mysql_select_db ($dbkanta,$link) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 1)!");
@@ -131,7 +131,7 @@ if (!function_exists("t")) {
 						$stringi = $sanakirjarow["fi"];
 					}
 				}
-				
+
 				//Päivitetään aikaleima
 				if ($verkkokauppa == "") {
 					$sanakirjaqueryupd  = "UPDATE sanakirja SET aikaleima=now(), kysytty=kysytty+1 WHERE tunnus='$sanakirjarow[tunnus]'";
@@ -4194,11 +4194,11 @@ if(!function_exists("enable_ajax")) {
 				getstr += obj.elements[i].name + "=" + encodeURI(obj.elements[i].value) + "&";
 			}
 		}
-		
+
 		if(method==undefined) {
 			method="post";
 		}
-		
+
 		sndReq(minne, urli, href, load, unToggle, method, getstr);
 	}
 
@@ -4295,14 +4295,14 @@ function yllapito(url, tag, submitOnSelect) {
 	}
 }
 function suljeYllapito(sID,value,text, fromDiv) {
-	
+
 	if(fromDiv) {
 		ref=document;
 	}
 	else {
 		ref=window.opener.document;
 	}
-	
+
 	//	Wanhaa on muokattu, submittoidaan formi tarvittaessa..
 	if(sID.substring(0,2)=='P_') {
 		sID=sID.substr(2);
@@ -4356,9 +4356,9 @@ function suljeYllapito(sID,value,text, fromDiv) {
 
 		//	Valitaan uusi arvo
 		sel.selectedIndex=1;
-		
+
 		if(fromDiv) {
-			pop=ref.getElementById('ajax_menu_yp'); 
+			pop=ref.getElementById('ajax_menu_yp');
 			pop.style.display='none';
 			pop.innerHTML='';
 		}
@@ -4521,14 +4521,14 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 
 	if(!document.getElementById(oi)) {
 		var myDiv = document.createElement('div');
-		
+
 		if(styleClass) {
 			myDiv.setAttribute('class', styleClass);
 		}
 		else {
 			myDiv.setAttribute('class', 'popup');
 		}
-		
+
 		myDiv.setAttribute('id', oi);
 		myDiv.setAttribute('name', 'dynamic_'+oi);
 		myDiv.style.display = 'block';
@@ -4536,11 +4536,11 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 	}
 
 	if(e.type == "mouseout") {
-		
+
 		if(popUp_timeout>0) {
 			clearTimeout(popUp_timeout);
 		}
-		
+
 		var de = document.getElementById(oi);
 
 		//	Jos meillä oli dynaamisesti ladattu elementti poistetaan se kokonaan..
@@ -4563,7 +4563,7 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 			var x = getMouseX(e);
 			var y = y-(offsetY);
 			var x = x-(offsetX);
-			
+
 			if(html) {
 				if(window.sndReq) {
 					if(styleClass == "liveSearch") {
@@ -4633,7 +4633,7 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 
 		ds.display = "block";
 		ds.visibility = "hidden";
-		
+
 		if(styleClass != "liveSearch") {
 			//	Detectoidaan ikkunan koko
 			var ww = window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;
@@ -5132,7 +5132,7 @@ if(!function_exists("muistista")) {
 if(!function_exists("aja_kysely")) {
 	function aja_kysely() {
 		global $kukarow, $hakukysely, $aja_kysely, $uusi_kysely, $tallenna_muutokset, $poista_kysely, $_POST;
-		
+
 		if(!table_exists("muisti") or $hakukysely == "") {
 			return true;
 		}
@@ -5628,7 +5628,7 @@ if(!function_exists("tarvitaanko_intrastat")) {
 
 if(!function_exists("js_liveSearch")) {
 	function js_liveSearch() {
-		
+
 		echo "	<SCRIPT TYPE='text/javascript' LANGUAGE='JavaScript'>
 			var keyStrokeIndex=-1;
 
@@ -5674,7 +5674,7 @@ if(!function_exists("js_liveSearch")) {
 						keyStrokeIndex=-1;
 					}
 
-					return false;				
+					return false;
 				}
 				else if (event.keyCode == 27){
 					selectOptions[keyStrokeIndex].className='liveSearchUnSelectedItem';
@@ -5688,7 +5688,7 @@ if(!function_exists("js_liveSearch")) {
 
 		</SCRIPT>";
 
-	}	
+	}
 }
 
 if(!function_exists("tee_asiakashaku")) {
@@ -5857,11 +5857,11 @@ if(!function_exists("tee_asiakashaku")) {
 		else {
 			echo "<font class='info'>".t("Anna vähintään 3 merkkiä.")."</font>";
 		}
-		
+
 		if(mysql_num_rows($result) == $limit) {
 			echo "<font class='info'>".t("HUOM! osa hakutulosesta nätetään vain %s ensimmäistä", $kieli, $limit)."</font>";
 		}
-		
+
 		if(mysql_num_rows($result)) {
 			while($row = mysql_fetch_array($result)) {
 				//ajaxPost('$formi', '$urli?' , '$div', false, true);
@@ -5883,10 +5883,10 @@ if(!function_exists("tee_asiakashaku")) {
 								$row[toim_osoite]<br>$row[toim_postino] $row[toim_postitp]<br>".maa($row["toim_maa"])."
 								</td>
 							<tr>
-						</table>	
-						</div>	
+						</table>
+						</div>
 						<div id='asiakas_toiminto_$row[tunnus]' name='selectValues' style='display: none;'>document.getElementById('liitos').value='$row[tunnus]'; document.getElementById('haku').value='$row[nimi] $row[nimitark]'; document.getElementById('haku').disabled='true'; asval=document.getElementById('asiakashaku'); asval=document.getElementById('asiakashaku'); asval.innerHTML=''; asval.style.display='none'; ajaxPost('$formi', '{$_SERVER["SCRIPT_NAME"]}?from=asiakasvalinta' , '$div', false, true);</div>";
-			}			
+			}
 		}
 	}
 }
@@ -5958,21 +5958,21 @@ if(!function_exists("hae_rahtisopimusnumero")) {
 
 		//etsitään löytyykö rahtisopimusta
 		$query = "	(SELECT *, '1' prio
-					FROM rahtisopimukset 
-					WHERE toimitustapa = '$toimitustapa' 
-					AND asiakas = '$asiakastunnus' 
+					FROM rahtisopimukset
+					WHERE toimitustapa = '$toimitustapa'
+					AND asiakas = '$asiakastunnus'
 					AND asiakas != ''
 					AND yhtio = '$kukarow[yhtio]')
-					
+
 					UNION
-					
-					(SELECT *, '2' prio 
+
+					(SELECT *, '2' prio
 					FROM rahtisopimukset as rahtisopimukset2
-					WHERE toimitustapa = '$toimitustapa' 
-					AND ytunnus = '$ytunnus' 
-					AND ytunnus != '' 
+					WHERE toimitustapa = '$toimitustapa'
+					AND ytunnus = '$ytunnus'
+					AND ytunnus != ''
 					AND yhtio = '$kukarow[yhtio]')
-					
+
 					ORDER BY prio
 					LIMIT 1";
 		$rares = mysql_query($query) or pupe_error($query);
@@ -5987,11 +5987,11 @@ if(!function_exists("hae_rahtimaksu")) {
 		global $kukarow;
 
 		// haetaan ensimmäinen (pienimmällä postinumerolla) etäisyys
-		$query = "	SELECT 
+		$query = "	SELECT
 					etaisyydet.km, etaisyydet.postino
 					FROM etaisyydet
 					JOIN varastopaikat ON (varastopaikat.yhtio = etaisyydet.yhtio AND varastopaikat.tunnus = '$laskurow[varasto]' AND varastopaikat.postino = etaisyydet.varasto_postino)
-					WHERE etaisyydet.yhtio='$kukarow[yhtio]' 
+					WHERE etaisyydet.yhtio='$kukarow[yhtio]'
 					AND etaisyydet.postino <= '$laskurow[toim_postino]'
 					ORDER BY postino DESC
 					LIMIT 1";
@@ -6000,7 +6000,7 @@ if(!function_exists("hae_rahtimaksu")) {
 		// jos saadaan joku kilometrimäärä niin laitetaan se muuttujaan talteen
 		if (mysql_num_rows($varastoresult) == 1) {
 			$varastorow = mysql_fetch_array($varastoresult);
-			
+
 			$km = $varastorow['km'];
 		}
 		else {

@@ -40,27 +40,35 @@ if ($laskurow["tilaustyyppi"] == 'E') {
 	//
 	// tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'3'))
+	if (strpos(" ".$laskurow['tilausvahvistus'],'3')) {
 		$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
-	else if (strpos(" ".$laskurow['tilausvahvistus'],'2'))
+	}
+	else if (strpos(" ".$laskurow['tilausvahvistus'],'2')) {
 		$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
-	else
+	}
+	else {
 		$naytatvale = 1; // halutaan n‰h‰ alet
+	}
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'E'))
+	if (strpos(" ".$laskurow['tilausvahvistus'],'E')) {
 		require("tilausvahvistus-edi.inc");
+	}
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'S'))
+	if (strpos(" ".$laskurow['tilausvahvistus'],'S')) {
 		require("tilausvahvistus-email.inc");
+	}
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'F'))
+	if (strpos(" ".$laskurow['tilausvahvistus'],'F')) {
 		require("tilausvahvistus-fax.inc");
+	}
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'O'))
+	if (strpos(" ".$laskurow['tilausvahvistus'],'O')) {
 		require("tilausvahvistus-email.inc");
+	}
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'U'))
+	if (strpos(" ".$laskurow['tilausvahvistus'],'U')) {
 		require("tilausvahvistus-futursoft.inc");
+	}
 
 	if (strpos(" ".$laskurow['tilausvahvistus'],'K')) {
 		$query = "	SELECT komento
@@ -74,6 +82,39 @@ if ($laskurow["tilaustyyppi"] == 'E') {
 
 			require_once ("tulosta_tilausvahvistus_pdf.inc");
 		}
+	}
+
+	if ($yhtiorow['tilausvahvistus_tallenna'] == 'K' and $tilausvahvistus_tallenna != '') {
+		if (stristr(basename($tilausvahvistus_tallenna), ".pdf")) {
+			$liite_tyyppi = "application/pdf";
+		}
+		else {
+			$liite_tyyppi = "text/plain";
+		}
+
+		$file["name"] 		= basename($tilausvahvistus_tallenna);
+		$file["type"] 		= $liite_tyyppi;
+		$file["tmp_name"] 	= $tilausvahvistus_tallenna;
+		$file["error"] 		= 0;
+		$file["size"] 		= filesize($tilausvahvistus_tallenna);
+
+		$_FILES['tilvah_liite'] = $file;
+
+		$liitetied_tunnus = '';
+
+		$lquer = "SELECT tunnus FROM liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and liitos = 'myyntilasku' and liitostunnus = '$laskurow[tunnus]' and filename = '".basename($tilausvahvistus_tallenna)."'";
+		$lres = mysql_query($lquer) or pupe_error($lquer);
+
+		$lro = mysql_fetch_array($lres);
+
+		if ($lro['tunnus'] != '' and $lro['tunnus'] > 0) {
+			$liitetied_tunnus = $lro['tunnus'];
+		}
+
+		$liitetied_id = tallenna_liite('tilvah_liite', 'myyntilasku', $laskurow['tunnus'], 'Myyntilaskun tilausvahvistus', '', $liitetied_tunnus, '');
+
+		//poistetaan tmp file samantien kuleksimasta...
+		system("rm -f ".basename($tilausvahvistus_tallenna));
 	}
 }
 elseif ($laskurow["tilaustyyppi"] == '0') {
@@ -868,29 +909,35 @@ else {
 				//
 				// T‰ss‰ haarassa tulostetaan tilausvahvistus KOKO tilauksesta
 
-				if (strpos(" ".$laskurow['tilausvahvistus'],'3'))
+				if (strpos(" ".$laskurow['tilausvahvistus'],'3')) {
 					$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
-				else if (strpos(" ".$laskurow['tilausvahvistus'],'2'))
+				}
+				else if (strpos(" ".$laskurow['tilausvahvistus'],'2')) {
 					$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
-				else
+				}
+				else {
 					$naytatvale = 1; // halutaan n‰h‰ alet
+				}
 
-				if (strpos(" ".$laskurow['tilausvahvistus'],'E'))
+				if (strpos(" ".$laskurow['tilausvahvistus'],'E')) {
 					require("tilausvahvistus-edi.inc");
+				}
 
 				if (strpos(" ".$laskurow['tilausvahvistus'],'S')) {
 					require("tilausvahvistus-email.inc");
 				}
 
-				if (strpos(" ".$laskurow['tilausvahvistus'],'F'))
+				if (strpos(" ".$laskurow['tilausvahvistus'],'F')) {
 					require("tilausvahvistus-fax.inc");
+				}
 
 				if (strpos(" ".$laskurow['tilausvahvistus'],'O')) {
 					require("tilausvahvistus-email.inc");
 				}
 
-				if (strpos(" ".$laskurow['tilausvahvistus'],'U'))
+				if (strpos(" ".$laskurow['tilausvahvistus'],'U')) {
 					require("tilausvahvistus-futursoft.inc");
+				}
 
 				if (strpos(" ".$laskurow['tilausvahvistus'],'K')) {
 					$query = "	SELECT komento
@@ -924,7 +971,7 @@ else {
 
 					$liitetied_tunnus = '';
 
-					$lquer = "SELECT tunnus FROM liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and liitos = 'myyntilasku' and liitostunnus = '$laskurow[tunnus]' and filename = '".basename($tilausvahvistus_tallenna)."'";
+					$lquer = "SELECT tunnus FROM liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and liitos = 'myyntilasku' and liitostunnus = '$laskurow[tunnusnippu]' and filename = '".basename($tilausvahvistus_tallenna)."'";
 					$lres = mysql_query($lquer) or pupe_error($lquer);
 
 					$lro = mysql_fetch_array($lres);
@@ -933,7 +980,7 @@ else {
 						$liitetied_tunnus = $lro['tunnus'];
 					}
 
-					$liitetied_id = tallenna_liite(basename($tilausvahvistus_tallenna), 'myyntilasku', $laskurow['tunnus'], 'Myyntilaskun tilausvahvistus', '', $liitetied_tunnus, '');
+					$liitetied_id = tallenna_liite('tilvah_liite', 'myyntilasku', $laskurow['tunnusnippu'], 'Myyntilaskun tilausvahvistus', '', $liitetied_tunnus, '');
 
 					//poistetaan tmp file samantien kuleksimasta...
 					system("rm -f ".basename($tilausvahvistus_tallenna));

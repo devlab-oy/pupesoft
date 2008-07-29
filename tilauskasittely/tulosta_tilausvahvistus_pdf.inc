@@ -11,7 +11,7 @@
 				$query = "	SELECT lasku.*, laskun_lisatiedot.*, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.luontiaika päiväys, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, lasku.tunnus toimitus, viesti asiakkaan_viite, sisviesti1 lisätiedot, lasku.ytunnus asiakkaan_VAT,
 							concat_ws(' ', postino, postitp) postiosoite,
 							concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
-							concat_ws(' ', laskutus_postino, laskutus_postitp) laskutus_postiosoite,							
+							concat_ws(' ', laskutus_postino, laskutus_postitp) laskutus_postiosoite,
 							yhteyshenkilo_kaupallinen.nimi asiakkaan_kaupallinen_käsittelijä,
 							yhteyshenkilo_tekninen.nimi asiakkaan_yhteyshenkilö
 							FROM lasku
@@ -23,7 +23,7 @@
 							and lasku.tunnus  = '$otunnus'";
 				$result = mysql_query($query) or pupe_error($query);
 				$laskurow = mysql_fetch_array($result);
-				
+
 				$ennakkolisa = "";
 				if($yhtiorow["ennakkomaksu_tuotenumero"] != '') {
 					$ennakkolisa = " and tilausrivi.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]' ";
@@ -144,7 +144,7 @@
 
 							//	Laitetaan toimitustiedot vasemmalle
 							$h=260;
-							
+
 							if($laskurow["laskutus_nimi"] != "") {
 								$pdf->writeToTemplate($h, 1, 0, $s[1], t("Laskutusosoite", $kieli).":", "norm", "L", "B", $tid);
 								$h-=$pdf->ln();
@@ -157,10 +157,10 @@
 									}
 									$h-=$pdf->ln();
 								}
-								$h-=$pdf->ln();	
-								
+								$h-=$pdf->ln();
+
 								$pdf->writeToTemplate($h, 1, 0, $s[1], t("Ostaja", $kieli).":", "norm", "L", "B", $tid);
-							}							
+							}
 							else {
 								$pdf->writeToTemplate($h, 1, 0, $s[1], t("Ostaja/Laskutusosoite", $kieli).":", "norm", "L", "B", $tid);
 							}
@@ -188,14 +188,14 @@
 								}
 								$h-=$pdf->ln();
 							}
-							
+
 							if($laskurow["laskutus_nimi"] != "") {
 								$h=170;
 							}
 							else {
 								$h=190;
 							}
-							
+
 							//	Tehdään template
 							$tid2=$pdf->template->create();
 
@@ -236,7 +236,7 @@
 						else {
 							$h=180;
 						}
-						
+
 						return $pdf;
 					}
 				}
@@ -277,7 +277,7 @@
 							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 							JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila in ('R','L','N','E','0')
 							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-							WHERE tilausrivi.otunnus IN ($tunnukset) 
+							WHERE tilausrivi.otunnus IN ($tunnukset)
 							and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.tyyppi!='D'
@@ -359,7 +359,7 @@
 
 						if($row["kommentti"] != "") {
 							$from = array("%se", "%ed");
-							$to = array("seuraava kausi", "edeltävä kausi"); 
+							$to = array("seuraava kausi", "edeltävä kausi");
 							$nb=$pdf->countParagraphHeight(str_replace($from, $to, $row["kommentti"]), "snadi", ($s[0]-5));
 							$pdf->write($h, $nb, 5+$offset, $s[0], str_replace($from, $to, $row["kommentti"]), $style_komm, "L", "I");
 							$h-=$pdf->ln($nb);
@@ -399,7 +399,7 @@
 							$grand_total+=$row["rivihinta"];
 						}
 					}
-					
+
 					$h-=$pdf->ln();
 				}
 
@@ -432,7 +432,7 @@
 					$pdf->write($h, $nb, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
 					$h-=$pdf->ln($nb+2);
 				}
-				
+
 				$query = "	SELECT *
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]' and laji='TV_LISATIETO' and kieli = '$kieli'";
@@ -443,21 +443,21 @@
 					$nb=$pdf->countParagraphHeight($lrow["selitetark"], "norm");
 					$pdf->write($h, $nb, 0, 0, $lrow["selitetark"], "norm", "L", "I");
 					$h-=$pdf->ln($nb+2);
-				}			
-				
+				}
+
 				if($laskurow["tilaustyyppi"] == "0") {
 					$pdf->write($h, 1, 0, 0, t("LASKUTUSJAKSOT", $kieli), "norm", "L", "B");
 					$h-=$pdf->ln(1.25);
 					$kk = explode(",", $laskurow["sopimus_kk"]);
 					$pp = explode(",", $laskurow["sopimus_pp"]);
-					
+
 					if(count($kk) == 12) {
 						$pdf->write($h, 1, 0, 0, t("Kuukausittain %s. päivä.", $kieli, implode(", ", $pp)), "norm", "L", "");
 						$h-=$pdf->ln();
 					}
 					$h-=$pdf->ln(2);
 				}
-				
+
 				$query = "	SELECT maksupositio.*, round(osuus,0) osuus, maksuehto.teksti
 							FROM maksupositio
 							LEFT JOIN maksuehto on maksuehto.yhtio=maksupositio.yhtio and maksuehto.tunnus=maksupositio.maksuehto
@@ -632,7 +632,9 @@
 					$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".pdf";
 					//kirjoitetaan pdf faili levylle..
 					$fh_liite = fopen($tilausvahvistus_tallenna, "w");
-					if (fwrite($fh_liite, $pdf->generate()) === FALSE) die("PDF create error $tilausvahvistus_tallenna");
+					if (fwrite($fh_liite, $pdf->generate()) === FALSE) {
+						die("PDF create error $tilausvahvistus_tallenna");
+					}
 					fclose($fh_liite);
 				}
 				else {
@@ -672,7 +674,7 @@
 		else {
 			$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W') ";
 		}
-		
+
 		if($laskurow["tunnusnippu"] > 0) {
 			$query = "	SELECT group_concat(tunnus) tunnukset
 						FROM lasku
@@ -680,9 +682,9 @@
 						GROUP BY tunnusnippu";
 			$abures = mysql_query($query) or pupe_error($query);
 			$aburow = mysql_fetch_array($abures);
-			
+
 			$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
-			
+
 			//	Laitetaan tämä tässä talteen!
 			$laskurow["nippu"] = $aburow["tunnukset"];
 		}
@@ -690,7 +692,7 @@
 			$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
 			$laskurow["nippu"] = $aburow["tunnus"];
 		}
-		
+
 		//generoidaan lähetteelle ja keräyslistalle rivinumerot
 		//Rivit groupataan tilausvahvistukselle
 		if (strpos(" ".$laskurow['tilausvahvistus'],'Y')) {
@@ -727,8 +729,8 @@
 						$tyyppilisa
 						and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 						ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
-		}	
-		
+		}
+
 		$riresult = mysql_query($query) or pupe_error($query);
 
 		//generoidaan rivinumerot

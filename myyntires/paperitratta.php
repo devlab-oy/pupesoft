@@ -5,7 +5,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$array = mysql_fetch_array($result);
 		if (!mysql_num_rows($result)) {
-			$query = "INSERT INTO karhukierros (pvm,yhtio) values (current_date,'$yhtio')";
+			$query = "INSERT INTO karhukierros (pvm,yhtio,tyyppi) values (current_date,'$yhtio','T')";
 			$result = mysql_query($query) or pupe_error($query);
 			$query = "SELECT LAST_INSERT_ID() FROM karhukierros";
 			$result = mysql_query($query) or pupe_error($query);

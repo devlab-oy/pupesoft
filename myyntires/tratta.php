@@ -22,7 +22,26 @@ if ($kukarow["kirjoitin"] == 0) {
 }
 
 if ($tee == 'LAHETA') {
-	require ('paperitratta.php');
+	if (! empty($_POST['lasku_tunnus'])) {
+		require ('paperitratta.php');
+		$jatka = true;
+	}
+	else {
+		echo "<font class='error'>Et valinnut yht‰‰n laskua.</font>";
+		$jatka = false;
+	}
+	
+	if ($jatka) {
+		array_shift($tratattavat);
+	}
+	
+	$tee = "TRATTAA";
+}
+
+// ohitetaanko asiakas?
+if ($tee == 'OHITA') {
+	array_shift($tratattavat);
+	
 	$tee = "TRATTAA";
 }
 
@@ -142,7 +161,8 @@ if ($tee == 'TRATTAA')  {
 				lasku.erpcm, lasku.laskunro, lasku.tapvm, lasku.tunnus,
 				TO_DAYS(now())-TO_DAYS(lasku.erpcm) as ika,
 				max(karhukierros.pvm) as kpvm,
-				count(distinct karhu_lasku.ktunnus) as karhuttu
+				count(distinct karhu_lasku.ktunnus) as karhuttu,
+				sum(if(karhukierros.tyyppi='T', 1, 0)) tratattu
 				FROM lasku
 				JOIN karhu_lasku on (lasku.tunnus=karhu_lasku.ltunnus)
 				JOIN karhukierros on (karhukierros.tunnus=karhu_lasku.ktunnus)
@@ -205,9 +225,7 @@ if ($tee == 'TRATTAA')  {
 	echo "</table>";
 	echo "</td></tr></table><br>";
 
-	//Poistetaan arraysta k‰ytetyt tunnukset
-	unset($tratattavat[0]);
-
+	
 	echo "<table>";
 	echo "<tr>";
 	echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.submit();' value='".t("L‰het‰")."'></td>";
@@ -252,7 +270,12 @@ if ($tee == 'TRATTAA')  {
 		echo "</td><td>";
 		echo $lasku["kpvm"];
 		echo "</td><td align='center'>";
-		echo "<input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]' checked>";
+		if ($lasku["tratattu"] > 0) {
+			echo t("Lasku tratattu");
+		}
+		else {
+			echo "<input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]' checked>";
+		}		
 		echo "</td></tr>\n";
 
 		$summmmma += $lasku["summa"];
@@ -280,7 +303,7 @@ if ($tee == 'TRATTAA')  {
 
 
 	echo "<form name='ohitaformi' action='$PHP_SELF' method='post'>";
-	echo "<input type='hidden' name='tee' value='TRATTAA'>";
+	echo "<input type='hidden' name='tee' value='OHITA'>";
 	echo "<input name='yhteyshenkilo' type='hidden' value='$yhteyshenkilo'>";
 
 	foreach($tratattavat as $tunnukset) {

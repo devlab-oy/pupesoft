@@ -160,7 +160,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 						and lasku.tila = 'U'
 						and lasku.mapvm	= '0000-00-00'
 						and (lasku.erpcm < date_sub(now(), interval $lpvm_aikaa day) or lasku.summa < 0)
-						and lasku.summa	!= 0
+						and lasku.summa	!= 0						
 						$maksuehtolista
 						$maa_lisa
 						group by lasku.tunnus
@@ -231,6 +231,7 @@ if ($tee == 'KARHUA')  {
 				TO_DAYS(now())-TO_DAYS(lasku.erpcm) as ika,
 				max(karhukierros.pvm) as kpvm,
 				count(distinct karhu_lasku.ktunnus) as karhuttu,
+				sum(if(karhukierros.tyyppi='T', 1, 0)) tratattu,
 				if(maksuehto.jv!='', '".t("Jälkivaatimus")."' ,'') jv, lasku.yhtio_toimipaikka, lasku.valkoodi,
 				concat_ws(' ', lasku.viesti, lasku.comments) comments
 				FROM lasku
@@ -283,7 +284,7 @@ if ($tee == 'KARHUA')  {
 	}
 	
 	
-	$query = "	select *, if(kieli='$sorttaus', concat(1, kieli), kieli) sorttaus
+	$query = "	SELECT *, if(kieli='$sorttaus', concat(1, kieli), kieli) sorttaus
 				from avainsana 
 				where laji 	= 'KARHUVIESTI' 
 				and yhtio 	= '{$yhtiorow['yhtio']}' 
@@ -418,7 +419,17 @@ if ($tee == 'KARHUA')  {
 		else {
 			$chk = "";
 		}
-		echo "<td><input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]' $chk> $lasku[jv]</td>";
+		
+		
+		echo "<td>";
+		if ($lasku["tratattu"] > 0) {
+			echo t("Lasku tratattu");
+		}
+		else {		
+			echo "<input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]' $chk> $lasku[jv]";
+		}
+		echo "</td>";
+		
 		echo "<td>$lasku[comments]</td>";
 		echo "</tr>\n";
 		

@@ -607,7 +607,7 @@
 							and tilino in ($tili)";
 				$result = mysql_query($query) or pupe_error($query);
 				$trow = mysql_fetch_array ($result);
-echo "$query";
+
 				$trow["saldo"] 	= sprintf("%.2f", $trow["saldo"]);
 				$erotus 		= $summatotal + $suoritussummatotal - $trow["saldo"];
 				$erotus 		= sprintf("%.2f", $erotus);

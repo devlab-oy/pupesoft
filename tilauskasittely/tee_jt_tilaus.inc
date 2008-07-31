@@ -14,7 +14,7 @@
 	if (!function_exists("tee_jt_tilaus")) {
 		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka = '', $tilaus_on_jo = '', $varastosta = '', $olpaikalta = '', $varataan_saldoa = '', $alv = '') {
 			global $yhtiorow, $kukarow, $toim;
-
+			
 			if ($yhtiorow["varaako_jt_saldoa"] != "") {
 				$lisavarattu = " + tilausrivi.varattu";
 			}
@@ -400,16 +400,21 @@
 // 				}
 
 				// T‰ss‰ haarassa k‰ytt‰j‰ on syˆtt‰nyt jonkun kappalem‰‰r‰n
-				if ($kpl[$tunnukset] > 0 or $loput[$tunnukset] == 'KAIKKI') {
-
-					if ($loput[$tunnukset] == 'KAIKKI') {
+				if ($kpl[$tunnukset] > 0 or $loput[$tunnukset] == 'KAIKKI' or $loput[$tunnukset] == 'VAKISIN') {
+					$jt_vakisin = false;
+					
+					if ($loput[$tunnukset] == 'KAIKKI' or $loput[$tunnukset] == 'VAKISIN') {
 						if ($toim == "ENNAKKO") {
 							$kpl[$tunnukset] = $isarivirow["varattu"];
 						}
 						else {
 							$kpl[$tunnukset] = $isarivirow["jt"];
 						}
-
+						
+						if ($loput[$tunnukset] == 'VAKISIN') {
+							$jt_vakisin = true;
+						}
+						
 						$loput[$tunnukset] = 'POISTA';
 					}
 
@@ -429,7 +434,7 @@
 						$paikka = "";
 					}
 
-					if ($kpl[$tunnukset] <= $isa_kpl and $kpl[$tunnukset] > 0) {
+					if ($kpl[$tunnukset] <= $isa_kpl and $kpl[$tunnukset] > 0 or $jt_vakisin == true) {
 
 						$luodut_rivit 		= array();
 						$luodut_kpl			= array();
@@ -492,16 +497,23 @@
 							$korvaavakielto	 	= "Y";
 							$perhekielto     	= "Y";
 							$osatoimkielto		= "Y";
-							$var				= "";
+							
+							if ($jt_vakisin == true) {
+								$var				= "H";							
+							}
+							else {
+								$var				= "";
+							}
+							
 							$perheid		 	= $lisataanrow["perheid"];
 							$perheid2		 	= $lisataanrow["perheid2"];
 							$kommentti		 	= trim($otsikkorivi['viesti']." ".$lisataanrow['kommentti']);
 
 							$jtspec				= "JTSPEC";
-
+							
 							// Tutkitaan onko t‰m‰ myyty ulkomaan alvilla
 							list(,,,$tsek_alehinta_alv,) = alehinta($laskurow, $trow, $kpl, '', '', '');
-
+							
 							if ($tsek_alehinta_alv > 0) {
 								$trow["alv"] = $tsek_alehinta_alv;
 							}
@@ -518,11 +530,11 @@
 							}
 
 							require("lisaarivi.inc");
-
+							
 							$kpl = $talteen_kpl; // lis‰‰rivi rikko t‰n, otetaan haltuun
 
 							if ($debug==1) echo t("Lis‰ttiin tuote").": $tuoteno kpl: $lisataanrow_kpl<br>";
-
+							
 							// Suoratoimitukset saliitaan jos ne ovat toivottuja
 							if ($var == "S" and $suoratoimpaikka[$tunnukset] != '') {
 								$lisatyt_rivit1 = $lisatyt_rivit2;
@@ -545,9 +557,9 @@
 									$luodut_rivit[] = $lisatty_tun;
 								}
 							}
-
+							
 							//Jos saldo ei riitt‰nyt
-							if (count($lisatyt_rivit2) > 0) {
+							if (count($lisatyt_rivit2) > 0 and $jt_vakisin != true) {
 								foreach($luodut_rivit as $poistetaan) {
 									$query = "	DELETE FROM tilausrivi
 												WHERE yhtio = '$kukarow[yhtio]' and tunnus=$poistetaan and kpl=0";

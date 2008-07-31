@@ -856,6 +856,7 @@
 										echo "<th valign='top'>".t("Poista")."<br>".t("loput")."</th>";
 										echo "<th valign='top'>".t("Jätä")."<br>".t("loput")."</th>";
 										echo "<th valign='top'>".t("Mitätöi")."<br>".t("rivi")."</th>";
+										echo "<th valign='top'>".t("Hyväksy")."<br>".t("väkisin")."</th>";
 									}
 									else {
 										echo "<th valign='top'>".t("Toimita")."</th>";
@@ -1056,9 +1057,9 @@
 								else {
 									echo "<td valign='top' align='right' $class>".($jtrow["jt"]*1)."<br>";
 								}
-
+								
 								echo sprintf("%.".$yhtiorow['hintapyoristys']."f", $jtrow["hinta"])."<br>$jtrow[ale]%</td>";
-
+								
 							}
 
 							if ($oikeurow['paivitys'] == '1') {
@@ -1123,6 +1124,10 @@
 								if ($loput[$tunnukset] == 'MITA') {
 									$mita_check = 'checked';
 								}
+								
+								if ($loput[$tunnukset] == 'VAKISIN') {
+									$mita_check = 'checked';
+								}
 	
 								// Riittää kaikille
 								if (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "")  and $perheok==0) {
@@ -1173,6 +1178,7 @@
 											echo "<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA' $poista_check></td>";
 											echo "<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA' $jata_check></td>";
 											echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
+											echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
 										}
 										elseif ($kukarow["extranet"] != "") {
 											echo "<td valign='top' $class><font style='color:green;'>".t("Voidaan toimittaa")."!</font></td>";
@@ -1239,6 +1245,7 @@
 												<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA' $poista_check></td>
 												<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA' $jata_check></td>
 												<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
+										echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
 
 										$jt_rivilaskuri++;
 									}
@@ -1265,6 +1272,7 @@
 									echo "<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA' $poista_check></td>";
 									echo "<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA' $jata_check></td>";
 									echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
+									echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
 
 									$jt_rivilaskuri++;
 								}
@@ -1292,6 +1300,7 @@
 												<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA' $poista_check></td>
 												<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA' $jata_check></td>
 												<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
+										echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
 
 										$jt_rivilaskuri++;
 									}
@@ -1322,6 +1331,7 @@
 													<td valign='top' align='center' $class>&nbsp;</td>
 													<td valign='top' align='center' $class>&nbsp;</td>
 													<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
+											echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
 										}
 										else {
 											echo "<td valign='top' align='center' $class>&nbsp;</td>";
@@ -1452,6 +1462,7 @@
 													<td valign='top' align='center' $class>&nbsp;</td>
 													<td valign='top' align='center' $class>&nbsp;</td>
 													<td valign='top' align='center' $class>&nbsp;</td>
+													<td valign='top' align='center' $classlisa>&nbsp;</td>
 													<td valign='top' align='center' $classlisa>&nbsp;</td>";
 										}
 										else {
@@ -1503,21 +1514,21 @@
 												echo "<td><font style='color:red;'>".t("Korvaava")."</font></td>";
 												echo "<td align='left' style='vertical-align:top'>";
 												echo "$krow2row[tuoteno] ($vapaana) <font style='color:green;'>".t("Riittää kaikille")."!$varalisa</font><br>";
-												echo "</td><td colspan='8' align='left'><input type='button' value='Korvaa tuote $jtrow[tuoteno]' onClick='javascript:update_params(\"$jtrow[tuoteno]\", \"$krow2row[tuoteno]\", \"$jtrow[tunnus]\");javascript:submit();'></td></tr>";
+												echo "</td><td colspan='9' align='left'><input type='button' value='Korvaa tuote $jtrow[tuoteno]' onClick='javascript:update_params(\"$jtrow[tuoteno]\", \"$krow2row[tuoteno]\", \"$jtrow[tunnus]\");javascript:submit();'></td></tr>";
 											}
 											elseif ($vapaana >= $jtrow["jt"]) {
 												echo "<tr class='aktiivi'>";
 												echo "<td><font style='color:red;'>".t("Korvaava")."</font></td>";
 												echo "<td align='left' style='vertical-align:top'>";
 												echo "$krow2row[tuoteno] ($vapaana) <font style='color:yellowgreen;'>".t("Ei riitä kaikille")."!$varalisa</font><br>";
-												echo "</td><td colspan='8' align='left'><input type='submit' value='Korvaa tuote $jtrow[tuoteno]' onClick='javascript:update_params(\"$jtrow[tuoteno]\", \"$krow2row[tuoteno]\", \"$jtrow[tunnus]\");javascript:submit();'></td></tr>";
+												echo "</td><td colspan='9' align='left'><input type='submit' value='Korvaa tuote $jtrow[tuoteno]' onClick='javascript:update_params(\"$jtrow[tuoteno]\", \"$krow2row[tuoteno]\", \"$jtrow[tunnus]\");javascript:submit();'></td></tr>";
 											}
 											elseif ($vapaana > 0) {
 												echo "<tr class='aktiivi'>";
 												echo "<td><font style='color:red;'>".t("Korvaava")."</font></td>";
 												echo "<td align='left' style='vertical-align:top'>";
 												echo "$krow2row[tuoteno] ($vapaana) <font style='color:orange;'>".t("Ei riitä koko riville")."!$varalisa</font><br>";
-												echo "</td><td colspan='8' align='left'><input type='submit' value='Korvaa tuote $jtrow[tuoteno]' onClick='javascript:update_params(\"$jtrow[tuoteno]\", \"$krow2row[tuoteno]\", \"$jtrow[tunnus]\");javascript:submit();'></td></tr>";
+												echo "</td><td colspan='9' align='left'><input type='submit' value='Korvaa tuote $jtrow[tuoteno]' onClick='javascript:update_params(\"$jtrow[tuoteno]\", \"$krow2row[tuoteno]\", \"$jtrow[tunnus]\");javascript:submit();'></td></tr>";
 											}
 										}
 									}

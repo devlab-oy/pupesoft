@@ -18,7 +18,7 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 			if ($dir_test[$i][0] != "d") {
 				
 				if (strpos($content[$i],$nodelpict) === FALSE) {
-					if(!ftp_delete($conn_id,$content[$i])) {
+					if(!ftp_delete($conn_id,$dir."/".$content[$i])) {
 						$poistosyy .= "Tiedoston poisto epäonnistui: ".$content[$i]."\n";
 					}
 				}
@@ -26,22 +26,22 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 			}
 			else {
 				
-				$subcontent = ftp_nlist($conn_id, $content[$i]);
+				$subcontent = ftp_nlist($conn_id, $dir."/".$content[$i]);
 				
 				if ($content[$i] != $nodel) {
 					for ($k=0; $k < count($subcontent); $k++) { 
-						if (!ftp_delete($conn_id,$subcontent[$k])) {
+						if (!ftp_delete($conn_id,$dir."/".$content[$i]."/".$subcontent[$k])) {
 							$poistosyy .= "Tiedoston poisto epäonnistui: ".$subcontent[$k]."\n";
 						}
 					}
 					
 					if ($rmdir == "") {
-						if (!ftp_rmdir($conn_id,$content[$i])) {
+						if (!ftp_rmdir($conn_id,$dir."/".$content[$i])) {
 							$poistosyy .= "Kansion poisto epäonnistui: ".$content[$i]."\n";
 						}
 					}
 					
-				}				
+				}			
 			}
 
 		}

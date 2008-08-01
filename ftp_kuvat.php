@@ -126,7 +126,7 @@ if ($tee == "aja") {
 			}
 			
 			$poistosyy = delete_dir_content($conn_id,$ftpmuupath,"","","nope");
-			$poistosyy .= delete_dir_content($conn_id,$ftpkuvapath,$ftpkuvapath."672x","kategoria");
+			$poistosyy .= delete_dir_content($conn_id,$ftpkuvapath,"672x","kategoria");
 			
 			$counter = 0;
 				

@@ -5427,13 +5427,14 @@ if (! function_exists('tallenna_liite')) {
 
 				$jarjestys = $row["jarjestys"]+1;
 			}
-
+			
 			$query = "	INSERT INTO liitetiedostot SET
 					  	yhtio    		= '$kukarow[yhtio]',
 					  	liitos   		= '$liitos',
 					  	liitostunnus 	= '$liitostunnus',
 					  	data     		= '$data',
 					  	selite   		= '".trim($selite)."',
+						kieli			= '$kieli',
 					  	filename 		= '$filename',
 					  	filesize 		= '$filesize',
 					  	filetype 		= '$filetype',

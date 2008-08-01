@@ -242,6 +242,7 @@ if ($tee == 'GO') {
 		}
 
 		$apuselite = "";
+		$mikakieli = "";
 		
 		if (strpos($kuva,"%") !== FALSE) {
 			// (wildkaard)
@@ -250,11 +251,41 @@ if ($tee == 'GO') {
 			//echo "Alku: $kuvanalku<br>";
 			
 			//kyseess‰ on k‰yttˆturvatiedot ja tuotekortti
-			if (strpos($kuva,"%ktt") !== FALSE) {
-				$apuselite = "K‰yttˆturvatiedote";
+			if (strpos($kuva,"%ktt") !== FALSE) {				
+				$mistakieli = strpos($kuva,"%ktt")+4;
+				$mikakieli = substr($kuva,$mistakieli,2);
+				
+				if (strpos($mikakieli,"fi") !== FALSE or
+					strpos($mikakieli,"se") !== FALSE or
+					strpos($mikakieli,"en") !== FALSE or
+					strpos($mikakieli,"ru") !== FALSE or
+					strpos($mikakieli,"ee") !== FALSE or
+					strpos($mikakieli,"de") !== FALSE) {
+					$apuselite = t("K‰yttˆturvatiedote",$mikakieli);
+				}
+				else {
+					$apuselite = t("K‰yttˆturvatiedote");
+					$mikakieli = "fi";
+				}
+				
 			}
 			elseif (strpos($kuva,"%tko") !== FALSE) {
-				$apuselite = "Tuotekortti";
+				$mistakieli = strpos($kuva,"%tko")+4;
+				$mikakieli = substr($kuva,$mistakieli,2);				
+				
+				if (strpos($mikakieli,"fi") !== FALSE or
+					strpos($mikakieli,"se") !== FALSE or
+					strpos($mikakieli,"en") !== FALSE or
+					strpos($mikakieli,"ru") !== FALSE or
+					strpos($mikakieli,"ee") !== FALSE or
+					strpos($mikakieli,"de") !== FALSE) {
+					$apuselite = t("Tuotekortti",$mikakieli);
+				}
+				else {
+					$apuselite = t("Tuotekortti");
+					$mikakieli = "fi";
+				}
+				
 			}
 
 			$query = "SELECT tuoteno, tunnus FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno LIKE '$kuvanalku%'";
@@ -311,7 +342,7 @@ if ($tee == 'GO') {
 			if (mysql_num_rows($apuresult) > 0) {
 
 				// lis‰t‰‰n file
-				while ($apurow = mysql_fetch_array($apuresult) ) {
+				while ($apurow = mysql_fetch_array($apuresult)) {
 					$kuvaselite = "Tuotekuva";
 
 					if (($toiminto == 'thumb' or $toiminto == 'TH') and $apuselite == "") {
@@ -351,6 +382,7 @@ if ($tee == 'GO') {
 								liitostunnus 		= '$apurow[tunnus]',
 								data     			= '$data',
 								selite   			= '$kuvaselite',
+								kieli				= '$mikakieli',
 								filename 			= '$apukuva',
 								filesize 			= '$filesize',
 								filetype 			= '$filetype',

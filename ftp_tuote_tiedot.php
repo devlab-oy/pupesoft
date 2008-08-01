@@ -48,29 +48,17 @@ function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $
 			
 				$fields = mysql_num_fields($result);
 			
-				$ulos = "";
-			
-				$temp = "";
-				$pos_lyhyt = 0;
-				$pos_lyhyt_se = 0;
+				$ulos = "";			
+				
 				for ($i=0; $i < $fields; $i++) { 
-					$temp = mysql_field_name($result, $i);
-					
-					$ulos .= $temp;
+					$ulos .= mysql_field_name($result, $i);
 				
 					if ($i == $fields-1) {
 						$ulos .= "\n";
 					}
 					else {
 						$ulos .= "\t";
-					}
-					
-					if ($temp == "lyhytkuvaus") {
-						$pos_lyhyt = $i;
-					}
-					elseif ($temp == "lyhytkuvaus_se") {
-						$pos_lyhyt_se = $i;
-					}
+					}					
 				}
 				
 				$order   = array("\r\n", "\n", "\r");
@@ -80,8 +68,8 @@ function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $
 						if (strpos($row[$i],'"') !== FALSE) {
 							$row[$i] = str_replace('"',"",$row[$i]);
 						}
-						
-						if (($pos_lyhyt == $i or $pos_lyhyt_se == $i) and $pos_lyhyt != 0 and $pos_lyhyt_se != 0) {
+												
+						if (strpos(($temp = mysql_field_name($result, $i)),"lyhytkuvaus") !== FALSE) {
 							$row[$i] = cut_text($row[$i],100);
 						}
 						
@@ -184,27 +172,58 @@ if ($tee == "aja") {
 		}
 
 		/*tuotetieto haku*/
-		$query = "  SELECT tuote.tuoteno, tuote.try, tuote.osasto, tuote.nimitys, ta_nimitys.selite as nimitys_se, tuote.kuvaus, ta_kuvaus.selite as kuvaus_se, group_concat(liitetiedostot.filename SEPARATOR ',') as tiedostot, group_concat(liitetiedostot.selite SEPARATOR ',') as selitteet, tuote.kuvaus as lyhytkuvaus, ta_kuvaus.selite as lyhytkuvaus_se
+		$query = "  SELECT tuote.tuoteno, tuote.try, tuote.osasto, tuote.nimitys, ta_nimitys_se.selite as nimitys_se, 
+					tuote.kuvaus, ta_kuvaus_se.selite as kuvaus_se, 
+					group_concat(liitetiedostot.filename SEPARATOR ',') as tiedostot, 
+					group_concat(liitetiedostot.selite SEPARATOR ',') as selitteet, 
+					tuote.kuvaus as lyhytkuvaus, ta_kuvaus_se.selite as lyhytkuvaus_se,
+					ta_nimitys_en.selite as nimitys_en, ta_kuvaus_en.selite as kuvaus_en, ta_kuvaus_en.selite as lyhytkuvaus_en,
+					ta_nimitys_ru.selite as nimitys_ru, ta_kuvaus_ru.selite as kuvaus_ru, ta_kuvaus_ru.selite as lyhytkuvaus_ru,
+					ta_nimitys_ee.selite as nimitys_ee, ta_kuvaus_ee.selite as kuvaus_ee, ta_kuvaus_ee.selite as lyhytkuvaus_ee,
+					ta_nimitys_de.selite as nimitys_de, ta_kuvaus_de.selite as kuvaus_de, ta_kuvaus_de.selite as lyhytkuvaus_de
 					FROM tuote
 					LEFT JOIN liitetiedostot on tuote.yhtio = liitetiedostot.yhtio and tuote.tunnus = liitetiedostot.liitostunnus and liitetiedostot.liitos = 'tuote' and liitetiedostot.kayttotarkoitus != 'TH'
-					LEFT JOIN tuotteen_avainsanat as ta_nimitys on tuote.yhtio = ta_nimitys.yhtio and tuote.tuoteno = ta_nimitys.tuoteno and ta_nimitys.laji = 'nimitys_se'
-					LEFT JOIN tuotteen_avainsanat as ta_kuvaus on tuote.yhtio = ta_kuvaus.yhtio and tuote.tuoteno = ta_kuvaus.tuoteno and ta_kuvaus.laji = 'kuvaus_se'
-					LEFT JOIN tuotteen_avainsanat as ta_lyhyt on tuote.yhtio = ta_lyhyt.yhtio and tuote.tuoteno = ta_lyhyt.tuoteno and ta_lyhyt.laji = 'lyhyt_se'
+					LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on tuote.yhtio = ta_nimitys_se.yhtio and tuote.tuoteno = ta_nimitys_se.tuoteno and ta_nimitys_se.laji = 'nimitys_se'
+					LEFT JOIN tuotteen_avainsanat as ta_kuvaus_se on tuote.yhtio = ta_kuvaus_se.yhtio and tuote.tuoteno = ta_kuvaus_se.tuoteno and ta_kuvaus_se.laji = 'kuvaus_se'
+					LEFT JOIN tuotteen_avainsanat as ta_lyhyt_se on tuote.yhtio = ta_lyhyt_se.yhtio and tuote.tuoteno = ta_lyhyt_se.tuoteno and ta_lyhyt_se.laji = 'lyhyt_se'
+					LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on tuote.yhtio = ta_nimitys_en.yhtio and tuote.tuoteno = ta_nimitys_en.tuoteno and ta_nimitys_en.laji = 'nimitys_en'
+					LEFT JOIN tuotteen_avainsanat as ta_kuvaus_en on tuote.yhtio = ta_kuvaus_en.yhtio and tuote.tuoteno = ta_kuvaus_en.tuoteno and ta_kuvaus_en.laji = 'kuvaus_en'
+					LEFT JOIN tuotteen_avainsanat as ta_lyhyt_en on tuote.yhtio = ta_lyhyt_en.yhtio and tuote.tuoteno = ta_lyhyt_en.tuoteno and ta_lyhyt_en.laji = 'lyhyt_en'
+					LEFT JOIN tuotteen_avainsanat as ta_nimitys_ru on tuote.yhtio = ta_nimitys_ru.yhtio and tuote.tuoteno = ta_nimitys_ru.tuoteno and ta_nimitys_ru.laji = 'nimitys_ru'
+					LEFT JOIN tuotteen_avainsanat as ta_kuvaus_ru on tuote.yhtio = ta_kuvaus_ru.yhtio and tuote.tuoteno = ta_kuvaus_ru.tuoteno and ta_kuvaus_ru.laji = 'kuvaus_ru'
+					LEFT JOIN tuotteen_avainsanat as ta_lyhyt_ru on tuote.yhtio = ta_lyhyt_ru.yhtio and tuote.tuoteno = ta_lyhyt_ru.tuoteno and ta_lyhyt_ru.laji = 'lyhyt_ru'
+					LEFT JOIN tuotteen_avainsanat as ta_nimitys_ee on tuote.yhtio = ta_nimitys_ee.yhtio and tuote.tuoteno = ta_nimitys_ee.tuoteno and ta_nimitys_ee.laji = 'nimitys_ee'
+					LEFT JOIN tuotteen_avainsanat as ta_kuvaus_ee on tuote.yhtio = ta_kuvaus_ee.yhtio and tuote.tuoteno = ta_kuvaus_ee.tuoteno and ta_kuvaus_ee.laji = 'kuvaus_ee'
+					LEFT JOIN tuotteen_avainsanat as ta_lyhyt_ee on tuote.yhtio = ta_lyhyt_ee.yhtio and tuote.tuoteno = ta_lyhyt_ee.tuoteno and ta_lyhyt_ee.laji = 'lyhyt_ee'
+					LEFT JOIN tuotteen_avainsanat as ta_nimitys_de on tuote.yhtio = ta_nimitys_de.yhtio and tuote.tuoteno = ta_nimitys_de.tuoteno and ta_nimitys_de.laji = 'nimitys_de'
+					LEFT JOIN tuotteen_avainsanat as ta_kuvaus_de on tuote.yhtio = ta_kuvaus_de.yhtio and tuote.tuoteno = ta_kuvaus_de.tuoteno and ta_kuvaus_de.laji = 'kuvaus_de'
+					LEFT JOIN tuotteen_avainsanat as ta_lyhyt_de on tuote.yhtio = ta_lyhyt_de.yhtio and tuote.tuoteno = ta_lyhyt_de.tuoteno and ta_lyhyt_de.laji = 'lyhyt_de'
 					join avainsana as avtry on tuote.yhtio = avtry.yhtio and tuote.try = avtry.selite and avtry.laji = 'TRY' and avtry.nakyvyys != 'E'
 					join avainsana as avosasto on tuote.yhtio = avosasto.yhtio and tuote.osasto = avosasto.selite and avosasto.laji = 'OSASTO' and avosasto.nakyvyys != 'E'
 					WHERE tuote.yhtio = '$kyhtio'
 					AND tuote.hinnastoon = 'W'
 					AND tuote.status NOT IN('P','X')					
-					GROUP BY tuote.tuoteno, tuote.try, tuote.osasto, tuote.nimitys, ta_nimitys.selite, tuote.kuvaus, ta_kuvaus.selite
+					GROUP BY tuote.tuoteno, tuote.try, tuote.osasto, tuote.nimitys, ta_nimitys_se.selite, tuote.kuvaus, ta_kuvaus_se.selite, 
+					ta_nimitys_en.selite, ta_kuvaus_en.selite, ta_nimitys_ru.selite, ta_kuvaus_ru.selite, ta_nimitys_ee.selite, ta_kuvaus_ee.selite, ta_nimitys_de.selite, ta_kuvaus_de.selite
 					ORDER BY tuote.tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$syy .= tee_file($result, $dirri, "tuotetiedot.csv",  $ftpkuvahost, $ftpkuvauser, $ftpkuvapass);
 	
 		/*osastot*/
-		$query = "	SELECT avainsana.selite as osasto, avainsana.selitetark as nimitys, if(isnull(a.selitetark) or a.selitetark='', '', a.selitetark) as nimitys_se, avainsana.selitetark_3 as kuvaus, if(isnull(a.selitetark_3) or a.selitetark_3='', '', a.selitetark_3) as kuvaus_se
+		$query = "	SELECT avainsana.selite as osasto, avainsana.selitetark as nimitys, 
+					if(isnull(se.selitetark) or se.selitetark='', '', se.selitetark) as nimitys_se, 
+					avainsana.selitetark_3 as kuvaus, if(isnull(se.selitetark_3) or se.selitetark_3='', '', se.selitetark_3) as kuvaus_se,
+					if(isnull(en.selitetark) or en.selitetark='', '', en.selitetark) as nimitys_en, if(isnull(en.selitetark_3) or en.selitetark_3='', '', en.selitetark_3) as kuvaus_en,
+					if(isnull(ru.selitetark) or ru.selitetark='', '', ru.selitetark) as nimitys_ru, if(isnull(ru.selitetark_3) or ru.selitetark_3='', '', ru.selitetark_3) as kuvaus_ru,
+					if(isnull(ee.selitetark) or ee.selitetark='', '', ee.selitetark) as nimitys_ee, if(isnull(ee.selitetark_3) or ee.selitetark_3='', '', ee.selitetark_3) as kuvaus_ee,
+					if(isnull(se.selitetark) or de.selitetark='', '', de.selitetark) as nimitys_de, if(isnull(de.selitetark_3) or de.selitetark_3='', '', de.selitetark_3) as kuvaus_de
 					FROM avainsana
-					LEFT JOIN avainsana AS a on avainsana.yhtio = a.yhtio and avainsana.selitetark = a.selite and a.laji = 'OSASTO_SE'
+					LEFT JOIN avainsana AS se on avainsana.yhtio = se.yhtio and avainsana.selitetark = se.selite and se.laji = 'OSASTO_SE' and avainsana.jarjestys = se.jarjestys
+					LEFT JOIN avainsana AS en on avainsana.yhtio = en.yhtio and avainsana.selitetark = en.selite and en.laji = 'OSASTO_EN' and avainsana.jarjestys = en.jarjestys
+					LEFT JOIN avainsana AS ru on avainsana.yhtio = ru.yhtio and avainsana.selitetark = ru.selite and ru.laji = 'OSASTO_RU' and avainsana.jarjestys = ru.jarjestys
+					LEFT JOIN avainsana AS ee on avainsana.yhtio = ee.yhtio and avainsana.selitetark = ee.selite and ee.laji = 'OSASTO_EE' and avainsana.jarjestys = ee.jarjestys
+					LEFT JOIN avainsana AS de on avainsana.yhtio = de.yhtio and avainsana.selitetark = de.selite and de.laji = 'OSASTO_DE' and avainsana.jarjestys = de.jarjestys
 					WHERE avainsana.yhtio = '$kyhtio'
 					AND avainsana.laji = 'OSASTO'
 					AND avainsana.nakyvyys != 'E'
@@ -214,9 +233,19 @@ if ($tee == "aja") {
 		$syy .= tee_file($result, $dirri, "osastot.csv",  $ftpkuvahost, $ftpkuvauser, $ftpkuvapass);
 	
 		/*tuoteryhmät*/
-		$query = "	SELECT avainsana.selite as try, avainsana.selitetark as nimitys, if(isnull(a.selitetark) or a.selitetark='', '', a.selitetark) as nimitys_se, avainsana.selitetark_3 as kuvaus, if(isnull(a.selitetark_3) or a.selitetark_3='', '', a.selitetark_3) as kuvaus_se
+		$query = "	SELECT avainsana.selite as try, avainsana.selitetark as nimitys, 
+					if(isnull(se.selitetark) or se.selitetark='', '', se.selitetark) as nimitys_se, 
+					avainsana.selitetark_3 as kuvaus, if(isnull(se.selitetark_3) or se.selitetark_3='', '', se.selitetark_3) as kuvaus_se,
+					if(isnull(en.selitetark) or en.selitetark='', '', en.selitetark) as nimitys_en, if(isnull(en.selitetark_3) or en.selitetark_3='', '', en.selitetark_3) as kuvaus_en,
+					if(isnull(ru.selitetark) or ru.selitetark='', '', ru.selitetark) as nimitys_ru, if(isnull(ru.selitetark_3) or ru.selitetark_3='', '', ru.selitetark_3) as kuvaus_ru,
+					if(isnull(ee.selitetark) or ee.selitetark='', '', ee.selitetark) as nimitys_ee, if(isnull(ee.selitetark_3) or ee.selitetark_3='', '', ee.selitetark_3) as kuvaus_ee,
+					if(isnull(se.selitetark) or de.selitetark='', '', de.selitetark) as nimitys_de, if(isnull(de.selitetark_3) or de.selitetark_3='', '', de.selitetark_3) as kuvaus_de
 					FROM avainsana
-					LEFT JOIN avainsana AS a on avainsana.yhtio = a.yhtio and avainsana.selitetark = a.selite and a.laji = 'TRY_SE'
+					LEFT JOIN avainsana AS se on avainsana.yhtio = se.yhtio and avainsana.selitetark = se.selite and se.laji = 'TRY_SE' and avainsana.jarjestys = se.jarjestys
+					LEFT JOIN avainsana AS en on avainsana.yhtio = en.yhtio and avainsana.selitetark = en.selite and en.laji = 'TRY_EN' and avainsana.jarjestys = en.jarjestys
+					LEFT JOIN avainsana AS ru on avainsana.yhtio = ru.yhtio and avainsana.selitetark = ru.selite and ru.laji = 'TRY_RU' and avainsana.jarjestys = ru.jarjestys
+					LEFT JOIN avainsana AS ee on avainsana.yhtio = ee.yhtio and avainsana.selitetark = ee.selite and ee.laji = 'TRY_EE' and avainsana.jarjestys = ee.jarjestys
+					LEFT JOIN avainsana AS de on avainsana.yhtio = de.yhtio and avainsana.selitetark = de.selite and de.laji = 'TRY_DE' and avainsana.jarjestys = de.jarjestys					
 					WHERE avainsana.yhtio = '$kyhtio'
 					AND avainsana.laji = 'TRY'
 					AND avainsana.nakyvyys != 'E'

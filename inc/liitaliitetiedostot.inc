@@ -98,6 +98,7 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
 		if ($teekuva == "paivita") {
 			$query = "	UPDATE liitetiedostot SET
 						selite   		= '$kuvaotsikko',
+						kieli			= '$teekieli',
 						kayttotarkoitus	= '$teetyyppi',
 						jarjestys		= '$liite_jarjestys',
 						muuttaja		= '$kukarow[kuka]',
@@ -130,7 +131,7 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
 			}
 			
 			$file_name = $_FILES['userfile']['name'];
-			
+			//ehkä kieli whereen
 			$query = "  SELECT filename, kayttotarkoitus
 						FROM liitetiedostot
 						where yhtio = '$kukarow[yhtio]'
@@ -182,7 +183,10 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
 				}
 				else {
 					$teetyyppi = "MU";
+					$tmp_kieli = $kieli;
+					$kieli = $teekieli;
 					tallenna_liite("userfile", $toim, $tunnus, $kuvaotsikko, $teetyyppi, 0, $liite_jarjestys);
+					$kieli = $tmp_kieli;
 				}				
 								
 			}
@@ -210,6 +214,34 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
 				else $select = '';
 
 				echo "<option value='$kirow[selite]' $select>$kirow[selitetark]</option>";
+			}
+
+			echo "</select></td></tr>";
+			
+			echo "<tr><th>".t("Kieli")."</th><td colspan='2'><select name='teekieli'>";							
+			
+			$query  = "show columns from sanakirja";
+			$fields =  mysql_query($query);
+
+			while ($apurow = mysql_fetch_array($fields)) {
+				if (strlen($apurow[0]) == 2) {
+					$sel = "";
+					if ($trow["kieli"] == $apurow[0]) {
+						$sel = "selected";
+					}
+					elseif ($trow["kieli"] == "" and $apurow[0] == $yhtiorow["kieli"]) {
+						$sel = "selected";
+					}
+
+					if ($apurow[0] != "tunnus") {
+						$query = "select distinct nimi from maat where koodi='$apurow[0]'";
+						$maare = mysql_query($query);
+						$maaro = mysql_fetch_array($maare);
+						$maa   = strtolower($maaro["nimi"]);
+						if ($maa=="") $maa = $apurow[0];
+						echo "<option value='$apurow[0]' $sel>".t("$maa")."</option>";
+					}
+				}
 			}
 
 			echo "</select></td></tr>";
@@ -265,9 +297,38 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
 
 				echo "</select></td></tr>";
 				
+				echo "<tr><th>".t("Kieli")."</th><td colspan='2'><select name='teekieli'>";							
+				
+				$query  = "show columns from sanakirja";
+				$fields =  mysql_query($query);
+
+				while ($apurow = mysql_fetch_array($fields)) {
+					if (strlen($apurow[0]) == 2) {
+						$sel = "";
+						if ($trow["kieli"] == $apurow[0]) {
+							$sel = "selected";
+						}
+						elseif ($trow["kieli"] == "" and $apurow[0] == $yhtiorow["kieli"]) {
+							$sel = "selected";
+						}
+
+						if ($apurow[0] != "tunnus") {
+							$query = "select distinct nimi from maat where koodi='$apurow[0]'";
+							$maare = mysql_query($query);
+							$maaro = mysql_fetch_array($maare);
+							$maa   = strtolower($maaro["nimi"]);
+							if ($maa=="") $maa = $apurow[0];
+							echo "<option value='$apurow[0]' $sel>".t("$maa")."</option>";
+						}
+					}
+				}
+
+				echo "</select></td></tr>";
+				
 				
 				echo "<tr><th>".t("Selite")."</th><td colspan='2'><input type='text' name='kuvaotsikko' value='$trow[selite]'></td></tr>";
 				echo "<tr><th>".t("Järjestys")."</th><td colspan='2'><input type='text' name='liite_jarjestys' value='$trow[jarjestys]'></td>";
+				
 				echo "<td class='back'><input type='submit' class='btn' value='".t("Päivitä tiedot")."'></td></tr>";
 				echo "</form>";
 				

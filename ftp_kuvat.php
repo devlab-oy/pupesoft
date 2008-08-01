@@ -1,7 +1,7 @@
 <?php
 
-function delete_dir_content($conn_id,$dir,$syy,$nodel = "",$nodelpict = "") {
-
+function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "") {
+	$poistosyy = "";
 	ftp_pasv($conn_id, true);
 
 	if (substr($dir, -1) == "/") {
@@ -12,43 +12,45 @@ function delete_dir_content($conn_id,$dir,$syy,$nodel = "",$nodelpict = "") {
 	$content = ftp_nlist($conn_id, $dir);
 	$dir_test = ftp_rawlist($conn_id, $dir);
 	
-	if ($content) {
+	if ($content != FALSE) {
 		for($i = 0; $i < count($content); $i++) {
 			
 			if ($dir_test[$i][0] != "d") {
 				
 				if (strpos($content[$i],$nodelpict) === FALSE) {
-					if(!ftp_delete($conn_id,$dir."/".$content[$i])) {
-						$syy .= "Tiedoston poisto epäonnistui: ".$content[$i]."\n";
+					if(!ftp_delete($conn_id,$content[$i])) {
+						$poistosyy .= "Tiedoston poisto epäonnistui: ".$content[$i]."\n";
 					}
 				}
 				
 			}
 			else {
 				
-				$subcontent = ftp_nlist($conn_id, $dir."/".$content[$i]);
+				$subcontent = ftp_nlist($conn_id, $content[$i]);
 				
 				if ($content[$i] != $nodel) {
 					for ($k=0; $k < count($subcontent); $k++) { 
-						if (!ftp_delete($conn_id,$dir."/".$content[$i]."/".$subcontent[$k])) {
-							$syy .= "Tiedoston poisto epäonnistui: ".$subcontent[$k]."\n";
+						if (!ftp_delete($conn_id,$subcontent[$k])) {
+							$poistosyy .= "Tiedoston poisto epäonnistui: ".$subcontent[$k]."\n";
 						}
-						
 					}
 					
-					if (!ftp_rmdir($conn_id,$dir."/".$content[$i])) {
-						$syy .= "Kansion poisto epäonnistui: ".$content[$i]."\n";
+					if ($rmdir == "") {
+						if (!ftp_rmdir($conn_id,$content[$i])) {
+							$poistosyy .= "Kansion poisto epäonnistui: ".$content[$i]."\n";
+						}
 					}
+					
 				}				
 			}
 
 		}
 	}
 	else {
-		$syy .= "Tiedostoja ei poistettu\n";
+		$poistosyy .= "Tiedostoja ei poistettu\n";
 	}
 	
-	return $syy;
+	return $poistosyy;
 }
 
 
@@ -73,6 +75,7 @@ if ($tee == "aja") {
 
 	$dummy			= array();
 	$syy			= "";
+	$poistosyy		= "";
 	$palautus		= "";
 	$tulos_ulos_ftp	= "";
 
@@ -122,7 +125,8 @@ if ($tee == "aja") {
 				die("$kokonimi ei ole määritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
 			}
 			
-			$syy .= delete_dir_content($conn_id,$ftpkuvapath,$syy,"672x","kategoria");
+			$poistosyy = delete_dir_content($conn_id,$ftpmuupath,"","","nope");
+			$poistosyy .= delete_dir_content($conn_id,$ftpkuvapath,$ftpkuvapath."672x","kategoria");
 			
 			$counter = 0;
 				
@@ -132,8 +136,13 @@ if ($tee == "aja") {
 					continue;
 				}
 			
-				//Tämä kohta täytyy muuttaa, kun tulee erikielisiä liitetiedostoja
-				$ftpmuupathlisa = "fi/";
+				//Laitetaan oikean maan kansioon
+				if ($row["kieli"] == "" or $row["kieli"] == "fi") {
+					$ftpmuupathlisa = "fi/";
+				}
+				else {
+					$ftpmuupathlisa = $row["kieli"]."/";
+				}
 			
 				$kokonimi = $dirri;			
 			
@@ -151,7 +160,7 @@ if ($tee == "aja") {
 						fclose($handle);
 					
 						list($mtype, $crap) = explode("/", $row["filetype"]);
-					
+						
 						if ($mtype == "image") {
 							$upload = ftp_put($conn_id, $ftpkuvapath.$row["filename"], realpath($kokonimi), FTP_BINARY);
 						}
@@ -182,6 +191,13 @@ if ($tee == "aja") {
 		
 		if ($conn_id) {
 			ftp_close($conn_id);
+		}
+	
+		if ($poistosyy != "") {
+			echo $poistosyy;
+		}
+		else {
+			echo "Vanhat tiedostot poistettiin onnistuneesti\n";
 		}
 	
 		if ($syy != "") {

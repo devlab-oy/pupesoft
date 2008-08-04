@@ -6,16 +6,16 @@ echo "<font class='head'>".t("Alkusynkronointi")."</font><hr>";
 
 if ($tee == "SYNK") {
 	
-	//	Onko mahdollista synkronoida?
-	if(strpos($yhtiorow["synkronoi"], $table) === false) {
-		echo "VIRHE: Pyydetty‰ taulua $table ei voida synkronoida, sit‰ ei ole m‰‰ritelty!";
-		exit;
-	}
-	
+	//	Onko mahdollista synkronoida?	
 	if(substr($table, 0, 9) == "avainsana") {
+		if(strpos($yhtiorow["synkronoi"], substr($table, 0, 9)) === false) {
+			echo "VIRHE: Pyydetty‰ taulua $table ei voida synkronoida, sit‰ ei ole m‰‰ritelty!";
+			exit;
+		}
+		
 		$table = substr($table, 0, 9);
 		
-		$abulisa = ereg("(avainsana\|*([\|a-zA-Z_]*)),*", $yhtiorow["synkronoi"], $regs);
+		$abulisa = ereg("(avainsana\|*([\|\-a-zA-Z_]*)),*", $yhtiorow["synkronoi"], $regs);
 		$la = explode("|",$regs[2]);
 				
 		$lajit  = " and laji in (";
@@ -27,6 +27,10 @@ if ($tee == "SYNK") {
 		$lajit .= ")";
 	}
 	else {
+		if(strpos($yhtiorow["synkronoi"], $table) === false or $table == "") {
+			echo "VIRHE: Pyydetty‰ taulua $table ei voida synkronoida, sit‰ ei ole m‰‰ritelty!";
+			exit;
+		}
 		$lajit = "";
 	}
 	

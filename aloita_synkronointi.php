@@ -15,7 +15,7 @@ if ($tee == "SYNK") {
 		
 		$table = substr($table, 0, 9);
 		
-		$abulisa = ereg("(avainsana\|*([\|\-a-zA-Z_]*)),*", $yhtiorow["synkronoi"], $regs);
+		$abulisa = ereg("(avainsana\|*([\|a-zA-Z_\-]*)),*", $yhtiorow["synkronoi"], $regs);
 		$la = explode("|",$regs[2]);
 				
 		$lajit  = " and laji in (";

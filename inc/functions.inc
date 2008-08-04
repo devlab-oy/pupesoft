@@ -1735,7 +1735,7 @@ if (!function_exists("synkronoi")) {
 				
 				//	Osa tauluista vaatii vähän käpistelyä!
 				if($table == "yhteyshenkilo") {
-					if($masterrow["tyyppi"] == "A") {
+					if($abuhaku["tyyppi"] == "A") {
 						$query = "select * from asiakas where yhtio='$yhtio' and tunnus='$abuhaku[liitostunnus]'";
 						$abures = mysql_query($query) or pupe_error($query);
 						$aburow = mysql_fetch_array($abures);

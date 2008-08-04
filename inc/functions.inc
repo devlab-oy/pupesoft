@@ -1724,7 +1724,84 @@ if (!function_exists("synkronoi")) {
 
 				$vanhatunnus = $utunnus="";
 				$override	 = array();
+				
+				//	Jos master on poistettu haetaan tiedot siitä vanhasta!
+				if(!isset($masterrow)) {
+					$abuhaku = $orig;
+				}
+				else {
+					$abuhaku = $masterrow;
+				}
+				
+				//	Osa tauluista vaatii vähän käpistelyä!
+				if($table == "yhteyshenkilo") {
+					if($masterrow["tyyppi"] == "A") {
+						$query = "select * from asiakas where yhtio='$yhtio' and tunnus='$abuhaku[liitostunnus]'";
+						$abures = mysql_query($query) or pupe_error($query);
+						$aburow = mysql_fetch_array($abures);
+						
+						//	Etsitään oikea asiakas, jotta saadaan oikea liitostunnus
+						$tarkquery = "select tunnus from asiakas where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]' and toim_ovttunnus='$aburow[toim_ovttunnus]'";
+					}
+					else {
+						$query = "select * from toimi where yhtio='$yhtio' and tunnus='$abuhaku[liitostunnus]'";
+						$abures = mysql_query($query) or pupe_error($query);
+						$aburow = mysql_fetch_array($abures);
+						
+						//	Etsitään oikea toimittaja, jotta saadaan oikea liitostunnus
+						$tarkquery = "select tunnus from toimi where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]'";
+					}
+					$tarkres = mysql_query($tarkquery) or pupe_error($tarkquery);
+										
+					if(mysql_num_rows($tarkres)==1) {
+						//	Ylikirjoitetaan liitostunnus
+						$tarkrow = mysql_fetch_array($tarkres);
+						$override["liitostunnus"] = $tarkrow["tunnus"];
+						
+						//	Meidän pitääkorvata se vanha liitostunnus myös where haarasta..
+						$where = str_replace(" and liitostunnus='$abuhaku[liitostunnus]'", " and liitostunnus='$override[liitostunnus]'", $where);
+					}
+					else {
+						$synclog .= "Yhtiölle '$kohderow[yhtio]' ei löydy asiakasta/toimittajaa $masterrow[ytunnus] joten yhteyshenkilöä ei voida synkronoida!\n";
+						$ok=0;
+					}
+				}
+				elseif($table == "tuotteen_toimittajat") {
 
+					$query = "select * from tuote where yhtio='$yhtio' and tuoteno='$abuhaku[tuoteno]'";
+					$abures = mysql_query($query) or pupe_error($query);
+
+					if(mysql_num_rows($abures) == 1) {
+
+						$query = "select * from toimi where yhtio='$yhtio' and tunnus='$abuhaku[liitostunnus]'";
+						$abures = mysql_query($query) or pupe_error($query);
+						$aburow = mysql_fetch_array($abures);
+
+						//	Etsitään oikea toimittaja jotta saadaan oikea liitostunnus
+						$tarkquery = "select tunnus from toimi where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]'";
+						$tarkres = mysql_query($tarkquery) or pupe_error($tarkquery);
+
+						if(mysql_num_rows($tarkres)==1) {
+							//	Ylikirjoitetaan liitostunnus
+							$tarkrow = mysql_fetch_array($tarkres);
+							$override["liitostunnus"] = $tarkrow["tunnus"];
+							
+							//	Meidän pitääkorvata se vanha liitostunnus myös where haarasta..
+							$where = str_replace(" and liitostunnus='$abuhaku[liitostunnus]'", " and liitostunnus='$override[liitostunnus]'", $where);
+							
+						}
+						else {
+							$synclog .= "Yhtiölle '$kohderow[yhtio]' ei löydy toimittajaa $masterrow[toimittaja] joten tuotteen toimittajaa ei voida sycronisoida\n";
+							$ok=0;
+						}
+					}
+					else {
+						$synclog .= "Yhtiölle '$kohderow[yhtio]' ei löydy tuotetta $masterrow[tuoteno] joten tuotteen toimittajaa ei voida sycronisoida\n";
+						$ok=0;
+					}
+				}
+				
+				
 				//	Poistetaan tietue jos masteria ei löydetty mutta originaali on tallessa.. olisiko tässä selvempi tapa?
 				if(!isset($masterrow) and is_array($orig) and count($orig) > 0) {
 
@@ -1757,37 +1834,6 @@ if (!function_exists("synkronoi")) {
 					}
 				}
 				else {
-					//	Osa tauluista vaatii vähän käpistelyä!
-					if($table == "tuotteen_toimittajat") {
-
-						$query = "select * from tuote where yhtio='$yhtio' and tuoteno='$masterrow[tuoteno]'";
-						$abures = mysql_query($query) or pupe_error($query);
-
-						if(mysql_num_rows($abures) == 1) {
-
-							$query = "select * from toimi where yhtio='$yhtio' and tunnus='$masterrow[liitostunnus]'";
-							$abures = mysql_query($query) or pupe_error($query);
-							$aburow = mysql_fetch_array($abures);
-
-							//	Etsitään oikea toimittaja jotta saadaan oikea liitostunnus
-							$tarkquery = "select tunnus from toimi where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]'";
-							$tarkres = mysql_query($tarkquery) or pupe_error($tarkquery);
-
-							if(mysql_num_rows($tarkres)==1) {
-								//	Ylikirjoitetaan liitostunnus
-								$tarkrow = mysql_fetch_array($tarkres);
-								$override["liitostunnus"] == $tarkrow["tunnus"];
-							}
-							else {
-								$synclog .= "Yhtiölle '$kohderow[yhtio]' ei löydy toimittajaa $masterrow[toimittaja] joten tuotteen toimittajaa ei voida sycronisoida\n";
-								$ok=0;
-							}
-						}
-						else {
-							$synclog .= "Yhtiölle '$kohderow[yhtio]' ei löydy tuotetta $masterrow[tuoteno] joten tuotteen toimittajaa ei voida sycronisoida\n";
-							$ok=0;
-						}
-					}
 
 					if($table == "toimi") {
 

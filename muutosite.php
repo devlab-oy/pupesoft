@@ -2,6 +2,16 @@
 
 require "inc/parametrit.inc";
 
+if ($tee == 'tulosta_karhu') {
+	require ('myyntires/paperikarhu.php');
+	exit;
+}
+
+if ($tee == 'tulosta_tratta') {
+	require ('myyntires/paperitratta.php');
+	exit;
+}
+
 echo "<font class='head'>".t("Tiliöintien muutos/selailu")."</font><hr>";
 
 if (($tee == 'U' or $tee == 'P' or $tee == 'M' or $tee == 'J') and ($oikeurow['paivitys'] != 1)) {
@@ -696,9 +706,34 @@ if ($tee == 'E' or $tee == 'F') {
 
 		require "inc/laskutyyppi.inc";
 
-		echo "<tr><th>".t("Tila").":</th><td>".t("$laskutyyppi")." ".t("$alatila");
 
 		// Jos myyntilasku, niin onko sitä karhuttu?
+		$karhu_query = "	SELECT pvm, tyyppi, ktunnus 
+							FROM karhu_lasku 
+							JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.yhtio = '$kukarow[yhtio]') 
+							WHERE karhu_lasku.ltunnus = '$trow[tunnus]'";
+		$karhu_result = mysql_query($karhu_query) or pupe_error($karhu_query);
+		
+		if (mysql_num_rows($karhu_result) > 0) {
+			echo "<tr><th>",t('Karhu / Tratta'),":</th><td>";
+
+			while ($karhu_row = mysql_fetch_array($karhu_result)) {
+				if ($karhu_row["tyyppi"] == 'T') {
+					echo "<a href='".$palvelin2."muutosite.php?karhutunnus=$karhu_row[ktunnus]&lasku_tunnus[]=$trow[tunnus]&tee=tulosta_tratta&nayta_pdf=1'>".tv1dateconv($karhu_row["pvm"])."</a> (Tratta)";
+				}
+				else {
+					echo "<a href='".$palvelin2."muutosite.php?karhutunnus=$karhu_row[ktunnus]&lasku_tunnus[]=$trow[tunnus]&tee=tulosta_karhu&nayta_pdf=1'>".tv1dateconv($karhu_row["pvm"])."</a> (Karhu)";
+				}
+				echo "<br>";
+			}
+
+			echo "</td></tr>";
+
+		}
+
+		/*
+		echo "<tr><th>".t("Tila").":</th><td>".t("$laskutyyppi")." ".t("$alatila");
+
 		if ($trow['tila'] == 'U') {
 			$query= "SELECT count(*) kerrat, max(pvm) vika, min(pvm) eka
 				from karhu_lasku
@@ -713,11 +748,54 @@ if ($tee == 'E' or $tee == 'F') {
 			}
 		}
 		echo "</td></tr>";
+		*/
 
 		// Myynnille
 		if ($trow['tila'] == 'U' or $trow['tila'] == 'L') {
 			for ($i = 21; $i < 22; $i++) {
 					echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$trow[$i]</td></tr>";
+			}
+
+			// katsotaan onko tästä laskusta tehty korkolasku
+			$korko_query = "	SELECT olmapvm, liitostunnus 
+								FROM lasku
+								WHERE yhtio='$kukarow[yhtio]' 
+								AND tunnus='$trow[tunnus]'
+								AND olmapvm > '0000-00-00'";
+			$korko_result = mysql_query($korko_query) or pupe_error($korko_query);
+
+			if (mysql_num_rows($korko_result) > 0) {
+				
+				$korkolaskurow = mysql_fetch_array($korko_result);
+
+				// etsitään korkolasku
+				$korko2_query = "	SELECT lasku2.tunnus
+									FROM lasku
+									JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'L' AND tilausrivi.tuoteno = 'Korko' AND tilausrivi.otunnus = lasku.tunnus) 
+									JOIN lasku AS lasku2 ON (lasku2.yhtio = lasku.yhtio AND lasku2.laskunro = lasku.laskunro AND lasku2.tila = 'U')
+									WHERE lasku.yhtio = '$kukarow[yhtio]'
+									AND lasku.olmapvm = '$korkolaskurow[olmapvm]'
+									AND lasku.tapvm = '$korkolaskurow[olmapvm]'
+									AND lasku.liitostunnus = '$korkolaskurow[liitostunnus]'
+									AND lasku.tila = 'L'";
+				$korko2_result = mysql_query($korko2_query) or pupe_error($korko2_query);
+				
+				if (mysql_num_rows($korko2_result) > 0) {
+				
+					echo "<tr><th>",t('Korkolaskut'),":</th><td>";
+
+					while ($korkolaskurow2 = mysql_fetch_array($korko2_result)) {
+
+						echo "<form action = 'tilauskasittely/tulostakopio.php' method='post'>
+							<input type='hidden' name='otunnus' value='$korkolaskurow2[tunnus]'>
+							<input type='hidden' name='TOIM' value='LASKU'>
+							<input type='hidden' name='tee' value='NAYTATILAUS'>
+							<input type='submit' value='",tv1dateconv($korkolaskurow['olmapvm']),"'></form>";						
+						echo "<br>";
+					}
+
+					echo "</td></tr>";
+				}
 			}
 		}
 		else {

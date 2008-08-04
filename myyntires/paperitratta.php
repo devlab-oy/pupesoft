@@ -240,11 +240,19 @@
 		$xquery .= "$lasku_tunnus[$i]";
 	}
 
+	if ($nayta_pdf == 1 and $karhutunnus != '') {
+		$karhutunnus = mysql_real_escape_string($karhutunnus);
+		$kjoinlisa = " and kl.ktunnus = '$karhutunnus' ";
+	}
+	else {
+		$kjoinlisa = "";
+	}
+
 	$query = "	SELECT l.tunnus, l.tapvm, l.liitostunnus,
 				l.summa-l.saldo_maksettu summa, l.erpcm, l.laskunro,
 				TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika, max(kk.pvm) as kpvm, count(distinct kl.ktunnus) as karhuttu
 				FROM lasku l
-				LEFT JOIN karhu_lasku kl on (l.tunnus=kl.ltunnus)
+				LEFT JOIN karhu_lasku kl on (l.tunnus=kl.ltunnus $kjoinlisa)
 				LEFT JOIN karhukierros kk on (kk.tunnus=kl.ktunnus)
 				WHERE l.tunnus in ($xquery) and l.yhtio='$kukarow[yhtio]' and l.tila='U'
 				GROUP BY 1
@@ -290,12 +298,18 @@
 	$kaatosumma=$kaato["summa"] * -1;
 	if (!$kaatosumma) $kaatosumma='0.00';
 
-	$karhukierros=uusi_karhukierros($kukarow['yhtio']);
+	if ($tee != 'tulosta_tratta') {
+		$karhukierros=uusi_karhukierros($kukarow['yhtio']);
+	}
+
 	$firstpage = alku();
 
 	$summa=0.0;
 	while ($row = mysql_fetch_array($result)) {
-		liita_lasku($karhukierros,$row['tunnus']);
+		if ($tee != 'tulosta_tratta') {
+			liita_lasku($karhukierros,$row['tunnus']);
+		}
+
 		$summa=rivi($firstpage,$summa);
 	}
 
@@ -313,14 +327,20 @@
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 	fclose($fh);
 
-	// itse print komento...
-	$query = "	select komento
-				from kirjoittimet
-				where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kirjoitin]'";
-	$kires = mysql_query($query) or pupe_error($query);
+	if ($nayta_pdf == 1) {
+		echo file_get_contents($pdffilenimi);
+	}
 
-	if (mysql_num_rows($kires) == 1) {
-		$kirow=mysql_fetch_array($kires);
-		$line = exec("$kirow[komento] $pdffilenimi");
+	if ($nayta_pdf != 1 and $tee != 'tulosta_tratta') {
+		// itse print komento...
+		$query = "	select komento
+					from kirjoittimet
+					where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kirjoitin]'";
+		$kires = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($kires) == 1) {
+			$kirow=mysql_fetch_array($kires);
+			$line = exec("$kirow[komento] $pdffilenimi");
+		}
 	}
 ?>

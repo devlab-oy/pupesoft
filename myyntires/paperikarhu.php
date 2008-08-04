@@ -413,11 +413,19 @@
 		$xquery .= "$lasku_tunnus[$i]";
 	}
 
+	if ($nayta_pdf == 1 and $karhutunnus != '') {
+		$karhutunnus = mysql_real_escape_string($karhutunnus);
+		$kjoinlisa = " and kl.ktunnus = '$karhutunnus' ";
+	}
+	else {
+		$kjoinlisa = "";
+	}
+
 	$query = "	SELECT l.tunnus, l.tapvm, l.liitostunnus,
 				l.summa-l.saldo_maksettu summa, l.summa_valuutassa-l.saldo_maksettu_valuutassa summa_valuutassa, l.erpcm, l.laskunro, l.viite,
 				TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika, max(kk.pvm) as kpvm, count(distinct kl.ktunnus) as karhuttu, l.yhtio_toimipaikka, l.valkoodi, l.maksuehto
 				FROM lasku l
-				LEFT JOIN karhu_lasku kl on (l.tunnus=kl.ltunnus)
+				LEFT JOIN karhu_lasku kl on (l.tunnus=kl.ltunnus $kjoinlisa)
 				LEFT JOIN karhukierros kk on (kk.tunnus=kl.ktunnus)
 				WHERE l.tunnus in ($xquery) and l.yhtio='$kukarow[yhtio]' and l.tila='U'
 				GROUP BY 1
@@ -576,6 +584,10 @@
 	$fh = fopen($pdffilenimi, "w");
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
 	fclose($fh);
+
+	if ($nayta_pdf == 1) {
+		echo file_get_contents($pdffilenimi);
+	}
 	
 	// jos halutaan eKirje sek‰ configuraatio on olemassa niin
 	// l‰hetet‰‰n eKirje
@@ -627,14 +639,17 @@
 	//
 	// nyt kirjoitetaan tiedot vasta kantaan kun tiedet‰‰n ett‰ kirje
 	// on l‰htenyt Itellaan tai tulostetaan kirje ainoastaan
-	$karhukierros = uusi_karhukierros($kukarow['yhtio']);
+	
+	if ($tee != 'tulosta_karhu') {
+		$karhukierros = uusi_karhukierros($kukarow['yhtio']);
 
-	foreach ($rivit as $row) {
-		liita_lasku($karhukierros,$row['tunnus']);
+		foreach ($rivit as $row) {
+			liita_lasku($karhukierros,$row['tunnus']);
+		}
 	}
 	
 	// tulostetaan jos ei l‰hetet‰ ekirjett‰
-	if (isset($_POST['ekirje_laheta']) === false) {
+	if (isset($_POST['ekirje_laheta']) === false and $tee != 'tulosta_karhu') {
 		// itse print komento...
 		$query = "	select komento
 					from kirjoittimet

@@ -53,9 +53,10 @@
 			list($email, $ekuka) = explode("###", $email);
 			
 			// Haetaan muistiinpano
-			$query = "	SELECT kalenteri.*
+			$query = "	SELECT kalenteri.*, asiakas.nimi
 						FROM kalenteri
-						WHERE kalenteri.tunnus='$tunnus'";
+						LEFT JOIN asiakas ON (kalenteri.yhtio = asiakas.yhtio and kalenteri.liitostunnus = asiakas.tunnus)
+						WHERE kalenteri.tunnus = '$tunnus'";
 			$res = mysql_query($query) or pupe_error($query);
 			$row = mysql_fetch_array($res);
 

@@ -11,7 +11,7 @@
 
 	if (mysql_field_name($result, $i) == "laji") {
 
-		$ulos = "<td><select name='$nimi' onchange='submit();'>";
+		$ulos = "<td><select name='$nimi'>";
 
 		$query = "	SELECT distinct selite, selitetark
 					FROM avainsana
@@ -41,20 +41,12 @@
 		$jatko = 0;
 	}
 	
-	if (mysql_field_name($result, $i) == "selite" and 
-		($avain_sel["kuvaus_se"] == "SELECTED" or
-		$avain_sel["kuvaus_en"] == "SELECTED" or
-		$avain_sel["kuvaus_ru"] == "SELECTED" or
-		$avain_sel["kuvaus_ee"] == "SELECTED" or
-		$avain_sel["kuvaus_de"] == "SELECTED" or
-		$avain_sel["lyhyt_se"] == "SELECTED" or
-		$avain_sel["lyhyt_en"] == "SELECTED" or
-		$avain_sel["lyhyt_ru"] == "SELECTED" or
-		$avain_sel["lyhyt_ee"] == "SELECTED" or
-		$avain_sel["lyhyt_de"] == "SELECTED")) {
+	if (mysql_field_name($result, $i) == "selite") {
 			
 		$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
 		$jatko = 0;
 	}
+	
+	
 
 ?>

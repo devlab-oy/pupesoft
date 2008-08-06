@@ -244,7 +244,7 @@
 					if (abs($heitto) >= 0.01) {
 						$query = "	UPDATE tiliointi SET
 									summa = summa - $totkasumma + $alennus,
-									summa_valuutassa = summa_valuutassa - $totkasumma_valuutassa + $alennus_valuutassa,
+									summa_valuutassa = summa_valuutassa - $totkasumma_valuutassa + $alennus_valuutassa
 									WHERE tunnus = '$aputunnus' and yhtio='$row[suoriyhtio]'";
 						$xresult = mysql_query($query) or pupe_error($query);
 

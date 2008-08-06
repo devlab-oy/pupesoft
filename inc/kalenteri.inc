@@ -1648,7 +1648,7 @@
 						pvmloppu  		= '$lopvm',
 						otunnus  		= '$otunnus',
 						kuittaus  		= '$kuittaus',
-						kentta01 		= '$viesti',
+						kentta01 		= '".addslashes($viesti)."',
 						kentta10 		= '$kentta10'";
 			$query .= $kysely.$where;
 			$result = mysql_query($query) or pupe_error($query);

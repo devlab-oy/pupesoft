@@ -10,23 +10,33 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(_
 if(!function_exists("iconv_array")) {
 	function iconv_array($key, &$item) {
 		global $_REQUEST, $serc, $repl;
-		iconv($_REQUEST["sourceCharset"], "latin1", str_replace($serc, $repl, $item));
+		if(isset($_REQUEST["dont_str_replace"])) {
+			$item = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", str_replace($serc, $repl, $item));
+		}
+		else {
+			$item = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", $item);
+		}
 	}
 }
 
 foreach ($_GET as $key => $value) {
 	//$_GET[$key] = addslashes(trim($_GET[$key]));
-	$_GET[$key] = str_replace($serc, $repl, $_GET[$key]);
 	if(isset($_REQUEST["sourceCharset"]) and $_REQUEST["sourceCharset"] != "") {
 		if(is_array($_GET[$key])) {
 			array_walk_recursive($_GET[$key], "iconv_array");
 			${$key} = $_GET[$key];
 		}
 		else {
-			${$key} = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", str_replace($serc, $repl, $_GET[$key]));
+			if(isset($_REQUEST["dont_str_replace"])) {
+				${$key} = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", $_GET[$key]);
+			}
+			else {
+				${$key} = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", str_replace($serc, $repl, $_GET[$key]));
+			}
 		}
 	}
 	else {
+		$_GET[$key] = str_replace($serc, $repl, $_GET[$key]);
 		${$key} = str_replace($serc, $repl, $_GET[$key]);
 	}
 }
@@ -34,17 +44,22 @@ foreach ($_GET as $key => $value) {
 // poistetaan hipsuja ja trimmataan kaikki post muuttujat!
 foreach ($_POST as $key => $value) {
 	//$_POST[$key] = addslashes(trim($_POST[$key]));
-	$_POST[$key] = str_replace($serc, $repl, $_POST[$key]);
 	if(isset($_REQUEST["sourceCharset"]) and $_REQUEST["sourceCharset"] != "") {
 		if(is_array($_POST[$key])) {
 			array_walk_recursive($_POST[$key], "iconv_array");
 			${$key} = $_POST[$key];
 		}
 		else {
-			${$key} = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", str_replace($serc, $repl, $_POST[$key]));
+			if(isset($_REQUEST["dont_str_replace"])) {
+				${$key} = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", $_POST[$key]);
+			}
+			else {
+				${$key} = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", str_replace($serc, $repl, $_POST[$key]));
+			}
 		}
 	}
 	else {
+		$_POST[$key] = str_replace($serc, $repl, $_POST[$key]);
 		${$key} = str_replace($serc, $repl, $_POST[$key]);
 	}
 }

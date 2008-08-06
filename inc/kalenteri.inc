@@ -2248,7 +2248,8 @@
 				<input type = 'hidden' name='toim' value = '$toim'>
 				<input type = 'hidden' name='ohje' value = 'off'>
 				<input type = 'hidden' name='tapvm' value = '$tapvm'>
-				<input type = 'hidden' name='lopvm' value = '$lopvm'>				
+				<input type = 'hidden' name='lopvm' value = '$lopvm'>
+				<input type = 'hidden' name='dont_str_replace' value = 'true'>
 				".url_params($kalenteri, "POST")."			
 				<input type = 'hidden' name='kaletee' value = 'TALLENNA_KALENTERITAPAHTUMA'>
 				<table>

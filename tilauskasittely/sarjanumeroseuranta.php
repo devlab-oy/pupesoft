@@ -1064,7 +1064,7 @@
 					$fnlina2 = "";
 					$sarjarow["myynti_nimi"] .= "<br>".$siirow["tuoteno"]." ".$siirow["sarjanumero"];
 				}
-				else {
+				elseif ($siirow["tyyppi"] == "G") {
 					// jos tämä on jollain siirtolistalla
 					$fnlina1 = "<font class='message'>(".t("Kesken siirtolistalla").": ";
 					$fnlina2 = ")</font>";

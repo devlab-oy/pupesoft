@@ -531,7 +531,7 @@
 			while ($trow = mysql_fetch_array ($result)) {
 					echo "<tr class='aktiivi'>";
 
-					$suoritussummatotal =+ $trow["suoritussumma"];
+					$suoritussummatotal += $trow["suoritussumma"];
 
 					if ($trow["tunnus"] != NULL) {
 						echo "<td><a href='myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[tunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
@@ -615,7 +615,7 @@
 				echo "<tr><td class='back' colspan='9'>&nbsp;</td></tr>";
 
 		        echo "<tr>";
-				echo "<th colspan='7'>".t("Avoimet - kohdistamattomat", "", $tili).":</th>";
+				echo "<th colspan='7'>".t("Erotus avoimet - kohdistamattomat", "", $tili).":</th>";
 				echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f",$summatotal + $suoritussummatotal)."</td>";
 				echo "<td class='tumma' align='right' nowrap>$yhtiorow[valkoodi]</td>";
 				echo "</tr>";

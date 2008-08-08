@@ -73,6 +73,32 @@ function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $
 							$row[$i] = cut_text($row[$i],100);
 						}
 						
+						/*
+						if (strpos(($temp = mysql_field_name($result, $i)),"mainosteksti") !== FALSE) {
+								
+																
+								$from = array("[lihavoitu]", "[/lihavoitu]", "[kursivoitui]", "[/kursivoitu]", "[alleviivaus]", "[/alleviivaus]", "[lista]", "[/lista]");
+								$to   = array("<b>", "</b>", "<i>", "</i>", "<u>", "</u>", "<ul>", "</li></ul>");
+
+								$row[$i] = str_replace($from,$to,$row[$i]);
+								
+								$ulcount = substr_count($row[$i], "<ul>");
+								
+								$ulppos = 0;
+								for ($s=0; $s < $ulcount; $s++) { 
+									$ulpos = strpos($row[$i], "<ul>",$ulpos);
+									
+									$ilpos = strpos($row[$i], "[*]", $ulpos);
+									
+									$row[$i] = substr_replace($row[$i],"<li>",$ilpos,3);
+									
+									$ulpos = $ilpos;
+								}
+								
+								$row[$i] = str_replace("[*]","</li><li>",$row[$i]);						
+								
+						}*/
+
 						
 						$ulos .= str_replace($order,"<br>",$row[$i]);
 					

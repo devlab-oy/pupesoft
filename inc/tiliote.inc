@@ -392,7 +392,15 @@
 				echo "<tr>";
 				echo "<td>" . substr($tietue, 147, 18) . "</td>";
 				echo "<td>" . substr($tietue, 99, 30) . "<br>$tilinvaluutta $pankkitilino</td>";
-				echo "<td>".t("Myönnetty määrä")."<br>". substr($tietue, 117, 30) * 1 . "</td>";
+				$tililimiitti = (int) (substr($tietue, 117, 30) * 1);
+				if($tililimiitti > 0) {
+					$tililimiitti =  sprintf("%01.2f", $tililimiitti);
+				}
+				else {
+					$tililimiitti =  "";
+				}
+				
+				echo "<td align='right'>".t("Myönnetty määrä")."<br>". $tililimiitti . "</td>";
 				echo "</tr>";
 			}
 
@@ -502,8 +510,15 @@
 
 			echo "<tr><td></td><td></td><td></td><td></td>";
 			echo "<td>".t("Saldo")." " . substr($tietue,65,6) . "</td>";
-			echo "<td align='right'>" . substr($tietue,71,19) / 100 . "</td>";
+			echo "<td align='right'>" . ((substr($tietue,71,19) / 100)-$tililimiitti) . "</td>";
 			echo "</tr>";
+			
+			if($tililimiitti != "") {
+				echo "<tr><td></td><td></td><td></td><td></td>";
+				echo "<td>".t("Käyttövara")."</td>";
+				echo "<td align='right'>" . (substr($tietue,71,19) / 100) . "</td>";
+				echo "</tr>";
+			}
 
 			break;
 
@@ -643,7 +658,12 @@
 			break;
 		case 'T40':
 			echo "<tr><td></td><td></td><td></td><td></td><td>".t("Saldo")." " . substr($tietue,6,6) . "</td>";
-			echo "<td>" . substr($tietue,31,19) / 100 . "</td></tr>";
+			echo "<td>" . ((substr($tietue,31,19) / 100) - $tililimiitti) . "</td></tr>";
+			
+			if($tililimiitti != "") {
+				echo "<tr><td></td><td></td><td></td><td></td><td>".t("Käyttövara")."</td>";
+				echo "<td>" . substr($tietue,31,19) / 100 . "</td></tr>";
+			}
 
 			// Päivitetään saldo yriti-tauluun, jos sellainen löytyi
 			if ($toim == 'K' and $tiliotedatarow['kasitelty'] == '0000-00-00') {

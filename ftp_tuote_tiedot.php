@@ -74,7 +74,7 @@ function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $
 						}
 						
 						/*
-						if (strpos(($temp = mysql_field_name($result, $i)),"mainosteksti") !== FALSE) {
+						if (strpos(($temp = mysql_field_name($result, $i)),"mainosteksti") !== FALSE or strpos(($temp = mysql_field_name($result, $i)),"kuvaus") !== FALSE) {
 								
 																
 								$from = array("[lihavoitu]", "[/lihavoitu]", "[kursivoitui]", "[/kursivoitu]", "[alleviivaus]", "[/alleviivaus]", "[lista]", "[/lista]");

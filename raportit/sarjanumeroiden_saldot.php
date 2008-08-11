@@ -15,18 +15,17 @@
 		list($saldot, $lisavarusteet) = hae_tuotteet();
 
 		// korjataan saldot
-		// nollataan eka tuotteiden kaikki saldot
-		foreach($saldot as $tuote => $kpl) {
-			list($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("#!#", $tuote);
-			$query = "	UPDATE tuotepaikat SET
-						saldo			= '0',
-						saldoaika		= now(),
-						muuttaja		= '$kukarow[kuka]',
-						muutospvm		= now()
-						WHERE tuoteno	= '$tuoteno'
-						and yhtio		= '$kukarow[yhtio]'";
-			$paikres = mysql_query($query) or pupe_error($query);
-		}
+		// nollataan eka kaikkien sarjanumerollisten tuotteiden saldot
+		$query = "	UPDATE tuotepaikat, tuote SET
+					tuotepaikat.saldo		= '0',
+					tuotepaikat.saldoaika	= now(),
+					tuotepaikat.muuttaja	= '$kukarow[kuka]',
+					tuotepaikat.muutospvm	= now()
+					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+					and tuote.yhtio			= tuotepaikat.yhtio
+					and tuote.tuoteno		= tuotepaikat.tuoteno
+					and tuote.sarjanumeroseuranta != ''";
+		$paikres = mysql_query($query) or pupe_error($query);
 		
 		// päivitetään saldot
 		foreach($saldot as $tuote => $kpl) {
@@ -47,7 +46,12 @@
 			
 			// katotaan onko paikka OK
 			$tunnus = kuuluukovarastoon($hyllyalue, $hyllynro);
-
+			
+			#TÄHÄN PITÄISI KOODATA
+			# if tunnus == 0
+			# jos sarjanumeron tiedoissa on joku väärä varastopaikka, niin pitäisi tallentaa joku oikea varastopaikka sinne, jonka jälkeen saataisiin tuotepaikat kuntoon
+			
+			
 			// jos paikka on OK
 			if ($tunnus != 0) {
 
@@ -137,7 +141,10 @@
 
 			// katotaan onko paikka OK
 			$tunnus = kuuluukovarastoon($hyllyalue, $hyllynro);
-			$toiminto = "";
+
+			#TÄHÄN PITÄISI KOODATA
+			# if tunnus == 0
+			# jos sarjanumeron tiedoissa on joku väärä varastopaikka, niin pitäisi tallentaa joku oikea varastopaikka sinne, jonka jälkeen saataisiin tuotepaikat kuntoon
 
 			// jos paikka on OK
 			if ($tunnus != 0) {

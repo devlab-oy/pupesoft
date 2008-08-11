@@ -291,6 +291,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		$ashinaleas 		= 0;
 		$ashinaletuo 		= 0;
 		$and 				= '';
+		$tpupque 			= '';
 
 		if ($eiyhtiota == "") {
 			$valinta   = " YHTIO='$kukarow[yhtio]'";
@@ -460,7 +461,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						} 
 						
 					}
-					elseif ((int) $ikenpituus[$r] > 0 and strlen($rivi[$r]) > $ikenpituus[$r]) {
+					elseif ((int) $ikenpituus[$r] > 0 and strlen($rivi[$r]) > $ikenpituus[$r] and ($table != "tuotepaikat" and $otsikot[$r] != "OLETUS" and $rivi[$r] != 'XVAIHDA')) {
 						echo "<font class='error'>".t("VIRHE").": ".$otsikot[$r]." ".t("kent‰ss‰ on liian pitk‰ tieto")."!</font> $rivi[$r]: ".strlen($rivi[$r])." > ".$ikenpituus[$r]."!<br>";
 						$hylkaa++; // ei p‰ivitet‰ t‰t‰ rivi‰
 					}
@@ -577,7 +578,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						}
 						else {
 							$tprow = mysql_fetch_array($tpres);
-							if ($rivi[$r] != '' and $tprow['oletus'] > 0) {
+							if ($rivi[$r] == 'XVAIHDA' and $tprow['oletus'] > 0) {
+								//vaihdetaan t‰m‰ oletukseksi
+								echo t("Tuotteelle")." '$tuoteno' ".t("Vaihdetaan annettu paikka oletukseksi").".<br>";
+							}
+							elseif ($rivi[$r] != '' and $tprow['oletus'] > 0) {
 								$rivi[$r] = ""; // t‰ll‰ tuotteella on jo oletuspaikka, nollataan t‰m‰
 								echo t("Tuotteella")." '$tuoteno' ".t("on jo oletuspaikka, ei p‰ivitetty oletuspaikkaa")."!<br>";
 							}
@@ -795,7 +800,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					}
 
 					//muutetaan rivi‰, silloin ei saa p‰ivitt‰‰ pakollisia kentti‰
-					if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA' and (!in_array($otsikot[$r], $pakolliset) or ($table == 'asiakashinta' or $table == 'asiakasalennus'))) {
+					if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA' and (!in_array($otsikot[$r], $pakolliset) or ($table == 'asiakashinta' or $table == 'asiakasalennus') or ($table == "tuotepaikat" and $otsikot[$r] == "OLETUS" and $rivi[$r] == 'XVAIHDA'))) {
 						///* T‰ss‰ on kaikki oikeellisuuscheckit *///
 						if ($table=='tuotepaikat' and $otsikot[$r] == 'SALDO') {
 							if ($rivi[$r] != 0 and $rivi[$r] != '') {
@@ -821,6 +826,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 								echo t("Selite ei saa olla tyhj‰!")."<br>";
 							}
 						}
+						elseif ($table=='tuotepaikat' and $otsikot[$r] == 'OLETUS' and $rivi[$r] == 'XVAIHDA') {
+							//vaihdetaan t‰m‰ oletukseksi
+							$rivi[$r] = "X"; // pakotetaan oletus
+							
+							$tpupque = "UPDATE tuotepaikat SET oletus = '' where yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+							
+							$query .= ", $otsikot[$r]='$rivi[$r]' ";
+						}
 						elseif ($table=='tuotepaikat' and $otsikot[$r] == 'OLETUS') {
 							//echo "Oletusta ei voi muuttaa!<br>";
 						}
@@ -833,7 +846,15 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 					//lis‰t‰‰n rivi‰
 					if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
-						if ($eilisataeikamuuteta == "") {
+						if ($table=='tuotepaikat' and $otsikot[$r] == 'OLETUS' and $rivi[$r] == 'XVAIHDA') {
+							//vaihdetaan t‰m‰ oletukseksi
+							$rivi[$r] = "X"; // pakotetaan oletus
+							
+							$tpupque = "UPDATE tuotepaikat SET oletus = '' where yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+							
+							$query .= ", $otsikot[$r]='$rivi[$r]' ";
+						}
+						elseif ($eilisataeikamuuteta == "") {
 							$query .= ", $otsikot[$r]='$rivi[$r]' ";
 						}
 					}
@@ -988,6 +1009,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				}				
 				$syncres = mysql_query($syncquery) or pupe_error($syncquery);
 				$syncrow = mysql_fetch_array($syncres);
+				
+				// tuotepaikkojen oletustyhjennysquery uskalletaan ajaa vasta t‰ss‰
+				if ($tpupque != '') {
+					$tpupres = mysql_query($tpupque) or pupe_error($tpupque);
+				}
+								
+				$tpupque = "";
 								
 				// Itse lue_datan p‰ivitysquery
 				$iresult = mysql_query($query) or pupe_error($query);

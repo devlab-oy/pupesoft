@@ -2,7 +2,8 @@
 	require "inc/parametrit.inc";
 
 	if ($lataa_tiedosto == 1) {
-		echo $file;
+		$filetxt = file_get_contents($file);
+		echo $filetxt;
 		exit;
 	}
 
@@ -104,8 +105,11 @@
 			}
 			echo "</table>";
 
+			$filename = "/tmp/".md5(uniqid()).".txt";
+			file_put_contents($filename, $txttieto);
+
 			echo "<br><form>";
-			echo "<input type='hidden' name='file' value='$txttieto'>";
+			echo "<input type='hidden' name='file' value='$filename'>";
 			echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
 			echo "<input type='hidden' name='kaunisnimi' value='$txtfile'>";
 			echo "<input type='submit' value='Tallenna tiedosto'>";

@@ -4,15 +4,20 @@
 
 	echo "<font class='head'>".t("Sarjanumeroiden saldokorjaus")."</font><hr>";
 
-	echo "<form name='haku' action='$PHP_SELF' method='post'>";
-	echo "<input type='hidden' name='toiminto' value='TULOSTA'>";
-	echo "<input type='submit' name='$subnimi' value='Korjaa!'>";
-	echo "</form>";
+	if ($kukarow["kuka"] == "admin") {
+		echo "<form name='haku' action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='toiminto' value='TULOSTA'>";
+		echo "<input type='submit' name='$subnimi' value='Korjaa!'>";
+		echo "</form>";
+	}
+	else {
+		echo "Vain admin käyttäjälle!";
+	}
 
-	if ($toiminto == 'TULOSTA') {
+	if ($toiminto == 'TULOSTA' and $kukarow["kuka"] == "admin") {
 
 		// haetaan tuotteet
-		list($saldot, $lisavarusteet) = hae_tuotteet();
+		list($saldot, $lisavarusteet, $paikat) = hae_tuotteet();
 
 		// korjataan saldot
 		// nollataan eka kaikkien sarjanumerollisten tuotteiden saldot
@@ -26,7 +31,60 @@
 					and tuote.tuoteno		= tuotepaikat.tuoteno
 					and tuote.sarjanumeroseuranta != ''";
 		$paikres = mysql_query($query) or pupe_error($query);
-		
+
+		// päivitetään eka virheelliset varastopaikat
+		foreach($paikat as $tuote => $kpl) {
+
+			list($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $sarjanumerotunnus) = explode("#!#", $tuote);
+
+			// katotaan löytyykö paikka mikä oli sarjanumerolla
+			$query = "	SELECT *
+						FROM tuotepaikat
+						WHERE tuoteno	= '$tuoteno'
+						and yhtio		= '$kukarow[yhtio]'
+						and hyllyalue	= '$hyllyalue'
+						and hyllynro	= '$hyllynro'
+						and hyllyvali	= '$hyllyvali'
+						and hyllytaso	= '$hyllytaso'";
+			$alkuresult = mysql_query($query) or pupe_error($query);
+			$alkurow = mysql_fetch_array($alkuresult);
+
+			// katotaan onko paikka OK
+			$tunnus = kuuluukovarastoon($hyllyalue, $hyllynro);
+
+			# jos sarjanumeron tiedoissa on joku väärä varastopaikka, niin haetaan ekan varaston eka paikka ja laitetaan se sinne!
+			if ($tunnus == 0) {
+
+				echo "<br>Päivitettiin sarjanumeron varastopaikka $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso -> ";
+
+				$query = "	SELECT alkuhyllyalue, alkuhyllynro, tunnus
+							FROM varastopaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							ORDER BY alkuhyllyalue, alkuhyllynro
+							LIMIT 1";
+				$ekavarres = mysql_query($query) or pupe_error($query);
+				$ekavarrow = mysql_fetch_array($ekavarres);
+
+				$hyllyalue = $ekavarrow["alkuhyllyalue"];
+				$hyllynro  = $ekavarrow["alkuhyllynro"];
+				$hyllytaso = $hyllyvali = 0;
+
+				$query = "	UPDATE sarjanumeroseuranta SET
+							hyllyalue = '$hyllyalue',
+							hyllynro  = '$hyllynro',
+							hyllytaso = '$hyllytaso',
+							hyllyvali = '$hyllyvali'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus = '$sarjanumerotunnus'";
+				$ekavarres = mysql_query($query) or pupe_error($query);
+
+				echo "$hyllyalue-$hyllynro-$hyllyvali-$hyllytaso";
+			}
+		}
+
+		// haetaan tuotteet
+		list($saldot, $lisavarusteet, $paikat) = hae_tuotteet();
+
 		// päivitetään saldot
 		foreach($saldot as $tuote => $kpl) {
 
@@ -43,19 +101,18 @@
 						and hyllytaso	= '$hyllytaso'";
 			$alkuresult = mysql_query($query) or pupe_error($query);
 			$alkurow = mysql_fetch_array($alkuresult);
-			
-			// katotaan onko paikka OK
+
+			// katotaan onko paikka OK (pitäs olla kyllä kaikki OK!)
 			$tunnus = kuuluukovarastoon($hyllyalue, $hyllynro);
-			
-			#TÄHÄN PITÄISI KOODATA
-			# if tunnus == 0
-			# jos sarjanumeron tiedoissa on joku väärä varastopaikka, niin pitäisi tallentaa joku oikea varastopaikka sinne, jonka jälkeen saataisiin tuotepaikat kuntoon
-			
-			
+
+			if ($tunnus == 0) {
+				echo "<h1>miten tänne tultiin $query</h1>";
+			}
+
 			// jos paikka on OK
 			if ($tunnus != 0) {
 
-				// tuotteella ei ollut perustettu tätä paikkaa 
+				// tuotteella ei ollut perustettu tätä paikkaa
 				if (mysql_num_rows($alkuresult) == 0) {
 					// katotaaan eka onko joku paikka jo oletus
 					$query = "	SELECT *
@@ -105,14 +162,14 @@
 				else {
 					echo "Tuotteella on useampi SAMA tuotepaikka!?!?! unpossible.";
 				}
-				
+
 				echo "<br>Tuote $tuoteno saldo muutettu $kpl paikalla $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso";
 			}
-			
+
 		}
 
 		// haetaan tuotteet
-		list($saldot, $lisavarusteet) = hae_tuotteet();
+		list($saldot, $lisavarusteet, $paikat) = hae_tuotteet();
 
 		// korjataan saldo_varatut
 		// nollataan eka kaikkien tuotteiden saldo_varattu
@@ -123,7 +180,7 @@
 					muutospvm		= now()
 					WHERE yhtio		= '$kukarow[yhtio]'";
 		$paikres = mysql_query($query) or pupe_error($query);
-			
+
 		foreach($lisavarusteet as $tuote => $kpl) {
 
 			list($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("#!#", $tuote);
@@ -142,14 +199,15 @@
 			// katotaan onko paikka OK
 			$tunnus = kuuluukovarastoon($hyllyalue, $hyllynro);
 
-			#TÄHÄN PITÄISI KOODATA
-			# if tunnus == 0
-			# jos sarjanumeron tiedoissa on joku väärä varastopaikka, niin pitäisi tallentaa joku oikea varastopaikka sinne, jonka jälkeen saataisiin tuotepaikat kuntoon
+			// pitäisi olla kaikki OK
+			if ($tunnus == 0) {
+				echo "<h1>tänne ei pitäs tulla $query</h1>";
+			}
 
 			// jos paikka on OK
 			if ($tunnus != 0) {
 
-				// tuotteella ei ollut perustettu tätä paikkaa 
+				// tuotteella ei ollut perustettu tätä paikkaa
 				if (mysql_num_rows($alkuresult) == 0) {
 
 					// katotaaan eka onko joku paikka jo oletus
@@ -200,7 +258,7 @@
 				else {
 					echo "Tuotteella on useampi SAMA tuotepaikka!?!?! wtf?";
 				}
-				
+
 				echo "<br>Tuote $tuoteno saldo_varattu muutettu $kpl paikalla $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso";
 			}
 		}
@@ -208,14 +266,15 @@
 	}
 
 	require ("../inc/footer.inc");
-	
+
 	function hae_tuotteet() {
-		
+
 		global $kukarow;
 
 		$lisavarusteet = array();
 		$saldot = array();
-		
+		$paikat = array();
+
 		// Näytetään kaikki vapaana/myymättä olevat sarjanumerot
 		$query	= "	SELECT sarjanumeroseuranta.*,
 					if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys) nimitys,
@@ -274,15 +333,26 @@
 				}
 			}
 
+			// pitää uppercaseta!
+			$sarjarow["tuoteno"]   = strtoupper($sarjarow["tuoteno"]);
+			$sarjarow["hyllyalue"] = strtoupper($sarjarow["hyllyalue"]);
+			$sarjarow["hyllynro"]  = strtoupper($sarjarow["hyllynro"]);
+			$sarjarow["hyllyvali"] = strtoupper($sarjarow["hyllyvali"]);
+			$sarjarow["hyllytaso"] = strtoupper($sarjarow["hyllytaso"]);
+
 			// normituotteet
 			$key = $sarjarow["tuoteno"]."#!#".$sarjarow["hyllyalue"]."#!#".$sarjarow["hyllynro"]."#!#".$sarjarow["hyllyvali"]."#!#".$sarjarow["hyllytaso"];
 			$saldot[$key] += 1;
+
+			$key = $sarjarow["tuoteno"]."#!#".$sarjarow["hyllyalue"]."#!#".$sarjarow["hyllynro"]."#!#".$sarjarow["hyllyvali"]."#!#".$sarjarow["hyllytaso"]."#!#".$sarjarow["tunnus"];
+			$paikat[$key] += 1;
 		}
 
 		ksort($lisavarusteet);
 		ksort($saldot);
+		ksort($paikat);
 
-		return array($saldot, $lisavarusteet);
+		return array($saldot, $lisavarusteet, $paikat);
 	}
 
 ?>

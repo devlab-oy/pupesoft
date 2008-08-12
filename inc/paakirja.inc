@@ -476,11 +476,7 @@
 			}
 			else {
 				if ($i == 5) {
-					$trow[$i] = str_replace("<br>"," ",$trow[$i]);
-					
-					if ($trow["valkoodi"] != $yhtiorow["valkoodi"] and $trow["valkoodi"] != "") {
-						$trow[$i] .= "($trow[summa_valuutassa] $trow[valkoodi])";
-					}
+					$trow[$i] = str_replace("<br>"," ",$trow[$i]);					
 				} 
 
 				echo "<td>$trow[$i]</td>";
@@ -498,6 +494,15 @@
 			}
 		}
 
+		if ($trow["summa_valuutassa"] == 0) $trow["summa_valuutassa"] = "";
+
+		if ($trow["valkoodi"] == $yhtiorow["valkoodi"]) {
+			$trow["valkoodi"] = "";
+			$trow["summa_valuutassa"] = "";
+		}
+
+		echo "<td align='right' class='back' nowrap>$trow[summa_valuutassa]</td>";
+		echo "<td align='right' class='back' nowrap>$trow[valkoodi]</td>";
 
 		echo "</tr>";
 

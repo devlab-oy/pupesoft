@@ -260,8 +260,6 @@
 					laatija = '$kukarow[kuka]',
 					luontiaika = now()";
 		$result = mysql_query($query) or pupe_error($query);
-
-//		echo "$query <br>";
 		$tunnus = mysql_insert_id ($link);
 
 		if ($kuva) {
@@ -470,6 +468,46 @@
 
 		echo "</select>";
 		echo "</td></tr>";
+		
+		// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity
+		$query = "	SELECT *
+					FROM yhtion_toimipaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					and maa != ''
+					and vat_numero != ''
+					and toim_alv != ''";
+		$alhire = mysql_query($query) or pupe_error($query);
+
+		// ollaan alv-rekisteröity
+		if (mysql_num_rows($alhire) >= 1) {
+
+			if ($tilino_alv == "") {
+				$tilino_alv = $trow["tilino_alv"];
+			}
+
+			echo "<tr>";
+			echo "<th>".t("Alv tili")."</th><td>";
+			echo "<select name='alv_tili'>";
+			echo "<option value='$yhtiorow[alv]'>$yhtiorow[alv] - $yhtiorow[nimi], $yhtiorow[kotipaikka], $yhtiorow[maa]</option>";
+
+			while ($vrow = mysql_fetch_array($alhire)) {
+				$sel = "";
+				if ($tilino_alv == $vrow['toim_alv']) {
+					$sel = "selected";
+				}
+				echo "<option value='$vrow[toim_alv]' $sel>$vrow[toim_alv] - $vrow[nimi], $vrow[kotipaikka], $vrow[maa]</option>";
+			}
+
+			echo "</select>";
+			echo "</td>";
+			echo "</tr>";
+		}
+		else {
+			$tilino_alv = $yhtiorow["alv"];
+			echo "<input type='hidden' name='alv_tili' value='$tilino_alv'>";
+		}
+		
+		
 		echo "<tr><th>".t("Nimi")."</th><td><input type='text' name='nimi' value='$nimi'>";
 
 		if ($kuitti != '') {

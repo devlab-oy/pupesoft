@@ -13,7 +13,8 @@
 	}
 
 	if ($tee == 'V') {
-		$summa = str_replace ( ",", ".", $summa);
+		$summa = str_replace (",", ".", $summa);
+		$summa_valuutassa = str_replace (",", ".", $summa_valuutassa);
 	}
 
 	if ($tee == 'W') {

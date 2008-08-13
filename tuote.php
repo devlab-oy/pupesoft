@@ -1338,7 +1338,11 @@
 			while ($prow = mysql_fetch_array ($qresult)) {
 
 				$vararvo_nyt -= $prow["arvo"];
-				$saldo_nyt -= $prow["kpl"];
+				
+				// Epäkuranteissa saldo ei muutu
+				if ($prow["laji"] != "Epäkurantti") {
+					$saldo_nyt -= $prow["kpl"];
+				}
 
 				if ($tapahtumalaji == "" or strtoupper($tapahtumalaji)==strtoupper($prow["laji"])) {
 					echo "<tr class='aktiivi'>";

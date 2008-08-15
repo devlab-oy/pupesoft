@@ -130,7 +130,8 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
 				$kayttotarkoitus_lisa = " and kayttotarkoitus in('MU') ";
 			}
 			
-			$file_name = $_FILES['userfile']['name'];
+			$file_name = mysql_real_escape_string($_FILES['userfile']['name']);
+			
 			//ehkä kieli whereen
 			$query = "  SELECT filename, kayttotarkoitus
 						FROM liitetiedostot

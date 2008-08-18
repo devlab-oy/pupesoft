@@ -324,13 +324,27 @@ if ($silent == "") {
 		echo "<input type='hidden' name='tee' value='haku'>";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 
+		$sel1 = "";
+		$sel2 = "";
+		$sel3 = "";
+
+		if ($hakutapa == '' or $hakutapa == 'S') {
+			$sel1 = "SELECTED";
+		}
+		elseif ($hakutapa == "N") {
+			$sel2 = "SELECTED";
+		}
+		elseif ($hakutapa == "V") {
+			$sel3 = "SELECTED";
+		}
+		
 		echo "<br><font class='message'>".t("Liit‰ lasku")." (".t("keikka").": $laskurow[laskunro] $laskurow[nimi])</font><br><br>";
 		echo "<table><tr>";
 		echo "<th>".t("Etsi lasku")."</th>";
 		echo "<th><SELECT name='hakutapa'>";
-		echo "<option value='S'>".t("verollisella summalla")."</option>";
-		echo "<option value='N'>".t("nimell‰")."</option>";
-		echo "<option value='V'>".t("viitteell‰")."</option>";
+		echo "<option value='S' $sel1>".t("verollisella summalla")."</option>";
+		echo "<option value='N' $sel2>".t("nimell‰")."</option>";
+		echo "<option value='V' $sel3>".t("viitteell‰")."</option>";
 		echo "</SELECT></th>";
 		echo "<td><input type='text' name='haku' value='$haku'></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
@@ -381,8 +395,10 @@ if ($silent == "") {
 
 	if ($tee == "haku") {
 
+		$aikalisa = "";
 		if (!isset($listaustapa)) {
 			$listaustapa = "liittamattomat";
+			$aikalisa = " AND tapvm > date_sub(now(), INTERVAL 1 YEAR)";
 		}
 
 		$lisa = ""; // no hacking
@@ -428,6 +444,7 @@ if ($silent == "") {
 					FROM lasku use index (kohdistus_index)
 					WHERE yhtio='$kukarow[yhtio]' and tila in ('H','Y','M','P','Q') and vienti in ('B','C','J','E','F','K','H','I','L')
 					$lisa
+					$aikalisa
 					order by tapvm desc";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -502,7 +519,24 @@ if ($silent == "") {
 
 				if ($summa_kaytettavissa > 0) {
 					if ($listaustapa == "liittamattomat" or $listaustapa == "") {
-						// annetaan menn‰ l‰pi
+						// checkkaus t‰ss‰ ettei piiret‰ turhaan
+						$voikolisata = "";
+						//kululaskut voidaan aina lis‰t‰
+						if ($llrow["vienti"] != "C" and $llrow["vienti"] != "F" and $llrow["vienti"] != "I" and $llrow["vienti"] != "J" and $llrow["vienti"] != "K" and $llrow["vienti"] != "L") {
+							$voikolisata = "OK";
+						}
+						//jos t‰m‰ on vahto-omaisuuslasku pit‰‰ viel‰ tarkistaa vienti ja valuutta
+						elseif ($laskurow["alatila"] != "S" and $llrow["valkoodi"] == $valuutta and $llrow["vienti"] == $vienti and ($llrow["vienti"] == "C" or $llrow["vienti"] == "F" or $llrow["vienti"] == "I" or $llrow["vienti"] == "J" or $llrow["vienti"] == "K" or $llrow["vienti"] == "L")) {
+							$voikolisata = "OK";
+						}
+						elseif ($laskurow["alatila"] != "S" and $vienti == '' and $valuutta == '' and ($llrow["vienti"] == "C" or $llrow["vienti"] == "F" or $llrow["vienti"] == "I" or $llrow["vienti"] == "J" or $llrow["vienti"] == "K" or $llrow["vienti"] == "L")) {
+							$voikolisata = "OK";
+						}
+						
+						if ($voikolisata != "OK" and $listaustapa == "liittamattomat") {
+							continue;
+						}
+						
 					}
 					else {
 						continue;
@@ -562,21 +596,7 @@ if ($silent == "") {
 					$summa_kaytettavissa = $summa_kaytettavissa * $lw;
 
 					echo "<td class='green' align='right' valign='top'>".sprintf('%.2f',$summa_kaytettavissa)."</td>";
-
-					$voikolisata = "";
-
-					//kululaskut voidaan aina lis‰t‰
-					if ($llrow["vienti"] != "C" and $llrow["vienti"] != "F" and $llrow["vienti"] != "I" and $llrow["vienti"] != "J" and $llrow["vienti"] != "K" and $llrow["vienti"] != "L") {
-						$voikolisata = "OK";
-					}
-					//jos t‰m‰ on vahto-omaisuuslasku pit‰‰ viel‰ tarkistaa vienti ja valuutta
-					elseif ($laskurow["alatila"] != "S" and $llrow["valkoodi"] == $valuutta and $llrow["vienti"] == $vienti and ($llrow["vienti"] == "C" or $llrow["vienti"] == "F" or $llrow["vienti"] == "I" or $llrow["vienti"] == "J" or $llrow["vienti"] == "K" or $llrow["vienti"] == "L")) {
-						$voikolisata = "OK";
-					}
-					elseif ($laskurow["alatila"] != "S" and $vienti == '' and $valuutta == '' and ($llrow["vienti"] == "C" or $llrow["vienti"] == "F" or $llrow["vienti"] == "I" or $llrow["vienti"] == "J" or $llrow["vienti"] == "K" or $llrow["vienti"] == "L")) {
-						$voikolisata = "OK";
-					}
-
+					
 					if ($voikolisata == "OK") {
 
 						echo "<form name='haku' action='$PHP_SELF' method='post'>";

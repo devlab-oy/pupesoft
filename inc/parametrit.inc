@@ -7,11 +7,13 @@ $repl = array("", "", "", "", "", "");
 // otetaan includepath aina rootista
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)));
 
+unset($postProcessVariables);
+
 if(!function_exists("iconv_array")) {
 	function iconv_array($key, &$item) {
-		global $_REQUEST, $serc, $repl;
+		global $_REQUEST, $serc, $repl, $postProcessVariables;
 		if(isset($_REQUEST["dont_str_replace"])) {
-			$item = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", str_replace($serc, $repl, $item));
+			$item = strip_tags(iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", str_replace($serc, $repl, $item)), "<br>");
 		}
 		else {
 			$item = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", $item);
@@ -25,10 +27,15 @@ foreach ($_GET as $key => $value) {
 		if(is_array($_GET[$key])) {
 			array_walk_recursive($_GET[$key], "iconv_array");
 			${$key} = $_GET[$key];
+
+			if(isset($_REQUEST["dont_str_replace"])) {
+				$postProcessVariables[] = $key;
+			}
 		}
 		else {
 			if(isset($_REQUEST["dont_str_replace"])) {
-				${$key} = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", $_GET[$key]);
+				${$key} = strip_tags(iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", $_GET[$key]), "<br>");
+				$postProcessVariables[] = $key;
 			}
 			else {
 				${$key} = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", str_replace($serc, $repl, $_GET[$key]));
@@ -48,10 +55,15 @@ foreach ($_POST as $key => $value) {
 		if(is_array($_POST[$key])) {
 			array_walk_recursive($_POST[$key], "iconv_array");
 			${$key} = $_POST[$key];
+
+			if(isset($_REQUEST["dont_str_replace"])) {
+				$postProcessVariables[] = $key;
+			}
 		}
 		else {
 			if(isset($_REQUEST["dont_str_replace"])) {
-				${$key} = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", $_POST[$key]);
+				${$key} = strip_tags(iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", $_POST[$key]), "<br>");
+				$postProcessVariables[] = $key;
 			}
 			else {
 				${$key} = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", str_replace($serc, $repl, $_POST[$key]));
@@ -77,6 +89,28 @@ require("salasanat.php");
 
 $link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen ei saada yhteyttä. Se on pois päältä tai käyttäjätietosi ovat virheelliset.");
 mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta!");
+
+if(isset($postProcessVariables)) {
+	
+	//	Poistetaan dublikaattimuuttujat
+	$flip = array_flip($postProcessVariables);
+	$postProcessVariables = array_flip($flip);
+	
+	if(!function_exists("mysqlrecescape")) {
+		function mysqlrecescape ($key, &$item) {
+			$item = mysql_real_escape_string($item);
+		}
+	}
+	
+	foreach($postProcessVariables as $postProcessVariable) {
+		if(is_array(${$postProcessVariable})) {
+			${$postProcessVariable} = ${$postProcessVariable} = array_walk_recursive(${$postProcessVariable}, "mysqlrecescape");
+		}
+		else {
+			${$postProcessVariable} = ${$postProcessVariable} = mysql_real_escape_string(${$postProcessVariable});
+		}
+	}
+}
 
 // jos käytetään jotain kummallista porttia (ei http eikä https)
 $portti = "";

@@ -229,6 +229,7 @@
 				//var_dump($kalenteri);
 				$otsikko = substr($row["tapa"], 0, 14);
 				
+				$row["viesti"] = stripslashes($row["viesti"]);
 
 				$popup_otsikko = "<table>
 									<tr><th class=''>".t("Tyyppi").":</th><td class=''>".kaleotsikko($row["tyyppi"])."</td></tr>";
@@ -1648,7 +1649,7 @@
 						pvmloppu  		= '$lopvm',
 						otunnus  		= '$otunnus',
 						kuittaus  		= '$kuittaus',
-						kentta01 		= '".addslashes($viesti)."',
+						kentta01 		= '$viesti',
 						kentta10 		= '$kentta10'";
 			$query .= $kysely.$where;
 			$result = mysql_query($query) or pupe_error($query);
@@ -1802,7 +1803,7 @@
 			if(mysql_num_rows($result) > 0) {
 				$krow 			= mysql_fetch_array($result);
 				
-				$viesti	 		= $krow["kentta01"];
+				$viesti	 		= stripslashes($krow["kentta01"]);
 				$liitostunnus 	= $krow["liitostunnus"];
 				$otunnus 		= $krow["otunnus"];
 				$tapvm 			= $krow["pvmalku"];

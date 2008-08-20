@@ -3,7 +3,7 @@
 	require ("inc/parametrit.inc");
 	
 	echo "<font class='head'>".t("Tulosta inventointilista")."</font><hr>";
-
+	
 	if ($tee == 'TULOSTA') {
 
 		$tulostimet[0] = "Inventointi";
@@ -21,8 +21,11 @@
 		}
 		
 		// jos ollaan ruksattu vain saldolliset tuotteet
-		if ($arvomatikka!='') {
+		if ($arvomatikka == 'S') {
 			$extra = " and tuotepaikat.saldo > 0 ";
+		}
+		elseif ($arvomatikka == 'N') {
+			$extra = " and tuotepaikat.saldo != 0 ";
 		}
 		else {
 			$extra = "";
@@ -565,10 +568,24 @@
 		echo "<tr><td class='back'><br></td></tr>";
 		echo "<tr><td class='back' colspan='2'>".t("Valitse ehdoista")."...</th></tr>";
 		
-		echo "<tr><th>".t("Listaa vain saldolliset tuotteet:")."</th>
-		<td><input type='checkbox' name='arvomatikka'></td>
-		</tr>";
-			
+				
+		echo "<tr><th>".t("Listaa tuotteet:")."</th>";
+				
+		$sel1 = "";
+		$sel2 = "";
+		
+		if ($arvomatikka == 'S') {
+			$sel1 = "SELECTED";
+		}
+		elseif ($arvomatikka == 'N') {
+			$sel2 = "SELECTED";
+		}
+		
+		echo "<td><select name='arvomatikka'>";
+		echo "<option value=''>".t("Kaikki")."</option>";
+		echo "<option value='S' $sel1>".t("Saldolliset")."</option>";
+		echo "<option value='N' $sel2>".t("Ei nolla saldollisia")."</option>";
+		echo "</td></tr>";	
 		
 		echo "<tr><th>".t("Tulosta hyllyss‰ oleva m‰‰r‰:")."</th>
 		<td><input type='checkbox' name='naytasaldo'></td>

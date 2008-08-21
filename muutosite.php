@@ -301,9 +301,9 @@ if ($tee == 'P') {
 
 	$query = "	SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm, tosite, summa_valuutassa, valkoodi
 				FROM tiliointi
-				WHERE tunnus = '$ptunnus' 
-				AND yhtio = '$kukarow[yhtio]' 
-				AND tapvm >= '$yhtiorow[tilikausi_alku]' 
+				WHERE tunnus = '$ptunnus'
+				AND yhtio = '$kukarow[yhtio]'
+				AND tapvm >= '$yhtiorow[tilikausi_alku]'
 				AND tapvm <= '$yhtiorow[tilikausi_loppu]'";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -327,7 +327,7 @@ if ($tee == 'P') {
 	$tositenro			= $tiliointirow['tosite'];
 	$ok					= 1;
 	$alv_tili			= $yhtiorow["alv"];
-	
+
 	// Katotaan voisiko meillä olla tässä joku toinen ALV tili
 	// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity ja oteteaan niiden alv tilit
 	$query = "	SELECT ifnull(group_concat(concat(\"'\",toim_alv,\"'\") SEPARATOR ','), '') toim_alv
@@ -338,14 +338,14 @@ if ($tee == 'P') {
 				and toim_alv != ''";
 	$result = mysql_query($query) or pupe_error($query);
 	$tilitrow = mysql_fetch_array($result);
-	
+
 	// haetaan ALV tili
 	if ($tilitrow["toim_alv"] != "") {
-		$query = "	SELECT tilino
+		$query = "	SELECT DISTINCT tilino
 					FROM tiliointi
-					WHERE aputunnus = '$ptunnus' 
-					AND yhtio = '$kukarow[yhtio]' 
-					AND tiliointi.korjattu = '' 
+					WHERE aputunnus = '$ptunnus'
+					AND yhtio = '$kukarow[yhtio]'
+					AND tiliointi.korjattu = ''
 					AND tilino in ($tilitrow[toim_alv], '$yhtiorow[alv]')";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -355,32 +355,32 @@ if ($tee == 'P') {
 			$alv_tili = $tilitrow["tilino"];
 		}
 	}
-	
+
 	// Etsitään kaikki tiliöintirivit, jotka kuuluvat tähän tiliöintiin ja lasketaan niiden summa
-	$query = "	SELECT sum(summa) 
+	$query = "	SELECT sum(summa)
 				FROM tiliointi
-				WHERE aputunnus = '$ptunnus' 
-				AND yhtio = '$kukarow[yhtio]' 
-				AND tiliointi.korjattu = '' 
+				WHERE aputunnus = '$ptunnus'
+				AND yhtio = '$kukarow[yhtio]'
+				AND tiliointi.korjattu = ''
 				GROUP BY aputunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) != 0) {
 		$summarow = mysql_fetch_array($result);
 		$summa += $summarow[0];
-		$query = "	UPDATE tiliointi SET 
-					korjattu = '$kukarow[kuka]', 
+		$query = "	UPDATE tiliointi SET
+					korjattu = '$kukarow[kuka]',
 					korjausaika = now()
-					WHERE aputunnus = '$ptunnus' 
-					and yhtio = '$kukarow[yhtio]' 
+					WHERE aputunnus = '$ptunnus'
+					and yhtio = '$kukarow[yhtio]'
 					and tiliointi.korjattu = ''";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
-	$query = "	UPDATE tiliointi SET 
-				korjattu = '$kukarow[kuka]', 
+	$query = "	UPDATE tiliointi SET
+				korjattu = '$kukarow[kuka]',
 				korjausaika = now()
-				WHERE tunnus = '$ptunnus' 
+				WHERE tunnus = '$ptunnus'
 				AND yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -406,6 +406,36 @@ if ($tee == 'U') {
 	}
 	else {
 		$laskurow = mysql_fetch_array($result);
+	}
+
+	// Katotaan voisiko meillä olla tässä joku toinen ALV tili
+	// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity ja oteteaan niiden alv tilit
+	$query = "	SELECT ifnull(group_concat(concat(\"'\",toim_alv,\"'\") SEPARATOR ','), '') toim_alv
+				FROM yhtion_toimipaikat
+				WHERE yhtio = '$kukarow[yhtio]'
+				and maa != ''
+				and vat_numero != ''
+				and toim_alv != ''";
+	$result = mysql_query($query) or pupe_error($query);
+	$tilitrow = mysql_fetch_array($result);
+
+	$alv_tili = $yhtiorow["alv"];
+
+	// haetaan ALV tili, käytetään sitä tositteen muidenkin alvitilien kirjailuun
+	if ($tilitrow["toim_alv"] != "") {
+		$query = "	SELECT DISTINCT tilino
+					FROM tiliointi
+					WHERE ltunnus = '$laskurow[tunnus]'
+					AND yhtio = '$kukarow[yhtio]'
+					AND tiliointi.korjattu = ''
+					AND tilino in ($tilitrow[toim_alv], '$yhtiorow[alv]')";
+		$result = mysql_query($query) or pupe_error($query);
+
+		// jos löytyy yks niin homma hyvin! (else tulee yhtiön takaa tosta ylhäältä)
+		if (mysql_num_rows($result) == 1) {
+			$tilitrow = mysql_fetch_array($result);
+			$alv_tili = $tilitrow["tilino"];
+		}
 	}
 
 	// Tarvitaan kenties tositenro
@@ -708,12 +738,12 @@ if ($tee == 'E' or $tee == 'F') {
 
 
 		// Jos myyntilasku, niin onko sitä karhuttu?
-		$karhu_query = "	SELECT pvm, tyyppi, ktunnus 
-							FROM karhu_lasku 
-							JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.yhtio = '$kukarow[yhtio]') 
+		$karhu_query = "	SELECT pvm, tyyppi, ktunnus
+							FROM karhu_lasku
+							JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.yhtio = '$kukarow[yhtio]')
 							WHERE karhu_lasku.ltunnus = '$trow[tunnus]'";
 		$karhu_result = mysql_query($karhu_query) or pupe_error($karhu_query);
-		
+
 		if (mysql_num_rows($karhu_result) > 0) {
 			echo "<tr><th>",t('Karhu / Tratta'),":</th><td>";
 
@@ -757,21 +787,21 @@ if ($tee == 'E' or $tee == 'F') {
 			}
 
 			// katsotaan onko tästä laskusta tehty korkolasku
-			$korko_query = "	SELECT olmapvm, liitostunnus 
+			$korko_query = "	SELECT olmapvm, liitostunnus
 								FROM lasku
-								WHERE yhtio='$kukarow[yhtio]' 
+								WHERE yhtio='$kukarow[yhtio]'
 								AND tunnus='$trow[tunnus]'
 								AND olmapvm > '0000-00-00'";
 			$korko_result = mysql_query($korko_query) or pupe_error($korko_query);
 
 			if (mysql_num_rows($korko_result) > 0) {
-				
+
 				$korkolaskurow = mysql_fetch_array($korko_result);
 
 				// etsitään korkolasku
 				$korko2_query = "	SELECT lasku2.tunnus
 									FROM lasku
-									JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'L' AND tilausrivi.tuoteno = 'Korko' AND tilausrivi.otunnus = lasku.tunnus) 
+									JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.tyyppi = 'L' AND tilausrivi.tuoteno = 'Korko' AND tilausrivi.otunnus = lasku.tunnus)
 									JOIN lasku AS lasku2 ON (lasku2.yhtio = lasku.yhtio AND lasku2.laskunro = lasku.laskunro AND lasku2.tila = 'U')
 									WHERE lasku.yhtio = '$kukarow[yhtio]'
 									AND lasku.olmapvm = '$korkolaskurow[olmapvm]'
@@ -779,9 +809,9 @@ if ($tee == 'E' or $tee == 'F') {
 									AND lasku.liitostunnus = '$korkolaskurow[liitostunnus]'
 									AND lasku.tila = 'L'";
 				$korko2_result = mysql_query($korko2_query) or pupe_error($korko2_query);
-				
+
 				if (mysql_num_rows($korko2_result) > 0) {
-				
+
 					echo "<tr><th>",t('Korkolaskut'),":</th><td>";
 
 					while ($korkolaskurow2 = mysql_fetch_array($korko2_result)) {
@@ -790,7 +820,7 @@ if ($tee == 'E' or $tee == 'F') {
 							<input type='hidden' name='otunnus' value='$korkolaskurow2[tunnus]'>
 							<input type='hidden' name='TOIM' value='LASKU'>
 							<input type='hidden' name='tee' value='NAYTATILAUS'>
-							<input type='submit' value='",tv1dateconv($korkolaskurow['olmapvm']),"'></form>";						
+							<input type='submit' value='",tv1dateconv($korkolaskurow['olmapvm']),"'></form>";
 						echo "<br>";
 					}
 

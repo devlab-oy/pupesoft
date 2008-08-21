@@ -882,7 +882,9 @@ if ($tee == 'E' or $tee == 'F') {
 	$queryoik = "SELECT tunnus from oikeu where nimi like '%liitetiedostot.php' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 	$res = mysql_query($queryoik) or pupe_error($queryoik);
 
-	if (mysql_num_rows($res) == 1 and $trow["ebid"] == "") {
+	//nyt voidaan laittaa verkkolaskuihin liitetiedostoja
+	//if (mysql_num_rows($res) == 1 and $trow["ebid"] == "") {
+	if (mysql_num_rows($res) == 1) {
 		echo "<form method='get' action='liitetiedostot.php?liitos=lasku&id=$tunnus'>
 			<input type='hidden' name='id' value='$tunnus'>
 			<input type='hidden' name='liitos' value='lasku'>

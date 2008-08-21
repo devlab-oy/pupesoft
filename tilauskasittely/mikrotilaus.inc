@@ -37,8 +37,22 @@ if ($tee == "file") {
 
 			$tuoteno	= trim($rivi[0]);
 			$kpl	  	= str_replace(",", ".", $rivi[1]);
-			$alv 		= "";
 
+			$toimaika			= "";
+			$kerayspvm			= "";
+			$hinta				= "";
+			$netto				= "";
+			$ale				= "";
+			$var				= "";
+			$alv				= "";
+			$paikka				= "";
+			$varasto			= "";
+			$rivitunnus			= "";
+			$korvaavakielto		= "";
+			$varataan_saldoa	= "";
+			$var				= "";
+			$perhekielto		= "";
+			
 			if ($kukarow["extranet"] == "") {
 				$toimaika 	= $rivi[2];
 				$hinta		= str_replace(",", ".", $rivi[3]);
@@ -75,9 +89,7 @@ if ($tee == "file") {
 								FROM tuote
 								WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
 				}
-				
-				
-				
+
 				$rarresult = mysql_query($query) or pupe_error($query);
 
 				if(mysql_num_rows($rarresult) == 1) {
@@ -96,6 +108,9 @@ if ($tee == "file") {
 
 					if ($laskurow["tilaustyyppi"] == "E") {
 						$varataan_saldoa = "EI";
+					}
+					else {
+						$varataan_saldoa = "";
 					}
 
 					//lis‰t‰‰n rivi

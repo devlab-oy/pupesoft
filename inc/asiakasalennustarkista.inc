@@ -50,7 +50,7 @@ if(!function_exists("asiakasalennustarkista")) {
 		if (mysql_field_name($result, $i) == "asiakas") {
 			$chastunn = $t[$i];
 
-			if ($chastunn != '') {
+			if ($chastunn != '' and $chastunn != 0) {
 				$query	= "	SELECT *
 							FROM asiakas
 							WHERE yhtio='$kukarow[yhtio]' and tunnus='$chastunn'";
@@ -136,7 +136,7 @@ if(!function_exists("asiakasalennustarkista")) {
 		if ($chytunnus != '') $rajlask++;
 		if ($chastunn != '') $rajlask++;
 
-		if ($rajlask > 1 and mysql_field_name($result, $i) == 'asiakas_ryhma') {
+		if ($rajlask > 1 and $chasiakas_ryhma != "" and mysql_field_name($result, $i) == 'asiakas_ryhma') {
 			$virhe[$i] = t("Et voi syöttää sekä asiakasta että asiakkaan ryhmää!");
 		}
 

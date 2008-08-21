@@ -254,6 +254,11 @@ if ($tee == 'I') {
 		$tee = 'E';
 	}*/
 
+	if (trim($hyvak[1]) == "") {
+		$errormsg .= "<font class='error'>".t("Laskulla on pakko olla ensimmäinen hyväksyjä")."!</font><br>";
+		$tee = 'E';		
+	}
+	
 	if ($luouusikeikka == "LUO" and $vienti != "C" and $vienti != "J" and $vienti != "F" and $vienti != "K" and $vienti != "I" and $vienti != "L") {
 		$errormsg .= "<font class='error'>".t("Keikkaa ei voi perustaa kululaskulle")."</font><br>";
 		$tee = 'E';

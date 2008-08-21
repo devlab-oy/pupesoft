@@ -1,5 +1,21 @@
 <?php
+
+	if (isset($_POST["tee"]) and $_POST["tee"] == 'lataa_tiedosto') {
+		$lataa_tiedosto = 1;
+		$file = file_get_contents($_POST["file"]);
+		unset($_POST["file"]);
+
+		if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
+			$_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+		}
+	}
+
 	require ("../inc/parametrit.inc");
+
+	if ($tee == "lataa_tiedosto") {
+		echo $file;
+		exit;
+	}
 
 	if ($toim == "") {
 		echo "<font class='head'>".t("Toimita ja laskuta tilaus").":</font><hr>";
@@ -82,7 +98,7 @@
 		$asrow = mysql_fetch_array($asres);
 
 		$summa = $laskurow["loppusumma"];
-		
+
 		//K‰sin syˆtetty summa johon lasku pyˆristet‰‰n
 		if (abs($laskurow["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {
 			$summa = sprintf("%.2f",$laskurow["hinta"]);
@@ -95,7 +111,7 @@
 
 		$loppusumma = $summa;
 		$valkoodi = $laskurow["valkoodi"];
-		
+
 		echo "<input type='hidden' name='tee' value='TOIMITA'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='kassalipas' value='$kassalipas'>";
@@ -111,23 +127,23 @@
 						luotto = Number(document.getElementById('luottokortti').value.replace(\",\",\".\"));
 
 						summa = rivihinta - (kateinen + pankki + luotto);
-						
+
 						summa = Math.round(summa*100)/100;
-						
+
 						if (summa == 0 && (document.getElementById('kateismaksu').value != '' || document.getElementById('pankkikortti').value != '' || document.getElementById('luottokortti').value != '')) {
 							summa = 0.00;
 							document.getElementById('hyvaksy_nappi').disabled = false;
 						} else {
-							document.getElementById('hyvaksy_nappi').disabled = true;							
+							document.getElementById('hyvaksy_nappi').disabled = true;
 						}
-						
-						document.getElementById('loppusumma').innerHTML = '<b>' + summa.toFixed(2) + '</b>'; 
+
+						document.getElementById('loppusumma').innerHTML = '<b>' + summa.toFixed(2) + '</b>';
 					}
 				-->
 				</script>";
 
 		echo "<tr><th>".t("Laskun loppusumma")."</th><td align='right'>$loppusumma</td><td>$valkoodi</td></tr>";
-		
+
 		echo "<tr><td>".t("K‰teisell‰")."</td><td><input type='text' name='kateismaksu[kateinen]' id='kateismaksu' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td><td>$valkoodi</td></tr>";
 		echo "<tr><td>".t("Pankkikortilla")."</td><td><input type='text' name='kateismaksu[pankkikortti]' id='pankkikortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td><td>$valkoodi</td></tr>";
 		echo "<tr><td>".t("Luottokortilla")."</td><td><input type='text' name='kateismaksu[luottokortti]' id='luottokortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$loppusumma\");'></td><td>$valkoodi</td></tr>";
@@ -183,7 +199,7 @@
 			else {
 				$katlisa = "";
 			}
-			
+
 			//ja p‰ivitet‰‰n laskujen otsikot laskutusjonoon
 			$query = "	UPDATE lasku
 						set alatila = 'D'
@@ -315,7 +331,7 @@
 			$tilloppp = $tillop[2];
 			$tillopkk = $tillop[1]-1;
 			$tillopvv = $tillop[0];
-						
+
 			$tanaanpp = date("d");
 			$tanaankk = date("m")-1;
 			$tanaanvv = date("Y");
@@ -331,11 +347,11 @@
 							kk = Number(kk.value)-1;
 							vv = Number(vv.value);
 
-							if (vv == 0 && pp == 0 && kk == -1) {								
+							if (vv == 0 && pp == 0 && kk == -1) {
 								var tanaanpp = $tanaanpp;
 								var tanaankk = $tanaankk;
 								var tanaanvv = $tanaanvv;
-								
+
 								var dateSyotetty = new Date(tanaanvv, tanaankk, tanaanpp);
 							}
 							else {
@@ -487,10 +503,10 @@
 					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
 					$rhire = mysql_query($query) or pupe_error($query);
 					$trow  = mysql_fetch_array($rhire);
-					
+
 					list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($row, $trow, '1', 'N', $rahti["rahtihinta"], 0);
 					list($hinta, $alv) = alv($row, $trow, $lis_hinta, '', $alehinta_alv);
-					
+
 					if ($row["kohdistettu"] == "K") {
 						$rahti_hinta = "(" . (float) $hinta ." $row[valkoodi])";
 					}
@@ -574,10 +590,10 @@
 
 				$query_maksuehto = "SELECT *
 									FROM maksuehto
-									WHERE yhtio='$kukarow[yhtio]' 
-									and kateinen != '' 
-									and kaytossa = '' 
-									and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$maa%') 
+									WHERE yhtio='$kukarow[yhtio]'
+									and kateinen != ''
+									and kaytossa = ''
+									and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$maa%')
 									ORDER BY tunnus";
 				$maksuehtores = mysql_query($query_maksuehto) or pupe_error($query_maksuehto);
 
@@ -740,14 +756,14 @@
 		$haku='';
 		if (is_string($etsi))  $haku="and lasku.nimi LIKE '%$etsi%'";
 		if (is_numeric($etsi)) $haku="and lasku.tunnus='$etsi'";
-		
+
 		if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T') {
-			$ketjutus_group = ", lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa ";										
+			$ketjutus_group = ", lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa ";
 		}
 		else {
 			$ketjutus_group = "";
 		}
-		
+
 		// GROUP BY pit‰‰‰ olla sama kun verkkolasku.php:ss‰ rivill‰†536
 		$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
 					lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
@@ -788,13 +804,13 @@
 			$tilauksiayhteensa = 0;
 
 			while ($tilrow = mysql_fetch_array($tilre)) {
-				
+
 				$laskutyyppi	= $tilrow["tila"];
 				$alatila		= $tilrow["alatila"];
 
 				//tehd‰‰n selv‰kielinen tila/alatila
 				require "../inc/laskutyyppi.inc";
-				
+
 				echo "	<tr class='aktiivi'>
 						<td valign='top'>$tilrow[tunnukset_ruudulle]</td>
 						<td valign='top'>$tilrow[ytunnus]</td>

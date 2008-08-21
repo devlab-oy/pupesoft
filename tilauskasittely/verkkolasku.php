@@ -93,7 +93,7 @@
 
 		require ("../inc/parametrit.inc");
 	}
-	
+
 	if ($tee == "lataa_tiedosto") {
 		echo $file;
 		exit;
@@ -458,14 +458,14 @@
 												and sarjanumeroseuranta.myyntirivitunnus > 0
 												and sarjanumeroseuranta.ostorivitunnus   > 0";
 									$sarjares12 = mysql_query($query) or pupe_error($query);
-									
+
 									if (mysql_num_rows($sarjares12) != 1) {
 										$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
 
 										if ($silent == "" or $silent == "VIENTI") {
 											$tulos_ulos_sarjanumerot .= t("Hyvitett‰v‰‰ rivi‰ ei lˆydy, ei voida laskuttaa").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
 										}
-									}																											
+									}
 								}
 							}
 						}
@@ -933,17 +933,23 @@
 						}
 
 						//	Onko k‰sinsyˆtetty viite?
-						$query = "SELECT kasinsyotetty_viite FROM laskun_lisatiedot WHERE yhtio='{$kukarow["yhtio"]}' and otunnus IN ($tunnukset) and kasinsyotetty_viite != ''";
-						$tarkres=mysql_query($query) or pupe_error($query);
-						if(mysql_num_rows($tarkres) == 1) {
-							$tarkrow=mysql_fetch_array($tarkres) or pupe_error($tarkres);
-							$viite=$tarkrow["kasinsyotetty_viite"];
+						$query = "	SELECT kasinsyotetty_viite
+									FROM laskun_lisatiedot
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND otunnus IN ($tunnukset)
+									AND kasinsyotetty_viite != ''";
+						$tarkres = mysql_query($query) or pupe_error($query);
+
+						if (mysql_num_rows($tarkres) == 1) {
+							$tarkrow = mysql_fetch_array($tarkres) or pupe_error($tarkres);
+							$viite = $tarkrow["kasinsyotetty_viite"];
+
 							if ($seviite != 'SE') {
 								require('inc/tarkistaviite.inc');
 
 								//	Jos viitenumero on v‰‰rin menn‰‰n oletuksilla!
-								if($ok!=1) {
-									$viite=$lasno;
+								if ($ok != 1) {
+									$viite = $lasno;
 									$tulos_ulos .= "<font class='message'><br>\n".t("HUOM!!! laskun '%s' k‰sinsyotetty viitenumero '%s' on v‰‰rin! Laskulle annettii uusi viite '%s'", $kieli, $lasno, $tarkrow["kasinsyotetty_viite"], $viite)."!</font><br>\n<br>\n";
 									require('inc/generoiviite.inc');
 								}
@@ -961,7 +967,11 @@
 						}
 
 						// p‰ivitet‰‰n ketjuun kuuluville laskuille sama laskunumero ja viite..
-						$query  = "UPDATE lasku set laskunro='$lasno', viite='$viite' where yhtio='$kukarow[yhtio]' and tunnus in ($tunnukset)";
+						$query  = "	UPDATE lasku SET
+									laskunro = '$lasno',
+									viite = '$viite'
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus IN ($tunnukset)";
 						$result = mysql_query($query) or pupe_error($query);
 
 						// tehd‰‰n U lasku ja tiliˆinnit
@@ -1102,7 +1112,10 @@
 							$pankkitiedot["pankkiswift3"] =	$yhtiorow["pankkiswift3"];
 						}
 
-						$asiakas_apu_query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$lasrow[liitostunnus]'";
+						$asiakas_apu_query = "	SELECT *
+												FROM asiakas
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND tunnus = '$lasrow[liitostunnus]'";
 						$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
 
 						if (mysql_num_rows($asiakas_apu_res) == 1) {
@@ -1124,7 +1137,7 @@
 						else {
 							$laskun_kieli = $yhtiorow["kieli"];
 						}
-						
+
 						if ($kieli != "") {
 							$laskun_kieli = $kieli;
 						}
@@ -1593,13 +1606,13 @@
 
 						if ($yhtiorow['laskutyyppi'] == 3) {
 							require_once ("tulosta_lasku_simppeli.inc");
-							if (in_array($laskurow["laskunro"], $tulostettavat_email) and $valittu_tulostin == "") {	
+							if (in_array($laskurow["laskunro"], $tulostettavat_email) and $valittu_tulostin == "") {
 								include_once("inc/generoi_laskun_saate.inc");
 								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $laskun_kieli);
-								
+
 								//	Falseback oma maili
 								if($komento == "") $komento = "email";
-								
+
 								//	Kaapataan output..
 								ob_start();
 								tulosta_lasku($laskurow["tunnus"], $komento, $laskun_kieli, "", "", $content_subject, $content_body);
@@ -1612,18 +1625,18 @@
 												where yhtio='$kukarow[yhtio]' and tunnus='$yhtiorow[lasku_tulostin]'";
 								$kires = mysql_query($querykieli) or pupe_error($querykieli);
 								$kirow = mysql_fetch_array($kires);
-								
+
 								tulosta_lasku($laskurow["tunnus"], $kirow["komento"], $laskun_kieli, $toim, $tee);
 							}
 						}
 						else {
-							
+
 							$tulos_ulos .= "Kielivalinta: Pakotettu keili:$kieli / Asiakkaan kieli: $laskun_kieli";
-							
+
 							$varakieli = $kieli;
-							
+
 							if ($kieli == '') {
-								$kieli 	= $laskun_kieli;								
+								$kieli 	= $laskun_kieli;
 							}
 
 							require_once("tulosta_lasku.inc");
@@ -1675,9 +1688,9 @@
 							alvierittely ($page[$sivu]);
 
 							$tulos_ulos .= " Tulostettiin kielell‰:$kieli";
-							
+
 							$kieli = $varakieli;
-							
+
 							//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 							list($usec, $sec) = explode(' ', microtime());
 							mt_srand((float) $sec + ((float) $usec * 100000));
@@ -1917,15 +1930,15 @@
 		if ($komentorivilta == "") {
 			echo "$tulos_ulos";
 
-			//	Annetaan mahdollisuus tallentaa finvoicetiedosto jos se on luotu..
-			if(file_exists($nimifinvoice) and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
+			// Annetaan mahdollisuus tallentaa finvoicetiedosto jos se on luotu..
+			if (file_exists($nimifinvoice) and 
+				(strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALCE or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE)) {
 				echo "<br><table><tr><th>".t("Tallenna finvoice-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='file' value='$nimifinvoice'>";
-				echo "<input type='hidden' name='kaunisnimi' value=".str_replace("../dataout/","",$nimifinvoice)."'>";
+				echo "<input type='hidden' name='kaunisnimi' value=".str_replace("../dataout/", "" ,$nimifinvoice)."'>";
 				echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr></form></table>";
-
 			}
 		}
 

@@ -1932,7 +1932,7 @@
 
 			// Annetaan mahdollisuus tallentaa finvoicetiedosto jos se on luotu..
 			if (file_exists($nimifinvoice) and 
-				(strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALCE or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE)) {
+				(strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE)) {
 				echo "<br><table><tr><th>".t("Tallenna finvoice-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";

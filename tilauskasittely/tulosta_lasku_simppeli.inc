@@ -352,7 +352,7 @@ if (!function_exists('tulosta_lasku')) {
 				$hinta_riv = "tilausrivi.hinta";
 			}
 
-			$lisa = " 	$hinta_riv / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) rivihinta,
+			$lisa = " 	$hinta_riv / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-if(tilausrivi.ale=100, 0, tilausrivi.ale)/100), (1-(if(tilausrivi.ale=100, 0, tilausrivi.ale)+$laskurow[erikoisale]-(if(tilausrivi.ale=100, 0, tilausrivi.ale)*$laskurow[erikoisale]/100))/100)) rivihinta,
 						(jt+varattu+kpl) kpl, ";
 		}
 		else {

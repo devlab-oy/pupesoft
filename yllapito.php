@@ -457,8 +457,11 @@
 			$uusi = 0;
 
 			if (isset($yllapitonappi) and $lukossa != "ON" or isset($paluunappi)) {
-				$tunnus  = 0;
-				$kikkeli = 0;
+								
+				if ($toim != "tuote") {
+					$tunnus  = 0;
+					$kikkeli = 0;
+				}				
 			}
 			else {
 				$kikkeli = 1;
@@ -494,7 +497,7 @@
     if (strlen($ojarj) > 0) {
     	$jarjestys = $ojarj." ";
     }
-
+	
 	// Nyt selataan
 	if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 		
@@ -670,6 +673,59 @@
 		
 		if($ajax_menu_yp!="") {
 			$ajax_post="ajaxPost('mainform', '{$palvelin2}yllapito.php?ojarj=$ojarj$ulisa#$tunnus' , 'ajax_menu_yp'); return false;";
+		}
+		
+		if ($toim == "tuote" and $uusi != 1 and $errori == '' and $tunnus > 0) {
+			
+			$query = "	SELECT *
+						FROM tuote
+						WHERE tunnus = '$tunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+			$nykyinentuote = mysql_fetch_array($result);
+			
+			$query = "	SELECT tunnus
+						FROM tuote use index (tuoteno_index)
+						WHERE tuote.yhtio 		= '$kukarow[yhtio]'
+						and tuote.tuoteno		< '$nykyinentuote[tuoteno]'
+						ORDER BY tuoteno desc
+						LIMIT 1";
+			$noperes = mysql_query($query) or pupe_error($query);
+			$noperow = mysql_fetch_array($noperes);
+			
+			echo "<table>";
+			echo "<form action = 'yllapito.php' method = 'post'>";
+			echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
+			echo "<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>";
+			echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
+			echo "<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>";
+			echo "<input type = 'hidden' name = 'laji' value = '$laji'>";
+			echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
+			echo "<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>";
+			echo "<input type = 'hidden' name = 'tunnus' value = '".$noperow[tunnus]."'>";
+			echo "<td><input type='submit' value='".t("Edellinen tuote")."'></td>";
+			echo "</form>";
+			
+			$query = "	SELECT tunnus
+						FROM tuote use index (tuoteno_index)
+						WHERE tuote.yhtio 		= '$kukarow[yhtio]'
+						and tuote.tuoteno		> '$nykyinentuote[tuoteno]'
+						ORDER BY tuoteno
+						LIMIT 1";
+			$yesres = mysql_query($query) or pupe_error($query);
+			$yesrow = mysql_fetch_array($yesres);
+			
+			echo "<form action = 'yllapito.php' method = 'post'>";
+			echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
+			echo "<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>";
+			echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
+			echo "<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>";
+			echo "<input type = 'hidden' name = 'laji' value = '$laji'>";
+			echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
+			echo "<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>";
+			echo "<input type = 'hidden' name = 'tunnus' value = '".$yesrow[tunnus]."'>";
+			echo "<td><input type='submit' value='".t("Seuraava tuote")."'></td></tr>";
+			echo "</form>";
+			echo "</table>";
 		}
 		
 		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa#$tunnus' name='mainform' id='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data' onSubmit=\"$ajax_post\">";

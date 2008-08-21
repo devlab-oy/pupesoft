@@ -582,6 +582,12 @@
 			}
 			elseif(isset($valmis)) {
 				$tee = "";
+				$tmp_tuoteno = "";
+				
+				if ($lista == '' and $filusta == '') {
+					$tmp_tuoteno = $tuoteno;
+					$tee = "INVENTOI";
+				}
 			}
 
 			//seuraava sivu
@@ -600,9 +606,13 @@
 
 	if ($tee == 'INVENTOI') {
 
+		if (isset($tmp_tuoteno) and $tmp_tuoteno != '') {
+			$tuoteno = $tmp_tuoteno;
+		}
+
 		//hakulause, tämä on sama kaikilla vaihtoehdoilla
 		$select = " tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.tunnus tptunnus, tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, tuotepaikat.inventointilista, tuotepaikat.inventointilista_aika, concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta";
-
+		
 		if ($tuoteno != "" and $lista == "") {
 			///* Inventoidaan tuotenumeron perusteella *///
 			$kutsu = " ".t("Tuote")." $tuoteno ";
@@ -615,10 +625,51 @@
 						and tuote.ei_saldoa		= ''
 						ORDER BY sorttauskentta, tuoteno";
 			$saldoresult = mysql_query($query) or pupe_error($query);
+						
 
 			if (mysql_num_rows($saldoresult) == 0) {
 				echo "<font class='error'>".t("Tuote")." '$tuoteno' ".t("ei löydy!")." ".t("Onko tuote saldoton tuote")."? ".t("Onko tuotteella varastopaikka")."?</font><br><br>";
 				$tee='';
+			}
+			else {
+				
+				$query = "	SELECT tuoteno
+							FROM tuote use index (tuoteno_index)
+							JOIN tuotepaikat use index (tuote_index) USING (yhtio, tuoteno)
+							WHERE tuote.yhtio 		= '$kukarow[yhtio]'
+							and tuote.tuoteno		< '$tuoteno'
+							and tuote.ei_saldoa		= ''
+							ORDER BY tuoteno desc
+							LIMIT 1";
+				$noperes = mysql_query($query) or pupe_error($query);
+				$noperow = mysql_fetch_array($noperes);
+				
+				echo "<table>";
+				echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+				echo "<input type='hidden' name='tee' value='INVENTOI'>";
+				echo "<input type='hidden' name='seuraava_tuote' value='nope'>";
+				echo "<input type='hidden' name='tuoteno' value='".$noperow[tuoteno]."'>";
+				echo "<tr><td><input type='submit' value='".t("Edellinen tuote")."'></td>";
+				echo "</form>";
+				
+				$query = "	SELECT tuoteno
+							FROM tuote use index (tuoteno_index)
+							JOIN tuotepaikat use index (tuote_index) USING (yhtio, tuoteno)
+							WHERE tuote.yhtio 		= '$kukarow[yhtio]'
+							and tuote.tuoteno		> '$tuoteno'
+							and tuote.ei_saldoa		= ''
+							ORDER BY tuoteno
+							LIMIT 1";
+				$yesres = mysql_query($query) or pupe_error($query);
+				$yesrow = mysql_fetch_array($yesres);
+				
+				echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+				echo "<input type='hidden' name='tee' value='INVENTOI'>";
+				echo "<input type='hidden' name='seuraava_tuote' value='yes'>";
+				echo "<input type='hidden' name='tuoteno' value='".$yesrow[tuoteno]."'>";
+				echo "<td><input type='submit' value='".t("Seuraava tuote")."'></td></tr>";
+				echo "</form>";
+				echo "</table>";
 			}
 		}
 		elseif($lista != "") {
@@ -897,7 +948,8 @@
 
 		echo "<form method='post' action='$PHP_SELF' enctype='multipart/form-data'>
 				<input type='hidden' name='tee' value='FILE'>
-
+				<input type='hidden' name='filusta' value='yep'>
+				
 				<font class='message'>".t("Inventoi tiedostosta").":</font><br>
 				<table border='0' cellpadding='3' cellspacing='2'>
 				<tr><th colspan='4'>".t("Sarkaineroteltu tekstitiedosto").".</th></tr>

@@ -255,20 +255,20 @@ if ($tee == 'I') {
 	}*/
 
 	if (trim($hyvak[1]) == "") {
-		$errormsg .= "<font class='error'>".t("Laskulla on pakko olla hyväksyjä")."!</font><br>";
+		$errormsg .= "<font class='error'>".t("Laskulla on pakko olla ensimmäinen hyväksyjä")."!</font><br>";
 		$tee = 'E';		
 	}
 
-	// poistetaan spacet
+	// poistetaan spacet ja tehdään uniikki
 	$apu_hyvak = array();
-	foreach ($hyvak as $apu_hyvakrivi) {
+	foreach (array_unique($hyvak) as $apu_hyvakrivi) {
 		if ($apu_hyvakrivi != " ") {
 			$apu_hyvak[] = $apu_hyvakrivi;
 		}
 	}
 
-	if ($apu_hyvak[count($apu_hyvak)-1] == $kukarow["kuka"]) {
-		$errormsg .= "<font class='error'>".t("Laskun syöttäjä ei saa olla viimeinen hyväksyjä")."!</font><br>";
+	if (count($apu_hyvak) == 1 and in_array($kukarow["kuka"], $apu_hyvak)) {
+		$errormsg .= "<font class='error'>".t("Laskun syöttäjä ei saa olla ainoa hyväksyjä")."!</font><br>";
 		$tee = 'E';
 	}
 

@@ -1,12 +1,12 @@
 <?php
-	
+
 	$MONTH_ARRAY = array(1=>t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kes‰kuu'),t('Hein‰kuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
-	
+
 	if ($tee == '1' and !isset($ajarappari)) {
 		$tee = "";
 	}
-	
-	
+
+
 	if ($tee == '1') {
 		if ($tilino != '') {
 			$query = "	SELECT nimi
@@ -23,7 +23,7 @@
 	}
 
 	if ($tee == '1') {
-		
+
 		$tkausi = (int) $tkausi;
 
 		$query = "	SELECT tilikausi_alku, tilikausi_loppu
@@ -40,24 +40,24 @@
 			echo "<font class='error'>".t("Tuntematon tilikausi")."</font>";
 			exit;
 		}
-		
+
 		$lisa = "";
 		$wher = "";
 
-		if ($alvk != "") {						
+		if ($alvk != "") {
 			$alvy = (int) substr($alvk, 0, 4);
 			$alvm = (int) substr($alvk, 4, 2);
 			$alvd = date("d", mktime(0, 0, 0, $alvm+1, 0, $alvy));
-			
+
 			echo "<font class='message'>".t("Vain kuukausi").": $alvy - ".$MONTH_ARRAY[$alvm]."</font><br>";
-			
+
 			$lisa = " sum(if(tapvm>='$alvy-$alvm-01' and tapvm<='$alvy-$alvm-$alvd', 1, 0)) Vientej‰, sum(if(tapvm>='$alvy-$alvm-01' and tapvm<='$alvy-$alvm-$alvd', summa, 0)) Saldo";
-			$wher = " and tapvm <= '$alvy-$alvm-$alvd'";						
+			$wher = " and tapvm <= '$alvy-$alvm-$alvd'";
 		}
 		else {
 			$lisa	= " count(*) Vientej‰, sum(summa) Saldo";
 		}
-		
+
 		if ($tilino != '') {
 			$tilinolisa1 = "tapvm,";
 			$tilinolisa2 = " and tiliointi.tilino = '$tilino' ";
@@ -83,23 +83,24 @@
 		echo "<table><tr>";
 
 		if ($tilino != '') {
-			echo "<th>".t("Pvm")."</font></th>";	
+			echo "<th>".t("Pvm")."</font></th>";
 		}
-		
+
 		echo "<th>".t("Tili")."</font></th>";
 		echo "<th>".t("Nimi")."</font></th>";
 		echo "<th>".t("Vientej‰")."</font></th>";
 		echo "<th>".t("Saldo")." ".$MONTH_ARRAY[($alvk*1)]."</font></th>";
 		echo "<th>".t("Kumulatiivinen")."</font></th>";
-		
+		echo "<th>".t("Summa valuutassa")."</font></th>";
+
 		if(isset($workbook)) {
 			$iiiiii = 0;
-			
+
 			if ($tilino != '') {
 				$worksheet->write($excelrivi, $iiiiii, t("Pvm"), $format_bold);
 				$iiiiii++;
 			}
-			
+
 			$worksheet->write($excelrivi, $iiiiii, t("Tili"), $format_bold);
 			$iiiiii++;
 			$worksheet->write($excelrivi, $iiiiii, t("Nimi"), $format_bold);
@@ -110,6 +111,8 @@
 			$iiiiii++;
 			$worksheet->write($excelrivi, $iiiiii, t("Kumulatiivinen"), $format_bold);
 			$iiiiii++;
+			$worksheet->write($excelrivi, $iiiiii, t("Summa valuutassa"), $format_bold);
+			$iiiiii++;
 			$excelrivi++;
 		}
 
@@ -118,24 +121,25 @@
 		$summa	= 0;
 		$summa2 = 0;
 		$summa3 = 0;
+		$summa_valuutassa = array();
 
 		while ($trow=mysql_fetch_array ($result)) {
-			
+
 			$summa  += $trow['Kumulatiivinen'];
 			$summa2 += $trow['Saldo'];
-			
+
 			if ($tilino == '' or $trow['Vientej‰'] > 0) {
 				echo "<tr>";
-			
+
 				if ($tilino != '') {
 					echo "<td><a href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]&alvv=".substr($trow["tapvm"], 0,4)."&alvk=".substr($trow["tapvm"],5,2)."&alvp=".substr($trow["tapvm"],-2)."'>".tv1dateconv($trow["tapvm"])."</a></td>";
 				}
-			
-				echo "<td><a href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]&tkausi=$tkausi'>$trow[tilino]</a></td>";				
-				echo "<td>$trow[nimi]</td>";	
+
+				echo "<td><a href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]&tkausi=$tkausi'>$trow[tilino]</a></td>";
+				echo "<td>$trow[nimi]</td>";
 				echo "<td>$trow[Vientej‰]</td>";
 				echo "<td align='right'>$trow[Saldo]</td>";
-			
+
 				if ($tilino != '') {
 					echo "<td align='right'>$summa</td>";
 					$summa3 = $summa;
@@ -144,10 +148,36 @@
 					echo "<td align='right'>$trow[Kumulatiivinen]</td>";
 					$summa3 = $summa;
 				}
-			
+
+				if ($trow['tapvm'] == '') {
+					$lisa = " AND tiliointi.tapvm >= '$tilikausirow[tilikausi_alku]' AND tiliointi.tapvm <= '$tilikausirow[tilikausi_loppu]' ";
+				}
+				else {
+					$lisa = " AND tiliointi.tapvm = '$trow[tapvm]' ";
+				}
+
+				$query = "	SELECT sum(summa_valuutassa) summa_val, valkoodi
+							FROM tiliointi
+							WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+							AND tiliointi.korjattu = ''
+							AND tiliointi.tilino = '$trow[tilino]'
+							AND tiliointi.valkoodi != '$yhtiorow[valkoodi]'
+							AND tiliointi.valkoodi != ''
+							$lisa
+							GROUP BY tiliointi.valkoodi
+							HAVING summa_val != 0";
+				$summa_val_result = mysql_query($query) or pupe_error($query);
+
+				echo "<td align='right'>";
+				while ($summa_val_row = mysql_fetch_array($summa_val_result)) {
+					echo "$summa_val_row[summa_val] $summa_val_row[valkoodi]<br/>";
+					$summa_valuutassa[$summa_val_row['valkoodi']] += $summa_val_row['summa_val'];
+				}
+				echo "</td>";
+
 				if(isset($workbook)) {
 					$iiiiii = 0;
-				
+
 					if ($tilino != '') {
 						$worksheet->write($excelrivi, $iiiiii, $trow["tapvm"]);
 						$iiiiii++;
@@ -163,27 +193,40 @@
 					$iiiiii++;
 					$worksheet->write($excelrivi, $iiiiii, $trow["Kumulatiivinen"]);
 					$iiiiii++;
+
+					$valuutta_summat = "";
+					foreach($summa_valuutassa as $valuutta => $sum) {
+						$valuutta_summat .= "$sum $valuutta\n";
+					}
+
+					$worksheet->write($excelrivi, $iiiiii, $valuutta_summat);
+					$iiiiii++;
 					$excelrivi++;
 				}
-				echo "</tr>";	
-			}			
+				echo "</tr>";
+			}
 		}
-		
+
 		echo "<tr>";
-		
+
 		if ($tilino != '') {
 			$cspan = 4;
 		}
 		else {
 			$cspan = 3;
 		}
-		
-		echo "<td class='tumma' colspan='$cspan'><strong>".t("Summa").":</strong></td><td align='right' class='tumma'>".round($summa2,2)."</td><td align='right' class='tumma'>".round($summa3,2)."</td></tr>";
 
-				
+		echo "<td class='tumma' colspan='$cspan'><strong>".t("Summa").":</strong></td><td align='right' class='tumma'>".round($summa2,2)."</td><td align='right' class='tumma'>".round($summa3,2)."</td>";
+		echo "<td align='right' class='tumma'>";
+		foreach ($summa_valuutassa as $valuutta => $sum) {
+			echo round($sum,2)." $valuutta<br/>";
+		}
+		echo "</td></tr>";
+
+
 		echo "</table><br>";
 	}
-	
+
 	if ($tee == '') { // N‰ytet‰‰n valikko
 
 		echo "<font class='head'>". t("Tilien saldot")."</font><hr>";
@@ -202,39 +245,39 @@
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		echo "<td><select name='tkausi' onchange='submit();'>";
-				
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			
+
 			if (!isset($savrow)) {
 				$savrow	= $vrow;
 			}
-			
+
 			if ($tkausi == $vrow["tunnus"]) {
-				$sel 	= "selected";				
+				$sel 	= "selected";
 				$savrow	= $vrow;
 			}
-			
+
 			echo "<option value = '$vrow[tunnus]' $sel>".tv1dateconv($vrow["tilikausi_alku"])." - ".tv1dateconv($vrow["tilikausi_loppu"]);
 		}
 		echo "</select></td></tr>";
 
 		$alku = str_replace("-", "", substr($savrow["tilikausi_alku"], 0, 7));
 		$lopp = str_replace("-", "", substr($savrow["tilikausi_loppu"], 0, 7));
-				
+
 		echo "<tr><th>".t("Valitse kuukausi")."</th>
 				<td><select name='alvk'>
 				<option value=''>".t("Koko tilikausi")."</option>";
 
 		for ($a=$alku; $a<=$lopp; $a++) {
 			if (substr($a, -2) == "13") {
-				$a+=88;				
+				$a+=88;
 			}
-			
+
 			echo "<option value = '$a'>".substr($a, 0, 4)." - ".$MONTH_ARRAY[(int) substr($a, -2)]."</option>";
 		}
 
-	
+
 		echo "	</select>
 				</td></tr>
 				<tr><th>".t("per p‰iv‰ tilist‰")."</th>

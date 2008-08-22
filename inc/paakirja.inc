@@ -379,6 +379,7 @@
 	$summamiinus 	= 0.0;
 	$summa 			= 0.0;
 	$edtili			= "";
+	$summa_valuutassa = array();
 
 	while ($trow = mysql_fetch_array ($result)) {
 
@@ -476,8 +477,8 @@
 			}
 			else {
 				if ($i == 5) {
-					$trow[$i] = str_replace("<br>"," ",$trow[$i]);					
-				} 
+					$trow[$i] = str_replace("<br>"," ",$trow[$i]);
+				}
 
 				echo "<td>$trow[$i]</td>";
 			}
@@ -503,6 +504,10 @@
 
 		echo "<td align='right' class='back' nowrap>$trow[summa_valuutassa]</td>";
 		echo "<td align='right' class='back' nowrap>$trow[valkoodi]</td>";
+
+		if ($trow['valkoodi'] != '' and $trow['summa_valuutassa'] != '') {
+			$summa_valuutassa[$trow['valkoodi']] += $trow['summa_valuutassa'];
+		}
 
 		echo "</tr>";
 
@@ -544,6 +549,20 @@
 	}
 
 	echo "</tr>";
+
+	if (count($summa_valuutassa) > 0) {
+		foreach ($summa_valuutassa as $valuutta => $summ) {
+			echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteensä")." $valuutta</td>";
+			echo "<td align = 'right' nowrap>";
+			printf("%.2f", $summ);
+			echo "</td><td>*</td>";
+
+			if (strlen(trim($tili)) > 0) {
+				echo "<td></td>";
+			}
+			echo "</tr>";
+		}
+	}
 
 	$summa = $summaplus + $summamiinus;
 	echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteensä")."</td>";

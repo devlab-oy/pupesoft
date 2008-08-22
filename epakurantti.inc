@@ -298,7 +298,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 						kpl     = '$tuoterow[saldo]',
 						hinta   = round('$tuoterow[kehahin]', 6),
 						kplhinta= round('$tuoterow[kehahin]', 6),
-						selite  = '$tee. ".t("Keskihankintahinta").": $tuoterow[kehahin] ".t("Saldo").": $tuoterow[saldo] -> $muutos',
+						selite  = '$tee. ".t("Keskihankintahinta").": $tuoterow[kehahin] ".t("Varastonmuutos").": $muutos',
 						laatija    = '$kukarow[kuka]',
 						laadittu = now()";
 			$result = mysql_query($query) or pupe_error($query);

@@ -255,10 +255,23 @@ if ($tee == 'I') {
 	}*/
 
 	if (trim($hyvak[1]) == "") {
-		$errormsg .= "<font class='error'>".t("Laskulla on pakko olla ensimmäinen hyväksyjä")."!</font><br>";
+		$errormsg .= "<font class='error'>".t("Laskulla on pakko olla hyväksyjä")."!</font><br>";
 		$tee = 'E';		
 	}
-	
+
+	// poistetaan spacet
+	$apu_hyvak = array();
+	foreach ($hyvak as $apu_hyvakrivi) {
+		if ($apu_hyvakrivi != " ") {
+			$apu_hyvak[] = $apu_hyvakrivi;
+		}
+	}
+
+	if ($apu_hyvak[count($apu_hyvak)-1] == $kukarow["kuka"]) {
+		$errormsg .= "<font class='error'>".t("Laskun syöttäjä ei saa olla viimeinen hyväksyjä")."!</font><br>";
+		$tee = 'E';
+	}
+
 	if ($luouusikeikka == "LUO" and $vienti != "C" and $vienti != "J" and $vienti != "F" and $vienti != "K" and $vienti != "I" and $vienti != "L") {
 		$errormsg .= "<font class='error'>".t("Keikkaa ei voi perustaa kululaskulle")."</font><br>";
 		$tee = 'E';

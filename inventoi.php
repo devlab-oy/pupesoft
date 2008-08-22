@@ -586,7 +586,6 @@
 				
 				if ($lista == '' and $filusta == '') {
 					$tmp_tuoteno = $tuoteno;
-					$tee = "INVENTOI";
 				}
 			}
 
@@ -630,47 +629,7 @@
 			if (mysql_num_rows($saldoresult) == 0) {
 				echo "<font class='error'>".t("Tuote")." '$tuoteno' ".t("ei löydy!")." ".t("Onko tuote saldoton tuote")."? ".t("Onko tuotteella varastopaikka")."?</font><br><br>";
 				$tee='';
-			}
-			else {
-				
-				$query = "	SELECT tuoteno
-							FROM tuote use index (tuoteno_index)
-							JOIN tuotepaikat use index (tuote_index) USING (yhtio, tuoteno)
-							WHERE tuote.yhtio 		= '$kukarow[yhtio]'
-							and tuote.tuoteno		< '$tuoteno'
-							and tuote.ei_saldoa		= ''
-							ORDER BY tuoteno desc
-							LIMIT 1";
-				$noperes = mysql_query($query) or pupe_error($query);
-				$noperow = mysql_fetch_array($noperes);
-				
-				echo "<table>";
-				echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
-				echo "<input type='hidden' name='tee' value='INVENTOI'>";
-				echo "<input type='hidden' name='seuraava_tuote' value='nope'>";
-				echo "<input type='hidden' name='tuoteno' value='".$noperow[tuoteno]."'>";
-				echo "<tr><td><input type='submit' value='".t("Edellinen tuote")."'></td>";
-				echo "</form>";
-				
-				$query = "	SELECT tuoteno
-							FROM tuote use index (tuoteno_index)
-							JOIN tuotepaikat use index (tuote_index) USING (yhtio, tuoteno)
-							WHERE tuote.yhtio 		= '$kukarow[yhtio]'
-							and tuote.tuoteno		> '$tuoteno'
-							and tuote.ei_saldoa		= ''
-							ORDER BY tuoteno
-							LIMIT 1";
-				$yesres = mysql_query($query) or pupe_error($query);
-				$yesrow = mysql_fetch_array($yesres);
-				
-				echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
-				echo "<input type='hidden' name='tee' value='INVENTOI'>";
-				echo "<input type='hidden' name='seuraava_tuote' value='yes'>";
-				echo "<input type='hidden' name='tuoteno' value='".$yesrow[tuoteno]."'>";
-				echo "<td><input type='submit' value='".t("Seuraava tuote")."'></td></tr>";
-				echo "</form>";
-				echo "</table>";
-			}
+			}		
 		}
 		elseif($lista != "") {
 			///* Inventoidaan listan perusteella *///
@@ -934,6 +893,46 @@
 
 		$formi  = "inve";
 		$kentta = "tuoteno";
+
+		if (isset($tmp_tuoteno) and $tmp_tuoteno != '') {
+			$query = "	SELECT tuoteno
+						FROM tuote use index (tuoteno_index)
+						JOIN tuotepaikat use index (tuote_index) USING (yhtio, tuoteno)
+						WHERE tuote.yhtio 		= '$kukarow[yhtio]'
+						and tuote.tuoteno		< '$tmp_tuoteno'
+						and tuote.ei_saldoa		= ''
+						ORDER BY tuoteno desc
+						LIMIT 1";
+			$noperes = mysql_query($query) or pupe_error($query);
+			$noperow = mysql_fetch_array($noperes);
+			
+			echo "<table>";
+			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<input type='hidden' name='tee' value='INVENTOI'>";
+			echo "<input type='hidden' name='seuraava_tuote' value='nope'>";
+			echo "<input type='hidden' name='tuoteno' value='".$noperow[tuoteno]."'>";
+			echo "<tr><td><input type='submit' value='".t("Edellinen tuote")."'></td>";
+			echo "</form>";
+			
+			$query = "	SELECT tuoteno
+						FROM tuote use index (tuoteno_index)
+						JOIN tuotepaikat use index (tuote_index) USING (yhtio, tuoteno)
+						WHERE tuote.yhtio 		= '$kukarow[yhtio]'
+						and tuote.tuoteno		> '$tmp_tuoteno'
+						and tuote.ei_saldoa		= ''
+						ORDER BY tuoteno
+						LIMIT 1";
+			$yesres = mysql_query($query) or pupe_error($query);
+			$yesrow = mysql_fetch_array($yesres);
+			
+			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<input type='hidden' name='tee' value='INVENTOI'>";
+			echo "<input type='hidden' name='seuraava_tuote' value='yes'>";
+			echo "<input type='hidden' name='tuoteno' value='".$yesrow[tuoteno]."'>";
+			echo "<td><input type='submit' value='".t("Seuraava tuote")."'></td></tr>";
+			echo "</form>";
+			echo "</table>";
+		}
 
 		echo "<form name='inve' action='$PHP_SELF' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='INVENTOI'>";

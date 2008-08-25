@@ -110,7 +110,7 @@
 							WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='pakkaus'";
 				$pakres = mysql_query($query) or pupe_error($query);
 				$pakrow = mysql_fetch_array($pakres);
-				
+
 				if($pakrow["veloitukset"]!="") {
 					$query = "DELETE from tilausrivi where yhtio='{$kukarow["yhtio"]}' and otunnus='$otsikkonro' and tuoteno IN ({$pakrow["veloitukset"]})";
 					$delres = mysql_query($query) or pupe_error($query);
@@ -147,14 +147,14 @@
 					require("tilauskasittely/lisaarivi.inc");
 
 					//	Merkataan tämä rivi kerätyksi ja toimitetuksi..
-					
+
 					if ($lisatyt_rivit1[0] != '') {
 						$lisatty_rivitunnus = $lisatyt_rivit1[0];
 					}
 					else {
 						$lisatty_rivitunnus = $lisatyt_rivit2[0];
 					}
-					
+
 					if ($lisatty_rivitunnus != '') {
 						$query = "	UPDATE tilausrivi set
 									kerattyaika	= now(),
@@ -607,20 +607,20 @@
 				}
 
 				$tiedot = "";
-				
+
 				$query = "	SELECT *
 							FROM toimitustapa
 							WHERE yhtio = '$kukarow[yhtio]' AND selite = '$laskurow[toimitustapa]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$toimitustaparow = mysql_fetch_array($result);
-				
+
 				if ($toimitustaparow['osoitelappu'] == 'intrade') {
 					require('tilauskasittely/osoitelappu_intrade_pdf.inc');
 				}
 				else {
-					require ("tilauskasittely/osoitelappu_pdf.inc");							
+					require ("tilauskasittely/osoitelappu_pdf.inc");
 				}
-				
+
 				if (($toimitustaparow["tulostustapa"] == "L" or $toimitustaparow["tulostustapa"] == "K") and $toimitustaparow["toim_nimi"] != '') {
 
 					$tiedot = "toimitusta";
@@ -629,7 +629,7 @@
 						require('tilauskasittely/osoitelappu_intrade_pdf.inc');
 					}
 					else {
-						require ("tilauskasittely/osoitelappu_pdf.inc");							
+						require ("tilauskasittely/osoitelappu_pdf.inc");
 					}
 				}
 			}
@@ -1138,9 +1138,9 @@
 		echo "<tr><th align='left'>".t("Vienti")."</th><td>$vientit</td>";
 
 		// haetaan kaikki toimitustavat
-		$query  = "	SELECT * 
-					FROM toimitustapa 
-					WHERE yhtio='$kukarow[yhtio]' 
+		$query  = "	SELECT *
+					FROM toimitustapa
+					WHERE yhtio='$kukarow[yhtio]'
 					and tulostustapa != 'X'
 					order by jarjestys,selite";
 		$result = mysql_query($query) or pupe_error($query);
@@ -1189,6 +1189,9 @@
 		echo "<option value='K' $mesel>".t("Lähettäjä")."</option>";
 		echo "</select></td>";
 
+		//tehdään rahtisopimuksen syöttö
+		echo "<th align='left'>".t("Rahtisopimus")."</th><td>";
+
 		//etsitään löytyykö rahtisopimusta
 		$rsop = hae_rahtisopimusnumero($toimitustapa, $rahtihaku, $otsik["liitostunnus"]);
 		$rahtisopimus = $rsop["rahtisopimus"];
@@ -1197,8 +1200,18 @@
 			$rahtisopimus = $otsik['rahtisopimus'];
 		}
 
-		//tehdään rahtisopimuksen syöttö
-		echo "<th align='left'>".t("Rahtisopimus")."</th><td><input value='$rahtisopimus' type='text' name='rahtisopimus' size='20'></td></tr>";
+		if ($rsop > 0) {
+			$ylisa = "&tunnus=$rsop[tunnus]";
+		}
+		else {
+			$ylisa = "&uusi=1&ytunnus=$rahtihaku&toimitustapa=$toimitustapa";
+			$rsop["rahtisopimus"] = t("Lisää rahtisopimus");
+		}
+
+		//
+		echo " <a href='".$palvelin2."yllapito.php?toim=rahtisopimukset$ylisa&tee=add&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//id=$id//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>$rsop[rahtisopimus]</a><br/>";
+
+		echo "<input value='$rahtisopimus' type='text' name='rahtisopimus' size='20'></td></tr>";
 
 		// haetaan kaikki varastot
 		$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
@@ -1256,9 +1269,9 @@
 		else {
 			echo "<th></th><td></td>";
 		}
-		
+
 		echo "</tr>";
-		
+
 		$query = "	SELECT GROUP_CONCAT(distinct if(viesti!='',viesti,NULL) separator '. ') viesti
 					from rahtikirjat use index (otsikko_index)
 					where yhtio			= '$kukarow[yhtio]'

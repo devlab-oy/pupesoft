@@ -920,14 +920,14 @@
 					$pdf->draw_text(454, 35,  $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"],	$thispage, $pieni);
 
 					if ($laitetaanko_yhteensarivi == 1 and $total != 0) {	
-						$pdf->draw_text(450, 72, t("Yhteensä", $kieli).":", 							$thispage, $norm);
+						$pdf->draw_text(430, 82, t("Yhteensä", $kieli).":", 							$thispage, $norm);
 						
 						$oikpos = $pdf->strlen(sprintf('%.2f',$total)." ".$laskurow["valkoodi"], $norm);					
-						$pdf->draw_text(575-$oikpos, 72, sprintf('%.2f',$total)." ".$laskurow["valkoodi"], $thispage, $norm);						
+						$pdf->draw_text(555-$oikpos, 82, sprintf('%.2f',$total)." ".$laskurow["valkoodi"], $thispage, $norm);						
 					}
 
 					if ($laitetaanko_yhteensarivi != 1) {
-						$pdf->draw_text(530, 72, t("Jatkuu", $kieli)."...", 							$thispage, $norm);
+						$pdf->draw_text(510, 82, t("Jatkuu", $kieli)."...", 							$thispage, $norm);
 					}
 
 					if ($laitetaanko_yhteensarivi == 1) {

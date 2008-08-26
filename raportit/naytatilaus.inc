@@ -412,14 +412,15 @@
 					kpl,
 					round(hinta*if($laskurow[vienti_kurssi]=0, 1, $laskurow[vienti_kurssi]), '$yhtiorow[hintapyoristys]') hinta, ale,
 					if(rivihinta != 0, round(rivihinta, '$yhtiorow[hintapyoristys]'), round((varattu+kpl)*hinta*if($laskurow[vienti_kurssi]=0, 1, $laskurow[vienti_kurssi])*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),'$yhtiorow[hintapyoristys]')) rivihinta,
-					'$laskurow[valkoodi]' valuutta,
 					tilausrivi.kommentti, tilausrivi.tunnus,
 					tilausrivi.uusiotunnus,
+					tilausrivin_lisatiedot.hankintakulut,
 					$sorttauskentta
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
 					".nimitys('join','tilausrivi')."
 					LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$laskurow[liitostunnus]'
+					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 					WHERE $where
 					and tilausrivi.yhtio='$kukarow[yhtio]'
 					and tyyppi='O'
@@ -438,10 +439,16 @@
 			}
 		}
 
+		echo "<th>".t("Kulut")."</th><th>".t("Eturahti")."</th><th>".t("Tulli%")."</th><th>".t("Tulli")."</th><th>".t("Lisäkulu")."</th>";
+
 		echo "</tr>";
 
 		$summa = 0;
-
+		$osuus_kululaskuista_yhteensa = "";
+		$osuus_eturahdista_yhteensa = "";
+		$aputullimaara_yhteensa = "";
+		$rivinlisakulu_yhteensa = "";
+		
 		while ($prow = mysql_fetch_array ($presult)) {
 
 			echo "<tr class='aktiivi'>";
@@ -465,6 +472,19 @@
 					echo "<td>$prow[$i]</td>";
 				}
 			}
+			
+			$osuus_kululaskuista = $osuus_eturahdista = $tulliprossa = $aputullimaara = $rivinlisakulu = "";
+			
+			if (strpos($prow["hankintakulut"], "#") !== false) {
+				list($osuus_kululaskuista, $osuus_eturahdista, $tulliprossa, $aputullimaara, $rivinlisakulu) = explode("#", $prow["hankintakulut"]);
+				$osuus_kululaskuista_yhteensa += $osuus_kululaskuista;
+				$osuus_eturahdista_yhteensa += $osuus_eturahdista;
+				$aputullimaara_yhteensa += $aputullimaara;
+				$rivinlisakulu_yhteensa += $rivinlisakulu;
+			}
+
+			echo "<td align='right'>$osuus_kululaskuista</td><td align='right'>$osuus_eturahdista</td><td align='right'>$tulliprossa</td><td align='right'>$aputullimaara</td><td align='right'>$rivinlisakulu</td>";
+			
 			echo "</tr>";
 
 			//Haetaan sarjanumeron tiedot
@@ -507,9 +527,23 @@
 			else {
 				$summa += $prow["rivihinta"];
 			}
+			
 		}
 
-		echo "<tr><td class='back' colspan='10' align='right'>".t("Yhteensä").":</td><td class='back' align='right'>".sprintf('%.2f',$summa)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
+		echo "<tr><td class='back' colspan='10' align='right'>".t("Yhteensä").":</td><td class='back' align='right'>".sprintf('%.2f',$summa)."</td>";
+		if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "") {
+			echo "<td class='back'>&nbsp;</td>";
+			echo "<td class='back'>&nbsp;</td>";
+			echo "<td class='back'>&nbsp;</td>";
+			echo "<td class='back'>&nbsp;</td>";
+			echo "<td class='back' align='right'>".sprintf('%.02f',$osuus_kululaskuista_yhteensa)."</td>";
+			echo "<td class='back' align='right'>".sprintf('%.02f',$osuus_eturahdista_yhteensa)."</td>";
+			echo "<td class='back'>&nbsp;</td>";
+			echo "<td class='back' align='right'>".sprintf('%.02f',$aputullimaara_yhteensa)."</td>";
+			echo "<td class='back' align='right'>".sprintf('%.02f',$rivinlisakulu_yhteensa)."</td>";
+		}
+		
+		echo "</tr>";
 	}
 	else {
 		// Myynnit ja muut myyntipuolen jutut
@@ -1303,7 +1337,8 @@
 						if(lasku.laskunro>0,lasku.laskunro, '') laskunro,
 						if(myre.tapvm!='0000-00-00', date_format(myre.tapvm, '%d.%m.%Y'), '') tapvm,
 						if(myre.erpcm!='0000-00-00', date_format(myre.erpcm, '%d.%m.%Y'), '') erpcm,
-						if(myre.mapvm!='0000-00-00', date_format(myre.mapvm, '%d.%m.%Y'), '') mapvm
+						if(myre.mapvm!='0000-00-00', date_format(myre.mapvm, '%d.%m.%Y'), '') mapvm,
+						lasku.summa, lasku.summa_valuutassa, lasku.valkoodi
 						FROM maksupositio
 						LEFT JOIN lasku ON lasku.yhtio=maksupositio.yhtio and lasku.tunnus=maksupositio.uusiotunnus
 						LEFT JOIN lasku myre ON myre.yhtio=lasku.yhtio and myre.laskunro=lasku.laskunro and myre.tila='U'
@@ -1322,7 +1357,11 @@
 						<td>{$maksusoprow[lisatiedot]}</td>
 						<td align='right'>{$maksusoprow[summa]}</td>
 						<td align='center'>{$maksusoprow[laskunro]}</td>
-						<td align='center'>{$maksusoprow[tapvm]}</td>
+						<td align='center'>{$maksusoprow[tapvm]} ";
+						if ($maksusoprow["tapvm"] != '') {
+							echo "($maksusoprow[summa] $yhtiorow[valkoodi] / $maksusoprow[summa_valuutassa] $maksusoprow[valkoodi])";
+						}
+						echo "</td>
 						<td align='center'>{$maksusoprow[erpcm]}</td>
 						<td align='center'>{$maksusoprow[mapvm]}</td>
 					</tr>";

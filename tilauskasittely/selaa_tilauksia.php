@@ -351,8 +351,7 @@
 
 		for ($i = 0; $i < mysql_num_fields($result); $i++) {
 			if (mysql_field_name($result, $i) == "hankintakulut") {
-				echo "<th>".t("Osuus kululaskuista")."</th><th>".t("Osuus eturahdista")."</th><th>".t("Tulli%")."</th><th>".t("Aputullim‰‰r‰")."</th><th>".t("Rivinlis‰kulu")."</th>";
-			}
+				echo "<th>".t("Kulut")."</th><th>".t("Eturahti")."</th><th>".t("Tulli%")."</th><th>".t("Tulli")."</th><th>".t("Lis‰kulu")."</th>";			}
 			else {
 				echo "<th>".mysql_field_name($result, $i)."</th>";
 			}
@@ -396,12 +395,17 @@
 					echo "<td align='right'>$row[$i]</td>";
 				}
 				elseif (mysql_field_name($result, $i) == "hankintakulut") {
-					list($osuus_kululaskuista, $osuus_eturahdista, $tulliprossa, $aputullimaara, $rivinlisakulu) = explode("#", $row[$i]);
+					$osuus_kululaskuista = $osuus_eturahdista = $tulliprossa = $aputullimaara = $rivinlisakulu = "";
+
+					if (strpos($row[$i], "#") !== FALSE) {
+						list($osuus_kululaskuista, $osuus_eturahdista, $tulliprossa, $aputullimaara, $rivinlisakulu) = explode("#", $row[$i]);
+						$osuus_kululaskuista_yhteensa += $osuus_kululaskuista;
+						$osuus_eturahdista_yhteensa += $osuus_eturahdista;
+						$aputullimaara_yhteensa += $aputullimaara;
+						$rivinlisakulu_yhteensa += $rivinlisakulu;
+					}
+
 					echo "<td align='right'>$osuus_kululaskuista $yhtiorow[valkoodi]</td><td align='right'>$osuus_eturahdista $yhtiorow[valkoodi]</td><td align='right'>$tulliprossa %</td><td align='right'>$aputullimaara $yhtiorow[valkoodi]</td><td align='right'>$rivinlisakulu $yhtiorow[valkoodi]</td>";
-					$osuus_kululaskuista_yhteensa += $osuus_kululaskuista;
-					$osuus_eturahdista_yhteensa += $osuus_eturahdista;
-					$aputullimaara_yhteensa += $aputullimaara;
-					$rivinlisakulu_yhteensa += $rivinlisakulu;
 				}
 				else {
 					echo "<td>$row[$i]</td>";

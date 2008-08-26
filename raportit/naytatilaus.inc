@@ -533,9 +533,6 @@
 		echo "<tr><td class='back' colspan='10' align='right'>".t("Yhteensä").":</td><td class='back' align='right'>".sprintf('%.2f',$summa)."</td>";
 		if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "") {
 			echo "<td class='back'>&nbsp;</td>";
-			echo "<td class='back'>&nbsp;</td>";
-			echo "<td class='back'>&nbsp;</td>";
-			echo "<td class='back'>&nbsp;</td>";
 			echo "<td class='back' align='right'>".sprintf('%.02f',$osuus_kululaskuista_yhteensa)."</td>";
 			echo "<td class='back' align='right'>".sprintf('%.02f',$osuus_eturahdista_yhteensa)."</td>";
 			echo "<td class='back'>&nbsp;</td>";

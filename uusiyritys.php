@@ -218,6 +218,7 @@
 									selitetark		= '$trow[selitetark]', 
 									selitetark_2	= '$trow[selitetark_2]',
 									selitetark_3	= '$trow[selitetark_3]',
+									kieli			= '$trow[kieli]',
 									yhtio			= '$yhtio'";
 					$rresult = mysql_query($query) or pupe_error($query);
 				}

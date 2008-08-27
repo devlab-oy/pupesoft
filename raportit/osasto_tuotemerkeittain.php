@@ -218,13 +218,8 @@ if ($tee == 'go') {
 						$kateosuus = sprintf('%.2f',($osastokatecuryht[$i] / $kaikkikatecuryht) * 100);
 					else $kateosuus = 0;
 
-					$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-								FROM avainsana
-								".avain('join','OSASTO_')."
-								WHERE avainsana.yhtio='$kukarow[yhtio]'
-								and avainsana.laji='OSASTO'
-								and avainsana.selite='$yhtrow[osasto]'";
-					$sresult = mysql_query($query) or pupe_error($query);
+					// tehd‰‰n avainsana query
+					$sresult = avainsana("OSASTO", $kukarow['kieli'], $yhtrow["osasto"]);
 					$srow = mysql_fetch_array($sresult);
 
 					echo "<tr>";

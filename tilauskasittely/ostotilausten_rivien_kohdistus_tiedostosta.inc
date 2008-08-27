@@ -31,7 +31,7 @@ if ($faarao == 'TUTKHM') {
 			$tuoteno		= trim($rivi[2]);
 			$kpl			= sprintf('%.2f', str_replace(',', '.', $rivi[3]));
 			$hinta			= sprintf("%.".$yhtiorow['hintapyoristys']."f", str_replace(',', '.', $rivi[4]));
-			$kuluhinta		= sprintf('%.2f', str_replace(',', '.', $rivi[5]));
+			//$kuluhinta		= sprintf('%.2f', str_replace(',', '.', $rivi[5]));
 
 			$tuote_etsi = "";
 
@@ -235,12 +235,12 @@ if ($faarao == 'TUTKHM') {
 					//Nyt tämä merkataan valituksi
 					if ($ok == 1) {
 
-						if ($kuluhinta != 0) {
+						/*if ($kuluhinta != 0) {
 							$kululisa = ", kate='$kuluhinta' ";
 						}
-						else {
+						else {*/
 							$kululisa = "";
-						}
+						//}
 
 						if ($paivi == 'JOO' and $hinta != 0) {
 							$hintalisa = ", hinta='$hinta' ";
@@ -298,9 +298,9 @@ else {
 			<td>".t("Toim_tuoteno")."</td>
 			<td>".t("Tuoteno")."</td>
 			<td>".t("Kpl")."</td>
-			<td>".t("Hinta")."</td>
-			<td>".t("Kuluhinta")."</td>
-			</tr>
+			<td>".t("Hinta")."</td>";
+	//		<td>".t("Kuluhinta")."</td>
+	echo "	</tr>
 			</table>
 
 			<br>

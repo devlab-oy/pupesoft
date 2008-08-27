@@ -873,7 +873,7 @@ if ($tila == '') {
 	echo "<th nowrap valign='top'><a href='$href=6".$ulisa."'>$kennim_array[6]</a><br><a href='$href=6".$ulisa."'>".t("Valuutta")."</a></th>";
 	echo "<th nowrap valign='top'><a href='$href=7".$ulisa."'>$kennim_array[7]</a><br><a href='$href=8".$ulisa."'>$kennim_array[8]</a></th>";
 	echo "<th nowrap valign='top'><a href='$href=9".$ulisa."'>$kennim_array[9]</a><br><a href='$href=10".$ulisa."'>$kennim_array[10]</a></th>";
-	echo "<th nowrap valign='top'><a href='$href=11".$ulisa."'>$kennim_array[11]</a><br><a href='$href=11".$ulisa."'>".t("Valuutta")."</a></th>";
+	//echo "<th nowrap valign='top'><a href='$href=11".$ulisa."'>$kennim_array[11]</a><br><a href='$href=11".$ulisa."'>".t("Valuutta")."</a></th>";
 	echo "<th nowrap valign='top'><a href='$href=12".$ulisa."'>$kennim_array[12]</a><br><a href='$href=13".$ulisa."'>$kennim_array[13]</a></th>";
 	echo "<th></th>";
 	echo "</tr>";
@@ -890,7 +890,7 @@ if ($tila == '') {
 	echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[6]' name='haku[6]' value='$haku[6]'></td>";
 	echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[7]' name='haku[7]' value='$haku[7]'><br><input type='text' size='$kenkok_array[8]' name='haku[8]' value='$haku[8]'></td>";
 	echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[9]' name='haku[9]' value='$haku[9]'><br><input type='text' size='$kenkok_array[10]' name='haku[10]' value='$haku[10]'></td>";
-	echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[11]' name='haku[11]' value='$haku[11]'></td>";
+	//echo "<td nowrap valign='top' align='right'><input type='text' size='$kenkok_array[11]' name='haku[11]' value='$haku[11]'></td>";
 	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[12]' name='haku[12]' value='$haku[12]'><br><input type='text' size='$kenkok_array[13]' name='haku[13]' value='$haku[13]'></td>";
 
 
@@ -1149,7 +1149,7 @@ if ($tila == '') {
 
 
 		echo "<$td $class valign='top' align='right'>". (float) $rivirow["rivihinta"]."<br>". (float) $rivirow["alerivihinta"]."</$td>";
-		echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_kuluhinta[$rivirow[rivitunnus]]' value='$rivirow[kuluhinta]' style='text-align:right'><br>$yhtiorow[valkoodi]</$td>";
+		//echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_kuluhinta[$rivirow[rivitunnus]]' value='$rivirow[kuluhinta]' style='text-align:right'><br>$yhtiorow[valkoodi]</$td>";
 		echo "<$td $class valign='top'>";
 
 		if ($rivirow["toimaika"] != "0000-00-00") {

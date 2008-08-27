@@ -602,8 +602,13 @@
 			if ($valittu_oslapp_tulostin != "" and $oslapp != '' and $oslappkpl > 0) {
 				$tunnus = $laskurow["tunnus"];
 
-				if ($oslappkpl > 0) {
+				$oslaput_email = 1;
+				
+				if ($oslappkpl > 0 and $oslappkpl != '' and $oslapp != 'email') {
 					$oslapp .= " -#$oslappkpl ";
+				}
+				elseif ($oslappkpl > 0 and $oslappkpl != '' and $oslapp == 'email') {
+					$oslaput_email = $oslappkpl;
 				}
 
 				$tiedot = "";
@@ -613,25 +618,28 @@
 							WHERE yhtio = '$kukarow[yhtio]' AND selite = '$laskurow[toimitustapa]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$toimitustaparow = mysql_fetch_array($result);
-
-				if ($toimitustaparow['osoitelappu'] == 'intrade') {
-					require('tilauskasittely/osoitelappu_intrade_pdf.inc');
-				}
-				else {
-					require ("tilauskasittely/osoitelappu_pdf.inc");
-				}
-
-				if (($toimitustaparow["tulostustapa"] == "L" or $toimitustaparow["tulostustapa"] == "K") and $toimitustaparow["toim_nimi"] != '') {
-
-					$tiedot = "toimitusta";
-
+				
+				for ($i = 0; $i < $oslaput_email; $i++) {
 					if ($toimitustaparow['osoitelappu'] == 'intrade') {
 						require('tilauskasittely/osoitelappu_intrade_pdf.inc');
 					}
 					else {
 						require ("tilauskasittely/osoitelappu_pdf.inc");
 					}
+
+					if (($toimitustaparow["tulostustapa"] == "L" or $toimitustaparow["tulostustapa"] == "K") and $toimitustaparow["toim_nimi"] != '') {
+
+						$tiedot = "toimitusta";
+
+						if ($toimitustaparow['osoitelappu'] == 'intrade') {
+							require('tilauskasittely/osoitelappu_intrade_pdf.inc');
+						}
+						else {
+							require ("tilauskasittely/osoitelappu_pdf.inc");
+						}
+					}
 				}
+				
 			}
 
 			echo "<br><br>";

@@ -280,11 +280,24 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_text(mm_pt(4), mm_pt(160), "$kukarow[nimi]" ,								$firstpage, $kirj);
 
 	$pdf->draw_text(mm_pt(70), mm_pt(165), "Viite - Referens - Reference: ",				$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(70), mm_pt(160), "$laskurow[viesti]" ,							$firstpage, $kirj);
-
+	
+	if ($rahtikirja_tulostus == "yep") {
+		$pdf->draw_text(mm_pt(70), mm_pt(160), $viestirarrow["viesti"] ,					$firstpage, $kirj);
+	}
+	else {
+		$pdf->draw_text(mm_pt(70), mm_pt(160), "$laskurow[viesti]" ,							$firstpage, $kirj);
+	}
+		
 	$pdf->draw_text(mm_pt(4), mm_pt(155), "Tilaukset - Order - Orders: ",					$firstpage, $otsik);
 	if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];
-	$pdf->draw_text(mm_pt(50), mm_pt(155), $tilausnumeroita, $firstpage, $kirj);
+	
+	if ($rahtikirja_tulostus == "yep") {
+		$pdf->draw_text(mm_pt(50), mm_pt(155), $kaikki_lotsikot, $firstpage, $kirj);
+	}
+	else {
+		$pdf->draw_text(mm_pt(50), mm_pt(155), $tilausnumeroita, $firstpage, $kirj);
+	}
+	
 
 	//Minne
 	$pdf->draw_rectangle(mm_pt(150),mm_pt(5),mm_pt(150),mm_pt(10),							$firstpage, $rectparam);
@@ -344,17 +357,28 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	}
 	
 	$pdf->draw_text(mm_pt(20), mm_pt(55), $laskurow["toimitustapa"].$jvlisays,									$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(20), mm_pt(50), $laskurow['viesti'],													$firstpage, $kirj);
+	if ($rahtikirja_tulostus == "yep") {
+		$pdf->draw_text(mm_pt(20), mm_pt(50), $viestirarrow["viesti"] ,					$firstpage, $kirj);
+	}
+	else {
+		$pdf->draw_text(mm_pt(20), mm_pt(50), "$laskurow[viesti]" ,							$firstpage, $kirj);
+	}
+	
 	
 	//kolliluku
-	$query = "	SELECT sum(kollit) kollit
-				FROM rahtikirjat
-				WHERE yhtio='$kukarow[yhtio]' and otsikkonro = '$laskurow[tunnus]'";
-	$pakka = mysql_query($query) or pupe_error($query);
-	$pak = mysql_fetch_array($pakka);
+	if ($rahtikirja_tulostus == "yep") {
+		$pdf->draw_text(mm_pt(20), mm_pt(45), t("Kollim‰‰r‰").": ".$s." (".$kollityht.") ",								$firstpage, $kirj);
+	}
+	else {
+		$query = "	SELECT sum(kollit) kollit
+					FROM rahtikirjat
+					WHERE yhtio='$kukarow[yhtio]' and otsikkonro = '$laskurow[tunnus]'";
+		$pakka = mysql_query($query) or pupe_error($query);
+		$pak = mysql_fetch_array($pakka);
 
-	if ((int) $pak["kollit"] > 0) {
-		$pdf->draw_text(mm_pt(20), mm_pt(45), t("Kollim‰‰r‰").": ".$pak["kollit"],								$firstpage, $kirj);
+		if ((int) $pak["kollit"] > 0) {
+			$pdf->draw_text(mm_pt(20), mm_pt(45), t("Kollim‰‰r‰").": ".$pak["kollit"],								$firstpage, $kirj);
+		}
 	}
 	
 	if($laskurow['yhteyshenkilo'] != "") {
@@ -376,7 +400,14 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	// ylh‰‰ll‰ on "oikee" tapa tehd‰, mutta me ei tiedet‰ t‰ss‰ vaiheessa kollien m‰‰r‰‰ eik‰ painoa
 	$pdf->draw_text(mm_pt(4), mm_pt(30), "Tilaukset - Order - Orders: ",	$firstpage, $otsik);
 	if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];
-	$pdf->draw_text(mm_pt(50), mm_pt(30), $tilausnumeroita, $firstpage, $kirj);
+	
+	if ($rahtikirja_tulostus == "yep") {
+		$pdf->draw_text(mm_pt(50), mm_pt(30), $kaikki_lotsikot, $firstpage, $kirj);
+	}
+	else {
+		$pdf->draw_text(mm_pt(50), mm_pt(30), $tilausnumeroita, $firstpage, $kirj);
+	}
+	
 }
 
 //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
@@ -398,7 +429,7 @@ fclose($fh);
 if ($oslapp == 'email') {
 	$liite = $pdffilenimi;
 	$kutsu = "Osoitelappu";
-
+	
 	require("inc/sahkoposti.inc");
 }
 elseif ($tee == 'NAYTATILAUS') {

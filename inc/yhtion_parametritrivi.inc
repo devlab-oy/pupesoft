@@ -463,6 +463,27 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "rahtikirjan_kollit_ja_lajit") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		elseif ($trow[$i] == "E") {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value=''  $sel1>".t("Yhteen")."</option>";
+		$ulos .= "<option value='E' $sel2>".t("Erikseen")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "tee_osto_myyntitilaukselta") {
 

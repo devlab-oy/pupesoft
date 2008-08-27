@@ -167,11 +167,18 @@
 				$otunnukset = substr($otunnukset,0,-1);
 				$tunnukset  = substr($tunnukset,0,-1);
 
+				if ($yhtiorow['rahtikirjan_kollit_ja_lajit'] != "") {
+					$groupby_lisa = ", tunnus";
+				}
+				else {
+					$groupby_lisa = "";
+				}
+
 				//summataan kaikki painot yhteen
 				$query = "	SELECT pakkaus, sum(kilot), sum(kollit), sum(kuutiot), sum(lavametri)
 							FROM rahtikirjat
 							WHERE tunnus in ($tunnukset) and yhtio='$kukarow[yhtio]'
-							group by pakkaus order by pakkaus";
+							group by pakkaus $groupby_lisa order by pakkaus";
 				$pakka = mysql_query($query) or pupe_error($query);
 
 				while ($pak = mysql_fetch_array($pakka)) {
@@ -189,7 +196,7 @@
 					$kuutiotyht += $pak[3];
 					$lavatyht   += $pak[4];
 				}
-
+				
 				$tulostuskpl = $kollityht;
 
 				//haetaan rahtikirjan kaikki vakkoodit arrayseen
@@ -256,7 +263,7 @@
 
 				// tarvitaan tiet‰‰, ett‰ onko kyseess‰ kopio
 				$tulostakopio = "kylla";
-
+				
 				// tulostetaan toimitustavan m‰‰rittelem‰ rahtikirja
 				if (file_exists("tilauskasittely/$toitarow[rahtikirja]")) {
 					require("tilauskasittely/$toitarow[rahtikirja]");

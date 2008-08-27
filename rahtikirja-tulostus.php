@@ -64,6 +64,16 @@
 		$kirjoitin = $print['komento'];		
 		$merkisto  = $print['merkisto'];
 		$pvm       = date("j.n.Y");
+		
+		if ($valittu_oslapp_tulostin != '') {
+			//haetaan osoitelapun tulostuskomento
+			if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE) {
+				$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$valittu_oslapp_tulostin'";
+				$kirres = mysql_query($query) or pupe_error($query);
+				$kirrow = mysql_fetch_array($kirres);
+				$oslapp = $kirrow['komento'];
+			}					
+		}
 
 		if ($kirjoitin == '') die (t("Valitsemallesi varastolle ole ole määritelty tarvittavaa rahtikirja-tulostinta")." ($mika)!");
 
@@ -79,7 +89,7 @@
 		}
 
 		// emuloidaan transactioita mysql LOCK komennolla
-		$query = "LOCK TABLES liitetiedostot READ, rahtikirjat WRITE, tilausrivi WRITE, tapahtuma WRITE, tuote WRITE, lasku WRITE, tiliointi WRITE, tuotepaikat WRITE, sanakirja WRITE, rahtisopimukset READ, rahtimaksut READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka READ, avainsana READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, tuotteen_alv READ, maat READ, etaisyydet READ";
+		$query = "LOCK TABLES liitetiedostot READ, rahtikirjat WRITE, tilausrivi WRITE, tapahtuma WRITE, tuote WRITE, lasku WRITE, tiliointi WRITE, tuotepaikat WRITE, sanakirja WRITE, rahtisopimukset READ, rahtimaksut READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka READ, avainsana READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, tuotteen_alv READ, maat READ, etaisyydet READ, laskun_lisatiedot READ, yhteyshenkilo READ, toimitustapa READ";
 		$res   = mysql_query($query) or pupe_error($query);
 
 		if ($jv == 'vainjv') {
@@ -138,6 +148,7 @@
 			$otunnukset    	= "";
 			$tunnukset     	= "";
 			$rahtikirjanro 	= "";
+			$kaikki_lotsikot = "";
 
 			if ($rakir_row['merahti'] == 'K') {
 				$rahdinmaksaja = "Lähettäjä";
@@ -208,7 +219,7 @@
 				// tarvitaan postin rahtikirjoissa
 				$rtunnus = $rivi["rtunnus"];
 			}
-
+			
 			if (mysql_num_rows($res) > 0) {
 				mysql_data_seek($res,0);
 				$rivi = mysql_fetch_array($res);
@@ -216,12 +227,19 @@
 				//vikat pilkut pois
 				$otunnukset = substr($otunnukset,0,-1);
 				$tunnukset  = substr($tunnukset,0,-1);
+				
+				if ($yhtiorow['rahtikirjan_kollit_ja_lajit'] != "") {
+					$groupby_lisa = ", tunnus";
+				}
+				else {
+					$groupby_lisa = "";
+				}
 
 				//summataan kaikki painot yhteen
 				$query = "	SELECT pakkaus, sum(kilot), sum(kollit), sum(kuutiot), sum(lavametri)
 							FROM rahtikirjat
 							WHERE tunnus in ($tunnukset) and yhtio='$kukarow[yhtio]'
-							group by pakkaus order by pakkaus";
+							group by pakkaus $groupby_lisa order by pakkaus";
 				$pakka = mysql_query($query) or pupe_error($query);
 
 				while ($pak = mysql_fetch_array($pakka)) {
@@ -229,7 +247,7 @@
 					
 					if ($pak[1] > 0 or $pak[2] > 0) {
 						$kilot[]     = $pak[1];
-						$kollit[]    = $pak[2];
+						$kollit[]    = $pak[2];						
 					}
 					
 					$kuutiot[]   = $pak[3];
@@ -241,7 +259,7 @@
 				}
 
 				$tulostuskpl = $kollityht;
-
+				
 				// merkataan tilausrivit toimitetuiksi..
 				$query = "	UPDATE tilausrivi
 							set toimitettu = '$kukarow[kuka]', toimitettuaika=now()
@@ -282,7 +300,7 @@
 				// rtunnus jossa on uniikki numero
 				//
 				// tulostetaan rahtikirja
-
+				
 				// merkataan rahtikirjat tulostetuksi..
 				$query = "	UPDATE rahtikirjat
 							set tulostettu=now()
@@ -300,7 +318,7 @@
 				$yhteensa	= "";
 				$aputeksti	= "";
 				$rahinta 	= "";
-
+				
 				// jos kyseessä on jälkivaatimus
 				if ($rakir_row['jv'] != '') {
 					// jos toimitustapa hanskaa monivarastojälkivaatimukset
@@ -317,7 +335,7 @@
 						if ($laskutulostin != '') {
 							$valittu_tulostin = $laskutulostin;
 						}
-
+						
 						$query = "	UPDATE lasku
 									set alatila='D'
 									where tunnus in ($laskutettavat)
@@ -350,7 +368,10 @@
 
 				echo "<font class='message'>".t("Asiakas")." $rakir_row[toim_nimi]</font><li>".t("Yhdistetään tilaukset").": ";
 				
-				foreach($lotsikot as $doit) echo "$doit ";
+				foreach($lotsikot as $doit) {
+					echo "$doit ";
+					$kaikki_lotsikot .= $doit." "; 
+				}
 
 				echo "$rahinta $jvtext";
 
@@ -364,13 +385,13 @@
 				else {
 					echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";
 				}
-
+				
 				$query = "	UPDATE rahtikirjat
 							set rahtikirjanro='$rahtikirjanro'
 							where tunnus in ($tunnukset)
 							and yhtio = '$kukarow[yhtio]'";
 				$ures  = mysql_query($query) or pupe_error($query);
-
+				
 				// jos ei JV merkataan rahtikirjat tulostetuksi otsikollekkin..
 				if ($rakir_row['jv'] == '') {
 					// kotimaan myynti menee alatilaan D
@@ -394,6 +415,46 @@
 								and kuljetusmuoto != ''";
 					$ures  = mysql_query($query) or pupe_error($query);
 				}
+				
+				// Tulostetaan osoitelappu
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE) {
+					if ($valittu_oslapp_tulostin != "" and $oslapp != '') {
+
+						$tunnus = $lotsikot[0];
+
+						$query = "	SELECT GROUP_CONCAT(distinct if(viesti!='',viesti,NULL) separator '. ') viesti
+									from lasku
+									where yhtio			= '$kukarow[yhtio]'
+									and tunnus		in ($otunnukset)";
+						$viestirar = mysql_query($query) or pupe_error($query);
+
+						$viestirarrow = mysql_fetch_array($viestirar);	
+
+						for ($s=1; $s <= $kollityht; $s++) { 
+							if ($toitarow['osoitelappu'] == 'intrade') {
+								require('tilauskasittely/osoitelappu_intrade_pdf.inc');
+							}
+							else {
+								$rahtikirja_tulostus = "yep";
+								require ("tilauskasittely/osoitelappu_pdf.inc");							
+							}
+
+							if (($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") and $toitarow["toim_nimi"] != '') {
+
+								$tiedot = "toimitusta";
+
+								if ($toitarow['osoitelappu'] == 'intrade') {
+									require('tilauskasittely/osoitelappu_intrade_pdf.inc');
+								}
+								else {
+									$rahtikirja_tulostus = "yep";
+									require ("tilauskasittely/osoitelappu_pdf.inc");							
+								}
+							}
+						}
+					}
+				}
+				
 
 			}
 			echo "<br>";
@@ -498,6 +559,21 @@
 			
 			while ($kirow = mysql_fetch_array($kires)) {
 				echo "<option id='K$kirow[tunnus]' value='$kirow[tunnus]'>$kirow[kirjoitin]</option>";
+			}
+			
+			echo "</select></td></tr>";
+			
+			echo "<tr><td>".t("Tulosta osoitelaput")."</td>";
+			
+			
+			mysql_data_seek($kires, 0);
+			
+			echo "<td>";
+			echo "<select name='valittu_oslapp_tulostin'>";
+			echo "<option value=''>".t("Ei tulosteta")."</option>";
+			
+			while ($kirrow = mysql_fetch_array($kires)) {
+				echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
 			}
 			
 			echo "</select></td></tr>";

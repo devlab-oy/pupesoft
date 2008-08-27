@@ -647,13 +647,17 @@ echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
 echo "<tr><th>".t("Osasto")."</th><td colspan='3'>";
 
 // n‰ytet‰‰n soveltuvat osastot
+/*
 $query = "	SELECT distinct avainsana.selite, group_concat(distinct ".avain('selectcon')." SEPARATOR ' / ') selitetark
 			FROM avainsana
-			".avain('join','OSASTO_')."
-			WHERE avainsana.yhtio in ($yhtiot) and avainsana.laji = 'OSASTO'
+			".avain('join','OSASTO_', $kukarow['kieli'])."
+			WHERE avainsana.yhtio in ($yhtiot) and avainsana.laji = 'OSASTO' and avainsana.kieli = '$kukarow[kieli]'
 			GROUP BY avainsana.selite
 			ORDER BY avainsana.jarjestys, avainsana.selite";
-$res2  = mysql_query($query) or die($query);
+*/
+
+// tehd‰‰n avainsana query
+$res2 = avainsana("OSASTO", $kukarow['kieli'], '', $yhtiot);
 
 echo "<select name='mul_osasto[]' multiple='TRUE' size='10' style='width:100%;'>";
 
@@ -685,13 +689,8 @@ echo "</td></tr>
 		<tr><th>".t("Tuoteryhm‰")."</th><td colspan='3'>";
 
 //Tehd‰‰n osasto & tuoteryhm‰ pop-upit
-$query = "	SELECT distinct avainsana.selite, group_concat(distinct ".avain('selectcon')." SEPARATOR ' / ') selitetark
-			FROM avainsana
-			".avain('join','TRY_')."
-			WHERE avainsana.yhtio in ($yhtiot) and avainsana.laji = 'TRY'
-			GROUP BY avainsana.selite
-			ORDER BY avainsana.jarjestys, avainsana.selite";
-$res2  = mysql_query($query) or die($query);
+// tehd‰‰n avainsana query
+$res2 = avainsana("TRY", $kukarow['kieli'], '', $yhtiot);
 
 echo "<select name='mul_try[]' multiple='TRUE' size='10' style='width:100%;'>";
 

@@ -115,12 +115,8 @@
 
 	echo "<tr><th>".t("Osasto")."</th><td colspan='3'>";
 
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','OSASTO_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO'
-				ORDER BY avainsana.selite+0";
-	$sresult = mysql_query($query) or pupe_error($query);
+	// tehd‰‰n avainsana query
+	$sresult = avainsana("OSASTO", $kukarow['kieli']);
 
 	echo "<select name='osasto'>";
 	echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
@@ -137,12 +133,8 @@
 	echo "</td></tr>
 			<tr><th>".t("Tuoteryhm‰")."</th><td colspan='3'>";
 
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','TRY_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY'
-				ORDER BY avainsana.selite+0";
-	$sresult = mysql_query($query) or pupe_error($query);
+	// tehd‰‰n avainsana query
+	$sresult = avainsana("TRY", $kukarow['kieli']);
 
 	echo "<select name='tuoryh'>";
 	echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";

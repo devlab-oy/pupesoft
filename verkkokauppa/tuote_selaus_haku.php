@@ -362,13 +362,19 @@
 		echo "<input type='text' size='10' name = 'haku[2]' value = '$haku[2]'>";
 		echo "</td>";
 
-		$query = "	SELECT distinct avainsana.selite, ".avain('select')."
+		$query = "	SELECT DISTINCT avainsana.*, 
+					IFNULL((SELECT avainsana_kieli.selitetark
+					FROM avainsana as avainsana_kieli
+					WHERE avainsana_kieli.yhtio = avainsana.yhtio
+					and avainsana_kieli.laji = avainsana.laji
+					and avainsana_kieli.selite = avainsana.selite
+					and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selitetark) selitetark
 					FROM avainsana
-					".avain('join','OSASTO_')."
-					WHERE avainsana.yhtio = '$kukarow[yhtio]'
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' 
 					and avainsana.laji = 'OSASTO'
+					and avainsana.kieli in ('$yhtiorow[kieli]', '')
 					$avainlisa
-					ORDER BY avainsana.jarjestys, avainsana.selite";
+					ORDER BY avainsana.jarjestys, avainsana.selite+0";
 		$sresult = mysql_query($query) or pupe_error($query);
 
 
@@ -376,36 +382,42 @@
 		echo "<option value='' $sel>".t("Ei valintaa")."</option>";
 
 		while($srow = mysql_fetch_array ($sresult)){
-			if($haku[3] == $srow[0]) {
+			if($haku[3] == $srow["selite"]) {
 				$sel = "SELECTED";
 			}
 			else {
 				$sel = '';
 			}
-			echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
+			echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
 		}
 		echo "</select><br>";
 
-		$query = "	SELECT distinct avainsana.selite, ".avain('select')."
+		$query = "	SELECT DISTINCT avainsana.*, 
+					IFNULL((SELECT avainsana_kieli.selitetark
+					FROM avainsana as avainsana_kieli
+					WHERE avainsana_kieli.yhtio = avainsana.yhtio
+					and avainsana_kieli.laji = avainsana.laji
+					and avainsana_kieli.selite = avainsana.selite
+					and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selitetark) selitetark
 					FROM avainsana
-					".avain('join','TRY_')."
-					WHERE avainsana.yhtio='$kukarow[yhtio]'
-					and avainsana.laji='TRY'
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' 
+					and avainsana.laji = 'TRY'
+					and avainsana.kieli in ('$yhtiorow[kieli]', '')
 					$avainlisa
-					ORDER BY avainsana.jarjestys, avainsana.selite";
+					ORDER BY avainsana.jarjestys, avainsana.selite+0";
 		$sresult = mysql_query($query) or pupe_error($query);
 
 		echo "<select name='haku[4]'>";
 		echo "<option value='' $sel>".t("Ei valintaa")."</option>";
 
 		while($srow = mysql_fetch_array ($sresult)){
-			if($haku[4] == $srow[0]) {
+			if($haku[4] == $srow["selite"]) {
 				$sel = "SELECTED";
 			}
 			else {
 				$sel = '';
 			}
-			echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
+			echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
 		}
 		echo "</select></td>";
 

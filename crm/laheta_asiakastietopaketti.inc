@@ -188,12 +188,8 @@
 						$indkpltot = sprintf('%.2f',$osastokplcuryht[$i] / $osastokpledyht[$i]);
 					else $indkpltot = "n/a";
 					
-					$query = "	SELECT distinct selite, selitetark
-								FROM avainsana
-								WHERE yhtio	= '$kukarow[yhtio]' 
-								and laji	= 'OSASTO' 
-								and selite	= '$yhtrow[osasto]'";
-					$sresult = mysql_query($query) or pupe_error($query);
+					// tehd‰‰n avainsana query
+					$sresult = avainsana("OSASTO", $kukarow['kieli'], $yhtrow["osasto"]);
 					$srow = mysql_fetch_array($sresult);
 				
 					$raportti .= "$yhtrow[osasto] $srow[selitetark] yhteens‰\t";
@@ -223,12 +219,8 @@
 					$indkpl = sprintf('%.2f',$yhtrow['kplcuryht'] / $yhtrow['kpledyht']);
 				else $indkpl = "n/a";
 	
-				$query = "	SELECT distinct selite, selitetark
-							FROM avainsana
-							WHERE yhtio='$kukarow[yhtio]' 
-							and laji='TRY' 
-							and selite='$yhtrow[try]'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				// tehd‰‰n avainsana query
+				$sresult = avainsana("TRY", $kukarow['kieli'], $yhtrow["try"]);
 				$srow = mysql_fetch_array($sresult);								
 				
 				$raportti .= "Tuoteryhm‰ $yhtrow[try] $srow[selitetark]\t";

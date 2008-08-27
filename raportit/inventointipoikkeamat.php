@@ -497,8 +497,8 @@
 		echo "<tr valign='top'><td><table><tr><td class='back'>";
 
 		// näytetään soveltuvat osastot
-		$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' order by avainsana.selite+0";
-		$res2  = mysql_query($query) or die($query);
+		// tehdään avainsana query
+		$res2 = avainsana("OSASTO", $kukarow['kieli']);
 
 		if (mysql_num_rows($res2) > 11) {
 			echo "<div style='height:265;overflow:auto;'>";
@@ -531,8 +531,8 @@
 		echo "<td><table><tr><td valign='top' class='back'>";
 
 		// näytetään soveltuvat tryt
-		$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','TRY_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' order by avainsana.selite+0";
-		$res2  = mysql_query($query) or die($query);
+		// tehdään avainsana query
+		$res2 = avainsana("TRY", $kukarow['kieli']);
 
 		if (mysql_num_rows($res2) > 11) {
 			echo "<div style='height:265;overflow:auto;'>";

@@ -528,7 +528,8 @@ if (!function_exists('rivi_otsikot')) {
 			$pdf->draw_rectangle($kala+30, 320, $kala+10, 370, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 370, $kala+10, 420, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 420, $kala+10, 470, 	$thispage, $rectparam);
-			$pdf->draw_rectangle($kala+30, 470, $kala+10, 520, 	$thispage, $rectparam);
+			$pdf->draw_rectangle($kala+30, 470, $kala+10, 495, 	$thispage, $rectparam);
+			$pdf->draw_rectangle($kala+30, 495, $kala+10, 520, 	$thispage, $rectparam);
 			$pdf->draw_rectangle($kala+30, 520, $kala+10, 580, 	$thispage, $rectparam);
 			$pdf->draw_text(25,  $kala+15, "#",							$thispage, $norm);
 			$pdf->draw_text(45,  $kala+15, t("Tuotenumero", $kieli),	$thispage, $norm);
@@ -536,7 +537,8 @@ if (!function_exists('rivi_otsikot')) {
 			$pdf->draw_text(330, $kala+15, t("Tilattu", $kieli),		$thispage, $norm);
 			$pdf->draw_text(375, $kala+15, t("Toimitus", $kieli),		$thispage, $norm);
 			$pdf->draw_text(425, $kala+15, t("Yks.hinta", $kieli),		$thispage, $norm);
-			$pdf->draw_text(478, $kala+15, t("Alennus", $kieli),		$thispage, $norm);
+			$pdf->draw_text(475, $kala+15, t("Ale", $kieli),			$thispage, $norm);
+			$pdf->draw_text(500, $kala+15, t("Alv", $kieli),			$thispage, $norm);
 			$pdf->draw_text(530, $kala+15, t("Rivihinta", $kieli),		$thispage, $norm);
 		}
 		elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_brutto.inc") {
@@ -1028,7 +1030,14 @@ if (!function_exists('rivi_hinta_ale')) {
 		$pdf->draw_text(465-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"]), 				$thispage, $norm);
 
 		$oikpos = $pdf->strlen(($row["ale"]*1)."%", $norm);
-		$pdf->draw_text(515-$oikpos, $kala, ($row["ale"]*1)."%", 							$thispage, $norm);
+		$pdf->draw_text(495-$oikpos, $kala, ($row["ale"]*1)."%", 							$thispage, $norm);
+		
+		if ($yhtiorow["alv_kasittely"] != '') {
+			$row["alv"] = "0";
+		}
+		
+		$oikpos = $pdf->strlen(($row["alv"]*1)."%", $norm);
+		$pdf->draw_text(520-$oikpos, $kala, ($row["alv"]*1)."%", 							$thispage, $norm);
 
 		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
 		$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), 			$thispage, $norm);
@@ -1416,8 +1425,14 @@ if (!function_exists('loppu')) {
 		$pdf->draw_text(404, 25, t("Alv.rek", $kieli),				$thispage, $pieni);
 
 		if ($tots == 1 and $summa != 0) {
-			$pdf->draw_text(450, 72, t("Yhteensä", $kieli).":", $thispage, $norm);
-
+			
+			if ($laskurow['alv'] > 0 and $yhtiorow["alv_kasittely"] == '') {
+				$pdf->draw_text(410, 72, t("Yhteensä verollinen", $kieli).":", $thispage, $norm);
+			}
+			else {
+				$pdf->draw_text(410, 72, t("Yhteensä veroton", $kieli).":", $thispage, $norm);
+			}
+			
 			$oikpos = $pdf->strlen(sprintf("%.2f",$summa)." ".$laskurow["valkoodi"], $norm);
 			$pdf->draw_text(575-$oikpos, 72, sprintf("%.2f",$summa)." ".$laskurow["valkoodi"], $thispage, $norm);
 		}

@@ -29,9 +29,9 @@
 	echo "<option value=''>".t("Osasto")."</option>";
 
 	while ($srow = mysql_fetch_array($sresult)) {
-		if ($osasto == $srow[0]) $sel = "selected";
+		if ($osasto == $srow["selite"]) $sel = "selected";
 		else $sel = "";
-		echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
+		echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
 	}
 
 	echo "</select></td>";
@@ -48,9 +48,9 @@
 	echo "<option value=''>".t("Tuoteryhmä")."</option>";
 
 	while ($srow = mysql_fetch_array($sresult)) {
-		if ($try == $srow[0]) $sel = "selected";
+		if ($try == $srow["selite"]) $sel = "selected";
 		else $sel = "";
-		echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
+		echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
 	}
 
 	echo "</select></td>";

@@ -1106,10 +1106,10 @@
 
 									while ($row = mysql_fetch_array($riresult)) {
 										if ($row['toimitettu'] == '') {
-											$row['kommentti'] = "*******".t("Toimitetaan erikseen").".******* ".$row['kommentti'];											
+											$row['kommentti'] = "*******".t("Toimitetaan erikseen",$kieli).".******* ".$row['kommentti'];											
 										}
 										else {
-											$row['kommentti'] = "*******".t("Toimitettu erikseen").".******* ".$row['kommentti'];				
+											$row['kommentti'] = "*******".t("Toimitettu erikseen",$kieli).".******* ".$row['kommentti'];				
 										}
 
 										$row['rivihinta'] = 0;

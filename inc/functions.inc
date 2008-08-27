@@ -107,7 +107,7 @@ if (!function_exists("t")) {
 		}
 
 		// Voi olla, että käytämme slavea ja INSERT ei siis onnistu (insert vain jos ei fi)
-		if ($useslave > 0 or $indeksi != 'fi') {
+		if ($useslave > 0 and $indeksi != 'fi') {
 			unset($link);
 			$link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
 			mysql_select_db ($dbkanta,$link) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 1)!");

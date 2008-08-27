@@ -230,47 +230,39 @@ echo "<table><form method='post' action=''>";
 echo "<input type='hidden' name='tee' value='kaikki'>";
 echo "<tr><th>".t("Valitse osasto alasevetovalikosta").":</th>";
 
-$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-			FROM avainsana
-			".avain('join','OSASTO_')."
-			WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO'
-			ORDER BY avainsana.selite+0";
-$sresult = mysql_query($query) or pupe_error($query);
+// tehdään avainsana query
+$sresult = avainsana("OSASTO", $kukarow['kieli']);
 
 echo "<td><select name='osasto'>";
 echo "<option value='' $sel>".t("Näytä kaikki")."</option>";
 
 while($srow = mysql_fetch_array ($sresult)){
-	if($osasto == $srow[0]) {
+	if($osasto == $srow["selite"]) {
 		$sel = "SELECTED";
 	}
 	else {
 		$sel = '';
 	}
-	echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
+	echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
 }
 echo "</select></td><th>".t("tai syötä käsin")."</th><td><input type='text' name='osasto2' value='$osasto' size='15'></td></tr>";
 
 echo "<tr><th>".t("Valitse tuoteryhmä alasevetovalikosta").":</th>";
 
-$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-			FROM avainsana
-			".avain('join','TRY_')."
-			WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY'
-			ORDER BY avainsana.selite+0";
-$sresult = mysql_query($query) or pupe_error($query);
+// tehdään avainsana query
+$sresult = avainsana("TRY", $kukarow['kieli']);
 
 echo "<td><select name='try'>";
 echo "<option value='' $sel>".t("Näytä kaikki")."</option>";
 
 while($srow = mysql_fetch_array ($sresult)) {
-	if($try == $srow[0]) {
+	if($try == $srow["selite"]) {
 		$sel = "SELECTED";
 	}
 	else {
 		$sel = '';
 	}
-	echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
+	echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
 }
 echo "</select></td><th>".t("tai syötä käsin")."</th><td><input type='text' name='try2' value='$try' size='15'></td></tr>";
 

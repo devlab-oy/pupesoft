@@ -142,12 +142,8 @@
 	echo "<tr>";
 	echo "<th>".t("Valitse tuoteosasto")."</th>";
 
-	$query = "	SELECT avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','OSASTO_')."
-				WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='OSASTO'
-				ORDER BY avainsana.selite+0";
-	$result = mysql_query($query) or pupe_error($query);
+	// tehd‰‰n avainsana query
+	$result = avainsana("OSASTO", $kukarow['kieli']);
 
 	echo "<td><select name='tuoteosasto'>";
 	echo "<option value='kaikki' $tuoteosastosel>".t("Kaikki")."</option>";
@@ -161,12 +157,8 @@
 	echo "</select></td></tr>";
 	echo "<tr><th>".t("tai tuoteryhm‰")."</th>";
 
-	$query = "	SELECT avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','OSASTO_')."
-				WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='TRY'
-				ORDER BY avainsana.selite+0";
-	$result = mysql_query($query) or pupe_error($query);
+	// tehd‰‰n avainsana query
+	$result = avainsana("TRY", $kukarow['kieli']);
 
 	echo "<td><select name='tuoteryhma'>";
 	echo "<option value='kaikki' $tuoteryhmasel>".t("Kaikki")."</option>";

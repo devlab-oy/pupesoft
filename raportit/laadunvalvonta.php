@@ -66,8 +66,8 @@ if (isset($tuoteryhmittain)) {
 	echo "<table>";
 	echo "<tr><th>".t("Tuoteryhmä")."</th><th>".t("Selite")."</th><th>".t("Aika")."</th><th>".t("Ajallaan")."</th><th>".t("Etuajassa")."</th><th>".t("Myöhässä")."</th></tr>";
 	foreach ($tuoteryh as $key) {
-			$query = "SELECT avainsana.selitetark FROM avainsana WHERE avainsana.yhtio = '$kukarow[yhtio]' AND avainsana.selite = '$key[try]' AND avainsana.laji = 'try'";
-			$seliteres = mysql_query($query) or pupe_error($query);
+			// tehdään avainsana query
+			$seliteres = avainsana("TRY", $kukarow['kieli'], $key["try"]);
 			$seliterow = mysql_fetch_array($seliteres);
 			echo "<tr><td align='right'>$key[try]</td><td align='left'>";
 				if ($seliterow[selitetark]) {

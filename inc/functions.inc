@@ -1353,6 +1353,61 @@ if (!function_exists("avain")) {
 
 }
 
+if(!function_exists("avainsana")) {
+	function avainsana($laji, $kieli = '', $selite = '', $yhtio = '', $limit = '') {
+		global $kukarow, $yhtiorow;
+
+		$laji = mysql_real_escape_string($laji);
+		$limit = mysql_real_escape_string($limit);
+		
+		if ($kieli == "") {
+			$kieli = $kukarow["kieli"];
+		}
+		else {
+			$kieli = mysql_real_escape_string($kieli);
+		}
+		
+		if ($selite != "") {
+			$querylisa = " and avainsana.selite = '".mysql_real_escape_string($selite)."' ";
+		}
+		else {
+			$querylisa = "";
+		}
+
+		if ($yhtio != "") {
+			$yhtiolisa = " avainsana.yhtio in ($yhtio) ";
+		}
+		else {
+			$yhtiolisa = " avainsana.yhtio = '$kukarow[yhtio]' ";
+		}
+
+		if ($limit != "") {
+			$limitlisa = " limit $limit";
+		}
+		else {
+			$limitlisa = "";
+		}
+
+		$query = "	SELECT avainsana.*,
+					IFNULL((SELECT avainsana_kieli.selitetark
+					FROM avainsana as avainsana_kieli
+					WHERE avainsana_kieli.yhtio = avainsana.yhtio
+					and avainsana_kieli.laji = avainsana.laji
+					and avainsana_kieli.selite = avainsana.selite
+					and avainsana_kieli.kieli = '$kieli'), avainsana.selitetark) selitetark
+					FROM avainsana
+					WHERE $yhtiolisa
+					and avainsana.laji = '$laji'
+					and avainsana.kieli in ('$yhtiorow[kieli]', '')
+					$querylisa
+					ORDER BY avainsana.jarjestys, avainsana.selite+0
+					$limitlisa";
+		$result = mysql_query($query) or pupe_error($query);
+
+		return $result;
+	}
+}
+
 if(!function_exists("desim")) {
 	function desim($summa) {
 		global $kukarow, $yhtiorow;

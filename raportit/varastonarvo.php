@@ -42,8 +42,8 @@ if ($valitaan_useita == "") {
 	echo "<table>";
 
 	// n‰ytet‰‰n soveltuvat osastot
-	$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' order by avainsana.selite+0";
-	$res2  = mysql_query($query) or die($query);
+	// tehd‰‰n avainsana query
+	$res2 = avainsana("OSASTO");
 
 	$sel = "";
 	if ($osasto == "kaikki") $sel = "selected";
@@ -72,8 +72,8 @@ if ($valitaan_useita == "") {
 	}
 
 	// n‰ytet‰‰n soveltuvat tuoteryhm‰t
-	$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','TRY_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' order by avainsana.selite+0";
-	$res2   = mysql_query($query) or die($query);
+	// tehd‰‰n avainsana query
+	$res2 = avainsana("TRY");
 
 	echo "<tr><th>",t("Tuoteryhm‰"),":</th><td>";
 	echo "<select name='tuoteryhma'>";
@@ -109,8 +109,8 @@ else {
 		echo "<table><tr><td valign='top' class='back'>";
 
 		// n‰ytet‰‰n soveltuvat osastot
-		$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' order by avainsana.selite+0";
-		$res2  = mysql_query($query) or die($query);
+		// tehd‰‰n avainsana query
+		$res2 = avainsana("OSASTO");
 
 		if (mysql_num_rows($res2) > 11) {
 			echo "<div style='height:265;overflow:auto;'>";
@@ -154,8 +154,8 @@ else {
 		foreach ($mul_osasto as $kala) {
 			echo "<input type='hidden' name='mul_osasto[]' value='$kala'>";
 
-			$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' and avainsana.selite='$kala'";
-			$res3   = mysql_query($query) or die($query);
+			// tehd‰‰n avainsana query
+			$res3 = avainsana("OSASTO", $kukarow['kieli'], $kala);
 			$selrow = mysql_fetch_array($res3);
 
 			echo "<tr><td>$kala - $selrow[selitetark]</td></tr>";
@@ -172,8 +172,8 @@ else {
 		echo "</td><td valign='top' class='back'>";
 
 		// n‰ytet‰‰n soveltuvat osastot
-		$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','TRY_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' order by avainsana.selite+0";
-		$res2  = mysql_query($query) or die($query);
+		// tehd‰‰n avainsana query
+		$res2 = avainsana("TRY");
 
 		if (mysql_num_rows($res2) > 11) {
 			echo "<div style='height:265;overflow:auto;'>";
@@ -221,8 +221,8 @@ else {
 
 			echo "<input type='hidden' name='mul_osasto[]' value='$kala'>";
 
-			$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' and avainsana.selite='$kala'";
-			$res3   = mysql_query($query) or die($query);
+			// tehd‰‰n avainsana query
+			$res3 = avainsana("OSASTO", $kukarow['kieli'], $kala);
 			$selrow = mysql_fetch_array($res3);
 
 			echo "<tr><td>$kala - $selrow[selitetark]</td></tr>";
@@ -255,8 +255,8 @@ else {
 
 			echo "<input type='hidden' name='mul_try[]' value='$kala'>";
 
-			$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','TRY_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' and avainsana.selite='$kala'";
-			$res3   = mysql_query($query) or die($query);
+			// tehd‰‰n avainsana query
+			$res3 = avainsana("TRY", $kukarow['kieli'], $kala);
 			$selrow = mysql_fetch_array($res3);
 
 			echo "<tr><td>$kala - $selrow[selitetark]</td></tr>";

@@ -222,12 +222,8 @@
 	echo "<tr><th>".t("Syötä tuotenumeroväli (Ei pakollinen)").":</th>
 			<td colspan='3'><input type='text' name='tuotealku' value='$tuotealku' size='15'> - <input type='text' name='tuoteloppu' value='$tuoteloppu' size='15'></td></tr>";
 
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','OSASTO_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO'
-				ORDER BY avainsana.selite+0";
-	$sresult = mysql_query($query) or pupe_error($query);
+	// tehdään avainsana query
+	$sresult = avainsana("OSASTO", $kukarow['kieli']);
 	
 	echo "<tr><th>".t("Osasto (Ei pakollinen)")."</th><td colspan='3'>";
 	
@@ -244,12 +240,8 @@
 	echo "</select>";
 	echo "</td></tr>";
 	
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','TRY_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY'
-				ORDER BY avainsana.selite+0";
-	$sresult = mysql_query($query) or pupe_error($query);
+	// tehdään avainsana query
+	$sresult = avainsana("TRY", $kukarow['kieli']);
 	
 	echo "<tr><th>".t("Tuoteryhmä (Ei pakollinen)")."</th><td colspan='3'>";
 	

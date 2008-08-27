@@ -43,12 +43,8 @@
 	echo "<th>".t("Syötä tai valitse osasto").":</th>";
 	echo "<td><input type='text' name='osasto' size='10'></td>";
 
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','OSASTO_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO'
-				ORDER BY selite";
-	$sresult = mysql_query($query) or pupe_error($query);
+	// tehdään avainsana query
+	$sresult = avainsana("OSASTO", $kukarow['kieli']);
 
 	echo "<td><select name='osasto2'>";
 	echo "<option value=''>".t("Osasto")."</option>";
@@ -66,12 +62,8 @@
 	echo "<th>".t("Syötä tai valitse tuoteryhmä").":</th>";
 	echo "<td><input type='text' name='try' size='10'></td>";
 
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','TRY_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY'
-				ORDER BY selite";
-	$sresult = mysql_query($query) or pupe_error($query);
+	// tehdään avainsana query
+	$sresult = avainsana("TRY", $kukarow['kieli']);
 
 	echo "<td><select name='try2'>";
 	echo "<option value=''>".t("Tuoteryhmä")."</option>";

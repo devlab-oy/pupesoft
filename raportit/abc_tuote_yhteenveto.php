@@ -25,12 +25,8 @@
 	echo "<th>".t("Syötä tai valitse osasto").":</th>";
 	echo "<td><input type='text' name='osasto' size='10'></td>";
 
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','OSASTO_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO'
-				ORDER BY selite";
-	$sresult = mysql_query($query) or pupe_error($query);
+	// tehdään avainsana query
+	$sresult = avainsana("OSASTO", $kukarow['kieli']);
 
 	echo "<td><select name='osasto2'>";
 	echo "<option value=''>".t("Osasto")."</option>";
@@ -51,12 +47,8 @@
 	echo "<th>".t("Syötä tai valitse tuoteryhmä").":</th>";
 	echo "<td><input type='text' name='try' size='10'></td>";
 
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','TRY_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY'
-				ORDER BY selite";
-	$sresult = mysql_query($query) or pupe_error($query);
+	// tehdään avainsana query
+	$sresult = avainsana("TRY", $kukarow['kieli']);
 
 	echo "<td><select name='try2'>";
 	echo "<option value=''>".t("Tuoteryhmä")."</option>";
@@ -274,23 +266,16 @@
 			echo "<tr>";
 			
 			if ($osasto == 'KAIKKI') {
-				$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-							FROM avainsana
-							".avain('join','OSASTO_')."
-							WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' and avainsana.selite='$row[osasto]'";
-				$keyres = mysql_query($query) or pupe_error($query);
+				// tehdään avainsana query
+				$keyres = avainsana("OSASTO", $kukarow['kieli'], $row["osasto"]);
 				$keyosa = mysql_fetch_array($keyres);
 				
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]&lisatiedot=$lisatiedot'>$row[osasto] $keyosa[selitetark]</a></td>";
 			}
 			
 			if ($try == 'KAIKKI') {
-				
-				$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-							FROM avainsana
-							".avain('join','TRY_')."
-							WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' and avainsana.selite='$row[try]'";
-				$keyres = mysql_query($query) or pupe_error($query);
+				// tehdään avainsana query
+				$keyres = avainsana("TRY", $kukarow['kieli'], $row["try"]);
 				$keytry = mysql_fetch_array($keyres);
 				
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&try=$row[try]&lisatiedot=$lisatiedot'>$row[try] $keytry[selitetark]</a></td>";

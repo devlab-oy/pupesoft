@@ -94,8 +94,8 @@ function rivi ($firstpage) {
 		$indexi = 0;
 	}
 
-	$query = "select selitetark from avainsana where laji='try' and selite='$row[try]' and yhtio='$kukarow[yhtio]'";
-	$tryre = mysql_query($query) or pupe_error($query);
+	// tehdään avainsana query
+	$tryre = avainsana("TRY", $kukarow['kieli'], $row["try"]);
 	$tryro = mysql_fetch_array($tryre);
 
 	$pdf->draw_text(30,  $kala, $row["try"],		$firstpage, $norm);		

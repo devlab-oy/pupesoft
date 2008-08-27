@@ -40,12 +40,19 @@ if (($kausi1!='') and ($kausi2!='') and ($osasto!='') and ($try!=''))
     $trynimet    = array();
 
 
-	$query = "	select distinct avainsana.selite, ".avain('select')."
-				from avainsana
-				".avain('join','OSASTO_')."
-				where avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji = 'OSASTO'
+	$query = "	SELECT DISTINCT avainsana.*, 
+				IFNULL((SELECT avainsana_kieli.selitetark
+				FROM avainsana as avainsana_kieli
+				WHERE avainsana_kieli.yhtio = avainsana.yhtio
+				and avainsana_kieli.laji = avainsana.laji
+				and avainsana_kieli.selite = avainsana.selite
+				and avainsana_kieli.kieli = '$kukarow[kieli]'), avainsana.selitetark) selitetark
+				FROM avainsana
+				WHERE avainsana.yhtio = '$kukarow[yhtio]' 
+				and avainsana.laji = 'OSASTO'
+				and avainsana.kieli in ('$yhtiorow[kieli]', '')
 				and avainsana.selite>='$osasto' and avainsana.selite<='$osastol'
-				order by avainsana.jarjestys";
+				ORDER BY avainsana.selite+0";
 	$res   = mysql_query ($query) or die("$query<br><br>".mysql_error());
 
 	while ($row=mysql_fetch_array($res)) {
@@ -53,12 +60,19 @@ if (($kausi1!='') and ($kausi2!='') and ($osasto!='') and ($try!=''))
 		$osastonimet[$row['selite']] = $row["selitetark"];
 	}
 
-	$query = "	select distinct avainsana.selite, ".avain('select')."
-				from avainsana
-				".avain('join','TRY_')."
-				where avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji = 'TRY'
+	$query = "	SELECT DISTINCT avainsana.*, 
+				IFNULL((SELECT avainsana_kieli.selitetark
+				FROM avainsana as avainsana_kieli
+				WHERE avainsana_kieli.yhtio = avainsana.yhtio
+				and avainsana_kieli.laji = avainsana.laji
+				and avainsana_kieli.selite = avainsana.selite
+				and avainsana_kieli.kieli = '$kukarow[kieli]'), avainsana.selitetark) selitetark
+				FROM avainsana
+				WHERE avainsana.yhtio = '$kukarow[yhtio]' 
+				and avainsana.laji = 'TRY'
+				and avainsana.kieli in ('$yhtiorow[kieli]', '')
 				and avainsana.selite>='$try' and avainsana.selite<='$tryl'
-				order by avainsana.jarjestys";
+				ORDER BY avainsana.selite+0";
 	$res   = mysql_query ($query) or die("$query<br><br>".mysql_error());
 
 	while ($row=mysql_fetch_array($res)) {

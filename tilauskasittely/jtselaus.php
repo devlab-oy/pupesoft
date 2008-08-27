@@ -1691,11 +1691,8 @@
 		echo "<tr>";
 		echo "<th>".t("Tuoteosasto")."</th>";
 
-		$query = "	SELECT *
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji='OSASTO'
-					ORDER BY selite+0";
-		$result = mysql_query($query) or pupe_error($query);
+		// tehd‰‰n avainsana query
+		$result = avainsana("OSASTO", $kukarow['kieli']);
 
 		echo "<td><select name='tuoteosasto'>";
 		echo "<option value=''>".t("Tuoteosasto")."</option>";
@@ -1712,11 +1709,8 @@
 		echo "<tr>";
 		echo "<th>".t("Tuoteryhm‰")."</th>";
 
-		$query = "	SELECT *
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji='TRY'
-					ORDER BY selite+0";
-		$result = mysql_query($query) or pupe_error($query);
+		// tehd‰‰n avainsana query
+		$result = avainsana("TRY", $kukarow['kieli']);
 
 		echo "<td><select name='tuoteryhma'>";
 		echo "<option value=''>".t("Tuoteryhm‰")."</option>";

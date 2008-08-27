@@ -371,6 +371,22 @@
 						$gluku++;
 					}
 
+					if ($mukaan == "konserni") {
+						if ($group != "") {
+							$group .= ",konserni";
+						}
+						else {
+							$group  .= "konserni";
+						}
+						$select .= "asiakas.konserni, ";
+						$order  .= "konserni,";
+						$gluku++;
+						
+						if ($rajaus[$i] != "") {
+							$lisa .= " and asiakas.konserni = '$rajaus[$i]' ";
+						}
+					}
+
 					if ($mukaan == "ytunnus" and $osoitetarrat == "") {
 						if ($group!="") $group .= ",asiakas.tunnus";
 						else $group  .= "asiakas.tunnus";
@@ -1081,12 +1097,8 @@
 
 							// jos kyseessa on tuoteosasto, haetaan sen nimi
 							if (mysql_field_name($result, $i) == "tuos") {
-								$query = "	SELECT avainsana.selite, ".avain('select')."
-											FROM avainsana
-											".avain('join','OSASTO_')."
-											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='OSASTO' and avainsana.selite='$row[$i]'
-											limit 1";
-								$osre = mysql_query($query) or pupe_error($query);
+								// tehd‰‰n avainsana query
+								$osre = avainsana("OSASTO", $kukarow['kieli'], $row[$i], $yhtio, "1");
 								if (mysql_num_rows($osre) == 1) {
 									$osrow = mysql_fetch_array($osre);
 									$row[$i] = $row[$i] ." ". $osrow['selitetark'];
@@ -1095,12 +1107,8 @@
 
 							// jos kyseessa on tuoteosasto, haetaan sen nimi
 							if (mysql_field_name($result, $i) == "tuoteryhm‰") {
-								$query = "	SELECT avainsana.selite, ".avain('select')."
-											FROM avainsana
-											".avain('join','TRY_')."
-											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='TRY' and avainsana.selite='$row[$i]'
-											limit 1";
-								$osre = mysql_query($query) or pupe_error($query);
+								// tehd‰‰n avainsana query
+								$osre = avainsana("TRY", $kukarow['kieli'], $row[$i], $yhtio, "1");
 								if (mysql_num_rows($osre) == 1) {
 									$osrow = mysql_fetch_array($osre);
 									$row[$i] = $row[$i] ." ". $osrow['selitetark'];
@@ -1744,11 +1752,8 @@
 			echo "<td valign='top'>";
 
 			// n‰ytet‰‰n soveltuvat osastot
-			$query = "	SELECT avainsana.selite, ".avain('select')."
-						FROM avainsana ".avain('join','OSASTO_')."
-						WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO'
-						order by avainsana.jarjestys, avainsana.selite";
-			$res2  = mysql_query($query) or die($query);
+			// tehd‰‰n avainsana query
+			$res2 = avainsana("OSASTO", $kukarow['kieli']);
 
 			echo "<select name='mul_osasto[]' multiple='TRUE' size='10' style='width:100%;'>";
 
@@ -1777,12 +1782,8 @@
 			echo "<td valign='top' class='back'>";
 
 			// n‰ytet‰‰n soveltuvat tryt
-			$query = "	SELECT avainsana.selite, ".avain('select')."
-						FROM avainsana ".avain('join','TRY_')."
-						WHERE avainsana.yhtio='$kukarow[yhtio]'
-						and avainsana.laji='TRY'
-						order by avainsana.jarjestys, avainsana.selite";
-			$res2  = mysql_query($query) or die($query);
+			// tehd‰‰n avainsana query
+			$res2 = avainsana("TRY", $kukarow['kieli']);
 
 			echo "<select name='mul_try[]' multiple='TRUE' size='10' style='width:100%;'>";
 
@@ -1873,6 +1874,7 @@
 			if ($ruksit[140]  != '') 		$ruk140chk 				= "CHECKED";
 			if ($ruksit[150] != '') 		$ruk150chk 				= "CHECKED";
 			if ($ruksit[160] != '')			$ruk160chk 				= "CHECKED";
+			if ($ruksit[170] != '')			$ruk170chk 				= "CHECKED";
 			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
 			if ($kateprossat != '')  		$katchk   				= "CHECKED";
 			if ($nettokateprossat != '')	$nettokatchk			= "CHECKED";
@@ -2029,6 +2031,12 @@
 				<td><input type='text' name='jarjestys[160]' size='2' value='$jarjestys[160]'></td>
 				<td><input type='checkbox' name='ruksit[160]' value='myyja' $ruk160chk></td>
 				<td><input type='text' name='rajaus[160]' value='$rajaus[160]'></td>
+				</tr>
+				<tr>
+				<th>".t("Listaa konsernittain")."</th>
+				<td><input type='text' name='jarjestys[170]' size='2' value='$jarjestys[170]'></td>
+				<td><input type='checkbox' name='ruksit[170]' value='konserni' $ruk170chk></td>
+				<td><input type='text' name='rajaus[170]' value='$rajaus[170]'></td>
 				</tr>
 				<tr>
 				<td class='back'><br></td>

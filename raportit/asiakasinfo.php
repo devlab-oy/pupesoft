@@ -392,22 +392,12 @@ if ($ytunnus!='') {
 
 			echo "<td valign='bottom' class='back'>";
 
-			$query = "	select avainsana.selite, ".avain('select')."
-						from avainsana
-						".avain('join','TRY_')."
-						where avainsana.yhtio	= '$kukarow[yhtio]'
-						and avainsana.laji	= 'TRY'
-						and avainsana.selite	= '$sumrow[try]'";
-			$avainresult = mysql_query($query) or pupe_error($query);
+			// tehd‰‰n avainsana query
+			$avainresult = avainsana("TRY", $kukarow['kieli'], $sumrow["try"]);
 			$tryrow = mysql_fetch_array($avainresult);
 
-			$query = "	select avainsana.selite, ".avain('select')."
-						from avainsana
-						".avain('join','OSASTO_')."
-						where avainsana.yhtio	= '$kukarow[yhtio]'
-						and avainsana.laji	= 'OSASTO'
-						and avainsana.selite	= '$sumrow[osasto]'";
-			$avainresult = mysql_query($query) or pupe_error($query);
+			// tehd‰‰n avainsana query
+			$avainresult = avainsana("OSASTO", $kukarow['kieli'], $sumrow["osasto"]);
 			$osastorow = mysql_fetch_array($avainresult);
 
 			if ($nimet == 'nayta') {
@@ -708,14 +698,16 @@ if ($ytunnus!='') {
 			$tryt 		= array();			
 			
 			//	Haetaan osastot ja avainsanat muistiin
-			$query = "	SELECT * FROM avainsana WHERE yhtio = '{$kukarow["yhtio"]}' and laji = 'OSASTO'";
-			$tryres = mysql_query($query) or pupe_error($query);
+			// tehd‰‰n avainsana query
+			$tryres = avainsana("OSASTO", $kukarow['kieli']);
+
 			while($tryrow = mysql_fetch_array($tryres)) {
 				$osastot[$tryrow["selite"]] = $tryrow["selitetark"];
 			}
 
-			$query = "	SELECT * FROM avainsana WHERE yhtio = '{$kukarow["yhtio"]}' and laji = 'TRY'";
-			$tryres = mysql_query($query) or pupe_error($query);
+			// tehd‰‰n avainsana query
+			$tryres = avainsana("TRY", $kukarow['kieli']);
+
 			while($tryrow = mysql_fetch_array($tryres)) {
 				$tryt[$tryrow["selite"]] = $tryrow["selitetark"];
 			}

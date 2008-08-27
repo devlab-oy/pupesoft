@@ -1394,7 +1394,7 @@ if(!function_exists("avainsana")) {
 					WHERE avainsana_kieli.yhtio = avainsana.yhtio
 					and avainsana_kieli.laji = avainsana.laji
 					and avainsana_kieli.selite = avainsana.selite
-					and avainsana_kieli.kieli = '$kieli'), avainsana.selitetark) selitetark,
+					and avainsana_kieli.kieli = '$kieli' LIMIT 1), avainsana.selitetark) selitetark,
 					avainsana.*
 					FROM avainsana
 					WHERE $yhtiolisa

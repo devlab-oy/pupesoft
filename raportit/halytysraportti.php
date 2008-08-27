@@ -2176,11 +2176,8 @@
 					<table>
 					<tr><th>".t("Osasto")."</th><td>";
 
-			$query = "	SELECT distinct selite, selitetark
-						FROM avainsana
-						WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO'
-						ORDER BY selite+0";
-			$sresult = mysql_query($query) or pupe_error($query);
+			// tehd‰‰n avainsana query
+			$sresult = avainsana("OSASTO", $kukarow['kieli']);
 
 			echo "<select name='osasto'>";
 			echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
@@ -2199,11 +2196,8 @@
 					<tr><th>".t("Tuoteryhm‰")."</th><td>";
 
 			//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
-			$query = "	SELECT distinct selite, selitetark
-						FROM avainsana
-						WHERE yhtio='$kukarow[yhtio]' and laji='TRY'
-						ORDER BY selite+0";
-			$sresult = mysql_query($query) or pupe_error($query);
+			// tehd‰‰n avainsana query
+			$sresult = avainsana("TRY", $kukarow['kieli']);
 
 			echo "<select name='tuoryh'>";
 			echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
@@ -2329,19 +2323,13 @@
 				$k3 = "CHECKED";
 
 			if ($tuoryh != '') {
-				$query = "	SELECT distinct selite, selitetark
-							FROM avainsana
-							WHERE yhtio='$kukarow[yhtio]' and laji='TRY'
-							and selite='$tuoryh'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				// tehd‰‰n avainsana query
+				$sresult = avainsana("TRY", $kukarow['kieli'], $tuoryh);
 				$srow = mysql_fetch_array($sresult);
 			}
 			if ($osasto != '') {
-				$query = "	SELECT distinct selite, selitetark
-							FROM avainsana
-							WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO'
-							and selite='$osasto'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				// tehd‰‰n avainsana query
+				$sresult = avainsana("OSASTO", $kukarow['kieli'], $osasto);
 				$trow = mysql_fetch_array($sresult);
 			}
 			if ($toimittajaid != '') {

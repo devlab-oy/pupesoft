@@ -1388,14 +1388,13 @@ if(!function_exists("avainsana")) {
 			$limitlisa = "";
 		}
 
-		$query = "	SELECT DISTINCT avainsana.selite, 
+		$query = "	SELECT DISTINCT avainsana.*, 
 					IFNULL((SELECT avainsana_kieli.selitetark
 					FROM avainsana as avainsana_kieli
 					WHERE avainsana_kieli.yhtio = avainsana.yhtio
 					and avainsana_kieli.laji = avainsana.laji
 					and avainsana_kieli.selite = avainsana.selite
-					and avainsana_kieli.kieli = '$kieli' LIMIT 1), avainsana.selitetark) selitetark,
-					avainsana.*
+					and avainsana_kieli.kieli = '$kieli' LIMIT 1), avainsana.selitetark) selitetark
 					FROM avainsana
 					WHERE $yhtiolisa
 					and avainsana.laji = '$laji'

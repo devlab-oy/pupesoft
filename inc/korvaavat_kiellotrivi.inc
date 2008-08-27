@@ -9,20 +9,17 @@
 	}
 
 	if (mysql_field_name($result, $i) == "try") {
-		$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-					FROM avainsana
-					".avain('join','TRY_')."
-					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY'";
-		$sresult = mysql_query($query) or pupe_error($query);
+		// tehd‰‰n avainsana query
+		$sresult = avainsana("TRY", $kukarow['kieli']);
 
 		$ulos = "<td><select name='$nimi'>";
 
 		while ($srow = mysql_fetch_array($sresult)) {
 			$sel = '';
-			if ($trow[$i] == $srow[0]) {
+			if ($trow[$i] == $srow["selite"]) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
+			$ulos .= "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
 		}
 
 		$sel = '';
@@ -36,20 +33,17 @@
 	}
 
 	if (mysql_field_name($result, $i) == "osasto") {
-		$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-					FROM avainsana
-					".avain('join','OSASTO_')."
-					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO'";
-		$sresult = mysql_query($query) or pupe_error($query);
+		// tehd‰‰n avainsana query
+		$sresult = avainsana("OSASTO", $kukarow['kieli']);
 
 		$ulos = "<td><select name='$nimi'>";
 
 		while ($srow = mysql_fetch_array($sresult)) {
 			$sel = '';
-			if ($trow[$i] == $srow[0]) {
+			if ($trow[$i] == $srow["selite"]) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
+			$ulos .= "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
 		}
 
 		$sel = '';

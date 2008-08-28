@@ -4672,7 +4672,7 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 					}
 					else {
 						sndReq(oi, html+'&ohje=off&sulje='+oi);
-						popUp_timeout = setTimeout("popUp('html', '"+oi+"', '"+x+"', '"+y+"');", 250);
+						popUp_timeout = setTimeout("popUp('html', '"+oi+"', '"+x+"', '"+y+"');", 500);
 						return true;
 					}
 				}

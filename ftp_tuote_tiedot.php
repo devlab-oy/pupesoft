@@ -243,7 +243,7 @@ if ($tee == "aja") {
 					if(isnull(en.selitetark) or en.selitetark='', '', en.selitetark) as nimitys_en, if(isnull(en.selitetark_3) or en.selitetark_3='', '', en.selitetark_3) as kuvaus_en,
 					if(isnull(ru.selitetark) or ru.selitetark='', '', ru.selitetark) as nimitys_ru, if(isnull(ru.selitetark_3) or ru.selitetark_3='', '', ru.selitetark_3) as kuvaus_ru,
 					if(isnull(ee.selitetark) or ee.selitetark='', '', ee.selitetark) as nimitys_ee, if(isnull(ee.selitetark_3) or ee.selitetark_3='', '', ee.selitetark_3) as kuvaus_ee,
-					if(isnull(se.selitetark) or de.selitetark='', '', de.selitetark) as nimitys_de, if(isnull(de.selitetark_3) or de.selitetark_3='', '', de.selitetark_3) as kuvaus_de
+					if(isnull(de.selitetark) or de.selitetark='', '', de.selitetark) as nimitys_de, if(isnull(de.selitetark_3) or de.selitetark_3='', '', de.selitetark_3) as kuvaus_de
 					FROM avainsana
 					LEFT JOIN avainsana AS se on avainsana.yhtio = se.yhtio and avainsana.selitetark = se.selite and se.laji = 'OSASTO_SE' and avainsana.jarjestys = se.jarjestys
 					LEFT JOIN avainsana AS en on avainsana.yhtio = en.yhtio and avainsana.selitetark = en.selite and en.laji = 'OSASTO_EN' and avainsana.jarjestys = en.jarjestys
@@ -265,7 +265,7 @@ if ($tee == "aja") {
 					if(isnull(en.selitetark) or en.selitetark='', '', en.selitetark) as nimitys_en, if(isnull(en.selitetark_3) or en.selitetark_3='', '', en.selitetark_3) as kuvaus_en,
 					if(isnull(ru.selitetark) or ru.selitetark='', '', ru.selitetark) as nimitys_ru, if(isnull(ru.selitetark_3) or ru.selitetark_3='', '', ru.selitetark_3) as kuvaus_ru,
 					if(isnull(ee.selitetark) or ee.selitetark='', '', ee.selitetark) as nimitys_ee, if(isnull(ee.selitetark_3) or ee.selitetark_3='', '', ee.selitetark_3) as kuvaus_ee,
-					if(isnull(se.selitetark) or de.selitetark='', '', de.selitetark) as nimitys_de, if(isnull(de.selitetark_3) or de.selitetark_3='', '', de.selitetark_3) as kuvaus_de
+					if(isnull(de.selitetark) or de.selitetark='', '', de.selitetark) as nimitys_de, if(isnull(de.selitetark_3) or de.selitetark_3='', '', de.selitetark_3) as kuvaus_de
 					FROM avainsana
 					LEFT JOIN avainsana AS se on avainsana.yhtio = se.yhtio and avainsana.selitetark = se.selite and se.laji = 'TRY_SE' and avainsana.jarjestys = se.jarjestys
 					LEFT JOIN avainsana AS en on avainsana.yhtio = en.yhtio and avainsana.selitetark = en.selite and en.laji = 'TRY_EN' and avainsana.jarjestys = en.jarjestys

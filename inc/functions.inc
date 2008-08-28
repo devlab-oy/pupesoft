@@ -4617,8 +4617,74 @@ function getMouseY(e) {
 }
 
 var popUp_timeout=0;
+var poUp_closeTimeOut=new Array();
 
-function popUp(e, oi, offsetX, offsetY, html, styleClass) {
+function closeOnExit(event, oi) {
+	
+
+	recurce=true;
+	r=event.relatedTarget;
+	r_orog = r;
+	while(recurce) {
+		
+		x=r.childNodes;
+		
+		if(r.id == oi) {
+			recurce = false;
+			return true;
+		}
+		
+		for (i=0;i<x.length;i++) {
+
+			if(x[i].id==oi) {
+				alert(r.tagName+' | '+x[i].id);
+				recurce = false;
+				return true;
+			}
+		}
+
+		r=r.parentNode;		
+		if(r == null || r.tagName == "BODY") {
+
+
+			o=document.getElementById(oi);
+
+			closePopUp(oi, o.id);
+			recurce = false;
+			return false;
+		}
+	}
+}
+
+function closePopUp(oi) {
+	poUp_closeTimeOut[oi] = setTimeout("document.body.removeChild(document.getElementById('"+oi+"'));", 400);
+	//alert(poUp_closeTimeOut[oi]);
+}
+function stopClose(oi) {
+	if(poUp_closeTimeOut[oi] > 0) {
+		clearTimeout(poUp_closeTimeOut[oi]);
+	}
+}
+
+function getEventCaller (e) {
+	if (e.target) targ = e.target;
+		else if (e.srcElement) targ = e.srcElement;
+		if (targ.nodeType == 3)
+			targ = targ.parentNode;
+
+	return targ;
+}
+
+function popUp(e, oi, offsetX, offsetY, html, styleClass, closeOnExit) {
+	oio= oi;
+	if(oi.indexOf(":")>0) {
+		c=oi.split(":");
+		appendTo = c[0];
+		oi=c[1];
+	}
+	else {
+		appendTo = false;
+	}
 
 	if(!document.getElementById(oi)) {
 		var myDiv = document.createElement('div');
@@ -4633,6 +4699,20 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 		myDiv.setAttribute('id', oi);
 		myDiv.setAttribute('name', 'dynamic_'+oi);
 		myDiv.style.display = 'block';
+		
+		//caller = getEventCaller(e);
+
+		//	Suljetaan n‰‰ aina kun menn‰‰ pois divist‰
+		if(closeOnExit) {
+			myDiv.setAttribute("onMouseOut", "closeOnExit(event, '"+oi+"');");
+			if(appendTo) {
+				myDiv.setAttribute("onMouseOver", "stopClose('"+appendTo+"'); stopClose('"+oi+"');");
+			}
+			else {
+				myDiv.setAttribute("onMouseOver", "stopClose('"+oi+"');");
+			}
+		}
+		
 		document.body.appendChild(myDiv);
 	}
 
@@ -4646,7 +4726,7 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass) {
 
 		//	Jos meill‰ oli dynaamisesti ladattu elementti poistetaan se kokonaan..
 		if(de.name=='dynamic_'+de.id) {
-			document.body.removeChild(de);
+			closePopUp(de);
 		}
 		else {
 			de.style.visibility='hidden';

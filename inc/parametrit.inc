@@ -517,6 +517,13 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
 	require("connect.inc");
 	
+	/*
+		tehdään linkki dokumentaationhallintaan!
+		
+		Funktiot voi kutsua suoraan koodista jos dokumentaationhallinta ei ole käytössä mitään ei ko funktioilla tapahdu
+	*/
+	require("inc/dokumentinhallinta.inc");
+
 }
 
 ?>

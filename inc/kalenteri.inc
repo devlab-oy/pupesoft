@@ -53,26 +53,86 @@
 				$data = "";
 				foreach($valinnat as $key => $valinta) {
 					if(isset($valinta["VALI"])) {
-						$data .= "&menu[$key][vali]=".urlencode($valinta["VALI"]);
+						$data .= "&menu[$key][VALI]=".urlencode($valinta["VALI"]);
 					}
 					else {
-						$data .= "&menu[$key][menu]=".urlencode($valinta["TEKSTI"]); 
-						$data .= "&menu[$key][href]=".urlencode($valinta["HREF"]);
-						$data .= "&menu[$key][div]=".urlencode($valinta["DIV"]);
-						$data .= "&menu[$key][offsetx]=".urlencode($valinta["OFFSETX"]);
-						$data .= "&menu[$key][offsety]=".urlencode($valinta["OFFSETY"]);
-						$data .= "&menu[$key][target]=".urlencode($valinta["TARGET"]);
-						$data .= "&menu[$key][tapa]=".urlencode($valinta["TAPA"]);										
+						foreach(array("TEKSTI", "HREF", "EVENT_ACTION", "ONMOUSEOUT", "DIV", "OFFSETX", "OFFSETY", "TARGET", "TAPA", "EVENT") as $p) {
+							if($valinta[$p] != "") {
+								$data .= "&menu[$key][$p]=".urlencode($valinta[$p]); 
+							}
+						}
 					}
 				}
-
-				$data = "<a href='#' onclick=\"popUp(event, 'ajax_menu', '50', '-10', '{$_SERVER["SCRIPT_NAME"]}?kaletee=GENEROIMENU$data'); return false;\">$nappi</a>";			
+				
+				$data = "<a href='#' onclick=\"popUp(event, 'ajax_menu', '50', '-10', '{$_SERVER["SCRIPT_NAME"]}?kaletee=GENEROIMENU$data', false, true); return false;\">$nappi</a>";
 				return $data;
 			}
 			return true;
 		}
 	}
 
+	if(!function_exists("generoiMenu")) {
+		function generoiMenu($menu) {
+			if(is_array($menu) and count($menu)>0) {
+
+				$ulos =  "<table>";
+				foreach($menu as $item) {
+					if(isset($item["VALI"])) {
+						$ulos .=  "<tr><td class=\"back\" height='20' style='vertical-align: bottom;'><font class='info'>{$item["VALI"]}</font></td></tr>";
+					}
+					else {
+						if($item["TARGET"] == "page") {
+							$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" href=\"{$item["HREF"]}\">$item[TEKSTI]</a></td></tr>";
+						}
+						elseif($item["TARGET"] == "_blank") {
+							$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" href=\"{$item["HREF"]}\" target='_blank'>$item[TEKSTI]</a></td></tr>";
+						}
+						else {
+							if($item["DIV"] != "") {
+								$div = $item["DIV"];
+							}
+							else {
+								$div = "ajax_menu";
+							}
+
+							if($item["EVENT"] != "") {
+								$event = $item["EVENT"];
+							}
+							else {
+								$event = "onclick";
+							}
+							
+							if(isset($item["OFFSETX"])) {
+								$x = $item["OFFSETX"];
+							}
+							else {
+								$x = 50;					
+							}
+
+							if(isset($item["OFFSETY"])) {
+								$y = $item["OFFSETY"];
+							}
+							else {
+								$y = -10;
+							}
+							if($item["TAPA"] == "request") {
+								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" $event=\"divi=document.getElementById('ajax_menu'); divi.innerHTML=''; divi.style.display='none'; sndReq('$div', '$item[HREF]', false, false);\">$item[TEKSTI]</a></td></tr>";	
+							}
+							elseif($item["TAPA"] == "CUSTOM") {
+								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" $event=\"".stripslashes($item["EVENT_ACTION"])."\">$item[TEKSTI]</a></td></tr>";
+							}
+							else {
+								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" href=\"#\" $event=\"divi=document.getElementById('ajax_menu'); divi.innerHTML=''; divi.style.display='none'; popUp(event, '$div', '$x', '$y', '{$item["HREF"]}'); return false;\">$item[TEKSTI]</a></td></tr>";
+							}
+						}
+					}
+				}
+				$ulos .=  "</table>";
+				
+				return $ulos;
+			}
+		}
+	}
 	if(!function_exists("color_code")) {
 		// scripti javascript menujen tekemiseen
 		function color_code ($arvo, $maxvalue) {
@@ -206,7 +266,6 @@
 			$laji		= $krow["laji"];
 			$lajitark	= $krow["laji_tark"];
 			$tunnus		= $krow["tunnus"];
-			
 			if($laji == "kalenteri" or substr($laji, 0, 8) == "kontakti") {
 				$query = "	SELECT  lasku.*, kalenteri.*, if(kentta01='', '***', kentta01) viesti, kalenteri.tyyppi,
 									UNIX_TIMESTAMP(pvmalku) pvmalku, 
@@ -389,7 +448,7 @@
 
 			}
 			elseif($laji == "") {
-				echo "Tuntematon laji '$laji'<br>";
+				echo "<pre>Tuntematon laji ".print_r($krow, true)."</pre><br>";
 				return false;
 			}
 			
@@ -413,41 +472,40 @@
 			if(is_array($kalenteri["kalenteri_ketka"])) {
 				$k=$kalenteri["kalenteri_ketka"]; 
 				$kalenteri["kalenteri_ketka"] = array();
-				foreach($k as $kj) {
-					if($kukalisa == "") {
-						$kukalisa = " and (";
-					}
-					else {
-						$kukalisa .= " or ";
-					}
+				$kukalisa = "";
+				
+				if($k[0] != "kaikki") {
+					foreach($k as $kj) {
+						if($kukalisa == "") {
+							$kukalisa = " and (";
+						}
+						else {
+							$kukalisa .= " or ";
+						}
 
-					if($kj == "myyjat") {
-						$kukalisa .= "kuka.myyja > 0";
-					}
-					elseif($kj == "keraajat") {
-						$kukalisa .= "kuka.keraajanro > 0";
-					}
-					elseif($kj == "projektipaallikot") {
-						$kukalisa .= "kuka.asema = 'PP'";
-					}
-					if($kj == "kaikki") {
-						//Haetaan kaikki k‰ytt‰j‰t joilla on kalenteri k‰ytˆss‰
-						$query = "	SELECT DISTINCT kuka.kuka
-									FROM kuka
-									JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php'";
-					}
-					
-					if($query != "") {
-						$result = mysql_query($query) or pupe_error($query);
-
-						while($row = mysql_fetch_array($result)) {
-							$kalenteri["kalenteri_ketka"][] = $row["kuka"];
+						if($kj == "myyjat") {
+							$kukalisa .= "kuka.myyja > 0";
+						}
+						elseif($kj == "keraajat") {
+							$kukalisa .= "kuka.keraajanro > 0";
+						}
+						elseif($kj == "projektipaallikot") {
+							$kukalisa .= "kuka.asema = 'PP'";
+						}
+						else {
+							die("V‰‰r‰ kj '$kj'");
 						}
 					}
-					else {
-						$kalenteri["kalenteri_ketka"] = "";
-						echo "T‰ll‰st‰ kalenteri_ketka:a ei tunneta '$kj'<br>";
-					}
+				}
+				
+				$query = "	SELECT DISTINCT kuka.kuka
+							FROM kuka
+							JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php'
+							WHERE kuka.yhtio = '$kukarow[yhtio]' $kukalisa";
+				$result = mysql_query($query) or pupe_error($query);
+
+				while($row = mysql_fetch_array($result)) {
+					$kalenteri["kalenteri_ketka"][] = $row["kuka"];
 				}
 			}
 			
@@ -527,7 +585,7 @@
 			//	Tarkistetaan, ett‰ koitetaan n‰ytt‰‰ oikeaa k‰ytt‰k‰‰
 			if(count($kalenteri["kalenteri_ketka"])>0) {
 				foreach($kalenteri["kalenteri_nayta_kuka"] as $key => $val) {
-					if(!array_search($val, $kalenteri["kalenteri_ketka"])) {
+					if(array_search($val, $kalenteri["kalenteri_ketka"] === false)) {
 						unset($kalenteri["kalenteri_nayta_kuka"][$key]);
 					}
 				}
@@ -857,7 +915,6 @@
 							WHERE yhtio='$kukarow[yhtio]' and kuka IN ('".implode("','", $kalenteri["kalenteri_ketka"])."')
 							ORDER BY kuka IN('{$kukarow["kuka"]}') DESC, nimi ";
 				$result = mysql_query($query) or pupe_error($query);
-				
 				if(mysql_num_rows($result)>0) {
 					while($row = mysql_fetch_array($result)) {
 						
@@ -956,7 +1013,7 @@
 			$palkki = array($toiminnot);
 
 			$menu = array();
-			foreach(array("TAPAHTUMALISTAUS", "KALENTERINAKYMA", "KUUKAUSINAKYMA", "VIIKKONAKYMA", "PAIVANAKYMA") as $n) {
+			foreach(array("TAPAHTUMALISTAUS", "KALENTERINAKYMA", "KUUKAUSINAKYMA", "VIIKKONAKYMA", "PAIVANAKYMA", "RIVINAKYMA") as $n) {
 				if($kalenteri["sallittu_nakyma"] == "" or in_array($n, $kalenteri["sallittu_nakyma"])) {
 					$menu[] = array("TEKSTI" => ucfirst(strtolower($n)),		"HREF" => "$kalenteri[URL]?nakyma=$n".url_params($kalenteri), "DIV" => $kalenteri["div"], "TAPA" => "request");
 				} 
@@ -977,15 +1034,9 @@
 			$kale = "<center>".implode("&nbsp;&nbsp;-&nbsp;&nbsp;", $palkki)."</center><br><br>";
 			
 			if($nakyma == "KALENTERINAKYMA" or $nakyma == "KUUKAUSINAKYMA") {
-				$kale .= "
-				<div style='float: left;'>
-				<table>
-				<tr>
-					<th>".t("Vko")."</th></td><th>".t("Ma")."</th><th>".t("Ti")."</th><th>".t("Ke")."</th><th>".t("To")."</th><th>".t("Pe")."</th><th>".t("La")."</th><th>".t("Su")."</th>
-				</tr>";
 
-				$leveys = 7;
 				if($nakyma == "KUUKAUSINAKYMA") {
+										
 					$kaleaika = mktime(0, 0, 0, date("m", $kaleaika), 1, date("Y", $kaleaika));
 					$paivia = cal_days_in_month(CAL_GREGORIAN, date("m", $kaleaika), date("Y", $kaleaika))-2;
 					
@@ -994,17 +1045,18 @@
 					$otsikko	= "Kausi ".date("m", $kaleaika)." - ".date("Y", $kaleaika);
 					
 					$kale .= "<caption><a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$edellinen".url_params($kalenteri)."', '$kalenteri[div]', false);\">&lt;&lt;&nbsp;</a>&nbsp;&nbsp;$otsikko&nbsp;&nbsp;&nbsp;<a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$seuraava".url_params($kalenteri)."', '$kalenteri[div]', false);\">&gt;&gt;</a></caption>";
+					
 				}
 				else {
+										
 					//	K‰sitell‰‰n maksimiajankohta
 					$query = " SELECT DATEDIFF('".date("Y-m-d", $data["tiedot"]["loppustr"])."', '".date("Y-m-d", $data["tiedot"]["alkustr"])."') paivia";
 					$abures = mysql_query($query) or pupe_error($query);
 					$aburow = mysql_fetch_array($abures);
 					$paivia = $aburow["paivia"];
 					$kaleaika = $data["tiedot"]["alkustr"];
-
+										
 				}
-				
 				
 				//	T‰n viikon eka p‰iv‰
 				if(date("N", $kaleaika)>0) {
@@ -1028,13 +1080,23 @@
 				$aburow = mysql_fetch_array($abures);
 				$paivia = $aburow["paivia"]+1;
 				
+				//	Tehd‰‰n otsikot
+				$kale .= "
+				<div style='float: left;'>
+				<table>
+				<tr>
+					<th>".t("Vko")."</th><th>".t("Ma")."</th><th>".t("Ti")."</th><th>".t("Ke")."</th><th>".t("To")."</th><th>".t("Pe")."</th><th>".t("La")."</th><th>".t("Su")."</th>
+				</tr>";
+				
+				$leveys = 7;
 				$height = floor(500/($paivia/7));
+								
 				
 				$tpos=array();
 				$tcolor = array();
 				for($i=0;$i<$paivia;$i++) {
 					$aikastr = strtotime("+$i days", $maanantai);
-					if($i/$leveys == (int) ($i/$leveys)) {
+					if($i/$leveys == (int) ($i/$leveys) and $nakyma!="RIVINAKYMA") {
 						$kale .= "	</tr>
 								<tr style='height: 5px;'>
 									<td class='back'></td>
@@ -1090,7 +1152,7 @@
 							if($row["aika"] == $aikastr and $row["vali"] < 1) {
 								if($u != "") $u .= "<hr>";
 
-								$lisatiedot = hae_lisatiedot($row, 10);	
+								$lisatiedot = hae_lisatiedot($row, 0);
 
 								$u .= $lisatiedot["viesti"];
 							}
@@ -1120,6 +1182,160 @@
 				}			
 
 				$kale .= "</table>
+						</div>
+						<div style='float: left; position: relative; left: 20px;'>$kalejako</div>";
+			}
+			elseif($nakyma == "RIVINAKYMA") {
+
+				//	K‰sitell‰‰n maksimiajankohta
+				$query = " SELECT DATEDIFF('".date("Y-m-d", $data["tiedot"]["loppustr"])."', '".date("Y-m-d", $data["tiedot"]["alkustr"])."') paivia";
+				$abures = mysql_query($query) or pupe_error($query);
+				$aburow = mysql_fetch_array($abures);
+				$paivia = $aburow["paivia"];
+				$kaleaika = $data["tiedot"]["alkustr"];
+				
+				//	T‰n viikon eka p‰iv‰
+				if(date("N", $kaleaika)>0) {
+					$maanantai = strtotime("-2 monday", $kaleaika);
+				}
+				elseif(date("N", $kaleaika)==1) {
+					$maanantai = $kaleaika;
+				}
+				else {
+					$maanantai = strtotime("+1 monday", $kaleaika);
+				}
+				
+				//	varmistetaan ett‰ p‰‰tyt‰‰n sunnuntaihin
+				$vikapaiva = strtotime("+$paivia days", $kaleaika);
+				if(date("N", $vikapaiva)!=0) {
+					$vikapaiva = strtotime("sunday", $vikapaiva);
+				}
+	
+				$query = " SELECT DATEDIFF('".date("Y-m-d", $vikapaiva)."', '".date("Y-m-d", $maanantai)."') paivia";
+				$abures = mysql_query($query) or pupe_error($query);
+				$aburow = mysql_fetch_array($abures);
+				$paivia = $aburow["paivia"]+1;
+				
+				//	Tehd‰‰n otsikot
+				$kale .= "
+				<div style='float: left;'>
+				<table>
+				<tr><td class='back'></td>";
+				
+				$d = 0;
+				for($i=0;$i<$paivia;$i++) {
+					
+					if($d == 7) $d = 0;
+					
+					switch ($d) {
+						case 0:
+							$day = "Ma";
+							break;
+						case 1:
+							$day = "Ti";
+							break;
+						case 2:
+							$day = "Ke";
+							break;
+						case 3:
+							$day = "To";
+							break;
+						case 4:
+							$day = "Pe";
+							break;
+						case 5:
+							$day = "La";
+							break;
+						case 6:
+							$day = "Su";
+							break;
+					}
+					
+					$kale .= "<th>".t($day)." ".date("m.d.", strtotime("+$i days", $maanantai))."</th>";
+
+					$d++;
+				}
+				
+				$kale .= "	</tr>";	
+				
+				$leveys = $paivia;
+				$height = 15;
+				
+				//echo "<pre>data: ".print_r($data, true)."</pre><br>";				
+				$dataByEvent = array();
+				foreach($data["lista"] as $date => $events) {
+					foreach($events as $key => $event) {
+						$dataByEvent[$event["laji"].$event["tunnus"]][$date] = $event;
+					}
+				}
+				//echo "<pre>dataByEvent".print_r($dataByEvent, true)."</pre><br>";
+				
+				foreach($dataByEvent as $event) {
+					
+					$lisatiedot = hae_lisatiedot(current($event), 0);
+					//echo "<pre>lisatiedot: ".print_r($lisatiedot, true)."</pre><br>";
+					$kale .= "<tr class='aktiivi'><th NOWRAP width = '150'>$lisatiedot[viesti]</th>";
+
+					$tcolor = array();
+					
+					for($i=0;$i<$paivia;$i++) {
+						$aikastr = strtotime("+$i days", $maanantai);
+
+						if(date("Ymd", $aikastr) == date("Ymd")) {
+							$color = "rgba(252,245,22,0.5)";
+						}
+						else {
+							$color = "inherit";				
+						}
+						
+						$ulos = "";
+						//echo "<pre>tdata $key".print_r($tdata[$aikastr], true)."</pre><br>";
+						if(is_array($event[$aikastr])) {
+							
+							$row = $event[$aikastr];
+							if(!isset($tcolor[$row["tunnus"]])) {
+								$tcolor[$row["tunnus"]] = color_code(count($tcolor)*13+55, 100);
+							}
+							
+							
+							//	Haetaan ensin useampip‰iv‰iset tapahtumat
+							if($row["vali"] >= 1) {
+								if($row["aika"] == $aikastr) {
+									$ulos = "<div style='height: 15; width; 100%; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";'>{$lisatiedot["viesti"]}</div>";
+								}
+								else {
+									$ulos = " <div style='height: 15; width; 100%; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";'></div>";
+								}
+							}
+							else {
+								$ulos = $lisatiedot["viesti"];
+							}
+						}
+						else {
+							$ulos = "&nbsp;";
+						}
+
+						$kale .= "	<td width='75' height = '$height' NOWRAP style='background-color: $color;'>
+										$ulos
+									</td>";
+
+					}
+					
+					$kale .= "</tr>";
+				}
+				
+				$menu = array();
+				$menu[] = array("TEKSTI" => "Lis‰‰ kalenteriisi", 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
+				$menu[] = array("TEKSTI" => "Lis‰‰ muistutus", 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
+				$menu[] = array("TEKSTI" => "Lis‰‰ asiakasmuistio", 	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
+				
+				$kale .= "
+						<tr>
+							<td>
+								".tee_menu($menu, "<font class='kaleinfo'>".t("Toiminnot")."</font>")."
+							</td>
+						</tr>
+						</table>
 						</div>
 						<div style='float: left; position: relative; left: 20px;'>$kalejako</div>";
 			}
@@ -1397,56 +1613,7 @@
 	}	
 	
 	if($kaletee == "GENEROIMENU") {
-		if(is_array($menu) and count($menu)>0) {
-		
-			echo "<table>";
-			foreach($menu as $item) {
-				if(isset($item["vali"])) {
-					echo "<tr><td class=\"back\" height='20' style='vertical-align: bottom;'><font class='info'>{$item["vali"]}</font></td></tr>";
-				}
-				else {
-					if($item["target"] == "page") {
-						echo "<tr><td class=\"back\"><a class=\"menu\" href=\"{$item["href"]}\">$item[menu]</a></td></tr>";
-					}
-					elseif($item["target"] == "_blank") {
-						echo "<tr><td class=\"back\"><a class=\"menu\" href=\"{$item["href"]}\" target='_blank'>$item[menu]</a></td></tr>";
-					}
-					else {
-						if($item["div"] != "") {
-							$div = $item["div"];
-						}
-						else {
-							$div = "ajax_menu";
-						}
-
-						if(isset($item["offsetx"])) {
-							$x = $item["offsetx"];
-						}
-						else {
-							$x = 50;					
-						}
-
-						if(isset($item["offsety"])) {
-							$y = $item["offsety"];
-						}
-						else {
-							$y = -10;
-						}
-					
-						if($item["tapa"] == "request") {
-							echo "<tr><td class=\"back\"><a class=\"menu\" onclick=\"divi=document.getElementById('ajax_menu'); divi.innerHTML=''; divi.style.display='none'; sndReq('$div', '$item[href]', false, false);\">$item[menu]</a></td></tr>";	
-						}
-						else {
-							echo "<tr><td class=\"back\"><a class=\"menu\" href=\"#\" onclick=\"divi=document.getElementById('ajax_menu'); divi.innerHTML=''; divi.style.display='none'; popUp(event, '$div', '$x', '$y', '{$item["href"]}'); return false;\">$item[menu]</a></td></tr>";	
-						}
-					}
-				}
-			}
-			echo "</table>";
-
-		}
-
-		die("</body></html>");
+		die(generoiMenu($menu)."</body></html>");
 	}
 	
 	if($kaletee == "ANNAKUITTAUS") {

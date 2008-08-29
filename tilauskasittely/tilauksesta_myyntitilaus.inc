@@ -174,6 +174,12 @@
 						$values .= ", '$projekti'";
 						$pvalues .= ", '$projekti'";
 						break;
+					case 'asiakkaan_kohde':
+						//	t‰m‰ talteen!
+						$asiakkaan_kohde = $monistarow2[$i];
+						$values .= ", '$asiakkaan_kohde'";
+						$pvalues .= ", '$asiakkaan_kohde'";
+						break;
 					default:
 						$values .= ", '".$monistarow2[$i]."'";
 						$pvalues .= ", '".$monistarow2[$i]."'";	
@@ -186,6 +192,23 @@
 			if($ptunnus>0) {
 				$kysely  = "INSERT into laskun_lisatiedot ($fields) VALUES ($pvalues)";
 				$insres2 = mysql_query($kysely) or pupe_error($kysely);
+				
+				//	Avataan projektille kansio ja siirret‰‰n tarjouksen dokumentaatio samaan laariin
+				$query = "	SELECT kohde
+							FROM asiakkaan_kohde
+							WHERE yhtio='$kukarow[yhtio]' and tunnus='$asiakkaan_kohde'";
+				$kohderes = mysql_query($query) or pupe_error($query);
+				$kohderow = mysql_fetch_array($kohderes);
+				
+				//	avataan projektille kansio dokumentinhallintaan
+				svnAction("copy", svnDocumentSamplesDirProjects."/{$monistarow2["seuranta"]}", svnProjectsActive."/{$ptunnus} {$monistarow2["seuranta"]} $nimi {$kohderow["kohde"]}", "Projekti avattu");
+				
+				if(svnProjectsQuotationSubDir) {
+					$svnKansio = svnQuotationDirectory($otunnus);
+					if($svnKansio != "") {
+						svnAction("move", $svnKansio, svnProjectsActive."/{$ptunnus} {$monistarow2["seuranta"]} $nimi {$kohderow["kohde"]}/".svnProjectsQuotationSubDir, "Siirrettiin tarjouskansio projektille");
+					}					
+				}
 			}
 			
 			//	Projektin maksusuunnitelma kuuluu projektiotsikolle, ei tilaukselle

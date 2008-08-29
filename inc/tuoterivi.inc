@@ -307,6 +307,19 @@
 			$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "suoratoimitus") {
+		$sele = "";
+
+		if ($trow[$i] == 'S') {
+			$sele = "SELECTED";
+		}
+
+		$ulos = "<td><select name = '$nimi'>
+			<option value=''>".t("Normaalituote")."</option>
+			<option value='S' $sele>".t("Suoratoimitustuote")."</option>";
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "hinnastoon") {
 
 		$sele = $selw = "";

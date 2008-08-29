@@ -455,33 +455,50 @@
 				$sel1 = "";
 				$sel2 = "";
 
-				if ($row["toimittajan_tunnus"] == $krow["liitostunnus"] and $row["hyllyalue"] == "" and $row["hyllynro"] == "") {
-					if ($row["var"] == 'T' or ($row["var"] == "J" and $row["suoraan_laskutukseen"] == "")) {
-						$sel1 = "SELECTED";
-
-						$selpaikka = "$krow[nimi] --> ".t("tilaa")." ".t("varastoon");
-						$selpaikkamaa = "";
-						$selpaikkamyytavissa = 0;
-					}
-					else {
-						$sel2 = "SELECTED";
-
-						$selpaikka = "$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle");
-						$selpaikkamaa = "";
-						$selpaikkamyytavissa = 0;
-					}
+				// katsotaan onko tuote suoratoimituskelpoinen eli onko siellä suoratoimitus-täppä päällä
+				// pitää olla suoratoimitus-täppä päällä jos meillä on yhtiön parametreissä "tee_osto_myyntitilaukselta" arvona W eli "Myyntitilaukselta voi luoda ostotilauksen asiakkaalle, jos se on tuotteen takana sallittu" 
+				// tai muuten ei näytetä dropdownissa "tilaa asiakkaalle"-vaihtoehtoa
+				$query = "	SELECT suoratoimitus
+							FROM tuote
+							WHERE tuote.yhtio = '$kukarow[yhtio]'
+							AND tuote.tuoteno = '$row[tuoteno]'";
+				$suoratoim_result = mysql_query($query) or pupe_error($query);
+				
+				if (mysql_num_rows($suoratoim_result) > 0) {
+					$suoratoim_tuote_row = mysql_fetch_array($suoratoim_result);
+				}
+				else {
+					$suoratoim_tuote_row = "";
 				}
 
-				// tallennetaan riville toimittajan tunnus
-				$title = "$krow[nimi] --> ".t("tilaa")." ".t("varastoon");
-				$paikat .= "<option value='¡¡¡$krow[liitostunnus]' title='$title' $sel1>$title</option>";
+				if ($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Y" or ($yhtiorow["tee_osto_myyntitilaukselta"] == "W" and $suoratoim_tuote_row["suoratoimitus"] != '')) {
+					
+					if ($row["toimittajan_tunnus"] == $krow["liitostunnus"] and $row["hyllyalue"] == "" and $row["hyllynro"] == "") {
+						if ($row["var"] == 'T' or ($row["var"] == "J" and $row["suoraan_laskutukseen"] == "")) {
+							$sel1 = "SELECTED";
 
-				if ($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Y") {
+							$selpaikka = "$krow[nimi] --> ".t("tilaa")." ".t("varastoon");
+							$selpaikkamaa = "";
+							$selpaikkamyytavissa = 0;
+						}
+						else {
+							$sel2 = "SELECTED";
+
+							$selpaikka = "$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle");
+							$selpaikkamaa = "";
+							$selpaikkamyytavissa = 0;
+						}
+					}
+
+					// tallennetaan riville toimittajan tunnus
+					$title = "$krow[nimi] --> ".t("tilaa")." ".t("varastoon");
+					$paikat .= "<option value='¡¡¡$krow[liitostunnus]' title='$title' $sel1>$title</option>";
+
 					$title = "$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle");
 					$paikat .= "<option value='!!!$krow[liitostunnus]' title='$title' $sel2>$title</option>";
-				}
 
-				$paikatlask=$paikatlask+2;
+					$paikatlask=$paikatlask+2;
+				}
 			}
 		}
 		elseif ($kotipaikatlask == 0 and $kpl_st > 0) {

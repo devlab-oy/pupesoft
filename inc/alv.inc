@@ -277,7 +277,7 @@
 					JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
 					tiliointi.korjattu = '' and
-					tiliointi.aputunnus = '' and
+					tiliointi.aputunnus = 0 and
 					tiliointi.tapvm >= '$alkupvm' and
 					tiliointi.tapvm <= '$loppupvm' and
 					tiliointi.tilino in ($alv_tilit)
@@ -455,7 +455,7 @@
 						FROM tiliointi
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 						and tiliointi.korjattu = ''
-						and aputunnus = '$trow[0]'";
+						and aputunnus = '$trow[tunnus]'";
 			$xresult = mysql_query($query) or pupe_error($query);
 
 			$error = '';
@@ -515,7 +515,7 @@
 					AND tiliointi.tapvm >= '$alkupvm'
 					AND tiliointi.tapvm <= '$loppupvm'
 					AND tiliointi.korjattu = ''
-					AND aputunnus = ''
+					AND aputunnus = 0
 					AND tilino in ($alv_tilit)";
 		$result = mysql_query($query) or pupe_error($query);
 

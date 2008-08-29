@@ -326,11 +326,11 @@ if($tee == "NAYTA") {
 		}       
 		else {
 			$kalenteri["kalenteri_tilausdata"]          = array("tilaus", "toimitus", "kerays", "laskutus");
-			$kalenteri["kalenteri_nayta_tilausdata"]    = array("tilaus", "laskutus", "toimitus");
+			$kalenteri["kalenteri_nayta_tilausdata"]    = array("");
 		}
 		
 		$kalenteri["kalenteri_tyypit"]      = array("kalenteri", "Memo", "Muistutus");
-		$kalenteri["kalenteri_nayta_tyyppi"]= array("kalenteri");
+		$kalenteri["kalenteri_nayta_tyyppi"]= array("Memo");
 		
 		$kalenteri["kalenteri_jako"]    = array("tilaus");
 				

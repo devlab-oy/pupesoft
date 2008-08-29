@@ -8,47 +8,55 @@
 
 	echo "<table>";
 	echo "<tr>";
-	echo "<td>".t("Arvonlisälaskelma")."</td>";
+	echo "<th>".t("Arvonlisälaskelma")."</th>";
 	echo "<td><select name='alvv'>";
 
 	for ($i = date("Y"); $i >= date("Y")-4; $i--) {
-		if ($i == date("Y")) $sel = "selected";
-		else $sel = "";
+		if (isset($alvv) and $alvv == $i) {
+			$sel = "selected";
+		}
+		elseif ($i == date("Y")) {
+			$sel = "selected";
+		}
+		else {
+			$sel = "";
+		}
 		echo "<option value='$i' $sel>$i</option>";
 	}
 
 	echo "</select></td>";
 
+	$alvk_sel = array();
+	$alvk_sel[$alvk] = "selected";
+
 	echo "<td><select name='alvk'>
-			<option value = '01'>01</option>
-			<option value = '02'>02</option>
-			<option value = '03'>03</option>
-			<option value = '04'>04</option>
-			<option value = '05'>05</option>
-			<option value = '06'>06</option>
-			<option value = '07'>07</option>
-			<option value = '08'>08</option>
-			<option value = '09'>09</option>
-			<option value = '10'>10</option>
-			<option value = '11'>11</option>
-			<option value = '12'>12</option>
+			<option value = '01' $alvk_sel[01]>01</option>
+			<option value = '02' $alvk_sel[02]>02</option>
+			<option value = '03' $alvk_sel[03]>03</option>
+			<option value = '04' $alvk_sel[04]>04</option>
+			<option value = '05' $alvk_sel[05]>05</option>
+			<option value = '06' $alvk_sel[06]>06</option>
+			<option value = '07' $alvk_sel[07]>07</option>
+			<option value = '08' $alvk_sel[08]>08</option>
+			<option value = '09' $alvk_sel[09]>09</option>
+			<option value = '10' $alvk_sel[10]>10</option>
+			<option value = '11' $alvk_sel[11]>11</option>
+			<option value = '12' $alvk_sel[12]>12</option>
 			</select></td>";
 
 	echo "<td>".t("Ruotsimoodi:")."</td>";
 	echo "<td><input type = 'checkbox' name = 'ruotsi'></td>";
-	echo "<td><input type = 'submit' value = '".t("Näytä")."'></td>";
+	echo "<td class='back'><input type = 'submit' value = '".t("Näytä")."'></td>";
 
 	echo "</tr>";
-	echo "</table>";
 	echo "</form>";
 
 	echo "<form action = 'raportit.php' method='post'>
 			<input type = 'hidden' name = 'toim' value = 'alv'>
 			<input type = 'hidden' name = 'tee' value = '2'>";
 
-	echo "<table>";
 	echo "<tr>";
-	echo "<td>".t("Alv-tarkistus")."</td>";
+	echo "<th>".t("Alv-tarkistus")."</th>";
 
 	echo "<td><select name='alvv'>";
 
@@ -75,7 +83,7 @@
 			<option value = '12'>12</option>
 			</select></td>";
 
-	echo "<td><input type = 'submit' value = '".t("Näytä")."'></td>";
+	echo "<td class='back'><input type = 'submit' value = '".t("Näytä")."'></td>";
 	echo "</tr>";
 	echo "</table>";
 	echo "</form>";
@@ -87,8 +95,8 @@
 		$alkupvm  = date("Y-m-d", mktime(0, 0, 0, $alvk,   1, $alvv));
 		$loppupvm = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
 
-		echo "<font class='head'>".t("Arvonlisäverolaskelma kaudelta")." $alvv-$alvk</font><hr>";
-
+		echo "<br><font class='head'>".t("Arvonlisäverolaskelma kaudelta")." $alvv-$alvk</font><hr>";
+/*
 		if ($ruotsi != 'on') {
 
 			// Myynti_eu tilit
@@ -233,10 +241,27 @@
 			}
 			echo "</table><br><br>";
 		}
+*/
+		echo "<br><font class='head'>".t("Käsiviennit")."</font><br><br>";
 
-		echo t("Käsiviennit")."<br>";
+		// Katotaan voisiko meillä olla tässä joku toinen ALV tili
+		// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity ja oteteaan niiden alv tilit
+		$query = "	SELECT ifnull(group_concat(concat(\"'\",toim_alv,\"'\") SEPARATOR ','), '') toim_alv
+					FROM yhtion_toimipaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					and maa != ''
+					and vat_numero != ''
+					and toim_alv != ''";
+		$result = mysql_query($query) or pupe_error($query);
+		$tilitrow = mysql_fetch_array($result);
 
-		$query = "	SELECT ltunnus, tiliointi.tapvm, tiliointi.summa, concat_ws(' ',selite, lasku.nimi) selite
+		$alv_tilit = "'$yhtiorow[alv]'";
+
+		if ($tilitrow["toim_alv"] != "") {
+			$alv_tilit = $tilitrow["toim_alv"]."'$yhtiorow[alv]'";
+		}
+
+		$query = "	SELECT ltunnus, tiliointi.tilino, tiliointi.tapvm, tiliointi.summa, concat_ws(' ',selite, lasku.nimi) selite
 					FROM tiliointi
 					JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
@@ -244,35 +269,47 @@
 					tiliointi.aputunnus = '' and
 					tiliointi.tapvm >= '$alkupvm' and
 					tiliointi.tapvm <= '$loppupvm' and
-					tiliointi.tilino = '$yhtiorow[alv]'";
+					tiliointi.tilino in ($alv_tilit)
+					ORDER BY tilino, tapvm";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<table><tr>";
-		for ($i = 0; $i < mysql_num_fields($result); $i++) {
-			echo "<th>" . t(mysql_field_name($result,$i)) . "</th>";
-		}
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("ltunnus")."</th>";
+		echo "<th>".t("tilino")."</th>";
+		echo "<th>".t("tapvm")."</th>";
+		echo "<th>".t("summa")."</th>";
+		echo "<th>".t("selite")."</th>";
+		echo "</tr>";
+
+		$kasiviennit_summa = 0;
+		$kasiviennit_kpl = 0;
 
 		while ($trow = mysql_fetch_array ($result)) {
 			echo "<tr>";
-			for ($i = 0; $i < mysql_num_fields($result); $i++) {
-				if ($i == 0) {
-					if ($kukarow['taso'] < 2) {
-						echo "<td>$trow[tapvm]</td>";
-					}
-					else {
-						echo "<td>";
-						echo "<a href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]'>";
-						echo "$trow[$i]</td>";
-					}
-				}
-				else {
-					echo "<td>$trow[$i]</td>";
-				}
-			}
-			echo "</tr>";
-		}
-		echo "</table><br><br>";
 
+			if ($kukarow['taso'] < 2) {
+				echo "<td>$trow[ltunnus]</td>";
+			}
+			else {
+				echo "<td><a href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[ltunnus]</td>";
+			}
+
+			echo "<td nowrap>$trow[tilino]</td>";
+			echo "<td nowrap>$trow[tapvm]</td>";
+			echo "<td nowrap align='right'>$trow[summa]</td>";
+			echo "<td>$trow[selite]</td>";
+			echo "</tr>";
+
+			$kasiviennit_summa += $trow["summa"];
+			$kasiviennit_kpl++;
+		}
+
+		echo "<tr><td colspan='3' align='right'>".t("Yhteensä")."</td><td align='right'>$kasiviennit_summa</td><td></td></tr>";
+
+		echo "</table><br>";
+
+		echo "<font class='head'>".t("Automaattiviennit")."</font><br><br>";
 
 		if ($ruotsi != 'on') {
 			$verolisa = " tiliointi.vero ";
@@ -282,7 +319,10 @@
 		}
 
 		$query = "	SELECT if(lasku.maa='', '$yhtiorow[maa]', lasku.maa) Maa,
-					if(lasku.valkoodi='', '$yhtiorow[valkoodi]', lasku.valkoodi) Valuutta, $verolisa, tiliointi.tilino, tili.nimi,
+					if(lasku.valkoodi='', '$yhtiorow[valkoodi]', lasku.valkoodi) Valuutta,
+					$verolisa,
+					tiliointi.tilino,
+					tili.nimi,
 					round(sum(tiliointi.summa * (1+tiliointi.vero/100)),2) Bruttosumma,
 					round(sum(tiliointi.summa * tiliointi.vero/100),2) Verot,
 					round(sum(tiliointi.summa/if(lasku.vienti_kurssi=0,1,lasku.vienti_kurssi) * (1+vero/100)),2) Bruttosumma_valuutassa,
@@ -312,6 +352,11 @@
 		echo "<th valign='top'>" . t("Verot valuutassa") . "</th>";
 		echo "<th valign='top'>" . t("Kpl") . "</th>";
 		echo "</tr>";
+
+		$verosum = 0;
+		$kplsum  = 0;
+		$verotot = 0;
+		$kpltot  = 0;
 
 		while ($trow = mysql_fetch_array ($result)) {
 
@@ -357,6 +402,12 @@
 		}
 
 		echo "<tr><td colspan='6' align='right'>".t("Yhteensä").":</td><td align = 'right'>".sprintf('%.2f', $verosum)."</td><td colspan='2'></td><td align = 'right'>$kplsum</td></tr>";
+		echo "<tr><td colspan='6' align='right'>".t("Verokannat yhteensä").":</td><td align = 'right'>".sprintf('%.2f', $verotot)."</td><td colspan='2'></td><td align = 'right'>$kpltot</td></tr>";
+
+		$verotot += $kasiviennit_summa;
+		$kpltot  += $kasiviennit_kpl;
+
+		echo "<tr><td colspan='6' align='right'>".t("Käsiviennit").":</td><td align = 'right'>".sprintf('%.2f', $kasiviennit_summa)."</td><td colspan='2'></td><td align = 'right'>$kasiviennit_kpl</td></tr>";
 		echo "<tr><td colspan='6' align='right'>".t("Kaikki yhteensä").":</td><td align = 'right'>".sprintf('%.2f', $verotot)."</td><td colspan='2'></td><td align = 'right'>$kpltot</td></tr>";
 		echo "</table><br>";
 	}

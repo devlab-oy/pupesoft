@@ -275,9 +275,8 @@
 
 		echo "<table>";
 		echo "<tr>";
-		echo "<th>".t("ltunnus")."</th>";
-		echo "<th>".t("tilino")."</th>";
 		echo "<th>".t("tapvm")."</th>";
+		echo "<th>".t("tilino")."</th>";
 		echo "<th>".t("summa")."</th>";
 		echo "<th>".t("selite")."</th>";
 		echo "</tr>";
@@ -289,23 +288,22 @@
 			echo "<tr>";
 
 			if ($kukarow['taso'] < 2) {
-				echo "<td>$trow[ltunnus]</td>";
+				echo "<td nowrap valign='top'>$trow[tapvm]</td>";
 			}
 			else {
-				echo "<td><a href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[ltunnus]</td>";
+				echo "<td nowrap valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[tapvm]</td>";
 			}
 
-			echo "<td nowrap>$trow[tilino]</td>";
-			echo "<td nowrap>$trow[tapvm]</td>";
-			echo "<td nowrap align='right'>$trow[summa]</td>";
-			echo "<td>$trow[selite]</td>";
+			echo "<td nowrap valign='top'>$trow[tilino]</td>";
+			echo "<td nowrap align='right' valign='top'>$trow[summa]</td>";
+			echo "<td valign='top'>$trow[selite]</td>";
 			echo "</tr>";
 
 			$kasiviennit_summa += $trow["summa"];
 			$kasiviennit_kpl++;
 		}
 
-		echo "<tr><td colspan='3' align='right'>".t("Yhteensä")."</td><td align='right'>$kasiviennit_summa</td><td></td></tr>";
+		echo "<tr><td colspan='2' align='right'>".t("Yhteensä")."</td><td align='right'>$kasiviennit_summa</td><td></td></tr>";
 
 		echo "</table><br>";
 

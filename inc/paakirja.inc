@@ -286,18 +286,23 @@
 	}
 	elseif ($alvk == '0') {
 		echo "<font class='head'>$nimi ".t("kalenterivuodelta")." $alvv</font><hr>";
-		$lisa  = "YEAR(tiliointi.tapvm) = '$alvv'";
-		$lisa2 = "tiliointi.tapvm < '$alvv-01-01'";
+		$alkupvm  = date("Y-m-d", mktime(0, 0, 0, 1, 1, $alvv));
+		$loppupvm = date("Y-m-d", mktime(0, 0, 0, 1, 0, $alvv+1));
+		$lisa  = "tiliointi.tapvm >= '$alkupvm' AND tiliointi.tapvm <= '$loppupvm'";
+		$lisa2 = "tiliointi.tapvm < '$alkupvm'";
 	}
 	elseif ($alvp == '0') {
 		echo "<font class='head'>$nimi ".t("kaudelta")." $alvv-$alvk</font><hr>";
-		$lisa  = "CONCAT_WS(' ',YEAR(tiliointi.tapvm),MONTH(tiliointi.tapvm)) = '$alvv $alvk'";
-		$lisa2 = "tiliointi.tapvm < '$alvv-$alvk-01'";
+		$alkupvm  = date("Y-m-d", mktime(0, 0, 0, $alvk,   1, $alvv));
+		$loppupvm = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
+		$lisa  = "tiliointi.tapvm >= '$alkupvm' AND tiliointi.tapvm <= '$loppupvm'";
+		$lisa2 = "tiliointi.tapvm < '$alkupvm'";
 	}
 	else {
 		echo "<font class='head'>$nimi ".t("päivältä")." $alvv-$alvk-$alvp</font><hr>";
-		$lisa  = "tiliointi.tapvm = '$alvv-$alvk-$alvp'";
-		$lisa2 = "tiliointi.tapvm < '$alvv-$alvk-$alvp'";
+		$alkupvm  = date("Y-m-d", mktime(0, 0, 0, $alvk, $alvp, $alvv));
+		$lisa  = "tiliointi.tapvm = '$alkupvm'";
+		$lisa2 = "tiliointi.tapvm < '$alkupvm'";
 	}
 
 	if (strlen(trim($kohde)) > 0) {
@@ -393,7 +398,7 @@
 				}
 				else {
 					if ($eka != 0) {
-						echo "<td></td><td></td><td></td><td></td><td></td><td></td><td align = 'right'>";
+						echo "<td></td><td></td><td></td><td></td><td></td><td></td><td valign='top' align = 'right' nowrap>";
 						printf("%.2f", $summa);
 						echo "</td><td>*</td>";
 
@@ -424,8 +429,8 @@
 					$kumsumma = $alkurow["saldo"];
 
 					//tilin alkusaldo
-					echo "<td colspan='".(mysql_num_fields($result)-4)."'></td>";
-					echo "<td align='right'>".sprintf("%.2f",$kumsumma)."</td></tr>";
+					echo "<td valign='top' colspan='".(mysql_num_fields($result)-4)."'></td>";
+					echo "<td valign='top' align='right' nowrap>".sprintf("%.2f",$kumsumma)."</td></tr>";
 					echo "<tr>";
 
 					if(isset($workbook)) {
@@ -453,7 +458,7 @@
 						$class = " class='message' ";
 					}
 
-					echo "<td align='right' $class>";
+					echo "<td valign='top' align='right' $class>";
 
 					echo "<a href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]'><font $class>";
 					echo str_replace(".",",",sprintf("%.2f", $trow[$i]));
@@ -469,7 +474,7 @@
 
 				 }
 				else {
-					echo "<td align = 'right' nowrap>";
+					echo "<td valign='top' align = 'right' nowrap>";
 					echo str_replace(".",",",sprintf("%.2f", $trow[$i]));
 					echo "</td>";
 				}
@@ -480,7 +485,7 @@
 					$trow[$i] = str_replace("<br>"," ",$trow[$i]);
 				}
 
-				echo "<td>$trow[$i]</td>";
+				echo "<td valign='top'>$trow[$i]</td>";
 			}
 		}
 
@@ -488,7 +493,7 @@
 			//lasketaan ja echotaan kumulatiivinen summa
 			$kumsumma += $trow["summa"];
 
-			echo "<td align='right'>".str_replace(".",",",sprintf("%.2f",$kumsumma))."</td>";
+			echo "<td align='right' valign='top'>".str_replace(".",",",sprintf("%.2f",$kumsumma))."</td>";
 
 			if(isset($workbook)) {
 				$worksheet->write($excelrivi, $i+1, $kumsumma);
@@ -502,8 +507,8 @@
 			$trow["summa_valuutassa"] = "";
 		}
 
-		echo "<td align='right' class='back' nowrap>$trow[summa_valuutassa]</td>";
-		echo "<td align='right' class='back' nowrap>$trow[valkoodi]</td>";
+		echo "<td valign='top' align='right' class='back' nowrap>$trow[summa_valuutassa]</td>";
+		echo "<td valign='top' align='right' class='back' nowrap>$trow[valkoodi]</td>";
 
 		if ($trow['valkoodi'] != '' and $trow['summa_valuutassa'] != '') {
 			$summa_valuutassa[$trow['valkoodi']] += $trow['summa_valuutassa'];

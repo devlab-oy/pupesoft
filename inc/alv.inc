@@ -448,11 +448,13 @@
 		echo "<th>".t("virhe")."</th>";
 		echo "</tr>";
 
+		$errorkpl = 0;
+		
 		while ($trow = mysql_fetch_array ($result)) {
 
 			// Etsitään vastaava automaattitiliöinti
 			$query = "	SELECT summa, ltunnus
-						FROM tiliointi
+						FROM tiliointi USE INDEX (aputunnus_index)
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 						and tiliointi.korjattu = ''
 						and aputunnus = '$trow[tunnus]'";
@@ -473,6 +475,7 @@
 			}
 
 			if ($error != '') {
+				$errorkpl++;
 				echo "<tr>";
 				if ($kukarow['taso'] < 2) {
 					echo "<td nowrap valign='top'>$trow[tapvm]</td>";
@@ -488,6 +491,11 @@
 			}
 		}
 
+		if ($errorkpl == 0) {
+			echo "<tr>";
+			echo "<td colspan='5'>".t("Ei virheellisiä automaattivientejä")."!</td>";
+			echo "</tr>";
+		}
 		echo "</table>";
 	}
 ?>

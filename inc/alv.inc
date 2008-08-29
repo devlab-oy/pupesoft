@@ -469,78 +469,25 @@
 				}
 			}
 			else {
-				$error = t("Vastaavaa automaattivientiä ei ole tai niitä on liikaa");
+				$error = t("Vastaavaa automaattivientiä ei ole tai niitä on liikaa")."!";
 			}
 
 			if ($error != '') {
 				echo "<tr>";
 				if ($kukarow['taso'] < 2) {
-					echo "<td>$trow[tapvm]</td>";
+					echo "<td nowrap valign='top'>$trow[tapvm]</td>";
 				}
 				else {
-					echo "<td><a href='muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[tapvm]</a></td>";
+					echo "<td nowrap valign='top'><a href='muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[tapvm]</td>";
 				}
-				echo "<td>$trow[summa]</td>";
-				echo "<td>$trow[selite]</td>";
-				echo "<td>$trow[verot]</td>";
-				echo "<td>$error</td>";
+				echo "<td nowrap align='right' valign='top'>$trow[summa]</td>";
+				echo "<td valign='top'>$trow[selite]</td>";
+				echo "<td valign='top'>$trow[verot]</td>";
+				echo "<td valign='top'>$error</td>";
 				echo "</tr>";
 			}
 		}
-		echo "</table>";
-
-		// Katotaan voisiko meillä olla tässä joku toinen ALV tili
-		// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity ja oteteaan niiden alv tilit
-		$query = "	SELECT ifnull(group_concat(concat(\"'\",toim_alv,\"'\") SEPARATOR ','), '') toim_alv,
-					ifnull(group_concat(toim_alv SEPARATOR ' '), '') alv_output
-					FROM yhtion_toimipaikat
-					WHERE yhtio = '$kukarow[yhtio]'
-					and maa != ''
-					and vat_numero != ''
-					and toim_alv != ''";
-		$result = mysql_query($query) or pupe_error($query);
-		$tilitrow = mysql_fetch_array($result);
-
-		echo "<br><font class='head'>".t("Tarkistetaan epäilyttävät käsiviennit")." $yhtiorow[alv] $tilitrow[alv_output]</font><br><br>";
-
-		$alv_tilit = "'$yhtiorow[alv]'";
-
-		if ($tilitrow["toim_alv"] != "") {
-			$alv_tilit = $tilitrow["toim_alv"]."'$yhtiorow[alv]'";
-		}
-
-		$query = "	SELECT ltunnus, tapvm, summa, selite
-					FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
-					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-					AND tiliointi.tapvm >= '$alkupvm'
-					AND tiliointi.tapvm <= '$loppupvm'
-					AND tiliointi.korjattu = ''
-					AND aputunnus = 0
-					AND tilino in ($alv_tilit)";
-		$result = mysql_query($query) or pupe_error($query);
-
-		echo "<table>";
-		echo "<tr>";
-		echo "<th>".t("tapvm")."</th>";
-		echo "<th>".t("summa")."</th>";
-		echo "<th>".t("selite")."</th>";
-		echo "</tr>";
-
-		while ($trow = mysql_fetch_array($result)) {
-			echo "<tr>";
-			if ($kukarow['taso'] < 2) {
-				echo "<td>$trow[tapvm]</td>";
-			}
-			else {
-				echo "<td><a href='muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[tapvm]</a></td>";
-			}
-			echo "<td>$trow[summa]</td>";
-			echo "<td>$trow[selite]</td>";
-			echo "</tr>";
-		}
 
 		echo "</table>";
-
 	}
-
 ?>

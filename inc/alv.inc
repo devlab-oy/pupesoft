@@ -61,26 +61,36 @@
 	echo "<td><select name='alvv'>";
 
 	for ($i = date("Y"); $i >= date("Y")-4; $i--) {
-		if ($i == date("Y")) $sel = "selected";
-		else $sel = "";
+		if (isset($alvv) and $alvv == $i) {
+			$sel = "selected";
+		}
+		elseif ($i == date("Y")) {
+			$sel = "selected";
+		}
+		else {
+			$sel = "";
+		}
 		echo "<option value='$i' $sel>$i</option>";
 	}
 
 	echo "</select></td>";
 
+	$alvk_sel = array();
+	$alvk_sel[$alvk] = "selected";
+
 	echo "<td><select name='alvk'>
-			<option value = '01'>01</option>
-			<option value = '02'>02</option>
-			<option value = '03'>03</option>
-			<option value = '04'>04</option>
-			<option value = '05'>05</option>
-			<option value = '06'>06</option>
-			<option value = '07'>07</option>
-			<option value = '08'>08</option>
-			<option value = '09'>09</option>
-			<option value = '10'>10</option>
-			<option value = '11'>11</option>
-			<option value = '12'>12</option>
+			<option value = '01' $alvk_sel[01]>01</option>
+			<option value = '02' $alvk_sel[02]>02</option>
+			<option value = '03' $alvk_sel[03]>03</option>
+			<option value = '04' $alvk_sel[04]>04</option>
+			<option value = '05' $alvk_sel[05]>05</option>
+			<option value = '06' $alvk_sel[06]>06</option>
+			<option value = '07' $alvk_sel[07]>07</option>
+			<option value = '08' $alvk_sel[08]>08</option>
+			<option value = '09' $alvk_sel[09]>09</option>
+			<option value = '10' $alvk_sel[10]>10</option>
+			<option value = '11' $alvk_sel[11]>11</option>
+			<option value = '12' $alvk_sel[12]>12</option>
 			</select></td>";
 
 	echo "<td class='back'><input type = 'submit' value = '".t("Näytä")."'></td>";
@@ -242,11 +252,10 @@
 			echo "</table><br><br>";
 		}
 */
-		echo "<br><font class='head'>".t("Käsiviennit")."</font><br><br>";
-
 		// Katotaan voisiko meillä olla tässä joku toinen ALV tili
 		// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity ja oteteaan niiden alv tilit
-		$query = "	SELECT ifnull(group_concat(concat(\"'\",toim_alv,\"'\") SEPARATOR ','), '') toim_alv
+		$query = "	SELECT ifnull(group_concat(concat(\"'\",toim_alv,\"'\") SEPARATOR ','), '') toim_alv,
+					ifnull(group_concat(toim_alv SEPARATOR ' '), '') alv_output
 					FROM yhtion_toimipaikat
 					WHERE yhtio = '$kukarow[yhtio]'
 					and maa != ''
@@ -254,6 +263,8 @@
 					and toim_alv != ''";
 		$result = mysql_query($query) or pupe_error($query);
 		$tilitrow = mysql_fetch_array($result);
+
+		echo "<br><font class='head'>".t("Käsiviennit")." $yhtiorow[alv] $tilitrow[alv_output]</font><br><br>";
 
 		$alv_tilit = "'$yhtiorow[alv]'";
 
@@ -412,12 +423,12 @@
 
 	if ($tee == '2') {
 
-		echo "<font class='head'>".t("Alv-tarkistus kaudelta")." $alvv-$alvk</font><hr>";
+		echo "<br><font class='head'>".t("Alv-tarkistus kaudelta")." $alvv-$alvk</font><hr>";
 
 		$alkupvm  = date("Y-m-d", mktime(0, 0, 0, $alvk,   1, $alvv));
 		$loppupvm = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
 
-		echo "<font class='message'>".t("Tarkistetaan automaattiviennit")."</font><br><br>";
+		echo "<br><font class='head'>".t("Tarkistetaan automaattiviennit")."</font><br><br>";
 
 		$query = "	SELECT tunnus, ltunnus, tapvm, summa, selite, round(summa * vero / 100 ,2) verot
 					FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
@@ -425,8 +436,7 @@
 					AND tiliointi.tapvm >= '$alkupvm'
 					AND tiliointi.tapvm <= '$loppupvm'
 					AND tiliointi.korjattu = ''
-					AND vero > 0
-					AND selite <> 'Myyntikirja'";
+					AND vero > 0";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table>";
@@ -479,7 +489,25 @@
 		}
 		echo "</table>";
 
-		echo "<br><br><font class='message'>".t("Tarkistetaan epäilyttävät käsiviennit")."</font><br><br>";
+		// Katotaan voisiko meillä olla tässä joku toinen ALV tili
+		// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity ja oteteaan niiden alv tilit
+		$query = "	SELECT ifnull(group_concat(concat(\"'\",toim_alv,\"'\") SEPARATOR ','), '') toim_alv,
+					ifnull(group_concat(toim_alv SEPARATOR ' '), '') alv_output
+					FROM yhtion_toimipaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					and maa != ''
+					and vat_numero != ''
+					and toim_alv != ''";
+		$result = mysql_query($query) or pupe_error($query);
+		$tilitrow = mysql_fetch_array($result);
+
+		echo "<br><font class='head'>".t("Tarkistetaan epäilyttävät käsiviennit")." $yhtiorow[alv] $tilitrow[alv_output]</font><br><br>";
+
+		$alv_tilit = "'$yhtiorow[alv]'";
+
+		if ($tilitrow["toim_alv"] != "") {
+			$alv_tilit = $tilitrow["toim_alv"]."'$yhtiorow[alv]'";
+		}
 
 		$query = "	SELECT ltunnus, tapvm, summa, selite
 					FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
@@ -488,8 +516,7 @@
 					AND tiliointi.tapvm <= '$loppupvm'
 					AND tiliointi.korjattu = ''
 					AND aputunnus = ''
-					AND selite != 'Myyntikirja'
-					AND tilino = '$yhtiorow[alv]'";
+					AND tilino in ($alv_tilit)";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table>";

@@ -648,6 +648,7 @@ else {
 						and tilausrivi.otunnus = '$laskurow[tunnus]'
 						and tilausrivi.hyllyalue != ''
 						and varattu > 0
+						and var not in ('J','P')
 						ORDER BY $sorttaus";
 			$result = mysql_query($query) or pupe_error($query);
 

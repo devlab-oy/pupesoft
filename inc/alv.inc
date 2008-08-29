@@ -269,12 +269,12 @@
 		$alv_tilit = "'$yhtiorow[alv]'";
 
 		if ($tilitrow["toim_alv"] != "") {
-			$alv_tilit = $tilitrow["toim_alv"]."'$yhtiorow[alv]'";
+			$alv_tilit = $tilitrow["toim_alv"].", '$yhtiorow[alv]'";
 		}
 
 		$query = "	SELECT ltunnus, tiliointi.tilino, tiliointi.tapvm, tiliointi.summa, concat_ws(' ',selite, lasku.nimi) selite
 					FROM tiliointi
-					JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
+					LEFT JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
 					tiliointi.korjattu = '' and
 					tiliointi.aputunnus = 0 and
@@ -327,26 +327,26 @@
 			$verolisa = " concat_ws(' ',vero, if(lasku.tila='U','".t("ulos")."','".t("sisään")."')) vero ";
 		}
 
-		$query = "	SELECT if(lasku.maa='', '$yhtiorow[maa]', lasku.maa) Maa,
-					if(lasku.valkoodi='', '$yhtiorow[valkoodi]', lasku.valkoodi) Valuutta,
+		$query = "	SELECT if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
+					if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
 					$verolisa,
 					tiliointi.tilino,
 					tili.nimi,
-					round(sum(tiliointi.summa * (1+tiliointi.vero/100)),2) Bruttosumma,
-					round(sum(tiliointi.summa * tiliointi.vero/100),2) Verot,
-					round(sum(tiliointi.summa/if(lasku.vienti_kurssi=0,1,lasku.vienti_kurssi) * (1+vero/100)),2) Bruttosumma_valuutassa,
-					round(sum(tiliointi.summa/if(lasku.vienti_kurssi=0,1,lasku.vienti_kurssi) * vero/100),2) Verot_valuutassa,
-					count(*) Kpl
+					sum(round(tiliointi.summa * (1 + tiliointi.vero / 100), 2)) bruttosumma,
+					sum(round(tiliointi.summa * tiliointi.vero / 100, 2)) verot,
+					sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100), 2)) bruttosumma_valuutassa,
+					sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) verot_valuutassa,
+					count(*) kpl
 					FROM tiliointi
-					JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
-					LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio and tiliointi.tilino = tili.tilino)
+					LEFT JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
+					LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-					and tiliointi.korjattu = ''
-					and tiliointi.tapvm >= '$alkupvm'
-					and tiliointi.tapvm <= '$loppupvm'
-					and tiliointi.vero 	> 0
-					GROUP BY 1,2,3,4,5
-					ORDER BY 1,2,3,4,5";
+					AND tiliointi.korjattu = ''
+					AND tiliointi.tapvm >= '$alkupvm'
+					AND tiliointi.tapvm <= '$loppupvm'
+					AND tiliointi.vero > 0
+					GROUP BY maa, valuutta, vero, tilino, nimi
+					ORDER BY maa, valuutta, vero, tilino, nimi";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr>";
@@ -369,7 +369,7 @@
 
 		while ($trow = mysql_fetch_array ($result)) {
 
-			if (isset($edvero) and ($edvero != $trow["vero"] or $edmaa != $trow["Maa"])) { // Vaihtuiko verokanta?
+			if (isset($edvero) and ($edvero != $trow["vero"] or $edmaa != $trow["maa"])) { // Vaihtuiko verokanta?
 				echo "<tr>
 						<td colspan='6' align='right'>".t("Yhteensä").":</td>
 						<td align = 'right'>".sprintf('%.2f', $verosum)."</td>
@@ -381,33 +381,33 @@
 			}
 
 			echo "<tr>";
-			echo "<td valign='top'>$trow[Maa]</td>";
-			echo "<td valign='top'>$trow[Valuutta]</td>";
+			echo "<td valign='top'>$trow[maa]</td>";
+			echo "<td valign='top'>$trow[valuutta]</td>";
 			echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
 			echo "<td valign='top'>$trow[tilino]</td>";
 			echo "<td valign='top'>$trow[nimi]</td>";
-			echo "<td valign='top' align='right' nowrap>$trow[Bruttosumma]</td>";
-			echo "<td valign='top' align='right' nowrap>$trow[Verot]</td>";
+			echo "<td valign='top' align='right' nowrap>$trow[bruttosumma]</td>";
+			echo "<td valign='top' align='right' nowrap>$trow[verot]</td>";
 
-			if (strtoupper($trow["Maa"]) != strtoupper($yhtiorow["maa"])) {
-				echo "<td valign='top' align='right' nowrap>$trow[Bruttosumma_valuutassa]</td>";
-				echo "<td valign='top' align='right' nowrap>$trow[Verot_valuutassa]</td>";
+			if (strtoupper($trow["maa"]) != strtoupper($yhtiorow["maa"])) {
+				echo "<td valign='top' align='right' nowrap>$trow[bruttosumma_valuutassa]</td>";
+				echo "<td valign='top' align='right' nowrap>$trow[verot_valuutassa]</td>";
 			}
 			else {
 				echo "<td valign='top' align='right'></td>";
 				echo "<td valign='top' align='right'></td>";
 			}
 
-			echo "<td valign='top' align='right' nowrap>$trow[Kpl]</td>";
+			echo "<td valign='top' align='right' nowrap>$trow[kpl]</td>";
 			echo "</tr>";
 
-			$verosum += $trow['Verot'];
-			$kplsum  += $trow['Kpl'];
-			$verotot += $trow['Verot'];
-			$kpltot  += $trow['Kpl'];
+			$verosum += $trow['verot'];
+			$kplsum  += $trow['kpl'];
+			$verotot += $trow['verot'];
+			$kpltot  += $trow['kpl'];
 
 			$edvero = $trow["vero"];
-			$edmaa 	= $trow["Maa"];
+			$edmaa 	= $trow["maa"];
 		}
 
 		echo "<tr><td colspan='6' align='right'>".t("Yhteensä").":</td><td align = 'right'>".sprintf('%.2f', $verosum)."</td><td colspan='2'></td><td align = 'right'>$kplsum</td></tr>";
@@ -430,8 +430,9 @@
 
 		echo "<br><font class='head'>".t("Tarkistetaan automaattiviennit")."</font><br><br>";
 
-		$query = "	SELECT tunnus, ltunnus, tapvm, summa, selite, round(summa * vero / 100 ,2) verot
+		$query = "	SELECT tiliointi.tunnus, tiliointi.ltunnus, tiliointi.tapvm, tiliointi.summa, tiliointi.selite, round(tiliointi.summa * tiliointi.vero / 100, 2) verot, lasku.tunnus laskutunnus
 					FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
+					LEFT JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.tila != 'D')
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 					AND tiliointi.tapvm >= '$alkupvm'
 					AND tiliointi.tapvm <= '$loppupvm'
@@ -449,7 +450,7 @@
 		echo "</tr>";
 
 		$errorkpl = 0;
-		
+
 		while ($trow = mysql_fetch_array ($result)) {
 
 			// Etsitään vastaava automaattitiliöinti
@@ -464,14 +465,17 @@
 
 			if (mysql_num_rows($xresult) == 1) {
 				$xrow = mysql_fetch_array($xresult);
-				$heitto = $xrow["summa"] - $trow["verot"];
-				$heitto = abs($heitto);
-				if ($heitto > 0.02) {
+				$heitto = abs(round($xrow["summa"] - $trow["verot"], 2));
+				if ($heitto > 0.01) {
 					$error = t("Vienti heittää")." $heitto";
 				}
 			}
 			else {
 				$error = t("Vastaavaa automaattivientiä ei ole tai niitä on liikaa")."!";
+			}
+
+			if ($trow["laskutunnus"] == NULL) {
+				$error .= " ".t("Tiliöinnillä ei ole otsikkoa")."! $trow[tunnus]";
 			}
 
 			if ($error != '') {
@@ -487,6 +491,43 @@
 				echo "<td valign='top'>$trow[selite]</td>";
 				echo "<td valign='top'>$trow[verot]</td>";
 				echo "<td valign='top'>$error</td>";
+				echo "</tr>";
+			}
+		}
+
+		// käydään läpi kaikki automaattitiliöinnit
+		$query = "	SELECT tiliointi.aputunnus, tiliointi.tunnus, tiliointi.ltunnus, tiliointi.tapvm, tiliointi.summa, tiliointi.selite, round(tiliointi.summa * tiliointi.vero / 100, 2) verot
+					FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
+					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+					AND tiliointi.tapvm >= '$alkupvm'
+					AND tiliointi.tapvm <= '$loppupvm'
+					AND tiliointi.korjattu = ''
+					AND tiliointi.aputunnus != 0";
+		$result = mysql_query($query) or pupe_error($query);
+
+		while ($trow = mysql_fetch_array ($result)) {
+
+			// Etsitään isätiliointi
+			$query = "	SELECT tunnus
+						FROM tiliointi USE INDEX (primary)
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						and tiliointi.korjattu = ''
+						and tunnus = '$trow[aputunnus]'";
+			$xresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($xresult) != 1) {
+				$errorkpl++;
+				echo "<tr>";
+				if ($kukarow['taso'] < 2) {
+					echo "<td nowrap valign='top'>$trow[tapvm]</td>";
+				}
+				else {
+					echo "<td nowrap valign='top'><a href='muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[tapvm]</td>";
+				}
+				echo "<td nowrap align='right' valign='top'>$trow[summa]</td>";
+				echo "<td valign='top'>$trow[selite]</td>";
+				echo "<td valign='top'>$trow[verot]</td>";
+				echo "<td valign='top'>Automaattitiliöinnin isää ei löydy! $trow[tunnus]</td>";
 				echo "</tr>";
 			}
 		}

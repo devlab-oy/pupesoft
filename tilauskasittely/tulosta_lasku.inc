@@ -662,7 +662,7 @@ if (!function_exists('rivi_original')) {
 			$pdf->draw_text(340, $kala, $yks_row["selitetark"],									$thispage, $pieni);
 		}
 		else {
-			$pdf->draw_text(340, $kala, $row["yksikko"],									$thispage, $pieni);
+			$pdf->draw_text(340, $kala, ta($kieli, "Y", $row["yksikko"]),						$thispage, $pieni);
 		}
 
 		//Toimitusaika

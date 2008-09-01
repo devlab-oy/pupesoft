@@ -65,39 +65,34 @@
 			$where = $where1." and ".$where2." and ";
 		}
 
-		$tila = "U";
-		if ($yhtio == "artr") $tila = "L";
-
-		$uusiotunnus = "uusiotunnus";
-		if ($yhtio == "artr") $uusiotunnus = "otunnus";
-
 		$lisa = 'tuote.aleryhma,';
-		$lisa2 = ',2,3,4,5';
+		$lisa2 = '1,2,3,4,5';
 		$asnimi = 'lasku';
+
 		if ($summaa != '') {
 			$lisa = '';
-			$lisa2 = '';
+			$lisa2 = '1';
 			$asnimi = 'asiakas';
 		}
 
-		$query = "	SELECT lasku.ytunnus, $asnimi.nimi, $asnimi.nimitark, asiakas.piiri, $lisa
-					sum(rivihinta) summa,
+		$query = "	SELECT lasku.ytunnus, 
+					$asnimi.nimi, 
+					$asnimi.nimitark, 
+					asiakas.piiri, 
+					$lisa
+					sum(tilausrivi.rivihinta) summa,
 					sum(tilausrivi.kate) kate,
 					sum(tilausrivi.kpl) kpl
-					FROM tilausrivi, lasku, asiakas, tuote
-					WHERE $where
-					lasku.yhtio='$kukarow[yhtio]'
-					and tilausrivi.yhtio=lasku.yhtio
-					and tilausrivi.yhtio=asiakas.yhtio
-					and tilausrivi.yhtio=tuote.yhtio
-					and lasku.liitostunnus=asiakas.tunnus
-					and tilausrivi.$uusiotunnus=lasku.tunnus
-					and tilausrivi.tuoteno=tuote.tuoteno
-					and lasku.tila='$tila'
-					and lasku.alatila='X'
-					and tapvm >= '$vva-$kka-$ppa'
-					and tapvm <= '$vvl-$kkl-$ppl'
-					GROUP BY 1 $lisa2
+					FROM lasku
+					JOIN tilausrivi ON ($where tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
+					JOIN asiakas ON (asiakas.yhtio = tilausrivi.yhtio and asiakas.tunnus = lasku.liitostunnus)
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tila = 'U'
+					and lasku.alatila = 'X'
+					and lasku.tapvm >= '$vva-$kka-$ppa'
+					and lasku.tapvm <= '$vvl-$kkl-$ppl'
+					GROUP BY $lisa2
 					ORDER BY nimi, nimitark";
 		$result = mysql_query($query) or pupe_error($query);
 

@@ -179,7 +179,6 @@ if (!function_exists('finvoice_otsik')) {
 						WHERE lasku.yhtio = '$lasrow[yhtio]' and lasku.laskunro = '$lasrow[laskunro]' and lasku.tila = 'L'
 						LIMIT 1";
 			$tarkres = mysql_query($query) or pupe_error($query);
-			echo $query;
 			
 			if(mysql_num_rows($tarkres) == 1) {
 				$tarkrow = mysql_fetch_array($tarkres);

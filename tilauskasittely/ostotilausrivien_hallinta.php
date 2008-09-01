@@ -39,15 +39,14 @@
 	}
 
 	if ($ytunnus == "" and $nayta_rivit == "vahvistamattomat") {
-		$query = "	SELECT tilausrivi.otunnus, 
-					lasku.nimi, 
-					lasku.ytunnus
+		$query = "	SELECT tilausrivi.otunnus, lasku.nimi, lasku.ytunnus
 					FROM tilausrivi
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					AND tilausrivi.toimitettu = ''
 					AND tilausrivi.uusiotunnus = 0
 					AND tilausrivi.tyyppi = 'O'
+					AND tilausrivi.jaksotettu = 0
 					GROUP BY tilausrivi.otunnus
 					ORDER BY lasku.nimi";
 		$result = mysql_query($query) or pupe_error($query);
@@ -55,7 +54,7 @@
 		if (mysql_num_rows($result) > 0) {
 
 			echo "<table>";
-			echo "<th>".t("Toimittaja")."</th><th>otunnus</th>";
+			echo "<th>".t("Toimittaja")."</th><th>Tilausnumero</th>";
 
 			while ($row = mysql_fetch_array($result)) {
 				echo "<tr><td>$row[nimi]</td><td><a href='$PHP_SELF?ytunnus=$row[ytunnus]&otunnus=$row[otunnus]&toimittajaid=$toimittajaid&ojarj=$apu'>$row[otunnus]</a></td></tr>";
@@ -65,19 +64,16 @@
 		}
 	}
 	
-	if($ytunnus != '') {
+	if ($ytunnus != '') {
+
 		$query = "	SELECT max(lasku.tunnus) maxtunnus, GROUP_CONCAT(distinct lasku.tunnus SEPARATOR ', ') tunnukset
-					FROM lasku, tilausrivi
-					WHERE 
-					lasku.liitostunnus = '$toimittajaid'
-					and lasku.yhtio = '$kukarow[yhtio]'
+					FROM lasku
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.uusiotunnus = 0 and tilausrivi.tyyppi = 'O')
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.liitostunnus = '$toimittajaid'
 					and lasku.tila = 'O'
 					and lasku.alatila = 'A'
-					and tilausrivi.yhtio=lasku.yhtio
-					and tilausrivi.otunnus=lasku.tunnus
-					and tilausrivi.uusiotunnus=0
-					and tilausrivi.tyyppi='O'
-					HAVING tunnukset is not null";
+					HAVING tunnukset IS NOT NULL";
 		$result = mysql_query($query) or pupe_error($query);
 		
 		if (mysql_num_rows($result) > 0) {		

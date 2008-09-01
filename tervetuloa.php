@@ -36,7 +36,7 @@ if (!isset($tee) or $tee == '') {
 		$result = mysql_query($query) or pupe_error($query);
 		$piilorow=mysql_fetch_array ($result);
 
-		$query = "	SELECT tapvm, erpcm 'eräpvm', ytunnus, nimi, round(summa * vienti_kurssi, 2) 'kotisumma'
+		$query = "	SELECT tapvm, erpcm 'eräpvm', ytunnus, nimi, round(summa * vienti_kurssi, 2) 'kotisumma', if(erpcm<=now(), 1, 0) wanha
 					FROM lasku
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila!='H' and tila!='D'
 					ORDER BY erpcm";
@@ -55,17 +55,24 @@ if (!isset($tee) or $tee == '') {
 				echo "<tr><td colspan='".mysql_num_fields($result)."' class='back'>". sprintf(t('Sinulla on %d pysäytettyä laskua'), $piilorow[0]) . "</tr>";
 
 			if (mysql_num_rows($result) > 0) {
-				for ($i = 1; $i < mysql_num_fields($result); $i++) {
+				for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
 					echo "<th>" . t(mysql_field_name($result,$i))."</th>";
 				}
 				while ($trow=mysql_fetch_array ($result)) {
 					echo "<tr>";
-					for ($i=1; $i<mysql_num_fields($result); $i++) {
-						if (mysql_field_name($result,$i) == "nimi" and $kukrow["yhtio"] == $kukarow["yhtio"]) {
-							echo "<td><a href='hyvak.php'>$trow[$i]</a></td>";
+					for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
+						if($trow["wanha"] == 1) {
+							$style = "error'"; 
 						}
 						else {
-							echo "<td>$trow[$i]</td>";
+							$style = "";
+						}
+						
+						if (mysql_field_name($result,$i) == "nimi" and $kukrow["yhtio"] == $kukarow["yhtio"]) {
+							echo "<td><a href='hyvak.php'><font class='$style'>$trow[$i]</font></a></td>";
+						}
+						else {
+							echo "<td><font class='$style'>$trow[$i]</font></td>";
 						}
 					}
 					echo "</tr>";

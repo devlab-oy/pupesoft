@@ -17,11 +17,6 @@ if ($tee == "file") {
 
 		$file=fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
 
-		//Myyd‰‰n vain tietyst‰ varastosta
-		if ($laskurow["varasto"] != 0) {
-			$varasto = (int) $laskurow["varasto"];
-		}
-
 		// luetaan tiedosto alusta loppuun...
 		$rivi = fgets($file, 4096);
 
@@ -52,6 +47,11 @@ if ($tee == "file") {
 			$varataan_saldoa	= "";
 			$var				= "";
 			$perhekielto		= "";
+
+			//Myyd‰‰n vain tietyst‰ varastosta
+			if ($laskurow["varasto"] != 0) {
+				$varasto = (int) $laskurow["varasto"];
+			}
 			
 			if ($kukarow["extranet"] == "") {
 				$toimaika 	= $rivi[2];

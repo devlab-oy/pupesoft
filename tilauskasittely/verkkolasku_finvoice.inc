@@ -171,16 +171,39 @@ if (!function_exists('finvoice_otsik')) {
 			fputs($tootfinvoice, "</InvoiceRecipientDetails>\r\n");
 
 			fputs($tootfinvoice, "</SellerInformationDetails>\r\n");
-
+			
+			//	Oisko toista laskutusosoitetta?
+			$query = "	SELECT *
+						FROM lasku
+						JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus and laskun_lisatiedot.laskutus_nimi != ''
+						WHERE lasku.yhtio = '$lasrow[yhtio]' and lasku.laskunro = '$lasrow[laskunro]' and lasku.tila = 'L'
+						LIMIT 1";
+			$tarkres = mysql_query($query) or pupe_error($query);
+			echo $query;
+			
+			if(mysql_num_rows($tarkres) == 1) {
+				$tarkrow = mysql_fetch_array($tarkres);
+				$BuyerOrganisationName 		= $tarkrow["laskutus_nimi"];
+				$BuyerStreetName 			= $tarkrow["laskutus_osoite"];
+				$BuyerTownName 				= $tarkrow["laskutus_postitp"];
+				$BuyerPostCodeIdentifier 	= $tarkrow["laskutus_postino"];
+			}
+			else {
+				$BuyerOrganisationName 		= $lasrow["nimi"];
+				$BuyerStreetName 			= $lasrow["osoite"];
+				$BuyerTownName 				= $lasrow["postitp"];
+				$BuyerPostCodeIdentifier 	= $lasrow["postino"];				
+			}
+			
 			fputs($tootfinvoice, "<BuyerPartyDetails>\r\n");
 			xml_add("BuyerPartyIdentifier",				  								$lasrow['ytunnus'], 									$tootfinvoice);
-			xml_add("BuyerOrganisationName",                     						$lasrow['nimi'],    									$tootfinvoice);
+			xml_add("BuyerOrganisationName",                     						$BuyerOrganisationName,    									$tootfinvoice);
 			xml_add("BuyerOrganisationTaxCode",                     					$lasrow['ytunnus'],		    							$tootfinvoice);
 
 			fputs($tootfinvoice, "<BuyerPostalAddressDetails>\r\n");
-			xml_add("BuyerStreetName",													$lasrow['osoite'],     									$tootfinvoice);
-			xml_add("BuyerTownName",                                  					$lasrow['postitp'],      								$tootfinvoice);
-			xml_add("BuyerPostCodeIdentifier",                         					$lasrow['postino'],     								$tootfinvoice);
+			xml_add("BuyerStreetName",													$BuyerStreetName,     									$tootfinvoice);
+			xml_add("BuyerTownName",                                  					$BuyerTownName,      								$tootfinvoice);
+			xml_add("BuyerPostCodeIdentifier",                         					$BuyerPostCodeIdentifier,     								$tootfinvoice);
 			fputs($tootfinvoice, "</BuyerPostalAddressDetails>\r\n");
 
 			fputs($tootfinvoice, "</BuyerPartyDetails>\r\n");

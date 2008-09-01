@@ -656,14 +656,20 @@ if (!function_exists('rivi_original')) {
 						".avain('join','Y_', $kieli)."
 						WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'Y' and avainsana.selite like '%$row[yksikko]%' and avainsana.kieli='$kieli'";
 		$yks_result = mysql_query($yks_query) or pupe_error($yks_query);
+		$yks_row = mysql_fetch_array($yks_result);
+
+		$yksikko_apu = $row["yksikko"];
+
+		if ($kieli != $yhtiorow["kieli"]) {
+			$yksikko_apu = ta($kieli, "Y", $row["yksikko"]);
+		}
+
+		if ($yksikko_apu == $row["yksikko"] and $yks_row["selitetark"] != "") {
+			$yksikko_apu = $yks_row["selitetark"];
+		}
 
 		//Yksikkö
-		if ($yks_row = mysql_fetch_array($yks_result)) {
-			$pdf->draw_text(340, $kala, $yks_row["selitetark"],									$thispage, $pieni);
-		}
-		else {
-			$pdf->draw_text(340, $kala, ta($kieli, "Y", $row["yksikko"]),						$thispage, $pieni);
-		}
+		$pdf->draw_text(340, $kala, $yksikko_apu,											$thispage, $pieni);
 
 		//Toimitusaika
 		if (substr($row["toimitettuaika"],0,10) != "0000-00-00") {
@@ -1375,7 +1381,7 @@ if (!function_exists('loppu')) {
 				$pdf->draw_text(270, 10, "Virhe viivakoodin luomisessa", $thispage, $boldi);
 			}
 
-			system("rm -f $filename");			
+			system("rm -f $filename");
 		}
 	}
 }

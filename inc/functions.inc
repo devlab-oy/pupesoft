@@ -3739,6 +3739,8 @@ if (!function_exists('ta')) {
 	function ta($kieli, $laji, $selite, $return = "selite", $selitetark="", $selitetark_2 = "", $selitetark_3 = "") {
 		global $kukarow, $yhtiorow;
 
+		if ($kieli == "") $kieli = $kukarow["kieli"];
+		
 		//	Jos kielet matchaa niin palautetaan suoraan vastaus
 		if($kieli == $yhtiorow["kieli"] and $return == "selite") {
 			return $selite;
@@ -3763,6 +3765,7 @@ if (!function_exists('ta')) {
 					RIGHT JOIN avainsana a ON avainsana.yhtio = a.yhtio and avainsana.laji = a.laji and avainsana.perhe=a.perhe and a.kieli = '$kieli'
 					WHERE avainsana.yhtio = '{$kukarow["yhtio"]}' and avainsana.laji = '$laji' and avainsana.kieli = '{$yhtiorow["kieli"]}' and avainsana.selite = '$selite' $lisa and avainsana.perhe>0";
 		$result = mysql_query($query) or pupe_error($query);
+
 		if(mysql_num_rows($result) == 1) {
 			$row = mysql_fetch_array($result);
 			return $row[$return];

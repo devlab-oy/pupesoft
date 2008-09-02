@@ -187,35 +187,50 @@ if (!function_exists('tulosta_tarjous')) {
 			
 		}
 		
-		foreach(array("Tuotteet","Palvelut","Alennukset","Ylläpito", "Optio") as $key) {
+		$rivityypit[] = "Tuotteet";
+		$rivityypit[] = "Palvelut";
+
+		$query = "	SELECT selite
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TRIVITYYPPI' and selite NOT IN ('Tuotteet', 'Palvelut', 'Ylläpito', 'Alennukset', 'Optio', '')";
+		$abures = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($abures) >0 ) {
+			while($aburow = mysql_fetch_array($abures)) {
+				$rivityypit[] = $aburow["selite"];
+			}
+		}
+		$rivityypit[] = "Ylläpito";
+		$rivityypit[] = "Alennukset";
+		$rivityypit[] = "Optio";
+		
+		
+		foreach($rivityypit as $key) {
 			
 			$query = "";
 			if($key == "Alennukset"){
-				$query = "$q $w and tilkpl < 0";
+				$query = "$q $w and tilkpl < 0 and tilausrivin_lisatiedot.positio=''";
 			}			
 			elseif($key == "Tuotteet") {
-				$query = "$q $w and (tuote.ei_saldoa = '' and tilkpl > 0 and ((tilausrivin_lisatiedot.positio != 'Optio' and tilausrivin_lisatiedot.positio != 'Ylläpito') or tilausrivin_lisatiedot.positio='') or tilausrivin_lisatiedot.positio = 'Tuotteet')";
+				$query = "$q $w and ((tuote.ei_saldoa = '' and tilkpl > 0 and tilausrivin_lisatiedot.positio = '') or tilausrivin_lisatiedot.positio = 'Tuotteet')";
 			}
 			elseif($key == "Palvelut"){
-				$query = "$q $w and (tuote.ei_saldoa != '' and tilkpl > 0 and ((tilausrivin_lisatiedot.positio != 'Optio' and tilausrivin_lisatiedot.positio != 'Ylläpito') or tilausrivin_lisatiedot.positio='') or tilausrivin_lisatiedot.positio = 'Palvelut')";
+				$query = "$q $w and ((tuote.ei_saldoa != '' and tilkpl > 0 and tilausrivin_lisatiedot.positio = '') or tilausrivin_lisatiedot.positio = 'Palvelut')";
 			}
-			elseif($key == "Ylläpito"){
-				$query = "$q $w and tilausrivin_lisatiedot.positio = 'Ylläpito'";
-			}
-			elseif($key == "Optio"){
-				$query = "$q $w and tilausrivin_lisatiedot.positio = 'Optio'";
-			}
-			
-			//	Ylläpitoa ei haluta mukaan grand totaliin
-			if($key == "Ylläpito") {
-				$pdf->write($h, 1, $s[1], $s[3], t("Tarjous yhteensä alv 0%",$kieli).": ", "norm", "R", "B");
-				$pdf->write($h, 1, $s[3], 0, money_format('%i',$grand_total), "norm", "R", "B");
-				$h-=$pdf->ln(2);
+			else {
+				$query = "$q $w and tilausrivin_lisatiedot.positio = '$key'";
 			}
 			
 			$query .= " ORDER BY otunnus, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
 			$riresult = mysql_query($query) or pupe_error($query);
 
+			//	Ylläpitoa ei haluta mukaan grand totaliin
+			if(($key == "Ylläpito" or $key == "Leasing") and $yhteensalaitettu == "") {
+				$pdf->write($h, 1, $s[1], $s[3], t("Tarjous yhteensä alv 0%",$kieli).": ", "norm", "R", "B");
+				$pdf->write($h, 1, $s[3], 0, money_format('%i',$grand_total), "norm", "R", "B");
+				$h-=$pdf->ln(2);
+				$yhteensalaitettu = 1;
+			}
+			
 			if(mysql_num_rows($riresult)>0) {
 				
 				if($h < 40) {

@@ -408,9 +408,8 @@
 			echo "<td colspan='6'>$tuoterow[kuvaus]&nbsp;</td></tr>";
 			
 			//8
-			echo "<tr><th>".t("Info")."</th><th colspan='5'>".t("Avainsanat")."</th></tr>";
+			echo "<tr><th>".t("Muuta")."</th><th colspan='5'>".t("Lyhytkuvaus")."</th></tr>";
 			echo "<tr><td>$tuoterow[muuta]&nbsp;</td><td colspan='5'>$tuoterow[lyhytkuvaus]</td></tr>";
-
 
 			echo "</table>";
 

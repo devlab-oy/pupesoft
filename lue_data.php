@@ -173,11 +173,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				if ($table == 'asiakashinta' or $table == 'asiakasalennus') {
 					if ($column == 'ASIAKAS_RYHMA' or $column == 'YTUNNUS') {
 						$ashinaleas++;
-						$wheretarkea++;
 					}
 					if ($column == 'RYHMA' or $column == 'TUOTENO') {
 						$ashinaletuo++;
-						$wheretarkea++;
 					}
 				}
 			}
@@ -188,7 +186,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			}
 		}
 	}
-	
+
 	// oli virheellisiä sarakkeita tai pakollisia ei löytynyt..
 	if ($vikaa != 0 or $tarkea != count($pakolliset) or $postoiminto == 'X' or $kielletty > 0 or (is_array($wherelliset) and $wheretarkea != count($wherelliset))) {
 
@@ -220,7 +218,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			foreach ($wherelliset as $apupako) {
 				echo "$apupako ";
 			}
-			
+
 			echo ") !</font><br>";
 		}
 

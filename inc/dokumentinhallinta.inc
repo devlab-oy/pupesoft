@@ -38,8 +38,13 @@ if(!function_exists("svnAction")) {
 					$comments = "-m \"$comments\n\n- $kukarow[nimi]\"";
 				}
 				
-				//	Pakotetaan oikea merkistö aina!
-				$cmd = "LC_CTYPE=".console_LC_CTYPE." ".utf8_encode("svn $action $comments $src $dst");
+				//	Koska joissain asennuksissa PHP:llä ei ole mitään järjellistä localea pakotetaan se aina mukaan constanilla console_LC_CTYPE
+				
+				$cmd = "LC_CTYPE=".console_LC_CTYPE." svn $action $comments $src $dst";
+				
+				if(strpos(console_LC_CTYPE, "UTF-8") !== false) {
+					$cmd = utf8_encode($cmd);
+				}
 
 				exec($cmd, $output, $retval);
 				
@@ -48,6 +53,13 @@ if(!function_exists("svnAction")) {
 				}
 
 				if($retval == 0) {
+					
+					if(strpos(console_LC_CTYPE, "UTF-8") !== false) {
+						foreach($output as &$o) {
+							$o = utf8_decode($o);
+						}
+					}
+					
 					return $output;
 				}
 				else {

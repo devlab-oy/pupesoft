@@ -2020,7 +2020,8 @@ if ($tee == "") {
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tila IN ('H','Y','M','P','Q') and h1time != '0000-00-00 00:00:00'
 				and hyvak1 = '{$kukarow[kuka]}'
-				and tilaustyyppi = 'M'";
+				and tilaustyyppi = 'M'
+				ORDER BY luontiaika DESC";
 	$result=mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result)) {

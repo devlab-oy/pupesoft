@@ -173,10 +173,10 @@
 						group_concat(tuotepaikat.tunnus) paikkatun,
 						group_concat(DISTINCT varastopaikat.nimitys) varastot						
 						FROM tuote
-						LEFT JOIN avainsana atry use index (yhtio_laji_selite) on atry.yhtio=tuote.yhtio and atry.selite=tuote.try and atry.laji='TRY'
-						LEFT JOIN avainsana aosa use index (yhtio_laji_selite) on aosa.yhtio=tuote.yhtio and aosa.selite=tuote.osasto and aosa.laji='OSASTO'
-						JOIN tuotepaikat ON tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno
-						JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio $varastontunnukset and
+						LEFT JOIN avainsana atry use index (yhtio_laji_selite) ON (atry.yhtio = tuote.yhtio and atry.kieli = '$yhtiorow[kieli]' and atry.selite = tuote.try and atry.laji = 'TRY')
+						LEFT JOIN avainsana aosa use index (yhtio_laji_selite) ON (aosa.yhtio = tuote.yhtio and aosa.kieli = '$yhtiorow[kieli]' and aosa.selite = tuote.osasto and aosa.laji = 'OSASTO')
+						JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
+						JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio $varastontunnukset and
 		                concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
 		                concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))
 						WHERE tuote.yhtio 	= '$kukarow[yhtio]'

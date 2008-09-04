@@ -171,8 +171,8 @@
 		}
 
 		//	Jos meillä on tilauksien seuranta käytössä ja svnStatus on ok meillä on oltava sopiva seuranta
-		if($yhtiorow["tilauksen_kohteet"] == "K" and $asiakkaan_kohde == "" and $toim == "PROJEKTI") {
-			echo "<font class='error'>".t("VIRHE: Anna projektille kohde")."!</font><br>";
+		if($yhtiorow["tilauksen_kohteet"] == "K" and $asiakkaan_kohde == "" and in_array($toim, array("PROJEKTI", "TARJOUS"))) {
+			echo "<font class='error'>".t("VIRHE: Anna kohde")."!</font><br>";
 			$tee = "OTSIK";
 			$tila = "";
 			unset($jatka);
@@ -2851,13 +2851,7 @@
 							SET tunnusnippu = '$kukarow[kesken]'
 							WHERE tunnus = '$kukarow[kesken]' and tunnusnippu = 0";
 				$result = mysql_query($query) or pupe_error($query);
-				
-				$query = "	SELECT kohde
-							FROM asiakkaan_kohde
-							WHERE yhtio='$kukarow[yhtio]' and tunnus='$asiakkaan_kohde'";
-				$kohderes = mysql_query($query) or pupe_error($query);
-				$kohderow = mysql_fetch_array($kohderes);
-				
+								
 				if($toim=="PROJEKTI") {
 					// avataan projekti kirjanpitoon
 					$query = " insert into kustannuspaikka set yhtio  = '{$kukarow["yhtio"]}', nimi = '$id - $nimi', tyyppi = 'P', kaytossa = 'o', luontiaika = now(), laatija = '{$kukarow["kuka"]}'";
@@ -2865,15 +2859,7 @@
 					$projekti = mysql_insert_id();
 
 					$projektilla = $tilausnumero;
-										
-					//	avataan projektille kansio dokumentinhallintaan
-					svnAction("copy", svnDocumentSamplesDirProjects."/$seuranta", svnProjectsActive."/{$kukarow["kesken"]} $seuranta $nimi {$kohderow["kohde"]}", "Projekti avattu");
-				}
-				
-				if($toim=="TARJOUS") {
-					//	avataan tarjoukselle kansio dokumentinhallintaan
-					svnAction("copy", svnDocumentSamplesDirQuotations."/$seuranta", svnQuotationsActive."/{$kukarow["kesken"]} $seuranta $nimi {$kohderow["kohde"]}", "Tarjous avattu");
-				}
+				}				
 			}
 
 			if ($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO" or $toim == "TARJOUS" or $tilaustyyppi == "T") {
@@ -2963,6 +2949,10 @@
 			//	Tahdistetaan toimitukset
 			if($toim == "PROJEKTI" or $yhtiorow["splittauskielto"] == "K") {
 				paivita_toimitukset($kukarow["kesken"], $originaali);
+			}
+			
+			if(in_array($toim, array("TARJOUS", "PROJEKTI"))) {
+				svnOpenNew($kukarow["kesken"], $toim);
 			}
 		}
 

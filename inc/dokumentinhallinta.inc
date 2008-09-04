@@ -11,7 +11,7 @@ if(!function_exists("svnInit")) {
 	function svnInit () {
 		
 		//	Oko n‰it‰ ei ole joten skipataan aina..
-		if(svnMethod == "" or svnUrl == "" or svnPath == "") {
+		if(svnMethod == "" or svnUrl == "" or svnPath == "" or svnLanguage == "") {
 			$status = false;
 		}
 		else {			
@@ -35,7 +35,7 @@ if(!function_exists("svnAction")) {
 			if($check === true) {
 								
 				if($comments != "") {
-					$comments = "-m \"$comments\n\n- $kukarow[nimi]\"";
+					$comments = "-m \"".t($comments, svnLanguage)."\n\n- $kukarow[nimi]\"";
 				}
 				
 				//	Koska joissain asennuksissa PHP:ll‰ ei ole mit‰‰n j‰rjellist‰ localea pakotetaan se aina mukaan constanilla console_LC_CTYPE
@@ -105,53 +105,52 @@ if(!function_exists("makeSvnTarget")) {
 if(!function_exists("svnCheckCommit")) {
 	function svnCheckCommit ($action, &$src, &$dst="", &$comments="") {
 		
-		$noDstAction = array("delete", "list");
-		$nocommentsAction = array("list");
-		if(makeSvnTarget($src) !== false) {
-			if(makeSvnTarget($dst) !== false or in_array($action, $noDstAction)) {
-
-				if(in_array($action, $noDstAction)) {
-					$dst="";
-				}
+		$noDstAction = array("delete", "list", "list -R");
+		$nocommentsAction = array("list", "list -R");
+		$allowedActions = array("move", "copy", "import", "delete", "list" , "list -R");
+		
+		if($action == "delete" and $src == "") {
+			return "juurikansiota et voi poistaa";
+		}
+		
+		if(in_array($action, $allowedActions)) {
+			
+			if(in_array($action, $nocommentsAction)) {
+				$comments="";
+			}
+			
+			if(in_array($action, $noDstAction)) {
+				$dst="";
+			}
+			
+			if($comments != "" or in_array($action, $nocommentsAction)) {
 				
-				if($comments != "" or in_array($action, $nocommentsAction)) {
-					
-					if(in_array($action, $nocommentsAction)) {
-						$comments="";
-					}
-					
-					if(in_array($action, array("move", "copy", "import", "delete", "list"))) {
-						
-						if($action == "delete" and $src == "") {
-							return "juurikansiota et voi poistaa";
-						}
-						
+				if(makeSvnTarget($src) !== false) {
+					if(makeSvnTarget($dst) !== false or in_array($action, $noDstAction)) {
+
 						return true;
 					}
-					
-					return "svn toiminto $action ei kelpaa";
+
+					return "dst virheellinen $dst";
 				}
-
-				return "comments puuttuu";
+				return "src virheellinen $src";
 			}
-
-			return "dst virheellinen $dst";
 		}
-
-		return "src virheellinen $src";
-
+		else {
+			return "svn toiminto $action ei kelpaa";
+		}
 	}		
 
 }
 
 if(!function_exists("svnListDirectory")) {
-	function svnListDirectory ($dir) {
+	function svnListDirectory ($dir, $params="") {
 		
-		$list = svnAction("list", $dir);
+		$list = svnAction("list $params", $dir);
 		if(count($list) > 0) {
 
 			foreach($list as &$p) {
-				$p = "$dir/$p";				
+				$p = "$dir$p";				
 			}
 			
 			return $list;
@@ -214,13 +213,13 @@ if(!function_exists("svnFindRejectedQuotation")) {
 }
 
 if(!function_exists("svnListProjectDirectory")) {
-	function svnListProjectDirectory ($tunnus) {
-		return svnListDirectory(svnProjectDirectory($tunnus));
+	function svnListProjectDirectory ($tunnus, $params="") {
+		return svnListDirectory(svnProjectDirectory($tunnus), $params);
 	}
 }
 if(!function_exists("svnListQuotationDirectory")) {
-	function svnListQuotationDirectory ($tunnus) {
-		return svnListDirectory(svnQuotationDirectory($tunnus));
+	function svnListQuotationDirectory ($tunnus, $params="") {
+		return svnListDirectory(svnQuotationDirectory($tunnus), $params);
 	}
 }
 
@@ -258,6 +257,52 @@ if(!function_exists("svnQuotationDirectory")) {
 		return false;
 	}
 }
+
+if(!function_exists("svnOpenNew")) {
+	function svnOpenNew ($tunnus, $type) {
+		global $kukarow;
+		
+		if($type == "PROJEKTI") {
+			$path 			= svnProjectsActive;
+			$templatePath 	= svnDocumentSamplesDirProjects;
+		}
+		elseif($type == "TARJOUS") {
+			$path 			= svnQuotationsActive;
+			$templatePath 	= svnDocumentSamplesDirQuotations;			
+		}
+		else {
+			return "Tyyppi puuttuu";
+		}
+		//	Haetaan vaadittava tieto
+		$query = "	SELECT lasku.nimi nimi, asiakkaan_kohde.kohde kohde, laskun_lisatiedot.seuranta seuranta
+					FROM lasku
+					JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
+					JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus= laskun_lisatiedot.asiakkaan_kohde
+					WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnus='$tunnus' and lasku.tunnusnippu = lasku.tunnus";
+		$kohderes = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($kohderes) > 0) {
+			$kohderow = mysql_fetch_array($kohderes);
+			$pDir = $path."/{$tunnus} {$kohderow["seuranta"]} {$kohderow["nimi"]} {$kohderow["kohde"]}";
+			if(svnAction("copy", $templatePath."/{$kohderow["seuranta"]}", $pDir, t(ucfirst(strtolower($type))." avattu")) !== false) {
+				//	Uudelleennimet‰‰nt tiedostot projektille
+				$list = svnAction("list -R", $pDir);
+				foreach($list as $file) {
+					if(strpos(basename($file), "XXXXXX") !== false) {
+						$file = $pDir."/".$file;
+						svnAction("move", $file, str_replace("XXXXXX", $tunnus, $file), "Nimet‰‰n tiedosto uudestaan");
+					}
+				}
+			}
+			else {
+				return t("Projektin avauksessa tapahtui virhe");
+			}
+		}
+		else {
+			return t("Projekti ei kelpaa");
+		}
+	}
+}
+
 
 //	Tarkastetaan/avataan lopuksi se yhteys
 svnInit();

@@ -1001,10 +1001,10 @@
 				}
 			}
 			
-			$menu[] = array("TEKSTI" => t("Lisää Kalenteritapahtuma"), "HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
-			$menu[] = array("TEKSTI" => t("Lisää Asiakasmuistio"),		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
-			$menu[] = array("TEKSTI" => t("Lisää Muistutus"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
-			//$menu[] = array("TEKSTI" => "Lisää Merkintä",			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Merkinta&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+			$menu[] = array("TEKSTI" => t("Lisää kalenteritapahtuma"), "HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
+			$menu[] = array("TEKSTI" => t("Lisää asiakasmuistio"),		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
+			$menu[] = array("TEKSTI" => t("Lisää muistutus"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+			//$menu[] = array("TEKSTI" => "Lisää merkintä",			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Merkinta&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
 			
 			$palkki[] = tee_menu($menu, "<font class='message'>".t("Toiminnot")."</font>");
 

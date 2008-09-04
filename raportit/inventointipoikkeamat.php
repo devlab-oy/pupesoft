@@ -443,25 +443,33 @@
 				$prn .= sprintf ('%-10.10s',	$row["kpl"]);
 				$prn .= sprintf ('%-9.9s', 		$row["yksikko"]);
 				$prn .= sprintf ('%-15.15s', 	$row["inventointiaika"]);
-				$prn .= "\n\n";
+				$prn .= "\n-------------------------------------------------------------------------------------------------------\n";
 				fwrite($fh, $prn);
 				$rivit++;
 			}
 
 			fclose($fh);
 
-			//k‰‰nnet‰‰n kaunniksi
-			$line = exec("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line=105 --no-header --columns=1 --margin=0 --borders=0 $filenimi");
 			//itse print komento...
-			$line2 = exec("$komento[Inventointipoikkeamat] ".$filenimi.".ps");
-			
-			echo "<br>".t("Inventointipoikkeamalista tulostuu")."!<br><br>";
+			if ($komento["Inventointipoikkeamat"] == 'email') {
+				$liite = $filenimi;
+				$ctype = "TEXT";
+				$kutsu = "inventointipoikkeamat-".date("Y-m-d").".txt";
+				require("inc/sahkoposti.inc");
+			}
+			else {
+				//k‰‰nnet‰‰n kaunniksi
+				$line = exec("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line=105 --no-header --columns=1 --margin=0 --borders=0 $filenimi");
+				$line2 = exec("$komento[Inventointipoikkeamat] ".$filenimi.".ps");
+				system("rm -f ".$filenimi.".ps");
+			}
+
+			echo "<br>".t("Inventointipoikkeamalista tulostuu")."!<br><br>";							
 
 			$tee = '';
 
 			//poistetaan tmp file samantien kuleksimasta...
 			system("rm -f $filenimi");
-			system("rm -f ".$filenimi.".ps");
 		}
 	}
 

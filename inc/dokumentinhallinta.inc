@@ -11,7 +11,7 @@ if(!function_exists("svnInit")) {
 	function svnInit () {
 		
 		//	Oko näitä ei ole joten skipataan aina..
-		if(svnMethod == "" or svnUrl == "" or svnPath == "" or svnLanguage == "") {
+		if(!defined(svnMethod) or !defined(svnUrl) or !defined(svnPath) or !defined(svnLanguage)) {
 			$status = false;
 		}
 		else {			

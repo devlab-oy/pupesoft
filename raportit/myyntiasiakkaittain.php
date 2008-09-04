@@ -6,6 +6,7 @@
 	echo "<font class='head'>".t("Myynti asiakkaittain").":</font><hr>";
 
 	if ($tee != '') {
+		$where = "";
 		$where1 = '';
 		$where2 = '';
 
@@ -30,7 +31,7 @@
 				}
 			}
 			$where1 = substr($where1,0,-1);
-			$where1 = " tilausrivi.osasto in (".$where1.") ";
+			$where1 = " tuote.osasto in (".$where1.") ";
 	    }
 
 		if ($try != '') {
@@ -52,7 +53,7 @@
 				}
 			}
 			$where2 = substr($where2,0,-1);
-			$where2 = " tilausrivi.try in (".$where2.") ";
+			$where2 = " tuote.try in (".$where2.") ";
 		}
 
 		if (strlen($where1) > 0) {
@@ -65,35 +66,29 @@
 			$where = $where1." and ".$where2." and ";
 		}
 
-		$lisa = 'tuote.aleryhma,';
-		$lisa2 = '1,2,3,4,5';
-		$asnimi = 'lasku';
+		$select = 'lasku.ytunnus, lasku.nimi, lasku.nimitark, asiakas.piiri, tuote.aleryhma, ';
+		$group  = 'lasku.ytunnus, lasku.nimi, lasku.nimitark, asiakas.piiri, tuote.aleryhma';
 
 		if ($summaa != '') {
-			$lisa = '';
-			$lisa2 = '1';
-			$asnimi = 'asiakas';
+			$select = 'lasku.ytunnus, lasku.nimi, lasku.nimitark, ';
+			$group  = 'lasku.ytunnus, lasku.nimi, lasku.nimitark';
 		}
 
-		$query = "	SELECT lasku.ytunnus, 
-					$asnimi.nimi, 
-					$asnimi.nimitark, 
-					asiakas.piiri, 
-					$lisa
+		$query = "	SELECT $select
 					sum(tilausrivi.rivihinta) summa,
 					sum(tilausrivi.kate) kate,
 					sum(tilausrivi.kpl) kpl
 					FROM lasku
-					JOIN tilausrivi ON ($where tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
 					JOIN asiakas ON (asiakas.yhtio = tilausrivi.yhtio and asiakas.tunnus = lasku.liitostunnus)
-					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+					JOIN tuote ON ($where tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'U'
 					and lasku.alatila = 'X'
 					and lasku.tapvm >= '$vva-$kka-$ppa'
 					and lasku.tapvm <= '$vvl-$kkl-$ppl'
-					GROUP BY $lisa2
-					ORDER BY nimi, nimitark";
+					GROUP BY $group
+					ORDER BY nimi, nimitark, ytunnus";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$rivi = '';
@@ -233,7 +228,7 @@
 			<td colspan='3'><input type='text' name='osasto' value='$osasto' size='15'></td></tr>
 		<tr><th>".t("Syötä tuoteryhmä (välilyönnillä eroteltuna)").":</th>
 			<td colspan='3'><input type='text' name='try' value='$try' size='15'></td></tr>";
-	echo "<tr><th>".t("Summaa myynnit (1 asiakas/rivi)").":</th><td colspan='3'><input type='checkbox' name='summaa' $chk></td>";
+	echo "<tr><th>".t("Summaa myynnit (1 ytunnus/rivi)").":</th><td colspan='3'><input type='checkbox' name='summaa' $chk></td>";
 
 	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table>";
 

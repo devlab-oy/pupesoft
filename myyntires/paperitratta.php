@@ -205,7 +205,7 @@
 
 	}
 
-	require('../inc/parametrit.inc');
+//	require('../inc/parametrit.inc');
 
 	require('pdflib/phppdflib.class.php');
 

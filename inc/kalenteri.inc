@@ -199,19 +199,19 @@
 			static $kaleotsikko;
 			
 			if(!is_array($kaleotsikko)) {
-				$kaleotsikko = array(	"kalenteri"		=> "Kalenteri",
-										"Memo" 			=> "Asiakasmuistio",
-										"Muistutus" 	=> "Muistutus",
-										"Merkinta" 		=> "Merkintä",
-										"tilaus"		=> "Tilaus/Projekti",
-										"tarjous" 		=> "Tarjous",
-										"toimitus" 		=> "Lähetys",
-										"kerays"		=> "Keräys",
-										"laskutus"		=> "Laskutus",
-										"kontakti_1"	=> "1. kontaktointi",
-										"kontakti_2"	=> "2. kontaktointi",
-										"kontakti_3"	=> "Viimeinen voitelu",
-										"tarjouskontaktointi" => "Tarjouskontaktointi",									
+				$kaleotsikko = array(	"kalenteri"		=> t("Kalenteri"),
+										"Memo" 			=> t("Asiakasmuistio"),
+										"Muistutus" 	=> t("Muistutus"),
+										"Merkinta" 		=> t("Merkintä"),
+										"tilaus"		=> t("Tilaus/Projekti"),
+										"tarjous" 		=> t("Tarjous"),
+										"toimitus" 		=> t("Lähetys"),
+										"kerays"		=> t("Keräys"),
+										"laskutus"		=> t("Laskutus"),
+										"kontakti_1"	=> t("1. kontaktointi"),
+										"kontakti_2"	=> t("2. kontaktointi"),
+										"kontakti_3"	=> t("Viimeinen voitelu"),
+										"tarjouskontaktointi" => t("Tarjouskontaktointi"),
 									);
 				
 			}
@@ -378,7 +378,7 @@
 					$row["viesti"] = "<a onclick=\"popUp(event, 'toimitus', '300', '-20', '$kalenteri[URL]?ohje=off&kaletee=ANNAKUITTAUS&ktunnus={$row["tunnus"]}".url_params($kalenteri)."'); return false;\">{$row["viesti"]}</a>";
 				}
 				else {
-					$row["viesti"] = "<a onclick=\"alert('Voit muokata vain omaa kalenteriasi'); return false;\" class='kale'>$row[viesti]</a>";
+					$row["viesti"] = "<a onclick=\"alert('".t("Voit muokata vain omaa kalenteriasi")."'); return false;\" class='kale'>$row[viesti]</a>";
 				}
 			}
 			elseif($laji == "lasku") {
@@ -906,7 +906,7 @@
 			if(is_array($kalenteri["kalenteri_nayta_kuka"])) {
 				$kalejako = "
 					<table border='1' width='140'>
-						<caption>".t("Rajaa kalenteri")."</caption>";
+						<caption>".t("Valitse henkilöt")."</caption>";
 						
 				$lisa = "";
 				
@@ -941,7 +941,7 @@
 				$kalejako .= "
 					<br>
 					<table border='1' width='140'>
-						<caption>".t("Näytä merkintä")."</caption>";
+						<caption>".t("Näytä tapahtumat")."</caption>";
 
 					foreach($kalenteri["kalenteri_tyypit"] as $tyyppi) {
 						
@@ -993,7 +993,7 @@
 			//	Piirretään header
 			
 			$menu = array();
-			$menu[]	= array("VALI" => "Toiminnot");	
+			$menu[]	= array("VALI" => t("Toiminnot"));	
 			if(is_array($data["tiedot"]["menut"]["toiminnot"])) {
 
 				foreach($data["tiedot"]["menut"]["toiminnot"] as $a) {
@@ -1001,10 +1001,10 @@
 				}
 			}
 			
-			$menu[] = array("TEKSTI" => "Lisää Kalenteritapahtuma", "HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
-			$menu[] = array("TEKSTI" => "Lisää Asiakasmuistio",		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
-			$menu[] = array("TEKSTI" => "Lisää Muistutus",			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
-			$menu[] = array("TEKSTI" => "Lisää Merkintä",			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Merkinta&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+			$menu[] = array("TEKSTI" => t("Lisää Kalenteritapahtuma"), "HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
+			$menu[] = array("TEKSTI" => t("Lisää Asiakasmuistio"),		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
+			$menu[] = array("TEKSTI" => t("Lisää Muistutus"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+			//$menu[] = array("TEKSTI" => "Lisää Merkintä",			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Merkinta&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
 			
 			$palkki[] = tee_menu($menu, "<font class='message'>".t("Toiminnot")."</font>");
 
@@ -1015,7 +1015,7 @@
 			$menu = array();
 			foreach(array("TAPAHTUMALISTAUS", "KALENTERINAKYMA", "KUUKAUSINAKYMA", "VIIKKONAKYMA", "PAIVANAKYMA", "RIVINAKYMA") as $n) {
 				if($kalenteri["sallittu_nakyma"] == "" or in_array($n, $kalenteri["sallittu_nakyma"])) {
-					$menu[] = array("TEKSTI" => ucfirst(strtolower($n)),		"HREF" => "$kalenteri[URL]?nakyma=$n".url_params($kalenteri), "DIV" => $kalenteri["div"], "TAPA" => "request");
+					$menu[] = array("TEKSTI" => ucfirst(strtolower(t($n))),		"HREF" => "$kalenteri[URL]?nakyma=$n".url_params($kalenteri), "DIV" => $kalenteri["div"], "TAPA" => "request");
 				} 
 			}
 
@@ -1171,9 +1171,9 @@
 					}
 					ksort($ulos);					
 					$menu = array();
-					$menu[] = array("TEKSTI" => "Lisää kalenteriisi", 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
-					$menu[] = array("TEKSTI" => "Lisää muistutus", 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
-					$menu[] = array("TEKSTI" => "Lisää asiakasmuistio", 	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
+					$menu[] = array("TEKSTI" => t("Lisää kalenteriisi"), 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
+					$menu[] = array("TEKSTI" => t("Lisää muistutus"), 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
+					$menu[] = array("TEKSTI" => t("Lisää asiakasmuistio"), 	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
 															
 					$kale .= "	<td width='100' height = '$height' NOWRAP style='border-style: solid; border-width: 1px; background-color: $color;'>
 									<div style='text-align: right;'>".tee_menu($menu, "<font class='kaleinfo'>".date("d.m.", $aikastr)."</font>")."</div>".implode("", $ulos)."
@@ -1326,8 +1326,8 @@
 				
 				$menu = array();
 				$menu[] = array("TEKSTI" => "Lisää kalenteriisi", 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
-				$menu[] = array("TEKSTI" => "Lisää muistutus", 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
-				$menu[] = array("TEKSTI" => "Lisää asiakasmuistio", 	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
+				$menu[] = array("TEKSTI" => t("Lisää muistutus"), 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
+				$menu[] = array("TEKSTI" => t("Lisää asiakasmuistio"), 	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
 				
 				$kale .= "
 						<tr>
@@ -1586,9 +1586,9 @@
 						}
 												
 						$menu = array();
-						$menu[] = array("TEKSTI" => "Lisää kalenteriin", 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
-						$menu[] = array("TEKSTI" => "Lisää muistutus", 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
-						$menu[] = array("TEKSTI" => "Lisää asiakasmuistio", 	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+						$menu[] = array("TEKSTI" => t("Lisää kalenteriin"), 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
+						$menu[] = array("TEKSTI" => t("Lisää muistutus"), 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
+						$menu[] = array("TEKSTI" => t("Lisää asiakasmuistio"), 	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
 
 						$kale .= "<div style='width: {$w}px; text-align: right; z-index: 1;'>".tee_menu($menu, "<font class='kaleinfo'>Lisää</font>")."</div>".implode("",$ulos);
 						$kale .= "</td>";
@@ -2059,7 +2059,7 @@
 						$alatila	 = $row["alatila"];
 						require "inc/laskutyyppi.inc";
 
-						$oval .= "<option value='$row[tunnus]'>$row[tunnus] - $laskutyyppi $alatila</option>";
+						$oval .= "<option value='$row[tunnus]'>$row[tunnus] - ".t($laskutyyppi)." ".t($alatila)."</option>";
 
 						if($tarjous == $row["tunnus"]) {
 							$liitostunnus = $row["liitostunnus"];
@@ -2086,26 +2086,23 @@
 		
 		//	Tavat ja Merkinnät
 		if($tyyppi == "Merkinta") {
-			$qlisa = "and selitetark_2 LIKE ('%merkinta%')";
+			$qlisa = "%merkinta%";
 			$tapaotsikko = t("Merkintä");
 		}
 		elseif($tyyppi == "Memo" or "Muistutus") {
-			$qlisa = "and selitetark_2 LIKE ('%tapahtuma%')";
+			$qlisa = "%tapahtuma%";
 			$tapaotsikko = t("Tapahtuma");
 		}
 		elseif(substr($tyyppi, 0, 8) == "kontakti") {
-			$qlisa = "and selitetark_2 LIKE ('%kontakti%')";
+			$qlisa = "%kontakti%";
 			$tapaotsikko = t("Kontaktitapa");			
 		}
 		else {
 			$tapaotsikko = t("Kalenteritapahtuma");			
 		}
+
+		$vresult = avainsana("KALETAPA", "", "", "", "", "", $qlisa);
 		
-		$query = "	SELECT selite, selitetark
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'KALETAPA' $qlisa
-					ORDER BY jarjestys, selite";
-		$vresult = mysql_query($query) or pupe_error($query);
 		$tavat = "<select name='tapa'>";
 		while($taparow = mysql_fetch_array($vresult)) {
 			if($tapa == $taparow["selitetark"]) {
@@ -2140,7 +2137,7 @@
 			}			
 		}
 		$yhdata .= "	<optgroup label='".t("Toiminnot")."'>
-					<option value='uusi'>Luo uusi yhteyshenkilö</option>
+					<option value='uusi'>".t("Luo uusi yhteyshenkilö")."</option>
 				</optgroup>";
 		
 		$yhdata .= "</select>";
@@ -2356,7 +2353,7 @@
 			$jakele = true;
 		}
 		else {
-			echo "Tapahtuman tyyppi puuttuu tai se on väärä '$tyyppi'!!<br>";
+			echo t("Tapahtuman tyyppi puuttuu tai se on väärä!!")." '$tyyppi'<br>";
 		}
 
 		$header .= " $klo";

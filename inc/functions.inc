@@ -1354,7 +1354,7 @@ if (!function_exists("avain")) {
 }
 
 if(!function_exists("avainsana")) {
-	function avainsana($laji, $kieli = '', $selite = '', $yhtio = '', $limit = '') {
+	function avainsana($laji, $kieli = '', $selite = '', $yhtio = '', $limit = '', $selitetark = "", $selitetark_2 = "") {
 		global $kukarow, $yhtiorow;
 
 		$laji = mysql_real_escape_string($laji);
@@ -1372,6 +1372,24 @@ if(!function_exists("avainsana")) {
 		}
 		else {
 			$querylisa = "";
+		}
+
+		if ($selitetark_2 != "") {
+			if(strpos($selitetark_2, "%") !== false) {
+				$querylisa .= " and avainsana.selitetark_2 LIKE ('".mysql_real_escape_string($selitetark_2)."') ";
+			}
+			else {
+				$querylisa .= " and avainsana.selitetark_2 = '".mysql_real_escape_string($selitetark_2)."' ";
+			}
+		}
+
+		if ($selitetark != "") {
+			if(strpos($selitetark, "%") !== false) {
+				$querylisa .= " and avainsana.selitetark LIKE ('".mysql_real_escape_string($selitetark)."') ";
+			}
+			else {
+				$querylisa .= " and avainsana.selitetark = '".mysql_real_escape_string($selitetark)."' ";
+			}
 		}
 
 		if ($yhtio != "") {

@@ -273,17 +273,28 @@ if(!function_exists("svnOpenNew")) {
 		else {
 			return "Tyyppi puuttuu";
 		}
+		
 		//	Haetaan vaadittava tieto
 		$query = "	SELECT lasku.nimi nimi, asiakkaan_kohde.kohde kohde, laskun_lisatiedot.seuranta seuranta
 					FROM lasku
 					JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
-					JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus= laskun_lisatiedot.asiakkaan_kohde
+					LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus= laskun_lisatiedot.asiakkaan_kohde
 					WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnus='$tunnus' and lasku.tunnusnippu = lasku.tunnus";
 		$kohderes = mysql_query($query) or pupe_error($query);
 		if(mysql_num_rows($kohderes) > 0) {
 			$kohderow = mysql_fetch_array($kohderes);
-			$pDir = $path."/{$tunnus} {$kohderow["seuranta"]} {$kohderow["nimi"]} {$kohderow["kohde"]}";
-			if(svnAction("copy", $templatePath."/{$kohderow["seuranta"]}", $pDir, t(ucfirst(strtolower($type))." avattu")) !== false) {
+			$pDir = trim($path."/{$tunnus} {$kohderow["seuranta"]} {$kohderow["nimi"]} {$kohderow["kohde"]}");
+			$sDir = $templatePath."/{$kohderow["seuranta"]}";
+			
+			//	Tsekataan onko seuranta specifi pohja
+			if(svnListDirectory($sDir) === false) {
+				$sDir = $templatePath."/{$kohderow["seuranta"]}";
+			}
+			else {
+				$sDir = $templatePath."/default";
+			}
+			
+			if(svnAction("copy", $sDir, $pDir, t(ucfirst(strtolower($type))." avattu")) !== false) {
 				//	Uudelleennimet‰‰nt tiedostot projektille
 				$list = svnAction("list -R", $pDir);
 				foreach($list as $file) {

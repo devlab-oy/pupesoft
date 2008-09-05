@@ -319,7 +319,7 @@ if($tee == "NAYTA") {
 		$kalenteri["tunnusnippu"]       = $tarjous;
 		
 		$kalenteri["kalenteri_ketka"]       = array("kaikki");
-		$kalenteri["kalenteri_nayta_kuka"]  = array($kukarow["kuka"]);
+		$kalenteri["kalenteri_nayta_kuka"]  = array("");
 
 		if($toim == "TARJOUSHAKUKONE") {
 			$kalenteri["kalenteri_nayta_tilausdata"]    = array("tarjous", "tarjouskontaktointi");
@@ -691,11 +691,11 @@ if($tee == "NAYTA") {
 			}
 		}
 		elseif(in_array($laskurow["alatila"], array("","A"))) {
-			$data["tiedot"]["menut"]["toiminnot"][] = array("TEKSTI" => "Kuittaa valmiiksi", "HREF" => "tilaushakukone.php?toim=$toim&setti=$setti&tarjous=$tarjous&tee=MERKKAAPROJEKTIVALMIIKSI&hakupalkki=OHI&aja_kysely=tmpquery", "TARGET" => "page");
+			$data["tiedot"]["menut"]["toiminnot"][] = array("TEKSTI" => t("Kuittaa valmiiksi"), "HREF" => "tilaushakukone.php?toim=$toim&setti=$setti&tarjous=$tarjous&tee=MERKKAAPROJEKTIVALMIIKSI&hakupalkki=OHI&aja_kysely=tmpquery", "TARGET" => "page");
 		}
 	}
 	elseif($laskurow["tila"] == "T" and in_array($laskurow["alatila"], array("", "A"))) {
-		$data["tiedot"]["menut"]["toiminnot"][] = array("TEKSTI" => "Mitätöi tarjous", "HREF" => "tilaushakukone.php?toim=$toim&setti=$setti&tarjous=$tarjous&tee=HYLKAATARJOUS", "TARGET" => "page");
+		$data["tiedot"]["menut"]["toiminnot"][] = array("TEKSTI" => t("Mitätöi tarjous"), "HREF" => "tilaushakukone.php?toim=$toim&setti=$setti&tarjous=$tarjous&tee=HYLKAATARJOUS", "TARGET" => "page");
 	}
 
 	$menu = array();
@@ -1527,10 +1527,10 @@ if($tee == "") {
 				
 				for($i=0;$i<=$c; $i++) {
 					$o = trim(str_replace("_", " ", mysql_field_name($laskures, $i)));                  
-					echo "<th>$o</th>";
+					echo "<th>".t($o)."</th>";
 					
 					if(isset($workbook)) {
-						$worksheet->write($excelrivi, $i, ucfirst(t($o)), $format_otsikko);
+						$worksheet->write($excelrivi, $i, t(ucfirst($o)), $format_otsikko);
 					}
 				}
 				

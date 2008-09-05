@@ -219,9 +219,14 @@
 	echo "</tr>";
 
 	echo "<tr>
-			<th>".t("Laskunro")."</th>
-			<th colspan='2'>".t("Laskun pvm")."</th>
-			<th>".t("Eräpäivä")."</th>
+			<th>".t("Laskunro")."</th>";
+			if ($laskurow["tila"] == "O" or $laskurow["tila"] == "K") {
+				echo "<th colspan='2'>".t("Valuutta")."</th>";
+			}
+			else {
+				echo "<th colspan='2'>".t("Laskun pvm")."</th>";
+			}
+	echo "<th>".t("Eräpäivä")."</th>
 			<th>".t("Maksupäivä")."</th>
 			<th>".t("Luontiaika")."</th>
 			<th>".t("ALV")."</th>";
@@ -231,9 +236,15 @@
 	}
 
 	echo "<tr>
-			<td>$laskurow[laskunro]</td>
-			<td colspan='2'>".tv1dateconv($laskurow["tapvm"])."</td>
-			<td>".tv1dateconv($laskurow["erpcm"])."</td>
+			<td>$laskurow[laskunro]</td>";
+	
+	if ($laskurow["tila"] == "O" or $laskurow["tila"] == "K") {
+		echo "<td colspan='2'>$laskurow[valkoodi]</td>";
+	}
+	else {
+		echo "<td colspan='2'>".tv1dateconv($laskurow["tapvm"])."</td>";
+	}
+	echo "<td>".tv1dateconv($laskurow["erpcm"])."</td>
 			<td>".tv1dateconv($laskurow["mapvm"])."</td>
 			<td>".tv1dateconv($laskurow["luontiaika"])."</td>
 			<td>".str_replace(".",",",$laskurow['alv'])." %</td>";

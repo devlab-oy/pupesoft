@@ -133,6 +133,7 @@
 			}
 		}
 	}
+
 	if(!function_exists("color_code")) {
 		// scripti javascript menujen tekemiseen
 		function color_code ($arvo, $maxvalue) {
@@ -245,6 +246,40 @@
 			return $otsikko;
 		}
 	}
+
+	if(!function_exists("kaletapaKaannos")) {
+		function kaletapaKaannos ($tapa, $from, $to) {
+			global $kukarow;
+			
+			//	Palautetaan automaattiseti takaisin
+			if($from == $to) return $tapa;
+			
+			//	Haetaan selite
+			$query = "	SELECT selite
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]' and avainsana.laji = 'KALETAPA' and selitetark = '$tapa' and kieli = '$from'
+						LIMIT 1";
+			$fromres = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($fromres) > 0) {
+				$fromrow = mysql_fetch_array($fromres);
+
+				$query = "	SELECT selitetark
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]' and avainsana.laji = 'KALETAPA' and selite = '$fromrow[selite]' and kieli = '$to'
+							LIMIT 1";
+				$tores = mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($tores) > 0) {
+					$torow = mysql_fetch_array($tores);
+					
+					//	Palautetaan käännös
+					return $torow["selitetark"];
+				}
+			}
+			
+			//	Palautetaan oletus jos muuta ei saatu..
+			return $tapa;
+		}
+	}	
 	
 	if(!function_exists("lyhytviesti")) {
 		function lyhytviesti (&$viesti, $viestipituus, $otsikko="", $popup_otsikko="") {
@@ -309,7 +344,7 @@
 				$res = mysql_query($query) or pupe_error($query);
 				$row = mysql_fetch_array($res);
 				//var_dump($kalenteri);
-				$otsikko = substr($row["tapa"], 0, 14);
+				$otsikko = substr(kaletapaKaannos($row["tapa"], "fi", $kukarow["kieli"]), 0, 14);
 				
 				$row["viesti"] = stripslashes($row["viesti"]);
 
@@ -330,7 +365,7 @@
 				}
 				
 				if($lajitark == "kalenteri") {
-					$popup_otsikko .= "<tr><th class=''>".t("Tapa").":</th><td class=''>$row[tapa]</td></tr>";
+					$popup_otsikko .= "<tr><th class=''>".t("Tapa").":</th><td class=''>".kaletapaKaannos($row["tapa"], "fi", $kukarow["kieli"])."</td></tr>";
 					$popup_otsikko .= "<tr><th class=''>".t("Alkaa").":</th><td class=''>".date("d.m.Y H:i", $row["pvmalku"])."</td></tr>";
 					$popup_otsikko .= "<tr><th class=''>".t("Päättyy").":</th><td class=''>".date("d.m.Y H:i", $row["pvmloppu"])."</td></tr>";
 				}
@@ -1064,7 +1099,7 @@
 					
 					$seuraava 	= strtotime("+1 months", $kaleaika);
 					$edellinen 	= strtotime("-1 months", $kaleaika);
-					$otsikko	= "Kausi ".date("m", $kaleaika)." - ".date("Y", $kaleaika);
+					$otsikko	= t("Kausi")." ".date("m", $kaleaika)." - ".date("Y", $kaleaika);
 					
 					$kale .= "<caption><a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$edellinen".url_params($kalenteri)."', '$kalenteri[div]', false);\">&lt;&lt;&nbsp;</a>&nbsp;&nbsp;$otsikko&nbsp;&nbsp;&nbsp;<a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$seuraava".url_params($kalenteri)."', '$kalenteri[div]', false);\">&gt;&gt;</a></caption>";
 					
@@ -1407,7 +1442,7 @@
 								$extra .= kaleotsikko($tapahtuma["laji_tark"]);
 								
 								if($lisatiedot["tapa"] != "") {
-									$extra .= "&nbsp;&ndash;&nbsp;".kaleotsikko($lisatiedot["tapa"]);
+									$extra .= "&nbsp;&ndash;&nbsp;".kaletapaKaannos($lisatiedot["tapa"], "fi", $kukarow["kieli"]);
 								}
 								
 								if($lisatiedot["yhteyshenkilo"] != "") {
@@ -1737,7 +1772,7 @@
 		//	Tavasta tallennetaankin ihan koko rimpsu..
 		$query = "	SELECT selitetark
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and avainsana.laji = 'KALETAPA' and selite = '$tapa'";
+					WHERE yhtio = '$kukarow[yhtio]' and avainsana.laji = 'KALETAPA' and selite = '$tapa' and kieli IN ('fi','')";
 		$tapares = mysql_query($query) or pupe_error($query);
 		if(mysql_num_rows($tapares) == 1) {
 			$taparow = mysql_fetch_array($tapares);
@@ -2011,7 +2046,7 @@
 				if($abur[0] > 0) {
 					$llisa = "({$abur[0]})";
 				}
-				$poistanappi 	= "<a href='#' onclick=\"sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaletee=POISTA_KALENTERITAPAHTUMA&ktunnus=$ktunnus".url_params($kalenteri)."', false, false); pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none'; return false;\">Poista</a>";
+				$poistanappi 	= "<a href='#' onclick=\"sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaletee=POISTA_KALENTERITAPAHTUMA&ktunnus=$ktunnus".url_params($kalenteri)."', false, false); pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none'; return false;\">".("Poista")."</a>";
 				$liitanappi 	= "<a href='#' onclick=\"sndReq('ajax_menu', '$kalenteri[URL]?ohje=off&kaletee=LISAA_LIITE&ktunnus=$ktunnus".url_params($kalenteri)."', false, false); return false;\">".t("Liitteet")." $llisa</a>";
 			}
 		}

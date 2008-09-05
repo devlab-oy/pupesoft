@@ -21,33 +21,30 @@
 			Yhteensä											600
 	*/
 
-	$ulos = "LUM200 ";
-  	$ulos .= sprintf ('%011.11s', $ytunnus);		//ytunnus
-	$ulos .= sprintf ('%5.5s', $lum_et_5kentta);	//asiakastunnus
-	$ulos .= "   ";
+	$ulos  = "LUM2";
+	$ulos .= "0";
+	$ulos .= "0";
+	$ulos .= sprintf ('%1.1s', 		' ');
+  	$ulos .= sprintf ('%011.11s',	$ytunnus);			//ytunnus
+	$ulos .= sprintf ('%5.5s',		$lum_et_5kentta);	//asiakastunnus
+	$ulos .= sprintf ('%2.2s', 		' ');
+	$ulos .= sprintf ('%1.1s', 		' ');
+
 	$luonti = getdate();
 
-	$ulos .= sprintf ('%02d', substr($luonti['year'],3,2));
+	// Pvm 10 merkkiä
+	$ulos .= sprintf ('%02d', substr($luonti['year'], 3, 2));
 	$ulos .= sprintf ('%02d', $luonti['mon']);
 	$ulos .= sprintf ('%02d', $luonti['mday']);
 	$ulos .= sprintf ('%02d', $luonti['hours']);
 	$ulos .= sprintf ('%02d', $luonti['minutes']);
 
-	//Nordean speksi
+	//Nordean speksi (menee Sampollekkin, siellä kenttä "Veloituksen päivämäärä" on vain myös tyyppiä "Varalla")
 	$ulos .= sprintf ('%14s', ' ');
 	$ulos .= sprintf ('%04d', $luonti['year']);		//Tämä on eräpvm, jonka voi ohittaa laskulla
-	$ulos .= sprintf ('%02d', $luonti['mon']);		//
-	$ulos .= sprintf ('%02d', $luonti['mday']);		//
+	$ulos .= sprintf ('%02d', $luonti['mon']);
+	$ulos .= sprintf ('%02d', $luonti['mday']);
 	$ulos .= sprintf ('%542s', ' ');
-
-	/*
-	Tuomaksen versio
-	//$ulos .= sprintf ('%14s', ' ');
-	$ulos .= sprintf ('%04d', $luonti['year']);		//Tämä on eräpvm, jonka voi ohittaa laskulla
-	$ulos .= sprintf ('%02d', $luonti['mon']);		//
-	$ulos .= sprintf ('%02d',  $luonti['mday']);	//
-	$ulos .= sprintf ('%556s', ' ');				//varalla
-	*/
 
 	//print strlen($ulos) . "/" . $ulos;
 	//print "</pre>";

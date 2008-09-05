@@ -2229,7 +2229,7 @@
 						</tr>
 						<tr>
 							<td>$valitse_kuka</td>
-							<td>$yhdata</td>
+							<td>$valitse_kuka</td>
 						</tr>
 						<tr>
 							<th>".t("Tapa")."</th>
@@ -2460,7 +2460,7 @@
 						</td>
 					</tr>
 					<tr align = 'right'>
-						<td colspan = '2'>$kuittaanappi&nbsp;&nbsp;$liitanappi&nbsp;&nbsp;$poistanappi&nbsp;&nbsp;<a href='#' onclick=\"ajaxPost('kaleForm', '$kalenteri[URL]?' , 'ajax_menu'); return false;\">Tallenna</a></td>
+						<td colspan = '2'>$kuittaanappi&nbsp;&nbsp;$liitanappi&nbsp;&nbsp;$poistanappi&nbsp;&nbsp;<a href='#' onclick=\"ajaxPost('kaleForm', '$kalenteri[URL]?' , 'ajax_menu'); return false;\">".t("Tallenna")."</a></td>
 					</tr>
 				</table>
 				</form>";

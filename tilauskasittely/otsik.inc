@@ -878,7 +878,7 @@
 							<td valign='top'> ".t("Sähköpostiosoite").": </td>
 							<td>$srow[email]</td></tr>";
 					echo "<tr>
-							<td valign='top'>Kotipuhelin</td>
+							<td valign='top'>".t("Kotipuhelin")."</td>
 							<td>$srow[puhelin]</td></tr>";
 					echo "<tr>
 							<td valign='top'>".t("Työpuhelin").": </td>
@@ -1355,7 +1355,7 @@
 				echo "<td>".t("Kohde").":</td>
 					<td><select id='asiakkaan_kohde' name='asiakkaan_kohde' onchange=\"yllapito('asiakkaan_kohde&liitostunnus=$srow[liitostunnus]',this.id)\">";
 
-				echo "<option value=''>Asiakkaalla ei ole kohdetta</option>";
+				echo "<option value=''>".t("Asiakkaalla ei ole kohdetta")."</option>";
 
 				$optlisa="";
 				while($row = mysql_fetch_array($kohderesult)) {

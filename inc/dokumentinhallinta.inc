@@ -11,13 +11,13 @@ if(!function_exists("svnInit")) {
 	function svnInit () {
 		
 		//	Oko näitä ei ole joten skipataan aina..
-		if(!defined(svnMethod) or !defined(svnUrl) or !defined(svnPath) or !defined(svnLanguage)) {
+		if(!defined("svnMethod") or !defined("svnUrl") or !defined("svnPath") or !defined("svnLanguage")) {
 			$status = false;
 		}
 		else {			
 			$status = true;
 		}
-		
+
 		define("svnStatus", $status);
 		
 		return $status;

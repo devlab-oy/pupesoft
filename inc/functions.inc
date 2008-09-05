@@ -3712,7 +3712,16 @@ if (!function_exists('ebid')) {
 				return $url;
 			}
 
-			return "<a href='$url'>". t('Näytä lasku')."</a>";
+			$out = "<a href='$url'>". t('Näytä lasku')."</a> ";
+
+			$query = "SELECT tunnus from liitetiedostot where liitostunnus='{$laskurow['tunnus']}' and liitos='lasku' and yhtio='{$kukarow['yhtio']}'";
+			$res = mysql_query($query) or pupe_error($query);
+
+			while ($row = mysql_fetch_array($res)) {
+				$out .= "<a $target href='".$palvelin2."view.php?id={$row['tunnus']}'>". t('Näytä liite') ."</a> ";
+			}
+
+			return $out;
 		}
 		elseif ($laskurow['tila'] == 'U') {
 

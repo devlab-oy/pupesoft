@@ -1273,7 +1273,7 @@
 				$yhresult = mysql_query($query) or pupe_error($query);
 
 				//duusaan näihin javascript handlerin myöhemmin
-				echo "	<option value=''>".("Ei teknistä yhteyshenkilöä")."</option>";
+				echo "	<option value=''>".t("Ei teknistä yhteyshenkilöä")."</option>";
 
 				$optlisa="";
 				while($row = mysql_fetch_array($yhresult)) {
@@ -1285,7 +1285,7 @@
 					echo "<option value='$row[0]' $sel>$row[1]</option>";
 				}
 
-				echo "	<optgroup label='Toiminto'>
+				echo "	<optgroup label='".t("Toiminto")."'>
 							<option value='uusi'>".t("Luo uusi yhteyshenkilö")."</option>
 							$optlisa
 						</optgroup>";
@@ -1334,8 +1334,8 @@
 				}
 
 				//duusaan näihin javascript handlerin myöhemmin
-				echo "	<optgroup label='Toiminto'>
-							<option value='uusi'>".("Luo uusi yhteyshenkilö")."</option>
+				echo "	<optgroup label='".t("Toiminto")."'>
+							<option value='uusi'>".t("Luo uusi yhteyshenkilö")."</option>
 							$optlisa
 						</optgroup>";
 
@@ -1367,8 +1367,8 @@
 				}
 
 				//duusaan näihin javascript handlerin myöhemmin
-				echo "	<optgroup label='Toiminto'>
-							<option value='uusi'>".("Luo uusi asiakkaan kohde")."</option>
+				echo "	<optgroup label='".t("Toiminto")."'>
+							<option value='uusi'>".t("Luo uusi asiakkaan kohde")."</option>
 							$optlisa
 						</optgroup>";
 

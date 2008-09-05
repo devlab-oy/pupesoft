@@ -4658,7 +4658,6 @@ function closeOnExit(event, oi) {
 		for (i=0;i<x.length;i++) {
 
 			if(x[i].id==oi) {
-				alert(r.tagName+' | '+x[i].id);
 				recurce = false;
 				return true;
 			}

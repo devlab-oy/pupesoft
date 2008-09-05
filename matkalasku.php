@@ -1244,10 +1244,10 @@ if ($tee == "MUOKKAA") {
 			
 			if($laskurow["tilaustyyppi"] == "M" or $lisaatapahtumaan == "OK" or $toim == "SUPER") {
 				if($perheid2 > 0) {
-					echo "<tr><td class='back' colspan = '7'><font class='message'>Valitse kulutyyppi matkalle:</font> <font class='head'>$tapahtumarow[kommentti]</font></td></tr>";
+					echo "<tr><td class='back' colspan = '7'><font class='message'>".t("Valitse kulutyyppi matkalle").":</font> <font class='head'>$tapahtumarow[kommentti]</font></td></tr>";
 				}
 				else {
-					echo "<tr><td class='back' colspan = '7'><font class='message'>Kulu lis‰t‰‰n uuteen tapahtumaan</font></td></tr>";
+					echo "<tr><td class='back' colspan = '7'><font class='message'>".t("Kulu lis‰t‰‰n uuteen tapahtumaan")."</font></td></tr>";
 				}
 				
 				//	Vaihdettaessa tuotetta pit‰‰ pysy‰ oikeassa tyypiss‰
@@ -1390,7 +1390,7 @@ if ($tee == "MUOKKAA") {
 			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 			
 			if($rivitunnus > 0) {
-				echo "<font class='error'>HUOM! Jos et lis‰‰ rivi‰ se poistetaan erittelyst‰/matkalaskusta</font><br>";
+				echo "<font class='error'>".t("HUOM! Jos et lis‰‰ rivi‰ se poistetaan erittelyst‰/matkalaskusta")."</font><br>";
 			}
 			
 			echo "<table><tr>";

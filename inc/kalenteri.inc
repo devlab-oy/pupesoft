@@ -207,6 +207,7 @@
 										"tarjous" 		=> t("Tarjous"),
 										"toimitus" 		=> t("L‰hetys"),
 										"kerays"		=> t("Ker‰ys"),
+										"alku"			=> t("Avattu"),
 										"laskutus"		=> t("Laskutus"),
 										"kontakti_1"	=> t("1. kontaktointi"),
 										"kontakti_2"	=> t("2. kontaktointi"),
@@ -218,6 +219,28 @@
 
 			$otsikko = $kaleotsikko[$tyyppi];
 			if($otsikko == "") $otsikko = $tyyppi;
+			
+			return $otsikko;
+		}
+	}
+
+	if(!function_exists("nakymaotsikko")) {
+		function nakymaotsikko ($nakyma) {
+			
+			static $nakymaotsikko;
+			
+			if(!is_array($nakymaotsikko)) {
+				$nakymaotsikko = array(	"KUUKAUSINAKYMA"	=> t("Kuukausin‰kym‰"),
+										"VIIKKONAKYMA" 		=> t("Viikkon‰kym‰"),
+										"PAIVANAKYMA" 		=> t("P‰iv‰n‰kym‰"),
+										"TAPAHTUMALISTAUS" 	=> t("Tapahtumalistaus"),
+										"RIVINAKYMA" 		=> t("Rivin‰kym‰"),
+									);
+				
+			}
+
+			$otsikko = $nakymaotsikko[$nakyma];
+			if($otsikko == "") $otsikko = $nakyma;
 			
 			return $otsikko;
 		}
@@ -428,8 +451,7 @@
 					else {
 						$viesti = $lajitark;
 					}
-				}
-				
+				}				
 				
 				//list($viesti, $poppari) = lyhytviesti($row["tunnus"]." ".$viesti."\nviite: {$row["viesti"]}\n\n{$row["comments"]}", strlen($row["tunnus"]));
 				$row["viesti"] = " <a href='#' onclick=\"popUp(event, 'toimitus', '300', '-20', '../raportit/asiakkaantilaukset.php?tee=NAYTA&toim=$atoim&h&tunnus=$row[tunnus]'); return false;\" class='kale' $poppari>$viesti</a>";
@@ -1015,7 +1037,7 @@
 			$menu = array();
 			foreach(array("TAPAHTUMALISTAUS", "KALENTERINAKYMA", "KUUKAUSINAKYMA", "VIIKKONAKYMA", "PAIVANAKYMA", "RIVINAKYMA") as $n) {
 				if($kalenteri["sallittu_nakyma"] == "" or in_array($n, $kalenteri["sallittu_nakyma"])) {
-					$menu[] = array("TEKSTI" => ucfirst(strtolower(t($n))),		"HREF" => "$kalenteri[URL]?nakyma=$n".url_params($kalenteri), "DIV" => $kalenteri["div"], "TAPA" => "request");
+					$menu[] = array("TEKSTI" => nakymaotsikko($n),		"HREF" => "$kalenteri[URL]?nakyma=$n".url_params($kalenteri), "DIV" => $kalenteri["div"], "TAPA" => "request");
 				} 
 			}
 
@@ -1385,7 +1407,7 @@
 								$extra .= kaleotsikko($tapahtuma["laji_tark"]);
 								
 								if($lisatiedot["tapa"] != "") {
-									$extra .= "&nbsp;&ndash;&nbsp;".$lisatiedot["tapa"];
+									$extra .= "&nbsp;&ndash;&nbsp;".kaleotsikko($lisatiedot["tapa"]);
 								}
 								
 								if($lisatiedot["yhteyshenkilo"] != "") {
@@ -1590,7 +1612,7 @@
 						$menu[] = array("TEKSTI" => t("Lis‰‰ muistutus"), 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
 						$menu[] = array("TEKSTI" => t("Lis‰‰ asiakasmuistio"), 	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
 
-						$kale .= "<div style='width: {$w}px; text-align: right; z-index: 1;'>".tee_menu($menu, "<font class='kaleinfo'>Lis‰‰</font>")."</div>".implode("",$ulos);
+						$kale .= "<div style='width: {$w}px; text-align: right; z-index: 1;'>".tee_menu($menu, "<font class='kaleinfo'>".t("Lis‰‰")."</font>")."</div>".implode("",$ulos);
 						$kale .= "</td>";
 					}			
 					

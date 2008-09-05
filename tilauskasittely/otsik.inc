@@ -1273,25 +1273,24 @@
 				$yhresult = mysql_query($query) or pupe_error($query);
 
 				//duusaan näihin javascript handlerin myöhemmin
-				echo "	<option value=''>Ei teknistä yhteyshenkilöä</option>";
+				echo "	<option value=''>".("Ei teknistä yhteyshenkilöä")."</option>";
 
 				$optlisa="";
 				while($row = mysql_fetch_array($yhresult)) {
 					$sel = "";
 					if ($row[0] == $srow["yhteyshenkilo_tekninen"]) {
 						$sel = 'selected';
-						$optlisa = "<option value='muokkaa#$srow[yhteyshenkilo_tekninen]'>Muokkaa yhteyshenkilöä</option>";
+						$optlisa = "<option value='muokkaa#$srow[yhteyshenkilo_tekninen]'>".t("Muokkaa yhteyshenkilöä")."</option>";
 					}
 					echo "<option value='$row[0]' $sel>$row[1]</option>";
 				}
 
 				echo "	<optgroup label='Toiminto'>
-							<option value='uusi'>Luo uusi yhteyshenkilö</option>
+							<option value='uusi'>".t("Luo uusi yhteyshenkilö")."</option>
 							$optlisa
 						</optgroup>";
 
 				echo "</select>";
-
 
 				echo "</td>";
 
@@ -1321,7 +1320,7 @@
 				echo "<tr><td>".t("Asiakkaan kaupallinen käsittelijä").":</td>
 				<td><select id='yhteyshenkilo_kaupallinen' name='yhteyshenkilo_kaupallinen' onchange=\"yllapito('yhteyshenkilo&liitostunnus=$srow[liitostunnus]&yhtyyppi=asiakas',this.id)\">";
 
-				echo "	<option value=''>Ei kaupallista käsittelijää</option>";
+				echo "	<option value=''>".t("Ei kaupallista käsittelijää")."</option>";
 				mysql_data_seek($yhresult,0);
 
 				$optlisa="";
@@ -1336,7 +1335,7 @@
 
 				//duusaan näihin javascript handlerin myöhemmin
 				echo "	<optgroup label='Toiminto'>
-							<option value='uusi'>Luo uusi yhteyshenkilö</option>
+							<option value='uusi'>".("Luo uusi yhteyshenkilö")."</option>
 							$optlisa
 						</optgroup>";
 
@@ -1362,14 +1361,14 @@
 					$sel = "";
 					if ($row[0] == $srow["asiakkaan_kohde"]) {
 						$sel = 'selected';
-						$optlisa = "<option value='muokkaa#$srow[asiakkaan_kohde]'>Muokkaa kohdetta</option>";
+						$optlisa = "<option value='muokkaa#$srow[asiakkaan_kohde]'>".t("Muokkaa kohdetta")."</option>";
 					}
 					echo "<option value='$row[0]' $sel>$row[0] - $row[1]</option>";
 				}
 
 				//duusaan näihin javascript handlerin myöhemmin
 				echo "	<optgroup label='Toiminto'>
-							<option value='uusi'>Luo uusi asiakkaan kohde</option>
+							<option value='uusi'>".("Luo uusi asiakkaan kohde")."</option>
 							$optlisa
 						</optgroup>";
 

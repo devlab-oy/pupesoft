@@ -1893,7 +1893,7 @@ if ($tee == "MUOKKAA") {
 			echo "	<tr><td class='back'><br></td></tr>
 					<tr>";
 
-			echo "	<td class='back' align='left'>
+			echo "	<td class='back' align='left' colspan='3'>
 						<form name='palaa' action='$PHP_SELF' method='post'>
 						<input type = 'hidden' name='tee' value = 'TUO_KALENTERISTA'>
 						<input type = 'hidden' name='tilausnumero' value = '$tilausnumero'>

@@ -522,7 +522,10 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		
 		Funktiot voi kutsua suoraan koodista jos dokumentaationhallinta ei ole käytössä mitään ei ko funktioilla tapahdu
 	*/
-	require("inc/dokumentinhallinta.inc");
+	
+	if ($kukarow["extranet"] == "") {
+		require("inc/dokumentinhallinta.inc");
+	}
 
 }
 

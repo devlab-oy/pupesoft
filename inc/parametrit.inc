@@ -519,13 +519,11 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 	
 	/*
 		tehdään linkki dokumentaationhallintaan!
-		
+
 		Funktiot voi kutsua suoraan koodista jos dokumentaationhallinta ei ole käytössä mitään ei ko funktioilla tapahdu
 	*/
 	
-	if ($kukarow["extranet"] == "") {
-		require("inc/dokumentinhallinta.inc");
-	}
+	require("inc/dokumentinhallinta.inc");
 
 }
 

@@ -963,7 +963,12 @@
 				</form>
 				</table>";
 		echo "<br><br><table>";
-		echo "<tr><th colspan='3'>".t("Avoimet inventointilistat").":</th></tr>";
+
+		echo "<font class='message'>".t("Avoimet inventointilistat").":</font><br>";
+		echo "<tr><th>".t("Nro")."</th>
+		<th>".t("Luontiaika")."</th>
+		<th colspan='2'></th>
+		</tr>";
 
 		//haetaan inventointilista numero tässä vaiheessa
 		$query = "	SELECT distinct inventointilista, inventointilista_aika
@@ -978,8 +983,21 @@
 
 			echo "<tr>
 					<td>$lrow[inventointilista]</td>
-					<td><a href='$PHP_SELF?tee=INVENTOI&lista=$lrow[inventointilista]'>".t("Inventoi")."</a></td>
-					<td><a href='$PHP_SELF?tee=MITATOI&lista=$lrow[inventointilista]'>".t("Mitätöi lista")."</a></td>
+					<td>".tv1dateconv($lrow["inventointilista_aika"])."</td>
+					<td>
+						<form action='inventoi.php' method='post'>
+						<input type='hidden' name='tee' value='INVENTOI'>
+						<input type='hidden' name='lista' value='$lrow[inventointilista]'>
+						<input type='submit' value='".t("Inventoi")."'>
+						</form>
+					</td>
+					<td>
+						<form action='inventoi.php' method='post'>
+						<input type='hidden' name='tee' value='MITATOI'>
+						<input type='hidden' name='lista' value='$lrow[inventointilista]'>
+						<input type='submit' value='".t("Mitätöi lista")."'>
+						</form>
+					</td>
 				</tr>";
 		}
 		echo "</table>";

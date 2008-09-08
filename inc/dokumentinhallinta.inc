@@ -10,6 +10,10 @@
 if(!function_exists("svnInit")) {
 	function svnInit () {
 		
+		if(defined("svnStatus")) {
+			return svnStatus;
+		}
+		
 		//	Oko näitä ei ole joten skipataan aina..
 		if(!defined("svnMethod") or !defined("svnUrl") or !defined("svnPath") or !defined("svnLanguage")) {
 			$status = false;
@@ -76,6 +80,8 @@ if(!function_exists("svnAction")) {
 if(!function_exists("makeSvnTarget")) {
 	function makeSvnTarget (&$target) {
 		
+		if(svnStatus===false) return false;
+		
 		if($target == "") {
 			return false;			
 		}
@@ -104,6 +110,8 @@ if(!function_exists("makeSvnTarget")) {
 
 if(!function_exists("svnCheckCommit")) {
 	function svnCheckCommit ($action, &$src, &$dst="", &$comments="") {
+		
+		if(svnStatus===false) return false;
 		
 		$noDstAction = array("delete", "list", "list -R");
 		$nocommentsAction = array("list", "list -R");
@@ -146,6 +154,8 @@ if(!function_exists("svnCheckCommit")) {
 if(!function_exists("svnListDirectory")) {
 	function svnListDirectory ($dir, $params="") {
 		
+		if(svnStatus===false) return false;
+		
 		$list = svnAction("list $params", $dir);
 		if(count($list) > 0) {
 
@@ -162,13 +172,18 @@ if(!function_exists("svnListDirectory")) {
 
 if(!function_exists("svnFileLink")) {
 	function svnFileLink ($file) {
-	
+		
+		if(svnStatus===false) return false;
+		
 		return svnPreviewMethod."://".svnPreviewUrl."/$file";
 	}		
 }
 
 if(!function_exists("svnFindActiveProject")) {
 	function svnFindActiveProject ($tunnus) {
+		
+		if(svnStatus===false) return false;
+		
 		$list = svnAction("list", svnProjectsActive);
 		
 		foreach($list as $p) {			
@@ -180,6 +195,9 @@ if(!function_exists("svnFindActiveProject")) {
 }
 if(!function_exists("svnFindActiveQuotation")) {
 	function svnFindActiveQuotation ($tunnus) {
+
+		if(svnStatus===false) return false;
+
 		$list = svnAction("list", svnQuotationsActive);
 		foreach($list as $p) {			
 			if(substr($p, 0, strpos($p, " ")) == $tunnus) {
@@ -191,6 +209,9 @@ if(!function_exists("svnFindActiveQuotation")) {
 
 if(!function_exists("svnFindCompleteProject")) {
 	function svnFindCompleteProject ($tunnus) {
+		
+		if(svnStatus===false) return false;
+		
 		$list = svnAction("list", svnProjectsComplete);
 		
 		foreach($list as $p) {			
@@ -202,6 +223,9 @@ if(!function_exists("svnFindCompleteProject")) {
 }
 if(!function_exists("svnFindRejectedQuotation")) {
 	function svnFindRejectedQuotation ($tunnus) {
+		
+		if(svnStatus===false) return false;
+		
 		$list = svnAction("list", svnQuotationsRejected);
 		
 		foreach($list as $p) {			
@@ -213,18 +237,26 @@ if(!function_exists("svnFindRejectedQuotation")) {
 }
 
 if(!function_exists("svnListProjectDirectory")) {
+
+	if(svnStatus===false) return false;
+
 	function svnListProjectDirectory ($tunnus, $params="") {
 		return svnListDirectory(svnProjectDirectory($tunnus), $params);
 	}
 }
 if(!function_exists("svnListQuotationDirectory")) {
 	function svnListQuotationDirectory ($tunnus, $params="") {
+		
+		if(svnStatus===false) return false;
+		
 		return svnListDirectory(svnQuotationDirectory($tunnus), $params);
 	}
 }
 
 if(!function_exists("svnProjectDirectory")) {
 	function svnProjectDirectory ($tunnus) {
+		
+		if(svnStatus===false) return false;
 		
 		//	Koitetaan eka aktiivisista
 		$path = svnFindActiveProject($tunnus);
@@ -242,6 +274,8 @@ if(!function_exists("svnProjectDirectory")) {
 }
 if(!function_exists("svnQuotationDirectory")) {
 	function svnQuotationDirectory ($tunnus) {
+		
+		if(svnStatus===false) return false;
 		
 		//	Koitetaan eka aktiivisista
 		$path = svnFindActiveQuotation($tunnus);
@@ -261,6 +295,8 @@ if(!function_exists("svnQuotationDirectory")) {
 if(!function_exists("svnOpenNew")) {
 	function svnOpenNew ($tunnus, $type) {
 		global $kukarow;
+		
+		if(svnStatus===false) return false;
 		
 		if($type == "PROJEKTI") {
 			$path 			= svnProjectsActive;

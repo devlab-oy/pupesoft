@@ -531,7 +531,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 	else {
 		require("dokumentinhallinta.inc");
 	}
-	/*
+	*/
 }
 
 ?>

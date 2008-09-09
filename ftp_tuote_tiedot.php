@@ -224,8 +224,8 @@ if ($tee == "aja") {
 					LEFT JOIN tuotteen_avainsanat as ta_nimitys_de on tuote.yhtio = ta_nimitys_de.yhtio and tuote.tuoteno = ta_nimitys_de.tuoteno and ta_nimitys_de.laji = 'nimitys_de'
 					LEFT JOIN tuotteen_avainsanat as ta_kuvaus_de on tuote.yhtio = ta_kuvaus_de.yhtio and tuote.tuoteno = ta_kuvaus_de.tuoteno and ta_kuvaus_de.laji = 'kuvaus_de'
 					LEFT JOIN tuotteen_avainsanat as ta_lyhyt_de on tuote.yhtio = ta_lyhyt_de.yhtio and tuote.tuoteno = ta_lyhyt_de.tuoteno and ta_lyhyt_de.laji = 'lyhyt_de'
-					join avainsana as avtry on tuote.yhtio = avtry.yhtio and tuote.try = avtry.selite and avtry.laji = 'TRY' and avtry.nakyvyys != 'E'
-					join avainsana as avosasto on tuote.yhtio = avosasto.yhtio and tuote.osasto = avosasto.selite and avosasto.laji = 'OSASTO' and avosasto.nakyvyys != 'E'
+					join avainsana as avtry on tuote.yhtio = avtry.yhtio and tuote.try = avtry.selite and avtry.laji = 'TRY' and avtry.nakyvyys != 'E' and avtry.kieli = '$yhtiorow[kieli]'
+					join avainsana as avosasto on tuote.yhtio = avosasto.yhtio and tuote.osasto = avosasto.selite and avosasto.laji = 'OSASTO' and avosasto.nakyvyys != 'E' and avosasto.kieli = '$yhtiorow[kieli]'
 					WHERE tuote.yhtio = '$kyhtio'
 					AND tuote.hinnastoon = 'W'
 					AND tuote.status NOT IN('P','X')					

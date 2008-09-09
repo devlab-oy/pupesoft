@@ -240,7 +240,7 @@
 					(	SELECT if(korvaavat.id>0,concat(tuote.try,(select tuoteno from korvaavat korva2 where korva2.yhtio=korvaavat.yhtio and korva2.id=korvaavat.id ORDER BY jarjestys LIMIT 1)), concat(tuote.try,tuote.tuoteno)) sorttauskentta,
 						ifnull(korvaavat.tuoteno, tuote.tuoteno) tuoteno, avainsana.selitetark trynimi
 						FROM tuote
-						LEFT JOIN avainsana ON avainsana.yhtio=tuote.yhtio and avainsana.selite=tuote.try and avainsana.laji='TRY'
+						LEFT JOIN avainsana ON avainsana.yhtio=tuote.yhtio and avainsana.selite=tuote.try and avainsana.laji='TRY' and avainsana.kieli = '$yhtiorow[kieli]'
 						LEFT JOIN korvaavat ON korvaavat.yhtio=tuote.yhtio and korvaavat.id = (select id from korvaavat where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1)
 						WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.tuoteno in ($row[tuoteno])
 						GROUP BY 1,2,3

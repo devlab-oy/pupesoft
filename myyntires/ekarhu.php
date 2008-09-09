@@ -41,7 +41,7 @@
 	}
 
 	function uusi_karhukierros($yhtio) {
-		$query = "SELECT tunnus FROM karhukierros where pvm=current_date and yhtio='$yhtio'";
+		$query = "SELECT tunnus FROM karhukierros where pvm=current_date and yhtio='$yhtio' and tyyppi=''";
 		$result = mysql_query($query) or karhu_rollback($query);
 		$array = mysql_fetch_array($result);
 		if (!mysql_num_rows($result)) {

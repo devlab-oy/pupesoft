@@ -2,7 +2,7 @@
 
 	if(!function_exists("uusi_karhukierros")) {
 		function uusi_karhukierros($yhtio) {
-			$query = "SELECT tunnus FROM karhukierros where pvm=current_date and yhtio='$yhtio'";
+			$query = "SELECT tunnus FROM karhukierros where pvm=current_date and yhtio='$yhtio' and tyyppi=''";
 			$result = mysql_query($query) or pupe_error($query);
 			$array = mysql_fetch_array($result);
 

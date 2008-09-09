@@ -522,16 +522,13 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 
 		Funktiot voi kutsua suoraan koodista jos dokumentaationhallinta ei ole käytössä mitään ei ko funktioilla tapahdu
 	*/
-	
-	
-	/*
+
 	if (file_exists("inc/dokumentinhallinta.inc")) {
 		require("inc/dokumentinhallinta.inc");
 	}
 	else {
 		require("dokumentinhallinta.inc");
 	}
-	*/
 }
 
 ?>

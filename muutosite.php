@@ -736,31 +736,49 @@ if ($tee == 'E' or $tee == 'F') {
 
 		require "inc/laskutyyppi.inc";
 
-
 		// Jos myyntilasku, niin onko sitä karhuttu?
-		$karhu_query = "	SELECT pvm, tyyppi, ktunnus
-							FROM karhu_lasku
-							JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.yhtio = '$kukarow[yhtio]')
-							WHERE karhu_lasku.ltunnus = '$trow[tunnus]'";
+		// tarttetaan liitostunnus
+		$karhu_query = "	SELECT liitostunnus
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus = '$trow[tunnus]'";
 		$karhu_result = mysql_query($karhu_query) or pupe_error($karhu_query);
+		$karhu_liitos = mysql_fetch_array($karhu_result);
 
-		if (mysql_num_rows($karhu_result) > 0) {
-			echo "<tr><th>",t('Karhu / Tratta'),":</th><td>";
+		// haetaan kaikki karhukerrat
+		$karhu_query = "	SELECT ifnull(group_concat(ktunnus), '') ktunnus
+							FROM karhu_lasku
+							WHERE karhu_lasku.ltunnus = '$trow[tunnus]'
+							ORDER BY ktunnus";
+		$karhu_result = mysql_query($karhu_query) or pupe_error($karhu_query);
+		$karhu_row = mysql_fetch_array($karhu_result);
 
-			while ($karhu_row = mysql_fetch_array($karhu_result)) {
-				if ($karhu_row["tyyppi"] == 'T') {
-					echo "<a href='".$palvelin2."muutosite.php?karhutunnus=$karhu_row[ktunnus]&lasku_tunnus[]=$trow[tunnus]&tee=tulosta_tratta&nayta_pdf=1'>".tv1dateconv($karhu_row["pvm"])."</a> (Tratta)";
+		if ($karhu_row["ktunnus"] != "") {		
+			// haetaan kaikki karhukerrat jotka kuuluu tähän laskuun
+			$karhu_query = "	SELECT pvm, tyyppi, karhukierros.tunnus ktunnus, group_concat(lasku.tunnus) laskutunnukset
+								FROM karhukierros
+								JOIN karhu_lasku ON (karhu_lasku.ktunnus = karhukierros.tunnus)
+								JOIN lasku USE INDEX (primary) ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.yhtio = karhukierros.yhtio and lasku.tila = 'U' and lasku.liitostunnus = '$karhu_liitos[liitostunnus]')
+								WHERE karhukierros.yhtio = '$kukarow[yhtio]'
+								and karhukierros.tunnus in ($karhu_row[ktunnus])
+								GROUP BY pvm, tyyppi, karhukierros.tunnus";
+			$karhu_result = mysql_query($karhu_query) or pupe_error($karhu_query);
+
+			if (mysql_num_rows($karhu_result) > 0) {
+				echo "<tr><th>",t('Karhu / Tratta'),":</th><td>";
+				while ($karhu_row = mysql_fetch_array($karhu_result)) {
+					if ($karhu_row["tyyppi"] == 'T') {
+						echo "<a href='".$palvelin2."muutosite.php?karhutunnus=$karhu_row[ktunnus]&lasku_tunnus[]=$karhu_row[laskutunnukset]&tee=tulosta_tratta&nayta_pdf=1'>".tv1dateconv($karhu_row["pvm"])."</a> (Tratta)";
+					}
+					else {
+						echo "<a href='".$palvelin2."muutosite.php?karhutunnus=$karhu_row[ktunnus]&lasku_tunnus[]=$karhu_row[laskutunnukset]&tee=tulosta_karhu&nayta_pdf=1'>".tv1dateconv($karhu_row["pvm"])."</a> (Karhu)";
+					}
+					echo "<br>";
 				}
-				else {
-					echo "<a href='".$palvelin2."muutosite.php?karhutunnus=$karhu_row[ktunnus]&lasku_tunnus[]=$trow[tunnus]&tee=tulosta_karhu&nayta_pdf=1'>".tv1dateconv($karhu_row["pvm"])."</a> (Karhu)";
-				}
-				echo "<br>";
+				echo "</td></tr>";
 			}
-
-			echo "</td></tr>";
-
 		}
-
+		
 		/*
 		echo "<tr><th>".t("Tila").":</th><td>".t("$laskutyyppi")." ".t("$alatila");
 

@@ -258,7 +258,7 @@ if ($tee == 'TRATTAA')  {
 		}
 
 		echo "</td><td>";
-		echo "<a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&laskunro=$lasku[laskunro]'>$lasku[laskunro]</a>";
+		echo "<a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=$lasku[laskunro]'>$lasku[laskunro]</a>";
 		echo "</td><td align='right'>";
 		echo $lasku["summa"];
 		echo "</td><td>";

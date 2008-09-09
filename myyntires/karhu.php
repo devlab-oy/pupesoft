@@ -397,7 +397,7 @@ if ($tee == 'KARHUA')  {
 			echo "<a href = '../muutosite.php?tee=E&tunnus=$lasku[tunnus]'>".tv1dateconv($lasku["tapvm"])."</a>";
 		}
 		echo "</td><td>";
-		echo "<a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&laskunro=$lasku[laskunro]'>$lasku[laskunro]</a>";
+		echo "<a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=$lasku[laskunro]'>$lasku[laskunro]</a>";
 		echo "</td><td>";
 		echo $lasku["summa"];
 		echo "</td><td>";

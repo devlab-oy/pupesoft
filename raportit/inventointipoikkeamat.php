@@ -442,7 +442,13 @@
 				$prn .= sprintf ('%-21.21s', 	$row["toim_tuoteno"]);
 				$prn .= sprintf ('%-10.10s',	$row["kpl"]);
 				$prn .= sprintf ('%-9.9s', 		$row["yksikko"]);
-				$prn .= sprintf ('%-15.15s', 	$row["inventointiaika"]);
+				$prn .= sprintf ('%-16.16s', 	$row["inventointiaika"]);
+				
+				if ($naytanimitys != '') {
+					$prn .= "\n".sprintf ('%-50.50s', 		$row["nimitys"]);
+					$rivit = $rivit+0.5;
+				}
+				
 				$prn .= "\n-------------------------------------------------------------------------------------------------------\n";
 				fwrite($fh, $prn);
 				$rivit++;
@@ -650,6 +656,13 @@
 		
 		echo "<tr><th>".t("Listaa vain varastonarvoon vaikuttaneet inventoinnit")."</th>
 				<td colspan='3'><input type='checkbox' name='vararvomuu' $sel></td></tr>";
+		
+		if ($naytanimitys != '') {
+			$naytanimitys = 'checked';
+		}
+		
+		echo "<tr><th>".t("Näytä tuotteen nimitys tulosteella")."</th>
+				<td colspan='3'><input type='checkbox' name='naytanimitys' $naytanimitys></td></tr>";
 
 		echo "<tr><td class='back'><br><input type='submit' value='".t("Aja raportti")."'></td></tr></form></table>";
 	}

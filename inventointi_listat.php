@@ -4,6 +4,9 @@
 	
 	echo "<font class='head'>".t("Tulosta inventointilista")."</font><hr>";
 	
+	// jos paat ykkˆseks niin ei koita muokata/tulostaa file‰, vaan ekottaa filen polun ja nimen
+	$debug = "0";
+	
 	if ($tee == 'TULOSTA') {
 
 		$tulostimet[0] = "Inventointi";
@@ -150,6 +153,13 @@
 				$lefttoimi = "";
 			}
 			
+			if ($jarjestys == 'tuoteno') {
+				$orderby = " tuoteno, sorttauskentta ";
+			}
+			else {
+				$orderby = " sorttauskentta, tuoteno ";				
+			}
+			
 			$query = "	SELECT $select
 						$from
 						$join
@@ -157,7 +167,7 @@
 						WHERE $yhtiotaulu.yhtio	= '$kukarow[yhtio]'
 						$where
 						group by $groupby
-						ORDER BY sorttauskentta, tuoteno";						
+						ORDER BY $orderby";						
 			$saldoresult = mysql_query($query) or pupe_error($query);
 			
 			if (mysql_num_rows($saldoresult) == 0) {
@@ -171,7 +181,14 @@
 			if ($raportti == 'loppuneet') {
 				
 				$kutsu = " ".t("Loppuneet tuotteet")." ($ppa.$kka.$vva-$ppl.$kkl.$vvl) ";	
-			
+				
+				if ($jarjestys == 'tuoteno') {
+					$orderby = " tuoteno, sorttauskentta ";
+				}
+				else {
+					$orderby = " sorttauskentta, tuoteno ";				
+				}
+				
 				$query = "	SELECT $select
 							FROM tuotepaikat use index (saldo_index)
 							JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = ''
@@ -183,14 +200,22 @@
 							$datesubnow							
 							and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00'
 							group by $groupby
-							ORDER BY sorttauskentta, tuoteno";
+							ORDER BY $orderby";
 				$saldoresult = mysql_query($query) or pupe_error($query);
             }
 			
 			if ($raportti == 'vaarat') {
 				
 				$kutsu = " ".t("V‰‰r‰t Saldot")." ($ppa.$kka.$vva-$ppl.$kkl.$vvl) ";	
-							
+				
+				if ($jarjestys == 'tuoteno') {
+					$orderby = " tuotepaikat.tuoteno, sorttauskentta ";
+				}
+				else {
+					$orderby = " sorttauskentta, tuotepaikat.tuoteno ";				
+				}
+				
+					
 				$query = "	SELECT distinct $select
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 							JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio = tilausrivi.yhtio and tuotepaikat.tuoteno = tilausrivi.tuoteno
@@ -208,14 +233,21 @@
 							and tuotepaikat.hyllytaso		= tilausrivi.hyllytaso
 							and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00'
 							group by $groupby
-							ORDER BY sorttauskentta, tuotepaikat.tuoteno";
+							ORDER BY $orderby";
 				$saldoresult = mysql_query($query) or pupe_error($query);
 			}
 			
 			if ($raportti == 'negatiiviset') {
 				
 				$kutsu = " ".t("Tuotteet miinus-saldolla")." ($ppa.$kka.$vva-$ppl.$kkl.$vvl) ";	
-			
+				
+				if ($jarjestys == 'tuoteno') {
+					$orderby = " tuoteno, sorttauskentta ";
+				}
+				else {
+					$orderby = " sorttauskentta, tuoteno ";				
+				}
+				
 				$query = "	SELECT $select
 							FROM tuotepaikat use index (saldo_index)
 							JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = ''
@@ -225,7 +257,7 @@
 							$datesubnow	
 							and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' 
 							group by $groupby
-							ORDER BY sorttauskentta, tuoteno";
+							ORDER BY $orderby";
 				$saldoresult = mysql_query($query) or pupe_error($query);
             }
 			
@@ -449,28 +481,36 @@
 			fclose($fh);
 
 			//k‰‰nnet‰‰n kaunniksi
-			system("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line=$rivinleveys --no-header --columns=1 --margin=0 --borders=0 $filenimi");
 			
-			if ($komento["Inventointi"] == 'email') {
+			if ($debug == '1') {
+				echo "filenimi=$filenimi<br>";
 				
-				system("ps2pdf ".$filenimi.".ps ".$filenimi.".pdf");
-				
-				$liite = $filenimi.".pdf";				
-				$kutsu = "Inventointilista";
-								
-				require("inc/sahkoposti.inc");				
 			}
-			elseif ($komento["Inventointi"] != '') {
-				// itse print komento...
-				$line = exec("$komento[Inventointi] ".$filenimi.".ps");
+			else {
+				system("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line=$rivinleveys --no-header --columns=1 --margin=0 --borders=0 $filenimi");
+
+				if ($komento["Inventointi"] == 'email') {
+
+					system("ps2pdf ".$filenimi.".ps ".$filenimi.".pdf");
+
+					$liite = $filenimi.".pdf";				
+					$kutsu = "Inventointilista";
+
+					require("inc/sahkoposti.inc");				
+				}
+				elseif ($komento["Inventointi"] != '') {
+					// itse print komento...
+					$line = exec("$komento[Inventointi] ".$filenimi.".ps");
+				}
+
+				echo "<font class='message'>".t("Inventointilista tulostuu!")."</font><br><br>";
+
+				//poistetaan tmp file samantien kuleksimasta...
+				system("rm -f $filenimi");
+				system("rm -f ".$filenimi.".ps");
+				system("rm -f ".$filenimi.".pdf");
 			}
-
-			echo "<font class='message'>".t("Inventointilista tulostuu!")."</font><br><br>";
-
-			//poistetaan tmp file samantien kuleksimasta...
-			system("rm -f $filenimi");
-			system("rm -f ".$filenimi.".ps");
-			system("rm -f ".$filenimi.".pdf");
+	
 			$tee = "";
 		}
 	}
@@ -596,9 +636,27 @@
 		<td><input type='checkbox' name='naytainvtuot'></td>
 		</tr>";
 		
+		echo "<tr><th>".t("J‰rjest‰ lista:")."</th>";
+				
+		$sel3 = "";
+		$sel4 = "";
+		
+		if ($jarjestys == '') {
+			$sel3 = "SELECTED";
+		}
+		else {
+			$sel4 = "SELECTED";
+		}
+		
+		echo "<td><select name='jarjestys'>";
+		echo "<option value=''  $sel4>".t("Osoitej‰rjestykseen")."</option>";
+		echo "<option value='tuoteno' $sel4>".t("Tuotenumeroj‰rjestykseen")."</option>";
+		
+		echo "</td></tr>";
+		
 		echo "</table>";
 
-		echo "<br><input type='Submit' value='".t("Valitse")."'>";
+		echo "<br><input type='Submit' value='".t("Aja")."'>";
 		echo "</form>";
 	}
 

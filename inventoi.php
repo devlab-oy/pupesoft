@@ -22,7 +22,11 @@
 			exit;
 		}
 	}
-
+	
+	if ($rivimaara == '') {
+		$rivimaara = '18';
+	}
+	
 	//katotaan onko tiedosto ladattu
 	if ($tee == "FILE") {
 		if (is_uploaded_file($_FILES['userfile']['tmp_name']) == TRUE) {
@@ -573,11 +577,11 @@
 
 		if ($virhe == 0) {
 			if(isset($prev)) {
-				$alku = $alku-18;
+				$alku = $alku-$rivimaara;
 				$tee = "INVENTOI";
 			}
 			elseif(isset($next)) {
-				$alku = $alku+18;
+				$alku = $alku+$rivimaara;
 				$tee = "INVENTOI";
 			}
 			elseif(isset($valmis)) {
@@ -638,14 +642,26 @@
 			if ($alku == '' or $alku < 0) {
 				$alku = 0;
 			}
+			
+			$loppu = "18";
+			
+			if ($rivimaara != "18" and $rivimaara != '') {
+				$loppu = $rivimaara;
+			}
+			
+			$order = "sorttauskentta, tuoteno";
+			
+			if ($jarjestys == 'tuoteno') {
+				$order = "tuoteno, sorttauskentta";
+			}
 
 			$query = "	SELECT $select
 						FROM tuotepaikat USE INDEX (yhtio_inventointilista)
 						JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno and tuote.ei_saldoa = '')
 						WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 						and tuotepaikat.inventointilista = '$lista'
-						ORDER BY sorttauskentta, tuoteno
-						LIMIT $alku, 18";
+						ORDER BY $order
+						LIMIT $alku, $loppu";
 			$saldoresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($saldoresult) == 0) {
@@ -678,12 +694,44 @@
 
 				//-->
 				</script>";
-
-
+			
+			$sel1rivi=$sel18rivi="";
+			
+			if ($rivimaara == '1') {
+				$sel1rivi = "SELECTED";
+			}
+			else {
+				$sel18rivi = "SELECTED";
+			}
+			
+			$seljarj1=$seljarj2="";
+			
+			if ($jarjestys == '') {
+				$seljarj1 = "SELECTED";
+			}
+			else {
+				$seljarj2 = "SELECTED";
+			}
+			
+			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<select name='rivimaara' onchange='submit()'>";
+			echo "<option value='18' $sel18rivi>".t("N‰ytet‰‰n 18 rivi‰")."</option>";
+			echo "<option value='1' $sel1rivi>".t("N‰ytet‰‰n 1 rivi")."</option>";
+			echo "</select>";
+			echo "<select name='jarjestys' onchange='submit()'>";
+			echo "<option value='' $seljarj1>".t("Tuotepaikkaj‰rjestys")."</option>";
+			echo "<option value='tuoteno' $seljarj2>".t("Tuotenumeroj‰rjestys")."</option>";
+			echo "</select>";
+			echo "<input type='hidden' name='tee' value='INVENTOI'>";
+			echo "<input type='hidden' name='lista' value='$lista'>";
+			echo "<input type='hidden' name='alku' value='$alku'>";
+			echo "</form>";
+			
 			echo "<form name='inve' action='$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='VALMIS'>";
 			echo "<input type='hidden' name='lista' value='$lista'>";
 			echo "<input type='hidden' name='alku' value='$alku'>";
+			echo "<input type='hidden' name='rivimaara' value='$rivimaara'>";
 
 			echo "<table>";
 			echo "<tr><td colspan='7' class='back'>".t("Syˆt‰ joko hyllyss‰ oleva m‰‰r‰, tai lis‰tt‰v‰ m‰‰r‰ + etuliitteell‰, tai v‰hennett‰v‰ m‰‰r‰ - etuliitteell‰")."</td></tr>";
@@ -864,7 +912,7 @@
 			echo "<br><font class='message'>".t("Syˆt‰ inventointiselite:")."</font><br>";
 			echo "<input type='text' size='50' name='lisaselite' value='$lisaselite'><br><br>";
 
-			if (mysql_num_rows($saldoresult) == 18) {
+			if (mysql_num_rows($saldoresult) == $rivimaara) {
 				echo "<input type='submit' name='next' value='".t("Inventoi/Seuraava sivu")."'>";
 				//echo "<input type='submit' name='prev' value='".t("Inventoi/Edellinen sivu")."'> ";
 			}

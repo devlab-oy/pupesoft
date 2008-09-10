@@ -55,7 +55,7 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 				FROM lasku
 				LEFT JOIN valuu ON valuu.yhtio=lasku.yhtio and lasku.valkoodi=valuu.nimi
 				JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.hyvaksyja_nyt=kuka.kuka and kuka.eposti <> ''
-				WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tila = 'H'
+				WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tila = 'H' and (tilaustyyppi != 'M' or h1time != '0000-00-00 00:00:00')
 				ORDER BY kuka.eposti, tapvm";
 	$result = mysql_query($query) or pupe_error($query);
 		

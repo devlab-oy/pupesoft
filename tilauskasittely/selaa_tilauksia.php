@@ -364,6 +364,7 @@
 		$teemita = "";
 		$osuus_kululaskuista_yhteensa = "";
 		$osuus_eturahdista_yhteensa = "";
+		$ostohinta_yhteesa = "";
 		$aputullimaara_yhteensa = "";
 		$rivinlisakulu_yhteensa = "";
 
@@ -414,6 +415,7 @@
 
 			$arvo  += $row["arvo"];
 			$summa += $row["summa"];
+			$ostohinta_yhteesa += $row["ostohinta"];
 
 			// jos ollaan muussa tilassa ku tilausn‰kym‰ss‰ tehd‰‰ n‰yt‰ nappi
 			if ($tee != "tilaus") {
@@ -462,17 +464,17 @@
 				$i = 6;
 			}
 			echo "<th colspan='".(mysql_num_fields($result)-$i)."'>".t("Yhteens‰").": </th>";
-			echo "<td align='right'>".sprintf('%.02f',$summa)."</td>";
-			echo "<td align='right'>".sprintf('%.02f',$arvo)."</td>";
+			echo "<th align='right'>".sprintf('%.02f',$summa)."</td>";
+			echo "<th align='right'>".sprintf('%.02f',$arvo)."</td>";
 			if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "") {
-				echo "<td align='right'>&nbsp;</td>";
-				echo "<td align='right'>&nbsp;</td>";
-				echo "<td align='right'>&nbsp;</td>";
-				echo "<td align='right'>".sprintf('%.02f',$osuus_kululaskuista_yhteensa)." $yhtiorow[valkoodi]</td>";
-				echo "<td align='right'>".sprintf('%.02f',$osuus_eturahdista_yhteensa)." $yhtiorow[valkoodi]</td>";
-				echo "<td align='right'>&nbsp;</td>";
-				echo "<td align='right'>".sprintf('%.02f',$aputullimaara_yhteensa)." $yhtiorow[valkoodi]</td>";
-				echo "<td align='right'>".sprintf('%.02f',$rivinlisakulu_yhteensa)." $yhtiorow[valkoodi]</td>";
+				echo "<th align='right'>&nbsp;</td>";
+				echo "<th align='right'>&nbsp;$ostohinta_yhteesa</td>";
+				echo "<th align='right'>&nbsp;</td>";
+				echo "<th align='right'>".sprintf('%.02f',$osuus_kululaskuista_yhteensa)." $yhtiorow[valkoodi]</td>";
+				echo "<th align='right'>".sprintf('%.02f',$osuus_eturahdista_yhteensa)." $yhtiorow[valkoodi]</td>";
+				echo "<th align='right'>&nbsp;</td>";
+				echo "<th align='right'>".sprintf('%.02f',$aputullimaara_yhteensa)." $yhtiorow[valkoodi]</td>";
+				echo "<th align='right'>".sprintf('%.02f',$rivinlisakulu_yhteensa)." $yhtiorow[valkoodi]</td>";
 			}
 			echo "</tr>";
 		}

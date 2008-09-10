@@ -61,14 +61,15 @@ if(!function_exists("asiakastarkista")) {
 			if ($asiakasnro_select != '') {
 				// Jos selectoitu drop downista niin katotaan, että tämä on vielä vapaa
 				//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
-				$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
+				$query = "	SELECT ifnull(group_concat(concat('\'',yhtio.yhtio,'\'')), '') yhtiot
 							FROM yhtio 
 							JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
 							where konserni	 = '$yhtiorow[konserni]' 
 							and synkronoi like '%$toim%'";
 				$sresult = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($sresult) > 0) {
+				$srowapu = mysql_fetch_array($sresult);
+				
+				if ($srowapu["yhtiot"] != "") {
 					$srowapu = mysql_fetch_array($sresult);
 					
 					if ($srowapu["yhtiot"] != '') {

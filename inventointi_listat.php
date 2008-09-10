@@ -14,6 +14,10 @@
 			require("inc/valitse_tulostin.inc");
 		}
 		
+		if ($ippa != '' and $ikka != '' and $ivva != '') {
+			$idate = $ivva."-".$ikka."-".$ippa." 00:00:00";
+			$invaamatta = " and tuotepaikat.inventointiaika <= '$idate'";
+		}
 		
 		// jos ollaan ruksattu nayta myös inventoidut
 		if ($naytainvtuot == '') {
@@ -89,7 +93,7 @@
 				
 				$yhtiotaulu = "tuote";
 				$from 		= " FROM tuote use index (osasto_try_index) ";
-				$join 		= " JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $datesubnow $extra ";
+				$join 		= " JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $datesubnow $invaamatta $extra ";
 				$lefttoimi 	= " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno ";
 				
 				$where		= " and tuote.osasto = '$osasto' 
@@ -104,7 +108,7 @@
 				if ($from == '') {
 					$yhtiotaulu = "tuote";
 					$from 		= " FROM tuote use index (osasto_try_index) ";
-					$join 		= " JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $datesubnow $extra ";
+					$join 		= " JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $datesubnow $invaamatta $extra ";
 					$lefttoimi 	= " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno ";
 				}
 				$where		.= " and tuote.tuotemerkki = '$tuotemerkki' ";
@@ -125,7 +129,7 @@
 					
 						$where		= " and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'),lpad(upper(tuotepaikat.hyllyvali) ,5,'0'),lpad(upper(tuotepaikat.hyllytaso) ,5,'0')) >= '$apaikka'
 										and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'),lpad(upper(tuotepaikat.hyllyvali) ,5,'0'),lpad(upper(tuotepaikat.hyllytaso) ,5,'0')) <= '$lpaikka'												
-										and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $datesubnow $extra ";
+										and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $datesubnow $invaamatta $extra ";
 
 					}
 					else {
@@ -142,7 +146,7 @@
 				if ($from == '') {
 					$yhtiotaulu = "tuotteen_toimittajat";
 					$from 		= " FROM tuotteen_toimittajat ";
-					$join 		= " JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio=tuotteen_toimittajat.yhtio and tuotepaikat.tuoteno=tuotteen_toimittajat.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $datesubnow $extra 
+					$join 		= " JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio=tuotteen_toimittajat.yhtio and tuotepaikat.tuoteno=tuotteen_toimittajat.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $datesubnow $invaamatta $extra 
 									JOIN tuote on tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno and tuote.ei_saldoa = '' $lisa ";
 					
 					$where		= " and tuotteen_toimittajat.toimittaja = '$toimittaja'";
@@ -197,7 +201,8 @@
 							and tuotepaikat.saldoaika >= '$vva-$kka-$ppa 00:00:00'
 							and tuotepaikat.saldoaika <= '$vvl-$kkl-$ppl 23:59:59'
 							and tuotepaikat.saldo 	  <= 0
-							$datesubnow							
+							$datesubnow
+							$invaamatta							
 							and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00'
 							group by $groupby
 							ORDER BY $orderby";
@@ -254,7 +259,8 @@
 							LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno
 							WHERE tuotepaikat.yhtio	= '$kukarow[yhtio]'
 							and tuotepaikat.saldo 	  < 0
-							$datesubnow	
+							$datesubnow
+							$invaamatta	
 							and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' 
 							group by $groupby
 							ORDER BY $orderby";
@@ -274,7 +280,8 @@
 							LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno
 							WHERE tuotepaikat.yhtio	= '$kukarow[yhtio]'
 							and tuotepaikat.tunnus in ($saldot)
-							$datesubnow							
+							$datesubnow
+							$invaamatta							
 							and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' 
 							group by $groupby
 							ORDER BY sorttauskentta, tuoteno";
@@ -285,7 +292,10 @@
 			$tee='';
 		}
 	}
-
+	
+	//echo "<pre>$query</pre><br>";
+	
+	
 	if ($tee == "TULOSTA") {
 		if (mysql_num_rows($saldoresult) > 0 ) {
 			//kirjoitetaan  faili levylle..
@@ -634,6 +644,12 @@
 		
 		echo "<tr><th>".t("Listaa myös tuotteet jotka ovat inventoitu lähiaikoina:")."</th>
 		<td><input type='checkbox' name='naytainvtuot'></td>
+		</tr>";
+		
+		echo "<tr><th>".t("Listaa vain tuotteet joita ei ole inventoitu päivämääränä tai sen jälkeen:")."</th>
+			<td><input type='text' name='ippa' value='$ippa' size='3'>
+			<input type='text' name='ikka' value='$ikka' size='3'>
+			<input type='text' name='ivva' value='$ivva' size='5'></td>
 		</tr>";
 		
 		echo "<tr><th>".t("Järjestä lista:")."</th>";

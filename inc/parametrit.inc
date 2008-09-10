@@ -517,17 +517,21 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
 	require("connect.inc");
 	
-	/*
-		tehdään linkki dokumentaationhallintaan!
+	if($yhtiorow["dokumentaatiohallinta"] != "") {
+		/*
+			tehdään linkki dokumentaationhallintaan!
 
-		Funktiot voi kutsua suoraan koodista jos dokumentaationhallinta ei ole käytössä mitään ei ko funktioilla tapahdu
-	*/
-
-	if (file_exists("inc/dokumentinhallinta.inc")) {
-		require("inc/dokumentinhallinta.inc");
-	}
-	else {
-		require("dokumentinhallinta.inc");
+			Funktiot voi kutsua suoraan koodista jos dokumentaationhallinta ei ole käytössä mitään ei ko funktioilla tapahdu
+		*/
+		
+		if(file_exists("inc/dokumentinhallinta.inc")) {
+			require("inc/dokumentinhallinta.inc");
+		}
+		else {
+			
+			//	Ei voida käyttää joten poistetaan tämä käytöstä
+			$yhtiorow["dokumentaatiohallinta"] = "";
+		}
 	}
 }
 

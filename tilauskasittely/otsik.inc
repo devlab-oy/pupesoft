@@ -2950,7 +2950,7 @@
 				paivita_toimitukset($kukarow["kesken"], $originaali);
 			}
 			
-			if(in_array($toim, array("TARJOUS", "PROJEKTI"))) {
+			if(in_array($toim, array("TARJOUS", "PROJEKTI")) and $yhtiorow["dokumentaatiohallinta"] != "") {
 				svnOpenNew($kukarow["kesken"], $toim);
 			}
 		}

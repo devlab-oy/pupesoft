@@ -193,14 +193,15 @@
 				$kysely  = "INSERT into laskun_lisatiedot ($fields) VALUES ($pvalues)";
 				$insres2 = mysql_query($kysely) or pupe_error($kysely);
 				
-
-				svnOpenNew($ptunnus, "PROJEKTI");
-				if(svnProjectsQuotationSubDir) {
-					$svnKansio = svnQuotationDirectory($otunnus);
-					if($svnKansio != "") {
-						svnAction("move", $svnKansio, svnFindActiveProject($ptunnus).svnProjectsQuotationSubDir, "Siirrettiin tarjouskansio projektille");
-					}					
-				}
+				if($yhtiorow["dokumentaatiohallinta"] != "") {
+					svnOpenNew($ptunnus, "PROJEKTI");
+					if(svnProjectsQuotationSubDir) {
+						$svnKansio = svnQuotationDirectory($otunnus);
+						if($svnKansio != "") {
+							svnAction("move", $svnKansio, svnFindActiveProject($ptunnus).svnProjectsQuotationSubDir, "Siirrettiin tarjouskansio projektille");
+						}					
+					}
+				}				
 			}
 			
 			//	Projektin maksusuunnitelma kuuluu projektiotsikolle, ei tilaukselle

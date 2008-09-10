@@ -222,12 +222,12 @@ if($tee == "HYLKAATARJOUS") {
 	//  Suoritetaan viimeisin kysely uudestaan..
 	$aja_kysely = "tmpquery";       
 	$hakupalkki = "OHI";
-	
-	$svnKansio = svnFindActiveQuotation($tarjous);
-	if($svnKansio != "") {
-		svnAction("move", $svnKansio, svnQuotationsRejected."/".basename($svnKansio), "Tarjous hyl‰tty");
+	if($yhtiorow["dokumentaatiohallinta"] != "") {
+		$svnKansio = svnFindActiveQuotation($tarjous);
+		if($svnKansio != "") {
+			svnAction("move", $svnKansio, svnQuotationsRejected."/".basename($svnKansio), "Tarjous hyl‰tty");
+		}
 	}
-
 }
 
 
@@ -267,10 +267,13 @@ if($tee == "SULJEPROJEKTI") {
 		echo "<font class='error'>".t("VIRHE!!! Tilaus '%s' ei ole projekti tai se on v‰‰r‰ss‰ tilassa", $kieli, $tarjous)."</font><br>";
 	}
 	
-	$svnKansio = svnFindActiveProject($tarjous);
-	if($svnKansio != "") {
-		svnAction("move", $svnKansio, svnProjectsComplete."/".basename($svnKansio), "Projekti suljettu");
+	if($yhtiorow["dokumentaatiohallinta"] != "") {
+		$svnKansio = svnFindActiveProject($tarjous);
+		if($svnKansio != "") {
+			svnAction("move", $svnKansio, svnProjectsComplete."/".basename($svnKansio), "Projekti suljettu");
+		}
 	}
+	
 	
 	$tee        = "";
 	$tarjous    = "";
@@ -723,22 +726,24 @@ if($tee == "NAYTA") {
 
 	$menu[] = array("TEKSTI" => "Muokkaa liitteit‰", "HREF" => "../liitetiedostot.php?liitos=lasku&id=$tarjous&lopetus=".urlencode("raportit/tilaushakukone.php?toim=$toim&setti=$setti&hakupalkki=OHI&aja_kysely=tmpquery&tarjous=$tarjous"), "TARGET" => "page");
 	
-	if($toim == "TARJOUSHAKUKONE") {
-		$files = svnListQuotationDirectory($tarjous);
-	}
-	else {
-		$files = svnListProjectDirectory($tarjous);
-	}
-	if(count($files)>0) {
-		$menu[] = array("VALI" => "Dokumentinhallinta");
-		foreach($files as $f) {
-			if(substr($f, -1, 1) == "/") {
-				$menu[] = array("TEKSTI" => basename($f)."/", "EVENT_ACTION" => "popUp(event, 'ajax_menu:docRoot', '-100', '-10', '{$_SERVER["SCRIPT_NAME"]}?svnOpenDir=$f&tarjous=$tarjous', false, true); return false;", "TAPA" => "CUSTOM", "EVENT" => "onclick");
-			} 
-			else {
-				$menu[] = array("TEKSTI" => basename($f), "HREF" => svnFileLink($f), "TARGET" => "_blank");
-			}
-		}		
+	if($yhtiorow["dokumentaatiohallinta"] != "") {
+		if($toim == "TARJOUSHAKUKONE") {
+			$files = svnListQuotationDirectory($tarjous);
+		}
+		else {
+			$files = svnListProjectDirectory($tarjous);
+		}
+		if(count($files)>0) {
+			$menu[] = array("VALI" => "Dokumentinhallinta");
+			foreach($files as $f) {
+				if(substr($f, -1, 1) == "/") {
+					$menu[] = array("TEKSTI" => basename($f)."/", "EVENT_ACTION" => "popUp(event, 'ajax_menu:docRoot', '-100', '-10', '{$_SERVER["SCRIPT_NAME"]}?svnOpenDir=$f&tarjous=$tarjous', false, true); return false;", "TAPA" => "CUSTOM", "EVENT" => "onclick");
+				} 
+				else {
+					$menu[] = array("TEKSTI" => basename($f), "HREF" => svnFileLink($f), "TARGET" => "_blank");
+				}
+			}		
+		}
 	}
 	
 	$data["tiedot"]["menut"][] = tee_menu($menu, "<font class='$class'>".t("Liitetiedostot")."</font>");

@@ -196,11 +196,16 @@ if (!function_exists('tulosta_lasku')) {
 							$o = str_replace("_"," ",ucfirst($key));
 						}
 						
-						if($key == "paivays" or $key == "viivastyskorko") {
+						if($key == "paivays" or $key == "toimituspvm") {
 							$pdf->writeToTemplate($h, 1, $s[0], $s[1], t($o, $kieli).":", "norm", "L", "B", $tid);
 							$pdf->writeToTemplate($h, 1, $s[1]+2, 0, strftime("%x",strtotime($laskurow[$key])), "norm", "L", "", $tid);
 							$h-=$pdf->ln();
 
+						}
+						elseif($key == "viivastyskorko") {
+							$pdf->writeToTemplate($h, 1, $s[0], $s[1], t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
+							$pdf->writeToTemplate($h, 1, $s[1]+2, 0, money_format('%!i',$laskurow[$key]), "norm", "L", "", $tid);
+							$h-=$pdf->ln();
 						}
 						elseif(trim($laskurow[$key])!="") {
 							$pdf->writeToTemplate($h, 1, $s[0], $s[1], t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);

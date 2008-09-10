@@ -1519,7 +1519,7 @@
 						$tulos_ulos .= $tulos_ulos_ftp;
 					}
 				}
-				elseif($silent == "") {
+				elseif($silent == "" and !file_exists($nimifinvoice)) {
 					$tulos_ulos .= t("Verkkolaskutus ei ole käytössä")."!<br>\n";
 				}
 
@@ -1631,7 +1631,7 @@
 						}
 						else {
 
-							$tulos_ulos .= "Kielivalinta: Pakotettu keili:$kieli / Asiakkaan kieli: $laskun_kieli";
+							// $tulos_ulos .= "Kielivalinta: Pakotettu keili:$kieli / Asiakkaan kieli: $laskun_kieli";
 
 							$varakieli = $kieli;
 
@@ -1687,7 +1687,7 @@
 
 							alvierittely ($page[$sivu]);
 
-							$tulos_ulos .= " Tulostettiin kielellä:$kieli";
+							// $tulos_ulos .= " Tulostettiin kielellä:$kieli";
 
 							$kieli = $varakieli;
 

@@ -740,7 +740,9 @@
 			echo "<tr>";
 			echo "<th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Varastosaldo")."</th><th>".t("Ennpois")."/".t("Ker‰tty")."</th><th>".t("Hyllyss‰")."</th><th>".t("Laskettu hyllyss‰")."</th>";
 			echo "</tr>";
-
+			
+			$rivilask = 0;
+			
 			while($tuoterow = mysql_fetch_array($saldoresult)) {
 				//Haetaan ker‰tty m‰‰r‰
 				$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
@@ -848,8 +850,14 @@
 
 
 					echo "<input type='hidden' name='tuote[$tuoterow[tptunnus]]' value='$tuoterow[tuoteno]#$tuoterow[hyllyalue]#$tuoterow[hyllynro]#$tuoterow[hyllyvali]#$tuoterow[hyllytaso]'>";
-					echo "<td valign='top'><input type='text' size='7' name='maara[$tuoterow[tptunnus]]' value='".$maara[$tuoterow["tptunnus"]]."'></td>";
+					echo "<td valign='top'><input type='text' size='7' name='maara[$tuoterow[tptunnus]]' id='maara_$tuoterow[tptunnus]' value='".$maara[$tuoterow["tptunnus"]]."'></td>";
 					echo "</tr>";
+					
+					if ($rivilask == 0) {
+						echo "<script LANGUAGE='JavaScript'>document.getElementById('maara_$tuoterow[tptunnus]').focus();</script>";
+						$kentta = "";
+						$rivilask++;
+					}
 
 				}
 				elseif ($tuoterow["inventointilista_aika"] == '0000-00-00 00:00:00' and $tuoterow["inventointilista"] == $lista) {

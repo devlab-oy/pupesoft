@@ -1114,6 +1114,27 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "dokumentaatiohallinta") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		elseif ($trow[$i] == "X") {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value=''  $sel1>".t("Dokumentaatiota ei luoda")."</option>";
+		$ulos .= "<option value='X' $sel2>".t("Dokumentaatio linkitet‰‰n projekteihin ja tarjouksiin")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "rekursiiviset_reseptit") {
 
 		$ulos = "<td><select name='$nimi'>";

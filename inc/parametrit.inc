@@ -524,14 +524,8 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			Funktiot voi kutsua suoraan koodista jos dokumentaationhallinta ei ole käytössä mitään ei ko funktioilla tapahdu
 		*/
 		
-		if(file_exists("inc/dokumentinhallinta.inc")) {
-			require("inc/dokumentinhallinta.inc");
-		}
-		else {
-			
-			//	Ei voida käyttää joten poistetaan tämä käytöstä
-			$yhtiorow["dokumentaatiohallinta"] = "";
-		}
+		@(include_once("inc/dokumentinhallinta.inc")) or $yhtiorow["dokumentaatiohallinta"] = "";
+		
 	}
 }
 

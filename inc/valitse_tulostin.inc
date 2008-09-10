@@ -43,7 +43,10 @@
 		<input type='hidden' name='rajaus' value='$rajaus'>
 		<input type='hidden' name='jarjestys' value='$jarjestys'>
 		<input type='hidden' name='debug' value='$debug'>
-		<input type='hidden' name='naytanimitys' value='$naytanimitys'>";
+		<input type='hidden' name='naytanimitys' value='$naytanimitys'>
+		<input type='hidden' name='ippa' value='$ippa'>
+		<input type='hidden' name='ikka' value='$ikka'>
+		<input type='hidden' name='ivva' value='$ivva'>";
 
 		if ($nappikeikalle == 'menossa') {
 			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";

@@ -732,6 +732,7 @@
 			echo "<input type='hidden' name='lista' value='$lista'>";
 			echo "<input type='hidden' name='alku' value='$alku'>";
 			echo "<input type='hidden' name='rivimaara' value='$rivimaara'>";
+			echo "<input type='hidden' name='jarjestys' value='$jarjestys'>";
 
 			echo "<table>";
 			echo "<tr><td colspan='7' class='back'>".t("Syˆt‰ joko hyllyss‰ oleva m‰‰r‰, tai lis‰tt‰v‰ m‰‰r‰ + etuliitteell‰, tai v‰hennett‰v‰ m‰‰r‰ - etuliitteell‰")."</td></tr>";

@@ -22,11 +22,11 @@
 			exit;
 		}
 	}
-	
+
 	if ($rivimaara == '') {
 		$rivimaara = '18';
 	}
-	
+
 	//katotaan onko tiedosto ladattu
 	if ($tee == "FILE") {
 		if (is_uploaded_file($_FILES['userfile']['tmp_name']) == TRUE) {
@@ -587,7 +587,7 @@
 			elseif(isset($valmis)) {
 				$tee = "";
 				$tmp_tuoteno = "";
-				
+
 				if ($lista == '' and $filusta == '') {
 					$tmp_tuoteno = $tuoteno;
 				}
@@ -615,7 +615,7 @@
 
 		//hakulause, t‰m‰ on sama kaikilla vaihtoehdoilla
 		$select = " tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.tunnus tptunnus, tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, tuotepaikat.inventointilista, tuotepaikat.inventointilista_aika, concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta";
-		
+
 		if ($tuoteno != "" and $lista == "") {
 			///* Inventoidaan tuotenumeron perusteella *///
 			$kutsu = " ".t("Tuote")." $tuoteno ";
@@ -628,12 +628,12 @@
 						and tuote.ei_saldoa		= ''
 						ORDER BY sorttauskentta, tuoteno";
 			$saldoresult = mysql_query($query) or pupe_error($query);
-						
+
 
 			if (mysql_num_rows($saldoresult) == 0) {
 				echo "<font class='error'>".t("Tuote")." '$tuoteno' ".t("ei lˆydy!")." ".t("Onko tuote saldoton tuote")."? ".t("Onko tuotteella varastopaikka")."?</font><br><br>";
 				$tee='';
-			}		
+			}
 		}
 		elseif($lista != "") {
 			///* Inventoidaan listan perusteella *///
@@ -642,15 +642,15 @@
 			if ($alku == '' or $alku < 0) {
 				$alku = 0;
 			}
-			
+
 			$loppu = "18";
-			
+
 			if ($rivimaara != "18" and $rivimaara != '') {
 				$loppu = $rivimaara;
 			}
-			
+
 			$order = "sorttauskentta, tuoteno";
-			
+
 			if ($jarjestys == 'tuoteno') {
 				$order = "tuoteno, sorttauskentta";
 			}
@@ -694,27 +694,31 @@
 
 				//-->
 				</script>";
-			
-			$sel1rivi=$sel18rivi="";
-			
+
+			$sel1rivi=$sel18rivi=$sel180rivi="";
+
 			if ($rivimaara == '1') {
 				$sel1rivi = "SELECTED";
 			}
-			else {
+			elseif ($rivimaara == '18') {
 				$sel18rivi = "SELECTED";
 			}
-			
+			else {
+				$sel180rivi = "SELECTED";
+			}
+
 			$seljarj1=$seljarj2="";
-			
+
 			if ($jarjestys == '') {
 				$seljarj1 = "SELECTED";
 			}
 			else {
 				$seljarj2 = "SELECTED";
 			}
-			
+
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<select name='rivimaara' onchange='submit()'>";
+			echo "<option value='180' $sel180rivi>".t("N‰ytet‰‰n 180 rivi‰")."</option>";
 			echo "<option value='18' $sel18rivi>".t("N‰ytet‰‰n 18 rivi‰")."</option>";
 			echo "<option value='1' $sel1rivi>".t("N‰ytet‰‰n 1 rivi")."</option>";
 			echo "</select>";
@@ -726,7 +730,7 @@
 			echo "<input type='hidden' name='lista' value='$lista'>";
 			echo "<input type='hidden' name='alku' value='$alku'>";
 			echo "</form>";
-			
+
 			echo "<form name='inve' action='$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='VALMIS'>";
 			echo "<input type='hidden' name='lista' value='$lista'>";
@@ -740,9 +744,9 @@
 			echo "<tr>";
 			echo "<th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Varastosaldo")."</th><th>".t("Ennpois")."/".t("Ker‰tty")."</th><th>".t("Hyllyss‰")."</th><th>".t("Laskettu hyllyss‰")."</th>";
 			echo "</tr>";
-			
+
 			$rivilask = 0;
-			
+
 			while($tuoterow = mysql_fetch_array($saldoresult)) {
 				//Haetaan ker‰tty m‰‰r‰
 				$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
@@ -852,7 +856,7 @@
 					echo "<input type='hidden' name='tuote[$tuoterow[tptunnus]]' value='$tuoterow[tuoteno]#$tuoterow[hyllyalue]#$tuoterow[hyllynro]#$tuoterow[hyllyvali]#$tuoterow[hyllytaso]'>";
 					echo "<td valign='top'><input type='text' size='7' name='maara[$tuoterow[tptunnus]]' id='maara_$tuoterow[tptunnus]' value='".$maara[$tuoterow["tptunnus"]]."'></td>";
 					echo "</tr>";
-					
+
 					if ($rivilask == 0) {
 						echo "<script LANGUAGE='JavaScript'>document.getElementById('maara_$tuoterow[tptunnus]').focus();</script>";
 						$kentta = "";
@@ -962,7 +966,7 @@
 						LIMIT 1";
 			$noperes = mysql_query($query) or pupe_error($query);
 			$noperow = mysql_fetch_array($noperes);
-			
+
 			echo "<table>";
 			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
@@ -970,7 +974,7 @@
 			echo "<input type='hidden' name='tuoteno' value='".$noperow[tuoteno]."'>";
 			echo "<tr><td><input type='submit' value='".t("Edellinen tuote")."'></td>";
 			echo "</form>";
-			
+
 			$query = "	SELECT tuoteno
 						FROM tuote use index (tuoteno_index)
 						JOIN tuotepaikat use index (tuote_index) USING (yhtio, tuoteno)
@@ -981,7 +985,7 @@
 						LIMIT 1";
 			$yesres = mysql_query($query) or pupe_error($query);
 			$yesrow = mysql_fetch_array($yesres);
-			
+
 			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='INVENTOI'>";
 			echo "<input type='hidden' name='seuraava_tuote' value='yes'>";
@@ -1005,7 +1009,7 @@
 		echo "<form method='post' action='$PHP_SELF' enctype='multipart/form-data'>
 				<input type='hidden' name='tee' value='FILE'>
 				<input type='hidden' name='filusta' value='yep'>
-				
+
 				<font class='message'>".t("Inventoi tiedostosta").":</font><br>
 				<table border='0' cellpadding='3' cellspacing='2'>
 				<tr><th colspan='4'>".t("Sarkaineroteltu tekstitiedosto").".</th></tr>

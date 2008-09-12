@@ -181,9 +181,10 @@
 			$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, ytunnus,
 						if(nimi!=toim_nimi and toim_nimi!='', concat(nimi,'<br>(',toim_nimi,')'), nimi) nimi,
 						if(postitp!=toim_postitp and toim_postitp!='', concat(postitp,'<br>(',toim_postitp,')'), postitp) postitp,
-						tuoteno, REPLACE(kpl+varattu,'.',',') kpl,
-						REPLACE(tilausrivi.hinta,'.',',') hinta,
-						REPLACE(rivihinta,'.',',') rivihinta,
+						tuoteno, 
+						kpl+varattu kpl,
+						tilausrivi.hinta hinta,
+						rivihinta rivihinta,
 						lasku.toimaika,
 						tilausrivi.laskutettuaika tuloutettu,
 						lasku.tila, lasku.alatila

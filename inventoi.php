@@ -110,7 +110,11 @@
 				if ($kpl != '') {
 
 					//Sarjanumerot
-					if (substr($kpl,0,1) == '+' and is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != (int) substr($kpl,1)) {
+					if (is_array($sarjanumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and $hyllyssa[$i] < $kpl) {
+						echo "<font class='error'>".t("VIRHE: Sarjanumeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
+						$virhe = 1;
+					}
+					elseif (substr($kpl,0,1) == '+' and is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != (int) substr($kpl,1)) {
 						echo "<font class='error'>".t("VIRHE: Sarjanumeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
 						$virhe = 1;
 					}
@@ -122,7 +126,6 @@
 						echo "<font class='error'>".t("VIRHE: Sarjanumeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
 						$virhe = 1;
 					}
-
 
 					if (is_array($eranumero_kaikki[$i])) {
 						if (is_array($eranumero_valitut[$i])) {
@@ -358,41 +361,39 @@
 								$varvo_jalke = 0;
 								$varvo_muuto = 0;
 
+								// ollaan syˆtetty absoluuttinen m‰‰r‰
 								if ((float) $skp == 0) {
 									// Ei ruksatut sarjanumerot poistetaan
 									foreach ($sarjanumero_kaikki[$i] as $snro_tun) {
 										$varvo_ennen += sarjanumeron_ostohinta("tunnus", $snro_tun);
 									}
 
-									$varvo_ennen = $row["saldo"] * ($varvo_ennen/count($sarjanumero_kaikki[$i]));
-
 									foreach ($sarjanumero_valitut[$i] as $snro_tun) {
 										$varvo_jalke += sarjanumeron_ostohinta("tunnus", $snro_tun);
 									}
 
-									$summa = round($varvo_jalke-$varvo_ennen, 2);
-
-									if ($erotus != 0) {
-										$row['kehahin'] = round(abs($summa/$erotus), 6);
-									}
+									$summa = round($varvo_jalke - $varvo_ennen, 6);
 								}
 								elseif ((float) $skp != 0) {
-									// Muutetaan $skp-verrran
+									// ollaan syˆtetty relatiivinen m‰‰r‰
 									foreach ($sarjanumero_valitut[$i] as $snro_tun) {
 										$varvo_muuto += sarjanumeron_ostohinta("tunnus", $snro_tun);
 									}
 
-									if ((float) $skp > 0) {
-										$summa = round($varvo_muuto, 2);
+									// ruksatut on varastonmuutos
+									if ($skp < 0) {
+										$summa = round($varvo_muuto * -1, 6);
 									}
 									else {
-										$summa = round($varvo_muuto*-1, 2);
-									}
-
-									if ($erotus != 0) {
-										$row['kehahin'] = round(abs($summa/$erotus), 6);
+										$summa = round($varvo_muuto, 6);
 									}
 								}
+								else {
+									echo "<font class='error'>".t("VIRHE: T‰nne ei pit‰isi p‰‰st‰")."! $tuoteno $kpl</font><br>";
+									exit;
+								}
+								
+								$row['kehahin'] = abs($summa);
 							}
 							else {
 								if 		($row['epakurantti100pvm'] != '0000-00-00') $row['kehahin'] = 0;
@@ -782,7 +783,7 @@
 											FROM tuotepaikat tt
 											WHERE sarjanumeroseuranta.yhtio = tt.yhtio and sarjanumeroseuranta.tuoteno = tt.tuoteno and sarjanumeroseuranta.hyllyalue = tt.hyllyalue
 											and sarjanumeroseuranta.hyllynro = tt.hyllynro and sarjanumeroseuranta.hyllyvali = tt.hyllyvali and sarjanumeroseuranta.hyllytaso = tt.hyllytaso) is null))
-								and ((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and tilausrivi_osto.laskutettuaika != '0000-00-00')
+								and ((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and (tilausrivi_osto.laskutettuaika != '0000-00-00' or tilausrivi_osto.laskutettuaika is null))
 								ORDER BY sarjanumero";
 					$sarjares = mysql_query($query) or pupe_error($query);
 				}
@@ -852,7 +853,7 @@
 						echo "<td valign='top'>$tuoterow[saldo]</td><td valign='top'></td><td valign='top'>$tuoterow[saldo]</td>";
 					}
 
-
+					echo "<input type='hidden' name='hyllyssa[$tuoterow[tptunnus]]' value='$tuoterow[saldo]'>";
 					echo "<input type='hidden' name='tuote[$tuoterow[tptunnus]]' value='$tuoterow[tuoteno]#$tuoterow[hyllyalue]#$tuoterow[hyllynro]#$tuoterow[hyllyvali]#$tuoterow[hyllytaso]'>";
 					echo "<td valign='top'><input type='text' size='7' name='maara[$tuoterow[tptunnus]]' id='maara_$tuoterow[tptunnus]' value='".$maara[$tuoterow["tptunnus"]]."'></td>";
 					echo "</tr>";

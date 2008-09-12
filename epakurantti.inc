@@ -179,7 +179,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 				$lisa50 = " epakurantti50pvm = now(), ";
 			}
 			
-			if ($tuoterow['epakurantti50pvm'] == '0000-00-00') { // jos tuote ei ole puoliep‰kurantti, p‰ivitet‰‰n sama p‰iv‰ t‰nnekkin
+			if ($tuoterow['epakurantti25pvm'] == '0000-00-00') { // jos tuote ei ole puoliep‰kurantti, p‰ivitet‰‰n sama p‰iv‰ t‰nnekkin
 				$lisa25 = " epakurantti25pvm = now(), ";
 			}
 			

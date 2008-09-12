@@ -129,7 +129,13 @@ if ($tee == "liita") {
 		$verotonsumma 	= (float) $oslasrow["arvo"];
 	}
 
-	if ($summa_kaytettavissa < $verotonsumma) {
+	if ($summa_kaytettavissa > 0 and $verotonsumma > 0 and $summa_kaytettavissa < $verotonsumma) {
+		echo "<font class='error'>".t("VIRHE: Yritit liitt‰‰ liian suuren summan. Laskun saldo ei riitt‰nyt")."!</font><br>";
+		$tee 			= "haku";
+		$verosumma 		= 0;
+		$verotonsumma 	= 0;
+	}
+	elseif ($summa_kaytettavissa < 0 and $verotonsumma < 0 and $summa_kaytettavissa > $verotonsumma) {
 		echo "<font class='error'>".t("VIRHE: Yritit liitt‰‰ liian suuren summan. Laskun saldo ei riitt‰nyt")."!</font><br>";
 		$tee 			= "haku";
 		$verosumma 		= 0;

@@ -347,6 +347,11 @@
 						echo "<font class='message'>".t("Valmistus siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
 					}
 					else {
+						$naytatvale = 3;
+						$laskurow["tilausvahvistus"] = "OP";
+						
+						require("tilausvahvistus-email.inc");
+					
 						echo "<font class='message'>".t("Siirtolista siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
 					}
 				}

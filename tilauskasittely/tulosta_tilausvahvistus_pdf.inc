@@ -659,6 +659,9 @@
 		if ($naytatvale == 2) {
 			$lahetetyyppi = "tulosta_lahete_eialeja.inc";
 		}
+		elseif ($naytatvale == 3) {
+			$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
+		}
 		else {
 			$lahetetyyppi = "tulosta_lahete.inc";
 		}

@@ -1,5 +1,6 @@
 <?php
 	// Tämä ohjelma haluaa $liite muuttujan jossa on tiedostonnimi joka liitetään
+	// Jos liite halutaan nimetä uudestaan annetaan uusi nimi $liitenimi muuttujassa
 	// Ja $kutsu jossa on tiedoston kuvaus
 	// $ctype muuttuja jossa on liitettävän tiedoston MIME tyyppi
 
@@ -49,9 +50,13 @@
 		$content .= "Content-Disposition: inline; filename=\"".$kutsu."\"\n\n";
 	}
 	elseif ($ctype == "excel") {
-		$content .= "Content-Type: application/excel; name=\"".basename($liite)."\"\n" ;
+		if ($liitenimi == '') {
+			$liitenimi = basename($liite);
+		}
+	
+		$content .= "Content-Type: application/excel; name=\"".$liitenimi."\"\n" ;
 		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: inline; filename=\"".basename($liite)."\"\n\n";
+		$content .= "Content-Disposition: inline; filename=\"".$liitenimi."\"\n\n";
 	}
 	else {
 		$content .= "Content-Type: application/pdf; name=\"".$kutsu.".pdf\"\n" ;

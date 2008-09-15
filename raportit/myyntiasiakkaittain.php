@@ -6,6 +6,28 @@
 	echo "<font class='head'>".t("Myynti asiakkaittain").":</font><hr>";
 
 	if ($tee != '') {
+		
+		if(include('Spreadsheet/Excel/Writer.php')) {
+
+			//keksitään failille joku varmasti uniikki nimi:
+			list($usec, $sec) = explode(' ', microtime());
+			mt_srand((float) $sec + ((float) $usec * 100000));
+			$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+
+			$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+			$workbook->setVersion(8);
+			$worksheet = $workbook->addWorksheet('Sheet 1');
+
+			$format_bold = $workbook->addFormat();
+			$format_bold->setBold();
+
+			$excelrivi = 0;
+			
+			$worksheet->writeString($excelrivi, 0, t("Myynti asiakkaittain"));
+			
+			$excelrivi ++;
+		}
+		
 		$where = "";
 		$where1 = '';
 		$where2 = '';
@@ -101,7 +123,23 @@
 		$rivi .= t("Summa")."\t";
 		$rivi .= t("Kate")."\t";
 		$rivi .= t("Katepros")."\n";
+		
+		if(isset($workbook)) {
+			$worksheet->write($excelrivi, 0, t("Ytunnus"), $format_bold);
+			$worksheet->write($excelrivi, 1, t("Nimi"), $format_bold);
+			$worksheet->write($excelrivi, 2, t("Nimitark"), $format_bold);
+			if ($summaa == '') {
+				$worksheet->write($excelrivi, 3, t("Alennus"), $format_bold);
+			}
+			$worksheet->write($excelrivi, 4, t("Piiri"), $format_bold);
+			$worksheet->write($excelrivi, 5, t("Kpl"), $format_bold);
+			$worksheet->write($excelrivi, 6, t("Summa"), $format_bold);
+			$worksheet->write($excelrivi, 7, t("Kate"), $format_bold);
+			$worksheet->write($excelrivi, 8, t("Katepros"), $format_bold);
 
+			$excelrivi++;
+		}
+		
 		while ($lrow = mysql_fetch_array($result)) {
 
 			if ($summaa == '') {
@@ -151,25 +189,52 @@
 			$rivi .= $lrow["summa"]."\t";
 			$rivi .= $lrow["kate"]."\t";
 			$rivi .= $katepros."\n";
+			
+			if(isset($workbook)) {
+				$worksheet->writeString($excelrivi, 0, $lrow["ytunnus"]);
+				$worksheet->write($excelrivi, 1, $lrow["nimi"]);
+				$worksheet->write($excelrivi, 2, $lrow["nimitark"]);
+				if ($summaa == '') {
+					$worksheet->write($excelrivi, 3, $ale);
+				}
+				$worksheet->write($excelrivi, 4, $lrow["piiri"]);
+				$worksheet->write($excelrivi, 5, $lrow["kpl"]);
+				$worksheet->write($excelrivi, 6, $lrow["summa"]);
+				$worksheet->write($excelrivi, 7, $lrow["kate"]);
+				$worksheet->write($excelrivi, 8, $katepros);
+
+				$excelrivi++;
+			}
 
 		}
+		
 
+		/*
 		$bound = uniqid(time()."_") ;
 
 		$header  = "From: <$yhtiorow[postittaja_email]>\n";
 		$header .= "MIME-Version: 1.0\n" ;
 		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
+		*/
+		
+		if(isset($workbook)) {
+			// We need to explicitly close the workbook
+			$workbook->close();
+			
+			$liite = "/tmp/".$excelnimi;
+			$liitenimi = "Myynti-asiakkaittain-$kukarow[yhtio].xls";
+			$kutsu = t("Myynnit asiakkaittain raportti")." $ppa-$kka-$vva $ppl-$kkl-$vvl ".t("osasto").":$osasto ".t("try").":$try";
+			$ctype = "excel";
+			require("inc/sahkoposti.inc");
+			
+		}
+		else {
+			echo "Excel tiedoston luonti epäonnistui!<br>";
+			die;
+		}
+		
 
-		$content = "--$bound\n";
-
-		$content .= "Content-Type: application/vnd.ms-excel; name=\"".t("Excel-raportti")."-$kukarow[yhtio].xls\"\n" ;
-		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: attachment; filename=\"".t("Excel-raportti")."-$kukarow[yhtio].xls\"\n\n";
-
-
-		$content .= chunk_split(base64_encode(str_replace('.',',',$rivi)));
-		$content .= "\n" ;
-
+		/*
 		$content .= "--$bound\n";
 
 		$content .= "Content-Type: text/x-comma-separated-values; name=\"".t("OpenOffice-raportti")."-$kukarow[yhtio].csv\"\n" ;
@@ -179,14 +244,16 @@
 
 		$content .= chunk_split(base64_encode($rivi));
 		$content .= "\n" ;
-
+		
+		
 		$content .= "--$bound--\n";
 
 		$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - ".t("Myynnit asiakkaittain raportti")." $ppa-$kka-$vva $ppl-$kkl-$vvl ".t("osasto").":$osasto ".t("try").":$try", $content, $header, "-f $yhtiorow[postittaja_email]");
-
+		*/
+		
 		if ($boob===FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
 		else echo "".t("Lähetettiin osoitteeseen").": $kukarow[eposti].<br>";
-
+		
 	}
 
 

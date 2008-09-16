@@ -631,7 +631,7 @@
 		$ulos .= "<table>";
 
 		while ($vrow = mysql_fetch_array($vresult)) {
-			$ulos .= "<tr><td>$vrow[selite]</td><td>";
+			$ulos .= "<tr><td>$vrow[selitetark]</td><td>";
 			$ulos .= "<input type='hidden' name='tuotteen_parametrit_keys[$xxx]' value='$vrow[selite]'>";
 			$ulos .= "<input type='text' name='tuotteen_parametrit_vals[$xxx]' size='10' value='".$tuotteen_parametrit[$vrow["selite"]]."'>";
 			$ulos .= "</td></tr>";

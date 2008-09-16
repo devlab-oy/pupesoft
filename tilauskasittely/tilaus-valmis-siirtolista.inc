@@ -346,7 +346,7 @@
 					if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 						echo "<font class='message'>".t("Valmistus siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
 					}
-					else {
+					elseif ($yhtiorow["varastosiirto_tilausvahvistus"] == "K") {
 						$naytatvale = 3;
 						$laskurow["tilausvahvistus"] = "OP";
 						

@@ -424,6 +424,8 @@
 			$ots = chr(12).$ots;
 
 			$rivit = 1;
+			$arvoyht = 0;
+			
 			while ($row = mysql_fetch_array($saldoresult)) {
 				if ($rivit >= 19) {
 					fwrite($fh, $ots);
@@ -454,6 +456,8 @@
 
 				if ($naytanimitys != '') {
 					$prn .= "\n".sprintf ('%-50.50s', 		$row["nimitys"]);
+					$prn .= "  ".t("Arvonmuutos").": ".sprintf ('%-21.21s',	$row["arvo"]);
+					$arvoyht += $row["arvo"];
 					$rivit = $rivit+0.5;
 				}
 
@@ -461,7 +465,12 @@
 				fwrite($fh, $prn);
 				$rivit++;
 			}
-
+			
+			if ($naytanimitys != '') {
+				$prn .= t("Arvonmuutos yhteensä").": ".sprintf ('%-21.21s',$arvoyht);
+				fwrite($fh, $prn);
+			}
+			
 			fclose($fh);
 
 			//itse print komento...
@@ -669,7 +678,7 @@
 			$naytanimitys = 'checked';
 		}
 
-		echo "<tr><th>".t("Näytä tuotteen nimitys tulosteella")."</th>
+		echo "<tr><th>".t("Näytä tuotteen nimitys ja arvonmuutos tulosteella")."</th>
 				<td colspan='3'><input type='checkbox' name='naytanimitys' $naytanimitys></td></tr>";
 
 		echo "<tr><td class='back'><br><input type='submit' value='".t("Aja raportti")."'></td></tr></form></table>";

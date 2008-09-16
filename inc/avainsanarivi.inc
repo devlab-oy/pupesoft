@@ -98,6 +98,7 @@
 			$ulos .= "<option value='Y' {$avain_sel['Y']}>									".t("Yksikko")."</option>";
 			$ulos .= "<option value='TRY' {$avain_sel['TRY']}>								".t("Tuoteryhmä")."</option>";
 			$ulos .= "<option value='OSASTO' {$avain_sel['OSASTO']}>						".t("Tuoteosasto")."</option>";
+			$ulos .= "<option value='TUOTEMERKKI' {$avain_sel['TUOTEMERKKI']}>				".t("Tuotemerkki")."</option>";
 			$ulos .= "<option value='S' {$avain_sel['S']}>									".t("Tuotteen status")."</option>";
 			$ulos .= "<option value='TUOTEULK' {$avain_sel['TUOTEULK']}>					".t("Tuotteiden avainsanojen laji")."</option>";
 			$ulos .= "<option value='VARASTOLUOKKA' {$avain_sel['VARASTOLUOKKA']}>			".t("Varastoluokka")."</option>";

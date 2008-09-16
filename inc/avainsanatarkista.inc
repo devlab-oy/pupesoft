@@ -17,6 +17,14 @@ if(!function_exists("avainsanatarkista")) {
 		if (mysql_field_name($result, $i) == "laji") {
 			$laji = trim($t[$i]);
 		}
+		
+		if (mysql_field_name($result, $i) == "selite" and $laji == "PARAMETRI") {
+			preg_match_all('/([a-zA-Z_])+/', $t[$i], $match);
+			
+			if ($match[0][0] != $t[$i]) {
+				$virhe[$i] = t("Vain aakkoset ja alaviivat ovat sallittuja merkkejä");
+			}
+		}
 	}
 }
 	

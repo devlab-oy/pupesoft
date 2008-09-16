@@ -2,7 +2,7 @@
 
 
 if(!function_exists("tuotetarkista")) {
-	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow, $tuotteen_parametrit_keys = "", $tuotteen_parametrit_vals = "") {
 		global $kukarow, $yhtiorow, $alias_set;
 		
 		static $tem_tuoteno;
@@ -158,6 +158,22 @@ if(!function_exists("tuotetarkista")) {
 			if ($t[$i] != '' and strpos($t[$i], "+") !== FALSE and strpos($t[$i], "-") !== FALSE) {
 				$virhe[$i] = t("Laita samanaikaisesti vain + tai - maakoodeja!");
 			}
+		}
+
+		if (mysql_field_name($result, $i) == "tuotteen_parametrit") {
+
+			$tuotteen_parametrit = "";
+
+			foreach ($tuotteen_parametrit_keys as $key => $val) {
+				$tuotteen_parametrit .= "$val=$tuotteen_parametrit_vals[$key];";
+			}
+
+			$tuotteen_parametrit_query = "	UPDATE tuote
+											SET tuotteen_parametrit = '$tuotteen_parametrit'
+											WHERE yhtio = '$kukarow[yhtio]'
+											AND tuoteno = '$t[tuoteno]'";
+			$tuotteen_parametrit_result = mysql_query($tuotteen_parametrit_query) or pupe_error($tuotteen_parametrit_query);
+
 		}
 
 		/*

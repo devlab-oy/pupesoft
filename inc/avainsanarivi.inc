@@ -114,6 +114,7 @@
 			$ulos .= "<option value='OSASTO_EE' {$avain_sel['OSASTO_EE']}>					".t("Vironkielinen tuoteosasto")."</option>";
 			$ulos .= "<option value='TRY_DE' {$avain_sel['TRY_DE']}>						".t("Saksankielinen tuoteryhmä")."</option>";
 			$ulos .= "<option value='OSASTO_DE' {$avain_sel['OSASTO_DE']}>					".t("Saksankielinen tuoteosasto")."</option>";
+			$ulos .= "<option value='PARAMETRI' {$avain_sel['PARAMETRI']}>					".t("Tuotteen parametri")."</option>";
 			$ulos .= "</optgroup>";
 
 			$ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";

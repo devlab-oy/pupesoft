@@ -605,4 +605,42 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "tuotteen_parametrit") {
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND laji = 'PARAMETRI'
+					ORDER BY selite";
+		$vresult = mysql_query($query) or pupe_error($query);
+		
+		$ulos = "<td>";
+		$ulos .= "<input type='hidden' name='tuotteen_parametriti' value='$i'>";
+		
+		$tuotteen_parametrit_split = array();
+		$tuotteen_parametrit = array();
+
+		$tuotteen_parametrit_split = split(";", $trow[$i]);
+
+		foreach ($tuotteen_parametrit_split as $params) {
+			list ($key, $val) = split("=", $params);
+			$tuotteen_parametrit[$key] = $val; 
+		}
+		
+		$xxx = 0;
+		$ulos .= "<table>";
+
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$ulos .= "<tr><td>$vrow[selite]</td><td>";
+			$ulos .= "<input type='hidden' name='tuotteen_parametrit_keys[$xxx]' value='$vrow[selite]'>";
+			$ulos .= "<input type='text' name='tuotteen_parametrit_vals[$xxx]' size='10' value='".$tuotteen_parametrit[$vrow["selite"]]."'>";
+			$ulos .= "</td></tr>";
+			$xxx++;
+		}
+		
+		$ulos .= "</table>";
+		
+		$ulos .= "</td>";
+		$jatko = 0;
+	}
 ?>

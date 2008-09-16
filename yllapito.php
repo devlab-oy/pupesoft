@@ -12,6 +12,10 @@
 		unset($apucssextranet);
 	}
 
+	if ($_POST["toim"] == "tuote") {
+		$aputuotteen_parametrit = $_POST["tuotteen_parametrit"];
+	}
+
 	if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 		require ("inc/parametrit.inc");
 	}
@@ -85,6 +89,9 @@
 	}
 	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucssverkkokauppa)) {
 		$t[$cssverkkokauppa] = $apucssverkkokauppa;
+	}
+	if ($_POST["toim"] == "tuote" and isset($aputuotteen_parametrit)) {
+		$t[$tuotteen_parametriti] = $aputuotteen_parametrit;
 	}
 
 	$rajauslisa	= "";
@@ -188,7 +195,6 @@
 			if($t["{$i}_uusi"] != "") {
 				$t[$i] = $t["{$i}_uusi"];
 			}
-			
 			$t[mysql_field_name($result, $i)] = &$t[$i];
 		}
 
@@ -233,7 +239,12 @@
 			}
 
 			if(function_exists($funktio)) {
-				$funktio($t, $i, $result, $tunnus, &$virhe, $trow);
+				if ($toim == "tuote") {
+					$funktio($t, $i, $result, $tunnus, &$virhe, $trow, $tuotteen_parametrit_keys, $tuotteen_parametrit_vals);
+				}
+				else {
+					$funktio($t, $i, $result, $tunnus, &$virhe, $trow);
+				}
 			}
 
 			if($virhe[$i] != "") {

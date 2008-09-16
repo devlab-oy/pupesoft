@@ -545,7 +545,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 		if ($merkkilisa1 == "") {
 
 			// tuotteen varastonarvon muutos
-			$query  = "	SELECT date_format(laadittu, '%Y-%m') kausi, sum(kpl*hinta) muutos, date_format(laadittu, '%Y') yy, date_format(laadittu, '%m') mm
+			$query  = "	SELECT date_format(laadittu, '%Y-%m') kausi, sum(kpl * if(laji in ('tulo', 'valmistus'), kplhinta, hinta)) muutos, date_format(laadittu, '%Y') yy, date_format(laadittu, '%m') mm
 						FROM tuote use index (osasto_try_index)
 						JOIN tapahtuma use index (yhtio_tuote_laadittu)
 						ON tapahtuma.yhtio = tuote.yhtio

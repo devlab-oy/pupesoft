@@ -157,6 +157,19 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "varastosiirto_tilausvahvistus") {
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Varastosiirroista ei l‰hetet‰ vahvistusta");
+		$ulos .= "<option value = 'K' $sel[K]>".t("Varastosiirroista l‰hetet‰‰n vahvistus");
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "ostotilaustyyppi") {
 

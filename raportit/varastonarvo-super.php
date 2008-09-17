@@ -249,9 +249,10 @@
 			if(isset($workbook)) {
 				$excelsarake = 0;
 
+				$worksheet->writeString($excelrivi, $excelsarake, t("Varasto"), 		$format_bold);
+				$excelsarake++;
+
 				if ($summaustaso == "P") {
-					$worksheet->writeString($excelrivi, $excelsarake, t("Varasto"), 		$format_bold);
-					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllyalue"), 		$format_bold);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllynro"), 		$format_bold);
@@ -259,10 +260,6 @@
 					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllyvali"), 		$format_bold);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllytaso"), 		$format_bold);
-					$excelsarake++;
-				}
-				elseif (!empty($varastot)) {
-					$worksheet->writeString($excelrivi, $excelsarake, t("Varasto"), 		$format_bold);
 					$excelsarake++;
 				}
 
@@ -552,9 +549,11 @@
 					}
 
 					if (isset($workbook)) {
+
+						$worksheet->writeString($excelrivi, $excelsarake, $row["varastonnimi"], 	$format_bold);
+						$excelsarake++;
+
 						if ($summaustaso == "P") {
-							$worksheet->writeString($excelrivi, $excelsarake, $row["varastonnimi"], 	$format_bold);
-							$excelsarake++;
 							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllyalue"], 		$format_bold);
 							$excelsarake++;
 							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllynro"], 		$format_bold);
@@ -562,10 +561,6 @@
 							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllyvali"], 		$format_bold);
 							$excelsarake++;
 							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllytaso"], 		$format_bold);
-							$excelsarake++;
-						}
-						elseif (!empty($varastot)) {
-							$worksheet->writeString($excelrivi, $excelsarake, $row["varastonnimi"]);
 							$excelsarake++;
 						}
 

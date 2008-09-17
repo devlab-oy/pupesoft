@@ -245,13 +245,14 @@ if ($tee == "aja") {
 					if(isnull(ee.selitetark) or ee.selitetark='', '', ee.selitetark) as nimitys_ee, if(isnull(ee.selitetark_3) or ee.selitetark_3='', '', ee.selitetark_3) as kuvaus_ee,
 					if(isnull(de.selitetark) or de.selitetark='', '', de.selitetark) as nimitys_de, if(isnull(de.selitetark_3) or de.selitetark_3='', '', de.selitetark_3) as kuvaus_de
 					FROM avainsana
-					LEFT JOIN avainsana AS se on avainsana.yhtio = se.yhtio and avainsana.selitetark = se.selite and se.laji = 'OSASTO_SE' and avainsana.jarjestys = se.jarjestys
-					LEFT JOIN avainsana AS en on avainsana.yhtio = en.yhtio and avainsana.selitetark = en.selite and en.laji = 'OSASTO_EN' and avainsana.jarjestys = en.jarjestys
-					LEFT JOIN avainsana AS ru on avainsana.yhtio = ru.yhtio and avainsana.selitetark = ru.selite and ru.laji = 'OSASTO_RU' and avainsana.jarjestys = ru.jarjestys
-					LEFT JOIN avainsana AS ee on avainsana.yhtio = ee.yhtio and avainsana.selitetark = ee.selite and ee.laji = 'OSASTO_EE' and avainsana.jarjestys = ee.jarjestys
-					LEFT JOIN avainsana AS de on avainsana.yhtio = de.yhtio and avainsana.selitetark = de.selite and de.laji = 'OSASTO_DE' and avainsana.jarjestys = de.jarjestys
+					LEFT JOIN avainsana AS se on avainsana.yhtio = se.yhtio and avainsana.selite = se.selite and se.laji = 'OSASTO' and se.kieli = 'se'
+					LEFT JOIN avainsana AS en on avainsana.yhtio = en.yhtio and avainsana.selite = en.selite and en.laji = 'OSASTO' and en.kieli = 'en'
+					LEFT JOIN avainsana AS ru on avainsana.yhtio = ru.yhtio and avainsana.selite = ru.selite and ru.laji = 'OSASTO' and ru.kieli = 'ru'
+					LEFT JOIN avainsana AS ee on avainsana.yhtio = ee.yhtio and avainsana.selite = ee.selite and ee.laji = 'OSASTO' and ee.kieli = 'ee'
+					LEFT JOIN avainsana AS de on avainsana.yhtio = de.yhtio and avainsana.selite = de.selite and de.laji = 'OSASTO' and de.kieli = 'de'
 					WHERE avainsana.yhtio = '$kyhtio'
 					AND avainsana.laji = 'OSASTO'
+					AND avainsana.kieli = 'fi'
 					AND avainsana.nakyvyys != 'E'
 					ORDER BY avainsana.jarjestys";
 		$result = mysql_query($query) or pupe_error($query);
@@ -267,13 +268,14 @@ if ($tee == "aja") {
 					if(isnull(ee.selitetark) or ee.selitetark='', '', ee.selitetark) as nimitys_ee, if(isnull(ee.selitetark_3) or ee.selitetark_3='', '', ee.selitetark_3) as kuvaus_ee,
 					if(isnull(de.selitetark) or de.selitetark='', '', de.selitetark) as nimitys_de, if(isnull(de.selitetark_3) or de.selitetark_3='', '', de.selitetark_3) as kuvaus_de
 					FROM avainsana
-					LEFT JOIN avainsana AS se on avainsana.yhtio = se.yhtio and avainsana.selitetark = se.selite and se.laji = 'TRY_SE' and avainsana.jarjestys = se.jarjestys
-					LEFT JOIN avainsana AS en on avainsana.yhtio = en.yhtio and avainsana.selitetark = en.selite and en.laji = 'TRY_EN' and avainsana.jarjestys = en.jarjestys
-					LEFT JOIN avainsana AS ru on avainsana.yhtio = ru.yhtio and avainsana.selitetark = ru.selite and ru.laji = 'TRY_RU' and avainsana.jarjestys = ru.jarjestys
-					LEFT JOIN avainsana AS ee on avainsana.yhtio = ee.yhtio and avainsana.selitetark = ee.selite and ee.laji = 'TRY_EE' and avainsana.jarjestys = ee.jarjestys
-					LEFT JOIN avainsana AS de on avainsana.yhtio = de.yhtio and avainsana.selitetark = de.selite and de.laji = 'TRY_DE' and avainsana.jarjestys = de.jarjestys					
+					LEFT JOIN avainsana AS se on avainsana.yhtio = se.yhtio and avainsana.selite = se.selite and se.laji = 'TRY' and se.kieli = 'se'
+					LEFT JOIN avainsana AS en on avainsana.yhtio = en.yhtio and avainsana.selite = en.selite and en.laji = 'TRY' and en.kieli = 'en'
+					LEFT JOIN avainsana AS ru on avainsana.yhtio = ru.yhtio and avainsana.selite = ru.selite and ru.laji = 'TRY' and ru.kieli = 'ru'
+					LEFT JOIN avainsana AS ee on avainsana.yhtio = ee.yhtio and avainsana.selite = ee.selite and ee.laji = 'TRY' and ee.kieli = 'ee'
+					LEFT JOIN avainsana AS de on avainsana.yhtio = de.yhtio and avainsana.selite = de.selite and de.laji = 'TRY' and de.kieli = 'de'					
 					WHERE avainsana.yhtio = '$kyhtio'
 					AND avainsana.laji = 'TRY'
+					AND avainsana.kieli = 'fi'
 					AND avainsana.nakyvyys != 'E'
 					ORDER BY avainsana.jarjestys";
 		$result = mysql_query($query) or pupe_error($query);

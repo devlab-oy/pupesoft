@@ -70,6 +70,7 @@
 		$tila = "tee_raportti";
 		require ("inc/asiakashaku.inc");
 		$tunnus = $asiakasid;
+		if ($ytunnus == "") exit;
 	}
 
 	if ($tila == 'tee_raportti') {
@@ -91,7 +92,7 @@
 
 			$asiakasrow = mysql_fetch_array($result);
 
-			$query = "	SELECT group_concat(tunnus) tunnukset
+			$query = "	SELECT group_concat(tunnus) tunnukset, count(*) kpl
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]'
 						and ytunnus = '$asiakasrow[ytunnus]'";
@@ -101,7 +102,8 @@
 		  	$tunnus 	= $asiakasrow['tunnus'];
 		  	$ytunnus 	= $asiakasrow['ytunnus'];
 			$tunnukset 	= $asiakasrow2['tunnukset'];
-
+			$nimet		= $asiakasrow2['kpl'];
+			
 			//kaatotilin saldo
 			if ($savalkoodi != "") {
 				$salisa = " and valkoodi='$savalkoodi' ";
@@ -202,7 +204,7 @@
 				
 			echo "
 				<tr>
-				<th rowspan='$riveja'>$ytunnus</td>
+				<th rowspan='$riveja'>$ytunnus ($nimet)</td>
 				<td rowspan='$riveja'>".t("Myöhässä olevia laskuja yhteensä")."</td>";
 
 			if (mysql_num_rows($result) > 1) { // Valuuttasummia

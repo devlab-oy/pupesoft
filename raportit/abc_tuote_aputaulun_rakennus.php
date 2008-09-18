@@ -207,6 +207,8 @@ if ($tee == 'YHTEENVETO') {
 				sum(if(tyyppi='O', 1, 0))									osto_rivia,
 				sum(if(tyyppi='O', kpl, 0))									osto_kpl,
 				sum(if(tyyppi='O', rivihinta, 0))							osto_summa,
+				count(distinct if(tyyppi='O',tilausrivi.otunnus,0))-1 osto_kerrat,
+				count(distinct if(tyyppi='L',tilausrivi.otunnus,0))-1 kerrat,
 				(select ifnull(sum(saldo) * if(epakurantti100pvm = '0000-00-00',if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25), 0), 0) from tuote, tuotepaikat where tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno) vararvo
 				FROM tilausrivi USE INDEX (yhtio_tyyppi_laskutettuaika)
 				$tuotejoin
@@ -302,6 +304,8 @@ if ($tee == 'YHTEENVETO') {
 					ostoerankpl 		= '$ostoeranakpl',
 					ostoeranarvo 		= '$ostoeranarvo',
 					osto_summa			= '$row[osto_summa]',
+					osto_kerrat			= '$row[osto_kerrat]',
+					kerrat				= '$row[kerrat]',
 					tuote_luontiaika	= '$row[luontiaika]'";
 		$insres = mysql_query($query) or pupe_error($query);
 

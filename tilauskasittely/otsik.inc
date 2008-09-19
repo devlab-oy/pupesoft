@@ -2239,7 +2239,10 @@
 		$apuqu = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kesken]'";
 		$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 		$apuro = mysql_fetch_array($meapu);
-
+		
+		$apuval = $apuro["valkoodi"];
+		$apukurssi = $apuro["vienti_kurssi"];
+		
 		//otetaan käyttöliittymästä tullut alv talteen
 		$laskunalv = $alv;
 
@@ -2599,9 +2602,13 @@
 			}
 
 		}
-
+				
 		//Otetaan valuutan kurssi
 		list($valkoodi, $kurssi) = explode('##', $valkoodi);
+
+		if ($apuval == $valkoodi) {
+			$kurssi = $apukurssi;
+		}
 
 		//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
 		if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv)) {

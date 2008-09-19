@@ -624,7 +624,8 @@
 
 		foreach ($tuotteen_parametrit_split as $params) {
 			list ($key, $val) = split("=", $params);
-			$tuotteen_parametrit[$key] = $val; 
+			$key = strtolower($key);
+			$tuotteen_parametrit[$key] = $val;
 		}
 		
 		$xxx = 0;

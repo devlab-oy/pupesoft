@@ -422,11 +422,9 @@ if ($tee == 'KARHUA')  {
 		
 		
 		echo "<td>";
+		echo "<input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]' $chk> $lasku[jv] ";
 		if ($lasku["tratattu"] > 0) {
 			echo t("Lasku tratattu");
-		}
-		else {		
-			echo "<input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]' $chk> $lasku[jv]";
 		}
 		echo "</td>";
 		

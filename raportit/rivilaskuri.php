@@ -8,15 +8,15 @@ echo "<font class='head'>".t("Rivilaskuri")."</font><hr>";
 
 if (($ppa!='') and ($kka!='') and ($vva!=''))
 {
-	$query = "select left(date_format(laadittu,'%H:%i'),4),
+	$query = "	SELECT left(date_format(laadittu,'%H:%i'),4),
 				count(*),
-				sum(kpl),
+				sum(kpl+varattu+jt),
 				sum(IF(lasku.vienti='E',1,0)),
-				sum(IF(lasku.vienti='E',kpl,0)),
+				sum(IF(lasku.vienti='E',kpl+varattu+jt,0)),
 				sum(IF(lasku.vienti='K',1,0)),
-				sum(IF(lasku.vienti='K',kpl,0)),
+				sum(IF(lasku.vienti='K',kpl+varattu+jt,0)),
 				sum(IF(lasku.laatija = 'EDI',1,0)),
-				sum(IF(lasku.laatija = 'EDI',kpl,0))
+				sum(IF(lasku.laatija = 'EDI',kpl+varattu+jt,0))
 				from tilausrivi, lasku
 				where tilausrivi.yhtio='$kukarow[yhtio]'
 				and tilausrivi.yhtio=lasku.yhtio

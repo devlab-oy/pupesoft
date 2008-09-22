@@ -19,7 +19,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				break;
 			case "tuotepaikat" :
 				$pakolliset = array("TUOTENO","HYLLYALUE","HYLLYNRO","HYLLYVALI","HYLLYTASO","OLETUS");
-				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM","SALDO","SALDO_VARATTU","SALDOAIKA","INVENTOINTIAIKA","INVENTOINTIPOIKKEAMA","INVENTOINTILISTA","INVENTOINTILISTA_AIKA");
 				break;
 			case "budjetti" :
 				$pakolliset = array("KAUSI","TASO","SUMMA");

@@ -768,7 +768,7 @@
 					$where4
 					$jarj";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($result) > 0) {
 
 			if($kukarow["extranet"] == "") {
@@ -1293,6 +1293,7 @@
 					$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
 
 					if ($toim == 'PROFORMA') {
+						$laskurow["tapvm"] = date("Y-m-d");
 						if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
 							$hinta_riv = "(tilausrivi.hinta/$laskurow[vienti_kurssi])";
 						}
@@ -1313,7 +1314,7 @@
 								LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 								WHERE $where
 								and tilausrivi.yhtio  = '$kukarow[yhtio]'
-								and tilausrivi.tyyppi = 'L'
+								and tilausrivi.tyyppi in ('L','W')
 								and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 								ORDER BY tilausrivi.otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 					$result = mysql_query($query) or pupe_error($query);

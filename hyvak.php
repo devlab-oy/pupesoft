@@ -183,7 +183,7 @@
 	}
 
  	// Jaaha poistamme laskun!
-	if ($tee == 'D' and $oikeurow['paivitys'] == '1' and $trow["tapvm"] > $yhtiorow["tilikausi_alku"]) {
+	if ($tee == 'D' and $oikeurow['paivitys'] == '1') {
 
 		$query = "	SELECT *
 					FROM lasku
@@ -201,27 +201,33 @@
 
 		$trow = mysql_fetch_array ($result);
 
-		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Poisti laskun")."<br>" . $trow['comments'];
+		if ($trow["tapvm"] > $yhtiorow["tilikausi_alku"]) {
 
-		// Ylikirjoitetaan tiliöinnit
-		$query = "	UPDATE tiliointi SET
-					korjattu = '$kukarow[kuka]',
-					korjausaika = now()
-					WHERE ltunnus = '$tunnus' and
-					yhtio = '$kukarow[yhtio]' and
-					tiliointi.korjattu = ''";
-		$result = mysql_query($query) or pupe_error($query);
+			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Poisti laskun")."<br>" . $trow['comments'];
 
-		// Merkataan lasku poistetuksi
-		$query = "	UPDATE lasku SET
-					alatila = 'H',
-					tila = 'D',
-					comments = '$komm'
-					WHERE tunnus = '$tunnus' and
-					yhtio = '$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
+			// Ylikirjoitetaan tiliöinnit
+			$query = "	UPDATE tiliointi SET
+						korjattu = '$kukarow[kuka]',
+						korjausaika = now()
+						WHERE ltunnus = '$tunnus' and
+						yhtio = '$kukarow[yhtio]' and
+						tiliointi.korjattu = ''";
+			$result = mysql_query($query) or pupe_error($query);
 
-		echo "<font class='error'>".sprintf(t('Poistit %s:n laskun tunnuksella %d.'), $trow['nimi'],$tunnus)."</font><br>";
+			// Merkataan lasku poistetuksi
+			$query = "	UPDATE lasku SET
+						alatila = 'H',
+						tila = 'D',
+						comments = '$komm'
+						WHERE tunnus = '$tunnus' and
+						yhtio = '$kukarow[yhtio]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			echo "<font class='error'>".sprintf(t('Poistit %s:n laskun tunnuksella %d.'), $trow['nimi'],$tunnus)."</font><br>";
+		}
+		else {
+			echo "<font class='error'>".t('Laskua ei voitu poistaa, se kuuluu lukitulle tilikaudelle')."!</font><br><br>";
+		}
 
 		$tunnus = '';
 		$tee = '';

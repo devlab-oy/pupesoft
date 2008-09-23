@@ -858,7 +858,7 @@
 			$miinus = 4;
 		}
 		elseif ($toim == 'YLLAPITO') {
-			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, if(kuka1.kuka != kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija, concat_ws(' - ', sopimus_alkupvm, if(sopimus_loppupvm='0000-00-00',' ".t("Toistaiseksi")." ',sopimus_loppupvm)) sopimuspvm, lasku.alatila, lasku.tila, lasku.tunnus, tunnusnippu
+			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, if(kuka1.kuka != kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija, concat_ws(' - ', sopimus_alkupvm, if(sopimus_loppupvm='0000-00-00',' ".t("Toistaiseksi")." ',sopimus_loppupvm)) sopimuspvm, lasku.alatila, lasku.tila, lasku.tunnus, tunnusnippu, sopimus_loppupvm
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio=lasku.yhtio and kuka1.kuka=lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio=lasku.yhtio and kuka2.tunnus=lasku.myyja)
@@ -875,11 +875,12 @@
 							count(distinct lasku.tunnus) kpl
 							FROM lasku use index (tila_index)
 							JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
+							JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus and (laskun_lisatiedot.sopimus_loppupvm >= now() or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
 							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('0') and lasku.alatila != 'D'";
 			$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
 			$sumrow = mysql_fetch_array($sumresult);
 
-			$miinus = 4;
+			$miinus = 5;
 		}
 		else {
 			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,
@@ -1041,13 +1042,21 @@
 					echo "<tr class='aktiivi'>";
 
 					for ($i=0; $i<mysql_num_fields($result)-$miinus; $i++) {
+						
+						if ($toim == "YLLAPITO" and $row["sopimus_loppupvm"] < date("Y-m-d") and $row["sopimus_loppupvm"] != '0000-00-00') {
+							$class = 'tumma';
+						}
+						else {
+							$class = '';
+						}
+						
 						if (mysql_field_name($result,$i) == 'luontiaika' or mysql_field_name($result,$i) == 'toimaika') {
-							echo "<td valign='top'>".tv1dateconv($row[$i],"pitka")."</td>";
+							echo "<td class='$class' valign='top'>".tv1dateconv($row[$i],"pitka")."</td>";
 						}
 						elseif (mysql_field_name($result,$i) == 'Pvm') {
 							list($aa, $bb) = explode('<br>', $row[$i]);
 							
-							echo "<td valign='top'>".tv1dateconv($aa,"pitka")."<br>".tv1dateconv($bb,"pitka")."</td>";
+							echo "<td class='$class' valign='top'>".tv1dateconv($aa,"pitka")."<br>".tv1dateconv($bb,"pitka")."</td>";
 						}
 						elseif (mysql_field_name($result,$i) == "tilaus") {
 							
@@ -1060,14 +1069,14 @@
 								echo "<div id='kommentti$row[$i]' class='popup' style='width: 500px;'>";
 								echo "$row_comments[comments]";
 								echo "</div>";
-								echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'kommentti$row[$i]')\" onmouseover=\"popUp(event,'kommentti$row[$i]')\">$row[$i]</a></td>";
+								echo "<td class='$class' valign='top'><a class='menu' onmouseout=\"popUp(event,'kommentti$row[$i]')\" onmouseover=\"popUp(event,'kommentti$row[$i]')\">$row[$i]</a></td>";
 							}
 							else {
-								echo "<td valign='top'>$row[$i]</td>";
+								echo "<td class='$class' valign='top'>$row[$i]</td>";
 							}
 						}
 						else {
-							echo "<td valign='top'>$row[$i]</td>";
+							echo "<td class='$class' valign='top'>$row[$i]</td>";
 						}
 
 						if(isset($workbook)) {
@@ -1083,7 +1092,7 @@
 
 					if ($row["tila"] == "N" and $row["alatila"] == "U") {
 						if ($jtok == 0) {
-							echo "<td valign='top'><font style='color:00FF00;'>".t("Voidaan toimittaa")."</font></td>";
+							echo "<td class='$class' valign='top'><font style='color:00FF00;'>".t("Voidaan toimittaa")."</font></td>";
 						
 							if(isset($workbook)) {
 								$worksheet->writeString($excelrivi, $i, "Voidaan toimittaa");
@@ -1091,7 +1100,7 @@
 							}
 						}
 						else {
-							echo "<td valign='top'><font style='color:FF0000;'>".t("Ei voida toimittaa")."</font></td>";
+							echo "<td class='$class' valign='top'><font style='color:FF0000;'>".t("Ei voida toimittaa")."</font></td>";
 						
 							if(isset($workbook)) {
 								$worksheet->writeString($excelrivi, $i, t("Ei voida toimittaa"));
@@ -1125,7 +1134,7 @@
 							$varastotila = "";
 						}
 						
-						echo "<td valign='top'>".t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila</td>";
+						echo "<td class='$class' valign='top'>".t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila</td>";
 					
 						if(isset($workbook)) {
 							$worksheet->writeString($excelrivi, $i, t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila");

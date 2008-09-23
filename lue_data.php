@@ -209,7 +209,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			echo "<font class='error'>".t("Toiminto sarake puuttuu")."!</font><br>";
 		}
 		if ($kielletty > 0) {
-			echo "<font class='error'>".t("Yrit‰t p‰ivitt‰‰ kiellettyj‰ sarakkeita")."!</font><br>";
+			echo "<font class='error'>".t("Yrit‰t p‰ivitt‰‰ kiellettyj‰ sarakkeita")."!</font><br>$viesti";
 		}
 
 		if(is_array($wherelliset) and $wheretarkea != count($wherelliset)) {

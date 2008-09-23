@@ -41,25 +41,32 @@ if ($yhtiorow['kuvapankki_polku'] == '') {
 
 Function listdir($start_dir='.') {
 
-  $files = array();
-  if (is_dir($start_dir)) {
-    $fh = opendir($start_dir);
-    while (($file = readdir($fh)) !== false) {
-      # loop through the files, skipping . and .., and recursing if necessary
-      if (strcmp($file, '.')==0 || strcmp($file, '..')==0 || substr($file,0,1)==".") continue;
-      $filepath = $start_dir . '/' . $file;
-      if ( is_dir($filepath) )
-        $files = array_merge($files, listdir($filepath));
-      else
-        array_push($files, $filepath);
-    }
-    closedir($fh);
-  } else {
-    # false if the function was called with an invalid non-directory argument
-    $files = false;
-  }
+	$files = array();
 
-  return $files;
+	if (is_dir($start_dir)) {
+
+		$fh = opendir($start_dir);
+
+		while (($file = readdir($fh)) !== false) {
+			if (strcmp($file, '.') == 0 or strcmp($file, '..') == 0 or substr($file,0,1) == ".") {
+				continue;
+			}
+			$filepath = $start_dir . '/' . $file;
+			if (is_dir($filepath)) {
+				$files = array_merge($files, listdir($filepath));
+			}
+			else {
+				array_push($files, $filepath);
+			}
+		}
+		closedir($fh);
+		sort($files);
+	}
+	else {
+		$files = false;
+	}
+
+	return $files;
 
 }
 
@@ -89,7 +96,7 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$kuva,$dirri,$upfile1) {
 
     // skaalataan kuva oikenakokoiseksi
     exec("nice -n 20 convert -resize x$ykoko -quality 80 $upfile1 $upfilesgh",$output,$error);
-	
+
 	if ($error != 0) {
 		echo "Virhe kuvan muokkauksessa<br>";
 	}
@@ -105,7 +112,7 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$kuva,$dirri,$upfile1) {
 		else {
 			$upfileall .= "$uusnimi";
 		}
-	}	
+	}
 
 	// poistetaan file
 	system("rm -f $upfilesgh");
@@ -141,7 +148,7 @@ if ($tee == 'GO') {
 
 			$size = getimagesize($file);
 			list($mtype, $crap) = explode("/", $size["mime"]);
-			
+
 			if ($toiminto == 'kasittele' and $mtype == "image") {
 				if (file_exists($file)) {
 
@@ -228,7 +235,7 @@ if ($tee == 'GO') {
 		$path_parts = pathinfo($kuva);
 		$ext = $path_parts['extension'];
 		//echo "$ext<br>";
-		
+
 		// pit‰‰ kattoo onko nimess‰ wildkardia ta h‰ssi‰
 		if (strpos($kuva,"#") !== FALSE) {
 			// (nro)
@@ -243,18 +250,18 @@ if ($tee == 'GO') {
 
 		$apuselite = "";
 		$mikakieli = "";
-		
+
 		if (strpos($kuva,"%") !== FALSE) {
 			// (wildkaard)
 			$mihin = strpos($kuva,"%");
 			$kuvanalku = substr($kuva,0,$mihin);
 			//echo "Alku: $kuvanalku<br>";
-			
+
 			//kyseess‰ on k‰yttˆturvatiedot ja tuotekortti
-			if (strpos($kuva,"%ktt") !== FALSE) {				
+			if (strpos($kuva,"%ktt") !== FALSE) {
 				$mistakieli = strpos($kuva,"%ktt")+4;
 				$mikakieli = substr($kuva,$mistakieli,2);
-				
+
 				if (strpos($mikakieli,"fi") !== FALSE or
 					strpos($mikakieli,"se") !== FALSE or
 					strpos($mikakieli,"en") !== FALSE or
@@ -267,12 +274,12 @@ if ($tee == 'GO') {
 					$apuselite = t("K‰yttˆturvatiedote");
 					$mikakieli = "fi";
 				}
-				
+
 			}
 			elseif (strpos($kuva,"%tko") !== FALSE) {
 				$mistakieli = strpos($kuva,"%tko")+4;
-				$mikakieli = substr($kuva,$mistakieli,2);				
-				
+				$mikakieli = substr($kuva,$mistakieli,2);
+
 				if (strpos($mikakieli,"fi") !== FALSE or
 					strpos($mikakieli,"se") !== FALSE or
 					strpos($mikakieli,"en") !== FALSE or
@@ -285,14 +292,14 @@ if ($tee == 'GO') {
 					$apuselite = t("Tuotekortti");
 					$mikakieli = "fi";
 				}
-				
+
 			}
 
 			$query = "SELECT tuoteno, tunnus FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno LIKE '$kuvanalku%'";
 			$apuresult = mysql_query($query) or pupe_error($query);
 		}
-		
-		
+
+
 
 		if (file_exists($file)) {
 			$filesize = filesize($file);
@@ -357,10 +364,10 @@ if ($tee == 'GO') {
 						if ($apuselite != "") {
 							$kuvaselite = $apuselite;
 						}
-						
+
 						$toiminto = "MU";
-					}					
-					
+					}
+
 					// poistetaan vanhat samat ja korvataan uusilla
 					$query =	"DELETE FROM liitetiedostot
 								WHERE yhtio 			= '$kukarow[yhtio]'
@@ -371,10 +378,10 @@ if ($tee == 'GO') {
 					$delresult = mysql_query($query) or pupe_error($query);
 					$dellatut = mysql_affected_rows();
 
-					
+
 					if ($dellatut > 0) {
 						echo "Poistettiin $dellatut $kuva kuvaa<br>";
-					}					
+					}
 
 					$query = "	INSERT INTO liitetiedostot SET
 								yhtio    			= '$kukarow[yhtio]',

@@ -78,7 +78,8 @@
 					WHERE yhtio='$kukarow[yhtio]'
 					AND liitos='tuote'
 					AND kayttotarkoitus not in ('thumb','TH')
-					AND liitostunnus='$tunnus'";
+					AND liitostunnus='$tunnus'
+					ORDER BY kayttotarkoitus, jarjestys, filename";
 
 		$kuvares = mysql_query($query) or pupe_error($query);
 
@@ -1329,7 +1330,7 @@
 			unset($pdf_exist);
 			unset($filetype);
 
-			$filetype_query = "	SELECT * FROM liitetiedostot WHERE yhtio='{$kukarow['yhtio']}' and liitos='tuote' AND liitostunnus='{$row['tunnus']}'";
+			$filetype_query = "	SELECT * FROM liitetiedostot WHERE yhtio='{$kukarow['yhtio']}' and liitos='tuote' AND liitostunnus='{$row['tunnus']}' ORDER BY kayttotarkoitus, jarjestys, filename";
 			$filetype_result = mysql_query($filetype_query) or pupe_error($filetype_query);
 
 			$filetype_row = mysql_fetch_array($filetype_result);

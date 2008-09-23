@@ -667,7 +667,23 @@
 				echo "<option value='' $sel1>".t("Normaalimyyj‰ ei toimi kassamyyj‰n‰")."</option>";
 				echo "<option value='o' $sel2>".t("Normaalimyyj‰ voi toimia tarpeen mukaan kassamyyj‰n‰")."</option>";
 				echo "</select></td>";
+				
+				$sel0 = $sel1 = "";
 
+				if ($krow["saatavat"] == "0") {
+					$sel0 = "SELECTED";
+				}
+				if ($krow["saatavat"] == "1") {
+					$sel1 = "SELECTED";
+				}
+
+				echo "<tr><th align='left'>".t("Saatavat").":</th>";
+
+				echo "<td><select name='saatavat'>";
+				echo "<option value='0' $sel0>".t("Ei n‰ytet‰ saatavia kassak‰ytt‰j‰n‰")."</option>";
+				echo "<option value='1' $sel1>".t("N‰ytet‰‰n saatavat kassak‰ytt‰j‰n‰")."</option>";
+				echo "</select></td></tr>";
+				
 				echo "<tr><th align='left'>".t("Hyv‰ksyj‰").":</td>";
 
 				if ($krow["hyvaksyja"] != '') {

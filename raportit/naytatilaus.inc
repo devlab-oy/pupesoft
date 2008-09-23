@@ -20,7 +20,13 @@
 		exit;
 	}
 	$laskurow = mysql_fetch_array($aresult);
-
+					
+	$vientikurssi = 1;
+	
+	if (!in_array($laskurow["vienti_kurssi"],array(1,0))) {
+		$vientikurssi = $laskurow["vienti_kurssi"];
+	}
+	
 	if ($laskurow['tila']=='L' or $laskurow['tila']=='G') {
 		// haetaan eka rahtikirjat tietue, niin saadaan rahtikirjanumerot tietoon
 		$query = "select * from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$laskurow[tunnus]' limit 1";
@@ -621,15 +627,25 @@
 
 
 		echo "<th>".t("Netto")."</th>";
-
-		echo "<th style='text-align:right;'>".t("Svh (Hinta val.)")."</th>";
+		
+		$kurssilisa = "";
+		if ($vientikurssi != 1) {
+			$kurssilisa = " (Hinta val.)";
+		}
+		
+		echo "<th style='text-align:right;'>".t("Svh $kurssilisa")."</th>";
 
 		if ($kukarow['hinnat'] == 0) {
 			echo "<th style='text-align:right;'>".t("Ale%")."</th>";
 			echo "<th style='text-align:right;'>".t("Hinta")."</th>";
 		}
-
-		echo "<th style='text-align:right;'>".t("Rivihinta")."</th>";
+		
+		$kurssilisa = "";
+		if ($vientikurssi != 1) {
+			$kurssilisa = " (Rivihinta val.)";
+		}
+		
+		echo "<th style='text-align:right;'>".t("Rivihinta $kurssilisa")."</th>";
 
 		if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 			echo "<th style='text-align:right;'>".t("Kate")."</th>";
@@ -1018,7 +1034,13 @@
 				echo "<td $class align='right' valign='top' nowrap>$myyntihinta</td>";
 			}
 			else {
-				if ($myyntihinta != $row["hinta"]) $myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $myyntihinta)." (".sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]/$laskurow["vienti_kurssi"]).")";
+				
+				$kurssilisa = "";
+				if ($vientikurssi != 1) {
+					$kurssilisa = " (".sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]/$vientikurssi).")";
+				}
+				
+				if ($myyntihinta != $row["hinta"]) $myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $myyntihinta)."$kurssilisa";
 				else $myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $myyntihinta);
 
 				echo "<td $class align='right' valign='top' nowrap>$myyntihinta</td>";
@@ -1030,12 +1052,21 @@
 				echo "<td $class align='right' valign='top' nowrap>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $bruttorivi)."</td>";
 			}
 			else {
+				
 				if ($yhtiorow["alv_kasittely"] == "") {
 					//verolliset hinnat
-					echo "<td $class align='right' valign='top' nowrap>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["summa"])."</td>";
+					$kurssilisa = "";
+					if ($vientikurssi != 1) {
+						$kurssilisa = " (".sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["summa"]/$vientikurssi).")";
+					}
+					echo "<td $class align='right' valign='top' nowrap>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["summa"])."$kurssilisa</td>";
 				}
 				else {
-					echo "<td $class align='right' valign='top' nowrap>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["arvo"])."</td>";
+					$kurssilisa = "";
+					if ($vientikurssi != 1) {
+						$kurssilisa = " (".sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["arvo"]/$vientikurssi).")";
+					}
+					echo "<td $class align='right' valign='top' nowrap>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["arvo"])."$kurssilisa</td>";
 				}
 			}
 

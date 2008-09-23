@@ -44,8 +44,8 @@
 					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					AND tilausrivi.toimitettu = ''
-					AND tilausrivi.uusiotunnus = 0
 					AND tilausrivi.tyyppi = 'O'
+					AND tilausrivi.kpl = 0
 					AND tilausrivi.jaksotettu = 0
 					GROUP BY tilausrivi.otunnus
 					ORDER BY lasku.nimi";

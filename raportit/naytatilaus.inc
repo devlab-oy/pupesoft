@@ -622,7 +622,7 @@
 
 		echo "<th>".t("Netto")."</th>";
 
-		echo "<th style='text-align:right;'>".t("Svh")."</th>";
+		echo "<th style='text-align:right;'>".t("Svh (Hinta val.)")."</th>";
 
 		if ($kukarow['hinnat'] == 0) {
 			echo "<th style='text-align:right;'>".t("Ale%")."</th>";
@@ -1018,7 +1018,7 @@
 				echo "<td $class align='right' valign='top' nowrap>$myyntihinta</td>";
 			}
 			else {
-				if ($myyntihinta != $row["hinta"]) $myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $myyntihinta)." (".sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]).")";
+				if ($myyntihinta != $row["hinta"]) $myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $myyntihinta)." (".sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]/$laskurow["vienti_kurssi"]).")";
 				else $myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $myyntihinta);
 
 				echo "<td $class align='right' valign='top' nowrap>$myyntihinta</td>";

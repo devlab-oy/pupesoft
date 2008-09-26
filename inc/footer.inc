@@ -10,7 +10,7 @@
 
 	$useslave  = 0;
 
-	if ($verkkokauppa == "") {		
+	if ($verkkokauppa == "") {
 		if (require("connect.inc")) {
 
 			//	Tarkastetaan käsitelläänkö suorituskykyongelmia
@@ -18,7 +18,6 @@
 			$suores = mysql_query($query);
 
 			if (mysql_error() == "") {
-
 				$starttime = date("Y-m-d H:i:s", $starttime);
 				$endtime = date("Y-m-d H:i:s", $endtime);
 
@@ -35,10 +34,11 @@
 		}
 	}
 
-	if($ei_kelloa == "") {
+	if ($ei_kelloa == "") {
 		echo "<br><font class='info'><br>$aika</font>";
 		echo "</body></html>";
-		
 	}
+
+	mysql_close();
 
 ?>

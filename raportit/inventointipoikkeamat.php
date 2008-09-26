@@ -181,6 +181,23 @@
 
 		if ($tila == 'tulosta') {
 			$tulostimet[0] = "Inventointipoikkeamat";
+
+			if (isset($rajaus)) {
+				$rajaus = unserialize(urldecode($rajaus));
+				$mul_osasto 	= $rajaus[0];
+				$mul_try 		= $rajaus[1];
+				$mul_tmr		= $rajaus[2];
+				$varastot		= $rajaus[3];
+				$prosmuutos		= $rajaus[4];
+				$kplmuutos		= $rajaus[5];
+				$sarjat			= $rajaus[6];
+				$vararvomuu		= $rajaus[7];
+				$naytanimitys	= $rajaus[8];
+			}
+			
+			$rajaus = array($mul_osasto, $mul_try, $mul_tmr, $varastot, $prosmuutos, $kplmuutos, $sarjat, $vararvomuu, $naytanimitys);
+			$rajaus = urlencode(serialize($rajaus));
+			
 			if (count($komento) == 0) {
 				require("../inc/valitse_tulostin.inc");
 			}
@@ -390,6 +407,7 @@
 			$tee = 'TULOSTA';
 		}
 	}
+
 	if ($tee == "TULOSTA") {
 		if (mysql_num_rows($saldoresult) > 0 ) {
 			if ($prosmuutos == 0) {

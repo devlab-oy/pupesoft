@@ -309,7 +309,7 @@
 				}
 
 				// Taulun ensimmäinen kenttä on aina yhtiö
-				$query = "UPDATE $toim SET yhtio='$kukarow[yhtio]', muuttaja='$kukarow[kuka]', muutospvm=now() ";
+				$query = "UPDATE $toim SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
 					if (isset($t[$i]) or is_array($_FILES["liite_$i"])) {
@@ -327,7 +327,7 @@
 					}
 				}
 
-				$query .= " where tunnus = $tunnus";
+				$query .= " where yhtio='$kukarow[yhtio]' and tunnus = $tunnus";
 			}
 
 			$result = mysql_query($query) or pupe_error($query);

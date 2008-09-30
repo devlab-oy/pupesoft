@@ -109,8 +109,12 @@
 			$lisa .= " and lasku.nimi like '%$sanimi%' ";
 		}
 		if ($sytunnus != '') {
-			$lisa .= " and lasku.ytunnus='$sytunnus' ";
-			$useindex = " use index (yhtio_tila_ytunnus_tapvm) ";
+			$query = "SELECT ifnull(group_concat(tunnus), 0) FROM asiakas WHERE yhtio = '$kukarow[yhtio]' AND ytunnus = '$sytunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+			$row = mysql_fetch_array($result);
+
+			$lisa .= " and lasku.liitostunnus in ($row[0]) ";
+			$useindex = " use index (yhtio_tila_liitostunnus_tapvm) ";
 		}
 		
 		$yli = str_replace(',','.', $yli);

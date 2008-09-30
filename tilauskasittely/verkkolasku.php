@@ -770,6 +770,83 @@
 					$tulos_ulos .= "<br>\n".t("Laskujen rahtikulut muodostuivat jo tilausvaiheessa").".<br>\n";
 				}
 
+				// katsotaan halutaanko laskuille lis‰t‰ joku staattinen lis‰kulu
+				if ($yhtiorow["lisakulu_tuotenumero"] != "" and (float) $yhtiorow["lisakulu_maara"] != 0) {
+
+					$tulos_ulos .= t("Lis‰t‰‰n laskulle lis‰kulu")."<br>\n";
+					$yhdista = array();
+
+					// tehd‰‰n ketjutus (group by PITƒƒ OLLA sama kun alhaalla) rivi ~886
+					$query = "	SELECT group_concat(tunnus) tunnukset
+								FROM lasku
+								where yhtio = '$kukarow[yhtio]'
+								and tunnus in ($tunnukset)
+								and ketjutus = ''
+								GROUP BY ytunnus, nimi, nimitark, osoite, postino, postitp, maksuehto, erpcm, vienti,
+								lisattava_era, vahennettava_era, maa_maara, kuljetusmuoto, kauppatapahtuman_luonne,
+								sisamaan_kuljetus, aktiivinen_kuljetus, kontti, aktiivinen_kuljetus_kansallisuus,
+								sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn, maa, valkoodi
+								$ketjutus_group";
+					$result = mysql_query($query) or pupe_error($query);
+
+					while ($row = mysql_fetch_array($result)) {
+						$yhdista[] = $row["tunnukset"];
+					}
+
+					// viel‰ laskut jota ei saa ketjuttaa
+					$query = "	SELECT tunnus
+								FROM lasku
+								where yhtio = '$kukarow[yhtio]'
+								and tunnus in ($tunnukset)
+								and ketjutus != ''";
+					$result = mysql_query($query) or pupe_error($query);
+
+					while ($row = mysql_fetch_array($result)) {
+						$yhdista[] = $row["tunnus"];
+					}
+
+					// haetaan lis‰kulu-tuotteen tiedot
+					$query = "	SELECT *
+								FROM tuote
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tuoteno = '$yhtiorow[lisakulu_tuotenumero]'";
+					$rhire = mysql_query($query) or pupe_error($query);
+					$trow  = mysql_fetch_array($rhire);
+
+					foreach ($yhdista as $otsikot) {
+						//haetaan ekan otsikon tiedot
+						$query = "	SELECT lasku.*
+									FROM lasku
+									WHERE lasku.yhtio = '$kukarow[yhtio]'
+									AND lasku.tunnus in ($otsikot)
+									ORDER BY lasku.tunnus
+									LIMIT 1";
+						$otsre = mysql_query($query) or pupe_error($query);
+						$laskurow = mysql_fetch_array($otsre);
+
+						if (mysql_num_rows($otsre) == 1 and mysql_num_rows($rhire) == 1) {
+
+							$hinta = (float) $yhtiorow["lisakulu_maara"];
+							$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
+							$otunnus = $laskurow['tunnus'];
+
+							list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
+							list($lkhinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
+
+							$query  = "	INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv)
+										VALUES ('$lkhinta', 'N', '1', '1', '$laskurow[tunnus]', '$trow[tuoteno]', '$trow[nimitys]', '$kukarow[yhtio]', 'L', '$alv')";
+							$addtil = mysql_query($query) or pupe_error($query);
+
+							if ($silent == "") {
+								$tulos_ulos .= t("Lis‰ttiin lis‰kuluja")." $laskurow[tunnus]: $lkhinta $laskurow[valkoodi]<br>\n";
+							}
+						}
+						else {
+							$tulos_ulos .= t("Lis‰kulua ei voitu lis‰t‰")." $laskurow[tunnus]!<br>\n";
+						}
+					}
+				}
+
 				// laskutetaan kaikki tilaukset (siis teh‰‰n kaikki tarvittava matikka)
 				// rullataan eka query alkuun
 				if (mysql_num_rows($res) != 0) {
@@ -1931,7 +2008,7 @@
 			echo "$tulos_ulos";
 
 			// Annetaan mahdollisuus tallentaa finvoicetiedosto jos se on luotu..
-			if (file_exists($nimifinvoice) and 
+			if (file_exists($nimifinvoice) and
 				(strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE)) {
 				echo "<br><table><tr><th>".t("Tallenna finvoice-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";

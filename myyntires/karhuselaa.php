@@ -31,49 +31,33 @@ if (isset($_POST['tee']) and $_POST['tee'] == 'Hae') {
 
 	if (!empty($_POST['laskunro'])) {
 		$where = sprintf("and lasku.laskunro = %d", (int) $_POST['laskunro']);
+		$limit = "GROUP BY karhu_lasku.ktunnus ORDER BY tunnus desc LIMIT 1";
 	}
-	elseif (!empty($_POST['laskunro'])) {
+	elseif (!empty($_POST['ytunnus'])) {
 		$where = sprintf("and lasku.ytunnus = '%s'", (int) $_POST['ytunnus']);
+		$limit = "ORDER BY tunnus desc LIMIT 1";
+	}
+	else {
+		$where = "and lasku.mapvm = '0000-00-00'";
+		$limit = "";
 	}
 
 	// haetaan uusin karhukierros/karhukerta
-	$query = "	SELECT karhu_lasku.ktunnus as tunnus, liitostunnus, ytunnus, concat_ws(' / ',lasku.nimi,lasku.toim_nimi) nimi
+	$query = "	SELECT ifnull(group_concat(distinct karhu_lasku.ktunnus), 0) as tunnus, ifnull(group_concat(distinct liitostunnus), 0) as liitostunnus
 				FROM karhu_lasku
 				JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.yhtio = '$kukarow[yhtio]' $where)
 				JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = '$tyyppi')
-				ORDER BY tunnus desc
-				LIMIT 1";
+				$limit";
 	$res = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($res) > 0) {
 
 		$ktunnus = mysql_fetch_array($res);
 
-		if ($toim == "TRATTA") {
-			echo "<br><font class='message'>Viimeinen trattakierros asiakkaalle ytunnus $ktunnus[ytunnus].</font>";
-		}
-		else {
-			echo "<br><font class='message'>Viimeinen karhukierros asiakkaalle ytunnus $ktunnus[ytunnus].</font>";
-		}
-
-		$query = "	SELECT group_concat(karhu_lasku.ltunnus) laskutunnukset
-					FROM karhu_lasku
-					JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.liitostunnus = '$ktunnus[liitostunnus]')
-					JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = '$kukarow[yhtio]' and karhukierros.tyyppi = '$tyyppi')
-					WHERE karhu_lasku.ktunnus = '$ktunnus[tunnus]'";
-		$res = mysql_query($query) or pupe_error($query);
-		$tunnukset = mysql_fetch_array($res);
-
-		if ($toim == "TRATTA") {
-			echo " <a href='".$palvelin2."muutosite.php?karhutunnus=$ktunnus[tunnus]&lasku_tunnus[]=$tunnukset[laskutunnukset]&tee=tulosta_tratta&nayta_pdf=1'>Näytä tratta</a><br>";
-		}
-		else {
-			echo " <a href='".$palvelin2."muutosite.php?karhutunnus=$ktunnus[tunnus]&lasku_tunnus[]=$tunnukset[laskutunnukset]&tee=tulosta_karhu&nayta_pdf=1'>Näytä karhu</a><br>";
-		}
-
 		echo "<br>
 			<table>
 				<tr>
+					<th>".t('Kierros')."</th>
 					<th>".t('Ytunnus')."</th>
 					<th>".t('Asiakas')."</th>
 					<th>".t('Laskunro')."</th>
@@ -93,30 +77,50 @@ if (isset($_POST['tee']) and $_POST['tee'] == 'Hae') {
 
 		echo "</tr>";
 
-		$query = "	SELECT lasku.laskunro, lasku.summa, lasku.saldo_maksettu,
+		$query = "	SELECT lasku.laskunro, lasku.summa, lasku.saldo_maksettu, lasku.liitostunnus, karhu_lasku.ktunnus,
 					if(lasku.nimi != lasku.toim_nimi and lasku.toim_nimi != '', concat_ws('<br>', lasku.nimi, lasku.toim_nimi), lasku.nimi) nimi,
 					karhukierros.pvm, lasku.erpcm, lasku.ytunnus, karhu_lasku.ltunnus
 					FROM karhu_lasku
-					JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.liitostunnus = {$ktunnus['liitostunnus']})
-					JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = '{$kukarow['yhtio']}' and karhukierros.tyyppi = '$tyyppi')
-					WHERE karhu_lasku.ktunnus = '{$ktunnus['tunnus']}'";
+					JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.liitostunnus in ($ktunnus[liitostunnus]))
+					JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = '$kukarow[yhtio]' and karhukierros.tyyppi = '$tyyppi')
+					WHERE karhu_lasku.ktunnus in ($ktunnus[tunnus])
+					ORDER BY ytunnus, pvm, laskunro";
 		$res = mysql_query($query) or pupe_error($query);
 
 		while ($row = mysql_fetch_array($res)) {
 
-			$query = "SELECT count(distinct ktunnus) as summa from karhu_lasku where ltunnus={$row['ltunnus']}";
+			$query = "SELECT count(distinct ktunnus) as kertoja from karhu_lasku where ltunnus={$row['ltunnus']}";
 			$ka_res = mysql_query($query);
 			$karhuttu = mysql_fetch_array($ka_res);
 
+			$query = "	SELECT group_concat(karhu_lasku.ltunnus) laskutunnukset
+						FROM karhu_lasku
+						JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.liitostunnus = $row[liitostunnus])
+						JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = '$kukarow[yhtio]' and karhukierros.tyyppi = '$tyyppi')
+						WHERE karhu_lasku.ktunnus = '$row[ktunnus]'";
+			$la_res = mysql_query($query) or pupe_error($query);
+			$tunnukset = mysql_fetch_array($la_res);
+
 			echo "<tr>
-					<td>$row[ytunnus]</td>
-					<td>$row[nimi]</td>
-					<td>$row[laskunro]</td>
-					<td>$row[summa]</td>
-					<td>$row[saldo_maksettu]</td>
-					<td>".tv1dateconv($row['pvm'])."</td>
-					<td>".tv1dateconv($row['erpcm'])."</td>
-					<td style='text-align: right;'>$karhuttu[summa]</td>
+					<td valign='top'>$row[ktunnus]</td>	
+					<td valign='top'>$row[ytunnus]</td>
+					<td valign='top'>$row[nimi]</td>
+					<td valign='top'>$row[laskunro]</td>
+					<td valign='top'>$row[summa]</td>
+					<td valign='top'>$row[saldo_maksettu]</td>
+					<td valign='top'>".tv1dateconv($row['pvm'])."</td>
+					<td valign='top'>".tv1dateconv($row['erpcm'])."</td>
+					<td valign='top' style='text-align: right;'>$karhuttu[kertoja]</td>
+					<td valign='top' class='back'>";
+
+				if ($toim == "TRATTA") {
+					echo " <a href='".$palvelin2."muutosite.php?karhutunnus=$row[ktunnus]&lasku_tunnus[]=$tunnukset[laskutunnukset]&tee=tulosta_tratta&nayta_pdf=1'>Näytä tratta</a><br>";
+				}
+				else {
+					echo " <a href='".$palvelin2."muutosite.php?karhutunnus=$row[ktunnus]&lasku_tunnus[]=$tunnukset[laskutunnukset]&tee=tulosta_karhu&nayta_pdf=1'>Näytä karhu</a><br>";
+				}
+					
+			echo "	</td>
 				</tr>";
 		}
 

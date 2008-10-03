@@ -255,14 +255,14 @@
 			$result = mysql_query($query) or pupe_error($query);
 			$asiakasrow 	= mysql_fetch_array($result);
 		
-			echo "<table><tr><th>Valittu asiakas:</th><td>$asiakasrow[nimi]</td></tr></table><br>";
+			echo "<table><tr><th>".t("Valittu asiakas").":</th><td>$asiakasrow[nimi]</td></tr></table><br>";
 		}
 		elseif ($toimittajaid > 0) {
 			$query  = "SELECT concat_ws(' ', nimi, nimitark) nimi FROM toimi WHERE yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
 			$result = mysql_query($query) or pupe_error($query);
 			$asiakasrow 	= mysql_fetch_array($result);
 			
-			echo "<table><tr><th>Valittu toimittaja:</th><td>$asiakasrow[nimi]</td></tr></table><br>";
+			echo "<table><tr><th>".("Valittu toimittaja").":</th><td>$asiakasrow[nimi]</td></tr></table><br>";
 		}
 		
 		

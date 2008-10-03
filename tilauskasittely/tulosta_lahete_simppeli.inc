@@ -379,7 +379,7 @@ if (!function_exists('tulosta_lahete')) {
 					if($row["kommentti"] != "") {
 						$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-5)+1);
 						$pdf->write($h, $nb, 5, $s[0], $row["kommentti"], "snadi", "L", "I");	
-						$h-=$pdf->ln($nb)+0.5;
+						$h-=$pdf->ln($nb)+0.25;
 					}
 
 					//	Vientilaskulle annetaan hieman lisäinfoa!
@@ -400,7 +400,7 @@ if (!function_exists('tulosta_lahete')) {
 
 					if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
 						$pdf->write($h, 1, 5, 0, t("RS-koodi", $kieli).": $laskurow[asiakkaan_kohde]-$row[asiakkaan_positio]", "snadi", "L", "I");
-						$h-=$pdf->ln();
+						$h-=$pdf->ln()+0.25;
 					}
 
 					if($row["netto"] != "") {

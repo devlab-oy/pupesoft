@@ -590,7 +590,7 @@ if (!function_exists('tulosta_lasku')) {
 
 				if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
 					$pdf->write($h, 1, 5+$offset, 0, t("RS-koodi", $kieli).": $laskurow[asiakkaan_kohde]-$row[asiakkaan_positio]", "snadi", "L", "I");
-					$h-=$pdf->ln();
+					$h-=$pdf->ln()+0.25;
 				}
 				
 				if($rivi=="isa") {

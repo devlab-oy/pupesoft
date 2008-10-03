@@ -1059,7 +1059,7 @@ if($tee == "") {
 						<tr>
 							<td class='back'>
 								<table>
-								<caption style='text-align: center;'>Rajaa aika</caption>
+								<caption style='text-align: center;'>".t("Rajaa aika")."</caption>
 								<tr>
 									<th>".t("Alkupäivä")."</th><th>".t("Loppupäivä")."</th<td></td>
 								</tr>
@@ -1334,7 +1334,7 @@ if($tee == "") {
 			$ppa = $kka = $vva = $ppl = $kkl = $vvl = "";
 		}
 		
-		if($ppa > 0 and $kka > 0 and $vva > 0) {
+		if($ppa != "" and $kka != "" and $vva != "") {
 			$ppa = sprintf("%02d", $ppa);
 			$kka = sprintf("%02d", $kka);
 			if($tapahtuma == "A") {
@@ -1346,12 +1346,13 @@ if($tee == "") {
 			}
 			else {
 				$versio_rajaus .= " and versio.luontiaika >= '$vva-$kka-$ppa'";
-			}           
+			}
 		}
-		if($ppl > 0 and $kkl > 0 and $vvl > 0) {
+		
+		if($ppl != "" and $kkl != "" and $vvl != "") {
 			$ppl = sprintf("%02d", $ppl);
 			$kkl = sprintf("%02d", $kkl);           
-			if($tapahtuma == "") {
+			if($tapahtuma == "A") {
 				$lasku_rajaus .= " and lasku.luontiaika <= '$vvl-$kkl-$ppl'";
 			}
 			elseif($tapahtuma == "K") {

@@ -4866,9 +4866,9 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass, closeOnExit) {
 
 				c=0;
 				//	Riittääkö leveys
-				if(x+ew-2>ww) {
-					c=x+ew-ww+2;
-					x -= c;
+				if(x-scrollX+ew+2>ww) {
+					c=(x-scrollX+ew+2)-ww;
+					x-=c;
 				}
 
 				if (wh - y - eh < -10 && c > 10) {

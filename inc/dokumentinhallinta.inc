@@ -325,9 +325,6 @@ if(!function_exists("svnOpenNew")) {
 			
 			//	Tsekataan onko seuranta specifi pohja
 			if(svnListDirectory($sDir) === false) {
-				$sDir = $templatePath."/{$kohderow["seuranta"]}";
-			}
-			else {
 				$sDir = $templatePath."/default";
 			}
 			
@@ -340,6 +337,8 @@ if(!function_exists("svnOpenNew")) {
 						svnAction("move", $file, str_replace("XXXXXX", $tunnus, $file), "Nimet‰‰n tiedosto uudestaan");
 					}
 				}
+				
+				return true;
 			}
 			else {
 				return t("Projektin avauksessa tapahtui virhe");

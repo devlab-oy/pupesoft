@@ -113,6 +113,7 @@ if(!function_exists("svnCheckCommit")) {
 		
 		if(svnStatus===false) return false;
 		
+		$action = trim($action);
 		$noDstAction = array("delete", "list", "list -R");
 		$nocommentsAction = array("list", "list -R");
 		$allowedActions = array("move", "copy", "import", "delete", "list" , "list -R");

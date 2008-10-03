@@ -219,9 +219,6 @@ class PDF extends pdffile {
 			elseif($maa == "IT") {
 				setlocale(LC_MONETARY, 'it_IT');
 			}
-			elseif($maa == "PT") {
-				setlocale(LC_MONETARY, 'pt_PT');
-			}
 			elseif($maa == "ES") {
 				setlocale(LC_MONETARY, 'es_ES');
 			}

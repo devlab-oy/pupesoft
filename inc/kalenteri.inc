@@ -122,7 +122,7 @@
 								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" $event=\"".stripslashes($item["EVENT_ACTION"])."\">$item[TEKSTI]</a></td></tr>";
 							}
 							else {
-								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" href=\"#\" $event=\"divi=document.getElementById('ajax_menu'); divi.innerHTML=''; divi.style.display='none'; popUp(event, '$div', '$x', '$y', '{$item["HREF"]}'); return false;\">$item[TEKSTI]</a></td></tr>";
+								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" href=\"#\" $event=\"divi=document.getElementById('ajax_menu'); divi.innerHTML=''; divi.style.display='none'; popUp(event, '$div', '$x', '$y', '{$item["HREF"]}', false, false); return false;\">$item[TEKSTI]</a></td></tr>";
 							}
 						}
 					}
@@ -206,7 +206,7 @@
 										"Merkinta" 		=> t("Merkintä"),
 										"tilaus"		=> t("Tilaus/Projekti"),
 										"tarjous" 		=> t("Tarjous"),
-										"toimitus" 		=> t("Lähetys"),
+										"toimitus" 		=> t("Toimitus"),
 										"kerays"		=> t("Keräys"),
 										"alku"			=> t("Avattu"),
 										"laskutus"		=> t("Laskutus"),
@@ -231,11 +231,13 @@
 			static $nakymaotsikko;
 			
 			if(!is_array($nakymaotsikko)) {
-				$nakymaotsikko = array(	"KUUKAUSINAKYMA"	=> t("Kuukausinäkymä"),
+				$nakymaotsikko = array(	"KALENTERINAKYMA"	=> t("Kalenterinakyma"),
+										"KUUKAUSINAKYMA"	=> t("Kuukausinäkymä"),
 										"VIIKKONAKYMA" 		=> t("Viikkonäkymä"),
 										"PAIVANAKYMA" 		=> t("Päivänäkymä"),
 										"TAPAHTUMALISTAUS" 	=> t("Tapahtumalistaus"),
-										"RIVINAKYMA" 		=> t("Rivinäkymä"),
+										"RIVINAKYMA_PAIVA"	=> t("Rivinäkymä päivittäin"),
+										"RIVINAKYMA_VIIKKO"	=> t("Rivinäkymä viikoittain"),
 									);
 				
 			}
@@ -325,13 +327,14 @@
 			$lajitark	= $krow["laji_tark"];
 			$tunnus		= $krow["tunnus"];
 			if($laji == "kalenteri" or substr($laji, 0, 8) == "kontakti") {
-				$query = "	SELECT  lasku.*, kalenteri.*, if(kentta01='', '***', kentta01) viesti, kalenteri.tyyppi,
+				$query = "	SELECT  lasku.*, kalenteri.*, concat_ws(', ', tapa, if(kentta09='', null, kentta09)) tapa, if(kentta01='', '***', kentta01) viesti, kalenteri.tyyppi,
 									UNIX_TIMESTAMP(pvmalku) pvmalku, 
 									UNIX_TIMESTAMP(pvmloppu) pvmloppu,
 									avainsana.selitetark tyyppi_nimi,
 									DATEDIFF(pvmalku, now()) paivia_jaljella, 
 									asiakas.nimi asiakas,
 									yhteyshenkilo.nimi yhteyshenkilo,
+									kuka.nimi kuka_nimi,
 									kalenteri.luontiaika,
 									kalenteri.laatija,
 									kalenteri.tunnus
@@ -340,11 +343,12 @@
 							LEFT JOIN asiakas ON asiakas.yhtio=kalenteri.yhtio and asiakas.tunnus=kalenteri.liitostunnus
 							LEFT JOIN lasku ON lasku.yhtio=kalenteri.yhtio and lasku.tunnus=kalenteri.otunnus
 							LEFT JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.liitostunnus=kalenteri.liitostunnus and yhteyshenkilo.tunnus = kalenteri.henkilo and yhteyshenkilo.tyyppi = 'A'
+							LEFT JOIN kuka ON kuka.yhtio = kalenteri.yhtio and kalenteri.kuka=kuka.kuka
 							WHERE kalenteri.yhtio='$kukarow[yhtio]' and kalenteri.tunnus='$tunnus'";
 				$res = mysql_query($query) or pupe_error($query);
 				$row = mysql_fetch_array($res);
 				//var_dump($kalenteri);
-				$otsikko = substr(kaletapaKaannos($row["tapa"], "fi", $kukarow["kieli"]), 0, 14);
+				$otsikko = kaletapaKaannos($row["tapa"], "fi", $kukarow["kieli"]);
 				
 				$row["viesti"] = stripslashes($row["viesti"]);
 
@@ -360,11 +364,14 @@
 				if($row["tila"] == "T" and $row["tunnusnippu"] > 0) {
 					$popup_otsikko .= "<tr><th class=''>".t("Tarjous").":</th><td class=''>{$row["tunnusnippu"]}</td></tr>";
 				}
-				elseif(in_array($row["tila"], array("L", "U", "R")) and $row["tunnusnippu"] > 0) {
+				elseif(in_array($row["tila"], array("R")) and $row["tunnusnippu"] > 0) {
+					$popup_otsikko .= "<tr><th class=''>".t("Projekti").":</th><td class=''>{$row["tunnusnippu"]}</td></tr>";
+				}
+				elseif(in_array($row["tila"], array("L", "U")) and $row["tunnusnippu"] > 0) {
 					$popup_otsikko .= "<tr><th class=''>".t("Tilaus").":</th><td class=''>{$row["tunnusnippu"]}</td></tr>";
 				}
 				
-				if($lajitark == "kalenteri") {
+				if(in_array($lajitark, array("kalenteri", "projektitapahtuma"))) {
 					$popup_otsikko .= "<tr><th class=''>".t("Tapa").":</th><td class=''>".kaletapaKaannos($row["tapa"], "fi", $kukarow["kieli"])."</td></tr>";
 					$popup_otsikko .= "<tr><th class=''>".t("Alkaa").":</th><td class=''>".date("d.m.Y H:i", $row["pvmalku"])."</td></tr>";
 					$popup_otsikko .= "<tr><th class=''>".t("Päättyy").":</th><td class=''>".date("d.m.Y H:i", $row["pvmloppu"])."</td></tr>";
@@ -477,8 +484,8 @@
 					elseif($lajitark == "laskutus") {
 						$viesti = t("Tilausta %s laskutettu, laskunro %s", $kieli, $row["tunnusnippu"], $row["laskunro"]);
 					}
-					elseif($lajitark == "lahetys") {
-						$viesti = t("Toimituksen %s lähetys", $kieli, $row["tunnusnippu"]);
+					elseif($lajitark == "toimitus") {
+						$viesti = t("Toimitus %s toimitus", $kieli, $row["tunnusnippu"]);
 					}
 					elseif($lajitark == "kerays") {
 						$viesti = t("Toimituksen %s keräys", $kieli, $row["tunnusnippu"]);
@@ -722,7 +729,7 @@
 						UNION
 						/*	Toimituksen lähetys	*/	
 						(	
-							SELECT 'lasku' laji, 'lahetys' laji_tark, UNIX_TIMESTAMP(date(lasku.toimaika)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
+							SELECT 'lasku' laji, 'toimitus' laji_tark, UNIX_TIMESTAMP(date(lasku.toimaika)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
 							FROM lasku
 							$asiakas_join
 							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnusnippu = lasku.tunnus and tila IN ('R','L','N') $wherelisa
@@ -898,8 +905,12 @@
 				if(!isset($data["tiedot"]["alkustr"])) {
 					$data["tiedot"]["alkustr"] = $row["aika"];
 				}
+				$laika = strtotime("+$row[vali] days", $row["aika"]);
 
-				$data["tiedot"]["loppustr"] = $row["aika"];	
+				if($laika > $data["tiedot"]["loppustr"]) {
+					$data["tiedot"]["loppustr"] = $laika;
+				}
+				
 				$data["lista"][$row["aika"]][] = purge($row);
 			}
 			
@@ -962,7 +973,7 @@
 			$kalejako = "";
 			if(is_array($kalenteri["kalenteri_nayta_kuka"])) {
 				$kalejako = "
-					<table border='1' width='140'>
+					<br><table border='1' width='140'>
 						<caption>".t("Valitse henkilöt")."</caption>";
 						
 				$lisa = "";
@@ -1058,9 +1069,14 @@
 				}
 			}
 			
-			$menu[] = array("TEKSTI" => t("Lisää kalenteritapahtuma"), "HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
+			$menu[] = array("TEKSTI" => t("Lisää kalenteritapahtuma"),	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
 			$menu[] = array("TEKSTI" => t("Lisää asiakasmuistio"),		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
 			$menu[] = array("TEKSTI" => t("Lisää muistutus"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+			
+			if(in_array("projektitapahtuma", $kalenteri["kalenteri_tyypit"])) {
+				$menu[] = array("TEKSTI" => t("Lisää projektitapahtuma"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=projektitapahtuma&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+			}
+			
 			//$menu[] = array("TEKSTI" => "Lisää merkintä",			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Merkinta&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
 			
 			$palkki[] = tee_menu($menu, "<font class='message'>".t("Toiminnot")."</font>");
@@ -1070,7 +1086,7 @@
 			$palkki = array($toiminnot);
 
 			$menu = array();
-			foreach(array("TAPAHTUMALISTAUS", "KALENTERINAKYMA", "KUUKAUSINAKYMA", "VIIKKONAKYMA", "PAIVANAKYMA", "RIVINAKYMA") as $n) {
+			foreach(array("TAPAHTUMALISTAUS", "KALENTERINAKYMA", "KUUKAUSINAKYMA", "VIIKKONAKYMA", "PAIVANAKYMA", "RIVINAKYMA_PAIVA", "RIVINAKYMA_VIIKKO") as $n) {
 				if($kalenteri["sallittu_nakyma"] == "" or in_array($n, $kalenteri["sallittu_nakyma"])) {
 					$menu[] = array("TEKSTI" => nakymaotsikko($n),		"HREF" => "$kalenteri[URL]?nakyma=$n".url_params($kalenteri), "DIV" => $kalenteri["div"], "TAPA" => "request");
 				} 
@@ -1153,7 +1169,7 @@
 				$tcolor = array();
 				for($i=0;$i<$paivia;$i++) {
 					$aikastr = strtotime("+$i days", $maanantai);
-					if($i/$leveys == (int) ($i/$leveys) and $nakyma!="RIVINAKYMA") {
+					if($i/$leveys == (int) ($i/$leveys)) {
 						$kale .= "	</tr>
 								<tr style='height: 5px;'>
 									<td class='back'></td>
@@ -1230,7 +1246,7 @@
 					$menu = array();
 					$menu[] = array("TEKSTI" => t("Lisää kalenteriisi"), 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
 					$menu[] = array("TEKSTI" => t("Lisää muistutus"), 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
-					$menu[] = array("TEKSTI" => t("Lisää asiakasmuistio"), 	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
+					$menu[] = array("TEKSTI" => t("Lisää asiakasmuistio"), 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
 															
 					$kale .= "	<td width='100' height = '$height' NOWRAP style='border-style: solid; border-width: 1px; background-color: $color;'>
 									<div style='text-align: right;'>".tee_menu($menu, "<font class='kaleinfo'>".date("d.m.", $aikastr)."</font>")."</div>".implode("", $ulos)."
@@ -1242,7 +1258,7 @@
 						</div>
 						<div style='float: left; position: relative; left: 20px;'>$kalejako</div>";
 			}
-			elseif($nakyma == "RIVINAKYMA") {
+			elseif(in_array($nakyma, array("RIVINAKYMA_PAIVA", "RIVINAKYMA_VIIKKO"))) {
 
 				//	Käsitellään maksimiajankohta
 				$query = " SELECT DATEDIFF('".date("Y-m-d", $data["tiedot"]["loppustr"])."', '".date("Y-m-d", $data["tiedot"]["alkustr"])."') paivia";
@@ -1250,10 +1266,10 @@
 				$aburow = mysql_fetch_array($abures);
 				$paivia = $aburow["paivia"];
 				$kaleaika = $data["tiedot"]["alkustr"];
-				
+
 				//	Tän viikon eka päivä
 				if(date("N", $kaleaika)>0) {
-					$maanantai = strtotime("-2 monday", $kaleaika);
+					$maanantai = strtotime("-1 monday", $kaleaika);
 				}
 				elseif(date("N", $kaleaika)==1) {
 					$maanantai = $kaleaika;
@@ -1271,8 +1287,14 @@
 				$query = " SELECT DATEDIFF('".date("Y-m-d", $vikapaiva)."', '".date("Y-m-d", $maanantai)."') paivia";
 				$abures = mysql_query($query) or pupe_error($query);
 				$aburow = mysql_fetch_array($abures);
-				$paivia = $aburow["paivia"]+1;
-				
+
+				if($nakyma == "RIVINAKYMA_PAIVA") {
+					$paivia = $aburow["paivia"]+1;
+				}
+				else {
+					$paivia = ($aburow["paivia"]/7)+1;
+				}
+
 				//	Tehdään otsikot
 				$kale .= "
 				<div style='float: left;'>
@@ -1282,35 +1304,40 @@
 				$d = 0;
 				for($i=0;$i<$paivia;$i++) {
 					
-					if($d == 7) $d = 0;
-					
-					switch ($d) {
-						case 0:
-							$day = "Ma";
-							break;
-						case 1:
-							$day = "Ti";
-							break;
-						case 2:
-							$day = "Ke";
-							break;
-						case 3:
-							$day = "To";
-							break;
-						case 4:
-							$day = "Pe";
-							break;
-						case 5:
-							$day = "La";
-							break;
-						case 6:
-							$day = "Su";
-							break;
-					}
-					
-					$kale .= "<th>".t($day)." ".date("m.d.", strtotime("+$i days", $maanantai))."</th>";
+					if($nakyma == "RIVINAKYMA_PAIVA") {
+						if($d == 7) $d = 0;
 
-					$d++;
+						switch ($d) {
+							case 0:
+								$day = "Ma";
+								break;
+							case 1:
+								$day = "Ti";
+								break;
+							case 2:
+								$day = "Ke";
+								break;
+							case 3:
+								$day = "To";
+								break;
+							case 4:
+								$day = "Pe";
+								break;
+							case 5:
+								$day = "La";
+								break;
+							case 6:
+								$day = "Su";
+								break;
+						}
+						
+						$kale .= "<th style = 'text-align: center; width: 60px;'>".t($day)." ".date("d.m.", strtotime("+$i days", $maanantai))."</th>";
+						
+						$d++;
+					}
+					else {
+						$kale .= "<th style = 'text-align: center; width: 25px;'>".date("W", strtotime("+$i weeks", $maanantai))."</th>";
+					}
 				}
 				
 				$kale .= "	</tr>";	
@@ -1322,21 +1349,40 @@
 				$dataByEvent = array();
 				foreach($data["lista"] as $date => $events) {
 					foreach($events as $key => $event) {
-						$dataByEvent[$event["laji"].$event["tunnus"]][$date] = $event;
+						
+						if($nakyma == "RIVINAKYMA_PAIVA") {
+							$dataByEvent[$event["laji_tark"].$event["tunnus"]][$date] = $event;
+						}
+						else {
+							$dataByEvent[$event["laji_tark"].$event["tunnus"]][strtotime("monday", $date)] = $event;
+						}
 					}
 				}
 				//echo "<pre>dataByEvent".print_r($dataByEvent, true)."</pre><br>";
 				
 				foreach($dataByEvent as $event) {
 					
+					$e = &current($event);
+					
 					$lisatiedot = hae_lisatiedot(current($event), 0);
 					//echo "<pre>lisatiedot: ".print_r($lisatiedot, true)."</pre><br>";
-					$kale .= "<tr class='aktiivi'><th NOWRAP width = '150'>$lisatiedot[viesti]</th>";
+					//echo "<pre>lisatiedot: ".print_r($e, true)."</pre><br>";
+					if($e["laji_tark"] == "kalenteri") {
+						$kale .= "<tr class='aktiivi'><td NOWRAP>$lisatiedot[viesti], $lisatiedot[kuka_nimi]</td>";
+					}
+					else {
+						$kale .= "<tr class='aktiivi'><th NOWRAP>$lisatiedot[viesti]</th>";
+					}
 
 					$tcolor = array();
 					
 					for($i=0;$i<$paivia;$i++) {
-						$aikastr = strtotime("+$i days", $maanantai);
+						if($nakyma == "RIVINAKYMA_PAIVA") {
+							$aikastr = strtotime("+$i days", $maanantai);
+						}
+						else {
+							$aikastr = strtotime("+$i weeks", $maanantai);
+						}
 
 						if(date("Ymd", $aikastr) == date("Ymd")) {
 							$color = "rgba(252,245,22,0.5)";
@@ -1345,6 +1391,7 @@
 							$color = "inherit";				
 						}
 						
+						$stylelisa = "";
 						$ulos = "";
 						//echo "<pre>tdata $key".print_r($tdata[$aikastr], true)."</pre><br>";
 						if(is_array($event[$aikastr])) {
@@ -1354,17 +1401,9 @@
 								$tcolor[$row["tunnus"]] = color_code(count($tcolor)*13+55, 100);
 							}
 							
+							$stylelisa = "background-color: ".$tcolor[$row["tunnus"]];
 							
-							//	Haetaan ensin useampipäiväiset tapahtumat
-							if($row["vali"] >= 1) {
-								if($row["aika"] == $aikastr) {
-									$ulos = "<div style='height: 15; width; 100%; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";'>{$lisatiedot["viesti"]}</div>";
-								}
-								else {
-									$ulos = " <div style='height: 15; width; 100%; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";'></div>";
-								}
-							}
-							else {
+							if(($nakyma == "RIVINAKYMA_PAIVA" and $row["aika"] == $aikastr) or ($nakyma == "RIVINAKYMA_VIIKKO" and strtotime("monday", $row["aika"]) == $aikastr)) {
 								$ulos = $lisatiedot["viesti"];
 							}
 						}
@@ -1372,7 +1411,7 @@
 							$ulos = "&nbsp;";
 						}
 
-						$kale .= "	<td width='75' height = '$height' NOWRAP style='background-color: $color;'>
+						$kale .= "	<td height = '$height' style='background-color: $color; $stylelisa'>
 										$ulos
 									</td>";
 
@@ -1382,9 +1421,13 @@
 				}
 				
 				$menu = array();
-				$menu[] = array("TEKSTI" => "Lisää kalenteriisi", 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
+				$menu[] = array("TEKSTI" => t("Lisää kalenteriisi"), 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
 				$menu[] = array("TEKSTI" => t("Lisää muistutus"), 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
-				$menu[] = array("TEKSTI" => t("Lisää asiakasmuistio"), 	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
+				$menu[] = array("TEKSTI" => t("Lisää asiakasmuistio"), 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
+				
+				if(in_array("projektitapahtuma", $kalenteri["kalenteri_tyypit"])) {
+					$menu[] = array("TEKSTI" => t("Lisää projektitapahtuma"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=projektitapahtuma&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+				}
 				
 				$kale .= "
 						<tr>
@@ -1874,10 +1917,11 @@
 						otunnus  		= '$otunnus',
 						kuittaus  		= '$kuittaus',
 						kentta01 		= '$viesti',
+						kentta09 		= '$tapatarkenne',
 						kentta10 		= '$kentta10'";
 			$query .= $kysely.$where;
 			$result = mysql_query($query) or pupe_error($query);
-
+			//die($query);
 			if(count($jakelu)) {
 				
 				$to = "";
@@ -2016,7 +2060,7 @@
 			die("OHO! Kalenterin meni rikki!");
 		}
 
-		//echo "data:<pre>".print_r($_REQUEST, true)."</pre>";
+		echo "data:<pre>".print_r($_REQUEST, true)."</pre>";
 		
 		if($ktunnus > 0) {
 			$muokkaus = 1;
@@ -2036,6 +2080,7 @@
 				$otunnus 		= $krow["otunnus"];
 				$yhteyshenkilo 	= $krow["henkilo"];
 				$tapa 			= $krow["tapa"];
+				$tapatarkenne	= $krow["kentta09"];
 				$kentta10		= $krow["kentta10"];
 				
 				$query = "	SELECT count(*)
@@ -2055,10 +2100,17 @@
 			$poistanappi = "";
 		}
 		
-		if($tarjous > 0) {
+		if($tarjous > 0 or $otunnus>0) {
+			if($otunnus > 0) {
+				$ttunnus = $otunnus;
+			}
+			else {
+				$ttunnus = $tarjous;
+			}
+			
 			$query = "	SELECT liitostunnus
 						FROM lasku
-						WHERE yhtio='$kukarow[yhtio]' and tunnus='$tarjous'";
+						WHERE yhtio='$kukarow[yhtio]' and tunnus='$ttunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$aburow = mysql_fetch_array($result);
 			$liitostunnus = $aburow["liitostunnus"];
@@ -2146,9 +2198,13 @@
 			$qlisa = "%merkinta%";
 			$tapaotsikko = t("Merkintä");
 		}
-		elseif($tyyppi == "Memo" or "Muistutus") {
-			$qlisa = "%tapahtuma%";
+		elseif($tyyppi == "Memo" or $tyyppi == "Muistutus") {
+			$qlisa = "%kalenteritapahtuma%";
 			$tapaotsikko = t("Tapahtuma");
+		}
+		elseif($tyyppi == "projektitapahtuma") {
+			$qlisa = "%projektitapahtuma%";
+			$tapaotsikko = t("Projektitapahtuma");
 		}
 		elseif(substr($tyyppi, 0, 8) == "kontakti") {
 			$qlisa = "%kontakti%";
@@ -2222,7 +2278,8 @@
 		$paiva_loppu	= "<input type = 'text' name='lopp' value = '".date("d", $lopvm)."' size = '3'><input type = 'text' name='lokk' value = '".date("m", $lopvm)."' size = '3'><input type = 'text' name='lovv' value = '".date("Y", $lopvm)."' size = '5'>";		
 		
 		if($otunnus > 0 or $tarjous > 0 or $ktunnus>0) {
-			$asiakas = "<input type='hidden' name='liitostunnus' value='$liitostunnus'>$asiakasrow[nimi] $asiakasrow[nimitark]";
+			if($liitostunnus == 0) echo "<font class='error'>".t("Liitostunnus katosi!")."</font>";
+			$asiakas = "<input type='hidden' name='liitostunnus' value='$liitostunnus'>$asiakasrow[nimi] $asiakasrow[nimitark] kivi";
 		} 
 		else {
 			$asiakas = nayta_asiakashaku($liitostunnus, "kaleForm");
@@ -2251,7 +2308,7 @@
 			$valitse_kuka .= "</select>";
 			
 			$header = "
-					<table>
+					<table width='100%'>
 						<tr>
 							<th colspan='2'>".t("Asiakas")."</th>
 						</tr>						
@@ -2292,7 +2349,7 @@
 			}
 			$header = "
 					<input type='hidden' name='otunnus' value='$otunnus'>
-					<table>
+					<table width='100%'>
 						<tr>
 							<th colspan='2'>".t("Yhteyshenkilö")."</th>
 						</tr>						
@@ -2324,7 +2381,7 @@
 				$otsikko = "Lisää asiakasmuistio";
 			}
 			
-			$header = "<table>
+			$header = "<table width='100%'>
 						<tr>
 							<th colspan='2'>".t("Asiakas")."</th>
 						</tr>						
@@ -2345,6 +2402,34 @@
 							<td>$paiva_alku</td>
 							<td>$oval</td>
 						</tr>						
+						</table>";
+			$jakele = true;
+		}
+		elseif($tyyppi == "projektitapahtuma") {
+
+			if($muokkaus) {
+				$otsikko = "Muokkaa projektitapahtumaa";
+			}
+			else {
+				$otsikko = "Lisää projektitapahtuma";
+			}
+			
+			$header = "	<input type='hidden' name='otunnus' value='$otunnus'>
+						<table width='100%'>
+							<tr>
+								<th colspan='2'>".t("Projektitapahtuma")."</th>
+							</tr>
+							<tr>
+								<td colspan='2'>$tavat <input type='text' name='tapatarkenne' value='$tapatarkenne' size='15'></td>
+							</tr>
+							<tr>
+								<th>".t("Alku")."</th>
+								<th>".t("Loppu")."</th>
+							</tr>
+							<tr>
+								<td>$paiva_alku</td>
+								<td>$paiva_loppu</td>
+							</tr>
 						</table>";
 			$jakele = true;
 		}
@@ -2377,7 +2462,7 @@
 				$kalenteriin = "<input type='checkbox' name='kalenteriin' value='M'>";
 			}
 			
-			$header = "<table>
+			$header = "<table width='100%'>
 						<tr>
 							<th colspan='2'>".t("Asiakas")."</th>
 						</tr>						

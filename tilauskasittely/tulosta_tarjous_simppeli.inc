@@ -199,8 +199,9 @@ if (!function_exists('tulosta_tarjous')) {
 				$rivityypit[] = $aburow["selite"];
 			}
 		}
+
+		$rivityypit[] = "Alennukset";		
 		$rivityypit[] = "Ylläpito";
-		$rivityypit[] = "Alennukset";
 		$rivityypit[] = "Optio";
 		
 		
@@ -240,7 +241,7 @@ if (!function_exists('tulosta_tarjous')) {
 				
 				unset($edperhe);				
 				$summa = 0;
-				$pdf->write($h, 1, 0, 0, t(mb_strtoupper($key), $kieli), "norm", "L", "B");
+				$pdf->write($h, 1, 0, 0, mb_strtoupper(t($key, $kieli)), "norm", "L", "B");
 				
 				//	Onko tällä selitettä?
 				$query = "select selitetark_2 from avainsana where laji='TRIVITYYPPI' and selite='$key' and selitetark_2!=''";
@@ -306,7 +307,7 @@ if (!function_exists('tulosta_tarjous')) {
 						$pdf->write($h, 1, 0, $s[1], $row["tuoteno"]." ".$row["nimitys"], "norm", "L", "");
 						$pdf->write($h, 1, $s[1], $s[2], $row["tilkpl"]." ".strtolower(ta($kieli, "Y", $row["yksikko"])), "norm", "R", "");
 																		
-						if($laskurow["rivihintoja_ei_nayteta"] == "" or $key == "Optio") {
+						if($laskurow["rivihintoja_ei_nayteta"] == "" or $key == "Optio" or $key == "Alennukset") {
 							$pdf->write($h, 1, $s[2], $s[3], money_format('%!i',$row["hinta"]), "norm", "R", "");
 							
 							if($alenaytetaan=="OK" and $row["ale"] > 0) {

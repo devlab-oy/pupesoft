@@ -304,7 +304,7 @@
 						}
 
 						if($h < 20) {
-							//$pdf = alku($pdf, $laskurow,$kieli, "OK");
+							$pdf = alku($pdf, $laskurow,$kieli, "OK");
 						}
 
 						//	Perheiden väliin laitetaan yksi extraväli..
@@ -362,7 +362,7 @@
 							$to = array("seuraava kausi", "edeltävä kausi");
 							$nb=$pdf->countParagraphHeight(str_replace($from, $to, $row["kommentti"]), "snadi", ($s[0]-5));
 							$pdf->write($h, $nb, 5+$offset, $s[0], str_replace($from, $to, $row["kommentti"]), $style_komm, "L", "I");
-							$h-=$pdf->ln($nb);
+							$h-=$pdf->ln($nb)+0.5;
 						}
 
 						//	Oisko sarjanumeroita

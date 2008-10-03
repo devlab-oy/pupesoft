@@ -379,7 +379,7 @@ if (!function_exists('tulosta_lahete')) {
 					if($row["kommentti"] != "") {
 						$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-5)+1);
 						$pdf->write($h, $nb, 5, $s[0], $row["kommentti"], "snadi", "L", "I");	
-						$h-=$pdf->ln($nb);					
+						$h-=$pdf->ln($nb)+0.5;
 					}
 
 					//	Vientilaskulle annetaan hieman lisäinfoa!

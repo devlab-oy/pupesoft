@@ -203,7 +203,7 @@ if (!function_exists('tulosta_lasku')) {
 
 						}
 						elseif($key == "viivastyskorko") {
-							$pdf->writeToTemplate($h, 1, $s[0], $s[1], t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
+							$pdf->writeToTemplate($h, 1, $s[0], $s[1], t($o, $kieli).":", "norm", "L", "B", $tid);
 							$pdf->writeToTemplate($h, 1, $s[1]+2, 0, money_format('%!i',$laskurow[$key]), "norm", "L", "", $tid);
 							$h-=$pdf->ln();
 						}

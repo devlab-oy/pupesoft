@@ -175,6 +175,8 @@
 			$ulos .= "<option value='KARHUVIESTI' {$avain_sel['KARHUVIESTI']}>				".t("Karhuviesti")."</option>";	
 			$ulos .= "<option value='MEHTOTXT_SE' {$avain_sel['MEHTOTXT_SE']}>				".t("Ruotsinkielinen maksuehdon teksti")."</option>";
 			$ulos .= "<option value='MEHTOKATXT_SE' {$avain_sel['MEHTOKATXT_SE']}>			".t("Ruotsinkielinen maksuehdon kassateksti")."</option>";
+			$ulos .= "<option value='MEHTOTXT_EN' {$avain_sel['MEHTOTXT_EN']}>				".t("Englanninkielinen maksuehdon teksti")."</option>";
+			$ulos .= "<option value='MEHTOKATXT_EN' {$avain_sel['MEHTOKATXT_EN']}>			".t("Englanninkielinen maksuehdon kassateksti")."</option>";
 			$ulos .= "</optgroup>";
 			
 			$ulos .= "<optgroup label='".t("Muut avainsanat")."'>";

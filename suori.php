@@ -74,6 +74,7 @@
 						WHERE kotivaluutta = '$yhtiorow[valkoodi]'
 						AND valuutta = '$laskurow[valkoodi]'
 						AND kurssipvm <= '$mav-$mak-$map'
+						ORDER BY kurssipvm DESC
 						LIMIT 1";
 			$valuures = mysql_query($query) or pupe_error($query);
 

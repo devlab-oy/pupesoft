@@ -29,6 +29,7 @@
 						WHERE kotivaluutta = '$yhtiorow[valkoodi]'
 						AND valuutta = '$valkoodi'
 						AND kurssipvm <= '$tpv-$tpk-$tpp'
+						ORDER BY kurssipvm DESC
 						LIMIT 1";
 			$valuures = mysql_query($query) or pupe_error($query);
 

@@ -106,6 +106,7 @@ if ($tee == "SYOTTO") {
 						WHERE kotivaluutta = '$yhtiorow[valkoodi]'
 						AND valuutta = '$row[valkoodi]'
 						AND kurssipvm <= '$vva-$kka-$ppa'
+						ORDER BY kurssipvm DESC
 						LIMIT 1";
 			$result = mysql_query($query) or pupe_error($query);
 

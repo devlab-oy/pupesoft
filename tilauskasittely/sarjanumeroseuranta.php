@@ -1030,15 +1030,29 @@
 				$sarjarow["myyntirivitunnus"] = "";
 			}
 
-
+			$echoostuns = "";
+			
 			if ($sarjarow["osto_uusiotunnus"] > 0) {
 				$ostuns = $sarjarow["osto_uusiotunnus"];
+				
+				$query = "SELECT laskunro FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tila = 'K' and tunnus = '$sarjarow[osto_uusiotunnus]'";
+				$keikkares = mysql_query($query) or pupe_error($query);
+				if (mysql_num_rows($keikkares) > 0) {
+					$keikkarow = mysql_fetch_array($keikkares);
+					$echoostuns = t("Keikka:").$keikkarow["laskunro"];
+				}
+				
+				
 			}
 			else {
 				$ostuns = $sarjarow["osto_tunnus"];
 			}
-
-			echo "<td colspan='2' valign='top'><a href='../raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$ostuns'>$ostuns $sarjarow[osto_nimi]</a><br>";
+			
+			if ($echoostuns == '') {
+				$echoostuns = $ostuns;
+			}
+			
+			echo "<td colspan='2' valign='top'><a href='../raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$ostuns'>$echoostuns $sarjarow[osto_nimi]</a><br>";
 
 			if (($sarjarow["siirtorivitunnus"] > 0 and $tunnuskentta != 'siirtorivitunnus') or ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"])) {
 

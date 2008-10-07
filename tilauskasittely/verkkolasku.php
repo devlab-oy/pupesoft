@@ -770,8 +770,8 @@
 					$tulos_ulos .= "<br>\n".t("Laskujen rahtikulut muodostuivat jo tilausvaiheessa").".<br>\n";
 				}
 
-				// katsotaan halutaanko laskuille lis‰t‰ joku staattinen lis‰kulu
-				if ($yhtiorow["lisakulu_tuotenumero"] != "" and (float) $yhtiorow["lisakulu_maara"] != 0) {
+				// katsotaan halutaanko laskuille lis‰t‰ lis‰kulu prosentti
+				if ($yhtiorow["lisakulu_tuotenumero"] != "" and $yhtiorow["lisakulu_prosentti"] > 0) {
 
 					$tulos_ulos .= t("Lis‰t‰‰n laskulle lis‰kulu")."<br>\n";
 					$yhdista = array();
@@ -825,8 +825,19 @@
 						$laskurow = mysql_fetch_array($otsre);
 
 						if (mysql_num_rows($otsre) == 1 and mysql_num_rows($rhire) == 1) {
+							// lasketaan laskun loppusumma (HUOM ei tarvitse huomioida veroa!)
+							$query = "	SELECT sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * 
+													if(tilausrivi.netto = 'N', (1 - tilausrivi.ale / 100), (1 - (tilausrivi.ale + lasku.erikoisale - (tilausrivi.ale * lasku.erikoisale / 100)) / 100))
+												) laskun_loppusumma
+										FROM tilausrivi
+										JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+										WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+										and tilausrivi.tyyppi = 'L'
+										and tilausrivi.otunnus in ($otsikot)";
+							$listilre = mysql_query($query) or pupe_error($query);
+							$listilro = mysql_fetch_array($listilre);
 
-							$hinta = (float) $yhtiorow["lisakulu_maara"];
+							$hinta = $listilro["laskun_loppusumma"] * $yhtiorow["lisakulu_prosentti"] / 100;
 							$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
 							$otunnus = $laskurow['tunnus'];
 

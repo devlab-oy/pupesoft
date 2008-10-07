@@ -1285,9 +1285,11 @@
 
 					if ($laskurow["tila"] == 'U') {
 						$where = " tilausrivi.uusiotunnus='$otunnus' ";
+						$where2= " and tilausrivi.tyyppi = 'L' ";
 					}
 					else {
 						$where = " tilausrivi.otunnus='$otunnus' ";
+						$where2= " and tilausrivi.tyyppi in ('L','W') ";
 					}
 
 					// katotaan miten halutaan sortattavan
@@ -1315,7 +1317,7 @@
 								LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 								WHERE $where
 								and tilausrivi.yhtio  = '$kukarow[yhtio]'
-								and tilausrivi.tyyppi in ('L','W')
+								$where2
 								and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 								ORDER BY tilausrivi.otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 					$result = mysql_query($query) or pupe_error($query);

@@ -607,11 +607,13 @@
 			//haetaan vain tuoteperheiden isät tai sellaset tuotteet jotka eivät kuulu tuoteperheisiin
 			if ($toim == "ENNAKKO") {
 				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.varattu jt, lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
-							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika, lasku.toimvko
+							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika, lasku.toimvko, maksuehto.jv
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila='E' and lasku.alatila='A' $laskulisa)
+							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila='E' and lasku.alatila='A' $laskulisa)							
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
 							$toimittajalisa
+							LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+							LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = asiakas.maksuehto)
 							WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
 							and tilausrivi.tyyppi 			= 'E'
 							and tilausrivi.laskutettuaika 	= '0000-00-00'
@@ -623,11 +625,13 @@
 			}
 			else {
 				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.jt $lisavarattu jt, lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
-							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika, lasku.toimvko
+							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika, lasku.toimvko, maksuehto.jv
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.osatoimitus = '' and ((lasku.tila = 'N' and lasku.alatila != '') or lasku.tila != 'N') $laskulisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
 							$toimittajalisa
+							LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+							LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = asiakas.maksuehto)
 							WHERE tilausrivi.yhtio 	= '$kukarow[yhtio]'
 							and tilausrivi.tyyppi in ('L','G')
 							and tilausrivi.var 				= 'J'
@@ -1044,7 +1048,13 @@
 										echo "$jtrow[nimi]<br>";
 									}
 
-									echo "$jtrow[toim_nimi]</td>";
+									echo "$jtrow[toim_nimi]";
+
+									if ($jtrow["jv"] != "") {
+										echo "<br><br><font class='message'>".t("Jälkivaatimusasiakas")."!</font><br><br>";
+									}
+
+									echo "</td>";
 								}
 
 								if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {

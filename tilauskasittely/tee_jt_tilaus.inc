@@ -219,9 +219,8 @@
 						elseif (mysql_field_name($stresult,$i)=='laatija') {
 							$query .= "laatija='$kukarow[kuka]',";
 						}
-						// keräysaika, luontiaika ja toimitusaikaan now
+						// keräysaika ja toimitusaikaan now
 						elseif (mysql_field_name($stresult,$i)=='kerayspvm' or
-								mysql_field_name($stresult,$i)=='luontiaika' or
 								mysql_field_name($stresult,$i)=='toimaika') {
 							$query .= mysql_field_name($stresult,$i)."=now(),";
 						}

@@ -681,7 +681,25 @@ if (!function_exists('rivi_original')) {
 			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]*(1+($row["alv"]/100))), $pieni);
 			$pdf->draw_text(535-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]*(1+($row["alv"]/100))), $thispage, $pieni);
 		}
-
+		
+		
+		$query = "SELECT asiakkaan_tilausnumero, viesti FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[otunnus]'";
+		$viiteres = mysql_query($query) or pupe_error($query);
+		$viiterow = mysql_fetch_array($viiteres);
+		
+		$alkupkommentti = $row["kommentti"];
+		
+		
+		if (trim($viiterow['viesti']) != '' and trim($viiterow['viesti']) != trim($alkupkommentti)) {
+			$row["kommentti"] = trim($viiterow["viesti"])." ".$row["kommentti"];
+		}
+		if (trim($viiterow['asiakkaan_tilausnumero']) != '' and trim($viiterow['asiakkaan_tilausnumero']) != trim($alkupkommentti)) {
+			$row["kommentti"] = trim($viiterow["asiakkaan_tilausnumero"])." ".$row["kommentti"];
+		}
+		
+		$row["kommentti"] = trim($row["kommentti"]);
+		
+		
 		//Jos rivikommentti on pitkä niin teemme siitä kauniimman
 		if (strlen($row["kommentti"]) >= 140) {
 

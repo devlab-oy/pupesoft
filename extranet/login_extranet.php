@@ -85,8 +85,16 @@ $kentta = "user";
 echo "
 <html>
 	<head>
-	<title>Login</title>
-	<link rel='shortcut icon' href='http://www.pupesoft.com/pupeicon.gif'>
+	<title>Login</title>";
+	
+	if (file_exists("pics/pupeicon.gif")) {
+	    echo "\n<link rel='shortcut icon' href='pics/pupeicon.gif'>\n";
+	}
+	else {
+	    echo "\n<link rel='shortcut icon' href='http://www.pupesoft.com/pupeicon.gif'>\n";
+	}
+	
+	echo "
 	<meta http-equiv='Pragma' content='no-cache'>
 	<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
 	</head>
@@ -107,7 +115,19 @@ echo "
 
 <table width='550' border='0'>
 <tr>
-<td valign='top'><br><a target='_top' href='/'><img src='http://www.pupesoft.com/pupesoft.gif' border='0'></a></td>
+<td valign='top'><br>";
+
+if (file_exists("pics/pupesoft_logo.jpg")) {
+	echo "<a target='_top' href='/'><img src='pics/pupesoft_logo.jpg' border='0'>";
+}
+elseif (file_exists("pics/pupesoft_logo.gif")) {
+	echo "<a target='_top' href='/'><img src='pics/pupesoft_logo.gif' border='0'>";
+}
+else {
+	echo "<a target='_top' href='/'><img src='http://www.pupesoft.com/pupesoft.gif' border='0'>";
+}
+
+echo "</a></td>
 <td>
 
 <font class='head'>".t("Sisäänkirjautuminen",$browkieli)."</font><br><br>

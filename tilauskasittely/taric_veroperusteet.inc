@@ -94,7 +94,7 @@
 		}
 
 		if (mysql_num_rows($tv_res) == 0) {
-			echo "<font class='error'>".t("Nimike ei ole ilmoituskelpoinen").": $nimike_taso1/$nimike_taso ($tuorow[tuoteno]) ".t("Korjaa tuotteen tullinimike ennenkuin viet sen varastoon")."!</font><br>";
+			echo "<font class='error'>".t("Nimike ei ole ilmoituskelpoinen").": $nimike_taso1/$nimike_taso ($tuorow[tuoteno]) ".t("Korjaa tuotteen tullinimike")."!</font><br>";
 		}
 		else {
 
@@ -103,9 +103,8 @@
 
 			$query  = "	select *
 						from maat
-						where koodi = '$alkuperamaa'";
+						where koodi in ('$alkuperamaa')";
 			$tv_maares = mysql_query($query) or pupe_error($query);
-
 
 			if (mysql_num_rows($tv_maares) > 0) {
 
@@ -184,7 +183,7 @@
 			// Toivottavasti löytyi jokin toimenpide
 			if (mysql_num_rows($tv_nimres) == 0) {
 				if ($mista != 'tuote.php') {
-					echo "<font class='error'>".t("Ei löytynyt yhtään toimenpidettä tuotteelle/nimikkeelle").": $tuorow[tuoteno]/$nimike_taso1 ".t("Alkuperämaa/maaryhmät").": $alkuperamaa/$maat ".t("Korjaa tuotteen tullinimike ennenkuin viet sen varastoon")."!</font><br>";
+					echo "<font class='error'>".t("Ei löytynyt yhtään toimenpidettä tuotteelle/nimikkeelle").": $tuorow[tuoteno]/$nimike_taso1 ".t("Alkuperämaa/maaryhmät").": $alkuperamaa/$maat ".t("Korjaa tuotteen tullinimike")."!</font><br>";
 				}
 			}
 			else {
@@ -196,7 +195,7 @@
 								from taric_veroperusteet use index (fyysinen_avain_index)
 								where laji = 'exc.dat'
 								and toimenpide_id= '$tv_nimrow[toimenpide_id]'
-								and maa_ryhma='$alkuperamaa'";
+								and maa_ryhma in ('$alkuperamaa')";
 					$tv_res = mysql_query($query) or pupe_error($query);
 
 					//jos maamme ei ole poissuljettujen maiden joukossa, niin olemme löytäneet sopivan toimenpiteen

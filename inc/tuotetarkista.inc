@@ -4,18 +4,18 @@
 if(!function_exists("tuotetarkista")) {
 	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow, $tuotteen_parametrit_keys = "", $tuotteen_parametrit_vals = "") {
 		global $kukarow, $yhtiorow, $alias_set;
-		
-		static $tem_tuoteno;
-		
+
+		static $tem_tuoteno, $tem_tullinimike1;
+
 		if (mysql_field_name($result, $i) == "tuoteno") {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu");
 			}
 			else {
 				if ($tunnus == "") {
-					$query  = "	SELECT yhtio 
-								FROM tuote 
-								WHERE yhtio = '$kukarow[yhtio]' 
+					$query  = "	SELECT yhtio
+								FROM tuote
+								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '".trim($t[$i])."'";
 					$chkressiresult = mysql_query($query) or pupe_error($query);
 
@@ -26,8 +26,8 @@ if(!function_exists("tuotetarkista")) {
 			}
 			$tem_tuoteno = $t[$i];
 		}
-		
-		if (mysql_field_name($result, $i) == "nimitys") {		
+
+		if (mysql_field_name($result, $i) == "nimitys") {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] .= t("Nimitys puuttuu")."!";
 
@@ -59,13 +59,49 @@ if(!function_exists("tuotetarkista")) {
 			if (mysql_num_rows($sresult) != 1) {
 				$virhe[$i] = t("Virheellinen tullinimike");
 			}
+
+			$tem_tullinimike1 = $t[$i];
+		}
+
+		if (mysql_field_name($result, $i) == "tullinimike2" and $tem_tullinimike1 != "") {
+
+			// jos tyhjää laitetaan nollaksi
+			if ($t[$i] == "") $t[$i] = 0;
+
+			// varmistetaan, että on numeerinen
+			if (!is_numeric($t[$i])) {
+				$virhe[$i] = t("Tullinimike2 tulee olla numeerinen");
+			}
+			else {
+				// haetaan kaikkien toimittajien alkuperämaat
+				$query = "	SELECT group_concat(distinct concat(\"'\",alkuperamaa,\"'\") separator ',')
+							FROM tuotteen_toimittajat
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$tem_tuoteno'";
+				$sresult = mysql_query($query) or pupe_error($query);
+				$sresrow = mysql_fetch_array($sresult);
+
+				// käännetään tullinimike 2 pitkäsksi numeroksi nollapädätty
+				$t[$i] = sprintf('%02s', (int) $t[$i]);
+
+				// kokeillaan näillä tiedoilla onko tullinimike1+2 oikein
+				$laskurow["maa_lahetys"] = trim($sresrow[0], "'"); // otetaan eka ja vika hipsu pois, niin ei rikota taricveroperusteet.incciä
+				$tuorow["tullinimike1"] = $tem_tullinimike1;
+				$tuorow["tullinimike2"] = $t[$i];
+				$tuorow["tuoteno"] = $tem_tuoteno;
+
+				ob_start();
+				require("tilauskasittely/taric_veroperusteet.inc");
+				$virhe[$i] = ob_get_contents();
+				ob_end_clean();
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "tuotetyyppi") {
 			// Tyyppiä ei saa vaihtaa, jos tuotteella on saldoa
-			$query  = "	SELECT tuotetyyppi 
-		    			FROM tuote 
-		    			WHERE yhtio = '$kukarow[yhtio]' 
+			$query  = "	SELECT tuotetyyppi
+		    			FROM tuote
+		    			WHERE yhtio = '$kukarow[yhtio]'
 		    			and tuoteno = '$tem_tuoteno'";
 		    $sresult = mysql_query($query) or pupe_error($query);
 		    $srow = mysql_fetch_array($sresult);
@@ -80,32 +116,32 @@ if(!function_exists("tuotetarkista")) {
 		    	if ($srow["kpl"] > 0) {
 					$virhe[$i] = t("Tuotetyyppiä ei voida muuttaa, koska tuotteella on saldoa")."!";
 				}
-		    }				
+		    }
 		}
 
 		if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 			// Tyyppiä ei saa vaihtaa, jos tuotteella on saldoa
-			$query  = "	SELECT sarjanumeroseuranta 
-		    			FROM tuote 
-		    			WHERE yhtio = '$kukarow[yhtio]' 
+			$query  = "	SELECT sarjanumeroseuranta
+		    			FROM tuote
+		    			WHERE yhtio = '$kukarow[yhtio]'
 		    			and tuoteno = '$tem_tuoteno'";
 		    $sresult = mysql_query($query) or pupe_error($query);
 		    $srow = mysql_fetch_array($sresult);
-			
+
 		    if (trim(strtoupper($srow["sarjanumeroseuranta"])) != trim(strtoupper($t[$i]))) {
 		    	$query = "	SELECT count(*) kpl
 		    				FROM tuotepaikat
 		    				WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tem_tuoteno' and saldo != 0";
 		    	$saresult = mysql_query($query) or pupe_error($query);
 				$sarow = mysql_fetch_array($saresult);
-				
+
 				if (($srow["sarjanumeroseuranta"] == "" or $srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F") and (trim(strtoupper($t[$i])) == '' or trim(strtoupper($t[$i])) == 'E' or trim(strtoupper($t[$i])) == 'F')) {
 					//annetaan vaihtaa
 				}
 		    	elseif ($sarow["kpl"] > 0) {
 					$virhe[$i] = t("Seurantatyyppiä ei voida muuttaa, koska tuotteella on saldoa")."!";
 				}
-		    }				
+		    }
 		}
 
 		if (mysql_field_name($result, $i) == "ei_saldoa") {
@@ -119,7 +155,7 @@ if(!function_exists("tuotetarkista")) {
 					$virhe[$i] = t("Tuotteella on varastopaikkoja. Poista ne ensin!");
 				}
 			}
-			else {				
+			else {
 				if ($yhtiorow["tuotteen_oletuspaikka"] != "" and mysql_num_rows($sresult) == 0) {
 					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", $yhtiorow["tuotteen_oletuspaikka"]);
 
@@ -150,7 +186,7 @@ if(!function_exists("tuotetarkista")) {
 											muutospvm		= now(),
 											muuttaja		= '$kukarow[kuka]'";
 					$tuotepaikka_result = mysql_query($tuotepaikka_query) or pupe_error($tuotepaikka_query);
-				}				
+				}
 			}
 		}
 
@@ -183,7 +219,7 @@ if(!function_exists("tuotetarkista")) {
 			}
 		}
 		*/
-		
+
 	}
 }
 

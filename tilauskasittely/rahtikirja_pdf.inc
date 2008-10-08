@@ -262,7 +262,7 @@
 			$pdf->draw_rectangle(752,60,740,300,											$firstpage, $rectparam);
 			$pdf->draw_text(65,  743,  $yhtiorow["osoite"],									$firstpage, $kirj);	
 			$pdf->draw_rectangle(740,60,728,300,											$firstpage, $rectparam);
-			$pdf->draw_text(65,  731,  $yhtiorow["postino"]."  ".$yhtiorow["postitp"]."    ".$yhtiorow["puhelin"],		$firstpage, $kirj);
+			$pdf->draw_text(65,  731,  $yhtiorow["postino"]."  ".$yhtiorow["postitp"]."  ".$yhtiorow["maa"]."    ".$yhtiorow["puhelin"],		$firstpage, $kirj);
 			
 			//vastaanottaja	
 			$pdf->draw_rectangle(713,60,696,300,											$firstpage, $rectparam);
@@ -273,7 +273,7 @@
 			$pdf->draw_rectangle(696,60,684,300,											$firstpage, $rectparam);
 			$pdf->draw_text(65,  687,  $rakir_row["osoite"],								$firstpage, $kirj);
 			$pdf->draw_rectangle(684,60,672,300,											$firstpage, $rectparam);
-			$pdf->draw_text(65,  675,  $rakir_row["postino"]."  ".$rakir_row["postitp"],	$firstpage, $kirj);
+			$pdf->draw_text(65,  675,  $rakir_row["postino"]."  ".$rakir_row["postitp"]."  ".$rakir_row["maa"],	$firstpage, $kirj);
 			
 			//toimitusosoite
 			$pdf->draw_rectangle(657,60,640,300,												$firstpage, $rectparam); 
@@ -295,7 +295,7 @@
 		   	$pdf->draw_rectangle(777,60,755,300,											$firstpage, $rectparam);
 		   	$pdf->draw_text(65,  758,  $yhtiorow["osoite"],									$firstpage, $kirj);	
 		   	$pdf->draw_rectangle(755,60,733,300,											$firstpage, $rectparam);
-		   	$pdf->draw_text(65,  736,  $yhtiorow["postino"]."  ".$yhtiorow["postitp"]."    ".$yhtiorow["puhelin"],		$firstpage, $kirj);
+		   	$pdf->draw_text(65,  736,  $yhtiorow["postino"]."  ".$yhtiorow["postitp"]."  ".$yhtiorow["maa"]."    ".$yhtiorow["puhelin"],		$firstpage, $kirj);
 		   	
 		   	//vastaanottaja	
 		   	$pdf->draw_rectangle(733,60,711,300,											$firstpage, $rectparam);
@@ -306,7 +306,7 @@
 		   	$pdf->draw_rectangle(711,60,689,300,											$firstpage, $rectparam);
 		   	$pdf->draw_text(65,  692,  $rakir_row["osoite"],								$firstpage, $kirj);
 		   	$pdf->draw_rectangle(689,60,667,300,											$firstpage, $rectparam);
-		   	$pdf->draw_text(65,  670,  $rakir_row["postino"]."  ".$rakir_row["postitp"],	$firstpage, $kirj);
+		   	$pdf->draw_text(65,  670,  $rakir_row["postino"]."  ".$rakir_row["postitp"]."  ".$rakir_row["maa"],	$firstpage, $kirj);
            	
 		   	//toimitusosoite
 		   	$pdf->draw_rectangle(667,60,645,300,											$firstpage, $rectparam); 
@@ -354,9 +354,9 @@
 		//Lastauspaikka
 		$pdf->draw_rectangle(623,60,535,300,											$firstpage, $rectparam);
 		$pdf->draw_text(62,  617, "Lähtö- ja lastauspaikka",							$firstpage, $norm);
-		$pdf->draw_text(65,  593,  $yhtiorow["postino"]."   ".strtoupper($yhtiorow["postitp"]),		$firstpage, $kirj);
+		$pdf->draw_text(65,  593,  $yhtiorow["postino"]."   ".strtoupper($yhtiorow["postitp"])."   ".strtoupper($yhtiorow["maa"]),		$firstpage, $kirj);
 		$pdf->draw_text(62,  573, "Määräpaikan postinumero ja -toimipaikka",			$firstpage, $norm);
-		$pdf->draw_text(65,  550,  $rakir_row["toim_postino"]." ".strtoupper($rakir_row["toim_postitp"]), $firstpage, $iso);
+		$pdf->draw_text(65,  550,  $rakir_row["toim_postino"]." ".strtoupper($rakir_row["toim_postitp"])."   ".strtoupper($rakir_row["toim_maa"]), $firstpage, $iso);
 	
 		//oikeeta laitaa
 		$pdf->draw_text(302,  617, "Toimituslauseke Leveransklausul",					$firstpage, $norm);

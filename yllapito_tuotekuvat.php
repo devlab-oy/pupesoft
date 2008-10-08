@@ -596,11 +596,12 @@
 			}
 
 			if (count($mul_ext) > 0) {
-				$sel_ext = "('image/".str_replace(',','\',\'image/',implode(",", $mul_ext))."')";
-				if (stristr($sel_ext, 'image/pdf')) {
-					$sel_ext = str_replace('image/pdf', 'application/pdf', $sel_ext);
+				$lisa .= " and (";
+				foreach ($mul_ext as $file_ext) {
+					$lisa .= " liitetiedostot.filename like '%.$file_ext' or";
 				}
-				$lisa .= " and liitetiedostot.filetype in $sel_ext ";
+				$lisa = substr($lisa, 0, -2); // vika "or" pois
+				$lisa .= ")";
 			}
 //			else {
 //				$lisa .= "  and liitetiedostot.filetype like 'image/%' ";

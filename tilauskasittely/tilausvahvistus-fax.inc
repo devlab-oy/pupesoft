@@ -35,9 +35,11 @@ else {
 				if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0) varattu,
 				if(tilausrivi.var in ('J','S'), tilausrivi.jt $lisavarattu, 0) jt,
 				tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv,
-				tilausrivi.nimitys, tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.var
+				".nimitys('select','tilausrivi', $kieli).",
+				tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.var
 				FROM tilausrivi
 				LEFT JOIN tuote USING (yhtio, tuoteno)
+				".nimitys('join','tilausrivi', $kieli)."				
 				WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
 				and tilausrivi.yhtio	 = '$kukarow[yhtio]'
 				ORDER BY tilausrivi.tunnus";

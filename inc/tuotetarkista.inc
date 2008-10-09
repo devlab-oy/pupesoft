@@ -77,7 +77,8 @@ if(!function_exists("tuotetarkista")) {
 				$query = "	SELECT group_concat(distinct concat(\"'\",alkuperamaa,\"'\") separator ','), count(*) kpl
 							FROM tuotteen_toimittajat
 							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$tem_tuoteno'";
+							and tuoteno = '$tem_tuoteno'
+							and alkuperamaa != ''";
 				$sresult = mysql_query($query) or pupe_error($query);
 				$sresrow = mysql_fetch_array($sresult);
 

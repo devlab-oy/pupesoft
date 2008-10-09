@@ -90,7 +90,7 @@
 								SET		alatila = tila, 
 								 		tila = 'D', 
 										muutospvm = now(), 
-										comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." now()')
+										comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ohjelmassa muokkaatilaus.php now()')
 								WHERE	yhtio = '$kukarow[yhtio]'
 								AND		tunnus = $tilausnumero";
 			$result_tarjous = mysql_query($query_tarjous) or pupe_error($query_tarjous);

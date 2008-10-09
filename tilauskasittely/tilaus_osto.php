@@ -120,7 +120,7 @@
 				$sarjares = mysql_query($query) or pupe_error($query);
 			}
 			
-			$query = "UPDATE lasku SET tila='D', alatila='$laskurow[tila]', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+			$query = "UPDATE lasku SET tila='D', alatila='$laskurow[tila]', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ohjelmassa tilaus_osto.php ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$query = "UPDATE kuka SET kesken=0 WHERE session='$session'";

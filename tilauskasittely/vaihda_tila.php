@@ -126,7 +126,7 @@
 				$query = "	update lasku set
 							tila     = 'D',
 							alatila  = tila,
-							comments = '$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ".date("d.m.y @ G:i:s")."'
+							comments = '$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ohjelmassa vaihda_tila.php ".date("d.m.y @ G:i:s")."'
 				 			where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 

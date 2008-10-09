@@ -74,26 +74,29 @@ if(!function_exists("tuotetarkista")) {
 			}
 			else {
 				// haetaan kaikkien toimittajien alkuper‰maat
-				$query = "	SELECT group_concat(distinct concat(\"'\",alkuperamaa,\"'\") separator ',')
+				$query = "	SELECT group_concat(distinct concat(\"'\",alkuperamaa,\"'\") separator ','), count(*) kpl
 							FROM tuotteen_toimittajat
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$tem_tuoteno'";
 				$sresult = mysql_query($query) or pupe_error($query);
 				$sresrow = mysql_fetch_array($sresult);
 
-				// k‰‰nnet‰‰n tullinimike 2 pitk‰sksi numeroksi nollap‰d‰tty
-				$t[$i] = sprintf('%02s', (int) $t[$i]);
+				// jos ei ole yht‰‰n toimittajaa ei voida tehd‰ t‰t‰ testi‰
+				if ($sresrow["kpl"] > 0) {
+					// k‰‰nnet‰‰n tullinimike 2 pitk‰sksi numeroksi nollap‰d‰tty
+					$t[$i] = sprintf('%02s', (int) $t[$i]);
 
-				// kokeillaan n‰ill‰ tiedoilla onko tullinimike1+2 oikein
-				$laskurow["maa_lahetys"] = trim($sresrow[0], "'"); // otetaan eka ja vika hipsu pois, niin ei rikota taricveroperusteet.incci‰
-				$tuorow["tullinimike1"] = $tem_tullinimike1;
-				$tuorow["tullinimike2"] = $t[$i];
-				$tuorow["tuoteno"] = $tem_tuoteno;
+					// kokeillaan n‰ill‰ tiedoilla onko tullinimike1+2 oikein
+					$laskurow["maa_lahetys"] = trim($sresrow[0], "'"); // otetaan eka ja vika hipsu pois, niin ei rikota taricveroperusteet.incci‰
+					$tuorow["tullinimike1"] = $tem_tullinimike1;
+					$tuorow["tullinimike2"] = $t[$i];
+					$tuorow["tuoteno"] = $tem_tuoteno;
 
-				ob_start();
-				require("tilauskasittely/taric_veroperusteet.inc");
-				$virhe[$i] = ob_get_contents();
-				ob_end_clean();
+					ob_start();
+					require("tilauskasittely/taric_veroperusteet.inc");
+					$virhe[$i] = ob_get_contents();
+					ob_end_clean();
+				}
 			}
 		}
 

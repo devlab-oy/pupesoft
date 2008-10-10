@@ -66,8 +66,8 @@ if(!function_exists("tuotetarkista")) {
 		if (mysql_field_name($result, $i) == "tullinimike2" and $tem_tullinimike1 != "") {
 
 			// jos tyhjää laitetaan nollaksi
-			if ($t[$i] == "") $t[$i] = 0;
-
+			if ($t[$i] == "") $t[$i] = "00";
+/* CHECKKI POIS TOISTAISEKSI, LIIAN JYRKKÄ
 			// varmistetaan, että on numeerinen
 			if (!is_numeric($t[$i])) {
 				$virhe[$i] = t("Tullinimike2 tulee olla numeerinen");
@@ -99,6 +99,8 @@ if(!function_exists("tuotetarkista")) {
 					ob_end_clean();
 				}
 			}
+*/
+
 		}
 
 		if (mysql_field_name($result, $i) == "tuotetyyppi") {

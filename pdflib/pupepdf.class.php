@@ -256,6 +256,7 @@ class PDF extends pdffile {
 
 			//	mennään liian leveeksi!
 			if($tw > $wmax) {
+				echo "IIK $tw > $wmax";
 				$s[] = $wmax;
 				return $s;
 			}
@@ -309,6 +310,32 @@ class PDF extends pdffile {
 		$this->draw_paragraph($top,	$left, $bottom, $right,	$txt, $page, $p);
 		
 		$this->lasth = $p["height"];
+	}
+	
+	function drawRectangle($top, $left, $bottom, $right, $font, $page="") {
+		global $fonts;
+ 		
+		if(!is_array($font)) {
+			$p = $fonts[$font];
+		}
+		else {
+			$p = $font;
+		}
+		
+		$right = mm_pt($right);
+		$left = mm_pt($left);
+		$top = mm_pt($top);
+		$bottom = mm_pt($bottom);								
+		
+		if($right == 0) {
+			$right = $this->currentPage["width"]-$this->currentPage["margin-left"]-$this->currentPage["margin-right"];
+		}
+		
+		if(!is_int($page)) {
+			$page = $this->currentPage["oid"];
+		}
+		
+		$this->draw_rectangle($top, $left, $bottom, $right, $page, $p);
 	}
 
 	function writeToTemplate($top, $ln, $left, $right, $txt, $font, $align="", $style="", $template="") {

@@ -136,7 +136,7 @@
 
 	if(!function_exists("color_code")) {
 		// scripti javascript menujen tekemiseen
-		function color_code ($arvo, $maxvalue) {
+		function color_code ($arvo, $maxvalue, $values="") {
 			$porras = 200/$maxvalue;
 			if($arvo < 0) $arvo = 0;
 			if($arvo > $maxvalue) $arvo = $maxvalue;
@@ -157,7 +157,12 @@
 			$g = floor($g);
 
 			// filter: alpha(opacity=60);-moz-opacity:.60;opacity:.60;
-			return "rgba($r,$g, 0, 0.4);";
+			if($values == 0) {
+				return "rgba($r,$g, 0, 0.4);";
+			}
+			else {
+				return array("red" => ($r/255), "green" => ($g/255), "blue" => 0, "alpha" => 0.4);
+			}			
 		}
 	}
 
@@ -349,7 +354,7 @@
 				$row = mysql_fetch_array($res);
 				//var_dump($kalenteri);
 				$otsikko = kaletapaKaannos($row["tapa"], "fi", $kukarow["kieli"]);
-				
+				$row["otsikko"] = $otsikko;
 				$row["viesti"] = stripslashes($row["viesti"]);
 
 				$popup_otsikko = "<table>
@@ -495,8 +500,15 @@
 					}
 				}				
 				
+				$row["otsikko"] = $viesti;
+				
 				//list($viesti, $poppari) = lyhytviesti($row["tunnus"]." ".$viesti."\nviite: {$row["viesti"]}\n\n{$row["comments"]}", strlen($row["tunnus"]));
-				$row["viesti"] = " <a href='#' onclick=\"popUp(event, 'toimitus', '300', '-20', '../raportit/asiakkaantilaukset.php?tee=NAYTA&toim=$atoim&h&tunnus=$row[tunnus]'); return false;\" class='kale' $poppari>$viesti</a>";
+				if(file_exists("../raportit/asiakkaantilaukset.php")) {
+					$row["viesti"] = " <a href='#' onclick=\"popUp(event, 'toimitus', '300', '-20', '../raportit/asiakkaantilaukset.php?tee=NAYTA&toim=$atoim&h&tunnus=$row[tunnus]'); return false;\" class='kale' $poppari>$viesti</a>";
+				}
+				else {
+					$row["viesti"] = " <a href='#' onclick=\"popUp(event, 'toimitus', '300', '-20', 'raportit/asiakkaantilaukset.php?tee=NAYTA&toim=$atoim&h&tunnus=$row[tunnus]'); return false;\" class='kale' $poppari>$viesti</a>";
+				}
 				
 			}
 			elseif($laji == "liite") {
@@ -935,10 +947,23 @@
 		}
 	}
 	
+	if($kaletee == "printPDF") {
+		require_once('pdflib/pupepdf.class.php');
+
+		$fonts["snadi"]['height']	= 9;
+		$fonts["snadi"]['font']		= "Helvetica";
+
+		$fonts["norm"]['height']	= 10;
+		$fonts["norm"]['font']		= "Helvetica";
+
+		$fonts["BIG"]['height']		= 14;
+		$fonts["BIG"]['font']		= "Helvetica";	
+	}
+	
 	//	Luodaan kalenterin‰kymi‰ annetusta datasta
 	if(!function_exists("kalenteri")) {
 		function kalenteri ($data) {
-			global $kukarow, $yhtiorow, $nakyma, $kaleaika;
+			global $kukarow, $yhtiorow, $nakyma, $kaleaika, $kaletee;
 			
 			//echo "<hr>data:<pre>".print_r($data, true)."</pre>";
 			$kalenteri = muistista("kalenteri", "kalenteri");
@@ -1075,6 +1100,7 @@
 			
 			if(in_array("projektitapahtuma", $kalenteri["kalenteri_tyypit"])) {
 				$menu[] = array("TEKSTI" => t("Lis‰‰ projektitapahtuma"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=projektitapahtuma&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+				$menu[] = array("TEKSTI" => t("Tulosta kalenteri"),					"HREF" => "$kalenteri[URL]?kaletee=printPDF&tyyppi=projektitapahtuma&nayta_pdf=1".url_params($kalenteri), "TARGET" => "_blank");
 			}
 			
 			//$menu[] = array("TEKSTI" => "Lis‰‰ merkint‰",			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Merkinta&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
@@ -1132,11 +1158,11 @@
 				}
 				
 				//	T‰n viikon eka p‰iv‰
-				if(date("N", $kaleaika)>0) {
-					$maanantai = strtotime("-2 monday", $kaleaika);
-				}
-				elseif(date("N", $kaleaika)==1) {
+				if(date("N", $kaleaika) == 1) {
 					$maanantai = $kaleaika;
+				}
+				elseif(date("N", $kaleaika)<1) {
+					$maanantai = strtotime("-1 monday", $kaleaika);
 				}
 				else {
 					$maanantai = strtotime("+1 monday", $kaleaika);
@@ -1259,7 +1285,7 @@
 						<div style='float: left; position: relative; left: 20px;'>$kalejako</div>";
 			}
 			elseif(in_array($nakyma, array("RIVINAKYMA_PAIVA", "RIVINAKYMA_VIIKKO"))) {
-
+				
 				//	K‰sitell‰‰n maksimiajankohta
 				$query = " SELECT DATEDIFF('".date("Y-m-d", $data["tiedot"]["loppustr"])."', '".date("Y-m-d", $data["tiedot"]["alkustr"])."') paivia";
 				$abures = mysql_query($query) or pupe_error($query);
@@ -1268,11 +1294,11 @@
 				$kaleaika = $data["tiedot"]["alkustr"];
 
 				//	T‰n viikon eka p‰iv‰
-				if(date("N", $kaleaika)>0) {
-					$maanantai = strtotime("-1 monday", $kaleaika);
-				}
-				elseif(date("N", $kaleaika)==1) {
+				if(date("N", $kaleaika) == 1) {
 					$maanantai = $kaleaika;
+				}
+				elseif(date("N", $kaleaika)<1) {
+					$maanantai = strtotime("-1 monday", $kaleaika);
 				}
 				else {
 					$maanantai = strtotime("+1 monday", $kaleaika);
@@ -1294,12 +1320,52 @@
 				else {
 					$paivia = ($aburow["paivia"]/7)+1;
 				}
-
+				
+				$dataByEvent = array();
+				foreach($data["lista"] as $date => $events) {
+					foreach($events as $key => $event) {
+						
+						if($nakyma == "RIVINAKYMA_PAIVA") {
+							$dataByEvent[$event["laji_tark"].$event["tunnus"]][$date] = $event;
+						}
+						else {
+							$dataByEvent[$event["laji_tark"].$event["tunnus"]][strtotime("monday", $date)] = $event;
+						}
+					}
+				}
+				
 				//	Tehd‰‰n otsikot
 				$kale .= "
 				<div style='float: left;'>
 				<table>
 				<tr><td class='back'></td>";
+				
+				if($kaletee == "printPDF") {					
+					//	Meid‰n pit‰‰ tehd‰ taulukko t‰t‰ varten, samalla selvi‰‰ mink‰ kokoinen sivu pit‰‰ olla
+					$pdfCellWidth = 20;
+					$pageWidth = (($paivia+2) * mm_pt($pdfCellWidth)) + mm_pt(50)+100;
+					$pageHeight = count(dataByEvent) * mm_pt(10) + 200;
+					
+					$pdf = new pdf;
+					$pdf->addPage($pageWidth."x".$pageHeight);
+
+					$pdf->set_default('margin-top', 	mm_pt(10));
+					$pdf->set_default('margin-bottom', 	mm_pt(10));
+					$pdf->set_default('margin-left', 	0);
+					$pdf->set_default('margin-right',	0);
+
+					//tehd‰‰n sarakkeet jotta piirt‰minen on snadisti helpompaa
+					$sarray = array_fill(0,$paivia+1, $pdfCellWidth);
+					array_unshift($sarray, "50");
+					$sarakkeet = $pdf->teeSarakkeet($sarray);
+
+					//echo "leveys: $pageWidth korkeus: $pageHeight<br>";
+
+					$h = $pdf->pt_mm($pageHeight) - 30;
+
+					$pdf->write($h, 1, 0, 0, t("PROJEKTIKALENTERI")." - ".$kalenteri["tunnusnippu"], "BIG", "C", "B");
+					$h-=20;
+				}
 				
 				$d = 0;
 				for($i=0;$i<$paivia;$i++) {
@@ -1332,34 +1398,32 @@
 						}
 						
 						$kale .= "<th style = 'text-align: center; width: 60px;'>".t($day)." ".date("d.m.", strtotime("+$i days", $maanantai))."</th>";
+
+						if($kaletee == "printPDF") {
+							$pdf->write($h, 1, $sarakkeet[$i], $sarakkeet[($i+1)], t($day)." ".date("d.m.", strtotime("+$i days", $maanantai)), "norm", "C", "");
+						}
 						
 						$d++;
 					}
 					else {
 						$kale .= "<th style = 'text-align: center; width: 25px;'>".date("W", strtotime("+$i weeks", $maanantai))."</th>";
+						
+						if($kaletee == "printPDF") {
+							$pdf->write($h, 1, $sarakkeet[$i], $sarakkeet[$i+1], date("W", strtotime("+$i weeks", $maanantai)), "norm", "C", "");
+						}
+						
 					}
+				}
+				
+				if($kaletee == "printPDF") {
+					$h-=$pdf->ln(0.5);
 				}
 				
 				$kale .= "	</tr>";	
 				
 				$leveys = $paivia;
 				$height = 15;
-				
-				//echo "<pre>data: ".print_r($data, true)."</pre><br>";				
-				$dataByEvent = array();
-				foreach($data["lista"] as $date => $events) {
-					foreach($events as $key => $event) {
-						
-						if($nakyma == "RIVINAKYMA_PAIVA") {
-							$dataByEvent[$event["laji_tark"].$event["tunnus"]][$date] = $event;
-						}
-						else {
-							$dataByEvent[$event["laji_tark"].$event["tunnus"]][strtotime("monday", $date)] = $event;
-						}
-					}
-				}
-				//echo "<pre>dataByEvent".print_r($dataByEvent, true)."</pre><br>";
-				
+								
 				foreach($dataByEvent as $event) {
 					
 					$e = &current($event);
@@ -1367,11 +1431,24 @@
 					$lisatiedot = hae_lisatiedot(current($event), 0);
 					//echo "<pre>lisatiedot: ".print_r($lisatiedot, true)."</pre><br>";
 					//echo "<pre>lisatiedot: ".print_r($e, true)."</pre><br>";
+					
+					
+					
 					if($e["laji_tark"] == "kalenteri") {
 						$kale .= "<tr class='aktiivi'><td NOWRAP>$lisatiedot[viesti], $lisatiedot[kuka_nimi]</td>";
+						
+						if($kaletee == "printPDF") {
+							$h-=$pdf->ln();
+							$pdf->write($h, 1, 0, $sarakkeet[0], "$lisatiedot[otsikko], $lisatiedot[kuka_nimi]", "norm", "L", "");
+						}
 					}
 					else {
 						$kale .= "<tr class='aktiivi'><th NOWRAP>$lisatiedot[viesti]</th>";
+						
+						if($kaletee == "printPDF") {
+							$h-=$pdf->ln();
+							$pdf->write($h, 1, 0, $sarakkeet[0], $lisatiedot["otsikko"], "norm", "L", "");
+						}
 					}
 
 					$tcolor = array();
@@ -1388,7 +1465,7 @@
 							$color = "rgba(252,245,22,0.5)";
 						}
 						else {
-							$color = "inherit";				
+							$color = "inherit";
 						}
 						
 						$stylelisa = "";
@@ -1399,6 +1476,7 @@
 							$row = $event[$aikastr];
 							if(!isset($tcolor[$row["tunnus"]])) {
 								$tcolor[$row["tunnus"]] = color_code(count($tcolor)*13+55, 100);
+								$colorRGPFill = color_code(count($tcolor)*13+55, 100, 1);
 							}
 							
 							$stylelisa = "background-color: ".$tcolor[$row["tunnus"]];
@@ -1406,11 +1484,28 @@
 							if(($nakyma == "RIVINAKYMA_PAIVA" and $row["aika"] == $aikastr) or ($nakyma == "RIVINAKYMA_VIIKKO" and strtotime("monday", $row["aika"]) == $aikastr)) {
 								$ulos = $lisatiedot["viesti"];
 							}
+							
+							if($kaletee == "printPDF") {
+
+								$param["width"] = 1; // PDF units
+								$param["strokecolor"] = $pdf->get_color('black');
+								$param["fillcolor"] = $colorRGPFill;
+								$param["mode"] = "fill+stroke";
+								$pdf->drawRectangle($h, $sarakkeet[$i], ($h-$pdf->ln()), $sarakkeet[($i+1)], $param);
+							}
+							
 						}
 						else {
+							if($kaletee == "printPDF") {
+								$param["width"] = 1; // PDF units
+								$param["strokecolor"] = $pdf->get_color('black');
+								$param["fillcolor"] = $pdf->get_color('white');
+								$param["mode"] = "fill+stroke";
+								$pdf->drawRectangle($h, $sarakkeet[$i], ($h-$pdf->ln()), $sarakkeet[($i+1)], $param);
+							}
 							$ulos = "&nbsp;";
 						}
-
+						
 						$kale .= "	<td height = '$height' style='background-color: $color; $stylelisa'>
 										$ulos
 									</td>";
@@ -1438,6 +1533,12 @@
 						</table>
 						</div>
 						<div style='float: left; position: relative; left: 20px;'>$kalejako</div>";
+						
+				if($kaletee == "printPDF") {
+					$pdffilenimi = "/tmp/projektikalenteri.pdf";
+					
+					die($pdf->generate());
+				}
 			}
 			elseif($nakyma == "TAPAHTUMALISTAUS") {
 				
@@ -1511,11 +1612,11 @@
 					$w		= 100;					
 					
 					//	T‰n viikon eka p‰iv‰
-					if(date("N", $kaleaika)>0) {
-						$maanantai = strtotime("-1 monday", $kaleaika);
-					}
-					elseif(date("N", $kaleaika)==1) {
+					if(date("N", $kaleaika) == 1) {
 						$maanantai = $kaleaika;
+					}
+					elseif(date("N", $kaleaika)<1) {
+						$maanantai = strtotime("-1 monday", $kaleaika);
 					}
 					else {
 						$maanantai = strtotime("+1 monday", $kaleaika);

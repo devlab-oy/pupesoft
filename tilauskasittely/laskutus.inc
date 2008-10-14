@@ -152,6 +152,7 @@ else {
 				if ($turow["sarjanumeroseuranta"] == "E" or $turow["sarjanumeroseuranta"] == "F") {
 					if ($trow["varattu"] > 0) {
 
+						// Haetaan eka er‰tiedot
 						$query = "	SELECT ostorivitunnus, myyntirivitunnus, sarjanumero
 									FROM sarjanumeroseuranta
 									WHERE yhtio			 = '$kukarow[yhtio]'
@@ -163,23 +164,140 @@ else {
 
 						if ($lisa_row["ostorivitunnus"] != $lisa_row["myyntirivitunnus"]) {
 							// Normikeissi jossa er‰ on jo tuloutettu
-							$query = "	UPDATE sarjanumeroseuranta
-										SET era_kpl = era_kpl-$trow[varattu]
-										WHERE yhtio 			= '$kukarow[yhtio]'
-										and tuoteno				= '$trow[tuoteno]'
-										and ostorivitunnus 		= '$lisa_row[ostorivitunnus]'
-										and myyntirivitunnus 	= 0
-										and sarjanumero 		= '$lisa_row[sarjanumero]'
-										LIMIT 1";
-							$lisa_res = mysql_query($query) or pupe_error($query);
 
-							$query = "	UPDATE sarjanumeroseuranta
-										SET era_kpl = era_kpl+$trow[varattu]
-										WHERE yhtio			 = '$kukarow[yhtio]'
-										and tuoteno			 = '$trow[tuoteno]'
-										and myyntirivitunnus = '$trow[tunnus]'
-										LIMIT 1";
-							$lisa_res = mysql_query($query) or pupe_error($query);
+							// luodaan muuttuja jota pienennet‰‰n luupissa
+							$eraayht=$trow["varattu"];
+
+							// luupataan niin kauan kuin tarvitaan jotta kaikki varatut on hanskattu
+							while ($eraayht > 0) {
+
+								// koitetaan lˆyt‰‰ vapaita ostettuja eri‰ mit‰ myyd‰
+								$query =   "SELECT era_kpl, tunnus, ostorivitunnus
+											FROM sarjanumeroseuranta
+											WHERE yhtio 			= '$kukarow[yhtio]'
+											and tuoteno				= '$trow[tuoteno]'
+											and ostorivitunnus 		> 0
+											and myyntirivitunnus 	= 0
+											and sarjanumero 		= '$lisa_row[sarjanumero]'
+											and era_kpl 			> 0
+											and hyllyalue   		= '$trow[hyllyalue]'
+											and hyllynro    		= '$trow[hyllynro]'
+											and hyllyvali   		= '$trow[hyllyvali]'
+											and hyllytaso   		= '$trow[hyllytaso]'
+											ORDER BY era_kpl DESC, tunnus 
+											LIMIT 1";
+								$erajaljella_res = mysql_query($query) or pupe_error($query);
+
+								// jos lˆytyy ostettuja eri‰ myyt‰v‰ks niin menn‰‰n t‰nne
+								if (mysql_num_rows($erajaljella_res) == 1) {
+									$erajaljella_row = mysql_fetch_array($erajaljella_res);
+
+									// luodaan muuttuja jossa annetaan kyselyille m‰‰r‰muutoksen
+									$eravahennetaan = 0;
+
+									// jos lˆydetyn er‰n m‰‰r‰ riitt‰‰ koko tarvittavaan m‰‰r‰‰n niin pannaan kaikki haisemaan
+									if ($erajaljella_row["era_kpl"] >= $eraayht) {
+										$eravahennetaan = $eraayht;
+										$lisataanrivi = "";
+									}
+									// muuten vaan lˆydetyn er‰n verran
+									else {
+										$eravahennetaan = $erajaljella_row["era_kpl"];
+										$lisataanrivi = "KYLLAKIITOS";
+									}
+
+									// v‰hennet‰‰n ostorivilt‰ tarvittava m‰‰r‰
+									$query = "	UPDATE sarjanumeroseuranta
+												SET era_kpl 			= era_kpl-$eravahennetaan,
+												muutospvm				= now(),
+												muuttaja				= '$kukarow[kuka]'
+												WHERE yhtio 			= '$kukarow[yhtio]'
+												and tuoteno				= '$trow[tuoteno]'
+												and ostorivitunnus 		= '$erajaljella_row[ostorivitunnus]'
+												and myyntirivitunnus 	= 0
+												and sarjanumero 		= '$lisa_row[sarjanumero]'
+												and tunnus				= '$erajaljella_row[tunnus]'
+												LIMIT 1";
+									$lisa_res = mysql_query($query) or pupe_error($query);
+
+									// haetaan p‰ivitett‰v‰ myyntirivi jotta voidaan kloonata se myˆhemmin tarvittaessa
+									$query = 	"SELECT * FROM sarjanumeroseuranta
+												WHERE yhtio			 = '$kukarow[yhtio]'
+												and tuoteno			 = '$trow[tuoteno]'
+												and myyntirivitunnus = '$trow[tunnus]'
+												and era_kpl			 = 0
+												LIMIT 1";
+									$erahakures = mysql_query($query) or pupe_error($query);
+									$erahakurow = mysql_fetch_array($erahakures);						
+
+									// lis‰t‰‰n myyntiriville sama m‰‰r‰, ja samalla p‰ivitet‰‰n ostorivitunnus oikeaksi
+									$query = "	UPDATE sarjanumeroseuranta
+												SET era_kpl			 = era_kpl+$eravahennetaan,
+												ostorivitunnus		 = '$erajaljella_row[ostorivitunnus]',
+												muutospvm			 = now(),
+												muuttaja			 = '$kukarow[kuka]'
+												WHERE yhtio			 = '$kukarow[yhtio]'
+												and tunnus 			 = '$erahakurow[tunnus]'
+												LIMIT 1";
+									$lisa_res = mysql_query($query) or pupe_error($query);
+
+									// lis‰t‰‰n uusi kloonattu rivi
+									if ($lisataanrivi != '') {
+										$query = "INSERT INTO sarjanumeroseuranta values (";
+										for ($ikentta=0; $ikentta < mysql_num_fields($erahakures)-1; $ikentta++) {
+											if (mysql_field_name($erahakures,$ikentta) == 'laatija') {
+												$query .= "'".$kukarow["kuka"]."',";
+											}
+											elseif (mysql_field_name($erahakures,$ikentta) == 'luontiaika') {
+												$query .= "now(),";
+											}
+											else {
+												$query .= "'".$erahakurow[$ikentta]."',";
+											}	
+										}
+										$query .= "0)";
+
+										$lisa_res = mysql_query($query) or pupe_error($query);
+									}
+
+									// v‰hennet‰‰n luupattavaa m‰‰r‰‰ 
+									$eraayht -= $eravahennetaan;
+								}
+								// Ei lˆytynyt (en‰‰n) ostettuja eri‰, eli "myyty pakkaselle" niin luodaan uusi er‰rivi jossa ostorivitunnus on nolla jonne laitetaan loppum‰‰r‰.
+								else {
+
+									$query = "	INSERT into sarjanumeroseuranta
+												SET yhtio 		= '$kukarow[yhtio]',
+												tuoteno			= '$trow[tuoteno]',
+												myyntirivitunnus= 0,
+												ostorivitunnus 	= '$trow[tunnus]',
+												era_kpl			= '0',
+												laatija			= '$kukarow[kuka]',
+												luontiaika		= now(),
+												hyllyalue   	= '$trow[hyllyalue]',
+												hyllynro    	= '$trow[hyllynro]',
+												hyllyvali   	= '$trow[hyllyvali]',
+												hyllytaso   	= '$trow[hyllytaso]',
+												sarjanumero 	= '$lisa_row[sarjanumero]'";
+									$lisa_res = mysql_query($query) or pupe_error($query);
+
+									$query = "	UPDATE sarjanumeroseuranta
+												SET era_kpl			 = $eraayht,
+												ostorivitunnus		 = '$trow[tunnus]',
+												muutospvm			 = now(),
+												muuttaja			 = '$kukarow[kuka]'
+												WHERE yhtio			 = '$kukarow[yhtio]'
+												and tuoteno			 = '$trow[tuoteno]'
+												and myyntirivitunnus = '$trow[tunnus]'
+												and era_kpl			 = 0
+												LIMIT 1";
+									$lisa_res = mysql_query($query) or pupe_error($query);
+
+									// v‰hennet‰‰n luupattavaa m‰‰r‰‰ 
+									$eraayht = 0;
+
+								}
+							}
 						}
 						else {
 							// Laskutetaan vaikka ei olla viel‰ ostettu

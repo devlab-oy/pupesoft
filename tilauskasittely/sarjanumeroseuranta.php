@@ -416,7 +416,11 @@
 		$sarjares = mysql_query($query) or pupe_error($query);
 
 		if ($insok == "OK" and mysql_num_rows($sarjares) == 0) {
-
+			
+			if ($rivirow["sarjanumeroseuranta"] == "E") {
+				$sarjanumero = strtoupper($sarjanumero);
+			}
+			
 			//jos ollaan syötetty kokonaan uusi sarjanuero
 			$query = "	INSERT into sarjanumeroseuranta
 						(yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty, era_kpl, laatija, luontiaika, takuu_alku, takuu_loppu, hyllyalue, hyllynro, hyllyvali, hyllytaso)

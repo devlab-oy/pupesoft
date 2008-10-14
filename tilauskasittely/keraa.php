@@ -145,6 +145,7 @@
 					}
 				}
 				else {
+					/*
 					$query = "	SELECT count(*) kpl
 								FROM sarjanumeroseuranta
 								WHERE yhtio = '$kukarow[yhtio]'
@@ -154,9 +155,10 @@
 					$sarjarow = mysql_fetch_array($sarjares2);
 
 					if ($sarjarow["kpl"] != 1) {
-						echo "<font class='error'>".t("Er‰numeroseurannassa oleville tuotteille on liitett‰v‰ er‰numero ennen ker‰yst‰")."! ".t("Tuote").": $toimrow[tuoteno].</font><br>";
+						//echo "<font class='error'>".t("Er‰numeroseurannassa oleville tuotteille on liitett‰v‰ er‰numero ennen ker‰yst‰")."! ".t("Tuote").": $toimrow[tuoteno].</font><br>";
 						$keraysvirhe++;
 					}
+					*/
 
 					// Muutetaanko er‰seurattavan tuotteen kappalem‰‰r‰‰
 					if (trim($maara[$toimrow["tunnus"]]) != '') {
@@ -221,11 +223,20 @@
 											and hyllynro    = '$myy_hyllynro'
 											and hyllytaso   = '$myy_hyllytaso'
 											and hyllyvali   = '$myy_hyllyvali'
-											and sarjanumero = '$myy_era'";
+											and sarjanumero = '$myy_era'
+											and myyntirivitunnus = 0
+											and ostorivitunnus > 0
+											LIMIT 1";
 								$lisa_res = mysql_query($query) or pupe_error($query);
-								$lisa_row = mysql_fetch_array($lisa_res);
-
-								$oslisa = " ostorivitunnus ='$lisa_row[ostorivitunnus]', ";
+								
+								if (mysql_num_rows($lisa_res) > 0) {
+									$lisa_row = mysql_fetch_array($lisa_res);
+									$oslisa = " ostorivitunnus ='$lisa_row[ostorivitunnus]', ";
+								}
+								else {
+									$oslisa = " ostorivitunnus ='', ";
+								}
+								
 							}
 							else {
 								$tunken = "ostorivitunnus";
@@ -261,6 +272,19 @@
 							$lisa_res = mysql_query($query) or pupe_error($query);
 						}
 
+						$keraysvirhe++;
+					}
+				
+					$query = "	SELECT count(*) kpl
+								FROM sarjanumeroseuranta
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$toimrow[tuoteno]'
+								and myyntirivitunnus = '$toimrow[tunnus]'";
+					$sarjares2 = mysql_query($query) or pupe_error($query);
+					$sarjarow = mysql_fetch_array($sarjares2);
+
+					if ($sarjarow["kpl"] != 1) {
+						echo "<font class='error'>".t("Er‰numeroseurannassa oleville tuotteille on liitett‰v‰ er‰numero ennen ker‰yst‰")."! ".t("Tuote").": $toimrow[tuoteno].</font><br>";
 						$keraysvirhe++;
 					}
 				}
@@ -682,6 +706,14 @@
 											nimitys 	= '$tilrivirow[nimitys]',
 											jaksotettu	= '$tilrivirow[jaksotettu]'";
 								$riviresult = mysql_query($querys) or pupe_error($querys);
+								
+								$queryera = "SELECT sarjanumeroseuranta FROM tuote WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tilrivirow[tuoteno]'";
+								$sarjares2 = mysql_query($queryera) or pupe_error($queryera);
+								$erarow = mysql_fetch_array($sarjares2);
+								
+								if ($erarow['sarjanumeroseuranta'] == 'E' or $erarow['sarjanumeroseuranta'] == 'F') {
+										echo "<font class='error'>".t("Er‰numeroseurannassa oleville tuotteille on liitett‰v‰ er‰numero ennen ker‰yst‰")."! ".t("Tuote").": $tilrivirow[tuoteno].</font><br>";
+								}
 							}
 
 							//p‰ivitet‰‰n tuoteperheiden saldottomat j‰senet oikeisiin m‰‰riin (ne voi olla alkuper‰isell‰kin l‰hetteell‰ == vanhatunnus)
@@ -1738,9 +1770,9 @@
 				   		$sarjarow = mysql_fetch_array($sarjares);
 
 						echo t("Er‰").": ";
-
+						
 						while($alkurow = mysql_fetch_array($omavarastores)) {
-
+							
 							if ($alkurow["hyllyalue"] != "!!M" and
 								($alkurow["varastotyyppi"] != "E" or
 								$laskurow["varasto"] == $alkurow["varasto"] or

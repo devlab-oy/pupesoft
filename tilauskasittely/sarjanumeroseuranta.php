@@ -745,7 +745,11 @@
 	if ($nimitys_haku != "") {
 		$lisa2 = " HAVING nimitys like '%$nimitys_haku%' ";
 	}
-
+	
+	if ($rivirow["sarjanumeroseuranta"] == "E" and $from == "KERAA") {
+		$lisa .= " and sarjanumeroseuranta.era_kpl > 0 ";
+	}
+	
 	$query	= "	SELECT sarjanumeroseuranta.*,
 				if(sarjanumeroseuranta.lisatieto = '', if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), concat(if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
 				lasku_osto.tunnus									osto_tunnus,
@@ -1201,8 +1205,8 @@
 		$formi	= "haku";
 		$kentta = "sarjanumero_haku";
 	}
-
-	if ($rivirow["tuoteno"] != '') {
+	
+	if ($rivirow["tuoteno"] != '' and ($rivirow["sarjanumeroseuranta"] != "U" or ($from != "PIKATILAUS" and $from != "RIVISYOTTO"))) {
 		echo "	<form name='sarjaformi' action='$PHP_SELF' method='post'>
 				<input type='hidden' name='$tunnuskentta' 		value='$rivitunnus'>
 				<input type='hidden' name='from' 				value='$from'>
@@ -1300,6 +1304,7 @@
 					$sarjanumero = $sarjanumero."-1";
 				}
 			}
+			
 
 			echo "<br><table>";
 			echo "<tr><th colspan='2'>".t("Lis‰‰ uusi sarjanumero")."</th></tr>";

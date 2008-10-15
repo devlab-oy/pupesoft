@@ -333,11 +333,16 @@
 					AND liitos='myyntilasku'
 					AND liitostunnus='$laskurow[tunnus]'";
 	$liiteres = mysql_query($liitequery) or pupe_error($liitequery);
-	$liiterow = mysql_fetch_array($liiteres);
 
 	if (mysql_num_rows($liiteres) > 0) {
-		$kuvapalvelin = substr($palvelin2, 0, -1);
-		echo "<tr><th>".t("Liitetiedosto")."</th><td colspan='8'><a href='$kuvapalvelin/view.php?id=$liiterow[tunnus]' target='_blank'>".t("Näytä")."</a></td></tr>";
+		$liitemaara = 1;
+		echo "<tr><th>".t("Liitetiedosto")."</th><td colspan='8'>";
+		while ($liiterow = mysql_fetch_array($liiteres)) {
+			$kuvapalvelin = substr($palvelin2, 0, -1);
+			echo "<a href='$kuvapalvelin/view.php?id=$liiterow[tunnus]' target='_blank'>".t("Liite")." $liitemaara</a> ";
+			$liitemaara++;
+		}
+		echo "</td></tr>";
 	}
 
 	if ($laskurow["tila"] == 'K') {

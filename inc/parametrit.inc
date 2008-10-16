@@ -441,13 +441,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";
 			echo "</head>";
 
-			if(isset($suljeYllapito) and $suljeYllapito != "") {
-				$body_js="onblur='window.close();'";
-			}
-			else {
-				$body_js="";
-			}
-			echo "<body $body_js>";
+			echo "<body>";
 
 			if (basename($phpnimi) != 'indexvas.php' and $_GET["ohje"] != "off") {
 				if (isset($toim) and $toim != '') {

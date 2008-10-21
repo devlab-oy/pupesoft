@@ -171,7 +171,8 @@
 		}
 		echo "</select> - <select name='kustp2'><option value=' '>".t("Ei valintaa");
 
-		mysql_data_seek($vresult,0);
+		if (mysql_num_rows($vresult) > 0)  mysql_data_seek($vresult,0);
+		
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['tunnus'] or $kustp2 == $vrow["tunnus"]) {

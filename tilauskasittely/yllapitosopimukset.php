@@ -250,8 +250,8 @@
 				FROM lasku
 				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and
 										laskun_lisatiedot.otunnus = lasku.tunnus and
-										laskun_lisatiedot.sopimus_alkupvm <= now() and
-										(laskun_lisatiedot.sopimus_loppupvm >= now() or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
+										laskun_lisatiedot.sopimus_alkupvm <= date_add(now(), interval 1 month) and
+										(laskun_lisatiedot.sopimus_loppupvm >= date_sub(now(), interval 1 month) or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
 				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = '0')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
 				lasku.tila = '0' and

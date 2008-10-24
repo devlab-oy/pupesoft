@@ -68,8 +68,24 @@ else {
 			// Valitaan myyntitili, t‰ss‰ on marginaalimyynti‰
 			$selite = "Marginaaliverolasku/Myynti ". $lasku['nimi']." ".$lasku['nimitark'];
 
+			// t‰ss‰ on kaikki marginaali-myyntitilausrivit
+			$query = "	SELECT * 
+						FROM tilausrivi
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tunnus IN ($xrow[tunnukset])";
+			$marginaali_myyntirivitres = mysql_query($query) or pupe_error($query);
+
+			// lasketaan kaikkien marginaalituotteiden ostohinnnat yhteen
+			$marginaali_ostohinta = 0;
+			while ($marginaali_myyntirivi = mysql_fetch_array($marginaali_myyntirivitres)) {
+				$marginaali_ostohinta += round(sarjanumeron_ostohinta("myyntirivitunnus", $marginaali_myyntirivi["tunnus"], "EIKULULASKUJA") * $marginaali_myyntirivi["kpl"], 6);
+			}
+
+			// lasketaan alv-laskennallisesti marginaalituotteille oikea "kate"
+			$marginaali_kate = $xrow['summa'] - $marginaali_ostohinta;
+
 			//Tilioidaan veroton osuus marginaalimyynnist‰
-			$tiliointisumma = $xrow['summa'] - $xrow['kate'];
+			$tiliointisumma = $xrow['summa'] - $marginaali_kate;
 
 			//T‰h‰n ei osata parempaa valuuttasummaa keksi‰, pit‰‰ k‰‰nt‰‰ kurssilla
 			$tiliointisumma_valuutassa = round($tiliointisumma / $lasku['vienti_kurssi'], 2);
@@ -103,8 +119,8 @@ else {
 			$tilino_eu 		= (int) $xrow['tilino_eu'];
 			$tilino_ei_eu 	= (int) $xrow['tilino_ei_eu'];
 
-			$tiliointisumma = $xrow['kate']; //Myynnin marginaali
-			$tiliointisumma_valuutassa = round($xrow['kate'] / $lasku['vienti_kurssi'], 2); //Myynnin marginaali valuutassa (paras arvaus on k‰‰nt‰‰ kurssilla)
+			$tiliointisumma = $marginaali_kate;
+			$tiliointisumma_valuutassa = round($marginaali_kate / $lasku['vienti_kurssi'], 2); //Myynnin marginaali valuutassa (paras arvaus on k‰‰nt‰‰ kurssilla)
 
 			$lukko			= "1";
 			$xrow['alv'] 	= $xrow['alv'] - 500; //Poistetaan 500 yksikkˆ‰ alvista

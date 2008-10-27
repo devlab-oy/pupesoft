@@ -313,20 +313,16 @@ if($tee == "SYOTA") {
 
 	$lisays .= "</select></td>";
 
-	$query = "	SELECT selite, selitetark
-				FROM avainsana
-				WHERE yhtio = '$kukarow[yhtio]' and laji = 'KALETAPA'
-				ORDER BY selite";
-	$vresult = mysql_query($query) or pupe_error($query);
+	$vresult = avainsana("KALETAPA", $kukarow["kieli"]);
 
-	$lisays .= "<tr><td>Tapa:</td><td><select name='tapa'>";
+	$lisays .= "<tr><td>".t("Tapa").":</td><td><select name='tapa'>";
 
-	while ($vrow=mysql_fetch_row($vresult)) {
+	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
- 		if ($tapa == $vrow[1]) {
+ 		if ($tapa == $vrow["selitetark"]) {
 			$sel = "selected";
 		}
-		$lisays .= "<option value = '$vrow[1]' $sel>$vrow[1]";
+		$lisays .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark]</option>";
 	}
 	$lisays .= "</select></td></tr>";
 

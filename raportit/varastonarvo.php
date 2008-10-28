@@ -542,7 +542,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 		echo "<td align='right'>",str_replace(".",",",sprintf("%.2f",$bvarvo)),"</td></tr>";
 
 		// jos on lisärajauksia ei tehdä historiaa
-		if ($merkkilisa1 == "") {
+		if ($merkkilisa1 == "EI NÄYTETÄ KOSKAAN, KOSKA ANTAA NIIN VÄÄRIÄ LUKUJA") {
 
 			// tuotteen varastonarvon muutos
 			$query  = "	SELECT date_format(laadittu, '%Y-%m') kausi, sum(kpl * if(laji in ('tulo', 'valmistus'), kplhinta, hinta)) muutos, date_format(laadittu, '%Y') yy, date_format(laadittu, '%m') mm

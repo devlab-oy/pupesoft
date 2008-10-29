@@ -485,21 +485,24 @@
 							}
 						}
 
-						$query = "	SELECT sum(if(ifnull(tilausrivi.rivihinta, 0) = 0, 1, 0)) ei_ostohintaa
-									FROM sarjanumeroseuranta
-									LEFT JOIN tilausrivi use index (PRIMARY) ON (tilausrivi.yhtio = sarjanumeroseuranta.yhtio and tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus)
-									WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-									and sarjanumeroseuranta.tuoteno = '$srow1[tuoteno]'
-									and sarjanumeroseuranta.$tunken = '$srow1[tunnus]'
-									and sarjanumeroseuranta.kaytetty = 'K'";
-						$sarres = mysql_query($query) or pupe_error($query);
-						$srow2 = mysql_fetch_array($sarres);
+						// ollaan tekemässä myyntiä
+						if ($tunken == "myyntirivitunnus") {
+							$query = "	SELECT sum(if(ifnull(tilausrivi.rivihinta, 0) = 0, 1, 0)) ei_ostohintaa
+										FROM sarjanumeroseuranta
+										LEFT JOIN tilausrivi use index (PRIMARY) ON (tilausrivi.yhtio = sarjanumeroseuranta.yhtio and tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus)
+										WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+										and sarjanumeroseuranta.tuoteno = '$srow1[tuoteno]'
+										and sarjanumeroseuranta.$tunken = '$srow1[tunnus]'
+										and sarjanumeroseuranta.kaytetty = 'K'";
+							$sarres = mysql_query($query) or pupe_error($query);
+							$srow2 = mysql_fetch_array($sarres);
 
-						if (mysql_num_rows($sarres) > 0 and $srow2["ei_ostohintaa"] > 0) {
-							$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+							if (mysql_num_rows($sarres) > 0 and $srow2["ei_ostohintaa"] > 0) {
+								$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
 
-							if ($silent == "" or $silent == "VIENTI") {
-								$tulos_ulos_sarjanumerot .= t("Käytettyä venettä ei ole vielä ostettu! Ei voida laskuttaa!").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
+								if ($silent == "" or $silent == "VIENTI") {
+									$tulos_ulos_sarjanumerot .= t("Olet myymässä käytettyä venettä, jota ei ole vielä ostettu! Ei voida laskuttaa!").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
+								}
 							}
 						}
 

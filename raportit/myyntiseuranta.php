@@ -263,6 +263,7 @@
 
 				if ($ytunnus != '') {
 					$toimittaja = $ytunnus;
+					$ytunnus = '';
 				}
 				else {
 					$tee 			= "";

@@ -285,8 +285,8 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$kehahin = $ohinta;
 	}
 	else {
-		if ($salrow['saldo'] + $tilrivirow['varattu'] > 0 and $salrow['saldo'] > 0) {
-			// kehahin matikka, tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen ett‰ edes tehd‰‰n matikkaa
+		if ($salrow['saldo'] + $tilrivirow['varattu'] > 0 and $salrow['saldo'] > 0 and $salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu'] > 0) {
+			// kehahin matikka, tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen ett‰ edes tehd‰‰n matikkaa, sek‰ jakolaskun osoittaja pit‰‰ olla positiivinen
 			$kehahin = round(($salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu']) / ($salrow['saldo'] + $tilrivirow['varattu']), 6);
 			if ($debug >= 1) {
 				$varastoon_msg .= "<font class='message'>Tuote: $tuorow[tuoteno] Matikka: ($salrow[saldo] * $tuorow[kehahin] + $ohinta * $tilrivirow[varattu]) / ($salrow[saldo] + $tilrivirow[varattu]) = $kehahin</font><br>";
@@ -294,7 +294,13 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		}
 		else {
 			// Jos j‰‰d‰‰n saldossa t‰m‰nkin tulon j‰lkeen miinukselle tai nollille, laitetaan kehahin suoraan t‰m‰n keikan hinnasta
-			$kehahin = round($ohinta, 6);
+			// Jos kappaleet on miinusta niin silloin keharikin pit‰‰ olla miinusta!
+			if ($tilrivirow['varattu'] < 0) {
+				$kehahin = round($ohinta * -1, 6);
+			}
+			else {
+				$kehahin = round($ohinta, 6);
+			}
 			if ($debug >= 1) {
 				$varastoon_msg .= "<font class='message'>Tuote: $tuorow[tuoteno] Saldo j‰i nollaan tai miinukselle. Kehahin = ostohinta = $kehahin</font><br>";
 			}

@@ -631,8 +631,8 @@ if ($tuoteno != '') {
 
 								if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Tulo. $trow[kpl] kappaletta. Saldo ennen tuloa: $uusisaldo Kehahin ennen tuloa: $uusikehahin Sort: Asc</font><br>";
 
-								// kehahin matikka. lasketaan uusi kehahin jos jakolaskun molemmat puolet on plussalla
-								if ($uusisaldo + $trow['kpl'] > 0 and $uusikehahin * $uusisaldo + $trow['kplhinta'] * $trow['kpl'] > 0) {
+								// kehahin matikka. lasketaan uusi kehahin jos jakolaskun molemmat puolet on plussalla, sekä saldo ENNEN tapahtumaa on plussalla
+								if ($uusisaldo > 0 and $uusisaldo + $trow['kpl'] > 0 and $uusikehahin * $uusisaldo + $trow['kplhinta'] * $trow['kpl'] > 0) {
 
 									if ($jalkilaskenta_debug >= 1) {
 										$jalkilaskenta_debug_text .= "<font class='message'>JÄLKILASKENTA: Uusi kehahin (Matikka): ($uusikehahin * $uusisaldo + $trow[kplhinta] * $trow[kpl]) / ($uusisaldo + $trow[kpl])";

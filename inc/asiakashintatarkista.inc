@@ -4,7 +4,7 @@ if(!function_exists("asiakashintatarkista")) {
 	function asiakashintatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $alasveto;
 		
-		static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chalkupvm, $chloppupvm, $chastunn;
+		static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn;
 		
 		if (mysql_field_name($result, $i) == "hinta") {
 			if (trim($t[$i]) == '') {
@@ -151,7 +151,21 @@ if(!function_exists("asiakashintatarkista")) {
 		if ($chryhma == '' and $chtuoteno == '' and mysql_field_name($result, $i) == 'ryhma') {
 			$virhe[$i] = t("Sinun on annettava joko tuote tai ryhmä!");
 		}
-
+		
+		if (mysql_field_name($result, $i) == "minkpl") {
+			$chminkpl = $t[$i];
+			if ($chminkpl == '') {
+				$chminkpl = 0;
+			}
+		}
+		
+		if (mysql_field_name($result, $i) == "maxkpl") {
+			$chmaxkpl = $t[$i];
+			if ($chmaxkpl == '') {
+				$chmaxkpl = 0;
+			}
+		}
+		
 		if (mysql_field_name($result, $i) == "alkupvm") {
 			$chalkupvm = $t[$i];
 			if ($chalkupvm == '') {
@@ -183,7 +197,7 @@ if(!function_exists("asiakashintatarkista")) {
 			}
 			$aquery = "	SELECT ytunnus
 						FROM asiakashinta
-						WHERE yhtio='$kukarow[yhtio]'$and and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm' and tunnus != '$tunnus'";
+						WHERE yhtio='$kukarow[yhtio]'$and and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm' and minkpl = $chminkpl and maxkpl = $chmaxkpl and tunnus != '$tunnus'";
 			$dsresult = mysql_query($aquery) or pupe_error($aquery);
 			
 			if (mysql_num_rows($dsresult) > 0) {

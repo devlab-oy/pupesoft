@@ -2646,7 +2646,7 @@ if (!function_exists("alehinta")) {
 			// 2. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) laskun valuutassa
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
-				$query = "	(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+				$query = "	(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
 							FROM asiakashinta USE INDEX (yhtio_asiakas_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
@@ -2654,11 +2654,12 @@ if (!function_exists("alehinta")) {
 							and tuoteno  = '$trow[tuoteno]'
 							and tuoteno != ''
 							and valkoodi = '$laskurow[valkoodi]'
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
 							UNION
 
-							(SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+							(SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
 							FROM asiakashinta USE INDEX (yhtio_ytunnus_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
@@ -2666,9 +2667,10 @@ if (!function_exists("alehinta")) {
 							and tuoteno = '$trow[tuoteno]'
 							and tuoteno != ''
 							and valkoodi = '$laskurow[valkoodi]'
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
-							ORDER BY prio, aika, tunnus desc
+							ORDER BY prio, minkpl desc, aika, tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
 
@@ -2708,7 +2710,7 @@ if (!function_exists("alehinta")) {
 			// 3. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) yhtiön valuutassa
 			if ($hinta == 0) {
 
-				$query = "	(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, valkoodi, tunnus
+				$query = "	(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
 							FROM asiakashinta USE INDEX (yhtio_asiakas_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
@@ -2716,11 +2718,12 @@ if (!function_exists("alehinta")) {
 							and tuoteno = '$trow[tuoteno]'
 							and tuoteno != ''
 							and valkoodi in ('$yhtiorow[valkoodi]','')
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
 							UNION
 
-							(SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, valkoodi, tunnus
+							(SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
 							FROM asiakashinta USE INDEX (yhtio_ytunnus_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
@@ -2728,9 +2731,10 @@ if (!function_exists("alehinta")) {
 							and tuoteno = '$trow[tuoteno]'
 							and tuoteno != ''
 							and valkoodi in ('$yhtiorow[valkoodi]','')
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
-							ORDER BY prio, aika, valkoodi DESC, tunnus desc
+							ORDER BY prio, minkpl desc, aika, valkoodi DESC, tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
 
@@ -2768,7 +2772,7 @@ if (!function_exists("alehinta")) {
 			// 4. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) laskun valuutassa
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
-				$query = "	(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+				$query = "	(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
 							FROM asiakashinta USE INDEX (yhtio_asiakas_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
@@ -2776,11 +2780,12 @@ if (!function_exists("alehinta")) {
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
 							and valkoodi = '$laskurow[valkoodi]'
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
 							UNION
 
-							(SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+							(SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
 							FROM asiakashinta USE INDEX (yhtio_ytunnus_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
@@ -2788,9 +2793,10 @@ if (!function_exists("alehinta")) {
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
 							and valkoodi = '$laskurow[valkoodi]'
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
-							ORDER BY prio, aika, tunnus desc
+							ORDER BY prio, minkpl desc, aika, tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
 
@@ -2829,7 +2835,7 @@ if (!function_exists("alehinta")) {
 			// 5. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) yhtiön valuutassa
 			if ($hinta == 0) {
 
-				$query = "	(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, valkoodi, tunnus
+				$query = "	(SELECT '1' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
 							FROM asiakashinta USE INDEX (yhtio_asiakas_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
@@ -2837,11 +2843,12 @@ if (!function_exists("alehinta")) {
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
 							and valkoodi in ('$yhtiorow[valkoodi]','')
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
 							UNION
 
-							(SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, valkoodi, tunnus
+							(SELECT '2' prio, hinta, laji, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, valkoodi, tunnus
 							FROM asiakashinta USE INDEX (yhtio_ytunnus_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
@@ -2849,9 +2856,10 @@ if (!function_exists("alehinta")) {
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
 							and valkoodi in ('$yhtiorow[valkoodi]','')
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
-							ORDER BY prio, aika, valkoodi DESC, tunnus desc
+							ORDER BY prio, minkpl desc, aika, valkoodi DESC, tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
 
@@ -2899,8 +2907,9 @@ if (!function_exists("alehinta")) {
 							and ytunnus = ''
 							and asiakas = 0
 							and valkoodi = '$laskurow[valkoodi]'
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-							ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
+							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
 
@@ -2949,8 +2958,9 @@ if (!function_exists("alehinta")) {
 							and ytunnus = ''
 							and asiakas = 0
 							and valkoodi in ('$yhtiorow[valkoodi]','')
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-							ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
+							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
 
@@ -2998,8 +3008,9 @@ if (!function_exists("alehinta")) {
 							and ytunnus = ''
 							and asiakas = 0
 							and valkoodi = '$laskurow[valkoodi]'
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-							ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
+							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
 
@@ -3048,8 +3059,9 @@ if (!function_exists("alehinta")) {
 							and ytunnus = ''
 							and asiakas = 0
 							and valkoodi in ('$yhtiorow[valkoodi]','')
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-							ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
+							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
 
@@ -3087,7 +3099,7 @@ if (!function_exists("alehinta")) {
 			// 10. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä negatiivinen-aleprosentti (asiakkaan katemyyntihinta netto)
 			if ($hinta == 0) {
 
-				$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+				$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
 							FROM asiakasalennus USE INDEX (yhtio_asiakas_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
@@ -3095,12 +3107,13 @@ if (!function_exists("alehinta")) {
 							and asiakas_ryhma = ''
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and (alennus < 0 or left(alennus,1) = '-'))
 
 							UNION
 
-							(SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+							(SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
 							FROM asiakasalennus USE INDEX (yhtio_ytunnus_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
@@ -3108,10 +3121,11 @@ if (!function_exists("alehinta")) {
 							and asiakas_ryhma = ''
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and (alennus < 0 or left(alennus,1) = '-'))
 
-							ORDER BY prio, aika, tunnus desc
+							ORDER BY prio, minkpl desc, aika, tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
 
@@ -3170,9 +3184,10 @@ if (!function_exists("alehinta")) {
 							and ryhma != ''
 							and ytunnus = ''
 							and asiakas = 0
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and (alennus < 0 or left(alennus,1) = '-')
-							ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
+							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
 
@@ -3223,29 +3238,31 @@ if (!function_exists("alehinta")) {
 
 			// 12. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä aleprosentti == 999.99 (asiakkaan myymälähinta)
 			if ($hinta == 0) {
-				$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+				$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
 							FROM asiakasalennus USE INDEX (yhtio_asiakas_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
 							and asiakas > 0
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus = 999.99)
 
 							UNION
 
-							(SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+							(SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
 							FROM asiakasalennus USE INDEX (yhtio_ytunnus_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
 							and ytunnus != ''
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus = 999.99)
 
-							ORDER BY prio, aika, tunnus desc
+							ORDER BY prio, minkpl desc, aika, tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
 
@@ -3431,31 +3448,33 @@ if (!function_exists("alehinta")) {
 			$ale = 0;
 
 			// 5. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus)
-			$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+			$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
 						FROM asiakasalennus USE INDEX (yhtio_asiakas_tuoteno)
 						WHERE yhtio = '$kukarow[yhtio]'
 						and asiakas = '$laskurow[liitostunnus]'
 						and asiakas > 0
 						and tuoteno = '$trow[tuoteno]'
 						and tuoteno != ''
+						and (minkpl <= $kpl or minkpl = 0)
 						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and alennus > 0
 						and alennus <= 100)
 
 						UNION
 
-						(SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+						(SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
 						FROM asiakasalennus USE INDEX (yhtio_ytunnus_tuoteno)
 						WHERE yhtio = '$kukarow[yhtio]'
 						and ytunnus = '$laskurow[ytunnus]'
 						and ytunnus != ''
 						and tuoteno = '$trow[tuoteno]'
 						and tuoteno != ''
+						and (minkpl <= $kpl or minkpl = 0)
 						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and alennus > 0
 						and alennus <= 100)
 
-						ORDER BY prio, aika, tunnus desc
+						ORDER BY prio, minkpl desc, aika, tunnus desc
 						LIMIT 1";
 			$hresult = mysql_query($query) or pupe_error($query);
 
@@ -3470,31 +3489,33 @@ if (!function_exists("alehinta")) {
 			// 6. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus)
 			if ($ale == 0) {
 
-				$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+				$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
 							FROM asiakasalennus USE INDEX (yhtio_asiakas_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas = '$laskurow[liitostunnus]'
 							and asiakas > 0
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus > 0
 							and alennus <= 100)
 
 							UNION
 
-							(SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+							(SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
 							FROM asiakasalennus USE INDEX (yhtio_ytunnus_tuoteno)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ytunnus = '$laskurow[ytunnus]'
 							and ytunnus != ''
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus > 0
 							and alennus <= 100)
 
-							ORDER BY prio, aika, tunnus desc
+							ORDER BY prio, minkpl desc, aika, tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
 
@@ -3519,10 +3540,11 @@ if (!function_exists("alehinta")) {
 							and tuoteno != ''
 							and ytunnus = ''
 							and asiakas = 0
+							and (minkpl <= $kpl or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus > 0
 							and alennus <= 100
-							ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
+							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
 
@@ -3557,10 +3579,11 @@ if (!function_exists("alehinta")) {
 								and ryhma != ''
 								and ytunnus = ''
 								and asiakas = 0
+								and (minkpl <= $kpl or minkpl = 0)
 								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 								and alennus > 0
 								and alennus <= 100
-								ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
+								ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
 								LIMIT 1";
 					$hresult = mysql_query($query) or pupe_error($query);
 
@@ -3605,7 +3628,7 @@ if (!function_exists("alehinta")) {
 		}
 
 		//$debug = 1;
-		if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: $ale ".t("% HINTA")." $hinta $yhtiorow[valkoodi]<br><br>";
+		if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: $ale ".t("% HINTA")." $hinta $yhtiorow[valkoodi] KPL:$kpl<br><br>";
 
 		if($palautus != "") {
 			$ret=array();

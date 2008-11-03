@@ -51,6 +51,8 @@ if(!function_exists("toimitarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "tilinumero") {
+			$t[$i] = trim($t[$i]);
+			
 			if ($tmp_maakoodi == strtoupper($yhtiorow['maa'])) {
 				if ((int)trim($t[$i]) != 0) {
 					$pankkitili = $t[$i];

@@ -209,7 +209,12 @@
 
 		// tuoteviivakoodin alle
 		$pdf->draw_text(320, 532,  $tuoteviiva1, 								$firstpage, $pieni); // x,y
-		$pdf->draw_text(345, 510,  "EDI",		 								$firstpage, $huge); // x,y
+
+		// jos käytetään ediä
+		if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $postiedipath != "") {
+			$pdf->draw_text(345, 510,  "EDI",		 								$firstpage, $huge); // x,y
+		}
+
 		$pdf->draw_text(250, 490,  "Jätetty postin kuljetettavaksi Överlämnat till Posten", $firstpage, $pieni); // x,y
 		$pdf->draw_text(250, 478,  date("d.m.Y"), 								$firstpage, $norm); // x,y
 

@@ -96,9 +96,12 @@
 	//PDF:n luonti ja defaultit
 	define (__TRACE_ENABLED__, false);
 	define (__DEBUG_ENABLED__, false);
-	require_once("barcode/barcode.php");
-	require_once("barcode/debug.php");
-	require_once("barcode/c39object.php");
+
+	if (in_array("gd", get_loaded_extensions())) {
+		require_once("barcode/barcode.php");
+		require_once("barcode/debug.php");
+		require_once("barcode/c39object.php");
+	}
 	require_once("pdflib/phppdflib.class.php");
 		
 	//PDF parametrit
@@ -172,45 +175,47 @@
 		$style   |= ($stretchtext== "on"  ) ? BCS_STRETCH_TEXT   : 0;
 		$style   |= ($negative   == "on"  ) ? BCS_REVERSE_COLOR  : 0;
 		
-		//luodaan viivakoodiolio
-		$obj = "";
-		$obj = new c39object($width, $height, $style, $viiva);
+		if (class_exists("c39object")) {
+			//luodaan viivakoodiolio
+			$obj = "";
+			$obj = new c39object($width, $height, $style, $viiva);
 	
-		if ($obj) {
-			$obj->SetFont($font);
-			$obj->DrawObject($xres);
+			if ($obj) {
+				$obj->SetFont($font);
+				$obj->DrawObject($xres);
 	
-			//flushataan barcode ja saadaam filenimi johon se tallennettiin
-			$nimi1 = $obj->FlushObject();
+				//flushataan barcode ja saadaam filenimi johon se tallennettiin
+				$nimi1 = $obj->FlushObject();
 
-			//keksitään uudelle failille joku varmasti uniikki nimi:
-			$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
+				//keksitään uudelle failille joku varmasti uniikki nimi:
+				$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
 	
-			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
+				passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 
-			$fh = fopen($nimi2, "r");
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
+				$fh = fopen($nimi2, "r");
+				$data = fread($fh, filesize($nimi2));
+				fclose($fh);
+				$image = $pdf->png_embed($data);
 	
-			if(!$image) {
+				if(!$image) {
+					echo "error";
+					exit;
+				}
+				// piirretään viivakoodi paprulle
+				$pdf->image_place($image, 631, 300, $firstpage); // Y, X
+				$pdf->draw_text(390, 625,  $viiva,							$firstpage, $norm);
+	
+				unset($obj);
+	
+				//dellataan tmp filet kuleksimasta
+				system("rm -f $nimi1 $nimi2");
+			}
+			else{
 				echo "error";
 				exit;
 			}
-			// piirretään viivakoodi paprulle
-			$pdf->image_place($image, 631, 300, $firstpage); // Y, X
-			$pdf->draw_text(390, 625,  $viiva,							$firstpage, $norm);
-	
-			unset($obj);
-	
-			//dellataan tmp filet kuleksimasta
-			system("rm -f $nimi1 $nimi2");
-		}
-		else{
-			echo "error";
-			exit;
-		}
-					
+		}			
+		
 		// sitten aletaan piirtämään itse PDF sisältöä
 		$pdf->draw_text(302,  812,  "RAHTIKIRJA FRAKTSEDEL",							$firstpage, $iso);
 		

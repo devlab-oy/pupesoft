@@ -898,7 +898,10 @@
 				//Missä tuotetta on?
 				$query  = "	SELECT *
 							FROM tuotepaikat
-							WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$rivirow[tuoteno]' $lisa";
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tuoteno = '$rivirow[tuoteno]' 
+							$lisa
+							ORDER BY oletus DESC, hyllyalue, hyllynro, hyllyvali, hyllytaso";
 				$vares = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($vares) > 1) {

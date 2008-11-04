@@ -16,6 +16,10 @@
 	if ($konserni != '') {
 		$sel4 = "CHECKED";
 	}
+
+	if ($eilahetettyja != '') {
+		$sel5 = "CHECKED";
+	}
 	
 	echo "<form action = 'raportit.php' method='post'>
 			<table><tr>
@@ -30,6 +34,8 @@
 			</select></td>
 			<td>".t("Konserni")."</td>
 			<td><input type = 'checkbox' name = 'konserni' $sel4></td>
+			<td>".t("Älä näytä lähetettyjä")."</td>
+			<td><input type = 'checkbox' name = 'eilahetettyja' $sel5></td>
 			<td><input type = 'submit' value = '".t("Näytä")."'></td>
 			</tr></table></form><br>";
 
@@ -102,13 +108,20 @@
 				}
 
 				//Ostoreskontra
+				//	Ei listata maksuun lähetettyjä aineistoja, luotetaan että ne on maksettu
+				if($eilahetettyja != "") {
+					$tilat = "'H', 'M', 'P'";
+				}
+				else {
+					$tilat = "'H', 'M', 'P','Q'";
+				}
+				
 				$query = "SELECT olmapvm, -1 * sum(summa * valuu.kurssi) summa, count(*)
 							FROM lasku, valuu, yhtio
 							WHERE lasku.yhtio = '$yrow[yhtio]' and valuu.yhtio = '$yrow[yhtio]' and
-									lasku.valkoodi = valuu.nimi and lasku.tila in ('H', 'M', 'P','Q')
+									lasku.valkoodi = valuu.nimi and lasku.tila in ($tilat)
 							GROUP BY olmapvm";
 				$yresult = mysql_query($query) or pupe_error($query);
-
 				while ($trow=mysql_fetch_array ($yresult)) {
 					$query = "INSERT into maksu values (
 								'$yrow[yhtio]',
@@ -154,15 +167,22 @@
 			}
 
 			//Ostoreskontra
+			//	Ei listata maksuun lähetettyjä aineistoja, luotetaan että ne on maksettu
+			if($eilahetettyja != "") {
+				$tilat = "'H', 'M', 'P'";
+			}
+			else {
+				$tilat = "'H', 'M', 'P','Q'";
+			}
+			
 			$query = "	SELECT olmapvm, -1 * sum(summa * valuu.kurssi) summa, count(*)
 						FROM lasku, valuu
 						WHERE lasku.yhtio = '$kukarow[yhtio]' 
 						and valuu.yhtio = '$kukarow[yhtio]' 
 						and lasku.valkoodi = valuu.nimi 
-						and lasku.tila in ('H', 'M', 'P', 'Q')
+						and lasku.tila in ($tilat)
 						GROUP BY olmapvm";
 			$result = mysql_query($query) or pupe_error($query);
-
 			//echo "Laskuja '". mysql_num_rows($result) . "'<br>";
 			while ($trow=mysql_fetch_array ($result)) {
 				$query = "INSERT into maksu values (

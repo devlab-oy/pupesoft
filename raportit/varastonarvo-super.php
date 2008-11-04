@@ -493,33 +493,16 @@
 						$kehasilloin = $row["kehahin_nyt"];		// nykyinen kehahin
 						$bkehasilloin = $row["kehahin"];		// brutto kehahin
 
-						// katotaan mikä oli tuotteen viimeisin hinta annettuna päivänä tai sitten sitä ennen
-						$query = "	SELECT hinta
-									FROM tapahtuma use index (yhtio_tuote_laadittu)
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tuoteno = '$row[tuoteno]'
-									and laadittu <= '$vv-$kk-$pp 23:59:59'
-									and laji NOT IN ('poistettupaikka','uusipaikka')
-									ORDER BY laadittu desc
-									LIMIT 1";
-						$ares = mysql_query($query) or pupe_error($query);
-
-						if (mysql_num_rows($ares) == 1) {
-							// löydettiin keskihankintahinta tapahtumista käytetään
-							$arow = mysql_fetch_array($ares);
-							$kehasilloin  = $arow["hinta"];
-							$bkehasilloin = $arow["hinta"];
-							$kehalisa = "";
-						}
-						else {
-							// ei löydetty alaspäin, kokeillaan kattoo lähin hinta ylöspäin
+						// ei suotta haeskella keharia jos ajetaan tälle päivälle
+						if (date("Y-m-d") != "$vv-$kk-$pp") {
+							// katotaan mikä oli tuotteen viimeisin hinta annettuna päivänä tai sitten sitä ennen
 							$query = "	SELECT hinta
 										FROM tapahtuma use index (yhtio_tuote_laadittu)
 										WHERE yhtio = '$kukarow[yhtio]'
 										and tuoteno = '$row[tuoteno]'
-										and laadittu > '$vv-$kk-$pp 23:59:59'
+										and laadittu <= '$vv-$kk-$pp 23:59:59'
 										and laji NOT IN ('poistettupaikka','uusipaikka')
-										ORDER BY laadittu
+										ORDER BY laadittu desc
 										LIMIT 1";
 							$ares = mysql_query($query) or pupe_error($query);
 
@@ -531,7 +514,27 @@
 								$kehalisa = "";
 							}
 							else {
-								$kehalisa = "~";
+								// ei löydetty alaspäin, kokeillaan kattoo lähin hinta ylöspäin
+								$query = "	SELECT hinta
+											FROM tapahtuma use index (yhtio_tuote_laadittu)
+											WHERE yhtio = '$kukarow[yhtio]'
+											and tuoteno = '$row[tuoteno]'
+											and laadittu > '$vv-$kk-$pp 23:59:59'
+											and laji NOT IN ('poistettupaikka','uusipaikka')
+											ORDER BY laadittu
+											LIMIT 1";
+								$ares = mysql_query($query) or pupe_error($query);
+
+								if (mysql_num_rows($ares) == 1) {
+									// löydettiin keskihankintahinta tapahtumista käytetään
+									$arow = mysql_fetch_array($ares);
+									$kehasilloin  = $arow["hinta"];
+									$bkehasilloin = $arow["hinta"];
+									$kehalisa = "";
+								}
+								else {
+									$kehalisa = "~";
+								}
 							}
 						}
 					}

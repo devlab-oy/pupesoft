@@ -414,6 +414,15 @@
 								and kauppatapahtuman_luonne > 0
 								and kuljetusmuoto != ''";
 					$ures  = mysql_query($query) or pupe_error($query);
+					
+					// Etuk‰teen maksetut tilaukset pit‰‰ muuttaa takaisin "maksettu"-tilaan
+					$query = "	UPDATE lasku SET
+								alatila = 'X'
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus in ($otunnukset)
+								AND mapvm != '0000-00-00'
+								AND chn = '999'";
+					$ures  = mysql_query($query) or pupe_error($query);
 				}
 				
 				// Tulostetaan osoitelappu

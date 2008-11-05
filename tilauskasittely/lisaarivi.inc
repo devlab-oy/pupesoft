@@ -627,7 +627,7 @@
 					if ($lisaarivi_debug==1) echo "Tuotteella $tuoteno ei ole yht‰‰n tuotepaikkaa! Myyd‰‰n silti koska saldoista ei nyt piitata!<br>";
 
 					$myy_tuoteno[$i]   = strtoupper($tuoteno);
-					$myy_kpl[$i]       = $toimittamatta;
+					$myy_kpl[$i]       = 99999999;
 					$myy_hyllyalue[$i] = "";
 					$myy_hyllynro[$i]  = "";
 					$myy_hyllyvali[$i] = "";
@@ -652,7 +652,7 @@
 				// Saldottomat tuotteet
 				// lis‰t‰‰n tuotteen tiedot arrayseen, koska t‰m‰n tuotteen voi myyd‰
 				$myy_tuoteno[$i]   = strtoupper($tuoteno);
-				$myy_kpl[$i]       = $toimittamatta;
+				$myy_kpl[$i]       = 99999999;
 				$myy_hyllyalue[$i] = "";
 				$myy_hyllynro[$i]  = "";
 				$myy_hyllyvali[$i] = "";

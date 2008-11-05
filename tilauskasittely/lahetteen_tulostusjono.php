@@ -582,7 +582,7 @@
 
 		// Vain keräyslistat saa groupata
 		if ($yhtiorow["lahetteen_tulostustapa"] == "K" and $yhtiorow["kerayslistojen_yhdistaminen"] == "Y") {
-			$grouppi = "GROUP BY lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi, varastonimi, varastotunnus, keraysviikko";
+			$grouppi = "GROUP BY lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi, varastonimi, varastotunnus, keraysviikko, lasku.mapvm";
 		}
 		elseif ($yhtiorow["lahetteen_tulostustapa"] == "K" and $yhtiorow["kerayslistojen_yhdistaminen"] == "T") {
 			$grouppi = "GROUP BY lasku.ytunnus";
@@ -608,7 +608,8 @@
 					count(distinct otunnus) tilauksia, 
 					count(*) riveja,
 					GROUP_CONCAT(distinct(if(sisviesti2 != '', concat(lasku.tunnus,' - ', sisviesti2,'<br>'), NULL)) SEPARATOR '') ohjeet,
-					GROUP_CONCAT(if(kommentti='',NULL,kommentti) separator '<br>') AS kommentit				
+					GROUP_CONCAT(if(kommentti='',NULL,kommentti) separator '<br>') AS kommentit,
+					lasku.mapvm				
 					FROM lasku
 					JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus
 					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto

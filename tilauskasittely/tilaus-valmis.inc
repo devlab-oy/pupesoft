@@ -851,13 +851,38 @@ else {
 
 			// Jos tilaus splittaantui moneen osaan
 			if(count($tilausnumerot) > 1) {
-				foreach ($tilausnumerot as $tilausnumero) {
-					$upviesti = t("Tilaus jakaantunut")." ".count($tilausnumerot)." ".t("tilaukseksi")."!";
+				$tilauksia = 1;
+				$asmuuttilaukset = "";
+				$numerot = implode(', ',$tilausnumerot);
+				
+				$query = " 	SELECT tunnus 
+						   	FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus not in($numerot) 
+							AND liitostunnus = '$laskurow[liitostunnus]'
+							AND ((tila = 'L' AND alatila not in ('D','X')) or (tila='n' and alatila='a'))";								
+				$muutresult = mysql_query($query) or pupe_error($query);
+				
+				while ($muutrow = mysql_fetch_array($muutresult)) {
+					$asmuuttilaukset .= $muutrow['tunnus']." "; 
+					
+				}
+
+				foreach ($tilausnumerot as $tilausnumero) {										
+					
+					$upviesti = t("Tilaus jakaantunut")." ".count($tilausnumerot)." ".t("tilaukseksi").": ".$numerot." ".t("Tilaus").": ".$tilauksia."/".count($tilausnumerot);
+						
+					if ($asmuuttilaukset != "") {
+						$upviesti .= "\n".t("Asiakkaalla on toimittamatta myös tilaukset").": ".$asmuuttilaukset;
+					}
 
 					$query = "	UPDATE lasku set sisviesti2 = concat_ws(' ', sisviesti2, '$upviesti')
 								where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
 					$upresult = mysql_query($query) or pupe_error($query);
-				}
+					
+					$tilauksia++;
+				}			
+				
 			}
 
 			// Laitetaan splittien toim ja kerpvm ät kuntoon / viikkojutut on pakko nollata splitille

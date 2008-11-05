@@ -207,7 +207,9 @@ if(!function_exists("tuotetarkista")) {
 			$tuotteen_parametrit = "";
 
 			foreach ($tuotteen_parametrit_keys as $key => $val) {
-				$tuotteen_parametrit .= "$val=$tuotteen_parametrit_vals[$key];";
+				if ($tuotteen_parametrit_vals[$key] != '') {
+					$tuotteen_parametrit .= "$val=$tuotteen_parametrit_vals[$key];";
+				}
 			}
 
 			$tuotteen_parametrit_query = "	UPDATE tuote

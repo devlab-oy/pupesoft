@@ -43,6 +43,15 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 		echo "</pre>";
 	}
 
+	if ($tyyppi=='magento') {
+		// tarvitaan $filename
+		echo "<pre>";
+		$edi_tyyppi = "magento";
+		require ("editilaus_in.inc");
+		echo "$edi_ulos";
+		echo "</pre>";
+	}
+
 	if ($tyyppi=='yct') {
 		// tarvitaan $filename
 		require ("../inc/tilaus_in.inc");
@@ -64,7 +73,8 @@ else {
 			<th>".t("Tiedoston tyyppi")."</th>
 			<td><select name='tyyppi'>
 		 		<option value='edi'>".t("Editilaus")."</option>
-		 		<option value='futursoft'>".t("Futursoft")."</option>
+		 		<option value='futursoft'>Futursoft</option>
+		 		<option value='magento'>Magento</option>
 		 		<option value='pos'>".t("Kassap‰‰te")."</option>
 		 		<option value='yct'>Yamaha Center</option>
 		 		<option value='multi'>Useita asiakkaita</option>

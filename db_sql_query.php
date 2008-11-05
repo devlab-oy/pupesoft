@@ -31,6 +31,9 @@
 				$ruksaa = array_merge($pakolliset,$wherelliset);
 			}
 		}
+
+		// jos ollaan annettu uusirappari nimi, niin unohdetaan dropdowni!
+		if ($uusirappari != "") $kysely = "";
 		
 		// Tässä luodaan uusi raporttiprofiili
 		if ($rtee == "AJA" and $uusirappari != '' and $kysely == "") {

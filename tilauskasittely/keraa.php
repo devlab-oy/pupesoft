@@ -1389,7 +1389,7 @@
 			}
 		}
 
-		$query = "	select distinct
+		$query = "	SELECT distinct
 					if(lasku.kerayslista!=0, lasku.kerayslista, lasku.tunnus) tunnus,
 					concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) asiakas,
 					date_format(lasku.luontiaika, '%Y-%m-%d') laadittu,
@@ -1409,8 +1409,8 @@
 					and tilausrivi.var				in ('', 'H' $var_lisa)
 					and tilausrivi.keratty	 		= ''
 					and tilausrivi.kerattyaika		= '0000-00-00 00:00:00'
-					and tilausrivi.laskutettu		= ''
-					and tilausrivi.laskutettuaika 	= '0000-00-00'
+					and ((tilausrivi.laskutettu		= ''
+					and tilausrivi.laskutettuaika 	= '0000-00-00') or lasku.mapvm != '0000-00-00')
 					$haku
 					$tilaustyyppi
 					GROUP BY tunnus
@@ -1520,7 +1520,8 @@
 						osoite, concat_ws(' ', postino, postitp) postitp,
 						toim_osoite, concat_ws(' ', toim_postino, toim_postitp) toim_postitp,
 						clearing,
-						tila
+						tila,
+						mapvm
 						FROM lasku LEFT JOIN kuka ON lasku.myyja = kuka.tunnus
 						WHERE lasku.tunnus in ($tilausnumeroita)
 						and lasku.yhtio = '$kukarow[yhtio]'
@@ -1643,6 +1644,14 @@
 					$ker			= '';
 				}
 
+				$poikkeava_maara_disabled = "";
+
+				if ($otsik_row["mapvm"] != '' and $otsik_row["mapvm"] != '0000-00-00') {
+					$row["varattu"] = $row["tilkpl"];
+					$poikkeava_maara_disabled = "disabled";
+					$puute .= " ".t("Verkkokaupassa etukäteen maksettu tuote!");
+				}
+
 				if ($row['ei_saldoa'] != '') {
 					echo "	<tr class='aktiivi'>
 							<td>*</td>
@@ -1673,7 +1682,7 @@
 						}
 					}
 					else {
-						echo "<input type='text' size='4' name='maara[$row[tunnus]]' value='$maara[$i]'> $puute";
+						echo "<input type='text' size='4' name='maara[$row[tunnus]]' value='$maara[$i]' $poikkeava_maara_disabled> $puute";
 						echo "<input type='hidden' name='kerivi[]' value='$row[tunnus]'>";
 					}
 

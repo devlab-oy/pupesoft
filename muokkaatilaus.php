@@ -363,7 +363,7 @@
 			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, ytunnus, lasku.luontiaika, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija,
 						round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
 						round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa,
-			 			$toimaikalisa alatila, tila, lasku.tunnus
+			 			$toimaikalisa alatila, tila, lasku.tunnus, lasku.mapvm
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
@@ -884,7 +884,7 @@
 		}
 		else {
 			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,
-						$seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka.extranet extra
+						$seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka.extranet extra, lasku.mapvm
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
 						$seurantalisa
@@ -1223,6 +1223,12 @@
 						$pitaako_varmistaa = t("Siirtolista on jo tulostettu! Oletko varma, että haluat vielä muokata siirtolistaa?");
 					}
 
+					$button_disabled = "";
+
+					if (($row["tila"] == "L" or $row["tila"] == "N") and $row["mapvm"] != '0000-00-00' and $row["mapvm"] != '') {
+						$button_disabled = "disabled";
+					}
+
 					// tehdään alertti jos sellanen ollaan määritelty
 					$javalisa = "";
 					if ($pitaako_varmistaa != "") {
@@ -1247,10 +1253,10 @@
 							<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
 
 					if ($toim == "" or $toim == "SUPER" or $toim == "EXTRANET" or $toim == "ENNAKKO" or $toim == "JTTOIMITA" or $toim == "LASKUTUSKIELTO"or (($toim == "VALMISTUSMYYNTI" or $toim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
-						echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
+						echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2' $button_disabled></td>";
 					}
 
-					echo "<td class='back'><input type='submit' name='$aputoim1' value='$lisa1'></td>";
+					echo "<td class='back'><input type='submit' name='$aputoim1' value='$lisa1' $button_disabled></td>";
 					echo "</form>";
 
 					if ($toim == "TARJOUS" or $toim == "TARJOUSSUPER" and $kukarow["kesken"] != 0) {

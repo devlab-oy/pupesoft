@@ -151,7 +151,7 @@
 		}
 	}
 
-	echo "<font class='head'>".t('Hyv‰ksytt‰v‰t laskusi')."</font><hr>";
+	echo "<font class='head'>".t('Hyv‰ksytt‰v‰t laskusi')."</font><hr><br>";
 
 	if ($tee == 'M') {
 		$query = "	SELECT *
@@ -232,7 +232,120 @@
 		$tunnus = '';
 		$tee = '';
 	}
+	
+	if($tee == "palauta") {
+		
+		$query = "	SELECT *
+					FROM lasku
+					WHERE hyvaksyja_nyt = '$kukarow[kuka]' and
+					yhtio = '$kukarow[yhtio]' and
+					tunnus = '$tunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($result) == 0) {
+			die(t("Lasku kateissa"));
+		}
+		$lrow = mysql_fetch_array($result);
+		
+		if($viesti == "" or (int) $hyvaksyja == 0) {
+			
+			if($formilta == "true") {
+				if((int) $hyvaksyja == 0) echo "<font class='error'>".t("Valitse kenelle lasku palautetaan.")."</font><br>";
 
+				if($viesti == "") echo "<font class='error'>".t("Anna syy palautukseen.")."</font><br>";
+			}
+			
+			$hyvaksyjat = "	<table>
+							<tr>
+								<th>".t("Kenelle lasku palautetaan")."</th>
+							</tr>";
+							
+								
+			//	Valitse kenelle palautetaan
+			for($i=1;$i<5;$i++) {
+				$haika	= "h".$i."time";
+				$haiku	= "hyvak".$i;
+				
+				if($lrow[$haika] != "0000-00-00 00:00:00") {
+					
+					$query = "	SELECT nimi
+								FROM kuka
+								WHERE yhtio = '$kukarow[yhtio]' and kuka = '".$lrow[$haiku]."'";
+					$result = mysql_query($query) or pupe_error($query);
+					$krow = mysql_fetch_array($result);
+					
+					if($hyvaksyja == $i) {
+						$sel = "checked";
+					}
+					else {
+						$sel = "";
+					}
+					$hyvaksyjat .= "	
+									<tr>
+										<td><input type='radio' name='hyvaksyja' value='$i' $sel> $i. {$krow["nimi"]}</td>
+									</tr>";
+				}
+			}
+
+			$hyvaksyjat .= "
+			</table><br>";
+			
+			echo "	
+					<form action = '$PHP_SELF' method='post'>
+					<input type='hidden' name='tee' value='$tee'>
+					<input type='hidden' name='formilta' value='true'>
+					<input type='hidden' name='tunnus' value='$tunnus'>
+					<br>
+					$hyvaksyjat
+					<br>
+					<table>
+						<tr>
+							<th>".t("Anna palautuksen syy")."</th>
+						</tr>
+						<tr>
+							<td><input type='text' name = 'viesti' value='$viesti' size = '50'></td>
+						</tr>
+					</table>
+					<input type = 'submit' value = '".t("Palauta")."'>
+					</form>
+					<br>
+					<form action = '$PHP_SELF' method='post'>
+					<input type='hidden' name='tunnus' value='$tunnus'>				
+					<input type = 'submit' value = '".t("Palaa laskun hyv‰ksynt‰‰n")."'>
+					</form>";
+
+			require("inc/footer.inc");
+			exit;
+		}
+		else {
+
+			//	Palautetaan takaisin edelliselle hyv‰ksyj‰lle
+			if((int) $hyvaksyja > 0) {
+				$upd = "h{$hyvaksyja}time = '0000-00-00 00:00:00', hyvaksyja_nyt = '".$lrow["hyvak{$hyvaksyja}"]."'";
+				$kukahyvak = $lrow["hyvak{$hyvaksyja}"];
+			}
+			else die("Hyv‰ksyj‰ ei kelpaa");
+			
+			$query = "	SELECT *
+						FROM kuka
+						WHERE yhtio = '{$kukarow["yhtio"]}' and kuka = '$kukahyvak'";
+			$result = mysql_query($query) or pupe_error($query);
+			$krow = mysql_fetch_array($result);
+			
+			// Merkataan lasku poistetuksi
+			$query = "	UPDATE lasku SET
+							$upd
+						WHERE tunnus = '$tunnus' and
+						yhtio = '$kukarow[yhtio]'";
+			$result = mysql_query($query) or pupe_error($query);
+			
+			echo "<font class='message'>".t('Palauttettiin lasku k‰ytt‰j‰lle')." {$krow["nimi"]}</font><br>";
+
+			//	L‰hetet‰‰n maili virheen merkiksi!
+			mail($krow["eposti"], "Hyv‰ksym‰si lasku palautettiin", t("Hyv‰ksym‰si lasku toimittajalta %s, %s %s palautettiin korjattavaksi.\n\nSyy: %s", $krow["kieli"], $lrow["nimi"], $lrow["summa"], $lrow["valkoodi"], $viesti));
+			$tunnus = "";
+			$tee = "";
+		}
+	}
 	if ($tee == 'W' and $komm == '') {
 		echo "<font class='error'>".t('Anna pys‰ytyksen syy')."</font>";
 		$tee = 'Z';
@@ -419,7 +532,7 @@
 			$toimirow = mysql_fetch_array($toimires);
 
 			//	P‰ivitet‰‰n tapvm ja viesti laskulle
-			$viesti = t("Matkalasku").date("d").".".date("m").".".date("Y");
+			$viesti = t("Matkalasku")." ".date("d").".".date("m").".".date("Y");
 			$query = " update lasku set tapvm=now(), erpcm=DATE_ADD(now(), INTERVAL {$toimirow["oletus_erapvm"]} DAY), viesti ='$viesti' where yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
 			$updres = mysql_query($query) or pupe_error($query);
 
@@ -1306,7 +1419,15 @@
 							<input type='Submit' value='".t("Hyv‰ksy tiliˆinti ja lasku")."'>
 							</form></td>";
 			}
-
+			
+			if($laskurow["h1time"] != "0000-00-00 00:00:00") {
+				echo "<form action = '$PHP_SELF' method='post'>
+						<input type='hidden' name='tee' value='palauta'>
+						<input type='hidden' name='tunnus' value='$tunnus'>
+						<td class='back'><input type='Submit' value='".t("Palauta lasku edelliselle hyv‰ksyj‰lle")."'></td>
+						</form>";
+			}
+			
 			// N‰ytet‰‰n alv-erittely, jos on useita kantoja.
 			if ($naytalisa != '') {
 				$query = "	SELECT vero, sum(summa) veroton, round(sum(summa*vero/100),2) 'veron m‰‰r‰', round(sum(summa*(1+vero/100)),2) verollinen from tiliointi

@@ -341,7 +341,7 @@
 			echo "<font class='message'>".t('Palauttettiin lasku k‰ytt‰j‰lle')." {$krow["nimi"]}</font><br>";
 
 			//	L‰hetet‰‰n maili virheen merkiksi!
-			mail($krow["eposti"], "Hyv‰ksym‰si lasku palautettiin", t("Hyv‰ksym‰si lasku toimittajalta %s, %s %s palautettiin korjattavaksi.\n\nSyy: %s", $krow["kieli"], $lrow["nimi"], $lrow["summa"], $lrow["valkoodi"], $viesti));
+			mail($krow["eposti"], "Hyv‰ksym‰si lasku palautettiin", t("Hyv‰ksym‰si lasku toimittajalta %s, %s %s palautettiin korjattavaksi.\n\nSyy: %s", $krow["kieli"], $lrow["nimi"], $lrow["summa"], $lrow["valkoodi"], $viesti), "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 			$tunnus = "";
 			$tee = "";
 		}

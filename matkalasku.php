@@ -1949,10 +1949,10 @@ if ($tee == "") {
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and tila = 'H'
 				and (
-					(hyvak2='{$kukarow["kuka"]}' and h2time='0000-00-00 00:00:00') or
-					(hyvak3='{$kukarow["kuka"]}' and h3time='0000-00-00 00:00:00') or
-					(hyvak4='{$kukarow["kuka"]}' and h4time='0000-00-00 00:00:00') or
-					(hyvak5='{$kukarow["kuka"]}' and h5time='0000-00-00 00:00:00')
+					(hyvak2='{$kukarow["kuka"]}' and h2time='0000-00-00 00:00:00' and hyvaksyja_nyt = '{$kukarow["kuka"]}') or
+					(hyvak3='{$kukarow["kuka"]}' and h3time='0000-00-00 00:00:00' and hyvaksyja_nyt = '{$kukarow["kuka"]}') or
+					(hyvak4='{$kukarow["kuka"]}' and h4time='0000-00-00 00:00:00' and hyvaksyja_nyt = '{$kukarow["kuka"]}') or
+					(hyvak5='{$kukarow["kuka"]}' and h5time='0000-00-00 00:00:00' and hyvaksyja_nyt = '{$kukarow["kuka"]}')
 				)
 				and tilaustyyppi = 'M'";
 	$result = mysql_query($query) or pupe_error($query);

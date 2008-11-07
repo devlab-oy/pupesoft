@@ -76,7 +76,22 @@
 			$tasonimi = array();
 			$summa    = array();
 			$kaudet   = array();
+			
+			if((int) $tkausi > 0) {
+				$query = "	SELECT 	month(tilikausi_alku) alkukk, year(tilikausi_alku) alkuvv,
+									month(tilikausi_loppu) loppukk, year(tilikausi_loppu) loppuvv
+							FROM tilikaudet
+							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
+				$result = mysql_query($query) or pupe_error($query);
+				$tkrow = mysql_fetch_array($result);
 
+				$alvk = $tkrow["loppukk"];
+				$alvv = $tkrow["loppuvv"];
+
+				$plvk = $tkrow["alkukk"];
+				$plvv = $tkrow["alkuvv"];
+			}
+			
 			$startmonth	= date("Ymd",   mktime(0, 0, 0, $plvk, 1, $plvv));
 			$endmonth 	= date("Ymd",   mktime(0, 0, 0, $alvk, 1, $alvv));
 			$annettualk = date("Y-m-d", mktime(0, 0, 0, $plvk, 1, $plvv));
@@ -601,6 +616,23 @@
 				<option $sel[12] value = '12'>12</option>
 				</select></td></tr>";
 
+		echo "<tr><th>".t("tai koko tilikausi")."</th>";
+	 	$query = "SELECT *
+					FROM tilikaudet
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY tilikausi_alku DESC";
+		$vresult = mysql_query($query) or pupe_error($query);
+		echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow["tunnus"]) {
+				$sel = "selected";
+			}
+			echo "<option value = '$vrow[tunnus]' $sel>$vrow[tilikausi_alku] - $vrow[tilikausi_loppu]";
+		}
+		echo "</select></td>";
+		echo "</tr>";
+		
 		echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
 
 		$query = "	SELECT tunnus, nimi

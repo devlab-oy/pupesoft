@@ -262,7 +262,8 @@
 						and korjattu		= ''
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and (mapvm > '$pvm' or mapvm = '0000-00-00')
-						and lasku.tapvm <= '$pvm'
+						and lasku.tapvm <= '$pvm' 
+						and lasku.tapvm > '0000-00-00'
 						and tila in ('H','Y','M','P','Q')
 						$lisa
 						$valkoodi1
@@ -418,6 +419,7 @@
 				  		WHERE lasku.yhtio		= '$kukarow[yhtio]'
 						and (lasku.mapvm		> '$pvm' or lasku.mapvm = '0000-00-00')
 						and lasku.tapvm			<= '$pvm'
+						and lasku.tapvm > '0000-00-00'
 						and lasku.tila			= 'U'
 						and lasku.alatila		= 'X'
 						$lisa1

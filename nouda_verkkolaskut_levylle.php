@@ -2,7 +2,8 @@
 	require ("inc/parametrit.inc");
 	echo "<font class='head'>Toimittajan verkkolaskujen siirto levylle</font><hr><br>";
 
-	if ($tee == 'A') { // N√§ytet√§√§n toimittajan laskuja joille lis√§tietoja voi sy√∂tt√§√§
+	// N‰ytet‰‰n toimittajan laskuja joille lis‰tietoja voi syˆtt‰‰
+	if ($tee == 'A') { 
 		$query = "SELECT tosite, lasku.tunnus, ebid
 					  FROM lasku, tiliointi
 					  WHERE lasku.yhtio='$kukarow[yhtio]' and ytunnus='$tunnus' and ebid <> '' and
@@ -51,8 +52,9 @@
 	}
 
 // be test begin -----------------------------------
-
-	if ($tee == 'all') { // haetaan kaikkien toimittajien kaikki laskujen kuvat
+	
+	// haetaan kaikkien toimittajien kaikki laskujen kuvat
+	if ($tee == 'all') { 
 		$lisa='';
 		if ($kausi != '') $lisa = "and DATE_FORMAT(lasku.tapvm, '%Y-%m') = '$kausi'";
 		$query = "SELECT tosite, lasku.tunnus, ebid
@@ -101,7 +103,62 @@
 		}
 		echo "Done!";
 	}
+	
+	//	Siirret‰‰n tietokantaan turvaan kaikki siirt‰m‰ttˆm‰t!
+	if($tee == "siirrasiirtamattomat") {
+		
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio='$kukarow[yhtio]' and ebid <> '' and tila in ('Y','M','P','Q')";
+				$result = mysql_query ($query)
+						or die ("Kysely ei onnistu $query<br>".mysql_error());
 
+				echo "Haettavia laskuja on ". mysql_num_rows($result) . " kpl<br>";
+
+				while ($laskurow=mysql_fetch_array($result)) {
+					$ebid=$laskurow['ebid'];
+					echo "<font class='message'>K‰sitell‰‰n lasku {$laskurow["nimi"]} {$laskurow["summa"]} {$laskurow["valkoodi"]}</font><br>ebid: {$laskurow["ebid"]}<br";
+
+					$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
+					$salasana		   = $yhtiorow['verkkosala_vas'];
+
+					$timestamppi = gmdate("YmdHis")."Z";
+
+					$urlhead = "http://www.verkkolasku.net";
+					$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";
+
+					$digest	 = md5($urlmain . "&" . $salasana);
+					$url	 = $urlhead.$urlmain."&DIGEST=$digest";
+
+					$sisalto = file_get_contents($url);
+					if($sisalto != "") {
+						$tyofile="/tmp/" . $laskurow['tunnus'].".pdf";
+						
+						if(file_put_contents($tyofile, $sisalto)) {
+							if(tallenna_liite($tyofile, "lasku", $laskurow["tunnus"], "{$laskurow["nimi"]} {$laskurow["summa"]} {$laskurow["valkoodi"]}")) {
+								$query = "	UPDATE lasku SET
+												ebid = '',
+												sisviesti2 = '{$laskurow["ebid"]}'
+											WHERE yhtio = '{$kukarow["yhtio"]}' and tunnus = '{$laskurow["tunnus"]}'";
+								$updres = mysql_query($query) or pupe_error($query);
+											
+								echo "<font class=''>".t("Lasku tallennettiin liitteeksi")."</font><br>";
+							}
+							else {
+								echo "<font class='error'>".t("Laskua ei voitu tallentaa liitteeksi!")."</font><br>";
+							}						
+						}
+						else {
+							echo "<font class='error'>".t("Laskua ei voitu tallentaa!")."</font><br>";
+						}						
+					}
+					else {
+						echo "<font class='error'>".t("Laskua ei lˆytynyt!")."</font><br>";
+					}
+					flush();
+				}
+				echo "Done!";
+	}
 
 // be test end
 
@@ -128,10 +185,10 @@
 
 		$result = mysql_query ($query) or die ("Kysely ei onnistu $query");
 		if (mysql_num_rows($result) == 0) {
-			echo "<b>Haulla ei l√∂ytynyt yht√§√§n toimittajaa</b>";
+			echo "<b>Haulla ei lˆytynyt yht‰‰n toimittajaa</b>";
 		}
 		if (mysql_num_rows($result) > 20 && $tila != '') {
-			echo "<b>Haulla l√∂ytyi liikaa toimittajia. Tarkenna hakua!</b><br><br>";
+			echo "<b>Haulla lˆytyi liikaa toimittajia. Tarkenna hakua!</b><br><br>";
 			$tila = '';
 		}
 		elseif(mysql_num_rows($result) <= 20) {
@@ -179,6 +236,13 @@
 						 esim 2004-08
 						<input type='Submit' value='Hae'>
 						</form>";
+
+		echo "<br><br><form action = '$PHP_SELF' method='post'>
+						<input type='hidden' name='tunnus' value='$trow[ytunnus]'>
+						<input type='hidden' name='tee' value='siirrasiirtamattomat'>
+						<input type='Submit' value='".t("Siirr‰ KAIKKI noutamattomat laskut liittetiedostoiksi tietokantaan")."'>
+						</form>";
+
 // be test end----------------------------------------
 	}
 	

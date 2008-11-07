@@ -71,7 +71,10 @@ if(!function_exists("svnAction")) {
 				}			
 			}
 			else {
-				return $check;
+				if(svnDebug>0) {
+					echo "<br><font class='error'>Virhe tarkastuksessa:</font><br>action: $action<br>src: $src<br>dst: $dst<br>comments: $comments<br>$check<br><br>";
+				}
+				return false;
 			}
 		} 
 	}		
@@ -86,15 +89,15 @@ if(!function_exists("makeSvnTarget")) {
 			return false;			
 		}
 		else {
-			$target = str_replace(" ", "\ ", $target);
 			
 			//	jos on paikallinen file tarkistetaan että sellanen oikeesti on
 			if(substr($target, 0, 6) == "local:") {
 				$target = substr($target, 6);
 				if(!file_exists($target)) {
-					var_dump(file_exists($target));
 					return false;
 				}
+
+				$target = str_replace(" ", "\ ", $target);
 			}
 			else {
 				
@@ -102,7 +105,7 @@ if(!function_exists("makeSvnTarget")) {
 					$target = "";
 				}
 				
-				$target = svnMethod."://".svnUrl."/".svnPath."/".$target;
+				$target = svnMethod."://".svnUrl."/".svnPath."/".str_replace("%2F", "/", rawurlencode($target));
 			}
 		}
 	}
@@ -342,6 +345,132 @@ if(!function_exists("svnOpenNew")) {
 			}
 			else {
 				return t("Projektin avauksessa tapahtui virhe");
+			}
+		}
+		else {
+			return t("Projekti ei kelpaa");
+		}
+	}
+}
+
+if(!function_exists("svnFindCustomerDir")) {
+	function svnFindCustomerDir ($tunnus) {
+		global $kukarow;
+		
+		if(svnStatus===false) return false;
+		
+		$query = "	SELECT concat_ws(' ', nimi, if(nimitark='', NULL, ''), if(toim_ovttunnus='', NULL, concat('[', toim_ovttunnus, ']'))) dir
+					FROM asiakas
+					WHERE yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+		$res = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($res) == 1) {
+			$row = mysql_fetch_array($res);
+			if(svnAction("list", svnCustomers."/".$row["dir"]) !== false) {
+				return svnCustomers."/".$row["dir"];
+			}
+		}
+
+		return false;
+	}		
+}
+
+if(!function_exists("svnSyncMaintenanceFolders")) {
+	function svnSyncMaintenanceFolders ($type, $tunnus, $oldRow="") {
+		global $kukarow;
+		
+		$type = strtoupper($type);
+		
+		if(svnStatus===false) return false;
+		
+		$table = $path = $templatePath = "";
+		
+		if($type == "ASIAKAS") {
+			$table 			= "asiakas";
+			$dirName 		= "concat_ws(' ', nimi, if(nimitark='', NULL, ''), if(toim_ovttunnus='', NULL, concat('[', toim_ovttunnus, ']')))";
+			$oldDirName 	= trim("$oldRow[nimi] $oldRow[nimitark] [$oldRow[toim_ovttunnus]]");
+			$path 			= svnCustomers;
+			$templatePath 	= "";
+		}
+		elseif($type == "ASIAKKAAN_KOHDE") {
+			$query = "	SELECT liitostunnus
+						FROM asiakkaan_kohde
+						WHERE yhtio='$kukarow[yhtio]' and tunnus = '$tunnus' and liitostunnus > 0";
+			$res = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($res) == 1) {
+				$row = mysql_fetch_array($res);
+				$path = svnFindCustomerDir($row["liitostunnus"]);
+				if($path !== false) {
+					$table 			= "asiakkaan_kohde";
+					$dirName 		= "kohde";
+					$oldDirName 	= $oldRow["kohde"];
+					$templatePath 	= svnCustomersTargetDefaultDir;
+				}
+				else {
+					return false;
+				}				
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			return "Tyyppi puuttuu";
+		}
+		
+		if(count($oldRow)<2) {
+			$oldDirName = "";
+		}
+		
+		//	Haetaan vaadittava tieto
+		$query = "	SELECT $dirName dirName
+					FROM $table
+					WHERE yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+		$res = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($res) > 0) {
+			$row = mysql_fetch_array($res);
+			
+			//	Tämä on meidän tuleva dirrikka
+			$pDir = trim($path."/".$row["dirName"]);
+			
+			if($oldDirName == "") {
+				if($templatePath != "") {
+					if(svnAction("copy", $templatePath, $pDir, t("%s avattu", $kieli, ucfirst(strtolower(t($type))))) !== false) {
+						return true;
+					}
+					else {
+						return t("Tapahtui virhe perustettaessa uusi $type");
+					}
+				}
+				else {
+					$tmpdir = "/tmp/svnImport-".md5(uniqid())."/".basename($pDir);
+					mkdir(dirname($tmpdir));
+					mkdir($tmpdir);
+					if(svnAction("import",	"local:$tmpdir", $pDir, t("%s avattu", $kieli, ucfirst(strtolower(t($type))))) !== false) {
+						return true;
+					}
+					else {
+						return t("Tapahtui virhe perustettaessa uusi $type");
+					}
+					
+					unlink(dirname($tmpdir));
+				}
+			}
+			else {
+				
+				//	Jos kansiot omat samat, ei tartte tehdä mittää
+				if($path."/".$oldDirName == $pDir) {
+					return true;
+				}
+				
+				//	Löydetäänkö vanha dirrikka?
+				if(svnAction("move", $path."/".$oldDirName, $pDir, t("%s nimi muutettu", $kieli, ucfirst(strtolower(t($type))))) !== false) {
+					return true;
+				}
+				else {
+					echo "<font class='error'>".t("VIRHE: Koitettiin muuttaa nimeä, mutta se epäonnistui. Ota yhteyttä järjestelmänvalvojaan.")."</font>";
+					return t("Tapahtui virhe synkronoidessa $type");
+				}
+				
 			}
 		}
 		else {

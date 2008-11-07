@@ -150,7 +150,9 @@
 						}
 						else {
 							echo "<font class='error'>".t("Laskua ei voitu tallentaa!")."</font><br>";
-						}						
+						}
+						
+						unlink($tyofile);						
 					}
 					else {
 						echo "<font class='error'>".t("Laskua ei löytynyt!")."</font><br>";

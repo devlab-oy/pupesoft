@@ -389,7 +389,7 @@ if(!function_exists("svnSyncMaintenanceFolders")) {
 			$dirName 		= "concat_ws(' ', nimi, if(nimitark='', NULL, ''), if(toim_ovttunnus='', NULL, concat('[', toim_ovttunnus, ']')))";
 			$oldDirName 	= trim("$oldRow[nimi] $oldRow[nimitark] [$oldRow[toim_ovttunnus]]");
 			$path 			= svnCustomers;
-			$templatePath 	= "";
+			$templatePath 	= svnCustomersDefaultDir;
 		}
 		elseif($type == "ASIAKKAAN_KOHDE") {
 			$query = "	SELECT liitostunnus

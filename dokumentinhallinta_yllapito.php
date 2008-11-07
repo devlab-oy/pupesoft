@@ -21,6 +21,28 @@ if($tee == "perusta_uusi" and (int) $tunnus > 0) {
 	echo "<br><br>";
 }
 
+if($tee == "luo_asiakaskansiot") {
+	$query = "	SELECT *
+				FROM asiakas
+				WHERE yhtio = '$kukarow[yhtio]'";
+	$result = mysql_query($query) or pupe_error($query);
+	while($row = mysql_fetch_array($result)) {
+		echo "Tarkastetaan asiakas {$row["nimi"]} {$row["nimitark"]}<br>";
+		svnSyncMaintenanceFolders("asiakas", $row["tunnus"]);
+		
+		//	Ja kohteet
+		$query = "	SELECT *
+					FROM asiakkaan_kohde
+					WHERE yhtio = '$kukarow[yhtio]' and liitostunnus = '$row[tunnus]'";
+		$kohderes = mysql_query($query) or pupe_error($query);
+		while($kohderow = mysql_fetch_array($kohderes)) {
+			var_dump(svnSyncMaintenanceFolders("asiakkaan_kohde", $kohderow["tunnus"]));
+		}
+		
+		flush();
+	}
+}
+
 echo "
 	<form action = '$PHP_SELF' method='POST'>
 	<input type='hidden' name='tee' value='perusta_uusi'>
@@ -39,6 +61,12 @@ echo "
 			</td>
 		</tr>
 	</table>
+	</form><br>";
+
+echo "
+	<form action = '$PHP_SELF' method='POST'>
+	<input type='hidden' name='tee' value='luo_asiakaskansiot'>
+	<input type = 'submit' value = 'Luo asiakaskansiot'>
 	</form>";
 
 ?>

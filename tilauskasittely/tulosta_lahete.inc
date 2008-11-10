@@ -1324,7 +1324,8 @@ if (!function_exists('rivi_viivakoodi_ean13')) {
 
 		$pdf->draw_text(45,  $kala, $row["tuoteno"],											$thispage, $norm);
 
-		$as_hinta = $row["myyntihinta"] * (1-$row["ale"]/100);
+//		$as_hinta = $row["myyntihinta"] * (1-$row["ale"]/100);
+		$as_hinta = $row["hinta"] * (1 - $row["ale"] / 100);
 
 		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $as_hinta), $norm);
 		$pdf->draw_text(475-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $as_hinta), 			$thispage, $norm);

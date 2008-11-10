@@ -105,7 +105,7 @@ if(!function_exists("makeSvnTarget")) {
 					$target = "";
 				}
 				
-				$target = svnMethod."://".svnUrl."/".svnPath."/".str_replace("%2F", "/", rawurlencode($target));
+				$target = svnMethod."://".svnUrl."/".svnPath."/".str_replace("%2F", "/", rawurlencode(utf8_encode($target)));
 			}
 		}
 	}
@@ -359,7 +359,7 @@ if(!function_exists("svnFindCustomerDir")) {
 		
 		if(svnStatus===false) return false;
 		
-		$query = "	SELECT concat_ws(' ', nimi, if(nimitark='', NULL, ''), if(toim_ovttunnus='', NULL, concat('[', toim_ovttunnus, ']'))) dir
+		$query = "	SELECT concat_ws(' ', nimi, if(nimitark='', NULL, nimitark), if(toim_ovttunnus='', NULL, concat('[', toim_ovttunnus, ']'))) dir
 					FROM asiakas
 					WHERE yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 		$res = mysql_query($query) or pupe_error($query);
@@ -386,8 +386,14 @@ if(!function_exists("svnSyncMaintenanceFolders")) {
 		
 		if($type == "ASIAKAS") {
 			$table 			= "asiakas";
-			$dirName 		= "concat_ws(' ', nimi, if(nimitark='', NULL, ''), if(toim_ovttunnus='', NULL, concat('[', toim_ovttunnus, ']')))";
-			$oldDirName 	= trim("$oldRow[nimi] $oldRow[nimitark] [$oldRow[toim_ovttunnus]]");
+			$dirName 		= "concat_ws(' ', nimi, if(nimitark='', NULL, nimitark), if(toim_ovttunnus='', NULL, concat('[', toim_ovttunnus, ']')))";
+			if($oldRow["toim_ovttunnus"] != "") {
+				$oldDirName 	= trim("$oldRow[nimi] $oldRow[nimitark] [$oldRow[toim_ovttunnus]]");	
+			}
+			else {
+				$oldDirName 	= trim("$oldRow[nimi] $oldRow[nimitark]");
+			}
+			
 			$path 			= svnCustomers;
 			$templatePath 	= svnCustomersDefaultDir;
 		}

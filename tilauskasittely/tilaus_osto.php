@@ -271,7 +271,7 @@
 
 			require('tulosta_ostotilaus.inc');
 
-			$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$kukarow[kesken]'";
+			$query = "UPDATE lasku SET alatila='A', lahetepvm = now() WHERE tunnus='$kukarow[kesken]'";
 			$result = mysql_query($query) or pupe_error($query);
 						
 			if ($toim == "HAAMU") {

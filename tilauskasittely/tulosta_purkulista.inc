@@ -356,10 +356,66 @@
 			$pdf->draw_text(315, $kala, $row["trhyllyalue"]." ".$row["trhyllynro"]." ".$row["trhyllyvali"]." ".$row["trhyllytaso"],		$firstpage, $p);
 
 			if ($vainlistaus != '') {
-				$pdf->draw_text(475, $kala, $t1[$row[tunnus]]." ".$t2[$row[tunnus]]." ".$t3[$row[tunnus]]." ".$t4[$row[tunnus]],		$firstpage, $p);
+				
+				$query = "	SELECT saldo, hyllyalue, hyllynro, hyllyvali, hyllytaso
+							FROM tuotepaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$row[tuoteno]'
+							and hyllyalue = '".$t1[$row[tunnus]]."'
+							and hyllynro = '".$t2[$row[tunnus]]."'
+							and hyllyvali = '".$t3[$row[tunnus]]."'
+							and hyllytaso = '".$t4[$row[tunnus]]."'";
+				$olesaldoresult = mysql_query($query) or pupe_error($query);
+				$olesaldorow = mysql_fetch_array($olesaldoresult);
+				
+				$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
+							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+							WHERE yhtio 	= '$kukarow[yhtio]'
+							and tyyppi 		in ('L','G','V')
+							and tuoteno		= '$row[tuoteno]'
+							and varattu    <> '0'
+							and laskutettu 	= ''
+							and hyllyalue	= '$olesaldorow[hyllyalue]'
+							and hyllynro 	= '$olesaldorow[hyllynro]'
+							and hyllyvali 	= '$olesaldorow[hyllyvali]'
+							and hyllytaso 	= '$olesaldorow[hyllytaso]'";
+				$hylresult = mysql_query($query) or pupe_error($query);
+				$hylrow = mysql_fetch_array($hylresult);
+
+				$hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
+				
+				$pdf->draw_text(475, $kala, $t1[$row[tunnus]]." ".$t2[$row[tunnus]]." ".$t3[$row[tunnus]]." ".$t4[$row[tunnus]]." (".$hyllyssa.") ",		$firstpage, $p);
 			}
 			else {
-				$pdf->draw_text(475, $kala, $row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"],		$firstpage, $p);
+				
+				$query = "	SELECT saldo, hyllyalue, hyllynro, hyllyvali, hyllytaso
+							FROM tuotepaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$row[tuoteno]'
+							and hyllyalue = '$row[hyllyalue]'
+							and hyllynro = '$row[hyllynro]'
+							and hyllyvali = '$row[hyllyvali]'
+							and hyllytaso = '$row[hyllytaso]'";
+				$olesaldoresult = mysql_query($query) or pupe_error($query);
+				$olesaldorow = mysql_fetch_array($olesaldoresult);
+				
+				$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
+							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+							WHERE yhtio 	= '$kukarow[yhtio]'
+							and tyyppi 		in ('L','G','V')
+							and tuoteno		= '$row[tuoteno]'
+							and varattu    <> '0'
+							and laskutettu 	= ''
+							and hyllyalue	= '$olesaldorow[hyllyalue]'
+							and hyllynro 	= '$olesaldorow[hyllynro]'
+							and hyllyvali 	= '$olesaldorow[hyllyvali]'
+							and hyllytaso 	= '$olesaldorow[hyllytaso]'";
+				$hylresult = mysql_query($query) or pupe_error($query);
+				$hylrow = mysql_fetch_array($hylresult);
+
+				$hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
+				
+				$pdf->draw_text(475, $kala, $row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
 			}
 
 		}

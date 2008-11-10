@@ -24,12 +24,12 @@ if($tee == "perusta_uusi" and (int) $tunnus > 0) {
 if($tee == "luo_asiakaskansiot") {
 	$query = "	SELECT *
 				FROM asiakas
-				WHERE yhtio = '$kukarow[yhtio]'";
+				WHERE yhtio = '$kukarow[yhtio]' and nimi != ''";
 	$result = mysql_query($query) or pupe_error($query);
 	while($row = mysql_fetch_array($result)) {
 		echo "Tarkastetaan asiakas {$row["nimi"]} {$row["nimitark"]}<br>";
 		svnSyncMaintenanceFolders("asiakas", $row["tunnus"]);
-		
+
 		//	Ja kohteet
 		$query = "	SELECT *
 					FROM asiakkaan_kohde
@@ -38,7 +38,7 @@ if($tee == "luo_asiakaskansiot") {
 		while($kohderow = mysql_fetch_array($kohderes)) {
 			var_dump(svnSyncMaintenanceFolders("asiakkaan_kohde", $kohderow["tunnus"]));
 		}
-		
+
 		flush();
 	}
 }

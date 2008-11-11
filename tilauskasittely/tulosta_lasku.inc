@@ -333,7 +333,7 @@ if (!function_exists('alku')) {
 		}
 
 		if ($yhtiorow["laskutyyppi"] == 1 or $yhtiorow["laskutyyppi"] == 4) {
-			$query 		= "SELECT ifnull(group_concat(distinct tunnus SEPARATOR ', '), 0) tilnot from lasku where yhtio='$kukarow[yhtio]' and laskunro='$laskurow[laskunro]' and tila = 'L'";
+			$query 		= "SELECT ifnull(group_concat(distinct tunnus SEPARATOR ', '), 0) tilnot from lasku where yhtio='$kukarow[yhtio]' and laskunro='$laskurow[laskunro]' and tila = 'L' and laskunro != 0";
 			$result  	= mysql_query($query) or pupe_error($query);
 			$apulaskuro = mysql_fetch_array($result);
 

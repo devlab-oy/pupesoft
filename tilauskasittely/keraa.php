@@ -1964,8 +1964,8 @@
 			}
 
 			echo "<th>";
-			echo "<input type='hidden' name='tilausnumeroita' id='tilausnumeroita' value='$tilausnumeroita'";
-			echo "<input type='submit' name='real_submit' value='".t("Merkkaa kerätyksi")."'></th></form></tr>";
+			echo "<input type='hidden' name='tilausnumeroita' id='tilausnumeroita' value='$tilausnumeroita'>";
+			echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa kerätyksi")."'></th></form></tr>";
 			echo "</table>";
 
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {

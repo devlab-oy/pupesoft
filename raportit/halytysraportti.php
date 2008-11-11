@@ -744,11 +744,11 @@
 					$excelsarake++;
 				}
 			}
-
+			
 			foreach ($valitut as $val) {
 				$rivi .= $sarakkeet[$val];
 		
-				if(isset($workbook)) {							
+				if(isset($workbook) and $sarakkeet[$val] != '') {					
 					$worksheet->write($excelrivi, $excelsarake, ucfirst($sarakkeet[$val]), $format_bold);
 					$excelsarake++;
 				}

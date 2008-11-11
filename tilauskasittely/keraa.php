@@ -59,7 +59,17 @@
 			$yhtiorow['karayksesta_rahtikirjasyottoon'] = '';
 		}
 	}
-
+	
+	
+	
+	if (isset($real_submit)) {
+		$real_submit = 'yes';
+		
+	}
+	else {
+		$real_submit = 'no';
+	}
+	
 	$var_lisa = "";
 
 	if ($yhtiorow["puute_jt_kerataanko"] == "J" or $yhtiorow["puute_jt_kerataanko"] == "Q") {
@@ -1954,9 +1964,8 @@
 			}
 
 			echo "<th>";
-			echo "<input type='hidden' name='real_submit' id='real_submit' value='no'>";
 			echo "<input type='hidden' name='tilausnumeroita' id='tilausnumeroita' value='$tilausnumeroita'";
-			echo "<input type='submit' value='".t("Merkkaa kerätyksi")."' onClick='javascript:document.getElementById(\"real_submit\").value=\"yes\";'></th></form></tr>";
+			echo "<input type='submit' name='real_submit' value='".t("Merkkaa kerätyksi")."'></th></form></tr>";
 			echo "</table>";
 
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {

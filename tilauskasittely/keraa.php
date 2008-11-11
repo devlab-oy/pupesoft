@@ -75,7 +75,7 @@
 	$mitkamuuttu = '';
 
 	if ($tee == 'P') {
-
+		
 		$query = "SELECT kerayslista from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
 		$testresult = mysql_query($query) or pupe_error($query);
 		$testrow = mysql_fetch_array($testresult);
@@ -186,8 +186,6 @@
 											and ostorivitunnus 	 = '$lisa_row[myyntirivitunnus]'
 											and myyntirivitunnus = 0";
 								$lisa_res = mysql_query($query) or pupe_error($query);
-
-								echo "$query<br>";
 							}
 
 							$keraysvirhe++;
@@ -203,6 +201,7 @@
 					}
 
 					// Päivitetään erä
+					
 					if ($era_new_paikka[$toimrow["tunnus"]] != $era_old_paikka[$toimrow["tunnus"]]) {
 
 						list($myy_hyllyalue, $myy_hyllynro, $myy_hyllyvali, $myy_hyllytaso, $myy_era) = explode("#", $era_new_paikka[$toimrow["tunnus"]]);
@@ -272,7 +271,7 @@
 							$lisa_res = mysql_query($query) or pupe_error($query);
 						}
 
-						$keraysvirhe++;
+						//$keraysvirhe++;
 					}
 				
 					$query = "	SELECT count(*) kpl
@@ -345,7 +344,7 @@
 						$query = "	UPDATE tilausrivi
 									SET yhtio=yhtio ";
 
-						if ($tilrivirow["var"] != "J" and $keraysvirhe == 0) {
+						if ($tilrivirow["var"] != "J" and $keraysvirhe == 0 and $real_submit == 'yes') {
 							//Muut kuin JT-rivit päivitetään aina kerätyiksi jos virhetsekit menivät ok
 							$query .= ", keratty = '$who',
 										 kerattyaika = now()";
@@ -877,8 +876,7 @@
 			}
 		}
 
-
-		if ($tee == 'P') {
+		if ($tee == 'P' and $real_submit == 'yes') {
 			if ($keraamaton > 0) {
 				// Jos tilauksella oli yhtään keräämätöntä riviä
 				$query = "	SELECT lasku.tunnus, lasku.vienti, lasku.tila, toimitustapa.rahtikirja, toimitustapa.tulostustapa
@@ -1271,7 +1269,7 @@
 
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
 
-		while ($row = mysql_fetch_array($result)){
+		while ($row = mysql_fetch_array($result)) {
 			$sel = '';
 			if (($row[0] == $tuvarasto) or ($kukarow['varasto'] == $row[0] and $tuvarasto=='')) {
 				$sel = 'selected';
@@ -1820,9 +1818,16 @@
 
 									$sel = "";
 
+									
+
 									if ($sarjarow["era"] == $alkurow["era"] and !in_array($row["var"], array("P","S")) and $alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]) {
 										$sel = "SELECTED";
 
+										$selpaikka = "$alkurow[hyllyalue]#$alkurow[hyllynro]#$alkurow[hyllyvali]#$alkurow[hyllytaso]#$alkurow[era]";
+									}
+									elseif (isset($_POST) and $_POST["era_new_paikka"][$row["tunnus"]] == "$alkurow[hyllyalue]#$alkurow[hyllynro]#$alkurow[hyllyvali]#$alkurow[hyllytaso]#$alkurow[era]") {
+										$sel = "SELECTED";
+										
 										$selpaikka = "$alkurow[hyllyalue]#$alkurow[hyllynro]#$alkurow[hyllyvali]#$alkurow[hyllytaso]#$alkurow[era]";
 									}
 
@@ -1860,7 +1865,7 @@
 							$kasittely = "";
 						}
 
-						echo "<td><select name='poikkeama_kasittely[$row[tunnus]]'>";
+						echo "<td><select name='poikkeama_kasittely[$row[tunnus]]' onchange='submit();'>";
 						echo "<option value='$kasittely'>".t("Oletus")."</option>";
 						echo "<option value='JT'>".t("JT")."</option>";
 						echo "<option value='PU'>".t("Puute")."</option>";
@@ -1948,7 +1953,10 @@
 				echo "<th></th>";
 			}
 
-			echo "<th><input type='submit' value='".t("Merkkaa kerätyksi")."'></th></form></tr>";
+			echo "<th>";
+			echo "<input type='hidden' name='real_submit' id='real_submit' value='no'>";
+			echo "<input type='hidden' name='tilausnumeroita' id='tilausnumeroita' value='$tilausnumeroita'";
+			echo "<input type='submit' value='".t("Merkkaa kerätyksi")."' onClick='javascript:document.getElementById(\"real_submit\").value=\"yes\";'></th></form></tr>";
 			echo "</table>";
 
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {

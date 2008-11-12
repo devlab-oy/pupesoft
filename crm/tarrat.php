@@ -33,13 +33,34 @@
 			$otunnus = substr($otunnu, 0, -1);
 		}
 
+		if (isset($rajaus)) {
+			$rajaus = unserialize(urldecode($rajaus));
+			$arvomatikka 		= $rajaus[0];
+			$tarra_aineisto 	= $rajaus[1];
+			$raportti			= $rajaus[2];
+			$toimas				= $rajaus[3];
+			$as_yht_tiedot		= $rajaus[4];
+		}
+		
+		$rajaus = array($arvomatikka, $tarra_aineisto, $raportti, $toimas, $as_yht_tiedot);
+		$rajaus = urlencode(serialize($rajaus));
+
 		if (count($komento) == 0) {
 			require("../inc/valitse_tulostin.inc");
 		}
 
-		$query = "	SELECT *
+		$joinilisa = "";
+		$selectilisa = "";
+		
+		if ($as_yht_tiedot == 'on') {
+			$selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli ";
+			$joinilisa = " LEFT JOIN yhteyshenkilo yht on yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus ";
+		}
+
+		$query = "	SELECT asiakas.* $selectilisa
 					FROM asiakas
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($otunnus)";
+					$joinilisa
+					WHERE asiakas.yhtio = '$kukarow[yhtio]' and asiakas.tunnus in ($otunnus)";
 		$res = mysql_query($query) or pupe_error($query);
 	    
 		$laskuri = 1;
@@ -60,8 +81,12 @@
 			$rivinpituus	= 27;
 			$sarakkeet 		= 3;
 			$rivit 			= 8;
+
+			if ($as_yht_tiedot == 'on') {
+				$sisalto .= "\n";
+				$sisalto .= "\n";
+			}
 		}
-		
 		
 		while ($row = mysql_fetch_array($res)) {
 			
@@ -110,11 +135,19 @@
 			
 			$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["nimi"]))."\n";
 			$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["nimitark"]))."\n";
+			if ($as_yht_tiedot == 'on' and $row["yht_nimi"] != '') {
+				$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["yht_nimi"]))."\n";
+			}
 			$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["osoite"]))."\n";
 			$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["postino"]." ".$row["postitp"]))."\n";
 			$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["maa"]))."\n";
 			
-			$sisalto .= "\n\n";
+			if ($as_yht_tiedot == 'on' and $row["yht_nimi"] != '') {
+				$sisalto .= "\n";
+			}
+			else {
+				$sisalto .= "\n\n";
+			}
 			
 			if ($raportti == 24 and $laskuri != $rivit) {
 				$sisalto .= "\n\n\n";
@@ -139,9 +172,10 @@
 				$laskuri = 0;
 				$sarake++;
 			}
+			
 			$laskuri++;
 		}
-				
+
 		//keksitään uudelle failille joku varmasti uniikki nimi:
 		list($usec, $sec) = explode(' ', microtime());
 		mt_srand((float) $sec + ((float) $usec * 100000));
@@ -151,10 +185,9 @@
 		fclose($fh);
 
 		$line = exec("a2ps -o ".$filenimi.".ps --no-header --columns=$sarakkeet -R --medium=a4 --chars-per-line=$rivinpituus_ps --margin=0 --major=columns --borders=0 $filenimi");
-		
+
 		// itse print komento...
 		if ($komento["Tarrat"] == 'email') {
-			
 			$liite = $filenimi.".ps";
 			$kutsu = "Tarrat.ps";
 			$ctype = "ps";
@@ -165,7 +198,7 @@
 			$cmd = $komento["Tarrat"]." ".$filenimi.".ps";
 			$line = exec($cmd);
 		}
-		
+
 		//poistetaan tmp file samantien kuleksimasta...
 		system("rm -f $filenimi");
 		system("rm -f ".$filenimi.".ps");
@@ -176,7 +209,7 @@
 
 	// Nyt selataan
 	if ($tee == '') {
-		$kentat = "nimi, osoite, postino, postitp, maa, ryhma, piiri";
+		$kentat = "nimi, osoite, postino, postitp, maa, ryhma, piiri, flag_1, flag_2, flag_3, flag_4";
 
 		$array = split(",", $kentat);
         $count = count($array);
@@ -203,7 +236,7 @@
 		}
 		
 		//haetaan omat asiakkaat
-		$query = "	SELECT nimi, osoite, postino, postitp, maa, ryhma, piiri, tunnus
+		$query = "	SELECT nimi, osoite, postino, postitp, maa, ryhma, piiri, flag_1, flag_2, flag_3, flag_4, tunnus
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]' 
 					and nimi != '' 
@@ -216,7 +249,8 @@
 		<input type='hidden' name='arvomatikka' value='$arvomatikka'>
 		<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>
 		<input type='hidden' name='raportti' value='$raportti'>
-		<input type='hidden' name='toimas' value='$toimas'>";
+		<input type='hidden' name='toimas' value='$toimas'>
+		<input type='hidden' name='as_yht_tiedot' value='$as_yht_tiedot'>";
 				
 		echo "<table><tr>";
 		echo "<th></th>";
@@ -233,7 +267,8 @@
 
 		echo "<form action = '$PHP_SELF' method = 'post'>
 				<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>
-				<input type='hidden' name='tee' value='TULOSTA'>";
+				<input type='hidden' name='tee' value='TULOSTA'>
+				<input type='hidden' name='as_yht_tiedot' value='$as_yht_tiedot'>";
 
 		while ($trow = mysql_fetch_array ($result)) {
 			
@@ -256,10 +291,15 @@
 		$otunnus = substr($otunnus,0,-1);
 
 		$tck = "";
+		$chk = "";
 		$sel = "";
 		
 		if ($toimas != "") {
 			$tck = "CHECKED";
+		}
+
+		if ($as_yht_tiedot != "") {
+			$chk = "CHECKED";
 		}
 		
 		$sel[$raportti] = "SELECTED";
@@ -267,6 +307,7 @@
 		echo "<table>";
 		echo "<tr><th>".t("Asiakasmemon viesti").":</th><td><input type='text' size='20' name='arvomatikka' value='$arvomatikka'></td></tr>";
 		echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas' value='on' $tck></td></tr>";
+		echo "<tr><th>".t("Luo aineisto yhteyshenkilön osoitetiedoista").":</th><td><input type='checkbox' name='as_yht_tiedot' value='on' $chk></td></tr>";
 		echo "<tr><th>".t("Valitse tarra-arkin tyyppi").":</th>
 				<td><select name='raportti'>
 				<option value='33' $sel[33]>33 ".t("Tarraa")."</option>

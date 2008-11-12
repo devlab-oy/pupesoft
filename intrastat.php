@@ -607,6 +607,11 @@
 			}
 		}
 
+		if (($lahetys == "mina" or $lahetys == "tuli" or $lahetys == "mole") and ($yhtiorow["tilastotullikamari"] == 0 or $yhtiorow["intrastat_sarjanro"] == "")) {
+			echo "<font class='error'>".t("Yhtiötiedoista puuttuu pakollisia tietoja (tilastotullikamari/intrastat_sarjanro)").!"</font>";
+			$virhe++;
+		}
+
 		// ei virheitä .. ja halutaan lähettää jotain meilejä
 		if ($virhe == 0 and $lahetys != "nope" and $kayttajan_valinta_maa == '' and $tapahtumalaji == "kaikki") {
 

@@ -215,7 +215,14 @@
         $count = count($array);
         for ($i=0; $i<=$count; $i++) {
 			if (strlen($haku[$i]) > 0) {
-				$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
+
+				if (isset($negaatio_haku) and $negaatio_haku == 'on') {
+					$lisa .= " and " . $array[$i] . " not like '%" . $haku[$i] . "%'";
+				}
+				else {
+					$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
+				}
+
 				$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
 			}
         }
@@ -234,7 +241,7 @@
 		else {
 			$limit = "LIMIT 1000";
 		}
-		
+
 		//haetaan omat asiakkaat
 		$query = "	SELECT nimi, osoite, postino, postitp, maa, ryhma, piiri, flag_1, flag_2, flag_3, flag_4, tunnus
 					FROM asiakas
@@ -256,11 +263,18 @@
 		echo "<th></th>";
 		
 		for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
-			echo "<th><a href='$PHP_SELF?ojarj=".mysql_field_table($result,$i).".".mysql_field_name($result,$i).$ulisa."&raportti=$raportti&tarra_aineisto=$tarra_aineisto&arvomatikka=$arvomatikka&toimas=$toimas'>".t(mysql_field_name($result,$i))."</a>";
+			echo "<th><a href='$PHP_SELF?ojarj=".mysql_field_table($result,$i).".".mysql_field_name($result,$i).$ulisa."&raportti=$raportti&tarra_aineisto=$tarra_aineisto&arvomatikka=$arvomatikka&toimas=$toimas&negaatio_haku=$negaatio_haku'>".t(mysql_field_name($result,$i))."</a>";
 
 			echo "<br><input type='text' size='10' name = 'haku[$i]' value = '$haku[$i]'></th>";
 		}
 
+		$neg_chk = '';
+
+		if (isset($negaatio_haku) and $negaatio_haku == 'on') {
+			$neg_chk = ' checked';
+		}
+
+		echo "<th valign='bottom'>".t("Negaatio")."<br><input type='checkbox' name='negaatio_haku'$neg_chk></th>";
 		echo "<th valign='bottom'><input type='Submit' value = '".t("Etsi")."'></th></tr>";
 		echo "</form>";
 

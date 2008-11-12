@@ -129,6 +129,11 @@
 			}
 		}
 	}
+		
+	if ($tee == "TULOSTAPDF") {
+		$komento["Ostotilaus"] = "email";
+		require("tulosta_vahvistamattomista_ostoriveista.inc");
+	}	
 			
 	if (isset($laskurow)) {
 		echo "<table width='720' cellpadding='2' cellspacing='1' border='0'>";
@@ -168,7 +173,7 @@
 		}
 
 		echo "<td><select name='nayta_rivit' onchange='submit();'>";
-		echo "<option value=''>".t("Kaikki avoimet rivit")."</option>";;
+		echo "<option value=''>".t("Kaikki avoimet rivit")."</option>";
 		echo "<option value='vahvistamattomat' $select>".t("Vain vahvistamattomia rivejä")."</option></td>";
 
 		echo "</form></td></tr></table><br>";
@@ -189,6 +194,17 @@
 				<input type='text' name='toimkk' value='$toimkk' size='3'>
 				<input type='text' name='toimvv' value='$toimvv' size='6'></td>
 				<td><input type='Submit' value='".t("Päivitä")."'></form></td></tr></table><br>";	
+		
+		echo "	<table>
+				<form action='$PHP_SELF' method='post'>
+				<input type='hidden' name='ytunnus' value = '$ytunnus'>
+				<input type='hidden' name='toimittajaid' value = '$toimittajaid'>
+				<input type='hidden' name='otunnus' value = '$otunnus'>
+				<input type='hidden' name='tee' value = 'TULOSTAPDF'>";
+
+		echo "<tr><th>".t("Tulosta vahvistamattomat rivit").": </th><td valign='middle'>
+				<td><input type='Submit' value='".t("Tulosta")."'></form></td></tr></table><br>";
+			
 	
 		//Haetaan kaikki tilausrivit
 		echo "<b>".t("Tilausrivit").":</b><hr>";

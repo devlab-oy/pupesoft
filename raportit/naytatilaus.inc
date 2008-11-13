@@ -298,6 +298,24 @@
 	if (trim($laskurow['viesti']) != '') {
 		$komm .= "\n".t("Lisätietoja").":###".$laskurow['viesti'];
 	}
+	
+	if ($laskurow['tilaustyyppi'] == 'R' or $laskurow['tilaustyyppi'] == 'T') {
+		$query  = "	SELECT komm1, komm2
+					from tyomaarays
+					where yhtio='$kukarow[yhtio]'
+					and otunnus = '$laskurow[tunnus]'";
+		$reklaresult = mysql_query($query) or pupe_error($query);
+		$reklarow = mysql_fetch_array($reklaresult);
+		
+		if (trim($reklarow['komm1']) != '') {
+			$komm .= "\n".t("Työn kuvaus").":###".wordwrap(str_replace("\n","\n###", $reklarow['komm1']), 90, "\n###");
+		}
+		
+		if (trim($reklarow['komm2']) != '') {
+			$komm .= "\n".t("Sisäiset kommentit").":###".wordwrap(str_replace("\n","\n###", $reklarow['komm2']), 90, "\n###");
+		}
+		
+	}
 
 	if (trim($laskurow['comments']) != '') {
 		$komm .= "\n".t("Kommentti")." 1:###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
@@ -314,14 +332,14 @@
 	if ($laskurow["noutaja"] != '') {
 		$komm .= "\n".t("Noutaja").":###$laskurow[noutaja]";
 	}
-
+	
 	if ($komm != "") {
 		$kommentit = explode("\n", trim($komm));
-
+		
 		foreach($kommentit as $kommentti) {
 
 			list($o, $v) = explode("###", $kommentti);
-
+			
 			echo "<tr><th>$o</th><td colspan='8'>$v</td></tr>";
 		}
 	}

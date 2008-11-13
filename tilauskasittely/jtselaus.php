@@ -528,6 +528,9 @@
 		if ($tilaus_on_jo == "KYLLA" and $asiakasid != '') {
 			$laskulisa .= " and lasku.liitostunnus = '$asiakasid' ";
 		}
+		elseif ($tilaus_on_jo == "" and $asiakasid != '') {
+			$laskulisa .= " and lasku.liitostunnus = '$asiakasid' ";
+	  	}
 		elseif ($tilaus_on_jo == "" and $asiakasno != '') {
 			$laskulisa .= " and lasku.ytunnus = '$asiakasno' ";
 		}

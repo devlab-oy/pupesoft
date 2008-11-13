@@ -6,7 +6,7 @@ require ("inc/connect.inc");
 require ("inc/functions.inc");
 
 function tee_viesti() {
-	global $row;
+	global $row, $kieli;
 	
 	$viesti = sprintf("%-8s", $row["tarjous"]);
 	$viesti .= sprintf("%-5s", $row["seuranta"]);
@@ -17,10 +17,10 @@ function tee_viesti() {
 					WHERE yhtio = '$row[yhtio]' and tunnus = '$row[yhteyshenkilo_tekninen]'";
 		$result = mysql_query($query) or pupe_error($query);					
 		$yrow = mysql_fetch_array($result);
-		$viesti .= sprintf("%-14s", "Yhteyshenkilö:")." $yrow[nimi]\n";
-		$viesti .= sprintf("%-14s", "Gsm:")." $yrow[gsm]\n";
-		$viesti .= sprintf("%-14s", "Puh:")." $yrow[puh]\n";
-		$viesti .= sprintf("%-14s", "email:")." $yrow[email]\n";
+		$viesti .= sprintf("%-14s", t("Yhteyshenkilö", $kieli).":")." $yrow[nimi]\n";
+		$viesti .= sprintf("%-14s", t("Gsm", $kieli).":")." $yrow[gsm]\n";
+		$viesti .= sprintf("%-14s", t("Puh").":")." $yrow[puh]\n";
+		$viesti .= sprintf("%-14s", t("email").":")." $yrow[email]\n";
 	}
 	$viesti .= "\n";
 	
@@ -28,7 +28,7 @@ function tee_viesti() {
 }
 
 function mailaa() {
-	global $row, $edlaatija, $viesti_1, $viesti_2, $viesti_3, $viesti_4;
+	global $row, $edlaatija, $viesti_1, $viesti_2, $viesti_3, $viesti_4, $kieli;
 	
 	if($viesti_4.$viesti_3.$viesti_2.$viesti_1 != "") {
 		$query = "	SELECT * 
@@ -37,7 +37,7 @@ function mailaa() {
 		$result = mysql_query($query) or pupe_error($query);
 		$yrow = mysql_fetch_array($result);
 
-		$viesti = "\n\nTässä olisi vähän listaa kelle pitäis ensiviikolla soitella!\n\n$viesti_1\n$viesti_2\n$viesti_3\n\n\n$viesti_4";
+		$viesti = "\n\n".t("Tässä olisi vähän listaa kelle pitäis ensiviikolla soitella!", $kieli)."\n\n$viesti_1\n$viesti_2\n$viesti_3\n\n\n$viesti_4";
 
 		$viesti_1 = $viesti_2 = $viesti_3 = $viesti_4 = "";
 
@@ -47,7 +47,7 @@ function mailaa() {
 		return true;
 	}
 	
-	return mail($yrow["eposti"], "Tarjousmuistutus!", $viesti);
+	return mail($yrow["eposti"], t("Tarjousmuistutus!", $kieli), $viesti);
 }
 
 
@@ -77,14 +77,14 @@ while($row=mysql_fetch_array($result)) {
 	//	Jos meidän 1. kontakti asiakkaalle sijoittuu seuraavalle viikolle
 	if($row["kulunut"] >= 9 and $row["kulunut"] <= 14) {
 		if($viesti_1 == "") {
-			$viesti_1 = "Ensiviikolla 1. kontaktit asiakkaisiin\n";
+			$viesti_1 = t("Ensiviikolla 1. kontaktit asiakkaisiin", $kieli)."\n";
 		}
 		$viesti_1 .= tee_viesti();
 	}
 	//	Jos meidän 2. kontakti asiakkaalle sijoittuu seuraavalle viikolle
 	elseif($row["kulunut"] >= 40 and $row["kulunut"] <= 45) {
 		if($viesti_2 == "") {
-			$viesti_2 = "Ensiviikolla 2. kontaktit asiakkaisiin\n";
+			$viesti_2 = t("Ensiviikolla 2. kontaktit asiakkaisiin", $kieli)."\n";
 		}
 		$viesti_2 .= tee_viesti();
 	}
@@ -92,13 +92,13 @@ while($row=mysql_fetch_array($result)) {
 
 	if($row["pva"] >= 0 and $row["pva"] <= 6) {
 		if($viesti_3 == "") {
-			$viesti_3 = "Seuraavien asiakkaiden tarjoukset umpeutuvat ensiviikolla\n";
+			$viesti_3 = t("Seuraavien asiakkaiden tarjoukset umpeutuvat ensiviikolla", $kieli)."\n";
 		}
 		$viesti_3 .= tee_viesti();
 	}
 	elseif($row["pva"] < 0) {
 		if($viesti_4 == "") {
-			$viesti_4 = "SEURAAVAT TARJOUKSET OVAT JO UMPEUTUNEET JA KÄSITTELEMÄTTÄ!!!\n";
+			$viesti_4 = t("SEURAAVAT TARJOUKSET OVAT JO UMPEUTUNEET JA KÄSITTELEMÄTTÄ!!!", $kieli)."\n";
 		}
 		$viesti_4 .= tee_viesti();		
 	}

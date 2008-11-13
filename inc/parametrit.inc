@@ -10,13 +10,14 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(_
 unset($postProcessVariables);
 
 if(!function_exists("iconv_array")) {
-	function iconv_array($key, &$item) {
+	function iconv_array(&$item, $key) {
 		global $_REQUEST, $serc, $repl, $postProcessVariables;
+		
 		if(isset($_REQUEST["dont_str_replace"])) {
-			$item = strip_tags(iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", str_replace($serc, $repl, $item)), "<br>");
+			$item = strip_tags(iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", ($item)), "<br>");
 		}
 		else {
-			$item = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", $item);
+			$item = iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", str_replace($serc, $repl, $item));
 		}
 	}
 }
@@ -97,17 +98,17 @@ if(isset($postProcessVariables)) {
 	$postProcessVariables = array_flip($flip);
 	
 	if(!function_exists("mysqlrecescape")) {
-		function mysqlrecescape ($key, &$item) {
+		function mysqlrecescape (&$item, $key) {
 			$item = mysql_real_escape_string($item);
 		}
 	}
 	
 	foreach($postProcessVariables as $postProcessVariable) {
 		if(is_array(${$postProcessVariable})) {
-			${$postProcessVariable} = ${$postProcessVariable} = array_walk_recursive(${$postProcessVariable}, "mysqlrecescape");
+			array_walk_recursive(${$postProcessVariable}, "mysqlrecescape");
 		}
 		else {
-			${$postProcessVariable} = ${$postProcessVariable} = mysql_real_escape_string(${$postProcessVariable});
+			${$postProcessVariable} = mysql_real_escape_string(${$postProcessVariable});
 		}
 	}
 }

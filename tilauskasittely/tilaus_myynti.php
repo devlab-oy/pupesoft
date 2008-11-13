@@ -2987,7 +2987,7 @@ if ($tee == '') {
 					$sel = "SELECTED";
 				}
 
-				$menuset .= "<option value='haku' $sel>Tuotehaku</option>";
+				$menuset .= "<option value='haku' $sel>".t("Tuotehaku")."</option>";
 				$menuset .= "</select>";
 
 				//	Tehdään paikka menusetille
@@ -4952,53 +4952,53 @@ if ($tee == '') {
 							$tarkres = mysql_query($query) or pupe_error($query);
 
 							if (mysql_num_rows($tarkres) > 0) {
-								echo "<option value='TARJOUS!!!VL'>Tarjous VL</option>";
+								echo "<option value='TARJOUS!!!VL'>".("Tarjous VL")."</option>";
 							}
 
 							$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='tilauskasittely/tulostakopio.php' and alanimi='TARJOUS!!!BR' LIMIT 1";
 							$tarkres = mysql_query($query) or pupe_error($query);
 
 							if (mysql_num_rows($tarkres) > 0) {
-								echo "<option value='TARJOUS!!!BR'>Tarjous BR</option>";
+								echo "<option value='TARJOUS!!!BR'>".t("Tarjous BR")."</option>";
 							}
 						}
 						if (file_exists("tulosta_tilausvahvistus_pdf.inc")) {
-							echo "<option value='TILAUSVAHVISTUS'>Tilausvahvistus</option>";
+							echo "<option value='TILAUSVAHVISTUS'>".t("Tilausvahvistus")."</option>";
 						}
 						if (file_exists("tulosta_myyntisopimus.inc")) {
-							echo "<option value='MYYNTISOPIMUS'>Myyntisopimus</option>";
+							echo "<option value='MYYNTISOPIMUS'>".t("Myyntisopimus")."</option>";
 
 							$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='tilauskasittely/tulostakopio.php' and alanimi='MYYNTISOPIMUS!!!VL' LIMIT 1";
 							$tarkres = mysql_query($query) or pupe_error($query);
 
 							if (mysql_num_rows($tarkres) > 0) {
-								echo "<option value='MYYNTISOPIMUS!!!VL'>Myyntisopimus VL</option>";
+								echo "<option value='MYYNTISOPIMUS!!!VL'>".t("Myyntisopimus VL")."</option>";
 							}
 
 							$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='tilauskasittely/tulostakopio.php' and alanimi='MYYNTISOPIMUS!!!BR' LIMIT 1";
 							$tarkres = mysql_query($query) or pupe_error($query);
 
 							if (mysql_num_rows($tarkres) > 0) {
-								echo "<option value='MYYNTISOPIMUS!!!BR'>Myyntisopimus BR</option>";
+								echo "<option value='MYYNTISOPIMUS!!!BR'>".t("Myyntisopimus BR")."</option>";
 							}
 						}
 						if (file_exists("tulosta_osamaksusoppari.inc")) {
-							echo "<option value='OSAMAKSUSOPIMUS'>Osamaksusopimus</option>";
+							echo "<option value='OSAMAKSUSOPIMUS'>".t("Osamaksusopimus")."</option>";
 						}
 						if (file_exists("tulosta_luovutustodistus.inc")) {
-							echo "<option value='LUOVUTUSTODISTUS'>Luovutustodistus</option>";
+							echo "<option value='LUOVUTUSTODISTUS'>".t("Luovutustodistus")."</option>";
 						}
 						if (file_exists("tulosta_vakuutushakemus.inc")) {
-							echo "<option value='VAKUUTUSHAKEMUS'>Vakuutushakemus</option>";
+							echo "<option value='VAKUUTUSHAKEMUS'>".t("Vakuutushakemus")."</option>";
 						}
 						if (file_exists("../tyomaarays/tulosta_tyomaarays.inc")) {
-							echo "<option value='TYOMAARAYS'>Työmäärys</option>";
+							echo "<option value='TYOMAARAYS'>".t("Työmäärys")."</option>";
 						}
 						if (file_exists("tulosta_rekisteriilmoitus.inc")) {
-							echo "<option value='REKISTERIILMOITUS'>Rekisteröinti-ilmoitus</option>";
+							echo "<option value='REKISTERIILMOITUS'>".t("Rekisteröinti-ilmoitus")."</option>";
 						}
 						if ($toim == "PROJEKTI") {
-							echo "<option value='TILAUSVAHVISTUS'>Tilausvahvistus</option>";
+							echo "<option value='TILAUSVAHVISTUS'>".t("Tilausvahvistus")."</option>";
 						}
 
 						echo "		</select>

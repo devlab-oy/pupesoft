@@ -406,6 +406,11 @@
 
 			//	Tämä funktio tekee myös oikeustarkistukset!
 			synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
+			
+			if(in_array(strtoupper($toim), array("ASIAKAS", "ASIAKKAAN_KOHDE")) and $yhtiorow["dokumentaatiohallinta"] != "") {
+				svnSyncMaintenanceFolders(strtoupper($toim), $tunnus, $trow);
+			}
+			
 
 			// Siirrytään takaisin sieltä mistä tultiin
 			if ($lopetus != '' and (isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset))) {
@@ -994,7 +999,7 @@
 		}
 
 		if ($toim == "asiakas" and $uusi != 1) {
-			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ja päivitä tiedot myös avoimille tilauksille'>";
+			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille tilauksille")."'>";
 		}
 
 		if($lukossa == "ON") {

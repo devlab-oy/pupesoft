@@ -1877,7 +1877,6 @@
 	}
 	
 	if($kaletee == "TALLENNA_KALENTERITAPAHTUMA") {
-		
 		$kalenteri = muistista("kalenteri", "kalenteri");
 		if(!is_array($kalenteri)) {
 			die("OHO! Kalenterin meni rikki!");
@@ -2022,20 +2021,49 @@
 						kentta10 		= '$kentta10'";
 			$query .= $kysely.$where;
 			$result = mysql_query($query) or pupe_error($query);
+
 			//die($query);
 			if(count($jakelu)) {
 				
-				$to = "";
-				//	Haetaan kaikki listata
-				$query = "	SELECT nimi, eposti
-							FROM kuka
-							WHERE yhtio = '$kukarow[yhtio]' and kuka IN ('".str_replace(",","','", implode(",", $jakelu))."') and eposti != ''";
-				$jres = mysql_query($query) or pupe_error($query);
-				if(mysql_num_rows($jres)>0) {
+				//	Otetaan listasta emailosoitteet pois..
+				unset($osoitteet);
+				unset($kayttajat);
+				foreach($jakelu as $j) {
+					if(strpos($j, "@")) {
+						$osoitteet[] = array(	"email" => $j);
+					}
+					else {
+						$kayttajat[] = $j;
+					}
+				}
+				
+				if(isset($kayttajat)) {
+					//	Haetaan kaikki listata
+					$query = "	SELECT nimi, eposti
+								FROM kuka
+								WHERE yhtio = '$kukarow[yhtio]' and kuka IN ('".str_replace(",","','", implode(",", $kayttajat))."') and eposti != ''";
+					$jres = mysql_query($query) or pupe_error($query);
+					if(mysql_num_rows($jres)>0) {
+						while($jrow = mysql_fetch_array($jres)) {
+							$osoitteet[] = array(	"email" => $jrow["eposti"],
+													"nimi" => $jrow["nimi"]);
+						}
+					}
+				}
+				
+				if(count($osoitteet) > 0) {
 					
-					while($jrow = mysql_fetch_array($jres)) {
+					//	Muodostetaan TO
+					$to = "";
+					
+					foreach($osoitteet as $o) {
 						if($to != "") $to .= ", ";
-						$to .= "=?iso-8859-1?Q?".imap_8bit($jrow["nimi"])."?= <{$jrow["eposti"]}>";
+						if($o["nimi"] == "") {
+							$to .= "{$o["email"]}";
+						}
+						else {
+							$to .= "=?iso-8859-1?Q?".imap_8bit($o["nimi"])."?= <{$o["email"]}>";
+						}
 					}
 					
 					//	melkosta..
@@ -2119,7 +2147,7 @@
 								WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$otunnus'";
 					$abures = mysql_query($query) or pupe_error($query);
 					$aburow = mysql_fetch_array($abures);
-					
+
 					$msg .= "\n$viesti\n";
 					if(mail($to, "=?iso-8859-1?Q?".imap_8bit($subject)."?=", $msg, $header, " -f {$kukarow["eposti"]}")) {
 						if(mysql_num_rows($jres) > 1) {
@@ -2132,7 +2160,7 @@
 					else {
 						echo "<font class='error'>".t("Sähköpostin lähetys epäonnistui")."</font>";
 					}
-				}
+				}				
 			}
 
 			die("<script LANGUAGE='JavaScript'>sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false); document.body.removeChild(document.getElementById('ajax_menu'))</script></body></html>");
@@ -2161,7 +2189,7 @@
 			die("OHO! Kalenterin meni rikki!");
 		}
 
-		echo "data:<pre>".print_r($_REQUEST, true)."</pre>";
+		//echo "data:<pre>".print_r($_REQUEST, true)."</pre>";
 		
 		if($ktunnus > 0) {
 			$muokkaus = 1;
@@ -2378,9 +2406,8 @@
 		$klo_loppu 		= "<input type = 'text' name='lohh' value = '".date("H", $lopvm)."' size = '3'>:<input type = 'text' name='lomm' value = '".date("i", $lopvm)."' size = '3'>";
 		$paiva_loppu	= "<input type = 'text' name='lopp' value = '".date("d", $lopvm)."' size = '3'><input type = 'text' name='lokk' value = '".date("m", $lopvm)."' size = '3'><input type = 'text' name='lovv' value = '".date("Y", $lopvm)."' size = '5'>";		
 		
-		if($otunnus > 0 or $tarjous > 0 or $ktunnus>0) {
-			if($liitostunnus == 0) echo "<font class='error'>".t("Liitostunnus katosi!")."</font>";
-			$asiakas = "<input type='hidden' name='liitostunnus' value='$liitostunnus'>$asiakasrow[nimi] $asiakasrow[nimitark] kivi";
+		if($otunnus > 0 or $tarjous > 0) {
+			$asiakas = "<input type='hidden' name='liitostunnus' value='$liitostunnus'>$asiakasrow[nimi] $asiakasrow[nimitark]";
 		} 
 		else {
 			$asiakas = nayta_asiakashaku($liitostunnus, "kaleForm");

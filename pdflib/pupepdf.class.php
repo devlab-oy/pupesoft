@@ -256,7 +256,6 @@ class PDF extends pdffile {
 
 			//	mennään liian leveeksi!
 			if($tw > $wmax) {
-				echo "IIK $tw > $wmax";
 				$s[] = $wmax;
 				return $s;
 			}

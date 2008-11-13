@@ -233,7 +233,7 @@ if (!function_exists('tulosta_lasku')) {
 							$h-=$pdf->ln();					
 							$nb=$pdf->countParagraphHeight($laskurow[$key], "norm", (-1*($s[0]-5)));										
 							$pdf->writeToTemplate($h, $nb, $s[0], 0, $laskurow[$key], "norm", "L", "", $tid);
-							$h-=$pdf->ln($nb)+0.25;
+							$h-=$pdf->ln($nb);
 						}
 					}
 
@@ -543,10 +543,12 @@ if (!function_exists('tulosta_lasku')) {
 					$pdf->write($h, 1, $offset, $s[0], $row["otunnus"]."/", $style_komm, "L", "I");	
 					$h-=$pdf->ln();
 				}
-
+				
+				$h-=$pdf->ln(0.5);
+				
 				if ($row["alv"] >= 500) {
 					$pdf->write($h, 1, 5+$offset, $s[0], t("Ei sisällä vähennettävää veroa", $kieli), "snadi", "L", "I");	
-					$h-=$pdf->ln();
+					$h-=$pdf->ln(1.5);
 				}
 
 				//	Oisko sarjanumeroita
@@ -590,7 +592,7 @@ if (!function_exists('tulosta_lasku')) {
 
 				if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
 					$pdf->write($h, 1, 5+$offset, 0, t("RS-koodi", $kieli).": $laskurow[asiakkaan_kohde]-$row[asiakkaan_positio]", "snadi", "L", "I");
-					$h-=$pdf->ln()+0.25;
+					$h-=$pdf->ln();
 				}
 				
 				if($rivi=="isa") {

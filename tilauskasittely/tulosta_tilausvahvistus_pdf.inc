@@ -360,11 +360,13 @@
 						if($row["kommentti"] != "") {
 							$from = array("%se", "%ed");
 							$to = array("seuraava kausi", "edeltävä kausi");
-							$nb=$pdf->countParagraphHeight(str_replace($from, $to, $row["kommentti"]), "snadi", ($s[0]-5));
+							$nb=$pdf->countParagraphHeight(str_replace($from, $to, $row["kommentti"]), $style_komm, ($s[0]-5));
 							$pdf->write($h, $nb, 5+$offset, $s[0], str_replace($from, $to, $row["kommentti"]), $style_komm, "L", "I");
-							$h-=$pdf->ln($nb)+0.25;
+							$h-=$pdf->ln($nb);
 						}
-
+						
+						$h-=$pdf->ln(0.5);
+						
 						//	Oisko sarjanumeroita
 						if ($row["kpl"]+$row["varattu"] > 0){
 							$sarjanutunnus = "myyntirivitunnus";
@@ -390,7 +392,7 @@
 
 						if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
 							$pdf->write($h, 1, 5+$offset, $s[0], t("RS-koodi", $kieli).": $laskurow[asiakkaan_kohde]-$row[asiakkaan_positio]", $style_komm, "L", "I");
-							$h-=$pdf->ln()+0.25;
+							$h-=$pdf->ln();
 						}
 
 						$h-=$pdf->ln();

@@ -80,6 +80,44 @@ if (!isset($tee) or $tee == '') {
 			}
 			echo "</table><br><br>";
 		}
+		
+		$query = "	SELECT tunnus, nimi, luontiaika
+					FROM lasku use index (tila_index)
+					WHERE yhtio = '$kukrow[yhtio]' 
+					and myyja='$kukarow[tunnus]'
+					and tila in ('N','L') 
+					and alatila != 'X' 
+					and chn = '999'";
+		$result = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($result) > 0) {
+			echo "<table width='100%'>";
+
+			// ei näytetä suotta firman nimeä, jos käyttäjä kuuluu vaan yhteen firmaan
+			if (mysql_num_rows($kukres) == 1) $kukrow["nimi"] = "";
+
+			echo "<tr><td colspan='".mysql_num_fields($result)."' class='back'><font class='head'>".t("Laskutuskiellossa olevat laskusi")." $kukrow[nimi]</font><hr></td></tr>";
+			
+			if (mysql_num_rows($result) > 0) {
+				for ($i = 0; $i < mysql_num_fields($result); $i++) {
+					echo "<th>" . t(mysql_field_name($result,$i))."</th>";
+				}
+				while ($trow=mysql_fetch_array ($result)) {
+					echo "<tr>";
+					for ($i=0; $i<mysql_num_fields($result); $i++) {
+												
+						if (mysql_field_name($result,$i) == "tunnus" and $kukrow["yhtio"] == $kukarow["yhtio"]) {
+							echo "<td><a href='muokkaatilaus.php?toim=LASKUTUSKIELTO&etsi=".$kukarow["kuka"]."'>$trow[$i]</a></td>";
+						}
+						else {
+							echo "<td>$trow[$i]</td>";
+						}
+					}
+					echo "</tr>";
+				}
+			}
+			echo "</table><br><br>";
+		}
 
 	}
 

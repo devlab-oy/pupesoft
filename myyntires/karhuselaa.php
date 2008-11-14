@@ -101,6 +101,20 @@ if (isset($_POST['tee']) and $_POST['tee'] == 'Hae') {
 			$la_res = mysql_query($query) or pupe_error($query);
 			$tunnukset = mysql_fetch_array($la_res);
 
+			if ($toim == "TRATTA") {
+				$yhtiorow['karhuerapvm'] = 7; // tämä on hardcoodattu tratan tulostukseen
+			}
+
+			if ($yhtiorow['karhuerapvm'] > 0) {
+				$paiva = substr($row["pvm"], 8, 2);
+				$kuu   = substr($row["pvm"], 5, 2);
+				$year  = substr($row["pvm"], 0, 4);
+				$erapaiva = tv1dateconv(date("Y-m-d",mktime(0, 0, 0, $kuu, $paiva+$yhtiorow['karhuerapvm'], $year)));
+			}
+			else {
+				$erapaiva = t("HETI");
+			}
+
 			echo "<tr>
 					<td valign='top'>$row[ktunnus]</td>	
 					<td valign='top'>$row[ytunnus]</td>
@@ -109,7 +123,7 @@ if (isset($_POST['tee']) and $_POST['tee'] == 'Hae') {
 					<td valign='top'>$row[summa]</td>
 					<td valign='top'>$row[saldo_maksettu]</td>
 					<td valign='top'>".tv1dateconv($row['pvm'])."</td>
-					<td valign='top'>".tv1dateconv($row['erpcm'])."</td>
+					<td valign='top'>$erapaiva</td>
 					<td valign='top' style='text-align: right;'>$karhuttu[kertoja]</td>
 					<td valign='top' class='back'>";
 

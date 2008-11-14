@@ -21,7 +21,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
-	function alku () {
+	function alku ($trattakierros_tunnus = '') {
 		global $pdf, $asiakastiedot, $yhteyshenkilo, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli;
 
 		$firstpage = $pdf->new_page("a4");
@@ -60,7 +60,21 @@
 		$pdf->draw_rectangle(800, 300, 779, 580, 				$firstpage, $rectparam);
 		$pdf->draw_rectangle(800, 420, 779, 580, 				$firstpage, $rectparam);
 		$pdf->draw_text(310, 792, t("Päivämäärä", $kieli), 		$firstpage, $pieni);
-		$pdf->draw_text(310, 782, date('Y-m-d'), 				$firstpage, $norm);
+
+		if ($trattakierros_tunnus != "") {
+			$query = "	SELECT pvm 
+						FROM karhukierros 
+						WHERE tunnus = '$trattakierros_tunnus'
+						LIMIT 1";
+			$pvm_result = mysql_query($query) or pupe_error($query);
+			$pvm_row = mysql_fetch_array($pvm_result);
+		}
+		else {
+			$pvm_row = array();
+			$pvm_row["pvm"] = date("Y-m-d");
+		}
+
+		$pdf->draw_text(310, 782, tv1dateconv($pvm_row["pvm"]),	$firstpage, $norm);
 		$pdf->draw_text(430, 792, t("Asiaa hoitaa", $kieli), 	$firstpage, $pieni);
 		$pdf->draw_text(430, 782, $yrow["nimi"], 				$firstpage, $norm);
 
@@ -302,7 +316,7 @@
 		$karhukierros=uusi_karhukierros($kukarow['yhtio']);
 	}
 
-	$firstpage = alku();
+	$firstpage = alku($karhutunnus);
 
 	$summa=0.0;
 	while ($row = mysql_fetch_array($result)) {

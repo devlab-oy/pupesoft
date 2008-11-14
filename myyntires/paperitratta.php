@@ -68,10 +68,16 @@
 						LIMIT 1";
 			$pvm_result = mysql_query($query) or pupe_error($query);
 			$pvm_row = mysql_fetch_array($pvm_result);
+			$paiva = substr($pvm_row["pvm"], 8, 2);
+			$kuu   = substr($pvm_row["pvm"], 5, 2);
+			$year  = substr($pvm_row["pvm"], 0, 4);			
 		}
 		else {
 			$pvm_row = array();
 			$pvm_row["pvm"] = date("Y-m-d");
+			$paiva = date("j");
+			$kuu   = date("n");
+			$year  = date("Y");
 		}
 
 		$pdf->draw_text(310, 782, tv1dateconv($pvm_row["pvm"]),	$firstpage, $norm);
@@ -82,9 +88,6 @@
 		$pdf->draw_rectangle(779, 420, 758, 580, $firstpage, $rectparam);
 		$pdf->draw_text(310, 771, t("Eräpäivä", $kieli), $firstpage, $pieni);
 
-		$paiva	   = date("j");
-		$kuu   	   = date("n");
-		$year  	   = date("Y");
 		$seurday   = date("j",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
 		$seurmonth = date("n",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
 		$seuryear  = date("Y",mktime(0, 0, 0, $kuu, $paiva+7,  $year));

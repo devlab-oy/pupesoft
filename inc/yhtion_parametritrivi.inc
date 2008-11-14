@@ -1707,4 +1707,22 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "lisakulun_lisays") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		/*1) lisäkulu kaikkiin laskuihin 2) kaikki paitsi käteinen 3) kaikki paitsi nouto.*/
+		$ulos .= "<option value = ''>".t("Ei lisätä")."</option>";
+		$ulos .= "<option value = 'L' $sel[L]>".t("Lisäkulu kaikkiin laskuihin")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Kaikkiin paitsi käteislaskuihin")."</option>";
+		$ulos .= "<option value = 'N' $sel[N]>".t("Kaikkiin paitsi Noutolaskuihin")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

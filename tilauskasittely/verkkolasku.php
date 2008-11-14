@@ -793,17 +793,57 @@
 				}
 
 				// katsotaan halutaanko laskuille lisätä lisäkulu prosentti
-				if ($yhtiorow["lisakulu_tuotenumero"] != "" and $yhtiorow["lisakulu_prosentti"] > 0) {
+				if ($yhtiorow["lisakulu_tuotenumero"] != "" and $yhtiorow["lisakulu_prosentti"] > 0 and $yhtiorow["lisakulun_lisays"] != "") {
 
 					$tulos_ulos .= t("Lisätään laskulle lisäkulu")."<br>\n";
 					$yhdista = array();
-
-					// tehdään ketjutus (group by PITÄÄ OLLA sama kun alhaalla) rivi ~886
+					$lisakulun_lisays_ehto = "";
+					
+					//ei käteislaskuihin
+					if ($yhtiorow["lisakulun_lisays"] == 'K') {
+						$query = " 	SELECT tunnus
+									FROM maksuehto
+									WHERE yhtio='$kukarow[yhtio]'
+									and kateinen != ''";
+						$limaresult = mysql_query($query) or pupe_error($query);
+						
+						$lisakulu_maksuehto = array();
+						while ($limaksuehtorow = mysql_fetch_array($limaresult)) {
+							$lisakulu_maksuehto[] = $limaksuehtorow["tunnus"];
+						}
+						
+						if (count($lisakulu_maksuehto) > 0) {
+							$lisakulun_lisays_ehto = " and maksuehto not in(".implode(',',$lisakulu_maksuehto).") ";
+						}
+						
+					}
+					elseif ($yhtiorow["lisakulun_lisays"] == 'N') {
+						//ei noudolle 
+						$query = " 	SELECT selite
+									FROM toimitustapa
+									WHERE yhtio='$kukarow[yhtio]'
+									and nouto != ''";
+						$toimitusresult = mysql_query($query) or pupe_error($query);
+						
+						$lisakulu_toimitustapa = array();
+						
+						while ($litoimitustaparow = mysql_fetch_array($toimitusresult)) {
+							$lisakulu_toimitustapa[] = "'".$litoimitustaparow["selite"]."'";
+						}
+						
+						if (count($lisakulu_toimitustapa) > 0) {
+							$lisakulun_lisays_ehto = " and toimitustapa not in(".implode(',',$lisakulu_toimitustapa).") ";
+						}
+																
+					}
+					
+					// tehdään ketjutus (group by PITÄÄ OLLA sama kun alhaalla) rivi ~976
 					$query = "	SELECT group_concat(tunnus) tunnukset
 								FROM lasku
 								where yhtio = '$kukarow[yhtio]'
 								and tunnus in ($tunnukset)
 								and ketjutus = ''
+								$lisakulun_lisays_ehto
 								GROUP BY ytunnus, nimi, nimitark, osoite, postino, postitp, maksuehto, erpcm, vienti,
 								lisattava_era, vahennettava_era, maa_maara, kuljetusmuoto, kauppatapahtuman_luonne,
 								sisamaan_kuljetus, aktiivinen_kuljetus, kontti, aktiivinen_kuljetus_kansallisuus,
@@ -815,12 +855,13 @@
 						$yhdista[] = $row["tunnukset"];
 					}
 
-					// vielä laskut jota ei saa ketjuttaa
+					// vielä laskut joita ei saa ketjuttaa
 					$query = "	SELECT tunnus
 								FROM lasku
 								where yhtio = '$kukarow[yhtio]'
 								and tunnus in ($tunnukset)
-								and ketjutus != ''";
+								and ketjutus != ''
+								$lisakulun_lisays_ehto";
 					$result = mysql_query($query) or pupe_error($query);
 
 					while ($row = mysql_fetch_array($result)) {

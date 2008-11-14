@@ -289,8 +289,8 @@
 	if(!function_exists("loppu")) {
 		function loppu ($firstpage, $summa) {
 
-			global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $ktunnus, $maksuehtotiedot, $toimipaikkarow, $laskutiedot, $frow, $karhut_samalle_laskulle;
-
+			global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $ktunnus, $maksuehtotiedot, $toimipaikkarow, $laskutiedot, $karhut_samalle_laskulle;
+/*
 			//yhteensärivi
 			$pdf->draw_rectangle(110, 20, 90, 580,	$firstpage, $rectparam);
 			$pdf->draw_rectangle(110, 207, 90, 580,	$firstpage, $rectparam);
@@ -302,80 +302,97 @@
 				$pdf->draw_text(464, 92,  $summa,						$firstpage, $norm);
 				$pdf->draw_text(550, 92,  $laskutiedot["valkoodi"],		$firstpage, $norm);
 			}
+*/
+			$pankkitiedot = array();
 
-			//Pankkiyhteystiedot
-			$pdf->draw_rectangle(90, 20, 20, 580,	$firstpage, $rectparam);
+			//Laitetaan pankkiyhteystiedot kuntoon
+			if ($maksuehtotiedot["factoring"] != "") {
+				$query = "	SELECT * 
+							FROM factoring 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							AND factoringyhtio = '$maksuehtotiedot[factoring]'";
+				$fac_result = mysql_query($query) or pupe_error($query);
+				$factoringrow = mysql_fetch_array($fac_result);
 
-			if ($ktunnus != 0) {
-				$pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
-				$pdf->draw_text(30, 72,  $frow["pankkinimi1"]." ".$frow["pankkitili1"],	$firstpage, $norm);
+				$pankkitiedot["pankkinimi1"]  =	$factoringrow["pankkinimi1"];
+				$pankkitiedot["pankkitili1"]  =	$factoringrow["pankkitili1"];
+				$pankkitiedot["pankkiiban1"]  =	$factoringrow["pankkiiban1"];
+				$pankkitiedot["pankkiswift1"] =	$factoringrow["pankkiswift1"];
+				$pankkitiedot["pankkinimi2"]  =	$factoringrow["pankkinimi2"];
+				$pankkitiedot["pankkitili2"]  =	$factoringrow["pankkitili2"];
+				$pankkitiedot["pankkiiban2"]  =	$factoringrow["pankkiiban2"];
+				$pankkitiedot["pankkiswift2"] = $factoringrow["pankkiswift2"];
+				$pankkitiedot["pankkinimi3"]  =	"";
+				$pankkitiedot["pankkitili3"]  =	"";
+				$pankkitiedot["pankkiiban3"]  =	"";
+				$pankkitiedot["pankkiswift3"] =	"";
+			}
+			elseif ($maksuehtotiedot["pankkinimi1"] != "") {
+				$pankkitiedot["pankkinimi1"]  =	$maksuehtotiedot["pankkinimi1"];
+				$pankkitiedot["pankkitili1"]  =	$maksuehtotiedot["pankkitili1"];
+				$pankkitiedot["pankkiiban1"]  =	$maksuehtotiedot["pankkiiban1"];
+				$pankkitiedot["pankkiswift1"] =	$maksuehtotiedot["pankkiswift1"];
+				$pankkitiedot["pankkinimi2"]  =	$maksuehtotiedot["pankkinimi2"];
+				$pankkitiedot["pankkitili2"]  =	$maksuehtotiedot["pankkitili2"];
+				$pankkitiedot["pankkiiban2"]  =	$maksuehtotiedot["pankkiiban2"];
+				$pankkitiedot["pankkiswift2"] = $maksuehtotiedot["pankkiswift2"];
+				$pankkitiedot["pankkinimi3"]  =	$maksuehtotiedot["pankkinimi3"];
+				$pankkitiedot["pankkitili3"]  =	$maksuehtotiedot["pankkitili3"];
+				$pankkitiedot["pankkiiban3"]  =	$maksuehtotiedot["pankkiiban3"];
+				$pankkitiedot["pankkiswift3"] =	$maksuehtotiedot["pankkiswift3"];
 			}
 			else {
+				$pankkitiedot["pankkinimi1"]  =	$yhtiorow["pankkinimi1"];
+				$pankkitiedot["pankkitili1"]  =	$yhtiorow["pankkitili1"];
+				$pankkitiedot["pankkiiban1"]  =	$yhtiorow["pankkiiban1"];
+				$pankkitiedot["pankkiswift1"] =	$yhtiorow["pankkiswift1"];
+				$pankkitiedot["pankkinimi2"]  =	$yhtiorow["pankkinimi2"];
+				$pankkitiedot["pankkitili2"]  =	$yhtiorow["pankkitili2"];
+				$pankkitiedot["pankkiiban2"]  =	$yhtiorow["pankkiiban2"];
+				$pankkitiedot["pankkiswift2"] = $yhtiorow["pankkiswift2"];
+				$pankkitiedot["pankkinimi3"]  =	$yhtiorow["pankkinimi3"];
+				$pankkitiedot["pankkitili3"]  =	$yhtiorow["pankkitili3"];
+				$pankkitiedot["pankkiiban3"]  =	$yhtiorow["pankkiiban3"];
+				$pankkitiedot["pankkiswift3"] =	$yhtiorow["pankkiswift3"];
+			}
 
-				$pankkitiedot = array();
+			//Pankkiyhteystiedot
+			$pdf->draw_rectangle(115, 20, 68, 580,	$firstpage, $rectparam);
 
-				//Laitetaan pankkiyhteystiedot kuntoon
-				if ($maksuehtotiedot["factoring"] != "") {
-					$pankkitiedot["pankkinimi1"]  =	$factoringrow["pankkinimi1"];
-					$pankkitiedot["pankkitili1"]  =	$factoringrow["pankkitili1"];
-					$pankkitiedot["pankkiiban1"]  =	$factoringrow["pankkiiban1"];
-					$pankkitiedot["pankkiswift1"] =	$factoringrow["pankkiswift1"];
-					$pankkitiedot["pankkinimi2"]  =	$factoringrow["pankkinimi2"];
-					$pankkitiedot["pankkitili2"]  =	$factoringrow["pankkitili2"];
-					$pankkitiedot["pankkiiban2"]  =	$factoringrow["pankkiiban2"];
-					$pankkitiedot["pankkiswift2"] = $factoringrow["pankkiswift2"];
-					$pankkitiedot["pankkinimi3"]  =	"";
-					$pankkitiedot["pankkitili3"]  =	"";
-					$pankkitiedot["pankkiiban3"]  =	"";
-					$pankkitiedot["pankkiswift3"] =	"";
+			$pdf->draw_text(30, 106,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
+			
+			$pdf->draw_text(30,  94, $pankkitiedot["pankkinimi1"]." ".$pankkitiedot["pankkitili1"],	$firstpage, $norm);
+			$pdf->draw_text(217, 94, $pankkitiedot["pankkinimi2"]." ".$pankkitiedot["pankkitili2"],	$firstpage, $norm);
+			$pdf->draw_text(404, 94, $pankkitiedot["pankkinimi3"]." ".$pankkitiedot["pankkitili3"],	$firstpage, $norm);
 
-				}
-				elseif ($maksuehtotiedot["pankkinimi1"] != "") {
-					$pankkitiedot["pankkinimi1"]  =	$maksuehtotiedot["pankkinimi1"];
-					$pankkitiedot["pankkitili1"]  =	$maksuehtotiedot["pankkitili1"];
-					$pankkitiedot["pankkiiban1"]  =	$maksuehtotiedot["pankkiiban1"];
-					$pankkitiedot["pankkiswift1"] =	$maksuehtotiedot["pankkiswift1"];
-					$pankkitiedot["pankkinimi2"]  =	$maksuehtotiedot["pankkinimi2"];
-					$pankkitiedot["pankkitili2"]  =	$maksuehtotiedot["pankkitili2"];
-					$pankkitiedot["pankkiiban2"]  =	$maksuehtotiedot["pankkiiban2"];
-					$pankkitiedot["pankkiswift2"] = $maksuehtotiedot["pankkiswift2"];
-					$pankkitiedot["pankkinimi3"]  =	$maksuehtotiedot["pankkinimi3"];
-					$pankkitiedot["pankkitili3"]  =	$maksuehtotiedot["pankkitili3"];
-					$pankkitiedot["pankkiiban3"]  =	$maksuehtotiedot["pankkiiban3"];
-					$pankkitiedot["pankkiswift3"] =	$maksuehtotiedot["pankkiswift3"];
-				}
-				else {
-					$pankkitiedot["pankkinimi1"]  =	$yhtiorow["pankkinimi1"];
-					$pankkitiedot["pankkitili1"]  =	$yhtiorow["pankkitili1"];
-					$pankkitiedot["pankkiiban1"]  =	$yhtiorow["pankkiiban1"];
-					$pankkitiedot["pankkiswift1"] =	$yhtiorow["pankkiswift1"];
-					$pankkitiedot["pankkinimi2"]  =	$yhtiorow["pankkinimi2"];
-					$pankkitiedot["pankkitili2"]  =	$yhtiorow["pankkitili2"];
-					$pankkitiedot["pankkiiban2"]  =	$yhtiorow["pankkiiban2"];
-					$pankkitiedot["pankkiswift2"] = $yhtiorow["pankkiswift2"];
-					$pankkitiedot["pankkinimi3"]  =	$yhtiorow["pankkinimi3"];
-					$pankkitiedot["pankkitili3"]  =	$yhtiorow["pankkitili3"];
-					$pankkitiedot["pankkiiban3"]  =	$yhtiorow["pankkiiban3"];
-					$pankkitiedot["pankkiswift3"] =	$yhtiorow["pankkiswift3"];
-				}
-
-
-				$pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
-				$pdf->draw_text(30, 72,  $pankkitiedot["pankkinimi1"]." ".$pankkitiedot["pankkitili1"],	$firstpage, $norm);
-				$pdf->draw_text(217, 72, $pankkitiedot["pankkinimi2"]." ".$pankkitiedot["pankkitili2"],	$firstpage, $norm);
-				$pdf->draw_text(404, 72, $pankkitiedot["pankkinimi3"]." ".$pankkitiedot["pankkitili3"],	$firstpage, $norm);
+			if ($pankkitiedot["pankkiiban1"] != "") {
+				$pdf->draw_text(30,  83, "IBAN: ".$pankkitiedot["pankkiiban1"],	$firstpage, $pieni);
+			}
+			if ($pankkitiedot["pankkiiban2"] != "") {
+				$pdf->draw_text(217, 83, "IBAN: ".$pankkitiedot["pankkiiban2"],	$firstpage, $pieni);
+			}
+			if ($pankkitiedot["pankkiiban3"] != "") {			
+				$pdf->draw_text(404, 83, "IBAN: ".$pankkitiedot["pankkiiban3"],	$firstpage, $pieni);
+			}
+			if ($pankkitiedot["pankkiswift1"] != "") {			
+				$pdf->draw_text(30,  72, "SWIFT: ".$pankkitiedot["pankkiswift1"],	$firstpage, $pieni);
+			}
+			if ($pankkitiedot["pankkiswift2"] != "") {
+				$pdf->draw_text(217, 72, "SWIFT: ".$pankkitiedot["pankkiswift2"],	$firstpage, $pieni);
+			}
+			if ($pankkitiedot["pankkiswift3"] != "") {
+				$pdf->draw_text(404, 72, "SWIFT: ".$pankkitiedot["pankkiswift3"],	$firstpage, $pieni);
 			}
 
 			//Alimmat kolme laatikkoa, yhtiötietoja
-			$pdf->draw_rectangle(70, 20, 20, 580,	$firstpage, $rectparam);
-			$pdf->draw_rectangle(70, 207, 20, 580,	$firstpage, $rectparam);
-			$pdf->draw_rectangle(70, 394, 20, 580,	$firstpage, $rectparam);
+			$pdf->draw_rectangle(65, 20,  20, 580,	$firstpage, $rectparam);
+			$pdf->draw_rectangle(65, 207, 20, 580,	$firstpage, $rectparam);
+			$pdf->draw_rectangle(65, 394, 20, 580,	$firstpage, $rectparam);
 
 			$pdf->draw_text(30, 55, $toimipaikkarow["nimi"],					$firstpage, $pieni);
 			$pdf->draw_text(30, 45, $toimipaikkarow["osoite"],					$firstpage, $pieni);
 			$pdf->draw_text(30, 35, $toimipaikkarow["postino"]."  ".$toimipaikkarow["postitp"],	$firstpage, $pieni);
 			$pdf->draw_text(30, 25, $toimipaikkarow["maa"],						$firstpage, $pieni);
-
 
 			$pdf->draw_text(217, 55, t("Puhelin", $kieli).":",					$firstpage, $pieni);
 			$pdf->draw_text(247, 55, $toimipaikkarow["puhelin"],				$firstpage, $pieni);
@@ -440,7 +457,7 @@
 
 	$query = "	SELECT l.tunnus, l.tapvm, l.liitostunnus,
 				l.summa-l.saldo_maksettu summa, l.summa_valuutassa-l.saldo_maksettu_valuutassa summa_valuutassa, l.erpcm, l.laskunro, l.viite,
-				TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika, max(kk.pvm) as kpvm, count(distinct kl.ktunnus) as karhuttu, l.yhtio_toimipaikka, l.valkoodi, l.maksuehto
+				TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika, max(kk.pvm) as kpvm, count(distinct kl.ktunnus) as karhuttu, l.yhtio_toimipaikka, l.valkoodi, l.maksuehto, l.maa
 				FROM lasku l
 				LEFT JOIN karhu_lasku kl on (l.tunnus=kl.ltunnus $kjoinlisa)
 				LEFT JOIN karhukierros kk on (kk.tunnus=kl.ktunnus)
@@ -491,10 +508,10 @@
 		$toimipaikkaquery = "	SELECT *
 								FROM yhtion_toimipaikat
 								WHERE yhtio='$kukarow[yhtio]' AND tunnus='$laskutiedot[yhtio_toimipaikka]'";
-
 		$toimipaikkares = mysql_query($toimipaikkaquery) or pupe_error($toimipaikkaquery);
 		$toimipaikkarow = mysql_fetch_array($toimipaikkares);
-	} else {
+	} 
+	else {
 		$toimipaikkarow["nimi"] 		= $yhtiorow["nimi"];
 		$toimipaikkarow["osoite"] 		= $yhtiorow["osoite"];
 		$toimipaikkarow["postino"] 		= $yhtiorow["postino"];
@@ -506,21 +523,6 @@
 		$toimipaikkarow["vat_numero"] 	= $yhtiorow["ytunnus"];
 		$toimipaikkarow["kotipaikka"] 	= $yhtiorow["kotipaikka"];
 	}
-
-	//Haetaan factoringsopimuksen tiedot
-	if ($maksuehtotiedot["factoring"] != '') {
-		$query = "	SELECT *
-					FROM factoring
-					WHERE yhtio 		= '$kukarow[yhtio]'
-					and factoringyhtio 	= '$maksuehtotiedot[factoring]'
-					and valkoodi 		= '$laskutiedot[valkoodi]'";
-		$fres = mysql_query($query) or pupe_error($query);
-		$frow = mysql_fetch_array($fres);
-	}
-	else {
-		unset($frow);
-	}
-
 
 	$kaatosumma=$kaato["summa"] * -1;
 	if (!$kaatosumma) $kaatosumma='0.00';
@@ -569,7 +571,7 @@
 		$karhuviesti = $kv["tunnus"];
 	}
 
-	$query 	 = "select selitetark from avainsana where tunnus='$karhuviesti' AND laji = 'KARHUVIESTI' AND yhtio ='{$yhtiorow['yhtio']}'";
+	$query 	 = "SELECT selitetark FROM avainsana WHERE tunnus='$karhuviesti' AND laji = 'KARHUVIESTI' AND yhtio ='{$yhtiorow['yhtio']}'";
 	$res 	 = mysql_query($query) or pupe_error();
 	$viestit = mysql_fetch_array($res);
 

@@ -160,17 +160,14 @@
 		global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $maksuehtotiedot;
 
 		//yhteensärivi
-		$pdf->draw_rectangle(110, 20, 90, 580,	$firstpage, $rectparam);
-		$pdf->draw_rectangle(110, 207, 90, 580,	$firstpage, $rectparam);
-		$pdf->draw_rectangle(110, 394, 90, 580,	$firstpage, $rectparam);
-		$pdf->draw_rectangle(110, 540, 90, 580,	$firstpage, $rectparam);
+		$pdf->draw_rectangle(134,  20, 115, 580,	$firstpage, $rectparam);
+		$pdf->draw_rectangle(134, 207, 115, 580,	$firstpage, $rectparam);
+		$pdf->draw_rectangle(134, 394, 115, 580,	$firstpage, $rectparam);
+		$pdf->draw_rectangle(134, 540, 115, 580,	$firstpage, $rectparam);
 
-		$pdf->draw_text(404, 92,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
-		$pdf->draw_text(464, 92,  $summa,						$firstpage, $norm);
-		$pdf->draw_text(550, 92,  $yhtiorow["valkoodi"],		$firstpage, $norm);
-
-		//Pankkiyhteystiedot
-		$pdf->draw_rectangle(90, 20, 20, 580,	$firstpage, $rectparam);
+		$pdf->draw_text(404, 122,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
+		$pdf->draw_text(464, 122,  $summa,						$firstpage, $norm);
+		$pdf->draw_text(550, 122,  $yhtiorow["valkoodi"],		$firstpage, $norm);
 
 		if ($maksuehtotiedot["pankkinimi1"] != "") {
 			$yhtiorow["pankkinimi1"]	= $maksuehtotiedot["pankkinimi1"];
@@ -187,19 +184,38 @@
 			$yhtiorow["pankkiswift3"]	= $maksuehtotiedot["pankkiswift3"];
 		}
 
-		$pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
-		$pdf->draw_text(30, 72,  $yhtiorow["pankkinimi1"],	$firstpage, $norm);
-		$pdf->draw_text(80, 72,  $yhtiorow["pankkitili1"],	$firstpage, $norm);
-		$pdf->draw_text(217, 72, $yhtiorow["pankkinimi2"],	$firstpage, $norm);
-		$pdf->draw_text(257, 72, $yhtiorow["pankkitili2"],	$firstpage, $norm);
-		$pdf->draw_text(404, 72, $yhtiorow["pankkinimi3"],	$firstpage, $norm);
-		$pdf->draw_text(444, 72, $yhtiorow["pankkitili3"],	$firstpage, $norm);
+		//Pankkiyhteystiedot
+		$pdf->draw_rectangle(115, 20, 20, 580,	$firstpage, $rectparam);
 
+		$pdf->draw_text(30, 106,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
+
+		$pdf->draw_text(30,  94, $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"],	$firstpage, $norm);
+		$pdf->draw_text(217, 94, $yhtiorow["pankkinimi2"]." ".$yhtiorow["pankkitili2"],	$firstpage, $norm);
+		$pdf->draw_text(404, 94, $yhtiorow["pankkinimi3"]." ".$yhtiorow["pankkitili3"],	$firstpage, $norm);
+
+		if ($yhtiorow["pankkiiban1"] != "") {
+			$pdf->draw_text(30,  83, "IBAN: ".$yhtiorow["pankkiiban1"],	$firstpage, $pieni);
+		}
+		if ($yhtiorow["pankkiiban2"] != "") {
+			$pdf->draw_text(217, 83, "IBAN: ".$yhtiorow["pankkiiban2"],	$firstpage, $pieni);
+		}
+		if ($yhtiorow["pankkiiban3"] != "") {			
+			$pdf->draw_text(404, 83, "IBAN: ".$yhtiorow["pankkiiban3"],	$firstpage, $pieni);
+		}
+		if ($yhtiorow["pankkiswift1"] != "") {			
+			$pdf->draw_text(30,  72, "SWIFT: ".$yhtiorow["pankkiswift1"],	$firstpage, $pieni);
+		}
+		if ($yhtiorow["pankkiswift2"] != "") {
+			$pdf->draw_text(217, 72, "SWIFT: ".$yhtiorow["pankkiswift2"],	$firstpage, $pieni);
+		}
+		if ($yhtiorow["pankkiswift3"] != "") {
+			$pdf->draw_text(404, 72, "SWIFT: ".$yhtiorow["pankkiswift3"],	$firstpage, $pieni);
+		}
 
 		//Alimmat kolme laatikkoa, yhtiötietoja
-		$pdf->draw_rectangle(70, 20, 20, 580,	$firstpage, $rectparam);
-		$pdf->draw_rectangle(70, 207, 20, 580,	$firstpage, $rectparam);
-		$pdf->draw_rectangle(70, 394, 20, 580,	$firstpage, $rectparam);
+		$pdf->draw_rectangle(65, 20,  20, 580,	$firstpage, $rectparam);
+		$pdf->draw_rectangle(65, 207, 20, 580,	$firstpage, $rectparam);
+		$pdf->draw_rectangle(65, 394, 20, 580,	$firstpage, $rectparam);
 
 		$pdf->draw_text(30, 55, $yhtiorow["nimi"],		$firstpage, $pieni);
 		$pdf->draw_text(30, 45, $yhtiorow["osoite"],	$firstpage, $pieni);
@@ -326,7 +342,6 @@
 		if ($tee != 'tulosta_tratta') {
 			liita_lasku($karhukierros,$row['tunnus']);
 		}
-
 		$summa=rivi($firstpage,$summa);
 	}
 

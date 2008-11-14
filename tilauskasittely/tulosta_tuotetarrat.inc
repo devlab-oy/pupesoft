@@ -62,13 +62,21 @@
 	}
 	fclose($fh);
 
-	//paperilista pit‰‰ saada kauniiksi
-	$line = exec("a2ps -o ".$filenimi.".ps --no-header --columns=1 -R --medium=a4 --chars-per-line=75 --margin=0 --borders=0 $filenimi");
+	//itse print komento...
+	if ($komento["Tuotetarrat"] == 'email') {
+		$liite = $filenimi;
+		$ctype = "TEXT";
+		$kutsu = "tuotetarrat-".date("Y-m-d").".txt";
+		require("inc/sahkoposti.inc");
+	}
+	else {
+		//paperilista pit‰‰ saada kauniiksi
+		$line = exec("a2ps -o ".$filenimi.".ps --no-header --columns=1 -R --medium=a4 --chars-per-line=75 --margin=0 --borders=0 $filenimi");
+		//itse print komento tulee valitse_tulosin.incilt‰...
+		$line = exec("$komento[Tuotetarrat] ".$filenimi.".ps");
+		system("rm -f ".$filenimi.".ps");
+	}
 
-	//itse print komento tulee valitse_tulosin.incilt‰...
-	$line = exec("$komento[Tuotetarrat] ".$filenimi.".ps");
-
-	system("rm -f ".$filenimi.".ps");
 	system("rm -f $filenimi");
 
 	//p‰‰dyt‰‰n taas selailemaan toimittajia

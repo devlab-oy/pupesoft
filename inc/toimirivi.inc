@@ -290,7 +290,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "maa") {
+	if (mysql_field_name($result, $i) == "maa" or mysql_field_name($result, $i) == "maa_lahetys") {
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
 					WHERE nimi != ''
@@ -303,6 +303,9 @@
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
+				$sel = "selected";
+			}
+			elseif($trow[$i] == "" and $trow["maa"] != "" and strtoupper($vrow[0]) == $trow["maa"]) {
 				$sel = "selected";
 			}
 			elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {

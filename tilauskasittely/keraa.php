@@ -431,7 +431,7 @@
 									$rkomm 			= $tilrivirow["kommentti"];
 								}
 							}
-							elseif($tilrivirow["var"] == 'J' and $maara[$apui] == 0 and $poikkeama_kasittely[$apui] == "MI") {
+							elseif($maara[$apui] == 0 and $poikkeama_kasittely[$apui] == "MI") {
 								// Varastomiehellä on nyt oikeus nollata myös JT-rivi jos hän saa lähetettyä $poikkeama_kasittely[$apui] == "MI"
 								if ($keraysvirhe == 0) {
 									$query .= ", keratty = '$who',
@@ -1858,8 +1858,14 @@
 								}
 							}
 						}
-
-						echo "<select name='era_new_paikka[$row[tunnus]]' onchange='submit();'>".$paikat."</select>";
+						
+						$subbari = " onchange='submit();'";
+						
+						if (($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F") and $yhtiorow["kerayspoikkeama_kasittely"] != '') {
+							$subbari = "";
+						}
+						
+						echo "<select name='era_new_paikka[$row[tunnus]]' $subbari>".$paikat."</select>";
 						echo "<input type='hidden' name='era_old_paikka[$row[tunnus]]' value='$selpaikka'>";
 						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id#".urlencode($sarjarow["sarjanumero"])."'>".t("E:nro")."</a>)";
 					}
@@ -1867,14 +1873,17 @@
 					echo "</td>";
 
 					if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
-
-						if ($yhtiorow["kerayspoikkeama_kasittely"] == 'J') {
+						
+						if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F") {
+							$kasittely = "RU";
+						}
+						elseif ($yhtiorow["kerayspoikkeama_kasittely"] == 'J') {
 							$kasittely = "JT";
 						}
 						else {
 							$kasittely = "";
 						}
-
+						
 						echo "<td><select name='poikkeama_kasittely[$row[tunnus]]' onchange='submit();'>";
 						echo "<option value='$kasittely'>".t("Oletus")."</option>";
 						echo "<option value='JT'>".t("JT")."</option>";

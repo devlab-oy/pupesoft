@@ -116,13 +116,13 @@
 								$y = -10;
 							}
 							if($item["TAPA"] == "request") {
-								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" $event=\"divi=document.getElementById('ajax_menu'); divi.innerHTML=''; divi.style.display='none'; sndReq('$div', '$item[HREF]', false, false);\">$item[TEKSTI]</a></td></tr>";	
+								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" $event=\"divi=document.getElementById('ajax_menu'); divi.innerHTML=''; divi.style.display='none'; sndReq('$div', '$item[HREF]', false, false);\">$item[TEKSTI] 1</a></td></tr>";	
 							}
 							elseif($item["TAPA"] == "CUSTOM") {
-								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" $event=\"".stripslashes($item["EVENT_ACTION"])."\">$item[TEKSTI]</a></td></tr>";
+								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" $event=\"".stripslashes($item["EVENT_ACTION"])."\">$item[TEKSTI] 2</a></td></tr>";
 							}
 							else {
-								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" href=\"#\" $event=\"divi=document.getElementById('ajax_menu'); divi.innerHTML=''; divi.style.display='none'; popUp(event, '$div', '$x', '$y', '{$item["HREF"]}', false, false); return false;\">$item[TEKSTI]</a></td></tr>";
+								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" href=\"#\" $event=\"divi=document.getElementById('ajax_menu'); divi.innerHTML=''; divi.style.display='none'; popUp(event, '$div', '$x', '$y', '{$item["HREF"]}', false, false); return false;\">$item[TEKSTI] 3</a></td></tr>";
 							}
 						}
 					}
@@ -180,6 +180,7 @@
 
 	if(!function_exists("url_params")) {
 		function url_params ($kalenteri, $method) {
+			global $_REQUEST;
 			
 			$ret = "";
 			//	Tehdään urliin parametrit
@@ -187,13 +188,21 @@
 				$kalenteri["url_params"]["kaleDIV"] = $kalenteri["div"];
 				foreach($kalenteri["url_params"] as $var => $varval) {
 					if($method != "POST") {
-						$ret .= "&$var=$varval";	
+						$ret .= "&$var=$varval";
 					}
 					else {
 						$ret .= "<input type='hidden' name='$var' value='$varval'>";
 					}
 				}				
 			}
+			
+			if($method != "POST") {
+				$ret .= "&ohje=$_REQUEST[ohje]&sulje=$_REQUEST[sulje]";
+			}
+			else {
+				$ret .= "<input type='hidden' name='ohje' value='$_REQUEST[ohje]'><input type='hidden' name='sulje' value='$_REQUEST[sulje]'>";
+			}
+			
 			
 			return $ret;
 		}
@@ -2148,7 +2157,7 @@
 					$abures = mysql_query($query) or pupe_error($query);
 					$aburow = mysql_fetch_array($abures);
 
-					$msg .= "\n$viesti\n";
+					$msg .= "\n".str_replace("\\n", "\n", $viesti)."\n";
 					if(mail($to, "=?iso-8859-1?Q?".imap_8bit($subject)."?=", $msg, $header, " -f {$kukarow["eposti"]}")) {
 						if(mysql_num_rows($jres) > 1) {
 							echo "<font class='message'>".t("Sähköpostin lähetettiin käyttäjille %s", $kieli, $jrow["nimi"])."</font>";

@@ -238,7 +238,7 @@
 			$varitys = "td";
 		}
 
-		echo "<tr><$varitys><a href='$PHP_SELF?day=1&month=$month&year=$year&valkuka=$row[kuka]&osasto=$osasto' title='$row[nimi]'>$row[nimi]</a></$varitys><td></td>";
+		echo "<tr><$varitys nowrap><a href='$PHP_SELF?day=1&month=$month&year=$year&valkuka=$row[kuka]&osasto=$osasto' title='$row[nimi]'>$row[nimi]</a></$varitys><td></td>";
 
 		for($i = 1; $i <= days_in_month($month, $year); $i++) {
 			$pva = to_mysql($i);
@@ -292,18 +292,18 @@
 					}
 					echo "</div>";
 	
-					echo "<$varitys align='center' width='35'><a class='td' href='kalenteri.php?valitut=$row[kuka]&kenelle=$row[kuka]&tee=SYOTA&kello=$krow[kello]&year=$krow[vuosi]&kuu=$krow[kuu]&paiva=$krow[paiva]&tunnus=$krow[tunnus]&konserni=XXX' onmouseout=\"popUp(event,'$krow[tunnus]')\" onmouseover=\"popUp(event,'$krow[tunnus]')\">$etufontti $krow[tapa] $takafontti</a></$varitys>";
+					echo "<$varitys align='center' width='35' nowrap><a class='td' href='kalenteri.php?valitut=$row[kuka]&kenelle=$row[kuka]&tee=SYOTA&kello=$krow[kello]&year=$krow[vuosi]&kuu=$krow[kuu]&paiva=$krow[paiva]&tunnus=$krow[tunnus]&konserni=XXX' onmouseout=\"popUp(event,'$krow[tunnus]')\" onmouseover=\"popUp(event,'$krow[tunnus]')\">$etufontti $krow[tapa] $takafontti</a></$varitys>";
 				}
 				else {
 					echo "	<div id='$krow[tunnus]' class='popup' style='width:200px;'>
 							$krow[kello]-$krow[lkello] $row[nimi]<br>$krow[selitetark].<br>$krow[kentta01]
 							</div>";
 	
-					echo "<$varitys align='center' width='35'><a class='td' href='#' onmouseout=\"popUp(event,'$krow[tunnus]')\" onmouseover=\"popUp(event,'$krow[tunnus]')\">$etufontti $krow[tapa] $takafontti</a></$varitys>";
+					echo "<$varitys align='center' width='35' nowrap><a class='td' href='#' onmouseout=\"popUp(event,'$krow[tunnus]')\" onmouseover=\"popUp(event,'$krow[tunnus]')\">$etufontti $krow[tapa] $takafontti</a></$varitys>";
 				}
 			}
 			else {
-				echo "<$varitys align='center' width='35'><a class='td' href='kalenteri.php?valitut=$row[kuka]&kenelle=$row[kuka]&tee=SYOTA&kello=&year=$year&kuu=$month&paiva=$pva&konserni=XXX'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></$varitys>";
+				echo "<$varitys align='center' width='35' nowrap><a class='td' href='kalenteri.php?valitut=$row[kuka]&kenelle=$row[kuka]&tee=SYOTA&kello=&year=$year&kuu=$month&paiva=$pva&konserni=XXX'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></$varitys>";
 			}
 
 			if (weekday_number($i, $month, $year)==6) {

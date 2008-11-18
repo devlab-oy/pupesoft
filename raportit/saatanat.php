@@ -361,6 +361,9 @@
 					$ffy 		+= $row["ff"];
 					$kky 		+= $surow["summa"];
 					$lly 		+= $row["ll"];
+					
+					// Muutettu ylikolkyt --> yliviistoista, mutta muuttujan nimi on edelleen ylikolkyt
+					$ylikolkyt	+= $row["bb"];
 					$ylikolkyt	+= $row["cc"];
 					$ylikolkyt 	+= $row["dd"];
 					$ylikolkyt 	+= $row["ee"];

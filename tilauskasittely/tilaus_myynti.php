@@ -2177,7 +2177,7 @@ if ($tee == '') {
 		if ($ylikolkyt > 0) {
 			echo "	<table>
 					<tr>$jarjlisa
-					<td class='back' align = 'left'><font class='error'>".t("HUOM!!!!!! Asiakkaalla on yli 30 p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan")."!!!!!<br></font>$menuset</td>
+					<td class='back' align = 'left'><font class='error'>".t("HUOM!!!!!! Asiakkaalla on yli 15 p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan")."!!!!!<br></font>$menuset</td>
 					</tr>
 					<tr>$jarjlisa
 					<td class='back'><hr></td>

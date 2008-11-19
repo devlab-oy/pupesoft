@@ -97,10 +97,10 @@
 
 			if ($summa != "") {
 				if ($laskurow['alatila'] != 'K') {
-					$kurssi = round($summa / $laskurow['summa'], 6);
+					$kurssi = round($summa / $laskurow['summa'], 9);
 				}
 				else {
-					$kurssi = round($summa / ($laskurow['summa']-$laskurow['kasumma']), 6);
+					$kurssi = round($summa / ($laskurow['summa']-$laskurow['kasumma']), 9);
 				}
 				$rahasumma_valuutassa = round($summa / $kurssi, 2);
 			}
@@ -135,7 +135,7 @@
 
 	if ($tee == 'V') {
 		if ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
-			echo "<font class='message'>".t("Valuuttakurssi")." " . round($kurssi,6) . " (". round(1/$kurssi,6) . ")</font><br>";
+			echo "<font class='message'>".t("Valuuttakurssi")." " . round($kurssi, 9) . " (". round(1/$kurssi, 9) . ")</font><br>";
 		}
 
 		// Ollaan yhteensopivia vanhan koodin kanssa

@@ -544,7 +544,7 @@ if ($tee == 'MONISTA') {
 						if ($kumpi == 'HYVITA') {
 							if ($monistarow[$i] == 0) {
 								// Vanhoilla u-laskuilla ei ole vienti kurssia....
-								$vienti_kurssi = round($monistarow["arvo"]/$monistarow["arvo_valuutassa"], 6);
+								$vienti_kurssi = round($monistarow["arvo"]/$monistarow["arvo_valuutassa"], 9);
 								
 								$values .= ", '$vienti_kurssi'";
 							}

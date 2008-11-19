@@ -482,7 +482,7 @@
 
 					if ($valuuttarow['kurssi'] != 1) {
 						if ($silent == "") {
-							echo "<font class='message'>".t("Tiliote kirjataan kurssiin")." ".(round(1/$valuuttarow['kurssi'],6))." ($valuuttarow[kurssi]).</font><br>";
+							echo "<font class='message'>".t("Tiliote kirjataan kurssiin")." ".(round(1/$valuuttarow['kurssi'], 9))." ($valuuttarow[kurssi]).</font><br>";
 						}
 					}
 

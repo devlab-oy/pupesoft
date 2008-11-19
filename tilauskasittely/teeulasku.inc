@@ -55,7 +55,7 @@ if (mysql_num_rows($uusiuresult) > 0) {
 		$vienti_kurssi = 1;
 	}
 	else {
-		$vienti_kurssi = round($arvo/$arvo_valuutassa, 6);
+		$vienti_kurssi = round($arvo/$arvo_valuutassa, 9);
 	}
 
 	$viestit				= $sumrow["viestit"];

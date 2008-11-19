@@ -282,7 +282,7 @@ function lue_kurssit($file, $handle, $tyyppi = '') {
 		}
 
 		$query = "	UPDATE valuu SET
-					kurssi = round(1 / $kurssi, 6),
+					kurssi = round(1 / $kurssi, 9),
 					muutospvm = now(),
 					muuttaja = '{$kukarow['kuka']}'
 					WHERE yhtio = '{$kukarow['yhtio']}' AND
@@ -293,12 +293,12 @@ function lue_kurssit($file, $handle, $tyyppi = '') {
 		$valuutat[] = $valuutta;
 
 		if (mysql_affected_rows() != 0) {
-			echo "<font class='message'>Päivitettiin kurssi valuutalle $valuutta: ".round(1/$kurssi,6)."</font><br>";
+			echo "<font class='message'>Päivitettiin kurssi valuutalle $valuutta: ".round(1/$kurssi, 9)."</font><br>";
 		}
 
 		$query = "	INSERT INTO valuu_historia (kotivaluutta, valuutta, kurssi, kurssipvm)
-					VALUES ('$vastavaluutta', '$valuutta', round(1 / $kurssi, 6), '$kurssipvm')
-		  			ON DUPLICATE KEY UPDATE kurssi = round(1 / $kurssi, 6)";
+					VALUES ('$vastavaluutta', '$valuutta', round(1 / $kurssi, 9), '$kurssipvm')
+		  			ON DUPLICATE KEY UPDATE kurssi = round(1 / $kurssi, 9)";
 		$result = mysql_query($query) or pupe_error($query);
 
 	}

@@ -75,6 +75,11 @@ if ($tee == "") {
 	$llres = mysql_query($query) or pupe_error($query);
 	$llrow = mysql_fetch_array($llres);
 
+	// haetaan toimittajan tiedot
+	$query  = "SELECT * FROM toimi WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[liitostunnus]'";
+	$result = mysql_query($query) or pupe_error($query);
+	$toimittaja = mysql_fetch_array($result);
+
 	// katotaan paljonko on kohdistamatta
 	$jaljella = sprintf("%.2f", $llrow["vosumma"] - $laskurow["summa"]);
 
@@ -180,10 +185,6 @@ if ($tee == "") {
 		$laskurow["tuontipvm"] = $vv."-".$kk."-".$pp;
 	}
 
-	$query  = "SELECT * from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$laskurow[ytunnus]'";
-	$result = mysql_query($query) or pupe_error($query);
-	$toimittaja = mysql_fetch_array($result);
-
 	echo "<tr><td>".t("Kauppatapahtuman luonne").":</td><td colspan='3'>
 		<select NAME='ktapahtuman_luonne'>";
 	echo "<option value=''>".t("Valitse")."</option>";
@@ -261,7 +262,7 @@ if ($tee == "") {
 		$lisamassa = "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s kg, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
 	}
 
-	echo "<tr><td valign='top'>".t("Nettopaino").":</td><td valign='top' colspan='3'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td><td valign='top' class='back'>$lisamassa</td></tr>";
+	echo "<tr><td valign='top'>".t("Nettopaino").":</td><td valign='top' colspan='3'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td><td valign='top' class='back' width='450'>$lisamassa</td></tr>";
 	echo "<tr><td valign='top'>".t("Veroton")." ".t("Eturahti").":</td><td valign='top'><input type='text' name='rahti_etu' value='$laskurow[rahti_etu]'></td><td colspan='2' valign='top' nowrap>".t("Eturahdin ALV").": ".alv_popup('rahti_etu_alv', $laskurow["rahti_etu_alv"])."</td></tr>";
 	echo "<tr><td valign='top'>".t("Arvioitu kuluprosentti").":</td><td valign='top' colspan='3'><input type='text' name='rahti' value='$laskurow[rahti]'> n.nn %</td></tr>";
 	echo "<tr><td valign='top'>".t("Kulusumma")." $yhtiorow[valkoodi]:</td><td valign='top' colspan='3'><input type='text' name='rahti_huolinta' value='$laskurow[rahti_huolinta]'> ".t("ohittaa kuluprosentin")."</td></tr>";

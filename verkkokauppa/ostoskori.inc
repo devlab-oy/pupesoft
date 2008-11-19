@@ -114,6 +114,7 @@ if (!function_exists("lisaa_ostoskoriin")) {
 			$korvaavakielto		= "";
 			$varataan_saldoa	= "";
 			$var				= "Y";
+//			$perhekielto		= "TODELLAKIN";
 
 			if (file_exists("../tilauskasittely/lisaarivi.inc")) {
 				require ("../tilauskasittely/lisaarivi.inc");

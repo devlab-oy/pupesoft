@@ -322,6 +322,7 @@ if(!function_exists("menu")) {
 						WHERE yhtio='{$kukarow["yhtio"]}' and laji = 'OSASTO' and selitetark_2 = 'verkkokauppa'
 						ORDER BY selitetark";
 			$ores = mysql_query($query) or pupe_error($query);
+
 			while($orow = mysql_fetch_array($ores)) {
 				$target		= "{$orow["osasto"]}_T";
 				$parent		= "{$orow["osasto"]}_P";
@@ -915,7 +916,6 @@ if($tee == "tilaa") {
 	die($ulos);
 }
 
-
 if($tee == "tilatut") {
 
 	$query = "	SELECT *
@@ -1363,9 +1363,22 @@ if($tee == "") {
 
 	$verkkokauppa =  "
 					<div class='login' id='login'>$login_screen</div>
-					<div class='menu' id='menu'>".menu()."</div>
-					<div class='selain' id='selain'>".uutiset()."</div>
-					</body>
+					<div class='menu' id='menu'>".menu()."</div>";
+
+	$tuotenumero = mysql_real_escape_string(trim($_GET["tuotenumero"]));
+
+	if ($tuotenumero != "") {
+		$verkkokauppa .= "	<div class='selain' id='selain'>
+								<SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+								sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla&tuotehaku=$tuotenumero');
+								</SCRIPT>
+							</div>";
+	}
+	else {
+		$verkkokauppa .= "<div class='selain' id='selain'>".uutiset()."</div>";
+	}
+
+	$verkkokauppa .= "</body>
 			</html>";
 
 	if(file_exists("verkkokauppa.template")) {

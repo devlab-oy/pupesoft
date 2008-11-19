@@ -360,6 +360,10 @@ if ($tee == 'GO') {
 						$toiminto = 'TK';
 						$kuvaselite .= " normaali";
 					}
+					elseif (($toiminto == 'paino' or $toiminto = 'HR') and $apuselite == "") {
+						$toiminto = 'HR';
+						$kuvaselite .= " painokuva";
+					}
 					else {
 						if ($apuselite != "") {
 							$kuvaselite = $apuselite;
@@ -481,6 +485,7 @@ $files = listdir($dirri);
 $lukuthumbit = 0;
 $lukunormit = 0;
 $lukutconvertit = 0;
+$lukupainot = 0;
 
 foreach ($files as $file) {
 	$polku = substr($file,$alkupituus);
@@ -489,6 +494,9 @@ foreach ($files as $file) {
 
 	if ($toiminto == 'thumb' and $kuva != '') {
 		$lukuthumbit ++;
+	}
+	if ($toiminto == 'paino' and $kuva != '') {
+		$lukupainot ++;
 	}
 	if ($toiminto == 'normaali' and $kuva != '') {
 		$lukunormit ++;
@@ -535,7 +543,7 @@ echo "</form>";
 echo "<br><br><br>";
 
 
-if ($lukuthumbit+$lukunormit == 0) {
+if ($lukuthumbit+$lukunormit+$lukupainot == 0) {
 	echo "<table><form name='dumppi' method='post' action='$PHP_SELF'>";
 	echo "<input type='hidden' name='tee' value='DUMPPAA'>";
 	echo "<tr><th colspan='2'>Vie kuvat takaisin kuvapankkiin</th></tr>";

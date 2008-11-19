@@ -19,6 +19,193 @@ require_once ('inc/ProgressBar.class.php');
 
 echo "<font class='head'>".t("Ostoehdotus")."</font><hr>";
 
+if ($tee == "paivita" and strpos($valmis,t("Päivitä")) !== false) {
+	
+	
+	foreach ($varmuus_varastot as $tuoteno => $val) {
+		
+		if ($toimittajien_tunnukset[$tuoteno] != '') {
+			//echo "Toim tunnus:".$toimittajien_tunnukset[$tuoteno]."<br>";
+			//echo "Tuoteno:".$tuoteno."<br>";
+			$query = "	UPDATE tuotteen_toimittajat 
+						SET pakkauskoko = '$pakkauskoot[$tuoteno]',
+							toimitusaika = '$toimitusajat[$tuoteno]',
+							muuttaja	= '$kukarow[kuka]',
+							muutospvm	= now()
+						WHERE yhtio = '$tuotteen_yhtiot[$tuoteno]'
+						and tuoteno = '$tuoteno'
+						and tunnus = '$toimittajien_tunnukset[$tuoteno]'";
+			$result   = mysql_query($query) or pupe_error($query);
+		}
+		
+		
+		$query = "	UPDATE tuote
+					SET varmuus_varasto = '$varmuus_varastot[$tuoteno]',
+						ei_varastoida = '$varastoitavat[$tuoteno]',
+						muuttaja	= '$kukarow[kuka]',
+						muutospvm	= now()
+					WHERE yhtio = '$tuotteen_yhtiot[$tuoteno]'
+					and tuoteno = '$tuoteno'";
+		$result   = mysql_query($query) or pupe_error($query);
+		
+	}
+
+	$valitutvarastot = unserialize(urldecode($valitutvarastot));
+	$valitutyhtiot = unserialize(urldecode($valitutyhtiot));
+	$mul_osasto = unserialize(urldecode($mul_osasto));
+	$mul_try = unserialize(urldecode($mul_try));
+	$tee = "RAPORTOI";
+	$ehdotusnappi = '';
+}
+elseif ($tee == "paivita" and strpos($valmis,t("Tee ostotilaus")) !== false) {
+	$valitutyhtiot = unserialize(urldecode($valitutyhtiot));
+	$tuoteno = str_replace(t("Tee ostotilaus")." ","",$valmis);
+	$temp_ytunnus = $ytunnus;
+		
+	//päivitetään kukarow[kesken] kun käyttäjä tekee uutta tilausta
+	$query = "	UPDATE kuka
+				SET kesken=0
+				WHERE session = '$session'";
+	$result = mysql_query($query) or pupe_error($query);
+
+	$kukarow['kesken'] 	= 0;
+	$tilausnumero 		= 0;
+	
+	$query	= "SELECT *, tunnus liitostunnus from toimi where yhtio='$kukarow[yhtio]' and tunnus='$toimittajien_liitostunnukset[$tuoteno]'";
+	$result = mysql_query($query) or pupe_error($query);
+	$srow 	= mysql_fetch_array($result);
+		
+	//oletuksia
+	$varasto 		= 0;
+	$toimipiste 	= 0;
+	
+	//tarvittavat muuttujat otsikolle
+	$ytunnus 		= $srow['ytunnus'];
+	$ovttunnus 		= $srow["ovttunnus"];
+	$nimi			= $srow["nimi"];
+	$nimitark		= $srow["nimitark"];
+	$osoite			= $srow["osoite"];
+	$postino		= $srow["postino"];
+	$postitp		= $srow["postitp"];
+	$maa			= $srow["maa"];
+	$liitostunnus  	= $toimittajien_liitostunnukset[$tuoteno];
+	$maksuteksti	= $srow["maksuteksti"];
+	$kuljetus		= $srow["kuljetus"];
+	$tnimi			= "";
+	
+	$query	= "SELECT nimi from yhteyshenkilo where yhtio='$kukarow[yhtio]' and tyyppi = 'T' and tilausyhteyshenkilo != '' and liitostunnus='$toimittajien_liitostunnukset[$tuoteno]'";
+	$result = mysql_query($query) or pupe_error($query);
+	$yhrow 	= mysql_fetch_array($result);
+	
+	$tilausyhteyshenkilo = $yhrow['nimi'];
+	
+	$verkkotunnus	= $srow["verkkotunnus"];
+	
+	$valkoodi 		= $srow["oletus_valkoodi"];
+	
+	//keräyspvm pitäisi olla -
+	if ($kukarow['kesken'] == 0 and $yhtiorow['ostotilaukseen_toimittajan_toimaika'] != '2') {
+	/*	$toimpp = $kerpp = date("j");
+		$toimkk = $kerkk = date("n");
+		$toimvv = $kervv = date("Y");*/
+		
+		$toimpp = date("j");
+		$toimkk = date("n");
+		$toimvv = date("Y");
+	}
+	elseif ($kukarow['kesken'] == 0 and $yhtiorow['ostotilaukseen_toimittajan_toimaika'] == '2') {
+		$toimittajan_toimaika = date('Y-m-d',time() + $srow["oletus_toimaika"] * 24 * 60 * 60);
+		
+		list($toimvv, $toimkk, $toimpp) = split('-', $toimittajan_toimaika);
+	//	list($kervv, $kerkk, $kerpp)    = split('-', $toimittajan_toimaika);
+		
+	}
+	else {
+		list($toimvv, $toimkk, $toimpp) = split('-', $srow["toimaika"]);
+	//	list($kervv, $kerkk, $kerpp)    = split('-', $srow["kerayspvm"]);
+	//	$kerpp = substr($kerpp,0,2);
+		$toimpp = substr($toimpp,0,2);
+
+	}
+	
+	//voidaan tarvita
+	if ($toimvv == '') {
+		$toimpp = date("j");
+		$toimkk = date("n");
+		$toimvv = date("Y");
+	}
+	/*if ($kervv == '') {
+		$kerpp = date("j");
+		$kerkk = date("n");
+		$kervv = date("Y");
+	}*/
+	
+	$maksaja 	= $srow["toimitusehto"];
+	$myyja		= $kukarow["tunnus"];
+	$comments	= "";
+		
+	$jatka = "jatka";
+	
+	$query = "	SELECT max(tunnus) tunnus
+				FROM lasku
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tila = 'O'
+				AND alatila = ''
+				AND liitostunnus = '$toimittajien_liitostunnukset[$tuoteno]'
+				AND myyja = '$kukarow[tunnus]'";
+	$lasres = mysql_query($query) or pupe_error($query);
+	$lasrow = mysql_fetch_array($lasres);
+	
+	if ($lasrow['tunnus'] == 0) {
+		require("../tilauskasittely/otsik_ostotilaus.inc");
+		$rivi = 1;
+	}
+	else {
+		$tilausnumero = $lasrow['tunnus'];
+		
+		$query = "	SELECT max(tilaajanrivinro) tilaajanrivinro
+					FROM tilausrivi
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tyyppi = 'O'
+					AND otunnus = '$tilausnumero'";
+		$trivires = mysql_query($query) or pupe_error($query);
+		$trivirow = mysql_fetch_array($trivires);
+		
+		$rivi = $trivirow['tilaajanrivinro'] + 1;
+	}
+	
+	
+	// haetaan oletuspaikan tiedot niin laitetaan se riville
+	$query = "select * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and oletus!=''";
+	$jtsre = mysql_query($query) or pupe_error($query);
+	$jtstu = mysql_fetch_array($jtsre);
+	
+	//haetaan tuotteen ostohinta
+	$query = "select * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and liitostunnus='$toimittajien_liitostunnukset[$tuoteno]'";
+	$ossre = mysql_query($query) or pupe_error($query);
+	$osstu = mysql_fetch_array($ossre);
+
+	//haetaan tuotteen ostohinta
+	$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+	$tuotere = mysql_query($query) or pupe_error($query);
+	$tuoterow = mysql_fetch_array($tuotere);
+	
+	// lisätään ostotilausrivi
+	$query = "	insert into tilausrivi
+				(hinta, nimitys, tuoteno, try, osasto, tilkpl, varattu, yksikko, otunnus, yhtio, tyyppi, kommentti, toimaika, kerayspvm,hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro, laatija, laadittu) values
+				('$osstu[ostohinta]','$tuoterow[nimitys]', '$tuoteno', '$tuoterow[try]', '$tuoterow[osasto]', '$ostettavat[$tuoteno]', '$ostettavat[$tuoteno]', '$tuoterow[yksikko]', '$tilausnumero', '$kukarow[yhtio]', 'O','', now(), now(), '$jtstu[hyllyalue]','$jtstu[hyllynro]','$jtstu[hyllyvali]','$jtstu[hyllytaso]', '$rivi','$kukarow[kuka]', now())";
+	$updre = mysql_query($query) or pupe_error($query);
+	
+	$valitutvarastot = unserialize(urldecode($valitutvarastot));
+	//$valitutyhtiot = unserialize(urldecode($valitutyhtiot));
+	$mul_osasto = unserialize(urldecode($mul_osasto));
+	$mul_try = unserialize(urldecode($mul_try));
+	$tee = "RAPORTOI";
+	$ehdotusnappi = '';
+	$ytunnus = $temp_ytunnus;
+}
+
+
 $useampi_yhtio = 0;
 if (is_array($valitutyhtiot)) {
 	foreach ($valitutyhtiot as $yhtio) {
@@ -37,6 +224,8 @@ if ($yhtiorow["varaako_jt_saldoa"] != "") {
 else {
 	$lisavarattu = "";
 }
+
+
 
 function myynnit($myynti_varasto = '', $myynti_maa = '') {
 
@@ -282,12 +471,19 @@ if (isset($muutparametrit) and $toimittajaid > 0) {
 	}
 }
 
+
+
+
 // tehdään itse raportti
 if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
-
+	enable_ajax();
+		
 	$lisaa  = ""; // tuote-rajauksia
 	$lisaa2 = ""; // toimittaja-rajauksia
 	$lisaa3 = ""; // asiakas-rajauksia
+
+	$paivitys_mul_osasto = $mul_osasto;
+	$paivitys_mul_try = $mul_try;
 
 	if (is_array($mul_osasto) and count($mul_osasto) > 0) {
 		$sel_osasto = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_osasto))."')";
@@ -431,7 +627,8 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 	$res = mysql_query($query) or pupe_error($query);
 
 	flush();
-
+	echo "<form name='ostoehdotuscs' action='$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<input type='hidden' name='tee' value='paivita'>";
 	echo "<table>";
 	echo "<tr>";
 
@@ -447,22 +644,25 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 	echo "<th valign='top'>".t("Ostoehdotus")."<br>".t("Vuosikulutus")."</th>";
 	echo "<th valign='top'>".t("Pakkauskoko")."<br>".t("Varastoitava")."</th>";
 	echo "<th valign='top'>".t("Toimaika")."</th>";
+	if ($useampi_yhtio == 1) {
+		echo "<th valign='top'>".t("Ostettavat")."</th>";
+	}	
 	echo "</tr>";
-
+	
 	$btl = " style='border-top: 1px solid; border-left: 1px solid;' ";
 	$btr = " style='border-top: 1px solid; border-right: 1px solid;' ";
 	$bt  = " style='border-top: 1px solid;' ";
 	$bb  = " style='border-bottom: 1px solid; margin-bottom: 20px;' ";
 	$bbr = " style='border-bottom: 1px solid; border-right: 1px solid; margin-bottom: 20px;' ";
 	$bbl = " style='border-bottom: 1px solid; border-left: 1px solid; margin-bottom: 20px;' ";
-
-
+	
+	$indeksi = 0;
 	// loopataan tuotteet läpi
 	while ($row = mysql_fetch_array($res)) {
-
+		
 		$toimilisa = "";
 		if ($toimittajaid != '') $toimilisa = " and liitostunnus = '$toimittajaid' ";
-
+		//hae liitostunnukset
 		// haetaan tuotteen toimittajatietoa
 		$query = "	SELECT group_concat(tuotteen_toimittajat.toimittaja     order by tuotteen_toimittajat.tunnus separator '/') toimittaja,
 					group_concat(distinct tuotteen_toimittajat.osto_era     order by tuotteen_toimittajat.tunnus separator '/') osto_era,
@@ -471,14 +671,16 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 					group_concat(distinct tuotteen_toimittajat.ostohinta    order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
 					group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin,
 					group_concat(distinct tuotteen_toimittajat.pakkauskoko  order by tuotteen_toimittajat.tunnus separator '/') pakkauskoko,
-					group_concat(distinct tuotteen_toimittajat.toimitusaika order by tuotteen_toimittajat.tunnus separator '/') toimitusaika
+					group_concat(distinct tuotteen_toimittajat.toimitusaika order by tuotteen_toimittajat.tunnus separator '/') toimitusaika,
+					group_concat(distinct tuotteen_toimittajat.tunnus 		order by tuotteen_toimittajat.tunnus separator '/') tunnukset,
+					group_concat(distinct tuotteen_toimittajat.liitostunnus order by tuotteen_toimittajat.tunnus separator '/') liitostunnukset
 					FROM tuotteen_toimittajat
 					WHERE yhtio in ($yhtiot)
 					and tuoteno = '$row[tuoteno]'
 					$toimilisa";
 		$result   = mysql_query($query) or pupe_error($query);
 		$toimirow = mysql_fetch_array($result);
-
+		//echo "toimittaja: ".$toimirow['toimittaja']."<br>";
 		// kaunistellaan kenttiä
 		if ($row["luontiaika"] == "0000-00-00 00:00:00")	$row["luontiaika"] = "";
 		if ($row['epakurantti25pvm'] == '0000-00-00')    	$row['epakurantti25pvm'] = "";
@@ -583,6 +785,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		
 
 		if (($ostoehdotus > 0 or $naytakaikkituotteet != '') and ($naytavainmyydyt == '' or $vku+$enp != 0) and $naytetaan == "juu") {
+			
 			echo "<tr>";
 
 			if ($useampi_yhtio > 1) {
@@ -594,7 +797,6 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			}
 
 
-			//echo "<td valign='top' $bt  align='right'></td>";
 			echo "<td valign='top' $bt  align='right'>".(float) $row["varmuus_varasto"]."</td>";
 			echo "<td valign='top' $bt  align='right'>".(float) $saldot."</td>";
 			echo "<td valign='top' $bt  align='right'>".(float) $ostot."</td>";
@@ -606,33 +808,117 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			}			
 			echo "<td valign='top' $bt  align='right'>".(float) $toimirow["pakkauskoko"]."</td>";
 			echo "<td valign='top' $btr align='right'>".(float) $toimirow["toimitusaika"]." ".t("pva")."</td>";
+			if ($useampi_yhtio == 1 and $yhtiorow['yhtio'] == $row['yhtio']) {
+				if ($toimirow["pakkauskoko"] != 0) {
+					echo "<td valign='top' $bt align='right'><input type='text' size='10' name='ostettavat[$row[tuoteno]]' value='".ceil($ostoehdotus)."'></td>";
+				}
+				else {
+					echo "<td valign='top' $bt align='right'><input type='text' size='10' name='ostettavat[$row[tuoteno]]' value='$ostoehdotus'></td>";
+				}
+			
+			}
+			
 			echo "</tr>";
 
 			echo "<tr>";
 
 			if ($useampi_yhtio > 1) {
 				echo "<td valign='top' $bbl>$row[yhtio]</td>";
-				echo "<td valign='top' $bb>$row[nimitys]</td>";
+				echo "<td valign='top' $bb><a href=\"javascript:toggleGroup('$indeksi')\">$row[nimitys]</a></td>";
 			}
 			else {
-				echo "<td valign='top' $bbl>$row[nimitys]</td>";
+				echo "<td valign='top' $bbl><a href=\"javascript:toggleGroup('$indeksi')\">$row[nimitys]</a></td>";
 			}
 
 
-			//echo "<td valign='top' $bb align='right'>".(float) $kiertonopeus_tavoite[$row["abcluokka"]]."</td>";
 			echo "<td valign='top' $bb align='right'>".(float) $row["halytysraja"]."</td>";
 			echo "<td valign='top' $bb></td>";
 			echo "<td valign='top' $bb align='right'>".(float) $enp."</td>";
 			echo "<td valign='top' $bb align='right'>".(float) $vku."</td>";
 			echo "<td valign='top' $bb>$row[ei_varastoida]</td>";
 			echo "<td valign='top' $bbr>".tv1dateconv(date("Y-m-d",mktime(0, 0, 0, date("m"), date("d")+$toimirow["toimitusaika"], date("Y"))))."</td>";
+			
+			if ($useampi_yhtio == 1 and $toimirow['toimittaja'] != '' and $yhtiorow['yhtio'] == $row['yhtio']) {
+				echo "<td><input type='submit' name='valmis' value='".t("Tee ostotilaus")." ".$row[tuoteno]."'></td>";
+			}
+			else {
+				echo "<td></td>";
+			}
+			
 			echo "</tr>";
-
-			echo "<tr style='height: 5px;'></tr>";
+			
+			echo "<tr style='height: 5px;'><td align='center' colspan ='8'>";
+			echo "<div id='$indeksi' style='display:none'>";
+			
+			$toim_tunnukset = explode('/', $toimirow['tunnukset']);
+			$toim_liitostunnukset = explode('/', $toimirow['liitostunnukset']);
+			
+			echo t("Varmuusvarasto")."<input type='text' size='10' name='varmuus_varastot[$row[tuoteno]]' value='".$row["varmuus_varasto"]."'>";
+			echo t("pakkauskoko")."<input type='text' size='10' name='pakkauskoot[$row[tuoteno]]' value='".(float) $toimirow["pakkauskoko"]."'>";
+			echo t("toimitusaika")."<input type='text' size='10' name='toimitusajat[$row[tuoteno]]' value='".(float) $toimirow["toimitusaika"]."'> ".t("pva");
+			
+			$sel1 = "";
+			$sel2 = "";
+			
+			if ($row["ei_varastoida_clean"] == '') {
+				$sel1 = "selected";
+			}
+			else {
+				$sel2 = "selected";
+			}
+			
+			echo "<select name='varastoitavat[$row[tuoteno]]'";
+			echo "<option value='' $sel1>".t("Varastoitava")."</option>";
+			echo "<option value='o' $sel2>".t("Ei varastoida")."</option>";
+			echo "</select>";
+			
+			echo "<input type='hidden' name='toimittajien_tunnukset[$row[tuoteno]]' value='$toim_tunnukset[0]'>";
+			echo "<input type='hidden' name='toimittajien_liitostunnukset[$row[tuoteno]]' value='$toim_liitostunnukset[0]'>";
+			echo "<input type='hidden' name='tuotteen_yhtiot[$row[tuoteno]]' value='$row[yhtio]'>";
+			
+			echo "</div>";
+			echo "</td></tr>";
+			
+			$indeksi++;
+			
 		}
 	}
-
-	echo "</table>";
+	echo "<tr><td colspan ='8'>";
+	if ($useampi_yhtio == 1) {
+		echo "<input type='submit' name='valmis' value='".t("Päivitä")."'>";
+	}	
+	
+	
+	
+	echo "<input type='hidden' name='mul_osasto' value='".urlencode(serialize($paivitys_mul_osasto))."'>";
+	echo "<input type='hidden' name='mul_try' value='".urlencode(serialize($paivitys_mul_try))."'>";
+	echo "<input type='hidden' name='valitutyhtiot' value='".urlencode(serialize($valitutyhtiot))."'>";
+	echo "<input type='hidden' name='valitutvarastot' value='".urlencode(serialize($valitutvarastot))."'>";
+	echo "<input type='hidden' name='tuotemerkki' value='$tuotemerkki'>";
+	echo "<input type='hidden' name='poistetut' value='$poistetut'>";
+	echo "<input type='hidden' name='poistuva' value='$poistuva'>";
+	echo "<input type='hidden' name='eihinnastoon' value='$eihinnastoon'>";
+	echo "<input type='hidden' name='varastointi' value='$varastointi'>";
+	echo "<input type='hidden' name='vainuudet' value='$vainuudet'>";
+	echo "<input type='hidden' name='eiuusia' value='$eiuusia'>";
+	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+	echo "<input type='hidden' name='eliminoikonserni' value='$eliminoikonserni'>";
+	echo "<input type='hidden' name='abcrajaus' value='$abcrajaus'>";
+	echo "<input type='hidden' name='abcrajaustapa' value='$abcrajaustapa'>";
+	echo "<input type='hidden' name='eliminoi' value='$eliminoi'>";
+	echo "<input type='hidden' name='erikoisvarastot' value='$erikoisvarastot'>";
+	echo "<input type='hidden' name='naytakaikkituotteet' value='$naytakaikkituotteet'>";
+	echo "<input type='hidden' name='eivarastoivattilaus' value='$eivarastoivattilaus'>";
+	
+	echo "<input type='hidden' name='kka4' value='$kka4'>";
+	echo "<input type='hidden' name='vva4' value='$vva4'>";
+	echo "<input type='hidden' name='ppa4' value='$ppa4'>";
+	echo "<input type='hidden' name='kkl4' value='$kkl4'>";
+	echo "<input type='hidden' name='vvl4' value='$vvl4'>";
+	echo "<input type='hidden' name='ppl4' value='$ppl4'>";
+	
+	echo "</td></tr></table>";
+	echo "</form>";
 }
 
 // näytetään käyttöliittymä..

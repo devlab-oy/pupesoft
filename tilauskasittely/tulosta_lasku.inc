@@ -618,7 +618,12 @@ if (!function_exists('rivi_original')) {
 		//Määrä
 		$pdf->draw_text(340, $kala, $row["kpl"], 										$thispage, $norm);
 
-		// A-hinta (voi olla verollinen tai veroton riippuen yhtiöstä)
+		// yksikköhinta pitää olla veroton
+		if ($yhtiorow["alv_kasittely"] == '') {
+			$row["hinta"] = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+		}
+
+		// A-hinta 		
 		$pdf->draw_text(390, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)),	$thispage, $norm);
 
 		//Alennus
@@ -843,7 +848,12 @@ if (!function_exists('rivi_plain')) {
 		$oikpos = $pdf->strlen($row["kpl"], $norm);
 		$pdf->draw_text(380-$oikpos, $kala, $row["kpl"], 													$thispage, $norm);
 
-		// A-hinta (voi olla verollinen tai veroton riippuen yhtiöstä)
+		// yksikköhinta pitää olla veroton
+		if ($yhtiorow["alv_kasittely"] == '') {
+			$row["hinta"] = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+		}
+
+		// A-hinta
 		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)), $norm);
 		$pdf->draw_text(455-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)),	$thispage, $norm);
 
@@ -956,11 +966,14 @@ if (!function_exists('rivi_plain_2')) {
 		$oikpos = $pdf->strlen($row["kpl"], $norm);
 		$pdf->draw_text(380-$oikpos, $kala, $row["kpl"], 			$thispage, $norm);
 
+		// yksikköhinta pitää olla veroton
+		if ($yhtiorow["alv_kasittely"] == '') {
+			$row["hinta"] = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+		}
 
-		// A-hinta (voi olla verollinen tai veroton riippuen yhtiöstä)
+		// A-hinta
 		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)), $norm);
-		$pdf->draw_text(455-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)), 			$thispage, $norm);
-
+		$pdf->draw_text(455-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)), $thispage, $norm);
 
 		//Alennus
 		if ($row["ale"] != 0) {
@@ -1053,6 +1066,11 @@ if (!function_exists('rivi_perhe')) {
 			}
 		}
 
+		// yksikköhinta pitää olla veroton
+		if ($yhtiorow["alv_kasittely"] == '') {
+			$row["hinta"] = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+		}
+
 		if ($lisataa == 0) {
 			rivi_original ($thispage);
 		}
@@ -1104,8 +1122,6 @@ if (!function_exists('loppu')) {
 		$pdf->draw_text(30,  92+$vientikala+$barcode_korkeus,  $erapaiva,		$thispage, $norm);
 		$pdf->draw_text(217, 102+$vientikala+$barcode_korkeus, t("Viitenumero", $kieli),	$thispage, $pieni);
 		$pdf->draw_text(217, 92+$vientikala+$barcode_korkeus,  $laskurow["viite"],		$thispage, $boldi);
-
-
 
 		if ($vikasivu != "") {
 			$pdf->draw_text(404, 92+$vientikala+$barcode_korkeus,  t("Yhteensä", $kieli).":",$thispage, $norm);
@@ -1172,7 +1188,6 @@ if (!function_exists('loppu')) {
 			$pankkitiedot["pankkitili3"]  =	"";
 			$pankkitiedot["pankkiiban3"]  =	"";
 			$pankkitiedot["pankkiswift3"] =	"";
-
 		}
 		elseif ($masrow["pankkinimi1"] != "") {
 			$pankkitiedot["pankkinimi1"]  =	$masrow["pankkinimi1"];

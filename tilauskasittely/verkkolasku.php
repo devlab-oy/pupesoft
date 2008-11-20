@@ -1523,6 +1523,11 @@
 								$tilrow['kommentti'] 	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+()%#]", " ", $tilrow['kommentti']);
 								$tilrow['nimitys'] 		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+()%#]", " ", $tilrow['nimitys']);
 
+								// yksikköhinta pitää olla veroton
+								if ($yhtiorow["alv_kasittely"] == '') {
+									$tilrow["hinta"] = round($tilrow["hinta"] / (1 + $tilrow["alv"] / 100), 2);
+								}
+
 								if ($lasrow["chn"] == "111") {
 
 									if ((int) substr(sprintf("%06s", $tilrow["tilaajanrivinro"]), -6) > 0 and !in_array((int) substr(sprintf("%06s", $tilrow["tilaajanrivinro"]), -6), $rivinumerot)) {

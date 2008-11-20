@@ -21,7 +21,7 @@
 			$valkoodi = (string) $valuutta->attributes()->currency;
 			$kurssi   = (float)  $valuutta->attributes()->rate;
 
-			echo "<tr><td>$valkoodi</td><td align='right'>$kurssi</td><td align='right'>".sprintf("%.6f", (1/$kurssi))."</td>";
+			echo "<tr><td>$valkoodi</td><td align='right'>$kurssi</td><td align='right'>".sprintf("%.9f", (1/$kurssi))."</td>";
 
 			if ($tee == "PAIVITA") {
 		    	$query = "	UPDATE valuu SET

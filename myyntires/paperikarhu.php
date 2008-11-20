@@ -244,7 +244,7 @@
 			global $firstpage, $pdf, $yhtiorow, $kukarow, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli;
 
 			// siirrytäänkö uudelle sivulle?
-			if ($kala < 123) {
+			if ($kala < 133) {
 				$sivu++;
 				loppu($firstpage,'');
 				$firstpage = alku();
@@ -296,13 +296,13 @@
 			$pdf->draw_rectangle(110, 207, 90, 580,	$firstpage, $rectparam);
 			$pdf->draw_rectangle(110, 394, 90, 580,	$firstpage, $rectparam);
 			$pdf->draw_rectangle(110, 540, 90, 580,	$firstpage, $rectparam);
-
-			if ($karhut_samalle_laskulle == 1) {
-				$pdf->draw_text(404, 92,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
-				$pdf->draw_text(464, 92,  $summa,						$firstpage, $norm);
-				$pdf->draw_text(550, 92,  $laskutiedot["valkoodi"],		$firstpage, $norm);
-			}
 */
+			if ($karhut_samalle_laskulle == 1) {
+				$pdf->draw_text(404, 118,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
+				$pdf->draw_text(464, 118,  $summa,						$firstpage, $norm);
+				$pdf->draw_text(550, 118,  $laskutiedot["valkoodi"],	$firstpage, $norm);
+			}
+
 			$pankkitiedot = array();
 
 			//Laitetaan pankkiyhteystiedot kuntoon

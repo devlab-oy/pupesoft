@@ -285,7 +285,7 @@
 		echo "<td></td><td>";
 
 		//Jos tämä on selvittelyssä, niin annetaan mahdollisuus suorittaa!
-		if (($tiliointirow['korjattu'] == "0000-00-00 00:00:00" or $tiliointirow['korjattu'] == "@0000-00-00 00:00:00") and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili']) and ($kuittikoodi==' ')) {
+		if (($tiliointirow['korjattu'] == "0000-00-00 00:00:00" or $tiliointirow['korjattu'] == "@0000-00-00 00:00:00") and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili'] or $tiliointirow['tilino'] == $yritirow['oletus_selvittelytili']) and ($kuittikoodi==' ')) {
 			//Olisiko tämä meidän toimittaja
 			$tpv = substr($pvm,0,2);
 			$tpk = substr($pvm,2,2);
@@ -454,7 +454,13 @@
 				}
 				else {
 					if ($silent == "") {
-						echo "<font class='message'>".t("Rahatili")." $yritirow[oletus_rahatili], ".t("Kulutili")." $yritirow[oletus_kulutili]</font><br>";
+						if($yritirow["oletus_selvittelytili"] > 0) {
+							$selvittelytili = $yritirow["oletus_selvittelytili"];
+						}
+						else {
+							$selvittelytili = $yhtiorow['selvittelytili'];
+						}
+						echo "<font class='message'>".t("Rahatili")." $yritirow[oletus_rahatili], ".t("Kulutili")." $yritirow[oletus_kulutili], ".t("Selvittelytili")." $selvittelytili</font><br>";
 					}
 				}
 

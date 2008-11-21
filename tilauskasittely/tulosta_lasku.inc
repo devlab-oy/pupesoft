@@ -1462,8 +1462,12 @@ if (!function_exists('alvierittely')) {
 		//loppusummat vain vikalle sivulle
 		$pdf->draw_text(360, $kala, t("Veroton arvo yhteensä", $kieli).":", 		$thispage, $norm);
 
-		if ($toim == 'PROFORMA' or ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])))) {
+		if ($toim == 'PROFORMA') {
 			$oikpos = $pdf->strlen(sprintf('%.2f', $arvo), $norm);
+			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $arvo), 			$thispage, $norm);			
+		}
+		elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+			$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["arvo_valuutassa"]), $norm);
 			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $arvo), 			$thispage, $norm);
 		}
 		else {

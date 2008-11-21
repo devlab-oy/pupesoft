@@ -393,8 +393,9 @@ if ($tila == 'Q') {
 
 	$query = "	UPDATE tiliointi SET
 				summa = round(-1 * $summa * $trow[vienti_kurssi],2),
+				summa_valuutassa = -1 * $summa,
 				laadittu = now(),
-				laatija='$kukarow[kuka]'
+				laatija = '$kukarow[kuka]'
 				WHERE (tilino = '$yhtiorow[ostovelat]' or tilino='$yhtiorow[konserniostovelat]') and
 				ltunnus = '$tunnus' and
 				yhtio = '$kukarow[yhtio]' and

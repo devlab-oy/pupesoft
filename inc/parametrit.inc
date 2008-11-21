@@ -12,7 +12,7 @@ unset($postProcessVariables);
 if(!function_exists("iconv_array")) {
 	function iconv_array(&$item, $key) {
 		global $_REQUEST, $serc, $repl, $postProcessVariables;
-		
+
 		if(isset($_REQUEST["dont_str_replace"])) {
 			$item = strip_tags(iconv($_REQUEST["sourceCharset"], "latin1//TRANSLIT", ($item)), "<br>");
 		}
@@ -89,20 +89,20 @@ $verkkokauppa = "";
 require("salasanat.php");
 
 $link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen ei saada yhteyttä. Se on pois päältä tai käyttäjätietosi ovat virheelliset.");
-mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta!");
+mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (parametrit.inc)");
 
 if(isset($postProcessVariables)) {
-	
+
 	//	Poistetaan dublikaattimuuttujat
 	$flip = array_flip($postProcessVariables);
 	$postProcessVariables = array_flip($flip);
-	
+
 	if(!function_exists("mysqlrecescape")) {
 		function mysqlrecescape (&$item, $key) {
 			$item = mysql_real_escape_string($item);
 		}
 	}
-	
+
 	foreach($postProcessVariables as $postProcessVariable) {
 		if(is_array(${$postProcessVariable})) {
 			array_walk_recursive(${$postProcessVariable}, "mysqlrecescape");
@@ -470,7 +470,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			}
 
 		}
-		
+
 		if (isset($tee) and $tee == "message_luettu") {
 			$query = "UPDATE messenger SET status='' WHERE vastaanottaja='$kukarow[kuka]' AND tunnus='$message_tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -511,16 +511,16 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 
 	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
 	require("connect.inc");
-	
+
 	if($yhtiorow["dokumentaatiohallinta"] != "") {
 		/*
 			tehdään linkki dokumentaationhallintaan!
 
 			Funktiot voi kutsua suoraan koodista jos dokumentaationhallinta ei ole käytössä mitään ei ko funktioilla tapahdu
 		*/
-		
+
 		@(include_once("inc/dokumentinhallinta.inc")) or $yhtiorow["dokumentaatiohallinta"] = "";
-		
+
 	}
 }
 

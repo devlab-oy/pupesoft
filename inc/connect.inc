@@ -35,7 +35,7 @@ else {
 	$link = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
 }
 
-mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (connect.inc)!");
+mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $dbhost! (connect.inc)");
 
 $query = "SET SESSION group_concat_max_len = 100000";
 $result = mysql_query($query) or die("Parametrien asentelu epäonnistui!");

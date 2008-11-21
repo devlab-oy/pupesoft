@@ -5390,7 +5390,7 @@ if ($tee == '') {
 }
 
 if ($takaisin == "LASKUTATILAUS" and $takaisin_valmis == "YES") {
-	echo "	<form action='valitse_laskutettavat_tilaukset.php' method='post'>
+	echo "	<br><form action='".$palvelin2."tilauskasittely/valitse_laskutettavat_tilaukset.php' method='post'>
 			<input type='submit' value='".t("Takaisin tilauksen laskutukseen")."'>
 			</form>";
 }

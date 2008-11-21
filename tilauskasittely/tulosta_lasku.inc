@@ -620,7 +620,12 @@ if (!function_exists('rivi_original')) {
 
 		// yksikköhinta pitää olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
-			$veroton_hinta = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+				$veroton_hinta = $row["hinta"] / (1 + $row["alv"] / 100);
+			}
+			else {
+				$veroton_hinta = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+			}
 		}
 		else {
 			$veroton_hinta = $row["hinta"];
@@ -853,7 +858,12 @@ if (!function_exists('rivi_plain')) {
 
 		// yksikköhinta pitää olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
-			$veroton_hinta = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+				$veroton_hinta = $row["hinta"] / (1 + $row["alv"] / 100);
+			}
+			else {
+				$veroton_hinta = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+			}
 		}
 		else {
 			$veroton_hinta = $row["hinta"];
@@ -974,7 +984,12 @@ if (!function_exists('rivi_plain_2')) {
 
 		// yksikköhinta pitää olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
-			$veroton_hinta = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+				$veroton_hinta = $row["hinta"] / (1 + $row["alv"] / 100);
+			}
+			else {
+				$veroton_hinta = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+			}
 		}
 		else {
 			$veroton_hinta = $row["hinta"];

@@ -821,12 +821,15 @@
 						<td valign='top'>$tilrow[mehka] $tilrow[meh]</td>
 						<td valign='top'>".t($laskutyyppi)." ".t($alatila)."</td>";
 
-				echo "	<form method='post' action='$PHP_SELF'>
+				echo "	<td class='back' valign='top'>
+						<form method='post' action='$palvelin2"."tilauskasittely/valitse_laskutettavat_tilaukset.php'>
 						<input type='hidden' name='tee' value='VALITSE'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tunnukset' value='$tilrow[tunnukset]'>
-						<td class='back' valign='top'><input type='submit' name='tila' value='".t("Valitse")."'></td>
-						</tr></form>";
+						<input type='submit' name='tila' value='".t("Valitse")."'>
+						</form>
+						</td>
+						</tr>";
 
 				$arvoyhteensa 		+= $tilrow["arvo"];
 				$summayhteensa 		+= $tilrow["summa"];

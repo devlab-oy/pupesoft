@@ -1,6 +1,6 @@
 <?php
 	require "inc/parametrit.inc";
-
+	require_once ("inc/tilinumero.inc");
 	if ($lataa_tiedosto == 1) {
 		$filetxt = file_get_contents($file);
 		echo $filetxt;

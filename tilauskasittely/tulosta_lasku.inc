@@ -1468,7 +1468,7 @@ if (!function_exists('alvierittely')) {
 		}
 		elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 			$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["arvo_valuutassa"]), $norm);
-			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $arvo), 			$thispage, $norm);
+			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow["arvo_valuutassa"]), $thispage, $norm);
 		}
 		else {
 			$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["arvo"]), $norm);

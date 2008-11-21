@@ -3,7 +3,11 @@
 // Bug 590
 
 function tilinumero_print($tilino_data) {
-  if ((substr($tilino_data, 0, 1) >= 0) and (substr($tilino_data, 0, 1) <= '9')) { 
+if (trim($tilino_data)=='') {
+	return "";
+}
+else {
+	if ((substr($tilino_data, 0, 1) >= 0) and (substr($tilino_data, 0, 1) <= '9')) { 
 	  $alkuosa = substr($tilino_data, 0, 6);
 	  if ($tilino_print[0] == "4" || $tilino_print[0] == "5") {
 	    $loppuosa = substr($tilino_data, 6, 1);
@@ -14,11 +18,12 @@ function tilinumero_print($tilino_data) {
 	  }
 	  while ($tilino_data[$loppuindex] == "0") $loppuindex++;
 	  $loppuosa .= substr($tilino_data, $loppuindex);
-      return "$alkuosa-$loppuosa";
-   }
-   else {
+	  return "$alkuosa-$loppuosa";
+   	}
+   	else {
    	  return "$tilino_data";
-   }
+   	}
+  }
 }
 
 function tilinumero_data($tilino_print) {
@@ -42,5 +47,9 @@ function tilinumero_data($tilino_print) {
   else {
   	return "$tilino_print";
   }
+}
+
+function pankkipvm($pvm) {
+	return substr($pvm,4,2).".".substr($pvm,2,2).".20".substr($pvm,0,2);
 }
 ?>

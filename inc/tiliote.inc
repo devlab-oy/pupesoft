@@ -269,7 +269,7 @@
 				$tiliointiresult = mysql_query($query) or pupe_error($query);
 
 				if ($tiliointirow = mysql_fetch_array ($tiliointiresult)) {
-					echo "<font class='message'>".t("Tapahtuma on käsitelty")." $tiliotedataka<br>";
+					echo "<font class='message'>".t("Tapahtuma on käsitelty")." ".tv1dateconv($tiliotedataka)."<br>";
 					echo t("Alkuperäinen tiliöinti on")." <a href='muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>";
 
 					if (($tiliointirow['korjattu'] != "0000-00-00 00:00:00") and ($tiliointirow['korjattu'] != "@0000-00-00 00:00:00")) {
@@ -375,7 +375,7 @@
 				echo "<tr>";
 				echo "<td rowspan='2'>". substr($tietue,222,40) . "<br>". substr($tietue,262,30) ."<br>". substr($tietue,292,30) ."</td>";
 				echo "<td></td>";
-				echo "<td>".t("Muodostettu")."<br>". substr($tietue,38,10) . "</td>";
+				echo "<td>".t("Muodostettu")."<br>". pankkipvm(substr($tietue,38,6)) ." " . substr($tietue,44,4) ."</td>";
 				echo "</tr>";
 
 				echo "<tr>";
@@ -386,12 +386,12 @@
 			$loppupvm = substr($tietue,32,6);
 
 			if ($silent == "") {
-				echo "<td>".t("Kausi")."<br> $alkupvm - $loppupvm</td>";
+				echo "<td>".t("Kausi")."<br>". pankkipvm($alkupvm) ." - ". pankkipvm($loppupvm)."</td>";
 				echo "</tr>";
 
 				echo "<tr>";
 				echo "<td>" . substr($tietue, 147, 18) . "</td>";
-				echo "<td>" . substr($tietue, 99, 30) . "<br>$tilinvaluutta $pankkitilino</td>";
+				echo "<td>" . substr($tietue, 99, 30) . "<br>$tilinvaluutta" . tilinumero_print($pankkitilino) . "</td>";
 				$tililimiitti = (int) (substr($tietue, 117, 30) * 1);
 				if($tililimiitti > 0) {
 					$tililimiitti =  sprintf("%01.2f", $tililimiitti);
@@ -400,7 +400,7 @@
 					$tililimiitti =  "";
 				}
 				
-				echo "<td align='right'>".t("Myönnetty määrä")."<br>". $tililimiitti . "</td>";
+				echo "<td>".t("Myönnetty määrä")."<br>". $tililimiitti . "</td>";
 				echo "</tr>";
 			}
 
@@ -515,14 +515,14 @@
 			echo "</tr>";
 
 			echo "<tr><td></td><td></td><td></td><td></td>";
-			echo "<td>".t("Saldo")." " . substr($tietue,65,6) . "</td>";
-			echo "<td align='right'>" . ((substr($tietue,71,19) / 100)-$tililimiitti) . "</td>";
+			echo "<td>".t("Saldo")." " . pankkipvm(substr($tietue,65,6)) . "</td>";
+			echo "<td style='text-align:right;'>" . sprintf("%01.2f",((substr($tietue,71,19) / 100)-$tililimiitti)) . "</td>";
 			echo "</tr>";
 			
 			if($tililimiitti != "") {
 				echo "<tr><td></td><td></td><td></td><td></td>";
 				echo "<td>".t("Käyttövara")."</td>";
-				echo "<td align='right'>" . (substr($tietue,71,19) / 100) . "</td>";
+				echo "<td style='text-align:right;'>" . (substr($tietue,71,19) / 100) . "</td>";
 				echo "</tr>";
 			}
 
@@ -577,14 +577,14 @@
 
 			echo "<tr>";
 			echo "<td>" . substr($tietue,12,18) . "</td>";
-			echo "<td>$kirjpvm</td>";
+			echo "<td>" . pankkipvm($kirjpvm) . "</td>";
 			echo "<td>$maksaa</td>";
 			echo "<td>" . substr($tietue, 6, 6) * 1 . "$kuittikoodi $omataso</td>";
 			echo "<td></td>";
-			echo "<td align='right'>$maara</td>";
+			echo "<td style='text-align:right;'>$maara</td>";
 			echo "</tr><tr>";
-			echo "<td>$tilino</td>";
-			echo "<td>$pvm</td>";
+			echo "<td>".tilinumero_print($tilino)."</td>";
+			echo "<td>" . pankkipvm($pvm) . "</td>";
 			echo "<td>$koodi $koodiselite</td>";
 			echo "<td></td><td></td><td></td>";
 			echo "</tr>";
@@ -620,8 +620,8 @@
 					break;
 				case'05' :
 
-					$vasta_arvo	  = sprintf('%.2f', substr($arvo, 0, 19)/100);
-					$vasta_kurssi = substr($arvo, 24, 11) * 1 / 10000000;
+					$vasta_arvo	= sprintf('%.2f', substr($arvo, 0, 19)/100);
+					$vasta_kurssi	= substr($arvo, 24, 11) * 1 / 10000000;
 
 					$selite  = t("vasta-arvo").": ".sprintf('%.2f', substr($arvo, 0, 19)/100)."<br>";
 					$selite .= t("valuutta").": ".substr($arvo, 20, 3)."<br>";
@@ -663,12 +663,12 @@
 			$vientiselite .= $selite;
 			break;
 		case 'T40':
-			echo "<tr><td></td><td></td><td></td><td></td><td>".t("Saldo")." " . substr($tietue,6,6) . "</td>";
-			echo "<td>" . ((substr($tietue,31,19) / 100) - $tililimiitti) . "</td></tr>";
+			echo "<tr><td></td><td></td><td></td><td></td><td>".t("Saldo")." " . pankkipvm(substr($tietue,6,6)) . "</td>";
+			echo "<td style='text-align:right;'>" .  sprintf("%01.2f",((substr($tietue,31,19) / 100) - $tililimiitti)) . "</td></tr>";
 			
 			if($tililimiitti != "") {
 				echo "<tr><td></td><td></td><td></td><td></td><td>".t("Käyttövara")."</td>";
-				echo "<td>" . substr($tietue,31,19) / 100 . "</td></tr>";
+				echo "<td style='text-align:right;'>" . sprintf("%01.2f",substr($tietue,31,19) / 100) . "</td></tr>";
 			}
 
 			// Päivitetään saldo yriti-tauluun, jos sellainen löytyi
@@ -697,8 +697,8 @@
 			if (substr($tietue,6,1) == 4) $jakso = "vuoden";
 
 			if ($silent == "") {
-				echo "<tr><th colspan='5'>".t("Panot")." $jakso ".t("alusta")." ".t("kpl")." " . substr($tietue,13,8) * 1 . "</th><th style='text-align:right;'>" . substr($tietue,21,19) / 100 . "</th></tr>";
-				echo "<tr><th colspan='5'>".t("Otot")." $jakso ".t("alusta")." kpl " . substr($tietue,40,8) * 1 . "</th><th style='text-align:right;'>" . substr($tietue,48,19) / 100 . "</th></tr>";
+				echo "<tr><th colspan='5'>".t("Panot")." $jakso ".t("alusta")." ".t("kpl")." " . substr($tietue,13,8) * 1 . "</th><th style='text-align:right;'>" . sprintf("%01.2f",substr($tietue,21,19) / 100) . "</th></tr>";
+				echo "<tr><th colspan='5'>".t("Otot")." $jakso ".t("alusta")." kpl " . substr($tietue,40,8) * 1 . "</th><th style='text-align:right;'>" . sprintf("%01.2f",substr($tietue,48,19) / 100) . "</th></tr>";
 			}
 			break;
 		case 'T60':

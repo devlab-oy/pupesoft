@@ -10,7 +10,7 @@
 	if ($type == 0 and substr($tietue, 0,3) != "\$\$E" and substr($tietue, 0,3) != "EOF") {
 		
 		echo "<table>";
-		echo "<tr><th>".t("Aineston luontipv")."</th><td>".substr($tietue,1,6)."</td></tr>";
+		echo "<tr><th>".t("Aineston luontipv")."</th><td>".pankkipvm(substr($tietue,1,6))."</td></tr>";
 		echo "<tr><th>".t("Aineston luontiaika")."</th><td>".substr($tietue,7,4)."</td></tr>";
 		echo "<tr><th>".t("Rahalaitostunnus")."</th><td>".substr($tietue,11,2)."</td></tr>";
 		echo "</table><br>";
@@ -29,12 +29,12 @@
 	elseif ($type == 3) {
 
 		echo "<tr><td>".substr($tietue,27,16)."</td>";
-		echo "<td>".substr($tietue,1,14)."</td>";
-		echo "<td>".substr($tietue,15,6)."</td>";
-		echo "<td>".substr($tietue,21,6)."</td>";
+		echo "<td>".tilinumero_print(substr($tietue,1,14))."</td>";
+		echo "<td>".pankkipvm(substr($tietue,15,6))."</td>";
+		echo "<td>".pankkipvm(substr($tietue,21,6))."</td>";
 		echo "<td>".substr($tietue,63,12)."</td>";
-		echo "<td>". substr($tietue,77,10) / 100 ."</td>";
-		echo "<td>".substr($tietue,43,20)."</td>";
+		echo "<td align='right'>".sprintf('%01.2f',substr($tietue,77,10) / 100) ."</td>";
+		echo "<td>".ltrim(substr($tietue,43,20),"0")."</td>";
 		echo "<td>".t("Tapahtuma on käsitelty")." ".tv1dateconv($tiliotedatarow["kasitelty"])."<br>";
 		
 		$query = "	SELECT kohdpvm, nimi 
@@ -65,8 +65,8 @@
 				<th>".t("Summa")."</th>
 				</tr>";
 				
-		echo "<tr><th>".t("Tapahtumia")."</th><td>".(int) substr($tietue,1,6)."</td><td>".round(substr($tietue,7,11)/100,2)."</td></tr>";
-		echo "<tr><th>".t("Oikaisutapahtumia")."</th><td>".(int) substr($tietue,18,6)."</td><td>".round(substr($tietue,24,11)/100,2)."</td></tr>";
+		echo "<tr><th>".t("Tapahtumia")."</th><td>".(int) substr($tietue,1,6)."</td><td>".sprintf("%01.2f",substr($tietue,7,11)/100)."</td></tr>";
+		echo "<tr><th>".t("Oikaisutapahtumia")."</th><td>".(int) substr($tietue,18,6)."</td><td>".sprintf("%01.2f",substr($tietue,24,11)/100)."</td></tr>";
 		echo "</table>";
 		//echo "<td>Varalla</td><td>".substr($tietue,35,5)."</td></tr>";
 	} 

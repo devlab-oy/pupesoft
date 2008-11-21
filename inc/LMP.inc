@@ -5,9 +5,9 @@
 	switch ($tunnus) {
 		case 'T03' :
 			echo "<table>";
-			echo "<tr><td>".t("asiakas")."</td><td colspan='4'>" . substr($tietue, 147, 35) .  "</td></tr>";
+			echo "<tr><th>".t("asiakas")."</th><th>" . t("tilino") .  "</th></tr>";
 			$pankkitilino = substr($tietue, 9, 14);
-			echo "<tr><td>".t("tilino")."</td><td colspan='4'>" . $pankkitilino . "</td></tr>";
+			echo "<tr><td>".substr($tietue, 147, 35)."</td><td>" . tilinumero_print($pankkitilino) . "</td></tr>";
 
 			$query = "SELECT hyvak, nimi, oletus_rahatili, oletus_kulutili, yhtio
 						FROM yriti
@@ -16,19 +16,19 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) != 1) {
-				echo "<font class='message'>Pupesoft: ".t("Tiliä")." '$pankkitilino' ".t("ei löytynyt")."!</font><br>";
+				echo "<font class='message'>".t("Tiliä")." '$pankkitilino' ".t("ei löytynyt")."!</font><br>";
 				$toim='E';
 			}
 			else {
 				$yritirow = mysql_fetch_array ($result);
-				echo "<tr><td colspan='5'><font class='message'>Pupesoft: ".t("tili löytyi")." $yritirow[4] ".t("vastuussa")." '$yritirow[0]'</font><br>";
+				echo "<tr><td colspan='5'><font class='message'>".t("tili löytyi")." $yritirow[4] ".t("vastuussa")." '$yritirow[0]'</font><br>";
 
 				if ((strlen($yritirow[2]) == 0) || (strlen($yritirow[2]) == 0)) { // Tarkistetaan tilit
-					echo "<font class='message'>Pupesoft: ".t("Tililtä puuttuu kulu tai rahatili")."</font>";
+					echo "<font class='message'>".t("Tililtä puuttuu kulu tai rahatili")."</font>";
 					$toim='E';
 				}
 				else {
-					echo "<font class='message'>Pupesoft: ".t("Tilin rahatili on")." '$yritirow[2]' ".t("ja kulutili")." '$yritirow[3]'</font><br>";
+					echo "<font class='message'>".t("Tilin rahatili on")." '$yritirow[2]' ".t("ja kulutili")." '$yritirow[3]'</font><br>";
 				}
 
 				$query = "SELECT *
@@ -38,7 +38,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) != 1) {
-					echo "<font class='message'>Pupesoft: ".t("Yritystä")." '$yritirow[4]' ".t("ei löytynyt")."!</font><br>";
+					echo "<font class='message'>".t("Yritystä")." '$yritirow[4]' ".t("ei löytynyt")."!</font><br>";
 					$toim='E';
 				}
 				else {
@@ -59,12 +59,13 @@
 						}
 					}
 
-					echo "<font class='message'>Pupesoft: ".t("Yritys löytyi")." $yhtiorow[nimi] ".t("ostovelat")." '$yhtiorow[ostovelat]'</font><br>";
+					echo "<font class='message'>".t("Yritys löytyi")." $yhtiorow[nimi] ".t("ostovelat")." '$yhtiorow[ostovelat]'</font><br>";
 					$toim="K";
 				}
 			}
 			if ($toim != 'K') exit; // Jos perustietoja ei löydy lopetetaam heti!
-			echo "</td></tr>";
+			echo "</td></tr></table><br>";
+			echo "<table><tr><th>".t("Pvm")."</th><th>".t("Maksaja")."</th><th>".t("Maksajan tilinumero")."</th><th>".t("Summa")."</th><th></th></tr>";
 			break;
 		case 'T10' :
 			$tiliotedataid = $tiliotedatarow['tunnus'];
@@ -80,10 +81,10 @@
 
 			if ($pvm == '000000') {
 				$pvm = $turvapvm;
-				echo "<td>$pvm*</td>";
+				echo "<td>".pankkipvm($pvm)."*</td>";
 			}
 			else {
-				echo "<td>$pvm</td>";
+				echo "<td>".pankkipvm($pvm)."</td>";
 			}
 
 			$etumerkki = substr($tietue, 87, 1);
@@ -92,13 +93,12 @@
 			if ($etumerkki == '-') {
 				$maara *= -1;
 			}
-			echo "<td>$maara</td>";
 			$maksaa = substr($tietue, 108, 35);
 			$vientiselite = $maksaa; // Ei ole muutakaan infoa!?
 			echo "<td>$maksaa</td>";
 			$tilino = substr($tietue, 144, 14);
-			echo "<td>$tilino</td>";
-
+			echo "<td>".tilinumero_print($tilino)."</td>";
+			echo "<td align='right'>".sprintf("%01.2f",$maara)."</td>";
 			if (($taso == '1') and ($tiliotedataka == '0000-00-00')) { // Tama on todellinen tapahtuma
 
 
@@ -147,7 +147,7 @@
 			}
 			else {
 				echo "<td>";
-				if ($taso != '1') echo "<font class='message'>".t("Erittely tulossa")."</font><br>";
+				if ($taso != '1') echo "<font class='message'>".t("Tapahtumat yhteensä")."</font><br>";
 
 				if ($tiliotedataka != '0000-00-00') {
 					$query = "SELECT tiliointi.tilino tilino, tili.nimi nimi, concat_ws('@',korjattu, korjausaika) korjattu, ltunnus
@@ -157,7 +157,7 @@
 					$tiliointiresult = mysql_query($query) or pupe_error($query);
 
 					if ($tiliointirow = mysql_fetch_array($tiliointiresult)) {
-						echo "<font class='message'>".t("Tapahtuma on käsitelty")." $tiliotedataka<br>";
+						echo "<font class='message'>".t("Tapahtuma on käsitelty"). " ". tv1dateconv($tiliotedataka) ."<br>";
 						echo "".t("Alkuperäinen tiliöinti on")." <a href='muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>";
 
 						if ($tiliointirow['korjattu'] != "0000-00-00 00:00:00" and $tiliointirow['korjattu'] != "@0000-00-00 00:00:00") {

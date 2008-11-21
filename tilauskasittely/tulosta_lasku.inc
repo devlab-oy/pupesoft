@@ -620,11 +620,14 @@ if (!function_exists('rivi_original')) {
 
 		// yksikköhinta pitää olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
-			$row["hinta"] = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+			$veroton_hinta = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+		}
+		else {
+			$veroton_hinta = $row["hinta"];
 		}
 
 		// A-hinta 		
-		$pdf->draw_text(390, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)),	$thispage, $norm);
+		$pdf->draw_text(390, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($veroton_hinta, $kurssi)),	$thispage, $norm);
 
 		//Alennus
 		if ($row["ale"] != 0) {
@@ -850,12 +853,15 @@ if (!function_exists('rivi_plain')) {
 
 		// yksikköhinta pitää olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
-			$row["hinta"] = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+			$veroton_hinta = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+		}
+		else {
+			$veroton_hinta = $row["hinta"];
 		}
 
 		// A-hinta
-		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)), $norm);
-		$pdf->draw_text(455-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)),	$thispage, $norm);
+		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($veroton_hinta, $kurssi)), $norm);
+		$pdf->draw_text(455-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($veroton_hinta, $kurssi)),	$thispage, $norm);
 
 		//Alennus
 		if ($row["ale"] != 0) {
@@ -968,12 +974,15 @@ if (!function_exists('rivi_plain_2')) {
 
 		// yksikköhinta pitää olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
-			$row["hinta"] = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+			$veroton_hinta = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+		}
+		else {
+			$veroton_hinta = $row["hinta"];
 		}
 
 		// A-hinta
-		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)), $norm);
-		$pdf->draw_text(455-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)), $thispage, $norm);
+		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($veroton_hinta, $kurssi)), $norm);
+		$pdf->draw_text(455-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($veroton_hinta, $kurssi)), $thispage, $norm);
 
 		//Alennus
 		if ($row["ale"] != 0) {
@@ -1064,11 +1073,6 @@ if (!function_exists('rivi_perhe')) {
 				// lapsia ei lisätä
 				$lisataa = 1;
 			}
-		}
-
-		// yksikköhinta pitää olla veroton
-		if ($yhtiorow["alv_kasittely"] == '') {
-			$row["hinta"] = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
 		}
 
 		if ($lisataa == 0) {

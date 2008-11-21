@@ -598,7 +598,7 @@ if (!function_exists('rivi_original')) {
 		$query = "	SELECT vienti_kurssi
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus 	= '$row[otunnus]'";
+					and tunnus 	= '$row[uusiotunnus]'";
 		$valres = mysql_query($query) or pupe_error($query);
 		$valrow = mysql_fetch_array($valres);
 
@@ -834,7 +834,7 @@ if (!function_exists('rivi_plain')) {
 		$query = "	SELECT vienti_kurssi
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus 	= '$row[otunnus]'";
+					and tunnus 	= '$row[uusiotunnus]'";
 		$valres = mysql_query($query) or pupe_error($query);
 		$valrow = mysql_fetch_array($valres);
 
@@ -933,7 +933,7 @@ if (!function_exists('rivi_plain_2')) {
 		$query = "	SELECT vienti_kurssi
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus 	= '$row[otunnus]'";
+					and tunnus 	= '$row[uusiotunnus]'";
 		$valres = mysql_query($query) or pupe_error($query);
 		$valrow = mysql_fetch_array($valres);
 

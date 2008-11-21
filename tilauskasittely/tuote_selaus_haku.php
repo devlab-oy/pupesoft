@@ -323,6 +323,8 @@
 
 	for ($i=0; $i<=$count; $i++) {
 
+		$haku[$i] = trim($haku[$i]);
+		
 		if (strlen($haku[$i]) > 0 && $i == 0) {
 			$lisa .= " and ".$array[$i]." like '%".$haku[$i]."%'";
 			$ulisa .= "&haku[".$i."]=".$haku[$i];

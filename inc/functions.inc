@@ -1359,14 +1359,14 @@ if(!function_exists("avainsana")) {
 
 		$laji = mysql_real_escape_string($laji);
 		$limit = mysql_real_escape_string($limit);
-		
+
 		if ($kieli == "") {
 			$kieli = $kukarow["kieli"];
 		}
 		else {
 			$kieli = mysql_real_escape_string($kieli);
 		}
-		
+
 		if ($selite != "") {
 			$querylisa = " and avainsana.selite = '".mysql_real_escape_string($selite)."' ";
 		}
@@ -1406,7 +1406,7 @@ if(!function_exists("avainsana")) {
 			$limitlisa = "";
 		}
 
-		$query = "	SELECT DISTINCT avainsana.*, 
+		$query = "	SELECT DISTINCT avainsana.*,
 					IFNULL((SELECT avainsana_kieli.selitetark
 					FROM avainsana as avainsana_kieli
 					WHERE avainsana_kieli.yhtio = avainsana.yhtio
@@ -1797,7 +1797,7 @@ if (!function_exists("synkronoi")) {
 
 				$vanhatunnus = $utunnus="";
 				$override	 = array();
-				
+
 				//	Jos master on poistettu haetaan tiedot siitä vanhasta!
 				if(!isset($masterrow)) {
 					$abuhaku = $orig;
@@ -1805,14 +1805,14 @@ if (!function_exists("synkronoi")) {
 				else {
 					$abuhaku = $masterrow;
 				}
-				
+
 				//	Osa tauluista vaatii vähän käpistelyä!
 				if($table == "yhteyshenkilo") {
 					if($abuhaku["tyyppi"] == "A") {
 						$query = "select * from asiakas where yhtio='$yhtio' and tunnus='$abuhaku[liitostunnus]'";
 						$abures = mysql_query($query) or pupe_error($query);
 						$aburow = mysql_fetch_array($abures);
-						
+
 						//	Etsitään oikea asiakas, jotta saadaan oikea liitostunnus
 						$tarkquery = "select tunnus from asiakas where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]' and toim_ovttunnus='$aburow[toim_ovttunnus]'";
 					}
@@ -1820,17 +1820,17 @@ if (!function_exists("synkronoi")) {
 						$query = "select * from toimi where yhtio='$yhtio' and tunnus='$abuhaku[liitostunnus]'";
 						$abures = mysql_query($query) or pupe_error($query);
 						$aburow = mysql_fetch_array($abures);
-						
+
 						//	Etsitään oikea toimittaja, jotta saadaan oikea liitostunnus
 						$tarkquery = "select tunnus from toimi where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]'";
 					}
 					$tarkres = mysql_query($tarkquery) or pupe_error($tarkquery);
-										
+
 					if(mysql_num_rows($tarkres)==1) {
 						//	Ylikirjoitetaan liitostunnus
 						$tarkrow = mysql_fetch_array($tarkres);
 						$override["liitostunnus"] = $tarkrow["tunnus"];
-						
+
 						//	Meidän pitääkorvata se vanha liitostunnus myös where haarasta..
 						$where = str_replace(" and liitostunnus='$abuhaku[liitostunnus]'", " and liitostunnus='$override[liitostunnus]'", $where);
 					}
@@ -1858,10 +1858,10 @@ if (!function_exists("synkronoi")) {
 							//	Ylikirjoitetaan liitostunnus
 							$tarkrow = mysql_fetch_array($tarkres);
 							$override["liitostunnus"] = $tarkrow["tunnus"];
-							
+
 							//	Meidän pitääkorvata se vanha liitostunnus myös where haarasta..
 							$where = str_replace(" and liitostunnus='$abuhaku[liitostunnus]'", " and liitostunnus='$override[liitostunnus]'", $where);
-							
+
 						}
 						else {
 							$synclog .= "Yhtiölle '$kohderow[yhtio]' ei löydy toimittajaa $masterrow[toimittaja] joten tuotteen toimittajaa ei voida sycronisoida\n";
@@ -1873,8 +1873,8 @@ if (!function_exists("synkronoi")) {
 						$ok=0;
 					}
 				}
-				
-				
+
+
 				//	Poistetaan tietue jos masteria ei löydetty mutta originaali on tallessa.. olisiko tässä selvempi tapa?
 				if(!isset($masterrow) and is_array($orig) and count($orig) > 0) {
 
@@ -3790,7 +3790,7 @@ if (!function_exists('ta')) {
 		global $kukarow, $yhtiorow;
 
 		if ($kieli == "") $kieli = $kukarow["kieli"];
-		
+
 		//	Jos kielet matchaa niin palautetaan suoraan vastaus
 		if($kieli == $yhtiorow["kieli"] and $return == "selite") {
 			return $selite;
@@ -4092,6 +4092,9 @@ if(!function_exists("tulosta_ytunnus")) {
 
 		//jos on suomalainen yritys tehdään ytunnus nätiks
 		if (strtoupper($maa) == 'FI') {
+
+			$ytunnus = str_replace("-", "", $ytunnus); // poistetaan väliviivat jos niitä oli jo
+
 			//muutetaan ytunnus takas oikean näköseks
 			$ytunpit = 8-strlen($ytunnus);
 
@@ -4673,20 +4676,20 @@ var popUp_timeout=0;
 var poUp_closeTimeOut=new Array();
 
 function closeOnExit(event, oi) {
-	
+
 
 	recurce=true;
 	r=event.relatedTarget;
 	r_orog = r;
 	while(recurce) {
-		
+
 		x=r.childNodes;
-		
+
 		if(r.id == oi) {
 			recurce = false;
 			return true;
 		}
-		
+
 		for (i=0;i<x.length;i++) {
 
 			if(x[i].id==oi) {
@@ -4695,7 +4698,7 @@ function closeOnExit(event, oi) {
 			}
 		}
 
-		r=r.parentNode;		
+		r=r.parentNode;
 		if(r == null || r.tagName == "BODY") {
 
 
@@ -4751,7 +4754,7 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass, closeOnExit) {
 		myDiv.setAttribute('id', oi);
 		myDiv.setAttribute('name', 'dynamic_'+oi);
 		myDiv.style.display = 'block';
-		
+
 		//caller = getEventCaller(e);
 
 		//	Suljetaan nää aina kun mennää pois divistä
@@ -4764,7 +4767,7 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass, closeOnExit) {
 				myDiv.setAttribute("onMouseOver", "stopClose('"+oi+"');");
 			}
 		}
-		
+
 		document.body.appendChild(myDiv);
 	}
 
@@ -5660,7 +5663,7 @@ if (! function_exists('tallenna_liite')) {
 
 				$jarjestys = $row["jarjestys"]+1;
 			}
-			
+
 			$query = "	INSERT INTO liitetiedostot SET
 					  	yhtio    		= '$kukarow[yhtio]',
 					  	liitos   		= '$liitos',

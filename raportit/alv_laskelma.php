@@ -59,7 +59,7 @@
 
 	while ($row = mysql_fetch_array($result)) {
 		$chk = "";
-		if ((!isset($vero) and strtoupper($row["laji"]) == "ALV") or in_array($row["selite"], $vero)) {
+		if ((!isset($vero) and strtoupper($row["laji"]) == "ALV") or (isset($vero) and in_array($row["selite"], $vero))) {
 			$chk = "checked";
 		}
 		echo "<input type='checkbox' name='vero[]' value='$row[selite]' $chk> $row[selite] %<br>";

@@ -470,10 +470,10 @@
 		}
 
 		if ($tiliotesumma == 0 or $summahakuok == 0) {
-			$query = "	SELECT tunnus, nimi, tapvm, round((summa - if(alatila='K', kasumma, 0)) * vienti_kurssi, 2) 'kotisumma', concat_ws(' ',summa - if(alatila='K', kasumma, 0),valkoodi, if(alatila='K', '(K)','')) summa, ebid, valkoodi
+			$query = "	SELECT tunnus, nimi, tapvm, round((summa - if(alatila='K', kasumma, 0)) * vienti_kurssi, 2) 'kotisumma', concat_ws(' ',summa - if(alatila='K', kasumma, 0),valkoodi, if(alatila='K', '(K)','')) summa, ebid, valkoodi, erpcm
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]' and maksu_tili='$mtili' and tila='Q'
-						ORDER BY ytunnus";
+						ORDER BY erpcm, ytunnus";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) == 0) {
@@ -485,6 +485,7 @@
 		echo "<tr>";		
 		echo "<th>".t("Nimi")."</th>";
 		echo "<th>".t("Tapvm")."</th>";
+		echo "<th>".t("Erpvm")."</th>";
 		echo "<th style='text-align:right;'>".t("Summa")."<br>$yhtiorow[valkoodi]</th>";
 		echo "<th style='text-align:right;'>".t('Summa')."<br>".t('valuutassa')."</th>";
 		echo "<th>".t("Ebid")."</th>";
@@ -499,6 +500,7 @@
 			echo "<tr class='aktiivi'>";
 			echo "<td valign='top'>$trow[nimi]</td>";
 			echo "<td nowrap valign='top'>".tv1dateconv($trow["tapvm"])."</td>";
+			echo "<td nowrap valign='top'>".tv1dateconv($trow["erpcm"])."</td>";
 			echo "<td nowrap valign='top' align='right'>$trow[kotisumma] $yhtiorow[valkoodi]</td>";
 			echo "<td nowrap valign='top' align='right'>$trow[summa]</td>";
 
@@ -541,41 +543,43 @@
 
 	if ($tee == '') {
 		// T‰ll‰ ollaan, jos olemme vasta valitsemassa pankkitili‰
-		$query = "	SELECT tunnus, nimi, tilino
-                    FROM yriti
-                 	WHERE yhtio = '$kukarow[yhtio]'";
+		$query = "	SELECT lasku.maksu_tili, yriti.nimi, yriti.tilino, count(*) 'kpl'
+                    FROM lasku, yriti
+                 	WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tila='Q' and yriti.yhtio = '$kukarow[yhtio]' and yriti.tunnus=lasku.maksu_tili
+                 	group by 1";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<font class='error'>".t("hmm, yrityksell‰ ei ole yht‰‰n pankkitili‰")."</font><br>";
+			echo "<font class='error'>".t("Yrityksell‰ ei ole suorittamattomia ostolaskuja")."</font><br>";
 		}
+		else {
+			echo "<table><tr>";
+			for ($i = 1; $i < mysql_num_fields($result); $i++) {
+				echo "<th>" . t(mysql_field_name($result,$i))."</th>";
+			}
+			echo "<th>".t("Maksupvm")."</th><th></th></tr>";
 
-		echo "<table><tr>";
-		for ($i = 1; $i < mysql_num_fields($result); $i++) {
-			echo "<th>" . t(mysql_field_name($result,$i))."</th>";
-		}
-		echo "<th>".t("Maksupvm")."</th><th></th></tr>";
+			while ($trow=mysql_fetch_array ($result)) {
+				echo "<tr>";
 
-		while ($trow=mysql_fetch_array ($result)) {
-			echo "<tr>";
+				for ($i=1; $i<mysql_num_fields($result); $i++) {
+					echo "<td>$trow[$i]</td>";
+				}
 
-			for ($i=1; $i<mysql_num_fields($result); $i++) {
-				echo "<td>$trow[$i]</td>";
+				echo "<form action = '$PHP_SELF?tee=W' method='post'><td>
+						<input type='text' name='map' maxlength='2' size=3 value='$map'>
+						<input type='text' name='mak' maxlength='2' size=3 value='$mak'>
+						<input type='text' name='mav' maxlength='4' size=5 value='$mav'></td>";
+
+				$trow[0]=rawurlencode ($trow[0]);
+
+				echo "<td>
+						<input type='hidden' name='mtili' value = $trow[0]>
+						<input type='Submit' value='".t("Valitse")."'></td></tr></form>";
 			}
 
-			echo "<form action = '$PHP_SELF?tee=W' method='post'><td>
-					<input type='text' name='map' maxlength='2' size=3 value='$map'>
-					<input type='text' name='mak' maxlength='2' size=3 value='$mak'>
-					<input type='text' name='mav' maxlength='4' size=5 value='$mav'></td>";
-
-			$trow[0]=rawurlencode ($trow[0]);
-
-			echo "<td>
-					<input type='hidden' name='mtili' value = $trow[0]>
-					<input type='Submit' value='".t("Valitse")."'></td></tr></form>";
+			echo "</table>";
 		}
-
-		echo "</table>";
 	}
 
 	require "inc/footer.inc";

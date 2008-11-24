@@ -544,16 +544,22 @@
 
 	// $haku[3] == '' and 
 	if (($haku[4] != '' or $haku[5] != '')) {
+		if ($haku[3] != '') {
+			$lisa_haku_osasto = " and tuote.osasto = '$haku[3]' ";
+			$lisa_haku_try = " and tuote.osasto = '$haku[3]' ";
+			$lisa_haku_tme = " and tuote.osasto = '$haku[3]' ";
+		}
+
 		if ($haku[4] != '') {
-			$lisa_haku_osasto = " and tuote.try = '$haku[4]' ";
-			$lisa_haku_try = " and tuote.try = '$haku[4]' ";
-			$lisa_haku_tme = " and tuote.try = '$haku[4]' ";
+			$lisa_haku_osasto .= " and tuote.try = '$haku[4]' ";
+			$lisa_haku_try .= " and tuote.try = '$haku[4]' ";
+			$lisa_haku_tme .= " and tuote.try = '$haku[4]' ";
 		}
 
 		if ($haku[5] != '') {
 			$lisa_haku_osasto .= " and tuote.tuotemerkki = '$haku[5]' ";
 			$lisa_haku_try .= " and tuote.tuotemerkki = '$haku[5]' ";
-			$lisa_haku_tme = " and tuote.tuotemerkki = '$haku[5]' ";
+			$lisa_haku_tme .= " and tuote.tuotemerkki = '$haku[5]' ";
 		}
 
 		$query = "	SELECT distinct avainsana.selite, avainsana.selitetark
@@ -676,11 +682,11 @@
 				FROM tuote
 				JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' $join_jarjestys_rajaus and avainsana.kieli = '$yhtiorow[kieli]')
 				where tuote.yhtio = '$kukarow[yhtio]'";
-				if ($lisa_haku != '') {
-					$query .= $lisa_haku;
-				}
-				elseif ($lisa_haku_try != '') {
+				if ($lisa_haku_try != '') {
 					$query .= $lisa_haku_try;
+				}
+				elseif ($lisa_haku != '') {
+					$query .= $lisa_haku;
 				}
 	$query .= "	ORDER BY selite+0, selitetark";
 	$sresult = mysql_query($query) or pupe_error($query);

@@ -354,10 +354,16 @@
 
 					$query = "	SELECT tunnus
 								FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-								WHERE yhtio 		= '$kukarow[yhtio]'
-								and ((tila in ('N','L','R') and alatila in ('','A','B','C')) or (tila = 'T' and alatila in ('','A')))
-								and liitostunnus	= $otsikrow[tunnus]
-								and tapvm			= '0000-00-00'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								and (
+										(tila IN ('L','N','R','V','E') AND alatila != 'X')
+										OR
+										(tila = 'T' AND alatila in ('','A'))
+										OR
+										(tila = '0')
+									)
+								and liitostunnus = '$otsikrow[tunnus]'
+								and tapvm = '0000-00-00'";
 					$laskuores = mysql_query($query) or pupe_error($query);
 
 					while ($laskuorow = mysql_fetch_array($laskuores)) {
@@ -370,6 +376,7 @@
 									postino 			= '$otsikrow[postino]',
 									postitp				= '$otsikrow[postitp]',
 									maa   				= '$otsikrow[maa]',
+									chn					= '$otsikrow[chn]',
 									toim_ovttunnus 		= '$otsikrow[toim_ovttunnus]',
 									toim_nimi      		= '$otsikrow[toim_nimi]',
 									toim_nimitark  		= '$otsikrow[toim_nimitark]',

@@ -605,7 +605,7 @@
 				ORDER BY selite+0, selitetark";
 	$sresult = mysql_query($query) or pupe_error($query);
 
-	echo "<td nowrap valign='top'><select name='haku[3]'>";
+	echo "<td nowrap valign='top'><select name='haku[3]' onchange='submit();'>";
 	echo "<option value='' $sel>".t("Ei valintaa")."</option>";
 
 	while($sxrow = mysql_fetch_array ($sresult)){

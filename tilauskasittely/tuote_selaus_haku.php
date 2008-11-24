@@ -534,6 +534,7 @@
 	$lisa_haku = "";
 	$lisa_haku_osasto = "";
 	$lisa_haku_try = "";
+	$lisa_haku_tme = "";
 
 	$join_jarjestys_rajaus = '';
 
@@ -541,21 +542,27 @@
 		$join_jarjestys_rajaus =  " and avainsana.jarjestys < 10000 ";
 	}
 
-	if ($haku[3] == '' and ($haku[4] != '' or $haku[5] != '')) {
+	// $haku[3] == '' and 
+	if (($haku[4] != '' or $haku[5] != '')) {
 		if ($haku[4] != '') {
 			$lisa_haku_osasto = " and tuote.try = '$haku[4]' ";
 			$lisa_haku_try = " and tuote.try = '$haku[4]' ";
+			$lisa_haku_tme = " and tuote.try = '$haku[4]' ";
 		}
 
 		if ($haku[5] != '') {
 			$lisa_haku_osasto .= " and tuote.tuotemerkki = '$haku[5]' ";
 			$lisa_haku_try .= " and tuote.tuotemerkki = '$haku[5]' ";
+			$lisa_haku_tme = " and tuote.tuotemerkki = '$haku[5]' ";
 		}
 
 		$query = "	SELECT distinct avainsana.selite, avainsana.selitetark
 					FROM tuote
 					JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.osasto = avainsana.selite and avainsana.laji = 'OSASTO' $join_jarjestys_rajaus and avainsana.kieli = '$yhtiorow[kieli]')
 					where tuote.yhtio = '$kukarow[yhtio]'
+					and tuote.status != 'P'
+					and tuote.hinnastoon != 'E'
+					and tuote.tuotemerkki != ''
 					$lisa_haku_osasto
 					ORDER BY selite+0, selitetark";
 		$sresult = mysql_query($query) or pupe_error($query);
@@ -577,6 +584,9 @@
 					FROM tuote
 					JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' $join_jarjestys_rajaus and avainsana.kieli = '$yhtiorow[kieli]')
 					where tuote.yhtio = '$kukarow[yhtio]'
+					and tuote.status != 'P'
+					and tuote.hinnastoon != 'E'
+					and tuote.tuotemerkki != ''
 					$lisa_haku_try
 					ORDER BY selite+0, selitetark";
 		$sresult = mysql_query($query) or pupe_error($query);
@@ -592,6 +602,38 @@
 		}
 		else {
 			$lisa_haku_try = "";
+		}
+		
+		$query = "	SELECT tuotemerkki
+					FROM tuote
+					where tuote.yhtio = '$kukarow[yhtio]'
+					and tuote.status != 'P'
+					and tuote.hinnastoon != 'E'
+					and tuote.tuotemerkki != ''
+					$lisa_haku_tme
+					GROUP BY tuotemerkki
+					ORDER BY tuotemerkki";
+		$sresult = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($sresult) > 0) {
+			$join_lisa = "";
+
+			while ($osasto_row = mysql_fetch_array($sresult)) {
+				if ($osasto_row['selite'] != '') {
+					$join_lisa .= "'$osasto_row[selite]',";
+				}
+			}
+
+			if ($osasto_row['selite'] != '') {
+				$join_lisa = substr($join_lisa, 0, -1);
+				$lisa_haku_tme = " and tuote.tuotemerkki in ($join_lisa) ";
+			}
+			else {
+				$lisa_haku_tme = "";
+			}
+		}
+		else {
+			$lisa_haku_tme = "";
 		}
 	}
 
@@ -667,9 +709,14 @@
 				where tuote.yhtio = '$kukarow[yhtio]'
 				and tuote.status != 'P'
 				and tuote.hinnastoon != 'E'
-				and tuote.tuotemerkki != ''
-				$lisa_haku
-				GROUP BY tuotemerkki
+				and tuote.tuotemerkki != ''";
+				if ($lisa_haku_tme != '') {
+					$query .= $lisa_haku_tme;
+				}
+				elseif ($lisa_haku != '') {
+					$query .= $lisa_haku;
+				}
+	$query .= "	GROUP BY tuotemerkki
 				ORDER BY tuotemerkki";
 	$sresult = mysql_query($query) or pupe_error($query);
 

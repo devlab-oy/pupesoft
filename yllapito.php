@@ -383,8 +383,7 @@
 									toim_osoite    		= '$otsikrow[toim_osoite]',
 									toim_postino  		= '$otsikrow[toim_postino]',
 									toim_postitp 		= '$otsikrow[toim_postitp]',
-									toim_maa    		= '$otsikrow[toim_maa]',
-									tilausyhteyshenkilo	= '$otsikrow[tilausyhteyshenkilo]'
+									toim_maa    		= '$otsikrow[toim_maa]'
 									WHERE yhtio 		= '$kukarow[yhtio]'
 									and tunnus			= '$laskuorow[tunnus]'";
 						$updaresult = mysql_query($query) or pupe_error($query);

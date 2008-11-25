@@ -542,7 +542,7 @@
 		$join_jarjestys_rajaus =  " and avainsana.jarjestys < 10000 ";
 	}
 
-	// $haku[3] == '' and 
+	// jos on valittu jotakin dropdowneista (muu kuin osasto) niin tehdään niillä rajaukset muihin dropdowneihin
 	if (($haku[4] != '' or $haku[5] != '')) {
 		if ($haku[3] != '') {
 			$lisa_haku_osasto = " and tuote.osasto = '$haku[3]' ";

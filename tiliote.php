@@ -21,6 +21,8 @@
 		echo "<font class='head'>Tiliotteen, LMP:n, kurssien ja viitemaksujen käsittely</font><hr><br><br>";
 	}
 
+	require ("inc/tilinumero.inc");
+
 	// katotaan onko faili uploadttu
 	if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		$userfile = $_FILES['userfile']['name'];

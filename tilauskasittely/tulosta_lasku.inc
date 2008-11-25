@@ -70,15 +70,25 @@ if (!function_exists('alku')) {
 			else {
 
 				$logoparam = array();
-
-				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= 50) {
+				
+				$lasku_logo_koko = 50;
+				$lasku_logo_positio = 830;
+				
+				if ((int) $yhtiorow["lasku_logo_koko"] > 0) {
+					$lasku_logo_koko = (int) $yhtiorow["lasku_logo_koko"];
+				}
+				if ((int) $yhtiorow["lasku_logo_positio"] > 0) {
+					$lasku_logo_positio = (int) $yhtiorow["lasku_logo_positio"];
+				}
+				
+				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= $lasku_logo_koko) {
 					$logoparam['scale'] = 240 / $isizelogo[0];
 				}
 				else {
-					$logoparam['scale'] = 50  / $isizelogo[1];
+					$logoparam['scale'] = $lasku_logo_koko  / $isizelogo[1];
 				}
 
-				$placement = $pdf->image_place($image, 830-($logoparam['scale']*$isizelogo[1]), 20, $thispage, $logoparam);
+				$placement = $pdf->image_place($image, $lasku_logo_positio-($logoparam['scale']*$isizelogo[1]), 20, $thispage, $logoparam);
 			}
 		}
 		else {

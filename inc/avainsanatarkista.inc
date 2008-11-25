@@ -10,14 +10,18 @@ if(!function_exists("avainsanatarkista")) {
 			$seliteerrori = 1;
 		}
 
-		if ($seliteerrori == 1 and mysql_field_name($result, $i) == "selitetark" and trim($t[$i]) == '') {
-			$virhe[$i] = t("Selite ja selitetark ei voi olla tyhjiä")."!";
-		}
-
 		if (mysql_field_name($result, $i) == "laji") {
 			$laji = trim($t[$i]);
 		}
+
+		if (mysql_field_name($result, $i) == "selite" and $laji == 'VAKIOVIESTI' and trim($t[$i]) == '') {
+			$virhe[$i] = t("Selite on pakollinen");
+		}
 		
+		if ($seliteerrori == 1 and mysql_field_name($result, $i) == "selitetark" and trim($t[$i]) == '' and $laji != 'VAKIOVIESTI') {
+			$virhe[$i] = t("Selite ja selitetark ei voi olla tyhjiä")."!";
+		}
+
 		if (mysql_field_name($result, $i) == "selite" and $laji == "PARAMETRI") {
 			preg_match_all('/([a-zA-Z_])+/', $t[$i], $match);
 			

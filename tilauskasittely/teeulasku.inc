@@ -204,13 +204,29 @@ if ($mehtorow["jv"] != '') {
 	$lisa_comments 	.= t("Kuitataan jälkivaatimuksella saaduksi. TÄTÄ LASKUA EI TULE MAKSAA!", $kielirow["kieli"])."\n";
 }
 
+// Haetaan avainsanoista vakioviesti
+$query = "	SELECT *
+			FROM avainsana
+			WHERE yhtio = '$kukarow[yhtio]'
+			AND kieli = '$kielirow[kieli]'
+			AND laji = 'VAKIOVIESTI'
+			ORDER BY jarjestys
+			LIMIT 1";
+$vakioviesti_result = mysql_query($query) or pupe_error($query);
+
+if (mysql_num_rows($vakioviesti_result) == 1) {
+	$vakioviesti_row = mysql_fetch_array($vakioviesti_result);
+	
+	$lisa_comments .= " $vakioviesti_row[selite]\n";
+}
+
 // Lisätään järjestelmän generoimat kommentit laskun kommenttikenttään
 if ($lisa_comments != "") {
 	$sisviestit1 = $lisa_comments." ".$sisviestit1;
 }
 
 // Lisätään järjestelmän generoimat viestit laskun viestikenttään
-if ($lisa_comments != "") {
+if ($lisa_viestit != "") {
 	$viestit = $lisa_viestit." ".$viestit;
 }
 

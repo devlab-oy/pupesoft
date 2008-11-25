@@ -385,6 +385,11 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "selite" and $avain_sel['VAKIOVIESTI'] == "SELECTED") {
+		$ulos = "<td><textarea rows=5 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "selite" and $avain_sel['TYOM_TYOLINJA'] == "SELECTED") {
 
 		$query = "	SELECT selite, selitetark

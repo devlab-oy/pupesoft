@@ -1534,6 +1534,26 @@ if ($tee == '') {
 					<input type='hidden' name='asiakasid' value='$laskurow[liitostunnus]'>
 					<input type='submit' ACCESSKEY='m' value='".t("Muuta Otsikkoa")."'>
 					</form></td>";
+			
+			if ($toim == 'PIKATILAUS' or $toim == 'RIVISYOTTO') {
+				if ($toim == 'PIKATILAUS') {
+					$vaihdatoim = 'RIVISYOTTO';
+					$vaihdaselite = t("Rivisyöttöön");
+				}
+				else {
+					$vaihdatoim = 'PIKATILAUS';
+					$vaihdaselite = t("Pikatilaukseen");
+				}
+				
+				echo "	<td class='back'><form action='$PHP_SELF' method='post'>
+						<input type='hidden' name='toim' value='$vaihdatoim'>
+						<input type='hidden' name='tee' value='AKTIVOI'>					
+						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+						<input type='hidden' name='lopetus' value='$lopetus'>
+						<input type='hidden' name='projektilla' value='$projektilla'>
+						<input type='submit' value='".t("Vaihda $vaihdaselite")."'>
+						</form></td>";
+			}
 		}
 
 

@@ -233,7 +233,7 @@ if ($lisa_viestit != "") {
 //Siivotaan kommenteista kaikki kummalliset merkit pois
 $comments 				= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $comments);
 $viestit				= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $viestit);
-$sisviestit1			= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $sisviestit1);
+$sisviestit1			= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%§\r\n]", "", $sisviestit1);
 $tilausyhteyshenkilo	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $tilausyhteyshenkilo);
 $asiakkaan_tilausnumero	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $asiakkaan_tilausnumero);
 $kohde					= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $kohde);

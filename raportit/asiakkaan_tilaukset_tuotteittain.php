@@ -199,15 +199,28 @@
 						and lasku.tunnus=tilausrivi.otunnus ";
 		}
 		else {
-			$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, laskunro, ytunnus,
-						if(nimi!=toim_nimi and toim_nimi!='', concat(nimi,'<br>(',toim_nimi,')'), nimi) nimi,
-						if(postitp!=toim_postitp and toim_postitp!='', concat(postitp,'<br>(',toim_postitp,')'), postitp) postitp,
-						tuoteno, (kpl+varattu) kpl,
-						tilausrivi.hinta hinta,
-						rivihinta rivihinta,
+			if ((int) $asiakasid > 0) {
+				$asiakaslisa = "";
+			}
+			else {
+				$asiakaslisa = "ytunnus, if(nimi!=toim_nimi and toim_nimi!='', concat(nimi,'<br>(',toim_nimi,')'), nimi) nimi, if(postitp!=toim_postitp and toim_postitp!='', concat(postitp,'<br>(',toim_postitp,')'), postitp) postitp, ";
+			}
+			
+			$query = "	SELECT distinct 
+						tilausrivi.tunnus, 
+						otunnus tilaus, 
+						laskunro,
+						$asiakaslisa 
+						tuoteno, 
+						tilausrivi.nimitys, 
+						(kpl+varattu) kpl,
+						round(tilausrivi.hinta, $yhtiorow[hintapyoristys]) hinta, 
+						tilausrivi.ale, 
+						round(rivihinta, $yhtiorow[hintapyoristys]) rivihinta,
 						lasku.toimaika,
 						lasku.lahetepvm,
-						lasku.tila, lasku.alatila
+						lasku.tila, 
+						lasku.alatila
 						FROM tilausrivi, lasku
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and lasku.yhtio=tilausrivi.yhtio

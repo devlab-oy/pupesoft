@@ -844,7 +844,7 @@
 						<th>".t("Myynti").":</th>
 						<th>".t("Edelliset 30pv")."</th>
 						<th>".t("Edelliset 90pv")."</th>
-						<th>".t("Kauden alusta")."</th>
+						<th>".t("Vuosi")." $taavuosi</th>
 						<th>".t("Vuosi")." $edvuosi</th>
 						</tr>";
 

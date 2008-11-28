@@ -11,6 +11,10 @@ echo "<font class='head'>",t("Varastonarvo"),"</font><hr>";
 $sel_osasto = "";
 $sel_tuoteryhma = "";
 
+if ($tryittain != '' and $osasto == '' and $tuoteryhma == '') {
+	$osasto=$tuoteryhma="kaikki";
+}
+
 echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 	<!--
 
@@ -291,6 +295,14 @@ else {
 
 echo "<br><table>";
 
+if ($tryittain != '') {
+	$chk2 = 'checked';
+	$merkki = '';
+}
+else {
+	$chk2 = '';
+}
+
 if ($merkki != '') {
 	$chk = 'checked';
 }
@@ -298,8 +310,14 @@ else {
 	$chk = '';
 }
 
+
+
 echo "<tr>";
 echo "<th>",t("Aja tuotemerkeittäin"),":</th><td><input type='checkbox' name='merkki' $chk></td>";
+echo "</tr>";
+
+echo "<tr>";
+echo "<th>",t("Tai tuoteryhmittäin"),":</th><td><input type='checkbox' name='tryittain' $chk2></td>";
 echo "</tr>";
 
 $epakur_chk1 = "";
@@ -390,7 +408,14 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 		$trylisa .= " and tuote.osasto in ('$sel_osasto') ";
 	}
 
-	if ($merkki != '') {
+
+	
+	if ($tryittain != '') {
+		$tryittainlisa1 = "tuote.try,";
+		$groupby .= "tuote.try";
+		$orderby .= "tuote.try";
+	}
+	elseif ($merkki != '') {
 		$merkkilisa1 = "tuote.tuotemerkki,";
 		$groupby .= "tuote.tuotemerkki";
 		$orderby .= "tuote.tuotemerkki";
@@ -432,7 +457,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 		$varastojoini = "";
 	}
 
-	if ($merkki == '' && $varasto == '' && count($varastot) == 0) {
+	if ($merkki == '' && $varasto == '' && count($varastot) == 0 && $tryittain == '') {
 		$groupby = "";
 		$orderby = "";
 	}
@@ -459,6 +484,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 	// Varaston arvo
 	$query = "	SELECT
 				$merkkilisa1
+				$tryittainlisa1
 				sum(
 					if(	tuote.sarjanumeroseuranta = 'S',
 						(	SELECT tuotepaikat.saldo*if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl), avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)*0.75), avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)*0.5), avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)*0.25)
@@ -505,6 +531,10 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 	if ($merkki != '') {
 		echo "<th>",t("Tuotemerkki"),"</th>";
 	}
+	
+	if ($tryittain != '') {
+		echo "<th>",t("Tuoteryhma"),"</th>";
+	}
 
 	if ($varastot != '' && count($varastot) > 0) {
 		echo "<th>",t("Varasto"),"</th>";
@@ -514,7 +544,11 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 
 	echo "<th>",t("Varastonarvo"),"</th>";
 	echo "<th>",t("Bruttovarastonarvo"),"</th>";
-
+	
+	if ($tryittain != '') {
+		echo "<th>",t("Varastonkierto"),"</th>";
+	}
+	
 	echo "</tr>";
 
 	$varvo = 0;
@@ -532,14 +566,14 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 			$varastosumma += $row["varasto"];
 			$bruttovarastosumma += $row["bruttovarasto"];
 		}
-		else if ($merkki != '' or count($varastot) > 0) {
+		else if ($merkki != '' or count($varastot) > 0 or $tryittain != '') {
 			echo "<td>",$row[0],"</td>";
 			$varastosumma += $row["varasto"];
 			$bruttovarastosumma += $row["bruttovarasto"];
 		}
 
 		echo "<td>",date("Y-m-d"),"</td><td align='right'>",str_replace(".",",",sprintf("%.2f",$varvo)),"</td>";
-		echo "<td align='right'>",str_replace(".",",",sprintf("%.2f",$bvarvo)),"</td></tr>";
+		echo "<td align='right'>",str_replace(".",",",sprintf("%.2f",$bvarvo)),"</td>";
 
 		// jos on lisärajauksia ei tehdä historiaa
 		if ($merkkilisa1 == "EI NÄYTETÄ KOSKAAN, KOSKA ANTAA NIIN VÄÄRIÄ LUKUJA") {
@@ -574,6 +608,49 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 			}
 
 		}
+		
+		if ($tryittain != '') {
+			
+			
+			// tuotteen määrä varastossa nyt
+			$query = "	SELECT sum(saldo) varasto
+						FROM tuote
+						JOIN tuotepaikat use index (tuote_index) on tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno
+						WHERE tuote.yhtio = '$kukarow[yhtio]'
+						and tuote.try = '$row[0]' and tuote.ei_saldoa = ''";
+			$vres = mysql_query($query) or pupe_error($query);
+			$vrow = mysql_fetch_array($vres);
+			
+			// haetaan tuotteen myydyt kappaleet
+			$query  = "	SELECT ifnull(sum(kpl),0) kpl
+						FROM tuote
+						JOIN tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika) on tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tilausrivi.tyyppi='L' and laskutettuaika <= now() and laskutettuaika >= date_sub(now(), INTERVAL 12 month)
+						WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.try = '$row[0]' and tuote.ei_saldoa = ''";
+			$xmyyres = mysql_query($query) or pupe_error($query);
+			$xmyyrow = mysql_fetch_array($xmyyres);
+			
+			// haetaan tuotteen kulutetut kappaleet
+			$query  = "	SELECT ifnull(sum(kpl),0) kpl
+						FROM tuote
+						JOIN tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika) on tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tilausrivi.tyyppi='V' and laskutettuaika <= now() and laskutettuaika >= date_sub(now(), INTERVAL 12 month)
+						WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.try = '$row[0]' and tuote.ei_saldoa = ''";
+			$xkulres = mysql_query($query) or pupe_error($query);
+			$xkulrow = mysql_fetch_array($xkulres);
+			
+			// lasketaan varaston kiertonopeus
+			if ($vrow["varasto"] > 0) {
+				$kierto = round(($xmyyrow["kpl"] + $xkulrow["kpl"]) / $vrow["varasto"], 2);
+			}
+			else {
+				$kierto = 0;
+			}
+			
+			echo "<td align='right'>",str_replace(".",",",sprintf("%.2f",$kierto)),"</td>";
+			
+		}
+		
+		echo "</tr>";
+		
 	}
 
 	if ($varastosumma != 0) {

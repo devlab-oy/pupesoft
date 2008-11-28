@@ -509,7 +509,7 @@
 	for ($i=0; $i<=$count; $i++) {
     	if (strlen($haku[$i]) > 0) {
 			
-			if ($toim == 'asiakasalennus' and trim($array[$i]) == 'asiakas') {
+			if (($toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
 				$lisa .= " and " . $array[$i] . " = '" . $haku[$i] . "'";
 			}
 			elseif (strpos($array[$i], "/") !== FALSE) {

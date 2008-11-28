@@ -1017,14 +1017,18 @@
 		echo "</td>";
 
 		echo "<td class='back' valign='top'>";
-
+		
 		if ($errori == '' and $toim == "sarjanumeron_lisatiedot") {
 			@include ("inc/arviokortti.inc");
 		}
-
+		
 		// Ylläpito.php:n formi kiinni vasta tässä
 		echo "</form>";
-
+		
+		if ($errori == '' and $uusi != 1) {
+			include ("inc/yllapito_linkit.inc");
+		}
+		
 		if ($errori == '' and $toim == "tuote" and $laji != "V") {
 			require ("inc/tuotteen_toimittajat.inc");
 		}

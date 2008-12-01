@@ -818,7 +818,7 @@
 		$laskurow = mysql_fetch_array($result);
 
 		if ($laskurow['hyvak1'] == $kukarow['kuka']) {
-			echo "<div style='height:800px;overflow:auto;'>";
+			echo "<div style='height:850px;overflow:auto;'>";
 		}
 
 		echo "<table>";
@@ -1524,9 +1524,6 @@
 
 			echo "</tr></table>";
 
-			if ($laskurow['hyvak1'] == $kukarow['kuka']) {
-				echo "</div>";
-			}
 		}
 
 		if ($kukarow['taso'] == 9) {
@@ -1578,6 +1575,10 @@
 			}
 
 			echo "<img src='$url' name='alaikkuna'>";
+		}
+
+		if ($laskurow['hyvak1'] == $kukarow['kuka']) {
+			echo "</div>";
 		}
 
 	}

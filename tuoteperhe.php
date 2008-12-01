@@ -416,9 +416,13 @@
 						$sel1 = "";
 						$sel2 = "SELECTED";
 					}
-					else {
+					elseif ($omasivu != 'X') {
 						$sel1 = "SELECTED";
 						$sel2 = "";	
+					}
+					else {
+						$sel1 = "";
+						$sel2 = "SELECTED";
 					}
 					
 					//echo "faktarow".$faktarow["omasivu"];

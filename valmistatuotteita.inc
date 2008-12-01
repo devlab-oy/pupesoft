@@ -173,7 +173,7 @@ if ($tee == 'UV') {
 
 					}
 					else {
-						if ($trow['saldo'] < $varataankpl) {
+						if ($trow['saldo'] < $varataankpl and $vakisinhyvaksy == "") {
 							$tee=''; //Raaka-aineet eivät riitä!
 							echo "<font class='error'>$perherow[tuoteno] ".t("saldo")." $trow[saldo] ".t("ei riitä valmistukseen")." ($varataankpl)</font><br>";
 						}

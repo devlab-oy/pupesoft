@@ -887,7 +887,14 @@
 						$otsre = mysql_query($query) or pupe_error($query);
 						$laskurow = mysql_fetch_array($otsre);
 
-						if (mysql_num_rows($otsre) == 1 and mysql_num_rows($rhire) == 1) {
+						$query = "	SELECT *
+									FROM asiakas
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND	tunnus = '$laskurow[liitostunnus]'";
+						$aslisakulres = mysql_query($query) or pupe_error($query);
+						$aslisakulrow = mysql_fetch_array($aslisakulres);			
+						
+						if (mysql_num_rows($otsre) == 1 and mysql_num_rows($rhire) == 1 and $aslisakulrow['lisakulu'] == '') {
 							// lasketaan laskun loppusumma (HUOM ei tarvitse huomioida veroa!)
 							$query = "	SELECT sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * 
 													if(tilausrivi.netto = 'N', (1 - tilausrivi.ale / 100), (1 - (tilausrivi.ale + lasku.erikoisale - (tilausrivi.ale * lasku.erikoisale / 100)) / 100))

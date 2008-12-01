@@ -192,8 +192,8 @@ elseif ($tee == "paivita" and strpos($valmis,t("Tee ostotilaus")) !== false) {
 	
 	// lis‰t‰‰n ostotilausrivi
 	$query = "	insert into tilausrivi
-				(hinta, nimitys, tuoteno, try, osasto, tilkpl, varattu, yksikko, otunnus, yhtio, tyyppi, kommentti, toimaika, kerayspvm,hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro, laatija, laadittu) values
-				('$osstu[ostohinta]','$tuoterow[nimitys]', '$tuoteno', '$tuoterow[try]', '$tuoterow[osasto]', '$ostettavat[$tuoteno]', '$ostettavat[$tuoteno]', '$tuoterow[yksikko]', '$tilausnumero', '$kukarow[yhtio]', 'O','', now(), now(), '$jtstu[hyllyalue]','$jtstu[hyllynro]','$jtstu[hyllyvali]','$jtstu[hyllytaso]', '$rivi','$kukarow[kuka]', now())";
+				(hinta, ale, nimitys, tuoteno, try, osasto, tilkpl, varattu, yksikko, otunnus, yhtio, tyyppi, kommentti, toimaika, kerayspvm,hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro, laatija, laadittu) values
+				('$osstu[ostohinta]', '$osstu[alennus]','$tuoterow[nimitys]', '$tuoteno', '$tuoterow[try]', '$tuoterow[osasto]', '$ostettavat[$tuoteno]', '$ostettavat[$tuoteno]', '$tuoterow[yksikko]', '$tilausnumero', '$kukarow[yhtio]', 'O','', now(), now(), '$jtstu[hyllyalue]','$jtstu[hyllynro]','$jtstu[hyllyvali]','$jtstu[hyllytaso]', '$rivi','$kukarow[kuka]', now())";
 	$updre = mysql_query($query) or pupe_error($query);
 	
 	$valitutvarastot = unserialize(urldecode($valitutvarastot));

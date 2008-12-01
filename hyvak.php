@@ -817,6 +817,10 @@
 
 		$laskurow = mysql_fetch_array($result);
 
+		if ($laskurow['hyvak1'] == $kukarow['kuka']) {
+			echo "<div style='height:100%;overflow:auto;'>";
+		}
+
 		echo "<table>";
 
 		echo "<tr>";
@@ -1563,13 +1567,18 @@
 
 		if ($iframe == 'yes' and ($laskurow["ebid"] != "" or $id > 0)) {
 		    if ($_POST['id'] > 0) {
+				$_POST['id'] = (int) mysql_real_escape_string($_POST['id']);
 				$url = "view.php?id={$_POST['id']}";
 			}
 			else {
 				$url = ebid($laskurow['tunnus'], 'alaikkuna');
 			}
 
-			echo "<iframe src='$url' name='alaikkuna' width='100%' height='60%' align='bottom' scrolling='auto'></iframe>";
+			echo "<img src='$url' name='alaikkuna'>";
+		}
+
+		if ($laskurow['hyvak1'] == $kukarow['kuka']) {
+			echo "</div>";
 		}
 
 	}

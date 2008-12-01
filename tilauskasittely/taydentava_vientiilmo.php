@@ -74,12 +74,9 @@
 		$atkfaili = "/tmp/TVI_Atktietue-".md5(uniqid(mt_rand(), true)).".txt";
 		$fhatk = fopen($atkfaili, "w+");
 
-
 		///* NIY *///
 		//$laskufaili[$pdfnro] = "/tmp/".$pdfnro.".TVI_Vientilaskut-".md5(uniqid(mt_rand(), true)).".pdf";
 		//$fhpdf = fopen($laskufaili[$pdfnro], "w+");
-
-
 
 		//aloitellaan ekan sivun tekemistä
 		$tarksivu 	= 0;
@@ -333,7 +330,6 @@
 					$kilot  += $rahtirow["kilot"];
 				}
 
-
 				//Haetaan kaikki tilausrivit
 				$query = "	SELECT
 							tuote.tullinimike1,
@@ -413,8 +409,6 @@
 						echo t("4. Rivin tunnus").":$rivirow[tunnus]. ".t("Tuoteno").": $rivirow[tuoteno]. ".t("Tullikohtelu on virheellinen, vain numeeriset arvot ovat sallittuja!")."<br>";
 						$virhe++;
 					}
-
-
 
 					//laskun rivi
 					//$row = $rivirow;
@@ -533,14 +527,11 @@
 		fwrite($fhpaperi,$paperi);
 		$paperi = '';
 
-
 		//suljetaan failit
 		fclose($fhatk);
 		fclose($fhpaperi);
 		//fclose($fhpdf);
 		fclose($fhtark);
-
-
 
 		//paperilista pitää saada kauniiksi
 		$line1 = exec("a2ps -o ".$paperifaili.".ps --no-header --columns=1 -r --chars-per-line=169 --margin=0 --borders=0 $paperifaili");
@@ -548,8 +539,7 @@
 		//tarkastuslistalle sama juttu
 		$line2 = exec("a2ps -o ".$tarkfaili.".ps --no-header --columns=1 -r --chars-per-line=121 --margin=0 --borders=0 $tarkfaili");
 
-
-    	//lopuks käännetään paskat vielä pdf:iks ja lähetetään sähköpostiin, voi sitten tulostella kun siltä tuntuu
+    	//lopuks käännetään vielä pdf:iks ja lähetetään sähköpostiin, voi sitten tulostella kun siltä tuntuu
 		$line3 = exec("ps2pdf -sPAPERSIZE=a4 ".$paperifaili.".ps ".$paperifaili.".pdf");
 
 		//tarkastuslistalle sama juttu
@@ -557,8 +547,6 @@
 
 		//mergataan pdf-ät yhdeksi failiksi joka sit lähetetään käyttäjälle
 		//$kaikkilaskut = "/tmp/TVI_Kaikki_Vientilaskut-".md5(uniqid(mt_rand(), true)).".pdf";
-
-
 
 		///* Katsotaan voidaanko rappari lähettää tulliin *///
 
@@ -575,57 +563,56 @@
 			exit;
 		}
 
-
 		///*Kasataan käyttäjälle lähetettävä meili *///
 		//tässa on kaikki failit jotka tarvitaan
  		$bound = uniqid(time()."_") ;
 
-		$header  = "From: <$yhtiorow[postittaja_email]>\r\n";
-		$header .= "MIME-Version: 1.0\r\n" ;
-		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n" ;
+		$header  = "From: <$yhtiorow[postittaja_email]>\n";
+		$header .= "MIME-Version: 1.0\n" ;
+		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
-		$content = "--$bound\r\n";
+		$content = "--$bound\n";
 
 		/*
-		$content .= "Content-Type: application/pdf; name=\"Laskut.pdf\"\r\n" ;
-		$content .= "Content-Transfer-Encoding: base64\r\n" ;
-		$content .= "Content-Disposition: inline; filename=\"Laskut.pdf\"\r\n\r\n";
+		$content .= "Content-Type: application/pdf; name=\"Laskut.pdf\"\n" ;
+		$content .= "Content-Transfer-Encoding: base64\n" ;
+		$content .= "Content-Disposition: inline; filename=\"Laskut.pdf\"\n\n";
 		$nimi 	 = $laskufaili;
 		$handle  = fopen($nimi, "r");
 		$sisalto = fread($handle, filesize($nimi));
 		fclose($handle);
 		$content .= chunk_split(base64_encode($sisalto));
-		$content .= "\r\n" ;
+		$content .= "\n" ;
 
-		$content .= "--$bound\r\n";
+		$content .= "--$bound\n";
 		*/
 
-		$content .= "Content-Type: application/pdf; name=\"".t("Tarkastuslista").".pdf\"\r\n" ;
-		$content .= "Content-Transfer-Encoding: base64\r\n" ;
-		$content .= "Content-Disposition: inline; filename=\"".t("Tarkastuslista").".pdf\"\r\n\r\n";
+		$content .= "Content-Type: application/pdf; name=\"".t("Tarkastuslista").".pdf\"\n" ;
+		$content .= "Content-Transfer-Encoding: base64\n" ;
+		$content .= "Content-Disposition: inline; filename=\"".t("Tarkastuslista").".pdf\"\n\n";
+
 		$nimi 	 = $tarkfaili.".pdf";
 		$handle  = fopen($nimi, "r");
 		$sisalto = fread($handle, filesize($nimi));
 		fclose($handle);
 		$content .= chunk_split(base64_encode($sisalto));
-		$content .= "\r\n" ;
+		$content .= "\n" ;
 
-		$content .= "--$bound\r\n";
+		$content .= "--$bound\n";
 
-		$content .= "Content-Type: application/pdf; name=\"".t("Taydentava-Ilmoitus").".pdf\"\r\n" ;
-		$content .= "Content-Transfer-Encoding: base64\r\n" ;
-		$content .= "Content-Disposition: inline; filename=\"".t("Taydentava-Ilmoitus").".pdf\"\r\n\r\n";
+		$content .= "Content-Type: application/pdf; name=\"".t("Taydentava-Ilmoitus").".pdf\"\n" ;
+		$content .= "Content-Transfer-Encoding: base64\n" ;
+		$content .= "Content-Disposition: inline; filename=\"".t("Taydentava-Ilmoitus").".pdf\"\n\n";
 		$nimi 	 = $paperifaili.".pdf";
 		$handle  = fopen($nimi, "r");
 		$sisalto = fread($handle, filesize($nimi));
 		fclose($handle);
 		$content .= chunk_split(base64_encode($sisalto));
-		$content .= "\r\n" ;
+		$content .= "\n" ;
 
-		$content .= "--$bound--\r\n";
+		$content .= "--$bound--\n";
 
-		mail($kukarow["eposti"],  t("Täydentävä vienti-ilmoitus")."", $content, $header, "-f $yhtiorow[postittaja_email]");
-
+		mail($kukarow["eposti"], t("Täydentävä vienti-ilmoitus")."", $content, $header, "-f $yhtiorow[postittaja_email]");
 
 		///* Tässä tehään täydentävä ilmoitus sähköiseen muotoon *///
 		//PGP-encryptaus atklabeli
@@ -639,14 +626,21 @@
 
 		$message = '';
 
-		$recipient = "pgp-key Customs Finland <ascii.vienti@tulli.fi>";
+		$recipient = "pgp-key Customs Finland <ascii.vienti@tulli.fi>"; 				// tämä on tullin virallinen avain
+
+		if ($lahetys == "test") {
+			$recipient = "pgp-testkey Customs Finland <test.ascii.vienti@tulli.fi>"; 	// tämä on tullin testiavain
+		}
 
 		$message = $label;
 		require("../inc/gpg.inc");
 		$label = $encrypted_message;
 
-		//PGP-encryptaus atktietue
-		$recipient = "pgp-key Customs Finland <ascii.vienti@tulli.fi>";
+		$recipient = "pgp-key Customs Finland <ascii.vienti@tulli.fi>"; 				// tämä on tullin virallinen avain
+
+		if ($lahetys == "test") {
+			$recipient = "pgp-testkey Customs Finland <test.ascii.vienti@tulli.fi>"; 	// tämä on tullin testiavain
+		}
 
 		$nimi	 = $atkfaili;
 		$handle  = fopen($nimi, "r");
@@ -656,37 +650,46 @@
 		require("../inc/gpg.inc");
 		$atk = $encrypted_message;
 
-
 		//Kasataan tulliin lähetettävä meili
  		$bound = uniqid(time()."_") ;
 
-		$header  = "From: <juppe@arwidson.fi>\r\n";
-		$header .= "MIME-Version: 1.0\r\n" ;
-		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n" ;
+		$header  = "From: <$yhtiorow[postittaja_email]>\n";
+		$header .= "MIME-Version: 1.0\n" ;
+		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
-		$content = "--$bound\r\n" ;
+		$content = "--$bound\n" ;
 
-		$content .= "Content-Type: application/pgp-encrypted;\r\n" ;
-		$content .= "Content-Transfer-Encoding: base64\r\n" ;
-		$content .= "Content-Disposition: attachment; filename=\"otsikko.pgp\"\r\n\r\n";
+		$content .= "Content-Type: application/pgp-encrypted;\n" ;
+		$content .= "Content-Transfer-Encoding: base64\n" ;
+		$content .= "Content-Disposition: attachment; filename=\"otsikko.pgp\"\n\n";
 		$content .= chunk_split(base64_encode($label));
-		$content .= "\r\n" ;
+		$content .= "\n" ;
 
-		$content .= "--$bound\r\n" ;
+		$content .= "--$bound\n" ;
 
-		$content .= "Content-Type: application/pgp-encrypted;\r\n" ;
-		$content .= "Content-Transfer-Encoding: base64\r\n" ;
-		$content .= "Content-Disposition: attachment; filename=\"tietue.pgp\"\r\n\r\n";
+		$content .= "Content-Type: application/pgp-encrypted;\n" ;
+		$content .= "Content-Transfer-Encoding: base64\n" ;
+		$content .= "Content-Disposition: attachment; filename=\"tietue.pgp\"\n\n";
 		$content .= chunk_split(base64_encode($atk));
-		$content .= "\r\n" ;
+		$content .= "\n" ;
 
-		$content .= "--$bound--\r\n" ;
+		$content .= "--$bound--\n" ;
 
-		$to = 'ascii.vienti@tulli.fi';
-		mail($to, "", $content, $header, "-f juppe@arwidson.fi");
-
-		$to = 'juppe@arwidson.fi';
-		mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
+		if ($lahetys == "tuli") {
+			// lähetetään meili tulliin
+			$to = 'ascii.vienti@tulli.fi';			// tämä on tullin virallinen osoite
+			mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
+			echo "<font class='message'>".t("Tiedot lähetettiin tulliin").".</font><br><br>";
+		}
+		elseif ($lahetys == "test") {
+			// lähetetään TESTI meili tulliin
+			$to = 'test.ascii.vienti@tulli.fi';		// tämä on tullin testiosoite
+			mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
+			echo "<font class='message'>".t("Testitiedosto lähetettiin tullin testipalvelimelle").".</font><br><br>";
+		}
+		else {
+			echo "<font class='message'>".t("Tietoja EI lähetetty tulliin").".</font><br><br>";
+		}
 
 		echo "<br><br>".t("Sähköpostit lähetetty! Kaikki on valmista")."!";
 
@@ -700,6 +703,7 @@
 		system("rm -f $atkfaili");
 
 	}
+
 	if ($tee == '') {
 		if (!isset($kka))
 			$kka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
@@ -730,11 +734,26 @@
 			</tr><tr><th>".t("Syötä loppupäivämäärä")." </th>
 			<td><input type='text' name='ppl' value='$ppl' size='5'></td>
 			<td><input type='text' name='kkl' value='$kkl' size='5'></td>
-			<td><input type='text' name='vvl' value='$vvl' size='7'></td>";
+			<td><input type='text' name='vvl' value='$vvl' size='7'></td></tr>";
 
-		echo "<td><input type='submit' value='".t("Tulosta")."'></td></tr>";
-		echo "</form>";
+		$sel[$lahetys]  = "SELECTED";
+
+		echo "
+			<tr>
+				<th>".t("Tietojen lähetys sähköpostilla")."</th>
+				<td colspan='3'>
+				<select name='lahetys'>
+				<option value='tuli' $sel[tuli]>".t("Lähetä aineisto tulliin")."</option>
+				<option value='test' $sel[test]>".t("Lähetä testiaineisto tullin testipalvelimelle")."</option>
+				<option value=''>".t("Älä lähetä aineistoa tulliin")."</option>
+				</select>
+			</tr>
+		";
+
 		echo "</table>";
+
+		echo "<br><input type='submit' value='".t("Tulosta")."'>";
+		echo "</form>";
 
 	}
 

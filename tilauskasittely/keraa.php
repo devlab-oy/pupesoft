@@ -1010,8 +1010,11 @@
 						$asrow = mysql_fetch_array($result);
 
 						$lahetetyyppi = "";
-
-						if ($asrow["lahetetyyppi"] != '') {
+						
+						if ($sellahetetyyppi != '') {
+							$lahetetyyppi = $sellahetetyyppi;
+						}
+						elseif ($asrow["lahetetyyppi"] != '') {
 							$lahetetyyppi = $asrow["lahetetyyppi"];
 						}
 						else {
@@ -1918,7 +1921,11 @@
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {
 				$spanni = 3;
 			}
-
+			
+			if ($yhtiorow["lahete_tyyppi_tulostus"] != '') {
+				$spanni += 1;
+			}
+			
 			echo "<tr><th>".t("Lähete").":</th><th colspan='$spanni'>";
 
 			$query = "	SELECT *
@@ -1937,12 +1944,42 @@
 				echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
 			}
 
-			echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'></th><th></th>";
+			echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'>";
+			
+			if ($yhtiorow["lahete_tyyppi_tulostus"] != '') {
+				echo " ".t("Lähetetyyppi").": <select name='sellahetetyyppi'>";
+				
+				$query = "	SELECT avainsana.selite, ".avain('select')."
+							FROM avainsana
+							".avain('join','LAHETETYYPPI_')."
+							WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'LAHETETYYPPI'
+							ORDER BY avainsana.jarjestys, avainsana.selite";
+				$vresult = mysql_query($query) or pupe_error($query);
+				
+				$query2 = 	"SELECT lahetetyyppi FROM lasku 
+							JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
+							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$id'";
+				$vresult2 = mysql_query($query2) or pupe_error($query2);
+				$row2 = mysql_fetch_array($vresult2);
+
+				while($row = mysql_fetch_array($vresult)) {
+					$sel = "";
+					if ($row[0] == $row2[0]) $sel = 'selected';
+					echo "<option value='$row[0]' $sel>$row[1]</option>";
+				}
+
+				echo "</select>";
+				
+				echo "</th>";
+			}
+			else {
+				echo "</th><th></th>";
+			}
 
 			if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
 				echo "<th></th>";
 			}
-
+			
 			echo "</tr>";
 
 			echo "<tr>";

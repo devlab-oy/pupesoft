@@ -998,8 +998,7 @@
 
 	if (mysql_field_name($result, $i) == "lahete_nouto_allekirjoitus") {
 
-		$sela = "";
-		$selb = "";
+		$sela = $selb = "";
 
 		if ($trow[$i] == 'K') {
 			$selb = "selected";
@@ -1011,6 +1010,25 @@
 		$ulos = "<td><select name='$nimi'>
 					<option value='' $sela>".t("Ei tulosteta allekirjoitussivua")."</option>
 					<option value='K' $selb>".t("Tulostetaan allekirjoitussivu")."</option>
+				</select><td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "lahete_tyyppi_tulostus") {
+
+		$sela = $selb = "";
+
+		if ($trow[$i] == 'K') {
+			$selb = "selected";
+		}
+		else {
+			$sela = "selected";
+		}
+
+		$ulos = "<td><select name='$nimi'>
+					<option value='' $sela>".t("Lähetetyyppiä EI SAA vaihtaa tulostuksessa")."</option>
+					<option value='K' $selb>".t("Lähetetyyppiä SAA vaihtaa tulostuksessa")."</option>
 				</select><td>";
 
 		$jatko = 0;

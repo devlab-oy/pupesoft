@@ -1621,8 +1621,10 @@
 				$asrow = mysql_fetch_array($result);
 
 				$lahetetyyppi = "";
-
-				if ($asrow["lahetetyyppi"] != '') {
+				if ($sellahetetyyppi != '') {
+					$lahetetyyppi = $sellahetetyyppi;
+				}
+				elseif ($asrow["lahetetyyppi"] != '') {
 					$lahetetyyppi = $asrow["lahetetyyppi"];
 				}
 				else {

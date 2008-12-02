@@ -49,8 +49,7 @@
 				FROM avainsana 
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND laji LIKE 'ALV%' 
-				AND selite != 0
-				ORDER BY selite + 0";
+				ORDER BY laji, selite + 0";
 	$result = mysql_query($query) or pupe_error($query);
 
 	echo "<tr>";
@@ -62,7 +61,7 @@
 		if ((!isset($vero) and strtoupper($row["laji"]) == "ALV") or (isset($vero) and in_array($row["selite"], $vero))) {
 			$chk = "checked";
 		}
-		echo "<input type='checkbox' name='vero[]' value='$row[selite]' $chk> $row[selite] %<br>";
+		echo "<input type='checkbox' name='vero[]' value='$row[selite]' $chk>$row[laji] $row[selite] %<br>";
 	}
 	
 	echo "</td>";
@@ -112,12 +111,18 @@
 				$taso[$i] = substr($tasorow["taso"], 0, $i+1);
 			}
 
-			$query = "	SELECT round(sum(tiliointi.summa * vero / 100) * -1, 2) summa,
+			$query = "	SELECT 
+						round(sum(tiliointi.summa * vero / 100) * -1, 2) veronmaara,
 						round(sum(tiliointi.summa * (1 + vero / 100)) * -1, 2) verollinensumma,
 						round(sum(tiliointi.summa * -1), 2) verotonsumma,
 						count(*) kpl
 					 	FROM tili
-						JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio AND tiliointi.tilino = tili.tilino AND tiliointi.korjattu = '' AND tiliointi.vero in ($verokannat) AND tiliointi.tapvm >= '$startmonth' AND tiliointi.tapvm <= '$endmonth')
+						JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio 
+							AND tiliointi.tilino = tili.tilino 
+							AND tiliointi.korjattu = '' 
+							AND tiliointi.vero in ($verokannat) 
+							AND tiliointi.tapvm >= '$startmonth' 
+							AND tiliointi.tapvm <= '$endmonth')
 						WHERE tili.yhtio = '$kukarow[yhtio]'
 						AND tili.alv_taso = '$tasorow[taso]'
 						AND tili.alv_taso != ''
@@ -129,7 +134,7 @@
 				for ($i = $tasoluku - 1; $i >= 0; $i--) {
 					$summa[$taso[$i]] += $tilirow["verollinensumma"];
 					$verol[$taso[$i]] += $tilirow["verotonsumma"];
-					$verot[$taso[$i]] += $tilirow["summa"];
+					$verot[$taso[$i]] += $tilirow["veronmaara"];
 					$kappa[$taso[$i]] += $tilirow["kpl"];
 				}
 			}
@@ -156,15 +161,20 @@
 
 			$tilirivi = "";
 
+			// haetaan tason tiedot
+			$query = "SELECT * FROM taso WHERE yhtio = '$kukarow[yhtio]' and taso = '$key'";
+			$tilires = mysql_query($query) or pupe_error($query);
+			$tasorow = mysql_fetch_array($tilires);
+
 			// haetaan kaikki summat per tili
 			$query = "SELECT * FROM tili WHERE yhtio = '$kukarow[yhtio]' and alv_taso = '$key'";
 			$tilires = mysql_query($query) or pupe_error($query);
 
 			while ($tilirow = mysql_fetch_array($tilires)) {
 				$query = "	SELECT tilino, vero,
+							round(sum(tiliointi.summa * vero / 100) * -1, 2) veronmaara,
 							round(sum(tiliointi.summa * (1 + vero / 100)) * -1, 2) verollinensumma,
-							round(sum(tiliointi.summa * -1), 2) verotonsumma,							
-							round(sum(tiliointi.summa * vero / 100) * -1, 2) verot,
+							round(sum(tiliointi.summa * -1), 2) verotonsumma,				
 							count(*) kpl
 							FROM tiliointi USE INDEX (yhtio_tilino_tapvm)
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -182,7 +192,7 @@
 					$tilirivi .= "<td nowrap align='right'>$summarow[vero]</td>";
 					$tilirivi .= "<td nowrap align='right'>$summarow[verollinensumma]</td>";
 					$tilirivi .= "<td nowrap align='right'>$summarow[verotonsumma]</td>";
-					$tilirivi .= "<td nowrap align='right'>$summarow[verot]</td>";
+					$tilirivi .= "<td nowrap align='right'>$summarow[veronmaara]</td>";						
 					$tilirivi .= "<td nowrap align='right'>$summarow[kpl]</td>";
 					$tilirivi .= "</tr>\n";
 				}
@@ -201,7 +211,7 @@
 					$staso = trim($staso);
 					$summa[$key] = $summa[$key] + $summa[$staso];
 					$verot[$key] = $verot[$key] + $verot[$staso];
-					$verol[$key] = $verot[$key] + $verol[$staso];
+					$verol[$key] = $verol[$key] + $verol[$staso];
 					$kappa[$key] = $kappa[$key] + $kappa[$staso];
 				}
 			}
@@ -210,8 +220,15 @@
 			$rivi .= "<th nowrap>$value</th>";
 			$rivi .= "<th></th>";
 			$rivi .= "<th style='text-align:right;'>$summa[$key]</th>";
-			$rivi .= "<th style='text-align:right;'>$verot[$key]</th>";
-			$rivi .= "<th style='text-align:right;'>$verol[$key]</th>";
+			if ($tasorow["laji"] == "N") {
+				$rivi .= "<th style='text-align:right;'><strong>$verol[$key]</strong></th>";
+				$apu = round($verol[$key] * 0.22, 2);
+				$rivi .= "<th style='text-align:right;'>($apu) $verot[$key]</th>";
+			}
+			else {
+				$rivi .= "<th style='text-align:right;'>$verol[$key]</th>";
+				$rivi .= "<th style='text-align:right;'><strong>$verot[$key]</strong></th>";				
+			}
 			$rivi .= "<th style='text-align:right;'>$kappa[$key]</th>";
 			$rivi .= "</tr>\n";
 

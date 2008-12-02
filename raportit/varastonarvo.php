@@ -441,7 +441,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 
 		$merkkilisa1 .= "varastopaikat.nimitys,";
 
-		if ($merkki != '') {
+		if ($merkki != '' or $tryittain != '') {
 			$groupby .= ",varastopaikat.nimitys";
 			$orderby .= ",varastopaikat.nimitys";
 		}

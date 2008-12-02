@@ -47,8 +47,14 @@ if ($tee == "file") {
 			else {
 				$hinta = "";
 			}
-			
-			$ale	  = (float) str_replace(",", ".", $rivi[4]);
+
+			if (trim($rivi[4]) != '') {
+				$ale = (float) str_replace(",", ".", $rivi[4]);
+			}
+			else {
+				$ale = "";
+			}
+
 			$paikka	  = $rivi[5];
 
 			if ($tuoteno != '' and $kpl != 0) {

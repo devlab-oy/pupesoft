@@ -24,6 +24,9 @@ $boldi["font"] 			= "Times-Bold";
 $pieni_boldi["height"] 	= 8;
 $pieni_boldi["font"] 	= "Times-Bold";
 
+$kommentti_font["height"] 			= 18;
+$kommentti_font["font"] 			= "Helvetica";
+
 $iso["height"] 			= 14;
 $iso["font"] 			= "Helvetica-Bold";
 
@@ -272,12 +275,13 @@ if (!function_exists('alku_kerayslista')) {
 		}
 
 		if (trim($laskurow['comments']) != '') {
-			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
+			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 70, "\n###");
 		}
 
-		if (trim($laskurow['sisviesti2']) != '') {
-			$komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 90, "\n###");
+		if (trim($laskurow['sisviesti2']) != '') {			
+			$komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 70, "\n###");
 		}
+ 
 
 		//Tulostetaan laskun kommentti
 		if (trim($komm) != '') {
@@ -304,13 +308,13 @@ if (!function_exists('alku_kerayslista')) {
 					list($o, $v) = explode("###", $kommentti);
 
 					$pdf->draw_text(35, $pohja, trim($o), $thispage, $boldi);
-					$pdf->draw_text(35+$maxoik+5, $pohja, trim($v), $thispage, $norm);
+					$pdf->draw_text(35+$maxoik+5, $pohja, trim($v), $thispage, $kommentti_font);
 				}
 				else {
-					$pdf->draw_text(35, $pohja, trim($kommentti), $thispage, $norm);
+					$pdf->draw_text(35, $pohja, trim($kommentti), $thispage, $kommentti_font);
 				}
 
-				$pohja = $pohja - 10;
+				$pohja = $pohja - 12;
 			}
 			$kala = $pohja-30;
 		}

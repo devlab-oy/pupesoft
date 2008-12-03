@@ -134,8 +134,15 @@
 				if ($tilino != '') {
 					echo "<td><a href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]&alvv=".substr($trow["tapvm"], 0,4)."&alvk=".substr($trow["tapvm"],5,2)."&alvp=".substr($trow["tapvm"],-2)."'>".tv1dateconv($trow["tapvm"])."</a></td>";
 				}
-
-				echo "<td><a href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]&tkausi=$tkausi'>$trow[tilino]</a></td>";
+				
+				if($alvk != "") {
+					$linkkilisa = "&alvv=".substr($alvk, 0,4)."&alvk=".substr($alvk, 4,2)."";
+				}
+				else {
+					$linkkilisa = "tkausi=$tkausi&";
+				}
+				
+				echo "<td><a href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]&$linkkilisa'>$trow[tilino]</a></td>";
 				echo "<td>$trow[nimi]</td>";
 				echo "<td>$trow[Vientejä]</td>";
 				echo "<td align='right'>$trow[Saldo]</td>";

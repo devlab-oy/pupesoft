@@ -21,30 +21,29 @@
 			Yhteensä											600
 	*/
 
-	$ulos  = "LUM2";
-	$ulos .= "0";
-	$ulos .= "0";
-	$ulos .= sprintf ('%1.1s', 		' ');
-  	$ulos .= sprintf ('%011.11s',	$ytunnus);			//ytunnus
-	$ulos .= sprintf ('%5.5s',		$lum_et_5kentta);	//asiakastunnus
-	$ulos .= sprintf ('%2.2s', 		' ');
-	$ulos .= sprintf ('%1.1s', 		' ');
+	$ulos  = "LUM2";											// Sovellustunnus
+	$ulos .= "0";                                       		// Tietuetunnus
+	$ulos .= "0";                                       		// Aineistolaji
+	$ulos .= sprintf ('%1.1s', 		' ');               		// Varalla
+  	$ulos .= sprintf ('%011.11s',	$ytunnus);					// Maksajan Y-tunnus
+	$ulos .= sprintf ('%5.5s',		$lum_et_5kentta);			// Asiakastunnuksen lisäosa
+	$ulos .= sprintf ('%2.2s', 		' ');               		// Varalla
+	$ulos .= sprintf ('%1.1s', 		'0');               		// Hyväksymiskoodi
 
 	$luonti = getdate();
 
 	// Pvm 10 merkkiä
-	$ulos .= sprintf ('%02d', substr($luonti['year'], 3, 2));
+	$ulos .= sprintf ('%02d', substr($luonti['year'], 3, 2));	// Aineiston/palautteen luontiaika
 	$ulos .= sprintf ('%02d', $luonti['mon']);
 	$ulos .= sprintf ('%02d', $luonti['mday']);
 	$ulos .= sprintf ('%02d', $luonti['hours']);
 	$ulos .= sprintf ('%02d', $luonti['minutes']);
 
-	//Nordean speksi (menee Sampollekkin, siellä kenttä "Veloituksen päivämäärä" on vain myös tyyppiä "Varalla")
-	$ulos .= sprintf ('%14s', ' ');
-	$ulos .= sprintf ('%04d', $luonti['year']);		//Tämä on eräpvm, jonka voi ohittaa laskulla
+	$ulos .= sprintf ('%014d', '0');							// Varalla
+	$ulos .= sprintf ('%04d', $luonti['year']);					// Veloituksen päivämäärä (Sampolla kenttä on vain tyyppiä "Varalla")
 	$ulos .= sprintf ('%02d', $luonti['mon']);
 	$ulos .= sprintf ('%02d', $luonti['mday']);
-	$ulos .= sprintf ('%542s', ' ');
+	$ulos .= sprintf ('%542s', ' ');							// Varalla
 
 	//print strlen($ulos) . "/" . $ulos;
 	//print "</pre>";

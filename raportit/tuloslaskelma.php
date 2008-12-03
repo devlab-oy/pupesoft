@@ -264,7 +264,7 @@
 	        $b["height"]	= 8;
 			$b["font"] 		= "Times-Bold";
 			$rivikork 		= "15";
-			$saraklev 		= "50";
+			$saraklev 		= "70";
 
 			function alku () {
 				global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi;

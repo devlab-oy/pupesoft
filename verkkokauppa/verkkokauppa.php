@@ -1361,28 +1361,28 @@ if($tee == "") {
 			<button onclick=\"javascript:document.location='".$palvelin2."logout.php?location=".$palvelin2."verkkokauppa.php';\">".t("Kirjaudu ulos")."</button>";
 	}
 
-	$verkkokauppa =  "
+	$verkkokauppa_ulos =  "
 					<div class='login' id='login'>$login_screen</div>
 					<div class='menu' id='menu'>".menu()."</div>";
 
 	$tuotenumero = mysql_real_escape_string(trim($_GET["tuotenumero"]));
 
 	if ($tuotenumero != "") {
-		$verkkokauppa .= "	<div class='selain' id='selain'>
+		$verkkokauppa_ulos .= "	<div class='selain' id='selain'>
 								<SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 								sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla&tuotehaku=$tuotenumero');
 								</SCRIPT>
 							</div>";
 	}
 	else {
-		$verkkokauppa .= "<div class='selain' id='selain'>".uutiset()."</div>";
+		$verkkokauppa_ulos .= "<div class='selain' id='selain'>".uutiset()."</div>";
 	}
 
-	$verkkokauppa .= "</body>
+	$verkkokauppa_ulos .= "</body>
 			</html>";
 
 	if(file_exists("verkkokauppa.template")) {
-		echo str_replace("<verkkokauppa>", $verkkokauppa, file_get_contents("verkkokauppa.template"));
+		echo str_replace("<verkkokauppa>", $verkkokauppa_ulos, file_get_contents("verkkokauppa.template"));
 	}
 	else {
 		echo "Verkkokauppapohjan m‰‰rittely puuttuu..<br>";

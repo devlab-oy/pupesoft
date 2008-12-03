@@ -115,14 +115,16 @@
 				$query = "	SELECT ei_saldoa from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuotenumero'";
 				$ress = mysql_query($query) or pupe_error($query);
 				$roww = mysql_fetch_array($ress);
-				
-				if ($hyllyssa == 0 and $roww['ei_saldoa'] == '') {
-					echo "<font class='error'>Hyllyssä $hyllyssa kpl tuotetta $tuotenumero</font><br>";
-					$tee = "VALMISTA";
-					$virheitaoli = "JOO";
+
+				if ($hyllyssa <= 0 and $roww['ei_saldoa'] == '' ) {
+					if (($_POST['osavalmistus'] == 'Valmista' and count($osatoimitetaan) != 0) or ($_POST['kokovalmistus'] == 'Valmista')) {
+						echo "<font class='error'>Hyllyssä $hyllyssa kpl tuotetta $tuotenumero</font><br>";
+						$virheitaoli = "JOO";
+						$tee = "VALMISTA";
+					}
 				}
 			}
-			
+
 			echo "<br>";
 		}
 	}
@@ -725,10 +727,10 @@
 		echo "<tr><td colspan='9' class='back'><br></td></tr>";
 
 		if ($toim != 'KORJAA' and $toim != 'TUTKAA') {
-			echo "<tr><td colspan='8'>Valmista syötetyt kappaleet:</td><td><input type='submit' name='osavalmistus' value='".t("Valmista")."'></td></tr>";
-			echo "<tr><td colspan='4'>Valmista prosentti koko tilauksesta:</td><td colspan='4' align='right'><input type='text' name='kokopros' size='5'> % </td><td><input type='submit' name='osavalmistus' value='".t("Valmista")."'></td></tr>";
-			echo "<tr><td colspan='8'>Siirrä valitut valmisteet uudelle tilaukselle:</td><td><input type='submit' name='osatoimitus' value='".t("Osatoimita")."'></td></tr>";
-			echo "<tr><td colspan='8'>Valmista koko tilaus:</td><td><input type='submit' name='kokovalmistus' value='".t("Valmista")."'></td>";
+			echo "<tr><td colspan='8'>Valmista syötetyt kappaleet:</td><td><input type='submit' name='osavalmistus' id='osavalmistus' value='".t("Valmista")."'></td></tr>";
+			echo "<tr><td colspan='4'>Valmista prosentti koko tilauksesta:</td><td colspan='4' align='right'><input type='text' name='kokopros' size='5'> % </td><td><input type='submit' name='osavalmistus' id='osavalmistus' value='".t("Valmista")."'></td></tr>";
+			echo "<tr><td colspan='8'>Siirrä valitut valmisteet uudelle tilaukselle:</td><td><input type='submit' name='osatoimitus' id='osatoimitus' value='".t("Osatoimita")."'></td></tr>";
+			echo "<tr><td colspan='8'>Valmista koko tilaus:</td><td><input type='submit' name='kokovalmistus' id='kokovalmistus' value='".t("Valmista")."'></td>";
 		}
 		elseif($toim == 'KORJAA' and $voikokorjata > 0) {
 			echo "<tr><td colspan='8'>Korjaa koko valmistus:</td><td class='back'><input type='submit' name='' value='".t("Korjaa")."'></td>";

@@ -116,7 +116,7 @@
 				$ress = mysql_query($query) or pupe_error($query);
 				$roww = mysql_fetch_array($ress);
 
-				if ($saldo <= 0 and $roww['ei_saldoa'] == '' ) {
+				if ($saldo < 0 and $roww['ei_saldoa'] == '' ) {
 					if (($_POST['osavalmistus'] == 'Valmista' and count($osatoimitetaan) != 0) or ($_POST['kokovalmistus'] == 'Valmista')) {
 						echo "<font class='error'>Saldoa $saldo kpl tuotetta $tuotenumero</font><br>";
 						$virheitaoli = "JOO";

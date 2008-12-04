@@ -114,14 +114,14 @@
 			foreach ($tuotenumerot as $key => $tuotenumero) {
 				list ($saldo, $hyllyssa, $myytavissa, $true) = saldo_myytavissa($tuotenumero);
 
-				$query = "	SELECT ei_saldoa from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuotenumero'";
+				$query = "	SELECT ei_saldoa, tuotetyyppi from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuotenumero'";
 				$ress = mysql_query($query) or pupe_error($query);
 				$roww = mysql_fetch_array($ress);
 
 				if ($saldo < 0 and $roww['ei_saldoa'] == '') {
 					if ($_POST['osavalmistus'] == 'Valmista') {
 						foreach ($valmkpllat as $tunn => $kpl_chk) {
-							if ($kpl_chk != '') {
+							if ($kpl_chk != '' and $roww['tuotetyyppi'] == 'R') {
 								echo "<font class='error'>Saldo $saldo kpl tuotetta $tuotenumero</font><br>";
 								$virheitaoli = "JOO";
 								$tee = "VALMISTA";
@@ -136,8 +136,8 @@
 				}
 				elseif ($saldo > 0 and $roww['ei_saldoa'] == '') {
 					if ($_POST['kokovalmistus'] == 'Valmista') {
-						foreach ($tilkpllat as $tunn => $kpl_chk) {
-							if (($saldo - $kpl_chk) < 0) {
+						foreach ($tilkpllat_chk as $tuoteno_chk => $kpl_chk) {
+							if (($saldo - $kpl_chk) < 0 and $roww['tuotetyyppi'] == 'R' and $tuotenumero == $tuoteno_chk) {
 								echo "<font class='error'>Saldo ei riitä! ($saldo kpl). Tuote $tuotenumero</font><br>";
 								$virheitaoli = "JOO";
 								$tee = "VALMISTA";
@@ -654,6 +654,7 @@
 				echo "<td class='$class' align='left'>
 						<input type='hidden' name='edtilkpllat[$prow[tunnus]]'  value='$prow[valmistetaan]'>
 						<input type='text' size='8' name='tilkpllat[$prow[tunnus]]' value='$prow[valmistetaan]'>";
+				echo "	<input type='hidden' name='tilkpllat_chk[$prow[tuoteno]]' value='$prow[valmistetaan]'>";
 
 				if($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") {
 					echo "R:<input type = 'checkbox' name = 'rekru[$prow[tunnus]]' checked>";

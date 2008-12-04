@@ -130,7 +130,7 @@
 	}
 
 	function rivi ($firstpage, $summa) {
-		global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli;
+		global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $karhukertanro;
 
 		if (($lask == 29 and $sivu == 1) or ($lask == 37 and $sivu > 1)) {
 			$sivu++;
@@ -146,7 +146,12 @@
 		$pdf->draw_text(280, $kala, $row["ika"], 		$firstpage, $norm);
 		$pdf->draw_text(340, $kala, $row["kpvm"],		$firstpage, $norm);
 		$pdf->draw_text(440, $kala, $row["summa"], 		$firstpage, $norm);
-		$pdf->draw_text(520, $kala, $row["karhuttu"]+1, $firstpage, $norm);
+
+		if ($karhukertanro == "") {
+			$karhukertanro = $row["karhuttu"] + 1;
+		}
+
+		$pdf->draw_text(520, $kala, $karhukertanro, $firstpage, $norm);
 		$kala = $kala - 13;
 
 		$lask++;
@@ -276,9 +281,19 @@
 	if ($nayta_pdf == 1 and $karhutunnus != '') {
 		$karhutunnus = mysql_real_escape_string($karhutunnus);
 		$kjoinlisa = " and kl.ktunnus = '$karhutunnus' ";
+		
+		$query = "	SELECT count(*) 
+					FROM karhu_lasku 
+					JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = 'T')
+					WHERE ltunnus in ($xquery) 
+					AND ktunnus <= $karhutunnus";
+		$karhukertares = mysql_query($query) or pupe_error($query);
+		$karhukertarow = mysql_fetch_array($karhukertares);
+		$karhukertanro = $karhukertarow[0];	
 	}
 	else {
 		$kjoinlisa = "";
+		$karhukertanro = "";
 	}
 
 	$query = "	SELECT l.tunnus, l.tapvm, l.liitostunnus,

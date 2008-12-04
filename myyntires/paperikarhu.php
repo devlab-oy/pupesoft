@@ -455,7 +455,11 @@
 		$karhutunnus = mysql_real_escape_string($karhutunnus);
 		$kjoinlisa = " and kl.ktunnus = '$karhutunnus' ";
 
-		$query = "SELECT count(*) FROM karhu_lasku WHERE ltunnus in ($xquery) AND ktunnus <= $karhutunnus";
+		$query = "	SELECT count(*) 
+					FROM karhu_lasku 
+					JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '')
+					WHERE ltunnus in ($xquery) 
+					AND ktunnus <= $karhutunnus";
 		$karhukertares = mysql_query($query) or pupe_error($query);
 		$karhukertarow = mysql_fetch_array($karhukertares);
 		$karhukertanro = $karhukertarow[0];

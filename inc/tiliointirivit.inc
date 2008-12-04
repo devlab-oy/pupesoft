@@ -115,7 +115,7 @@
 					UNION
 					(SELECT CURDATE())
 					UNION
-					(SELECT '$laspvm')";
+					(SELECT if('$laspvm' >= '$yhtiorow[tilikausi_alku]', '$laspvm', CURDATE()))";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 1) {

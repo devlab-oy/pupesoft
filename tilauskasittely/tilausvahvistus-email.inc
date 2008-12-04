@@ -96,20 +96,21 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 	if (mysql_num_rows($tilvahresult) > 0) {
 
 		if ($laskurow["tilaustyyppi"] == 'E') {
-			$ulos  = sprintf("%-50.s",$yhtiorow['nimi'])								.t("Tilausvahvistus Ennakkomyynti", $kieli)."\n";
+			$ulos = sprintf("%-50.s", $yhtiorow['nimi'])								.t("Tilausvahvistus Ennakkomyynti", $kieli)."\n";
 		}
 		else {
-			$ulos  = sprintf("%-50.s",$yhtiorow['nimi'])								.t("Tilausvahvistus", $kieli)."\n";
+			$ulos = sprintf("%-50.s", $yhtiorow['nimi'])								.t("Tilausvahvistus", $kieli)."\n";
 		}
 
 		$ulos .= sprintf("%-50.s",$yhtiorow['osoite'])								."\n";
 		$ulos .= sprintf("%-50.s",$yhtiorow['postino']." ".$yhtiorow['postitp'])	.tv1dateconv($laskurow['luontiaika'])."\n";
 		$ulos .= "\n";
-		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).":")									.t("Toimitusosoite", $kieli).":\n";
+		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).":")							.t("Toimitusosoite", $kieli).":\n";
 		$ulos .= sprintf("%-50.s",$laskurow['nimi'])								.$laskurow['toim_nimi']."\n";
 		$ulos .= sprintf("%-50.s",$laskurow['nimitark'])							.$laskurow['toim_nimitark']."\n";
 		$ulos .= sprintf("%-50.s",$laskurow['osoite'])								.$laskurow['toim_osoite']."\n";
 		$ulos .= sprintf("%-50.s",$laskurow['postino']." ".$laskurow['postitp'])	.$laskurow['toim_postino']." ".$laskurow['toim_postitp']."\n";
+		$ulos .= sprintf("%-50.s",$laskurow['maa'])									.$laskurow['toim_maa']."\n";
 		$ulos .= "\n";
 
 		if ($laskurow['toimvko'] == 'V') {
@@ -130,10 +131,18 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
 		$ulos .= "\n";
 
-		$ulos .= t("Nro", $kieli)." ".t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."              ".t("EAN", $kieli)."          ".t("Kpl", $kieli);
+		// headerit
+		$ulos .= sprintf("%-4.4s",   t("Nro", $kieli));
+		$ulos .= sprintf("%-30.30s", t("Nimitys", $kieli));
+		$ulos .= sprintf("%-20.20s", t("Tuotenumero", $kieli));
+		$ulos .= sprintf("%-12.12s", t("EAN", $kieli));
+		$ulos .= sprintf("%9.9s",    t("M‰‰r‰", $kieli));
 
 		if ($naytatvale != 3) {
-			$ulos .= "   ".t("Hinta", $kieli)." ".t("Val", $kieli)."   ".t("Ale", $kieli);
+			$hinta_pituus = (8 + $yhtiorow['hintapyoristys'] - 2);
+			$ulos .= sprintf("%".$hinta_pituus.".".$hinta_pituus."s", t("Hinta", $kieli));
+			$ulos .= sprintf("%4.4s", t("Val", $kieli));
+			$ulos .= sprintf("%7.7s", t("Ale", $kieli));
 		}
 
 		$ulos .= "\n";

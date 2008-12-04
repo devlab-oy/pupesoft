@@ -271,13 +271,13 @@
 
 	$nimi = "P‰‰kirja";
 	$alku = "CONCAT_WS(' ', tiliointi.tilino, tili.nimi) Tili, DATE_FORMAT(tiliointi.tapvm,'%d.%m.%Y') tapvm";
-	$jarj = "tiliointi.tilino, tiliointi.tapvm, tiliointi.summa";
+	$jarj = "tiliointi.tilino, tiliointi.tapvm, tiliointi.laadittu, tiliointi.summa";
 
 	// Haluttiinkin p‰iv‰kirja
 	if ($tee == 'P') {
 		$nimi = "P‰iv‰kirja";
 		$alku = "DATE_FORMAT(tiliointi.tapvm,'%d.%m.%Y') tapvm, CONCAT_WS(' ', tiliointi.tilino, tili.nimi) Tili";
-		$jarj = "tiliointi.tapvm, tiliointi.tilino, tiliointi.summa";
+		$jarj = "tiliointi.tapvm, tiliointi.laadittu, tiliointi.tilino, tiliointi.summa";
 	}
 
 	if ($tkausi != '0') {

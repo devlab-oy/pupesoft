@@ -28,6 +28,10 @@ if (!function_exists('finvoice_otsik')) {
 			case 'PSPBFIHH':
 	        	$tulostuspalvelu	= "003718062728810P";
 				break;
+			case 'DABAFIHH':	
+			case 'HELSFIHH':
+	        	$tulostuspalvelu	= "TULOSTUSPALVELU";
+				break;
 			default:
 	        	$tulostuspalvelu	= "";
 				break;

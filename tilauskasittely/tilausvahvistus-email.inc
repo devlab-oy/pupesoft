@@ -263,7 +263,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 	$content = "--$bound\n";
 
 	$content .= "Content-Type: text/plain;\n";
-	$content .= "Content-Transfer-Encoding: quoted-printable\n";
+	$content .= "Content-Transfer-Encoding: quoted-printable\n\n";
 	$content .= $ulos;
 	$content .= "\n" ;
 

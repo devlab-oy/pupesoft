@@ -153,6 +153,24 @@
 
 	echo "<font class='head'>".t('Hyväksyttävät laskusi')."</font><hr><br>";
 
+	if ($tunnus != '') {
+		$tunnus = mysql_real_escape_string($tunnus);
+
+		$query = "	SELECT hyvak1, hyvaksyja_nyt
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$tunnus'";
+		$check_res = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($check_res) == 1) {
+			$check_row = mysql_fetch_array($check_res);
+			
+			if ($check_row['hyvak1'] == $kukarow['kuka'] and $check_row['hyvaksyja_nyt'] == $kukarow['kuka']) {
+				$tee = 'M';
+			}
+		}
+	}
+
 	if ($tee == 'M') {
 		$query = "	SELECT *
 					FROM lasku
@@ -829,7 +847,21 @@
 		echo "<td>$laskurow[kuka]</td>";
 
 		if (($kukarow['taso'] == '2' or $kukarow["taso"] == '3') and $laskurow['hyvak1'] == $kukarow['kuka']) {
-			echo "<td><a href='$PHP_SELF?tee=M&tunnus=$tunnus'>".tv1dateconv($laskurow["tapvm"])."</a></td>";
+
+			echo "<td><a href='$PHP_SELF?tee=M&tunnus=$tunnus";
+
+			if (isset($id)) {
+				echo "&id=$id";
+			}
+			elseif ($_POST['id'] != '') {
+				echo "&id=".mysql_real_escape_string($_POST['id']);
+			}
+			
+			if (isset($iframe)) {
+				echo "&iframe=$iframe";
+			}
+			
+			echo "'>".tv1dateconv($laskurow["tapvm"])."</a></td>";
 		}
 		else {
 			echo "<td>".tv1dateconv($laskurow["tapvm"])."</td>";
@@ -1565,6 +1597,10 @@
 		    if ($_POST['id'] > 0) {
 				$_POST['id'] = (int) mysql_real_escape_string($_POST['id']);
 				$url = "view.php?id={$_POST['id']}";
+			}
+			elseif ($id > 0) {
+				$id = (int) mysql_real_escape_string($id);
+				$url = "view.php?id={$id}";
 			}
 			else {
 				$url = ebid($laskurow['tunnus'], 'alaikkuna');

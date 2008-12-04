@@ -102,8 +102,9 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 			$ulos = sprintf("%-50.s", $yhtiorow['nimi'])								.t("Tilausvahvistus", $kieli)."\n";
 		}
 
-		$ulos .= sprintf("%-50.s",$yhtiorow['osoite'])								."\n";
+		$ulos .= sprintf("%-50.s",$yhtiorow['osoite'])."\n";
 		$ulos .= sprintf("%-50.s",$yhtiorow['postino']." ".$yhtiorow['postitp'])	.tv1dateconv($laskurow['luontiaika'])."\n";
+		$ulos .= sprintf("%-50.s",$yhtiorow['maa']."\n";
 		$ulos .= "\n";
 		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).":")							.t("Toimitusosoite", $kieli).":\n";
 		$ulos .= sprintf("%-50.s",$laskurow['nimi'])								.$laskurow['toim_nimi']."\n";
@@ -121,6 +122,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 		$ulos .= sprintf("%-50.s",t("Tilausnumero", $kieli).": ".$laskurow['tunnus'])			.t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
 		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).": ".$laskurow['tilausyhteyshenkilo'])	.t("Tilaajan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero']."\n";
 		$ulos .= sprintf("%-50.s",t("Kohde", $kieli).": ".$laskurow['kohde'])					.t("Myyjä", $kieli).": ".$krow['nimi']."\n";
+		$ulos .= sprintf("%-50.s",t("Toimitusehto", $kieli).": ".$laskurow['toimitusehto'])."\n";
 
 		if ($laskurow['erikoisale'] > 0) {
 			$ulos .= sprintf("%-50.s",t("Erikoisalennus", $kieli).": ".$laskurow['erikoisale']."%\n");

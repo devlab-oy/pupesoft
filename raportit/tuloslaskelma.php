@@ -263,11 +263,25 @@
 			$p["font"]	 	= "Times-Roman";
 	        $b["height"]	= 8;
 			$b["font"] 		= "Times-Bold";
-			$rivikork 		= "15";
-			$saraklev 		= "70";
-
+			
+			
+			
+			if(count($kaudet) > 10) {
+				$p["height"]--;
+				$b["height"]--;
+				$saraklev 			= 49;
+				$yhteensasaraklev 	= 63;
+				$vaslev 			= 150;
+				$rivikork 			= 13;				
+			}
+			else {
+				$saraklev 			= 60;
+				$yhteensasaraklev 	= 70;
+				$vaslev 			= 160;
+				$rivikork 			= 15;
+			}
 			function alku () {
-				global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi;
+				global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev;
 
 				$firstpage = $pdf->new_page("11.5x8in");
 				$bottom = "530";
@@ -311,11 +325,18 @@
 
 				$pdf->draw_text(200,  560, $otsikko, $firstpage);
 
-				$left 	= "150";
+				$left 	= $vaslev;
 
 				for ($i = $alkukausi; $i < count($kaudet); $i++) {
 					$oikpos = $pdf->strlen($kaudet[$i], $b);
-					$pdf->draw_text($left-$oikpos+$saraklev,  $bottom, $kaudet[$i], $firstpage, $b);
+					if($i+1 == count($kaudet) and $eiyhteensa == "") {
+						$lev = $yhteensasaraklev;
+					}
+					else {
+						$lev = $saraklev;
+					}
+					
+					$pdf->draw_text($left-$oikpos+$lev,  $bottom, $kaudet[$i], $firstpage, $b);
 
 					$left += $saraklev;
 				}
@@ -478,11 +499,19 @@
 
 						$left = 10+(strlen($key)-1)*3;
 						$pdf->draw_text($left,  $bottom, $value, $firstpage, $b);
-						$left = 150;
+						$left = $vaslev;
 
 						for ($i = $alkukausi; $i < count($kaudet); $i++) {
-							$oikpos = $pdf->strlen(sprintf($muoto, $summa[$kaudet[$i]][$key] * -1 / $tarkkuus), $p);
-							$pdf->draw_text($left-$oikpos+$saraklev, $bottom, sprintf($muoto, $summa[$kaudet[$i]][$key] * -1 / $tarkkuus), $firstpage, $p);
+							$oikpos = $pdf->strlen(number_format($summa[$kaudet[$i]][$key] * -1 / $tarkkuus, $desi, ',', ' '), $p);
+							
+							if($i+1 == count($kaudet) and $eiyhteensa == "") {
+								$lev = $yhteensasaraklev;
+							}
+							else {
+								$lev = $saraklev;
+							}
+							
+							$pdf->draw_text($left-$oikpos+$lev, $bottom, number_format($summa[$kaudet[$i]][$key] * -1 / $tarkkuus, $desi, ',', ' '), $firstpage, $p);
 							$left += $saraklev;
 						}
 

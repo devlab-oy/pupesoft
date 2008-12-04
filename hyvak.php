@@ -1595,11 +1595,11 @@
 
 		if ($iframe == 'yes' and ($laskurow["ebid"] != "" or $id > 0)) {
 		    if ($_POST['id'] > 0) {
-				$_POST['id'] = (int) mysql_real_escape_string($_POST['id']);
+				$_POST['id'] = (int) $_POST['id'];
 				$url = "view.php?id={$_POST['id']}";
 			}
 			elseif ($id > 0) {
-				$id = (int) mysql_real_escape_string($id);
+				$id = (int) $id;
 				$url = "view.php?id={$id}";
 			}
 			else {

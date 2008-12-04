@@ -108,19 +108,42 @@
 	}
 
 	if ($tee == 'TEEVALMISTUS' and $vakisinhyvaksy == '') {
+
 		if (isset($tuotenumerot) and is_array($tuotenumerot) and count($tuotenumerot) > 0) {
-			foreach ($tuotenumerot as $tuotenumero) {
+
+			foreach ($tuotenumerot as $key => $tuotenumero) {
 				list ($saldo, $hyllyssa, $myytavissa, $true) = saldo_myytavissa($tuotenumero);
 
 				$query = "	SELECT ei_saldoa from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuotenumero'";
 				$ress = mysql_query($query) or pupe_error($query);
 				$roww = mysql_fetch_array($ress);
 
-				if ($saldo < 0 and $roww['ei_saldoa'] == '' ) {
-					if (($_POST['osavalmistus'] == 'Valmista' and count($osatoimitetaan) != 0) or ($_POST['kokovalmistus'] == 'Valmista')) {
-						echo "<font class='error'>Saldoa $saldo kpl tuotetta $tuotenumero</font><br>";
+				if ($saldo < 0 and $roww['ei_saldoa'] == '') {
+					if ($_POST['osavalmistus'] == 'Valmista') {
+						foreach ($valmkpllat as $tunn => $kpl_chk) {
+							if ($kpl_chk != '') {
+								echo "<font class='error'>Saldo $saldo kpl tuotetta $tuotenumero</font><br>";
+								$virheitaoli = "JOO";
+								$tee = "VALMISTA";
+							}
+						}
+					}
+					elseif ($_POST['kokovalmistus'] == 'Valmista') {
+						echo "<font class='error'>Saldo ei riitä! ($saldo kpl). Tuote $tuotenumero</font><br>";
 						$virheitaoli = "JOO";
 						$tee = "VALMISTA";
+					}
+				}
+				elseif ($saldo > 0 and $roww['ei_saldoa'] == '') {
+					if ($_POST['kokovalmistus'] == 'Valmista') {
+						foreach ($tilkpllat as $tunn => $kpl_chk) {
+							if (($saldo - $kpl_chk) < 0) {
+								echo "<font class='error'>Saldo ei riitä! ($saldo kpl). Tuote $tuotenumero</font><br>";
+								$virheitaoli = "JOO";
+								$tee = "VALMISTA";
+								break;
+							}
+						}
 					}
 				}
 			}
@@ -607,7 +630,7 @@
 
 			echo "<td class='$class'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
 			echo "<td class='$class'><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a></td>";
-			echo "<input type='hidden' name='tuotenumerot[$prow[tuoteno]]' value='$prow[tuoteno]'>";
+			echo "<input type='hidden' name='tuotenumerot[$prow[tunnus]]' value='$prow[tuoteno]'>";
 			echo "<td class='$class' align='right'>$prow[tilattu]</td>";
 
 

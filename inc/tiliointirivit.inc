@@ -113,7 +113,9 @@
 					FROM tiliointi
 					WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and korjattu = '' and tapvm >= '$yhtiorow[tilikausi_alku]')
 					UNION
-					(SELECT CURDATE())";
+					(SELECT CURDATE())
+					UNION
+					(SELECT '$laspvm')";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 1) {

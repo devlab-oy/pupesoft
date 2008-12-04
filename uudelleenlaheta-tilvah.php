@@ -6,7 +6,7 @@ require ("inc/parametrit.inc");
 
 if ($tee == "laheta" and $tunnukset != "") {
 
-	$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tila='L' and tunnus in ($tunnukset)";
+	$query = "SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' AND tila in ('N','L') AND tunnus in ($tunnukset)";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {

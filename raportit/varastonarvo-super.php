@@ -1,7 +1,7 @@
 <?php
 
 	// käytetään slavea
-	$useslave = 1;
+	$useslave = 0;
 
 	if (isset($_POST["tee"])) {
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;

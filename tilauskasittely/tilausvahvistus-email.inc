@@ -104,7 +104,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
 		$ulos .= sprintf("%-50.s",$yhtiorow['osoite'])."\n";
 		$ulos .= sprintf("%-50.s",$yhtiorow['postino']." ".$yhtiorow['postitp'])	.tv1dateconv($laskurow['luontiaika'])."\n";
-		$ulos .= sprintf("%-50.s",$yhtiorow['maa']."\n";
+		$ulos .= sprintf("%-50.s",$yhtiorow['maa'])."\n";
 		$ulos .= "\n";
 		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).":")							.t("Toimitusosoite", $kieli).":\n";
 		$ulos .= sprintf("%-50.s",$laskurow['nimi'])								.$laskurow['toim_nimi']."\n";

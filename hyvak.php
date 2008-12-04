@@ -153,24 +153,6 @@
 
 	echo "<font class='head'>".t('Hyväksyttävät laskusi')."</font><hr><br>";
 
-	if ($tunnus != '') {
-		$tunnus = mysql_real_escape_string($tunnus);
-
-		$query = "	SELECT hyvak1, hyvaksyja_nyt
-					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND tunnus = '$tunnus'";
-		$check_res = mysql_query($query) or pupe_error($query);
-		
-		if (mysql_num_rows($check_res) == 1) {
-			$check_row = mysql_fetch_array($check_res);
-			
-			if ($check_row['hyvak1'] == $kukarow['kuka'] and $check_row['hyvaksyja_nyt'] == $kukarow['kuka']) {
-				$tee = 'M';
-			}
-		}
-	}
-
 	if ($tee == 'M') {
 		$query = "	SELECT *
 					FROM lasku

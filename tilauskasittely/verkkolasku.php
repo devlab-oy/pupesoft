@@ -798,7 +798,7 @@
 					$tulos_ulos .= t("Lis‰t‰‰n laskulle lis‰kulu")."<br>\n";
 					$yhdista = array();
 					$lisakulun_lisays_ehto = "";
-					
+
 					//ei k‰teislaskuihin
 					if ($yhtiorow["lisakulun_lisays"] == 'K') {
 						$query = " 	SELECT tunnus
@@ -806,37 +806,37 @@
 									WHERE yhtio='$kukarow[yhtio]'
 									and kateinen != ''";
 						$limaresult = mysql_query($query) or pupe_error($query);
-						
+
 						$lisakulu_maksuehto = array();
 						while ($limaksuehtorow = mysql_fetch_array($limaresult)) {
 							$lisakulu_maksuehto[] = $limaksuehtorow["tunnus"];
 						}
-						
+
 						if (count($lisakulu_maksuehto) > 0) {
 							$lisakulun_lisays_ehto = " and maksuehto not in(".implode(',',$lisakulu_maksuehto).") ";
 						}
-						
+
 					}
 					elseif ($yhtiorow["lisakulun_lisays"] == 'N') {
-						//ei noudolle 
+						//ei noudolle
 						$query = " 	SELECT selite
 									FROM toimitustapa
 									WHERE yhtio='$kukarow[yhtio]'
 									and nouto != ''";
 						$toimitusresult = mysql_query($query) or pupe_error($query);
-						
+
 						$lisakulu_toimitustapa = array();
-						
+
 						while ($litoimitustaparow = mysql_fetch_array($toimitusresult)) {
 							$lisakulu_toimitustapa[] = "'".$litoimitustaparow["selite"]."'";
 						}
-						
+
 						if (count($lisakulu_toimitustapa) > 0) {
 							$lisakulun_lisays_ehto = " and toimitustapa not in(".implode(',',$lisakulu_toimitustapa).") ";
 						}
-																
+
 					}
-					
+
 					// tehd‰‰n ketjutus (group by PITƒƒ OLLA sama kun alhaalla) rivi ~976
 					$query = "	SELECT group_concat(tunnus) tunnukset
 								FROM lasku
@@ -892,11 +892,11 @@
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND	tunnus = '$laskurow[liitostunnus]'";
 						$aslisakulres = mysql_query($query) or pupe_error($query);
-						$aslisakulrow = mysql_fetch_array($aslisakulres);			
-						
+						$aslisakulrow = mysql_fetch_array($aslisakulres);
+
 						if (mysql_num_rows($otsre) == 1 and mysql_num_rows($rhire) == 1 and $aslisakulrow['lisakulu'] == '') {
 							// lasketaan laskun loppusumma (HUOM ei tarvitse huomioida veroa!)
-							$query = "	SELECT sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * 
+							$query = "	SELECT sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) *
 													if(tilausrivi.netto = 'N', (1 - tilausrivi.ale / 100), (1 - (tilausrivi.ale + lasku.erikoisale - (tilausrivi.ale * lasku.erikoisale / 100)) / 100))
 												) laskun_loppusumma
 										FROM tilausrivi
@@ -1914,8 +1914,12 @@
 								}
 								elseif ($kukarow["eposti"] != '') {
 									// l‰hetet‰‰n meili
+									$komento = "";
 									$kutsu = "lasku $lasku";
 									$liite = $pdffilenimi;
+									$sahkoposti_cc = "";
+									$content_subject = "";
+									$content_body = "";
 									include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
 								}
 
@@ -1934,8 +1938,12 @@
 									}
 									elseif ($kukarow["eposti"] != '') {
 										// l‰hetet‰‰n meili
+										$komento = "";
 										$kutsu = "lasku $lasku";
 										$liite = $pdffilenimi;
+										$sahkoposti_cc = "";
+										$content_subject = "";
+										$content_body = "";
 										include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
 									}
 								}
@@ -1988,8 +1996,12 @@
 								}
 								elseif ($kukarow["eposti"] != '') {
 									// l‰hetet‰‰n meili
+									$komento = "";
 									$kutsu = "lasku $lasku SAD-lomake";
 									$liite = $pdffilenimi;
+									$sahkoposti_cc = "";
+									$content_subject = "";
+									$content_body = "";									
 									include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
 								}
 
@@ -2024,8 +2036,12 @@
 							}
 							elseif ($kukarow["eposti"] != '') {
 								// l‰hetet‰‰n meili
+								$komento = "";
 								$kutsu = "lasku $lasku Vientierittely";
 								$liite = $pdffilenimi;
+								$sahkoposti_cc = "";
+								$content_subject = "";
+								$content_body = "";								
 								include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
 							}
 

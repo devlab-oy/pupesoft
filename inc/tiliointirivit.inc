@@ -106,7 +106,7 @@
 			echo "$tiliulos";
 		}
 
-		list($laspvm,$suopvm) = split(" ",$laskunpvm);
+		list($laspvm,$suopvm) = split(" / ",$laskunpvm);
 
 		// haetaan kaikki tiliöintien tapahtumapäivät plus unionilla tämä päivä mukaan
 		$query = "	(SELECT distinct(tapvm)
@@ -115,7 +115,12 @@
 					UNION
 					(SELECT CURDATE())
 					UNION
-					(SELECT if('$laspvm' >= '$yhtiorow[tilikausi_alku]', '$laspvm', CURDATE()))";
+					(SELECT if('$laspvm' >= '$yhtiorow[tilikausi_alku]', '$laspvm', CURDATE()))
+					UNION
+					(SELECT mapvm
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus' and mapvm >= '$yhtiorow[tilikausi_alku]')
+					GROUP BY 1";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 1) {

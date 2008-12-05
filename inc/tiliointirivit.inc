@@ -117,10 +117,7 @@
 					UNION
 					(SELECT if('$laspvm' >= '$yhtiorow[tilikausi_alku]', '$laspvm', CURDATE()))
 					UNION
-					(SELECT mapvm
-					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus' and mapvm >= '$yhtiorow[tilikausi_alku]')
-					GROUP BY 1";
+					(SELECT mapvm FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus' and mapvm >= '$yhtiorow[tilikausi_alku]')";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 1) {

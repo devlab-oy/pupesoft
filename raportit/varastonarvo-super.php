@@ -8,7 +8,19 @@
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
-	require("../inc/parametrit.inc");
+	if (count($argv) == 0) {
+		require("../inc/parametrit.inc");
+	}
+	else {
+		require_once("../inc/functions.inc");
+		require_once("../inc/connect.inc");
+
+		// otetaan includepath aina rootista
+		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)));
+
+		$tyyppi = "";
+		$email_osoite = "";
+	}
 
 	if (!function_exists("force_echo")) {
 		function force_echo($teksti) {
@@ -27,7 +39,9 @@
 	}
 	else {
 
-		echo "<font class='head'>".t("Varastonarvo tuotteittain")."</font><hr>";
+		if (count($argv) == 0) {
+			echo "<font class='head'>".t("Varastonarvo tuotteittain")."</font><hr>";
+		}
 
 		if (!isset($pp)) $pp = date("d");
 		if (!isset($kk)) $kk = date("m");
@@ -47,28 +61,53 @@
 		$sel_osasto 	= "";
 		$sel_tuoteryhma = "";
 
-		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
-			<!--
+		if (count($argv) == 0) {
+			echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+				<!--
 
-			function toggleAll(toggleBox) {
+				function toggleAll(toggleBox) {
 
-				var currForm = toggleBox.form;
-				var isChecked = toggleBox.checked;
-				var nimi = toggleBox.name;
+					var currForm = toggleBox.form;
+					var isChecked = toggleBox.checked;
+					var nimi = toggleBox.name;
 
-				for (var elementIdx=1; elementIdx<currForm.elements.length; elementIdx++) {
-					if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,7) == nimi && currForm.elements[elementIdx].value != '".t("Ei valintaa")."') {
-						currForm.elements[elementIdx].checked = isChecked;
+					for (var elementIdx=1; elementIdx<currForm.elements.length; elementIdx++) {
+						if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,7) == nimi && currForm.elements[elementIdx].value != '".t("Ei valintaa")."') {
+							currForm.elements[elementIdx].checked = isChecked;
+						}
 					}
 				}
-			}
 
-			//-->
-			</script>";
+				//-->
+				</script>";
+		}
 
 		$varastot2 = array();
 
-		if ($supertee == "RAPORTOI") {
+		if ($supertee == "RAPORTOI" or ($argv[0] == 'varastonarvo-super.php' and $argv[1] != '')) {
+
+			if ($argv[0] == 'varastonarvo-super.php' and $argv[1] != '' and $argv[2] != '') {
+				$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
+
+				$query    = "SELECT * from yhtio where yhtio = '$kukarow[yhtio]'";
+				$yhtiores = mysql_query($query) or die($query);
+
+				if (mysql_num_rows($yhtiores)==1) {
+					$yhtiorow = mysql_fetch_array($yhtiores);
+				}
+				else {
+					die ("Yhtiö $kukarow[yhtio] ei löydy!");
+				}
+
+				$varastot[] = $argv[2];
+
+				$email_osoite = mysql_real_escape_string($argv[3]);
+
+				$supertee == "RAPORTOI";
+				
+				$epakur = 'kaikki';
+				$tyyppi = 'A';
+			}
 
 			$tuote_lisa  = ""; // tuoterajauksia
 			$having_lisa = ""; // having ehtoja
@@ -141,7 +180,9 @@
 				$having_lisa .= "HAVING try = '0' ";
 			}
 
-			force_echo("Haetaan käsiteltävien tuotteiden varastopaikat historiasta.");
+			if (count($argv) == 0) {
+				force_echo("Haetaan käsiteltävien tuotteiden varastopaikat historiasta.");
+			}
 
 			// tätä ei pitäisi ikinä olla, kun tempit on per connectio, mutta varmuudenvuoksi
 			$query = "DROP TEMPORARY TABLE IF EXISTS tmp_tuotepaikat";
@@ -211,9 +252,13 @@
 			$result = mysql_query($query) or pupe_error($query);
 			$row = mysql_fetch_array($result);
 
-			echo "Löytyi $row[0] varastopaikkaa.<br>";
+			if (count($argv) == 0) {
+				echo "Löytyi $row[0] varastopaikkaa.<br>";
+			}
 
-			force_echo("Haetaan käsiteltävien tuotteiden tiedot.");
+			if (count($argv) == 0) {
+				force_echo("Haetaan käsiteltävien tuotteiden tiedot.");
+			}
 
 			// haetaan halutut tuotteet
 			$query  = "	SELECT DISTINCT
@@ -259,6 +304,10 @@
 				list($usec, $sec) = explode(' ', microtime());
 				mt_srand((float) $sec + ((float) $usec * 100000));
 				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+				
+				if (count($argv) > 0) {
+					$excelnimi = "Varastonarvo_$argv[2]_$vv-$kk-$pp.xls";
+				}
 
 				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
 				$workbook->setVersion(8);
@@ -327,13 +376,15 @@
 
 			$elements = mysql_num_rows($result); // total number of elements to process
 
-			echo "Löytyi $elements tietuetta.<br><br>";
-			echo "Lasketaan varastonarvo.<br>";
+			if (count($argv) == 0) {
+				echo "Löytyi $elements tietuetta.<br><br>";
+				echo "Lasketaan varastonarvo.<br>";
 
-			if ($elements > 0) {
-				require_once ('inc/ProgressBar.class.php');
-				$bar = new ProgressBar();
-				$bar->initialize($elements); // print the empty bar
+				if ($elements > 0) {
+					require_once ('inc/ProgressBar.class.php');
+					$bar = new ProgressBar();
+					$bar->initialize($elements); // print the empty bar
+				}
 			}
 
 			while ($row = mysql_fetch_array($result)) {
@@ -341,7 +392,9 @@
 				$kpl = 0;
 				$varaston_arvo = 0;
 				$bruttovaraston_arvo = 0;
-				$bar->increase();
+				if (count($argv) == 0) {
+					$bar->increase();
+				}
 
 				// Jos tuote on sarjanumeroseurannassa niin varastonarvo lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole laskutettu)
 				if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U") {
@@ -664,296 +717,317 @@
 				}
 			}
 
-			echo "<br>";
-			echo "<table>";
-			echo "<tr><th>".t("Varasto")."</th><th>".t("Varastonarvo")."</th><th>".t("Bruttovarastonarvo")."</th></tr>";
+			if (count($argv) == 0) {
+				echo "<br>";
+				echo "<table>";
+				echo "<tr><th>".t("Varasto")."</th><th>".t("Varastonarvo")."</th><th>".t("Bruttovarastonarvo")."</th></tr>";
 
-			ksort($varastot2);
+				ksort($varastot2);
 
-			foreach ($varastot2 AS $varasto => $arvot) {
-				echo "<tr><td>$varasto</td>";
-				foreach ($arvot AS $arvo) {
-					if ($arvo != '') {
-						echo "<td align='right'>".sprintf("%.2f",$arvo)."</td>";
+				foreach ($varastot2 AS $varasto => $arvot) {
+					echo "<tr><td>$varasto</td>";
+					foreach ($arvot AS $arvo) {
+						if ($arvo != '') {
+							echo "<td align='right'>".sprintf("%.2f",$arvo)."</td>";
+						}
+						else {
+							echo "<td>&nbsp;</td>";
+						}
 					}
-					else {
-						echo "<td>&nbsp;</td>";
-					}
+					echo "</tr>";
 				}
-				echo "</tr>";
-			}
 
-			echo "<tr><th>".t("Pvm")."</th><th colspan='2'>".t("Yhteensä")."</th></tr>";
-			echo "<tr><td>$vv-$kk-$pp</td><td align='right'>".sprintf("%.2f",$varvo)."</td>";
-			echo "<td align='right'>".sprintf("%.2f",$bvarvo)."</td></tr>";
-			echo "</table><br>";
+				echo "<tr><th>".t("Pvm")."</th><th colspan='2'>".t("Yhteensä")."</th></tr>";
+				echo "<tr><td>$vv-$kk-$pp</td><td align='right'>".sprintf("%.2f",$varvo)."</td>";
+				echo "<td align='right'>".sprintf("%.2f",$bvarvo)."</td></tr>";
+				echo "</table><br>";
+			}
 		}
 
 		if(isset($workbook)) {
 			$workbook->close();
-			echo "<form method='post' action='$PHP_SELF'>";
-			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='Varastonarvo.xls'>";
-			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+			if (count($argv) == 0) {
+				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+				echo "<input type='hidden' name='kaunisnimi' value='Varastonarvo.xls'>";
+				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+				echo "<table>";
+				echo "<tr><th>".t("Tallenna Excel-aineisto").":</th>";
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
+				echo "</table><br>";
+				echo "</form>";
+			}
+			else {
+				$komento = 'email';
+
+				// itse print komento...
+				$liite = $excelnimi;
+				$kutsu = t("Varastonarvoraportti")." ($argv[2]) $vv-$kk-$pp";
+
+				$ctype = "excel";
+				$kukarow["eposti"] = $email_osoite;
+				
+				require("../inc/sahkoposti.inc");
+
+				//poistetaan tmp file samantien kuleksimasta...
+				system("rm -f /tmp/$excelnimi");
+			}
+		}
+
+		if (count($argv) == 0) {
+			// piirrellään formi
+			echo "<form action='$PHP_SELF' name='formi' method='post' autocomplete='OFF'>";
+			echo "<input type='hidden' name='supertee' value='RAPORTOI'>";
+
+			echo "<table><tr valign='top'><td><table><tr><td class='back'>";
+
+			// näytetään soveltuvat osastot
+			// tehdään avainsana query
+			$res2 = avainsana("OSASTO", $kukarow['kieli']);
+
+			if (mysql_num_rows($res2) > 11) {
+				echo "<div style='height:265;overflow:auto;'>";
+			}
+
 			echo "<table>";
-			echo "<tr><th>".t("Tallenna Excel-aineisto").":</th>";
-			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
-			echo "</table><br>";
+			echo "<tr><th colspan='2'>".t("Tuoteosasto").":</th></tr>";
+			echo "<tr><td><input type='checkbox' name='mul_osa' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
+
+			while ($rivi = mysql_fetch_array($res2)) {
+				$mul_check = '';
+				if ($mul_osasto!="") {
+					if (in_array($rivi['selite'],$mul_osasto)) {
+						$mul_check = 'CHECKED';
+					}
+				}
+
+				echo "<tr><td><input type='checkbox' name='mul_osasto[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
+			}
+
+			echo "</table>";
+
+			if (mysql_num_rows($res2) > 11) {
+				echo "</div>";
+			}
+
+			echo "</table>";
+			echo "</td>";
+
+			echo "<td><table><tr><td valign='top' class='back'>";
+
+			// näytetään soveltuvat tryt
+			// tehdään avainsana query
+			$res2 = avainsana("TRY", $kukarow['kieli']);
+
+			if (mysql_num_rows($res2) > 11) {
+				echo "<div style='height:265;overflow:auto;'>";
+			}
+
+			echo "<table>";
+			echo "<tr><th colspan='2'>".t("Tuoterymä").":</th></tr>";
+			echo "<tr><td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
+
+			while ($rivi = mysql_fetch_array($res2)) {
+				$mul_check = '';
+				if ($mul_try!="") {
+					if (in_array($rivi['selite'],$mul_try)) {
+						$mul_check = 'CHECKED';
+					}
+				}
+
+				echo "<tr><td><input type='checkbox' name='mul_try[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
+			}
+
+			echo "</table>";
+
+			if (mysql_num_rows($res2) > 11) {
+				echo "</div>";
+			}
+
+			echo "</table>";
+			echo "</td>";
+
+			echo "<td><table><tr><td valign='top' class='back'>";
+
+			// näytetään soveltuvat tuotemerkit
+			$query = "SELECT distinct tuotemerkki FROM tuote use index (yhtio_tuotemerkki) WHERE yhtio = '$kukarow[yhtio]' and tuotemerkki != '' ORDER BY tuotemerkki";
+			$res2  = mysql_query($query) or die($query);
+
+			if (mysql_num_rows($res2) > 11) {
+				echo "<div style='height:265;overflow:auto;'>";
+			}
+
+			echo "<table>";
+			echo "<tr><th colspan='2'>".t("Tuotemerkki").":</th></tr>";
+			echo "<tr><td><input type='checkbox' name='mul_tmr' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
+
+			while ($rivi = mysql_fetch_array($res2)) {
+				$mul_check = '';
+				if ($mul_tmr!="") {
+					if (in_array($rivi['tuotemerkki'], $mul_tmr)) {
+						$mul_check = 'CHECKED';
+					}
+				}
+
+				echo "<tr><td><input type='checkbox' name='mul_tmr[]' value='$rivi[tuotemerkki]' $mul_check></td><td> $rivi[tuotemerkki] </td></tr>";
+			}
+
+			echo "</table>";
+
+			if (mysql_num_rows($res2) > 11) {
+				echo "</div>";
+			}
+
+			echo "</table>";
+			echo "</td>";
+
+			echo "</tr>";
+			echo "</table>";
+
+
+			if ($osasto != "") {
+				$rukOchk = "CHECKED";
+			}
+			else {
+				$rukOchk = "";
+			}
+			if ($tuoteryhma != "") {
+				$rukTchk = "CHECKED";
+			}
+			else {
+				$rukTchk = "";
+			}
+
+			echo "<br><table>
+				<tr>
+				<th>".t("Listaa vain tuotteet, jotka ei kuulu mihinkään osastoon")."</th>
+				<td><input type='checkbox' name='osasto' value='tyhjat' $rukOchk></td>
+				</tr>
+				<tr>
+				<th>".t("Listaa vain tuotteet, jotka ei kuulu mihinkään tuoteryhmään")."</th>
+				<td><input type='checkbox' name='tuoteryhma' value='tyhjat' $rukTchk></td>
+				</tr></table>";
+
+			echo "<br><table>";
+
+			$epakur_chk1 = "";
+			$epakur_chk2 = "";
+			$epakur_chk3 = "";
+
+			if ($epakur == 'kaikki') {
+				$epakur_chk1 = ' selected';
+			}
+			elseif ($epakur == 'epakur') {
+				$epakur_chk2 = ' selected';
+			}
+			elseif ($epakur == 'ei_epakur') {
+				$epakur_chk3 = ' selected';
+			}
+
+			echo "<tr>";
+			echo "<th rowspan='2' valign=top>",t("Tuoterajaus"),":</th><td>";
+			echo "<select name='epakur'>";
+			echo "<option value='kaikki'$epakur_chk1>",t("Näytä kaikki tuotteet"),"</option>";
+			echo "<option value='epakur'$epakur_chk2>",t("Näytä vain epäkurantit tuotteet"),"</option>";
+			echo "<option value='ei_epakur'$epakur_chk3>",t("Näytä varastonarvoon vaikuttavat tuotteet"),"</option>";
+			echo "</select>";
+			echo "</td></tr>";
+
+			echo "<tr>";
+
+			$sel1 = "";
+			$sel2 = "";
+			$sel3 = "";
+
+			if ($tyyppi == "A") {
+				$sel1 = "SELECTED";
+			}
+			elseif($tyyppi == "B") {
+				$sel2 = "SELECTED";
+			}
+			elseif($tyyppi == "C") {
+				$sel3 = "SELECTED";
+			}
+			elseif($tyyppi == "D") {
+				$sel4 = "SELECTED";
+			}
+
+			echo "<td>
+					<select name='tyyppi'>
+					<option value='A' $sel1>".t("Näytetään tuotteet joilla on saldoa")."</option>
+					<option value='B' $sel2>".t("Näytetään tuotteet joilla ei ole saldoa")."</option>
+					<option value='C' $sel3>".t("Näytetään kaikki tuotteet")."</option>
+					<option value='D' $sel4>".t("Näytetään miinus-saldolliset tuotteet")."</option>
+					</select>
+					</td>";
+			echo "</tr>";
+
+			$sel1 = "";
+			$sel2 = "";
+
+			if ($summaustaso == "S") {
+				$sel1 = "SELECTED";
+			}
+			elseif($summaustaso == "P") {
+				$sel2 = "SELECTED";
+			}
+
+			echo "<tr>";
+			echo "<th>Summaustaso:</th>";
+
+			echo "<td>
+					<select name='summaustaso'>
+					<option value='S' $sel1>".t("Varastonarvo varastoittain")."</option>
+					<option value='P' $sel2>".t("Varastonarvo varastopaikoittain")."</option>
+					</select>
+					</td>";
+			echo "</tr>";
+
+			$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+			$vares = mysql_query($query) or pupe_error($query);
+
+			echo "<tr>
+					<th valign=top>".t('Valitse varastot').":</th>
+			    <td>";
+
+			$varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
+
+	        while ($varow = mysql_fetch_array($vares)) {
+				$sel = '';
+				if (in_array($varow['tunnus'], $varastot)) {
+					$sel = 'checked';
+				}
+
+				echo "<input type='checkbox' name='varastot[]' value='{$varow['tunnus']}' $sel/>{$varow['nimitys']}<br />\n";
+			}
+
+			echo "</td><td class='back' valign='top'>".t('Saat kaikki varastot jos et valitse mitään').".</td></tr>";
+
+			echo "<tr>";
+			echo "<th>Syötä vvvv-kk-pp:</th>";
+			echo "<td><input type='text' name='vv' size='7' value='$vv'><input type='text' name='kk' size='5' value='$kk'><input type='text' name='pp' size='5' value='$pp'></td>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<th valign='top'>Varastonarvorajaus:</th>";
+			echo "<td>Alaraja: <input type='text' name='alaraja' size='7' value='$alaraja'><br>Yläraja: <input type='text' name='ylaraja' size='7' value='$ylaraja'></td>";
+			echo "</tr>";
+
+			echo "<tr><th valign='top'>".t("Tuotelista")."</th><td><textarea name='tuotteet_lista' rows='5' cols='35'>$tuotteet_lista</textarea></td></tr>";
+
+			echo "</table>";
+			echo "<br>";
+
+			if($valitaan_useita == '') {
+				echo "<input type='submit' value='Laske varastonarvot'>";
+			}
+			else {
+				echo "<input type='submit' name='valitaan_useita' value='Laske varastonarvot'>";
+			}
+
 			echo "</form>";
+
+			require ("../inc/footer.inc");
 		}
-
-		// piirrellään formi
-		echo "<form action='$PHP_SELF' name='formi' method='post' autocomplete='OFF'>";
-		echo "<input type='hidden' name='supertee' value='RAPORTOI'>";
-
-		echo "<table><tr valign='top'><td><table><tr><td class='back'>";
-
-		// näytetään soveltuvat osastot
-		// tehdään avainsana query
-		$res2 = avainsana("OSASTO", $kukarow['kieli']);
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "<div style='height:265;overflow:auto;'>";
-		}
-
-		echo "<table>";
-		echo "<tr><th colspan='2'>".t("Tuoteosasto").":</th></tr>";
-		echo "<tr><td><input type='checkbox' name='mul_osa' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
-
-		while ($rivi = mysql_fetch_array($res2)) {
-			$mul_check = '';
-			if ($mul_osasto!="") {
-				if (in_array($rivi['selite'],$mul_osasto)) {
-					$mul_check = 'CHECKED';
-				}
-			}
-
-			echo "<tr><td><input type='checkbox' name='mul_osasto[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
-		}
-
-		echo "</table>";
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "</div>";
-		}
-
-		echo "</table>";
-		echo "</td>";
-
-		echo "<td><table><tr><td valign='top' class='back'>";
-
-		// näytetään soveltuvat tryt
-		// tehdään avainsana query
-		$res2 = avainsana("TRY", $kukarow['kieli']);
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "<div style='height:265;overflow:auto;'>";
-		}
-
-		echo "<table>";
-		echo "<tr><th colspan='2'>".t("Tuoterymä").":</th></tr>";
-		echo "<tr><td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
-
-		while ($rivi = mysql_fetch_array($res2)) {
-			$mul_check = '';
-			if ($mul_try!="") {
-				if (in_array($rivi['selite'],$mul_try)) {
-					$mul_check = 'CHECKED';
-				}
-			}
-
-			echo "<tr><td><input type='checkbox' name='mul_try[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
-		}
-
-		echo "</table>";
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "</div>";
-		}
-
-		echo "</table>";
-		echo "</td>";
-
-		echo "<td><table><tr><td valign='top' class='back'>";
-
-		// näytetään soveltuvat tuotemerkit
-		$query = "SELECT distinct tuotemerkki FROM tuote use index (yhtio_tuotemerkki) WHERE yhtio = '$kukarow[yhtio]' and tuotemerkki != '' ORDER BY tuotemerkki";
-		$res2  = mysql_query($query) or die($query);
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "<div style='height:265;overflow:auto;'>";
-		}
-
-		echo "<table>";
-		echo "<tr><th colspan='2'>".t("Tuotemerkki").":</th></tr>";
-		echo "<tr><td><input type='checkbox' name='mul_tmr' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
-
-		while ($rivi = mysql_fetch_array($res2)) {
-			$mul_check = '';
-			if ($mul_tmr!="") {
-				if (in_array($rivi['tuotemerkki'], $mul_tmr)) {
-					$mul_check = 'CHECKED';
-				}
-			}
-
-			echo "<tr><td><input type='checkbox' name='mul_tmr[]' value='$rivi[tuotemerkki]' $mul_check></td><td> $rivi[tuotemerkki] </td></tr>";
-		}
-
-		echo "</table>";
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "</div>";
-		}
-
-		echo "</table>";
-		echo "</td>";
-
-		echo "</tr>";
-		echo "</table>";
-
-
-		if ($osasto != "") {
-			$rukOchk = "CHECKED";
-		}
-		else {
-			$rukOchk = "";
-		}
-		if ($tuoteryhma != "") {
-			$rukTchk = "CHECKED";
-		}
-		else {
-			$rukTchk = "";
-		}
-
-		echo "<br><table>
-			<tr>
-			<th>".t("Listaa vain tuotteet, jotka ei kuulu mihinkään osastoon")."</th>
-			<td><input type='checkbox' name='osasto' value='tyhjat' $rukOchk></td>
-			</tr>
-			<tr>
-			<th>".t("Listaa vain tuotteet, jotka ei kuulu mihinkään tuoteryhmään")."</th>
-			<td><input type='checkbox' name='tuoteryhma' value='tyhjat' $rukTchk></td>
-			</tr></table>";
-
-		echo "<br><table>";
-
-		$epakur_chk1 = "";
-		$epakur_chk2 = "";
-		$epakur_chk3 = "";
-
-		if ($epakur == 'kaikki') {
-			$epakur_chk1 = ' selected';
-		}
-		elseif ($epakur == 'epakur') {
-			$epakur_chk2 = ' selected';
-		}
-		elseif ($epakur == 'ei_epakur') {
-			$epakur_chk3 = ' selected';
-		}
-
-		echo "<tr>";
-		echo "<th rowspan='2' valign=top>",t("Tuoterajaus"),":</th><td>";
-		echo "<select name='epakur'>";
-		echo "<option value='kaikki'$epakur_chk1>",t("Näytä kaikki tuotteet"),"</option>";
-		echo "<option value='epakur'$epakur_chk2>",t("Näytä vain epäkurantit tuotteet"),"</option>";
-		echo "<option value='ei_epakur'$epakur_chk3>",t("Näytä varastonarvoon vaikuttavat tuotteet"),"</option>";
-		echo "</select>";
-		echo "</td></tr>";
-
-		echo "<tr>";
-
-		$sel1 = "";
-		$sel2 = "";
-		$sel3 = "";
-
-		if ($tyyppi == "A") {
-			$sel1 = "SELECTED";
-		}
-		elseif($tyyppi == "B") {
-			$sel2 = "SELECTED";
-		}
-		elseif($tyyppi == "C") {
-			$sel3 = "SELECTED";
-		}
-		elseif($tyyppi == "D") {
-			$sel4 = "SELECTED";
-		}
-
-		echo "<td>
-				<select name='tyyppi'>
-				<option value='A' $sel1>".t("Näytetään tuotteet joilla on saldoa")."</option>
-				<option value='B' $sel2>".t("Näytetään tuotteet joilla ei ole saldoa")."</option>
-				<option value='C' $sel3>".t("Näytetään kaikki tuotteet")."</option>
-				<option value='D' $sel4>".t("Näytetään miinus-saldolliset tuotteet")."</option>
-				</select>
-				</td>";
-		echo "</tr>";
-
-		$sel1 = "";
-		$sel2 = "";
-
-		if ($summaustaso == "S") {
-			$sel1 = "SELECTED";
-		}
-		elseif($summaustaso == "P") {
-			$sel2 = "SELECTED";
-		}
-
-		echo "<tr>";
-		echo "<th>Summaustaso:</th>";
-
-		echo "<td>
-				<select name='summaustaso'>
-				<option value='S' $sel1>".t("Varastonarvo varastoittain")."</option>
-				<option value='P' $sel2>".t("Varastonarvo varastopaikoittain")."</option>
-				</select>
-				</td>";
-		echo "</tr>";
-
-		$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
-		$vares = mysql_query($query) or pupe_error($query);
-
-		echo "<tr>
-				<th valign=top>".t('Valitse varastot').":</th>
-		    <td>";
-
-		$varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
-
-        while ($varow = mysql_fetch_array($vares)) {
-			$sel = '';
-			if (in_array($varow['tunnus'], $varastot)) {
-				$sel = 'checked';
-			}
-
-			echo "<input type='checkbox' name='varastot[]' value='{$varow['tunnus']}' $sel/>{$varow['nimitys']}<br />\n";
-		}
-
-		echo "</td><td class='back' valign='top'>".t('Saat kaikki varastot jos et valitse mitään').".</td></tr>";
-
-		echo "<tr>";
-		echo "<th>Syötä vvvv-kk-pp:</th>";
-		echo "<td><input type='text' name='vv' size='7' value='$vv'><input type='text' name='kk' size='5' value='$kk'><input type='text' name='pp' size='5' value='$pp'></td>";
-		echo "</tr>";
-
-		echo "<tr>";
-		echo "<th valign='top'>Varastonarvorajaus:</th>";
-		echo "<td>Alaraja: <input type='text' name='alaraja' size='7' value='$alaraja'><br>Yläraja: <input type='text' name='ylaraja' size='7' value='$ylaraja'></td>";
-		echo "</tr>";
-
-		echo "<tr><th valign='top'>".t("Tuotelista")."</th><td><textarea name='tuotteet_lista' rows='5' cols='35'>$tuotteet_lista</textarea></td></tr>";
-
-		echo "</table>";
-		echo "<br>";
-
-		if($valitaan_useita == '') {
-			echo "<input type='submit' value='Laske varastonarvot'>";
-		}
-		else {
-			echo "<input type='submit' name='valitaan_useita' value='Laske varastonarvot'>";
-		}
-
-		echo "</form>";
-
-		require ("../inc/footer.inc");
 	}
 ?>

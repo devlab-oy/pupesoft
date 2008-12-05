@@ -835,7 +835,7 @@
 
 			$grouppi	= " GROUP BY lasku.tunnus";
 			$ylatilat	= " 'V' ";
-			$alatilat 	= " 'V', 'C' ";
+			$alatilat 	= " 'V', 'C', 'K' ";
 			$orderby 	= " order by lasku.tunnus desc";
 			$lisa 		= " and tilausrivi.toimitettu != '' ";
 			$limit 		= " LIMIT 100 ";

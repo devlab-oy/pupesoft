@@ -291,7 +291,7 @@
 			$tpk = substr($pvm,2,2);
 			$tpp = substr($pvm,4,2);
 
-			$query = "SELECT ytunnus FROM toimi WHERE yhtio = '$yritirow[yhtio]' and left(nimi,35) LIKE '%$maksaa%'";
+			$query = "SELECT ytunnus FROM toimi WHERE yhtio = '$yritirow[yhtio]' and nimi LIKE '%$maksaa%'";
 			$suotoiresult = mysql_query($query) or pupe_error($query);
 
 			$boob = 0;
@@ -302,7 +302,7 @@
 			}
 
 			//Olisiko tämä meidän asiakas
-			$query = "SELECT * FROM asiakas WHERE yhtio = '$yritirow[yhtio]' and left(nimi,35) LIKE '%$maksaa%'";
+			$query = "SELECT * FROM asiakas WHERE yhtio = '$yritirow[yhtio]' and nimi LIKE '%$maksaa%'";
 			$suoasiresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($suoasiresult) > 0) {

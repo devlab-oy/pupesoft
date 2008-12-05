@@ -258,7 +258,6 @@
 			$oikpos = $pdf->strlen($row["ika"], $norm);
 			$pdf->draw_text(338-$oikpos, $kala, $row["ika"], 					$firstpage, $norm);
 
-
 			$pdf->draw_text(365, $kala, tv1dateconv($row["kpvm"]),				$firstpage, $norm);
 
 			if ($row["valkoodi"] != $yhtiorow["valkoodi"]) {
@@ -455,10 +454,10 @@
 		$karhutunnus = mysql_real_escape_string($karhutunnus);
 		$kjoinlisa = " and kl.ktunnus = '$karhutunnus' ";
 
-		$query = "	SELECT count(*) 
-					FROM karhu_lasku 
+		$query = "	SELECT count(distinct ktunnus)
+					FROM karhu_lasku
 					JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '')
-					WHERE ltunnus in ($xquery) 
+					WHERE ltunnus in ($xquery)
 					AND ktunnus <= $karhutunnus";
 		$karhukertares = mysql_query($query) or pupe_error($query);
 		$karhukertarow = mysql_fetch_array($karhukertares);
@@ -471,11 +470,13 @@
 
 	$query = "	SELECT l.tunnus, l.tapvm, l.liitostunnus,
 				l.summa-l.saldo_maksettu summa, l.summa_valuutassa-l.saldo_maksettu_valuutassa summa_valuutassa, l.erpcm, l.laskunro, l.viite,
-				TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika, max(kk.pvm) as kpvm, count(distinct kl.ktunnus) as karhuttu, l.yhtio_toimipaikka, l.valkoodi, l.maksuehto, l.maa
+				TO_DAYS(ifnull(kk.pvm, now())) - TO_DAYS(l.erpcm) as ika, max(kk.pvm) as kpvm, count(distinct kl.ktunnus) as karhuttu, l.yhtio_toimipaikka, l.valkoodi, l.maksuehto, l.maa
 				FROM lasku l
-				LEFT JOIN karhu_lasku kl on (l.tunnus=kl.ltunnus $kjoinlisa)
-				LEFT JOIN karhukierros kk on (kk.tunnus=kl.ktunnus)
-				WHERE l.tunnus in ($xquery) and l.yhtio='$kukarow[yhtio]' and l.tila='U'
+				LEFT JOIN karhu_lasku kl on (l.tunnus = kl.ltunnus $kjoinlisa)
+				LEFT JOIN karhukierros kk on (kk.tunnus = kl.ktunnus)
+				WHERE l.tunnus in ($xquery)
+				and l.yhtio = '$kukarow[yhtio]'
+				and l.tila = 'U'
 				GROUP BY 1
 				ORDER BY l.erpcm";
 	$result = mysql_query($query) or pupe_error($query);

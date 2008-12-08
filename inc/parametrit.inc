@@ -160,11 +160,15 @@ if(!isset($extranet)) 	$extranet = "";
 // jos saamme n‰m‰ muuttujat getiss‰, kokeillaan logata niill‰ sis‰‰n
 if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "") {
 
-	$query = "select * from kuka where yhtio='$_GET[yhtio]' and kuka='$_GET[user]' and salasana='$_GET[pass]'";
+	$_GET["yhtio"] = mysql_real_escape_string($_GET["yhtio"]);
+	$_GET["user"]  = mysql_real_escape_string($_GET["user"]);
+	$_GET["pass"]  = mysql_real_escape_string($_GET["pass"]);
+
+	$query = "SELECT * FROM kuka WHERE yhtio='$_GET[yhtio]' AND kuka='$_GET[user]' AND salasana='$_GET[pass]'";
 	$result = mysql_query($query) or die ("Sis‰‰nkirjaus ep‰onnistui!");
 
 	if (mysql_num_rows($result) != 1) {
-		$query = "select * from kuka where yhtio='$_GET[yhtio]' and kuka='$_GET[user]' and salasana=md5('$_GET[pass]')";
+		$query = "SELECT * FROM kuka WHERE yhtio='$_GET[yhtio]' AND kuka='$_GET[user]' AND salasana=md5('$_GET[pass]')";
 		$result = mysql_query($query) or die ("Sis‰‰nkirjaus ep‰onnistui!");
 	}
 
@@ -207,6 +211,9 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 		if ($bool === FALSE) {
 			die ("Sis‰‰nkirjaus ep‰onnistui!");
 		}
+		
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";
+		exit;		
 	}
 	else {
 		die ("Sis‰‰nkirjaus ep‰onnistui!");
@@ -270,6 +277,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 
 			// No niin nyt meill‰ on k‰ytt‰j‰, mutta saako h‰n tehd‰ t‰t‰????
 			if(isset($toim)) {
+				$toim = mysql_real_escape_string($toim);
 				// Luetaan alanime‰ vain ekaan &-merkkiin saakka koska joskus kantaan on tallennettu myˆs jotain lis‰tietoja toisessa muuttujassa
 				$toimlisa = " and substring(alanimi, 1, if(LOCATE('&',alanimi) > 0, LOCATE('&',alanimi)-1, CHAR_LENGTH(alanimi))) ='$toim'";
 			}
@@ -472,6 +480,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		}
 
 		if (isset($tee) and $tee == "message_luettu") {
+			$message_tunnus = mysql_real_escape_string($message_tunnus);
 			$query = "UPDATE messenger SET status='' WHERE vastaanottaja='$kukarow[kuka]' AND tunnus='$message_tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			exit;

@@ -179,8 +179,21 @@ while ($orow = mysql_fetch_array($result)) {
 	}
 	else {
 		// normaali menuitem
-		echo "<tr><td class='back'><a class='menu' href='$mrow[nimi]";
 		
+		// voidaan käyttää kukarow muuttujia osoitteissa
+		$mrow["nimi"] = str_replace('$kukarow[kuka]',     "$kukarow[kuka]",     $mrow["nimi"]);
+		$mrow["nimi"] = str_replace('$kukarow[yhtio]',    "$kukarow[yhtio]",    $mrow["nimi"]);
+		$mrow["nimi"] = str_replace('$kukarow[salasana]', "$kukarow[salasana]", $mrow["nimi"]);
+		$target = "";
+
+		// jos ollaan menossa ulkopuolelle, niin alanimessä voidaan passata hreffin target
+		if (substr($mrow["nimi"], 0, 4) == "http" and $mrow["alanimi"] != "") {
+			$target = "target='$mrow[alanimi]'";
+			$mrow["alanimi"] = "";
+		}
+
+		echo "<tr><td class='back'><a class='menu' $target href='$mrow[nimi]";
+
 		if ($mrow['alanimi'] != '') {				
 				echo "?toim=$mrow[alanimi]";	
 				

@@ -32,7 +32,6 @@
 		if (mysql_num_rows($varastores) > 0) {
 			while ($varastorow = mysql_fetch_array($varastores)) {
 				exec("php varastonarvo-super.php $kukarow[yhtio] $varastorow[tunnus] atk@arwidson.fi");
-				break;
 			}
 		}
 		else {

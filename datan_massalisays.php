@@ -125,6 +125,7 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$kuva,$dirri,$upfile1) {
 //$dirri = "kuvapankki";
 $dirri = $yhtiorow['kuvapankki_polku'];
 $dirri .= "/".$kukarow['yhtio'];
+
 $alkupituus = strlen($dirri)+1;
 
 if (!is_writable($dirri)) {
@@ -187,7 +188,7 @@ if ($tee == 'GO') {
 		$polku = substr($file,$alkupituus);
 
 		list($taulu, $toiminto, $kuva) = split("/", $polku, 3);
-
+		
 		$path_parts = pathinfo($kuva);
 		$ext = $path_parts['extension'];
 
@@ -196,7 +197,7 @@ if ($tee == 'GO') {
 		$leve = $koko[0];
 		$kork = $koko[1];
 
-		if (strtoupper($ext) != "PDF") {
+		if (strtoupper($ext) != "PDF" and $toiminto != "paino") {
 			if ($toiminto == 'thumb') {
 				if ($kork <> $thumbkork) {
 					continue;
@@ -213,12 +214,12 @@ if ($tee == 'GO') {
 		}
 
 		$apukuva = $kuva;
-
+		
 		if (strtolower($taulu) != 'tuote') {
 			die("Toistaiseksi voidaan vaan lukea tuotekuvia!");
 		}
 
-		if (strtoupper($ext) != "PDF") {
+		if (strtoupper($ext) != "PDF" and $toiminto != "paino") {
 			if ($toiminto == 'kasittele') {
 				// n‰ist‰ ollaan jo tehty uudet versiot
 				continue;
@@ -228,10 +229,10 @@ if ($tee == 'GO') {
 				continue;
 			}
 		}
-
+		
 
 		unset($apuresult);
-
+		
 		$path_parts = pathinfo($kuva);
 		$ext = $path_parts['extension'];
 		//echo "$ext<br>";
@@ -300,7 +301,7 @@ if ($tee == 'GO') {
 		}
 
 
-
+		
 		if (file_exists($file)) {
 			$filesize = filesize($file);
 
@@ -335,7 +336,7 @@ if ($tee == 'GO') {
 				$image_bits 	= "";
 				$image_channels	= "";
 			}
-
+			
 			$filee = fopen($file, 'r');
 			$data = addslashes(fread($filee, $filesize));
 
@@ -347,20 +348,20 @@ if ($tee == 'GO') {
 			}
 
 			if (mysql_num_rows($apuresult) > 0) {
-
+				
 				// lis‰t‰‰n file
 				while ($apurow = mysql_fetch_array($apuresult)) {
 					$kuvaselite = "Tuotekuva";
-
+					
 					if (($toiminto == 'thumb' or $toiminto == 'TH') and $apuselite == "") {
 						$toiminto = 'TH';
 						$kuvaselite .= " pieni";
 					}
-					elseif (($toiminto == 'normaali' or $toiminto = 'TK') and $apuselite == "") {
+					elseif (($toiminto == 'normaali' or $toiminto == 'TK') and $apuselite == "") {
 						$toiminto = 'TK';
 						$kuvaselite .= " normaali";
 					}
-					elseif (($toiminto == 'paino' or $toiminto = 'HR') and $apuselite == "") {
+					elseif (($toiminto == 'paino' or $toiminto == 'HR') and $apuselite == "") {
 						$toiminto = 'HR';
 						$kuvaselite .= " painokuva";
 					}

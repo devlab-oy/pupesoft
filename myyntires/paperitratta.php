@@ -62,15 +62,15 @@
 		$pdf->draw_text(310, 792, t("Päivämäärä", $kieli), 		$firstpage, $pieni);
 
 		if ($trattakierros_tunnus != "") {
-			$query = "	SELECT pvm 
-						FROM karhukierros 
+			$query = "	SELECT pvm
+						FROM karhukierros
 						WHERE tunnus = '$trattakierros_tunnus'
 						LIMIT 1";
 			$pvm_result = mysql_query($query) or pupe_error($query);
 			$pvm_row = mysql_fetch_array($pvm_result);
 			$paiva = substr($pvm_row["pvm"], 8, 2);
 			$kuu   = substr($pvm_row["pvm"], 5, 2);
-			$year  = substr($pvm_row["pvm"], 0, 4);			
+			$year  = substr($pvm_row["pvm"], 0, 4);
 		}
 		else {
 			$pvm_row = array();
@@ -204,10 +204,10 @@
 		if ($yhtiorow["pankkiiban2"] != "") {
 			$pdf->draw_text(217, 83, "IBAN: ".$yhtiorow["pankkiiban2"],	$firstpage, $pieni);
 		}
-		if ($yhtiorow["pankkiiban3"] != "") {			
+		if ($yhtiorow["pankkiiban3"] != "") {
 			$pdf->draw_text(404, 83, "IBAN: ".$yhtiorow["pankkiiban3"],	$firstpage, $pieni);
 		}
-		if ($yhtiorow["pankkiswift1"] != "") {			
+		if ($yhtiorow["pankkiswift1"] != "") {
 			$pdf->draw_text(30,  72, "SWIFT: ".$yhtiorow["pankkiswift1"],	$firstpage, $pieni);
 		}
 		if ($yhtiorow["pankkiswift2"] != "") {
@@ -281,24 +281,27 @@
 	if ($nayta_pdf == 1 and $karhutunnus != '') {
 		$karhutunnus = mysql_real_escape_string($karhutunnus);
 		$kjoinlisa = " and kl.ktunnus = '$karhutunnus' ";
-		
+
 		$query = "	SELECT count(distinct ktunnus)
-					FROM karhu_lasku 
+					FROM karhu_lasku
 					JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = 'T')
-					WHERE ltunnus in ($xquery) 
+					WHERE ltunnus in ($xquery)
 					AND ktunnus <= $karhutunnus";
 		$karhukertares = mysql_query($query) or pupe_error($query);
 		$karhukertarow = mysql_fetch_array($karhukertares);
-		$karhukertanro = $karhukertarow[0];	
+		$karhukertanro = $karhukertarow[0];
+		$ikalaskenta = ", TO_DAYS(kk.pvm) - TO_DAYS(l.erpcm) as ika";
 	}
 	else {
 		$kjoinlisa = "";
 		$karhukertanro = "";
+		$ikalaskenta = ", TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika";
 	}
 
 	$query = "	SELECT l.tunnus, l.tapvm, l.liitostunnus,
 				l.summa-l.saldo_maksettu summa, l.erpcm, l.laskunro,
-				TO_DAYS(ifnull(kk.pvm, now())) - TO_DAYS(l.erpcm) as ika, max(kk.pvm) as kpvm, count(distinct kl.ktunnus) as karhuttu
+				max(kk.pvm) as kpvm, count(distinct kl.ktunnus) as karhuttu
+				$ikalaskenta
 				FROM lasku l
 				LEFT JOIN karhu_lasku kl on (l.tunnus=kl.ltunnus $kjoinlisa)
 				LEFT JOIN karhukierros kk on (kk.tunnus=kl.ktunnus)

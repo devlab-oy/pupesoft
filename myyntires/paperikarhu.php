@@ -462,15 +462,18 @@
 		$karhukertares = mysql_query($query) or pupe_error($query);
 		$karhukertarow = mysql_fetch_array($karhukertares);
 		$karhukertanro = $karhukertarow[0];
+		$ikalaskenta = ", TO_DAYS(kk.pvm) - TO_DAYS(l.erpcm) as ika";
 	}
 	else {
 		$kjoinlisa = "";
 		$karhukertanro = "";
+		$ikalaskenta = ", TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika";
 	}
 
 	$query = "	SELECT l.tunnus, l.tapvm, l.liitostunnus,
 				l.summa-l.saldo_maksettu summa, l.summa_valuutassa-l.saldo_maksettu_valuutassa summa_valuutassa, l.erpcm, l.laskunro, l.viite,
-				TO_DAYS(ifnull(kk.pvm, now())) - TO_DAYS(l.erpcm) as ika, max(kk.pvm) as kpvm, count(distinct kl.ktunnus) as karhuttu, l.yhtio_toimipaikka, l.valkoodi, l.maksuehto, l.maa
+				max(kk.pvm) as kpvm, count(distinct kl.ktunnus) as karhuttu, l.yhtio_toimipaikka, l.valkoodi, l.maksuehto, l.maa
+				$ikalaskenta
 				FROM lasku l
 				LEFT JOIN karhu_lasku kl on (l.tunnus = kl.ltunnus $kjoinlisa)
 				LEFT JOIN karhukierros kk on (kk.tunnus = kl.ktunnus)

@@ -100,6 +100,7 @@
 
 			//haetaan maakoodit/-ryhmät jonka toimenpiteitä tulee tarkistaa
 			$alkuperamaa = trim($laskurow["maa_lahetys"]);
+			$maat = "";
 
 			$query  = "	select *
 						from maat
@@ -110,11 +111,11 @@
 
 				while($tv_maarow = mysql_fetch_array($tv_maares)) {
 					if ($tv_maarow["ryhma_tunnus"] != '') {
-						$maat = $maat."'$tv_maarow[ryhma_tunnus]',";
+						$maat .= "'$tv_maarow[ryhma_tunnus]',";
 					}
 				}
 
-				$maat = $maat."'".$alkuperamaa."'";
+				$maat .= "'".$alkuperamaa."'";
 			}
 			else {
 				$maat = "''";

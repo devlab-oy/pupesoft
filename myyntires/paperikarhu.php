@@ -35,6 +35,10 @@
 			$firstpage = $pdf->new_page("a4");
 			$pdf->enable('template');
 
+			if ($yhteyshenkilo == "") {
+				$yhteyshenkilo = $kukarow["tunnus"];
+			}
+
 			//Haetaan yhteyshenkilon tiedot
 			$apuqu = "	select *
 						from kuka
@@ -292,7 +296,7 @@
 	if(!function_exists("loppu")) {
 		function loppu ($firstpage, $summa) {
 
-			global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $ktunnus, $maksuehtotiedot, $toimipaikkarow, $laskutiedot, $karhut_samalle_laskulle;
+			global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $ktunnus, $maksuehtotiedot, $toimipaikkarow, $laskutiedot, $karhut_samalle_laskulle, $karhukertanro;
 /*
 			//yhteensärivi
 			$pdf->draw_rectangle(110, 20, 90, 580,	$firstpage, $rectparam);
@@ -300,7 +304,7 @@
 			$pdf->draw_rectangle(110, 394, 90, 580,	$firstpage, $rectparam);
 			$pdf->draw_rectangle(110, 540, 90, 580,	$firstpage, $rectparam);
 */
-			if ($karhut_samalle_laskulle == 1) {
+			if ($karhut_samalle_laskulle == 1 or $karhukertanro != "") {
 				$pdf->draw_text(404, 118,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
 				$pdf->draw_text(464, 118,  $summa,						$firstpage, $norm);
 				$pdf->draw_text(550, 118,  $laskutiedot["valkoodi"],	$firstpage, $norm);

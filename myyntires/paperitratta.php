@@ -29,6 +29,10 @@
 		$tid = $pdf->template->create();
 		$pdf->template->size($tid, 600, 830);
 
+		if ($yhteyshenkilo == "") {
+			$yhteyshenkilo = $kukarow["tunnus"];
+		}
+
 		//Haetaan yhteyshenkilon tiedot
 		$apuqu = "	select *
 					from kuka

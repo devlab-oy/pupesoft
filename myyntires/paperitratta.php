@@ -303,9 +303,11 @@
 				max(kk.pvm) as kpvm, count(distinct kl.ktunnus) as karhuttu
 				$ikalaskenta
 				FROM lasku l
-				LEFT JOIN karhu_lasku kl on (l.tunnus=kl.ltunnus $kjoinlisa)
-				LEFT JOIN karhukierros kk on (kk.tunnus=kl.ktunnus)
-				WHERE l.tunnus in ($xquery) and l.yhtio='$kukarow[yhtio]' and l.tila='U'
+				LEFT JOIN karhu_lasku kl on (l.tunnus = kl.ltunnus $kjoinlisa)
+				LEFT JOIN karhukierros kk on (kk.tunnus = kl.ktunnus and kk.tyyppi = 'T')
+				WHERE l.tunnus in ($xquery) 
+				and l.yhtio = '$kukarow[yhtio]' 
+				and l.tila = 'U'
 				GROUP BY 1
 				ORDER BY l.erpcm";
 	$result = mysql_query($query) or pupe_error($query);

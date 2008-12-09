@@ -476,7 +476,7 @@
 				$ikalaskenta
 				FROM lasku l
 				LEFT JOIN karhu_lasku kl on (l.tunnus = kl.ltunnus $kjoinlisa)
-				LEFT JOIN karhukierros kk on (kk.tunnus = kl.ktunnus)
+				LEFT JOIN karhukierros kk on (kk.tunnus = kl.ktunnus AND kk.tyyppi = '')
 				WHERE l.tunnus in ($xquery)
 				and l.yhtio = '$kukarow[yhtio]'
 				and l.tila = 'U'

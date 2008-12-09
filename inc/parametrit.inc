@@ -163,6 +163,7 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 	$_GET["yhtio"] = mysql_real_escape_string($_GET["yhtio"]);
 	$_GET["user"]  = mysql_real_escape_string($_GET["user"]);
 	$_GET["pass"]  = mysql_real_escape_string($_GET["pass"]);
+	$ostoskori     = (int) $_REQUEST["ostoskori"];
 
 	$query = "SELECT * FROM kuka WHERE yhtio='$_GET[yhtio]' AND kuka='$_GET[user]' AND salasana='$_GET[pass]'";
 	$result = mysql_query($query) or die ("Sis‰‰nkirjaus ep‰onnistui!");
@@ -204,16 +205,15 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 
 		$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH)); // 12 tuntia voimassa
 
-		if (!is_numeric($ostoskori)) {
-			$ostoskori = 1;
-		}
-
 		if ($bool === FALSE) {
 			die ("Sis‰‰nkirjaus ep‰onnistui!");
 		}
-		
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";
-		exit;		
+
+		// refreshataan vain jos ei ole ostoskoria mukana
+		if ($ostoskori == 0) {
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";
+			exit;
+		}
 	}
 	else {
 		die ("Sis‰‰nkirjaus ep‰onnistui!");

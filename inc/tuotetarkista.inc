@@ -206,17 +206,19 @@ if(!function_exists("tuotetarkista")) {
 
 			$tuotteen_parametrit = "";
 
-			foreach ($tuotteen_parametrit_keys as $key => $val) {
-				if ($tuotteen_parametrit_vals[$key] != '') {
-					$tuotteen_parametrit .= "$val=$tuotteen_parametrit_vals[$key];";
+			if (is_array($tuotteen_parametrit_keys)) {
+				foreach ($tuotteen_parametrit_keys as $key => $val) {
+					if ($tuotteen_parametrit_vals[$key] != '') {
+						$tuotteen_parametrit .= "$val=$tuotteen_parametrit_vals[$key];";
+					}
 				}
-			}
 
-			$tuotteen_parametrit_query = "	UPDATE tuote
-											SET tuotteen_parametrit = '$tuotteen_parametrit'
-											WHERE yhtio = '$kukarow[yhtio]'
-											AND tuoteno = '$t[tuoteno]'";
-			$tuotteen_parametrit_result = mysql_query($tuotteen_parametrit_query) or pupe_error($tuotteen_parametrit_query);
+				$tuotteen_parametrit_query = "	UPDATE tuote
+												SET tuotteen_parametrit = '$tuotteen_parametrit'
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND tuoteno = '$t[tuoteno]'";
+				$tuotteen_parametrit_result = mysql_query($tuotteen_parametrit_query) or pupe_error($tuotteen_parametrit_query);
+			}
 
 		}
 

@@ -153,6 +153,27 @@
 
 	echo "<font class='head'>".t('Hyv‰ksytt‰v‰t laskusi')."</font><hr><br>";
 
+	$tee_check = "";
+
+	if ($tunnus != '' and (!isset($tee) or $tee == 'M')) {
+		$tunnus = mysql_real_escape_string($tunnus);
+
+		$query = "	SELECT hyvak1, hyvaksyja_nyt
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$tunnus'";
+		$check_res = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($check_res) == 1) {
+			$check_row = mysql_fetch_array($check_res);
+
+			if ($check_row['hyvak1'] == $kukarow['kuka'] and $check_row['hyvaksyja_nyt'] == $kukarow['kuka']) {
+				$tee = 'M';
+				$tee_check = 'M';
+			}
+		}
+	}
+
 	if ($tee == 'M') {
 		$query = "	SELECT *
 					FROM lasku
@@ -839,7 +860,7 @@
 				echo "&id=".mysql_real_escape_string($_POST['id']);
 			}
 			
-			if (isset($iframe)) {
+			if (isset($iframe) and $iframe == 'yes') {
 				echo "&iframe=$iframe";
 			}
 			
@@ -1510,24 +1531,35 @@
 
 			// jos vain yks tai verkkolasku niin tehd‰‰n nappej‰
 			if ($iframe == "" and ($laskurow["ebid"] != "" or mysql_num_rows($liiteres) == 1)) {
+
+				if ($tee_check != '') {
+					$tee = $tee_check;
+				}
+
+				// <input type='hidden' name = 'iframe' value = '$iframe'>
 		  		echo "<form action = '$PHP_SELF' method='post'>
 		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
-						<input type='hidden' name = 'iframe' value = '$iframe'>
 						<input type='hidden' name = 'id' value = '$id'>
 		  				<input type='hidden' name = 'iframe' value='yes'>
 		  				<input type='hidden' name = 'nayta' value='$nayta'>
-		  				<input type='hidden' name = 'tee' value = ''>
+		  				<input type='hidden' name = 'tee' value = '$tee'>
 		  				<td class='back'><input type='Submit' value='".t("Avaa lasku t‰h‰n ikkunaan")."'></td>
 						</form>";
 			}
 			elseif ($iframe == 'yes' and ($laskurow["ebid"] != "" or mysql_num_rows($liiteres) == 1)) {
+
+				if ($tee_check != '') {
+					$tee = $tee_check;
+				}
+
+				// <input type='hidden' name = 'iframe' value = '$iframe'>
+			
 		  		echo "<form action = '$PHP_SELF' method='post'>
 		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
-						<input type='hidden' name = 'iframe' value = '$iframe'>
 						<input type='hidden' name = 'id' value = '$id'>
 		  				<input type='hidden' name = 'iframe' value=''>
 		  				<input type='hidden' name = 'nayta' value='$nayta'>
-		  				<input type='hidden' name = 'tee' value = ''>
+		  				<input type='hidden' name = 'tee' value = '$tee'>
 		  				<td class='back'><input type='Submit' value='".t("Sulje lasku")."'></td>
 						</form>";
 			}
@@ -1554,20 +1586,30 @@
 					</form>";
 
 			if ($iframe == "" and $laskurow["ebid"] != "") {
+
+				if ($tee_check != '') {
+					$tee = $tee_check;
+				}
+
 		  		echo "<form action = '$PHP_SELF' method='post'>
 		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
 		  				<input type='hidden' name = 'iframe' value='yes'>
 		  				<input type='hidden' name = 'nayta' value='$nayta'>
-		  				<input type='hidden' name = 'tee' value = ''>
+		  				<input type='hidden' name = 'tee' value = '$tee'>
 		  				<td class='back'><input type='Submit' value='".t("Avaa lasku t‰h‰n ikkunaan")."'></td>
 						</form>";
 			}
 			elseif ($iframe == 'yes' and $laskurow["ebid"] != "") {
+
+				if ($tee_check != '') {
+					$tee = $tee_check;
+				}
+
 		  		echo "<form action = '$PHP_SELF' method='post'>
 		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
 		  				<input type='hidden' name = 'iframe' value=''>
 		  				<input type='hidden' name = 'nayta' value='$nayta'>
-		  				<input type='hidden' name = 'tee' value = ''>
+		  				<input type='hidden' name = 'tee' value = '$tee'>
 		  				<td class='back'><input type='Submit' value='".t("Sulje lasku")."'></td>
 						</form>";
 			}

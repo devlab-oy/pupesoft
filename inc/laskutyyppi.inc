@@ -106,6 +106,9 @@
 				case "":
 					$alatila = "kesken";
 					break;
+				case "K":
+					$alatila = "korjattu";
+					break;
 				case "J":
 					$alatila = "tulostusjonossa";
 					break;

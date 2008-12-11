@@ -947,22 +947,22 @@
 					$ed=($vv-1)."-".sprintf("%02s",$kk)."-01 00:00:00";
 
 					if($select_summa=="") {
-						$select_summa .= "	SUM(IF(toimitettuaika>='$alku' and toimitettuaika<=DATE_ADD('$alku', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 kpl_myynti_$kk
-											, SUM(IF(toimitettuaika>='$alku' and toimitettuaika<=DATE_ADD('$alku', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 kpl_valmistus_asiakkaalle_$kk
-											, SUM(IF(toimitettuaika>='$alku' and toimitettuaika<=DATE_ADD('$alku', interval 1 month) and tyyppi='W', tapahtuma.kpl, 0)) kpl_valmistus_varastoon_$kk
-											, SUM(IF(toimitettuaika>='$ed' and toimitettuaika<=DATE_ADD('$ed', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 ed_kpl_myynti_$kk
-											, SUM(IF(toimitettuaika>='$ed' and toimitettuaika<=DATE_ADD('$ed', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 ed_kpl_valmistus_asiakkaalle_$kk
-											, SUM(IF(toimitettuaika>='$ed' and toimitettuaika<=DATE_ADD('$ed', interval 1 month) and tyyppi='W', tapahtuma.kpl, 0)) ed_kpl_valmistus_varastoon_$kk
+						$select_summa .= "	SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 kpl_myynti_$kk
+											, SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 kpl_valmistus_asiakkaalle_$kk
+											, SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='W', tapahtuma.kpl, 0)) kpl_valmistus_varastoon_$kk
+											, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 ed_kpl_myynti_$kk
+											, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 ed_kpl_valmistus_asiakkaalle_$kk
+											, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='W', tapahtuma.kpl, 0)) ed_kpl_valmistus_varastoon_$kk
 
 											";
 					}
 					else {
-						$select_summa .= "	, SUM(IF(toimitettuaika>='$alku' and toimitettuaika<=DATE_ADD('$alku', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 kpl_myynti_$kk
-											, SUM(IF(toimitettuaika>='$alku' and toimitettuaika<=DATE_ADD('$alku', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 kpl_valmistus_asiakkaalle_$kk
-											, SUM(IF(toimitettuaika>='$alku' and toimitettuaika<=DATE_ADD('$alku', interval 1 month) and tyyppi='W', tapahtuma.kpl, 0)) kpl_valmistus_varastoon_$kk
-											, SUM(IF(toimitettuaika>='$ed' and toimitettuaika<=DATE_ADD('$ed', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 ed_kpl_myynti_$kk
-											, SUM(IF(toimitettuaika>='$ed' and toimitettuaika<=DATE_ADD('$ed', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 ed_kpl_valmistus_asiakkaalle_$kk
-											, SUM(IF(toimitettuaika>='$ed' and toimitettuaika<=DATE_ADD('$ed', interval 1 month) and tyyppi='W', tapahtuma.kpl, 0)) ed_kpl_valmistus_varastoon_$kk
+						$select_summa .= "	, SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 kpl_myynti_$kk
+											, SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 kpl_valmistus_asiakkaalle_$kk
+											, SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='W', tapahtuma.kpl, 0)) kpl_valmistus_varastoon_$kk
+											, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 ed_kpl_myynti_$kk
+											, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 ed_kpl_valmistus_asiakkaalle_$kk
+											, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='W', tapahtuma.kpl, 0)) ed_kpl_valmistus_varastoon_$kk
 
 											";
 					}
@@ -972,12 +972,12 @@
 				//	Tutkitaan onko tää liian hias, indexi on ainakin vähän paska, toimitettuaikaa ei ole indexoitu
 				$query = "	SELECT
 							$select_summa
-							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-							JOIN tapahtuma on tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus
-							WHERE tilausrivi.yhtio='$kukarow[yhtio]'
-							and tilausrivi.tyyppi IN ('L','W','V')
-							and tilausrivi.tuoteno='$tuoteno'
-							and tilausrivi.toimitettuaika >= '$ed'";
+							FROM tapahtuma use index (yhtio_tuote_laadittu)
+							JOIN tilausrivi on tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus
+							WHERE tapahtuma.yhtio='$kukarow[yhtio]'
+							and tapahtuma.tuoteno='$tuoteno'
+							and tapahtuma.laadittu >= '$ed'
+							and tilausrivi.tyyppi IN ('L','W','V')";
 				$result3 = mysql_query($query) or pupe_error($query);
 				$lrow = mysql_fetch_array($result3);
 

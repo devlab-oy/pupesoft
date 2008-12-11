@@ -1046,11 +1046,9 @@
 				$query = "SELECT laskunro FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tila = 'K' and tunnus = '$sarjarow[osto_uusiotunnus]'";
 				$keikkares = mysql_query($query) or pupe_error($query);
 				if (mysql_num_rows($keikkares) > 0) {
-					$keikkarow = mysql_fetch_array($keikkares);
-					$echoostuns = t("Keikka:").$keikkarow["laskunro"];
-				}
-				
-				
+					$keikkarow2 = mysql_fetch_array($keikkares);
+					$echoostuns = t("Keikka:").$keikkarow2["laskunro"];
+				}				
 			}
 			else {
 				$ostuns = $sarjarow["osto_tunnus"];
@@ -1177,7 +1175,7 @@
 				}
 
 				echo "<br><a href='".$palvelin2."yllapito.php?toim=sarjanumeron_lisatiedot$ylisa&lopetus=$PHP_SELF////$tunnuskentta=$rivitunnus//from=$from//aputoim=$aputoim//otunnus=$otunnus//sarjanumero_haku=$sarjanumero_haku//tuoteno_haku=$tuoteno_haku//nimitys_haku=$nimitys_haku//varasto_haku=$varasto_haku//ostotilaus_haku=$ostotilaus_haku//myyntitilaus_haku=$myyntitilaus_haku//lisatieto_haku=$lisatieto_haku//muut_siirrettavat=$muut_siirrettavat'>".t("Lisätiedot")."</a>";
-				echo "<br><a onClick=\"javascript:sarjanumeronlisatiedot_popup('$sarjarow[tunnus]')\"><u>".t("Lisätietoikkuna")."</u></a>";
+				echo "<br><a href='#' onClick=\"javascript:sarjanumeronlisatiedot_popup('$sarjarow[tunnus]')\">".t("Lisätietoikkuna")."</a>";
 			}
 
 			if ($sarjarow['ostorivitunnus'] == 0 and $sarjarow['myyntirivitunnus'] == 0 and $keikkarow["tunnus"] == 0 and $sarjarow["era_kpl"] >= 0) {

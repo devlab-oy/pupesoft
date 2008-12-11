@@ -1,8 +1,47 @@
 <?php
+	function laskeveroja ($taso, $tulos) {
+		global $kukarow, $startmonth, $endmonth;
 
+		if ($tulos == '22' or $tulos == 'veronmaara' or $tulos == 'summa') { 
+			$query = "SELECT group_concat(tilino) tilit
+					FROM tili
+					WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%$taso%'";
+			$tilires = mysql_query($query) or pupe_error($query);
+
+			$vero = 0.0;
+
+			$tilirow = mysql_fetch_array($tilires);
+
+			if ($tilirow['tilit']!='') {
+				$query = "SELECT round(sum(summa * if('$tulos'='22',22,vero) / 100), 2) veronmaara,
+						sum(summa) summa,
+				 		count(*) kpl
+						FROM tiliointi
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND korjattu = '' 
+						AND tilino in ($tilirow[tilit]) 
+						AND tapvm >= '$startmonth' 
+						AND tapvm <= '$endmonth'";
+						
+				$verores = mysql_query($query) or pupe_error($query);
+
+				while ($verorow = mysql_fetch_array ($verores)) {
+					//echo "$verorow[veronmaara] $verorow[summa] $verorow[kpl] / ";
+					if ($tulos == '22') $tulos = 'veronmaara';
+					$vero += $verorow[$tulos];
+				}
+
+			}
+		}
+		else {
+			$vero = 0;
+		}
+		return sprintf('%.2f',$vero);
+	}
+	
 	require("../inc/parametrit.inc");
 
-   	echo "<font class='head'>".t("ALV-laskelma")."</font><hr>";
+	echo "<font class='head'>".t("ALV-laskelma")."</font><hr>";
 
 	// tehdään käyttöliittymä, näytetään aina
 	echo "<form action = 'alv_laskelma.php' method='post'>";
@@ -44,27 +83,6 @@
 			</select>";
 	echo "</td>";
 	echo "</tr>";
-	
-	$query = "	SELECT DISTINCT selite, laji
-				FROM avainsana 
-				WHERE yhtio = '$kukarow[yhtio]'
-				AND laji LIKE 'ALV%' 
-				ORDER BY laji, selite + 0";
-	$result = mysql_query($query) or pupe_error($query);
-
-	echo "<tr>";
-	echo "<th>".t("Valitse alv-kannat")."</th>";
-	echo "<td>";
-
-	while ($row = mysql_fetch_array($result)) {
-		$chk = "";
-		if ((!isset($vero) and strtoupper($row["laji"]) == "ALV") or (isset($vero) and in_array($row["selite"], $vero))) {
-			$chk = "checked";
-		}
-		echo "<input type='checkbox' name='vero[]' value='$row[selite]' $chk>$row[laji] $row[selite] %<br>";
-	}
-	
-	echo "</td>";
 
 	echo "<td class='back' style='text-align:bottom;'><input type = 'submit' value = '".t("Näytä")."'></td>";
 	echo "</tr>";
@@ -75,170 +93,102 @@
 
 	if ($tee == "aja") {
 
-		// edellinen taso
-		$taso     = array();
-		$tasonimi = array();
-		$summa    = array();
-		$verot    = array();
-		$verol    = array();
-		$kappa    = array();
-
 		$startmonth	= date("Y-m-d", mktime(0, 0, 0, $kk,   1, $vv));
 		$endmonth 	= date("Y-m-d", mktime(0, 0, 0, $kk+1, 0, $vv));
-
-		$verokannat = implode(",", $vero);
 		
-		$query = "	SELECT *
-					FROM taso
+	// 201-203 sääntö fi200
+		
+		$query = "SELECT group_concat(tilino) tilit
+				FROM tili
+				WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%fi200%'";
+		$tilires = mysql_query($query) or pupe_error($query);
+
+		$fi201 = 0.0;
+		$fi202 = 0.0;
+		$fi203 = 0.0;
+		
+		$tilirow = mysql_fetch_array($tilires);
+
+		if ($tilirow['tilit']!='') {
+			$query = "SELECT vero, round(sum(summa * vero / 100) * -1, 2) veronmaara, count(*) kpl
+					FROM tiliointi
 					WHERE yhtio = '$kukarow[yhtio]'
-					AND	tyyppi = 'A'
-					AND taso != ''
-					ORDER BY taso";
-		$tasores = mysql_query($query) or pupe_error($query);
+					AND korjattu = '' 
+					AND tilino in ($tilirow[tilit]) 
+					AND tapvm >= '$startmonth' 
+					AND tapvm <= '$endmonth'
+					AND vero > 0
+					GROUP BY vero";
+			$verores = mysql_query($query) or pupe_error($query);
 
-		while ($tasorow = mysql_fetch_array($tasores)) {
-
-			// millä tasolla ollaan (1,2,3,4,5,6)
-			$tasoluku = strlen($tasorow["taso"]);
-
-			// tasonimi talteen (rightpäddätään Ö:llä, niin saadaan oikeaan järjestykseen)
-			$apusort = str_pad($tasorow["taso"], 20, "Ö");
-			$tasonimi[$apusort] = $tasorow["nimi"];
-
-			// pilkotaan taso osiin
-			$taso = array();
-			for ($i=0; $i < $tasoluku; $i++) {
-				$taso[$i] = substr($tasorow["taso"], 0, $i+1);
-			}
-
-			$query = "	SELECT 
-						round(sum(tiliointi.summa * vero / 100) * -1, 2) veronmaara,
-						round(sum(tiliointi.summa * (1 + vero / 100)) * -1, 2) verollinensumma,
-						round(sum(tiliointi.summa * -1), 2) verotonsumma,
-						count(*) kpl
-					 	FROM tili
-						JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio 
-							AND tiliointi.tilino = tili.tilino 
-							AND tiliointi.korjattu = '' 
-							AND tiliointi.vero in ($verokannat) 
-							AND tiliointi.tapvm >= '$startmonth' 
-							AND tiliointi.tapvm <= '$endmonth')
-						WHERE tili.yhtio = '$kukarow[yhtio]'
-						AND tili.alv_taso = '$tasorow[taso]'
-						AND tili.alv_taso != ''
-						GROUP BY tili.alv_taso";
-			$tilires = mysql_query($query) or pupe_error($query);
-
-			while ($tilirow = mysql_fetch_array ($tilires)) {
-				// summataan tän plus pienempien tasojen saldot
-				for ($i = $tasoluku - 1; $i >= 0; $i--) {
-					$summa[$taso[$i]] += $tilirow["verollinensumma"];
-					$verol[$taso[$i]] += $tilirow["verotonsumma"];
-					$verot[$taso[$i]] += $tilirow["veronmaara"];
-					$kappa[$taso[$i]] += $tilirow["kpl"];
+			while ($verorow = mysql_fetch_array ($verores)) {
+//				echo "$verorow[vero] $verorow[kpl] / ";
+				switch ($verorow['vero']) {
+					case 22 :
+						$fi201 += $verorow['veronmaara'];
+						break;
+					case 17 :
+						$fi202 += $verorow['veronmaara'];
+						break;
+					case 6 :
+						$fi203 += $verorow['veronmaara'];
+						break;
 				}
 			}
-
 		}
-
 		echo "<br><table>";
-		echo "<tr>";
-		echo "<th>Tilino</th>";
-		echo "<th>Alv%</th>";
-		echo "<th>Verollinen summa</th>";
-		echo "<th>Veroton summa</th>";
-		echo "<th>Veron määrä</th>";
-		echo "<th>Tiliöintejä</th>";
-		echo "</tr>\n";
+		echo "<tr><th colspan='2'>Vero kotimaan myynnistä verokannoittain</th></tr>";
+		echo "<tr><td>201 22% :n vero</td><td align='right'>".sprintf('%.2f',$fi201)."</td></tr>";
+		echo "<tr><td>202 17% :n vero</td><td align='right'>".sprintf('%.2f',$fi202)."</td></tr>";
+		echo "<tr><td>203 6% :n vero</td><td align='right'>".sprintf('%.2f',$fi203)."</td></tr>";
 
-		// sortataan array indexin (tason) mukaan
-		ksort($tasonimi);
+	// 205 sääntö fi205
 
-		// loopataan tasot läpi
-		foreach ($tasonimi as $key => $value) {
+		$fi205 = laskeveroja('fi205','22');
+		
+		echo "<tr><th colspan='2'></th></tr>";
+		echo "<tr><td>205 Vero tavaraostoista muista EU-maista</td><td align='right'>$fi205</td></tr>";
 
-			$key = str_replace("Ö", "", $key); // Ö-kirjaimet pois
+	// 206 sääntö fi206
 
-			$tilirivi = "";
+		$fi206 = laskeveroja('fi206','veronmaara') + $fi205;
+		echo "<tr><th colspan='2'></th></tr>";
+		echo "<tr><td>206 Kohdekuukauden vähennettävä vero</td><td align='right'>$fi206</td></tr>";
 
-			// haetaan tason tiedot
-			$query = "SELECT * FROM taso WHERE yhtio = '$kukarow[yhtio]' and taso = '$key'";
-			$tilires = mysql_query($query) or pupe_error($query);
-			$tasorow = mysql_fetch_array($tilires);
+	// 207 sääntö fi207
 
-			// haetaan kaikki summat per tili
-			$query = "SELECT * FROM tili WHERE yhtio = '$kukarow[yhtio]' and alv_taso = '$key'";
-			$tilires = mysql_query($query) or pupe_error($query);
+		$fi207 = 0.0;
 
-			while ($tilirow = mysql_fetch_array($tilires)) {
-				$query = "	SELECT tilino, vero,
-							round(sum(tiliointi.summa * vero / 100) * -1, 2) veronmaara,
-							round(sum(tiliointi.summa * (1 + vero / 100)) * -1, 2) verollinensumma,
-							round(sum(tiliointi.summa * -1), 2) verotonsumma,				
-							count(*) kpl
-							FROM tiliointi USE INDEX (yhtio_tilino_tapvm)
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND tilino = '$tilirow[tilino]'
-							AND korjattu = ''
-							AND vero in ($verokannat)
-							AND tapvm >= '$startmonth'
-							AND tapvm <= '$endmonth'
-							GROUP BY tilino, vero";
-				$summares = mysql_query($query) or pupe_error($query);
+		echo "<tr><th colspan='2'></th></tr>";
+		echo "<tr><td>207 Edellisen kuukauden negatiivinen vero</td><td align='right'>$fi207</td></tr>";
 
-				while ($summarow = mysql_fetch_array($summares)) {
-					$tilirivi .= "<tr>";
-					$tilirivi .= "<td nowrap>$tilirow[tilino] - $tilirow[nimi]</td>";
-					$tilirivi .= "<td nowrap align='right'>$summarow[vero]</td>";
-					$tilirivi .= "<td nowrap align='right'>$summarow[verollinensumma]</td>";
-					$tilirivi .= "<td nowrap align='right'>$summarow[verotonsumma]</td>";
-					$tilirivi .= "<td nowrap align='right'>$summarow[veronmaara]</td>";						
-					$tilirivi .= "<td nowrap align='right'>$summarow[kpl]</td>";
-					$tilirivi .= "</tr>\n";
-				}
-			}
+	// 208 laskennallinen
 
-			$query = "	SELECT summattava_taso
-						FROM taso
-						WHERE yhtio 		 = '$kukarow[yhtio]'
-						and taso 			 = '$key'
-						and summattava_taso != ''
-						and tyyppi 			 = 'A'";
-			$summares = mysql_query($query) or pupe_error($query);
+		$fi208 = $fi201 + $fi202 + $fi203 + $fi205 - $fi206 - $fi207;
 
-			if ($summarow = mysql_fetch_array ($summares)) {
-				foreach(explode(",", $summarow["summattava_taso"]) as $staso) {
-					$staso = trim($staso);
-					$summa[$key] = $summa[$key] + $summa[$staso];
-					$verot[$key] = $verot[$key] + $verot[$staso];
-					$verol[$key] = $verol[$key] + $verol[$staso];
-					$kappa[$key] = $kappa[$key] + $kappa[$staso];
-				}
-			}
+		echo "<tr><th colspan='2'></th></tr>";
+		echo "<tr><td>208 Maksettava vero(+)/Seuraavalle kuukaudelle siirrettävä negatiivinen vero (-)</td><td align='right'>".sprintf('%.2f',$fi208)."</td></tr>";
 
-			$rivi  = "<tr class='aktiivi'>";
-			$rivi .= "<th nowrap>$value</th>";
-			$rivi .= "<th></th>";
-			$rivi .= "<th style='text-align:right;'>$summa[$key]</th>";
-			if ($tasorow["laji"] == "N") {
-				$rivi .= "<th style='text-align:right;'><strong>$verol[$key]</strong></th>";
-				$apu = round($verol[$key] * 0.22, 2);
-				$rivi .= "<th style='text-align:right;'>($apu) $verot[$key]</th>";
-			}
-			else {
-				$rivi .= "<th style='text-align:right;'>$verol[$key]</th>";
-				$rivi .= "<th style='text-align:right;'><strong>$verot[$key]</strong></th>";				
-			}
-			$rivi .= "<th style='text-align:right;'>$kappa[$key]</th>";
-			$rivi .= "</tr>\n";
+	// 209 sääntö fi209
 
-			// jos oli summa != 0 niin tulostetaan rivi
-			if ($summa[$key] != 0 or $verot[$key] != 0 or $verol[$key] != 0 or $kappa[$key] != 0) {
-				echo $tilirivi, $rivi;
-			}
+		$fi209 = laskeveroja('fi209','summa') * -1;
 
-		}
+		echo "<tr><th colspan='2'></th></tr>";
+		echo "<tr><td>209 Veroton liikevaihto</td><td align='right'>$fi209</td></tr>";
 
+	// 210 sääntö fi210
+
+		$fi210 = laskeveroja('fi210','summa') * -1;
+
+		echo "<tr><th colspan='2'></th></tr>";
+		echo "<tr><td>210 Tavaran myynti muihin EU-maihin </td><td align='right'>$fi210</td></tr>";
+
+	// 211 sääntö fi205
+
+		$fi211 = laskeveroja('fi205','summa');
+
+		echo "<tr><th colspan='2'></th></tr>";
+		echo "<tr><td>211 Tavaraostot muista EU-maista</td><td align='right'>$fi211</td></tr>";
 		echo "</table>";
 	}
 

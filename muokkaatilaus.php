@@ -1060,14 +1060,14 @@
 						}
 						elseif (mysql_field_name($result,$i) == "tilaus") {
 							
-							$query_comments = "SELECT comments from lasku where yhtio='$kukarow[yhtio]' and tunnus=$row[$i]";
+							$query_comments = "SELECT comments, sisviesti2 from lasku where yhtio='$kukarow[yhtio]' and tunnus=$row[$i]";
 							$result_comments = mysql_query($query_comments) or pupe_error($query_comments);
 
 							$row_comments = mysql_fetch_array($result_comments);
 
 							if (mysql_num_rows($result_comments) == 1 and $row_comments["comments"] != "") {
 								echo "<div id='kommentti$row[$i]' class='popup' style='width: 500px;'>";
-								echo "$row_comments[comments]";
+								echo "$row_comments[comments] $row_comments[sisviesti2]";
 								echo "</div>";
 								echo "<td class='$class' valign='top'><a class='menu' onmouseout=\"popUp(event,'kommentti$row[$i]')\" onmouseover=\"popUp(event,'kommentti$row[$i]')\">$row[$i]</a></td>";
 							}

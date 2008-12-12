@@ -1086,7 +1086,7 @@
 									if ($varattu > 0) {
 										$tunken = "myyntirivitunnus";
 
-										$query = "	SELECT ostorivitunnus
+										$query = "	SELECT *
 													FROM sarjanumeroseuranta
 													WHERE yhtio		= '$kukarow[yhtio]'
 													and tuoteno		= '$myy_tuoteno[$indeksi]'
@@ -1106,22 +1106,23 @@
 									}
 
 									$query = "	INSERT into sarjanumeroseuranta
-												SET yhtio 	= '$kukarow[yhtio]',
-												tuoteno		= '$myy_tuoteno[$indeksi]',
-												lisatieto 	= '$lisa_row[lisatieto]',
-												$tunken 	= '$lisatty_tun',
+												SET yhtio 		= '$kukarow[yhtio]',
+												tuoteno			= '$myy_tuoteno[$indeksi]',
+												lisatieto 		= '$lisa_row[lisatieto]',
+												$tunken 		= '$lisatty_tun',
 												$oslisa
-												kaytetty	= '$lisa_row[kaytetty]',
-												era_kpl		= '',
-												laatija		= '$kukarow[kuka]',
-												luontiaika	= now(),
-												takuu_alku 	= '$lisa_row[takuu_alku]',
-												takuu_loppu	= '$lisa_row[takuu_loppu]',
-												hyllyalue   = '$myy_hyllyalue[$indeksi]',
-												hyllynro    = '$myy_hyllynro[$indeksi]',
-												hyllytaso   = '$myy_hyllytaso[$indeksi]',
-												hyllyvali   = '$myy_hyllyvali[$indeksi]',
-												sarjanumero = '$myy_era[$indeksi]'";
+												kaytetty		= '$lisa_row[kaytetty]',
+												era_kpl			= '',
+												laatija			= '$kukarow[kuka]',
+												luontiaika		= now(),
+												takuu_alku 		= '$lisa_row[takuu_alku]',
+												takuu_loppu		= '$lisa_row[takuu_loppu]',
+												parasta_ennen	= '$lisa_row[parasta_ennen]',
+												hyllyalue   	= '$myy_hyllyalue[$indeksi]',
+												hyllynro    	= '$myy_hyllynro[$indeksi]',
+												hyllytaso   	= '$myy_hyllytaso[$indeksi]',
+												hyllyvali   	= '$myy_hyllyvali[$indeksi]',
+												sarjanumero 	= '$myy_era[$indeksi]'";
 									$lisa_res = mysql_query($query) or pupe_error($query);
 								}
 

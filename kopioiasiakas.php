@@ -38,7 +38,21 @@
 			
 			$result = mysql_query($query) or pupe_error($query);
 			
+			$uusiidee = mysql_insert_id();
+			
+			if (isset($tapahtumat) !== FALSE) {
+				$query = "SELECT ytunnus FROM asiakas WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$uusiidee'";
+				$result = mysql_query($query) or pupe_error($query);
+				$ytrow = mysql_fetch_array($result);
+				
+			
+				$query = "UPDATE kalenteri SET liitostunnus = '$uusiidee', asiakas = '$ytrow[ytunnus]' WHERE yhtio = '$kukarow[yhtio]' AND liitostunnus = '$id' ORDER BY tunnus;";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+			
+			unset($tapahtumat);
 			$tee = '';
+			
 		}
 		else {
 			$tee = 'edit';
@@ -128,7 +142,18 @@
 		}
 		echo "</table>";
 		
+		if (isset($tapahtumat) !== FALSE) {
+			$chk = 'CHECKED';
+		}
+		
+		echo "<table>";
+		echo "<tr><td>";
+		echo t("Siirrä kalenteritapahtumat ja asiakasmemot")." <input type = 'checkbox' name = 'tapahtumat' $chk>";
+		echo "</td></tr>";
+		echo "<tr><td class='back'>";		
 		echo "<input type = 'submit' value = '".t("Perusta")."'>";
+		echo "</td></tr>";
+		echo "</table>";
 		echo "</form>";
 	}
 	

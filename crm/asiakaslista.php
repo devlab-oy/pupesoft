@@ -14,7 +14,13 @@
 	}
 	
 	$otsikko   = 'Asiakaslista';
-	$kentat    = "tunnus::if(toim_postitp!='',toim_postitp,postitp)::postino::ytunnus::yhtio::asiakasnro::nimi";
+	if ($yhtiorow['viikkosuunnitelma'] == '') {
+		$kentat    = "tunnus::if(toim_postitp!='',toim_postitp,postitp)::postino::ytunnus::yhtio::asiakasnro::nimi";
+	}
+	else {
+		$kentat    = "tunnus::nimi::myyjanro::ytunnus::asiakasnro::if(toim_postitp!='',toim_postitp,postitp)::yhtio";
+	}
+	
 	$jarjestys = 'selaus, nimi';
 
 	echo "<font class='head'>".t("$otsikko")."</font><hr>";
@@ -61,22 +67,30 @@
 		$konsernit = " yhtio = '$kukarow[yhtio]' ";
 	}
 	
-	
-	if ($tee == "lahetalista") {		
-		$query = "	SELECT tunnus, postitp, ytunnus, yhtio, asiakasnro, nimi, nimitark, osoite, postino, postitp, maa, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa,
-					puhelin, fax, email, osasto, piiri, ryhma, fakta, toimitustapa, yhtio
-					FROM asiakas 
-					WHERE $konsernit 
-					$lisa";
-		$tiednimi = "asiakaslista.xls";
+	if ($yhtiorow['viikkosuunnitelma'] == '') {
+		if ($tee == "lahetalista") {		
+			$query = "	SELECT tunnus, postitp, ytunnus, yhtio, asiakasnro, nimi, nimitark, osoite, postino, postitp, maa, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa,
+						puhelin, fax, email, osasto, piiri, ryhma, fakta, toimitustapa, yhtio
+						FROM asiakas 
+						WHERE $konsernit 
+						$lisa";
+			$tiednimi = "asiakaslista.xls";
+		}
+		else {
+			$query = "	SELECT tunnus, if(toim_postitp!='',toim_postitp,postitp) postitp, if(toim_postino!=00000,toim_postino,postino) postino, ytunnus, yhtio, asiakasnro,nimi, puhelin
+						FROM asiakas 
+						WHERE $konsernit 
+						$lisa";
+			$tiednimi = "viikkosuunnitelma.xls";
+		}
 	}
 	else {
-		$query = "	SELECT tunnus, if(toim_postitp!='',toim_postitp,postitp) postitp, if(toim_postino!=00000,toim_postino,postino) postino, ytunnus, yhtio, asiakasnro,nimi, puhelin
+		$query = "	SELECT tunnus, nimi, (SELECT concat_ws(' ',myyja,nimi) from kuka where yhtio='$kukarow[yhtio]' and myyja=myyjanro and myyja > 0 limit 1) myyja, ytunnus, asiakasnro, if(toim_postitp!='',toim_postitp,postitp) postitp, yhtio, puhelin
 					FROM asiakas 
 					WHERE $konsernit 
 					$lisa";
-		$tiednimi = "viikkosuunnitelma.xls";
-	}			
+	}
+	
 
 				
 	if ($lisa == "" and ($tee != 'laheta' or $tee != 'lahetalista')) {
@@ -227,9 +241,11 @@
 		mysql_data_seek($result,0);
 		
 	}
-
-	echo "<li><a href='$PHP_SELF?tee=laheta&asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&asmyyja=$asmyyja".$ulisa."'>".t("Lähetä viikkosuunnitelmapohja sähköpostiisi")."</a><br>";
-	echo "<li><a href='$PHP_SELF?tee=lahetalista&asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&asmyyja=$asmyyja".$ulisa."'>".t("Lähetä asiakaslista sähköpostiisi")."</a><br>";
+	
+	if ($yhtiorow['viikkosuunnitelma'] == '') {
+		echo "<li><a href='$PHP_SELF?tee=laheta&asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&asmyyja=$asmyyja".$ulisa."'>".t("Lähetä viikkosuunnitelmapohja sähköpostiisi")."</a><br>";
+		echo "<li><a href='$PHP_SELF?tee=lahetalista&asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&asmyyja=$asmyyja".$ulisa."'>".t("Lähetä asiakaslista sähköpostiisi")."</a><br>";
+	}
 	
 	echo "<br><table>
 			<form action='$PHP_SELF' method='post'>

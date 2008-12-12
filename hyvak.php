@@ -153,13 +153,12 @@
 
 	echo "<font class='head'>".t('Hyv‰ksytt‰v‰t laskusi')."</font><hr><br>";
 
-	$tee_check = "";
+	$onko_eka_hyvaksyja = FALSE;
 
-	/*
-	if ($tunnus != '' and (!isset($tee) or $tee == 'M')) {
+	if ((int) $tunnus != 0) {
 		$tunnus = mysql_real_escape_string($tunnus);
 
-		$query = "	SELECT hyvak1, hyvaksyja_nyt
+		$query = "	SELECT hyvak1, h1time
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus = '$tunnus'";
@@ -168,15 +167,15 @@
 		if (mysql_num_rows($check_res) == 1) {
 			$check_row = mysql_fetch_array($check_res);
 
-			if ($check_row['hyvak1'] == $kukarow['kuka'] and $check_row['hyvaksyja_nyt'] == $kukarow['kuka']) {
-				$tee = 'M';
-				$tee_check = 'M';
+			// jos ensimm‰inen hyv‰ksyj‰ on t‰‰ k‰ytt‰j‰ ja ei olla viel‰ hyv‰ksytty
+			if ($check_row['hyvak1'] == $kukarow['kuka'] and $check_row["h1time"] == "0000-00-00 00:00:00") {
+				$onko_eka_hyvaksyja = TRUE;
 			}
 		}
 	}
-	*/
 
-	if ($tee == 'M') {
+	// halutaan n‰hd‰ otsikko, tai ollaan eka hyv‰ksyj‰ ja ei olla hyv‰ksym‰ss‰ laskua
+	if ($tee == 'M' or ($onko_eka_hyvaksyja == TRUE and $tee != 'H')) {
 		$query = "	SELECT *
 					FROM lasku
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]'
@@ -186,7 +185,6 @@
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus</font>";
-
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -194,14 +192,9 @@
 		$trow = mysql_fetch_array ($result);
 
 		if ($trow['hyvak1'] == $kukarow['kuka']) {
+			$hyvak_apu_tee = $tee;
 			require ("inc/muutosite.inc");
-		}
-		else {
-			echo "Tietosuojaongelma! Et ole oikea k‰ytt‰j‰";
-
-
-			require ("inc/footer.inc");
-			exit;
+			$tee = $hyvak_apu_tee;
 		}
 	}
 

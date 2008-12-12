@@ -90,19 +90,20 @@
 		
 		while ($row = mysql_fetch_array($res)) {
 			
-			$kysely = "	INSERT INTO kalenteri
-						SET tapa 		= '".t("Osoitetarrat")."',
-						asiakas  		= '$row[ytunnus]',
-						liitostunnus 	= '$row[tunnus]',
-						kuka     		= '$kukarow[kuka]',
-						yhtio    		= '$kukarow[yhtio]',
-						tyyppi   		= 'Memo',
-						pvmalku  		= now(),
-						kentta01 		= '$kukarow[nimi] tulosti osoitetarrat.\n$arvomatikka',
-						laatija			= '$kukarow[kuka]',
-						luontiaika		= now()";
-			$result = mysql_query($kysely) or pupe_error($kysely);
-			
+			if ($yhtiorow["kalenterimerkinnat"] == "") {
+				$kysely = "	INSERT INTO kalenteri
+							SET tapa 		= '".t("Osoitetarrat")."',
+							asiakas  		= '$row[ytunnus]',
+							liitostunnus 	= '$row[tunnus]',
+							kuka     		= '$kukarow[kuka]',
+							yhtio    		= '$kukarow[yhtio]',
+							tyyppi   		= 'Memo',
+							pvmalku  		= now(),
+							kentta01 		= '$kukarow[nimi] tulosti osoitetarrat.\n$arvomatikka',
+							laatija			= '$kukarow[kuka]',
+							luontiaika		= now()";
+				$result = mysql_query($kysely) or pupe_error($kysely);
+			}			
 			
     	    // käytetään toim_ tietoja jos niin halutaan
     		if ($_POST['toimas'] == 'on') {
@@ -319,7 +320,10 @@
 		$sel[$raportti] = "SELECTED";
 
 		echo "<table>";
-		echo "<tr><th>".t("Asiakasmemon viesti").":</th><td><input type='text' size='20' name='arvomatikka' value='$arvomatikka'></td></tr>";
+		if ($yhtiorow['kalenterimerkinnat'] == '') {
+			echo "<tr><th>".t("Asiakasmemon viesti").":</th><td><input type='text' size='20' name='arvomatikka' value='$arvomatikka'></td></tr>";
+		}
+		
 		echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas' value='on' $tck></td></tr>";
 		echo "<tr><th>".t("Luo aineisto yhteyshenkilön osoitetiedoista").":</th><td><input type='checkbox' name='as_yht_tiedot' value='on' $chk></td></tr>";
 		echo "<tr><th>".t("Valitse tarra-arkin tyyppi").":</th>

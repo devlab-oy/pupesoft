@@ -2236,19 +2236,22 @@ if ($tee == '') {
 
 			if (trim($retval) == "0") {
 				$ok = 0;
+				
+				if ($yhtiorow["kalenterimerkinnat"] == "") {
+					$kysely = "	INSERT INTO kalenteri
+								SET tapa 		= '".t("Teksiviesti")."',
+								asiakas  		= '$laskurow[ytunnus]',
+								liitostunnus 	= '$laskurow[liitostunnus]',
+								kuka     		= '$kukarow[kuka]',
+								yhtio    		= '$kukarow[yhtio]',
+								tyyppi   		= 'Memo',
+								pvmalku  		= now(),
+								kentta01 		= '$smsnumero\n$smsviesti',
+								laatija			= '$kukarow[kuka]',
+								luontiaika		= now()";
+					$result = mysql_query($kysely) or pupe_error($kysely);
+				}
 
-				$kysely = "	INSERT INTO kalenteri
-							SET tapa 		= '".t("Teksiviesti")."',
-							asiakas  		= '$laskurow[ytunnus]',
-							liitostunnus 	= '$laskurow[liitostunnus]',
-							kuka     		= '$kukarow[kuka]',
-							yhtio    		= '$kukarow[yhtio]',
-							tyyppi   		= 'Memo',
-							pvmalku  		= now(),
-							kentta01 		= '$smsnumero\n$smsviesti',
-							laatija			= '$kukarow[kuka]',
-							luontiaika		= now()";
-				$result = mysql_query($kysely) or pupe_error($kysely);
 			}
 		}
 

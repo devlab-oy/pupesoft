@@ -1758,4 +1758,19 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "kalenterimerkinnat") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Kalenterimerkintöjä lisätään automaattisesti")."</option>";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Kalenterimerkintöjä EI lisätä automaattisesti")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

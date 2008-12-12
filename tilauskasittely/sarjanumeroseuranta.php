@@ -532,27 +532,8 @@
 				$lisaysok = "";
 			}
 		}
-
-		// Tutkitaan ettei liitet‰ sek‰ uusia ett‰ vanhoja sarjanumeroita samaan riviin
-		if (count($sarjataan) > 0) {
-			$ktark = implode(",", $sarjataan);
-
-			$query = "	SELECT distinct kaytetty
-						FROM sarjanumeroseuranta
-						WHERE yhtio	= '$kukarow[yhtio]'
-						and tunnus in (".$ktark.")";
-			$sarres = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($sarres) > 1) {
-				echo "<font class='error'>".t('Riviin ei voi liitt‰‰ sek‰ k‰ytettyj‰ ett‰ uusia sarjanumeroita')."</font><br><br>";
-
-				$lisaysok = "";
-			}
-		}
-
 		// Tutkitaan koitetaanko salaa liitt‰‰ enempi kuin $rivirow["varattu"]
-		if (count($sarjataan) > 0) {
-		
+		elseif (count($sarjataan) > 0) {
 			$ktark = implode(",", $sarjataan);
 		
 			$query = 	"SELECT tunnus
@@ -568,6 +549,23 @@
 
 					$lisaysok = "";
 				}
+			}
+		}
+
+		// Tutkitaan ettei liitet‰ sek‰ uusia ett‰ vanhoja sarjanumeroita samaan riviin
+		if (count($sarjataan) > 0) {
+			$ktark = implode(",", $sarjataan);
+
+			$query = "	SELECT distinct kaytetty
+						FROM sarjanumeroseuranta
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and tunnus in (".$ktark.")";
+			$sarres = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($sarres) > 1) {
+				echo "<font class='error'>".t('Riviin ei voi liitt‰‰ sek‰ k‰ytettyj‰ ett‰ uusia sarjanumeroita')."</font><br><br>";
+
+				$lisaysok = "";
 			}
 		}
 		

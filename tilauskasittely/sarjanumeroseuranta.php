@@ -507,7 +507,7 @@
 
 	// Ollaan valittu joku tunnus listasta ja halutaan liitt‰‰ se tilausriviin tai poistaa se tilausrivilt‰
 	if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
-
+		
 		$lisaysok = "OK";
 
 		// Jos t‰m‰ on er‰seurantaa niin tehd‰‰n tsekit lis‰t‰‰n kaikki t‰m‰n er‰n sarjanumerot
@@ -550,6 +550,27 @@
 			}
 		}
 
+		// Tutkitaan koitetaanko salaa liitt‰‰ enempi kuin $rivirow["varattu"]
+		if (count($sarjataan) > 0) {
+		
+			$ktark = implode(",", $sarjataan);
+		
+			$query = 	"SELECT tunnus
+						FROM sarjanumeroseuranta
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and $tunnuskentta = $rivitunnus
+						and tunnus not in (".$ktark.")";
+			$result = mysql_query($query) or pupe_error($query);
+			if (mysql_num_rows($result) > 0) {
+				$liityht = count($sarjataan)+mysql_num_rows($result);
+				if ($liityht > $rivirow["varattu"]) {
+					echo "<font class='error'>".t('Riviin voi liitt‰‰ enint‰‰n')." $rivirow[varattu] $rivirow[yksikko].</font><br><br>";
+
+					$lisaysok = "";
+				}
+			}
+		}
+		
 		// jos olemme ruksanneet v‰hemm‰n tai yht‰ paljon kuin tuotteita on rivill‰, voidaan p‰ivitt‰‰ muutokset
 		if ($rivirow["varattu"] >= count($sarjataan) and $lisaysok == "OK") {
 			foreach ($sarjat as $sarjatun) {

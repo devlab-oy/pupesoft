@@ -387,7 +387,7 @@
 			$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
 			$sumrow = mysql_fetch_array($sumresult);
 						
-			$miinus = 3;
+			$miinus = 4;
 		}
 		elseif ($toim == 'ENNAKKO') {
 			$query = "	SELECT lasku.tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, lasku.laatija, viesti tilausviite,$toimaikalisa alatila, tila, lasku.tunnus

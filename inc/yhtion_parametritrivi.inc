@@ -1743,4 +1743,19 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "viikkosuunnitelma") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Viikkosuunnitelma käytössä")."</option>";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Ei käytetä viikkosuunnitelmaa")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

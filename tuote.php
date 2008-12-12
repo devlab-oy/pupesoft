@@ -969,7 +969,7 @@
 
 				}
 
-				//	Tutkitaan onko t‰‰ liian hias, indexi on ainakin v‰h‰n paska, toimitettuaikaa ei ole indexoitu
+				//	Tutkitaan onko t‰‰ liian hias
 				$query = "	SELECT
 							$select_summa
 							FROM tapahtuma use index (yhtio_tuote_laadittu)

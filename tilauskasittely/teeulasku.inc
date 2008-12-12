@@ -248,6 +248,7 @@ $query = "	INSERT into lasku SET
 			yhtio_ovttunnus						= '$lasrow[yhtio_ovttunnus]',
 			yhtio_kotipaikka					= '$lasrow[yhtio_kotipaikka]',
 			yhtio_toimipaikka					= '$lasrow[yhtio_toimipaikka]',
+			alv_tili							= '$lasrow[alv_tili]',
 			aktiivinen_kuljetus 				= '$lasrow[aktiivinen_kuljetus]',
 			aktiivinen_kuljetus_kansallisuus	= '$lasrow[aktiivinen_kuljetus_kansallisuus]',
 			alv									= '$lasrow[alv]',

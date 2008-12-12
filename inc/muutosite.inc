@@ -665,6 +665,7 @@ if ($tila == 'W') {
 	$tila = 'X';
 }
 
+// Lis‰t‰‰n kommentti
 if ($tila == 'K') {
 		$query = "	SELECT comments
 					FROM lasku
@@ -686,6 +687,18 @@ if ($tila == 'K') {
 
 		$tee = 'E';
 		$tila = 'X';
+}
+
+// P‰ivitet‰‰n alv_tili
+if ($tila == 'KK') {
+	if ($alv_tili != '') {
+		$alv_tili = mysql_real_escape_string($alv_tili);
+		$query = "UPDATE lasku SET alv_tili = '$alv_tili' WHERE tunnus = '$tunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+	}
+
+	$tee = 'E';
+	$tila = 'X';
 }
 
 if ($tila == '') {
@@ -889,6 +902,46 @@ if ($tila == '') {
 				<td><input type = 'submit' value = '".t("Poista")."'></td>
 				</tr>
 				</form>";
+	}
+
+	// tutkitaan ollaanko jossain toimipaikassa alv-rekisterˆity
+	$query = "	SELECT *
+				FROM yhtion_toimipaikat
+				WHERE yhtio = '$kukarow[yhtio]'
+				and maa != ''
+				and vat_numero != ''
+				and toim_alv != ''";
+	$alhire = mysql_query($query) or pupe_error($query);
+
+	// ollaan alv-rekisterˆity
+	if (mysql_num_rows($alhire) >= 1) {
+
+		if ($alv_tili == "") {
+			$alv_tili = $trow["alv_tili"];
+		}
+
+		echo "<form action = '' method='post'>";
+		echo "<input type = 'hidden' name='tunnus' value='$tunnus'>";
+		echo "<input type = 'hidden' name='tee' value='M'>";
+		echo "<input type = 'hidden' name='tila' value='KK'>";
+		echo "<tr>";
+		echo "<th>".t("Alv tili")."</th><td>";
+		echo "<select name='alv_tili'>";
+		echo "<option value='$yhtiorow[alv]'>$yhtiorow[alv] - $yhtiorow[nimi], $yhtiorow[kotipaikka], $yhtiorow[maa]</option>";
+
+		while ($vrow = mysql_fetch_array($alhire)) {
+			$sel = "";
+			if ($alv_tili == $vrow['toim_alv']) {
+				$sel = "selected";
+			}
+			echo "<option value='$vrow[toim_alv]' $sel>$vrow[toim_alv] - $vrow[nimi], $vrow[kotipaikka], $vrow[maa]</option>";
+		}
+
+		echo "</select>";
+		echo "</td>";
+		echo "<td><input type = 'submit' value = '".t("Muuta")."'></td>";
+		echo "</tr>";
+		echo "</form>";
 	}
 
 	echo "<form action = '$PHP_SELF?tee=M&tila=K' method='post'>

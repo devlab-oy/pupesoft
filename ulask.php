@@ -1244,7 +1244,8 @@ if ($tee == 'I') {
 			suoraveloitus = '$osuoraveloitus',
 			luontiaika = now(),
 			comments = '$komm',
-			sisviesti1 = '$ohjeitapankille'";
+			sisviesti1 = '$ohjeitapankille',
+			alv_tili = '$tilino_alv'";
 
 // Poistin nämä toistaiseksi insertistä
 //			sisviesti1 = '$sis1',

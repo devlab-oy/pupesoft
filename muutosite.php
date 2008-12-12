@@ -330,30 +330,12 @@ if ($tee == 'P') {
 
 	// Katotaan voisiko meillä olla tässä joku toinen ALV tili
 	// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity ja oteteaan niiden alv tilit
-	$query = "	SELECT ifnull(group_concat(concat(\"'\",toim_alv,\"'\") SEPARATOR ','), '') toim_alv
-				FROM yhtion_toimipaikat
-				WHERE yhtio = '$kukarow[yhtio]'
-				and maa != ''
-				and vat_numero != ''
-				and toim_alv != ''";
-	$result = mysql_query($query) or pupe_error($query);
-	$tilitrow = mysql_fetch_array($result);
+	$query = "	SELECT alv_tili FROM lasku WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$tunnus' AND alv_tili != ''";
+	$alv_tili_res = mysql_query($query) or pupe_error($query);
 
-	// haetaan ALV tili
-	if ($tilitrow["toim_alv"] != "") {
-		$query = "	SELECT DISTINCT tilino
-					FROM tiliointi
-					WHERE aputunnus = '$ptunnus'
-					AND yhtio = '$kukarow[yhtio]'
-					AND tiliointi.korjattu = ''
-					AND tilino in ($tilitrow[toim_alv], '$yhtiorow[alv]')";
-		$result = mysql_query($query) or pupe_error($query);
-
-		// jos löytyy yks niin homma hyvin! (else tulee yhtiön takaa tosta ylhäältä)
-		if (mysql_num_rows($result) == 1) {
-			$tilitrow = mysql_fetch_array($result);
-			$alv_tili = $tilitrow["tilino"];
-		}
+	if (mysql_num_rows($alv_tili_res) == 1) {
+		$alv_tili_row = mysql_fetch_array($alv_tili_res);
+		$alv_tili = $alv_tili_row['alv_tili'];
 	}
 
 	// Etsitään kaikki tiliöintirivit, jotka kuuluvat tähän tiliöintiin ja lasketaan niiden summa
@@ -410,32 +392,11 @@ if ($tee == 'U') {
 
 	// Katotaan voisiko meillä olla tässä joku toinen ALV tili
 	// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity ja oteteaan niiden alv tilit
-	$query = "	SELECT ifnull(group_concat(concat(\"'\",toim_alv,\"'\") SEPARATOR ','), '') toim_alv
-				FROM yhtion_toimipaikat
-				WHERE yhtio = '$kukarow[yhtio]'
-				and maa != ''
-				and vat_numero != ''
-				and toim_alv != ''";
-	$result = mysql_query($query) or pupe_error($query);
-	$tilitrow = mysql_fetch_array($result);
-
-	$alv_tili = $yhtiorow["alv"];
-
-	// haetaan ALV tili, käytetään sitä tositteen muidenkin alvitilien kirjailuun
-	if ($tilitrow["toim_alv"] != "") {
-		$query = "	SELECT DISTINCT tilino
-					FROM tiliointi
-					WHERE ltunnus = '$laskurow[tunnus]'
-					AND yhtio = '$kukarow[yhtio]'
-					AND tiliointi.korjattu = ''
-					AND tilino in ($tilitrow[toim_alv], '$yhtiorow[alv]')";
-		$result = mysql_query($query) or pupe_error($query);
-
-		// jos löytyy yks niin homma hyvin! (else tulee yhtiön takaa tosta ylhäältä)
-		if (mysql_num_rows($result) == 1) {
-			$tilitrow = mysql_fetch_array($result);
-			$alv_tili = $tilitrow["tilino"];
-		}
+	if ($laskurow['alv_tili'] != '') {
+		$alv_tili = $laskurow['alv_tili'];
+	}
+	else {
+		$alv_tili = $yhtiorow["alv"];
 	}
 
 	// Tarvitaan kenties tositenro
@@ -926,7 +887,6 @@ if ($tee == 'E' or $tee == 'F') {
 				</form>";
 	}
 
-
 	$queryoik = "SELECT tunnus from oikeu where nimi like '%liitetiedostot.php' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 	$res = mysql_query($queryoik) or pupe_error($queryoik);
 
@@ -956,8 +916,6 @@ if ($tee == 'E' or $tee == 'F') {
 				<input type = 'submit' value = '".t("Normaalitiedot")."'></form>";
 		}
 	}
-
-
 
 	if ($trow['tila'] == 'U') {
 		echo "<form action = 'tilauskasittely/tulostakopio.php' method='post'>

@@ -252,12 +252,12 @@
 
 	// Kirjoitetaan tosite jos tiedot ok!
 	if ($tee == 'I') {
-
 		$query = "	INSERT into lasku set
 					yhtio = '$kukarow[yhtio]',
 					tapvm = '$tpv-$tpk-$tpp',
 					nimi = '$nimi',
 					tila = 'X',
+					alv_tili = '$alv_tili',
 					laatija = '$kukarow[kuka]',
 					luontiaika = now()";
 		$result = mysql_query($query) or pupe_error($query);
@@ -482,10 +482,6 @@
 		// ollaan alv-rekisteröity
 		if (mysql_num_rows($alhire) >= 1) {
 
-			if ($tilino_alv == "") {
-				$tilino_alv = $trow["tilino_alv"];
-			}
-
 			echo "<tr>";
 			echo "<th>".t("Alv tili")."</th><td>";
 			echo "<select name='alv_tili'>";
@@ -493,7 +489,7 @@
 
 			while ($vrow = mysql_fetch_array($alhire)) {
 				$sel = "";
-				if ($tilino_alv == $vrow['toim_alv']) {
+				if ($alv_tili == $vrow['toim_alv']) {
 					$sel = "selected";
 				}
 				echo "<option value='$vrow[toim_alv]' $sel>$vrow[toim_alv] - $vrow[nimi], $vrow[kotipaikka], $vrow[maa]</option>";

@@ -2581,6 +2581,7 @@
 		$yhtioovttunnus 	= $yhtiorow["ovttunnus"];
 		$yhtiokotipaikka	= $yhtiorow["kotipaikka"];
 		$yhtiotoimipaikka	= $kukarow["toimipaikka"];
+		$yhtioalv_tilino	= $yhtiorow["alv"];
 
 		// poikkeava laskutusosoite
 		if ($alv_velvollisuus != "") {
@@ -2599,6 +2600,7 @@
 				$yhtioovttunnus  	= $apualvrow["vat_numero"];
 				$yhtiokotipaikka 	= $apualvrow["kotipaikka"];
 				$yhtiotoimipaikka	= $apualvrow["tunnus"]; // ylikirjoitetaan myös käyttäjän oletustoimipaikka
+				$yhtioalv_tilino	= $apualvrow["toim_alv"];
 			}
 
 		}
@@ -2639,6 +2641,7 @@
 					yhtio_ovttunnus						= '$yhtioovttunnus',
 					yhtio_kotipaikka					= '$yhtiokotipaikka',
 					yhtio_toimipaikka					= '$yhtiotoimipaikka',
+					alv_tili							= '$yhtioalv_tilino',
 					ytunnus								= '$ytunnus',
 					nimi 								= '$nimi',
 					nimitark 							= '$nimitark',

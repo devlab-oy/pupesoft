@@ -130,7 +130,7 @@
 					case 17 :
 						$fi202 += $verorow['veronmaara'];
 						break;
-					case 6 :
+					case 8 :
 						$fi203 += $verorow['veronmaara'];
 						break;
 				}
@@ -140,7 +140,7 @@
 		echo "<tr><th colspan='2'>Vero kotimaan myynnistä verokannoittain</th></tr>";
 		echo "<tr><td>201 22% :n vero</td><td align='right'>".sprintf('%.2f',$fi201)."</td></tr>";
 		echo "<tr><td>202 17% :n vero</td><td align='right'>".sprintf('%.2f',$fi202)."</td></tr>";
-		echo "<tr><td>203 6% :n vero</td><td align='right'>".sprintf('%.2f',$fi203)."</td></tr>";
+		echo "<tr><td>203 8% :n vero</td><td align='right'>".sprintf('%.2f',$fi203)."</td></tr>";
 
 	// 205 sääntö fi205
 

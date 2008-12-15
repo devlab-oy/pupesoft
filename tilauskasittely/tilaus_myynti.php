@@ -971,7 +971,13 @@ if ($tee == "VALMIS" and $kassamyyja_kesken == 'ei' and ($kukarow["kassamyyja"] 
 // Tilaus valmis
 if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
-	if ($rahtipainohinta != '' and $yhtiorow["rahti_hinnoittelu"] == 'P') {
+	///* Reload ja back-nappulatsekki *///
+	if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
+		echo "<font class='error'> ".t("Taisit painaa takaisin tai p‰ivit‰ nappia. N‰in ei saa tehd‰")."! </font><br>";
+		exit;
+	}
+
+	if ($rahtipainohinta != '' and $yhtiorow["rahti_hinnoittelu"] == 'P' and $laskurow["rahtivapaa"] == "") {
 		// kirjoitetaan rahtikulut laskulle
 		if (trim($yhtiorow["rahti_tuotenumero"]) == "") {
 			$tuotska = t("Rahtikulu");
@@ -982,8 +988,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
 		$query = "	SELECT *
 					from tuote
-					where yhtio='$kukarow[yhtio]'
-					and tuoteno='$tuotska'";
+					where yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$tuotska'";
 		$rhire = mysql_query($query) or pupe_error($query);
 		$tuote_row  = mysql_fetch_array($rhire);
 
@@ -997,12 +1003,6 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		$query  = "	INSERT INTO tilausrivi (hinta, ale, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv)
 					values ('$rahinta', '$lis_ale', 'N', '1', '1', '$otunnus', '$tuote_row[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv')";
 		$addtil = mysql_query($query) or pupe_error($query);
-	}
-
-	///* Reload ja back-nappulatsekki *///
-	if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
-		echo "<font class='error'> ".t("Taisit painaa takaisin tai p‰ivit‰ nappia. N‰in ei saa tehd‰")."! </font><br>";
-		exit;
 	}
 
 	// Tsekataan jos ollaan tehty asiakkaallevalmistus jossa ei ole yht‰‰n valmistettavaa rivi‰
@@ -4907,7 +4907,7 @@ if ($tee == '') {
 
 				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 
-				if ($yhtiorow["rahti_hinnoittelu"] == "P") {
+				if ($yhtiorow["rahti_hinnoittelu"] == "P" and $laskurow["rahtivapaa"] == "") {
 
 					$query  = "	SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 								FROM tilausrivi

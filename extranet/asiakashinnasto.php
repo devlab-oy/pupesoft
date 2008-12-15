@@ -15,8 +15,44 @@
 	if ($kukarow["eposti"] == "") {
 		echo "<font class='error'>".t("Sinulle ei ole määritelty sähköpostiosoitetta. Et voi ajaa tätä raporttia.")."</font><br>";
 	}
+	
+	if ($tee != '' and $ytunnus != '' and $kukarow["extranet"] == '') {
+		
+		if (isset($muutparametrit)) {
+			$muutparametrit = unserialize(urldecode($muutparametrit));
+			$osasto 	= $muutparametrit[0];
+			$try 		= $muutparametrit[1];
+			$checkall	= $muutparametrit[2];
+		}
+		
+		$muutparametrit = array($osasto, $try, $checkall);
+		$muutparametrit = urlencode(serialize($muutparametrit));
+		
+		
+		require("../inc/asiakashaku.inc");
 
-	if ($tee != '' and $kukarow["eposti"] != "") {
+		$asiakas = $asiakasrow["tunnus"];
+		$ytunnus = $asiakasrow["ytunnus"];
+	}
+	elseif ($tee != '' and $kukarow["extranet"] != '' and $kukarow["oletus_asiakas"] != '') {
+		//Haetaan asiakkaan tunnuksella
+		$query  = "	SELECT *
+					FROM asiakas
+					WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) == 1) {
+			$asiakasrow = mysql_fetch_array($result);
+			$ytunnus = $asiakasrow["ytunnus"];
+			$asiakas = $asiakasrow["tunnus"];
+		}
+		else {
+			echo t("VIRHE: Käyttäjätiedoissasi on virhe! Ota yhteys järjestelmän ylläpitäjään.")."<br><br>";
+			exit;
+		}
+	}
+	
+	if ($tee != '' and $kukarow["eposti"] != "" and $asiakas > 0) {
 		$where1 = '';
 		$where2 = '';
 
@@ -76,33 +112,10 @@
 			$where = "(". $where1." and ".$where2.")  and ";
 		}
 
-		$ytunnus = "";
-
-		if ($kukarow["extranet"] == '' and $kukarow["oletus_asiakas"] == '' and $syytunnus != "") {
-			$ytunnus = $syytunnus;
-		}
-		elseif ($kukarow["extranet"] != '' and $kukarow["oletus_asiakas"] != '') {
-			//Haetaan asiakkaan tunnuksella
-			$query  = "	SELECT *
-						FROM asiakas
-						WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
-			$result = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($result) == 1) {
-				$asiakas = mysql_fetch_array($result);
-				$ytunnus = $asiakas["ytunnus"];
-			}
-			else {
-				echo t("VIRHE: Käyttäjätiedoissasi on virhe! Ota yhteys järjestelmän ylläpitäjään.")."<br><br>";
-				exit;
-			}
-		}
-
-
-		if ((strlen($where) > 0 or $checkall != "") and $ytunnus != '') {
+		if ((strlen($where) > 0 or $checkall != "") and $ytunnus != '' and $asiakas != '') {
 			$query = "	SELECT *
 						FROM tuote
-						WHERE $where tuote.yhtio='$kukarow[yhtio]' and tuote.status NOT IN ('P','X')
+						WHERE $where tuote.yhtio='$kukarow[yhtio]' and tuote.status NOT IN ('P','X') and hinnastoon != 'E'
 						ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
 			$rresult = mysql_query($query) or pupe_error($query);
 
@@ -113,7 +126,7 @@
 					die("filen luonti epäonnistui!");
 
 			echo "<font class='message'>";
-			echo mysql_num_rows($rresult)." ".t("tuotetta löytyi").". ";
+			//echo mysql_num_rows($rresult)." ".t("tuotetta löytyi").". ";
 			echo t("Asiakashinnastoa ajetaan...");
 			echo "</font>";
 			echo "<br>";
@@ -139,8 +152,13 @@
 
 				//haetaan asiakkaan oma hinta
 				$laskurow["ytunnus"] = $ytunnus;
+				$laskurow["liitostunnus"] = $asiakas;
 				
 				list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $rrow, 1, '', '', '');
+				
+				if ($rrow["hinnastoon"] == "V" and $hinta == 0 and $ale == 0) {
+					continue;
+				}
 				
 				if ($netto != '') {
 					$ale = t("Netto");
@@ -213,7 +231,7 @@
 			echo "<font class='message'>".t("Hinnasto lähetetty sähköpostiosoitteeseen").": $kukarow[eposti]</font><br>";
 		}
 	}
-
+	
 	//Käyttöliittymä
 	echo "<br>";
 
@@ -223,12 +241,17 @@
 	echo "<input type='hidden' name='tee' value='kaikki'>";
 
 	if ($kukarow["extranet"] == '' and $kukarow["oletus_asiakas"] == '') {
-		echo "<tr><th>".t("Syötä asiakkaan ytunnus").":</th><td><input type='text' name='syytunnus' size='15' value='$syytunnus'></td></tr>";
+		echo "<tr><th>".t("Syötä asiakkaan ytunnus").":</th><td><input type='text' name='ytunnus' size='15' value='$ytunnus'></td></tr>";
 	}
 
 	echo "<tr><th>".t("Osasto").":</th><td><input type='text' name='osasto' value='$osasto' size='15'></td></tr>";
 	echo "<tr><th>".t("Tuoteryhmä").":</th><td><input type='text' name='try' value='$try' size='15'></td></tr>";
-	echo "<tr><th>".t("Kaikki osastot ja tuoteryhmät").":</th><td><input type='checkbox' name='checkall'></td></tr>";
+	
+	if (isset($checkall) !== FALSE) {
+		$chk='CHECKED';
+	}
+	
+	echo "<tr><th>".t("Kaikki osastot ja tuoteryhmät").":</th><td><input type='checkbox' name='checkall' $chk></td></tr>";
 
 	echo "</table><br>";
 	echo "<input type='submit' value='Aja hinnasto'>";

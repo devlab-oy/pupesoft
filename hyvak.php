@@ -175,7 +175,7 @@
 	}
 
 	// halutaan n‰hd‰ otsikko, tai ollaan eka hyv‰ksyj‰ ja ei olla hyv‰ksym‰ss‰ laskua
-	if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H')) {
+	if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H' and ($kukarow['taso'] == '2' or $kukarow["taso"] == '3'))) {
 		$query = "	SELECT *
 					FROM lasku
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]'
@@ -250,9 +250,9 @@
 		$tunnus = '';
 		$tee = '';
 	}
-	
+
 	if($tee == "palauta") {
-		
+
 		$query = "	SELECT *
 					FROM lasku
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]' and
@@ -263,41 +263,41 @@
 			die(t("Lasku kateissa"));
 		}
 		$lrow = mysql_fetch_array($result);
-		
+
 		if($viesti == "" or (int) $hyvaksyja == 0) {
-			
+
 			if($formilta == "true") {
 				if((int) $hyvaksyja == 0) echo "<font class='error'>".t("Valitse kenelle lasku palautetaan.")."</font><br>";
 
 				if($viesti == "") echo "<font class='error'>".t("Anna syy palautukseen.")."</font><br>";
 			}
-			
+
 			$hyvaksyjat = "	<table>
 							<tr>
 								<th>".t("Kenelle lasku palautetaan")."</th>
 							</tr>";
-							
-								
+
+
 			//	Valitse kenelle palautetaan
 			for($i=1;$i<5;$i++) {
 				$haika	= "h".$i."time";
 				$haiku	= "hyvak".$i;
-				
+
 				if($lrow[$haika] != "0000-00-00 00:00:00") {
-					
+
 					$query = "	SELECT nimi
 								FROM kuka
 								WHERE yhtio = '$kukarow[yhtio]' and kuka = '".$lrow[$haiku]."'";
 					$result = mysql_query($query) or pupe_error($query);
 					$krow = mysql_fetch_array($result);
-					
+
 					if($hyvaksyja == $i) {
 						$sel = "checked";
 					}
 					else {
 						$sel = "";
 					}
-					$hyvaksyjat .= "	
+					$hyvaksyjat .= "
 									<tr>
 										<td><input type='radio' name='hyvaksyja' value='$i' $sel> $i. {$krow["nimi"]}</td>
 									</tr>";
@@ -306,8 +306,8 @@
 
 			$hyvaksyjat .= "
 			</table><br>";
-			
-			echo "	
+
+			echo "
 					<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tee' value='$tee'>
 					<input type='hidden' name='formilta' value='true'>
@@ -327,7 +327,7 @@
 					</form>
 					<br>
 					<form action = '$PHP_SELF' method='post'>
-					<input type='hidden' name='tunnus' value='$tunnus'>				
+					<input type='hidden' name='tunnus' value='$tunnus'>
 					<input type = 'submit' value = '".t("Palaa laskun hyv‰ksynt‰‰n")."'>
 					</form>";
 
@@ -342,20 +342,20 @@
 				$kukahyvak = $lrow["hyvak{$hyvaksyja}"];
 			}
 			else die("Hyv‰ksyj‰ ei kelpaa");
-			
+
 			$query = "	SELECT *
 						FROM kuka
 						WHERE yhtio = '{$kukarow["yhtio"]}' and kuka = '$kukahyvak'";
 			$result = mysql_query($query) or pupe_error($query);
 			$krow = mysql_fetch_array($result);
-			
+
 			// Merkataan lasku poistetuksi
 			$query = "	UPDATE lasku SET
 							$upd
 						WHERE tunnus = '$tunnus' and
 						yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			echo "<font class='message'>".t('Palauttettiin lasku k‰ytt‰j‰lle')." {$krow["nimi"]}</font><br>";
 
 			//	L‰hetet‰‰n maili virheen merkiksi!
@@ -856,11 +856,11 @@
 			elseif ($_POST['id'] != '') {
 				echo "&id=".mysql_real_escape_string($_POST['id']);
 			}
-			
+
 			if (isset($iframe) and $iframe == 'yes') {
 				echo "&iframe=$iframe";
 			}
-			
+
 			echo "'>".tv1dateconv($laskurow["tapvm"])."</a></td>";
 		}
 		else {
@@ -1451,7 +1451,7 @@
 							<input type='Submit' value='".t("Hyv‰ksy tiliˆinti ja lasku")."'>
 							</form></td>";
 			}
-			
+
 			if($laskurow["h1time"] != "0000-00-00 00:00:00") {
 				echo "<form action = '$PHP_SELF' method='post'>
 						<input type='hidden' name='tee' value='palauta'>
@@ -1459,7 +1459,7 @@
 						<td class='back'><input type='Submit' value='".t("Palauta lasku edelliselle hyv‰ksyj‰lle")."'></td>
 						</form>";
 			}
-			
+
 			// N‰ytet‰‰n alv-erittely, jos on useita kantoja.
 			if ($naytalisa != '') {
 				$query = "	SELECT vero, sum(summa) veroton, round(sum(summa*vero/100),2) 'veron m‰‰r‰', round(sum(summa*(1+vero/100)),2) verollinen from tiliointi
@@ -1542,7 +1542,7 @@
 			elseif ($iframe == 'yes' and ($laskurow["ebid"] != "" or mysql_num_rows($liiteres) == 1)) {
 
 				// <input type='hidden' name = 'iframe' value = '$iframe'>
-			
+
 		  		echo "<form action = '$PHP_SELF' method='post'>
 		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
 						<input type='hidden' name = 'id' value = '$id'>
@@ -1682,7 +1682,7 @@
 			echo "<tr>";
 
 			 // Eli vain tasolla 1/2/3 ja ensimm‰iselle hyv‰ksyj‰lle.
-			if (($kukarow['taso'] == '1' or $kukarow["taso"] == '2' or $kukarow["taso"] == '3') and $trow['hyvak1'] == $kukarow['kuka']) {
+			if (($kukarow["taso"] == '2' or $kukarow["taso"] == '3') and $trow['hyvak1'] == $kukarow['kuka']) {
 				echo "<td valign='top'><a href='$PHP_SELF?tee=M&tunnus=$trow[tunnus]'>".tv1dateconv($trow["tapvm"])."</a></td>";
 			}
 			else {

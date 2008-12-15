@@ -175,7 +175,7 @@
 	}
 
 	// halutaan nähdä otsikko, tai ollaan eka hyväksyjä ja ei olla hyväksymässä laskua
-	if ($tee == 'M' or ($onko_eka_hyvaksyja == TRUE and $tee != 'H')) {
+	if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H')) {
 		$query = "	SELECT *
 					FROM lasku
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]'
@@ -193,8 +193,10 @@
 
 		if ($trow['hyvak1'] == $kukarow['kuka']) {
 			$hyvak_apu_tee = $tee;
+			$hyvak_apu_tila = $tila;
 			require ("inc/muutosite.inc");
 			$tee = $hyvak_apu_tee;
+			$tila = $hyvak_apu_tila;
 		}
 	}
 

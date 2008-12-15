@@ -15,7 +15,7 @@
 
 	if (isset($tee)) {
 		if ($tee == "lataa_tiedosto") {
-			readfile("/tmp/".$tmpfilenimi);	
+			readfile("/tmp/".$tmpfilenimi);
 			exit;
 		}
 	}
@@ -29,7 +29,7 @@
 					}
 				-->
 				</script>";
-			
+
 		$toim = strtoupper($toim);
 
 		if ($toim == "" or $toim == "SUPER") {
@@ -86,22 +86,22 @@
 		}
 
 		if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER") and $tee == '' and $kukarow["kesken"] != 0 and $tilausnumero != "") {
-			$query_tarjous = "	UPDATE 	lasku 
-								SET		alatila = tila, 
-								 		tila = 'D', 
-										muutospvm = now(), 
+			$query_tarjous = "	UPDATE 	lasku
+								SET		alatila = tila,
+								 		tila = 'D',
+										muutospvm = now(),
 										comments = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mit‰tˆi tilauksen")." ohjelmassa muokkaatilaus.php now()')
 								WHERE	yhtio = '$kukarow[yhtio]'
 								AND		tunnus = $tilausnumero";
 			$result_tarjous = mysql_query($query_tarjous) or pupe_error($query_tarjous);
-			
+
 			echo "<font class='message'>".t("Mit‰tˆitiin lasku")." $tilausnumero</font><br><br>";
 		}
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
-			
+
 			echo "<font class='head'>".t("Muokkaa")." $otsikko<hr></font>";
-				
+
 			// Tehd‰‰n popup k‰ytt‰j‰n lep‰‰m‰ss‰ olevista tilauksista
 			if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOLISTASUPER" or $toim == "MYYNTITILI" or $toim == "MYYNTITILISUPER") {
 				$query = "	SELECT *
@@ -139,7 +139,7 @@
 							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and tilaustyyppi = '' and alatila = ''";
 				$eresult = mysql_query($query) or pupe_error($query);
 			}
-			elseif ($toim == "OSTOSUPER") {		
+			elseif ($toim == "OSTOSUPER") {
 				$query = "	SELECT lasku.*
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 							JOIN lasku use index (primary) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila = 'A' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]')
@@ -386,7 +386,7 @@
 							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X'";
 			$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
 			$sumrow = mysql_fetch_array($sumresult);
-						
+
 			$miinus = 4;
 		}
 		elseif ($toim == 'ENNAKKO') {
@@ -624,9 +624,9 @@
 			$miinus = 5;
 		}
 		elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYSSUPER") {
-			$query = "	SELECT lasku.tunnus tilaus, 
-						concat_ws('<br>',lasku.nimi,lasku.tilausyhteyshenkilo,lasku.viesti, concat_ws(' ', ifnull((SELECT selitetark_2 FROM avainsana WHERE avainsana.yhtio=tyomaarays.yhtio and avainsana.laji = 'sarjanumeron_li' and avainsana.selite = 'MERKKI' and avainsana.selitetark=tyomaarays.merkki LIMIT 1), tyomaarays.merkki), tyomaarays.mallivari)) asiakas, 
-						lasku.ytunnus, lasku.luontiaika, 
+			$query = "	SELECT lasku.tunnus tilaus,
+						concat_ws('<br>',lasku.nimi,lasku.tilausyhteyshenkilo,lasku.viesti, concat_ws(' ', ifnull((SELECT selitetark_2 FROM avainsana WHERE avainsana.yhtio=tyomaarays.yhtio and avainsana.laji = 'sarjanumeron_li' and avainsana.selite = 'MERKKI' and avainsana.selitetark=tyomaarays.merkki LIMIT 1), tyomaarays.merkki), tyomaarays.mallivari)) asiakas,
+						lasku.ytunnus, lasku.luontiaika,
 						if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija, $toimaikalisa alatila, lasku.tila, lasku.tunnus
 						FROM lasku use index (tila_index)
 						LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
@@ -672,9 +672,9 @@
 			$miinus = 4;
 		}
 		elseif ($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOTYOMAARAYSSUPER") {
-			$query = "	SELECT lasku.tunnus tilaus, 
-						concat_ws('<br>',lasku.nimi,lasku.tilausyhteyshenkilo,lasku.viesti, concat_ws(' ', ifnull((SELECT selitetark_2 FROM avainsana WHERE avainsana.yhtio=tyomaarays.yhtio and avainsana.laji = 'sarjanumeron_li' and avainsana.selite = 'MERKKI' and avainsana.selitetark=tyomaarays.merkki LIMIT 1), tyomaarays.merkki), tyomaarays.mallivari)) asiakas, 
-						lasku.ytunnus, lasku.luontiaika, 
+			$query = "	SELECT lasku.tunnus tilaus,
+						concat_ws('<br>',lasku.nimi,lasku.tilausyhteyshenkilo,lasku.viesti, concat_ws(' ', ifnull((SELECT selitetark_2 FROM avainsana WHERE avainsana.yhtio=tyomaarays.yhtio and avainsana.laji = 'sarjanumeron_li' and avainsana.selite = 'MERKKI' and avainsana.selitetark=tyomaarays.merkki LIMIT 1), tyomaarays.merkki), tyomaarays.mallivari)) asiakas,
+						lasku.ytunnus, lasku.luontiaika,
 						if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija, $toimaikalisa alatila, lasku.tila, lasku.tunnus
 						FROM lasku use index (tila_index)
 						LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
@@ -687,7 +687,7 @@
 			$miinus = 3;
 		}
 		elseif ($toim == "TARJOUS") {
-			$query = "	SELECT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,						
+			$query = "	SELECT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
 						if(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, interval $yhtiorow[tarjouksen_voimaika] day)) >= now(), '<font style=\'color:00FF00;\'>Voimassa</font>', '<font style=\'color:FF0000;\'>Er‰‰ntynyt</font>') voimassa,
 						DATEDIFF(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, INTERVAL $yhtiorow[tarjouksen_voimaika] day)), now()) pva,
 						if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija,
@@ -716,7 +716,7 @@
 			$miinus = 4;
 		}
 		elseif ($toim == "TARJOUSSUPER") {
-			$query = "	SELECT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,						
+			$query = "	SELECT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
 						if(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, interval $yhtiorow[tarjouksen_voimaika] day)) >= now(), '<font style=\'color:00FF00;\'>Voimassa</font>', '<font style=\'color:FF0000;\'>Er‰‰ntynyt</font>') voimassa,
 						DATEDIFF(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, INTERVAL $yhtiorow[tarjouksen_voimaika] day)), now()) pva,
 						if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija,
@@ -788,16 +788,16 @@
 		}
 		elseif ($toim == 'OSTO') {
 			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus,
-							(SELECT count(*) 
-							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)  
-							WHERE aputilausrivi.yhtio = lasku.yhtio 
-							AND aputilausrivi.otunnus = lasku.tunnus 
+							(SELECT count(*)
+							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)
+							WHERE aputilausrivi.yhtio = lasku.yhtio
+							AND aputilausrivi.otunnus = lasku.tunnus
 							AND aputilausrivi.uusiotunnus > 0
-							AND aputilausrivi.kpl <> 0 
+							AND aputilausrivi.kpl <> 0
 							AND aputilausrivi.tyyppi = 'O') varastokpl
 						FROM lasku use index (tila_index)
-						WHERE lasku.yhtio = '$kukarow[yhtio]' 
-						and lasku.tila		= 'O' 
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila		= 'O'
 						and lasku.alatila	= ''
 						and lasku.tilaustyyppi	= ''
 						$haku
@@ -807,12 +807,12 @@
 		}
 		elseif ($toim == 'OSTOSUPER') {
 			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus,
-							(SELECT count(*) 
-							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)  
-							WHERE aputilausrivi.yhtio = tilausrivi.yhtio 
-							AND aputilausrivi.otunnus = tilausrivi.otunnus 
+							(SELECT count(*)
+							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)
+							WHERE aputilausrivi.yhtio = tilausrivi.yhtio
+							AND aputilausrivi.otunnus = tilausrivi.otunnus
 							AND aputilausrivi.uusiotunnus > 0
-							AND aputilausrivi.kpl <> 0 
+							AND aputilausrivi.kpl <> 0
 							AND aputilausrivi.tyyppi = 'O') varastokpl
 						FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 						JOIN lasku use index (primary) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != ''
@@ -820,7 +820,7 @@
 						and tilausrivi.tyyppi 			= 'O'
 						and tilausrivi.laskutettuaika 	= '0000-00-00'
 						and tilausrivi.uusiotunnus 		= 0
-						and lasku.tilaustyyppi			= ''						
+						and lasku.tilaustyyppi			= ''
 						$haku
 						GROUP by lasku.tunnus
 						ORDER by lasku.luontiaika desc
@@ -829,18 +829,18 @@
 		}
 		elseif ($toim == 'HAAMU') {
 			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus,
-							(SELECT count(*) 
-							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)  
-							WHERE aputilausrivi.yhtio = lasku.yhtio 
-							AND aputilausrivi.otunnus = lasku.tunnus 
+							(SELECT count(*)
+							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)
+							WHERE aputilausrivi.yhtio = lasku.yhtio
+							AND aputilausrivi.otunnus = lasku.tunnus
 							AND aputilausrivi.uusiotunnus > 0
-							AND aputilausrivi.kpl <> 0 
+							AND aputilausrivi.kpl <> 0
 							AND aputilausrivi.tyyppi = 'O') varastokpl
 						FROM lasku use index (tila_index)
-						WHERE lasku.yhtio = '$kukarow[yhtio]' 
-						and lasku.tila			= 'O' 
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila			= 'O'
 						and lasku.alatila		= ''
-						and lasku.tilaustyyppi	= 'O'						
+						and lasku.tilaustyyppi	= 'O'
 						$haku
 						ORDER by lasku.luontiaika desc
 						$rajaus";
@@ -945,19 +945,19 @@
 
 			if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 				if(@include('Spreadsheet/Excel/Writer.php')) {
-		
+
 					//keksit‰‰n failille joku varmasti uniikki nimi:
 					list($usec, $sec) = explode(' ', microtime());
 					mt_srand((float) $sec + ((float) $usec * 100000));
 					$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-		
+
 					$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
 					$workbook->setVersion(8);
 					$worksheet = $workbook->addWorksheet('Sheet 1');
-	
+
 					$format_bold = $workbook->addFormat();
 					$format_bold->setBold();
-	
+
 					$excelrivi = 0;
 				}
 			}
@@ -965,20 +965,20 @@
 
 			// scripti balloonien tekemiseen
 			js_popup();
-		
+
 			echo "<tr>";
 
 			for ($i=0; $i < mysql_num_fields($result)-$miinus; $i++) {
 				echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
-		
+
 				if(isset($workbook)) {
 					$worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 				}
 			}
 			$excelrivi++;
-			
+
 			echo "<th align='left'>".t("tyyppi")."</th></tr>";
-			
+
 			$lisattu_tunnusnippu  = array();
 			while ($row = mysql_fetch_array($result)) {
 
@@ -995,7 +995,7 @@
 						$piilotarivi = "kylla";
 					}
 				}
-				
+
 				//	Nipuista vain se viimeisin jos niin halutaan
 				if($row["tunnusnippu"] > 0 and ($toim == "PROJEKTI" or $toim == "TARJOUS")) {
 
@@ -1013,26 +1013,26 @@
 
 					// jos kyseess‰ on "odottaa JT tuotteita rivi ja kyseessa on toim=JTTOIMITA"
 					if ($row["tila"] == "N" and $row["alatila"] == "U") {
-						
+
 						if ($yhtiorow["varaako_jt_saldoa"] != "") {
 							$lisavarattu = " + tilausrivi.varattu";
 						}
 						else {
 							$lisavarattu = "";
 						}
-						
-						$query = "	SELECT tilausrivi.tuoteno, tilausrivi.jt $lisavarattu jt 
-									from tilausrivi 
-									where tilausrivi.yhtio	= '$kukarow[yhtio]' 
-									and tilausrivi.tyyppi	= 'L' 
+
+						$query = "	SELECT tilausrivi.tuoteno, tilausrivi.jt $lisavarattu jt
+									from tilausrivi
+									where tilausrivi.yhtio	= '$kukarow[yhtio]'
+									and tilausrivi.tyyppi	= 'L'
 									and tilausrivi.otunnus	= '$row[tilaus]'";
 						$countres = mysql_query($query) or pupe_error($query);
 
 						$jtok = 0;
-						
+
 						while($countrow = mysql_fetch_array($countres)) {
 							list( , , $jtapu_myytavissa) = saldo_myytavissa($countrow["tuoteno"], "JTSPEC", 0, "");
-							
+
 							if ($jtapu_myytavissa < $countrow["jt"]) {
 								$jtok--;
 							}
@@ -1042,30 +1042,33 @@
 					echo "<tr class='aktiivi'>";
 
 					for ($i=0; $i<mysql_num_fields($result)-$miinus; $i++) {
-						
+
 						if ($toim == "YLLAPITO" and $row["sopimus_loppupvm"] < date("Y-m-d") and $row["sopimus_loppupvm"] != '0000-00-00') {
 							$class = 'tumma';
 						}
 						else {
 							$class = '';
 						}
-						
+
 						if (mysql_field_name($result,$i) == 'luontiaika' or mysql_field_name($result,$i) == 'toimaika') {
 							echo "<td class='$class' valign='top'>".tv1dateconv($row[$i],"pitka")."</td>";
 						}
 						elseif (mysql_field_name($result,$i) == 'Pvm') {
 							list($aa, $bb) = explode('<br>', $row[$i]);
-							
+
 							echo "<td class='$class' valign='top'>".tv1dateconv($aa,"pitka")."<br>".tv1dateconv($bb,"pitka")."</td>";
 						}
 						elseif (mysql_field_name($result,$i) == "tilaus") {
-							
-							$query_comments = "SELECT comments, sisviesti2 from lasku where yhtio='$kukarow[yhtio]' and tunnus=$row[$i]";
-							$result_comments = mysql_query($query_comments) or pupe_error($query_comments);
 
+							$query_comments = "	SELECT comments, sisviesti2
+												FROM lasku use index (primary)
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND tunnus = '$row[$i]'
+												AND (comments != '' OR sisviesti2 != '')";
+							$result_comments = mysql_query($query_comments) or pupe_error($query_comments);
 							$row_comments = mysql_fetch_array($result_comments);
 
-							if (mysql_num_rows($result_comments) == 1 and $row_comments["comments"] != "") {
+							if (mysql_num_rows($result_comments) == 1) {
 								echo "<div id='kommentti$row[$i]' class='popup' style='width: 500px;'>";
 								echo "$row_comments[comments] $row_comments[sisviesti2]";
 								echo "</div>";
@@ -1083,17 +1086,17 @@
 							if (mysql_field_type($result,$i) == 'real') {
 								$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
 							}
-							else {						
+							else {
 								$worksheet->writeString($excelrivi, $i, $row[$i]);
 							}
 						}
 					}
-				
+
 
 					if ($row["tila"] == "N" and $row["alatila"] == "U") {
 						if ($jtok == 0) {
 							echo "<td class='$class' valign='top'><font style='color:00FF00;'>".t("Voidaan toimittaa")."</font></td>";
-						
+
 							if(isset($workbook)) {
 								$worksheet->writeString($excelrivi, $i, "Voidaan toimittaa");
 								$i++;
@@ -1101,7 +1104,7 @@
 						}
 						else {
 							echo "<td class='$class' valign='top'><font style='color:FF0000;'>".t("Ei voida toimittaa")."</font></td>";
-						
+
 							if(isset($workbook)) {
 								$worksheet->writeString($excelrivi, $i, t("Ei voida toimittaa"));
 								$i++;
@@ -1133,15 +1136,15 @@
 						} else {
 							$varastotila = "";
 						}
-						
+
 						echo "<td class='$class' valign='top'>".t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila</td>";
-					
+
 						if(isset($workbook)) {
 							$worksheet->writeString($excelrivi, $i, t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila");
 							$i++;
 						}
 					}
-				
+
 					$excelrivi++;
 
 					// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
@@ -1273,30 +1276,30 @@
 			}
 
 			echo "</table>";
-			
-			
+
+
 			if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 				if (is_array($sumrow)) {
 					echo "<br><table>";
 					echo "<tr><th>".t("Arvo yhteens‰")." ($sumrow[kpl] ".t("kpl")."): </th><td align='right'>$sumrow[arvo] $yhtiorow[valkoodi]</td></tr>";
-					
+
 					if (isset($sumrow["jt_arvo"]) and $sumrow["jt_arvo"] != 0) {
-						echo "<tr><th>".t("Muu tilauskanta").":</th><td align='right'>$sumrow[jt_arvo] $yhtiorow[valkoodi]</td></tr>";	
-					
-					
+						echo "<tr><th>".t("Muu tilauskanta").":</th><td align='right'>$sumrow[jt_arvo] $yhtiorow[valkoodi]</td></tr>";
+
+
 						echo "<tr><th>".t("Yhteens‰")."</th><td align='right'>".sprintf('%.2f', $sumrow["jt_arvo"]+$sumrow["arvo"])." $yhtiorow[valkoodi]</td></tr>";
-						
+
 						echo "<tr><td class='back'><br></td></tr>";
 					}
-					
+
 					echo "<tr><th>".t("Summa yhteens‰").": </th><td align='right'>$sumrow[summa] $yhtiorow[valkoodi]</td></tr>";
-					
+
 					if (isset($sumrow["jt_summa"]) and $sumrow["jt_summa"] != 0) {
-						echo "<tr><th>".t("Muu tilauskanta").":</th><td align='right'>$sumrow[jt_summa] $yhtiorow[valkoodi]</td></tr>";	
-						
+						echo "<tr><th>".t("Muu tilauskanta").":</th><td align='right'>$sumrow[jt_summa] $yhtiorow[valkoodi]</td></tr>";
+
 						echo "<tr><th>".t("Yhteens‰")."</th><td align='right'>".sprintf('%.2f', $sumrow["jt_summa"]+$sumrow["summa"])." $yhtiorow[valkoodi]</td></tr>";
 					}
-					
+
 					echo "</table>";
 				}
 
@@ -1312,12 +1315,12 @@
 						<td class='back'><input type='Submit' value = '".t("N‰yt‰ kaikki")."'></td>
 						</form></tr></table>";
 				}
-		
+
 				if(isset($workbook)) {
-		
+
 					// We need to explicitly close the workbook
 					$workbook->close();
-		
+
 					echo "<br><table>";
 					echo "<tr><th>".t("Tallenna lista").":</th>";
 					echo "<form method='post' action='$PHP_SELF'>";

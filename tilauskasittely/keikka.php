@@ -220,7 +220,7 @@ if ($toiminto == "poista") {
 	}
 
 	if ($eisaapoistaa == 0) {
-		$query  = "delete from lasku where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkaid'";
+		$query  = "UPDATE lasku SET alatila = tila, tila = 'D' where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkaid'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// formissa on tullut myös $ytunnus, joten näin päästään takaisin selaukseen

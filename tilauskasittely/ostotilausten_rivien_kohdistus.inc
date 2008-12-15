@@ -622,8 +622,9 @@ if ($tila == '') {
 		$lisa1 = " HAVING ".substr($lisa1, 0, -3);
 		$limit = "";
 		$alku = 0;
-	}
-
+	}	
+	
+	// tilassa on D mukana koska joskus voi k‰yd‰ niin ett‰ alkuper‰inen tilaus dellataan mutta jo kohdistettu rivi j‰‰ keikalle.
 	$query = "	SELECT $kentat
 				varattu,
 				tilausrivi.perheid,
@@ -643,7 +644,7 @@ if ($tila == '') {
 				LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.liitostunnus = '$laskurow[liitostunnus]'
-				and lasku.tila in ('O','K')
+				and lasku.tila in ('O','K','D')
 				GROUP BY tilausrivi.tunnus
 				$lisa1
 				ORDER BY $jarjestys

@@ -1289,7 +1289,7 @@
 					}
 					else {
 						$where = " tilausrivi.otunnus='$otunnus' ";
-						$where2= " and tilausrivi.tyyppi in ('L','W') ";
+						$where2= " and tilausrivi.tyyppi in ('L','W','E') ";
 					}
 
 					// katotaan miten halutaan sortattavan

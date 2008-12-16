@@ -15,7 +15,8 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
 	$ulos .= "ICHG_INFO:$postirow[laatija]\n";								// laatija
 	$ulos .= "SMSGSTART:$postirow[tunnus]\n";								// rahtikirjan numero
 	$ulos .= "SBGMITYPE:700\n";
-	$ulos .= "SBGMINUMB:$postirow[tunnus]$postirow[ytunnus]".date("Ymd")."\n";// rahtikirjan numero, ytunnus ja pvm
+//	$ulos .= "SBGMINUMB:$postirow[tunnus]$postirow[ytunnus]".date("Ymd")."\n";// rahtikirjan numero, ytunnus ja pvm
+	$ulos .= "SBGMINUMB:$postirow[ytunnus]\n";								// pelkkä ytunnus, niin niputtuu paremmin
 	$ulos .= "SMGMMFUNC:7\n";
 	$ulos .= "SCNT11_TL:1@PCE\n";											// kollit, aina yksi. koska aina file per kolli
 	$ulos .= "SCNT7__TL:$kilotyht@KGM\n";									// kilot

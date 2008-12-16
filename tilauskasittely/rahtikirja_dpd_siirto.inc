@@ -169,6 +169,16 @@ if ($kollityht > 0) {
 	// Lis‰t‰‰n, jos tulostetaan useita rivej‰ tiedostoon (Jepulis, pit‰‰ olla Windows rivinvaihto CR\LF!)
 	$rivit .= $rivi."\r\n";
 
+	if ($delisprint_polku != '') {
+		if (substr($delisprint_polku,-1) != '/') {
+			$delisprint_polku .= '/';
+		}
+		$filenimi = $delisprint_polku."dpdimport-".md5(uniqid(rand(),true)).".dat";
+	}
+	else {
+		$filenimi = "/tmp/dpdimport-".md5(uniqid(rand(),true)).".dat";
+	}
+
 	$filenimi = "/tmp/dpdimport-".md5(uniqid(rand(),true)).".dat";
 	//kirjoitetaan faili levylle..
 	$fh = fopen($filenimi, "w");

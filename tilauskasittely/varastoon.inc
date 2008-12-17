@@ -155,7 +155,7 @@ else {
 					WHERE tilausrivi.uusiotunnus = '$otunnus'
 					and tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.netto = ''
-					and tilausrivi.varattu<>0";
+					and tilausrivi.varattu <> 0";
 	$result   = mysql_query($query) or pupe_error($query);
 	$hintarow = mysql_fetch_array($result);
 
@@ -228,9 +228,14 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$alvit = 1;
 	}
 
-	if ($laskurow['summa'] != 0) {
-		$osuus   = round($erikoisale*$tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin'],2)/$laskurow['summa'];	// kuinka paljon tämä rivi on koko tilauksesta
-		$rahtios = $osuus*$rahtikulut;	// lasketaan sama osuus rahtikuluista tälle riville
+	// lasketaan rivin hinta
+	$osuus_apu_hinta = round($erikoisale*$tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin'], $yhtiorow["hintapyoristys"]);
+
+	// jos keikan arvo on muuta kuin nolla ja rivin hinta on pienempi kuin keikan hinta, lasketaan rahtiosuus. muuten nollaa
+	if ($laskurow['summa'] != 0 and $osuus_apu_hinta < $laskurow["summa"]) {
+		// rivin hinta
+		$osuus   = $osuus_apu_hinta / $laskurow['summa'];	// kuinka paljon tämä rivi on koko keikasta
+		$rahtios = $osuus*$rahtikulut;						// lasketaan sama osuus rahtikuluista tälle riville
 	}
 	else {
 		$rahtios = 0;
@@ -322,8 +327,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$rivitunnus = $tilrivirow["tunnus"]; 		// rivin tunnus, tällä löydetään varmasti oikea tapahtuma
 
 		$uusikehahin = jalkilaskentafunktio($tuoteno, $pvm, $uusihinta, $rivitunnus);
-
-		$uusikehahin = "-> $uusikehahin";
+		$uusikehahin = sprintf('%.6f', $uusikehahin);
 
 		if ($hankintakulut != '') {
 			$query = "SELECT hankintakulut FROM tilausrivin_lisatiedot WHERE yhtio = '$kukarow[yhtio]' AND tilausrivitunnus = '$tilrivirow[tunnus]'";
@@ -574,11 +578,11 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	$varastoon_msg .= "	<td valign='top'>$tilrivirow[tuoteno]</td>
 						<td align='right' valign='top'>$tilrivirow[varattu]<br>".sprintf('%.2f', $tilrivirow['varattu']*$tuorow['tuotekerroin'])."</td>
 						<td align='right' valign='top'>$tilrivirow[ale]%</td>
-						<td align='right' valign='top'>$tilrivirow[hinta]<br>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta']*$tuorow['tuotekerroin'])."</td>
+						<td align='right' valign='top'>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta'])."<br>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta']*$tuorow['tuotekerroin'])."</td>
 						<td align='right' valign='top'>".sprintf('%.6f', $osuus)."</td>
 						<td align='right' valign='top'>".sprintf('%.6f', $osuus*$rahtikulut)."</td>
 						<td align='right' valign='top'>$tv_nimrow[maara] $tv_nimrow[rahayksikko]</td>
-						<td align='right' valign='top'>$ohinta</td>
+						<td align='right' valign='top'>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $ohinta)."</td>
 						<td align='right' valign='top'>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $ohinta*$tilrivirow['varattu']) . " $kuluteksti</td>";
 
 
@@ -586,7 +590,12 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$varastoon_msg .= "	<td align='right'></td>";
 	}
 	else {
-		$varastoon_msg .= "	<td align='right'>$tuorow[kehahin]<br>$kehahin $uusikehahin</td>";
+		if ($uusikehahin == "") {
+			$varastoon_msg .= "	<td align='right'>$tuorow[kehahin]<br>~$kehahin</td>";
+		}
+		else {
+			$varastoon_msg .= "	<td align='right'>$tuorow[kehahin]<br>$uusikehahin</td>";
+		}
 	}
 
 	if ($tee == "") {

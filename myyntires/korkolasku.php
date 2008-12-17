@@ -35,7 +35,10 @@ if ($tee == 'LAHETA') {
 	$tee = "KOROTA";
 }
 
+$kasittelykulu = str_replace(',','.', $kasittelykulu);
+
 if (($yhtiorow["kasittelykulu_tuotenumero"] != '') and (!is_numeric($kasittelykulu) or $kasittelykulu < 0)) {
+	echo "<font class='error'>".t("Virheellinen summa")."!</font><br>";
 	$tee = "";
 }
 

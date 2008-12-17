@@ -805,10 +805,67 @@
 					}
 				}
 			}
+			
+			
+			$query = "SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
+			$kuvalaskures = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($kuvalaskures) > 0) {
+				$kuvalaskurow = mysql_fetch_array($kuvalaskures);
+                  
+				$ebid=$kuvalaskurow['ebid'];
+                
+				$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
+				$salasana		   = $yhtiorow['verkkosala_vas'];
+                
+				$timestamppi = gmdate("YmdHis")."Z";
+                
+				$urlhead = "http://www.verkkolasku.net";
+				$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";
+                
+				$digest	 = md5($urlmain . "&" . $salasana);
+				$url	 = $urlhead.$urlmain."&DIGEST=$digest";
+                
+				$sisalto = file_get_contents($url);
+
+				if (substr($sisalto,0,4) == "%PDF") {
+					// tallennetaan kuva
+					$filename = $ebid.".pdf";
+					
+					//filesize functio ei toimi koska ei ole oikea file.
+					$filesize = strlen($sisalto);
+					
+					//echo "Ebid: $ebid\n";
+					
+					//echo "Filesize: $filesize\n";
+					
+					
+					$mime = 'application/pdf';
+
+					$data  = addslashes($sisalto);
+
+					$selite = mysql_real_escape_string("{$kuvalaskurow['nimi']} {$kuvalaskurow['summa']} {$kuvalaskurow['valkoodi']}");
+                
+					// lisätään kuva
+					$query = "  INSERT into liitetiedostot SET
+								liitos       = 'lasku',
+								liitostunnus = '$tunnus',
+								luontiaika   = now(),
+								selite       = '$selite',
+								data         = '$data',
+								laatija      = '$kukarow[kuka]',
+								filename 	 = '$filename',
+								filetype 	 = '$mime',
+								filesize 	 = '$filesize',
+								yhtio    	 = '$kukarow[yhtio]'";
+                
+					$Xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+				}
+			}
 
 			// päästiin onnillisesti loppuun
 	    	$sub = "$yhtiorow[nimi] vastaanotti laskun $verkapunimi:lta";
-	    	$meili = "Verkkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLaskunro: $laskun_numero\nPäivä: $laskun_paiva\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
+	    	$meili = "Verkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLaskunro: $laskun_numero\nPäivä: $laskun_paiva\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
 		    $tulos = mail($yhtiorow['alert_email'], $sub, $meili, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
 			if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[alert_email]<br>";

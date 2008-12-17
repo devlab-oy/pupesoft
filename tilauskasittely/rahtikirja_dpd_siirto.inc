@@ -179,7 +179,6 @@ if ($kollityht > 0) {
 		$filenimi = "/tmp/dpdimport-".md5(uniqid(rand(),true)).".dat";
 	}
 
-	$filenimi = "/tmp/dpdimport-".md5(uniqid(rand(),true)).".dat";
 	//kirjoitetaan faili levylle..
 	$fh = fopen($filenimi, "w");
 	if (fwrite($fh, $rivit) === FALSE) {

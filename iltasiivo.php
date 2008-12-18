@@ -12,6 +12,7 @@
 
 		// hmm.. jännää
 		$kukarow['yhtio'] = $argv[1];
+		$kukarow['kuka'] = "crond";
 
 		$query    = "select * from yhtio where yhtio='$kukarow[yhtio]'";
 		$yhtiores = mysql_query($query) or pupe_error($query);
@@ -19,7 +20,7 @@
 		if (mysql_num_rows($yhtiores) == 1) {
 			$yhtiorow = mysql_fetch_array($yhtiores);
 			$aja = 'run';
-			
+
 			$query = "	SELECT *
 						FROM yhtion_parametrit
 						WHERE yhtio='$yhtiorow[yhtio]'";
@@ -33,7 +34,7 @@
 					$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
 				}
 			}
-			
+
 		}
 		else {
 			die ("Yhtiö $kukarow[yhtio] ei löydy!");
@@ -104,7 +105,7 @@
 
 		while ($row = mysql_fetch_array($result)) {
 			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php (1)")."<br>";
-			
+
 			//	Jos kyseessä on tunnusnippupaketti, halutaan säilyttää linkki tästä tehtyihin tilauksiin, tilaus merkataan vain toimitetuksi
 			if($row["tunnusnippu"] > 0) {
 				$query = "update lasku set tila = 'L', alatila='X' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[laskutunnus]'";
@@ -112,22 +113,20 @@
 				$laskuri2 ++;
 			}
 			else {
-				$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php (1)")."<br>";
-
 				$query = "update lasku set alatila='$row[tila]', tila='D',  comments = '$komm' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[laskutunnus]'";
 				$deler = mysql_query($query) or die($query);
 				$laskuri ++;
 			}
-			
+
 			//poistetaan TIETENKIN kukarow[kesken] ettei voi syöttää extranetissä rivejä tälle
 			$query = "update kuka set kesken = '' where yhtio = '$kukarow[yhtio]' and kesken = '$row[laskutunnus]'";
 			$deler = mysql_query($query) or die($query);
-			
+
 		}
 
 		if ($laskuri > 0) $iltasiivo .= "Poistettiin $laskuri rivitöntä tilausta.\n";
 		if ($laskuri2 > 0) $iltasiivo .= "Merkattiin toimitetuksi $laskuri2 rivitöntä tilausta.\n";
-		
+
 		// tässä tehdään isittömistä perheistä ei-perheitä ja myös perheistä joissa ei ole lapsia eli nollataan perheid
 		$lask = 0;
 		$lask2 = 0;
@@ -140,7 +139,7 @@
 
 		while ($row = mysql_fetch_array($result)) {
 			$query =	"SELECT perheid
-						FROM tilausrivi 
+						FROM tilausrivi
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'L' and laskutettuaika = '0000-00-00' and tunnus = '$row[perheid]'";
 			$result2 = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($result2) == 0) {
@@ -156,11 +155,11 @@
 				}
 			}
 		}
-		
+
 		if ($lask+$lask2 > 0) {
 			$iltasiivo .= "Tuhotiin $lask orpoa perhettä, ja $lask2 lapsetonta isää (eli perheid nollattiin)\n";
 		}
-		
+
 		$lasktuote = 0;
 		$laskpois = 0;
 		$poistetaankpl = 0;
@@ -175,11 +174,11 @@
 			$lasktuote++;
 			$poistetaankpl = $row['countti']-1;
 
-			$poisquery =	"DELETE FROM tuotteen_toimittajat 
-							WHERE yhtio = '$kukarow[yhtio]' 
-							AND tuoteno = '$row[tuoteno]' 
+			$poisquery =	"DELETE FROM tuotteen_toimittajat
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tuoteno = '$row[tuoteno]'
 							AND liitostunnus = '$row[liitostunnus]'
-							ORDER BY tunnus DESC 
+							ORDER BY tunnus DESC
 							LIMIT $poistetaankpl";
 			$poisresult = mysql_query($poisquery) or pupe_error($poisquery);
 			$laskpois += mysql_affected_rows();
@@ -188,34 +187,34 @@
 		if ($lasktuote > 0) {
 			$iltasiivo .= "Poistettiin $lasktuote tuotteelta yhteensä $laskpois duplikaatti tuotteen_toimittajaa\n";
 		}
-		
+
 		// Korjataan rikkinäiset käyttöoikeudet (jos samassa sovelluksessa on duplikaatti linkkejä)
-		$query = "	SELECT kuka, sovellus, nimi, alanimi, group_concat(tunnus) tunnukset,  count(*) kpl 
-					FROM oikeu 
+		$query = "	SELECT kuka, sovellus, nimi, alanimi, group_concat(tunnus) tunnukset,  count(*) kpl
+					FROM oikeu
 					WHERE yhtio = '$kukarow[yhtio]'
 					and kuka   != ''
 					group by 1,2,3,4
 					having kpl > 1";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		while ($row = mysql_fetch_array($result)) {
 			$query = "DELETE FROM oikeu WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($row[tunnukset]) LIMIT ".($row["kpl"]-1);
 			$delresult = mysql_query($query) or pupe_error($query);
-			
+
 			$iltasiivo .= "Poistettiin käyttäjältä $row[kuka] duplikaatti käyttöoikeus: $row[sovellus] $row[nimi] $row[alanimi]\n";
 		}
-		
+
 		if ($iltasiivo != "") {
-			
+
 			echo "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]\n\n";
 			echo $iltasiivo;
 			echo "\n";
-			
+
 			if($iltasiivo_email == 1) {
 				$header 	= "From: <$yhtiorow[postittaja_email]>\n";
 				$header 	.= "MIME-Version: 1.0\n" ;
 				$subject 	= "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]";
-				
+
 				mail($yhtiorow["admin_email"], "Iltasiivo yhtiolle '{$yhtiorow["yhtio"]}'", $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
 			}
 		}

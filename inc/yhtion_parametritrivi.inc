@@ -99,6 +99,7 @@
 
 		$ulos .= "<option value = '0' $sel[0]>".t("Normaali laskupohja");
 		$ulos .= "<option value = '2' $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)");
+		$ulos .= "<option value = '5' $sel[5]>".t("Normaali laskupohja (Ei näytetä verollista rivihintaa)")."</option>";
 		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty laskupohja 1");
 		$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");
 		$ulos .= "<option value = '4' $sel[4]>".t("Pelkistetty laskupohja 3");

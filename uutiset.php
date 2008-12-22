@@ -67,7 +67,22 @@ if ($tee == 'LISAA') {
 
 		// ollaanko valittu konsernitasoinen uutinen
 		if ($konserni != '') $konserni = $yhtiorow['konserni'];
-		
+
+		$tapa = "";
+
+		if ($automanual_uutinen != '' and $extranet_uutinen != '') {
+			$tapa = "automanual_ext_uutinen";
+		}
+		elseif ($automanual_uutinen != '' and $extranet_uutinen == '') {
+			$tapa = "automanual_uutinen";
+		}
+		elseif ($automanual_uutinen == '' and $extranet_uutinen != '') {
+			$tapa = "extranet_uutinen";
+		}
+		else {
+			$tapa = $tyyppi;
+		}
+
 		for ($i=0; $i < count($lang); $i++) { 
 				
 			if ($tunnus != 0) {
@@ -78,7 +93,6 @@ if ($tee == 'LISAA') {
 				$query = "	INSERT INTO kalenteri
 							SET
 							kuka 		= '$kukarow[kuka]',
-							tapa 		= '$tyyppi',
 							tyyppi 		= '$tyyppi',
 							yhtio 		= '$kukarow[yhtio]',
 							pvmalku 	= now(), 
@@ -94,7 +108,8 @@ if ($tee == 'LISAA') {
 						konserni 	= '$konserni',
 						kieli 		= '$lang[$i]',
 						kokopaiva	= '$kokopaiva',
-						kuittaus	= '$lukittu'";
+						kuittaus	= '$lukittu',
+						tapa		= '$tapa'";
 			$query .= $postquery;
 			$result = mysql_query($query) or pupe_error($query);
 			$katunnus = mysql_insert_id();
@@ -309,6 +324,38 @@ if ($tee == "SYOTA") {
 			</tr>";
 	}
 
+	if ($kukarow['yhtio'] == 'artr') {
+		if ($rivi['tapa'] == "automanual_ext_uutinen" and $rivi['tyyppi'] == "extranet_uutinen") {
+			$check1 = $check2 = "CHECKED";
+		}
+		elseif ($rivi['tapa'] == "automanual_uutinen" and $rivi['tyyppi'] == "extranet_uutinen") {
+			$check1 = "CHECKED";
+			$check2 = "";
+		}
+		elseif ($rivi['tapa'] == "extranet_uutinen" and $rivi['tyyppi'] == "extranet_uutinen") {
+			$check1 = "";
+			$check2 = "CHECKED";
+		}
+		else {
+			$check1 = "";
+			if ($toim == "EXTRANET") {
+				$check2 = "CHECKED";
+			}
+			else {
+				$check2 = "";
+			}
+		}
+	
+		echo "<tr>
+			<th>".t("Automanual")."</th>
+			<td><input type='checkbox' name='automanual_uutinen' $check1> ".t("Näytetäänkö uutinen Automanualissa")."</td>
+		</tr>";
+		echo "<tr>
+			<th>".t("Extranet")."</th>
+			<td><input type='checkbox' name='extranet_uutinen' $check2> ".t("Näytetäänkö uutinen Extranetissä")."</td>
+		</tr>";
+	}
+
 	echo "
 		</table>
 
@@ -452,6 +499,7 @@ if ($tee == '') {
 				from kalenteri
 				left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
 				where tyyppi='$tyyppi' $lisa and $ehto
+				and tapa != 'automanual_uutinen'
 				order by kokopaiva desc, pvmalku desc, kalenteri.tunnus desc
 				$limit";
 	$result = mysql_query($query) or pupe_error($query);

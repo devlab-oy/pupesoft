@@ -70,13 +70,13 @@ if ($tee == 'LISAA') {
 
 		$tapa = "";
 
-		if ($automanual_uutinen != '' and $extranet_uutinen != '') {
+		if ($automanual_uutinen != '' and $extranet_uutinen != '' and $toim == 'EXTRANET') {
 			$tapa = "automanual_ext_uutinen";
 		}
-		elseif ($automanual_uutinen != '' and $extranet_uutinen == '') {
+		elseif ($automanual_uutinen != '' and $extranet_uutinen == '' and $toim == 'EXTRANET') {
 			$tapa = "automanual_uutinen";
 		}
-		elseif ($automanual_uutinen == '' and $extranet_uutinen != '') {
+		elseif ($automanual_uutinen == '' and $extranet_uutinen != '' and $toim == 'EXTRANET') {
 			$tapa = "extranet_uutinen";
 		}
 		else {
@@ -324,7 +324,7 @@ if ($tee == "SYOTA") {
 			</tr>";
 	}
 
-	if ($kukarow['yhtio'] == 'artr') {
+	if ($kukarow['yhtio'] == 'artr' and $toim == 'EXTRANET') {
 		if ($rivi['tapa'] == "automanual_ext_uutinen" and $rivi['tyyppi'] == "extranet_uutinen") {
 			$check1 = $check2 = "CHECKED";
 		}

@@ -44,10 +44,11 @@ if ($tee == '') {
 		$lisa = " and kalenteri.kieli = '$kukarow[kieli]' ";
 	}
 
-	$query = "	select *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
+	$query = "	SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
 				from kalenteri
 				left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
 				where tyyppi='extranet_uutinen' $lisa and $ehto
+				and tapa != 'automanual_uutinen'
 				order by kokopaiva desc, pvmalku desc, kalenteri.tunnus desc
 				$limit";
 
@@ -131,7 +132,7 @@ if ($tee == "PRINTTAA") {
 		//-->
 		</script>";
 
-	$query = "	select *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
+	$query = "	SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
 				from kalenteri
 				left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
 				where tyyppi='uutinen'

@@ -49,8 +49,18 @@ else {
 
 if ($tee == 'LISAA') {
 
-	if (strlen($otsikko) > 0 and strlen($uutinen) > 0 and count($lang) > 0) {
-
+	if ($toim == 'EXTRANET' and $automanual_uutinen == '' and $extranet_uutinen == '') {
+		echo "<font class='error'>".t("Uutisen näkyvyys on valittava! (Extranet tai Automanual)")."</font><br><br>";
+		$rivi["kentta01"]  = $otsikko;
+		$rivi["kentta02"]  = $uutinen;
+		$rivi["kentta09"]  = $kentta09;
+		$rivi["kentta10"]  = $kentta10;				
+		$rivi["konserni"]  = $konserni;
+		$rivi["kokopaiva"] = $kokopaiva;
+		$tee = "SYOTA";
+	}
+	elseif (strlen($otsikko) > 0 and strlen($uutinen) > 0 and count($lang) > 0) {
+		
 		$liitostunnus = 0;
 		
 		$retval = tarkasta_liite("userfile");

@@ -25,11 +25,14 @@
 		if ($pvm != date("Y-m-d")) {
 			$onkotanaan = "NO";
 		}
-		// Löytyykö oikea tilikausi?
-		
-		$query = "SELECT * FROM tilikaudet
-			WHERE yhtio = '$kukarow[yhtio]' and '$pvm' >= tilikausi_alku and '$pvm' <= tilikausi_loppu";
+
+		// Löytyykö oikea tilikausi?		
+		$query = "	SELECT * FROM tilikaudet
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and '$pvm' >= tilikausi_alku 
+					and '$pvm' <= tilikausi_loppu";
 		$result = mysql_query($query) or pupe_error($query);
+
 		if (mysql_num_rows($result) != 1) {
 			echo "<font class='error'>".t("Päivämäärälle ei löydy tilikautta")."</font><br>";
 			$tee = '';			
@@ -195,6 +198,7 @@
 	}
 
 	if ($tee != '') {
+
 		switch ($laji) {
 			case 'M' :
 				$lista = t("myyntisaamiset");
@@ -333,7 +337,7 @@
 				}
 			}
 
-	        	$query = "SELECT sum(summa) saldo FROM tiliointi
+        	$query = "	SELECT sum(summa) saldo FROM tiliointi
 						WHERE yhtio	 = '$kukarow[yhtio]'
 						and korjattu = ''
 						and tapvm	>= '$tilikausirow[tilikausi_alku]'
@@ -407,9 +411,13 @@
 						lasku.laskunro maksutieto,
 						lasku.tunnus laskutunnus,
 						lasku.summa-lasku.saldo_maksettu laskuavoinsaldo,
+						lasku.summa_valuutassa-lasku.saldo_maksettu_valuutassa laskuavoinsaldo_valuutassa,
 						lasku.summa laskusumma,
+						lasku.summa_valuutassa laskusumma_valuutassa,
 						sum(tiliointi.summa) tiliointiavoinsaldo,
-						sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa, 0)) tiliointisumma
+						sum(tiliointi.summa_valuutassa) tiliointiavoinsaldo_valuutassa,
+						sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa, 0))-lasku.pyoristys tiliointisumma,
+						sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa_valuutassa, 0))-lasku.pyoristys_valuutassa tiliointisumma_valuutassa
 						FROM lasku $indeksi
 						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio
 						and lasku.tunnus		= tiliointi.ltunnus
@@ -419,7 +427,7 @@
 				  		WHERE lasku.yhtio		= '$kukarow[yhtio]'
 						and (lasku.mapvm		> '$pvm' or lasku.mapvm = '0000-00-00')
 						and lasku.tapvm			<= '$pvm'
-						and lasku.tapvm > '0000-00-00'
+						and lasku.tapvm 		> '0000-00-00'
 						and lasku.tila			= 'U'
 						and lasku.alatila		= 'X'
 						$lisa1
@@ -484,10 +492,10 @@
 					$summatotal += $trow['tiliointiavoinsaldo'];
 
 					if ($valuutassako == 'V') {
-						echo "<td align='right' $class>".round(laskuval($trow["tiliointisumma"], $trow["vienti_kurssi"]), 2)."</td>";
-						echo "<td align='right' $class>".round(laskuval($trow["tiliointiavoinsaldo"], $trow["vienti_kurssi"]), 2)."</td>";
+						echo "<td align='right' $class>$trow[tiliointisumma_valuutassa]</td>";
+						echo "<td align='right' $class>$trow[tiliointiavoinsaldo_valuutassa]</td>";
 						echo "<td align='right' $class>$trow[valkoodi]</td>";
-						$summa[$trow["valkoodi"]] += round(laskuval($trow["tiliointiavoinsaldo"], $trow["vienti_kurssi"]), 2);	// paljo kirjanpidossa avoimena valuutassa
+						$summa[$trow["valkoodi"]] += $trow["tiliointiavoinsaldo_valuutassa"];	// paljo kirjanpidossa avoimena valuutassa
 					}
 					else {
 						echo "<td align='right' $class>$trow[tiliointisumma]</td>";
@@ -512,12 +520,13 @@
 			//Listataan vielä kohdistamattomat
 			$query = "	SELECT asiakas.tunnus, asiakas.ytunnus, nimi_maksaja, viite, kirjpvm,
 						tiliointi.summa tiliointisumma,
-						round(suoritus.summa*if(suoritus.kurssi=0, 1, kurssi),2)*-1 suoritussumma,
+						tiliointi.summa_valuutassa tiliointisumma_valuutassa,
+						round(suoritus.summa * if(suoritus.kurssi = 0, 1, kurssi), 2) * -1 suoritussumma,
 						tiliointi.ltunnus,
-						suoritus.summa*-1 summa,
+						suoritus.summa * -1 summa,
 						suoritus.valkoodi
 				  		FROM suoritus
-						LEFT JOIN tiliointi ON (tiliointi.tunnus = suoritus.ltunnus and tiliointi.korjattu = '')
+						JOIN tiliointi ON (tiliointi.tunnus = suoritus.ltunnus and tiliointi.korjattu = '' and tiliointi.tilino	in ($tili))
 				  		LEFT JOIN asiakas ON (suoritus.yhtio = asiakas.yhtio and suoritus.asiakas_tunnus = asiakas.tunnus $lisa3)
 				  		WHERE suoritus.yhtio = '$kukarow[yhtio]'
 						and kirjpvm <= '$pvm'
@@ -560,7 +569,9 @@
 						$suoritussumma[$yhtiorow["valkoodi"]] += $trow["suoritussumma"];
 					}
 
-					if ($trow["suoritussumma"] != $trow["tiliointisumma"] and $trow["tiliointisumma"] != NULL) echo "<td class='back' nowrap><font class='error'>VIRHE: Kirjanpito / Suoritus summat heittävät!</font> (<a href='muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[tiliointisumma] / $trow[suoritussumma]</a>)</td>";
+					if ($trow["suoritussumma"] != $trow["tiliointisumma"] and $trow["summa"] != $trow["tiliointisumma_valuutassa"] and $trow["tiliointisumma"] != NULL and $trow["tiliointisumma_valuutassa"] != NULL) {
+						echo "<td class='back' nowrap><font class='error'>VIRHE: Kirjanpito / Suoritus summat heittävät!</font> (<a href='muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[tiliointisumma] / $trow[suoritussumma]</a>)</td>";
+					}
 
 					if ($trow["tiliointisumma"] == NULL) echo "<td class='back' nowrap><font class='error'>VIRHE: Suoritukselle ei löydy tiliöintejä!</font></td>";
 

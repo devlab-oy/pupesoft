@@ -18,6 +18,10 @@ elseif ($toim == "EXTRANET") {
 	echo "<font class='head'>".t("Extranet Uutiset")."</font><hr>";
 	$tyyppi = "extranet_uutinen";
 }
+elseif ($toim == "AUTOMANUAL") {
+	echo "<font class='head'>".t("Automanual Uutiset")."</font><hr>";
+	$tyyppi = "extranet_uutinen";
+}
 elseif ($toim == "VIIKKOPALAVERI") {
 	echo "<font class='head'>".t("Viikkopalaveri")."</font><hr>";
 	$tyyppi = "viikkopalaveri";
@@ -59,6 +63,16 @@ if ($tee == 'LISAA') {
 		$rivi["kokopaiva"] = $kokopaiva;
 		$tee = "SYOTA";
 	}
+	elseif ($toim == 'AUTOMANUAL' and $automanual_uutinen == '') {
+		echo "<font class='error'>".t("Uutisen näkyvyys on valittava!")."</font><br><br>";
+		$rivi["kentta01"]  = $otsikko;
+		$rivi["kentta02"]  = $uutinen;
+		$rivi["kentta09"]  = $kentta09;
+		$rivi["kentta10"]  = $kentta10;				
+		$rivi["konserni"]  = $konserni;
+		$rivi["kokopaiva"] = $kokopaiva;
+		$tee = "SYOTA";
+	}
 	elseif (strlen($otsikko) > 0 and strlen($uutinen) > 0 and count($lang) > 0) {
 		
 		$liitostunnus = 0;
@@ -83,7 +97,7 @@ if ($tee == 'LISAA') {
 		if ($automanual_uutinen != '' and $extranet_uutinen != '' and $toim == 'EXTRANET') {
 			$tapa = "automanual_ext_uutinen";
 		}
-		elseif ($automanual_uutinen != '' and $extranet_uutinen == '' and $toim == 'EXTRANET') {
+		elseif ($automanual_uutinen != '' and $extranet_uutinen == '' and ($toim == 'EXTRANET' or $toim == 'AUTOMANUAL')) {
 			$tapa = "automanual_uutinen";
 		}
 		elseif ($automanual_uutinen == '' and $extranet_uutinen != '' and $toim == 'EXTRANET') {
@@ -334,7 +348,7 @@ if ($tee == "SYOTA") {
 			</tr>";
 	}
 
-	if ($kukarow['yhtio'] == 'artr' and $toim == 'EXTRANET') {
+	if ($kukarow['yhtio'] == 'artr' and ($toim == 'EXTRANET' or $toim == 'AUTOMANUAL')) {
 		if ($rivi['tapa'] == "automanual_ext_uutinen" and $rivi['tyyppi'] == "extranet_uutinen") {
 			$check1 = $check2 = "CHECKED";
 		}
@@ -347,7 +361,12 @@ if ($tee == "SYOTA") {
 			$check2 = "CHECKED";
 		}
 		else {
-			$check1 = "";
+			if ($toim == 'AUTOMANUAL') {
+				$check1 = "CHECKED";
+			}
+			else {
+				$check1 = "";
+			}
 			if ($toim == "EXTRANET") {
 				$check2 = "CHECKED";
 			}
@@ -356,14 +375,18 @@ if ($tee == "SYOTA") {
 			}
 		}
 	
-		echo "<tr>
-			<th>".t("Automanual")."</th>
-			<td><input type='checkbox' name='automanual_uutinen' $check1> ".t("Näytetäänkö uutinen Automanualissa")."</td>
-		</tr>";
-		echo "<tr>
-			<th>".t("Extranet")."</th>
-			<td><input type='checkbox' name='extranet_uutinen' $check2> ".t("Näytetäänkö uutinen Extranetissä")."</td>
-		</tr>";
+		if ($toim == 'EXTRANET' or $toim == 'AUTOMANUAL') {
+			echo "<tr>
+				<th>".t("Automanual")."</th>
+				<td><input type='checkbox' name='automanual_uutinen' $check1> ".t("Näytetäänkö uutinen Automanualissa")."</td>
+			</tr>";
+		}
+		if ($toim == 'EXTRANET') {
+			echo "<tr>
+				<th>".t("Extranet")."</th>
+				<td><input type='checkbox' name='extranet_uutinen' $check2> ".t("Näytetäänkö uutinen Extranetissä")."</td>
+			</tr>";
+		}
 	}
 
 	echo "
@@ -504,12 +527,21 @@ if ($tee == '') {
 	else {
 		$lisa = " and kalenteri.kieli = '$kukarow[kieli]' ";
 	}
+
+	$querylisa_tapa = "";
 	
+	if ($toim == 'AUTOMANUAL') {
+		$querylisa_tapa = " and tapa in ('automanual_uutinen', 'automanual_ext_uutinen') ";
+	}
+	else {
+		$querylisa_tapa = "	and tapa != 'automanual_uutinen' ";
+	}
+
 	$query = "	SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
 				from kalenteri
 				left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
 				where tyyppi='$tyyppi' $lisa and $ehto
-				and tapa != 'automanual_uutinen'
+				$querylisa_tapa
 				order by kokopaiva desc, pvmalku desc, kalenteri.tunnus desc
 				$limit";
 	$result = mysql_query($query) or pupe_error($query);

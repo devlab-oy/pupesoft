@@ -392,12 +392,14 @@
 				echo "<tr>";
 				echo "<td>" . substr($tietue, 147, 18) . "</td>";
 				echo "<td>" . substr($tietue, 99, 30) . "<br>$tilinvaluutta" . tilinumero_print($pankkitilino) . "</td>";
-				$tililimiitti = (int) (substr($tietue, 117, 30) * 1);
-				if($tililimiitti > 0) {
+
+				$tililimiitti = (int) (substr($tietue, 117, 30) / 100);
+
+				if ($tililimiitti > 0) {
 					$tililimiitti =  sprintf("%01.2f", $tililimiitti);
 				}
 				else {
-					$tililimiitti =  "";
+					$tililimiitti =  "<br>";
 				}
 				
 				echo "<td>".t("Myönnetty määrä")."<br>". $tililimiitti . "</td>";

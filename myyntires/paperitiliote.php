@@ -141,6 +141,7 @@
 			$pdf->draw_text(100, $kala, $row["tapvm"], 				$firstpage, $norm);
 			$pdf->draw_text(180, $kala, $row["erpcm"], 				$firstpage, $norm);
 			$pdf->draw_text(300, $kala, $row["valkoodi"], 				$firstpage, $norm);
+
 			if ($row['valkoodi'] == $yhtiorow['valkoodi']) {
 				$oikpos = $pdf->strlen($row["avoinsumma"], $norm);
 				$pdf->draw_text(480-$oikpos, $kala, $row["avoinsumma"], 		$firstpage, $norm);
@@ -166,7 +167,6 @@
 		$lask++;
 		return($firstpage);
 	}
-
 
 	function loppu ($firstpage, $summat) {
 
@@ -274,10 +274,15 @@
 	$asiakasrow2 = mysql_fetch_array($result);
 	$tunnukset 	= $asiakasrow2['tunnukset'];		
 			
-	$query = "	SELECT tapvm, liitostunnus,
-				summa - saldo_maksettu avoinsumma, summa_valuutassa - saldo_maksettu_valuutassa avoinsummavaluutassa, 
-				summa, summa_valuutassa, valkoodi,
-				erpcm, laskunro
+	$query = "	SELECT tapvm, 
+				liitostunnus,
+				summa - saldo_maksettu - pyoristys avoinsumma, 
+				summa_valuutassa - saldo_maksettu_valuutassa - pyoristys_valuutassa  avoinsummavaluutassa, 
+				summa, 
+				summa_valuutassa, 
+				valkoodi,
+				erpcm, 
+				laskunro
 				FROM lasku
 				WHERE yhtio ='$kukarow[yhtio]'
 				and tila = 'U'
@@ -285,6 +290,7 @@
 				and liitostunnus in ($tunnukset)";
 	$result = mysql_query($query) or pupe_error($query);
 	$laskutiedot = mysql_fetch_array($result);
+
 	//otetaan asiakastiedot ekalta laskulta
 	$query = "	SELECT *
 				FROM asiakas
@@ -296,13 +302,15 @@
 	$kieli = $asiakastiedot["kieli"];
 
 	//ja kelataan akuun
-	if (mysql_num_rows($result) > 0) mysql_data_seek($result,0);
+	if (mysql_num_rows($result) > 0) {
+		mysql_data_seek($result, 0);
+	}
 
 	$query = "	SELECT maksupvm tapvm, summa * -1 summa, valkoodi
 				FROM suoritus
 				WHERE yhtio  = '$kukarow[yhtio]'
 				and ltunnus <> 0
-				and kohdpvm = '0000-00-00-'
+				and kohdpvm = '0000-00-00'
 				and asiakas_tunnus in ($tunnukset)";
 	$suoritusresult = mysql_query($query) or pupe_error($query);
 
@@ -311,15 +319,19 @@
 	$totaali = array();
 	
 	while ($row = mysql_fetch_array($result)) {
-		$firstpage=rivi(1,$firstpage,$summa,$row);
-		if ($row['valkoodi'] == $yhtiorow['valkoodi'])
+
+		$firstpage = rivi(1, $firstpage, $summa, $row);
+
+		if ($row['valkoodi'] == $yhtiorow['valkoodi']) {
 			$totaali[$row['valkoodi']] += $row['avoinsumma'];
-		else
+		}
+		else {
 			$totaali[$row['valkoodi']] += $row['avoinsummavaluutassa'];
+		}
 	}
 
 	while ($row = mysql_fetch_array($suoritusresult)) {
-		$firstpage=rivi(2,$firstpage,$summa,$row);
+		$firstpage = rivi(2, $firstpage, $summa, $row);
 		$totaali[$row['valkoodi']] += $row['summa'];
 	}
 	
@@ -336,7 +348,9 @@
 	$fh = fopen($pdffilenimi, "w");
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 	fclose($fh);
+
 	echo file_get_contents($pdffilenimi);
+	
 /*	// itse print komento...
 	$query = "	select komento
 				from kirjoittimet
@@ -348,4 +362,5 @@
 		$line = exec("$kirow[komento] $pdffilenimi");
 	}
 */
+
 ?>

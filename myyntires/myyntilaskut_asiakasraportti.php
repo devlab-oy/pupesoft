@@ -2,12 +2,14 @@
 
 	///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 	$useslave = 1;
-	
-	if (isset($tiliote) and $tiliote==1) $nayta_pdf = 1;
-	
+
+	if (isset($_POST['tiliote']) and $_POST['tiliote'] == '1') {
+		$nayta_pdf = 1;
+	}
+
 	require ("../inc/parametrit.inc");
 
-	if (isset($tiliote) and $tiliote==1) {
+	if (isset($_POST['tiliote']) and $_POST['tiliote'] == '1') {
 		require('paperitiliote.php');
 		exit;
 	}
@@ -76,9 +78,11 @@
 	if ($tila == 'tee_raportti') {
 
 		if ((int) $tunnus != 0) {
+			$tunnus = (int) $tunnus;
 			$haku_sql = "tunnus='$tunnus'";
 		}
 		else {
+			$ytunnus = mysql_real_escape_string($ytunnus);
 			$haku_sql = "ytunnus='$ytunnus'";
 		}
 
@@ -103,16 +107,17 @@
 		  	$ytunnus 	= $asiakasrow['ytunnus'];
 			$tunnukset 	= $asiakasrow2['tunnukset'];
 			$nimet		= $asiakasrow2['kpl'];
-			
+
 			//kaatotilin saldo
 			if ($savalkoodi != "") {
+				$savalkoodi = mysql_real_escape_string($savalkoodi);
 				$salisa = " and valkoodi='$savalkoodi' ";
 			}
 			else {
 				$salisa = "";
 			}
 
-			$query = "	SELECT valkoodi, sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa, sum(summa) summa_valuutassa 
+			$query = "	SELECT valkoodi, sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa, sum(summa) summa_valuutassa
 						FROM suoritus
 						WHERE yhtio='$kukarow[yhtio]'
 						and ltunnus<>0
@@ -146,8 +151,8 @@
 						and mapvm = '0000-00-00'
 						group by 1";
 			$result = mysql_query($query) or pupe_error($query);
-			
-			if (mysql_num_rows($kaatoresult) > 1) { 
+
+			if (mysql_num_rows($kaatoresult) > 1) {
 				$riveja = mysql_num_rows($kaatoresult) + 1;
 			}
 			else {
@@ -155,18 +160,18 @@
 				if (mysql_num_rows($kaatoresult) != 0) {
 					$kaato = mysql_fetch_array($kaatoresult);
 					mysql_data_seek($kaatoresult,0);
-				
+
 					if (strtoupper($yhtiorow['valkoodi']) != strtoupper($kaato['valkoodi'])) {
 						$riveja = 2;
 					}
 				}
 			}
-				
+
 			echo "<table>
 				<tr>
 				<th rowspan='$riveja'><a href='../crm/asiakasmemo.php?ytunnus=$ytunnus'>$asiakasrow[nimi]</a></td>
 				<td rowspan='$riveja'>".t("Kaatotilill‰")."</td>";
-				
+
 			if (mysql_num_rows($kaatoresult) > 1) { // Valuuttasummia
 				$kotisumma = 0;
 				while ($kaato = mysql_fetch_array($kaatoresult)) {
@@ -188,7 +193,7 @@
 
 
 
-			if (mysql_num_rows($result) > 1) { 
+			if (mysql_num_rows($result) > 1) {
 				$riveja = mysql_num_rows($result) + 1;
 			}
 			else {
@@ -201,7 +206,7 @@
 					}
 				}
 			}
-				
+
 			echo "
 				<tr>
 				<th rowspan='$riveja'>$ytunnus ($nimet)</td>
@@ -246,11 +251,11 @@
 					echo "<td align='right'>$kok[avoinsumma_valuutassa]</td><td>$kok[valkoodi]</td></tr>";
 					echo "<tr><td align='right'>$kok[avoinsumma]</td><td>$yhtiorow[valkoodi]</td></tr>";
 				}
-				else { 
+				else {
 					echo "<td align='right'>$kok[avoinsumma]</td></tr>";
 				}
 			}
-			
+
 /*			mysql_data_seek($result,0);
 			echo "<tr>
 				<th>$asiakasrow[postino] $asiakasrow[postitp]</td>
@@ -356,9 +361,13 @@
 				$chk2 = 'SELECTED';
 				$mapvmlisa = " and mapvm > '0000-00-00' ";
 			}
-			elseif($valintra == 'kaikki') {
+			elseif ($valintra == 'kaikki') {
 				$chk3 = 'SELECTED';
 				$mapvmlisa = " ";
+			}
+			elseif ($valintra == "eraantyneet") {
+				$chk4 = 'SELECTED';
+				$mapvmlisa = " and erpcm < now() ";
 			}
 			else {
 				$chk1 = 'SELECTED';
@@ -395,6 +404,7 @@
 					<td>
 					<select name='valintra' onchange='submit();'>
 					<option value='' $chk1>".t("Avoimet laskut")."</option>
+					<option value='eraantyneet' $chk4>".t("Er‰‰ntyneet laskut")."</option>
 					<option value='maksetut' $chk2>".t("Maksetut laskut")."</option>
 					<option value='kaikki' $chk3>".t("Kaikki laskut")."</option>
 					</select>
@@ -527,7 +537,7 @@
 							}
 							else {
 								echo "$lasktilitro[summa] $yhtiorow[valkoodi] ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
-							}							
+							}
 						}
 					}
 				}

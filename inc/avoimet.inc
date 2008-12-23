@@ -26,26 +26,27 @@
 			$onkotanaan = "NO";
 		}
 
-		// Löytyykö oikea tilikausi?		
+		// Löytyykö oikea tilikausi?
 		$query = "	SELECT * FROM tilikaudet
-					WHERE yhtio = '$kukarow[yhtio]' 
-					and '$pvm' >= tilikausi_alku 
+					WHERE yhtio = '$kukarow[yhtio]'
+					and '$pvm' >= tilikausi_alku
 					and '$pvm' <= tilikausi_loppu";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {
 			echo "<font class='error'>".t("Päivämäärälle ei löydy tilikautta")."</font><br>";
-			$tee = '';			
+			$tee = '';
 		}
 		else {
 			$tilikausirow = mysql_fetch_array($result);
 		}
-		
+
 	}
 
 	// Valitaan asiakas, jos sitä ei tiedetä
 	if ($tee != '' and $ytunnus != '') {
 
+		$ytunnus = mysql_real_escape_string($ytunnus);
 		$muutparametrit = $tee."/".$vv."/".$kk."/".$pp."/".$laji."/".$naytetaankokommentit."/".$savalkoodi."/".$valuutassako."/".$maa."/".$maksuehto;
 
 		if (substr($laji,0,1) == 'M') {
@@ -252,7 +253,7 @@
 			else {
 				$indeksi = " use index (yhtio_tila_tapvm)";
 			}
-			
+
 			if ($laji == 'OOK') 	$tili = "'".$yhtiorow['ostovelat']."','".$yhtiorow['konserniostovelat']."'";
 			elseif ($laji == 'OK') 	$tili = "'".$yhtiorow['konserniostovelat']."'";
 			else 					$tili = "'".$yhtiorow['ostovelat']."'";
@@ -266,7 +267,7 @@
 						and korjattu		= ''
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and (mapvm > '$pvm' or mapvm = '0000-00-00')
-						and lasku.tapvm <= '$pvm' 
+						and lasku.tapvm <= '$pvm'
 						and lasku.tapvm > '0000-00-00'
 						and tila in ('H','Y','M','P','Q')
 						$lisa
@@ -383,24 +384,27 @@
 			if (isset($_POST['maa']) and $_POST['maa'] != '') {
 				$maa = " and lasku.maa = '{$_POST['maa']}'";
 			}
-			
+
 			if ($lasku_ytunnus != "") {
+				$lasku_ytunnus = mysql_real_escape_string($lasku_ytunnus);
 				$lisa1 .= "and lasku.ytunnus like '%$lasku_ytunnus%'";
 				$lisa3 .= "and asiakas.ytunnus like '%$lasku_ytunnus%'";
 			}
 
 			if ($lasku_nimi != "") {
+				$lasku_nimi = mysql_real_escape_string($lasku_nimi);
 				$lisa1 .= "and lasku.nimi like '%$lasku_nimi%'";
 				$lisa2 .= "and suoritus.nimi_maksaja like '%$lasku_nimi%'";
 				$lisa3 .= "and asiakas.nimi like '%$lasku_nimi%'";
 			}
 
 			if ($lasku_laskunro != "") {
+				$lasku_laskunro = mysql_real_escape_string($lasku_laskunro);
 				$lisa1 .= "and lasku.laskunro like '%$lasku_laskunro%'";
 			}
 
 			$tili = 0;
-			
+
 			if ($laji == 'MK') 		$tili = "'$yhtiorow[konsernimyyntisaamiset]'";
 			elseif ($laji == 'MF') 	$tili = "'$yhtiorow[factoringsaamiset]'";
 			elseif ($laji == 'MA') 	$tili = "'$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]'";
@@ -445,7 +449,7 @@
 			if ($toimittajaid == '') {
 				echo "<font class='message'>".t("Yrityksellä")." $yhtiorow[nimi] ".t("oli")." ".tv1dateconv($pvm)." ".t("seuraavat avoimet")." $lista:</font><br>";
 			}
-			
+
 			echo "<table>";
 			echo "<form method='post' action='?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=$ojarj'>";
 			echo "<tr>";
@@ -463,7 +467,7 @@
 					</th>";
 			echo "	<th>
 						<a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.tapvm&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro'>".t("Pvm")."</a>
-						
+
 					</th>";
 			echo "<th>".t("Maksupäivä")."</th>";
 			echo "<th>".t("Eräpäivä")."</th>";
@@ -473,7 +477,7 @@
 			echo "<td class='back'><input type='submit' value='Hae'></th>";
 			echo "</tr>";
 			echo "</form>";
-			
+
 			$summa = array(); // tässä kirjanpidosta osasuoritukset poistettuna
 			$summatotal = 0;  // ässä koko höskä kotivaluutassa
 

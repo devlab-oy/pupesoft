@@ -9,6 +9,11 @@ if ($tee == "lataa_tiedosto") {
 
 echo "<font class='head'>".t("Viranomaisilmoitukset")."</font><hr><br><br>";
 
+if ($tee == "VSRALVKK") {
+	include ('raportit/alv_laskelma.php');
+	alvlaskelma($kk,$vv);
+}
+
 if ($tee == "VSRALVYV") {
 
 	echo "<font class='message'></font>".t("Arvonlisäveron yhteenvetoilmoitus");
@@ -242,13 +247,13 @@ if ($tee == "VSRALVYV") {
 }
 
 if ($tee == "") {
-	echo "<form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
+	echo "<form action='viranomaisilmoitukset.php' method='post'>
 			<select name='tee' onchange='submit();'>
 				<option value = ''>".t('Valitse viranomaisilmoitus')."</option>
 				<option value = 'VSRALVYV'>".t("Arvonlisäveron yhteenvetoilmoitus")."</option>
+				<option value = 'VSRALVKK'>".t("Arvonlisäveroilmoitus")."</option>
 			</select></form>";
 }
 
 require ("inc/footer.inc");
-
 ?>

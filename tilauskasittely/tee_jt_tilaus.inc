@@ -248,6 +248,7 @@
 								mysql_field_name($stresult,$i)=='viite' or
 								mysql_field_name($stresult,$i)=='laskunro' or
 								mysql_field_name($stresult,$i)=='mapvm' or
+								mysql_field_name($stresult,$i)=='kerayslista' or
 								mysql_field_name($stresult,$i)=='tilausvahvistus' or
 								mysql_field_name($stresult,$i)=='viikorkoeur' or
 								mysql_field_name($stresult,$i)=='tullausnumero' or

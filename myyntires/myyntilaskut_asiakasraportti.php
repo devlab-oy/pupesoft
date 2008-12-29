@@ -328,7 +328,7 @@
 			list ($naama, $nopeushtml) = laskeMaksunopeus($ytunnus, $kukarow["yhtio"]);
 
 			echo "<br>$naama<br>$nopeushtml</td>";
-			echo "<form action=''><td class='back'>
+			echo "<form action='' method='post'><td class='back'>
 			<input type='hidden' name = 'tiliote' value='1'>
 			<input type='hidden' name = 'ytunnus' value='$ytunnus'>
 			<input type='submit' value='".t("Tulosta tiliote")."'></td></form>";

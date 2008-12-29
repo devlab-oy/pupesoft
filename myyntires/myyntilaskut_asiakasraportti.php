@@ -123,6 +123,7 @@
 						and ltunnus<>0
 						and asiakas_tunnus in ($tunnukset)
 						and summa != 0
+						and kohdpvm = '0000-00-00'
 						$salisa
 						group by 1";
 			$kaatoresult = mysql_query($query) or pupe_error($query);

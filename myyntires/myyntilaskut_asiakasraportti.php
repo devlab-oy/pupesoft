@@ -368,7 +368,7 @@
 			}
 			elseif ($valintra == "eraantyneet") {
 				$chk4 = 'SELECTED';
-				$mapvmlisa = " and erpcm < now() ";
+				$mapvmlisa = " and erpcm < now() and mapvm = '0000-00-00' ";
 			}
 			else {
 				$chk1 = 'SELECTED';

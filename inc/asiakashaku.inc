@@ -223,7 +223,7 @@ if ($monta == 0) {
 			}
 		}
 	
-		echo "<input type='submit' value='".t("Etsi möys poistettuja asiakkaita")."'>";
+		echo "<input type='submit' value='".t("Etsi myös poistettuja asiakkaita")."'>";
 		echo "</form>";
 	}
 	

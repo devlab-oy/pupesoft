@@ -220,7 +220,9 @@
 
 		if ($xtyyppi == 3) {
 			require("inc/viitemaksut_kohdistus.inc");
+			require("myyntires/suoritus_asiakaskohdistus_kaikki.php");
 		}
+
 	}
 	else {
 		echo "<form enctype='multipart/form-data' name='sendfile' action='$PHP_SELF' method='post'>";

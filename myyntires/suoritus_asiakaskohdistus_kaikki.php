@@ -9,7 +9,7 @@ $query  = "	SELECT *
 			summa != 0";
 $result = mysql_query($query) or pupe_error($query);
 
-echo "Yritän kohdistaa " .mysql_num_rows($result) . " suoritusta.<br>";
+//echo "Yritän kohdistaa " .mysql_num_rows($result) . " suoritusta.<br>";
 
 while ($suoritus = mysql_fetch_array ($result)) {
 	$ok = 0;
@@ -37,7 +37,7 @@ while ($suoritus = mysql_fetch_array ($result)) {
 				$asiakas = mysql_fetch_array($asres);
 				$ok = 1;
 
-				echo "Kohdistettiin: $suoritus[nimi_maksaja] --> $asiakas[nimi] viitteen perusteella<br>";
+				echo "<font class='message'>Kohdistettiin: $suoritus[nimi_maksaja] --> $asiakas[nimi] viitteen perusteella</font><br>";
 
 				if ($asiakas['konserniyhtio'] != '') {
 					$query   = "	UPDATE tiliointi SET tilino = '$yhtiorow[konsernimyyntisaamiset]'
@@ -46,7 +46,7 @@ while ($suoritus = mysql_fetch_array ($result)) {
 									tiliointi.tunnus   = '$suoritus[ltunnus]' AND
 									tiliointi.korjattu = ''";
 					$result2 = mysql_query($query) or pupe_error($query);
-					echo "Asiakas on konserniyhtiö<br>";
+					// echo "Asiakas on konserniyhtiö<br>";
 				}
 				$query   = "UPDATE suoritus set asiakas_tunnus = '$asiakas[tunnus]' where tunnus = '$suoritus[tunnus]' AND yhtio = '$kukarow[yhtio]'";
 				$result2 = mysql_query($query) or pupe_error($query);
@@ -68,7 +68,7 @@ while ($suoritus = mysql_fetch_array ($result)) {
 		if (mysql_num_rows($asres) == 1) {
 			$asiakas = mysql_fetch_array($asres);
 
-			echo "Kohdistettiin: $suoritus[nimi_maksaja] --> $asiakas[nimi] nimen perusteella<br>";
+			echo "<font class='message'>Kohdistettiin: $suoritus[nimi_maksaja] --> $asiakas[nimi] nimen perusteella</font><br>";
 
 			if ($asiakas['konserniyhtio'] != '') {
 				$query   = "	UPDATE tiliointi SET tilino = '$yhtiorow[konsernimyyntisaamiset]'
@@ -77,7 +77,7 @@ while ($suoritus = mysql_fetch_array ($result)) {
 								tiliointi.tunnus   = '$suoritus[ltunnus]' AND
 								tiliointi.korjattu = ''";
 				$result2 = mysql_query($query) or pupe_error($query);
-				echo "Asiakas on konserniyhtiö<br>";
+				//echo "Asiakas on konserniyhtiö<br>";
 			}
 			$query   = "UPDATE suoritus set asiakas_tunnus = '$asiakas[tunnus]' where tunnus = '$suoritus[tunnus]' AND yhtio = '$kukarow[yhtio]'";
 			$result2 = mysql_query($query) or pupe_error($query);

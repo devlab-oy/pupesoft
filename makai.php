@@ -8,6 +8,7 @@
 	require("inc/parametrit.inc");
 
 	if (isset($tee)) {
+		$filenimi = basename($filenimi);
 		if ($tee == "lataa_tiedosto") {
 			readfile("dataout/".$filenimi);
 			exit;
@@ -111,7 +112,7 @@
 		$totsumma	= 0;
 
 		while ($pvmrow = mysql_fetch_array($pvmresult)) {
-			echo "<tr><th>".t("Maksup‰iv‰").":</th><td>".tv1dateconv($pvmrow[0])."</td></tr>";
+			echo "<tr><th>".t("Maksup‰iv‰").":</th><td>".tv1dateconv($pvmrow["olmapvm"])."</td></tr>";
 
 			$makskpl 	 = 0;
 			$makssumma 	 = 0;
@@ -309,8 +310,8 @@
 							echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 							echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
 							echo "<input type='hidden' name='filenimi' value='$kaunisnimi'>";
-							echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-
+							echo "<td><input type='submit' value='".t("Tallenna")."'></form></td>";
+							echo "</tr>";
 						}
 						else {
 							echo "OOOOH We have problems! Toot is not a resource<br>";
@@ -358,8 +359,8 @@
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
 				echo "<input type='hidden' name='filenimi' value='$kaunisnimi'>";
-				echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-				echo "</table>";
+				echo "<td><input type='submit' value='".t("Tallenna")."'></form></td>";
+				echo "</tr></table>";
 			}
 		}
 
@@ -403,8 +404,11 @@
 		$pvmresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($pvmresult) != 0) {
+
 			while ($pvmrow = mysql_fetch_array($pvmresult)) {
+
 				echo "<table>";
+
 				if ($yhtiorow['pankkitiedostot'] != '' or !(is_resource($toot))) {
 					if ($kotimaa == "FI") {
 						$kaunisnimi = "lum3-$kukarow[yhtio]-" . date("d.m.y.H.i.s") . "-". $generaatio . ".txt";
@@ -413,9 +417,9 @@
 						$kaunisnimi = "bgut-$kukarow[yhtio]-" . date("d.m.y.H.i.s") . "-". $generaatio . ".txt";
 					}
 					$generaatio++;
-
 					$toot = fopen("dataout/".$kaunisnimi,"w+");
 				}
+
 				unset($edmaksu_tili);
 
 				if (!$toot) {
@@ -442,47 +446,51 @@
 				$hyvitysresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($hyvitysresult) > 0 ) {
+
 					echo "<tr><th>".t("Maksan hyvityslaskut").":</th><td>".mysql_num_rows($hyvitysresult)."</td></tr>";
 
 					while ($hyvitysrow=mysql_fetch_array($hyvitysresult)) {
 						$query = "	SELECT maksu_tili,
-							left(concat_ws(' ', lasku.nimi, nimitark),45) nimi,
-							left(concat_ws(' ', osoite, osoitetark),45) osoite,
-							left(concat_ws(' ', postino, postitp),45) postitp,
-							sum(if(alatila='K', summa-kasumma, summa)) summa, lasku.valkoodi,
-							group_concat(viite) viite, group_concat(viesti) viesti,
-							ultilno, group_concat(lasku.tunnus) tunnus,
-							yriti.tilino ytilino, yriti.nimi tilinimi,
-							maa, pankki1, pankki2, pankki3, pankki4,
-							swift, ytunnus, yriti.valkoodi yritivalkoodi
-							FROM lasku, yriti, valuu
-							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							and tila = 'P'
-							and maa <> '$kotimaa'
-							and yriti.tunnus = maksu_tili
-							and yriti.yhtio = lasku.yhtio
-							and valuu.nimi = lasku.valkoodi
-							and valuu.yhtio = lasku.yhtio
-							and maksaja = '$kukarow[kuka]'
-							and maksu_tili = '$pvmrow[maksu_tili]'
-							and lasku.valkoodi = '$pvmrow[valkoodi]'
-							and olmapvm = '$hyvitysrow[olmapvm]'
-							and maksu_tili = '$hyvitysrow[maksu_tili]'
-							and ultilno = '$hyvitysrow[ultilno]'
-							and swift = '$hyvitysrow[swift]'
-							and pankki1 = '$hyvitysrow[pankki1]'
-							and pankki2 = '$hyvitysrow[pankki2]'
-							and pankki3 = '$hyvitysrow[pankki3]'
-							and pankki4 = '$hyvitysrow[pankki4]'
-							and sisviesti1 = '$hyvitysrow[sisviesti1]'
-							GROUP BY maksu_tili, lasku.valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1";
+									left(concat_ws(' ', lasku.nimi, nimitark),45) nimi,
+									left(concat_ws(' ', osoite, osoitetark),45) osoite,
+									left(concat_ws(' ', postino, postitp),45) postitp,
+									sum(if(alatila='K', summa-kasumma, summa)) summa, lasku.valkoodi,
+									group_concat(viite) viite, group_concat(viesti) viesti,
+									ultilno, group_concat(lasku.tunnus) tunnus,
+									yriti.tilino ytilino, yriti.nimi tilinimi,
+									maa, pankki1, pankki2, pankki3, pankki4,
+									swift, ytunnus, yriti.valkoodi yritivalkoodi, lasku.olmapvm
+									FROM lasku, yriti, valuu
+									WHERE lasku.yhtio = '$kukarow[yhtio]'
+									and tila = 'P'
+									and maa <> '$kotimaa'
+									and yriti.tunnus = maksu_tili
+									and yriti.yhtio = lasku.yhtio
+									and valuu.nimi = lasku.valkoodi
+									and valuu.yhtio = lasku.yhtio
+									and maksaja = '$kukarow[kuka]'
+									and maksu_tili = '$pvmrow[maksu_tili]'
+									and lasku.valkoodi = '$pvmrow[valkoodi]'
+									and olmapvm = '$hyvitysrow[olmapvm]'
+									and maksu_tili = '$hyvitysrow[maksu_tili]'
+									and ultilno = '$hyvitysrow[ultilno]'
+									and swift = '$hyvitysrow[swift]'
+									and pankki1 = '$hyvitysrow[pankki1]'
+									and pankki2 = '$hyvitysrow[pankki2]'
+									and pankki3 = '$hyvitysrow[pankki3]'
+									and pankki4 = '$hyvitysrow[pankki4]'
+									and sisviesti1 = '$hyvitysrow[sisviesti1]'
+									GROUP BY maksu_tili, lasku.valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1";
 						$maksuresult = mysql_query($query) or pupe_error($query);
+
 						if (mysql_num_rows($maksuresult) > 0 ) {
 
-							while ($laskurow=mysql_fetch_array($maksuresult)) {
+							while ($laskurow = mysql_fetch_array($maksuresult)) {
+
 								if (!isset($edmaksu_tili)) {
-									$yritystilino =  $laskurow["ytilino"];
-									$yrityytunnus =  $yhtiorow['ytunnus'];
+									$yritystilino = $laskurow["ytilino"];
+									$yrityytunnus = $yhtiorow['ytunnus'];
+									$maksupvm     = $laskurow["olmapvm"];
 
 									if ($kotimaa == "FI") {
 										//haetaan t‰m‰n tilin tiedot
@@ -536,6 +544,7 @@
 								$makssumma += $laskusumma;
 								$maksulk += $ulklaskusumma;	//viritet‰‰n bgutrivi.inc-failissa
 							}
+
 							$query = "	UPDATE lasku SET tila = 'Q'
 										WHERE lasku.yhtio = '$kukarow[yhtio]'
 										and tila = 'P'
@@ -552,13 +561,13 @@
 										and sisviesti1 = '$hyvitysrow[sisviesti1]'
 									    ORDER BY yhtio, tila";
 							$result = mysql_query($query) or pupe_error($query);
-
 						}
 						else {
 							echo "Meill‰ oli hyvityksi‰, mutta ne kaikki katosivat yhdistelyss‰!";
 						}
 					}
 				}
+
 				// Yrit‰mme nyt v‰litt‰‰ maksupointterin $laskusis1:ss‰ --> $laskurow[9] --> tunnus
 				$query = "	SELECT maksu_tili,
 							left(concat_ws(' ', lasku.nimi, nimitark),45) nimi,
@@ -568,7 +577,7 @@
 							ultilno, lasku.tunnus, sisviesti2, sisviesti1,
 							yriti.tilino ytilino, yriti.nimi tilinimi,
 							maa, pankki1, pankki2, pankki3, pankki4,
-							swift, alatila, kasumma, kurssi, ytunnus, yriti.valkoodi yritivalkoodi
+							swift, alatila, kasumma, kurssi, ytunnus, yriti.valkoodi yritivalkoodi, lasku.olmapvm
 							FROM lasku, yriti, valuu
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and tila = 'P'
@@ -585,13 +594,15 @@
 
 				if (mysql_num_rows($result) > 0) {
 
-					while ($laskurow=mysql_fetch_array ($result)) {
+					while ($laskurow = mysql_fetch_array ($result)) {
+
 						$yritysnimi 	= strtoupper($yhtiorow["nimi"]);
 						$yritysosoite 	= strtoupper($yhtiorow["osoite"]);
 						$yritystilino 	= $laskurow["ytilino"];
 						$laskunimi1 	= $laskurow["nimi"];
 						$laskunimi2 	= $laskurow["osoite"];
 						$laskunimi3 	= $laskurow["postitp"];
+						$maksupvm		= $laskurow["olmapvm"];
 
 						if ($laskurow["alatila"] == 'K') { // maksetaan k‰teisalennuksella
 							$laskusumma = $laskurow["summa"] - $laskurow["kasumma"];
@@ -699,7 +710,9 @@
 						$maksulk += $ulklaskusumma;	//viritet‰‰n bgutrivi.inc-failissa
 					}
 				}
+
 				if (isset($edmaksu_tili)) {
+
 					if ($kotimaa == "FI") {
 						require("inc/lum2summa.inc");
 					}
@@ -716,7 +729,6 @@
 					$makssumma = 0;
 					unset($edmaksu_tili);
 
-
 					if ($yhtiorow['pankkitiedostot'] != '') {
 						fclose($toot);
 
@@ -730,7 +742,8 @@
 						echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 						echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimilum2'>";
 						echo "<input type='hidden' name='filenimi' value='$kaunisnimi'>";
-						echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+						echo "<td><input type='submit' value='".t("Tallenna")."'></form></td>";
+						echo "</tr>";
 					}
 
 					$query = "	UPDATE lasku SET tila = 'Q'
@@ -758,7 +771,8 @@
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimilum2'>";
 				echo "<input type='hidden' name='filenimi' value='$kaunisnimi'>";
-				echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "<td><input type='submit' value='".t("Tallenna")."'></form></td>";
+				echo "</tr>";
 			}
 
 			echo "<tr><td class='back'><br></td></tr>";

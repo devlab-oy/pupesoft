@@ -54,7 +54,9 @@
 	$ulos .= sprintf ('%14s',		'');								// Kurssisopimusnumero
 	$ulos .= sprintf ('%-1.1s', 	$lum_maksutapa);					// Maksutyyppi
 	$ulos .= "J";														// Palvelumaksu
-	$ulos .= sprintf ('%8s', 		' '); 								// Veloituksen p‰iv‰m‰‰r‰
+    $ulos .= sprintf ('%02d', substr($maksupvm, 8, 2));					// Veloituksen p‰iv‰m‰‰r‰ (laitetaan numeerinen nollalla p‰d‰tty vaikka speksiss‰ on alpha!)
+    $ulos .= sprintf ('%02d', substr($maksupvm, 5, 2));
+	$ulos .= sprintf ('%04d', substr($maksupvm, 0, 4));
 	$ulos .= sprintf ('%015d', 		'0'); 								// Maksun vasta-arvo
 	$ulos .= sprintf ('%011d', 		'0'); 								// Maksun kurssi
 	$ulos .= sprintf ('%14.14s', 	$yritystilino);						// Veloitettava tili

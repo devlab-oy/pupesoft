@@ -1,10 +1,12 @@
 <?php
+
 	function alvlaskelma ($kk,$vv) {
-		global $yhtiorow, $kukarow, $startmonth, $endmonth, $PHP_SELF;
+		global $yhtiorow, $kukarow, $startmonth, $endmonth;
+
 		function laskeveroja ($taso, $tulos) {
 			global $kukarow, $startmonth, $endmonth;
 
-			if ($tulos == '22' or $tulos == 'veronmaara' or $tulos == 'summa') { 
+			if ($tulos == '22' or $tulos == 'veronmaara' or $tulos == 'summa') {
 				$query = "SELECT group_concat(tilino) tilit
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%$taso%'";
@@ -20,9 +22,9 @@
 					 		count(*) kpl
 							FROM tiliointi
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND korjattu = '' 
-							AND tilino in ($tilirow[tilit]) 
-							AND tapvm >= '$startmonth' 
+							AND korjattu = ''
+							AND tilino in ($tilirow[tilit])
+							AND tapvm >= '$startmonth'
 							AND tapvm <= '$endmonth'";
 
 					$verores = mysql_query($query) or pupe_error($query);
@@ -43,35 +45,33 @@
 
 		echo "<font class='head'>".t("ALV-laskelma")."</font><hr>";
 
-		
 		if (isset($kk)) {
 
 			$startmonth	= date("Y-m-d", mktime(0, 0, 0, $kk,   1, $vv));
 			$endmonth 	= date("Y-m-d", mktime(0, 0, 0, $kk+1, 0, $vv));
-			
-		// 201-203 sääntö fi200
-			
-			$query = "SELECT group_concat(tilino) tilit
-					FROM tili
-					WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%fi200%'";
+
+			// 201-203 sääntö fi200
+			$query = "	SELECT group_concat(tilino) tilit
+						FROM tili
+						WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%fi200%'";
 			$tilires = mysql_query($query) or pupe_error($query);
 
 			$fi201 = 0.0;
 			$fi202 = 0.0;
 			$fi203 = 0.0;
-			
+
 			$tilirow = mysql_fetch_array($tilires);
 
-			if ($tilirow['tilit']!='') {
-				$query = "SELECT vero, round(sum(summa * vero / 100) * -1, 2) veronmaara, count(*) kpl
-						FROM tiliointi
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND korjattu = '' 
-						AND tilino in ($tilirow[tilit]) 
-						AND tapvm >= '$startmonth' 
-						AND tapvm <= '$endmonth'
-						AND vero > 0
-						GROUP BY vero";
+			if ($tilirow['tilit'] != '') {
+				$query = "	SELECT vero, round(sum(summa * vero / 100) * -1, 2) veronmaara, count(*) kpl
+							FROM tiliointi
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND korjattu = ''
+							AND tilino in ($tilirow[tilit])
+							AND tapvm >= '$startmonth'
+							AND tapvm <= '$endmonth'
+							AND vero > 0
+							GROUP BY vero";
 				$verores = mysql_query($query) or pupe_error($query);
 
 				while ($verorow = mysql_fetch_array ($verores)) {
@@ -90,55 +90,34 @@
 				}
 			}
 
-		// 205 sääntö fi205
-
+			// 205 sääntö fi205
 			$fi205 = laskeveroja('fi205','22');
 
-		// 206 sääntö fi206
-
+			// 206 sääntö fi206
 			$fi206 = laskeveroja('fi206','veronmaara') + $fi205;
 
-		// 207 sääntö fi207
-
+			// 207 sääntö fi207
 			$fi207 = 0.0;
 
-		// 208 laskennallinen
-
+			// 208 laskennallinen
 			$fi208 = $fi201 + $fi202 + $fi203 + $fi205 - $fi206 - $fi207;
 
-		// 209 sääntö fi209
-
+			// 209 sääntö fi209
 			$fi209 = laskeveroja('fi209','summa') * -1;
 
-		// 210 sääntö fi210
-
+			// 210 sääntö fi210
 			$fi210 = laskeveroja('fi210','summa') * -1;
 
-		// 211 sääntö fi205
-
+			// 211 sääntö fi205
 			$fi211 = laskeveroja('fi205','summa');
 
-
-			if (strtoupper($yhtiorow["maa"])== 'FI') {
-				//muutetaan ytunnus takas oikean näköseks
-				$ytunpit = 8-strlen($yhtiorow["ytunnus"]);
-
-				if ($ytunpit > 0) {
-					$uytunnus = $yhtiorow["ytunnus"];
-					while ($ytunpit > 0) {
-					    $uytunnus = "0".$uytunnus; $ytunpit--;
-					}
-				}
-				else {
-					$uytunnus = $yhtiorow["ytunnus"];
-				}
-
-				$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
+			if (strtoupper($yhtiorow["maa"]) == 'FI') {
+				$uytunnus = tulosta_ytunnus($yhtiorow["ytunnus"]);
 			}
 			else {
 				$uytunnus = $yhtiorow["ytunnus"];
 			}
-					
+
 			echo "<br><table>";
 			echo "<tr><th>Ilmoittava yritys</th><th>$uytunnus</th></tr>";
 			echo "<tr><th>Ilmoitettava kausi</th><th>$startmonth</th></tr>";
@@ -148,7 +127,7 @@
 			echo "<tr><td>203 8% :n vero</td><td align='right'>".sprintf('%.2f',$fi203)."</td></tr>";
 			echo "<tr><th colspan='2'></th></tr>";
 			echo "<tr><td>205 Vero tavaraostoista muista EU-maista</td><td align='right'>".sprintf('%.2f',$fi205)."</td></tr>";
-			
+
 			echo "<tr><th colspan='2'></th></tr>";
 			echo "<tr><td>206 Kohdekuukauden vähennettävä vero</td><td align='right'>".sprintf('%.2f',$fi206)."</td></tr>";
 
@@ -167,21 +146,25 @@
 			echo "<tr><th colspan='2'></th></tr>";
 			echo "<tr><td>211 Tavaraostot muista EU-maista</td><td align='right'>".sprintf('%.2f',$fi211)."</td></tr>";
 			echo "</table><br>";
-			
-			$query = "SELECT sum(tiliointi.summa) vero
+
+			$query = "	SELECT sum(tiliointi.summa) vero
 						FROM tiliointi
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-						AND tiliointi.korjattu = '' 
-						AND tiliointi.tilino = '$yhtiorow[alv]' 
-						AND tiliointi.tapvm >= '$startmonth' 
+						AND tiliointi.korjattu = ''
+						AND tiliointi.tilino = '$yhtiorow[alv]'
+						AND tiliointi.tapvm >= '$startmonth'
 						AND tiliointi.tapvm <= '$endmonth'";
 			$verores = mysql_query($query) or pupe_error($query);
-
 			$verorow = mysql_fetch_array ($verores);
-			echo "<br><table><tr><td>Tili $yhtiorow[alv] yhteensä</td><td>".sprintf('%.2f',$verorow['vero'])."</td></tr>";
-			echo "<tr><td>Maksettava alv</td><td>".sprintf('%.2f',$fi208)."</td></tr>";
-			echo "<tr><td>Erotus</td><td>".sprintf('%.2f',$verorow['vero'] - $fi208)."</td></tr></table><br>";
-			if(substr($PHP_SELF,-16) != 'alv_laskelma.php') {
+
+			echo "<table>";
+			echo "<tr><td>Tili $yhtiorow[alv] yhteensä</td><td align='right'>".sprintf('%.2f',$verorow['vero'])."</td></tr>";
+			echo "<tr><td>Maksettava alv</td><td align='right'>".sprintf('%.2f',$fi208)."</td></tr>";
+			echo "<tr><td>Erotus</td><td align='right'>".sprintf('%.2f',$verorow['vero'] - $fi208)."</td></tr>";
+			echo "</table><br>";
+
+			if (basename($_SERVER["SCRIPT_FILENAME"]) != 'alv_laskelma.php') {
+
 				$ilmoituskausi = substr($startmonth,0,4).substr($startmonth,5,2);
 				$file  = "000:VSRALVKK\n";
 				$file .= "100:".date("dmY")."\n";
@@ -201,24 +184,21 @@
 				$file .= "211:".round($fi211*100,0)."\n";
 				$file .= "999:1\n";
 
-				$filenimi = "VSRALVKK-$	".date("dmy-His").".txt";
-				$fh = fopen("dataout/".$filenimi, "w");
-				if (fwrite($fh, $file) === FALSE) die("Kirjoitus epäonnistui $filenimi");
-				fclose($fh);
-				
-				echo "<table><tr><td>
-							<form action='$PHP_SELF' method='post'>
+				$filenimi = "VSRALVKK-$kukarow[yhtio]-".date("dmy-His").".txt";
+				file_put_contents("dataout/".$filenimi, $file);
+
+				echo "	<form method='post'>
 							<input type='hidden' name='tee' value='lataa_tiedosto'>
 							<input type='hidden' name='lataa_tiedosto' value='1'>
-							<input type='hidden' name='kaunisnimi' value='".t("Arvonlisaveroilmoitus-$ilmoituskausi")."'>
+							<input type='hidden' name='kaunisnimi' value='".t("arvonlisaveroilmoitus")."-$ilmoituskausi.txt'>
 							<input type='hidden' name='filenimi' value='$filenimi'>
-							<input type='submit' name='tallenna' value='".t("Tallenna tiedosto")."'></form>
-						</td></tr></table><br><br>";
+							<input type='submit' name='tallenna' value='".t("Tallenna tiedosto")."'>
+						</form><br><br>";
 			}
 		}
-		
+
 		// tehdään käyttöliittymä, näytetään aina
-		echo "<form action = '$PHP_SELF' method='post'><input type='hidden' name='tee' value ='VSRALVKK'>";
+		echo "<form method='post'><input type='hidden' name='tee' value ='VSRALVKK'>";
 		echo "<table>";
 
 		if (!isset($vv)) $vv = date("Y");
@@ -255,19 +235,26 @@
 				<option $sel[12] value = '12'>12</option>
 				</select>";
 		echo "</td>";
-		echo "</tr>";
 
 		echo "<td class='back' style='text-align:bottom;'><input type = 'submit' value = '".t("Näytä")."'></td>";
 		echo "</tr>";
-		
+
 		echo "</table>";
 
 		echo "</form><br>";
 	}
 
-	if(substr($PHP_SELF,-16) == 'alv_laskelma.php') {
-			require("../inc/parametrit.inc");
-			alvlaskelma($kk,$vv);
-			require("inc/footer.inc");
+	if (basename($_SERVER["SCRIPT_FILENAME"]) == 'alv_laskelma.php') {
+		require("../inc/parametrit.inc");
+
+		if ($tee == "lataa_tiedosto") {
+			readfile("/tmp/".$tmpfilenimi);
+			exit;
+		}
+
+		alvlaskelma($kk, $vv);
+
+		require("inc/footer.inc");
 	}
+
 ?>

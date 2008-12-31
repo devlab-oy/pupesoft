@@ -977,34 +977,6 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		exit;
 	}
 
-	if ($rahtipainohinta != '' and $yhtiorow["rahti_hinnoittelu"] == 'P' and $laskurow["rahtivapaa"] == "") {
-		// kirjoitetaan rahtikulut laskulle
-		if (trim($yhtiorow["rahti_tuotenumero"]) == "") {
-			$tuotska = t("Rahtikulu");
-		}
-		else {
-			$tuotska = $yhtiorow["rahti_tuotenumero"];
-		}
-
-		$query = "	SELECT *
-					from tuote
-					where yhtio = '$kukarow[yhtio]'
-					and tuoteno = '$tuotska'";
-		$rhire = mysql_query($query) or pupe_error($query);
-		$tuote_row  = mysql_fetch_array($rhire);
-
-		$otunnus	= $laskurow['tunnus'];
-		$hinta		= $rahtipainohinta; // rahtihinta
-		$nimitys	= tv1dateconv($laskurow["toimaika"])." $laskurow[toimitustapa]";
-
-		list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuote_row, '1', 'N', $hinta, 0);
-		list($rahinta, $alv) = alv($laskurow, $tuote_row, $lis_hinta, '', $alehinta_alv);
-
-		$query  = "	INSERT INTO tilausrivi (hinta, ale, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv)
-					values ('$rahinta', '$lis_ale', 'N', '1', '1', '$otunnus', '$tuote_row[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv')";
-		$addtil = mysql_query($query) or pupe_error($query);
-	}
-
 	// Tsekataan jos ollaan tehty asiakkaallevalmistus jossa ei ole yht‰‰n valmistettavaa rivi‰
 	$msiirto = "";
 

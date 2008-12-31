@@ -329,9 +329,9 @@ else {
 	}
 	else {
 		//t‰ss‰ k‰yd‰‰n l‰pi v‰h‰n n‰it‰ rahtijuttuja
-		//jos rahtihinnoittelu tapahtuu tilauksen hinnan (alviton) perusteella niin tehd‰‰n se t‰ss‰
-		//t‰m‰ olkoon hyv‰ arvaus rahtihinnasta, sit‰ voidaan sitten myˆhemmin tarkentaa
-		if ($yhtiorow["rahti_hinnoittelu"] == "o") {
+		//jos rahtihinnoittelu tapahtuu tilauksen hinnan (alviton) perusteella
+		//tai rahtihinnoittelu tapahtuu tilauksen painon mukaan automaattisesti niin tehd‰‰n se t‰ss‰
+		if ($yhtiorow["rahti_hinnoittelu"] == "o" or $yhtiorow["rahti_hinnoittelu"] == "P") {
 
 			$query = "	SELECT tunnus
 						from tilausrivi
@@ -349,73 +349,80 @@ else {
 
 				// jos toimitustapana on joku nouto niin ei lis‰t‰ rahtikulua
 				if ($torow["nouto"] == "") {
-					if ($yhtiorow["alv_kasittely"] == '') {
-						$query = "	SELECT round(((varattu+jt)*hinta*(1-(ale/100)))/(1+alv/100),'$yhtiorow[hintapyoristys]') rivihinta, netto
-									FROM tilausrivi
-									WHERE otunnus 	= '$laskurow[tunnus]'
-									and yhtio	  	= '$kukarow[yhtio]'
-									and tyyppi		= 'L'";
+
+					// jos meill‰ on automaattinen painoihin perustuva hinnooittelu
+					if ($yhtiorow["rahti_hinnoittelu"] == 'P') {
+						$hirow = array();
+						$hirow["rahtihinta"] = (float) $rahtipainohinta;
 					}
 					else {
-						$query = "	SELECT round(((varattu+jt)*hinta*(1-(ale/100))),'$yhtiorow[hintapyoristys]') rivihinta, netto
-									FROM tilausrivi
-									WHERE otunnus 	= '$laskurow[tunnus]'
-									and yhtio	  	= '$kukarow[yhtio]'
-									and tyyppi		= 'L'";
-					}
-
-					$presult = mysql_query($query) or pupe_error($query);
-
-					$nyht = 0;
-					$myht = 0;
-					$kyht = 0;
-
-					while ($prow = mysql_fetch_array ($presult)) {
-
-						if ($prow["netto"] != 'N') {
-							$myht += $prow["rivihinta"]; // lasketaan tilauksen loppusummaa MUUT RIVIT..
+						if ($yhtiorow["alv_kasittely"] == '') {
+							$query = "	SELECT round(((varattu+jt)*hinta*(1-(ale/100)))/(1+alv/100),'$yhtiorow[hintapyoristys]') rivihinta, netto
+										FROM tilausrivi
+										WHERE otunnus 	= '$laskurow[tunnus]'
+										and yhtio	  	= '$kukarow[yhtio]'
+										and tyyppi		= 'L'";
 						}
 						else {
-							$nyht += $prow["rivihinta"]; // lasketaan tilauksen loppusummaa NETTORIVIT..
+							$query = "	SELECT round(((varattu+jt)*hinta*(1-(ale/100))),'$yhtiorow[hintapyoristys]') rivihinta, netto
+										FROM tilausrivi
+										WHERE otunnus 	= '$laskurow[tunnus]'
+										and yhtio	  	= '$kukarow[yhtio]'
+										and tyyppi		= 'L'";
 						}
-					}
-					//erikoisalennus lasketaan vain riveille joilla EI ole NETTOHINTAA
-					if ($laskurow['erikoisale'] != 0) {
-						$apu1 = round($laskurow['erikoisale']/100,2);	// erikoisale prosentti
-						$apu2 = round($myht*$apu1,2); 					// erikoisalen m‰‰r‰
-						$apu3 = round((1-$apu1)*$myht,2);				// loppusumma
+						$presult = mysql_query($query) or pupe_error($query);
 
-						//Kakki yhteens‰
-						$kyht = $apu3 + $nyht;
-					}
-					else {
-						//Kakki yhteens‰
-						$kyht = $myht + $nyht;
-					}
+						$nyht = 0;
+						$myht = 0;
+						$kyht = 0;
 
-					// $kyht on KOTIVALUUTASSA, k‰‰nnet‰‰n laskun valuuttaan
-					if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-						$kyht = round(laskuval($kyht, $laskurow["vienti_kurssi"]), 2);
-					}
+						while ($prow = mysql_fetch_array ($presult)) {
 
-					/*
-					$query = "	SELECT rahtihinta
-								from rahtimaksut
-								where yhtio		 = '$kukarow[yhtio]'
-								and toimitustapa = '$laskurow[toimitustapa]'
-								and kilotalku   <= '$kyht'
-								and kilotloppu  >= '$kyht'";
-					$result = mysql_query($query) or pupe_error($query);
-					*/
+							if ($prow["netto"] != 'N') {
+								$myht += $prow["rivihinta"]; // lasketaan tilauksen loppusummaa MUUT RIVIT..
+							}
+							else {
+								$nyht += $prow["rivihinta"]; // lasketaan tilauksen loppusummaa NETTORIVIT..
+							}
+						}
+						//erikoisalennus lasketaan vain riveille joilla EI ole NETTOHINTAA
+						if ($laskurow['erikoisale'] != 0) {
+							$apu1 = round($laskurow['erikoisale']/100,2);	// erikoisale prosentti
+							$apu2 = round($myht*$apu1,2); 					// erikoisalen m‰‰r‰
+							$apu3 = round((1-$apu1)*$myht,2);				// loppusumma
 
-					$result = hae_rahtimaksu($laskurow, $kyht);
+							//Kakki yhteens‰
+							$kyht = $apu3 + $nyht;
+						}
+						else {
+							//Kakki yhteens‰
+							$kyht = $myht + $nyht;
+						}
 
-					if (mysql_num_rows($result) > 0) {
-						$hirow = mysql_fetch_array($result);
-					}
-					else {
-						$hirow = array();
-						$hirow["rahtihinta"] = 0;
+						// $kyht on KOTIVALUUTASSA, k‰‰nnet‰‰n laskun valuuttaan
+						if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+							$kyht = round(laskuval($kyht, $laskurow["vienti_kurssi"]), 2);
+						}
+
+						/*
+						$query = "	SELECT rahtihinta
+									from rahtimaksut
+									where yhtio		 = '$kukarow[yhtio]'
+									and toimitustapa = '$laskurow[toimitustapa]'
+									and kilotalku   <= '$kyht'
+									and kilotloppu  >= '$kyht'";
+						$result = mysql_query($query) or pupe_error($query);
+						*/
+
+						$result = hae_rahtimaksu($laskurow, $kyht);
+
+						if (mysql_num_rows($result) > 0) {
+							$hirow = mysql_fetch_array($result);
+						}
+						else {
+							$hirow = array();
+							$hirow["rahtihinta"] = 0;
+						}
 					}
 
 					// jos halutaan rahtikulu, katotaan saadaanko siltikin ilmaseks jos ollaan yli rajojen
@@ -451,7 +458,12 @@ else {
 
 					//lis‰t‰‰n rahtikulurivi vain jos rahtikulu on erisuuri kuin nolla, nollarivej‰ on ilmeisesti turha llis‰t‰
 					if ($hirow["rahtihinta"] != 0) {
-						$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
+
+						// haetaan rahtituotteen tiedot
+						$query = "	SELECT *
+									FROM tuote
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tuoteno = '$yhtiorow[rahti_tuotenumero]'";
 						$rhire = mysql_query($query) or pupe_error($query);
 						$trow  = mysql_fetch_array($rhire);
 
@@ -463,13 +475,13 @@ else {
 						list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, '1', 'N', $hinta, 0);
 						list($hinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
 
-						$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
+						$query = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
 									values  (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
 						$addtil = mysql_query($query) or pupe_error($query);
 
 						$tilaus_valmis_ulos .= t("Tilaukselle lis‰ttiin rahtikulua").": $hinta $laskurow[valkoodi]<br>";
 
-						if ($torow["jvkulu"] != 0) {
+						if ($torow["jvkulu"] != 0 and $maksuehtorow["jv"] != "") {
 							$otunnus	 = $laskurow['tunnus'];
 							$hinta		 = $torow["jvkulu"]; // jvkulu
 							$trow["alv"] = $laskurow["alv"];
@@ -854,24 +866,24 @@ else {
 				$tilauksia = 1;
 				$asmuuttilaukset = "";
 				$numerot = implode(', ',$tilausnumerot);
-				
-				$query = " 	SELECT tunnus 
+
+				$query = " 	SELECT tunnus
 						   	FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND tunnus not in($numerot) 
+							AND tunnus not in($numerot)
 							AND liitostunnus = '$laskurow[liitostunnus]'
-							AND ((tila = 'L' AND alatila not in ('D','X')) or (tila='n' and alatila='a'))";								
+							AND ((tila = 'L' AND alatila not in ('D','X')) or (tila='n' and alatila='a'))";
 				$muutresult = mysql_query($query) or pupe_error($query);
-				
+
 				while ($muutrow = mysql_fetch_array($muutresult)) {
-					$asmuuttilaukset .= $muutrow['tunnus']." "; 
-					
+					$asmuuttilaukset .= $muutrow['tunnus']." ";
+
 				}
 
-				foreach ($tilausnumerot as $tilausnumero) {										
-					
+				foreach ($tilausnumerot as $tilausnumero) {
+
 					$upviesti = t("Tilaus jakaantunut")." ".count($tilausnumerot)." ".t("tilaukseksi").": ".$numerot." ".t("Tilaus").": ".$tilauksia."/".count($tilausnumerot);
-						
+
 					if ($asmuuttilaukset != "") {
 						$upviesti .= "\n".t("Asiakkaalla on toimittamatta myˆs tilaukset").": ".$asmuuttilaukset;
 					}
@@ -879,10 +891,10 @@ else {
 					$query = "	UPDATE lasku set sisviesti2 = concat_ws(' ', sisviesti2, '$upviesti')
 								where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
 					$upresult = mysql_query($query) or pupe_error($query);
-					
+
 					$tilauksia++;
-				}			
-				
+				}
+
 			}
 
 			// Laitetaan splittien toim ja kerpvm ‰t kuntoon / viikkojutut on pakko nollata splitille

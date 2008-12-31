@@ -1520,15 +1520,17 @@
 			$osath = '';
 			$laskkielto = '';
 			$jtki = "";
-			if ($srow['eilahetetta'] != '') $eilah = 'CHECKED';
-			if ($srow['ketjutus']    != '') $eiket = 'CHECKED';
-			if ($srow['sisainen']    != '') $sisah = 'CHECKED';
-			if ($srow['jtkielto']    != '') $jtki  = 'CHECKED';
+			$rahtivapaa_chk = '';
+			
+			if ($srow['eilahetetta'] != '') $eilah          = 'CHECKED';
+			if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
+			if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
+			if ($srow['jtkielto']    != '') $jtki           = 'CHECKED';
+			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
+			if ($srow['chn'] == '999')      $laskkielto     = 'CHECKED';
 
 			// Tarjouksia ei oletuksena osatoimiteta
 			if ($srow['osatoimitus'] != '' or ($toim == "TARJOUS" and $kukarow["kesken"] == 0)) $osath = 'CHECKED';
-
-			if ($srow['chn'] == '999') $laskkielto = 'CHECKED';
 
 			echo "<td>".t("Sisäinen lasku").":</td><td><input type='checkbox' name='sisainen' $sisah></td>";
 			echo "</tr>";
@@ -1732,21 +1734,8 @@
 
 			echo "</select></td>";
 
-			$rahtivapaaquery = "SELECT rahtivapaa FROM asiakas WHERE yhtio='$kukarow[yhtio]' AND tunnus='$asiakasid'";
-			$rahtivapaaresult = mysql_query($rahtivapaaquery) or pupe_error($rahtivapaaquery);
-
-			if (mysql_num_rows($rahtivapaaresult) > 0) {
-				$rahtivapaarow = mysql_fetch_array($rahtivapaaresult);
-				if ($rahtivapaarow["rahtivapaa"] != '') {
-					$rahtivapaa_chk = " checked";
-				}
-			}
-			else {
-				$rahtivapaa_chk = "";
-			}
-
 			echo "<td>",t("Rahtivapaa"),"</td>";
-			echo "<td><input type='checkbox' name='rahtivapaa'$rahtivapaa_chk></td>";
+			echo "<td><input type='checkbox' name='rahtivapaa' $rahtivapaa_chk></td>";
 			echo "</tr>";
 
 			echo "<tr>";

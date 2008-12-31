@@ -14,7 +14,7 @@ function hinnastorivi($tuote, $laskurow) {
 		$yksikko = "PAR";
 	
     // tehd‰‰n tietuetta
-	$out  .= sprintf("%-35.25s", $tuote['tuoteno']);					// tuotenumero
+	$out  .= sprintf("%-35.35s", $tuote['tuoteno']);					// tuotenumero
 	$out  .= sprintf("%-10.10s", sprintf("%02s", $tuote['try']));		// tuotteen tuoteryhm‰ kahteen merkkiin asti zeropaddattuna
 	$out  .= sprintf("%-10.10s", sprintf("%02s", $tuote['aleryhma']));	// tuotteen alennusryhm‰ kahteen merkkiin asti zeropaddattuna
 	$out  .= sprintf("%-50.50s", $tuote['nimitys']);		   			// tuotteen nimitys

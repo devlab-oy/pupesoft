@@ -350,73 +350,63 @@ else {
 				// jos toimitustapana on joku nouto niin ei lis‰t‰ rahtikulua
 				if ($torow["nouto"] == "") {
 
-					// jos meill‰ on automaattinen painoihin perustuva hinnooittelu
+					if ($yhtiorow["alv_kasittely"] == '') {
+						$query = "	SELECT round(((varattu+jt)*hinta*(1-(ale/100)))/(1+alv/100),'$yhtiorow[hintapyoristys]') rivihinta, netto
+									FROM tilausrivi
+									WHERE otunnus 	= '$laskurow[tunnus]'
+									and yhtio	  	= '$kukarow[yhtio]'
+									and tyyppi		= 'L'";
+					}
+					else {
+						$query = "	SELECT round(((varattu+jt)*hinta*(1-(ale/100))),'$yhtiorow[hintapyoristys]') rivihinta, netto
+									FROM tilausrivi
+									WHERE otunnus 	= '$laskurow[tunnus]'
+									and yhtio	  	= '$kukarow[yhtio]'
+									and tyyppi		= 'L'";
+					}
+					$presult = mysql_query($query) or pupe_error($query);
+
+					$nyht = 0;
+					$myht = 0;
+					$kyht = 0;
+
+					while ($prow = mysql_fetch_array ($presult)) {
+
+						if ($prow["netto"] != 'N') {
+							$myht += $prow["rivihinta"]; // lasketaan tilauksen loppusummaa MUUT RIVIT..
+						}
+						else {
+							$nyht += $prow["rivihinta"]; // lasketaan tilauksen loppusummaa NETTORIVIT..
+						}
+					}
+					//erikoisalennus lasketaan vain riveille joilla EI ole NETTOHINTAA
+					if ($laskurow['erikoisale'] != 0) {
+						$apu1 = round($laskurow['erikoisale']/100,2);	// erikoisale prosentti
+						$apu2 = round($myht*$apu1,2); 					// erikoisalen m‰‰r‰
+						$apu3 = round((1-$apu1)*$myht,2);				// loppusumma
+
+						//Kakki yhteens‰
+						$kyht = $apu3 + $nyht;
+					}
+					else {
+						//Kakki yhteens‰
+						$kyht = $myht + $nyht;
+					}
+
+					// $kyht on KOTIVALUUTASSA, k‰‰nnet‰‰n laskun valuuttaan
+					if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+						$kyht = round(laskuval($kyht, $laskurow["vienti_kurssi"]), 2);
+					}
+
+					// jos meill‰ on automaattinen painoihin perustuva hinnoittelu
 					if ($yhtiorow["rahti_hinnoittelu"] == 'P') {
 						$hirow = array();
 						$hirow["rahtihinta"] = (float) $rahtipainohinta;
 					}
 					else {
-						if ($yhtiorow["alv_kasittely"] == '') {
-							$query = "	SELECT round(((varattu+jt)*hinta*(1-(ale/100)))/(1+alv/100),'$yhtiorow[hintapyoristys]') rivihinta, netto
-										FROM tilausrivi
-										WHERE otunnus 	= '$laskurow[tunnus]'
-										and yhtio	  	= '$kukarow[yhtio]'
-										and tyyppi		= 'L'";
-						}
-						else {
-							$query = "	SELECT round(((varattu+jt)*hinta*(1-(ale/100))),'$yhtiorow[hintapyoristys]') rivihinta, netto
-										FROM tilausrivi
-										WHERE otunnus 	= '$laskurow[tunnus]'
-										and yhtio	  	= '$kukarow[yhtio]'
-										and tyyppi		= 'L'";
-						}
-						$presult = mysql_query($query) or pupe_error($query);
-
-						$nyht = 0;
-						$myht = 0;
-						$kyht = 0;
-
-						while ($prow = mysql_fetch_array ($presult)) {
-
-							if ($prow["netto"] != 'N') {
-								$myht += $prow["rivihinta"]; // lasketaan tilauksen loppusummaa MUUT RIVIT..
-							}
-							else {
-								$nyht += $prow["rivihinta"]; // lasketaan tilauksen loppusummaa NETTORIVIT..
-							}
-						}
-						//erikoisalennus lasketaan vain riveille joilla EI ole NETTOHINTAA
-						if ($laskurow['erikoisale'] != 0) {
-							$apu1 = round($laskurow['erikoisale']/100,2);	// erikoisale prosentti
-							$apu2 = round($myht*$apu1,2); 					// erikoisalen m‰‰r‰
-							$apu3 = round((1-$apu1)*$myht,2);				// loppusumma
-
-							//Kakki yhteens‰
-							$kyht = $apu3 + $nyht;
-						}
-						else {
-							//Kakki yhteens‰
-							$kyht = $myht + $nyht;
-						}
-
-						// $kyht on KOTIVALUUTASSA, k‰‰nnet‰‰n laskun valuuttaan
-						if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-							$kyht = round(laskuval($kyht, $laskurow["vienti_kurssi"]), 2);
-						}
-
-						/*
-						$query = "	SELECT rahtihinta
-									from rahtimaksut
-									where yhtio		 = '$kukarow[yhtio]'
-									and toimitustapa = '$laskurow[toimitustapa]'
-									and kilotalku   <= '$kyht'
-									and kilotloppu  >= '$kyht'";
-						$result = mysql_query($query) or pupe_error($query);
-						*/
-
 						$result = hae_rahtimaksu($laskurow, $kyht);
 
-						if (mysql_num_rows($result) > 0) {
+						if (mysql_num_rows($result) == 1) {
 							$hirow = mysql_fetch_array($result);
 						}
 						else {
@@ -430,25 +420,22 @@ else {
 						$as_que = "SELECT rahtivapaa_alarajasumma FROM asiakas WHERE yhtio='$kukarow[yhtio]' AND tunnus='$laskurow[liitostunnus]' and rahtivapaa_alarajasumma > 0";
 						$as_res = mysql_query($as_que) or pupe_error($as_que);
 
-						if (mysql_num_rows($as_res) > 0) {
+						$rahtivapaa_alarajasumma = 0;
+
+						if (mysql_num_rows($as_res) == 1) {
 							$as_row = mysql_fetch_array($as_res);
-
-							if ($kyht > $as_row["rahtivapaa_alarajasumma"]) {
-								$hirow = array();
-								$hirow["rahtihinta"] = 0;
-
-								$query = "UPDATE lasku SET rahtivapaa='o' WHERE yhtio='$kukarow[yhtio]' AND tunnus='$laskurow[tunnus]'";
-								$rahtivapres = mysql_query($query) or pupe_error($query);
-							}
+							$rahtivapaa_alarajasumma = $as_row["rahtivapaa_alarajasumma"];
 						}
 						else {
-							if ($kyht > $yhtiorow["rahtivapaa_alarajasumma"] and $yhtiorow["rahtivapaa_alarajasumma"] != 0) {
-								$hirow = array();
-								$hirow["rahtihinta"] = 0;
+							$rahtivapaa_alarajasumma = $yhtiorow["rahtivapaa_alarajasumma"];
+						}
 
-								$query = "UPDATE lasku SET rahtivapaa='o' WHERE yhtio='$kukarow[yhtio]' AND tunnus='$laskurow[tunnus]'";
-								$rahtivapres = mysql_query($query) or pupe_error($query);
-							}
+						if ($kyht > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) {
+							$hirow = array();
+							$hirow["rahtihinta"] = 0;
+
+							$query = "UPDATE lasku SET rahtivapaa='o' WHERE yhtio='$kukarow[yhtio]' AND tunnus='$laskurow[tunnus]'";
+							$rahtivapres = mysql_query($query) or pupe_error($query);
 						}
 					}
 					else {

@@ -84,6 +84,12 @@
 				$ulos = '';
 			}
 			
+			if (mysql_field_name($result, $i) == "muuttaja") {
+				$tyyppi = 0;
+				$jatko = 0;
+				$ulos = '';
+			}
+			
 			if(mysql_field_name($result, $i) == 'laatija') {	//speciaali tapaukset
 				$tyyppi = 2;
 				$trow[$i] = $kukarow["kuka"];

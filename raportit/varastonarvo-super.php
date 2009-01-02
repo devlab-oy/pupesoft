@@ -95,14 +95,33 @@
 			if ($argv[0] == 'varastonarvo-super.php' and $argv[1] != '' and $argv[2] != '') {
 				$kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
 
-				$query    = "SELECT * from yhtio where yhtio = '$kukarow[yhtio]'";
-				$yhtiores = mysql_query($query) or die($query);
+				$query = "	SELECT *
+							FROM yhtio
+							WHERE yhtio='$kukarow[yhtio]'";
+				$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
-				if (mysql_num_rows($yhtiores)==1) {
-					$yhtiorow = mysql_fetch_array($yhtiores);
+				if (mysql_num_rows($result) == 0) {
+					echo "<b>Käyttäjän yritys ei löydy! ($kukarow[yhtio])";
+					exit;
 				}
-				else {
-					die ("Yhtiö $kukarow[yhtio] ei löydy!");
+				$yhtiorow = mysql_fetch_array($result);
+
+				$query = "	SELECT *
+							FROM yhtion_parametrit
+							WHERE yhtio='$kukarow[yhtio]'";
+				$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+				if (mysql_num_rows($result) == 1) {
+					$yhtion_parametritrow = mysql_fetch_array($result);
+
+					if ($yhtion_parametritrow['hintapyoristys'] != 2 and $yhtion_parametritrow['hintapyoristys'] != 4 and $yhtion_parametritrow['hintapyoristys'] != 6) {
+						$yhtion_parametritrow['hintapyoristys'] = 2;
+					}
+
+					// lisätään kaikki yhtiorow arrayseen
+					foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
+						$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
+					}
 				}
 
 				$varastot[] = $argv[2];

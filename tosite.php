@@ -161,9 +161,23 @@
 		$isumma_valuutassa = array();
 
 		for ($i=1; $i<$maara; $i++) {
-			if (strlen($itili[$i]) > 0 or strlen($isumma[$i]) > 0) { // Käsitelläänkö rivi??
+
+ 			// Käsitelläänkö rivi??
+			if (strlen($itili[$i]) > 0 or strlen($isumma[$i]) > 0) {
 
 				$isumma[$i] = str_replace ( ",", ".", $isumma[$i]);
+
+				// Oletussummalla korvaaminen mahdollista
+				if ($turvasumma_valuutassa > 0) {
+					// Summan vastaluku käyttöön
+					if ($isumma[$i] == '-') {
+						$isumma[$i] = -1 * $turvasumma_valuutassa;
+					}
+					// Kopioidaan summa
+					elseif (strlen($itili[$i]) > 0 and $isumma[$i] == 0) {
+						$isumma[$i] = $turvasumma_valuutassa;
+					}
+				}
 
 				// otetaan valuuttasumma talteen
 				$isumma_valuutassa[$i] = $isumma[$i];
@@ -178,16 +192,6 @@
 					$gok = 1;
 				}
 
-				if ($turvasumma > 0) {  // Oletussummalla korvaaminen mahdollista
-					if ($isumma[$i] == '-') { // Summan vastaluku käyttöön
-						$isumma[$i] = -1 * $turvasumma;
-					}
-					else {
-						if ((strlen($itili[$i]) > 0) && ($isumma[$i] == 0))  { // Kopioidaan summa
-							$isumma[$i] = $turvasumma;
-						}
-					}
-				}
 				if ($isumma[$i] == 0) { // Summa puuttuu
 					$ivirhe[$i] .= t('Riviltä puuttuu summa').'<br>';
 					$gok = 1;
@@ -469,7 +473,7 @@
 
 		echo "</select>";
 		echo "</td></tr>";
-		
+
 		// tutkitaan ollaanko jossain toimipaikassa alv-rekisteröity
 		$query = "	SELECT *
 					FROM yhtion_toimipaikat
@@ -503,8 +507,8 @@
 			$tilino_alv = $yhtiorow["alv"];
 			echo "<input type='hidden' name='alv_tili' value='$tilino_alv'>";
 		}
-		
-		
+
+
 		echo "<tr><th>".t("Nimi")."</th><td><input type='text' name='nimi' value='$nimi'>";
 
 		if ($kuitti != '') {

@@ -20,6 +20,8 @@
 
 		$tyyppi = "";
 		$email_osoite = "";
+
+		$supertee = "RAPORTOI";
 	}
 
 	if (!function_exists("force_echo")) {
@@ -48,8 +50,12 @@
 		if (!isset($vv)) $vv = date("Y");
 
 		// tutkaillaan saadut muuttujat
-		$osasto = trim($osasto);
-		$try    = trim($try);
+		if (isset($osasto)) {
+			$osasto = trim($osasto);
+		}
+		if (isset($try)) {
+			$try    = trim($try);
+		}
 		$pp 	= sprintf("%02d", trim($pp));
 		$kk 	= sprintf("%02d", trim($kk));
 		$vv 	= sprintf("%04d", trim($vv));
@@ -103,8 +109,6 @@
 
 				$email_osoite = mysql_real_escape_string($argv[3]);
 
-				$supertee == "RAPORTOI";
-				
 				$epakur = 'kaikki';
 				$tyyppi = 'A';
 			}
@@ -115,7 +119,7 @@
 			$paikka_lisa = "";
 
 			// jos summaustaso on paikka, otetaan paikat mukaan selectiin
-			if ($summaustaso == "P") {
+			if (isset($summaustaso) and $summaustaso == "P") {
 				$paikka_lisa = ", tmp_tuotepaikat.hyllyalue,
 								  tmp_tuotepaikat.hyllynro,
 								  tmp_tuotepaikat.hyllyvali,
@@ -139,27 +143,27 @@
 			}
 
 			// tehdään tuoterajauksia
-			if (count($mul_osasto) > 0) {
+			if (isset($mul_osasto) and count($mul_osasto) > 0) {
 				$sel_osasto = "('".str_replace(',','\',\'',implode(",", $mul_osasto))."')";
 				$tuote_lisa .= " and tuote.osasto in $sel_osasto ";
 			}
-			if (count($mul_try) > 0) {
+			if (isset($mul_try) and count($mul_try) > 0) {
 				$sel_tuoteryhma = "('".str_replace(',','\',\'',implode(",", $mul_try))."')";
 				$tuote_lisa .= " and tuote.try in $sel_tuoteryhma ";
 			}
-			if (count($mul_tmr) > 0) {
+			if (isset($mul_tmr) and count($mul_tmr) > 0) {
 				$sel_tuotemerkki = "('".str_replace(',','\',\'',implode(",", $mul_tmr))."')";
 				$tuote_lisa .= " AND tuote.tuotemerkki in $sel_tuotemerkki ";
 			}
 
-			if ($epakur == 'epakur') {
+			if (isset($epakur) and $epakur == 'epakur') {
 				$tuote_lisa .= " AND (tuote.epakurantti100pvm != '0000-00-00' OR tuote.epakurantti75pvm != '0000-00-00' OR tuote.epakurantti50pvm != '0000-00-00' OR tuote.epakurantti25pvm != '0000-00-00') ";
 			}
-			elseif ($epakur == 'ei_epakur') {
+			elseif (isset($epakur) and $epakur == 'ei_epakur') {
 				$tuote_lisa .= " AND tuote.epakurantti100pvm = '0000-00-00' ";
 			}
 
-			if ($tuotteet_lista != '') {
+			if (isset($tuotteet_lista) and $tuotteet_lista != '') {
 				$tuotteet = explode("\n", $tuotteet_lista);
 				$tuoterajaus = "";
 				foreach($tuotteet as $tuote) {
@@ -170,13 +174,13 @@
 				$tuote_lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
 			}
 
-			if ($tuoteryhma == "tyhjat" and $osasto == "tyhjat") {
+			if (isset($tuoteryhma) and $tuoteryhma == "tyhjat" and isset($osasto) and $osasto == "tyhjat") {
 				$having_lisa .= "HAVING (try = '0' or osasto = '0') ";
 			}
-			elseif ($osasto == "tyhjat") {
+			elseif (isset($osasto) and $osasto == "tyhjat") {
 				$having_lisa .= "HAVING osasto = '0' ";
 			}
-			elseif ($tuoteryhma == "tyhjat") {
+			elseif (isset($tuoteryhma) and $tuoteryhma == "tyhjat") {
 				$having_lisa .= "HAVING try = '0' ";
 			}
 
@@ -761,7 +765,7 @@
 				$komento = 'email';
 
 				// itse print komento...
-				$liite = $excelnimi;
+				$liite = "/tmp/".$excelnimi;
 				$kutsu = t("Varastonarvoraportti")." ($argv[2]) $vv-$kk-$pp";
 
 				$ctype = "excel";

@@ -320,7 +320,7 @@
 					}
 					else {
 						list($height, $width, $scale) = $pdf->scaleImage("$isizelogo[1]x$isizelogo[0]", "40x80");
-						echo "$height $scale";
+
                         $placement = $pdf->image_place($image, ($bottom+$height-30), 10, $firstpage, array("scale" => $scale));
 					}
 				}

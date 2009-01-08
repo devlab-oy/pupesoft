@@ -251,10 +251,10 @@
 				$alkukausi = 0;
 			}
 
+			//	Laajempi pdf käsittel
+			require_once('pdflib/pupepdf.class.php');
 
-			require_once('pdflib/phppdflib.class.php');
-
-			$pdf = new pdffile;
+			$pdf = new pdf;
 			$pdf->set_default('margin', 0);
 			$pdf->set_default('margin-left', 5);
 			$rectparam["width"] = 0.3;
@@ -266,7 +266,7 @@
 			
 			
 			
-			if(count($kaudet) > 10) {
+			if(count($kaudet) > 10 and $kaikkikaudet != "") {
 				$p["height"]--;
 				$b["height"]--;
 				$saraklev 			= 49;
@@ -280,11 +280,19 @@
 				$vaslev 			= 160;
 				$rivikork 			= 15;
 			}
+			
 			function alku () {
 				global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev;
-
-				$firstpage = $pdf->new_page("11.5x8in");
-				$bottom = "530";
+				
+				if(count($kaudet) > 5 and $kaikkikaudet != "") {
+					$firstpage = $pdf->new_page("11.5x8in");
+					$bottom = "530";
+				}
+				else {
+					$firstpage = $pdf->new_page("8x11.5in");
+					$bottom = "780";
+				}
+				
 
 				unset($data);
 				if( (int) $yhtiorow["lasku_logo"] > 0) {
@@ -311,19 +319,16 @@
 						echo t("Logokuvavirhe");
 					}
 					else {
-						$logoparam = array();
-						$logoparam['scale'] = 0.15;
+						list($height, $width, $scale) = $pdf->scaleImage("$isizelogo[1]x$isizelogo[0]", "40x80");
 
-						$iy    = $isizelogo[1]*0.15*0.35714;	// kuvan y-korkeus millimetreissä
-
-						$placement = $pdf->image_place($image, mm_pt(200-$iy), 10, $firstpage, $logoparam);
+                        $placement = $pdf->image_place($image, ($bottom+$height-30), 10, $firstpage, array("scale" => $scale));
 					}
 				}
 				else {
-					$pdf->draw_text(10, 560,  $yhtiorow["nimi"], $firstpage);
+					$pdf->draw_text(10, ($bottom+30),  $yhtiorow["nimi"], $firstpage);
 				}
 
-				$pdf->draw_text(200,  560, $otsikko, $firstpage);
+				$pdf->draw_text(200,  ($bottom+30), $otsikko, $firstpage);
 
 				$left 	= $vaslev;
 

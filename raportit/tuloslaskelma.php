@@ -285,12 +285,12 @@
 				global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev;
 				
 				if(count($kaudet) > 5 and $kaikkikaudet != "") {
-					$firstpage = $pdf->new_page("11.5x8in");
-					$bottom = "530";
+					$firstpage = $pdf->new_page("842x595");
+					$bottom = "535";
 				}
 				else {
-					$firstpage = $pdf->new_page("8x11.5in");
-					$bottom = "780";
+					$firstpage = $pdf->new_page("595x842");
+					$bottom = "782";
 				}
 				
 
@@ -320,7 +320,7 @@
 					}
 					else {
 						list($height, $width, $scale) = $pdf->scaleImage("$isizelogo[1]x$isizelogo[0]", "40x80");
-
+						echo "$height $scale";
                         $placement = $pdf->image_place($image, ($bottom+$height-30), 10, $firstpage, array("scale" => $scale));
 					}
 				}

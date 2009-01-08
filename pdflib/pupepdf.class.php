@@ -26,7 +26,7 @@ class PDF extends pdffile {
 		
 		$s = min($scale);
 				
-		return array(($height * $s), ($width * $s));
+		return array(($height * $s), ($width * $s), $s);
 	}
 
 

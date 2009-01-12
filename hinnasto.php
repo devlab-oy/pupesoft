@@ -135,15 +135,17 @@ if ($tee != '') {
 	else {
 		$kl_lisa = " and tuote.hinnastoon!='E' ";	
 	}
-    
-	$query = "	SELECT tuote.*, korvaavat.id
+
+	$query = "	SELECT tuote.*, korvaavat.id, sum(tuotepaikat.saldo) saldo
 				FROM tuote
 				LEFT JOIN korvaavat use index (yhtio_tuoteno) ON (tuote.tuoteno=korvaavat.tuoteno and tuote.yhtio=korvaavat.yhtio)
+				LEFT JOIN tuotepaikat ON tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno
 				WHERE $where tuote.yhtio='$kukarow[yhtio]' 
-				and tuote.status in ('','a') 
 				$kl_lisa
 				and ((tuote.vienti = '' or tuote.vienti like '%-{$laskurowfake['maa']}%' or tuote.vienti like '%+%')
 				and tuote.vienti not like '%+{$laskurowfake['maa']}%')
+				GROUP BY tuote.tuoteno, korvaavat.id
+				HAVING tuote.status in ('','a') or saldo > 0
 				ORDER BY tuote.osasto+0, tuote.try+0";
 	$result = mysql_query($query) or pupe_error($query);
 

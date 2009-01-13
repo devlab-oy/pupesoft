@@ -298,12 +298,14 @@
 			echo "</tr>";
 
 			$summa = 0;
-
+			$summa2= 0;
+			
 			while ($trow = mysql_fetch_array ($result)) {
 				if ($trow['avoinsaldo'] != 0) {
 
 					$summa += $trow['avoinsaldo'];
-
+					$summa2+= $trow['summa'];
+					
 					echo "<tr class='aktiivi'>";
 					echo "<td><a href='$palvelin2","raportit.php?toim=toimittajahaku&tee=A&ytunnus=$trow[ytunnus]&alku=0&laji=M'>$trow[ytunnus]</a></td>";
 					echo "<td>$trow[nimi]</td>";
@@ -346,12 +348,21 @@
 						and tilino	IN ($tili)";
 			$result = mysql_query($query) or pupe_error($query);
 			$trow = mysql_fetch_array ($result);
-
+			
+			if ($valuutassako != "V" and $savalkoodi != '') {
+				$summa2 = '';
+				$lisaval = '';
+			}
+			else {
+				$summa2 = "/".$summa2;
+				$lisaval = "/".$savalkoodi;
+			}
+			
 			$erotus = $trow['saldo']+$summa;
 
 			$summa = sprintf("%01.2f", $summa);
 			$summa = str_replace('.',',',$summa);
-			echo "<tr><th colspan='7'>".t("Avoimet yhteensä").":</th><th align='right' nowrap>$summa</th><th>$yhtiorow[valkoodi]</th></tr>";
+			echo "<tr><th colspan='7'>".t("Avoimet yhteensä").":</th><th align='right' nowrap>$summa $summa2</th><th>$yhtiorow[valkoodi] $lisaval</th></tr>";
 
 			$summa = sprintf("%01.2f", $trow['saldo']);
 			$summa = str_replace('.',',',$summa);

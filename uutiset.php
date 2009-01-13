@@ -53,7 +53,7 @@ else {
 
 if ($tee == 'LISAA') {
 
-	if ($toim == 'EXTRANET' and $automanual_uutinen == '' and $extranet_uutinen == '') {
+	if ($kukarow['yhtio'] == 'artr' and $toim == 'EXTRANET' and $automanual_uutinen == '' and $extranet_uutinen == '') {
 		echo "<font class='error'>".t("Uutisen näkyvyys on valittava! (Extranet tai Automanual)")."</font><br><br>";
 		$rivi["kentta01"]  = $otsikko;
 		$rivi["kentta02"]  = $uutinen;
@@ -63,7 +63,7 @@ if ($tee == 'LISAA') {
 		$rivi["kokopaiva"] = $kokopaiva;
 		$tee = "SYOTA";
 	}
-	elseif ($toim == 'AUTOMANUAL' and $automanual_uutinen == '') {
+	elseif ($kukarow['yhtio'] == 'artr' and $toim == 'AUTOMANUAL' and $automanual_uutinen == '') {
 		echo "<font class='error'>".t("Uutisen näkyvyys on valittava!")."</font><br><br>";
 		$rivi["kentta01"]  = $otsikko;
 		$rivi["kentta02"]  = $uutinen;

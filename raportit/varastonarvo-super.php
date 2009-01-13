@@ -155,7 +155,13 @@
 					}
 				}
 				$varastontunnukset .= ")";
-				$order_lisa = "varastonnimi, osasto, try, tuoteno";
+				
+				if ($summaustaso == "T") {
+					$order_lisa = "osasto, try, tuoteno";
+				}
+				else {
+					$order_lisa = "varastonnimi, osasto, try, tuoteno";
+				}
             }
 			else {
 				$order_lisa = "osasto, try, tuoteno";
@@ -282,11 +288,16 @@
 			if (count($argv) == 0) {
 				force_echo("Haetaan käsiteltävien tuotteiden tiedot.");
 			}
-
+			
+			$varastolisa = " varastopaikat.nimitys varastonnimi, varastopaikat.tunnus varastotunnus, ";
+			
+			if ($summaustaso == 'T') {
+				$varastolisa = "";
+			}
+			
 			// haetaan halutut tuotteet
 			$query  = "	SELECT DISTINCT
-						varastopaikat.nimitys varastonnimi,
-						varastopaikat.tunnus varastotunnus,
+						$varastolisa
 						ifnull(atry.selite, 0) try,
 						ifnull(aosa.selite, 0) osasto,
 						tmp_tuotepaikat.tuoteno,
@@ -344,9 +355,11 @@
 
 			if(isset($workbook)) {
 				$excelsarake = 0;
-
-				$worksheet->writeString($excelrivi, $excelsarake, t("Varasto"), 		$format_bold);
-				$excelsarake++;
+				
+				if ($summaustaso != "T") {
+					$worksheet->writeString($excelrivi, $excelsarake, t("Varasto"), 		$format_bold);
+					$excelsarake++;
+				}
 
 				if ($summaustaso == "P") {
 					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllyalue"), 		$format_bold);
@@ -418,7 +431,14 @@
 				if (count($argv) == 0) {
 					$bar->increase();
 				}
-
+				
+				if ($summaustaso == 'T') {
+					$mistavarastosta = $varastontunnukset;						
+				}
+				else {
+					$mistavarastosta = " and varastopaikat.tunnus = '$row[varastotunnus]' ";
+				}
+				
 				// Jos tuote on sarjanumeroseurannassa niin varastonarvo lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole laskutettu)
 				if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U") {
 
@@ -432,13 +452,13 @@
 					else {
 						$summaus_lisa = "";
 					}
-
+					
 					$query	= "	SELECT sarjanumeroseuranta.tunnus
 								FROM sarjanumeroseuranta
 								JOIN varastopaikat ON (varastopaikat.yhtio = sarjanumeroseuranta.yhtio
 														and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(sarjanumeroseuranta.hyllyalue), 5, '0'), lpad(upper(sarjanumeroseuranta.hyllynro), 5, '0'))
 														and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue), 5, '0'), lpad(upper(sarjanumeroseuranta.hyllynro), 5, '0'))
-														and varastopaikat.tunnus = '$row[varastotunnus]')
+														$mistavarastosta)
 								LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON (tilausrivi_myynti.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus = sarjanumeroseuranta.myyntirivitunnus)
 								LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON (tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus = sarjanumeroseuranta.ostorivitunnus)
 								WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
@@ -477,7 +497,7 @@
 								JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
 														and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'), lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 														and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'), lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-														and varastopaikat.tunnus = '$row[varastotunnus]')
+														$mistavarastosta)
 								WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 								and tuotepaikat.tuoteno = '$row[tuoteno]'
 								$summaus_lisa";
@@ -506,7 +526,7 @@
 							JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio
 													and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0'))
 													and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0'))
-													and varastopaikat.tunnus = '$row[varastotunnus]')
+													$mistavarastosta)
 				 			WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 				 			and tapahtuma.tuoteno = '$row[tuoteno]'
 				 			and tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'
@@ -632,7 +652,7 @@
 								JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
 														and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))
 														and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))
-														and varastopaikat.tunnus = '$row[varastotunnus]')
+														$mistavarastosta)
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.tyyppi = 'L'
 								and tilausrivi.tuoteno = '$row[tuoteno]'
@@ -648,7 +668,7 @@
 								JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
 														and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))
 														and concat(rpad(upper(loppuhyllyalue), 5, '0'), lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0'))
-														and varastopaikat.tunnus = '$row[varastotunnus]')
+														$mistavarastosta)
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.tyyppi = 'V'
 								and tilausrivi.tuoteno = '$row[tuoteno]'
@@ -667,10 +687,12 @@
 					}
 
 					if (isset($workbook)) {
-
-						$worksheet->writeString($excelrivi, $excelsarake, $row["varastonnimi"], 	$format_bold);
-						$excelsarake++;
-
+						
+						if ($summaustaso != "T") {
+							$worksheet->writeString($excelrivi, $excelsarake, $row["varastonnimi"], 	$format_bold);
+							$excelsarake++;
+						}
+						
 						if ($summaustaso == "P") {
 							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllyalue"], 		$format_bold);
 							$excelsarake++;
@@ -744,11 +766,17 @@
 				echo "<br>";
 				echo "<table>";
 				echo "<tr><th>".t("Varasto")."</th><th>".t("Varastonarvo")."</th><th>".t("Bruttovarastonarvo")."</th></tr>";
-
+				
 				ksort($varastot2);
 
 				foreach ($varastot2 AS $varasto => $arvot) {
-					echo "<tr><td>$varasto</td>";
+					if ($summaustaso == 'T') {
+						echo "<tr><td>Varastot</td>";
+					}
+					else {
+						echo "<tr><td>$varasto</td>";
+					}
+
 					foreach ($arvot AS $arvo) {
 						if ($arvo != '') {
 							echo "<td align='right'>".sprintf("%.2f",$arvo)."</td>";
@@ -987,12 +1015,16 @@
 
 			$sel1 = "";
 			$sel2 = "";
+			$sel3 = "";
 
 			if ($summaustaso == "S") {
 				$sel1 = "SELECTED";
 			}
 			elseif($summaustaso == "P") {
 				$sel2 = "SELECTED";
+			}
+			elseif($summaustaso == "T") {
+				$sel3 = "SELECTED";
 			}
 
 			echo "<tr>";
@@ -1002,6 +1034,7 @@
 					<select name='summaustaso'>
 					<option value='S' $sel1>".t("Varastonarvo varastoittain")."</option>
 					<option value='P' $sel2>".t("Varastonarvo varastopaikoittain")."</option>
+					<option value='T' $sel3>".t("Varastonarvo tuotteittain")."</option>
 					</select>
 					</td>";
 			echo "</tr>";

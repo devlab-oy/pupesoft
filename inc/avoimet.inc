@@ -231,7 +231,7 @@
 		$valkoodi2 = "";
 
 		if (isset($_POST['savalkoodi']) and $_POST['savalkoodi'] != '') {
-			$valkoodi = " and lasku.valkoodi = '{$_POST['savalkoodi']}'";
+			$valkoodi1 = $valkoodi = " and lasku.valkoodi = '{$_POST['savalkoodi']}'";
 			$valkoodi2 = " and suoritus.valkoodi = '{$_POST['savalkoodi']}'";
 		}
 

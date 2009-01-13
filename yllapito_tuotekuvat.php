@@ -226,7 +226,16 @@
 									}
 
 									echo "<tr><td><input type='checkbox' name='mul_kay[]' value='tk' ",$mul_check,"></td><td nowrap>".t("Tuotekuva")."</td></tr>";
+									
+									$mul_check = '';
+									if ($mul_kay != '') {
+										if (in_array('hr', $mul_kay)) {
+											$mul_check = 'CHECKED';
+										}
+									}
 
+									echo "<tr><td><input type='checkbox' name='mul_kay[]' value='hr' ",$mul_check,"></td><td nowrap>".t("Painokuva")."</td></tr>";
+									
 									$mul_check = '';
 									if ($mul_kay != '') {
 										if (in_array('mu', $mul_kay)) {
@@ -258,7 +267,17 @@
 									}
 
 									echo "<tr><td><input type='checkbox' name='nayta_tk' value='naytetaan' ",$mul_check,"></td><td nowrap>".t("Tuotekuvat")."</td></tr>";
+									
+									$mul_check = '';
+									if ($nayta_hr != '') {
+										if ($nayta_hr == 'naytetaan') {
+											$mul_check = 'CHECKED';
+										}
+									}
 
+									echo "<tr><td><input type='checkbox' name='nayta_hr' value='naytetaan' ",$mul_check,"></td><td nowrap>".t("Painokuvat")."</td></tr>";
+									
+									
 									$mul_check = '';
 									if ($nayta_th != '') {
 										if ($nayta_th == 'naytetaan') {
@@ -750,7 +769,7 @@
 
 							// tehd‰‰n pop-up divi jos keikalla on kommentti...
 							if ($row['filename'] != '') {
-								if ((strtolower($row['kayttotarkoitus']) == 'tk' and $nayta_tk != 'naytetaan') or (strtolower($row['kayttotarkoitus']) == 'th' and $nayta_th != 'naytetaan') or (strtolower($row['kayttotarkoitus']) == 'mu')) {
+								if ((strtolower($row['kayttotarkoitus']) == 'tk' and $nayta_tk != 'naytetaan') or (strtolower($row['kayttotarkoitus']) == 'hr' and $nayta_hr != 'naytetaan') or (strtolower($row['kayttotarkoitus']) == 'th' and $nayta_th != 'naytetaan') or (strtolower($row['kayttotarkoitus']) == 'mu')) {
 									echo "<td valign='top'>",$row['nimitys'],"</td>";
 								}
 								else {
@@ -908,11 +927,11 @@
 
 						$limitx = (($sivu - 1) * 50) - 50;
 						if ($limitx >= 0) {
-							$alkuun = "<a href='$PHP_SELF?tee=LISTAA&sivu=1&limit=0&tuoteno=$tuoteno&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
+							$alkuun = "<a href='$PHP_SELF?tee=LISTAA&sivu=1&limit=0&tuoteno=$tuoteno&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
 							echo $alkuun,"&lt;&lt; ",t('Ensimm‰inen'),"</a>&nbsp;&nbsp;";
 
 							$y = $sivu - 1;
-							$edellinen = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limitx&tuoteno=$tuoteno&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
+							$edellinen = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limitx&tuoteno=$tuoteno&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
 							echo $edellinen,"&lt;&lt; ",t('Edellinen'),"</a>&nbsp;&nbsp;";
 						}
 
@@ -924,15 +943,15 @@
 							}
 							elseif ($sivu == '' and (int)$y == '1') {
 								echo "<font style='font-weight: bold;'>",$y,"</font>";
-								$edellinen = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=$tuoteno&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
+								$edellinen = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=$tuoteno&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
 								$seuraava = "ok";
 							}
 							else {
 								if ($seuraava == "ok") {
-									$seuraava = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=$tuoteno&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
+									$seuraava = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=$tuoteno&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
 								}
 
-								echo "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=$tuoteno&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>$y</a>";
+								echo "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=$tuoteno&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>$y</a>";
 							}
 							$limit += 50;
 							if (($y % '40') == 0) {
@@ -946,7 +965,7 @@
 							echo $seuraava," ",t('Seuraava')," &gt;&gt;</a>&nbsp;&nbsp;";
 
 							$limit -= 50;
-							$loppuun = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$i."&limit=$limit&tuoteno=$tuoteno&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
+							$loppuun = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$i."&limit=$limit&tuoteno=$tuoteno&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
 							echo $loppuun," ",t('Viimeinen')," &gt;&gt;</a>";
 						}
 						echo "</td>";

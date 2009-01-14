@@ -11,6 +11,19 @@ if ($tee == 'tulosta_tratta') {
 	require ('myyntires/paperitratta.php');
 	exit;
 }
+if ($tee == 'tulosta_korkoerittely') {
+	$apuqu = "	select *
+				from lasku
+				where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+	$res = mysql_query($apuqu) or pupe_error($apuqu);
+	if (mysql_num_rows($res) == 1) {
+		$trow = mysql_fetch_array($res);
+		require ('myyntires/tulosta_korkoerittely.inc');
+	}
+	exit;
+}
+
+
 
 echo "<font class='head'>".t("Tiliöintien muutos/selailu")."</font><hr>";
 
@@ -554,7 +567,7 @@ if ($tee == 'E' or $tee == 'F') {
 					tilinumero, concat_ws(' ', viite, viesti, sisviesti1) Maksutieto,
 					maa, ultilno, pankki1, pankki2, pankki3, pankki4, swift, clearing, maksutyyppi,
 					ebid,
-					toim_osoite, '' toim_osoitetark, toim_postino, toim_postitp, toim_maa, alatila, vienti, comments, yriti.nimi maksajanpankkitili, lasku.laskunro, saldo_maksettu, saldo_maksettu_valuutassa, lasku.tunnus
+					toim_osoite, '' toim_osoitetark, toim_postino, toim_postitp, toim_maa, alatila, vienti, comments, yriti.nimi maksajanpankkitili, lasku.laskunro, saldo_maksettu, saldo_maksettu_valuutassa, lasku.tunnus, lasku.viesti
 					FROM lasku
 					LEFT JOIN yriti ON lasku.yhtio=yriti.yhtio and maksu_tili=yriti.tunnus
 					LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
@@ -923,6 +936,13 @@ if ($tee == 'E' or $tee == 'F') {
 			<input type='hidden' name='TOIM' value='LASKU'>
 			<input type='hidden' name='tee' value='NAYTATILAUS'>
 			<input type='submit' value='" . t('Näytä laskun PDF')."'></form>";
+		if ($trow['viesti'] == 'Korkolasku') {
+			echo "<form action = '$PHP_SELF' method='post'>
+			<input type='hidden' name='tunnus' value='$trow[tunnus]'>
+			<input type='hidden' name='nayta_pdf' value='1'>
+			<input type='hidden' name='tee' value='tulosta_korkoerittely'>
+			<input type='submit' value='" . t('Tulosta korkoerittely')."'></form>";
+		}
 	}
 
 	echo "</tr>";

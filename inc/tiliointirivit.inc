@@ -225,7 +225,7 @@
 		if ($trow['korjattu'] == '@0000-00-00 00:00:00') $trow['korjattu'] = '';
 		if ($trow['korjattu'] == '0000-00-00 00:00:00') $trow['korjattu'] = '';
 
-		echo "<tr>";
+		echo "<tr class='aktiivi'>";
 
 		if ($viivatut == 'on') {
 			$poistasarake = 4;
@@ -239,10 +239,10 @@
 			// Tämä toimii vain selaajatarkista.php:n yhteydessä
 			if (isset($seutunnus) and mysql_field_name($result,$i)=='selite') {
 				if ($viivatut == 'on' and $trow['poistettu'] != '') {
-					echo "<th></th></tr><tr><th colspan='3'>";
+					echo "<th></th></tr><tr class='aktiivi'><th colspan='3'>";
 				}
 				else {
-					echo "<td></td></tr><tr><td colspan='3'>";
+					echo "<td></td></tr><tr class='aktiivi'><td colspan='3'>";
 				}
 
 			}

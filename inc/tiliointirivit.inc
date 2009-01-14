@@ -46,7 +46,7 @@
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
-		$ulos = "<select name = 'kustp'><option value = ' '>".t("Ei kustannuspaikkaa");
+		$ulos = "<select name = 'kustp' style='width: 200px'><option value = ' '>".t("Ei kustannuspaikkaa");
 
 		while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
 			$valittu = "";
@@ -62,7 +62,7 @@
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
-		$ulos .= "<select name = 'kohde'><option value = ' '>".t("Ei kohdetta");
+		$ulos .= "<select name = 'kohde' style='width: 200px'><option value = ' '>".t("Ei kohdetta");
 
 		while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
 			$valittu = "";
@@ -78,7 +78,7 @@
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
-		$ulos .= "<select name = 'projekti'><option value = ' '>".t("Ei projektia");
+		$ulos .= "<select name = 'projekti' style='width: 200px'><option value = ' '>".t("Ei projektia");
 
 		while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
 			$valittu = "";
@@ -121,7 +121,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 1) {
-			echo " ".t("Tapvm");
+			echo "<br>".t("Tapvm");
 			echo ": <select name = 'tiliointipvm'>";
 
 			while ($tiliointirow=mysql_fetch_array($result)) {
@@ -242,7 +242,7 @@
 					echo "<th></th></tr><tr class='aktiivi'><th colspan='3'>";
 				}
 				else {
-					echo "<td></td></tr><tr class='aktiivi'><td colspan='3'>";
+					echo "<td></td></tr><tr><td colspan='3'>";
 				}
 
 			}

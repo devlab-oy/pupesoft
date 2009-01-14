@@ -1,7 +1,7 @@
 <?php
 
 	function paperi_alku () {
-		global $pdf, $asiakastiedot, $yhteyshenkilo, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $bold, $kaatosumma, $kieli, $vmehto;
+		global $pdf, $asiakastiedot, $yhteyshenkilo, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $bold, $kaatosumma, $kieli, $vmehto, $trow;
 
 		$firstpage = $pdf->new_page("a4");
 
@@ -31,7 +31,12 @@
 		$pdf->draw_rectangle(800, 300, 779, 580, $firstpage, $rectparam);
 		$pdf->draw_rectangle(800, 420, 779, 580, $firstpage, $rectparam);
 		$pdf->draw_text(310, 792, t("Päivämäärä", $kieli), $firstpage, $pieni);
-		$pdf->draw_text(310, 782, tv1dateconv(date('Y-m-d')), $firstpage, $norm);
+
+		if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php')
+			$pdf->draw_text(310, 782, tv1dateconv(date('Y-m-d')), $firstpage, $norm);
+		else
+			$pdf->draw_text(310, 782, tv1dateconv($trow['tapvm']), $firstpage, $norm);
+			
 		$pdf->draw_text(430, 792, t("Asiaa hoitaa", $kieli), $firstpage, $pieni);
 		$pdf->draw_text(430, 782, $yrow["nimi"], $firstpage, $norm);
 
@@ -40,25 +45,30 @@
 		$pdf->draw_text(310, 771, t("Eräpäivä", $kieli), $firstpage, $pieni);
 
 
-		// Etsitään maksuehto
-		$query = "	SELECT *
-					FROM maksuehto
-					WHERE tunnus='$vmehto' and yhtio='$kukarow[yhtio]'";
-		$presult = mysql_query($query) or pupe_error($query);
-		$xrow = mysql_fetch_array($presult);
+		if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php') {
+			// Etsitään maksuehto
+			$query = "	SELECT *
+						FROM maksuehto
+						WHERE tunnus='$vmehto' and yhtio='$kukarow[yhtio]'";
+			$presult = mysql_query($query) or pupe_error($query);
+			$xrow = mysql_fetch_array($presult);
 
-		if ($xrow['abs_pvm'] == '0000-00-00') {
+			if ($xrow['abs_pvm'] == '0000-00-00') {
 
-			$seurday   = sprintf('%02d', date("j", mktime(0, 0, 0, date("n"), date("j")+$xrow["rel_pvm"],  date("Y"))));
-			$seurmonth = sprintf('%02d', date("n", mktime(0, 0, 0, date("n"), date("j")+$xrow["rel_pvm"],  date("Y"))));
-			$seuryear  = sprintf('%02d', date("Y", mktime(0, 0, 0, date("n"), date("j")+$xrow["rel_pvm"],  date("Y"))));
+				$seurday   = sprintf('%02d', date("j", mktime(0, 0, 0, date("n"), date("j")+$xrow["rel_pvm"],  date("Y"))));
+				$seurmonth = sprintf('%02d', date("n", mktime(0, 0, 0, date("n"), date("j")+$xrow["rel_pvm"],  date("Y"))));
+				$seuryear  = sprintf('%02d', date("Y", mktime(0, 0, 0, date("n"), date("j")+$xrow["rel_pvm"],  date("Y"))));
 
-			$erapvm = $seuryear."-".$seurmonth."-".$seurday;
+				$erapvm = $seuryear."-".$seurmonth."-".$seurday;
+			}
+			else {
+				$erapvm = "'$xrow[abs_pvm]'";
+			}
 		}
 		else {
-			$erapvm = "'$xrow[abs_pvm]'";
+			$erapvm = $trow['erpcm'];
 		}
-
+		
 		$pdf->draw_text(310, 761, tv1dateconv($erapvm), $firstpage, $norm);
 
 		$pdf->draw_text(430, 771, t("Puhelin", $kieli),	$firstpage, $pieni);
@@ -122,6 +132,11 @@
 		global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $toimipaikkarow;
 
 		//yhteensärivi
+		if ($summa == '')
+			$pdf->draw_text(420, 75, t('Jatkuu...',$kieli), $firstpage, $norm);
+		else
+			$pdf->draw_text(420, 75, t('Yhteensä',$kieli) . " " .$summa, $firstpage, $norm);
+
 		//Alimmat kolme laatikkoa, yhtiötietoja
 		$pdf->draw_rectangle(70, 20, 20, 580,	$firstpage, $rectparam);
 		$pdf->draw_rectangle(70, 207, 20, 580,	$firstpage, $rectparam);
@@ -150,7 +165,7 @@
 
 	require('pdflib/phppdflib.class.php');
 
-	//echo "<font class='message'>Karhukirje tulostuu...</font>";
+	//echo "<font class='message'>Korkoerittely tulostuu...</font>";
 	flush();
 
 	//PDF parametrit
@@ -184,6 +199,37 @@
 		$xquery=$xquery . "$lasku_tunnus[$i]";
 	}
 
+	if (basename($_SERVER["SCRIPT_FILENAME"]) == 'muutosite.php') {
+		$query = "	SELECT tunnus
+				FROM kuka
+				WHERE yhtio = '$kukarow[yhtio]'
+				and kuka = '$trow[laatija]'";
+		$result = mysql_query($query) or pupe_error($query);
+		$yrow = mysql_fetch_array($result);
+		$yhteyshenkilo = $yrow['tunnus'];
+		
+		$query = "	SELECT group_concat(tunnus) tunnukset
+				FROM asiakas
+				WHERE yhtio = '$kukarow[yhtio]'
+				and ytunnus = '$trow[ytunnus]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		$asiakasrow2 = mysql_fetch_array($result);
+		$query = "	SELECT l.tunnus, l.liitostunnus, t.summa*-1 summa, l.erpcm, l.yhtio_toimipaikka,
+			l.laskunro, t.tapvm mapvm, l.tapvm tapvm, l.tunnus, l.viikorkopros, to_days(t.tapvm) - to_days(l.erpcm) as ika,
+			round(l.viikorkopros * t.summa * -1 * (to_days(t.tapvm)-to_days(l.erpcm)) / 36500,2) as korkosumma, l.maksuehto
+			FROM lasku l
+			join tiliointi t use index (tositerivit_index) on (t.yhtio = l.yhtio and t.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and t.tapvm > l.erpcm and t.tapvm <= '$trow[tapvm]' and l.tunnus = t.ltunnus)
+			LEFT JOIN maksuehto me on (me.yhtio=l.yhtio and me.tunnus=l.maksuehto)
+			WHERE l.liitostunnus in ($asiakasrow2[tunnukset])
+			and l.yhtio = '$kukarow[yhtio]'
+			and l.tila = 'U'
+			and l.mapvm > '0000-00-00'
+			and l.olmapvm = '$trow[tapvm]'
+			ORDER BY l.laskunro, t.tapvm";
+	}
+	else
+	{
 	$query = "	SELECT l.tunnus, l.liitostunnus, t.summa*-1 summa, l.erpcm, l.yhtio_toimipaikka,
 				l.laskunro, t.tapvm mapvm, l.tapvm tapvm, l.tunnus, l.viikorkopros, to_days(t.tapvm) - to_days(l.erpcm) as ika,
 				round(l.viikorkopros * t.summa * -1 * (to_days(t.tapvm)-to_days(l.erpcm)) / 36500,2) as korkosumma, l.maksuehto
@@ -194,9 +240,9 @@
 				and l.yhtio = '$kukarow[yhtio]'
 				and l.tila = 'U'
 				ORDER BY l.laskunro, t.tapvm";
-
+	}
+	
 	$result = mysql_query($query) or pupe_error($query);
-
 	//otetaan asiakastiedot ekalta laskulta
 	$asiakastiedot = mysql_fetch_array($result);
 
@@ -247,43 +293,49 @@
 	$summa = 0;
 	while ($row = mysql_fetch_array($result)) {
 		$summa = paperi_rivi($firstpage,$summa);
-
 		//päivitetään korkosumma
-		$query = "	UPDATE lasku
-					SET viikorkoeur = '$row[korkosumma]'
-					WHERE tunnus = '$row[tunnus]'
-					and yhtio = '$kukarow[yhtio]'";
-		$eurresult = mysql_query($query) or pupe_error($query);
+		if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php') {	
+			$query = "	UPDATE lasku
+						SET viikorkoeur = '$row[korkosumma]'
+						WHERE tunnus = '$row[tunnus]'
+						and yhtio = '$kukarow[yhtio]'";
+			$eurresult = mysql_query($query) or pupe_error($query);
+		}
 	}
 
 	$loppusumma = sprintf('%.2f', $summa);
 
 	paperi_loppu($firstpage,$loppusumma, $mehtorow);
 
-	//keksitään uudelle failille joku varmasti uniikki nimi:
-	list($usec, $sec) = explode(' ', microtime());
-	mt_srand((float) $sec + ((float) $usec * 100000));
-	$pdffilenimi = "/tmp/korkoerittely-".md5(uniqid(mt_rand(), true)).".pdf";
 
-	//kirjoitetaan pdf faili levylle..
-	$fh = fopen($pdffilenimi, "w");
-	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
-	fclose($fh);
+	if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php') {	
+		//keksitään uudelle failille joku varmasti uniikki nimi:
+		list($usec, $sec) = explode(' ', microtime());
+		mt_srand((float) $sec + ((float) $usec * 100000));
+		$pdffilenimi = "/tmp/korkoerittely-".md5(uniqid(mt_rand(), true)).".pdf";
 
-	// itse print komento...
-	$query = "	select komento
-				from kirjoittimet
-				where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kirjoitin]'";
-	$kires = mysql_query($query) or pupe_error($query);
+		//kirjoitetaan pdf faili levylle..
+		$fh = fopen($pdffilenimi, "w");
+		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+		fclose($fh);
 
-	if (mysql_num_rows($kires) == 1) {
-		$kirow = mysql_fetch_array($kires);
-		$line  = exec("$kirow[komento] $pdffilenimi");
+		// itse print komento...
+		$query = "	select komento
+					from kirjoittimet
+					where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kirjoitin]'";
+		$kires = mysql_query($query) or pupe_error($query);
 
-		//system("rm -f $pdffilenimi");
-		unset($pdffilenimi);
+		if (mysql_num_rows($kires) == 1) {
+			$kirow = mysql_fetch_array($kires);
+			$line  = exec("$kirow[komento] $pdffilenimi");
+
+			//system("rm -f $pdffilenimi");
+			unset($pdffilenimi);
+		}
 	}
-
+	else {
+		echo $pdf->generate();
+	}
 	unset($pdf);
 	unset($firstpage);
 ?>

@@ -3,6 +3,13 @@
 
 	js_popup();	
 	
+	if($kukarow["resoluutio"] == "I") {
+		$tiliointiDivWidth = "650px";
+	}
+	else {
+		$tiliointiDivWidth = "520px";
+	}
+	
 	echo "<font class='head'>".t("Tiliöintien muutos/selailu")."</font><hr>";
 
 	if ((($tee == 'U') or ($tee == 'P') or ($tee == 'M') or ($tee == 'J')) and ($oikeurow['paivitys'] != 1)) {
@@ -102,7 +109,7 @@
 	}
 	else {
 		$seutunnus = 0;
-		echo "<div id='vasen' style='position: absolute; top: 100px; height: 200px; width:520px; overflow: scroll;'><table><tr>";
+		echo "<div id='vasen' style='position: absolute; top: 100px; height: 200px; width:$tiliointiDivWidth; overflow: scroll;'><table><tr>";
 		echo "<th></th>";
 		for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
 			echo "<th>" . t(mysql_field_name($result,$i))."</th>";
@@ -149,7 +156,7 @@
 	echo "</tr></table></div>";
 
 //Oikealla laskun kuva
-	echo "<div id='oikea' style='position: absolute; top: 100px; left: 525px; height: 700px; width:520px; overflow: scroll;'>";
+	echo "<div id='oikea' style='position: absolute; top: 100px; left: 525px; height: 700px; width:$tiliointiDivWidth; overflow: scroll;'>";
 	if ($tunnus != '') {
 		// tehdään lasku linkki
 		echo "<td>".ebid($tunnus) ."</td>";
@@ -160,7 +167,7 @@
 	echo "</div>";
 
 // Alas tiliöinnit
-	echo "<div id='alas' style='position: absolute; top: 300px; height: 500px; width:520px; overflow: scroll;''>";
+	echo "<div id='alas' style='position: absolute; top: 300px; height: 500px; width:$tiliointiDivWidth; overflow: scroll;''>";
 	 
 	if ($tee == 'P') { // Olemassaolevaa tiliöintiä muutetaan, joten yliviivataan rivi ja annetaan perustettavaksi
 		$query = "SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm

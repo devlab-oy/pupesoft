@@ -807,6 +807,8 @@
 			echo "<form action='$PHP_SELF#Raportit' method='post'>
 					<input type='hidden' name='tuoteno' value='$tuoteno'>
 					<input type='hidden' name='tee' value='Z'>
+					<input type='hidden' name='historia' value='$historia'>
+					<input type='hidden' name='tapahtumalaji' value='$tapahtumalaji'>
 					<font class='message'>".t("Raportointi")."</font><a href='#' name='Raportit'></a>
 					<input type='radio' onclick='submit()' name='raportti' value='MYYNTI' $sele[M]> ".t("Myynnistä")."
 					<input type='radio' onclick='submit()' name='raportti' value='KULUTUS' $sele[K]> ".t("Kulutuksesta")."
@@ -947,22 +949,18 @@
 					$ed=($vv-1)."-".sprintf("%02s",$kk)."-01 00:00:00";
 
 					if($select_summa=="") {
-						$select_summa .= "	SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 kpl_myynti_$kk
-											, SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 kpl_valmistus_asiakkaalle_$kk
-											, SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='W', tapahtuma.kpl, 0)) kpl_valmistus_varastoon_$kk
+						$select_summa .= "	  SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 kpl_myynti_$kk
+											, SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 kpl_kulutus_$kk
 											, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 ed_kpl_myynti_$kk
-											, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 ed_kpl_valmistus_asiakkaalle_$kk
-											, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='W', tapahtuma.kpl, 0)) ed_kpl_valmistus_varastoon_$kk
+											, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 ed_kpl_kulutus_$kk
 
 											";
 					}
 					else {
 						$select_summa .= "	, SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 kpl_myynti_$kk
-											, SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 kpl_valmistus_asiakkaalle_$kk
-											, SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='W', tapahtuma.kpl, 0)) kpl_valmistus_varastoon_$kk
+											, SUM(IF(tapahtuma.laadittu>='$alku' and tapahtuma.laadittu<=DATE_ADD('$alku', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 kpl_kulutus_$kk
 											, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='L', tapahtuma.kpl, 0))*-1 ed_kpl_myynti_$kk
-											, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 ed_kpl_valmistus_asiakkaalle_$kk
-											, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='W', tapahtuma.kpl, 0)) ed_kpl_valmistus_varastoon_$kk
+											, SUM(IF(tapahtuma.laadittu>='$ed' and tapahtuma.laadittu<=DATE_ADD('$ed', interval 1 month) and tyyppi='V', tapahtuma.kpl, 0))*-1 ed_kpl_kulutus_$kk
 
 											";
 					}
@@ -985,7 +983,7 @@
 				$erittely=array();
 				$ed_erittely=array();
 
-				foreach(array("myynti", "valmistus_asiakkaalle", "valmistus_varastoon") as $tyyppi) {
+				foreach(array("myynti", "kulutus") as $tyyppi) {
 					echo "<tr class='aktiivi'><td class='tumma'>".t(str_replace("_"," ",$tyyppi))."</td>";
 
 					$kk=date("m");
@@ -1207,7 +1205,7 @@
 
 			echo "<input type='hidden' name='tee' value='Z'>";
 			echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
-
+			echo "<input type='hidden' name='raportti' value='$raportti'>";
 			echo "<a href='#' name='Tapahtumat'>";
 
 			echo "<tr><th>".t("Tuotehistoria").":</th>";

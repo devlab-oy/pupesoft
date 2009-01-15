@@ -1444,9 +1444,6 @@ if (!function_exists('loppu')) {
 			$pdf->draw_text(470, 92+$vientikala+$barcode_korkeus,  t("Jatkuu", $kieli)."...",			$thispage, $boldi);
 		}
 
-		//Pankkiyhteystiedot
-		$pdf->draw_rectangle(90+$vientikala+$barcode_korkeus, 20, 20 + $vientikala+$barcode_korkeus, 580,	$thispage, $rectparam);
-
 		//Haetaan factoringsopimuksen tiedot
 		if ($masrow["factoring"] != '') {
 			$query = "	SELECT *
@@ -1506,7 +1503,7 @@ if (!function_exists('loppu')) {
 			$pankkitiedot["pankkiiban3"]  =	$yhtiorow["pankkiiban3"];
 			$pankkitiedot["pankkiswift3"] =	$yhtiorow["pankkiswift3"];
 		}
-
+				
 	    if ($masrow["factoring"] != '') {
 			// jos factoroidaan tulostetaan eri kentät
 			$query = "	SELECT *
@@ -1546,47 +1543,57 @@ if (!function_exists('loppu')) {
 			}
 		}
 		else {
-			// ei factoroida niin normitiedot
-			if ($laskurow["vienti"] != "" or strtoupper($laskurow["maa"]) != strtoupper($yhtiorow["maa"])) {
-				// viennissä tällästä
-				$pdf->draw_text(30,  102 + $barcode_korkeus, t("Pankkiyhteys", $kieli),													$thispage, $pieni);
-
-				$pdf->draw_text(30,  92 + $barcode_korkeus, $pankkitiedot["pankkinimi1"]."  ".$pankkitiedot["pankkitili1"],						$thispage, $norm);
-
-				if($pankkitiedot["pankkiiban1"]) {
-					$pdf->draw_text(217, 92 + $barcode_korkeus, "IBAN: ".$pankkitiedot["pankkiiban1"],											$thispage, $norm);
-				}
-				if($pankkitiedot["pankkiswift1"]) {
-					$pdf->draw_text(404, 92 + $barcode_korkeus, "SWIFT: ".$pankkitiedot["pankkiswift1"],										$thispage, $norm);
-				}
-
-				$pdf->draw_text(30,  82 + $barcode_korkeus, $pankkitiedot["pankkinimi2"]."  ".$pankkitiedot["pankkitili2"],						$thispage, $norm);
-
-				if($pankkitiedot["pankkiiban2"]) {
-					$pdf->draw_text(217, 82 + $barcode_korkeus, "IBAN: ".$pankkitiedot["pankkiiban2"],											$thispage, $norm);
-				}
-				if($pankkitiedot["pankkiswift2"]) {
-					$pdf->draw_text(404, 82 + $barcode_korkeus, "SWIFT: ".$pankkitiedot["pankkiswift2"],										$thispage, $norm);
-				}
-
-				$pdf->draw_text(30,  72 + $barcode_korkeus, $pankkitiedot["pankkinimi3"]."  ".$pankkitiedot["pankkitili3"],						$thispage, $norm);
-
-				if($pankkitiedot["pankkiiban3"]) {
-					$pdf->draw_text(217, 72 + $barcode_korkeus, "IBAN: ".$pankkitiedot["pankkiiban3"],											$thispage, $norm);
-				}
-				if($pankkitiedot["pankkiswift3"]) {
-					$pdf->draw_text(404, 72 + $barcode_korkeus, "SWIFT: ".$pankkitiedot["pankkiswift3"],										$thispage, $norm);
-				}
+			
+			if ($vientikala == 0) {
+				$tileja = -20;
 			}
-			else {
-				// ja normitilauksissa tällästä
-			    $pdf->draw_text(30, 82 + $barcode_korkeus,  t("Pankkiyhteys", $kieli),														$thispage, $pieni);
-	        	$pdf->draw_text(30, 72 + $barcode_korkeus,  $pankkitiedot["pankkinimi1"]." ".$pankkitiedot["pankkitili1"],							$thispage, $norm);
-	        	$pdf->draw_text(217, 72 + $barcode_korkeus, $pankkitiedot["pankkinimi2"]." ".$pankkitiedot["pankkitili2"],							$thispage, $norm);
-	        	$pdf->draw_text(404, 72 + $barcode_korkeus, $pankkitiedot["pankkinimi3"]." ".$pankkitiedot["pankkitili3"],							$thispage, $norm);
-            }
+			
+			// ei factoroida niin normitiedot
+			$pdf->draw_text(30,  102 + $tileja + $barcode_korkeus, t("Pankkiyhteys", $kieli),													$thispage, $pieni);
+
+			$pdf->draw_text(30,  92 + $tileja + $barcode_korkeus, $pankkitiedot["pankkinimi1"]."  ".$pankkitiedot["pankkitili1"],						$thispage, $norm);
+
+			if($pankkitiedot["pankkiiban1"]) {
+				$pdf->draw_text(217, 92 + $tileja + $barcode_korkeus, "IBAN: ".$pankkitiedot["pankkiiban1"],											$thispage, $norm);
+			}
+			if($pankkitiedot["pankkiswift1"]) {
+				$pdf->draw_text(404, 92 + $tileja + $barcode_korkeus, "SWIFT: ".$pankkitiedot["pankkiswift1"],										$thispage, $norm);
+			}
+			
+			$pdf->draw_text(30,  82 + $tileja + $barcode_korkeus, $pankkitiedot["pankkinimi2"]."  ".$pankkitiedot["pankkitili2"],						$thispage, $norm);
+
+			if($pankkitiedot["pankkiiban2"]) {
+				$pdf->draw_text(217, 82 + $tileja + $barcode_korkeus, "IBAN: ".$pankkitiedot["pankkiiban2"],											$thispage, $norm);
+			}
+			if($pankkitiedot["pankkiswift2"]) {
+				$pdf->draw_text(404, 82 + $tileja + $barcode_korkeus, "SWIFT: ".$pankkitiedot["pankkiswift2"],										$thispage, $norm);
+			}
+			
+			$pdf->draw_text(30,  72 + $tileja + $barcode_korkeus, $pankkitiedot["pankkinimi3"]."  ".$pankkitiedot["pankkitili3"],						$thispage, $norm);
+
+			if($pankkitiedot["pankkiiban3"]) {
+				$pdf->draw_text(217, 72 + $tileja + $barcode_korkeus, "IBAN: ".$pankkitiedot["pankkiiban3"],											$thispage, $norm);
+			}
+			if($pankkitiedot["pankkiswift3"]) {
+				$pdf->draw_text(404, 72 + $tileja + $barcode_korkeus, "SWIFT: ".$pankkitiedot["pankkiswift3"],										$thispage, $norm);
+			}
+			
+			if ($pankkitiedot["pankkitili2"] != '' and $vientikala == 0) {
+				$tileja-=10;
+			}
+			
+			if ($pankkitiedot["pankkitili3"] != '' and $vientikala == 0) {
+				$tileja-=10;
+			}
+			
+			if ($vientikala == 0) {
+				$tileja+=20;
+			}
+			
 		}
 
+		//Pankkiyhteystiedot
+		$pdf->draw_rectangle(90+$vientikala+$barcode_korkeus, 20, 20+$tileja+$barcode_korkeus, 580,	$thispage, $rectparam);
 
 		// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
 		if ($laskurow["yhtio_ovttunnus"] != "" and $laskurow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
@@ -1638,34 +1645,34 @@ if (!function_exists('loppu')) {
 		}
 
 		//Alimmat kolme laatikkoa, yhtiötietoja
-		$pdf->draw_rectangle(70 + $barcode_korkeus, 20, 20 + $barcode_korkeus, 580,	$thispage, $rectparam);
-		$pdf->draw_rectangle(70 + $barcode_korkeus, 207, 20 + $barcode_korkeus, 580,	$thispage, $rectparam);
-		$pdf->draw_rectangle(70 + $barcode_korkeus, 394, 20 + $barcode_korkeus, 580,	$thispage, $rectparam);
+		$pdf->draw_rectangle(70 + $tileja + $barcode_korkeus, 20, 20 + $tileja + $barcode_korkeus, 580,	$thispage, $rectparam);
+		$pdf->draw_rectangle(70 + $tileja + $barcode_korkeus, 207, 20 + $tileja + $barcode_korkeus, 580,	$thispage, $rectparam);
+		$pdf->draw_rectangle(70 + $tileja + $barcode_korkeus, 394, 20 + $tileja + $barcode_korkeus, 580,	$thispage, $rectparam);
+		
+		$pdf->draw_text(30, 55 + $tileja + $barcode_korkeus, $y_nimi,					$thispage, $pieni);
+		$pdf->draw_text(30, 45 + $tileja + $barcode_korkeus, $y_osoite,					$thispage, $pieni);
+		$pdf->draw_text(30, 35 + $tileja + $barcode_korkeus, $y_postino."  ".$y_postitp,	$thispage, $pieni);
+		$pdf->draw_text(30, 25 + $tileja + $barcode_korkeus, $y_maa,						$thispage, $pieni);
 
-		$pdf->draw_text(30, 55 + $barcode_korkeus, $y_nimi,					$thispage, $pieni);
-		$pdf->draw_text(30, 45 + $barcode_korkeus, $y_osoite,					$thispage, $pieni);
-		$pdf->draw_text(30, 35 + $barcode_korkeus, $y_postino."  ".$y_postitp,	$thispage, $pieni);
-		$pdf->draw_text(30, 25 + $barcode_korkeus, $y_maa,						$thispage, $pieni);
+		$pdf->draw_text(217, 55 + $tileja + $barcode_korkeus, t("Puhelin", $kieli).":",		$thispage, $pieni);
+		$pdf->draw_text(257, 55 + $tileja + $barcode_korkeus, $y_puhelin,					$thispage, $pieni);
+		$pdf->draw_text(217, 45 + $tileja + $barcode_korkeus, t("Telefax", $kieli).":",		$thispage, $pieni);
+		$pdf->draw_text(257, 45 + $tileja + $barcode_korkeus, $y_fax,						$thispage, $pieni);
+		$pdf->draw_text(217, 35 + $tileja + $barcode_korkeus, t("Sähköposti", $kieli).":",	$thispage, $pieni);
+		$pdf->draw_text(257, 35 + $tileja + $barcode_korkeus, $y_email,						$thispage, $pieni);
 
-		$pdf->draw_text(217, 55 + $barcode_korkeus, t("Puhelin", $kieli).":",		$thispage, $pieni);
-		$pdf->draw_text(257, 55 + $barcode_korkeus, $y_puhelin,					$thispage, $pieni);
-		$pdf->draw_text(217, 45 + $barcode_korkeus, t("Telefax", $kieli).":",		$thispage, $pieni);
-		$pdf->draw_text(257, 45 + $barcode_korkeus, $y_fax,						$thispage, $pieni);
-		$pdf->draw_text(217, 35 + $barcode_korkeus, t("Sähköposti", $kieli).":",	$thispage, $pieni);
-		$pdf->draw_text(257, 35 + $barcode_korkeus, $y_email,						$thispage, $pieni);
-
-		$pdf->draw_text(404, 55 + $barcode_korkeus, t("Y-tunnus", $kieli).":",										$thispage, $pieni);
-		$pdf->draw_text(444, 55 + $barcode_korkeus, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]),	$thispage, $pieni);
-		$pdf->draw_text(404, 45 + $barcode_korkeus, t("Kotipaikka", $kieli).":",									$thispage, $pieni);
-		$pdf->draw_text(444, 45 + $barcode_korkeus, $y_kotipaikka,													$thispage, $pieni);
-		$pdf->draw_text(404, 35 + $barcode_korkeus, t("Enn.per.rek", $kieli),										$thispage, $pieni);
-		$pdf->draw_text(404, 25 + $barcode_korkeus, t("Alv.rek", $kieli),											$thispage, $pieni);
+		$pdf->draw_text(404, 55 + $tileja + $barcode_korkeus, t("Y-tunnus", $kieli).":",										$thispage, $pieni);
+		$pdf->draw_text(444, 55 + $tileja + $barcode_korkeus, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]),	$thispage, $pieni);
+		$pdf->draw_text(404, 45 + $tileja + $barcode_korkeus, t("Kotipaikka", $kieli).":",									$thispage, $pieni);
+		$pdf->draw_text(444, 45 + $tileja + $barcode_korkeus, $y_kotipaikka,													$thispage, $pieni);
+		$pdf->draw_text(404, 35 + $tileja + $barcode_korkeus, t("Enn.per.rek", $kieli),										$thispage, $pieni);
+		$pdf->draw_text(404, 25 + $tileja + $barcode_korkeus, t("Alv.rek", $kieli),											$thispage, $pieni);
 
 		// Viivakoodin piirtaminen
 		if ($piirra_viivakoodi) {
 
 			$width = 340;
-			$height = $barcode_korkeus * 1.2;
+			$height = $barcode_korkeus-1 * 1.2;
 			$style = BCS_IMAGE_JPEG;
 			$code = PalautaPankkiviivakoodi($pankkitiedot["pankkitili1"], $summa, $erapaiva, $laskurow["viite"]);
 			//$pdf->draw_text(1, 300, $code, $thispage, $boldi);

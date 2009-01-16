@@ -87,6 +87,51 @@
 	echo "</table><br>";
 
 	if ($aja == "AJA") {
+		
+		if (@include('Spreadsheet/Excel/Writer.php')) {
+
+			//keksitään failille joku varmasti uniikki nimi:
+			list($usec, $sec) = explode(' ', microtime());
+			mt_srand((float) $sec + ((float) $usec * 100000));
+			$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+
+			$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+			$workbook->setVersion(8);
+			$worksheet =& $workbook->addWorksheet('Sheet 1');
+			
+			$excelrivi = 0;
+			
+			$worksheet->write($excelrivi, 0,  t("ABC"));
+			$worksheet->write($excelrivi, 1,  t("Tuoteno"));
+			$worksheet->write($excelrivi, 2,  t("Toim_tuoteno"));
+			$worksheet->write($excelrivi, 3,  t("Nimitys"));
+			$worksheet->write($excelrivi, 4,  t("Merkki"));
+			$worksheet->write($excelrivi, 5,  t("Osasto"));
+			$worksheet->write($excelrivi, 6,  t("Try"));
+			$worksheet->write($excelrivi, 7,  t("Tulopvm"));
+			$worksheet->write($excelrivi, 8,  t("Myynti$yhtiorow[valkoodi]"));
+			$worksheet->write($excelrivi, 9,  t("Kate"));
+			$worksheet->write($excelrivi, 10,  t("Kate%"));
+			$worksheet->write($excelrivi, 11,  t("Kateosuus"));
+			$worksheet->write($excelrivi, 12,  t("Vararvo"));
+			$worksheet->write($excelrivi, 13,  t("Kierto"));
+			$worksheet->write($excelrivi, 14,  t("MyyntiKpl"));
+			$worksheet->write($excelrivi, 15,  t("MyyntieraKpl"));
+			$worksheet->write($excelrivi, 16,  t("Myyntiera$yhtiorow[valkoodi]"));
+			$worksheet->write($excelrivi, 17,  t("Myyntirivit"));
+			$worksheet->write($excelrivi, 18,  t("Puuterivit"));
+			$worksheet->write($excelrivi, 19,  t("Palvelutaso"));
+			$worksheet->write($excelrivi, 20,  t("OstoeraKPL"));
+			$worksheet->write($excelrivi, 21,  t("Ostoera$yhtiorow[valkoodi]"));
+			$worksheet->write($excelrivi, 22,  t("Ostorivit"));
+			$worksheet->write($excelrivi, 23,  t("KustannusMyynti"));
+			$worksheet->write($excelrivi, 24,  t("KustannusOsto"));
+			$worksheet->write($excelrivi, 25,  t("KustannusYht"));
+			$worksheet->write($excelrivi, 26,  t("Kate-Kustannus"));
+			$worksheet->write($excelrivi, 27,  t("Tuotepaikka"));
+			$worksheet->write($excelrivi, 28,  t("Saldo"));
+			$excelrivi++;
+		}
 				
 		echo "<pre>";
 		echo "ABC\t";
@@ -136,12 +181,11 @@
 					distinct luokka
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi='$abcchar'
+					and tyyppi = '$abcchar'
 					ORDER BY luokka";
 		$luokkares = mysql_query($query) or pupe_error($query);
 
 		while($luokkarow = mysql_fetch_array($luokkares)) {
-
 
 			//kauden yhteismyynnit ja katteet
 			$query = "	SELECT
@@ -155,6 +199,7 @@
 						and luokka = '$luokkarow[luokka]'";
 			$sumres = mysql_query($query) or pupe_error($query);
 			$sumrow = mysql_fetch_array($sumres);
+			
 			$sumrow['yhtkate'] = (float) $sumrow['yhtkate'];
 			$sumrow['yhtmyynti'] = (float) $sumrow['yhtmyynti'];
 
@@ -192,7 +237,7 @@
 						$osastolisa
 						$trylisa
 						and luokka = '$luokkarow[luokka]'
-						ORDER BY summa desc";
+						ORDER BY $abcwhat desc";
 			$res = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_array($res)) {
@@ -208,7 +253,7 @@
 				$tuorow = mysql_fetch_array($tuoresult);
 
 				//haetaan varastopaikat ja saldot
-				$query = "	select concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, saldo
+				$query = "	SELECT concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, saldo
 							from tuotepaikat
 							where tuoteno='$row[tuoteno]'
 							and yhtio='$kukarow[yhtio]'";
@@ -217,7 +262,41 @@
 				while ($paikrow = mysql_fetch_array($paikresult)) {
 
 					$l = $row["luokka"];
-
+					
+					// Lisätään rivi exceltiedostoon
+					if(isset($workbook)) {
+						$worksheet->write($excelrivi, 0,  "$ryhmanimet[$l]");
+						$worksheet->write($excelrivi, 1,  "$row[tuoteno]");
+						$worksheet->write($excelrivi, 2,  "$tuorow[toim_tuoteno]");
+						$worksheet->write($excelrivi, 3,  asana('nimitys_',$row['tuoteno'],$tuorow['nimitys']));
+						$worksheet->write($excelrivi, 4,  "$tuorow[tuotemerkki]");
+						$worksheet->write($excelrivi, 5,  "$row[osasto]");
+						$worksheet->write($excelrivi, 6,  "$row[try]");
+						$worksheet->write($excelrivi, 7,  "$row[tulopvm]");
+						$worksheet->write($excelrivi, 8,  sprintf('%.1f',$row["summa"]));
+						$worksheet->write($excelrivi, 9,  sprintf('%.1f',$row["kate"]));
+						$worksheet->write($excelrivi, 10, sprintf('%.1f',$row["katepros"]));
+						$worksheet->write($excelrivi, 11, sprintf('%.1f',$row["kateosuus"]));
+						$worksheet->write($excelrivi, 12, sprintf('%.1f',$row["vararvo"]));
+						$worksheet->write($excelrivi, 13, sprintf('%.1f',$row["varaston_kiertonop"]));
+						$worksheet->write($excelrivi, 14, sprintf('%.1f',$row["kpl"]));
+						$worksheet->write($excelrivi, 15, sprintf('%.1f',$row["myyntierankpl"]));
+						$worksheet->write($excelrivi, 16, sprintf('%.1f',$row["myyntieranarvo"]));
+						$worksheet->write($excelrivi, 17, sprintf('%.0f',$row["rivia"]));
+						$worksheet->write($excelrivi, 18, sprintf('%.0f',$row["puuterivia"]));
+						$worksheet->write($excelrivi, 19, sprintf('%.1f',$row["palvelutaso"]));
+						$worksheet->write($excelrivi, 20, sprintf('%.1f',$row["ostoerankpl"]));
+						$worksheet->write($excelrivi, 21, sprintf('%.1f',$row["ostoeranarvo"]));
+						$worksheet->write($excelrivi, 22, sprintf('%.0f',$row["osto_rivia"]));
+						$worksheet->write($excelrivi, 23, sprintf('%.1f',$row["kustannus"]));
+						$worksheet->write($excelrivi, 24, sprintf('%.1f',$row["kustannus_osto"]));
+						$worksheet->write($excelrivi, 25, sprintf('%.1f',$row["kustannus_yht"]));
+						$worksheet->write($excelrivi, 26, sprintf('%.1f',$row["total"]));
+						$worksheet->write($excelrivi, 27, "$paikrow[paikka]");
+						$worksheet->write($excelrivi, 28, sprintf('%.0f',$paikrow["saldo"]));
+						$excelrivi++;
+					}
+				
 					echo "$ryhmanimet[$l]\t";
 					echo "$row[tuoteno]\t";
 					echo "$tuorow[toim_tuoteno]\t";
@@ -247,11 +326,25 @@
 					echo str_replace(".",",",sprintf('%.1f',$row["total"]))."\t";
 					echo "$paikrow[paikka]\t";
 					echo str_replace(".",",",sprintf('%.0f',$paikrow["saldo"]))."\t";
-					echo "\n";
+					echo "\n";					
 				}
 			}
 		}
 
 		echo "</pre>";
+		
+		if(isset($workbook)) {
+			// We need to explicitly close the workbook
+			$workbook->close();
+
+			echo "<table>";
+			echo "<tr><th>".t("Tallenna Excel").":</th>";
+			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<input type='hidden' name='exceltee' value='lataa_tiedosto'>";
+			echo "<input type='hidden' name='kaunisnimi' value='ABC_listaus.xls'>";
+			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+			echo "</table><br>";
+		}
 	}
 ?>

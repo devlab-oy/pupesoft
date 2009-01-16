@@ -4318,11 +4318,11 @@ if(!function_exists("enable_ajax")) {
  		for (i=0; i<obj.length; i++) {
 			if (obj.elements[i].tagName == "INPUT" && obj.elements[i].value != "") {
 				if (obj.elements[i].type == "text" || obj.elements[i].type == "hidden") {
-					getstr += obj.elements[i].name + "=" + encodeURI(obj.elements[i].value) + "&";
+					getstr += obj.elements[i].name + "=" + encodeURIComponent(obj.elements[i].value) + "&";
 				}
 				else if (obj.elements[i].type == "checkbox") {
 					if (obj.elements[i].checked) {
-						getstr += obj.elements[i].name + "=" + encodeURI(obj.elements[i].value) + "&";
+						getstr += obj.elements[i].name + "=" + encodeURIComponent(obj.elements[i].value) + "&";
 					}
 					else {
 						getstr += obj.elements[i].name + "=&";
@@ -4330,7 +4330,7 @@ if(!function_exists("enable_ajax")) {
 				}
 				else if (obj.elements[i].type == "radio") {
 					if (obj.elements[i].checked) {
-						getstr += obj.elements[i].name + "=" + encodeURI(obj.elements[i].value) + "&";
+						getstr += obj.elements[i].name + "=" + encodeURIComponent(obj.elements[i].value) + "&";
 					}
 				}
 			}
@@ -4348,7 +4348,7 @@ if(!function_exists("enable_ajax")) {
 				}
 			}
 			else if (obj.elements[i].tagName == "TEXTAREA") {
-				getstr += obj.elements[i].name + "=" + encodeURI(obj.elements[i].value) + "&";
+				getstr += obj.elements[i].name + "=" + encodeURIComponent(obj.elements[i].value) + "&";
 			}
 		}
 

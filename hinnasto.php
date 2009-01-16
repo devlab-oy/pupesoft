@@ -97,7 +97,7 @@ if ($tee != '') {
 	if (isset($_POST['pp']) && isset($_POST['kk']) && isset($_POST['vv'])) {
 		if (strlen(trim($_POST['vv'])) > 0 and strlen(trim($_POST['kk'])) > 0 and strlen(trim($_POST['pp'])) > 0) {
 			$pvm = mysql_real_escape_string("{$_POST['vv']}-{$_POST['kk']}-{$_POST['pp']}");
-			$where .= "muutospvm >= '" . $pvm . "' and ";
+			$where .= "tuote.muutospvm >= '" . $pvm . "' and ";
 		}
 	}
     

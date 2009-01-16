@@ -1433,8 +1433,8 @@
 			$sel2 = "selected";
 		}
 
-		$ulos .= "<option value=''  $sel1>".t("Logoa ei tulosteta rahtikirjaan eikä osoitelappuun")."</option>";
-		$ulos .= "<option value='X' $sel2>".t("Logo tulostetaan rahtikirjaan ja osoitelappuun")."</option>";
+		$ulos .= "<option value=''  $sel1>".t("Logo tulostetaan rahtikirjaan ja osoitelappuun")."</option>";
+		$ulos .= "<option value='X' $sel2>".t("Logoa ei tulosteta rahtikirjaan eikä osoitelappuun")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

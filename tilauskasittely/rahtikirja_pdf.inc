@@ -237,7 +237,7 @@
 			$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
 		}
 		
-		if($data) {
+		if(isset($data) !== FALSE and $yhtiorow["oslapp_rakir_logo"] == '') {
 			$image = $pdf->jfif_embed($data);
 		
 			if(!$image) {
@@ -253,7 +253,7 @@
 				else {
 					$logoparam['scale'] = 50  / $isizelogo[1];
 				}
-
+				
 				$placement = $pdf->image_place($image, 830-($logoparam['scale']*$isizelogo[1]), 20, $firstpage, $logoparam);
 			}
 			

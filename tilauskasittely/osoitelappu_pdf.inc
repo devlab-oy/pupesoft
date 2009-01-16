@@ -242,7 +242,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
 	}
 	
-	if($data) {
+	if(isset($data) !== FALSE and $yhtiorow["oslapp_rakir_logo"] == '') {
 		$image = $pdf->jfif_embed($data);
 
 		if(!$image) {

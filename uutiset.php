@@ -125,10 +125,12 @@ if ($tee == 'LISAA') {
 			}
 
 			$query .= "	kentta01 	= '$otsikko',
-						kentta02 	= '$uutinen',
-						kentta03 	= '$kuva',
-						kentta09 	= '$kentta09',
-						kentta10 	= '$kentta10',										
+						kentta02 	= '$uutinen',";
+			if ($kuva != '') {
+						$query .= "kentta03 	= '$kuva',";
+						}
+			$query .=  "kentta09 	= '$kentta09',
+						kentta10 	= '$kentta10',								
 						konserni 	= '$konserni',
 						kieli 		= '$lang[$i]',
 						kokopaiva	= '$kokopaiva',
@@ -138,7 +140,7 @@ if ($tee == 'LISAA') {
 			$result = mysql_query($query) or pupe_error($query);
 			$katunnus = mysql_insert_id();
 
-			if ($liitostunnus != 0) {
+			if ($liitostunnus != 0 && $kuva != '') {
 				// p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
 				$query = "update liitetiedostot set liitostunnus='$katunnus' where tunnus='$liitostunnus'";
 				$result = mysql_query($query) or pupe_error($query);

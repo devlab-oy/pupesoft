@@ -1871,7 +1871,7 @@
 								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $laskun_kieli);
 
 								// l‰hetet‰‰n meili
-								$kutsu = "lasku $lasku";
+								$kutsu = t("lasku", $kieli)." $lasku";
 								$liite = $pdffilenimi;
 
 								// l‰hetet‰‰n cc aina postittaja osoitteeseen
@@ -1915,7 +1915,7 @@
 								elseif ($kukarow["eposti"] != '') {
 									// l‰hetet‰‰n meili
 									$komento = "";
-									$kutsu = "lasku $lasku";
+									$kutsu = t("lasku", $kieli)." $lasku";
 									$liite = $pdffilenimi;
 									$sahkoposti_cc = "";
 									$content_subject = "";
@@ -1939,7 +1939,7 @@
 									elseif ($kukarow["eposti"] != '') {
 										// l‰hetet‰‰n meili
 										$komento = "";
-										$kutsu = "lasku $lasku";
+										$kutsu = t("lasku", $kieli)." $lasku";
 										$liite = $pdffilenimi;
 										$sahkoposti_cc = "";
 										$content_subject = "";

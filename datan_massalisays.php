@@ -296,10 +296,6 @@ if ($tee == 'GO') {
 
 			}
 			
-			if (strpos($kuva,"|") !== FALSE) {
-				$kuvanalku = str_replace('|','/',$kuvanalku);
-			}
-			
 			$query = "SELECT tuoteno, tunnus FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno LIKE '$kuvanalku%'";
 			$apuresult = mysql_query($query) or pupe_error($query);
 		}

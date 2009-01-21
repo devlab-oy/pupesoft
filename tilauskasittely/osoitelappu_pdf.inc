@@ -329,7 +329,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$asiakasrow = mysql_fetch_array($tempr);
 	
 	$pdf->draw_text(mm_pt(15),	mm_pt(112),  "Puh -Tel - Tel: ",		$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(38),	mm_pt(112), $asiakasrow['puhelin'],		$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(38),	mm_pt(112), substr($asiakasrow['puhelin'],0,15),		$firstpage, $kirj);
 
 	$pdf->draw_text(mm_pt(65), mm_pt(112), "Toimitustapa:",				$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(87), mm_pt(112), $laskurow["toimitustapa"],	$firstpage, $kirj);

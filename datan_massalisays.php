@@ -348,10 +348,6 @@ if ($tee == 'GO') {
 				$mihin = strpos($kuva,".$ext");
 				$tuoteno = substr($kuva,0,"$mihin");
 				
-				if (strpos($kuva,"|") !== FALSE) {
-					$tuoteno = str_replace('|','/',$tuoteno);
-				}
-				
 				$query = "SELECT tuoteno, tunnus FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno = '$tuoteno' LIMIT 1";
 				$apuresult = mysql_query($query) or pupe_error($query);
 			}

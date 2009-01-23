@@ -167,7 +167,14 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
 					}
 					
 					$_FILES["userfile"] = $temp_file;
-					$uusi_filu = konvertoi(65,96,"thumb",$toim,"userfile");
+					if (isset($thumb_size_x) and trim($thumb_size_x) != '' and isset($thumb_size_y) and trim($thumb_size_y) != '') {
+						$thumb_size_x = (int)$thumb_size_x;
+						$thumb_size_y = (int)$thumb_size_y;
+						$uusi_filu = konvertoi($thumb_size_y,$thumb_size_x,"thumb",$toim,"userfile");
+					}
+					else {
+						$uusi_filu = konvertoi(65,96,"thumb",$toim,"userfile");
+					}
 					
 					$teetyyppi = "TH";
 					tallenna_liite("userfile", $toim, $tunnus, $kuvaotsikko, $teetyyppi, 0, $liite_jarjestys);
@@ -176,7 +183,15 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
 					}
 				}
 				elseif ($teetyyppi == "TH" and $type == "image" and strtoupper($toim) == 'TUOTE') {
-					$uusi_filu = konvertoi(65,96,"thumb",$toim,"userfile");
+					if (isset($thumb_size_x) and trim($thumb_size_x) != '' and isset($thumb_size_y) and trim($thumb_size_y) != '') {
+						$thumb_size_x = (int)$thumb_size_x;
+						$thumb_size_y = (int)$thumb_size_y;
+						$uusi_filu = konvertoi($thumb_size_y,$thumb_size_x,"thumb",$toim,"userfile");
+					}
+					else {
+						$uusi_filu = konvertoi(65,96,"thumb",$toim,"userfile");
+					}
+
 					tallenna_liite("userfile", $toim, $tunnus, $kuvaotsikko, $teetyyppi, 0, $liite_jarjestys);
 					if ($uusi_filu != "") {
 						system("rm -f \"$uusi_filu\"");

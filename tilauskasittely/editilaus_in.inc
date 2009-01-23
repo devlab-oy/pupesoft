@@ -15,9 +15,24 @@ if (trim($argv[1])!='') {
 	// ja parametri komentoriviltä
 	$filename	= $argv[1];
 
-	if ($argv[2] == '' and substr(strtolower(basename($filename)), 0, 13) == 'magento-order') {
+	if (trim($argv[2]) == '' and substr(strtolower(basename($filename)), 0, 13) == 'magento-order') {
 		$argv[2] = 'magento';
 	}
+
+	$bound = uniqid(time()."_") ;
+	$header  = "From: <$yhtiorow[postittaja_email]>\n";
+	$header .= "MIME-Version: 1.0\n" ;
+	$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
+	$content .= "--$bound\n";
+	$content .= "Content-Type: text/plain; name=\"testi\"\n" ;
+	$content .= "Content-Transfer-Encoding: base64\n" ;
+	$content .= "Content-Disposition: inline; filename=\"testi\"\n\n";
+	$handle  = fopen($filename, "r");
+	$sisalto = fread($handle, filesize($filename));
+	fclose($handle);
+	$content .= chunk_split(base64_encode($sisalto));
+	$content .= "\n";
+	$boob = mail("sami@devlab.fi",  "Devlab testi argv: $argv[2]", $content, $header, "-f mailer@pupesoft.com");
 
 	// ja toinen parametri komentoriviltä
 	$edi_tyyppi	= $argv[2];

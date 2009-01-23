@@ -3241,7 +3241,8 @@ if ($tee == '') {
 									FROM toimitustapa
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND selite = '$laskurow[toimitustapa]'
-									AND vak_kielto != ''";
+									AND vak_kielto != ''
+									AND vak_kielto != 'Erilliskäsiteltävä'";
 				$vak_toim_result = mysql_query($vak_toim_query) or pupe_error($vak_toim_query);
 
 				if (mysql_num_rows($vak_toim_result) > 0) {

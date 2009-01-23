@@ -523,13 +523,14 @@ while (!feof ($fd)) {
 			break;
 
 		case 'ONADDP_NA' :
-		case 'OSTOTIL.OT_TOIMITUS_YRITYS' :
-		// toimitusasiakkaan nimi
+		case 'OSTOTIL.OT_TOIMITUS_NIMI' :
+			// toimitusasiakkaan nimi
 			$tnimi = $tieto;
 			break;
 
 		case 'ONADDP_NB' :
-		// toimitusasiakkaan nimitark
+		case 'OSTOTIL.OT_TOIMITUS_YRITYS' :
+			// toimitusasiakkaan nimitark
 			$tnimitark = $tieto;
 			break;
 

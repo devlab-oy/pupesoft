@@ -14,7 +14,11 @@ if (trim($argv[1])!='') {
 
 	// ja parametri komentoriviltä
 	$filename	= $argv[1];
-	
+
+	if ($argv[2] == '' and strpos(strtolower($filename), 0, 13) == 'magento-order') {
+		$argv[2] == 'magento';
+	}
+
 	// ja toinen parametri komentoriviltä
 	$edi_tyyppi	= $argv[2];
 }

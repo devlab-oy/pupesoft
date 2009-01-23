@@ -111,6 +111,20 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$ttype[]	= "";
 		}
 	}
+
+	if ($table == 'tullinimike') {
+		$tulli_ei_kielta = "";
+		$tulli_ei_toimintoa = "";
+		
+		if (in_array("KIELI", $otsikot) === FALSE) {
+			$tulli_ei_kielta = "PUUTTUU"; 
+			$otsikot[] = "KIELI";
+		}
+		if (in_array("TOIMINTO", $otsikot) === FALSE) {
+			$otsikot[] = "TOIMINTO";
+			$tulli_ei_toimintoa = "PUUTTUU"; 
+		}
+	}
 	
 	//määrittelee onko tämä taulu sellanen jossa ei ole yhtiö-saraketta
 	$eiyhtiota = "";
@@ -122,8 +136,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	// $otsikot 	sisältää kaikki sarakkeet saadusta tiedostosta
 
 	foreach ($otsikot as $key => $column) {
-
-		$column = strtoupper(trim($column));
+		
+		$column = strtoupper(trim($column));		
 		$otsikot[$key] = strtoupper(trim($column)); // trimmataan myös itte otsikot arrayn arvo, sitä käytetään myöhemmin
 
 		if ($column != '') {
@@ -305,7 +319,15 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		foreach ($erivi as $eriv) {
 			$rivi[] = $eriv;
 		}
-
+		
+		if ($table == 'tullinimike' and $tulli_ei_kielta != "") {
+			$rivi[] = "FI";
+		}
+		
+		if ($table == 'tullinimike' and $tulli_ei_toimintoa != "") {
+			$rivi[] = "LISAA";
+		}
+		
 		//Jos eri where-ehto array on määritelty
 		if (is_array($wherelliset)) {
 			$indeksi = array_merge($indeksi, $indeksi_where);
@@ -313,7 +335,17 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		}
 
 		foreach($indeksi as $j) {
-
+			
+			if ($table == 'tullinimike') {
+				if (strtoupper($otsikot[$j]) == "CN") {
+					$rivi[$j] = str_replace(' ','',$rivi[$j]);
+				}
+				
+				if (strtoupper($otsikot[$j]) == "CN" and trim($rivi[$j]) == '') {
+					$tila = 'ohita';
+				}
+			}
+			
 			if ($otsikot[$j] == "TUOTENO") {
 
 				$tuoteno = trim($rivi[$j]);

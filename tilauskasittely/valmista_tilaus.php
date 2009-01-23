@@ -118,7 +118,7 @@
 				$ress = mysql_query($query) or pupe_error($query);
 				$roww = mysql_fetch_array($ress);
 
-				if ($saldo < 0 and $roww['ei_saldoa'] == '') {
+				if ($saldo <= 0 and $roww['ei_saldoa'] == '') {
 					if ($_POST['osavalmistus'] == 'Valmista') {
 						foreach ($valmkpllat as $tunn => $kpl_chk) {
 							if ($kpl_chk != '' and $roww['tuotetyyppi'] == 'R') {

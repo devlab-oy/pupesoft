@@ -17,19 +17,29 @@ if ($tee == "teeyhdistys") {
 
 			if (mysql_num_rows($result) == 1) {
 				$keikkarow = mysql_fetch_array($result);
-
+				
+				//p‰ivitet‰‰n otunnus jo kohdistetuille riveille jotta ne ev‰t j‰isi ilman otsikkoa
 				$query = "update tilausrivi set otunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and uusiotunnus='$keikkatunnus' and otunnus=uusiotunnus order by yhtio";
 				$result = mysql_query($query) or pupe_error($query);
+				
+				//p‰ivitet‰‰n otunnus niille riveille joiden otunnus pointtaa dellattavaan otsikkoon jotta ne ev‰t j‰isi ilman otsikkoa
+				$query = "update tilausrivi set otunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and otunnus='$keikkatunnus' order by yhtio";
+				$result = mysql_query($query) or pupe_error($query);
 
+				//liitet‰‰n jo liitetyt rivit uuteen otsikkoon
 				$query = "update tilausrivi set uusiotunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and uusiotunnus='$keikkatunnus' order by yhtio";
 				$result = mysql_query($query) or pupe_error($query);
-
-				$query = "delete from lasku where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkarow[laskunro]' and vanhatunnus = 0";
+				
+				//poistetaan keikat, mutta ei en‰‰ sanota delete from
+				$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit‰tˆitiin ohjelmassa ostotilausten_rivien_yhdistys.inc (1)")."<br>";
+				$query = "update lasku set alatila='K', tila='D',  comments = '$komm' where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkarow[laskunro]' and vanhatunnus = 0";
 				$result = mysql_query($query) or pupe_error($query);
-
+				
+				//liitet‰‰n liitosotsikot uudestaan
 				$query = "update lasku set laskunro = '$laskurow[laskunro]' where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkarow[laskunro]' and vanhatunnus != 0";
 				$result = mysql_query($query) or pupe_error($query);
 				
+				//Varmistetaan ett‰ keikka ei ole merkitty kohdistetuks
 				$query = "update lasku set kohdistettu = '' where yhtio='$kukarow[yhtio]' and tila='K' and tunnus = '$otunnus'";
 				$result = mysql_query($query) or pupe_error($query);
 			}

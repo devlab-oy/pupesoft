@@ -79,10 +79,18 @@
 		echo "<option value='$srow[0]' $sel>$srow[0]</option>";
 	}
 
-	echo "</select></td>";
-	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
-	echo "</tr>";
+	echo "</select></td></tr>";
+	echo "<tr>";
+	echo "<th>".t("Varastopaikoittain").":</th>";
 	
+	$sel = "";
+	if ($paikoittain == 'JOO') {
+		$sel = "CHECKED";
+	}
+	
+	echo "<td><input type='checkbox' name='paikoittain' value='JOO' $sel></td><td></td>";
+	
+	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr>";
 	echo "</form>";
 	echo "</table><br>";
 
@@ -253,10 +261,18 @@
 				$tuorow = mysql_fetch_array($tuoresult);
 
 				//haetaan varastopaikat ja saldot
-				$query = "	SELECT concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, saldo
-							from tuotepaikat
-							where tuoteno='$row[tuoteno]'
-							and yhtio='$kukarow[yhtio]'";
+				if ($paikoittain == 'JOO') {
+					$query = "	SELECT concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, saldo
+								from tuotepaikat
+								where tuoteno 	= '$row[tuoteno]'
+								and yhtio 		= '$kukarow[yhtio]'";
+				}
+				else {
+					$query = "	SELECT sum(saldo) saldo	
+								from tuotepaikat
+								where tuoteno	= '$row[tuoteno]'
+								and yhtio 		= '$kukarow[yhtio]'";
+				}						
 				$paikresult = mysql_query($query) or pupe_error($query);
 
 				while ($paikrow = mysql_fetch_array($paikresult)) {

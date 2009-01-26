@@ -529,9 +529,6 @@ while (!feof ($fd)) {
 		case 'ONADDP_NA' :
 		case 'OSTOTIL.OT_TOIMITUS_NIMI' :
 			// toimitusasiakkaan nimi
-			if ($edi_tyyppi == "magento") {
-				$tieto = utf8_decode($tieto);
-			}
 			$tnimi = $tieto;
 			break;
 

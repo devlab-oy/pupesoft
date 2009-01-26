@@ -209,7 +209,15 @@ if(!function_exists("tuotetarkista")) {
 			if (is_array($tuotteen_parametrit_keys)) {
 				foreach ($tuotteen_parametrit_keys as $key => $val) {
 					if ($tuotteen_parametrit_vals[$key] != '') {
-						$tuotteen_parametrit .= "$val=$tuotteen_parametrit_vals[$key];";
+						if (trim(strtolower($val)) == 'variaatio_jako' and trim(strtolower($tuotteen_parametrit_vals[$key])) == trim(strtolower('variaatio'))) {
+							$virhe[$i] = t("Variaatio_jako ei saa olla 'variaatio'-niminen");
+						}
+						elseif (trim(strtolower($val)) == 'variaatio' and trim(strtolower($tuotteen_parametrit_vals[$key])) == trim(strtolower($t['tuoteno']))) {
+							$virhe[$i] = t("Variaatio ei saa olla tuotteen tuotenumero");
+						}
+						else {
+							$tuotteen_parametrit .= "$val=$tuotteen_parametrit_vals[$key];";
+						}
 					}
 				}
 

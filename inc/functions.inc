@@ -257,6 +257,57 @@ if (!function_exists("kuuluukovarastoon")) {
 	}
 }
 
+if (!function_exists("onkotulostusalueita")) {
+	function onkotulostusalueita($hyllyalue, $hyllynro, $varasto, $yhtio = '') {
+		global $kukarow, $yhtiorow;
+/*
+		$varastolisa = "";
+
+		// voidaan zekata onko varastoalue jossain tietyssä varastossa...
+		if ($varasto != "") {
+			$varastolisa = " and tunnus='$varasto'";
+		}*/
+
+		//Jos yhtiö tulee parametrinä niin katsotaa, ettei se ole ihan mitä sattuu
+		if ($yhtio != "") {
+			$query	= "	SELECT GROUP_CONCAT(distinct yhtio) yhtiot
+						from yhtio
+						where yhtio='$kukarow[yhtio]' or (konserni = '$yhtiorow[konserni]' and konserni != '')";
+			$pres = mysql_query($query) or pupe_error($query);
+			$prow = mysql_fetch_array($pres);
+
+			$yhtiot = explode(",", $prow["yhtiot"]);
+
+			if (in_array($yhtio, $yhtiot)) {
+				$yhtiolisa = $yhtio;
+			}
+			else {
+				$yhtiolisa = $kukarow["yhtio"];
+			}
+		}
+		else {
+			$yhtiolisa = $kukarow["yhtio"];
+		}
+
+		$query = "	SELECT nimi
+					FROM varaston_tulostimet
+					WHERE concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0')) 
+					and	concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0')) 
+					and	yhtio = '$yhtiolisa'
+					and varasto ='$varasto'";
+		$varcheckres = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($varcheckres) == 0) {
+			return "";
+		}
+		else {
+			$varcheckrow = mysql_fetch_array($varcheckres);
+			return $varcheckrow['nimi'];
+		}
+	}
+}
+
+
 if (!function_exists("pdf_substr")) {
 	function pdf_substr($str, $len, $pdf, $param) {
 

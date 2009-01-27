@@ -1,5 +1,14 @@
 <?php
 
+
+	// jos php-gd on installoitu niin loidataab barcode library
+	if (in_array("gd", get_loaded_extensions())) {	
+		if (@include_once("viivakoodi/Barcode.php")) {
+		}
+		else {
+			include_once("Barcode.php");
+		}
+	}
 	//Ohjelma vatii muuttujan $otunnus joka viittaa ostolaskuun johon rivit on kohdistettu.
 	// sekä $laskurow arrayn jossa on select tähti from lasku jossa tunnus on $otunnus
 
@@ -212,6 +221,9 @@
 	elseif ($mitkarivit == "viedyt") {
 		$mitkalisa = " and tilausrivi.varattu = 0 ";
 	}
+	elseif ($mitkarivit == "koodittomat") {
+		$eanlisa = " and tuote.eankoodi = '' ";
+	}
 	else {
 		$mitkalisa = "";
 	}
@@ -246,7 +258,7 @@
 					tuote.nimitys, tilausrivi.perheid2, tilausrivi.kommentti, tilausrivi.otunnus, tilausrivi.tunnus,
 					$sorttauskentta
 					FROM tilausrivi
-					JOIN tuote USING (yhtio, tuoteno)
+					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno $eanlisa
 					JOIN tuotteen_toimittajat ON tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 					WHERE tilausrivi.uusiotunnus = '$otunnus'
 					and tilausrivi.yhtio='$kukarow[yhtio]'
@@ -264,11 +276,22 @@
 	$firstpage = alku_purku();
 
 	while ($row = mysql_fetch_array($result)) {
-		if ($kala < 50) {
-			$sivu++;
-			$firstpage = alku_purku();
-			$kala = 500;
+		
+		if ($yhtiorow['viivakoodi_purkulistaan'] == 'K' and $mista != "vastaanota") {
+			if ($kala < 75) {
+				$sivu++;
+				$firstpage = alku_purku();
+				$kala = 500;
+			}
 		}
+		else {
+			if ($kala < 50) {
+				$sivu++;
+				$firstpage = alku_purku();
+				$kala = 500;
+			}
+		}
+			
 
 		$query = "	SELECT saldo, hyllyalue, hyllynro, hyllyvali, hyllytaso
 					FROM tuotepaikat
@@ -443,7 +466,7 @@
 		$pdf->draw_text(770, $kala, $row["yksikko"], 					$firstpage, $p);
 
 
-		$kala = $kala - 15 - $lisaa;
+		$kala = $kala - 30 - $lisaa;
 
 		if ($row["sarjanumeroseuranta"] != "") {
 
@@ -475,6 +498,27 @@
 				}
 			}
 		}
+
+		if ($yhtiorow['viivakoodi_purkulistaan'] == 'K' and $mista != "vastaanota") {
+			if (class_exists("Image_Barcode")) {
+				//viivakoodi
+				$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+
+				imagejpeg(Image_Barcode::draw($row["tuoteno"], 'Code128', 'jpg', false, 1, 20), $nimi, 90);
+
+				$fh = fopen($nimi, "r");
+				$data = fread($fh, filesize($nimi));
+				fclose($fh);
+
+				$image = $pdf->jfif_embed($data);
+
+				$pdf->image_place($image, $kala, 150, $firstpage);
+
+				system("rm -f $nimi");
+				$kala -= 15;
+			}
+		}
+		
 
 		// Trimmataan uudestaan
 		$row["kommentti"] = trim($row["kommentti"]);

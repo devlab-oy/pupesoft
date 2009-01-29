@@ -1,7 +1,7 @@
 <?php
 
 	if (@include_once('PEAR.php')) {
-		require_once("viivakoodi/Barcode.php");
+		require_once("../viivakoodi/Barcode.php");
 	}
 	
 	//Ohjelma vatii muuttujan $otunnus joka viittaa ostolaskuun johon rivit on kohdistettu.

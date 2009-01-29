@@ -1,13 +1,18 @@
 <?php
 
-	if (@include_once('PEAR.php')) {
-		require_once("../viivakoodi/Barcode.php");
-	}
-	
 	//Ohjelma vatii muuttujan $otunnus joka viittaa ostolaskuun johon rivit on kohdistettu.
 	// sekä $laskurow arrayn jossa on select tähti from lasku jossa tunnus on $otunnus
 
 	require_once('pdflib/phppdflib.class.php');
+
+	// jos php-gd on installoitu niin loidataab barcode library
+	if (in_array("gd", get_loaded_extensions())) {	
+		if (@include_once("viivakoodi/Barcode.php")) {
+		}
+		else {
+			include_once("Barcode.php");
+		}
+	}
 
 	$pdf = new pdffile;
 	$pdf->set_default('margin', 0);

@@ -504,7 +504,7 @@
 				//viivakoodi
 				$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
-				imagejpeg(Image_Barcode::draw($row["tuoteno"], 'Code128', 'jpg', false, 1, 20), $nimi, 90);
+				imagejpeg(Image_Barcode::draw($row["tuoteno"], 'code128', 'jpg', false, 1, 20), $nimi, 90);
 
 				$fh = fopen($nimi, "r");
 				$data = fread($fh, filesize($nimi));

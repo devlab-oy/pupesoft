@@ -9,7 +9,7 @@ $viivapaikka = str_replace('-','.',$paikka);
 if (strlen($paikka) <= 12) {
 $sivu = "
 *** ETIKETIN KOKO ***
-{D0240,0800,0200|}
+{D0230,0800,0200|}
 {AX;+000,+000,+00|}
 {AY;+05,0|}
 {C|}
@@ -30,7 +30,7 @@ $sivu = "
 else {
 $sivu = "
 *** ETIKETIN KOKO ***
-{D0240,0800,0200|}
+{D0230,0800,0200|}
 {AX;+000,+000,+00|}
 {AY;+05,0|}
 {C|}

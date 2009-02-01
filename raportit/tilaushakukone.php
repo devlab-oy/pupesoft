@@ -223,10 +223,7 @@ if($tee == "HYLKAATARJOUS") {
 	$aja_kysely = "tmpquery";       
 	$hakupalkki = "OHI";
 	if($yhtiorow["dokumentaatiohallinta"] != "") {
-		$svnKansio = svnFindActiveQuotation($tarjous);
-		if($svnKansio != "") {
-			svnAction("move", $svnKansio, svnQuotationsRejected."/".basename($svnKansio), "Tarjous hylätty");
-		}
+		svnCloseProject($tarjous, "TARJOUS");
 	}
 }
 
@@ -268,10 +265,7 @@ if($tee == "SULJEPROJEKTI") {
 	}
 	
 	if($yhtiorow["dokumentaatiohallinta"] != "") {
-		$svnKansio = svnFindActiveProject($tarjous);
-		if($svnKansio != "") {
-			svnAction("move", $svnKansio, svnProjectsComplete."/".basename($svnKansio), "Projekti suljettu");
-		}
+		svnCloseProject($tarjous, "PROJEKTI");
 	}
 	
 	

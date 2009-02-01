@@ -276,6 +276,7 @@ if(!function_exists("svnProjectDirectory")) {
 		return false;
 	}
 }
+
 if(!function_exists("svnQuotationDirectory")) {
 	function svnQuotationDirectory ($tunnus) {
 		
@@ -349,6 +350,66 @@ if(!function_exists("svnOpenNew")) {
 		}
 		else {
 			return t("Projekti ei kelpaa");
+		}
+	}
+}
+
+if(!function_exists("svnClose")) {
+	function svnClose ($tunnus, $type) {
+		global $kukarow;
+		
+		if($type == "PROJEKTI") {
+			$svnKansio 	= svnFindActiveProject($tunnus);
+			$closeMsg 	= t("Projekti suljettu", $kieli);
+			$targetDir 	= svnProjectsComplete; 
+		}
+		else {
+			$svnKansio 	= svnFindActiveQuotation($tunnus);
+			$closeMsg 	= t("Tarjous hylätty", $kieli);
+			$targetDir 	= svnQuotationsRejected;
+		}
+		
+
+		if($svnKansio != "") {
+			if(strpos(svnProjectsComplete, "customerFolder") !== FALSE) {
+				
+
+				$query = "	SELECT liitostunnus
+							FROM lasku
+							WHERE yhtio='$kukarow[yhtio]' and tunnus = '$tunnus'";
+				$res = mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($res) == 1) {
+					$row = mysql_fetch_array($res);
+					$destDir = svnFindCustomerDir($row["liitostunnus"]);
+					
+					$targetDir = str_replace("customerFolder" , $destDir, $targetDir);
+					
+					if(svnListDirectory($targetDir) === false) {
+						$tempDir = "/tmp/svnClose-".md5(uniqid());
+						mkdir($tempDir);
+						$tempDirCreate = $tempDir;
+						foreach(explode("/", str_replace($destDir, "", $targetDir)) as $dir) {
+							if($dir != "") {
+								$tempDirCreate = $tempDirCreate."/$dir";
+								mkdir($tempDirCreate);
+							}
+						}
+						
+						svnAction("import",	"local:$tempDir", $destDir, t("Lisättiin puuttuva kansio", $kieli));
+						
+						system("rm -rf $tempDir");
+						
+					}
+					
+					svnAction("move", $svnKansio, "$targetDir/".basename($svnKansio), $closeMsg);
+					return true;
+				}
+				
+				return false;
+			}
+			else {
+				svnAction("move", $svnKansio, "$targetDir/".basename($svnKansio), $closeMsg);
+			}
 		}
 	}
 }

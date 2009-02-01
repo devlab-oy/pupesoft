@@ -8,14 +8,37 @@ if($svnStatus === false) {
 
 echo "<font class='head'>".t("Dokumentinhallinnan korjaukset")."</font><hr><br>";
 
-if($tee == "perusta_uusi" and (int) $tunnus > 0) {
+if($tee == "perusta_uusi") {
 	
-	$retval = svnOpenNew($tunnus, $tyyppi);
-	if($retval === true) {
-		echo "<font class='message'>".t("Kansio perustettu")."</font>";
+	if((int) $tunnus > 0) {
+		$retval = svnOpenNew($tunnus, $tyyppi);
+		if($retval === true) {
+			echo "<font class='message'>".t("Kansio perustettu")."</font>";
+		}
+		else {
+			echo "<font class='error'>".t("Virhe!")." ".t($retval)."</font>";
+		}
 	}
 	else {
-		echo "<font class='error'>".t("Virhe!")." ".t($retval)."</font>";
+		echo "<font class='error'>".t("Anna tunnus!")."</font>";
+	}
+	
+	echo "<br><br>";
+}
+
+if($tee == "sulje") {
+	
+	if((int) $tunnus > 0) {
+		$retval = svnClose($tunnus, $tyyppi);
+		if($retval === true) {
+			echo "<font class='message'>".t("Kansio siirretty")."</font>";
+		}
+		else {
+			echo "<font class='error'>".t("Virhe!")." ".t($retval)."</font>";
+		}
+	}
+	else {
+		echo "<font class='error'>".t("Anna tunnus!")."</font>";
 	}
 	
 	echo "<br><br>";
@@ -44,24 +67,42 @@ if($tee == "luo_asiakaskansiot") {
 }
 
 echo "
-	<form action = '$PHP_SELF' method='POST'>
-	<input type='hidden' name='tee' value='perusta_uusi'>
 	<table>
 		<tr>
-			<th>".t("Perusta uusi kansio")."</th>
+			<th>".t("Perusta uusi kansio projektille/tarjoukselle")."</th>
 		</tr>
 		<tr>
 			<td>
-				<select name='tyyppi'>
-					<option value = ''>".t("Valitse laji")."</option>
-					<option value = 'TARJOUS'>".t("Tarjous")."</option>
-					<option value = 'PROJEKTI'>".t("Projekti")."</option>
-				</select>
-				<input type = 'text' name='tunnus' value = '' size = '10'>
+				<form action = '$PHP_SELF' method='POST'>
+				<input type='hidden' name='tee' value='perusta_uusi'>		
+					<select name='tyyppi'>
+						<option value = ''>".t("Valitse laji")."</option>
+						<option value = 'TARJOUS'>".t("Tarjous")."</option>
+						<option value = 'PROJEKTI'>".t("Projekti")."</option>
+					</select>
+					<input type = 'text' name='tunnus' value = '$tunnus' size = '10'>
+					<input type = 'submit' value='Avaa'>
+				</form>
 			</td>
 		</tr>
+		<tr>
+			<th>".t("Sulje projekti/tarjous")."</th>
+		</tr>
+		<tr>
+			<td>
+				<form action = '$PHP_SELF' method='POST'>
+				<input type='hidden' name='tee' value='sulje'>
+					<select name='tyyppi'>
+						<option value = ''>".t("Valitse laji")."</option>
+						<option value = 'TARJOUS'>".t("Tarjous")."</option>
+						<option value = 'PROJEKTI'>".t("Projekti")."</option>
+					</select>
+					<input type = 'text' name='tunnus' value = '$tunnus' size = '10'>
+					<input type = 'submit' value='Sulje'>					
+				</form>
+			</td>
 	</table>
-	</form><br>";
+	<br>";
 
 echo "
 	<form action = '$PHP_SELF' method='POST'>

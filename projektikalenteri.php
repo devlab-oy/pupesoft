@@ -4,9 +4,12 @@
 //parametrit
 require('inc/parametrit.inc');
 
-js_popup();
-js_showhide();
-enable_ajax();
+if($nayta_pdf != 1) {
+	js_popup();
+	js_showhide();
+	enable_ajax();	
+}
+
 
 require('inc/kalenteri.inc');
 

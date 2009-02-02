@@ -229,8 +229,9 @@ if ($tee == "aja") {
 					WHERE tuote.yhtio = '$kyhtio'
 					AND tuote.hinnastoon = 'W'
 					AND tuote.status NOT IN('P','X')					
-					GROUP BY tuote.tuoteno, tuote.try, tuote.osasto, tuote.nimitys, ta_nimitys_se.selite, tuote.kuvaus, ta_kuvaus_se.selite, 
-					ta_nimitys_en.selite, ta_kuvaus_en.selite, ta_nimitys_ru.selite, ta_kuvaus_ru.selite, ta_nimitys_ee.selite, ta_kuvaus_ee.selite, ta_nimitys_de.selite, ta_kuvaus_de.selite
+					GROUP BY tuote.tuoteno, tuote.try, tuote.osasto, tuote.nimitys, substring(ta_nimitys_se.selite,1,1024), substring(tuote.kuvaus,1,1024), substring(ta_kuvaus_se.selite,1,1024), 
+					substring(ta_nimitys_en.selite,1,1024), substring(ta_kuvaus_en.selite,1,1024), substring(ta_nimitys_ru.selite,1,1024), substring(ta_kuvaus_ru.selite,1,1024), 
+					substring(ta_nimitys_ee.selite,1,1024), substring(ta_kuvaus_ee.selite,1,1024), substring(ta_nimitys_de.selite,1,1024), substring(ta_kuvaus_de.selite,1,1024)
 					ORDER BY tuote.tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 

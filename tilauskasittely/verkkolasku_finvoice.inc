@@ -23,17 +23,22 @@ if (!function_exists('finvoice_otsik')) {
 		//	Osataanko tämän käsitellä tämän pankin finvoiceaineistoa?
 		switch ($senderintermediator) {
 			case 'NDEAFIHH':
-	        	$tulostuspalvelu	= "tulostukseen";
+			$tulostuspalvelu	= "tulostukseen";
 				break;
 			case 'PSPBFIHH':
-	        	$tulostuspalvelu	= "003718062728810P";
+			$tulostuspalvelu	= "003718062728810P";
 				break;
-			case 'DABAFIHH':	
+			case 'DABAFIHH':
+			$tulostuspalvelu	= "003718062728810P";
+				break;
 			case 'HELSFIHH':
-	        	$tulostuspalvelu	= "TULOSTUSPALVELU";
+			$tulostuspalvelu	= "TULOSTUSPALVELU";
+				break;
+			case 'OKOYFIHH':
+			$tulostuspalvelu	= "TULOSTUSPALVELU";
 				break;
 			default:
-	        	$tulostuspalvelu	= "";
+			$tulostuspalvelu	= "";
 				break;
 		}
 

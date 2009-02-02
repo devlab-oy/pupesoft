@@ -94,7 +94,7 @@ if ($tee == '') {
 			</tr><tr>
 			<td valign='top' align='center' width='140'><br>$kuva<br><br></td>
 			<td valign='top'>$uutinen[kentta02]<br>
-			<a href='$PHP_SELF?tee=PRINTTAA&tun=$uutinen[tun]'>Tulosta</a>
+			<a href='$PHP_SELF?tee=PRINTTAA&tun=$uutinen[tun]'>".t("Tulosta")."</a>
 			</font></td>
 			</tr><tr>
 			<th colspan='2'>".t("Toimittaja").": $uutinen[nimi]<br>".t("P‰iv‰m‰‰r‰").": $uutinen[pvmalku]</th>

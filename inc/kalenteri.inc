@@ -3,46 +3,47 @@
 	/*
 		Melko geneerisiä kalenterifunktioita
 	*/
-
-	?>
-	<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
-
-	function selectPopper(event, url, id) {
-
-		select=document.getElementById(id);
-
-		url=url+'&ajax_menu_yp='+id;
-
-		proceed=false;
-		if(select.options[select.selectedIndex].value == "uusi") {
-			url=url+'&uusi=1';
-			proceed=true;
-		}
-		
-		if(proceed!==false) {
-			popUp(event, 'ajax_menu_yp', '100', '-10', url);	
-		}
-	}
-
-	</SCRIPT>
-
-	<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
-
-	function doSelectAction (sel, event, asiakasID, kaleDIV) {
-
-		s=document.getElementById(sel);
-		if(isNaN(s.options[s.selectedIndex].value)) {
-			selectPopper(event, '../yllapito.php?toim=yhteyshenkilo&liitostunnus='+asiakasID+'&yhtyyppi=asiakas', sel);
-		}
-		else {
-			ajaxPost('yhteyshenkiloLista_'+asiakasID, 'asiakasmemo.php?kaleDIV='+kaleDIV , kaleDIV);
-		}
-	}
-
-	</SCRIPT>
 	
-	<?php
-	
+	if($nayta_pdf != 1) {
+		?>
+		<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+
+		function selectPopper(event, url, id) {
+
+			select=document.getElementById(id);
+
+			url=url+'&ajax_menu_yp='+id;
+
+			proceed=false;
+			if(select.options[select.selectedIndex].value == "uusi") {
+				url=url+'&uusi=1';
+				proceed=true;
+			}
+
+			if(proceed!==false) {
+				popUp(event, 'ajax_menu_yp', '100', '-10', url);	
+			}
+		}
+
+		</SCRIPT>
+
+		<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+
+		function doSelectAction (sel, event, asiakasID, kaleDIV) {
+
+			s=document.getElementById(sel);
+			if(isNaN(s.options[s.selectedIndex].value)) {
+				selectPopper(event, '../yllapito.php?toim=yhteyshenkilo&liitostunnus='+asiakasID+'&yhtyyppi=asiakas', sel);
+			}
+			else {
+				ajaxPost('yhteyshenkiloLista_'+asiakasID, 'asiakasmemo.php?kaleDIV='+kaleDIV , kaleDIV);
+			}
+		}
+
+		</SCRIPT>
+
+		<?php
+	}	
 
 	if (!function_exists("tee_menu")) {
 				
@@ -116,13 +117,13 @@
 								$y = -10;
 							}
 							if($item["TAPA"] == "request") {
-								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" $event=\"divi=document.getElementById('ajax_menu'); divi.innerHTML=''; divi.style.display='none'; sndReq('$div', '$item[HREF]', false, false);\">$item[TEKSTI] 1</a></td></tr>";	
+								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" $event=\"divi=document.getElementById('ajax_menu'); divi.innerHTML=''; divi.style.display='none'; sndReq('$div', '$item[HREF]', false, false);\">$item[TEKSTI]</a></td></tr>";	
 							}
 							elseif($item["TAPA"] == "CUSTOM") {
-								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" $event=\"".stripslashes($item["EVENT_ACTION"])."\">$item[TEKSTI] 2</a></td></tr>";
+								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" $event=\"".stripslashes($item["EVENT_ACTION"])."\">$item[TEKSTI]</a></td></tr>";
 							}
 							else {
-								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" href=\"#\" $event=\"divi=document.getElementById('ajax_menu'); divi.innerHTML=''; divi.style.display='none'; popUp(event, '$div', '$x', '$y', '{$item["HREF"]}', false, false); return false;\">$item[TEKSTI] 3</a></td></tr>";
+								$ulos .=  "<tr><td class=\"back\"><a class=\"menu\" href=\"#\" $event=\"divi=document.getElementById('ajax_menu'); divi.innerHTML=''; divi.style.display='none'; popUp(event, '$div', '$x', '$y', '{$item["HREF"]}', false, false); return false;\">$item[TEKSTI]</a></td></tr>";
 							}
 						}
 					}

@@ -50,10 +50,10 @@
 	if ($toitarow['kuljyksikko']!='')	$x[]='7'; // kuljetusyksikkökuljetus
 
 	$keku = "16";
-	if (strpos($toitarow['selite'], "9"))  $keku="9";
-	if (strpos($toitarow['selite'], "00")) $keku="00";
-	if (strpos($toitarow['selite'], "14")) $keku="14";
-	if (strpos($toitarow['selite'], "21")) $keku="21";
+	if (strpos($toitarow['selite'], "9")  !== FALSE) $keku = "9";
+	if (strpos($toitarow['selite'], "00") !== FALSE) $keku = "00";
+	if (strpos($toitarow['selite'], "14") !== FALSE) $keku = "14";
+	if (strpos($toitarow['selite'], "21") !== FALSE) $keku = "21";
 
 	$keltainen = "Keltainen";
 	$kuljetus  = "Kuljetus";

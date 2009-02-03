@@ -937,7 +937,7 @@
 			$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
 			$sumrow = mysql_fetch_array($sumresult);
 
-			$miinus = 4;
+			$miinus = 5;
 		}
 		$result = mysql_query($query) or pupe_error($query);
 

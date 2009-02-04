@@ -117,7 +117,8 @@
 
 		if ($vaintullinimike != "") {
 			$vainnimikelisa = " and tuote.tullinimike1 = '$vaintullinimike' ";
-			$vainnimikegroup = " tilausrivi.tunnus, ";
+			$vainnimikelisa2 = " tilausrivi.tunnus, ";
+			$vainnimikegroup = " ,9 ";
 		}
 		else {
 			$vainnimikelisa = "";
@@ -136,6 +137,7 @@
 						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,						
 						'Keikka' as tapa,
+						$vainnimikelisa2
 						max(lasku.laskunro) laskunro,
 						max(tuote.tuoteno) tuoteno,												
 						round(sum(tilausrivi.kpl),0) kpl,
@@ -156,7 +158,7 @@
 						and lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.mapvm >= '$vva-$kka-$ppa'
 						and lasku.mapvm <= '$vvl-$kkl-$ppl'
-						GROUP BY $vainnimikegroup 1,2,3,4,5,6,7,8
+						GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup
 						HAVING $maalisa)";
 		}
 		
@@ -174,6 +176,7 @@
 						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,
 						'Lasku' as tapa,
+						$vainnimikelisa2
 						max(lasku.laskunro) laskunro,
 						max(tuote.tuoteno) tuoteno,
 						round(sum(tilausrivi.kpl),0) kpl,						
@@ -193,7 +196,7 @@
 						and lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tapvm >= '$vva-$kka-$ppa'
 						and lasku.tapvm <= '$vvl-$kkl-$ppl'
-						GROUP BY $vainnimikegroup 1,2,3,4,5,6,7,8
+						GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup
 						HAVING $maalisa)";
 		}
 		
@@ -210,7 +213,8 @@
 						lasku.kuljetusmuoto,
 						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,												
-						'Siirtolista' as tapa,	
+						'Siirtolista' as tapa,
+						$vainnimikelisa2	
 						max(lasku.tunnus) laskunro,
 						max(tuote.tuoteno) tuoteno,											
 						round(sum(tilausrivi.kpl),0) kpl,
@@ -230,7 +234,7 @@
 						and lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tapvm >= '$vva-$kka-$ppa'
 						and lasku.tapvm <= '$vvl-$kkl-$ppl'
-						GROUP BY $vainnimikegroup 1,2,3,4,5,6,7,8
+						GROUP BY 1,2,3,4,5,6,7,8 $vainnimikegroup
 						HAVING $maalisa)";
 		}
 		

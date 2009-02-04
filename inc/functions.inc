@@ -2705,7 +2705,7 @@ if (!function_exists("alehinta")) {
 							and tuoteno  = '$trow[tuoteno]'
 							and tuoteno != ''
 							and valkoodi = '$laskurow[valkoodi]'
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
 							UNION
@@ -2718,7 +2718,7 @@ if (!function_exists("alehinta")) {
 							and tuoteno = '$trow[tuoteno]'
 							and tuoteno != ''
 							and valkoodi = '$laskurow[valkoodi]'
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
 							ORDER BY prio, minkpl desc, aika, tunnus desc
@@ -2769,7 +2769,7 @@ if (!function_exists("alehinta")) {
 							and tuoteno = '$trow[tuoteno]'
 							and tuoteno != ''
 							and valkoodi in ('$yhtiorow[valkoodi]','')
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
 							UNION
@@ -2782,7 +2782,7 @@ if (!function_exists("alehinta")) {
 							and tuoteno = '$trow[tuoteno]'
 							and tuoteno != ''
 							and valkoodi in ('$yhtiorow[valkoodi]','')
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
 							ORDER BY prio, minkpl desc, aika, valkoodi DESC, tunnus desc
@@ -2831,7 +2831,7 @@ if (!function_exists("alehinta")) {
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
 							and valkoodi = '$laskurow[valkoodi]'
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
 							UNION
@@ -2844,7 +2844,7 @@ if (!function_exists("alehinta")) {
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
 							and valkoodi = '$laskurow[valkoodi]'
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
 							ORDER BY prio, minkpl desc, aika, tunnus desc
@@ -2894,7 +2894,7 @@ if (!function_exists("alehinta")) {
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
 							and valkoodi in ('$yhtiorow[valkoodi]','')
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
 							UNION
@@ -2907,7 +2907,7 @@ if (!function_exists("alehinta")) {
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
 							and valkoodi in ('$yhtiorow[valkoodi]','')
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00')))
 
 							ORDER BY prio, minkpl desc, aika, valkoodi DESC, tunnus desc
@@ -2958,7 +2958,7 @@ if (!function_exists("alehinta")) {
 							and ytunnus = ''
 							and asiakas = 0
 							and valkoodi = '$laskurow[valkoodi]'
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
 							LIMIT 1";
@@ -3009,7 +3009,7 @@ if (!function_exists("alehinta")) {
 							and ytunnus = ''
 							and asiakas = 0
 							and valkoodi in ('$yhtiorow[valkoodi]','')
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
 							LIMIT 1";
@@ -3059,7 +3059,7 @@ if (!function_exists("alehinta")) {
 							and ytunnus = ''
 							and asiakas = 0
 							and valkoodi = '$laskurow[valkoodi]'
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
 							LIMIT 1";
@@ -3110,7 +3110,7 @@ if (!function_exists("alehinta")) {
 							and ytunnus = ''
 							and asiakas = 0
 							and valkoodi in ('$yhtiorow[valkoodi]','')
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC, tunnus desc
 							LIMIT 1";
@@ -3158,7 +3158,7 @@ if (!function_exists("alehinta")) {
 							and asiakas_ryhma = ''
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and (alennus < 0 or left(alennus,1) = '-'))
 
@@ -3172,7 +3172,7 @@ if (!function_exists("alehinta")) {
 							and asiakas_ryhma = ''
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and (alennus < 0 or left(alennus,1) = '-'))
 
@@ -3235,7 +3235,7 @@ if (!function_exists("alehinta")) {
 							and ryhma != ''
 							and ytunnus = ''
 							and asiakas = 0
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and (alennus < 0 or left(alennus,1) = '-')
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
@@ -3296,7 +3296,7 @@ if (!function_exists("alehinta")) {
 							and asiakas > 0
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus = 999.99)
 
@@ -3309,7 +3309,7 @@ if (!function_exists("alehinta")) {
 							and ytunnus != ''
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus = 999.99)
 
@@ -3506,7 +3506,7 @@ if (!function_exists("alehinta")) {
 						and asiakas > 0
 						and tuoteno = '$trow[tuoteno]'
 						and tuoteno != ''
-						and (minkpl <= $kpl or minkpl = 0)
+						and (minkpl <= '$kpl' or minkpl = 0)
 						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and alennus > 0
 						and alennus <= 100)
@@ -3520,7 +3520,7 @@ if (!function_exists("alehinta")) {
 						and ytunnus != ''
 						and tuoteno = '$trow[tuoteno]'
 						and tuoteno != ''
-						and (minkpl <= $kpl or minkpl = 0)
+						and (minkpl <= '$kpl' or minkpl = 0)
 						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and alennus > 0
 						and alennus <= 100)
@@ -3547,7 +3547,7 @@ if (!function_exists("alehinta")) {
 							and asiakas > 0
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus > 0
 							and alennus <= 100)
@@ -3561,7 +3561,7 @@ if (!function_exists("alehinta")) {
 							and ytunnus != ''
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus > 0
 							and alennus <= 100)
@@ -3591,7 +3591,7 @@ if (!function_exists("alehinta")) {
 							and tuoteno != ''
 							and ytunnus = ''
 							and asiakas = 0
-							and (minkpl <= $kpl or minkpl = 0)
+							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							and alennus > 0
 							and alennus <= 100
@@ -3630,7 +3630,7 @@ if (!function_exists("alehinta")) {
 								and ryhma != ''
 								and ytunnus = ''
 								and asiakas = 0
-								and (minkpl <= $kpl or minkpl = 0)
+								and (minkpl <= '$kpl' or minkpl = 0)
 								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 								and alennus > 0
 								and alennus <= 100

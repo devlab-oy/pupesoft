@@ -306,6 +306,21 @@
 			$ulos = "<td>".alv_popup($nimi,$trow[$i])."</td>";
 			$jatko = 0;
 	}
+	/*
+	if (mysql_field_name($result, $i) == "budjetti_seurantaan") {
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos .= "<option value = ''>".t("Ei seurantaa")."</option>";
+		$ulos .= "<option value = 'S' $sel[S]>".t("Seurantaan")."</option>";		
+		
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}*/
+
 
 	if (mysql_field_name($result, $i) == "suoratoimitus") {
 		$sele = "";
@@ -319,6 +334,7 @@
 			<option value='S' $sele>".t("Suoratoimitustuote")."</option>";
 		$jatko = 0;
 	}
+
 
 	if (mysql_field_name($result, $i) == "hinnastoon") {
 
@@ -624,7 +640,7 @@
 
 		foreach ($tuotteen_parametrit_split as $params) {
 			list ($key, $val) = split("=", $params);
-			$key = strtolower($key);
+			//$key = strtolower($key);
 			$tuotteen_parametrit[$key] = $val;
 		}
 		

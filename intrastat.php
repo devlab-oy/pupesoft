@@ -116,12 +116,13 @@
 		}
 
 		if ($vaintullinimike != "") {
-			$vainnimikelisa = " and tuote.tullinimike1 = '$vaintullinimike' ";
+			$vainnimikelisa  = " and tuote.tullinimike1 = '$vaintullinimike' ";
 			$vainnimikelisa2 = " tilausrivi.tunnus, ";
 			$vainnimikegroup = " ,9 ";
 		}
 		else {
-			$vainnimikelisa = "";
+			$vainnimikelisa  = "";
+			$vainnimikelisa2 = "";
 			$vainnimikegroup = "";
 		}
 

@@ -66,12 +66,12 @@
 	echo " $varaosavirhe</td>";
 	echo "<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Lis‰‰")."'></td></tr>";
 
-	if ($toim == "HAAMU" or $tuoteno == "99") {
+	if ($toim == "HAAMU" or $tuoteno == "99" or $yhtiorow["nimityksen_muutos_tilauksella"] == "Y") {
 		echo "	<tr><th align='left' colspan='7'>".t("Nimitys")."</th></tr>
 				<tr><td align='left' colspan='7'><input type = 'text' name='tuotenimitys' value='$tuotenimitys' size = '70'></td></tr>";
 
 	}
-	
+
 	echo "<tr>
 			<th align='left'>".t("Toimitusaika")."</th>";
 	
@@ -99,7 +99,6 @@
 	echo "<tr>
 			<td><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>
 			<td colspan='6'><textarea name='kommentti' cols='50'>$kommentti</textarea></td>
-		</tr>
 		</form>";
 
 	//Tyhjennet‰‰n kent‰t

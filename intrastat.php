@@ -130,14 +130,14 @@
 			$query = "	(SELECT
 						tuote.tullinimike1,
 						if(lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-						if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
-						lasku.laskunro,
-						tuote.tuoteno,
-						lasku.kauppatapahtuman_luonne,
+						if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 						lasku.kuljetusmuoto,
+						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,						
-						'Keikka' as tapa,						
+						'Keikka' as tapa,
+						max(lasku.laskunro) laskunro,
+						max(tuote.tuoteno) tuoteno,												
 						round(sum(tilausrivi.kpl),0) kpl,
 						if(round(sum(if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0) > 0.5, round(sum(if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0), 1) as paino,
 						if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
@@ -156,7 +156,7 @@
 						and lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.mapvm >= '$vva-$kka-$ppa'
 						and lasku.mapvm <= '$vvl-$kkl-$ppl'
-						GROUP BY $vainnimikegroup 1,2,3,4,5,6,7,8,9,10
+						GROUP BY $vainnimikegroup 1,2,3,4,5,6,7,8
 						HAVING $maalisa)";
 		}
 		
@@ -168,14 +168,14 @@
 			$query .= "	(SELECT
 						tuote.tullinimike1,
 						if(lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-						if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
-						lasku.laskunro,
-						tuote.tuoteno,
-						lasku.kauppatapahtuman_luonne,
+						if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 						lasku.kuljetusmuoto,
+						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,
 						'Lasku' as tapa,
+						max(lasku.laskunro) laskunro,
+						max(tuote.tuoteno) tuoteno,
 						round(sum(tilausrivi.kpl),0) kpl,						
 						if(round(sum((if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1))*lasku.bruttopaino),0) > 0.5, round(sum((if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1))*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
 						if(round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
@@ -193,7 +193,7 @@
 						and lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tapvm >= '$vva-$kka-$ppa'
 						and lasku.tapvm <= '$vvl-$kkl-$ppl'
-						GROUP BY $vainnimikegroup 1,2,3,4,5,6,7,8,9,10
+						GROUP BY $vainnimikegroup 1,2,3,4,5,6,7,8
 						HAVING $maalisa)";
 		}
 		
@@ -205,14 +205,14 @@
 			$query .= "	(SELECT
 						tuote.tullinimike1,
 						if(lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-						if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
-						lasku.tunnus laskunro,
-						tuote.tuoteno,
-						lasku.kauppatapahtuman_luonne,
+						if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 						lasku.kuljetusmuoto,
-						tullinimike.su_vientiilmo su,						
-						'Siirtolista' as tapa,						
+						lasku.kauppatapahtuman_luonne,
+						tullinimike.su_vientiilmo su,												
+						'Siirtolista' as tapa,	
+						max(lasku.tunnus) laskunro,
+						max(tuote.tuoteno) tuoteno,											
 						round(sum(tilausrivi.kpl),0) kpl,
 						if(count(tilausrivi.tunnus) = count(if(tuote.tuotemassa > 0,1,0)),if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) = 0,1,round(sum(tilausrivi.kpl*tuote.tuotemassa),0)),if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1))) paino,
 						if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
@@ -230,7 +230,7 @@
 						and lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tapvm >= '$vva-$kka-$ppa'
 						and lasku.tapvm <= '$vvl-$kkl-$ppl'
-						GROUP BY $vainnimikegroup 1,2,3,4,5,6,7,8,9,10
+						GROUP BY $vainnimikegroup 1,2,3,4,5,6,7,8
 						HAVING $maalisa)";
 		}
 		

@@ -80,7 +80,9 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 	$GLOBALS['lavametri'] = $data['lavametri'];
     
     $GLOBALS['kilotyht']  = $data['kilotyht'];
-    $GLOBALS['kollityht']  = $data['kolliyht'];
+    $GLOBALS['kollityht'] = $data['kolliyht'];
+	
+	$GLOBALS['rtunnus']   = abs($otsikkonro);
 	
 	// pistet‰‰n kaikki globaaleiksi
 	$GLOBALS = array_merge($GLOBALS, $data);
@@ -144,24 +146,23 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 		$osoitelappurow["toim_osoite"] = $asiakasrow["osoite"];
 	}
 
-		$osoitelappurow["nimi"] = $asiakasrow["nimi"];
-		$osoitelappurow["nimitark"] = $asiakasrow["nimitark"];
-		$osoitelappurow["osoite"] = $asiakasrow["osoite"];
-		$osoitelappurow["postino"] = $asiakasrow["postino"];
-		$osoitelappurow["postitp"] = $asiakasrow["postitp"];
-		$osoitelappurow["viesti"] = "";
-		$osoitelappurow["liitostunnus"] = $asiakasrow["tunnus"];
-		$osoitelappurow["toimitustapa"] = $asiakasrow["toimitustapa"];
-		$osoitelappurow["maksuehto"] = $asiakasrow["maksuehto"];
-		$osoitelappurow["yhteyshenkilo"] = $kukarow["tunnus"];
-		$osoitelappurow["sisviesti1"] = $asiakasrow["sisviesti1"];
+	$osoitelappurow["nimi"] = $asiakasrow["nimi"];
+	$osoitelappurow["nimitark"] = $asiakasrow["nimitark"];
+	$osoitelappurow["osoite"] = $asiakasrow["osoite"];
+	$osoitelappurow["postino"] = $asiakasrow["postino"];
+	$osoitelappurow["postitp"] = $asiakasrow["postitp"];
+	$osoitelappurow["viesti"] = "";
+	$osoitelappurow["liitostunnus"] = $asiakasrow["tunnus"];
+	$osoitelappurow["toimitustapa"] = $asiakasrow["toimitustapa"];
+	$osoitelappurow["maksuehto"] = $asiakasrow["maksuehto"];
+	$osoitelappurow["yhteyshenkilo"] = $kukarow["tunnus"];
+	$osoitelappurow["sisviesti1"] = $asiakasrow["sisviesti1"];
 
 	$query  = "SELECT * FROM toimitustapa WHERE yhtio='{$GLOBALS['kukarow']['yhtio']}' AND selite='$toimitustapa' ORDER BY jarjestys,selite";
 	$result = mysql_query($query) or pupe_error($query);
-	
 	$toitarow = mysql_fetch_array($result);
 
-	include "tilauskasittely/{$toitarow['rahtikirja']}";
+	include ("tilauskasittely/{$toitarow['rahtikirja']}");
 		
 	//haetaan osoitelapun tulostuskomento
 	$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$valittu_oslapp_tulostin'";
@@ -466,7 +467,6 @@ function pupe_rahtikirja_insert($data)
 function pupe_rahtikirja_fetch($otsikkonro)
 {
     $query = sprintf("SELECT * from rahtikirjat where otsikkonro=%d", (int) $otsikkonro);
-    
     $result = mysql_query($query);
     
 	$data = array(

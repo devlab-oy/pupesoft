@@ -153,6 +153,7 @@
 		$sarakkeet["SARAKE4D"] 	= t("luontiaika")."\t";
 		$sarakkeet["SARAKE5"] 	= t("saldo")."\t";
 		$sarakkeet["SARAKE6"] 	= t("halytysraja")."\t";
+		$sarakkeet["SARAKE6B"] 	= t("tilausmaara")."\t";
 		$sarakkeet["SARAKE7"] 	= t("tilauksessa")."\t";
 		$sarakkeet["SARAKE8"] 	= t("ennpois")."\t";
 		$sarakkeet["SARAKE9"] 	= t("jt")."\t";
@@ -182,6 +183,7 @@
 		$sarakkeet["SARAKE12"] 	= t("ostettava $ehd_kausi_o3 kk")."\t";
                                	
 		$sarakkeet["SARAKE13"] 	= t("ostettava haly")."\t";
+		$sarakkeet["SARAKE13B"] = t("ostettava tilausmaara")."\t";
 		$sarakkeet["SARAKE14"] 	= t("osto_era")."\t";
 		$sarakkeet["SARAKE15"] 	= t("myynti_era")."\t";
 		$sarakkeet["SARAKE16"] 	= t("toimittaja")."\t";
@@ -575,6 +577,7 @@
 							tuote.yhtio,
 							tuote.tuoteno,
 							tuote.halytysraja,
+							tuote.tilausmaara,
 							tuote.tahtituote,
 							tuote.status,
 							tuote.nimitys,
@@ -616,6 +619,7 @@
 							tuote.yhtio,
 							tuote.tuoteno,
 							tuotepaikat.halytysraja,
+							tuote.tilausmaara,
 							tuote.tahtituote,
 							tuote.status,
 							tuote.nimitys,
@@ -988,6 +992,13 @@
 				$ostettava4kk  = ((($laskurow[$indeksi] + $kulutrow[$indeksi]) / $ero * $ehd_kausi3) - ($saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
 
 				$ostettavahaly = ($row['halytysraja'] - ($saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
+								
+				if ($ostettavahaly > 0 and $row['tilausmaara'] > 0) {
+					$ostettavahalytilausmaara = ceil($ostettavahaly/$row['tilausmaara']) * $row['tilausmaara'];
+				}
+				else {
+					$ostettavahalytilausmaara = 0;
+				}				
 
 				// jos tuotteella on joku ostoerä pyöristellään ylospäin, että tilataan aina toimittajan haluama määrä
 				if ($ostettava1kk > 0)	$ostettava1kk = ceil($ostettava1kk) * $row['osto_era'];
@@ -1174,7 +1185,16 @@
 							$excelsarake++;
 						}
 					}
-			
+					
+					if($valitut["SARAKE6B"] != '') { 
+						$rivi .= str_replace(".",",",$row['tilausmaara'])."\t";
+				
+						if(isset($workbook)) {
+							$worksheet->writeNumber($excelrivi, $excelsarake, $row["tilausmaara"]);
+							$excelsarake++;
+						}
+					}
+								
 					if($valitut["SARAKE7"] != '') { 
 						$rivi .= str_replace(".",",",$ennp['tilattu'])."\t";
 				
@@ -1234,6 +1254,15 @@
 				
 						if(isset($workbook)) {
 							$worksheet->writeNumber($excelrivi, $excelsarake, $ostettavahaly);
+							$excelsarake++;
+						}
+					}
+					
+					if($valitut["SARAKE13B"] != '') { 
+						$rivi .= "$ostettavahalytilausmaara\t";
+				
+						if(isset($workbook)) {
+							$worksheet->writeNumber($excelrivi, $excelsarake, $ostettavahalytilausmaara);
 							$excelsarake++;
 						}
 					}

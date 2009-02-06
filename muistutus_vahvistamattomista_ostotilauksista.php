@@ -45,6 +45,7 @@
 					AND tilausrivi.toimitettu = ''
 					AND tilausrivi.tyyppi = 'O'
 					AND tilausrivi.kpl = 0
+					and tilausrivi.varattu != 0
 					AND tilausrivi.jaksotettu = 0
 					AND lasku.lahetepvm < SUBDATE(CURDATE(), INTERVAL 5 DAY)
 					AND kuka.eposti != ''

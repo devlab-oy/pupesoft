@@ -150,11 +150,12 @@
 	$result   = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($result);
 	
-	if ($kukarow["kuka"] != "" and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "T" or $laskurow["tila"] == "A" or $laskurow["tila"] == "S")) {
+	if ($kukarow["kuka"] != "" and $toim_kutsu == "RIVISYOTTO" and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "T" or $laskurow["tila"] == "A" or $laskurow["tila"] == "S")) {
 		
 		if ($kukarow["extranet"] != "") {
 			$toim_kutsu = "EXTRANET";
 		}
+		
 
 		echo "	<form method='post' action='tilauskasittely/tilaus_myynti.php'>
 				<input type='hidden' name='toim' value='$toim_kutsu'>

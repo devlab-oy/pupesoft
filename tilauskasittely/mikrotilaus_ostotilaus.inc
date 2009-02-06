@@ -7,30 +7,70 @@ if ($tee == "file") {
 
 		list($name,$ext) = split("\.", $_FILES['userfile']['name']);
 
-		if (!(strtoupper($ext) == "TXT" || strtoupper($ext) == "CSV")) {
-			die ("<font class='error'><br>".t("Ainoastaa .txt tai .csv tiedostot sallittuja")."!</font>");
+		if (strtoupper($ext) !="TXT" and strtoupper($ext)!="XLS" and strtoupper($ext)!="CSV") {
+			die ("<font class='error'><br>".t("Ainoastaan .xls, .txt ja .cvs tiedostot sallittuja")."!</font>");
 		}
 
 		if ($_FILES['userfile']['size']==0) {
 			die ("<font class='error'><br>".t("Tiedosto oli tyhj‰")."!</font>");
 		}
+		
+		if (strtoupper($ext)=="XLS") {
+			require_once ('excel_reader/reader.php');
 
-		$file=fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+			// ExcelFile
+			$data = new Spreadsheet_Excel_Reader();
 
-		// luetaan tiedosto alusta loppuun...
-		$rivi = fgets($file, 4096);
+			// Set output Encoding.
+			$data->setOutputEncoding('CP1251');
+			$data->setRowColOffset(0);
+			$data->read($_FILES['userfile']['tmp_name']);
+		}
+		else {
+			$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+		}
+		
+		
+		// luetaan tiedosto loppuun ja tehd‰‰n array koko datasta
+		$excelrivi[][] = array();
 
-		while (!feof($file)) {
+		if (strtoupper($ext) == "XLS") {
+			for ($excei = 0; $excei < $data->sheets[0]['numRows']; $excei++) {
+				for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
+					$excelrivi[$excei-1][$excej] = $data->sheets[0]['cells'][$excei][$excej];
+				}
+			}
+		}
+		else {
+			$rivi = fgets($file);
+
+			$excei = 0;
+
+			while (!feof($file)) {
+				// luetaan rivi tiedostosta..
+				$poista	 = array("'", "\\");
+				$rivi	 = str_replace($poista,"",$rivi);
+				$rivi	 = explode("\t", trim($rivi));
+
+				$excej = 0;
+				foreach ($rivi as $riv) {
+					$excelrivi[$excei][$excej] = $riv;
+					$excej++;
+				}
+				$excei++;
+
+				// luetaan seuraava rivi failista
+				$rivi = fgets($file);
+			}
+			fclose($file);
+		}
+
+		foreach ($excelrivi as $rivi) {
 
 			$tila			= '';
 			$valinta		= '';
 			$varaosavirhe 	= '';
 			$tuoteerror 	= 0;
-
-			// luetaan rivi tiedostosta..
-			$poista	  	= array("\"", "'", "\\");
-			$rivi	  	= str_replace($poista,"",$rivi);
-			$rivi	  	= explode("\t", trim($rivi));
 
 			$tuoteno	= trim($rivi[0]);
 			$kpl  		= (float) str_replace(",", ".", $rivi[1]);
@@ -98,10 +138,7 @@ if ($tee == "file") {
 			$kommentti	= '';
 			$rivitunnus = '';
 
-			$rivi = fgets($file, 4096);
-		} // end while eof
-
-		fclose($file);
+		}
 
 		echo "<br><br>";
 		$tee = "Y";

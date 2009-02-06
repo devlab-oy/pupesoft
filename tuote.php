@@ -145,6 +145,26 @@
 		echo "</td>";
 		echo "</form>";
 	}
+	
+	$query    = "SELECT * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
+	$result   = mysql_query($query) or pupe_error($query);
+	$laskurow = mysql_fetch_array($result);
+	
+	if ($kukarow["kuka"] != "" and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "T" or $laskurow["tila"] == "A" or $laskurow["tila"] == "S")) {
+		
+		if ($kukarow["extranet"] != "") {
+			$toim_kutsu = "EXTRANET";
+		}
+
+		echo "	<form method='post' action='tilauskasittely/tilaus_myynti.php'>
+				<input type='hidden' name='toim' value='$toim_kutsu'>
+				<input type='hidden' name='aktivoinnista' value='true'>
+				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
+				<td class='back'>
+				<input type='submit' value='".t("Takaisin tilaukselle")."'>
+				</td>
+				</form><br><br>";
+	}
 	echo "</tr></table><br>";
 
 

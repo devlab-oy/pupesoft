@@ -3883,7 +3883,7 @@ if ($tee == '') {
 				}
 
 				if($kukarow['extranet'] == '') {
-					echo "<td $class valign='top'><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a>";
+					echo "<td $class valign='top'><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]&toim_kutsu=$toim'>$row[tuoteno]</a>";
 				}
 				else {
 

@@ -893,7 +893,7 @@
 						echo "<li>".t("Keskihinta").": $prow[keskihinta] $prow[valuutta]</li><li>".t("Ostohinta").": $prow[ostohinta] $prow[valuutta]</li>";
 						echo "</ul>";
 						echo "</div>";
-						echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]' onmouseout=\"popUp(event,'$prow[tunnus]')\" onmouseover=\"popUp(event,'$prow[tunnus]')\">$prow[tuoteno]</a>";
+						echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]&toim_kutsu=RIVISYOTTO&tultiin=OSTO' onmouseout=\"popUp(event,'$prow[tunnus]')\" onmouseover=\"popUp(event,'$prow[tunnus]')\">$prow[tuoteno]</a>";
 					}
 					else {
 						echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a>";

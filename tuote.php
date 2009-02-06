@@ -146,21 +146,37 @@
 		echo "</form>";
 	}
 	
+	//Paluu nappi osto/myyntitilaukselle
 	$query    = "SELECT * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 	$result   = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($result);
 	
-	if ($kukarow["kuka"] != "" and $toim_kutsu == "RIVISYOTTO" and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "T" or $laskurow["tila"] == "A" or $laskurow["tila"] == "S")) {
+	if ($kukarow["kuka"] != "" and $toim_kutsu == "RIVISYOTTO" and $tultiin != "" and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "T" or $laskurow["tila"] == "A" or $laskurow["tila"] == "S" or $laskurow["tila"] == "O")) {
 		
 		if ($kukarow["extranet"] != "") {
 			$toim_kutsu = "EXTRANET";
 		}
 		
+		if ($tultiin == "OSTO") {
+			$minne = "tilaus_osto.php";
+			$toim_kutsu = "";
+		}
+		else {
+			$minne = "tilaus_myynti.php";
+		}
 
-		echo "	<form method='post' action='tilauskasittely/tilaus_myynti.php'>
-				<input type='hidden' name='toim' value='$toim_kutsu'>
-				<input type='hidden' name='aktivoinnista' value='true'>
-				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
+		echo "	<form method='post' action='tilauskasittely/$minne'>
+				<input type='hidden' name='toim' value='$toim_kutsu'>";
+				
+				if ($tultiin == "OSTO") {
+					echo "<input type='hidden' name='tee' value='AKTIVOI'>";
+				}
+				else {
+					echo "<input type='hidden' name='aktivoinnista' value='true'>";
+				}
+				
+		
+		echo "	<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
 				<td class='back'>
 				<input type='submit' value='".t("Takaisin tilaukselle")."'>
 				</td>

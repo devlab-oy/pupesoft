@@ -1071,7 +1071,7 @@
 			$page[$sivu] = alku();
 
 			while ($row = mysql_fetch_array($result)) {
-				if ($row["tuoteno"] == "99" and $row["rivinimitys"] != "") {
+				if (($row["tuoteno"] == "99" or $yhtiorow["nimityksen_muutos_tilauksella"] == "Y") and $row["rivinimitys"] != "" ) {
 					$row["nimitys"] = $row["rivinimitys"];
 				}
 				

@@ -384,7 +384,7 @@ if (!function_exists('finvoice_lasku_loppu')) {
 				xml_add("EpiBei",                         									ymuuta($yhtiorow['ytunnus']),		$tootfinvoice);
 			}
 
-			xml_add("EpiAccountID IdentificationSchemeName=\"BBAN\"",						$pankkitiedot["pankkiiban1"],		$tootfinvoice);
+			xml_add("EpiAccountID IdentificationSchemeName=\"IBAN\"",						$pankkitiedot["pankkiiban1"],		$tootfinvoice);
 			fputs($tootfinvoice, "</EpiBeneficiaryPartyDetails>\r\n");
 
 			fputs($tootfinvoice, "</EpiPartyDetails>\r\n");

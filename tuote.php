@@ -101,11 +101,48 @@
 	 //syotetaan tuotenumero
 	$formi  = 'formi';
 	$kentta = 'tuoteno';
+	
+	
+	//Paluu nappi osto/myyntitilaukselle
+	$query    = "SELECT * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
+	$result   = mysql_query($query) or pupe_error($query);
+	$laskurow = mysql_fetch_array($result);
+	
+	if ($kukarow["kuka"] != "" and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "T" or $laskurow["tila"] == "A" or $laskurow["tila"] == "S" or $laskurow["tila"] == "O")) {
+		
+		if ($kukarow["extranet"] != "") {
+			$toim_kutsu = "EXTRANET";
+		}
+		
+		if ($laskurow['tila'] == "O") {
+			$minne = "tilaus_osto.php";
+			$toim_kutsu = "";
+		}
+		else {
+			$minne = "tilaus_myynti.php";
+		}
 
+		echo "	<table><form method='post' action='tilauskasittely/$minne'>
+				<input type='hidden' name='toim' value='$toim_kutsu'>";
+				
+				if ($laskurow['tila'] == "O") {
+					echo "<input type='hidden' name='tee' value='AKTIVOI'>";
+				}
+				else {
+					echo "<input type='hidden' name='aktivoinnista' value='true'>";
+				}
+				
+		
+		echo "	<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
+				<tr><td class='back'>
+				<input type='submit' value='".t("Takaisin tilaukselle")."'>
+				</td></tr>
+				</form></table>";
+	}
+	
 	echo "<table><tr>";
 	echo "<form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
-	echo "<input type='hidden' name='tultiin' value='$tultiin'>";
 	echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 	echo "<td class='back'><select name='tyyppi'>";
 	echo "<option value=''>".t("Tuotenumero").":</option>";
@@ -132,7 +169,6 @@
 		echo "<input type='hidden' name='tee' value='E'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
-		echo "<input type='hidden' name='tultiin' value='$tultiin'>";
 		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 		echo "<td class='back'>";
 		echo "<input type='Submit' value='".t("Edellinen")."'>";
@@ -143,50 +179,13 @@
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tee' value='N'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
-		echo "<input type='hidden' name='tultiin' value='$tultiin'>";
 		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 		echo "<td class='back'>";
 		echo "<input type='Submit' value='".t("Seuraava")."'>";
 		echo "</td>";
 		echo "</form>";
-	}
+	}	
 	
-	//Paluu nappi osto/myyntitilaukselle
-	$query    = "SELECT * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
-	$result   = mysql_query($query) or pupe_error($query);
-	$laskurow = mysql_fetch_array($result);
-	
-	if ($kukarow["kuka"] != "" and $toim_kutsu == "RIVISYOTTO" and $tultiin != "" and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "T" or $laskurow["tila"] == "A" or $laskurow["tila"] == "S" or $laskurow["tila"] == "O")) {
-		
-		if ($kukarow["extranet"] != "") {
-			$toim_kutsu = "EXTRANET";
-		}
-		
-		if ($tultiin == "OSTO") {
-			$minne = "tilaus_osto.php";
-			$toim_kutsu = "";
-		}
-		else {
-			$minne = "tilaus_myynti.php";
-		}
-
-		echo "	<form method='post' action='tilauskasittely/$minne'>
-				<input type='hidden' name='toim' value='$toim_kutsu'>";
-				
-				if ($tultiin == "OSTO") {
-					echo "<input type='hidden' name='tee' value='AKTIVOI'>";
-				}
-				else {
-					echo "<input type='hidden' name='aktivoinnista' value='true'>";
-				}
-				
-		
-		echo "	<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
-				<td class='back'>
-				<input type='submit' value='".t("Takaisin tilaukselle")."'>
-				</td>
-				</form><br><br>";
-	}
 	echo "</tr></table><br>";
 
 
@@ -851,6 +850,7 @@
 					<input type='hidden' name='tee' value='Z'>
 					<input type='hidden' name='historia' value='$historia'>
 					<input type='hidden' name='tapahtumalaji' value='$tapahtumalaji'>
+					<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>
 					<font class='message'>".t("Raportointi")."</font><a href='#' name='Raportit'></a>
 					<input type='radio' onclick='submit()' name='raportti' value='MYYNTI' $sele[M]> ".t("Myynnistä")."
 					<input type='radio' onclick='submit()' name='raportti' value='KULUTUS' $sele[K]> ".t("Kulutuksesta")."

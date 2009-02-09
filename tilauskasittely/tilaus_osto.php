@@ -894,7 +894,7 @@
 						echo "</ul>";
 						echo "</div>";
 						if ($toim != "HAAMU") {
-							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]&toim_kutsu=RIVISYOTTO&tultiin=OSTO' onmouseout=\"popUp(event,'$prow[tunnus]')\" onmouseover=\"popUp(event,'$prow[tunnus]')\">$prow[tuoteno]</a>";
+							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]&toim_kutsu=RIVISYOTTO' onmouseout=\"popUp(event,'$prow[tunnus]')\" onmouseover=\"popUp(event,'$prow[tunnus]')\">$prow[tuoteno]</a>";
 						}
 						else {
 							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]' onmouseout=\"popUp(event,'$prow[tunnus]')\" onmouseover=\"popUp(event,'$prow[tunnus]')\">$prow[tuoteno]</a>";
@@ -903,7 +903,7 @@
 					}
 					else {
 						if ($toim != "HAAMU") {
-							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]&toim_kutsu=RIVISYOTTO&tultiin=OSTO'>$prow[tuoteno]</a>";
+							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]&toim_kutsu=RIVISYOTTO'>$prow[tuoteno]</a>";
 						}
 						else {
 							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a>";

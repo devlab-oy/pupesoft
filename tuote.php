@@ -102,10 +102,11 @@
 	$formi  = 'formi';
 	$kentta = 'tuoteno';
 
-	echo "<table><tr>";;
+	echo "<table><tr>";
 	echo "<form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
-
+	echo "<input type='hidden' name='tultiin' value='$tultiin'>";
+	echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 	echo "<td class='back'><select name='tyyppi'>";
 	echo "<option value=''>".t("Tuotenumero").":</option>";
 	echo "<option value='TOIMTUOTENO'>".t("Toimittajan tuotenumero").":</option>";
@@ -131,6 +132,8 @@
 		echo "<input type='hidden' name='tee' value='E'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+		echo "<input type='hidden' name='tultiin' value='$tultiin'>";
+		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 		echo "<td class='back'>";
 		echo "<input type='Submit' value='".t("Edellinen")."'>";
 		echo "</td>";
@@ -140,6 +143,8 @@
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tee' value='N'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+		echo "<input type='hidden' name='tultiin' value='$tultiin'>";
+		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 		echo "<td class='back'>";
 		echo "<input type='Submit' value='".t("Seuraava")."'>";
 		echo "</td>";

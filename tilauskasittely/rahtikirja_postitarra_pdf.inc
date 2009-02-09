@@ -55,8 +55,15 @@
 	if (strpos($toitarow['selite'], "14") !== FALSE) $keku = "14";
 	if (strpos($toitarow['selite'], "21") !== FALSE) $keku = "21";
 
-	$keltainen = "Keltainen";
-	$kuljetus  = "Kuljetus";
+	
+	if ($toitarow['kuljyksikko']!='') {
+		$keltainen = "Kuljetus-";
+		$kuljetus  = "yksikkö";
+	}
+	else {
+		$keltainen = "Keltainen";
+		$kuljetus  = "Kuljetus";	
+	}
 
 	if ($keku=="00") {
 		$keltainen = "";

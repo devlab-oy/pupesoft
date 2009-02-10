@@ -479,7 +479,7 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 			$tuotteet_str 		= "'".$tuoteno."',";
 		}
 		else {
-			$tuotteet_str 		= "";
+			$tuotteet_str 		= "'',";
 		}
 
 		$riikoko 		= 1;
@@ -505,7 +505,8 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 					and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 					$valinta1
 					WHERE tuote.yhtio = '$yhtio'
-					and tuote.tuoteno in ($tuotteet_str)
+					and tuote.tuoteno IN ($tuotteet_str)
+					and tuote.tuoteno != ''
 					$valinta3
 					ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys";
 		$varresult = mysql_query($query) or pupe_error($query);

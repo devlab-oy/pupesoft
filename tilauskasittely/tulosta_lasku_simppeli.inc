@@ -1014,8 +1014,17 @@ if (!function_exists('tulosta_lasku')) {
 			$liite = $pdf_laskufilenimi;
 			$kutsu = ucfirst(strtolower($otsikko))." $laskurow[laskunro]";
 			
-			echo t(ucfirst(strtolower($otsikko))." l‰hetet‰‰n osoitteeseen $kukarow[eposti]")."...<br>";
-
+			if(substr($komento,0,12) == 'asiakasemail') {
+				echo t(ucfirst(strtolower($otsikko))." l‰hetet‰‰n osoitteeseen %s", $kieli, substr($komento,12))."...<br>";
+			}
+			else {
+				echo t(ucfirst(strtolower($otsikko))." l‰hetet‰‰n osoitteeseen %s", $kieli, $kukarow["eposti"])."...<br>";
+			}
+			
+			if($sahkoposti_cc != "") {
+				echo t("Kopio l‰hetet‰‰n osoitteeseen %s", $kieli, $sahkoposti_cc)."...<br>";
+			}
+			
 			if ($kukarow["extranet"] == '') {
 				require("../inc/sahkoposti.inc");
 			}

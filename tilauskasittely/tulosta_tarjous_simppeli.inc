@@ -93,6 +93,17 @@ if (!function_exists('tulosta_tarjous')) {
 						$pdf->placeImageToTemplate($h,0,$yhtiorow["lasku_logo"], $tid, "57x100");
 					}
 
+					if( (int) $yhtiorow["lasku_logo2"] > 0) {
+						$liite = hae_liite($yhtiorow["lasku_logo2"], "Yllapito", "array");
+						$data = $liite["data"];
+						$pdf->placeImageToTemplate($h,200,$liite, $tid, "47x85");
+
+						unset($liite);
+					}
+					elseif(file_exists($yhtiorow["lasku_logo2"])) {
+						$pdf->placeImageToTemplate($h,0,$yhtiorow["lasku_logo2"], $tid, "57x100");
+					}
+
 					//	Kirjoitetaan otsikko
 					$pdf->writeToTemplate($h, 1, 0, 0, t("TARJOUS", $kieli)." ".$laskurow["tarjous"], "BIG", "C", "B", $tid);
 
@@ -180,10 +191,10 @@ if (!function_exists('tulosta_tarjous')) {
 				$ennakkolisa";
 		$grand_total=0;
 		if($alenaytetaan == "OK") {
-			$s=$pdf->teeSarakkeet(array(75,30,13,20,20));
+			$s=$pdf->teeSarakkeet(array(70,30,13,20,20));
 		}
 		else {
-			$s=$pdf->teeSarakkeet(array(75,30,30,20));
+			$s=$pdf->teeSarakkeet(array(70,30,30,20));
 			
 		}
 		
@@ -226,7 +237,12 @@ if (!function_exists('tulosta_tarjous')) {
 
 			//	Ylläpitoa ei haluta mukaan grand totaliin
 			if(($key == "Ylläpito" or $key == "Leasing") and $yhteensalaitettu == "") {
-				$pdf->write($h, 1, $s[1], $s[3], t("Tarjous yhteensä alv 0%",$kieli).": ", "norm", "R", "B");
+				if($alenaytetaan == "OK") {
+					$pdf->write($h, 1, $s[1], $s[4], t("Tarjous yhteensä alv 0%",$kieli).": ", "norm", "R", "B");
+				}
+				else {
+					$pdf->write($h, 1, $s[1], $s[3], t("Tarjous yhteensä alv 0%",$kieli).": ", "norm", "R", "B");
+				}	
 				$pdf->write($h, 1, $s[3], 0, money_format('%i',$grand_total), "norm", "R", "B");
 				$h-=$pdf->ln(2);
 				$yhteensalaitettu = 1;
@@ -537,7 +553,7 @@ if (!function_exists('tulosta_tarjous')) {
 		}
 		
 		foreach($pages as $key => $value) {
-			$pdf->write(270, 2, 0, 0, ($key+1)."/".count($pages), "snadi", "R", "I", $value);
+			$pdf->write(280, 2, 0, 0, ($key+1)."/".count($pages), "snadi", "R", "I", $value);
 		}
 
 		if(file_exists($kukarow["yhtio"]."_tarjous_liitte.pdf")) {

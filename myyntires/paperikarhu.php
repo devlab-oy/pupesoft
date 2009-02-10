@@ -177,7 +177,7 @@
 				$pdf->draw_text(330, 721, tv1dateconv($seuryear."-".$seurmonth."-".$seurday), $firstpage, $norm);
 			}
 			else {
-				$pdf->draw_text(330, 721, t("HETI"), $firstpage, $norm);
+				$pdf->draw_text(330, 721, t("HETI", $kieli), $firstpage, $norm);
 			}
 
 			$pdf->draw_text(430, 731, t("Puhelin", $kieli), $firstpage, $pieni);

@@ -1,70 +1,78 @@
 <?php
 
+	function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
+		global $kukarow, $yhtiorow,$_FILES;
+	
+		// testausta varten staattinen
+		//$dirri = "kuvapankki";
+		$dirri = $yhtiorow['kuvapankki_polku'];
+		$dirri .= "/".$kukarow['yhtio'];
+	
+	
+		list($usec, $sec) = explode(" ",microtime());
 
-function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
-	global $kukarow, $yhtiorow,$_FILES;
+		$nimi      = $usec+$sec; // uniikki nimi
+		$resize    = ""; // resize komento
+		$crop      = ""; // crop komento
+		$upfileall = ""; // palautus
 	
-	// testausta varten staattinen
-	//$dirri = "kuvapankki";
-	$dirri = $yhtiorow['kuvapankki_polku'];
-	$dirri .= "/".$kukarow['yhtio'];
+		$filetsu = $_FILES[$upfile1];
 	
-	
-	list($usec, $sec) = explode(" ",microtime());
+		$path_parts = pathinfo($filetsu["name"]);
+		$ext = strtolower($path_parts['extension']);	
+		
+		$image = getimagesize($filetsu["tmp_name"],$imageinfo);	// l‰hetetty kuva
+		
+		$leve = $image[0];       
 
-	$nimi      = $usec+$sec; // uniikki nimi
-	$resize    = ""; // resize komento
-	$crop      = ""; // crop komento
-	$upfileall = ""; // palautus
+		$kork = $image[1];
 	
-	$filetsu = $_FILES[$upfile1];
-	
-	$path_parts = pathinfo($filetsu["name"]);
-	$ext = strtolower($path_parts['extension']);	
+		// eih‰n molemmat (y ja x) ole nollia?!
+		if ($ykoko > 0 or $xkoko > 0) {
+			/* skaaltaanko x:n vai y:n mukaan, jos xkoko tai ykoko == 0, skaalataan != 0 mukaan */	
+			if ($ykoko > 0 and $kork > $ykoko) {	
+				$upfilesgh = strtolower("/tmp/$nimi"."1.".$ext);
+				
+				// skaalataan kuva oikenakokoiseksi y:n mukaan
+		    	exec("nice -n 20 convert -resize x$ykoko -quality 80 $filetsu[tmp_name] $upfilesgh", $output);
+		    }
 		
-	$image = getimagesize($filetsu["tmp_name"],$imageinfo);	// l‰hetetty kuva
+			if ($xkoko > 0 and $leve > $xkoko) {	
+				$upfilesgh = strtolower("/tmp/$nimi"."1.".$ext);
+				
+				// skaalataan kuva oikenakokoiseksi x:n mukaan
+		  		exec("nice -n 20 convert -resize $xkoko -quality 80 $filetsu[tmp_name] $upfilesgh", $output);
+		    }
+				
+			$uusnimi = $dirri."/".$taulu."/".$type."/".$filetsu["name"];
 		
-	$leve = $image[0];       
+			if (!copy($upfilesgh,$uusnimi)) {
+		    	echo "Kopiointi ep‰onnistui $upfilesgh -> $uusnimi<br>";
+				$upfileall = "";
+			}
+			else {
+				$upfileall = "$uusnimi";
+			}
+		
+			$a = getimagesize($uusnimi);
 
-	$kork = $image[1];
-		
-	if ($kork > $ykoko) {
-		// teh‰‰n pienent‰m‰ll‰
-		$upfilesgh = strtolower("/tmp/$nimi"."1.".$ext);
+			$file["name"] 		= basename($uusnimi);
+			$file["type"] 		= $a["mime"];
+			$file["tmp_name"] 	= $uusnimi;
+			$file["error"] 		= 0;
+			$file["size"] 		= filesize($uusnimi);
+
+			$_FILES[$upfile1] = $file;
 	
-    	// skaalataan kuva oikenakokoiseksi
-	    exec("nice -n 20 convert -resize x$ykoko -quality 80 $filetsu[tmp_name] $upfilesgh");
-		$uusnimi = $dirri."/".$taulu."/".$type."/".$filetsu["name"];
-		
-		if (!copy($upfilesgh,$uusnimi)) {
-	    	echo "Kopiointi ep‰onnistui $upfile1<br>";
-			$upfileall = "";
+			// poistetaan file
+			system("rm -f $upfilesgh");
 		}
 		else {
-			$upfileall .= "$uusnimi";
+			$upfileall = "";
 		}
-		
-		$a = getimagesize($uusnimi);
-
-		$file["name"] 		= basename($uusnimi);
-		$file["type"] 		= $a["mime"];
-		$file["tmp_name"] 	= $uusnimi;
-		$file["error"] 		= 0;
-		$file["size"] 		= filesize($uusnimi);
-
-		$_FILES[$upfile1] = $file;
 	
-		// poistetaan file
-		system("rm -f $upfilesgh");
-	
-		
+		return $upfileall;
 	}
-	else {
-		$upfileall = "";
-	}
-	
-	return $upfileall;
-}
 
 
 	echo "<font class='head'>".t("Liitetiedostot")."</font><hr>";

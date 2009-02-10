@@ -115,6 +115,9 @@ if (!function_exists('alku')) {
 		if ($tyyppi == "TILAUSVAHVISTUS") {
 			$kerarow["kerattyaika"] = date("Y-m-d");
 		}
+		elseif ($tyyppi == "YLLAPITOSOPIMUS") {
+			$kerarow["kerattyaika"] = date("Y-m-d");
+		}
 		else {
 			// haetaan max(kerattyaika)
 			$query  = "SELECT max(kerattyaika) as kerattyaika from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
@@ -128,6 +131,9 @@ if (!function_exists('alku')) {
 
 		if ($tyyppi == "TILAUSVAHVISTUS") {
 			$pdf->draw_text(310,815, t("Tilausvahvistus", $kieli), 		$thispage, $iso);
+		}
+		elseif ($tyyppi == "YLLAPITOSOPIMUS") {
+			$pdf->draw_text(310,815, t("Ylläpitosopimus", $kieli), 		$thispage, $iso);
 		}
 		elseif ($tyyppi == "SIIRTOLISTA") {
 			$pdf->draw_text(310,815, t("Lähete/Siirtolista", $kieli), 	$thispage, $iso);
@@ -163,6 +169,10 @@ if (!function_exists('alku')) {
 
 		if($laskurow["tunnusnippu"] > 0) {
 			if($tyyppi == "TILAUSVAHVISTUS") {
+				$pdf->draw_text(310, 792, t("Tilausnumero", $kieli), 	$thispage, $pieni);
+				$pdf->draw_text(310, 782, $laskurow["tunnusnippu"],			$thispage, $boldi);
+			}
+			elseif($tyyppi == "YLLAPITOSOPIMUS") {
 				$pdf->draw_text(310, 792, t("Tilausnumero", $kieli), 	$thispage, $pieni);
 				$pdf->draw_text(310, 782, $laskurow["tunnusnippu"],			$thispage, $boldi);
 			}
@@ -455,6 +465,9 @@ if (!function_exists('uusi_sivu')) {
 		if ($tyyppi == "TILAUSVAHVISTUS") {
 			$kerarow["kerattyaika"] = date("Y-m-d");
 		}
+		elseif ($tyyppi == "YLLAPITOSOPIMUS") {
+			$kerarow["kerattyaika"] = "";
+		}
 		else {
 			// haetaan max(kerattyaika)
 			$query  = "SELECT max(kerattyaika) as kerattyaika from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
@@ -468,6 +481,9 @@ if (!function_exists('uusi_sivu')) {
 
 		if ($tyyppi == "TILAUSVAHVISTUS") {
 			$pdf->draw_text(310,815, t("Tilausvahvistus", $kieli), 		$thispage, $iso);
+		}
+		elseif ($tyyppi == "YLLAPITOSOPIMUS") {
+			$pdf->draw_text(310,815, t("Ylläpitosopimus", $kieli), 		$thispage, $iso);
 		}
 		elseif ($tyyppi == "SIIRTOLISTA") {
 			$pdf->draw_text(310,815, t("Lähete/Siirtolista", $kieli), 	$thispage, $iso);
@@ -1550,6 +1566,10 @@ if (!function_exists('print_pdf')) {
 			if ($tyyppi == "TILAUSVAHVISTUS") {
 				$kutsu = "Tilausvahvistus";
 				echo t("Tilausvahvistus tulostuu")."...<br>";
+			}
+			elseif ($tyyppi == "YLLAPITOSOPIMUS") {
+				$kutsu = "Ylläpitosopimus";
+				echo t("Ylläpitosopimus tulostuu")."...<br>";
 			}
 			else {
 				$kutsu = "Lahete";

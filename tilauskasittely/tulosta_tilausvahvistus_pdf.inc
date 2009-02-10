@@ -5,10 +5,10 @@
 
 		if (!function_exists('tulosta_tilausvahvistus')) {
 			function tulosta_tilausvahvistus ($otunnus, $komento, $kieli = "", $tee = "") {
-				global $yhtiorow, $kukarow, $fonts, $h, $tilausvahvistus_tallenna;
+				global $yhtiorow, $kukarow, $fonts, $h, $tilausvahvistus_tallenna, $toim;
 
 				// Haetaan laskun tiedot
-				$query = "	SELECT lasku.*, laskun_lisatiedot.*, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.luontiaika p‰iv‰ys, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, lasku.tunnus toimitus, viesti asiakkaan_viite, sisviesti1 lis‰tiedot, lasku.ytunnus asiakkaan_VAT,
+				$query = "  SELECT lasku.*, laskun_lisatiedot.*, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.luontiaika p‰iv‰ys, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, lasku.tunnus toimitus, viesti asiakkaan_viite, sisviesti1 lis‰tiedot, lasku.ytunnus asiakkaan_VAT,
 							concat_ws(' ', postino, postitp) postiosoite,
 							concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
 							concat_ws(' ', laskutus_postino, laskutus_postitp) laskutus_postiosoite,
@@ -44,42 +44,42 @@
 					$kieli = strtolower($kielrow['kieli']);
 				}
 
-				//	Aloituskorkeus
+				//  Aloituskorkeus
 				if (!function_exists('alku')) {
 					function alku ($pdf, $laskurow, $kieli, $riviotsikot="") {
-						global $yhtiorow, $kukarow, $fonts, $tid, $h;
+						global $yhtiorow, $kukarow, $fonts, $tid, $h, $toim;
 
 						if(!is_object($pdf)) {
-							//	Aloitellaan piirtely‰
+							//  Aloitellaan piirtely‰
 							$pdf = new pdf;
 							$pdf->enable('template');
 
-							$pdf->set_default('margin-top', 	mm_pt(10));
-							$pdf->set_default('margin-bottom', 	mm_pt(10));
-							$pdf->set_default('margin-left', 	mm_pt(15));
-							$pdf->set_default('margin-right',	mm_pt(15));
+							$pdf->set_default('margin-top',     mm_pt(10));
+							$pdf->set_default('margin-bottom',  mm_pt(10));
+							$pdf->set_default('margin-left',    mm_pt(15));
+							$pdf->set_default('margin-right',   mm_pt(15));
 
-							$fonts["snadi"]['height']	= 9;
-							$fonts["snadi"]['font']		= "Helvetica";
+							$fonts["snadi"]['height']   = 9;
+							$fonts["snadi"]['font']     = "Helvetica";
 
-							$fonts["norm"]['height']	= 10;
-							$fonts["norm"]['font']		= "Helvetica";
+							$fonts["norm"]['height']    = 10;
+							$fonts["norm"]['font']      = "Helvetica";
 
-							$fonts["BIG"]['height']		= 14;
-							$fonts["BIG"]['font']		= "Helvetica";
+							$fonts["BIG"]['height']     = 14;
+							$fonts["BIG"]['font']       = "Helvetica";
 
-							//	Asetetaan localet
+							//  Asetetaan localet
 							$pdf->setLocales($laskurow["maa"], $laskurow["valkoodi"]);
 
-							//	Tehd‰‰n uusi sivu
+							//  Tehd‰‰n uusi sivu
 							$pdf->addPage("a4");
 
-							//	Tehd‰‰n template
+							//  Tehd‰‰n template
 							$tid=$pdf->template->create();
 
 							$h=282;
 
-							//	Liitet‰‰n kuva
+							//  Liitet‰‰n kuva
 							if( (int) $yhtiorow["lasku_logo"] > 0) {
 								$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
 								$data = $liite["data"];
@@ -90,14 +90,20 @@
 							elseif(file_exists($yhtiorow["lasku_logo"])) {
 								$pdf->placeImageToTemplate($h,0,$yhtiorow["lasku_logo"], $tid, "57x100");
 							}
+							
+							if($toim == "YLLAPITOSOPIMUS") {
+								$otsikko = "YLLƒPITOSOPIMUS";
+							}
+							else {
+								$otsikko = "TILAUSVAHVISTUS";
+							}
+							$pdf->writeToTemplate($h, 1, 0, 0, t($otsikko, $kieli), "BIG", "C", "B", $tid);
 
-							$pdf->writeToTemplate($h, 1, 0, 0, t("TILAUSVAHVISTUS", $kieli), "BIG", "C", "B", $tid);
-
-							//	Laitetaan perustiedot oikealle
+							//  Laitetaan perustiedot oikealle
 							$h=260;
 							$s=$pdf->teeSarakkeet(array(102,33));
 							if($laskurow["projekti"] > 0) {
-								//	Onko nippulla projektia?
+								//  Onko nippulla projektia?
 								$query = "select tunnus from lasku where yhtio ='$kukarow[yhtio]' and tunnusnippu='$laskurow[projekti]' and tila = 'R'";
 								$abures = mysql_query($query) or pupe_error($query);
 								if(mysql_num_rows($abures)>0) {
@@ -131,18 +137,19 @@
 							}
 							$h-=$pdf->ln(0.5);
 
-							//	Sitten yhteyshenkilˆit‰
+							//  Sitten yhteyshenkilˆit‰
 							foreach(array("asiakkaan_tilausnumero", "asiakkaan_viite", "toimittajan_yhteyshenkilˆ", "asiakkaan_yhteyshenkilˆ", "asiakkaan_kaupallinen_k‰sittelij‰") as $key) {
 								if($laskurow[$key] != "") {
+									
 									$pdf->writeToTemplate($h, 1, $s[0], 0, t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
 									$h-=$pdf->ln();
 									$nb=$pdf->countParagraphHeight($laskurow[$key], "norm", (-1*($s[0])));
-									$pdf->writeToTemplate($h, $nb, $s[0], 0, $laskurow[$key], "norm", "L", "", $tid);
+									$pdf->writeToTemplate($h, $nb, $s[0], 0, str_replace(array("%se", "%ed"), array("seuraava kausi", "edelt‰v‰ kausi"), $laskurow[$key]), "norm", "L", "", $tid);
 									$h-=$pdf->ln($nb);
 								}
 							}
 
-							//	Laitetaan toimitustiedot vasemmalle
+							//  Laitetaan toimitustiedot vasemmalle
 							$h=260;
 
 							if($laskurow["laskutus_nimi"] != "") {
@@ -196,7 +203,7 @@
 								$h=190;
 							}
 
-							//	Tehd‰‰n template
+							//  Tehd‰‰n template
 							$tid2=$pdf->template->create();
 
 							$s=$pdf->teeSarakkeet(array(105,20,25));
@@ -213,14 +220,14 @@
 								$pdf->writeToTemplate($h, 1, $s[1], $s[2], t("Ale", $kieli), "norm", "R", "B", $tid2);
 							}
 
-							//	Liitet‰‰n pohjat
+							//  Liitet‰‰n pohjat
 							$pdf->placeTemplate($tid);
 							$pdf->placeTemplate($tid2);
 						}
 						else {
 							$pdf->addPage("a4");
 
-							//	Liitet‰‰n pohjat
+							//  Liitet‰‰n pohjat
 							if($riviotsikot!="") {
 								$pdf->placeTemplate($tid);
 								$pdf->placeTemplate($tid2);
@@ -244,7 +251,7 @@
 				$pdf=alku($pdf, $laskurow,$kieli, "OK");
 
 				if($laskurow["tila"] == "R") {
-					$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
+					$query = "  SELECT GROUP_CONCAT(tunnus) tunnukset
 								FROM lasku
 								WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnus]' and tila IN ('L','G','E','V','W','N','R','A')";
 					$result = mysql_query($query) or pupe_error($query);
@@ -255,7 +262,7 @@
 					$tunnukset=$laskurow["tunnus"];
 				}
 
-				//	Voidaanko n‰ytt‰‰ alet?
+				//  Voidaanko n‰ytt‰‰ alet?
 				$query = "select tunnus from tilausrivi where yhtio = '$kukarow[yhtio]' and ale > 0 and otunnus IN ($tunnukset)";
 				$abures = mysql_query($query) or pupe_error($query);
 				if(mysql_num_rows($abures) > 0) {
@@ -267,10 +274,10 @@
 
 				$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 				$rivihinta = "round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),$yhtiorow[hintapyoristys])";
-				$perherivihinta = "	(select sum(".str_replace("tilausrivi.","t.",$rivihinta).") from tilausrivi t where t.perheid=tilausrivi.perheid and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.tyyppi!='D')";
+				$perherivihinta = " (select sum(".str_replace("tilausrivi.","t.",$rivihinta).") from tilausrivi t where t.perheid=tilausrivi.perheid and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.tyyppi!='D')";
 
-				//	K‰sitell‰‰n tuoterivit
-				$query = "	SELECT tilausrivi.*,
+				//  K‰sitell‰‰n tuoterivit
+				$query = "  SELECT tilausrivi.*,
 							if(tilausrivi.perheid=0,$rivihinta,$perherivihinta) rivihinta, (jt+varattu) kpl,
 							$hinta_riv hinta, tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.asiakkaan_positio, tilausrivin_lisatiedot.ei_nayteta, ei_saldoa, $sorttauskentta
 							FROM tilausrivi
@@ -292,7 +299,7 @@
 
 					while ($row = mysql_fetch_array($riresult)) {
 
-						//	Etsit‰‰n k‰‰nnˆksi‰
+						//  Etsit‰‰n k‰‰nnˆksi‰
 						if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
 							$laji = 'nimitys_'.strtolower($kieli);
 							$query = "SELECT selite FROM tuotteen_avainsanat WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$row[tuoteno]' LIMIT 1";
@@ -307,30 +314,30 @@
 							$pdf = alku($pdf, $laskurow,$kieli, "OK");
 						}
 
-						//	Perheiden v‰liin laitetaan yksi extrav‰li..
+						//  Perheiden v‰liin laitetaan yksi extrav‰li..
 						if(isset($edperhe) and $edperhe != $row["perheid"]) {
 							$h-=$pdf->ln(1);
 							unset($edperhe);
 						}
 
-						//	Jos meill‰ on "normaali tuote"
+						//  Jos meill‰ on "normaali tuote"
 						if($row["perheid"]==0 or $row["perheid"]==$row["tunnus"]) {
 							$offset=0;
 							$style_rivi = "norm";
 							$style_rivi2 = "snadi";
 							$style_komm = "snadi";
-							//	Jos meill‰ on is‰tuote fiksataan yksikkˆhinta
+							//  Jos meill‰ on is‰tuote fiksataan yksikkˆhinta
 							if($row["perheid"]==$row["tunnus"]) {
 								$row["hinta"] = round(($row["rivihinta"]/$row["kpl"]),$yhtiorow['hintapyoristys']);
 
-								//	Ale 100 on varmaan feikki joten se piilotetaan..
+								//  Ale 100 on varmaan feikki joten se piilotetaan..
 								if($row["ale"] == 100) {
 									$row["ale"] = "";
 								}
 							}
 							$rivi="isa";
 						}
-						//	Meill‰ on lapsituote
+						//  Meill‰ on lapsituote
 						else{
 							$offset=5;
 							$style_rivi = "snadi";
@@ -367,7 +374,7 @@
 						
 						$h-=$pdf->ln(0.5);
 						
-						//	Oisko sarjanumeroita
+						//  Oisko sarjanumeroita
 						if ($row["kpl"]+$row["varattu"] > 0){
 							$sarjanutunnus = "myyntirivitunnus";
 						}
@@ -375,7 +382,7 @@
 							$sarjanutunnus = "ostorivitunnus";
 						}
 
-						$query = "	select *
+						$query = "  select *
 									from sarjanumeroseuranta
 									where yhtio = '$kukarow[yhtio]'
 									and tuoteno = '$row[tuoteno]'
@@ -413,9 +420,9 @@
 					$pdf = alku($pdf, $laskurow,$kieli);
 				}
 
-				//	Todella speciaali tapaus
+				//  Todella speciaali tapaus
 				if($kukarow["yhtio"] == "RTEC") {
-					$query = "	SELECT tunnus
+					$query = "  SELECT tunnus
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]' and otunnus IN ($tunnukset) and tuoteno LIKE ('EN1%')
 								LIMIT 1";
@@ -427,7 +434,7 @@
 				}
 
 				if($laskurow["sisviesti1"] != "") {
-					//	Maksusopimus
+					//  Maksusopimus
 					$pdf->write($h, 1, 0, 0, t("LISƒTIEDOT", $kieli), "norm", "L", "B");
 					$h-=$pdf->ln(1.25);
 					$nb=$pdf->countParagraphHeight($laskurow["sisviesti1"], "norm");
@@ -435,7 +442,7 @@
 					$h-=$pdf->ln($nb+2);
 				}
 
-				$query = "	SELECT *
+				$query = "  SELECT *
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]' and laji='TV_LISATIETO' and kieli = '$kieli'";
 				$result = mysql_query($query) or pupe_error($query);
@@ -460,7 +467,7 @@
 					$h-=$pdf->ln(2);
 				}
 
-				$query = "	SELECT maksupositio.*, round(osuus,0) osuus, maksuehto.teksti
+				$query = "  SELECT maksupositio.*, round(osuus,0) osuus, maksuehto.teksti
 							FROM maksupositio
 							LEFT JOIN maksuehto on maksuehto.yhtio=maksupositio.yhtio and maksuehto.tunnus=maksupositio.maksuehto
 							WHERE maksupositio.yhtio = '$kukarow[yhtio]' and otunnus = $laskurow[jaksotettu]
@@ -468,12 +475,12 @@
 				$result = mysql_query($query) or pupe_error($query);
 				if(mysql_num_rows($result)>0) {
 
-					//	Koitetaan arpoa mahtuuko t‰m‰ samalle sivulle, vai ei..
+					//  Koitetaan arpoa mahtuuko t‰m‰ samalle sivulle, vai ei..
 					if($h < (mysql_num_rows($result)*$pdf->ln(2.75) + 10)) {
 						$pdf = alku($pdf, $laskurow,$kieli);
 					}
 
-					//	Maksusopimus
+					//  Maksusopimus
 					$pdf->write($h, 1, 0, 0, t("MAKSUEHTO", $kieli), "norm", "L", "B");
 					$h-=$pdf->ln(1.25);
 
@@ -492,16 +499,16 @@
 					}
 				}
 				else {
-					//	Katosotaan, ett‰ t‰m‰ mahtuu samalle sivulle
+					//  Katosotaan, ett‰ t‰m‰ mahtuu samalle sivulle
 					if($h < 50) {
 						$pdf = alku($pdf, $laskurow,$kieli);
 					}
 
-					//	Maksusopimus
+					//  Maksusopimus
 					$pdf->write($h, 1, 0, 0, t("MAKSUEHTO", $kieli), "norm", "L", "B");
 					$h-=$pdf->ln(1.25);
 
-					$query = "	SELECT teksti
+					$query = "  SELECT teksti
 								FROM maksuehto
 								WHERE yhtio = '$kukarow[yhtio]' and tunnus = $laskurow[maksuehto]";
 					$result = mysql_query($query) or pupe_error($query);
@@ -512,7 +519,7 @@
 				}
 
 
-				//	Allekirjoituspohjat
+				//  Allekirjoituspohjat
 				if($h < 35) {
 					$pdf = alku($pdf, $laskurow,$kieli);
 					$h = 35;
@@ -536,36 +543,36 @@
 
 				$h = 15;
 				$s=$pdf->teeSarakkeet(array(70,15,58,15));
-				$pdf->write($h, 1, 0, $s[0], 		$yhtiorow["nimi"], "norm", "L", "B");
-				$pdf->write($h, 1, $s[0], $s[1], 	t("Puh", $kieli).":", "norm", "L", "");
-				$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["puhelin"], "norm", "L", "");
+				$pdf->write($h, 1, 0, $s[0],        $yhtiorow["nimi"], "norm", "L", "B");
+				$pdf->write($h, 1, $s[0], $s[1],    t("Puh", $kieli).":", "norm", "L", "");
+				$pdf->write($h, 1, $s[1], $s[2],    $yhtiorow["puhelin"], "norm", "L", "");
 				if($laskurow["maa"] == "FI") {
-					$pdf->write($h, 1, $s[2], $s[3], 	t("Y-tunnus", $kieli).":", "norm", "L", "");
-					$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["ytunnus"], "norm", "R", "");
+					$pdf->write($h, 1, $s[2], $s[3],    t("Y-tunnus", $kieli).":", "norm", "L", "");
+					$pdf->write($h, 1, $s[3], 0,        $yhtiorow["ytunnus"], "norm", "R", "");
 				}
 				else {
-					$pdf->write($h, 1, $s[2], $s[3], 	t("VAT", $kieli).":", "norm", "L", "");
-					$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["maa"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");
+					$pdf->write($h, 1, $s[2], $s[3],    t("VAT", $kieli).":", "norm", "L", "");
+					$pdf->write($h, 1, $s[3], 0,        $yhtiorow["maa"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");
 				}
 				$h-=$pdf->ln();
 
-				$pdf->write($h, 1, 0, $s[1], 		$yhtiorow["osoite"], "norm", "L", "");
-				$pdf->write($h, 1, $s[0], $s[1], 	t("Fax", $kieli).":", "norm", "L", "");
-				$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["fax"], "norm", "L", "");
+				$pdf->write($h, 1, 0, $s[1],        $yhtiorow["osoite"], "norm", "L", "");
+				$pdf->write($h, 1, $s[0], $s[1],    t("Fax", $kieli).":", "norm", "L", "");
+				$pdf->write($h, 1, $s[1], $s[2],    $yhtiorow["fax"], "norm", "L", "");
 				if($laskurow["maa"] == "FI") {
-					$pdf->write($h, 1, $s[2], $s[3], 	t("VAT", $kieli).":", "norm", "L", "");
-					$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["maa"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");
+					$pdf->write($h, 1, $s[2], $s[3],    t("VAT", $kieli).":", "norm", "L", "");
+					$pdf->write($h, 1, $s[3], 0,        $yhtiorow["maa"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");
 				}
 				$h-=$pdf->ln();
 
-				$pdf->write($h, 1, 0, $s[1], 		$yhtiorow["maa"].$yhtiorow["postino"]." ".$yhtiorow["postitp"], "norm", "L", "");
-				$pdf->write($h, 1, $s[0], $s[1], 	t("Web", $kieli).":", "norm", "L", "");
-				$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["www"], "norm", "L", "");
+				$pdf->write($h, 1, 0, $s[1],        $yhtiorow["maa"].$yhtiorow["postino"]." ".$yhtiorow["postitp"], "norm", "L", "");
+				$pdf->write($h, 1, $s[0], $s[1],    t("Web", $kieli).":", "norm", "L", "");
+				$pdf->write($h, 1, $s[1], $s[2],    $yhtiorow["www"], "norm", "L", "");
 				$h-=$pdf->ln();
 
-				$pdf->write($h, 1, 0, $s[0], 		strtoupper(maa($yhtiorow["maa"], $kieli)), "norm", "L", "");
-				$pdf->write($h, 1, $s[0], $s[1], 	t("Email", $kieli).":", "norm", "L", "");
-				$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["email"], "norm", "L", "");
+				$pdf->write($h, 1, 0, $s[0],        strtoupper(maa($yhtiorow["maa"], $kieli)), "norm", "L", "");
+				$pdf->write($h, 1, $s[0], $s[1],    t("Email", $kieli).":", "norm", "L", "");
+				$pdf->write($h, 1, $s[1], $s[2],    $yhtiorow["email"], "norm", "L", "");
 
 				// Tulostetaan sivu
 				//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
@@ -591,13 +598,27 @@
 
 				if ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
 					$liite = $pdf_tilausvahvistusfilenimi;
+					
 					if($laskurow["tunnusnippu"] > 0) {
-						$kutsu = "Tilausvahvistus $laskurow[tunnusnippu]";
+						$tno = $laskurow["tunnusnippu"];
 					}
 					else {
-						$kutsu = "Tilausvahvistus $laskurow[tunnus]";
+						$tno = $laskurow["tunnus"];
 					}
-
+					
+					if($toim == "YLLAPITOSOPIMUS") {
+						$msg = t("Yll‰pitosopimus %s l‰hetet‰‰n osoitteeseen %s", $kieli, $tno, $kukarow["eposti"]);
+						$kutsu = t("Yll‰pitosopimus %s", $kieli, $tno);
+					}
+					else {
+						$msg = t("Tilausvahvistus %s l‰hetet‰‰n osoitteeseen %s", $kieli, $tno, $kukarow["eposti"]);
+						$kutsu = t("Tilausvahvistus %s", $kieli, $tno);
+					}
+					
+					echo "<font class='message'>$msg</font>";
+					
+					
+					
 					if ($kukarow["extranet"] == '') {
 						require("../inc/sahkoposti.inc");
 					}
@@ -610,8 +631,8 @@
 					echo file_get_contents($pdf_tilausvahvistusfilenimi);
 				}
 				elseif ($komento != '' and $komento != 'edi') {
-					//	Haetaan kirjoittimen nimi..
-					$querykieli = "	select *
+					//  Haetaan kirjoittimen nimi..
+					$querykieli = " select *
 									from kirjoittimet
 									where yhtio='$kukarow[yhtio]' and komento='$komento'";
 					$kires = mysql_query($querykieli) or pupe_error($querykieli);
@@ -647,8 +668,13 @@
 				system("rm -f $pdf_tilausvahvistusfilenimi");
 			}
 		}
-
-		tulosta_tilausvahvistus($otunnus, $komento["Tilausvahvistus"], $kieli, $tee);
+		
+		if($toim=="YLLAPITOSOPIMUS") {
+			tulosta_tilausvahvistus($otunnus, $komento["Yllapitosopimus"], $kieli, $tee);
+		}
+		else {
+			tulosta_tilausvahvistus($otunnus, $komento["Tilausvahvistus"], $kieli, $tee);
+		}
 	}
 	else {
 		//hatetaan asiakkaan l‰hetetyyppi
@@ -681,7 +707,7 @@
 		}
 
 		if($laskurow["tunnusnippu"] > 0) {
-			$query = "	SELECT group_concat(tunnus) tunnukset
+			$query = "  SELECT group_concat(tunnus) tunnukset
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '{$laskurow["tunnusnippu"]}' and tunnusnippu > 0 and tila IN ('N','L')
 						GROUP BY tunnusnippu";
@@ -690,7 +716,7 @@
 
 			$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
 
-			//	Laitetaan t‰m‰ t‰ss‰ talteen!
+			//  Laitetaan t‰m‰ t‰ss‰ talteen!
 			$laskurow["nippu"] = $aburow["tunnukset"];
 		}
 		else {
@@ -763,11 +789,11 @@
 		$total = 0;
 
 		// Aloitellaan l‰hetteen teko
-		$page[$sivu] = alku("TILAUSVAHVISTUS");
+		$page[$sivu] = alku($toim);
 
 
 		while ($row = mysql_fetch_array($riresult)) {
-			rivi($page[$sivu], "TILAUSVAHVISTUS");
+			rivi($page[$sivu], $toim);
 			$total+= $row["rivihinta"];
 		}
 
@@ -785,8 +811,16 @@
 		}
 
 		//tulostetaan sivu
-		print_pdf($komento["Tilausvahvistus"], "TILAUSVAHVISTUS");
+		print_pdf($komento["Tilausvahvistus"], $toim);
 
 	}
 
 ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+	<head>
+		<title></title>
+	</head>
+	<body>
+	</body>
+</html>

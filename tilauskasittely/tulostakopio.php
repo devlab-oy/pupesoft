@@ -90,6 +90,9 @@
 	if ($toim == "TILAUSVAHVISTUS") {
 		$fuse = t("Tilausvahvistus");
 	}
+	if ($toim == "YLLAPITOSOPIMUS") {
+		$fuse = t("Ylläpitosopimus");
+	}
 	if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR") {
 		$fuse = t("Tarjous");
 	}
@@ -636,7 +639,28 @@
 		}
 		if ($toim == "TILAUSVAHVISTUS") {
 			//myyntitilaus.
-			$where1 .= " lasku.tila in ('N','L','R','0')";
+			$where1 .= " lasku.tila in ('N','L','R')";
+
+			if ($ytunnus{0} == '£') {
+				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'
+							 and lasku.nimitark  = '$asiakasrow[nimitark]'
+							 and lasku.osoite    = '$asiakasrow[osoite]'
+							 and lasku.postino   = '$asiakasrow[postino]'
+							 and lasku.postitp   = '$asiakasrow[postitp]' ";
+			}
+			elseif ($asiakasid > 0) {
+				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
+			}
+
+			$where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+
+			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			$use = " use index (yhtio_tila_luontiaika) ";
+		}
+		if ($toim == "YLLAPITOSOPIMUS") {
+			//myyntitilaus.
+			$where1 .= " lasku.tila in ('0')";
 
 			if ($ytunnus{0} == '£') {
 				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -1019,6 +1043,12 @@
 				$komento["Tilausvahvistus"] .= " -# $kappaleet ";
 			}
 		}
+		if ($toim == "YLLAPITOSOPIMUS" and $komento["Lasku"] != 'email') {
+			$tulostimet[0] = 'Yllapitosopimus';
+			if ($kappaleet > 0) {
+				$komento["Yllapitosopimus"] .= " -# $kappaleet ";
+			}
+		}
 		if (($toim == "TARJOUS"  or $toim == "TARJOUS!!!VL" or $toim == "TARJOUS!!!BR") and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
 			$tulostimet[0] = 'Tarjous';
 			if ($kappaleet > 0) {
@@ -1388,7 +1418,7 @@
 				}
 			}
 
-			if ($toim == "TILAUSVAHVISTUS") {
+			if ($toim == "TILAUSVAHVISTUS" or $toim == "YLLAPITOSOPIMUS") {
 				require_once ("tulosta_tilausvahvistus_pdf.inc");
 
 				$tee = '';

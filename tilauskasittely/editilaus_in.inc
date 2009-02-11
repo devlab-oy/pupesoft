@@ -26,9 +26,9 @@ if (trim($argv[1])!='') {
 if (!function_exists('jt_toimita')) {
 	function jt_toimita ($asiakasno, $asiakasid, $asiakasmaa) {
 		global $yhtiorow, $kukarow, $edi_ulos;
-		
+
 		$automaaginen 			= "automaaginen";
-		$tee 					= "JATKA";		
+		$tee 					= "JATKA";
 		$oikeurow['paivitys'] 	= '1';
 		$toimittaja				= "";
 		$toimittajaid			= "";
@@ -39,7 +39,7 @@ if (!function_exists('jt_toimita')) {
 		$superit				= "";
 		$tilaus_on_jo			= "KYLLA";
 		$from_varastoon_inc 	= "editilaus_in.inc";
-		
+
 		if ($asiakasmaa != '') {
 			$asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
 		}
@@ -47,10 +47,10 @@ if (!function_exists('jt_toimita')) {
 		$query = "	SELECT *
 					FROM varastopaikat
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi  = '' 
+					and tyyppi  = ''
 					$asiakasmaalisa";
 		$vtresult = mysql_query($query) or pupe_error($query);
-		
+
 		$varastosta = array();
 
 		while ($vrow = mysql_fetch_array($vtresult)) {
@@ -196,7 +196,7 @@ while (!feof ($fd)) {
 				// kokeillaan v‰‰nt‰‰ luvusta ytunnus
 				$tieto2 = substr($tieto, 4, 8);     // etunollilla
 				$tieto  = substr($tieto, 4, 8) * 1; // ilman etunollio
-				
+
 				// Arwidson h‰kki Arwidson Baltia varten
 				if ($tieto == 0) $tieto = "07495288";
 				// Arwidson h‰kki Arwidson Automotivea varten
@@ -343,9 +343,9 @@ while (!feof ($fd)) {
 			if (!is_array($arow)) {
 				$edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
 
-				$query = "	SELECT * 
+				$query = "	SELECT *
 							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]' 
+							WHERE yhtio = '$kukarow[yhtio]'
 							and toim_ovttunnus = '$tieto'
 							and toim_ovttunnus not in ('','0')";
 				$result = mysql_query($query) or die($query);
@@ -358,9 +358,9 @@ while (!feof ($fd)) {
 			}
 
 			if (!is_array($arow)) {
-				$query = "	SELECT * 
+				$query = "	SELECT *
 							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]' 
+							WHERE yhtio = '$kukarow[yhtio]'
 							and ovttunnus = '$tieto'
 							and ovttunnus not in ('','0')";
 				$result = mysql_query($query) or die($query);
@@ -373,9 +373,9 @@ while (!feof ($fd)) {
 			}
 
 			if (!is_array($arow)) {
-				$query = "	SELECT * 
+				$query = "	SELECT *
 							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]' 
+							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakasnro = '$tieto'
 							and asiakasnro not in ('','0')";
 				$result = mysql_query($query) or die($query);
@@ -402,9 +402,9 @@ while (!feof ($fd)) {
 			if (!is_array($arow)) {
 				$edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
 
-				$query = "	SELECT * 
+				$query = "	SELECT *
 							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]' 
+							WHERE yhtio = '$kukarow[yhtio]'
 							and toim_ovttunnus = '$tieto'
 							and toim_ovttunnus not in ('','0')";
 				$result = mysql_query($query) or die($query);
@@ -417,9 +417,9 @@ while (!feof ($fd)) {
 			}
 
 			if (!is_array($arow)) {
-				$query = "	SELECT * 
+				$query = "	SELECT *
 							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]' 
+							WHERE yhtio = '$kukarow[yhtio]'
 							and ovttunnus = '$tieto'
 							and ovttunnus not in ('','0')";
 				$result = mysql_query($query) or die($query);
@@ -432,9 +432,9 @@ while (!feof ($fd)) {
 			}
 
 			if (!is_array($arow)) {
-				$query = "	SELECT * 
+				$query = "	SELECT *
 							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]' 
+							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakasnro = '$tieto'
 							and asiakasnro not in ('','0')";
 				$result = mysql_query($query) or die($query);
@@ -475,9 +475,9 @@ while (!feof ($fd)) {
 
 				$edi_ulos .= t("Tilaava toim_asiakas")." $tieto -> ";
 
-				$query = "	SELECT * 
+				$query = "	SELECT *
 							FROM asiakas
-							WHERE yhtio = '$kukarow[yhtio]' 
+							WHERE yhtio = '$kukarow[yhtio]'
 							and toim_ovttunnus = '$tieto'
 							and toim_ovttunnus not in ('','0')";
 				$result = mysql_query($query) or die($query);
@@ -559,7 +559,7 @@ while (!feof ($fd)) {
 		// jos Magenton tilaus on jo maksettu luottokortilla niin p‰ivitet‰‰n maksuehto
 			if ($edi_tyyppi == "magento" and $tieto == 'processing') {
 				$kukarow["kassamyyja"] = $editilaus_kassalipas = "";
-	
+
 				$query = "	SELECT tunnus
 							FROM maksuehto
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -567,16 +567,16 @@ while (!feof ($fd)) {
 							LIMIT 1";
 				$editilaus_kateinen_res = mysql_query($query) or pupe_error($query);
 				$editilaus_kateinen_row = mysql_fetch_array($editilaus_kateinen_res);
-				
+
 				if (mysql_num_rows($editilaus_kateinen_res) == 1) {
 					$editilaus_maksuehto = $editilaus_kateinen_row["tunnus"];
-					
+
 					$query = "	SELECT tunnus
 								FROM kassalipas
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND nimi = 'Verkkokauppa'";
 					$kassalipas_res = mysql_query($query) or pupe_error($query);
-					
+
 					if (mysql_num_rows($kassalipas_res) == 1) {
 						$kassalipas_row = mysql_fetch_array($kassalipas_res);
 						$kukarow["kassamyyja"] = $editilaus_kassalipas = $kassalipas_row["tunnus"];
@@ -663,17 +663,17 @@ while (!feof ($fd)) {
 				if ($ketjutus != "") {
 					$arow["ketjutus"] = $ketjutus;
 				}
-				
+
 				// Haetaan viel‰ myyyj‰numero
 				$query = "	SELECT tunnus
 							FROM kuka
-							WHERE yhtio = '$kukarow[yhtio]' 
+							WHERE yhtio = '$kukarow[yhtio]'
 							and kuka 	= 'EDI'";
 				$meapu = mysql_query($query) or pupe_error($query);
 				$apuro = mysql_fetch_array($meapu);
 				$edimyyja = $apuro['tunnus'];
-				
-				
+
+
 				// Lis‰t‰‰n otsikko
 				$query = "	INSERT into lasku SET
 							yhtio_nimi							= '$yhtiorow[nimi]',
@@ -747,10 +747,10 @@ while (!feof ($fd)) {
 		case 'OLINSA_NU' :
 		case 'OSTOTILRIV.OTR_TUOTEKOODI' :
 			//Tuotenumero
-			
+
 			// jos ei olla saatu tuoteinfoa aikasemmin, kokeillaan etsi‰ tuote tuotenumerolla
 			if ($tuoteno == "" and $tieto != "") {
-				
+
 				$kieltolisa = "";
 				//vientikieltotarkistus
 				if (isset($laskurow) and $laskurow["liitostunnus"] != 0) {
@@ -765,7 +765,7 @@ while (!feof ($fd)) {
 						$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
 					}
 				}
-				
+
 				if ($edi_tyyppi != "magento" and $edi_tyyppi != "futursoft" and $yhtiorow["yhtio"] == "artr") {
 					// poistetaan jos kolmas merkki jos se on viiva
 					if (substr($tieto, 2, 1) == '-') {
@@ -806,7 +806,7 @@ while (!feof ($fd)) {
 
 			// jos ei olla saatu tuoteinfoa aikasemmin, kokeillaan etsi‰ tuote EAN koodilla
 			if ($tuoteno == "" and $tieto != "") {
-			
+
 				$kieltolisa = "";
 				//vientikieltotarkistus
 				if (isset($laskurow) and $laskurow["liitostunnus"] != 0) {
@@ -822,7 +822,12 @@ while (!feof ($fd)) {
 					}
 				}
 
-				$query = "SELECT * FROM tuote USE INDEX (yhtio_eankoodi_index) WHERE yhtio='$kukarow[yhtio]' and eankoodi='$tieto' $kieltolisa";
+				$query = "	SELECT *
+							FROM tuote USE INDEX (yhtio_eankoodi_index)
+							WHERE yhtio = '$kukarow[yhtio]'
+							and eankoodi = '$tieto'
+							$kieltolisa
+							ORDER BY tunnus";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 0) {
@@ -869,10 +874,10 @@ while (!feof ($fd)) {
 			}
 			break;
 		case 'OSTOTILRIV.OTR_SALLITAANJT' :
-			// Sallitaan JT-Rivit  
+			// Sallitaan JT-Rivit
 			if ($tieto == '1') {
 				$sallitaanjt = '1';
-				
+
 				if ($edi_tyyppi == "magento") {
 					$tilaus_hyvaksyntaan = "kyll‰";
 				}
@@ -880,13 +885,13 @@ while (!feof ($fd)) {
 			else {
 				$sallitaanjt = '0';
 			}
-			
+
 			break;
 		case 'OLIN__END' :
 		case '*RE  OSTOTILRIV' :
 
 			if ($editilaus_otsikko_ok == "KYLLA") {
-							
+
 		 		// jos tuote on lˆytynyt ok
 				if ($tuoteerror == 0) {
 
@@ -927,11 +932,11 @@ while (!feof ($fd)) {
 						$hinta = $editilaus_rahtikulu_hinta;
 					}
 
-					// Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa. 
+					// Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
 					// Jos tilattu kpl-m‰‰r‰ on suurempi kuin myyt‰viss‰ oleva kpl-m‰‰r‰, niin pakotetaan rivi hyv‰ksytyksi
 					if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "") {
 						list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno);
-						
+
 						if ($chk_myytavissa < $kpl) {
 							$var = "H";
 							$kommentti = t("Huom: Tuote toimitetaan erikoisvarastosta!");
@@ -939,7 +944,7 @@ while (!feof ($fd)) {
 					}
 
 					$kutsuja = "EDITILAUS";
-					
+
 					//jos meill‰ on t‰pp‰ p‰‰ll‰, ett‰ asiakas haluaa kamat j‰lkitoimitukseen
 					if ($sallitaanjt == '1') {
 						$var = "J";
@@ -957,16 +962,16 @@ while (!feof ($fd)) {
 										AND tunnus = '$lisatty_rivitunnus'";
 							$edi_varastopaikka_res = mysql_query($query) or pupe_error($query);
 							$edi_varastopaikka_row = mysql_fetch_array($edi_varastopaikka_res);
-							
+
 							$varastoon_tunnus = kuuluukovarastoon($edi_varastopaikka_row["hyllyalue"], $edi_varastopaikka_row["hyllynro"]);
-							
+
 							$query = "	SELECT tyyppi
 										FROM varastopaikat
 										WHERE yhtio = '$kukarow[yhtio]'
 										AND tunnus = '$varastoon_tunnus'";
 							$edi_varastopaikka_res = mysql_query($query) or pupe_error($query);
 							$edi_varastopaikka_row = mysql_fetch_array($edi_varastopaikka_res);
-							
+
 							if ($edi_varastopaikka_row["tyyppi"] != '') {
 								$tilaus_hyvaksyntaan = "kyll‰";
 								break;
@@ -1046,37 +1051,37 @@ while (!feof ($fd)) {
 			// jos meilla on otsikko voidaan laittaa sen valmiiksi
 			if ($editilaus_otsikko_ok == "KYLLA") {
 				//tarkistetaan toimitustapa vakin takia
-				$query = " 	SELECT * 
-				  			from tilausrivi 
+				$query = " 	SELECT *
+				  			from tilausrivi
 							join tuote on tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi != ''
 							where tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.otunnus = '$id'";
 				$result = mysql_query($query) or die($query);
-				
+
 				if (mysql_num_rows($result) > 0) {
-					$query = "	SELECT vak_kielto 
+					$query = "	SELECT vak_kielto
 								from toimitustapa
 								where yhtio = '$kukarow[yhtio]'
 								and selite = '$laskurow[toimitustapa]'";
 					$result = mysql_query($query) or die($query);
 					$toimtapatmp = mysql_fetch_array($result);
-							
+
 					if ($toimtapatmp['vak_kielto'] != '') {
-						$query = "	SELECT * 
+						$query = "	SELECT *
 									from toimitustapa
 									where yhtio = '$kukarow[yhtio]'
 									and oletus_vak != ''";
 						$result = mysql_query($query) or die($query);
-						
+
 						if (mysql_num_rows($result) > 0) {
 							$oletustoim = mysql_fetch_array($result);
-							
+
 							$query = "UPDATE lasku SET toimitustapa = '$oletustoim[selite]' where yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
 							$result = mysql_query($query) or die($query);
 						}
-					}			 
-				}			
-							
+					}
+				}
+
 
 				// Tilaus merkataan valmiiksi
 				$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' and yhtio='$kukarow[yhtio]'";
@@ -1117,25 +1122,25 @@ while (!feof ($fd)) {
 
 					// jos magentosta tullut tilaus on jo maksettu, merkataan se maksetuksi
 					if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "") {
-						// Haetaan yrityksen ensimm‰inen normivarasto. Tallennetaan tilaus t‰h‰n varastoon 
-						$varasto_query = "	SELECT tunnus 
-											from varastopaikat 
-											where yhtio='$kukarow[yhtio]' 
-											and tyyppi='' 
-											order by alkuhyllyalue 
+						// Haetaan yrityksen ensimm‰inen normivarasto. Tallennetaan tilaus t‰h‰n varastoon
+						$varasto_query = "	SELECT tunnus
+											from varastopaikat
+											where yhtio='$kukarow[yhtio]'
+											and tyyppi=''
+											order by alkuhyllyalue
 											limit 1";
 						$varasto_res = mysql_query($varasto_query) or pupe_error($varasto_query);
 						$varasto_row = mysql_fetch_array($varasto_res);
 
 						// Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan, lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi
-						$query = "	UPDATE lasku SET 
+						$query = "	UPDATE lasku SET
 									mapvm = now(),
 									tila = 'N',
 									alatila = 'A',
 									chn = '999',
 									varasto = '$varasto_row[tunnus]',
 									sisviesti2 = 'Verkkokauppatilaus! Ker‰yslistan tuotteet voivat kuulua useaan varastoon.'
-									WHERE yhtio = '$kukarow[yhtio]' 
+									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '$editilaus_lasku_tunnus'";
 						$magento_maksettu_res = mysql_query($query) or pupe_error($query);
 					}

@@ -2802,9 +2802,10 @@
 						$fields .= ", ".mysql_field_name($monistares,$i);
 					}
 
-					$values ="";
+					
 					while($monistarow = mysql_fetch_array($monistares)) {
-
+						
+						$values ="";
 						if($values == "") {
 							$values = "('".$monistarow[0]."'";
 						}
@@ -2828,15 +2829,62 @@
 									break;
 							}
 						}
+						
+						$values .= ")";
+
+						// 	Ja insertoidaan rivit kantaan
+						$query = "	INSERT INTO tilausrivi ($fields) VALUES $values";
+						$insres=mysql_query($query) or pupe_error($query);
+						$lisattyRivitunnus = mysql_insert_id();
+
+						//	Oliko meillä lisatietoja?
+						$query = "select * from tilausrivin_lisatiedot WHERE yhtio = '$kukarow[yhtio]' and tilausrivitunnus='$monistarow[tunnus]'";
+						$monistares2 = mysql_query($query) or pupe_error($query);
+
+						if(mysql_num_rows($monistares2)>0) {
+
+							$fields2 = mysql_field_name($monistares2,0);
+							for($i=1; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
+								$fields2 .= ", ".mysql_field_name($monistares2,$i);
+							}
+
+							$values2 ="";
+							while($monistarow2 = mysql_fetch_array($monistares2)) {
+
+								if($values2 == "") {
+									$values2 = "('".$monistarow2[0]."'";
+								}
+								else {
+									$values2 .= "), ('".$monistarow2[0]."'";
+								}
+
+								for($i=1; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
+									switch (mysql_field_name($monistares2,$i)) {
+										case "laatija";
+											$values2 .= ", '$kukarow2[kuka]'";
+											break;
+										case "luontiaika";
+											$values2 .= ", now()";
+											break;
+										case "tilausrivitunnus";
+											$values2 .= ", '$lisattyRivitunnus'";
+											break;
+										default;
+											$values2 .= ", '$monistarow2[$i]'";
+											break;
+									}
+								}
+							}
+
+							$values2 .= ")";
+
+							// 	Ja insertoidaan rivit kantaan
+							$query = "	INSERT INTO tilausrivin_lisatiedot ($fields2) VALUES $values2";
+							$insres2=mysql_query($query) or pupe_error($query);
+
+						}
+						
 					}
-
-					$values .= ")";
-
-					// 	Ja insertoidaan rivit kantaan
-					$query = "	INSERT INTO tilausrivi ($fields) VALUES $values";
-					$insres=mysql_query($query) or pupe_error($query);
-
-					//	Nämä kivatietää tarjoukset pitäisi varmaan vaihtaa toiseen tilaan jottei hämää tarjousraportointia?
 				}
 			}
 		}
@@ -2937,6 +2985,8 @@
 							yhtio						= '$kukarow[yhtio]',
 							sopimus_kk					= '$sopimus_kk',
 							sopimus_pp					= '$sopimus_pp',
+							yhteyshenkilo_kaupallinen	= '$yhteyshenkilo_kaupallinen',
+							yhteyshenkilo_tekninen		= '$yhteyshenkilo_tekninen',
 							sopimus_alkupvm				= '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
 							sopimus_loppupvm			= '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
 							otunnus 					= '$kukarow[kesken]'";

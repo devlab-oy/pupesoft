@@ -909,7 +909,7 @@
 
 					while ($varow = mysql_fetch_array($vares)) {
 						$sel='';
-						if ($varow['tunnus'] == $varasto) $sel = 'selected';
+//						if ($varow['tunnus'] == $varasto) $sel = 'selected';
 						echo "<option value='$varow[tunnus]' $sel>$varow[hyllyalue] $varow[hyllynro] $varow[hyllyvali] $varow[hyllytaso]</option>";
 					}
 

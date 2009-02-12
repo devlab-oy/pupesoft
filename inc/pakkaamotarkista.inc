@@ -1,6 +1,6 @@
 <?php
 
-	if (!function_exists("pakkaamotarkist")) {
+	if (!function_exists("pakkaamotarkista")) {
 		function pakkaamotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 			global $kukarow, $yhtiorow, $alias_set, $upd, $uusi;
 

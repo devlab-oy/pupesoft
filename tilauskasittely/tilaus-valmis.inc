@@ -486,7 +486,23 @@ else {
 				}
 			}
 		}
+		else {
+			$query = "	SELECT tunnus
+						from tilausrivi
+						where yhtio = '$kukarow[yhtio]'
+						and otunnus = '$laskurow[tunnus]'
+						and tuoteno = '$yhtiorow[rahti_tuotenumero]'";
+			$result = mysql_query($query) or pupe_error($query);
 
+			//jos tilauksella on jo rahtikulu niin merkataan se rahtivapaaksi, ettei mene uudestaan laskutuksen yhteydessä!
+			if (mysql_num_rows($result) > 0) {
+				$tilaus_valmis_ulos .= t("Tilauksella oli käsin syötetty rahtikulu! Merkattiin tilaus 'rahtivapaaksi', ettei kulua lisätä enää automaattisesti laskutuksessa.")."<br>";				
+				$query = "UPDATE lasku SET rahtivapaa = 'o' WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[tunnus]'";
+				$rahtivapres = mysql_query($query) or pupe_error($query);
+			}
+
+		}
+		
 		//jos on kassamyyntiä ja se on käteistä niin tulostetaan lasku heti ilman lähetettä
 		if (($kateinen == 'X' and $kateisohitus == "" and ($kukarow["kassamyyja"] != '' or $kertakassa != "") and $laskurow["vienti"] == '') or ($korkolasku == 'kylla')) {
 			$query = "	UPDATE tilausrivi

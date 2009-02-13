@@ -640,7 +640,7 @@
 
 		foreach ($tuotteen_parametrit_split as $params) {
 			list ($key, $val) = split("=", $params);
-			//$key = strtolower($key);
+			$key = strtolower($key);
 			$tuotteen_parametrit[$key] = $val;
 		}
 		
@@ -649,8 +649,8 @@
 
 		while ($vrow = mysql_fetch_array($vresult)) {
 			$ulos .= "<tr><td>$vrow[selitetark]</td><td>";
-			$ulos .= "<input type='hidden' name='tuotteen_parametrit_keys[$xxx]' value='$vrow[selite]'>";
-			$ulos .= "<input type='text' name='tuotteen_parametrit_vals[$xxx]' size='10' value='".$tuotteen_parametrit[$vrow["selite"]]."'>";
+			$ulos .= "<input type='hidden' name='tuotteen_parametrit_keys[$xxx]' value='".strtolower($vrow["selite"])."'>";
+			$ulos .= "<input type='text' name='tuotteen_parametrit_vals[$xxx]' size='10' value='".$tuotteen_parametrit[strtolower($vrow["selite"])]."'>";
 			$ulos .= "</td></tr>";
 			$xxx++;
 		}

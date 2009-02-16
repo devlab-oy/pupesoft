@@ -73,7 +73,7 @@
 				if (substr($laskurow['ytilino'], 0, 1) == '8' and strlen(trim($laskuviesti)) == 0) $laskuviesti = ';';
 
 				if (strlen($laskurow["viite"]) > 0) {
-					$laskuviesti = $laskurow["viite"];
+					$laskuviesti = sprintf ('%020s',$laskurow["viite"]); //Etunollatäyttö
 					$laskutyyppi = 1;
 				}
 

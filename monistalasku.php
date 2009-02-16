@@ -544,7 +544,7 @@ if ($tee == 'MONISTA') {
 						if ($kumpi == 'HYVITA') {
 							if ($monistarow[$i] == 0) {
 								// Vanhoilla u-laskuilla ei ole vienti kurssia....
-								$vienti_kurssi = round($monistarow["arvo"]/$monistarow["arvo_valuutassa"], 9);
+								$vienti_kurssi = @round($monistarow["arvo"]/$monistarow["arvo_valuutassa"], 9);
 								
 								$values .= ", '$vienti_kurssi'";
 							}
@@ -676,7 +676,7 @@ if ($tee == 'MONISTA') {
 						$paikkavaihtu = 1;
 					}
 				}
-
+				
 				$rfields = "yhtio";
 				$rvalues = "'$kukarow[yhtio]'";
 
@@ -862,7 +862,7 @@ if ($tee == 'MONISTA') {
 							$uusi_tunken = "ostorivitunnus";
 						}
 						
-						echo "# JOTAIN...$tunken $rivirow[tunnus] | $uusi_tunken $insid<br>";
+						//echo "# JOTAIN...$tunken $rivirow[tunnus] | $uusi_tunken $insid<br>";
 						
 						$query = "SELECT sarjanumeroseuranta FROM tuote WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$rivirow[tuoteno]'";
 						$sarjatuoteres = mysql_query($query) or pupe_error($query);
@@ -880,12 +880,22 @@ if ($tee == 'MONISTA') {
 										takuu_alku 		= '$sarjarow[takuu_alku]',
 										takuu_loppu		= '$sarjarow[takuu_loppu]',
 										parasta_ennen	= '$sarjarow[parasta_ennen]',
-										era_kpl			= '$sarjarow[era_kpl]',
-										hyllyalue   	= '$sarjarow[hyllyalue]',
-										hyllynro    	= '$sarjarow[hyllynro]',
-										hyllytaso   	= '$sarjarow[hyllytaso]',
-										hyllyvali   	= '$sarjarow[hyllyvali]',
-										laatija			= '$kukarow[kuka]',
+										era_kpl			= '$sarjarow[era_kpl]',";
+							
+							if ($paikkavaihtu == 1) {
+								$query .= "	hyllyalue   = '$paikka2row[hyllyalue]',
+											hyllynro    = '$paikka2row[hyllynro]',
+											hyllytaso   = '$paikka2row[hyllytaso]',
+											hyllyvali   = '$paikka2row[hyllyvali]',";								
+							}
+							else {
+								$query .= "	hyllyalue   = '$rivirow[hyllyalue]',
+											hyllynro    = '$rivirow[hyllynro]',
+											hyllytaso   = '$rivirow[hyllytaso]',
+											hyllyvali   = '$rivirow[hyllyvali]',";								
+							}
+					
+							$query .= "	laatija			= '$kukarow[kuka]',
 										luontiaika		= now()";
 							$sres = mysql_query($query) or pupe_error($query);
 						}
@@ -904,8 +914,22 @@ if ($tee == 'MONISTA') {
 								$sarjarow1 = mysql_fetch_array($sarjares1);
 
 								$query = "	UPDATE sarjanumeroseuranta
-											SET $uusi_tunken= '$insid'
-											WHERE tunnus 	= '$sarjarow1[tunnus]'
+											SET $uusi_tunken = '$insid', ";
+
+								if ($paikkavaihtu == 1) {
+									$query .= "	hyllyalue   = '$paikka2row[hyllyalue]',
+												hyllynro    = '$paikka2row[hyllynro]',
+												hyllytaso   = '$paikka2row[hyllytaso]',
+												hyllyvali   = '$paikka2row[hyllyvali]'";								
+								}
+								else {
+									$query .= "	hyllyalue   = '$rivirow[hyllyalue]',
+												hyllynro    = '$rivirow[hyllynro]',
+												hyllytaso   = '$rivirow[hyllytaso]',
+												hyllyvali   = '$rivirow[hyllyvali]'";								
+								}
+								
+								$query .= "	WHERE tunnus 	= '$sarjarow1[tunnus]'
 											and yhtio		= '$kukarow[yhtio]'";
 								$sres = mysql_query($query) or pupe_error($query);
 							}
@@ -920,11 +944,23 @@ if ($tee == 'MONISTA') {
 											takuu_alku 		= '$sarjarow[takuu_alku]',
 											takuu_loppu		= '$sarjarow[takuu_loppu]',
 											parasta_ennen 	= '$sarjarow[parasta_ennen]',
-											era_kpl			= '$sarjarow[era_kpl]',
-											hyllyalue   	= '$sarjarow[hyllyalue]',
-											hyllynro    	= '$sarjarow[hyllynro]',
-											hyllytaso   	= '$sarjarow[hyllytaso]',
-											hyllyvali   	= '$sarjarow[hyllyvali]'";
+											era_kpl			= '$sarjarow[era_kpl]',";
+
+								if ($paikkavaihtu == 1) {
+									$query .= "	hyllyalue   = '$paikka2row[hyllyalue]',
+												hyllynro    = '$paikka2row[hyllynro]',
+												hyllytaso   = '$paikka2row[hyllytaso]',
+												hyllyvali   = '$paikka2row[hyllyvali]',";								
+								}
+								else {
+									$query .= "	hyllyalue   = '$rivirow[hyllyalue]',
+												hyllynro    = '$rivirow[hyllynro]',
+												hyllytaso   = '$rivirow[hyllytaso]',
+												hyllyvali   = '$rivirow[hyllyvali]',";								
+								}
+
+								$query .= "	laatija			= '$kukarow[kuka]',
+											luontiaika		= now()";
 								$sres = mysql_query($query) or pupe_error($query);
 							}
 						}

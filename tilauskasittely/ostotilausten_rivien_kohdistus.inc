@@ -296,11 +296,6 @@ if (isset($muut_siirrettavat)) {
 	}
 }
 
-if(isset($lisaa_lisavarusteita) and $lisaa_lisavarusteita > 0) {
-	$query = "UPDATE tilausrivi set perheid2=0 WHERE tyyppi='O' and yhtio='$kukarow[yhtio]' and tunnus='$lisaa_lisavarusteita'";
-	$result = mysql_query($query) or pupe_error($query);
-}
-
 //kohdistetaan rivejä laskulle
 if ($tila == 'tee_kohdistus') {
 
@@ -311,7 +306,44 @@ if ($tila == 'tee_kohdistus') {
 	if ($kohdista_koko_sivu != "") {
 		$rivi_valitut_tunnukset = $rivi_kaikki_tunnukset;
 	}
+	
+	//Tehdään uusia lisävarusterivejä
+	if(is_array($lisavarusterivi_kpl)) {
+		foreach ($lisavarusterivi_kpl as $tunnus => $kpl) {
+			$kpl	  = str_replace(",",".", $kpl);
+			$perheid2 = substr($tunnus, 0, strpos($tunnus,'##'));
+			$tuoteno  = substr($tunnus,  strpos($tunnus,'##')+2, strpos($tunnus,'#*#')-strpos($tunnus,'##')-2);
+			$hinta 	  = str_replace(",", ".", $lisavarusterivi_hinta[$tunnus]);
+			$potunnus = substr($tunnus, strpos($tunnus,'#*#')+3);
 
+			if (abs($kpl) > 0 or strtoupper($kpl) == "DEL") {
+				if (abs($kpl) > 0) {
+					$query  = "	SELECT *
+								FROM tuote
+								LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus='$toimittajaid'
+								where tuote.yhtio = '$kukarow[yhtio]'
+								and tuote.tuoteno = '$tuoteno'";
+					$lisaresult = mysql_query($query) or pupe_error($query);
+					$lisarow = mysql_fetch_array($lisaresult);
+
+					if ($hinta == "") {
+						$hinta = $lisarow["ostohinta"];
+					}
+
+					$query = "	INSERT into tilausrivi
+								(perheid2, hinta, nimitys, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, laatija, laadittu) values
+								('$perheid2','$hinta','$lisarow[nimitys]','$tuoteno', '$kpl', '$kpl', '$potunnus', '$kukarow[yhtio]', 'O', '$kukarow[kuka]', now())";
+					$updre = mysql_query($query) or pupe_error($query);
+				}
+			}
+			
+			unset($lisaa_lisavarusteita);
+		}
+
+		$query = "UPDATE tilausrivi SET perheid2='$perheid2' where yhtio='$kukarow[yhtio]' and tunnus='$perheid2' and tyyppi='O'";
+		$result = mysql_query($query) or pupe_error($query);
+	}
+	
 	//Kohdistetaan kaikki rivit
 	if(count($rivi_kaikki_tunnukset) > 0) {
 		for ($i=0; $i<sizeof($rivi_kaikki_tunnukset); $i++) {
@@ -414,41 +446,6 @@ if ($tila == 'tee_kohdistus') {
 				$sarjares = mysql_query($query) or pupe_error($query);
 			}
 		}
-	}
-
-	//Tehdään uusia lisävarusterivejä
-	if(is_array($lisavarusterivi_kpl)) {
-		foreach ($lisavarusterivi_kpl as $tunnus => $kpl) {
-			$kpl	  = str_replace(",",".", $kpl);
-			$perheid2 = substr($tunnus,0,strpos($tunnus,'##'));
-			$tuoteno  = substr($tunnus,  strpos($tunnus,'##')+2, strpos($tunnus,'#*#')-strpos($tunnus,'##')-2);
-			$hinta 	  = str_replace(",", ".", $lisavarusterivi_hinta[$tunnus]);
-			$potunnus = substr($tunnus, strpos($tunnus,'#*#')+3);
-
-			if (abs($kpl) > 0 or strtoupper($kpl) == "DEL") {
-				if (abs($kpl) > 0) {
-					$query  = "	SELECT *
-								FROM tuote
-								LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus='$toimittajaid'
-								where tuote.yhtio = '$kukarow[yhtio]'
-								and tuote.tuoteno = '$tuoteno'";
-					$lisaresult = mysql_query($query) or pupe_error($query);
-					$lisarow = mysql_fetch_array($lisaresult);
-
-					if ($hinta == "") {
-						$hinta = $lisarow["ostohinta"];
-					}
-
-					$query = "	insert into tilausrivi
-								(perheid2, hinta, nimitys, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, laatija, laadittu) values
-								('$perheid2','$hinta','$lisarow[nimitys]','$tuoteno', '$kpl', '$kpl', '$potunnus', '$kukarow[yhtio]', 'O', '$kukarow[kuka]', now())";
-					$updre = mysql_query($query) or pupe_error($query);
-				}
-			}
-		}
-
-		$query = "UPDATE tilausrivi SET perheid2='$perheid2' where yhtio='$kukarow[yhtio]' and tunnus='$perheid2' and tyyppi='O'";
-		$result = mysql_query($query) or pupe_error($query);
 	}
 }
 
@@ -1200,21 +1197,21 @@ if ($tila == '') {
 
 		echo "</$td>";
 
-		if (mysql_num_rows($lisaresult) > 0 and $rivirow["perheid2"] == 0) {
+		if (mysql_num_rows($lisaresult) > 0 and ($rivirow["perheid2"] == 0 or (isset($lisaa_lisavarusteita) and $lisaa_lisavarusteita > 0))) {
 
 			echo "</tr>\n";
 
 			while($lisavar_row = mysql_fetch_array($lisaresult)) {
 				echo "<tr>
-						<$td $class valign='top' colspan='2' class='back'></$td>
-						<$td $class valign='top'>$lisavar_row[tuoteno]<br>$lisavar_row[toim_tuoteno]</$td>";
+						<$td  valign='top' colspan='2' class='back'></$td>
+						<$td  valign='top'>$lisavar_row[tuoteno]<br>$lisavar_row[toim_tuoteno]</$td>";
 
 				if ($kukarow["resoluutio"] == 'I') {
-					echo "<$td $class valign='top'>".asana('nimitys_',$lisavar_row['tuoteno'],$lisavar_row['nimitys'])."</$td>";
+					echo "<$td valign='top'>".asana('nimitys_',$lisavar_row['tuoteno'],$lisavar_row['nimitys'])."</$td>";
 				}
 
-				echo "<$td $class valign='top' align='right'><input size='5' type='text' name='lisavarusterivi_kpl[$rivirow[rivitunnus]##$lisavar_row[tuoteno]#*#$rivirow[otunnus]]' style='text-align:right'></$td>";
-				echo "<$td $class valign='top' align='right'><input size='7' type='text' name='lisavarusterivi_hinta[$rivirow[rivitunnus]##$lisavar_row[tuoteno]#*#$rivirow[otunnus]]' style='text-align:right'><br>$kulurow[valkoodi]</$td>";
+				echo "<$td valign='top' align='right'><input size='5' type='text' name='lisavarusterivi_kpl[$rivirow[rivitunnus]##$lisavar_row[tuoteno]#*#$rivirow[otunnus]]' style='text-align:right'></$td>";
+				echo "<$td valign='top' align='right'><input size='7' type='text' name='lisavarusterivi_hinta[$rivirow[rivitunnus]##$lisavar_row[tuoteno]#*#$rivirow[otunnus]]' style='text-align:right'><br>$kulurow[valkoodi]</$td>";
 				echo "</tr>";
 			}
 		}

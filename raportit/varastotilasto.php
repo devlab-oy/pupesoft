@@ -59,6 +59,15 @@
 					}
 				}
 				
+				if ($yhtioittain != '') {	
+					$yhtioittain1 = " yhtio, ";
+					$yhtioittain2 = " ,4 ";
+				}
+				else {
+					$yhtioittain1 = "";
+					$yhtioittain2 = "";	
+				}
+				
 				
 				$vvaa = $vva - '1';
 				$vvll = $vvl - '1';
@@ -66,7 +75,8 @@
 				$query = "	SELECT
 							tuote.status,
 							tuote.tuoteno, 
-							tuote.nimitys, 
+							tuote.nimitys,
+							$yhtioittain1 
 							ifnull(sum((SELECT sum(saldo) 
 										FROM tuotepaikat 
 										WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno)), 0) saldo,
@@ -76,6 +86,14 @@
 										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'L' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.varattu <> 0)), 0) varattu,
 
+							(ifnull(sum((SELECT sum(varattu) 
+										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu)
+										JOIN lasku on tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and lasku.tilaustyyppi='S'
+										WHERE tilausrivi.yhtio=tuote.yhtio and tilausrivi.tyyppi = 'G' and tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.varattu <> 0)), 0) +
+							ifnull(sum((SELECT sum(saldo_varattu) 
+										FROM tuotepaikat 
+										WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno)), 0)) Varattu_lisavar,	
+										
 							ifnull(sum((SELECT sum(if(tilausrivin_lisatiedot.osto_vai_hyvitys = 'O' or tilausrivin_lisatiedot.osto_vai_hyvitys = 'H', varattu * -1, 0))
 										FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu)
 										LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
@@ -104,9 +122,9 @@
 							FROM tuote
 							WHERE tuote.yhtio in ($yhtio)
 							$lisa
-							GROUP BY 1,2,3
+							GROUP BY 1,2,3 $yhtioittain2
 							$lisa2
-							ORDER BY 2,3";
+							ORDER BY tuote.tuoteno, tuote.yhtio";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$rivilimitti = 1000;
@@ -165,7 +183,7 @@
 					}
 
 					if(isset($workbook)) {
-						for ($i=1; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+						for ($i=1; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, ($i-1), ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 						$excelrivi++;
 					}
 
@@ -219,21 +237,21 @@
 								if (mysql_num_rows($result) <= $rivilimitti) echo "<td></td>";
 
 								if(isset($workbook)) {
-									$worksheet->writeString($excelrivi, $i, "");
+									$worksheet->writeString($excelrivi, ($i-1), "");
 								}
 							}
 							elseif (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
 								if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
 
 								if(isset($workbook)) {
-									$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
+									$worksheet->writeNumber($excelrivi, ($i-1), sprintf("%.02f",$row[$i]));
 								}
 							}
 							else {
 								if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top'>$row[$i]</td>";
 
 								if(isset($workbook)) {
-									$worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", " / ", $row[$i])));
+									$worksheet->writeString($excelrivi, ($i-1), strip_tags(str_replace("<br>", " / ", $row[$i])));
 								}
 							}
 						}
@@ -377,6 +395,7 @@
 			
 			if ($nollapiilo != '')	$nollapiilochk	= "CHECKED";
 			if ($poispiilo != '')	$poispiilochk	= "CHECKED";
+			if ($yhtioittain != '')	$yhtioittainchk	= "CHECKED";
 			
 			echo "<table>
 				<tr>
@@ -387,6 +406,10 @@
 				<tr>
 				<th>".t("Piilota poistetut tuotteet")."</th>
 				<td><input type='checkbox' name='poispiilo' $poispiilochk></td>
+				</tr>
+				<tr>
+				<th>".t("Näytä saldot yhtiöittäin")."</th>
+				<td><input type='checkbox' name='yhtioittain' $yhtioittainchk></td>
 				</tr>
 				</table><br>";
 			

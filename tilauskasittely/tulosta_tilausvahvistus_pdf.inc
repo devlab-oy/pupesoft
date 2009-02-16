@@ -1,6 +1,6 @@
 <?php
 
-	if($yhtiorow["tilausvahvistustyyppi"] == 3) {
+	if ($yhtiorow["tilausvahvistustyyppi"] == 3) {
 		require_once('pdflib/pupepdf.class.php');
 
 		if (!function_exists('tulosta_tilausvahvistus')) {
@@ -25,7 +25,7 @@
 				$laskurow = mysql_fetch_array($result);
 
 				$ennakkolisa = "";
-				if($yhtiorow["ennakkomaksu_tuotenumero"] != '') {
+				if ($yhtiorow["ennakkomaksu_tuotenumero"] != '') {
 					$ennakkolisa = " and tilausrivi.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]' ";
 				}
 
@@ -90,7 +90,7 @@
 							elseif(file_exists($yhtiorow["lasku_logo"])) {
 								$pdf->placeImageToTemplate($h,0,$yhtiorow["lasku_logo"], $tid, "57x100");
 							}
-							
+
 							if($toim == "YLLAPITOSOPIMUS") {
 								$otsikko = "YLLƒPITOSOPIMUS";
 							}
@@ -140,7 +140,7 @@
 							//  Sitten yhteyshenkilˆit‰
 							foreach(array("asiakkaan_tilausnumero", "asiakkaan_viite", "toimittajan_yhteyshenkilˆ", "asiakkaan_yhteyshenkilˆ", "asiakkaan_kaupallinen_k‰sittelij‰") as $key) {
 								if($laskurow[$key] != "") {
-									
+
 									$pdf->writeToTemplate($h, 1, $s[0], 0, t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
 									$h-=$pdf->ln();
 									$nb=$pdf->countParagraphHeight($laskurow[$key], "norm", (-1*($s[0])));
@@ -248,24 +248,24 @@
 					}
 				}
 
-				$pdf=alku($pdf, $laskurow,$kieli, "OK");
+				$pdf=alku($pdf, $laskurow, $kieli, "OK");
 
 				if($laskurow["tila"] == "R") {
 					$query = "  SELECT GROUP_CONCAT(tunnus) tunnukset
 								FROM lasku
 								WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnus]' and tila IN ('L','G','E','V','W','N','R','A')";
 					$result = mysql_query($query) or pupe_error($query);
-					$tunnusrow=mysql_fetch_array($result);
-					$tunnukset=$tunnusrow["tunnukset"];
+					$tunnusrow = mysql_fetch_array($result);
+					$tunnukset = $tunnusrow["tunnukset"];
 				}
 				else {
-					$tunnukset=$laskurow["tunnus"];
+					$tunnukset = $laskurow["tunnus"];
 				}
 
 				//  Voidaanko n‰ytt‰‰ alet?
-				$query = "select tunnus from tilausrivi where yhtio = '$kukarow[yhtio]' and ale > 0 and otunnus IN ($tunnukset)";
+				$query = "SELECT tunnus from tilausrivi where yhtio = '$kukarow[yhtio]' and ale > 0 and otunnus IN ($tunnukset)";
 				$abures = mysql_query($query) or pupe_error($query);
-				if(mysql_num_rows($abures) > 0) {
+				if (mysql_num_rows($abures) > 0) {
 					$alenaytetaan="OK";
 				}
 				else {
@@ -371,9 +371,9 @@
 							$pdf->write($h, $nb, 5+$offset, $s[0], str_replace($from, $to, $row["kommentti"]), $style_komm, "L", "I");
 							$h-=$pdf->ln($nb);
 						}
-						
+
 						$h-=$pdf->ln(0.5);
-						
+
 						//  Oisko sarjanumeroita
 						if ($row["kpl"]+$row["varattu"] > 0){
 							$sarjanutunnus = "myyntirivitunnus";
@@ -598,14 +598,14 @@
 
 				if ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
 					$liite = $pdf_tilausvahvistusfilenimi;
-					
+
 					if($laskurow["tunnusnippu"] > 0) {
 						$tno = $laskurow["tunnusnippu"];
 					}
 					else {
 						$tno = $laskurow["tunnus"];
 					}
-					
+
 					if($toim == "YLLAPITOSOPIMUS") {
 						$msg = t("Yll‰pitosopimus %s l‰hetet‰‰n osoitteeseen %s", $kieli, $tno, $kukarow["eposti"]);
 						$kutsu = t("Yll‰pitosopimus %s", $kieli, $tno);
@@ -614,11 +614,11 @@
 						$msg = t("Tilausvahvistus %s l‰hetet‰‰n osoitteeseen %s", $kieli, $tno, $kukarow["eposti"]);
 						$kutsu = t("Tilausvahvistus %s", $kieli, $tno);
 					}
-					
+
 					echo "<font class='message'>$msg</font>";
-					
-					
-					
+
+
+
 					if ($kukarow["extranet"] == '') {
 						require("../inc/sahkoposti.inc");
 					}
@@ -668,12 +668,12 @@
 				system("rm -f $pdf_tilausvahvistusfilenimi");
 			}
 		}
-		
+
 		if($toim=="YLLAPITOSOPIMUS") {
-			tulosta_tilausvahvistus($otunnus, $komento["Yllapitosopimus"], $kieli, $tee);
+			tulosta_tilausvahvistus($laskurow["tunnus"], $komento["Yllapitosopimus"], $kieli, $tee);
 		}
 		else {
-			tulosta_tilausvahvistus($otunnus, $komento["Tilausvahvistus"], $kieli, $tee);
+			tulosta_tilausvahvistus($laskurow["tunnus"], $komento["Tilausvahvistus"], $kieli, $tee);
 		}
 	}
 	else {

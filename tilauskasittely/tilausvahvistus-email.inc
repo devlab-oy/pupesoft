@@ -3,19 +3,27 @@
 // tarvitaan $laskurow array
 // tarvitaan $yhtiorow array
 
-$query         = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-$tilvahresult  = mysql_query($query) or pupe_error($query);
+$query = "	SELECT * 
+			FROM asiakas 
+			WHERE yhtio = '$kukarow[yhtio]' 
+			AND tunnus = '$laskurow[liitostunnus]'";
+$tilvahresult = mysql_query($query) or pupe_error($query);
 $tilvahasiakas = mysql_fetch_array($tilvahresult);
 
 $kieli = strtolower($tilvahasiakas['kieli']);
 
 $virexx = 0;
+$komento = array();
 
 // asiakkaan sähköpostiin
 if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 
-	$query	= "select * from yhteyshenkilo where yhtio='$kukarow[yhtio]' and liitostunnus='$laskurow[liitostunnus]' and nimi = '$laskurow[tilausyhteyshenkilo]'";
-	$yhteyshenkiloresult  = mysql_query($query) or pupe_error($query);
+	$query = "	SELECT * 
+				FROM yhteyshenkilo 
+				WHERE yhtio = '$kukarow[yhtio]' 
+				AND liitostunnus = '$laskurow[liitostunnus]' 
+				AND nimi = '$laskurow[tilausyhteyshenkilo]'";
+	$yhteyshenkiloresult = mysql_query($query) or pupe_error($query);
 	$yhteyshenkiloasiakas = mysql_fetch_array($yhteyshenkiloresult);
 
 	if ($yhteyshenkiloasiakas['email'] != '') {
@@ -33,12 +41,8 @@ if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 		$virexx++;
 	}
 	else {
-		// lähetetään PDF vahvistus vain jos meillä on P kirjain vahvistuksessa
-		if (strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
-			$komento["Tilausvahvistus"] = "asiakasemail".$tilvahasiakas['email'];
-
-			require("tulosta_tilausvahvistus_pdf.inc");
-		}
+		// komentoon asiakasemail
+		$komento["Tilausvahvistus"] = "asiakasemail".$tilvahasiakas['email'];
 	}
 }
 
@@ -52,16 +56,17 @@ if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 		$virexx++;
 	}
 	else {
-		// lähetetään PDF vahvistus vain jos meillä on P kirjain vahvistuksessa
-		if (strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
-			$komento["Tilausvahvistus"] = "email";
-
-			require("tulosta_tilausvahvistus_pdf.inc");
-		}
+		// komentoon email
+		$komento["Tilausvahvistus"] = "email";
 	}
 }
 
-// lähetetään textimuotoinen tilausvahvistusmeili jos miellä ei ole P:kirjainta vahvistuksessa
+// lähetetään PDF vahvistus jos meillä on P kirjain vahvistuksessa
+if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
+	require("tulosta_tilausvahvistus_pdf.inc");
+}
+
+// lähetetään textimuotoinen tilausvahvistusmeili jos miellä _EI OLE_ P kirjainta vahvistuksessa
 if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
 	if ($yhtiorow["varaako_jt_saldoa"] != "") {
@@ -281,7 +286,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 		if ($boob===FALSE) echo t("Sähköpostin lähetys epäonnistui")."!<br>";
 	}
 
-	if (strpos($laskurow['tilausvahvistus'],'O') !== FALSE) {
+	if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 		unset($boob);
 		$boob = mail($kukarow['eposti']		, $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli), $content, $header, "-f $yhtiorow[postittaja_email]");
 		if ($boob===FALSE) echo t("Sähköpostin lähetys epäonnistui")."!<br>";

@@ -40,37 +40,37 @@ if ($laskurow["tilaustyyppi"] == 'E') {
 	//
 	// tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'3')) {
+	if (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {
 		$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
 	}
-	else if (strpos(" ".$laskurow['tilausvahvistus'],'2')) {
+	elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
 		$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
 	}
 	else {
 		$naytatvale = 1; // halutaan n‰h‰ alet
 	}
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'E')) {
+	if (strpos($laskurow['tilausvahvistus'], 'E') !== FALSE) {
 		require("tilausvahvistus-edi.inc");
 	}
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'S')) {
+	if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 		require("tilausvahvistus-email.inc");
 	}
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'F')) {
+	if (strpos($laskurow['tilausvahvistus'], 'F') !== FALSE) {
 		require("tilausvahvistus-fax.inc");
 	}
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'O')) {
+	if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 		require("tilausvahvistus-email.inc");
 	}
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'U')) {
+	if (strpos($laskurow['tilausvahvistus'], 'U') !== FALSE) {
 		require("tilausvahvistus-futursoft.inc");
 	}
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'K')) {
+	if (strpos($laskurow['tilausvahvistus'], 'K') !== FALSE) {
 		$query = "	SELECT komento
 					FROM kirjoittimet
 					WHERE yhtio = '$kukarow[yhtio]' and
@@ -496,13 +496,13 @@ else {
 
 			//jos tilauksella on jo rahtikulu niin merkataan se rahtivapaaksi, ettei mene uudestaan laskutuksen yhteydess‰!
 			if (mysql_num_rows($result) > 0) {
-				$tilaus_valmis_ulos .= t("Tilauksella oli k‰sin syˆtetty rahtikulu! Merkattiin tilaus 'rahtivapaaksi', ettei kulua lis‰t‰ en‰‰ automaattisesti laskutuksessa.")."<br>";				
+				$tilaus_valmis_ulos .= t("Tilauksella oli k‰sin syˆtetty rahtikulu! Merkattiin tilaus 'rahtivapaaksi', ettei kulua lis‰t‰ en‰‰ automaattisesti laskutuksessa.")."<br>";
 				$query = "UPDATE lasku SET rahtivapaa = 'o' WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[tunnus]'";
 				$rahtivapres = mysql_query($query) or pupe_error($query);
 			}
 
 		}
-		
+
 		//jos on kassamyynti‰ ja se on k‰teist‰ niin tulostetaan lasku heti ilman l‰hetett‰
 		if (($kateinen == 'X' and $kateisohitus == "" and ($kukarow["kassamyyja"] != '' or $kertakassa != "") and $laskurow["vienti"] == '') or ($korkolasku == 'kylla')) {
 			$query = "	UPDATE tilausrivi
@@ -939,37 +939,37 @@ else {
 				//
 				// T‰ss‰ haarassa tulostetaan tilausvahvistus KOKO tilauksesta
 
-				if (strpos(" ".$laskurow['tilausvahvistus'],'3')) {
+				if (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {
 					$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
 				}
-				else if (strpos(" ".$laskurow['tilausvahvistus'],'2')) {
+				elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
 					$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
 				}
 				else {
 					$naytatvale = 1; // halutaan n‰h‰ alet
 				}
 
-				if (strpos(" ".$laskurow['tilausvahvistus'],'E')) {
+				if (strpos($laskurow['tilausvahvistus'], 'E') !== FALSE) {
 					require("tilausvahvistus-edi.inc");
 				}
 
-				if (strpos(" ".$laskurow['tilausvahvistus'],'S')) {
+				if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 					require("tilausvahvistus-email.inc");
 				}
 
-				if (strpos(" ".$laskurow['tilausvahvistus'],'F')) {
+				if (strpos($laskurow['tilausvahvistus'], 'F') !== FALSE) {
 					require("tilausvahvistus-fax.inc");
 				}
 
-				if (strpos(" ".$laskurow['tilausvahvistus'],'O')) {
+				if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 					require("tilausvahvistus-email.inc");
 				}
 
-				if (strpos(" ".$laskurow['tilausvahvistus'],'U')) {
+				if (strpos($laskurow['tilausvahvistus'], 'U') !== FALSE) {
 					require("tilausvahvistus-futursoft.inc");
 				}
 
-				if (strpos(" ".$laskurow['tilausvahvistus'],'K')) {
+				if (strpos($laskurow['tilausvahvistus'], 'K') !== FALSE) {
 					$query = "	SELECT komento
 								FROM kirjoittimet
 								WHERE yhtio = '$kukarow[yhtio]' and
@@ -1041,37 +1041,37 @@ else {
 					//
 					// tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
 
-					if (strpos(" ".$laskurow['tilausvahvistus'],'3')) {
+					if (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {
 						$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
 					}
-					else if (strpos(" ".$laskurow['tilausvahvistus'],'2')) {
+					elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
 						$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
 					}
 					else {
 						$naytatvale = 1; // halutaan n‰h‰ alet
 					}
 
-					if (strpos(" ".$laskurow['tilausvahvistus'],'E')) {
+					if (strpos($laskurow['tilausvahvistus'], 'E') !== FALSE) {
 						require("tilausvahvistus-edi.inc");
 					}
 
-					if (strpos(" ".$laskurow['tilausvahvistus'],'S')) {
+					if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 						require("tilausvahvistus-email.inc");
 					}
 
-					if (strpos(" ".$laskurow['tilausvahvistus'],'F')) {
+					if (strpos($laskurow['tilausvahvistus'], 'F') !== FALSE) {
 						require("tilausvahvistus-fax.inc");
 					}
 
-					if (strpos(" ".$laskurow['tilausvahvistus'],'O')) {
+					if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 						require("tilausvahvistus-email.inc");
 					}
 
-					if (strpos(" ".$laskurow['tilausvahvistus'],'U')) {
+					if (strpos($laskurow['tilausvahvistus'], 'U') !== FALSE) {
 						require("tilausvahvistus-futursoft.inc");
 					}
 
-					if (strpos(" ".$laskurow['tilausvahvistus'],'K')) {
+					if (strpos($laskurow['tilausvahvistus'], 'K') !== FALSE) {
 						$query = "	SELECT komento
 									FROM kirjoittimet
 									WHERE yhtio = '$kukarow[yhtio]' and

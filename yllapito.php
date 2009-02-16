@@ -512,6 +512,9 @@
 			if (($toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
 				$lisa .= " and " . $array[$i] . " = '" . $haku[$i] . "'";
 			}
+			elseif ($haku[$i]{0} == "#") {
+				$lisa .= " and " . $array[$i] . " = '" . substr($haku[$i], 1) . "'";
+			}
 			elseif (strpos($array[$i], "/") !== FALSE) {
 				list($a, $b) = explode("/", $array[$i]);
 

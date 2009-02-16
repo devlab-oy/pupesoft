@@ -63,6 +63,7 @@ if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 
 // l‰hetet‰‰n PDF vahvistus jos meill‰ on P kirjain vahvistuksessa
 if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
+	$toim = "TILAUSVAHVISTUS";
 	require("tulosta_tilausvahvistus_pdf.inc");
 }
 

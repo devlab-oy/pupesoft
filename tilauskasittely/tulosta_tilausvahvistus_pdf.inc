@@ -791,7 +791,6 @@
 		// Aloitellaan lähetteen teko
 		$page[$sivu] = alku($toim);
 
-
 		while ($row = mysql_fetch_array($riresult)) {
 			rivi($page[$sivu], $toim);
 			$total+= $row["rivihinta"];

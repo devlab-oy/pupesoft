@@ -15,17 +15,21 @@
 				$vero = 0.0;
 
 				$tilirow = mysql_fetch_array($tilires);
+				
+				$vainsuomi = '';
+				if ($taso == 'fi206') $vainsuomi = "JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.maa in ('FI', '')";
 
 				if ($tilirow['tilit']!='') {
-					$query = "SELECT sum(round(summa * if('$tulos'='22',22,vero) / 100, 2)) veronmaara,
-							sum(summa) summa,
+					$query = "SELECT sum(round(tiliointi.summa * if('$tulos'='22',22,vero) / 100, 2)) veronmaara,
+							sum(tiliointi.summa) summa,
 					 		count(*) kpl
 							FROM tiliointi
-							WHERE yhtio = '$kukarow[yhtio]'
+							$vainsuomi
+							WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 							AND korjattu = ''
 							AND tilino in ($tilirow[tilit])
-							AND tapvm >= '$startmonth'
-							AND tapvm <= '$endmonth'";
+							AND tiliointi.tapvm >= '$startmonth'
+							AND tiliointi.tapvm <= '$endmonth'";
 
 					$verores = mysql_query($query) or pupe_error($query);
 

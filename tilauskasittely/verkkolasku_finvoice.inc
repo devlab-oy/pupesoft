@@ -258,10 +258,10 @@ if (!function_exists('finvoice_otsik')) {
 			xml_add("InvoiceNumber",       	 	                     					$lasrow['laskunro'],  									$tootfinvoice);
 			xml_add('InvoiceDate Format="CCYYMMDD"',									vlas_dateconv($lasrow['tapvm']),						$tootfinvoice);
 			xml_add("SellerReferenceIdentifier",										$lasrow['tunnus'],										$tootfinvoice);
-			xml_add("OrderIdentifier",													$lasrow['viesti'],										$tootfinvoice);
-			xml_add("InvoiceTotalVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($lasrow['arvo']),									$tootfinvoice);
-			xml_add("InvoiceTotalVatAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",			pp(round($lasrow['summa']-$lasrow['arvo'], 2)),			$tootfinvoice);
-			xml_add("InvoiceTotalVatIncludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($lasrow['summa']),									$tootfinvoice);
+			xml_add("OrderIdentifier",													substr($lasrow['viesti'], 0, 35),										$tootfinvoice);
+			xml_add("InvoiceTotalVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($lasrow['arvo'], 2),									$tootfinvoice);
+			xml_add("InvoiceTotalVatAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",			pp(($lasrow['summa']-$lasrow['arvo']), 2),			$tootfinvoice);
+			xml_add("InvoiceTotalVatIncludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($lasrow['summa'], 2),									$tootfinvoice);
 
 		}
 		elseif($silent == "" or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) {
@@ -293,7 +293,7 @@ if (!function_exists('finvoice_alvierittely')) {
 
 			fputs($tootfinvoice, "</VatSpecificationDetails>\r\n");
 			if($lasrow["sisviesti1"]!="") {
-				xml_add("InvoiceFreeText",											trim(str_replace("|", " ", $lasrow["sisviesti1"])), 				$tootfinvoice);
+				xml_add("InvoiceFreeText",											substr(trim(str_replace("|", " ", $lasrow["sisviesti1"])), 0, 512), 				$tootfinvoice);
 			}
 		}
 	}
@@ -301,16 +301,17 @@ if (!function_exists('finvoice_alvierittely')) {
 
 if (!function_exists('finvoice_otsikko_loput')) {
 	function finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow) {
-		global $err_finvoice;
+		global $err_finvoice, $yhtiorow;
+		
 		if($err_finvoice == 0)	{
 			fputs($tootfinvoice, "<PaymentTermsDetails>\r\n");
 			xml_add("PaymentTermsFreeText",       											pp($masrow['teksti']." ".$masrow['kassa_teksti']),			$tootfinvoice);
 			xml_add('InvoiceDueDate Format="CCYYMMDD"',               						pp(vlas_dateconv($lasrow['erpcm'])),   	       				$tootfinvoice);
 			xml_add('CashDiscountDate Format="CCYYMMDD"',               					pp(vlas_dateconv($lasrow['kapvm'])),   	       				$tootfinvoice);
-			xml_add("CashDiscountBaseAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",					pp($lasrow['kasumma']),				         				$tootfinvoice);
+			xml_add("CashDiscountBaseAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",					pp($lasrow['kasumma'], $yhtiorow["hintapyoristys"], 5, 2),				         				$tootfinvoice);
 			fputs($tootfinvoice, "<PaymentOverDueFineDetails>\r\n");
 			xml_add("PaymentOverDueFineFreeText",											"Viiv‰styskorko ".pp($lasrow['viikorkopros']),				$tootfinvoice);
-			xml_add("PaymentOverDueFinePercent",                 						 	pp($lasrow['viikorkopros']),   								$tootfinvoice);
+			xml_add("PaymentOverDueFinePercent",                 						 	pp($lasrow['viikorkopros'], 2),   								$tootfinvoice);
 			fputs($tootfinvoice, "</PaymentOverDueFineDetails>\r\n");
 			fputs($tootfinvoice, "</PaymentTermsDetails>\r\n");
 			fputs($tootfinvoice, "</InvoiceDetails>\r\n");
@@ -324,14 +325,14 @@ if (!function_exists('finvoice_otsikko_loput')) {
 
 if (!function_exists('finvoice_rivi')) {
 	function finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat) {
-		global $err_finvoice;
+		global $err_finvoice, $yhtiorow;
 
 		if($err_finvoice == 0) {
 			fputs($tootfinvoice, "<InvoiceRow>\r\n");
 			xml_add("ArticleIdentifier",                                   						$tilrow['tuoteno'],         	$tootfinvoice);
 			xml_add("ArticleName",                                    							$tilrow['nimitys'],  			$tootfinvoice);
 			xml_add("DeliveredQuantity QuantityUnitCode=\"$tilrow[yksikko]\"",					pp($tilrow['kpl']),      		$tootfinvoice);
-			xml_add("UnitPriceAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",			pp($tilrow['hinta']),        	$tootfinvoice);
+			xml_add("UnitPriceAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",			pp($tilrow['hinta'], $yhtiorow["hintapyoristys"], 5, 2),        	$tootfinvoice);
 
 			if($tilrow["tilaajanrivinro"] != 0) {
 				xml_add("RowIdentifier",                                    					$tilrow['tilaajanrivinro'], 	$tootfinvoice); // t‰nne laitetaan asiakkaan rivinumero, niin saavat parseroida senkin laskuista
@@ -347,10 +348,10 @@ if (!function_exists('finvoice_rivi')) {
 				}
 			}
 
-			xml_add("RowVatRatePercent",                                    					pp($tilrow['alv']),           	$tootfinvoice);
-			xml_add("RowVatAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",          	pp($vatamount),      			$tootfinvoice);	// veron m‰‰r‰
-			xml_add("RowVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",  	pp($tilrow['rivihinta']),      	$tootfinvoice);	// veroton rivihinta
-			xml_add("RowAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",             	pp($totalvat),     				$tootfinvoice);	// verollinen rivihinta
+			xml_add("RowVatRatePercent",                                    					pp($tilrow['alv'], $yhtiorow["hintapyoristys"], 5, 2),           	$tootfinvoice);
+			xml_add("RowVatAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",          	pp($vatamount, $yhtiorow["hintapyoristys"], 5, 2),      			$tootfinvoice);	// veron m‰‰r‰
+			xml_add("RowVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",  	pp($tilrow['rivihinta'], $yhtiorow["hintapyoristys"], 5, 2),      	$tootfinvoice);	// veroton rivihinta
+			xml_add("RowAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",             	pp($totalvat, $yhtiorow["hintapyoristys"], 5, 2),     				$tootfinvoice);	// verollinen rivihinta
 			fputs($tootfinvoice, "</InvoiceRow>\r\n");
 		}
 	}

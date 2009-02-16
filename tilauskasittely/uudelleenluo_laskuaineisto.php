@@ -76,8 +76,20 @@
 
 			//pilkut pisteiksi
 			if (!function_exists("pp")) {
-				function pp ($muuttuja) {
-					return $muuttuja = str_replace(".",",",$muuttuja);
+				function pp ($muuttuja, $round="", $rmax="", $rmin="") {
+					if(strlen($round)>0) {
+						if(strlen($rmax)>0 and $rmax<$round) {
+							$round = $rmax;
+						}
+						if(strlen($rmin)>0 and $rmin>$round) {
+							$round = $rmin;
+						}
+												
+						return $muuttuja = number_format($muuttuja, $round, ",", "");
+					}
+					else {
+						return $muuttuja = str_replace(".",",",$muuttuja);
+					}
 				}
 			}
 

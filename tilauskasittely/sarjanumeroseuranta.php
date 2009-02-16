@@ -1064,9 +1064,10 @@
 				
 				$query = "SELECT laskunro FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tila = 'K' and tunnus = '$sarjarow[osto_uusiotunnus]'";
 				$keikkares = mysql_query($query) or pupe_error($query);
+				
 				if (mysql_num_rows($keikkares) > 0) {
 					$keikkarow2 = mysql_fetch_array($keikkares);
-					$echoostuns = t("Keikka:").$keikkarow2["laskunro"];
+					$echoostuns = t("Keikka").": ".$keikkarow2["laskunro"];
 				}				
 			}
 			else {
@@ -1079,6 +1080,18 @@
 			
 			echo "<td colspan='2' valign='top'><a href='../raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$ostuns'>$echoostuns $sarjarow[osto_nimi]</a><br>";
 
+			$fnlina1 = "";
+			$fnlina2 = "";
+			
+			if ($sarjarow["myynti_tila"] == 'T') {
+				$fnlina1 = "<font class='message'>(".t("Tarjous").": ";
+				$fnlina2 = ")</font>";
+			}
+
+			if ($sarjarow["myyntirivitunnus"] == -1) {
+				$sarjarow["myynti_nimi"] = t("Inventointi");
+			}
+			
 			if (($sarjarow["siirtorivitunnus"] > 0 and $tunnuskentta != 'siirtorivitunnus') or ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"])) {
 
 				if ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"]) {
@@ -1099,33 +1112,20 @@
 
 				if ($siirow["tyyppi"] == "O") {
 					// pultattu kiinni johonkin
-					$fnlina1 = t("<br>Varattu lisävarusteena").": ";
-					$fnlina2 = "";
-					$sarjarow["myynti_nimi"] .= "<br>".$siirow["tuoteno"]." ".$siirow["sarjanumero"];
+					$fnlina1 .= "";
+					$fnlina2 .= "<br><br>".t("Varattu lisävarusteena").":<br>".$siirow["tuoteno"]." ".$siirow["sarjanumero"];
 				}
 				elseif ($siirow["tyyppi"] == "G") {
 					// jos tämä on jollain siirtolistalla
-					$fnlina1 = "<font class='message'>(".t("Kesken siirtolistalla").": ";
-					$fnlina2 = ")</font>";
-					$sarjarow["myynti_nimi"] = $siirow["otunnus"];
+					$fnlina1 .= "<font class='message'>(".t("Kesken siirtolistalla").": ";
+					$fnlina2 .= ")</font>";
+					$sarjarow["myynti_nimi"] .= $siirow["otunnus"];
 				}
 
 			}
-			elseif ($sarjarow["myynti_tila"] == 'T') {
-				$fnlina1 = "<font class='message'>(".t("Tarjous").": ";
-				$fnlina2 = ")</font>";
-			}
-			else {
-				$fnlina1 = "";
-				$fnlina2 = "";
-			}
-
-			if ($sarjarow["myyntirivitunnus"] == -1) {
-				$sarjarow["myynti_nimi"] = t("Inventointi");
-			}
 
 			if ($sarjarow["myynti_tunnus"] > 0) {
-				echo "<a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$sarjarow[myynti_tunnus]'>$fnlina1 $sarjarow[myynti_tunnus] $sarjarow[myynti_nimi] $fnlina2</a></td>";
+				echo "$fnlina1 <a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$sarjarow[myynti_tunnus]'>$sarjarow[myynti_tunnus] $sarjarow[myynti_nimi]</a> $fnlina2</td>";
 			}
 			else {
 				echo "$fnlina1 $sarjarow[myynti_nimi] $fnlina2</td>";
@@ -1145,7 +1145,7 @@
 					echo "<td valign='top'>".t("Lukittu")."</td>";
 				}
 				elseif ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA" or $from == "riviosto" or $from == "kohdista" or $from == "INVENTOINTI") {
-					if (($from != "SIIRTOTYOMAARAYS" and $laskurow["tila"] != "G" and $from != "SIIRTOLISTA" and $sarjarow["siirtorivitunnus"] > 0) or (($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON" and $sarjarow["osto_laskaika"] > '0000-00-00' and ($sarjarow["siirtorivitunnus"] > 0 or $sarjarow["myyntirivitunnus"] > 0))) {
+					if (($from != "SIIRTOTYOMAARAYS" and $laskurow["tila"] != "G" and $from != "SIIRTOLISTA" and $sarjarow["siirtorivitunnus"] > 0) or (($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON" and $sarjarow["osto_laskaika"] > '0000-00-00' and ($sarjarow["siirtorivitunnus"] > 0 or $sarjarow["myyntirivitunnus"] > 0)) or ($from == "SIIRTOTYOMAARAYS" and $sarjarow["ostorivitunnus"] == 0)) {
 						$dis = "DISABLED";
 					}
 					else {

@@ -55,9 +55,11 @@
 	if ($tee != '' and $kukarow["eposti"] != "" and $asiakas > 0) {
 		$where1 = '';
 		$where2 = '';
+		$osasto = mysql_real_escape_string(trim($osasto));
+		$try    = mysql_real_escape_string(trim($try));
 
 		if ($osasto != '' and $checkall == "") {
-			$osastot = split(" ",$osasto);
+			$osastot = split(" ", $osasto);
 
 			for($i = 0; $i < sizeof($osastot); $i++) {
 				$osastot[$i] = trim($osastot[$i]);
@@ -98,7 +100,7 @@
 					}
 				}
 			}
-			$where2 = substr($where2,0,-1);
+			$where2 = substr($where2, 0, -1);
 			$where2 = " try in (".$where2.") ";
 		}
 

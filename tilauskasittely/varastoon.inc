@@ -202,7 +202,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 else {
 	if ($mobiili_keikka != "yes") {
 		echo "<font class='message'>".t("Vied‰‰n varastoon %s tuotetta", "", $elements).":<br></font>";
-	}		
+	}
 }
 
 if ($tee != "" and $mobiili_keikka != "yes") {
@@ -240,7 +240,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	$osuus_apu_hinta = round($erikoisale*$tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin'], $yhtiorow["hintapyoristys"]);
 
 	// jos keikan arvo on muuta kuin nolla ja rivin hinta on pienempi kuin keikan hinta, lasketaan rahtiosuus. muuten nollaa
-	if ($laskurow['summa'] != 0 and $osuus_apu_hinta <= $laskurow["summa"]) {
+	if ($laskurow['summa'] != 0 and $osuus_apu_hinta <= $laskurow["summa"] + 0.01) {
 		// rivin hinta
 		$osuus   = $osuus_apu_hinta / $laskurow['summa'];	// kuinka paljon t‰m‰ rivi on koko keikasta
 		$rahtios = $osuus*$rahtikulut;						// lasketaan sama osuus rahtikuluista t‰lle riville
@@ -629,7 +629,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	if ($tee != "" and $mobiili_keikka != "yes") {
 		$bar->increase(); //calls the bar with every processed element
 	}
-	
+
 	if ($mobiili_keikka == "yes") {
 		echo "<font class='message'>".t("Vietiin tuotetta")." $tilrivirow[tuoteno] ".t("varastoon").": $tilrivirow[varattu] ".t("kappaletta").".</font><br>";
 	}
@@ -760,7 +760,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 	if ($mobiili_keikka != "yes") {
 		echo "<font class='message'>".t("Vietiin keikka")." $laskurow[laskunro] ".t("varastoon").": $rivia ".t("rivi‰").".</font><br><br>";
 	}
-	
+
 	$query 	= "SELECT automaatti_toimitus FROM toimi where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
 	$result	= mysql_query($query) or pupe_error($query);
 	$atrow 	= mysql_fetch_array($result);
@@ -821,7 +821,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 		}
 
 		if ($yhtiorow["automaattinen_jt_toimitus"] != "") {
-			
+
 			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "automaaginen", "JATKA");
 			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "tosi_automaaginen", "JATKA");
 

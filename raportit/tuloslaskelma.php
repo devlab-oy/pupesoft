@@ -14,7 +14,14 @@
 	}
 	else {
 
-    	echo "<font class='head'>".t("Tase/tuloslaskelma")."</font><hr>";
+	echo "<font class='head'>".t("Tase/tuloslaskelma")."</font><hr>";
+		if ($tltee == "aja") {
+			if ($plvv * 12 + $plvk > $alvv * 12 + $alvk) {
+				echo "<font class='error'>".t("Alkukausi on p‰‰ttymiskauden j‰lkeen")."</font><br>";
+				$tltee = '';
+			}
+		}
+
 
 		if ($tltee == "aja") {
 

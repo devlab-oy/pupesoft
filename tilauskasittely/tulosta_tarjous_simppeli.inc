@@ -203,7 +203,7 @@ if (!function_exists('tulosta_tarjous')) {
 
 		$query = "	SELECT selite
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TRIVITYYPPI' and selite NOT IN ('Tuotteet', 'Palvelut', 'Ylläpito', 'Alennukset', 'Optio', '')";
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TRIVITYYPPI' and selite NOT IN ('Tuotteet', 'Palvelut', 'Ylläpito', 'Alennukset', 'Optio', '') and selitetark_3 != 'EISUMMATA'";
 		$abures = mysql_query($query) or pupe_error($query);
 		if(mysql_num_rows($abures) >0 ) {
 			while($aburow = mysql_fetch_array($abures)) {
@@ -211,7 +211,19 @@ if (!function_exists('tulosta_tarjous')) {
 			}
 		}
 
-		$rivityypit[] = "Alennukset";		
+		$rivityypit[] = "Alennukset";
+		
+		$rivityypit[] = "SUMMAA";
+		
+		$query = "	SELECT selite
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TRIVITYYPPI' and selite NOT IN ('Tuotteet', 'Palvelut', 'Ylläpito', 'Alennukset', 'Optio', '') and selitetark_3 = 'EISUMMATA'";
+		$abures = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($abures) >0 ) {
+			while($aburow = mysql_fetch_array($abures)) {
+				$rivityypit[] = $aburow["selite"];
+			}
+		}
 		$rivityypit[] = "Ylläpito";
 		$rivityypit[] = "Optio";
 		
@@ -236,7 +248,7 @@ if (!function_exists('tulosta_tarjous')) {
 			$riresult = mysql_query($query) or pupe_error($query);
 
 			//	Ylläpitoa ei haluta mukaan grand totaliin
-			if(($key == "Ylläpito" or $key == "Leasing") and $yhteensalaitettu == "") {
+			if($key == "SUMMAA") {
 				if($alenaytetaan == "OK") {
 					$pdf->write($h, 1, $s[1], $s[4], t("Tarjous yhteensä alv 0%",$kieli).": ", "norm", "R", "B");
 				}
@@ -245,7 +257,7 @@ if (!function_exists('tulosta_tarjous')) {
 				}	
 				$pdf->write($h, 1, $s[3], 0, money_format('%i',$grand_total), "norm", "R", "B");
 				$h-=$pdf->ln(2);
-				$yhteensalaitettu = 1;
+				continue;
 			}
 			
 			if(mysql_num_rows($riresult)>0) {
@@ -271,7 +283,7 @@ if (!function_exists('tulosta_tarjous')) {
 
 				$pdf->write($h, 1, 0, $s[1], t("Tuote", $kieli)." / ".t("Kommentti", $kieli), "norm", "L", "B");
 				$pdf->write($h, 1, $s[1], $s[2], t("Määrä", $kieli), "norm", "R", "B");
-								
+				
 				if($laskurow["rivihintoja_ei_nayteta"] == "" or $key == "Optio") {
 					$pdf->write($h, 1, $s[2], $s[3], t("Hinta/yks", $kieli), "norm", "R", "B");
 					
@@ -366,7 +378,12 @@ if (!function_exists('tulosta_tarjous')) {
 					}
 				}
 				
-				if($laskurow["rivihintoja_ei_nayteta"] == "" and $key != "Optio") {
+				//	Summataanko?
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]' and laji = 'TRIVITYYPPI' and selite = '$key' and selitetark_3='EISUMMATA'";
+				$abures = mysql_query($query) or pupe_error($query);
+				if($laskurow["rivihintoja_ei_nayteta"] == "" and $key != "Optio" and mysql_num_rows($abures) == 0) {
 					$pdf->write($h, 1, $s[0], $s[3], t(ucfirst(strtolower($key))." yhteensä",$kieli).": ", "norm", "R", "B");				
 					$pdf->write($h, 1, $s[3], 0, money_format('%!i',$summa), "norm", "R", "B");
 				}

@@ -40,23 +40,49 @@ if (!function_exists('alku_tarjous')) {
 		global $tarjoustyyppi, $yhtiorow, $kukarow, $pieni, $norm, $boldi, $pieni_boldi, $iso, $rectparam;
 	
 		$page_tarjous = $pdf_tarjous->new_page("a4");
-			
+
+		$apu_yhtiorow = array();
+
+		// varmistetaan, että kopiossakin tulee oikean toimipaikan logo
+		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
+			$query = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_toimipaikkarow = mysql_fetch_array($result);
+				$apu_yhtiorow["lasku_logo"] = $yhtion_toimipaikkarow["lasku_logo"];
+		 	}
+		}
+		else {
+			$query = "	SELECT *
+						FROM yhtion_parametrit
+						WHERE yhtio = '$laskurow[yhtio]'";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_parametritrow = mysql_fetch_array($result);
+				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
+			}
+		}
+					
 		unset($data);		
-		if( (int) $yhtiorow["lasku_logo"] > 0) {
-			$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
+		if( (int) $apu_yhtiorow["lasku_logo"] > 0) {
+			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
 			$data = $liite["data"];
 			$isizelogo[0] = $liite["image_width"];
 			$isizelogo[1] = $liite["image_height"];
 			unset($liite);
 		}
-		elseif(file_exists($yhtiorow["lasku_logo"])) {
-			$filename = $yhtiorow["lasku_logo"];
+		elseif(file_exists($apu_yhtiorow["lasku_logo"])) {
+			$filename = $apu_yhtiorow["lasku_logo"];
 
 			$fh = fopen($filename, "r");
 			$data = fread($fh, filesize($filename));
 			fclose($fh);
 			
-			$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+			$isizelogo = getimagesize($apu_yhtiorow["lasku_logo"]);
 		}
 		
 		if($data) {
@@ -80,10 +106,10 @@ if (!function_exists('alku_tarjous')) {
 			}
 		}
 		else {
-			$pdf_tarjous->draw_text(30, 815, $yhtiorow["nimi"], 	$page_tarjous, $norm);
-			$pdf_tarjous->draw_text(30, 805, $yhtiorow["osoite"], 	$page_tarjous, $norm);
-			$pdf_tarjous->draw_text(30, 795, $yhtiorow["postino"]." ".$yhtiorow["postitp"], 	$page_tarjous, $norm);
-			$pdf_tarjous->draw_text(30, 785, $yhtiorow["maa"], 		$page_tarjous, $norm);
+			$pdf_tarjous->draw_text(30, 815, $laskurow["yhtio_nimi"], 	$page_tarjous, $norm);
+			$pdf_tarjous->draw_text(30, 805, $laskurow["yhtio_osoite"], 	$page_tarjous, $norm);
+			$pdf_tarjous->draw_text(30, 795, $laskurow["yhtio_postino"]." ".$laskurow["yhtio_postitp"], 	$page_tarjous, $norm);
+			$pdf_tarjous->draw_text(30, 785, $laskurow["yhtio_maa"], 		$page_tarjous, $norm);
 		}
 		
 		$pdf_tarjous->draw_text(310,815, t("Tarjous", $kieli), 		$page_tarjous, $iso);
@@ -291,22 +317,48 @@ if (!function_exists('uusi_sivu_tarjous')) {
 		
 		$page_tarjous = $pdf_tarjous->new_page("a4");
 		
+		$apu_yhtiorow = array();
+
+		// varmistetaan, että kopiossakin tulee oikean toimipaikan logo
+		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
+			$query = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_toimipaikkarow = mysql_fetch_array($result);
+				$apu_yhtiorow["lasku_logo"] = $yhtion_toimipaikkarow["lasku_logo"];
+		 	}
+		}
+		else {
+			$query = "	SELECT *
+						FROM yhtion_parametrit
+						WHERE yhtio = '$laskurow[yhtio]'";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_parametritrow = mysql_fetch_array($result);
+				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
+			}
+		}
+		
 		unset($data);		
-		if( (int) $yhtiorow["lasku_logo"] > 0) {
-			$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
+		if( (int) $apu_yhtiorow["lasku_logo"] > 0) {
+			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
 			$data = $liite["data"];
 			$isizelogo[0] = $liite["image_width"];
 			$isizelogo[1] = $liite["image_height"];
 			unset($liite);
 		}
-		elseif(file_exists($yhtiorow["lasku_logo"])) {
-			$filename = $yhtiorow["lasku_logo"];
+		elseif(file_exists($apu_yhtiorow["lasku_logo"])) {
+			$filename = $apu_yhtiorow["lasku_logo"];
 
 			$fh = fopen($filename, "r");
 			$data = fread($fh, filesize($filename));
 			fclose($fh);
 			
-			$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+			$isizelogo = getimagesize($apu_yhtiorow["lasku_logo"]);
 		}
 		
 		if($data) {
@@ -330,10 +382,10 @@ if (!function_exists('uusi_sivu_tarjous')) {
 			}
 		}
 		else {
-			$pdf_tarjous->draw_text(30, 815, $yhtiorow["nimi"], 	$page_tarjous, $norm);
-			$pdf_tarjous->draw_text(30, 805, $yhtiorow["osoite"], 	$page_tarjous, $norm);
-			$pdf_tarjous->draw_text(30, 795, $yhtiorow["postino"]." ".$yhtiorow["postitp"], 	$page_tarjous, $norm);
-			$pdf_tarjous->draw_text(30, 785, $yhtiorow["maa"], 		$page_tarjous, $norm);
+			$pdf_tarjous->draw_text(30, 815, $laskurow["yhtio_nimi"], 	$page_tarjous, $norm);
+			$pdf_tarjous->draw_text(30, 805, $laskurow["yhtio_osoite"], 	$page_tarjous, $norm);
+			$pdf_tarjous->draw_text(30, 795, $laskurow["yhtio_postino"]." ".$laskurow["yhtio_postitp"], 	$page_tarjous, $norm);
+			$pdf_tarjous->draw_text(30, 785, $laskurow["yhtio_maa"], 		$page_tarjous, $norm);
 		}
 			
 		$pdf_tarjous->draw_text(310,815, t("Tarjous", $kieli), 		$page_tarjous, $iso);
@@ -733,7 +785,7 @@ if (!function_exists('loppu_tarjous')) {
 				$myyrow = $kukarow;
 			}
 			
-			$pdf_tarjous->draw_text(mm_pt(15),  47, $yhtiorow["nimi"].",    ".$yhtiorow["osoite"]."    ".$yhtiorow["postino"]."    ".$yhtiorow["postitp"].",    Puh:".$yhtiorow["puhelin"].",    Email:".$yhtiorow["email"], $page_tarjous, $boldi);
+			$pdf_tarjous->draw_text(mm_pt(15),  47, $laskurow["yhtio_nimi"].",    ".$laskurow["yhtio_osoite"]."    ".$laskurow["yhtio_postino"]."    ".$laskurow["yhtio_postitp"].",    Puh:".$yhtiorow["puhelin"].",    Email:".$yhtiorow["email"], $page_tarjous, $boldi);
 			$pdf_tarjous->draw_text(mm_pt(15),  35, $myyrow["nimi"].",    Puh:".$myyrow["puhno"].",    Email:".$myyrow["eposti"], $page_tarjous, $boldi);
 		}
 		

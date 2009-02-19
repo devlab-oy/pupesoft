@@ -908,7 +908,7 @@
 			/* ei oteta huomioon niitä mistä puuttuu tulostusalue ja millä on tietty alatila */
 				$query = "	SELECT count(distinct lasku.tunnus) kpl
 							FROM lasku
-							JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != ''
+							JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							AND lasku.tila in ('L','N')
 							AND lasku.tulostusalue != ''
@@ -917,11 +917,12 @@
 							group by lasku.vanhatunnus";
 				$vanhat_res = mysql_query($query) or pupe_error($query);
 				$vanhat_row = mysql_fetch_array($vanhat_res);
+				
 				// Debug 				
-				echo "tarkistus: $vanhat_row[kpl] <br>";
+				/*echo "tarkistus: $vanhat_row[kpl] <br>";
 				echo "main: $row[tunnukset_lkm] <br>";				
 				echo "main: $row[vanhatunnus] <br>";				
-				echo "main: $row[tunnukset] <br>";		
+				echo "main: $row[tunnukset] <br>";	*/	
 						
 				if ($vanhat_row['kpl'] == $row['tunnukset_lkm'] or $vanhat_row['kpl'] == 0 or $yhtiorow["splittauskielto"] == "K") {
 									

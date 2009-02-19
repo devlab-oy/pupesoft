@@ -165,13 +165,24 @@
 				}
 			}
 
+			$having = "";
+
+			if ($yhtiorow['pakkaamolokerot'] == 'K') {
+				$having = " HAVING ((rahtikirjat.otsikkonro is null or (rahtikirjat.otsikkonro is not null and lasku.pakkaamo > 0) and (rahtikirjat.pakkaus = 'KOLLI' or rahtikirjat.pakkaus = 'Rullakko')) or rahtikirjat.poikkeava = -9) and ";
+			}
+			else {
+				$having = " HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ";
+			}
+
 			// saadaanko n‰ille tilauksille syˆtt‰‰ rahtikirjoja
 			$query = "	SELECT
 						lasku.yhtio,
 						rahtikirjat.otsikkonro,
 						rahtikirjat.poikkeava,
 						toimitustapa.nouto,
-						lasku.vienti
+						lasku.vienti,
+						rahtikirjat.pakkaus,
+						lasku.pakkaamo
 						FROM lasku use index (tila_index)
 						JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != ''
 						$joinmaksuehto
@@ -181,7 +192,7 @@
 						and lasku.tila = '$tila'
 						$alatilassa
 						and lasku.tunnus in ($tunnukset)
-						HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ((toimitustapa.nouto is null or toimitustapa.nouto='') or lasku.vienti!='')";
+						$having ((toimitustapa.nouto is null or toimitustapa.nouto='') or lasku.vienti!='')";
 			$tilre = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($tilre) == 0) {
@@ -337,7 +348,29 @@
 						toimitustapa	= '$toimitustapa'
 						where yhtio = '$kukarow[yhtio]' and tunnus in ($tunnukset)";
 			$updateres = mysql_query($query) or pupe_error($query);
-
+			
+			//yhdistet‰‰n splittaantuneet
+			if (strpos($tunnukset,',') !== false) {
+				$otsikko_tunnarit = explode(',',$tunnukset);
+				
+				$query = "	UPDATE tilausrivi SET
+							otunnus		= '$otsikko_tunnarit[0]'
+							where yhtio = '$kukarow[yhtio]' and otunnus in ($tunnukset)";
+				$updateres = mysql_query($query) or pupe_error($query);
+				
+				
+				$query = "	UPDATE lasku SET
+							tila		= 'D',
+							comments	= concat(comments, ' $kukarow[kuka] poisti otsikot rahtikirjan syˆtˆss‰.', now())
+							where yhtio = '$kukarow[yhtio]' and tunnus in($tunnukset) and tunnus != $otsikko_tunnarit[0]";
+				$updateres = mysql_query($query) or pupe_error($query);
+			
+				$laskurow['tunnus'] = $otsikko_tunnarit[0];
+			}
+			
+			
+			
+			
 			// Katsotaan pit‰isikˆ t‰m‰ rahtikirja tulostaa heti...
 			$query = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -797,6 +830,19 @@
 			$wherelasku = " and lasku.toim_nimi != '' ";
 		}
 
+		$having = "";
+		
+		if ($yhtiorow['pakkaamolokerot'] == 'K') {
+			$having = " HAVING ((rahtikirjat.otsikkonro is null or (rahtikirjat.otsikkonro is not null and lasku.pakkaamo > 0) and (rahtikirjat.pakkaus = 'KOLLI' or rahtikirjat.pakkaus = 'Rullakko')) or rahtikirjat.poikkeava = -9) and ";
+		}
+		else {
+			$having = " HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ";
+		}
+		
+		if ($yhtiorow["splittauskielto"] == "") {
+			$grouplisa = ", lasku.vanhatunnus, lasku.varasto ";
+		}
+
 		// Haetaan sopivia tilauksia
 		$query = "	SELECT
 					min(lasku.tunnus) tunnus,
@@ -811,7 +857,13 @@
 					date_format(lasku.luontiaika, '%Y-%m-%d') laadittux,
 					date_format(lasku.toimaika, '%Y-%m-%d') toimaika,
 					rahtikirjat.otsikkonro,
-					rahtikirjat.poikkeava
+					rahtikirjat.poikkeava,
+					lasku.pakkaamo,
+					sum(rahtikirjat.kollit) kollit,
+					rahtikirjat.pakkaus,
+					count(distinct lasku.tunnus) tunnukset_lkm,
+					vanhatunnus,
+					varasto
 					FROM lasku use index (tila_index)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != ''
 					$joinmaksuehto
@@ -823,11 +875,11 @@
 					$wherelasku
 					$haku
 					$tilaustyyppi
-					GROUP BY lasku.toimitustapa, toimitustapa.nouto, $groupmaksuehto kimppakyyti, lasku.vienti, laadittux, toimaika, rahtikirjat.otsikkonro
-					HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
+					GROUP BY lasku.toimitustapa, toimitustapa.nouto, $groupmaksuehto kimppakyyti, lasku.vienti, laadittux, toimaika $grouplisa
+					$having ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
 					ORDER BY laadittu";
 		$tilre = mysql_query($query) or pupe_error($query);
-
+		
 		//piirret‰‰n taulukko...
 		if (mysql_num_rows($tilre) != 0) {
 
@@ -844,30 +896,103 @@
 				echo "<th>".t("Toimaika")."</th>";
 			}
 
+			if ($yhtiorow['pakkaamolokerot'] == 'K') {
+				echo "<th>".t("Kollit")."</th>";
+				echo "<th>".t("Rullakot")."</th>";
+			}
+
 			echo "</tr>";
 
 			while ($row = mysql_fetch_array($tilre)) {
-				echo "<tr class='aktiivi'>";
-				echo "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";
-				echo "<td valign='top'>$row[nimi]</td>";
-				echo "<td valign='top'>$row[toimitustapa]</td>";
-				echo "<td valign='top'>$row[laatija]</td>";
-				echo "<td valign='top'>".tv1dateconv($row["laadittux"])."</td>";
+				//chekkaus ett‰ kaikki splitatut tilaukset on ker‰tty
+			/* ei oteta huomioon niit‰ mist‰ puuttuu tulostusalue ja mill‰ on tietty alatila */
+				$query = "	SELECT count(distinct lasku.tunnus) kpl
+							FROM lasku
+							JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != ''
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							AND lasku.tila in ('L','N')
+							AND lasku.tulostusalue != ''
+							AND lasku.vanhatunnus = '$row[vanhatunnus]'
+							AND lasku.varasto = '$row[varasto]'
+							group by lasku.vanhatunnus";
+				$vanhat_res = mysql_query($query) or pupe_error($query);
+				$vanhat_row = mysql_fetch_array($vanhat_res);
+				// Debug 				
+				/*echo "tarkistus: $vanhat_row[kpl] <br>";
+				echo "main: $row[tunnukset_lkm] <br>";				
+				echo "main: $row[vanhatunnus] <br>";				
+				echo "main: $row[tunnukset] <br>";	*/	
+						
+				if ($vanhat_row['kpl'] == $row['tunnukset_lkm'] or $vanhat_row['kpl'] == 0 or $yhtiorow["splittauskielto"] == "K") {
+									
+					echo "<tr class='aktiivi'>";
+					echo "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";
+					echo "<td valign='top'>$row[nimi]</td>";
+					echo "<td valign='top'>$row[toimitustapa]</td>";
+					echo "<td valign='top'>$row[laatija]</td>";
+					echo "<td valign='top'>".tv1dateconv($row["laadittux"])."</td>";
 
-				if ($kukarow['resoluutio'] == 'I') {
-					echo "<td valign='top'>".tv1dateconv($row["toimaika"])."</td>";
+					if ($kukarow['resoluutio'] == 'I') {
+						echo "<td valign='top'>".tv1dateconv($row["toimaika"])."</td>";
+					}
+
+					if ($yhtiorow['pakkaamolokerot'] == 'K') {
+
+						$kollit_chk = 0;
+						$rullakot_chk = 0;
+					
+						$query = "	SELECT pakkaus, kollit
+									FROM rahtikirjat
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND otsikkonro in($row[tunnukset])";
+						$kollit_res = mysql_query($query) or pupe_error($query);
+					
+						while ($kollit_row = mysql_fetch_array($kollit_res)) {
+							if (trim(strtolower($kollit_row['pakkaus'])) == 'kolli') {
+								$kollit_chk += $kollit_row['kollit'];
+							}
+
+							if (trim(strtolower($kollit_row['pakkaus'])) == 'rullakko') {
+								$rullakot_chk += $kollit_row['kollit'];
+							}						
+						}
+					
+						if ($kollit_chk == 0) {
+							$kollit_chk = "";
+						}
+
+						if ($rullakot_chk == 0) {
+							$rullakot_chk = "";
+						}
+
+						echo "<td valign='top'>";
+						if ($kollit_chk > 0) {
+							echo $kollit_chk;
+						}
+						else {
+							echo "&nbsp;";
+						}
+						echo "</td>";
+						echo "<td valign='top'>";
+						if ($rullakot_chk > 0) {
+							echo $rullakot_chk;
+						}
+						else {
+							echo "&nbsp;";
+						}
+						echo "</td>";
+					}
+
+					echo "	<form method='post' action='$PHP_SELF'>
+							<input type='hidden' name='id' value='$row[tunnus]'>
+							<input type='hidden' name='tunnukset' value='$row[tunnukset]'>
+							<input type='hidden' name='toim' value='$toim'>
+							<input type='hidden' name='rakirno' value='$row[tunnus]'>
+							<td class='back' valign='top'><input type='submit' name='tila' value='".t("Syˆt‰")."'></td>
+							</form>";
+					echo "</tr>";
 				}
-
-				echo "	<form method='post' action='$PHP_SELF'>
-						<input type='hidden' name='id' value='$row[tunnus]'>
-						<input type='hidden' name='tunnukset' value='$row[tunnukset]'>
-						<input type='hidden' name='toim' value='$toim'>
-						<input type='hidden' name='rakirno' value='$row[tunnus]'>
-						<td class='back' valign='top'><input type='submit' name='tila' value='".t("Syˆt‰")."'></td>
-						</form>";
-				echo "</tr>";
 			}
-
 			echo "</table>";
 		}
 		else {
@@ -1325,6 +1450,20 @@
 			echo "</select></td></tr>";
 
 		}
+		
+		if ($otsik['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
+			$query = "	SELECT nimi, lokero
+						FROM pakkaamo
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tunnus = '$otsik[pakkaamo]'";
+			$lokero_chk_res = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($lokero_chk_res) > 0) {
+				$lokero_chk_row = mysql_fetch_array($lokero_chk_res, MYSQL_ASSOC);
+				echo "<tr><th>".t("Pakkaamo")."</th><td>$lokero_chk_row[nimi]</td><th>".t("Lokero")."</th><td>$lokero_chk_row[lokero]</td></tr>";
+			}
+		}
+		
 		echo "</table>";
 
 		$vakquery = "	SELECT group_concat(DISTINCT tuote.tuoteno) vaktuotteet
@@ -1428,11 +1567,21 @@
 		$i = 0;
 
 		while ($row = mysql_fetch_array($result)) {
+			
+			if (strpos($tunnukset,',') !== false) {
+				$rahti_otsikot = " AND otsikkonro in($tunnukset) ";
+				$rahti_rahtikirjanro = " AND rahtikirjanro in($tunnukset) ";
+			}
+			else {
+				$rahti_otsikot = " AND otsikkonro = $id ";
+				$rahti_rahtikirjanro = " AND rahtikirjanro = $id ";
+			}
+						
 			$query = "	SELECT sum(kollit) kollit, sum(kilot) kilot, sum(kuutiot) kuutiot, sum(lavametri) lavametri, min(pakkauskuvaustark) pakkauskuvaustark
 						from rahtikirjat use index (otsikko_index)
 						where yhtio			= '$kukarow[yhtio]'
-						and otsikkonro		= '$id'
-						and rahtikirjanro	= '$rakirno'
+						$rahti_otsikot
+						$rahti_rahtikirjanro
 						and pakkaus			= '$row[selite]'
 						and pakkauskuvaus	= '$row[selitetark]'";
 			$rarrr = mysql_query($query) or pupe_error($query);

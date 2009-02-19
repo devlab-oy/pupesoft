@@ -662,10 +662,15 @@ else {
 
 			//mihin varastoon l‰hete kuuluu. aluksi x
 			$varasto = $edvarasto = $kerayspvm = $edkerayspvm = "x";
-
+			$tulostusalue = $edtulostusalue = "x";
+			
+			//jos tilaus splittaantuu, niin laitetaan muihin otsikoihin ensimm‰isen tilauksen tunnus vanhaksitunnukseksi 
+			$temp_laskutunnus = $laskurow['tunnus'];
+			
 			while ($row = mysql_fetch_array($result)) {
 
 				$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
+				$tulostusalue = onkotulostusalueita($row["hyllyalue"], $row["hyllynro"], $varasto);
 
 				$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
 				$varaston_res = mysql_query($query) or pupe_error($query);
@@ -723,8 +728,10 @@ else {
 					$laskurow["kauppatapahtuman_luonne"] = '999';
 				}
 
+				
+
 				//varasto vaihtuu, splitataan tilaus, paitsi jos kyseess‰ on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
-				if ((($varasto != $edvarasto and $edvarasto != 'x') and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") or ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K")) {
+				if (((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '')) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") or ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K")) {
 
 					// Meid‰n on p‰ivitett‰v‰ tunnusnippu
 					if($yhtiorow["splittauskielto"] == "K" and $laskurow["tunnusnippu"] == 0) {
@@ -785,7 +792,7 @@ else {
 								toimitustapa						= '$laskurow[toimitustapa]',
 								valkoodi							= '$laskurow[valkoodi]',
 								vienti_kurssi						= '$laskurow[vienti_kurssi]',
-								vanhatunnus							= '$laskurow[tunnus]',
+								vanhatunnus							= '$temp_laskutunnus',
 								tunnusnippu							= '$laskurow[tunnusnippu]',
 								verkkotunnus						= '$laskurow[verkkotunnus]',
 								vienti 								= '$laskurow[vienti]',
@@ -796,6 +803,7 @@ else {
 								viikorkopros						= '$laskurow[viikorkopros]',
 								viite								= '$laskurow[viite]',
 								varasto 							= '$varasto',
+								tulostusalue						= '$tulostusalue',
 								liitostunnus    					= '$laskurow[liitostunnus]',
 								yhtio								= '$laskurow[yhtio]',
 								clearing							= '$laskurow[clearing]',
@@ -819,15 +827,18 @@ else {
 								lisattava_era 						= '$laskurow[lisattava_era]',
 								vahennettava_era 					= '$laskurow[vahennettava_era]',
 								ultilno								= '$ultilno',
-								piiri 								= '$laskurow[piiri]'";
-					$uusires = mysql_query($query) or pupe_error($query);
+								piiri 								= '$laskurow[piiri]',
+								hyvaksynnanmuutos					= '$laskurow[hyvaksynnanmuutos]'";
+					$uusires = mysql_query($query) or pupe_error($query);					
 					$laskurow['tunnus'] = (string) mysql_insert_id();
 					$tilausnumerot[] = $laskurow["tunnus"];
+					
 				}
 				else {
 					//p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu
 					$query = "	UPDATE lasku set
 								varasto 							= '$varasto',
+								tulostusalue						= '$tulostusalue',
 								ultilno 							= '$ultilno',
 								maa_maara							= '$laskurow[maa_maara]',
 								maa_lahetys							= '$laskurow[maa_lahetys]',
@@ -853,7 +864,10 @@ else {
 
 				//	edellinen varasto talteen
 				$edvarasto = $varasto;
-
+				
+				// edellinen tulostusalue talteen
+				$edtulostusalue = $tulostusalue;
+				
 				//	edellinen kerayspvm talteen
 				$edkerayspvm = $row["kerayspvm"];
 

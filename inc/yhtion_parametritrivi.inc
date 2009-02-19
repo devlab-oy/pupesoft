@@ -1790,4 +1790,19 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "pakkaamolokerot") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Ei k‰ytet‰ pakkaamojen lokeroita")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("K‰ytet‰‰n pakkaamojen lokeroita")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

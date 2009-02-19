@@ -6321,33 +6321,33 @@ if(!function_exists("hae_rahtimaksu")) {
 if (!function_exists("pakkaamo")) {
 	function pakkaamo ($tilausnumero, $update = '') {
 		global $kukarow, $yhtiorow;
+		
+		if ($yhtiorow['pakkaamolokerot'] == 'K') {
+		
+			// Haetaan varastotunnus laskulta pakkaamoa varten
+			$query = "	SELECT lasku.varasto, lasku.tulostusalue, varaston_tulostimet.nimi
+						FROM lasku
+						JOIN varaston_tulostimet ON (varaston_tulostimet.yhtio = lasku.yhtio AND varaston_tulostimet.varasto = lasku.varasto AND varaston_tulostimet.nimi = lasku.tulostusalue)
+						WHERE lasku.tunnus in ($tilausnumero)
+						AND lasku.yhtio = '$kukarow[yhtio]'
+						LIMIT 1";
+			$varasto_chk_result = mysql_query($query) or pupe_error($query);
+			$varasto_chk_row = mysql_fetch_array($varasto_chk_result);
 
-		// Haetaan varastotunnus laskulta pakkaamoa varten
-		$query = "	SELECT lasku.varasto, lasku.tulostusalue, varaston_tulostimet.nimi
-					FROM lasku
-					JOIN varaston_tulostimet ON (varaston_tulostimet.yhtio = lasku.yhtio AND varaston_tulostimet.varasto = lasku.varasto AND varaston_tulostimet.nimi = lasku.tulostusalue)
-					WHERE lasku.tunnus in ($tilausnumero)
-					AND lasku.yhtio = '$kukarow[yhtio]'
-					LIMIT 1";
-		$varasto_chk_result = mysql_query($query) or pupe_error($query);
-		$varasto_chk_row = mysql_fetch_array($varasto_chk_result);
+			$query = "	SELECT *
+						FROM varaston_tulostimet
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND varasto = '$varasto_chk_row[varasto]'
+						AND nimi = '$varasto_chk_row[tulostusalue]'
+						ORDER BY nimi, prioriteetti ASC
+						LIMIT 1";
+			$tulostusalue_pakkaamo_res = mysql_query($query) or pupe_error($query);
 
-		$query = "	SELECT *
-					FROM varaston_tulostimet
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND varasto = '$varasto_chk_row[varasto]'
-					AND nimi = '$varasto_chk_row[tulostusalue]'
-					ORDER BY nimi, prioriteetti ASC
-					LIMIT 1";
-		$tulostusalue_pakkaamo_res = mysql_query($query) or pupe_error($query);
-
-		$tulostusalue_pakkaamot = "";
-		if (mysql_num_rows($tulostusalue_pakkaamo_res) > 0) {
-			$tulostusalue_pakkaamo_row = mysql_fetch_assoc($tulostusalue_pakkaamo_res);
-			$tulostusalue_pakkaamot = $tulostusalue_pakkaamo_row['pakkaamo'];
-		}
-
-		if ($yhtiorow['konsernivarasto'] == 'K') {
+			$tulostusalue_pakkaamot = "";
+			if (mysql_num_rows($tulostusalue_pakkaamo_res) > 0) {
+				$tulostusalue_pakkaamo_row = mysql_fetch_assoc($tulostusalue_pakkaamo_res);
+				$tulostusalue_pakkaamot = $tulostusalue_pakkaamo_row['pakkaamo'];
+			}		
 
 			$pakkaamolisa = "";
 

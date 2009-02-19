@@ -417,7 +417,13 @@
 		}
 
 		if ($tuvarasto != '' and $tuvarasto != 'KAIKKI') {
-			$haku .= " and lasku.varasto='$tuvarasto' ";
+			if (strpos($tuvarasto,"##")) {
+				$temp_tuvarasto = explode("##",$tuvarasto);
+				$haku .= " and lasku.varasto='$temp_tuvarasto[0]' and lasku.tulostusalue = '$temp_tuvarasto[1]'";
+			}
+			else {
+				$haku .= " and lasku.varasto='$tuvarasto' ";
+			}			
 		}
 
 		if ($tumaa != '') {
@@ -462,13 +468,13 @@
 		echo "<input type='hidden' id='jarj' name='jarj' value='$jarj'>";
 		
 		echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
-
-		$query = "	SELECT varastopaikat.tunnus, varastopaikat.nimitys, count(*) kpl
+		
+		$query = "	SELECT varastopaikat.tunnus, varastopaikat.nimitys, count(*) kpl, lasku.tulostusalue
 					FROM varastopaikat
 					JOIN lasku ON varastopaikat.yhtio=lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto=varastopaikat.tunnus
 					WHERE varastopaikat.yhtio = '$kukarow[yhtio]'
-					GROUP BY varastopaikat.tunnus
-					ORDER BY nimitys";			
+					GROUP BY varastopaikat.tunnus, lasku.tulostusalue
+					ORDER BY nimitys";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
@@ -476,7 +482,12 @@
 		$sel=array();
 		$sel[$tuvarasto] = "SELECTED";
 		while ($row = mysql_fetch_array($result)){
-			echo "<option value='$row[0]' ".$sel[$row[0]].">$row[1] ({$row[kpl]})</option>";
+			if ($row[3] != '') {
+				echo "<option value='$row[0]##$row[3]' ".$sel[$row[0]."##".$row[3]].">$row[1] ({$row[kpl]}) $row[3]</option>";
+			}
+			else {
+				echo "<option value='$row[0]' ".$sel[$row[0]].">$row[1] ({$row[kpl]})</option>";
+			}
 		}
 		echo "</select>";
 
@@ -582,7 +593,12 @@
 
 		// Vain ker‰yslistat saa groupata
 		if ($yhtiorow["lahetteen_tulostustapa"] == "K" and $yhtiorow["kerayslistojen_yhdistaminen"] == "Y") {
+			//jos halutaan eritell‰ tulostusalueen mukaan , lasku.tulostusalue
 			$grouppi = "GROUP BY lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi, varastonimi, varastotunnus, keraysviikko, lasku.mapvm";
+		
+			if ($yhtiorow["pakkaamolokerot"] == "K") {
+				$grouppi .= ", lasku.tulostusalue";
+			}
 		}
 		elseif ($yhtiorow["lahetteen_tulostustapa"] == "K" and $yhtiorow["kerayslistojen_yhdistaminen"] == "T") {
 			$grouppi = "GROUP BY lasku.ytunnus";
@@ -622,7 +638,7 @@
 					$grouppi
 					$jarjx";
 		$tilre = mysql_query($query) or pupe_error($query);
-
+		
 		if (mysql_num_rows($tilre)==0) {
 			echo "<br><br><font class='message'>".t("Tulostusjonossa ei ole yht‰‰n tilausta")."...</font>";
 		}

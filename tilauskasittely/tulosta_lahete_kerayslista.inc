@@ -27,6 +27,9 @@ $pieni_boldi["font"] 	= "Times-Bold";
 $kommentti_font["height"] 			= 18;
 $kommentti_font["font"] 			= "Helvetica";
 
+$keraaja_font["height"]			= 12;
+$keraaja_font["font"] 			= "Helvetica";
+
 $iso["height"] 			= 14;
 $iso["font"] 			= "Helvetica-Bold";
 
@@ -278,9 +281,32 @@ if (!function_exists('alku_kerayslista')) {
 			$pdf->draw_text(310, 635, $laskurow[""], $thispage, $norm);
 		}
 
-		$pdf->draw_rectangle(632, 300, 611, 580, $thispage, $rectparam);
-		$pdf->draw_text(310, 624, t("", $kieli), 	$thispage, $pieni);
-		$pdf->draw_text(310, 614, $laskurow[""], 	$thispage, $norm);
+
+		if ($laskurow['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
+			$keraaja_teksti = "";
+
+			$query = "	SELECT nimi, lokero
+						FROM pakkaamo
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tunnus = '$laskurow[pakkaamo]'
+						LIMIT 1";
+			$pakkaamo_fetch_res = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($pakkaamo_fetch_res) == 1) {
+				$pakkaamo_fetch_row = mysql_fetch_array($pakkaamo_fetch_res, MYSQL_ASSOC);
+
+				$keraaja_teksti = "Pakkaamo: $pakkaamo_fetch_row[nimi] Lokero: $pakkaamo_fetch_row[lokero]";
+			}
+
+			$pdf->draw_rectangle(632, 300, 611, 580, $thispage, $rectparam);
+			$pdf->draw_text(310, 624, t("Kerääjälle", $kieli), 	$thispage, $pieni);
+			$pdf->draw_text(310, 614, $keraaja_teksti, 	$thispage, $keraaja_font);
+		}
+		else {
+			$pdf->draw_rectangle(632, 300, 611, 580, $thispage, $rectparam);
+			$pdf->draw_text(310, 624, t("", $kieli), 	$thispage, $pieni);
+			$pdf->draw_text(310, 614, "", 	$thispage, $norm);
+		}
 
 		$komm = "";
 
@@ -307,7 +333,6 @@ if (!function_exists('alku_kerayslista')) {
 		if (trim($laskurow['sisviesti2']) != '') {
 			$komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 70, "\n###");
 		}
-
 
 		//Tulostetaan laskun kommentti
 		if (trim($komm) != '') {

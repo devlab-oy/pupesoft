@@ -1057,7 +1057,7 @@
 
 		echo "</td></tr>";
 		echo "</table>";
-
+		
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
 		if ($toim == "avainsana" or
 			$toim == "tili" or
@@ -1073,6 +1073,8 @@
 			$toim == "rahtisopimukset" or
 			$toim == "etaisyydet" or
 			$toim == "tuotteen_avainsanat" or
+			$toim == "varaston_tulostimet" or
+			$toim == "pakkaamo" or
 			($toim == "toimi" and $kukarow["taso"] == "3")) {
 
 			// Tehd‰‰n "poista tietue"-nappi

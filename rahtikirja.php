@@ -1453,15 +1453,29 @@
 		}
 		
 		if ($otsik['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
+			if (strpos($tunnukset,',') !== false) {				
+				$query = "	SELECT GROUP_CONCAT(pakkaamo SEPARATOR ',') pakkaamot
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus in($tunnukset)";
+				$pakkaamotres = mysql_query($query) or pupe_error($query);
+				$pakkaamotrow = mysql_fetch_array($pakkaamotres);
+				$pakkaamotunnukset = " AND tunnus in($pakkaamotrow[pakkaamot]) ";
+			}
+			else {
+				$pakkaamotunnukset = " AND tunnus = $otsik[pakkaamo] ";
+			}
+						
 			$query = "	SELECT nimi, lokero
 						FROM pakkaamo
 						WHERE yhtio = '$kukarow[yhtio]'
-						AND tunnus = '$otsik[pakkaamo]'";
+						$pakkaamotunnukset";
 			$lokero_chk_res = mysql_query($query) or pupe_error($query);
 			
 			if (mysql_num_rows($lokero_chk_res) > 0) {
-				$lokero_chk_row = mysql_fetch_array($lokero_chk_res, MYSQL_ASSOC);
-				echo "<tr><th>".t("Pakkaamo")."</th><td>$lokero_chk_row[nimi]</td><th>".t("Lokero")."</th><td>$lokero_chk_row[lokero]</td></tr>";
+				while ($lokero_chk_row = mysql_fetch_array($lokero_chk_res)) {
+					echo "<tr><th>".t("Pakkaamo")."</th><td>$lokero_chk_row[nimi]</td><th>".t("Lokero")."</th><td>$lokero_chk_row[lokero]</td></tr>";
+				}				
 			}
 		}
 		

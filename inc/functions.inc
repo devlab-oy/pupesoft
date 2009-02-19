@@ -1666,7 +1666,13 @@ if (!function_exists("generoi_sorttauskentta")) {
 											if(tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)))) as sorttauskentta";
 		}
 		elseif ($jarjestys == "M") {
-			$sorttauskentta = " ifnull((SELECT tlt2.jarjestys FROM tilausrivin_lisatiedot tlt2 WHERE tlt2.yhtio=tilausrivi.yhtio and tlt2.tilausrivitunnus=tilausrivi.tunnus LIMIT 1), tilausrivi.tunnus) as sorttauskentta";
+			$sorttauskentta = " if((tilausrivi.perheid=0 or tilausrivi.perheid=tilausrivi.tunnus),
+									ifnull((SELECT tlt2.jarjestys FROM tilausrivin_lisatiedot tlt2 WHERE tlt2.yhtio=tilausrivi.yhtio and tlt2.tilausrivitunnus=tilausrivi.tunnus LIMIT 1), tilausrivi.tunnus),
+									if(tilausrivi.perheid >0 ,
+										ifnull((SELECT tlt2.jarjestys FROM tilausrivin_lisatiedot tlt2 WHERE tlt2.yhtio=tilausrivi.yhtio and tlt2.tilausrivitunnus=tilausrivi.perheid LIMIT 1), tilausrivi.perheid),
+										tilausrivi.tunnus
+										)
+									) as sorttauskentta";
 		}
 
 		// joku default

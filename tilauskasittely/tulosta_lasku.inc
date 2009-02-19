@@ -43,22 +43,49 @@ if (!function_exists('alku')) {
 
 		$thispage = $pdf->new_page("a4");
 
+		$apu_yhtiorow = array();
+
+		// varmistetaan, että kopiossakin tulee oikean toimipaikan logo
+		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
+			$query = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_toimipaikkarow = mysql_fetch_array($result);
+				$apu_yhtiorow["lasku_logo"] = $yhtion_toimipaikkarow["lasku_logo"];
+		 	}
+		}
+		else {
+			$query = "	SELECT *
+						FROM yhtion_parametrit
+						WHERE yhtio = '$laskurow[yhtio]'";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_parametritrow = mysql_fetch_array($result);
+				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
+			}
+		}
+
 		unset($data);
-		if( (int) $yhtiorow["lasku_logo"] > 0) {
-			$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
+
+		if( (int) $apu_yhtiorow["lasku_logo"] > 0) {
+			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
 			$data = $liite["data"];
 			$isizelogo[0] = $liite["image_width"];
 			$isizelogo[1] = $liite["image_height"];
 			unset($liite);
 		}
-		elseif(file_exists($yhtiorow["lasku_logo"])) {
-			$filename = $yhtiorow["lasku_logo"];
+		elseif(file_exists($apu_yhtiorow["lasku_logo"])) {
+			$filename = $apu_yhtiorow["lasku_logo"];
 
 			$fh = fopen($filename, "r");
 			$data = fread($fh, filesize($filename));
 			fclose($fh);
 
-			$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+			$isizelogo = getimagesize($apu_yhtiorow["lasku_logo"]);
 		}
 
 		if($data) {
@@ -70,17 +97,17 @@ if (!function_exists('alku')) {
 			else {
 
 				$logoparam = array();
-				
+
 				$lasku_logo_koko = 50;
 				$lasku_logo_positio = 830;
-				
+
 				if ((int) $yhtiorow["lasku_logo_koko"] > 0) {
 					$lasku_logo_koko = (int) $yhtiorow["lasku_logo_koko"];
 				}
 				if ((int) $yhtiorow["lasku_logo_positio"] > 0) {
 					$lasku_logo_positio = (int) $yhtiorow["lasku_logo_positio"];
 				}
-				
+
 				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= $lasku_logo_koko) {
 					$logoparam['scale'] = 240 / $isizelogo[0];
 				}
@@ -92,7 +119,7 @@ if (!function_exists('alku')) {
 			}
 		}
 		else {
-			$pdf->draw_text(30, 815,  $yhtiorow["nimi"], $thispage);
+			$pdf->draw_text(30, 815,  $laskurow["yhtio_nimi"], $thispage);
 		}
 
 		// Asiakkaan tiedot
@@ -412,22 +439,48 @@ if (!function_exists('uusi_sivu')) {
 
 		$thispage = $pdf->new_page("a4");
 
+		$apu_yhtiorow = array();
+
+		// varmistetaan, että kopiossakin tulee oikean toimipaikan logo
+		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
+			$query = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_toimipaikkarow = mysql_fetch_array($result);
+				$apu_yhtiorow["lasku_logo"] = $yhtion_toimipaikkarow["lasku_logo"];
+		 	}
+		}
+		else {
+			$query = "	SELECT *
+						FROM yhtion_parametrit
+						WHERE yhtio = '$laskurow[yhtio]'";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_parametritrow = mysql_fetch_array($result);
+				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
+			}
+		}
+
 		unset($data);
-		if( (int) $yhtiorow["lasku_logo"] > 0) {
-			$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
+		if( (int) $apu_yhtiorow["lasku_logo"] > 0) {
+			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
 			$data = $liite["data"];
 			$isizelogo[0] = $liite["image_width"];
 			$isizelogo[1] = $liite["image_height"];
 			unset($liite);
 		}
-		elseif(file_exists($yhtiorow["lasku_logo"])) {
-			$filename = $yhtiorow["lasku_logo"];
+		elseif(file_exists($apu_yhtiorow["lasku_logo"])) {
+			$filename = $apu_yhtiorow["lasku_logo"];
 
 			$fh = fopen($filename, "r");
 			$data = fread($fh, filesize($filename));
 			fclose($fh);
 
-			$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+			$isizelogo = getimagesize($apu_yhtiorow["lasku_logo"]);
 		}
 
 		if($data) {
@@ -446,7 +499,7 @@ if (!function_exists('uusi_sivu')) {
 			}
 		}
 		else {
-			$pdf->draw_text(30, 815,  $yhtiorow["nimi"], $thispage);
+			$pdf->draw_text(30, 815,  $laskurow["yhtio_nimi"], $thispage);
 		}
 
 		//Otsikko
@@ -668,7 +721,7 @@ if (!function_exists('rivi_original')) {
 			$veroton_hinta = $row["hinta"];
 		}
 
-		// A-hinta 		
+		// A-hinta
 		$pdf->draw_text(390, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($veroton_hinta, $kurssi)),	$thispage, $norm);
 
 		//Alennus
@@ -731,25 +784,25 @@ if (!function_exists('rivi_original')) {
 			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]*(1+($row["alv"]/100))), $pieni);
 			$pdf->draw_text(535-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]*(1+($row["alv"]/100))), $thispage, $pieni);
 		}
-		
-		
+
+
 		$query = "SELECT asiakkaan_tilausnumero, viesti FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[otunnus]'";
 		$viiteres = mysql_query($query) or pupe_error($query);
 		$viiterow = mysql_fetch_array($viiteres);
-		
+
 		$alkupkommentti = $row["kommentti"];
-		
-		
+
+
 		if (trim($viiterow['viesti']) != '' and trim($viiterow['viesti']) != trim($alkupkommentti)) {
 			$row["kommentti"] = trim($viiterow["viesti"])." ".$row["kommentti"];
 		}
 		if (trim($viiterow['asiakkaan_tilausnumero']) != '' and trim($viiterow['asiakkaan_tilausnumero']) != trim($alkupkommentti)) {
 			$row["kommentti"] = trim($viiterow["asiakkaan_tilausnumero"])." ".$row["kommentti"];
 		}
-		
+
 		$row["kommentti"] = trim($row["kommentti"]);
-		
-		
+
+
 		//Jos rivikommentti on pitkä niin teemme siitä kauniimman
 		if (strlen($row["kommentti"]) >= 140) {
 
@@ -1139,7 +1192,7 @@ if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
 			$veroton_hinta = $row["hinta"];
 		}
 
-		// A-hinta 		
+		// A-hinta
 		$pdf->draw_text(390, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($veroton_hinta, $kurssi)),	$thispage, $norm);
 
 		//Alennus
@@ -1196,23 +1249,23 @@ if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
 		if (substr($row["toimitettuaika"],0,10) != "0000-00-00") {
 			$pdf->draw_text(390, $kala, tv1dateconv(substr($row["toimitettuaika"],0,10)), 	$thispage, $pieni);
 		}
-	
+
 		$query = "SELECT asiakkaan_tilausnumero, viesti FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[otunnus]'";
 		$viiteres = mysql_query($query) or pupe_error($query);
 		$viiterow = mysql_fetch_array($viiteres);
-		
+
 		$alkupkommentti = $row["kommentti"];
-		
-		
+
+
 		if (trim($viiterow['viesti']) != '' and trim($viiterow['viesti']) != trim($alkupkommentti)) {
 			$row["kommentti"] = trim($viiterow["viesti"])." ".$row["kommentti"];
 		}
 		if (trim($viiterow['asiakkaan_tilausnumero']) != '' and trim($viiterow['asiakkaan_tilausnumero']) != trim($alkupkommentti)) {
 			$row["kommentti"] = trim($viiterow["asiakkaan_tilausnumero"])." ".$row["kommentti"];
 		}
-		
+
 		$row["kommentti"] = trim($row["kommentti"]);
-		
+
 		//Jos rivikommentti on pitkä niin teemme siitä kauniimman
 		if (strlen($row["kommentti"]) >= 140) {
 
@@ -1503,7 +1556,7 @@ if (!function_exists('loppu')) {
 			$pankkitiedot["pankkiiban3"]  =	$yhtiorow["pankkiiban3"];
 			$pankkitiedot["pankkiswift3"] =	$yhtiorow["pankkiswift3"];
 		}
-				
+
 	    if ($masrow["factoring"] != '') {
 			// jos factoroidaan tulostetaan eri kentät
 			$query = "	SELECT *
@@ -1543,11 +1596,11 @@ if (!function_exists('loppu')) {
 			}
 		}
 		else {
-			
+
 			if ($vientikala == 0) {
 				$tileja = -20;
 			}
-			
+
 			// ei factoroida niin normitiedot
 			$pdf->draw_text(30,  102 + $tileja + $barcode_korkeus, t("Pankkiyhteys", $kieli),													$thispage, $pieni);
 
@@ -1559,7 +1612,7 @@ if (!function_exists('loppu')) {
 			if($pankkitiedot["pankkiswift1"]) {
 				$pdf->draw_text(404, 92 + $tileja + $barcode_korkeus, "SWIFT: ".$pankkitiedot["pankkiswift1"],										$thispage, $norm);
 			}
-			
+
 			$pdf->draw_text(30,  82 + $tileja + $barcode_korkeus, $pankkitiedot["pankkinimi2"]."  ".$pankkitiedot["pankkitili2"],						$thispage, $norm);
 
 			if($pankkitiedot["pankkiiban2"]) {
@@ -1568,7 +1621,7 @@ if (!function_exists('loppu')) {
 			if($pankkitiedot["pankkiswift2"]) {
 				$pdf->draw_text(404, 82 + $tileja + $barcode_korkeus, "SWIFT: ".$pankkitiedot["pankkiswift2"],										$thispage, $norm);
 			}
-			
+
 			$pdf->draw_text(30,  72 + $tileja + $barcode_korkeus, $pankkitiedot["pankkinimi3"]."  ".$pankkitiedot["pankkitili3"],						$thispage, $norm);
 
 			if($pankkitiedot["pankkiiban3"]) {
@@ -1577,78 +1630,70 @@ if (!function_exists('loppu')) {
 			if($pankkitiedot["pankkiswift3"]) {
 				$pdf->draw_text(404, 72 + $tileja + $barcode_korkeus, "SWIFT: ".$pankkitiedot["pankkiswift3"],										$thispage, $norm);
 			}
-			
+
 			if ($pankkitiedot["pankkitili2"] != '' and $vientikala == 0) {
 				$tileja-=10;
 			}
-			
+
 			if ($pankkitiedot["pankkitili3"] != '' and $vientikala == 0) {
 				$tileja-=10;
 			}
-			
+
 			if ($vientikala == 0) {
 				$tileja+=20;
 			}
-			
+
 		}
 
 		//Pankkiyhteystiedot
 		$pdf->draw_rectangle(90+$vientikala+$barcode_korkeus, 20, 20+$tileja+$barcode_korkeus, 580,	$thispage, $rectparam);
 
+		// yhtiötiedot
+		$y_puhelin		= $yhtiorow['puhelin'];
+		$y_fax			= $yhtiorow['fax'];
+		$y_email		= $yhtiorow['email'];
+		$y_nimi 		= $laskurow["yhtio_nimi"];
+		$y_osoite 		= $laskurow["yhtio_osoite"];
+		$y_postino	 	= $laskurow["yhtio_postino"];
+		$y_postitp	 	= $laskurow["yhtio_postitp"];
+		$y_maa 			= $laskurow["yhtio_maa"];
+		$y_kotipaikka	= $laskurow["yhtio_kotipaikka"];
+		$y_vatnumero	= $laskurow["yhtio_ovttunnus"];
+
+		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
+			// haetaan toimipaikan tiedot
+			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_toimipaikka]'";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+			if (mysql_num_rows($alhire) == 1) {
+				// haetaan toimipaikan tiedot
+				$alhiro = mysql_fetch_array($alhire);
+				$y_puhelin		= $alhiro['puhelin'];
+				$y_fax			= $alhiro['fax'];
+				$y_email		= $alhiro['email'];
+			}
+		}
+
 		// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
 		if ($laskurow["yhtio_ovttunnus"] != "" and $laskurow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
-
 			// haetaan toimipaikan tiedot
 			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
 			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 			if (mysql_num_rows($alhire) == 1) {
-
 				// haetaan toimipaikan tiedot
 				$alhiro = mysql_fetch_array($alhire);
-
 				$y_puhelin		= $alhiro['puhelin'];
 				$y_fax			= $alhiro['fax'];
 				$y_email		= $alhiro['email'];
-				$y_nimi 		= $laskurow["yhtio_nimi"];
-				$y_osoite 		= $laskurow["yhtio_osoite"];
-				$y_postino	 	= $laskurow["yhtio_postino"];
-				$y_postitp	 	= $laskurow["yhtio_postitp"];
-				$y_maa 			= $laskurow["yhtio_maa"];
-				$y_kotipaikka	= $laskurow["yhtio_kotipaikka"];
-				$y_vatnumero	= $laskurow["yhtio_ovttunnus"];
 			}
-			else {
-				$y_puhelin		= $yhtiorow['puhelin'];
-				$y_fax			= $yhtiorow['fax'];
-				$y_email		= $yhtiorow['email'];
-				$y_nimi 		= $yhtiorow["nimi"];
-				$y_osoite 		= $yhtiorow["osoite"];
-				$y_postino	 	= $yhtiorow["postino"];
-				$y_postitp	 	= $yhtiorow["postitp"];
-				$y_maa 			= $yhtiorow["maa"];
-				$y_kotipaikka	= $yhtiorow["kotipaikka"];
-				$y_vatnumero	= $yhtiorow["ovttunnus"];
-			}
-		}
-		else {
-			$y_puhelin		= $yhtiorow['puhelin'];
-			$y_fax			= $yhtiorow['fax'];
-			$y_email		= $yhtiorow['email'];
-			$y_nimi 		= $yhtiorow["nimi"];
-			$y_osoite 		= $yhtiorow["osoite"];
-			$y_postino	 	= $yhtiorow["postino"];
-			$y_postitp	 	= $yhtiorow["postitp"];
-			$y_maa 			= $yhtiorow["maa"];
-			$y_kotipaikka	= $yhtiorow["kotipaikka"];
-			$y_vatnumero	= $yhtiorow["ytunnus"];
 		}
 
 		//Alimmat kolme laatikkoa, yhtiötietoja
 		$pdf->draw_rectangle(70 + $tileja + $barcode_korkeus, 20, 20 + $tileja + $barcode_korkeus, 580,	$thispage, $rectparam);
 		$pdf->draw_rectangle(70 + $tileja + $barcode_korkeus, 207, 20 + $tileja + $barcode_korkeus, 580,	$thispage, $rectparam);
 		$pdf->draw_rectangle(70 + $tileja + $barcode_korkeus, 394, 20 + $tileja + $barcode_korkeus, 580,	$thispage, $rectparam);
-		
+
 		$pdf->draw_text(30, 55 + $tileja + $barcode_korkeus, $y_nimi,					$thispage, $pieni);
 		$pdf->draw_text(30, 45 + $tileja + $barcode_korkeus, $y_osoite,					$thispage, $pieni);
 		$pdf->draw_text(30, 35 + $tileja + $barcode_korkeus, $y_postino."  ".$y_postitp,	$thispage, $pieni);
@@ -1741,7 +1786,7 @@ if (!function_exists('alvierittely')) {
 
 		if ($toim == 'PROFORMA') {
 			$oikpos = $pdf->strlen(sprintf('%.2f', $arvo), $norm);
-			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $arvo), 			$thispage, $norm);			
+			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $arvo), 			$thispage, $norm);
 		}
 		elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 			$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["arvo_valuutassa"]), $norm);

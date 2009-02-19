@@ -64,22 +64,48 @@ if (!function_exists('alku_kerayslista')) {
 		$style |= ($stretchtext== "on" ) ? BCS_STRETCH_TEXT  : 0;
 		$style |= ($negative== "on"  ) ? BCS_REVERSE_COLOR  : 0;
 
+		$apu_yhtiorow = array();
+
+		// varmistetaan, että kopiossakin tulee oikean toimipaikan logo
+		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
+			$query = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_toimipaikkarow = mysql_fetch_array($result);
+				$apu_yhtiorow["lasku_logo"] = $yhtion_toimipaikkarow["lasku_logo"];
+		 	}
+		}
+		else {
+			$query = "	SELECT *
+						FROM yhtion_parametrit
+						WHERE yhtio = '$laskurow[yhtio]'";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query".mysql_error());
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_parametritrow = mysql_fetch_array($result);
+				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
+			}
+		}
+
 		unset($data);
-		if( (int) $yhtiorow["lasku_logo"] > 0) {
-			$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
+		if( (int) $apu_yhtiorow["lasku_logo"] > 0) {
+			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
 			$data = $liite["data"];
 			$isizelogo[0] = $liite["image_width"];
 			$isizelogo[1] = $liite["image_height"];
 			unset($liite);
 		}
-		elseif(file_exists($yhtiorow["lasku_logo"])) {
-			$filename = $yhtiorow["lasku_logo"];
+		elseif(file_exists($apu_yhtiorow["lasku_logo"])) {
+			$filename = $apu_yhtiorow["lasku_logo"];
 
 			$fh = fopen($filename, "r");
 			$data = fread($fh, filesize($filename));
 			fclose($fh);
 
-			$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+			$isizelogo = getimagesize($apu_yhtiorow["lasku_logo"]);
 		}
 
 		if($data) {
@@ -103,11 +129,11 @@ if (!function_exists('alku_kerayslista')) {
 			}
 		}
 		else {
-			$pdf->draw_text(30, 815, $yhtiorow["nimi"], 	$thispage, $norm);
-			$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$thispage, $norm);
-			$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$thispage, $norm);
-			$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$thispage, $norm);
-			$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$thispage, $norm);
+			$pdf->draw_text(30, 815, $laskurow["yhtio_nimi"],	 	$thispage, $norm);
+			$pdf->draw_text(30, 805, $laskurow["yhtio_osoite"], 	$thispage, $norm);
+			$pdf->draw_text(30, 795, $laskurow["yhtio_postino"], 	$thispage, $norm);
+			$pdf->draw_text(60, 795, $laskurow["yhtio_postitp"], 	$thispage, $norm);
+			$pdf->draw_text(30, 785, $laskurow["yhtio_maa"], 		$thispage, $norm);
 		}
 
 		// haetaan maksuehdon tiedot
@@ -278,10 +304,10 @@ if (!function_exists('alku_kerayslista')) {
 			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 70, "\n###");
 		}
 
-		if (trim($laskurow['sisviesti2']) != '') {			
+		if (trim($laskurow['sisviesti2']) != '') {
 			$komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 70, "\n###");
 		}
- 
+
 
 		//Tulostetaan laskun kommentti
 		if (trim($komm) != '') {
@@ -390,22 +416,48 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 		$style |= ($stretchtext== "on" ) ? BCS_STRETCH_TEXT  : 0;
 		$style |= ($negative== "on"  ) ? BCS_REVERSE_COLOR  : 0;
 
+		$apu_yhtiorow = array();
+
+		// varmistetaan, että kopiossakin tulee oikean toimipaikan logo
+		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
+			$query = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_toimipaikkarow = mysql_fetch_array($result);
+				$apu_yhtiorow["lasku_logo"] = $yhtion_toimipaikkarow["lasku_logo"];
+		 	}
+		}
+		else {
+			$query = "	SELECT *
+						FROM yhtion_parametrit
+						WHERE yhtio = '$laskurow[yhtio]'";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_parametritrow = mysql_fetch_array($result);
+				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
+			}
+		}
+
 		unset($data);
-		if( (int) $yhtiorow["lasku_logo"] > 0) {
-			$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
+		if( (int) $apu_yhtiorow["lasku_logo"] > 0) {
+			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
 			$data = $liite["data"];
 			$isizelogo[0] = $liite["image_width"];
 			$isizelogo[1] = $liite["image_height"];
 			unset($liite);
 		}
-		elseif(file_exists($yhtiorow["lasku_logo"])) {
-			$filename = $yhtiorow["lasku_logo"];
+		elseif(file_exists($apu_yhtiorow["lasku_logo"])) {
+			$filename = $apu_yhtiorow["lasku_logo"];
 
 			$fh = fopen($filename, "r");
 			$data = fread($fh, filesize($filename));
 			fclose($fh);
 
-			$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+			$isizelogo = getimagesize($apu_yhtiorow["lasku_logo"]);
 		}
 
 		if($data) {
@@ -429,11 +481,11 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 			}
 		}
 		else {
-			$pdf->draw_text(30, 815, $yhtiorow["nimi"], 	$thispage, $norm);
-			$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$thispage, $norm);
-			$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$thispage, $norm);
-			$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$thispage, $norm);
-			$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$thispage, $norm);
+			$pdf->draw_text(30, 815, $laskurow["yhtio_nimi"], 		$thispage, $norm);
+			$pdf->draw_text(30, 805, $laskurow["yhtio_osoite"], 	$thispage, $norm);
+			$pdf->draw_text(30, 795, $laskurow["yhtio_postino"], 	$thispage, $norm);
+			$pdf->draw_text(60, 795, $laskurow["yhtio_postitp"], 	$thispage, $norm);
+			$pdf->draw_text(30, 785, $laskurow["yhtio_maa"], 		$thispage, $norm);
 		}
 
 		// haetaan maksuehdon tiedot
@@ -500,43 +552,45 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 		//viivakoodin arvo
 		$barcode  = $laskurow["tunnus"];
 
-		//luodaan viivakoodiolio
-		$obj = "";
-		$obj = new C39Object($width, $height, $style, $barcode);
+		if (class_exists("c39object")) {		
+			//luodaan viivakoodiolio
+			$obj = "";
+			$obj = new C39Object($width, $height, $style, $barcode);
 
-		if ($obj) {
-			$obj->SetFont($font);
-			$obj->DrawObject($xres);
+			if ($obj) {
+				$obj->SetFont($font);
+				$obj->DrawObject($xres);
 
-			//flushataan pdf ja saadaam filenimi johon se tallennettiin
-			$nimi1 = $obj->FlushObject();
+				//flushataan pdf ja saadaam filenimi johon se tallennettiin
+				$nimi1 = $obj->FlushObject();
 
-			//keksitään uudelle failille joku varmasti uniikki nimi:
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
+				//keksitään uudelle failille joku varmasti uniikki nimi:
+				list($usec, $sec) = explode(' ', microtime());
+				mt_srand((float) $sec + ((float) $usec * 100000));
+				$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
 
-			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
+				passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 
-			$fh = fopen($nimi2, "r");
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
+				$fh = fopen($nimi2, "r");
+				$data = fread($fh, filesize($nimi2));
+				fclose($fh);
+				$image = $pdf->png_embed($data);
 
-			if(!$image) {
-				echo t("Viivakoodivirhe").": ".$image.$data;
+				if(!$image) {
+					echo t("Viivakoodivirhe").": ".$image.$data;
+					exit;
+				}
+				$placement = $pdf->image_place($image, 805, 440, $thispage);
+
+				unset($obj);
+
+				//dellataan tmp filet kuleksimasta
+				system("rm -f $nimi1 $nimi2");
+			}
+			else{
+				echo t("Oliota ei voitu luoda").".";
 				exit;
 			}
-			$placement = $pdf->image_place($image, 805, 440, $thispage);
-
-			unset($obj);
-
-			//dellataan tmp filet kuleksimasta
-			system("rm -f $nimi1 $nimi2");
-		}
-		else{
-			echo t("Oliota ei voitu luoda").".";
-			exit;
 		}
 
 		$kala = 715;
@@ -852,10 +906,10 @@ if (!function_exists('loppu_kerayslista')) {
 		$pdf->draw_rectangle(70, 207, 20, 580,	$thispage, $rectparam);
 		$pdf->draw_rectangle(70, 394, 20, 580,	$thispage, $rectparam);
 
-		$pdf->draw_text(30, 55, $yhtiorow["nimi"],		$thispage, $pieni);
-		$pdf->draw_text(30, 45, $yhtiorow["osoite"],	$thispage, $pieni);
-		$pdf->draw_text(30, 35, $yhtiorow["postino"]."  ".$yhtiorow["postitp"],	$thispage, $pieni);
-		$pdf->draw_text(30, 25, $yhtiorow["maa"],		$thispage, $pieni);
+		$pdf->draw_text(30, 55, $laskurow["yhtio_nimi"],		$thispage, $pieni);
+		$pdf->draw_text(30, 45, $laskurow["yhtio_osoite"],		$thispage, $pieni);
+		$pdf->draw_text(30, 35, $laskurow["yhtio_postino"]."  ".$laskurow["yhtio_postitp"],	$thispage, $pieni);
+		$pdf->draw_text(30, 25, $laskurow["yhtio_maa"],			$thispage, $pieni);
 
 		$pdf->draw_text(217, 55, t("Puhelin", $kieli).":",			$thispage, $pieni);
 		$pdf->draw_text(257, 55, $yhtiorow["puhelin"],				$thispage, $pieni);
@@ -895,7 +949,7 @@ if (!function_exists('loppu_kerayslista')) {
 		$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",			$thispage, $pieni);
 		$pdf->draw_text(444, 55, $uytunnus,							$thispage, $pieni);
 		$pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",		$thispage, $pieni);
-		$pdf->draw_text(444, 45, $yhtiorow["kotipaikka"],			$thispage, $pieni);
+		$pdf->draw_text(444, 45, $laskurow["yhtio_kotipaikka"],			$thispage, $pieni);
 
 		if ($tots != 1) {
 			$pdf->draw_text(530, 72, t("Jatkuu", $kieli)."...", 	$thispage, $norm);

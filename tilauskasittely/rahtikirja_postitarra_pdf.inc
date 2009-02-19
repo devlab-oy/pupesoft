@@ -55,14 +55,14 @@
 	if (strpos($toitarow['selite'], "14") !== FALSE) $keku = "14";
 	if (strpos($toitarow['selite'], "21") !== FALSE) $keku = "21";
 
-	
+
 	if ($toitarow['kuljyksikko']!='') {
 		$keltainen = "Kuljetus-";
 		$kuljetus  = "yksikkö";
 	}
 	else {
 		$keltainen = "Keltainen";
-		$kuljetus  = "Kuljetus";	
+		$kuljetus  = "Kuljetus";
 	}
 
 	if ($keku=="00") {
@@ -200,9 +200,9 @@
 		$pdf->draw_text(150,  562,  $keku	 									,$firstpage, $huge);
 
 		$pdf->draw_text(18,  540,  "Lähettäjä Avsändare From", 					$firstpage, $pieni); // x,y
-		$pdf->draw_text(18,  530, $yhtiorow["nimi"],	 						$firstpage, $norm);
-		$pdf->draw_text(18,  520, $yhtiorow["osoite"],	 						$firstpage, $norm);
-		$pdf->draw_text(18,  510, $yhtiorow["postino"]." ".$yhtiorow["postitp"],$firstpage, $norm);
+		$pdf->draw_text(18,  530, $postirow["yhtio_nimi"],	 					$firstpage, $norm);
+		$pdf->draw_text(18,  520, $postirow["yhtio_osoite"],					$firstpage, $norm);
+		$pdf->draw_text(18,  510, $postirow["yhtio_postino"]." ".$postirow["yhtio_postitp"],$firstpage, $norm);
 
 		$pdf->draw_text(18,  490,  "Vastaanottaja Addressat To", 				$firstpage, $pieni); // x,y
 		$pdf->draw_text(18,  480,  $rakir_row["toim_nimi"],	 					$firstpage, $iso);
@@ -282,9 +282,9 @@
 		$pdf->draw_text(18,  226,  "Säilytysaika on 2 täyttä kalenteriviikkoa. Kvarligger 2 hela kalenderveckor.", $firstpage, $pieni); // x,y
 
 		$pdf->draw_text(18,  215,  "Lähettäjä Avsändare From", 					$firstpage, $pieni); // x,y
-		$pdf->draw_text(18,  206, $yhtiorow["nimi"],	 						$firstpage, $norm);
-		$pdf->draw_text(18,  197, $yhtiorow["osoite"],	 						$firstpage, $norm);
-		$pdf->draw_text(18,  188, $yhtiorow["postino"]." ".$yhtiorow["postitp"],$firstpage, $norm);
+		$pdf->draw_text(18,  206, $postirow["yhtio_nimi"],	 						$firstpage, $norm);
+		$pdf->draw_text(18,  197, $postirow["yhtio_osoite"],	 						$firstpage, $norm);
+		$pdf->draw_text(18,  188, $postirow["yhtio_postino"]." ".$postirow["yhtio_postitp"],$firstpage, $norm);
 
 		$pdf->draw_text(18,  180,  "Vastaanottaja Addressat To", 				$firstpage, $pieni); // x,y
 		$pdf->draw_text(18,  170,  $rakir_row["toim_nimi"],	 					$firstpage, $iso);

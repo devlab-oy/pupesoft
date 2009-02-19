@@ -1,8 +1,13 @@
 <?php
-	
+
 	require("inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Rahtikirjakopio")."</font><hr>";
+
+	if ($tee == 'tulosta' and (!isset($rtunnukset) or count($rtunnukset) == 0)) {
+		echo "<font class='error'>Et valinnut yht‰‰n rahtikirjaa!</font><br>";
+		$tee = "";
+	}
 
 	if ($tee=='tulosta') {
 
@@ -36,7 +41,7 @@
 		else {
 			$printteri = $valittu_tulostin;
 		}
-		
+
 		// haetaan printteri 2:lle tulostuskomento
 		$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$printteri'";
 		$pres  = mysql_query($query) or pupe_error($query);
@@ -57,7 +62,7 @@
 			$yhtiorow["puhelin"] = $print["puhelin"];
 			$yhtiorow["yhteyshenkilo"] = $print["yhteyshenkilo"];
 		}
-		
+
 		// haetaan kaikki distinct rahtikirjat..
 		$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
@@ -72,7 +77,7 @@
 					and rahtikirjat.rahtikirjanro  in ('".str_replace(',','\',\'',implode(",", $rtunnukset))."')
 					order by lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus";
 		$rakir_res = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($rakir_res) == 0) {
 			echo "<font class='message'>".t("Yht‰‰n tulostettavaa rahtikirjaa ei lˆytynyt").".$query</font><br><br>";
 		}
@@ -103,7 +108,7 @@
 			else {
 				$rahdinmaksaja = "Vastaanottaja"; //t‰m‰ on defaultti
 			}
-			
+
 			// Katsotaan onko t‰m‰ koontikuljetus
 			if ($toitarow["tulostustapa"] == "K" or $toitarow["tulostustapa"] == "L") {
 				// Monen asiakkaan rahtikirjat tulostuu aina samalle paperille
@@ -183,12 +188,12 @@
 
 				while ($pak = mysql_fetch_array($pakka)) {
 					$pakkaus[]   = $pak[0];
-					
+
 					if ($pak[1] > 0 or $pak[2] > 0) {
 						$kilot[]     = $pak[1];
 						$kollit[]    = $pak[2];
 					}
-					
+
 					$kuutiot[]   = $pak[3];
 					$lavametri[] = $pak[4];
 					$kilotyht   += $pak[1];
@@ -196,7 +201,7 @@
 					$kuutiotyht += $pak[3];
 					$lavatyht   += $pak[4];
 				}
-				
+
 				$tulostuskpl = $kollityht;
 
 				//haetaan rahtikirjan kaikki vakkoodit arrayseen
@@ -225,9 +230,9 @@
 
 				// jos kyseess‰ on j‰lkivaatimus
 				if ($rakir_row['jv'] != '') {
-					$query = "	SELECT * 
-								FROM lasku 
-								WHERE yhtio = '$kukarow[yhtio]' 
+					$query = "	SELECT *
+								FROM lasku
+								WHERE yhtio = '$kukarow[yhtio]'
 								and laskunro = '$rakir_row[laskunro]'
 								and tila = 'U'
 								and alatila = 'X'";
@@ -263,7 +268,7 @@
 
 				// tarvitaan tiet‰‰, ett‰ onko kyseess‰ kopio
 				$tulostakopio = "kylla";
-				
+
 				// tulostetaan toimitustavan m‰‰rittelem‰ rahtikirja
 				if (file_exists("tilauskasittely/$toitarow[rahtikirja]")) {
 					require("tilauskasittely/$toitarow[rahtikirja]");
@@ -281,11 +286,11 @@
 		echo "<br>";
 
 	} // end tee==tulosta
-		
+
 	if ($tee == 'valitse') {
 
 		if ($otunnus == "") {
-			$query = "	select rahtikirjanro, sum(kilot) paino
+			$query = "	SELECT rahtikirjanro, sum(kilot) paino
 						from rahtikirjat
 						where yhtio		= '$kukarow[yhtio]' and
 						tulostuspaikka	= '$varasto' and
@@ -295,14 +300,14 @@
 						GROUP BY rahtikirjanro";
 		}
 		else {
-		    $query = "	SELECT rahtikirjanro 
-						from rahtikirjat 
+		    $query = "	SELECT rahtikirjanro
+						from rahtikirjat
 						where otsikkonro = '$otunnus'
 		            	and yhtio = '{$kukarow['yhtio']}'";
 		    $res = mysql_query($query) or pupe_error($query);
 		    $rahtikirjanro = mysql_fetch_array($res);
 
-			$query = "	select rahtikirjanro, sum(kilot) paino
+			$query = "	SELECT rahtikirjanro, sum(kilot) paino
 						from rahtikirjat
 						where yhtio			= '$kukarow[yhtio]'
 						and rahtikirjanro	= '{$rahtikirjanro['rahtikirjanro']}'
@@ -313,13 +318,12 @@
 			$varasto 		= "";
 		}
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='message'>$toimitustapa: $vv-$kk-$pp<br><br>".t("Yht‰‰n rahtikirjaa ei lˆytynyt")."!</font><br><br>";
 			$tee = "";
 		}
 		else {
-
 			echo "<form action='rahtikirja-kopio.php' method='post'>";
 			echo "<input type='hidden' name='tee' value='tulosta'>";
 			echo "<input type='hidden' name='pp' value='$pp'>";

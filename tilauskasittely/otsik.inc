@@ -2795,7 +2795,8 @@
 				//	Haetaan rivit ja kopioidaan ne uuteen tarjoukseen.. as they are..
 				$query = "select * from tilausrivi WHERE yhtio = '$kukarow[yhtio]' and otunnus='$aburow[tunnus]'";
 				$monistares = mysql_query($query) or pupe_error($query);
-
+				
+				$korjaaPerheet=array();
 				if(mysql_num_rows($monistares)>0) {
 					$fields = mysql_field_name($monistares,0);
 					for($i=1; $i < mysql_num_fields($monistares)-1; $i++) { // Ei monisteta tunnusta
@@ -2836,7 +2837,12 @@
 						$query = "	INSERT INTO tilausrivi ($fields) VALUES $values";
 						$insres=mysql_query($query) or pupe_error($query);
 						$lisattyRivitunnus = mysql_insert_id();
-
+						
+						//	Otetaan korjattava perheid talteen
+						if($monistarow["perheid"] > 0 and $monistarow["perheid"] == $monistarow["tunnus"]) {
+							$korjaaPerheet[$monistarow["perheid"]] = $lisattyRivitunnus;
+						}
+						
 						//	Oliko meillä lisatietoja?
 						$query = "select * from tilausrivin_lisatiedot WHERE yhtio = '$kukarow[yhtio]' and tilausrivitunnus='$monistarow[tunnus]'";
 						$monistares2 = mysql_query($query) or pupe_error($query);
@@ -2884,6 +2890,18 @@
 
 						}
 						
+					}
+				}
+				
+				//	Korjataan tuoteperheet jos tuli jotain korjattavaa
+				if(count($korjaaPerheet) > 0) {
+					foreach($korjaaPerheet as $wanhaPerhe => $uusiPerhe) {
+						if($wanhaPerhe > 0 and $uusiPerhe > 0) {
+							$query = "	UPDATE tilausrivi SET
+											perheid = $uusiPerhe
+										WHERE  yhtio = '$kukarow[yhtio]' and otunnus='$tilausnumero' and perheid>0 and perheid=$wanhaPerhe";
+							$monistares2 = mysql_query($query) or pupe_error($query);
+						}
 					}
 				}
 			}

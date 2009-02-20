@@ -172,7 +172,6 @@
 				$silent = "SILENT";
 			}
 
-
 			// tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow ja $yhtiorow
 			$kukarow["kesken"] = $laskurow["tunnus"];
 			
@@ -1152,7 +1151,7 @@
 											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";
 										}
 										else {
-											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!</font><br>";
+											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen").". (".t("Tuotetta riitti kaikille JT-riveille").")</font><br>";
 										}
 
 										// Pomitaan tämä rivi/perhe
@@ -1223,7 +1222,7 @@
 											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";
 										}
 										else {
-											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!</font><br>";
+											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen").". (".t("Tuotetta ei riittänyt kaikille JT-riveille").")</font><br>";
 										}
 
 										// Pomitaan tämä rivi/perhe
@@ -1236,7 +1235,7 @@
 
 										$jt_rivilaskuri++;
 									}
-									elseif($automaaginen == "") {
+									elseif ($automaaginen == "") {
 										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:yellowgreen;'>".t("Ei riitä kaikille")."!</font><br>";
 
 										if (!isset($toimpva) and $toimvko > 0) {
@@ -1564,6 +1563,9 @@
 				elseif ($jt_rivilaskuri == 0) {
 					if ($from_varastoon_inc == "editilaus_in.inc") {
 						$edi_ulos .= "\n".t("Yhtään JT-riviä ei löytynyt")."!";
+					}
+					elseif ($from_varastoon_inc == "varastoon.inc") {
+						// ei mitään
 					}
 					else {
 						echo t("Yhtään JT-riviä ei löytynyt")."!<br>";

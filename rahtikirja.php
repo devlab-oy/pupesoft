@@ -989,12 +989,12 @@
 							echo "&nbsp;";
 						}
 						echo "</td>";
-						
+						/*
 						$query = "	SELECT nimi, kollit
 									FROM 
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND otsikkonro in($row[tunnukset])";
-						$kollit_res = mysql_query($query) or pupe_error($query);
+						$kollit_res = mysql_query($query) or pupe_error($query);*/
 						
 						
 					}

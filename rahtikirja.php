@@ -903,6 +903,8 @@
 			if ($yhtiorow['pakkaamolokerot'] == 'K') {
 				echo "<th>".t("Kollit")."</th>";
 				echo "<th>".t("Rullakot")."</th>";
+				echo "<th>".t("pakkaamo")."</th>";
+				echo "<th>".t("lokero")."</th>";
 			}
 
 			echo "</tr>";
@@ -915,6 +917,7 @@
 							JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							AND lasku.tila in ('L','N')
+							AND lasku.alatila not in('X','V','D')
 							AND lasku.tulostusalue != ''
 							AND lasku.vanhatunnus = '$row[vanhatunnus]'
 							AND lasku.varasto = '$row[varasto]'
@@ -986,6 +989,14 @@
 							echo "&nbsp;";
 						}
 						echo "</td>";
+						
+						$query = "	SELECT nimi, kollit
+									FROM 
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND otsikkonro in($row[tunnukset])";
+						$kollit_res = mysql_query($query) or pupe_error($query);
+						
+						
 					}
 
 					echo "	<form method='post' action='$PHP_SELF'>

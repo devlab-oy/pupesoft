@@ -439,7 +439,7 @@
 			if ($laskurow['pakkaamo'] > 0 and $laskurow['varasto'] != '' and $laskurow['tulostusalue'] != '') {
 				$query = "	select pakkaamo.printteri1, pakkaamo.printteri3, varastopaikat.printteri5
 							from pakkaamo
-							join varastopaikat ON pakkaamo.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '$laskurow[tunnus]'
+							join varastopaikat ON pakkaamo.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '$laskurow[varasto]'
 							where pakkaamo.yhtio='$kukarow[yhtio]' 
 							and pakkaamo.tunnus='$laskurow[pakkaamo]'
 							order by pakkaamo.tunnus";

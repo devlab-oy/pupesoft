@@ -906,7 +906,7 @@
 			while ($row = mysql_fetch_array($tilre)) {
 				//chekkaus että kaikki splitatut tilaukset on kerätty
 			/* ei oteta huomioon niitä mistä puuttuu tulostusalue ja millä on tietty alatila */
-				$query = "	SELECT count(distinct lasku.tunnus) kpl
+			/*	$query = "	SELECT count(distinct lasku.tunnus) kpl, if(toimitustapa.tulostustapa='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti
 							FROM lasku
 							JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -916,7 +916,7 @@
 							AND lasku.varasto = '$row[varasto]'
 							group by lasku.vanhatunnus";
 				$vanhat_res = mysql_query($query) or pupe_error($query);
-				$vanhat_row = mysql_fetch_array($vanhat_res);
+				$vanhat_row = mysql_fetch_array($vanhat_res);*/
 				
 				// Debug 				
 				/*echo "tarkistus: $vanhat_row[kpl] <br>";
@@ -924,7 +924,7 @@
 				echo "main: $row[vanhatunnus] <br>";				
 				echo "main: $row[tunnukset] <br>";	*/	
 						
-				if ($vanhat_row['kpl'] == $row['tunnukset_lkm'] or $vanhat_row['kpl'] == 0 or $yhtiorow["splittauskielto"] == "K") {
+				//if ($vanhat_row['kpl'] == $row['tunnukset_lkm'] or $vanhat_row['kpl'] == 0 or $yhtiorow["splittauskielto"] == "K") {
 									
 					echo "<tr class='aktiivi'>";
 					echo "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";
@@ -993,7 +993,7 @@
 							</form>";
 					echo "</tr>";
 				}
-			}
+		//	}
 			echo "</table>";
 		}
 		else {

@@ -883,7 +883,7 @@
 					$having ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
 					ORDER BY laadittu";
 		$tilre = mysql_query($query) or pupe_error($query);
-		echo $query;
+		
 		//piirret‰‰n taulukko...
 		if (mysql_num_rows($tilre) != 0) {
 

@@ -839,7 +839,7 @@
 			$having = " HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ";
 		}
 		
-		if ($yhtiorow["splittauskielto"] == "") {
+		if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K') {
 			$grouplisa = ", lasku.vanhatunnus, lasku.varasto ";
 		}
 

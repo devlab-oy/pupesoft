@@ -11,6 +11,55 @@
 	else {
 		$sallitut_tilat = "'L','G','E','V','W','N'";
 	}
+	
+	if($tila == "lisaa_kaikki_jaksotukseen") {
+		
+		if($laskurow["jaksotettu"] == 0) {
+			echo "<font class='error'>".t("Lasku ei osa maksusopimusta")."</font>";
+		}
+		else {
+			//	Varmistetaan että kaikki otsikot on nipussa
+			$query = "	UPDATE lasku
+						SET jaksotettu=(if(tunnusnippu=0,tunnus,tunnusnippu))
+						WHERE yhtio = '$kukarow[yhtio]'
+						and if(tunnusnippu = 0,tunnus=$laskurow[tunnus], tunnusnippu=$laskurow[tunnusnippu])
+						and jaksotettu = 0
+						and tila in ('N','L','T','R')
+						and alatila != 'X'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			//	Varmistetaan, että kaikki vanhatunnukset on sopparilla
+			if ($laskurow["vanhatunnus"] > 0) {
+				$query = "	UPDATE lasku
+							SET jaksotettu = '$laskurow[jaksotettu]'
+							WHERE yhtio 	= '$kukarow[yhtio]'
+							and vanhatunnus = '$laskurow[vanhatunnus]'
+							and tila IN ($sallitut_tilat)
+							and alatila != 'X'";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+			
+			//	Haetaan kaikki tunnukset
+			$query = "	SELECT group_concat(distinct tunnus) tunnukset
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
+						and jaksotettu  = '$laskurow[jaksotettu]'
+						and tila IN ($sallitut_tilat)
+						and alatila != 'X'";
+			$result = mysql_query($query) or pupe_error($query);
+			$posrow = mysql_fetch_array($result);
+			
+			$ltunnukset	= $posrow["tunnukset"];
+			
+			$query = "	UPDATE tilausrivi
+						SET jaksotettu = '$laskurow[jaksotettu]'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and otunnus in ($ltunnukset)";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+	}
+
+	
 	if($tila == "uusi") {
 		if ($laskurow["jaksotettu"] == 0) {
 			$query = "	UPDATE lasku
@@ -116,7 +165,7 @@
 			//Lasketaan prossa annetun summan perusteella
 			$osuus = round($summa / $laskunsumma * 100,4);
 		}
-		elseif($posrow["osuus"] != $osuus and $osuus > 0) {
+		else {
 			//Lasketaan summa annetun prossan perusteella
 			$summa = round($osuus/100 * $laskunsumma,2);
 		}
@@ -445,18 +494,33 @@
 		else {
 			echo "<font class='error'>".t("Tilauksella ei ole maksupositioita!")."</font><br><br>";
 		}
-
+		
 		echo "<form method='post' name='maksupositiot' action='$PHP_SELF'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='hidden' name='tee' value='$tee'>
 				<input type='hidden' name='tila' value='uusi'>
-				<input type='submit' name='uusi_maksupositio' value='".t("Uusi positio")."'></form>
-
+				<input type='submit' name='uusi_maksupositio' value='".t("Uusi positio")."'>
+			</form>";
+			
+		if($laskurow["jaksotettu"] > 0) {
+			echo "
+					<form method='post' name='maksupositiot' action='$PHP_SELF'>
+							<input type='hidden' name='toim' value='$toim'>
+							<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+							<input type='hidden' name='tee' value='$tee'>
+							<input type='hidden' name='tila' value='lisaa_kaikki_jaksotukseen'>
+							<input type='submit' name='uusi_maksupositio' value='".t("Lisää kaikki rivit sopimukseen")."'>
+					</form>";
+		}
+			
+				
+		echo "
 				<form method='post' action='$PHP_SELF'>
-				<input type='hidden' name='toim' value='$toim'>
-				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-				<input type='submit' value='".t("Takaisin tilaukselle")."'></form>";
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='submit' value='".t("Takaisin tilaukselle")."'>
+				</form>";
 
 	}
 ?>

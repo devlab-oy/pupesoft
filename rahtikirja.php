@@ -436,7 +436,15 @@
 			$lahetekpl = (int) $lahetekpl;
 
 			//tulostetaan faili ja valitaan sopivat printterit
-			if ($laskurow["varasto"] == '') {
+			if ($laskurow['pakkaamo'] > 0 and $laskurow['varasto'] != '' and $laskurow['tulostusalue'] != '') {
+				$query = "	select pakkaamo.printteri1, pakkaamo.printteri3, varastopaikat.printteri5
+							from pakkaamo
+							join varastopaikat ON pakkaamo.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '$laskurow[tunnus]'
+							where pakkaamo.yhtio='$kukarow[yhtio]' 
+							and pakkaamo.tunnus='$laskurow[pakkaamo]'
+							order by pakkaamo.tunnus";
+			}
+			elseif ($laskurow["varasto"] == '') {
 				$query = "	select *
 							from varastopaikat
 							where yhtio='$kukarow[yhtio]'
@@ -863,6 +871,7 @@
 					rahtikirjat.otsikkonro,
 					rahtikirjat.poikkeava,
 					lasku.pakkaamo,
+					GROUP_CONCAT(lasku.pakkaamo order by lasku.tunnus SEPARATOR ',') pakkaamot,
 					sum(rahtikirjat.kollit) kollit,
 					rahtikirjat.pakkaus,
 					count(distinct lasku.tunnus) tunnukset_lkm,
@@ -903,8 +912,7 @@
 			if ($yhtiorow['pakkaamolokerot'] == 'K') {
 				echo "<th>".t("Kollit")."</th>";
 				echo "<th>".t("Rullakot")."</th>";
-				echo "<th>".t("pakkaamo")."</th>";
-				echo "<th>".t("lokero")."</th>";
+				echo "<th>".t("pakkaamo")."/".t("lokero")."</th>";				
 			}
 
 			echo "</tr>";
@@ -989,14 +997,23 @@
 							echo "&nbsp;";
 						}
 						echo "</td>";
-						/*
-						$query = "	SELECT nimi, kollit
-									FROM 
+						
+						$query = "	SELECT nimi, lokero 
+									FROM pakkaamo
 									WHERE yhtio = '$kukarow[yhtio]'
-									AND otsikkonro in($row[tunnukset])";
-						$kollit_res = mysql_query($query) or pupe_error($query);*/
+									AND tunnus in($row[pakkaamot])";
+						$pakkaamoresult = mysql_query($query) or pupe_error($query);
 						
-						
+						echo "<td>";
+						if (mysql_num_rows($pakkaamoresult) > 0) {
+							while ($pakkaamo_row = mysql_fetch_array($pakkaamoresult)) {
+								echo $pakkaamo_row['nimi']."/".$pakkaamo_row['lokero']."<br>";
+							}
+						}
+						else {
+							echo "&nbsp;";
+						}			
+						echo "</td>";			
 					}
 
 					echo "	<form method='post' action='$PHP_SELF'>

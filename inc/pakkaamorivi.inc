@@ -50,8 +50,6 @@
 					WHERE yhtio = '$kukarow[yhtio]'";
 		$varasto_res = mysql_query($query) or pupe_error($query);
 
-		$ulos .= "<option value=''>".t("Ei varastopaikkaa")."</option>";
-
 		while ($varasto_row = mysql_fetch_array($varasto_res)) {
 			if ($varasto_row["tunnus"] == $row[$i]) {
 				$select = 'SELECTED';

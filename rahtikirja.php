@@ -841,6 +841,10 @@
 		
 		if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K') {
 			$grouplisa = ", lasku.vanhatunnus, lasku.varasto ";
+			$selecttoimitustapaehto = " toimitustapa.tunnus kimppakyyti, ";
+		}
+		else {
+			$selecttoimitustapaehto = " if(toimitustapa.tulostustapa='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti, "; 
 		}
 
 		// Haetaan sopivia tilauksia
@@ -852,7 +856,7 @@
 					lasku.toimitustapa toimitustapa,
 					toimitustapa.nouto nouto,
 					$selectmaksuehto
-					if(toimitustapa.tulostustapa='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti,
+					$selecttoimitustapaehto
 					lasku.vienti,
 					date_format(lasku.luontiaika, '%Y-%m-%d') laadittux,
 					date_format(lasku.toimaika, '%Y-%m-%d') toimaika,
@@ -879,7 +883,7 @@
 					$having ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
 					ORDER BY laadittu";
 		$tilre = mysql_query($query) or pupe_error($query);
-		
+		echo $query;
 		//piirret‰‰n taulukko...
 		if (mysql_num_rows($tilre) != 0) {
 
@@ -906,7 +910,7 @@
 			while ($row = mysql_fetch_array($tilre)) {
 				//chekkaus ett‰ kaikki splitatut tilaukset on ker‰tty
 			/* ei oteta huomioon niit‰ mist‰ puuttuu tulostusalue ja mill‰ on tietty alatila */
-			/*	$query = "	SELECT count(distinct lasku.tunnus) kpl, if(toimitustapa.tulostustapa='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti
+				$query = "	SELECT count(distinct lasku.tunnus) kpl
 							FROM lasku
 							JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -916,15 +920,15 @@
 							AND lasku.varasto = '$row[varasto]'
 							group by lasku.vanhatunnus";
 				$vanhat_res = mysql_query($query) or pupe_error($query);
-				$vanhat_row = mysql_fetch_array($vanhat_res);*/
+				$vanhat_row = mysql_fetch_array($vanhat_res);
 				
 				// Debug 				
-				/*echo "tarkistus: $vanhat_row[kpl] <br>";
+			/*	echo "tarkistus: $vanhat_row[kpl] <br>";
 				echo "main: $row[tunnukset_lkm] <br>";				
 				echo "main: $row[vanhatunnus] <br>";				
-				echo "main: $row[tunnukset] <br>";	*/	
+				echo "main: $row[tunnukset] <br>";		*/
 						
-				//if ($vanhat_row['kpl'] == $row['tunnukset_lkm'] or $vanhat_row['kpl'] == 0 or $yhtiorow["splittauskielto"] == "K") {
+				if ($vanhat_row['kpl'] == $row['tunnukset_lkm'] or $vanhat_row['kpl'] == 0 or $yhtiorow["splittauskielto"] == "K") {
 									
 					echo "<tr class='aktiivi'>";
 					echo "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";
@@ -993,7 +997,7 @@
 							</form>";
 					echo "</tr>";
 				}
-		//	}
+			}
 			echo "</table>";
 		}
 		else {

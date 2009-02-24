@@ -796,7 +796,21 @@
 		}
 
 		if (is_numeric($etsi) and $etsi != '') {
-			$haku .= "and lasku.tunnus='$etsi'";
+			
+			//etsitään myös splittaantuneet 			
+			$query = "	SELECT group_concat(tunnus SEPARATOR ',') tunnukset
+			  			FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND vanhatunnus = (select distinct vanhatunnus from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$etsi')";
+			$etsire = mysql_query($query) or pupe_error($query);
+			$etsirow = mysql_fetch_array($etsire);	
+						
+			if ($etsirow[tunnukset] != '') {
+				$haku .= "and lasku.tunnus in($etsirow[tunnukset])";
+			}		
+			else {
+				echo "<font class='message'>".t("Sopivia tilauksia ei löytynyt")."...</font><br><br>";
+			}	
 		}
 
 		if ($tuvarasto != '' and $tuvarasto != 'KAIKKI') {
@@ -892,7 +906,7 @@
 					$having ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
 					ORDER BY laadittu";
 		$tilre = mysql_query($query) or pupe_error($query);
-		
+
 		//piirretään taulukko...
 		if (mysql_num_rows($tilre) != 0) {
 

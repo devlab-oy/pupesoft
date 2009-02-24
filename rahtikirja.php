@@ -797,20 +797,37 @@
 
 		if (is_numeric($etsi) and $etsi != '') {
 			
-			//etsitään myös splittaantuneet 			
-			$query = "	SELECT group_concat(tunnus SEPARATOR ',') tunnukset
-			  			FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND vanhatunnus = (select distinct vanhatunnus from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$etsi')";
-			$etsire = mysql_query($query) or pupe_error($query);
-			$etsirow = mysql_fetch_array($etsire);	
-						
-			if ($etsirow[tunnukset] != '') {
-				$haku .= "and lasku.tunnus in($etsirow[tunnukset])";
-			}		
+			//etsitään myös splittaantuneet 		
+			$query = "	SELECT distinct vanhatunnus 
+						FROM lasku 
+						WHERE yhtio = '$kukarow[yhtio]' 
+						AND tunnus = '$etsi'
+						AND tila = '$tila'
+						AND alatila = 'C'";
+			$vanhatre = mysql_query($query) or pupe_error($query);
+			$vanhatrow = mysql_fetch_array($vanhatre);
+			
+			if ($vanhatrow['vanhatunnus'] == 0) {
+				$haku .= "and lasku.tunnus = '$etsi'";
+			}
 			else {
-				echo "<font class='message'>".t("Sopivia tilauksia ei löytynyt")."...</font><br><br>";
-			}	
+				$query = "	SELECT group_concat(tunnus SEPARATOR ',') tunnukset
+				  			FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND vanhatunnus = $vanhatrow[vanhatunnus]
+							AND tila = '$tila'
+							AND alatila = 'C'";
+				$etsire = mysql_query($query) or pupe_error($query);
+				$etsirow = mysql_fetch_array($etsire);	
+
+				if ($etsirow[tunnukset] != '') {
+					$haku .= "and lasku.tunnus in($etsirow[tunnukset])";
+				}		
+				else {
+					echo "<font class='message'>".t("Sopivia tilauksia ei löytynyt")."...</font><br><br>";
+				}
+			}				
+				
 		}
 
 		if ($tuvarasto != '' and $tuvarasto != 'KAIKKI') {

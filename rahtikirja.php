@@ -935,7 +935,7 @@
 			$having = " HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ";
 		}
 		
-		if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K') {
+		if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K' and $tila == 'L') {
 			$grouplisa = ", lasku.vanhatunnus, lasku.varasto ";
 			$selecttoimitustapaehto = " toimitustapa.tunnus kimppakyyti, ";
 		}

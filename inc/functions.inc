@@ -6371,7 +6371,7 @@ if (!function_exists("pakkaamo")) {
 						JOIN pakkaamo ON (pakkaamo.yhtio = lasku.yhtio and pakkaamo.tunnus = lasku.pakkaamo)
 						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
 						AND (lasku.tunnus 		in ($tilausnumero)
-							or lasku.vanhatunnus 	in ($tilausnumero))
+							or lasku.vanhatunnus 	in ($vanhattunnukset))
 						AND lasku.tila 		in ('N', 'L')
 						AND lasku.alatila 	in ('A', 'C')
 						$pakkaamolisa
@@ -6380,7 +6380,7 @@ if (!function_exists("pakkaamo")) {
 			
 			if (mysql_num_rows($split_pakkaamo_res) == 1) {
 				$split_pakkaamo_row = mysql_fetch_assoc($split_pakkaamo_res);
-
+				
 				if (isset($update) and $update != '') {
 					$query = "	UPDATE lasku SET
 								pakkaamo = '$split_pakkaamo_row[pakkaamo]'
@@ -6388,7 +6388,7 @@ if (!function_exists("pakkaamo")) {
 								AND tunnus in ($tilausnumero)";
 					$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
 				}
-
+				
 				return $split_pakkaamo_row['pakkaamo'];
 			}
 			else {

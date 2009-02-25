@@ -186,6 +186,7 @@
 						keraajanro 		= '$keraajanro',
 						myyja 			= '$myyja',
 						varasto 		= '$varasto',
+						oletus_pakkaamo	= '$oletus_pakkaamo',
 						kirjoitin 		= '$kirjoitin',
 						kassamyyja 		= '$kassamyyja',
 						dynaaminen_kassamyynti = '$dynaaminen_kassamyynti',
@@ -346,6 +347,7 @@
 						myyja 			= '$myyja',
 						osasto			= '$osasto',
 						varasto 		= '$varasto',
+						oletus_pakkaamo	= '$oletus_pakkaamo',
 						kirjoitin 		= '$kirjoitin',
 						oletus_asiakas 	= '$oletus_asiakas',
 						oletus_asiakastiedot = '$oletus_asiakastiedot',
@@ -621,6 +623,23 @@
 			}
 
 			echo "</select></td></tr>";
+			
+			if ($toim != 'extranet' and $yhtiorow['pakkaamolokerot'] == 'K') {
+				echo "<tr><th align='left'>".t("Oletus pakkaamo").":</td>";
+				echo "<td><select name='oletus_pakkaamo'><option value=''>".t("Ei pakkaamoa")."</option>";
+
+				$query  = "SELECT distinct nimi FROM pakkaamo WHERE yhtio='$kukarow[yhtio]'";
+				$pakkaamores = mysql_query($query) or pupe_error($query);
+
+				while ($pakkaamorow = mysql_fetch_array($pakkaamores)) {
+					$sel='';
+					if ($pakkaamorow['nimi']==$krow["oletus_pakkaamo"]) $sel = 'selected';
+					echo "<option value='$pakkaamorow[nimi]' $sel>$pakkaamorow[nimi]</option>";
+				}
+
+				echo "</select></td></tr>";
+			}
+			
 
 			if ($toim != 'extranet') {
 				echo "<tr><th align='left'>".t("Henkilökohtainen tulostin:")."</td>";

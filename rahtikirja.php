@@ -784,9 +784,43 @@
 
 		echo "</select></td>";
 
+		
+		
+		if ($yhtiorow['pakkaamolokerot'] == 'K' and $tila == 'L') {
+			echo "<td>".t("Valitse pakkaamo:")."</td><td><select name='tupakkaamo' onchange='submit()'>";
+
+			$query = "	SELECT distinct nimi
+						FROM pakkaamo
+						WHERE yhtio = '$kukarow[yhtio]'
+						ORDER BY nimi";
+			$result = mysql_query($query) or pupe_error($query);
+
+			echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
+
+			while($row = mysql_fetch_array($result)){
+				$sel = '';
+				if ($tupakkaamo == '') {
+					if($row['nimi'] == $kukarow['oletus_pakkaamo']) {
+						$sel = 'selected';
+						$tupakkaamo = $row['nimi'];
+					}
+				}
+				else {
+					if($row['nimi'] == $tupakkaamo) {
+						$sel = 'selected';
+						$tupakkaamo = $row['nimi'];
+					}
+				}
+
+				echo "<option value='$row[nimi]' $sel>".$row[nimi]."</option>";
+			}
+
+			echo "</select></td></tr><tr>";
+		}	
+		
 		echo "<td>".t("Etsi tilausta").":</td><td><input type='text' name='etsi'>";
 		echo "<input type='Submit' value='".t("Etsi")."'></form></td></tr>";
-
+		
 		echo "</table>";
 
 		$haku = '';
@@ -833,6 +867,31 @@
 		if ($tuvarasto != '' and $tuvarasto != 'KAIKKI') {
 			$haku .= " and lasku.varasto='$tuvarasto' ";
 		}
+		
+		if ($yhtiorow['pakkaamolokerot'] == 'K' and $tila == 'L') {
+			if ($tupakkaamo == '' and $kukarow['oletus_pakkaamo'] != '') {
+				$query = "	SELECT group_concat(tunnus SEPARATOR ',') tunnukset
+				  			FROM pakkaamo
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND nimi = '$kukarow[oletus_pakkaamo]'";
+				$etsire = mysql_query($query) or pupe_error($query);
+				$etsirow = mysql_fetch_array($etsire);
+				
+				$haku .= " and lasku.pakkaamo in($etsirow[tunnukset])";
+				
+			}
+			elseif ($tupakkaamo != '' and $tupakkaamo != 'KAIKKI') {
+				$query = "	SELECT group_concat(tunnus SEPARATOR ',') tunnukset
+				  			FROM pakkaamo
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND nimi = '$tupakkaamo'";
+				$etsire = mysql_query($query) or pupe_error($query);
+				$etsirow = mysql_fetch_array($etsire);
+				
+				$haku .= " and lasku.pakkaamo in($etsirow[tunnukset])";
+			}
+		}
+		
 
 		if ($tumaa != '') {
 			$query = "	SELECT group_concat(tunnus) tunnukset

@@ -783,8 +783,6 @@
 		}
 
 		echo "</select></td>";
-
-		
 		
 		if ($yhtiorow['pakkaamolokerot'] == 'K' and $tila == 'L') {
 			echo "<td>".t("Valitse pakkaamo:")."</td><td><select name='tupakkaamo' onchange='submit()'>";

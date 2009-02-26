@@ -350,7 +350,7 @@
 			$updateres = mysql_query($query) or pupe_error($query);
 			
 			//yhdistet‰‰n splittaantuneet
-			if (strpos($tunnukset,',') !== false) {
+			if (strpos($tunnukset,',') !== false and $yhtiorow['pakkaamolokerot'] == 'K') {
 				$otsikko_tunnarit = explode(',',$tunnukset);
 				
 				$query = "	UPDATE tilausrivi SET

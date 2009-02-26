@@ -199,6 +199,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				$postoiminto = (string) array_search($column, $otsikot);
 			}
 		}
+		else {
+			$vikaa++;
+			echo "<font class='error'>".t("Tiedostossa on tyhjiä sarakkeiden otsikoita")."!</font><br>";
+		}
 	}
 
 	// oli virheellisiä sarakkeita tai pakollisia ei löytynyt..
@@ -371,6 +375,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			if (strlen(trim($rivi[$j])) == 0 and in_array($otsikot[$j], $pakolliset)) {
 				$tila = 'ohita';
 			}
+			
 		}
 
 		// jos ei ole puuttuva tieto etsitään riviä

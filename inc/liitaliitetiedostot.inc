@@ -303,7 +303,9 @@
 				echo "<input type='hidden' name='tunnus' value='$tunnus'>";
 				echo "<input type='hidden' name='kuvatunnus' value='$trow[tunnus]'>";
 				echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
-				
+
+				echo "<tr><th>",t("Tiedoston nimi"),"</th><td colspan='2'>$trow[filename]</td></tr>";
+
 				$query = "	SELECT selite, selitetark
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]' and laji = 'LITETY'

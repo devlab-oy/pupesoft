@@ -1007,7 +1007,8 @@
 
 			while ($row = mysql_fetch_array($tilre)) {
 				//chekkaus että kaikki splitatut tilaukset on kerätty
-			/* ei oteta huomioon niitä mistä puuttuu tulostusalue ja millä on tietty alatila */
+			/* ei oteta huomioon niitä mistä puuttuu tulostusalue ja millä on tietty alatila 
+			lisää alatila B jos käytetään keräästä rahtikirjansyöttöön halutessa*/
 				$query = "	SELECT count(distinct lasku.tunnus) kpl
 							FROM lasku
 							JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
@@ -1025,9 +1026,9 @@
 			/*	echo "tarkistus: $vanhat_row[kpl] <br>";
 				echo "main: $row[tunnukset_lkm] <br>";				
 				echo "main: $row[vanhatunnus] <br>";				
-				echo "main: $row[tunnukset] <br>";		*/
+				echo "main: $row[tunnukset] <br>";	*/	
 						
-				if ($vanhat_row['kpl'] == $row['tunnukset_lkm'] or $vanhat_row['kpl'] == 0 or $yhtiorow["splittauskielto"] == "K") {
+				if ($vanhat_row['kpl'] == $row['tunnukset_lkm'] or $vanhat_row['kpl'] == 0 or $yhtiorow["splittauskielto"] == "K" or $yhtiorow['pakkaamolokerot'] == '') {
 									
 					echo "<tr class='aktiivi'>";
 					echo "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";

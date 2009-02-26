@@ -31,18 +31,21 @@
 			// Onko meillä lisärajoitteita??
 			$lisa  = "";
 			$lisa2 = "";
-
-			if ($kustp != "") {
-				$lisa .= " and kustp = '$kustp'";
-				$lisa2 .= " and kustannuspaikka = '$kustp'";
+			
+			if (is_array($mul_kustp) and count($mul_kustp) > 0) {
+				$sel_kustp = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_kustp))."')";
+				$lisa 	.= " and kustp in $sel_kustp ";
+				$lisa2	.= " and kustannuspaikka in $sel_kustp ";
 			}
-			if ($proj != "") {
-				$lisa .= " and projekti = '$proj'";
-				$lisa2 .= " and projekti = '$proj'";
+			if (is_array($mul_proj) and count($mul_proj) > 0) {
+				$sel_proj = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_proj))."')";
+				$lisa 	.= " and projekti in $sel_proj ";
+				$lisa2 	.= " and projekti in $sel_proj ";
 			}
-			if ($kohde != "") {
-				$lisa .= " and kohde = '$kohde'";
-				$lisa2 .= " and kohde = '$kohde'";
+			if (is_array($mul_kohde) and count($mul_kohde) > 0) {
+				$sel_kohde = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_kohde))."')";
+				$lisa 	.= " and kohde in $sel_kohde ";
+				$lisa2 	.= " and kohde in $sel_kohde ";
 			}
 			if ($plvk == '' or $plvv == '') {
 				$plvv = substr($yhtiorow['tilikausi_alku'], 0, 4);
@@ -77,7 +80,7 @@
 				$aputyyppi 	= 3;
 				$tilikarttataso = "sisainen_taso";
 			}
-
+		
 			// edellinen taso
 			$taso     = array();
 			$tasonimi = array();
@@ -456,8 +459,9 @@
 									$tilirivi .= "<td class='back' nowrap>$key</td>";
 									$tilirivi .= "<td class='back' nowrap><input type='checkbox' name='tiliarray[]' value=\"'$tilirow[tilino]'\"></td>";
 								}
-
-								$tilirivi .= "<td nowrap>$tilirow[tilino] - $tilirow[nimi]</td>$tilirivi2</tr>";
+								$tilirivi .= "<td nowrap>";
+								$tilirivi .= "<a href ='../raportit.php?toim=paakirja&tee=P&mista=tuloslaskelma&alvv=$alvv&alvk=$alvk&kohde=".base64_encode(serialize($mul_kohde))."&proj=".base64_encode(serialize($mul_proj))."&kustp=".base64_encode(serialize($mul_kustp))."&tili=$tilirow[tilino]'>$tilirow[tilino] - $tilirow[nimi]";
+								$tilirivi .= "</td>$tilirivi2</tr>";
 							}
 						}
 					}
@@ -674,7 +678,7 @@
 		echo "</select></td>";
 		echo "</tr>";
 		
-		echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
+		echo "<tr><th>".t("Kustannuspaikka")."</th>";
 
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -682,11 +686,22 @@
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		echo "<td><select name='kustp'><option value=''>".t("Ei valintaa")."</option>";
+		echo "<td><select name='mul_kustp[]'  multiple='TRUE'>";
 
+		$mul_check = '';
+		if ($mul_kustp!="") {
+			if (in_array("PUPEKAIKKIMUUT", $mul_kustp)) {
+				$mul_check = 'SELECTED';
+			}
+		}
+		
+		echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei valintaa")."</option>";
+		
 		while ($vrow=mysql_fetch_array($vresult)) {
+		
+			
 			$sel="";
-			if ($trow[$i] == $vrow['tunnus'] or $kustp == $vrow["tunnus"]) {
+			if ($trow[$i] == $vrow['tunnus'] or in_array($vrow[tunnus],$mul_kustp)) {
 				$sel = "selected";
 			}
 			echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
@@ -694,7 +709,7 @@
 
 		echo "</select></td>";
 		echo "</tr>";
-		echo "<tr><th>".t("Vain kohde")."</th>";
+		echo "<tr><th>".t("Kohde")."</th>";
 
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -702,19 +717,28 @@
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		echo "<td><select name='kohde'><option value=''>Ei valintaa</option>";
+		echo "<td><select name='mul_kohde[]'  multiple='TRUE'>";
+		
+		$mul_check = '';
+		if ($mul_kohde!="") {
+			if (in_array("PUPEKAIKKIMUUT", $mul_kohde)) {
+				$mul_check = 'SELECTED';
+			}
+		}
+		echo "<option value='PUPEKAIKKIMUUT' $mul_check>Ei valintaa</option>";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
+						
 			$sel="";
-			if ($trow[$i] == $vrow['tunnus'] or $kohde == $vrow["tunnus"]) {
+			if ($trow[$i] == $vrow['tunnus'] or in_array($vrow["tunnus"],$mul_kohde)) {
 				$sel = "selected";
 			}
-			echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
+			echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";	
 		}
 
 		echo "</select></td>";
 		echo "</tr>";
-		echo "<tr><th>".t("Vain projekti")."</th>";
+		echo "<tr><th>".t("Projekti")."</th>";
 
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -722,11 +746,20 @@
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		echo "<td><select name='proj'><option value=''>".t("Ei valintaa")."</option>";
+		echo "<td><select name='mul_proj[]'  multiple='TRUE'>";
+		
+		$mul_check = '';
+		if ($mul_proj!="") {
+			if (in_array("PUPEKAIKKIMUUT", $mul_proj)) {
+				$mul_check = 'SELECTED';
+			}
+		}
+		echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei valintaa")."</option>";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
+					
 			$sel="";
-			if ($trow[$i] == $vrow['tunnus'] or $proj == $vrow["tunnus"]) {
+			if ($trow[$i] == $vrow['tunnus'] or in_array($vrow["tunnus"],$mul_proj)) {
 				$sel = "selected";
 			}
 			echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";

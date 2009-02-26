@@ -306,26 +306,51 @@
 		$lisa2 = "tiliointi.tapvm < '$alkupvm'";
 	}
 
-	if (strlen(trim($kohde)) > 0) {
-		$lisa .= " and tiliointi.kohde = '" . $kohde . "'";
-		$lisa2 .= " and tiliointi.kohde = '" . $kohde . "'";
+	if ($mista == "tuloslaskelma") {
+		$mul_kohde 	= unserialize(base64_decode($kohde));
+		$mul_proj 	= unserialize(base64_decode($proj));
+		$mul_kustp 	= unserialize(base64_decode($kustp));
+		
+		if (is_array($mul_kustp) and count($mul_kustp) > 0) {
+			$sel_kustp = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_kustp))."')";
+			$lisa 	.= " and tiliointi.kustp in $sel_kustp ";
+			$lisa2	.= " and tiliointi.kustp in $sel_kustp ";
+		}
+		if (is_array($mul_proj) and count($mul_proj) > 0) {
+			$sel_proj = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_proj))."')";
+			$lisa 	.= " and tiliointi.projekti in $sel_proj ";
+			$lisa2 	.= " and tiliointi.projekti in $sel_proj ";
+		}
+		if (is_array($mul_kohde) and count($mul_kohde) > 0) {
+			$sel_kohde = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_kohde))."')";
+			$lisa 	.= " and tiliointi.kohde in $sel_kohde ";
+			$lisa2 	.= " and tiliointi.kohde in $sel_kohde ";
+		}
+	}
+	else {
+		if (strlen(trim($kohde)) > 0) {
+			$lisa .= " and tiliointi.kohde = '" . $kohde . "'";
+			$lisa2 .= " and tiliointi.kohde = '" . $kohde . "'";
+		}
+
+		if (strlen(trim($proj)) > 0) {
+			$lisa .= " and tiliointi.projekti = '" . $proj . "'";
+			$lisa2 .= " and tiliointi.projekti = '" . $proj . "'";
+		}
+
+		if (strlen(trim($kustp)) > 0) {
+			if (strlen(trim($kustp2)) > 0) {
+				$lisa .= " and tiliointi.kustp in (" . $vrow['lista'] . ")";
+				$lisa2 .= " and tiliointi.kustp in (" . $vrow['lista'] . ")";
+			}
+			else {
+				$lisa .= " and tiliointi.kustp = '" . $kustp . "'";
+				$lisa2 .= " and tiliointi.kustp = '" . $kustp . "'";
+			}
+		}
 	}
 
-	if (strlen(trim($proj)) > 0) {
-		$lisa .= " and tiliointi.projekti = '" . $proj . "'";
-		$lisa2 .= " and tiliointi.projekti = '" . $proj . "'";
-	}
 
-	if (strlen(trim($kustp)) > 0) {
-		if (strlen(trim($kustp2)) > 0) {
-			$lisa .= " and tiliointi.kustp in (" . $vrow['lista'] . ")";
-			$lisa2 .= " and tiliointi.kustp in (" . $vrow['lista'] . ")";
-		}
-		else {
-			$lisa .= " and tiliointi.kustp = '" . $kustp . "'";
-			$lisa2 .= " and tiliointi.kustp = '" . $kustp . "'";
-		}
-	}
 
 	if ($tili2 == 0) $tili2 = $tili;
 
@@ -357,7 +382,7 @@
 				and $lisa
 				ORDER BY $jarj";
 	$result = mysql_query($query) or pupe_error($query);
-
+	
 	echo "<table><tr>";
 
 	for ($i = 0; $i < mysql_num_fields($result)-4; $i++) {

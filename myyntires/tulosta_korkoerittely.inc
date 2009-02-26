@@ -320,14 +320,23 @@
 		fclose($fh);
 
 		// itse print komento...
-		$query = "	select komento
+		$query = "	SELECT komento
 					from kirjoittimet
 					where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kirjoitin]'";
 		$kires = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($kires) == 1) {
 			$kirow = mysql_fetch_array($kires);
-			$line  = exec("$kirow[komento] $pdffilenimi");
+
+			if ($kirow["komento"] == 'email') {
+				$liite = $pdffilenimi;
+				$kutsu = "korkoerittely-$asiakastiedot[ytunnus]";
+				$ctype = "pdf";
+				require("../inc/sahkoposti.inc");
+			}
+			else {
+				$line  = exec("$kirow[komento] $pdffilenimi");
+			}
 
 			//system("rm -f $pdffilenimi");
 			unset($pdffilenimi);

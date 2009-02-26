@@ -193,7 +193,7 @@
 			$kutsu = "Tarrat.pdf";
 			$ctype = "pdf";
 
-			system("ps2pdf /tmp/".$filenimi.".ps $liite");
+			system("ps2pdf ".$filenimi.".ps $liite");
 			require("../inc/sahkoposti.inc");
 		}
 		else {

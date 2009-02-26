@@ -350,7 +350,7 @@ if ($tee == "SYOTA") {
 			</tr>";
 	}
 
-	if ($kukarow['yhtio'] == 'artr' and ($toim == 'EXTRANET' or $toim == 'AUTOMANUAL')) {
+	if (($kukarow['yhtio'] == 'artr' and ($toim == 'EXTRANET' or $toim == 'AUTOMANUAL')) or ($toim == 'EXTRANET')) {
 		if ($rivi['tapa'] == "automanual_ext_uutinen" and $rivi['tyyppi'] == "extranet_uutinen") {
 			$check1 = $check2 = "CHECKED";
 		}
@@ -375,9 +375,9 @@ if ($tee == "SYOTA") {
 			else {
 				$check2 = "";
 			}
-		}
+		}	
 	
-		if ($toim == 'EXTRANET' or $toim == 'AUTOMANUAL') {
+		if ($kukarow['yhtio'] == 'artr' and ($toim == 'EXTRANET' or $toim == 'AUTOMANUAL')) {
 			echo "<tr>
 				<th>".t("Automanual")."</th>
 				<td><input type='checkbox' name='automanual_uutinen' $check1> ".t("Näytetäänkö uutinen Automanualissa")."</td>

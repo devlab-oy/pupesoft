@@ -189,10 +189,11 @@
 
 		// itse print komento...
 		if ($komento["Tarrat"] == 'email') {
-			$liite = $filenimi.".ps";
-			$kutsu = "Tarrat.ps";
-			$ctype = "ps";
+			$liite = "/tmp/CRM-Osoitetarrat-".md5(uniqid(mt_rand(), true)).".pdf";
+			$kutsu = "Tarrat.pdf";
+			$ctype = "pdf";
 
+			system("ps2pdf /tmp/".$filenimi.".ps $liite");
 			require("../inc/sahkoposti.inc");
 		}
 		else {

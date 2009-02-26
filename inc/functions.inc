@@ -302,7 +302,7 @@ if (!function_exists("onkotulostusalueita")) {
 		}
 		else {
 			$varcheckrow = mysql_fetch_array($varcheckres);
-			return $varcheckrow['nimi'];
+			return trim($varcheckrow['nimi']);
 		}
 	}
 }

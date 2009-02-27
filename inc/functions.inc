@@ -6339,7 +6339,7 @@ if (!function_exists("pakkaamo")) {
 			$vanhattunnukset = substr($vanhattunnukset, 0, -1); 
 					
 			// haetaan tärkein pakkaamo
-			$query = "	SELECT distinct pakkaamo.pakkaamon_prio, lasku.varasto, lasku.tulostusalue, trim(varaston_tulostimet.nimi), varaston_tulostimet.pakkaamo
+			$query = "	SELECT distinct pakkaamo.pakkaamon_prio, lasku.varasto, lasku.tulostusalue, varaston_tulostimet.nimi, varaston_tulostimet.pakkaamo
 						FROM lasku
 						JOIN varaston_tulostimet ON (varaston_tulostimet.yhtio = lasku.yhtio AND varaston_tulostimet.varasto = lasku.varasto AND trim(varaston_tulostimet.nimi) = lasku.tulostusalue)
 						JOIN pakkaamo ON (pakkaamo.yhtio = lasku.yhtio and pakkaamo.nimi = varaston_tulostimet.pakkaamo)

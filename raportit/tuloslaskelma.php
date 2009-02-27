@@ -105,13 +105,14 @@
 			$startmonth	= date("Ymd",   mktime(0, 0, 0, $plvk, 1, $plvv));
 			$endmonth 	= date("Ymd",   mktime(0, 0, 0, $alvk, 1, $alvv));
 			$annettualk = date("Y-m-d", mktime(0, 0, 0, $plvk, 1, $plvv));
-			$totalloppu = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
+			$totalloppu = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));			
 
 			$budjettalk = date("Ym",    mktime(0, 0, 0, $plvk, 1, $plvv));
 			$budjettlop = date("Ym", 	mktime(0, 0, 0, $alvk+1, 0, $alvv));
 
 			if ($vertailued != "") {
 				$totalalku  = date("Y-m-d", mktime(0, 0, 0, $plvk, 1, $plvv-1));
+				$totalloppued = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv-1));
 			}
 			else {
 				$totalalku = date("Y-m-d", mktime(0, 0, 0, $plvk, 1, $plvv));
@@ -164,6 +165,9 @@
 
 			$vka = date("Y/m", mktime(0, 0, 0, $plvk, 1, $plvv));
 			$vkl = date("Y/m", mktime(0, 0, 0, $alvk+1, 0, $alvv));
+			
+			$vkaed = date("Y/m", mktime(0, 0, 0, $plvk, 1, $plvv-1));
+			$vkled = date("Y/m", mktime(0, 0, 0, $alvk+1, 0, $alvv-1));
 
 			// Yhteensäotsikkomukaan
 			if ($eiyhteensa == "") {
@@ -171,6 +175,15 @@
 				$alkuquery2 .= " ,sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) 'Total' \n";
 				$alkuquery3 .= " ,sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl' \n";
 				$kaudet[] = $vka." - ".$vkl;
+
+				if ($vertailued != "") {
+					
+					$alkuquery1 .= " ,sum(if(tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppued', tiliointi.summa, 0)) '$vkaed - $vkled' \n";
+					$alkuquery2 .= " ,sum(if(tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppued', tiliointi.summa, 0)) 'Totaled' \n";
+					$alkuquery3 .= " ,sum(if(tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppued', tiliointi.summa, 0)) '$vkaed - $vkled' \n";
+
+					$kaudet[] = $vkaed." - ".$vkled;
+				}
 
 				if ($vertailubu != "" and $kirjain == "S") {
 					$alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.taso = tili.$tilikarttataso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $lisa2) 'budj $vka - $vkl' \n";
@@ -248,7 +261,7 @@
 				$alkukausi = count($kaudet)-2;
 
 				if ($eiyhteensa == "") {
-					if ($vertailued != "") $alkukausi-=1;
+					if ($vertailued != "") $alkukausi-=2;
 					if ($vertailubu != "") $alkukausi-=2;
 				}
 				else {

@@ -80,6 +80,13 @@ if (!function_exists("dateconv")) {
 	}
 }
 
+if (!function_exists("date2mysql")) {
+	function date2mysql ($date) {
+		//kääntää pp.kk.vvvv muodon mysqk muotoon vvvv-kk-mm
+		return substr($date,6,4)."-".substr($date,3,2) . "-".substr($date,0,2);
+	}
+}
+
 if (!function_exists("t")) {
 	function t($stringi, $kieli = "") {
 		// tarvitaan yhtiörowta, kukarowta ja tieto slaven:n käytöstä

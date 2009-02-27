@@ -336,7 +336,7 @@
 
 			echo "<table>";
 			echo "<tr><th>".t("Ovtlisa")."</th>						<td><input type='text' name='toim_ovtlisa'  				value='$trow[ovtlisa]'></td></tr>";
-			echo "<tr><th>".t("VAT-numero")."</th>					<td><input type='text' name='vat_numero'  					value='$trow[vat_numero]'></td><td class='back'><a target='uusiytj' href='http://ec.europa.eu/taxation_customs/vies/$kukarow[kieli]/vieshome.htm'>Tarkista numero t‰‰lt‰!</a></td></tr>";
+			echo "<tr><th>".t("VAT-numero")."</th>					<td><input type='text' name='vat_numero'  					value='$trow[vat_numero]'></td><td class='back'><a target='uusiytj' href='http://ec.europa.eu/taxation_customs/vies/vieshome.do?selectedLanguage=$kukarow[kieli]'>Tarkista numero t‰‰lt‰!</a></td></tr>";
 			echo "<tr><th>".t("Kotipaikka")."</th>					<td><input type='text' name='toim_kotipaikka'				value='$trow[kotipaikka]'></td></tr>";
 			echo "<tr><th>".t("Nimi")."</th>						<td><input type='text' name='toim_nimi' 					value='$trow[nimi]'></td></tr>";
 			echo "<tr><th>".t("Osoite")."</th>						<td><input type='text' name='toim_osoite'   				value='$trow[osoite]'></td></tr>";

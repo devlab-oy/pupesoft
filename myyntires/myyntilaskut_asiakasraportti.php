@@ -557,9 +557,11 @@
 				echo $totaali[$yhtiorow['valkoodi']];
 			}
 			else {
-				foreach ($totaali as $valuutta => $valsumma) {
-					printf("%.2f",$valsumma);
-					echo " $valuutta<br>";
+				if (count($totaali) > 0) {
+					foreach ($totaali as $valuutta => $valsumma) {
+						printf("%.2f",$valsumma);
+						echo " $valuutta<br>";
+					}
 				}
 				echo "$summa $yhtiorow[valkoodi]";
 			}

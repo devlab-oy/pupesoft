@@ -1,33 +1,45 @@
 <?php
 /**
- * 
+ *
  * Kirjasto PDF eKirjeen lähetykseen
- * 
+ *
  * Luo Itellan vaatiman XML filen jossa kirjeen tiedot. LÄhetettävä
  * tiedosto (PDF) sekä XML file pistetään ZIP fileen joka lähetetään
  * FTP:llä Itellaan.
- * 
+ *
  * Esim:
- * 
+ *
  * <code>
  * $ekirje = new Pupe_Pdfekirje($info);
- * 
+ *
  * try {
  *     $ekirje->send('/tmp/pdf_file.pdf');
  * } catch(Exception $e) {
  *     echo $e->getMessage();
  * }
  * </code>
- * 
+ *
+ * Tarvitaan salasanat.php config:
+ *
+ * $ekirje_config = array(
+ *     'ftp_host'              => 'tuljuftp.enet.fi',	// ftp palvelimen osoite
+ *     'ftp_user'              => 'username',			// ftp palvelimen username
+ *     'ftp_pass'              => 'password',			// ftp palvelimen passwd
+ *     'ftp_path'              => 'PDFekirje/',			// vakiopolku ftp-palvelimella
+ *     'is_test'               => false,				// true/false lähetetäänkö kirje postitse asiakkaalle asti
+ *     'asiakas_tunnus'        => 'userid',				// asiakkaan itella tunnus
+ *     'salasana'              => 'passwd',				// asiakkaan itella passwd
+ * );
+ *
  * @author Antti Holvikari <antth@gmail.com>
- * 
+ *
  */
 class Pupe_Pdfekirje {
-	
+
 	/**
-	 * 
+	 *
 	 * eKirjeeseen tarvittavat tiedot
-	 * 
+	 *
 	 * @var array
 	 *
 	 */
@@ -60,38 +72,38 @@ class Pupe_Pdfekirje {
         'sivumaara'             => '1',
 		'tmp_dir'               => '/tmp',
     );
-    
+
 	/**
-	 * 
+	 *
 	 * ZIP filen nimi
-	 * 
+	 *
 	 * @var string
-	 * 
+	 *
 	 */
 	private $_zip_filename;
-	
+
 	/**
-	 * 
+	 *
 	 * PDF tiedoston nimi ZIP tiedoston sisällä
-	 * 
+	 *
 	 * @var string
-	 * 
+	 *
 	 */
 	private $_pdf_filename;
-	
+
 	/**
-	 * 
+	 *
 	 * Constructori
-	 * 
+	 *
 	 * Yli-kirjoitetaan defaultit
-	 * 
+	 *
 	 * @return void
-	 * 
+	 *
 	 */
 	public function __construct($config = array())
 	{
 		$this->_info = array_merge($this->_info, (array) $config);
-		
+
 		// jos viimeinen merkki pathissä ei ole kauttaviiva lisätään kauttaviiva...
 		if (substr($this->_info['ftp_path'], -1) != "/") {
 			$this->_info['ftp_path'] .= '/';
@@ -100,53 +112,53 @@ class Pupe_Pdfekirje {
 		if (substr($this->_info['tmp_dir'], -1) != "/") {
 			$this->_info['tmp_dir'] .= '/';
 		}
-		
+
 		// is_test pitää olla (string) 'true' tai 'false'
 		$this->_info['is_test'] = ($this->_info['is_test'] == true) ? 'true' : 'false';
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * Lähettää filen FTP:n avulla
-	 * 
+	 *
 	 * @return void
-	 * 
+	 *
 	 */
 	public function send($file)
 	{
 		if (! is_readable($file)) {
 			throw new Exception("File $file does not exist or is not readable.");
 		}
-		
-		$pdf_file = $this->_info['tmp_dir'] 
+
+		$pdf_file = $this->_info['tmp_dir']
 				  . 'ekirje-' . $this->_info['kirje_id'] . '.pdf';
-		
+
 		if (! copy($file, $pdf_file)) {
 			throw new Exception(
 				'Cannot copy PDF file.',
 				array('pdf_filename' => $pdf_file)
 			);
 		}
-		
+
 		// asetetaan pdf tiedoston nimi
 		$this->_pdf_filename = $pdf_file;
-		
+
 		// tehdään XML file
 		$this->_generateXmlFile();
-		
+
 		// tehdään zip jossa XML file sekä PDF file
 		$this->_zip();
-		
+
 		// lähetetään FTP:llä zippi
 		$this->_ftpSend();
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * Poistaa temp filet koneelta
-	 * 
+	 *
 	 * @return void
-	 * 
+	 *
 	 */
 	public function clean()
 	{
@@ -154,27 +166,27 @@ class Pupe_Pdfekirje {
 		unlink($this->_xml_filename);
 		unlink($this->_zip_filename);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * Tekee XML datan
-	 * 
+	 *
 	 * @return string Polku XML fileen
-	 * 
+	 *
 	 */
 	protected function _generateXmlFile()
 	{
 		// haetaan XML template
 		$xml = $this->_getXml();
-        
+
 		$o = array(
 			// tiedoston nimi zipin sisällä
 			'file_nimi' => basename($this->_pdf_filename),
 		);
-		
+
 		// lisätään PDF filen nimi joka on ZIPin sisällä
 		$info = array_merge($this->_info, $o);
-		
+
 		// korvataan placeholderit oikeilla tiedoilla
         foreach ($info as $key => $val) {
 			$val = str_replace(
@@ -188,29 +200,29 @@ class Pupe_Pdfekirje {
 				),
 				$val
 			);
-			
+
             $xml = str_replace(":$key", $val, $xml);
         }
-        
+
 		$file = $this->_info['tmp_dir'] . 'ekirje-' . $this->_info['kirje_id'] . '.xml';
-		
+
 		// kirjoitetaan xml tiedostoon
 		if (! file_put_contents($file, $xml)) {
 			throw new Exception('Could not create XML file.');
 		}
-		
+
 		$this->_xml_filename = $file;
-		
+
 		// palautetaan xml file nimi joka juuri tehtiin
         return $this->_xml_filename;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * Tekee ZIPin jossa xml- sekä pdf file
-	 * 
+	 *
 	 * @return string Zip filen polku
-	 * 
+	 *
 	 */
 	protected function _zip()
 	{
@@ -218,22 +230,22 @@ class Pupe_Pdfekirje {
 		$command = 'zip -j ' . escapeshellcmd($zipfile)
 				. ' ' . escapeshellcmd($this->_xml_filename)
 				. ' ' . escapeshellcmd($this->_pdf_filename);
-				
+
 		$out = exec($command);
 
 		// asetetaan zip filenimi
 		$this->_zip_filename = $zipfile;
-		
+
 		// palautetaan myös
 		return $this->_zip_filename;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * Lähettää itse zip tiedoston FTP:llä
-	 * 
+	 *
 	 * @return bool true
-	 * 
+	 *
 	 */
 	protected function _ftpSend()
 	{
@@ -244,50 +256,50 @@ class Pupe_Pdfekirje {
 		) {
 			throw new Exception("FTP info missing.");
 		}
-		
+
 		$conn_id = @ftp_connect($this->_info['ftp_host']);
-		
+
 		if (! $conn_id) {
 			throw new Exception("Could not connect to remote host {$this->_info['ftp_host']}");
 		}
-		
+
 		// jos connectio ok, kokeillaan loginata
 		$login = @ftp_login(
 			$conn_id,
 			$this->_info['ftp_user'],
 			$this->_info['ftp_pass']
 		);
-			
+
 		if (! $login) {
 			throw new Exception("Could not log in.");
 		}
-		
+
 		// jos login ok kokeillaan uploadata
 		$upload = @ftp_put(
-			$conn_id, 
+			$conn_id,
 			$this->_info['ftp_path'] . basename($this->_zip_filename),
 			realpath($this->_zip_filename),
 			FTP_BINARY
 		);
-		
+
 		if (! $upload) {
 			throw new Exception("Could not upload to directory {$this->_info['ftp_path']}");
 		}
-		
+
 		// disconnect
 		if ($conn_id) {
 			ftp_close($conn_id);
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * Palauttaa XML templaten
-	 * 
+	 *
 	 * @return string eKirje XML
-	 * 
+	 *
 	 */
 	private function _getXml()
 	{

@@ -1163,8 +1163,11 @@
 
 				echo "<font class='message'>".t("Sarjanumerot")."</font><hr>";
 
-				$query	= "	SELECT sarjanumeroseuranta.*, sarjanumeroseuranta.tunnus sarjatunnus, tilausrivi_osto.tunnus, if(tilausrivi_osto.rivihinta=0 and tilausrivi_osto.tyyppi='L', tilausrivi_osto.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi_osto.alv<500, (1+tilausrivi_osto.alv/100), 1) * if(tilausrivi_osto.netto='N', (1-tilausrivi_osto.ale/100), (1-(tilausrivi_osto.ale+lasku_osto.erikoisale-(tilausrivi_osto.ale*lasku_osto.erikoisale/100))/100)), if(tilausrivi_osto.rivihinta!=0 and tilausrivi_osto.kpl!=0, tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 0)) ostosumma,
-							tilausrivi_osto.nimitys nimitys, lasku_myynti.nimi myynimi
+				$query	= "	SELECT sarjanumeroseuranta.*, sarjanumeroseuranta.tunnus sarjatunnus, 
+							tilausrivi_osto.tunnus osto_rivitunnus,
+							tilausrivi_osto.perheid2 osto_perheid2,  
+							tilausrivi_osto.nimitys nimitys, 
+							lasku_myynti.nimi myynimi
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -1185,9 +1188,38 @@
 					echo "<th>".t("Varastopaikka")."</th>";
 					echo "<th>".t("Ostohinta")."</th>";
 					echo "<th>".t("Varattu asiakaalle")."</th></tr>";
-
+					
 					while($sarjarow = mysql_fetch_array($sarjares)) {
-						echo "<tr><td>$sarjarow[nimitys]</td><td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$tuoterow[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td><td>$sarjarow[hyllyalue] $sarjarow[hyllynro] $sarjarow[hyllyvali] $sarjarow[hyllytaso]</td><td align='right'>".sprintf('%.2f', sarjanumeron_ostohinta("tunnus", $sarjarow["sarjatunnus"]))."</td><td>$sarjarow[myynimi]</td></tr>";
+						
+						$fnlina1 = "";
+						
+						if (($sarjarow["siirtorivitunnus"] > 0) or ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"])) {
+
+							if ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"]) {
+								$ztun = $sarjarow["osto_perheid2"];
+							}
+							else {
+								$ztun = $sarjarow["siirtorivitunnus"];
+							}
+
+							$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, sarjanumeroseuranta.sarjanumero, tyyppi, otunnus
+										FROM tilausrivi
+										LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
+										WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.tunnus='$ztun'";
+							$siires = mysql_query($query) or pupe_error($query);
+							$siirow = mysql_fetch_array($siires);
+
+							if ($siirow["tyyppi"] == "O") {
+								// pultattu kiinni johonkin
+								$fnlina1 = " <font class='message'>(".t("Varattu lisävarusteena").": $siirow[tuoteno] $siirow[sarjanumero])</font>";
+							}
+							elseif ($siirow["tyyppi"] == "G") {
+								// jos tämä on jollain siirtolistalla
+								$fnlina1 = " <font class='message'>(".t("Kesken siirtolistalla").": $siirow[otunnus])</font>";
+							}
+						}																	
+						
+						echo "<tr><td>$sarjarow[nimitys]</td><td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$tuoterow[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td><td>$sarjarow[hyllyalue] $sarjarow[hyllynro] $sarjarow[hyllyvali] $sarjarow[hyllytaso]</td><td align='right'>".sprintf('%.2f', sarjanumeron_ostohinta("tunnus", $sarjarow["sarjatunnus"]))."</td><td>$sarjarow[myynimi] $fnlina1</td></tr>";
 					}
 
 					echo "</table><br>";

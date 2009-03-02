@@ -1211,7 +1211,7 @@
 
 							if ($siirow["tyyppi"] == "O") {
 								// pultattu kiinni johonkin
-								$fnlina1 = " <font class='message'>(".t("Varattu lisävarusteena").": $siirow[tuoteno] $siirow[sarjanumero])</font>";
+								$fnlina1 = " <font class='message'>(".t("Varattu lisävarusteena").": $siirow[tuoteno] <a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$siirow[tuoteno]&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>)</font>";
 							}
 							elseif ($siirow["tyyppi"] == "G") {
 								// jos tämä on jollain siirtolistalla
@@ -1219,7 +1219,12 @@
 							}
 						}																	
 						
-						echo "<tr><td>$sarjarow[nimitys]</td><td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$tuoterow[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td><td>$sarjarow[hyllyalue] $sarjarow[hyllynro] $sarjarow[hyllyvali] $sarjarow[hyllytaso]</td><td align='right'>".sprintf('%.2f', sarjanumeron_ostohinta("tunnus", $sarjarow["sarjatunnus"]))."</td><td>$sarjarow[myynimi] $fnlina1</td></tr>";
+						echo "<tr>
+								<td>$sarjarow[nimitys]</td>
+								<td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$tuoterow[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td>
+								<td>$sarjarow[hyllyalue] $sarjarow[hyllynro] $sarjarow[hyllyvali] $sarjarow[hyllytaso]</td>
+								<td align='right'>".sprintf('%.2f', sarjanumeron_ostohinta("tunnus", $sarjarow["sarjatunnus"]))."</td>
+								<td>$sarjarow[myynimi] $fnlina1</td></tr>";
 					}
 
 					echo "</table><br>";

@@ -1113,7 +1113,7 @@
 				if ($siirow["tyyppi"] == "O") {
 					// pultattu kiinni johonkin
 					$fnlina1 .= "";
-					$fnlina2 .= "<br><br>".t("Varattu lisävarusteena").":<br>".$siirow["tuoteno"]." <a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$siirow[tuoteno]&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>";
+					$fnlina2 .= "<br><br>".t("Varattu lisävarusteena").":<br>".$siirow["tuoteno"]." <a href='sarjanumeroseuranta.php?tuoteno_haku=$siirow[tuoteno]&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>";
 				}
 				elseif ($siirow["tyyppi"] == "G") {
 					// jos tämä on jollain siirtolistalla

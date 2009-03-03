@@ -2,7 +2,10 @@
 
 	$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
 	$DAY_ARRAY_EN = array(1=>"Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday");
-
+	
+	// toimehtoTarkenne javascript funktio
+	js_toimehtoTarkenne();
+	
 	//t‰ss‰ joko tehd‰‰n uutta otsikkoa tai muutetaan olemassa olevaa
 	if ($tee == '' or $kopioitava_otsikko != 0) {
 		//p‰ivitet‰‰n kukarow[kesken] kun k‰ytt‰j‰ tekee uutta tilausta
@@ -1568,8 +1571,8 @@
 						WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO'
 						ORDER BY jarjestys, selite";
 			$tresult = mysql_query($query) or pupe_error($query);
-
-			echo "<select id='toimitusehto' name='toimitusehto' Style='width: 55px; font-size: 8pt; padding: 0' onchange=toimehtoTarkenne('toimitusehto')>";
+			
+			echo "<select id='toimitusehto' name='toimitusehto' Style='width: 55px; font-size: 8pt; padding: 0' onchange='toimehtoTarkenne(\"toimitusehto\");'>";
 
 			while($row = mysql_fetch_array($tresult)) {
 				$sel = "";
@@ -1618,7 +1621,7 @@
 							ORDER BY jarjestys, selite";
 				$tresult = mysql_query($query) or pupe_error($query);
 
-				echo "<select id='toimitusehto2' name='toimitusehto2' Style='width: 55px; font-size: 8pt; padding: 0' onchange=toimehtoTarkenne('toimitusehto2')>";
+				echo "<select id='toimitusehto2' name='toimitusehto2' Style='width: 55px; font-size: 8pt; padding: 0' onchange='toimehtoTarkenne(\"toimitusehto2\");'>";
 
 				while($row = mysql_fetch_array($tresult)) {
 					$sel = "";

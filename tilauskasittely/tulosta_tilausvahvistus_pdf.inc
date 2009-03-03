@@ -724,9 +724,9 @@
 			$laskurow["nippu"] = $aburow["tunnus"];
 		}
 
-		//generoidaan lähetteelle ja keräyslistalle rivinumerot
-		//Rivit groupataan tilausvahvistukselle
-		if (strpos(" ".$laskurow['tilausvahvistus'],'Y')) {
+		// generoidaan lähetteelle ja keräyslistalle rivinumerot
+		// Rivit groupataan tilausvahvistukselle
+		if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
 			$query = "  SELECT tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kommentti, tilausrivi.tilaajanrivinro, tilausrivi.otunnus, sum(tilausrivi.varattu) varattu,
 						sum(tilausrivi.kpl) kpl, sum(tilausrivi.jt) jt, sum(tilausrivi.hinta), tilausrivi.netto, tilausrivi.ale, min(tilausrivi.tunnus) tunnus, tilausrivi.toimaika, tilausrivi.hinta,
 						sum(tilausrivi.tilkpl) tilkpl, tilausrivi.keratty, tilausrivi.var, tilausrivi.yksikko,
@@ -813,13 +813,4 @@
 		print_pdf($komento["Tilausvahvistus"], $toim);
 
 	}
-
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
-<html>
-	<head>
-		<title></title>
-	</head>
-	<body>
-	</body>
-</html>

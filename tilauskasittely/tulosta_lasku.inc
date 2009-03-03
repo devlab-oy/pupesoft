@@ -1658,7 +1658,7 @@ if (!function_exists('loppu')) {
 		$y_postitp	 	= $laskurow["yhtio_postitp"];
 		$y_maa 			= $laskurow["yhtio_maa"];
 		$y_kotipaikka	= $laskurow["yhtio_kotipaikka"];
-		$y_vatnumero	= $laskurow["yhtio_ovttunnus"];
+		$y_vatnumero	= str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);
 
 		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
 			// haetaan toimipaikan tiedot

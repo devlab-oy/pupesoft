@@ -63,6 +63,7 @@
 	// itse raportti
 	if ($tee == "raportti") {
 
+		// yhteeveto
 		$laskurajaus = "";
 
 		if ($laji == "myynti") {
@@ -77,16 +78,16 @@
 
 		if ($laji == "tosite") {
 			$laskurajaus = "AND lasku.tila = 'X'";
-			echo "<font class='head'>".t("Tositteet")."</font><hr>";			
+			echo "<font class='head'>".t("Tositteet")."</font><hr>";
 		}
 
 		if ($laji == "kaikki") {
 			$laskurajaus = "AND lasku.tila in ('H','Y','M','P','Q','U','X')";
 			echo "<font class='head'>".t("Myyntilaskut")." + ".t("Ostolaskut")." + ".t("Tositteet")."</font><hr>";
-			
+
 		}
-		
-		$query = "	SELECT tiliointi.tilino, tili.nimi, sum(tiliointi.summa) summa				
+
+		$query = "	SELECT tiliointi.tilino, tili.nimi, sum(tiliointi.summa) summa
 					FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
 					JOIN lasku ON (lasku.yhtio = tiliointi.yhtio
 						AND lasku.tunnus = tiliointi.ltunnus
@@ -112,7 +113,7 @@
 			$summa = 0;
 
 			while ($row = mysql_fetch_array($result)) {
-				echo "<tr>";
+				echo "<tr class='aktiivi'>";
 				echo "<td>$row[tilino]</td>";
 				echo "<td>$row[nimi]</td>";
 				echo "<td align='right'>$row[summa]</td>";
@@ -128,46 +129,74 @@
 			echo "</table>";
 		}
 
-/*
-		$query = "	SELECT lasku.*
-					FROM lasku
-					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					AND lasku.tapvm >= '$vv-$kk-$pp'
-					AND lasku.tapvm <= '$lvv-$lkk-$lpp'
-					$laskurajaus
-					ORDER BY tapvm, tunnus";
-		$result = mysql_query($query) or pupe_error($query);
+		// erittely
+		$laskurajaus = "";
+		$laskutiedot = "";
 
-		if (mysql_num_rows($result) > 0) {
-			echo "<br><table>";
-			echo "<tr>";
-			echo "<th>".t("Nro")."</th>";
-			echo "<th>".t("Nimi")."</th>";
-			echo "<th>".t("Tapvm")."</th>";
-			echo "<th>".t("Summa")."</th>";
-			echo "</tr>";
+		if ($laji == "myynti") {
+			$laskurajaus = "AND lasku.tila = 'U'";
+			$laskutiedot = "lasku.laskunro, lasku.nimi, lasku.tapvm, lasku.arvo summa, '$yhtiorow[valkoodi]' valkoodi";
+		}
 
-			$summa = 0;
+		if ($laji == "osto") {
+			$laskurajaus = "AND lasku.tila in ('H','Y','M','P','Q')";
+			$laskutiedot = "concat_ws('<br>', lasku.viesti, lasku.viite) laskunro, lasku.nimi, lasku.tapvm, lasku.summa, lasku.valkoodi";
+		}
 
-			while ($row = mysql_fetch_array($result)) {
+		if ($laji == "tosite") {
+			$laskurajaus = "AND lasku.tila = 'X'";
+			$laskutiedot = "group_concat(tiliointi.tilino SEPARATOR '<br>') laskunro, group_concat(tiliointi.selite SEPARATOR '<br>') nimi, group_concat(tiliointi.tapvm SEPARATOR '<br>') tapvm, sum(tiliointi.summa) summa, group_concat(tiliointi.summa SEPARATOR '<br>') valkoodi";
+		}
+
+		if ($laskurajaus != "") {
+
+			$query = "	SELECT $laskutiedot
+						FROM lasku
+						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
+							AND tiliointi.ltunnus = lasku.tunnus
+							and tiliointi.korjattu = '')
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						AND lasku.tapvm >= '$vv-$kk-$pp'
+						AND lasku.tapvm <= '$lvv-$lkk-$lpp'
+						$laskurajaus
+						GROUP BY lasku.tunnus
+						ORDER BY tapvm, lasku.tunnus";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) > 0) {
+				echo "<br><table>";
 				echo "<tr>";
-				echo "<td>$row[laskunro]</td>";
-				echo "<td>$row[nimi]</td>";
-				echo "<td>$row[tapvm]</td>";
-				echo "<td align='right'>$row[summa]</td>";
+				echo "<th>#</th>";
+				echo "<th>".t("Nimi")."</th>";
+				echo "<th>".t("Tapvm")."</th>";
+				echo "<th>".t("Summa")."</th>";
+				echo "<th></th>";
 				echo "</tr>";
-				$summa += $row["summa"];
+
+				$summa = 0;
+
+				while ($row = mysql_fetch_array($result)) {
+					echo "<tr class='aktiivi'>";
+					echo "<td nowrap valign='top'>$row[laskunro]</td>";
+					echo "<td valign='top'>$row[nimi]</td>";
+					echo "<td nowrap valign='top'>$row[tapvm]</td>";
+					echo "<td nowrap valign='top' align='right'>$row[summa]</td>";
+					echo "<td nowrap valign='top' align='right'>$row[valkoodi]</td>";
+					echo "</tr>";
+					$summa += $row["summa"];
+				}
+
+				echo "<tr>";
+				echo "<th colspan='3'>".t("Yhteensä")."</th>";
+				echo "<th style='text-align:right;'>". sprintf("%.02f", $summa)."</td>";
+				echo "<th></th>";
+				echo "</tr>";
+
+				echo "</table>";
 			}
 
-			echo "<tr>";
-			echo "<th colspan='3'>".t("Yhteensä")."</th>";
-			echo "<th style='text-align:right;'>". sprintf("%.02f", $summa)."</td>";
-			echo "</tr>";
-
-			echo "</table>";
 		}
-*/
-					
+
 	}
 
 	require ("../inc/footer.inc");

@@ -181,19 +181,17 @@ if (!function_exists('alku_tarjous')) {
 		else {			
 			$pdf_tarjous->draw_text(430, 782, tv1dateconv($laskurow["toimaika"]), 	$page_tarjous, $norm);
 		}
-
-		if ($asiakasrow["asiakasnro"] == "" and $laskurow["ytunnus"] != "") $asiakasrow["asiakasnro"] = $laskurow["ytunnus"];
 		
 		$pdf_tarjous->draw_rectangle(779, 300, 758, 580, $page_tarjous, $rectparam);
 		$pdf_tarjous->draw_rectangle(779, 420, 758, 580, $page_tarjous, $rectparam);
-		$pdf_tarjous->draw_text(310, 771, t("Asiakasnumero", $kieli), 					$page_tarjous, $pieni);
-		$pdf_tarjous->draw_text(310, 761, $asiakasrow["asiakasnro"], 						$page_tarjous, $norm);
-		$pdf_tarjous->draw_text(430, 771, t("P‰iv‰ys", $kieli), 						$page_tarjous, $pieni);
-		$pdf_tarjous->draw_text(430, 761, tv1dateconv($laskurow["muutospvm"]), 		$page_tarjous, $norm);
+		$pdf_tarjous->draw_text(310, 771, t("Asiakkaan Y-tunnus", $kieli), 									$page_tarjous, $pieni);
+		$pdf_tarjous->draw_text(310, 761, tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]),	$page_tarjous, $norm);
+		$pdf_tarjous->draw_text(430, 771, t("P‰iv‰ys", $kieli), 											$page_tarjous, $pieni);
+		$pdf_tarjous->draw_text(430, 761, tv1dateconv($laskurow["muutospvm"]), 								$page_tarjous, $norm);
 
 		$pdf_tarjous->draw_rectangle(758, 300, 737, 580, $page_tarjous, $rectparam);
 		$pdf_tarjous->draw_rectangle(758, 420, 737, 580, $page_tarjous, $rectparam);
-		$pdf_tarjous->draw_text(310, 750, t("Myyj‰", $kieli), 						$page_tarjous, $pieni);
+		$pdf_tarjous->draw_text(310, 750, t("Myyj‰", $kieli), 												$page_tarjous, $pieni);
 		
 		//etsit‰‰n myyj‰n nimi
 		$query  = "	SELECT nimi

@@ -45,6 +45,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 			<th>".t("Me")." FI</td><th>".t("Ref")." FI</td>
 			<th>".t("Me")." SE</td><th>".t("Ref")." SE</td>
 			<th>".t("Me")." EN</td><th>".t("Ref")." EN</td>
+			<th>".t("Me")." DE</td><th>".t("Ref")." DE</td>
 			</tr>";
 			
 			
@@ -108,6 +109,26 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 						}
 						
 						echo "<td>$e".$sanakirjarow["en"]."$t</td><td>".$rivi[$sync_otsikot["en"]]."</td>";
+						
+						if ($sanakirjarow["de"] != $rivi[$sync_otsikot["de"]]) {
+							
+							if ($tee == "UPDATE") {
+								$sanakirjaquery  = "UPDATE sanakirja SET de = '".$rivi[$sync_otsikot["de"]]."' where fi = BINARY '$sanakirjarow[fi]'";
+								$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
+							}
+							
+							
+							$e = "<font class='error'>";
+							$t = "</font>";
+						}
+						else {
+							$e = "";
+							$t = "";
+						}
+						
+						echo "<td>$e".$sanakirjarow["de"]."$t</td><td>".$rivi[$sync_otsikot["de"]]."</td>";
+						
+						
 						echo "</tr>";
 					}
 					else {
@@ -122,6 +143,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 								<td><font class='error'>".t("Sanaa puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["fi"]]."</td>
 								<td><font class='error'>".t("Sanaa puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["se"]]."</td>
 								<td><font class='error'>".t("Sanaa puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["en"]]."</td>
+								<td><font class='error'>".t("Sanaa puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["de"]]."</td>
 								</tr>";
 					}
 				}
@@ -140,6 +162,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 				echo "<td>".$sanakirjarow["fi"]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>";
 				echo "<td>".$sanakirjarow["se"]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>";
 				echo "<td>".$sanakirjarow["en"]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>";
+				echo "<td>".$sanakirjarow["de"]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>";
 				echo "</tr>";
 			}
 			

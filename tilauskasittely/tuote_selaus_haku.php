@@ -906,7 +906,7 @@
 
 	echo "<table style='display:inline;'>";
 	echo "<tr><th>",t("Osasto"),"</th></tr>";
-	echo "<tr><td nowrap valign='top'><select name='mul_osasto[]' multiple size='10' onchange='submit();'>";
+	echo "<tr><td nowrap valign='top' class='back'><select name='mul_osasto[]' multiple size='10' onchange='submit();'>";
 	echo "<option value=''>".t("Ei valintaa")."</option>";
 
 	while($sxrow = mysql_fetch_array ($sresult)){
@@ -966,7 +966,7 @@
 	$sresult = mysql_query($query) or pupe_error($query);
 
 	echo "<table style='display:inline;'><tr><th>",t("Tuoteryhmä"),"</th></tr>";
-	echo "<tr><td nowrap valign='top'><select name='mul_try[]' onchange='submit();' multiple='TRUE' size='10'>";
+	echo "<tr><td nowrap valign='top' class='back'><select name='mul_try[]' onchange='submit();' multiple='TRUE' size='10'>";
 	echo "<option value=''>".t("Ei valintaa")."</option>";
 
 	while($srow = mysql_fetch_array ($sresult)){
@@ -1029,7 +1029,7 @@
 
 	if (mysql_num_rows($sresult) > 0) {
 		echo "<table style='display:inline;'><tr><th>",t("Tuotemerkki"),"</th></tr>";
-		echo "<tr><td nowrap valign='top'>";
+		echo "<tr><td nowrap valign='top' class='back'>";
 		echo "<select name='mul_tme[]' multiple='TRUE' size='10' onchange='submit();'>";
 		echo "<option value=''>",t("Ei valintaa"),"</option>";
 
@@ -1080,7 +1080,7 @@
 
 		if (mysql_num_rows($sxresult) > 0) {
 			echo "<table style='display:inline;'><tr><th>",t("Malli"),"</th></tr>";
-			echo "<tr><td nowrap valign='top'>";
+			echo "<tr><td nowrap valign='top' class='back'>";
 			echo "<select name='mul_malli[]' multiple='TRUE' size='10' onchange='submit();'>";
 			echo "<option value=''>",t("Ei valintaa"),"</option>";
 
@@ -1105,7 +1105,7 @@
 	if (count($mul_malli) != 0 and $mul_malli[0] != '') {
 		echo "</td></tr><tr><td class='back'><table>";
 		echo "<tr><th colspan='4'>",t("Mallitarkenne"),"</th></tr>";
-		echo "<tr><td nowrap valign='top' colspan='4'>";
+		echo "<tr><td nowrap valign='top' colspan='4' class='back'>";
 
 			$query = "	SELECT DISTINCT tuote.mallitarkenne
 						FROM tuote

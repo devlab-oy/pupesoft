@@ -748,7 +748,7 @@
 			}
 		}
 
-		$lisa = $lisa_haku_osasto;
+		$lisa .= $lisa_haku_osasto;
 
 		$query = "	SELECT distinct avainsana.selite, avainsana.selitetark
 					FROM tuote
@@ -906,7 +906,7 @@
 
 	echo "<table style='display:inline;'>";
 	echo "<tr><th>",t("Osasto"),"</th></tr>";
-	echo "<tr><td nowrap valign='top'><select name='mul_osasto[]' multiple size='10' style='width:100%;' onchange='submit();'>";
+	echo "<tr><td nowrap valign='top'><select name='mul_osasto[]' multiple size='10' onchange='submit();'>";
 	echo "<option value=''>".t("Ei valintaa")."</option>";
 
 	while($sxrow = mysql_fetch_array ($sresult)){
@@ -966,7 +966,7 @@
 	$sresult = mysql_query($query) or pupe_error($query);
 
 	echo "<table style='display:inline;'><tr><th>",t("Tuoteryhm‰"),"</th></tr>";
-	echo "<tr><td nowrap valign='top'><select name='mul_try[]' onchange='submit();' multiple='TRUE' size='10' style='width:100%;'>";
+	echo "<tr><td nowrap valign='top'><select name='mul_try[]' onchange='submit();' multiple='TRUE' size='10'>";
 	echo "<option value=''>".t("Ei valintaa")."</option>";
 
 	while($srow = mysql_fetch_array ($sresult)){
@@ -1030,7 +1030,7 @@
 	if (mysql_num_rows($sresult) > 0) {
 		echo "<table style='display:inline;'><tr><th>",t("Tuotemerkki"),"</th></tr>";
 		echo "<tr><td nowrap valign='top'>";
-		echo "<select name='mul_tme[]' multiple='TRUE' size='10' style='width:100%;' onchange='submit();'>";
+		echo "<select name='mul_tme[]' multiple='TRUE' size='10' onchange='submit();'>";
 		echo "<option value=''>",t("Ei valintaa"),"</option>";
 
 		while($srow = mysql_fetch_array ($sresult)){
@@ -1081,7 +1081,7 @@
 		if (mysql_num_rows($sxresult) > 0) {
 			echo "<table style='display:inline;'><tr><th>",t("Malli"),"</th></tr>";
 			echo "<tr><td nowrap valign='top'>";
-			echo "<select name='mul_malli[]' multiple='TRUE' size='10' style='width:100%;' onchange='submit();'>";
+			echo "<select name='mul_malli[]' multiple='TRUE' size='10' onchange='submit();'>";
 			echo "<option value=''>",t("Ei valintaa"),"</option>";
 
 			while($mallirow = mysql_fetch_array ($sxresult)){
@@ -1103,7 +1103,7 @@
 	}
 
 	if (count($mul_malli) != 0 and $mul_malli[0] != '') {
-		echo "</td></tr><tr><td><table width='100%'>";
+		echo "</td></tr><tr><td class='back'><table>";
 		echo "<tr><th colspan='4'>",t("Mallitarkenne"),"</th></tr>";
 		echo "<tr><td nowrap valign='top' colspan='4'>";
 
@@ -1131,7 +1131,7 @@
 			$rivimaara = 15;
 		}
 
-		echo "<select name='mul_mallitarkenne[]' multiple='TRUE' size='$rivimaara' style='width:100%;'>";
+		echo "<select name='mul_mallitarkenne[]' multiple='TRUE' size='$rivimaara'>";
 		echo "<option value=''>",t("Ei valintaa"),"</option>";
 
 		while($mallitarkennerow = mysql_fetch_array ($sxresult)){
@@ -1164,6 +1164,7 @@
 	echo "<form><input type='submit' name='submit_button2' id='submit_button2' value = '",t("Tyhjenn‰"),"'></form><br/>";
 
 	// Ei listata mit‰‰n jos k‰ytt‰j‰ ei ole tehnyt mit‰‰n rajauksia
+	/*
 	if($lisa == "") {
 		if (file_exists("../inc/footer.inc")) {
 			require ("../inc/footer.inc");
@@ -1174,7 +1175,7 @@
 
 		exit;
 	}
-
+	*/
 
 	// Halutaanko saldot koko konsernista?
 	$query = "	SELECT *

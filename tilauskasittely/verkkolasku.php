@@ -1296,21 +1296,21 @@
 							$asiakas_apu_row = array();
 						}
 
-						if (strtoupper($asiakas_apu_row["kieli"]) == "SE") {
+						if (strtoupper(trim($asiakas_apu_row["kieli"])) == "SE") {
 							$laskun_kieli = "SE";
 						}
-						elseif (strtoupper($asiakas_apu_row["kieli"]) == "EE") {
+						elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "EE") {
 							$laskun_kieli = "EE";
 						}
-						elseif (strtoupper($asiakas_apu_row["kieli"]) == "FI") {
+						elseif (strtouppertrim(($asiakas_apu_row["kieli"])) == "FI") {
 							$laskun_kieli = "FI";
 						}
 						else {
-							$laskun_kieli = $yhtiorow["kieli"];
+							$laskun_kieli = trim(strtoupper($yhtiorow["kieli"]));
 						}
 
 						if ($kieli != "") {
-							$laskun_kieli = $kieli;
+							$laskun_kieli = trim(strtoupper($kieli));
 						}
 
 						// tässä pohditaan laitetaanko verkkolaskuputkeen

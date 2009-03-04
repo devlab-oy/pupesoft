@@ -17,7 +17,11 @@
 		$tila_result = mysql_query($tila_query) or pupe_error($tila_query);
 
 		if (mysql_num_rows($tila_result) == 1) {
-
+			
+			// lock tables
+			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, rahtikirjat WRITE, tuote WRITE, sarjanumeroseuranta WRITE";
+			$locre = mysql_query($query) or pupe_error($query);
+			
 			// tilaus kesken
 			if ($tila == "1") {
 				$query = "	UPDATE tilausrivi set
@@ -158,6 +162,10 @@
 			       $sarjares = mysql_query($query) or pupe_error($query);
 				}
 			}
+			
+			// poistetaan lukot
+			$query = "UNLOCK TABLES";
+			$locre = mysql_query($query) or pupe_error($query);
 
 		}
 

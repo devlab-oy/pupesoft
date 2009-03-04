@@ -476,7 +476,19 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			elseif(isset($_GET["sulje"]) and $_GET["sulje"] != "") {
 				echo "<div><a href='#' onclick=\"divi=document.getElementById('{$_GET["sulje"]}'); document.body.removeChild(divi); return false;\"><font style='color: red;'>x</font></a><br></div>";
 			}
-
+		
+			// Autetaan sanakirjan ylläpidossa
+			if ($kukarow["yhtio"] != "" and $kukarow["kuka"] != "") {
+				$query = "	SELECT yhtio
+							FROM oikeu
+							WHERE yhtio	= '$kukarow[yhtio]'
+							and kuka	= '$kukarow[kuka]'
+							and nimi	= 'sanakirja.php'
+							and alanimi = ''";
+				$ksres = mysql_query($query) or pupe_error($query);
+			
+				if (mysql_num_rows($ksres) > 0) $kaannetyt_sanat = array();
+			}
 		}
 
 		if (isset($tee) and $tee == "message_luettu") {

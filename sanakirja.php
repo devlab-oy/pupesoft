@@ -79,10 +79,16 @@ foreach ($sanakirja_kielet as $sanakirja_kieli) {
 
 echo "</select></td>";
 echo "</tr>";
-echo "<tr><th>Hakusana</th><td class='back'><input type='text' name='hakusana' value='$hakusana'></td>";
-echo "<td class='back'><input name='nappi1' type='submit' value='".t("Hae")."'></td>";
-echo "</tr>";
-echo "</table><br>";
+echo "<tr><th>Hakusana</th><td><textarea name='hakusana' rows='5' cols='25'>$hakusana</textarea></td></tr>";
+
+if ($tarkkahaku != "") {
+	$tahas = "CHECKED";
+}
+
+echo "<tr><th>Tarkka haku</th><td><input type='checkbox' name='tarkkahaku' value='ON' $tahas></td>";
+
+echo "<td class='back'><input name='nappi1' type='submit' value='".t("Hae")."'></td></tr>";
+echo "</table></form><br>";
 
 
 
@@ -117,12 +123,32 @@ if (sizeof($kieli) > 0) {
 	$query .= " from sanakirja ";
 
 
-	if ($etsi_kieli != '' or $show == 'empty') {
+	if (($etsi_kieli != '' and isset($hakusana) and $hakusana != '') or $show == 'empty') {
 		$query .= " where ";
 	}
 
 	if ($etsi_kieli != '') {
-		$query .= " $etsi_kieli like '%$hakusana%' ";
+		
+		if (isset($hakusana) and $hakusana != '') {
+			$sanat = explode("\n", $hakusana);
+			
+			$query .= " (";
+			
+			$sanarajaus = "";
+			foreach($sanat as $sana) {
+				if (trim($sana) != '') {
+					
+					if ($tarkkahaku == "") {
+						$query .= " $etsi_kieli like '%".trim($sana)."%' or ";
+					}
+					else {
+						$query .= " $etsi_kieli = '".trim($sana)."' or ";
+					}
+				}
+			}
+			
+			$query = substr($query, 0, -3).") ";
+		}		
 	}
 
 	if ($show == "empty") {
@@ -139,7 +165,6 @@ if (sizeof($kieli) > 0) {
 	}
 
 	$query .= " ORDER BY luontiaika desc,fi ";
-
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {

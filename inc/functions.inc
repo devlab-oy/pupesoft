@@ -90,7 +90,7 @@ if (!function_exists("date2mysql")) {
 if (!function_exists("t")) {
 	function t($stringi, $kieli = "") {
 		// tarvitaan yhtiörowta, kukarowta ja tieto slaven:n käytöstä
-		global $yhtiorow, $kukarow, $useslave, $link, $verkkokauppa;
+		global $yhtiorow, $kukarow, $useslave, $link, $verkkokauppa, $kaannetyt_sanat;
 
 		require("salasanat.php");
 
@@ -123,7 +123,9 @@ if (!function_exists("t")) {
 		if ($indeksi != 'fi') {
 			$sanakirjaquery  = "SELECT fi, $indeksi, tunnus FROM sanakirja WHERE fi = BINARY '$stringi'";
 			$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
-
+			
+			if (isset($kaannetyt_sanat) and !in_array($stringi, $kaannetyt_sanat)) $kaannetyt_sanat[] = $stringi;
+			
 			if (mysql_num_rows($sanakirjaresult) > 0) {
 				$sanakirjarow = mysql_fetch_array($sanakirjaresult);
 
@@ -149,6 +151,9 @@ if (!function_exists("t")) {
 				$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";
 				$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
 			}
+		}
+		elseif(isset($kaannetyt_sanat) and !in_array($stringi, $kaannetyt_sanat)) {
+			$kaannetyt_sanat[] = $stringi;
 		}
 
 		if ($useslave > 0) { //Palautetaan slave käyttöön

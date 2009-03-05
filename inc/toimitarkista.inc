@@ -115,6 +115,15 @@ if(!function_exists("toimitarkista")) {
 				$t[$i] = $ytunnus;
 			}
 			$tmp_ytunnus=$t[$i];
+		
+			// Jos ytunnus vaihtuu niin korjataan myös tuotteiden toimittajat
+			if (trim($t[$i]) != "" and $trow[$i] != $t[$i] and $errori != 1) {				
+				$query = "	UPDATE tuotteen_toimittajat
+							SET toimittaja = '$t[$i]'
+							WHERE tuotteen_toimittajat.yhtio		= '$kukarow[yhtio]'
+							and tuotteen_toimittajat.liitostunnus 	= $tunnus"; 
+				$vres = mysql_query($query) or pupe_error($query);
+			}							
 		}
 		
 		if (mysql_field_name($result, $i) == "ohjeitapankille") {

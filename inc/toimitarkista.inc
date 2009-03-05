@@ -117,7 +117,7 @@ if(!function_exists("toimitarkista")) {
 			$tmp_ytunnus=$t[$i];
 		
 			// Jos ytunnus vaihtuu niin korjataan myös tuotteiden toimittajat
-			if (trim($t[$i]) != "" and $trow[$i] != $t[$i] and $errori != 1) {				
+			if (trim($t[$i]) != "" and $trow[$i] != $t[$i] and $errori != 1 and (int) $tunnus > 0) {				
 				$query = "	UPDATE tuotteen_toimittajat
 							SET toimittaja = '$t[$i]'
 							WHERE tuotteen_toimittajat.yhtio		= '$kukarow[yhtio]'

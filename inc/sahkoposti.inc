@@ -42,12 +42,12 @@
 	if ($ctype == "TEXT") {
 		$content .= "Content-Type: text/plain; name=\"".$kutsu."\"\n" ;
 		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: inline; filename=\"".$kutsu."\"\n\n";
+		$content .= "Content-Disposition: attachment; filename=\"".$kutsu."\"\n\n";
 	}
 	elseif ($ctype == "ps") {
 		$content .= "Content-Type: application/ps; name=\"".$kutsu."\"\n" ;
 		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: inline; filename=\"".$kutsu."\"\n\n";
+		$content .= "Content-Disposition: attachment; filename=\"".$kutsu."\"\n\n";
 	}
 	elseif ($ctype == "excel") {
 		if ($liitenimi == '') {
@@ -56,12 +56,12 @@
 	
 		$content .= "Content-Type: application/excel; name=\"".$liitenimi."\"\n" ;
 		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: inline; filename=\"".$liitenimi."\"\n\n";
+		$content .= "Content-Disposition: attachment; filename=\"".$liitenimi."\"\n\n";
 	}
 	else {
 		$content .= "Content-Type: application/pdf; name=\"".$kutsu.".pdf\"\n" ;
 		$content .= "Content-Transfer-Encoding: base64\n" ;
-		$content .= "Content-Disposition: inline; filename=\"".$kutsu.".pdf\"\n\n";
+		$content .= "Content-Disposition: attachment; filename=\"".$kutsu.".pdf\"\n\n";
 	}
 
 	$handle  = fopen($liite, "r");

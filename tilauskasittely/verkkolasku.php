@@ -1302,7 +1302,7 @@
 						elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "EE") {
 							$laskun_kieli = "EE";
 						}
-						elseif (strtouppertrim(($asiakas_apu_row["kieli"])) == "FI") {
+						elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "FI") {
 							$laskun_kieli = "FI";
 						}
 						else {

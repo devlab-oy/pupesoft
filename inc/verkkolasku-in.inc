@@ -45,43 +45,25 @@
 			$komm = "";
 
 			// $yhtio:ssa on nyt laskun VASTAANOTTAJAN ovt-tunnus ja $verkkotunnus_vas:ssa on VASTAANOTTAJAN verkkolaskutunnus
-			$verkkotunnus_vas = trim($verkkotunnus_vas);
+			$verkkotunnus_vas 	= trim($verkkotunnus_vas);
+			$yhtio	 			= trim($yhtio);  
 
-			// elma l‰het‰t‰ joskus verkkotunnusta todella kummallisessa muodossa.. kokeillaan arvailla oikein
+			// Itella lehett‰‰ joskus verkkotunnusta todella kummallisessa muodossa.. kokeillaan arvailla oikein
 			$pos = strpos($verkkotunnus_vas,"@");
+			
 			if ($pos !== FALSE) {
 				$verkkotunnus_vas = substr($verkkotunnus_vas, 0, $pos); // otetaan info ekaan ‰tt‰merkkiin asti
 			}
-
-			if ($yhtio != 0) {
-				// etsit‰‰n vastaanottavaa yrityst‰ ovt-tunnuksella..
-				$yyhtio = substr($yhtio, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
-				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$yyhtio'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
-
-				if (mysql_num_rows($result) == 1) {
-					$yhtiorow = mysql_fetch_array($result);
-				}
-			}
-
-			if (!isset($yhtiorow) and $yhtio != 0) {
-				// etsit‰‰n vastaanottavaa yrityst‰ ytunnuksella..
-				$yyhtio = substr($yhtio,4,8) * 1; // Poistetaan mahdolliset nollat
-				$query = "SELECT * FROM yhtio WHERE ytunnus = '$yyhtio'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
-
-				if (mysql_num_rows($result) == 1) {
-					$yhtiorow = mysql_fetch_array($result);
-				}
-			}
-
-			if (!isset($yhtiorow) and $verkkotunnus_vas != "") {
-				// kokeillaan lˆyt‰‰ yritys sitten verkkotunnuksella..
+			
+			
+			if ($verkkotunnus_vas != "") {
+				// 1 kokeillaan lˆyt‰‰ yritys verkkotunnuksella				
 				$query = "SELECT * FROM yhtion_parametrit WHERE verkkotunnus_vas = '$verkkotunnus_vas'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 				if (mysql_num_rows($result) == 1) {
 					$paramrow = mysql_fetch_array($result);
+					
 					// lˆydettiin parametreist‰ oikea yhtiˆ haetaan yhtiorow
 					$query = "SELECT * FROM yhtio WHERE yhtio = '$paramrow[yhtio]'";
 					$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
@@ -91,9 +73,79 @@
 					}
 				}
 			}
+			
+			if (!isset($yhtiorow) and $verkkotunnus_vas != "") {
+				// 2 etsit‰‰n vastaanottavaa yrityst‰ ovt-tunnuksella..				
+				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$verkkotunnus_vas'";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
+				if (mysql_num_rows($result) == 1) {
+					$yhtiorow = mysql_fetch_array($result);
+				}
+			}
+			
+			if (!isset($yhtiorow) and $verkkotunnus_vas != "") {
+				// 3 etsit‰‰n vastaanottavaa yrityst‰ ovt-tunnuksella ilman tarkenteita		
+				$yyhtio = substr($verkkotunnus_vas, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
+				
+				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$yyhtio'";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+
+				if (mysql_num_rows($result) == 1) {
+					$yhtiorow = mysql_fetch_array($result);
+				}
+			}
+			
+			if (!isset($yhtiorow) and $verkkotunnus_vas != 0) {
+				// 4 etsit‰‰n vastaanottavaa yrityst‰ ytunnuksella..
+				$yyhtio1 = substr(str_replace("0037", "", $verkkotunnus_vas), 0, 8); // mahdollisella etunollalla
+				$yyhtio2 = (int) $yyhtio1; // ilman etunollaa
+				
+				$query = "SELECT * FROM yhtio WHERE ytunnus in ('$yyhtio1', '$yyhtio2')";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+
+				if (mysql_num_rows($result) == 1) {
+					$yhtiorow = mysql_fetch_array($result);
+				}
+			}						
+			
 			if (!isset($yhtiorow) and $yhtio != 0) {
-				// viimeinen h‰t‰keino, katotaan onko joku lis‰tieto ongelma
+				// 5 etsit‰‰n vastaanottavaa yrityst‰ ovt-tunnuksella..
+				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$yhtio'";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+
+				if (mysql_num_rows($result) == 1) {
+					$yhtiorow = mysql_fetch_array($result);
+				}
+			}
+			
+			if (!isset($yhtiorow) and $yhtio != 0) {
+				// 6 etsit‰‰n vastaanottavaa yrityst‰ ovt-tunnuksella ilman tarkenteita
+				$yyhtio = substr($yhtio, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
+				
+				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$yyhtio'";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+
+				if (mysql_num_rows($result) == 1) {
+					$yhtiorow = mysql_fetch_array($result);
+				}
+			}
+									
+			if (!isset($yhtiorow) and $yhtio != 0) {
+				// 7 etsit‰‰n vastaanottavaa yrityst‰ ytunnuksella..
+				$yyhtio1 = substr(str_replace("0037", "", $yhtio), 0, 8); // mahdollisella etunollalla
+				$yyhtio2 = (int) $yyhtio1; // ilman etunollaa
+				
+				$query = "SELECT * FROM yhtio WHERE ytunnus in ('$yyhtio1', '$yyhtio2')";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+
+				if (mysql_num_rows($result) == 1) {
+					$yhtiorow = mysql_fetch_array($result);
+				}
+			}
+			
+			if (!isset($yhtiorow) and $yhtio != 0) {
+				// 8 viimeinen h‰t‰keino, katotaan onko joku lis‰tieto ongelma
 				$query = "SELECT * FROM yhtio WHERE ovttunnus like '$yhtio%'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
@@ -154,11 +206,26 @@
 			$ebid   = $laskun_ebid;
 			$selite = "Lasno: ".$laskun_numero;
 
-			//poistetaan ovt tunnuksesta ekat nelj‰ ja otetaan kaheksan seuraavaa
 			$ytunnus_nolla = substr($laskuttajan_ovt,4,8); // etunollalla
 			$ytunnus = (int) substr($laskuttajan_ovt,4,8); // ilman etunollaa
 			$ok = 0;
 
+			
+			// $laskuttajan_ovt --> voi olla ovttunnus, ytunnus, tai vatnumero
+			
+			//vatnumero FI-2837467-4
+			//vatnumero FI-28374284
+			//vatnumero FI28374684
+			//vatnumero FI2837728-4
+			
+			//ovt 0037349439001
+			//ovt 0037349439KOLA
+			//ovt 0037338474
+			
+			//ytunnus 98343412
+			//ytunnus 9434123-4
+			
+			// Kokeillaan ensin koko ovttunnuksella
 			$query  = "SELECT * FROM toimi WHERE ovttunnus='$laskuttajan_ovt' and yhtio='$yhtio'";
 			$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 			if (mysql_num_rows($result) == 1) $ok = 1;

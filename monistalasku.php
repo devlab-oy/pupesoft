@@ -435,6 +435,10 @@ if ($tee == 'MONISTA') {
 							$values .= ", 'A'";
 							break;
 						}
+						elseif ($toim == 'TARJOUS') {
+							$values .= ", 'T'";
+							break;
+						}
 					case 'tunnus':
 					case 'tapvm':
 					case 'kapvm':

@@ -264,7 +264,40 @@
 		$erpcmkk = (int) $erpcmkk;
 		$erpcmpp = (int) $erpcmpp;
 
-		if (!checkdate($erpcmkk, $erpcmpp, $erpcmvv) or mysql_num_rows($erpres) == 0) {
+
+		if ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "") {
+			if ($kukarow['extranet'] == '') {
+				if ($erpcmvv < date("Y")) {
+					echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
+					$tee	= "OTSIK";
+					unset($jatka);
+					$erpcm_virhe = "X"; // apumuuttuja
+					if ($kukarow['kesken'] != 0) {
+						$tiedot_laskulta = "ok";
+					}
+				}
+				elseif ($erpcmvv == date("Y") and ($erpcmkk < date("n") or $erpcmkk < date("m"))) {
+					echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
+					$tee	= "OTSIK";
+					unset($jatka);
+					$erpcm_virhe = "X"; // apumuuttuja
+					if ($kukarow['kesken'] != 0) {
+						$tiedot_laskulta = "ok";
+					}
+				}
+				elseif ($erpcmvv == date("Y") and ($erpcmkk == date("n") or $erpcmkk == date("m")) and ($erpcmpp < date("j") or $erpcmpp < date("d"))) {
+					echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
+					$tee	= "OTSIK";
+					unset($jatka);
+					$erpcm_virhe = "X"; // apumuuttuja
+					if ($kukarow['kesken'] != 0) {
+						$tiedot_laskulta = "ok";
+					}
+				}
+			}
+		}
+
+		if ($erpcm_virhe == '' and (!checkdate($erpcmkk, $erpcmpp, $erpcmvv) or mysql_num_rows($erpres) == 0)) {
 			if (mysql_num_rows($erpres) == 0) {
 				if ($kukarow['extranet'] != '') {
 					echo t("VIRHE: Käyttäjätiedoissasi on virhe! Ota yhteys järjestelmän ylläpitäjään.")."<br><br>";
@@ -287,6 +320,9 @@
 			$tee	= "OTSIK";
 			unset($jatka);
 			$erpcm_virhe = "X"; // apumuuttuja
+			if ($kukarow['kesken'] != 0) {
+				$tiedot_laskulta = "ok";
+			}
 		}
 		else {
 			$erpcm_kasin = "KYLLA";

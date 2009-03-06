@@ -1,6 +1,6 @@
 <?php
 
-if (trim($argv[1]) != '') {
+if (isset($argv[1]) and trim($argv[1]) != '') {
 
 	if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 
@@ -10,11 +10,15 @@ if (trim($argv[1]) != '') {
 
 	$kukarow['yhtio'] = trim($argv[1]);
 
-	if (trim($argv[2]) != "") {
+	$abctyyppi = "";
+	$saldottomatmukaan = "";
+	$kustannuksetyht = "";
+
+	if (isset($argv[2]) and trim($argv[2]) != "") {
 		$abctyyppi = trim($argv[2]);
 	}
 
-	if (trim($argv[3]) != "") {
+	if (isset($argv[3]) and trim($argv[3]) != "") {
 		$saldottomatmukaan = trim($argv[3]);
 	}
 

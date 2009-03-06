@@ -731,7 +731,7 @@
 			$rivi .= t("tuoteno")."\t";
 	
 			if(isset($workbook)) {
-				$worksheet->write($excelrivi, $excelsarake, ucfirst(t("tuoteno")), $format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("tuoteno")), $format_bold);
 				$excelsarake++;
 			}
 	
@@ -740,7 +740,7 @@
 				$rivi .= t("Varastopaikka")."\t";
 		
 				if(isset($workbook)) {
-					$worksheet->write($excelrivi, $excelsarake, ucfirst(t("Varastopaikka")), $format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("Varastopaikka")), $format_bold);
 					$excelsarake++;
 				}
 			}
@@ -749,7 +749,7 @@
 				$rivi .= $sarakkeet[$val];
 		
 				if(isset($workbook) and $sarakkeet[$val] != '') {					
-					$worksheet->write($excelrivi, $excelsarake, ucfirst($sarakkeet[$val]), $format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, ucfirst($sarakkeet[$val]), $format_bold);
 					$excelsarake++;
 				}
 			}
@@ -1061,7 +1061,7 @@
 					$rivi .= "\"$row[tuoteno]\"\t";
 			
 					if(isset($workbook)) {
-						$worksheet->write($excelrivi, $excelsarake, $row["tuoteno"], $format_center);
+						$worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"], $format_center);
 						$excelsarake++;
 					}
 						
@@ -1069,7 +1069,7 @@
 						$rivi .= "\"$row[varastopaikka]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["varastopaikka"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["varastopaikka"]);
 							$excelsarake++;
 						}
 					}
@@ -1096,7 +1096,7 @@
 						$rivi .= "\"$row[tuotemerkki]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["tuotemerkki"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["tuotemerkki"]);
 							$excelsarake++;
 						}
 					}
@@ -1105,7 +1105,7 @@
 						$rivi .= "\"$row[tahtituote]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["tahtituote"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["tahtituote"]);
 							$excelsarake++;
 						}
 					}
@@ -1114,7 +1114,7 @@
 						$rivi .= "\"$row[status]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["status"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["status"]);
 							$excelsarake++;
 						}
 					}
@@ -1123,7 +1123,7 @@
 						$rivi .= "\"".$ryhmanimet[$row["abcluokka"]]."\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $ryhmanimet[$row["abcluokka"]]);
+							$worksheet->writeString($excelrivi, $excelsarake, $ryhmanimet[$row["abcluokka"]]);
 							$excelsarake++;
 						}
 					}
@@ -1152,7 +1152,7 @@
 						$rivi .= "\"$row[luontiaika]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["luontiaika"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["luontiaika"]);
 							$excelsarake++;
 						}
 					}
@@ -1260,7 +1260,7 @@
 						$rivi .= "\"$row[toimittaja]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["toimittaja"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["toimittaja"]);
 							$excelsarake++;
 						}
 					}
@@ -1269,7 +1269,7 @@
 						$rivi .= "\"$row[toim_tuoteno]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["toim_tuoteno"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["toim_tuoteno"]);
 							$excelsarake++;
 						}
 					}
@@ -1278,7 +1278,7 @@
 						$rivi .= "\"".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, asana('nimitys_',$row['tuoteno'],$row['nimitys']));
+							$worksheet->writeString($excelrivi, $excelsarake, asana('nimitys_',$row['tuoteno'],$row['nimitys']));
 							$excelsarake++;
 						}
 					}
@@ -1287,7 +1287,7 @@
 						$rivi .= "\"$row[toim_nimitys]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["toim_nimitys"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["toim_nimitys"]);
 							$excelsarake++;
 						}
 					}
@@ -1296,7 +1296,7 @@
 						$rivi .= "\"$row[kuvaus]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["kuvaus"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["kuvaus"]);
 							$excelsarake++;
 						}
 					}
@@ -1305,7 +1305,7 @@
 						$rivi .= "\"$row[lyhytkuvaus]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["lyhytkuvaus"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["lyhytkuvaus"]);
 							$excelsarake++;
 						}
 					}
@@ -1350,7 +1350,7 @@
 						$rivi .= "\"$row[hinnastoon]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["hinnastoon"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["hinnastoon"]);
 							$excelsarake++;
 						}
 					}
@@ -1379,7 +1379,7 @@
 						$rivi .= "$row[epakurantti25pvm]\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["epakurantti25pvm"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["epakurantti25pvm"]);
 							$excelsarake++;
 						}
 					}
@@ -1390,7 +1390,7 @@
 						$rivi .= "$row[epakurantti50pvm]\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["epakurantti50pvm"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["epakurantti50pvm"]);
 							$excelsarake++;
 						}
 					}
@@ -1401,7 +1401,7 @@
 						$rivi .= "$row[epakurantti75pvm]\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["epakurantti75pvm"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["epakurantti75pvm"]);
 							$excelsarake++;
 						}
 					}
@@ -1412,7 +1412,7 @@
 						$rivi .= "$row[epakurantti100pvm]\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["epakurantti100pvm"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["epakurantti100pvm"]);
 							$excelsarake++;
 						}
 					}
@@ -1430,7 +1430,7 @@
 						$rivi .= "\"$osaldo[hyllyalue]-$osaldo[hyllynro]-$osaldo[hyllyvali]-$osaldo[hyllytaso]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, "$osaldo[hyllyalue]-$osaldo[hyllynro]-$osaldo[hyllyvali]-$osaldo[hyllytaso]");
+							$worksheet->writeString($excelrivi, $excelsarake, "$osaldo[hyllyalue]-$osaldo[hyllynro]-$osaldo[hyllyvali]-$osaldo[hyllytaso]");
 							$excelsarake++;
 						}
 					}
@@ -1712,7 +1712,7 @@
 						$rivi .= "\"$row[aleryhma]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $laskurow["aleryhma"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $laskurow["aleryhma"]);
 							$excelsarake++;
 						}
 					}
@@ -1950,7 +1950,7 @@
 								$rivi .= "\"$korvarow[tuoteno]\"\t";
 					
 								if(isset($workbook)) {
-									$worksheet->write($excelrivi, $excelsarake, $korvarow["tuoteno"], $format_center);
+									$worksheet->writeString($excelrivi, $excelsarake, $korvarow["tuoteno"], $format_center);
 									$excelsarake++;
 								}
 							}

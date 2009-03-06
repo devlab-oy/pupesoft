@@ -699,14 +699,15 @@ if (!function_exists('rivi_original')) {
 			$kurssi = 1;
 		}
 
+		//Nimitys 
+		list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 150, $pdf, $norm);
+		$pdf->draw_text(35,  $kala, $ff_string, $thispage, $ff_font);
+				
 		//Tuoteno
-		$pdf->draw_text(35,  $kala, substr($row["nimitys"],0,22),						$thispage, $norm);
-
-		//Nimitys
-		$pdf->draw_text(190, $kala, $row["tuoteno"], 									$thispage, $norm);
+		$pdf->draw_text(190, $kala, $row["tuoteno"], $thispage, $norm);
 
 		//M‰‰r‰
-		$pdf->draw_text(340, $kala, $row["kpl"], 										$thispage, $norm);
+		$pdf->draw_text(340, $kala, $row["kpl"], $thispage, $norm);
 
 		// yksikkˆhinta pit‰‰ olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
@@ -940,7 +941,11 @@ if (!function_exists('rivi_plain')) {
 			$kurssi = 1;
 		}
 
-		$pdf->draw_text(20,  $kala, substr($row["nimitys"],0,27),											$thispage, $norm);
+		//Nimitys 
+		list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 180, $pdf, $norm);
+		$pdf->draw_text(20,  $kala, $ff_string, $thispage, $ff_font);
+		
+		//Tuoteno		
 		$pdf->draw_text(210, $kala, $row["tuoteno"], 														$thispage, $norm);
 
 		$oikpos = $pdf->strlen($row["kpl"], $norm);
@@ -1170,10 +1175,11 @@ if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
 			$kurssi = 1;
 		}
 
-		//Tuoteno
-		$pdf->draw_text(35,  $kala, substr($row["nimitys"],0,22),						$thispage, $norm);
-
 		//Nimitys
+		list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 150, $pdf, $norm);
+		$pdf->draw_text(35,  $kala, $ff_string, $thispage, $ff_font);
+		
+		//Tuoteno
 		$pdf->draw_text(190, $kala, $row["tuoteno"], 									$thispage, $norm);
 
 		//M‰‰r‰

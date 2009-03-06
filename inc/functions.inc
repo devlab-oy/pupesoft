@@ -319,7 +319,6 @@ if (!function_exists("onkotulostusalueita")) {
 	}
 }
 
-
 if (!function_exists("pdf_substr")) {
 	function pdf_substr($str, $len, $pdf, $param) {
 
@@ -333,6 +332,32 @@ if (!function_exists("pdf_substr")) {
 		}
 
 		return $str;
+	}
+}
+
+if (!function_exists("pdf_fontfit")) {
+	function pdf_fontfit($str, $len, $pdf, $param) {
+		
+		$ffok = 0;
+		
+		if ($pdf->strlen($str, $param) > $len) {
+						
+			for($fkoko = $param["height"]; $fkoko >= 7; $fkoko--) {
+				
+				$param["height"] = $fkoko;
+				
+				if ($pdf->strlen($str, $param) <= $len) {
+					$ffok = 1;
+					break;
+				}
+			}			
+		}
+		
+		if (!$ffok) {
+			$str = pdf_substr($str, $len, $pdf, $param);
+		}
+		
+		return array($str, $param);
 	}
 }
 

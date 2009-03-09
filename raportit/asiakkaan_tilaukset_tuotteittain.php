@@ -5,6 +5,7 @@
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
+	
 	require ("../inc/parametrit.inc");
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
@@ -33,7 +34,8 @@
 
 	if ($tee == 'NAYTATILAUS') {
 		require ("naytatilaus.inc");
-		echo "<hr>";
+		
+		echo "<br><br>";
 		$tee = "TULOSTA";
 	}
 
@@ -176,27 +178,29 @@
 			$jarj = "ORDER BY lasku.laskunro desc";
 		}
 
-
 		if ($toim == 'OSTO') {
-			$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, ytunnus,
-						if(nimi!=toim_nimi and toim_nimi!='', concat(nimi,'<br>(',toim_nimi,')'), nimi) nimi,
-						if(postitp!=toim_postitp and toim_postitp!='', concat(postitp,'<br>(',toim_postitp,')'), postitp) postitp,
-						tuoteno, 
-						kpl+varattu kpl,
-						tilausrivi.hinta hinta,
-						rivihinta rivihinta,
+			$query = "	SELECT 
+						tilausrivi.tunnus, 
+						lasku.tunnus tilaus,
+			 			lasku.ytunnus,
+						lasku.nimi,
+						lasku.postitp, 
+						tilausrivi.tuoteno,
+						round((tilausrivi.varattu+tilausrivi.kpl),4) m‰‰r‰,						
+						round((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) ulkm‰‰r‰,
+						round(tilausrivi.hinta*if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi), '$yhtiorow[hintapyoristys]') hinta, 
+						round((tilausrivi.varattu+tilausrivi.kpl)*tilausrivi.hinta*if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi)*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(tilausrivi.ale/100)),'$yhtiorow[hintapyoristys]') rivihinta,											
 						lasku.toimaika,
 						tilausrivi.laskutettuaika tuloutettu,
-						lasku.tila, lasku.alatila
-						FROM tilausrivi, lasku
+						lasku.tila, lasku.alatila						
+						FROM tilausrivi
+						JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
+						JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus						
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and lasku.yhtio=tilausrivi.yhtio
-						and lasku.tunnus=tilausrivi.otunnus
 						and lasku.tila IN ('O','K')
 						and tilausrivi.tyyppi = 'O'
 						and tilausrivi.$pvmtapa >='$vva-$kka-$ppa 00:00:00'
-						and tilausrivi.$pvmtapa <='$vvl-$kkl-$ppl 23:59:59'
-						and lasku.tunnus=tilausrivi.otunnus ";
+						and tilausrivi.$pvmtapa <='$vvl-$kkl-$ppl 23:59:59'";
 		}
 		else {
 			if ((int) $asiakasid > 0) {
@@ -213,7 +217,7 @@
 						$asiakaslisa 
 						tuoteno, 
 						tilausrivi.nimitys, 
-						(kpl+varattu) kpl,
+						(kpl+varattu) m‰‰r‰,
 						round(tilausrivi.hinta, $yhtiorow[hintapyoristys]) hinta, 
 						tilausrivi.ale, 
 						round(rivihinta, $yhtiorow[hintapyoristys]) rivihinta,
@@ -289,23 +293,28 @@
 				echo "<tr class='aktiivi'>";
 
 				for ($i=1; $i<mysql_num_fields($result)-2; $i++) {
-					if (mysql_field_name($result,$i) == 'kpl' or mysql_field_name($result,$i) == 'hinta' or mysql_field_name($result,$i) == 'rivihinta') {
-						echo "<$ero valign='top' align='right'>".str_replace(".", ",", $row[$i])."</$ero>";
+					
+					if (mysql_field_name($result,$i) == 'kerattyaika' or mysql_field_name($result,$i) == 'toimaika' or mysql_field_name($result,$i) == 'tuloutettu') {
+						echo "<$ero valign='top'>".tv1dateconv($row[$i],"pitka")."</$ero>";
 					}
-					elseif (mysql_field_name($result,$i) == 'toimaika' or mysql_field_name($result,$i) == 'lahetepvm' or mysql_field_name($result,$i) == 'tuloutettu') {
-						if (substr($row[$i], 0, 10) == '0000-00-00') {
-							echo "<$ero valign='top'></$ero>";
-						}
-						else {
-							echo "<$ero valign='top'>".tv1dateconv($row[$i],"pitka")."</$ero>";
-						}
+					elseif (mysql_field_name($result,$i) == 'kpl' or mysql_field_name($result,$i) == 'tilkpl' or mysql_field_name($result,$i) == 'jt' or mysql_field_name($result,$i) == 'ale') {
+						echo "<$ero valign='top' align='right'>".($row[$i]*1)."</$ero>";
+					}
+					elseif (mysql_field_name($result,$i) == 'tuoteno') {
+						echo "<$ero valign='top'><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=".urlencode($row[$i])."'>$row[$i]</a></$ero>";
+					}
+					elseif (mysql_field_name($result,$i) == 'alv') {
+						echo "<$ero valign='top' align='right'>".($row[$i]*1)."</td>";
+					}
+					elseif (is_numeric($row[$i])) {
+						echo "<$ero valign='top' align='right' nowrap>".(float) $row[$i]."</$ero>";
 					}
 					else {
-						echo "<$ero valign='top'>$row[$i]</$ero>";
+						echo "<$ero valign='top'>$row[$i]</td>";
 					}
 
 					if(isset($workbook)) {
-						if (mysql_field_name($result,$i) == 'kpl' or mysql_field_name($result,$i) == 'hinta' or mysql_field_name($result,$i) == 'rivihinta') {
+						if (is_numeric($row[$i])) {
 							$worksheet->writeNumber($excelrivi, $excelsarake, $row[$i], $format_num);
 						}
 						else {
@@ -315,12 +324,12 @@
 					}
 				}
 
-				$kplsumma += $row["kpl"];
+				$kplsumma += $row["m‰‰r‰"];
 				$rivihintasumma += $row["rivihinta"];
 
 				if ($toim != "OSTO") {
-					$laskutyyppi=$row["tila"];
-					$alatila=$row["alatila"];
+					$laskutyyppi= $row["tila"];
+					$alatila	= $row["alatila"];
 
 					//tehd‰‰n selv‰kielinen tila/alatila
 					require "../inc/laskutyyppi.inc";
@@ -355,13 +364,16 @@
 			}
 
 			if ($toim == "OSTO") {
-				$csp = 5;
+				$csp = 4;
 			}
 			else {
 				$csp = 6;
 			}
 
-			echo "<tr><td colspan='$csp'>".t("Yhteens‰").":</td><td>".sprintf('%01.2f', $kplsumma)."</td><td></td><td>".sprintf('%01.2f', $rivihintasumma)."</td></tr>";
+			echo "<tr><td colspan='$csp' align='right' class='back'>".t("Yhteens‰").":</td>
+					<td align='right' class='back'>".(float) $kplsumma."</td>
+					<td colspan='2' align='right' class='back'></td>
+					<td align='right' class='back'>".sprintf('%01.2f', $rivihintasumma)."</td></tr>";
 			echo "</table>";
 
 			if(isset($workbook)) {

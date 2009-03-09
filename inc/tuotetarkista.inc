@@ -239,7 +239,8 @@ if(!function_exists("tuotetarkista")) {
 					$query  = "	SELECT eankoodi
 								FROM tuote
 								WHERE yhtio = '$kukarow[yhtio]'
-								and eankoodi = '".trim($t[$i])."'";
+								and eankoodi = '".trim($t[$i])."'
+								and tuoteno != '$tem_tuoteno'";
 					$chkressiresult = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($chkressiresult) > 0) {

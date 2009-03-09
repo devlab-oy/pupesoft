@@ -332,7 +332,15 @@
 
 		if ($kukarow["kesken"] == 0) {
 			$query = "INSERT into ";
-			$postquery = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
+			
+			$vquery = "	SELECT nimi, kurssi, tunnus
+						FROM valuu
+						WHERE yhtio = '$kukarow[yhtio]'
+						and nimi = '$valkoodi'";
+			$vresult = mysql_query($vquery) or pupe_error($vquery);
+			$vrow = mysql_fetch_array($vresult);
+									
+			$postquery = ",vienti_kurssi='$vrow[kurssi]' ,laatija = '$kukarow[kuka]', luontiaika=NOW()";			
 		}
 		else {
 			// Pidet‰‰n huolta tilausrivien toimitusp‰ivist‰ ja kerayspaivasta

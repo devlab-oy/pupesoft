@@ -10,7 +10,7 @@
 	if ((int) $avaintunnus == 0 and $uusi == 1) {
 		
 		echo "	<form action='#' method='POST'>
-				<input type='button' onclick='javascript:document.mainform.submit();' name='kikkeli' value='".t("Lisää uusi käännösS")."'>
+				<input type='button' onclick='javascript:document.mainform.submit();' name='kikkeli' value='".t("Lisää uusi käännös")."'>
 				</form>";
 	}
 	elseif((int) $perhe == 0) {

@@ -9,6 +9,10 @@ if(!function_exists("avainsanatarkista")) {
 		if (mysql_field_name($result, $i) == "selite" and trim($t[$i]) == '') {
 			$seliteerrori = 1;
 		}
+		
+		if (mysql_field_name($result, $i) == "selite" and !is_numeric($t[$i]) and in_array($laji, array("TRY", "OSASTO", "PIIRI"))) {
+			$seliteerrori = 1;
+		}
 
 		if (mysql_field_name($result, $i) == "laji") {
 			$laji = trim($t[$i]);

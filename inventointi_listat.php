@@ -442,7 +442,7 @@
 				}
 
 				$prn .= sprintf ('%-7.7s', 	"_____");
-				$prn .= sprintf ('%-9.9s', 	$tuoterow["yksikko"]);
+				$prn .= sprintf ('%-9.9s', 	ta($kieli, "Y", $tuoterow["yksikko"]));
 				$prn .= sprintf ('%-8.8d', 	$prow["varattu"]);
 
 				if ($tuoterow["sarjanumeroseuranta"] != "") {

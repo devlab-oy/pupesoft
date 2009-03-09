@@ -636,7 +636,7 @@ if (!function_exists('rivi_tarjous')) {
 		}
 		
 		$row["tilkpl"] 	= ($row["tilkpl"]*1);
-		$row["varattu"] = ($row["kpl"]+$row["varattu"]+$row["jt"])." ".strtolower($row["yksikko"]);
+		$row["varattu"] = ($row["kpl"]+$row["varattu"]+$row["jt"])." ".ta($kieli, "Y", $row["yksikko"]);
 		$row["kpl"] 	= ($row["kpl"]*1);
 		$kpl_rivilla 	= ($row["kpl"]+$row["varattu"]+$row["jt"]);
 		

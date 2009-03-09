@@ -166,15 +166,15 @@
 			echo "<td>$tulrow[tuoteno]</td>";
 			echo "<td>$tulrow[nimitys]</td>";
 			echo "<td>$tulrow[myydyt]</td>";
-			echo "<td>$tulrow[yksikko]</td>";
-			echo "<td>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tulrow[arvo])."</td>";
+			echo "<td>".ta($kieli, "Y", $tulrow["yksikko"])."</td>";
+			echo "<td>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tulrow["arvo"])."</td>";
 			if ($yhtiorow['saldo_kasittely'] != '') {
 				echo "<td>$myytavissa ($myytavissa_tul)</td>";
 			}
 			else {
 				echo "<td>$myytavissa</td>";
 			}
-			echo "<td>".tv1dateconv($tulrow[toimaika])."</td>";
+			echo "<td>".tv1dateconv($tulrow["toimaika"])."</td>";
 			
 			if ($tulrow['tila'] == "L" and $tulrow['alatila'] == "D") {
 				echo "<td><font class='OK'>".t($laskutyyppi)."<br>".t($alatila)."</font></td>";
@@ -188,23 +188,23 @@
 			if(isset($workbook)) {
 				$excelsarake = 0;
 
-				$worksheet->write($excelrivi, $excelsarake, $tulrow[ytunnus], $format_bold);
+				$worksheet->write($excelrivi, $excelsarake, $tulrow["ytunnus"], $format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, $tulrow[nimi], $format_bold);
+				$worksheet->write($excelrivi, $excelsarake, $tulrow["nimi"], $format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, $tulrow[postitp], $format_bold);
+				$worksheet->write($excelrivi, $excelsarake, $tulrow["postitp"], $format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, $tulrow[tunnus], $format_bold);
+				$worksheet->write($excelrivi, $excelsarake, $tulrow["tunnus"], $format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, $tulrow[tuoteno], $format_bold);
+				$worksheet->write($excelrivi, $excelsarake, $tulrow["tuoteno"], $format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, $tulrow[nimitys], $format_bold);
+				$worksheet->write($excelrivi, $excelsarake, $tulrow["nimitys"], $format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, $tulrow[myydyt], $format_bold);
+				$worksheet->write($excelrivi, $excelsarake, $tulrow["myydyt"], $format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, $tulrow[yksikko], $format_bold);
+				$worksheet->write($excelrivi, $excelsarake, ta($kieli, "Y", $tulrow["yksikko"]), $format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, sprintf("%.".$yhtiorow['hintapyoristys']."f", $tulrow[arvo]), $format_bold);
+				$worksheet->write($excelrivi, $excelsarake, sprintf("%.".$yhtiorow['hintapyoristys']."f", $tulrow["arvo"]), $format_bold);
 				$excelsarake++;
 				if ($yhtiorow['saldo_kasittely'] != '') {
 					$worksheet->write($excelrivi, $excelsarake, $myytavissa ."(".$myytavissa_tul.")", $format_bold);
@@ -216,7 +216,7 @@
 				}
 				
 				
-				$worksheet->write($excelrivi, $excelsarake, tv1dateconv($tulrow[toimaika]), $format_bold);
+				$worksheet->write($excelrivi, $excelsarake, tv1dateconv($tulrow["toimaika"]), $format_bold);
 				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, t($laskutyyppi)."\n".t($alatila), $format_bold);
 				
@@ -266,7 +266,6 @@
 				".avain('join','TRY_')."
 				WHERE avainsana.yhtio='$kukarow[yhtio]'
 				and avainsana.laji='TRY'
-				$avainlisa
 				ORDER BY avainsana.jarjestys, avainsana.selite";
 	$sresult = mysql_query($query) or pupe_error($query);
 

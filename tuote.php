@@ -407,7 +407,7 @@
 
 				}
 			}
-			echo "<br>$tuoterow[tuotemerkki]</td><td>$tuoterow[yksikko]</td><td>$tuoterow[eankoodi]</td><td colspan='2'>".substr(asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']),0,100)."</td><td>$tuoterow[hinnastoon]</td></tr>";
+			echo "<br>$tuoterow[tuotemerkki]</td><td>".ta($kieli, "Y", $tuoterow["yksikko"])."</td><td>$tuoterow[eankoodi]</td><td colspan='2'>".substr(asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']),0,100)."</td><td>$tuoterow[hinnastoon]</td></tr>";
 
 			//2
 			echo "<tr><th>".t("Osasto/try")."</th><th>".t("Toimittaja")."</th><th>".t("Aleryhmä")."</th><th>".t("Tähti")."</th><th>".t("Perusalennus")."</th><th>".t("VAK")."</th></tr>";
@@ -417,16 +417,17 @@
 			//3
 			echo "<tr><th>".t("Toimtuoteno")."</th><th>".t("Myyntihinta")."</th><th>".t("Netto/Ovh")."</th><th>".t("Ostohinta")." / ".t("Alennus")."</th><th>".t("Kehahinta")."</th><th>".t("Vihahinta")."</th>";
 			echo "<tr><td valign='top' >$tuoterow[toim_tuoteno]</td>
-						<td valign='top' align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["myyntihinta"])." $yhtiorow[valkoodi]$valuuttalisa</td>
-						<td valign='top' align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["nettohinta"])."/".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["myymalahinta"])."</td>
-						<td valign='top' align='right'>";
-						if ($tuoterow[ostohinta][0] != '/') {
-							echo $tuoterow["ostohinta"];
-						}
+					<td valign='top' align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["myyntihinta"])." $yhtiorow[valkoodi]$valuuttalisa</td>
+					<td valign='top' align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["nettohinta"])."/".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["myymalahinta"])."</td>
+					<td valign='top' align='right'>";
+						
+			if ($tuoterow["ostohinta"][0] != '/') {
+				echo $tuoterow["ostohinta"];
+			}
 
-						echo"</td><td valign='top' align='right'>$tuoterow[kehahin]</td>
-						<td valign='top' align='right'>$tuoterow[vihahin] ".tv1dateconv($tuoterow["vihapvm"])."</td>
-				</tr>";
+			echo"</td><td valign='top' align='right'>$tuoterow[kehahin]</td>
+					<td valign='top' align='right'>$tuoterow[vihahin] ".tv1dateconv($tuoterow["vihapvm"])."</td>
+					</tr>";
 
 			//4
 			echo "<tr><th>".t("Hälyraja")." / ".t("Varastoitava")."</th><th>".t("Tilerä")."</th><th>".t("Toierä")."</th><th>".t("Kerroin")."</th><th>".t("Tarrakerroin")."</th><th>".t("Tarrakpl")."</th>";
@@ -899,10 +900,10 @@
 						<td align='right' nowrap>$lrow[summaEDV] $yhtiorow[valkoodi]</td></tr>";
 
 				echo "<tr><th align='left'>".t("Myykpl").":</th>
-						<td align='right' nowrap>$lrow[kpl30] ".t("KPL")."</td>
-						<td align='right' nowrap>$lrow[kpl90] ".t("KPL")."</td>
-						<td align='right' nowrap>$lrow[kplVA] ".t("KPL")."</td>
-						<td align='right' nowrap>$lrow[kplEDV] ".t("KPL")."</td></tr>";
+						<td align='right' nowrap>$lrow[kpl30] ".ta($kieli, "Y", $tuoterow["yksikko"])."</td>
+						<td align='right' nowrap>$lrow[kpl90] ".ta($kieli, "Y", $tuoterow["yksikko"])."</td>
+						<td align='right' nowrap>$lrow[kplVA] ".ta($kieli, "Y", $tuoterow["yksikko"])."</td>
+						<td align='right' nowrap>$lrow[kplEDV] ".ta($kieli, "Y", $tuoterow["yksikko"])."</td></tr>";
 
 				echo "<tr><th align='left'>".t("Kate").":</th>
 						<td align='right' nowrap>$lrow[kate30] $yhtiorow[valkoodi]</td>
@@ -1052,7 +1053,7 @@
 						}
 
 						if($muutos_abs<>0) {
-							$muutos = "edellinen: ".(int)$lrow["ed_".$key]."{$tuoterow["yksikko"]} muutos: $muutos_abs{$tuoterow["yksikko"]}";
+							$muutos = "edellinen: ".(int)$lrow["ed_".$key]."{".ta($kieli, "Y", $tuoterow["yksikko"])."} muutos: $muutos_abs{".ta($kieli, "Y", $tuoterow["yksikko"])."}";
 						}
 
 						if($muutos_suht<>0 and $lrow[$key]<>0 and $lrow["ed_".$key] <> 0) {
@@ -1084,7 +1085,7 @@
 					}
 
 					if($muutos_abs<>0) {
-						$muutos = "edellinen: ".(int)$ed_summa."{$tuoterow["yksikko"]} muutos: $muutos_abs{$tuoterow["yksikko"]}";
+						$muutos = "edellinen: ".(int)$ed_summa."{".ta($kieli, "Y", $tuoterow["yksikko"])."} muutos: $muutos_abs{".ta($kieli, "Y", $tuoterow["yksikko"])."}";
 					}
 
 					if($muutos_suht<>0 and $summa<>0 and $ed_summa<>0) {
@@ -1121,7 +1122,7 @@
 					}
 
 					if($muutos_abs<>0) {
-						$muutos = "edellinen: ".(int)$ed_erittely[$kk]."{$tuoterow["yksikko"]} muutos: $muutos_abs{$tuoterow["yksikko"]}";
+						$muutos = "edellinen: ".(int)$ed_erittely[$kk]."{".ta($kieli, "Y", $tuoterow["yksikko"])."} muutos: $muutos_abs{".ta($kieli, "Y", $tuoterow["yksikko"])."";
 					}
 
 					if($muutos_suht<>0 and $erittely[$kk]<>0 and $ed_erittely[$kk]<>0) {
@@ -1149,7 +1150,7 @@
 				}
 
 				if($muutos_abs<>0) {
-					$muutos = "edellinen: ".(int)$ed_gt."{$tuoterow["yksikko"]} muutos: $muutos_abs{$tuoterow["yksikko"]}";
+					$muutos = "edellinen: ".(int)$ed_gt."{".ta($kieli, "Y", $tuoterow["yksikko"])."} muutos: $muutos_abs{".ta($kieli, "Y", $tuoterow["yksikko"])."}";
 				}
 
 				if($muutos_suht<>0 and $gt<>0 and $ed_gt <> 0) {

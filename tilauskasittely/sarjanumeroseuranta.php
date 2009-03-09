@@ -522,12 +522,12 @@
 			$sarrow = mysql_fetch_array($sarres);
 
 			if ($from == "KERAA" and $rivirow["varattu"] != $sarrow["kpl"]) {
-				echo "<font class='error'>".t('Riviin voi liitt‰‰ vain')." $rivirow[varattu] $rivirow[yksikko].</font><br><br>";
+				echo "<font class='error'>".t('Riviin voi liitt‰‰ vain')." $rivirow[varattu] ".ta($kieli, "Y", $rivirow["yksikko"]).".</font><br><br>";
 
 				$lisaysok = "";
 			}
 			elseif ($rivirow["varattu"] < $sarrow["kpl"]) {
-				echo "<font class='error'>".t('Riviin voi liitt‰‰ enint‰‰n')." $rivirow[varattu] $rivirow[yksikko].</font><br><br>";
+				echo "<font class='error'>".t('Riviin voi liitt‰‰ enint‰‰n')." $rivirow[varattu] ".ta($kieli, "Y", $rivirow["yksikko"]).".</font><br><br>";
 
 				$lisaysok = "";
 			}
@@ -545,7 +545,7 @@
 			if (mysql_num_rows($result) > 0) {
 				$liityht = count($sarjataan)+mysql_num_rows($result);
 				if ($liityht > $rivirow["varattu"]) {
-					echo "<font class='error'>".t('Riviin voi liitt‰‰ enint‰‰n')." $rivirow[varattu] $rivirow[yksikko].</font><br><br>";
+					echo "<font class='error'>".t('Riviin voi liitt‰‰ enint‰‰n')." $rivirow[varattu] ".ta($kieli, "Y", $rivirow["yksikko"]).".</font><br><br>";
 
 					$lisaysok = "";
 				}
@@ -927,7 +927,7 @@
 	if ($rivirow["tuoteno"] != '') {
 		echo "<table>";
 		echo "<tr><th>".t("Tuotenumero")."</th><td>$rivirow[tuoteno] $rivirow[nimitys]</td></tr>";
-		echo "<tr><th>".t("M‰‰r‰")."</th><td>$rivirow[varattu] $rivirow[yksikko]</td></tr>";
+		echo "<tr><th>".t("M‰‰r‰")."</th><td>$rivirow[varattu] ".ta($kieli, "Y", $rivirow["yksikko"])."</td></tr>";
 		echo "</table><br>";
 	}
 
@@ -1029,10 +1029,10 @@
 
 			if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F") {
 				if ($sarjarow["era_kpl"] < 0) {
-					echo "<br>".t("Er‰ss‰").": ".abs($sarjarow["era_kpl"])." $rivirow[yksikko]<br><font class='error'>".t("Er‰ on jo myyty")."!</font>";
+					echo "<br>".t("Er‰ss‰").": ".abs($sarjarow["era_kpl"])." ".ta($kieli, "Y", $rivirow["yksikko"])."<br><font class='error'>".t("Er‰ on jo myyty")."!</font>";
 				}
 				else {
-					echo "<br>".t("Er‰ss‰").": $sarjarow[era_kpl] $rivirow[yksikko]";
+					echo "<br>".t("Er‰ss‰").": $sarjarow[era_kpl] ".ta($kieli, "Y", $rivirow["yksikko"]);
 				}
 			}
 

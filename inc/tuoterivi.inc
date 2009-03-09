@@ -89,6 +89,22 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "tuotemerkki") {
+		// tehd‰‰n avainsana query
+		$sresult = avainsana("TUOTEMERKKI", $kukarow['kieli']);
+
+		$ulos = "<td><select name='$nimi'>";
+		while ($srow = mysql_fetch_array($sresult)) {
+			$sel = '';
+			if ($trow[$i] == $srow["selite"]) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
+		}
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "osasto") {
 		// tehd‰‰n avainsana query

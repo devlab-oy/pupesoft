@@ -181,7 +181,7 @@
 				$rivi .= $rrow["osasto"]."\t";
 				$rivi .= $rrow["try"]."\t";
 				$rivi .= $rrow["nimitys"]."\t";
-				$rivi .= $rrow["yksikko"]."\t";
+				$rivi .= ta($kieli, "Y", $rrow["yksikko"])."\t";
 				$rivi .= $rrow["aleryhma"]."\t";
 				$rivi .= str_replace(".",",",$rrow["myyntihinta"])."\t";
 

@@ -264,31 +264,29 @@
 						LIMIT 1";
 			$rarres = mysql_query($query) or pupe_error($query);
 			$rarrow	 = mysql_fetch_array($rarres);
-
-			//	Jos toimittajalla on yksikkö ohitetaan tuotteen yksikkö
-			if($rarrow["toim_yksikko"]!= "") {
-				$row["yksikko"] = $rarrow["toim_yksikko"];
-			}
-
-			$pdf->draw_text(105,  $kala, $row["toim_tuoteno"],									$thispage, $norm);
-			$pdf->draw_text(205, $kala, "(".$row["tuoteno"].")",								$thispage, $norm);
+			
+			if ($row["yksikko"] == "") $row["yksikko"] = $rarrow["toim_yksikko"];			
+			if ($rarrow["toim_yksikko"] == "") $rarrow["toim_yksikko"] = $row["yksikko"];
 			
 			
-			$pdf->draw_text(300, $kala, tv1dateconv($row["toimaika"]),							$thispage, $norm);
+			$pdf->draw_text(105,  $kala, $row["toim_tuoteno"],														$thispage, $norm);
+			$pdf->draw_text(205, $kala, "(".$row["tuoteno"].")",													$thispage, $norm);
+						
+			$pdf->draw_text(295, $kala, tv1dateconv($row["toimaika"]),												$thispage, $norm);
 			
-			$oikpos = $pdf->strlen(($row["tilattu sis/ulk"]*1)." ".$row["yksikko"], $norm);					
-			$pdf->draw_text(415-$oikpos, $kala, ($row["tilattu sis/ulk"]*1)." ".$row["yksikko"], 		$thispage, $norm);
+			$oikpos = $pdf->strlen((float) $row["tilkpl"]."/".(float) $row["ulkkpl"]." ".ta($kieli, "Y", $row["yksikko"])."/".ta($kieli, "Y", $rarrow["toim_yksikko"]), $norm);					
+			$pdf->draw_text(415-$oikpos, $kala, (float) $row["tilkpl"]."/".(float) $row["ulkkpl"]." ".ta($kieli, "Y", $row["yksikko"])."/".ta($kieli, "Y", $rarrow["toim_yksikko"]), 	$thispage, $norm);
 			
 			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), $norm);					
-			$pdf->draw_text(470-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), 					$thispage, $norm);
+			$pdf->draw_text(480-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), 		$thispage, $norm);
 								
 			if ($row["ale"] != 0) {
 				$oikpos = $pdf->strlen(($row["ale"]*1)."%", $norm);
-				$pdf->draw_text(515-$oikpos, $kala, ($row["ale"]*1)."%", 						$thispage, $norm);
+				$pdf->draw_text(515-$oikpos, $kala, ($row["ale"]*1)."%", 											$thispage, $norm);
 			}
 			
 			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["rivihinta"]), $norm);					
-			$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["rivihinta"]), 				$thispage, $norm);
+			$pdf->draw_text(580-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["rivihinta"]), 	$thispage, $norm);
 			
 			$kala = $kala - 15;
 		}
@@ -410,13 +408,14 @@
 
            		$tee = "";
 				//poistetaan tmp file samantien kuleksimasta...
-				system("rm -f $pdffilenimi");
+				//system("rm -f $pdffilenimi");
 			}
 		}
 	}	
 					
 	$query = "	SELECT tilausrivi.otunnus, tilausrivi.tuoteno, tuotteen_toimittajat.toim_tuoteno, tilausrivi.nimitys,
-				concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
+				tilkpl,
+				round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) ulkkpl,
 				hinta, ale, round((varattu+jt)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),'$yhtiorow[hintapyoristys]') rivihinta, 
 				toimaika, tilausrivi.jaksotettu as vahvistettu, tilausrivi.tunnus,
 				toim_tuoteno

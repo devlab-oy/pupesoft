@@ -202,7 +202,7 @@
 				<input type='hidden' name='otunnus' value = '$otunnus'>
 				<input type='hidden' name='tee' value = 'TULOSTAPDF'>";
 
-		echo "<tr><th>".t("Tulosta vahvistamattomat rivit").": </th><td valign='middle'>
+		echo "<tr><th>".t("Tulosta vahvistamattomat rivit").": </th>
 				<td><input type='Submit' value='".t("Tulosta")."'></form></td></tr></table><br>";
 			
 	

@@ -449,21 +449,21 @@
 
 		if ($mista == "vastaanota") {
 			$oikpos = $pdf->strlen((float) $row["varattu"], $p);
-			$pdf->draw_text(745-$oikpos, $kala, (float) $row["varattu"], 	$firstpage, $p);
+			$pdf->draw_text(745-$oikpos, $kala, (float) $row["varattu"], 		$firstpage, $p);
 		}
 		else {
 			$oikpos = $pdf->strlen((float) $row["varattu"], $p);
-			$pdf->draw_text(620-$oikpos, $kala, (float) $row["varattu"], 	$firstpage, $p);
+			$pdf->draw_text(620-$oikpos, $kala, (float) $row["varattu"], 		$firstpage, $p);
 
 			$oikpos = $pdf->strlen((float) $row["tuotekerroin"], $p);
 			$pdf->draw_text(675-$oikpos, $kala, (float) $row["tuotekerroin"], 	$firstpage, $p);
 
 			$oikpos = $pdf->strlen((float) $row["toimmaara"], $p);
-			$pdf->draw_text(745-$oikpos, $kala, (float) $row["toimmaara"], 	$firstpage, $p);
+			$pdf->draw_text(745-$oikpos, $kala, (float) $row["toimmaara"], 		$firstpage, $p);
 		}
 
 
-		$pdf->draw_text(770, $kala, $row["yksikko"], 					$firstpage, $p);
+		$pdf->draw_text(770, $kala, ta($kieli, "Y", $row["yksikko"]), 			$firstpage, $p);
 
 
 		$kala = $kala - 30 - $lisaa;

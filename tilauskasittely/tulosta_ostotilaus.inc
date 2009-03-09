@@ -278,26 +278,9 @@
 							if($rarrow["toim_yksikko"]!= "") {
 								$row["yksikko"] = $rarrow["toim_yksikko"];
 							}
-
-							$yks_query = "	SELECT DISTINCT avainsana.selitetark
-											FROM avainsana
-											".avain('join','Y_', $kieli)."
-											WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'Y' and avainsana.selite like '%$row[yksikko]%' and avainsana.kieli='$kieli'";
-							$yks_result = mysql_query($yks_query) or pupe_error($yks_query);
-							$yks_row = mysql_fetch_array($yks_result);
-
-							$yksikko_apu = $row["yksikko"];
-
-							if ($kieli != $yhtiorow["kieli"]) {
-								$yksikko_apu = ta($kieli, "Y", $row["yksikko"]);
-							}
-
-							if ($yksikko_apu == $row["yksikko"] and $yks_row["selitetark"] != "") {
-								$yksikko_apu = $yks_row["selitetark"];
-							}
-
+							
 							$pdf->write($h, 1, 0, $s[0], $row["toim_tuoteno"]." ".$row["toim_nimitys"], "norm", "L", "");
-							$pdf->write($h, 1, $s[0], $s[1], $row["varattu"]." ".$yksikko_apu, "norm", "R", "");
+							$pdf->write($h, 1, $s[0], $s[1], $row["varattu"]." ".ta($kieli, "Y", $row["yksikko"]), "norm", "R", "");
 							$pdf->write($h, 1, $s[1], $s[2], money_format('%!i',$row["hinta"]), "norm", "R", "");
 							$pdf->write($h, 1, $s[2], 0, money_format('%!i',$row["rivihinta"]), "norm", "R", "");
 							$h-=$pdf->ln();
@@ -825,25 +808,8 @@
 						$row["yksikko"] = $rarrow["toim_yksikko"];
 					}
 
-					$yks_query = "	SELECT DISTINCT avainsana.selitetark
-									FROM avainsana
-									".avain('join','Y_', $kieli)."
-									WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'Y' and avainsana.selite like '%$row[yksikko]%' and avainsana.kieli='$kieli'";
-					$yks_result = mysql_query($yks_query) or pupe_error($yks_query);
-					$yks_row = mysql_fetch_array($yks_result);
-
-					$yksikko_apu = $row["yksikko"];
-
-					if ($kieli != $yhtiorow["kieli"]) {
-						$yksikko_apu = ta($kieli, "Y", $row["yksikko"]);
-					}
-
-					if ($yksikko_apu == $row["yksikko"] and $yks_row["selitetark"] != "") {
-						$yksikko_apu = $yks_row["selitetark"];
-					}
-
-					$oikpos = $pdf->strlen(($row["varattu"]*1)." ".$yksikko_apu, $norm);
-					$pdf->draw_text(415-$oikpos, $kala, ($row["varattu"]*1)." ".$yksikko_apu, 		$thispage, $norm);
+					$oikpos = $pdf->strlen(($row["varattu"]*1)." ".ta($kieli, "Y", $row["yksikko"]), $norm);
+					$pdf->draw_text(415-$oikpos, $kala, ($row["varattu"]*1)." ".ta($kieli, "Y", $row["yksikko"]), 		$thispage, $norm);
 
 					$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), $norm);
 					$pdf->draw_text(470-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), 					$thispage, $norm);

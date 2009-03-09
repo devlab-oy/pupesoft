@@ -183,7 +183,7 @@ if (!function_exists('rivi')) {
 			$pdf->draw_text(35,  $kala, $row["otunnus"],	$thispage, $pieni);
 		}
 		
-		$pdf->draw_text(290, $kala, $row["yksikko"],	$thispage, $pieni);	
+		$pdf->draw_text(290, $kala, ta($kieli, "Y", $row["yksikko"]),	$thispage, $pieni);	
 		$pdf->draw_text(350, $kala, $row["toimaika"], 	$thispage, $pieni);
 			
 		$pdf->draw_text(470, $kala, $row["rivihinta"], $thispage, $pieni);

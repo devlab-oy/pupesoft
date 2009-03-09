@@ -347,7 +347,7 @@
 						}
 
 						$pdf->write($h, 1, $offset, $s[0], $row["tuoteno"]." ".$row["nimitys"], $style_rivi, "L", "");
-						$pdf->write($h, 1, $offset, $s[1], $row["kpl"]." ".strtolower(ta($kieli, "Y", $row["yksikko"])), $style_rivi, "R", "");
+						$pdf->write($h, 1, $offset, $s[1], $row["kpl"]." ".ta($kieli, "Y", $row["yksikko"]), $style_rivi, "R", "");
 
 						if($rivi=="isa") {
 							if($laskurow["rivihintoja_ei_nayteta"] == "") {

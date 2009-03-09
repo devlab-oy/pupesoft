@@ -842,8 +842,10 @@ if (!function_exists('rivi_kerayslista')) {
 				}
 			}
 
-			$oikpos = $pdf->strlen(($row["tilkpl"]*1)." ".strtolower($row["yksikko"]), $boldi);
-			$pdf->draw_text(520-$oikpos, $kala, ($row["tilkpl"]*1)." ".strtolower($row["yksikko"]), 	$thispage, $boldi);
+			$oikpos = $pdf->strlen(($row["tilkpl"]*1), $boldi);
+			$pdf->draw_text(504-$oikpos, $kala, ($row["tilkpl"]*1), 	$thispage, $boldi);
+			
+			$pdf->draw_text(505, $kala, ta($kieli, "Y", $row["yksikko"]), 	$thispage, $pieni);
 
 			if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
 				$oikpos = $pdf->strlen($row['varattu']+$row['kpl'], $norm);

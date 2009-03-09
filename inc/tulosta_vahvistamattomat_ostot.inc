@@ -254,7 +254,7 @@
 
 					$pdf->write($h, 1, 0, $s[0], $row["toim_tuoteno"]." ".$row["toim_nimitys"], "norm", "L", "");
 					$pdf->write($h, 1, $s[0], $s[1], $row["otunnus"], "norm", "R", "");
-					$pdf->write($h, 1, $s[0], 0, $row["varattu"]." ".strtolower(ta($kieli, "Y", $row["yksikko"])), "norm", "R", "");
+					$pdf->write($h, 1, $s[0], 0, $row["varattu"]." ".ta($kieli, "Y", $row["yksikko"]), "norm", "R", "");
 					$h-=$pdf->ln();
 					$pdf->write($h, 1, $s[0], 0, strftime("%x",strtotime($row["toimaika"])), "snadi", "R", "I");
 					

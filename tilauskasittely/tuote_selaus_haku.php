@@ -1351,7 +1351,7 @@
 						foreach ($saldot as $varaso => $saldo) {
 							if ($saldo != 0) {
 								$ei_tyhja = 'yes';
-								echo "<tr><td class='$vari' nowrap>$varaso</td><td class='$vari' align='right' nowrap>".sprintf("%.2f", $saldo)." $row[yksikko]</td></tr>";
+								echo "<tr><td class='$vari' nowrap>$varaso</td><td class='$vari' align='right' nowrap>".sprintf("%.2f", $saldo)." ".ta($kieli, "Y", $row["yksikko"])."</td></tr>";
 							}
 						}
 
@@ -1495,7 +1495,7 @@
 								if ($myytavissa != 0 or ($lisatiedot != "" and $kukarow["extranet"] == "" and $hyllyssa != 0)) {
 									echo "	<tr>
 											<td class='$vari' nowrap>$saldorow[nimitys] $saldorow[tyyppi]</td>
-											<td class='$vari' align='right' nowrap>".sprintf("%.2f", $myytavissa)." $row[yksikko]</td>
+											<td class='$vari' align='right' nowrap>".sprintf("%.2f", $myytavissa)." ".ta($kieli, "Y", $row["yksikko"])."</td>
 											</tr>";
 								}
 

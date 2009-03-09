@@ -586,11 +586,11 @@
 			//tehdään selväkielinen tila/alatila
 			require "inc/laskutyyppi.inc";
 
-			$varaosakommentti .= t("Siirtolistalla").": {$siirtorow["kpl"]} {$trow["yksikko"]} {$siirtorow["lahde"]} -> {$siirtorow["kohde"]} <i>($alatila)</i><br>";
+			$varaosakommentti .= t("Siirtolistalla").": {$siirtorow["kpl"]} {".ta($kieli, "Y", $trow["yksikko"])."} {$siirtorow["lahde"]} -> {$siirtorow["kohde"]} ($alatila)<br>";
 		}
 		
 		// katotaan onko vielä ostotilauksella!
-		$tulossa_query = " 	SELECT IFNULL(min(toimaika),'') paivamaara, IFNULL(max(toimaika),'') paivamaara2, sum(varattu) kpl, group_concat(distinct yksikko) yksikko
+		$tulossa_query = " 	SELECT IFNULL(min(toimaika),'') paivamaara, IFNULL(max(toimaika),'') paivamaara2, sum(varattu) kpl, max(yksikko) yksikko
 		 					FROM tilausrivi
 							WHERE yhtio = '$kukarow[yhtio]' 
 							AND tuoteno = '$row[tuoteno]' 
@@ -600,7 +600,7 @@
 		$tulossa_row = mysql_fetch_array($tulossa_result);
 
 		if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '' and $tulossa_row["kpl"] > 0) {
-			$varaosakommentti .= "$tulossa_row[kpl] $tulossa_row[yksikko] ".t("Tulossa")." ".tv1dateconv($tulossa_row['paivamaara']);
+			$varaosakommentti .= "$tulossa_row[kpl] ".ta($kieli, "Y", $tulossa_row["yksikko"])." ".t("Tulossa")." ".tv1dateconv($tulossa_row['paivamaara']);
 			if ($tulossa_row["paivamaara"] != $tulossa_row["paivamaara2"]) {
 				$varaosakommentti .= " - ".tv1dateconv($tulossa_row['paivamaara2']);
 			}

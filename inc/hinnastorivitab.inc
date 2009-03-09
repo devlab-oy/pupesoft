@@ -46,7 +46,7 @@ function hinnastorivi($tuote, $laskurow) {
 	$out = $tuote['tuoteno']."\t";		// tuotenumero
 	$out .= $tuote['nimitys']."\t";		// tuotteen nimitys
 	$out .= $tuote['eankoodi']."\t";	// tuotteen eankoodi alennusryhmä kahteen merkkiin asti zeropaddattuna
-	$out .= $tuote['yksikko']."\t";		// tuotteen yksikko
+	$out .= ta($kieli, "Y", $tuote["yksikko"])."\t";		// tuotteen yksikko
 	$out .= $tuote['aleryhma']."\t"; 	// tuotteen aleryhmä
 	$out .= $myyntihinta."\t";	   		// tuotteen luettelohint
 	$out .= $tuote['tuotemerkki']."\t";	// tuotemerkki

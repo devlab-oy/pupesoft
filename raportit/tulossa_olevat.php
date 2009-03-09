@@ -30,7 +30,7 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
 	echo "<th>".t("nimi")."</th>";
 	echo "<th>".t("saapumispvm")."</th>";
 	echo "<th>".t("rivim‰‰r‰")."</th>";
-	echo "<th>".t("kplm‰‰r‰")."</th>";
+	echo "<th>".t("m‰‰r‰")."</th>";
 	echo "<th>".t("arvo")."</th>";
 	echo "<th>".t("valuutta")."</th>";
 	echo "</tr>";
@@ -60,15 +60,15 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
 	
 	
 
-	$query = "	SELECT lasku.tunnus, lasku.nimi, tilausrivi.tuoteno, tilausrivi.toimaika, 
-				count(*) maara, sum(tilausrivi.varattu) tilattu, sum(tilausrivi.varattu * tilausrivi.hinta) arvo, lasku.valkoodi
+	$query = "	SELECT lasku.tunnus, lasku.nimi, tilausrivi.tuoteno, tilausrivi.toimaika, lasku.valkoodi,
+				count(*) maara, sum(tilausrivi.varattu) tilattu, sum(tilausrivi.varattu * tilausrivi.hinta) arvo
 				from tilausrivi
 				JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 				where tilausrivi.yhtio	= '$kukarow[yhtio]' 
 				and tilausrivi.varattu 	> '0' 
 				and tilausrivi.tyyppi 	= 'O' 
 				$lisa
-				group by 1,2,3,4
+				group by 1,2,3,4,5
 				order by $sorttaus lasku.nimi, tilausrivi.tuoteno";
 	$result = mysql_query($query) or pupe_error($query);
 	
@@ -84,13 +84,13 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
 		echo "<td>".tv1dateconv($tulrow["toimaika"])."</td>";
 		echo "<td align='right'>$tulrow[maara]</td>";
 		echo "<td align='right'>$tulrow[tilattu]</td>";
-		echo "<td align='right'>$tulrow[arvo]</td>";
+		echo "<td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tulrow["arvo"])."</td>";
 		echo "<td>$tulrow[valkoodi]</td>";
 		echo "</tr>";
 		
-		if ($edellinen == "" or $edellinen != $tulrow[tunnus]) {
-			$lastunnus .= $tulrow[tunnus].",";
-			$edellinen = $tulrow[tunnus];
+		if ($edellinen == "" or $edellinen != $tulrow["tunnus"]) {
+			$lastunnus .= $tulrow["tunnus"].",";
+			$edellinen = $tulrow["tunnus"];
 		}		
 	}
 

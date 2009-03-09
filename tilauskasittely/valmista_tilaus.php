@@ -31,7 +31,111 @@
 		require('../inc/footer.inc');
 		exit;
 	}
+	
+	if(!function_exists("onkokaikkivalmistettu")) {
+		function onkokaikkivalmistettu ($valmkpllat) {
+			global $kukarow, $tee, $valmistettavat;
+			
+			//katotaan onko enää mitään valmistettavaa
+			foreach ($valmkpllat as $rivitunnus => $valmkpl) {
+				//Haetaan tilausrivi
+				$query = "	SELECT otunnus, uusiotunnus
+							FROM tilausrivi
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus = $rivitunnus
+							and tyyppi in ('W','M')";
+				$roxresult = mysql_query($query) or pupe_error($query);
+				$tilrivirow = mysql_fetch_array($roxresult);
 
+				//Katsotaan onko yhtään valmistamatonta riviä tällä tilauksella/jobilla
+				$query = "	SELECT tunnus
+							FROM tilausrivi
+							WHERE yhtio	= '$kukarow[yhtio]'
+							and otunnus = $tilrivirow[otunnus]
+							and tyyppi	in ('W','M')
+							and tunnus	= perheid
+							and toimitettuaika = '0000-00-00 00:00:00'";
+				$chkresult1 = mysql_query($query) or pupe_error($query);
+
+				//eli tilaus on kokonaan valmistettu
+				if (mysql_num_rows($chkresult1) == 0) {
+					//Jos kyseessä on varastovalmistus
+					$query = "	UPDATE lasku
+								SET alatila	= 'V'
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus  = $tilrivirow[otunnus]
+								and tila	= 'V'
+								and alatila = 'C'
+								and tilaustyyppi = 'W'";
+					$chkresult2 = mysql_query($query) or pupe_error($query);
+
+					//Jos kyseessä on asiakaalle valmistus
+					$query = "	UPDATE lasku
+								SET tila	= 'L',
+								alatila 	= 'C'
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus  = $tilrivirow[otunnus]
+								and tila	= 'V'
+								and alatila = 'C'
+								and tilaustyyppi = 'V'";
+					$chkresult2 = mysql_query($query) or pupe_error($query);
+
+					$tee	 		= "";
+					$valmistettavat = "";
+				}
+				else {
+					$tee = "VALMISTA";
+				}
+
+				//jos rivit oli siirretty toiselta otsikolta niin siirretään ne nyt takaisin
+				if ($tilrivirow["uusiotunnus"] != 0 and mysql_num_rows($chkresult1) == 0) {
+					$query = "	UPDATE tilausrivi
+								SET otunnus = uusiotunnus,
+								uusiotunnus = 0
+								WHERE yhtio = '$kukarow[yhtio]'
+								and otunnus = $tilrivirow[otunnus]
+								and uusiotunnus = $tilrivirow[uusiotunnus]
+								and uusiotunnus != 0";
+					$chkresult3 = mysql_query($query) or pupe_error($query);
+
+					//tutkitaan pitääkö alkuperäisen otsikon tilat päivittää
+					$query = "	SELECT tunnus
+								FROM tilausrivi
+								WHERE yhtio	= '$kukarow[yhtio]'
+								and (otunnus = $tilrivirow[uusiotunnus] or uusiotunnus = $tilrivirow[uusiotunnus])
+								and tyyppi	in ('W','M')
+								and tunnus	= perheid
+								and toimitettuaika = '0000-00-00 00:00:00'";
+					$selres = mysql_query($query) or pupe_error($query);
+
+					//eli alkuperäinen tilaus on kokonaan valmistettu
+					if (mysql_num_rows($selres) == 0) {
+						//Jos kyseessä on varastovalmistus
+						$query = "	UPDATE lasku
+									SET alatila	= 'V'
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus  = '$tilrivirow[uusiotunnus]'
+									and tila	= 'V'
+									and alatila in ('C','Y')
+									and tilaustyyppi = 'W'";
+						$chkresult4 = mysql_query($query) or pupe_error($query);
+
+						//Jos kyseessä on asiakaalle valmistus
+						$query = "	UPDATE lasku
+									SET tila	= 'L',
+									alatila 	= 'C'
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus  = '$tilrivirow[uusiotunnus]'
+									and tila	= 'V'
+									and alatila in ('C','Y')
+									and tilaustyyppi = 'V'";
+						$chkresult4 = mysql_query($query) or pupe_error($query);
+					}
+				}
+			}
+		}
+	}
+	
 	if ($tee == "LISAARIVI") {
 
 		$query	= "	SELECT *
@@ -105,6 +209,12 @@
 
 		$valmistettavat = "";
 		$tee = "";
+	}
+	
+	if ($tee == 'TEEVALMISTUS' and count($valmkpllat) == 0 and count($tilkpllat) == 0) {
+
+		//katotaan onko enää mitään valmistettavaa		
+		onkokaikkivalmistettu ($valmisteet_chk);				
 	}
 
 	if ($tee == 'TEEVALMISTUS' and $vakisinhyvaksy == '') {
@@ -216,7 +326,7 @@
 									
 									//katotaan kanssa, että perheenjäsenet löytyy kannasta ja niitä on riittävästi
 									if ($saldot_valm[$perherow["tuoteno"]] < $varataankpl) {
-										echo "<font class='error'>Saldo ".$saldot[$perherow["tuoteno"]]." ei riitä! Tuotetta $perherow[tuoteno] kulutetaan $varataankpl.</font><br>";
+										echo "<font class='error'>Saldo ".$saldot[$perherow["tuoteno"]]." ei riitä! Tuotetta $perherow[tuoteno] kulutetaan $varataankpl ".ta($kieli, "Y", $perherow["yksikko"]).".</font><br>";
 										$virheitaoli 	= "JOO";
 										$tee 			= "VALMISTA";
 									}
@@ -476,105 +586,9 @@
 				}
 
 				//katotaan onko enää mitään valmistettavaa
-				foreach ($valmkpllat as $rivitunnus => $valmkpl) {
-					//Haetaan tilausrivi
-					$query = "	SELECT otunnus, uusiotunnus
-								FROM tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tunnus = $rivitunnus
-								and tyyppi in ('W','M')";
-					$roxresult = mysql_query($query) or pupe_error($query);
-					$tilrivirow = mysql_fetch_array($roxresult);
-
-					//Katsotaan onko yhtään valmistamatonta riviä tällä tilauksella/jobilla
-					$query = "	SELECT tunnus
-								FROM tilausrivi
-								WHERE yhtio	= '$kukarow[yhtio]'
-								and otunnus = $tilrivirow[otunnus]
-								and tyyppi	in ('W','M')
-								and tunnus	= perheid
-								and toimitettuaika = '0000-00-00 00:00:00'";
-					$chkresult1 = mysql_query($query) or pupe_error($query);
-
-					//eli tilaus on kokonaan valmistettu
-					if (mysql_num_rows($chkresult1) == 0) {
-						//Jos kyseessä on varastovalmistus
-						$query = "	UPDATE lasku
-									SET alatila	= 'V'
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus  = $tilrivirow[otunnus]
-									and tila	= 'V'
-									and alatila = 'C'
-									and tilaustyyppi = 'W'";
-						$chkresult2 = mysql_query($query) or pupe_error($query);
-
-						//Jos kyseessä on asiakaalle valmistus
-						$query = "	UPDATE lasku
-									SET tila	= 'L',
-									alatila 	= 'C'
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus  = $tilrivirow[otunnus]
-									and tila	= 'V'
-									and alatila = 'C'
-									and tilaustyyppi = 'V'";
-						$chkresult2 = mysql_query($query) or pupe_error($query);
-
-						$tee	 		= "";
-						$valmistettavat = "";
-					}
-					else {
-						$tee = "VALMISTA";
-					}
-
-					//jos rivit oli siirretty toiselta otsikolta niin siirretään ne nyt takaisin
-					if ($tilrivirow["uusiotunnus"] != 0 and mysql_num_rows($chkresult1) == 0) {
-						$query = "	UPDATE tilausrivi
-									SET otunnus = uusiotunnus,
-									uusiotunnus = 0
-									WHERE yhtio = '$kukarow[yhtio]'
-									and otunnus = $tilrivirow[otunnus]
-									and uusiotunnus = $tilrivirow[uusiotunnus]
-									and uusiotunnus != 0";
-						$chkresult3 = mysql_query($query) or pupe_error($query);
-
-						//tutkitaan pitääkö alkuperäisen otsikon tilat päivittää
-						$query = "	SELECT tunnus
-									FROM tilausrivi
-									WHERE yhtio	= '$kukarow[yhtio]'
-									and (otunnus = $tilrivirow[uusiotunnus] or uusiotunnus = $tilrivirow[uusiotunnus])
-									and tyyppi	in ('W','M')
-									and tunnus	= perheid
-									and toimitettuaika = '0000-00-00 00:00:00'";
-						$selres = mysql_query($query) or pupe_error($query);
-
-						//eli alkuperäinen tilaus on kokonaan valmistettu
-						if (mysql_num_rows($selres) == 0) {
-							//Jos kyseessä on varastovalmistus
-							$query = "	UPDATE lasku
-										SET alatila	= 'V'
-										WHERE yhtio = '$kukarow[yhtio]'
-										and tunnus  = '$tilrivirow[uusiotunnus]'
-										and tila	= 'V'
-										and alatila in ('C','Y')
-										and tilaustyyppi = 'W'";
-							$chkresult4 = mysql_query($query) or pupe_error($query);
-
-							//Jos kyseessä on asiakaalle valmistus
-							$query = "	UPDATE lasku
-										SET tila	= 'L',
-										alatila 	= 'C'
-										WHERE yhtio = '$kukarow[yhtio]'
-										and tunnus  = '$tilrivirow[uusiotunnus]'
-										and tila	= 'V'
-										and alatila in ('C','Y')
-										and tilaustyyppi = 'V'";
-							$chkresult4 = mysql_query($query) or pupe_error($query);
-						}
-					}
-				}
+				onkokaikkivalmistettu ($valmkpllat);	
 			}
-
-			$toim = "TUOTE";
+			
 			$tee = "";
 		}
 	}
@@ -706,7 +720,9 @@
 			
 			if($prow["tyyppi"] == 'W' or $prow["tyyppi"] == 'M') {
 				// Nämä ovat valmisteita
-				$class = "spec";				
+				$class = "spec";
+				
+				echo "<input type='hidden' name='valmisteet_chk[$prow[tunnus]]' value='$prow[tuoteno]'>";				
 			}
 			elseif ($prow["tyyppi"] == 'D') {
 				// Nämä ovat jo valmistettu
@@ -843,20 +859,26 @@
 
 		echo "<tr><td colspan='9' class='back'><br></td></tr>";
 
+		if ($virheitaoli == "JOO") {
+			
+			$forcenap = "<td>".t("Väkisinvalmista vaikka raaka-aineiden saldo ei riitä").". <input type='checkbox' name='vakisinhyvaksy' value='OK'></td>";
+			
+			if (isset($kokovalmistus)) 								$kokovalmistus_force = $forcenap;
+			elseif (isset($osavalmistus) and (int) $kokopros > 0)	$osavalmistuspros_force = $forcenap;
+			elseif (isset($osavalmistus))  							$osavalmistus_force = $forcenap;
+			elseif (isset($osatoimitus))							$osatoimitus_force = $forcenap;						
+		}
+		
 		if ($toim != 'KORJAA' and $toim != 'TUTKAA') {
-			echo "<tr><td colspan='8'>Valmista syötetyt kappaleet:</td><td><input type='submit' name='osavalmistus' id='osavalmistus' value='".t("Valmista")."'></td></tr>";
-			echo "<tr><td colspan='4'>Valmista prosentti koko tilauksesta:</td><td colspan='4' align='right'><input type='text' name='kokopros' size='5'> % </td><td><input type='submit' name='osavalmistus' id='osavalmistus' value='".t("Valmista")."'></td></tr>";
-			echo "<tr><td colspan='8'>Siirrä valitut valmisteet uudelle tilaukselle:</td><td><input type='submit' name='osatoimitus' id='osatoimitus' value='".t("Osatoimita")."'></td></tr>";
-			echo "<tr><td colspan='8'>Valmista koko tilaus:</td><td><input type='submit' name='kokovalmistus' id='kokovalmistus' value='".t("Valmista")."'></td>";
+			echo "<tr><td colspan='8'>Valmista syötetyt kappaleet:</td><td><input type='submit' name='osavalmistus' id='osavalmistus' value='".t("Valmista")."'></td>$osavalmistus_force</tr>";
+			echo "<tr><td colspan='4'>Valmista prosentti koko tilauksesta:</td><td colspan='4' align='right'><input type='text' name='kokopros' size='5'> % </td><td><input type='submit' name='osavalmistus' id='osavalmistus' value='".t("Valmista")."'></td>$osavalmistuspros_force</tr>";
+			echo "<tr><td colspan='8'>Siirrä valitut valmisteet uudelle tilaukselle:</td><td><input type='submit' name='osatoimitus' id='osatoimitus' value='".t("Osatoimita")."'></td>$osatoimitus_force</tr>";
+			echo "<tr><td colspan='8'>Valmista koko tilaus:</td><td><input type='submit' name='kokovalmistus' id='kokovalmistus' value='".t("Valmista")."'></td>$kokovalmistus_force";
 		}
 		elseif($toim == 'KORJAA' and $voikokorjata > 0) {
 			echo "<tr><td colspan='8'>Korjaa koko valmistus:</td><td class='back'><input type='submit' name='' value='".t("Korjaa")."'></td>";
 		}
-
-		if ($virheitaoli == "JOO") {
-			echo "<td>".t("Väkisinvalmista vaikka raaka-aineiden saldo ei riitä").". <input type='checkbox' name='vakisinhyvaksy' value='OK'></td>";
-		}
-
+		
 		echo "</tr>";
 		echo "</form>";
 		echo "</table><br><br>";

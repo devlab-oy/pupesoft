@@ -739,6 +739,7 @@
 						tilausrivi.var,
 						tilausrivi.var2,
 						tilausrivi.jaksotettu,
+						tilausrivi.yksikko,
 						tuote.kehahin keskihinta,
 						tuotteen_toimittajat.ostohinta,
 						tuotteen_toimittajat.valuutta
@@ -888,8 +889,8 @@
 						list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($prow["tuoteno"]);
 						echo "<div id='$prow[tunnus]' class='popup' style='width: 400px;'>";
 						echo "<ul>";
-						echo "<li>".t("Saldo").": $saldo ".t("kpl")."</li><li>".t("Hyllyssä").": $hyllyssa ".t("kpl")."</li><li>".t("Myytävissä").": $myytavissa ".t("kpl")."</li>";
-						echo "<li>".t("Tilattu").": $prow[tilattu] ".t("kpl")."</li><li>".t("Varattu").": $prow[varattukpl] ".t("kpl")."</li>";
+						echo "<li>".t("Saldo").": $saldo ".ta($kieli, "Y", $prow["yksikko"])."</li><li>".t("Hyllyssä").": $hyllyssa ".ta($kieli, "Y", $prow["yksikko"])."</li><li>".t("Myytävissä").": $myytavissa ".ta($kieli, "Y", $prow["yksikko"])."</li>";
+						echo "<li>".t("Tilattu").": $prow[tilattu] ".ta($kieli, "Y", $prow["yksikko"])."</li><li>".t("Varattu").": $prow[varattukpl] ".ta($kieli, "Y", $prow["yksikko"])."</li>";
 						echo "<li>".t("Keskihinta").": $prow[keskihinta] $prow[valuutta]</li><li>".t("Ostohinta").": $prow[ostohinta] $prow[valuutta]</li>";
 						echo "</ul>";
 						echo "</div>";

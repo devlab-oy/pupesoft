@@ -417,7 +417,7 @@ if ($tee == "") {
 		echo "<tr>";
 		echo "<th>".t("Toimittajan tuotenumero")."</th>";
 		echo "<th>".t("Tuoteno")."</th>";
-		echo "<th>".t("Kpl")."</th>";
+		echo "<th>".t("M‰‰r‰")."</th>";
 		echo "<th>".t("Vied‰‰n paikalle")."</th>";
 		echo "<th>".t("Tee t‰st‰<br>Oletuspaikka")."</th>";
 		echo "<th>".t("Hyllyalue")."</th>";

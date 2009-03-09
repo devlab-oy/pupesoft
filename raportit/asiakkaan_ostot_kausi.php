@@ -89,14 +89,14 @@ if ($tee == 'go') {
 		//$rivit = mysql_num_rows($result);
 		//echo "Rivej‰ $rivit<br>";
 		echo "<pre>";
-		echo "".t("tuoteno")."\t";
-		echo "".t("nimitys")."\t";
-		echo "".t("Summa alv0")."\t";
-		echo "".t("Kate")."\t";
-		echo "".t("KPL")."\t";
-		echo "".t("Ed.Summa alv0")."\t";
-		echo "".t("Ed.Kate")."\t";
-		echo "".t("Ed.KPL")."\t";
+		echo t("Tuoteno")."\t";
+		echo t("Nimitys")."\t";
+		echo t("Summa alv0")."\t";
+		echo t("Kate")."\t";
+		echo t("M‰‰r‰")."\t";
+		echo t("Ed.Summa alv0")."\t";
+		echo t("Ed.Kate")."\t";
+		echo t("Ed.M‰‰r‰")."\t";
 		echo "\n";
 		while ($row = mysql_fetch_array($result)) {
 			echo "$row[tuoteno]\t";

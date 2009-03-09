@@ -114,7 +114,7 @@ if ($tee != '' and $asiakasid != "" and $toimittajaid != "" and $ytunnus != '' a
 					<tr>
 					<th>".t("Tuotenumero")."</th>
 					<th>".t("Nimitys")."</th>
-					<th>".t("KPL")."</th>
+					<th>".t("M‰‰r‰")."</th>
 					<th>".t("Summa veroll")."</th>
 					<th>".t("Summa vton")."</th>
 					</tr>";

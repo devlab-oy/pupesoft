@@ -1685,7 +1685,7 @@
 					<tr>
 					<th>".t("Varastopaikka")."</th>
 					<th>".t("Tuoteno")."</th>
-					<th>".t("Kpl")."</th>
+					<th>".t("M‰‰r‰")."</th>
 					<th>".t("Poikkeava m‰‰r‰")."</th>";
 
 			if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {

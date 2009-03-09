@@ -247,7 +247,7 @@
 			}
 
 			echo "<table>";
-			echo "<th>".t("Korvaavat")."</th><th>".t("Kpl").".</th>";
+			echo "<th>".t("Korvaavat")."</th><th>".t("M‰‰r‰").".</th>";
 
 			if (mysql_num_rows($korvaresult)==0)
 			{
@@ -309,7 +309,7 @@
 						<th>".t("Tilaus/Keikka")."</th>
 						<th>".t("Tyyppi")."</th>
 						<th>".t("Toimaika")."</th>
-						<th>".t("Kpl")."</th>
+						<th>".t("M‰‰r‰")."</th>
 						</tr>";
 
 				// jtrivej‰ lˆytyi
@@ -386,7 +386,7 @@
 			echo "<tr>";
 			echo "<th>".t("K‰ytt‰j‰@Pvm")."</th>";
 			echo "<th>".t("Tyyppi")."</th>";
-			echo "<th>".t("Kpl")."</th>";
+			echo "<th>".t("M‰‰r‰")."</th>";
 			echo "<th>".t("Selite")."";
 
 			echo "</th></form>";

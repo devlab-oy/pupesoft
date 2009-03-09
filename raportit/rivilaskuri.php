@@ -30,7 +30,7 @@ if (($ppa!='') and ($kka!='') and ($vva!=''))
 
 	echo "<br><table>";
 	echo "<tr><th>$ppa.$kka.$vva-$ppl.$kkl.$vvl</th><th colspan='2' align='center'>".t("Yhteensä")."</th><th colspan='2' align='center'>".t("Vienti EU")."</th><th colspan='2' align='center'>".t("ei-EU")."</th><th colspan='2' align='center'>".t("EDI")."</th></tr>
-		  <tr><th>".t("Kello")."</th><th>".t("Rivejä")."</th><th>".t("Kpl")."</th><th>".t("Rivejä")."</th><th>".t("Kpl")."</th><th>".t("Rivejä")."</th><th>".t("Kpl")."</th><th>".t("Rivejä")."</th><th>".t("Kpl")."</th></tr>";
+		  <tr><th>".t("Kello")."</th><th>".t("Rivejä")."</th><th>".t("Nimikkeitä")."</th><th>".t("Rivejä")."</th><th>".t("Nimikkeitä")."</th><th>".t("Rivejä")."</th><th>".t("Nimikkeitä")."</th><th>".t("Rivejä")."</th><th>".t("Nimikkeitä")."</th></tr>";
 
 	while ($row = mysql_fetch_array($res))
 	{

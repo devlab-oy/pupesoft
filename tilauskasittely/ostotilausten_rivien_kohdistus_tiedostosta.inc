@@ -252,7 +252,7 @@ if ($faarao == 'TUTKHM') {
 						$query = "UPDATE tilausrivi SET uusiotunnus='$otunnus' $kululisa $hintalisa WHERE tunnus = '$rivirow[tunnus]' AND yhtio='$kukarow[yhtio]'";
 						$result = mysql_query($query) or pupe_error($query);
 
-						echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $rivirow[tuoteno] ".t("Kpl").": $apukpl ".t("kohdistettu laskuun")."!</font><br>";
+						echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $rivirow[tuoteno] ".t("M‰‰r‰").": $apukpl ".t("kohdistettu laskuun")."!</font><br>";
 
 						if ($hinta != 0 and $hinta != $rivirow["hinta"] and $paivi != 'JOO') {
 							echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $rivirow[tuoteno] ".t("Hinta on v‰‰r‰")."!</font><br>";
@@ -269,7 +269,7 @@ if ($faarao == 'TUTKHM') {
 					}
 				}
 			}
-			if ($ok==0) echo "<font class='error'>".t("Rivi")." $rivino ".t("Tuotenumero").": $tuote_etsi ".t("Kpl").": $apukpl ".t("EI voitu kohdistaa laskuun")."!<br></font>";
+			if ($ok==0) echo "<font class='error'>".t("Rivi")." $rivino ".t("Tuotenumero").": $tuote_etsi ".t("M‰‰r‰").": $apukpl ".t("EI voitu kohdistaa laskuun")."!<br></font>";
 
 			//haetaan seuraava rivi
 			$rivi = fgets($file);
@@ -297,7 +297,7 @@ else {
 			<td>".t("Tilausnumero")."</td>
 			<td>".t("Toim_tuoteno")."</td>
 			<td>".t("Tuoteno")."</td>
-			<td>".t("Kpl")."</td>
+			<td>".t("M‰‰r‰")."</td>
 			<td>".t("Hinta")."</td>";
 	//		<td>".t("Kuluhinta")."</td>
 	echo "	</tr>

@@ -695,7 +695,7 @@
 				<tr>
 				<th>".t("Lähettävä")."<br>".t("varastopaikka").":</th>
 				<th>".t("Vastaanottava")."<br>".t("varastopaikka").":</th>
-				<th>".t("Siirretään")."<br>".t("kpl").":</th>";
+				<th>".t("Siirrettävä")."<br>".t("määrä").":</th>";
 				
 		if($trow["sarjanumeroseuranta"] != '') {
 			echo "<th>".t("Valitse")."<br>".t("sarjanumerot").":</th>";	

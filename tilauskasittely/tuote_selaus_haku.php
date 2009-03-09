@@ -249,7 +249,7 @@
 						require ("lisaarivi.inc");
 					}
 
-					echo "<font class='message'>".t("Lisättiin")." $kpl_echo ".t("kpl")." ".t("tuotetta")." $tiltuoteno[$yht_i].</font><br>";
+					echo "<font class='message'>".t("Lisättiin")." $kpl_echo ".ta($kieli, "Y", $trow["yksikko"])." ".t("tuotetta")." $tiltuoteno[$yht_i].</font><br>";
 
 					//Hanskataan sarjanumerollisten tuotteiden lisävarusteet
 					if ($tilsarjatunnus[$yht_i] > 0 and $lisatty_tun > 0) {

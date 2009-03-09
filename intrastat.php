@@ -299,7 +299,7 @@
 			$ulos .= "<th>".t("Rivihinta")."</th>";
 			$ulos .= "<th>".t("Paino")."</th>";
 			$ulos .= "<th>".t("2. paljous")."</th>";
-			$ulos .= "<th>".t("Kpl")."</th>";
+			$ulos .= "<th>".t("M‰‰r‰")."</th>";
 
 			if ($lisavar == "S") {
 				$ulos .= "<th>".t("Tehdaslis‰varusteet")."</th>";

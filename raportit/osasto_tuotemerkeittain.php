@@ -66,8 +66,8 @@ if ($tee == 'go') {
 			echo "<th>".t("Osuus")." %</th>";
 		}
 
-		echo "<th>".t("Kpl")."</th>";
-		echo "<th>".t("ind Kpl")."</th>";
+		echo "<th>".t("M‰‰r‰")."</th>";
+		echo "<th>".t("ind M‰‰r‰")."</th>";
 
 		if ($kukarow["extranet"] == '') {
 			echo "<th>".t("Kate")."</th>";

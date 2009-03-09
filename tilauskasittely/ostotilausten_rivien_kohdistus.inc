@@ -542,7 +542,7 @@ if ($tila == '') {
 							"tilausrivi.toimaika toimaika",
 							"tilausrivi.kommentti kommentti");
 
-	$kennim_array = array(t('Tilaus'),t('Tuoteno'),t('Toim_tuoteno'),t('Nimitys'),t('Kpl'), t('Kpl/Ulk') ,t('Hinta'),t('Ale'),t('Alv'),t('Rivihinta'),t('+Alv -Ale'),t('Extrakulu'),t('Toimaika'), t('Kommentti'));
+	$kennim_array = array(t('Tilaus'),t('Tuoteno'),t('Toim_tuoteno'),t('Nimitys'),t('M‰‰r‰'), t('M‰‰r‰/Ulk') ,t('Hinta'),t('Ale'),t('Alv'),t('Rivihinta'),t('+Alv -Ale'),t('Extrakulu'),t('Toimaika'), t('Kommentti'));
 	$kenhak_array = array('otunnus','tuoteno','toim_tuoteno','nimitys','siskpl', 'ulkkpl' ,'hinta','ale','alv','rivihinta','alerivihinta','kuluhinta','toimaika', 'toimaika');
 	$kenkok_array = array(6,15,15,17,7,7,7,4,4,8,8,4,12,12);
 
@@ -633,7 +633,9 @@ if ($tila == '') {
 				round((varattu+jt)*tilausrivi.hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(tilausrivi.ale/100)),'$yhtiorow[hintapyoristys]') rivihinta,
 				tuote.kehahin keskihinta,
 				tuotteen_toimittajat.ostohinta,
-				tuotteen_toimittajat.valuutta
+				tuotteen_toimittajat.valuutta,
+				tilausrivi.yksikko tilyksikko,
+				tuotteen_toimittajat.toim_yksikko toimyksikko
 				FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
 				JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro $lisa2
 				JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
@@ -1054,8 +1056,8 @@ if ($tila == '') {
 			list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($rivirow["tuoteno"]);
 			echo "<div id='tuoteno_$rivirow[rivitunnus]' class='popup' style='width: 400px;'>";
 			echo "<ul>";
-			echo "<li>".t("Saldo").": $saldo ".t("kpl")."</li><li>".t("Hyllyss‰").": $hyllyssa ".t("kpl")."</li><li>".t("Myyt‰viss‰").": $myytavissa ".t("kpl")."</li>";
-			echo "<li>".t("Tilattu").": $rivirow[tilattu] ".t("kpl")."</li><li>".t("Varattu").": $rivirow[varattu] ".t("kpl")."</li>";
+			echo "<li>".t("Saldo").": $saldo ".ta($kieli, "Y", $rivirow["tilyksikko"])."</li><li>".t("Hyllyss‰").": $hyllyssa ".ta($kieli, "Y", $rivirow["tilyksikko"])."</li><li>".t("Myyt‰viss‰").": $myytavissa ".ta($kieli, "Y", $rivirow["tilyksikko"])."</li>";
+			echo "<li>".t("Tilattu").": $rivirow[tilattu] ".ta($kieli, "Y", $rivirow["tilyksikko"])."</li><li>".t("Varattu").": $rivirow[varattu] ".ta($kieli, "Y", $rivirow["tilyksikko"])."</li>";
 			echo "<li>".t("Keskihinta").": $rivirow[keskihinta] $rivirow[valuutta]</li><li>".t("Ostohinta").": $rivirow[ostohinta] $rivirow[valuutta]</li>";
 			echo "</ul>";
 			echo "</div>";
@@ -1128,7 +1130,7 @@ if ($tila == '') {
 
 		// jos rivi‰ ei ole viel‰ viety varastoon, voidaan muuttaa kappaleita
 		if ($rivirow["varattu"] != 0) {
-			echo "<$td $class valign='top' align='right'><input size='5' type='text' name='rivi_kpl[$rivirow[rivitunnus]]' value='". (float) $rivirow["siskpl"]."' style='text-align:right'><br>". (float) $rivirow["ulkkpl"]."</$td>";
+			echo "<$td $class valign='top' align='right'><input size='5' type='text' name='rivi_kpl[$rivirow[rivitunnus]]' value='". (float) $rivirow["siskpl"]."' style='text-align:right'> ".ta($kieli, "Y", $rivirow["tilyksikko"])."<br>". (float) $rivirow["ulkkpl"]." ".ta($kieli, "Y", $rivirow["toimyksikko"])."</$td>";
 		}
 		else {
 			echo "<$td $class valign='top' align='right'>". (float) $rivirow["siskpl"]."<br>". (float) $rivirow["ulkkpl"]."</$td>";

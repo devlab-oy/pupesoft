@@ -119,7 +119,7 @@
 		$rivi .= t("Nimitark")."\t";
 		if ($summaa == '') $rivi .= t("Alennus")."\t";
 		$rivi .= t("Piiri")."\t";
-		$rivi .= t("Kpl")."\t";
+		$rivi .= t("Määrä")."\t";
 		$rivi .= t("Summa")."\t";
 		$rivi .= t("Kate")."\t";
 		$rivi .= t("Katepros")."\n";
@@ -132,7 +132,7 @@
 				$worksheet->write($excelrivi, 3, t("Alennus"), $format_bold);
 			}
 			$worksheet->write($excelrivi, 4, t("Piiri"), $format_bold);
-			$worksheet->write($excelrivi, 5, t("Kpl"), $format_bold);
+			$worksheet->write($excelrivi, 5, t("Määrä"), $format_bold);
 			$worksheet->write($excelrivi, 6, t("Summa"), $format_bold);
 			$worksheet->write($excelrivi, 7, t("Kate"), $format_bold);
 			$worksheet->write($excelrivi, 8, t("Katepros"), $format_bold);

@@ -64,7 +64,7 @@
 
 				<table border='0' cellpadding='3' cellspacing='2'>
 				<tr><th colspan='5'>".t("Tabulaattorilla eroteltu tekstitiedosto").".</th></tr>
-				<tr><td>".t("Tuoteno")."</td><td>".t("Kpl")."</td><td>".t("Kommentti")."</td><td>".t("L‰hett‰v‰ varastopaikka")."</td><td>".t("Vastaanottava varastopaikka")."</td></tr>
+				<tr><td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."</td><td>".t("Kommentti")."</td><td>".t("L‰hett‰v‰ varastopaikka")."</td><td>".t("Vastaanottava varastopaikka")."</td></tr>
 				</table>
 				<br>
 				<table>

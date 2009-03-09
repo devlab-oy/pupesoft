@@ -514,7 +514,7 @@
 			echo "<th align='left'><a href = '$PHP_SELF?ojarj=2&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&etsi=$etsi'>".t("Asiakas/Varasto")."</a></th>";
 			echo "<th align='left'><a href = '$PHP_SELF?ojarj=3&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&etsi=$etsi'>".t("Ytunnus")."</a></th>";
 			echo "<th align='left'><a href = '$PHP_SELF?ojarj=4&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&etsi=$etsi'>".t("Valmiste")."</a></th>";
-			echo "<th align='left'><a href = '$PHP_SELF?ojarj=5&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&etsi=$etsi'>".t("Kpl")."</a></th>";
+			echo "<th align='left'><a href = '$PHP_SELF?ojarj=5&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&etsi=$etsi'>".t("M‰‰r‰")."</a></th>";
 			echo "<th align='left'><a href = '$PHP_SELF?ojarj=6&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&etsi=$etsi'>".t("Ker‰ysaika")."</a></th>";
 			echo "<th align='left'><a href = '$PHP_SELF?ojarj=7&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&etsi=$etsi'>".t("Valmistusaika")."</a></th>";
 			echo "</tr>";			

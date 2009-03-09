@@ -461,7 +461,7 @@
 			echo "<table><tr>";
 			echo "<td class='back' valign='top' align='left'>";
 			echo "<table>";
-			echo "<tr><th>".t("Korvaavat")."</th><th>".t("Kpl")."</th></tr>";
+			echo "<tr><th>".t("Korvaavat")."</th><th>".t("Myyt‰viss‰")."</th></tr>";
 
 			//korvaavat tuotteet
 			$query  = "select * from korvaavat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
@@ -734,7 +734,7 @@
 						<th>".t("Tilaus/Keikka")."</th>
 						<th>".t("Tyyppi")."</th>
 						<th>".t("Pvm")."</th>
-						<th>".t("Kpl")."</th>
+						<th>".t("M‰‰r‰")."</th>
 						<th>".t("Myyt‰viss‰")."</th>
 						</tr>";
 
@@ -1253,7 +1253,7 @@
 						echo "<th>".t("Parasta ennen")."</th>";
 					}
 
-					echo "<th>".t("Kpl")."</th>";
+					echo "<th>".t("M‰‰r‰")."</th>";
 					echo "<th>".t("Lis‰tieto")."</th></tr>";
 
 					while($sarjarow = mysql_fetch_array($sarjares)) {
@@ -1350,7 +1350,7 @@
 			echo "<tr>";
 			echo "<th>".t("K‰ytt‰j‰@Pvm")."</th>";
 			echo "<th>".t("Tyyppi")."</th>";
-			echo "<th>".t("Kpl")."</th>";
+			echo "<th>".t("M‰‰r‰")."</th>";
 			echo "<th>".t("Kplhinta")."</th>";
 			echo "<th>".t("Kehahinta")."</th>";
 			echo "<th>".t("Kate")."</th>";

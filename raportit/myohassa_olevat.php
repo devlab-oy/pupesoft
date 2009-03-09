@@ -63,7 +63,7 @@
 		echo "<th>".t("Tilaus")."</th>";
 		echo "<th>".t("Tuoteno")."</th>";
 		echo "<th>".t("Nimike")."</th>";
-		echo "<th>".t("Kpl")."</th>";
+		echo "<th>".t("Määrä")."</th>";
 		echo "<th>".t("Yksikkö")."</th>";
 		echo "<th>".t("Arvo")."</th>";
 		echo "<th>".t("Myytävissä")."</th>";
@@ -101,7 +101,7 @@
 				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, t("Nimike"), $format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Kpl"), $format_bold);
+				$worksheet->write($excelrivi, $excelsarake, t("Määrä"), $format_bold);
 				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, t("Yksikkö"), $format_bold);
 				$excelsarake++;

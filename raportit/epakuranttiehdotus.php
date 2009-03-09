@@ -183,7 +183,7 @@ if ($subnappi != '') {
 	}
 
 	echo "<pre>";
-	echo "".t("osasto")."\t".t("try")."\t".t("kpl")."\t".t("saldo")."\t".t("kierto")."\t".t("tahtituote")."\t".t("status")."\t".t("hinnastoon")."\t".t("eka saapuminen")."\t".t("vika saapuminen")."\t".t("hinta")."\t".t("kehahin")."\t".t("tuoteno")."\t".t("nimitys")."\t".t("toimittaja").$yhtsop;
+	echo t("osasto")."\t".t("try")."\t".t("m‰‰r‰")."\t".t("saldo")."\t".t("kierto")."\t".t("tahtituote")."\t".t("status")."\t".t("hinnastoon")."\t".t("eka saapuminen")."\t".t("vika saapuminen")."\t".t("hinta")."\t".t("kehahin")."\t".t("tuoteno")."\t".t("nimitys")."\t".t("toimittaja").$yhtsop;
 
 
 	while ($row = mysql_fetch_array($result)) {

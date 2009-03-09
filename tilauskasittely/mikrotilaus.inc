@@ -177,7 +177,7 @@ if ($tee == 'mikrotila') {
 			<tr><th colspan='8'>".t("Sarkaineroteltu tekstitiedosto").".</th></tr>
 			<tr>";
 
-	echo "	<td>".t("Tuoteno")."</td><td>".t("Kpl")."</td>";
+	echo "	<td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."</td>";
 
 	if ($kukarow["extranet"] == "") {
 		echo "<td>".t("Arvioitu toimitusp‰iv‰ vvvv-kk-pp")."</td><td>".t("Hinta")."</td><td>".t("Ale")."</td><td>".t("Netto")."</td><td>".t("Var")."</td><td>".t("Kommentti")."</td>";

@@ -858,7 +858,7 @@
 								if ($oikeurow['paivitys'] == '1') {
 									if ($kukarow["extranet"] == "") {
 										echo "<th valign='top'>".t("Toimita")."<br>".t("kaikki")."</th>";
-										echo "<th valign='top'>".t("Toimita")."<br>".t("kpl")."</th>";
+										echo "<th valign='top'>".t("Toimita")."<br>".t("määrä")."</th>";
 										echo "<th valign='top'>".t("Poista")."<br>".t("loput")."</th>";
 										echo "<th valign='top'>".t("Jätä")."<br>".t("loput")."</th>";
 										echo "<th valign='top'>".t("Mitätöi")."<br>".t("rivi")."</th>";

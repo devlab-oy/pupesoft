@@ -300,7 +300,7 @@
 				echo "<table>";
 
 				echo "<tr>";
-				echo "<th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("Kpl")."</th><th>".t("Poikkeamaprosentti")." %</th>";
+				echo "<th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("M‰‰r‰")."</th><th>".t("Poikkeamaprosentti")." %</th>";
 				echo "</tr>";
 
 				while ($tuoterow = mysql_fetch_array($saldoresult)) {

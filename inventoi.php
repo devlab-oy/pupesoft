@@ -963,7 +963,8 @@
 				$hyllyssa = sprintf('%.2f',$tuoterow['saldo']-$hylrow['keratty']);
 
 				if ($tuoterow["sarjanumeroseuranta"] != "") {
-					$query = "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, era_kpl
+					$query = "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, 
+								round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, era_kpl, tilausrivi_osto.yksikko
 								FROM sarjanumeroseuranta
 								LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 								LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -1025,7 +1026,7 @@
 
 							while($sarjarow = mysql_fetch_array($sarjares)) {
 								echo "<tr><td>$sarjalaskk. $sarjarow[sarjanumero]</td>
-										<td>$sarjarow[era_kpl] ".t("KPL")."</td>
+										<td>$sarjarow[era_kpl] ".ta($kieli, "Y", $sarjarow["yksikko"])."</td>
 										<td>
 										<input type='hidden' 		name='eranumero_kaikki[$tuoterow[tptunnus]][$sarjarow[tunnus]]' 	value='$sarjarow[tunnus]'>
 										<input type='text' size='5' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' 	value='$sarjarow[era_kpl]'>

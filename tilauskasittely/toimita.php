@@ -99,6 +99,15 @@
 			$result = mysql_query($query) or pupe_error($query);
 			$tilrow = mysql_fetch_array($result);
 
+			// Etukäteen maksetut tilaukset pitää muuttaa takaisin "maksettu"-tilaan
+			$query = "	UPDATE lasku SET
+						alatila = 'X'
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tunnus = '$otunnus'
+						AND mapvm != '0000-00-00'
+						AND chn = '999'";
+			$ures  = mysql_query($query) or pupe_error($query);
+
 			// jos kyseessä on käteiskauppaa ja EI vientiä, laskutetaan ja tulostetaan tilaus..
 			if ($tilrow['kateinen']!='' and $tilrow["vienti"]=='') {
 				
@@ -296,7 +305,7 @@
 				<input type='hidden' name='tee' value='P'>";
 
 
-		if ($toita['nouto'] != '' and $row['kateinen'] != '') {
+		if ($toita['nouto'] != '' and $row['kateinen'] != '' and $row["chn"] != '999' and ($row["mapvm"] == "" or $row["mapvm"] == '0000-00-00')) {
 
 			echo "<table><tr><th>".t("Valitse kassalipas")."</th><td>";
 
@@ -365,7 +374,11 @@
 			echo "</table><br>";
 		}
 		
-		if ($toita['nouto']!='' and $row['kateinen']=='') {
+		if ($row["chn"] == '999' and $row["mapvm"] != "" and $row["mapvm"] != '0000-00-00') {
+			echo "<font class='error'>Tilaus on maksettu jo etukäteen luottokortilla.</font><br><br>";
+		}
+
+		if (($toita['nouto'] !='' and $row['kateinen']) == '' or ($row["chn"] == '999' and $row["mapvm"] != "" and $row["mapvm"] != '0000-00-00')) {
 			// jos kyseessä on nouto jota *EI* makseta käteisellä, kysytään noutajan nimeä..	
 			echo "<table><tr><th>".t("Syötä noutajan nimi")."</th></tr>";
 			echo "<tr><td><input size='60' type='text' name='noutaja'></td></tr></table><br>";

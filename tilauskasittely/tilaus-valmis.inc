@@ -333,6 +333,53 @@ else {
 		//tai rahtihinnoittelu tapahtuu tilauksen painon mukaan automaattisesti niin tehd‰‰n se t‰ss‰
 		if ($yhtiorow["rahti_hinnoittelu"] == "o" or $yhtiorow["rahti_hinnoittelu"] == "P") {
 
+			// t‰h‰n ker‰t‰‰n tilausnumerot, joista lasketaan rahti
+			$rahtimaksu_tunnukset = "";
+
+			// jos kyseess‰ on JT-tilaus, katsotaan pit‰‰kˆ lis‰t‰ rahtikulua usealle tilaukselle
+			if ($laskurow["clearing"] == "JT-TILAUS" and $yhtiorow["jt_rahti"] == "E") {
+				// etsit‰‰n kaikki is‰tilaukset milt‰ n‰m‰ JT-tuotteet ovat tulleet ja katsotaan onko niill‰ jo rahtikulu (lis‰t‰‰n rahtikulu niille jolla ei ole)
+				$query = "	SELECT vanha_otunnus
+							FROM tilausrivi
+							JOIN tilausrivin_lisatiedot USE INDEX (tilausrivitunnus) ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+							AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							AND tilausrivi.otunnus = '$laskurow[tunnus]'";
+				$step1re = mysql_query($query) or pupe_error($query);
+
+				while ($step1row = mysql_fetch_array($step1re)) {
+
+					// etsit‰‰n ist‰tilausten kaikki lapset
+					$query = "	SELECT DISTINCT tilausrivi.otunnus otunnus
+								FROM tilausrivin_lisatiedot
+								JOIN tilausrivi on (tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivi.otunnus != '$laskurow[tunnus]')
+								WHERE tilausrivin_lisatiedot.yhtio = '$kukarow[yhtio]' and tilausrivin_lisatiedot.vanha_otunnus = '$step1row[vanha_otunnus]'";
+					$step2re = mysql_query($query) or pupe_error($query);
+
+					while ($step2row = mysql_fetch_array($step2re)) {
+						// katsotaan onko lapsitilauksilla rahtikulu syˆtetty
+						$query = "	SELECT tunnus
+									FROM tilausrivi
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND otunnus = '$step2row[otunnus]'
+									AND tuoteno = '$yhtiorow[rahti_tuotenumero]'";
+						$step3re = mysql_query($query) or pupe_error($query);
+
+						// jos ei niin pit‰‰ syˆtt‰‰!
+						if (mysql_num_rows($step3re) == 0) {
+							$rahtimaksu_tunnukset .= "$step2row[otunnus], ";
+						}
+					}
+				}
+
+				if ($rahtimaksu_tunnukset != "") {
+					$rahtimaksu_tunnukset = substr($rahtimaksu_tunnukset, 0, -2);
+				}
+			}
+			else {
+				$rahtimaksu_tunnukset = $laskurow["tunnus"];
+			}
+
 			$query = "	SELECT tunnus
 						from tilausrivi
 						where yhtio = '$kukarow[yhtio]'
@@ -343,108 +390,21 @@ else {
 			//jos tilauksella on jo rahtikulu niin ei lis‰t‰ sit‰ uudestaan
 			if (mysql_num_rows($result) == 0) {
 
-				$query = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
+				$query = "	SELECT *
+							FROM toimitustapa
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND selite = '$laskurow[toimitustapa]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$torow = mysql_fetch_array($result);
 
 				// jos toimitustapana on joku nouto niin ei lis‰t‰ rahtikulua
 				if ($torow["nouto"] == "") {
 
-					if ($yhtiorow["alv_kasittely"] == '') {
-						$query = "	SELECT round(((varattu+jt)*hinta*(1-(ale/100)))/(1+alv/100),'$yhtiorow[hintapyoristys]') rivihinta, netto
-									FROM tilausrivi
-									WHERE otunnus 	= '$laskurow[tunnus]'
-									and yhtio	  	= '$kukarow[yhtio]'
-									and tyyppi		= 'L'";
-					}
-					else {
-						$query = "	SELECT round(((varattu+jt)*hinta*(1-(ale/100))),'$yhtiorow[hintapyoristys]') rivihinta, netto
-									FROM tilausrivi
-									WHERE otunnus 	= '$laskurow[tunnus]'
-									and yhtio	  	= '$kukarow[yhtio]'
-									and tyyppi		= 'L'";
-					}
-					$presult = mysql_query($query) or pupe_error($query);
-
-					$nyht = 0;
-					$myht = 0;
-					$kyht = 0;
-
-					while ($prow = mysql_fetch_array ($presult)) {
-
-						if ($prow["netto"] != 'N') {
-							$myht += $prow["rivihinta"]; // lasketaan tilauksen loppusummaa MUUT RIVIT..
-						}
-						else {
-							$nyht += $prow["rivihinta"]; // lasketaan tilauksen loppusummaa NETTORIVIT..
-						}
-					}
-					//erikoisalennus lasketaan vain riveille joilla EI ole NETTOHINTAA
-					if ($laskurow['erikoisale'] != 0) {
-						$apu1 = round($laskurow['erikoisale']/100,2);	// erikoisale prosentti
-						$apu2 = round($myht*$apu1,2); 					// erikoisalen m‰‰r‰
-						$apu3 = round((1-$apu1)*$myht,2);				// loppusumma
-
-						//Kakki yhteens‰
-						$kyht = $apu3 + $nyht;
-					}
-					else {
-						//Kakki yhteens‰
-						$kyht = $myht + $nyht;
-					}
-
-					// $kyht on KOTIVALUUTASSA, k‰‰nnet‰‰n laskun valuuttaan
-					if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-						$kyht = round(laskuval($kyht, $laskurow["vienti_kurssi"]), 2);
-					}
-
-					// jos meill‰ on automaattinen painoihin perustuva hinnoittelu
-					if ($yhtiorow["rahti_hinnoittelu"] == 'P') {
-						$hirow = array();
-						$hirow["rahtihinta"] = (float) $rahtipainohinta;
-					}
-					else {
-						$result = hae_rahtimaksu($laskurow, $kyht);
-
-						if (mysql_num_rows($result) == 1) {
-							$hirow = mysql_fetch_array($result);
-						}
-						else {
-							$hirow = array();
-							$hirow["rahtihinta"] = 0;
-						}
-					}
-
-					// jos halutaan rahtikulu, katotaan saadaanko siltikin ilmaseks jos ollaan yli rajojen
-					if ($laskurow["rahtivapaa"] == "" or ($mista == 'jtselaus' and $yhtiorow["jt_rahti"] == "D")) {
-						$as_que = "SELECT rahtivapaa_alarajasumma FROM asiakas WHERE yhtio='$kukarow[yhtio]' AND tunnus='$laskurow[liitostunnus]' and rahtivapaa_alarajasumma > 0";
-						$as_res = mysql_query($as_que) or pupe_error($as_que);
-
-						$rahtivapaa_alarajasumma = 0;
-
-						if (mysql_num_rows($as_res) == 1) {
-							$as_row = mysql_fetch_array($as_res);
-							$rahtivapaa_alarajasumma = $as_row["rahtivapaa_alarajasumma"];
-						}
-						else {
-							$rahtivapaa_alarajasumma = $yhtiorow["rahtivapaa_alarajasumma"];
-						}
-
-						if ($kyht > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) {
-							$hirow = array();
-							$hirow["rahtihinta"] = 0;
-
-							$query = "UPDATE lasku SET rahtivapaa='o' WHERE yhtio='$kukarow[yhtio]' AND tunnus='$laskurow[tunnus]'";
-							$rahtivapres = mysql_query($query) or pupe_error($query);
-						}
-					}
-					else {
-						$hirow = array();
-						$hirow["rahtihinta"] = 0;
-					}
+					// haetaan rahtimaksu
+					$rahtihinta = hae_rahtimaksu($rahtimaksu_tunnukset);
 
 					//lis‰t‰‰n rahtikulurivi vain jos rahtikulu on erisuuri kuin nolla, nollarivej‰ on ilmeisesti turha llis‰t‰
-					if ($hirow["rahtihinta"] != 0) {
+					if ($rahtihinta != 0) {
 
 						// haetaan rahtituotteen tiedot
 						$query = "	SELECT *
@@ -455,7 +415,7 @@ else {
 						$trow  = mysql_fetch_array($rhire);
 
 						$otunnus	 = $laskurow['tunnus'];
-						$hinta		 = $hirow["rahtihinta"]; // rahtihinta
+						$hinta		 = $rahtihinta;
 						$trow["alv"] = $laskurow["alv"];
 						$nimitys	 = $laskurow["toimitustapa"];
 
@@ -463,7 +423,7 @@ else {
 						list($hinta, $alv) = alv($laskurow, $trow, $lis_hinta, '', $alehinta_alv);
 
 						$query = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-									values  (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
+									values  (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$rahtimaksu_tunnukset')";
 						$addtil = mysql_query($query) or pupe_error($query);
 
 						$tilaus_valmis_ulos .= t("Tilaukselle lis‰ttiin rahtikulua").": $hinta $laskurow[valkoodi]<br>";
@@ -485,8 +445,10 @@ else {
 					}
 				}
 			}
+
 		}
 		else {
+			// meill‰ on rahdituksessa syˆtett‰v‰‰n painoon perustuva rahtimaksu
 			$query = "	SELECT tunnus
 						from tilausrivi
 						where yhtio = '$kukarow[yhtio]'
@@ -494,7 +456,7 @@ else {
 						and tuoteno = '$yhtiorow[rahti_tuotenumero]'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			//jos tilauksella on jo rahtikulu niin merkataan se rahtivapaaksi, ettei mene uudestaan laskutuksen yhteydess‰!
+			//jos tilauksella on jo rahtikulu niin merkataan se rahtivapaaksi, ettei raihtikulu mene uudestaan laskutuksen yhteydess‰!
 			if (mysql_num_rows($result) > 0) {
 				$tilaus_valmis_ulos .= t("Tilauksella oli k‰sin syˆtetty rahtikulu! Merkattiin tilaus rahtivapaaksi, ettei kulua lis‰t‰ en‰‰ automaattisesti laskutuksessa.")."<br>";
 				$query = "UPDATE lasku SET rahtivapaa = 'o' WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[tunnus]'";
@@ -663,10 +625,10 @@ else {
 			//mihin varastoon l‰hete kuuluu. aluksi x
 			$varasto = $edvarasto = $kerayspvm = $edkerayspvm = "x";
 			$tulostusalue = $edtulostusalue = "x";
-			
-			//jos tilaus splittaantuu, niin laitetaan muihin otsikoihin ensimm‰isen tilauksen tunnus vanhaksitunnukseksi 
+
+			//jos tilaus splittaantuu, niin laitetaan muihin otsikoihin ensimm‰isen tilauksen tunnus vanhaksitunnukseksi
 			$temp_laskutunnus = $laskurow['tunnus'];
-			
+
 			while ($row = mysql_fetch_array($result)) {
 
 				$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
@@ -728,7 +690,7 @@ else {
 					$laskurow["kauppatapahtuman_luonne"] = '999';
 				}
 
-				
+
 
 				//varasto vaihtuu, splitataan tilaus, paitsi jos kyseess‰ on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
 				if (((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '')) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") or ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K")) {
@@ -829,10 +791,10 @@ else {
 								ultilno								= '$ultilno',
 								piiri 								= '$laskurow[piiri]',
 								hyvaksynnanmuutos					= '$laskurow[hyvaksynnanmuutos]'";
-					$uusires = mysql_query($query) or pupe_error($query);					
+					$uusires = mysql_query($query) or pupe_error($query);
 					$laskurow['tunnus'] = (string) mysql_insert_id();
 					$tilausnumerot[] = $laskurow["tunnus"];
-					
+
 				}
 				else {
 					//p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu
@@ -864,10 +826,10 @@ else {
 
 				//	edellinen varasto talteen
 				$edvarasto = $varasto;
-				
+
 				// edellinen tulostusalue talteen
 				$edtulostusalue = $tulostusalue;
-				
+
 				//	edellinen kerayspvm talteen
 				$edkerayspvm = $row["kerayspvm"];
 

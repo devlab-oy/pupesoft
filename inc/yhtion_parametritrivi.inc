@@ -1708,6 +1708,7 @@
 		$ulos .= "<option value = 'B' $sel[B]>".t("Ennakot/J‰lkitoimitukset ovat aina rahtivapaita")."</option>";
 		$ulos .= "<option value = 'C' $sel[C]>".t("Ennakoihin/J‰lkitoimituksiin lis‰t‰‰n aina rahtikulu")."</option>";
 		$ulos .= "<option value = 'D' $sel[D]>".t("Ennakot/J‰lkitoimitukset ovat rahtivapaita, jos tilauksen arvo on yli rahtivapausrajan")."</option>";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Ensimm‰isen‰ toimitetulle ennakko-/j‰lkitoimitustilaukselle lis‰t‰‰n rahtikulu koko tilauksesta")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

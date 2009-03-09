@@ -113,10 +113,9 @@
 		$rares = mysql_query($query) or pupe_error($query);
 		*/
 
-		$rares = hae_rahtimaksu($laskurow, $kilotyht);
+		$rahtihinta = hae_rahtimaksu($oikeatunnus);
 
-		if (mysql_num_rows($rares)==1) {
-			$rahti = mysql_fetch_array($rares);
+		if ($rahtihinta != 0) {
 			$rahdinhinta = "<li>Rahdin hinta: $rahti[rahtihinta] $yhtiorow[valkoodi] ($kilotyht kg)";
 
 			// kirjoitetaan hintarivi ekalle otsikolle
@@ -131,7 +130,7 @@
 			$nimitys			= "$toimitustapa";
 			$kommentti			= "";
 
-			list($rahtihinta, $alv) = alv($laskurow, $trow, $rahti["rahtihinta"], '', '');
+			list($rahtihinta, $alv) = alv($laskurow, $trow, $rahtihinta, '', '');
 
 			if ($laskutettu == "ei") {
 				$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) 

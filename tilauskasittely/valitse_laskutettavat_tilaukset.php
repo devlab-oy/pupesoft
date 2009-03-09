@@ -481,30 +481,13 @@
 
 				if ($yhtiorow["rahti_hinnoittelu"] == "" and $row["rahtivapaa"] == "") {
 
-					$query = "SELECT sum(kilot) kilot FROM rahtikirjat WHERE yhtio='$kukarow[yhtio]' and otsikkonro = '$row[tunnus]'";
-					$pakre = mysql_query($query) or pupe_error($query);
-					$pakka = mysql_fetch_array($pakre);
-
-					/*
-					//haetaan tällä rahtikirjalle rahtimaksu
-					$query = "	SELECT *
-								from rahtimaksut
-								where toimitustapa = '$row[toimitustapa]'
-								and kilotalku <= '$pakka[kilot]'
-								and kilotloppu >= '$pakka[kilot]'
-								and yhtio = '$kukarow[yhtio]'";
-					$rares = mysql_query($query) or pupe_error($query);
-					$rahti = mysql_fetch_array($rares);
-					*/
-
-					$rares = hae_rahtimaksu($row, $pakka['kilot']);
-					$rahti = mysql_fetch_array($rares);
+					$rahtihinta = hae_rahtimaksu($row["tunnus"]);
 
 					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
 					$rhire = mysql_query($query) or pupe_error($query);
 					$trow  = mysql_fetch_array($rhire);
 
-					list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($row, $trow, '1', 'N', $rahti["rahtihinta"], 0);
+					list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($row, $trow, '1', 'N', $rahtihinta, 0);
 					list($hinta, $alv) = alv($row, $trow, $lis_hinta, '', $alehinta_alv);
 
 					if ($row["kohdistettu"] == "K") {

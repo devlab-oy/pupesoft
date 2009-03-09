@@ -4882,26 +4882,9 @@ if ($tee == '') {
 
 				if ($yhtiorow["rahti_hinnoittelu"] == "P" and $laskurow["rahtivapaa"] == "") {
 
-					$query  = "	SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
-								FROM tilausrivi
-								JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-								WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.var != 'J'";
-					$painoresult = mysql_query($query) or pupe_error($query);
-					$painorow = mysql_fetch_array($painoresult);
+					$rahtihinta = hae_rahtimaksu($laskurow["tunnus"]);
 
-					/*
-					$query = "	SELECT *
-								from rahtimaksut
-								where toimitustapa = '$laskurow[toimitustapa]'
-								and kilotalku <= '$painorow[massa]'
-								and kilotloppu >= '$painorow[massa]'
-								and yhtio = '$kukarow[yhtio]'";
-					$rares = mysql_query($query) or pupe_error($query);
-					*/
-
-					$rares = hae_rahtimaksu($laskurow, $painorow['massa']);
-
-					if (mysql_num_rows($rares)==1) {
+					if ($rahtihinta != 0) {
 						$rahti = mysql_fetch_array($rares);
 
 						echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>&nbsp;</th><td>&nbsp;</td><td>&nbsp;</td></tr>";
@@ -4914,9 +4897,9 @@ if ($tee == '') {
 							$tuotska = $yhtiorow["rahti_tuotenumero"];
 						}
 
-						echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtihinta yhteensä").":</th><td class='spec' align='right'>$rahti[rahtihinta]</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
+						echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtihinta yhteensä").":</th><td class='spec' align='right'>$rahtihinta</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
 						echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>&nbsp;</th><td>&nbsp;</td><td>&nbsp;</td></tr>";
-						echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Loppusumma").":</th><td class='spec' align='right'>".sprintf("%.2f",$summa+$rahti["rahtihinta"])."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
+						echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Loppusumma").":</th><td class='spec' align='right'>".sprintf("%.2f",$summa+$rahtihinta)."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
 					}
 				}
 
@@ -5267,7 +5250,7 @@ if ($tee == '') {
 					<input type='hidden' name='projektilla' value='$projektilla'>
 					<input type='hidden' name='tee' value='VALMIS'>
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-					<input type='hidden' name='rahtipainohinta' value='$rahti[rahtihinta]'>
+					<input type='hidden' name='rahtipainohinta' value='$rahtihinta'>
 					<input type='hidden' name='kaikkiyhteensa' value='".sprintf('%.2f',$summa)."'>
 					<input type='hidden' name='takaisin' value = '$takaisin'>";
 

@@ -123,9 +123,9 @@ if (!function_exists("t")) {
 		if ($indeksi != 'fi') {
 			$sanakirjaquery  = "SELECT fi, $indeksi, tunnus FROM sanakirja WHERE fi = BINARY '$stringi'";
 			$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
-			
+
 			if (isset($kaannetyt_sanat) and !in_array($stringi, $kaannetyt_sanat)) $kaannetyt_sanat[] = $stringi;
-			
+
 			if (mysql_num_rows($sanakirjaresult) > 0) {
 				$sanakirjarow = mysql_fetch_array($sanakirjaresult);
 
@@ -303,8 +303,8 @@ if (!function_exists("onkotulostusalueita")) {
 
 		$query = "	SELECT nimi
 					FROM varaston_tulostimet
-					WHERE concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0')) 
-					and	concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0')) 
+					WHERE concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0'))
+					and	concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0'))
 					and	yhtio = '$yhtiolisa'
 					and varasto ='$varasto'";
 		$varcheckres = mysql_query($query) or pupe_error($query);
@@ -337,26 +337,26 @@ if (!function_exists("pdf_substr")) {
 
 if (!function_exists("pdf_fontfit")) {
 	function pdf_fontfit($str, $len, $pdf, $param) {
-		
+
 		$ffok = 0;
-		
+
 		if ($pdf->strlen($str, $param) > $len) {
-						
+
 			for($fkoko = $param["height"]; $fkoko >= 7; $fkoko--) {
-				
+
 				$param["height"] = $fkoko;
-				
+
 				if ($pdf->strlen($str, $param) <= $len) {
 					$ffok = 1;
 					break;
 				}
-			}			
+			}
 		}
-		
+
 		if (!$ffok) {
 			$str = pdf_substr($str, $len, $pdf, $param);
 		}
-		
+
 		return array($str, $param);
 	}
 }
@@ -6349,8 +6349,138 @@ if(!function_exists("hae_rahtisopimusnumero")) {
 }
 
 if(!function_exists("hae_rahtimaksu")) {
-	function hae_rahtimaksu ($laskurow, $kilot) {
-		global $kukarow;
+	// otetaan sis‰‰n halutut otsikot mysql muodossa (1,2,3,4)
+	function hae_rahtimaksu ($otsikot) {
+
+		global $kukarow, $yhtiorow;
+
+		$otsikot = mysql_real_escape_string(trim($otsikot));
+
+		if ($otsikot == "") {
+			return 0;
+		}
+		
+		// haetaan ensimm‰isen otsikon tiedot
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus IN ($otsikot)
+					ORDER BY tunnus
+					LIMIT 1";
+		$otsre = mysql_query($query) or pupe_error($query);
+		$laskurow = mysql_fetch_array($otsre);
+
+		$kyht = 0;
+
+		// jos JT-tilaukset annetaan aina rahtivapaasti
+		if ($laskurow["clearing"] == "JT-TILAUS" and $yhtiorow["jt_rahti"] == "B") {
+			return 0;
+		}
+
+		// jos laskulla on rahtivapaa t‰pp‰ niin annetaan ilmaseks (paitsi jos kyseess‰ on JT ja niille halutaan v‰kisin rahti optiot C tai D)
+		if ($laskurow["rahtivapaa"] != "" AND ($laskurow["clearing"] != "JT-TILAUS" OR $yhtiorow["jt_rahti"] != "C") AND ($laskurow["clearing"] != "JT-TILAUS" OR $yhtiorow["jt_rahti"] != "D")) {
+			return 0;
+		}
+
+		// jos meill‰ on automaattinen tuoteella tallennettuihin painoihin perustuva hinnoittelu
+		if ($yhtiorow["rahti_hinnoittelu"] == 'P') {
+			$query  = "	SELECT sum(tuotemassa * (varattu + kpl + jt)) massa
+						FROM tilausrivi
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+							AND tuote.tuoteno = tilausrivi.tuoteno)
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						AND tilausrivi.tyyppi = 'L'
+						AND tilausrivi.otunnus in ($otsikot)";
+			$painoresult = mysql_query($query) or pupe_error($query);
+			$painorow = mysql_fetch_array($painoresult);
+			$kyht = $painorow['massa'];
+		}
+		// meill‰ on tilauksen hintaan perustuva hinnoittelu
+		elseif ($yhtiorow["rahti_hinnoittelu"] == "o") {
+			// alvittomat hinnat
+			if ($yhtiorow["alv_kasittely"] == '') {
+				$query = "	SELECT round(((varattu + kpl + jt) * hinta * (1 - (ale / 100))) / (1 + alv / 100), '$yhtiorow[hintapyoristys]') rivihinta, netto
+							FROM tilausrivi
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tyyppi = 'L'
+							AND otunnus in ($otsikot)";
+			}
+			else {
+				$query = "	SELECT round(((varattu + kpl + jt) * hinta * (1 - (ale / 100))), '$yhtiorow[hintapyoristys]') rivihinta, netto
+							FROM tilausrivi
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tyyppi = 'L'
+							AND otunnus in ($otsikot)";
+			}
+			$presult = mysql_query($query) or pupe_error($query);
+
+			$nyht = 0;
+			$myht = 0;
+			$kyht = 0;
+
+			while ($prow = mysql_fetch_array($presult)) {
+				if ($prow["netto"] != 'N') {
+					$myht += $prow["rivihinta"]; // lasketaan tilauksen loppusummaa MUUT RIVIT..
+				}
+				else {
+					$nyht += $prow["rivihinta"]; // lasketaan tilauksen loppusummaa NETTORIVIT..
+				}
+			}
+
+			//erikoisalennus lasketaan vain riveille joilla EI ole NETTOHINTAA
+			if ($laskurow['erikoisale'] != 0) {
+				$apu1 = round($laskurow['erikoisale']/100,2);	// erikoisale prosentti
+				$apu2 = round($myht*$apu1,2); 					// erikoisalen m‰‰r‰
+				$apu3 = round((1-$apu1)*$myht,2);				// loppusumma
+
+				//Kaikki yhteens‰
+				$kyht = $apu3 + $nyht;
+			}
+			else {
+				//Kaikki yhteens‰
+				$kyht = $myht + $nyht;
+			}
+
+			// $kyht on KOTIVALUUTASSA, k‰‰nnet‰‰n laskun valuuttaan
+			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+				$kyht = round(laskuval($kyht, $laskurow["vienti_kurssi"]), 2);
+			}
+		}
+		// meill‰ on rahtikirjan syˆtˆss‰ syˆtettyihin painoihin perustuva hinnoittelu
+		else {
+			//summataan kaikki rahtikirjojen painot yhteen
+			$query = "	SELECT sum(kilot) kilot
+						FROM rahtikirjat
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND otsikkonro in ($otsikot)";
+			$pakre = mysql_query($query) or pupe_error($query);
+			$pakka = mysql_fetch_array($pakre);
+			$kyht = $pakka["kilot"];
+		}
+
+		// katotaan saadaanko siltikin ilmaseks jos ollaan yli rajojen
+		// haetaan asiakkaan alarajasumma
+		$as_que = "	SELECT rahtivapaa_alarajasumma
+					FROM asiakas
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$laskurow[liitostunnus]'
+					AND rahtivapaa_alarajasumma > 0";
+		$as_res = mysql_query($as_que) or pupe_error($as_que);
+
+		$rahtivapaa_alarajasumma = 0;
+
+		if (mysql_num_rows($as_res) == 1) {
+			$as_row = mysql_fetch_array($as_res);
+			$rahtivapaa_alarajasumma = $as_row["rahtivapaa_alarajasumma"];
+		}
+		else {
+			$rahtivapaa_alarajasumma = $yhtiorow["rahtivapaa_alarajasumma"];
+		}
+
+		if ($kyht > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) {
+			// jos ollaan yli rajojen return nolla
+			return 0;
+		}
 
 		// haetaan ensimm‰inen (pienimm‰ll‰ postinumerolla) et‰isyys
 		$query = "	SELECT
@@ -6366,49 +6496,57 @@ if(!function_exists("hae_rahtimaksu")) {
 		// jos saadaan joku kilometrim‰‰r‰ niin laitetaan se muuttujaan talteen
 		if (mysql_num_rows($varastoresult) == 1) {
 			$varastorow = mysql_fetch_array($varastoresult);
-
 			$km = $varastorow['km'];
 		}
 		else {
 			$km = 0;
 		}
 
-		//haetaan t‰ll‰ rahtikirjalle rahtimaksu painon ja et‰isyyden mukaan
+		//haetaan t‰ll‰ rahtimaksu hinnan/painon ja/tai et‰isyyden mukaan
 		$query = "	SELECT *
-					from rahtimaksut
-					where toimitustapa = '$laskurow[toimitustapa]'
-					and kilotalku <= '$kilot'
-					and kilotloppu >= '$kilot'
-					and yhtio = '$kukarow[yhtio]'
-					and ((kmalku <= '$km' and kmloppu >= '$km') or (kmalku = 0 and kmloppu = 0))
+					FROM rahtimaksut
+					WHERE toimitustapa = '$laskurow[toimitustapa]'
+					AND toimitustapa != ''
+					AND kilotalku <= '$kyht'
+					AND kilotloppu >= '$kyht'
+					AND yhtio = '$kukarow[yhtio]'
+					AND ((kmalku <= '$km' and kmloppu >= '$km') or (kmalku = 0 and kmloppu = 0))
 					ORDER BY kmloppu DESC, kmalku DESC
 					LIMIT 1";
 		$rares = mysql_query($query) or pupe_error($query);
 
-		return $rares;
+		if (mysql_num_rows($rares) == 1) {
+			$hirow = mysql_fetch_array($rares);
+			return $hirow["rahtihinta"];
+		}
+		else {
+			return 0;
+		}
+
 	}
+
 }
 
 if (!function_exists("pakkaamo")) {
 	function pakkaamo ($tilausnumero, $update = '') {
 		global $kukarow, $yhtiorow;
-		
+
 		if ($yhtiorow['pakkaamolokerot'] == 'K') {
-			
+
 			$query = "	SELECT distinct vanhatunnus
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tila 		in ('N', 'L')
 						AND alatila 	in ('A', 'C')
-						AND tunnus in($tilausnumero)";							
+						AND tunnus in($tilausnumero)";
 			$vanhattunnukset_res = mysql_query($query) or pupe_error($query);
 
 			$vanhatunnus = "";
 			while ($vanhattunnukset_row = mysql_fetch_array($vanhattunnukset_res)) {
-					$vanhattunnukset .= $vanhattunnukset_row['vanhatunnus'].",";										
+					$vanhattunnukset .= $vanhattunnukset_row['vanhatunnus'].",";
 			}
-			$vanhattunnukset = substr($vanhattunnukset, 0, -1); 
-					
+			$vanhattunnukset = substr($vanhattunnukset, 0, -1);
+
 			// haetaan t‰rkein pakkaamo
 			$query = "	SELECT distinct pakkaamo.pakkaamon_prio, lasku.varasto, lasku.tulostusalue, varaston_tulostimet.nimi, varaston_tulostimet.pakkaamo
 						FROM lasku
@@ -6422,14 +6560,14 @@ if (!function_exists("pakkaamo")) {
 						LIMIT 1";
 			$varasto_chk_result = mysql_query($query) or pupe_error($query);
 			$varasto_chk_row = mysql_fetch_array($varasto_chk_result);
-			
+
 			$tulostusalue_pakkaamot = "";
 			if (mysql_num_rows($varasto_chk_result) > 0) {
 				$tulostusalue_pakkaamot = $varasto_chk_row['pakkaamo'];
-			}	
+			}
 			else {
 				return 0;
-			}	
+			}
 
 			$pakkaamolisa = "";
 
@@ -6448,10 +6586,10 @@ if (!function_exists("pakkaamo")) {
 						$pakkaamolisa
 						LIMIT 1";
 			$split_pakkaamo_res = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($split_pakkaamo_res) == 1) {
 				$split_pakkaamo_row = mysql_fetch_assoc($split_pakkaamo_res);
-				
+
 				if (isset($update) and $update != '') {
 					$query = "	UPDATE lasku SET
 								pakkaamo = '$split_pakkaamo_row[pakkaamo]'
@@ -6459,7 +6597,7 @@ if (!function_exists("pakkaamo")) {
 								AND tunnus in ($tilausnumero)";
 					$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
 				}
-				
+
 				return $split_pakkaamo_row['pakkaamo'];
 			}
 			else {
@@ -6592,7 +6730,7 @@ if (!function_exists("pakkaamo")) {
 									ORDER BY prio, lokero ASC";
 						$pakkaamo_chk_res = mysql_query($query) or pupe_error($query);
 						$pakkaamo_chk_row = mysql_fetch_array($pakkaamo_chk_res);
-					
+
 						if (isset($update) and $update != '') {
 							$query = "	UPDATE lasku SET
 										pakkaamo = '{$pakkaamo_chk_row['tunnus']}'

@@ -739,21 +739,10 @@
 						//vika pilkku pois
 						$rahtikirjanrot = substr($rahtikirjanrot,0,-1);
 
-/*
-						//haetaan tällä rahtikirjalle rahtimaksu
-						$query = "	SELECT *
-									from rahtimaksut
-									where toimitustapa = '$laskurow[toimitustapa]'
-									and kilotalku <= '$pakka[kilot]'
-									and kilotloppu >= '$pakka[kilot]'
-									and yhtio = '$kukarow[yhtio]'";
-						$rares = mysql_query($query) or pupe_error($query);
-*/
+						// haetaan rahdin hinta
+						$rahtihinta = hae_rahtimaksu($otsikot);
 
-						$rares = hae_rahtimaksu($laskurow, $pakka['kilot']);
-
-						if (mysql_num_rows($rares)==1 and $virhe==0) {
-							$rahti = mysql_fetch_array($rares);
+						if ($rahtihinta != 0 and $virhe == 0) {
 
 							// kirjoitetaan hintarivi ekalle otsikolle
 							if (trim($yhtiorow["rahti_tuotenumero"]) == "") {
@@ -771,7 +760,7 @@
 							$trow  = mysql_fetch_array($rhire);
 
 							$otunnus	= $laskurow['tunnus'];
-							$hinta		= $rahti["rahtihinta"]; // rahtihinta
+							$hinta		= $rahtihinta;
 							$nimitys	= "$pvm $laskurow[toimitustapa]";
 							$kommentti  = "".t("Rahtikirja").": $rahtikirjanrot";
 
@@ -784,7 +773,7 @@
 							$addtil = mysql_query($query) or pupe_error($query);
 
 							if ($silent == "") {
-								$tulos_ulos .= "<tr><td>".t("Lisättiin rahtikulut")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td>$rahti[rahtihinta]</td><td>$yhtiorow[valkoodi]</td><td>$pakka[kilot] kg</td></tr>\n";
+								$tulos_ulos .= "<tr><td>".t("Lisättiin rahtikulut")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td>$rahtihinta</td><td>$yhtiorow[valkoodi]</td><td>$pakka[kilot] kg</td></tr>\n";
 							}
 
 							$rah++;

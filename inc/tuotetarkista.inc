@@ -230,6 +230,26 @@ if(!function_exists("tuotetarkista")) {
 
 		}
 
+		if (mysql_field_name($result, $i) == "eankoodi") {
+			if (trim($t[$i]) == '') {
+				$virhe[$i] = t("Tieto puuttuu");
+			}
+			else {
+				if (trim($t[$i]) != 0) {
+					$query  = "	SELECT eankoodi
+								FROM tuote
+								WHERE yhtio = '$kukarow[yhtio]'
+								and eankoodi = '".trim($t[$i])."'";
+					$chkressiresult = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($chkressiresult) > 0) {
+						$virhe[$i] = t("EAN-koodi on jo perustettu j‰rjestelm‰‰n");
+					}
+				}
+			}
+		}
+
+
 		/*
 		if (mysql_field_name($result, $i) == "tuotekuva" and $t[$i] != '') {
 			if (!file_exists($t[$i])) {

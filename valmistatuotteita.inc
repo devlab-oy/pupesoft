@@ -305,11 +305,11 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 						and tunnus  = '$tuoterow[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			echo "<font class='message'>".t("Varastosta k‰ytettiin tuotetta")." $perherow[tuoteno] $kpl $tuoterow[yksikko]</font><br>";
+			echo "<font class='message'>".t("Varastosta k‰ytettiin tuotetta")." $perherow[tuoteno] $kpl ".ta($kieli, "Y", $tuoterow["yksikko"])."</font><br>";
 
 		}
 		else {
-			echo "<font class='message'>".t("K‰ytettiin tuotetta")." $perherow[tuoteno] $kpl $tuoterow[yksikko]</font><br>";
+			echo "<font class='message'>".t("K‰ytettiin tuotetta")." $perherow[tuoteno] $kpl ".ta($kieli, "Y", $tuoterow["yksikko"])."</font><br>";
 		}
 
 		//p‰ivitet‰‰n tilausrivi k‰ytetyksi
@@ -466,7 +466,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 			}
 
 			//printataan pikku raporttia mit‰ tulikaan tehty‰
-			echo "<font class='message'>".t("Valmistettiin tuotetta")." $isatuoteno $isavarattu $isarow[yksikko]</font><br>";
+			echo "<font class='message'>".t("Valmistettiin tuotetta")." $isatuoteno $isavarattu ".ta($kieli, "Y", $isarow["yksikko"])."</font><br>";
 		}
 	}
 

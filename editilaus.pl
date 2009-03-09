@@ -3,12 +3,13 @@
 use FileHandle;
 use Net::SMTP;
 
-$dirri1   = "/home/elma/elma/edi/autolink_orders/";    # mistä haetaan
-$dirri2   = "/home/elma/elma/edi/autolink_orders/done/"; # minne siirretään
-$pupedir  = "/var/www/html/pupesoft/tilauskasittely/"; # ajettava komento
-$komento  = "/usr/bin/php"; # ajettava komento
-$email    = "atk\@arwidson.fi"; # kenelle meilataan jos on ongelma
-$tmpfile  = "/tmp/##edi-tmp";   # minne tehdään lock file
+$dirri1    = "/home/elma/elma/edi/autolink_orders/";    # mistä haetaan
+$dirri2    = "/home/elma/elma/edi/autolink_orders/done/"; # minne siirretään
+$pupedir   = "/var/www/html/pupesoft/tilauskasittely/"; # pupesoftin tilauskäsittely hakemisto
+$komento   = "/usr/bin/php"; # ajettava komento
+$email     = "atk\@arwidson.fi"; # kenelle meilataan jos on ongelma
+$emailfrom = "atk\@arwidson.fi"; # millä osoitteella meili lähetetään
+$tmpfile   = "/tmp/##edi-tmp";   # minne tehdään lock file
 
 if (!-f $tmpfile) {
 
@@ -72,7 +73,7 @@ if (!-f $tmpfile) {
 				# jos ollaan luupattu samaa failia 10 kertaa, ni siirreätän se pois...
 				if ($laskuri>10) {
 					$smtp = Net::SMTP->new('localhost');
-					$smtp->mail('mailer@pupesoft.com');
+					$smtp->mail($emailfrom);
 					$smtp->to($email);
 					$smtp->data();
 					$smtp->datasend("Subject: Editilaus ERROR!\n\n");

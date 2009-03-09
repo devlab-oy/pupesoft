@@ -4,7 +4,7 @@ $debug = 0;
 $edi_ulos = "\n";
 
 // jos meillä ei ole sessiota ja meillä on komentoriviparametri annettuna
-if (trim($argv[1])!='') {
+if (trim($argv[1]) != '') {
 
 	if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 
@@ -13,7 +13,7 @@ if (trim($argv[1])!='') {
 	require ("../inc/functions.inc");
 
 	// ja parametri komentoriviltä
-	$filename	= $argv[1];
+	$filename = $argv[1];
 
 	if (trim($argv[2]) == 'futursoft' and substr(strtolower(basename($filename)), 0, 13) == 'magento-order') {
 		$argv[2] = 'magento';
@@ -21,6 +21,9 @@ if (trim($argv[1])!='') {
 
 	// ja toinen parametri komentoriviltä
 	$edi_tyyppi	= $argv[2];
+
+	// laitetaan pupe-rootti ja tilauskäsittely mukaan includepathiin
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname($argv[0])).PATH_SEPARATOR.dirname($argv[0]));
 }
 
 if (!function_exists('jt_toimita')) {
@@ -229,6 +232,11 @@ while (!feof ($fd)) {
 			}
 
 			$kukarow['yhtio'] = $yhtiorow['yhtio']; // Tämä on vaarallista, mutta tätä ilman ei mikän toimi!
+			
+			// nollataan argv ja laitetaan ensimmäiseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
+			$argv = array();
+			$argv[1] = $kukarow["yhtio"];
+
 			$edi_ulos .= "-> $yhtiorow[nimi] ($kukarow[yhtio])\n";
 			break;
 

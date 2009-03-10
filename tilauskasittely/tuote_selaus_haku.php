@@ -355,19 +355,19 @@
 	}
 
 	if (trim($nimitys) != '') {
-		$nimitys = mysql_real_escape_string($nimitys);
+		$nimitys = mysql_real_escape_string(trim($nimitys));
 		$lisa .= " and tuote.nimitys like '%$nimitys%' ";
 		$ulisa .= "&nimitys=$nimitys";
 	}
 
 	if (trim($tuotenumero) != '') {
-		$tuotenumero = mysql_real_escape_string($tuotenumero);
+		$tuotenumero = mysql_real_escape_string(trim($tuotenumero));
 		$lisa .= " and tuote.tuoteno like '%$tuotenumero%' ";
 		$ulisa .= "&tuotenumero=$tuotenumero";
 	}
 
 	if (trim($toim_tuoteno) != '') {
-		$toim_tuoteno = mysql_real_escape_string($toim_tuoteno);
+		$toim_tuoteno = mysql_real_escape_string(trim($toim_tuoteno));
 
 		//Otetaan konserniyhtiöt hanskaan
 		$query	= "	SELECT distinct tuoteno
@@ -393,7 +393,7 @@
 	}
 
 	if (trim($alkuperaisnumero) != '') {
-		$alkuperaisnumero = mysql_real_escape_string($alkuperaisnumero);
+		$alkuperaisnumero = mysql_real_escape_string(trim($alkuperaisnumero));
 
 		$query	= "	SELECT distinct tuoteno
 					FROM tuotteen_orginaalit

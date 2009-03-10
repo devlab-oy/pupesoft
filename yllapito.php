@@ -509,8 +509,43 @@
 	for ($i=0; $i<=$count; $i++) {
     	if (strlen($haku[$i]) > 0) {
 			
-			if (($toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
-				$lisa .= " and " . $array[$i] . " = '" . $haku[$i] . "'";
+			if (($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
+				
+				if (!is_numeric($haku[$i])) {
+					// haetaan laskutus-asiakas
+					$ashak = "SELECT group_concat(tunnus) tunnukset FROM asiakas WHERE yhtio='$kukarow[yhtio]' and nimi like '%" . $haku[$i] . "%'";
+					$ashakres = mysql_query($ashak) or pupe_error($ashak);
+					$ashakrow = mysql_fetch_array($ashakres);
+										
+					if ($ashakrow["tunnukset"] != "") {
+						$lisa .= " and " . $array[$i] . " in (" . $ashakrow["tunnukset"] . ")";						
+					}
+					else {
+						$lisa .= " and " . $array[$i] . " = NULL ";							
+					}
+				}
+				else {
+					$lisa .= " and " . $array[$i] . " = '" . $haku[$i] . "'";
+				}
+			}
+			elseif (($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'ytunnus') {
+				
+				if (!is_numeric($haku[$i])) {
+					// haetaan laskutus-asiakas
+					$ashak = "SELECT group_concat(distinct concat('\'',ytunnus,'\'')) tunnukset FROM asiakas WHERE yhtio='$kukarow[yhtio]' and (nimi like '%" . $haku[$i] . "%' or ytunnus like '%" . $haku[$i] . "%')";
+					$ashakres = mysql_query($ashak) or pupe_error($ashak);
+					$ashakrow = mysql_fetch_array($ashakres);
+										
+					if ($ashakrow["tunnukset"] != "") {
+						$lisa .= " and " . $array[$i] . " in (" . $ashakrow["tunnukset"] . ")";
+					}
+					else {
+						$lisa .= " and " . $array[$i] . " = NULL ";	
+					}
+				}
+				else {
+					$lisa .= " and " . $array[$i] . " = '" . $haku[$i] . "'";
+				}
 			}
 			elseif ($haku[$i]{0} == "@") {
 				$lisa .= " and " . $array[$i] . " = '" . substr($haku[$i], 1) . "'";

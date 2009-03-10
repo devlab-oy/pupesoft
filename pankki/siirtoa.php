@@ -25,21 +25,21 @@ function tarkistapariteetti($jono) {
 		$apu = hexdec($apu);
 		$apu = decbin($apu);
 		//echo " $apu";
-		// Lasketaan ykk√∂sten m√§√§r√§
+		// Lasketaan ykkˆsten m‰‰r‰
 		$i = 0;
 		for($m = 0; $m < 8; $m++) {
 			if ($apu[$m] == '1') $i++;
 		}
 
-		// Jos ykk√∂si√§ parillinen m√§√§r√§ muutetaan viimeist√§ merkki√§
+		// Jos ykkˆsi‰ parillinen m‰‰r‰ muutetaan viimeist‰ merkki‰
 		if(!($i % 2)){
 			//echo " on parillinen ja koko on ". strlen($apu);
 			$vmerkki = strlen($apu) - 1;
-			// Jos viimeinen on ykk√∂nen niin muutetaan se nollaksi
+			// Jos viimeinen on ykkˆnen niin muutetaan se nollaksi
 			if($apu[$vmerkki] == 1) {
 				$apu[$vmerkki] = 0;
 			}
-			// Jos viimeinen on nolla muutetaan se ykk√∂seksi
+			// Jos viimeinen on nolla muutetaan se ykkˆseksi
 			else {
 				$apu[$vmerkki] = 1;
 			}
@@ -54,7 +54,7 @@ function tarkistapariteetti($jono) {
 		//echo " --> $apu\n";;
 	}
 
-	// Yhdistet√§√§n lohkot takaisin luvuksi
+	// Yhdistet‰‰n lohkot takaisin luvuksi
 	for($i = 0; $i <= sizeof($data); $i++) {
 		$jono .= $data[$i];
 	}
@@ -63,44 +63,70 @@ function tarkistapariteetti($jono) {
 	return $jono;
 }
 
-$pa1 = tarkistapariteetti($argv[1]);
-$pa2 = tarkistapariteetti($argv[2]);
+function ekasiirtoavain($osa1, $osa2, $tarkiste, $tunnus) {
 
-if(($pa1 != $argv[1]) or ($pa2 != $argv[2])){
-	echo "\nPariteetin tarkastus ei mennyt l√§pi. Pariteetti asetettu v√§√§rin!";
-	exit;
-}
+	$pa1 = tarkistapariteetti($osa1);
+	$pa2 = tarkistapariteetti($osa2);
 
-// xor on v√§h√§n vaikea?
-$tulos = '';
-for($i = 0; $i < 8; $i++) {
+	if(($pa1 != $osa1) or ($pa2 != $osa2)){
+		return "Pariteetin tarkastus ei mennyt l‰pi. Pariteetti asetettu v‰‰rin!";
+		exit;
+	}
 
-	$pala1 = hexdec(substr($pa1, 2*$i, 2));
-	$pala2 = hexdec(substr($pa2, 2*$i, 2));
+	// xor on v‰h‰n vaikea?
+	$tulos = '';
+	for($i = 0; $i < 8; $i++) {
 
-	$uusipala = $pala1 ^ $pala2;
-	$uusipala = dechex($uusipala);
-	if (strlen($uusipala) == 1) $uusipala = "0".$uusipala;
+		$pala1 = hexdec(substr($pa1, 2*$i, 2));
+		$pala2 = hexdec(substr($pa2, 2*$i, 2));
+
+		$uusipala = $pala1 ^ $pala2;
+		$uusipala = dechex($uusipala);
+		if (strlen($uusipala) == 1) $uusipala = "0".$uusipala;
+		
+		//echo "\n$pala1 xor $pala2 = $uusipala";
+		
+		$tulos .= $uusipala;
+	}
+
+	$tulos = tarkistapariteetti($tulos);
+	//echo "\n$tulos";
+
+	$tulos = pack('H*',$tulos);
+	$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
+	$iv = mcrypt_create_iv (mcrypt_enc_get_iv_size($td), pack('H*','0000000000000000'));
+	mcrypt_generic_init($td, $tulos, $iv);
+	$tulos = mcrypt_generic($td, pack('H*','0000000000000000'));
+	mcrypt_generic_deinit($td);
+	mcrypt_module_close($td);
+
+	$tulos=unpack('H*',$tulos);
+
+	//echo "\nlopullinen tulos '$tulos[1]'\n";
 	
-	//echo "\n$pala1 xor $pala2 = $uusipala";
-	
-	$tulos .= $uusipala;
+	if (substr($tulos[1],0,6) == $tarkiste) {
+		$query = "SELECT sasukupolvi FROM yriti WHERE tunnus='$tunnus'";
+		$tilires = mysql_query($query) or pupe_error($query);
+		if (mysql_num_rows($tilires) == 1) {
+			$tilirow = mysql_fetch_array($tilires);
+			$tilirow['sassukupolvi']++;
+			if($tilirow['sassukupolvi']>9) $tilirow['sassukupolvi']=1;
+		}
+		if(($suku - $tilirow['sassukupolvi']) < 2) {
+			$query = "UPDATE yriti SET siirtoavain='$tulos[1]', sasukupolvi='$tilirow[sassukupolvi]' WHERE tunnus = '$tunnus'";
+			$xres = mysql_query($query) or pupe_error($query);
+		}
+
+		else{
+			return "Sukupolvi numero, $suku, ei t‰sm‰‰ tietokannan kanssa!";
+			exit;
+		}
+		return "";
+		exit;
+	}
+	else {
+		return "Tarkiste ei t‰sm‰‰! $tulos[1]";
+	}
 }
-
-$tulos = tarkistapariteetti($tulos);
-//echo "\n$tulos";
-
-$tulos = pack('H*',$tulos);
-$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
-$iv = mcrypt_create_iv (mcrypt_enc_get_iv_size($td), pack('H*','0000000000000000'));
-mcrypt_generic_init($td, $tulos, $iv);
-$tulos = mcrypt_generic($td, pack('H*','0000000000000000'));
-mcrypt_generic_deinit($td);
-mcrypt_module_close($td);
-
-$tulos=unpack('H*',$tulos);
-
-echo "\nlopullinen tulos '$tulos[1]'\n";
-
 
 ?>

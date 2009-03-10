@@ -120,6 +120,11 @@
 		$ulos .= "<option value='MEHTOKATXT_EN' {$avain_sel['MEHTOKATXT_EN']}>			".t("Englanninkielinen maksuehdon kassateksti")."</option>";
 		$ulos .= "</optgroup>";
 		
+		$ulos .= "<optgroup label='".t("CRM avainsanat")."'>";
+		$ulos .= "<option value='CRM_ROOLI' {$avain_sel['CRM_ROOLI']}>					".t("Yhteyshenkilön rooli")."</option>";	
+		$ulos .= "<option value='CRM_SUORAMARKKI' {$avain_sel['CRM_SUORAMARKKI']}>		".t("Yhteyshenkilön suoramarkkinointitiedot")."</option>";
+		$ulos .= "</optgroup>";
+		
 		$ulos .= "<optgroup label='".t("Muut avainsanat")."'>";
 		$ulos .= "<option value='VAKIOVIESTI' {$avain_sel['VAKIOVIESTI']}>				".t("Vakioviesti")."</option>";	
 		$ulos .= "<option value='LITETY' {$avain_sel['LITETY']}>						".t("Liitetiedostotyyppi")."</option>";
@@ -129,8 +134,7 @@
 		$ulos .= "<option value='TRIVITYYPPI' {$avain_sel['TRIVITYYPPI']}>				".t("Tilausrivin tyyppi")."</option>";
 		$ulos .= "<option value='LASKUTUS_SAATE' {$avain_sel['LASKUTUS_SAATE']}>		".t("Laskun sähköpostisaatekirje asiakkaalle")."</option>";
 		$ulos .= "<option value='TV_LISATIETO' {$avain_sel['TV_LISATIETO']}>			".t("Tilausvahvistuksen lisätiedot")."</option>";
-					
-		$ulos .= "</optgroup>";
+		
 		
 		$ulos .= "</select></td>";
 		$jatko = 0;			

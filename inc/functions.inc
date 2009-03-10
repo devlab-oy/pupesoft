@@ -1376,7 +1376,7 @@ if (!function_exists("avain")) {
 			$returni = " kassa_teksti ";
 			$joinaa = "maksuehto";
 		}
-		else {
+		else {	
 			$returni = " selitetark ";
 			$joinaa = "avainsana";
 		}
@@ -1416,7 +1416,7 @@ if (!function_exists("avain")) {
 				}
 			}
 			elseif ($laji == 'select') {
-				$returni = " if(isnull(a.selitetark) or a.selitetark='', ".$joinaa.".".trim($returni).", a.selitetark) as ".trim($as)." ";
+				$returni = " if(isnull(a.selitetark) or a.selitetark='', ".$joinaa.".".trim($returni).", a.selitetark) as ".trim($as)." ";			
 			}
 			elseif ($laji == 'select2') {
 				$returni = " if(isnull(b.selitetark) or b.selitetark='', ".$joinaa.".".trim($returni).", b.selitetark) as ".trim($as)." ";
@@ -2400,7 +2400,6 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 		}
 	}
 }
-
 
 if (!function_exists("jalkilaskentafunktio")) {
 	function jalkilaskentafunktio ($tuoteno, $pvm, $uusihinta, $rivitunnus) {
@@ -3890,7 +3889,6 @@ if (!function_exists('ta')) {
 			return;
 		}
 		
-		
 		if ($kieli == "") $kieli = $kukarow["kieli"];
 		if ($kieli == "") $kieli = $yhtiorow["kieli"];
 
@@ -3933,7 +3931,7 @@ if (!function_exists('ta')) {
 		}
 		else {
 			// Taaksepäin yhteensopivuus
-			$query = "	SELECT avainsana.selite, ".avain('select')."
+			$query = "	SELECT avainsana.selite, ".avain('select', '', $kieli)."
 						FROM avainsana
 						".avain('join',$laji.'_', $kieli)."
 						WHERE avainsana.yhtio 	= '$kukarow[yhtio]' 

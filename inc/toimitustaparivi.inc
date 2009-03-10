@@ -280,4 +280,24 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "ei_pakkaamoa") {
+
+		$ulos  = "<td><select name='$nimi'>";
+		$chk1 = '';
+		$chk2 = '';
+
+		if ($trow[$i] == "1") {
+			$chk1 = 'selected';
+		}
+		if ($trow[$i] == "0") {
+			$chk2 = 'selected';
+		}
+
+		$ulos .= "<option value='0' $chk2>".t("Ei")."</option>";
+		$ulos .= "<option value='1' $chk1>".t("Kyllä")."</option>";
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 ?>

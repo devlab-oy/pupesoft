@@ -432,7 +432,7 @@
 							$gluku++;
 						}
 						else {
-							if ($group!="") $group .= ",tuote.tuoteno, tuote.nimitys";
+							if ($group!="") $group .= ", tuote.tuoteno, tuote.nimitys";
 							else $group  .= "tuote.tuoteno, tuote.nimitys";
 							$select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, ";
 							$order  .= "tuote.tuoteno,";
@@ -663,7 +663,7 @@
 				}
 
 				if ($ajotapanlisa == "erikseen") {
-					$tilauslisa3 = ", if(tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt>0, 'Veloitus', 'Hyvitys') rivityyppi";
+					$tilauslisa3 = ", if(tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt>0,'Veloitus','Hyvitys') rivityyppi";
 					$group .= ", rivityyppi";
 				}
 				else {
@@ -671,6 +671,9 @@
 				}
 
 				$query = "	SELECT $select";
+				
+				// Katotaan mistä kohtaa queryä alkaa varsinaiset numerosarakkeet (HUOM: toi ', ' pilkkuspace erottaa sarakket toisistaan)
+				$data_start_index = substr_count($select, ", ");
 
 				// generoidaan selectit
 				if ($kuukausittain != "") {
@@ -1050,316 +1053,326 @@
 					}
 
 					while ($row = mysql_fetch_array($result)) {
-
 						if (mysql_num_rows($result) > $rivilimitti) $bar->increase();
-
-						if ($osoitetarrat != "" and $row["astunnus"] > 0) {
-							$tarra_aineisto .= $row["astunnus"].",";
+												
+						$piilosumma = 0;
+						
+						for ($i=$data_start_index; $i < mysql_num_fields($result); $i++) {
+							if (is_numeric($row[$i])) {
+								$piilosumma += $row[$i];								
+							}
 						}
 
-						if (mysql_num_rows($result) <= $rivilimitti) echo "<tr>";
-
-						// echotaan kenttien sisältö
-						for ($i=0; $i < mysql_num_fields($result); $i++) {
-
-							// jos kyseessa on tuote
-							if (mysql_field_name($result, $i) == "tuoteno") {
-								$row[$i] = "<a href='../tuote.php?tee=Z&tuoteno=$row[$i]'>$row[$i]</a>";
+						// Näytetään vain jos halutaan nähdä kaikki rivit tai summa on > 0
+						if ($piilotanollarivit == "" or (float) $piilosumma != 0) {							
+							if ($osoitetarrat != "" and $row["astunnus"] > 0) {
+								$tarra_aineisto .= $row["astunnus"].",";
 							}
 
-							// jos kyseessa on asiakasosasto, haetaan sen nimi
-							if (mysql_field_name($result, $i) == "asos") {
-								$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-											FROM avainsana
-											".avain('join','ASOSASTO_')."
-											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASOSASTO' and avainsana.selite='$row[$i]'
-											limit 1";
-								$osre = mysql_query($query) or pupe_error($query);
-								if (mysql_num_rows($osre) == 1) {
-									$osrow = mysql_fetch_array($osre);
-									$row[$i] = $row[$i] ." ". $osrow['selitetark'];
+							if (mysql_num_rows($result) <= $rivilimitti) echo "<tr>";
+
+							// echotaan kenttien sisältö
+							for ($i=0; $i < mysql_num_fields($result); $i++) {
+
+								// jos kyseessa on tuote
+								if (mysql_field_name($result, $i) == "tuoteno") {
+									$row[$i] = "<a href='../tuote.php?tee=Z&tuoteno=$row[$i]'>$row[$i]</a>";
 								}
-							}
 
-							// jos kyseessa on asiakasryhma, haetaan sen nimi
-							if (mysql_field_name($result, $i) == "asry") {
-								$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-											FROM avainsana
-											".avain('join','ASRYHMA_')."
-											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASRYHMA' and avainsana.selite='$row[$i]'
-											limit 1";
-								$osre = mysql_query($query) or pupe_error($query);
-								if (mysql_num_rows($osre) == 1) {
-									$osrow = mysql_fetch_array($osre);
-									$row[$i] = $row[$i] ." ". $osrow['selitetark'];
-								}
-							}
-
-							// jos kyseessa on tuoteosasto, haetaan sen nimi
-							if (mysql_field_name($result, $i) == "tuos") {
-								// tehdään avainsana query
-								$osre = avainsana("OSASTO", $kukarow['kieli'], $row[$i], $yhtio, "1");
-								if (mysql_num_rows($osre) == 1) {
-									$osrow = mysql_fetch_array($osre);
-									$row[$i] = $row[$i] ." ". $osrow['selitetark'];
-								}
-							}
-
-							// jos kyseessa on tuoteosasto, haetaan sen nimi
-							if (mysql_field_name($result, $i) == "tuoteryhmä") {
-								// tehdään avainsana query
-								$osre = avainsana("TRY", $kukarow['kieli'], $row[$i], $yhtio, "1");
-								if (mysql_num_rows($osre) == 1) {
-									$osrow = mysql_fetch_array($osre);
-									$row[$i] = $row[$i] ." ". $osrow['selitetark'];
-								}
-							}
-
-							// jos kyseessa on myyjä, haetaan sen nimi
-							if (mysql_field_name($result, $i) == "tuotemyyja" or mysql_field_name($result, $i) == "asiakasmyyja") {
-								$query = "	SELECT nimi
-											FROM kuka
-											WHERE yhtio in ($yhtio) and myyja='$row[$i]' and myyja!='0' limit 1";
-								$osre = mysql_query($query) or pupe_error($query);
-
-								if (mysql_num_rows($osre) == 1) {
-									$osrow = mysql_fetch_array($osre);
-									$row[$i] = $row[$i] ." ". $osrow['nimi'];
-								}
-							}
-
-							// jos kyseessa on myyjä, haetaan sen nimi
-							if (mysql_field_name($result, $i) == "myyja") {
-								$query = "	SELECT nimi
-											FROM kuka
-											WHERE yhtio in ($yhtio) and tunnus='$row[$i]'";
-								$osre = mysql_query($query) or pupe_error($query);
-
-								if (mysql_num_rows($osre) == 1) {
-									$osrow = mysql_fetch_array($osre);
-									$row[$i] = $osrow['nimi'];
-								}
-								else {
-									$row[$i] = t("Tyhjä");
-								}
-							}
-
-							// jos kyseessa on ostaja, haetaan sen nimi
-							if (mysql_field_name($result, $i) == "tuoteostaja") {
-								$query = "	SELECT nimi
-											FROM kuka
-											WHERE yhtio in ($yhtio) and myyja='$row[$i]' and myyja!='0' limit 1";
-								$osre = mysql_query($query) or pupe_error($query);
-								if (mysql_num_rows($osre) == 1) {
-									$osrow = mysql_fetch_array($osre);
-									$row[$i] = $row[$i] ." ". $osrow['nimi'];
-								}
-							}
-
-							// jos kyseessa on toimittaja, haetaan nimi/nimet
-							if (mysql_field_name($result, $i) == "toimittaja") {
-								// fixataan mysql 'in' muotoon
-								$toimittajat = "'".str_replace(",","','",$row[$i])."'";
-								$query = "	SELECT group_concat(concat_ws('/',ytunnus,nimi)) nimi
-											FROM toimi
-											WHERE yhtio in ($yhtio) and ytunnus in ($toimittajat)";
-								$osre = mysql_query($query) or pupe_error($query);
-								if (mysql_num_rows($osre) == 1) {
-									$osrow = mysql_fetch_array($osre);
-									$row[$i] = $osrow['nimi'];
-								}
-							}
-
-							// kateprossa
-							if (mysql_field_name($result, $i) == "kateprosnyt") {
-								if ($row["myyntinyt"] != 0) {
-									$row[$i] = round($row["katenyt"] / abs($row["myyntinyt"]) * 100, 2);
-								}
-								else {
-									$row[$i] = 0;
-								}
-							}
-
-							// kateprossa
-							if (mysql_field_name($result, $i) == "kateprosed") {
-								if ($row["myyntied"] != 0) {
-									$row[$i] = round($row["kateed"] / abs($row["myyntied"]) * 100, 2);
-								}
-								else {
-									$row[$i] = 0;
-								}
-							}
-
-							// nettokateprossa
-							if (mysql_field_name($result, $i) == "nettokateprosnyt") {
-								if ($row["myyntinyt"] != 0) {
-									$row[$i] = round($row["nettokatenyt"] / abs($row["myyntinyt"]) * 100, 2);
-								}
-								else {
-									$row[$i] = 0;
-								}
-							}
-
-							// nettokateprossa
-							if (mysql_field_name($result, $i) == "nettokateprosed") {
-								if ($row["myyntied"] != 0) {
-									$row[$i] = round($row["nettokateed"] / abs($row["myyntied"]) * 100, 2);
-								}
-								else {
-									$row[$i] = 0;
-								}
-							}
-
-							// kustannuspaikka
-							if (mysql_field_name($result, $i) == "kustpaikka") {
-								// näytetään soveltuvat kustannuspaikka
-								$query = "	SELECT nimi
-											FROM kustannuspaikka
-											WHERE yhtio = '$kukarow[yhtio]'
-											and tunnus = '$row[$i]'";
-								$osre = mysql_query($query) or pupe_error($query);
-
-								if (mysql_num_rows($osre) == 1) {
-									$osrow = mysql_fetch_array($osre);
-									$row[$i] = $osrow['nimi'];
-								}
-							}
-
-							// jos kyseessa on sarjanumero
-							if (mysql_field_name($result, $i) == "sarjanumero") {
-								$sarjat = explode(",", $row[$i]);
-
-								$row[$i] = "";
-
-								foreach($sarjat as $sarja) {
-									list($s,$k) = explode("#", $sarja);
-
-
-									$query = "	SELECT osto_vai_hyvitys
-												FROM tilausrivin_lisatiedot
-												WHERE yhtio in ($yhtio)
-												and tilausrivitunnus = '$s'";
-									$rilires = mysql_query($query) or pupe_error($query);
-									$rilirow = mysql_fetch_array($rilires);
-
-									if ($k > 0 or ($k < 0 and $rilirow["osto_vai_hyvitys"] == "")) {
-										$tunken = "myyntirivitunnus";
+								// jos kyseessa on asiakasosasto, haetaan sen nimi
+								if (mysql_field_name($result, $i) == "asos") {
+									$query = "	SELECT distinct avainsana.selite, ".avain('select')."
+												FROM avainsana
+												".avain('join','ASOSASTO_')."
+												WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASOSASTO' and avainsana.selite='$row[$i]'
+												limit 1";
+									$osre = mysql_query($query) or pupe_error($query);
+									if (mysql_num_rows($osre) == 1) {
+										$osrow = mysql_fetch_array($osre);
+										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
 									}
-									else {
-										$tunken = "ostorivitunnus";
-									}
+								}
 
-									$query = "	SELECT sarjanumero
-												FROM sarjanumeroseuranta
-												WHERE yhtio in ($yhtio)
-												and $tunken=$s";
+								// jos kyseessa on asiakasryhma, haetaan sen nimi
+								if (mysql_field_name($result, $i) == "asry") {
+									$query = "	SELECT distinct avainsana.selite, ".avain('select')."
+												FROM avainsana
+												".avain('join','ASRYHMA_')."
+												WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASRYHMA' and avainsana.selite='$row[$i]'
+												limit 1";
+									$osre = mysql_query($query) or pupe_error($query);
+									if (mysql_num_rows($osre) == 1) {
+										$osrow = mysql_fetch_array($osre);
+										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
+									}
+								}
+
+								// jos kyseessa on tuoteosasto, haetaan sen nimi
+								if (mysql_field_name($result, $i) == "tuos") {
+									// tehdään avainsana query
+									$osre = avainsana("OSASTO", $kukarow['kieli'], $row[$i], $yhtio, "1");
+									if (mysql_num_rows($osre) == 1) {
+										$osrow = mysql_fetch_array($osre);
+										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
+									}
+								}
+
+								// jos kyseessa on tuoteosasto, haetaan sen nimi
+								if (mysql_field_name($result, $i) == "tuoteryhmä") {
+									// tehdään avainsana query
+									$osre = avainsana("TRY", $kukarow['kieli'], $row[$i], $yhtio, "1");
+									if (mysql_num_rows($osre) == 1) {
+										$osrow = mysql_fetch_array($osre);
+										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
+									}
+								}
+
+								// jos kyseessa on myyjä, haetaan sen nimi
+								if (mysql_field_name($result, $i) == "tuotemyyja" or mysql_field_name($result, $i) == "asiakasmyyja") {
+									$query = "	SELECT nimi
+												FROM kuka
+												WHERE yhtio in ($yhtio) and myyja='$row[$i]' and myyja!='0' limit 1";
 									$osre = mysql_query($query) or pupe_error($query);
 
-									if (mysql_num_rows($osre) > 0) {
+									if (mysql_num_rows($osre) == 1) {
 										$osrow = mysql_fetch_array($osre);
-										$row[$i] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=".urlencode($osrow["sarjanumero"])."'>".$osrow['sarjanumero']."</a><br>";
+										$row[$i] = $row[$i] ." ". $osrow['nimi'];
 									}
 								}
-								$row[$i] = substr($row[$i], 0, -4);
-							}
 
-							// jos kyseessa on varastonarvo
-							if (mysql_field_name($result, $i) == "varastonarvo") {
-								list($varvo, $kierto) = vararvo($row["tuoteno"], $vvl, $kkl, $ppl);
+								// jos kyseessa on myyjä, haetaan sen nimi
+								if (mysql_field_name($result, $i) == "myyja") {
+									$query = "	SELECT nimi
+												FROM kuka
+												WHERE yhtio in ($yhtio) and tunnus='$row[$i]'";
+									$osre = mysql_query($query) or pupe_error($query);
 
-								$row[$i] = $varvo;
-							}
+									if (mysql_num_rows($osre) == 1) {
+										$osrow = mysql_fetch_array($osre);
+										$row[$i] = $osrow['nimi'];
+									}
+									else {
+										$row[$i] = t("Tyhjä");
+									}
+								}
 
-							// jos kyseessa on varastonkierto
-							if (mysql_field_name($result, $i) == "kierto") {
-								$row[$i] = $kierto;
-							}
+								// jos kyseessa on ostaja, haetaan sen nimi
+								if (mysql_field_name($result, $i) == "tuoteostaja") {
+									$query = "	SELECT nimi
+												FROM kuka
+												WHERE yhtio in ($yhtio) and myyja='$row[$i]' and myyja!='0' limit 1";
+									$osre = mysql_query($query) or pupe_error($query);
+									if (mysql_num_rows($osre) == 1) {
+										$osrow = mysql_fetch_array($osre);
+										$row[$i] = $row[$i] ." ". $osrow['nimi'];
+									}
+								}
 
-							// Jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
-							if ($gluku > 1 and $edluku != $row[0] and $edluku != 'x' and $piiyhteensa == '' and strpos($group, ',') !== FALSE and substr($group, 0, 13) != "tuote.tuoteno") {
-								$excelsarake = $myyntiind = $kateind = $nettokateind = $myykplind = 0;
+								// jos kyseessa on toimittaja, haetaan nimi/nimet
+								if (mysql_field_name($result, $i) == "toimittaja") {
+									// fixataan mysql 'in' muotoon
+									$toimittajat = "'".str_replace(",","','",$row[$i])."'";
+									$query = "	SELECT group_concat(concat_ws('/',ytunnus,nimi)) nimi
+												FROM toimi
+												WHERE yhtio in ($yhtio) and ytunnus in ($toimittajat)";
+									$osre = mysql_query($query) or pupe_error($query);
+									if (mysql_num_rows($osre) == 1) {
+										$osrow = mysql_fetch_array($osre);
+										$row[$i] = $osrow['nimi'];
+									}
+								}
 
-								foreach($valisummat as $vnim => $vsum) {
-									if ((string) $vsum != '') {
-										$vsum = sprintf("%.2f", $vsum);
+								// kateprossa
+								if (mysql_field_name($result, $i) == "kateprosnyt") {
+									if ($row["myyntinyt"] != 0) {
+										$row[$i] = round($row["katenyt"] / abs($row["myyntinyt"]) * 100, 2);
 									}
-									if ($vnim == "kateprosnyt") {
-										if ($valisummat["myyntinyt"] <> 0) 		$vsum = round($valisummat["katenyt"] / abs($valisummat["myyntinyt"]) * 100, 2);
+									else {
+										$row[$i] = 0;
 									}
-									if ($vnim == "kateprosed") {
-										if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["kateed"] / abs($valisummat["myyntied"]) * 100, 2);
-									}
-									if ($vnim == "nettokateprosnyt") {
-										if ($valisummat["myyntinyt"] <> 0) 		$vsum = round($valisummat["nettokatenyt"] / abs($valisummat["myyntinyt"]) * 100, 2);
-									}
-									if ($vnim == "nettokateprosed") {
-										if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["nettokateed"] / abs($valisummat["myyntied"]) * 100, 2);
-									}
-									if ($vnim == "myyntiind") {
-										if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["myyntinyt"] / $valisummat["myyntied"],2);
-									}
-									if ($vnim == "kateind") {
-										if ($valisummat["kateed"] <> 0) 		$vsum = round($valisummat["katenyt"] / $valisummat["kateed"],2);
-									}
-									if ($vnim == "nettokateind") {
-										if ($valisummat["nettokateed"] <> 0) 	$vsum = round($valisummat["nettokatenyt"] / $valisummat["nettokateed"],2);
-									}
-									if ($vnim == "myykplind") {
-										if ($valisummat["myykpled"] <> 0)		$vsum = round($valisummat["myykplnyt"] / $valisummat["myykpled"],2);
-									}
+								}
 
-									if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
+								// kateprossa
+								if (mysql_field_name($result, $i) == "kateprosed") {
+									if ($row["myyntied"] != 0) {
+										$row[$i] = round($row["kateed"] / abs($row["myyntied"]) * 100, 2);
+									}
+									else {
+										$row[$i] = 0;
+									}
+								}
+
+								// nettokateprossa
+								if (mysql_field_name($result, $i) == "nettokateprosnyt") {
+									if ($row["myyntinyt"] != 0) {
+										$row[$i] = round($row["nettokatenyt"] / abs($row["myyntinyt"]) * 100, 2);
+									}
+									else {
+										$row[$i] = 0;
+									}
+								}
+
+								// nettokateprossa
+								if (mysql_field_name($result, $i) == "nettokateprosed") {
+									if ($row["myyntied"] != 0) {
+										$row[$i] = round($row["nettokateed"] / abs($row["myyntied"]) * 100, 2);
+									}
+									else {
+										$row[$i] = 0;
+									}
+								}
+
+								// kustannuspaikka
+								if (mysql_field_name($result, $i) == "kustpaikka") {
+									// näytetään soveltuvat kustannuspaikka
+									$query = "	SELECT nimi
+												FROM kustannuspaikka
+												WHERE yhtio = '$kukarow[yhtio]'
+												and tunnus = '$row[$i]'";
+									$osre = mysql_query($query) or pupe_error($query);
+
+									if (mysql_num_rows($osre) == 1) {
+										$osrow = mysql_fetch_array($osre);
+										$row[$i] = $osrow['nimi'];
+									}
+								}
+
+								// jos kyseessa on sarjanumero
+								if (mysql_field_name($result, $i) == "sarjanumero") {
+									$sarjat = explode(",", $row[$i]);
+
+									$row[$i] = "";
+
+									foreach($sarjat as $sarja) {
+										list($s,$k) = explode("#", $sarja);
+
+
+										$query = "	SELECT osto_vai_hyvitys
+													FROM tilausrivin_lisatiedot
+													WHERE yhtio in ($yhtio)
+													and tilausrivitunnus = '$s'";
+										$rilires = mysql_query($query) or pupe_error($query);
+										$rilirow = mysql_fetch_array($rilires);
+
+										if ($k > 0 or ($k < 0 and $rilirow["osto_vai_hyvitys"] == "")) {
+											$tunken = "myyntirivitunnus";
+										}
+										else {
+											$tunken = "ostorivitunnus";
+										}
+
+										$query = "	SELECT sarjanumero
+													FROM sarjanumeroseuranta
+													WHERE yhtio in ($yhtio)
+													and $tunken=$s";
+										$osre = mysql_query($query) or pupe_error($query);
+
+										if (mysql_num_rows($osre) > 0) {
+											$osrow = mysql_fetch_array($osre);
+											$row[$i] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=".urlencode($osrow["sarjanumero"])."'>".$osrow['sarjanumero']."</a><br>";
+										}
+									}
+									$row[$i] = substr($row[$i], 0, -4);
+								}
+
+								// jos kyseessa on varastonarvo
+								if (mysql_field_name($result, $i) == "varastonarvo") {
+									list($varvo, $kierto) = vararvo($row["tuoteno"], $vvl, $kkl, $ppl);
+
+									$row[$i] = $varvo;
+								}
+
+								// jos kyseessa on varastonkierto
+								if (mysql_field_name($result, $i) == "kierto") {
+									$row[$i] = $kierto;
+								}
+
+								// Jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
+								if ($gluku > 1 and $edluku != $row[0] and $edluku != 'x' and $piiyhteensa == '' and strpos($group, ',') !== FALSE and substr($group, 0, 13) != "tuote.tuoteno") {
+									$excelsarake = $myyntiind = $kateind = $nettokateind = $myykplind = 0;
+
+									foreach($valisummat as $vnim => $vsum) {
+										if ((string) $vsum != '') {
+											$vsum = sprintf("%.2f", $vsum);
+										}
+										if ($vnim == "kateprosnyt") {
+											if ($valisummat["myyntinyt"] <> 0) 		$vsum = round($valisummat["katenyt"] / abs($valisummat["myyntinyt"]) * 100, 2);
+										}
+										if ($vnim == "kateprosed") {
+											if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["kateed"] / abs($valisummat["myyntied"]) * 100, 2);
+										}
+										if ($vnim == "nettokateprosnyt") {
+											if ($valisummat["myyntinyt"] <> 0) 		$vsum = round($valisummat["nettokatenyt"] / abs($valisummat["myyntinyt"]) * 100, 2);
+										}
+										if ($vnim == "nettokateprosed") {
+											if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["nettokateed"] / abs($valisummat["myyntied"]) * 100, 2);
+										}
+										if ($vnim == "myyntiind") {
+											if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["myyntinyt"] / $valisummat["myyntied"],2);
+										}
+										if ($vnim == "kateind") {
+											if ($valisummat["kateed"] <> 0) 		$vsum = round($valisummat["katenyt"] / $valisummat["kateed"],2);
+										}
+										if ($vnim == "nettokateind") {
+											if ($valisummat["nettokateed"] <> 0) 	$vsum = round($valisummat["nettokatenyt"] / $valisummat["nettokateed"],2);
+										}
+										if ($vnim == "myykplind") {
+											if ($valisummat["myykpled"] <> 0)		$vsum = round($valisummat["myykplnyt"] / $valisummat["myykpled"],2);
+										}
+
+										if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
+
+										if(isset($workbook)) {
+											$worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
+										}
+
+										$excelsarake++;
+
+									}
+									$excelrivi++;
+									if (mysql_num_rows($result) <= $rivilimitti) echo "</tr><tr>";
+
+									$valisummat = array();
+								}
+								$edluku = $row[0];
+
+								// hoidetaan pisteet piluiksi!!
+								if (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int' or substr(mysql_field_name($result, $i),0 ,4) == 'kate')) {
+									if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
 
 									if(isset($workbook)) {
-										$worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
+										$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
 									}
-
-									$excelsarake++;
-
 								}
-								$excelrivi++;
-								if (mysql_num_rows($result) <= $rivilimitti) echo "</tr><tr>";
+								elseif (mysql_field_name($result, $i) == 'sarjanumero') {
+									if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top'>$row[$i]</td>";
 
-								$valisummat = array();
-							}
-							$edluku = $row[0];
+									if(isset($workbook)) {
+										$worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", "\n", $row[$i])));
+									}
+								}
+								else {
+									if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top'>$row[$i]</td>";
 
-							// hoidetaan pisteet piluiksi!!
-							if (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int' or substr(mysql_field_name($result, $i),0 ,4) == 'kate')) {
-								if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
-
-								if(isset($workbook)) {
-									$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
+									if(isset($workbook)) {
+										$worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", " / ", $row[$i])));
+									}
 								}
 							}
-							elseif (mysql_field_name($result, $i) == 'sarjanumero') {
-								if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top'>$row[$i]</td>";
 
-								if(isset($workbook)) {
-									$worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", "\n", $row[$i])));
+							if (mysql_num_rows($result) <= $rivilimitti) echo "</tr>\n";
+							$excelrivi++;
+
+							for ($i=0; $i < mysql_num_fields($result); $i++) {
+
+								if($i < substr_count($select, ", ")) {
+									$valisummat[mysql_field_name($result, $i)] = "";
+									$totsummat[mysql_field_name($result, $i)]  = "";
 								}
-							}
-							else {
-								if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top'>$row[$i]</td>";
-
-								if(isset($workbook)) {
-									$worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", " / ", $row[$i])));
+								else {
+									$valisummat[mysql_field_name($result, $i)] += $row[mysql_field_name($result, $i)];
+									$totsummat[mysql_field_name($result, $i)]  += $row[mysql_field_name($result, $i)];
 								}
-							}
-						}
-
-						if (mysql_num_rows($result) <= $rivilimitti) echo "</tr>\n";
-						$excelrivi++;
-
-						for ($i=0; $i < mysql_num_fields($result); $i++) {
-
-							if($i < substr_count($select, ", ")) {
-								$valisummat[mysql_field_name($result, $i)] = "";
-								$totsummat[mysql_field_name($result, $i)]  = "";
-							}
-							else {
-								$valisummat[mysql_field_name($result, $i)] += $row[mysql_field_name($result, $i)];
-								$totsummat[mysql_field_name($result, $i)]  += $row[mysql_field_name($result, $i)];
 							}
 						}
 					}
@@ -1890,6 +1903,7 @@
 			if ($piilota_nettokate != '')	$piilota_nettokate_sel	= "CHECKED";
 			if ($piilota_kate != '')		$piilota_kate_sel 		= "CHECKED";
 			if ($piilota_kappaleet != '')	$piilota_kappaleet_sel 	= "CHECKED";
+			if ($piilotanollarivit != '')	$einollachk 			= "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -2121,8 +2135,15 @@
 				<td></td>
 				<td class='back'>".t("(Toimii vain jos listaat asiakkaittain)")."</td>
 				</tr>
+				<tr>
 				<th>".t("Raportti vain Exceliin")."</th>
 				<td><input type='checkbox' name='vain_excel' $vain_excelchk></td>
+				<td></td>
+				<td class='back'></td>
+				</tr>
+				<tr>
+				<th>".t("Piilota nollarivit")."</th>
+				<td><input type='checkbox' name='piilotanollarivit' $einollachk></td>
 				<td></td>
 				<td class='back'></td>
 				</tr>

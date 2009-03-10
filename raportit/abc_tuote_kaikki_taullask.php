@@ -9,10 +9,27 @@
 	$osasto 		= trim($osasto);
 	$try    		= trim($try);
 	$tuotemerkki    = trim($tuotemerkki);
+	$tuotemyyja    	= trim($tuotemyyja);
+	$tuoteostaja   	= trim($tuoteostaja);
+	$tuotemalli	   	= trim($tuotemalli);
+	
+	
+	if (trim($saapumispp) != '' and trim($saapumiskk) != '' and trim($saapumisvv) != '') {
+		$saapumispp = $saapumispp; 
+		$saapumiskk = $saapumiskk;  
+		$saapumisvv	= $saapumisvv;
+	}
+	elseif (trim($saapumispvm) != '') {
+		list($saapumisvv, $saapumiskk, $saapumispp) = split('-', $saapumispvm);
+	}
 
-	if ($osasto 	 == "")	$osasto 	 = trim($osasto2);
-	if ($try    	 == "")	$try 		 = trim($try2);
-	if ($tuotemerkki == "")	$tuotemerkki = trim($tuotemerkki2);
+	if ($osasto		 	== "")	$osasto 	 	= trim($osasto2);
+	if ($try    		== "")	$try 		 	= trim($try2);
+	if ($tuotemerkki 	== "")	$tuotemerkki 	= trim($tuotemerkki2);
+	if ($tuotemyyja	 	== "")	$tuotemyyja	 	= trim($tuotemyyja2);
+	if ($tuoteostaja	== "")	$tuoteostaja	= trim($tuoteostaja2);
+	if ($tuotemalli		== "")	$tuotemalli		= trim($tuotemalli2);
+	
 
 	// piirrellään formi
 	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
@@ -80,6 +97,91 @@
 	}
 
 	echo "</select></td></tr>";
+	
+	echo "<tr>";
+	echo "<th>".t("Syötä tai valitse tuotemyyjä").":</th>";
+	echo "<td><input type='text' name='tuotemyyja' size='10'></td>";
+
+	$query = "	SELECT distinct myyja, nimi 
+				FROM kuka 
+				WHERE yhtio='$kukarow[yhtio]' 
+				AND myyja>0 
+				ORDER BY myyja";
+	$sresult = mysql_query($query) or pupe_error($query);
+
+	echo "<td><select name='tuotemyyja2'>";
+	echo "<option value=''>".t("Tuotemyyjä")."</option>";
+
+	if ($tuotemyyja == "KAIKKI") $sel = "selected";
+	echo "<option value='KAIKKI' $sel>".t("Tuotemyyjittäin")."</option>";
+
+	while ($srow = mysql_fetch_array($sresult)) {
+		if ($tuotemyyja == $srow[0]) $sel = "selected";
+		else $sel = "";
+		echo "<option value='$srow[0]' $sel>$srow[0] - $srow[1]</option>";
+	}
+
+	echo "</select></td>";
+	echo "</tr>";
+	
+	echo "<tr>";
+	echo "<th>".t("Syötä tai valitse tuoteostaja").":</th>";
+	echo "<td><input type='text' name='tuoteostaja' size='10'></td>";
+
+	$query = "	SELECT distinct myyja, nimi 
+				FROM kuka 
+				WHERE yhtio='$kukarow[yhtio]' 
+				AND myyja>0 
+				ORDER BY myyja";
+	$sresult = mysql_query($query) or pupe_error($query);
+
+	echo "<td><select name='tuoteostaja2'>";
+	echo "<option value=''>".t("Tuoteostaja")."</option>";
+
+	if ($tuoteostaja == "KAIKKI") $sel = "selected";
+	echo "<option value='KAIKKI' $sel>".t("Tuoteostajittain")."</option>";
+
+	while ($srow = mysql_fetch_array($sresult)) {
+		if ($tuoteostaja == $srow[0]) $sel = "selected";
+		else $sel = "";
+		echo "<option value='$srow[0]' $sel>$srow[0] - $srow[1]</option>";
+	}
+
+	echo "</select></td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>".t("Syötä tai valitse tuotemalli").":</th>";
+	echo "<td><input type='text' name='malli' size='10'></td>";
+
+	$query = "	SELECT distinct malli
+				FROM abc_aputaulu
+				WHERE yhtio='$kukarow[yhtio]' and malli != ''
+				ORDER BY malli";
+	$sresult = mysql_query($query) or pupe_error($query);
+
+	echo "<td><select name='tuotemalli2'>";
+	echo "<option value=''>".t("Tuotemalli")."</option>";
+
+	if ($tuotemalli == "KAIKKI") $sel = "selected";
+	echo "<option value='KAIKKI' $sel>".t("Tuotemalleittain")."</option>";
+
+	while ($srow = mysql_fetch_array($sresult)) {
+		if ($tuotemalli == $srow[0]) $sel = "selected";
+		else $sel = "";
+		echo "<option value='$srow[0]' $sel>$srow[0]</option>";
+	}
+
+	echo "</select></td>";
+	echo "</tr>";
+	
+	
+	echo "<tr>";
+	echo "<th>".t("Syötä viimeinen saapumispäivä").":</th>";
+	echo "	<td><input type='text' name='saapumispp' value='$saapumispp' size='2'>
+			<input type='text' name='saapumiskk' value='$saapumiskk' size='2'>
+			<input type='text' name='saapumisvv' value='$saapumisvv'size='4'></td><td></td></tr>";
+	
 	echo "<tr>";
 	echo "<th>".t("Varastopaikoittain").":</th>";
 	
@@ -138,6 +240,11 @@
 			$worksheet->write($excelrivi, 26,  t("Kate-Kustannus"));
 			$worksheet->write($excelrivi, 27,  t("Tuotepaikka"));
 			$worksheet->write($excelrivi, 28,  t("Saldo"));
+			$worksheet->write($excelrivi, 29,  t("Myyjä"));
+			$worksheet->write($excelrivi, 30,  t("Ostaja"));
+			$worksheet->write($excelrivi, 31,  t("Malli"));
+			$worksheet->write($excelrivi, 32,  t("Mallitarkenne"));
+			$worksheet->write($excelrivi, 33,  t("Saapumispvm"));
 			$excelrivi++;
 		}
 				
@@ -171,9 +278,14 @@
 		echo "Kate-Kustannus\t";
 		echo "Tuotepaikka\t";
 		echo "Saldo\t";
+		echo "Myyja\t";
+		echo "Ostaja\t";
+		echo "Malli\t";
+		echo "Mallitarkenne\t";
+		echo "Saapumispvm\t";
 		echo "\n";
 
-		$osastolisa = $trylisa = $tuotemerkkilisa = "";
+		$osastolisa = $trylisa = $tuotemerkkilisa = $tuotemyyjalisa = $tuoteostajalisa = $tuotemallilisa = $saapumispvmlisa = "";
 
 		if ($osasto != '') {
 			$osastolisa = " and osasto='$osasto' ";
@@ -183,6 +295,23 @@
 		}
 		if ($tuotemerkki != '') {
 			$tuotemerkkilisa = " and tuotemerkki='$tuotemerkki' ";
+		}
+		
+		if ($tuotemyyja != '') {
+			$tuotemyyjalisa = " and myyjanro='$tuotemyyja' ";
+		}
+
+		if ($tuoteostaja != '') {
+			$tuoteostajalisa = " and ostajanro='$tuoteostaja' ";
+		}
+
+		if ($tuotemalli != '') {
+			$tuotemallilisa = " and malli='$tuotemalli' ";
+		}
+
+		if (trim($saapumispp) != '' and trim($saapumiskk) != '' and trim($saapumisvv) != '') {
+			$saapumispvm = "$saapumisvv-$saapumiskk-$saapumispp";
+			$saapumispvmlisa = " and saapumispvm <= '$saapumispvm' ";
 		}
 
 		$query = "	SELECT
@@ -204,6 +333,11 @@
 						and tyyppi='$abcchar'
 						$osastolisa
 						$trylisa
+						$tuotemerkkilisa
+						$tuotemyyjalisa
+						$tuoteostajalisa
+						$tuotemallilisa
+						$saapumispvmlisa
 						and luokka = '$luokkarow[luokka]'";
 			$sumres = mysql_query($query) or pupe_error($query);
 			$sumrow = mysql_fetch_array($sumres);
@@ -238,12 +372,23 @@
 						kustannus,
 						kustannus_osto,
 						kustannus_yht,
-						kate - kustannus_yht total
+						kate - kustannus_yht total,
+						saldo,
+						myyjanro,
+						ostajanro,
+						malli,
+						mallitarkenne,
+						saapumispvm
 						FROM abc_aputaulu
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tyyppi='$abcchar'
 						$osastolisa
 						$trylisa
+						$tuotemerkkilisa
+						$tuotemyyjalisa
+						$tuoteostajalisa
+						$tuotemallilisa
+						$saapumispvmlisa
 						and luokka = '$luokkarow[luokka]'
 						ORDER BY $abcwhat desc";
 			$res = mysql_query($query) or pupe_error($query);
@@ -259,6 +404,24 @@
 							group by tuote.tuoteno";
 				$tuoresult = mysql_query($query) or pupe_error($query);
 				$tuorow = mysql_fetch_array($tuoresult);
+				
+				$query = "	SELECT distinct myyja, nimi 
+							FROM kuka 
+							WHERE yhtio='$kukarow[yhtio]' 
+							AND myyja = '$row[myyjanro]'
+							AND myyja != ''
+							ORDER BY myyja";
+				$myyjaresult = mysql_query($query) or pupe_error($query);
+				$myyjarow = mysql_fetch_array($myyjaresult);
+
+				$query = "	SELECT distinct myyja, nimi 
+							FROM kuka 
+							WHERE yhtio='$kukarow[yhtio]' 
+							AND myyja = '$row[ostajanro]'
+							AND myyja != ''
+							ORDER BY myyja";
+				$ostajaresult = mysql_query($query) or pupe_error($query);
+				$ostajarow = mysql_fetch_array($ostajaresult);
 
 				//haetaan varastopaikat ja saldot
 				if ($paikoittain == 'JOO') {
@@ -272,6 +435,7 @@
 								from tuotepaikat
 								where tuoteno	= '$row[tuoteno]'
 								and yhtio 		= '$kukarow[yhtio]'";
+					
 				}						
 				$paikresult = mysql_query($query) or pupe_error($query);
 
@@ -310,6 +474,11 @@
 						$worksheet->write($excelrivi, 26, sprintf('%.1f',$row["total"]));
 						$worksheet->write($excelrivi, 27, "$paikrow[paikka]");
 						$worksheet->write($excelrivi, 28, sprintf('%.0f',$paikrow["saldo"]));
+						$worksheet->write($excelrivi, 29, "$myyjarow[nimi]");
+						$worksheet->write($excelrivi, 30, "$ostajarow[nimi]");
+						$worksheet->write($excelrivi, 31, "$row[malli]");
+						$worksheet->write($excelrivi, 32, "$row[mallitarkenne]");
+						$worksheet->write($excelrivi, 33, tv1dateconv($row["saapumispvm"]));
 						$excelrivi++;
 					}
 				
@@ -342,6 +511,11 @@
 					echo str_replace(".",",",sprintf('%.1f',$row["total"]))."\t";
 					echo "$paikrow[paikka]\t";
 					echo str_replace(".",",",sprintf('%.0f',$paikrow["saldo"]))."\t";
+					echo "$myyjarow[nimi]\t";
+					echo "$ostajarow[nimi]\t";
+					echo "$row[malli]\t";
+					echo "$row[mallitarkenne]\t";
+					echo tv1dateconv($row["saapumispvm"])."\t";
 					echo "\n";					
 				}
 			}

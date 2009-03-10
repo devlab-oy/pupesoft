@@ -202,6 +202,11 @@ if ($tee == 'YHTEENVETO') {
 				ifnull(tuote.tuotemerkki,'#') tuotemerkki,
 				ifnull(tuote.nimitys,'#') tuotenimitys,
 				ifnull(tuote.luontiaika,'#') luontiaika,
+				ifnull(tuote.myyjanro,'0') myyjanro,
+				ifnull(tuote.ostajanro,'0') ostajanro,
+				ifnull(tuote.malli,'#') malli,
+				ifnull(tuote.mallitarkenne,'#') mallitakenne,
+				ifnull(tuote.vihapvm,'0000-00-00') saapumispvm,
 				sum(if(tyyppi='L' and (var='H' or var=''), 1, 0))			rivia,
 				sum(if(tyyppi='L' and (var='H' or var=''), kpl, 0))			kpl,
 				sum(if(tyyppi='L' and (var='H' or var=''), rivihinta, 0))	summa,
@@ -281,6 +286,14 @@ if ($tee == 'YHTEENVETO') {
 		$insres = mysql_query($query) or pupe_error($query);
 		$tulorow = mysql_fetch_array($insres);			
 		
+		
+		$query = " 	SELECT sum(saldo) saldo
+					FROM tuotepaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND	tuoteno = '$row[tuoteno]'";
+		$saldores = mysql_query($query) or pupe_error($query);
+		$saldorow = mysql_fetch_array($saldores);
+		
 		$query = "	INSERT INTO abc_aputaulu
 					SET yhtio			= '$kukarow[yhtio]',
 					tyyppi				= '$abcchar',
@@ -310,7 +323,13 @@ if ($tee == 'YHTEENVETO') {
 					osto_summa			= '$row[osto_summa]',
 					osto_kerrat			= '$row[osto_kerrat]',
 					kerrat				= '$row[kerrat]',
-					tuote_luontiaika	= '$row[luontiaika]'";
+					tuote_luontiaika	= '$row[luontiaika]',
+					myyjanro			= '$row[myyjanro]',
+					ostajanro			= '$row[ostajanro]',
+					malli				= '$row[malli]',
+					mallitarkenne		= '$row[mallitarkenne]',
+					saapumispvm			= '$row[saapumispvm]',
+					saldo				= '$row[saldo]'";
 		$insres = mysql_query($query) or pupe_error($query);
 
 		// luokka vaihtuu
@@ -333,6 +352,11 @@ if ($tee == 'YHTEENVETO') {
 				tuote.luontiaika,
 				tuote.tuotemerkki,
 				tuote.nimitys,
+				tuote.myyjanro,
+				tuote.ostajanro,
+				tuote.malli,
+				tuote.mallitarkenne,
+				tuote.vihapvm saapumispvm,
 				abc_aputaulu.luokka,
 				sum(saldo) saldo,
 				sum(saldo) * if(epakurantti100pvm = '0000-00-00',if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25), 0) vararvo
@@ -369,7 +393,13 @@ if ($tee == 'YHTEENVETO') {
 					tuotemerkki			= '$row[tuotemerkki]',
 					tulopvm				= '$tulorow[tulopvm]',
 					vararvo				= '$row[vararvo]',
-					tuote_luontiaika	= '$row[luontiaika]'";
+					tuote_luontiaika	= '$row[luontiaika]',
+					myyjanro			= '$row[myyjanro]',
+					ostajanro			= '$row[ostajanro]',
+					malli				= '$row[malli]',
+					mallitarkenne		= '$row[mallitarkenne]',
+					saapumispvm			= '$row[saapumispvm]',
+					saldo				= '$row[saldo]'";
 		$insres = mysql_query($query) or pupe_error($query);
 
 	}

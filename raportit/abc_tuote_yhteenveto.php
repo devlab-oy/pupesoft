@@ -3,13 +3,28 @@
 	echo "<font class='head'>".t("ABC-Analyysiä: ABC-Luokkayhteenveto")." $yhtiorow[nimi]<hr></font>";
 
 	// tutkaillaan saadut muuttujat
-	$osasto 		= trim($osasto);
-	$try    		= trim($try);
-	$tuotemerkki    = trim($tuotemerkki);
+	$osasto 			= trim($osasto);
+	$try    			= trim($try);
+	$tuotemerkki    	= trim($tuotemerkki);
+	$tuotemyyja 	   	= trim($tuotemyyja);
+	$tuoteostaja    	= trim($tuoteostaja);
+	$tuotemalli	    	= trim($tuotemalli);
+	
+	if (trim($saapumispp) != '' and trim($saapumiskk) != '' and trim($saapumisvv) != '') {
+		$saapumispp = $saapumispp; 
+		$saapumiskk = $saapumiskk;  
+		$saapumisvv	= $saapumisvv;
+	}
+	elseif (trim($saapumispvm) != '') {
+		list($saapumisvv, $saapumiskk, $saapumispp) = split('-', $saapumispvm);
+	}
 
-	if ($osasto 	 == "")	$osasto 	 = trim($osasto2);
-	if ($try    	 == "")	$try 		 = trim($try2);
-	if ($tuotemerkki == "")	$tuotemerkki = trim($tuotemerkki2);
+	if ($osasto 	 	== "")	$osasto 	 	= trim($osasto2);
+	if ($try    	 	== "")	$try 		 	= trim($try2);
+	if ($tuotemerkki 	== "")	$tuotemerkki 	= trim($tuotemerkki2);
+	if ($tuotemyyja	 	== "")	$tuotemyyja	 	= trim($tuotemyyja2);
+	if ($tuoteostaja	== "")	$tuoteostaja	= trim($tuoteostaja2);
+	if ($tuotemalli		== "")	$tuotemalli		= trim($tuotemalli2);
 
 	if ($ed == 'on')	$chk = "CHECKED";
 	else				$chk = "";
@@ -89,6 +104,89 @@
 
 	echo "</select></td>";
 	echo "</tr>";
+	
+	echo "<tr>";
+	echo "<th>".t("Syötä tai valitse tuotemyyjä").":</th>";
+	echo "<td><input type='text' name='tuotemyyja' size='10'></td>";
+
+	$query = "	SELECT distinct myyja, nimi 
+				FROM kuka 
+				WHERE yhtio='$kukarow[yhtio]' 
+				AND myyja>0 
+				ORDER BY myyja";
+	$sresult = mysql_query($query) or pupe_error($query);
+
+	echo "<td><select name='tuotemyyja2'>";
+	echo "<option value=''>".t("Tuotemyyjä")."</option>";
+
+	if ($tuotemyyja == "KAIKKI") $sel = "selected";
+	echo "<option value='KAIKKI' $sel>".t("Tuotemyyjittäin")."</option>";
+
+	while ($srow = mysql_fetch_array($sresult)) {
+		if ($tuotemyyja == $srow[0]) $sel = "selected";
+		else $sel = "";
+		echo "<option value='$srow[0]' $sel>$srow[0] - $srow[1]</option>";
+	}
+
+	echo "</select></td>";
+	echo "</tr>";
+	
+	echo "<tr>";
+	echo "<th>".t("Syötä tai valitse tuoteostaja").":</th>";
+	echo "<td><input type='text' name='tuoteostaja' size='10'></td>";
+
+	$query = "	SELECT distinct myyja, nimi 
+				FROM kuka 
+				WHERE yhtio='$kukarow[yhtio]' 
+				AND myyja>0 
+				ORDER BY myyja";
+	$sresult = mysql_query($query) or pupe_error($query);
+	
+	echo "<td><select name='tuoteostaja2'>";
+	echo "<option value=''>".t("Tuoteostaja")."</option>";
+
+	if ($tuoteostaja == "KAIKKI") $sel = "selected";
+	echo "<option value='KAIKKI' $sel>".t("Tuoteostajittain")."</option>";
+
+	while ($srow = mysql_fetch_array($sresult)) {
+		if ($tuoteostaja == $srow[0]) $sel = "selected";
+		else $sel = "";
+		echo "<option value='$srow[0]' $sel>$srow[0] - $srow[1]</option>";
+	}
+
+	echo "</select></td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>".t("Syötä tai valitse tuotemalli").":</th>";
+	echo "<td><input type='text' name='malli' size='10'></td>";
+
+	$query = "	SELECT distinct malli
+				FROM abc_aputaulu
+				WHERE yhtio='$kukarow[yhtio]' and malli != ''
+				ORDER BY malli";
+	$sresult = mysql_query($query) or pupe_error($query);
+
+	echo "<td><select name='tuotemalli2'>";
+	echo "<option value=''>".t("Tuotemalli")."</option>";
+
+	if ($tuotemalli == "KAIKKI") $sel = "selected";
+	echo "<option value='KAIKKI' $sel>".t("Tuotemalleittain")."</option>";
+
+	while ($srow = mysql_fetch_array($sresult)) {
+		if ($tuotemalli == $srow[0]) $sel = "selected";
+		else $sel = "";
+		echo "<option value='$srow[0]' $sel>$srow[0]</option>";
+	}
+
+	echo "</select></td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>".t("Syötä viimeinen saapumispäivä").":</th>";
+	echo "	<td><input type='text' name='saapumispp' value='$saapumispp' size='2'>
+			<input type='text' name='saapumiskk' value='$saapumiskk' size='2'>
+			<input type='text' name='saapumisvv' value='$saapumisvv'size='4'></td><td></td></tr>";
 
 	echo "<tr>";
 	echo "<th>".t("Taso").":</th>";
@@ -129,18 +227,30 @@
 		}
 
 		if ($osasto == 'KAIKKI') {
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot&order=".$orderurl."osasto'>".t("Osasto")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemyyja=$tuotemyyja&tuoteostaja=$tuoteostaja&tuotemalli=$tuotemalli&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=".$orderurl."osasto'>".t("Osasto")."</a><br>&nbsp;</th>";
 		}
 
 		if ($try == 'KAIKKI') {
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot&order=".$orderurl."try'>".t("Tuoteryhmä")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemyyja=$tuotemyyja&tuoteostaja=$tuoteostaja&tuotemalli=$tuotemalli&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=".$orderurl."try'>".t("Tuoteryhmä")."</a><br>&nbsp;</th>";
 		}
 
 		if ($tuotemerkki == 'KAIKKI') {
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot&order=".$orderurl."tuotemerkki'>".t("Tuotemerkki")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemyyja=$tuotemyyja&tuoteostaja=$tuoteostaja&tuotemalli=$tuotemalli&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=".$orderurl."tuotemerkki'>".t("Tuotemerkki")."</a><br>&nbsp;</th>";
+		}
+		
+		if ($tuotemyyja == 'KAIKKI') {
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemyyja=$tuotemyyja&tuoteostaja=$tuoteostaja&tuotemalli=$tuotemalli&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=".$orderurl."myyjanro'>".t("Tuotemyyjä")."</a><br>&nbsp;</th>";
+		}
+		
+		if ($tuoteostaja == 'KAIKKI') {
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemyyja=$tuotemyyja&tuoteostaja=$tuoteostaja&tuotemalli=$tuotemalli&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=".$orderurl."ostajanro'>".t("Tuoteostaja")."</a><br>&nbsp;</th>";
+		}
+		
+		if ($tuotemalli == 'KAIKKI') {
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemyyja=$tuotemyyja&tuoteostaja=$tuoteostaja&tuotemalli=$tuotemalli&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=".$orderurl."malli'>".t("Tuotemalli")."</a><br>&nbsp;</th>";
 		}
 
-		if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI')  {
+		if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI')  {
 			echo "<th nowrap>".t("ABC")."<br>".t("Luokka")."</th>";
 		}
 
@@ -217,7 +327,7 @@
 		}
 		echo "</tr>\n";
 
-		$osastolisa = $trylisa = $tuotemerkkilisa = "";
+		$osastolisa = $trylisa = $tuotemerkkilisa = $tuotemyyjalisa = $tuoteostajalisa = $tuotemallilisa = $saapumispvmlisa = "";
 
 		if ($osasto != '' and $osasto != 'KAIKKI') {
 			$osastolisa = " and osasto='$osasto' ";
@@ -227,6 +337,22 @@
 		}
 		if ($tuotemerkki != '' and $tuotemerkki != 'KAIKKI') {
 			$tuotemerkkilisa = " and tuotemerkki='$tuotemerkki' ";
+		}
+		if ($tuotemyyja != '' and $tuotemyyja != 'KAIKKI') {
+			$tuotemyyjalisa = " and myyjanro='$tuotemyyja' ";
+		}		
+		
+		if ($tuoteostaja != '' and $tuoteostaja != 'KAIKKI') {
+			$tuoteostajalisa = " and ostajanro = '$tuoteostaja' ";
+		}
+		
+		if ($tuotemalli != '' and $tuotemalli != 'KAIKKI') {
+			$tuotemallilisa = " and malli = '$tuotemalli' ";
+		}
+		
+		if (trim($saapumispp) != '' and trim($saapumiskk) != '' and trim($saapumisvv) != '') {
+			$saapumispvm = "$saapumisvv-$saapumiskk-$saapumispp";
+			$saapumispvmlisa = " and abc_aputaulu.saapumispvm <= '$saapumispvm' ";
 		}
 
 		//kauden yhteismyynnit ja katteet
@@ -238,10 +364,14 @@
 					and tyyppi='$abcchar'
 					$osastolisa
 					$trylisa
-					$tuotemerkkilisa";
+					$tuotemerkkilisa
+					$tuotemyyjalisa
+					$tuoteostajalisa
+					$tuotemallilisa
+					$saapumispvmlisa";
 		$sumres = mysql_query($query) or pupe_error($query);
 		$sumrow = mysql_fetch_array($sumres);
-
+	
 		if ($sumrow["yhtkate"] == 0) {
 			$sumrow["yhtkate"] = 0.01;
 		}
@@ -265,7 +395,22 @@
 			$groupby  .= " tuotemerkki,";
 		}
 
-		if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI')  {
+		if ($tuotemyyja == 'KAIKKI') {
+			$prequery .= " myyjanro,";
+			$groupby  .= " myyjanro,";
+		}
+		
+		if ($tuoteostaja == 'KAIKKI') {
+			$prequery .= " ostajanro,";
+			$groupby  .= " ostajanro,";
+		}
+		
+		if ($tuotemalli == 'KAIKKI') {
+			$prequery .= " malli,";
+			$groupby  .= " malli,";
+		}		
+
+		if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI')  {
 			$prequery .= " luokka,";
 			$groupby  .= " luokka,";
 			$orderby  .= " luokka,";
@@ -310,13 +455,18 @@
 					(sum(kate)/sum(summa)*100) * ((sum(summa)-sum(kate))/sum(vararvo)) kate_kertaa_kierto,
 					sum(kate)/$sumrow[yhtkate] * 100	kateosuus,
 					100 - ((sum(puuterivia)/(sum(puuterivia)+sum(rivia))) * 100) palvelutaso,
-					sum(kate)-sum(kustannus_yht)		total
+					sum(kate)-sum(kustannus_yht)		total,
+					sum(saldo)							saldo
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi='$abcchar'
 					$osastolisa
 					$trylisa
 					$tuotemerkkilisa
+					$tuotemyyjalisa
+					$tuoteostajalisa
+					$tuotemallilisa
+					$saapumispvmlisa
 					$groupby
 					$orderby";
 		$res = mysql_query($query) or pupe_error($query);
@@ -371,10 +521,32 @@
 			if ($tuotemerkki == 'KAIKKI') {
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&tuotemerkki=$row[tuotemerkki]&lisatiedot=$lisatiedot'>$row[tuotemerkki]</a></td>";
 			}
-
-			if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI')  {
-				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$row[luokka]&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot'>".$ryhmanimet[$row["luokka"]]."</a></td>";
+			
+			if ($tuotemyyja == 'KAIKKI') {
+				$keymyyja = "	SELECT nimi FROM kuka WHERE yhtio = '$kukarow[yhtio]' and myyja = '$row[myyjanro]'";
+				$myyjares = mysql_query($keymyyja) or pupe_error($keymyyja);
+				$keytuotemyyja = mysql_fetch_array($myyjares);
+				
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&tuotemyyja=$row[myyjanro]&lisatiedot=$lisatiedot'>$keytuotemyyja[nimi]</a></td>";
 			}
+			
+			if ($tuoteostaja == 'KAIKKI') {
+				$keyostaja = "	SELECT nimi FROM kuka WHERE yhtio = '$kukarow[yhtio]' and myyja = '$row[ostajanro]'";
+				$ostajares = mysql_query($keyostaja) or pupe_error($keymyyja);
+				$keytuoteostaja = mysql_fetch_array($ostajares);
+				
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&tuoteostaja=$row[ostajanro]&lisatiedot=$lisatiedot'>$keytuoteostaja[nimi]</a></td>";
+			}
+
+			if ($tuotemalli == 'KAIKKI') {
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&tuotemalli=$row[malli]&lisatiedot=$lisatiedot'>$row[malli]</a></td>";
+			}
+
+			if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI')  {
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$row[luokka]&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemyyja=$tuotemyyja&tuoteostaja=$tuoteostaja&tuotemalli=$tuotemalli&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot'>".$ryhmanimet[$row["luokka"]]."</a></td>";
+			}
+			
+			
 
 			echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["summa"]));
 			echo "<input type='hidden' name='summa_$i' id='summa_$i' value='$row[summa]'></td>";
@@ -604,8 +776,20 @@
 		if ($tuotemerkki == 'KAIKKI') {
 			$colspan++;
 		}
+		
+		if ($tuotemyyja == 'KAIKKI') {
+			$colspan++;
+		}
+		
+		if ($tuoteostaja == 'KAIKKI') {
+			$colspan++;
+		}
+		
+		if ($tuotemalli == 'KAIKKI') {
+			$colspan++;
+		}
 
-		if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI')  {
+		if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI')  {
 			$colspan++;
 		}
 

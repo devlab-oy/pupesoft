@@ -20,15 +20,15 @@ if($tee == "POISTA") {
 }
 
 function lisaa_paivaraha($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, $kommentti, $kustp, $kohde, $projekti) {
-	return lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, "", "", "", $kommentti, "A", $kustp, $kohde, $projekti);
+	return lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, "", 0, "", "", $kommentti, "A", $kustp, $kohde, $projekti);
 }
 
-function lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $hinta, $kommentti, $maa, $kustp, $kohde, $projekti) {
-	return lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, "", "", $kpl, $hinta, $maa, $kommentti, "B", $kustp, $kohde, $projekti);
+function lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero, $hinta, $kommentti, $maa, $kustp, $kohde, $projekti) {
+	return lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, "", "", $kpl, $vero, $hinta, $maa, $kommentti, "B", $kustp, $kohde, $projekti);
 }
 
 
-function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, $kpl, $hinta, $maa, $kommentti, $tyyppi, $kustp, $kohde, $projekti) {
+function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, $kpl, $vero, $hinta, $maa, $kommentti, $tyyppi, $kustp, $kohde, $projekti) {
 	global $yhtiorow, $kukarow, $toim, $hardcoded_alv;
 	
 	$query = "	select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
@@ -246,9 +246,6 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 
 						$vero=0;
 					}
-					else {
-						$vero = $trow["alv"];
-					}
 				}
 				else {
 					$vero = 0;
@@ -444,7 +441,7 @@ function korjaa_ostovelka($ltunnus) {
 	$laskurow=mysql_fetch_array($result);
 	
 	if($laskurow["tila"] != "H") {
-		echo "<font class='message'>Lasku on jo hyväksytty, laskun summaa ja osovelkatiliöintiä ei enää muutetta!</font><br>";
+		echo "<font class='message'>Lasku on jo hyväksytty, laskun summaa ja ostovelkatiliöintiä ei enää muuteta!</font><br>";
 		return true;
 	}
 	
@@ -1041,6 +1038,7 @@ if ($tee == "MUOKKAA") {
 							kustp.tunnus kustp,
 							kohde.tunnus kohde,
 							tiliointi.tilino tiliointitili,
+							tiliointi.vero tiliointialv,
 							projekti.tunnus projekti
 							FROM tilausrivi use index (PRIMARY)
 							LEFT JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
@@ -1097,6 +1095,7 @@ if ($tee == "MUOKKAA") {
 
 
 						$kpl		= $tilausrivi["kpl"];
+						$vero		= $tilausrivi["tiliointialv"];
 						$hinta		= round($tilausrivi["hinta"], 2);
 						$kommentti	= $tilausrivi["kommentti"];
 						$rivitunnus	= $tilausrivi["tunnus"];
@@ -1136,7 +1135,7 @@ if ($tee == "MUOKKAA") {
 				$errori = lisaa_paivaraha($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, "$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm", "$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm", $kommentti, $kustp, $kohde, $projekti);
 			}
 			else {
-				$errori = lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $hinta, $kommentti, $maa, $kustp, $kohde, $projekti);
+				$errori = lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero, $hinta, $kommentti, $maa, $kustp, $kohde, $projekti);
 			}
 			if($errori == "") {
 				$tyhjenna = "JOO";
@@ -1530,10 +1529,13 @@ if ($tee == "MUOKKAA") {
 						}
 					}
 
-					echo "<td>".alv_popup_oletus("alvulk",$alvulk, $maa, 'lista')."</td>";
+					echo "<td><input type='hidden' name='vero' value='0'>".alv_popup_oletus("alvulk", $alvulk, $maa, 'lista')."</td>";
 				}
 				else {
-					echo "<td>{$trow["alv"]}</td>";
+					if(!isset($vero)) {
+						$vero = $trow["alv"];
+					}
+					echo "<td>".alv_popup_oletus("vero", $vero, $maa, 'lista')."</td>";
 				}
 
 				$leveys=50;
@@ -1610,7 +1612,7 @@ if ($tee == "MUOKKAA") {
 
 			$saa_hyvaksya="JOO";
 
-			echo "<tr><th style='text-align: left; width: 20px;'>&nbsp;#</th><th>".t("Kulu")."</th><th>".t("Kustannuspaikka")."</th><th>".t("Kpl")."</th><th>".t("Hinta")."</th><th>".t("Yhteensä")."</th></tr>";
+			echo "<tr><th style='text-align: left; width: 20px;'>&nbsp;#</th><th>".t("Kulu")."</th><th>".t("Kustannuspaikka")."</th><th>".t("Kpl")."</th><th>".t("Hinta")."</th><th>".t("Alv")."</th><th>".t("Yhteensä")."</th></tr>";
 			$eka="joo";
 			$edperhe = $edperheid2 = 0;
 			$summa=0;
@@ -1628,11 +1630,11 @@ if ($tee == "MUOKKAA") {
 				}
 				
 				if (($row["perhe"] != $edperhe) and $eka != "joo" and $row["perheid2"] == $edperheid2) {
-					echo "<tr><td class='back' colspan = '5' height='10' style='border-right: 1px solid;'></td></tr>";
+					echo "<tr><td class='back' colspan = '6' height='10' style='border-right: 1px solid;'></td></tr>";
 				}
 
 				if (($row["perheid2"] != $edperheid2) and $eka != "joo") {
-					echo "<tr><td class='back' colspan = '6' height='25'></td></tr>";
+					echo "<tr><td class='back' colspan = '7' height='25'></td></tr>";
 				}
 				
 				echo "<tr>";
@@ -1769,6 +1771,7 @@ if ($tee == "MUOKKAA") {
 				echo "<td style='".$border["t"]["m"]."'>$row[kustannuspaikka]</td>";
 				echo "<td align='right' style='font-weight: bold; ".$border["t"]["m"]."'>$row[kpl]</td>";
 				echo "<td align='right' style='font-weight: bold; ".$border["t"]["m"]."'>".number_format($row["hinta"],2, ', ', ' ')."</td>";
+				echo "<td align='right' style='font-weight: bold; ".$border["t"]["m"]."'>".number_format($row["alv"],2, ', ', ' ')."</td>";				
 				echo "<td align='right' style='font-weight: bold; ".$border["t"]["r"]."'>".number_format($row["rivihinta"],2, ', ', ' ')."</td>";
 				
 				//	Aina kun perhe vaihtuu voidaan näyttää nappulat!
@@ -1825,7 +1828,7 @@ if ($tee == "MUOKKAA") {
 				if ($row["tunnus"] == $row["viimonen"]) {
 					
 					if($row["tuotetyyppi"] != "A") {
-						echo "<tr><th>".t("kohdemaa").":</th><td colspan='4' style=\"font-style: italic; border-right: 1px solid;\">".maa($row[kulun_kohdemaa])."</td></tr>";
+						echo "<tr><th>".t("kohdemaa").":</th><td colspan='5' style=\"font-style: italic; border-right: 1px solid;\">".maa($row[kulun_kohdemaa])."</td></tr>";
 					}
 
 					if($toim == "SUPER") {
@@ -1834,15 +1837,15 @@ if ($tee == "MUOKKAA") {
 									WHERE yhtio = '{$kukarow["yhtio"]}' and tilino = '$row[tilino]'";
 						$tilires=mysql_query($query) or pupe_error($query);
 						$tilirow = mysql_fetch_array($tilires);
-						echo "<tr><th>".t("Tilino").":</th><td colspan='4' style=\"font-style: italic; border-right: 1px solid;\">$row[tilino] {$tilirow["nimi"]}</td></tr>";
+						echo "<tr><th>".t("Tilino").":</th><td colspan='5' style=\"font-style: italic; border-right: 1px solid;\">$row[tilino] {$tilirow["nimi"]}</td></tr>";
 					}					
 					
 					if($row["kommentti"] != "") {
-						echo "<tr><th style='".$border["k"]["m"]."'>".t("Kommentti").":</th><td colspan='4' style=\"font-style: italic; ".$border["k"]["r"]."\">$row[kommentti]</td></tr>";
+						echo "<tr><th style='".$border["k"]["m"]."'>".t("Kommentti").":</th><td colspan='5' style=\"font-style: italic; ".$border["k"]["r"]."\">$row[kommentti]</td></tr>";
 					}
 															
 					if($row["tuotetyyppi"] == "A") {
-						echo "<tr><th style='".$border["a"]["m"]."'>".t("Ajalla").":</th><td colspan='4' style=\"font-style: italic; ".$border["a"]["r"]."\">$row[ajalla]</td></tr>";
+						echo "<tr><th style='".$border["a"]["m"]."'>".t("Ajalla").":</th><td colspan='5' style=\"font-style: italic; ".$border["a"]["r"]."\">$row[ajalla]</td></tr>";
 					}
 				}
 				
@@ -1853,7 +1856,7 @@ if ($tee == "MUOKKAA") {
 				$rivei--;
 			}
 
-			echo "<tr><td colspan='3' class='back'></td><th colspan='2' style='text-align:right;'>".t("Yhteensä")."</th><th style='text-align:right;'>".number_format($summa,2, ', ', ' ')."</th></tr>";
+			echo "<tr><td colspan='3' class='back'></td><th colspan='3' style='text-align:right;'>".t("Yhteensä")."</th><th style='text-align:right;'>".number_format($summa,2, ', ', ' ')."</th></tr>";
 			
 		}
 		else {

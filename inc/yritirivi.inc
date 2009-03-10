@@ -156,4 +156,17 @@
 		}
 	}
 
+	if (mysql_field_name($result, $i) == "siirtoavain" or
+		mysql_field_name($result, $i) == "kasukupolvi" or
+		mysql_field_name($result, $i) == "sasukupolvi" or
+		mysql_field_name($result, $i) == "kertaavain" or
+		mysql_field_name($result, $i) == "siemen" or
+		mysql_field_name($result, $i) == "salattukerta" or
+		mysql_field_name($result, $i) == "generointiavain" or
+		mysql_field_name($result, $i) == "asiakas" or
+		mysql_field_name($result, $i) == "pankki" or
+		mysql_field_name($result, $i) == "asiakastarkenne" or
+		mysql_field_name($result, $i) == "pankkitarkenne") {
+			$tyyppi = 0;
+	}
 ?>

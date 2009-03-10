@@ -39,20 +39,22 @@
 		// p‰ivitet‰‰n toimittaja
 		if ($tee == "update") {
 			
-			$query = "	update yhteyshenkilo set
+			$query = "	UPDATE yhteyshenkilo set
 						$tyyppilisa
-						nimi 			= '$henkilonimi',
-						titteli		 	= '$titteli',
-						email 			= '$email',
-						puh 			= '$puh',
-						gsm 			= '$gsm',
-						fax 			= '$fax',
-						www 			= '$www',
-						fakta 			= '$fakta',
+						nimi 				= '$henkilonimi',
+						titteli		 		= '$titteli',
+						rooli 				= '$rooli',
+						suoramarkkinointi 	= '$suoramarkkinointi',
+						email 				= '$email',
+						puh 				= '$puh',
+						gsm 				= '$gsm',
+						fax 				= '$fax',
+						www 				= '$www',
+						fakta 				= '$fakta',
 						tilausyhteyshenkilo = '$tilausyhteyshenkilo',
 						oletusyhteyshenkilo = '$oletusyhteyshenkilo',						
-						muuttaja		= '$kukarow[kuka]', 
-						muutospvm		= now()
+						muuttaja			= '$kukarow[kuka]', 
+						muutospvm			= now()
 						where yhtio = '$kukarow[yhtio]' 
 						and tunnus  = '$henkilotunnus' 
 						and liitostunnus='$tunnus'";
@@ -62,7 +64,7 @@
 
 		// poistetaan toimittaja
 		if ($tee == "poista") {
-			$query = "	delete from yhteyshenkilo 
+			$query = "	DELETE from yhteyshenkilo 
 						where yhtio		= '$kukarow[yhtio]' 
 						and tunnus		= '$henkilotunnus' 
 						and liitostunnus= '$tunnus'";
@@ -72,22 +74,24 @@
 
 		// lis‰t‰‰n toimittaja
 		if ($tee == "insert") {
-			$query = "	insert into yhteyshenkilo set
-						yhtio			= '$kukarow[yhtio]',
+			$query = "	INSERT into yhteyshenkilo set
+						yhtio				= '$kukarow[yhtio]',
 						$tyyppilisa
-						liitostunnus 	= '$tunnus',
-						nimi 			= '$henkilonimi',
-						titteli		 	= '$titteli',
-						email 			= '$email',
-						puh 			= '$puh',
-						gsm 			= '$gsm',
-						fax 			= '$fax',
-						www 			= '$www',
-						fakta 			= '$fakta',
+						liitostunnus 		= '$tunnus',
+						nimi 				= '$henkilonimi',
+						titteli		 		= '$titteli',
+						rooli 				= '$rooli',
+						suoramarkkinointi 	= '$suoramarkkinointi',
+						email 				= '$email',
+						puh 				= '$puh',
+						gsm 				= '$gsm',
+						fax 				= '$fax',
+						www 				= '$www',
+						fakta 				= '$fakta',
 						tilausyhteyshenkilo = '$tilausyhteyshenkilo',
 						oletusyhteyshenkilo = '$oletusyhteyshenkilo',
-						laatija			= '$kukarow[kuka]',
-						luontiaika		= now()";
+						laatija				= '$kukarow[kuka]',
+						luontiaika			= now()";
 			$result = mysql_query($query) or pupe_error($query);
 			$tee = "";
 		}
@@ -101,6 +105,38 @@
 
 			echo "<tr><th>".t("nimi")."</th>				<td><input type='text' name='henkilonimi' 			value='$henkilonimi'></td></tr>";
 			echo "<tr><th>".t("titteli")."</th>				<td><input type='text' name='titteli' 				value='$titteli'></td></tr>";
+			
+			$query = "	SELECT avainsana.selite, avainsana.selitetark
+						FROM avainsana
+						WHERE avainsana.yhtio 	= '$kukarow[yhtio]' 
+						and avainsana.laji 		= 'CRM_ROOLI'
+						ORDER BY avainsana.jarjestys, avainsana.selite";
+			$vresult = mysql_query($query) or pupe_error($query);
+
+			echo "<tr><th>".t("rooli")."</th><td><select name='rooli'><option value=''>".t("Ei roolia")."</option>";
+
+			while($row = mysql_fetch_assoc($vresult)) {
+				echo "<option value='$row[selite]'> $row[selite]</option>";
+			}
+
+			echo "</select></td></tr>";
+
+			$query = "	SELECT avainsana.selite, avainsana.selitetark
+						FROM avainsana
+						WHERE avainsana.yhtio 	= '$kukarow[yhtio]' 
+						and avainsana.laji 		= 'CRM_SUORAMARKKI'
+						ORDER BY avainsana.jarjestys, avainsana.selite";
+			$vresult = mysql_query($query) or pupe_error($query);
+
+			echo "<tr><th>".t("Suoramarkkinointitiedot")."</th><td><select name='suoramarkkinointi'><option value=''>".t("Ei suoramarkkinointitietoja")."</option>";
+
+			while($row = mysql_fetch_assoc($vresult)) {
+				echo "<option value='$row[selite]'> $row[selite]</option>";
+			}
+
+			echo "</select></td></tr>";
+			
+			
 			echo "<tr><th>".t("email")."</th>				<td><input type='text' name='email' 				value='$email'></td></tr>";
 			echo "<tr><th>".t("puh")."</th>					<td><input type='text' name='puh' 					value='$puh'></td></tr>";
 			echo "<tr><th>".t("gsm")."</th>					<td><input type='text' name='gsm' 					value='$gsm'></td></tr>";
@@ -140,6 +176,41 @@
 				
 				echo "<tr><th>".t("nimi")."</th>			<td><input type='text' name='henkilonimi' 		value='$trow[nimi]'></td></tr>";
 				echo "<tr><th>".t("titteli")."</th>			<td><input type='text' name='titteli'		 	value='$trow[titteli]'></td></tr>";
+				
+				$query = "	SELECT avainsana.selite, avainsana.selitetark
+							FROM avainsana
+							WHERE avainsana.yhtio 	= '$kukarow[yhtio]' 
+							and avainsana.laji 		= 'CRM_ROOLI'
+							ORDER BY avainsana.jarjestys, avainsana.selite";
+				$vresult = mysql_query($query) or pupe_error($query);
+
+				echo "<tr><th>".t("rooli")."</th><td><select name='rooli'><option value=''>".t("Ei roolia")."</option>";
+
+				while($row = mysql_fetch_assoc($vresult)) {
+					$sel = "";
+					if ($row["selite"] == $trow["rooli"]) $sel = 'selected';
+					echo "<option value='$row[selite]' $sel> $row[selite] $row[1]</option>";
+				}
+
+				echo "</select></td></tr>";
+
+				$query = "	SELECT avainsana.selite, avainsana.selitetark
+							FROM avainsana
+							WHERE avainsana.yhtio 	= '$kukarow[yhtio]' 
+							and avainsana.laji 		= 'CRM_SUORAMARKKI'
+							ORDER BY avainsana.jarjestys, avainsana.selite";
+				$vresult = mysql_query($query) or pupe_error($query);
+
+				echo "<tr><th>".t("Suoramarkkinointitiedot")."</th><td><select name='suoramarkkinointi'><option value=''>".t("Ei suoramarkkinointitietoja")."</option>";
+
+				while($row = mysql_fetch_assoc($vresult)) {
+					$sel = "";
+					if ($row["selite"] == $trow["suoramarkkinointi"]) $sel = 'selected';
+					echo "<option value='$row[selite]' $sel> $row[selite] $row[1]</option>";
+				}
+
+				echo "</select></td></tr>";
+
 				echo "<tr><th>".t("email")."</th>			<td><input type='text' name='email'			 	value='$trow[email]'></td></tr>";
 				echo "<tr><th>".t("puh")."</th>				<td><input type='text' name='puh'		 		value='$trow[puh]'></td></tr>";
 				echo "<tr><th>".t("gsm")."</th>				<td><input type='text' name='gsm' 				value='$trow[gsm]'></td></tr>";

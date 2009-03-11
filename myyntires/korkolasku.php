@@ -305,9 +305,11 @@ if ($tee == "") {
 
 	$ulos = "<select name='vmehto'>";
 
-	while ($vrow=mysql_fetch_row($vresult)) {
-		$sel="";
-		$ulos .= "<option value = '$vrow[0]'>$vrow[1]";
+	while ($vrow = mysql_fetch_row($vresult)) {
+		$sel = "";
+		if ($vmehto == $vrow[0]) $sel = "SELECTED";
+		
+		$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
 	}
 	$ulos .= "</select>";
 

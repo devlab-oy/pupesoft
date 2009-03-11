@@ -195,10 +195,26 @@
 				if($laskurow["vienti"] != '' and $rivirow["riveja"] == $rivirow["saldottomat"]) {
 					$alat = "D";
 					$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
+					$query  = "	UPDATE tilausrivi
+								SET toimitettuaika = now(),
+								toimitettu = '$kukarow[kuka]'
+								WHERE otunnus 	= '$laskurow[tunnus]'
+								and yhtio 		= '$kukarow[yhtio]'
+								and var not in ('P','J','S')
+								and toimitettu 	= ''";
+					$result = mysql_query($query) or pupe_error($query);
 				}
 				elseif($laskurow["vienti"] != '') {
 					$alat = "B";
 					$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi. Viennin lis‰tiedot syˆtett‰v‰."), $laskurow["tunnus"])."</font><br><br>\n";
+					$query  = "	UPDATE tilausrivi
+								SET toimitettuaika = now(),
+								toimitettu = '$kukarow[kuka]'
+								WHERE otunnus 	= '$laskurow[tunnus]'
+								and yhtio 		= '$kukarow[yhtio]'
+								and var not in ('P','J','S')
+								and toimitettu 	= ''";
+					$result = mysql_query($query) or pupe_error($query);
 				}
 				else {
 					$alat = "C";

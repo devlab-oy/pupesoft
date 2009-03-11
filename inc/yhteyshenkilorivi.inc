@@ -7,15 +7,14 @@
 		$tyyppi = 0;
 	}
 	
-	if($popparista or $ajax_menu_yp != "") {
-		if (mysql_field_name($result, $i) == "liitostunnus") {
-			if ($liitostunnus != ''){
-				$trow[$i] = $liitostunnus;
-			}
-			$tyyppi = 4;
+	if (mysql_field_name($result, $i) == "liitostunnus") {
+		if ($liitostunnus != ''){
+			$trow[$i] = $liitostunnus;
 		}
+		$tyyppi = 3;
 	}
-	else {
+	
+	if(!($popparista or $ajax_menu_yp != "")) {
 		if (mysql_field_name($result, $i) == "asiakas") {
 			if ($liitostunnus != ''){
 				$trow[$i] = $liitostunnus;

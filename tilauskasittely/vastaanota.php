@@ -761,14 +761,7 @@
 
 		if ($toim == "") {
 			echo "<td>";
-
-			$cchk = '';
-
-			if ($oletuspaiv != '') {
-				$cchk = "CHECKED";
-			}
-
-			echo "<input type='checkbox' name='oletuspaiv' $cchk>";
+			echo "<input type='checkbox' name='oletuspaiv' checked>";
 			echo "</td>";
 		}
 

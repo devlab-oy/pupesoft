@@ -158,6 +158,22 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "tilausvahvistus_lahetys") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = '0' $sel[0]>".t("Tilausvahvistus l‰hetet‰‰n jokaisesta osatilauksesta erikseen");
+		$ulos .= "<option value = '1' $sel[1]>".t("Tilausvahvistus l‰hetet‰‰n alkuper‰isest‰ tilauksesta");
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 	
 	if (mysql_field_name($result, $i) == "varastosiirto_tilausvahvistus") {
 		$apu = $trow[$i];

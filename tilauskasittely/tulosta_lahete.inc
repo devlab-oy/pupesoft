@@ -1596,7 +1596,7 @@ if (!function_exists('print_pdf')) {
 
 			if ($tyyppi == "TILAUSVAHVISTUS") {
 				$kutsu = "Tilausvahvistus";
-				echo t("Tilausvahvistus tulostuu")."...<br>";
+				echo t("Tilausvahvistus tulostuu")." $laskurow[tunnus]...<br>";
 			}
 			elseif ($tyyppi == "YLLAPITOSOPIMUS") {
 				$kutsu = "Ylläpitosopimus";
@@ -1624,7 +1624,8 @@ if (!function_exists('print_pdf')) {
 			$line = exec("$komento $pdffilenimi", $output, $returnvalue);
 		}
 
-
+		unset($pdf);
+		unset($GLOBALS['pdf']);
 
 		//poistetaan tmp file samantien kuleksimasta...
 		system("rm -f $pdffilenimi");

@@ -347,10 +347,12 @@
 						echo "<font class='message'>".t("Valmistus siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
 					}
 					elseif ($yhtiorow["varastosiirto_tilausvahvistus"] == "K") {
-						$naytatvale = 3;
-						$laskurow["tilausvahvistus"] = "OP";
-						
-						require("tilausvahvistus-email.inc");
+
+						// pakotetaan tilausvanvistus PDF muodossa omaan sähköpostiin, ilman hintoja.
+						$laskurow["tilausvahvistus"] = "3OP";
+
+						// LÄHETETÄÄN TILAUSVAHVISTUS
+						laheta_tilausvahvistus($laskurow);
 					
 						echo "<font class='message'>".t("Siirtolista siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
 					}

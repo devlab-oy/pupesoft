@@ -17,21 +17,8 @@ if ($tee == "laheta" and $tunnukset != "") {
 
 			chdir("tilauskasittely");
 
-			if (strpos(" ".$laskurow['tilausvahvistus'],'E'))
-				require("tilausvahvistus-edi.inc");
-
-			if (strpos(" ".$laskurow['tilausvahvistus'],'S'))
-				require("tilausvahvistus-email.inc");
-
-			if (strpos(" ".$laskurow['tilausvahvistus'],'F'))
-				require("tilausvahvistus-fax.inc");
-
-			if (strpos(" ".$laskurow['tilausvahvistus'],'O'))
-				require("tilausvahvistus-email.inc");
-
-			if (strpos(" ".$laskurow['tilausvahvistus'],'U'))
-				require("tilausvahvistus-futursoft.inc");
-
+			// LÄHETETÄÄN TILAUSVAHVISTUS
+			laheta_tilausvahvistus($laskurow);
 		}
 
 	}

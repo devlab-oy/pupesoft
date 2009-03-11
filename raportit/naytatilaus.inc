@@ -1325,10 +1325,10 @@
 		if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 
 			if ($kate_yht < 0) {
-				$ykate = round(-1 * abs($kate_yht / $rihin_yht * 100), 2);
+				$ykate = @round(-1 * abs($kate_yht / $rihin_yht * 100), 2);
 			}
 			else {
-				$ykate = round(abs($kate_yht / $rihin_yht * 100), 2);
+				$ykate = @round(abs($kate_yht / $rihin_yht * 100), 2);
 			}
 					
 			echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Kate yhteensä").":</td><td class='back' align='right' nowrap>".sprintf('%.2f',$ykate)."</td><td class='back'>%</td></tr>";

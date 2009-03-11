@@ -734,13 +734,14 @@ if($tee == "tuotteen_lisatiedot") {
 	}
 
 	//	Haetaan kaikki liitetiedostot
-	$query = "	SELECT liitetiedostot.tunnus, liitetiedostot.selite, liitetiedostot.kayttotarkoitus, avainsana.selitetark, avainsana.selitetark_2, (select tunnus from liitetiedostot l where l.yhtio=liitetiedostot.yhtio and l.liitos=liitetiedostot.liitos and l.selite=liitetiedostot.selite and l.kayttotarkoitus='TH') peukalokuva
+	$query = "	SELECT liitetiedostot.tunnus, liitetiedostot.selite, liitetiedostot.kayttotarkoitus, avainsana.selitetark, avainsana.selitetark_2, (select tunnus from liitetiedostot l where l.yhtio=liitetiedostot.yhtio and l.liitos=liitetiedostot.liitos and l.selite=liitetiedostot.selite and l.kayttotarkoitus='TH' ORDER BY liitetiedostot.tunnus DESC LIMIT 1) peukalokuva
 				FROM tuote
 				JOIN liitetiedostot ON liitetiedostot.yhtio = tuote.yhtio and liitos = 'TUOTE' and liitetiedostot.liitostunnus=tuote.tunnus
 				JOIN avainsana ON avainsana.yhtio = liitetiedostot.yhtio and avainsana.laji = 'LITETY' and avainsana.selite!='TH' and avainsana.selite=liitetiedostot.kayttotarkoitus
 				WHERE tuote.yhtio = '{$kukarow["yhtio"]}' and tuoteno = '$tuoteno' and hinnastoon = 'W'
 				ORDER BY liitetiedostot.kayttotarkoitus IN ('TK') DESC, liitetiedostot.selite";
 	$result = mysql_query($query) or pupe_error($query);
+	
 	if(mysql_num_rows($result) > 0) {
 
 		$liitetiedostot = $edkaytto = "";

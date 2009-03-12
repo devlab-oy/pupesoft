@@ -222,10 +222,10 @@
 		$apu_yhtiorow = array();
 
 		// varmistetaan, että kopiossakin tulee oikean toimipaikan logo
-		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
+		if ((int) $postirow["yhtio_toimipaikka"] != 0) {
 			$query = "	SELECT *
 						FROM yhtion_toimipaikat
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[yhtio_toimipaikka]' and lasku_logo != ''";
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$postirow[yhtio_toimipaikka]' and lasku_logo != ''";
 			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 1) {
@@ -236,7 +236,7 @@
 		else {
 			$query = "	SELECT *
 						FROM yhtion_parametrit
-						WHERE yhtio = '$laskurow[yhtio]'";
+						WHERE yhtio = '$postirow[yhtio]'";
 			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 1) {
@@ -246,7 +246,8 @@
 		}
 
 		unset($data);
-		if( (int) $apu_yhtiorow["lasku_logo"] > 0) {
+		
+		if((int) $apu_yhtiorow["lasku_logo"] > 0) {
 			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
 			$data = $liite["data"];
 			$isizelogo[0] = $liite["image_width"];

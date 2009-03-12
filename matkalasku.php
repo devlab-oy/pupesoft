@@ -1579,10 +1579,8 @@ if ($tee == "MUOKKAA") {
 			Piilotetaan rivit joilla ei ole kappaleita (päiväraha, jos vain puolikas..)
 		*/
 		
-		$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
 		$summa = "sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))";
-		$query = "	SELECT tilausrivi.*, tuotetyyppi, $sorttauskentta,
-					
+		$query = "	SELECT tilausrivi.*, tuotetyyppi,					
 					if (tuote.tuotetyyppi='A' or tuote.tuotetyyppi='B', concat(date_format(kerattyaika, '%d.%m.%Y %k:%i'),' - ',date_format(toimitettuaika, '%d.%m.%Y %k:%i')), '') ajalla,
 					concat_ws('/',kustp.nimi,kohde.nimi,projekti.nimi) kustannuspaikka, 
 					if(tilausrivi.perheid=0, tilausrivi.tunnus,

@@ -85,9 +85,9 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 		$litety = "<td>&nbsp;</td>";		
 	}
 	//	Nämä ovat varmaankin sitten itse tilauksia?
-	elseif(in_array($laskurow['tila'], array("L","N","R","E","T"))) {
+	elseif(in_array($laskurow['tila'], array("L","N","R","E","T","U"))) {
 		$ok = true;
-		
+
 		//	Näille voidaan laittaa myös minkä lajin liite on kyseessä
 		$query = "	SELECT selite, if(selitetark_2='PAKOLLINEN', concat('* ', selitetark), concat('&nbsp;&nbsp;', selitetark)) selitetark
 					FROM avainsana

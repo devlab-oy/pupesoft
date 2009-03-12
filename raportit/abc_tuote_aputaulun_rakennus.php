@@ -205,7 +205,7 @@ if ($tee == 'YHTEENVETO') {
 				ifnull(tuote.myyjanro,'0') myyjanro,
 				ifnull(tuote.ostajanro,'0') ostajanro,
 				ifnull(tuote.malli,'#') malli,
-				ifnull(tuote.mallitarkenne,'#') mallitakenne,
+				ifnull(tuote.mallitarkenne,'#') mallitarkenne,
 				ifnull(tuote.vihapvm,'0000-00-00') saapumispvm,
 				sum(if(tyyppi='L' and (var='H' or var=''), 1, 0))			rivia,
 				sum(if(tyyppi='L' and (var='H' or var=''), kpl, 0))			kpl,
@@ -329,7 +329,7 @@ if ($tee == 'YHTEENVETO') {
 					malli				= '$row[malli]',
 					mallitarkenne		= '$row[mallitarkenne]',
 					saapumispvm			= '$row[saapumispvm]',
-					saldo				= '$row[saldo]'";
+					saldo				= '$saldorow[saldo]'";
 		$insres = mysql_query($query) or pupe_error($query);
 
 		// luokka vaihtuu

@@ -53,7 +53,7 @@
 		}
 
 		$ulos .= "<option value=''  $chk1>".t("Käytössä")."</option>";
-		$ulos .= "<option value='E' $chk2>".t("Ei käytössä")."</option>";
+		$ulos .= "<option value='E' $chk2>".t("Poistettu / Ei käytössä")."</option>";
 		
 		$ulos .= "</select></td>";
 		$jatko = 0;

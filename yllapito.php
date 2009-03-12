@@ -734,6 +734,7 @@
 						
 			if (($toim == "asiakas" and $trow["HIDDEN_laji"] == "P") or
 				($toim == "toimi" and $trow["HIDDEN_tyyppi"] == "P") or
+				(($toim == "yriti" or $toim == 'maksuehto') and $trow["HIDDEN_kaytossa"] == "E") or
 				($toim == "tuote" and $trow["HIDDEN_status"] == "P")) {
 					
 				$fontlisa1 = "<font style='text-decoration: line-through'>";

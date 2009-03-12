@@ -73,7 +73,10 @@ if ($tee == '') {
 	echo "<table>";
 
 	// katotaan jos meillä on jotain selvittelytilejä pankkitilien takana
-	$query = "	SELECT oletus_selvittelytili from yriti where yhtio='$kukarow[yhtio]' and oletus_selvittelytili!=''";
+	$query = "	SELECT oletus_selvittelytili 
+				from yriti 
+				where yhtio = '$kukarow[yhtio]' 
+				and oletus_selvittelytili != ''";
 	$result = mysql_query($query) or pupe_error($query);
 
 	$selvittelytilit = "'$yhtiorow[selvittelytili]',";

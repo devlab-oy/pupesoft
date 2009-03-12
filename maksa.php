@@ -640,9 +640,10 @@
 		echo "".t("Tilien maksulimiitit")."<hr>";
 
 		$query = "	SELECT tunnus, concat(nimi, ' (', tilino, ')') tili, maksulimitti
-	                 FROM yriti
+	               	FROM yriti
 					WHERE yhtio='$kukarow[yhtio]'
-					and maksulimitti > 0 and factoring = ''";
+					and maksulimitti > 0 
+					and factoring = ''";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -676,8 +677,9 @@
 		//echo t("maksutili")."<hr>";
 		$query = "	SELECT tunnus, nimi, maksulimitti
 				 	FROM yriti
-				 	WHERE yhtio='$kukarow[yhtio]'
-					and tunnus = '$oltilrow[tunnus]' and factoring = ''";
+				 	WHERE yhtio 	= '$kukarow[yhtio]'
+					and tunnus 		= '$oltilrow[tunnus]' 
+					and factoring 	= ''";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {

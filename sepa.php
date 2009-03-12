@@ -180,11 +180,12 @@ else {
 				echo "<tr><td>".t("Summa koostuu").":</td><td>$makskpl ".t("laskusta")."</td></tr>";
 			}
 			
-			$query = "SELECT *
-				FROM yriti
-				WHERE yhtio  = '$kukarow[yhtio]'
-				and tunnus 	 = '$laskurow[maksu_tili]'";
+			$query = "	SELECT *
+						FROM yriti
+						WHERE yhtio  = '$kukarow[yhtio]'
+						and tunnus 	 = '$laskurow[maksu_tili]'";
 			$yritiresult = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_num_rows($yritiresult) == 0) {
 				echo "<font class='error'>".t("Maksutili ei löydy")." $laskurow[maksu_tili]</font>";
 				exit;

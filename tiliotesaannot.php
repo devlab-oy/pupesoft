@@ -92,9 +92,10 @@
 		}
 			
 		if ($pankkitili !='x') {	
-			$query = "SELECT tilino
+			$query = "	SELECT tilino
 						FROM yriti
-						WHERE tilino = '$pankkitili' and yhtio = '$kukarow[yhtio]'";
+						WHERE tilino = '$pankkitili' 
+						and yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($result) == 0) {
 				$virhe.= t("Pankkitiliä ei enää löydy")."<br>";
@@ -113,12 +114,12 @@
 	}
 
 	if (strlen($pankkitili) != 0) {
-// Pankkitili on valittu ja sille annetaan sääntöjä
+		// Pankkitili on valittu ja sille annetaan sääntöjä
 		if ($pankkitili != 'x') {
-			$query = "SELECT nimi, tilino, tunnus
+			$query = "	SELECT nimi, tilino, tunnus
 						FROM yriti
-						WHERE tilino='$pankkitili' and yhtio = '$kukarow[yhtio]'";
-
+						WHERE tilino='$pankkitili' 
+						and yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) != 1) {
@@ -291,16 +292,19 @@
 		}
 	}
 	else {
-// Tällä ollaan, jos olemme vasta valitsemassa pankkitiliä
-		$query = "SELECT *
+		// Tällä ollaan, jos olemme vasta valitsemassa pankkitiliä
+		$query = "	SELECT *
 					FROM yriti
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE yhtio	 = '$kukarow[yhtio]'
+					and kaytossa = '' 
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
+		
 		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
 				<table>
 				<td>
 				<select name = 'pankkitili'><option value = 'x'>".t("Viiteaineisto")."";
+		
 		while ($yritirow=mysql_fetch_array ($result)) {
 			$valittu = "";
 			if ($yritirow['tilino'] == $pankkitili) {
@@ -312,5 +316,6 @@
 				<td><input type = 'submit' value = '".t("Valitse")."'></td>
 				</tr></table></form>";
 	}
+	
 	require "inc/footer.inc";
 ?>

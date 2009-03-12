@@ -21,7 +21,7 @@
 			$vresult = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($vresult) == 1) {
 				$vrow=mysql_fetch_array($vresult);
-				$ulos .= " " . $vrow[nimi] . "</td>";
+				$ulos .= " " . $vrow["nimi"] . "</td>";
 				$jatko = 0;
 			}
 		}
@@ -33,9 +33,10 @@
 
 	if (mysql_field_name($result, $i) == "oletus_suoravel_pankki") { //suoraveloitus suoritetaan automaattisesti
 
-		$query = "SELECT nimi, tilino, tunnus
-				FROM yriti
-				WHERE yhtio = '$kukarow[yhtio]'";
+		$query = "	SELECT nimi, tilino, tunnus
+					FROM yriti
+					WHERE yhtio  = '$kukarow[yhtio]'
+					and kaytossa = ''";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		$sel="";

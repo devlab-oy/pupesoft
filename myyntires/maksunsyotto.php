@@ -388,7 +388,10 @@ if ($ytunnus != '' and $tee == "") {
 		<th>".t("Saajan tilinumero")."</th>
 		<td>";
 
-	$query  = "SELECT * FROM yriti WHERE yhtio = '$kukarow[yhtio]'";
+	$query  = "	SELECT * 
+				FROM yriti 
+				WHERE yhtio  = '$kukarow[yhtio]'
+				and kaytossa = ''";
 	$result = mysql_query($query) or pupe_error($query);
 
 	$sel='';

@@ -341,7 +341,8 @@ if ($tila == 'tee_kohdistus') {
 
 		$errorrow = mysql_fetch_array ($result);
 
-		$query = "	SELECT * FROM yriti
+		$query = "	SELECT * 
+					FROM yriti
 					WHERE yhtio = '$errorrow[yhtio]' and
 					tilino = '$errorrow[tilino]'";
 		$result = mysql_query($query) or pupe_error($query);

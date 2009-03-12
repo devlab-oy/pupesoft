@@ -11,6 +11,25 @@
 	if (mysql_field_name($result, $i) == "tilinumero") { //suoraveloitus suoritetaan automaattisesti
 		$maxsize++; //Tilaa mahdolliselle viivalle
 	}
+	
+	if (mysql_field_name($result, $i) == "kaytossa") {
+
+		$sel1 = '';
+		$sel2 = '';
+
+		if (strtoupper($trow[$i]) == 'E') {
+			$sel2 = "SELECTED";
+		}
+		else {
+			$sel1 = "SELECTED";
+		}
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value = '' $sel1>".t("Käytössä")."</option>";
+		$ulos .= "<option value = 'E' $sel2>".t("Poistettu / Ei käytössä")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "valkoodi") { //valuutta
 		$query = "	SELECT nimi, tunnus

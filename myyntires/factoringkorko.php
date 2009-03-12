@@ -43,7 +43,15 @@ if (isset($tilino)){
 if (isset($tapa) and $tapa == 'paalle') {
 	if (isset($viite)) {
 		// tutkaillaan suoritusta
-		$query = "select suoritus.* from suoritus, yriti where suoritus.yhtio='$kukarow[yhtio]' and summa != 0 and kohdpvm = '0000-00-00' and viite like '$viite%' and suoritus.yhtio=yriti.yhtio and suoritus.tilino=yriti.tilino and yriti.factoring != ''";
+		$query = "	SELECT suoritus.* 
+					from suoritus, yriti 
+					where suoritus.yhtio='$kukarow[yhtio]' 
+					and summa != 0 
+					and kohdpvm = '0000-00-00' 
+					and viite like '$viite%' 
+					and suoritus.yhtio=yriti.yhtio 
+					and suoritus.tilino=yriti.tilino 
+					and yriti.factoring != ''";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -103,9 +111,19 @@ if (isset($tapa) and $tapa == 'paalle') {
 }
 if (isset($tapa) and $tapa == 'pois') {
 	if (isset($viite)) {
-		$query = "select suoritus.*, tiliointi.summa from suoritus, yriti, tiliointi where suoritus.yhtio='$kukarow[yhtio]' and suoritus.summa = 0 and kohdpvm != '0000-00-00' and viite like '$viite%' and suoritus.yhtio=yriti.yhtio and suoritus.tilino=yriti.tilino and yriti.factoring != '' and tiliointi.yhtio=suoritus.yhtio and selite = '".t("Kohdistettiin korkoihin")."' and tiliointi.tunnus=suoritus.ltunnus";
+		$query = "	SELECT suoritus.*, tiliointi.summa 
+					from suoritus, yriti, tiliointi 
+					where suoritus.yhtio='$kukarow[yhtio]' 
+					and suoritus.summa = 0 
+					and kohdpvm != '0000-00-00' 
+					and viite like '$viite%' 
+					and suoritus.yhtio=yriti.yhtio 
+					and suoritus.tilino=yriti.tilino 
+					and yriti.factoring != '' 
+					and tiliointi.yhtio=suoritus.yhtio 
+					and selite = '".t("Kohdistettiin korkoihin")."' 
+					and tiliointi.tunnus=suoritus.ltunnus";
 		$result = mysql_query($query) or pupe_error($query);
-		//echo $query."<br>";
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("Sopivia korkovientejä ei löydy")."!</font><br><br>";

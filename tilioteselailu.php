@@ -11,7 +11,8 @@
 
 	//Olemme tulossa takain suorituksista
 	if ($tee == 'Z' or $tiliote == 'Z') {
-		$query = "	SELECT tilino FROM yriti
+		$query = "	SELECT tilino 
+					FROM yriti
 					WHERE tunnus = $mtili and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -122,7 +123,8 @@
 
 		$query = "	SELECT *
 					FROM yriti
-					WHERE yhtio = '$kukarow[yhtio]'";
+					WHERE yhtio  = '$kukarow[yhtio]'
+					and kaytossa = '' ";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {

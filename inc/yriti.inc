@@ -1,5 +1,13 @@
 <?php
 	$otsikko = 'Yrityksen pankkitilit';
-	$kentat = 'tunnus, nimi, tilino, maksulimitti, oletus_kulutili, oletus_rahatili, oletus_selvittelytili';
+	$kentat = 'tunnus, nimi, tilino, maksulimitti, oletus_kulutili, oletus_rahatili, oletus_selvittelytili, kaytossa HIDDEN_kaytossa';
 	$jarjestys = 'tunnus';
+
+	if ($nayta_poistetut == "") {
+		$rajauslisa = " and yriti.kaytossa != 'E' ";
+	}
+	else {
+		$rajauslisa	= "";
+	}
+
 ?>

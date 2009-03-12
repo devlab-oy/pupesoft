@@ -64,7 +64,8 @@
 	if (mysql_field_name($result, $i) == "pankki_tili") { //valuutta
 		$query = "	SELECT nimi, tilino
 	                FROM yriti
-	             	WHERE yhtio = '$kukarow[yhtio]'
+	             	WHERE yhtio  = '$kukarow[yhtio]'
+					and kaytossa = '' 
 	               	ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 

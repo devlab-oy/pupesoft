@@ -761,7 +761,13 @@
 
 		if ($toim == "") {
 			echo "<td>";
-			echo "<input type='checkbox' name='oletuspaiv' checked>";
+			$chk = '';
+			
+			if ($oletuspaiv != '') {
+				$chk = 'checked';
+			}
+
+			echo "<input type='checkbox' name='oletuspaiv' $chk>";
 			echo "</td>";
 		}
 

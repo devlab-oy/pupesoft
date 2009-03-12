@@ -6526,10 +6526,73 @@ if(!function_exists("hae_rahtimaksu")) {
 }
 
 if (!function_exists("pakkaamo")) {
-	function pakkaamo ($tilausnumero, $update = '') {
+	function pakkaamo ($tilausnumero, $update = '', $ei_pakkaamoa = '') {
 		global $kukarow, $yhtiorow;
 
 		if ($yhtiorow['pakkaamolokerot'] == 'K') {
+
+			if ($ei_pakkaamoa != '') {
+				if (is_array($ei_pakkaamoa) !== FALSE) {
+					$ei_pakkaamoa_tun = "";
+
+					$temp_tilausnumerot = array();
+
+					if (stristr($tilausnumero, ",") !== FALSE) {
+						$temp_tilausnumerot = explode(",", $tilausnumero);
+					}
+
+					foreach ($ei_pakkaamoa as $tun) {
+						$ei_pakkaamoa_tun .= "$tun,";
+
+						if (count($temp_tilausnumerot) > 0) {
+							if (in_array($tun, $temp_tilausnumerot) !== FALSE) {
+								$key = array_keys($temp_tilausnumerot, $tun);
+								unset($temp_tilausnumerot[$key[0]]);
+							}
+						}
+					}
+
+					$ei_pakkaamoa_tun = substr($ei_pakkaamoa_tun,0,-1);
+
+					if (count($temp_tilausnumerot) > 0) {
+						$tilausnumerox = '';
+
+						foreach ($temp_tilausnumerot as $tun) {
+							$tilausnumerox .= "$tun,";
+						}
+
+						$tilausnumero = substr($tilausnumerox,0,-1);
+					}
+					else {
+						$tilausnumero = '';
+					}
+
+					$query = "	UPDATE lasku SET 
+								pakkaamo = 0
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tila 		in ('N', 'L')
+								AND alatila 	in ('A', 'C')
+								AND tunnus 		in ($ei_pakkaamoa_tun)";
+					$ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);			
+
+					if ($tilausnumero == '') {
+						return 0;
+					}
+				}
+				else {
+					$query = "	UPDATE lasku SET 
+								pakkaamo = 0
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tila 		in ('N', 'L')
+								AND alatila 	in ('A', 'C')
+								AND tunnus 		in ($ei_pakkaamoa)";
+					$ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);			
+
+					if ($ei_pakkaamoa == $tilausnumero) {
+						return 0;
+					}
+				}			
+			}
 
 			$query = "	SELECT distinct vanhatunnus
 						FROM lasku

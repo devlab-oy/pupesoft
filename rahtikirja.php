@@ -1538,6 +1538,33 @@
 
 		echo "<tr><th>".t("Kuljetusohje")."</th><td><textarea name='viesti' cols='30' rows='3'>$viestirarrow[viesti]</textarea></td><th></th><td></td></tr>";
 
+		if ($otsik['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
+			if (strpos($tunnukset,',') !== false) {				
+				$query = "	SELECT GROUP_CONCAT(pakkaamo SEPARATOR ',') pakkaamot
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus in($tunnukset)";
+				$pakkaamotres = mysql_query($query) or pupe_error($query);
+				$pakkaamotrow = mysql_fetch_array($pakkaamotres);
+				$pakkaamotunnukset = " AND tunnus in($pakkaamotrow[pakkaamot]) ";
+			}
+			else {
+				$pakkaamotunnukset = " AND tunnus = $otsik[pakkaamo] ";
+			}
+						
+			$query = "	SELECT nimi, lokero
+						FROM pakkaamo
+						WHERE yhtio = '$kukarow[yhtio]'
+						$pakkaamotunnukset";
+			$lokero_chk_res = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($lokero_chk_res) > 0) {
+				while ($lokero_chk_row = mysql_fetch_array($lokero_chk_res)) {
+					echo "<tr><th>".t("Pakkaamo")."</th><td>$lokero_chk_row[nimi]</td><th>".t("Lokero")."</th><td>$lokero_chk_row[lokero]</td></tr>";
+				}				
+			}
+		}
+
 		// jos meillä on hetitulostettava jälkivaatimus-tilaus niin (annetaan mahdollisuus tulostaa) TULOSTETAAN lasku heti
 		if ((strtoupper($tulostustapa) == 'H' or strtoupper($tulostustapa) == 'K') and $marow["jv"] != "") {
 
@@ -1572,34 +1599,7 @@
 			echo "</select></td></tr>";
 
 		}
-		
-		if ($otsik['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
-			if (strpos($tunnukset,',') !== false) {				
-				$query = "	SELECT GROUP_CONCAT(pakkaamo SEPARATOR ',') pakkaamot
-							FROM lasku
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND tunnus in($tunnukset)";
-				$pakkaamotres = mysql_query($query) or pupe_error($query);
-				$pakkaamotrow = mysql_fetch_array($pakkaamotres);
-				$pakkaamotunnukset = " AND tunnus in($pakkaamotrow[pakkaamot]) ";
-			}
-			else {
-				$pakkaamotunnukset = " AND tunnus = $otsik[pakkaamo] ";
-			}
-						
-			$query = "	SELECT nimi, lokero
-						FROM pakkaamo
-						WHERE yhtio = '$kukarow[yhtio]'
-						$pakkaamotunnukset";
-			$lokero_chk_res = mysql_query($query) or pupe_error($query);
-			
-			if (mysql_num_rows($lokero_chk_res) > 0) {
-				while ($lokero_chk_row = mysql_fetch_array($lokero_chk_res)) {
-					echo "<tr><th>".t("Pakkaamo")."</th><td>$lokero_chk_row[nimi]</td><th>".t("Lokero")."</th><td>$lokero_chk_row[lokero]</td></tr>";
-				}				
-			}
-		}
-		
+				
 		echo "</table>";
 
 		// erroricheckit
@@ -1671,7 +1671,7 @@
 			$osumapros = "N/A";
 		}
 
-		echo "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s kg, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
+		echo "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on %s kg. %s%%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
 
 		//Tuotekannassa voi olla tuotteen mitat kahdella eri tavalla
 		// leveys x korkeus x syvyys
@@ -1704,7 +1704,7 @@
 
 		$tilavuusrow["tilavuus"] = round($tilavuusrow["tilavuus"],3);
 
-		echo "<font class='message'>".t("Tilauksen tilavuus tuoterekisterin tietojen mukaan on").": $tilavuusrow[tilavuus] m&sup3; , $osumapros ".t("%:lle kappaleista on annettu koko.")."</font><br>";
+		echo "<font class='message'>".t("Tilauksen tilavuus tuoterekisterin tietojen mukaan on")." $tilavuusrow[tilavuus] m&sup3;. $osumapros".t("%:lle kappaleista on annettu tilavuus.")."</font><br>";
 
 		echo "<table>";
 

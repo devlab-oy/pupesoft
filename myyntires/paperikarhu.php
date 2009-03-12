@@ -33,7 +33,6 @@
 				$rectparam, $norm, $pieni, $boldi, $kaatosumma, $kieli, $_POST;
 
 			$firstpage = $pdf->new_page("a4");
-			$pdf->enable('template');
 
 			if ($yhteyshenkilo == "") {
 				$yhteyshenkilo = $kukarow["tunnus"];
@@ -49,9 +48,10 @@
 			//Otsikko
 			$pdf->draw_text(320, 780, t("MAKSUKEHOTUS", $kieli), 	$firstpage);
 			$pdf->draw_text(470, 780, t("Sivu", $kieli)." ".$sivu, 	$firstpage, $norm);
-
+			
 			unset($data);
-			if( (int) $yhtiorow["lasku_logo"] > 0) {
+
+			if((int) $yhtiorow["lasku_logo"] > 0) {
 				$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
 				$data = $liite["data"];
 				$isizelogo[0] = $liite["image_width"];
@@ -69,34 +69,46 @@
 			}
 
 			if($data) {
-
 				$image = $pdf->jfif_embed($data);
 
 				if(!$image) {
 					echo t("Logokuvavirhe");
 				}
 				else {
+
 					$logoparam = array();
 
-					if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (120 / $isizelogo[0]) <= 50) {
-						$logoparam['scale'] = 120 / $isizelogo[0];
+					$lasku_logo_koko = 50;
+					$lasku_logo_positio = 830;
+
+					if ((int) $yhtiorow["lasku_logo_koko"] > 0) {
+						$lasku_logo_koko = (int) $yhtiorow["lasku_logo_koko"];
+					}
+					if ((int) $yhtiorow["lasku_logo_positio"] > 0) {
+						$lasku_logo_positio = (int) $yhtiorow["lasku_logo_positio"];
+					}
+
+					if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= $lasku_logo_koko) {
+						$logoparam['scale'] = 240 / $isizelogo[0];
 					}
 					else {
-						$logoparam['scale'] = 50  / $isizelogo[1];
+						$logoparam['scale'] = $lasku_logo_koko  / $isizelogo[1];
 					}
-					$placement = $pdf->image_place($image, 785, 20, $firstpage, $logoparam);
+
+					$placement = $pdf->image_place($image, $lasku_logo_positio-($logoparam['scale']*$isizelogo[1]), 20, $firstpage, $logoparam);
 				}
 			}
 			else {
-				$pdf->draw_text(30, 805,  $yhtiorow["nimi"], $firstpage);
+				$pdf->draw_text(30, 815,  $yhtiorow["nimi"], $firstpage);
 			}
 
 			if (isset($_POST['ekirje_laheta']) === false) {
 				// vastaanottaja
-				$pdf->draw_text(50, 720, substr($asiakastiedot["nimi"], 0, 40),												$firstpage, $iso);
-				$pdf->draw_text(50, 708, substr($asiakastiedot["nimitark"], 0, 40), 										$firstpage, $iso);
-				$pdf->draw_text(50, 694, substr($asiakastiedot["osoite"], 0, 40), 											$firstpage, $iso);
-				$pdf->draw_text(50, 681, substr($asiakastiedot["postino"]." ".$asiakastiedot["postitp"], 0, 40),			$firstpage, $iso);
+				$pdf->draw_text(50, 717, $asiakastiedot["nimi"], 									$firstpage, $iso);
+				$pdf->draw_text(50, 707, $asiakastiedot["nimitark"],								$firstpage, $iso);
+				$pdf->draw_text(50, 697, $asiakastiedot["osoite"], 									$firstpage, $iso);
+				$pdf->draw_text(50, 687, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], 	$firstpage, $iso);
+				$pdf->draw_text(50, 677, $laskurow["maa"], 											$firstpage, $iso);
 
 				// jos vastaanottaja on eri maassa kuin yhtio niin lisätään maan nimi
 				if ($yhtiorow['maa'] != $asiakastiedot['maa']) {
@@ -107,7 +119,7 @@
 
 					$maa_result = mysql_query($query) or pupe_error($query);
 					$maa_nimi = mysql_fetch_array($maa_result);
-					$pdf->draw_text(50, 668, $asiakastiedot["maa"], 														$firstpage, $iso);
+					$pdf->draw_text(50, 677, $asiakastiedot["maa"], 								$firstpage, $iso);
 				}
 			}
 			else {
@@ -305,9 +317,10 @@
 			$pdf->draw_rectangle(110, 540, 90, 580,	$firstpage, $rectparam);
 */
 			if ($karhut_samalle_laskulle == 1 or $karhukertanro != "") {
-				$pdf->draw_text(404, 118,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
-				$pdf->draw_text(464, 118,  $summa,						$firstpage, $norm);
-				$pdf->draw_text(550, 118,  $laskutiedot["valkoodi"],	$firstpage, $norm);
+				$pdf->draw_text(380, 118,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
+				
+				$oikpos = $pdf->strlen(sprintf("%.2f", $summa), $norm);
+				$pdf->draw_text(500-$oikpos, 118, sprintf("%.2f", $summa)." ".$laskutiedot["valkoodi"],		$firstpage, $norm);				
 			}
 
 			$pankkitiedot = array();
@@ -517,10 +530,17 @@
 	$lires = mysql_query($query) or pupe_error($query);
 	$lirow = mysql_fetch_array($lires);
 
+	// Karhuvaiheessa tämä on tyhjä
+	if ($laskutiedot["kpvm"] == "") {
+		$laskutiedot["kpvm"] = date("Y-m-d");
+	}
+
 	$query = "	SELECT SUM(summa) summa
 				FROM suoritus
 				WHERE yhtio  = '$kukarow[yhtio]'
 				and ltunnus <> 0
+				and (kohdpvm = '0000-00-00' or kohdpvm >= '$laskutiedot[kpvm]')
+				and kirjpvm <= '$laskutiedot[kpvm]'
 				and asiakas_tunnus in ($lirow[liitokset])";
 	$summaresult = mysql_query($query) or pupe_error($query);
 	$kaato = mysql_fetch_array($summaresult);

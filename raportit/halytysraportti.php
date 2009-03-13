@@ -2216,10 +2216,11 @@
 					<tr><th>".t("Tuotemerkki")."</th><td>";
 
 			//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
-			$query = "	SELECT distinct tuotemerkki
-						FROM tuote
-						WHERE yhtio='$kukarow[yhtio]' and tuotemerkki != ''
-						ORDER BY tuotemerkki";
+			$query = "	SELECT avainsana.selite, avainsana.selitetark		         
+			            FROM avainsana
+			            WHERE avainsana.yhtio 	= '$kukarow[yhtio]'
+			            and avainsana.laji 		= 'TUOTEMERKKI'
+			            ORDER BY avainsana.jarjestys, avainsana.selite";
 			$sresult = mysql_query($query) or pupe_error($query);
 
 			echo "<select name='tuotemerkki'>";
@@ -2227,10 +2228,10 @@
 
 			while ($srow = mysql_fetch_array($sresult)) {
 				$sel = '';
-				if ($tuotemerkki == $srow["tuotemerkki"]) {
+				if ($tuotemerkki == $srow["selite"]) {
 					$sel = "selected";
 				}
-				echo "<option value='$srow[tuotemerkki]' $sel>$srow[tuotemerkki]</option>";
+				echo "<option value='$srow[selite]' $sel>$srow[selite]</option>";
 			}
 			echo "</select>";
 

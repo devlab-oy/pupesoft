@@ -684,22 +684,15 @@
 	echo "</tr></table>";
 
 	if ($lisa_haku_osasto == "" and $lisa_haku_try == "") {
-		$query = "	SELECT DISTINCT avainsana.selite,
-		            IFNULL((SELECT avainsana_kieli.selitetark
-		            FROM avainsana as avainsana_kieli
-		            WHERE avainsana_kieli.yhtio = avainsana.yhtio
-		            and avainsana_kieli.laji = avainsana.laji
-		            and avainsana_kieli.selite = avainsana.selite
-		            and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selitetark) selitetark
+		$query = "	SELECT avainsana.selite, avainsana.selitetark		         
 		            FROM avainsana
-		            WHERE avainsana.yhtio = '$kukarow[yhtio]'
-		            and avainsana.laji = 'TUOTEMERKKI'
-		            and avainsana.kieli in ('$yhtiorow[kieli]', '')
+		            WHERE avainsana.yhtio 	= '$kukarow[yhtio]'
+		            and avainsana.laji 		= 'TUOTEMERKKI'
 		            $avainlisa
-		            ORDER BY avainsana.jarjestys, avainsana.selite+0";
+		            ORDER BY avainsana.jarjestys, avainsana.selite";
 	}
 	else {
-		$query = "	SELECT distinct avainsana.selite, selitetark
+		$query = "	SELECT distinct avainsana.selite, avainsana.selitetark
 					FROM tuote
 					JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' $avainlisa)
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -708,7 +701,7 @@
 					$kieltolisa
 					$extra_poislisa
 					$poislisa_mulsel
-					ORDER BY avainsana.jarjestys, avainsana.selite+0";
+					ORDER BY avainsana.jarjestys, avainsana.selite";
 	}
 	$sresult = mysql_query($query) or pupe_error($query);
 

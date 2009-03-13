@@ -779,9 +779,10 @@ else {
 			// Jos tilaus splittaantui moneen osaan
 			if(count($tilausnumerot) > 1) {
 				$tilauksia = 1;
-				$asmuuttilaukset = "";
+				//$asmuuttilaukset = "";
 				$numerot = implode(', ',$tilausnumerot);
-
+				
+				/*
 				$query = " 	SELECT tunnus
 						   	FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -793,15 +794,16 @@ else {
 				while ($muutrow = mysql_fetch_array($muutresult)) {
 					$asmuuttilaukset .= $muutrow['tunnus']." ";
 
-				}
+				}*/
 
 				foreach ($tilausnumerot as $tilausnumero) {
 
 					$upviesti = t("Tilaus jakaantunut")." ".count($tilausnumerot)." ".t("tilaukseksi").": ".$numerot." ".t("Tilaus").": ".$tilauksia."/".count($tilausnumerot);
-
+				
+					/*
 					if ($asmuuttilaukset != "") {
 						$upviesti .= "\n".t("Asiakkaalla on toimittamatta myös tilaukset").": ".$asmuuttilaukset;
-					}
+					}*/
 
 					$query = "	UPDATE lasku set sisviesti2 = concat_ws(' ', sisviesti2, '$upviesti')
 								where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";

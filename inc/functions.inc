@@ -6530,7 +6530,7 @@ if (!function_exists("pakkaamo")) {
 		global $kukarow, $yhtiorow;
 
 		if ($yhtiorow['pakkaamolokerot'] == 'K') {
-
+			
 			if ($ei_pakkaamoa != '') {
 				if (is_array($ei_pakkaamoa) !== FALSE) {
 					$ei_pakkaamoa_tun = "";
@@ -6594,6 +6594,39 @@ if (!function_exists("pakkaamo")) {
 				}			
 			}
 
+			$query = "	SELECT varasto
+						FROM lasku
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						AND lasku.tila 		in ('N', 'L')
+						AND lasku.alatila 	in ('A', 'C')
+						AND lasku.tunnus in($tilausnumero)";
+			$varastotark_res = mysql_query($query) or pupe_error($query);
+			$varastotark_row = mysql_fetch_array($varastotark_res);
+			
+			$query = "	SELECT lasku.tunnus
+						FROM lasku
+						JOIN varaston_tulostimet ON (varaston_tulostimet.yhtio = lasku.yhtio 
+							AND varaston_tulostimet.varasto = lasku.varasto 
+							AND trim(varaston_tulostimet.nimi) = lasku.tulostusalue
+							AND trim(varaston_tulostimet.nimi) != '')
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						AND lasku.tila 		in ('N', 'L')
+						AND lasku.alatila 	in ('A', 'C')
+						AND lasku.tunnus in($tilausnumero)";
+			$pakkaamotark_res = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($pakkaamotark_res) > 0) {
+				$tilausnumero = ""; 
+				while ($pakkaamotark_row = mysql_fetch_array($pakkaamotark_res)) {
+						$tilausnumero .= $pakkaamotark_row['tunnus'].",";
+				}
+				$tilausnumero = substr($tilausnumero, 0, -1);
+			}
+			else {
+				return 0;
+			}
+			
+			
 			$query = "	SELECT distinct vanhatunnus
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -6602,12 +6635,12 @@ if (!function_exists("pakkaamo")) {
 						AND tunnus in($tilausnumero)";
 			$vanhattunnukset_res = mysql_query($query) or pupe_error($query);
 
-			$vanhatunnus = "";
+			$vanhatunnus = $varastotunnukset = "";
 			while ($vanhattunnukset_row = mysql_fetch_array($vanhattunnukset_res)) {
 					$vanhattunnukset .= $vanhattunnukset_row['vanhatunnus'].",";
 			}
 			$vanhattunnukset = substr($vanhattunnukset, 0, -1);
-
+						
 			// haetaan tärkein pakkaamo
 			$query = "	SELECT distinct pakkaamo.pakkaamon_prio, lasku.varasto, lasku.tulostusalue, varaston_tulostimet.nimi, varaston_tulostimet.pakkaamo
 						FROM lasku
@@ -6617,13 +6650,14 @@ if (!function_exists("pakkaamo")) {
 						AND tila 		in ('N', 'L')
 						AND alatila 	in ('A', 'C')
 						AND vanhatunnus in($vanhattunnukset)
+						AND lasku.varasto = '$varastotark_row[varasto]'
 						ORDER BY pakkaamo.pakkaamon_prio asc
 						LIMIT 1";
 			$varasto_chk_result = mysql_query($query) or pupe_error($query);
 			$varasto_chk_row = mysql_fetch_array($varasto_chk_result);
-
+			
 			$tulostusalue_pakkaamot = "";
-			if (mysql_num_rows($varasto_chk_result) > 0) {
+			if (mysql_num_rows($varasto_chk_result) == 1) {
 				$tulostusalue_pakkaamot = $varasto_chk_row['pakkaamo'];
 			}
 			else {
@@ -6631,7 +6665,6 @@ if (!function_exists("pakkaamo")) {
 			}
 
 			$pakkaamolisa = "";
-
 			if ($tulostusalue_pakkaamot != '') {
 				$pakkaamolisa = " and pakkaamo.nimi = '$tulostusalue_pakkaamot' ";
 			}
@@ -6644,6 +6677,7 @@ if (!function_exists("pakkaamo")) {
 							or lasku.vanhatunnus 	in ($vanhattunnukset))
 						AND lasku.tila 		in ('N', 'L')
 						AND lasku.alatila 	in ('A', 'C')
+						AND lasku.varasto = '$varastotark_row[varasto]'
 						$pakkaamolisa
 						LIMIT 1";
 			$split_pakkaamo_res = mysql_query($query) or pupe_error($query);
@@ -6674,7 +6708,7 @@ if (!function_exists("pakkaamo")) {
 							WHERE pakkaamo.yhtio = '{$kukarow['yhtio']}'
 							AND lasku.tila in ('N', 'L')
 							AND lasku.alatila in ('A', 'C')
-							AND lasku.varasto = '{$varasto_chk_row['varasto']}'
+							AND lasku.varasto = '$varastotark_row[varasto]'
 							HAVING lasku.pakkaamo IS NULL
 							ORDER BY pakkaamo.lokero, pakkaamo.varasto ASC
 							LIMIT 1";
@@ -6708,11 +6742,11 @@ if (!function_exists("pakkaamo")) {
 								JOIN pakkaamo ON (pakkaamo.yhtio = lasku.yhtio and pakkaamo.tunnus = lasku.pakkaamo)
 								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 								AND lasku.pakkaamo > 0
-								AND lasku.varasto = '{$varasto_chk_row['varasto']}'
+								AND lasku.varasto = '$varastotark_row[varasto]'
 								AND lasku.tila in ('N', 'L')
 								AND lasku.alatila in ('A', 'C')
 								$pakkaamolisa
-								and lasku.tulostusalue = '$varasto_chk_row[tulostusalue]'
+								and lasku.tulostusalue = '$varasto_chk_row[tulostusalue]'								
 								GROUP BY lasku.pakkaamo
 								ORDER BY laskuri, pakkaamo.pakkaamon_prio, pakkaamo.prio, lasku.pakkaamo ASC";
 					$pakkaamo2_result = mysql_query($query) or pupe_error($query);
@@ -6742,7 +6776,7 @@ if (!function_exists("pakkaamo")) {
 						$query = "	SELECT *
 									FROM pakkaamo
 									WHERE tunnus NOT IN ($pakkaamot)
-									AND varasto = '{$varasto_chk_row['varasto']}'
+									AND varasto = '$varastotark_row[varasto]'
 									AND nimi = '$varasto_chk_row[pakkaamo]'
 									AND yhtio = '{$kukarow['yhtio']}'
 									ORDER BY prio, lokero ASC
@@ -6786,7 +6820,7 @@ if (!function_exists("pakkaamo")) {
 						$query = "	SELECT tunnus, lokero, prio
 									FROM pakkaamo
 									WHERE yhtio = '{$kukarow['yhtio']}'
-									AND varasto = '{$varasto_chk_row['varasto']}'
+									AND varasto = '$varastotark_row[varasto]'
 									$pakkaamolisa
 									ORDER BY prio, lokero ASC";
 						$pakkaamo_chk_res = mysql_query($query) or pupe_error($query);

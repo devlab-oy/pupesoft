@@ -29,11 +29,16 @@
 							
 		$lis = substr($lis,0,-1);
 		
+		if ($yhtiorow['pakkaamolokerot'] == 'K') {
+			$kirjoitintilrivilisa = " AND var != 'J' ";			
+		}
+		
 		if ($lis != '') {
 			$query = "	SELECT $lis
 						FROM tilausrivi
 						WHERE otunnus in ($tilaus)
-						and yhtio = '$kukarow[yhtio]'";
+						and yhtio = '$kukarow[yhtio]'
+						$kirjoitintilrivilisa";
 			$tiresult = mysql_query($query) or pupe_error($query);
 			$tirow = mysql_fetch_row($tiresult);
 									

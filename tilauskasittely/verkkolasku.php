@@ -778,9 +778,9 @@
 
 							$rah++;
 						}
-						elseif (mysql_num_rows($rares) != 1 and $silent == "") {
-							$tulos_ulos .= "<tr><td>".t("Rahtimaksua ei löydy!")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td></td><td></td><td>$pakka[kilot] kg</td></tr>\n";
-						}
+//						elseif (mysql_num_rows($rares) != 1 and $silent == "") {
+//							$tulos_ulos .= "<tr><td>".t("Rahtimaksua ei löydy!")."</td><td>$laskurow[tunnus]</td><td>$laskurow[toimitustapa]</td><td></td><td></td><td>$pakka[kilot] kg</td></tr>\n";
+//						}
 						elseif ($silent == "") {
 							$tulos_ulos .= "<tr><td>".t("Rahtimaksua ei osattu lisätä!")." $virhe</td><td>$otsikot</td><td>$laskurow[toimitustapa]</td><td></td><td></td><td>$pakka[kilot] kg</td></tr>\n";
 						}

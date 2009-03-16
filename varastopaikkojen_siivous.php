@@ -382,7 +382,7 @@
 		 			FROM tuotepaikat
 					LEFT JOIN tuote ON tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
 					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-					HAVING tuote.tunnus is null
+					and tuote.tunnus is null or (tuote.ei_saldoa != '' and tuotepaikat.saldo = 0)
 					ORDER BY tuotepaikat.tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 

@@ -17,45 +17,41 @@ else {
 	$konsyhtiot = " yhtio = '$kukarow[yhtio]' ";
 }
 
-$ytunnus = addslashes(trim($ytunnus));
-$limit   = 300; // montako riviä on maksimi
-$monta   = 0;
+$ytunnus	 	= addslashes(trim($ytunnus));
+$limit  		= 300; // montako riviä on maksimi
+$monta   		= 0;
+$asiakasrajaus 	= "";
 
-$prospektlisa = "";
-
-$apupuquery = "SELECT selite FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = 'PIIRI' and selitetark_2 = 'rajattu'";
-$apupuresult = mysql_query($apupuquery) or pupe_error($apupuquery);
-if (mysql_num_rows($apupuresult) > 0) {
-	while ($apupurow = mysql_fetch_array($apupuresult)) {
-		$prospektpiirit .= "$apupurow[selite],";
+if (in_array($kutsuja, array("asiakasemo.php","kalenteri.php"))) {
+	// Tässä haarassa myös prospektit näytetään
+	if ($myos_poistetut == "") {
+		$asiakasrajaus = " and asiakas.laji != 'P' ";
 	}
-	$prospektlisa = " and asiakas.piiri not in ('".str_replace(',','\',\'',substr($prospektpiirit,0,-1))."') ";
-}
-
-if ($myos_poistetut != "") {
-	$lajilisa = "";
+	else {
+		$asiakasrajaus = "";
+	}
 }
 else {
-	$lajilisa = " and laji != 'P' ";
+	// Normaalisti prospekteja ei näytetä
+	if ($myos_poistetut == "") {
+		$asiakasrajaus = " and asiakas.laji not in ('P','R') ";
+	}
+	else {
+		$asiakasrajaus = " and asiakas.laji != 'R' ";
+	}
 }
 
 //	Jos käyttäjällä on valittu piirejä niin sallitaan vain ko. piirin/piirien hakeminen
 if($kukarow["piirit"] != "")	 {
-	$asiakasrajaus = " and asiakas.piiri IN ($kukarow[piirit]) ";
+	$asiakasrajaus .= " and asiakas.piiri IN ($kukarow[piirit]) ";
 }
-else {
-	$asiakasrajaus = "";
-}
-
-if ($prospektlisa != "" and !in_array($kutsuja,array("asiakasemo.php","kalenteri.php"))) {
-	$asiakasrajaus .= $prospektlisa;
-}
-
 
 if (is_numeric($asiakasid) and $asiakasid > 0) {
 	$query	= "	SELECT *
 				FROM asiakas
-				WHERE $konsyhtiot and tunnus='$asiakasid' $asiakasrajaus";
+				WHERE $konsyhtiot 
+				and tunnus='$asiakasid' 
+				$asiakasrajaus";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
 }

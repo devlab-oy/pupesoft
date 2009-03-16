@@ -141,6 +141,7 @@
 		$sel  = '';
 		$sel1 = '';
 		$sel2 = '';
+		$sel3 = '';
 
 		if(!isset($trow[$i])) {
 			$trow[$i] = $laji;
@@ -148,6 +149,9 @@
 
 		if (strtoupper($trow[$i]) == 'H') {
 			$sel1 = "SELECTED";
+		}
+		elseif (strtoupper($trow[$i]) == 'R') {
+			$sel3 = "SELECTED";
 		}
 		elseif (strtoupper($trow[$i]) == 'P') {
 			$sel2 = "SELECTED";
@@ -159,6 +163,7 @@
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value = '' $sel>".t("Yritys")."</option>";
 		$ulos .= "<option value = 'H' $sel1>".t("Yksityishenkilö")."</option>";
+		$ulos .= "<option value = 'R' $sel3>".t("Prospekti")."</option>";
 		$ulos .= "<option value = 'P' $sel2>".t("Poistettu / Ei käytössä")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
@@ -248,7 +253,7 @@
 		$ulos .= "<div id='ytunnus_etsi'>";
 		$ulos .= "<input type='text' name='$nimi' id='$nimi' value='$trow[$i]'>";
 
-		if ($alias_set == "VAHITTAISMYYNTI") {
+		if ($alias_set == "VAHITTAISMYYNTI" or $laji == "R") {
 			$ulos .= "<input type='button' name='etsi_vapytunnus' id='etsi_vapytunnus' value='".t("Etsi seuraava vapaa asiakasnumero")."' onClick='javascript:document.getElementById(\"etsi_vapytunnus\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapytunnus\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=ytunnus&ohje=off&pointer=$i\", \"ytunnus_etsi\", false, false)'>";
 		}
 
@@ -825,13 +830,10 @@
 	}
 
 	if (mysql_field_name($result, $i) == "piiri") {
-		if ($prospekti == 'TRUE') {
-			$piirilisa = " and selitetark_2 = 'rajattu' ";
-		}
 
 		$query = "	SELECT selite, if (selite!=selitetark, concat_ws(' - ', selite, selitetark), selite) selitetark
 					FROM avainsana
-					WHERE yhtio='$kukarow[yhtio]' and laji = 'PIIRI' $piirilisa
+					WHERE yhtio='$kukarow[yhtio]' and laji = 'PIIRI'
 					ORDER BY jarjestys, selite+0";
 		$vresult = mysql_query($query) or pupe_error($query);
 

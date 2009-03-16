@@ -71,59 +71,27 @@
 
 
 	if ($laji == "H") {
+		// Yksityisasiakkaat
 		$rajauslisa = " and asiakas.laji = 'H' ";
 	}
 	elseif ($laji == "Y") {
+		// Yritykset asiakkaat
 		$rajauslisa = " and asiakas.laji = '' ";
 	}
+	elseif ($laji == "R") {
+		// Prospektit
+		$rajauslisa = " and asiakas.laji = 'R' ";
+	}
 	elseif ($laji == "P") {
+		// Poistetut
 		$rajauslisa = " and asiakas.laji = 'P' ";
 	}
 	else {
 		if ($nayta_poistetut == "") {
-			$rajauslisa = " and asiakas.laji != 'P' ";
+			$rajauslisa = " and asiakas.laji not in ('P','R') ";
 		}
 		else {
-			$rajauslisa	= "";
+			$rajauslisa = " and asiakas.laji != 'R' ";
 		}
 	}
-	
-	$prospekti		 = "";
-	$prospektlisa	 = "";
-
-	$apupuquery = "SELECT selite FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = 'PIIRI' and selitetark_2 = 'rajattu'";
-	
-	if (strtoupper($rajattu_nakyma) == 'PROSPEKTI') {
-		$apupuresult = mysql_query($apupuquery) or pupe_error($apupuquery);
-		$prospekti = "TRUE"; 
-		
-		if (mysql_num_rows($apupuresult) > 0) {
-			while ($apupurow = mysql_fetch_array($apupuresult)) {
-				if($prospektlisa == "") {
-					$prospektlisa = " and asiakas.piiri in ('".$apupurow["selite"];
-				}
-				else {
-					$prospektlisa .= "', '".$apupurow["selite"];
-				}
-			}
-			$prospektlisa .= "') ";
-		}
-	}
-	elseif($laji == 'ASIAKAS') {
-		$apupuresult = mysql_query($apupuquery) or pupe_error($apupuquery);
-		
-		if (mysql_num_rows($apupuresult) > 0) {
-			while ($apupurow = mysql_fetch_array($apupuresult)) {
-				if($prospektlisa == "") {
-					$prospektlisa = " and asiakas.piiri not in ('".$apupurow["selite"];
-				}
-				else {
-					$prospektlisa .= "', '".$apupurow["selite"];
-				}
-			}
-			$prospektlisa .= "') ";
-		}
-	}
-	
-	
 ?>

@@ -308,8 +308,7 @@ if ($tee == "") {
 	$query  = "SELECT * FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
 	$vares = mysql_query($query) or pupe_error($query);
 
-	while ($varow = mysql_fetch_array($vares))
-	{
+	while ($varow = mysql_fetch_array($vares)) {
 		$sel='';
 		if ($varow['tunnus'] == $varasto) $sel = 'selected';
 		echo "<option value='$varow[tunnus]' $sel>".t("Varastoon")." - $varow[nimitys]</option>";
@@ -317,8 +316,6 @@ if ($tee == "") {
 
 	echo "</select></td>";
 	echo "</form>";
-	
-	
 	
 	if ($varasto == 'y') {
 		echo "<form action='$PHP_SELF' method='post'>";
@@ -436,7 +433,9 @@ if ($tee == "") {
 			//Missä tuotetta on?
 			$query  = "	SELECT *
 						FROM tuotepaikat
-						WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$rivirow[tuoteno]'";
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and tuoteno = '$rivirow[tuoteno]'
+						ORDER BY oletus DESC, hyllyalue, hyllynro, hyllyvali, hyllytaso";
 			$paikkares = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($paikkares) >= 1) {
@@ -454,6 +453,11 @@ if ($tee == "") {
 					$varow = mysql_fetch_array($vares);
 
 					$sel = "";
+					
+					// Valkataan oletuspaikka tässä vaiheessa jos ei viedä tiettyyn varastoon
+					if(!is_numeric($varasto) and $paikkarow['oletus'] != '') {
+						$sel = 'selected';
+					}					
 
 					if (is_numeric($varasto) and $varow['tunnus'] == $varasto) {
 						$sel = 'selected';
@@ -466,11 +470,13 @@ if ($tee == "") {
 					}
 
 					$ole = "";
+					
 					if ($paikkarow['oletus'] != '') {
 						$ole = "(".t("oletus").")";
 					}
 
 					$riv = "";
+					
 					if($rivirow['r1'] == $paikkarow["hyllyalue"] and $rivirow['r2'] == $paikkarow["hyllynro"] and $rivirow['r3'] == $paikkarow["hyllyvali"] and $rivirow['r4'] == $paikkarow["hyllytaso"]) {
 						$riv = "(".t("rivillä").")";
 					}

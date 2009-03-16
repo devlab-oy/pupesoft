@@ -909,22 +909,25 @@
 			else {
 				$seljarj2 = "SELECTED";
 			}
-
-			echo "<form action='$PHP_SELF' method='post'>";
-			echo "<select name='rivimaara' onchange='submit()'>";
-			echo "<option value='180' $sel180rivi>".t("N‰ytet‰‰n 180 rivi‰")."</option>";
-			echo "<option value='18' $sel18rivi>".t("N‰ytet‰‰n 18 rivi‰")."</option>";
-			echo "<option value='1' $sel1rivi>".t("N‰ytet‰‰n 1 rivi")."</option>";
-			echo "</select>";
-			echo "<select name='jarjestys' onchange='submit()'>";
-			echo "<option value='' $seljarj1>".t("Tuotepaikkaj‰rjestys")."</option>";
-			echo "<option value='tuoteno' $seljarj2>".t("Tuotenumeroj‰rjestys")."</option>";
-			echo "</select>";
-			echo "<input type='hidden' name='tee' value='INVENTOI'>";
-			echo "<input type='hidden' name='tee2' value='$tee2'>";
-			echo "<input type='hidden' name='lista' value='$lista'>";
-			echo "<input type='hidden' name='alku' value='$alku'>";
-			echo "</form>";
+			
+			if ($lista != "") {
+				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<select name='rivimaara' onchange='submit()'>";
+				echo "<option value='180' $sel180rivi>".t("N‰ytet‰‰n 180 rivi‰")."</option>";
+				echo "<option value='18' $sel18rivi>".t("N‰ytet‰‰n 18 rivi‰")."</option>";
+				echo "<option value='1' $sel1rivi>".t("N‰ytet‰‰n 1 rivi")."</option>";
+				echo "</select>";
+				echo "<select name='jarjestys' onchange='submit()'>";
+				echo "<option value='' $seljarj1>".t("Tuotepaikkaj‰rjestys")."</option>";
+				echo "<option value='tuoteno' $seljarj2>".t("Tuotenumeroj‰rjestys")."</option>";
+				echo "</select>";
+				echo "<input type='hidden' name='tee' value='INVENTOI'>";
+				echo "<input type='hidden' name='tee2' value='$tee2'>";
+				echo "<input type='hidden' name='lista' value='$lista'>";
+				echo "<input type='hidden' name='alku' value='$alku'>";
+				echo "</form>";
+			}
+			
 
 			echo "<form name='inve' action='$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='VALMIS'>";

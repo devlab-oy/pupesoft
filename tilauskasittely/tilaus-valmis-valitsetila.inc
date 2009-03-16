@@ -230,9 +230,7 @@
 				// Jos on laskuettavia rivejä ja jos kyseessä ei ole käteinen, merkataan tilaukset kerätyksi ja toimitetuksi ja alatila 'D'
 				$query  = "	UPDATE tilausrivi
 							SET kerattyaika = now(),
-							keratty = '$kukarow[kuka]',
-							toimitettuaika = now(),
-							toimitettu = '$kukarow[kuka]'
+							keratty = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio		= '$kukarow[yhtio]'
 							and var not in ('P','J','S')
@@ -240,6 +238,15 @@
 							and toimitettu	= ''";
 				$result = mysql_query($query) or pupe_error($query);
 
+				$query  = "	UPDATE tilausrivi
+							SET toimitettuaika = now(),
+							toimitettu = '$kukarow[kuka]'
+							WHERE otunnus 	= '$laskurow[tunnus]'
+							and yhtio		= '$kukarow[yhtio]'
+							and var not in ('P','J','S')
+							and toimitettu	= ''";
+				$result = mysql_query($query) or pupe_error($query);
+				
 				$query  = "	UPDATE lasku
 							set tila='L', alatila='D', lahetepvm=now()
 							where tunnus = '$laskurow[tunnus]'

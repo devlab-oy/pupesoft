@@ -656,6 +656,13 @@
 					$nettokatelisaed  = "";
 				}
 
+				if ($eiOstSarjanumeroita != "") {
+					$trlisatiedot = " JOIN tilausrivin_lisatiedot use index (tilausrivitunnus) ON tilausrivin_lisatiedot.yhtio=lasku.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus and tilausrivin_lisatiedot.osto_vai_hyvitys!='O'";
+				}
+				else {
+					$trlisatiedot = "";
+				}
+
 				// Jos ei olla valittu mit‰‰n
 				if ($group == "") {
 					$select = "tuote.yhtio, ";
@@ -892,6 +899,7 @@
 				$query .= $tilauslisa3;
 				$query .= "	FROM lasku use index (yhtio_tila_tapvm)
 							JOIN tilausrivi use index ($index) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.$ouusio=lasku.tunnus and tilausrivi.tyyppi=$tyyppi
+							$trlisatiedot
 							JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
 							LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							LEFT JOIN asiakas use index (PRIMARY) ON asiakas.yhtio=lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
@@ -1894,6 +1902,7 @@
 			if ($osoitetarrat != '') 		$tarchk   				= "CHECKED";
 			if ($piiyhteensa != '')  		$piychk   				= "CHECKED";
 			if ($sarjanumerot != '')  		$sarjachk 				= "CHECKED";
+			if ($eiOstSarjanumeroita != '') $sarjachk2 				= "CHECKED";
 			if ($kuukausittain != '')		$kuuchk	  				= "CHECKED";
 			if ($varastonarvo != '')		$varvochk 				= "CHECKED";
 			if ($piiloed != '')				$piiloedchk 			= "CHECKED";
@@ -2110,6 +2119,12 @@
 				<td><input type='checkbox' name='sarjanumerot' $sarjachk></td>
 				<td></td>
 				<td class='back'>".t("(Toimii vain jos listaat tuotteittain)")."</td>
+				</tr>
+				<tr>
+				<th>".t("N‰yt‰ vain myydyt sarjanumerot")."</th>
+				<td><input type='checkbox' name='eiOstSarjanumeroita' $sarjachk2></td>
+				<td></td>
+				<td class='back'></td>
 				</tr>
 				<tr>
 				<th>".t("N‰yt‰ varastonarvo")."</th>

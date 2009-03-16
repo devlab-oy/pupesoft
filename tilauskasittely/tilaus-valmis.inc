@@ -151,11 +151,11 @@ else {
 		//jos otsikko sanoo, että tilaus on kerätty mutta rivit kuitenkaan ei ole kerätty niin merkataan ne kumminkin kerätyiksi
 		//tai jos yksikin rivi on kerätty (lähetettä ei tulosteta uudestaan) niin päivitetään keräämättömät rivit kerätyksi aktiiviselle käyttäjälle
 		$query = "	UPDATE tilausrivi
-					SET keratty='$kukarow[kuka]', kerattyaika=now()
-					WHERE yhtio='$kukarow[yhtio]'
-					and otunnus='$laskurow[tunnus]'
-					and keratty=''
-					and var != 'J'";
+					SET keratty = '$kukarow[kuka]', kerattyaika=now()
+					WHERE yhtio = '$kukarow[yhtio]'
+					and otunnus = '$laskurow[tunnus]'
+					and keratty = ''
+					and var not in ('P','J','S')";
 		$result = mysql_query($query) or pupe_error($query);
 
 		//Laitetaan rivit toimitetuiksi jos otsikko sanoo toimitettu
@@ -185,7 +185,7 @@ else {
 							keratty = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio 		= '$kukarow[yhtio]'
-							and var not in ('P','J')
+							and var not in ('P','J','S')
 							and keratty 	= ''
 							and toimitettu 	= ''";
 				$result = mysql_query($query) or pupe_error($query);
@@ -218,7 +218,7 @@ else {
 							toimitettu = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio		= '$kukarow[yhtio]'
-							and var not in ('P','J')
+							and var not in ('P','J','S')
 							and keratty		= ''
 							and toimitettu	= ''
 							and tyyppi 	   != 'D'";
@@ -441,7 +441,7 @@ else {
 							keratty = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio 		= '$kukarow[yhtio]'
-							and var not in ('P','J')
+							and var not in ('P','J','S')
 							and keratty 	= ''
 							and toimitettu 	= ''";
 				$result = mysql_query($query) or pupe_error($query);
@@ -474,7 +474,7 @@ else {
 							toimitettu = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio		= '$kukarow[yhtio]'
-							and var not in ('P','J')
+							and var not in ('P','J','S')
 							and keratty		= ''
 							and toimitettu	= ''
 							and tyyppi 	   != 'D'";

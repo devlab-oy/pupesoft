@@ -244,9 +244,8 @@ while ((!feof ($fd)) and ($error!=1)) {
 						tyyppi 			= 'L',
 						kommentti 		= '$trow[kommentti]'";
 	
-			//if ($trow['ei_saldoa']!='') {
-			//	$query .= ", kerattyaika = now()";
-			//}
+			if ($trow['ei_saldoa'] != '') $query .= ", keratty = 'saldoton', kerattyaika = now()";
+			
 			if ($trow['ei_saldoa'] == '') {	
 				$query .= ", hyllyalue	= '$alue'";
 				$query .= ", hyllynro	= '0'";
@@ -377,8 +376,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 					tyyppi = 'L',
 					toimaika = '$toimpvm'";
 	
-				if ($trow['ei_saldoa']!='')
-					$query .= ", kerattyaika = now()";
+				if ($trow['ei_saldoa'] != '') $query .= ", keratty = 'saldoton', kerattyaika = now()";
 	
 				$rperustettu += 1;
 	

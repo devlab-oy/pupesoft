@@ -37,10 +37,11 @@
 
 		//...niin päivitetään keräämättömät rivit kerätyksi aktiiviselle käyttäjälle
 		$query = "	UPDATE tilausrivi use index (yhtio_otunnus)
-					SET keratty='$kukarow[kuka]', kerattyaika=now()
-					where yhtio='$kukarow[yhtio]'
-					and otunnus='$laskurow[tunnus]'
-					and keratty=''";
+					SET keratty = '$kukarow[kuka]', kerattyaika=now()
+					where yhtio = '$kukarow[yhtio]'
+					and otunnus = '$laskurow[tunnus]'
+					and keratty = ''
+					and var not in ('P','J','S')";
 		$result = mysql_query($query) or pupe_error($query);
 
 

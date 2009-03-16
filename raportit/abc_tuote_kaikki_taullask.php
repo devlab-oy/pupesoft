@@ -211,78 +211,82 @@
 			
 			$excelrivi = 0;
 			
-			$worksheet->write($excelrivi, 0,  t("ABC"));
-			$worksheet->write($excelrivi, 1,  t("Tuoteno"));
-			$worksheet->write($excelrivi, 2,  t("Toim_tuoteno"));
-			$worksheet->write($excelrivi, 3,  t("Nimitys"));
-			$worksheet->write($excelrivi, 4,  t("Merkki"));
-			$worksheet->write($excelrivi, 5,  t("Osasto"));
-			$worksheet->write($excelrivi, 6,  t("Try"));
-			$worksheet->write($excelrivi, 7,  t("Tulopvm"));
-			$worksheet->write($excelrivi, 8,  t("Myynti$yhtiorow[valkoodi]"));
-			$worksheet->write($excelrivi, 9,  t("Kate"));
-			$worksheet->write($excelrivi, 10,  t("Kate%"));
-			$worksheet->write($excelrivi, 11,  t("Kateosuus"));
-			$worksheet->write($excelrivi, 12,  t("Vararvo"));
-			$worksheet->write($excelrivi, 13,  t("Kierto"));
-			$worksheet->write($excelrivi, 14,  t("MyyntiKpl"));
-			$worksheet->write($excelrivi, 15,  t("MyyntieraKpl"));
-			$worksheet->write($excelrivi, 16,  t("Myyntiera$yhtiorow[valkoodi]"));
-			$worksheet->write($excelrivi, 17,  t("Myyntirivit"));
-			$worksheet->write($excelrivi, 18,  t("Puuterivit"));
-			$worksheet->write($excelrivi, 19,  t("Palvelutaso"));
-			$worksheet->write($excelrivi, 20,  t("OstoeraKPL"));
-			$worksheet->write($excelrivi, 21,  t("Ostoera$yhtiorow[valkoodi]"));
-			$worksheet->write($excelrivi, 22,  t("Ostorivit"));
-			$worksheet->write($excelrivi, 23,  t("KustannusMyynti"));
-			$worksheet->write($excelrivi, 24,  t("KustannusOsto"));
-			$worksheet->write($excelrivi, 25,  t("KustannusYht"));
-			$worksheet->write($excelrivi, 26,  t("Kate-Kustannus"));
-			$worksheet->write($excelrivi, 27,  t("Tuotepaikka"));
-			$worksheet->write($excelrivi, 28,  t("Saldo"));
-			$worksheet->write($excelrivi, 29,  t("Myyjä"));
-			$worksheet->write($excelrivi, 30,  t("Ostaja"));
-			$worksheet->write($excelrivi, 31,  t("Malli"));
-			$worksheet->write($excelrivi, 32,  t("Mallitarkenne"));
-			$worksheet->write($excelrivi, 33,  t("Saapumispvm"));
+			$worksheet->write($excelrivi, 0,  t("ABC"));			
+			$worksheet->write($excelrivi, 1,  t("ABC osaston luokka"));
+			$worksheet->write($excelrivi, 2,  t("ABC tuoteryhmän luokka"));			
+			$worksheet->write($excelrivi, 3,  t("Tuoteno"));
+			$worksheet->write($excelrivi, 4,  t("Toim_tuoteno"));
+			$worksheet->write($excelrivi, 5,  t("Nimitys"));
+			$worksheet->write($excelrivi, 6,  t("Merkki"));
+			$worksheet->write($excelrivi, 7,  t("Osasto"));
+			$worksheet->write($excelrivi, 8,  t("Try"));
+			$worksheet->write($excelrivi, 9,  t("Tulopvm"));
+			$worksheet->write($excelrivi, 10,  t("Myynti$yhtiorow[valkoodi]"));
+			$worksheet->write($excelrivi, 11,  t("Kate"));
+			$worksheet->write($excelrivi, 12,  t("Kate%"));
+			$worksheet->write($excelrivi, 13,  t("Kateosuus"));
+			$worksheet->write($excelrivi, 14,  t("Vararvo"));
+			$worksheet->write($excelrivi, 15,  t("Kierto"));
+			$worksheet->write($excelrivi, 16,  t("MyyntiKpl"));
+			$worksheet->write($excelrivi, 17,  t("MyyntieraKpl"));
+			$worksheet->write($excelrivi, 18,  t("Myyntiera$yhtiorow[valkoodi]"));
+			$worksheet->write($excelrivi, 19,  t("Myyntirivit"));
+			$worksheet->write($excelrivi, 20,  t("Puuterivit"));
+			$worksheet->write($excelrivi, 21,  t("Palvelutaso"));
+			$worksheet->write($excelrivi, 22,  t("OstoeraKPL"));
+			$worksheet->write($excelrivi, 23,  t("Ostoera$yhtiorow[valkoodi]"));
+			$worksheet->write($excelrivi, 24,  t("Ostorivit"));
+			$worksheet->write($excelrivi, 25,  t("KustannusMyynti"));
+			$worksheet->write($excelrivi, 26,  t("KustannusOsto"));
+			$worksheet->write($excelrivi, 27,  t("KustannusYht"));
+			$worksheet->write($excelrivi, 28,  t("Kate-Kustannus"));
+			$worksheet->write($excelrivi, 29,  t("Tuotepaikka"));
+			$worksheet->write($excelrivi, 30,  t("Saldo"));
+			$worksheet->write($excelrivi, 31,  t("Myyjä"));
+			$worksheet->write($excelrivi, 32,  t("Ostaja"));
+			$worksheet->write($excelrivi, 33,  t("Malli"));
+			$worksheet->write($excelrivi, 34,  t("Mallitarkenne"));
+			$worksheet->write($excelrivi, 35,  t("Saapumispvm"));
 			$excelrivi++;
 		}
 				
 		echo "<pre>";
-		echo "ABC\t";
-		echo "Tuoteno\t";
-		echo "Toim_tuoteno\t";
-		echo "Nimitys\t";
-		echo "Merkki\t";
-		echo "Osasto\t";
-		echo "Try\t";
-		echo "Tulopvm\t";
-		echo "Myynti$yhtiorow[valkoodi]\t";
-		echo "Kate\t";
-		echo "Kate%\t";
-		echo "Kateosuus\t";
-		echo "Vararvo\t";
-		echo "Kierto\t";
-		echo "MyyntiKpl\t";
-		echo "MyyntieraKpl\t";
-		echo "Myyntiera$yhtiorow[valkoodi]\t";
-		echo "Myyntirivit\t";
-		echo "Puuterivit\t";
-		echo "Palvelutaso\t";
-		echo "OstoeraKPL\t";
-		echo "Ostoera$yhtiorow[valkoodi]\t";
-		echo "Ostorivit\t";
-		echo "KustannusMyynti\t";
-		echo "KustannusOsto\t";
-		echo "KustannusYht\t";
-		echo "Kate-Kustannus\t";
-		echo "Tuotepaikka\t";
-		echo "Saldo\t";
-		echo "Myyja\t";
-		echo "Ostaja\t";
-		echo "Malli\t";
-		echo "Mallitarkenne\t";
-		echo "Saapumispvm\t";
+		echo t("ABC")."\t";		
+		echo t("ABC osaston luokka");
+		echo t("ABC tuoteryhmän luokka");		
+		echo t("Tuoteno")."\t";
+		echo t("Toim_tuoteno")."\t";
+		echo t("Nimitys")."\t";
+		echo t("Merkki")."\t";
+		echo t("Osasto")."\t";
+		echo t("Try")."\t";
+		echo t("Tulopvm")."\t";
+		echo t("Myynti")." $yhtiorow[valkoodi]\t";
+		echo t("Kate")."\t";
+		echo t("Kate%")."\t";
+		echo t("Kateosuus")."\t";
+		echo t("Vararvo")."\t";
+		echo t("Kierto")."\t";
+		echo t("MyyntiKpl")."\t";
+		echo t("MyyntieraKpl")."\t";
+		echo t("Myyntiera")." $yhtiorow[valkoodi]\t";
+		echo t("Myyntirivit")."\t";
+		echo t("Puuterivit")."\t";
+		echo t("Palvelutaso")."\t";
+		echo t("OstoeraKPL")."\t";
+		echo t("Ostoera")." $yhtiorow[valkoodi]\t";
+		echo t("Ostorivit")."\t";
+		echo t("KustannusMyynti")."\t";
+		echo t("KustannusOsto")."\t";
+		echo t("KustannusYht")."\t";
+		echo t("Kate-Kustannus")."\t";
+		echo t("Tuotepaikka")."\t";
+		echo t("Saldo")."\t";
+		echo t("Myyja")."\t";
+		echo t("Ostaja")."\t";
+		echo t("Malli")."\t";
+		echo t("Mallitarkenne")."\t";
+		echo t("Saapumispvm")."\t";
 		echo "\n";
 
 		$osastolisa = $trylisa = $tuotemerkkilisa = $tuotemyyjalisa = $tuoteostajalisa = $tuotemallilisa = $saapumispvmlisa = "";
@@ -348,6 +352,8 @@
 			//haetaan rivien arvot
 			$query = "	SELECT
 						luokka,
+						luokka_osasto,
+						luokka_try,
 						tuoteno,
 						osasto,
 						try,
@@ -440,49 +446,51 @@
 				$paikresult = mysql_query($query) or pupe_error($query);
 
 				while ($paikrow = mysql_fetch_array($paikresult)) {
-
-					$l = $row["luokka"];
 					
 					// Lisätään rivi exceltiedostoon
 					if(isset($workbook)) {
-						$worksheet->write($excelrivi, 0,  "$ryhmanimet[$l]");
-						$worksheet->write($excelrivi, 1,  "$row[tuoteno]");
-						$worksheet->write($excelrivi, 2,  "$tuorow[toim_tuoteno]");
-						$worksheet->write($excelrivi, 3,  asana('nimitys_',$row['tuoteno'],$tuorow['nimitys']));
-						$worksheet->write($excelrivi, 4,  "$tuorow[tuotemerkki]");
-						$worksheet->write($excelrivi, 5,  "$row[osasto]");
-						$worksheet->write($excelrivi, 6,  "$row[try]");
-						$worksheet->write($excelrivi, 7,  "$row[tulopvm]");
-						$worksheet->write($excelrivi, 8,  sprintf('%.1f',$row["summa"]));
-						$worksheet->write($excelrivi, 9,  sprintf('%.1f',$row["kate"]));
-						$worksheet->write($excelrivi, 10, sprintf('%.1f',$row["katepros"]));
-						$worksheet->write($excelrivi, 11, sprintf('%.1f',$row["kateosuus"]));
-						$worksheet->write($excelrivi, 12, sprintf('%.1f',$row["vararvo"]));
-						$worksheet->write($excelrivi, 13, sprintf('%.1f',$row["varaston_kiertonop"]));
-						$worksheet->write($excelrivi, 14, sprintf('%.1f',$row["kpl"]));
-						$worksheet->write($excelrivi, 15, sprintf('%.1f',$row["myyntierankpl"]));
-						$worksheet->write($excelrivi, 16, sprintf('%.1f',$row["myyntieranarvo"]));
-						$worksheet->write($excelrivi, 17, sprintf('%.0f',$row["rivia"]));
-						$worksheet->write($excelrivi, 18, sprintf('%.0f',$row["puuterivia"]));
-						$worksheet->write($excelrivi, 19, sprintf('%.1f',$row["palvelutaso"]));
-						$worksheet->write($excelrivi, 20, sprintf('%.1f',$row["ostoerankpl"]));
-						$worksheet->write($excelrivi, 21, sprintf('%.1f',$row["ostoeranarvo"]));
-						$worksheet->write($excelrivi, 22, sprintf('%.0f',$row["osto_rivia"]));
-						$worksheet->write($excelrivi, 23, sprintf('%.1f',$row["kustannus"]));
-						$worksheet->write($excelrivi, 24, sprintf('%.1f',$row["kustannus_osto"]));
-						$worksheet->write($excelrivi, 25, sprintf('%.1f',$row["kustannus_yht"]));
-						$worksheet->write($excelrivi, 26, sprintf('%.1f',$row["total"]));
-						$worksheet->write($excelrivi, 27, "$paikrow[paikka]");
-						$worksheet->write($excelrivi, 28, sprintf('%.0f',$paikrow["saldo"]));
-						$worksheet->write($excelrivi, 29, "$myyjarow[nimi]");
-						$worksheet->write($excelrivi, 30, "$ostajarow[nimi]");
-						$worksheet->write($excelrivi, 31, "$row[malli]");
-						$worksheet->write($excelrivi, 32, "$row[mallitarkenne]");
-						$worksheet->write($excelrivi, 33, tv1dateconv($row["saapumispvm"]));
+						$worksheet->write($excelrivi, 0,  $ryhmanimet[$row["luokka"]]);						
+						$worksheet->write($excelrivi, 1,  $ryhmanimet[$row["luokka_osasto"]]);
+						$worksheet->write($excelrivi, 2,  $ryhmanimet[$row["luokka_try"]]);						
+						$worksheet->write($excelrivi, 3,  "$row[tuoteno]");
+						$worksheet->write($excelrivi, 4,  "$tuorow[toim_tuoteno]");
+						$worksheet->write($excelrivi, 5,  asana('nimitys_',$row['tuoteno'],$tuorow['nimitys']));
+						$worksheet->write($excelrivi, 6,  "$tuorow[tuotemerkki]");
+						$worksheet->write($excelrivi, 7,  "$row[osasto]");
+						$worksheet->write($excelrivi, 8,  "$row[try]");
+						$worksheet->write($excelrivi, 9,  "$row[tulopvm]");
+						$worksheet->write($excelrivi, 10,  sprintf('%.1f',$row["summa"]));
+						$worksheet->write($excelrivi, 11,  sprintf('%.1f',$row["kate"]));
+						$worksheet->write($excelrivi, 12, sprintf('%.1f',$row["katepros"]));
+						$worksheet->write($excelrivi, 13, sprintf('%.1f',$row["kateosuus"]));
+						$worksheet->write($excelrivi, 14, sprintf('%.1f',$row["vararvo"]));
+						$worksheet->write($excelrivi, 15, sprintf('%.1f',$row["varaston_kiertonop"]));
+						$worksheet->write($excelrivi, 16, sprintf('%.1f',$row["kpl"]));
+						$worksheet->write($excelrivi, 17, sprintf('%.1f',$row["myyntierankpl"]));
+						$worksheet->write($excelrivi, 18, sprintf('%.1f',$row["myyntieranarvo"]));
+						$worksheet->write($excelrivi, 19, sprintf('%.0f',$row["rivia"]));
+						$worksheet->write($excelrivi, 20, sprintf('%.0f',$row["puuterivia"]));
+						$worksheet->write($excelrivi, 21, sprintf('%.1f',$row["palvelutaso"]));
+						$worksheet->write($excelrivi, 22, sprintf('%.1f',$row["ostoerankpl"]));
+						$worksheet->write($excelrivi, 23, sprintf('%.1f',$row["ostoeranarvo"]));
+						$worksheet->write($excelrivi, 24, sprintf('%.0f',$row["osto_rivia"]));
+						$worksheet->write($excelrivi, 25, sprintf('%.1f',$row["kustannus"]));
+						$worksheet->write($excelrivi, 26, sprintf('%.1f',$row["kustannus_osto"]));
+						$worksheet->write($excelrivi, 27, sprintf('%.1f',$row["kustannus_yht"]));
+						$worksheet->write($excelrivi, 28, sprintf('%.1f',$row["total"]));
+						$worksheet->write($excelrivi, 29, "$paikrow[paikka]");
+						$worksheet->write($excelrivi, 30, sprintf('%.0f',$paikrow["saldo"]));
+						$worksheet->write($excelrivi, 31, "$myyjarow[nimi]");
+						$worksheet->write($excelrivi, 32, "$ostajarow[nimi]");
+						$worksheet->write($excelrivi, 33, "$row[malli]");
+						$worksheet->write($excelrivi, 34, "$row[mallitarkenne]");
+						$worksheet->write($excelrivi, 35, tv1dateconv($row["saapumispvm"]));
 						$excelrivi++;
 					}
 				
-					echo "$ryhmanimet[$l]\t";
+					echo $ryhmanimet[$row["luokka"]]."\t";
+					echo $ryhmanimet[$row["luokka_osasto"]]."\t";
+					echo $ryhmanimet[$row["luokka_try"]]."\t";
 					echo "$row[tuoteno]\t";
 					echo "$tuorow[toim_tuoteno]\t";
 					echo asana('nimitys_',$row['tuoteno'],$tuorow['nimitys'])."\t";

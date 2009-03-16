@@ -69,7 +69,7 @@ while (!feof ($fd)) {
  			echo "Tehtiin tilaus $id asiakkaalle $ytunnus<br>";
 
  			// haetaan tilauksen tiedot
- 			$query    = "select * from lasku where tunnus='$id' and yhtio='$kukarow[yhtio]'";
+ 			$query    = "SELECT * from lasku where tunnus='$id' and yhtio='$kukarow[yhtio]'";
  			$result   = mysql_query($query) or die($query);
  			$laskurow = mysql_fetch_array($result);		
  		}
@@ -85,6 +85,8 @@ while (!feof ($fd)) {
  			if ($hinta == 0) {
  				$hinta = "";
  			}
+
+			$jtkielto = $laskurow['jtkielto'];
  
  			//lis‰t‰‰n rivi
  			require ("lisaarivi.inc");

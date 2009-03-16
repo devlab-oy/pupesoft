@@ -54,6 +54,7 @@
 						$toimaika 	= $laskurow["toimaika"];
 						$kerayspvm 	= $laskurow["kerayspvm"];
 						$varasto 	= $laskurow["varasto"];
+						$jtkielto 	= $laskurow['jtkielto'];
 						
 						require('lisaarivi.inc');
 

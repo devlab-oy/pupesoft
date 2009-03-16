@@ -906,17 +906,18 @@ while (!feof ($fd)) {
 					// halutaan $tuoteno
 					// $kpl kappaletta
 					// $trow jossa on tuotten tiedot
-					$ytunnus    = $arow["ytunnus"];
-					$hinta 		= "";
-					$netto 		= "";
-					$ale 		= "";
-					$var		= "";
-					$alv		= "";
-					$toimaika 	= $laskurow["toimaika"];
-					$kerayspvm	= $laskurow["kerayspvm"];
-					$paikka		= "";
-					$varasto 	= $olinvarasto;
-					$kukarow["kesken"] = $laskurow["tunnus"];
+					$ytunnus    		= $arow["ytunnus"];
+					$hinta 				= "";
+					$netto 				= "";
+					$ale 				= "";
+					$var				= "";
+					$alv				= "";
+					$toimaika 			= $laskurow["toimaika"];
+					$kerayspvm			= $laskurow["kerayspvm"];
+					$paikka				= "";
+					$varasto 			= $olinvarasto;
+					$kukarow["kesken"] 	= $laskurow["tunnus"];
+					$jtkielto 			= $laskurow['jtkielto'];
 
 					if ($ketjutus == 'o') {
 						// kielletään kaikki muutokset alkuperäiseen tilausriviin, jos ketjutus = 'o' eli pupesoft --> pupesoft

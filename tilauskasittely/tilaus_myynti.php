@@ -355,11 +355,6 @@ if ((int) $kukarow["kesken"] != 0) {
 	}
 
 	if ($laskurow["toim_maa"] == "") $laskurow["toim_maa"] = $yhtiorow['maa'];
-
-	if ($laskurow['jtkielto'] != '') {
-		$yhtiorow["puute_jt_oletus"] = "";
-	}
-
 }
 
 //tietyissä keisseissä tilaus lukitaan (ei syöttöriviä eikä muota muokkaa/poista-nappuloita)
@@ -2832,6 +2827,9 @@ if ($tee == '') {
 			else {
 				$varataan_saldoa = "";
 			}
+			
+			// Jos ei haluta JT-rivejä
+			$jtkielto = $laskurow['jtkielto'];
 
 			//Tehdään muuttujaswitchit
 			if (is_array($hinta_array)) {

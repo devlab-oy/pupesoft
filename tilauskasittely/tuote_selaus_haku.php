@@ -227,6 +227,7 @@
 					$varasto 	     = "";
 					$rivitunnus		 = "";
 					$korvaavakielto	 = "";
+					$jtkielto 		 = $laskurow['jtkielto'];
 					$varataan_saldoa = "";
 					$myy_sarjatunnus = $tilsarjatunnus[$yht_i];
 

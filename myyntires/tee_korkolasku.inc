@@ -169,6 +169,8 @@
 			$rivitunnus		 = "";
 			$korvaavakielto	 = "";
 			$varataan_saldoa = "";
+			$jtkielto 		 = $laskurow['jtkielto'];
+			
 
 			require ("tilauskasittely/lisaarivi.inc");
 		}

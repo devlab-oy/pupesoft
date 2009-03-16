@@ -18,6 +18,7 @@
 	// $rivitunnus		 --> tietokannan tunnus jolle rivi lis‰t‰‰n
 	// $rivilaadittu     --> vanhan rivin laadittuaika, s‰ilytet‰‰n se
 	// $korvaavakielto	 --> Jos erisuuri kuin tyhj‰ niin ei myyd‰ korvaavia
+	// $jtkielto	 	 --> Jos erisuuri kuin tyhj‰ niin ei laiteta JT:Seen
 	// $perhekielto      --> Jos erisuuri kuin tyhj‰ niin ei etsit‰ ollenkaan perheit‰
 	// $varataan_saldoa  --> Jos == EI niin ei varata saldoa (tietyiss‰ keisseiss‰), tai siis ei ainakan tehd‰ saldotsekki‰
 	// $kutsuja			 --> Kuka t‰t‰ skripti‰ kutsuu
@@ -32,7 +33,6 @@
 
 	// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si myyntihaarassa
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
-	
 	
 	if(!function_exists("tuoteperhe_reku")) {
 		function tuoteperhe_reku($esiisatuoteno, $isatuoteno, $tuoteperhe, $kaikkituotteet) {
@@ -1444,7 +1444,7 @@
 						// Sirtolistoissa defaultti on JT jos saldo ei riit‰. (jos yhtio ei v‰lit‰ saldoista ei v‰litet‰ t‰‰ll‰k‰‰n..)
 						// Tai jos yhtiˆlle on konffattu, ett‰ se haluaa ylimemen‰t jteiksi
 						// Sis‰isiss‰ tyˆm‰‰r‰ykiss‰ ei haluta JT-rivej‰
-						if ((($rivityyppi == 'G' and $yhtiorow["puute_jt_oletus"] != "H") or ($yhtiorow["puute_jt_oletus"] == "J" and $kpl > 0)) and $laskurow["tila"] != 'S') {
+						if ((($rivityyppi == 'G' and $yhtiorow["puute_jt_oletus"] != "H") or ($yhtiorow["puute_jt_oletus"] == "J" and $kpl > 0)) and $laskurow["tila"] != 'S' and $jtkielto == "") {
 							if ($yhtiorow["varaako_jt_saldoa"] == "") {
 								$varattu 	= 0;
 								$jt 		= $kpl;
@@ -1453,6 +1453,7 @@
 								$varattu 	= $kpl;
 								$jt 		= 0;
 							}
+							
 							$var	= "J";
 						}
 						// Terminaalitoimitukset tai ostoskorit; var tyhj‰‰ ja varattu normisti

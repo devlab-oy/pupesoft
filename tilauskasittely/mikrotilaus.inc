@@ -47,6 +47,7 @@ if ($tee == "file") {
 			$varataan_saldoa	= "";
 			$var				= "";
 			$perhekielto		= "";
+			$jtkielto 		 	= $laskurow['jtkielto'];
 
 			//Myyd‰‰n vain tietyst‰ varastosta
 			if ($laskurow["varasto"] != 0) {

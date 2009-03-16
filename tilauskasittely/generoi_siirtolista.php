@@ -179,17 +179,16 @@
 
 							if(mysql_num_rows($rarresult) == 1) {
 								$trow = mysql_fetch_array($rarresult);
-								$toimaika 	= $laskurow["toimaika"];
-								$kerayspvm	= $laskurow["kerayspvm"];
-								$tuoteno	= $pairow["tuoteno"];
-								$kpl		= $siirretaan;
-								//$paikka		= "$uuspairow[hyllyalue]#$uuspairow[hyllynro]#$uuspairow[hyllyvali]#$uuspairow[hyllytaso]";
-								$varasto	= $lahdevarasto;
-								$hinta 		= "";
-								$netto 		= "";
-								$ale 		= "";
-								$var		= "";
-							
+								$toimaika 			= $laskurow["toimaika"];
+								$kerayspvm			= $laskurow["kerayspvm"];
+								$tuoteno			= $pairow["tuoteno"];
+								$kpl				= $siirretaan;
+								$jtkielto 			= $laskurow['jtkielto'];
+								$varasto			= $lahdevarasto;
+								$hinta 				= "";
+								$netto 				= "";
+								$ale 				= "";
+								$var				= "";							
 								$korvaavakielto		= 1;
 								$perhekielto		= 1;
 								$orvoteikiinnosta	= "EITOD";

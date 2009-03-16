@@ -137,6 +137,7 @@
 								$varasto 	     = "";
 								$rivitunnus		 = "";
 								$korvaavakielto	 = "";
+								$jtkielto 		 = $laskurow['jtkielto'];
 								
 								//Ennakkotilauksen, Tarjoukset ja Ylläpitosopimukset eivät varaa saldoa
 								if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {

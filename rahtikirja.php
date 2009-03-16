@@ -143,7 +143,8 @@
 					$korvaavakielto 	= "ON";
 					$toimaika			= $laskurow["toimaika"];
 					$kerayspvm			= $laskurow["kerayspvm"];
-
+					$jtkielto 			= $laskurow['jtkielto'];
+					
 					require("tilauskasittely/lisaarivi.inc");
 
 					//	Merkataan tämä rivi kerätyksi ja toimitetuksi..

@@ -134,10 +134,15 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			else {
 				$splittauskielto = "";
 			}
+			
+			if ($asiakasrow['jtkielto'] != '') $jtkielto = 'ON';
+			if ($asiakasrow['rahtivapaa'] != '') $rahtivapaa = 'ON';
+			if ($asiakasrow['osatoimitus'] != '') $osatoimitus = 'ON';
+			
 		}
 		else {
 			//yhtiön oletusalvi!
-			$xwquery = "select selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
+			$xwquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
 			$xwtres  = mysql_query($xwquery) or pupe_error($xwquery);
 			$xwtrow  = mysql_fetch_array($xwtres);
 

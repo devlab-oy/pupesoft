@@ -334,7 +334,8 @@
 				}
 				
 				$korvaavakielto		= "";
-
+				$jtkielto 		 	= $laskurow['jtkielto'];
+				
 				$query = "SELECT * FROM tuote WHERE yhtio='$kukarow[yhtio]' and tuoteno='$coprivirow[tuoteno]'";
 				$tuote_result = mysql_query($query) or pupe_error($query);
 				$trow = mysql_fetch_array($tuote_result);

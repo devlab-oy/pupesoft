@@ -1359,10 +1359,10 @@ if($tee == "") {
 		}
 		
 		if($summamin > 0) {
-			$having_rajaus .= " and summa_ >= $summamin";
+			$having_rajaus .= " and Yhteensä >= $summamin";
 		}
 		if($summamax > 0) {
-			$having_rajaus .= " and summa_ <= $summamax";
+			$having_rajaus .= " and Yhteensä <= $summamax";
 		}
 	}
 	else {

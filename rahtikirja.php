@@ -921,9 +921,9 @@
 
 		//jos myyntitilaus niin halutaan maksuehto mukaan
 		if ($tila == 'L') {
-			$joinmaksuehto = "JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus";
-			$selectmaksuehto = "if(maksuehto.jv='', 'OK', lasku.tunnus) jvgrouppi,";
-			$groupmaksuehto = "jvgrouppi,";
+			$joinmaksuehto 		= "JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus";
+			$selectmaksuehto 	= "if(maksuehto.jv='', 'OK', lasku.tunnus) jvgrouppi,";
+			$groupmaksuehto 	= "jvgrouppi,";
 		}
 		else {
 			$wherelasku = " and lasku.toim_nimi != '' ";
@@ -948,26 +948,26 @@
 
 		// Haetaan sopivia tilauksia
 		$query = "	SELECT
-					min(lasku.tunnus) tunnus,
-					GROUP_CONCAT(distinct lasku.tunnus order by lasku.tunnus SEPARATOR ',') tunnukset,
-					if(lasku.tila='L',GROUP_CONCAT(distinct concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) order by concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) SEPARATOR '<br>'),nimi) nimi,
-					GROUP_CONCAT(distinct lasku.laatija order by lasku.laatija SEPARATOR '<br>') laatija,
 					lasku.toimitustapa toimitustapa,
 					toimitustapa.nouto nouto,
 					$selectmaksuehto
 					$selecttoimitustapaehto
 					lasku.vienti,
 					date_format(lasku.luontiaika, '%Y-%m-%d') laadittux,
-					date_format(lasku.toimaika, '%Y-%m-%d') toimaika,
+					date_format(lasku.toimaika, '%Y-%m-%d') toimaika,										
 					rahtikirjat.otsikkonro,
 					rahtikirjat.poikkeava,
-					lasku.pakkaamo,
-					GROUP_CONCAT(lasku.pakkaamo order by lasku.tunnus SEPARATOR ',') pakkaamot,
-					sum(rahtikirjat.kollit) kollit,
 					rahtikirjat.pakkaus,
-					count(distinct lasku.tunnus) tunnukset_lkm,
-					vanhatunnus,
-					varasto
+					lasku.vanhatunnus,
+					lasku.pakkaamo,
+					lasku.varasto,															
+					min(lasku.tunnus) tunnus,
+					GROUP_CONCAT(distinct lasku.tunnus order by lasku.tunnus) tunnukset,
+					if(lasku.tila='L',GROUP_CONCAT(distinct concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) order by concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) SEPARATOR '<br>'), GROUP_CONCAT(distinct nimi)) nimi,
+					GROUP_CONCAT(distinct lasku.laatija order by lasku.laatija SEPARATOR '<br>') laatija,																									
+					GROUP_CONCAT(lasku.pakkaamo order by lasku.tunnus) pakkaamot,
+					sum(rahtikirjat.kollit) kollit,					
+					count(distinct lasku.tunnus) tunnukset_lkm					
 					FROM lasku use index (tila_index)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != ''
 					$joinmaksuehto
@@ -1010,24 +1010,25 @@
 
 			while ($row = mysql_fetch_array($tilre)) {
 				//chekkaus että kaikki splitatut tilaukset on kerätty
-			/* ei oteta huomioon niitä mistä puuttuu tulostusalue ja millä on tietty alatila 
-			lisää alatila B jos käytetään keräästä rahtikirjansyöttöön halutessa */
+				/* ei oteta huomioon niitä mistä puuttuu tulostusalue ja millä on tietty alatila 
+				lisää alatila B jos käytetään keräästä rahtikirjansyöttöön halutessa */
+				
 				$query = "	SELECT count(distinct lasku.tunnus) kpl
 							FROM lasku
 							JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							AND lasku.tila in ('L','N')
-							AND lasku.alatila not in('X','V','D')
+							AND lasku.alatila not in ('X','V','D')
 							AND lasku.tulostusalue != ''
 							AND lasku.vanhatunnus = '$row[vanhatunnus]'
 							AND lasku.varasto = '$row[varasto]'
-							AND lasku.pakkaamo = '$row[pakkaamo]'
+							AND lasku.pakkaamo IN ('$row[pakkaamo]', '0')
 							group by lasku.vanhatunnus";
 				$vanhat_res = mysql_query($query) or pupe_error($query);
 				$vanhat_row = mysql_fetch_array($vanhat_res);
 				
 				// Debug 				
-			/*	echo "tarkistus tunnukset_lkm: 	$vanhat_row[kpl] <br>";
+				/*	echo "tarkistus tunnukset_lkm: 	$vanhat_row[kpl] <br>";
 				echo "main tunnukset_lkm: 		$row[tunnukset_lkm] <br>";				
 				echo "main vanhatunnus: 		$row[vanhatunnus] <br>";				
 				echo "main tunnukset: 			$row[tunnukset] <br>";	*/	

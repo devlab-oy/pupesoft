@@ -920,26 +920,26 @@
 		}
 
 		//jos myyntitilaus niin halutaan maksuehto mukaan
-		if ($tila == 'L') {
-			$joinmaksuehto 		= "JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus";
-			$selectmaksuehto 	= "if(maksuehto.jv='', 'OK', lasku.tunnus) jvgrouppi,";
-			$groupmaksuehto 	= "jvgrouppi,";
+		if ($tila == 'L') {		
+			$selectmaksuehto 	= " if(maksuehto.jv='', 'OK', lasku.tunnus) jvgrouppi, ";
+			$joinmaksuehto 		= " JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus ";	
+			$groupmaksuehto 	= " jvgrouppi, ";
 		}
 		else {
 			$wherelasku = " and lasku.toim_nimi != '' ";
 		}
 
-		$having = "";
+		$lisawhere = "";
 		
 		if ($yhtiorow['pakkaamolokerot'] == 'K') {
-			$having = " HAVING ((rahtikirjat.otsikkonro is null or (rahtikirjat.otsikkonro is not null and lasku.pakkaamo > 0) and (rahtikirjat.pakkaus = 'KOLLI' or rahtikirjat.pakkaus = 'Rullakko')) or rahtikirjat.poikkeava = -9) and ";
+			$lisawhere = " and ((rahtikirjat.otsikkonro is null or (rahtikirjat.otsikkonro is not null and lasku.pakkaamo > 0) and (rahtikirjat.pakkaus = 'KOLLI' or rahtikirjat.pakkaus = 'Rullakko')) or rahtikirjat.poikkeava = -9) ";
 		}
 		else {
-			$having = " HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ";
+			$lisawhere = " and (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) ";
 		}
 		
-		if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K' and $tila == 'L') {
-			$grouplisa = ", lasku.vanhatunnus, lasku.varasto, lasku.pakkaamo ";
+		if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K' and $tila == 'L') {					
+			$grouplisa = ", lasku.vanhatunnus, lasku.varasto, lasku.pakkaamo ";			
 			$selecttoimitustapaehto = " toimitustapa.tunnus kimppakyyti, ";
 		}
 		else {
@@ -954,13 +954,10 @@
 					$selecttoimitustapaehto
 					lasku.vienti,
 					date_format(lasku.luontiaika, '%Y-%m-%d') laadittux,
-					date_format(lasku.toimaika, '%Y-%m-%d') toimaika,										
-					rahtikirjat.otsikkonro,
-					rahtikirjat.poikkeava,
-					rahtikirjat.pakkaus,
-					lasku.vanhatunnus,
-					lasku.pakkaamo,
-					lasku.varasto,															
+					date_format(lasku.toimaika, '%Y-%m-%d') toimaika,															
+					min(lasku.vanhatunnus) vanhatunnus,
+					min(lasku.pakkaamo) pakkaamo,
+					min(lasku.varasto) varasto,					
 					min(lasku.tunnus) tunnus,
 					GROUP_CONCAT(distinct lasku.tunnus order by lasku.tunnus) tunnukset,
 					if(lasku.tila='L',GROUP_CONCAT(distinct concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) order by concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) SEPARATOR '<br>'), GROUP_CONCAT(distinct nimi)) nimi,
@@ -979,8 +976,9 @@
 					$wherelasku
 					$haku
 					$tilaustyyppi
-					GROUP BY lasku.toimitustapa, toimitustapa.nouto, $groupmaksuehto kimppakyyti, lasku.vienti, laadittux, toimaika $grouplisa
-					$having ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
+					$lisawhere 
+					and ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')					
+					GROUP BY lasku.toimitustapa, toimitustapa.nouto, $groupmaksuehto kimppakyyti, lasku.vienti, laadittux, toimaika $grouplisa					
 					ORDER BY laadittu";
 		$tilre = mysql_query($query) or pupe_error($query);
 
@@ -1013,19 +1011,21 @@
 				/* ei oteta huomioon niitä mistä puuttuu tulostusalue ja millä on tietty alatila 
 				lisää alatila B jos käytetään keräästä rahtikirjansyöttöön halutessa */
 				
-				$query = "	SELECT count(distinct lasku.tunnus) kpl
-							FROM lasku
-							JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
-							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							AND lasku.tila in ('L','N')
-							AND lasku.alatila not in ('X','V','D')
-							AND lasku.tulostusalue != ''
-							AND lasku.vanhatunnus = '$row[vanhatunnus]'
-							AND lasku.varasto = '$row[varasto]'
-							AND lasku.pakkaamo IN ('$row[pakkaamo]', '0')
-							group by lasku.vanhatunnus";
-				$vanhat_res = mysql_query($query) or pupe_error($query);
-				$vanhat_row = mysql_fetch_array($vanhat_res);
+				if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K' and $tila == 'L') {	
+					$query = "	SELECT count(distinct lasku.tunnus) kpl
+								FROM lasku
+								JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
+								WHERE lasku.yhtio = '$kukarow[yhtio]'
+								AND lasku.tila in ('L','N')
+								AND lasku.alatila not in ('X','V','D')
+								AND lasku.tulostusalue != ''
+								AND lasku.vanhatunnus = '$row[vanhatunnus]'
+								AND lasku.varasto = '$row[varasto]'
+								AND (lasku.pakkaamo = '$row[pakkaamo]' or lasku.tila = 'N')
+								group by lasku.vanhatunnus";
+					$vanhat_res = mysql_query($query) or pupe_error($query);
+					$vanhat_row = mysql_fetch_array($vanhat_res);
+				}
 				
 				// Debug 				
 				/*	echo "tarkistus tunnukset_lkm: 	$vanhat_row[kpl] <br>";
@@ -1033,7 +1033,7 @@
 				echo "main vanhatunnus: 		$row[vanhatunnus] <br>";				
 				echo "main tunnukset: 			$row[tunnukset] <br>";	*/	
 						
-				if ($vanhat_row['kpl'] == $row['tunnukset_lkm'] or $vanhat_row['kpl'] == 0 or $yhtiorow["splittauskielto"] == "K" or $yhtiorow['pakkaamolokerot'] == '') {
+				if ($vanhat_row['kpl'] == $row['tunnukset_lkm'] or $vanhat_row['kpl'] == 0 or $yhtiorow["splittauskielto"] != "" or $yhtiorow['pakkaamolokerot'] == '') {
 									
 					echo "<tr class='aktiivi'>";
 					echo "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";
@@ -1054,7 +1054,7 @@
 						$query = "	SELECT pakkaus, kollit
 									FROM rahtikirjat
 									WHERE yhtio = '$kukarow[yhtio]'
-									AND otsikkonro in($row[tunnukset])";
+									AND otsikkonro in ($row[tunnukset])";
 						$kollit_res = mysql_query($query) or pupe_error($query);
 					
 						while ($kollit_row = mysql_fetch_array($kollit_res)) {

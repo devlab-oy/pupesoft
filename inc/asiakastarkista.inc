@@ -272,7 +272,8 @@ if(!function_exists("asiakastarkista")) {
 			
 			$apu_maa = $t[$i];
 			
-			if (strtoupper($t[$i]) == 'FI' and $asiak_laji != "R" and ($yhtiorow["ytunnus_tarkistukset"] == "" or $yhtiorow["ytunnus_tarkistukset"] == "A")) {
+			if (strtoupper($t[$i]) == 'FI' and $asiak_laji != "R" and $asiak_laji != "H" and ($yhtiorow["ytunnus_tarkistukset"] == "" or $yhtiorow["ytunnus_tarkistukset"] == "A")) {
+				
 				require ("tarkistaytunnus.inc");
 
 				if ($ok == 0) {

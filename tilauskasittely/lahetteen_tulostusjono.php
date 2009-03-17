@@ -227,6 +227,11 @@
 				}
 				
 				echo "<th>".t("Riv")."</th>";
+
+				if ($yhtiorow['pakkaamolokerot'] == 'K') {
+					echo "<th>",t("Ei lokeroa"),"</th>";
+				}
+
 				echo "<th>".t("Tulosta")."</th>";
 				echo "<th>".t("Näytä")."</th>";
 				echo "</tr>";
@@ -317,6 +322,26 @@
 					}
 					
 					echo "<$ero valign='top'>$tilrow[riveja]</$ero>";
+
+					if ($yhtiorow["pakkaamolokerot"] == "K") {
+
+						echo "<$ero valign='top'><input type='checkbox' name='ei_pakkaamoa[]' value='$tilrow[tunnus]'";
+
+						if ($tila == 'N') {
+							$query = "	SELECT ei_pakkaamoa	
+										FROM toimitustapa 
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND selite = '$tilrow[toimitustapa]'";
+							$ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
+
+							$ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
+
+							if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1') {
+								echo " checked";
+							}
+						}
+						echo "></$ero>";				
+					}
 
 					echo "<$ero valign='top'><input type='checkbox' name='tulostukseen[]' value='$tilrow[otunnus]' CHECKED></$ero>";
 
@@ -659,6 +684,11 @@
 			echo "<th><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">".t("Toimitustapa")."</th>";
 			echo "<th><a href='#' onclick=\"getElementById('jarj').value='tilauksia'; document.forms['find'].submit();\">".t("Til.")."</th>";
 			echo "<th><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">".t("Riv")."</th>";
+
+			if ($yhtiorow["pakkaamolokerot"] == "K") {
+				echo "<th><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">".t("Ei lokeroa")."</th>";
+			}
+
 			echo "<th>".t("Tulostin")."</th>";
 			echo "<th>".t("Tulosta")."</th>";
 			echo "<th>".t("Näytä")."</th>";
@@ -773,6 +803,26 @@
 					require("varaston_tulostusalue.inc");
 
 					echo "<form method='post' action='$PHP_SELF'>";
+
+					if ($yhtiorow["pakkaamolokerot"] == "K") {
+
+						echo "<$ero valign='top'><input type='checkbox' name='ei_pakkaamoa' id='ei_pakkaamoa' value='$tilaus'";
+
+						if ($tila == 'N') {
+							$query = "	SELECT ei_pakkaamoa	
+										FROM toimitustapa 
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND selite = '$tilrow[toimitustapa]'";
+							$ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
+
+							$ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
+
+							if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1') {
+								echo " checked";
+							}
+						}
+						echo "></$ero>";				
+					}
 
 					$query = "	SELECT *
 								FROM kirjoittimet

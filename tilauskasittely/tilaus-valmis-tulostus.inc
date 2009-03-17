@@ -35,7 +35,7 @@
 	// Katsotaan, että tämä keräyslista ei ole jo tulostettu
 	if ($chk_row["ok"] == $chk_row["kaikki"] and $chk_row["ok"] != 0) {
 
-		$laskurow['pakkaamo'] = pakkaamo("$tilausnumeroita", "yes");
+		$laskurow['pakkaamo'] = pakkaamo("$tilausnumeroita", "yes", $ei_pakkaamoa);
 
 		//keräyslistan tulostusta varten
 		require_once ("tulosta_lahete_kerayslista.inc");

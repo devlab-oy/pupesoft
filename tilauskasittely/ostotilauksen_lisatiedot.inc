@@ -31,6 +31,8 @@ if ($tee == "update") {
 	$rahti 			= str_replace ( ",", ".", $rahti);
 	$rahti_huolinta = str_replace ( ",", ".", $rahti_huolinta);
 	$erikoisale 	= str_replace ( ",", ".", $erikoisale);
+	$bruttopaino 	= str_replace ( ",", ".", $bruttopaino);
+	
 	$toimaika 		= $vv."-".$kk."-".$pp;
 	$ultilno 		= tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 

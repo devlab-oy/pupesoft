@@ -4,7 +4,7 @@
 		require("inc/parametrit.inc");
 	}
 
-	echo "<font class='head'>".t("Rahtikirjojen tulostus")."</font><hr>";
+	echo "<font class='head'>",t("Rahtikirjojen tulostus"),"</font><hr>";
 
 	$laskutettu = "";
 
@@ -14,10 +14,113 @@
 		//	$tee = "";
 	}
 
+	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+			<!--
+			function disableEnterKey(e)
+			{
+				var key;
+
+				if (window.event) {
+					key = window.event.keyCode;     //IE
+				}
+				else {
+					key = e.which;     //firefox
+				}
+
+				if (key == 13) {
+					document.getElementById('etsi_button').focus();
+					return false;
+				}
+				else {
+					return true;
+				}
+			}
+
+			function untoggleAll(toggleBox, param) {
+
+				var currForm = toggleBox.form;
+				var isChecked = toggleBox.checked;
+				var selectMenu = document.getElementById('toimitustapa_varasto');
+				var chosenOption = selectMenu.options[selectMenu.selectedIndex];
+				var chosenOptionValue = chosenOption.value;
+				var tableObject = document.getElementById('toim_table');
+				var edOpt = document.getElementById('edOpt');
+
+				for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
+					if (currForm.elements[elementIdx].type == 'checkbox') {
+						currForm.elements[elementIdx].checked = false;
+					}
+					
+					if (currForm.elements[elementIdx].name == 'toimitustapa_varasto') {
+						var value = chosenOptionValue.substr(0,chosenOptionValue.indexOf('!!!!'));
+						value = value.replace(/^\s*/, '').replace(/\s*$/, '');
+						if (edOpt.value != value) {
+							document.getElementById(edOpt.value).style.display='none';
+						}
+						document.getElementById('nayta_rahtikirjat').checked = false;
+					}
+				}
+			}
+
+			function naytaTunnukset(data) {
+				var currForm = data.form;
+				var selectMenu = document.getElementById('toimitustapa_varasto');
+				var chosenOption = selectMenu.options[selectMenu.selectedIndex];
+				var chosenOptionValue = chosenOption.value;
+
+				for (var elementIdx = 0; elementIdx < currForm.elements.length; elementIdx++) {
+					if (currForm.elements[elementIdx].name == 'toimitustapa_varasto') {
+						var value = chosenOptionValue.substr(0,chosenOptionValue.indexOf('!!!!'));
+						value = value.replace(/^\s*/, '').replace(/\s*$/, '');
+						document.getElementById(value).style.display='inline';
+						document.getElementById('edOpt').value = value;
+					}
+				}
+			}
+
+			function showNumber(data) {
+				var currForm = data.form;
+				var etsi_value = currForm.etsi_nro.value;
+				var nro_etsi = 'nro_'+etsi_value;
+
+				if (etsi_value != '') {
+					for (var elementIdx = 0; elementIdx < currForm.elements.length; elementIdx++) {
+						if (currForm.elements[elementIdx].name == 'div_nro') {
+							if (currForm.elements[elementIdx].value == etsi_value) {
+								document.getElementById(nro_etsi).style.display = 'inline';
+							}
+							else {
+								document.getElementById('nro_'+currForm.elements[elementIdx].value).style.display = 'none';
+							}
+						}
+					}
+				}
+			}
+			function showNumbers(data) {
+				var currForm = data.form;
+				document.getElementById('etsi_nro').value = '';
+
+				for (var elementIdx = 0; elementIdx < currForm.elements.length; elementIdx++) {
+					if (currForm.elements[elementIdx].name == 'div_nro') {
+						document.getElementById('nro_'+currForm.elements[elementIdx].value).style.display = 'inline';
+					}
+				}
+			}
+
+			//-->
+			</script>";
+
+	if(!isset($tee)) {
+		$tee = '';
+	}
+
 	if ($tee == 'tulosta') {
-		
+
 		list($toimitustapa, $varasto, $crap) = explode("!!!!", $toimitustapa_varasto);
-		
+
+		$toimitustapa 	= mysql_real_escape_string(trim($toimitustapa));
+		$varasto 		= (int) $varasto;
+
 		// haetaan toimitustavan tiedot
 		$query    = "select * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
 		$toitares = mysql_query($query) or pupe_error($query);
@@ -34,7 +137,7 @@
 		$print = mysql_fetch_array($pres);
 
 		if ($komento != "") {
-			$kirjoitin_tunnus = $komento; // jos ollaan valittu oma printteri
+			$kirjoitin_tunnus = (int) $komento; // jos ollaan valittu oma printteri
 			
 		}
 		elseif ($avainrow["selitetark_2"] == "1") {
@@ -108,13 +211,24 @@
 		else {
 			$jvehto = " ";
 		}
-		
+
+		$ltun_querylisa = '';
+		if ($sel_ltun != '') {
+			$ltunnukset_x = '';
+			foreach ($sel_ltun as $ltun_x) {
+				$ltun_x = (int) $ltun_x;
+				$ltunnukset_x .= "'$ltun_x',";
+			}
+			$ltunnukset_x = substr($ltunnukset_x, 0, -1);
+			$ltun_querylisa = " and lasku.tunnus in ($ltunnukset_x)";
+		}
+
 		// haetaan kaikki distinct rahtikirjat..
 		$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
 					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja
 					FROM rahtikirjat
-					JOIN lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B'
+					JOIN lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B' $ltun_querylisa
 					$vainvakilliset
 					LEFT JOIN maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
 					LEFT JOIN rahtisopimukset on lasku.ytunnus = rahtisopimukset.ytunnus and rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa and rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus
@@ -193,7 +307,7 @@
 			// haetaan tälle rahtikirjalle kuuluvat tunnukset
 			$query = "	SELECT rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.asiakkaan_tilausnumero
 						FROM rahtikirjat
-						join lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B'
+						join lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B' $ltun_querylisa
 						left join maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
 						WHERE rahtikirjat.tulostettu	= '0000-00-00 00:00:00'
 						and rahtikirjat.yhtio			= '$kukarow[yhtio]'
@@ -381,6 +495,10 @@
 				// tulostetaan toimitustavan määrittelemä rahtikirja
 				if (file_exists("tilauskasittely/$toitarow[rahtikirja]")) {
 					require("tilauskasittely/$toitarow[rahtikirja]");
+
+					if ($tulosta_vak_yleisrahtikirja != '') {
+						require("tilauskasittely/rahtikirja_pdf.inc");
+					}
 				}
 				else {
 					echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";
@@ -486,7 +604,11 @@
 
 	} // end tee==tulosta
 
-	if($tee == '') {
+	if (!isset($tee)) {
+		$tee = '';
+	}
+
+	if ($tee == '') {
 
 		// haetaan kaikki distinct toimitustavat joille meillä on rahtikirjoja tulostettavana..
 		$query = "	SELECT distinct lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.printteri7
@@ -506,21 +628,27 @@
 		if (mysql_num_rows($result) > 0) {
 			echo "<form action='rahtikirja-tulostus.php' method='post'>";
 			echo "<input type='hidden' name='tee' value='tulosta'>";
+			echo "<input type='hidden' name='edOpt' id='edOpt' value=''>";
+			echo "<table><tr><td valign='top'>";
 
-				echo "<table>";
-			echo "<tr><td>".t("Valitse toimitustapa").":</td>";
-			echo "<td><select name='toimitustapa_varasto' onchange=\"document.getElementById('kirjoitin').options.selectedIndex=document.getElementById('K'+this.value.substr(this.value.indexOf('!!!!!')+5)).index;\">";
+			echo "<table><tr><td>",t("Valitse toimitustapa"),":</td>";
+			echo "<td valign='top'><select name='toimitustapa_varasto' id='toimitustapa_varasto' onchange=\"document.getElementById('kirjoitin').options.selectedIndex=document.getElementById('K'+this.value.substr(this.value.indexOf('!!!!!')+5)).index;untoggleAll(this);document.getElementById('sel_rahtikirjat').style.display='none';document.getElementById('sel_td').className='back';\">";
+
+			$toimitustapa_lask_tun = '';
 
 			while ($rakir_row = mysql_fetch_array($result)) {
-				$sel = "";
-				if($rakir_row["tunnus"] == $kukarow["varasto"] and $varasto == "") {
-					$sel = "selected";
-					$varasto = $rakir_row["tunnus"];
+				if ($rakir_row['toimitustapa'] != '' and $rakir_row['tunnus'] != '' and $rakir_row['printteri7'] != '') {
+					$sel = "";
+					if($rakir_row["tunnus"] == $kukarow["varasto"] and $varasto == "") {
+						$sel = "selected";
+						$varasto = $rakir_row["tunnus"];
+					}
+					echo "<option value='{$rakir_row["toimitustapa"]}!!!!{$rakir_row["tunnus"]}!!!!!{$rakir_row["printteri7"]}' $sel>{$rakir_row["nimitys"]} - {$rakir_row["toimitustapa"]}</option>";
 				}
-				echo "<option value='$rakir_row[toimitustapa]!!!!$rakir_row[tunnus]!!!!!$rakir_row[printteri7]' $sel>$rakir_row[nimitys] - $rakir_row[toimitustapa]</option>";
 			}
 
-			echo "</select></td></tr>";
+			echo "</select></td>";
+			echo "</tr>";
 
 			echo "<tr><td>".t("Tulosta kaikki rahtikirjat").":</td>";
 			echo "<td><input type='radio' name='jv' value='' checked></td></tr>";
@@ -532,11 +660,11 @@
 			echo "<td><input type='radio' name='jv' value='eijv'></td></tr>";
 			
 			echo "<tr><td>".t("Tulosta vain rahtikirjoja joilla on VAK-koodeja").":</td>";
-			echo "<td><input type='radio' name='jv' value='vainvak'></td></tr>";
+			echo "<td><input type='radio' name='jv' id='jv' value='vainvak'></td></tr>";
 
 			echo "<tr><td>".t("Valitse jälkivaatimuslaskujen tulostuspaikka").":</td>";
 			echo "<td><select id='kirjoitin' name='laskukomento'>";
-			echo "<option value=''>".t("Ei kirjoitinta")."</option>";
+			echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
 			$query = "SELECT printteri7 FROM varastopaikat WHERE yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
 			$jvres = mysql_query($query) or pupe_error($query);
@@ -545,54 +673,113 @@
 			$sel = array();
 			$sel[$e] = "SELECTED";
 
-			
-			$query = "	select *
+			$query = "	SELECT *
 						from kirjoittimet
 						where yhtio='$kukarow[yhtio]'
 						ORDER BY kirjoitin";
 			$kires = mysql_query($query) or pupe_error($query);
 			
-			
-			
 			while ($kirow = mysql_fetch_array($kires)) {
-				echo "<option id='K$kirow[tunnus]' value='$kirow[komento]' ".$sel[$kirow["tunnus"]].">$kirow[kirjoitin]</option>";
+				echo "<option id='K{$kirow["tunnus"]}' value='{$kirow["komento"]}' ".$sel[$kirow["tunnus"]].">{$kirow["kirjoitin"]}</option>";
 			}
 
 			echo "</select></td></tr>";
 			
-			echo "<tr><td>".t("Valitse tulostin").":</td>";
+			echo "<tr><td>",t("Valitse tulostin"),":</td>";
 			echo "<td><select name='komento'>";
-			echo "<option value='' SELECTED>".t("Oletustulostimelle")."</option>";
+			echo "<option value='' SELECTED>",t("Oletustulostimelle"),"</option>";
 			
 			mysql_data_seek($kires, 0);			
 			
 			while ($kirow = mysql_fetch_array($kires)) {
-				echo "<option id='K$kirow[tunnus]' value='$kirow[tunnus]'>$kirow[kirjoitin]</option>";
+				echo "<option id='K{$kirow["tunnus"]}' value='{$kirow["tunnus"]}'>{$kirow["kirjoitin"]}</option>";
 			}
 			
 			echo "</select></td></tr>";
 			
-			echo "<tr><td>".t("Tulosta osoitelaput")."</td>";
+			echo "<tr><td>",t("Tulosta osoitelaput"),"</td>";
 			
 			
 			mysql_data_seek($kires, 0);
 			
 			echo "<td>";
 			echo "<select name='valittu_oslapp_tulostin'>";
-			echo "<option value=''>".t("Ei tulosteta")."</option>";
+			echo "<option value=''>",t("Ei tulosteta"),"</option>";
 			
 			while ($kirrow = mysql_fetch_array($kires)) {
-				echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
+				echo "<option value='{$kirrow["tunnus"]}'>{$kirrow["kirjoitin"]}</option>";
 			}
 			
 			echo "</select></td></tr>";
 			
-			echo "</table><br>";
-			echo "<input type='submit' value='".t("Tulosta rahtikirjat")."'>";
+			echo "</table>";
+			echo "</td>";
+
+			echo "<td valign='top'><table><tr>";
+
+			$query = "	SELECT DISTINCT lasku.toimitustapa, group_concat(lasku.tunnus ORDER BY lasku.tunnus ASC) ltunnus
+						FROM rahtikirjat
+						JOIN lasku ON (rahtikirjat.otsikkonro = lasku.tunnus AND rahtikirjat.yhtio = lasku.yhtio AND lasku.tila IN ('L','G') AND lasku.alatila = 'B')
+						JOIN toimitustapa ON (lasku.yhtio = toimitustapa.yhtio 
+												AND lasku.toimitustapa = toimitustapa.selite 
+												AND toimitustapa.tulostustapa in ('E','L') 
+												AND toimitustapa.nouto = '')
+						LEFT JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio AND lasku.maksuehto = maksuehto.tunnus)
+						LEFT JOIN varastopaikat ON (varastopaikat.yhtio = rahtikirjat.yhtio AND varastopaikat.tunnus = rahtikirjat.tulostuspaikka)
+						WHERE rahtikirjat.tulostettu = '0000-00-00 00:00:00'
+						AND rahtikirjat.yhtio = '$kukarow[yhtio]'
+						GROUP BY lasku.toimitustapa	
+						ORDER BY lasku.toimitustapa";
+			$asdf_res = mysql_query($query) or pupe_error($query);
+
+			echo "<td valign='top'><input type='checkbox' name='nayta_rahtikirjat' id='nayta_rahtikirjat' onchange=\"document.getElementById('etsi_button').focus();if(document.getElementById('nayta_rahtikirjat').checked==true){document.getElementById('sel_rahtikirjat').style.display='inline';document.getElementById('sel_td').className='';naytaTunnukset(this);}else{untoggleAll(this);document.getElementById('sel_rahtikirjat').style.display='none';document.getElementById('sel_td').className='back';}\"> Valitse rahtikirjat</td>";
+			echo "</tr><tr>";
+			echo "<td valign='top' class='back' id='sel_td'><div id='sel_rahtikirjat' style='display:none'>";
+			echo "<table id='toim_table' name='toim_table'><tr><td valign='top'>",t("Etsi numerolla"),": <input type='input' name='etsi_nro' id='etsi_nro' onkeypress=\"return disableEnterKey(event);\"> <input type='button' name='etsi_button' id='etsi_button' value='",t("Etsi"),"' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumber(this);'> <input type='button' name='etsi_kaikki' id='etsi_kaikki' value='",t("Näytä kaikki"),"' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumbers(this);'></td></tr>";
+			while ($asdf_row = mysql_fetch_assoc($asdf_res)) {
+				echo "<tr><td valign='top'>";
+				echo "<div id='{$asdf_row["toimitustapa"]}' style='display:none'>";
+				echo $asdf_row['toimitustapa'];
+
+				$ltun = array();
+
+				$ltun_temp = array();
+				$ltun_temp = explode(",",$asdf_row['ltunnus']);
+
+				foreach ($ltun_temp as $tun) {
+					$ltun[$tun] = $tun;
+				}
+
+				unset($ltun_temp);
+
+				echo "<table id='table_{$asdf_row["toimitustapa"]}' name='table_{$asdf_row["toimitustapa"]}'><tr>";
+				$i = 0;
+				foreach ($ltun as $tun) {
+					echo "<td valign='top'><input type='hidden' name='div_nro' value='$tun'><div id='nro_$tun' name='nro_$tun'><input type='checkbox' name='sel_ltun[]' id='sel_{$asdf_row["toimitustapa"]}*$tun' value='$tun'> $tun</div></td>";
+					if ($i >= 4) {
+						echo "</tr>";
+						$i = 0;
+					}
+					else {
+						$i++;
+					}
+				}
+				echo "</tr></table>";
+				echo "</div></td></tr>";
+			}
+			echo "</table>";
+			echo "</div></td>";
+
+			echo "</tr></table>";
+			echo "</td></tr>";
+			echo "</table>";
+
+			echo "<br>";
+			echo "<input type='submit' value='",t("Tulosta rahtikirjat"),"'>";
 			echo "</form>";
 		}
 		else {
-			echo "<br><br><br><font class='message'>".t("Yhtään tulostettavaa rahtikirjaa ei löytynyt").".</font><br><br>";
+			echo "<br><br><br><font class='message'>",t("Yhtään tulostettavaa rahtikirjaa ei löytynyt"),".</font><br><br>";
 		}
 
 		require("inc/footer.inc");

@@ -877,7 +877,7 @@ while (!feof ($fd)) {
 			break;
 		case 'OSTOTILRIV.OTR_RIVISUMMA' :
 			// jos tullaan magentosta ja meillä on rahtikulu, niin otetaan se hinta talteeen
-			if ($edi_tyyppi == "magento" and strtolower($tuoteno) == 'rahtikulu' and $tieto != '') {
+			if ($edi_tyyppi == "magento" and strtolower($tuoteno) == '100' and $tieto != '') {
 				$editilaus_rahtikulu_hinta = $tieto;
 			}
 			break;
@@ -937,7 +937,7 @@ while (!feof ($fd)) {
 					}
 
 					// jos tullaan magentosta ja hinta on tiedossa ja kyseessä on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
-					if ($edi_tyyppi == "magento" and strtolower($tuoteno) == 'rahtikulu' and $editilaus_rahtikulu_hinta != '') {
+					if ($edi_tyyppi == "magento" and strtolower($tuoteno) == '100' and $editilaus_rahtikulu_hinta != '') {
 						$hinta = $editilaus_rahtikulu_hinta;
 					}
 

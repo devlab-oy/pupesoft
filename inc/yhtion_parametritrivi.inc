@@ -597,8 +597,8 @@
 			$sel2 = "selected";
 		}
 
-		$ulos .= "<option value=''  $sel1>".t("JT-rivej‰ ei lis‰t‰ automaattisesti")."</option>";
-		$ulos .= "<option value='Y' $sel2>".t("JT-rivej‰ lis‰t‰‰n automaattisesti")."</option>";
+		$ulos .= "<option value=''  $sel1>".t("Asiakkaan JT-rivej‰ ei kohdisteta automaattisesti sis‰‰ntulevalle EDI-tilaukselle")."</option>";
+		$ulos .= "<option value='Y' $sel2>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti sis‰‰ntulevalle EDI-tilaukselle")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

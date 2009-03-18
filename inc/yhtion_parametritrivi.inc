@@ -474,6 +474,7 @@
 
 		$sel1 = "";
 		$sel2 = "";
+		$sel3 = "";
 
 		if ($trow[$i] == "") {
 			$sel1 = "selected";
@@ -481,9 +482,13 @@
 		elseif ($trow[$i] == "Y") {
 			$sel2 = "selected";
 		}
+		elseif ($trow[$i] == "H") {
+			$sel3 = "selected";
+		}
 
 		$ulos .= "<option value=''  $sel1>".t("Keräyksestä ei siirrytä suoraan rahtikirjan syöttöön")."</option>";
 		$ulos .= "<option value='Y' $sel2>".t("Keräyksestä siirrytään suoraan rahtikirjan syöttöön")."</option>";
+		$ulos .= "<option value='H' $sel3>".t("Keräyksestä siirrytään suoraan rahtikirjan syöttöön, jos halutaan")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

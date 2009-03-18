@@ -1010,14 +1010,13 @@
 				//chekkaus että kaikki splitatut tilaukset on kerätty
 				/* ei oteta huomioon niitä mistä puuttuu tulostusalue ja millä on tietty alatila 
 				lisää alatila B jos käytetään keräästä rahtikirjansyöttöön halutessa */
-				
 				if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K' and $tila == 'L') {	
 					$query = "	SELECT count(distinct lasku.tunnus) kpl
 								FROM lasku
 								JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
 								AND lasku.tila in ('L','N')
-								AND lasku.alatila not in ('X','V','D')
+								AND lasku.alatila not in ('X','V','D','B')
 								AND lasku.tulostusalue != ''
 								AND lasku.vanhatunnus = '$row[vanhatunnus]'
 								AND lasku.varasto = '$row[varasto]'
@@ -1031,7 +1030,7 @@
 				/*	echo "tarkistus tunnukset_lkm: 	$vanhat_row[kpl] <br>";
 				echo "main tunnukset_lkm: 		$row[tunnukset_lkm] <br>";				
 				echo "main vanhatunnus: 		$row[vanhatunnus] <br>";				
-				echo "main tunnukset: 			$row[tunnukset] <br>";	*/	
+				echo "main tunnukset: 			$row[tunnukset] <br>";		*/
 						
 				if ($vanhat_row['kpl'] == $row['tunnukset_lkm'] or $vanhat_row['kpl'] == 0 or $yhtiorow["splittauskielto"] != "" or $yhtiorow['pakkaamolokerot'] == '') {
 									
@@ -1897,8 +1896,13 @@
 				echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
 			}
 
-			echo "</select> ".t("Kpl").": <input type='text' size='4' name='oslappkpl' value='$oslappkpl'></th>";
-
+			echo "</select> ".t("Kpl").": <input type='text' size='4' name='oslappkpl' value='$oslappkpl'></th></tr>";
+			
+			if ($vakrow['vaktuotteet'] != '') {
+		    	echo "<tr><td class='back'><font class='info'>",t("Tulosta myös yleisrahtikirja"),"<br/>",t("VAK-postipaketille"),":</font></td>";
+			    echo "<td class='back'><input type='checkbox' name='tulosta_vak_yleisrahtikirja' id='tulosta_vak_yleisrahtikirja'></td></tr>";
+			}
+					
 			echo "</table>";
 		}
 

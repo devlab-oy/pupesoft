@@ -172,6 +172,13 @@ else {
 			$result = mysql_query($query) or pupe_error($query);
 		}
 	}
+	
+	$query = "	UPDATE lasku 
+				SET h1time = now() 
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tunnus = '$laskurow[tunnus]'
+				AND alatila = ''";
+	$result = mysql_query($query) or pupe_error($query);
 
 	// otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
 	$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
@@ -877,7 +884,8 @@ else {
 								vahennettava_era 					= '$laskurow[vahennettava_era]',
 								ultilno								= '$ultilno',
 								piiri 								= '$laskurow[piiri]',
-								hyvaksynnanmuutos					= '$laskurow[hyvaksynnanmuutos]'";
+								hyvaksynnanmuutos					= '$laskurow[hyvaksynnanmuutos]',
+								h1time								= now()";
 					$uusires = mysql_query($query) or pupe_error($query);
 					$laskurow['tunnus'] = (string) mysql_insert_id();
 					$tilausnumerot[] = $laskurow["tunnus"];

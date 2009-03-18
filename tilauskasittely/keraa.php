@@ -54,10 +54,10 @@
 					and tulostustapa != 'H'
 					and maksuehto.jv = ''";
 		$result = mysql_query($query) or pupe_error($query);
-
+		
 		if (mysql_num_rows($result) == 0) {
 			$yhtiorow['karayksesta_rahtikirjasyottoon'] = '';
-		}
+		}		
 	}
 	
 	
@@ -1240,7 +1240,7 @@
 					}
 
 
-					if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {
+					if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
 						$valittu_oslapp_tulostin 	= "";
 						$oslapp 					= '';
 						$oslappkpl 					= 0;
@@ -1275,8 +1275,8 @@
 			$header  			= '';
 			$content 			= '';
 			$rivit   			= '';
-
-			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {
+			
+			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y' or ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $rahtikirjalle != "")) {
 				$query = "	SELECT tunnus
 							FROM lasku
 							WHERE lasku.yhtio 	= '$kukarow[yhtio]'
@@ -1447,6 +1447,8 @@
 					lasku.laatija,
 					lasku.kerayspvm,
 					lasku.toimaika,
+					lasku.lahetepvm,
+					lasku.h1time,
 					concat_ws('<br><br>',if(comments!='',concat('".t("Lähetteen lisätiedot").":<br>',comments),NULL), if(sisviesti2!='',concat('".t("Keräyslistan lisätiedot").":<br>',sisviesti2),NULL)) ohjeet,
 					count(*) riveja
 					from lasku use index (tila_index),
@@ -1480,12 +1482,14 @@
 			echo "<th>".t("Rivejä")."</th>";
 			echo "<th>".t("Laatija")."</th>";
 			echo "<th>".t("Laadittu")."</th>";
-
+			
 			if ($kukarow['resoluutio'] == 'I') {
 				echo "<th>".t("Kerayspvm")."</th>";
 				echo "<th>".t("Toimaika")."</th>";
-			}
-
+				echo "<th>".t("Keräyslista tulostettu")."</th>";
+				echo "<th>".t("Tilaus valmis")."</th>";
+			}		
+			
 			echo "</tr>";
 
 			$riveja_yht = 0;
@@ -1512,9 +1516,13 @@
 				if ($kukarow['resoluutio'] == 'I') {
 					echo "<td valign='top'>".tv1dateconv($row["kerayspvm"])."</td>";
 					echo "<td valign='top'>".tv1dateconv($row["toimaika"])."</td>";
+					echo "<td valign='top'>".tv1dateconv($row["lahetepvm"],"yep")."</td>";
+					echo "<td valign='top'>".tv1dateconv($row["h1time"],"yep")."</td>";
 				}
 
-				echo "<form method='post' action='$PHP_SELF'><td class='back'>
+				echo "<form method='post' action='$PHP_SELF'>";				
+				
+				echo "<td class='back'>
 						<input type='hidden' name='id' value='$row[tunnus]'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='submit' name='tila' value='".t("Kerää")."'></td></tr></form>";
@@ -1677,6 +1685,10 @@
 					$lokero_chk_row = mysql_fetch_array($lokero_chk_res, MYSQL_ASSOC);
 					echo "<tr><th>".t("Pakkaamo")."</th><td>$lokero_chk_row[nimi]</td></tr><tr><th>".t("Lokero")."</th><td>$lokero_chk_row[lokero]</td></tr>";
 				}
+			}
+			
+			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H') {
+				echo "<tr><th>".t("Haluatko mennä rahtikirjan syöttöön")."</th><td><input type='checkbox' name='rahtikirjalle'>".t("Kyllä")."</td></tr>";
 			}
 
 			echo "</table><br><br>";
@@ -2087,8 +2099,11 @@
 			echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa kerätyksi")."'></th></form></tr>";
 			echo "</table>";
 
-			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {
+			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y') {
 				echo "<br><font class='message'>".t("Siirryt automaattisesti rahtikirjan syöttöön")."!</font>";
+			}
+			elseif ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H') {
+				echo "<br><font class='message'>".t("Voit halutessasi siirtyä rahtikirjan syöttöön")."!</font>";
 			}
 		}
 		else {

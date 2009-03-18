@@ -12,7 +12,7 @@
 	if ($tee == 'MITATOI_TARJOUS') {
 		unset($tee);
 	}
-
+	
 	if (isset($tee)) {
 		if ($tee == "lataa_tiedosto") {
 			readfile("/tmp/".$tmpfilenimi);
@@ -31,7 +31,7 @@
 				</script>";
 
 		$toim = strtoupper($toim);
-
+		
 		if ($toim == "" or $toim == "SUPER") {
 			$otsikko = t("myyntitilausta");
 		}
@@ -691,7 +691,7 @@
 						if(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, interval $yhtiorow[tarjouksen_voimaika] day)) >= now(), '<font style=\'color:00FF00;\'>Voimassa</font>', '<font style=\'color:FF0000;\'>Er‰‰ntynyt</font>') voimassa,
 						DATEDIFF(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, INTERVAL $yhtiorow[tarjouksen_voimaika] day)), now()) pva,
 						if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija,
-						$toimaikalisa alatila, tila, lasku.tunnus, tunnusnippu
+						$toimaikalisa alatila, tila, lasku.tunnus, tunnusnippu, lasku.liitostunnus
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
@@ -713,7 +713,7 @@
 			$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
 			$sumrow = mysql_fetch_array($sumresult);
 
-			$miinus = 4;
+			$miinus = 5;
 		}
 		elseif ($toim == "TARJOUSSUPER") {
 			$query = "	SELECT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
@@ -847,7 +847,7 @@
 			$miinus = 3;
 		}
 		elseif ($toim == 'PROJEKTI') {
-			$query = "	SELECT if(lasku.tunnusnippu > 0, lasku.tunnusnippu, lasku.tunnus) tilaus, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, tunnusnippu
+			$query = "	SELECT if(lasku.tunnusnippu > 0, lasku.tunnusnippu, lasku.tunnus) tilaus, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, tunnusnippu, lasku.liitostunnus
 						FROM lasku use index (tila_index)
 						$seurantalisa
 						$kohdelisa
@@ -855,7 +855,7 @@
 						$haku
 						ORDER by lasku.tunnusnippu desc, tunnus asc
 						$rajaus";
-			$miinus = 4;
+			$miinus = 5;
 		}
 		elseif ($toim == 'YLLAPITO') {
 			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, if(kuka1.kuka != kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija, concat_ws(' - ', sopimus_alkupvm, if(sopimus_loppupvm='0000-00-00',' ".t("Toistaiseksi")." ',sopimus_loppupvm)) sopimuspvm, lasku.alatila, lasku.tila, lasku.tunnus, tunnusnippu, sopimus_loppupvm
@@ -1067,7 +1067,7 @@
 												AND (comments != '' OR sisviesti2 != '')";
 							$result_comments = mysql_query($query_comments) or pupe_error($query_comments);
 							$row_comments = mysql_fetch_array($result_comments);
-
+							
 							if (mysql_num_rows($result_comments) == 1) {
 								echo "<div id='kommentti$row[$i]' class='popup' style='width: 500px;'>";
 								echo "$row_comments[comments] $row_comments[sisviesti2]";
@@ -1077,6 +1077,37 @@
 							else {
 								echo "<td class='$class' valign='top'>$row[$i]</td>";
 							}
+						}
+						elseif (mysql_field_name($result,$i) == "seuranta") {
+							
+							$img = "mini-comment.png";
+							$linkkilisa = "";
+							$query_comments = "	SELECT group_concat(tunnus)
+												FROM lasku
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND lasku.tila != 'S'
+												AND tunnusnippu = '$row[tunnusnippu]' and tunnusnippu>0";
+							$ares = mysql_query($query_comments) or pupe_error($query_comments);
+							if (mysql_num_rows($ares) > 0) {	
+								$arow = mysql_fetch_array($ares);
+
+								//	Olisiko meill‰ kalenterissa kommentteja?
+								$query_comments = "	SELECT tunnus
+													FROM kalenteri
+													WHERE yhtio = '$kukarow[yhtio]'
+													AND tyyppi = 'Memo'
+													AND otunnus IN ($arow[0])";
+								$result_comments = mysql_query($query_comments) or pupe_error($query_comments);
+								//echo "$query_comments<br>";
+								$nums="";
+								if (mysql_num_rows($result_comments) > 0) {
+									$img = "info.png";
+									$linkkilisa = "onmouseover=\"popUp(event, 'asiakasmemo_$row[$i]', '0', '0', '{$palvelin2}crm/asiakasmemo.php?tee=NAYTAMUISTIOT&liitostunnus=$row[liitostunnus]&tunnusnippu=$row[tunnusnippu]', false, true); return false;\" onmouseout=\"popUp(event, 'asiakasmemo_$row[$i]'); return false;\"";
+								}							
+							}
+							
+							
+							echo "<td class='$class' valign='top' NOWRAP>$row[$i] <div style='float: right;'><img src='pics/lullacons/$img' class='info' $linkkilisa onclick=\"window.open('{$palvelin2}crm/asiakasmemo.php?tee=NAYTA&liitostunnus=$row[liitostunnus]&tunnusnippu=$row[tunnusnippu]&from=muokkaatilaus.php');\"> $nums</div></td>";
 						}
 						else {
 							echo "<td class='$class' valign='top'>$row[$i]</td>";

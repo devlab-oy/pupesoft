@@ -64,11 +64,11 @@
 						}
 					}
 				}
-				
+
 				$data = "<a href='#' onclick=\"popUp(event, 'ajax_menu', '50', '-10', '{$_SERVER["SCRIPT_NAME"]}?kaletee=GENEROIMENU$data', false, true); return false;\">$nappi</a>";
 				return $data;
 			}
-			return true;
+			return false;
 		}
 	}
 
@@ -448,17 +448,19 @@
 					lyhytviesti($row["viesti"], $viestipituus, $otsikko, $popup_otsikko);
 				}
 				
-				if($laji == "kontakti_oletettu") {
-					$row["viesti"] = "<a onclick=\"popUp(event, 'ajax_menu', '350', '-10', '$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=$lajitark&otunnus={$row["tunnusnippu"]}&liitostunnus={$row["liitostunnus"]}".url_params($kalenteri)."'); return false;\" class='kale'>$row[viesti]</a>";
-				}
-				elseif($row["laatija"] == $kukarow["kuka"]) {
-					$row["viesti"] = "<a onclick=\"popUp(event, 'ajax_menu', '350', '-10', '$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=$lajitark&ktunnus=$tunnus".url_params($kalenteri)."'); return false;\" class='kale'>$row[viesti]</a>";
-				}
-				elseif(in_array($lajitark, array("Muistutus"))) {
-					$row["viesti"] = "<a onclick=\"popUp(event, 'toimitus', '300', '-20', '$kalenteri[URL]?ohje=off&kaletee=ANNAKUITTAUS&ktunnus={$row["tunnus"]}".url_params($kalenteri)."'); return false;\">{$row["viesti"]}</a>";
-				}
-				else {
-					$row["viesti"] = "<a onclick=\"alert('".t("Voit muokata vain omaa kalenteriasi")."'); return false;\" class='kale'>$row[viesti]</a>";
+				if($kalenteri["vain_luku"] != true) {
+					if($laji == "kontakti_oletettu") {
+						$row["viesti"] = "<a onclick=\"popUp(event, 'ajax_menu', '350', '-10', '$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=$lajitark&otunnus={$row["tunnusnippu"]}&liitostunnus={$row["liitostunnus"]}".url_params($kalenteri)."'); return false;\" class='kale'>$row[viesti]</a>";
+					}
+					elseif($row["laatija"] == $kukarow["kuka"]) {
+						$row["viesti"] = "<a onclick=\"popUp(event, 'ajax_menu', '350', '-10', '$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=$lajitark&ktunnus=$tunnus".url_params($kalenteri)."'); return false;\" class='kale'>$row[viesti]</a>";
+					}
+					elseif(in_array($lajitark, array("Muistutus"))) {
+						$row["viesti"] = "<a onclick=\"popUp(event, 'toimitus', '300', '-20', '$kalenteri[URL]?ohje=off&kaletee=ANNAKUITTAUS&ktunnus={$row["tunnus"]}".url_params($kalenteri)."'); return false;\">{$row["viesti"]}</a>";
+					}
+					else {
+						$row["viesti"] = "<a onclick=\"alert('".t("Voit muokata vain omaa kalenteriasi")."'); return false;\" class='kale'>$row[viesti]</a>";
+					}
 				}
 			}
 			elseif($laji == "lasku") {
@@ -612,9 +614,9 @@
 									WHERE yhtio='$kukarow[yhtio]' and tunnusnippu = '{$kalenteri["tunnusnippu"]}' and tila in ('R','L','N','T')";
 						$res = mysql_query($abuq) or pupe_error($abuq);
 						$row = mysql_fetch_array($res);
-
-						if($row["nippu"] == "") $row["nippu"] = $kalenteri["otunnus"];
 						
+						if($row["nippu"] == "") $row["nippu"] = $kalenteri["otunnus"];
+
 						$kalenteri_jako .= "kalenteri.otunnus IN ({$row["nippu"]})";
 					}
 					elseif($kj == "asiakas"){
@@ -895,9 +897,6 @@
 			elseif($kalenteri["kalenteri_rajaus"] == "kayttaja") {
 				$kukalisa = " and kuka.kuka IN ('')";
 			}
-			else {
-				$kukalisa = " and kuka.kuka IN ('".implode("','", $kalenteri["kalenteri_ketka"])."')";
-			}
 			
 			$q = "	
 				SELECT 'kalenteri' laji, kalenteri.tyyppi laji_tark, UNIX_TIMESTAMP(date(pvmalku)) aika,  kalenteri.luontiaika, DATEDIFF(pvmloppu, pvmalku) vali, kalenteri.laatija, kalenteri.tunnus
@@ -1094,41 +1093,47 @@
 					
 			
 			//	Piirret‰‰n header
-			
-			$menu = array();
-			$menu[]	= array("VALI" => t("Toiminnot"));	
-			if(is_array($data["tiedot"]["menut"]["toiminnot"])) {
+			if($kalenteri["vain_luku"] != true) {
+				$menu = array();
+				$menu[]	= array("VALI" => t("Toiminnot"));	
+				if(is_array($data["tiedot"]["menut"]["toiminnot"])) {
 
-				foreach($data["tiedot"]["menut"]["toiminnot"] as $a) {
-					$menu[] = $a;
+					foreach($data["tiedot"]["menut"]["toiminnot"] as $a) {
+						$menu[] = $a;
+					}
 				}
-			}
-			
-			$menu[] = array("TEKSTI" => t("Lis‰‰ kalenteritapahtuma"),	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
-			$menu[] = array("TEKSTI" => t("Lis‰‰ asiakasmuistio"),		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
-			$menu[] = array("TEKSTI" => t("Lis‰‰ muistutus"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
-			
-			if(in_array("projektitapahtuma", $kalenteri["kalenteri_tyypit"])) {
-				$menu[] = array("TEKSTI" => t("Lis‰‰ projektitapahtuma"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=projektitapahtuma&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
-				$menu[] = array("TEKSTI" => t("Tulosta kalenteri"),					"HREF" => "$kalenteri[URL]?kaletee=printPDF&tyyppi=projektitapahtuma&nayta_pdf=1".url_params($kalenteri), "TARGET" => "_blank");
-			}
-			
-			//$menu[] = array("TEKSTI" => "Lis‰‰ merkint‰",			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Merkinta&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
-			
-			$palkki[] = tee_menu($menu, "<font class='message'>".t("Toiminnot")."</font>");
 
+				$menu[] = array("TEKSTI" => t("Lis‰‰ kalenteritapahtuma"),	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
+				$menu[] = array("TEKSTI" => t("Lis‰‰ asiakasmuistio"),		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
+				$menu[] = array("TEKSTI" => t("Lis‰‰ muistutus"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+
+				if(in_array("projektitapahtuma", $kalenteri["kalenteri_tyypit"])) {
+					$menu[] = array("TEKSTI" => t("Lis‰‰ projektitapahtuma"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=projektitapahtuma&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+					$menu[] = array("TEKSTI" => t("Tulosta kalenteri"),					"HREF" => "$kalenteri[URL]?kaletee=printPDF&tyyppi=projektitapahtuma&nayta_pdf=1".url_params($kalenteri), "TARGET" => "_blank");
+				}
+
+				//$menu[] = array("TEKSTI" => "Lis‰‰ merkint‰",			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Merkinta&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+				
+			}
+			
+			$palkki = array();
 			//	Tallennetaan t‰m‰ oletukseksi
-			$toiminnot = tee_menu($menu, "<font class='message'>".t("Toiminnot")."</font>");
-			$palkki = array($toiminnot);
+			$menuItem = tee_menu($menu, "<font class='message'>".t("Toiminnot")."</font>");
+			if($menuItem) {
+				$palkki = array($menuItem);
+			}
 
 			$menu = array();
 			foreach(array("TAPAHTUMALISTAUS", "KALENTERINAKYMA", "KUUKAUSINAKYMA", "VIIKKONAKYMA", "PAIVANAKYMA", "RIVINAKYMA_PAIVA", "RIVINAKYMA_VIIKKO") as $n) {
-				if($kalenteri["sallittu_nakyma"] == "" or in_array($n, $kalenteri["sallittu_nakyma"])) {
+				if(in_array($n, $kalenteri["sallittu_nakyma"])) {
 					$menu[] = array("TEKSTI" => nakymaotsikko($n),		"HREF" => "$kalenteri[URL]?nakyma=$n".url_params($kalenteri), "DIV" => $kalenteri["div"], "TAPA" => "request");
 				} 
 			}
-
-			$palkki[] = tee_menu($menu, "<font class='message'>".t("Vaihda n‰kym‰‰")."</font>");
+			
+			$menuItem = tee_menu($menu, "<font class='message'>".t("Vaihda n‰kym‰‰")."</font>");
+			if($menuItem) {
+				$palkki[] = $menuItem;
+			}
 			
 			if(is_array($data["tiedot"]["menut"])) {
 				foreach($data["tiedot"]["menut"] as $key => $val) {
@@ -2257,25 +2262,27 @@
 		
 		$order = "DESC";		
 		if($kalenteri["laskutilat"] != "") {
-
+			
+			$vquery="select count(*) from lasku l where l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu and l.tunnus<=lasku.tunnus and l.tila='T'";
 			$query = "";
 			//	Jos tullaan tilaushakukoneesta..
 			if($tarjous > 0) {
 				//	Valitaan joku toimitus
-				$query = "	SELECT tunnus, tila, alatila, liitostunnus
+				
+				$query = "	SELECT tunnus, tila, alatila, liitostunnus, if(lasku.tila='T' and lasku.tunnusnippu>0, concat(lasku.tunnusnippu,'/',($vquery)), tunnus) nakyvatunnus
 							FROM lasku
 							WHERE yhtio  = '$kukarow[yhtio]' and tunnusnippu = $tarjous and tila IN ($kalenteri[laskutilat])
 							ORDER BY tunnus $order";
 			}
 			elseif($otunnus > 0) {
-				$query = "	SELECT tunnus, tila, alatila, liitostunnus
+				$query = "	SELECT tunnus, tila, alatila, liitostunnus, if(lasku.tila='T' and lasku.tunnusnippu>0, concat(lasku.tunnusnippu,'/',($vquery)), tunnus) nakyvatunnus
 							FROM lasku
 							WHERE yhtio  = '$kukarow[yhtio]' and tunnus = $otunnus
 							ORDER BY tunnus $order";			
 			}
 			elseif($liitostunnus > 0) {
 				//	Valitaan joku asiakkaan tilaus
-				$query = "	SELECT tunnus, tila, alatila
+				$query = "	SELECT tunnus, tila, alatila, if(lasku.tila='T' and lasku.tunnusnippu>0, concat(lasku.tunnusnippu,'/',($vquery)), tunnus) nakyvatunnus
 							FROM lasku
 							WHERE yhtio  = '$kukarow[yhtio]' and liitostunnus = $liitostunnus and tunnusnippu=tunnus and tila IN ($kalenteri[laskutilat]) and alatila != 'X'
 							ORDER BY tunnus $order";										
@@ -2290,7 +2297,7 @@
 					$alatila	 = $row["alatila"];
 					require "inc/laskutyyppi.inc";
 
-					$oval .= "<input type='hidden' name='otunnus' value='$row[tunnus]'>$row[tunnus] - $laskutyyppi $alatila</option>";
+					$oval .= "<input type='hidden' name='otunnus' value='$row[tunnus]'>$row[nakyvatunnus] - $laskutyyppi $alatila</option>";
 					
 				}
 				elseif(mysql_num_rows($result) > 0) {
@@ -2307,7 +2314,7 @@
 						$alatila	 = $row["alatila"];
 						require "inc/laskutyyppi.inc";
 
-						$oval .= "<option value='$row[tunnus]'>$row[tunnus] - ".t($laskutyyppi)." ".t($alatila)."</option>";
+						$oval .= "<option value='$row[tunnus]'>$row[nakyvatunnus] - ".t($laskutyyppi)." ".t($alatila)."</option>";
 
 						if($tarjous == $row["tunnus"]) {
 							$liitostunnus = $row["liitostunnus"];

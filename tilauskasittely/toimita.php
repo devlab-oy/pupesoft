@@ -67,7 +67,7 @@
 	}
 
 	if($tee=='P') {
-
+		
 		// jos kyseessä ei ole nouto tai noutajan nimi on annettu, voidaan merkata tilaus toimitetuksi..
 		if (($nouto != 'yes') or ($noutaja != '')) {
 			$query = "	UPDATE tilausrivi
@@ -126,7 +126,276 @@
 								
 				require ("verkkolasku.php");
 			}
+			
+			//Tulostetaan uusi lähete jos käyttäjä valitsi drop-downista printterin
+			//Paitsi jos tilauksen tila päivitettiin sellaiseksi, että lähetettä ei kuulu tulostaa
+			$query = "	SELECT *
+						FROM lasku
+						WHERE tunnus in ($otunnus)
+						and yhtio = '$kukarow[yhtio]'";
+			$lasresult = mysql_query($query) or pupe_error($query);
 
+			while($laskurow = mysql_fetch_array($lasresult)) {
+				
+				//tulostetaan faili ja valitaan sopivat printterit
+				if ($laskurow["varasto"] == '') {
+					$query = "	SELECT *
+								from varastopaikat
+								where yhtio='$kukarow[yhtio]'
+								order by alkuhyllyalue,alkuhyllynro
+								limit 1";
+				}
+				else {
+					$query = "	SELECT *
+								from varastopaikat
+								where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
+								order by alkuhyllyalue,alkuhyllynro";
+				}
+				$prires = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($prires) > 0) {
+
+					$prirow= mysql_fetch_array($prires);
+
+					// käteinen muuttuja viritetään tilaus-valmis.inc:issä jos maksuehto on käteinen
+					// ja silloin pitää kaikki lähetteet tulostaa aina printteri5:lle (lasku printteri)
+					if ($kateinen == 'X') {
+						$apuprintteri = $prirow['printteri5']; // laskuprintteri
+					}
+					else {
+						if ($valittu_tulostin == "oletukselle") {
+							$apuprintteri = $prirow['printteri1']; // läheteprintteri
+						}
+						else {
+							$apuprintteri = $valittu_tulostin;
+						}
+					}
+
+					//haetaan lähetteen tulostuskomento
+					$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+					$kirres  = mysql_query($query) or pupe_error($query);
+					$kirrow  = mysql_fetch_array($kirres);
+					$komento = $kirrow['komento'];
+
+
+					if ($valittu_oslapp_tulostin == "oletukselle") {
+						$apuprintteri = $prirow['printteri3']; // osoitelappuprintteri
+					}
+					else {
+						$apuprintteri = $valittu_oslapp_tulostin;
+					}
+
+					//haetaan osoitelapun tulostuskomento
+					$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+					$kirres = mysql_query($query) or pupe_error($query);
+					$kirrow = mysql_fetch_array($kirres);
+					$oslapp = $kirrow['komento'];
+				}
+
+				if ($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) {
+
+					$otunnus = $laskurow["tunnus"];
+
+					//hatetaan asiakkaan lähetetyyppi
+					$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+								FROM asiakas
+								WHERE tunnus='$tilrow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+					$result = mysql_query($query) or pupe_error($query);
+					$asrow = mysql_fetch_array($result);
+
+					$lahetetyyppi = "";
+					
+					if ($sellahetetyyppi != '') {
+						$lahetetyyppi = $sellahetetyyppi;
+					}
+					elseif ($asrow["lahetetyyppi"] != '') {
+						$lahetetyyppi = $asrow["lahetetyyppi"];
+					}
+					else {
+						//Haetaan yhtiön oletuslähetetyyppi
+						$query = "  SELECT selite
+									FROM avainsana
+									WHERE yhtio = '$kukarow[yhtio]' and laji = 'LAHETETYYPPI'
+									ORDER BY jarjestys, selite
+									LIMIT 1";
+						$vres = mysql_query($query) or pupe_error($query);
+						$vrow = mysql_fetch_array($vres);
+
+						if ($vrow["selite"] != '' and file_exists($vrow["selite"])) {
+							$lahetetyyppi = $vrow["selite"];
+						}
+					}
+
+					$utuotteet_mukaan = 0;
+					if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
+						require_once ("tulosta_lahete_alalasku.inc");
+					}
+					elseif (strpos($lahetetyyppi,'simppeli') !== FALSE) {
+						require_once ("$lahetetyyppi");
+					}
+					else {
+						require_once ("tulosta_lahete.inc");
+						$utuotteet_mukaan = 1;
+					}
+
+					//	Jos meillä on funktio tulosta_lahete meillä on suora funktio joka hoitaa koko tulostuksen
+					if(function_exists("tulosta_lahete")) {
+						if($vrow["selite"] != '') {
+							$tulostusversio = $vrow["selite"];
+						}
+						else {
+							$tulostusversio = $asrow["lahetetyyppi"];
+						}
+
+						tulosta_lahete($otunnus, $komento["Lähete"], $kieli = "", $toim, $tee, $tulostusversio);
+					}
+					else {
+						// katotaan miten halutaan sortattavan
+						$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+
+						if($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
+							$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
+						}
+						else {
+							$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W') ";
+						}
+
+						//generoidaan lähetteelle ja keräyslistalle rivinumerot
+						$query = "  SELECT tilausrivi.*,
+									round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
+									round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
+									$sorttauskentta,
+									if(tilausrivi.var='J', 1, 0) jtsort
+									FROM tilausrivi
+									JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+									JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+									LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+									WHERE tilausrivi.otunnus = '$otunnus'
+									and tilausrivi.yhtio = '$kukarow[yhtio]'
+									$tyyppilisa
+									and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
+									ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+						$riresult = mysql_query($query) or pupe_error($query);
+
+						//generoidaan rivinumerot
+						$rivinumerot = array();
+
+						while ($row = mysql_fetch_array($riresult)) {
+							$rivinumerot[$row["tunnus"]] = $row["tunnus"];
+						}
+
+						sort($rivinumerot);
+
+						$kal = 1;
+
+						foreach($rivinumerot as $rivino) {
+							$rivinumerot[$rivino] = $kal;
+							$kal++;
+						}
+
+						mysql_data_seek($riresult,0);
+
+
+						unset($pdf);
+						unset($page);
+
+						$sivu  = 1;
+						$total = 0;
+						$save_tyyppi =	$tyyppi;
+
+						if ($laskurow["tila"] == "G") {
+							$lah_tyyppi = "SIIRTOLISTA";
+						}
+						else {
+							$lah_tyyppi = "";
+						}
+
+						// Aloitellaan lähetteen teko
+						$page[$sivu] = alku($lah_tyyppi);
+
+						while ($row = mysql_fetch_array($riresult)) {
+							rivi($page[$sivu], $lah_tyyppi);
+
+							$total+= $row["rivihinta"];
+						}
+
+						//Haetaan erikseen toimitettavat tuotteet
+						if ($laskurow["vanhatunnus"] != 0 and $utuotteet_mukaan == 1) {
+							$query = " 	SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
+										FROM lasku use index (yhtio_vanhatunnus)
+										WHERE yhtio		= '$kukarow[yhtio]'
+										and vanhatunnus = '$laskurow[vanhatunnus]'
+										and tunnus != '$laskurow[tunnus]'";
+							$perheresult = mysql_query($query) or pupe_error($query);
+							$tunrow = mysql_fetch_array($perheresult);
+
+							//generoidaan lähetteelle ja keräyslistalle rivinumerot
+							if ($tunrow["tunnukset"] != "") {
+								$query = "  SELECT tilausrivi.*,
+											round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
+											round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
+											$sorttauskentta,
+											if(tilausrivi.var='J', 1, 0) jtsort
+											FROM tilausrivi
+											JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+											JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+											WHERE tilausrivi.otunnus in ('$tunrow[tunnukset]')
+											and tilausrivi.yhtio = '$kukarow[yhtio]'
+											$tyyppilisa
+											ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+								$riresult = mysql_query($query) or pupe_error($query);
+
+								while ($row = mysql_fetch_array($riresult)) {
+									if ($row['toimitettu'] == '') {
+										$row['kommentti'] = "*******".t("Toimitetaan erikseen",$kieli).".******* ".$row['kommentti'];
+									}
+									else {
+										$row['kommentti'] = "*******".t("Toimitettu erikseen",$kieli).".******* ".$row['kommentti'];
+									}
+
+									$row['rivihinta'] = 0;
+									rivi($page[$sivu], $lah_tyyppi);
+								}
+							}
+						}
+
+						//Vikan rivin loppuviiva
+						$x[0] = 20;
+						$x[1] = 580;
+						$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
+						$pdf->draw_line($x, $y, $page[$sivu], $rectparam);
+
+						loppu($page[$sivu], 1);
+
+						//katotaan onko laskutus nouto
+						$query = "  SELECT toimitustapa.nouto, maksuehto.kateinen
+									FROM lasku
+									JOIN toimitustapa ON lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite
+									JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+									WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$laskurow[tunnus]'
+									and toimitustapa.nouto != '' and maksuehto.kateinen = ''";
+						$kures = mysql_query($query) or pupe_error($query);
+
+						if (mysql_num_rows($kures) > 0 and $yhtiorow["lahete_nouto_allekirjoitus"] != "") {
+							kuittaus();
+						}
+
+						if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
+							alvierittely($page[$sivu]);
+						}
+
+						//tulostetaan sivu
+						if ($lahetekpl > 1) {
+							$komento .= " -#$lahetekpl ";
+						}
+
+						print_pdf($komento);
+					}
+				}
+
+				echo "<br><br>";
+			}
+			
 			$id=0;
 		}
 		else {
@@ -371,6 +640,9 @@
 				$maksuehtorow = mysql_fetch_array($maksuehtores);
 				echo "<input type='hidden' name='maksutapa' value='$maksuehtorow[tunnus]'>";
 			}
+			
+			
+			
 			echo "</table><br>";
 		}
 		
@@ -389,6 +661,28 @@
 			$formi="rivit";
 			$kentta="noutaja";
 		}
+		
+		echo "<table>";
+		echo "<tr><th>".t("Lähete").":</th><th>";
+
+		$query = "	SELECT *
+					FROM kirjoittimet
+					WHERE
+					yhtio='$kukarow[yhtio]'
+					ORDER by kirjoitin";
+		$kirre = mysql_query($query) or pupe_error($query);
+
+		echo "<select name='valittu_tulostin'>";
+
+		echo "<option value=''>".t("Ei tulosteta")."</option>";
+		echo "<option value='oletukselle' $sel>".t("Oletustulostimelle")."</option>";
+
+		while ($kirrow = mysql_fetch_array($kirre)) {
+			echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
+		}
+
+		echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'></th>";
+		echo "</tr></table>";
 
 		echo "$virhe";
 		echo "<input type='submit' value='".t("Merkkaa toimitetuksi")."'></form>";

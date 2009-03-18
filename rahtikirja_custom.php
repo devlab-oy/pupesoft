@@ -123,43 +123,61 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 	
 	if ($tnimi != '') {
 		$osoitelappurow["toim_postino"] = $tpostino;
-		$osoitelappurow["toim_nimi"] = $tnimi;
-		$osoitelappurow["toim_nimitark"] = $tnimitark;
+		$osoitelappurow["toim_nimi"] 	= $tnimi;
+		$osoitelappurow["toim_nimitark"]= $tnimitark;
 		$osoitelappurow["toim_postitp"] = $tpostitp;
-		$osoitelappurow["toim_osoite"] = $tosoite;
-		$osoitelappurow["toim_maa"] = $asiakasrow["toim_maa"];
+		$osoitelappurow["toim_osoite"] 	= $tosoite;
+		$osoitelappurow["toim_maa"] 	= $asiakasrow["toim_maa"];
 	}
 	else if ($asiakasrow["toim_nimi"] != '') {
 		$osoitelappurow["toim_postino"] = $asiakasrow["toim_postino"];
-		$osoitelappurow["toim_nimi"] = $asiakasrow["toim_nimi"];
-		$osoitelappurow["toim_nimitark"] = $asiakasrow["toim_nimitark"];
+		$osoitelappurow["toim_nimi"] 	= $asiakasrow["toim_nimi"];
+		$osoitelappurow["toim_nimitark"]= $asiakasrow["toim_nimitark"];
 		$osoitelappurow["toim_postitp"] = $asiakasrow["toim_postitp"];
-		$osoitelappurow["toim_maa"] = $asiakasrow["toim_maa"];
-		$osoitelappurow["toim_osoite"] = $asiakasrow["toim_osoite"];
+		$osoitelappurow["toim_maa"] 	= $asiakasrow["toim_maa"];
+		$osoitelappurow["toim_osoite"] 	= $asiakasrow["toim_osoite"];
 	}
 	else {
 		$osoitelappurow["toim_postino"] = $asiakasrow["postino"];
-		$osoitelappurow["toim_nimi"] = $asiakasrow["nimi"];
-		$osoitelappurow["toim_nimitark"] = $asiakasrow["nimitark"];
+		$osoitelappurow["toim_nimi"] 	= $asiakasrow["nimi"];
+		$osoitelappurow["toim_nimitark"]= $asiakasrow["nimitark"];
 		$osoitelappurow["toim_postitp"] = $asiakasrow["postitp"];
-		$osoitelappurow["toim_maa"] = $asiakasrow["maa"];
-		$osoitelappurow["toim_osoite"] = $asiakasrow["osoite"];
+		$osoitelappurow["toim_maa"] 	= $asiakasrow["maa"];
+		$osoitelappurow["toim_osoite"] 	= $asiakasrow["osoite"];
 	}
 
-	$osoitelappurow["nimi"] = $asiakasrow["nimi"];
-	$osoitelappurow["nimitark"] = $asiakasrow["nimitark"];
-	$osoitelappurow["osoite"] = $asiakasrow["osoite"];
-	$osoitelappurow["postino"] = $asiakasrow["postino"];
-	$osoitelappurow["postitp"] = $asiakasrow["postitp"];
-	$osoitelappurow["viesti"] = "";
-	$osoitelappurow["liitostunnus"] = $asiakasrow["tunnus"];
-	$osoitelappurow["toimitustapa"] = $asiakasrow["toimitustapa"];
-	$osoitelappurow["maksuehto"] = $asiakasrow["maksuehto"];
-	$osoitelappurow["yhteyshenkilo"] = $kukarow["tunnus"];
-	$osoitelappurow["sisviesti1"] = $asiakasrow["sisviesti1"];
-	$osoitelappurow["merahti"] = $data['merahti'];
-
+	$osoitelappurow["nimi"] 			= $asiakasrow["nimi"];
+	$osoitelappurow["nimitark"] 		= $asiakasrow["nimitark"];
+	$osoitelappurow["osoite"] 			= $asiakasrow["osoite"];
+	$osoitelappurow["postino"] 			= $asiakasrow["postino"];
+	$osoitelappurow["postitp"] 			= $asiakasrow["postitp"];
+	$osoitelappurow["viesti"] 			= "";
+	$osoitelappurow["liitostunnus"] 	= $asiakasrow["tunnus"];
+	$osoitelappurow["toimitustapa"] 	= $asiakasrow["toimitustapa"];
+	$osoitelappurow["maksuehto"] 		= $asiakasrow["maksuehto"];
+	$osoitelappurow["yhteyshenkilo"] 	= $kukarow["tunnus"];
+	$osoitelappurow["sisviesti1"] 		= $asiakasrow["sisviesti1"];
+	$osoitelappurow["merahti"] 			= $data['merahti'];
 	
+	
+	// yhtiön tiedot
+	$osoitelappurow['yhtio_nimi'] 		= $yhtiorow["nimi"];
+	$osoitelappurow['yhtio_osoite']		= $yhtiorow["osoite"];
+	$osoitelappurow['yhtio_postino']	= $yhtiorow["postino"];
+	$osoitelappurow['yhtio_postitp']	= $yhtiorow["postitp"];
+
+	// poikkeava toimipaikka
+	$alhqur = "SELECT * from yhtion_toimipaikat WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[toimipaikka]'";
+	$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+	if (mysql_num_rows($alhire) == 1) {
+		$apualvrow  = mysql_fetch_array($alhire);
+		
+		$osoitelappurow['yhtio_nimi'] 		= $apualvrow["nimi"];
+		$osoitelappurow['yhtio_osoite']		= $apualvrow["osoite"];
+		$osoitelappurow['yhtio_postino']	= $apualvrow["postino"];
+		$osoitelappurow['yhtio_postitp']	= $apualvrow["postitp"];
+	}
 
 	$query  = "SELECT * FROM toimitustapa WHERE yhtio='{$GLOBALS['kukarow']['yhtio']}' AND selite='$toimitustapa' ORDER BY jarjestys,selite";
 	$result = mysql_query($query) or pupe_error($query);
@@ -220,10 +238,6 @@ if ($asiakasid) {
 	}
 	
     echo "<form action='' method='post' name='rahtikirja'><table>";
-//	echo "<tr><th align='left'>",t("Asiakas"),"</th><td>{$asiakasrow['nimi']} {$asiakasrow['nimitark']}<br>{$asiakasrow['osoite']}<br>{$asiakasrow['postino']} {$asiakasrow['postitp']}</td>";
-
-	echo "<tr><td valign='top'>";
-//	echo "<table cellpadding='1' cellspacing='1'>";
 	echo "<tr>
 			<th colspan='2' align='left' valign='top'>&nbsp; ".t("Asiakkaan tiedot").":</td></tr>";
 	echo "<tr>
@@ -239,16 +253,8 @@ if ($asiakasid) {
 			<td valign='top'>".t("Postitp").": </td>
 			<td><input type='text' name='tpostino' size='10' value='$asiakasrow[toim_postino]'> <input type='text' name='tpostitp' size='21' value='$asiakasrow[toim_postitp]'></td></tr>";
 
-/*
-	echo "<th colspan='2'>",t("Toimitusosoite"),"</th><td>{$asiakasrow['toim_nimi']} {$asiakasrow['toim_nimitark']}<br />
-		{$asiakasrow['toim_osoite']}<br />
-		{$asiakasrow['toim_postino']} {$asiakasrow['toim_postitp']}
-		</td>
-	</tr>";
-*/
 ?>
 
-</tr>
 <tr><th><?php echo t('Varasto') ?></th><td><select name='varasto'>
 	<?php foreach (pupe_varasto_fetch_all() as $key => $val): ?>
 		<option value="<?php echo $key ?>"><?php echo $val ?></option>
@@ -347,7 +353,7 @@ if (! isset($_POST['toimitustapa'])) {
 	echo "</select></td></tr>";
 	
 	echo "<tr><th>".t("Osoitelappu").":</th>";
-	echo "<th colspan='$spanni'>";
+	echo "<td colspan='$spanni'>";
 	
 	echo "<select name='valittu_oslapp_tulostin'>";
 	echo "<option value=''>".t("Ei tulosteta")."</option>";
@@ -366,7 +372,7 @@ if (! isset($_POST['toimitustapa'])) {
 
 	echo "</select> ".t("Kpl").": <input type='text' size='4' name='oslappkpl' value='$oslappkpl'></th>";
 		
-	echo "</tr></table>";
+	echo "</tr></table><br><br>";
 	
 	echo "<table>";
 	
@@ -565,8 +571,8 @@ function pupe_rahtisopimus($merahti, $toimitustapa, $ytunnus = null)
 	if ($merahti) {
 		$query = "SELECT merahti,sopimusnro from toimitustapa where selite='{$toimitustapa}' and yhtio='{$GLOBALS['kukarow']['yhtio']}'";
 		$res = mysql_query($query) or pupe_error($query);
-
 		$merahti = mysql_fetch_array($res);
+		
 		if ($merahti['merahti'] == 'K') {
 			return $merahti['sopimusnro'];
 		}

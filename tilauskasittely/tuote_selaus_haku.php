@@ -288,6 +288,7 @@
 
 	$lisa  = "";
 	$ulisa = "";
+	$toimtuotteet = "";
 
 	$count = count($array);
 
@@ -377,8 +378,6 @@
 					and toim_tuoteno like '%".$toim_tuoteno."%'
 					LIMIT 500";
 		$pres = mysql_query($query) or pupe_error($query);
-
-		$toimtuotteet = "";
 
 		while($prow = mysql_fetch_array($pres)) {
 			$toimtuotteet .= "'".$prow["tuoteno"]."',";
@@ -853,7 +852,13 @@
 		$sort = 'asc';
 	}
 
-	if ($submit_button != '' or ($toim_kutsu != '' and $lisa != '' and $url == 'y')) {
+	if (isset($toim_tuoteno) !== FALSE and trim($toim_tuoteno) != '') {
+		if (trim($toimtuotteet) == '') {
+			$lisa = '';
+		}
+	}
+
+	if ($submit_button != '' and ($lisa != '' or ($toim_kutsu != '' and $lisa != '' and $url == 'y'))) {
 		$query = "	SELECT
 					ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi='P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
 					ifnull((SELECT id FROM korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) korvaavat,

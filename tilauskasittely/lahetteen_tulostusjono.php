@@ -696,7 +696,8 @@
 
 			$tulostakaikki_tun = "";
 			$edennakko = "";
-
+			$riveja_yht = 0;
+			
 			while ($tilrow = mysql_fetch_array($tilre)) {
 
 				if ($edennakko != "" and $edennakko != $tilrow["t_tyyppi"] and $tilrow["t_tyyppi"] == "E") {
@@ -875,8 +876,18 @@
 
 				// Ker‰t‰‰n tunnukset tulosta kaikki-toimintoa varten
 				$tulostakaikki_tun .= $tilrow["otunnus"].",";
-
+				$riveja_yht += $tilrow["riveja"];
 			}
+			
+			echo "<tr class='aktiivi'>";
+			if ($kukarow["resoluutio"] == "I") {
+				echo "<th colspan='8'>";
+			}
+			else {
+				echo "<th colspan='7'>";
+			}
+			echo t("Rivej‰ yhteens‰")."</th><th>".$riveja_yht."</th></tr>";
+			
 			echo "</table>";
 			echo "<br>";
 

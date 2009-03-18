@@ -800,8 +800,9 @@
 
 		if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
 			$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".pdf";
+						
 			//kirjoitetaan pdf faili levylle..
-			$apu_pdf = $GLOBALS["pdf"]; // otetaan globaali käyttöön..
+			$apu_pdf = $pdf; // otetaan globaali käyttöön..
 			$fh_liite = fopen($tilausvahvistus_tallenna, "w");
 			if (fwrite($fh_liite, $apu_pdf->generate()) === FALSE) die("PDF create error $tilausvahvistus_tallenna");
 			fclose($fh_liite);

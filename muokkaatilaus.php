@@ -29,7 +29,7 @@
 					}
 				-->
 				</script>";
-
+		
 		$toim = strtoupper($toim);
 		
 		if ($toim == "" or $toim == "SUPER") {
@@ -965,7 +965,8 @@
 
 			// scripti balloonien tekemiseen
 			js_popup();
-
+			enable_ajax();
+			
 			echo "<tr>";
 
 			for ($i=0; $i < mysql_num_fields($result)-$miinus; $i++) {

@@ -57,6 +57,10 @@
 			//-->
 			</SCRIPT>";
 
+	if (!isset($toiminto)) {
+		$toiminto = '';
+	}
+
 	if ($toiminto == "sarjanumeronlisatiedot_popup") {
 		@include('sarjanumeron_lisatiedot_popup.inc');
 
@@ -111,6 +115,10 @@
 
 	echo "<font class='head'>".t("Etsi ja selaa tuotteita").":</font><hr>";
 
+	if (!isset($toim_kutsu)) {
+		$toim_kutsu = '';
+	}
+
 	if ($toim_kutsu == "") {
 		$toim_kutsu = "RIVISYOTTO";
 	}
@@ -118,6 +126,10 @@
 	$query    = "SELECT * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 	$result   = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($result);
+
+	if (!isset($ostoskori)) {
+		$ostoskori = '';
+	}
 
 	if (is_numeric($ostoskori)) {
 		echo "<table><tr><td class='back'>";
@@ -149,6 +161,10 @@
 				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
 				<input type='submit' value='".t("Takaisin tilaukselle")."'>
 				</form><br><br>";
+	}
+
+	if (!isset($tee)) {
+		$tee = '';
 	}
 
 	// Tarkistetaan tilausrivi
@@ -291,7 +307,9 @@
 	$toimtuotteet = "";
 	$origtuotteet = "";
 
-	$count = count($array);
+	if (!isset($ojarj)) {
+		$ojarj = '';
+	}
 
 	if (strlen($ojarj) > 0) {
 		$ojarj = trim(mysql_real_escape_string($ojarj));
@@ -328,6 +346,10 @@
 		}
 	}
 
+	if (!isset($poistetut)) {
+		$poistetut = '';
+	}
+
 	if ($poistetut != "") {
 		$poislisa  = "";
 		$poislisa_mulsel  = "";
@@ -338,6 +360,10 @@
 		$poislisa  = " HAVING (tuote.status not in ('P','X') or saldo > 0) ";
 		$poislisa_mulsel  = " and tuote.status not in ('P','X') ";
 		$poischeck = "";
+	}
+
+	if (!isset($lisatiedot)) {
+		$lisatiedot = '';
 	}
 
 	if ($lisatiedot != "") {
@@ -357,16 +383,28 @@
 		$avainlisa = "";
 	}
 
+	if (!isset($nimitys)) {
+		$nimitys = '';
+	}
+
 	if (trim($nimitys) != '') {
 		$nimitys = mysql_real_escape_string(trim($nimitys));
 		$lisa .= " and tuote.nimitys like '%$nimitys%' ";
 		$ulisa .= "&nimitys=$nimitys";
 	}
 
+	if (!isset($tuotenumero)) {
+		$tuotenumero = '';
+	}
+
 	if (trim($tuotenumero) != '') {
 		$tuotenumero = mysql_real_escape_string(trim($tuotenumero));
 		$lisa .= " and tuote.tuoteno like '%$tuotenumero%' ";
 		$ulisa .= "&tuotenumero=$tuotenumero";
+	}
+
+	if (!isset($toim_tuoteno)) {
+		$toim_tuoteno = '';
 	}
 
 	if (trim($toim_tuoteno) != '') {
@@ -391,6 +429,10 @@
 		}
 
 		$ulisa .= "&toim_tuoteno=$toim_tuoteno";
+	}
+
+	if (!isset($alkuperaisnumero)) {
+		$alkuperaisnumero = '';
 	}
 
 	if (trim($alkuperaisnumero) != '') {
@@ -471,7 +513,11 @@
 
 	echo "<form action = '$PHP_SELF?toim_kutsu=$toim_kutsu' method = 'post'>";
 	echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
-	
+
+	if (!isset($tultiin)) {
+		$tultiin = '';
+	}
+
 	if ($tultiin == "futur") {
 		echo " <input type='hidden' name='tultiin' value='$tultiin'>";
 	}
@@ -498,6 +544,18 @@
 	$lisa_haku_tme 			 = "";
 	$lisa_haku_malli 		 = "";
 	$lisa_haku_mallitarkenne = "";
+
+	if (!isset($mul_osasto)) {
+		$mul_osasto = array();
+	}
+
+	if (!isset($mul_try)) {
+		$mul_try = array();
+	}
+
+	if (!isset($mul_tme)) {
+		$mul_tme = array();
+	}
 
 	// jos on valittu jotakin dropdowneista (muu kuin osasto) niin tehdään niillä rajaukset muihin dropdowneihin
 	if (count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_tme) > 0) {
@@ -844,6 +902,10 @@
 		$sort = trim(mysql_real_escape_string($sort));
 	}
 
+	if (!isset($sort)) {
+		$sort = '';
+	}
+
 	if ($sort == 'asc') {
 		$sort = 'desc';
 	}
@@ -861,6 +923,10 @@
 		if (trim($origtuotteet) == '') {
 			$lisa = '';
 		}
+	}
+
+	if (!isset($submit_button)) {
+		$submit_button = '';
 	}
 
 	if ($submit_button != '' and ($lisa != '' or ($toim_kutsu != '' and $lisa != '' and $url == 'y'))) {

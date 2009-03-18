@@ -289,6 +289,7 @@
 	$lisa  = "";
 	$ulisa = "";
 	$toimtuotteet = "";
+	$origtuotteet = "";
 
 	$count = count($array);
 
@@ -400,9 +401,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and orig_tuoteno like '%$alkuperaisnumero%'
 					LIMIT 500";
-		$pres = mysql_query($query) or pupe_error($query);
-
-		$origtuotteet = "";
+		$pres = mysql_query($query) or pupe_error($query);	
 
 		while($prow = mysql_fetch_array($pres)) {
 			$origtuotteet .= "'".$prow["tuoteno"]."',";
@@ -854,6 +853,12 @@
 
 	if (isset($toim_tuoteno) !== FALSE and trim($toim_tuoteno) != '') {
 		if (trim($toimtuotteet) == '') {
+			$lisa = '';
+		}
+	}
+	
+	if (isset($alkuperaisnumero) !== FALSE and trim($alkuperaisnumero) != '') {
+		if (trim($origtuotteet) == '') {
 			$lisa = '';
 		}
 	}

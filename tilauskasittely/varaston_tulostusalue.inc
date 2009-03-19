@@ -30,7 +30,7 @@
 		$lis = substr($lis,0,-1);
 		
 		if ($yhtiorow['pakkaamolokerot'] == 'K') {
-			$kirjoitintilrivilisa = " AND var != 'J' ";			
+			$kirjoitintilrivilisa = " AND var NOT IN('J','P') ";			
 		}
 		
 		if ($lis != '') {

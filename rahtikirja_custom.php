@@ -329,9 +329,9 @@ if (! isset($_POST['toimitustapa'])) {
 </tr>
 
 <?php
-	echo "<tr><th>". t('L‰hett‰j‰n viite') . "</th><td><input type=hidden name='asiakas' value='{$asiakasrow['ytunnus']}'><input type='text' name='viitelah'></td></tr>";
-	echo "<tr><th>Vastaanottajan viite</th><td><input type='text' name='viitevas'></td></tr>";
-    echo "<tr><th>" . t('Tulostin') . "</th><td><select name='tulostin'>";
+	echo "<tr><th>".t('L‰hett‰j‰n viite')."</th><td><input type=hidden name='asiakas' value='{$asiakasrow['ytunnus']}'><input type='text' name='viitelah'></td></tr>";
+	echo "<tr><th>".t('Vastaanottajan viite')."</th><td><input type='text' name='viitevas'></td></tr>";
+    echo "<tr><th>".t('Rahtikirja')."</th><td><select name='tulostin'>";
     
     $query = "	SELECT *
 				from kirjoittimet
@@ -352,8 +352,8 @@ if (! isset($_POST['toimitustapa'])) {
 
 	echo "</select></td></tr>";
 	
-	echo "<tr><th>".t("Osoitelappu").":</th>";
-	echo "<td colspan='$spanni'>";
+	echo "<tr><th>".t("Osoitelappu")."</th>";
+	echo "<td>";
 	
 	echo "<select name='valittu_oslapp_tulostin'>";
 	echo "<option value=''>".t("Ei tulosteta")."</option>";
@@ -370,7 +370,12 @@ if (! isset($_POST['toimitustapa'])) {
 		echo "<option value='{$kirow['tunnus']}' $sel>{$kirow['kirjoitin']}</option>";
 	}
 
-	echo "</select> ".t("Kpl").": <input type='text' size='4' name='oslappkpl' value='$oslappkpl'></th>";
+	echo "</select></td></tr>";
+	
+	if (!isset($oslappkpl)) $oslappkpl = 1;
+	
+	echo "<tr><th>".t("Tulostusm‰‰r‰").":</th>";
+	echo "<td><input type='text' size='4' name='oslappkpl' value='$oslappkpl'></td>";
 		
 	echo "</tr></table><br><br>";
 	

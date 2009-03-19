@@ -637,7 +637,7 @@
 			$toimitustapa_lask_tun = '';
 
 			while ($rakir_row = mysql_fetch_array($result)) {
-				if ($rakir_row['toimitustapa'] != '' and $rakir_row['tunnus'] != '' and $rakir_row['printteri7'] != '') {
+				if ($rakir_row['toimitustapa'] != '') {
 					$sel = "";
 					if($rakir_row["tunnus"] == $kukarow["varasto"] and $varasto == "") {
 						$sel = "selected";

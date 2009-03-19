@@ -36,7 +36,8 @@
 		// lähettäjän viite otetaan laskulta
 		$viitelah = $lotsikot[0];
 	}
-	else if ($osoitelappurow["toim_nimi"] != '') {
+	elseif ($osoitelappurow["toim_nimi"] != '') {		
+		$postirow = $osoitelappurow;
 		$rakir_row = $osoitelappurow;
 	}
 	else {

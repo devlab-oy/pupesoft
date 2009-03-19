@@ -161,6 +161,8 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 	
 	
 	// yhtiön tiedot
+	
+	$osoitelappurow['yhtio']			= $yhtiorow["yhtio"];	
 	$osoitelappurow['yhtio_nimi'] 		= $yhtiorow["nimi"];
 	$osoitelappurow['yhtio_osoite']		= $yhtiorow["osoite"];
 	$osoitelappurow['yhtio_postino']	= $yhtiorow["postino"];
@@ -177,6 +179,7 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 		$osoitelappurow['yhtio_osoite']		= $apualvrow["osoite"];
 		$osoitelappurow['yhtio_postino']	= $apualvrow["postino"];
 		$osoitelappurow['yhtio_postitp']	= $apualvrow["postitp"];
+		$osoitelappurow['yhtio_toimipaikka']= $apualvrow["tunnus"];
 	}
 
 	$query  = "SELECT * FROM toimitustapa WHERE yhtio='{$GLOBALS['kukarow']['yhtio']}' AND selite='$toimitustapa' ORDER BY jarjestys,selite";

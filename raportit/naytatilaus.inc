@@ -751,7 +751,7 @@
 						and sarjanumero != ''";
 			$sarjares = mysql_query($query) or pupe_error($query);
 
-			$row["kommentti"] = str_replace("\n", "<br>", $row["kommentti"]);
+			$row["kommentti"] = str_replace("\n", "<br>", trim($row["kommentti"]));
 
 			if ($row["sarjanumeroseuranta"] != ''){
 				if ($row["kommentti"] != '') {
@@ -774,6 +774,7 @@
 			if($kukarow['extranet'] == '' and $row["toimitettuaika"] != '0000-00-00 00:00:00') {
 				$row['kommentti'] .= "<br><font class='info'>".t("Toimitettu").": $row[toimitettu] ".tv1dateconv($row["toimitettuaika"], "P")."</font>";
 			}
+			
 			if($kukarow['extranet'] == '' and $row["kerattyaika"] != '0000-00-00 00:00:00') {
 				$row['kommentti'] .= "<br><font class='info'>".t("Kerätty").": $row[keratty] ".tv1dateconv($row["kerattyaika"], "P")."</font>";
 			}
@@ -834,8 +835,11 @@
 						$pkusei = " use index (yhtio_otunnus) ";
 					}
 				}
-
-				$pkquery = "SELECT sum(if(tilausrivi.kommentti != '' or tuote.sarjanumeroseuranta!='', 1, 0)), count(*)
+				
+				$pkquery = "SELECT sum(if(tilausrivi.kommentti != '' 
+										or tuote.sarjanumeroseuranta!='' 
+										or (tilausrivi.kerattyaika != '0000-00-00 00:00:00' and '$kukarow[extranet]' = '')
+										or (tilausrivi.toimitettuaika != '0000-00-00 00:00:00' and '$kukarow[extranet]' = ''), 1, 0)), count(*)
 							FROM tilausrivi $pkusei
 							JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'

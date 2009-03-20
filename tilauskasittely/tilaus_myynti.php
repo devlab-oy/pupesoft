@@ -1785,40 +1785,27 @@ if ($tee == '') {
 		if ($kukarow["extranet"] == "" and $kukarow["yhtio"] == "allr") {
 			
 			echo "<tr>";
-			echo 	"<td class='back'>
+			echo 	"<td class='back' colspan='4'>
 						<form action='../yhteensopivuus.php' method='post'>
 						<input type='hidden' name='toim' value='MP'>
 						<input type='hidden' name='toim_kutsu' value='$toim'>
 						<input type='submit' value='".t("MP-Selain")."'>
 						</form>
-					</td>";
-					
-			echo 	"<td class='back'>
 						<form action='../yhteensopivuus.php' method='post'>
 						<input type='hidden' name='toim' value='MO'>
 						<input type='hidden' name='toim_kutsu' value='$toim'>
 						<input type='submit' value='".t("Moposelain")."'>
 						</form>
-					</td>";			
-					
-			echo 	"<td class='back'>
 						<form action='../yhteensopivuus.php' method='post'>
 						<input type='hidden' name='toim' value='MK'>
 						<input type='hidden' name='toim_kutsu' value='$toim'>
 						<input type='submit' value='".t("Kelkkaselain")."'>
 						</form>
-					</td>";					
-					
-			
-			echo 	"<td class='back'>
 						<form action='../yhteensopivuus.php' method='post'>
 						<input type='hidden' name='toim' value='MX'>
 						<input type='hidden' name='toim_kutsu' value='$toim'>
 						<input type='submit' value='".t("Crossiselain")."'>
 						</form>
-					</td>";
-			
-			echo 	"<td class='back'>
 						<form action='../yhteensopivuus.php' method='post'>
 						<input type='hidden' name='toim' value='AT'>
 						<input type='hidden' name='toim_kutsu' value='$toim'>

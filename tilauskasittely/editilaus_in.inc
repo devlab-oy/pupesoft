@@ -630,7 +630,7 @@ while (!feof ($fd)) {
 				}
 
 				// jos asiakkalla ei ole toimitusosoitetietoja, kopsataan laskutustiedot
-				if ($arow['toim_nimi'] == "") {
+				if (trim($arow['toim_nimi']) == "") {
 					$arow['toim_nimi']		= $arow['nimi'];
 					$arow['toim_nimitark']	= $arow['nimitark'];
 					$arow['toim_osoite']	= $arow['osoite'];

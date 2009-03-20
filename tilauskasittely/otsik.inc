@@ -613,7 +613,7 @@
 				$toimasiakas_result = mysql_query($toimasiakas_query) or pupe_error($toimasiakas_query);
 				$toimasiakas_row = mysql_fetch_array($toimasiakas_result);
 				
-				if ($toimasiakas_row["toim_nimi"] != "") {
+				if (trim($toimasiakas_row["toim_nimi"]) != "") {
 					$srow["toim_nimi"]		= $toimasiakas_row["toim_nimi"];
 					$srow["toim_nimitark"]	= $toimasiakas_row["toim_nimitark"];
 					$srow["toim_osoite"]	= $toimasiakas_row["toim_osoite"];

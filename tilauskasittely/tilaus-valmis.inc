@@ -1085,9 +1085,7 @@ else {
 					}
 
 					$liitetied_id = tallenna_liite('tilvah_liite', 'myyntilasku', $laskurow['tunnusnippu'], 'Myyntilaskun tilausvahvistus', '', $liitetied_tunnus, '');
-					
-					echo "$liitetied_id = tallenna_liite('tilvah_liite', 'myyntilasku', $laskurow[tunnusnippu], 'Myyntilaskun tilausvahvistus', '', $liitetied_tunnus, '')";
-					
+										
 					//poistetaan tmp file samantien kuleksimasta...
 					system("rm -f ".basename($tilausvahvistus_tallenna));
 				}

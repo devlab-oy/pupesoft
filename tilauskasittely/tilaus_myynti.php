@@ -1656,7 +1656,7 @@ if ($tee == '') {
 						</form>
 					</td>";
 		}
-
+		
 		if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == 'REKLAMAATIO')) {
 			echo "	<td class='back'>
 					<form action = '$PHP_SELF' method='post'>
@@ -1778,7 +1778,61 @@ if ($tee == '') {
 				</td>";
 		}
 
-		echo "</tr></table><br>\n";
+		echo "</tr>";
+		
+		
+		// aivan karseeta, mutta joskus pit‰‰ olla n‰in asiakasyst‰v‰llinen... toivottavasti ei h‰iritse ket‰‰n
+		if ($kukarow["extranet"] == "" and $kukarow["yhtio"] == "allr") {
+			
+			echo "<tr>";
+			echo 	"<td class='back'>
+						<form action='../yhteensopivuus.php' method='post'>
+						<input type='hidden' name='toim' value='MP'>
+						<input type='hidden' name='toim_kutsu' value='$toim'>
+						<input type='submit' value='".t("MP-Selain")."'>
+						</form>
+					</td>";
+					
+			echo 	"<td class='back'>
+						<form action='../yhteensopivuus.php' method='post'>
+						<input type='hidden' name='toim' value='MO'>
+						<input type='hidden' name='toim_kutsu' value='$toim'>
+						<input type='submit' value='".t("Moposelain")."'>
+						</form>
+					</td>";			
+					
+			echo 	"<td class='back'>
+						<form action='../yhteensopivuus.php' method='post'>
+						<input type='hidden' name='toim' value='MK'>
+						<input type='hidden' name='toim_kutsu' value='$toim'>
+						<input type='submit' value='".t("Kelkkaselain")."'>
+						</form>
+					</td>";					
+					
+			
+			echo 	"<td class='back'>
+						<form action='../yhteensopivuus.php' method='post'>
+						<input type='hidden' name='toim' value='MX'>
+						<input type='hidden' name='toim_kutsu' value='$toim'>
+						<input type='submit' value='".t("Crossiselain")."'>
+						</form>
+					</td>";
+			
+			echo 	"<td class='back'>
+						<form action='../yhteensopivuus.php' method='post'>
+						<input type='hidden' name='toim' value='AT'>
+						<input type='hidden' name='toim_kutsu' value='$toim'>
+						<input type='submit' value='".t("ATV-Selain")."'>
+						</form>
+					</td>";
+						
+			echo "</tr>";
+		}
+		
+		
+		
+		
+		echo "</table><br>\n";
 	}
 
 	//Oletetaan, ett‰ tilaus on ok, $tilausok muuttujaa summataan alempana jos jotain virheit‰ ilmenee

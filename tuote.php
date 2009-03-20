@@ -6,6 +6,72 @@
 		echo js_popup(-100);
 	}
 
+	echo "<SCRIPT type='text/javascript'>
+			<!--
+				function picture_popup(tuote_tunnus, maxwidth, totalheight, tuoteno) {
+					var myWidth = 0, myHeight = 0;
+					if (typeof(window.innerWidth ) == 'number') {
+						//Non-IE
+						myWidth = window.innerWidth;
+						myHeight = window.innerHeight;
+					} else if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
+						//IE 6+ in 'standards compliant mode'
+						myWidth = document.documentElement.clientWidth;
+						myHeight = document.documentElement.clientHeight;
+					} else if (document.body && (document.body.clientWidth || document.body.clientHeight)) {
+						//IE 4 compatible
+						myWidth = document.body.clientWidth;
+						myHeight = document.body.clientHeight;
+					}
+
+					if (maxwidth == '0' && totalheight == '0') {
+						window.open('$PHP_SELF?tuoteno='+tuoteno+'&ohje=off&toiminto=avaa_kuva&tunnus='+tuote_tunnus+'&laji=tuotekuva', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=0,top = 0, width='+myWidth+', height='+myHeight);
+					}
+					else {
+						window.open('$PHP_SELF?tuoteno='+tuoteno+'&ohje=off&toiminto=avaa_kuva&&maxi='+maxwidth+'&tunnus='+tuote_tunnus+'&laji=tuotekuva', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=0,top = 0, width='+maxwidth+', height='+totalheight);
+					}
+				}
+			//-->
+			</SCRIPT>";
+
+	if ($toiminto == "avaa_kuva") {
+		$query = "	SELECT tunnus, selite, filetype
+		 			FROM liitetiedostot
+					WHERE yhtio='$kukarow[yhtio]'
+					AND liitos='tuote'
+					AND kayttotarkoitus not in ('thumb','TH')
+					AND liitostunnus='$tunnus'
+					ORDER BY kayttotarkoitus, jarjestys, filename";
+		$kuvares = mysql_query($query) or pupe_error($query);
+
+		echo "<table border='0' cellspacing='5' align='center'";
+		
+		if ($maxwidth) {
+			echo "width='$maxwidth'";
+		}
+		echo ">";
+
+		while ($kuvarow = mysql_fetch_array($kuvares)) {
+			echo "<tr><td class='back' align='center' valign='top'>";
+
+			if ($kuvarow["filetype"] == "application/pdf") {
+				echo "<a href='".$palvelin2."view.php?id=$kuvarow[tunnus]' target='_top'>".t("Avaa pdf")."</a></td></tr>";
+			}
+			else {
+				if ($maxi > 0) {
+					$maxi = "width = '$maxi' ";
+				}
+				echo "<img $maxi src='".$palvelin2."view.php?id=$kuvarow[tunnus]'></td></tr>";
+			}
+
+			echo "<tr><td class='back' align='center' valign='top'>$kuvarow[selite]</td></tr>";
+			echo "<tr><td class='back'><br></td></tr>";
+		}
+		echo "</table>";
+		exit;
+	}
+
+
 	if ($tee == 'NAYTATILAUS') {
 		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 		require ("raportit/naytatilaus.inc");
@@ -454,8 +520,7 @@
 
 			//8
 			echo "<tr><th>".t("Muuta")."</th><th colspan='5'>".t("Lyhytkuvaus")."</th></tr>";
-			echo "<tr><td>$tuoterow[muuta]&nbsp;</td><td colspan='5'>$tuoterow[lyhytkuvaus]</td></tr>";
-
+			echo "<tr><td>$tuoterow[muuta]&nbsp;</td><td colspan='5'>$tuoterow[lyhytkuvaus]</td></tr>";			
 			echo "</table>";
 
 			echo "<table><tr>";
@@ -494,23 +559,103 @@
 
 			if (mysql_error() == "" and file_exists("yhteensopivuus_tuote.php")) {
 
-				$query = "select count(*) countti from yhteensopivuus_tuote where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]' and tyyppi='HA'";
+				$query = "	SELECT tyyppi, count(*) countti 
+							from yhteensopivuus_tuote 
+							where tuoteno = '$tuoteno' 
+							and yhtio = '$kukarow[yhtio]' 
+							GROUP BY 1";
 				$yhtresult = mysql_query($query) or pupe_error($query);
-				$yhtrow = mysql_fetch_array($yhtresult);
-
-				if ($yhtrow['countti'] > 0) {
+				
+				if (mysql_num_rows($yhtresult) > 0) {
 					echo "<td class='back' valign='top' align='left'>";
 					echo "<table>";
 					echo "<tr><th>".t("Yhteensopivuudet")."</th></tr>";
+				}
+				
+				while ($yhtrow = mysql_fetch_array($yhtresult)) {
+					
+					if ($yhtrow["countti"] > 0) {
+						
+						if ($yhtrow["tyyppi"] == "HA") $yhttoim = "";
+						else $yhttoim = $yhtrow["tyyppi"];
+						
+						echo "<tr><td><a href='yhteensopivuus_tuote.php?toim=$yhttoim&tee=etsi&tuoteno=$tuoteno'>Siirry tuotteen $yhttoim yhteensopivuuksiin</a></td></tr>";
+					}
+				}
 
-					echo "<tr><td><a href='yhteensopivuus_tuote.php?tee=etsi&tuoteno=$tuoteno'>Siirry tuotteen yhteensopivuuksiin</a></td></tr>";
-
+				if (mysql_num_rows($yhtresult) > 0) {
 					echo "</table>";
 					echo "</td>";
 				}
 			}
 
-			echo "<tr></table><br>";
+			// Onko tuotekuvia
+			unset($images_exist);
+			unset($pdf_exist);
+			unset($filetype);
+
+			$filetype_query = "	SELECT * 
+								FROM liitetiedostot 
+								WHERE yhtio		 = '{$kukarow['yhtio']}' 
+								and liitos		 = 'tuote' 
+								and liitostunnus = '{$tuoterow['tunnus']}' 
+								ORDER BY kayttotarkoitus, jarjestys, filename
+								LIMIT 1";
+			$filetype_result = mysql_query($filetype_query) or pupe_error($filetype_query);
+			$filetype_row = mysql_fetch_array($filetype_result);
+
+			if (mysql_num_rows($filetype_result) > 0) {
+				if (in_array("image/jpeg", $filetype_row) or in_array("image/jpg", $filetype_row) or in_array("image/gif", $filetype_row) or in_array("image/png", $filetype_row) or in_array("image/bmp", $filetype_row)) {
+					list ($prefix, $filetype) = explode("/", $filetype_row["filetype"]);
+					$filetype = strtolower($filetype);
+
+					if ($filetype == "jpeg" or $filetype == "jpg" or $filetype == "gif" or $filetype == "png" or $filetype == "bmp") {
+						$query = "	SELECT MAX(image_width) AS max_width, SUM(image_height) AS total_height, count(liitostunnus) AS kpl
+						 			FROM liitetiedostot
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND liitos = 'tuote'
+									AND liitostunnus = '$tuoterow[tunnus]'";
+						$kuvares = mysql_query($query) or pupe_error($query);
+
+						$apurow = mysql_fetch_array($kuvares);
+						$maxwidth = $apurow["max_width"] + 30;
+						
+						if ($maxwidth > 640) {
+							$maxwidth = 640;
+						}
+						$totalheight = $apurow["total_height"] + 60;
+
+						if ($apurow["kpl"] > 0) {
+							$images_exist = 1;
+						}
+					}
+				}
+				else if (in_array("application/pdf", $filetype_row)) {
+					$maxwidth 		= 0;
+					$totalheight 	= 0;
+					$pdf_exist 		= 1;
+				}
+			}
+
+			if (isset($images_exist) or isset($pdf_exist)) {
+								
+				echo "<td class='back' valign='top' align='left'>";
+				echo "<table>";
+				echo "<tr><th>".t("Tuotekuvat")."</th></tr><tr><td><input type='button' value='";
+
+				if ($pdf_exist) {
+					echo t("Pdf");
+				}
+				else {
+					echo t("Kuva");
+				}
+				echo "' onClick=\"javascript:picture_popup('$tuoterow[tunnus]', '$maxwidth', '$totalheight', '$tuoterow[tuoteno]')\"></td></tr>";
+
+				echo "</table>";
+				echo "</td>";
+			}
+
+			echo "</tr></table><br>";
 
 			// Varastosaldot ja paikat
 			echo "<font class='message'>".t("Varastopaikat")."</font><hr>";

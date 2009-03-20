@@ -465,7 +465,7 @@
 			if (mysql_num_rows($prires) > 0) {
 
 				$prirow= mysql_fetch_array($prires);
-
+				//print_r($pirow);
 				// käteinen muuttuja viritetään tilaus-valmis.inc:issä jos maksuehto on käteinen
 				// ja silloin pitää kaikki lähetteet tulostaa aina printteri5:lle (lasku printteri)
 				if ($kateinen == 'X') {
@@ -492,14 +492,14 @@
 				else {
 					$apuprintteri = $valittu_oslapp_tulostin;
 				}
-
+				
 				//haetaan osoitelapun tulostuskomento
 				$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
 				$kirres = mysql_query($query) or pupe_error($query);
 				$kirrow = mysql_fetch_array($kirres);
 				$oslapp = $kirrow['komento'];
 			}
-
+			
 			if ($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) {
 
 				$otunnus = $laskurow["tunnus"];
@@ -1850,7 +1850,7 @@
 			echo "</table>";
 		}
 
-		if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == '' or $mista != 'keraa.php') {
+		if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != 'Y' or $mista != 'keraa.php') {
 
 			$sel 		= "SELECTED";
 			$oslappkpl 	= 0;

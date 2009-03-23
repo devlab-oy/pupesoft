@@ -215,8 +215,8 @@
 					sum(if(tyyppi='MU',-1 * summa,summa)) Yhteensa
 					FROM maksu
 					WHERE yhtio = '$kukarow[yhtio]' and maksettu <> 1
-					GROUP BY Aika
-			        ORDER BY Aika";
+					GROUP BY Aika ASC
+			        WITH ROLLUP";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr>";
@@ -232,34 +232,49 @@
 		while ($trow=mysql_fetch_array ($result)) {
 			echo "<tr>";
 			
-			if ($aika == 'pv') {
-				echo "<td>".t("Päivä").": ";
-				echo "<td style='text-align: right;'>".tv1dateconv($trow["Aika"])."</td>";
+			if($trow["Aika"] != "") {
+				$class = "";
+				if ($aika == 'pv') {
+					echo "<td>".t("Päivä").": ";
+					echo "<td style='text-align: right;'>".tv1dateconv($trow["Aika"])."</td>";
+				}
+				if ($aika == 'vi') {
+					echo "<td>".t("Viikko").": ";
+					echo "<td>".substr($trow["Aika"], 4, 2)." - ".substr($trow["Aika"], 0, 4)."</td>";
+				}
+				if ($aika == 'kk') {
+					echo "<td>".t("Kuukausi").": ";
+					echo "<td>".substr($trow["Aika"], 5, 2)." - ".substr($trow["Aika"], 0, 4)."</td>";
+				}
 			}
-			if ($aika == 'vi') {
-				echo "<td>".t("Viikko").": ";
-				echo "<td>".substr($trow["Aika"], 4, 2)." - ".substr($trow["Aika"], 0, 4)."</td>";
-			}
-			if ($aika == 'kk') {
-				echo "<td>".t("Kuukausi").": ";
-				echo "<td>".substr($trow["Aika"], 5, 2)." - ".substr($trow["Aika"], 0, 4)."</td>";
+			else {
+				$class = "tumma";
+				echo "<td class='$class'>".t("Yhteensä").": ";
+				echo "<td class='$class'></td>";
 			}
 			
-			echo "<td style='text-align: right;'>$trow[Myyntires]</td>";
+			
+			
+			echo "<td style='text-align: right;' class='$class'>$trow[Myyntires]</td>";
 			
 			if ($aika == 'pv') {
-				echo "<td style='text-align: right;'><a href = raportit.php?toim=laskuhaku&tee=M&pvm=$trow[Aika]>$trow[Ostores]</td>";
+				if($trow["Aika"] == "") {
+					echo "<td style='text-align: right;' class='$class'>$trow[Ostores]</td>";
+				}
+				else {
+					echo "<td style='text-align: right;' class='$class'><a href = raportit.php?toim=laskuhaku&tee=M&pvm=$trow[Aika]>$trow[Ostores]</a></td>";
+				}
 			}
 			if ($aika == 'vi') {
-				echo "<td style='text-align: right;'>$trow[Ostores]</td>";
+				echo "<td style='text-align: right;' class='$class'>$trow[Ostores]</td>";
 			}
 			if ($aika == 'kk') {
-				echo "<td style='text-align: right;'>$trow[Ostores]</td>";
+				echo "<td style='text-align: right;' class='$class'>$trow[Ostores]</td>";
 			}
 
-			echo "<td style='text-align: right;'>$trow[Muu]</td>";
-			echo "<td style='text-align: right;'>$trow[Yhteensa]</td>";
-			echo "<td style='text-align: right;'>".sprintf("%.2f", $kumulat)."</td></tr>";
+			echo "<td style='text-align: right;' class='$class'>$trow[Muu]</td>";
+			echo "<td style='text-align: right;' class='$class'>$trow[Yhteensa]</td>";
+			echo "<td style='text-align: right;' class='$class'>".sprintf("%.2f", $kumulat)."</td></tr>";
 		
 			$kumulat += $trow['Yhteensa'];
 		}

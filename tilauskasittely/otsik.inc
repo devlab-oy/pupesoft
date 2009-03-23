@@ -569,7 +569,7 @@
 			elseif ($asiakasid != "" and $tiedot_laskulta == "") {
 				// asiakashaussa pitää olla vakio columni kohdistettu, jonka arvo on O että saadaan OLETUS toimitustapa haettua asiakashaunkin yhteydessä
 				if ($toim == "TYOMAARAYS") {
-					$puhlisa = " asiakas.puhelin kotipuh, asiakas.tyopuhelin tyopuh,";
+					$puhlisa = " if(asiakas.puhelin!='', asiakas.puhelin, asiakas.gsm) kotipuh, asiakas.tyopuhelin tyopuh,";
 				}
 				else {
 					$puhlisa = "";
@@ -911,7 +911,7 @@
 							<td valign='top'>".t("Postitp").": </td>
 							<td><input type='text' name='kolm_postino' size='6' value='$srow[kolm_postino]'> <input type='text' name='kolm_postitp' size='21' value='$srow[kolm_postitp]'></td></tr>";
 					echo "</table>";
-				echo "</td><td>";
+					echo "</td><td>";
 					echo "<table>";
 					echo "<tr>
 							<td valign='top'> ".t("Sähköpostiosoite").": </td>

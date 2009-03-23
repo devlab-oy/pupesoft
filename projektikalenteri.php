@@ -1,7 +1,5 @@
 <?php
 
-//echo "data:<pre>".print_r($_REQUEST, true)."</pre>";	
-//parametrit
 require('inc/parametrit.inc');
 
 if($nayta_pdf != 1) {
@@ -67,8 +65,11 @@ else {
 				LEFT JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
 				LEFT JOIN kuka pp ON pp.yhtio=lasku.yhtio and pp.tunnus=laskun_lisatiedot.projektipaallikko
 				LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=lasku.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde
-				WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'R' and lasku.alatila != 'X'";
+				WHERE lasku.yhtio = '$kukarow[yhtio]' 
+				and lasku.tila = 'R' 
+				and lasku.alatila != 'X'";
 	$result = mysql_query($query) or pupe_error($query);
+	
 	if(mysql_num_rows($result) > 0) {
 		echo "	<table>
 					<tr>
@@ -96,10 +97,13 @@ else {
 
 		echo "</table>";
 	}
-	
+	else {
+		echo t("Ei avoimia projekteja")."!<br>";
+	}
 }
 
 $ei_kelloa = 1;
+
 require ("inc/footer.inc");
 
 ?>

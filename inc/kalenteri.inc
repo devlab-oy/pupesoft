@@ -180,7 +180,7 @@
 	}	
 
 	if(!function_exists("url_params")) {
-		function url_params ($kalenteri, $method) {
+		function url_params ($kalenteri, $method = "") {
 			global $_REQUEST;
 			
 			$ret = "";
@@ -641,10 +641,11 @@
 	}
 	
 	if(!function_exists("kalequery")) {
-		function kalequery($query) {
+		function kalequery($query = "") {
 			global $kukarow, $kalelisaa, $kalepoisto;
 			
 			$kalenteri = muistista("kalenteri", "kalenteri");
+			
 			if(!is_array($kalenteri)) {
 				die("OHO! Kalenterin meni rikki!");
 			}
@@ -671,9 +672,10 @@
 			}
 			
 			//	Tarkistetaan, että koitetaan näyttää oikeaa käyttäkää
-			if(count($kalenteri["kalenteri_ketka"])>0) {
+			if(count($kalenteri["kalenteri_ketka"]) > 0) {
 				foreach($kalenteri["kalenteri_nayta_kuka"] as $key => $val) {
-					if(array_search($val, $kalenteri["kalenteri_ketka"] === false)) {
+					
+					if(array_search($val, $kalenteri["kalenteri_ketka"]) === FALSE) {
 						unset($kalenteri["kalenteri_nayta_kuka"][$key]);
 					}
 				}
@@ -976,6 +978,7 @@
 			
 			//echo "<hr>data:<pre>".print_r($data, true)."</pre>";
 			$kalenteri = muistista("kalenteri", "kalenteri");
+			
 			if(!is_array($kalenteri)) {
 				die("OHO! Kalenterin meni rikki!");
 			}
@@ -1682,36 +1685,39 @@
 				
 				$tpos=array();
 				$tcolor = array();
+				
 				for($i=0;$i<$days;$i++) {
 					$ulos = "";
 					
-					foreach($data["lista"][$paivat[$i]] as $row) {
-						if(in_array($row["laji"], array("kalenteri"))) {
-							if(in_array($row["laji_tark"], array("Muistutus", "Memo"))) {
+					if (is_array($data["lista"][$paivat[$i]])) {
+						foreach($data["lista"][$paivat[$i]] as $row) {
+							if(in_array($row["laji"], array("kalenteri"))) {
+								if(in_array($row["laji_tark"], array("Muistutus", "Memo"))) {
 
-								if($ulos != "") {
-									$ulos .= "<hr>";
-								}
-								$lisatiedot = hae_lisatiedot($row);
-								list($viesti, $poppari) = lyhytviesti($lisatiedot["viesti"], 20);
+									if($ulos != "") {
+										$ulos .= "<hr>";
+									}
+									$lisatiedot = hae_lisatiedot($row);
+									list($viesti, $poppari) = lyhytviesti($lisatiedot["viesti"], 20);
 								
-								$viesti = $poppari = "";
-								if($nakyma == "VIIKKONAKYMA") {
-									list($viesti, $poppari) = lyhytviesti($lisatiedot["viesti"], 40);
+									$viesti = $poppari = "";
+									if($nakyma == "VIIKKONAKYMA") {
+										list($viesti, $poppari) = lyhytviesti($lisatiedot["viesti"], 40);
 									
-									if($poppari != "") {
-										$ulos .= "<div $poppari>$viesti</div>";
+										if($poppari != "") {
+											$ulos .= "<div $poppari>$viesti</div>";
+										}
+										else {
+											$ulos .= $viesti;
+										}
 									}
 									else {
-										$ulos .= $viesti;
+										$ulos .= $lisatiedot["viesti"];
 									}
 								}
 								else {
-									$ulos .= $lisatiedot["viesti"];
+									$tpos[$i][$row["tunnus"]] = (int) count($tpos[$i])+1;
 								}
-							}
-							else {
-								$tpos[$i][$row["tunnus"]] = (int) count($tpos[$i])+1;
 							}
 						}
 					}
@@ -1729,15 +1735,17 @@
 				
 				for($i=0;$i<$days;$i++) {
 					$ulos = "";
+					
+					if (is_array($data["lista"][$paivat[$i]])) {
+						foreach($data["lista"][$paivat[$i]] as $row) {
+							if(in_array($row["laji"], array("lasku"))) {
+								if($ulos .= "") {
+									$ulos .= "<hr>";
+								}
+								$lisatiedot = hae_lisatiedot($row);
 
-					foreach($data["lista"][$paivat[$i]] as $row) {
-						if(in_array($row["laji"], array("lasku"))) {
-							if($ulos .= "") {
-								$ulos .= "<hr>";
+								$ulos .= $lisatiedot["viesti"];
 							}
-							$lisatiedot = hae_lisatiedot($row);
-
-							$ulos .= $lisatiedot["viesti"];
 						}
 					}
 					$kale .= "
@@ -1785,14 +1793,14 @@
 												$viesti = $lisatiedot["viesti"];
 											}
 
-											$ulos[$tpos[$i][$row["tunnus"]]] = "<div style='width: ".($w/count($tpos[$i]))."; float: left; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";' $poppari>$viesti</div>";
+											$ulos[$tpos[$i][$row["tunnus"]]] = "<div style='width: ".@($w/count($tpos[$i]))."; float: left; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";' $poppari>$viesti</div>";
 										}
 										else {
-											$ulos[$tpos[$i][$row["tunnus"]]] = "<div style='width: ".($w/count($tpos[$i]))."; float: left; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";'>&nbsp;</div>";
+											$ulos[$tpos[$i][$row["tunnus"]]] = "<div style='width: ".@($w/count($tpos[$i]))."; float: left; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";'>&nbsp;</div>";
 										}
 									}
 									else {
-										$ulos[$tpos[$i][$row["tunnus"]]] = "<div style='width: ".($w/count($tpos[$i]))."; height: 1px; float: left; background-color: inherit;'></div>";
+										$ulos[$tpos[$i][$row["tunnus"]]] = "<div style='width: ".@($w/count($tpos[$i]))."; height: 1px; float: left; background-color: inherit;'></div>";
 									}
 								}
 							}

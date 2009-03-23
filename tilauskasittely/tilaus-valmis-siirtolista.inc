@@ -351,9 +351,19 @@
 
 						// pakotetaan tilausvanvistus PDF muodossa omaan sähköpostiin, ilman hintoja.
 						$laskurow["tilausvahvistus"] = "3OP";
+						
+						if (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {
+							$naytatvale = 3; // jos mellä on tilausvahvistuksessa kolmonen, ei haluta nähdä hintoja, pelkästään kpl-määrät
+						}
+						elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
+							$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
+						}
+						else {
+							$naytatvale = 1; // halutaan nähä alet
+						}
 
 						// LÄHETETÄÄN TILAUSVAHVISTUS
-						laheta_tilausvahvistus($laskurow);
+						require("tilausvahvistus-email.inc");
 					
 						echo "<font class='message'>".t("Siirtolista siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
 					}

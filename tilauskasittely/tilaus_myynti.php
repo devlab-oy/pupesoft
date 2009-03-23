@@ -2024,14 +2024,17 @@ if ($tee == '') {
 
 		echo "<tr>$jarjlisa";
 
-		if ($toim != "VALMISTAVARASTOON") {
+		if ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
 			echo "<th>".t("Tilausvahvistus").":</th>";
 		}
+		elseif (($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOLISTA") and $yhtiorow["varastosiirto_tilausvahvistus"] == "K") {
+			echo "<th>".t("Siirtovahvistus").":</th>";
+		}
 		else {
-			echo "<th> </th>";
+			echo "<th>&nbsp;</th>";
 		}
 
-		if ($toim != "VALMISTAVARASTOON") {
+		if ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
 			$extralisa = "";
 			if ($kukarow["extranet"] != "") {
 				$extralisa = "  and avainsana.selite not like '%E%' and avainsana.selite not like '%O%' ";
@@ -2057,6 +2060,9 @@ if ($tee == '') {
 				echo "<option value='$row[0]' $sel>$row[1]</option>";
 			}
 			echo "</select></td>";
+		}
+		elseif (($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOLISTA") and $yhtiorow["varastosiirto_tilausvahvistus"] == "K") {
+			echo "<td>".t("Kyllä")."</td>";
 		}
 		else {
 			echo "<td>&nbsp;</td>";
@@ -2101,7 +2107,7 @@ if ($tee == '') {
 			$faktaresult = mysql_query($query) or pupe_error($query);
 			$faktarow = mysql_fetch_array($faktaresult);
 
-			if ($toim != 'VALMISTAVARASTOON') {
+			if ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
 				echo "<tr>$jarjlisa<th>".t("Asiakasfakta").":</th><td colspan='3'>";
 
 				//jos asiakkaalla on luokka K niin se on myyntikiellossa ja siitä herjataan
@@ -3304,7 +3310,7 @@ if ($tee == '') {
 				echo t("Tilausrivit").":</font>";
 
 				// jos meillä on yhtiön myyntihinnoissa alvit mukana ja meillä on alvillinen tilaus, annetaan mahdollisuus switchata listaus alvittomaksi
-				if ($laskurow["alv"] != 0 and $toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA" and $toim != "SIIRTOTYOMAARAYS") {
+				if ($laskurow["alv"] != 0 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
 
 					$sele = array();
 
@@ -4550,7 +4556,7 @@ if ($tee == '') {
 				}
 			}
 
-			if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA" and $toim != "SIIRTOTYOMAARAYS") {
+			if ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
 				// Laskeskellaan tilauksen loppusummaa
 				$alvquery = "	SELECT if(isnull(varastopaikat.maa) or varastopaikat.maa='', '$yhtiorow[maa]', varastopaikat.maa) maa, group_concat(tilausrivi.tunnus) rivit
 								FROM tilausrivi

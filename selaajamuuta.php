@@ -174,6 +174,7 @@
 					FROM tiliointi
 					WHERE tunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
+		
 		if (mysql_num_rows($result) == 0) {
 			echo "".t("Tiliöintiä ei löydy")."! $query";
 			exit;
@@ -253,7 +254,7 @@
 	
 	echo $loppudiv;
 	
-	echo "<div id='footer' style='position: absolute; top:780px;'>",
+	echo "<div id='footer' style='position: absolute; top:780px;'>";
 	require "inc/footer.inc";
 	echo "</div>";
 ?>

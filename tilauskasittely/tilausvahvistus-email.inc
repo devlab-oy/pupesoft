@@ -63,9 +63,11 @@ if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 
 // l‰hetet‰‰n PDF vahvistus jos meill‰ on P kirjain vahvistuksessa
 if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
-	$toim = "TILAUSVAHVISTUS";
+	$toim_save = $toim;
+	if ($toim != "YLLAPITOSOPIMUS") $toim = "TILAUSVAHVISTUS";
 	
 	require("tulosta_tilausvahvistus_pdf.inc");
+	$toim = $toim_save;
 }
 
 // l‰hetet‰‰n textimuotoinen tilausvahvistusmeili jos miell‰ _EI OLE_ P kirjainta vahvistuksessa

@@ -6892,7 +6892,11 @@ if (!function_exists("laheta_tilausvahvistus")) {
 			if ($tilvakir = mysql_fetch_array($tilvares)) {
 				$komento["Tilausvahvistus"] = $tilvakir["komento"];
 
-				require_once ("tulosta_tilausvahvistus_pdf.inc");
+				$toim_save = $toim;
+				if ($toim != "YLLAPITOSOPIMUS") $toim = "TILAUSVAHVISTUS";
+				
+				require("tulosta_tilausvahvistus_pdf.inc");
+				$toim = $toim_save;
 			}
 		}
 

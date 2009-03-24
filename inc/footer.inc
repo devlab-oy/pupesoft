@@ -34,6 +34,10 @@
 		}				
 	}
 
+	if (!isset($ei_kelloa)) {
+		$ei_kelloa = '';
+	}
+
 	if ($ei_kelloa == "") {
 		echo "<br><br>";
 		echo "<font class='info'>$aika</font> ";

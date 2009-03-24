@@ -1547,6 +1547,7 @@
 		$kentta="keraajanro";
 
 		$otsik_row = array();
+		$keraysklontti = false;
 
 		$query = "SELECT kerayslista from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
 		$testresult = mysql_query($query) or pupe_error($query);
@@ -1569,6 +1570,7 @@
 			if (mysql_num_rows($toimresult) > 0) {
 				$toimrow = mysql_fetch_array($toimresult);
 				$tilausnumeroita = $toimrow["tunnukset"];
+				$keraysklontti = true;
 			}
 			else {
 				$tilausnumeroita = $id;
@@ -1687,7 +1689,7 @@
 				}
 			}
 			
-			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H') {
+			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $keraysklontti == false) {
 				echo "<tr><th>".t("Haluatko mennä rahtikirjan syöttöön")."</th><td><input type='checkbox' name='rahtikirjalle'>".t("Kyllä")."</td></tr>";
 			}
 
@@ -2102,7 +2104,7 @@
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y') {
 				echo "<br><font class='message'>".t("Siirryt automaattisesti rahtikirjan syöttöön")."!</font>";
 			}
-			elseif ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H') {
+			elseif ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H'  and $keraysklontti == false) {
 				echo "<br><font class='message'>".t("Voit halutessasi siirtyä rahtikirjan syöttöön")."!</font>";
 			}
 		}

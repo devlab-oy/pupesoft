@@ -226,12 +226,7 @@
 					echo "<th>".t("Toimaika")."</th>";
 				}
 				
-				echo "<th>".t("Riv")."</th>";
-
-				if ($yhtiorow['pakkaamolokerot'] == 'K') {
-					echo "<th>",t("Ei lokeroa"),"</th>";
-				}
-
+				echo "<th>".t("Riv")."</th>";				
 				echo "<th>".t("Tulosta")."</th>";
 				echo "<th>".t("Näytä")."</th>";
 				echo "</tr>";
@@ -322,27 +317,6 @@
 					}
 					
 					echo "<$ero valign='top'>$tilrow[riveja]</$ero>";
-
-					if ($yhtiorow["pakkaamolokerot"] == "K") {
-
-						echo "<$ero valign='top'><input type='checkbox' name='ei_pakkaamoa[]' value='$tilrow[tunnus]'";
-
-						if ($tila == 'N') {
-							$query = "	SELECT ei_pakkaamoa	
-										FROM toimitustapa 
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND selite = '$tilrow[toimitustapa]'";
-							$ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
-
-							$ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
-
-							if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1') {
-								echo " checked";
-							}
-						}
-						echo "></$ero>";				
-					}
-
 					echo "<$ero valign='top'><input type='checkbox' name='tulostukseen[]' value='$tilrow[otunnus]' CHECKED></$ero>";
 
 					echo "<$ero valign='top'><a href='$PHP_SELF?toim=$toim&tilaukset=$tilaukset&vanha_tee2=VALITSE&tee2=NAYTATILAUS&tunnus=$tilrow[otunnus]'>".t("Näytä")."</a></$ero>";
@@ -358,7 +332,32 @@
 
 			if ($tee2 != '') {
 				echo "</table><br>";
+				echo "<table>";
+				
+				if ($yhtiorow["pakkaamolokerot"] == "K") {
 
+					echo "<tr>";
+					echo "<th>",t("Ei lokeroa"),"</th>";
+					echo "<td valign='top'><input type='checkbox' name='ei_pakkaamoa' id='ei_pakkaamoa' value='EI'";
+
+					if ($tila == 'N') {
+						$query = "	SELECT ei_pakkaamoa	
+									FROM toimitustapa 
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND selite = '$tilrow[toimitustapa]'";
+						$ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
+
+						$ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
+
+						if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1') {
+							echo " checked";
+						}
+					}
+					echo "></td>";
+					echo "</tr>";				
+				}
+				
+				
 				//haetaan lähetteen oletustulostin
 				$query = "	select *
 							from varastopaikat
@@ -371,8 +370,10 @@
 				$tilaus  = $tilaukset;
 
 				require("varaston_tulostusalue.inc");
-
-				echo "<form method='post' action='$PHP_SELF'>";
+				
+				echo "<tr>";
+				echo "<th>",t("Tulostin"),"</th>";				
+				echo "<td><form method='post' action='$PHP_SELF'>";
 
 				$query = "	SELECT *
 							FROM kirjoittimet
@@ -393,7 +394,10 @@
 
 					echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
 				}
-				echo "</select><br><br>";
+				echo "</select></td></tr>";
+				
+				
+				echo "</table><br><br>";
 				echo "<input type='submit' name='tila' value='".t("Tulosta")."'></form>";
 			}
 		}
@@ -401,7 +405,7 @@
 
 	//valitaan keräysklöntti
 	if ($tee2 == '') {
-
+		
 		if ($toim == 'SIIRTOLISTA') {
 			echo "<font class='head'>".t("Tulosta siirtolista").":</font><hr>";
 		}

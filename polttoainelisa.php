@@ -8,8 +8,8 @@
 
 	if (isset($lisaa) and isset($polttoainelisa) and trim($polttoainelisa) != '') {
 
-		$polttoainelisa = str_replace(",",".",$polttoainelisa);
-		if ($polttoainelisa == '0' or (float)$polttoainelisa == '0') {
+		$polttoainelisa = str_replace(",",".",trim($polttoainelisa));
+		if ($polttoainelisa == '0' or (float) $polttoainelisa == '0') {
 			echo "<font class='error'>",t("Polttoainelisä ei saa olla nolla"),"!</font><br/><br/>";
 		}
 		else {

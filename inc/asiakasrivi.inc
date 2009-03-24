@@ -125,6 +125,7 @@
 		$ulos .= "<option value='020' $sel[020]>".t("Vienti eInvoice")."</option>";
 		$ulos .= "<option value='111' $sel[111]>".t("Elma EDI-inhouse")."</option>";
 		$ulos .= "<option value='666' $sel[666]>".t("Sähköposti")."</option>";
+		$ulos .= "<option value='667' $sel[667]>".t("Sisäinen")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

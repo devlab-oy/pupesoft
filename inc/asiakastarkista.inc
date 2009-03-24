@@ -216,7 +216,7 @@ if(!function_exists("asiakastarkista")) {
 				}
 
 				// jos ollaan valittu jotain muuta kuin PAPERI tai EMAIL niin verkkotunnus pitää syöttää!				
-				if (trim($t[$i]) != '666' and trim($t[$i]) != '100' and $apuverkkotunnus == "") {
+				if (trim($t[$i]) != '666' and trim($t[$i]) != '667' and trim($t[$i]) != '100' and $apuverkkotunnus == "") {
 					$virhe[$i] = "".t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhjä! Laskutus ei onnistu")."!";
 					$virhe[$apuverkkotunnusi] = "".t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhjä! Laskutus ei onnistu")."!";
 					$errori = 1;

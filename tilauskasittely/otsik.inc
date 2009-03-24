@@ -1571,7 +1571,7 @@
 			// Tarjouksia ei oletuksena osatoimiteta
 			if ($srow['osatoimitus'] != '' or ($toim == "TARJOUS" and $kukarow["kesken"] == 0)) $osath = 'CHECKED';
 
-			echo "<td>".t("Sisäinen lasku").":</td><td><input type='checkbox' name='sisainen' $sisah></td>";
+			echo "<td>".t("Laskuta heti")." (".t("sisäinen")."):</td><td><input type='checkbox' name='sisainen' $sisah></td>";
 			echo "</tr>";
 
 			echo "<td>".t("Keräysprioriteetti").":</td><td>";
@@ -1643,7 +1643,7 @@
 
 			echo "</td>";
 
-			echo "<td>".t("Laskua ei ketjuteta").":</td><td><input type='checkbox' name='ketjutus' $eiket></td>";
+			echo "<td>".t("Tilauksesta oma lasku").":</td><td><input type='checkbox' name='ketjutus' $eiket></td>";
 			echo "</tr>";
 
 			echo "<tr>";
@@ -1773,7 +1773,7 @@
 
 			echo "</select></td>";
 
-			echo "<td>",t("Rahtivapaa"),"</td>";
+			echo "<td>",t("Rahtivapaa"),":</td>";
 			echo "<td><input type='checkbox' name='rahtivapaa' $rahtivapaa_chk></td>";
 			echo "</tr>";
 
@@ -1787,8 +1787,9 @@
 			}
 			echo "</tr>";
 
-			echo "<tr>";
-			
+			if ($toim == "TARJOUS" or $yhtiorow["splittauskielto"] == "E") {
+				echo "<tr>";
+			}
 			if ($toim == "TARJOUS") {
 
 				echo "<td>",t("Tarjouksen voimassaoloaika"),":</td><td>";
@@ -1813,7 +1814,7 @@
 						<input type='text' name='voimaika_vv' value='$voimaika_vv' size='6'>
 						</td>";
 			}
-			else {
+			elseif ($yhtiorow["splittauskielto"] == "E") {
 				echo "<td></td><td></td>";
 			}
 
@@ -1822,6 +1823,9 @@
 				if (($yhtiorow["splittauskielto"] != '' and !isset($srow["splittauskielto"])) or $srow["splittauskielto"] != '') $laskkielto = 'CHECKED';
 
 				echo "<td>".t("Splittauskielto").":</td><td><input type='checkbox' value='E' name='splittauskielto' $laskkielto></td>";
+			}
+			
+			if ($toim == "TARJOUS" or $yhtiorow["splittauskielto"] == "E") {
 				echo "</tr>";
 			}
 
@@ -1874,6 +1878,7 @@
 				echo "	</td>
 						</tr>";
 			}
+			
 			if ($toim == "TYOMAARAYS") {
 				//Täysin dynaaminen osio
 				$query = "	SELECT *

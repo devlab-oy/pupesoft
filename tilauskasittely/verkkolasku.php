@@ -1303,7 +1303,7 @@
 						}
 
 						// tässä pohditaan laitetaanko verkkolaskuputkeen
-						if (($lasrow["vienti"] == "" or ($lasrow["vienti"] == "E" and $lasrow["chn"] == "020")) and $masrow["itsetulostus"] == "" and $lasrow["sisainen"] == "" and $masrow["kateinen"] == "" and abs($lasrow["summa"]) != 0 and $lasrow["chn"] != '666') {
+						if (($lasrow["vienti"] == "" or ($lasrow["vienti"] == "E" and $lasrow["chn"] == "020")) and $masrow["itsetulostus"] == "" and $lasrow["sisainen"] == "" and $masrow["kateinen"] == ""  and $lasrow["chn"] != '666' and $lasrow["chn"] != '667' and abs($lasrow["summa"]) != 0) {
 
 							// Nyt meillä on:
 							// $lasrow array on U-laskun tiedot
@@ -1577,7 +1577,7 @@
 						elseif ($lasrow["sisainen"] != '') {
 							if ($silent == "") $tulos_ulos .= "<br>\n".t("Tehtiin sisäinen lasku")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
 
-							// Sisäisiä laskuja ei normaaalisti tuloseta paitski jos meillä on valittu_tulostin
+							// Sisäisiä laskuja ei normaaalisti tuloseta paitsi jos meillä on valittu_tulostin
 							if ($valittu_tulostin != '') {
 								$tulostettavat[] = $lasrow["laskunro"];
 								$lask++;
@@ -1592,20 +1592,25 @@
 							$tulostettavat[] = $lasrow["laskunro"];
 							$lask++;
 						}
-						elseif ($lasrow["vienti"] != '' or $masrow["itsetulostus"] != '' or $lasrow["chn"] == "666") {
+						elseif ($lasrow["vienti"] != '' or $masrow["itsetulostus"] != '' or $lasrow["chn"] == "666" or $lasrow["chn"] == '667') {
 							if ($silent == "" or $silent == "VIENTI") {
-								if ($lasrow["chn"] != "666") {
-									$tulos_ulos .= "<br>\n".t("Tämä lasku tulostetaan omalle tulostimelle")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
-								}
-								else {
+								
+								if ($lasrow["chn"] == "666") {
 									$tulos_ulos .= "<br>\n".t("Tämä lasku lähetetään suoraan asiakkaan sähköpostiin")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
 								}
+								elseif ($lasrow["chn"] == "667") {
+									$tulos_ulos .= "<br>\n".t("Tehtiin sisäinen lasku")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
+								}
+								else {
+									$tulos_ulos .= "<br>\n".t("Tämä lasku tulostetaan omalle tulostimelle")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
+								}
+								
 							}
 
 							// halutaan lähettää lasku suoraan asiakkaalle sähköpostilla..
 							if ($lasrow["chn"] == "666") {
 								$tulostettavat_email[] = $lasrow["laskunro"];
-							}
+							}								
 
 							// Halutaan tulostaa itse
 							$tulostettavat[] = $lasrow["laskunro"];
@@ -1707,8 +1712,8 @@
 					}
 				}
 
-				// jos yhtiöllä on laskuprintteri on määritelty tai halutaan jostain muusta syystä tulostella laskuja paperille
-				if ($yhtiorow['lasku_tulostin'] != 0 or (isset($valittu_tulostin) and $valittu_tulostin != "") or count($tulostettavat_email)>0) {
+				// jos yhtiöllä on laskuprintteri on määritelty tai halutaan jostain muusta syystä tulostella laskuja paperille 
+				if ($yhtiorow['lasku_tulostin'] != 0 or (isset($valittu_tulostin) and $valittu_tulostin != "") or count($tulostettavat_email) > 0) {
 
 					//Käsin valittu tulostin
 					if ($valittu_tulostin != "") {
@@ -1770,7 +1775,9 @@
 						$kateistyyppi	= $masrow["kateinen"];
 
 						if ($yhtiorow['laskutyyppi'] == 3) {
+							
 							require_once ("tulosta_lasku_simppeli.inc");
+							
 							if (in_array($laskurow["laskunro"], $tulostettavat_email) and $valittu_tulostin == "") {
 								include_once("inc/generoi_laskun_saate.inc");
 								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $laskun_kieli);
@@ -1898,7 +1905,7 @@
 								}
 
 								if (isset($valittu_tulostin)) {
-									$yhtiorow[lasku_tulostin] = $valittu_tulostin;
+									$yhtiorow["lasku_tulostin"] = $valittu_tulostin;
 								}
 
 								$querykieli = "	select *

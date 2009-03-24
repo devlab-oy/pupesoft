@@ -1659,7 +1659,7 @@
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='id'  value='$id'>";
 			echo "<th>".t("Ker‰‰j‰")."</th><td><input type='text' size='5' name='keraajanro'> ".t("tai")." ";
-			echo "<td><select name='keraajalist'>";
+			echo "<select name='keraajalist'>";
 
 			if ($kukarow["keraajanro"] != 0) {
 				echo "<option value='$kukarow[keraajanro]'>$kukarow[nimi]</option>";

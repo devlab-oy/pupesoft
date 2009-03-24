@@ -363,7 +363,7 @@
 
 				$query = "	UPDATE lasku SET
 							tila		= 'D',
-							comments	= concat(comments, ' $kukarow[kuka] poisti otsikot rahtikirjan syötössä. rivit liitettiin otsikolle $otsikko_tunnarit[0]', now())
+							comments	= concat(comments, ' $kukarow[kuka] poisti otsikot rahtikirjan syötössä. rivit liitettiin otsikolle $otsikko_tunnarit[0] ', now())
 							where yhtio = '$kukarow[yhtio]' and tunnus in($tunnukset) and tunnus != $otsikko_tunnarit[0]";
 				$updateres = mysql_query($query) or pupe_error($query);
 
@@ -461,11 +461,11 @@
 							order by alkuhyllyalue,alkuhyllynro";
 			}
 			$prires = mysql_query($query) or pupe_error($query);
-
+			
 			if (mysql_num_rows($prires) > 0) {
 
 				$prirow= mysql_fetch_array($prires);
-				//print_r($pirow);
+				
 				// käteinen muuttuja viritetään tilaus-valmis.inc:issä jos maksuehto on käteinen
 				// ja silloin pitää kaikki lähetteet tulostaa aina printteri5:lle (lasku printteri)
 				if ($kateinen == 'X') {
@@ -1005,7 +1005,9 @@
 			}
 
 			echo "</tr>";
-
+			
+			$osittaiset = array();			
+			
 			while ($row = mysql_fetch_array($tilre)) {
 				//chekkaus että kaikki splitatut tilaukset on kerätty
 				/* ei oteta huomioon niitä mistä puuttuu tulostusalue ja millä on tietty alatila 
@@ -1030,7 +1032,7 @@
 				/*	echo "tarkistus tunnukset_lkm: 	$vanhat_row[kpl] <br>";
 				echo "main tunnukset_lkm: 		$row[tunnukset_lkm] <br>";				
 				echo "main vanhatunnus: 		$row[vanhatunnus] <br>";				
-				echo "main tunnukset: 			$row[tunnukset] <br>";		*/
+				echo "main tunnukset: 			$row[tunnukset] <br>";	*/	
 						
 				if ($vanhat_row['kpl'] == $row['tunnukset_lkm'] or $vanhat_row['kpl'] == 0 or $yhtiorow["splittauskielto"] != "" or $yhtiorow['pakkaamolokerot'] == '') {
 									
@@ -1108,7 +1110,7 @@
 						}			
 						echo "</td>";			
 					}
-
+					
 					echo "	<form method='post' action='$PHP_SELF'>
 							<input type='hidden' name='id' value='$row[tunnus]'>
 							<input type='hidden' name='tunnukset' value='$row[tunnukset]'>
@@ -1118,8 +1120,151 @@
 							</form>";
 					echo "</tr>";
 				}
+				else {
+					//kesken olevat
+					$temp_osittaiset = "";
+					
+					$temp_osittaiset .= "<tr class='aktiivi'>";
+					$temp_osittaiset .= "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";
+					$temp_osittaiset .= "<td valign='top'>$row[nimi]</td>";
+					$temp_osittaiset .= "<td valign='top'>$row[toimitustapa]</td>";
+					$temp_osittaiset .= "<td valign='top'>$row[laatija]</td>";
+					$temp_osittaiset .= "<td valign='top'>".tv1dateconv($row["laadittux"])."</td>";
+
+					if ($kukarow['resoluutio'] == 'I') {
+						$temp_osittaiset .= "<td valign='top'>".tv1dateconv($row["toimaika"])."</td>";
+					}
+
+					if ($yhtiorow['pakkaamolokerot'] == 'K') {
+
+						$kollit_chk = 0;
+						$rullakot_chk = 0;
+					
+						$query = "	SELECT pakkaus, kollit
+									FROM rahtikirjat
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND otsikkonro in ($row[tunnukset])";
+						$kollit_res = mysql_query($query) or pupe_error($query);
+					
+						while ($kollit_row = mysql_fetch_array($kollit_res)) {
+							if (trim(strtolower($kollit_row['pakkaus'])) == 'kolli') {
+								$kollit_chk += $kollit_row['kollit'];
+							}
+
+							if (trim(strtolower($kollit_row['pakkaus'])) == 'rullakko') {
+								$rullakot_chk += $kollit_row['kollit'];
+							}						
+						}
+					
+						if ($kollit_chk == 0) {
+							$kollit_chk = "";
+						}
+
+						if ($rullakot_chk == 0) {
+							$rullakot_chk = "";
+						}
+
+						$temp_osittaiset .= "<td valign='top'>";
+						if ($kollit_chk > 0) {
+							$temp_osittaiset .= $kollit_chk;
+						}
+						else {
+							$temp_osittaiset .= "&nbsp;";
+						}
+						$temp_osittaiset .= "</td>";
+						$temp_osittaiset .= "<td valign='top'>";
+						if ($rullakot_chk > 0) {
+							$temp_osittaiset .= $rullakot_chk;
+						}
+						else {
+							$temp_osittaiset .= "&nbsp;";
+						}
+						$temp_osittaiset .= "</td>";
+						
+						$query = "	SELECT nimi, lokero 
+									FROM pakkaamo
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus in($row[pakkaamot])";
+						$pakkaamoresult = mysql_query($query) or pupe_error($query);
+						
+						$temp_osittaiset .= "<td>";
+						if (mysql_num_rows($pakkaamoresult) > 0) {
+							while ($pakkaamo_row = mysql_fetch_array($pakkaamoresult)) {
+								$temp_osittaiset .= $pakkaamo_row['nimi']."/".$pakkaamo_row['lokero']."<br>";
+							}
+						}
+						else {
+							$temp_osittaiset .= "&nbsp;";
+						}			
+						$temp_osittaiset .= "</td>";
+													
+					}
+
+					$temp_osittaiset .= "	<form method='post' action='$PHP_SELF'>";
+					$temp_osittaiset .= "<td>";
+					
+					$checkit = explode(",",$row[tunnukset]); 
+					if (count($checkit) > 1) {
+						foreach ($checkit as $key => $value) {
+							$temp_osittaiset .= "<input type='checkbox' name='checktunnukset[]' value='$value'><br>";
+						}
+					}
+					
+					$temp_osittaiset .= "</td>";
+					
+					$temp_osittaiset .= "	<input type='hidden' name='id' value='$row[tunnus]'>
+											<input type='hidden' name='tunnukset' value='$row[tunnukset]'>
+											<input type='hidden' name='toim' value='$toim'>
+											<input type='hidden' name='rakirno' value='$row[tunnus]'>
+											<td class='back' valign='top'><input type='submit' name='tila' value='".t("Syötä")."'></td>
+											</form>";
+					$temp_osittaiset .= "</tr>";
+					
+					$osittaiset[] = $temp_osittaiset;					
+				}
 			}
 			echo "</table>";
+			
+			if (count($osittaiset) > 0) {
+				$spanni = 5;
+				
+				if ($kukarow['resoluutio'] == 'I') {
+					$spanni++;
+				}
+				
+				if ($yhtiorow['pakkaamolokerot'] == 'K') {
+					$spanni += 4;
+				}
+				
+				echo "<br><table>";
+				
+				echo "<tr><th colspan ='$spanni'>".t("Odottavat tilaukset")."</th></tr>";
+				echo "<tr>";
+				echo "<th>".t("Tilaus")."</th>";
+				echo "<th>".t("Asiakas")."</th>";
+				echo "<th>".t("Toimitustapa")."</th>";
+				echo "<th>".t("Laatija")."</th>";
+				echo "<th>".t("Laadittu")."</th>";
+
+				if ($kukarow['resoluutio'] == 'I') {
+					echo "<th>".t("Toimaika")."</th>";
+				}
+
+				if ($yhtiorow['pakkaamolokerot'] == 'K') {
+					echo "<th>".t("Kollit")."</th>";
+					echo "<th>".t("Rullakot")."</th>";
+					echo "<th>".t("pakkaamo")."/".t("lokero")."</th>";
+					echo "<th>".t("Valitse")."</th>";				
+				}
+
+				echo "</tr>";
+				
+				for ($i=0; $i < count($osittaiset); $i++) { 
+					echo $osittaiset[$i];
+				}
+				
+				echo "</table>";
+			}					
 		}
 		else {
 			echo "<font class='message'>".t("Sopivia tilauksia ei löytynyt")."...</font><br><br>";
@@ -1370,7 +1515,11 @@
 				$marow = mysql_fetch_array($resul);
 			}
 		}
-
+	
+		if (isset($checktunnukset) and is_array($checktunnukset)) {
+			$tunnukset = implode(',',$checktunnukset);
+		}
+		
 		echo "<table>";
 		echo "<form name='rahtikirjainfoa' action='$PHP_SELF' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='rahtikirjan_esisyotto' value='$rahtikirjan_esisyotto'>";
@@ -1380,7 +1529,7 @@
 		echo "<input type='hidden' name='otsikkonro' value='$otsik[tunnus]'>";
 		echo "<input type='hidden' name='tunnukset' value='$tunnukset'>";
 		echo "<input type='hidden' name='mista' value='$mista'>";
-
+		
 		echo "<tr><th align='left'>".t("Tilaus")."</th><td>$otsik[tunnus]</td>";
 		echo "<th align='left'>".t("Ytunnus")."</th><td>$otsik[ytunnus]</td></tr>";
 

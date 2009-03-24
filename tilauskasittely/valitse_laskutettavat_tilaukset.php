@@ -420,6 +420,7 @@
 			if ($ekarow["chn"] == '020') $toimitusselite = t("Vienti eInvoice");
 			if ($ekarow["chn"] == '111') $toimitusselite = t("Elma EDI-inhouse");
 			if ($ekarow["chn"] == '666') $toimitusselite = t("Sähköpostiin");
+			if ($ekarow["chn"] == '667') $toimitusselite = t("Sisäinen");
 
 			echo "<tr><th>".t("Laskutus:")."</th><th>".t("Nimi")."</th><th>".t("Osoite")."</th><th>".t("Postino")."</th><th>".t("Postitp")."</th><th>".t("Maa")."</th><tr>";
 			echo "<tr><td>$ekarow[ytunnus]</td><td>$ekarow[nimi]</td><td>$ekarow[osoite]</td><td>$ekarow[postino]</td><td>$ekarow[postitp]</td><td>$ekarow[maa]</td></tr>";

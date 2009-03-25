@@ -162,7 +162,16 @@
 				<input type='submit' value='".t("Takaisin tilaukselle")."'>
 				</form><br><br>";
 	}
+	elseif ($kukarow["kuka"] != "" and $laskurow["tila"] == "O") {
 
+		echo "	<form method='post' action='tilaus_osto.php'>
+				<input type='hidden' name='aktivoinnista' value='true'>
+				<input type='hidden' name='tee' value='AKTIVOI'>
+				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
+				<input type='submit' value='".t("Takaisin tilaukselle")."'>
+				</form><br><br>";
+	}
+	
 	if (!isset($tee)) {
 		$tee = '';
 	}
@@ -1612,10 +1621,15 @@
 				unset($pdf_exist);
 				unset($filetype);
 
-				$filetype_query = "	SELECT * FROM liitetiedostot WHERE yhtio='{$kukarow['yhtio']}' and liitos='tuote' AND liitostunnus='{$row['tunnus']}' ORDER BY kayttotarkoitus, jarjestys, filename";
+				$filetype_query = "	SELECT * 
+									FROM liitetiedostot 
+									WHERE yhtio		 = '{$kukarow['yhtio']}' 
+									and liitos		 = 'tuote' 
+									and liitostunnus = '{$row['tunnus']}' 
+									ORDER BY kayttotarkoitus, jarjestys, filename
+									LIMIT 1";
 				$filetype_result = mysql_query($filetype_query) or pupe_error($filetype_query);
-
-				$filetype_row = mysql_fetch_array($filetype_result);
+				$filetype_row = mysql_fetch_assoc($filetype_result);
 
 				if (mysql_num_rows($filetype_result) > 0) {
 					if (in_array("image/jpeg", $filetype_row) or in_array("image/jpg", $filetype_row) or in_array("image/gif", $filetype_row) or in_array("image/png", $filetype_row) or in_array("image/bmp", $filetype_row)) {
@@ -1650,7 +1664,7 @@
 				}
 
 				if (isset($images_exist) or isset($pdf_exist)) {
-					echo "<td class='back' valign='top'><input type='button' style='width: 55px; height: 20px' value='";
+					echo "<td class='back' valign='top'><input type='button' value='";
 
 					if ($pdf_exist) {
 						echo t("Pdf");

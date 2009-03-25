@@ -120,7 +120,7 @@
 			}
 		}
 		
-		mysql_data_seek($result,0);
+		if (is_resource($result) and mysql_num_rows($result)) mysql_data_seek($result,0);
 		
 		while ($prow = mysql_fetch_array($result)) {
 			if (in_array($prow["tunnus"],$rivit)) {

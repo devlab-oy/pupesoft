@@ -550,6 +550,10 @@
 			if ($toim == 'extranet') {
 				$sel0 = $sel1 = "";
 
+				if (!isset($krow["hinnat"])) {
+					$sel1 = "SELECTED";
+				}
+
 				if ($krow["hinnat"] == "0") {
 					$sel0 = "SELECTED";
 				}
@@ -565,7 +569,11 @@
 			}
 
 			if ($toim == 'extranet') {
-				$sel0 = $sel1 = "";
+				$sel0 = $sel1 = $sel2 = $sel3 = "";
+
+				if (!isset($krow["saatavat"])) {
+					$sel2 = "SELECTED";
+				}
 
 				if ($krow["saatavat"] == "0") {
 					$sel0 = "SELECTED";

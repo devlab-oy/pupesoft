@@ -1,5 +1,8 @@
 <?php
+
 require ("inc/parametrit.inc");
+
+echo "<font class='head'>".t("Budjetin ylläpito")."</font><hr>";
 
 if (is_array($luvut)) {
 	$paiv=0;
@@ -30,7 +33,7 @@ if (is_array($luvut)) {
 			}
 		}
 	}
-	echo "<font class='message'>".t("Päivitin ").$paiv.t(" Lisäsin ").$lisaa."</font><br>";
+	echo "<font class='message'>".t("Päivitin ").$paiv.t(" Lisäsin ").$lisaa."</font><br><br>";
 }
 
 if (isset($tyyppi)) {
@@ -45,7 +48,7 @@ if (isset($tyyppi)) {
 		case (4): $sel4 = 'selected';
 	}
 }
-echo "<font class='head'>".t("Budjetin ylläpito")."<hr></font>";
+
 echo "<table>";
 echo "<form action = '' method='post'>
 		<table><tr>
@@ -118,8 +121,10 @@ while ($vrow=mysql_fetch_array($vresult)) {
 	}
 	echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]";
 }
-echo "</select></td></tr>";
-echo "<td><input type='submit' VALUE='valmis'></td><td>".t("Budjettiluvun voi poistaa huutomerkillä (!)")."</td></tr>";
+echo "</select></td></tr></table>";
+echo t("Budjettiluvun voi poistaa huutomerkillä (!)")."<br><br>";
+echo "<input type='submit' VALUE='".t("Näytä/Tallenna")."'>";
+
 echo "</table>";
 
 		
@@ -138,7 +143,7 @@ if (is_array($tilikaudetrow)) {
 	echo "<input type='hidden' name = 'vkohde' value='$kohde'>";
 	echo "<input type='hidden' name = 'vproj' value='$proj'>";
 	echo "<table>";
-	echo "<tr><td></td>";
+	echo "<tr><td class='back'></td>";
 	$raja = '0000-00';
 	$rajataulu = array();
 	$j=0;

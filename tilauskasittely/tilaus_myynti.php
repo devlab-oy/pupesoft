@@ -3103,7 +3103,12 @@ if ($tee == '') {
 			$tuote = mysql_fetch_array($result);
 			
 			//kursorinohjausta
-			$kentta = 'kpl';
+			if ($toim == "REKLAMAATIO" and $tuoteno == '') {
+				$kentta = 'tuoteno';
+			}
+			else {
+				$kentta = 'kpl';
+			}
 
 			echo "<br>
 				<table>

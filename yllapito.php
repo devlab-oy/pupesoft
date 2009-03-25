@@ -1038,7 +1038,7 @@
 			}
 		}
 
-		if ($errori == '' and ($toim == "sarjanumeron_lisatiedot" or $toim == "tuote" or (($toim == "avainsana") and (strtolower($laji) == "osasto" or strtolower($laji) == "try" or strtolower($laji) == "tuotemerkki")))) {
+		if ($errori == '' and ($toim == "sarjanumeron_lisatiedot" or ($toim == "tuote" and $laji != "V") or (($toim == "avainsana") and (strtolower($laji) == "osasto" or strtolower($laji) == "try" or strtolower($laji) == "tuotemerkki")))) {
 			require ("inc/liitaliitetiedostot.inc");
 		}
 

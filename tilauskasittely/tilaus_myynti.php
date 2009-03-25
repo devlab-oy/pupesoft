@@ -281,7 +281,7 @@ if ($tee == "" and (($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 
 		$ytunnus = $syotetty_ytunnus;
 	}
 
-	$kutsuja    = "otsik.inc";
+	$kutsuja = "otsik.inc";
 
 	if (file_exists("../inc/asiakashaku.inc")) {
 		require ("../inc/asiakashaku.inc");
@@ -1296,6 +1296,9 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
 		$lasklisatied_row  = mysql_fetch_array($result);
 	}
 
+	if ($toim == "ENNAKKO") {
+		$toim = "RIVISYOTTO";
+	}
 
 	$kaytiin_otsikolla = "NOJOO!";
 }

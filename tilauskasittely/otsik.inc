@@ -1490,6 +1490,16 @@
 
 				echo "<td>".t("Valmistus-Tilaus")."</td>";
 			}
+			elseif ($toim == "ENNAKKO" or $srow["tilaustyyppi"] == 'E') {		
+				//Tarvitaan ainakin Ennakkotilauksilla
+				if ($srow["clearing"] != '') {
+					echo "<input type='hidden' name='clearing' value='$srow[clearing]'>";
+				}
+				
+				echo "<tr><td>".t("Tilaustyyppi").":</td>";
+				echo "<input type='hidden' name='tilaustyyppi' value='E'>";
+				echo "<td>".t("Ennakkotilaus")."</td>";
+			}
 			elseif ($srow["tilaustyyppi"] != 'E' or $templ == 0) {
 
 				//Tarvitaan ainakin tarjoustilauksilla
@@ -1509,11 +1519,7 @@
 
 				echo "</select></td>";
 			}
-			else {
-				echo "<tr><td>".t("Tilaustyyppi").":</td>";
-				echo "<input type='hidden' name='tilaustyyppi' value='E'>";
-				echo "<td>".t("Ennakkotilaus")."</td>";
-			}
+			
 
 			echo "<td>".t("Myy varastosta").":</td>";
 			echo "<td><select name='varasto'><option value='0'>".t("Kaikista")."</option>";

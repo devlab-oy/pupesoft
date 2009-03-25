@@ -1032,10 +1032,9 @@ if (!function_exists('rivi_plain_2')) {
 			$kurssi = 1;
 		}
 
-		// rivitetään tuotenimitys
-		// jos pidempi kuin 68 merkkiä niin tehdään pidempi kommenttirivi
-		// ja rivitetään
-		if (strlen($row['nimitys']) > 68) {
+		// rivitetään tuotenimitys jos se ei mahdo lokeroonsa
+		//Nimitys 
+		if ($pdf->strlen($row['nimitys'], $norm) > 200) {
 			$kala2 = $kala;
 			$rivit = explode("\n", wordwrap($row['nimitys'], 90, "\n"));
 			$pos = 0;
@@ -1051,7 +1050,7 @@ if (!function_exists('rivi_plain_2')) {
 			$kala -= 15;
 		}
 		else {
-			// lyhyt kommentti
+			// lyhyt nimitys
 			$pdf->draw_text(20,  $kala, $row['nimitys'],	$thispage, $norm);
 		}
 

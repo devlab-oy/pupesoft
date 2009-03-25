@@ -546,44 +546,58 @@
 			else {
 				echo "<font class='head'>".t("Ostotilaus").":</font><hr><br>";
 			}
-
-
+			
+			echo "<table>";
+			echo "<tr>";
+			echo "<td class='back'>
+					<form action = '$PHP_SELF' method='post'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
+					<input type='hidden' name='tee' value='MUUOTAOSTIKKOA'>
+					<input type='hidden' name='tila' value='Muuta'>
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>
+					<input type='Submit' value='".t("Muuta otsikkoa")."'>
+					</form></td>";
+			
+			echo "<td class='back'>
+					<form action='tuote_selaus_haku.php' method='post'>
+					<input type='hidden' name='toim_kutsu' value='$toim'>
+					<input type='submit' value='".t("Selaa tuotteita")."'>
+					</form></td>";
+						
+			echo "<td class='back'>
+					<form action='$PHP_SELF' method='post'>
+					<input type='hidden' name='tee' value='mikrotila'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
+					<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>
+					<input type='Submit' value='".t("Lue tilausrivit tiedostosta")."'>
+					</form></td>";
+			echo "</tr>";
+			echo "</table><br>";
+			
+			
 			$query = "	SELECT a.fakta, l.ytunnus
 						FROM toimi a, lasku l
 						WHERE l.tunnus='$kukarow[kesken]' and l.yhtio='$kukarow[yhtio]' and a.yhtio = l.yhtio and a.tunnus = l.liitostunnus";
 			$faktaresult = mysql_query($query) or pupe_error($query);
 			$faktarow = mysql_fetch_array($faktaresult);
 
-			echo "<table width='720' cellpadding='2' cellspacing='1' border='0'>";
+			echo "<table>";
 
 			echo "<tr><th>".t("Ytunnus")."</th><th colspan='3'>".t("Toimittaja")."</th></tr>";
-			echo "<tr><td>$laskurow[ytunnus]</td><td colspan='3'>$laskurow[nimi] $laskurow[nimitark]<br>$laskurow[osoite] $laskurow[postino] $laskurow[postitp]</td>";
+			echo "<tr><td>$laskurow[ytunnus]</td><td colspan='3'>$laskurow[nimi] $laskurow[nimitark]<br>$laskurow[osoite] $laskurow[postino] $laskurow[postitp]</td></tr>";
 			
 			echo "<tr><th colspan='4'>".t("Toimitusosoite")."</th></tr>";
-			echo "<tr><td colspan='4'>$laskurow[toim_nimi] $laskurow[toim_nimitark]<br>$laskurow[toim_osoite] $laskurow[toim_postino] $laskurow[toim_postitp]</td>";
+			echo "<tr><td colspan='4'>$laskurow[toim_nimi] $laskurow[toim_nimitark]<br>$laskurow[toim_osoite] $laskurow[toim_postino] $laskurow[toim_postitp]</td></tr>";
 			
-			echo "<form action = 'tilaus_osto.php' method='post'>
-				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-				<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-				<input type='hidden' name='tee' value='MUUOTAOSTIKKOA'>
-				<input type='hidden' name='tila' value='Muuta'>
-				<input type='hidden' name='toim' value='$toim'>
-				<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>
-				<td class='back'><input type='Submit' value='".t("Muuta otsikkoa")."'></td></form></tr>";
-
 			echo "<tr><th>".t("Tila")."</th><th>".t("Toimaika")."</th><th>".t("Tilausnumero")."</th<th>".t("Valuutta")."</th><td class='back'></td></tr>";
 
 			echo "<tr><td>$laskurow[tila]</td>
 				<td>".tv1dateconv($laskurow["toimaika"])."</td><td>$laskurow[tunnus]</td>
 				<td>{$laskurow["valkoodi"]}</td>
-				<td class='back'>
-				<form action='$PHP_SELF' method='post'>
-				<input type='hidden' name='tee' value='mikrotila'>
-				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-				<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
-				<input type='hidden' name='ei_aikatarkistusta' value='$ei_aikatarkistusta'>
-				<input type='Submit' value='".t("Lue tilausrivit tiedostosta")."'></form>
-				</td></tr>
+				</tr>
 				<tr><th>".t("Fakta")."</th><td colspan='3'>$faktarow[fakta]&nbsp;</td></tr>";
 			echo "</table><br>";
 

@@ -1,19 +1,28 @@
 <?php
-	if (isset($_POST["tee"])) {
-		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+	if (isset($_POST["teetiedosto"])) {
+		if($_POST["teetiedosto"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
 	require("../inc/parametrit.inc");
 
-	if (isset($tee)) {
-		if ($tee == "lataa_tiedosto") {
+	if (isset($teetiedosto)) {
+		if ($teetiedosto == "lataa_tiedosto") {
 			readfile("/tmp/".$tmpfilenimi);
 			exit;
 		}
 	}
 	else {
-
+		
+		// Muokataan tilikartan rakennetta
+		if (isset($tasomuutos)) {			
+			require("../tasomuutos.inc");
+			require ('../inc/footer.inc');
+			exit;
+		}
+		
+		
+		
 		echo "<font class='head'>".t("Tase/tuloslaskelma")."</font><hr>";
 
 		if ($tltee == "aja") {
@@ -379,12 +388,13 @@
 
 			if ($toim == "TASOMUUTOS") {
 
-				echo "	<form action = '".$palvelin2."tasomuutos.php' method='post'>
+				echo "	<form method='post'>
+						<input type = 'hidden' name = 'tasomuutos' value = 'TRUE'>
 						<input type = 'hidden' name = 'tee' value = 'tilitaso'>
 						<input type = 'hidden' name = 'kirjain' value = '$kirjain'>
 						<input type = 'hidden' name = 'taso' value = '$aputyyppi'>";
 
-				$lopetus = "raportit/tuloslaskelma.php////";
+				$lopetus = "tuloslaskelma.php////";
 
 				foreach ($_REQUEST as $key => $value) {
 					$lopetus .= $key."=".$value."//";
@@ -425,8 +435,8 @@
 					$rivi  = "<tr class='aktiivi'>";
 
 					if ($toim == "TASOMUUTOS") {
-						$rivi .= "<td class='back' nowrap><a href='".$palvelin2."tasomuutos.php?taso=$key&kirjain=$kirjain&tee=muuta&lopetus=$lopetus'>$key</a></td>";
-						$rivi .= "<td class='back' nowrap><a href='".$palvelin2."tasomuutos.php?taso=$key&kirjain=$kirjain&edtaso=$edkey&tee=lisaa&lopetus=$lopetus'>Lis‰‰ taso tasoon $key</a></td>";
+						$rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&tee=muuta&lopetus=$lopetus'>$key</a></td>";
+						$rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&edtaso=$edkey&tee=lisaa&lopetus=$lopetus'>Lis‰‰ taso tasoon $key</a></td>";
 					}
 
 					$tilirivi = "";
@@ -572,7 +582,7 @@
 			echo "<tr><th>".t("Tallenna pdf").":</th>";
 			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
-			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+			echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='".urlencode($otsikko).".pdf'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$pdffilenimi'>";
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";

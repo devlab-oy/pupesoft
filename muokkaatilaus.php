@@ -269,7 +269,7 @@
 					echo "	<input type='hidden' name='toim' value='$aputoim1'>
 							<input type='hidden' name='tee' value='AKTIVOI'>";
 
-					echo "<table>
+					echo "<br><table>
 							<tr>
 							<th>".t("Kesken olevat").":</th>
 							<td><select name='tilausnumero'>";
@@ -300,7 +300,7 @@
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 			// Näytetään muuten vaan sopivia tilauksia
-			echo "<br><form action='$PHP_SELF' method='post'>
+			echo "<br><br><form action='$PHP_SELF' method='post'>
 					<input type='hidden' name='toim' value='$toim'>
 					<font class='head'>".t("Etsi")." $otsikko<hr></font>
 					".t("Syötä tilausnumero, nimen tai laatijan osa").":

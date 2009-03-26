@@ -240,10 +240,10 @@
 
 			if(function_exists($funktio)) {
 				if ($toim == "tuote") {
-					$funktio($t, $i, $result, $tunnus, &$virhe, $trow, $tuotteen_parametrit_keys, $tuotteen_parametrit_vals);
+					@$funktio($t, $i, $result, $tunnus, &$virhe, $trow, $tuotteen_parametrit_keys, $tuotteen_parametrit_vals);
 				}
 				else {
-					$funktio($t, $i, $result, $tunnus, &$virhe, $trow);
+					@$funktio($t, $i, $result, $tunnus, &$virhe, $trow);
 				}
 			}
 

@@ -3,7 +3,7 @@
 
 if(!function_exists("tuotetarkista")) {
 	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow, $tuotteen_parametrit_keys = "", $tuotteen_parametrit_vals = "") {
-		global $kukarow, $yhtiorow, $alias_set;
+		global $kukarow, $yhtiorow, $alias_set, $laji;
 
 		static $tem_tuoteno, $tem_tullinimike1;
 

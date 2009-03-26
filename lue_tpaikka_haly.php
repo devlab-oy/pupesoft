@@ -131,10 +131,10 @@ if ($korjataan != '') {
 					$error = "".t("Paikkaa ei löytynyt tästä varastosta, anna uusi paikka")."";
 				}
 				echo	"<td>".asana('nimitys_',$nimrow['tuoteno'],$nimrow['nimitys'])."</td><td>$halytysraja[$id]</td><td>$tilattava[$id]</td><td>$error</td>
-						<td><input type='text' name='hyllyalue[$id]' value='$hyllyalue[$id]' maxzise='3' size='3'>
-						<input type='text' name='hyllynro[$id]' value='$hyllynro[$id]' maxzise='2' size='2'>
-						<input type='text' name='hyllyvali[$id]' value='$hyllyvali[$id]' maxzise='2' size='2'>
-						<input type='text' name='hyllytaso[$id]' value='$hyllytaso[$id]' maxzise='2' size='2'></td>";
+						<td><input type='text' name='hyllyalue[$id]' value='$hyllyalue[$id]' maxlength='3' size='3'>
+						<input type='text' name='hyllynro[$id]' value='$hyllynro[$id]' maxlength='2' size='2'>
+						<input type='text' name='hyllyvali[$id]' value='$hyllyvali[$id]' maxlength='2' size='2'>
+						<input type='text' name='hyllytaso[$id]' value='$hyllytaso[$id]' maxlength='2' size='2'></td>";
 				echo	"<input type='hidden' name='tuoteno[$id]' value='$tuoteno[$id]'>
 						<input type='hidden' name='halytysraja[$id]' value='$halytysraja[$id]'>
 						<input type='hidden' name='tilattava[$id]' value='$tilattava[$id]'>

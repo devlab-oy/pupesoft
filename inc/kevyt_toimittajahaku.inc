@@ -91,6 +91,7 @@ if ($monta > 1 and $monta <= $limit) {
 		echo "<input type='hidden' name='muutparametrit'  value='$muutparametrit'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 		echo "<input type='hidden' name='ytunnus' value='$numero'>";
+		echo "<input type='hidden' name='keikka' value='$keikka'>";
 		echo "<input type='submit' value='".t("Valitse")."' onclick=\"this.form.id='kevyt_toimittajahaku';\">";
 		echo "</form>";
 		echo "</td></tr>";

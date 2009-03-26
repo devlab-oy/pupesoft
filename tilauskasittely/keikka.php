@@ -363,6 +363,23 @@ if ($toiminto == "kohdista") {
 	require('ostotilausten_rivien_kohdistus.inc');
 }
 
+if ($ytunnus == "" and $keikka != "") {
+	$keikka = (int) $keikka;
+	$query = "	SELECT ytunnus
+				FROM lasku USE INDEX (tila_index)
+				where lasku.yhtio = '$kukarow[yhtio]'
+				and lasku.tila = 'K'
+				and lasku.alatila = ''
+				and lasku.vanhatunnus = 0
+				and lasku.laskunro = $keikka
+				order by lasku.laskunro desc";
+	$keikkahaku_res = mysql_query($query) or pupe_error($query);
+
+	$keikkahaku_row = mysql_fetch_array($keikkahaku_res);
+	
+	$ytunnus = $keikkahaku_row["ytunnus"];
+}
+
 // jos ollaan annettu $ytunnus haetaan toimittajan tiedot arrayseen $toimittajarow
 if ($ytunnus != "" or $toimittajaid != "") {
 	$keikkamonta = 0;
@@ -392,13 +409,17 @@ if ($ytunnus != "" or $toimittajaid != "") {
 }
 
 
-if ($toiminto == "" and $ytunnus == "") {
+if ($toiminto == "" and ($ytunnus == "" and $keikka == "")) {
 	echo "<table>";
 	echo "<form name='toimi' action='$PHP_SELF' method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "<tr>";
 	echo "<th>".t("Etsi toimittaja")."</th>";
 	echo "<td><input type='text' name='ytunnus' value='$ytunnus'></td>";
+	echo "</tr>";
+	echo "<tr>";
+	echo "<th>".t("Etsi keikkanumerolla")."</th>";
+	echo "<td><input type='text' name='keikka' value='$keikka'></td>";
 	echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
 	echo "</tr>";
 	echo "</form>";
@@ -508,7 +529,7 @@ if ($toiminto == "uusi" and $toimittajaid > 0) {
 }
 
 // selataan toimittajan keikkoja
-if ($toiminto == "" and $ytunnus != "") {
+if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["ytunnus"] != '')) {
 
 	// n‰ytet‰‰n v‰h‰ toimittajan tietoja
 	echo "<table>";
@@ -544,6 +565,15 @@ if ($toiminto == "" and $ytunnus != "") {
 		$limitti = " LIMIT 50";
 	}
 
+	if (!isset($keikkalisa)) {
+		$keikkalisa = '';
+	}
+
+	if ($keikka != '') {
+		$keikka = (int) $keikka;
+		$keikkalisa = " and lasku.laskunro = $keikka ";
+	}
+
 	// etsit‰‰n vanhoja keikkoja, vanhatunnus pit‰‰ olla tyhj‰‰ niin ei listata liitettyj‰ laskuja
 	$query = "	SELECT *
 				FROM lasku USE INDEX (tila_index)
@@ -552,6 +582,7 @@ if ($toiminto == "" and $ytunnus != "") {
 				and lasku.tila = 'K'
 				and lasku.alatila = ''
 				and lasku.vanhatunnus = 0
+				$keikkalisa
 				order by lasku.laskunro desc
 				$limitti";
 	$result = mysql_query($query) or pupe_error($query);

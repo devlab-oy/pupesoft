@@ -352,7 +352,7 @@ if ($tee == "") {
 
 	//kahtsotaan löytyikö yhtään tilausriviä
 	if (mysql_num_rows($result) == 0) {
-		echo "<font class='error'>".t("Yhtään tilausriviä ei löydytynyt!")."</font>";
+		echo "<font class='error'>".t("Yhtään tilausriviä ei löytynyt!")."</font>";
 	}
 	else {
 		echo "<table>";

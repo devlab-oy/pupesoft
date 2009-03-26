@@ -49,6 +49,10 @@ if(!function_exists("tuotetarkista")) {
 				$virhe[$i] = t("Tili puuttuu tai sitä ei loydy");
 			}
 		}
+		
+		if (mysql_field_name($result, $i) == "tilino" and trim($t[$i]) == "" and $laji == "V") {
+			$virhe[$i] = t("Viranomaistuotteella on oltava tili")."!";
+		}
 
 		if ((mysql_field_name($result, $i) == "tullinimike1") and ($t[$i] != 0)) {
 			$query = "	SELECT cn

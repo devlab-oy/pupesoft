@@ -700,6 +700,33 @@
 		$row = mysql_fetch_array($result);
 
 		echo "<table>";
+
+		echo "	<script language='javascript'>
+				function WriteText(sarake) {
+					var count = document.siirtolistaformi.elements.length;
+
+					for (j=0; j<count; j++) {
+						var element = document.siirtolistaformi.elements[j];
+
+						if(sarake == 't1' && element.name.substring(0,2) == 't1') {
+							element.value=document.siirtolistaformi.t1_kaikki.value;
+						}
+
+						if(sarake == 't2' && element.name.substring(0,2) == 't2') {
+							element.value=document.siirtolistaformi.t2_kaikki.value;
+						}
+
+						if(sarake == 't3' && element.name.substring(0,2) == 't3') {
+							element.value=document.siirtolistaformi.t3_kaikki.value;
+						}
+
+						if(sarake == 't4' && element.name.substring(0,2) == 't4') {
+							element.value=document.siirtolistaformi.t4_kaikki.value;
+						}
+					}
+				}
+			</script> ";
+
 		echo "<tr>";
 
 		for ($y=0; $y < mysql_num_fields($result)-1; $y++) {
@@ -740,7 +767,7 @@
 		}
 
 		//hakukentät
-		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<form action='$PHP_SELF' method='post' name='siirtolistaformi'>";
 		echo "<input type='hidden' name='id' value='$id'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 
@@ -880,19 +907,19 @@
 
 			if ($rivirow["ei_saldoa"] != "") {
 				echo "<td colspan='6'></td>";
-				echo "<input type='hidden' name='t1[$rivirow[tunnus]]' value='$privirow[t1]' maxzise='3' size='5'>";
+				echo "<input type='hidden' name='t1[$rivirow[tunnus]]' value='$privirow[t1]' maxlength='3' size='5'>";
 			}
 			else {
 				if ($toim == "") {
-					echo "<td><input type='text' name='t1[$rivirow[tunnus]]' value='$privirow[t1]' maxzise='3' size='5'></td>";
+					echo "<td><input type='text' name='t1[$rivirow[tunnus]]' value='$privirow[t1]' maxlength='3' size='5'></td>";
 				}
 				else {
 					echo "<td align='center'><input type='hidden' name='t1[$rivirow[tunnus]]' value='!!M'>!!M</td>";
 				}
 
-				echo "<td><input type='text' name='t2[$rivirow[tunnus]]' value='$privirow[t2]' maxzise='3' size='5'></td>";
-				echo "<td><input type='text' name='t3[$rivirow[tunnus]]' value='$privirow[t3]' maxzise='3' size='5'></td>";
-				echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='$privirow[t4]' maxzise='3' size='5'></td>";
+				echo "<td><input type='text' name='t2[$rivirow[tunnus]]' value='$privirow[t2]' maxlength='3' size='5'></td>";
+				echo "<td><input type='text' name='t3[$rivirow[tunnus]]' value='$privirow[t3]' maxlength='3' size='5'></td>";
+				echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='$privirow[t4]' maxlength='3' size='5'></td>";
 
 				//Missä tuotetta on?
 				$query  = "	SELECT *
@@ -948,7 +975,7 @@
 				if ($eankoodi== 0) {
 					$eankoodi = '';
 				}
-				echo "<td><input type='text' name='eankoodi[$rivirow[tunnus]]' value='$eankoodi' maxzise='13' size='13'></td>";
+				echo "<td><input type='text' name='eankoodi[$rivirow[tunnus]]' value='$eankoodi' maxlength='13' size='13'></td>";
 
 				//annetaan mahdollisuus tulostaa tuotetarroja
 				$echk = '';
@@ -962,6 +989,13 @@
 			echo"</tr>";
 
 		}
+
+		echo "<tr><td colspan='4' class='back' align='right' valign='center'>",t("Täytä kaikki kentät"),":</td>";
+		echo "<td><input type='text' name='t1_kaikki' onKeyUp='WriteText(\"t1\");' value='' maxlength='3' size='5'></td>";
+		echo "<td><input type='text' name='t2_kaikki' onKeyUp='WriteText(\"t2\");' value='' maxlength='3' size='5'></td>";
+		echo "<td><input type='text' name='t3_kaikki' onKeyUp='WriteText(\"t3\");' value='' maxlength='3' size='5'></td>";
+		echo "<td><input type='text' name='t4_kaikki' onKeyUp='WriteText(\"t4\");' value='' maxlength='3' size='5'></td>";
+		echo "</tr>";
 
 		echo "</table><br>";
 

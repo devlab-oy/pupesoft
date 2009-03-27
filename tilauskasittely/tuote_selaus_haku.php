@@ -176,6 +176,20 @@
 		$tee = '';
 	}
 
+	if (!isset($orderlisa)) {
+		$orderlisa = '';
+	}
+
+	// automotivelle purkkafixi jotta saadaan kauniimmat dropdownit
+	if (!isset($yhtiorow['naytetaan_kaunis_os_try']) and $kukarow['yhtio'] == 'artr') {
+		$yhtiorow['naytetaan_kaunis_os_try'] = 'K';
+		$orderlisa = "ORDER BY avainsana.selitetark";
+	}
+	else {
+		$yhtiorow['naytetaan_kaunis_os_try'] = '';
+		$orderlisa = "ORDER BY avainsana.jarjestys, avainsana.selite+0";
+	} 
+
 	// Tarkistetaan tilausrivi
 	//and ($kukarow["kesken"] != 0
 	if (($tee == 'TI' or is_numeric($ostoskori)) and isset($tilkpl)) {
@@ -574,7 +588,7 @@
 			foreach ($mul_osasto as $osx) {
 				if (trim($osx) != '') {
 					$osx = trim(mysql_real_escape_string($osx));
-					$osastot .= "$osx,";
+					$osastot .= "'$osx',";
 				}
 			}
 
@@ -593,7 +607,7 @@
 			foreach ($mul_try as $tryx) {
 				if (trim($tryx) != '') {
 					$tryx = trim(mysql_real_escape_string($tryx));
-					$tryt .= "$tryx,";
+					$tryt .= "'$tryx',";
 				}
 			}
 
@@ -676,7 +690,7 @@
 	            and avainsana.laji = 'OSASTO'
 	            and avainsana.kieli in ('$yhtiorow[kieli]', '')
 	            $avainlisa
-	            ORDER BY avainsana.jarjestys, avainsana.selite+0";
+	            $orderlisa";
 	$sresult = mysql_query($query) or pupe_error($query);
 	
 	echo "<table style='display:inline;'>";
@@ -693,7 +707,11 @@
 			}
 		}
 		
-		echo "<option value='$sxrow[selite]' $sel>$sxrow[selite] $sxrow[selitetark]</option>";
+		echo "<option value='$sxrow[selite]' $sel>";
+		if ($yhtiorow['naytetaan_kaunis_os_try'] == '') {
+			echo $sxrow['selite']." ";
+		}
+		echo "$sxrow[selitetark]</option>";
 	}
 	echo "</select></td>";
 	echo "</tr></table>";
@@ -711,7 +729,7 @@
 		            and avainsana.laji = 'TRY'
 		            and avainsana.kieli in ('$yhtiorow[kieli]', '')
 		            $avainlisa
-		            ORDER BY avainsana.jarjestys, avainsana.selite+0";
+		            $orderlisa";
 	}
 	else {
 		$query = "	SELECT distinct avainsana.selite,
@@ -728,7 +746,7 @@
 					$kieltolisa
 					$extra_poislisa
 					$poislisa_mulsel
-					ORDER BY avainsana.jarjestys, avainsana.selite+0";
+					$orderlisa";
 	}
 	
 	$sresult = mysql_query($query) or pupe_error($query);
@@ -744,7 +762,11 @@
 			$sel = 'SELECTED';
 		}
 
-		echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
+		echo "<option value='$srow[selite]' $sel>";
+		if ($yhtiorow['naytetaan_kaunis_os_try'] == '') {
+			echo $srow['selite']." ";
+		}
+		echo "$srow[selitetark]</option>";
 	}
 	echo "</select></td>";
 	echo "</tr></table>";
@@ -792,7 +814,7 @@
 	}
 
 	// malli ja mallitarkenne dropdownit
-	if ($lisa_haku_tme != '') {
+	if ($lisa_haku_tme != '' or  $lisa_haku_try != '') {
 		$query = "	SELECT DISTINCT tuote.malli
 					FROM tuote
 					WHERE tuote.yhtio = '$kukarow[yhtio]'

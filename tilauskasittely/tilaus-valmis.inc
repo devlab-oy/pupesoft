@@ -177,12 +177,14 @@ else {
 		}
 	}
 	
-	$query = "	UPDATE lasku 
-				SET h1time = now() 
-				WHERE yhtio = '$kukarow[yhtio]'
-				AND tunnus = '$laskurow[tunnus]'
-				AND alatila = ''";
-	$result = mysql_query($query) or pupe_error($query);
+	//p‰ivitet‰‰n tilaus valmisaika, kun painetaan ekan kerran tilaus valmiiksi
+	if ($laskurow['h1time'] == "0000-00-00 00:00:00") {
+		$query = "	UPDATE lasku 
+					SET h1time = now() 
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$laskurow[tunnus]'";
+		$result = mysql_query($query) or pupe_error($query);
+	}	
 
 	// otetaan maksuehto t‰ss‰ heti alussa selville.. k‰teinen ja itsetulostus muuttaa asioita
 	$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";

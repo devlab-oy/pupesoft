@@ -29,12 +29,15 @@
 			$al_res = mysql_query($query) or pupe_error($query);
 			
 			if ($mysqlaliasbox[$al_nimi] != "" or trim($mysqlalias[$al_nimi]) != "") {
+				
+				$xotsikko = str_replace("(BR)", "<br>", trim($mysqlalias[$al_nimi]));
+				
 				$query = "	INSERT INTO avainsana
-							SET yhtio = '$kukarow[yhtio]',
-							laji	= 'MYSQLALIAS',
-							selite	= '$xtaulu.$al_nimi',
-							selitetark = '".trim($mysqlalias[$al_nimi])."',
-							selitetark_2 = '$xalias_set'";
+							SET yhtio 		= '$kukarow[yhtio]',
+							laji			= 'MYSQLALIAS',
+							selite			= '$xtaulu.$al_nimi',
+							selitetark 		= '$xotsikko',
+							selitetark_2 	= '$xalias_set'";
 				$al_res = mysql_query($query) or pupe_error($query);				
 			}
 		}
@@ -143,7 +146,7 @@
 			if(mysql_num_rows($al_res) > 0) {
 				$al_row = mysql_fetch_array($al_res);
 
-				$otsikko = $al_row["selitetark"];				
+				$otsikko = str_replace("<br>", "(BR)", $al_row["selitetark"]);				
 				$box = "CHECKED";
 			}
 

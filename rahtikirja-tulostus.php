@@ -131,12 +131,27 @@
 		$query    = "select * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'RAHTIKIRJA' and selite = '$toitarow[rahtikirja]'";
 		$avainres = mysql_query($query) or pupe_error($query);
 		$avainrow = mysql_fetch_array($avainres);
-
+		
 		// haetaan printterin tiedot
-		$query = "select * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
+		if (isset($laskurow)) {
+			if ($laskurow['pakkaamo'] > 0 and $laskurow['varasto'] != '' and $laskurow['tulostusalue'] != '') {
+				$query = "	select pakkaamo.printteri2, pakkaamo.printteri4, pakkaamo.printteri6
+							from pakkaamo
+							where pakkaamo.yhtio='$kukarow[yhtio]' 
+							and pakkaamo.tunnus='$laskurow[pakkaamo]'
+							order by pakkaamo.tunnus";
+			}
+			else {
+				$query = "select * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";				
+			}
+		}
+		else {
+			$query = "select * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";			
+		}
+		
 		$pres  = mysql_query($query) or pupe_error($query);
 		$print = mysql_fetch_array($pres);
-
+		
 		if ($komento != "") {
 			$kirjoitin_tunnus = (int) $komento; // jos ollaan valittu oma printteri
 			

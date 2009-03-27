@@ -21,6 +21,17 @@
 		$lisasalker = " ";
 	}
 
+	// päivitetään vanhatunnus laskulle
+	$query  = "	UPDATE lasku SET
+	 			vanhatunnus = tunnus
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tunnus = '$laskurow[tunnus]'
+				AND vanhatunnus = 0";
+	$oldtur = mysql_query($query) or pupe_error($query);
+
+	//otetaan varmuuden vuoksi alkuperäisen otsikon tunnus
+	$alkuplaskutunnus = $laskurow["tunnus"];
+
 	// katotaan ihan aluksi, onko tämä jo kerätty...
 	$query = "	select tilausrivi.*
 				from tilausrivi use index (yhtio_otunnus)
@@ -94,10 +105,12 @@
 			//mihin varastoon lähete kuuluu. aluksi x
 			$varasto   = 'x';
 			$edvarasto = 'x';
+			$tulostusalue = $edtulostusalue = "x";
 
 			while ($row = mysql_fetch_array($result)) {
 
 				$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
+				$tulostusalue = onkotulostusalueita($row["hyllyalue"], $row["hyllynro"], $varasto);
 
 				$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
 				$varaston_res = mysql_query($query) or pupe_error($query);
@@ -156,7 +169,7 @@
 				}
 
 				//varaasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
-				if ($varasto != $edvarasto and $edvarasto != 'x' and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" and $toim != "SIIRTOTYOMAARAYS") {
+				if ((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '' and $toim == "SIIRTOLISTA")) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" and $toim != "SIIRTOTYOMAARAYS") {
 
 					//tehdään uusi otsikko
 					$query = "INSERT into lasku SET
@@ -217,6 +230,7 @@
 							asiakkaan_tilausnumero	= '$laskurow[asiakkaan_tilausnumero]',
 							kohde					= '$laskurow[kohde]',
 							varasto 				= '$varasto',
+							tulostusalue			= '$tulostusalue',
 							liitostunnus    		= '$laskurow[liitostunnus]',
 							yhtio					= '$laskurow[yhtio]',
 							clearing				= '$laskurow[clearing]',
@@ -237,6 +251,7 @@
 					//päivitetään laskulle tieto mihin varastoon se kuuluu
 					$query  ="	UPDATE lasku SET
 								varasto 							= '$varasto',
+								tulostusalue						= '$tulostusalue',
 								ultilno 							= '$ultilno',
 								maa_maara							= '$laskurow[maa_maara]',
 								maa_lahetys							= '$laskurow[maa_lahetys]',
@@ -262,6 +277,9 @@
 				//edellinen varasto talteen
 				$edvarasto=$varasto;
 
+				// edellinen tulostusalue talteen
+				$edtulostusalue = $tulostusalue;
+
 				//jos tilausrivin laskunumero on eri
 				if ($row['otunnus'] != $laskurow['tunnus']) {
 					$query = "update tilausrivi set otunnus='$laskurow[tunnus]' where tunnus='$row[tunnus]' and yhtio='$kukarow[yhtio]'";
@@ -269,7 +287,7 @@
 				}
 			}
 
-			$query = "select tunnus, sisviesti2 from lasku where yhtio = '$kukarow[yhtio]' and vanhatunnus = '$laskurow[tunnus]'";
+			$query = "select tunnus, sisviesti2 from lasku where yhtio = '$kukarow[yhtio]' and vanhatunnus = '$alkuplaskutunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($result) > 1) {
 
@@ -364,7 +382,7 @@
 
 						// LÄHETETÄÄN TILAUSVAHVISTUS
 						require("tilausvahvistus-email.inc");
-					
+
 						echo "<font class='message'>".t("Siirtolista siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
 					}
 				}
@@ -436,6 +454,8 @@
 						$res = mysql_query($query) or pupe_error($query);
 					}
 				}
+
+				$laskurow['pakkaamo'] = pakkaamo($laskurow["tunnus"], "yes", $ei_pakkaamoa);
 
 				// Tulostetaan keräyslista
 				require_once ("tulosta_lahete_kerayslista.inc");

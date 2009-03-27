@@ -349,9 +349,9 @@
 						toimitustapa	= '$toimitustapa'
 						where yhtio = '$kukarow[yhtio]' and tunnus in ($tunnukset)";
 			$updateres = mysql_query($query) or pupe_error($query);
-			
-			//Ainostaan tulostusaluuen mukaan splittaantuneet tilaukset yhdistet‰‰n 
-			if ($yhtiorow["splittauskielto"] == "" and strpos($tunnukset,',') !== false and $yhtiorow['pakkaamolokerot'] == 'K' and $tila == 'L') {
+
+			//Ainostaan tulostusaluuen mukaan splittaantuneet tilaukset yhdistet‰‰n
+			if ($yhtiorow["splittauskielto"] == "" and strpos($tunnukset,',') !== false and $yhtiorow['pakkaamolokerot'] == 'K') {
 				$otsikko_tunnarit = explode(',',$tunnukset);
 				sort($otsikko_tunnarit);
 				
@@ -786,8 +786,8 @@
 		}
 
 		echo "</select></td>";
-		
-		if ($yhtiorow['pakkaamolokerot'] == 'K' and $tila == 'L') {
+
+		if ($yhtiorow['pakkaamolokerot'] == 'K') {
 			echo "<td>".t("Valitse pakkaamo:")."</td><td><select name='tupakkaamo' onchange='submit()'>";
 
 			$query = "	SELECT distinct nimi
@@ -868,8 +868,8 @@
 		if ($tuvarasto != '' and $tuvarasto != 'KAIKKI') {
 			$haku .= " and lasku.varasto='$tuvarasto' ";
 		}
-		
-		if ($yhtiorow['pakkaamolokerot'] == 'K' and $tila == 'L') {
+
+		if ($yhtiorow['pakkaamolokerot'] == 'K') {
 			if ($tupakkaamo == '' and $kukarow['oletus_pakkaamo'] != '') {
 				$query = "	SELECT group_concat(tunnus SEPARATOR ',') tunnukset
 				  			FROM pakkaamo
@@ -937,9 +937,9 @@
 		else {
 			$lisawhere = " and (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) ";
 		}
-		
-		if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K' and $tila == 'L') {					
-			$grouplisa = ", lasku.vanhatunnus, lasku.varasto, lasku.pakkaamo ";			
+
+		if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K') {
+			$grouplisa = ", lasku.vanhatunnus, lasku.varasto, lasku.pakkaamo ";
 			$selecttoimitustapaehto = " toimitustapa.tunnus kimppakyyti, ";
 		}
 		else {
@@ -1012,17 +1012,17 @@
 				//chekkaus ett‰ kaikki splitatut tilaukset on ker‰tty
 				/* ei oteta huomioon niit‰ mist‰ puuttuu tulostusalue ja mill‰ on tietty alatila 
 				lis‰‰ alatila B jos k‰ytet‰‰n ker‰‰st‰ rahtikirjansyˆttˆˆn halutessa */
-				if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K' and $tila == 'L') {	
+				if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K') {
 					$query = "	SELECT count(distinct lasku.tunnus) kpl
 								FROM lasku
 								JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
-								AND lasku.tila in ('L','N')
+								AND lasku.tila in ('L','N','G')
 								AND lasku.alatila not in ('X','V','D','B')
 								AND lasku.tulostusalue != ''
 								AND lasku.vanhatunnus = '$row[vanhatunnus]'
 								AND lasku.varasto = '$row[varasto]'
-								AND (lasku.pakkaamo = '$row[pakkaamo]' or lasku.tila = 'N')
+								AND (lasku.pakkaamo = '$row[pakkaamo]' or (lasku.tila = 'N' or (lasku.tila = 'G' and lasku.alatila = 'J')))
 								group by lasku.vanhatunnus";
 					$vanhat_res = mysql_query($query) or pupe_error($query);
 					$vanhat_row = mysql_fetch_array($vanhat_res);

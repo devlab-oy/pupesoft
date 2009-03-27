@@ -340,7 +340,7 @@
 					echo "<th>",t("Ei lokeroa"),"</th>";
 					echo "<td valign='top'><input type='checkbox' name='ei_pakkaamoa' id='ei_pakkaamoa' value='EI'";
 
-					if ($tila == 'N') {
+					if ($tila == 'N' or ($toim == 'SIIRTOLISTA' and $tila == "G")) {
 						$query = "	SELECT ei_pakkaamoa	
 									FROM toimitustapa 
 									WHERE yhtio = '$kukarow[yhtio]'
@@ -813,7 +813,7 @@
 
 						echo "<$ero valign='top'><input type='checkbox' name='ei_pakkaamoa' id='ei_pakkaamoa' value='$tilaus'";
 
-						if ($tila == 'N') {
+						if ($tila == 'N' or ($toim == 'SIIRTOLISTA' and $tila == "G")) {
 							$query = "	SELECT ei_pakkaamoa	
 										FROM toimitustapa 
 										WHERE yhtio = '$kukarow[yhtio]'

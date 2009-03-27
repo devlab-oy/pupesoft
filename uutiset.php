@@ -57,6 +57,7 @@ if ($tee == 'LISAA') {
 		echo "<font class='error'>".t("Uutisen näkyvyys on valittava! (Extranet tai Automanual)")."</font><br><br>";
 		$rivi["kentta01"]  = $otsikko;
 		$rivi["kentta02"]  = $uutinen;
+		$rivi["kentta08"]  = $kentta08;
 		$rivi["kentta09"]  = $kentta09;
 		$rivi["kentta10"]  = $kentta10;				
 		$rivi["konserni"]  = $konserni;
@@ -127,8 +128,13 @@ if ($tee == 'LISAA') {
 			$query .= "	kentta01 	= '$otsikko',
 						kentta02 	= '$uutinen',";
 			if ($kuva != '') {
-						$query .= "kentta03 	= '$kuva',";
-						}
+				$query .= "kentta03 	= '$kuva',";
+			}
+			
+			if ($kentta08 == 'X') {
+				$query .= "kentta08 = '$kentta08',";
+			}
+						
 			$query .=  "kentta09 	= '$kentta09',
 						kentta10 	= '$kentta10',								
 						konserni 	= '$konserni',
@@ -153,6 +159,7 @@ if ($tee == 'LISAA') {
 		echo "<font class='error'>".t("Sekä otsikko että uutinen on syötettävä!")."</font><br><br>";
 		$rivi["kentta01"]  = $otsikko;
 		$rivi["kentta02"]  = $uutinen;
+		$rivi["kentta08"]  = $kentta08;
 		$rivi["kentta09"]  = $kentta09;
 		$rivi["kentta10"]  = $kentta10;				
 		$rivi["konserni"]  = $konserni;
@@ -387,6 +394,16 @@ if ($tee == "SYOTA") {
 			echo "<tr>
 				<th>".t("Extranet")."</th>
 				<td><input type='checkbox' name='extranet_uutinen' $check2> ".t("Näytetäänkö uutinen Extranetissä")."</td>
+			</tr>";
+			
+			$check3 = "";
+			if ($rivi['kentta08'] == 'X') {
+				$check3 = "CHECKED";
+			}
+			
+			echo "<tr>
+				<th>".t("Extranet")."</th>
+				<td><input type='checkbox' name='kentta08' value='X' $check3> ".t("Ei näytetä asiakkaan asiakkaille")."</td>
 			</tr>";
 		}
 	}

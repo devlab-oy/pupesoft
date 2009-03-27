@@ -43,6 +43,11 @@ if ($tee == '') {
 	else {
 		$lisa = " and kalenteri.kieli = '$kukarow[kieli]' ";
 	}
+	
+	//katsotaan saako uutista n‰ytt‰‰ asiakkaan asiakkaalle
+	if ($kukarow['oletus_asiakas'] != $kukarow['oletus_asiakastiedot'] and $kukarow['oletus_asiakastiedot'] != "") {
+		$ehto .= " and kentta08 != 'X' ";
+	}
 
 	$query = "	SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
 				from kalenteri

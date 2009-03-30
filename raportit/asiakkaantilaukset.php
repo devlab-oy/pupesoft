@@ -479,11 +479,12 @@
 				echo "<$ero valign='top' $classloppu>".t($laskutyyppi)." ".t($alatila)."</$ero>";
 
 				echo "<form method='post' action='$PHP_SELF'><td class='back' valign='top'>
-						<input type='hidden' name='tee' value='NAYTATILAUS'>
-						<input type='hidden' name='toim' value='$toim'>
-						<input type='hidden' name='asiakasid' value='$asiakasid'>
-						<input type='hidden' name='toimittajaid' value='$toimittajaid'>		
-						<input type='hidden' name='tunnus' value='$row[tilaus]'>";
+						<input type='hidden' name='tee' 			value = 'NAYTATILAUS'>
+						<input type='hidden' name='toim' 			value = '$toim'>
+						<input type='hidden' name='asiakasid' 		value = '$asiakasid'>
+						<input type='hidden' name='toimittajaid' 	value = '$toimittajaid'>
+						<input type='hidden' name='laskunro'	 	value = '$laskunro'>		
+						<input type='hidden' name='tunnus' 			value = '$row[tilaus]'>";
 				
 				//	Pysytään projektilla jos valitaan vain projekti
 				if($row["tila"] == "R" or $nippu > 0) {

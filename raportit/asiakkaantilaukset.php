@@ -207,6 +207,8 @@
 			$query = "	SELECT laskunro, ytunnus, liitostunnus
 						FROM lasku
 						WHERE laskunro	= '$laskunro'
+						and tila 		= 'U'
+						and alatila		= 'X'
 						and yhtio 		= '$kukarow[yhtio]' ";
 			$result = mysql_query($query) or pupe_error($query);
 			$row = mysql_fetch_array($result);

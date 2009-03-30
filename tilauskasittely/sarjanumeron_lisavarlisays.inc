@@ -11,7 +11,12 @@
 			$laskurow   = mysql_fetch_array($result);
 			
 			//Tutkitaan lis‰varusteita
-			$query = "	SELECT tilausrivi_osto.perheid2
+			$query = "	SELECT tilausrivi_osto.perheid2,
+						sarjanumeroseuranta.hyllyalue, 
+						sarjanumeroseuranta.hyllynro, 
+						sarjanumeroseuranta.hyllyvali, 
+						sarjanumeroseuranta.hyllytaso,
+						concat_ws('#', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) paikka						
 						FROM sarjanumeroseuranta 
 						JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.tunnus=tilausrivi_osto.perheid2
 						WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]' 
@@ -19,13 +24,13 @@
 			$sarjares = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($sarjares) == 1) {
-				$sarjarow = mysql_fetch_array($sarjares);
+				$sarjarow_isa = mysql_fetch_array($sarjares);
 						
 				// Ostorivi
 				$query = "	SELECT if(kpl!=0, kpl, if(varattu!=0, varattu, tilkpl)) kpl
 							FROM tilausrivi 
 							WHERE yhtio  = '$kukarow[yhtio]' 
-							and tunnus   = '$sarjarow[perheid2]'
+							and tunnus   = '$sarjarow_isa[perheid2]'
 							and perheid2!= 0";
 				$sarjares = mysql_query($query) or pupe_error($query);
 				$ostorow = mysql_fetch_array($sarjares);
@@ -46,9 +51,9 @@
 							FROM tilausrivi use index (yhtio_perheid2)
 							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 							WHERE tilausrivi.yhtio  = '$kukarow[yhtio]' 
-							and tilausrivi.perheid2 = '$sarjarow[perheid2]'
+							and tilausrivi.perheid2 = '$sarjarow_isa[perheid2]'
 							and tilausrivi.tyyppi  != 'D'
-							and tilausrivi.tunnus  != '$sarjarow[perheid2]'
+							and tilausrivi.tunnus  != '$sarjarow_isa[perheid2]'
 							and tilausrivi.perheid2!= 0";
 				$sarjares1 = mysql_query($query) or pupe_error($query);
 				
@@ -64,7 +69,7 @@
 						return t("VIRHE: Jos tuotteella on lis‰vausteita on tilausrivin tilattum‰‰r‰n oltava 1!");
 					}
 
-					if($myyrow["perheid2"] == 0) {
+					if ($myyrow["perheid2"] == 0) {
 						$query = "	UPDATE tilausrivi
 						 			SET perheid2 = tunnus
 									WHERE yhtio  = '$kukarow[yhtio]' 
@@ -75,7 +80,7 @@
 					}
 						
 					while ($sarjarow = mysql_fetch_array($sarjares1)) {
-
+												
 						// haetaan tuotteen tiedot
 						$query = "	SELECT *
 									from tuote
@@ -130,8 +135,8 @@
 								$ale 		     = "";
 								$alv		     = "";	
 								
-								if ($sarjarow["paikka"] != "###") {
-									$paikka		 = $sarjarow["paikka"];
+								if ($sarjarow_isa["paikka"] != "###") {
+									$paikka		 = $sarjarow_isa["paikka"];
 								}
 							
 								$varasto 	     = "";
@@ -159,9 +164,9 @@
 												and tunnus  = '$sarjarow[sistyomaarays_sarjatunnus]'
 												and siirtorivitunnus = '$sarjarow[perheid2]'";
 									$tarkres = mysql_query($query) or pupe_error($query);
-									
+
 									if (mysql_num_rows($tarkres) == 1) {
-										$myy_sarjatunnus = $sarjarow["sistyomaarays_sarjatunnus"];
+										$myy_sarjatunnus = $sarjarow["sistyomaarays_sarjatunnus"];										
 									}
 								}
 								
@@ -191,10 +196,10 @@
 								}
 
 								$query = "	UPDATE tilausrivi
-											SET hyllyalue	= '$sarjarow[hyllyalue]',
-											hyllynro		= '$sarjarow[hyllynro]',
-											hyllyvali		= '$sarjarow[hyllyvali]',
-											hyllytaso		= '$sarjarow[hyllytaso]'
+											SET hyllyalue	= '$sarjarow_isa[hyllyalue]',
+											hyllynro		= '$sarjarow_isa[hyllynro]',
+											hyllyvali		= '$sarjarow_isa[hyllyvali]',
+											hyllytaso		= '$sarjarow_isa[hyllytaso]'
 											$Ulisa
 											WHERE yhtio	= '$kukarow[yhtio]' 
 											and tunnus 	= '$tarkrow[tunnus]'";

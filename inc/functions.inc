@@ -391,6 +391,70 @@ if (!function_exists("table_exists")) {
 	}
 }
 
+if (!function_exists("vapauta_sarjanumerot")) {
+	function vapauta_sarjanumerot($toim, $tilausnumero, $lisa="") {
+		global $kukarow, $yhtiorow;
+
+		$query = "	SELECT tilausrivi.tunnus, (tilausrivi.varattu+tilausrivi.jt) varattu, tilausrivi.tuoteno, tuote.sarjanumeroseuranta, tilausrivin_lisatiedot.tilausrivilinkki
+					FROM tilausrivi use index (yhtio_otunnus)
+					JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
+					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.otunnus = '$kukarow[kesken]'
+					$lisa ";
+		$sres = mysql_query($query) or pupe_error($query);
+
+		while ($srow = mysql_fetch_array($sres)) {
+			
+			if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
+				// merktaan siirtolistatunnus nollaks
+				$query = "UPDATE sarjanumeroseuranta set siirtorivitunnus = 0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and siirtorivitunnus='$srow[tunnus]'";
+				$sarjares = mysql_query($query) or pupe_error($query);
+			}			 
+			elseif ($srow["varattu"] < 0) {
+				// dellataan koko rivi jos sitä ei ole vielä myyty
+				$query = "DELETE from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
+				$sarjares = mysql_query($query) or pupe_error($query);
+
+				if (mysql_affected_rows() == 0) {
+					// merkataan osorivitunnus nollaksi
+					$query = "UPDATE sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
+					$sarjares = mysql_query($query) or pupe_error($query);
+				}
+			}
+			else {
+				// merkataan myyntirivitunnus nollaks
+				if ($srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F") {
+					$query = "	DELETE FROM sarjanumeroseuranta
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$srow[tuoteno]'
+								and myyntirivitunnus = '$srow[tunnus]'";
+					$sarjares = mysql_query($query) or pupe_error($query);
+				}
+				else {
+					$query = "	UPDATE sarjanumeroseuranta
+								SET myyntirivitunnus = 0
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$srow[tuoteno]'
+								and myyntirivitunnus = '$srow[tunnus]'";
+					$sarjares = mysql_query($query) or pupe_error($query);
+				}
+			}
+			
+			// Onko tätä ostotilauksella?
+			if ($srow["tilausrivilinkki"] > 0) {
+				$query = "	UPDATE tilausrivi
+							SET tyyppi = 'D'
+							WHERE yhtio 	= '$kukarow[yhtio]'
+							and tunnus  	= '$srow[tilausrivilinkki]'
+							and tyyppi 		= 'O'
+							and uusiotunnus = 0";
+				$siirtores = mysql_query($query) or pupe_error($query);
+			}
+		}
+	}
+}
+
 if (!function_exists("viikonpaiva")) {
 	function viikonpaiva($day="", $now="") {
 

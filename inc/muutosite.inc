@@ -97,7 +97,9 @@ if ($kukarow['taso'] != 1) {
 	// Laskun maksutilintarkastus
 	if ($tila == 'T') {
 		$pankkitili = $tili;
+		
 		require ("inc/pankkitilinoikeellisuus.php");
+		
 		if ($pankkitili == '') {
 			echo "<font class='error'>".t("Pankkitili on virheellinen")."</font><br>";
 			$tee='E';
@@ -262,11 +264,57 @@ if ($tila == 'R') {
 	$tila = 'X';
 }
 
+
 //T‰‰ll‰ p‰ivitet‰‰n maksuehto
 if ($tila == 'maksuehto') {
-	$query = "UPDATE lasku SET maksuehto = '$maksuehto' WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
+	
+	// Etsit‰‰n lasku
+	$query = "SELECT summa, summa_valuutassa FROM lasku WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
+	$lasres = mysql_query($query) or pupe_error($query);
+	$lasrow = mysql_fetch_array($lasres);
+	
+	// Etsit‰‰n maksuehto
+	$query = "	SELECT *
+				FROM maksuehto
+				WHERE tunnus = '$maksuehto' and yhtio = '$kukarow[yhtio]'";
+	$mehres = mysql_query($query) or pupe_error($query);
+	$mehrow = mysql_fetch_array($mehres);
+	
+	if ($mehrow['kassa_teksti'] != '') {
+		if ($mehrow['kassa_abspvm'] == '0000-00-00') {
+			$kassa_erapvm = "adddate(tapvm, interval $mehrow[kassa_relpvm] day)";
+		}
+		else {
+			$kassa_erapvm = "'$mehrow[kassa_abspvm]'";
+		}
+		
+		$kassa_loppusumma 				= round((float) $lasrow["summa"] * $mehrow['kassa_alepros']/100, 2);
+		$kassa_loppusumma_valuutassa 	= round((float) $lasrow["summa_valuutassa"] * $mehrow['kassa_alepros']/100, 2);
+	}
+	else {
+		$kassa_erapvm 				 = "0000-00-00";
+		$kassa_loppusumma 			 = 0;
+		$kassa_loppusumma_valuutassa = 0;
+	}
+	
+	if ($mehrow['abs_pvm'] == '0000-00-00') {
+		$uerapvm = "adddate(tapvm, interval $mehrow[rel_pvm] day)";
+	}
+	else {
+		$uerapvm = "'$mehrow[abs_pvm]'";
+	}
+	
+	$query = "	UPDATE lasku 
+				SET maksuehto 		= '$maksuehto', 
+				erpcm				= $uerapvm,
+				kapvm 				= $kassa_erapvm,
+				kasumma 			= '$kassa_loppusumma',
+				kasumma_valuutassa	= '$kassa_loppusumma_valuutassa'
+				WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
-	$tee = 'E';
+	
+	
+	$tee  = 'E';
 	$tila = 'X';
 }
 

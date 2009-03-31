@@ -10,7 +10,7 @@ $xlaskun_paiva			= $xml->xpath('DTM[@eC507.2005="3"]/@eC507.2380');
 $xlaskun_erapaiva		= $xml->xpath('Group8[PAT/@e4279="1"]/DTM[@eC507.2005="13"]/@eC507.2380');
 $xlaskuttajan_ovt		= $xml->xpath('Group2/NAD[@e3035="II"]/@eC082.3039');
 $xlaskuttaja			= $xml->xpath('Group2/NAD[@e3035="II"]/@eC080.3036.1');
-$xlaskun_pankkiviite	= $xml->xpath('Group1/RFF[@eC506.1153="PQ"]/@eC506.1154');
+$xlaskuttajan_vat		= $xml->xpath('Group2/Group3/RFF[@eC506.1153="VA"]/@eC506.1154');
 $xlaskun_pankkiviite	= $xml->xpath('Group1/RFF[@eC506.1153="PQ"]/@eC506.1154');
 $xlaskun_asiakastunnus	= $xml->xpath('Group2[NAD/@e3035="IV"]/Group3/RFF/@eC506.1154');
 $xlaskun_summa_eur		= $xml->xpath('Group48/MOA[@eC516.5025="9" and @eC516.6345="EUR"]/@eC516.5004');
@@ -118,6 +118,7 @@ $laskun_paiva			= $xlaskun_paiva[0];
 $laskun_erapaiva		= $xlaskun_erapaiva[0];
 $laskuttajan_ovt		= $xlaskuttajan_ovt[0];
 $laskuttajan_nimi		= $xlaskuttaja[0];
+$laskuttajan_vat		= $xlaskuttajan_vat[0];
 $laskun_pankkiviite		= $xlaskun_pankkiviite[0];
 $laskun_summa_eur		= (float) $xlaskun_summa_eur[0];
 $laskun_pankkiviite 	= $xlaskun_pankkiviite[0];
@@ -128,6 +129,7 @@ $xlisavat = array();
 $i = 0;
 
 $vattiedot = $xml->xpath('Group50');
+
 if (sizeof($vattiedot) > 0) {
 	foreach ($vattiedot as $vattieto) {
 		$xlisavat[$i]	= $vattieto->xpath('TAX/@eC243.5278');
@@ -136,6 +138,5 @@ if (sizeof($vattiedot) > 0) {
 		$i++;
 	}
 }
-
 
 ?>

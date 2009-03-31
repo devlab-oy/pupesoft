@@ -8,8 +8,7 @@
 		$type="";
 		
 		$poistettavat=array('/','.',':'); //Merkit, jotka poistetaan filennimest‰
-		
-		echo "Aloitan laskujen erittelyn\n";
+				
 		foreach (file($file) as $ln) {
 
 			$ln = trim($ln); // varmistaan ett‰ ei j‰‰ roskia

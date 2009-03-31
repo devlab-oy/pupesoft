@@ -250,7 +250,7 @@
 
 				$pdf=alku($pdf, $laskurow, $kieli, "OK");
 
-				if($laskurow["tila"] == "R") {
+				if($laskurow["tunnusnippu"] == $laskurow["tunnus"]) {
 					$query = "  SELECT GROUP_CONCAT(tunnus) tunnukset
 								FROM lasku
 								WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnus]' and tila IN ('L','G','E','V','W','N','R','A')";
@@ -282,7 +282,7 @@
 							$hinta_riv hinta, tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.asiakkaan_positio, tilausrivin_lisatiedot.ei_nayteta, ei_saldoa, $sorttauskentta
 							FROM tilausrivi
 							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-							JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila in ('R','L','N','E','0')
+							JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila in ('L','G','E','V','W','N','R','A')
 							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 							WHERE tilausrivi.otunnus IN ($tunnukset)
 							and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)

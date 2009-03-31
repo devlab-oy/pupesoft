@@ -181,7 +181,7 @@ define("BCD_C128_BAR_4"              ,   4);
 		}
 		
 		function DestroyObject () {
-			ImageDestroy($obj->mImg);
+			imagedestroy($this->mImg);
 		}
 	}
 ?>

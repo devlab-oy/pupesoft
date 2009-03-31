@@ -801,6 +801,9 @@ if ($tee == 'P' or $tee == 'E') {
 
 		<tr>
 			<td>".t("Kommentti")."</td><td><input type='text' name='komm' size='60' value='$komm'></td>
+		</tr>
+		<tr>
+			<td>".t("Laskunumero")."</td><td><input type='text' name='toimittajan_laskunumero' value='$toimittajan_laskunumero' size='60'></td>
 		</tr>";
 
 		if ((is_array($trow) and strtoupper($trow['maa']) != strtoupper($yhtiorow['maa'])) or (!is_array($trow) and $tyyppi != strtoupper($yhtiorow['maa']))) {
@@ -1244,6 +1247,7 @@ if ($tee == 'I') {
 			suoraveloitus = '$osuoraveloitus',
 			luontiaika = now(),
 			comments = '$komm',
+			asiakkaan_tilausnumero = '$toimittajan_laskunumero',
 			sisviesti1 = '$ohjeitapankille',
 			alv_tili = '$tilino_alv'";
 

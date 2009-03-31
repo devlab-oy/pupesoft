@@ -87,6 +87,36 @@ if ($tee == 'T') {
 	$jarj = "nimi, summa";
 }
 
+// L = Toimittajan laskunumero
+if ($tee == 'L') {
+	$ehto = "tila in ('H','Y','M','P','Q') and asiakkaan_tilausnumero = '$summa1'";
+	$jarj = "nimi, summa";
+}
+
+
+$sel=array();
+$sel[$tee] = "SELECTED";
+echo "<br><form name = 'valinta' action = 'raportit.php?selaus=n' method='post'>
+		<input type = 'hidden' name = 'toim' value = 'laskuhaku'>
+
+		<table><tr>
+		<td>".t("Valitse lasku")."</td>
+		<td><select name = 'tee'>
+		<option value = 'S' $sel[S]>".t("summalla")."
+		<option value = 'N' $sel[N]>".t("nimellä")."
+		<option value = 'V' $sel[V]>".t("viitteellä")."
+		<option value = 'K' $sel[K]>".t("kommentilla")."
+		<option value = 'W' $sel[W]>".t("viestillä")."
+		<option value = 'L' $sel[L]>".t("Toimittajan laskunumerolla")."
+		</select></td>
+		<td><input type = 'text' name = 'summa1' value = '$summa1' size=8> - <input type = 'text' name = 'summa2' value = '$summa2' size=8></td>
+		<td><input type = 'submit' value = '".t("Valitse")."'></td>
+		</tr></table>
+
+		</form><br>";
+$formi = 'valinta';
+$kentta = 'summa1';
+
 if ($tee != '') {
 
 	$alku += 0;
@@ -165,28 +195,6 @@ if ($tee != '') {
 	echo "<br><br>";
 
 	$toim="";
-}
-
-if ($tee == '') {
-	echo "<form name = 'valinta' action = 'raportit.php?selaus=n' method='post'>
-			<input type = 'hidden' name = 'toim' value = 'laskuhaku'>
-
-			<table><tr>
-			<td>".t("Valitse lasku")."</td>
-			<td><select name = 'tee'>
-			<option value = 'S'>".t("summalla")."
-			<option value = 'N'>".t("nimellä")."
-			<option value = 'V'>".t("viitteellä")."
-			<option value = 'K'>".t("kommentilla")."
-			<option value = 'W'>".t("viestillä")."			
-			</select></td>
-			<td><input type = 'text' name = 'summa1' size=8> - <input type = 'text' name = 'summa2' size=8></td>
-			<td><input type = 'submit' value = '".t("Valitse")."'></td>
-			</tr></table>
-
-			</form>";
-	$formi = 'valinta';
-	$kentta = 'summa1';
 }
 
 ?>

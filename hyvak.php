@@ -219,7 +219,7 @@
 
 		$trow = mysql_fetch_array ($result);
 
-		if ($trow["tapvm"] > $yhtiorow["tilikausi_alku"]) {
+		if ($trow["tapvm"] > $yhtiorow["tilikausi_alku"] or ($trow["tapvm"]=="0000-00-00" and $trow["laskutyyppi"] == "M")) {
 
 			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Poisti laskun")."<br>" . $trow['comments'];
 
@@ -370,7 +370,7 @@
 	}
 
 	if ($tee == 'V' and $komm == '') {
-		echo "<font class='error'>".t('Anna kommentti')."</font>";
+		echo "<font class='error'>".t('Anna kommentti')."</font><br>";
 		$tee = '';
 	}
 
@@ -834,7 +834,26 @@
 		}
 
 		$laskurow = mysql_fetch_array($result);
+		
+		//	Tarkistetaan onko tälläistä laskua tältä toimittajalta jo kierrossa
+		if($laskurow["asiakkaan_tilausnumero"] != "") {
+			$query = "	SELECT *,
+						concat_ws('@', laatija, luontiaika) kuka,
+						summa,
+						valkoodi
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]' and liitostunnus='$laskurow[liitostunnus]' and tila IN ('H','M','P','Q','Y') and asiakkaan_tilausnumero = '$laskurow[asiakkaan_tilausnumero]' and tunnus != $laskurow[tunnus]";
+			$tarkres = mysql_query($query) or pupe_error($query);
+			if (mysql_num_rows($tarkres) != 0) {
+				echo "<br><font class = 'error'>".t("HUOM! Toimittajalta on saapunut jo lasku samalla laskunumerolla!")."</font><table>";
 
+				while($tarkrow = mysql_fetch_array($tarkres)) {
+					echo "<tr><td class='back'>$tarkrow[summa] $tarkrow[valkoodi]</td><td class='back'>$tarkrow[kuka]</td><td class='back'><a href='muutosite.php?tee=E&tunnus=$tarkrow[tunnus]'>".t("Avaa lasku")."</a></td>";
+				}
+				echo "</table><br><br>";
+			}
+		}
+		
 		echo "<table>";
 
 		echo "<tr>";
@@ -1436,9 +1455,26 @@
 			}
 
 			if($laskurow["tilaustyyppi"] == "M") {
+				
+				//	Saadaanko muokata superina?
+				$query = "	SELECT yhtio
+							FROM oikeu
+							WHERE yhtio	= '$kukarow[yhtio]'
+							and kuka	= '$kukarow[kuka]'
+							and nimi	= 'matkalasku.php'
+							and alanimi = 'SUPER'";
+				$oires = mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($oires) > 0) {
+					$su = "SUPER";
+				}
+				else {
+					$su = "";
+				}
+				
 				echo "<td class='back'><form action = 'matkalasku.php' method='post'>
 							<input type='hidden' name = 'tilausnumero' value='$tunnus'>
 							<input type='hidden' name = 'tee' value='MUOKKAA'>
+							<input type='hidden' name = 'toim' value='$su'>
 							<input type='hidden' name = 'lopetus' value='".urlencode("hyvak.php?tunnus={$laskurow["tunnus"]}")."'>
 							<input type='Submit' value='".t("Tarkastele matkalaskua")."'>
 							</form></td>";

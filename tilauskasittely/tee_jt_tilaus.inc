@@ -1,6 +1,6 @@
 <?php
 
-	// $tunnukset jossa on k‰sitelt‰vien tilausrivien tunnukset
+	// $tunnukset jossa on k‰sitelt‰vien tilausrivien tunnukset (tuoteperhe)
 	// $tunnusarray array jossa on k‰sitelt‰vien tilausrivien tunnukset arrayssa
 	// $kpl[$tunnukset]   = monta toimitetaan
 	// $loput[$tunnukset] = KAIKKI/POISTA/JATA/MITA/SUORA mit‰ tehd‰‰n lopuille
@@ -96,7 +96,7 @@
 						echo "Otsikkoa '$isarivirow[otunnus]' ei lˆytynyt";
 						exit;
 					}
-					$otsikkorivi=mysql_fetch_array ($stresult);
+					$otsikkorivi = mysql_fetch_array ($stresult);
 
 					if ($debug==1) echo t("Perusotsikko lˆytyi")." $otsikkorivi[nimi] $isarivirow[otunnus]<br>";
 
@@ -131,6 +131,15 @@
 						$tila		= 'N';
 						$alatila	= 'J';
 					}
+					
+					// Vain saman alkuper‰isen tilauksen rivej‰ samalle otsikolle
+					if ($otsikkorivi['jtkielto'] == "Y") {
+						// v‰‰rink‰ytet‰‰n hyvaksyja_nyt kentt‰‰...
+						$yhdlisa = " and hyvaksyja_nyt = '$otsikkorivi[tunnus]' ";
+					}
+					else {
+						$yhdlisa = "";
+					}
 
 					// Tarvitsemmeko uuden otsikon?
 					$query = "	SELECT *
@@ -164,8 +173,9 @@
 								eilahetetta		= '$isarivirow[suoraan_laskutukseen]' and
 								tunnusnippu		= '$otsikkorivi[tunnusnippu]' and
 								piiri			= '$otsikkorivi[piiri]'
-								$erpcmlisa1";
-					$stresult = mysql_query($query) or pupe_error($query);
+								$erpcmlisa1
+								$yhdlisa";
+					$stresult = mysql_query($query) or pupe_error($query);					
 				}
 
 				if (mysql_num_rows($stresult) != 0) {
@@ -176,7 +186,8 @@
 				else {
 
 					// tehd‰‰n vanhasta laskusta 1:1 kopio...
-					$query = "insert into lasku set ";
+					$query = "INSERT into lasku set ";
+					
 					for ($i=0; $i<mysql_num_fields($stresult); $i++) {
 
 						// Tilaan laitetaan jotain speciaalia
@@ -233,7 +244,7 @@
 								$query .= "erpcm='',";
 							}
 						}
-						// n‰m‰ kent‰t tyhjennet‰‰n
+						// n‰m‰ kent‰t tyhjennet‰‰n aina
 						elseif (mysql_field_name($stresult,$i)=='kapvm' or
 								mysql_field_name($stresult,$i)=='tapvm' or
 								mysql_field_name($stresult,$i)=='erpcm' or
@@ -265,20 +276,30 @@
 								mysql_field_name($stresult,$i)=='sisamaan_kuljetusmuoto' or
 								mysql_field_name($stresult,$i)=='poistumistoimipaikka' or
 								mysql_field_name($stresult,$i)=='vanhatunnus' or
-								mysql_field_name($stresult,$i)=='sisviesti1' or
-								mysql_field_name($stresult,$i)=='sisviesti2' or
 								mysql_field_name($stresult,$i)=='poistumistoimipaikka_koodi') {
 							$query .= mysql_field_name($stresult,$i)."='',";
 						}
+						elseif (mysql_field_name($stresult,$i)=='hyvaksyja_nyt' and $otsikkorivi['jtkielto'] == "Y") {
+							$query .= mysql_field_name($stresult,$i)."='$otsikkorivi[tunnus]',";
+						}
+						// n‰m‰ kent‰t tyhjennet‰‰n jos jtrivit kootaan yhdelle otsikolle (siis normikeissi)
+						elseif ($otsikkorivi['jtkielto'] != "Y" and (
+								mysql_field_name($stresult,$i)=='sisviesti1' or
+								mysql_field_name($stresult,$i)=='sisviesti2' or
+								mysql_field_name($stresult,$i)=='tilausyhteyshenkilo' or
+								mysql_field_name($stresult,$i)=='asiakkaan_tilausnumero' or
+								mysql_field_name($stresult,$i)=='kohde')) {
+							$query .= mysql_field_name($stresult,$i)."='',";
+						}												
 						elseif (mysql_field_name($stresult,$i) == 'viesti') {
-							if ($toim == "ENNAKKO") {
+							if ($toim == "ENNAKKO" or $otsikkorivi['jtkielto'] == "Y") {
 								$query .= "viesti='".$otsikkorivi[$i]."',";
-							}
+							}							
 							else {
 								$query .= "viesti='',";
 							}
 						}
-						// kommenttii speciaalia
+						// kommentti speciaalia
 						elseif (mysql_field_name($stresult,$i) == 'comments') {
 							if ($toim == "ENNAKKO") {
 								$query .= "comments='".t("ENNAKKOTILAUS")."',";
@@ -356,48 +377,6 @@
 				}
 
 				///* T‰ss‰ meill‰ on otsikko hallussa se on $id muuttujassa*///
-
-// 				// Jos yhtion rahtihinnoittelu tapahtuu alkuper‰isen tilausarvon mukaan, niin JT-tilauksiin ei en‰‰ laiteta rahtikulua uudestaan
-// 				// Eli lis‰t‰‰n rahtikulurivi-nollahintaisena
-// 				if ($yhtiorow["rahti_hinnoittelu"] != "") {
-//
-// 					$query = "	SELECT *
-// 								FROM lasku
-// 								WHERE yhtio = '$kukarow[yhtio]'
-// 								AND tunnus = '$id'";
-// 					$aresult = mysql_query($query) or pupe_error($query);
-// 					$laskurow = mysql_fetch_array($aresult);
-//
-// 					$query = "	SELECT tunnus
-// 								from tilausrivi
-// 								where yhtio = '$kukarow[yhtio]'
-// 								and otunnus = '$laskurow[tunnus]'
-// 								and tuoteno = '$yhtiorow[rahti_tuotenumero]'";
-// 					$result = mysql_query($query) or pupe_error($query);
-//
-// // ($yhtiorow['jt_rahti'] == 'Y' and ($laskurow['summa'] < $asiakas_row['rahtivapaa_alarajasumma'] or $laskurow['summa'] < $yhtiorow['rahtivapaa_alarajasumma']))
-//
-// 					//jos tilauksella on jo rahtikulu niin ei lis‰t‰ sit‰ uudestaan
-// 					if (mysql_num_rows($result) == 0 and $laskurow['rahtivapaa'] == '') {
-//
-// 						//lis‰t‰‰n rahtikulurivi
-// 						$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
-// 						$rhire = mysql_query($query) or pupe_error($query);
-// 						$trow  = mysql_fetch_array($rhire);
-//
-// 						$hinta		= 0; // rahtihinta
-// 						$trow["alv"]= $laskurow["alv"];
-// 						$nimitys	= $laskurow["toimitustapa"];
-//
-// 						list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
-//
-// 						$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-// 									values ('$hinta', 'N', '1', '1', '$laskurow[tunnus]', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
-// 						$addtil = mysql_query($query) or pupe_error($query);
-//
-// 						if ($debug==1) echo t("Lis‰ttiin rahtikulu")." $otsikkorivi[nimi] $id<br>";
-// 					}
-// 				}
 
 				// T‰ss‰ haarassa k‰ytt‰j‰ on syˆtt‰nyt jonkun kappalem‰‰r‰n
 				if ($kpl[$tunnukset] > 0 or $loput[$tunnukset] == 'KAIKKI' or $loput[$tunnukset] == 'VAKISIN') {
@@ -507,8 +486,33 @@
 							
 							$perheid		 	= $lisataanrow["perheid"];
 							$perheid2		 	= $lisataanrow["perheid2"];
-							$kommentti		 	= trim($otsikkorivi['viesti']." ".$lisataanrow['kommentti']);
+							
 
+							// Joitain tietoja alkuper‰iselt‰ tilaukselta
+							$query = "	SELECT tunnus, asiakkaan_tilausnumero, viesti
+										FROM lasku
+										WHERE tunnus = '$lisataanrow[otunnus]'";
+							$aresult = mysql_query($query) or pupe_error($query);							
+							$orig_laskurow = mysql_fetch_array($aresult);
+														
+							$kommentti = "";
+							
+							if (trim($lisataanrow['kommentti']) != "") {
+								$kommentti .= trim($lisataanrow['kommentti']);
+							}
+							if (trim($orig_laskurow['tunnus']) != "") {
+								if (trim($kommentti) != "") $kommentti .= " / ";
+								$kommentti .= t("Tilaus").": ".trim($orig_laskurow['tunnus']);
+							}
+							if (trim($orig_laskurow['asiakkaan_tilausnumero']) != "") {
+								if (trim($kommentti) != "") $kommentti .= " / ";
+								$kommentti .= t("Asiakkaan tilaus").": ".trim($orig_laskurow['asiakkaan_tilausnumero']);
+							}
+							if (trim($orig_laskurow['viesti']) != "") {
+								if (trim($kommentti) != "") $kommentti .= " / ";
+								$kommentti .= t("Tilausviite").": ".trim($orig_laskurow['viesti']);
+							}
+							
 							$jtspec				= "JTSPEC";
 							
 							// Tutkitaan onko t‰m‰ myyty ulkomaan alvilla

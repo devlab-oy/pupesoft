@@ -1570,7 +1570,6 @@
 			if ($srow['eilahetetta'] != '') $eilah          = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah          = 'CHECKED';
-			if ($srow['jtkielto']    != '') $jtki           = 'CHECKED';
 			if ($srow['rahtivapaa']  != '') $rahtivapaa_chk = 'CHECKED';
 			if ($srow['chn'] == '999')      $laskkielto     = 'CHECKED';
 
@@ -1725,8 +1724,16 @@
 
 			}
 			echo "</select>";
+			echo "</td>";
 			
-			echo "</td><td>".t("Ei jälkitoimituksia").":</td><td><input type='checkbox' value='o' name='jtkielto' $jtki></td></tr>";
+			$jtksel[$srow["jtkielto"]] = "SELECTED";
+			
+			echo "<td>".t("JT-käsittely").":</td><td>
+					<select name='jtkielto'>
+					<option value = ''>".t("Normaali")."</option>
+					<option value = 'Y' $jtksel[Y]>".t("Jälkitoimituksia ei yhdistetä")."</option>
+					<option value = 'o' $jtksel[o]>".t("Ei jälkitoimituksia")."</option>
+					</select></td></tr>";
 
 			if($yhtiorow["tilauksen_seuranta"] == "K") {
 				//seuranta

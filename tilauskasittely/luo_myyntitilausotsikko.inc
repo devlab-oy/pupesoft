@@ -135,7 +135,8 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				$splittauskielto = "";
 			}
 			
-			if ($asiakasrow['jtkielto'] != '') $jtkielto = 'ON';
+			$jtkielto = $asiakasrow['jtkielto'];
+			
 			if ($asiakasrow['rahtivapaa'] != '') $rahtivapaa = 'ON';
 			if ($asiakasrow['osatoimitus'] != '') $osatoimitus = 'ON';
 			

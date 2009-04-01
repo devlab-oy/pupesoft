@@ -1444,7 +1444,7 @@
 						// Sirtolistoissa defaultti on JT jos saldo ei riitä. (jos yhtio ei välitä saldoista ei välitetä täälläkään..)
 						// Tai jos yhtiölle on konffattu, että se haluaa ylimemenät jteiksi
 						// Sisäisissä työmääräykissä ei haluta JT-rivejä
-						if ((($rivityyppi == 'G' and $yhtiorow["puute_jt_oletus"] != "H") or ($yhtiorow["puute_jt_oletus"] == "J" and $kpl > 0)) and $laskurow["tila"] != 'S' and $jtkielto == "") {
+						if ((($rivityyppi == 'G' and $yhtiorow["puute_jt_oletus"] != "H") or ($yhtiorow["puute_jt_oletus"] == "J" and $kpl > 0)) and $laskurow["tila"] != 'S' and $jtkielto != "o") {
 							if ($yhtiorow["varaako_jt_saldoa"] == "") {
 								$varattu 	= 0;
 								$jt 		= $kpl;

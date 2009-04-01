@@ -662,41 +662,53 @@
 	}
 	
 	if (mysql_field_name($result, $i) == "tuotteen_parametrit") {
-		$query = "	SELECT *
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND laji = 'PARAMETRI'
-					ORDER BY selite";
-		$vresult = mysql_query($query) or pupe_error($query);
 		
-		$ulos = "<td>";
-		$ulos .= "<input type='hidden' name='tuotteen_parametriti' value='$i'>";
-		
-		$tuotteen_parametrit_split = array();
-		$tuotteen_parametrit = array();
-
-		$tuotteen_parametrit_split = split(";", $trow[$i]);
-
-		foreach ($tuotteen_parametrit_split as $params) {
-			list ($key, $val) = split("=", $params);
-			$key = strtolower($key);
-			$tuotteen_parametrit[$key] = $val;
+		if($laji == "V") {
+			$ulos = "<td><select name='$nimi'>";
+			$sel[$trow[$i]] = "SELECTED";
+			$ulos .= "<option value = '' >".t("Ei ilmoiteta vuosi-ilmoituksessa")."</option>";
+			$ulos .= "<option value = '50' $sel[50]>".t("50 Päivärahat  ja ateriakorvaukset")."</option>";
+			$ulos .= "<option value = '56' $sel[56]>".t("56 Verovapaa kilometrikorvaus")."</option>";
+			
+			$ulos .= "</td>";
 		}
-		
-		$xxx = 0;
-		$ulos .= "<table>";
+		else {
+			$query = "	SELECT *
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND laji = 'PARAMETRI'
+						ORDER BY selite";
+			$vresult = mysql_query($query) or pupe_error($query);
 
-		while ($vrow = mysql_fetch_array($vresult)) {
-			$ulos .= "<tr><td>$vrow[selitetark]</td><td>";
-			$ulos .= "<input type='hidden' name='tuotteen_parametrit_keys[$xxx]' value='".strtolower($vrow["selite"])."'>";
-			$ulos .= "<input type='text' name='tuotteen_parametrit_vals[$xxx]' size='10' value='".$tuotteen_parametrit[strtolower($vrow["selite"])]."'>";
-			$ulos .= "</td></tr>";
-			$xxx++;
+			$ulos = "<td>";
+			$ulos .= "<input type='hidden' name='tuotteen_parametriti' value='$i'>";
+
+			$tuotteen_parametrit_split = array();
+			$tuotteen_parametrit = array();
+
+			$tuotteen_parametrit_split = split(";", $trow[$i]);
+
+			foreach ($tuotteen_parametrit_split as $params) {
+				list ($key, $val) = split("=", $params);
+				$key = strtolower($key);
+				$tuotteen_parametrit[$key] = $val;
+			}
+
+			$xxx = 0;
+			$ulos .= "<table>";
+
+			while ($vrow = mysql_fetch_array($vresult)) {
+				$ulos .= "<tr><td>$vrow[selitetark]</td><td>";
+				$ulos .= "<input type='hidden' name='tuotteen_parametrit_keys[$xxx]' value='".strtolower($vrow["selite"])."'>";
+				$ulos .= "<input type='text' name='tuotteen_parametrit_vals[$xxx]' size='10' value='".$tuotteen_parametrit[strtolower($vrow["selite"])]."'>";
+				$ulos .= "</td></tr>";
+				$xxx++;
+			}
+
+			$ulos .= "</table>";
+
+			$ulos .= "</td>";
 		}
-		
-		$ulos .= "</table>";
-		
-		$ulos .= "</td>";
 		$jatko = 0;
 	}
 ?>

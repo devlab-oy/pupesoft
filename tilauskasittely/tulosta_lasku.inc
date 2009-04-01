@@ -769,13 +769,11 @@ if (!function_exists('rivi_original')) {
 			$pdf->draw_text(535-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]*(1+($row["alv"]/100))), $thispage, $pieni);
 		}
 
-
 		$query = "SELECT asiakkaan_tilausnumero, viesti FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[otunnus]'";
 		$viiteres = mysql_query($query) or pupe_error($query);
 		$viiterow = mysql_fetch_array($viiteres);
 
 		$alkupkommentti = $row["kommentti"];
-
 
 		if (trim($viiterow['viesti']) != '' and trim($viiterow['viesti']) != trim($alkupkommentti)) {
 			$row["kommentti"] = trim($viiterow["viesti"])." ".$row["kommentti"];
@@ -786,9 +784,8 @@ if (!function_exists('rivi_original')) {
 
 		$row["kommentti"] = trim($row["kommentti"]);
 
-
 		//Jos rivikommentti on pitkä niin teemme siitä kauniimman
-		if (strlen($row["kommentti"]) >= 140) {
+		if ($pdf->strlen($row["kommentti"], $pieni) > 200) {
 
 			$row["kommentti"] = str_replace(' ' ,' ##', $row["kommentti"]);
 			$row["kommentti"] = str_replace('.' ,'.##', $row["kommentti"]);
@@ -799,7 +796,7 @@ if (!function_exists('rivi_original')) {
 			$lauseet = array();
 			$ind = 0;
 			foreach($sanat as $sana) {
-				if (strlen($lauseet[$ind]) >= 100) {
+				if ($pdf->strlen($lauseet[$ind], $pieni) > 200) {
 					$lauseet[$ind] .= "\n";
 					$ind++;
 				}
@@ -852,8 +849,10 @@ if (!function_exists('rivi_original')) {
 			$kommentit = explode("\n", trim($row["kommentti"]));
 
 			foreach($kommentit as $kommentti) {
-				$pdf->draw_text(35, $kala, $row["otunnus"]."/".$kommentti, $thispage, $pieni);
+				$pdf->draw_text(35, $kala, $row["otunnus"].": ".$kommentti, $thispage, $pieni);
+				
 				$kala = $kala - 10;
+				
 				if ($kala <= 180 + $barcode_korkeus) {
 					$sivu++;
 					loppu($thispage);
@@ -1227,7 +1226,6 @@ if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
 
 		$alkupkommentti = $row["kommentti"];
 
-
 		if (trim($viiterow['viesti']) != '' and trim($viiterow['viesti']) != trim($alkupkommentti)) {
 			$row["kommentti"] = trim($viiterow["viesti"])." ".$row["kommentti"];
 		}
@@ -1238,7 +1236,7 @@ if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
 		$row["kommentti"] = trim($row["kommentti"]);
 
 		//Jos rivikommentti on pitkä niin teemme siitä kauniimman
-		if (strlen($row["kommentti"]) >= 140) {
+		if ($pdf->strlen($row["kommentti"], $pieni) > 200) {
 
 			$row["kommentti"] = str_replace(' ' ,' ##', $row["kommentti"]);
 			$row["kommentti"] = str_replace('.' ,'.##', $row["kommentti"]);
@@ -1249,7 +1247,7 @@ if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
 			$lauseet = array();
 			$ind = 0;
 			foreach($sanat as $sana) {
-				if (strlen($lauseet[$ind]) >= 100) {
+				if ($pdf->strlen($lauseet[$ind], $pieni) > 200) {
 					$lauseet[$ind] .= "\n";
 					$ind++;
 				}
@@ -1302,8 +1300,10 @@ if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
 			$kommentit = explode("\n", trim($row["kommentti"]));
 
 			foreach($kommentit as $kommentti) {
-				$pdf->draw_text(35, $kala, $row["otunnus"]."/".$kommentti, $thispage, $pieni);
+				$pdf->draw_text(35, $kala, $row["otunnus"].": ".$kommentti, $thispage, $pieni);
+				
 				$kala = $kala - 10;
+				
 				if ($kala <= 180 + $barcode_korkeus) {
 					$sivu++;
 					loppu($thispage);

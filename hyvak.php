@@ -1114,7 +1114,7 @@
 			$alvires = mysql_query($query) or pupe_error($query);
 			$alvirow = mysql_fetch_array($alvires);
 
-			$jaljella = round((float)$laskurow["summa"] - (float) $alvirow["summa"], 2);
+			$jaljella = round((float) $laskurow["summa"] - (float) $alvirow["summa"], 2);
 
 			$query = "	SELECT lasku.laskunro, keikka.nimi, lasku.summa, keikka.comments, keikka.vanhatunnus vanhatunnus, keikka.tunnus tunnus, keikka.liitostunnus toimittajaid, keikka.alatila
 						FROM lasku
@@ -1153,9 +1153,14 @@
 			else {
 				echo "<tr><td colspan = '2'>".t("Laskua ei ole vielä kohdistettu")."</td></tr>";
 			}
+			
 			$apurow = mysql_fetch_array($apure);
+			
+			// Roundataan...
+			$jaljella = round($jaljella, 2);
 
 			$lisa = "";
+			
 			if($jaljella > 0) {
 				//	Vaihtoomaisuuslaskuille ei tarvitse hakea toimittajaa, sen me tiedämme jo!
 				if(!in_array($laskurow["vienti"], array("B","E","H")) and $jaljella > 0) {
@@ -1167,7 +1172,7 @@
 				}
 			}
 
-			echo "<tr><th>".t("Jaljella")."</th><th>$jaljella $laskurow[valkoodi]</th><td class='back'>$lisa</td></tr>";
+			echo "<tr><th>".t("Jäljellä")."</th><th>$jaljella $laskurow[valkoodi]</th><td class='back'>$lisa</td></tr>";
 
 			echo "</table>";
 

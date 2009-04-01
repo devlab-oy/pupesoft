@@ -576,17 +576,12 @@
 
 	if (mysql_field_name($result, $i) == "jtkielto") {
 
-		$sela = $selb = '';
-		if ($trow[$i] != '') {
-			$selb = "SELECTED";
-		}
-		else {
-			$sela = "SELECTED";
-		}
+		$jtksel[$trow[$i]] = "SELECTED";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value = '' $sela>".t("Ei")."</option>";
-		$ulos .= "<option value = 'o' $selb>".t("Kyll‰")."</option>";
+		$ulos .= "<option value = ''>".t("Asiakkaalle l‰hetet‰‰n j‰lkitoimituksia normaalisti")."</option>";
+		$ulos .= "<option value = 'Y' $jtksel[Y]>".t("Asiakkaan j‰lkitoimituksia ei yhdistet‰ JT-selauksessa")."</option>";
+		$ulos .= "<option value = 'o' $jtksel[o]>".t("Asiakkaalle ei l‰hete‰ j‰lkitoimituksia")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

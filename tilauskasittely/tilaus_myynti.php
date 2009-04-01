@@ -4240,7 +4240,7 @@ if ($tee == '') {
 								</form> ";
 					}
 
-					if ($row["var"] == "P" and $saako_jalkitoimittaa == 0 and $laskurow["jtkielto"] == "") {
+					if ($row["var"] == "P" and $saako_jalkitoimittaa == 0 and $laskurow["jtkielto"] != "o") {
 						echo " <form action='$PHP_SELF' method='post' name='jalkitoimita'>
 									<input type='hidden' name='toim' 			value = '$toim'>
 									<input type='hidden' name='lopetus' 		value = '$lopetus'>

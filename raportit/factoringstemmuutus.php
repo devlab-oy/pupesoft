@@ -48,8 +48,8 @@ if (isset($submit)) {
 				WHERE yhtio='$kukarow[yhtio]' AND tila='U' AND alatila='X' AND tapvm >= '$vva-$kka-$ppa' AND tapvm <= '$vvl-$kkl-$ppl'
  AND maksuehto in ($maksuehtorow[joukko])";
 	$laskures = mysql_query($query) or pupe_error($query);
-	
 	$laskurow = mysql_fetch_array($laskures);
+
 	echo "<tr><th>",t("Lähteneet veloituslaskut"),"</th><td>$laskurow[possumma]</td></tr>";
 	$lahteneet=$laskurow['possumma'];
 	echo "<tr><th>",t("Lähteneet hyvityslaskut"),"</th><td>$laskurow[negsumma]</td></tr>";
@@ -58,21 +58,33 @@ if (isset($submit)) {
 
 	$query = "	SELECT tiliointi.tilino, SUM(tiliointi.summa) summa, sum(if(lasku.tapvm=tiliointi.tapvm,tiliointi.summa,0)) summa2 FROM tiliointi, lasku
 				WHERE tiliointi.yhtio='$kukarow[yhtio]' AND tiliointi.tapvm >= '$vva-$kka-$ppa' AND tiliointi.tapvm <= '$vvl-$kkl-$ppl'
-AND tiliointi.tilino in ('$yhtiorow[factoringsaamiset]', '$yhtiorow[kassaale]', '$yhtiorow[luottotappiot]') AND korjattu = '' AND lasku.tila='U' AND lasku.alatila='X' AND lasku.tunnus = tiliointi.ltunnus AND lasku.yhtio=tiliointi.yhtio AND lasku.maksuehto in ($maksuehtorow[joukko])
+AND tiliointi.tilino in ('$yhtiorow[factoringsaamiset]', '$yhtiorow[myynninkassaale]', '$yhtiorow[luottotappiot]', $yhtiorow[alv]) AND korjattu = '' AND lasku.tila='U' AND lasku.alatila='X' AND lasku.tunnus = tiliointi.ltunnus AND lasku.yhtio=tiliointi.yhtio AND lasku.maksuehto in ($maksuehtorow[joukko])
 				GROUP BY 1";
 	$laskures = mysql_query($query) or pupe_error($query);
 	$suoritukset = -$lahteneet;
+
 	while ($laskurow = mysql_fetch_array($laskures)) {
 		$suoritukset += $laskurow['summa'];
-		$kplahteneet += $laskurow['summa2'];
-		//echo "<tr><th>debug $laskurow[tilino]</th><td>$laskurow[summa] $laskurow[summa2] ",$laskurow['summa'] - $laskurow['summa2']," ", $laskurow['summa'] + $laskurow['summa2'] + $lahteneet,"</td></tr>";
+
 		if ($laskurow['tilino'] == $yhtiorow['factoringsaamiset'])
-			echo "<tr><th>",t("Suoritukset"),"</th><td>",$laskurow['summa']-$lahteneet,"</td></tr>";
-		elseif ($laskurow['tilino'] == $yhtiorow['kassaale'])
-			echo "<tr><th>",t("Käteisalennukset"),"</th><td>$laskurow[summa]</td></tr>";
+			$kplahteneet += $laskurow['summa2'];
+
+		//echo "<tr><th>debug $laskurow[tilino] $yhtiorow[myynninkassaale]</th><td>$laskurow[summa] $laskurow[summa2] ",$laskurow['summa'] - $laskurow['summa2']," ", $laskurow['summa'] + $laskurow['summa2'] + $lahteneet,"</td></tr>";
+
+		if ($laskurow['tilino'] == $yhtiorow['factoringsaamiset'])
+			$factoringsaamiset = $laskurow['summa'];
+		elseif ($laskurow['tilino'] == $yhtiorow['myynninkassaale'])
+			$kateisalennukset = $laskurow['summa'];
+		elseif ($laskurow['tilino'] == $yhtiorow['alv'])
+			$suoritustenalv = round($laskurow['summa'] - $laskurow['summa2'],2);
 		else
-			echo "<tr><th>",t("Luottotappiot"),"</th><td>$laskurow[summa]</td></tr>";
+			$luottotappiot = $laskurow['summa'];
 	}
+
+	echo "<tr><th>",t("Suoritukset"),"</th><td>",$factoringsaamiset-$lahteneet,"</td></tr>";
+	echo "<tr><th>",t("Käteisalennukset"),"</th><td>$kateisalennukset</td></tr>";
+	echo "<tr><th>",t("Alv"),"</th><td>$suoritustenalv</td></tr>";
+	echo "<tr><th>",t("Luottotappiot"),"</th><td>$luottotappiot</td></tr>";
 	echo "<tr><th>",t("Tili yhteensä"),"</th><td>$suoritukset</td></tr>";
 	$erotus = round($kplahteneet - $lahteneet,2);
 	echo "<tr><th>",t("Korjaus ongelmista"),"</th><td>$erotus</td></tr>";
@@ -80,22 +92,22 @@ AND tiliointi.tilino in ('$yhtiorow[factoringsaamiset]', '$yhtiorow[kassaale]', 
 	echo "<tr><th>",t("Suoritukset yhteensä"),"</th><td>$suoritukset</td></tr>";
 
 	if ($kplahteneet!=$lahteneet) {
-		$query = "	SELECT tiliointi.summa summa, lasku.summa summa2, lasku.nimi, lasku.laskunro FROM tiliointi, lasku
-					WHERE tiliointi.yhtio='$kukarow[yhtio]' AND tiliointi.tapvm >= '$vva-$kka-$ppa' AND tiliointi.tapvm <= '$vvl-$kkl-$ppl'
-	AND tiliointi.tilino = '$yhtiorow[factoringsaamiset]' AND korjattu = '' AND lasku.tila='U' AND lasku.alatila='X' AND lasku.tunnus = tiliointi.ltunnus AND lasku.yhtio=tiliointi.yhtio AND lasku.tapvm=tiliointi.tapvm AND lasku.summa - tiliointi.summa != 0";
+		$query = "SELECT tiliointi.summa summa, lasku.summa summa2, lasku.nimi, lasku.laskunro FROM tiliointi, lasku
+			WHERE tiliointi.yhtio='$kukarow[yhtio]' AND tiliointi.tapvm >= '$vva-$kka-$ppa' AND tiliointi.tapvm <= '$vvl-$kkl-$ppl'
+			AND tiliointi.tilino = '$yhtiorow[factoringsaamiset]' AND korjattu = '' AND lasku.tila='U' AND lasku.alatila='X' AND lasku.tunnus = tiliointi.ltunnus AND lasku.yhtio=tiliointi.yhtio AND lasku.tapvm=tiliointi.tapvm AND lasku.summa - tiliointi.summa != 0";
 		$laskures = mysql_query($query) or pupe_error($query);
+		
 		while ($laskurow = mysql_fetch_array($laskures)) {
 			echo "<tr><th>",t("Laskussa ongelma"),"</th><td>$laskurow[laskunro] $laskurow[summa] $laskurow[summa2] $laskurow[nimi]</td></tr>";
 		}
 	}
 
-	
 	$query = "	SELECT * FROM factoring
 				WHERE yhtio='$kukarow[yhtio]' AND factoringyhtio='$sopimus'";
 	$res = mysql_query($query) or pupe_error($query);
 	if (mysql_num_rows($res) == 1) {
 		$factoringrow = mysql_fetch_array($res);
-		
+
 		$query = "	SELECT * FROM yriti WHERE yhtio='$kukarow[yhtio]' AND tilino='$factoringrow[pankki_tili]'";
 		$res = mysql_query($query) or pupe_error($query);
 		$yritirow = mysql_fetch_array($res);

@@ -27,7 +27,9 @@ while ($vrow = mysql_fetch_array($vresult)) {
 }
 echo "</select></td></tr>";
 
-if (isset($ppa) and $ppa != '') {
+
+
+if (isset($ppa) and $ppa != '' and $ppl=='') {
 	$ppl = $ppa;
 	$kkl = $kka;
 	$vvl = $vva;

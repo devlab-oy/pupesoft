@@ -466,6 +466,7 @@ if (!function_exists('uusi_sivu')) {
 		}
 
 		unset($data);
+
 		if( (int) $apu_yhtiorow["lasku_logo"] > 0) {
 			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
 			$data = $liite["data"];
@@ -490,12 +491,27 @@ if (!function_exists('uusi_sivu')) {
 				echo t("Logokuvavirhe");
 			}
 			else {
+
 				$logoparam = array();
-				$logoparam['scale'] = 0.15;
 
-				$iy    = $isizelogo[1]*0.15*0.35714;	// kuvan y-korkeus millimetreissä
+				$lasku_logo_koko = 50;
+				$lasku_logo_positio = 830;
 
-				$placement = $pdf->image_place($image, mm_pt(292-$iy), mm_pt(7), $thispage, $logoparam);
+				if ((int) $yhtiorow["lasku_logo_koko"] > 0) {
+					$lasku_logo_koko = (int) $yhtiorow["lasku_logo_koko"];
+				}
+				if ((int) $yhtiorow["lasku_logo_positio"] > 0) {
+					$lasku_logo_positio = (int) $yhtiorow["lasku_logo_positio"];
+				}
+
+				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= $lasku_logo_koko) {
+					$logoparam['scale'] = 240 / $isizelogo[0];
+				}
+				else {
+					$logoparam['scale'] = $lasku_logo_koko  / $isizelogo[1];
+				}
+
+				$placement = $pdf->image_place($image, $lasku_logo_positio-($logoparam['scale']*$isizelogo[1]), 20, $thispage, $logoparam);
 			}
 		}
 		else {

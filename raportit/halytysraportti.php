@@ -196,6 +196,7 @@
 		$sarakkeet["SARAKE18G"] = t("tuotesyvyys")."\t";
 		$sarakkeet["SARAKE18H"] = t("tuotemassa")."\t";
 		$sarakkeet["SARAKE18I"] = t("hinnastoon")."\t";
+		$sarakkeet["SARAKE18J"] = t("ei_varastoida")."\t";
 		
 		$sarakkeet["SARAKE19"] 	= t("ostohinta")."\t";
 		$sarakkeet["SARAKE20"] 	= t("myyntihinta")."\t";
@@ -443,6 +444,9 @@
 			if ($valitut["EIHINNASTOON"] != '') {
 				$lisaa .= " and tuote.hinnastoon != 'E' ";
 			}
+			if ($valitut["EIVARASTOITAVA"] != '') {
+				$lisaa .= " and tuote.ei_varastoida = '' ";
+			}
 			// Listaa vain äskettäin perustetut tuotteet:
 			if ($valitut["VAINUUDETTUOTTEET"] != '') {
 				$lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
@@ -590,6 +594,7 @@
 							tuote.try,
 							tuote.aleryhma,
 							tuote.kehahin,
+							tuote.ei_varastoida,
 							abc_aputaulu.luokka abcluokka,
 							abc_aputaulu.luokka_osasto abcluokka_osasto,
 							abc_aputaulu.luokka_try abcluokka_try,
@@ -630,7 +635,8 @@
 							tuote.osasto,
 							tuote.try,
 							tuote.aleryhma,
-							tuote.kehahin,							
+							tuote.kehahin,
+							tuote.ei_varastoida,							
 							abc_aputaulu.luokka abcluokka,
 							abc_aputaulu.luokka_osasto abcluokka_osasto,
 							abc_aputaulu.luokka_try abcluokka_try,
@@ -1354,6 +1360,15 @@
 							$excelsarake++;
 						}
 					}
+
+					if($valitut["SARAKE18J"] != '') { 
+						$rivi .= "\"$row[ei_varastoida]\"\t";
+				
+						if(isset($workbook)) {
+							$worksheet->writeString($excelrivi, $excelsarake, $row["ei_varastoida"]);
+							$excelsarake++;
+						}
+					}
 					
 					if($valitut["SARAKE19"] != '') { 
 						$rivi .= str_replace(".",",",$row['ostohinta'])."\t";
@@ -1893,8 +1908,8 @@
 						}
 					}
 
-					if(is_resource($korvaresult2)) {
-						
+					if(is_resource($korvaresult2) and mysql_num_rows($korvaresult2) > 0) {
+
 						mysql_data_seek($korvaresult2, 0);
 
 						//tulostetaan korvaavat
@@ -2106,7 +2121,7 @@
 				$yht+=$aika;
 			}
 
-			$yht=round($yht/count($ajat),5);
+			$yht=@round($yht/count($ajat),5);
 
 			echo t("Ajo kesti")." $total sec.</font> <font class='info'>($yht ".t("sec/tuoterivi").")</font><br><br>";
 
@@ -2622,6 +2637,22 @@
 
 			echo "<tr><th>".t("Älä näytä tuotteita joita ei näytetä hinnastossa")."</th><td colspan='3'><input type='checkbox' name='valitut[EIHINNASTOON]' value='EIHINNASTOON' $chk></td></tr>";
 
+			//Näytetäänkö ei varastoitavat tuotteet
+			$query = "	SELECT selitetark
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji = 'HALYRAP'
+						and selite	= '$rappari'
+						and selitetark = 'EIVARASTOITAVA'";
+			$sresult = mysql_query($query) or pupe_error($query);
+			$srow = mysql_fetch_array($sresult);
+
+			$chk = "";
+			if (($srow["selitetark"] == "EIVARASTOITAVA" and $tee == "JATKA") or $valitut["EIVARASTOITAVA"] != '') {
+				$chk = "CHECKED";
+			}
+
+			echo "<tr><th>".t("Älä näytä tuotteita joita ei varastoida")."</th><td colspan='3'><input type='checkbox' name='valitut[EIVARASTOITAVA]' value='EIVARASTOITAVA' $chk></td></tr>";
 
 			//Näytetäänkö poistuvat tuotteet
 			$query = "	SELECT selitetark

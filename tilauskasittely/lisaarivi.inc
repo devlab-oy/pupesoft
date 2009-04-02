@@ -305,6 +305,7 @@
 	// -maa tarkoittaa ett‰ ainoastaan t‰h‰n maahan saa myyd‰
 	// eli n‰ytet‰‰n vaan tuotteet jossa vienti kent‰ss‰ on tyhj‰‰ tai -maa.. ja se ei saa olla +maa
 	$kieltolisa = "";
+	$uusin_korvaava_tuote = '';
 
 	if ($laskurow["toim_maa"] != "" and $laskurow["tila"] != 'V') {
 		$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$laskurow[toim_maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$laskurow[toim_maa]%' ";
@@ -387,6 +388,8 @@
 
 						if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) $kaikkituotteet[]=strtoupper($krow2["tuoteno"]); // lis‰t‰‰n tuoteno arrayseen
 					}
+
+					$uusin_korvaava_tuote = $krow2['tuoteno'];
 				}
 			} // end k‰yd‰‰n l‰pi korvaavat
 
@@ -1226,7 +1229,7 @@
 			if ($lisaarivi_debug==1) echo "Laitetaan loput rivit jtksi tai puutteeksi (".substr($var,0,4).") (".substr($lop,0,4).")<br>";
 
 			//Lis‰t‰‰n syˆtetyt ja laitetaan loput JT:seen tai puutteiksi
-			$puu_tuoteno[]	= $alkupera_trow["tuoteno"];
+			$puu_tuoteno[] 	= ($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A' and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
 			$puu_kpl[] 		= $toimittamatta;
 			$puu_hintake[]	= "X";
 			$puu_alekerr[]	= "X";
@@ -1234,7 +1237,7 @@
 			$puu_var[]		= $var;
 
 			if (substr($var,0,4) == "LOJ#") {
-				$puu_tuoteno[]	= $alkupera_trow["tuoteno"];
+				$puu_tuoteno[] 	= ($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A' and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
 				$puu_kpl[] 		= substr($var,4) - $toimittamatta;
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
@@ -1242,7 +1245,7 @@
 				$puu_var[]		= "";
 			}
 			elseif(substr($lop,0,4) == "LOP#") {
-				$puu_tuoteno[]	= $alkupera_trow["tuoteno"];
+				$puu_tuoteno[] 	= ($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A' and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
 				$puu_kpl[] 		= substr($lop,4) - $toimittamatta;
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
@@ -1254,7 +1257,7 @@
 
 			if ($lisaarivi_debug==1) echo "Kaikki puutteeksi var $var<br>";
 
-			$puu_tuoteno[]	= $alkupera_trow["tuoteno"];
+			$puu_tuoteno[] 	= ($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A' and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
 			$puu_kpl[]	 	= $toimittamatta;
 			$puu_hintake[]	= "X";
 			$puu_alekerr[]	= "X";
@@ -1266,8 +1269,8 @@
 			
 			$riikoko 		= 1;
 			$isat_array 	= array();
-			$kaikki_array 	= array($alkupera_trow["tuoteno"]);
-			$kerroin_array 	= array($alkupera_trow["tuoteno"]."#!°!#1");
+			$kaikki_array 	= ($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A' and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote) : array($alkupera_trow["tuoteno"]);
+			$kerroin_array 	= ($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A' and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote."#!°!#1") : array($alkupera_trow["tuoteno"]."#!°!#1");
 			$perhearray 	= array();
 
 			for($isa=0; $isa < $riikoko; $isa++) {
@@ -1444,7 +1447,7 @@
 						// Sirtolistoissa defaultti on JT jos saldo ei riit‰. (jos yhtio ei v‰lit‰ saldoista ei v‰litet‰ t‰‰ll‰k‰‰n..)
 						// Tai jos yhtiˆlle on konffattu, ett‰ se haluaa ylimemen‰t jteiksi
 						// Sis‰isiss‰ tyˆm‰‰r‰ykiss‰ ei haluta JT-rivej‰
-						if ((($rivityyppi == 'G' and $yhtiorow["puute_jt_oletus"] != "H") or ($yhtiorow["puute_jt_oletus"] == "J" and $kpl > 0)) and $laskurow["tila"] != 'S' and $jtkielto != "o") {
+						if ((($rivityyppi == 'G' and $yhtiorow["puute_jt_oletus"] != "H") or ($yhtiorow["puute_jt_oletus"] == "J" or $yhtiorow["puute_jt_oletus"] == "B" and $kpl > 0)) and $laskurow["tila"] != 'S' and $jtkielto != "o") {
 							if ($yhtiorow["varaako_jt_saldoa"] == "") {
 								$varattu 	= 0;
 								$jt 		= $kpl;

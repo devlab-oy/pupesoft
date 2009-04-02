@@ -371,9 +371,17 @@
 		elseif ($trow[$i] == "O") {
 			$sel4 = "selected";
 		}
+		elseif ($trow[$i] == "A") {
+			$sel5 = "selected";
+		}
+		elseif ($trow[$i] == "B") {
+			$sel6 = "selected";
+		}
 
 		$ulos .= "<option value=''  $sel1>".t("Jos varastosaldo ei riit‰, tilausrivi merkataan puuteriviksi")."</option>";
+		$ulos .= "<option value='A' $sel5>".t("Jos varastosaldo ei riit‰, tilausrivi merkataan puutteeksi uusimmalla tuotteella")."</option>";
 		$ulos .= "<option value='J' $sel2>".t("Jos varastosaldo ei riit‰, tilausrivi merkataan j‰lkitoimitukseksi")."</option>";
+		$ulos .= "<option value='B' $sel6>".t("Jos varastosaldo ei riit‰, tilausrivi merkataan j‰lkitoimitukseksi uusimmalla tuotteella")."</option>";
 		$ulos .= "<option value='H' $sel3>".t("Jos varastosaldo ei riit‰, tilausrivi myyd‰‰n normaalisti")."</option>";
 		$ulos .= "<option value='O' $sel4>".t("Kaikki myyd‰‰n aina oletuspaikalta")."</option>";
 		$ulos .= "</select></td>";

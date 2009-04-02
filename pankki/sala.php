@@ -35,8 +35,6 @@ function salaa ($jono, $arg, $kayttoavain) {
 	# Muutetaan salattu teksti Heksoiksi
 	$tark = unpack("H*","$text");
 
-	$tark=~tr/a-z/A-Z/;
-
 	# Tulostellaan arvot
 	print "\nSalaus: $tark[1]";
 	# Tehd‰‰n tarvittavat temput tietyille tiedostotyypeille

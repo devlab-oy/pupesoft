@@ -90,6 +90,7 @@ function ekasiirtoavain($osa1, $osa2, $tarkiste, $tunnus) {
 	}
 
 	$tulos = tarkistapariteetti($tulos);
+	$siirtoavain = $tulos;
 	//echo "\n$tulos";
 
 	$tulos = pack('H*',$tulos);
@@ -113,7 +114,7 @@ function ekasiirtoavain($osa1, $osa2, $tarkiste, $tunnus) {
 			if($tilirow['sassukupolvi']>9) $tilirow['sassukupolvi']=1;
 		}
 		if(($suku - $tilirow['sassukupolvi']) < 2) {
-			$query = "UPDATE yriti SET siirtoavain='$tulos[1]', sasukupolvi='$tilirow[sassukupolvi]' WHERE tunnus = '$tunnus'";
+			$query = "UPDATE yriti SET siirtoavain='$siirtoavain', sasukupolvi='$tilirow[sassukupolvi]' WHERE tunnus = '$tunnus'";
 			$xres = mysql_query($query) or pupe_error($query);
 		}
 

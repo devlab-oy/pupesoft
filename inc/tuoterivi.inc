@@ -272,30 +272,7 @@
 		}
 		$ulos .= "</select></td>";
 		$jatko = 0;
-	}
-	
-	if (mysql_field_name($result, $i) == "vienti" and $laji == "V") {
-		$query = "	SELECT distinct koodi, nimi
-					FROM maat
-					WHERE nimi != ''
-					ORDER BY koodi";
-		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi'>";
-
-		$ulos .= "<option value = '' ></option>";
-
-		while ($vrow=mysql_fetch_array($vresult)) {
-			$sel="";
-			if ($trow[$i] == $vrow[0] or ($trow[$i] == "" and $vrow[0] == $yhtiorow["maa"])) {
-				$sel = "selected";
-			}
-			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
-		}
-
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-	
+	}	
 
 	if (mysql_field_name($result, $i) == "alkuperamaa") {
 		$query = "	SELECT distinct koodi, nimi

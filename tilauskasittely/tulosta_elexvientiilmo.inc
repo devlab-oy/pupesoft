@@ -25,7 +25,10 @@
 	function packaging ($xml, $object, $params) {
 		$Packaging = $object->appendChild($xml->createElement('Packaging'));
 			$Packaging->appendChild($xml->createElement('marksNumber', 	$params['marksNumber']));
-			$Packaging->appendChild($xml->createElement('packages', 	$params['packages']));
+			
+			if ($params['packages'] != "") $Packaging->appendChild($xml->createElement('packages', 	$params['packages']));
+			else $Packaging->appendChild($xml->createElement('pieces', 	$params['pieces']));			
+			
 			$Packaging->appendChild($xml->createElement('packageType', 	$params['packageType']));
 	}
 
@@ -79,6 +82,11 @@
 		else {
 			$kilot  = 0;
 		}
+		
+		if ($laskurow["bruttopaino"] > 0) {
+			$kilot = $laskurow["bruttopaino"];
+		}
+		
 
 		if ($rahtirow["kollit"] > 0) {
 			$kollit = $rahtirow["kollit"];
@@ -104,7 +112,7 @@
 
 		//ylimääräisten erien vaikutus
 		$extrat = abs($laskurow["lisattava_era"])-abs($laskurow["vahennettava_era"]);
-
+		
 		$query = "	SELECT
 					tuote.tullinimike1,
 					tuote.tullinimike2,
@@ -117,7 +125,7 @@
 					GROUP_CONCAT(distinct trim(tuote.nimitys) ORDER BY tuote.nimitys SEPARATOR '##') nimitys_hieno,
 					sum(tilausrivi.rivihinta) rivihinta,
 					sum(tilausrivi.kpl) kpl,
-					round(sum(if(tuote.tuotemassa!=0, tilausrivi.kpl*tuote.tuotemassa, (tilausrivi.rivihinta/$laskurow[summa])*$kilot)),0) nettop
+					round(sum(if(tuote.tuotemassa!=0, tilausrivi.kpl*tuote.tuotemassa, (tilausrivi.rivihinta/$laskurow[summa])*$kilot)),3) nettop
 					FROM tilausrivi
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = ''
 					JOIN tullinimike ON tuote.tullinimike1 = tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tuote.tullinimike1!=''
@@ -130,6 +138,7 @@
 		if (mysql_num_rows($riviresult) > 0) {
 			
 			$tavaraerittelyt = mysql_num_rows($riviresult);
+			$tavaraera = 1;
 
 			// create a new XML document
 			$xml = new DomDocument('1.0');
@@ -143,71 +152,78 @@
 					$Message->appendChild($xml->createElement('recipient', '003702454428-TESTI')); 				// Tunnisteena käytetään Tullihallituksen OVT-tunnusta 003702454428
 					$Message->appendChild($xml->createElement('issue', date('Y-m-d')."T".date('H:i:s').".0Z")); // Ilmoitetaan sanoman lähetyspäivä ja -aika
 					$Message->appendChild($xml->createElement('reference', $laskurow["tunnus"])); 				// Asiakkaan antama tunnus ilmoitussanomalle. Asiakas voi tämän tunnuksen avulla kohdentaa vastaussanoman omaan tapahtumaansa
-					$Message->appendChild($xml->createElement('controlReference', ''));
+					//$Message->appendChild($xml->createElement('controlReference', ''));
 					$Message->appendChild($xml->createElement('version', '1.0')); 								// Ilmoitetaan sanomaskeeman versionumero  		
 
 				$Declaration = $FIExportDeclaration->appendChild($xml->createElement('Declaration'));
 					$Exporter =	$Declaration->appendChild($xml->createElement('Exporter')); 			
 						$params = array();
 						$params['identity'] 					= $yhtiorow["ytunnus"];	//Y-tunnus (tunnistenumero erotettuna väliviivalla, tunnuksen edessä maakoodi)					
-						$params['identityExtension'] 			= "";					// Ilmoitetaan Tullin antama viejän tunnisteen viennin jatko-osa, mikäli viejä on rekisteröitynyt Tullin vientiasiakkaaksi. 		
-						$params['codeListResponsibleAgency'] 	= "";
+						//$params['identityExtension']			= "";
 						$params['name1'] 						= $yhtiorow["nimi"];			
-						$params['name2'] 						= $yhtiorow["nimitark"];                                                                                   
+						//$params['name2'] 						= $yhtiorow["nimitark"];                                                                                   
 						$params['line'] 						= $yhtiorow["osoite"];			
 						$params['city'] 						= $yhtiorow["postitp"];			
 						$params['postCode'] 					= $yhtiorow["postino"];			
 						$params['country'] 						= $yhtiorow["maa"];			
-						$params['name'] 						= ""; 					// Yhteyshenkilön tiedot       
-						$params['telephone'] 					= "";					// Yhteyshenkilön tiedot     
-						$params['telefax'] 						= ""; 					// Yhteyshenkilön tiedot     
-						$params['email'] 						= "";					// Yhteyshenkilön tiedot     
 						
 						party ($xml, $Exporter, $params);
-					
-					/*
-					Jos käytössä on asiamies
-					$Agent = $Declaration->appendChild($xml->createElement('Agent'));              
-						$params = array();
+										
+					//$Agent = $Declaration->appendChild($xml->createElement('Agent'));              
+						//$params = array();
+						//$params['identity'] 					= "";					
+						//$params['identityExtension']			= "";
+						//$params['name1'] 						= "";
+						//$params['name2'] 						= "";                                                             
+						//$params['line'] 						= "";
+						//$params['city'] 						= "";
+						//$params['postCode'] 					= "";
+						//$params['country'] 					= "";
 						
-						party ($xml, $Agent, $params);
-					*/
+						//party ($xml, $Agent, $params);
 					
 					$CurrencyExchange = $Declaration->appendChild($xml->createElement('CurrencyExchange'));
-						$CurrencyExchange->appendChild($xml->createElement('currencyType', ' '));	
+						$CurrencyExchange->appendChild($xml->createElement('currencyType', 'EUR'));
 
 					$RepresentativePerson = $Declaration->appendChild($xml->createElement('RepresentativePerson'));
-						party ($xml, $RepresentativePerson);
+						$params = array();
+						$params['name1'] 						= $kukarow["nimi"];
+						$params['telephone'] 					= $kukarow["puhno"];     
+						$params['email'] 						= $kukarow["eposti"]; 
+						                                                               
+						party ($xml, $RepresentativePerson, $params);
 
 					$DeclarationPackaging =  $Declaration->appendChild($xml->createElement('DeclarationPackaging'));
 						$params = array();
-						$params['marksNumber'] 	= "";
-						$params['packages'] 	= $kollit;
-						$params['packageType'] 	= $laskurow["laskunro"];
+						//$params['marksNumber'] 	= "";
+						$params['packages'] 		= $kollit;
+						//$params['packageType'] 	= "";
 						
 						packaging ($xml, $DeclarationPackaging, $params);	
 
-					$Declaration->appendChild($xml->createElement('issue', ''));
+					$Declaration->appendChild($xml->createElement('issue', date("Y-m-d")));
 					$Declaration->appendChild($xml->createElement('function', '9')); // Ilmoitetaan sanoman tarkoitus (koodiluettelo 0093).
 					$Declaration->appendChild($xml->createElement('customsReference', ''));
 					$Declaration->appendChild($xml->createElement('typePartOne', 'EX'));
 					$Declaration->appendChild($xml->createElement('typePartTwo', 'A'));
 					$Declaration->appendChild($xml->createElement('goodsItem', $tavaraerittelyt));
-					$Declaration->appendChild($xml->createElement('totalGrossMass', ''));
-					$Declaration->appendChild($xml->createElement('sealsAffixed', ''));
-					$Declaration->appendChild($xml->createElement('predeclarationDateTime', ''));
-					$Declaration->appendChild($xml->createElement('exportPointDate', ''));
-					$Declaration->appendChild($xml->createElement('language', ''));
+					$Declaration->appendChild($xml->createElement('totalGrossMass', $kilot));
+					//$Declaration->appendChild($xml->createElement('sealsAffixed', ''));
+					//$Declaration->appendChild($xml->createElement('predeclarationDateTime', ''));
+					//$Declaration->appendChild($xml->createElement('exportPointDate', ''));
+					$Declaration->appendChild($xml->createElement('language', 'FI'));
 
 				$GoodsShipment = $FIExportDeclaration->appendChild($xml->createElement('GoodsShipment'));
 					$Consignee = $GoodsShipment->appendChild($xml->createElement('Consignee'));
-						$params = array();
-						$params['name1']   	= $laskurow["nimi"];			
-						$params['name2']   	= $laskurow["nimitark"];                                                                                   
-						$params['line']    	= $laskurow["osoite"];			
-						$params['city']    	= $laskurow["postitp"];			
-						$params['postCode']	= $laskurow["postino"];			
-						$params['country'] 	= $laskurow["maa"];			
+						$params = array();						 
+						//$params['identity'] 				 	= ""; 				
+						//$params['codeListResponsibleAgency'] 	= "";												
+						$params['name1']   					 	= $laskurow["nimi"];			
+						$params['name2']   					 	= $laskurow["nimitark"];                                                                                   
+						$params['line']    					 	= $laskurow["osoite"];			
+						$params['city']    					 	= $laskurow["postitp"];			
+						$params['postCode']					 	= $laskurow["postino"];			
+						$params['country'] 						= $laskurow["maa"];			
 						
 						party ($xml, $Consignee, $params);
 
@@ -215,106 +231,144 @@
 						$Consignee->appendChild($xml->createElement('country', $laskurow["maa_maara"]));
 
 					$UCR = $GoodsShipment->appendChild($xml->createElement('UCR'));
-						$UCR->appendChild($xml->createElement('traderReference', ''));
-						$UCR->appendChild($xml->createElement('additionalTraderReference', ''));
+						$UCR->appendChild($xml->createElement('traderReference', $yhtiorow["ytunnus"]." ".$laskurow["laskunro"]));
+						//$UCR->appendChild($xml->createElement('additionalTraderReference', ''));
 
 					$TradeTerm = $GoodsShipment->appendChild($xml->createElement('TradeTerm'));
-						$TradeTerm->appendChild($xml->createElement('condition', substr($laskurow["toimitusehto"],0,3)));
-						$TradeTerm->appendChild($xml->createElement('locationName', substr($laskurow["toimitusehto"],4)));
+						$TradeTerm->appendChild($xml->createElement('condition', trim(substr($laskurow["toimitusehto"],0,3))));
+						$TradeTerm->appendChild($xml->createElement('locationName', trim(substr($laskurow["toimitusehto"],4))));
 
 					$ExitCustomsOffice = $GoodsShipment->appendChild($xml->createElement('ExitCustomsOffice'));
 						$params = array();
-						$params['qualifier']   		= "";
+						//$params['qualifier']   	= "";
 						$params['identification']   = $laskurow["poistumistoimipaikka_koodi"];
 						
-						location ($xml, $ExitCustomsOffice);
+						location ($xml, $ExitCustomsOffice, $params);
 
-					$Loading = $GoodsShipment->appendChild($xml->createElement('Loading'));
-						location ($xml, $Loading);
+					//$Loading = $GoodsShipment->appendChild($xml->createElement('Loading'));
+						//$params = array();
+						//$params['qualifier']   	= "";
+						//$params['name']   		= "";
+						//$params['identification']	= $laskurow["poistumistoimipaikka_koodi"];
+						
+						//location ($xml, $Loading, $params);
 
 					$AdditionalDocument = $GoodsShipment->appendChild($xml->createElement('AdditionalDocument'));
-						document ($xml, $AdditionalDocument);
+						$params = array();
+						$params['type']			= "N380"; // Kauppalasku
+						$params['reference']	= $laskurow["laskunro"];
+						$params['issue']		= $laskurow["tapvm"];
+						
+						document ($xml, $AdditionalDocument, $params);
 
 					$AdditionalInformation = $GoodsShipment->appendChild($xml->createElement('AdditionalInformation'));
-						$AdditionalInformation->appendChild($xml->createElement('statement', ''));
-						$AdditionalInformation->appendChild($xml->createElement('statementDescription', ''));
+						$AdditionalInformation->appendChild($xml->createElement('statement', '30400'));
+						//$AdditionalInformation->appendChild($xml->createElement('statementDescription', ''));
 
-					$Warehouse = $GoodsShipment->appendChild($xml->createElement('Warehouse'));
-						$Warehouse->appendChild($xml->createElement('type', ''));
-						$Warehouse->appendChild($xml->createElement('identification', ''));
-						$Warehouse->appendChild($xml->createElement('identitificationExtension', ''));
-						$Warehouse->appendChild($xml->createElement('warehouseType', ''));
-						$Warehouse->appendChild($xml->createElement('country', ''));
+					//$Warehouse = $GoodsShipment->appendChild($xml->createElement('Warehouse'));
+						//$Warehouse->appendChild($xml->createElement('type', ''));
+						//$Warehouse->appendChild($xml->createElement('identification', ''));
+						//$Warehouse->appendChild($xml->createElement('identitificationExtension', ''));
+						//$Warehouse->appendChild($xml->createElement('warehouseType', ''));
+						//$Warehouse->appendChild($xml->createElement('country', ''));
 
 					$GoodsShipment->appendChild($xml->createElement('transactionNature', $laskurow["kauppatapahtuman_luonne"]));
 					$GoodsShipment->appendChild($xml->createElement('exportationCountry', 'FI'));
 
+			while ($rivirow = mysql_fetch_array($riviresult)) {
+				
 				$CustomsGoodsItem = $FIExportDeclaration->appendChild($xml->createElement('CustomsGoodsItem'));
-					$CustomsGoodsItem->appendChild($xml->createElement('sequence', ''));
+					$CustomsGoodsItem->appendChild($xml->createElement('sequence', $tavaraera));
 
 					$Commodity = $CustomsGoodsItem->appendChild($xml->createElement('Commodity'));
-						$Commodity->appendChild($xml->createElement('description', ''));
-						$Commodity->appendChild($xml->createElement('tariffClassification', ''));
-						$Commodity->appendChild($xml->createElement('tariffClassificationExtension', ''));
-						$Commodity->appendChild($xml->createElement('nationalTariffClassificationExtension', ''));
-						$Commodity->appendChild($xml->createElement('UNDG', ''));
+						$Commodity->appendChild($xml->createElement('description', $rivirow["nimitys"]));
+						$Commodity->appendChild($xml->createElement('tariffClassification', $rivirow["tullinimike1"]));
+						$Commodity->appendChild($xml->createElement('tariffClassificationExtension', $rivirow["tullinimike2"]));
+						//$Commodity->appendChild($xml->createElement('nationalTariffClassificationExtension', ''));
+						//$Commodity->appendChild($xml->createElement('UNDG', ''));
 
 					$Origin = $CustomsGoodsItem->appendChild($xml->createElement('Origin'));
-						$Origin->appendChild($xml->createElement('originCountry', ''));
+						$Origin->appendChild($xml->createElement('originCountry', $rivirow["alkuperamaa"]));
 
 					$CustomsProcedure = $CustomsGoodsItem->appendChild($xml->createElement('CustomsProcedure'));
-						$CustomsProcedure->appendChild($xml->createElement('currentAndPrevious', ''));
-						$CustomsProcedure->appendChild($xml->createElement('national', ''));	
+						$CustomsProcedure->appendChild($xml->createElement('currentAndPrevious', $rivirow["tullikohtelu"]));
+						//$CustomsProcedure->appendChild($xml->createElement('national', ''));
 
-					
-					/*
-					Jos tavaroilla olisi useita vastaanottajia (toimitusosoitteita)
-					$Consignee = $CustomsGoodsItem->appendChild($xml->createElement('Consignee'));
-						$params = array();
-						$params['name1']   	= $laskurow["nimi"];			
-						$params['name2']   	= $laskurow["nimitark"];                                                                                   
-						$params['line']    	= $laskurow["osoite"];			
-						$params['city']    	= $laskurow["postitp"];			
-						$params['postCode']	= $laskurow["postino"];			
-						$params['country'] 	= $laskurow["maa"];			
+					//$Consignee = $CustomsGoodsItem->appendChild($xml->createElement('Consignee'));
+						//$params = array();
+						//$params['identity'] 				 	= ""; 				
+						//$params['codeListResponsibleAgency'] 	= "";
+						//$params['name1']   					= "";   	
+						//$params['name2']   					= "";                                                                                  
+						//$params['line']    					= "";   	
+						//$params['city']    					= "";   	
+						//$params['postCode']					= "";   	
+						//$params['country'] 					= "";   
 						
-						party ($xml, $Consignee, $params);
-					*/
+						//party ($xml, $Consignee, $params);
 					
 					$GoodsPackaging = $CustomsGoodsItem->appendChild($xml->createElement('GoodsPackaging'));
-						packaging ($xml, $GoodsPackaging);	
+						$params = array();
+						$params['marksNumber'] 		= $rivirow["nimitys"];
+						//$params['packages'] 		= "";
+						//$params['packageType'] 	= "";
+						
+						packaging ($xml, $GoodsPackaging, $params);	
 
-					$PreviousCustomsDocument = $CustomsGoodsItem->appendChild($xml->createElement('PreviousCustomsDocument'));
-						document ($xml, $PreviousCustomsDocument);
+					//$PreviousCustomsDocument = $CustomsGoodsItem->appendChild($xml->createElement('PreviousCustomsDocument'));
+						//$params = array();
+						//$params['type']		= "";
+						//$params['reference']	= "";
+						//$params['issue']		= "";
 
-					$AdditionalDocument = $CustomsGoodsItem->appendChild($xml->createElement('AdditionalDocument'));
-						document ($xml, $AdditionalDocument);
+						//document ($xml, $PreviousCustomsDocument, $params);
 
-					$AdditionalInformation = $CustomsGoodsItem->appendChild($xml->createElement('AdditionalInformation'));
-						$AdditionalInformation->appendChild($xml->createElement('statement', ''));
-						$AdditionalInformation->appendChild($xml->createElement('statementDescription', ''));
+					//$AdditionalDocument = $CustomsGoodsItem->appendChild($xml->createElement('AdditionalDocument'));
+						//$params = array();
+						//$params['type']		= "";
+						//$params['reference']	= "";
+						//$params['issue']		= "";
+							
+						//document ($xml, $AdditionalDocument, $params);
+
+					//$AdditionalInformation = $CustomsGoodsItem->appendChild($xml->createElement('AdditionalInformation'));
+						//$AdditionalInformation->appendChild($xml->createElement('statement', ''));
+						//$AdditionalInformation->appendChild($xml->createElement('statementDescription', ''));
 
 					$GoodsLocation = $CustomsGoodsItem->appendChild($xml->createElement('GoodsLocation'));	
 						$params = array();
-						$params['qualifier']	= "O"; 			// Hardcoodattu O (Koodiluettelo 0114)
-						$params['name']   		= sprintf($sijaintipaikka, 0, 17);
+						$params['qualifier']	= "O";	// Hardcoodattu O (Koodiluettelo 0114)
+						$params['name']   		= $sijaintipaikka;
 												
-						location ($xml, $GoodsLocation);
+						location ($xml, $GoodsLocation, $params);
 
 					$GoodsMeasure = $CustomsGoodsItem->appendChild($xml->createElement('GoodsMeasure'));
-						$GoodsMeasure->appendChild($xml->createElement('grossMass', ''));
-						$GoodsMeasure->appendChild($xml->createElement('netNetWeight', ''));
-						$GoodsMeasure->appendChild($xml->createElement('tariff', ''));
-						$GoodsMeasure->appendChild($xml->createElement('measurementUnit', ''));
-						$GoodsMeasure->appendChild($xml->createElement('measurementUnitQualifier', ''));
-
-					$CustomsGoodsItem->appendChild($xml->createElement('statisticalValue', ''));		
-
+						//$GoodsMeasure->appendChild($xml->createElement('grossMass', ''));
+						$GoodsMeasure->appendChild($xml->createElement('netNetWeight', $rivirow["nettop"]));
+						
+					if ($rivirow["su"] != '') {
+						$GoodsMeasure->appendChild($xml->createElement('tariff', $rivirow["kpl"]));
+						$GoodsMeasure->appendChild($xml->createElement('measurementUnit', $rivirow["su_vientiilmo"]));
+						//$GoodsMeasure->appendChild($xml->createElement('measurementUnitQualifier', ''));
+					}
+					
+					//tullausarvi lisäerineen
+					if ($extrat != 0 and $laskurow["summa"] != 0) {
+						$tullarvo = round(($rivirow["rivihinta"]/$laskurow["summa"]*$extrat)+$rivirow["rivihinta"],2);
+					}
+					else {
+						$tullarvo = $rivirow["rivihinta"];
+					}
+						
+					$CustomsGoodsItem->appendChild($xml->createElement('statisticalValue', $tullarvo));	
+					
+					$tavaraera++;	
+			}
 				$Consignment = $FIExportDeclaration->appendChild($xml->createElement('Consignment'));
 					$BorderTransportMeans = $Consignment->appendChild($xml->createElement('BorderTransportMeans'));
 						$params = array();
 						$params['identity']					= $laskurow["aktiivinen_kuljetus"];
-						$params['identifier']				= "";
+						//$params['identifier']				= "";
 						$params['modeAndType']				= $laskurow["kuljetusmuoto"];
 						$params['registrationNationality'] 	= $laskurow["aktiivinen_kuljetus_kansallisuus"];
 						
@@ -323,61 +377,41 @@
 					$DepartureTransportMeans = $Consignment->appendChild($xml->createElement('DepartureTransportMeans'));
 						$params = array();
 						$params['identity']					= $laskurow["sisamaan_kuljetus"];
-						$params['identifier']				= "";
+						//$params['identifier']				= "";
 						$params['modeAndType']				= $laskurow["sisamaan_kuljetusmuoto"];
-						$params['registrationNationality'] 	= "";
+						//$params['registrationNationality'] 	= "";
 						
-						transportmeans ($xml, $DepartureTransportMeans);
+						transportmeans ($xml, $DepartureTransportMeans, $params);
 
-					$EquipmentIdentification = $Consignment->appendChild($xml->createElement('EquipmentIdentification'));
-						$EquipmentIdentification->appendChild($xml->createElement('sequence', ''));
-						$EquipmentIdentification->appendChild($xml->createElement('identification', ''));
+					//$EquipmentIdentification = $Consignment->appendChild($xml->createElement('EquipmentIdentification'));
+						//$EquipmentIdentification->appendChild($xml->createElement('sequence', ''));
+						//$EquipmentIdentification->appendChild($xml->createElement('identification', ''));
 
-					$FreightPayment = $Consignment->appendChild($xml->createElement('FreightPayment'));
-						$FreightPayment->appendChild($xml->createElement('method', ''));
+					//$FreightPayment = $Consignment->appendChild($xml->createElement('FreightPayment'));
+						//$FreightPayment->appendChild($xml->createElement('method', ''));
 
-					$TransportEquipment = $Consignment->appendChild($xml->createElement('TransportEquipment'));
-						$TransportEquipment->appendChild($xml->createElement('seal', ''));
+					//$TransportEquipment = $Consignment->appendChild($xml->createElement('TransportEquipment'));
+						//$TransportEquipment->appendChild($xml->createElement('seal', ''));
 
 					$Consignment->appendChild($xml->createElement('containerIndicator', $laskurow["kontti"]));
-					$Consignment->appendChild($xml->createElement('routingCountry', ''));
-
-			while ($rivirow = mysql_fetch_array($riviresult)) {
-				if ($lask == 3) {
-
-					if ($sivu == 1) {
-						//$paalomake  = sadteksti_loppu ($paalomake, $sivu, $lask);
-					}
-					else {
-					//	$lisalomake = sadteksti_loppu ($lisalomake, $sivu, $lask);	
-					}
-
-					$lask = 0;
-					$sivu++;
-
-					//$lisalomake = sadteksti_lisasivu ($lisalomake, $sivu, $sivut);
-				}
-
-				if ($sivu == 1) {
-					//$paalomake  = sadteksti_rivi ($paalomake, $laskurow, $rivirow, $tjarj, $extrat, $lask);
-				}
-				else {
-				//	$lisalomake = sadteksti_rivi ($lisalomake, $laskurow, $rivirow, $tjarj, $extrat, $lask);	
-				}
-
-				$lask++;
-				$tjarj++;
-			}
-
-			if ($sivu == 1) {
-				//$paalomake  = sadteksti_loppu ($paalomake, $sivu, $lask);
-			}
-			else {
-			//	$lisalomake = sadteksti_loppu ($lisalomake, $sivu, $lask);
-			}
+					//$Consignment->appendChild($xml->createElement('routingCountry', ''));						
 		}
 	}		
 	
-	echo "<pre>".htmlentities(preg_replace("/\>\</", ">\n<", $xml->saveXML()))."</pre>";
+	
+	/*
+	if(!$xml->schemaValidate('/Users/juppe/Desktop/xsd/FIExportDeclaration.xsd')) {
+		echo "NOT VALID XML!";
+		die();
+	}
+	*/
+	
+	$out = $xml->saveXML();
+	$out = preg_replace("/<[a-z0-9]*?> *?<\/[a-z0-9]*?>/i", "", $out);
+	$out = preg_replace("/<[a-z0-9]*?> *?<\/[a-z0-9]*?>/i", "", $out);
+	
+	$out = preg_replace("/></", ">\n<", $out);
+	
+	echo "<pre>".htmlentities($out)."</pre>";
 	
 ?>

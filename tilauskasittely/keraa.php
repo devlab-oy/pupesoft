@@ -1547,7 +1547,7 @@
 		$kentta="keraajanro";
 
 		$otsik_row = array();
-		$keraysklontti = false;
+		$keraysklontti = FALSE;
 
 		$query = "SELECT kerayslista from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
 		$testresult = mysql_query($query) or pupe_error($query);
@@ -1689,7 +1689,7 @@
 				}
 			}
 			
-			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $keraysklontti == false) {
+			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H' and $keraysklontti === FALSE) {
 				echo "<tr><th>".t("Haluatko mennä rahtikirjan syöttöön")."</th><td><input type='checkbox' name='rahtikirjalle'>".t("Kyllä")."</td></tr>";
 			}
 
@@ -2028,46 +2028,46 @@
 				}
 
 				echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'>";
+				
+				if ($yhtiorow["lahete_tyyppi_tulostus"] != '') {
+					echo " ".t("Lähetetyyppi").": <select name='sellahetetyyppi'>";
+
+					$query = "	SELECT avainsana.selite, ".avain('select')."
+								FROM avainsana
+								".avain('join','LAHETETYYPPI_')."
+								WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'LAHETETYYPPI'
+								ORDER BY avainsana.jarjestys, avainsana.selite";
+					$vresult = mysql_query($query) or pupe_error($query);
+
+					$query2 = 	"SELECT lahetetyyppi FROM lasku 
+								JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
+								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$id'";
+					$vresult2 = mysql_query($query2) or pupe_error($query2);
+					$row2 = mysql_fetch_array($vresult2);
+
+					while($row = mysql_fetch_array($vresult)) {
+						$sel = "";
+						if ($row[0] == $row2[0]) $sel = 'selected';
+						echo "<option value='$row[0]' $sel>$row[1]</option>";
+					}
+
+					echo "</select>";
+					echo "</th>";
+				}
+				
+				if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
+					echo "<th>&nbsp;</th>";
+				}
+				echo "</tr>";
 			}
 			elseif ($otsik_row['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
 				echo "<tr><th>".t("Kolli")."</th><th colspan='$spanni'><input type='text' name='pakkaamo_kolli' size='5'/></th>";
-			}
-			
-			if ($yhtiorow["lahete_tyyppi_tulostus"] != '' and $otsik_row['pakkaamo'] == 0 and $yhtiorow['pakkaamolokerot'] == '') {
-				echo " ".t("Lähetetyyppi").": <select name='sellahetetyyppi'>";
 				
-				$query = "	SELECT avainsana.selite, ".avain('select')."
-							FROM avainsana
-							".avain('join','LAHETETYYPPI_')."
-							WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'LAHETETYYPPI'
-							ORDER BY avainsana.jarjestys, avainsana.selite";
-				$vresult = mysql_query($query) or pupe_error($query);
-				
-				$query2 = 	"SELECT lahetetyyppi FROM lasku 
-							JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
-							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$id'";
-				$vresult2 = mysql_query($query2) or pupe_error($query2);
-				$row2 = mysql_fetch_array($vresult2);
-
-				while($row = mysql_fetch_array($vresult)) {
-					$sel = "";
-					if ($row[0] == $row2[0]) $sel = 'selected';
-					echo "<option value='$row[0]' $sel>$row[1]</option>";
+				if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
+					echo "<th>&nbsp;</th>";
 				}
-
-				echo "</select>";
-				
-				echo "</th>";
+				echo "</tr>";
 			}
-			else {
-				echo "<th>&nbsp;</th>";
-			}
-
-			if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
-				echo "<th>&nbsp;</th>";
-			}
-			
-			echo "</tr>";
 
 			echo "<tr>";
 
@@ -2087,25 +2087,33 @@
 				}
 
 				echo "</select> ".t("Kpl").": <input type='text' size='4' name='oslappkpl' value='$oslappkpl'></th>";
+				
+				if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
+					echo "<th></th>";
+				}
+				echo "</tr>";
 			}
 			elseif ($otsik_row['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
-				echo "<tr><th>".t("Rullakko")."</th><th colspan='$spanni'><input type='text' name='pakkaamo_rullakko' size='5'/></th>";
+				echo "<th>".t("Rullakko")."</th><th colspan='$spanni'><input type='text' name='pakkaamo_rullakko' size='5'/></th>";
+				
+				if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
+					echo "<th></th>";
+				}
+				echo "</tr>";
 			}
+			
+			echo "</table><br>";
+			
 
-			if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
-				echo "<th></th>";
-			}
-
-			echo "<th>";
 			echo "<input type='hidden' name='tilausnumeroita' id='tilausnumeroita' value='$tilausnumeroita'>";
-			echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa kerätyksi")."'></th></form></tr>";
-			echo "</table>";
+			echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa kerätyksi")."'></form>";
+			
 
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y') {
-				echo "<br><font class='message'>".t("Siirryt automaattisesti rahtikirjan syöttöön")."!</font>";
+				echo "<br><br><font class='message'>".t("Siirryt automaattisesti rahtikirjan syöttöön")."!</font>";
 			}
-			elseif ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H'  and $keraysklontti == false) {
-				echo "<br><font class='message'>".t("Voit halutessasi siirtyä rahtikirjan syöttöön")."!</font>";
+			elseif ($yhtiorow['karayksesta_rahtikirjasyottoon'] == 'H'  and $keraysklontti === FALSE) {
+				echo "<br><br><font class='message'>".t("Voit halutessasi siirtyä rahtikirjan syöttöön")."!</font>";
 			}
 		}
 		else {

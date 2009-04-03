@@ -352,6 +352,7 @@
 
 			//Ainostaan tulostusaluuen mukaan splittaantuneet tilaukset yhdistetään
 			if ($yhtiorow["splittauskielto"] == "" and strpos($tunnukset,',') !== false and $yhtiorow['pakkaamolokerot'] == 'K') {
+				
 				$otsikko_tunnarit = explode(',',$tunnukset);
 				sort($otsikko_tunnarit);
 				
@@ -370,9 +371,6 @@
 				$laskurow['tunnus'] = $otsikko_tunnarit[0];
 							
 			}
-			
-			
-			
 			
 			// Katsotaan pitäisikö tämä rahtikirja tulostaa heti...
 			$query = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
@@ -1203,7 +1201,8 @@
 					$temp_osittaiset .= "	<form method='post' action='$PHP_SELF'>";
 					$temp_osittaiset .= "<td>";
 					
-					$checkit = explode(",",$row[tunnukset]); 
+					$checkit = explode(",",$row["tunnukset"]); 
+					
 					if (count($checkit) > 1) {
 						foreach ($checkit as $key => $value) {
 							$temp_osittaiset .= "<input type='checkbox' name='checktunnukset[]' value='$value'><br>";
@@ -1389,6 +1388,7 @@
 						WHERE maa != '' and yhtio = '$kukarow[yhtio]' and maa = '$tumaa'";
 			$maare = mysql_query($query) or pupe_error($query);
 			$maarow = mysql_fetch_array($maare);
+			
 			$haku .= " and lasku.varasto in ($maarow[tunnukset]) ";
 		}
 
@@ -1502,7 +1502,7 @@
 		$otsik = mysql_fetch_array($resul);
 
 		if ($tila == 'L') {
-			$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$otsik[maksuehto]'";
+			$query = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$otsik[maksuehto]'";
 			$resul = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($resul) == 0) {
@@ -1517,7 +1517,7 @@
 		}
 	
 		if (isset($checktunnukset) and is_array($checktunnukset)) {
-			$tunnukset = implode(',',$checktunnukset);
+			$tunnukset = implode(',', $checktunnukset);
 		}
 		
 		echo "<table>";
@@ -1530,7 +1530,11 @@
 		echo "<input type='hidden' name='tunnukset' value='$tunnukset'>";
 		echo "<input type='hidden' name='mista' value='$mista'>";
 		
-		echo "<tr><th align='left'>".t("Tilaus")."</th><td>$otsik[tunnus]</td>";
+		echo "<tr><th align='left'>".t("Tilaus")."</th>";
+		
+		if ($tunnukset != "") echo "<td>$tunnukset</td>";
+		else echo "<td>$otsik[tunnus]</td>";		
+		
 		echo "<th align='left'>".t("Ytunnus")."</th><td>$otsik[ytunnus]</td></tr>";
 
 		echo "<tr><th align='left'>".t("Asiakas")."</th><td>$otsik[nimi] $otsik[nimitark]<br>$otsik[osoite]<br>$otsik[postino] $otsik[postitp]</td>";

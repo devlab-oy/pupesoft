@@ -1177,10 +1177,7 @@ if ($tee == "MUOKKAA") {
 
 		echo "</tr>";
 		
-		if (	
-				$laskurow["tila"] == "H" and $laskurow["hyvaksyja_nyt"] == $kukarow["kuka"] or
-				($toim == "SUPER" and strtotime($laskurow["tapvm"]) > strtotime($yhtiorow["tilikausi_alku"]) and strtotime($laskurow["tapvm"]) < strtotime($yhtiorow["tilikausi_loppu"])) 
-			) {
+		if ($laskurow["tila"] == "H" and $laskurow["hyvaksyja_nyt"] == $kukarow["kuka"] or ($toim == "SUPER" and strtotime($laskurow["tapvm"]) > strtotime($yhtiorow["tilikausi_alku"]) and strtotime($laskurow["tapvm"]) < strtotime($yhtiorow["tilikausi_loppu"]))) {
 				
 			if($rivitunnus == "") {
 				// tässä alotellaan koko formi.. tämä pitää kirjottaa aina
@@ -1206,6 +1203,7 @@ if ($tee == "MUOKKAA") {
 
 				$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='$tilausnumero'";
 				$liiteres=mysql_query($query) or pupe_error($query);
+				
 				if (mysql_num_rows($liiteres)>0) {
 					while ($liiterow=mysql_fetch_array($liiteres)) {
 						if ($laskurow["hyvaksyja_nyt"] == $kukarow["kuka"]) {
@@ -1549,7 +1547,7 @@ if ($tee == "MUOKKAA") {
 			
 			if ($toim == "SUPER") {
 				echo "<tr><th colspan='$cols'>".t("Poikkeava tilinumero, oletus on")." '$trow[tilino]'</th></tr>";
-				if($tilino == $trow[tilino] or $kuivat == "JOO" or $kulupoiminta == "JOO") {
+				if($tilino == $trow["tilino"] or $kuivat == "JOO" or $kulupoiminta == "JOO") {
 					$tilino	= "";
 				}
 				
@@ -1676,6 +1674,7 @@ if ($tee == "MUOKKAA") {
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and otunnus = $tilausnumero and perheid2 = $row[perheid2] and tilausrivi.tyyppi = 'M'";
 					$abures = mysql_query($query) or pupe_error($query);
 					$aburow = mysql_fetch_array($abures);
+					
 					if($toim == "SUPER") {
 						$v = 3;
 					}

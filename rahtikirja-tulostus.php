@@ -773,7 +773,7 @@
 				$class = '';
 			}
 
-			if ($etsi_button2 != '') {
+			if ($etsi_button2 != '' and $etsi_nro2 != '') {
 				$checked_chk = 'checked';
 				$nayta_div = '';
 				$class = '';

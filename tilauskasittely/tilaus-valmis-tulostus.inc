@@ -127,33 +127,27 @@
 						limit 1";
 		}
 		else {
+			
 			$query = "	SELECT *
 						from varastopaikat
-						where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
-						order by alkuhyllyalue,alkuhyllynro";
+						where yhtio='$kukarow[yhtio]' 
+						and tunnus='$laskurow[varasto]'";
 		}
 		$prires= mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($prires) > 0) {
 			$prirow = mysql_fetch_array($prires);
 
-			// k‰teinen muuttuja viritet‰‰n tilaus-valmis.inc:iss‰ jos maksuehto on k‰teinen
-			// ja silloin pit‰‰ kaikki l‰hetteet tulostaa aina printteri5:lle (lasku printteri)
-			if ($kateinen == 'X') {
-				$apuprintteri = $prirow['printteri5']; // laskuprintteri
-			}
-			else {
-				$apuprintteri = $prirow['printteri1']; // l‰heteprintteri
+			$apuprintteri = $prirow['printteri1']; // l‰heteprintteri
 
-				//haetaan optimaalinen tulostin t‰lle l‰hetteelle
-				$tilaus  = $tilausnumeroita;
-				$varasto = $laskurow["varasto"];
+			//haetaan optimaalinen tulostin t‰lle l‰hetteelle
+			$tilaus  = $tilausnumeroita;
+			$varasto = $laskurow["varasto"];
 
-				require("varaston_tulostusalue.inc");
+			require("varaston_tulostusalue.inc");
 
-				if ($kirjoitin != '') {
-					$apuprintteri = $kirjoitin;
-				}
+			if ($kirjoitin != '') {
+				$apuprintteri = $kirjoitin;
 			}
 
 			//k‰sinvalittu printteri
@@ -165,6 +159,7 @@
 			$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
 			$kirres  = mysql_query($query) or pupe_error($query);
 			$kirrow  = mysql_fetch_array($kirres);
+			
 			$komento = $kirrow['komento'];
 		}
 

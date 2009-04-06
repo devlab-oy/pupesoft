@@ -219,7 +219,7 @@
 					if ($mukaan == "toimittaja") {
 						if ($group!="") $group .= ",toimittaja";
 						else $group  .= "toimittaja";
-						$select .= "(select group_concat(distinct toimittaja) from tuotteen_toimittajat use index (yhtio_tuoteno) where tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno) toimittaja, ";
+						$select .= "concat_ws(' / ', lasku.ytunnus, lasku.nimi) toimittaja, ";
 						$order  .= "toimittaja,";
 						$gluku++;
 					}
@@ -319,6 +319,7 @@
 						$query .= " round(sum(if(lasku.mapvm >= '$vva-$kka-$ppa'  and lasku.mapvm <= '$vvl-$kkl-$ppl', tilausrivi.kpl,0))/sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kpl,0)),2) ostokplind, ";
 					}
 				}
+				
 				// Vika pilkku ja space pois
 				$query = substr($query, 0 ,-2);
 
@@ -329,8 +330,9 @@
 							LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							LEFT JOIN toimi use index (PRIMARY) ON toimi.yhtio=lasku.yhtio and toimi.tunnus=lasku.liitostunnus
 							WHERE lasku.yhtio in ($yhtio)
-							$asiakasrajaus and
-							lasku.tila = 'K' and kohdistettu = 'X'";
+							$asiakasrajaus 
+							and lasku.tila = 'K' 
+							and kohdistettu = 'X'";
 
 				//yritetään saada kaikki tarvittavat laskut mukaan
 				$lalku  = date("Y-m-d", mktime(0, 0, 0, $kka-1, $ppa,  $vva));
@@ -520,19 +522,7 @@
 								}
 							}
 
-							// jos kyseessa on toimittaja, haetaan nimi/nimet
-							if (mysql_field_name($result, $i) == "toimittaja") {
-								// fixataan mysql 'in' muotoon
-								$toimittajat = "'".str_replace(",","','",$row[$i])."'";
-								$query = "	SELECT group_concat(concat_ws('/',ytunnus,nimi)) nimi
-											FROM toimi
-											WHERE yhtio in ($yhtio) and ytunnus in ($toimittajat)";
-								$osre = mysql_query($query) or pupe_error($query);
-								if (mysql_num_rows($osre) == 1) {
-									$osrow = mysql_fetch_array($osre);
-									$row[$i] = $osrow['nimi'];
-								}
-							}
+							
 
 							// Jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
 							if ($gluku > 1 and $edluku != $row[0] and $edluku != 'x' and $piiyhteensa == '' and strpos($group, ',') !== FALSE and substr($group, 0, 13) != "tuote.tuoteno") {

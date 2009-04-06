@@ -3929,9 +3929,23 @@ if (!function_exists('ebid')) {
 			$query = "SELECT tunnus from liitetiedostot where liitostunnus='{$laskurow['tunnus']}' and liitos='lasku' and yhtio='{$kukarow['yhtio']}'";
 			$res = mysql_query($query) or pupe_error($query);
 
-			$out = '';
+			if ($url_only) {
+				
+				$out = array();
+			}
+			else {
+				$out = '';
+			}
+			
+			
 			while ($row = mysql_fetch_array($res)) {
-				$out .= "<a $target href='".$palvelin2."view.php?id={$row['tunnus']}'>". t('Näytä lasku') ."</a> ";
+				if ($url_only) {
+					$out[] = $palvelin2."view.php?id={$row['tunnus']}";
+				}
+				else {
+					$out .= "<a $target href='".$palvelin2."view.php?id={$row['tunnus']}'>". t('Näytä lasku') ."</a> ";
+				}
+				
 			}
 
 			if ($out != '') {

@@ -1,633 +1,615 @@
 <?php
-/**
- *
- *
- */
 
-if (empty($argv)) {
-    die('<p>Tämän scriptin voi ajaa ainoastaan komentoriviltä.</p>');
-}
-
-if ($argv[1] == '') {
-	die("Yhtiö on annettava!!");
-}
-
-require 'inc/connect.inc';
-require 'inc/functions.inc';
-
-// kaikki virheilmotukset
-//ini_set('error_reporting', E_ALL | E_STRICT);
-
-$path            = '/tmp/';
-$path_nimike     = $path . 'NIMIKE.txt';
-$path_asiakas    = $path . 'ASIAKAS.txt';
-$path_toimittaja = $path . 'TOIMITTAJA.txt';
-$path_varasto    = $path . 'VARASTO.txt';
-$path_tapahtumat = $path . 'TAPAHTUMAT.txt';
-$path_myynti     = $path . 'MYYNTI.txt';
-
-/*$kukarow = array(
-	'kuka'  => 'macce',
-	'yhtio' => $argv[1];
-);*/
-
-$kukarow = array();
-
-$kukarow["yhtio"] = $argv[1];
-
-$query = "SELECT * from yhtio where yhtio='{$kukarow['yhtio']}'";
-$res = mysql_query($query) or pupe_error($query);
-$yhtiorow = mysql_fetch_assoc($res);
-
-
-$query = "SELECT * from yhtion_parametrit where yhtio='{$kukarow['yhtio']}'";
-$res = mysql_query($query) or pupe_error($query);
-$params = mysql_fetch_assoc($res);
-
-$yhtiorow = array_merge($yhtiorow, $params);
-
-//testausta varten limit
-//$limit = "limit 500";
-
-$limit = '';
-
-// ajetaan kaikki operaatiot
-nimike($limit);
-asiakas();
-toimittaja();
-varasto($limit);
-varastotapahtumat($limit);
-myynti();
-
-function nimike($limit = '') {
-	global $kukarow, $path_nimike;
-
-	$query = "SELECT tuoteno from tuote where yhtio='{$kukarow['yhtio']}' $limit";
-	$rest = mysql_query($query) or pupe_error($query);
-
-	$rows = mysql_num_rows($rest);
-	if ($rows == 0) {
-		echo "Yhtään tuotetta ei löytynyt\n";
-		die();
+	if (empty($argv)) {
+	    die('<p>Tämän scriptin voi ajaa ainoastaan komentoriviltä.</p>');
 	}
 
-	$fp = fopen($path_nimike, 'w+');
+	if ($argv[1] == '') {
+		die("Yhtiö on annettava!!");
+	}
+	
+	$yhtio = $argv[1];
 
-	$row = 0;
+	require('../inc/connect.inc');
+	require('../inc/functions.inc');
 
-	$data = array(
-		'nimiketunnus'     => null,
-		'nimitys'          => null,
-		'yksikko'          => null,
-		'tuoteryhma'       => null,
-		'osasto'	       => null,
-		'kustannuspaikka'  => null,
-		'varastotunnus'    => null,
-		'hintayksikko'     => null,
-		'varastoimiskoodi' => null,
-		'nimikelaji'       => null,
-		'ostaja'           => null,
-		'paino'            => null,
-		'toimittajatunnus' => null,
-		'toimittajannimiketunnus' => null
-	);
+	$path            = '/Users/juppe/Desktop/';
+	$path_nimike     = $path . 'NIMIKE.txt';
+	$path_asiakas    = $path . 'ASIAKAS.txt';
+	$path_toimittaja = $path . 'TOIMITTAJA.txt';
+	$path_varasto    = $path . 'VARASTO.txt';
+	$path_tapahtumat = $path . 'TAPAHTUMAT.txt';
+	$path_myynti     = $path . 'MYYNTI.txt';
 
-	create_headers($fp, array_keys($data));
+	$query = "SELECT * from yhtio where yhtio='$yhtio'";
+	$res = mysql_query($query) or pupe_error($query);
+	$yhtiorow = mysql_fetch_assoc($res);
 
-	while ($tuoteno = mysql_fetch_assoc($rest)) {
+	$query = "SELECT * from yhtion_parametrit where yhtio='$yhtio'";
+	$res = mysql_query($query) or pupe_error($query);
+	$params = mysql_fetch_assoc($res);
 
-		// mones tämä on
-		$row++;
+	$yhtiorow = array_merge($yhtiorow, $params);
 
-        #JOIN tuotteen_toimittajat ON tuote.tuoteno=tuotteen_toimittajat.tuoteno and tuote.yhtio=tuotteen_toimittajat.yhtio
-		$query = "	SELECT
-		          	tuote.tuoteno        	nimiketunnus,
-			        nimitys              	nimitys,
-			        yksikko              	yksikko,
-			        avainsana.selitetark 	tuoteryhma,
-			        avainsana_os.selitetark	osasto,
+	// Jos jt-rivit varaavat saldoa niin se vaikuttaa asioihin
+	if ($yhtiorow["varaako_jt_saldoa"] != "") {
+		$lisavarattu = " not in ('P') ";
+	}
+	else {
+		$lisavarattu = " not in ('P','J','S') ";
+	}
+
+	
+	echo "$yhtio\n";
+
+
+	//testausta varten limit
+	$limit = "limit 200";
+
+	// ajetaan kaikki operaatiot
+	nimike($limit);
+	asiakas($limit);
+	toimittaja($limit);
+	varasto($limit);
+	varastotapahtumat($limit);
+	myynti($limit);
+
+	function nimike($limit = '') {
+		global $path_nimike, $yhtio;
+
+		$query = "	SELECT 
+					tuote.tuoteno        	nimiketunnus,
+        			tuote.nimitys           nimitys,
+			        tuote.yksikko           yksikko,
+			        concat_ws(' ', tuote.try, avainsana.selitetark) tuoteryhma,
 					tuote.kustp				kustannuspaikka,
-			        #varastotunnus,
-			        ei_varastoida 			varastoimiskoodi,
-			        tuotetyyppi    			nimikelaji,
+					'0'						toimittajatunnus,
+					'0'						varastotunnus,
+					'0'						toimittajannimiketunnus,
+					'1'						hintayksikko,
+					tuote.ei_varastoida 	varastoimiskoodi,
+			        tuote.tuotetyyppi    	nimikelaji,
 			        kuka.kuka      			ostaja,
-			        tuotemassa     			paino
-			        #lava,
-			        #lavakerros
-			        from tuote
-			        JOIN avainsana ON avainsana.selite=tuote.try and avainsana.yhtio=tuote.yhtio
-			        JOIN avainsana avainsana_os ON avainsana_os.selite=tuote.osasto and avainsana_os.yhtio=tuote.yhtio
-					JOIN kuka ON kuka.myyja=tuote.ostajanro
-					WHERE tuote.yhtio='{$kukarow['yhtio']}'
-					and tuote.tuoteno='{$tuoteno['tuoteno']}'";
-		$res = mysql_query($query) or pupe_error($query);
+			        tuote.tuotemassa     	paino
+			        FROM tuote
+			        LEFT JOIN avainsana ON avainsana.selite=tuote.try and avainsana.yhtio=tuote.yhtio
+					LEFT JOIN kuka ON kuka.myyja=tuote.ostajanro and kuka.yhtio=tuote.yhtio and kuka.myyja > 0
+					WHERE tuote.yhtio='$yhtio' 
+					$limit";
+		$rest = mysql_query($query) or pupe_error($query);
+		$rows = mysql_num_rows($rest);
+		
+		if ($rows == 0) {
+			echo "Yhtään tuotetta ei löytynyt $query\n";
+			die();
+		}
 
-		$query = "	SELECT tuotteen_toimittajat.liitostunnus toimittajatunnus, tuotteen_toimittajat.toim_tuoteno toimittajannimiketunnus
-					FROM tuotteen_toimittajat
-					WHERE tuoteno = '{$tuoteno['tuoteno']}'
-					AND yhtio = '{$kukarow['yhtio']}'";
-		$tuot_toim_res = mysql_query($query) or pupe_error($query);
-		$tuot_toim_row = mysql_fetch_array($tuot_toim_res);
+		$fp = fopen($path_nimike, 'w+');
 
-		while ($tuote = mysql_fetch_assoc($res)) {
+		$row = 0;
+
+		$headers = array(
+			'nimiketunnus'     			=> null,
+			'nimitys'          			=> null,
+			'yksikko'          			=> null,
+			'tuoteryhma'       			=> null,
+			'kustannuspaikka'  			=> null,
+			'toimittajatunnus' 			=> null,
+			'varastotunnus'    			=> null,
+			'toimittajannimiketunnus' 	=> null,
+			'hintayksikko'    	 		=> null,
+			'varastoimiskoodi' 			=> null,
+			'nimikelaji'       			=> null,
+			'ostaja'           			=> null,
+			'paino'            			=> null
+		);
+
+		create_headers($fp, array_keys($headers));
+
+		while ($tuote = mysql_fetch_assoc($rest)) {
+
+			// mones tämä on
+			$row++;
+
+			$query = "	SELECT 
+						liitostunnus toimittajatunnus, 
+						toim_tuoteno toimittajannimiketunnus
+						FROM tuotteen_toimittajat
+						WHERE tuoteno = '{$tuote['tuoteno']}'
+						AND yhtio = '$yhtio'
+						LIMIT 1";
+			$tuot_toim_res = mysql_query($query) or pupe_error($query);
+			$tuot_toim_row = mysql_fetch_assoc($tuot_toim_res);
 
 			if (trim($tuote['varastoimiskoodi']) != '') {
 				// tuotetta ei varastoida
 				$tuote['varastoimiskoodi'] = '0';
-			} else {
+			} 
+			else {
 				$tuote['varastoimiskoodi'] = '1';
 			}
 
-			// hintayksikko aina 1
-			$tuote['hintayksikko'] = '1';
-
-			$query = "SELECT hyllyalue, hyllynro from tuotepaikat where tuoteno='{$tuoteno['tuoteno']}' and oletus != '' and yhtio='{$kukarow['yhtio']}' limit 1";
+			$query = "	SELECT hyllyalue, hyllynro 
+						from tuotepaikat 
+						where tuoteno='{$tuote['tuoteno']}' 
+						and oletus != '' 
+						and yhtio='$yhtio' 
+						limit 1";
 			$res = mysql_query($query) or pupe_error($query);
 			$paikka = mysql_fetch_assoc($res);
 
 			// mikä varasto
-			$tuote['varastotunnus'] = kuuluukovarastoon($paikka['hyllyalue'], $paikka['hyllynro']);
-
-			$data = array(
-				'nimiketunnus'     => $tuote['nimiketunnus'],
-				'nimitys'          => $tuote['nimitys'],
-				'yksikko'          => $tuote['yksikko'],
-				'tuoteryhma'       => $tuote['tuoteryhma'],
-				'osasto'	       => $tuote['osasto'],
-				'kustannuspaikka'  => $tuote['kustannuspaikka'],
-				'varastotunnus'    => $tuote['varastotunnus'],
-				'hintayksikko'     => $tuote['hintayksikko'],
-				'varastoimiskoodi' => $tuote['varastoimiskoodi'],
-				'nimikelaji'       => $tuote['nimikelaji'],
-				'ostaja'           => $tuote['ostaja'],
-				'paino'            => $tuote['paino'],
-				'toimittajatunnus' => $tuot_toim_row['toimittajatunnus'],
-				'toimittajannimiketunnus' => $tuot_toim_row['toimittajannimiketunnus']
-			);
-
+			$tuote['varastotunnus'] 			= kuuluukovarastoon($paikka['hyllyalue'], $paikka['hyllynro']);
+			$tuote['toimittajatunnus'] 			= $tuot_toim_row['toimittajatunnus'];
+			$tuote['toimittajannimiketunnus'] 	= $tuot_toim_row['toimittajannimiketunnus'];
+			
+			$data = array_merge($headers, $tuote);
 			$data = implode("\t", $data);
-			//echo '.';
 
 			if (! fwrite($fp, $data . "\n")) {
 				echo "Failed writing row.\n";
 				die();
 			}
+
+			$progress = floor(($row/$rows) * 40);
+			$str = sprintf("%10s", "$row/$rows");
+
+			$hash = '';
+			for ($i=0; $i < (int) $progress; $i++) {
+				$hash .= "#";
+			}
+
+			echo sprintf("%s  |%-40s|\r", $str, $hash);
 		}
 
-		$progress = floor(($row/$rows) * 40);
-		$str = sprintf("%10s", "$row/$rows");
+		fclose($fp);
+		echo "\nDone.\n";
+	}
 
-		$hash = '';
-		for ($i=0; $i < (int) $progress; $i++) {
-			$hash .= "#";
+	function asiakas($limit = '') {
+		global $path_asiakas, $yhtio;
+
+		echo "Asiakkaat...";
+
+		$query = "	SELECT 
+					asiakas.tunnus		asiakastunnus, 
+					concat_ws(' ', asiakas.nimi, asiakas.nimitark)	asiakkaannimi, 
+					asiakas.ryhma		asiakasryhma, 
+					kuka.kuka 			myyjatunnus 
+					FROM asiakas
+					LEFT JOIN kuka ON kuka.myyja=asiakas.myyjanro and kuka.yhtio=asiakas.yhtio and kuka.myyja > 0
+					where asiakas.yhtio='$yhtio'
+					$limit";
+		$rest = mysql_query($query) or pupe_error($query);
+
+		$rows = mysql_num_rows($rest);
+		$row = 0;
+
+		if ($rows == 0) {
+			echo "Yhtään asiakasta ei löytynyt\n";
+			die();
 		}
 
-		echo sprintf("%s  |%-40s|\r", $str, $hash);
-	}
+		$fp = fopen($path_asiakas, 'w+');
 
-	fclose($fp);
-	echo "\nDone.\n";
-}
-
-function asiakas() {
-	global $path_asiakas, $kukarow;
-
-	echo "Asiakkaat...";
-
-	$query = "SELECT tunnus, nimi, nimitark, ryhma, if(myyjanro=0,'',myyjanro) myyjanro from asiakas where yhtio='{$kukarow['yhtio']}'";
-	$rest = mysql_query($query) or pupe_error($query);
-
-	$rows = mysql_num_rows($rest);
-	$row = 0;
-
-	if ($rows == 0) {
-		echo "Yhtään asiakasta ei löytynyt\n";
-		die();
-	}
-
-	$fp = fopen($path_asiakas, 'w+');
-
-	$data = array(
-		'asiakastunnus'  => null,
-		'asiakkaan nimi' => null,
-		'asiakasryhma'   => null,
-		'myyjatunnus'    => null,
-		'laskutustunnus' => null,
-	);
-
-	create_headers($fp, array_keys($data));
-
-	while ($asiakas = mysql_fetch_array($rest)) {
-		$row++;
-
-		$data = array(
-			'asiakastunnus'  => $asiakas['tunnus'],
-			'asiakkaan nimi' => $asiakas['nimi'] . ' ' . $asiakas['nimitark'],
-			'asiakasryhma'   => $asiakas['ryhma'],
-			'myyjatunnus'    => $asiakas['myyjanro'],
-			'laskutustunnus' => $asiakas['tunnus'],
+		$headers = array(
+			'asiakastunnus'  => null,
+			'asiakkaannimi'  => null,
+			'asiakasryhma'   => null,
+			'myyjatunnus'    => null
 		);
 
-		$data = implode("\t", $data);
+		create_headers($fp, array_keys($headers));
 
-		if (! fwrite($fp, $data . "\n")) {
-			echo "Failed writing row.\n";
+		while ($asiakas = mysql_fetch_assoc($rest)) {
+			$row++;
+
+			$data = array_merge($headers, $asiakas);
+			$data = implode("\t", $data);
+
+			if (! fwrite($fp, $data . "\n")) {
+				echo "Failed writing row.\n";
+				die();
+			}
+
+			$progress = floor(($row/$rows) * 40);
+			$str = sprintf("%10s", "$row/$rows");
+
+			$hash = '';
+			for ($i=0; $i < (int) $progress; $i++) {
+				$hash .= "#";
+			}
+
+			echo sprintf("%s  |%-40s|\r", $str, $hash);
+		}
+
+		fclose($fp);
+		echo "Done.\n";
+	}
+
+	function toimittaja($limit = '') {
+		global $path_toimittaja, $yhtio;
+
+		echo "Toimittajat...";
+		
+		$query = "	SELECT 
+					tunnus							toimittajatunnus, 
+					concat_ws(' ', nimi, nimitark)	toimittajannimi
+					from toimi 
+					where yhtio='$yhtio'
+					$limit";
+		$rest = mysql_query($query) or pupe_error($query);
+
+		$rows = mysql_num_rows($rest);
+		$row = 0;
+		if ($rows == 0) {
+			echo "Yhtään toimittajaa ei löytynyt\n";
 			die();
 		}
 
-		$progress = floor(($row/$rows) * 40);
-		$str = sprintf("%10s", "$row/$rows");
+		$fp = fopen($path_toimittaja, 'w+');
 
-		$hash = '';
-		for ($i=0; $i < (int) $progress; $i++) {
-			$hash .= "#";
-		}
-
-		echo sprintf("%s  |%-40s|\r", $str, $hash);
-	}
-
-	fclose($fp);
-	echo "Done.\n";
-}
-
-function toimittaja() {
-	global $path_toimittaja, $kukarow;
-
-	echo "Toimittajat...";
-	$query = "SELECT tunnus, nimi, nimitark, yhteyshenkilo from toimi where yhtio='{$kukarow['yhtio']}'";
-	$rest = mysql_query($query) or pupe_error($query);
-
-	$rows = mysql_num_rows($rest);
-	$row = 0;
-	if ($rows == 0) {
-		echo "Yhtään toimittajaa ei löytynyt\n";
-		die();
-	}
-
-	$fp = fopen($path_toimittaja, 'w+');
-
-	$data = array(
-		'toimittajatunnus'  => null,
-		'toimittajan nimi'  => null,
-		'ostajatunnus'      => null,
-	);
-
-	create_headers($fp, array_keys($data));
-
-	while ($asiakas = mysql_fetch_array($rest)) {
-		$row++;
-
-		$data = array(
-			'toimittajatunnus'  => $asiakas['tunnus'],
-			'toimittajan nimi'  => $asiakas['nimi'] . ' ' . $asiakas['nimitark'],
-			'ostajatunnus'      => $asiakas['yhteyshenkilo'],
+		$headers = array(
+			'toimittajatunnus'  => null,
+			'toimittajannimi'   => null
 		);
 
-		$data = implode("\t", $data);
+		create_headers($fp, array_keys($headers));
 
-		if (! fwrite($fp, $data . "\n")) {
-			echo "Failed writing row.\n";
+		while ($toimittaja = mysql_fetch_assoc($rest)) {
+			$row++;
+				
+			$data = array_merge($headers, $toimittaja);
+			$data = implode("\t", $data);
+
+			if (! fwrite($fp, $data . "\n")) {
+				echo "Failed writing row.\n";
+				die();
+			}
+
+			$progress = floor(($row/$rows) * 40);
+			$str = sprintf("%10s", "$row/$rows");
+
+			$hash = '';
+			for ($i=0; $i < (int) $progress; $i++) {
+				$hash .= "#";
+			}
+
+			echo sprintf("%s  |%-40s|\r", $str, $hash);
+		}
+
+		fclose($fp);
+		echo "Done.\n";
+	}
+
+	function varasto($limit = '') {
+		global $path_varasto, $lisavarattu, $yhtio;
+
+		echo "Varasto... ";
+		
+		$fp = fopen($path_varasto, 'w+');
+
+		$query = "	SELECT 
+					tuotepaikat.tuoteno nimiketunnus, 					
+					sum(tuotepaikat.saldo) saldo,
+					tuote.kehahin keskihinta, 		
+					'0' tilattu,
+					'0' varattu,					
+					varastopaikat.tunnus varastotunnus,
+					(SELECT tuotteen_toimittajat.toimitusaika FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = '$yhtio' AND tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno AND tuotteen_toimittajat.toimitusaika != '' LIMIT 1) toimitusaika
+					FROM tuotepaikat
+					LEFT JOIN varastopaikat ON
+					concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+					concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+					and varastopaikat.yhtio=tuotepaikat.yhtio
+					JOIN tuote ON tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio
+					WHERE tuote.ei_saldoa = ''
+					AND tuotepaikat.yhtio = '$yhtio'
+					GROUP BY 1,3,4,5,6,7
+					ORDER BY 1
+					$limit";
+		$res = mysql_query($query) or pupe_error($query);
+
+		$rows = mysql_num_rows($res);
+		$row = 0;
+		if ($rows == 0) {
+			echo "Yhtään varastoa ei löytynyt\n";
 			die();
 		}
 
-		$progress = floor(($row/$rows) * 40);
-		$str = sprintf("%10s", "$row/$rows");
+		$headers = array(
+			'nimiketunnus',
+			'saldo',
+			'keskihinta',
+			'tilattu',
+			'varattu',
+			'varastotunnus',
+			'toimitusaika'
+		);
 
-		$hash = '';
-		for ($i=0; $i < (int) $progress; $i++) {
-			$hash .= "#";
+		// tehdään otsikot
+		create_headers($fp, $headers);
+
+		while ($trow = mysql_fetch_assoc($res)) {
+			$row++;
+			
+			$query = "	SELECT
+						sum(if(tilausrivi.tyyppi='O', tilausrivi.varattu, 0)) tilattu,
+						sum(if((tilausrivi.tyyppi='L' or tilausrivi.tyyppi='V') and tilausrivi.var $lisavarattu, tilausrivi.varattu, 0)) varattu
+						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+						WHERE yhtio = '$yhtio'
+	 					and tyyppi in ('L','V','O','G')
+						and tuoteno = '{$trow['nimiketunnus']}'
+						and laskutettuaika = '0000-00-00'";
+			$result = mysql_query($query) or pupe_error($query);
+			$ennp = mysql_fetch_assoc($result);
+
+			$trow['tilattu'] = $ennp['tilattu'];
+			$trow['varattu'] = $ennp['varattu'];
+
+			$data = array_merge($headers, $trow);
+			$data = implode("\t", $trow);
+
+			if (! fwrite($fp, $data . "\n")) {
+				echo "Failed writing row.\n";
+				die();
+			}
+
+			$progress = floor(($row/$rows) * 40);
+			$str = sprintf("%10s", "$row/$rows");
+
+			$hash = '';
+			for ($i=0; $i < (int) $progress; $i++) {
+				$hash .= "#";
+			}
+
+			echo sprintf("%s  |%-40s|\r", $str, $hash);
 		}
 
-		echo sprintf("%s  |%-40s|\r", $str, $hash);
+		fclose($fp);
+		echo "Done.\n";
 	}
 
-	fclose($fp);
-	echo "Done.\n";
-}
+	function varastotapahtumat($limit = '') {
+		global $path_tapahtumat, $yhtio;
 
-function varasto($limit = '') {
-	global $path_varasto, $kukarow;
-
-	echo "Varasto... ";
-	$fp = fopen($path_varasto, 'w+');
-
-	$query = "	SELECT tuotepaikat.tuoteno nimiketunnus, sum(tuotepaikat.saldo) saldo, tuote.kehahin keskihinta, varastopaikat.tunnus varastotunnus,
-				(	SELECT tuotteen_toimittajat.toimitusaika
-					FROM tuotteen_toimittajat
-					WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-					AND tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno
-					AND tuotteen_toimittajat.toimitusaika != ''
-					LIMIT 1) toimitusaika
-				FROM tuotepaikat
-				JOIN varastopaikat ON
-				concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
-				concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-				and varastopaikat.yhtio=tuotepaikat.yhtio
-				JOIN tuote ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio)
-				WHERE tuote.ei_saldoa = ''
-				AND tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-				GROUP BY 1,4
-				ORDER BY 1
-				$limit";
-	$res = mysql_query($query) or pupe_error($query);
-
-	$rows = mysql_num_rows($res);
-	$row = 0;
-	if ($rows == 0) {
-		echo "Yhtään varastoa ei löytynyt\n";
-		die();
-	}
-
-	$headers = array(
-		'nimiketunnus',
-		'saldo',
-		'keskihinta',
-		'varastotunnus',
-		'toimitusaika',
-		'tilattu',
-		'varattu',
-	);
-
-	// tehdään otsikot
-	create_headers($fp, $headers);
-
-	while ($trow = mysql_fetch_assoc($res)) {
-		$row++;
-
-		$query = "	SELECT
-					sum(if(tilausrivi.tyyppi='O', tilausrivi.varattu, 0)) tilattu,
-					sum(if(tilausrivi.tyyppi='L', tilausrivi.varattu, 0)) varattu
-					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					and tyyppi in ('L','O')
-					and tuoteno = '{$trow['nimiketunnus']}'
-					and laskutettuaika = '0000-00-00'
-					and tilausrivi.var not in ('P','J','S')";
-		$result = mysql_query($query) or pupe_error($query);
-		$kplv = 0;
-		$kplt = 0;
-		while ($ennp = mysql_fetch_array($result)) {
-			$kplv += $ennp['varattu'];
-			$kplt += $ennp['tilattu'];
+		echo "Varastotapahtumat... ";
+		
+		if (! $fp = fopen($path_tapahtumat, 'w+')) {
+			die("Ei voitu avata filea $path_tapahtumat");
 		}
 
-		$trow['tilattu'] = $kplt;
-		$trow['varattu'] = $kplv;
+		$date = date('Y-m-d', mktime(0, 0, 0, date('m')-12, date('d'), date('Y')));
 
-		$data = implode("\t", $trow);
+	    $query = "	SELECT 
+					tilausrivi.tuoteno 			nimiketunnus,
+					lasku.liitostunnus          asiakastunnus,
+					lasku.liitostunnus			toimitusasiakas,
+					tilausrivi.laskutettuaika   tapahtumapaiva,
+					tilausrivi.tyyppi           tapahtumalaji,
+					tilausrivi.rivihinta        myyntiarvo,
+					tilausrivi.rivihinta        ostoarvo,					
+					tilausrivi.kate             kate,					
+					tilausrivi.kpl              tapahtumamaara,
+					lasku.laskunro              laskunumero,					
+					kuka.kuka	                myyjatunnus,
+					lasku.yhtio_toimipaikka		toimipaikka,
+					varastopaikat.tunnus        varastotunnus,
+					tilausrivi.tyyppi  			tapahtumatyyppi
+					FROM tilausrivi
+					JOIN lasku USE INDEX (PRIMARY) ON lasku.tunnus=tilausrivi.uusiotunnus and lasku.yhtio=tilausrivi.yhtio
+					LEFT JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.tuoteno=tilausrivi.tuoteno and tuotepaikat.hyllyvali=tilausrivi.hyllyvali and tuotepaikat.hyllytaso=tilausrivi.hyllytaso AND tilausrivi.hyllyalue=tuotepaikat.hyllyalue and tilausrivi.hyllynro=tuotepaikat.hyllynro and tilausrivi.yhtio=tuotepaikat.yhtio
+					LEFT JOIN varastopaikat ON
+					concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+					concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))	            
+					and varastopaikat.yhtio=tuotepaikat.yhtio
+					LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
+					WHERE tilausrivi.tyyppi IN ('L', 'O') 
+					and tilausrivi.laskutettuaika >= '$date' 
+					and tilausrivi.yhtio='$yhtio'
+					ORDER BY tilausrivi.laskutettuaika
+					$limit";
+	    $res = mysql_query($query) or pupe_error($query);
 
-		if (! fwrite($fp, $data . "\n")) {
-			echo "Failed writing row.\n";
+		$rows = mysql_num_rows($res);
+		$row = 0;
+		if ($rows == 0) {
+			echo "Yhtään varastotapahtumaa ei löytynyt\n";
 			die();
 		}
 
-		$progress = floor(($row/$rows) * 40);
-		$str = sprintf("%10s", "$row/$rows");
+		$headers = array(
+			'nimiketunnus'    => null,
+			'asiakastunnus'   => null,
+			'toimitusasiakas' => null,
+			'tapahtumapaiva'  => null,
+			'tapahtumalaji'   => null,
+			'myyntiarvo'      => null,
+			'ostoarvo'        => null,
+			'tapahtumamaara'  => null,
+			'laskunumero'     => null,
+			'myyjatunnus'     => null,
+			'toimipaikka'	  => null,
+			'varastotunnus'   => null,
+			'tapahtumatyyppi' => null			
+		);
 
-		$hash = '';
-		for ($i=0; $i < (int) $progress; $i++) {
-			$hash .= "#";
+		// tehdään otsikot
+		create_headers($fp, array_keys($headers));
+
+	    while ($trow = mysql_fetch_assoc($res)) {
+			$row++;
+
+			switch($trow['tapahtumalaji']) {
+				// ostot
+				case 'O':
+
+					// 1 = saapuminen tai oston palautus
+					$trow['tapahtumalaji'] = 1;
+
+					// myyntiarvo on 0
+					$trow['myyntiarvo'] = 0;
+
+					// jos kpl alle 0 niin tämä on oston palautus
+					// jolloin hinta myös miinus
+					if ($trow['tapahtumamaara'] < 0) {
+						// tapahtumamaara on aina positiivinen logisticarissa
+						$trow['tapahtumamaara'] = -1 * $trow['tapahtumamaara'];
+					}
+
+			        break;
+
+				// myynnit
+				case 'L':
+
+					// 2 = otto tai myynninpalautus
+					$trow['tapahtumalaji'] = 2;
+
+					$trow['myyntiarvo'] = $trow['hinta'];
+
+					// ostoarvo
+					$trow['ostoarvo'] = $trow['hinta'] - $trow['kate'];
+
+					// tämä on myynninpalautus eli myyntiarvo on negatiivinen
+					if ($trow['tapahtumamaara'] < 0) {
+						// tapahtumamaara on aina positiivinen logisticarissa
+						$trow['tapahtumamaara'] = -1 * $trow['tapahtumamaara'];
+					}
+
+					break;
+			}
+
+			unset($trow['kate']);
+
+			$data = array_merge($headers, $trow);
+			$data = implode("\t", $data);
+
+			if (! fwrite($fp, $data . "\n")) {
+				echo "Failed writing row.\n";
+				die();
+			}
+
+			$progress = floor(($row/$rows) * 40);
+			$str = sprintf("%10s", "$row/$rows");
+
+			$hash = '';
+			for ($i=0; $i < (int) $progress; $i++) {
+				$hash .= "#";
+			}
+
+			echo sprintf("%s  |%-40s|\r", $str, $hash);
+	    }
+
+		fclose($fp);
+		echo "Done.\n";
+	}
+
+	function myynti($limit = '') {
+		global $path_myynti, $yhtiorow, $yhtio;
+
+		echo "Myynnit... ";
+		
+		if (! $fp = fopen($path_myynti, 'w+')) {
+			die("Ei voitu avata filea $path_myynti");
 		}
 
-		echo sprintf("%s  |%-40s|\r", $str, $hash);
-	}
+		$date = date('Y-m-d', mktime(0, 0, 0, date('m')-12, date('d'), date('Y')));
 
-	fclose($fp);
-	echo "Done.\n";
-}
+	    $query = "	SELECT 
+					tilausrivi.tuoteno nimiketunnus,
+					lasku.liitostunnus asiakastunnus,
+					lasku.liitostunnus toimitusasiakas,
+					tilausrivi.toimaika toimituspaiva,
+					tilausrivi.tyyppi tapahtumalaji,
+					round(tilausrivi.hinta  / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)), $yhtiorow[hintapyoristys]) myyntiarvo,
+					(tilausrivi.varattu+tilausrivi.jt) * tuote.kehahin ostoarvo,
+					tilausrivi.varattu tapahtumamaara,				
+					lasku.tunnus tilausnro,
+					kuka.kuka myyjatunnus,					
+					lasku.yhtio_toimipaikka	toimipaikka,
+					varastopaikat.tunnus varastotunnus										
+					FROM tilausrivi
+					JOIN lasku USE INDEX (PRIMARY) ON lasku.tunnus=tilausrivi.otunnus and lasku.yhtio=tilausrivi.yhtio
+					JOIN tuote ON tuote.tuoteno = tilausrivi.tuoteno and tuote.yhtio = tilausrivi.yhtio
+					JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.tuoteno=tilausrivi.tuoteno and tuotepaikat.hyllyvali=tilausrivi.hyllyvali and tuotepaikat.hyllytaso=tilausrivi.hyllytaso AND tilausrivi.hyllyalue=tuotepaikat.hyllyalue and tilausrivi.hyllynro=tuotepaikat.hyllynro and tilausrivi.yhtio=tuotepaikat.yhtio
+					JOIN varastopaikat ON
+					concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+					concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+					and varastopaikat.yhtio=tuotepaikat.yhtio
+					LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
+					WHERE
+					tilausrivi.varattu != 0
+					AND tilausrivi.tyyppi IN ('L', 'O')
+					AND tilausrivi.laskutettuaika = '0000-00-00' 
+					AND tilausrivi.laadittu >= '$date 00:00:00'
+					AND tilausrivi.yhtio	= '$yhtio'
+					ORDER BY tilausrivi.laadittu
+					$limit";
+		$res = mysql_query($query) or pupe_error($query);
 
-function varastotapahtumat($limit = '') {
-	global $path_tapahtumat, $kukarow;
-
-	echo "Varastotapahtumat... ";
-	if (! $fp = fopen($path_tapahtumat, 'w+')) {
-		die("Ei voitu avata filea $path_tapahtumat");
-	}
-
-	$date = date('Y-m-d', mktime(0, 0, 0, date('m')-2, date('d'), date('Y')));
-
-    $query = "SELECT tilausrivi.tuoteno nimiketunnus,
-			tilausrivi.laskutettuaika   tapahtumapaiva,
-			tilausrivi.tyyppi           tapahtumalaji,
-			tilausrivi.rivihinta        hinta, # rivin veroton arvo
-			tilausrivi.kate             kate,
-			tilausrivi.kpl              tapahtumamaara,
-			lasku.laskunro              laskunumero,
-			lasku.liitostunnus          asiakastunnus,
-			lasku.myyja                 myyjatunnus,
-			varastopaikat.tunnus        varastotunnus,
-			lasku.liitostunnus			toimitusasiakas,
-			lasku.yhtio_toimipaikka		toimipaikka
-			FROM tilausrivi
-			JOIN lasku USE INDEX (PRIMARY) ON lasku.tunnus=tilausrivi.uusiotunnus and lasku.yhtio=tilausrivi.yhtio
-			JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.tuoteno=tilausrivi.tuoteno and tuotepaikat.hyllyvali=tilausrivi.hyllyvali and tuotepaikat.hyllytaso=tilausrivi.hyllytaso AND tilausrivi.hyllyalue=tuotepaikat.hyllyalue and tilausrivi.hyllynro=tuotepaikat.hyllynro and tilausrivi.yhtio=tuotepaikat.yhtio
-			JOIN varastopaikat ON
-			concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
-			concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-            WHERE tilausrivi.tyyppi IN('L', 'O') and tilausrivi.laskutettuaika >= '$date' and tilausrivi.yhtio='{$kukarow['yhtio']}'
-			ORDER BY tilausrivi.laskutettuaika
-			$limit";
-    $res = mysql_query($query) or pupe_error($query);
-
-	$rows = mysql_num_rows($res);
-	$row = 0;
-	if ($rows == 0) {
-		echo "Yhtään varastotapahtumaa ei löytynyt\n";
-		die();
-	}
-
-	$headers = array(
-		'nimiketunnus'   => null,
-		'asiakastunnus'  => null,
-		'tapahtumapaiva' => null,
-		'tapahtumalaji'  => null,
-		'myyntiarvo'     => null,
-		'ostoarvo'       => null,
-		'tapahtumamaara' => null,
-		'laskunumero'    => null,
-		'myyjatunnus'    => null,
-		'varastotunnus'  => null,
-		'toimitusasiakas' => null,
-		'toimipaikka'	 => null,
-	);
-
-	// tehdään otsikot
-	create_headers($fp, array_keys($headers));
-
-    while ($trow = mysql_fetch_assoc($res)) {
-		$row++;
-
-		switch($trow['tapahtumalaji']) {
-			// ostot
-			case 'O':
-
-				// 1 = saapuminen tai oston palautus
-				$trow['tapahtumalaji'] = 1;
-
-				// ostoarvo
-				$trow['ostoarvo'] = $trow['hinta'];
-
-				// myyntiarvo on 0
-				$trow['myyntiarvo'] = 0;
-
-				// jos kpl alle 0 niin tämä on oston palautus
-				// jolloin hinta myös miinus
-				if ($trow['tapahtumamaara'] < 0) {
-					// tapahtumamaara on aina positiivinen logisticarissa
-					$trow['tapahtumamaara'] = -1 * $trow['tapahtumamaara'];
-				}
-
-		        break;
-
-			// myynnit
-			case 'L':
-
-				// 2 = otto tai myynninpalautus
-				$trow['tapahtumalaji'] = 2;
-
-				$trow['myyntiarvo'] = $trow['hinta'];
-
-				// ostoarvo
-				$trow['ostoarvo'] = $trow['hinta'] - $trow['kate'];
-
-				// tämä on myynninpalautus eli myyntiarvo on negatiivinen
-				if ($trow['tapahtumamaara'] < 0) {
-					// tapahtumamaara on aina positiivinen logisticarissa
-					$trow['tapahtumamaara'] = -1 * $trow['tapahtumamaara'];
-				}
-
-				break;
-		}
-
-		unset($trow['hinta']);
-		unset($trow['kate']);
-
-		$data = array_merge($headers, $trow);
-
-		$data = implode("\t", $data);
-
-		if (! fwrite($fp, $data . "\n")) {
-			echo "Failed writing row.\n";
+		$rows = mysql_num_rows($res);
+		$row = 0;
+		if ($rows == 0) {
+			echo "Yhtään myyntitapahtumaa ei löytynyt\n";
 			die();
 		}
 
-		$progress = floor(($row/$rows) * 40);
-		$str = sprintf("%10s", "$row/$rows");
+		$headers = array(
+			'nimiketunnus'    => null,
+			'asiakastunnus'   => null,
+			'toimitusasiakas' => null,
+			'toimituspaiva'   => null,
+			'tapahtumalaji'   => null,
+			'myyntiarvo'      => null,
+			'ostoarvo'        => null,
+			'tapahtumamaara'  => null,
+			'tilausnro'       => null,
+			'myyjatunnus'     => null,
+			'toimipaikka'	  => null,
+			'varastotunnus'   => null						
+		);
 
-		$hash = '';
-		for ($i=0; $i < (int) $progress; $i++) {
-			$hash .= "#";
-		}
+		// tehdään otsikot
+		create_headers($fp, array_keys($headers));
 
-		echo sprintf("%s  |%-40s|\r", $str, $hash);
-    }
+		while ($trow = mysql_fetch_assoc($res)) {
+			$row++;
 
-	fclose($fp);
-	echo "Done.\n";
-}
+			switch ($trow['tapahtumalaji']) {
+				case 'L':
+					$trow['tapahtumalaji']	= '4';
+					break;
+				case 'O':
+					$trow['tapahtumalaji'] 	= '3';
+					$trow['myyntiarvo'] 	= 0;
+					break;
+			}
+			
+			$data = array_merge($headers, $trow);
+			$data = implode("\t", $data);
 
-function myynti() {
-	global $path_myynti, $kukarow, $yhtiorow;
+			if (! fwrite($fp, $data . "\n")) {
+				echo "Failed writing row.\n";
+				die();
+			}
 
-	echo "Myynnit... ";
-	if (! $fp = fopen($path_myynti, 'w+')) {
-		die("Ei voitu avata filea $path_myynti");
+			$progress = floor(($row/$rows) * 40);
+			$str = sprintf("%10s", "$row/$rows");
+
+			$hash = '';
+			for ($i=0; $i < (int) $progress; $i++) {
+				$hash .= "#";
+			}
+
+			echo sprintf("%s  |%-40s|\r", $str, $hash);
+	    }
+
+		fclose($fp);
+		echo "Done.\n";
 	}
 
-	$date = date('Y-m-d', mktime(0, 0, 0, date('m')-2, date('d'), date('Y')));
-
-    $query = "SELECT tilausrivi.tuoteno nimiketunnus,
-			tilausrivi.toimaika toimituspaiva,
-			tilausrivi.tyyppi tapahtumalaji,
-			tilausrivi.hinta  / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) rivihinta,
-			tilausrivi.varattu tapahtumamaara,
-			lasku.liitostunnus asiakastunnus,
-			lasku.myyja myyjatunnus,
-			lasku.tunnus tilausnro,
-			varastopaikat.tunnus varastotunnus,
-			lasku.liitostunnus toimitusasiakas,
-			lasku.yhtio_toimipaikka	toimipaikka
-			FROM tilausrivi
-			JOIN lasku USE INDEX (PRIMARY) ON lasku.tunnus=tilausrivi.uusiotunnus and lasku.yhtio=tilausrivi.yhtio
-			JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.tuoteno=tilausrivi.tuoteno and tuotepaikat.hyllyvali=tilausrivi.hyllyvali and tuotepaikat.hyllytaso=tilausrivi.hyllytaso AND tilausrivi.hyllyalue=tuotepaikat.hyllyalue and tilausrivi.hyllynro=tuotepaikat.hyllynro and tilausrivi.yhtio=tuotepaikat.yhtio
-			JOIN varastopaikat ON
-			concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
-			concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-			WHERE
-			tilausrivi.varattu != 0
-			AND tilausrivi.tyyppi IN('L', 'O')
-			AND tilausrivi.laskutettuaika = '0000-00-00' AND tilausrivi.laadittu >= '$date 00:00:00'
-			AND tilausrivi.yhtio='{$kukarow['yhtio']}'
-			ORDER BY tilausrivi.laskutettuaika";
-	$res = mysql_query($query) or pupe_error($query);
-
-	$rows = mysql_num_rows($res);
-	$row = 0;
-	if ($rows == 0) {
-		echo "Yhtään myyntitapahtumaa ei löytynyt\n";
-		die();
+	function create_headers($fp, array $cols) {
+		$data = implode("\t", $cols) . "\n";
+		fwrite($fp, $data);
 	}
-
-	$headers = array(
-		'nimiketunnus'   => null,
-		'asiakastunnus'  => null,
-		'toimituspaiva'  => null,
-		'tapahtumalaji'  => null,
-		'myyntiarvo'     => null,
-		'ostoarvo'       => null,
-		'tapahtumamaara' => null,
-		'tilausnro'      => null,
-		'myyjatunnus'    => null,
-		'varastotunnus'  => null,
-		'toimitusasiakas' => null,
-		'toimipaikka'	 => null,
-	);
-
-	// tehdään otsikot
-	create_headers($fp, array_keys($headers));
-
-	while ($trow = mysql_fetch_assoc($res)) {
-		$row++;
-
-		$trow['myyntiarvo'] = $trow['rivihinta'];
-		$trow['ostoarvo']   = $trow['rivihinta'];
-
-		unset($trow['rivihinta']);
-
-		switch ($trow['tapahtumalaji']) {
-			case 'L':
-				$trow['tapahtumalaji'] = '4';
-				break;
-			case 'O':
-				$trow['tapahtumalaji'] = '3';
-				break;
-		}
-		$data = array_merge($headers, $trow);
-
-		$data = implode("\t", $data);
-
-		if (! fwrite($fp, $data . "\n")) {
-			echo "Failed writing row.\n";
-			die();
-		}
-
-		$progress = floor(($row/$rows) * 40);
-		$str = sprintf("%10s", "$row/$rows");
-
-		$hash = '';
-		for ($i=0; $i < (int) $progress; $i++) {
-			$hash .= "#";
-		}
-
-		echo sprintf("%s  |%-40s|\r", $str, $hash);
-    }
-
-	fclose($fp);
-	echo "Done.\n";
-}
-
-function create_headers($fp, array $cols) {
-	$data = implode("\t", $cols) . "\n";
-	fwrite($fp, $data);
-}
 ?>

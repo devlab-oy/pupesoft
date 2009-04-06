@@ -225,12 +225,9 @@ if ($tee != '') {
 
 
 // Käyttöliittymä
-echo "<br>".t("Voit valita osaston ja tuoteryhmän joko alasvetovalikosta tai syöttämällä osaston- ja tuoteryhmien numerot käsin").".
-		  ".t("Käsin voit syöttää tiedot joko välilyönnillä tai väliviivalla eroteltuna").". 
-		  ".t("Muutospäivämäärä kohtaan voit asettaa päivämäärän jolloin hinnastoon tulee vain tuotteet joita on muutettu ko. päivämäärän jälkeen, näin sinun ei tarvitse hakea koko hinnastoa").". 
-		  ".t("Hinnastoformaatti tyypiksi valitse oikea riippuen ajatko hinnaston Futursoftiin tai Automasteriin.  Vientihinnasto on rakenteeltaan erilainen ja tarkoitettu vain vientiasiakkaille").". 
-		  ".t("Jos haluat hinnaston tekstieditoriin tai Exceliin niin valitse Tab eroteltu. Voit tallentaa tämän tekstimuodossa olevan tiedoston koneellesi ja sen jälkeen avata sen haluamallasi ohjelmalla").". 
-		  ".t("Tab erotellun tiedoston sarakkeet ovat: Tuotenumero, Nimitys, EAN koodi, Yksikkö, Alennusryhmä, Osh Hinta, Tuotemerkki, Osasto, Tuoteryhmä ja Korvaavan tuotteen tuotenro").".<br><br>";
+echo "<br>".t("Voit valita osaston ja tuoteryhmän joko alasvetovalikosta tai syöttämällä osaston- ja tuoteryhmien numerot käsin").".<br>
+		  ".t("Käsin voit syöttää tiedot joko välilyönnillä tai väliviivalla eroteltuna").".<br>
+		  ".t("Tarkemmat ohjeet")." <a target='_blank' href='$hreffi'>".t("tässä")."</a>.<br><br>";
 
 echo "<br>";
 echo "<table><form method='post' action=''>";

@@ -374,10 +374,18 @@
 	}
 
 	if ($poistetut != "") {
-		$poislisa  = "";
-		$poislisa_mulsel  = "";
+		
 		$poischeck = "CHECKED";
 		$ulisa .= "&poistetut=checked";
+		
+		if ($kukarow["extranet"] != "") {
+			$poislisa  = " HAVING tuote.status in ('P','X') ";
+			$poislisa_mulsel  = " and tuote.status in ('P','X') ";
+		}
+		else {
+			$poislisa  = "";
+			$poislisa_mulsel  = "";
+		}
 	}
 	else {
 		$poislisa  = " HAVING (tuote.status not in ('P','X') or saldo > 0) ";
@@ -555,9 +563,7 @@
 
 	echo "<tr><th>",t("Nimitys"),"</th><td nowrap valign='top' colspan='2'><input type='text' size='25' name='nimitys' id='nimitys' value = '$nimitys'></td></tr>";
 	
-	if ($kukarow["extranet"] == "") {
-		echo "<tr><th>",t("Poistetut"),"</th><td nowrap valign='top' colspan='2'><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
-	}
+	echo "<tr><th>",t("Poistetut"),"</th><td nowrap valign='top' colspan='2'><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
 
 	echo "<tr><th>",t("Lisätiedot"),"</th><td nowrap valign='top' colspan='2'><input type='checkbox' name='lisatiedot' id='lisatiedot' $lisacheck></td></tr>";
 	echo "</table>";
@@ -1216,7 +1222,32 @@
 			}
 
 			foreach($rows as $row) {
-
+				/*
+				if ($kukarow['extranet'] != '') {
+					$query    = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
+					$tuotetempres = mysql_query($query);
+					$temptrow = mysql_fetch_array($tuotetempres);
+					
+					
+					$temp_laskurowwi = $laskurow;
+					if (!is_array($temp_laskurowwi)) {
+						$query = "SELECT * FROM asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
+						$asiakastempres = mysql_query($query);
+						$asiakastemprow = mysql_fetch_array($asiakastempres);
+												
+						$temp_laskurowwi['liitostunnus']	= $asiakastemprow['tunnus'];
+						$temp_laskurowwi['ytunnus']			= $asiakastemprow['ytunnus'];
+						$temp_laskurowwi['valkoodi']		= $asiakastemprow['valkoodi'];
+						$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
+					}
+				
+					$hinnat = alehinta($temp_laskurowwi, $temptrow, 1, '', '', '', "hintaperuste,aleperuste");
+					
+					if 	($temptrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] < 2 or $hinnat["hintaperuste"] > 12) and ($hinnat["aleperuste"] < 5 or $hinnat["aleperuste"] > 8)) {
+						continue;
+					}
+				}*/
+				
 				if ($row["sarjatunnus"] > 0 and $kukarow["extranet"] == "" and function_exists("sarjanumeronlisatiedot_popup")) {
 					if ($lisatiedot != "") {
 						echo "<tr><td colspan='7' class='back'><br></td></tr>";

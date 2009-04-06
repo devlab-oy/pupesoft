@@ -124,10 +124,9 @@
 					}
 				}
 
-				$varastot[] = $argv[2];
-
+				$varastot = explode(",", $argv[2]);
 				$email_osoite = mysql_real_escape_string($argv[3]);
-
+				
 				$epakur = 'kaikki';
 				$tyyppi = 'A';
 			}
@@ -340,7 +339,7 @@
 				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
 				
 				if (count($argv) > 0) {
-					$excelnimi = "Varastonarvo_$argv[2]_$vv-$kk-$pp.xls";
+					$excelnimi = "Varastonarvo_$vv-$kk-$pp.xls";
 				}
 
 				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
@@ -813,7 +812,7 @@
 
 				// itse print komento...
 				$liite = "/tmp/".$excelnimi;
-				$kutsu = t("Varastonarvoraportti")." ($argv[2]) $vv-$kk-$pp";
+				$kutsu = t("Varastonarvoraportti")." $vv-$kk-$pp";
 
 				$ctype = "excel";
 				$kukarow["eposti"] = $email_osoite;

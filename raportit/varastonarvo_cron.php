@@ -26,13 +26,14 @@
 			die ("Yhtiö $kukarow[yhtio] ei löydy!");
 		}
 
-		$query = "SELECT distinct tunnus FROM varastopaikat WHERE yhtio = '$kukarow[yhtio]'";
+		$query = "	SELECT group_concat(distinct tunnus order by tunnus) varastot 
+					FROM varastopaikat 
+					WHERE yhtio = '$kukarow[yhtio]'";
 		$varastores = mysql_query($query) or die ("Varastonhaussa tapahtui virhe!\n".mysql_error()."\n");
+		$varastorow = mysql_fetch_array($varastores);
 		
-		if (mysql_num_rows($varastores) > 0) {
-			while ($varastorow = mysql_fetch_array($varastores)) {
-				exec("php varastonarvo-super.php $kukarow[yhtio] $varastorow[tunnus] laskut@arwidson.fi");
-			}
+		if ($varastorow["varastot"] != "") {
+			exec("php varastonarvo-super.php $kukarow[yhtio] $varastorow[varastot] laskut@arwidson.fi");			
 		}
 		else {
 			die ("Yhtään varastoa ei löytynyt!\n");

@@ -181,6 +181,7 @@ if ($tee != '') {
 
 	while ($tuoterow = mysql_fetch_array($result)) {
 		
+		$ohitus = 0;
 		if (!empty($kukarow['extranet'])) {
 			$query = "  SELECT selite 
 						FROM tuotteen_avainsanat 
@@ -193,11 +194,30 @@ if ($tee != '') {
 
 				$tuoterow['nimitys'] = $avainrow['selite'];			
 			}
+			
+			$query = "SELECT * FROM asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
+			$asiakastempres = mysql_query($query);
+			$asiakastemprow = mysql_fetch_array($asiakastempres);
+			
+			$temp_laskurowwi = array();							
+			$temp_laskurowwi['liitostunnus']	= $asiakastemprow['tunnus'];
+			$temp_laskurowwi['ytunnus']			= $asiakastemprow['ytunnus'];
+			$temp_laskurowwi['valkoodi']		= $asiakastemprow['valkoodi'];
+			$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
+			
+		
+			$hinnat = alehinta($temp_laskurowwi, $tuoterow, 1, '', '', '', "hintaperuste,aleperuste");
+			
+			if 	($tuoterow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] < 2 or $hinnat["hintaperuste"] > 12) and ($hinnat["aleperuste"] < 5 or $hinnat["aleperuste"] > 8)) {
+				$ohitus = 1;
+			}
 		}
 						 		
 		// tehd‰‰n yksi rivi
-		$ulos = hinnastorivi($tuoterow, $laskurowfake);
-		fwrite($fh, $ulos);
+		if ($ohitus == 0) {
+			$ulos = hinnastorivi($tuoterow, $laskurowfake);
+			fwrite($fh, $ulos);
+		}		
 	}
 
 	fclose($fh);

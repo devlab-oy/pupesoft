@@ -1222,7 +1222,7 @@
 			}
 
 			foreach($rows as $row) {
-				/*
+				
 				if ($kukarow['extranet'] != '') {
 					$query    = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
 					$tuotetempres = mysql_query($query);
@@ -1246,7 +1246,7 @@
 					if 	($temptrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] < 2 or $hinnat["hintaperuste"] > 12) and ($hinnat["aleperuste"] < 5 or $hinnat["aleperuste"] > 8)) {
 						continue;
 					}
-				}*/
+				}
 				
 				if ($row["sarjatunnus"] > 0 and $kukarow["extranet"] == "" and function_exists("sarjanumeronlisatiedot_popup")) {
 					if ($lisatiedot != "") {

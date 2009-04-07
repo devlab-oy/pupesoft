@@ -92,30 +92,56 @@ if ($tee == "file") {
 				}
 
 				$rarresult = mysql_query($query) or pupe_error($query);
-
+				
 				if(mysql_num_rows($rarresult) == 1) {
 
 					$trow = mysql_fetch_array($rarresult);
 					
-					$tuoteno = $trow["tuoteno"];
+					$ohitus = 0;
+					if ($kukarow["extranet"] != "") {
+						$query = "SELECT * FROM asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
+						$asiakastempres = mysql_query($query);
+						$asiakastemprow = mysql_fetch_array($asiakastempres);
+
+						$temp_laskurowwi = array();							
+						$temp_laskurowwi['liitostunnus']	= $asiakastemprow['tunnus'];
+						$temp_laskurowwi['ytunnus']			= $asiakastemprow['ytunnus'];
+						$temp_laskurowwi['valkoodi']		= $asiakastemprow['valkoodi'];
+						$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
+
+
+						$hinnat = alehinta($temp_laskurowwi, $trow, 1, '', '', '', "hintaperuste,aleperuste");
+
+						if 	($trow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] < 2 or $hinnat["hintaperuste"] > 12) and ($hinnat["aleperuste"] < 5 or $hinnat["aleperuste"] > 8)) {
+							$ohitus = 1;
+						}
+					}
 					
-					if ($toimaika == '') {
-						$toimaika = $laskurow["toimaika"];
-					}
+					if ($ohitus == 0) {
+						$tuoteno = $trow["tuoteno"];
 
-					if ($hinta == 0) {
-						$hinta = "";
-					}
+						if ($toimaika == '') {
+							$toimaika = $laskurow["toimaika"];
+						}
 
-					if ($laskurow["tilaustyyppi"] == "E") {
-						$varataan_saldoa = "EI";
+						if ($hinta == 0) {
+							$hinta = "";
+						}
+
+						if ($laskurow["tilaustyyppi"] == "E") {
+							$varataan_saldoa = "EI";
+						}
+						else {
+							$varataan_saldoa = "";
+						}
+
+						//lisätään rivi
+						require ("lisaarivi.inc");
 					}
 					else {
-						$varataan_saldoa = "";
+						echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
 					}
-
-					//lisätään rivi
-					require ("lisaarivi.inc");
+					
 				}
 				else {
 					echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";

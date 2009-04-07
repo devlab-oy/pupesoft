@@ -2091,7 +2091,43 @@ if ($tee == '') {
 					</tr>
 					</table>";
 		}
-
+		
+		//katsotaan onko asiakkaalla maksamattomia trattoja, jos on niin ei anneta tehdä tilausta
+		$query = " 	SELECT count(lasku.tunnus) kpl 
+					FROM karhu_lasku 
+					JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.yhtio = '$kukarow[yhtio]' and lasku.mapvm = '0000-00-00' and lasku.ytunnus = '$laskurow[ytunnus]') 
+					JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = 'T')";
+		$trattares = mysql_query($query) or pupe_error($query);
+		$tratat = mysql_fetch_array($trattares);
+		
+		if ($tratat['kpl'] > 0) {
+			echo "	<table>
+					<tr>$jarjlisa
+					<td class='back' align = 'left'><font class='error'>".t("HUOM!!!!!! Asiakkaalla on maksamattomia trattoja")."!!!!!<br></font>$menuset</td>
+					</tr>
+					<tr>$jarjlisa
+					<td class='back'><hr></td>
+					</tr>
+					</table>";
+										
+			echo "<td align='right' class='back' valign='top'>
+					<form name='mitatoikokonaan' action='$PHP_SELF' method='post' onSubmit = 'return verify()'>
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='hidden' name='projektilla' value='$projektilla'>
+					<input type='hidden' name='tee' value='POISTA'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='submit' value='* ".t("Mitätöi koko")." $otsikko *'>
+					</form></td>";
+		
+			if (file_exists("../inc/footer.inc")) {
+				require ("../inc/footer.inc");
+			}
+			else {
+				require ("footer.inc");
+			}
+			exit;
+		}
 
 		if ($yhtiorow["myyntitilaus_asiakasmemo"] == "K") {
 			echo "<br>";
@@ -2695,6 +2731,19 @@ if ($tee == '') {
 						$kpl	 = 0;
 						$kielletty++;
 					}
+				}
+				elseif ($kukarow['extranet'] != '' and $trow['hinnastoon'] == 'V') {
+					//	katsotaan löytyyko asiakasalennus / asikakashinta						
+						$hinnat = alehinta($laskurow, $trow, 1, '', '', '',"hintaperuste,aleperuste");
+						
+						if (($hinnat["hintaperuste"] < 2 or $hinnat["hintaperuste"] > 12) and ($hinnat["aleperuste"] < 5 or $hinnat["aleperuste"] > 8)) {
+							$varaosavirhe .= t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
+							$trow 	 = "";
+							$tuoteno = "";
+							$kpl	 = 0;
+							$kielletty++;
+					}
+
 				}
 			}
 			elseif ($kukarow["extranet"] != '') {

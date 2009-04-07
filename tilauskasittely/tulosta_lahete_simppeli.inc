@@ -250,7 +250,24 @@ if (!function_exists('tulosta_lahete')) {
 		$h = 185;
 		
 		// katotaan miten halutaan sortattavan
-		$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+		// haetaan asiakkaan tietojen takaa sorttaustiedot
+		$order_sorttaus = '';
+
+		$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta 
+								FROM asiakas 
+								WHERE yhtio='$kukarow[yhtio]' 
+								and tunnus='$laskurow[liitostunnus]'";
+		$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
+
+		if (mysql_num_rows($asiakas_apu_res) == 1) {
+			$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
+			$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["lahetteen_jarjestys"]);
+			$order_sorttaus = $asiakas_apu_row["lahetteen_jarjestys_suunta"];
+		}
+		else {
+			$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+			$order_sorttaus = $yhtiorow["lahetteen_jarjestys_suunta"];
+		}
 		
 		if ($laskurow["tila"] == 'U') {
 			$where = " uusiotunnus='$otunnus' ";
@@ -284,7 +301,7 @@ if (!function_exists('tulosta_lahete')) {
 					and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 					and tilausrivi.tyyppi!='D'
 					GROUP BY tilausrivi.tunnus
-					ORDER BY otunnus, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+					ORDER BY otunnus, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 		$riresult = mysql_query($query) or pupe_error($query);
 
 		//kuollaan jos yhtään riviä ei löydy
@@ -336,7 +353,7 @@ if (!function_exists('tulosta_lahete')) {
 					$pdf->write($h, 1, 0, $s[0], $row["tuoteno"]." ".$row["nimitys"], "norm", "L", "");
 
 					if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
-						$pdf->write($h, 1, $s[0], $s[1], (($row['varattu']+$row['kpl'])*1)." ".ta($kieli, "Y", $row["yksikko"]), "norm", "R", "");					
+						$pdf->write($h, 1, $s[0], $s[1], (($row['varattu']+$row['kpl'])*1)." ".strtolower(ta($kieli, "Y", $row["yksikko"])), "norm", "R", "");					
 					}
 					else {	
 						if ($row["jt"] != 0) { // jälkitoimitus
@@ -365,7 +382,7 @@ if (!function_exists('tulosta_lahete')) {
 					}
 					$h-=$pdf->ln();
 
-					$pdf->write($h, 1, $s[0], $s[1], ($row['tilkpl']*1)." ".ta($kieli, "Y", $row["yksikko"]), "snadi", "R", "I");
+					$pdf->write($h, 1, $s[0], $s[1], ($row['tilkpl']*1)." ".strtolower(ta($kieli, "Y", $row["yksikko"])), "snadi", "R", "I");
 
 					if($lahete_param["ale"] == "on" and $lahete_param["hinnat"] == "on") {
 						if($alenaytetaan=="OK") {
@@ -417,7 +434,7 @@ if (!function_exists('tulosta_lahete')) {
 					$pdf->write($h, 1, 5, $s[0], $row["tuoteno"]." ".$row["nimitys"], "snadi", "L", "");
 
 					if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
-						$pdf->write($h, 1, $s[0], $s[1], (($row['varattu']+$row['kpl'])*1)." ".ta($kieli, "Y", $row["yksikko"]), "snadi", "R", "");					
+						$pdf->write($h, 1, $s[0], $s[1], (($row['varattu']+$row['kpl'])*1)." ".strtolower(ta($kieli, "Y", $row["yksikko"])), "snadi", "R", "");					
 					}
 					else {	
 						if ($row["jt"] != 0) { // jälkitoimitus

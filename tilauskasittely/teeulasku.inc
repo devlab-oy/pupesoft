@@ -356,7 +356,24 @@ $montakotilausta = split(",", $tunnukset);
 if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
 
 	// katotaan miten halutaan sortattavan
-	$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
+	// haetaan asiakkaan tietojen takaa sorttaustiedot
+	$order_sorttaus = '';
+
+	$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta 
+							FROM asiakas 
+							WHERE yhtio='$kukarow[yhtio]' 
+							and tunnus='$laskurow[liitostunnus]'";
+	$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
+
+	if (mysql_num_rows($asiakas_apu_res) == 1) {
+		$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
+		$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["laskun_jarjestys"]);
+		$order_sorttaus = $asiakas_apu_row["laskun_jarjestys_suunta"];
+	}
+	else {
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
+		$order_sorttaus = $yhtiorow["laskun_jarjestys_suunta"];
+	}
 
 	//laitetaan välisummat rivin kommenttiin aina kun otunnus vaihtuu
 	$query = "	SELECT otunnus, tunnus, $sorttauskentta
@@ -364,7 +381,7 @@ if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
 				WHERE yhtio='$kukarow[yhtio]'
 				and otunnus in ($tunnukset)
 				and kpl != 0
-				ORDER BY otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
+				ORDER BY otunnus, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 	$valsures = mysql_query($query) or pupe_error($query);
 
 	$edotunnus = '';

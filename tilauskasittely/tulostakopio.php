@@ -1323,7 +1323,24 @@
 					}
 
 					// katotaan miten halutaan sortattavan
-					$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
+					// haetaan asiakkaan tietojen takaa sorttaustiedot
+					$order_sorttaus = '';
+
+					$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta 
+											FROM asiakas 
+											WHERE yhtio='$kukarow[yhtio]' 
+											and tunnus='$laskurow[liitostunnus]'";
+					$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
+
+					if (mysql_num_rows($asiakas_apu_res) == 1) {
+						$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
+						$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["laskun_jarjestys"]);
+						$order_sorttaus = $asiakas_apu_row["laskun_jarjestys_suunta"];
+					}
+					else {
+						$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
+						$order_sorttaus = $yhtiorow["laskun_jarjestys_suunta"];
+					}
 
 					if ($toim == 'PROFORMA') {
 						$laskurow["tapvm"] = date("Y-m-d");
@@ -1349,7 +1366,7 @@
 								and tilausrivi.yhtio  = '$kukarow[yhtio]'
 								$where2
 								and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-								ORDER BY tilausrivi.otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
+								ORDER BY tilausrivi.otunnus, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 					$result = mysql_query($query) or pupe_error($query);
 
 					//kuollaan jos yhtään riviä ei löydy
@@ -1506,14 +1523,24 @@
 				$otunnus = $laskurow["tunnus"];
 
 				//hatetaan asiakkaan tiedot
-				$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+				$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro, lahetteen_jarjestys, lahetteen_jarjestys_suunta 
 							FROM asiakas
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$asrow = mysql_fetch_array($result);				
 				
 				// katotaan miten halutaan sortattavan
-				$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+				// haetaan asiakkaan tietojen takaa sorttaustiedot
+				$order_sorttaus = '';
+
+				if (mysql_num_rows($result) == 1) {
+					$sorttauskentta = generoi_sorttauskentta($asrow["lahetteen_jarjestys"]);
+					$order_sorttaus = $asrow["lahetteen_jarjestys_suunta"];
+				}
+				else {
+					$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+					$order_sorttaus = $yhtiorow["lahetteen_jarjestys_suunta"];
+				}
 
 				//työmääräyksen rivit
 				$query = "  SELECT tilausrivi.*,
@@ -1528,7 +1555,7 @@
 							and tilausrivi.yhtio 	= '$kukarow[yhtio]'
 							and tilausrivi.yhtio 	= tuote.yhtio
 							and tilausrivi.tuoteno  = tuote.tuoteno
-							ORDER BY tuotetyyppi, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+							ORDER BY tuotetyyppi, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$tilausnumeroita = $otunnus;
@@ -1579,8 +1606,25 @@
 
 				require_once ("tulosta_valmistus.inc");
 
-				$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
-				
+				// katotaan miten halutaan sortattavan
+				// haetaan asiakkaan tietojen takaa sorttaustiedot
+				$order_sorttaus = '';
+
+				$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta 
+										FROM asiakas 
+										WHERE yhtio='$kukarow[yhtio]' 
+										and tunnus='$laskurow[liitostunnus]'";
+				$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
+
+				if (mysql_num_rows($asiakas_apu_res) == 1) {
+					$sorttauskentta = generoi_sorttauskentta($asrow["lahetteen_jarjestys"]);
+					$order_sorttaus = $asrow["lahetteen_jarjestys_suunta"];
+				}
+				else {
+					$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+					$order_sorttaus = $yhtiorow["lahetteen_jarjestys_suunta"];
+				}
+
 				$query = " 	SELECT *, 
 							$sorttauskentta
 							FROM tilausrivi use index (yhtio_otunnus)
@@ -1588,7 +1632,7 @@
 							and yhtio = '$kukarow[yhtio]'
 							and var in ('','H')
 							and tyyppi != 'D'
-							ORDER BY sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+							ORDER BY sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 
 				require_once ("tulosta_valmistus.inc");
@@ -1702,7 +1746,24 @@
 				}
 				else {
 					// katotaan miten halutaan sortattavan
-					$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+					// haetaan asiakkaan tietojen takaa sorttaustiedot
+					$order_sorttaus = '';
+
+					$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta 
+											FROM asiakas 
+											WHERE yhtio='$kukarow[yhtio]' 
+											and tunnus='$laskurow[liitostunnus]'";
+					$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
+
+					if (mysql_num_rows($asiakas_apu_res) == 1) {
+						$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
+						$sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["lahetteen_jarjestys"]);
+						$order_sorttaus = $asiakas_apu_row["lahetteen_jarjestys_suunta"];
+					}
+					else {
+						$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+						$order_sorttaus = $yhtiorow["lahetteen_jarjestys_suunta"];
+					}
 
 					if($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
 						$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
@@ -1725,7 +1786,7 @@
 								and tilausrivi.yhtio = '$kukarow[yhtio]'
 								$tyyppilisa
 								and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-								ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+								ORDER BY jtsort, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 					$riresult = mysql_query($query) or pupe_error($query);
 
 					//generoidaan rivinumerot

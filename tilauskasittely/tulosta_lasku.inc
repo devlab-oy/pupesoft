@@ -732,7 +732,7 @@ if (!function_exists('rivi_original')) {
 			$laskalv = $row["alv"];
 
 			if ($row["alv"] >= 500) {
-				$laskalv -= 500;
+				$laskalv = 0;
 			}
 
 			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -765,7 +765,7 @@ if (!function_exists('rivi_original')) {
 				$laskalv = $row["alv"];
 
 				if ($row["alv"] >= 500) {
-					$laskalv -= 500;
+					$laskalv = 0;
 				}
 				
 				$row["rivihinta"] = $row["rivihinta"] / (1+$laskalv/100);
@@ -907,7 +907,7 @@ if (!function_exists('rivi_original')) {
 		$laskalv = $row["alv"];
 
 		if ($row["alv"] >= 500) {
-			$laskalv -= 500;
+			$laskalv = 0;
 		}
 		
 		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($laskalv/100))));
@@ -981,7 +981,7 @@ if (!function_exists('rivi_plain')) {
 			$laskalv = $row["alv"];
 
 			if ($row["alv"] >= 500) {
-				$laskalv -= 500;
+				$laskalv = 0;
 			}
 			
 			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -1016,7 +1016,7 @@ if (!function_exists('rivi_plain')) {
 				$laskalv = $row["alv"];
 
 				if ($row["alv"] >= 500) {
-					$laskalv -= 500;
+					$laskalv = 0;
 				}
 				
 				$row["rivihinta"] = $row["rivihinta"] / (1+$laskalv/100);
@@ -1039,7 +1039,7 @@ if (!function_exists('rivi_plain')) {
 		$laskalv = $row["alv"];
 
 		if ($row["alv"] >= 500) {
-			$laskalv -= 500;
+			$laskalv = 0;
 		}
 		
 		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($laskalv/100))));
@@ -1130,7 +1130,7 @@ if (!function_exists('rivi_plain_2')) {
 			$laskalv = $row["alv"];
 
 			if ($row["alv"] >= 500) {
-				$laskalv -= 500;
+				$laskalv = 0;
 			}
 			
 			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -1165,7 +1165,7 @@ if (!function_exists('rivi_plain_2')) {
 				$laskalv = $row["alv"];
 
 				if ($row["alv"] >= 500) {
-					$laskalv -= 500;
+					$laskalv = 0;
 				}
 				
 				$row["rivihinta"] = $row["rivihinta"] / (1+$laskalv/100);
@@ -1188,7 +1188,7 @@ if (!function_exists('rivi_plain_2')) {
 		$laskalv = $row["alv"];
 
 		if ($row["alv"] >= 500) {
-			$laskalv -= 500;
+			$laskalv = 0;
 		}
 		
 		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($laskalv/100))));
@@ -1262,7 +1262,7 @@ if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
 			$laskalv = $row["alv"];
 
 			if ($row["alv"] >= 500) {
-				$laskalv -= 500;
+				$laskalv = 0;
 			}
 			
 			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -1295,7 +1295,7 @@ if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
 				$laskalv = $row["alv"];
 
 				if ($row["alv"] >= 500) {
-					$laskalv -= 500;
+					$laskalv = 0;
 				}
 				
 				$row["rivihinta"] = $row["rivihinta"] / (1+$laskalv/100);
@@ -1430,7 +1430,7 @@ if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
 		$laskalv = $row["alv"];
 
 		if ($row["alv"] >= 500) {
-			$laskalv -= 500;
+			$laskalv = 0;
 		}
 		
 		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($laskalv/100))));

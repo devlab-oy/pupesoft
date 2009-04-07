@@ -1040,7 +1040,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "lahetteen_jarjestys_suunta" or
-		mysql_field_name($result, $i) == "laskun_jarjestys_suunta") {
+		mysql_field_name($result, $i) == "laskun_jarjestys_suunta") { 
 
 
 		$ulos = "<td><select name='$nimi'>";

@@ -727,11 +727,19 @@ if (!function_exists('rivi_original')) {
 
 		// yksikköhinta pitää olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
+			
+			// Onko marginaaliverotusta
+			$laskalv = $row["alv"];
+
+			if ($row["alv"] >= 500) {
+				$laskalv -= 500;
+			}
+
 			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-				$veroton_hinta = $row["hinta"] / (1 + $row["alv"] / 100);
+				$veroton_hinta = $row["hinta"] / (1 + $laskalv / 100);
 			}
 			else {
-				$veroton_hinta = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+				$veroton_hinta = round($row["hinta"] / (1 + $laskalv / 100), 2);
 			}
 		}
 		else {
@@ -752,7 +760,15 @@ if (!function_exists('rivi_original')) {
 			$row["rivihinta"] = laskuval($row["hinta"], $kurssi)*$row["kpl"]*(1-$row["ale"]/100);
 
 			if ($yhtiorow["alv_kasittely"] == '') {
-				$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
+				
+				// Onko marginaaliverotusta
+				$laskalv = $row["alv"];
+
+				if ($row["alv"] >= 500) {
+					$laskalv -= 500;
+				}
+				
+				$row["rivihinta"] = $row["rivihinta"] / (1+$laskalv/100);
 			}
 		}
 
@@ -885,7 +901,16 @@ if (!function_exists('rivi_original')) {
 		$kala = $kala - 15;
 
 		$arvo	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) $row["rivihinta"]);
-		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($row["alv"]/100))));
+		
+		
+		// Onko marginaaliverotusta
+		$laskalv = $row["alv"];
+
+		if ($row["alv"] >= 500) {
+			$laskalv -= 500;
+		}
+		
+		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($laskalv/100))));
 	}
 }
 
@@ -951,11 +976,19 @@ if (!function_exists('rivi_plain')) {
 
 		// yksikköhinta pitää olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
+			
+			// Onko marginaaliverotusta
+			$laskalv = $row["alv"];
+
+			if ($row["alv"] >= 500) {
+				$laskalv -= 500;
+			}
+			
 			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-				$veroton_hinta = $row["hinta"] / (1 + $row["alv"] / 100);
+				$veroton_hinta = $row["hinta"] / (1 + $laskalv / 100);
 			}
 			else {
-				$veroton_hinta = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+				$veroton_hinta = round($row["hinta"] / (1 + $laskalv / 100), 2);
 			}
 		}
 		else {
@@ -978,7 +1011,15 @@ if (!function_exists('rivi_plain')) {
 			$row["rivihinta"] = laskuval($row["hinta"], $kurssi)*$row["kpl"]*(1-$row["ale"]/100);
 
 			if ($yhtiorow["alv_kasittely"] == '') {
-				$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
+				
+				// Onko marginaaliverotusta
+				$laskalv = $row["alv"];
+
+				if ($row["alv"] >= 500) {
+					$laskalv -= 500;
+				}
+				
+				$row["rivihinta"] = $row["rivihinta"] / (1+$laskalv/100);
 			}
 		}
 
@@ -993,7 +1034,15 @@ if (!function_exists('rivi_plain')) {
 		$kala = $kala - 15;
 
 		$arvo	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) $row["rivihinta"]);
-		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($row["alv"]/100))));
+		
+		// Onko marginaaliverotusta
+		$laskalv = $row["alv"];
+
+		if ($row["alv"] >= 500) {
+			$laskalv -= 500;
+		}
+		
+		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($laskalv/100))));
 	}
 }
 
@@ -1076,11 +1125,19 @@ if (!function_exists('rivi_plain_2')) {
 
 		// yksikköhinta pitää olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
+			
+			// Onko marginaaliverotusta
+			$laskalv = $row["alv"];
+
+			if ($row["alv"] >= 500) {
+				$laskalv -= 500;
+			}
+			
 			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-				$veroton_hinta = $row["hinta"] / (1 + $row["alv"] / 100);
+				$veroton_hinta = $row["hinta"] / (1 + $laskalv / 100);
 			}
 			else {
-				$veroton_hinta = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+				$veroton_hinta = round($row["hinta"] / (1 + $laskalv / 100), 2);
 			}
 		}
 		else {
@@ -1103,7 +1160,15 @@ if (!function_exists('rivi_plain_2')) {
 			$row["rivihinta"] = laskuval($row["hinta"], $kurssi)*$row["kpl"]*(1-$row["ale"]/100);
 
 			if ($yhtiorow["alv_kasittely"] == '') {
-				$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
+				
+				// Onko marginaaliverotusta
+				$laskalv = $row["alv"];
+
+				if ($row["alv"] >= 500) {
+					$laskalv -= 500;
+				}
+				
+				$row["rivihinta"] = $row["rivihinta"] / (1+$laskalv/100);
 			}
 		}
 
@@ -1118,7 +1183,15 @@ if (!function_exists('rivi_plain_2')) {
 		$kala = $kala - 15;
 
 		$arvo	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) $row["rivihinta"]);
-		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($row["alv"]/100))));
+		
+		// Onko marginaaliverotusta
+		$laskalv = $row["alv"];
+
+		if ($row["alv"] >= 500) {
+			$laskalv -= 500;
+		}
+		
+		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($laskalv/100))));
 	}
 }
 
@@ -1184,11 +1257,19 @@ if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
 
 		// yksikköhinta pitää olla veroton
 		if ($yhtiorow["alv_kasittely"] == '') {
+			
+			// Onko marginaaliverotusta
+			$laskalv = $row["alv"];
+
+			if ($row["alv"] >= 500) {
+				$laskalv -= 500;
+			}
+			
 			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-				$veroton_hinta = $row["hinta"] / (1 + $row["alv"] / 100);
+				$veroton_hinta = $row["hinta"] / (1 + $laskalv / 100);
 			}
 			else {
-				$veroton_hinta = round($row["hinta"] / (1 + $row["alv"] / 100), 2);
+				$veroton_hinta = round($row["hinta"] / (1 + $laskalv / 100), 2);
 			}
 		}
 		else {
@@ -1209,7 +1290,15 @@ if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
 			$row["rivihinta"] = laskuval($row["hinta"], $kurssi)*$row["kpl"]*(1-$row["ale"]/100);
 
 			if ($yhtiorow["alv_kasittely"] == '') {
-				$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
+				
+				// Onko marginaaliverotusta
+				$laskalv = $row["alv"];
+
+				if ($row["alv"] >= 500) {
+					$laskalv -= 500;
+				}
+				
+				$row["rivihinta"] = $row["rivihinta"] / (1+$laskalv/100);
 			}
 		}
 
@@ -1336,7 +1425,15 @@ if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
 		$kala = $kala - 15;
 
 		$arvo	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) $row["rivihinta"]);
-		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($row["alv"]/100))));
+		
+		// Onko marginaaliverotusta
+		$laskalv = $row["alv"];
+
+		if ($row["alv"] >= 500) {
+			$laskalv -= 500;
+		}
+		
+		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($laskalv/100))));
 	}
 }
 

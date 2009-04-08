@@ -621,10 +621,7 @@
 			$rivino = $rivilaskuri+1;
 		}
 
-		echo "<br><table>";
-		echo "<tr><td class='back' colspan='5'><font class='message'>";
-		echo t("Tilausrivit").":</font>";
-		echo "</td></tr>";
+		echo "<table>";
 		echo "<tr><th>".t("#")."</th>";
 
 		if ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K') {

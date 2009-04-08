@@ -1585,6 +1585,9 @@
 					elseif ($prow["laji"] == "tulo" and $prow["laskutunnus"] != "") {
 						echo "<a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";
 					}
+					elseif ($prow["laji"] == "siirto" and $prow["laskutunnus"] != "") {
+						echo "<a href='$PHP_SELF?tuoteno=$tuoteno&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";
+					}
 					else {
 						echo t("$prow[laji]");
 					}

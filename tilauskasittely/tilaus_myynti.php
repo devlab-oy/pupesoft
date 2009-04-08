@@ -1722,6 +1722,13 @@ if ($tee == '') {
 
 	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] > 0) {
+		
+		$query = "	SELECT fakta, round(luottoraja, 0) luottoraja, luokka, asiakasnro
+					FROM asiakas
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tunnus = '$laskurow[liitostunnus]'";
+		$faktaresult = mysql_query($query) or pupe_error($query);
+		$faktarow = mysql_fetch_array($faktaresult);
 
 		echo "<input type='hidden' name='pikaotsikko' value='TRUE'>";
 
@@ -1736,16 +1743,25 @@ if ($tee == '') {
 			echo "<td>&nbsp;</td>";
 		}
 		else {
+			
+			echo "<th>".t("Ytunnus").":</th><td>$laskurow[ytunnus] </td><th>".t("Asiakasnro").":</th><td>$faktarow[asiakasnro]</td>";
+			
+			echo "</tr>";
+			
+			echo "<tr>$jarjlisa";
+			
 			echo "<th align='left'>".t("Asiakas").":</th>";
 
-
 			if ($kukarow["extranet"] == "") {
-				echo "<td><a href='../crm/asiakasmemo.php?ytunnus=$laskurow[ytunnus]&asiakasid=$laskurow[liitostunnus]&from=$toim'>$laskurow[ytunnus] $laskurow[nimi]</a><br>$laskurow[toim_nimi]</td>";
+				echo "<td><a href='../crm/asiakasmemo.php?ytunnus=$laskurow[ytunnus]&asiakasid=$laskurow[liitostunnus]&from=$toim'>$laskurow[nimi]</a>";				
  			}
 			else {
-				echo "<td>$laskurow[ytunnus] $laskurow[nimi]<br>$laskurow[toim_nimi]</td>";
+				echo "<td>$laskurow[nimi]";				
 			}
-
+			
+			if ($laskurow["toim_nimi"] != $laskurow["nimi"]) echo "<br>$laskurow[toim_nimi]";				
+			echo "</td>";
+			
 			echo "<th align='left'>".t("Toimitustapa").":</th>";
 
 			if ($kukarow["extranet"] != "") {
@@ -1801,7 +1817,7 @@ if ($tee == '') {
 				}
 				else {
 					$ylisa = "&uusi=1&ytunnus=$laskurow[ytunnus]&toimitustapa=$laskurow[toimitustapa]";
-					$rahsoprow["rahtisopimus"] = t("Lis‰‰ rahtisopimus");
+					$rahsoprow["rahtisopimus"] = t("Rahtisopimus");
 				}
 
 				echo " <a href='".$palvelin2."yllapito.php?toim=rahtisopimukset$ylisa&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>$rahsoprow[rahtisopimus]</a>";
@@ -1974,13 +1990,7 @@ if ($tee == '') {
 			}
 			echo "</select></td></tr>";
 
-			$query = "	SELECT a.fakta, l.ytunnus, round(a.luottoraja,0) luottoraja, a.luokka
-						FROM asiakas a, lasku l
-						WHERE l.tunnus='$kukarow[kesken]' and l.yhtio='$kukarow[yhtio]' and a.yhtio = l.yhtio and a.tunnus = l.liitostunnus";
-			$faktaresult = mysql_query($query) or pupe_error($query);
-			$faktarow = mysql_fetch_array($faktaresult);
-
-			if ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
+			if ((trim($faktarow["fakta"]) != "" or $faktarow["luokka"]== 'K') and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
 				echo "<tr>$jarjlisa<th>".t("Asiakasfakta").":</th><td colspan='3'>";
 
 				//jos asiakkaalla on luokka K niin se on myyntikiellossa ja siit‰ herjataan
@@ -2065,7 +2075,6 @@ if ($tee == '') {
 
 	echo "</table>";
 
-
 	//N‰ytet‰‰nko asiakkaan saatavat!
 	$query  = "	SELECT yhtio
 				FROM tilausrivi
@@ -2074,14 +2083,20 @@ if ($tee == '') {
 	$numres = mysql_query($query) or pupe_error($query);
 
 	if ($kukarow['extranet'] == '' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or mysql_num_rows($numres) == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "EXTRANET")) {
-
-		echo "<br>";
 		$sytunnus 	 = $laskurow['ytunnus'];
 		$eiliittymaa = 'ON';
-
+		
+		ob_start();
 		require ("../raportit/saatanat.php");
-
+		$retval = ob_get_contents();
+		ob_end_clean();
+		
+		if (trim ($retval) != "") {
+			echo "<br>$retval";
+		}
+				
 		if ($ylikolkyt > 0) {
+			echo "<br>";
 			echo "	<table>
 					<tr>$jarjlisa
 					<td class='back' align = 'left'><font class='error'>".t("HUOM!!!!!! Asiakkaalla on yli 15 p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan")."!!!!!<br></font>$menuset</td>

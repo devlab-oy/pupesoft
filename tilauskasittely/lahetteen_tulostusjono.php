@@ -329,7 +329,7 @@
 				echo t("Tilaus on kesken käyttäjällä").", $keskenrow[nimi], ".t("ota yhteyttä häneen ja käske hänen laittaa vähän vauhtia tähän touhuun")."!<br>";
 				$tee2 = '';
 			}
-
+			
 			if ($tee2 != '') {
 				echo "</table><br>";
 				echo "<table>";
@@ -341,6 +341,12 @@
 					echo "<td valign='top'><input type='checkbox' name='ei_pakkaamoa' id='ei_pakkaamoa' value='EI'";
 
 					if ($tila == 'N' or ($toim == 'SIIRTOLISTA' and $tila == "G")) {
+						
+						if (mysql_num_rows($tilre) > 0) {
+							mysql_data_seek($tilre, 0);
+							$tilrow = mysql_fetch_array($tilre);
+						}						
+						
 						$query = "	SELECT ei_pakkaamoa	
 									FROM toimitustapa 
 									WHERE yhtio = '$kukarow[yhtio]'
@@ -348,7 +354,7 @@
 						$ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
 
 						$ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
-
+						
 						if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1') {
 							echo " checked";
 						}

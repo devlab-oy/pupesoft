@@ -1047,7 +1047,7 @@
 				/*	echo "tarkistus tunnukset_lkm: 	$vanhat_row[kpl] <br>";
 				echo "main tunnukset_lkm: 		$row[tunnukset_lkm] <br>";				
 				echo "main vanhatunnus: 		$row[vanhatunnus] <br>";				
-				echo "main tunnukset: 			$row[tunnukset] <br>";	*/	
+				echo "main tunnukset: 			$row[tunnukset] <br>";*/		
 						
 				if ($vanhat_row['kpl'] == $row['tunnukset_lkm'] or $vanhat_row['kpl'] == 0 or $yhtiorow["splittauskielto"] != "" or $yhtiorow['pakkaamolokerot'] == '') {
 									
@@ -1141,6 +1141,23 @@
 					
 					$temp_osittaiset .= "<tr class='aktiivi'>";
 					$temp_osittaiset .= "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";
+					
+					//haetaan tunnukset inkä takia nämä tilaukset odottavat
+					$query = "	SELECT GROUP_CONCAT(distinct lasku.tunnus order by lasku.tunnus SEPARATOR '<br>') tunnukset
+								FROM lasku
+								JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
+								WHERE lasku.yhtio = '$kukarow[yhtio]'
+								AND lasku.tila in ('L','N','G')
+								AND lasku.alatila not in ('X','V','D','B')
+								AND lasku.tulostusalue != ''
+								AND lasku.vanhatunnus = '$row[vanhatunnus]'
+								AND lasku.tunnus not in($row[tunnukset])
+								AND lasku.varasto = '$row[varasto]'
+								AND (lasku.pakkaamo = '$row[pakkaamo]' or (lasku.tila = 'N' or (lasku.tila = 'G' and lasku.alatila = 'J')))";
+					$vanhat_res = mysql_query($query) or pupe_error($query);
+					$vanhat_row = mysql_fetch_array($vanhat_res);
+				
+					$temp_osittaiset .= "<td valign='top'>$vanhat_row[tunnukset]</td>";
 					$temp_osittaiset .= "<td valign='top'>$row[nimi]</td>";
 					$temp_osittaiset .= "<td valign='top'>$row[toimitustapa]</td>";
 					$temp_osittaiset .= "<td valign='top'>$row[laatija]</td>";
@@ -1257,6 +1274,7 @@
 				echo "<tr><th colspan ='$spanni'>".t("Odottavat tilaukset")."</th></tr>";
 				echo "<tr>";
 				echo "<th>".t("Tilaus")."</th>";
+				echo "<th>".t("Odottaa")."</th>";
 				echo "<th>".t("Asiakas")."</th>";
 				echo "<th>".t("Toimitustapa")."</th>";
 				echo "<th>".t("Laatija")."</th>";

@@ -6615,7 +6615,7 @@ if (!function_exists("pakkaamo")) {
 				$query = "	UPDATE lasku SET 
 							pakkaamo = 0
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND ((tila in('N','L') and alatila = 'A') or (tila = 'L' and alatila = 'C') or (tila = 'G' and alatila = 'J'))
+							AND ((tila in('N','L') and alatila = 'A') or (tila = 'L' and alatila = 'C') or (tila = 'G' and alatila in('J','A','C')))
 							AND tunnus 		in ($tilausnumero)";
 				$ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
 								
@@ -6626,7 +6626,7 @@ if (!function_exists("pakkaamo")) {
 			$query = "	SELECT varasto
 						FROM lasku
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						AND ((tila in('N','L') and alatila = 'A') or (tila = 'L' and alatila = 'C') or (tila = 'G' and alatila = 'J'))
+						AND ((tila in('N','L') and alatila = 'A') or (tila = 'L' and alatila = 'C') or (tila = 'G' and alatila in('J','A','C')))
 						AND lasku.tunnus in ($tilausnumero)";
 			$varastotark_res = mysql_query($query) or pupe_error($query);
 			$varastotark_row = mysql_fetch_array($varastotark_res);
@@ -6638,7 +6638,7 @@ if (!function_exists("pakkaamo")) {
 							AND trim(varaston_tulostimet.nimi) = lasku.tulostusalue
 							AND trim(varaston_tulostimet.nimi) != '')
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						AND ((lasku.tila in('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila = 'J'))
+						AND ((lasku.tila in('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in('J','A','C')))
 						AND lasku.tunnus in ($tilausnumero)";
 			$pakkaamotark_res = mysql_query($query) or pupe_error($query);
 			
@@ -6656,7 +6656,7 @@ if (!function_exists("pakkaamo")) {
 			$query = "	SELECT distinct vanhatunnus
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
-						AND ((tila in('N','L') and alatila = 'A') or (tila = 'L' and alatila = 'C') or (tila = 'G' and alatila = 'J'))
+						AND ((tila in('N','L') and alatila = 'A') or (tila = 'L' and alatila = 'C') or (tila = 'G' and alatila in('J','A','C')))
 						AND tunnus in ($tilausnumero)";
 			$vanhattunnukset_res = mysql_query($query) or pupe_error($query);
 
@@ -6672,7 +6672,7 @@ if (!function_exists("pakkaamo")) {
 						JOIN varaston_tulostimet ON (varaston_tulostimet.yhtio = lasku.yhtio AND varaston_tulostimet.varasto = lasku.varasto AND trim(varaston_tulostimet.nimi) = lasku.tulostusalue)
 						JOIN pakkaamo ON (pakkaamo.yhtio = lasku.yhtio and pakkaamo.nimi = varaston_tulostimet.pakkaamo)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						AND ((lasku.tila in('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila = 'J'))
+						AND ((lasku.tila in('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in('J','A','C')))
 						AND vanhatunnus in ($vanhattunnukset)
 						AND lasku.varasto = '$varastotark_row[varasto]'
 						ORDER BY pakkaamo.pakkaamon_prio asc
@@ -6699,7 +6699,7 @@ if (!function_exists("pakkaamo")) {
 						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
 						AND (lasku.tunnus 		in ($tilausnumero)
 							or lasku.vanhatunnus 	in ($vanhattunnukset))
-						AND ((lasku.tila in('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila = 'J'))
+						AND ((lasku.tila in('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in('J','A','C')))
 						AND lasku.varasto = '$varastotark_row[varasto]'
 						$pakkaamolisa
 						LIMIT 1";
@@ -6730,7 +6730,7 @@ if (!function_exists("pakkaamo")) {
 							FROM pakkaamo
 							LEFT JOIN lasku ON (lasku.yhtio = pakkaamo.yhtio AND lasku.pakkaamo = pakkaamo.tunnus AND lasku.varasto = pakkaamo.varasto)
 							WHERE pakkaamo.yhtio = '{$kukarow['yhtio']}'
-							AND ((lasku.tila in('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila = 'J'))
+							AND ((lasku.tila in('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in('J','A','C')))
 							AND lasku.varasto = '$varastotark_row[varasto]'
 							HAVING lasku.pakkaamo IS NULL
 							ORDER BY pakkaamo.lokero, pakkaamo.varasto ASC
@@ -6767,7 +6767,7 @@ if (!function_exists("pakkaamo")) {
 								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
 								AND lasku.pakkaamo > 0
 								AND lasku.varasto = '$varastotark_row[varasto]'
-								AND ((lasku.tila in('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila = 'J'))
+								AND ((lasku.tila in('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in('J','A','C')))
 								$pakkaamolisa
 								and lasku.tulostusalue = '$varasto_chk_row[tulostusalue]'								
 								GROUP BY lasku.pakkaamo

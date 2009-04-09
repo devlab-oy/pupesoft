@@ -686,7 +686,7 @@ if ($tee == 'P' or $tee == 'E') {
 				<table border='0'><tr><td class='back' valign='top'>
 
 				<table>
-				<tr><th>".t("ytunnus")."</th>	<td><input type='text' name='trow[ytunnus]'    maxlength='8'  size=10 value='$trow[ytunnus]'></td></tr>
+				<tr><th>".t("ytunnus")."</th>	<td><input type='text' name='trow[ytunnus]'    maxlength='16'  size=18 value='$trow[ytunnus]'></td></tr>
 				<tr><th>".t("nimi")."</th>		<td><input type='text' name='trow[nimi]'       maxlength='45' size=45 value='$trow[nimi]'></td></tr>
 				<tr><th>".t("nimitark")."</th>	<td><input type='text' name='trow[nimitark]'   maxlength='45' size=45 value='$trow[nimitark]'></td></tr>
 				<tr><th>".t("osoite")."</th>		<td><input type='text' name='trow[osoite]'     maxlength='45' size=45 value='$trow[osoite]'></td></tr>

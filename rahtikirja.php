@@ -1142,7 +1142,7 @@
 					$temp_osittaiset .= "<tr class='aktiivi'>";
 					$temp_osittaiset .= "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";
 					
-					//haetaan tunnukset inkä takia nämä tilaukset odottavat
+					//haetaan tunnukset minkä takia nämä tilaukset odottavat
 					$query = "	SELECT GROUP_CONCAT(distinct lasku.tunnus order by lasku.tunnus SEPARATOR '<br>') tunnukset
 								FROM lasku
 								JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
@@ -1266,7 +1266,7 @@
 				}
 				
 				if ($yhtiorow['pakkaamolokerot'] == 'K') {
-					$spanni += 4;
+					$spanni += 5;
 				}
 				
 				echo "<br><table>";

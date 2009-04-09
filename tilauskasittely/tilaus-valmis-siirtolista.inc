@@ -287,7 +287,7 @@
 				}
 			}
 
-			$query = "select tunnus, sisviesti2 from lasku where yhtio = '$kukarow[yhtio]' and vanhatunnus = '$alkuplaskutunnus'";
+			$query = "select tunnus, sisviesti2 from lasku where yhtio = '$kukarow[yhtio]' and vanhatunnus = '$alkuplaskutunnus' and alatila = ''";
 			$result = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($result) > 1) {
 				$tilauksia = 1;

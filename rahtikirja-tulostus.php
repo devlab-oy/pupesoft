@@ -464,10 +464,16 @@
 
 						if ($laskutulostin != '') {
 							$valittu_tulostin = $laskutulostin;
+							$chnlisa = ", chn = '667' ";
+						}
+						else {
+							$valittu_tulostin = "";
+							$chnlisa = "";	
 						}
 						
 						$query = "	UPDATE lasku
 									set alatila='D'
+									$chnlisa
 									where tunnus in ($laskutettavat)
 									and yhtio = '$kukarow[yhtio]'";
 						$result = mysql_query($query) or pupe_error($query);

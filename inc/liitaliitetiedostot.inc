@@ -1,14 +1,11 @@
 <?php
 
-	function konvertoi ($ykoko,$xkoko,$type,$taulu,$upfile1) {
-		global $kukarow, $yhtiorow,$_FILES;
+	function konvertoi ($ykoko, $xkoko, $type, $taulu, $upfile1) {
+		global $kukarow, $yhtiorow, $_FILES;
 	
-		// testausta varten staattinen
-		//$dirri = "kuvapankki";
-		$dirri = $yhtiorow['kuvapankki_polku'];
-		$dirri .= "/".$kukarow['yhtio'];
-	
-	
+		if ($yhtiorow['kuvapankki_polku'] != "") $dirri = $yhtiorow['kuvapankki_polku']."/".$kukarow['yhtio']."/".$taulu."/".$type."/";
+		else $dirri = "/tmp/";
+		
 		list($usec, $sec) = explode(" ",microtime());
 
 		$nimi      = $usec+$sec; // uniikki nimi
@@ -22,11 +19,9 @@
 		$ext = strtolower($path_parts['extension']);	
 		
 		$image = getimagesize($filetsu["tmp_name"],$imageinfo);	// lähetetty kuva
-		
 		$leve = $image[0];       
-
 		$kork = $image[1];
-	
+		
 		// eihän molemmat (y ja x) ole nollia?!
 		if ($ykoko > 0 or $xkoko > 0) {
 			/* skaaltaanko x:n vai y:n mukaan, jos xkoko tai ykoko == 0, skaalataan != 0 mukaan */	
@@ -35,25 +30,28 @@
 				
 				// skaalataan kuva oikenakokoiseksi y:n mukaan
 		    	exec("nice -n 20 convert -resize x$ykoko -quality 80 $filetsu[tmp_name] $upfilesgh", $output);
-		    }
-		
-			if ($xkoko > 0 and $leve > $xkoko) {	
+		    }		
+			elseif ($xkoko > 0 and $leve > $xkoko) {	
 				$upfilesgh = strtolower("/tmp/$nimi"."1.".$ext);
 				
 				// skaalataan kuva oikenakokoiseksi x:n mukaan
 		  		exec("nice -n 20 convert -resize $xkoko -quality 80 $filetsu[tmp_name] $upfilesgh", $output);
 		    }
-				
-			$uusnimi = $dirri."/".$taulu."/".$type."/".$filetsu["name"];
-		
-			if (!copy($upfilesgh,$uusnimi)) {
+			else {	
+				return $upfile1;
+		    }
+	
+			$uusnimi = $dirri.$filetsu["name"];
+	
+			if (!copy($upfilesgh, $uusnimi)) {
 		    	echo "Kopiointi epäonnistui $upfilesgh -> $uusnimi<br>";
+				
 				$upfileall = "";
 			}
 			else {
-				$upfileall = "$uusnimi";
+				$upfileall = $uusnimi;
 			}
-		
+	
 			$a = getimagesize($uusnimi);
 
 			$file["name"] 		= basename($uusnimi);
@@ -61,7 +59,7 @@
 			$file["tmp_name"] 	= $uusnimi;
 			$file["error"] 		= 0;
 			$file["size"] 		= filesize($uusnimi);
-
+			
 			$_FILES[$upfile1] = $file;
 	
 			// poistetaan file
@@ -73,7 +71,6 @@
 	
 		return $upfileall;
 	}
-
 
 	echo "<font class='head'>".t("Liitetiedostot")."</font><hr>";
 
@@ -150,31 +147,32 @@
 						and filename = '$file_name'";
 			$result = mysql_query($query) or pupe_error($query);
 			
-			
-			if($retval !== true) {
-				echo $retval;
-				
+			if($retval !== TRUE) {
+				echo $retval;	
 			}
 			elseif (mysql_num_rows($result) > 0) {				
-				$checkrow=mysql_fetch_array($result);
+				$checkrow = mysql_fetch_array($result);
+				
 				echo "<font class='error'>".t("VIRHE! Tiedosto %s %s löytyy jo tuotteelle", $kieli, $file_name, $checkrow['kayttotarkoitus']).".</font><br><br>";						
 			}
 			else {
 			
-							
 				$uusi_filu = "";
 				
 				//konvertoidaan kuva
 				if ($teetyyppi == "TK" and $type == "image" and strtoupper($toim) == 'TUOTE') {	
 					$temp_file = $_FILES["userfile"];
 					
-					$uusi_filu = konvertoi(480,640,"normaali",$toim,"userfile");
+					$uusi_filu = konvertoi(480, 640, "normaali", $toim, "userfile");
+					
 					tallenna_liite("userfile", $toim, $tunnus, $kuvaotsikko, $teetyyppi, 0, $liite_jarjestys);
+					
 					if ($uusi_filu != "") {
 						system("rm -f \"$uusi_filu\"");
 					}
 					
 					$_FILES["userfile"] = $temp_file;
+					
 					if (isset($thumb_size_x) and trim($thumb_size_x) != '' and isset($thumb_size_y) and trim($thumb_size_y) != '') {
 						$thumb_size_x = (int)$thumb_size_x;
 						$thumb_size_y = (int)$thumb_size_y;
@@ -186,6 +184,7 @@
 					
 					$teetyyppi = "TH";
 					tallenna_liite("userfile", $toim, $tunnus, $kuvaotsikko, $teetyyppi, 0, $liite_jarjestys);
+					
 					if ($uusi_filu != "") {
 						system("rm -f \"$uusi_filu\"");
 					}

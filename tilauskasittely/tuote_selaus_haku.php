@@ -379,7 +379,7 @@
 		$ulisa .= "&poistetut=checked";
 		
 		if ($kukarow["extranet"] != "") {
-			$poislisa  = " HAVING tuote.status in ('P','X') ";
+			$poislisa  = " HAVING (tuote.status in ('P','X') and saldo > 0) ";
 			$poislisa_mulsel  = " and tuote.status in ('P','X') ";
 		}
 		else {
@@ -564,7 +564,7 @@
 	echo "<tr><th>",t("Nimitys"),"</th><td nowrap valign='top' colspan='2'><input type='text' size='25' name='nimitys' id='nimitys' value = '$nimitys'></td></tr>";
 	
 	echo "<tr><th>",t("Poistetut"),"</th><td nowrap valign='top' colspan='2'><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
-
+	
 	echo "<tr><th>",t("Lisätiedot"),"</th><td nowrap valign='top' colspan='2'><input type='checkbox' name='lisatiedot' id='lisatiedot' $lisacheck></td></tr>";
 	echo "</table>";
 

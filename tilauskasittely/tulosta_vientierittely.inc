@@ -117,7 +117,7 @@ if ($Xtunnukset2 != "") {
 			$Xpdf->draw_rectangle(800, 300, 779, 580, $Xfirstpage, 	$Xrectparam);
 			$Xpdf->draw_rectangle(800, 420, 779, 580, $Xfirstpage, 	$Xrectparam);
 			$Xpdf->draw_text(310, 792, t("Laskun pvm", $kieli), 	$Xfirstpage, $Xpieni);
-			$Xpdf->draw_text(310, 782, $laskurow["tapvm"], 			$Xfirstpage, $Xnorm);
+			$Xpdf->draw_text(310, 782, tv1dateconv($laskurow["tapvm"]),	$Xfirstpage, $Xnorm);
 			$Xpdf->draw_text(430, 792, t("Laskun numero", $kieli), 	$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(430, 782, $laskurow["laskunro"], 		$Xfirstpage, $Xnorm);
 	
@@ -133,7 +133,7 @@ if ($Xtunnukset2 != "") {
 			$Xpdf->draw_text(310, 750, t("Toimitusehto", $kieli), 	$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(310, 740, $laskurow["toimitusehto"], 	$Xfirstpage, $Xnorm);
 			$Xpdf->draw_text(430, 750, t("Toimituspvm", $kieli), 	$Xfirstpage, $Xpieni);
-			$Xpdf->draw_text(430, 740, $laskurow["toimaika"], 		$Xfirstpage, $Xnorm);
+			$Xpdf->draw_text(430, 740, tv1dateconv($laskurow["toimaika"]), 		$Xfirstpage, $Xnorm);
 	
 			$Xpdf->draw_rectangle(737, 300, 716, 580, 				$Xfirstpage, $Xrectparam);
 			$Xpdf->draw_text(310, 729, t("Toimitustapa", $kieli),	$Xfirstpage, $Xpieni);
@@ -203,8 +203,7 @@ if ($Xtunnukset2 != "") {
 			$Xpdf->draw_text(247, 45, $yhtiorow["puhelin"],					$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(217, 35, t("Telefax", $kieli).":",				$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(247, 35, $yhtiorow["fax"],						$Xfirstpage, $Xpieni);
-			$Xpdf->draw_text(217, 25, t("Sähköposti", $kieli).":",			$Xfirstpage, $Xpieni);
-			$Xpdf->draw_text(247, 25, $yhtiorow["email"],					$Xfirstpage, $Xpieni);
+			$Xpdf->draw_text(217, 25, t("Sähköposti", $kieli).": ".$yhtiorow["email"], $Xfirstpage, $Xpieni);
 	
 			$Xpdf->draw_text(404, 45, t("Y-tunnus", $kieli).":",			$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(444, 45, $yhtiorow["maa"]."-".$yhtiorow["ytunnus"],	$Xfirstpage, $Xpieni);

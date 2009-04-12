@@ -1,70 +1,70 @@
 <?
-function siirto ($yritirow, $aineiisto, $pvm) {
-	// Kasvatetaan tiedostojen p√§√§tett√§ yhdell√§ pankkiyhteystietokannassa
-	$nro = $yritirow['nro'] +1;
-	// Tehd√§√§n numerosta kolminumeroinen esitys
-	$nroo='';
-	if($nro<100){
-		$nroo="0";
-		if($nro<10){
-			$nroo.="0";
+function siirto ($yritirow, $aineisto, $pvm) {
+	$nro = $yritirow['nro'];
+	// Tehd‰‰n numerosta kolminumeroinen esitys
+	$nroo = '';
+	if($nro < 100){
+		$nroo = "0";
+		if($nro < 10){
+			$nroo .= "0";
 		}
 	}
 	$nro=$nroo.$nro;
 	
 	// TIEDOSTONIMET
-	echo "<pre>";
-	$osoite="/var/www/html/pupesoft/tiedostot";
+
+	$osoite="/var/www/html/pupesoft/dataout";
 	$etiedosto="ESI.A";
 	$sptiedosto="SIIRTOPYYNTO.$nro";
-	// Alustetaan ja tehd√§√§n Siirtopyynt√∂-tiedosto
-	// Siirtopyynt√∂√∂n lis√§t√§√§n tilinumero, jolta tiliote haetaan
+	// Alustetaan ja tehd‰‰n Siirtopyyntˆ-tiedosto
+	// Siirtopyyntˆˆn lis‰t‰‰n tilinumero, jolta tiliote haetaan
 	//$tili="195030-10";
-	$tili=$yriti['tilino'];
-	echo "Tehd√§√§n siirtopyynt√∂ $osoite/$sptiedosto<br>";
-	if ($pvm == '') $pvm ='000000';
-
-	$siirtopyynto = siirtopyynto($tili, DEMO, $pvm);
-
-	// Alustetaan ESI-tiedoston teko
-	$esi="perl sanoma.pl $osoite/$etiedosto ESI $dbhost $dbuser $dbpass $dbkanta $tunnus";
-	// Tehd√§√§n ESI-tiedosto
-	echo "Tehd√§√§n ESI-tiedosto $osoite/$etiedosto<br>";
-	passthru($esi, $retval);
-	if ($retval != 0) die ("ESI sanoman luonti ei onnistu");
-
-	echo "Suojataan ESI-tiedosto $esi<br>";
-	$esi = salaa($esi, ESIa, $yritirow['kayttoavain']);
 	
-	// Jos ei haluta avainvaihtoa, lis√§t√§√§n sanoman per√§√§n nolla	
+	echo "Tehd‰‰n siirtopyyntˆ $osoite/$sptiedosto<br>";
+	if ($pvm == '') $pvm = '000000';
+	$siirtopyynto = siirtopyynto($yritirow['tilino'], $aineisto, "DEMO", $pvm);
+	echo strlen($siirtopyynto). "-->" . $siirtopyynto."<br>";
+
+	echo "Alustetaan ESI-tiedoston teko<br>";
+	$esi = sanoma($yritirow, "ESI");
+	echo strlen($esi). "-->" . $esi."<br>";
+
+	echo "Suojataan ESI-tiedosto '$yritirow[kayttoavain]'<br>";
+	$esi = salaa($esi, "ESIa", $yritirow['kayttoavain']);
+	echo strlen($esi). "-->" . $esi."<br>";
+
+	// Jos ei haluta avainvaihtoa, lis‰t‰‰n sanoman per‰‰n nolla	
 	$esi .= "0";
-	
+	echo "Ei avainvaihtoa<br>";
+	echo strlen($esi). "-->" . $esi."<br>";
+
 	file_put_contents("$osoite/$etiedosto", $esi);
-	// L√ÑHETET√Ñ√ÑN PAKETIT FTP:LL√Ñ
+	file_put_contents("$osoite/$sptiedosto",$siirtopyynto);
+	exit;
 	// Tiedostojen nimet
 	$esia= "$osoite/$etiedosto";
 	$esip= "ESI.P";
 	$siirto= "$osoite/$sptiedosto";
-	$aineisto = $aineisto.$nro";
+	$aineisto = $aineisto.$nro;
 	$kuittaus = "KUITTAUS".$nro;
 	// FTP-yhteydenottomuuttujat
 	$host="solo.nordea.fi";
 	$log="anonymous";
 	$pass="SITE PASSIVE";
-	echo "Avataan FTP-yhteys $host";
+	echo "Avataan FTP-yhteys $host<br>";
 	$ftp = ftp_connect($host);
 	if($ftp) {
-	// Jos jokin asia ep√§onnistuu, katkaistaan heti yhteys
+	// Jos jokin asia ep‰onnistuu, katkaistaan heti yhteys
 	  echo "Yhteys muodostettu: $host<br>";
 	  $login_ok = ftp_login($ftp,$log,$pass);
 	  ftp_pasv($ftp, true);
-	  echo "L√§hetet√§√§n Esi-sanoma: $esia<br>";
+	  echo "L‰hetet‰‰n Esi-sanoma: $esia<br>";
 	  if(ftp_put($ftp, "ESI.A", $esia, FTP_ASCII)) {
-			echo "Esi-sanoman l√§hetys onnistui. Haetaan vastaus: $esip<br>";
+			echo "Esi-sanoman l‰hetys onnistui. Haetaan vastaus: $esip<br>";
 			if(ftp_get($ftp, "$osoite/$esip", $esip, FTP_ASCII)) {
-					echo  "Esi-sanoman vastaus saatiin.L√§hetet√§√§n siirtopyynt√∂: $siirto<br>";
+					echo  "Esi-sanoman vastaus saatiin.L‰hetet‰‰n siirtopyyntˆ: $siirto<br>";
 					if(ftp_put($ftp, "SIIRTO", $siirto, FTP_ASCII)) {
-							echo "Siirtopyynt√∂ l√§hetettiin. Haetaan aineisto: $aineisto<br>";
+							echo "Siirtopyyntˆ l‰hetettiin. Haetaan aineisto: $aineisto<br>";
 							if(ftp_get($ftp, "$osoite/$aineisto", $aineisto, FTP_ASCII)) {
 									echo "Aineiston haku onnistui. Haetaan kuittaus: $kuittaus<br>";
 									if(ftp_get($ftp, "$osoite/$kuittaus", $kuittaus, FTP_ASCII)) {
@@ -86,7 +86,7 @@ function siirto ($yritirow, $aineiisto, $pvm) {
 							}
 					}
 					else{
-						echo "Siirtopyynt√∂ ev√§ttiin<br>";
+						echo "Siirtopyyntˆ ev‰ttiin<br>";
 					}
 			}
 			else{
@@ -94,13 +94,13 @@ function siirto ($yritirow, $aineiisto, $pvm) {
 			}
 	  }
 	  else{
-			echo "Esi-sanoman l√§hetys ei onnistunut<br>";
+			echo "Esi-sanoman l‰hetys ei onnistunut<br>";
 	  }
 	  echo "<br>Lopetetaan yhteys";
 	  ftp_quit($ftp);
 	}
 	else{
-			echo "Ei yhteytt√§!<br>";
+			echo "Ei yhteytt‰!<br>";
 	}
 	return "";
 }

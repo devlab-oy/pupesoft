@@ -1,13 +1,14 @@
 <?php
 
 function salaa ($jono, $arg, $kayttoavain) {
+	$palautus = $jono;
 	//Alustetaan kryptaus k‰yttˆavaimella  
 	$kayttoavain = pack("H*",$kayttoavain);
 	$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
 	$iv = mcrypt_create_iv (mcrypt_enc_get_iv_size($td), pack('H*','0000000000000000'));
 	mcrypt_generic_init($td, $kayttoavain, $iv);
 
-	#Jaetaan 8 merkin lohkoiksi ja sijoitetaan taulukkoon
+	//Jaetaan 8 merkin lohkoiksi ja sijoitetaan taulukkoon
 	$k=0;
 
 	while(strlen($jono) > 0) {
@@ -17,33 +18,32 @@ function salaa ($jono, $arg, $kayttoavain) {
 		//echo "$jono\n";
 	}
 
-	#Jos viimeinen lohko j‰‰ vajaaksi t‰ytet‰‰n se bin‰‰ri nollilla
+	//Jos viimeinen lohko j‰‰ vajaaksi t‰ytet‰‰n se bin‰‰ri nollilla
 	$k--;
 	if (strlen($data[$k]) != 8) $data[$k] = str_pad($data[$k], 8, "\0");
 
-	#Salataan lohko, XOR:taan salattu lohko seuraavan lohkon kanssa ja 
-	#salataan se, ja XOR:taan seuraavan lohkon kanssa jne.
+	//Salataan lohko, XOR:taan salattu lohko seuraavan lohkon kanssa ja 
+	//salataan se, ja XOR:taan seuraavan lohkon kanssa jne.
 
-	$text=$data[0];
+	$text = $data[0];
 	$text = mcrypt_generic($td, $text);
 
 	for($i=1; $i<=$k; $i++){
 		$ortext=$text ^ $data[$i];
-		$text = mcrypt_generic($td, $text);
+		$text = mcrypt_generic($td, $ortext);
 	}
 
-	# Muutetaan salattu teksti Heksoiksi
+	// Muutetaan salattu teksti Heksoiksi
 	$tark = unpack("H*","$text");
 
-	# Tulostellaan arvot
-	echo "Salaus: $tark[1]<br>";
-	# Tehd‰‰n tarvittavat temput tietyille tiedostotyypeille
+	// Tulostellaan arvot
+	// Tehd‰‰n tarvittavat temput tietyille tiedostotyypeille
 	if (($arg == "ESIa") or ($arg == "VARa")) {
 		if($arg == "VARa"){
-			$jono = ">>VAR" . $jono;
+			$palautus = ">>VAR" . $palautus;
 		}
-		$jono .= $tark[1];
-		return $jono;
+		$palautus .= $tark[1];
+		return $palautus;
 	}
 
 	if (($arg == "ESIp") or ($arg == "PTE")) {

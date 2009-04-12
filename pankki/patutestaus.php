@@ -3,7 +3,7 @@
 	require ("ekakaytto.php");
 	require ("../inc/parametrit.inc");
 	
-	echo "<font class='head'>".t("Siirtoavaimen päivitys")."<hr></font>";
+	echo "<font class='head'>".t("Patutestaus")."<hr></font>";
 	
 	if ($tunnus != '' and $ekapala != '') {
 		echo "<font class='error'>".ekasiirtoavain($ekapala,$tokapala,$tarkiste,$tunnus)."</font><br><br>";
@@ -14,6 +14,20 @@
 		$vresult = mysql_query($query) or pupe_error($query);
 		if ($vrow=mysql_fetch_array($vresult)) {
 			echo "<font class='error'>".ekakayttoavain($tunnus)."</font><br><br>";
+		}
+	}
+	
+	if ($tunnus != '' and $aineisto != '') {
+		$query = "	SELECT * 
+				FROM yriti 
+				WHERE yhtio  = '$kukarow[yhtio]'
+				and tunnus = '$tunnus' and kayttoavain != ''";
+		$vresult = mysql_query($query) or pupe_error($query);
+		if ($vrow=mysql_fetch_array($vresult)) {
+			echo "<font class='error'>Tilillä ei ole käyttöavainta</font><br><br>";
+		}
+		else {
+			siirto($yritirow, $aineisto, $pvm);
 		}
 	}
 	

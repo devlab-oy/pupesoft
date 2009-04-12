@@ -36,9 +36,9 @@ function salaa ($jono, $arg, $kayttoavain) {
 	$tark = unpack("H*","$text");
 
 	# Tulostellaan arvot
-	print "\nSalaus: $tark[1]";
+	echo "Salaus: $tark[1]<br>";
 	# Tehd‰‰n tarvittavat temput tietyille tiedostotyypeille
-	if($arg == "ESIa"or $arg == "VARa"){
+	if (($arg == "ESIa") or ($arg == "VARa")) {
 		if($arg == "VARa"){
 			$jono = ">>VAR" . $jono;
 		}
@@ -46,17 +46,15 @@ function salaa ($jono, $arg, $kayttoavain) {
 		return $jono;
 	}
 
-	if($arg == "ESIp" or $arg == "PTE"){
+	if (($arg == "ESIp") or ($arg == "PTE")) {
 		$tarkiste =  $data[18];
 		$tarkiste .= $data[19];
-		print "\nTarkiste: $tarkiste\n";
-		if($tark[1] == $tarkiste){
-			print "\nTarkisteet t‰sm‰‰v‰t\n";
-			return TRUE;
+		echo "Tarkiste: $tarkiste<br>";
+		if ($tark[1] == $tarkiste){
+			return ""; // ok!
 		}
-		else{
-			print "\nTarkisteet eiv‰t t‰sm‰‰!\n";
-			return FALSE;
+		else {
+			return "Tarkisteet eiv‰t t‰sm‰‰!";
 		}
 	}
 	mcrypt_generic_deinit($td);

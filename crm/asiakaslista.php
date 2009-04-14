@@ -75,7 +75,7 @@
 	if ($yhtiorow['viikkosuunnitelma'] == '') {
 		if ($tee == "lahetalista") {		
 			$query = "	SELECT tunnus, nimi, postitp, ytunnus, yhtio, asiakasnro, nimitark, osoite, postino, postitp, maa, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa,
-						puhelin, fax, myyja, email, osasto, piiri, ryhma, fakta, toimitustapa, yhtio
+						puhelin, fax, myyjanro, email, osasto, piiri, ryhma, fakta, toimitustapa, yhtio
 						FROM asiakas 
 						WHERE $konsernit 
 						$lisa";
@@ -100,20 +100,21 @@
 				
 	if ($lisa == "" and ($tee != 'laheta' or $tee != 'lahetalista')) {
 		$limit = " LIMIT 200 ";
-	} else {
+	} 
+	else {
 		$limit = " ";
 	}
-
 				
 	$query .= "$ryhma ORDER BY $jarjestys $limit";
 	$result = mysql_query($query) or pupe_error($query);
 
-
 	if ($oper == t("Vaihda listan kaikkien asiakkaiden tila")) {
-		// KÃ¤ydÃ¤Ã¤n lista lÃ¤pi kertaalleen
-		while ($trow=mysql_fetch_array ($result)) {
-			$query_update = "UPDATE asiakas SET tila = '$astila_vaihto' WHERE tunnus = '$trow[tunnus]' 
-				AND yhtio = '$yhtiorow[yhtio]'";
+		// Käydään lista läpi kertaalleen
+		while ($trow = mysql_fetch_array ($result)) {
+			$query_update = "	UPDATE asiakas 
+								SET tila = '$astila_vaihto' 
+								WHERE tunnus = '$trow[tunnus]' 
+								AND yhtio = '$yhtiorow[yhtio]'";
 			$result_update = mysql_query($query_update) or pupe_error($query_update);
 		}
 		$result = mysql_query($query) or pupe_error($query);
@@ -245,7 +246,7 @@
 		
 		if ($tee == "lahetalista") {
 			mail($kukarow['eposti'], "Asiakkaiden tiedot", $content, $header, "-f $yhtiorow[postittaja_email]");			
-			echo "<br><br><font class='message'>".t("Asiakkaiden tiedot sähköpostiisi")."!</font>$tiednimi<br><br><br>";
+			echo "<br><br><font class='message'>".t("Asiakkaiden tiedot sähköpostiisi")."!</font><br><br><br>";
 		}
 		else {
 			mail($kukarow['eposti'], "Viikkosunnitelmapohja", $content, $header, "-f $yhtiorow[postittaja_email]");
@@ -427,7 +428,8 @@
 				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASTILA' order by avainsana.selite+0";
 	$asosresult = mysql_query($query) or pupe_error($query);
 
-	echo "".t("Vaihda asiakkaiden tila").": <select name='astila_vaihto'>";
+	echo t("Vaihda asiakkaiden tila").": <select name='astila_vaihto'>";
+	
 	while ($asosrow = mysql_fetch_array($asosresult)) {
 		$sel2 = '';
 		if ($astila == $asosrow["selite"]) {

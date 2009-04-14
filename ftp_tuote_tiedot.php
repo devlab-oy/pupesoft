@@ -206,7 +206,8 @@ if ($tee == "aja") {
 					ta_nimitys_en.selite as nimitys_en, ta_kuvaus_en.selite as kuvaus_en, ta_kuvaus_en.selite as lyhytkuvaus_en,
 					ta_nimitys_ru.selite as nimitys_ru, ta_kuvaus_ru.selite as kuvaus_ru, ta_kuvaus_ru.selite as lyhytkuvaus_ru,
 					ta_nimitys_ee.selite as nimitys_ee, ta_kuvaus_ee.selite as kuvaus_ee, ta_kuvaus_ee.selite as lyhytkuvaus_ee,
-					ta_nimitys_de.selite as nimitys_de, ta_kuvaus_de.selite as kuvaus_de, ta_kuvaus_de.selite as lyhytkuvaus_de
+					ta_nimitys_de.selite as nimitys_de, ta_kuvaus_de.selite as kuvaus_de, ta_kuvaus_de.selite as lyhytkuvaus_de,
+					tuote.myyntihinta
 					FROM tuote
 					LEFT JOIN liitetiedostot on tuote.yhtio = liitetiedostot.yhtio and tuote.tunnus = liitetiedostot.liitostunnus and liitetiedostot.liitos = 'tuote' and liitetiedostot.kayttotarkoitus in ('TK','MU')
 					LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on tuote.yhtio = ta_nimitys_se.yhtio and tuote.tuoteno = ta_nimitys_se.tuoteno and ta_nimitys_se.laji = 'nimitys_se'

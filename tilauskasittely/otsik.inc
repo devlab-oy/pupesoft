@@ -892,26 +892,35 @@
 			echo "</table><br>";
 
 
-			if ($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") {
+			if ($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T" or $srow["vienti"] =='K') {
 				echo "<table>";
 				echo "<tr><td>";
-					echo "<table>";
-					echo "<tr>
-							<th colspan='2' align='left' valign='top'>&nbsp; ".t("Rinnakkaisostaja").":</th></tr>";
-					echo "<tr>
-							<td valign='top'> ".t("Nimi").": </td>
-							<td><input type='text' name='kolm_nimi' size='35' value='$srow[kolm_nimi]'></td></tr>";
-					echo "<tr>
-							<td></td>
-							<td><input type='text' name='kolm_nimitark' size='35' value='$srow[kolm_nimitark]'></td></tr>";
-					echo "<tr>
-							<td valign='top'>".t("Osoite").": </td>
-							<td><input type='text' name='kolm_osoite' size='35' value='$srow[kolm_osoite]'></td></tr>";
-					echo "<tr>
-							<td valign='top'>".t("Postitp").": </td>
-							<td><input type='text' name='kolm_postino' size='6' value='$srow[kolm_postino]'> <input type='text' name='kolm_postitp' size='21' value='$srow[kolm_postitp]'></td></tr>";
-					echo "</table>";
-					echo "</td><td>";
+				echo "<table>";
+								
+				if ($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") {	
+					echo "<tr><th colspan='2' align='left' valign='top'>&nbsp; ".t("Rinnakkaisostaja").":</th></tr>";
+				}
+				else {
+					echo "<tr><th colspan='2' align='left' valign='top'>&nbsp; ".t("Asiamies").":</th></tr>";
+				}
+				
+				echo "<tr>
+						<td valign='top'> ".t("Nimi").": </td>
+						<td><input type='text' name='kolm_nimi' size='35' value='$srow[kolm_nimi]'></td></tr>";
+				echo "<tr>
+						<td></td>
+						<td><input type='text' name='kolm_nimitark' size='35' value='$srow[kolm_nimitark]'></td></tr>";
+				echo "<tr>
+						<td valign='top'>".t("Osoite").": </td>
+						<td><input type='text' name='kolm_osoite' size='35' value='$srow[kolm_osoite]'></td></tr>";
+				echo "<tr>
+						<td valign='top'>".t("Postitp").": </td>
+						<td><input type='text' name='kolm_postino' size='6' value='$srow[kolm_postino]'> <input type='text' name='kolm_postitp' size='21' value='$srow[kolm_postitp]'></td></tr>";
+				echo "</table>";
+				echo "</td>";
+				
+				if ($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") {	
+					echo "<td>";
 					echo "<table>";
 					echo "<tr>
 							<td valign='top'> ".t("Sähköpostiosoite").": </td>
@@ -929,7 +938,10 @@
 							<td valign='top'></td>
 							<td></td></tr>";
 					echo "</table>";
-				echo "</td></tr></table><br>";
+					echo "</td>";
+				}
+					
+				echo "</tr></table><br>";
 			}
 			
 			echo "<table>";
@@ -3019,7 +3031,7 @@
 				$result = mysql_query($query2) or pupe_error($query2);
 			}
 
-			if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or ($yhtiorow["tilauksen_seuranta"] != "" and in_array($toim, array("PROJEKTI","RIVISYOTTO","PIKATILAUS")))) {
+			if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $vienti =='K' or ($yhtiorow["tilauksen_seuranta"] != "" and in_array($toim, array("PROJEKTI","RIVISYOTTO","PIKATILAUS")))) {
 				$query3 .= "laskun_lisatiedot SET
 							yhtio						= '$kukarow[yhtio]',
 							kolm_ovttunnus				= '$kolm_ovttunnus',

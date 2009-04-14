@@ -341,6 +341,19 @@
 			$tee = "";
 		}
 		
+		if ($tee == 'paivita_tila') {
+			$tee2 = $tee;
+			$tee = '';
+			
+			$query_update = "	UPDATE asiakas SET tila = '$astila'
+								WHERE yhtio	= '$kukarow[yhtio]'
+                                and ytunnus	= '$ytunnus'
+                                and tunnus	= '$asiakasid'";
+			$result_update = mysql_query($query_update) or pupe_error($query_update);
+			
+			echo t("Vaihdettiin asiakkaan tila")."<br/>";
+		}
+
 		if ($tee == '') {
 
 			///* Yhteyshenkilön tiedot, otetaan valitun yhteyshenkilön tiedot talteen  *///
@@ -493,7 +506,11 @@
 
 				echo "</tr>";
 				echo "<tr>";
-				echo "<td>$asiakasrow[fakta]</td><td></td><td>".t("Email.")." $yemail</td>";
+				echo "<td>$asiakasrow[fakta]</td><td></td><td>".t("Email.")." $yemail";
+				if ($yemail != "") {
+					echo " &nbsp; <a href=\"mailto:$yemail\">".t("Email")."</a>";
+				}
+				echo "</td>";
 
 				$query = "	SELECT yhtio
 							FROM oikeu
@@ -511,11 +528,40 @@
 				}
 
 				echo "</tr>";
+				echo "<tr><td colspan='2'></td><td>".t("Tila").": ";
+				echo "<form action='$PHP_SELF' method='POST'>";
+				echo "<input type='hidden' name='from' value='$from'>
+					<input type='hidden' name='ytunnus' value='$ytunnus'>
+					<input type='hidden' name='asiakasid' value='$asiakasid'>
+					<input type='hidden' name='tee' value='paivita_tila'>";
+				echo "<select name='astila' Onchange='submit();'>";
+				echo "<option value=''>".t("Ei tilaa")."</option>";
+
+				$query = "	SELECT distinct avainsana.selite, ".avain('select')."
+	                       	FROM avainsana
+        	                ".avain('join','ASTILA_')."
+                	        WHERE avainsana.yhtio='$kukarow[yhtio]' 
+							and avainsana.laji='ASIAKASTILA' 
+							order by avainsana.selite+0";
+				$asosresult = mysql_query($query) or pupe_error($query);
+
+				if ($tee2 == "") {
+					$astila = $asiakasrow['tila'];
+				}
+				while ($asosrow = mysql_fetch_array($asosresult)) {
+					$sel2 = '';
+					if ($astila == $asosrow["selite"]) {
+                        			$sel2 = "selected";
+					}
+					echo "<option value='$asosrow[selite]' $sel2>$asosrow[selite] - $asosrow[selitetark]</option>";
+        		}
+
+				echo "</select></form>";
+				echo "</td><td></td></tr>";
 
 				if ($yfakta != '' or $ytitteli != '' or $ynimi != '') {
 					echo "<tr><td colspan='2'>Valittu yhteyshenkilö: $ytitteli $ynimi</td><td colspan='2'>$yfakta</td></tr>";
 				}
-
 
 				echo "</table><br>";
 			}

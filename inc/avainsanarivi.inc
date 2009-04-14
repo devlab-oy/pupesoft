@@ -63,6 +63,7 @@
 		$ulos .= "<option value='ASIAKASLUOKKA' {$avain_sel['ASIAKASLUOKKA']}>			".t("Asiakasluokka")."</option>";
 		$ulos .= "<option value='ASIAKASOSASTO' {$avain_sel['ASIAKASOSASTO']}>			".t("Asiakasosasto")."</option>";
 		$ulos .= "<option value='ASIAKASRYHMA' {$avain_sel['ASIAKASRYHMA']}>			".t("Asiakasryhma")."</option>";
+		$ulos .= "<option value='ASIAKASTILA' {$avain_sel['ASIAKASTILA']}>				".t("Asiakastila")."</option>";
 		$ulos .= "<option value='PIIRI' {$avain_sel['PIIRI']}>							".t("Asiakkaan piiri")."</option>";
 		$ulos .= "<option value='ASLUOKKA_SE' {$avain_sel['ASLUOKKA_SE']}>				".t("Ruotsinkielinen asiakasluokka")."</option>";
 		$ulos .= "<option value='ASOSASTO_SE' {$avain_sel['ASOSASTO_SE']}>				".t("Ruotsinkielinen asiakasosasto")."</option>";

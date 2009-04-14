@@ -787,6 +787,30 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tila") {
+		$query = "	SELECT avainsana.selite, ".avain('select')."
+					FROM avainsana
+					".avain('join','ASTILA_')."
+					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji = 'ASIAKASTILA'
+					ORDER BY avainsana.jarjestys";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value = '' >".t("Ei tilaa")."</option>";
+
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow['selite']) {
+				$sel = "selected";
+			}
+
+			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "myyjanro") {
 
 		$query = "SELECT distinct myyja, nimi from kuka where yhtio='$kukarow[yhtio]' and myyja>0 order by myyja";

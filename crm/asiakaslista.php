@@ -15,7 +15,7 @@
 	
 	$otsikko   = 'Asiakaslista';
 	if ($yhtiorow['viikkosuunnitelma'] == '') {
-		$kentat    = "tunnus::if(toim_postitp!='',toim_postitp,postitp)::postino::ytunnus::yhtio::asiakasnro::nimi";
+		$kentat    = "tunnus::nimi::asiakasnro::ytunnus::if(toim_postitp!='',toim_postitp,postitp)::postino::yhtio::myyjanro::email";
 	}
 	else {
 		$kentat    = "tunnus::nimi::myyjanro::ytunnus::asiakasnro::if(toim_postitp!='',toim_postitp,postitp)::yhtio";
@@ -48,10 +48,15 @@
 	if ($asryhma != '') {
 		$lisa .= " and ryhma='$asryhma' ";
 	}
+	if ($astila != '') {
+		$lisa .= " and tila='$astila' ";
+	}
 	
 	if ($asmyyja != '') {
 		$lisa .= " and myyjanro='$asmyyja' ";
 	}
+
+	$lisa .= " and laji != 'P' ";
 	
 	if (trim($konserni) != '') {
 		$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
@@ -69,15 +74,15 @@
 	
 	if ($yhtiorow['viikkosuunnitelma'] == '') {
 		if ($tee == "lahetalista") {		
-			$query = "	SELECT tunnus, postitp, ytunnus, yhtio, asiakasnro, nimi, nimitark, osoite, postino, postitp, maa, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa,
-						puhelin, fax, email, osasto, piiri, ryhma, fakta, toimitustapa, yhtio
+			$query = "	SELECT tunnus, nimi, postitp, ytunnus, yhtio, asiakasnro, nimitark, osoite, postino, postitp, maa, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa,
+						puhelin, fax, myyja, email, osasto, piiri, ryhma, fakta, toimitustapa, yhtio
 						FROM asiakas 
 						WHERE $konsernit 
 						$lisa";
 			$tiednimi = "asiakaslista.xls";
 		}
 		else {
-			$query = "	SELECT tunnus, if(toim_postitp!='',toim_postitp,postitp) postitp, if(toim_postino!=00000,toim_postino,postino) postino, ytunnus, yhtio, asiakasnro,nimi, puhelin
+			$query = "	SELECT tunnus, nimi, asiakasnro, ytunnus,  if(toim_postitp!='',toim_postitp,postitp) postitp, if(toim_postino!=00000,toim_postino,postino) postino, yhtio, myyjanro, email, puhelin
 						FROM asiakas 
 						WHERE $konsernit 
 						$lisa";
@@ -103,6 +108,16 @@
 	$query .= "$ryhma ORDER BY $jarjestys $limit";
 	$result = mysql_query($query) or pupe_error($query);
 
+
+	if ($oper == t("Vaihda listan kaikkien asiakkaiden tila")) {
+		// KÃ¤ydÃ¤Ã¤n lista lÃ¤pi kertaalleen
+		while ($trow=mysql_fetch_array ($result)) {
+			$query_update = "UPDATE asiakas SET tila = '$astila_vaihto' WHERE tunnus = '$trow[tunnus]' 
+				AND yhtio = '$yhtiorow[yhtio]'";
+			$result_update = mysql_query($query_update) or pupe_error($query_update);
+		}
+		$result = mysql_query($query) or pupe_error($query);
+	}
 	
 	if ($tee == 'laheta' or $tee == 'lahetalista') {
 		
@@ -243,8 +258,8 @@
 	}
 	
 	if ($yhtiorow['viikkosuunnitelma'] == '') {
-		echo "<li><a href='$PHP_SELF?tee=laheta&asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&asmyyja=$asmyyja".$ulisa."'>".t("Lähetä viikkosuunnitelmapohja sähköpostiisi")."</a><br>";
-		echo "<li><a href='$PHP_SELF?tee=lahetalista&asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&asmyyja=$asmyyja".$ulisa."'>".t("Lähetä asiakaslista sähköpostiisi")."</a><br>";
+		echo "<li><a href='$PHP_SELF?tee=laheta&asos=$asos&asryhma=$asryhma&astila=$astila&aspiiri=$aspiiri&konserni=$konserni&asmyyja=$asmyyja".$ulisa."'>".t("Lähetä viikkosuunnitelmapohja sähköpostiisi")."</a><br>";
+		echo "<li><a href='$PHP_SELF?tee=lahetalista&asos=$asos&asryhma=$asryhma&astila=$astila&aspiiri=$aspiiri&konserni=$konserni&asmyyja=$asmyyja".$ulisa."'>".t("Lähetä asiakaslista sähköpostiisi")."</a><br>";
 	}
 	
 	echo "<br><table>
@@ -334,7 +349,27 @@
 		echo "<option value='$asosrow[myyjanro]' $sel2>$asosrow[myyjanro] - $asosrow[nimi]</option>";
 	}
 	
-	echo "</select></td></tr>\n\n";				
+	echo "</select></td>\n\n";				
+
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
+				FROM avainsana
+				".avain('join','ASTILA_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASTILA' order by avainsana.selite+0";
+	$asosresult = mysql_query($query) or pupe_error($query);
+
+	echo "<th>".t("Valitse asiakkaan tila").":</th><td><select name='astila' onchange='submit();'>";
+	echo "<option value=''>".t("Kaikki tilat")."</option>";
+	
+	while ($asosrow = mysql_fetch_array($asosresult)) {
+		$sel2 = '';
+		if ($astila == $asosrow["selite"]) {
+			$sel2 = "selected";
+		}
+		echo "<option value='$asosrow[selite]' $sel2>$asosrow[selite] - $asosrow[selitetark]</option>";
+	}
+	
+	echo "</select></td></tr>\n\n";
+
 					
 					
 	echo "</table><br><table>";
@@ -344,7 +379,7 @@
 	
 	
 	for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
-		echo "<th><a href='$PHP_SELF?asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&asmyyja=$asmyyja&ojarj=".mysql_field_name($result,$i).$ulisa."'>" . t(mysql_field_name($result,$i)) . "</a>";
+		echo "<th><a href='$PHP_SELF?asos=$asos&asryhma=$asryhma&astila=$astila&aspiiri=$aspiiri&konserni=$konserni&asmyyja=$asmyyja&ojarj=".mysql_field_name($result,$i).$ulisa."'>" . t(mysql_field_name($result,$i)) . "</a>";
 
 		if 	(mysql_field_len($result,$i)>10) $size='20';
 		elseif	(mysql_field_len($result,$i)<5)  $size='5';
@@ -354,7 +389,7 @@
 		echo "</th>";
 	}
 
-	echo "<td class='back'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></form></tr>\n\n";
+	echo "<td class='back'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></tr>\n\n";
 	
 	while ($trow=mysql_fetch_array ($result)) {
 		echo "<tr class='aktiivi'>";
@@ -376,13 +411,35 @@
 		if ($trow["puhelin"] != "" and $kukarow["puhno"] != "" and isset($VOIPURL)) {
 			$d = ereg_replace("[^0-9]", "", $trow["puhelin"]);  // dest
 			$o = ereg_replace("[^0-9]", "", $kukarow["puhno"]); // orig
-			echo "<a href='$PHP_SELF?asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&ojarj=$ulisa&o=$o&d=$d&voipcall=call'>Soita $o -&gt; $d</a>";
+			echo "<a href='$PHP_SELF?asos=$asos&asryhma=$asryhma&astila=$astila&aspiiri=$aspiiri&konserni=$konserni&ojarj=$ulisa&o=$o&d=$d&voipcall=call'>Soita $o -&gt; $d</a>";
 		}
 
 		echo "</td>";		
 		echo "</tr>\n\n";
 	}
 	echo "</table>";
+
+	echo "<br/>";
+
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
+				FROM avainsana
+				".avain('join','ASTILA_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASTILA' order by avainsana.selite+0";
+	$asosresult = mysql_query($query) or pupe_error($query);
+
+	echo "".t("Vaihda asiakkaiden tila").": <select name='astila_vaihto'>";
+	while ($asosrow = mysql_fetch_array($asosresult)) {
+		$sel2 = '';
+		if ($astila == $asosrow["selite"]) {
+			$sel2 = "selected";
+		}
+		echo "<option value='$asosrow[selite]' $sel2>$asosrow[selite] - $asosrow[selitetark]</option>";
+	}
+	
+	echo "</select></td></tr>\n\n";
+
+	echo "<input type=\"submit\" name=\"oper\" value=\"".t("Vaihda listan kaikkien asiakkaiden tila")."\">";
+	echo "</form>";
 
 	require ("../inc/footer.inc");
 ?>

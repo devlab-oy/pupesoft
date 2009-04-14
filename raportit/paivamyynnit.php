@@ -18,20 +18,18 @@ if ($tee != '') {
 		}
 
 
-		$query = "SELECT osasto, date_format(tapvm, '%j') pvm, tapvm, replace(sum(kate), '.', ',') kate, replace(sum(arvo), '.', ',') myynti
-				from lasku use index (yhtio_tila_tapvm), asiakas
-				where lasku.yhtio = '$kukarow[yhtio]'
-				and asiakas.yhtio = lasku.yhtio
-				and asiakas.tunnus = lasku.liitostunnus
-				and tapvm >= '$vva-$kka-$ppa'
-				and tapvm <= '$vva-$kkl-$ppl'
-				and tila = 'u'
-				and alatila = 'x'
-				group by 1,2,3
-				order by 1,2,3";
+		$query = "	SELECT osasto, date_format(tapvm, '%j') pvm, tapvm, replace(sum(kate), '.', ',') kate, replace(sum(arvo), '.', ',') myynti
+					from lasku use index (yhtio_tila_tapvm), asiakas
+					where lasku.yhtio = '$kukarow[yhtio]'
+					and asiakas.yhtio = lasku.yhtio
+					and asiakas.tunnus = lasku.liitostunnus
+					and lasku.tapvm >= '$vva-$kka-$ppa'
+					and lasku.tapvm <= '$vva-$kkl-$ppl'
+					and lasku.tila = 'u'
+					and lasku.alatila = 'x'
+					group by 1,2,3
+					order by 1,2,3";
 		$result = mysql_query($query) or pupe_error($query);
-
-		//echo "$query";
 
 		while ($ressu = mysql_fetch_array($result)) {
 				$apu 		= (int) $ressu['pvm'];

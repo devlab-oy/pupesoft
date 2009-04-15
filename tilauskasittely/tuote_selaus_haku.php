@@ -1,6 +1,5 @@
 <?php
 
-
 	if (file_exists("../inc/parametrit.inc")) {
 		require ("../inc/parametrit.inc");
 		require ("../verkkokauppa/ostoskori.inc");
@@ -476,7 +475,7 @@
 					LIMIT 500";
 		$pres = mysql_query($query) or pupe_error($query);	
 
-		while($prow = mysql_fetch_array($pres)) {
+		while($prow = mysql_fetch_assoc($pres)) {
 			$origtuotteet .= "'".$prow["tuoteno"]."',";
 		}
 
@@ -486,7 +485,7 @@
 			$lisa .= " and tuote.tuoteno in ($origtuotteet) ";
 		}
 
-		$ulisa .= "&alkuperaisnumero=$alkuperaisnumero";
+		$ulisa .= "&alkuperaisnumero=$alkuperaisnumero";		
 	}
 
 	// vientikieltok‰sittely:
@@ -603,7 +602,7 @@
 			if (trim($osastot) != '') {
 				$lisa_haku_osasto = " and tuote.osasto in ($osastot) ";
 				$lisa .= $lisa_haku_osasto;
-				$ulisa .= "&mul_osasto[]=$osastot";
+				$ulisa .= "&mul_osasto[]=".urlencode($osastot);
 			}
 		}
 
@@ -622,7 +621,7 @@
 			if (trim($tryt) != '') {
 				$lisa_haku_try = " and tuote.try in ($tryt) ";
 				$lisa .= $lisa_haku_try;
-				$ulisa .= "&mul_try[]=$tryt";
+				$ulisa .= "&mul_try[]=".urlencode($tryt);
 			}
 		}
 
@@ -901,7 +900,7 @@
 	
 	echo "<br>";
 	echo "<input type='Submit' name='submit_button' id='submit_button' value = '",t("Etsi"),"'></form>";
-	echo "<form><input type='submit' name='submit_button2' id='submit_button2' value = '",t("Tyhjenn‰"),"'></form></td></tr></table>";
+	echo "<form><input type='submit' name='submit_button2' id='submit_button2' value = '",t("Tyhjenn‰"),"'></form></td></tr></table><br>";
 
 	// Ei listata mit‰‰n jos k‰ytt‰j‰ ei ole tehnyt mit‰‰n rajauksia
 	/*
@@ -945,21 +944,11 @@
 
 	if ($sort == 'asc') {
 		$sort = 'desc';
+		$edsort = 'asc';
 	}
 	else {
 		$sort = 'asc';
-	}
-
-	if (isset($toim_tuoteno) !== FALSE and trim($toim_tuoteno) != '') {
-		if (trim($toimtuotteet) == '') {
-			$lisa = '';
-		}
-	}
-	
-	if (isset($alkuperaisnumero) !== FALSE and trim($alkuperaisnumero) != '') {
-		if (trim($origtuotteet) == '') {
-			$lisa = '';
-		}
+		$edsort = 'desc';
 	}
 
 	if (!isset($submit_button)) {
@@ -1112,26 +1101,27 @@
 			echo "<table>";
 			echo "<tr>";
 			
-			echo "<th><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=tuoteno$ulisa'>",t("Tuoteno"),"</a>";
+			echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=tuoteno$ulisa'>",t("Tuoteno"),"</a>";
 
 			if ($lisatiedot != "") {
-				echo "<br/><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=toim_tuoteno$ulisa'>",t("Toim Tuoteno");
+				echo "<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=toim_tuoteno$ulisa'>",t("Toim Tuoteno");
 			}
 
 			echo "</th>";
 
-			echo "<th><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=nimitys$ulisa'>",t("Nimitys")."</th>";
-			echo "<th><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=osasto$ulisa'>",t("Osasto"),"<br/><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=try$ulisa'>",t("Try"),"</th>";
-			echo "<th><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=hinta$ulisa'>",t("Hinta");
+			echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=nimitys$ulisa'>",t("Nimitys")."</th>";
+			echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=osasto$ulisa'>",t("Osasto");
+			echo "<br><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=try$ulisa'>",t("Try"),"</th>";
+			echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=hinta$ulisa'>",t("Hinta");
 
 			if ($lisatiedot != "" and $kukarow["extranet"] == "") {
-				echo "<br/><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=nettohinta$ulisa'>",t("Nettohinta");
+				echo "<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=nettohinta$ulisa'>",t("Nettohinta");
 			}
 
-			echo "<th><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=aleryhma$ulisa'>",t("Aleryhm‰");
+			echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=aleryhma$ulisa'>",t("Aleryhm‰");
 
 			if ($lisatiedot != "" and $kukarow["extranet"] == "") {
-				echo "<br/><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=status$ulisa'>",t("Status");
+				echo "<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&url=y&sort=$sort&ojarj=status$ulisa'>",t("Status");
 			}
 
 			echo "</th>";
@@ -1152,13 +1142,7 @@
 
 			$yht_i = 0; // t‰‰ on mei‰n indeksi
 
-			echo "<form action='$PHP_SELF' name='lisaa' method='post'>";
-			echo "<input type='hidden' name='haku[0]' value = '$haku[0]'>";
-			echo "<input type='hidden' name='haku[1]' value = '$haku[1]'>";
-			echo "<input type='hidden' name='haku[2]' value = '$haku[2]'>";
-			echo "<input type='hidden' name='haku[3]' value = '$haku[3]'>";
-			echo "<input type='hidden' name='haku[4]' value = '$haku[4]'>";
-			echo "<input type='hidden' name='haku[5]' value = '$haku[5]'>";
+			echo "<form action='?submit_button=1&sort=$edsort&ojarj=$ojarj$ulisa' name='lisaa' method='post'>";
 			echo "<input type='hidden' name='tee' value = 'TI'>";
 			echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 			echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";

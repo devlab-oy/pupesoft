@@ -30,7 +30,7 @@
 	if(!function_exists("alku")) {
 		function alku ($viesti = null, $karhukierros_tunnus = '') {
 			global $pdf, $asiakastiedot, $yhteyshenkilo, $yhtiorow, $kukarow, $kala, $sivu,
-				$rectparam, $norm, $pieni, $boldi, $kaatosumma, $kieli, $_POST;
+				$rectparam, $norm, $pieni, $boldi, $kaatosumma, $kieli, $_POST, $iso;
 
 			$firstpage = $pdf->new_page("a4");
 
@@ -39,19 +39,19 @@
 			}
 
 			//Haetaan yhteyshenkilon tiedot
-			$apuqu = "	select *
+			$apuqu = "	SELECT *
 						from kuka
 						where yhtio='$kukarow[yhtio]' and tunnus='$yhteyshenkilo'";
 			$yres = mysql_query($apuqu) or pupe_error($apuqu);
 			$yrow = mysql_fetch_array($yres);
 
 			//Otsikko
-			$pdf->draw_text(320, 780, t("MAKSUKEHOTUS", $kieli), 	$firstpage);
-			$pdf->draw_text(470, 780, t("Sivu", $kieli)." ".$sivu, 	$firstpage, $norm);
+			$pdf->draw_text(310, 815, t("Maksukehotus", $kieli), $firstpage, $iso);
+			$pdf->draw_text(430, 815, t("Sivu", $kieli)." ".$sivu, 	$firstpage, $norm);
 			
 			unset($data);
 
-			if((int) $yhtiorow["lasku_logo"] > 0) {
+			if( (int) $yhtiorow["lasku_logo"] > 0) {
 				$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
 				$data = $liite["data"];
 				$isizelogo[0] = $liite["image_width"];
@@ -103,38 +103,28 @@
 			}
 
 			if (isset($_POST['ekirje_laheta']) === false) {
-				// vastaanottaja
-				$pdf->draw_text(50, 717, $asiakastiedot["nimi"], 									$firstpage, $iso);
-				$pdf->draw_text(50, 707, $asiakastiedot["nimitark"],								$firstpage, $iso);
-				$pdf->draw_text(50, 697, $asiakastiedot["osoite"], 									$firstpage, $iso);
-				$pdf->draw_text(50, 687, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], 	$firstpage, $iso);
-				$pdf->draw_text(50, 677, $laskurow["maa"], 											$firstpage, $iso);
-
-				// jos vastaanottaja on eri maassa kuin yhtio niin lisätään maan nimi
-				if ($yhtiorow['maa'] != $asiakastiedot['maa']) {
-					$query = sprintf(
-							"SELECT nimi from maat where koodi='%s' AND ryhma_tunnus = ''",
-							mysql_real_escape_string($asiakastiedot['maa'])
-					);
-
-					$maa_result = mysql_query($query) or pupe_error($query);
-					$maa_nimi = mysql_fetch_array($maa_result);
-					$pdf->draw_text(50, 677, $asiakastiedot["maa"], 								$firstpage, $iso);
-				}
+				//Vasen sarake
+				//$pdf->draw_rectangle(737, 20,  674, 300, $firstpage, $rectparam);
+				$pdf->draw_text(50, 729, t("Laskutusosoite", $kieli), 	$firstpage, $pieni);
+				$pdf->draw_text(50, 717, $asiakastiedot["nimi"], 		$firstpage, $norm);
+				$pdf->draw_text(50, 707, $asiakastiedot["nimitark"], 	$firstpage, $norm);
+				$pdf->draw_text(50, 697, $asiakastiedot["osoite"], 		$firstpage, $norm);
+				$pdf->draw_text(50, 687, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], $firstpage, $norm);
+				$pdf->draw_text(50, 677, $asiakastiedot["maa"], 		$firstpage, $norm);
 			}
 			else {
 				// lähettäjä
-				$iso = array('height' => 11, 'font' => 'Times-Roman');
-				$pdf->draw_text(mm_pt(22), mm_pt(268), strtoupper($yhtiorow["nimi"]), 										$firstpage, $iso);
-				$pdf->draw_text(mm_pt(22), mm_pt(264), strtoupper($yhtiorow["nimitark"]), 									$firstpage, $iso);
-				$pdf->draw_text(mm_pt(22), mm_pt(260), strtoupper($yhtiorow["osoite"]), 									$firstpage, $iso);
-				$pdf->draw_text(mm_pt(22), mm_pt(256), strtoupper($yhtiorow["postino"]." ".$yhtiorow["postitp"]), 			$firstpage, $iso);
+				$iiso = array('height' => 11, 'font' => 'Times-Roman');
+				$pdf->draw_text(mm_pt(22), mm_pt(268), strtoupper($yhtiorow["nimi"]), 										$firstpage, $iiso);
+				$pdf->draw_text(mm_pt(22), mm_pt(264), strtoupper($yhtiorow["nimitark"]), 									$firstpage, $iiso);
+				$pdf->draw_text(mm_pt(22), mm_pt(260), strtoupper($yhtiorow["osoite"]), 									$firstpage, $iiso);
+				$pdf->draw_text(mm_pt(22), mm_pt(256), strtoupper($yhtiorow["postino"]." ".$yhtiorow["postitp"]), 			$firstpage, $iiso);
 
 				// vastaanottaja
-				$pdf->draw_text(mm_pt(22), mm_pt(234), strtoupper($asiakastiedot["nimi"]), 									$firstpage, $iso);
-				$pdf->draw_text(mm_pt(22), mm_pt(230), strtoupper($asiakastiedot["nimitark"]), 								$firstpage, $iso);
-				$pdf->draw_text(mm_pt(22), mm_pt(226), strtoupper($asiakastiedot["osoite"]), 								$firstpage, $iso);
-				$pdf->draw_text(mm_pt(22), mm_pt(222), strtoupper($asiakastiedot["postino"]." ".$asiakastiedot["postitp"]), $firstpage, $iso);
+				$pdf->draw_text(mm_pt(22), mm_pt(234), strtoupper($asiakastiedot["nimi"]), 									$firstpage, $iiso);
+				$pdf->draw_text(mm_pt(22), mm_pt(230), strtoupper($asiakastiedot["nimitark"]), 								$firstpage, $iiso);
+				$pdf->draw_text(mm_pt(22), mm_pt(226), strtoupper($asiakastiedot["osoite"]), 								$firstpage, $iiso);
+				$pdf->draw_text(mm_pt(22), mm_pt(222), strtoupper($asiakastiedot["postino"]." ".$asiakastiedot["postitp"]), $firstpage, $iiso);
 
 				// jos vastaanottaja on eri maassa kuin yhtio niin lisätään maan nimi
 				if ($yhtiorow['maa'] != $asiakastiedot['maa']) {
@@ -145,7 +135,7 @@
 
 					$maa_result = mysql_query($query) or pupe_error($query);
 					$maa_nimi = mysql_fetch_array($maa_result);
-					$pdf->draw_text(mm_pt(22), mm_pt(218), $maa_nimi['nimi'], 												$firstpage, $iso);
+					$pdf->draw_text(mm_pt(22), mm_pt(218), $maa_nimi['nimi'], 												$firstpage, $iiso);
 				}
 			}
 
@@ -232,7 +222,7 @@
 
 			//Laskurivien otsikkotiedot
 			//eka rivi
-			$pdf->draw_text(30,  $kala, t("Laskun numero", $kieli)." / ".t("Viite", $kieli),			$firstpage, $pieni);
+			$pdf->draw_text(30,  $kala, t("Laskun numero", $kieli)." / ".t("Viite", $kieli),		$firstpage, $pieni);
 			$pdf->draw_text(180, $kala, t("Laskun pvm", $kieli),									$firstpage, $pieni);
 			$pdf->draw_text(240, $kala, t("Eräpäivä", $kieli),										$firstpage, $pieni);
 			$pdf->draw_text(295, $kala, t("Myöhässä pv", $kieli),									$firstpage, $pieni);
@@ -444,14 +434,17 @@
 	$pdf->set_default('margin-right', 	0);
 	$rectparam["width"] = 0.3;
 
-	$norm["height"] = 10;
-	$norm["font"] = "Times-Roman";
+	$norm["height"] 	= 10;
+	$norm["font"] 		= "Times-Roman";
 
-	$boldi["height"] = 10;
-	$boldi["font"] = "Times-Bold";
+	$boldi["height"] 	= 10;
+	$boldi["font"] 		= "Times-Bold";
 
-	$pieni["height"] = 8;
-	$pieni["font"] = "Times-Roman";
+	$pieni["height"] 	= 8;
+	$pieni["font"] 		= "Times-Roman";
+	
+	$iso["height"] 		= 14;
+	$iso["font"] 		= "Helvetica-Bold";
 
 	// defaultteja
 	$lask = 1;
@@ -478,26 +471,31 @@
 					AND ktunnus <= $karhutunnus";
 		$karhukertares = mysql_query($query) or pupe_error($query);
 		$karhukertarow = mysql_fetch_array($karhukertares);
+		
 		$karhukertanro = $karhukertarow[0];
-		$ikalaskenta = ", TO_DAYS(kk.pvm) - TO_DAYS(l.erpcm) as ika";
+		$ikalaskenta = " TO_DAYS(kk.pvm) - TO_DAYS(l.erpcm) as ika, ";
 	}
 	else {
 		$kjoinlisa = "";
 		$karhukertanro = "";
-		$ikalaskenta = ", TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika";
+		$ikalaskenta = " TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika, ";
 	}
 
 	$query = "	SELECT l.tunnus, l.tapvm, l.liitostunnus,
-				l.summa-l.saldo_maksettu summa, l.summa_valuutassa-l.saldo_maksettu_valuutassa summa_valuutassa, l.erpcm, l.laskunro, l.viite,
-				max(kk.pvm) as kpvm, count(distinct kl.ktunnus) as karhuttu, l.yhtio_toimipaikka, l.valkoodi, l.maksuehto, l.maa
+				l.summa-l.saldo_maksettu summa, 
+				l.summa_valuutassa-l.saldo_maksettu_valuutassa summa_valuutassa, 
+				l.erpcm, l.laskunro, l.viite,
+				l.yhtio_toimipaikka, l.valkoodi, l.maksuehto, l.maa,
 				$ikalaskenta
+				max(kk.pvm) as kpvm, 
+				count(distinct kl.ktunnus) as karhuttu				
 				FROM lasku l
 				LEFT JOIN karhu_lasku kl on (l.tunnus = kl.ltunnus $kjoinlisa)
 				LEFT JOIN karhukierros kk on (kk.tunnus = kl.ktunnus AND kk.tyyppi = '')
 				WHERE l.tunnus in ($xquery)
 				and l.yhtio = '$kukarow[yhtio]'
 				and l.tila = 'U'
-				GROUP BY 1
+				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
 				ORDER BY l.erpcm";
 	$result = mysql_query($query) or pupe_error($query);
 

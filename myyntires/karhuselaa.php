@@ -11,35 +11,35 @@ else {
 	$tyyppi = "";
 }
 
-?>
+echo "<form name='karhu_selaa' action='' method='post'>
+		<table>
+		<tr>
+			<th>".t("Ytunnus")."</th><td><input type='text' name='ytunnus'></td>
+		</tr>
+		<tr>
+			<th>".t("Laskunro")."</th><td><input type='text' name='laskunro'></td>
+			<td class='back'><input type='submit' name='tee1' value='".t("Hae")."'></td>
+			<td class='back'><input type='submit' name='tee2' value='".t("Näytä kaikki avoimet")."'></td>
+		</tr>
+		</table>
+		</form>";
 
-<form name="karhu_selaa" action="" method="post">
-<table>
-	<tr>
-		<th><?php echo t('Ytunnus') ?>:</th><td><input type="text" name="ytunnus"></td>
-	</tr>
-	<tr>
-		<th><?php echo t('Laskunro') ?>:</th><td><input type="text" name="laskunro"></td>
-		<td class="back"><input type="submit" name="tee" value="Hae"></td>
-	</tr>
-</table>
-</form>
-
-<?php
-
-if (isset($_POST['tee']) and $_POST['tee'] == 'Hae') {
+if (isset($_POST['tee1']) or isset($_POST['tee2'])) {
 
 	if (!empty($_POST['laskunro'])) {
-		$where = sprintf("and lasku.laskunro = %d", (int) $_POST['laskunro']);
-		$limit = "GROUP BY karhu_lasku.ktunnus ORDER BY tunnus desc LIMIT 1";
+		$where  = sprintf("and lasku.laskunro = %d", (int) $_POST['laskunro']);
+		$malisa = " ";
+		$limit  = "GROUP BY karhu_lasku.ktunnus ORDER BY tunnus desc LIMIT 1";
 	}
 	elseif (!empty($_POST['ytunnus'])) {
-		$where = sprintf("and lasku.ytunnus = '%s'", (int) $_POST['ytunnus']);
-		$limit = "ORDER BY tunnus desc LIMIT 1";
+		$where  = sprintf("and lasku.ytunnus = '%s'", (int) $_POST['ytunnus']);
+		$malisa = " ";
+		$limit  = "ORDER BY tunnus desc LIMIT 1";
 	}
 	else {
-		$where = "and lasku.mapvm = '0000-00-00'";
-		$limit = "";
+		$where  = " and lasku.mapvm = '0000-00-00'";
+		$malisa = " and lasku.mapvm = '0000-00-00' ";
+		$limit  = "";
 	}
 
 	// haetaan uusin karhukierros/karhukerta
@@ -58,20 +58,18 @@ if (isset($_POST['tee']) and $_POST['tee'] == 'Hae') {
 			<table>
 				<tr>
 					<th>".t('Kierros')."</th>
-					<th>".t('Ytunnus')."</th>
-					<th>".t('Asiakas')."</th>
+					<th>".t('Ytunnus')."<br>".t('Asiakas')."</th>
 					<th>".t('Laskunro')."</th>
 					<th>".t('Summa')."</th>
-					<th>".t('Maksettu')."</th>";
+					<th>".t('Maksettu')."</th>
+					<th>".t('Laskun eräpäivä')."</th>";
 
 		if ($toim == "TRATTA") {
-			echo "<th>".t('Tratta pvm')."</th>";
-			echo "<th>".t('Eräpäivä')."</th>";
+			echo "<th>".t('Tratta pvm')."<br>".t('Eräpäivä')."</th>";
 			echo "<th>".t('Trattakertoja')."</th>";
 		}
 		else {
-			echo "<th>".t('Karhuamis pvm')."</th>";
-			echo "<th>".t('Eräpäivä')."</th>";
+			echo "<th>".t('Karhuamis pvm')."<br>".t('Eräpäivä')."</th>";
 			echo "<th>".t('Karhukertoja')."</th>";
 		}
 
@@ -79,17 +77,21 @@ if (isset($_POST['tee']) and $_POST['tee'] == 'Hae') {
 
 		$query = "	SELECT lasku.laskunro, lasku.summa, lasku.saldo_maksettu, lasku.liitostunnus, karhu_lasku.ktunnus,
 					if(lasku.nimi != lasku.toim_nimi and lasku.toim_nimi != '', concat_ws('<br>', lasku.nimi, lasku.toim_nimi), lasku.nimi) nimi,
-					karhukierros.pvm, lasku.erpcm, lasku.ytunnus, karhu_lasku.ltunnus
+					karhukierros.pvm, lasku.erpcm, lasku.mapvm, lasku.ytunnus, karhu_lasku.ltunnus
 					FROM karhu_lasku
 					JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.liitostunnus in ($ktunnus[liitostunnus]))
 					JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = '$kukarow[yhtio]' and karhukierros.tyyppi = '$tyyppi')
 					WHERE karhu_lasku.ktunnus in ($ktunnus[tunnus])
+					$malisa
 					ORDER BY ytunnus, pvm, laskunro";
 		$res = mysql_query($query) or pupe_error($query);
 
 		while ($row = mysql_fetch_array($res)) {
 
-			$query = "SELECT count(distinct ktunnus) as kertoja from karhu_lasku where ltunnus={$row['ltunnus']}";
+			$query = "	SELECT count(distinct ktunnus) as kertoja
+						FROM karhu_lasku
+						JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '$tyyppi')
+						WHERE ltunnus={$row['ltunnus']}";					
 			$ka_res = mysql_query($query);
 			$karhuttu = mysql_fetch_array($ka_res);
 
@@ -109,6 +111,7 @@ if (isset($_POST['tee']) and $_POST['tee'] == 'Hae') {
 				$paiva = substr($row["pvm"], 8, 2);
 				$kuu   = substr($row["pvm"], 5, 2);
 				$year  = substr($row["pvm"], 0, 4);
+				
 				$erapaiva = tv1dateconv(date("Y-m-d",mktime(0, 0, 0, $kuu, $paiva+$yhtiorow['karhuerapvm'], $year)));
 			}
 			else {
@@ -117,15 +120,22 @@ if (isset($_POST['tee']) and $_POST['tee'] == 'Hae') {
 
 			echo "<tr>
 					<td valign='top'>$row[ktunnus]</td>	
-					<td valign='top'>$row[ytunnus]</td>
-					<td valign='top'>$row[nimi]</td>
-					<td valign='top'>$row[laskunro]</td>
-					<td valign='top'>$row[summa]</td>
-					<td valign='top'>$row[saldo_maksettu]</td>
-					<td valign='top'>".tv1dateconv($row['pvm'])."</td>
-					<td valign='top'>$erapaiva</td>
-					<td valign='top' style='text-align: right;'>$karhuttu[kertoja]</td>
-					<td valign='top' class='back'>";
+					<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>
+					<td valign='top'><a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=$row[laskunro]'>$row[laskunro]</a></td>
+					<td valign='top' style='text-align: right;'>$row[summa]</td>";
+					
+					
+			if ($row["mapvm"] != "0000-00-00") {
+				echo "	<td valign='top'>".tv1dateconv($row["mapvm"])."</td>";
+			}
+			else {			
+				echo "	<td valign='top' style='text-align: right;'>$row[saldo_maksettu]</td>";
+			}
+			
+			
+			echo "	<td valign='top'>".tv1dateconv($row['erpcm'])."</td>
+					<td valign='top'>".tv1dateconv($row['pvm'])."<br>$erapaiva</td>
+					<td valign='top' style='text-align: right;'>$karhuttu[kertoja]<br>";
 
 				if ($toim == "TRATTA") {
 					echo " <a href='".$palvelin2."muutosite.php?karhutunnus=$row[ktunnus]&lasku_tunnus[]=$tunnukset[laskutunnukset]&tee=tulosta_tratta&nayta_pdf=1'>Näytä tratta</a><br>";
@@ -134,7 +144,7 @@ if (isset($_POST['tee']) and $_POST['tee'] == 'Hae') {
 					echo " <a href='".$palvelin2."muutosite.php?karhutunnus=$row[ktunnus]&lasku_tunnus[]=$tunnukset[laskutunnukset]&tee=tulosta_karhu&nayta_pdf=1'>Näytä karhu</a><br>";
 				}
 					
-			echo "	</td>
+			echo "</td>
 				</tr>";
 		}
 

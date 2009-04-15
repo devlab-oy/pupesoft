@@ -462,6 +462,9 @@
 		elseif ($toim == "SIIRTOLISTA") {
 			$query .= ",tilaustyyppi = 'G', tila='G', ytunnus='SIIRTO', liitostunnus='9999999999'";
 			$query .= ",kohdistettu = 'K'";
+			if (isset($chn) and $chn == 'GEN') {
+				$query .= ",chn = 'GEN'"; // tällä erotellaan "tulosta siirtolista"-kohdassa generoidut ja käsin tehdyt siirtolistat
+			}
 
 
 			$tee = "";

@@ -355,7 +355,7 @@
 
 						$ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
 						
-						if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1') {
+						if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1' or $tilrow["t_tyyppi"] == "E") {
 							echo " checked";
 						}
 					}
@@ -625,6 +625,14 @@
 			$jarjx = " ORDER BY t_tyyppi desc, prioriteetti, kerayspvm ";
 		}
 
+		$selectlisa = '';
+
+		if ($toim == 'SIIRTOLISTA') {
+			$selectlisa = " if(lasku.chn = 'GEN', '2', '1') t_tyyppi2, ";
+		}
+		else {
+			$selectlisa = " if(lasku.clearing = 'ENNAKKOTILAUS', '2', '1') t_tyyppi2, ";
+		}
 
 		// Vain keräyslistat saa groupata
 		if ($yhtiorow["lahetteen_tulostustapa"] == "K" and $yhtiorow["kerayslistojen_yhdistaminen"] == "Y") {
@@ -651,7 +659,7 @@
 					week(lasku.kerayspvm, 1) keraysviikko,				
 					min(if(lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
 					max(if(lasku.clearing = '', 'N', if(lasku.clearing = 'JT-TILAUS', 'J', if(lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,
-					if(lasku.clearing = 'ENNAKKOTILAUS', '2', '1') t_tyyppi2, 
+					$selectlisa 
 					left(min(lasku.kerayspvm),10) kerayspvm,
 					left(min(lasku.toimaika),10) toimaika,
 					min(keraysvko) keraysvko,
@@ -829,7 +837,7 @@
 
 							$ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
 
-							if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1') {
+							if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1' or $tilrow["t_tyyppi"] == "E") {
 								echo " checked";
 							}
 						}

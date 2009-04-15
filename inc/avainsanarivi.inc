@@ -78,7 +78,6 @@
 		$ulos .= "<option value='LAHETETYYPPI' {$avain_sel['LAHETETYYPPI']}>			".t("Lähetetyyppi")."</option>";
 		$ulos .= "<option value='KALETAPA' {$avain_sel['KALETAPA']}>					".t("CRM yhteydenottotapa")."</option>";
 		$ulos .= "<option value='MYSQLALIAS' {$avain_sel['MYSQLALIAS']}>				".t("Tietokantasarakkeen nimialias")."</option>";
-		$ulos .= "<option value='T' {$avain_sel[T]}>									".t("Toimitustapa")."</option>";
 		$ulos .= "<option value='TOIMITUSTAPA_OS' {$avain_sel['TOIMITUSTAPA_OS']}>		".t("Toimitustapa ostolle (kuljetus)")."</option>";			
 		$ulos .= "<option value='KUKAASEMA' {$avain_sel['KUKAASEMA']}>					".t("Käytäjän asema")."</option>";
 		$ulos .= "<option value='ALVULK' {$avain_sel['ALVULK']}>						".t("Ulkomaan ALV%")."</option>";			

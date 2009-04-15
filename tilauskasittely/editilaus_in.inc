@@ -1141,6 +1141,17 @@ while (!feof ($fd)) {
 						$varasto_res = mysql_query($varasto_query) or pupe_error($varasto_query);
 						$varasto_row = mysql_fetch_array($varasto_res);
 
+						$query = "	SELECT hyllyalue, hyllynro
+									FROM tilausrivi
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND hyllyalue != ''
+									AND hyllynro != ''
+									AND otunnus = '$editilaus_lasku_tunnus'";
+						$edi_varastopaikka_res = mysql_query($query) or pupe_error($query);
+						$edi_varastopaikka_row = mysql_fetch_array($edi_varastopaikka_res);
+
+						$tulostusalue = onkotulostusalueita($edi_varastopaikka_row["hyllyalue"], $edi_varastopaikka_row["hyllynro"], $varasto_row['tunnus'], $kukarow['yhtio']);
+
 						// Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan, lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi
 						$query = "	UPDATE lasku SET
 									mapvm = now(),
@@ -1148,7 +1159,8 @@ while (!feof ($fd)) {
 									alatila = 'A',
 									chn = '999',
 									varasto = '$varasto_row[tunnus]',
-									sisviesti2 = 'Verkkokauppatilaus! Ker‰yslistan tuotteet voivat kuulua useaan varastoon.'
+									sisviesti2 = 'Verkkokauppatilaus! Ker‰yslistan tuotteet voivat kuulua useaan varastoon.',
+									tulostusalue = '$tulostusalue'
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '$editilaus_lasku_tunnus'";
 						$magento_maksettu_res = mysql_query($query) or pupe_error($query);

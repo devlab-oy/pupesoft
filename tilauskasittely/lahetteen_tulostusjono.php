@@ -629,7 +629,7 @@
 		// Vain keräyslistat saa groupata
 		if ($yhtiorow["lahetteen_tulostustapa"] == "K" and $yhtiorow["kerayslistojen_yhdistaminen"] == "Y") {
 			//jos halutaan eritellä tulostusalueen mukaan , lasku.tulostusalue
-			$grouppi = "GROUP BY lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi, varastonimi, varastotunnus, keraysviikko, lasku.mapvm";
+			$grouppi = "GROUP BY lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi, varastonimi, varastotunnus, keraysviikko, lasku.mapvm, t_tyyppi2";
 		
 			if ($yhtiorow["pakkaamolokerot"] == "K") {
 				$grouppi .= ", lasku.tulostusalue";
@@ -650,7 +650,8 @@
 					varastopaikat.tunnus varastotunnus,
 					week(lasku.kerayspvm, 1) keraysviikko,				
 					min(if(lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
-					min(if(lasku.clearing = '', 'N', if(lasku.clearing = 'JT-TILAUS', 'J', if(lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,
+					max(if(lasku.clearing = '', 'N', if(lasku.clearing = 'JT-TILAUS', 'J', if(lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,
+					if(lasku.clearing = 'ENNAKKOTILAUS', '2', '1') t_tyyppi2, 
 					left(min(lasku.kerayspvm),10) kerayspvm,
 					left(min(lasku.toimaika),10) toimaika,
 					min(keraysvko) keraysvko,

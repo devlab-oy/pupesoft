@@ -6466,7 +6466,8 @@ if(!function_exists("hae_rahtimaksu")) {
 			$query  = "	SELECT sum(tuotemassa * (varattu + kpl + jt)) massa
 						FROM tilausrivi
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-							AND tuote.tuoteno = tilausrivi.tuoteno)
+							AND tuote.tuoteno = tilausrivi.tuoteno
+							AND tuote.ei_saldoa = '')
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						AND tilausrivi.tyyppi = 'L'
 						AND tilausrivi.otunnus in ($otsikot)";

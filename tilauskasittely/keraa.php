@@ -1205,7 +1205,7 @@
 												WHERE tilausrivi.otunnus in ('$tunrow[tunnukset]')
 												and tilausrivi.yhtio = '$kukarow[yhtio]'
 												$tyyppilisa
-												ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+												ORDER BY jtsort, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 									$riresult = mysql_query($query) or pupe_error($query);
 
 									while ($row = mysql_fetch_array($riresult)) {

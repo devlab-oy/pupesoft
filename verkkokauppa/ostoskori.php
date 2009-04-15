@@ -31,14 +31,16 @@ else {
 }
 
 if ($tee == 'tarjous') {
-	$query = "	select lasku.tunnus laskutunnus, asiakas.* 
+	$query = "	SELECT lasku.tunnus laskutunnus, asiakas.* 
 				from lasku, asiakas
-				where lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus and 
-				lasku.yhtio = '$kukarow[yhtio]' and
-				tila = 'B' and
-				liitostunnus = '$kukarow[oletus_asiakas]' and
-				alatila='$ostoskori'";
+				where lasku.yhtio 	= asiakas.yhtio and 
+				lasku.liitostunnus 	= asiakas.tunnus and 
+				lasku.yhtio 		= '$kukarow[yhtio]' and
+				lasku.tila 			= 'B' and
+				lasku.liitostunnus 	= '$kukarow[oletus_asiakas]' and
+				lasku.alatila		='$ostoskori'";
 	$result = mysql_query($query) or pupe_error($query);
+	
 	if (mysql_num_rows($result) == 1) {
 		$laskurow = mysql_fetch_array($result);
 		

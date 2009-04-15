@@ -486,6 +486,8 @@
 			
 		if (count($yhtiot) > 0) {
 			
+			$dirikka = getcwd();
+			
 			foreach($yhtiot as $yhtio) {
 				echo "<td class='back' valign='top'>";
 				
@@ -583,16 +585,15 @@
 					}
 					
 					
-					if(@!fopen($palvelin2.$nimi, "r")) {
+					if(!file_exists($dirikka."/".$nimi)) {
 						$mordor1 = "<font class='error'>";
 						$mordor2 = "</font>";
 					}
 					else {
 						$mordor1 = $mordor2 = "";	
 					}
-					
-					if ($yhtio == "REFERENSSI") {
-						
+										
+					if ($yhtio == "REFERENSSI") {						
 							echo "$mordor1$nimi$mordor2</td>";
 							echo "<td nowrap>$alanimi</td>";
 							echo "<td nowrap>".t($nimitys)."</td>";					

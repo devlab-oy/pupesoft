@@ -562,7 +562,12 @@
 
 	echo "<tr><th>",t("Nimitys"),"</th><td nowrap valign='top' colspan='2'><input type='text' size='25' name='nimitys' id='nimitys' value = '$nimitys'></td></tr>";
 	
-	echo "<tr><th>",t("Poistetut"),"</th><td nowrap valign='top' colspan='2'><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
+	if ($kukarow["extranet"] != "") {
+		echo "<tr><th>",t("Tarjoustuotteet"),"</th><td nowrap valign='top' colspan='2'><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
+	}
+	else {
+		echo "<tr><th>",t("Poistetut"),"</th><td nowrap valign='top' colspan='2'><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
+	}	
 	
 	echo "<tr><th>",t("Lisätiedot"),"</th><td nowrap valign='top' colspan='2'><input type='checkbox' name='lisatiedot' id='lisatiedot' $lisacheck></td></tr>";
 	echo "</table>";

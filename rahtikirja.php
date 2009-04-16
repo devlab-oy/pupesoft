@@ -1,6 +1,8 @@
 <?php
 	require ("inc/parametrit.inc");
 
+	js_popup();
+
 	if (strpos($toim,'_') !== false) {
 		$toim = substr($toim,0,strpos($toim,'_'));
 		$tila = 'G';
@@ -26,6 +28,12 @@
 		$row = mysql_fetch_array($result);
 
 		$tila = $row["tila"];
+	}
+	
+	if ($tee == 'NAYTATILAUS') {
+		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+		require ("raportit/naytatilaus.inc");
+		exit;
 	}
 
 	if ($id == '') $id=0;
@@ -828,7 +836,7 @@
 					}
 				}
 
-				echo "<option value='$row[nimi]' $sel>".$row[nimi]."</option>";
+				echo "<option value='$row[nimi]' $sel>".$row["nimi"]."</option>";
 			}
 
 			echo "</select></td></tr><tr>";
@@ -969,14 +977,25 @@
 					$selecttoimitustapaehto
 					lasku.vienti,
 					date_format(lasku.luontiaika, '%Y-%m-%d') laadittux,
-					date_format(lasku.toimaika, '%Y-%m-%d') toimaika,															
+					date_format(lasku.toimaika, '%Y-%m-%d') toimaika,
 					min(lasku.vanhatunnus) vanhatunnus,
 					min(lasku.pakkaamo) pakkaamo,
 					min(lasku.varasto) varasto,					
 					min(lasku.tunnus) tunnus,
-					GROUP_CONCAT(distinct lasku.tunnus order by lasku.tunnus) tunnukset,
+					GROUP_CONCAT(distinct lasku.tunnus order by lasku.tunnus) tunnukset,					
+					GROUP_CONCAT(distinct ytunnus) ytunnus,
+					min(tilausrivi.kerattyaika) kerattyaika,
+					min(lasku.luontiaika) luontiaika,	
+					min(lasku.h1time) h1time,	
+					min(lasku.lahetepvm) lahetepvm,	
+					min(lasku.kerayspvm) kerayspvm,	
+					min(lasku.tunnus) mintunnus,	
 					if(lasku.tila='L',GROUP_CONCAT(distinct concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) order by concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) SEPARATOR '<br>'), GROUP_CONCAT(distinct nimi)) nimi,
 					GROUP_CONCAT(distinct lasku.laatija order by lasku.laatija SEPARATOR '<br>') laatija,																									
+					group_concat(DISTINCT concat_ws('\n\n', if(comments!='',concat('".t("Lähetteen lisätiedot").":\n',comments),NULL), if(sisviesti2!='',concat('".t("Keräyslistan lisätiedot").":\n',sisviesti2),NULL)) SEPARATOR '\n') ohjeet,
+					min(if(lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
+					min(if(lasku.clearing = '', 'N', if(lasku.clearing = 'JT-TILAUS', 'J', if(lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,					
+					(select nimitys from varastopaikat where varastopaikat.tunnus=min(lasku.varasto)) varastonimi,
 					GROUP_CONCAT(lasku.pakkaamo order by lasku.tunnus) pakkaamot,
 					sum(rahtikirjat.kollit) kollit,					
 					count(distinct lasku.tunnus) tunnukset_lkm					
@@ -1003,20 +1022,16 @@
 			echo "<br><table>";
 
 			echo "<tr>";
-			echo "<th>".t("Tilaus")."</th>";
-			echo "<th>".t("Asiakas")."</th>";
-			echo "<th>".t("Toimitustapa")."</th>";
-			echo "<th>".t("Laatija")."</th>";
-			echo "<th>".t("Laadittu")."</th>";
+			echo "<th valign='top'>".t("Pri")."<br>".t("Varastoon")."</th>";
+			echo "<th valign='top'>".t("Tilaus")."</th>";
+			echo "<th valign='top'>".t("Asiakas")."<br>".t("Nimi")."</th>";
+			echo "<th valign='top'>".t("Laadittu")."<br>".t("Valmis")."<br>".t("Tulostettu")."<br>".t("Kerätty")."</th>";
+			echo "<th valign='top'>".t("Keräysaika")."<br>".t("Toimitusaika")."</th>";
+			echo "<th valign='top'>".t("Toimitustapa")."</th>";
 
-			if ($kukarow['resoluutio'] == 'I') {
-				echo "<th>".t("Toimaika")."</th>";
-			}
-
-			if ($yhtiorow['pakkaamolokerot'] == 'K') {
-				echo "<th>".t("Kollit")."</th>";
-				echo "<th>".t("Rullakot")."</th>";
-				echo "<th>".t("pakkaamo")."/".t("lokero")."</th>";				
+			if ($yhtiorow['pakkaamolokerot'] == 'K') {				
+				echo "<th valign='top'>".t("Kollit")."<br>".t("Rullakot")."</th>";
+				echo "<th valign='top'>".t("Pakkaamo")."<br>".t("Lokero")."</th>";
 			}
 
 			echo "</tr>";
@@ -1028,7 +1043,7 @@
 				/* ei oteta huomioon niitä mistä puuttuu tulostusalue ja millä on tietty alatila 
 				lisää alatila B jos käytetään keräästä rahtikirjansyöttöön halutessa */
 				if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K') {
-					$query = "	SELECT count(distinct lasku.tunnus) kpl
+					$query = "	SELECT count(distinct lasku.tunnus) kpl, GROUP_CONCAT(DISTINCT if(lasku.tunnus not in ($row[tunnukset]), lasku.tunnus, null) order by lasku.tunnus) odottaa
 								FROM lasku
 								JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -1041,26 +1056,42 @@
 								group by lasku.vanhatunnus";
 					$vanhat_res = mysql_query($query) or pupe_error($query);
 					$vanhat_row = mysql_fetch_array($vanhat_res);
-				}
-				
-				// Debug 				
-				/*	echo "tarkistus tunnukset_lkm: 	$vanhat_row[kpl] <br>";
-				echo "main tunnukset_lkm: 		$row[tunnukset_lkm] <br>";				
-				echo "main vanhatunnus: 		$row[vanhatunnus] <br>";				
-				echo "main tunnukset: 			$row[tunnukset] <br>";*/		
+				}	
 						
 				if ($vanhat_row['kpl'] == $row['tunnukset_lkm'] or $vanhat_row['kpl'] == 0 or $yhtiorow["splittauskielto"] != "" or $yhtiorow['pakkaamolokerot'] == '') {
-									
+													
 					echo "<tr class='aktiivi'>";
-					echo "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";
-					echo "<td valign='top'>$row[nimi]</td>";
-					echo "<td valign='top'>$row[toimitustapa]</td>";
-					echo "<td valign='top'>$row[laatija]</td>";
-					echo "<td valign='top'>".tv1dateconv($row["laadittux"])."</td>";
+					
+					if(trim($row["ohjeet"]) != "") {
+						echo "<div id='$row[mintunnus]' class='popup' style='width: 500px;'>";
+						echo t("Tilaukset").": ".$row["tunnukset"]."<br>";
+						echo t("Laatija").": ".$row["laatija"]."<br><br>";
+						echo str_replace("\n", "<br>", $row["ohjeet"])."<br>";
+						echo "</div>";
 
-					if ($kukarow['resoluutio'] == 'I') {
-						echo "<td valign='top'>".tv1dateconv($row["toimaika"])."</td>";
+						echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'$row[mintunnus]')\" onmouseover=\"popUp(event,'$row[mintunnus]')\">$row[t_tyyppi] $row[prioriteetti] <IMG SRC='pics/lullacons/alert.png'></a>";
 					}
+					else {
+						echo "<td valign='top'>$row[t_tyyppi] $row[prioriteetti]";
+					}
+
+
+					echo "<br>$row[varastonimi]</td>";
+															
+					echo "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";					
+					echo "<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>";					
+					
+					$laadittu_e 	= tv1dateconv($row["luontiaika"], "P", "LYHYT");
+					$h1time_e		= tv1dateconv($row["h1time"], "P", "LYHYT");
+					$lahetepvm_e	= tv1dateconv($row["lahetepvm"], "P", "LYHYT");									
+					$kerattyaika_e	= tv1dateconv($row["kerattyaika"], "P", "LYHYT");						
+					$kerattyaika_e	= str_replace(substr($lahetepvm_e, 0, strpos($lahetepvm_e, " ")), "", $kerattyaika_e);
+					$lahetepvm_e	= str_replace(substr($h1time_e, 0, strpos($h1time_e, " ")), "", $lahetepvm_e);
+					$h1time_e		= str_replace(substr($laadittu_e, 0, strpos($laadittu_e, " ")), "", $h1time_e);			
+
+					echo "<td valign='top' nowrap align='right'>$laadittu_e<br>$h1time_e<br>$lahetepvm_e<br>$kerattyaika_e</td>";
+					echo "<td valign='top' nowrap align='right'>".tv1dateconv($row["kerayspvm"], "", "LYHYT")."<br>".tv1dateconv($row["toimaika"], "", "LYHYT")."</td>";
+					echo "<td valign='top'>$row[toimitustapa]</td>";
 
 					if ($yhtiorow['pakkaamolokerot'] == 'K') {
 
@@ -1098,8 +1129,7 @@
 						else {
 							echo "&nbsp;";
 						}
-						echo "</td>";
-						echo "<td valign='top'>";
+						echo "<br>";
 						if ($rullakot_chk > 0) {
 							echo $rullakot_chk;
 						}
@@ -1114,7 +1144,7 @@
 									AND tunnus in($row[pakkaamot])";
 						$pakkaamoresult = mysql_query($query) or pupe_error($query);
 						
-						echo "<td>";
+						echo "<td valign='top'>";
 						if (mysql_num_rows($pakkaamoresult) > 0) {
 							while ($pakkaamo_row = mysql_fetch_array($pakkaamoresult)) {
 								echo $pakkaamo_row['nimi']."/".$pakkaamo_row['lokero']."<br>";
@@ -1136,36 +1166,49 @@
 					echo "</tr>";
 				}
 				else {
+					
 					//kesken olevat
-					$temp_osittaiset = "";
+					$temp_osittaiset  = "";					
+					$temp_osittaiset .= "<tr class='aktiivi'>";					
 					
-					$temp_osittaiset .= "<tr class='aktiivi'>";
-					$temp_osittaiset .= "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";
-					
-					//haetaan tunnukset minkä takia nämä tilaukset odottavat
-					$query = "	SELECT GROUP_CONCAT(distinct lasku.tunnus order by lasku.tunnus SEPARATOR '<br>') tunnukset
-								FROM lasku
-								JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
-								WHERE lasku.yhtio = '$kukarow[yhtio]'
-								AND lasku.tila in ('L','N','G')
-								AND lasku.alatila not in ('X','V','D','B')
-								AND lasku.tulostusalue != ''
-								AND lasku.vanhatunnus = '$row[vanhatunnus]'
-								AND lasku.tunnus not in($row[tunnukset])
-								AND lasku.varasto = '$row[varasto]'
-								AND (lasku.pakkaamo = '$row[pakkaamo]' or (lasku.tila = 'N' or (lasku.tila = 'G' and lasku.alatila = 'J')))";
-					$vanhat_res = mysql_query($query) or pupe_error($query);
-					$vanhat_row = mysql_fetch_array($vanhat_res);
-				
-					$temp_osittaiset .= "<td valign='top'>$vanhat_row[tunnukset]</td>";
-					$temp_osittaiset .= "<td valign='top'>$row[nimi]</td>";
-					$temp_osittaiset .= "<td valign='top'>$row[toimitustapa]</td>";
-					$temp_osittaiset .= "<td valign='top'>$row[laatija]</td>";
-					$temp_osittaiset .= "<td valign='top'>".tv1dateconv($row["laadittux"])."</td>";
+					if(trim($row["ohjeet"]) != "") {
+						$temp_osittaiset .= "<div id='$row[mintunnus]' class='popup' style='width: 500px;'>";
+						$temp_osittaiset .= t("Tilaukset").": ".$row["tunnukset"]."<br>";
+						$temp_osittaiset .= t("Laatija").": ".$row["laatija"]."<br><br>";
+						$temp_osittaiset .= str_replace("\n", "<br>", $row["ohjeet"])."<br>";
+						$temp_osittaiset .= "</div>";
 
-					if ($kukarow['resoluutio'] == 'I') {
-						$temp_osittaiset .= "<td valign='top'>".tv1dateconv($row["toimaika"])."</td>";
+						$temp_osittaiset .= "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'$row[mintunnus]')\" onmouseover=\"popUp(event,'$row[mintunnus]')\">$row[t_tyyppi] $row[prioriteetti] <IMG SRC='pics/lullacons/alert.png'></a>";
 					}
+					else {
+						$temp_osittaiset .= "<td valign='top'>$row[t_tyyppi] $row[prioriteetti]";
+					}
+
+
+					$temp_osittaiset .= "<br>$row[varastonimi]</td>";
+															
+					$temp_osittaiset .= "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";										
+					$temp_osittaiset .= "<td valign='top'>";
+					
+					$odotamme_naita = explode(",", $vanhat_row["odottaa"]);
+					
+					foreach ($odotamme_naita as $odn) {
+						$temp_osittaiset .= "<a href='?toim=$toim&tee=NAYTATILAUS&tunnus=$odn'>$odn</a><br>";
+					}
+					$temp_osittaiset .= "</td>";					
+					$temp_osittaiset .= "<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>";
+					
+					$laadittu_e 	= tv1dateconv($row["luontiaika"], "P", "LYHYT");
+					$h1time_e		= tv1dateconv($row["h1time"], "P", "LYHYT");
+					$lahetepvm_e	= tv1dateconv($row["lahetepvm"], "P", "LYHYT");									
+					$kerattyaika_e	= tv1dateconv($row["kerattyaika"], "P", "LYHYT");						
+					$kerattyaika_e	= str_replace(substr($lahetepvm_e, 0, strpos($lahetepvm_e, " ")), "", $kerattyaika_e);
+					$lahetepvm_e	= str_replace(substr($h1time_e, 0, strpos($h1time_e, " ")), "", $lahetepvm_e);
+					$h1time_e		= str_replace(substr($laadittu_e, 0, strpos($laadittu_e, " ")), "", $h1time_e);			
+
+					$temp_osittaiset .= "<td valign='top' nowrap align='right'>$laadittu_e<br>$h1time_e<br>$lahetepvm_e<br>$kerattyaika_e</td>";					
+					$temp_osittaiset .= "<td valign='top' nowrap align='right'>".tv1dateconv($row["kerayspvm"], "", "LYHYT")."<br>".tv1dateconv($row["toimaika"], "", "LYHYT")."</td>";
+					$temp_osittaiset .= "<td valign='top'>$row[toimitustapa]</td>";
 
 					if ($yhtiorow['pakkaamolokerot'] == 'K') {
 
@@ -1203,8 +1246,8 @@
 						else {
 							$temp_osittaiset .= "&nbsp;";
 						}
-						$temp_osittaiset .= "</td>";
-						$temp_osittaiset .= "<td valign='top'>";
+						$temp_osittaiset .= "<br>";
+						
 						if ($rullakot_chk > 0) {
 							$temp_osittaiset .= $rullakot_chk;
 						}
@@ -1219,7 +1262,7 @@
 									AND tunnus in($row[pakkaamot])";
 						$pakkaamoresult = mysql_query($query) or pupe_error($query);
 						
-						$temp_osittaiset .= "<td>";
+						$temp_osittaiset .= "<td valign='top'>";
 						if (mysql_num_rows($pakkaamoresult) > 0) {
 							while ($pakkaamo_row = mysql_fetch_array($pakkaamoresult)) {
 								$temp_osittaiset .= $pakkaamo_row['nimi']."/".$pakkaamo_row['lokero']."<br>";
@@ -1228,12 +1271,11 @@
 						else {
 							$temp_osittaiset .= "&nbsp;";
 						}			
-						$temp_osittaiset .= "</td>";
-													
+						$temp_osittaiset .= "</td>";													
 					}
 
-					$temp_osittaiset .= "	<form method='post' action='$PHP_SELF'>";
-					$temp_osittaiset .= "<td>";
+					$temp_osittaiset .= "<form method='post' action='$PHP_SELF'>";
+					$temp_osittaiset .= "<td valign='top'>";
 					
 					$checkit = explode(",",$row["tunnukset"]); 
 					
@@ -1259,38 +1301,29 @@
 			echo "</table>";
 			
 			if (count($osittaiset) > 0) {
-				$spanni = 5;
-				
-				if ($kukarow['resoluutio'] == 'I') {
-					$spanni++;
-				}
+				$spanni = 8;
 				
 				if ($yhtiorow['pakkaamolokerot'] == 'K') {
-					$spanni += 5;
+					$spanni += 2;
 				}
 				
-				echo "<br><table>";
-				
+				echo "<br><table>";			
 				echo "<tr><th colspan ='$spanni'>".t("Odottavat tilaukset")."</th></tr>";
+				
 				echo "<tr>";
-				echo "<th>".t("Tilaus")."</th>";
-				echo "<th>".t("Odottaa")."</th>";
-				echo "<th>".t("Asiakas")."</th>";
-				echo "<th>".t("Toimitustapa")."</th>";
-				echo "<th>".t("Laatija")."</th>";
-				echo "<th>".t("Laadittu")."</th>";
+				echo "<th valign='top'>".t("Pri")."<br>".t("Varastoon")."</th>";
+				echo "<th valign='top'>".t("Tilaus")."</th>";
+				echo "<th valign='top'>".t("Odottaa")."</th>";
+				echo "<th valign='top'>".t("Asiakas")."<br>".t("Nimi")."</th>";
+				echo "<th valign='top'>".t("Laadittu")."<br>".t("Valmis")."<br>".t("Tulostettu")."<br>".t("Kerätty")."</th>";
+				echo "<th valign='top'>".t("Keräysaika")."<br>".t("Toimitusaika")."</th>";
+				echo "<th valign='top'>".t("Toimitustapa")."</th>";
 
-				if ($kukarow['resoluutio'] == 'I') {
-					echo "<th>".t("Toimaika")."</th>";
+				if ($yhtiorow['pakkaamolokerot'] == 'K') {				
+					echo "<th valign='top'>".t("Kollit")."<br>".t("Rullakot")."</th>";
+					echo "<th valign='top'>".t("Pakkaamo")."<br>".t("Lokero")."</th>";
 				}
-
-				if ($yhtiorow['pakkaamolokerot'] == 'K') {
-					echo "<th>".t("Kollit")."</th>";
-					echo "<th>".t("Rullakot")."</th>";
-					echo "<th>".t("pakkaamo")."/".t("lokero")."</th>";
-					echo "<th>".t("Valitse")."</th>";				
-				}
-
+				echo "<th valign='top'>".t("Valitse")."</th>";
 				echo "</tr>";
 				
 				for ($i=0; $i < count($osittaiset); $i++) { 

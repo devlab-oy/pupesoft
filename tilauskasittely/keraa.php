@@ -1459,23 +1459,26 @@
 
 		$query = "	SELECT distinct
 					if(lasku.kerayslista!=0, lasku.kerayslista, lasku.tunnus) tunnus,
-					concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) asiakas,
-					date_format(lasku.luontiaika, '%Y-%m-%d') laadittu,
-					lasku.laatija,
-					lasku.kerayspvm,
-					lasku.toimaika,
-					lasku.lahetepvm,
-					lasku.h1time,
-					concat_ws('<br><br>',if(comments!='',concat('".t("L‰hetteen lis‰tiedot").":<br>',comments),NULL), if(sisviesti2!='',concat('".t("Ker‰yslistan lis‰tiedot").":<br>',sisviesti2),NULL)) ohjeet,
+					group_concat(DISTINCT lasku.tunnus SEPARATOR '<br>') tunnukset,	
+					min(lasku.ytunnus) ytunnus,
+					min(concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark)) asiakas,					
+					min(lasku.luontiaika) laadittu,
+					min(lasku.h1time) h1time,
+					min(lasku.lahetepvm) lahetepvm,
+					min(lasku.kerayspvm) kerayspvm,
+					min(lasku.toimaika) toimaika,
+					group_concat(DISTINCT lasku.laatija) laatija,				
+					group_concat(DISTINCT lasku.toimitustapa SEPARATOR '<br>') toimitustapa,					
+					group_concat(DISTINCT concat_ws('\n\n', if(comments!='',concat('".t("L‰hetteen lis‰tiedot").":\n',comments),NULL), if(sisviesti2!='',concat('".t("Ker‰yslistan lis‰tiedot").":\n',sisviesti2),NULL)) SEPARATOR '\n') ohjeet,					
+					min(if(lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
+					min(if(lasku.clearing = '', 'N', if(lasku.clearing = 'JT-TILAUS', 'J', if(lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,					
+					(select nimitys from varastopaikat where varastopaikat.tunnus=min(lasku.varasto)) varastonimi, 
 					count(*) riveja
-					from lasku use index (tila_index),
-					tilausrivi use index (yhtio_otunnus)
-					where
-					lasku.yhtio						= '$kukarow[yhtio]'
+					from lasku use index (tila_index)
+					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+					WHERE lasku.yhtio				= '$kukarow[yhtio]'
 					and lasku.tila					in ($tila)
-					and lasku.alatila				= 'A'
-					and tilausrivi.yhtio			= lasku.yhtio
-					and tilausrivi.otunnus			= lasku.tunnus
+					and lasku.alatila				= 'A'					
 					and tilausrivi.tyyppi			in ($tyyppi)
 					and tilausrivi.var				in ('', 'H' $var_lisa)
 					and tilausrivi.keratty	 		= ''
@@ -1494,60 +1497,61 @@
 			echo "<br><table>";
 
 			echo "<tr>";
-			echo "<th>".t("Tilaus")."</th>";
-			echo "<th>".t("Asiakas")."</th>";
-			echo "<th>".t("Rivej‰")."</th>";
-			echo "<th>".t("Laatija")."</th>";
-			echo "<th>".t("Laadittu")."</th>";
-			
-			if ($kukarow['resoluutio'] == 'I') {
-				echo "<th>".t("Kerayspvm")."</th>";
-				echo "<th>".t("Toimaika")."</th>";
-				echo "<th>".t("Ker‰yslista tulostettu")."</th>";
-				echo "<th>".t("Tilaus valmis")."</th>";
-			}		
-			
+			echo "<th valign='top'>".t("Pri")."<br>".t("Varastoon")."</th>";
+			echo "<th valign='top'>".t("Tilaus")."</th>";
+			echo "<th valign='top'>".t("Asiakas")."<br>".t("Nimi")."</th>";
+			echo "<th valign='top'>".t("Laadittu")."<br>".t("Valmis")."<br>".t("Tulostettu")."</th>";
+			echo "<th valign='top'>".t("Ker‰ysaika")."<br>".t("Toimitusaika")."</th>";
+			echo "<th valign='top'>".t("Toimitustapa")."</th>";
+			echo "<th valign='top'>".t("Riv")."</th>";
+			echo "<th valign='top'>".t("Ker‰‰")."</th>";
 			echo "</tr>";
 
 			$riveja_yht = 0;
 
 			while ($row = mysql_fetch_array($result)) {
 				echo "<tr class='aktiivi'>";
-
+				
 				if(trim($row["ohjeet"]) != "") {
 					echo "<div id='$row[tunnus]' class='popup' style='width: 500px;'>";
-					echo $row["ohjeet"]."<br>";
+					echo t("Tilaukset").": ".$row["tunnukset"]."<br>";
+					echo t("Laatija").": ".$row["laatija"]."<br><br>";
+					echo str_replace("\n", "<br>", $row["ohjeet"])."<br>";
 					echo "</div>";
-					echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'$row[tunnus]')\" onmouseover=\"popUp(event,'$row[tunnus]')\">$row[tunnus]</a></td>";
+					
+					echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'$row[tunnus]')\" onmouseover=\"popUp(event,'$row[tunnus]')\">$row[t_tyyppi] $row[prioriteetti] <IMG SRC='../pics/lullacons/alert.png'></a>";
 				}
 				else {
-					echo "<td valign='top'>$row[tunnus]</td>";
+					echo "<td valign='top'>$row[t_tyyppi] $row[prioriteetti]";
 				}
-
-				echo "<td valign='top'>$row[asiakas]</td>";
-				echo "<td valign='top'>$row[riveja]</td>";
-				$riveja_yht += $row['riveja'];
-				echo "<td valign='top'>$row[laatija]</td>";
-				echo "<td valign='top'>".tv1dateconv($row["laadittu"])."</td>";
-
-				if ($kukarow['resoluutio'] == 'I') {
-					echo "<td valign='top'>".tv1dateconv($row["kerayspvm"])."</td>";
-					echo "<td valign='top'>".tv1dateconv($row["toimaika"])."</td>";
-					echo "<td valign='top'>".tv1dateconv($row["lahetepvm"],"yep")."</td>";
-					echo "<td valign='top'>".tv1dateconv($row["h1time"],"yep")."</td>";
-				}
-
-				echo "<form method='post' action='$PHP_SELF'>";				
+								
+				echo "<br>$row[varastonimi]</td>";											
+				echo "<td valign='top'>$row[tunnus]</td>";
+				echo "<td valign='top'>$row[ytunnus]<br>$row[asiakas]</td>";	
 				
-				echo "<td class='back'>
+				$laadittu_e 	= tv1dateconv($row["laadittu"], "P", "LYHYT");
+				$h1time_e		= tv1dateconv($row["h1time"], "P", "LYHYT");
+				$lahetepvm_e	= tv1dateconv($row["lahetepvm"], "P", "LYHYT");				
+				$lahetepvm_e	= str_replace(substr($h1time_e, 0, strpos($h1time_e, " ")), "", $lahetepvm_e);
+				$h1time_e		= str_replace(substr($laadittu_e, 0, strpos($laadittu_e, " ")), "", $h1time_e);			
+				
+				echo "<td valign='top' nowrap align='right'>$laadittu_e<br>$h1time_e<br>$lahetepvm_e</td>";
+				echo "<td valign='top' nowrap align='right'>".tv1dateconv($row["kerayspvm"], "", "LYHYT")."<br>".tv1dateconv($row["toimaika"], "", "LYHYT")."</td>";				
+				echo "<td valign='top'>$row[toimitustapa]</td>";
+				echo "<td valign='top'>$row[riveja]</td>";
+				
+				$riveja_yht += $row['riveja'];
+								
+				echo "<td valign='top'>
+						<form method='post' action='$PHP_SELF'>
 						<input type='hidden' name='id' value='$row[tunnus]'>
 						<input type='hidden' name='toim' value='$toim'>
-						<input type='submit' name='tila' value='".t("Ker‰‰")."'></td></tr></form>";
+						<input type='submit' name='tila' value='".t("Ker‰‰")."'></form></td></tr>";
 			}
 
 			echo "<tr>";
-			echo "<th colspan='2' style='text-align:right;'>".t("Rivej‰ yhteens‰")."</th>";
-			echo "<th valign='top'>$riveja_yht</th>";
+			echo "<td colspan='5' style='text-align:right;' class='back'>".t("Rivej‰ yhteens‰").":</td>";
+			echo "<td valign='top' class='back'>$riveja_yht</td>";
 			echo "</tr>";
 
 			echo "</table>";

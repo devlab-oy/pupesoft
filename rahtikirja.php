@@ -726,6 +726,7 @@
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='toimtila' value='$tila'>";
 		echo "<input type='hidden' name='text' value='etsi'>";
+		echo "<input type='hidden' id='jarj' name='jarj' value='$jarj'>";
 		echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
 
 		$query = "	SELECT tunnus, nimitys
@@ -968,7 +969,14 @@
 		else {
 			$selecttoimitustapaehto = " if(toimitustapa.tulostustapa='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti, "; 
 		}
-
+		
+		if($jarj != "") {
+			$jarjx = " ORDER BY $jarj";
+		}
+		else {
+			$jarjx = " ORDER BY laadittu";
+		}
+		
 		// Haetaan sopivia tilauksia
 		$query = "	SELECT
 					lasku.toimitustapa toimitustapa,
@@ -1013,7 +1021,7 @@
 					$lisawhere 
 					and ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')					
 					GROUP BY lasku.toimitustapa, toimitustapa.nouto, $groupmaksuehto kimppakyyti, lasku.vienti, laadittux, toimaika $grouplisa					
-					ORDER BY laadittu";
+					$jarjx";
 		$tilre = mysql_query($query) or pupe_error($query);
 
 		//piirret‰‰n taulukko...
@@ -1022,19 +1030,31 @@
 			echo "<br><table>";
 
 			echo "<tr>";
-			echo "<th valign='top'>".t("Pri")."<br>".t("Varastoon")."</th>";
-			echo "<th valign='top'>".t("Tilaus")."</th>";
-			echo "<th valign='top'>".t("Asiakas")."<br>".t("Nimi")."</th>";
-			echo "<th valign='top'>".t("Laadittu")."<br>".t("Valmis")."<br>".t("Tulostettu")."<br>".t("Ker‰tty")."</th>";
-			echo "<th valign='top'>".t("Ker‰ysaika")."<br>".t("Toimitusaika")."</th>";
-			echo "<th valign='top'>".t("Toimitustapa")."</th>";
-
-			if ($yhtiorow['pakkaamolokerot'] == 'K') {				
+			
+			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='prioriteetti'; document.forms['find'].submit();\">".t("Pri")."<br>
+					  <a href='#' onclick=\"getElementById('jarj').value='varastonimi'; document.forms['find'].submit();\">".t("Varastoon")."</th>";
+			
+			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='tunnus'; document.forms['find'].submit();\">".t("Tilaus")."</th>";
+			
+			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='ytunnus'; document.forms['find'].submit();\">".t("Asiakas")."<br>
+					  <a href='#' onclick=\"getElementById('jarj').value='nimi'; document.forms['find'].submit();\">".t("Nimi")."</th>";			
+			
+			
+			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='luontiaika'; document.forms['find'].submit();\">".t("Valmis")."<br>
+				  	  <a href='#' onclick=\"getElementById('jarj').value='lasku.h1time'; document.forms['find'].submit();\">".t("Tulostettu")."<br>
+						<a href='#' onclick=\"getElementById('jarj').value='lasku.lahetepvm'; document.forms['find'].submit();\">".t("Ker‰tty")."</th>";
+			
+			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='kerayspvm'; document.forms['find'].submit();\">".t("Ker‰ysaika")."<br>
+					  <a href='#' onclick=\"getElementById('jarj').value='toimaika'; document.forms['find'].submit();\">".t("Toimitusaika")."</th>";
+			
+			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">".t("Toimitustapa")."</th>";
+			
+			if ($yhtiorow['pakkaamolokerot'] == 'K') {
 				echo "<th valign='top'>".t("Kollit")."<br>".t("Rullakot")."</th>";
 				echo "<th valign='top'>".t("Pakkaamo")."<br>".t("Lokero")."</th>";
 			}
-
-			echo "</tr>";
+			
+			echo "</tr></form>";
 			
 			$osittaiset = array();			
 			
@@ -1160,6 +1180,7 @@
 							<input type='hidden' name='id' value='$row[tunnus]'>
 							<input type='hidden' name='tunnukset' value='$row[tunnukset]'>
 							<input type='hidden' name='toim' value='$toim'>
+							<input type='hidden' id='jarj' name='jarj' value='$jarj'>
 							<input type='hidden' name='rakirno' value='$row[tunnus]'>
 							<td class='back' valign='top'><input type='submit' name='tila' value='".t("Syˆt‰")."'></td>
 							</form>";
@@ -1290,6 +1311,7 @@
 					$temp_osittaiset .= "	<input type='hidden' name='id' value='$row[tunnus]'>
 											<input type='hidden' name='tunnukset' value='$row[tunnukset]'>
 											<input type='hidden' name='toim' value='$toim'>
+											<input type='hidden' id='jarj' name='jarj' value='$jarj'>
 											<input type='hidden' name='rakirno' value='$row[tunnus]'>
 											<td class='back' valign='top'><input type='submit' name='tila' value='".t("Syˆt‰")."'></td>
 											</form>";

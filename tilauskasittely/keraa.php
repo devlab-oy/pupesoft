@@ -1325,10 +1325,11 @@
 
 		$formi	= "find";
 		$kentta	= "etsi";
-
+		
 		echo "<table>";
 		echo "<form action='$PHP_SELF' name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' id='jarj' name='jarj' value='$jarj'>";
 		echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
 
 		$query = "	SELECT tunnus, nimitys
@@ -1456,6 +1457,13 @@
 				$haku .= " and lasku.clearing='JT-TILAUS' ";
 			}
 		}
+		
+		if($jarj != "") {
+			$jarjx = " ORDER BY $jarj";
+		}
+		else {
+			$jarjx = " ORDER BY laadittu";
+		}
 
 		$query = "	SELECT distinct
 					if(lasku.kerayslista!=0, lasku.kerayslista, lasku.tunnus) tunnus,
@@ -1488,24 +1496,36 @@
 					$haku
 					$tilaustyyppi
 					GROUP BY tunnus
-					ORDER BY laadittu";
+					$jarjx";
 		$result = mysql_query($query) or pupe_error($query);
-
+		
 		//piirret‰‰n taulukko...
 		if (mysql_num_rows($result)!=0) {
 
 			echo "<br><table>";
 
 			echo "<tr>";
-			echo "<th valign='top'>".t("Pri")."<br>".t("Varastoon")."</th>";
-			echo "<th valign='top'>".t("Tilaus")."</th>";
-			echo "<th valign='top'>".t("Asiakas")."<br>".t("Nimi")."</th>";
-			echo "<th valign='top'>".t("Laadittu")."<br>".t("Valmis")."<br>".t("Tulostettu")."</th>";
-			echo "<th valign='top'>".t("Ker‰ysaika")."<br>".t("Toimitusaika")."</th>";
-			echo "<th valign='top'>".t("Toimitustapa")."</th>";
-			echo "<th valign='top'>".t("Riv")."</th>";
+			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='prioriteetti'; document.forms['find'].submit();\">".t("Pri")."<br>
+					  <a href='#' onclick=\"getElementById('jarj').value='varastonimi'; document.forms['find'].submit();\">".t("Varastoon")."</th>";
+			
+			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='tunnus'; document.forms['find'].submit();\">".t("Tilaus")."</th>";
+			
+			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='ytunnus'; document.forms['find'].submit();\">".t("Asiakas")."<br>
+					  <a href='#' onclick=\"getElementById('jarj').value='asiakas'; document.forms['find'].submit();\">".t("Nimi")."</th>";			
+			
+			
+			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='laadittu'; document.forms['find'].submit();\">".t("Laadittu")."<br>
+				  	  <a href='#' onclick=\"getElementById('jarj').value='lasku.h1time'; document.forms['find'].submit();\">".t("Valmis")."<br>
+						<a href='#' onclick=\"getElementById('jarj').value='lasku.lahetepvm'; document.forms['find'].submit();\">".t("Tulostettu")."</th>";
+			
+			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='kerayspvm'; document.forms['find'].submit();\">".t("Ker‰ysaika")."<br>
+					  <a href='#' onclick=\"getElementById('jarj').value='toimaika'; document.forms['find'].submit();\">".t("Toimitusaika")."</th>";
+			
+			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">".t("Toimitustapa")."</th>";
+			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">".t("Riv")."</th>";
 			echo "<th valign='top'>".t("Ker‰‰")."</th>";
-			echo "</tr>";
+			
+			echo "</tr></form>";
 
 			$riveja_yht = 0;
 

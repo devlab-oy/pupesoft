@@ -100,7 +100,7 @@
 			$perhelisa2 = "HAVING rajaus='mukaan'";
 		}
 		
-		if($kaikkituhaku != "KYLLA") {
+		if ($kaikkituhaku != "KYLLA") {
 			
 			$poislisa = " HAVING (tuote.status not in ('P','X') or saldo > 0) ";
 		
@@ -156,7 +156,8 @@
 					(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 					tuote.sarjanumeroseuranta,
 					tuote.status,
-					(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
+					(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo,
+					tuote.tuotteen_parametrit
 					FROM tuote use index (tuoteno, nimitys)
 					WHERE tuote.$yhtiot
 					$kieltolisa
@@ -192,7 +193,8 @@
 								(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 								tuote.sarjanumeroseuranta,
 								tuote.status,
-								(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo
+								(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) saldo,
+								tuote.tuotteen_parametrit
 								FROM korvaavat
 								JOIN tuote ON tuote.yhtio=korvaavat.yhtio and tuote.tuoteno=korvaavat.tuoteno
 								WHERE korvaavat.yhtio = '$mrow[yhtio]'
@@ -260,8 +262,8 @@
 			$ulos .= "<option value=''>".t("Valitse tuote")."</option>";
 
 			// Loopataan tuotteet läpi
-			foreach($rows as $trow) {
-
+			foreach ($rows as $trow) {												
+				
 				$lisakala1 = "";
 
 				if ($trow["yhtio"].$trow["korvaavat"] == $edtuoteno) {
@@ -302,10 +304,17 @@
 					$lisakala2 = " $trow[yhtio] - ";
 					$lisakala3 = "####$trow[yhtio]";
 				}
+				
+				preg_match("/variaatio=(.*?);/i", $trow["tuotteen_parametrit"], $variaatiot);
+				
+				if (trim($variaatiot[1]) != "" and $variaatiot[1] != $edvariaatio) {
+					$ulos .= "<option value='$variaatiot[1]'> ** $variaatiot[1] ** </option>";
+				}
 
 				$ulos .= "<option value='$trow[tuoteno]$lisakala3'>$lisakala2 $lisakala1 $trow[tuoteno] ".asana('nimitys_',$trow['tuoteno'],$trow['nimitys'])." ($kokonaismyytavissa)</option>";
 
 				$edtuoteno = $trow["yhtio"].$trow["korvaavat"];
+				$edvariaatio = $variaatiot[1];
 			}
 
 			if ($kutsuja != "yllapito.php") {

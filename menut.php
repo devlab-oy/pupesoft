@@ -193,8 +193,7 @@
 							and kuka 		= ''
 							and sovellus	= '$row[sovellus]'
 							and nimi		= '$row[nimi]'
-							and alanimi		= '$row[alanimi]'
-							and nimitys		= '$row[nimitys]'";
+							and alanimi		= '$row[alanimi]'";
 				$result = mysql_query($query) or pupe_error($query);
 				
 				if (mysql_num_rows($result) == 0) {

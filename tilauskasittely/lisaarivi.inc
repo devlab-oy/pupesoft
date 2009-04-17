@@ -314,7 +314,7 @@
 	//Tutkitaan onko tämä hyvitysrivi
 	if ((float) $kpl < 0 and trim($var) == "") {
 		//Laitetaan varriksi Y jotta ei tarvitse mennä myyntihaaraan
-		$var = "Y";
+		$var = "Y";		
 	}
 
 	if ($laskurow['tila'] != "O" and trim($var) == "" and $trow["tuoteno"] != "") {
@@ -1447,7 +1447,7 @@
 						// Sirtolistoissa defaultti on JT jos saldo ei riitä. (jos yhtio ei välitä saldoista ei välitetä täälläkään..)
 						// Tai jos yhtiölle on konffattu, että se haluaa ylimemenät jteiksi
 						// Sisäisissä työmääräykissä ei haluta JT-rivejä
-						if ((($rivityyppi == 'G' and $yhtiorow["puute_jt_oletus"] != "H") or ($yhtiorow["puute_jt_oletus"] == "J" or $yhtiorow["puute_jt_oletus"] == "B" and $kpl > 0)) and $laskurow["tila"] != 'S' and $jtkielto != "o") {
+						if ((($rivityyppi == 'G' and $yhtiorow["puute_jt_oletus"] != "H") or (($yhtiorow["puute_jt_oletus"] == "J" or $yhtiorow["puute_jt_oletus"] == "B") and $kpl > 0)) and $laskurow["tila"] != 'S' and $jtkielto != "o") {
 							if ($yhtiorow["varaako_jt_saldoa"] == "") {
 								$varattu 	= 0;
 								$jt 		= $kpl;
@@ -1470,7 +1470,7 @@
 							$varattu = $kpl;
 						}
 						// Hyvitysrivit menee normaaleina
-						elseif($kpl < 0) {
+						elseif($kpl < 0) {														
 							$var 	= "";
 							$varattu = $kpl;
 						}

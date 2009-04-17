@@ -9,6 +9,6 @@
 				alkuhyllynro,
 				loppuhyllyalue,
 				loppuhyllynro,
-				(select kirjoitin from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = varaston_tulostimet.printteri) printteri";
+				(select kirjoitin from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = varaston_tulostimet.printteri1) printteri1";
 	$jarjestys = 'varasto, prioriteetti, alkuhyllyalue';	
 ?>

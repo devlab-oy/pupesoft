@@ -324,11 +324,12 @@
 
 	$jarjestys = "tuote.tuoteno";
 
-	$lisa  = "";
-	$ulisa = "";
-	$toimtuotteet = "";
-	$origtuotteet = "";
-
+	$lisa  				= "";
+	$ulisa 				= "";
+	$toimtuotteet 		= "";
+	$origtuotteet 		= "";
+	$poislisa_mulsel 	= "";
+	
 	if (!isset($ojarj)) {
 		$ojarj = '';
 	}
@@ -378,17 +379,18 @@
 		$ulisa .= "&poistetut=checked";
 		
 		if ($kukarow["extranet"] != "") {
-			$poislisa  = " HAVING (tuote.status in ('P','X') and saldo > 0) ";
-			$poislisa_mulsel  = " and tuote.status in ('P','X') ";
+			// Näytetään vain poistettuja tuotteita
+			$poislisa  			= " HAVING (tuote.status in ('P','X') and saldo > 0) ";
+			$poislisa_mulsel	= " and tuote.status in ('P','X') ";
 		}
 		else {
-			$poislisa  = "";
-			$poislisa_mulsel  = "";
+			$poislisa  		 	= "";
+			//$poislisa_mulsel	= "";
 		}
 	}
 	else {
 		$poislisa  = " HAVING (tuote.status not in ('P','X') or saldo > 0) ";
-		$poislisa_mulsel  = " and tuote.status not in ('P','X') ";
+		//$poislisa_mulsel  = " and tuote.status not in ('P','X') ";
 		$poischeck = "";
 	}
 

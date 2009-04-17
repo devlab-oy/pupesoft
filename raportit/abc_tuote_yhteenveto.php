@@ -274,7 +274,11 @@
 		}
 
 		echo "<th nowrap>".t("Varast").".<br>".t("arvo")."<br>".t("nyt")."</th>";
-
+		
+		if ($lisatiedot == "TARK" or $lisatiedot == "OSTONOHJ") {
+			echo "<th nowrap>".t("Saldo")."</th>";
+		}		
+		
 		if ($lisatiedot == "OSTONOHJ") {
 			echo "<th nowrap>".t("Varast")."<br>".t("arvo")."<br>".t("tavoite")."</th>";
 		}
@@ -569,7 +573,11 @@
 			}
 
 			echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["vararvo"]))."</td>";
-
+			
+			if ($lisatiedot == "TARK" or $lisatiedot == "OSTONOHJ") {
+				echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.0f',$row["saldo"]))."</td>";
+			}
+			
 			if ($lisatiedot == "OSTONOHJ") {
 				echo "<td align='right' valign='top' nowrap>";
 				echo "<input type='text' size='10' name='vararvo_$i' id='vararvo_$i' value='' disabled>";
@@ -727,6 +735,7 @@
 			$ryhmakustaostyht		+= $row["kustannus_osto"];
 			$ryhmakustayhtyht		+= $row["kustannus_yht"];
 			$totalyht				+= $row["total"];
+			$saldoyht				+= $row["saldo"];
 		}
 
 		//yhteensärivi
@@ -817,11 +826,15 @@
 		}
 
 		echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$ryhmanvarastonarvoyht))."</td>";
+		
+		if ($lisatiedot == "TARK" or $lisatiedot == "OSTONOHJ") {
+			echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.0f',$saldoyht))."</td>";
+		}
 
 		if ($lisatiedot == "OSTONOHJ") {
 			echo "<td align='right' valign='top' nowrap><input type='text' size='10' name='vararvo_yht' id='vararvo_yht' value='' disabled></td>";
 		}
-
+		
 		echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$kiertonopeusyht))."</td>";
 
 		if ($lisatiedot == "OSTONOHJ") {

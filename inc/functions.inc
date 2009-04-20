@@ -6625,7 +6625,7 @@ if (!function_exists("pakkaamo")) {
 				return 0;		
 			}			
 			
-			$query = "	SELECT ytunnus, toim_ovttunnus, toim_nimi, toim_nimitark, nimi, nimitark, toim_osoite, toim_postitp, toim_maa, toimitustapa, varasto, tulostusalue
+			$query = "	SELECT ytunnus, toim_ovttunnus, toim_nimi, toim_nimitark, nimi, nimitark, toim_osoite, toim_postitp, toim_maa, toimitustapa, varasto
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus in ($tilausnumero)
@@ -6649,7 +6649,6 @@ if (!function_exists("pakkaamo")) {
 						AND toim_maa = '$lasku_row[toim_maa]'
 						AND toimitustapa = '$lasku_row[toimitustapa]'
 						AND varasto = '$lasku_row[varasto]'
-						AND tulostusalue = '$lasku_row[tulostusalue]'
 						AND pakkaamo > 0
 						AND tila in('L','G') 
 						AND alatila in('A','C')";

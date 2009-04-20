@@ -316,6 +316,14 @@
 		//Laitetaan varriksi Y jotta ei tarvitse mennä myyntihaaraan
 		$var = "Y";		
 	}
+	
+	//Varastosiirroissa ei siirretä lähdevarastosta lähdevarastoon!!!!
+	if($laskurow["tila"] == 'G' and $laskurow["clearing"] > 0) {
+		$notfromvarasto = " and varastopaikat.tunnus != $laskurow[clearing] ";
+	}
+	else {
+		$notfromvarasto = "";
+	}
 
 	if ($laskurow['tila'] != "O" and trim($var) == "" and $trow["tuoteno"] != "") {
 
@@ -470,6 +478,7 @@
 								and sarjanumeroseuranta.era_kpl != 0
 								WHERE tuote.yhtio = '$kukarow[yhtio]'
 								and tuote.tuoteno = '$tuoteno'
+								$notfromvarasto
 								GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
 								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 				}
@@ -492,9 +501,11 @@
 								and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 								WHERE tuote.yhtio = '$kukarow[yhtio]'
 								and tuote.tuoteno = '$tuoteno'
+								$notfromvarasto
 								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta 
 								$limit";
 				}
+								
 				$zres = mysql_query($query) or pupe_error($query);
 
 				//Nähdään vaivaa jottaa saadaan paikat sortattua oletuspaikka ensin ja sitten myytävissäolevan määrän mukaan laskevassa järjestyksessä
@@ -761,7 +772,7 @@
 					}
 				}
 			}
-			
+						
 			foreach ($myy_tuoteno as $i => $tuoteno) {
 				//Tässä loopataan vain isä/normaleja tuotteita
 

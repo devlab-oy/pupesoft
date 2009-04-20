@@ -1,6 +1,11 @@
 <?php
 	require ("inc/parametrit.inc");
 	
+	if ($tee == 'NAYTATILAUS') {
+		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+		require ("raportit/naytatilaus.inc");
+	}
+	
 	echo "<font class='head'>".t("Pakkaamojen selaus")."</font><hr>";
 	
 	if ($tee == "nollaa") {
@@ -133,7 +138,7 @@
 			
 			echo "<td>".$row['ytunnus']."</td>";
 			echo "<td>".$row['asnimi']."</td>";
-			echo "<td>".$row['tunnus']."</td>";
+			echo "<td><a href='?tupakkaamo=$tupakkaamo&tee=NAYTATILAUS&tunnus=$row[tunnus]'>".$row['tunnus']."</a></td>";
 			echo "<td>".tv1dateconv($row['lahetepvm'],"P","LYHYT")."</td>";
 			echo "<td>".tv1dateconv($row['kerayspvm'],"P","LYHYT")."</td>";
 			echo "<td><input type='checkbox' name='checktunnukset[]' value='$row[tunnus]'></td></tr>";

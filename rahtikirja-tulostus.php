@@ -135,18 +135,27 @@
 		// haetaan printterin tiedot
 		if (isset($laskurow)) {
 			if ($laskurow['pakkaamo'] > 0 and $laskurow['varasto'] != '' and $laskurow['tulostusalue'] != '') {
-				$query = "	select pakkaamo.printteri2, pakkaamo.printteri4, pakkaamo.printteri6
+				$query = "	SELECT pakkaamo.printteri2, pakkaamo.printteri4, pakkaamo.printteri6
 							from pakkaamo
 							where pakkaamo.yhtio='$kukarow[yhtio]' 
 							and pakkaamo.tunnus='$laskurow[pakkaamo]'
 							order by pakkaamo.tunnus";
 			}
+			elseif ($laskurow['tulostusalue'] != '' and $laskurow['varasto'] != '') {
+				$query = "	SELECT varaston_tulostimet.printteri1, varaston_tulostimet.printteri3, varastopaikat.printteri5
+							FROM varaston_tulostimet
+							JOIN varastopaikat ON (varaston_tulostimet.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '{$laskurow['varasto']}')
+							WHERE varaston_tulostimet.yhtio = '{$kukarow['yhtio']}' 
+							AND varaston_tulostimet.nimi = '{$laskurow['tulostusalue']}'
+							AND varaston_tulostimet.varasto = '{$laskurow['varasto']}'
+							ORDER BY varaston_tulostimet.prioriteetti, varaston_tulostimet.alkuhyllyalue";
+			}
 			else {
-				$query = "select * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";				
+				$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";				
 			}
 		}
 		else {
-			$query = "select * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";			
+			$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";			
 		}
 		
 		$pres  = mysql_query($query) or pupe_error($query);

@@ -446,22 +446,31 @@
 
 			//tulostetaan faili ja valitaan sopivat printterit
 			if ($laskurow['pakkaamo'] > 0 and $laskurow['varasto'] != '' and $laskurow['tulostusalue'] != '') {
-				$query = "	select pakkaamo.printteri1, pakkaamo.printteri3, varastopaikat.printteri5
+				$query = "	SELECT pakkaamo.printteri1, pakkaamo.printteri3, varastopaikat.printteri5
 							from pakkaamo
 							join varastopaikat ON pakkaamo.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '$laskurow[varasto]'
 							where pakkaamo.yhtio='$kukarow[yhtio]' 
 							and pakkaamo.tunnus='$laskurow[pakkaamo]'
 							order by pakkaamo.tunnus";
 			}
+			elseif ($laskurow['tulostusalue'] != '' and $laskurow['varasto'] != '') {
+				$query = "	SELECT varaston_tulostimet.printteri1, varaston_tulostimet.printteri3, varastopaikat.printteri5
+							FROM varaston_tulostimet
+							JOIN varastopaikat ON (varaston_tulostimet.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '{$laskurow['varasto']}')
+							WHERE varaston_tulostimet.yhtio = '{$kukarow['yhtio']}' 
+							AND varaston_tulostimet.nimi = '{$laskurow['tulostusalue']}'
+							AND varaston_tulostimet.varasto = '{$laskurow['varasto']}'
+							ORDER BY varaston_tulostimet.prioriteetti, varaston_tulostimet.alkuhyllyalue";
+			}
 			elseif ($laskurow["varasto"] == '') {
-				$query = "	select *
+				$query = "	SELECT *
 							from varastopaikat
 							where yhtio='$kukarow[yhtio]'
 							order by alkuhyllyalue,alkuhyllynro
 							limit 1";
 			}
 			else {
-				$query = "	select *
+				$query = "	SELECT *
 							from varastopaikat
 							where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
 							order by alkuhyllyalue,alkuhyllynro";

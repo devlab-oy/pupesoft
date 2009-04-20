@@ -33,7 +33,7 @@
 	if ($tee == 'NAYTATILAUS') {
 		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 		require ("raportit/naytatilaus.inc");
-		exit;
+		$id=0;
 	}
 
 	if ($id == '') $id=0;
@@ -1214,7 +1214,7 @@
 					$odotamme_naita = explode(",", $vanhat_row["odottaa"]);
 					
 					foreach ($odotamme_naita as $odn) {
-						$temp_osittaiset .= "<a href='?toim=$toim&tee=NAYTATILAUS&tunnus=$odn'>$odn</a><br>";
+						$temp_osittaiset .= "<a href='?toim=$toim&tee=NAYTATILAUS&tuvarasto=$tuvarasto&tumaa=$tumaa&tutyyppi=$tutyyppi&tutoimtapa=$tutoimtapa&tupakkaamo=$tupakkaamo&tunnus=$odn'>$odn</a><br>";
 					}
 					$temp_osittaiset .= "</td>";					
 					$temp_osittaiset .= "<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>";

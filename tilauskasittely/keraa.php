@@ -1570,7 +1570,7 @@
 			}
 
 			echo "<tr>";
-			echo "<td colspan='5' style='text-align:right;' class='back'>".t("Rivejä yhteensä").":</td>";
+			echo "<td colspan='6' style='text-align:right;' class='back'>".t("Rivejä yhteensä").":</td>";
 			echo "<td valign='top' class='back'>$riveja_yht</td>";
 			echo "</tr>";
 

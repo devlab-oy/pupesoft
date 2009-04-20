@@ -2,7 +2,7 @@
 
 function hinnastorivi($tuote, $laskurow) {
     
-	$myyntihinta = tuotteen_myyntihinta($laskurow, $tuote, 1);
+	$myyntihinta = tuotteen_myyntihinta($laskurow, $tuote, 1, "ei");
 
     // muutetaan yksiköt ISO-standardin mukaisiksi
 	$yksikko="";

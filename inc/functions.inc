@@ -2486,7 +2486,7 @@ if (!function_exists("jalkilaskentafunktio")) {
 }
 
 if (!function_exists("tuotteen_myyntihinta")) {
-	function tuotteen_myyntihinta ($laskurow, $trow, $kpl) {
+	function tuotteen_myyntihinta ($laskurow, $trow, $kpl, $naytetaanko_netto = "") {
 		global $yhtiorow, $kukarow;
 
 		// palautetaan tuotteen SVH laskun valuutassa
@@ -2546,8 +2546,7 @@ if (!function_exists("tuotteen_myyntihinta")) {
 		}
 
 		// 15. tuote.nettohinta (tuotteen nettohinta)
-		if ($hinta == 0 and $trow['nettohinta'] > 0) {
-
+		if ($hinta == 0 and $trow['nettohinta'] > 0 and $naytetaanko_netto == "") {
 			$hinta 			= $trow['nettohinta'];
 			$netto 			= 'N';
 			$valuutta		= $yhtiorow["valkoodi"];

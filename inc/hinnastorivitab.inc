@@ -40,7 +40,7 @@ function hinnastorivi($tuote, $laskurow) {
 		}
 	}
 	
-	$myyntihinta = tuotteen_myyntihinta($laskurow, $tuote, 1);
+	$myyntihinta = tuotteen_myyntihinta($laskurow, $tuote, 1, "ei");
     			
     // tehd‰‰n tietuetta
 	$out = $tuote['tuoteno']."\t";		// tuotenumero

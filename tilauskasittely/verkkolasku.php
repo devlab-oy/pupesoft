@@ -139,8 +139,8 @@
 				if (checkdate($laskkk, $laskpp, $laskvv)) {
 
 					//vertaillaan tilikauteen
-					list($vv1,$kk1,$pp1) = split("-",$yhtiorow["tilikausi_alku"]);
-					list($vv2,$kk2,$pp2) = split("-",$yhtiorow["tilikausi_loppu"]);
+					list($vv1,$kk1,$pp1) = split("-",$yhtiorow["myyntireskontrakausi_alku"]);
+					list($vv2,$kk2,$pp2) = split("-",$yhtiorow["myyntireskontrakausi_loppu"]);
 
 					$tilialku  = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
 					$tililoppu = (int) date('Ymd',mktime(0,0,0,$kk2,$pp2,$vv2));
@@ -2167,8 +2167,8 @@
 		if ($tee == '' and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
 
 			//p‰iv‰m‰‰r‰n tarkistus
-			$tilalk = split("-", $yhtiorow["tilikausi_alku"]);
-			$tillop = split("-", $yhtiorow["tilikausi_loppu"]);
+			$tilalk = split("-", $yhtiorow["myyntireskontrakausi_alku"]);
+			$tillop = split("-", $yhtiorow["myyntireskontrakausi_loppu"]);
 
 			$tilalkpp = $tilalk[2];
 			$tilalkkk = $tilalk[1]-1;

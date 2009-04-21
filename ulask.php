@@ -454,8 +454,8 @@ if ($tee == 'Y') {
 if ($tee == 'P' or $tee == 'E') {
 
 	//p‰iv‰m‰‰r‰n tarkistus
-	$tilalk = split("-", $yhtiorow["tilikausi_alku"]);
-	$tillop = split("-", $yhtiorow["tilikausi_loppu"]);
+	$tilalk = split("-", $yhtiorow["ostoreskontrakausi_alku"]);
+	$tillop = split("-", $yhtiorow["ostoreskontrakausi_loppu"]);
 
 	$tilalkpp = $tilalk[2];
 	$tilalkkk = $tilalk[1]-1;

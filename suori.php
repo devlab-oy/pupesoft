@@ -521,7 +521,7 @@
 			}
 
 			$kmaksupvm = $mav."-".$mak."-".$map;
-			if ($yhtiorow['tilikausi_alku'] <= $kmaksupvm) {			
+			if ($yhtiorow['ostoreskontrakausi_alku'] <= $kmaksupvm) {			
 				echo "</td>
 					<td valign='top'><INPUT TYPE='checkbox' NAME='selvittely' CHECKED></td>
 					<td valign='top'>

@@ -373,6 +373,29 @@
 				$komm = "(verkkolas@" . date('Y-m-d') .") Tiedoista puuttui p‰iv‰ys. Tarkista asia laskulta!<br>" . $komm;
 			}
 
+			// Otetaan yhtiˆn tiedoista ostoreskontran sallittu tilikauden ajankohta
+			$tilalk = split("-", $yhtiorow["ostoreskontrakausi_alku"]);
+			$tillop = split("-", $yhtiorow["ostoreskontrakausi_loppu"]);
+
+			// verrataan v‰h‰n p‰iv‰m‰‰ri‰. onpa vittumaista PHP:ss‰!
+			$ostoresktilalk = (int) date('Ymd',mktime(0,0,0,$tilalk[1],$tilalk[2],$tilalk[0]));
+			$ostoresktillop = (int) date('Ymd',mktime(0,0,0,$tillop[1],$tillop[2],$tillop[0]));
+			$syotettypvm = (int) date('Ymd',mktime(0,0,0,$tpk,$tpp,$tpv));
+
+			if ($syotettypvm > $ostoresktillop) {
+				$tpp = $tillop[2];
+				$tpk = $tillop[1];
+				$tpv = $tillop[0];
+				$komm = "(verkkolas@" . date('Y-m-d') .") Laskulla oli p‰iv‰ys liian pitk‰lle tulevaisuuteen. Tarkista asia laskulta!<br>" . $komm;
+			}
+
+			if ($syotettypvm < $ostoresktilalk) {
+				$tpp = $tilalk[2];
+				$tpk = $tilalk[1];
+				$tpv = $tilalk[0];
+				$komm = "(verkkolas@" . date('Y-m-d') .") Laskulla oli liian vanha p‰iv‰ys. Tarkista asia laskulta!<br>" . $komm;
+			}
+
 			// oletus alv nolla paitsi jos toimittajalla on oletuksena jotain kotimaahan liittyv‰‰ ni haetaan oletus avainsanoista...
 			$oletusalvi = 0;
 

@@ -9,7 +9,11 @@
 	}
 	
 	if (mysql_field_name($result, $i) == "tilikausi_alku" or 
-		mysql_field_name($result, $i) == "tilikausi_loppu") {
+		mysql_field_name($result, $i) == "tilikausi_loppu" or
+		mysql_field_name($result, $i) == "ostoreskontrakausi_alku" or
+		mysql_field_name($result, $i) == "ostoreskontrakausi_loppu" or
+		mysql_field_name($result, $i) == "myyntireskontrakausi_alku" or
+		mysql_field_name($result, $i) == "myyntireskontrakausi_loppu") {
 		$tyyppi = 1.5;
 	}
 

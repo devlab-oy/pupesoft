@@ -8,7 +8,13 @@ if(!function_exists("yhtiotarkista")) {
 			(mysql_field_name($result, $i) == "nimi") or
 			(mysql_field_name($result, $i) == "kieli") or
 			(mysql_field_name($result, $i) == "ovttunnus") or
-			(mysql_field_name($result, $i) == "pankkinimi1")) {
+			(mysql_field_name($result, $i) == "pankkinimi1") or
+			(mysql_field_name($result, $i) == "tilikausi_alku") or
+			(mysql_field_name($result, $i) == "tilikausi_loppu") or
+			(mysql_field_name($result, $i) == "ostoreskontrakausi_alku") or
+			(mysql_field_name($result, $i) == "ostoreskontrakausi_loppu") or
+			(mysql_field_name($result, $i) == "myyntireskontrakausi_alku") or
+			(mysql_field_name($result, $i) == "myyntireskontrakausi_loppu")) {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = "".t("Tieto puuttuu!")."";
 			}

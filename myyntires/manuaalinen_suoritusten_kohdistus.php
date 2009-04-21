@@ -919,7 +919,7 @@ if ($tila == 'suorituksenvalinta') {
 		$r=1;
 		while ($suoritus=mysql_fetch_array ($result)) {
 
-			if ($yhtiorow['tilikausi_alku'] <= $suoritus['kirjpvm']) {
+			if ($yhtiorow['myyntireskontrakausi_alku'] <= $suoritus['kirjpvm']) {
 				echo "<tr class='aktiivi'><td>";
 				echo "<input type='radio' name='suoritus_tunnus' value='$suoritus[tunnus]' ";
 
@@ -1215,7 +1215,7 @@ if ($tila == 'kohdistaminen') {
 	echo "<tr><th>".t("Kirjaa erotus kassa-aleen")."</th><td><input type='checkbox' name='pyoristys_virhe_ok' value='1' $pyocheck></td>";
 	echo "<th>".t("Osasuorita lasku")."</th><td><input type='checkbox' name='osasuoritus' value='1' $osacheck onclick='javascript:osasuo(this)'></td></tr>";
 	echo "</table>";
-	if ($yhtiorow['tilikausi_alku'] <= $suoritus['kirjpvm']) {
+	if ($yhtiorow['myyntireskontrakausi_alku'] <= $suoritus['kirjpvm']) {
 		echo "<br><input type='submit' value='".t("Kohdista")."'>";
 	}
 	else {

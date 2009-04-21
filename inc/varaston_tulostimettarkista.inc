@@ -119,7 +119,7 @@ if(!function_exists("varaston_tulostimettarkista")) {
 			}
 		}
 		
-		if (mysql_field_name($result, $i) == "printteri") {
+		if (substr(mysql_field_name($result,$i),0,9) == 'printteri') {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] .= t("Tulostin puuttuu")."!";
 			}

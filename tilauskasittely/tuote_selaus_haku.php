@@ -656,8 +656,11 @@
 
 			foreach ($mul_malli as $mallix) {
 				if (trim($mallix) != '') {
-					$mallix = trim(mysql_real_escape_string($mallix));
-					$mallit .= "'$mallix',";
+					if (count($_GET['mul_malli']) > 0) {
+						$mallix = rawurldecode($mallix);
+					}
+					$mallit .= "'".mysql_real_escape_string($mallix)."',";
+					$ulisa .= "&mul_malli[]=".rawurlencode($mallix);
 				}
 			}
 
@@ -666,7 +669,6 @@
 			if (trim($mallit) != '') {
 				$lisa_haku_malli = " and tuote.malli in ($mallit) ";
 				$lisa .= $lisa_haku_malli;
-				$ulisa .= "&mul_malli[]=".urlencode($mallit);
 			}
 		}
 
@@ -675,8 +677,11 @@
 
 			foreach ($mul_mallitarkenne as $mallitarkennex) {
 				if (trim($mallitarkennex) != '') {
-					$mallitarkennex = trim(mysql_real_escape_string($mallitarkennex));
-					$mallitarkenteet .= "'$mallitarkennex',";
+					if (count($_GET['mul_mallitarkenne']) > 0) {
+						$mallitarkennex = rawurldecode($mallitarkennex);
+					}
+					$mallitarkenteet .= "'".mysql_real_escape_string($mallitarkennex)."',";
+					$ulisa .= "&mul_mallitarkenne[]=".rawurlencode($mallitarkennex);
 				}
 			}
 
@@ -685,7 +690,6 @@
 			if (trim($mallitarkenteet) != '') {
 				$lisa_haku_mallitarkenne = " and tuote.mallitarkenne in ($mallitarkenteet) ";
 				$lisa .= $lisa_haku_mallitarkenne;
-				$ulisa .= "&mul_mallitarkenne[]=".urlencode($mallitarkenteet);
 			}
 		}
 	}

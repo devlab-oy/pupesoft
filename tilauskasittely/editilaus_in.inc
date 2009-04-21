@@ -344,6 +344,28 @@ while (!feof ($fd)) {
 			$viite .= $tieto;
 			break;
 
+		case 'ONADCN_PC' :
+			//Asiakkaan toim_OVTtunnus
+			$tieto = trim(substr($tieto, 0, 17));
+
+			if (!is_array($arow)) {
+				$edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
+
+				$query = "	SELECT *
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]'
+							and toim_ovttunnus = '$tieto'
+							and toim_ovttunnus not in ('','0')";
+				$result = mysql_query($query) or die($query);
+
+				if (mysql_num_rows($result) == 1) {
+					$arow = mysql_fetch_array($result);
+					$vastaustapa .= $arow['tilausvahvistus'];
+					$edi_ulos .= "$arow[nimi]\n";
+				}
+			}
+			break;
+			
 		case 'ONADBY_PC' :
 			//Asiakkaan OVTtunnus
 			$tieto = trim(substr($tieto, 0, 17));
@@ -873,7 +895,7 @@ while (!feof ($fd)) {
 			$tieto = str_replace ( ",", ".", $tieto);
 			$kpl = (float) abs(substr($tieto,0,16)); // abs() ettei asiakkaat pysty tekem‰‰n hyvityksi‰!
 
-			$edi_ulos .= t("tilattiin")." $kpl ".t("kpl").". ";
+			$edi_ulos .= t("tilattiin")." $kpl ".t("kpl").".\n";
 			break;
 		case 'OSTOTILRIV.OTR_RIVISUMMA' :
 			// jos tullaan magentosta ja meill‰ on rahtikulu, niin otetaan se hinta talteeen

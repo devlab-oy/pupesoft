@@ -656,7 +656,7 @@
 
 			foreach ($mul_malli as $mallix) {
 				if (trim($mallix) != '') {
-					$mallix = trim(mysql_real_escape_string(urldecode($mallix)));
+					$mallix = trim(mysql_real_escape_string($mallix));
 					$mallit .= "'$mallix',";
 				}
 			}
@@ -675,7 +675,7 @@
 
 			foreach ($mul_mallitarkenne as $mallitarkennex) {
 				if (trim($mallitarkennex) != '') {
-					$mallitarkennex = trim(mysql_real_escape_string(urldecode($mallitarkennex)));
+					$mallitarkennex = trim(mysql_real_escape_string($mallitarkennex));
 					$mallitarkenteet .= "'$mallitarkennex',";
 				}
 			}

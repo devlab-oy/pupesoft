@@ -1611,13 +1611,9 @@ if (!function_exists('print_pdf')) {
 				echo t("Lähete tulostuu")."...<br>";
 			}
 
-			if ($kukarow["extranet"] == '') {
-				require("../inc/sahkoposti.inc");
-			}
-			else {
-				require("sahkoposti.inc");
-			}
-
+			if (@include("../inc/sahkoposti.inc"));
+			elseif (@include("inc/sahkoposti.inc"));
+			else include("sahkoposti.inc");	
 		}
 		elseif ($tee == 'NAYTATILAUS') {
 			//Työnnetään tuo pdf vaan putkeen!

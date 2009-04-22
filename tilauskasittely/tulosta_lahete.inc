@@ -948,32 +948,36 @@ if (!function_exists('rivi')) {
 		if($useita == "JOO") {
 			$row["kommentti"] .= "\n".t("Toimitusaika", $kieli).": ".tv1dateconv($row["toimaika"]);
 		}
-
-		$row["tilkpl"] 	= ($row["tilkpl"]*1);
-		$row["varattu"] = ($row["varattu"]*1);
-		$row["kpl"] 	= ($row["kpl"]*1);
-		$kpl_rivilla 	= ($row["kpl"]+$row["varattu"]+$row["jt"]);
-
-		if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
-			$row['varattu'] = ($row['varattu']+$row['kpl'])." ".ta($kieli, "Y", $row["yksikko"]);
-			$row['varattu_viivakoodi'] = $kpl_rivilla;
-		}
-		else {
-			if ($row["var"] == 'J') { // jälkitoimitus
-				$row['varattu'] = t("**JT**", $kieli);
-				$row['varattu_viivakoodi'] = 0;
-			}
-			elseif ($row["var"] == 'P') { // puute
-				$row['varattu'] = t("PUUTE", $kieli);
-				$row['varattu_viivakoodi'] = 0;
+		
+		// Erikseen toimitetuille riveille ei näytetä toimitettu-saraketta
+		if ($row["d_erikseen"] == "") {
+			
+			$row["tilkpl"] 	= ($row["tilkpl"]*1);
+			$row["varattu"] = ($row["varattu"]*1);
+			$row["kpl"] 	= ($row["kpl"]*1);
+			$kpl_rivilla 	= ($row["kpl"]+$row["varattu"]+$row["jt"]);
+			
+			if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
+				$row['varattu'] = ($row['varattu']+$row['kpl'])." ".ta($kieli, "Y", $row["yksikko"]);
+				$row['varattu_viivakoodi'] = $kpl_rivilla;
 			}
 			else {
-				$row["varattu"] = "";
-				$row["kpl"] 	= "";
-				$row['varattu_viivakoodi'] = 0;
+				if ($row["var"] == 'J') { // jälkitoimitus
+					$row['varattu'] = t("**JT**", $kieli);
+					$row['varattu_viivakoodi'] = 0;
+				}
+				elseif ($row["var"] == 'P') { // puute
+					$row['varattu'] = t("PUUTE", $kieli);
+					$row['varattu_viivakoodi'] = 0;
+				}
+				else {
+					$row["varattu"] = "";
+					$row["kpl"] 	= "";
+					$row['varattu_viivakoodi'] = 0;
+				}
 			}
 		}
-
+		
 		//Haetan sarjanumeron tiedot
 		if ($tyyppi == "SIIRTOLISTA") {
 			$sarjanutunnus = "siirtorivitunnus";

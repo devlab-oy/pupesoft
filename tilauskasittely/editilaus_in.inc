@@ -971,6 +971,7 @@ while (!feof ($fd)) {
 						if ($chk_myytavissa < $kpl) {
 							$var = "H";
 							$kommentti = t("Huom: Tuote toimitetaan erikoisvarastosta!");
+							$tilaus_hyvaksyntaan = "kyllä";
 						}
 					}
 

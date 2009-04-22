@@ -1196,7 +1196,12 @@
 										$row[$i] = round($row["katenyt"] / abs($row["myyntinyt"]) * 100, 2);
 									}
 									else {
-										$row[$i] = 0;
+										if ($ajotapa == "tilausauki" and $row["myyntilaskuttamattanyt"] != 0) {											
+											$row[$i] = round($row["katenyt"] / abs($row["myyntilaskuttamattanyt"]) * 100, 2);
+										}
+										else {
+											$row[$i] = 0;
+										}										
 									}
 								}
 
@@ -1344,7 +1349,7 @@
 								}
 								$edluku = $row[0];
 
-								// hoidetaan pisteet piluiksi!!
+								// hoidetaan pisteet pilkuiksi!!
 								if (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int' or substr(mysql_field_name($result, $i),0 ,4) == 'kate')) {
 									if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
 

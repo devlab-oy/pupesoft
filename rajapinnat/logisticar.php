@@ -14,12 +14,12 @@
 	require('../inc/functions.inc');
 
 	$path            = '/Users/juppe/Desktop/';
-	$path_nimike     = $path . 'NIMIKE.txt';
-	$path_asiakas    = $path . 'ASIAKAS.txt';
-	$path_toimittaja = $path . 'TOIMITTAJA.txt';
-	$path_varasto    = $path . 'VARASTO.txt';
-	$path_tapahtumat = $path . 'TAPAHTUMAT.txt';
-	$path_myynti     = $path . 'MYYNTI.txt';
+	$path_nimike     = $path . 'ITEM.txt';
+	$path_asiakas    = $path . 'CUSTOMER.txt';
+	$path_toimittaja = $path . 'VENDOR.txt';
+	$path_varasto    = $path . 'BALANCE.txt';
+	$path_tapahtumat = $path . 'TRANSACTION.txt';
+	$path_myynti     = $path . 'ORDER.txt';
 
 	$query = "SELECT * from yhtio where yhtio='$yhtio'";
 	$res = mysql_query($query) or pupe_error($query);
@@ -38,10 +38,8 @@
 	else {
 		$lisavarattu = " not in ('P','J','S') ";
 	}
-
 	
 	echo "$yhtio\n";
-
 
 	//testausta varten limit
 	$limit = "limit 200";

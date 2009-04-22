@@ -11,6 +11,34 @@ else {
 	$tyyppi = "";
 }
 
+// Jos ollaan painettu poista-nappia
+if (isset($_POST['poista_tratta'])) {
+	if ($poista_tratta_tunnus != '' and $ltunnus != '') {
+		// k‰sitell‰‰n muuttujat
+		$poista_tratta_tunnus = (int) $poista_tratta_tunnus;
+		$ltunnus = (int) $ltunnus;
+
+		$query = "	SELECT *
+					FROM karhu_lasku
+					WHERE ktunnus = $poista_tratta_tunnus
+					AND ltunnus = $ltunnus";
+		$res = mysql_query($query) or pupe_error($query);
+
+		while ($row = mysql_fetch_assoc($res)) {
+			// "poistetaan" haluttu tratta n‰kyvist‰ kertomalla laskuntunnus -1:ll‰
+			$ltun = $row['ltunnus'] * -1;
+
+			$query = "	UPDATE karhu_lasku SET
+						ltunnus = $ltun
+						WHERE ktunnus = $poista_tratta_tunnus
+						AND ltunnus = $row[ltunnus]";
+			$kres = mysql_query($query) or pupe_error($query);
+
+			echo "<font class='message'>",t("Tratta poistettu laskulta")," {$row['ltunnus']} (",t("kierros")," $poista_tratta_tunnus)</font><br/>";
+		}
+	}
+}
+
 echo "<form name='karhu_selaa' action='' method='post'>
 		<table>
 		<tr>
@@ -144,8 +172,17 @@ if (isset($_POST['tee1']) or isset($_POST['tee2'])) {
 					echo " <a href='".$palvelin2."muutosite.php?karhutunnus=$row[ktunnus]&lasku_tunnus[]=$tunnukset[laskutunnukset]&tee=tulosta_karhu&nayta_pdf=1'>N‰yt‰ karhu</a><br>";
 				}
 					
-			echo "</td>
-				</tr>";
+			echo "</td>";
+
+			if ($toim == "TRATTA") {
+				echo "<form action='' method='post'>";
+				echo "<td class='back'><input type='submit' name='poista_tratta' id='poista_tratta' value='",t("Poista"),"'></td>";
+				echo "<input type='hidden' name='poista_tratta_tunnus' id='poista_tratta_tunnus' value='{$row['ktunnus']}'>";
+				echo "<input type='hidden' name='ltunnus' id='ltunnus' value='{$row['ltunnus']}'>";
+				echo "</form>";
+			}
+
+			echo "</tr>";
 		}
 
 		echo "</table>";

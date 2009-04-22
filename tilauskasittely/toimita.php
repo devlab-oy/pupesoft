@@ -227,6 +227,7 @@
 					}
 
 					$utuotteet_mukaan = 0;
+					
 					if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
 						require_once ("tulosta_lahete_alalasku.inc");
 					}
@@ -364,13 +365,18 @@
 
 								while ($row = mysql_fetch_array($riresult)) {
 									if ($row['toimitettu'] == '') {
-										$row['kommentti'] = "*******".t("Toimitetaan erikseen",$kieli).".******* ".$row['kommentti'];
+										$row['kommentti'] .= "\n*******".t("Toimitetaan erikseen",$kieli).".*******";
 									}
 									else {
-										$row['kommentti'] = "*******".t("Toimitettu erikseen",$kieli).".******* ".$row['kommentti'];
+										$row['kommentti'] .= "\n*******".t("Toimitettu erikseen",$kieli).".*******";
 									}
 
-									$row['rivihinta'] = 0;
+									$row['rivihinta'] 	= "";
+									$row['varattu'] 	= "";
+									$row['kpl']			= "";
+									$row['jt'] 			= "";
+									$row['d_erikseen'] 	= "JOO";
+									
 									rivi($page[$sivu], $lah_tyyppi);
 								}
 							}
@@ -402,7 +408,7 @@
 						}
 
 						//tulostetaan sivu
-						if ($lahetekpl > 1) {
+						if ($lahetekpl > 1 and $komento != "email") {
 							$komento .= " -#$lahetekpl ";
 						}
 
@@ -424,10 +430,11 @@
 	if ($id=='') $id=0;
 
 	// meillä ei ole valittua tilausta
-	if ($id=='0') {
-		$formi="find";
-		$kentta="etsi";
-
+	if ($id == '0') {
+		$formi	= "find";
+		$kentta	= "etsi";
+		$boob 	= "";
+		
 		// tehdään etsi valinta
 		echo "<form action='$PHP_SELF' name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form>";
 
@@ -435,7 +442,7 @@
 		if (is_string($etsi))  $haku="and lasku.nimi LIKE '%$etsi%'";
 		if (is_numeric($etsi)) $haku="and lasku.tunnus='$etsi'";
 
-		$query = "	select distinct otunnus
+		$query = "	SELECT distinct otunnus
 					from tilausrivi, lasku, toimitustapa
 					where tilausrivi.yhtio='$kukarow[yhtio]' 
 					and lasku.yhtio='$kukarow[yhtio]' 
@@ -463,6 +470,7 @@
 					// piirretään vaan kerran taulukko-otsikot
 					if ($boob=='') {
 						$boob='kala';
+						
 						echo "<table>";
 						echo "<tr>";
 						for ($i=0; $i<mysql_num_fields($result); $i++)
@@ -472,14 +480,15 @@
 
 					echo "<tr class='aktiivi'>";
 
-					for ($i=0; $i<mysql_num_fields($result); $i++)
+					for ($i=0; $i<mysql_num_fields($result); $i++) {
 						if (mysql_field_name($result,$i) == 'laadittu' or mysql_field_name($result,$i) == 'toimaika') {
 							echo "<td>".tv1dateconv($row[$i])."</td>";
 						}
 						else {
 							echo "<td>$row[$i]</td>";
 						}
-
+					}
+					
 					echo "<form method='post' action='$PHP_SELF'><td class='back'>
 						  <input type='hidden' name='id' value='$row[0]'>
 						  <input type='submit' name='tila' value='".t("Toimita")."'></td></tr></form>";
@@ -508,7 +517,7 @@
 			die(t("Tilausta")." $id ".t("ei voida toimittaa, koska kaikkia tilauksen tietoja ei löydy! Uuuuuuuhhhhhhh")."!");
 		}
 
-		$row    = mysql_fetch_array($result);
+		$row = mysql_fetch_array($result);
 
 		echo "<table>";
 		echo "<tr><th>" . t("Tilaus") ."</th><td>$row[laskutunnus]</td></tr>";	

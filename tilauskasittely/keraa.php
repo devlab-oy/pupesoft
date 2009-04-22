@@ -1255,7 +1255,7 @@
 							}
 
 							//tulostetaan sivu
-							if ($lahetekpl > 1) {
+							if ($lahetekpl > 1 and $komento != "email") {
 								$komento .= " -#$lahetekpl ";
 							}
 

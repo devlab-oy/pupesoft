@@ -1397,7 +1397,7 @@
 				}
 
 				// Riviä saa muuttaa vaan jos taso 2
-				if ($tiliointirow['lukko'] != 1 and $tiliointirow['tapvm'] == $laskurow['tapvm'] and ($kukarow["taso"] == '2' or $kukarow["taso"] == '3') and $laskurow["tapvm"] > $yhtiorow["ostoreskontrakausi_alku"]) {
+				if ($tiliointirow['lukko'] != 1 and $tiliointirow['tapvm'] == $laskurow['tapvm'] and ($kukarow["taso"] == '2' or $kukarow["taso"] == '3') and $laskurow["tapvm"] >= $yhtiorow["ostoreskontrakausi_alku"]) {
 					echo "	<form action = '$PHP_SELF' method='post' >
 							<input type='hidden' name = 'nayta' value='$nayta'>
 							<input type='hidden' name='tunnus' value = '$tunnus'>

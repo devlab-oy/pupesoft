@@ -1073,6 +1073,7 @@
 						}
 
 						$utuotteet_mukaan = 0;
+						
 						if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
 							require_once ("tulosta_lahete_alalasku.inc");
 						}
@@ -1209,14 +1210,20 @@
 									$riresult = mysql_query($query) or pupe_error($query);
 
 									while ($row = mysql_fetch_array($riresult)) {
+										
 										if ($row['toimitettu'] == '') {
-											$row['kommentti'] = "*******".t("Toimitetaan erikseen",$kieli).".******* ".$row['kommentti'];
+											$row['kommentti'] .= "\n*******".t("Toimitetaan erikseen",$kieli).".*******";
 										}
 										else {
-											$row['kommentti'] = "*******".t("Toimitettu erikseen",$kieli).".******* ".$row['kommentti'];
+											$row['kommentti'] .= "\n*******".t("Toimitettu erikseen",$kieli).".*******";
 										}
 
-										$row['rivihinta'] = 0;
+										$row['rivihinta'] 	= "";
+										$row['varattu'] 	= "";
+										$row['kpl']			= "";
+										$row['jt'] 			= "";
+										$row['d_erikseen'] 	= "JOO";
+										
 										rivi($page[$sivu], $lah_tyyppi);
 									}
 								}

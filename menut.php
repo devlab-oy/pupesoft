@@ -100,14 +100,15 @@
 		
 		$file = fopen("http://www.pupesoft.com/softa/referenssivalikot.sql","r") or die (t("Tiedoston avaus epäonnistui")."!");
 		$rivi = fgets($file);
-		$rivi = fgets($file);
 		$lask = 0;
 		$rows = array();
 			
 		while (!feof($file)) {
+			
+			$rivi = fgets($file);
+						
 			// luetaan rivi tiedostosta..
 			$rivi = explode("\t", trim($rivi));
-			
 			
 			if ($sovellus == '' or strtoupper($sovellus) == strtoupper($rivi[0])) {	
 			
@@ -122,10 +123,7 @@
 				$row["tunnus"] 		= $rivi[7];
 								
 				$rows[$row["sovellus"].$row["nimi"].$row["alanimi"]] = $row;
-			}
-			
-			// luetaan seuraava rivi failista
-			$rivi = fgets($file);			
+			}			
 		}
 		
 		foreach($syncyhtiot as $yhtio) {
@@ -496,10 +494,13 @@
 				if ($yhtio == "REFERENSSI") {
 					$file = fopen("http://www.pupesoft.com/softa/referenssivalikot.sql","r") or die (t("Tiedoston avaus epäonnistui")."!");
 					$rivi = fgets($file);
-					$rivi = fgets($file);
+					
 					$lask = 0;
 					
 					while (!feof($file)) {
+						
+						$rivi = fgets($file);
+						
 						// luetaan rivi tiedostosta..
 						$rivi	 = explode("\t", trim($rivi));
 				
@@ -513,9 +514,6 @@
 							$rows[$lask]["hidden"] 		= $rivi[6];
 							$rows[$lask]["tunnus"] 		= $rivi[7];
 						}
-						
-						// luetaan seuraava rivi failista
-						$rivi = fgets($file);
 
 						$lask++;
 					}

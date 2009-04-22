@@ -2124,7 +2124,7 @@ if ($tee == '') {
 					<td class='back'><hr></td>
 					</tr>
 					</table>";
-										
+			/*							
 			echo "<td align='right' class='back' valign='top'>
 					<form name='mitatoikokonaan' action='$PHP_SELF' method='post' onSubmit = 'return verify()'>
 					<input type='hidden' name='toim' value='$toim'>
@@ -2141,7 +2141,7 @@ if ($tee == '') {
 			else {
 				require ("footer.inc");
 			}
-			exit;
+			exit;*/
 		}
 
 		if ($yhtiorow["myyntitilaus_asiakasmemo"] == "K") {

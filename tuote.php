@@ -1548,7 +1548,7 @@
 						ORDER BY tapahtuma.laadittu desc $maara";
 			$qresult = mysql_query($query) or pupe_error($query);
 
-			if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow["sarjanumeroseuranta"] == "V") {
+			if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
 				$kokonaissaldo_tapahtumalle = $sarjanumero_kpl;
 			}
 

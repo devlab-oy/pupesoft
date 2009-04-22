@@ -157,22 +157,23 @@
 		
 		// Sortataan array niin että omat privaatit lisäykset tulee sopivaan rakoon referenssiin nähden
 		foreach ($rows as $key => $row) {
+			$jarj0[$key] = $row['sovellus'];
 		    $jarj1[$key] = $row['jarjestys'];
 		    $jarj2[$key] = $row['jarjestys2'];
 		}
 
-		array_multisort($jarj1, SORT_ASC, $jarj2, SORT_ASC, $rows);
+		array_multisort($jarj0, SORT_ASC, $jarj1, SORT_ASC, $jarj2, SORT_ASC, $rows);
 
 		$jarj  = 0;
 		$jarj2 = 0;	
 			
 		foreach($rows as $row) {		
-						
+									
 			if ($edsovellus != $row["sovellus"]) {
 				$jarj  = 0;
 				$jarj2 = 0;
 			}
-
+						
 			if ($row["jarjestys"] != $edjarjoikea or (($row["nimi"] != $ednimi or $row["alanimi"] != $edalan) and $row["jarjestys2"] == 0 )) {
 				$jarj += 10;
 				$jarj2 = 0;

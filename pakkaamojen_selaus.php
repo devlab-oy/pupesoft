@@ -90,10 +90,10 @@
 						lasku.tunnus,
 						lasku.lahetepvm,
 						if(lasku.tila = 'L', concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark), lasku.nimi) asnimi,
-						min(tilausrivi.kerattyaika) kerayspvm
+						ifnull(min(tilausrivi.kerattyaika),'0000-00-00 00:00:00') kerayspvm
 						FROM lasku
 						JOIN pakkaamo ON pakkaamo.yhtio = lasku.yhtio and pakkaamo.tunnus = lasku.pakkaamo
-						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+						LEFT JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.kerattyaika != '0000-00-00 00:00:00'
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.tila in('L','G') 
 						AND lasku.alatila in('A','C')

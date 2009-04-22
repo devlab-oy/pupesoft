@@ -1859,8 +1859,18 @@
 							$riresult = mysql_query($query) or pupe_error($query);
 							
 							while ($row = mysql_fetch_array($riresult)) {
-								$row['kommentti'] = "*******".t("Toimitetaan erikseen",$kieli).".******* ".$row['kommentti'];
-								$row['rivihinta'] = 0;
+								if ($row['toimitettu'] == '') {
+									$row['kommentti'] .= "\n*******".t("Toimitetaan erikseen",$kieli).".*******";
+								}
+								else {
+									$row['kommentti'] .= "\n*******".t("Toimitettu erikseen",$kieli).".*******";
+								}
+
+								$row['rivihinta']   = "";
+								$row['varattu']     = "";
+								$row['kpl']         = "";
+								$row['jt']          = "";
+								$row['d_erikseen']	= "JOO";
 								
 								rivi($page[$sivu], $lah_tyyppi);						
 							}

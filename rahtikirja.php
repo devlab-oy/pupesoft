@@ -514,7 +514,7 @@
 				$kirrow = mysql_fetch_array($kirres);
 				$oslapp = $kirrow['komento'];
 			}
-			
+						
 			if ($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) {
 
 				$otunnus = $laskurow["tunnus"];
@@ -545,7 +545,9 @@
 						$lahetetyyppi = $vrow["selite"];
 					}
 				}
-
+				
+				$utuotteet_mukaan = 0;
+				
 				if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
 					require_once ("tilauskasittely/tulosta_lahete_alalasku.inc");
 				}
@@ -554,7 +556,8 @@
 				}
 				else {
 					require_once ("tilauskasittely/tulosta_lahete.inc");
-				}
+					$utuotteet_mukaan = 1;
+				}				
 
 				//	Jos meillä on funktio tulosta_lahete meillä on suora funktio joka hoitaa koko tulostuksen
 				if(function_exists("tulosta_lahete")) {
@@ -652,6 +655,51 @@
 
 						$total+= $row["rivihinta"];
 					}
+					
+					//Haetaan erikseen toimitettavat tuotteet
+					if ($laskurow["vanhatunnus"] != 0 and $utuotteet_mukaan == 1) {
+						$query = " 	SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
+									FROM lasku use index (yhtio_vanhatunnus)
+									WHERE yhtio		= '$kukarow[yhtio]'
+									and vanhatunnus = '$laskurow[vanhatunnus]'
+									and tunnus != '$laskurow[tunnus]'";
+						$perheresult = mysql_query($query) or pupe_error($query);
+						$tunrow = mysql_fetch_array($perheresult);
+
+						//generoidaan lähetteelle ja keräyslistalle rivinumerot
+						if ($tunrow["tunnukset"] != "") {
+							$query = "  SELECT tilausrivi.*,
+										round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
+										round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
+										$sorttauskentta,
+										if(tilausrivi.var='J', 1, 0) jtsort
+										FROM tilausrivi
+										JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+										JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+										WHERE tilausrivi.otunnus in ('$tunrow[tunnukset]')
+										and tilausrivi.yhtio = '$kukarow[yhtio]'
+										$tyyppilisa
+										ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+							$riresult = mysql_query($query) or pupe_error($query);
+
+							while ($row = mysql_fetch_array($riresult)) {
+								if ($row['toimitettu'] == '') {
+									$row['kommentti'] .= "\n*******".t("Toimitetaan erikseen",$kieli).".*******";
+								}
+								else {
+									$row['kommentti'] .= "\n*******".t("Toimitettu erikseen",$kieli).".*******";
+								}
+
+								$row['rivihinta'] 	= "";
+								$row['varattu'] 	= "";
+								$row['kpl']			= "";
+								$row['jt'] 			= "";
+								$row['d_erikseen'] 	= "JOO";
+								
+								rivi($page[$sivu], $lah_tyyppi);
+							}
+						}
+					}
 
 					//Vikan rivin loppuviiva
 					$x[0] = 20;
@@ -666,7 +714,7 @@
 					}
 
 					//tulostetaan sivu
-					if ($lahetekpl > 0) {
+					if ($lahetekpl > 1 and $komento != "email") {
 						$komento .= " -#$lahetekpl ";
 					}
 

@@ -50,7 +50,6 @@ else {
 	$kulisa = " and kuka='$kukarow[kuka]' ";
 }
 
-
 if ($tee == 'LISAA') {
 
 	if ($kukarow['yhtio'] == 'artr' and $toim == 'EXTRANET' and $automanual_uutinen == '' and $extranet_uutinen == '') {
@@ -636,6 +635,42 @@ if ($tee == '') {
 			if ($uutinen['nimi'] == "") {
 				$uutinen['nimi'] = $uutinen['toimittaja'];
 			}
+			
+			if ($toim == "EXTRANET") {
+				// ##tuoteno##
+				$search = "/#{2}(.*?)#{2}/s";
+				preg_match_all($search, $uutinen["kentta02"], $matches, PREG_SET_ORDER);
+				//echo "<pre>".print_r($matches, true)."</pre>";
+
+				if(count($matches) > 0) {
+					$search = array();
+					$replace = array();
+					foreach($matches as $m) {
+
+						//	Haetaan tuotenumero
+						$query = "	SELECT tuoteno, nimitys
+						 			FROM tuote
+									WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$m[1]'";
+						$tres = mysql_query($query) or pupe_error($query);
+
+						//	Tämä me korvataan aina!
+						$search[] = "/$m[0]/";
+
+						if(mysql_num_rows($tres) <> 1) {
+							$replace[]	= "";
+						}
+						else {
+							$trow = mysql_fetch_array($tres);
+
+						//	$replace[]	= "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=$m[1]'>$trow[tuoteno]</a> $trow[nimitys]";
+							$replace[]	= "<a href = '$PHP_SELF?toim=$toim'>$trow[tuoteno]</a> $trow[nimitys]";
+						}
+					}
+
+					$uutinen["kentta02"] = preg_replace($search, $replace, $uutinen["kentta02"]);
+				}
+			}
+			
 
 			echo "	<tr><td colspan='2' class='back'><font class='head'>$uutinen[kentta01]</font><hr></td></tr>
 					<tr>

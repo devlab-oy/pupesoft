@@ -4,6 +4,100 @@ require ("parametrit.inc");
 
 echo "<font class='head'>$yhtiorow[nimi] Extranet</font><hr>";
 
+if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
+	
+	// haetaan avoimen tilauksen otsikko
+	if ($kukarow["kesken"] != 0) {
+		$query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+		$laskures = mysql_query($query);
+	}
+	else {
+		// Luodaan uusi myyntitilausotsikko
+		require_once("luo_myyntitilausotsikko.inc");
+		$tilausnumero = luo_myyntitilausotsikko($kukarow["oletus_asiakas"]);
+		$kukarow["kesken"] = $tilausnumero;
+		$kaytiin_otsikolla = "NOJOO!";
+
+		// haetaan avoimen tilauksen otsikko
+		$query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+		$laskures = mysql_query($query);
+	}
+
+	if ($kukarow["kesken"] != 0 and $laskures != '') {
+		// tilauksen tiedot
+		$laskurow = mysql_fetch_array($laskures);
+	}
+
+	echo "<font class='message'>Lisätään tuotteita tilaukselle $kukarow[kesken].</font><br>";
+
+
+	$kpl = 1;
+	
+	// haetaan tuotteen tiedot
+	$query    = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+	$tuoteres = mysql_query($query);
+
+	if (mysql_num_rows($tuoteres) == 0) {
+		echo "<font class='error'>Tuotetta $tuoteno ei löydy!</font><br>";
+	}
+	else {
+		// tuote löytyi ok, lisätään rivi
+		$trow = mysql_fetch_array($tuoteres);
+
+		$ytunnus         = $laskurow["ytunnus"];
+		$kpl             = (float) $kpl;
+		$kpl_echo 		 = (float) $kpl;
+		$tuoteno         = $trow["tuoteno"];
+		$toimaika 	     = $laskurow["toimaika"];
+		$kerayspvm	     = $laskurow["kerayspvm"];
+		$hinta 		     = "";
+		$netto 		     = "";
+		$ale 		     = "";
+		$alv		     = "";
+		$var			 = "";
+		$varasto 	     = "";
+		$rivitunnus		 = "";
+		$korvaavakielto	 = "";
+		$jtkielto 		 = $laskurow['jtkielto'];
+		$varataan_saldoa = "";
+		$paikka	= "";
+		
+
+		// jos meillä on ostoskori muuttujassa numero, niin halutaan lisätä tuotteita siihen ostoskoriin
+		if (file_exists("../tilauskasittely/lisaarivi.inc")) {
+			require ("../tilauskasittely/lisaarivi.inc");
+		}
+		else {
+			require ("lisaarivi.inc");
+		}
+
+		echo "<font class='message'>".t("Lisättiin")." $kpl_echo ".ta($kieli, "Y", $trow["yksikko"])." ".t("tuotetta")." $tuoteno.</font><br>";
+
+		
+	} // tuote ok else
+
+	echo "<br>";
+
+	$trow			 = "";
+	$ytunnus         = "";
+	$kpl             = "";
+	$tuoteno         = "";
+	$toimaika 	     = "";
+	$kerayspvm	     = "";
+	$hinta 		     = "";
+	$netto 		     = "";
+	$ale 		     = "";
+	$alv		     = "";
+	$var			 = "";
+	$varasto 	     = "";
+	$rivitunnus		 = "";
+	$korvaavakielto	 = "";
+	$varataan_saldoa = "";
+	$paikka			 = "";
+	$tee 			 = "";
+	
+}
+
 if ($tee == '') {
 
 	if ($kukarow['saatavat'] <= 1) {
@@ -98,6 +192,38 @@ if ($tee == '') {
 
 			if ($uutinen['nimi'] == "") {
 				$uutinen['nimi'] = $uutinen['toimittaja'];
+			}
+
+			// ##tuoteno##
+			$search = "/#{2}(.*?)#{2}/s";
+			preg_match_all($search, $uutinen["kentta02"], $matches, PREG_SET_ORDER);
+			//echo "<pre>".print_r($matches, true)."</pre>";
+
+			if(count($matches) > 0) {
+				$search = array();
+				$replace = array();
+				foreach($matches as $m) {
+
+					//	Haetaan tuotenumero
+					$query = "	SELECT tuoteno, nimitys
+					 			FROM tuote
+								WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$m[1]'";
+					$tres = mysql_query($query) or pupe_error($query);
+
+					//	Tämä me korvataan aina!
+					$search[] = "/$m[0]/";
+
+					if(mysql_num_rows($tres) <> 1) {
+						$replace[]	= "";
+					}
+					else {
+						$trow = mysql_fetch_array($tres);
+
+						$replace[]	= "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=$m[1]'>$trow[tuoteno]</a> $trow[nimitys]";
+					}
+				}
+
+				$uutinen["kentta02"] = preg_replace($search, $replace, $uutinen["kentta02"]);
 			}
 
 			echo "

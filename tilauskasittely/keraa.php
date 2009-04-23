@@ -1487,7 +1487,7 @@
 					group_concat(DISTINCT concat_ws('\n\n', if(comments!='',concat('".t("Lähetteen lisätiedot").":\n',comments),NULL), if(sisviesti2!='',concat('".t("Keräyslistan lisätiedot").":\n',sisviesti2),NULL)) SEPARATOR '\n') ohjeet,					
 					min(if(lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
 					min(if(lasku.clearing = '', 'N', if(lasku.clearing = 'JT-TILAUS', 'J', if(lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,					
-					(select nimitys from varastopaikat where varastopaikat.tunnus=min(lasku.varasto)) varastonimi, 
+					#(select nimitys from varastopaikat where varastopaikat.tunnus=min(lasku.varasto)) varastonimi, 
 					count(*) riveja
 					from lasku use index (tila_index)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus

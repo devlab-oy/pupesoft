@@ -92,6 +92,7 @@
 		}
 
 		if ($laskuri > 0) $iltasiivo .= "Poistettiin $laskuri poistetun tuotteen tuoteliitosta.\n";
+		
 		$laskuri = 0;
 		$laskuri2 = 0;
 		// poistetaan kaikki JT-otsikot jolla ei ole enää rivejä ja extranet tilaukset joilla ei ole rivejä ja tietenkin myös ennakkootsikot joilla ei ole rivejä.
@@ -126,6 +127,33 @@
 
 		if ($laskuri > 0) $iltasiivo .= "Poistettiin $laskuri rivitöntä tilausta.\n";
 		if ($laskuri2 > 0) $iltasiivo .= "Merkattiin toimitetuksi $laskuri2 rivitöntä tilausta.\n";
+
+		$laskuri = 0;
+		// Merkitään laskut mitätöidyksi joilla on pelkästään mitätöityjä rivejä.
+		$query = "	select lasku.tunnus laskutunnus, lasku.tila, count(*) kaikki, sum(if(tilausrivi.tyyppi='D',1,0)) dellatut
+					from lasku
+					join tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+					where lasku.yhtio = '$kukarow[yhtio]' 
+					and lasku.tila in ('N','E','L')
+					and lasku.alatila != 'X'
+					group by 1,2
+					having dellatut > 0 and kaikki = dellatut";
+		$result = mysql_query($query) or die($query);
+
+		while ($row = mysql_fetch_array($result)) {
+			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php (1.5)")."<br>";
+
+			$query = "update lasku set alatila='$row[tila]', tila='D',  comments = '$komm' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[laskutunnus]'";
+			$deler = mysql_query($query) or die($query);
+			$laskuri ++;
+
+			//poistetaan TIETENKIN kukarow[kesken] ettei voi syöttää extranetissä rivejä tälle
+			$query = "update kuka set kesken = '' where yhtio = '$kukarow[yhtio]' and kesken = '$row[laskutunnus]'";
+			$deler = mysql_query($query) or die($query);
+
+		}
+
+		if ($laskuri > 0) $iltasiivo .= "Mitätöitiin $laskuri tilausta joilla oli pelkkiä mitätöityjä rivejä.\n";
 
 		// tässä tehdään isittömistä perheistä ei-perheitä ja myös perheistä joissa ei ole lapsia eli nollataan perheid
 		$lask = 0;

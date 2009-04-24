@@ -5,6 +5,7 @@ $lasktarrat = 0;
 $lisa = '';
 $alatila = '';
 $vanhatunnus = 0;
+//$debug = 1;
 
 if ($tee == 'uudet') {
 	$alatila = 'A';
@@ -19,7 +20,7 @@ $query =	"select ytunnus, asiakkaan_tilausnumero tiltunnus, tilkpl, sisviesti2 a
 			aktiivinen_kuljetus suunnistus, lasku.tunnus xtunnus,
 			concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 			from lasku
-			join tilausrivi on lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+			join tilausrivi on lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and (tilausrivi.tunnus = tilausrivi.perheid or tilausrivi.perheid = 0)
 			left join tuote on lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 			where lasku.yhtio = '$kukarow[yhtio]' and tila = 'Z' and alatila = '$alatila' and tyyppi = 'Z'
 			$lisa

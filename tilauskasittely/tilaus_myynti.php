@@ -1806,7 +1806,10 @@ if ($tee == '') {
 				echo "<option value='$row[selite]' $sel>".asana('TOIMITUSTAPA_',$row['selite'])."</option>";
 			}
 			echo "</select>";
-
+			
+			if ($laskurow["rahtivapaa"] != "") {
+				echo " (".t("Rahtivapaa").") ";
+			}
 
 			if ($kukarow["extranet"] == "") {
 				//etsitään löytyykö rahtisopimusta

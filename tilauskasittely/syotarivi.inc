@@ -44,7 +44,7 @@
 			echo "<td valign='top'>$ulos</td>";
 		}
 
-		echo "	<td valign='top'><input type='text' name='kpl' size='5' maxlength='5' value='$kpl'></td>
+		echo "	<td valign='top'><input type='text' name='kpl' size='5' maxlength='13' value='$kpl'></td>
 				<td valign='top'><input type='text' name='var' size='2' maxlength='1' value='$var'></td>
 				<td valign='top'><input type='text' name='hinta' size='".(5+$yhtiorow['hintapyoristys']-2)."' maxlength='".(12+$yhtiorow['hintapyoristys']-2)."' value='$hinta'></td>
 				<td valign='top'><input type='text' name='ale' size='5' maxlength='6' value='$ale'></td>
@@ -184,7 +184,7 @@
 		}
 
 		echo "
-			<td valign='top'><input type='text' size='5' name='kpl' value='$kpl'></td>";
+			<td valign='top'><input type='text' size='5' name='kpl' maxlength='13' value='$kpl'></td>";
 
 		$selh = $selj = $selp = "";
 
@@ -350,7 +350,7 @@
 			echo "<td valign='top'>$ulos</td>";
 		}
 
-		echo "<td valign='top'><input type='text' size='5' name='kpl' value='$kpl'></td>";
+		echo "<td valign='top'><input type='text' size='5' name='kpl' maxlength='13' value='$kpl'></td>";
 
 		echo "<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
@@ -458,7 +458,7 @@
 		echo "<table>";
 		echo "<tr>$jarjlisa";
 		echo "<input type='hidden' name='tuoteno' value='$hi_tuoteno'>
-				<td valign='top'><input type='text' name='kpl' size='5' maxlength='5' value='$kpl' onKeyUp='DisableText();'></td>";
+				<td valign='top'><input type='text' name='kpl' size='5' maxlength='13' value='$kpl' onKeyUp='DisableText();'></td>";
 
 		echo "	<td valign='top'> $varaosavirhe </td> ";
 
@@ -486,7 +486,7 @@
 			echo "<td valign='top'>$ulos</td>";
 		}
 
-		echo "	<td valign='top'><input type='text' name='kpl' size='5' maxlength='5' value='$kpl'></td>
+		echo "	<td valign='top'><input type='text' name='kpl' size='5' maxlength='13' value='$kpl'></td>
 				<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'></td>
 				<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'> <font class='error'>$varaosavirhe</font></td>
 			</tr>";

@@ -104,7 +104,7 @@ if ($tee == "VSRALVYV") {
 					JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuotetyyppi = '')
 					LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and lasku.liitostunnus = asiakas.tunnus)
 					WHERE lasku.yhtio = '$kukarow[yhtio]' 
-					and tila = 'U'
+					and lasku.tila = 'U'
 					and lasku.tapvm >= '$alkupvm' 
 					and lasku.tapvm < '$loppupvm'
 					and lasku.vienti = 'E'

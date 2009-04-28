@@ -26,13 +26,14 @@
 		}
 		
 		if ($lisa == '') {
-			$query = 	"SELECT distinct concat_ws('-',hyllyalue,if(hyllynro!='',hyllynro,0),if(hyllyvali!='',hyllyvali,0),if(hyllytaso!='',hyllytaso,0)) as paikka 
+			$query = "	SELECT distinct concat_ws('-',hyllyalue,if(hyllynro!='',hyllynro,0),if(hyllyvali!='',hyllyvali,0),if(hyllytaso!='',hyllytaso,0)) as paikka 
 						FROM tuotepaikat
 						WHERE yhtio = '$kukarow[yhtio]' and
 						concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) >= concat(rpad(upper('$ahyllyalue'), 5, '0'),lpad(upper('$ahyllynro'), 5, '0'),lpad(upper('$ahyllyvali'), 5, '0'),lpad(upper('$ahyllytaso'), 5, '0')) and
 						concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) <= concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'), 5, '0'))
 						ORDER BY hyllyalue,hyllynro+0,hyllyvali+0,hyllytaso+0";
 			$paikatres = mysql_query($query) or pupe_error($query);
+
 			if (mysql_num_rows($paikatres) > 0) {
 				while ($paikatrow=mysql_fetch_array($paikatres)) {
 					$paikat[] = $paikatrow['paikka'];
@@ -45,25 +46,24 @@
 		}
 		else {
 			$paikat = array();
-			$paikat[] = $yhyllyalue."-".$yhyllynro."-".$yhyllyvali."-".$yhyllytaso;
+			$paikat[] = $yhyllyalue."-".$yhyllynro."-".$yhyllyvali."-".$yhyllytaso;			
 		}
-		
 	}
 
 	
 	if ($tee=='Y') echo "<font class='error'>$varaosavirhe</font>";
 	
 	if ($tee== 'Z' and $ulos == '') {
-		$query = "select komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$kirjoitin'";
+		$query = "SELECT komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$kirjoitin'";
 		$komres = mysql_query($query) or pupe_error($query);
 		$komrow = mysql_fetch_array($komres);
 		$komento = $komrow['komento'];
-		
+				
 		foreach ($paikat as $paikka) {
 			require("inc/tulosta_hyllytarrat_tec.inc");
 		}
 		
-
+		echo t("Hyllytarrat tulostuu")."...<br><br>";
 		$tee = '';
 	}
 
@@ -71,7 +71,6 @@
 	$kentta = 'ahyllyalue';	
 	
 	echo t("Osoiteväli");
-	
 	
 	echo "<form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
@@ -98,7 +97,7 @@
 	
 	echo "<tr><th>".t("Kirjoitin")."</th><th>".t("Malli")."</th></tr>";
 	
-	$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' order by kirjoitin";
+	$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' order by kirjoitin";
 	$kires = mysql_query($query) or pupe_error($query);
 	
 	echo "<td><select name='kirjoitin'>";

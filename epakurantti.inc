@@ -302,7 +302,10 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 						laatija    = '$kukarow[kuka]',
 						laadittu = now()";
 			$result = mysql_query($query) or pupe_error($query);
-
+			
+			// otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
+			$tapahtumaid = mysql_insert_id();
+			
 			///* Kirjanpito *///
 			if ($muutos <> 0) {
 
@@ -310,6 +313,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 							yhtio      = '$kukarow[yhtio]',
 							tapvm      = now(),
 							tila       = 'X',
+							viite      = '$tapahtumaid',
 							laatija    = '$kukarow[kuka]',
 							luontiaika = now()";
 

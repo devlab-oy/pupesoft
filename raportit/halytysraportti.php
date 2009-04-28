@@ -177,9 +177,9 @@
 			$ehd_kausi_o3	= $lo;
 		}
 
-		$sarakkeet["SARAKE10"] 	= t("ostettava $ehd_kausi_o1 kk")."\t";
-		$sarakkeet["SARAKE11"] 	= t("ostettava $ehd_kausi_o2 kk")."\t";
-		$sarakkeet["SARAKE12"] 	= t("ostettava $ehd_kausi_o3 kk")."\t";
+		$sarakkeet["SARAKE10"] 	= t("Ostoehdotus")." $ehd_kausi_o1\t";
+		$sarakkeet["SARAKE11"] 	= t("Ostoehdotus")." $ehd_kausi_o2\t";
+		$sarakkeet["SARAKE12"] 	= t("Ostoehdotus")." $ehd_kausi_o3\t";
                                	
 		$sarakkeet["SARAKE13"] 	= t("ostettava haly")."\t";
 		$sarakkeet["SARAKE14"] 	= t("osto_era")."\t";
@@ -938,7 +938,7 @@
 				}
 				else {
 					// Ajetaan varastopaikoittain eli t‰ss‰ on just t‰n paikan saldo
-					$query = "	select saldo
+					$query = "	SELECT saldo
 								from tuotepaikat
 								where yhtio='$row[yhtio]'
 								and tuoteno='$row[tuoteno]'
@@ -948,7 +948,7 @@
 				}
 
 				// oletuspaikan saldo ja hyllypaikka
-				$query = "	select sum(saldo) osaldo, hyllyalue, hyllynro, hyllyvali, hyllytaso
+				$query = "	SELECT sum(saldo) osaldo, hyllyalue, hyllynro, hyllyvali, hyllytaso
 							from tuotepaikat
 							where yhtio='$row[yhtio]'
 							and tuoteno='$row[tuoteno]'
@@ -964,7 +964,7 @@
 				$indeksi    = "kpl".$ostoehdotus;
 
 				//Kausien ero sekunneissa
-				$ero = strtotime(${vvl.$ostoehdotus}."-".${kkl.$ostoehdotus}."-".${ppl.$ostoehdotus}) - strtotime(${vva.$ostoehdotus}."-".${kka.$ostoehdotus}."-".${ppa.$ostoehdotus});
+				$ero = strtotime(${"vvl".$ostoehdotus}."-".${"kkl".$ostoehdotus}."-".${"ppl".$ostoehdotus}) - strtotime(${"vva".$ostoehdotus}."-".${"kka".$ostoehdotus}."-".${"ppa".$ostoehdotus});
 
 				//Kausien ero kuukausissa, t‰ss‰ approximoidaan, ett‰ kuukausissa on keskim‰‰rin 365/12 p‰iv‰‰
 				$ero = $ero/60/60/24/(365/12);
@@ -2478,15 +2478,15 @@
 			echo "	<tr><td class='back'><br></td></tr>";
 
 			//Ostokausivalinnat
-			$kaudet_oletus = array(1,3,4);
+			$kaudet_oletus = array("A" => 1, "B" => 3, "C" => 4);
 			$kaudet_kaikki = array(1,2,3,4,5,6,7,8,9,10,11,12,24);
 
 			$kaudet = array();
 			$kaulas = 1;
 
-			foreach ($kaudet_oletus as $kausi1) {
+			foreach ($kaudet_oletus as $kaunimi => $kausi1) {
 
-				echo "<tr><th>Ostoehdotus $kausi1:</th><td colspan='3'><select name='valitut[KAUSI$kaulas]'>";
+				echo "<tr><th>Ostoehdotus $kaunimi:</th><td colspan='3'><select name='valitut[KAUSI$kaulas]'>";
 
 				foreach ($kaudet_kaikki as $kausi2) {
 					$query = "	SELECT selitetark
@@ -2507,7 +2507,7 @@
 					echo "<option value='KAUSI$kaulas##$kausi2' $chk onchange='submit();'>$kausi2</option>";
 				}
 
-				echo "</select></td></tr>";
+				echo "</select> ".t("kuukauden tarve")."</td></tr>";
 
 				$kaulas++;
 			}

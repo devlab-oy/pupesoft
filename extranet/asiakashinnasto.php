@@ -27,14 +27,13 @@
 		
 		$muutparametrit = array($osasto, $try, $checkall);
 		$muutparametrit = urlencode(serialize($muutparametrit));
-		
-		
+			
 		require("../inc/asiakashaku.inc");
-
+		
 		$asiakas = $asiakasrow["tunnus"];
 		$ytunnus = $asiakasrow["ytunnus"];
 	}
-	elseif ($tee != '' and $kukarow["extranet"] != '' and $kukarow["oletus_asiakas"] != '') {
+	elseif ($tee != '' and $kukarow["extranet"] != '') {
 		//Haetaan asiakkaan tunnuksella
 		$query  = "	SELECT *
 					FROM asiakas
@@ -43,6 +42,7 @@
 
 		if (mysql_num_rows($result) == 1) {
 			$asiakasrow = mysql_fetch_array($result);
+			
 			$ytunnus = $asiakasrow["ytunnus"];
 			$asiakas = $asiakasrow["tunnus"];
 		}
@@ -117,7 +117,8 @@
 		if ((strlen($where) > 0 or $checkall != "") and $ytunnus != '' and $asiakas != '') {
 			$query = "	SELECT *
 						FROM tuote
-						WHERE $where tuote.yhtio='$kukarow[yhtio]' and tuote.status NOT IN ('P','X') and hinnastoon != 'E'
+						WHERE $where tuote.yhtio='$kukarow[yhtio]' 
+						and tuote.status NOT IN ('P','X') and hinnastoon != 'E'
 						ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
 			$rresult = mysql_query($query) or pupe_error($query);
 
@@ -128,7 +129,6 @@
 					die("filen luonti epäonnistui!");
 
 			echo "<font class='message'>";
-			//echo mysql_num_rows($rresult)." ".t("tuotetta löytyi").". ";
 			echo t("Asiakashinnastoa ajetaan...");
 			echo "</font>";
 			echo "<br>";
@@ -242,7 +242,7 @@
 	echo "<table><form method='post' action='$PHP_SELF'>";
 	echo "<input type='hidden' name='tee' value='kaikki'>";
 
-	if ($kukarow["extranet"] == '' and $kukarow["oletus_asiakas"] == '') {
+	if ($kukarow["extranet"] == '') {
 		echo "<tr><th>".t("Syötä asiakkaan ytunnus").":</th><td><input type='text' name='ytunnus' size='15' value='$ytunnus'></td></tr>";
 	}
 

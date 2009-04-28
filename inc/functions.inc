@@ -6634,7 +6634,7 @@ if (!function_exists("pakkaamo")) {
 			$lasku_res = mysql_query($query) or pupe_error($query);
 			$lasku_row = mysql_fetch_array($lasku_res);			
 			
-			//katsotaan onko jo annettu pakkaamolokero kyseisen asiakkaan tilaukselle
+			//katsotaan onko jo annettu pakkaamolokero vastaavalle SIIRTOLISTALLE, niitä saa/pitää yhdistää
 			$query = " 	SELECT pakkaamo
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -6650,8 +6650,8 @@ if (!function_exists("pakkaamo")) {
 						AND toimitustapa = '$lasku_row[toimitustapa]'
 						AND varasto = '$lasku_row[varasto]'
 						AND pakkaamo > 0
-						AND tila in('L','G') 
-						AND alatila in('A','C')";
+						AND tila in ('G') 
+						AND alatila in ('A','C')";
 			$vanhat_res = mysql_query($query) or pupe_error($query);
 			
 			if (mysql_num_rows($vanhat_res) > 0) {

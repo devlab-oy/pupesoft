@@ -56,8 +56,9 @@
 								and tilausrivi.tyyppi  = 'E'";
 				}
 				else {
-					$query = "	SELECT tilausrivi.*, tilausrivi.jt $lisavarattu jt, tuote.ei_saldoa, tilausrivin_lisatiedot.suoraan_laskutukseen
+					$query = "	SELECT tilausrivi.*, tilausrivi.jt $lisavarattu jt, tuote.ei_saldoa, tilausrivin_lisatiedot.suoraan_laskutukseen, lasku.osatoimitus
 								FROM tilausrivi use index (PRIMARY)
+								JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 								JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
 								WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
@@ -76,7 +77,7 @@
 
 				///* T‰m‰ on alkuper‰isen rivinipun eka ja vanhin rivi, k‰ytet‰‰n sit‰ otsikon tekoa varten *///
 				$isarivirow = mysql_fetch_array ($rivitres);
-
+				
 				///* Etsit‰‰n alkuper‰isen-rivin laskun kaikki tiedot *///
 				if ($tilaus_on_jo == "KYLLA") {
 					//Tullaan myntitilauksen jtrivijutusta
@@ -86,6 +87,15 @@
 								tunnus		= '$kukarow[kesken]' and
 								tila        in ('N', 'L', 'E', 'G')";
 					$stresult = mysql_query($query) or pupe_error($query);
+				}
+				elseif ($isarivirow["osatoimitus"] != "") {
+					$query = "	SELECT *
+								FROM lasku
+								WHERE yhtio	= '$kukarow[yhtio]'
+								and tunnus	= '$isarivirow[otunnus]'
+								and tila	in ('N', 'L') 
+								and alatila != 'X'";
+					$stresult = mysql_query($query) or pupe_error($query);				
 				}
 				else {
 					// tila pit‰‰ olla l‰hete, tilaus, ennakko tai siirtolista
@@ -181,6 +191,7 @@
 				if (mysql_num_rows($stresult) != 0) {
 					$otsikkorivi = mysql_fetch_array ($stresult);
 					$id = $otsikkorivi['tunnus'];
+					
 					if ($debug==1) echo t("Lis‰‰n laskun olemassaolevaan")." $otsikkorivi[nimi] $id<br>";
 				}
 				else {
@@ -413,7 +424,7 @@
 						$paikka = "";
 					}
 
-					if ($kpl[$tunnukset] <= $isa_kpl and $kpl[$tunnukset] > 0 or $jt_vakisin == true) {
+					if ($kpl[$tunnukset] <= $isa_kpl and $kpl[$tunnukset] > 0 or $jt_vakisin === TRUE) {
 
 						$luodut_rivit 		= array();
 						$luodut_kpl			= array();
@@ -500,15 +511,18 @@
 							if (trim($lisataanrow['kommentti']) != "") {
 								$kommentti .= trim($lisataanrow['kommentti']);
 							}
-							if (trim($orig_laskurow['tunnus']) != "") {
+							
+							if (trim($orig_laskurow['tunnus']) != "" and $otsikkorivi["osatoimitus"] == "") {
 								if (trim($kommentti) != "") $kommentti .= " / ";
 								$kommentti .= t("Tilaus").": ".trim($orig_laskurow['tunnus']);
 							}
-							if (trim($orig_laskurow['asiakkaan_tilausnumero']) != "") {
+							
+							if (trim($orig_laskurow['asiakkaan_tilausnumero']) != "" and $otsikkorivi["osatoimitus"] == "") {
 								if (trim($kommentti) != "") $kommentti .= " / ";
 								$kommentti .= t("Asiakkaan tilaus").": ".trim($orig_laskurow['asiakkaan_tilausnumero']);
 							}
-							if (trim($orig_laskurow['viesti']) != "") {
+							
+							if (trim($orig_laskurow['viesti']) != "" and $otsikkorivi["osatoimitus"] == "") {
 								if (trim($kommentti) != "") $kommentti .= " / ";
 								$kommentti .= t("Tilausviite").": ".trim($orig_laskurow['viesti']);
 							}
@@ -569,7 +583,7 @@
 												WHERE yhtio = '$kukarow[yhtio]' and tunnus=$poistetaan and kpl=0";
 									$tresult = mysql_query($query) or pupe_error($query);
 
-									$query = "update sarjanumeroseuranta set myyntirivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and myyntirivitunnus=$poistetaan";
+									$query = "UPDATE sarjanumeroseuranta set myyntirivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and myyntirivitunnus=$poistetaan";
 									$sarjares = mysql_query($query) or pupe_error($query);
 
 									if ($debug==1) echo t("Saldo ei riitt‰nyt. Tehd‰‰n rollback")."<br>";

@@ -80,6 +80,9 @@
 		elseif ($toim == "VALMISTUSMYYNTI" or $toim == "VALMISTUSMYYNTISUPER") {
 			$otsikko = t("tilauksia ja valmistuksia");
 		}
+		elseif ($toim == "JTTOIMITA") {
+			$otsikko = t("JT-tilausta");
+		}
 		else {
 			$otsikko = t("myyntitilausta");
 			$toim = "";
@@ -345,7 +348,7 @@
 				$rajaus	= "";
 			}
 		}
-
+		
 		// Etsit‰‰n muutettavaa tilausta
 		if ($toim == 'SUPER') {
 

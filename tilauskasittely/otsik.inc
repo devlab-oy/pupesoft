@@ -511,6 +511,17 @@
 				$assresult = mysql_query($squery) or pupe_error($squery);
 				$assrow = mysql_fetch_array($assresult);
 				
+				if (trim($assrow["toim_nimi"]) == "") {
+					$assrow["toim_nimi"]	= $assrow["nimi"];
+					$assrow["toim_nimitark"]= $assrow["nimitark"];
+					$assrow["toim_osoite"]	= $assrow["osoite"];
+					$assrow["toim_postino"]	= $assrow["postino"];
+					$assrow["toim_postitp"]	= $assrow["postitp"];
+					$assrow["toim_maa"]		= $assrow["maa"];
+				}
+				
+				
+				
 				$query = "	UPDATE lasku
 							SET liitostunnus 	= '$assrow[tunnus]',
 							ytunnus				= '$assrow[ytunnus]',

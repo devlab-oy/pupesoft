@@ -632,8 +632,14 @@
 						ORDER BY jarjestys, selite";
 			$trivityyppi_result = mysql_query($query) or pupe_error($query);
 
+
 			if (mysql_num_rows($trivityyppi_result) > 0) {
 				echo "<th>".t("Tyyppi")."</th>";
+			
+				$tyyppisarake = "OK";
+			}
+			else {
+				$tyyppisarake = "";
 			}
 		}
 
@@ -915,13 +921,10 @@
 				$class    .= " style='font-style:italic;' ";
 				$borderlask--;
 			}
-
-			
-			//echo "<td>$row[tunnus] $row[perheid]</td>";
 			
 			$vanhaid = $row["perheid"];
 
-			if ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K') {
+			if ($tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
 
 				echo "<td $class valign='top'>";
 

@@ -1230,8 +1230,8 @@
 				}
 				if($kukarow["resoluutio"] == "I") {
 					$cspan++;
-				}
-				if($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K') {
+				}								
+				if ($tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
 					$cspan++;
 				}
 
@@ -1268,7 +1268,7 @@
 		if($kukarow["resoluutio"] == "I") {
 			$colspan++;
 		}
-		if($laskurow["tila"] == 'T' or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K') {
+		if ($tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
 			$colspan++;
 		}
 		if($kukarow["extranet"] != "" and $yhtiorow['varastopaikan_lippu'] != '') {

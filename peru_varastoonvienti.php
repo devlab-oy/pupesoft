@@ -43,7 +43,31 @@
 		echo "<table>";
 
 		while ($rivirow = mysql_fetch_array($res)) {
-
+			
+			$query = "	SELECT *
+						from tuote
+						where yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$rivirow[tuoteno]'";
+			$tuores = mysql_query($query) or pupe_error($query);
+			$tuorow = mysql_fetch_array($tuores);
+			
+			$voidaankosnropoistaa = "";
+			
+			if ($tuorow["sarjanumeroseuranta"] == "S" or $tuorow["sarjanumeroseuranta"] == "U") {
+				$query = "	SELECT yhtio
+							FROM sarjanumeroseuranta
+							WHERE yhtio 		  = '$kukarow[yhtio]'
+							and tuoteno			  = '$rivirow[tuoteno]'
+							and ostorivitunnus	  = '$rivirow[tunnus]'
+							and myyntirivitunnus != 0";
+				$sarjares = mysql_query($query) or pupe_error($query);
+			
+				if (mysql_num_rows($sarjares) == 0) {
+					$voidaankosnropoistaa = "OK";
+				}
+			}
+			
+			
 			if ($tee != 'KORJAA') {
 				echo "<tr>";
 
@@ -113,10 +137,10 @@
 
 				$voidaankopoistaa = "";
 
-				if ($vientikerrat == 1 and $taparow2["kpl"] > 0) {
+				if ($vientikerrat == 1 and ($taparow2["kpl"] > 0 and $voidaankosnropoistaa == "")) {
 					$voidaankopoistaa = "Ei";
 				}
-				elseif($vientikerrat == 1 and $taparow2["kpl"] == 0) {
+				elseif($vientikerrat == 1 and ($taparow2["kpl"] == 0 or $voidaankosnropoistaa == "OK")) {
 					$voidaankopoistaa = "Kyllä";
 				}
 				elseif($vientikerrat > 1 and $taparow2["kpl"] >= 0 and $vientikerta > 0) {

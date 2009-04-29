@@ -7,20 +7,28 @@
 	$kerattavia 	= 0;
 	$ei_kerattavia 	= 0;
 	$tilaus_valmis_message = "";
-	
+
+	// etukäteen maksettu lasku, pitää huomioida myös kpl
+	if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $laskurow["mapvm"] != '0000-00-00' and $laskurow["mapvm"] != '') {
+		$lis_plus_kpl = " + tilausrivi.kpl";
+	}
+	else {
+		$lis_plus_kpl = "";
+	}
+
 	if ($yhtiorow["varaako_jt_saldoa"] != "") {
-		$lisavarattu = " + tilausrivi.varattu";
+		$lisavarattu = " + tilausrivi.varattu $lis_plus_kpl";
 	}
 	else {
 		$lisavarattu = "";
 	}
 
 	$query = "	SELECT count(*) riveja,
-				sum(if(tilausrivi.var = 'P' and tilausrivi.tilkpl > 0, 1, 0)) puutteet,
+				sum(if(tilausrivi.var = 'P' and tilausrivi.tilkpl $lis_plus_kpl > 0, 1, 0)) puutteet,
 				sum(if(tilausrivi.var in ('J','S') and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet,
-				sum(if(tilausrivi.var not in ('P','J','S') and tilausrivi.varattu < 0, 1, 0)) hyvitykset,
-				sum(if(tilausrivi.var not in ('P','J','S') and (('$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa = '') or '$yhtiorow[kerataanko_saldottomat]' = 'S') and tilausrivi.varattu > 0, 1, 0)) normaalit_kerataan,
-				sum(if(tilausrivi.var not in ('P','J','S') and '$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa != '' and tilausrivi.varattu > 0, 1, 0)) saldottomat
+				sum(if(tilausrivi.var not in ('P','J','S') and tilausrivi.varattu $lis_plus_kpl < 0, 1, 0)) hyvitykset,
+				sum(if(tilausrivi.var not in ('P','J','S') and (('$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa = '') or '$yhtiorow[kerataanko_saldottomat]' = 'S') and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) normaalit_kerataan,
+				sum(if(tilausrivi.var not in ('P','J','S') and '$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa != '' and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) saldottomat
 				FROM tilausrivi
 				LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 				WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'

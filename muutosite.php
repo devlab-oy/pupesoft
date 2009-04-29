@@ -535,7 +535,9 @@ if ($tee == 'U') {
 	$tee = 'E';
 
 	if ($ok != 1) {
+		
 		require "inc/teetiliointi.inc";
+		
 		if ($jaksota == 'on') {
 			$tee = 'U';
 			require "inc/jaksota.inc"; // Jos jotain jaksotetaan on $tee J
@@ -809,6 +811,7 @@ if ($tee == 'E' or $tee == 'F') {
 					while ($korkolaskurow2 = mysql_fetch_array($korko2_result)) {
 
 						echo "<form action = 'tilauskasittely/tulostakopio.php' method='post'>
+							<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 							<input type='hidden' name='otunnus' value='$korkolaskurow2[tunnus]'>
 							<input type='hidden' name='TOIM' value='LASKU'>
 							<input type='hidden' name='tee' value='NAYTATILAUS'>
@@ -893,6 +896,7 @@ if ($tee == 'E' or $tee == 'F') {
 	// N‰ytet‰‰n nappi vain jos siihen on oikeus
 	if ($oikeurow['paivitys'] == 1) {
 		echo "<form action = '$PHP_SELF' method='post'>
+				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type = 'hidden' name = 'tee' value='M'>
 				<input type = 'hidden' name = 'tila' value=''>
 				<input type = 'hidden' name = 'tunnus' value='$tunnus'>
@@ -907,6 +911,7 @@ if ($tee == 'E' or $tee == 'F') {
 	//if (mysql_num_rows($res) == 1 and $trow["ebid"] == "") {
 	if (mysql_num_rows($res) == 1) {
 		echo "<form method='get' action='liitetiedostot.php?liitos=lasku&id=$tunnus'>
+			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 			<input type='hidden' name='id' value='$tunnus'>
 			<input type='hidden' name='liitos' value='lasku'>
 			<input type='submit' value='" . t('Muokkaa liitteit‰')."'>
@@ -917,6 +922,7 @@ if ($tee == 'E' or $tee == 'F') {
 	if ($trow['vienti'] != '' and $trow['vienti'] != 'A' and $trow['vienti'] != 'D' and $trow['vienti'] != 'G') {
 		if ($tee2 != 1) {
 			echo "<form action = '$PHP_SELF' method='post'>
+				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type = 'hidden' name = 'tee' value='$tee'>
 				<input type = 'hidden' name = 'tee2' value='1'>
 				<input type = 'hidden' name = 'tunnus' value='$tunnus'>
@@ -924,6 +930,7 @@ if ($tee == 'E' or $tee == 'F') {
 		}
 		else {
 			echo "<form action = '$PHP_SELF' method='post'>
+				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>	
 				<input type = 'hidden' name = 'tee' value='$tee'>
 				<input type = 'hidden' name = 'tunnus' value='$tunnus'>
 				<input type = 'submit' value = '".t("Normaalitiedot")."'></form>";
@@ -932,12 +939,14 @@ if ($tee == 'E' or $tee == 'F') {
 
 	if ($trow['tila'] == 'U') {
 		echo "<form action = 'tilauskasittely/tulostakopio.php' method='post'>
+			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 			<input type='hidden' name='otunnus' value='$tunnus'>
 			<input type='hidden' name='TOIM' value='LASKU'>
 			<input type='hidden' name='tee' value='NAYTATILAUS'>
 			<input type='submit' value='" . t('N‰yt‰ laskun PDF')."'></form>";
 		if ($trow['viesti'] == 'Korkolasku') {
 			echo "<form action = '$PHP_SELF' method='post'>
+			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 			<input type='hidden' name='tunnus' value='$trow[tunnus]'>
 			<input type='hidden' name='nayta_pdf' value='1'>
 			<input type='hidden' name='tee' value='tulosta_korkoerittely'>
@@ -960,10 +969,12 @@ if ($tee == 'E' or $tee == 'F') {
 	}
 
 	echo "<form action = '$PHP_SELF' method='post'>
+		<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 		<input type = 'hidden' name = 'tee' value='$ftee'>
 		<input type = 'hidden' name = 'tunnus' value='$tunnus'>
 		<tr><td><input type = 'submit' value = '$fnappula'></form>
 		<form action = '$PHP_SELF' method='post'>
+			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 			<input type = 'hidden' name = 'tee' value='G'>
 			<input type = 'hidden' name = 'tunnus' value='$tunnus'>
 			<td><input type = 'submit' value = '".t("Seuraava")."'></form>";
@@ -1094,7 +1105,15 @@ if (strlen($tee) == 0) {
 			</table>";
 }
 
-require "inc/footer.inc";
 
+if ($lopetus != '') {
+	// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
+	$lopetus1 = str_replace('////','?', $lopetus);
+	$lopetus1 = str_replace('//','&',  $lopetus1);
+	echo "<br><br>";
+	echo "<a href='$lopetus1'>".t("Palaa edelliseen n‰kym‰‰n")."</a>";
+}
+
+require "inc/footer.inc";
 
 ?>

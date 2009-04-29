@@ -1,5 +1,6 @@
 <?php
 	echo "<font class='head'>".t("Laskut per tila")."</font><hr>";
+	
 	if (!isset($erittely)) {
 		$query = "	SELECT tila, alatila, round(sum(summa * valuu.kurssi),2) summa, count(*) kpl
 					FROM lasku use index (tila_index)
@@ -26,39 +27,52 @@
 
 		echo "</table><br>";
 	}
+	
 	if (isset($erittely)) {
-		$query = "SELECT tapvm, kapvm, erpcm, if (comments!='',concat_ws('<br>', nimi, comments),nimi) nimi, postitp, round(summa * vienti_kurssi, 2) 'kotisumma', summa, valkoodi, ebid, tunnus
-			FROM lasku
-			WHERE yhtio = '$kukarow[yhtio]' and tila = '$erittely' and alatila = '$alatila'
-			ORDER BY tapvm";
+		$query = "	SELECT lasku.tapvm, lasku.kapvm, lasku.erpcm, if (lasku.comments!='',concat_ws('<br>', lasku.nimi, lasku.comments), lasku.nimi) nimi, lasku.postitp, 
+					round(lasku.summa * lasku.vienti_kurssi, 2) 'kotisumma', lasku.summa, lasku.valkoodi, lasku.ebid, lasku.tunnus, yriti.nimi tilinimi, yriti.tunnus maksutili
+					FROM lasku
+					left join yriti on lasku.yhtio=yriti.yhtio and lasku.maksu_tili=yriti.tunnus
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = '$erittely' and lasku.alatila = '$alatila'
+					ORDER BY lasku.tapvm";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr>";
-		for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
-			echo "<th>" . t(mysql_field_name($result,$i))."</th>";
+		echo "<th valign='top'>".t("Pvm")."</th>";
+		echo "<th valign='top'>".t("Erpvm")."<br>".t("Kapvm")."</th>";
+		echo "<th valign='top'>".t("Nimi")."</th>";		
+		echo "<th valign='top'>".t("Summa")." $yhtiorow[valkoodi]</th>";
+		echo "<th valign='top'>".t("Summa")."</th>";
+		echo "<th valign='top'>".t("EBID")."</th>";
+				
+		if ($erittely == "Q" or $erittely == "P") {
+			echo "<th valign='top'>".t("Maksutili")."</th>";
 		}
+		
 		echo "</tr>";
 
-		while ($trow=mysql_fetch_array ($result)) {
+		while ($trow = mysql_fetch_array ($result)) {
 
 			echo "<tr>";			
-			echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
 			
-			if ($trow["kapvm"] != "0000-00-00") {
-				echo "<td>".tv1dateconv($trow["kapvm"])."</td>";
+			if ($kukarow['taso'] != 1 and $kukarow['taso'] != 2 and $kukarow['taso'] != 3) {
+				echo "<td valign='top'>".tv1dateconv($trow["tapvm"])."</td>";
 			}
 			else {
-				echo "<td></td>";
+				echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////toim=$toim//erittely=$erittely'>".tv1dateconv($trow["tapvm"])."</a></td>";
 			}
-		
-			echo "<td>".tv1dateconv($trow["erpcm"])."</td>";
-			echo "<td>$trow[nimi]</td>";
-			echo "<td>$trow[postitp]</td>";
-			echo "<td style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</td>";
-			echo "<td style='text-align: right;'>$trow[summa] $trow[valkoodi]</td>";
+						
+			echo "<td valign='top'>".tv1dateconv($trow["erpcm"])."<br>".tv1dateconv($trow["kapvm"])."</td>";
+			echo "<td valign='top'>$trow[nimi]<br>$trow[postitp]</td>";
+			echo "<td valign='top' style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</td>";
+			echo "<td valign='top' style='text-align: right;'>$trow[summa] $trow[valkoodi]</td>";
 			
 			// tehdään lasku linkki
-			echo "<td>". ebid($trow['tunnus']) ."</td>";			
+			echo "<td valign='top'>". ebid($trow['tunnus']) ."</td>";
+			
+			if ($erittely == "Q" or $erittely == "P") {
+				echo "<td valign='top'>$trow[tilinimi]</td>";				
+			}								
 		}
 		echo "</table><br>";
 	}

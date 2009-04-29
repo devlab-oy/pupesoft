@@ -96,11 +96,11 @@ if ($tee == 'L') {
 
 $sel=array();
 $sel[$tee] = "SELECTED";
+
 echo "<br><form name = 'valinta' action = 'raportit.php?selaus=n' method='post'>
 		<input type = 'hidden' name = 'toim' value = 'laskuhaku'>
-
 		<table><tr>
-		<td>".t("Valitse lasku")."</td>
+		<th>".t("Etsi lasku")."</th>
 		<td><select name = 'tee'>
 		<option value = 'S' $sel[S]>".t("summalla")."
 		<option value = 'N' $sel[N]>".t("nimellä")."
@@ -110,10 +110,10 @@ echo "<br><form name = 'valinta' action = 'raportit.php?selaus=n' method='post'>
 		<option value = 'L' $sel[L]>".t("Toimittajan laskunumerolla")."
 		</select></td>
 		<td><input type = 'text' name = 'summa1' value = '$summa1' size=8> - <input type = 'text' name = 'summa2' value = '$summa2' size=8></td>
-		<td><input type = 'submit' value = '".t("Valitse")."'></td>
+		<td class='back'><input type = 'submit' value = '".t("Valitse")."'></td>
 		</tr></table>
-
-		</form><br>";
+		</form><br><br>";
+		
 $formi = 'valinta';
 $kentta = 'summa1';
 
@@ -156,7 +156,7 @@ if ($tee != '') {
 			echo "<td valign='top'>".tv1dateconv($trow["tapvm"])."<br>".tv1dateconv($trow["erpcm"])."</td>";
 		}
 		else {
-			echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]'>".tv1dateconv($trow["tapvm"])."</a><br>".tv1dateconv($trow["erpcm"])."</td>";
+			echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////toim=$toim//tee=$tee//summa1=$summa1//summa2=$summa2'>".tv1dateconv($trow["tapvm"])."</a><br>".tv1dateconv($trow["erpcm"])."</td>";
 		}
 		
 		echo "<td valign='top'>$trow[nimi]</td>";

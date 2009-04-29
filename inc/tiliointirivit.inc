@@ -91,6 +91,7 @@
 
 		echo "<tr>
 				<td><form name = 'uusi' action = '$PHP_SELF#$tunnus' method='post'>
+				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type='hidden' name='tee' value = 'U'>
 				<input type='hidden' name='tunnus' value = '$tunnus'>
 				<input type='hidden' name='viivatut' value = '$viivatut'>
@@ -284,6 +285,7 @@
 			//jos sen saa poistaa niin on hankalaa löytää heittävät tositteet...
 			echo "<td>
 					<form action = '$PHP_SELF#$tunnus' method='post'>
+					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type='hidden' name='tee' value = 'P'>
 					<input type='hidden' name='tunnus' value = '$tunnus'>
 					<input type='hidden' name='viivatut' value = '$viivatut'>
@@ -348,7 +350,8 @@
 	echo "<td>";
 	// Tehdään boxi, jolla saadaan poistetut näkyviin
 	echo "<form action = '$PHP_SELF#$tunnus' method='post'><input type='hidden' name=tee value='E'>
-		<input type='hidden' name=tunnus value = '$tunnus'>";
+			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+			<input type='hidden' name=tunnus value = '$tunnus'>";
 
 	echo t('Näytä poistetut');
 
@@ -391,6 +394,7 @@
 	$toimires = mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($toimires)==1) {
 		echo "	<td class='back'><form action = 'matkalasku.php' method='get'>
+					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type='hidden' name = 'tilausnumero' value='$tunnus'>
 					<input type='hidden' name = 'tee' value='MUOKKAA'>
 					<input type='hidden' name = 'toim' value='$su'>
@@ -402,6 +406,7 @@
 
 	if($laskurow["tilaustyyppi"] == "M") {
 		echo "<td class='back'><form action = 'matkalasku.php' method='post'>
+					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type='hidden' name = 'tilausnumero' value='$tunnus'>
 					<input type='hidden' name = 'tee' value='MUOKKAA'>
 					<input type='hidden' name = 'toim' value='$su'>

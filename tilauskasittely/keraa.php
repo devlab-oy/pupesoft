@@ -952,14 +952,14 @@
 						}
 					}
 
-				}
-
+				}				
+				
 				// Tutkitaan viel‰ aivan lopuksi mihin tilaan me laitetaan t‰m‰ otsikko
 				// Ker‰ysvaiheessahan tilausrivit muuttuvat ja tarkastamme nyt tilanteen uudestaan
 				// T‰m‰ tehd‰‰n vain myyntitilauksille
-				if ($tila == "L") {
+				if ($tila == "'L'") {
 					$kutsuja = "keraa.php";
-
+					
 					$query = "	SELECT *
 								FROM lasku
 								WHERE tunnus in ($tilausnumeroita)

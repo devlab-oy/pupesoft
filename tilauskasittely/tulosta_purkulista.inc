@@ -272,6 +272,8 @@
 	$total 		= 0;
 	$sivu 		= 1;
 	$sumarum	= 0;
+	$apukala 	= 0;
+	$ekakala	= '';
 
 	$firstpage = alku_purku();
 
@@ -323,6 +325,12 @@
 		$pieni["height"] = 8;
 		$pieni["font"] = "Times-Roman";
 
+		$boldi["height"] = 8;
+		$boldi["font"] = "Times-Bold";
+
+		$b["height"] = 10;
+		$b["font"] = "Times-Bold";
+
 		$query = "	SELECT *
 					FROM tuotepaikat
 					WHERE yhtio   = '$kukarow[yhtio]'
@@ -358,15 +366,15 @@
 			$pdf->draw_text(30, $kala, $row["tuoteno"], 		$firstpage, $p);
 		}
 		else {
-			$pdf->draw_text(30,  $kala, $row["toim_tuoteno"],	$firstpage, $p);
-			$pdf->draw_text(155, $kala, $row["tuoteno"], 		$firstpage, $p);
+			$pdf->draw_text(30,  $kala, $row["toim_tuoteno"],	$firstpage, $b);
+			$pdf->draw_text(155, $kala, $row["tuoteno"], 		$firstpage, $b);
 		}
 
 		if ($mista == "vastaanota") {
 			$pohja = $pdf->draw_paragraph($kala+10, 155, 5, 315, asana('nimitys_',$row['tuoteno'],$row['nimitys']), $firstpage, $pieni);
 		}
 		else {
-			$pohja = $pdf->draw_paragraph($kala+10, 280, 5, 440, asana('nimitys_',$row['tuoteno'],$row['nimitys']), $firstpage, $pieni);
+			$pohja = $pdf->draw_paragraph($kala+10, 280, 5, 440, asana('nimitys_',$row['tuoteno'],$row['nimitys']), $firstpage, $boldi);
 		}
 
 		$lisaa = 0;
@@ -464,9 +472,10 @@
 
 
 		$pdf->draw_text(770, $kala, ta($kieli, "Y", $row["yksikko"]), 			$firstpage, $p);
+		$apukala = $kala;
 
-
-		$kala = $kala - 30 - $lisaa;
+		$lisaa = 0;
+		$kala = $kala - 25 - $lisaa;
 
 		if ($row["sarjanumeroseuranta"] != "") {
 
@@ -512,10 +521,11 @@
 
 				$image = $pdf->jfif_embed($data);
 
-				$pdf->image_place($image, $kala, 150, $firstpage);
+				$apukala -= 23;
 
+				$pdf->image_place($image, $apukala, 21, $firstpage);
 				system("rm -f $nimi");
-				$kala -= 15;
+				$kala -= 5;
 			}
 		}
 		
@@ -525,9 +535,10 @@
 
 		if ($row["kommentti"] != '') {
 			$pohja = $pdf->draw_paragraph($kala+$p["height"]+5, 160, 5, 440, $row["kommentti"],	$firstpage, $p);
-			$kala = $pohja - 15;
+			$kala = $pohja - 10;
 		}
-		$kala -= 15;
+
+		$kala -= 7;
 
 		$sumarum += $row["varattu"];
 		$total   += $row["hinta"];

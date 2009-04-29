@@ -232,7 +232,7 @@ while (!feof ($fd)) {
 			}
 
 			$kukarow['yhtio'] = $yhtiorow['yhtio']; // T‰m‰ on vaarallista, mutta t‰t‰ ilman ei mik‰n toimi!
-			
+
 			// nollataan argv ja laitetaan ensimm‰iseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
 			$argv = array();
 			$argv[1] = $kukarow["yhtio"];
@@ -365,7 +365,7 @@ while (!feof ($fd)) {
 				}
 			}
 			break;
-			
+
 		case 'ONADBY_PC' :
 			//Asiakkaan OVTtunnus
 			$tieto = trim(substr($tieto, 0, 17));
@@ -668,10 +668,6 @@ while (!feof ($fd)) {
 					$arow['toim_osoite']	= $tosoite;
 					$arow['toim_postino']	= $tpostino;
 					$arow['toim_postitp']	= $tpostitp;
-				}
-
-				if ($tilaus_hyvaksyntaan == "kyll‰") {
-					$editilaus_alatila = 'F';
 				}
 
 				// jos tilauksella ei ole maksuehtoa, k‰ytet‰‰n asiakkaan oletusta
@@ -1116,11 +1112,11 @@ while (!feof ($fd)) {
 
 
 				// Tilaus merkataan valmiiksi
-				$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' and yhtio='$kukarow[yhtio]'";
+				$query = "UPDATE lasku SET alatila='A' WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
 				$result = mysql_query($query) or die($query);
 
 				// haetaan tilauksen tiedot
-				$query    = "select * from lasku where tunnus='$id' and yhtio='$kukarow[yhtio]'";
+				$query    = "SELECT * FROM lasku WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
 				$result   = mysql_query($query) or die($query);
 				$laskurow = mysql_fetch_array($result);
 
@@ -1145,8 +1141,6 @@ while (!feof ($fd)) {
 					$edi_ulos .= "\n";
 					$edi_ulos .= jt_super($laskurow["tunnus"]);
 					$edi_ulos .= "\n";
-
-
 					$edi_ulos .= "\n";
 
 					$silent = "SILENT";
@@ -1184,6 +1178,15 @@ while (!feof ($fd)) {
 									varasto = '$varasto_row[tunnus]',
 									sisviesti2 = 'Verkkokauppatilaus! Ker‰yslistan tuotteet voivat kuulua useaan varastoon.',
 									tulostusalue = '$tulostusalue'
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus = '$editilaus_lasku_tunnus'";
+						$magento_maksettu_res = mysql_query($query) or pupe_error($query);
+					}
+
+					// Verkkokauppatilaus halutaan hyv‰ksynn‰n kautta!
+					if ($edi_tyyppi == "magento" and $tilaus_hyvaksyntaan != "") {
+						$query = "	UPDATE lasku SET
+									alatila = 'F'
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '$editilaus_lasku_tunnus'";
 						$magento_maksettu_res = mysql_query($query) or pupe_error($query);

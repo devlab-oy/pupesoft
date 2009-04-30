@@ -10,11 +10,16 @@
 	
 	$yhtio = $argv[1];
 
-	require('../inc/connect.inc');
-	require('../inc/functions.inc');
+	require('/var/www/html/pupesoft/inc/connect.inc');
+	require('/var/www/html/pupesoft/inc/functions.inc');
 
+	$path = "/tmp/logisticar_siirto_$yhtio/";
 	
-	$path = '/tmp/logisticar_siirto/';
+	// Sivotaan eka vanha pois
+	system("rm -rf $path");
+	
+	// Teh‰‰n uysi dirikka
+	system("mkdir $path");
 	
 	$path_nimike     = $path . 'ITEM.txt';
 	$path_asiakas    = $path . 'CUSTOMER.txt';

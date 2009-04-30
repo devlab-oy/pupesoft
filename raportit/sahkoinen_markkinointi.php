@@ -115,7 +115,7 @@
 					AND laji = 'ASAVAINSANA'
 					AND selitetark_3 = 'mursu'
 					GROUP BY selite	
-					ORDER BY jarjestys";
+					ORDER BY jarjestys, selite";
 		$dynamic_res = mysql_query($query) or pupe_error($query);
 
 		$riv = 0;

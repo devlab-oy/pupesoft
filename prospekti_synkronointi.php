@@ -134,7 +134,7 @@
 							yhtio = '{$kukarow['yhtio']}',
 							laji = 'R'";
 				$asiakas_res = mysql_query($query, $link) or pupe_error($query);
-				$user_id = mysql_insert_id();
+				$user_id = mysql_insert_id($link);
 			}
 			else {
 				$asiakas_check_row = mysql_fetch_assoc($asiakas_check_res);

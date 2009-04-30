@@ -13,7 +13,9 @@
 	require('../inc/connect.inc');
 	require('../inc/functions.inc');
 
-	$path            = '/Users/juppe/Desktop/';
+	
+	$path = '/tmp/logisticar_siirto/';
+	
 	$path_nimike     = $path . 'ITEM.txt';
 	$path_asiakas    = $path . 'CUSTOMER.txt';
 	$path_toimittaja = $path . 'VENDOR.txt';
@@ -39,19 +41,57 @@
 		$lisavarattu = " not in ('P','J','S') ";
 	}
 	
-	echo "$yhtio\n";
+	echo "Logisticar siirto: $yhtio\n";
 
 	//testausta varten limit
-	$limit = "limit 200";
+	//$limit = "limit 200";
 
-	// ajetaan kaikki operaatiot
+	// Ajetaan kaikki operaatiot
 	nimike($limit);
 	asiakas($limit);
 	toimittaja($limit);
 	varasto($limit);
 	varastotapahtumat($limit);
 	myynti($limit);
+	
+	//Siirret‰‰n failit logisticar palvelimelle	
+	siirto($path_nimike);
+	siirto($path_asiakas);
+	siirto($path_toimittaja);
+	siirto($path_varasto);
+	siirto($path_tapahtumat);	
+	siirto($path_myynti);
 
+	
+	function siirto ($siirtofile) {
+		GLOBAL $host_logisticar, $user_logisticar, $pass_logisticar, $path_logisticar;
+		
+		$path_localdir 	= "/mnt/logisticar_siirto/";
+		
+		unset($retval);
+		system("mount -t cifs -o username=$user_logisticar,password=$pass_logisticar //$host_logisticar/$path_logisticar $path_localdir", $retval);
+
+		if ($retval != 0) {
+			echo "Mount failed! $retval\n";
+		}
+		else {
+		
+			unset($retval);
+			system("cp -f $siirtofile $localdir", $retval);
+		
+			if ($retval != 0) {
+				echo "Copy failed! $retval\n";
+			}
+
+			unset($retval);
+			system("umount $localdir", $retval);
+		
+			if ($retval != 0) {
+				echo "Unmount failed! $retval\n";
+			}
+		}
+	}
+	
 	function nimike($limit = '') {
 		global $path_nimike, $yhtio;
 

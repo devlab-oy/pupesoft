@@ -92,7 +92,7 @@
 	}
 	
 	function nimike($limit = '') {
-		global $path_nimike, $yhtio;
+		global $path_nimike, $yhtio, $where_logisticar;
 
 		$query = "	SELECT 
 					tuote.tuoteno        	nimiketunnus,
@@ -204,7 +204,7 @@
 	}
 
 	function asiakas($limit = '') {
-		global $path_asiakas, $yhtio;
+		global $path_asiakas, $yhtio, $where_logisticar;
 
 		echo "Asiakkaat...";
 
@@ -265,7 +265,7 @@
 	}
 
 	function toimittaja($limit = '') {
-		global $path_toimittaja, $yhtio;
+		global $path_toimittaja, $yhtio, $where_logisticar;
 
 		echo "Toimittajat...";
 		
@@ -320,7 +320,7 @@
 	}
 
 	function varasto($limit = '') {
-		global $path_varasto, $lisavarattu, $yhtio;
+		global $path_varasto, $lisavarattu, $yhtio, $where_logisticar;
 
 		echo "Varasto... ";
 		
@@ -342,6 +342,7 @@
 					JOIN tuote ON tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio
 					WHERE tuote.ei_saldoa = ''
 					AND tuotepaikat.yhtio = '$yhtio'
+					$where_logisticar[varasto_1]
 					GROUP BY 1,3,4,5,6,7
 					ORDER BY 1
 					$limit";
@@ -408,7 +409,7 @@
 	}
 
 	function varastotapahtumat($limit = '') {
-		global $path_tapahtumat, $yhtio;
+		global $path_tapahtumat, $yhtio, $where_logisticar;
 
 		echo "Varastotapahtumat... ";
 		
@@ -540,7 +541,7 @@
 	}
 
 	function myynti($limit = '') {
-		global $path_myynti, $yhtiorow, $yhtio;
+		global $path_myynti, $yhtiorow, $yhtio, $where_logisticar;
 
 		echo "Myynnit... ";
 		

@@ -38,7 +38,7 @@
 		}
 
 		// otetaan yhteys tietokantaan mursu
-		$mursu = mysql_connect("d69.arwidson.fi", "mursu", "Hevonen12@") or die ("Ongelma tietokantapalvelimessa d157\n");
+		$mursu = mysql_connect("d69.arwidson.fi", "mursu", '!"mursunperse') or die ("Ongelma tietokantapalvelimessa d69\n");
 		mysql_select_db("mursu", $mursu) or die ("Tietokantaa mursu löydy palvelimelta!\n");
 
 		$query = "	SELECT *

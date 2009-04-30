@@ -60,15 +60,9 @@
 	myynti($limit);
 	
 	//Siirretään failit logisticar palvelimelle	
-	siirto($path_nimike);
-	siirto($path_asiakas);
-	siirto($path_toimittaja);
-	siirto($path_varasto);
-	siirto($path_tapahtumat);	
-	siirto($path_myynti);
+	siirto($path);
 
-	
-	function siirto ($siirtofile) {
+	function siirto ($path) {
 		GLOBAL $host_logisticar, $user_logisticar, $pass_logisticar, $path_logisticar;
 		
 		$path_localdir 	= "/mnt/logisticar_siirto/";
@@ -82,7 +76,7 @@
 		else {
 		
 			unset($retval);
-			system("cp -f $siirtofile $path_localdir", $retval);
+			system("cp -f $path/* $path_localdir", $retval);
 		
 			if ($retval != 0) {
 				echo "Copy failed! $retval\n";
@@ -422,8 +416,6 @@
 			die("Ei voitu avata filea $path_tapahtumat");
 		}
 
-		$date = date('Y-m-d', mktime(0, 0, 0, date('m')-12, date('d'), date('Y')));
-
 	    $query = "	SELECT 
 					tilausrivi.tuoteno 			nimiketunnus,
 					lasku.liitostunnus          asiakastunnus,
@@ -448,8 +440,8 @@
 					and varastopaikat.yhtio=tuotepaikat.yhtio
 					LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
 					WHERE tilausrivi.tyyppi IN ('L', 'O') 
-					and tilausrivi.laskutettuaika >= '$date' 
-					and tilausrivi.yhtio='$yhtio'
+					and tilausrivi.laskutettuaika > '0000-00-00' 
+					and tilausrivi.yhtio = '$yhtio'
 					ORDER BY tilausrivi.laskutettuaika
 					$limit";
 	    $res = mysql_query($query) or pupe_error($query);
@@ -556,8 +548,6 @@
 			die("Ei voitu avata filea $path_myynti");
 		}
 
-		$date = date('Y-m-d', mktime(0, 0, 0, date('m')-12, date('d'), date('Y')));
-
 	    $query = "	SELECT 
 					tilausrivi.tuoteno nimiketunnus,
 					lasku.liitostunnus asiakastunnus,
@@ -580,12 +570,10 @@
 					concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 					and varastopaikat.yhtio=tuotepaikat.yhtio
 					LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
-					WHERE
-					tilausrivi.varattu != 0
+					WHERE tilausrivi.varattu != 0
 					AND tilausrivi.tyyppi IN ('L', 'O')
 					AND tilausrivi.laskutettuaika = '0000-00-00' 
-					AND tilausrivi.laadittu >= '$date 00:00:00'
-					AND tilausrivi.yhtio	= '$yhtio'
+					AND tilausrivi.yhtio = '$yhtio'
 					ORDER BY tilausrivi.laadittu
 					$limit";
 		$res = mysql_query($query) or pupe_error($query);

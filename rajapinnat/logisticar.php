@@ -82,14 +82,14 @@
 		else {
 		
 			unset($retval);
-			system("cp -f $siirtofile $localdir", $retval);
+			system("cp -f $siirtofile $path_localdir", $retval);
 		
 			if ($retval != 0) {
 				echo "Copy failed! $retval\n";
 			}
 
 			unset($retval);
-			system("umount $localdir", $retval);
+			system("umount $path_localdir", $retval);
 		
 			if ($retval != 0) {
 				echo "Unmount failed! $retval\n";

@@ -115,7 +115,7 @@ if (!function_exists('pupevoice_otsik')) {
 		xml_add("InvoicedPartyOVT",						$lasrow['ovttunnus'],							$tootxml);
 		xml_add("InvoicedPartyEBA",						$lasrow['verkkotunnus'], 						$tootxml);
 		xml_add("InvoicedCustNumber",					$asiakasrow['asiakasnro'], 						$tootxml);
-		xml_add("InvoicedOrganisationName",				"$lasrow[nimi] $lasrow[nimitark]", 				$tootxml);
+		xml_add("InvoicedOrganisationName",				$lasrow['nimi']." ".$lasrow['nimitark'], 		$tootxml);
 		xml_add("InvoicedStreetName",					$lasrow['osoite'], 								$tootxml);
 		xml_add("InvoicedPostCode",						$lasrow['postino'],								$tootxml);
 		xml_add("InvoicedTownName",						$lasrow['postitp'],								$tootxml);
@@ -124,8 +124,8 @@ if (!function_exists('pupevoice_otsik')) {
 		xml_add("InvoiceCurrency",						$lasrow['valkoodi'],							$tootxml);
 		xml_add("InvoicePaymentReference",				$lasrow['viite'], 								$tootxml);
 		xml_add("InvoiceDate",							vlas_dateconv($lasrow['tapvm']), 				$tootxml);
-		xml_add("OrderIdentifier",						'', 											$tootxml); //Ostajan tilausnumero, eii oo vielä olemassa
-		xml_add("DeliveredPartyName",					"$lasrow[toim_nimi] $lasrow[toim_nimitark]",	$tootxml);
+		xml_add("OrderIdentifier",						$lasrow['asiakkaan_tilausnumero'],				$tootxml); //Ostajan tilausnumero, eii oo vielä olemassa
+		xml_add("DeliveredPartyName",					$lasrow['toim_nimi']." ".$lasrow['toim_nimitark'],	$tootxml);
 		xml_add("DeliveredPartyStreetName",				$lasrow['toim_osoite'], 						$tootxml);
 		xml_add("DeliveredPartyPostCode",				$lasrow['toim_postino'], 						$tootxml);
 		xml_add("DeliveredPartyTownName",				$lasrow['toim_postitp'], 						$tootxml);

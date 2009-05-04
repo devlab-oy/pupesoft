@@ -142,9 +142,8 @@
 							order by pakkaamo.tunnus";
 			}
 			elseif ($laskurow['tulostusalue'] != '' and $laskurow['varasto'] != '') {
-				$query = "	SELECT varaston_tulostimet.printteri1, varaston_tulostimet.printteri3, varastopaikat.printteri5
+				$query = "	SELECT varaston_tulostimet.printteri2, varaston_tulostimet.printteri4, varaston_tulostimet.printteri6
 							FROM varaston_tulostimet
-							JOIN varastopaikat ON (varaston_tulostimet.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '{$laskurow['varasto']}')
 							WHERE varaston_tulostimet.yhtio = '{$kukarow['yhtio']}' 
 							AND varaston_tulostimet.nimi = '{$laskurow['tulostusalue']}'
 							AND varaston_tulostimet.varasto = '{$laskurow['varasto']}'

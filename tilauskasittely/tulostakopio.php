@@ -151,7 +151,7 @@
 
 	// Extranettaajat voivat ottaa kopioita omista laskuistaan ja lähetteistään
 	if($kukarow["extranet"] != "") {
-		if ($kukarow["oletus_asiakas"] > 0 and ($toim == "LAHETE" or $toim == "LASKU")) {
+		if ($kukarow["oletus_asiakas"] > 0 and ($toim == "LAHETE" or $toim == "LASKU" or $toim == "TILAUSVAHVISTUS")) {
 			$query  = "	SELECT *
 						FROM asiakas
 						WHERE yhtio	= '$kukarow[yhtio]'

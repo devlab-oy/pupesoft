@@ -221,7 +221,7 @@
 	elseif($astilnro != '') {
 		$query = "	SELECT laskunro, ytunnus, liitostunnus, tunnus
 					FROM lasku use index (yhtio_asiakkaan_tilausnumero)
-					WHERE asiakkaan_tilausnumero = '$astilnro'
+					WHERE asiakkaan_tilausnumero LIKE ('%$astilnro%')
 					and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);

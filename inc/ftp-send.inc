@@ -34,6 +34,10 @@ else {
 	// jos login ok kokeillaan uploadata
 	if ($login_result) {
 		$upload = ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
+		if($upload === TRUE and $renameftpfile!="") {
+			$renameftpfile = basename($renameftpfile);
+			$rename = ftp_rename($conn_id, $ftppath.$filenimi, $ftppath.$renameftpfile);
+		}
 	}
 
 	if ($conn_id) {
@@ -50,6 +54,9 @@ else {
 	if ($upload === FALSE) {
 		$palautus = 3;
 	}
+	if ($rename === FALSE) {
+		$palautus = 4;
+	}
 
 	// jos siirto epäonnistuu
 	if ($palautus<>0) {
@@ -64,6 +71,9 @@ else {
 				break;
 			case  3:
 				$syy = "Transfer failed ($conn_id, $ftppath, ".realpath($ftpfile).")";
+				break;
+			case  4:
+				$syy = "Rename failed ($conn_id, $ftppath, $ftppath.$filenimi -> $ftppath.$renameftpfile)";
 				break;
 			default:
 				$syy = t("Tuntematon errorkoodi")." ($palautus)!!";
@@ -80,7 +90,8 @@ else {
 		$rivi .= "$syy\n";
 
 		$boob = mail($yhtiorow['alert_email'], "".t("Tiedostonsiirto epäonnistui")."!", $rivi, "From: $yhtiorow[postittaja_email]\n", "-f $yhtiorow[postittaja_email]");
-
+		$boob = FALSE;
+		
 		if ($boob===FALSE) {
 			$tulos_ulos_ftp .= "<font class='error'>\n";
 			$tulos_ulos_ftp .= "".t("Tiedostonsiirto epäonnistui! Ja meilin lähettäminen")." $yhtiorow[alert_email] ".t("epäonnistui myös! Perkele!")."\n";

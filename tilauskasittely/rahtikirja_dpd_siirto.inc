@@ -34,26 +34,125 @@ if ($kollityht > 0) {
 		$laskurow = $osoitelappurow;
 		$rakir_row = $osoitelappurow;
 	}
-	else {
-		//Tulostetaan standardi kolliosoitelappu
-		$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
-		$tempr = mysql_query($query) or pupe_error($query);
-		$laskurow = mysql_fetch_array($tempr);
-	}
-
+		
 	//$apu_kollityht = $kollityht;
 	if ($kollityht > 10) {
 		die("Liikaa kolleja! (max 10 kpl)"); // kolleja ei saa olla yli 10 per toimitusrivi...
 	}
+	
+	//	Luodaan meidän tiedostorakenne parcelOrder arrayhin ja pukataan se tonne aineistoon sitten laakista
+	$parcelOrder=array();
+	$parcelOrder["rahtikirjanro"] = $rahtikirjanro;
+	
+	/*
+		Arvotaan lähetystapa
+	*/
+	
+	// onko EXPRESS10 tai 12
+	if ($rakir_row["jv"] != '' or $mehto['jv'] != '') {
+		$parcelOrder["lahetystapa"] = "NN";
+	}
+	elseif (strpos($toitarow['selite'], "E10")) {
+		$parcelOrder["lahetystapa"] = "E10";
+	}
+	elseif (strpos($toitarow['selite'], "E12")) {
+		$parcelOrder["lahetystapa"] = "E12";
+	}
+	else {
+		$parcelOrder["lahetystapa"] = "NP";
+	}
+	
+	//	Haetaan otsikkotiedot pohjalle
+	$query = "	SELECT *
+				FROM lasku
+				WHERE yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset)
+				ORDER BY tunnus limit 1";
+	$laskures = mysql_query($query) or pupe_error($query);
+	$laskurow = mysql_fetch_array($laskures);
+	
+	for($i=0;$i<mysql_num_fields($laskures);$i++) {
+		$r = mysql_field_name($laskures, $i);
+		$v = $laskurow[$i];
+		
+		//	Korvaavuksia ja näppäilyä
+		if($r=="asiakkaan_viite" and $v == "") {
+			$v = $laskurow["viite"];
+		}
 
-	//$kiloja = "1/2/3.5";
-	//$express = 10;
-	//$express = 12;
-	//$jv = true;
+		$parcelOrder[$r] = $v;
+	}
+	
+	//	Luotamme vahvasti siihen, että meillä on rakir_res tallella.. Täältä tulee jotain hyödyllistä kumminkin..
+	for($i=0;$i<mysql_num_fields($rakir_res);$i++) {
 
-	//print_r($laskurow);
+		$r = mysql_field_name($rakir_res, $i);
+		$v = $rakir_row[$i];
+		
+		//	Korvaavuksia ja näppäilyä
+		if($r=="jv" and $v != "") {
+			$parcelOrder["jv_maara"] 		= $yhteensa;
+			$parcelOrder["jv_valkoodi"] 	= $yhtiorow["valkoodi"];
+			$parcelOrder["jv_pankkitili"] 	= $yhtiorow["pankkitili1"];
+			$parcelOrder["jv_viite"] 		= $viite;
+		}
+
+		$parcelOrder[$r] = $v;
+	}
+	
+	//	Haetaan asiakastiedot
+	$query = "	SELECT *
+				FROM asiakas
+				WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+	$asres = mysql_query($query) or pupe_error($query);
+	$asrow = mysql_fetch_array($asres);
+	
+	for($i=0;$i<mysql_num_fields($asres);$i++) {
+		$r = mysql_field_name($asres, $i);
+		$v = $asrow[$i];
+		
+		//	Korvaavuksia ja näppäilyä
+		
+		$parcelOrder["asiakas_".$r] = $v;
+	}
+
+	/*	
+	Jos meillä oli joku yhteyshenkilö haetaan sen tiedot myös! (Falceback asiakas)
+	*/
+	$query = "	SELECT nimi, titteli, email, puh, gsm, fax
+				FROM laskun_lisatiedot
+				JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen
+				WHERE laskun_lisatiedot.yhtio='$kukarow[yhtio]' and otunnus IN ($otunnukset) and yhteyshenkilo_tekninen>0";
+	$yhres = mysql_query($query) or pupe_error($query);
+	if(mysql_num_rows($yhres) == 0) {
+		$query = "	SELECT nimi, titteli, email, puh, gsm, fax
+					FROM laskun_lisatiedot
+					JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_kaupallinen
+					WHERE laskun_lisatiedot.yhtio='$kukarow[yhtio]' and otunnus IN ($otunnukset) and yhteyshenkilo_tekninen>0";
+		$yhres = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($yhres) == 0) {
+			$query = "	SELECT '2' O, '' nimi, '' titteli, email, puhelin puh, gsm, fax
+						FROM asiakas
+						WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+			$yhres = mysql_query($query) or pupe_error($query);
+		}
+	}
+	if(mysql_num_rows($yhres) > 0) {
+		$yhrow = mysql_fetch_array($yhres);
+		for($i=0;$i<mysql_num_fields($yhres);$i++) {
+			$r = mysql_field_name($yhres, $i);
+			$v = $yhrow[$i];
+
+			//	Korvaavuksia ja näppäilyä
+
+			$parcelOrder["yhteyshenkilo_".$r] = $v;
+		}
+	}
+	else {
+		//	Falceback 
+	}
+	
 	$query ="	SELECT sum(kollit) kollit,
-				group_concat(kilot SEPARATOR '/') kilot,
+				sum(kilot) kilot,
 				sum(kuutiot) kuutiot,
 				sum(lavametri) lavametri,
 				min(pakkauskuvaustark) pakkauskuvaustark
@@ -63,112 +162,72 @@ if ($kollityht > 0) {
 				and rahtikirjanro = '$rahtikirjanro'
 				and pakkaus = '$pakkaus[0]'";
 	//and pakkauskuvaus = '$row[selitetark]'";
-	$tempr = mysql_query($query) or pupe_error($query);
-	$rakirow = mysql_fetch_array($tempr);
-
-	$kiloja = explode('/', $rakirow[kilot]);
-
+	$rakires = mysql_query($query) or pupe_error($query);
+	$rakirow = mysql_fetch_array($rakires);
+	
+	/*
 	if (count($kiloja) != $kollit[0]) {
 		die("Kollit ja painot ei täsmää! ".count($kiloja)."/".$kollit[0]."Kiloja = ".$rakirow[kilot]);
 	}
-
-	// Myöhemmin tarvitaan asiakastietoja, suoritetaan kysely
-	$query = "	SELECT *
-				FROM asiakas
-				WHERE yhtio = '$kukarow[yhtio]'
-				AND tunnus  = '$laskurow[liitostunnus]'";
-	$tempr = mysql_query($query) or pupe_error($query);
-	$asiakasrow = mysql_fetch_array($tempr);
-
-	// luodaan DELISprint export-tiedoston rivi
-	// ensin lähetystapa (oletus: Normal Parcel, NP)
-	$lahTapa = "NP";
-
-	// onko pienipaketti? EI TARVITA TÄLLÄ HETKELLÄ!
-	/*
-	$pieni = true;
-	for ($i = 0; $i < count($kiloja); $i++) {
-		if ((float) $kiloja[$i] > 3.5) {
-			$pieni = false;
-			break;
-		}
-	}
-
-	if ($pieni == true) {
-		$lahTapa = "KP";
-	}
 	*/
-
-	// onko EXPRESS10 tai 12
-	if (strpos($toitarow['selite'], "E10")) $lahTapa .= ",E10";
-	if (strpos($toitarow['selite'], "E12")) $lahTapa .= ",E12";
-
-	// jälkivaatimus?
-	if ($rakir_row["jv"] != '' or $mehto['jv'] != '') $lahTapa .= ",NN";
-
-	// Lähetystapa valmis, laitetaan rivin alkuun
-	$rivi = $lahTapa.";";
-
-	// Kollien määrä
-	$rivi .= $kollityht.";";
-
-	// paino, oletetaan, että aiemmin tarkistettu splittauksella, että syötettyjen painojen lukumäärä = syötetty kollimäärä, joten syötetään suoraan DELISprintille muodossa paino1/paino2/paino3/... jne.
-	$rakirow[kilot] = str_replace('.', ',', $rakirow[kilot]); //pitää muuttaa pisteet pilkuiks!
-	$rivi .= $rakirow[kilot].";";
-
-	// Jv-summa (ei vielä implementoitu, mutta kenttä vaaditaan!)
-	$rivi .= ";";
-
-	// "Viite" = osoitetietoviite DELISprintille = ytunnus
-	$rivi .= substr($asiakasrow["ytunnus"],0,20).";";
-
-	// osoitetiedot
-	$rivi .= substr($laskurow["toim_nimi"],0,40).";";
-	$rivi .= substr($laskurow["toim_nimitark"],0,40).";";
-	$rivi .= substr($laskurow["toim_osoite"],0,40).";";
-	$rivi .= substr($laskurow["toim_osoite"],40,40).";";
-	$rivi .= substr($laskurow["toim_maa"],0,10).";";
-	$rivi .= substr($laskurow["toim_postino"],0,10).";";
-	$rivi .= substr($laskurow["toim_postitp"],0,40).";";
-
-	// asiakkaan yhteystiedot
-	if ($laskurow["tilausyhteyshenkilo"] =="") {
-		if (strpos($toitarow['selite'], "E10")) die("Asiakkaan yhteystiedot puuttuvat! Pakolliset EXPRESS-toimitustavalle!");
-		if (strpos($toitarow['selite'], "E12")) die("Asiakkaan yhteystiedot puuttuvat! Pakolliset EXPRESS-toimitustavalle!");
-		$rivi .= ";";
-		$rivi .= sprintf("%s", substr($asiakasrow["puhelin"],0,25)).";";
-
+	for($i=0;$i<mysql_num_fields($rakires);$i++) {
+		$r = mysql_field_name($rakires, $i);
+		$v = $rakirow[$i];
+		
+		//	Korvaavuksia ja näppäilyä
+		if($r == "kilot") {
+			$k = round(($rakirow[$i]/$rakirow["kollit"]), 1);
+			if($rakirow["kollit"] == 2) {
+				$v = str_replace('.', ',', $k)."/".str_replace('.', ',', $k);
+			}
+			else {
+				$v = str_replace('.', ',', $k);
+			}
+		}
+		
+		$parcelOrder[$r] = $v;
 	}
-	else {
-		$yhtTiedot = split("/", $laskurow["tilausyhteyshenkilo"]);
-		$rivi .= substr($yhtTiedot[0],0,40).";";
-		$rivi .= substr($yhtTiedot[1],0,25).";";
-	}
-
-	$rivi .= substr($asiakasrow["fax"],0,25).";";
-	$rivi .= substr($asiakasrow["email"],0,40).";";
-	$rivi .= substr($rahtikirjanro,0,35).";";
-	$viitteenne = $laskurow["asiakkaan_tilausnumero"];
-
-	if ($viitteenne == "") {
-		$viitteenne = $laskurow["viesti"];
-	}
-
-	$rivi .= substr($viitteenne,0,30).";";
-
-	if ($tilausnumeroita == "") {
-		$tilausnumeroita = $laskurow["tunnus"];
-	}
-
-	$rivi .= substr($tilausnumeroita,0,30).";";
-	$rivi .= substr($laskurow["viesti"],0,30).";";
-	$rivi .= substr($laskurow["kohde"],0,30).";";
+	
+	//echo "<hr>data:<pre>".print_r($parcelOrder, true)."</pre>";
 
 	// Muunnetaan merkistö Windows ANSI
 	iconv("ISO-8859-1", "Windows-1252", $rivi);
 	// Lisätään, jos tulostetaan useita rivejä tiedostoon (Jepulis, pitää olla Windows rivinvaihto CR\LF!)
 	$rivit .= $rivi."\r\n";
+	
+	//	Luodaan aineostoformaatti
+	if(!is_array($delisprintFileFormat)) {
+		// Lähetystapa ; Paino (kg) ; Senders Reference: ; Order #: ; Nimi ; Osoite 1 ; Maa ; Postinr. ; Kaup. ; Yhteyshenkilö ; Puh. ; Fax ; Sähköposti ;
+		$delisprintFileFormat = array(
+										"lahetystapa",
+										"kollit",
+										"kilot",
+										"rahtikirjanro",
+										"asiakkaan_tilausnumero",
+										"toim_nimi",
+										"toim_osoite",
+										"toim_maa",
+										"toim_postino",
+										"toim_postitp",										
+										"yhteyshenkilo_nimi",
+										"puh",
+										"fax",
+										"emai",
+										"comments",										
+									);
+		
+	}
+	
+	//echo "<hr>data:<pre>".print_r($delisprintFileFormat, true)."</pre>";
 
+	unset($aineisto);
+	foreach($delisprintFileFormat as $p) {
+		if(isset($aineisto)) {
+			$aineisto .=";";
+		}
+		$aineisto.=$parcelOrder[$p];
+	}
+	
 	if ($delisprint_polku != '') {
 		if (substr($delisprint_polku,-1) != '/') {
 			$delisprint_polku .= '/';
@@ -178,16 +237,14 @@ if ($kollityht > 0) {
 	else {
 		$filenimi = "/tmp/dpdimport-".md5(uniqid(rand(),true)).".dat";
 	}
-
+	
 	//kirjoitetaan faili levylle..
-	$fh = fopen($filenimi, "w");
-	if (fwrite($fh, $rivit) === FALSE) {
-		die("Tiedoston kirjoitus epäonnistui $filenimi");
+	if (file_put_contents($filenimi, $aineisto) === FALSE) {
+		echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";
 	}
-	fclose($fh);
-
-	$filenimi='';
-
+	else {
+		echo "<br><font class='message'>".t("Tallennettiin DPD-aineisto")."</font><br>";
+	}
 }
 
 ?>

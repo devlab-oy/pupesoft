@@ -69,6 +69,56 @@ if (!function_exists("tv1dateconv")) {
 	}
 }
 
+if (!function_exists("lopetus")) {
+	function lopetus($lopetus, $meta="") {
+		global $kukarow, $palvelin2;
+
+		// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
+		$lopetus = str_replace('////','?', $lopetus);
+		$lopetus = preg_replace('/([^:])\/\//','\\1&',  $lopetus);
+		
+		if ($meta != "") {
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$lopetus'>";
+			exit;
+		}
+		else {
+		
+			preg_match("/^([^\?&]*)\??/i", $lopetus, $nimi);
+			preg_match("/toim=([^&]*)&?/i", $lopetus, $alanimi);
+		
+			$nimet = explode("/", str_replace($palvelin2, "", $nimi[1]));
+		
+			for($i=0; $i<count($nimet); $i++) {
+			
+				$nimi = "";
+			
+				for($j = $i; $j<count($nimet); $j++) {
+					$nimi .= $nimet[$j]."/";
+				}
+			
+				$nimi = substr($nimi,0,-1);
+			
+				$query = "	SELECT nimitys
+							FROM oikeu
+							WHERE yhtio 	= '$kukarow[yhtio]'
+							and kuka 		= ''
+							and nimi		= '$nimi'
+							and alanimi		= '$alanimi[1]'
+							LIMIT 1";
+				$res = mysql_query($query) or pupe_error($query);
+										
+				if (mysql_num_rows($res) > 0) {
+					$row = mysql_fetch_array($res);
+					break;
+				}
+			}
+		
+			if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": $row[nimitys]</a><br>";
+			else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
+		}
+	}
+}
+
 if (!function_exists("tv2dateconv")) {
 	function tv2dateconv($date) {
 		//k‰‰nt‰‰ mysqln vvvv-kk-pp muodon muotoon vvvvkkpp

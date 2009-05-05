@@ -12,7 +12,7 @@
 		$_POST["tee"] = "NAYTATILAUS";
 	}
 
-	if($_POST["tee"] == 'NAYTATILAUS') $nayta_pdf=1; //Generoidaan .pdf-file
+	if($_REQUEST["tee"] == 'NAYTATILAUS') $nayta_pdf=1; //Generoidaan .pdf-file
 	
 	if (file_exists("../inc/parametrit.inc")) {
 		require('../inc/parametrit.inc');

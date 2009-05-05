@@ -311,7 +311,7 @@ if($tee == "NAYTA") {
 		$kalenteri["URL"]               = "tilaushakukone.php";
 		$kalenteri["url_params"]        = array("toim", "setti", "tarjous", "tee");
 		$kalenteri["nakyma"]            = "TAPAHTUMALISTAUS";   
-		$kalenteri["sallittu_nakyma"]   = "";
+		$kalenteri["sallittu_nakyma"]   = array("TAPAHTUMALISTAUS", "KUUKAUSINAKYMA", "VIIKKONAKYMA", "PAIVANAKYMA");
 		$kalenteri["laskutilat"]        = $laskutilat;
 		$kalenteri["tunnusnippu"]       = $tarjous;
 		

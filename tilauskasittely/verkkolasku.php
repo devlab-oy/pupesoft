@@ -272,10 +272,18 @@
 			//keksitään uudelle failille joku varmasti uniikki nimi:
 			$nimixml = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
 			$nimi_filexml = "laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
-
-			$nimifinvoice = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
-			$nimi_filefinvoice = "laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
-
+			
+			//	Itellan iPost vaatii siirtoon vähän oman nimen..
+			if($yhtiorow["verkkolasku_lah"] == "iPost") {
+				$nimifinvoice = "../dataout/TRANSFER_IPOST-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+				$nimi_filefinvoice = "TRANSFER_IPOST-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+				$nimi_filefinvoice_siirto_valmis = "DELIVERED_IPOST-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+			}
+			else {
+				$nimifinvoice = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+				$nimi_filefinvoice = "laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+			}
+			
 			$nimiedi = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".edi";
 			$nimi_fileedi = "laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".edi";
 
@@ -1675,14 +1683,14 @@
 			// poistetaan lukot
 			$query = "UNLOCK TABLES";
 			$locre = mysql_query($query) or pupe_error($query);
-
+			
 			// jos laskutettiin jotain
 			if ($lask > 0) {
 
 				if ($silent == "" or $silent == "VIENTI") {
 					$tulos_ulos .= t("Luotiin")." $lask ".t("laskua").".<br>\n";
 				}
-
+				
 				//jos verkkotunnus löytyy niin
 				if ($yhtiorow['verkkotunnus_lah'] != '' and file_exists(realpath($nimixml))) {
 
@@ -1705,6 +1713,28 @@
 					if ($silent == "") {
 						$tulos_ulos .= $tulos_ulos_ftp;
 					}
+				}
+				elseif($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {
+					if ($silent == "") {
+						$tulos_ulos .= "<br><br>\n".t("FTP-siirto iPost Finvoice:")."<br>\n";
+					}
+
+					//siirretaan laskutiedosto operaattorille
+					$ftphost = "ftp.itella.net";
+					$ftpuser = $yhtiorow['verkkotunnus_lah'];
+					$ftppass = $yhtiorow['verkkosala_lah'];
+					$ftppath = "out/finvoice/data/";
+					$ftpfile = realpath($nimifinvoice);
+					$renameftpfile = $nimi_filefinvoice_siirto_valmis;
+					
+					// tätä ei ajata eikä käytetä, mutta jos tulee ftp errori niin echotaan tää meiliin, niin ei tartte käsin kirjotella resendiä
+					$cmd = "mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile);
+
+					require ("inc/ftp-send.inc");
+
+					if ($silent == "") {
+						$tulos_ulos .= $tulos_ulos_ftp;
+					}					
 				}
 				elseif($silent == "" and !file_exists($nimifinvoice)) {
 					$tulos_ulos .= t("Verkkolaskutus ei ole käytössä")."!<br>\n";
@@ -2154,7 +2184,7 @@
 
 			// Annetaan mahdollisuus tallentaa finvoicetiedosto jos se on luotu..
 			if (file_exists($nimifinvoice) and
-				(strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE)) {
+				(strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) and $yhtiorow["verkkolasku_lah"] == "finvoice") {
 				echo "<br><table><tr><th>".t("Tallenna finvoice-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";

@@ -32,8 +32,12 @@
 
 		$sel1 = "";
 		$sel2 = "";
+		$sel3 = "";
 
-		if ($trow[$i] == 'finvoice') {
+		if ($trow[$i] == 'iPost') {
+			$sel3 = "selected";
+		}
+		elseif ($trow[$i] == 'finvoice') {
 			$sel2 = "selected";
 		}
 		else {
@@ -42,6 +46,7 @@
 
 		$ulos .= "<option value = '' $sel1>".t("Pupevoice")."";
 		$ulos .= "<option value = 'finvoice' $sel2>".t("Finvoice")."";
+		$ulos .= "<option value = 'iPost' $sel3>".t("Finvoice iPost")."";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

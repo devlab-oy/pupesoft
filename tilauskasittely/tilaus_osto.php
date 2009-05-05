@@ -86,10 +86,11 @@
 			echo "<font class='message'>".t("VIRHE: Tilausta ei löydy")."!<br><br></font>";
 			exit;
 		}
+		
 		$laskurow = mysql_fetch_array($aresult);
 		
 		
-		if($tee == "vahvista") {
+		if ($tee == "vahvista") {
 			$query = "UPDATE tilausrivi SET  jaksotettu=1 where yhtio='$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi='O' and uusiotunnus=0";
 			$result = mysql_query($query) or pupe_error($query);
 			if(mysql_affected_rows() > 0) {
@@ -302,7 +303,6 @@
 			$rivitunnus = "";
 		}
 
-
 		// Olemassaolevaa riviä muutetaan, joten poistetaan se ja annetaan perustettavaksi
 		if ($tee == 'PV') {
 			$query = "	SELECT tilausrivi.*, tuote.sarjanumeroseuranta
@@ -356,25 +356,41 @@
 		}
 
 		// Tyhjennetään tilausrivikentät näytöllä
-		if ($tee == 'TY') {
-			$tee 				= "Y";
-			$tuoteno			= '';
-			$perheid 			= '';
-			$perheid2 			= '';
-			$kpl				= '';
-			$var				= '';
-			$hinta				= '';
-			$netto				= '';
-			$ale				= '';
-			$rivitunnus			= '';
-			$kerayspvm			= '';
-			$toimaika			= '';
-			$alv				= '';
-			$paikka 			= '';
-			$paikat				= '';
-			$osto_sarjatunnus	= '';
-			$kommentti			= '';
-
+		if ($tee == 'TI' and isset($tyhjenna)) {
+						
+			$tee = "Y";
+			
+			unset($ale);
+			unset($ale_array);
+			unset($alv);
+			unset($alv_array);
+			unset($hinta);
+			unset($hinta_array);
+			unset($kayttajan_ale);
+			unset($kayttajan_alv);
+			unset($kayttajan_hinta);
+			unset($kayttajan_kpl);
+			unset($kayttajan_netto);
+			unset($kayttajan_var);
+			unset($kerayspvm);
+			unset($kommentti);
+			unset($kpl);
+			unset($kpl_array);
+			unset($netto);
+			unset($netto_array);
+			unset($paikat);
+			unset($paikka);
+			unset($paikka_array);
+			unset($perheid);
+			unset($perheid2);
+			unset($rivinumero);
+			unset($rivitunnus);
+			unset($toimaika);
+			unset($tuotenimitys);
+			unset($tuoteno);
+			unset($var);
+			unset($variaatio_tuoteno);
+			unset($var_array);
 		}
 
 		if ($tee == "LISLISAV") {
@@ -396,7 +412,7 @@
 			
 		}
 				
-		if ($tee == 'TI' and (trim($tuoteno) != '' or is_array($tuoteno_array)) and ($kpl != '' or is_array($kpl_array))) {
+		if ($tee == 'TI' and ((trim($tuoteno) != '' or is_array($tuoteno_array)) and ($kpl != '' or is_array($kpl_array))) and ($variaatio_tuoteno == "" or (is_array($kpl_array) and array_sum($kpl_array) != 0))) {
 			if (!is_array($tuoteno_array) and trim($tuoteno) != "") {
 				$tuoteno_array[] = $tuoteno;
 			}
@@ -411,7 +427,7 @@
 
 			foreach($tuoteno_array as $tuoteno) {
 
-				$query	= "	select *
+				$query	= "	SELECT *
 							from tuote
 							where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
@@ -500,34 +516,46 @@
 
 			if ($lisavarusteita == "ON" and $perheid2 > 0) {
 				//Päivitetään isälle perheid jotta tiedetään, että lisävarusteet on nyt lisätty
-				$query = "	update tilausrivi set
+				$query = "	UPDATE tilausrivi set
 							perheid2	= '$perheid2'
 							where yhtio = '$kukarow[yhtio]'
 							and tunnus 	= '$perheid2'";
 				$updres = mysql_query($query) or pupe_error($query);
 			}
 
-			$tee 				= "Y";
-			$tuoteno			= '';
-			$kpl				= '';
-			$var				= '';
-			$hinta				= '';
-			$netto				= '';
-			$ale				= '';
-			$rivitunnus			= '';
-			$kerayspvm			= '';
-			$toimaika			= '';
-			$alv				= '';
-			$paikka 			= '';
-			$paikat				= '';
-			$kayttajan_hinta	= '';
-			$kayttajan_ale		= '';
-			$kayttajan_netto 	= '';
-			$kayttajan_var		= '';
-			$kayttajan_kpl		= '';
-			$kayttajan_alv		= '';
-			$perheid			= '';
-			$perheid2			= '';
+			$tee = "Y";
+			
+			unset($ale);
+			unset($ale_array);
+			unset($alv);
+			unset($alv_array);
+			unset($hinta);
+			unset($hinta_array);
+			unset($kayttajan_ale);
+			unset($kayttajan_alv);
+			unset($kayttajan_hinta);
+			unset($kayttajan_kpl);
+			unset($kayttajan_netto);
+			unset($kayttajan_var);
+			unset($kerayspvm);
+			unset($kommentti);
+			unset($kpl);
+			unset($kpl_array);
+			unset($netto);
+			unset($netto_array);
+			unset($paikat);
+			unset($paikka);
+			unset($paikka_array);
+			unset($perheid);
+			unset($perheid2);
+			unset($rivinumero);
+			unset($rivitunnus);
+			unset($toimaika);
+			unset($tuotenimitys);
+			unset($tuoteno);
+			unset($var);
+			unset($variaatio_tuoteno);
+			unset($var_array);
 		}
 		elseif ($tee == 'TI') {
 			$tee = "Y";

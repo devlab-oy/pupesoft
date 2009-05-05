@@ -77,7 +77,7 @@ if ($tila == 'valmis') {
 }
 
 //muokataan tilausriviä
-if ($tila == 'muokkaa_rivi' and $tee != 'TY' and $tee != 'TI') {
+if ($tila == 'muokkaa_rivi' and $tee != 'TI') {
 
 	$query = "	SELECT tilausrivi.*, tuote.sarjanumeroseuranta
 				FROM tilausrivi use index (PRIMARY)
@@ -212,6 +212,45 @@ if ($tila == 'uusirivi') {
 	exit;
 }
 
+//poistetaan rivi, tyhjennetään muuttujat, näytetään lista
+if ($tee == 'TI' and isset($tyhjenna)) {
+	
+	unset($tila);
+	unset($tee);
+		
+	unset($ale);
+	unset($ale_array);
+	unset($alv);
+	unset($alv_array);
+	unset($hinta);
+	unset($hinta_array);
+	unset($kayttajan_ale);
+	unset($kayttajan_alv);
+	unset($kayttajan_hinta);
+	unset($kayttajan_kpl);
+	unset($kayttajan_netto);
+	unset($kayttajan_var);
+	unset($kerayspvm);
+	unset($kommentti);
+	unset($kpl);
+	unset($kpl_array);
+	unset($netto);
+	unset($netto_array);
+	unset($paikat);
+	unset($paikka);
+	unset($paikka_array);
+	unset($perheid);
+	unset($perheid2);
+	unset($rivinumero);
+	unset($rivitunnus);
+	unset($toimaika);
+	unset($tuotenimitys);
+	unset($tuoteno);
+	unset($var);
+	unset($variaatio_tuoteno);
+	unset($var_array);
+}
+
 //tarkastetaan tilausrivi
 if ($tee == 'TI' or $tee == "Y") {
 	// Parametreja joita tarkistarivi tarvitsee
@@ -262,21 +301,154 @@ if ($tee == 'TI' or $tee == "Y") {
 
 //rivi on tarkistettu ja se lisataan tietokantaan
 if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
+	
 	$laskurow["tila"] = "O";
 	$kukarow["kesken"] = $rivinotunnus;
-	//$trow saadaan tuota tarkistarivistä
+	
+	if (!is_array($tuoteno_array) and trim($tuoteno) != "") {
+		$tuoteno_array[] = $tuoteno;
+	}
 
-	require('lisaarivi.inc');
+	//Käyttäjän syöttämä hinta ja ale ja netto, pitää säilöä jotta tuotehaussakin voidaan syöttää nämä
+	$kayttajan_hinta	= $hinta;
+	$kayttajan_ale		= $ale;
+	$kayttajan_netto 	= $netto;
+	$kayttajan_var		= $var;
+	$kayttajan_kpl		= $kpl;
+	$kayttajan_alv		= $alv;
 
-	$tuoteno 	= '';
-	$tila 		= '';
-	$tee 		= '';
-}
+	foreach($tuoteno_array as $tuoteno) {
 
-//poistetaan rivi, tyhjennetään muuttujat, näytetään lista
-if ($tee == 'TY') {
-	$tuoteno 	= '';
-	$tila 		= '';
+		$query	= "	SELECT *
+					from tuote
+					where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) > 0) {
+			//Tuote löytyi
+			$trow = mysql_fetch_array($result);
+		}
+		else {
+			//Tuotetta ei löydy, arvataan muutamia muuttujia
+			$trow["alv"] = $laskurow["alv"];
+		}
+
+		if (checkdate($toimkka,$toimppa,$toimvva)) {
+			$toimaika = $toimvva."-".$toimkka."-".$toimppa;
+		}
+		if (checkdate($kerayskka,$keraysppa,$keraysvva)) {
+			$kerayspvm = $keraysvva."-".$kerayskka."-".$keraysppa;
+		}
+		if ($toimaika == "" or $toimaika == "0000-00-00") {
+			$toimaika = $laskurow["toimaika"];
+		}
+		if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+			$kerayspvm = $laskurow["kerayspvm"];
+		}
+
+		if ($laskurow["varasto"] != 0) {
+			$varasto = (int) $laskurow["varasto"];
+		}
+
+		//Tehdään muuttujaswitchit
+		if (is_array($hinta_array)) {
+			$hinta = $hinta_array[$tuoteno];
+		}
+		else {
+			$hinta = $kayttajan_hinta;
+		}
+
+		if (is_array($ale_array)) {
+			$ale = $ale_array[$tuoteno];
+		}
+		else {
+			$ale = $kayttajan_ale;
+		}
+
+		if (is_array($netto_array)) {
+			$netto = $netto_array[$tuoteno];
+		}
+		else {
+			$netto = $kayttajan_netto;
+		}
+
+		if (is_array($var_array)) {
+			$var = $var_array[$tuoteno];
+		}
+		else {
+			$var = $kayttajan_var;
+		}
+
+		if (is_array($kpl_array)) {
+			$kpl = $kpl_array[$tuoteno];
+		}
+		else {
+			$kpl = $kayttajan_kpl;
+		}
+
+		if (is_array($alv_array)) {
+			$alv = $alv_array[$tuoteno];
+		}
+		else {
+			$alv = $kayttajan_alv;
+		}
+
+		if ($kpl != 0) {
+			require ('lisaarivi.inc');
+		}
+
+		$hinta 	= '';
+		$ale 	= '';
+		$netto 	= '';
+		$var 	= '';
+		$kpl 	= '';
+		$alv 	= '';
+		$paikka	= '';
+	}
+
+	if ($lisavarusteita == "ON" and $perheid2 > 0) {
+		//Päivitetään isälle perheid jotta tiedetään, että lisävarusteet on nyt lisätty
+		$query = "	UPDATE tilausrivi set
+					perheid2	= '$perheid2'
+					where yhtio = '$kukarow[yhtio]'
+					and tunnus 	= '$perheid2'";
+		$updres = mysql_query($query) or pupe_error($query);
+	}
+
+	unset($tee);
+	unset($tila);
+	
+	unset($ale);
+	unset($ale_array);
+	unset($alv);
+	unset($alv_array);
+	unset($hinta);
+	unset($hinta_array);
+	unset($kayttajan_ale);
+	unset($kayttajan_alv);
+	unset($kayttajan_hinta);
+	unset($kayttajan_kpl);
+	unset($kayttajan_netto);
+	unset($kayttajan_var);
+	unset($kerayspvm);
+	unset($kommentti);
+	unset($kpl);
+	unset($kpl_array);
+	unset($netto);
+	unset($netto_array);
+	unset($paikat);
+	unset($paikka);
+	unset($paikka_array);
+	unset($perheid);
+	unset($perheid2);
+	unset($rivinumero);
+	unset($rivitunnus);
+	unset($toimaika);
+	unset($tuotenimitys);
+	unset($tuoteno);
+	unset($var);
+	unset($variaatio_tuoteno);
+	unset($var_array);
 }
 
 //korjataan siirrettävät muuttujat taas talteen

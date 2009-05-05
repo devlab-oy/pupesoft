@@ -12,9 +12,14 @@
 	else {
 		require ("alvpopup.inc");
 	}
+	
+	$variaaritorivi = FALSE;
 
-	//if ($kukarow["extranet"] == '' and ($toim == "PIKATILAUS" or $toim == "SIIRTOTYOMAARAYS")) {
-	if ($kukarow["extranet"] == '' and ($toim == "PIKATILAUS")) {
+	if ($yhtiorow['variaatiomyynti'] == "K" and $kukarow["extranet"] == '' and (is_array($tuoteno_array) or $tuoteno != "" or $variaatio_tuoteno) and $ulos == "" and $rivitunnus == "") {
+		require ("syota_variaatiorivi.inc");
+	}
+	
+	if (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "PIKATILAUS")) {
 		// Pikatilauksen syöttörivi
 		echo "<table><tr>$jarjlisa";
 				
@@ -43,6 +48,7 @@
 		else {
 			echo "<td valign='top'>$ulos</td>";
 		}
+
 
 		echo "	<td valign='top'><input type='text' name='kpl' size='5' maxlength='13' value='$kpl'></td>
 				<td valign='top'><input type='text' name='var' size='2' maxlength='1' value='$var'></td>
@@ -154,7 +160,7 @@
 
 		echo "</table></form>";
 	}
-	elseif ($kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS" or $aputoim == "RIVISYOTTO" or $toim == "YLLAPITO" or $toim == "TARJOUS" or $toim == "REKLAMAATIO")) {
+	elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS" or $aputoim == "RIVISYOTTO" or $toim == "YLLAPITO" or $toim == "TARJOUS" or $toim == "REKLAMAATIO")) {
 		// Rivisyötön syöttörivi
 		echo "<table>
 				<tr>$jarjlisa
@@ -323,7 +329,7 @@
 
 		echo "</td></tr></table></form>";
 	}
-	elseif ($kukarow["extranet"] == '' and ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI" or $toim == "VALMISTAVARASTOON" or $toim == "KORJAA" or $toim == "SIIRTOTYOMAARAYS")) {
+	elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI" or $toim == "VALMISTAVARASTOON" or $toim == "KORJAA" or $toim == "SIIRTOTYOMAARAYS")) {
 		// Rivisyötön syöttörivi
 		echo "<table>
 				<tr>$jarjlisa";
@@ -437,7 +443,7 @@
 
 		echo "</td></tr></table></form>";
 	}
-	elseif ($miniliittyma == "JOO") {
+	elseif (!$variaaritorivi and $miniliittyma == "JOO") {
 
 		echo "	<form name='rivi' action = '$PHP_SELF?ojarj=$array[0]$ulisa$ankka' method='post' autocomplete='off'>
 				<input type='hidden' name='tee' value = 'TI'>
@@ -467,7 +473,7 @@
 		echo "</td></tr></table></form>";
 
 	}
-	elseif ($kukarow["extranet"] != '') {
+	elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
 		// Extranetin syöttörivi
 		echo "<table>
 				<tr>$jarjlisa
@@ -485,6 +491,7 @@
 		else {
 			echo "<td valign='top'>$ulos</td>";
 		}
+
 
 		echo "	<td valign='top'><input type='text' name='kpl' size='5' maxlength='13' value='$kpl'></td>
 				<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'></td>
@@ -504,4 +511,5 @@
    if ($kentta == '') {
        $kentta='tuoteno';
    }
+
 ?>

@@ -259,6 +259,22 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "variaatiomyynti") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos .= "<option value = ''>".t("Tilausrivien syötössä ei käytetä variaatiomatriisia");
+		$ulos .= "<option value = 'K' $sel[K]>".t("Tilausrivien syötössä käytetään variaatiomatriisia");
+
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "tarjouksen_tuotepaikat") {
 
 		$ulos = "<td><select name='$nimi'>";

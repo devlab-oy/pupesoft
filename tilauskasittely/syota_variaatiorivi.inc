@@ -73,11 +73,18 @@
 	
 		echo "<tr><td class='back'><br></td></tr><tr>";
 		echo "<th align='left'>".t("Tuotenumero")."</th>
-				<th align='left'>".t("M‰‰r‰")."</th>
-				<th align='left'>".t("Var")."</th>
-				<th align='left'>".t("Hinta")."</th>
-				<th align='left'>".t("Ale")."</th>
-				<th align='left'>".t("Netto")."</th>";
+				<th align='left'>".t("M‰‰r‰")."</th>";
+
+		if ($variaaritorivi_osto !== TRUE) {
+			echo "<th align='left'>".t("Var")."</th>";
+		}
+		
+		echo "	<th align='left'>".t("Hinta")."</th>
+				<th align='left'>".t("Ale")."</th>";
+		
+		if ($variaaritorivi_osto !== TRUE) {
+			echo "<th align='left'>".t("Netto")."</th>";
+		}
 		
 		if ($toim != "PIKATILAUS") {
 			echo "<th align='left'>".t("Alv")."</th>";
@@ -98,60 +105,64 @@
 			echo "<td valign='top'>$varirow[tuoteno] $varirow[nimitys] <input type='hidden' name='tuoteno_array[$varirow[tuoteno]]' value='$varirow[tuoteno]'></td>
 					<td valign='top'><input type='text' name='kpl_array[$varirow[tuoteno]]' size='5' maxlength='5' value='".$kpl_array[$varirow["tuoteno"]]."'></td>";
 					
-			
-			if ($toim != "PIKATILAUS") {
-				$selh = $selj = $selp = "";
+			if ($variaaritorivi_osto !== TRUE) {
+				if ($toim != "PIKATILAUS") {
+					$selh = $selj = $selp = "";
 
-				if ($var_array[$varirow["tuoteno"]] == "H") {
-					$selh = "SELECTED";
-				}
-				elseif ($var_array[$varirow["tuoteno"]] == "J") {
-					$selj = "SELECTED";
-				}
-				elseif ($var_array[$varirow["tuoteno"]] == "P") {
-					$selp = "SELECTED";
-				}
-				elseif ($var_array[$varirow["tuoteno"]] == "W") {
-					$selw = "SELECTED";
-				}
+					if ($var_array[$varirow["tuoteno"]] == "H") {
+						$selh = "SELECTED";
+					}
+					elseif ($var_array[$varirow["tuoteno"]] == "J") {
+						$selj = "SELECTED";
+					}
+					elseif ($var_array[$varirow["tuoteno"]] == "P") {
+						$selp = "SELECTED";
+					}
+					elseif ($var_array[$varirow["tuoteno"]] == "W") {
+						$selw = "SELECTED";
+					}
 
-				echo "<td valign='top'><select name='var_array[$varirow[tuoteno]]'>";
-				echo "<option value=''>".t("Oletus")."</option>";
-				echo "<option value='J' $selj>".t("JT")."</option>";
-				echo "<option value='H' $selh>".t("Hyv‰ksy")."</option>";
-				echo "<option value='P' $selp>".t("Puute")."</option>";
+					echo "<td valign='top'><select name='var_array[$varirow[tuoteno]]'>";
+					echo "<option value=''>".t("Oletus")."</option>";
+					echo "<option value='J' $selj>".t("JT")."</option>";
+					echo "<option value='H' $selh>".t("Hyv‰ksy")."</option>";
+					echo "<option value='P' $selp>".t("Puute")."</option>";
 
-				if($laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
-					echo "<option value='W' $selw>".t("Varastosta")."</option>";
+					if($laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
+						echo "<option value='W' $selw>".t("Varastosta")."</option>";
+					}
+
+					echo "</select></td>";
 				}
-
-				echo "</select></td>";
-			}
-			else {
-				echo "<td valign='top'><input type='text' name='var_array[$varirow[tuoteno]]' size='2' maxlength='1' value='".$var_array[$varirow["tuoteno"]]."'></td>";
+				else {
+					echo "<td valign='top'><input type='text' name='var_array[$varirow[tuoteno]]' size='2' maxlength='1' value='".$var_array[$varirow["tuoteno"]]."'></td>";
+				}
 			}
 								
 			echo "<td valign='top'><input type='text' name='hinta_array[$varirow[tuoteno]]' size='".(5+$yhtiorow['hintapyoristys']-2)."' maxlength='".(12+$yhtiorow['hintapyoristys']-2)."' value='".$hinta_array[$varirow["tuoteno"]]."'></td>
 					<td valign='top'><input type='text' name='ale_array[$varirow[tuoteno]]' size='5' maxlength='6' value='".$ale_array[$varirow["tuoteno"]]."'></td>";			
 			
-			if ($toim != "PIKATILAUS") {
-				$chke = $chkn = "";
+			
+			if ($variaaritorivi_osto !== TRUE) {
+				if ($toim != "PIKATILAUS") {
+					$chke = $chkn = "";
 
-				if ($netto_array[$varirow["tuoteno"]] == 'N') {
-					$chkn = 'SELECTED';
-				}
-				elseif($netto_array[$varirow["tuoteno"]] == "E") {
-					$chke = 'SELECTED';
-				}
+					if ($netto_array[$varirow["tuoteno"]] == 'N') {
+						$chkn = 'SELECTED';
+					}
+					elseif($netto_array[$varirow["tuoteno"]] == "E") {
+						$chke = 'SELECTED';
+					}
 
-				echo "<td valign='top'><select name='netto_array[$varirow[tuoteno]]'>";
-				echo "<option value=''>".t("Oletus")."</option>";
-				echo "<option value='N' $chkn>".t("N-Netto")."</option>";
-				echo "<option value='E' $chke>".t("E-Netto")."</option>";
-				echo "</select></td>";
-			}
-			else {
-				echo "<td valign='top'><input type='text' name='netto_array[$varirow[tuoteno]]' size='2' maxlength='1' value='".$netto_array[$varirow["tuoteno"]]."'></td>";
+					echo "<td valign='top'><select name='netto_array[$varirow[tuoteno]]'>";
+					echo "<option value=''>".t("Oletus")."</option>";
+					echo "<option value='N' $chkn>".t("N-Netto")."</option>";
+					echo "<option value='E' $chke>".t("E-Netto")."</option>";
+					echo "</select></td>";
+				}
+				else {
+					echo "<td valign='top'><input type='text' name='netto_array[$varirow[tuoteno]]' size='2' maxlength='1' value='".$netto_array[$varirow["tuoteno"]]."'></td>";
+				}
 			}
 			
 			if ($toim != "PIKATILAUS") {
@@ -159,7 +170,9 @@
 					echo "<td valign='top'>".t("M.V.")."</td>";
 					echo "<input type='hidden' name='alv' value='".$alv_array[$varirow["tuoteno"]]."'>";
 				}
-				else {
+				else {										
+					if ($variaaritorivi_osto === TRUE and $alv_array[$varirow["tuoteno"]] == '') $alv_array[$varirow["tuoteno"]]=$laskurow['alv'];					
+					
 					echo "<td valign='top'>".alv_popup_oletus("alv_array[$varirow[tuoteno]]", $alv_array[$varirow["tuoteno"]], $laskurow["maa"])."</td>";
 				}
 
@@ -186,9 +199,18 @@
 		}
 		
 		if ($toim != "PIKATILAUS") {
-			echo "<tr>
-					<th align='left'>".t("Ker‰ysaika")."</th>
-					<th align='left' colspan='2'>".t("Toimitusaika")."</th>
+			echo "<tr>";
+			
+			if ($variaaritorivi_osto !== TRUE) {
+				echo "<th align='left'>".t("Ker‰ysaika")."</th>";
+				
+				$toimcspl = 2;
+			}
+			else {
+				$toimcspl = 1;
+			}
+			
+			echo "<th align='left' colspan='$toimcspl'>".t("Toimitusaika")."</th>
 					<th colspan='4' align='left'>".t("Kommentti")."</th>";
 		
 			if ($yhtiorow['rivinumero_syotto'] != '') {
@@ -227,9 +249,12 @@
 				$keraysvva = substr($kerayspvm, 0, 4);
 				$keraysppa = substr($kerayspvm, 8, 2);
 			}
-		
-			echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
-			echo "<td valign='top' colspan='2'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";		
+						
+			if ($variaaritorivi_osto !== TRUE) {
+				echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
+			}
+			
+			echo "<td valign='top' colspan='$toimcspl'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";		
 			echo "<td valign='top' colspan='4'><textarea name='kommentti' cols='32' rows='2' wrap='soft'>$kommentti</textarea></td>";
 		
 			if ($yhtiorow['rivinumero_syotto'] != '') {

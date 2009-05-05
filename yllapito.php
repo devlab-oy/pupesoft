@@ -152,12 +152,7 @@
 
 		// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
 		if ($lopetus != '') {
-			// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
-			$lopetus = str_replace('////','?', $lopetus);
-			$lopetus = str_replace('//','&',  $lopetus);
-
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
-			exit;
+			lopetus($lopetus, "META");
 		}
 	}
 
@@ -1045,6 +1040,25 @@
 		echo "</td></tr>";
 		echo "</table>";
 		
+		
+		// Tuotteen saa poistaa mik‰li sill‰ ei ole yht‰‰n tapahtumaa
+		$sdtchk = "";
+		
+		if ($toim == "tuote") {			 			
+			$query = "SELECT yhtio FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+			$sdtres = mysql_query($query) or pupe_error($query);
+						
+			if (mysql_num_rows($sdtres) == 0) {
+				$query = "SELECT yhtio FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and tyyppi!='D'";
+				$sdtres = mysql_query($query) or pupe_error($query);
+								
+				if (mysql_num_rows($sdtres) == 0) {
+					$sdtchk = "OK";
+				}
+			}
+		}
+		
+		
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
 		if ($toim == "avainsana" or
 			$toim == "tili" or
@@ -1062,6 +1076,7 @@
 			$toim == "tuotteen_avainsanat" or
 			$toim == "varaston_tulostimet" or
 			$toim == "pakkaamo" or
+			($toim == "tuote" and $sdtchk == "OK") or
 			($toim == "toimi" and $kukarow["taso"] == "3")) {
 
 			// Tehd‰‰n "poista tietue"-nappi

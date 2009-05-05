@@ -114,12 +114,12 @@
 			echo "</tr>";
 
 			$summa = 0;
-
+			$alvsumma=array();
 			while ($row = mysql_fetch_array($result)) {
 				echo "<tr class='aktiivi'>";
 				echo "<td>$row[tilino]</td>";
 				echo "<td>$row[nimi]</td>";
-				echo "<td align='right'>$row[summa]</td>";
+				echo "<td align='right'>". number_format($row[summa], 2, ',', ' ')."</td>";
 				echo "</tr>";
 				$summa += $row["summa"];
 			}
@@ -138,7 +138,8 @@
 
 		if ($laji == "myynti") {
 			$laskurajaus = "AND lasku.tila = 'U'";
-			$laskutiedot = "lasku.laskunro, lasku.nimi, lasku.tapvm, lasku.arvo summa, '$yhtiorow[valkoodi]' valkoodi";
+			
+			$laskutiedot = "lasku.laskunro, lasku.nimi, lasku.tapvm, lasku.arvo summa, '$yhtiorow[valkoodi]' valkoodi, vienti";
 		}
 
 		if ($laji == "osto") {
@@ -153,7 +154,7 @@
 
 		if ($laskurajaus != "") {
 
-			$query = "	SELECT $laskutiedot
+			$query = "	SELECT lasku.tunnus, $laskutiedot
 						FROM lasku
 						JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
 							AND tiliointi.ltunnus = lasku.tunnus
@@ -167,32 +168,86 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
-				echo "<br><table>";
+				echo "<br><table width = '1000px'>";
 				echo "<tr>";
 				echo "<th>#</th>";
 				echo "<th>".t("Nimi")."</th>";
 				echo "<th>".t("Tapvm")."</th>";
 				echo "<th>".t("Summa")."</th>";
-				echo "<th></th>";
+				echo "<th>".t("vienti")."</th>";
+				echo "<th>".t("Valuutta")."</th>";
+				if($laji == "myynti") {
+					echo "<th>".t("Alv 22%")."</th>";
+					echo "<th>".t("Alv 17%")."</th>";
+					echo "<th>".t("Alv 8%")."</th>";
+					echo "<th>".t("Alv 0%")."</th>";
+				}
 				echo "</tr>";
 
 				$summa = 0;
 
 				while ($row = mysql_fetch_array($result)) {
+					if(in_array($row["vienti"], array("", "A", "B", "C", "J"))) {
+						$row["vienti"] = t("Kotimaa");
+					}
+					elseif(in_array($row["vienti"], array("D", "E", "F", "K"))) {
+						$row["vienti"] = t("EU");
+					}
+					elseif(in_array($row["vienti"], array("G", "H", "I", "L"))) {
+						$row["vienti"] = t("EI EU");
+					}
+					
 					echo "<tr class='aktiivi'>";
 					echo "<td nowrap valign='top'>$row[laskunro]</td>";
 					echo "<td valign='top'>$row[nimi]</td>";
 					echo "<td nowrap valign='top'>$row[tapvm]</td>";
-					echo "<td nowrap valign='top' align='right'>$row[summa]</td>";
+					echo "<td nowrap valign='top' align='right'>".number_format($row["summa"], 2, ',', ' ')."</td>";
 					echo "<td nowrap valign='top' align='right'>$row[valkoodi]</td>";
+					echo "<td nowrap valign='top' align='right'>$row[vienti]</td>";
+					
+					if($laji == "myynti") {
+						//	Tehd‰‰n lista viel‰ alv erottelusta
+						$query = "	SELECT 	sum(if(tilausrivi.alv=22, rivihinta*(tilausrivi.alv/100), 0)) alv22,
+											sum(if(tilausrivi.alv=17, rivihinta*(tilausrivi.alv/100), 0)) alv17,
+											sum(if(tilausrivi.alv=8, rivihinta*(tilausrivi.alv/100), 0)) alv8,
+											sum(if(tilausrivi.alv=0, 0, 0)) alv0
+									FROM lasku
+									JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi!='D'
+									WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$row[tunnus]'";
+						$alvres = mysql_query($query) or pupe_error($query);
+						$alvrow=mysql_fetch_array($alvres);
+						echo "<td nowrap valign='top' align='right'>".number_format($alvrow["alv22"], 2, ',', ' ')."</td>";
+						echo "<td nowrap valign='top' align='right'>".number_format($alvrow["alv17"], 2, ',', ' ')."</td>";
+						echo "<td nowrap valign='top' align='right'>".number_format($alvrow["alv8"], 2, ',', ' ')."</td>";
+						echo "<td nowrap valign='top' align='right'>".number_format($alvrow["alv0"], 2, ',', ' ')."</td>";
+						$alvsumma["22"]+=$alvrow["alv22"];
+						$alvsumma["17"]+=$alvrow["alv17"];
+						$alvsumma["8"]+=$alvrow["alv8"];
+						$alvsumma["0"]+=$alvrow["alv0"];
+					}
+					
+					if($laji == "myynti") {
+						echo "<td nowrap valign='top' class='back'><a href='../tilauskasittely/tulostakopio.php?otunnus=$row[tunnus]&toim=LASKU&tee=NAYTATILAUS'>".t("N‰yt‰ lasku")."</a></td>";
+					}
+					else {
+						echo "<td nowrap valign='top' class='back'>".ebid($row['tunnus'])."</td>";
+					}
+					
 					echo "</tr>";
 					$summa += $row["summa"];
 				}
 
 				echo "<tr>";
 				echo "<th colspan='3'>".t("Yhteens‰")."</th>";
-				echo "<th style='text-align:right;'>". sprintf("%.02f", $summa)."</td>";
-				echo "<th></th>";
+				echo "<th style='text-align:right;'>". number_format($summa, 2, ',', ' ')."</th>";
+				if($laji == "myynti") {
+					echo "<th style='text-align:right;'></th>";
+					echo "<th style='text-align:right;'></th>";				
+					echo "<th style='text-align:right;'>".number_format($alvsumma["22"], 2, ',', ' ')."</th>";
+					echo "<th style='text-align:right;'>".number_format($alvsumma["17"], 2, ',', ' ')."</th>";
+					echo "<th style='text-align:right;'>".number_format($alvsumma["8"], 2, ',', ' ')."</th>";
+					echo "<th style='text-align:right;'>".number_format($alvsumma["0"], 2, ',', ' ')."</th>";
+				}
 				echo "</tr>";
 
 				echo "</table>";

@@ -344,12 +344,7 @@ if ($tee == "tilitaso") {
 
 if ($tee == "") {
 	if ($lopetus != '') {
-		// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
-		$lopetus = str_replace('////','?', $lopetus);
-		$lopetus = str_replace('//','&',  $lopetus);
-		
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$lopetus'>";
-		exit;
+		lopetus($lopetus, "META");
 	}
 }
 

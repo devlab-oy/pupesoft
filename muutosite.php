@@ -1105,13 +1105,9 @@ if (strlen($tee) == 0) {
 			</table>";
 }
 
-
 if ($lopetus != '') {
-	// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
-	$lopetus1 = str_replace('////','?', $lopetus);
-	$lopetus1 = str_replace('//','&',  $lopetus1);
 	echo "<br><br>";
-	echo "<a href='$lopetus1'>".t("Palaa edelliseen n‰kym‰‰n")."</a>";
+	lopetus($lopetus);
 }
 
 require "inc/footer.inc";

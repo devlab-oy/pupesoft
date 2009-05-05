@@ -1,4 +1,5 @@
 <?php
+	
 	if (isset($_POST["teetiedosto"])) {
 		if($_POST["teetiedosto"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
@@ -20,8 +21,6 @@
 			require ('../inc/footer.inc');
 			exit;
 		}
-		
-		
 		
 		echo "<font class='head'>".t("Tase/tuloslaskelma")."</font><hr>";
 
@@ -394,11 +393,12 @@
 						<input type = 'hidden' name = 'kirjain' value = '$kirjain'>
 						<input type = 'hidden' name = 'taso' value = '$aputyyppi'>";
 
-				$lopetus = "tuloslaskelma.php////";
+				$lopetus =  $palvelin2."raportit/tuloslaskelma.php////";
 
 				foreach ($_REQUEST as $key => $value) {
 					$lopetus .= $key."=".$value."//";
 				}
+				
 				echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 
 				echo "<td class='back' colspan='3'></td>";

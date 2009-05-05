@@ -192,20 +192,14 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 			echo "</tr>";
 		}
 
-		echo "</table><br>";
+		echo "</table>";
 		
-		if($lopetus == "") {
-			echo "<br><br><a href='muutosite.php?tee=E&tunnus={$laskurow['tunnus']}'>&laquo; ".t('Takaisin laskulle')."</a>";
-		}
-		else {
+		echo "<br><br><a href='muutosite.php?tee=E&tunnus={$laskurow['tunnus']}&lopetus=$lopetus'>&laquo; ".t('Takaisin laskulle')."</a>";
 
-			echo "	<form name='lopetusformi' action='".urldecode($lopetus)."' method='post'>
-						<input type='submit' value='".t("Siirry sinne mistä tulit")."'>
-					</form>";
+		if ($lopetus != "") {						
+			echo "<br><br>";
+			lopetus($lopetus);
 		}
-	}
-	else{
-		//echo "<font class='error'>".t("HEI, sun natsat ei ehkä riitä tähän")."</font><br>";
 	}
 }
 

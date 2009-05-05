@@ -1105,13 +1105,9 @@ if ($ytunnus!='') {
 	}	
 }
 
-
 if ($lopetus != '') {
-	// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
-	$lopetus = str_replace('////','?', $lopetus);
-	$lopetus = str_replace('//','&',  $lopetus);
-	echo "<br>";
-	echo "<a href='$lopetus'>".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";	
+	echo "<br><br>";
+	lopetus($lopetus);
 }
 
 // kursorinohjausta

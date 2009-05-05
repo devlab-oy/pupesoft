@@ -752,11 +752,10 @@ if($tee == "NAYTA") {
 
 	if($lopetus != "") {
 
-		echo "
-		</div>
-		<form name='lopetusformi' action='$lopetus' method='post'>
-			<input type='submit' value='".t("Siirry sinne mistä tulit")."'>
-		</form>";
+		echo "</div>";
+		
+		echo "<br><br>";
+		lopetus($lopetus);
 	}
 }
 

@@ -35,7 +35,7 @@
 		if ($ytunnus != '' or $asiakasid > 0) {
 		
 			$kutsuja 	= "asiakasemo.php";
-			$ahlopetus 	= "crm/asiakasmemo.php";
+			$ahlopetus 	= $palvelin2."crm/asiakasmemo.php";
 		
 			require ("../inc/asiakashaku.inc");
 		}
@@ -438,7 +438,7 @@
 
 
 				if (mysql_num_rows($result) > 0) {
-					echo "<td><a href='../yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Luo uusi yhteyshenkilö")."</a></td>";
+					echo "<td><a href='../yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=".$palvelin2."crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Luo uusi yhteyshenkilö")."</a></td>";
 				}
 				else {
 					echo "<td>".t("(Luo uusi yhteyshenkilö)")."</td>";
@@ -450,7 +450,7 @@
 
 
 				if (mysql_num_rows($result) > 0 and $yhtunnus != '') {
-					echo "<td><a href='../yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Muuta yhteyshenkilön tietoja")."</a></td>";
+					echo "<td><a href='../yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=".$palvelin2."crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Muuta yhteyshenkilön tietoja")."</a></td>";
 				}
 				else {
 					echo "<td></td>";
@@ -477,7 +477,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) > 0) {
-					echo "<td><a href='kalenteri.php?lopetus=asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Kalenteri")."</a></td>";
+					echo "<td><a href='kalenteri.php?lopetus=".$palvelin2."crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Kalenteri")."</a></td>";
 				}
 				else {
 					echo "<td>".t("Kalenteri")."</td>";
@@ -498,7 +498,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) > 0) {
-					echo "<td><a href='../raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=MYYNTI&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuoteosasto2=kaikki&yhtiot[]=$kukarow[yhtio]&jarjestys[]=&lopetus=../crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Myynninseuranta")."</a></td>";
+					echo "<td><a href='../raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=MYYNTI&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuoteosasto2=kaikki&yhtiot[]=$kukarow[yhtio]&jarjestys[]=&lopetus=".$palvelin2."crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Myynninseuranta")."</a></td>";
 				}
 				else {
 					echo "<td>".t("Myynninseuranta")."</td>";
@@ -521,7 +521,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) > 0) {
-					echo "<td><a href='../raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=ALENNUKSET&lopetus=../crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Näytä alennustaulukko")."</a></td>";
+					echo "<td><a href='../raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=ALENNUKSET&lopetus=".$palvelin2."crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Näytä alennustaulukko")."</a></td>";
 				}
 				else {
 					echo "<td><u>".t("(Näytä alennustaulukko)")."</u></td>";

@@ -653,13 +653,8 @@ if ($silent == "") {
 		echo "<hr>";
 
 		if ($lopetus != '') {
-			// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
-			$lopetus = str_replace('////','?', $lopetus);
-			$lopetus = str_replace('//','&',  $lopetus);
-
-			echo "<form action='$lopetus' method='post'>";
-			echo "<input type='submit' value='".t("Takaisin sarjanumeroseurantaan")."'>";
-			echo "</form>";
+			echo "<br><br>";
+			lopetus($lopetus);
 		}
 		else {
 			echo "<form action='$PHP_SELF' method='post'>";

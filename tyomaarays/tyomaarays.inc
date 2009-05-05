@@ -5,7 +5,7 @@
 		$otunnus = $kukarow["kesken"];
 
 		if ($toim != "REKLAMAATIO") {
-			$tulostimet[0] = "Työmääräys";
+			$tulostimet[0] = "Työmääräys";			
 			require_once ("tulosta_tyomaarays.inc");
 		}
 		else {
@@ -143,14 +143,8 @@
 		$kukarow['kesken']	= '';
 		
 		if ($lopetus != '') {
-			// Jotta urlin parametrissa voisi päässätä toisen urlin parametreineen
-			$lopetus = str_replace('////','?', $lopetus);
-			$lopetus = str_replace('//','&',  $lopetus);
-
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
-			exit;
+			lopetus($lopetus, "META");
 		}
-
 	}
 
 	if ($toim == "TYOMAARAYS" and $tee == 'VALMIS') {	

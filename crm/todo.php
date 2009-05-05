@@ -98,6 +98,7 @@ if ($tee == "muokkaa") {
 				<option $prio_sel[8] value='8'>8</option>
 				<option $prio_sel[9] value='9'>9</option>
 				<option $prio_sel[10] value='10'>Hyväksynnässä</option>
+				<option $prio_sel[11] value='11'>Testauksessa</option>
 				</select>
 			</td>
 
@@ -247,6 +248,7 @@ if ($tee == "") {
 				<option value='8'>8</option>
 				<option value='9' selected>9</option>
 				<option value='10'>Hyväksynnässä</option>
+				<option value='11'>Testauksessa</option>
 				</select>
 			</td>
 
@@ -399,6 +401,10 @@ if ($tee == "") {
 			
 			if ($rivi["prioriteetti"] == 10) {
 				$rivi["prioriteetti"] = "hyväksynnässä";
+			}			
+			
+			if ($rivi["prioriteetti"] == 11) {
+				$rivi["prioriteetti"] = "testauksessa";
 			}
 
 			$numero ++;
@@ -484,6 +490,10 @@ if ($tee == "") {
 		
 		if ($rivi["prioriteetti"] == 10) {
 			$rivi["prioriteetti"] = "hyväksynnässä";
+		}
+
+		if ($rivi["prioriteetti"] == 11) {
+			$rivi["prioriteetti"] = "testauksessa";
 		}
 
 		if ($rivi["deadline"] == '9999-12-31') {

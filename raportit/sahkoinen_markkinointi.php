@@ -357,7 +357,7 @@
 							AND kieli = 'fi'
 							AND laji = 'ASAVAINSANA'
 							AND selitetark_3 = 'mursu'
-							ORDER BY jarjestys, selite";
+							ORDER BY jarjestys";
 				$otsikot_res = mysql_query($query) or pupe_error($query);
 
 				while ($otsikot_row = mysql_fetch_assoc($otsikot_res)) {
@@ -566,7 +566,7 @@
 					$worksheet->writeString($excelrivi, $excelsarake, $yht_row["vm"], 	$format_bold);
 					$excelsarake++;
 
-					$query = "	SELECT DISTINCT selitetark, jarjestys
+					$query = "	SELECT DISTINCT selite, jarjestys
 								FROM avainsana
 								WHERE yhtio = '{$kukarow['yhtio']}'
 								AND kieli = 'fi'
@@ -585,7 +585,7 @@
 									FROM asiakkaan_avainsanat
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND liitostunnus = '{$row['tunnus']}'
-									AND laji = '{$otsikot_row['selitetark']}'";
+									AND laji = '{$otsikot_row['selite']}'";
 						$attr_res = mysql_query($query) or pupe_error($query);
 
 						$attr_row = mysql_fetch_assoc($attr_res);

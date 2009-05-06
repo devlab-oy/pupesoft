@@ -1863,7 +1863,7 @@
 									$row['kommentti'] .= "\n*******".t("Toimitetaan erikseen",$kieli).".*******";
 								}
 								else {
-									$row['kommentti'] .= "\n*******".t("Toimitettu erikseen",$kieli).".*******";
+									$row['kommentti'] .= "\n*******".t("Toimitettu erikseen tilauksella",$kieli)." ".$row['otunnus'].".*******";
 								}
 
 								$row['rivihinta']   = "";

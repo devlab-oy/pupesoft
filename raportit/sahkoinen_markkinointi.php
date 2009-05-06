@@ -349,20 +349,26 @@
 				$worksheet->writeString($excelrivi, $excelsarake, t("Cc"), $format_bold);
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Vm"), $format_bold);
+				$excelsarake++;
 
-				if (isset($dyn) and count($dyn) > 0) {
-					$excelsarake++;
+				$query = "	SELECT DISTINCT selitetark, jarjestys
+							FROM avainsana
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND kieli = 'fi'
+							AND laji = 'ASAVAINSANA'
+							AND selitetark_3 = 'mursu'
+							ORDER BY jarjestys, selite";
+				$otsikot_res = mysql_query($query) or pupe_error($query);
 
-					if ($ika1 != '' or $ika2 != '') {
+				while ($otsikot_row = mysql_fetch_assoc($otsikot_res)) {
+
+					if (strtolower($otsikot_row['selitetark']) == 'ikä') {
 						$worksheet->writeString($excelrivi, $excelsarake, t("Syntymävuosi"), $format_bold);
 						$excelsarake++;
 					}
-
-					foreach($dyn as $muuttuja) {
-						if ($$muuttuja != '') {
-							$worksheet->writeString($excelrivi, $excelsarake, t($muuttuja), $format_bold);
-							$excelsarake++;
-						}
+					else {
+						$worksheet->writeString($excelrivi, $excelsarake, t($otsikot_row['selitetark']), $format_bold);
+						$excelsarake++;
 					}
 				}
 
@@ -558,45 +564,33 @@
 					$worksheet->writeString($excelrivi, $excelsarake, $yht_row["cc"], 	$format_bold);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, $yht_row["vm"], 	$format_bold);
+					$excelsarake++;
 
-					if (isset($dyn) and count($dyn) > 0) {
+					$query = "	SELECT DISTINCT selitetark, jarjestys
+								FROM avainsana
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND kieli = 'fi'
+								AND laji = 'ASAVAINSANA'
+								AND selitetark_3 = 'mursu'
+								ORDER BY jarjestys, selite";
+					$otsikot_res = mysql_query($query) or pupe_error($query);
+
+					while ($otsikot_row = mysql_fetch_assoc($otsikot_res)) {
+
+						if (strtolower($otsikot_row['selitetark']) == 'ikä') {
+							$otsikot_row['selitetark'] = 'syntymavuosi';
+						}
+
+						$query = "	SELECT *
+									FROM asiakkaan_avainsanat
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND liitostunnus = '{$row['tunnus']}'
+									AND laji = '{$otsikot_row['selitetark']}'";
+						$attr_res = mysql_query($query) or pupe_error($query);
+
+						$attr_row = mysql_fetch_assoc($attr_res);
+						$worksheet->writeString($excelrivi, $excelsarake, $attr_row['avainsana'], $format_bold);
 						$excelsarake++;
-
-						if ($ika1 != '' or $ika2 != '') {
-
-							$query = "	SELECT *
-										FROM asiakkaan_avainsanat
-										WHERE yhtio = '{$kukarow['yhtio']}'
-										AND liitostunnus = '{$row['tunnus']}'
-										AND laji = 'syntymavuosi'";
-							$attr_res = mysql_query($query) or pupe_error($query);
-
-							if (mysql_num_rows($attr_res) > 0) {
-								$attr_row = mysql_fetch_assoc($attr_res);
-								$worksheet->writeString($excelrivi, $excelsarake, $attr_row['avainsana'], $format_bold);
-								$excelsarake++;
-							}
-						}
-
-						foreach($dyn as $muuttuja) {
-							if ($$muuttuja != '') {
-								$$muuttuja = mysql_real_escape_string($$muuttuja);
-
-								$query = "	SELECT *
-											FROM asiakkaan_avainsanat
-											WHERE yhtio = '{$kukarow['yhtio']}'
-											AND liitostunnus = '{$row['tunnus']}'
-											AND laji = '$muuttuja'
-											AND avainsana = '${$muuttuja}'";
-								$attr_res = mysql_query($query) or pupe_error($query);
-
-								if (mysql_num_rows($attr_res) > 0) {
-									$attr_row = mysql_fetch_assoc($attr_res);
-									$worksheet->writeString($excelrivi, $excelsarake, $attr_row['avainsana'], $format_bold);
-									$excelsarake++;
-								}
-							}
-						}
 					}
 
 					$excelrivi++;

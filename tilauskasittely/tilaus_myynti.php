@@ -2919,7 +2919,7 @@ if ($tee == '') {
 		unset($tuotenimitys);
 		unset($tuoteno);
 		unset($var);
-		unset($variaatio_tuoteno);
+		if (!isset($lisaa_jatka)) unset($variaatio_tuoteno);
 		unset($var_array);	
 	}
 

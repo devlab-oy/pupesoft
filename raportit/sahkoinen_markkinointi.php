@@ -336,7 +336,9 @@
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Sähköpostiosoite"), $format_bold);
 				$excelsarake++;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Postitp Postino"), $format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Postitp"), $format_bold);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, t("Postino"), $format_bold);
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Yhteensopivuustunnus"), $format_bold);
 				$excelsarake++;
@@ -549,7 +551,9 @@
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, $row["email"], 	$format_bold);
 					$excelsarake++;
-					$worksheet->writeString($excelrivi, $excelsarake, $row["postino"]." ".$row["postitp"], 	$format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, $row["postino"], 	$format_bold);
+					$excelsarake++;
+					$worksheet->writeString($excelrivi, $excelsarake, $row["postitp"], 	$format_bold);
 					$excelsarake++;
 
 					$worksheet->writeString($excelrivi, $excelsarake, $avain_row["avainsana"], 	$format_bold);
@@ -603,9 +607,9 @@
 				$workbook->close();
 			}
 
-			list ($fname, $ext) = explode(".", $tmptiedostonimi);
+			$info = pathinfo($tmptiedostonimi);
 
-			file_put_contents("/tmp/$fname.csv", $rivi);
+			file_put_contents("/tmp/$info[filename].csv", $rivi);
 			echo "<tr><th colspan='10' id='riveja'>",t("Rivejä")," $rows ",t("kappaletta"),"</th></tr>";
 		}
 		echo "</form>";

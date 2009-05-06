@@ -487,12 +487,7 @@
 					$apuprintteri = $prirow['printteri5']; // laskuprintteri
 				}
 				else {
-					if ($valittu_tulostin == "oletukselle") {
-						$apuprintteri = $prirow['printteri1']; // läheteprintteri
-					}
-					else {
-						$apuprintteri = $valittu_tulostin;
-					}
+					$apuprintteri = $valittu_tulostin;
 				}
 
 				//haetaan lähetteen tulostuskomento
@@ -500,14 +495,9 @@
 				$kirres  = mysql_query($query) or pupe_error($query);
 				$kirrow  = mysql_fetch_array($kirres);
 				$komento = $kirrow['komento'];
-
-				if ($valittu_oslapp_tulostin == "oletukselle") {
-					$apuprintteri = $prirow['printteri3']; // osoitelappuprintteri
-				}
-				else {
-					$apuprintteri = $valittu_oslapp_tulostin;
-				}
 				
+				$apuprintteri = $valittu_oslapp_tulostin;
+							
 				//haetaan osoitelapun tulostuskomento
 				$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
 				$kirres = mysql_query($query) or pupe_error($query);
@@ -687,7 +677,7 @@
 									$row['kommentti'] .= "\n*******".t("Toimitetaan erikseen",$kieli).".*******";
 								}
 								else {
-									$row['kommentti'] .= "\n*******".t("Toimitettu erikseen",$kieli).".*******";
+									$row['kommentti'] .= "\n*******".t("Toimitettu erikseen tilauksella",$kieli)." ".$row['otunnus'].".*******";
 								}
 
 								$row['rivihinta'] 	= "";
@@ -1667,6 +1657,29 @@
 			$tunnukset = implode(',', $checktunnukset);
 		}
 		
+		echo "	<script language='javascript'>
+				function summaa_kollit(kollit_yht) {
+					
+					var currForm = kollit_yht.form;
+					var isChecked = kollit_yht.checked;
+					var nimi = 'kollit';					
+					var yht = 0;
+					
+					for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {											
+						if (currForm.elements[elementIdx].name.substring(0,6) == nimi) {
+							yht += Math.round(currForm.elements[elementIdx].value);
+						}
+					}
+					
+					if (isNaN(yht)) {
+						currForm.oslappkpl.value=0;
+					}
+					else {
+						currForm.oslappkpl.value=yht;
+					}										
+				}
+			</script> ";
+		
 		echo "<table>";
 		echo "<form name='rahtikirjainfoa' action='$PHP_SELF' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='rahtikirjan_esisyotto' value='$rahtikirjan_esisyotto'>";
@@ -1810,6 +1823,58 @@
 		}
 
 		if (strtoupper($tulostustapa) == 'H' or strtoupper($tulostustapa) == 'K') {
+			if ($otsik['pakkaamo'] > 0 and $otsik['varasto'] != '' and $otsik['tulostusalue'] != '') {
+				$query = "	SELECT pakkaamo.printteri2, pakkaamo.printteri4, pakkaamo.printteri6
+							from pakkaamo
+							where pakkaamo.yhtio='$kukarow[yhtio]' 
+							and pakkaamo.tunnus='$otsik[pakkaamo]'
+							order by pakkaamo.tunnus";
+			}
+			elseif ($otsik['tulostusalue'] != '' and $otsik['varasto'] != '') {
+				$query = "	SELECT varaston_tulostimet.printteri2, varaston_tulostimet.printteri4, varaston_tulostimet.printteri6
+							FROM varaston_tulostimet
+							WHERE varaston_tulostimet.yhtio = '{$kukarow['yhtio']}' 
+							AND varaston_tulostimet.nimi = '{$otsik['tulostusalue']}'
+							AND varaston_tulostimet.varasto = '{$otsik['varasto']}'
+							ORDER BY varaston_tulostimet.prioriteetti, varaston_tulostimet.alkuhyllyalue";
+							echo "varaston_tulostimet";
+			}
+			else {
+				$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$tulostuspaikka'";				
+			}
+			
+			$pres  = mysql_query($query) or pupe_error($query);
+			$print = mysql_fetch_array($pres);
+			
+			// haetaan toimitustavan tiedot
+			$query    = "select * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
+			$toitares = mysql_query($query) or pupe_error($query);
+			$toitarow = mysql_fetch_array($toitares);
+
+			// haetaan rahtikirjan tyyppi
+			$query    = "select * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'RAHTIKIRJA' and selite = '$toitarow[rahtikirja]'";
+			$avainres = mysql_query($query) or pupe_error($query);
+			$avainrow = mysql_fetch_array($avainres);
+			
+			if ($avainrow["selitetark_2"] == "1") {
+				$kirjoitin_tunnus = $print["printteri6"]; // Rahtikirja A4
+			}
+			elseif ($avainrow["selitetark_2"] == "2") {
+				$kirjoitin_tunnus = $print["printteri4"]; // Rahtikirja A5
+			}
+			elseif ($avainrow["selitetark_2"] == "3") {
+				$kirjoitin_tunnus = $print["printteri2"]; // Rahtikirja matriisi
+			}
+			elseif ($toitarow['tulostustapa'] == 'H') {
+				$kirjoitin_tunnus = $print["printteri4"]; // Rahtikirja A5
+			}
+			elseif (strpos($toitarow['rahtikirja'],'pdf') === false) {
+				$kirjoitin_tunnus = $print["printteri2"]; // Rahtikirja matriisi
+			}
+			else {
+				$kirjoitin_tunnus = $print["printteri6"]; // Rahtikirja A4
+			}
+			
 			$query = "	SELECT *
 						FROM kirjoittimet
 						WHERE
@@ -1817,11 +1882,15 @@
 						ORDER by kirjoitin";
 			$kirre = mysql_query($query) or pupe_error($query);
 
-			echo "<th>".t("Rahtikirjatulostin")."</th><td><select name='komento'>";
-			echo "<option value=''>".t("Oletus")."</option>";
+			echo "<th>".t("Rahtikirjatulostin")."</th><td><select name='komento'>";		
 
 			while ($kirrow = mysql_fetch_array($kirre)) {
-				echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
+				$sel = "";
+				if ($kirrow['tunnus'] == $kirjoitin_tunnus) {
+					$sel = "SELECTED";
+				}
+				
+				echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
 			}
 			echo "</select></td>";
 		}
@@ -2043,13 +2112,20 @@
 				if ($roror['kuutiot']>0)				$kuutiot[$i]			= $roror['kuutiot'];
 				if ($roror['lavametri']>0)				$lavametri[$i]			= $roror['lavametri'];
 				if ($roror['pakkauskuvaustark']!='')	$pakkauskuvaustark[$i]	= $roror['pakkauskuvaustark'];
-			}
-
+			}			
+			
 			echo "<tr>
 			<td><input type='hidden' name='pakkaus[$i]' value='$row[selite]'>
-				<input type='hidden' name='pakkauskuvaus[$i]' value='$row[selitetark]'>
-			    <input type='text' size='4' value='$kollit[$i]' name='kollit[$i]'></td>
-			<td><input type='text' size='7' value='$kilot[$i]' name='kilot[$i]'></td>
+				<input type='hidden' name='pakkauskuvaus[$i]' value='$row[selitetark]'>";
+			
+			if (strtoupper($tulostustapa) == 'E' or strtoupper($tulostustapa) == 'L') {
+				echo "<input type='text' size='4' value='$kollit[$i]' name='kollit[$i]' onKeyUp='summaa_kollit(this);'></td>";
+			}
+			else {
+				echo "<input type='text' size='4' value='$kollit[$i]' name='kollit[$i]'></td>";
+			}			
+			
+			echo "<td><input type='text' size='7' value='$kilot[$i]' name='kilot[$i]'></td>
 			<td><input type='text' size='7' value='$kuutiot[$i]' name='kuutiot[$i]'></td>
 			<td><input type='text' size='7' value='$lavametri[$i]' name='lavametri[$i]'></td>
 			<td>$row[selite]</td>
@@ -2153,9 +2229,60 @@
 		if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != 'Y' or $mista != 'keraa.php') {
 
 			$sel 		= "SELECTED";
-			$oslappkpl 	= 0;
-			$lahetekpl  = 0;
+			$oslappkpl 	= $yhtiorow['oletus_rahtikirja_oslappkpl'];
+			$lahetekpl  = $yhtiorow['oletus_rahtikirja_lahetekpl'];
 
+
+			//tulostetaan faili ja valitaan sopivat printterit
+			if ($otsik['pakkaamo'] > 0 and $otsik['varasto'] != '' and $otsik['tulostusalue'] != '') {
+				$query = "	SELECT pakkaamo.printteri1, pakkaamo.printteri3, varastopaikat.printteri5
+							from pakkaamo
+							join varastopaikat ON pakkaamo.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '$otsik[varasto]'
+							where pakkaamo.yhtio='$kukarow[yhtio]' 
+							and pakkaamo.tunnus='$otsik[pakkaamo]'
+							order by pakkaamo.tunnus";
+			}
+			elseif ($otsik['tulostusalue'] != '' and $otsik['varasto'] != '') {
+				$query = "	SELECT varaston_tulostimet.printteri1, varaston_tulostimet.printteri3, varastopaikat.printteri5
+							FROM varaston_tulostimet
+							JOIN varastopaikat ON (varaston_tulostimet.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '{$otsik['varasto']}')
+							WHERE varaston_tulostimet.yhtio = '{$kukarow['yhtio']}' 
+							AND varaston_tulostimet.nimi = '{$otsik['tulostusalue']}'
+							AND varaston_tulostimet.varasto = '{$otsik['varasto']}'
+							ORDER BY varaston_tulostimet.prioriteetti, varaston_tulostimet.alkuhyllyalue";
+			}
+			elseif ($otsik["varasto"] == '') {
+				$query = "	SELECT *
+							from varastopaikat
+							where yhtio='$kukarow[yhtio]'
+							order by alkuhyllyalue,alkuhyllynro
+							limit 1";
+			}
+			else {
+				$query = "	SELECT *
+							from varastopaikat
+							where yhtio='$kukarow[yhtio]' and tunnus='$otsik[varasto]'
+							order by alkuhyllyalue,alkuhyllynro";
+			}
+			$prires = mysql_query($query) or pupe_error($query);
+
+			
+			if (mysql_num_rows($prires) > 0) {
+				$prirow= mysql_fetch_array($prires);
+				
+				$lahete_printteri = "";
+				//lähete
+				if ($prirow['printteri1'] != '') {
+					$lahete_printteri = $prirow['printteri1'];
+				}
+				
+				$oslappu_printteri = "";
+				//osoitelappu
+				if ($prirow['printteri3'] != '') {
+					$oslappu_printteri = $prirow['printteri3'];
+				}				
+			}
+			
 			echo "<br><table>";
 			echo "<tr><th>".t("Lähete").":</th><th>";
 
@@ -2169,10 +2296,14 @@
 			echo "<select name='valittu_tulostin'>";
 
 			echo "<option value=''>".t("Ei tulosteta")."</option>";
-			echo "<option value='oletukselle' $sel>".t("Oletustulostimelle")."</option>";
-
+			
 			while ($kirrow = mysql_fetch_array($kirre)) {
-				echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
+				$sel = "";
+				if ($kirrow['tunnus'] == $lahete_printteri) {
+					$sel = "SELECTED";
+				}
+				
+				echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
 			}
 
 			echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'></th>";
@@ -2190,10 +2321,14 @@
 
 			echo "<select name='valittu_oslapp_tulostin'>";
 			echo "<option value=''>".t("Ei tulosteta")."</option>";
-			echo "<option value='oletukselle' $sel>".t("Oletustulostimelle")."</option>";
-
+			
 			while ($kirrow = mysql_fetch_array($kirre)) {
-				echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
+				$sel = "";
+				if ($kirrow['tunnus'] == $oslappu_printteri) {
+					$sel = "SELECTED";
+				}
+				
+				echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
 			}
 
 			echo "</select> ".t("Kpl").": <input type='text' size='4' name='oslappkpl' value='$oslappkpl'></th></tr>";

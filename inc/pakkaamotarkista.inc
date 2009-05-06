@@ -54,7 +54,15 @@
 					}
 				}
 			}
-
+			
+			if (mysql_field_name($result, $i) == "printteri0") {
+				if (trim($t[$i]) == '') {
+					$virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhjä")."!";
+				}
+				else {
+					$t[$i] = trim(mysql_real_escape_string($t[$i]));
+				}
+			}
 			if (mysql_field_name($result, $i) == "printteri1") {
 				if (trim($t[$i]) == '') {
 					$virhe[$i] .= t("Pakkaamon tulostin ei saa olla tyhjä")."!";

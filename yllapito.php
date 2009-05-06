@@ -362,6 +362,17 @@
 					$laskuores = mysql_query($query) or pupe_error($query);
 
 					while ($laskuorow = mysql_fetch_array($laskuores)) {
+						
+						if (trim($otsikrow["toim_nimi"]) == "") {
+							$otsikrow["toim_nimi"]		= $otsikrow["nimi"];
+							$otsikrow["toim_nimitark"]	= $otsikrow["nimitark"];
+							$otsikrow["toim_osoite"]	= $otsikrow["osoite"];
+							$otsikrow["toim_postino"]	= $otsikrow["postino"];
+							$otsikrow["toim_postitp"]	= $otsikrow["postitp"];
+							$otsikrow["toim_maa"]		= $otsikrow["maa"];
+						}
+						
+						
 						$query = "	UPDATE lasku
 									SET ytunnus			= '$otsikrow[ytunnus]',
 									ovttunnus			= '$otsikrow[ovttunnus]',
@@ -869,8 +880,11 @@
 			}
 			else {
 				switch (mysql_field_name($result,$i)) {
+					case "printteri0":
+						$otsikko = t("Keräyslista");
+						break;
 					case "printteri1":
-						$otsikko = t("Lähete/Keräyslista");
+						$otsikko = t("Lähete");
 						break;
 					case "printteri2":
 						$otsikko = t("Rahtikirja matriisi");

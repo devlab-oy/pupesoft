@@ -365,13 +365,13 @@
 				}
 				
 				
-				//haetaan lähetteen oletustulostin
+				//haetaan keräyslistan oletustulostin
 				$query = "	select *
 							from varastopaikat
 							where yhtio='$kukarow[yhtio]' and tunnus='$tul_varastoon'";
 				$prires = mysql_query($query) or pupe_error($query);
 				$prirow = mysql_fetch_array($prires);
-				$kirjoitin = $prirow['printteri1'];
+				$kirjoitin = $prirow['printteri0'];
 
 				$varasto = $tul_varastoon;
 				$tilaus  = $tilaukset;
@@ -815,13 +815,13 @@
 					echo "</tr>";
 				}
 				else {
-					//haetaan lähetteen oletustulostin
+					//haetaan keräyslistan oletustulostin
 					$query = "	select *
 								from varastopaikat
 								where yhtio='$kukarow[yhtio]' and tunnus='$tilrow[varasto]'";
 					$prires = mysql_query($query) or pupe_error($query);
 					$prirow = mysql_fetch_array($prires);
-					$kirjoitin = $prirow['printteri1'];
+					$kirjoitin = $prirow['printteri0'];
 
 					$varasto = $tilrow["varasto"];
 					$tilaus  = $tilrow["otunnus"];

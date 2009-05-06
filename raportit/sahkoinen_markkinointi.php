@@ -581,10 +581,6 @@
 
 					while ($otsikot_row = mysql_fetch_assoc($otsikot_res)) {
 
-						if (strtolower($otsikot_row['selitetark']) == 'ikä') {
-							$otsikot_row['selitetark'] = 'syntymavuosi';
-						}
-
 						$query = "	SELECT *
 									FROM asiakkaan_avainsanat
 									WHERE yhtio = '{$kukarow['yhtio']}'

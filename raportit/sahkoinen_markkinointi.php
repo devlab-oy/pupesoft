@@ -1,23 +1,6 @@
 <?php
 
 	if (isset($_POST["tee"])) {
-		if ($_POST["tiedostonimi"] != '') {
-			if ($_POST["tulosta"] == 'csv') {
-				$_POST["kaunisnimi"] = $_POST["tiedostonimi"].".csv";
-			}
-			else {
-				$_POST["kaunisnimi"] = $_POST["tiedostonimi"].".xls";
-			}
-		}
-		else {
-			if ($_POST["tulosta"] == 'csv') {
-				$_POST["kaunisnimi"] = $_POST["tmptiedostonimi"].".csv";
-			}
-			else {
-				$_POST["kaunisnimi"] = $_POST["tmptiedostonimi"].".xls";
-			}
-		}
-
 		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
@@ -25,29 +8,33 @@
 	require ("../inc/parametrit.inc");
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
-
-		if ($tulosta == 'csv') {
-			$tmptiedostonimi = $tmptiedostonimi.".csv";
-			$tiedostonimi = $tiedostonimi.".csv";
-		}
-		else {
-			$tmptiedostonimi = $tmptiedostonimi.".xls";
-			$tiedostonimi = $tiedostonimi.".xls";
-		}
-
-		/*
-		if ($tiedostonimi != '') {
-			if (!file_exists("/tmp/$tiedostonimi")) {
-				copy("/tmp/$tmptiedostonimi", "/tmp/$tiedostonimi");
-			}
-			$tmptiedostonimi = $tiedostonimi;
-		}
-		*/
-
-		readfile("/tmp/".$tmptiedostonimi);
+		readfile("/tmp/".$tmpfilenimi);
 		exit;
 	}
 	else {
+
+		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+				<!--
+
+				function nimi(e) {
+					document.getElementById('tmpfilenimi').value = document.getElementById('tmp').value+'.'+e;
+
+					if (document.getElementById('kaunisnimi').value == '') {
+						document.getElementById('kaunisnimi').value = document.getElementById('tmp').value+'.'+e;
+					}
+					else {
+						document.getElementById('kaunisnimi').value = document.getElementById('tiedostonimi').value+'.'+e;
+					}
+
+					document.getElementById('ext').value = e;
+				}
+
+				function nimi2(e) {
+					document.getElementById('kaunisnimi').value = e+'.'+document.getElementById('ext').value;
+				}
+
+				//-->
+				</script>";
 
 		echo "<font class='head'>",t("Sähköinen markkinointi"),"</font><hr>";
 	
@@ -289,32 +276,34 @@
 
 			$res = mysql_query($query) or pupe_error($query);
 
-			echo "<form action='' method='post'>";
+			echo "<form method='post' action=''>";
 			echo "<tr><th colspan='4'>",t("Tallennustoiminnot"),"</th></tr>";
-//			echo "<tr><td colspan='4'>",t("Haulla löytyi")," ",mysql_num_rows($res)," ",t("osumaa"),"</td></tr>";
+
 			echo "<tr><td>",t("Tallenna tulostetut"),":</td><td colspan='3'>";
-			echo "<select name='tulosta' id='tulosta'>";
-			echo "<option value='csv'>",t("CSV-tiedosto"),"</option>";
-			echo "<option value='excel'>",t("EXCEL-tiedosto"),"</option></select></td></tr>";
-			echo "<tr><td>",t("Tallenna tiedosto nimellä (ilman päätettä)"),"</td><td colspan='3'><input type='text' name='tiedostonimi' id='tiedostonimi' value='$tiedostonimi'>&nbsp;<font class='info'>(",t("Tyhjä nimi on muotoa postituslista-pvmkellonaika.pääte"),")</font></td>";
+			echo "<input type='hidden' name='ext' id='ext' value=''>";
+			echo "CSV <input type='radio' name='paate' id='paate' value='csv' onclick='nimi(this.value);'> ";
+			echo "Excel <input type='radio' name='paate' id='paate' value='xls' onclick='nimi(this.value);'></td>";
+			echo "</tr>";
+
+			echo "<tr><td>",t("Tallenna tiedosto nimellä (ilman päätettä)"),"</td>";
+			echo "<td colspan='3'><input type='text' name='tiedostonimi' id='tiedostonimi' value='$tiedostonimi' onkeyup='nimi2(this.value);'>";
+			echo "&nbsp;<font class='info'>(",t("Tyhjä nimi on muotoa postituslista-pvmkellonaika.pääte"),")</font></td>";
+
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
-			echo "<td class='back'><input type='submit' name='save_file' id='save_file' value='Tulosta'></td>";
+			echo "<input type='hidden' name='kaunisnimi' id='kaunisnimi' value=''>";
+			echo "<input type='hidden' name='tmpfilenimi' id='tmpfilenimi' value=''";
+			echo "<input type='hidden' name='tmp' id='tmp' value='Postituslista-".date("dmYHis")."'";
+
+			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td>";
 			echo "</tr>";
 
 			echo "<tr><th>",t("Ytunnus"),"</th><th>",t("Nimi"),"</th><th>",t("Sähköpostiosoite"),"</th><th>",t("Postitp Postino"),"</th><th>",t("Yhteensopivuustunnus"),"</th><th>",t("Tyyppi"),"</th><th>",t("Merkki"),"</th><th>",t("Malli"),"</th><th>",t("Cc"),"</th><th>",t("Vm"),"</th></tr>";
 
+			$tmptiedostonimi = "Postituslista-".date("dmYHis").".xls";
+
 			if(@include('Spreadsheet/Excel/Writer.php')) {
-				if ($tiedostonimi != '') {
-					$tmptiedostonimi = mysql_real_escape_string($tiedostonimi);
-				}
-				else {
-					$tmptiedostonimi = "Postituslista-".date("dmYHis");
-				}
 
-				echo "<input type='hidden' name='tmptiedostonimi' id='tmptiedostonimi' value='$tmptiedostonimi'>";
-
-				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$tmptiedostonimi.".xls");
+				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$tmptiedostonimi);
 				$workbook->setVersion(8);
 				$worksheet =& $workbook->addWorksheet('Sheet 1');
 
@@ -326,16 +315,16 @@
 
 			// csv-tiedostoa varten
 			$rivi = "";
-			$rivi .= t("Ytunnus")."\t";
-			$rivi .= t("Nimi")."\t";
-			$rivi .= t("Sähköpostiosoite")."\t";
-			$rivi .= t("Postitp Postino")."\t";
-			$rivi .= t("Yhteensopivuustunnus")."\t";
-			$rivi .= t("Tyyppi")."\t";
-			$rivi .= t("Merkki")."\t";
-			$rivi .= t("Malli")."\t";
-			$rivi .= t("Cc")."\t";
-			$rivi .= t("Vm")."\t";
+			$rivi .= t("Nimi").",";
+			$rivi .= t("Sähköpostiosoite").",";
+			$rivi .= t("Postitp").",";
+			$rivi .= t("Postino").",";
+			$rivi .= t("Yhteensopivuustunnus").",";
+			$rivi .= t("Tyyppi").",";
+			$rivi .= t("Merkki").",";
+			$rivi .= t("Malli").",";
+			$rivi .= t("Cc").",";
+			$rivi .= t("Vm");
 			$rivi .= "\r\n";
 
 			if (isset($workbook)) {
@@ -360,7 +349,6 @@
 				$worksheet->writeString($excelrivi, $excelsarake, t("Cc"), $format_bold);
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Vm"), $format_bold);
-				$excelsarake++;
 				$excelrivi++;
 				$excelsarake = 0;
 			}
@@ -519,16 +507,16 @@
 				echo "<td>{$yht_row['tyyppi']}</td><td>{$yht_row['merkki']}</td><td>{$yht_row['malli']}</td><td>{$yht_row['cc']}</td><td>{$yht_row['vm']}</td>";
 				echo "</tr>";
 
-				$rivi .= "\"$row[ytunnus]\"\t";
-				$rivi .= "\"$row[nimi]\"\t";
-				$rivi .= "\"$row[email]\"\t";
-				$rivi .= "\"$row[postino] $row[postitp]\"\t";
-				$rivi .= "\"$avain_row[avainsana]\"\t";
-				$rivi .= "\"$yht_row[tyyppi]\"\t";
-				$rivi .= "\"$yht_row[merkki]\"\t";
-				$rivi .= "\"$yht_row[malli]\"\t";
-				$rivi .= "\"$yht_row[cc]\"\t";
-				$rivi .= "\"$yht_row[vm]\"\t";
+				$rivi .= "$row[nimi],";
+				$rivi .= "$row[email],";
+				$rivi .= "$row[postino],";
+				$rivi .= "$row[postitp],";
+				$rivi .= "$avain_row[avainsana],";
+				$rivi .= "$yht_row[tyyppi],";
+				$rivi .= "$yht_row[merkki],";
+				$rivi .= "$yht_row[malli],";
+				$rivi .= "$yht_row[cc],";
+				$rivi .= "$yht_row[vm]";
 				$rivi .= "\r\n";
 
 				if (isset($workbook)) {
@@ -564,8 +552,10 @@
 				$workbook->close();
 			}
 
-			file_put_contents("/tmp/$tmptiedostonimi.csv", $rivi);
-			echo "<tr><th colspan='10'>",t("Rivejä")," $rows ",t("kappaletta"),"</th></tr>";
+			list ($fname, $ext) = explode(".", $tmptiedostonimi);
+
+			file_put_contents("/tmp/$fname.csv", $rivi);
+			echo "<tr><th colspan='10' id='riveja'>",t("Rivejä")," $rows ",t("kappaletta"),"</th></tr>";
 		}
 		echo "</form>";
 		echo "</table>";

@@ -54,7 +54,7 @@
 			$varow = mysql_fetch_array($result);
 			
 			//katotaan tarvetta
-			$query = "SELECT tuotepaikat.*, tuotepaikat.halytysraja-saldo tarve, concat_ws('-',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka, tuote.nimitys
+			$query = "SELECT tuotepaikat.*, tuotepaikat.halytysraja-tuotepaikat.saldo tarve, concat_ws('-',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka, tuote.nimitys
 						FROM tuotepaikat
 						JOIN tuote on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno $lisa)
 						$abcjoin
@@ -62,7 +62,7 @@
 						and concat(rpad(upper('$varow[alkuhyllyalue]'),  5, '0'),lpad(upper('$varow[alkuhyllynro]'),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 						and concat(rpad(upper('$varow[loppuhyllyalue]'), 5, '0'),lpad(upper('$varow[loppuhyllynro]'), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 						and tuotepaikat.halytysraja != 0
-						and tuotepaikat.halytysraja > saldo
+						and tuotepaikat.halytysraja > tuotepaikat.saldo
 						order by tuotepaikat.tuoteno";
 			$resultti = mysql_query($query) or pupe_error($query);
 			$luku = mysql_num_rows($result);

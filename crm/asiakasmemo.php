@@ -187,8 +187,7 @@
 					$muist = mysql_insert_id();
 
 					if ($tyyppi == "Muistutus") {
-						$ok = 1;
-
+						
 						$query = "	SELECT *
 									FROM kuka
 									WHERE yhtio	= '$kukarow[yhtio]'
@@ -198,22 +197,24 @@
 
 						// K‰ytt‰j‰lle l‰hetet‰‰n tekstiviestimuistutus
 						if ($row["puhno"] != '' and strlen($viesti) > 0 and $sms_palvelin != "" and $sms_user != "" and $sms_pass != "") {
-
+							
+							$ok = 1;
+							
 							$teksti = substr("Muistutus $yhtiorow[nimi]. $tapa. ".$viesti, 0, 160);
 							$teksti = urlencode($teksti);
 
 							$retval = file_get_contents("$sms_palvelin?user=$sms_user&pass=$sms_pass&numero=$row[puhno]&viesti=$teksti&not_before_date=$mvva-$mkka-$mppa&not_before=$mhh:$mmm:00&yhtio=$kukarow[yhtio]&kalenteritunnus=$muist");
 
 							if (trim($retval) == "0") $ok = 0;
-						}
+												
+							if ($ok == 1) {
+								echo "<font class='error'>VIRHE: Tekstiviestin l‰hetys ep‰onnistui! $retval</font><br><br>";
+							}
 
-						if ($ok == 1) {
-							echo "<font class='error'>VIRHE: Tekstiviestin l‰hetys ep‰onnistui! $retval</font><br><br>";
-						}
-
-						if ($ok == 0) {
-							echo "<font class='message'>Tekstiviestimuistutus lehetet‰‰n!</font><br><br>";
-						}
+							if ($ok == 0) {
+								echo "<font class='message'>Tekstiviestimuistutus lehetet‰‰n!</font><br><br>";
+							}
+						}						
 					}
 				
 					$tapa     			= "";

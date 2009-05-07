@@ -1547,7 +1547,7 @@ if ($tee == '') {
 					</td>";
 		}
 
-		if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == 'REKLAMAATIO')) {
+		if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == 'REKLAMAATIO') and $sms_palvelin != "" and $sms_user != "" and $sms_pass != "") {
 			echo "	<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 					<input type='hidden' name='tila' value='SYOTASMS'>

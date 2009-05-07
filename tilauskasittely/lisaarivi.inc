@@ -894,6 +894,10 @@
 									}
 								}
 
+								if ($yhtiorow['huomautetaanko_poistuvasta'] == 'K' and ($trow['status'] == 'X' or $trow['status'] == 'P')) {
+									$kommentti .= " ".t("HUOM!")." $alkupera_trow[tuoteno] ".t("on poistuva tuote!");
+								}
+
 								if ($kutsuja == "EDITILAUS" or $lisaarivi_debug == 1) {
 									$edi_ulos .= " --> ".t("Myyd‰‰n")." $myy_tuoteno[$indeksi] ".t("paikalta")." $myy_hyllyalue[$indeksi]-$myy_hyllynro[$indeksi]-$myy_hyllyvali[$indeksi]-$myy_hyllytaso[$indeksi]: $myy_kpl[$indeksi] ".ta($kieli, "Y", $trow["yksikko"])." ".t("Ale")." $lis_ale% ".t("Hinta")." $lis_hinta $aperuste ".t("ALV")." $lis_alv% $rivikomm\n";
 									if ($lisaarivi_debug == 1) echo "$edi_ulos<br>";

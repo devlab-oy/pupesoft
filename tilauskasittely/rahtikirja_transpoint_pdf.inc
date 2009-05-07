@@ -16,6 +16,22 @@
 	$tempr = mysql_query($query) or pupe_error($query);
 	$postirow = mysql_fetch_array($tempr);
 	
+	// haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
+	$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
+				FROM varastopaikat
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tunnus = '$postirow[varasto]'";
+	$tempr = mysql_query($query) or pupe_error($query);
+	$postirow_varasto = mysql_fetch_array($tempr);
+
+	// jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
+	if ($postirow_varasto["osoite"] != "") {
+		$postirow["yhtio_osoite"]   = $postirow_varasto["osoite"];
+		$postirow["yhtio_postino"]  = $postirow_varasto["postino"];
+		$postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];
+		$postirow["yhtio_maa"]      = $postirow_varasto["maa"];
+	}
+
 	$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and ytunnus='$postirow[liitostunnus]'";
 	$tempr = mysql_query($query) or pupe_error($query);
 	$asiakasrow = mysql_fetch_array($tempr);

@@ -33,6 +33,23 @@ if ($kollityht > 0) {
 		$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
 		$tempr = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($tempr);
+
+		// haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
+		$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
+					FROM varastopaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$laskurow[varasto]'";
+		$tempr = mysql_query($query) or pupe_error($query);
+		$postirow_varasto = mysql_fetch_array($tempr);
+
+		// jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
+		if ($postirow_varasto["osoite"] != "") {
+			$yhtiorow["osoite"]   = $postirow_varasto["osoite"];
+			$yhtiorow["postino"]  = $postirow_varasto["postino"];
+			$yhtiorow["postitp"]  = $postirow_varasto["postitp"];
+			$yhtiorow["maa"]      = $postirow_varasto["maa"];
+		}
+
 	}
 
 	if (!function_exists('tarkiste')) {

@@ -22,21 +22,38 @@
 		}
 	}
 
-	// onko t‰m‰ tyhj‰ rahtikirja (custom)?
+	// onko t‰m‰ tyhj‰ rahtikirja (rahtikirja_custom.php), jos EI niin haetaan infot tilaukselta
 	if (!isset($GLOBALS['tyhja'])) {
 		$query = "	SELECT *
 					FROM lasku
-					WHERE yhtio='$kukarow[yhtio]'
-					and tunnus in ($otunnukset)
-					order by tunnus
-					limit 1";
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus in ($otunnukset)
+					ORDER BY tunnus
+					LIMIT 1";
 		$tempr = mysql_query($query) or pupe_error($query);
 		$postirow = mysql_fetch_array($tempr);
+
+		// haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
+		$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
+					FROM varastopaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$postirow[varasto]'";
+		$tempr = mysql_query($query) or pupe_error($query);
+		$postirow_varasto = mysql_fetch_array($tempr);
+
+		// jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
+		if ($postirow_varasto["osoite"] != "") {
+			$postirow["yhtio_osoite"]   = $postirow_varasto["osoite"];
+			$postirow["yhtio_postino"]  = $postirow_varasto["postino"];
+			$postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];
+			$postirow["yhtio_maa"]      = $postirow_varasto["maa"];
+		}
 
 		// l‰hett‰j‰n viite otetaan laskulta
 		$viitelah = $lotsikot[0];
 	}
-	elseif ($osoitelappurow["toim_nimi"] != '') {		
+	elseif ($osoitelappurow["toim_nimi"] != '') {
+		// t‰nne tullaan, jos ollaan oltu rahtikirja_custom.phpss‰	
 		$postirow = $osoitelappurow;
 		$rakir_row = $osoitelappurow;
 	}

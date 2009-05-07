@@ -46,12 +46,21 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$kervv = date("Y");
 			$kerkk = date("m");
 			$kerpp = date("d");
+			
+			
+			if ($toim == "TARJOUS" or $asiakasrow["vienti"] =='K') {			
+				$kolm_nimi 		= $asiakasrow["kolm_nimi"];
+				$kolm_nimitark 	= $asiakasrow["kolm_nimitark"];
+				$kolm_osoite 	= $asiakasrow["kolm_osoite"];
+				$kolm_postino 	= $asiakasrow["kolm_postino"];
+				$kolm_postitp 	= $asiakasrow["kolm_postitp"];
+			}
 
 			$maksuehto 		= $asiakasrow["maksuehto"];
 			$toimitustapa 	= $asiakasrow["toimitustapa"];
 
 			// haetaan tomitustavan oletusmaksajan tiedot
-			$apuqu = "	select *
+			$apuqu = "	SELECT *
 						from toimitustapa use index (selite_index)
 						where yhtio='$kukarow[yhtio]' and selite='$asiakasrow[toimitustapa]'";
 			$meapu = mysql_query($apuqu) or pupe_error($apuqu);

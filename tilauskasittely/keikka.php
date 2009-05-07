@@ -6,11 +6,11 @@ if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 
 if (!function_exists("tsekit")) {
 	function tsekit($row, $kaikkivarastossayhteensa) {
-		
+
 		global $kukarow, $yhtiorow;
-		
+
 		$tsekit = array();
-		
+
 		// tutkitaan onko kaikilla tuotteilla on joku varastopaikka
 		$query  = "	SELECT tilausrivi.*
 					FROM tilausrivi USE INDEX (uusiotunnus_index)
@@ -27,10 +27,10 @@ if (!function_exists("tsekit")) {
 		$uusiot = array();
 
 		while ($rivirow = mysql_fetch_array($tilres)) {
-			$query = "select * from tuote where tuoteno='$rivirow[tuoteno]' and yhtio='$kukarow[yhtio]'";
+			$query = "SELECT * from tuote where tuoteno='$rivirow[tuoteno]' and yhtio='$kukarow[yhtio]'";
 			$tuore = mysql_query($query) or pupe_error($query);
 			$tuote = mysql_fetch_array($tuore);
-	
+
 			if (!in_array($rivirow["otunnus"], $uusiot)) {
 				$uusiot[] = $rivirow["otunnus"];
 			}
@@ -49,7 +49,7 @@ if (!function_exists("tsekit")) {
 				//jos rivi on jo viety varastoon niin ei enää katota sen paikkaa
 				if ($rivirow["kpl"] == 0 and $rivirow["varattu"] != 0) {
 					// katotaan löytyykö tuotteelta varastopaikka joka on tilausriville tallennettu
-					$query = "	select *
+					$query = "	SELECT *
 								from tuotepaikat use index (tuote_index)
 								where tuoteno='$rivirow[tuoteno]' and yhtio='$kukarow[yhtio]' and hyllyalue='$rivirow[hyllyalue]' and hyllynro='$rivirow[hyllynro]' and hyllytaso='$rivirow[hyllytaso]' and hyllyvali='$rivirow[hyllyvali]'";
 					$tpres = mysql_query($query) or pupe_error($query);
@@ -78,7 +78,7 @@ if (!function_exists("tsekit")) {
 		}
 
 		// tutkitaan onko kaikki lisätiedot syötetty vai ei...
-		$query = "	select *
+		$query = "	SELECT *
 					from lasku use index (PRIMARY)
 					where lasku.yhtio='$kukarow[yhtio]'
 					and tunnus='$row[tunnus]'
@@ -114,18 +114,18 @@ if (!function_exists("tsekit")) {
 					tilausrivi.uusiotunnus='$row[tunnus]' and
 					tilausrivi.tyyppi='O'";
 		$toimresult = mysql_query($query) or pupe_error($query);
-		
+
 		$sarjanrook = 1;
-		
+
 		while ($toimrow = mysql_fetch_array($toimresult)) {
-	
+
 			if ($toimrow["kpl"] < 0) {
 				$tunken = "myyntirivitunnus";
 			}
 			else {
 				$tunken = "ostorivitunnus";
 			}
-	
+
 			if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "U" or $toimrow["sarjanumeroseuranta"] == "V") {
 				$query = "	SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
 							FROM sarjanumeroseuranta
@@ -142,14 +142,14 @@ if (!function_exists("tsekit")) {
 			}
 			$sarjares = mysql_query($query) or pupe_error($query);
 			$sarjarow = mysql_fetch_array($sarjares);
-			
-			// pitää olla yhtämonta sarjanumeroa liitettynä kun kamaa viety varastoon			
+
+			// pitää olla yhtämonta sarjanumeroa liitettynä kun kamaa viety varastoon
 			if ($sarjarow["kpl"] != abs($toimrow["kpl"])) {
 				$sarjanrook++;
 			}
 		}
-		
-		// pitää olla yhtämonta sarjanumeroa liitettynä kun kamaa viety varastoon			
+
+		// pitää olla yhtämonta sarjanumeroa liitettynä kun kamaa viety varastoon
 		if ($sarjanrook == 1) {
 			$sarjanrook	= 1;
 			$sarjanrot	= "<font class='ok'>".t("ok")."</font>";
@@ -164,11 +164,11 @@ if (!function_exists("tsekit")) {
 		// ('C','F','I','J','K','L') // vaihto-omaisuus ja raaka-aine
 		// ('B','C','J','E','F','K','H','I','L') // kaikki
 
-		$query = "	select count(*) num,
+		$query = "	SELECT count(*) num,
 					sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L',1,0)) volasku,
 					sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L',1,0)) kulasku,
-					sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L',summa,0)) vosumma,
-					sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L',arvo,0)) kusumma
+					round(sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L',summa * if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi), 0)),2) vosumma,
+					round(sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L',arvo * if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi), 0)),2) kusumma
 					from lasku use index (yhtio_tila_laskunro)
 					where yhtio='$kukarow[yhtio]'
 					and tila='K'
@@ -176,11 +176,10 @@ if (!function_exists("tsekit")) {
 					and laskunro='$row[laskunro]'";
 		$llres = mysql_query($query) or pupe_error($query);
 		$llrow = mysql_fetch_array($llres);
-		
-		
+
 		// $kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok
 		return array($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok);
-		
+
 	}
 }
 
@@ -359,7 +358,7 @@ if ($toiminto != 'kohdista' and $nappikeikalla == 'ollaan') {
 	$toiminto = "kohdista";
 }
 
-if ($toiminto == "kohdista") {	
+if ($toiminto == "kohdista") {
 	require('ostotilausten_rivien_kohdistus.inc');
 }
 
@@ -376,7 +375,7 @@ if ($ytunnus == "" and $keikka != "") {
 	$keikkahaku_res = mysql_query($query) or pupe_error($query);
 
 	$keikkahaku_row = mysql_fetch_array($keikkahaku_res);
-	
+
 	$ytunnus = $keikkahaku_row["ytunnus"];
 }
 
@@ -431,10 +430,12 @@ if ($toiminto == "" and ($ytunnus == "" and $keikka == "")) {
 	$toiminto = "";
 
 	$kaikkivarastossayhteensa = 0;
+	$vaihtoomaisuuslaskujayhteensa = 0;
+	$kululaskujayhteensa = 0;
 
 	// näytetään millä toimittajilla on keskeneräisiä keikkoja
 	$query = "	SELECT ytunnus, nimi, nimitark, osoite, postitp, swift, group_concat(distinct if(comments!='',comments,NULL) SEPARATOR '<br><br>') comments, liitostunnus, count(distinct lasku.tunnus) kpl, group_concat(distinct laskunro SEPARATOR ', ') keikat,
-				sum(tilausrivi.rivihinta) varastossaarvo
+				round(sum(tilausrivi.rivihinta),2) varastossaarvo, lasku.laskunro
 				FROM lasku
 				LEFT JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -454,7 +455,22 @@ if ($toiminto == "" and ($ytunnus == "" and $keikka == "")) {
 
 		while ($row = mysql_fetch_array($result)) {
 
+			$query = "	SELECT count(*) num,
+						sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L', 1, 0)) volasku,
+						sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L', 1, 0)) kulasku,
+						sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L', summa * if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi), 0)) vosumma,
+						sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L', arvo * if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi), 0)) kusumma
+						from lasku use index (yhtio_tila_laskunro)
+						where yhtio='$kukarow[yhtio]'
+						and tila='K'
+						and vanhatunnus<>0
+						and laskunro='$row[laskunro]'";
+			$laskuja_result = mysql_query($query) or pupe_error($query);
+			$laskuja_row = mysql_fetch_array($laskuja_result);
+
 			$kaikkivarastossayhteensa += $row["varastossaarvo"];
+			$vaihtoomaisuuslaskujayhteensa += $laskuja_row["vosumma"];
+			$kululaskujayhteensa += $laskuja_row["kusumma"];
 
 			echo "<tr class='aktiivi'>";
 
@@ -481,9 +497,11 @@ if ($toiminto == "" and ($ytunnus == "" and $keikka == "")) {
 
 		echo "</table>";
 
-		if ($kaikkivarastossayhteensa != 0) {
+		if ($kaikkivarastossayhteensa != 0 or $vaihtoomaisuuslaskujayhteensa != 0 or $kululaskujayhteensa != 0) {
 			echo "<br><table>";
-			echo "<tr><th>".t("Varastossa yhteensä").": </th><td align='right'> ".round($kaikkivarastossayhteensa, 2)." $yhtiorow[valkoodi]</td></tr>";
+			echo "<tr><th>".t("Varastoon viety yhteensä")."</th><td align='right'> ".sprintf("%01.2f", $kaikkivarastossayhteensa)." $yhtiorow[valkoodi]</td></tr>";
+			echo "<tr><th>".t("Vaihto-omaisuuslaskuja liitetty")."</th><td align='right'>".sprintf("%01.2f", $vaihtoomaisuuslaskujayhteensa)." $yhtiorow[valkoodi]</td></tr>";
+			echo "<tr><th>".t("Kululaskuja liitetty")."</th><td align='right'>".sprintf("%01.2f", $kululaskujayhteensa)." $yhtiorow[valkoodi]</td></tr>";
 			echo "</table>";
 		}
 
@@ -622,10 +640,14 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 		}
 
 		$kaikkivarastossayhteensa = 0;
+		$vaihtoomaisuuslaskujayhteensa = 0;
+		$kululaskujayhteensa = 0;
 
 		while ($row = mysql_fetch_array($result)) {
-			
+
 			list ($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok) = tsekit($row,$kaikkivarastossayhteensa);
+			$vaihtoomaisuuslaskujayhteensa += $llrow["vosumma"];
+			$kululaskujayhteensa += $llrow["kusumma"];
 
 			echo "<tr class='aktiivi'>";
 
@@ -644,8 +666,8 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 			echo "<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>";
 			echo "<td valign='top'>$kohdistus<br>$lisatiedot</td>";
 			echo "<td valign='top'>$varastopaikat<br>$sarjanrot</td>";
-			
-			
+
+
 			if (count($uusiot) > 0) {
 				echo "<div id='keikka_$row[laskunro]' class='popup' style='width:100px;'>";
 				echo t("Tilaukset").":<br><br>";
@@ -656,8 +678,18 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 			else {
 				echo "<td valign='top'>$kplyhteensa<br>$kplvarasto $varastossaarvo</td>";
 			}
-			
-			echo "<td valign='top'>$llrow[volasku] $llrow[vosumma]<br>$llrow[kulasku] $llrow[kusumma]</td>";
+
+			$laskujen_tiedot = "";
+
+			if ($llrow["volasku"] > 0) {
+				$laskujen_tiedot .= "$llrow[volasku] ($llrow[vosumma])";
+			}
+			$laskujen_tiedot .= "<br>";
+			if ($llrow["kulasku"] > 0) {
+				$laskujen_tiedot .= "$llrow[kulasku] ($llrow[kusumma])";
+			}
+
+			echo "<td valign='top'>$laskujen_tiedot</td>";
 
 			// jos tätä keikkaa ollaan just viemässä varastoon ei tehdä dropdownia
 			if ($keikkakesken == $row["tunnus"]) {
@@ -711,9 +743,11 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 
 		echo "</table>";
 
-		if ($kaikkivarastossayhteensa != 0) {
+		if ($kaikkivarastossayhteensa != 0 or $vaihtoomaisuuslaskujayhteensa != 0 or $kululaskujayhteensa != 0) {
 			echo "<br><table>";
-			echo "<tr><th>".t("Varastossa yhteensä").": </th><td align='right'>".round($kaikkivarastossayhteensa, 2)." $yhtiorow[valkoodi]</td></tr>";
+			echo "<tr><th>".t("Varastoon viety yhteensä")."</th><td align='right'> ".sprintf("%01.2f", $kaikkivarastossayhteensa)." $yhtiorow[valkoodi]</td></tr>";
+			echo "<tr><th>".t("Vaihto-omaisuuslaskuja liitetty")."</th><td align='right'>".sprintf("%01.2f", $vaihtoomaisuuslaskujayhteensa)." $yhtiorow[valkoodi]</td></tr>";
+			echo "<tr><th>".t("Kululaskuja liitetty")."</th><td align='right'>".sprintf("%01.2f", $kululaskujayhteensa)." $yhtiorow[valkoodi]</td></tr>";
 			echo "</table>";
 		}
 
@@ -724,7 +758,7 @@ $nappikeikka = "";
 
 // kohdisteaan keikkaa laskun tunnuksella $otunnus
 if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" or $toiminto == "tulosta" or $toiminto == "lisatiedot" or $toiminto == "varastopaikat" or $toiminto == "kululaskut" or $toiminto == "kalkyyli" or $toiminto == "kaikkiok") {
-	
+
 	$query = "	SELECT *
 				FROM lasku
 				where lasku.yhtio 		= '$kukarow[yhtio]'
@@ -734,9 +768,9 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	$tsekkirow = mysql_fetch_array($tsekkiresult);
 
 	list ($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok) = tsekit($tsekkirow,$kaikkivarastossayhteensa);
-	
+
 	$formalku =  "<td class='back'>";
-	$formalku .= "<form action='$PHP_SELF' method='post'>";	
+	$formalku .= "<form action='$PHP_SELF' method='post'>";
 	$formalku .= "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	$formalku .= "<input type='hidden' name='otunnus' value='$tsekkirow[tunnus]'>";
 	$formalku .= "<input type='hidden' name='ytunnus' value='$ytunnus'>";
@@ -746,7 +780,7 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	$formalku .= "<input type='hidden' name='nappikeikalle' value='menossa'>";
 
 	$formloppu = "</form></td>";
-	
+
 	// näitä saa tehdä aina keikalle
 	$nappikeikka = "<table><tr>";
 
@@ -793,7 +827,7 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 		$nappikeikka .= "<input type='submit' value='".t("Vie varastoon")."'>";
 		$nappikeikka .= "$formloppu";
 	}
-	
+
 	$nappikeikka .=	"</tr></table>";
 	$nappikeikka = str_replace('\n','',$nappikeikka);
 }

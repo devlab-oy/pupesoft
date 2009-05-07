@@ -10,7 +10,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$selkukarow = mysql_fetch_array($result);
 	}
-	else if ($toim != "extranet") {
+	elseif ($toim != "extranet") {
 		$query = "	SELECT nimi, kuka, tunnus
 					FROM kuka
 					WHERE tunnus='$kukarow[tunnus]'";
@@ -110,7 +110,7 @@
 	if ($toim == "" or $selkukarow["kuka"] != "") {	
 		echo "<option selected value='$selkukarow[tunnus]'>$selkukarow[nimi] ($selkukarow[kuka])</option>";
 	}
-	else if ($toim == "extranet" and $selkukarow["kuka"] == "") {
+	elseif ($toim == "extranet" and $selkukarow["kuka"] == "") {
 		echo "<option selected value=''>".t("Valitse käyttäjä")."</option>";			
 	}
 
@@ -120,7 +120,7 @@
 				  WHERE tunnus!='$selkukarow[tunnus]' and yhtio='$kukarow[yhtio]' and extranet != ''
 				  ORDER BY nimi";
 	}
-	else if ($toim == "extranet" and $selkukarow["tunnus"] == "") {
+	elseif ($toim == "extranet" and $selkukarow["tunnus"] == "") {
 		$query = "SELECT *
 				  FROM kuka
 				  WHERE yhtio='$kukarow[yhtio]' and extranet != ''
@@ -129,10 +129,9 @@
 	else {
 		$query = "SELECT *
 				  FROM kuka
-				  WHERE tunnus!='$selkukarow[tunnus]' and yhtio='$kukarow[yhtio]'
+				  WHERE tunnus!='$selkukarow[tunnus]' and extranet = '' and yhtio='$kukarow[yhtio]'
 				  ORDER BY nimi";
 	}
-
 	$kukares = mysql_query($query) or pupe_error($query);
 
 	while ($kurow=mysql_fetch_array($kukares)) {
@@ -148,6 +147,7 @@
 		$query = "	SELECT distinct sovellus
 					FROM oikeu
 					where yhtio='$kukarow[yhtio]'
+					and sovellus != 'Extranet'
 					order by sovellus";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -183,7 +183,7 @@
 	else {
 		$query = "	SELECT *
 					FROM oikeu
-					WHERE kuka = ''	and yhtio='$kukarow[yhtio]'";
+					WHERE kuka = ''	and yhtio='$kukarow[yhtio]' and sovellus != 'Extranet'";
 	}
 
 	if ($sovellus != '') {

@@ -236,6 +236,9 @@
 					$laskuta_message .= ", laskutetaan tilaus $ok päivälle ".date("d.m.Y").".</font><br>";
 					require("verkkolasku.php");					
 				}
+				else {
+					$laskuta_message .= ", lasku jätettiin avoimeksi.</font><br>";
+				}
 			}
 		}
 

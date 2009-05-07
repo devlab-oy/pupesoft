@@ -189,11 +189,6 @@ if ($kollityht > 0) {
 	}
 	
 	//echo "<hr>data:<pre>".print_r($parcelOrder, true)."</pre>";
-
-	// Muunnetaan merkistö Windows ANSI
-	iconv("ISO-8859-1", "Windows-1252", $rivi);
-	// Lisätään, jos tulostetaan useita rivejä tiedostoon (Jepulis, pitää olla Windows rivinvaihto CR\LF!)
-	$rivit .= $rivi."\r\n";
 	
 	//	Luodaan aineostoformaatti
 	if(!is_array($delisprintFileFormat)) {
@@ -227,6 +222,9 @@ if ($kollityht > 0) {
 		}
 		$aineisto.=$parcelOrder[$p];
 	}
+
+	// Muunnetaan merkistö Windows ANSI
+	iconv("ISO-8859-1", "Windows-1252", $aineisto);
 	
 	if ($delisprint_polku != '') {
 		if (substr($delisprint_polku,-1) != '/') {

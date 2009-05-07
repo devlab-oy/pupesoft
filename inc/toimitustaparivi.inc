@@ -73,9 +73,8 @@
 	}
 
 	if (mysql_field_name($result, $i) == "tulostustapa") {
-			$sel		= array();
-			$pv			= $trow[$i];
-			$sel[$pv]	= " selected";
+			$sel			= array();
+			$sel[$trow[$i]]	= " selected";
 
 			$ulos = "<td>
 				<select name='$nimi'>
@@ -89,16 +88,13 @@
 	}
 
 	if (mysql_field_name($result, $i) == "extranet") {
-		$sel1='';
-		$sel2='';
-		if ($trow[$i]=='')
-			$sel1 = 'SELECTED';
-		else
-			$sel2 = 'SELECTED';
+		$sel			= array();
+		$sel[$trow[$i]]	= " selected";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''  $sel1>".t("Toimitustapa n‰ytet‰‰n vain myynniss‰")."</option>";
-		$ulos .= "<option value='K' $sel2>".t("Toimitustapa n‰ytet‰‰n vain extranetiss‰")."</option>";
+		$ulos .= "<option value=''>".t("Toimitustapa n‰ytet‰‰n vain myynniss‰")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Toimitustapa n‰ytet‰‰n vain extranetiss‰")."</option>";
+		$ulos .= "<option value='M' $sel[M]>".t("Toimitustapa n‰ytet‰‰n molemmissa")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

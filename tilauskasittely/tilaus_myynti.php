@@ -1772,7 +1772,7 @@ if ($tee == '') {
 				$query = "	SELECT * FROM (
 								(SELECT toimitustapa.tunnus, toimitustapa.selite, toimitustapa.jarjestys
 								FROM toimitustapa
-								WHERE toimitustapa.yhtio = '$kukarow[yhtio]' and (toimitustapa.extranet = 'K' or toimitustapa.selite = '$extra_asiakas[toimitustapa]')
+								WHERE toimitustapa.yhtio = '$kukarow[yhtio]' and (toimitustapa.extranet in ('K','M') or toimitustapa.selite = '$extra_asiakas[toimitustapa]')
 								and (toimitustapa.sallitut_maat = '' or toimitustapa.sallitut_maat like '%$laskurow[toim_maa]%'))
 								UNION
 								(SELECT toimitustapa.tunnus, toimitustapa.selite, toimitustapa.jarjestys
@@ -1787,7 +1787,7 @@ if ($tee == '') {
 			else {
 				$query = "	SELECT tunnus, selite
 							FROM toimitustapa
-							WHERE yhtio = '$kukarow[yhtio]' and (extranet = '' or selite = '$laskurow[toimitustapa]')
+							WHERE yhtio = '$kukarow[yhtio]' and (extranet in ('','M') or selite = '$laskurow[toimitustapa]')
 							and (sallitut_maat = '' or sallitut_maat like '%$laskurow[toim_maa]%')
 							ORDER BY jarjestys,selite";
 			}

@@ -1010,7 +1010,8 @@ if (!function_exists('tulosta_lasku')) {
 		//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 		list($usec, $sec) = explode(' ', microtime());
 		mt_srand((float) $sec + ((float) $usec * 100000));
-		$pdf_laskufilenimi = "/tmp/Lasku-".md5(uniqid(mt_rand(), true)).".pdf";
+		
+		$pdf_laskufilenimi = "/tmp/".t("Lasku", $kieli)."-".md5(uniqid(mt_rand(), true)).".pdf";
 
 		//duusataan sivunumerot!
 		foreach($pdf->objects as $key => $value) {
@@ -1029,7 +1030,7 @@ if (!function_exists('tulosta_lasku')) {
 		
 		if ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
 			$liite = $pdf_laskufilenimi;
-			$kutsu = ucfirst(strtolower($otsikko))." $laskurow[laskunro]";
+			$kutsu = ucfirst(strtolower(t($otsikko, $kieli)))." $laskurow[laskunro]";
 			
 			if(substr($komento,0,12) == 'asiakasemail') {
 				echo t(ucfirst(strtolower($otsikko))." l‰hetet‰‰n osoitteeseen %s", $kieli, substr($komento,12))."...<br>";

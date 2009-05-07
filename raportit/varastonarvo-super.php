@@ -228,6 +228,7 @@
 						tuote.try,
 						tuote.osasto,
 						tuote.tuotemerkki,
+						tuote.yksikko,
 						tuote.nimitys,
 						tuote.kehahin,
 						if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0) kehahin_nyt,
@@ -259,6 +260,7 @@
 						tuote.try,
 						tuote.osasto,
 						tuote.tuotemerkki,
+						tuote.yksikko,
 						tuote.nimitys,
 						tuote.kehahin,
 						if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0) kehahin_nyt,
@@ -302,6 +304,8 @@
 						tmp_tuotepaikat.tuoteno,
 						tmp_tuotepaikat.tuotemerkki,
 						tmp_tuotepaikat.nimitys,
+						tmp_tuotepaikat.nimitys,
+						tmp_tuotepaikat.yksikko,
 						tmp_tuotepaikat.kehahin,
 						tmp_tuotepaikat.kehahin_nyt,
 						tmp_tuotepaikat.epakurantti25pvm,
@@ -383,6 +387,8 @@
 				$worksheet->writeString($excelrivi, $excelsarake, t("Tuoteno"), 			$format_bold);
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"), 			$format_bold);
+				$excelsarake++;
+				$worksheet->writeString($excelrivi, $excelsarake, t("Yksikko"), 			$format_bold);
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Saldo"), 				$format_bold);
 				$excelsarake++;
@@ -715,6 +721,8 @@
 						$worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"]);
 						$excelsarake++;
 						$worksheet->writeString($excelrivi, $excelsarake, asana('nimitys_',$row['tuoteno'],$row['nimitys']));
+						$excelsarake++;
+						$worksheet->writeString($excelrivi, $excelsarake, $row["yksikko"]);
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$muutoskpl));
 						$excelsarake++;

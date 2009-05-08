@@ -128,7 +128,7 @@ else {
 $maksupaiva = "''";
 $maksaja    = "''";
 
-if ($mehtorow['kateinen']!='') {
+if ($mehtorow['kateinen'] != '' or (float) $summa == 0) {
 	$maksaja    = "'$kukarow[kuka]'";
 	$maksupaiva = "now()";
 }

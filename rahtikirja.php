@@ -2120,7 +2120,7 @@
 			<td><input type='hidden' name='pakkaus[$i]' value='$row[selite]'>
 				<input type='hidden' name='pakkauskuvaus[$i]' value='$row[selitetark]'>";
 			
-			if (strtoupper($tulostustapa) == 'E' or strtoupper($tulostustapa) == 'L') {
+			if ((strtoupper($tulostustapa) == 'E' or strtoupper($tulostustapa) == 'L') and $yhtiorow['oletus_rahtikirja_oslappkpl'] != 0) {
 				echo "<input type='text' size='4' value='$kollit[$i]' name='kollit[$i]' onKeyUp='summaa_kollit(this);'></td>";
 			}
 			else {

@@ -721,7 +721,18 @@
 				}
 				echo "<td><input type='checkbox' name='hyvaksyja' $chk></td></tr>";
 			}
+			else {
+				echo "<tr><th align='left'>".t("Tilaukset suoraan laskutukseen").":</td>";
 
+				if ($krow["hyvaksyja"] != '') {
+					$chk = "CHECKED";
+				}
+				else {
+					$chk = "";
+				}
+				echo "<td><input type='checkbox' name='hyvaksyja' $chk></td></tr>";
+			}
+			
 			if ($selkuka != "UUSI") {
 
 				echo "<tr><th align='left'>".t("Oletusasiakas").":</th><td>";

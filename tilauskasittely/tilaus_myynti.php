@@ -5352,6 +5352,21 @@ if ($tee == '') {
 
 		echo "</tr>";
 
+		if ($kukarow['extranet'] != "") {
+			echo "	<tr>
+						<td align='laft' class='back' valign='top'>
+						<form name='valmis' action='tulostakopio.php' method='post' name='tulostakopio'>
+						<input type='hidden' name='otunnus' value='$tilausnumero'>
+						<input type='hidden' name='tilausnumero' value='$tilausnumero'>						
+						<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
+						<input type='hidden' name='toim' value='TILAUSVAHVISTUS'>
+						<input type='hidden' name='tee' value='NAYTATILAUS'>
+						<input type='submit' name='NAYTATILAUS' value='".t("Näytä Tilausvahvistus")."'>
+						</form>
+						</td>
+					</tr>";			
+		}
+		
 		if ($lopetus != "") {
 			echo "<tr>$jarjlisa<td class='back'>".lopetus($lopetus)."</td></tr>";
 		}

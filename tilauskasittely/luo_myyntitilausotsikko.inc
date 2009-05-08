@@ -28,6 +28,10 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$toim_maa 		   	   	   			= $asiakasrow["toim_maa"];
 			$verkkotunnus 	   	   	   			= $asiakasrow["verkkotunnus"];
 			$piiri 								= $asiakasrow["piiri"];
+			
+			if ($kukarow['extranet'] != '' and $kukarow['hyvaksyja'] != "") {
+				$eilahe = "o";
+			}
 
 			if ($asiakasrow["spec_ytunnus"] != '') {
 				$ytunnus 				= $asiakasrow["spec_ytunnus"];

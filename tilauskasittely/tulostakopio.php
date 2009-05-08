@@ -1436,6 +1436,10 @@
 			}
 
 			if ($toim == "TILAUSVAHVISTUS" or $toim == "YLLAPITOSOPIMUS") {
+				if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
+					$naytatvale = "2";
+				}
+				
 				require_once ("tulosta_tilausvahvistus_pdf.inc");
 
 				$tee = '';

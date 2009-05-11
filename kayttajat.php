@@ -13,13 +13,13 @@
 	}
 
 	if (isset($muutparametrit)) {
-		list ($tee, $selkuka, $selyhtio, $kumpi) = split("#", $muutparametrit);
+		list ($tee, $selkuka, $kumpi) = split("#", $muutparametrit);
 		$ytunnus = "";
 		$ytunnus2 = "";
 	}
 
 	if ($tee == "MUUTA" and $ytunnus != "" and $ytunnus != '0') {
-		$muutparametrit = "MUUTA#$selkuka#$selyhtio#1";
+		$muutparametrit = "MUUTA#$selkuka#1";
 		$asiakasid = "";
 		$ytunnus2 = "";
 		require ("inc/asiakashaku.inc");
@@ -45,7 +45,7 @@
 	}
 
 	if ($tee == "MUUTA" and $ytunnus2 != "" and $ytunnus2 != '0') {
-		$muutparametrit = "MUUTA#$selkuka#$selyhtio#2";
+		$muutparametrit = "MUUTA#$selkuka#2";
 		$ytunnus = $ytunnus2;
 		$asiakasid = "";
 		require ("inc/asiakashaku.inc");
@@ -100,12 +100,7 @@
 	// Perustetaan uusi käyttäjä
 	if ($tee == 'UUSI') {
 
-		if ($selyhtio != '') {
-			$yhtio = $selyhtio;
-		}
-		else {
-			$yhtio = $kukarow['yhtio'];
-		}
+		$yhtio = $kukarow['yhtio'];
 
 		$query   = "SELECT * FROM kuka WHERE kuka='$ktunnus' and yhtio<>'$yhtio'";
 		$reskuka = mysql_query($query) or pupe_error($query);
@@ -143,7 +138,7 @@
 			$naytetaan_katteet_tilauksella	= $monta['naytetaan_katteet_tilauksella'];
 			$naytetaan_asiakashinta			= $monta['naytetaan_asiakashinta'];
 			$naytetaan_tuotteet				= $monta['naytetaan_tuotteet'];
-			$naytetaan_tilaukset			= $monta['naytetaan_tilaukset'];			
+			$naytetaan_tilaukset			= $monta['naytetaan_tilaukset'];
 			$profile 						= $monta['profiilit'];
 			$piirit	 						= $monta['piirit'];
 
@@ -173,42 +168,42 @@
 			}
 
 			$query = "	INSERT into kuka
-						SET nimi 		= '$firname',
-						kuka 			= '$ktunnus',
-						puhno 			= '$phonenum',
-						eposti 			= '$email',
-						kieli 			= '$lang',
-						taso 			= '$taso',
-						hinnat			= '$hinta',
-						saatavat		= '$saatavat',
-						osasto			= '$osasto',
-						salasana		= '$salasana',
-						keraajanro 		= '$keraajanro',
-						myyja 			= '$myyja',
-						varasto 		= '$varasto',
-						oletus_pakkaamo	= '$oletus_pakkaamo',
-						kirjoitin 		= '$kirjoitin',
-						kassamyyja 		= '$kassamyyja',
-						dynaaminen_kassamyynti = '$dynaaminen_kassamyynti',
-						jyvitys			= '$jyvitys',
-						oletus_asiakas 	= '$oletus_asiakas',
-						oletus_asiakastiedot = '$oletus_asiakastiedot',
-						oletus_ohjelma 	= '$oletus_ohjelma',
-						resoluutio		= '$resoluutio',
-						extranet		= '$extranet',
-						hyvaksyja		= '$hyvaksyja',
-						lomaoikeus		= '$lomaoikeus',
-						asema			= '$asema',
-						toimipaikka		= '$toimipaikka',
+						SET nimi 						= '$firname',
+						kuka 							= '$ktunnus',
+						puhno 							= '$phonenum',
+						eposti 							= '$email',
+						kieli 							= '$lang',
+						taso 							= '$taso',
+						hinnat							= '$hinta',
+						saatavat						= '$saatavat',
+						osasto							= '$osasto',
+						salasana						= '$salasana',
+						keraajanro 						= '$keraajanro',
+						myyja 							= '$myyja',
+						varasto 						= '$varasto',
+						oletus_pakkaamo					= '$oletus_pakkaamo',
+						kirjoitin 						= '$kirjoitin',
+						kassamyyja 						= '$kassamyyja',
+						dynaaminen_kassamyynti 			= '$dynaaminen_kassamyynti',
+						jyvitys							= '$jyvitys',
+						oletus_asiakas 					= '$oletus_asiakas',
+						oletus_asiakastiedot 			= '$oletus_asiakastiedot',
+						oletus_ohjelma 					= '$oletus_ohjelma',
+						resoluutio						= '$resoluutio',
+						extranet						= '$extranet',
+						hyvaksyja						= '$hyvaksyja',
+						lomaoikeus						= '$lomaoikeus',
+						asema							= '$asema',
+						toimipaikka						= '$toimipaikka',
 						naytetaan_katteet_tilauksella 	= '$naytetaan_katteet_tilauksella',
 						naytetaan_asiakashinta 			= '$naytetaan_asiakashinta',
 						naytetaan_tuotteet				= '$naytetaan_tuotteet',
 						naytetaan_tilaukset				= '$naytetaan_tilaukset',
-						profiilit 		= '$profile',
-						piirit			= '$piirit',
-						laatija			= '$kukarow[kuka]',
-						luontiaika		= now(),
-						yhtio 			= '$yhtio'";
+						profiilit 						= '$profile',
+						piirit							= '$piirit',
+						laatija							= '$kukarow[kuka]',
+						luontiaika						= now(),
+						yhtio 							= '$yhtio'";
 			$result = mysql_query($query) or pupe_error($query);
 			$selkuka = mysql_insert_id();
 
@@ -253,7 +248,7 @@
 									and hidden		= '$trow[hidden]'
 									and yhtio		= '$yhtio'";
 						$tarkesult = mysql_query($query) or pupe_error($query);
-						
+
 						if (mysql_num_rows($tarkesult) == 0) {
 							$query = "	INSERT into oikeu
 										SET
@@ -303,12 +298,7 @@
 	//muutetaan kayttajan tietoja tai syotetaan uuden kayttajan tiedot
 	if ($tee == 'MUUTA') {
 
-		if ($selyhtio != '') {
-			$yhtio = $selyhtio;
-		}
-		else {
-			$yhtio = $kukarow['yhtio'];
-		}
+		$yhtio = $kukarow['yhtio'];
 
 		if (strlen($firname) > 0) {
 
@@ -631,7 +621,7 @@
 			}
 
 			echo "</select></td></tr>";
-			
+
 			if ($toim != 'extranet' and $yhtiorow['pakkaamolokerot'] == 'K') {
 				echo "<tr><th align='left'>".t("Oletus pakkaamo").":</td>";
 				echo "<td><select name='oletus_pakkaamo'><option value=''>".t("Ei pakkaamoa")."</option>";
@@ -647,7 +637,7 @@
 
 				echo "</select></td></tr>";
 			}
-			
+
 
 			if ($toim != 'extranet') {
 				echo "<tr><th align='left'>".t("Henkilökohtainen tulostin:")."</td>";
@@ -694,7 +684,7 @@
 				echo "<option value='' $sel1>".t("Normaalimyyjä ei toimi kassamyyjänä")."</option>";
 				echo "<option value='o' $sel2>".t("Normaalimyyjä voi toimia tarpeen mukaan kassamyyjänä")."</option>";
 				echo "</select></td>";
-				
+
 				$sel0 = $sel1 = "";
 
 				if ($krow["saatavat"] == "0") {
@@ -710,7 +700,7 @@
 				echo "<option value='0' $sel0>".t("Ei näytetä saatavia kassakäyttäjänä")."</option>";
 				echo "<option value='1' $sel1>".t("Näytetään saatavat kassakäyttäjänä")."</option>";
 				echo "</select></td></tr>";
-				
+
 				echo "<tr><th align='left'>".t("Hyväksyjä").":</td>";
 
 				if ($krow["hyvaksyja"] != '') {
@@ -732,7 +722,7 @@
 				}
 				echo "<td><input type='checkbox' name='hyvaksyja' $chk></td></tr>";
 			}
-			
+
 			if ($selkuka != "UUSI") {
 
 				echo "<tr><th align='left'>".t("Oletusasiakas").":</th><td>";
@@ -759,14 +749,14 @@
 					else {
 						echo " ".t("Asiakas ei löydy")."!";
 					}
-					
+
 				}
 				else {
 					echo " ".t("Oletusasiakasta ei ole syötetty")."!";
 				}
 
 				echo "</td></tr>";
-				
+
 				echo "<tr><th align='left'>".t("Oletusasiakastiedot").":</th><td>";
 				echo "<input type='text' name='ytunnus2'>";
 
@@ -785,9 +775,9 @@
 						if ($varow["toim_ovttunnus"] != "") {
 							echo " / $varow[toim_ovttunnus] $varow[toim_nimi]";
 						}
-						
+
 						echo "<input type='hidden' name='oletus_asiakastiedot' value='$krow[oletus_asiakastiedot]'>";
-						
+
 					}
 					else {
 						echo " ".t("Asiakas ei löydy")."!";
@@ -798,7 +788,7 @@
 				}
 
 				echo "</td></tr>";
-				
+
 			}
 
 			$sel=array();
@@ -824,7 +814,7 @@
 					<option value=''  {$sel[""]}>".t("Näytetään kaikki tilaukset")."</option>
 					<option value='O' {$sel["O"]}>".t("Näytetään vain omat tilaukset")."</option>
 					</select></td></tr>";
-					
+
 
 			if ($toim != 'extranet') {
 				echo "<tr><th align='left'>".t("Oletusohjelma").":</th><td><select name='oletus_ohjelma'>";
@@ -1013,30 +1003,6 @@
 
 				}
 				echo "</td></tr>";
-			}
-
-			if ($selkuka == "UUSI" and $toim != "extranet") {
-				$query = "select yhtio, nimi from yhtio order by yhtio";
-				$yhres = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($yhres) > 1) {
-					echo "<tr><th align='left'>".t("Yhtio").":</th><td><select name='selyhtio'>";
-
-					while ($yhrow = mysql_fetch_array ($yhres)) {
-						$sel = "";
-
-						if ($yhtiorow["yhtio"] == $yhrow["yhtio"]) {
-							$sel = "SELECTED";
-						}
-
-						echo "<option value='$yhrow[yhtio]' $sel>$yhrow[nimi]";
-					}
-
-					echo "</select></td></tr>";
-				}
-			}
-			else {
-				echo "<input type='hidden' name='selyhtio' value='$kukarow[yhtio]'>";
 			}
 
 			echo "</table>";

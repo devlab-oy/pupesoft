@@ -270,6 +270,9 @@
 					$query = substr($query, 0, -1);
 					$query .= ") ";
 				}
+				else {
+					exit;
+				}
 			}
 
 			$query .= "	ORDER BY nimi";

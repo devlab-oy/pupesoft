@@ -905,12 +905,8 @@
 			}
 			
 			echo "<tr class='aktiivi'>";
-			if ($kukarow["resoluutio"] == "I") {
-				echo "<th colspan='8'>";
-			}
-			else {
-				echo "<th colspan='7'>";
-			}
+			echo "<th colspan='6'>";
+			
 			echo t("Rivejä yhteensä")."</th><th>".$riveja_yht."</th></tr>";
 			
 			echo "</table>";

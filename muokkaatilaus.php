@@ -850,7 +850,7 @@
 			$miinus = 3;
 		}
 		elseif ($toim == 'PROJEKTI') {
-			$query = "	SELECT if(lasku.tunnusnippu > 0, lasku.tunnusnippu, lasku.tunnus) tilaus, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, tunnusnippu, lasku.liitostunnus
+			$query = "	SELECT if(lasku.tunnusnippu > 0, concat(lasku.tunnusnippu,'<br>',lasku.tunnus), lasku.tunnus) tilaus, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, tunnusnippu, lasku.liitostunnus
 						FROM lasku use index (tila_index)
 						$seurantalisa
 						$kohdelisa

@@ -248,14 +248,14 @@
 				$query .= " AND email = '$email' ";
 			}
 
-			if ($yhtsoptun != '') {
-				$yhtsoptun = (int) $yhtsoptun;
+			if (trim($yhtsoptun) != '') {
+				$yhtsoptun = trim($yhtsoptun);
 
 				$yht_as_query = "	SELECT DISTINCT liitostunnus
 									FROM asiakkaan_avainsanat
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND laji = 'yhteensopivuus'
-									AND avainsana = '$yhtsoptun'";
+									AND avainsana in ($yhtsoptun)";
 				$yht_as_res = mysql_query($yht_as_query) or pupe_error($yht_as_query);
 
 				if (mysql_num_rows($yht_as_res) > 0) {

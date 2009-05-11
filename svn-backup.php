@@ -9,15 +9,15 @@
 
 	echo date("d.m.Y @ G:i:s")." - Backup svn.\n";
 
-	$filename = "svn-backup-".date("Y-m-d").".zip";
+	$filename = "svn-backup-".date("Y-m-d").".bz2";
 
 	// siirryt‰‰n svn-dirriin
-	chdir("/usr/svn");
+	chdir("/var/svn");
 
 	// pakataan failit
-	system("/usr/bin/zip -9qr $filename *");
+	system("/bin/tar -cjf $filename *");
 
-	echo date("d.m.Y @ G:i:s")." - Zip done.\n";
+	echo date("d.m.Y @ G:i:s")." - Bzip2 done.\n";
 
 	// kopsataan faili
 	$scpma = "scp $filename $scp_host:$scp_dir";

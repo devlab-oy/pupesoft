@@ -850,7 +850,7 @@
 			$miinus = 3;
 		}
 		elseif ($toim == 'PROJEKTI') {
-			$query = "	SELECT if(lasku.tunnusnippu > 0 and lasku.tunnusnippu!=lasku.tunnus, concat('*',lasku.tunnusnippu,'<br>',lasku.tunnus), lasku.tunnus) tilaus, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, tunnusnippu, lasku.liitostunnus
+			$query = "	SELECT if(lasku.tunnusnippu > 0 and lasku.tunnusnippu!=lasku.tunnus, concat(lasku.tunnus,',',lasku.tunnusnippu), lasku.tunnus) tilaus, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, tunnusnippu, lasku.liitostunnus
 						FROM lasku use index (tila_index)
 						$seurantalisa
 						$kohdelisa
@@ -1064,22 +1064,22 @@
 						}
 						elseif (mysql_field_name($result,$i) == "tilaus") {
 
-							$query_comments = "	SELECT comments, sisviesti2
+							$query_comments = "	SELECT group_concat(concat_ws('<br>', comments, sisviesti2) SEPARATOR '<br><br>') comments
 												FROM lasku use index (primary)
 												WHERE yhtio = '$kukarow[yhtio]'
-												AND tunnus = '$row[$i]'
+												AND tunnus in ($row[$i])
 												AND (comments != '' OR sisviesti2 != '')";
 							$result_comments = mysql_query($query_comments) or pupe_error($query_comments);
 							$row_comments = mysql_fetch_array($result_comments);
 							
-							if (mysql_num_rows($result_comments) == 1) {
+							if (trim($row_comments["comments"]) != "") {
 								echo "<div id='kommentti$row[$i]' class='popup' style='width: 500px;'>";
-								echo "$row_comments[comments] $row_comments[sisviesti2]";
+								echo $row_comments["comments"];
 								echo "</div>";
-								echo "<td class='$class' align='right' valign='top'><a class='menu' onmouseout=\"popUp(event,'kommentti$row[$i]')\" onmouseover=\"popUp(event,'kommentti$row[$i]')\">$row[$i]</a></td>";
+								echo "<td class='$class' align='right' valign='top'><a class='menu' onmouseout=\"popUp(event,'kommentti$row[$i]')\" onmouseover=\"popUp(event,'kommentti$row[$i]')\">".str_replace(",", "<br>*", $row[$i])."</a></td>";
 							}
 							else {
-								echo "<td class='$class' align='right' valign='top'>$row[$i]</td>";
+								echo "<td class='$class' align='right' valign='top'>".str_replace(",", "<br>*", $row[$i])."</td>";
 							}
 						}
 						elseif (mysql_field_name($result,$i) == "seuranta") {

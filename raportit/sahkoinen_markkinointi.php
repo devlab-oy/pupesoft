@@ -318,17 +318,6 @@
 
 			// csv-tiedostoa varten
 			$rivi = "";
-			$rivi .= t("Nimi").",";
-			$rivi .= t("Sähköpostiosoite").",";
-			$rivi .= t("Postitp").",";
-			$rivi .= t("Postino").",";
-			$rivi .= t("Yhteensopivuustunnus").",";
-			$rivi .= t("Tyyppi").",";
-			$rivi .= t("Merkki").",";
-			$rivi .= t("Malli").",";
-			$rivi .= t("Cc").",";
-			$rivi .= t("Vm");
-			$rivi .= "\r\n";
 
 			if (isset($workbook)) {
 				$excelsarake = 0;

@@ -19,11 +19,11 @@ if (!isset($tee) or $tee == '') {
 
 	///* Hyv‰ksytt‰v‰t laskut*///
 	echo "<td class='back' width='10'></td>";
-
-	echo "<td class='back' valign='top' width='350'>";
+	echo "<td class='back' valign='top' width='450'>";
 
 	// haetaan kaikki yritykset, jonne t‰m‰ k‰ytt‰j‰ p‰‰see
-	$query  = "	SELECT distinct yhtio.yhtio, yhtio.nimi from kuka
+	$query  = "	SELECT distinct yhtio.yhtio, yhtio.nimi 
+				from kuka
 				join yhtio using (yhtio)
 				where kuka='$kukarow[kuka]'";
 	$kukres = mysql_query($query) or pupe_error($query);
@@ -34,9 +34,9 @@ if (!isset($tee) or $tee == '') {
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila = 'H' and tila!='D'
 					ORDER BY erpcm";
 		$result = mysql_query($query) or pupe_error($query);
-		$piilorow=mysql_fetch_array ($result);
+		$piilorow = mysql_fetch_array ($result);
 
-		$query = "	SELECT tapvm, erpcm 'er‰pvm', ytunnus, nimi, round(summa * vienti_kurssi, 2) 'kotisumma', if(erpcm<=now(), 1, 0) wanha
+		$query = "	SELECT tapvm, erpcm, ytunnus, nimi, round(summa * vienti_kurssi, 2) 'kotisumma', if(erpcm<=now(), 1, 0) wanha
 					FROM lasku
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila!='H' and tila!='D'
 					ORDER BY erpcm";
@@ -55,26 +55,36 @@ if (!isset($tee) or $tee == '') {
 				echo "<tr><td colspan='".mysql_num_fields($result)."' class='back'>". sprintf(t('Sinulla on %d pys‰ytetty‰ laskua'), $piilorow[0]) . "</tr>";
 
 			if (mysql_num_rows($result) > 0) {
-				for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
-					echo "<th>" . t(mysql_field_name($result,$i))."</th>";
-				}
+				
+				echo "<th>" . t("Er‰pvm")."</th>";
+				echo "<th>" . t("Ytunnus")."</th>";
+				echo "<th>" . t("Nimi")."</th>";
+				echo "<th>" . t("Summa")."</th>";
+				
+
 				while ($trow=mysql_fetch_array ($result)) {
 					echo "<tr>";
-					for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
-						if($trow["wanha"] == 1) {
-							$style = "error'"; 
-						}
-						else {
-							$style = "";
-						}
-						
-						if (mysql_field_name($result,$i) == "nimi" and $kukrow["yhtio"] == $kukarow["yhtio"]) {
-							echo "<td><a href='hyvak.php'><font class='$style'>$trow[$i]</font></a></td>";
-						}
-						else {
-							echo "<td><font class='$style'>$trow[$i]</font></td>";
-						}
+					
+					if($trow["wanha"] == 1) {
+						$style = "error'"; 
 					}
+					else {
+						$style = "";
+					}
+					
+					echo "<td><font class='$style'>".tv1dateconv($trow["erpcm"])."</font></td>";
+					echo "<td><font class='$style'>$trow[ytunnus]</font></td>";
+					
+					
+					if ($kukrow["yhtio"] == $kukarow["yhtio"]) {
+						echo "<td><a href='hyvak.php'><font class='$style'>$trow[nimi]</font></a></td>";
+					}
+					else {
+						echo "<td><font class='$style'>$trow[nimi]</font></td>";
+					}
+					
+					echo "<td align='right'><font class='$style'>$trow[kotisumma]</font></td>";
+										
 					echo "</tr>";
 				}
 			}
@@ -120,6 +130,38 @@ if (!isset($tee) or $tee == '') {
 		}
 
 	}
+	
+	///* MUISTUTUKSET *///
+	//listataan paivan muistutukset
+	$query = "	SELECT kalenteri.tunnus tunnus, left(pvmalku,10) Muistutukset, asiakas.nimi Asiakas, yhteyshenkilo.nimi Yhteyshenkilo, 
+				kalenteri.kentta01 Kommentit, kalenteri.tapa Tapa
+				FROM kalenteri
+				LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio
+				LEFT JOIN asiakas ON asiakas.tunnus=kalenteri.liitostunnus and asiakas.yhtio=kalenteri.yhtio
+				WHERE kalenteri.kuka = '$kukarow[kuka]'
+				and kalenteri.tyyppi = 'Muistutus'
+				and kalenteri.kuittaus = 'K'
+				and kalenteri.yhtio = '$kukarow[yhtio]' 
+				ORDER BY kalenteri.pvmalku desc";
+	$result = mysql_query($query) or pupe_error($query);
+	
+	if (mysql_num_rows($result) > 0) {
+        echo "<table width='100%'>";
+        echo "<tr>";
+       	echo "<th colspan='4'>".t("Muistutukset")."</th>";
+        echo "</tr>";
+
+
+        while ($prow = mysql_fetch_array ($result)) {
+                echo "<tr>";
+               	echo "<td nowrap><a href='".$palvelin2."crm/kuittaamattomat.php?tee=A&kaletunnus=$prow[tunnus]&kuka=$prow[kuka]'>".tv1dateconv($prow["Muistutukset"])."</a></td>";
+                echo "<td>$prow[Asiakas]<br>$prow[Yhteyshenkilo]</td>";
+                echo "<td>$prow[Kommentit]</td>";
+                echo "<td nowrap>$prow[Tapa]</td>";
+                echo "</tr>";
+        }
+        echo "</table><br>";
+}
 
 	///* RUOKALISTA *///
 	$query = "	SELECT *, kalenteri.tunnus tun, year(pvmalku) vva, month(pvmalku) kka, dayofmonth(pvmalku) ppa, year(pvmloppu) vvl, month(pvmloppu) kkl, dayofmonth(pvmloppu) ppl

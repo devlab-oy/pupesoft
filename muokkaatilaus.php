@@ -991,7 +991,7 @@
 
 				// jos kyseess‰ on "odottaa JT tuotteita rivi"
 				if ($row["tila"] == "N" and $row["alatila"] == "T") {
-					$query = "select tunnus from tilausrivi where yhtio='$kukarow[yhtio]' and tyyppi='L' and otunnus='$row[tilaus]'";
+					$query = "SELECT tunnus from tilausrivi where yhtio='$kukarow[yhtio]' and tyyppi='L' and otunnus='$row[tilaus]'";
 					$countres = mysql_query($query) or pupe_error($query);
 
 					// ja sill‰ ei ole yht‰‰n rivi‰
@@ -1076,10 +1076,10 @@
 								echo "<div id='kommentti$row[$i]' class='popup' style='width: 500px;'>";
 								echo "$row_comments[comments] $row_comments[sisviesti2]";
 								echo "</div>";
-								echo "<td class='$class' valign='top'><a class='menu' onmouseout=\"popUp(event,'kommentti$row[$i]')\" onmouseover=\"popUp(event,'kommentti$row[$i]')\">$row[$i]</a></td>";
+								echo "<td class='$class' align='right' valign='top'><a class='menu' onmouseout=\"popUp(event,'kommentti$row[$i]')\" onmouseover=\"popUp(event,'kommentti$row[$i]')\">$row[$i]</a></td>";
 							}
 							else {
-								echo "<td class='$class' valign='top'>$row[$i]</td>";
+								echo "<td class='$class' align='right' valign='top'>$row[$i]</td>";
 							}
 						}
 						elseif (mysql_field_name($result,$i) == "seuranta") {

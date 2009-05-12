@@ -46,8 +46,9 @@
 			}
 			else {
 				if ($toim == "ENNAKKO") {
-					$query = "	SELECT tilausrivi.*, tuote.ei_saldoa, tilausrivin_lisatiedot.suoraan_laskutukseen
+					$query = "	SELECT tilausrivi.*, tuote.ei_saldoa, tilausrivin_lisatiedot.suoraan_laskutukseen, lasku.vienti_kurssi
 								FROM tilausrivi use index (PRIMARY)
+								JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 								JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -56,9 +57,9 @@
 								and tilausrivi.tyyppi  = 'E'";
 				}
 				else {
-					$query = "	SELECT tilausrivi.*, tilausrivi.jt $lisavarattu jt, tuote.ei_saldoa, tilausrivin_lisatiedot.suoraan_laskutukseen, lasku.osatoimitus
+					$query = "	SELECT tilausrivi.*, tilausrivi.jt $lisavarattu jt, tuote.ei_saldoa, tilausrivin_lisatiedot.suoraan_laskutukseen, lasku.osatoimitus, lasku.vienti_kurssi
 								FROM tilausrivi use index (PRIMARY)
-								JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
+								JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 								JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
 								WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
@@ -115,7 +116,7 @@
 
 					if ($toim == "ENNAKKO") {
 						// Tutkitaan perusotsikon er‰p‰iv‰m‰‰r‰‰
-						$erpquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and tunnus='$otsikkorivi[maksuehto]'";
+						$erpquery = "SELECT * from maksuehto where yhtio = '$kukarow[yhtio]' and tunnus='$otsikkorivi[maksuehto]'";
 						$erpres = mysql_query($erpquery) or pupe_error($erpquery);
 						$meapurow = mysql_fetch_array($erpres);
 
@@ -544,7 +545,9 @@
 							}
 
 							if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-								$hinta 			= laskuval($hinta, $laskurow["vienti_kurssi"]);
+								//K‰ytet‰‰n alkuper‰isen JT-rivin otsikon valuuttakurssia
+								//$hinta 		= laskuval($hinta, $laskurow["vienti_kurssi"]);								
+								$hinta 			= laskuval($hinta, $isarivirow["vienti_kurssi"]);
 							}
 
 							require("lisaarivi.inc");

@@ -352,14 +352,14 @@
 		}
 
 		if ($tuoterow["alv"] != $trow["alv"] and $yhtiorow["alv_kasittely"] == "" and $trow["alv"] < 500) {
-			$hinta 		= sprintf("%.".$yhtiorow['hintapyoristys']."f",round($trow["hinta"] / (1+$trow['alv']/100) * (1+$tuoterow['alv']/100), $yhtiorow['hintapyoristys']));
+			$hinta 		= round($trow["hinta"] / (1+$trow['alv']/100) * (1+$tuoterow['alv']/100), $yhtiorow['hintapyoristys']);
 		}
 		else {
 			$hinta		= $trow["hinta"];
 		}
 
-		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			$hinta 		= laskuval($hinta, $laskurow["vienti_kurssi"]);
+		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {			
+			$hinta  = round(laskuval($hinta, $laskurow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);	
 		}
 
 		$ale 			= $trow["ale"];
@@ -608,8 +608,11 @@
 		if (in_array($jarj, array("ytunnus","tuoteno","luontiaika","toimaika"))) {
 			//haetaan vain tuoteperheiden is‰t tai sellaset tuotteet jotka eiv‰t kuulu tuoteperheisiin
 			if ($toim == "ENNAKKO") {
-				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.varattu jt, lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
-							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika, lasku.toimvko, maksuehto.jv, lasku.osatoimitus
+				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.varattu jt, 
+							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
+							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, 
+							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika, 
+							lasku.toimvko, maksuehto.jv, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila='E' and lasku.alatila='A' $laskulisa)							
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
@@ -626,8 +629,11 @@
 							$limit";
 			}
 			else {
-				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.jt $lisavarattu jt, lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
-							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika, lasku.toimvko, maksuehto.jv, lasku.osatoimitus
+				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.jt $lisavarattu jt, 
+							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
+							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, 
+							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika, 
+							lasku.toimvko, maksuehto.jv, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and ((lasku.tila = 'N' and lasku.alatila != '') or lasku.tila != 'N') $laskulisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
@@ -730,8 +736,9 @@
 
 						if ($toim == "ENNAKKO" and ($jtrow["perheid"] > 0 or $jtrow["perheid2"] > 0)) {
 							$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.varattu jt, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
-										tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, tuote.yksikko
+										tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, tuote.yksikko, lasku.valkoodi, lasku.vienti_kurssi
 										FROM tilausrivi use index (yhtio_otunnus)
+										JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 										JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 										WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 										$otunlisa
@@ -743,8 +750,9 @@
 						}
 						elseif ($jtrow["perheid"] > 0 or $jtrow["perheid2"] > 0) {
 							$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.jt $lisavarattu jt, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
-										tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, tuote.yksikko
+										tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, tuote.yksikko, lasku.valkoodi, lasku.vienti_kurssi
 										FROM tilausrivi use index (yhtio_otunnus)
+										JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 										JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 										WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 										$otunlisa
@@ -948,7 +956,7 @@
 
 											if (mysql_num_rows($vtresult) > 1) {
 												echo "<b>".t("N‰yt‰ saatavuus vain varastosta").": </b> <select name='vainvarastosta' onchange='submit();'>";
-												echo "<option value=''>Kaikki varastot</option>";
+												echo "<option value=''>".t("Kaikki varastot")."</option>";
 
 												while ($vrow = mysql_fetch_array($vtresult)) {
 													if ($vrow["tyyppi"] != 'E' or $kukarow["varasto"] == $vrow["tunnus"]) {
@@ -1070,8 +1078,14 @@
 									echo "<td valign='top' align='right' $class>".($jtrow["jt"]*1)."<br>";
 								}
 								
-								echo sprintf("%.".$yhtiorow['hintapyoristys']."f", $jtrow["hinta"])."<br>$jtrow[ale]%</td>";
+								if ($jtrow["valkoodi"] != '' and trim(strtoupper($jtrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+									$hinta	= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) laskuval($jtrow["hinta"], $jtrow["vienti_kurssi"]))." ".$jtrow["valkoodi"];
+								}
+								else {
+									$hinta	= sprintf("%.".$yhtiorow['hintapyoristys']."f", $jtrow["hinta"])." ".$jtrow["valkoodi"];
+								}
 								
+								echo "$hinta<br>$jtrow[ale]%</td>";
 							}
 
 							if ($oikeurow['paivitys'] == '1') {
@@ -1481,8 +1495,16 @@
 										echo "<td valign='top' align='right' $class>$perherow[jt]<br>";
 									}
 
-									echo sprintf("%.".$yhtiorow['hintapyoristys']."f", $perherow["hinta"])."<br>$perherow[ale]%</td>";
-
+								
+									if ($perherow["valkoodi"] != '' and trim(strtoupper($perherow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+										$hinta	= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) laskuval($perherow["hinta"], $perherow["vienti_kurssi"]))." ".$perherow["valkoodi"];
+									}
+									else {
+										$hinta	= sprintf("%.".$yhtiorow['hintapyoristys']."f", $perherow["hinta"])." ".$perherow["valkoodi"];
+									}
+									
+									echo $hinta."<br>$perherow[ale]%</td>";
+									
 									if ($oikeurow['paivitys'] == '1') {
 										echo "<td valign='top' $class>$kokonaismyytavissa ".ta($kieli, "Y", $perherow["yksikko"])."<br></font>";
 
@@ -1557,21 +1579,21 @@
 												echo "<td><font style='color:red;'>".t("Korvaava")."</font></td>";
 												echo "<td align='left' style='vertical-align:top'>";
 												echo "$krow2row[tuoteno] ($vapaana) <font style='color:green;'>".t("Riitt‰‰ kaikille")."!$varalisa</font><br>";
-												echo "</td><td colspan='9' align='left'><input type='button' value='Korvaa tuote $jtrow[tuoteno]' onClick='javascript:update_params(\"$jtrow[tuoteno]\", \"$krow2row[tuoteno]\", \"$jtrow[tunnus]\");javascript:submit();'></td></tr>";
+												echo "</td><td colspan='9' align='left'><input type='button' value='".t("Korvaa tuote")." $jtrow[tuoteno]' onClick='javascript:update_params(\"$jtrow[tuoteno]\", \"$krow2row[tuoteno]\", \"$jtrow[tunnus]\");javascript:submit();'></td></tr>";
 											}
 											elseif ($vapaana >= $jtrow["jt"]) {
 												echo "<tr class='aktiivi'>";
 												echo "<td><font style='color:red;'>".t("Korvaava")."</font></td>";
 												echo "<td align='left' style='vertical-align:top'>";
 												echo "$krow2row[tuoteno] ($vapaana) <font style='color:yellowgreen;'>".t("Ei riit‰ kaikille")."!$varalisa</font><br>";
-												echo "</td><td colspan='9' align='left'><input type='submit' value='Korvaa tuote $jtrow[tuoteno]' onClick='javascript:update_params(\"$jtrow[tuoteno]\", \"$krow2row[tuoteno]\", \"$jtrow[tunnus]\");javascript:submit();'></td></tr>";
+												echo "</td><td colspan='9' align='left'><input type='submit' value='".t("Korvaa tuote")." $jtrow[tuoteno]' onClick='javascript:update_params(\"$jtrow[tuoteno]\", \"$krow2row[tuoteno]\", \"$jtrow[tunnus]\");javascript:submit();'></td></tr>";
 											}
 											elseif ($vapaana > 0) {
 												echo "<tr class='aktiivi'>";
 												echo "<td><font style='color:red;'>".t("Korvaava")."</font></td>";
 												echo "<td align='left' style='vertical-align:top'>";
 												echo "$krow2row[tuoteno] ($vapaana) <font style='color:orange;'>".t("Ei riit‰ koko riville")."!$varalisa</font><br>";
-												echo "</td><td colspan='9' align='left'><input type='submit' value='Korvaa tuote $jtrow[tuoteno]' onClick='javascript:update_params(\"$jtrow[tuoteno]\", \"$krow2row[tuoteno]\", \"$jtrow[tunnus]\");javascript:submit();'></td></tr>";
+												echo "</td><td colspan='9' align='left'><input type='submit' value='".t("Korvaa tuote")." $jtrow[tuoteno]' onClick='javascript:update_params(\"$jtrow[tuoteno]\", \"$krow2row[tuoteno]\", \"$jtrow[tunnus]\");javascript:submit();'></td></tr>";
 											}
 										}
 									}

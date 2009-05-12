@@ -910,8 +910,8 @@
 	}
 	
 	echo "<br>";
-	echo "<input type='Submit' name='submit_button' id='submit_button' value = '",t("Etsi"),"'></form>";
-	echo "<form><input type='submit' name='submit_button2' id='submit_button2' value = '",t("Tyhjenn‰"),"'></form></td></tr></table><br>";
+	echo "<input type='Submit' name='submit_button' id='submit_button' value = '".t("Etsi")."'></form>";
+	echo "<form><input type='submit' name='submit_button2' id='submit_button2' value = '".t("Tyhjenn‰")."'></form></td></tr></table><br>";
 
 	// Ei listata mit‰‰n jos k‰ytt‰j‰ ei ole tehnyt mit‰‰n rajauksia
 	/*

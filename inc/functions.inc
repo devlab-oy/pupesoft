@@ -3905,7 +3905,7 @@ if (!function_exists('ebid')) {
 		$query = "SELECT * from lasku where tunnus=" . (int) $lasku_tunnus . " and yhtio='{$kukarow['yhtio']}'";
 		$res = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($res);
-
+		
 		if ($laskurow['ebid'] != "") {
 
 			if (substr($laskurow['ebid'], 0, 1) == '/') {
@@ -3959,22 +3959,15 @@ if (!function_exists('ebid')) {
 		elseif ($laskurow['tila'] == 'U') {
 
 			$out = "";
-
-			if ($laskurow['chn'] == '111') {
-				$out = t("Elma EDI-inhouse");
-			}
-			elseif ($laskurow['chn'] == '010') {
-				$out = t("eInvoice");
-			}
-			elseif ($laskurow['chn'] == '020') {
-				$out = t("Vienti eInvoice");
-			}
-			elseif ($laskurow['chn'] == '100') {
-				$out = t("Paperilasku");
-			}
-
+			
+			if ($laskurow['chn'] == '100') $out = t("Paperilasku");
+			elseif ($laskurow['chn'] == '010') $out = t("eInvoice")."-".t("lasku");
+			elseif ($laskurow['chn'] == '020') $out = t("Vienti eInvoice")."-".t("lasku");
+			elseif ($laskurow['chn'] == '111') $out = t("Elma EDI-inhouse")."-".t("lasku");
+			elseif ($laskurow['chn'] == '666') $out = t("Sähköposti")."-".t("lasku");
+			elseif ($laskurow['chn'] == '667') $out = t("Sisäinen")."-".t("lasku");
+			
 			return $out;
-
 	    }
 		else {
 

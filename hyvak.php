@@ -364,6 +364,7 @@
 			$tee = "";
 		}
 	}
+	
 	if ($tee == 'W' and $komm == '') {
 		echo "<font class='error'>".t('Anna pysäytyksen syy')."</font>";
 		$tee = 'Z';
@@ -844,6 +845,7 @@
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]' and liitostunnus='$laskurow[liitostunnus]' and tila IN ('H','M','P','Q','Y') and asiakkaan_tilausnumero = '$laskurow[asiakkaan_tilausnumero]' and tunnus != $laskurow[tunnus]";
 			$tarkres = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_num_rows($tarkres) != 0) {
 				echo "<br><font class = 'error'>".t("HUOM! Toimittajalta on saapunut jo lasku samalla laskunumerolla!")."</font><table>";
 
@@ -925,7 +927,7 @@
 		echo "<td>".ebid($laskurow["tunnus"]) . "</td>";
 
 		// Näytetään poistonappi, jos se on sallittu ja lasku ei ole keikalla ja on avoimella tilikaudella
-		$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";
+		$query = "SELECT laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";
 		$keikres = mysql_query($query) or pupe_error($query);
 
 		if (($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') and $oikeurow['paivitys'] == '1' and mysql_num_rows($keikres) == 0 and $laskurow["tapvm"] > $yhtiorow["ostoreskontrakausi_alku"]) {
@@ -954,6 +956,22 @@
 
 			echo "<tr>";
 			echo "<td colspan='3'>$laskurow[viite] $laskurow[viesti] $laskurow[sisviesti1]</td>";
+			echo "</tr>";
+		}
+		
+		$query = "	SELECT fakta
+					FROM toimi
+					WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+		$toimres = mysql_query($query) or pupe_error($query);
+		$toimrow = mysql_fetch_assoc($toimres);
+		
+		if (trim($toimrow["fakta"]) != "") {
+			echo "<tr>";
+			echo "<th colspan='3'>".t("Fakta")."</th>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<td colspan='3'>$toimrow[fakta]</td>";
 			echo "</tr>";
 		}
 

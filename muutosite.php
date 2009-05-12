@@ -11,8 +11,9 @@ if ($tee == 'tulosta_tratta') {
 	require ('myyntires/paperitratta.php');
 	exit;
 }
+
 if ($tee == 'tulosta_korkoerittely') {
-	$apuqu = "	select *
+	$apuqu = "	SELECT *
 				from lasku
 				where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 	$res = mysql_query($apuqu) or pupe_error($apuqu);
@@ -22,8 +23,6 @@ if ($tee == 'tulosta_korkoerittely') {
 	}
 	exit;
 }
-
-
 
 echo "<font class='head'>".t("Tiliˆintien muutos/selailu")."</font><hr>";
 
@@ -549,31 +548,33 @@ if ($tee == 'U') {
 if ($tee == 'E' or $tee == 'F') {
 
 	// N‰ytet‰‰n laskun tai tositteen tiedot....
-	$query = "SELECT tila, concat_ws('@', ifnull(kuka.nimi, lasku.laatija), lasku.luontiaika) Laatija,
-					ytunnus, lasku.nimi, nimitark, osoite, osoitetark, postino, postitp, maa,
-					lasku.valkoodi,
-					concat_ws(' / ',tapvm, mapvm) 'tapvm / mapvm',
-					if(kasumma = 0,'',
-					if (tila = 'U',
-					if(lasku.valkoodi='$yhtiorow[valkoodi]',concat_ws('@',kasumma, kapvm),concat(kasumma, ' (', round(kasumma/if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),lasku.valkoodi,')', '@', kapvm)),
-					if(lasku.valkoodi='$yhtiorow[valkoodi]',concat_ws('@',kasumma, kapvm),concat(kasumma, ' (', round(kasumma*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),'$yhtiorow[valkoodi])', '@', kapvm)))) kassa_ale,
-					if (tila = 'U',
-					if(lasku.valkoodi='$yhtiorow[valkoodi]', concat_ws('@', summa, erpcm),concat(summa, ' (', round(summa/if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),lasku.valkoodi,')', '@', erpcm)),
-					if(lasku.valkoodi='$yhtiorow[valkoodi]', concat_ws('@', summa, erpcm),concat(summa, ' (', round(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),'$yhtiorow[valkoodi])', '@', erpcm))) summa,
-					concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak1), lasku.hyvak1), if(h1time='0000-00-00 00:00:00', null, h1time)) Hyv‰ksyj‰1,
-					concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak2), lasku.hyvak2), if(h2time='0000-00-00 00:00:00', null, h2time)) Hyv‰ksyj‰2,
-					concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak3), lasku.hyvak3), if(h3time='0000-00-00 00:00:00', null, h3time)) Hyv‰ksyj‰3,
-					concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak4), lasku.hyvak4), if(h4time='0000-00-00 00:00:00', null, h4time)) Hyv‰ksyj‰4,
-					concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak5), lasku.hyvak5), if(h5time='0000-00-00 00:00:00', null, h5time)) Hyv‰ksyj‰5,
-					concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.maksaja), lasku.maksaja), maksuaika) Maksaja,
-					tilinumero, concat_ws(' ', viite, viesti, sisviesti1) Maksutieto,
-					maa, ultilno, pankki1, pankki2, pankki3, pankki4, swift, clearing, maksutyyppi,
-					ebid,
-					toim_osoite, '' toim_osoitetark, toim_postino, toim_postitp, toim_maa, alatila, vienti, comments, yriti.nimi maksajanpankkitili, lasku.laskunro, saldo_maksettu, saldo_maksettu_valuutassa, lasku.tunnus, lasku.viesti
-					FROM lasku
-					LEFT JOIN yriti ON lasku.yhtio=yriti.yhtio and maksu_tili=yriti.tunnus
-					LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
-					WHERE lasku.tunnus = '$tunnus' and lasku.yhtio = '$kukarow[yhtio]'";
+	$query = "	SELECT tila, concat_ws('@', ifnull(kuka.nimi, lasku.laatija), lasku.luontiaika) Laatija,
+				ytunnus, lasku.nimi, nimitark, osoite, osoitetark, postino, postitp, maa,
+				lasku.valkoodi,
+				concat_ws(' / ',tapvm, mapvm) 'tapvm / mapvm',
+				if(kasumma = 0,'',
+				if (tila = 'U',
+				if(lasku.valkoodi='$yhtiorow[valkoodi]',concat_ws('@',kasumma, kapvm),concat(kasumma, ' (', round(kasumma/if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),lasku.valkoodi,')', '@', kapvm)),
+				if(lasku.valkoodi='$yhtiorow[valkoodi]',concat_ws('@',kasumma, kapvm),concat(kasumma, ' (', round(kasumma*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),'$yhtiorow[valkoodi])', '@', kapvm)))) kassa_ale,
+				if (tila = 'U',
+				if(lasku.valkoodi='$yhtiorow[valkoodi]', concat_ws('@', summa, erpcm),concat(summa, ' (', round(summa/if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),lasku.valkoodi,')', '@', erpcm)),
+				if(lasku.valkoodi='$yhtiorow[valkoodi]', concat_ws('@', summa, erpcm),concat(summa, ' (', round(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),'$yhtiorow[valkoodi])', '@', erpcm))) summa,
+				concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak1), lasku.hyvak1), if(h1time='0000-00-00 00:00:00', null, h1time)) Hyv‰ksyj‰1,
+				concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak2), lasku.hyvak2), if(h2time='0000-00-00 00:00:00', null, h2time)) Hyv‰ksyj‰2,
+				concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak3), lasku.hyvak3), if(h3time='0000-00-00 00:00:00', null, h3time)) Hyv‰ksyj‰3,
+				concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak4), lasku.hyvak4), if(h4time='0000-00-00 00:00:00', null, h4time)) Hyv‰ksyj‰4,
+				concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak5), lasku.hyvak5), if(h5time='0000-00-00 00:00:00', null, h5time)) Hyv‰ksyj‰5,
+				concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.maksaja), lasku.maksaja), maksuaika) Maksaja,
+				tilinumero, concat_ws(' ', viite, viesti, sisviesti1) Maksutieto,
+				maa, ultilno, pankki1, pankki2, pankki3, pankki4, swift, clearing, maksutyyppi,
+				ebid,
+				toim_osoite, '' toim_osoitetark, toim_postino, toim_postitp, toim_maa, alatila, vienti, comments, yriti.nimi maksajanpankkitili, 
+				lasku.laskunro, saldo_maksettu, saldo_maksettu_valuutassa, lasku.tunnus, lasku.viesti, lasku.liitostunnus
+				FROM lasku
+				LEFT JOIN yriti ON lasku.yhtio=yriti.yhtio and maksu_tili=yriti.tunnus
+				LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
+				WHERE lasku.tunnus = '$tunnus' 
+				and lasku.yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) != 1) {
@@ -623,7 +624,6 @@ if ($tee == 'E' or $tee == 'F') {
 
 	// Yleiset tiedot
 	echo "<table>"; // T‰m‰ aloittaa vasemman sarakkeen
-
 
 	list($aa, $bb) = explode("@", $trow[1]);
 	echo "<tr><th>" . t(mysql_field_name($result,1)) ."</th><td>$aa@".tv1dateconv($bb, "P")."</td></tr>";
@@ -695,7 +695,8 @@ if ($tee == 'E' or $tee == 'F') {
 					echo "<tr><th>" . t(mysql_field_name($keikres,$i)) ."</th><td>$keikrow[$i]</td></tr>";
 				}
 				if (mysql_num_rows($muutkeikres) != 0) {
-					echo "<tr><th>keikan muut laskut</td><td>";
+					echo "<tr><th>".t("keikan muut laskut")."</td><td>";
+					
 					while ($muutkeikrow = mysql_fetch_array($muutkeikres)) {
 						echo "<a href='muutosite.php?tee=E&tunnus=$muutkeikrow[vanhatunnus]'>$muutkeikrow[nimi] ($muutkeikrow[summa])</a><br>";
 					}
@@ -742,6 +743,7 @@ if ($tee == 'E' or $tee == 'F') {
 
 			if (mysql_num_rows($karhu_result) > 0) {
 				echo "<tr><th>",t('Karhu / Tratta'),":</th><td>";
+				
 				while ($karhu_row = mysql_fetch_array($karhu_result)) {
 					if ($karhu_row["tyyppi"] == 'T') {
 						echo "<a href='".$palvelin2."muutosite.php?karhutunnus=$karhu_row[ktunnus]&lasku_tunnus[]=$karhu_row[laskutunnukset]&tee=tulosta_tratta&nayta_pdf=1'>".tv1dateconv($karhu_row["pvm"])."</a> (Tratta)";
@@ -755,25 +757,6 @@ if ($tee == 'E' or $tee == 'F') {
 			}
 		}
 		
-		/*
-		echo "<tr><th>".t("Tila").":</th><td>".t("$laskutyyppi")." ".t("$alatila");
-
-		if ($trow['tila'] == 'U') {
-			$query= "SELECT count(*) kerrat, max(pvm) vika, min(pvm) eka
-				from karhu_lasku
-				join karhukierros on ktunnus=tunnus
-				where ltunnus='$trow[tunnus]'
-				having kerrat > 0";
-			$karhuresult = mysql_query($query) or pupe_error($query);
-			if (mysql_num_rows($karhuresult) == 1) {
-				$karhurow = mysql_fetch_array($karhuresult);
-				echo " ";
-				printf (t("Karhuttu %s kertaa %s - %s"), $karhurow['kerrat'], tv1dateconv($karhurow['eka']), tv1dateconv($karhurow['vika']));
-			}
-		}
-		echo "</td></tr>";
-		*/
-
 		// Myynnille
 		if ($trow['tila'] == 'U' or $trow['tila'] == 'L') {
 			for ($i = 21; $i < 22; $i++) {
@@ -815,7 +798,7 @@ if ($tee == 'E' or $tee == 'F') {
 							<input type='hidden' name='otunnus' value='$korkolaskurow2[tunnus]'>
 							<input type='hidden' name='TOIM' value='LASKU'>
 							<input type='hidden' name='tee' value='NAYTATILAUS'>
-							<input type='submit' value='",tv1dateconv($korkolaskurow['olmapvm']),"'></form>";
+							<input type='submit' value='".tv1dateconv($korkolaskurow['olmapvm'])."'></form>";
 						echo "<br>";
 					}
 
@@ -855,14 +838,17 @@ if ($tee == 'E' or $tee == 'F') {
 				echo "<tr><th>".t("Oma pankkitili")."</th><td>$trow[maksajanpankkitili]</td></tr>";
 			}
 		}
+		
 		// en jaksa mietti‰ indeksilukuja perkele!
 		if ($trow["comments"] != '' or $trow['saldo_maksettu'] != 0) {
 			echo "<tr><th>".t("Kommentti")."</th><td>$trow[comments]";
+			
 			if ($trow['saldo_maksettu'] != 0) {
 				if ($trow["comments"] != '') echo "<br>";
 				echo t("Laskusta avoinna");
 				echo " ";
 				echo $trow['summa'] - $trow['saldo_maksettu'];
+				
 				if ($trow['valkoodi'] != $yhtiorow['valkoodi']) {
 					echo " (";
 					echo $trow['saldo_valuutassa'] - $trow['saldo_maksettu_valuutassa'];
@@ -875,7 +861,35 @@ if ($tee == 'E' or $tee == 'F') {
 
 		// tehd‰‰n laskulinkki
 		echo "<tr><th>".t("Laskun kuva")."</th><td>".ebid($tunnus) ."</td></tr>";
+		
+		if ($trow['tila'] == 'U' or $trow['tila'] == 'L') {
+			$query = "	SELECT fakta
+						FROM asiakas
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus='$trow[liitostunnus]'";
+			$faktares = mysql_query($query) or pupe_error($query);
+			$faktarow = mysql_fetch_assoc($faktares);
 
+			if (trim($faktarow["fakta"]) != "") {
+				echo "<tr>";
+				echo "<th>".t("Fakta")."</th>";
+				echo "<td>$faktarow[fakta]</td>";
+				echo "</tr>";
+			}
+		}
+		else {
+			$query = "	SELECT fakta
+						FROM toimi
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus='$trow[liitostunnus]'";
+			$faktares = mysql_query($query) or pupe_error($query);
+			$faktarow = mysql_fetch_assoc($faktares);
+
+			if (trim($faktarow["fakta"]) != "") {
+				echo "<tr>";
+				echo "<th>".t("Fakta")."</th>";
+				echo "<td>$faktarow[fakta]</td>";
+				echo "</tr>";
+			}	
+		}
 	}
 	else {
 		// kommentti n‰kyviin
@@ -890,8 +904,9 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "<td>".ebid($tunnus) ."</td></tr>";
 
 	}
+	
 	echo "<tr>";
-	echo "<th></th><td>";
+	echo "<td colspan='2'><br>";
 
 	// N‰ytet‰‰n nappi vain jos siihen on oikeus
 	if ($oikeurow['paivitys'] == 1) {
@@ -953,8 +968,8 @@ if ($tee == 'E' or $tee == 'F') {
 			<input type='submit' value='" . t('Tulosta korkoerittely')."'></form>";
 		}
 	}
-
-	echo "</tr>";
+	
+	echo "</td></tr>";
 	echo "</table></td></tr>"; //Lopetettiin viimeinen sarake
 	echo "</table>";
 

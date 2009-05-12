@@ -180,11 +180,22 @@ else {
 	//p‰ivitet‰‰n tilaus valmisaika, kun painetaan ekan kerran tilaus valmiiksi
 	if ($laskurow['h1time'] == "0000-00-00 00:00:00") {
 		$query = "	UPDATE lasku 
-					SET h1time = now() 
+					SET h1time = now(),
+					hyvak1 = '$kukarow[kuka]' 
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus = '$laskurow[tunnus]'";
 		$result = mysql_query($query) or pupe_error($query);
 	}	
+	
+	//p‰ivitet‰‰n tilaus valmisaika, kun painetaan ekan kerran tilaus valmiiksi
+	if ($laskurow['tila'] == "N" and $laskurow['alatila'] == "F") {
+		$query = "	UPDATE lasku 
+					SET h2time = now(),
+					hyvak2 = '$kukarow[kuka]' 
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$laskurow[tunnus]'";
+		$result = mysql_query($query) or pupe_error($query);
+	}
 
 	// otetaan maksuehto t‰ss‰ heti alussa selville.. k‰teinen ja itsetulostus muuttaa asioita
 	$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";

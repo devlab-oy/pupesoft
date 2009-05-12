@@ -31,11 +31,20 @@
 	$postirow_varasto = mysql_fetch_array($tempr);
 
 	// jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
-	if ($postirow_varasto["osoite"] != "") {
+	if ($postirow_varasto["nimi"] != "") {
+		$postirow["yhtio_nimi"]     = $postirow_varasto["nimi"];
 		$postirow["yhtio_osoite"]   = $postirow_varasto["osoite"];
 		$postirow["yhtio_postino"]  = $postirow_varasto["postino"];
 		$postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];
 		$postirow["yhtio_maa"]      = $postirow_varasto["maa"];
+	}
+
+	// jos meill‰ on printterin takana joku spessu osoitetieto niin k‰ytet‰‰n sen tietoja l‰hett‰j‰n tietoina
+	if ($print["nimi"] != "") {
+		$postirow["yhtio_nimi"]    = $print["nimi"];
+		$postirow["yhtio_osoite"]  = $print["osoite"];
+		$postirow["yhtio_postino"] = $print["postino"];
+		$postirow["yhtio_postitp"] = $print["postitp"];
 	}
 
 	$query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and ytunnus='$postirow[liitostunnus]'";

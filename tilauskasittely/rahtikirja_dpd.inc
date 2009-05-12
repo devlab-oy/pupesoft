@@ -43,11 +43,20 @@ if ($kollityht > 0) {
 		$postirow_varasto = mysql_fetch_array($tempr);
 
 		// jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
-		if ($postirow_varasto["osoite"] != "") {
+		if ($postirow_varasto["nimi"] != "") {
+			$yhtiorow["nimi"]     = $postirow_varasto["nimi"];
 			$yhtiorow["osoite"]   = $postirow_varasto["osoite"];
 			$yhtiorow["postino"]  = $postirow_varasto["postino"];
 			$yhtiorow["postitp"]  = $postirow_varasto["postitp"];
 			$yhtiorow["maa"]      = $postirow_varasto["maa"];
+		}
+
+		// jos meill‰ on printterin takana joku spessu osoitetieto niin k‰ytet‰‰n sen tietoja l‰hett‰j‰n tietoina
+		if ($print["nimi"] != "") {
+			$yhtiorow["nimi"]    = $print["nimi"];
+			$yhtiorow["osoite"]  = $print["osoite"];
+			$yhtiorow["postino"] = $print["postino"];
+			$yhtiorow["postitp"] = $print["postitp"];
 		}
 
 	}

@@ -18,8 +18,7 @@
 
 	echo "<font class='head'>".t("Ostoehdotus")."</font><hr>";
 
-	if ($tee == "paivita" and strpos($valmis,t("P‰ivit‰")) !== false) {
-	
+	if ($tee == "paivita" and $valmis == "PAIVITA") {
 	
 		foreach ($varmuus_varastot as $tuoteno => $val) {
 		
@@ -56,7 +55,7 @@
 		$tee = "RAPORTOI";
 		$ehdotusnappi = '';
 	}
-	elseif ($tee == "paivita" and strpos($valmis,t("Tee ostotilaus")) !== false) {
+	elseif ($tee == "paivita" and $valmis == "TILAA") {
 		$valitutyhtiot = unserialize(urldecode($valitutyhtiot));
 		$tuoteno = str_replace(t("Tee ostotilaus")." ","",$valmis);
 		$temp_ytunnus = $ytunnus;
@@ -199,8 +198,8 @@
 		$ytunnus = $temp_ytunnus;
 	}
 
-
 	$useampi_yhtio = 0;
+
 	if (is_array($valitutyhtiot)) {
 		foreach ($valitutyhtiot as $yhtio) {
 			$yhtiot .= "'$yhtio',";
@@ -465,6 +464,7 @@
 
 	// tehd‰‰n itse raportti
 	if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
+		
 		enable_ajax();
 		
 		$lisaa  = ""; // tuote-rajauksia
@@ -616,7 +616,17 @@
 		$res = mysql_query($query) or pupe_error($query);
 
 		flush();
-		echo "<form name='ostoehdotuscs' action='$PHP_SELF' method='post' autocomplete='off'>";
+		
+		//itse rivit
+		echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
+					function submit_juppe(valmis, ankkuri) {												
+						document.ostoehdotuscs.action='$PHP_SELF?valmis='+valmis+'#A_'+ankkuri;
+						document.ostoehdotuscs.submit();
+					}
+				</SCRIPT>";
+		
+		
+		echo "<form name='ostoehdotuscs' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='paivita'>";
 		echo "<table>";
 		echo "<tr>";
@@ -731,10 +741,10 @@
 
 				if ($useampi_yhtio > 1) {
 					echo "<td valign='top' $btl>$row[yhtio]</td>";
-					echo "<td valign='top' $bt><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
+					echo "<td valign='top' $bt><a name='A_$indeksi'><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
 				}
 				else {
-					echo "<td valign='top' $btl><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
+					echo "<td valign='top' $btl><a name='A_$indeksi'><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
 				}
 
 				echo "<td valign='top' $bt  align='right'>".(float) $row["varmuus_varasto"]."</td>";
@@ -761,10 +771,12 @@
 			
 				}
 			
-				echo "</tr>";
+				echo "</tr>\n";
 
+				echo "\n";
+				
 				echo "<tr>";
-
+					
 				if ($useampi_yhtio > 1) {
 					echo "<td valign='top' $bbl>$row[yhtio]</td>";
 					echo "<td valign='top' $bb><a href=\"javascript:toggleGroup('$indeksi')\">$row[nimitys]</a></td>";
@@ -781,7 +793,7 @@
 				echo "<td valign='top' $bbr>".tv1dateconv(date("Y-m-d",mktime(0, 0, 0, date("m"), date("d")+$toimirow["toimitusaika"], date("Y"))))."</td>";
 			
 				if ($useampi_yhtio == 1 and $toimirow['toimittaja'] != '' and $yhtiorow['yhtio'] == $row['yhtio']) {
-					echo "<td valign='top' align='right'><input type='submit' name='valmis' value='".t("Tilaa tuotetta")."'></td>";
+					echo "<td valign='top' align='right'><input type='submit' value='".t("Tilaa tuotetta")."' onclick=\"submit_juppe('TILAA', $indeksi);\"></td>";
 				}
 				else {
 					echo "<td></td>";
@@ -829,7 +841,7 @@
 		echo "<tr><td colspan ='8'>";
 	
 		if ($useampi_yhtio == 1) {
-			echo "<input type='submit' name='valmis' value='".t("P‰ivit‰")."'>";
+			echo "<input type='submit' value='".t("P‰ivit‰")."' onclick=\"submit_juppe('PAIVITA', 0);\">";
 		}	
 
 		echo "<input type='hidden' name='mul_osasto' value='".urlencode(serialize($paivitys_mul_osasto))."'>";

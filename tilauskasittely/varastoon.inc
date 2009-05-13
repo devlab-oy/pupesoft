@@ -375,7 +375,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 					WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		if ($tuorow["sarjanumeroseuranta"] == "E" or $tuorow["sarjanumeroseuranta"] == "F") {
+		if ($tuorow["sarjanumeroseuranta"] == "E" or $tuorow["sarjanumeroseuranta"] == "F" or $tuorow["sarjanumeroseuranta"] == "G") {
 
 			$query = "	SELECT era_kpl, tunnus
 						FROM sarjanumeroseuranta

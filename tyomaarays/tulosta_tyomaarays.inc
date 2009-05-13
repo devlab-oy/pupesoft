@@ -812,7 +812,7 @@ if (!function_exists('rivi')) {
 				if ($row["sarjanumeroseuranta"] == "S") {
 					$row["kommentti"] .= " \n".t("S:nro").": ".$sarjarow["sarjanumero"];		
 				}
-				elseif ($row["sarjanumeroseuranta"] == "E") {
+				elseif ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "G") {
 					$row["kommentti"] .= " \n".t("Erä").": ".$sarjarow["sarjanumero"];	
 				}
 				elseif ($row["sarjanumeroseuranta"] == "F") {

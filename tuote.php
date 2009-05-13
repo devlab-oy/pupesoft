@@ -674,7 +674,7 @@
 				$kokonaismyytavissa = 0;
 
 				//saldot per varastopaikka
-				if ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F") {
+				if ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F" or $tuoterow["sarjanumeroseuranta"] == "G") {
 					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								sarjanumeroseuranta.sarjanumero era,
@@ -718,7 +718,7 @@
 					while ($saldorow = mysql_fetch_array ($sresult)) {
 
 						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $saldoaikalisa, $saldorow["era"]);
-
+						
 						//summataan kokonaissaldoa
 						$kokonaissaldo += $saldo;
 						$kokonaishyllyssa += $hyllyssa;
@@ -1376,7 +1376,7 @@
 					echo "</table><br>";
 				}
 			}
-			elseif ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F") {
+			elseif ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F" or $tuoterow["sarjanumeroseuranta"] == "G") {
 				echo "<font class='message'>".t("Eränumerot")."</font><hr>";
 
 				$query	= "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.parasta_ennen, sarjanumeroseuranta.lisatieto,
@@ -1658,7 +1658,7 @@
 						$sarjares = mysql_query($query) or pupe_error($query);
 
 						while($sarjarow = mysql_fetch_array($sarjares)) {
-							if ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F") {
+							if ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F" or $tuoterow["sarjanumeroseuranta"] == "G") {
 								echo "<br>".t("E:nro").": $sarjarow[sarjanumero]";
 							}
 							else {

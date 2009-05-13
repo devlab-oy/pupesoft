@@ -1858,7 +1858,7 @@
 							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id#".urlencode($sarjarow["sarjanumero"])."'>".t("S:nro")."</a>)";
 						}
 					}
-					elseif ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F") {
+					elseif ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") {
 
 						if ($row["sarjanumeroseuranta"] == "F") {
 							$pepvmlisa1 = " sarjanumeroseuranta.parasta_ennen, ";
@@ -1995,7 +1995,7 @@
 						
 						$subbari = " onchange='submit();'";
 						
-						if (($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F") and $yhtiorow["kerayspoikkeama_kasittely"] != '') {
+						if (($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") and $yhtiorow["kerayspoikkeama_kasittely"] != '') {
 							$subbari = "";
 						}
 						
@@ -2008,7 +2008,7 @@
 
 					if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
 						
-						if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F") {
+						if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") {
 							$kasittely = "RU";
 						}
 						elseif ($yhtiorow["kerayspoikkeama_kasittely"] == 'J') {
@@ -2023,7 +2023,7 @@
 						echo "<option value='JT'>".t("JT")."</option>";
 						echo "<option value='PU'>".t("Puute")."</option>";
 
-						if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F") {
+						if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") {
 							echo "<option value='UR'>".t("Uusi rivi")."</option>";
 						}
 

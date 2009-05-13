@@ -145,7 +145,7 @@ if($tee == "HYLKAATARJOUS") {
 		}
 		else {
 			// merktaan myyntirivitunnus nollaks
-			if ($srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F") {
+			if ($srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F" or $srow["sarjanumeroseuranta"] == "G") {
 				$query = "  DELETE FROM sarjanumeroseuranta
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$srow[tuoteno]'
@@ -197,7 +197,7 @@ if($tee == "HYLKAATARJOUS") {
 				}
 				else {
 					// merkataan myyntirivitunnus nollaks
-					if ($srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F") {
+					if ($srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F" or $srow["sarjanumeroseuranta"] == "G") {
 						$query = "  DELETE FROM sarjanumeroseuranta
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tuoteno = '$srow[tuoteno]'

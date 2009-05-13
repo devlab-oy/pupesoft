@@ -149,7 +149,7 @@ else {
 			//Paivitetaan tuotteen saldo jos saldoa on varattu
 			if ($turow['ei_saldoa'] == '' and $trow['varattu'] != 0) {
 
-				if ($turow["sarjanumeroseuranta"] == "E" or $turow["sarjanumeroseuranta"] == "F") {
+				if ($turow["sarjanumeroseuranta"] == "E" or $turow["sarjanumeroseuranta"] == "F" or $turow["sarjanumeroseuranta"] == "G") {
 					if ($trow["varattu"] > 0) {
 
 						// Haetaan eka er‰tiedot
@@ -376,7 +376,7 @@ else {
 			}
 
 			// lasketaan kate
-			if ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "U") and $trow["varattu"] > 0) {
+			if ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "U" or $turow["sarjanumeroseuranta"] == "G") and $trow["varattu"] > 0) {
 				//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
 				$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $trow["tunnus"]);
 
@@ -389,7 +389,7 @@ else {
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "laskutus";
 			}
-			elseif ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "U") and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "O") {
+			elseif ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "U" or $turow["sarjanumeroseuranta"] == "G") and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "O") {
 				//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on OSTOA
 
 				// Kate = 0
@@ -399,7 +399,7 @@ else {
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "tulo";
 			}
-			elseif ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "U") and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "") {
+			elseif ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or $turow["sarjanumeroseuranta"] == "U" or $turow["sarjanumeroseuranta"] == "G") and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "") {
 				//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on HYVITYSTƒ
 
 				//T‰h‰n hyvitysriviin liitetyt sarjanumerot
@@ -459,10 +459,18 @@ else {
 						else {
 							$myritu = 0;
 						}
-
+						
+						//	Jos meill‰ on In-Out er‰ merkataan myˆs er‰n kappalem‰‰r‰
+						if($turow["sarjanumeroseuranta"] == "G") {
+							$eraKpl = $sarjarow["era_kpl"];
+						}
+						else {
+							$eraKpl = 0;
+						}
+						
 						$query = "	INSERT into sarjanumeroseuranta
-									(yhtio, tuoteno, sarjanumero, lisatieto, ostorivitunnus, myyntirivitunnus, kaytetty, laatija, luontiaika, takuu_alku, takuu_loppu, parasta_ennen, hyllyalue, hyllynro, hyllyvali, hyllytaso)
-									VALUES ('$kukarow[yhtio]','$sarjarow[tuoteno]','$sarjarow[sarjanumero]','$sarjarow[lisatieto]','$sarjarow1[ostorivitunnus]','$myritu','$sarjarow1[kaytetty]','$kukarow[kuka]',now(),'$sarjarow1[takuu_alku]','$sarjarow1[takuu_loppu]', '$sarjarow1[parasta_ennen]', '$sarjarow[hyllyalue]', '$sarjarow[hyllynro]', '$sarjarow[hyllyvali]', '$sarjarow[hyllytaso]')";
+									(yhtio, tuoteno, sarjanumero, lisatieto, ostorivitunnus, myyntirivitunnus, kaytetty, era_kpl, laatija, luontiaika, takuu_alku, takuu_loppu, parasta_ennen, hyllyalue, hyllynro, hyllyvali, hyllytaso)
+									VALUES ('$kukarow[yhtio]','$sarjarow[tuoteno]','$sarjarow[sarjanumero]','$sarjarow[lisatieto]','$sarjarow1[ostorivitunnus]','$myritu','$sarjarow1[kaytetty]', '$eraKpl', '$kukarow[kuka]',now(),'$sarjarow1[takuu_alku]','$sarjarow1[takuu_loppu]', '$sarjarow1[parasta_ennen]', '$sarjarow[hyllyalue]', '$sarjarow[hyllynro]', '$sarjarow[hyllyvali]', '$sarjarow[hyllytaso]')";
 						$sarjares1 = mysql_query($query) or pupe_error($query);
 					}						
 				}

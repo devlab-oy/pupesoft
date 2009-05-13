@@ -748,7 +748,7 @@
 			
 			
 			$sarjalinkkilisa = "";
-			if (($prow["sarjanumeroseuranta"] == "S" or $prow["sarjanumeroseuranta"] == "T" or $prow["sarjanumeroseuranta"] == "U" or $prow["sarjanumeroseuranta"] == "V" or (($prow["sarjanumeroseuranta"] == "E" or $prow["sarjanumeroseuranta"] == "F") and $prow["varattu"] < 0)) and $prow["var"] != 'P' and $prow["var"] != 'T' and $prow["var"] != 'U') {
+			if (($prow["sarjanumeroseuranta"] == "S" or $prow["sarjanumeroseuranta"] == "T" or $prow["sarjanumeroseuranta"] == "U" or $prow["sarjanumeroseuranta"] == "V" or (($prow["sarjanumeroseuranta"] == "E" or $prow["sarjanumeroseuranta"] == "F" or $prow["sarjanumeroseuranta"] == "G") and $prow["varattu"] < 0)) and $prow["var"] != 'P' and $prow["var"] != 'T' and $prow["var"] != 'U') {
 
 				$query = "	SELECT count(*) kpl 
 							from sarjanumeroseuranta 

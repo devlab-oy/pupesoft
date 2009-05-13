@@ -771,7 +771,7 @@ if (!function_exists('rivi_kerayslista')) {
 				$rivipaikka = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 
 				//saldot per varastopaikka
-				if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") {
+				if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") {
 					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								sarjanumeroseuranta.sarjanumero era,
@@ -899,7 +899,7 @@ if (!function_exists('rivi_kerayslista')) {
 
 				while ($sarjarow = mysql_fetch_array($sarjares)) {
 
-					if ($row["sarjanumeroseuranta"] == "E") {
+					if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "G") {
 						$row["kommentti"] .= " \n".t("Erä").": ".$sarjarow["sarjanumero"];
 					}
 					elseif ($row["sarjanumeroseuranta"] == "F") {

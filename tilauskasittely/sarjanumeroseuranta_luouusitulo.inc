@@ -11,7 +11,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$tuoterow = mysql_fetch_array($result);
 		
-		if ($tuoterow["sarjanumeroseuranta"] == "S") {
+		if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "G") {
 			// Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu)
 			$query	= "	SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
 						FROM sarjanumeroseuranta
@@ -37,8 +37,12 @@
 				$kehahin = sprintf('%.2f', $ikrow["kehahin"]);
 			}
 		
-		
-			echo "<font class='head'>".t("Sarjanumeroseuranta")."</font><hr>";
+			if($tuoterow["sarjanumeroseuranta"] == "G") {
+				echo "<font class='head'>".t("Sarjanumeroseuranta")."</font><hr>";
+			}
+			else {
+				echo "<font class='head'>".t("Eränumeroseuranta In-Out")."</font><hr>";
+			}
 		}
 		else {
 			echo "<font class='head'>".t("Eränumeroseuranta")."</font><hr>";
@@ -59,9 +63,14 @@
 				<input type='hidden' name='from'		value='INVENTOINTI'>                       
 				<input type='hidden' name='lopetus'		value='$lopetus'>";
 		
-		if ($tuoterow["sarjanumeroseuranta"] == "S") {	
+		if ($tuoterow["sarjanumeroseuranta"] == "S") {
 			echo "<tr><th>Tuotteen keskimääräinen hankintahinta:</th><td>$kehahin</td></tr>";
 			echo "<tr><th>".t("Inventoitavan yksilön hankintahinta").":</th><td><input type='text' name='kehahin' size='10'	value='$kehahin'></td></tr>";
+		}
+		elseif ($tuoterow["sarjanumeroseuranta"] == "G") {
+			echo "<tr><th>Tuotteen keskimääräinen hankintahinta:</th><td>$kehahin</td></tr>";
+			echo "<tr><th>".t("Inventoitavan erän hankintahinta").":</th><td><input type='text' name='kehahin' size='10'	value='$kehahin'></td></tr>";
+			echo "<tr><th>".t("Erän suuruus").":</th><td><input type='text' name='iera_kpl' size='10'></td></tr>";			
 		}
 		else {
 			echo "<tr><th>".t("Erän suuruus").":</th><td><input type='text' name='iera_kpl' size='10'></td></tr>";

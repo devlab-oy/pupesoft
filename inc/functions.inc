@@ -477,7 +477,7 @@ if (!function_exists("vapauta_sarjanumerot")) {
 			}
 			else {
 				// merkataan myyntirivitunnus nollaks
-				if ($srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F") {
+				if ($srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F" or $srow["sarjanumeroseuranta"] == "G") {
 					$query = "	DELETE FROM sarjanumeroseuranta
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$srow[tuoteno]'
@@ -836,7 +836,7 @@ if (!function_exists("saldo_myytavissa")) {
 			}
 
 			// Saldo varastoista
-			if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F") and $era != '') {
+			if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F" or $tuote["sarjanumeroseuranta"] == "G") and $era != '') {
 				$query = "	SELECT sum(sarjanumeroseuranta.era_kpl) saldo, tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi
 							FROM tuotepaikat
 							LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio
@@ -907,7 +907,7 @@ if (!function_exists("saldo_myytavissa")) {
 					$saldo += $row["saldo"];
 
 					// Myyntirivien, varastosiirtojen ja valmistusten ennakkopoistot ja kerätyt rivit
-					if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F") and $era != '') {
+					if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F" or $tuote["sarjanumeroseuranta"] == "G") and $era != '') {
 						$query = "	SELECT
 									ifnull(sum(if(tilausrivi.keratty!='', tilausrivi.varattu, 0)),0) keratty,
 									ifnull(sum(tilausrivi.varattu),0) varattu
@@ -958,7 +958,7 @@ if (!function_exists("saldo_myytavissa")) {
 
 					if ($pvm != '') {
 						// jos lasketaan tulevaisuuteen niin otetaan tietenkin huomioon jo kerätyt rivit
-						if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F") and $era != '') {
+						if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F" or $tuote["sarjanumeroseuranta"] == "G") and $era != '') {
 							$query = "	SELECT
 										ifnull(sum(if(tilausrivi.keratty!='', tilausrivi.varattu, 0)),0) keratty
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
@@ -1004,7 +1004,7 @@ if (!function_exists("saldo_myytavissa")) {
 						$hyllyssa -= $kerarow["keratty"];
 
 						// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon
-						if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F") and $era != '') {
+						if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F" or $tuote["sarjanumeroseuranta"] == "G") and $era != '') {
 							$query = "	SELECT
 										ifnull(sum(tilausrivi.varattu),0) varattu
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
@@ -1056,7 +1056,7 @@ if (!function_exists("saldo_myytavissa")) {
 
 				// jos lasketaan tulevaisuuteen niin otetaan ostorivit huomioon
 				if ($pvm != '') {
-					if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F") and $era != '') {
+					if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F" or $tuote["sarjanumeroseuranta"] == "G") and $era != '') {
 						$query = "	SELECT
 									ifnull(sum(tilausrivi.varattu),0) varattu
 									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
@@ -4106,7 +4106,7 @@ if(!function_exists("sarjanumeron_ostohinta")) {
 					and sarjanumeroseuranta.$kentta = '$arvo'";
 		$otsores = mysql_query($query) or pupe_error($query);
 		$ostorow = mysql_fetch_array($otsores);
-
+		
 		if($ostorow["tunnukset"] != '') {
 			$query = "	SELECT
 						sum(tilausrivi.rivihinta/tilausrivi.kpl) ostosumma,

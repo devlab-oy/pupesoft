@@ -1003,7 +1003,7 @@ if (!function_exists('rivi')) {
 			$row["kommentti"] .= "\n";
 		}
 		while($sarjarow = mysql_fetch_array($sarjares)) {
-			if($asrow1["sarjanumeroseuranta"] == "E" or $asrow1["sarjanumeroseuranta"] == "F") {
+			if($asrow1["sarjanumeroseuranta"] == "E" or $asrow1["sarjanumeroseuranta"] == "F" or $asrow1["sarjanumeroseuranta"] == "G") {
 				$row["kommentti"] .= t("E:nro").": $sarjarow[sarjanumero]\n";
 			}
 			else {

@@ -72,7 +72,7 @@ if ((int) $valitsetoimitus > 0) {
 		$toim = "PROJEKTI";
 	}
 }
-elseif(in_array($valitsetoimitus, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","VALMISTAVARASTOON","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI", "TYOMAARAYS"))) {
+elseif(in_array($valitsetoimitus, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","VALMISTAVARASTOON","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
 	$uusitoimitus = $valitsetoimitus;
 }
 
@@ -1915,13 +1915,14 @@ if ($tee == '') {
 				}
 				else {
 					echo "<option value='RIVISYOTTO'>".T("Toimitus")."</option>";
-				}
+					}
 
-				echo "<option value='TYOMAARAYS'>".T("Työmääräys")."</option>";
-				echo "<option value='REKLAMAATIO'>".T("Reklamaatio")."</option>";
-				echo "<option value='VALMISTAVARASTOON'>".T("Valmistus")."</option>";
-				echo "<option value='SIIRTOLISTA'>".T("Siirtolista")."</option>";
-				echo "<option value='TYOMAARAYS'>".T("Työmääräys")."</option>";					
+				if ($projektilla != '') {
+					echo "<option value='TYOMAARAYS'>".T("Työmääräys")."</option>";
+					echo "<option value='REKLAMAATIO'>".T("Reklamaatio")."</option>";
+					echo "<option value='VALMISTAVARASTOON'>".T("Valmistus")."</option>";
+					echo "<option value='SIIRTOLISTA'>".T("Siirtolista")."</option>";
+				}
 			}
 
 			echo "</optgroup></select>";
@@ -3872,7 +3873,7 @@ if ($tee == '') {
 							echo "<td $class align='left' valign='top'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";
 						}
 
-						if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") and !in_array($row["var"], array('P','J','S','T','U'))) {
+						if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and !in_array($row["var"], array('P','J','S','T','U'))) {
 					   		$query	= "	SELECT sarjanumeroseuranta.sarjanumero era, sarjanumeroseuranta.parasta_ennen
 					   					FROM sarjanumeroseuranta
 					   					WHERE yhtio = '$kukarow[yhtio]'
@@ -3949,7 +3950,7 @@ if ($tee == '') {
 				}
 
 				// Näytetäänkö sarjanumerolinkki
-				if (($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V" or (($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F") and $row["varattu"] < 0)) and $row["var"] != 'P' and $row["var"] != 'T' and $row["var"] != 'U') {
+				if (($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V" or (($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") and $row["varattu"] < 0)) and $row["var"] != 'P' and $row["var"] != 'T' and $row["var"] != 'U') {
 
 					if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
 						$tunken1 = "siirtorivitunnus";
@@ -3974,6 +3975,9 @@ if ($tee == '') {
 									where yhtio	 = '$kukarow[yhtio]'
 									and tuoteno	 = '$row[tuoteno]'
 									and $tunken1 = '$row[tunnus]'";
+
+						$snro_ok = t("S:nro ok");
+						$snro	 = t("S:nro");						
 					}
 					else {
 						$query = "	SELECT sum(era_kpl) kpl, min(sarjanumero) sarjanumero
@@ -3981,15 +3985,18 @@ if ($tee == '') {
 									where yhtio	 = '$kukarow[yhtio]'
 									and tuoteno	 = '$row[tuoteno]'
 									and $tunken1 = '$row[tunnus]'";
+
+						$snro_ok = t("E:nro ok");
+						$snro	 = t("E:nro");															
 					}
 					$sarjares = mysql_query($query) or pupe_error($query);
 					$sarjarow = mysql_fetch_array($sarjares);
 					
 					if ($sarjarow["kpl"] == abs($row["varattu"]+$row["jt"])) {
-						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&$tunken2=$row[tunnus]&from=$toim#".urlencode($sarjarow["sarjanumero"])."' style='color:00FF00'>".t("S:nro ok")."</font></a>)";
+						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&$tunken2=$row[tunnus]&from=$toim#".urlencode($sarjarow["sarjanumero"])."' style='color:00FF00'>$snro_ok</font></a>)";
 					}
 					else {
-						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&$tunken2=$row[tunnus]&from=$toim'>".t("S:nro")."</a>)";
+						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&$tunken2=$row[tunnus]&from=$toim'>$snro</a>)";
 						
 						if ($laskurow['sisainen'] != '' or $laskurow['ei_lahetetta'] != '') {
 							$sarjapuuttuu++;
@@ -4028,7 +4035,7 @@ if ($tee == '') {
 					}
 
 
-					if ($kpl_ruudulle < 0 and $row["sarjanumeroseuranta"] == "S") {
+					if ($kpl_ruudulle < 0 and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "G")) {
 
 						echo "<td $class align='right' valign='top' nowrap>";
 
@@ -4981,7 +4988,6 @@ if ($tee == '') {
 								<td colspan='2' nowrap>
 								<form name='valmis' action='tulostakopio.php' method='post' name='tulostakopio'>
 									<input type='hidden' name='otunnus' value='$tilausnumero'>
-									<input type='hidden' name='tee' value='NAYTATILAUS'>
 									<input type='hidden' name='projektilla' value='$projektilla'>
 									<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//lopetus=$lopetus//tee='>";
 

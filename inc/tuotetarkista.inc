@@ -145,7 +145,7 @@ if(!function_exists("tuotetarkista")) {
 		    	$saresult = mysql_query($query) or pupe_error($query);
 				$sarow = mysql_fetch_array($saresult);
 
-				if (($srow["sarjanumeroseuranta"] == "" or $srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F") and (trim(strtoupper($t[$i])) == '' or trim(strtoupper($t[$i])) == 'E' or trim(strtoupper($t[$i])) == 'F')) {
+				if (($srow["sarjanumeroseuranta"] == "" or $srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F" or $srow["sarjanumeroseuranta"] == "G") and (trim(strtoupper($t[$i])) == '' or trim(strtoupper($t[$i])) == 'E' or trim(strtoupper($t[$i])) == 'F') or trim(strtoupper($t[$i])) == 'G')) {
 					//annetaan vaihtaa
 				}
 		    	elseif ($sarow["kpl"] > 0) {

@@ -223,6 +223,7 @@
 		
 		$ulos .= "<option value = 'E' $sel[E]>".t("Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")."</option>";
 		$ulos .= "<option value = 'F' $sel[F]>".t("Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo")."</option>";
+		$ulos .= "<option value = 'G' $sel[G]>".t("Eränumeroseuranta. Osto-Myynti / In-Out varastonarvo")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

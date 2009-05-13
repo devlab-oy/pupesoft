@@ -140,7 +140,7 @@
 			$sarres = mysql_query($query) or pupe_error($query);
 			$sarrow = mysql_fetch_array($sarres);
 
-			if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F") {
+			if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") {
 				$query = "	UPDATE sarjanumeroseuranta
 							SET lisatieto 	= '$lisatieto',
 							sarjanumero 	= '$sarjanumero',
@@ -217,7 +217,7 @@
 
 				echo "<table>";
 
-				if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F") {
+				if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F" or $muutarow["sarjanumeroseuranta"] == "G") {
 					echo "<tr><th colspan='2'>".t("Muuta eränumerotietoja").":</th></tr>";
 				}
 				else {
@@ -243,7 +243,7 @@
 						<input type='hidden' name='myyntitilaus_haku'	value='$myyntitilaus_haku'>
 						<input type='hidden' name='lisatieto_haku' 		value='$lisatieto_haku'>";
 
-				if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F") {
+				if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F" or $muutarow["sarjanumeroseuranta"] == "G") {
 					echo "<tr><th>".t("Eränumero")."</th>";
 				}
 				else {
@@ -282,7 +282,7 @@
 
 				echo "<td><input type='text' size='30' name='sarjanumero' value='$muutarow[sarjanumero]'> <a onclick='document.muokkaaformi.sarjanumero.value=\"$nxt\";'><u>".t("Sarjanumero ei tiedossa")."</u></a> <a onclick='document.muokkaaformi.sarjanumero.value=\"$nxt2\";'><u>".t("Ei Sarjanumeroa")."</u></a></td></tr>";
 
-				if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F") {
+				if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F" or $muutarow["sarjanumeroseuranta"] == "G") {
 					if ($muutarow["era_kpl"] >= 0 and $muutarow["myyntirivitunnus"] == 0 and ($muutarow["ostorivitunnus"] == 0 or $from == "kohdista")) {
 						echo "<tr><th>".t("Erän suuruus")."</th><td><input type='text' size='30' name='era_kpl' value='$muutarow[era_kpl]'></td></tr>";
 					}
@@ -511,7 +511,7 @@
 		$lisaysok = "OK";
 
 		// Jos tämä on eräseurantaa niin tehdään tsekit lisätään kaikki tämän erän sarjanumerot
-		if (count($sarjataan) > 0 and ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F")) {
+		if (count($sarjataan) > 0 and ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G")) {
 			$ktark = implode(",", $sarjataan);
 
 			$query = "	SELECT sum(abs(era_kpl)) kpl
@@ -764,7 +764,7 @@
 	if ($nimitys_haku != "") {
 		$lisa2 = " HAVING nimitys like '%$nimitys_haku%' ";
 	}
-	
+
 	if ($rivirow["sarjanumeroseuranta"] == "E" and $from == "KERAA") {
 		$lisa .= " and sarjanumeroseuranta.era_kpl > 0 ";
 	}
@@ -1027,7 +1027,7 @@
 			echo "<tr>";
 			echo "<td valign='top'>".strtoupper($sarjarow["sarjanumero"])."<a name='$sarjarow[sarjanumero]'></a>";
 
-			if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F") {
+			if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") {
 				if ($sarjarow["era_kpl"] < 0) {
 					echo "<br>".t("Erässä").": ".abs($sarjarow["era_kpl"])." ".ta($kieli, "Y", $rivirow["yksikko"])."<br><font class='error'>".t("Erä on jo myyty")."!</font>";
 				}
@@ -1043,7 +1043,7 @@
 				echo "<br>".t("Takuu").": ".tv1dateconv($sarjarow["takuu_alku"])." - ".tv1dateconv($sarjarow["takuu_loppu"]);
 			}
 
-			if ($rivirow["sarjanumeroseuranta"] != "E" and $rivirow["sarjanumeroseuranta"] != "F" and ($sarjarow["myynti_laskaika"] == "0000-00-00" or $sarjarow["myynti_laskaika"] == "")) {
+			if ($rivirow["sarjanumeroseuranta"] != "E" and $rivirow["sarjanumeroseuranta"] != "F" and $rivirow["sarjanumeroseuranta"] != "G" and ($sarjarow["myynti_laskaika"] == "0000-00-00" or $sarjarow["myynti_laskaika"] == "")) {
 				echo "<br>".t("Varastointiaika").": ".$sarjarow["varpvm"]." ".t("pva").". (".tv1dateconv($sarjarow["osto_laskaika"]).")";
 			}
 
@@ -1233,7 +1233,7 @@
 				<input type='hidden' name='toiminto' 			value='LISAA'>
 				<input type='hidden' name='valitut_sarjat' 		value='".implode(",", $valitut_sarjat)."'>";
 
-		if ($rivirow["tuoteno"] != '' and ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F")) {
+		if ($rivirow["tuoteno"] != '' and ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G")) {
 			$query = "	SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero
 						FROM sarjanumeroseuranta
 						WHERE yhtio = '$kukarow[yhtio]'

@@ -873,7 +873,7 @@ if ($tee == 'MONISTA') {
 						$sarjatuoterow = mysql_fetch_array($sarjatuoteres);
 						
 						
-						if ($sarjatuoterow["sarjanumeroseuranta"] == "E" or $sarjatuoterow["sarjanumeroseuranta"] == "F") {
+						if ($sarjatuoterow["sarjanumeroseuranta"] == "E" or $sarjatuoterow["sarjanumeroseuranta"] == "F" or $sarjatuoterow["sarjanumeroseuranta"] == "G") {
 							$query = "	INSERT INTO sarjanumeroseuranta
 										SET yhtio		= '$kukarow[yhtio]',
 										tuoteno			= '$rivirow[tuoteno]',

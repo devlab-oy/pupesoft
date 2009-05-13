@@ -12,7 +12,7 @@
 	if ($tee == 'MITATOI_TARJOUS') {
 		unset($tee);
 	}
-	
+
 	if (isset($tee)) {
 		if ($tee == "lataa_tiedosto") {
 			readfile("/tmp/".$tmpfilenimi);

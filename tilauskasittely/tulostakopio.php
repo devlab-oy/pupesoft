@@ -2,15 +2,18 @@
 
 	//Pari muutujakorjausta ettei tilausmyynnissä tarttis tehdä niin pirun rumia nappuloita
 	if(isset($_POST["NAYTATILAUS"])) {
-		$_POST["tee"] = "NAYTATILAUS";
-	}
-	if(isset($_POST["TULOSTA"])) {
-		$_POST["tee"] = "TULOSTA";
-	}
+        $_POST["tee"] = "NAYTATILAUS";
+        $_REQUEST["tee"] = "NAYTATILAUS";
+    }
+    if(isset($_POST["TULOSTA"])) {
+        $_POST["tee"] = "TULOSTA";
+        $_REQUEST["tee"] = "TULOSTA";
+    }
 
-	if(isset($_POST["komento"]) and in_array("PDF_RUUDULLE", $_POST["komento"]) !== false) {
-		$_POST["tee"] = "NAYTATILAUS";
-	}
+    if(isset($_POST["komento"]) and in_array("PDF_RUUDULLE", $_POST["komento"]) !== false) {
+        $_POST["tee"] = "NAYTATILAUS";
+        $_REQUEST["tee"] = "NAYTATILAUS";
+    }
 
 	if($_REQUEST["tee"] == 'NAYTATILAUS') $nayta_pdf=1; //Generoidaan .pdf-file
 	

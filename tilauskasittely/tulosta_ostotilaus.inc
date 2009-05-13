@@ -189,7 +189,7 @@
 
 							$h-=$pdf->ln(1.5);
 
-							$pdf->write($h, 1, 0, 0, t("Merkitk‰‰ tilausnumero l‰hetteeseen, laskuun sek‰ muihin dokumentteihin. Hinnat eiv‰t sis‰ll‰ arvonlis‰veroa.", $kieli), "norm", "L", "");
+							$pdf->write($h, 1, 0, 0, t("Merkitk‰‰ tilausnumero, tilaaja sek‰ viite l‰hetteeseen, laskuun sek‰ muihin dokumentteihin. Hinnat eiv‰t sis‰ll‰ arvonlis‰veroa.", $kieli), "norm", "L", "");
 
 							return $pdf;
 						}

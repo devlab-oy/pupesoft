@@ -36,6 +36,12 @@
 			}
 		}
 
+		$query = "	SELECT *
+					FROM yhteyshenkilo
+					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$henkilotunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+		$orig_row = mysql_fetch_array($result);
+		
 		// päivitetään toimittaja
 		if ($tee == "update") {
 			
@@ -60,6 +66,8 @@
 						and liitostunnus='$tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$tee = "";
+			
+			synkronoi($kukarow["yhtio"], "yhteyshenkilo", $henkilotunnus, $orig_row, "");
 		}
 
 		// poistetaan toimittaja
@@ -70,6 +78,8 @@
 						and liitostunnus= '$tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$tee = "";
+
+			synkronoi($kukarow["yhtio"], "yhteyshenkilo", $henkilotunnus, $orig_row, "");
 		}
 
 		// lisätään toimittaja
@@ -94,8 +104,10 @@
 						luontiaika			= now()";
 			$result = mysql_query($query) or pupe_error($query);
 			$tee = "";
-		}
 
+			synkronoi($kukarow["yhtio"], "yhteyshenkilo", mysql_insert_id(), "", "");
+		}
+		
 		// uuden syöttö
 		if ($tee == "uusi") {
 

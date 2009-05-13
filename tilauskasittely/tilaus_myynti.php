@@ -17,6 +17,10 @@ else {
 
 if($yhtiorow["tilauksen_yhteyshenkilot"] == "K" or $yhtiorow["asiakkaan_kohde"] == "K") {
 	js_yllapito();
+	enable_ajax();
+	js_popup();
+	js_showhide();
+	js_liveSearch();
 }
 
 if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0) {
@@ -3734,54 +3738,66 @@ if ($tee == '') {
 							}
 							$trivityyulos .= "</select></form>";
 						}
-
-						if($yhtiorow['tilauksen_kohteet'] == 'K' and $lasklisatied_row["asiakkaan_kohde"] > 0) {
-							$posq = "SELECT * FROM asiakkaan_positio WHERE yhtio = '$kukarow[yhtio]' and asiakkaan_kohde = '$lasklisatied_row[asiakkaan_kohde]'";
-							$posres = mysql_query($posq) or pupe_error($posq);
-
-							$trivityyulos .= "	<form name='asiakkaan_positio_$rivino' action='$PHP_SELF' method='post'>
-												<input type='hidden' name='toim' value='$toim'>
-												<input type='hidden' name='lopetus' value='$lopetus'>
-												<input type='hidden' name='projektilla' value='$projektilla'>
-												<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
-												<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
-												<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
-												<input type='hidden' name='menutila' value='$menutila'>
-												<input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE'>
-												<select id='asiakkaan_positio_$row[tunnus]' name='asiakkaan_positio' onchange=\"yllapito('asiakkaan_positio&asiakkaan_kohde=$lasklisatied_row[asiakkaan_kohde]', this.id, 'asiakkaan_positio_$rivino');\" $state>
-												<option value=''>Asiakkaalla ei ole positiota</option>";
-
-							if(mysql_num_rows($posres) > 0) {
-								$optlisa="";
-								while($posrow = mysql_fetch_array($posres)) {
-									$sel = "";
-									if($posrow["tunnus"] == $row["asiakkaan_positio"]) {
-										$sel = "SELECTED";
-										$optlisa = "<option value='muokkaa#$row[asiakkaan_positio]'>Muokkaa asiakaan positiota</option>";
-									}
-									$trivityyulos .= "<option value='$posrow[tunnus]' $sel>$posrow[tunnus] - $posrow[positio]</option>";
-								}
-							}
-							$trivityyulos .= "	<optgroup label='Toiminto'>
-												<option value='uusi'>Luo uusi asiakkaan positio</option>
-												$optlisa
-												</optgroup>
-												</select>
-												</form>";
-						}
-						elseif ($yhtiorow['tilauksen_kohteet'] == 'K') {
-							$trivityyulos .= "<font class='info'>".t("Kohdetta ei valittu")."</font>";
-						}
-
-						if ($trivityyulos != "") {
-							echo "<td $class valign='top'>$trivityyulos</td>";
-						}
 					}
 					elseif(mysql_num_rows($trivityyppi_result) > 0 or $yhtiorow['tilauksen_kohteet'] == 'K') {
-						echo "<td $class>&nbsp;</td>";
+						$trivityyulos = "&nbsp;";
 					}
 				}
+				
+				if($yhtiorow['tilauksen_kohteet'] == 'K' and in_array($toim, array("TARJOUS", "RIVISYOTTO", "PIKATILAUS", "PROJEKTI"))) {
+					
+					$valitse_positio_return_url = urlencode("tilauskasittely/tilaus_myynti.php?toim=$toim&lopetus=$lopetus&projektilla=$projektilla&tilausnumero=$tilausnumero&rivitunnus=$row[tunnus]&rivilaadittu=$row[laadittu]&menutila=$menutila&tila=LISATIETOJA_RIVILLE&asiakkaan_positio");
+					
+					if($lasklisatied_row["asiakkaan_kohde"] > 0) {
+						$posq = "	SELECT asiakkaan_positio.positio, concat_ws(' - ', asiakkaan_kohde.kohde, asiakkaan_positio.positio) positio_tarkenne
+									FROM asiakkaan_positio
+									LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=asiakkaan_positio.yhtio and asiakkaan_kohde.tunnus=asiakkaan_positio.asiakkaan_kohde 
+									WHERE asiakkaan_positio.yhtio = '$kukarow[yhtio]' and asiakkaan_positio.tunnus = '$row[asiakkaan_positio]'";
+						$posres = mysql_query($posq) or pupe_error($posq);
+						$info = "";
+						if(mysql_num_rows($posres) == 1) {
+							$posrow = mysql_fetch_array($posres);
+							$info = "<img src='$palvelin2/pics/lullacons/info-grey-bg.png' class='info' style='float: right; border: 1px solid; margin: 2px; vertical-align: top;' onclick=\"popUp(event, 'positioselain_DIV', 0, 0, '../positioselain.php?tee=nayta_positio&positio=$row[asiakkaan_positio]');\">";
+						}
+						else {
+							$posrow["positio"] = "Valitse positio";
+						}
 
+						$trivityyulos .= "<button class='valinta' onclick=\"popUp(event, 'positioselain_DIV', 0, 0, '../positioselain.php?kohde={$lasklisatied_row["asiakkaan_kohde"]}&valitse_positio_return_url=$valitse_positio_return_url'); return false;\" title='$posrow[positio_tarkenne]' $state>{$posrow["positio"]}</button>$info";
+					}
+					else {
+						$trivityyulos .= t("Valitse kohde otsikolta");
+					}
+				}
+				elseif ($yhtiorow['tilauksen_kohteet'] == 'K' and $row["tyyppi"] == "W") {
+					
+					$valitse_positio_return_url = urlencode("tilauskasittely/tilaus_myynti.php?toim=$toim&lopetus=$lopetus&projektilla=$projektilla&tilausnumero=$tilausnumero&rivitunnus=$row[tunnus]&rivilaadittu=$row[laadittu]&menutila=$menutila&tila=LISATIETOJA_RIVILLE&asiakkaan_positio");
+					
+					$posq = "	SELECT asiakkaan_positio.positio, concat_ws(' - ', asiakkaan_kohde.kohde, asiakkaan_positio.positio) positio_tarkenne
+								FROM asiakkaan_positio
+								LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=asiakkaan_positio.yhtio and asiakkaan_kohde.tunnus=asiakkaan_positio.asiakkaan_kohde 
+								WHERE asiakkaan_positio.yhtio = '$kukarow[yhtio]' and asiakkaan_positio.tunnus = '$row[asiakkaan_positio]' and asiakkaan_positio.tunnus";
+					$posres = mysql_query($posq) or pupe_error($posq);
+
+					if(mysql_num_rows($posres) == 1) {
+						$posrow = mysql_fetch_array($posres);								
+					}
+					else {
+						$posrow["positio"] = "Valitse positio";
+					}
+					
+					
+					$trivityyulos .= "<button onclick=\"popUp(event, 'positioselain_DIV', 0, 0, '../positioselain.php?kohde={$lasklisatied_row["asiakkaan_kohde"]}&valitse_positio_return_url=$valitse_positio_return_url'); return false;\" title='$posrow[positio_tarkenne]' $state>$posrow[positio]</button>";
+					$trivityyulos .= "<img src='$palvelin2/pics/lullacons/info-grey-bg.png' class='info' style='float: right; border: 1px solid; margin: 2px; vertical-align: top;' onclick=\"popUp(event, 'positioselain_DIV', 0, 0, '../positioselain.php?tee=nayta_positio&positio=$row[asiakkaan_positio]');\">";
+				}
+				elseif($yhtiorow['tilauksen_kohteet'] == "K") {
+					$trivityyulos .= "&nbsp;";
+				}
+				
+				if ($trivityyulos != "") {
+					echo "<td $class valign='top'>$trivityyulos</td>";
+				}
+				
 				// Tuotteen nimitys n‰ytet‰‰n vain jos k‰ytt‰j‰n resoluution on iso
 				if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
 					if (strtolower($kukarow["kieli"]) != strtolower($yhtiorow["kieli"])) {

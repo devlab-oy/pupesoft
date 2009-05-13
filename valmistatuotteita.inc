@@ -332,16 +332,23 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 			if ((float) $kaikenkaikkiaan != (float) $isavarattu) {
 				$uusiarvo = round($uusiarvo * ($isavarattu/$kaikenkaikkiaan), 6);
 			}
-
-			if ($isarow['saldo'] + $isavarattu > 0 and $isarow['saldo'] > 0) {
-				// kehahin matikka (tuotteella pitää olla saldoa ennen ja jälkeen, että kehahin lasketaan)
-				$kehahin = sprintf('%.4f', ($isarow['saldo'] * $isarow['kehahin'] + $uusiarvo) / ($isarow['saldo'] + $isavarattu));
+			
+			if($isarow["sarjanumeroseuranta"] == "S" or $isarow["sarjanumeroseuranta"] == "S" or $isarow["sarjanumeroseuranta"] == "G") {
+				$kehahin = 0;
+				$selite = "".t("Valmistettiin tuotetta työmääräyksellä")." $tilrivirow[otunnus] ($uusiarvo)";
 			}
 			else {
-				// jos jäädään saldossa tämänkin tulon jälkeen miinukselle tai nollille, laitetaan kehahin suoraan tämän valmistuksen hinnasta
-				$kehahin = sprintf('%.4f', $uusiarvo/$isavarattu);
+				if ($isarow['saldo'] + $isavarattu > 0 and $isarow['saldo'] > 0) {
+					// kehahin matikka (tuotteella pitää olla saldoa ennen ja jälkeen, että kehahin lasketaan)
+					$kehahin = sprintf('%.4f', ($isarow['saldo'] * $isarow['kehahin'] + $uusiarvo) / ($isarow['saldo'] + $isavarattu));
+				}
+				else {
+					// jos jäädään saldossa tämänkin tulon jälkeen miinukselle tai nollille, laitetaan kehahin suoraan tämän valmistuksen hinnasta
+					$kehahin = sprintf('%.4f', $uusiarvo/$isavarattu);
+				}
+				
+				$selite = "".t("Valmistettiin tuotetta työmääräyksellä")." $tilrivirow[otunnus] ($isarow[kehahin] --> $kehahin)";
 			}
-
 			///* Tehdään tapahtuma *///
 			$query = "	INSERT into tapahtuma set
 						yhtio   	= '$kukarow[yhtio]',
@@ -355,7 +362,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 						hyllynro 	= '$isarow[hyllynro]',
 						hyllytaso 	= '$isarow[hyllytaso]',
 						hyllyvali 	= '$isarow[hyllyvali]',
-						selite  	= '".t("Valmistettiin tuotetta työmääräyksellä")." $tilrivirow[otunnus] ($isarow[kehahin] --> $kehahin)',
+						selite  	= '$selite',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
 			$result = mysql_query($query) or pupe_error($query);

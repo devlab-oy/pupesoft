@@ -191,11 +191,10 @@ if (!function_exists('tulosta_tarjous')) {
 				$ennakkolisa";
 		$grand_total=0;
 		if($alenaytetaan == "OK") {
-			$s=$pdf->teeSarakkeet(array(70,30,13,20,20));
+			$s=$pdf->teeSarakkeet(array(68,30,13,20,20));
 		}
 		else {
-			$s=$pdf->teeSarakkeet(array(70,30,30,20));
-			
+			$s=$pdf->teeSarakkeet(array(68,30,30,20));			
 		}
 		
 		$rivityypit[] = "Tuotteet";
@@ -354,6 +353,17 @@ if (!function_exists('tulosta_tarjous')) {
 						if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
 							$pdf->write($h, 1, 0, 0, t("RS-koodi", $kieli).": $laskurow[asiakkaan_kohde]-$row[asiakkaan_positio]", "snadi", "L", "I");
 							$h-=$pdf->ln();
+
+							$abuq = "	SELECT concat_ws(' ', asiakkaan_kohde.kohde, asiakkaan_positio.positio) positio
+										FROM asiakkaan_kohde
+										JOIN asiakkaan_positio ON asiakkaan_kohde.yhtio=asiakkaan_positio.yhtio and asiakkaan_positio.asiakkaan_kohde=asiakkaan_kohde.tunnus and asiakkaan_positio.tunnus='$row[asiakkaan_positio]'
+										WHERE asiakkaan_kohde.yhtio='$kukarow[yhtio]' and asiakkaan_kohde.tunnus='$laskurow[asiakkaan_kohde]'";
+							$abures = mysql_query($abuq);
+							$aburow = mysql_fetch_array($abures);
+							
+							$pdf->write($h, 1, 0, 0, t("Positio", $kieli).": $aburow[positio]", "snadi", "L", "I");
+							$h-=$pdf->ln();
+							
 						}
 
 						$summa += $row["rivihinta"];

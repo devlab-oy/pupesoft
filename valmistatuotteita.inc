@@ -474,16 +474,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 					
 					//	Siirret‰‰n sarjanumerot valmistetulle tilausriville
 					
-					if(in_array($isarow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
-						
-						//foreach
-						$query = "	UPDATE tuote
-									SET kehahin	= $kehahin,
-									vihahin		= round($uusiarvo/$isavarattu, 2),
-									vihapvm		= now()
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tuoteno = '$isatuoteno'";
-						$result = mysql_query($query) or pupe_error($query);
+					if(in_array($isarow["sarjanumeroseuranta"], array("S", "U"))) {
 						
 						//	Siirret‰‰n ostorivin tunnus valmistetulle riville
 						$query = "	SELECT tunnus
@@ -498,7 +489,6 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 											WHERE yhtio = '$kukarow[yhtio]'
 											and tunnus = '$sarjarow[tunnus]'";
 								$result = mysql_query($query) or pupe_error($query);
-								echo $query."<br>";
 							}
 						}
 						else {

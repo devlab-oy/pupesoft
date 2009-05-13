@@ -415,14 +415,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 						$insresult = mysql_query($query) or pupe_error($query);
 						$valmistettavat .= ",".mysql_insert_id();
 					}
-					
-					if(in_array($isarow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
-						$tilausriviTyyppi = "O";
-					}
-					else {
-						$tilausriviTyyppi = "D";
-					}
-					
+										
 					//luodaan toimitettu valmisterivi
 					$query = "	INSERT into tilausrivi set
 								laatija			= '$kukarow[kuka]',
@@ -445,7 +438,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 								nimitys 		= '$tilrivirow[nimitys]',
 								otunnus 		= '$tilrivirow[otunnus]',
 								uusiotunnus		= '$tilrivirow[uusiotunnus]',
-								tyyppi 			= '$tilausriviTyyppi',
+								tyyppi 			= 'D',
 								keratty	 		= '$kukarow[kuka]',
 								kerattyaika		= now(),
 								toimaika 		= '$tilrivirow[toimaika]',
@@ -475,6 +468,15 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 					//	Siirretään sarjanumerot valmistetulle tilausriville
 					
 					if(in_array($isarow["sarjanumeroseuranta"], array("S", "U"))) {
+						//	Päivitetään valmistetulle riville laskutettuaika, jotta se näkyy kaikkialla oikein
+						$query = "	UPDATE tilausrivi SET
+										laskutettuaika = now(),
+										laskutettu = '$kukarow[kuka]'
+									WHERE yhtio = '$kukarow[yhtio]'
+									and otunnus = '$tilrivirow[otunnus]'
+									and tunnus  = '$uusrivitunnus'
+									and tyyppi = 'D'";
+						$upparesult = mysql_query($query) or pupe_error($query);
 						
 						//	Siirretään ostorivin tunnus valmistetulle riville
 						$query = "	SELECT tunnus
@@ -482,7 +484,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 									WHERE yhtio='$kukarow[yhtio]' and ostorivitunnus='$tilrivirow[tunnus]'
 									LIMIT ".(int) $isavarattu."";
 						$sarjares = mysql_query($query) or pupe_error($query);
-						if(mysql_num_rows($sarjares) == $isavarattu) {
+						if(mysql_num_rows($sarjares) > 0) {
 							while($sarjarow = mysql_fetch_array($sarjares)) {
 								$query = "	UPDATE sarjanumeroseuranta SET
 											ostorivitunnus	= $uusrivitunnus
@@ -491,10 +493,95 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 								$result = mysql_query($query) or pupe_error($query);
 							}
 						}
-						else {
-							//	Täällä nämä sarjanumerot voisi generoida automaattisesti?
-							echo "<font class='error'>".t("Nyt on piru irti!")."</font><br>";
+						
+						
+						//	Generoidaan loput jos jotain puuttuu!
+						$puuttuva_sarjanumerot = $isavarattu - mysql_num_rows($sarjares);
+						if($puuttuva_sarjanumerot>0) {
+							
+							for($i=1;$i<=$puuttuva_sarjanumerot;$i++) {
+								//	Arvotaan uniikki sarjanumero
+								$query = "	SELECT count(*) kpl
+											FROM sarjanumeroseuranta
+											WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '{$tilrivirow["tuoteno"]}'";
+								$sarjares = mysql_query($query) or pupe_error($query);
+								$sarjarow = mysql_fetch_array($sarjares);
+								$sarja = $sarjarow["kpl"]+1;
+								
+								// varmistetaan, että tämä on uniikki!
+								$onUniikki = false;
+								$x=0;
+								while($onUniikki === false) {
+									$sarjanro = "{$tilrivirow["tuoteno"]}-$sarja";
+									$query = "	SELECT tunnus
+												FROM sarjanumeroseuranta
+												WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '{$tilrivirow["tuoteno"]}' and sarjanumero = '$sarjanro'";
+									$sarjares = mysql_query($query) or pupe_error($query);
+									if(mysql_num_rows($sarjares) == 0) {
+										$onUniikki = true;
+									}
+									
+									if($x > 50) {
+										echo "<font class='error'>".t("VIRHE: Uniikkia sarjanumeroa ei meinaa löytyä! Ota yhteys ylläpitoon.")."</font><br>";
+										die();
+									}
+
+									$x++;
+								}
+								
+								$query = "	INSERT INTO sarjanumeroseuranta
+											(yhtio, tuoteno, sarjanumero, ostorivitunnus, myyntirivitunnus, laatija, luontiaika, hyllyalue, hyllynro, hyllyvali, hyllytaso)
+											VALUES ('{$kukarow["yhtio"]}', '{$tilrivirow["tuoteno"]}', '$sarjanro', '$uusrivitunnus', 0, '{$kuka["kuka"]}', now(), '{$tilrivirow["hyllyalue"]}', '{$tilrivirow["hyllynro"]}', '{$tilrivirow["hyllyvali"]}', '{$tilrivirow["hyllytaso"]}')";
+								$sarjares1 = mysql_query($query) or pupe_error($query);
+								
+							}
 						}
+					}
+					elseif(in_array($isarow["sarjanumeroseuranta"], array("E", "F", "G"))) {
+						//	Päivitetään valmistetulle riville laskutettuaika, jotta se näkyy kaikkialla oikein
+						$query = "	UPDATE tilausrivi SET
+										laskutettuaika = now(),
+										laskutettu = '$kukarow[kuka]'
+									WHERE yhtio = '$kukarow[yhtio]'
+									and otunnus = '$tilrivirow[otunnus]'
+									and tunnus  = '$uusrivitunnus'
+									and tyyppi = 'D'";
+						$upparesult = mysql_query($query) or pupe_error($query);
+						
+						//	Arvotaan uniikki sarjanumero
+						$query = "	SELECT count(*) kpl
+									FROM sarjanumeroseuranta
+									WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '{$tilrivirow["tuoteno"]}'";
+						$sarjares = mysql_query($query) or pupe_error($query);
+						$sarjarow = mysql_fetch_array($sarjares);
+						$sarja = $sarjarow["kpl"]+1;
+						
+						// varmistetaan, että tämä on uniikki!
+						$onUniikki = false;
+						$x=0;
+						while($onUniikki === false) {
+							$sarjanro = "{$tilrivirow["tuoteno"]}-$sarja";
+							$query = "	SELECT tunnus
+										FROM sarjanumeroseuranta
+										WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '{$tilrivirow["tuoteno"]}' and sarjanumero = '$sarjanro'";
+							$sarjares = mysql_query($query) or pupe_error($query);
+							if(mysql_num_rows($sarjares) == 0) {
+								$onUniikki = true;
+							}
+							
+							if($x > 50) {
+								echo "<font class='error'>".t("VIRHE: Uniikkia sarjanumeroa ei meinaa löytyä! Ota yhteys ylläpitoon.")."</font><br>";
+								die();
+							}
+
+							$x++;
+						}
+						
+						//	Generoidaan eränumerot! näitä ei siis edes pitäisi voida tehdä  mistään käyttöliittymästä!
+						$query = "	INSERT INTO sarjanumeroseuranta
+									(yhtio, tuoteno, sarjanumero, ostorivitunnus, myyntirivitunnus, era_kpl, laatija, luontiaika, hyllyalue, hyllynro, hyllyvali, hyllytaso)
+									VALUES ('{$kukarow["yhtio"]}', '{$tilrivirow["tuoteno"]}', '$sarjanro', '$uusrivitunnus', 0, '$isavarattu', '{$kuka["kuka"]}', now(), '{$tilrivirow["hyllyalue"]}', '{$tilrivirow["hyllynro"]}', '{$tilrivirow["hyllyvali"]}', '{$tilrivirow["hyllytaso"]}')";
+						$sarjares1 = mysql_query($query) or pupe_error($query);
 					}
 				}
 			}

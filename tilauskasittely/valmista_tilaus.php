@@ -274,18 +274,24 @@
 				$valmkpl = str_replace(',','.',$valmkpl);
 
 				//Haetaan tilausrivi
-				$query = "	SELECT *, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka
+				$query = "	SELECT tilausrivi.*, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.sarjanumeroseuranta
 							FROM tilausrivi
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tunnus = '$rivitunnus'
-							and tyyppi in ('W','M')
-							and toimitettuaika = '0000-00-00 00:00:00'";
+							JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							and tilausrivi.tunnus = '$rivitunnus'
+							and tilausrivi.tyyppi in ('W','M')
+							and tilausrivi.toimitettuaika = '0000-00-00 00:00:00'";
 				$roxresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($roxresult) == 1) {
 					$tilrivirow = mysql_fetch_array($roxresult);
 					
-					if (($valmkpl > 0 and $valmkpl <= $tilrivirow["varattu"]) or ($kokopros > 0 and $kokopros <= 100) or isset($kokovalmistus)) {
+					//	Tarkastetaan, ett‰ sarjanumeroseurattuja tuotteita valmistetaan tasam‰‰r‰.
+					if(($tilrivirow["sarjanumeroseuranta"] == "S" or $tilrivirow["sarjanumeroseuranta"] == "U") and $valmkpl != (int) $valmkpl) {
+						echo "<font class='error'>".t("VIRHE: Sarjanumeroseurattua tuotetta ei voi valmistaa vain osittain!")."</font><br>";
+						$tee = "VALMISTA";
+					}
+					elseif (($valmkpl > 0 and $valmkpl <= $tilrivirow["varattu"]) or ($kokopros > 0 and $kokopros <= 100) or isset($kokovalmistus)) {
 
 						if ($valmkpl > 0) {
 							$atil = round($valmkpl, 2);
@@ -301,7 +307,7 @@
 						$akerroin = $atil / $tilrivirow["varattu"];
 
 						//k‰ytet‰‰n tilausriveill‰ olevia tuotteita
-						$query = "	SELECT tilausrivi.*, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.ei_saldoa
+						$query = "	SELECT tilausrivi.*, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.ei_saldoa, tuote.sarjanumeroseuranta
 									FROM tilausrivi
 									JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -331,7 +337,7 @@
 										$tee 			= "VALMISTA";
 									}
 									
-									// T‰n verran saldoa k‰ytet‰‰n
+																		// T‰n verran saldoa k‰ytet‰‰n
 									$saldot_valm[$perherow["tuoteno"]] -= $kpl_chk;									
 								}
 							}
@@ -755,7 +761,7 @@
 							where yhtio='$kukarow[yhtio]' and tuoteno='$prow[tuoteno]' and ostorivitunnus='$prow[tunnus]'";
 				$sarjares = mysql_query($query) or pupe_error($query);
 				$sarjarow = mysql_fetch_array($sarjares);
-				echo $query;
+
 				if ($sarjarow["kpl"] == abs($prow["varattu"]+$prow["jt"])) {
 					$sarjalinkkilisa = " (<a href='sarjanumeroseuranta.php?tuoteno=$prow[tuoteno]&ostorivitunnus=$prow[tunnus]&return=valmistus&from=valmistus#".urlencode($sarjarow["sarjanumero"])."' style='color:00FF00'>".t("S:nro ok")."</font></a>)";
 				}

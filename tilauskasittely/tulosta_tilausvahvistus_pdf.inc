@@ -428,7 +428,7 @@
 								LIMIT 1";
 					$result = mysql_query($query) or pupe_error($query);
 					if(mysql_num_rows($result)>0) {
-						$pdf->write($h, 3, 0, 0, t("Jos Runtechin asiantuntijaa vaaditaan asiakkaan toimesta viipymään tehtaalla pisempään, kuin on sovittu, lisätään loppulaskuun päiväveloitus tuntityöhinnaston kohdan 4 mukaan, sekä matkakulut syntyneiden kulujen mukaan.", $kieli), "norm", "L", "");
+						$pdf->write($h, 3, 0, 0, t("Jos Runtechin asiantuntijaa vaaditaan asiakkaan toimesta viipymään tehtaalla pidempään, kuin on sovittu, lisätään loppulaskuun päiväveloitus tuntityöhinnaston kohdan 4 mukaan, sekä matkakulut syntyneiden kulujen mukaan.", $kieli), "norm", "L", "");
 						$h-=$pdf->ln(5);
 					}
 				}

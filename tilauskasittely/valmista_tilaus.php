@@ -31,7 +31,7 @@
 		require('../inc/footer.inc');
 		exit;
 	}
-	
+
 	if(!function_exists("onkokaikkivalmistettu")) {
 		function onkokaikkivalmistettu ($valmkpllat) {
 			global $kukarow, $tee, $valmistettavat;
@@ -210,7 +210,7 @@
 		$valmistettavat = "";
 		$tee = "";
 	}
-	
+
 	if ($tee == 'TEEVALMISTUS' and count($valmkpllat) == 0 and count($tilkpllat) == 0) {
 
 		//katotaan onko en‰‰ mit‰‰n valmistettavaa		
@@ -588,10 +588,10 @@
 				//katotaan onko en‰‰ mit‰‰n valmistettavaa
 				onkokaikkivalmistettu ($valmkpllat);	
 			}
-			
-			$tee = "";
-		}
-	}
+
+						$tee	 		= "";
+					}
+					}
 
 	if ($tee == "VALMISTA" and $valmistettavat != "") {
 		//Haetaan otsikoiden tiedot
@@ -666,7 +666,11 @@
 					tilausrivi.otunnus otunnus,
 					tilausrivi.uusiotunnus laskutettu,
 					tilausrivi.kommentti,
-					tuote.ei_saldoa
+					tuote.ei_saldoa,
+					tilausrivi.kommentti,
+					tuote.sarjanumeroseuranta,
+					tilausrivi.varattu,
+					tilausrivi.var
 					FROM tilausrivi, tuote
 					WHERE
 					tilausrivi.otunnus in ($row[Tilaus])
@@ -720,7 +724,7 @@
 			
 			if($prow["tyyppi"] == 'W' or $prow["tyyppi"] == 'M') {
 				// N‰m‰ ovat valmisteita
-				$class = "spec";
+				$class = "spec";				
 				
 				echo "<input type='hidden' name='valmisteet_chk[$prow[tunnus]]' value='$prow[tuoteno]'>";				
 			}
@@ -741,10 +745,34 @@
 
 			echo "<td valign='top' class='$class'>$rivkpl</td>";
 			$rivkpl--;
+			
+			
+			$sarjalinkkilisa = "";
+			if (($prow["sarjanumeroseuranta"] == "S" or $prow["sarjanumeroseuranta"] == "T" or $prow["sarjanumeroseuranta"] == "U" or $prow["sarjanumeroseuranta"] == "V" or (($prow["sarjanumeroseuranta"] == "E" or $prow["sarjanumeroseuranta"] == "F") and $prow["varattu"] < 0)) and $prow["var"] != 'P' and $prow["var"] != 'T' and $prow["var"] != 'U') {
 
-			echo "<td valign='top' class='$class'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
-			echo "<td valign='top' class='$class'><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a></td>";
-			echo "<td valign='top' class='$class' align='right'>$prow[tilattu]</td>";
+				$query = "	SELECT count(*) kpl 
+							from sarjanumeroseuranta 
+							where yhtio='$kukarow[yhtio]' and tuoteno='$prow[tuoteno]' and ostorivitunnus='$prow[tunnus]'";
+				$sarjares = mysql_query($query) or pupe_error($query);
+				$sarjarow = mysql_fetch_array($sarjares);
+				echo $query;
+				if ($sarjarow["kpl"] == abs($prow["varattu"]+$prow["jt"])) {
+					$sarjalinkkilisa = " (<a href='sarjanumeroseuranta.php?tuoteno=$prow[tuoteno]&ostorivitunnus=$prow[tunnus]&return=valmistus&from=valmistus#".urlencode($sarjarow["sarjanumero"])."' style='color:00FF00'>".t("S:nro ok")."</font></a>)";
+				}
+				else {
+					$sarjalinkkilisa = " (<a href='sarjanumeroseuranta.php?tuoteno=$prow[tuoteno]&ostorivitunnus=$prow[tunnus]&return=valmistus&from=valmistus'>".t("S:nro")."</a>)";
+
+					if ($laskurow['sisainen'] != '' or $laskurow['ei_lahetetta'] != '') {
+						$sarjapuuttuu++;
+						$tilausok++;
+					}
+				}
+			}
+			
+			echo "<td class='$class'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
+			echo "<td class='$class'><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a> $sarjalinkkilisa</td>";
+			echo "<input type='hidden' name='tuotenumerot[$prow[tunnus]]' value='$prow[tuoteno]'>";
+			echo "<td class='$class' align='right'>$prow[tilattu]</td>";
 
 
 			if ($toim == "KORJAA" and  $prow["tyyppi"] == 'V') {
@@ -878,7 +906,7 @@
 		elseif($toim == 'KORJAA' and $voikokorjata > 0) {
 			echo "<tr><td colspan='8'>Korjaa koko valmistus:</td><td class='back'><input type='submit' name='' value='".t("Korjaa")."'></td>";
 		}
-		
+
 		echo "</tr>";
 		echo "</form>";
 		echo "</table><br><br>";

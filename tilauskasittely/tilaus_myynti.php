@@ -3956,6 +3956,10 @@ if ($tee == '') {
 						$tunken1 = "siirtorivitunnus";
 						$tunken2 = "siirtorivitunnus";
 					}
+					elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
+						$tunken1 = "ostorivitunnus";
+						$tunken2 = "ostorivitunnus";
+					}					
 					elseif ($row["varattu"] < 0) {
 						$tunken1 = "ostorivitunnus";
 						$tunken2 = "myyntirivitunnus";
@@ -4978,6 +4982,7 @@ if ($tee == '') {
 								<td colspan='2' nowrap>
 								<form name='valmis' action='tulostakopio.php' method='post' name='tulostakopio'>
 									<input type='hidden' name='otunnus' value='$tilausnumero'>
+									<input type='hidden' name='tee' value='NAYTATILAUS'>
 									<input type='hidden' name='projektilla' value='$projektilla'>
 									<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//lopetus=$lopetus//tee='>";
 

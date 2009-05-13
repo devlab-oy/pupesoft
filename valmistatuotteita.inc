@@ -36,7 +36,7 @@ if ($tee == 'UV') {
 
 	if ($varastopaikka != '') {
 		//k‰ytet‰‰n rivill‰ olevaa paikkaa
-		$query = "	SELECT  saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus,
+		$query = "	SELECT  saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus, tuote.sarjanumeroseuranta,
 					tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
 					FROM tuote, tuotepaikat
 					WHERE tuote.yhtio=tuotepaikat.yhtio
@@ -48,7 +48,7 @@ if ($tee == 'UV') {
 
 		if(mysql_num_rows($tuoteresult) != 1) {
 			//jos ei lˆytynyt yksiselitteist‰ rivi‰ yritet‰‰n oletuspaikkaa
-			$query = "	SELECT  saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus,
+			$query = "	SELECT  saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus, tuote.sarjanumeroseuranta,
 						tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
 						FROM tuote, tuotepaikat
 						WHERE tuote.yhtio=tuotepaikat.yhtio
@@ -61,7 +61,7 @@ if ($tee == 'UV') {
 	}
 	else {
 		//k‰ytet‰‰n oletuspaikkaa
-		$query = "	SELECT  saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus,
+		$query = "	SELECT  saldo, ei_saldoa, tuote.yksikko, kehahin, tuotepaikat.tunnus tunnus, tuote.sarjanumeroseuranta,
 					tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso
 					FROM tuote, tuotepaikat
 					WHERE tuote.yhtio=tuotepaikat.yhtio
@@ -360,13 +360,13 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 						laadittu 	= now()";
 			$result = mysql_query($query) or pupe_error($query);
 
-			$query = "	UPDATE tuote
-						SET kehahin	= $kehahin,
-						vihahin		= round($uusiarvo/$isavarattu, 2),
-						vihapvm		= now()
-						WHERE yhtio = '$kukarow[yhtio]'
-						and tuoteno = '$isatuoteno'";
-			$result = mysql_query($query) or pupe_error($query);
+				$query = "	UPDATE tuote
+							SET kehahin	= $kehahin,
+							vihahin		= round($uusiarvo/$isavarattu, 2),
+							vihapvm		= now()
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$isatuoteno'";
+				$result = mysql_query($query) or pupe_error($query);
 
 			$query = "	UPDATE tuotepaikat
 						SET saldo = saldo+$isavarattu
@@ -415,7 +415,14 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 						$insresult = mysql_query($query) or pupe_error($query);
 						$valmistettavat .= ",".mysql_insert_id();
 					}
-
+					
+					if(in_array($isarow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+						$tilausriviTyyppi = "O";
+					}
+					else {
+						$tilausriviTyyppi = "D";
+					}
+					
 					//luodaan toimitettu valmisterivi
 					$query = "	INSERT into tilausrivi set
 								laatija			= '$kukarow[kuka]',
@@ -433,11 +440,12 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 								osasto 			= '$tilrivirow[osasto]',
 								alv 			= '$tilrivirow[alv]',
 								hinta 			= '$tilrivirow[hinta]',
+								rivihinta		= '$uusiarvo',
 								kerayspvm 		= '$tilrivirow[kerayspvm]',
 								nimitys 		= '$tilrivirow[nimitys]',
 								otunnus 		= '$tilrivirow[otunnus]',
 								uusiotunnus		= '$tilrivirow[uusiotunnus]',
-								tyyppi 			= 'D',
+								tyyppi 			= '$tilausriviTyyppi',
 								keratty	 		= '$kukarow[kuka]',
 								kerattyaika		= now(),
 								toimaika 		= '$tilrivirow[toimaika]',
@@ -449,7 +457,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 								hyllytaso 		= '$tilrivirow[hyllytaso]',
 								hyllyvali 		= '$tilrivirow[hyllyvali]'";
 					$insresult = mysql_query($query) or pupe_error($query);
-					$valmistettavat .= ",".mysql_insert_id();
+					$uusrivitunnus = mysql_insert_id();
+					$valmistettavat .= ",".$uusrivitunnus;
 
 					$jaljella = round($tilrivirow["varattu"] - $isavarattu, 2);
 					$jaljella_tot += $jaljella;
@@ -462,6 +471,41 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 								and tunnus  = '$tilrivirow[tunnus]'
 								and tyyppi in ('W','M')";
 					$upparesult = mysql_query($query) or pupe_error($query);
+					
+					//	Siirret‰‰n sarjanumerot valmistetulle tilausriville
+					
+					if(in_array($isarow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+						
+						//foreach
+						$query = "	UPDATE tuote
+									SET kehahin	= $kehahin,
+									vihahin		= round($uusiarvo/$isavarattu, 2),
+									vihapvm		= now()
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tuoteno = '$isatuoteno'";
+						$result = mysql_query($query) or pupe_error($query);
+						
+						//	Siirret‰‰n ostorivin tunnus valmistetulle riville
+						$query = "	SELECT tunnus
+									FROM sarjanumeroseuranta
+									WHERE yhtio='$kukarow[yhtio]' and ostorivitunnus='$tilrivirow[tunnus]'
+									LIMIT ".(int) $isavarattu."";
+						$sarjares = mysql_query($query) or pupe_error($query);
+						if(mysql_num_rows($sarjares) == $isavarattu) {
+							while($sarjarow = mysql_fetch_array($sarjares)) {
+								$query = "	UPDATE sarjanumeroseuranta SET
+											ostorivitunnus	= $uusrivitunnus
+											WHERE yhtio = '$kukarow[yhtio]'
+											and tunnus = '$sarjarow[tunnus]'";
+								$result = mysql_query($query) or pupe_error($query);
+								echo $query."<br>";
+							}
+						}
+						else {
+							//	T‰‰ll‰ n‰m‰ sarjanumerot voisi generoida automaattisesti?
+							echo "<font class='error'>".t("Nyt on piru irti!")."</font><br>";
+						}
+					}
 				}
 			}
 

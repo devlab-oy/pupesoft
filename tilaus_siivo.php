@@ -10,9 +10,7 @@
 		echo "<a href='javascript:history.back()'>Takaisin</a><br><br>";
 		exit;
 	}
-	
-	
-	
+		
 	if ($tee == 'CLEAN') {
 		if (count($valittutil) != 0) {
 			foreach ($valittutil as $rastit) {	
@@ -66,10 +64,7 @@
 			}
 		}				
 	}
-	
-	
-	
-	
+
 	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 			<!--
 
@@ -77,9 +72,10 @@
 
 				var currForm = toggleBox.form;
 				var isChecked = toggleBox.checked;
+				var nimi = toggleBox.name;
 
-				for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
-					if (currForm.elements[elementIdx].type == 'checkbox') {
+				for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {											
+					if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].id.substring(0,5) == nimi) {
 						currForm.elements[elementIdx].checked = isChecked;
 					}
 				}
@@ -90,10 +86,12 @@
 	
 	
 	echo "<font class='head'>Siivoa tilaukset-listaa:</font><hr>";
-	
 		
 	//keskenolevat tilaukset
-	$query = "	SELECT lasku.*, tilausrivi.otunnus otunnus, concat(if(kuka.kassamyyja!='', 'Kassa',''), ' ', if(extranet!='', 'Extranet','')) kassamyyja
+	$query = "	SELECT lasku.*, 
+				tilausrivi.otunnus otunnus, concat(if(kuka.kassamyyja!='', 'Kassa',''), ' ', if(extranet!='', 'Extranet','')) kassamyyja,
+				if(lasku.luontiaika <= date_sub(now(),interval 30 day), 0, 1) kkorder,
+				concat(if(lasku.luontiaika <= date_sub(now(),interval 30 day), 0, 1), if(lasku.vienti='', ' ', lasku.vienti), lasku.valkoodi) grouppi
 				FROM lasku
 				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.laatija=kuka.kuka
 				LEFT JOIN tilausrivi ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
@@ -103,7 +101,7 @@
 				and lasku.luontiaika < date_sub(now(),interval 1 day)
 				GROUP BY lasku.tunnus
 				HAVING otunnus is not null
-				ORDER BY lasku.luontiaika";
+				ORDER BY kkorder, lasku.vienti, lasku.valkoodi, lasku.luontiaika";
 	$res = mysql_query($query) or pupe_error($query);
 	
 	
@@ -112,18 +110,17 @@
 	echo "<input type='hidden' name='tee' value='CLEAN'>";
 	echo "<tr><td colspan='8' class='back'>Keskenolevat tilaukset joilla on rivejä (".mysql_num_rows($res)."kpl):</td></tr>";
 	
-	echo "<tr>
-			<th>Tunnus:</th>
-			<th>Tila:</th>
-			<th>Alatila:</th>
-			<th>Nimi:</th>
-			<th>Vienti:</th>
-			<th>Kassa/Extranet:</th>
-			<th>Luontiaika:</th>
-			<th>Mitätöi:</th>
-			<tr>";					
+	$edgrouppi = "";
+	$lask	   = 1;
 	
 	while ($laskurow = mysql_fetch_array($res)) {
+				
+		if ($laskurow["grouppi"] != $edgrouppi) {
+			
+			if ($edgrouppi != "") echo "<tr><td colspan='7' class='back'></td><td>Ruksaa ylläolevat:</td><td><input type='checkbox' name='$edgrouppi' onclick='toggleAll(this)'></td></tr>";
+			
+			echo "<tr><th>Tunnus:</th><th>Tila:</th><th>Alatila:</th><th>Nimi:</th><th>Vienti:</th><th>Valuutta:</th><th>Kassa/Extranet:</th><th>Luontiaika:</th><th>Mitätöi:</th></tr>";					
+		}
 		
 		$ero="td";
 		if ($tunnus==$laskurow["tunnus"]) $ero="th";
@@ -133,11 +130,15 @@
 		echo "<$ero>$laskurow[alatila]</$ero>";
 		echo "<$ero>$laskurow[nimi]</$ero>";
 		echo "<$ero>$laskurow[vienti]</$ero>";
+		echo "<$ero>$laskurow[valkoodi]</$ero>";
 		echo "<$ero>$laskurow[kassamyyja]</$ero>";
-		echo "<$ero>$laskurow[luontiaika]</$ero>";
-		echo "<$ero><input type='checkbox' value='$laskurow[tunnus]' name='valittutil[]'></$ero></tr>";		
-
+		echo "<$ero>".tv1dateconv($laskurow["luontiaika"], "P")."</$ero>";
+		echo "<$ero><input type='checkbox' value='$laskurow[tunnus]' name='valittutil[]' id='$laskurow[grouppi]$lask'></$ero></tr>";	
+		
+		$edgrouppi = $laskurow["grouppi"];
+		$lask++;
 	}
+	echo "<tr><td colspan='7' class='back'></td><td>Ruksaa ylläolevat:</td><td><input type='checkbox' name='$edgrouppi' onclick='toggleAll(this)'></td></tr>";
 	
 	
 	echo "<tr><td colspan='8' class='back'><br><br></td></tr>";
@@ -158,16 +159,9 @@
 	$res = mysql_query($query) or pupe_error($query);		
 	
 	echo "<tr><td colspan='8' class='back'>Rivittömät otsikot (".mysql_num_rows($res)."kpl):</tr>";
-	echo "<tr>
-			<th>Tunnus:</th>
-			<th>Tila:</th>
-			<th>Alatila:</th>
-			<th>Nimi:</th>
-			<th>Vienti:</th>
-			<th>Kassamyyjä:</th>
-			<th>Luontiaika:</th>
-			<th>Mitätöi:</th>
-			<tr>";					
+	echo "<tr><th>Tunnus:</th><th>Tila:</th><th>Alatila:</th><th>Nimi:</th><th>Vienti:</th><th>Valuutta:</th><th>Kassa/Extranet:</th><th>Luontiaika:</th><th>Mitätöi:</th></tr>";					
+					
+	$lask = 1;
 	
 	while ($laskurow = mysql_fetch_array($res)) {
 
@@ -179,18 +173,15 @@
 		echo "<$ero>$laskurow[alatila]</$ero>";
 		echo "<$ero>$laskurow[nimi]</$ero>";
 		echo "<$ero>$laskurow[vienti]</$ero>";
+		echo "<$ero>$laskurow[valkoodi]</$ero>";
 		echo "<$ero>$laskurow[kassamyyja]</$ero>";
 		echo "<$ero>$laskurow[luontiaika]</$ero>";
-		echo "<$ero><input type='checkbox' value='$laskurow[tunnus]' name='valitturiv[]'></$ero></tr>";		
+		echo "<$ero><input type='checkbox' value='$laskurow[tunnus]' name='valitturiv[]' id='EIRIV$lask'></$ero></tr>";		
 
 	}
-	
-	echo "<tr><td colspan='8' class='back'><br><br></td></tr>";
-	
-	echo "<tr><td colspan='7'>Ruksaa kaikki:</td>";
-	echo "<td><input type='checkbox' name='chbox' onclick='toggleAll(this)'></td></tr>";
-			
+	echo "<tr><td colspan='7' class='back'></td><td>Ruksaa ylläolevat:</td><td><input type='checkbox' name='EIRIV' onclick='toggleAll(this)'></td></tr>";			
 	echo "</table><br><br>";
+	
 	echo "<input type='submit' value='".t("Mitätöi valitut tilaukset")."'></form>";
 		
 		

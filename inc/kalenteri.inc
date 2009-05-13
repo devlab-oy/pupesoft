@@ -746,7 +746,7 @@
 							SELECT 'lasku' laji, 'tilaus' laji_tark, UNIX_TIMESTAMP(date(lasku.luontiaika)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
 							FROM lasku
 							$asiakas_join
-							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnusnippu = lasku.tunnus and tila IN ('R','L','N') $wherelisa
+							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnusnippu = lasku.tunnus and lasku.tila IN ('R','L','N') $wherelisa
 						)
 						";						
 					}
@@ -758,7 +758,7 @@
 							SELECT 'lasku' laji, 'toimitus' laji_tark, UNIX_TIMESTAMP(date(lasku.toimaika)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
 							FROM lasku
 							$asiakas_join
-							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnusnippu = lasku.tunnus and tila IN ('R','L','N') $wherelisa
+							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnusnippu = lasku.tunnus and lasku.tila IN ('R','L','N') $wherelisa
 						)
 						";
 					}
@@ -770,7 +770,7 @@
 							SELECT 'lasku' laji, 'kerays' laji_tark, UNIX_TIMESTAMP(date(lasku.kerayspvm)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
 							FROM lasku
 							$asiakas_join
-							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnusnippu = lasku.tunnus and tila IN ('R','L','N') $wherelisa
+							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnusnippu = lasku.tunnus and lasku.tila IN ('R','L','N') $wherelisa
 						)
 						";
 					}
@@ -782,7 +782,7 @@
 							SELECT 'lasku' laji, 'alku' laji_tark, UNIX_TIMESTAMP(date(lasku.luontiaika)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
 							FROM lasku
 							$asiakas_join
-							WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'T' $wherelisa
+							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'T' $wherelisa
 						)
 						";
 					}

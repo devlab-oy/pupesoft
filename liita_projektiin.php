@@ -22,7 +22,7 @@ if($tee=="KORJAA" or $tee=="LIITA") {
 	if(mysql_num_rows($result)>0) {
 		$laskurow=mysql_fetch_array($result);
 		
-		$query = "	SELECT nimi, nimitark, tila, alatila, tunnusnippu, tunnus from lasku where yhtio='$kukarow[yhtio]' and tila IN ('L','G','E','V','W','N','T') and tunnus='$tunnus'";
+		$query = "	SELECT nimi, nimitark, tila, alatila, tunnusnippu, tunnus from lasku where yhtio='$kukarow[yhtio]' and tila IN ('L','G','E','V','W','N','T','C') and tunnus='$tunnus'";
 		$res = mysql_query($query) or pupe_error($query);
 		if(mysql_num_rows($res)>0) {
 			$row=mysql_fetch_array($res);

@@ -72,7 +72,7 @@ if ((int) $valitsetoimitus > 0) {
 		$toim = "PROJEKTI";
 	}
 }
-elseif(in_array($valitsetoimitus, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","VALMISTAVARASTOON","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
+elseif(in_array($valitsetoimitus, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","VALMISTAVARASTOON","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI", "TYOMAARAYS"))) {
 	$uusitoimitus = $valitsetoimitus;
 }
 
@@ -1915,14 +1915,13 @@ if ($tee == '') {
 				}
 				else {
 					echo "<option value='RIVISYOTTO'>".T("Toimitus")."</option>";
-					}
-
-				if ($projektilla != '') {
-					echo "<option value='TYOMAARAYS'>".T("Työmääräys")."</option>";
-					echo "<option value='REKLAMAATIO'>".T("Reklamaatio")."</option>";
-					echo "<option value='VALMISTAVARASTOON'>".T("Valmistus")."</option>";
-					echo "<option value='SIIRTOLISTA'>".T("Siirtolista")."</option>";
 				}
+
+				echo "<option value='TYOMAARAYS'>".T("Työmääräys")."</option>";
+				echo "<option value='REKLAMAATIO'>".T("Reklamaatio")."</option>";
+				echo "<option value='VALMISTAVARASTOON'>".T("Valmistus")."</option>";
+				echo "<option value='SIIRTOLISTA'>".T("Siirtolista")."</option>";
+				echo "<option value='TYOMAARAYS'>".T("Työmääräys")."</option>";					
 			}
 
 			echo "</optgroup></select>";

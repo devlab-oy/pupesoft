@@ -775,10 +775,10 @@
 				}
 			}
 			
-			echo "<td class='$class'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
-			echo "<td class='$class'><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a> $sarjalinkkilisa</td>";
+			echo "<td class='$class' valign='top'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
+			echo "<td class='$class' valign='top'><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a> $sarjalinkkilisa</td>";
 			echo "<input type='hidden' name='tuotenumerot[$prow[tunnus]]' value='$prow[tuoteno]'>";
-			echo "<td class='$class' align='right'>$prow[tilattu]</td>";
+			echo "<td class='$class' valign='top' align='right'>$prow[tilattu]</td>";
 
 
 			if ($toim == "KORJAA" and  $prow["tyyppi"] == 'V') {

@@ -28,10 +28,12 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 	$session = "";
 	srand ((double) microtime() * 1000000);
 
-	$query = "	SELECT kuka, session, salasana, yhtio
+	$query = "	SELECT kuka.kuka, kuka.session, kuka.salasana, kuka.yhtio
 				FROM kuka
-				where kuka		= '$user'
-				and extranet 	= ''";
+				JOIN oikeu ON oikeu.yhtio=kuka.yhtio and oikeu.kuka=kuka.kuka 
+				where kuka.kuka		= '$user'
+				and kuka.extranet 	= ''
+				GROUP BY 1,2,3,4";
 	$result = mysql_query($query) or die("Kysely ep‰onnistui");
 	$krow = mysql_fetch_array ($result);
 
@@ -115,7 +117,7 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 				}
 				else {
 					// katsotaan onko k‰ytt‰j‰ll‰ oletus_ohjelma.. jos on menn‰‰n suoraan siihen.
-					$query = "select oletus_ohjelma from kuka where session = '$session'";
+					$query = "SELECT oletus_ohjelma from kuka where session = '$session'";
 					$result = mysql_query($query) or die ("P‰ivitys ep‰onnistui kuka $query");
 					$row = mysql_fetch_array($result);
 

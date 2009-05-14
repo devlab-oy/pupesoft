@@ -524,16 +524,16 @@
 				echo "<td>{$yht_row['tyyppi']}</td><td>{$yht_row['merkki']}</td><td>{$yht_row['malli']}</td><td>{$yht_row['cc']}</td><td>{$yht_row['vm']}</td>";
 				echo "</tr>";
 
-				$rivi .= "$row[nimi],";
-				$rivi .= "$row[email],";
-				$rivi .= "$row[postino],";
-				$rivi .= "$row[postitp],";
-				$rivi .= "$avain_row[avainsana],";
-				$rivi .= "$yht_row[tyyppi],";
-				$rivi .= "$yht_row[merkki],";
-				$rivi .= "$yht_row[malli],";
-				$rivi .= "$yht_row[cc],";
-				$rivi .= "$yht_row[vm]";
+				$rivi .= str_replace(",", ".", $row['nimi']).",";
+				$rivi .= str_replace(",", ".", $row['email']).",";
+				$rivi .= str_replace(",", ".", $row['postino']).",";
+				$rivi .= str_replace(",", ".", $row['postitp']).",";
+				$rivi .= str_replace(",", ".", $avain_row['avainsana']).",";
+				$rivi .= str_replace(",", ".", $yht_row['tyyppi']).",";
+				$rivi .= str_replace(",", ".", $yht_row['merkki']).",";
+				$rivi .= str_replace(",", ".", $yht_row['malli']).",";
+				$rivi .= str_replace(",", ".", $yht_row['cc']).",";
+				$rivi .= str_replace(",", ".", $yht_row['vm']).",";
 				$rivi .= "\r\n";
 
 				if (isset($workbook)) {

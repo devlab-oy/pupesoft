@@ -19,13 +19,13 @@
 		$laskurow = mysql_fetch_array($res);
 									
 		// Laskun tiedot		
-		echo "Laskun tiedot";
+		echo t("Laskun tiedot");
 		echo "<table>";
-		echo "<tr><th>Tunnus:</th>	<td>$laskurow[tunnus]</td></tr>";
-		echo "<tr><th>Tila:</th>	<td>$laskurow[tila]</td></tr>";
-		echo "<tr><th>Alatila:</th>	<td>$laskurow[alatila]</td></tr>";
-		echo "<tr><th>Nimi:</th>	<td>$laskurow[nimi]</td></tr>";
-		echo "<tr><th>Viite:</th>	<td>$laskurow[viesti]</td></tr>";
+		echo "<tr><th>".t("Tunnus").":</th>	<td>$laskurow[tunnus]</td></tr>";
+		echo "<tr><th>".t("Tila").":</th>	<td>$laskurow[tila]</td></tr>";
+		echo "<tr><th>".t("Alatila").":</th><td>$laskurow[alatila]</td></tr>";
+		echo "<tr><th>".t("Nimi").":</th>	<td>$laskurow[nimi]</td></tr>";
+		echo "<tr><th>".t("Viite").":</th>	<td>$laskurow[viesti]</td></tr>";
 		echo "</table><br><br>";
 		
 	
@@ -34,26 +34,27 @@
 					from tilausrivi
 					where yhtio = '$kukarow[yhtio]' 
 					and otunnus = '$laskurow[tunnus]'
-					and tyyppi in ('W','V')
-					order by perheid, tunnus";
+					and tyyppi in ('V','W','M')
+					ORDER BY perheid desc, tyyppi in ('W','M','L','D','V'), tunnus";
 		$res = mysql_query($query) or pupe_error($query);
 		
-		echo "Tilausrivit, Tuote ja Tapahtumat:<br>";
+		echo t("Tilausrivit, Tuote ja Tapahtumat").":<br>";
 		echo "<table>";
 		echo "<form action='$PHP_SELF' method=POST'>";
 		echo "<input type='hidden' name='id'  value='$laskurow[tunnus]'>";				
 		
 		while ($rivirow = mysql_fetch_array($res)) {
 			
-			if ($edtuote != $rivirow["perheid"]) {
+			if ($tee != 'KORJAA' and $edtuote != $rivirow["perheid"]) {
 				echo "<tr><td colspan='3' class='back'><hr></td></tr>";
 			}												
+			
 			$edtuote = $rivirow["perheid"];					
 			
 			if ($rivirow["perheid"] == $rivirow["tunnus"]) {
 				
 				if ($tee != 'KORJAA') {
-					echo "<tr><td colspan='3'><input type='checkbox' name='perutaan[$rivirow[tunnus]]' value='$rivirow[tunnus]'> Peru tuotteen valmistus</td></tr>";
+					echo "<tr><th colspan='1'><input type='checkbox' name='perutaan[$rivirow[tunnus]]' value='$rivirow[tunnus]'> ".t("Peru tuotteen valmistus")."</th></tr>";
 				}
 				
 				//Fl‰g‰t‰‰n voidaanko is‰ poistaa
@@ -90,18 +91,17 @@
 			$tuoterow = mysql_fetch_array($tuoteres);
 
 			if ($tee != 'KORJAA') {
-				echo "<tr>";
-				
+				echo "<tr>";				
 				echo "<td class='back' valign='top'><table>";
-				echo "<tr><th>Tuoteno:</th>			<td>$rivirow[tuoteno]</td></tr>";
-				echo "<tr><th>Tilattu:</th>			<td>$rivirow[tilkpl]</td></tr>";
-				echo "<tr><th>Varattu:</th>			<td>$rivirow[varattu]</td></tr>";
-				echo "<tr><th>Valmistettu:</th>		<td>$valmkpl</td></tr>";
-				echo "<tr><th>Valmistettu:</th>		<td>$rivirow[toimitettuaika]</td></tr>";
+				echo "<tr><th>".t("Tuoteno").":</th>			<td>$rivirow[tuoteno]</td></tr>";
+				echo "<tr><th>".t("Tilattu").":</th>			<td>$rivirow[tilkpl]</td></tr>";
+				echo "<tr><th>".t("Varattu").":</th>			<td>$rivirow[varattu]</td></tr>";
+				echo "<tr><th>".t("Valmistettu").":</th>		<td>$valmkpl</td></tr>";
+				echo "<tr><th>".t("Valmistettu").":</th>		<td>$rivirow[toimitettuaika]</td></tr>";
 				
-				if ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L") {
-					echo "<tr><th>Kehahinta:</th>	<td>$tuoterow[kehahin]</td></tr>";
-					echo "<tr><th>Otunnus:</th>		<td>$rivirow[otunnus]</td></tr>";
+				if ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L" or $rivirow["tyyppi"] == "M") {
+					echo "<tr><th>".t("Kehahinta").":</th>		<td>$tuoterow[kehahin]</td></tr>";
+					echo "<tr><th>".t("Otunnus").":</th>		<td>$rivirow[otunnus]</td></tr>";
 				}
 				
 				echo "</table></td>";
@@ -120,6 +120,7 @@
 			
 			// T‰ss‰ toi DESC sana ja LIMIT 1 ovat erityisen t‰rkeit‰
 			$order = "";
+			
 			if ($tee == 'KORJAA') {
 				$order = "DESC LIMIT 1";
 				
@@ -144,12 +145,12 @@
 				
 				if ($tee != 'KORJAA') {
 					echo "<td class='back' valign='top'><table>";
-					echo "<tr><th>Tuoteno:</th><td>$taparow[tuoteno]</td></tr>";
-					echo "<tr><th>Kpl:</th><td>$taparow[kpl]</td></tr>";
-					echo "<tr><th>Laatija Laadittu:</th><td>$taparow[laatija] $taparow[laadittu]</td></tr>";
-					echo "<tr><th>Selite:</th><td>$taparow[selite]</td></tr>";
+					echo "<tr><th>".t("Tuoteno").":</th><td>$taparow[tuoteno]</td></tr>";
+					echo "<tr><th>".t("Kpl").":</th><td>$taparow[kpl]</td></tr>";
+					echo "<tr><th>".t("Laatija")." ".t("Laadittu").":</th><td>$taparow[laatija] $taparow[laadittu]</td></tr>";
+					echo "<tr><th>".t("Selite").":</th><td>$taparow[selite]</td></tr>";
 					
-					if ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L") {	
+					if ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L" or $rivirow["tyyppi"] == "M") {	
 						echo "<tr><th>Kehahinta:</th><td>$taparow[hinta]</td></tr>";								
 					}
 				}
@@ -158,14 +159,14 @@
 				$query = "	SELECT count(*) kpl
 							from tapahtuma 
 							where yhtio = '$kukarow[yhtio]' 
-							and laji in ('laskutus','inventointi','ep‰kurantti','valmistus')
+							and laji in ('laskutus','inventointi','ep‰kurantti','valmistus', 'kulutus')
 							and tuoteno = '$taparow[tuoteno]'
 							and tunnus > '$taparow[tunnus]'
 							and rivitunnus != '$taparow[rivitunnus]'";
 				$tapares2 = mysql_query($query) or pupe_error($query);
 				$taparow2 = mysql_fetch_array($tapares2);	
 														
-				if ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L") {				
+				if ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L" or $rivirow["tyyppi"] == "M") {				
 					$voidaankopoistaa = "";
 					
 					if ($isa_voidaankopoistaa == "EI") {
@@ -182,8 +183,8 @@
 					}															
 				}
 				
-				if ($tee != 'KORJAA' and ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L")) {
-					echo "<tr><th>Voidaankopoistaa:</th><td>$voidaankopoistaa</td></tr>";
+				if ($tee != 'KORJAA' and ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L" or $rivirow["tyyppi"] == "M")) {
+					echo "<tr><th>".t("Voidaanko poistaa").":</th><td>$voidaankopoistaa</td></tr>";
 				}
 																																																						
 				$query = "	SELECT * 
@@ -214,8 +215,8 @@
 				
 				if ($tee != 'KORJAA') {
 					
-					if ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L") {
-						echo "<tr><th>Kehahinta from --> to:</th><td>$taparow[hinta] --> $taparow3[hinta]</td></tr>";
+					if ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L" or $rivirow["tyyppi"] == "M") {
+						echo "<tr><th>".t("Kehahinta")." from --> to:</th><td>$taparow[hinta] --> $taparow3[hinta]</td></tr>";
 					}
 					echo "</table></td>";
 				}
@@ -228,7 +229,7 @@
 								and tunnus	  = '$taparow[tunnus]'";
 					$korjres = mysql_query($query) or pupe_error($query);
 					
-					echo "$rivirow[tuoteno]: Poistetaan tapahtuma!<br>";			
+					echo "$rivirow[tuoteno]: ".t("Poistetaan tapahtuma")."!<br>";			
 					
 																								
 					//Haetaan valmistetut tuotteet ja poistetaan informativinen valmistusrivi
@@ -250,7 +251,7 @@
 										and tunnus	 = '$valm_row[tunnus]'";
 							$korjres = mysql_query($query) or pupe_error($query);
 							
-							echo "$valm_row[tuoteno]: Poistetaan informatiivinen valmistusrivi!<br>";																																		
+							echo "$valm_row[tuoteno]: ".t("Poistetaan informatiivinen valmistusrivi")."!<br>";																																		
 						}
 					}
 					
@@ -270,7 +271,7 @@
 								and tunnus  = '$rivirow[tunnus]'";
 					$korjres = mysql_query($query) or pupe_error($query);
 					
-					echo "$rivirow[tuoteno]: Palautetaan $palkpl kappaletta takaisin valmistukseen!<br>";	
+					echo "$rivirow[tuoteno]: ".t("Palautetaan")." $palkpl ".t("kappaletta")." ".t("takaisin valmistukseen")."!<br>";	
 					
 					
 					// Laitetaan takas saldoille
@@ -344,10 +345,10 @@
 							}								
 						}
 					
-						echo "$rivirow[tuoteno]: P‰ivitet‰‰n saldo ($taparow[kpl]) pois tuotepaikalta!<br>";
+						echo "$rivirow[tuoteno]: ".t("P‰ivitet‰‰n saldo")." ($taparow[kpl]) ".t("pois tuotepaikalta")."!<br>";
 					}
 										
-					if ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L") {
+					if ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L" or $rivirow["tyyppi"] == "M") {
 						//P‰ivitet‰‰n tuotteen kehahinta
 						$query = "	UPDATE tuote
 									SET kehahin   = '$taparow3[hinta]'
@@ -355,7 +356,7 @@
 									and tuoteno	  = '$rivirow[tuoteno]'";
 						$korjres = mysql_query($query) or pupe_error($query);
 						
-						echo "$rivirow[tuoteno]: P‰ivitet‰‰n tuotteen keskihankintahinta ($taparow[hinta] --> $taparow3[hinta]) takaisin edelliseen arvoon!<br>";
+						echo "$rivirow[tuoteno]: ".t("P‰ivitet‰‰n tuotteen keskihankintahinta")." ($taparow[hinta] --> $taparow3[hinta]) ".t("takaisin edelliseen arvoon")."!<br>";
 					}
 					
 
@@ -366,7 +367,7 @@
 								and tunnus = '$rivirow[tunnus]'";
 					$korjres = mysql_query($query) or pupe_error($query);
 					
-					echo "$rivirow[tuoteno]: P‰ivitet‰‰n tilausrivi takaisin tilaan ennen valmistusta<br>";
+					echo "$rivirow[tuoteno]: ".t("P‰ivitet‰‰n tilausrivi takaisin tilaan ennen valmistusta")."<br>";
 										
 					echo "<br><br>";
 				}
@@ -398,7 +399,7 @@
 							and tunnus  = $laskurow[tunnus]";															
 				$chkresult2 = mysql_query($query) or pupe_error($query);	
 				
-				echo "P‰ivitet‰‰n valmistus takaisin avoimeksi!<br>";	
+				echo t("P‰ivitet‰‰n valmistus takaisin avoimeksi")."!<br>";	
 			}
 		}
 		
@@ -408,17 +409,17 @@
 			echo "<input type='hidden' name='tee' value='KORJAA'>";
 		
 		
-			echo "V‰kisinkorjaa vaikka korjaaminen ei olisi j‰rjev‰‰: <input type='checkbox' name='vakisinpoista' value='Kyll‰'><br><br>";
+			echo t("V‰kisinkorjaa vaikka korjaaminen ei olisi j‰rjev‰‰").": <input type='checkbox' name='vakisinpoista' value='Kyll‰'><br><br>";
 			
 		
 			echo t("N‰ytt‰‰ hyv‰lt‰ ja haluan korjata").":<br><br>";
-			echo "<input type='submit' value='Korjaa'><br><br>";
+			echo "<input type='submit' value='".t("Korjaa")."'><br><br>";
 			
-			echo "<font class='error'>HUOM: Poistaa vain yhden varastoonviennin per tuote per korjausajo!</font>";
+			echo "<font class='error'>".t("HUOM: Poistaa vain yhden valmistuksen/osavalmistuksen per tuote per korjausajo")."!</font>";
 			
 		}
 		else {
-			echo "<a href='$PHP_SELF?id=$id'>".t("N‰yt‰‰ keikka uudestaan")."</a>";
+			echo "<a href='$PHP_SELF?id=$id'>".t("N‰yt‰ valmistus uudestaan")."</a>";
 		}
 		
 		echo "</form>";

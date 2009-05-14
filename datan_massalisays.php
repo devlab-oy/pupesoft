@@ -188,7 +188,7 @@ if ($tee == 'GO') {
 		$polku = substr($file,$alkupituus);
 
 		list($taulu, $toiminto, $kuva) = split("/", $polku, 3);
-		
+
 		$path_parts = pathinfo($kuva);
 		$ext = $path_parts['extension'];
 
@@ -214,7 +214,7 @@ if ($tee == 'GO') {
 		}
 
 		$apukuva = $kuva;
-		
+
 		if (strtolower($taulu) != 'tuote') {
 			die("Toistaiseksi voidaan vaan lukea tuotekuvia!");
 		}
@@ -229,10 +229,10 @@ if ($tee == 'GO') {
 				continue;
 			}
 		}
-		
+
 
 		unset($apuresult);
-		
+
 		$path_parts = pathinfo($kuva);
 		$ext = $path_parts['extension'];
 		//echo "$ext<br>";
@@ -295,13 +295,13 @@ if ($tee == 'GO') {
 				}
 
 			}
-			
+
 			$query = "SELECT tuoteno, tunnus FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno LIKE '$kuvanalku%'";
 			$apuresult = mysql_query($query) or pupe_error($query);
 		}
 
 
-		
+
 		if (file_exists($file)) {
 			$filesize = filesize($file);
 
@@ -336,24 +336,24 @@ if ($tee == 'GO') {
 				$image_bits 	= "";
 				$image_channels	= "";
 			}
-			
+
 			$filee = fopen($file, 'r');
 			$data = addslashes(fread($filee, $filesize));
 
 			if (!isset($apuresult)) {
 				$mihin = strpos($kuva,".$ext");
 				$tuoteno = substr($kuva,0,"$mihin");
-				
+
 				$query = "SELECT tuoteno, tunnus FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno = '$tuoteno' LIMIT 1";
 				$apuresult = mysql_query($query) or pupe_error($query);
 			}
 
 			if (mysql_num_rows($apuresult) > 0) {
-				
+
 				// lis‰t‰‰n file
 				while ($apurow = mysql_fetch_array($apuresult)) {
 					$kuvaselite = "Tuotekuva";
-					
+
 					if (($toiminto == 'thumb' or $toiminto == 'TH') and $apuselite == "") {
 						$toiminto = 'TH';
 						$kuvaselite .= " pieni";
@@ -406,6 +406,13 @@ if ($tee == 'GO') {
 								kayttotarkoitus		= '$toiminto',
 								laatija				= '$kukarow[kuka]',
 								luontiaika			= now()";
+					$insre = mysql_query($query) or pupe_error($query);
+
+					$query = "	UPDATE $taulu
+								SET muutospvm = now(),
+								muuttaja = '$kukarow[kuka]'
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus = '$apurow[tunnus]'";
 					$insre = mysql_query($query) or pupe_error($query);
 
 					echo "Lis‰ttiin $toiminto $kuva tuotteelle $apurow[tuoteno]<br>";

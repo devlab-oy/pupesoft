@@ -91,7 +91,8 @@
 	$query = "	SELECT lasku.*, 
 				tilausrivi.otunnus otunnus, concat(if(kuka.kassamyyja!='', 'Kassa',''), ' ', if(extranet!='', 'Extranet','')) kassamyyja,
 				if(lasku.luontiaika <= date_sub(now(),interval 30 day), 0, 1) kkorder,
-				concat(if(lasku.luontiaika <= date_sub(now(),interval 30 day), 0, 1), if(lasku.vienti='', ' ', lasku.vienti), lasku.valkoodi) grouppi
+				concat(if(lasku.luontiaika <= date_sub(now(),interval 30 day), 0, 1), if(lasku.vienti='', ' ', lasku.vienti), lasku.valkoodi) grouppi,
+				concat(if(lasku.luontiaika <= date_sub(now(),interval 30 day), '".t("Yli 30 päivää vanhat")."', '".t("Alle 30 päivää vanhat")."'), ', ', if(lasku.vienti='', '".t("Kotimaan myynti")."', if(lasku.vienti='K','".t("Ei-EU vienti")."','".t("EU vienti")."')), ', ', lasku.valkoodi) grouppi_nimi
 				FROM lasku
 				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.laatija=kuka.kuka
 				LEFT JOIN tilausrivi ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
@@ -119,6 +120,7 @@
 			
 			if ($edgrouppi != "") echo "<tr><td colspan='7' class='back'></td><td>Ruksaa ylläolevat:</td><td><input type='checkbox' name='$edgrouppi' onclick='toggleAll(this)'></td></tr>";
 			
+			echo "<tr><th colspan='9' class='back'>$laskurow[grouppi_nimi]</th></tr>";
 			echo "<tr><th>Tunnus:</th><th>Tila:</th><th>Alatila:</th><th>Nimi:</th><th>Vienti:</th><th>Valuutta:</th><th>Kassa/Extranet:</th><th>Luontiaika:</th><th>Mitätöi:</th></tr>";					
 		}
 		

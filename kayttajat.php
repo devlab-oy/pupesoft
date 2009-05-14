@@ -74,14 +74,33 @@
 
 	// Poistetaan koko käyttäjä tältä yriykseltä!!
 	if ($tee == 'deluser') {
-		$query = "delete from kuka WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
+		$query = "DELETE from kuka WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		$query = "delete from oikeu WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
+		$query = "DELETE from oikeu WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<b>".t("Käyttäjä")." $selkuka ".t("poistettu")."!</b><br>";
-		$selkuka=$kukarow['tunnus'];
+
+		$selkuka = $kukarow['tunnus'];		
+		$tee = "";
+	}
+	
+	if ($tee == 'deloikeu') {
+		$query = "	UPDATE kuka
+					SET profiilit 	= '',
+					muuttaja		= '$kukarow[kuka]',
+					muutospvm		= now()
+					WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+		
+		$query = "DELETE from oikeu WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<b>".t("Käyttäjän")." $selkuka ".t("käyttöoikeudet")." ".t("poistettu")."!</b><br>";
+		
+		$selkuka = $kukarow['tunnus'];		
+		$tee = "";
 	}
 
 	// Poistetaan käyttäjän salasana
@@ -1014,23 +1033,29 @@
 				echo "<br><input type='submit' value='".t("Päivitä käyttäjän")." $krow[kuka] ".t("tiedot")."'></form>";
 				echo "</td></tr></table>";
 
-				echo "<hr>";
+				echo "<br><br><br><hr>";
 
 				echo "<table><tr><td class='back'>";
 
 				echo "<form action='$PHP_SELF' method='post'>
 					<input type='hidden' name='selkuka' value='$selkukarow[kuka]'>
 					<input type='hidden' name='tee' value='delpsw'>
-					<input type='submit' value='".t("Poista käyttäjän")." $selkukarow[nimi] ".t("salasana")."'>
+					<input type='submit' value='* ".t("Poista käyttäjän")." $selkukarow[nimi] ".t("salasana")." *'>
 					</form>";
 
 				echo "</td><td class='back'>";
 
 				echo "<form action='$PHP_SELF' method='post'>
 					<input type='hidden' name='selkuka' value='$selkukarow[kuka]'>
+					<input type='hidden' name='tee' value='deloikeu'>
+					<input type='submit' value='** ".t("Poista käyttäjän")." $selkukarow[nimi] ".t("käyttöoikeudet")." **'>
+					</form>";
+					
+				echo "<form action='$PHP_SELF' method='post'>
+					<input type='hidden' name='selkuka' value='$selkukarow[kuka]'>
 					<input type='hidden' name='tee' value='deluser'>
 					<input type='submit' value='*** ".t("Poista käyttäjä")." $selkukarow[nimi] ***'>
-					</form>";
+					</form>";	
 
 				echo "</td></tr></table>";
 			}
@@ -1051,19 +1076,34 @@
 		if ($toim == "extranet") $extrsel = "X";
 		else $extrsel = "";
 
-		$query = "	SELECT distinct(nimi), kuka, tunnus
+		$query = "	SELECT kuka.nimi, kuka.kuka, kuka.tunnus, if(count(oikeu.tunnus) > 0, 0, 1) aktiivinen
 					FROM kuka
-					WHERE yhtio='$kukarow[yhtio]' and extranet='$extrsel'
-					ORDER BY nimi";
+					LEFT JOIN oikeu ON oikeu.yhtio=kuka.yhtio and oikeu.kuka=kuka.kuka
+					WHERE  kuka.yhtio = '$kukarow[yhtio]' 
+					and  kuka.extranet = '$extrsel'
+					GROUP BY 1,2,3
+					ORDER BY aktiivinen,  kuka.nimi";
 		$kukares = mysql_query($query) or pupe_error($query);
+		
+		echo "<optgroup label='".t("Aktiiviset käyttäjät")."'>";
 
+		$edakt = 0;
+		
 		while ($kurow=mysql_fetch_array($kukares)) {
 			if ($selkukarow["tunnus"] == $kurow["tunnus"]) $sel = "selected";
 			else $sel = "";
-			echo "<option value='$kurow[tunnus]' $sel>$kurow[nimi] ($kurow[kuka])</option>";
+			
+			if ($kurow["aktiivinen"] != $edakt) {
+				echo "</optgroup><optgroup label='".t("Poistetut käyttäjät")."'>";
+				$poislisa = "*";
+			}
+			
+			echo "<option value='$kurow[tunnus]' $sel>$poislisa $kurow[nimi] ($kurow[kuka])</option>";
+			
+			$edakt = $kurow["aktiivinen"];
 		}
 
-		echo "</select></td><td><input type='submit' value='".t("Muokkaa käyttäjän tietoja")."'></td></form>";
+		echo "</optgroup></select></td><td><input type='submit' value='".t("Muokkaa käyttäjän tietoja")."'></td></form>";
 
 
 		echo "<form action='$PHP_SELF' method='post'>

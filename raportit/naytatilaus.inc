@@ -1020,7 +1020,7 @@
 			}
 
 			if($kukarow['extranet'] == '') {
-				echo "<td $class valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
+				echo "<td $class valign='top'><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
 			}
 			else {
 				echo "<td $class valign='top'>$row[tuoteno]</td>";

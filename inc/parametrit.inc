@@ -469,7 +469,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 					$urltoim = "/EXTRANET";
 				}
 
-				$hreffi = "http://www.pupesoft.com/trac/wiki/$kukarow[kieli]/".basename($phpnimi).$urltoim;
+				$hreffi = "http://www.devlab.fi/wiki/index.php/Ohjeet:".basename($phpnimi).$urltoim;
 
 				echo "<div align='right'><a target='_blank' href='$hreffi'>".t("OHJE")."</a><br></div>";
 			}

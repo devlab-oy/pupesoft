@@ -1018,7 +1018,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					}
 					
 					if($virhe[$i] != "") {
-						echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".mysql_field_name($result, $i).": ".$virhe[$i]." ($t[$i])</font><br>";
+						switch ($table) {
+							case "tuote":
+								$virheApu = t("Tuote")." ".$tarkrow["tuoteno"].": ";
+								break;
+							default:
+								$virheApu = "";
+						}
+						echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>$virheApu".mysql_field_name($result, $i).": ".$virhe[$i]." ($t[$i])</font><br>";
 						$errori = 1;
 					}					
 				}				

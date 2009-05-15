@@ -216,7 +216,11 @@
 			
 			if ($laskuttajan_ovt != "") {
 				// 1 etsit‰‰n toimittaja ovttunnuksella				
-				$query  = "SELECT * FROM toimi WHERE ovttunnus='$laskuttajan_ovt' and yhtio='$yhtio'";
+				$query  = "	SELECT * 
+							FROM toimi 
+							WHERE ovttunnus = '$laskuttajan_ovt' 
+							and ovttunnus not in ('','0') 
+							and yhtio='$yhtio'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 				
 				if (mysql_num_rows($result) == 1) {
@@ -228,7 +232,11 @@
 				// 2 etsit‰‰n toimittaja ovt-tunnuksella ilman tarkenteita
 				$yovt = substr($laskuttajan_ovt, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet			
 				
-				$query  = "SELECT * FROM toimi WHERE ovttunnus='$yovt' and yhtio='$yhtio'";
+				$query  = "	SELECT * 
+							FROM toimi 
+							WHERE ovttunnus = '$yovt' 
+							and ovttunnus not in ('','0') 
+							and yhtio = '$yhtio'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 				
 				if (mysql_num_rows($result) == 1) {
@@ -241,7 +249,11 @@
 				$yovt1 = substr(str_replace("0037", "", $laskuttajan_ovt), 0, 8); // mahdollisella etunollalla
 				$yovt2 = (int) $yovt1; // ilman etunollaa
 				
-				$query  = "SELECT * FROM toimi WHERE ytunnus in ('$yovt1', '$yovt2') and yhtio='$yhtio'";
+				$query  = "	SELECT * 
+							FROM toimi 
+							WHERE ytunnus in ('$yovt1', '$yovt2') 
+							and ytunnus not in ('','0') 
+							and yhtio = '$yhtio'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 				if (mysql_num_rows($result) == 1) {
@@ -251,7 +263,11 @@
 			
 			if (!isset($trow) and $laskuttajan_vat != "") {
 				// 4 etsit‰‰n toimittaja vat-numerolla			
-				$query  = "SELECT * FROM toimi WHERE ovttunnus='$laskuttajan_vat' and yhtio='$yhtio'";
+				$query  = "	SELECT * 
+							FROM toimi 
+							WHERE ovttunnus = '$laskuttajan_vat' 
+							and ovttunnus not in ('','0') 
+							and yhtio = '$yhtio'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 				
 				if (mysql_num_rows($result) == 1) {
@@ -261,8 +277,28 @@
 			
 			if (!isset($trow) and $laskuttajan_vat != "") {
 				// 5 etsit‰‰n toimittaja vat-numerolla				
-				$query  = "SELECT * FROM toimi WHERE ytunnus='$laskuttajan_vat' and yhtio='$yhtio'";
+				$query  = "	SELECT * 
+							FROM toimi 
+							WHERE ytunnus = '$laskuttajan_vat' 
+							and ytunnus not in ('','0') 
+							and yhtio = '$yhtio'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				
+				if (mysql_num_rows($result) == 1) {
+					$trow = mysql_fetch_array($result);
+				}				
+			}
+			
+			if (!isset($trow) and $laskuttajan_vat != "") {
+				$intvat = preg_replace("/[^0-9]/", "", $laskuttajan_vat);
+				
+				// 6 etsit‰‰n toimittaja vat-numerolla				
+				$query  = "	SELECT * 
+							FROM toimi 
+							WHERE ytunnus = '$intvat' 
+							and ytunnus not in ('','0') 
+							and yhtio = '$yhtio'";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());				
 				
 				if (mysql_num_rows($result) == 1) {
 					$trow = mysql_fetch_array($result);
@@ -270,8 +306,12 @@
 			}
 
 			if (!isset($trow) and $laskuttajan_nimi != "") {
-				// 6 etsit‰‰n toimittaja nimell‰		
-				$query = "SELECT * FROM toimi WHERE yhtio='$yhtio' and nimi='$laskuttajan_nimi'";
+				// 7 etsit‰‰n toimittaja nimell‰		
+				$query = "	SELECT * 
+							FROM toimi 
+							WHERE yhtio = '$yhtio' 
+							and nimi = '$laskuttajan_nimi' 
+							and nimi not in ('','0')";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 				
 				if (mysql_num_rows($result) == 1) {

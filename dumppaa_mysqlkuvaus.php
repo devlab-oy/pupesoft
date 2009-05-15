@@ -49,7 +49,7 @@
 		$curlfile = "/tmp/".$tmpfilenimi;
 		
 		$ch  = curl_init();
-		curl_setopt ($ch, CURLOPT_URL, "http://www.devlab.fi/sqlupdate/index.php");
+		curl_setopt ($ch, CURLOPT_URL, "http://www.devlab.fi/pupesoft/sqlupdate");
 		curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 		curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
 		curl_setopt ($ch, CURLOPT_HEADER, 1);

@@ -44,6 +44,7 @@
 		// jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
 		if ($postirow_varasto["nimi"] != "") {
 			$postirow["yhtio_nimi"]     = $postirow_varasto["nimi"];
+			$postirow['yhtio_nimitark']	= $postirow_varasto["nimitark"];
 			$postirow["yhtio_osoite"]   = $postirow_varasto["osoite"];
 			$postirow["yhtio_postino"]  = $postirow_varasto["postino"];
 			$postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];

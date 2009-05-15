@@ -19,21 +19,43 @@ else {
 	$laskurow = $osoitelappurow;
 }
 
+// haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
+$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
+			FROM varastopaikat
+			WHERE yhtio = '$kukarow[yhtio]'
+			AND tunnus = '$postirow[varasto]'";
+$tempr = mysql_query($query) or pupe_error($query);
+$postirow_varasto = mysql_fetch_array($tempr);
+
+// jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
+if ($postirow_varasto["nimi"] != "") {
+	$laskurow["yhtio_nimi"]     = $postirow_varasto["nimi"];
+	$laskurow['yhtio_nimitark']	= $postirow_varasto["nimitark"];
+	$laskurow["yhtio_osoite"]   = $postirow_varasto["osoite"];
+	$laskurow["yhtio_postino"]  = $postirow_varasto["postino"];
+	$laskurow["yhtio_postitp"]  = $postirow_varasto["postitp"];
+	$laskurow["yhtio_maa"]      = $postirow_varasto["maa"];
+}
+
 $prikomento = explode('-#', $oslapp);
 
 // haetaan printterin osoitetiedot
-$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and trim(komento) like concat(trim('$prikomento[0]'),'%') and nimi!=''";
+$query = "	SELECT * 
+			from kirjoittimet 
+			where yhtio = '$kukarow[yhtio]' 
+			and trim(komento) like concat(trim('$prikomento[0]'),'%') 
+			and nimi != ''";
 $pres  = mysql_query($query) or pupe_error($query);
+$print = mysql_fetch_assoc($pres);
 
-if (mysql_num_rows($pres) > 0) {
-	$print = mysql_fetch_array($pres);
-
+// jos meill‰ on printterin takana joku spessu osoitetieto niin k‰ytet‰‰n sen tietoja l‰hett‰j‰n tietoina
+if ($print["nimi"] != "") {
 	$laskurow["yhtio_nimi"]    = $print["nimi"];
 	$laskurow["yhtio_osoite"]  = $print["osoite"];
 	$laskurow["yhtio_postino"] = $print["postino"];
 	$laskurow["yhtio_postitp"] = $print["postitp"];
-	$yhtiorow["puhelin"] = $print["puhelin"];
 }
+
 
 if (!function_exists('tarkiste')) {
 
@@ -298,9 +320,9 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 	//Mist‰
 	$pdf->draw_text(mm_pt(4), mm_pt(200), "Mist‰ - FrÂn - From: ",							$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(4), mm_pt(195), $laskurow['yhtio_nimi'],								$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(4), mm_pt(190), $laskurow['yhtio_nimitark'],							$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(4), mm_pt(185), $laskurow['yhtio_osoite'],								$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(4), mm_pt(195), $laskurow['yhtio_nimi'],							$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(4), mm_pt(190), $laskurow['yhtio_nimitark'],						$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(4), mm_pt(185), $laskurow['yhtio_osoite'],						$firstpage, $kirj);
 	$pdf->draw_text(mm_pt(4), mm_pt(180), $laskurow['yhtio_postino']." ".strtoupper($laskurow['yhtio_postitp']),	$firstpage, $kirj);
 
 	$pdf->draw_text(mm_pt(4), mm_pt(175), "Puh -Tel - Tel: ",								$firstpage, $otsik);

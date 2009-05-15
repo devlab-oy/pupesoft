@@ -44,21 +44,21 @@ if ($kollityht > 0) {
 
 		// jos varastolle on annettu joku osoite, käytetään sitä
 		if ($postirow_varasto["nimi"] != "") {
-			$yhtiorow["nimi"]     = $postirow_varasto["nimi"];
-			$yhtiorow["osoite"]   = $postirow_varasto["osoite"];
-			$yhtiorow["postino"]  = $postirow_varasto["postino"];
-			$yhtiorow["postitp"]  = $postirow_varasto["postitp"];
-			$yhtiorow["maa"]      = $postirow_varasto["maa"];
+			$laskurow["yhtio_nimi"]     = $postirow_varasto["nimi"];
+			$laskurow['yhtio_nimitark']	= $postirow_varasto["nimitark"];
+			$laskurow["yhtio_osoite"]   = $postirow_varasto["osoite"];
+			$laskurow["yhtio_postino"]  = $postirow_varasto["postino"];
+			$laskurow["yhtio_postitp"]  = $postirow_varasto["postitp"];
+			$laskurow["yhtio_maa"]     	= $postirow_varasto["maa"];
 		}
 
 		// jos meillä on printterin takana joku spessu osoitetieto niin käytetään sen tietoja lähettäjän tietoina
 		if ($print["nimi"] != "") {
-			$yhtiorow["nimi"]    = $print["nimi"];
-			$yhtiorow["osoite"]  = $print["osoite"];
-			$yhtiorow["postino"] = $print["postino"];
-			$yhtiorow["postitp"] = $print["postitp"];
+			$laskurow["yhtio_nimi"]    = $print["nimi"];
+			$laskurow["yhtio_osoite"]  = $print["osoite"];
+			$laskurow["yhtio_postino"] = $print["postino"];
+			$laskurow["yhtio_postitp"] = $print["postitp"];
 		}
-
 	}
 
 	if (!function_exists('tarkiste')) {
@@ -287,10 +287,10 @@ if ($kollityht > 0) {
 
 		//Mistä
 		$pdf->draw_text(mm_pt(4), mm_pt(200), "Mistä - Från - From: ",							$firstpage, $otsik);
-		$pdf->draw_text(mm_pt(4), mm_pt(195), $yhtiorow['nimi'],								$firstpage, $kirj);
-		$pdf->draw_text(mm_pt(4), mm_pt(190), $yhtiorow['nimitark'],							$firstpage, $kirj);
-		$pdf->draw_text(mm_pt(4), mm_pt(185), $yhtiorow['osoite'],								$firstpage, $kirj);
-		$pdf->draw_text(mm_pt(4), mm_pt(180), $yhtiorow['postino']." ".strtoupper($yhtiorow['postitp']),	$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(4), mm_pt(195), $laskurow['yhtio_nimi'],							$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(4), mm_pt(190), $laskurow['yhtio_nimitark'],						$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(4), mm_pt(185), $laskurow['yhtio_osoite'],						$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(4), mm_pt(180), $laskurow['yhtio_postino']." ".strtoupper($laskurow['yhtio_postitp']),	$firstpage, $kirj);
 
 		$pdf->draw_text(mm_pt(4), mm_pt(175), "Puh -Tel - Tel: ",								$firstpage, $otsik);
 		$pdf->draw_text(mm_pt(4), mm_pt(170), $yhtiorow['puhelin'],								$firstpage, $kirj);

@@ -12,7 +12,7 @@
 	//
 	// tulostetaan rahtikirja
 	
-	$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
+	$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
 	$tempr = mysql_query($query) or pupe_error($query);
 	$postirow = mysql_fetch_array($tempr);
 	
@@ -27,6 +27,7 @@
 	// jos varastolle on annettu joku osoite, käytetään sitä
 	if ($postirow_varasto["nimi"] != "") {
 		$postirow["yhtio_nimi"]     = $postirow_varasto["nimi"];
+		$postirow['yhtio_nimitark']	= $postirow_varasto["nimitark"];
 		$postirow["yhtio_osoite"]   = $postirow_varasto["osoite"];
 		$postirow["yhtio_postino"]  = $postirow_varasto["postino"];
 		$postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];
@@ -184,12 +185,12 @@
 		$pdf->draw_rectangle(810,60,777,300,												$firstpage, $rectparam);
 		$pdf->draw_text(62,  803,  "Lähettäjä Avsändare",									$firstpage, $norm);
 		$pdf->draw_text(240, 803,  "Asiakasnro Kundnr",										$firstpage, $norm);
-		$pdf->draw_text(65,  782,  $yhtiorow["nimi"],  										$firstpage, $kirj);
+		$pdf->draw_text(65,  782,  $postirow["yhtio_nimi"],  								$firstpage, $kirj);
 		$pdf->draw_text(240, 782,  $toitarow['sopimusnro'],									$firstpage, $kirj);
 		$pdf->draw_rectangle(777,60,755,300,												$firstpage, $rectparam);
-		$pdf->draw_text(65,  758,  $yhtiorow["osoite"],										$firstpage, $kirj);	
+		$pdf->draw_text(65,  758,  $postirow["yhtio_osoite"],								$firstpage, $kirj);	
 		$pdf->draw_rectangle(755,60,733,300,												$firstpage, $rectparam);
-		$pdf->draw_text(65,  736,  $yhtiorow["postino"]."   ".$yhtiorow["postip"],			$firstpage, $kirj);
+		$pdf->draw_text(65,  736,  $postirow["yhtio_postino"]."   ".$postirow["yhtio_postitp"], $firstpage, $kirj);
 		//oikeeta
 		$pdf->draw_text(302,  803,  "Lähetyspäivämäärä Avsändningsdatum",					$firstpage, $norm);
 		$pdf->draw_text(302,  788,  date("d.m.Y"),											$firstpage, $kirj);

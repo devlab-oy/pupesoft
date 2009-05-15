@@ -294,7 +294,7 @@ if (isset($liitaasiakasnappi) and $kukarow["extranet"] == "") {
 }
 
 // asiakasnumero on annettu, etsitään tietokannasta...
-if ($tee == "" and (($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0) or ($kukarow["extranet"] == "" and ($syotetty_ytunnus != '' or $asiakasid != '')))) {
+if (($tee == "" or ($myos_prospektit=="TRUE" and $toim == "TARJOUS")) and (($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0) or ($kukarow["extranet"] == "" and ($syotetty_ytunnus != '' or $asiakasid != '')))) {
 
 	if (substr($ytunnus,0,1) == "£") {
 		$ytunnus = $asiakasid;

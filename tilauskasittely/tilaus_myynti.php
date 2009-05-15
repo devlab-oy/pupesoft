@@ -153,7 +153,7 @@ if ($tee == 'AKTIVOI') {
 }
 
 // jos ei olla postattu mit‰‰n, niin halutaan varmaan tehd‰ kokonaan uusi tilaus..
-if ($kukarow["extranet"] == "" and count($_POST) == 0 and ($from != "ASIAKASYLLAPITO" and $from != "LASKUTATILAUS" and $from != "VALITSETOIMITUS" and $from != "PROJEKTIKALENTERI")) {
+if ($kukarow["extranet"] == "" and count($_POST) == 0 and ($from != "ASIAKASYLLAPITO" and $from != "LASKUTATILAUS" and $from != "VALITSETOIMITUS" and $from != "PROJEKTIKALENTERI" and $from != "POSITIOSELAIN")) {
 	$tila				= '';
 	$tilausnumero		= '';
 	$laskurow			= '';

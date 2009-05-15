@@ -1,13 +1,29 @@
 <?php
 	
-	$query = "SELECT selite, selitetark, selitetark_2 FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = 'asavainsana' GROUP BY 1 ORDER BY jarjestys, selitetark";
+	$query = "SELECT selite, selitetark, selitetark_2, selitetark_3 FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = 'asavainsana' GROUP BY 1 ORDER BY jarjestys, selitetark";
 	$vresult = mysql_query($query) or pupe_error($query);
 	if (mysql_num_rows($vresult)>0) {
 		
 		if ($asavtee == 'asinsert') {
 			
-			if($tosiuussana != "" and $uussana == "") $uussana = $tosiuussana;
-			
+			if ($tosiuussana != "" and $uussana == "") $uussana = $tosiuussana;
+
+			if ($deittipp != '' and $deittikk != '' and $deittivv != '') {
+				$ppa = (int) $deittipp;
+				if (strlen($ppa) < 2) {
+					$ppa = str_pad($ppa, 2, "0", STR_PAD_LEFT);
+				}
+
+				$kka = (int) $deittikk;
+				if (strlen($kka) < 2) {
+					$kka = str_pad($kka, 2, "0", STR_PAD_LEFT);
+				}
+
+				$vva = (int) $deittivv;
+
+				$uussana = "$vva-$kka-$ppa";
+			}
+
 			if ($liitostunnus != '' and $uuslaji != '' and $uussana != '' and isset($puttoni)) {
 				$query = "	INSERT INTO asiakkaan_avainsanat SET
 							yhtio = '$kukarow[yhtio]',
@@ -54,6 +70,7 @@
 		$lajidd = "<select name='uuslaji' onchange='submit()'>";
 		
 		$laskuri = 0;
+		$deitti = false;
 		$valittu = '';
 		$vapaa = $vapaa_default = false;
 		
@@ -64,6 +81,9 @@
 				$valittu  = $uuslaji;
 				if($vrow["selitetark_2"] == "VAPAA") {
 					$vapaa = true;
+				}
+				if ($vrow['selitetark_3'] == 'date') {
+					$deitti = true;
 				}
 			}
 			
@@ -110,13 +130,29 @@
 				$query = "SELECT distinct selite AS selitetark_2 FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' ORDER BY jarjestys, selite";
 			}
 
-			$sanadd = "<select name='uussana'>";
-
 			$result = mysql_query($query) or pupe_error($query);
-			while ($row = mysql_fetch_array($result)) {
-				$sanadd .= "<option value='$row[selitetark_2]' $sel>$row[selitetark_2]</option>";
+
+			if (mysql_num_rows($result) < 2) {
+				if ($deitti) {
+					$vva = substr($row['avainsana'],0,4);
+					$kka = substr($row['avainsana'],5,2);
+					$ppa = substr($row['avainsana'],8,2);
+
+					$sanadd = "	<input type = 'text' name = 'deittipp' value = '$ppa' size='3' maxlength='2'>&nbsp;
+								<input type = 'text' name = 'deittikk' value = '$kka' size='3' maxlength='2'>&nbsp;
+								<input type = 'text' name = 'deittivv' value = '$vva' size='5' maxlength='4'>";
+				}
+				else {
+					$sanadd = "<input type='text' name='uussana' id='uussana' value=''>";
+				}
 			}
-			$sanadd .= "</select>";
+			else {
+				$sanadd = "<select name='uussana'>";
+				while ($row = mysql_fetch_array($result)) {
+					$sanadd .= "<option value='$row[selitetark_2]' $sel>$row[selitetark_2]</option>";
+				}
+				$sanadd .= "</select>";
+			}
 		}
 		echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 		echo "<input type='hidden' name='lopetus' value = '$lopetus'>";

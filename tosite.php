@@ -62,6 +62,7 @@
 			$tee = "N";
 
 			$retval = tarkasta_liite("tositefile", array("TXT", "CSV", "XLS"));
+			
 			if($retval === true) {
 				list($name, $ext) = split("\.", $_FILES['tositefile']['name']);
 
@@ -205,10 +206,14 @@
 				$totsumma += $summa;
 				$selausnimi = 'itili[' . $i .']'; // Minka niminen mahdollinen popup on?
 				$vero='';
+				
 				require "inc/tarkistatiliointi.inc";
+				
 				if ($vero!='') $ivero[$i]=$vero; //Jos meill‰ on hardkoodattuvero, otetaan se k‰yttˆˆn
+				
 				$ivirhe[$i] .= $virhe;
 				$iulos[$i] = $ulos;
+				
 				if ($ok==0) { // Sielt‰ kenties tuli p‰ivitys tilinumeroon
 					if ($itili[$i] != $tili) { // Annetaan k‰ytt‰j‰n p‰‰tt‰‰ onko ok
 						$itili[$i] = $tili;
@@ -222,7 +227,6 @@
 					$gok = $ok; // Nostetaan virhe ylemm‰lle tasolle
 				}
 			}
-
 		}
 
 		if (count($isumma_valuutassa) == 0) {
@@ -589,7 +593,7 @@
 			}
 
 			// Tehd‰‰n kustannuspaikkapopup
-			$query = "SELECT tunnus, nimi
+			$query = "	SELECT tunnus, nimi
 						FROM kustannuspaikka
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa <> 'E'
 						ORDER BY nimi";
@@ -607,7 +611,7 @@
 			echo "</select><br>";
 
 			// Tehd‰‰n kohdepopup
-			$query = "SELECT tunnus, nimi
+			$query = "	SELECT tunnus, nimi
 						FROM kustannuspaikka
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O' and kaytossa <> 'E'
 						ORDER BY nimi";

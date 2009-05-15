@@ -1915,9 +1915,10 @@ if ($tee == '') {
 				}
 				else {
 					echo "<option value='RIVISYOTTO'>".T("Toimitus")."</option>";
-					}
+				}
 
-				if ($projektilla != '') {
+				//	Pidetään tämä vielä piilossa, en tiedä onko tästä muille haittaa vai hyötyä.
+				if ($yhtiorow["asiakkaan_kohde"] == "K") {
 					echo "<option value='TYOMAARAYS'>".T("Työmääräys")."</option>";
 					echo "<option value='REKLAMAATIO'>".T("Reklamaatio")."</option>";
 					echo "<option value='VALMISTAVARASTOON'>".T("Valmistus")."</option>";

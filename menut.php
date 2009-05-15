@@ -98,7 +98,7 @@
 	
 	if (isset($synkronoireferenssi) and count($syncyhtiot) > 0) {
 		
-		$file = fopen("http://www.pupesoft.com/softa/referenssivalikot.sql","r") or die (t("Tiedoston avaus epäonnistui")."!");
+		$file = fopen("http://www.devlab.fi/softa/referenssivalikot.sql","r") or die (t("Tiedoston avaus epäonnistui")."!");
 		$rivi = fgets($file);
 		$lask = 0;
 		$rows = array();
@@ -492,7 +492,7 @@
 				$rows = array();
 				
 				if ($yhtio == "REFERENSSI") {
-					$file = fopen("http://www.pupesoft.com/softa/referenssivalikot.sql","r") or die (t("Tiedoston avaus epäonnistui")."!");
+					$file = fopen("http://www.devlab.fi/softa/referenssivalikot.sql","r") or die (t("Tiedoston avaus epäonnistui")."!");
 					$rivi = fgets($file);
 					
 					$lask = 0;

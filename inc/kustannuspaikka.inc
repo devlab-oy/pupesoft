@@ -1,5 +1,5 @@
 <?php
 	$otsikko = 'Tarkenteet';
-	$kentat = 'tunnus, nimi, tyyppi, tunnus';
+	$kentat = 'tunnus, nimi, koodi, tyyppi, tunnus';
 	$jarjestys = 'tyyppi, nimi';
 ?>

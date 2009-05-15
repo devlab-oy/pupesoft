@@ -23,7 +23,7 @@ else {
 $query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
 			FROM varastopaikat
 			WHERE yhtio = '$kukarow[yhtio]'
-			AND tunnus = '$postirow[varasto]'";
+			AND tunnus = '$laskurow[varasto]'";
 $tempr = mysql_query($query) or pupe_error($query);
 $postirow_varasto = mysql_fetch_array($tempr);
 

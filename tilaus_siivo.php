@@ -21,19 +21,18 @@
 							alatila  = 'N',
 							comments = '$komm'
 							WHERE yhtio = '$kukarow[yhtio]'
-							and lasku.tila    = 'N'
-							and lasku.alatila = ''
-							and lasku.tunnus  = '$rastit'";
+							and tila    = 'N'
+							and alatila = ''
+							and tunnus  = '$rastit'";
 				$result = mysql_query($query) or pupe_error($query);
 				
 				if (mysql_affected_rows() == 1) {
 					$query = "	UPDATE tilausrivi 
 								SET tyyppi  = 'D'
 								WHERE yhtio = '$kukarow[yhtio]'
-								and tyyppi  = 'L'
+								and var    != 'P'
 								and otunnus = '$rastit'";
-					$result = mysql_query($query) or pupe_error($query);
-				
+					$result = mysql_query($query) or pupe_error($query);				
 				}
 			}
 		}
@@ -47,16 +46,42 @@
 							alatila  = 'N',
 							comments = '$komm'
 							WHERE yhtio = '$kukarow[yhtio]'
-							and lasku.tila in ('L','N')
+							and tila in ('L','N')
 							and alatila     != 'X'
-							and lasku.tunnus = '$rastit'";
+							and tunnus = '$rastit'";
 				$result = mysql_query($query) or pupe_error($query);
 				
 				if (mysql_affected_rows() == 1) {
 					$query = "	UPDATE tilausrivi 
 								SET tyyppi  = 'D'
 								WHERE yhtio = '$kukarow[yhtio]'
-								and tyyppi  = 'L'
+								and var    != 'P'
+								and otunnus = '$rastit'";
+					$result = mysql_query($query) or pupe_error($query);
+					
+				}
+			}
+		}
+		
+		if (count($jttilriv) != 0) {
+			foreach ($jttilriv as $rastit) {
+				$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa tilaus_siivo.php (3)")."<br>";
+
+				$query = "	UPDATE lasku 
+							SET tila = 'D',
+							alatila  = 'N',
+							comments = '$komm'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tila = 'N'
+							and alatila	= 'T'
+							and tunnus = '$rastit'";
+				$result = mysql_query($query) or pupe_error($query);
+				
+				if (mysql_affected_rows() == 1) {
+					$query = "	UPDATE tilausrivi 
+								SET tyyppi  = 'D'
+								WHERE yhtio = '$kukarow[yhtio]'
+								and var    != 'P'
 								and otunnus = '$rastit'";
 					$result = mysql_query($query) or pupe_error($query);
 					
@@ -100,11 +125,10 @@
 				and lasku.tila = 'N'
 				and lasku.alatila = ''
 				and lasku.luontiaika < date_sub(now(),interval 1 day)
-				GROUP BY lasku.tunnus
-				HAVING otunnus is not null
+				and otunnus is not null
+				GROUP BY lasku.tunnus				
 				ORDER BY kkorder, lasku.vienti, lasku.valkoodi, lasku.luontiaika";
 	$res = mysql_query($query) or pupe_error($query);
-	
 	
 	echo "<table>";
 	echo "<form method='POST' action='$PHP_SELF'>";
@@ -143,20 +167,17 @@
 	echo "<tr><td colspan='7' class='back'></td><td>Ruksaa ylläolevat:</td><td><input type='checkbox' name='$edgrouppi' onclick='toggleAll(this)'></td></tr>";
 	
 	
-	echo "<tr><td colspan='8' class='back'><br><br></td></tr>";
-	
+	echo "<tr><td colspan='8' class='back'><br><br></td></tr>";	
 	
 	//rivittömät otsikot
-	$query = "	SELECT lasku.*, tilausrivi.tunnus tilausrivi_tunnus, concat(if(kuka.kassamyyja!='', 'Kassa',''), ' ', if(extranet!='', 'Extranet','')) kassamyyja
+	$query = "	SELECT lasku.*, concat(if(kuka.kassamyyja!='', 'Kassa',''), ' ', if(extranet!='', 'Extranet','')) kassamyyja
 				FROM lasku use index (yhtio_tila_luontiaika)
 				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.laatija = kuka.kuka
 				LEFT JOIN tilausrivi ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 				WHERE lasku.yhtio = '$kukarow[yhtio]' 
 				and lasku.tila in ('L','N')
 				and alatila != 'X'
-				and lasku.luontiaika < date_sub(now(),interval 1 day)
-				and lasku.luontiaika > date_sub(now(),interval 180 day)
-				HAVING tilausrivi_tunnus is null
+				and tilausrivi.tunnus is null
 				ORDER BY lasku.luontiaika";
 	$res = mysql_query($query) or pupe_error($query);		
 	
@@ -181,11 +202,67 @@
 		echo "<$ero><input type='checkbox' value='$laskurow[tunnus]' name='valitturiv[]' id='EIRIV$lask'></$ero></tr>";		
 
 	}
-	echo "<tr><td colspan='7' class='back'></td><td>Ruksaa ylläolevat:</td><td><input type='checkbox' name='EIRIV' onclick='toggleAll(this)'></td></tr>";			
-	echo "</table><br><br>";
+	echo "<tr><td colspan='7' class='back'></td><td>Ruksaa ylläolevat:</td><td><input type='checkbox' name='EIRIV' onclick='toggleAll(this)'></td></tr>";
 	
-	echo "<input type='submit' value='".t("Mitätöi valitut tilaukset")."'></form>";
+	
+	echo "<tr><td colspan='8' class='back'><br><br></td></tr>";
+	
+	
+	if ($yhtiorow["varaako_jt_saldoa"] == "") {
+		$kpl 	= "jt";
+	}
+	else {
+		$kpl 	= "jt+varattu";
+	}	
+	
+	//Odottaa JT-tuotteita
+	$query = "	SELECT lasku.tunnus, lasku.tila, lasku.alatila, lasku.nimi, lasku.vienti, lasku.valkoodi, concat(if(kuka.kassamyyja!='', 'Kassa',''), ' ', if(extranet!='', 'Extranet','')) kassamyyja, lasku.luontiaika,
+				count(tilausrivi.tunnus) tilausrivi1,
+				sum(if(tilausrivi.var != 'P', 1, 0)) tilausrivi2,
+				sum(if($kpl != 0 and tilausrivi.var in ('J','S'), 1, 0)) tilausrivi3
+				FROM lasku use index (yhtio_tila_luontiaika)
+				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.laatija = kuka.kuka
+				LEFT JOIN tilausrivi ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and tilausrivi.tyyppi != 'D'
+				WHERE lasku.yhtio = '$kukarow[yhtio]' 
+				and lasku.tila = 'N'
+				and lasku.alatila = 'T'
+				GROUP BY 1,2,3,4,5,6,7,8
+				HAVING tilausrivi2 != tilausrivi3 or (tilausrivi1 > 0 and tilausrivi2 = 0)
+				ORDER BY lasku.luontiaika";
+	$res = mysql_query($query) or pupe_error($query);		
+	
+	echo "<tr><td colspan='8' class='back'>Odottaa JT-tuotteita, mutta tilauksella ei JT rivejä (".mysql_num_rows($res)."kpl):</tr>";
+	echo "<tr><th>Tunnus:</th><th>Tila:</th><th>Alatila:</th><th>Nimi:</th><th>Vienti:</th><th>Valuutta:</th>
+			<th>Kassa/Extranet:</th><th>Luontiaika:</th>
+			<th>Rivejä:</th><th>JT-rivejä:</th>
+			<th>Mitätöi:</th></tr>";					
+					
+	$lask = 1;
+	
+	while ($laskurow = mysql_fetch_array($res)) {
+
+		$ero="td";
+		if ($tunnus==$laskurow["tunnus"]) $ero="th";
 		
+		echo "<tr><$ero><a href='$PHP_SELF?tee=NAYTA&tunnus=$laskurow[tunnus]'>$laskurow[tunnus]</a></$ero>";
+		echo "<$ero>$laskurow[tila]</$ero>";
+		echo "<$ero>$laskurow[alatila]</$ero>";
+		echo "<$ero>$laskurow[nimi]</$ero>";
+		echo "<$ero>$laskurow[vienti]</$ero>";
+		echo "<$ero>$laskurow[valkoodi]</$ero>";
+		echo "<$ero>$laskurow[kassamyyja]</$ero>";
+		echo "<$ero>$laskurow[luontiaika]</$ero>";
+		
+		echo "<$ero>$laskurow[tilausrivi1]</$ero>";
+		echo "<$ero>$laskurow[tilausrivi3]</$ero>";
+		
+		echo "<$ero><input type='checkbox' value='$laskurow[tunnus]' name='jttilriv[]' id='JTRIV$lask'></$ero></tr>";		
+
+	}
+	echo "<tr><td colspan='7' class='back'></td><td colspan='3'>Ruksaa ylläolevat:</td><td><input type='checkbox' name='JTRIV' onclick='toggleAll(this)'></td></tr>";
+
+	echo "</table><br><br>";
+	echo "<input type='submit' value='".t("Mitätöi valitut tilaukset")."'></form>";
 		
 	require("inc/footer.inc");
 ?>

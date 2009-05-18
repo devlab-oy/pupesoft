@@ -1390,6 +1390,16 @@
 			</form>";
 	}
 
+	if ($from == "VALMISTUS") {
+		echo "<form method='post' action='valmista_tilaus.php'>
+			<input type='hidden' name='toim' value='$aputoim'>
+			<input type='hidden' name='otunnus'   value='$otunnus'>
+			<input type='hidden' name='tee'   value='VALMISTA'>
+			<input type='hidden' name='valmistettavat'   value='$valmistettavat'>
+			<input type='submit' value='".t("Takaisin valmistukseen")."'>
+			</form>";
+	}
+
 	if ($from == "valmistus") {
 		echo "<form method='post' action='valmista_tilaus.php'>
 			<input type='hidden' name='toim' value='$aputoim'>

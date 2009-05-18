@@ -1,6 +1,8 @@
 <?php
 	require ("../inc/parametrit.inc");
-
+	require ("valitse_sarjanumero.inc");
+	
+	
 	if ($toim == 'KORJAA') {
 		echo "<font class='head'>".t("Korjaa valmistus").":</font><hr>";		
 	}
@@ -31,7 +33,7 @@
 		require('../inc/footer.inc');
 		exit;
 	}
-
+	
 	if(!function_exists("onkokaikkivalmistettu")) {
 		function onkokaikkivalmistettu ($valmkpllat) {
 			global $kukarow, $tee, $valmistettavat;
@@ -210,7 +212,14 @@
 		$valmistettavat = "";
 		$tee = "";
 	}
-
+	
+	if($tee == "TEEVALMISTUS" and $era_new_paikka!="") {
+		$paivitettiin = teeValinta("myyntirivitunnus", array("V"));
+		if($paivitettiin > 0) {
+			$tee = "VALMISTA";
+		}
+	}
+	
 	if ($tee == 'TEEVALMISTUS' and count($valmkpllat) == 0 and count($tilkpllat) == 0) {
 
 		//katotaan onko enää mitään valmistettavaa		
@@ -272,7 +281,6 @@
 			foreach ($valmkpllat as $rivitunnus => $valmkpl) {
 
 				$valmkpl = str_replace(',','.',$valmkpl);
-
 				//Haetaan tilausrivi
 				$query = "	SELECT tilausrivi.*, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.sarjanumeroseuranta
 							FROM tilausrivi
@@ -338,7 +346,13 @@
 									}
 									
 																		// Tän verran saldoa käytetään
-									$saldot_valm[$perherow["tuoteno"]] -= $kpl_chk;									
+									$saldot_valm[$perherow["tuoteno"]] -= $kpl_chk;
+									
+									//	Tarkistetaan sarjanumerot 
+									if(tarkistaSarjanumerot(0, $perherow["tunnus"], "ostorivitunnus") > 0) {
+										$virheitaoli 	= "JOO";
+										$tee 			= "VALMISTA";
+									}
 								}
 							}
 						}
@@ -676,7 +690,11 @@
 					tilausrivi.kommentti,
 					tuote.sarjanumeroseuranta,
 					tilausrivi.varattu,
-					tilausrivi.var
+					tilausrivi.var,
+					tilausrivi.hyllyalue,
+					tilausrivi.hyllyvali,
+					tilausrivi.hyllytaso,
+					tilausrivi.hyllynro
 					FROM tilausrivi, tuote
 					WHERE
 					tilausrivi.otunnus in ($row[Tilaus])
@@ -775,10 +793,15 @@
 				}
 			}
 			
+			$sarjavalinta = "";
+			if($prow["tyyppi"] == "V" and $prow["toimitettuaika"] == "0000-00-00 00:00:00") {
+				$sarjavalinta = naytaValinta($laskurow, $prow, "myyntirivitunnus", "myyntirivitunnus", array("D","O"), "VALMISTUS", "&otunnus=$laskurow[tunnus]&valmistettavat=$valmistettavat");
+			}
+			
 			echo "<td class='$class' valign='top'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
 			echo "<td class='$class' valign='top'><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a> $sarjalinkkilisa</td>";
 			echo "<input type='hidden' name='tuotenumerot[$prow[tunnus]]' value='$prow[tuoteno]'>";
-			echo "<td class='$class' valign='top' align='right'>$prow[tilattu]</td>";
+			echo "<td class='$class' valign='top' align='right'>$prow[tilattu] $sarjavalinta</td>";
 
 
 			if ($toim == "KORJAA" and  $prow["tyyppi"] == 'V') {

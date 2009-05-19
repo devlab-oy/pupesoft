@@ -1,9 +1,11 @@
 <?php
 
 	require ("inc/parametrit.inc");
-
-	echo "<font class='head'>".t("Inventointi")."</font><hr>";
-
+	
+	if ($mobiili != "YES") {
+		echo "<font class='head'>".t("Inventointi")."</font><hr>";
+	}
+	
 	if ($oikeurow["paivitys"] != '1') { // Saako p‰ivitt‰‰
 		if ($uusi == 1) {
 			echo "<b>".t("Sinulla ei ole oikeutta lis‰t‰ t‰t‰ tietoa")."</b><br>";
@@ -86,12 +88,12 @@
 	// lukitaan tableja
 	$query = "lock tables tuotepaikat write, tapahtuma write, lasku write, tiliointi write, sanakirja write, tuote read, tilausrivi read, tuotteen_avainsanat read, sarjanumeroseuranta write, tilausrivi as tilausrivi_myynti read, tilausrivi as tilausrivi_osto read, tuotepaikat as tt read";
 	$result = mysql_query($query) or pupe_error($query);
-
+	
 	//tuotteen varastostatus
 	if ($tee == 'VALMIS') {
 
 		$virhe = 0;
-
+		
 		if (count($tuote) > 0) {
 			foreach($tuote as $i => $tuotteet) {
 
@@ -106,7 +108,7 @@
 				$kpl		= $maara[$i];
 				$poikkeama  = 0;
 				$skp		= 0;
-
+				
 				if ($kpl != '') {
 
 					//Sarjanumerot
@@ -759,7 +761,7 @@
 			}
 		}
 
-		if ($virhe == 0) {
+		if ($virhe == 0 and $mobiili != "YES") {
 			if(isset($prev)) {
 				$alku = $alku-$rivimaara;
 				$tee = "INVENTOI";
@@ -786,6 +788,9 @@
 			$kpl		= "";
 			$poikkeama  = "";
 		}
+		elseif ($mobiili == "YES") {
+			$tee = "MOBIILI";
+		}		
 		else {
 			$tee = "INVENTOI";
 		}
@@ -1301,7 +1306,9 @@
 	// lukitaan tableja
 	$query = "unlock tables";
 	$result = mysql_query($query) or pupe_error($query);
-
-	require ("inc/footer.inc");
+	
+	if ($mobiili != "YES") {
+		require ("inc/footer.inc");
+	}
 
 ?>

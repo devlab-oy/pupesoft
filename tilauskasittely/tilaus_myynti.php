@@ -3332,7 +3332,7 @@ if ($tee == '') {
 
 			echo "<tr>$jarjlisa<th>".t("#")."</th>";
 
-			if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K') {
+			if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or ($yhtiorow['tilauksen_kohteet'] == 'K' and in_array($toim, array("RIVISYOTTO", "TYOMAARAYS")))) {
 
 				$query = "	SELECT selite, selitetark
 							FROM avainsana

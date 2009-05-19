@@ -515,10 +515,12 @@
 			$paikat = "";
 		}
 	}
+	
+	/*
 	elseif ($trow["ei_saldoa"] != "" and $row["tyyppi"] != "E" and $kpl_st > 0 and $row["tunnus"] == $row["perheid"] and in_array($row["var"], array('S','P','J'))) {
 
 		// Suoratoimitushäkki
-		$query = "	select sum(if(var='S', 1, 0)) suoria, count(*) lapsia, count(distinct tilaajanrivinro) toimittajia, group_concat(distinct tilaajanrivinro) toimittaja
+		$query = "	SELECT sum(if(var='S', 1, 0)) suoria, count(*) lapsia, count(distinct tilaajanrivinro) toimittajia, group_concat(distinct tilaajanrivinro) toimittaja
 					from tilausrivi
 					where yhtio = '$kukarow[yhtio]'
 					and otunnus = '$row[otunnus]'
@@ -535,17 +537,7 @@
 						where yhtio = '$kukarow[yhtio]'
 						and tunnus 	= '$row[tunnus]'";
 			$updres = mysql_query($query) or pupe_error($query);
-
-			/*
-			$query = "	update tilausrivi set
-						kommentti = concat_ws(' ', kommentti, '".t("Tuoteperhe").": $row[nimitys]')
-						where yhtio = '$kukarow[yhtio]'
-						and otunnus = '$row[otunnus]'
-						and perheid = '$row[tunnus]'
-						and tunnus != '$row[tunnus]'";
-			$updres = mysql_query($query) or pupe_error($query);
-			*/
-
+			
 			$row["var"] = "";
 		}
 
@@ -567,7 +559,8 @@
 		$paikat .= "<option value='X' $sel3>".t("Suoratoimita")."</option>";
 		$paikat = "<select name='var' onchange='submit();'>".$paikat."</select>";
 	}
-
+	*/
+	
 	//	Onko tätä varattuna siirtolistalla?
 	if ($kukarow["extranet"] == "" and $trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $kpl_st > 0 and in_array($row["var"], array("J","U","T","P"))) {
 		$query = "	SELECT kohde.nimitys kohde, lahde.nimitys lahde, tila, alatila, sum(varattu+jt+kpl) kpl, lasku.tunnus

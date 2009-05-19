@@ -423,13 +423,14 @@
 				svnSyncMaintenanceFolders(strtoupper($toim), $tunnus, $trow);
 			}
 			
-
+			
 			// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
 			if ($lopetus != '' and (isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset))) {
-
+				
 				// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
 				$lopetus = str_replace('////','?', $lopetus);
-				$lopetus = str_replace('//','&',  $lopetus);
+				$lopetus = preg_replace('/([^:])\/\//','\\1&',  $lopetus);
+				
 
 				if (strpos($lopetus, "?") === FALSE) {
 					$lopetus .= "?";
@@ -447,7 +448,7 @@
 				elseif (strpos($lopetus, "tilaus_myynti.php") !== FALSE and $toim == "asiakas") {
 					$lopetus.= "&asiakasid=$tunnus";
 				}
-
+			
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
 				exit;
 			}

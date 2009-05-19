@@ -152,7 +152,7 @@
 			foreach ($mul_tuoteostaja as $tuoteostajax) {
 				if (trim($tuoteostajax) != '') {
 					if (count($_GET['mul_tuoteostaja']) > 0) {
-						$tuoteostajat = rawurldecode($tuoteostajax);
+						$tuoteostajax = rawurldecode($tuoteostajax);
 					}
 					$tuoteostajat .= "'".mysql_real_escape_string($tuoteostajax)."',";
 					$ulisa .= "&mul_tuoteostaja[]=".rawurlencode($tuoteostajax);

@@ -259,6 +259,10 @@ if ($tee == 'TI' or $tee == "Y") {
 	$prow["tuoteno"] 	= $tuoteno;
 	$prow["var"]		= $rivinvar;
 	$kukarow["kesken"]	= $rivinotunnus;
+	
+	$kpl 	= str_replace(',','.',$kpl);
+	$hinta 	= str_replace(',','.',$hinta);
+	$ale 	= str_replace(',','.',$ale);
 
 	if (checkdate($toimkka,$toimppa,$toimvva)) {
 		$toimaika = $toimvva."-".$toimkka."-".$toimppa;

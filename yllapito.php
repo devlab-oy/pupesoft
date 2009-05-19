@@ -887,7 +887,7 @@
 						$otsikko = t("Lähete");
 						break;
 					case "printteri2":
-						$otsikko = t("Rahtikirja matriisi");
+						$otsikko = t("Tuotetarrat");
 						break;
 					case "printteri3":
 						$otsikko = t("Osoitelappu");

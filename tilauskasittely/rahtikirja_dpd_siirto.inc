@@ -228,11 +228,11 @@ if ($kollityht > 0) {
 		// Muunnetaan merkistö Windows ANSI
 		iconv("ISO-8859-1", "Windows-1252", $aineisto);
 
-		if ($delisprint_polku != '') {
-			if (substr($delisprint_polku,-1) != '/') {
-				$delisprint_polku .= '/';
+		if ($dpd_delisprint_path != '') {
+			if (substr($dpd_delisprint_path,-1) != '/') {
+				$dpd_delisprint_path .= '/';
 			}
-			$filenimi = $delisprint_polku."dpdimport-".md5(uniqid(rand(),true)).".dat";
+			$filenimi = $dpd_delisprint_path."dpdimport-".md5(uniqid(rand(),true)).".dat";
 		}
 		else {
 			$filenimi = "/tmp/dpdimport-".md5(uniqid(rand(),true)).".dat";

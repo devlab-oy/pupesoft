@@ -205,7 +205,7 @@ if ($tee == '') {
 				foreach($matches as $m) {
 
 					//	Haetaan tuotenumero
-					$query = "	SELECT tuoteno, nimitys
+					$query = "	SELECT *
 					 			FROM tuote
 								WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$m[1]'";
 					$tres = mysql_query($query) or pupe_error($query);
@@ -219,7 +219,18 @@ if ($tee == '') {
 					else {
 						$trow = mysql_fetch_array($tres);
 
-						$replace[]	= "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=$m[1]'>$trow[tuoteno]</a> $trow[nimitys]";
+						$query = "SELECT * FROM asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
+						$asiakastempres = mysql_query($query);
+						$asiakastemprow = mysql_fetch_array($asiakastempres);
+												
+						$temp_laskurowwi['liitostunnus']	= $asiakastemprow['tunnus'];
+						$temp_laskurowwi['ytunnus']			= $asiakastemprow['ytunnus'];
+						$temp_laskurowwi['valkoodi']		= $asiakastemprow['valkoodi'];
+						$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
+						
+						list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($temp_laskurowwi, $trow, 1, '', '', '');
+					
+						$replace[]	= "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=$m[1]'>$trow[tuoteno]</a> $trow[nimitys] ".t("Ovh")." ".sprintf('%.2f',$trow[myyntihinta])." ".t("Asiakashinta")." ".sprintf('%.2f',$hinta);
 					}
 				}
 

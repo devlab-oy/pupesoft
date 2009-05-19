@@ -22,6 +22,7 @@
 			$ulos .= "<option value='nimitys_en'>".t("Tuotteen englanninkielinen nimitys")."</option>";
 			$ulos .= "<option value='nimitys_se'>".t("Tuotteen ruotsinkielinen nimitys")."</option>";
 			$ulos .= "<option value='nimitys_ee'>".t("Tuotteen eestinkielinen nimitys")."</option>";
+			$ulos .= "<option value='nimitys_fr'>".t("Tuotteen ranskankielinen nimitys")."</option>";			
 		}
 		
 		while ($srow = mysql_fetch_array($sresult)) {

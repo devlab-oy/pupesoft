@@ -17,7 +17,7 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
 							sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.myyntirivitunnus, sarjanumeroseuranta.lisatieto, sarjanumeroseuranta.tunnus sarjatunnus
 					FROM tilausrivi
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' and tuote.sarjanumeroseuranta!=''
-					JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio=tilausrivi.yhtio and sarjanumeroseuranta.ostorivitunnus = tilausrivi.tunnus
+					JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio=tilausrivi.yhtio and sarjanumeroseuranta.ostorivitunnus = tilausrivi.tunnus and sarjanumeroseuranta.myyntirivitunnus=0
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]' and $lisa tilausrivi.tyyppi = 'O'";
 		$result = mysql_query($query) or pupe_error($query);
 		

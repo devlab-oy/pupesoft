@@ -1,6 +1,12 @@
 <?php
 
-require_once("tulosta_tilaustuotetarrat.inc");
+if(file_exists("tulosta_tilaustuotetarrat.inc")) {
+	require_once("tulosta_tilaustuotetarrat.inc");
+}
+else {
+	require_once("tilauskasittely/tulosta_tilaustuotetarrat.inc");
+}
+
 
 //vähän joutuu laitaa talteen näitä alkuperäisiä
 $isavarattu = $atil;

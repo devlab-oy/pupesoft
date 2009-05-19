@@ -1019,8 +1019,8 @@ if ($tila == 'kohdistaminen') {
 	echo "<td>$suoritus[valkoodi]</td>";
 	echo "<td>$suoritus[tieto]</td>";
 	echo "<td>$suoritus[tilino]</td>";
-	echo "<td>$suoritus[maksupvm]</td>";
-	echo "<td>$suoritus[kirjpvm]</td>";
+	echo "<td>".tv1dateconv($suoritus["maksupvm"])."</td>";
+	echo "<td>".tv1dateconv($suoritus["kirjpvm"])."</td>";
 
 	$sel1 = '';
 	$sel2 = '';

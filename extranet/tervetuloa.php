@@ -230,7 +230,7 @@ if ($tee == '') {
 						
 						list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($temp_laskurowwi, $trow, 1, '', '', '');
 					
-						$replace[]	= "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=$m[1]'>$trow[tuoteno]</a> $trow[nimitys] ".t("Ovh")." ".sprintf('%.2f',$trow[myyntihinta])." ".t("Asiakashinta")." ".sprintf('%.2f',$hinta);
+						$replace[]	= "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=$m[1]'>$trow[tuoteno]</a> $trow[nimitys] ".sprintf('%.2f',$hinta)." (".t("ovh").". ". sprintf('%.2f',$trow[myyntihinta]).") ";
 					}
 				}
 

@@ -64,7 +64,7 @@
 		$fuse = t("Tuotetarra");
 	}
 	if ($toim == "TILAUSTUOTETARRA") {
-		$fuse = t("Toimituksen tuotetarrat");
+		$fuse = t("Tilauksen tuotetarrat");
 	}
 	if ($toim == "TYOMAARAYS") {
 		$fuse = t("Työmääräys");
@@ -1176,6 +1176,7 @@
 			if ($toim == "TILAUSTUOTETARRA") {
 				$otunnus = $laskurow["tunnus"];
 				require('tulosta_tilaustuotetarrat.inc');
+				tulosta_tilaustuotetarrat($otunnus, 0, $komento["Sarjanumerotarrat"], $tee);
 				$tee = '';
 			}
 

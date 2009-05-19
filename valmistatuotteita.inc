@@ -1,5 +1,7 @@
 <?php
 
+require_once("tulosta_tilaustuotetarrat.inc");
+
 //vähän joutuu laitaa talteen näitä alkuperäisiä
 $isavarattu = $atil;
 $isatuoteno = $tuoteno;
@@ -778,6 +780,8 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 									(yhtio, tuoteno, sarjanumero, ostorivitunnus, myyntirivitunnus, era_kpl, laatija, luontiaika, hyllyalue, hyllynro, hyllyvali, hyllytaso)
 									VALUES ('{$kukarow["yhtio"]}', '{$tilrivirow["tuoteno"]}', '$sarjanro', '$uusrivitunnus', 0, '$isavarattu', '{$kuka["kuka"]}', now(), '{$tilrivirow["hyllyalue"]}', '{$tilrivirow["hyllynro"]}', '{$tilrivirow["hyllyvali"]}', '{$tilrivirow["hyllytaso"]}')";
 						$sarjares1 = mysql_query($query) or pupe_error($query);
+						
+						tulosta_tilaustuotetarrat(0, $uusrivitunnus, "OPTIMOI");
 					}
 				}
 			}

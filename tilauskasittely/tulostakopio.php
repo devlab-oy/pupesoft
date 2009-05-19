@@ -970,9 +970,9 @@
 			}
 		}
 		if ($toim == "TILAUSTUOTETARRA") {
-			$tulostimet[0] = 'Toimituksen tuotetarrat';
-			if ($kappaleet > 0 and $komento["Toimituksen tuotetarrat"] != 'email') {
-				$komento["Toimituksen tuotetarrat"] .= " -# $kappaleet ";
+			$tulostimet[0] = 'Tilauksen tuotetarrat';
+			if ($kappaleet > 0 and $komento["Tilauksen tuotetarrat"] != 'email') {
+				$komento["Tilauksen tuotetarrat"] .= " -# $kappaleet ";
 			}
 		}
 		if ($toim == "SIIRTOLISTA") {
@@ -1176,7 +1176,7 @@
 			if ($toim == "TILAUSTUOTETARRA") {
 				$otunnus = $laskurow["tunnus"];
 				require('tulosta_tilaustuotetarrat.inc');
-				tulosta_tilaustuotetarrat($otunnus, 0, $komento["Sarjanumerotarrat"], $tee);
+				tulosta_tilaustuotetarrat($otunnus, 0, $komento["Tilauksen tuotetarrat"], $tee);
 				$tee = '';
 			}
 

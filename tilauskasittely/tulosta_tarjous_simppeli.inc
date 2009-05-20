@@ -455,9 +455,11 @@ if (!function_exists('tulosta_tarjous')) {
 		}
 		
 		//	Maksusopimus		
-		$query = "	SELECT maksupositio.*, round(osuus,0) osuus, maksuehto.teksti
+		$query = "	SELECT maksupositio.*, round(osuus,0) osuus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_', $kieli).",  ".avain('selectcon2','MEHTOTXT_', $kieli).") mehto
 					FROM maksupositio
-					LEFT JOIN maksuehto on maksuehto.yhtio=maksupositio.yhtio and maksuehto.tunnus=maksupositio.maksuehto
+					LEFT JOIN maksuehto ON maksuehto.yhtio=maksupositio.yhtio and maksuehto.tunnus=maksupositio.maksuehto
+					".avain('join','MEHTOKATXT_', $kieli)."
+					".avain('join2','MEHTOTXT_', $kieli)."
 					WHERE maksupositio.yhtio = '$kukarow[yhtio]' and otunnus = $laskurow[jaksotettu] order by tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 		if(mysql_num_rows($result)>0) {
@@ -467,7 +469,7 @@ if (!function_exists('tulosta_tarjous')) {
 				$pdf = alku($pdf, $laskurow,$kieli);
 				$h = 190;
 			}
-
+			
 			//	Maksusopimus
 			$pdf->write($h, 1, 0, 0, t("MAKSUEHTO", $kieli), "norm", "L", "B");
 			$h-=$pdf->ln(2.25);
@@ -477,7 +479,7 @@ if (!function_exists('tulosta_tarjous')) {
 				$i++;
 				$pdf->write($h, 1, 0, 5, "$i.", "norm", "L", "");
 				$pdf->write($h, 1, 5, 15, "$row[osuus]%", "norm", "L", "");
-				$pdf->write($h, 1, 15, 0, t($row["teksti"], $kieli).", ".t($row["kuvaus"], $kieli)."", "norm", "L");
+				$pdf->write($h, 1, 15, 0, $row["mehto"].", ".t($row["kuvaus"], $kieli)."", "norm", "L");
 				
 				if($row["lisatiedot"] != "") {
 					$h-=$pdf->ln(1.25);
@@ -497,13 +499,15 @@ if (!function_exists('tulosta_tarjous')) {
 			$pdf->write($h, 1, 0, 0, t("MAKSUEHTO", $kieli), "norm", "L", "B");
 			$h-=$pdf->ln(2.25);
 			
-			$query = "	SELECT teksti
+			$query = "	SELECT concat_ws(' ', ".avain('selectcon','MEHTOKATXT_', $kieli).",  ".avain('selectcon2','MEHTOTXT_', $kieli).") mehto
 						FROM maksuehto
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus = $laskurow[maksuehto]";
+						".avain('join','MEHTOKATXT_', $kieli)."
+						".avain('join2','MEHTOTXT_', $kieli)."
+						WHERE maksuehto.yhtio = '$kukarow[yhtio]' and maksuehto.tunnus = $laskurow[maksuehto]";
 			$result = mysql_query($query) or pupe_error($query);
 			$row = mysql_fetch_array($result);
 			$pdf->write($h, 1, 0, 5, "1.", "norm", "L", "");
-			$pdf->write($h, 1, 5, 0, "100% ".t($row["teksti"], $kieli)." ".t("toimituksesta", $kieli), "norm", "L", "");
+			$pdf->write($h, 1, 5, 0, "100% {$row["mehto"]} ".t("toimituksesta", $kieli), "norm", "L", "");
 			$h-=$pdf->ln(1.25);			
 		}
 		

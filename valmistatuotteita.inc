@@ -786,7 +786,12 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 									(yhtio, tuoteno, sarjanumero, ostorivitunnus, myyntirivitunnus, era_kpl, laatija, luontiaika, hyllyalue, hyllynro, hyllyvali, hyllytaso)
 									VALUES ('{$kukarow["yhtio"]}', '{$tilrivirow["tuoteno"]}', '$sarjanro', '$uusrivitunnus', 0, '$isavarattu', '{$kuka["kuka"]}', now(), '{$tilrivirow["hyllyalue"]}', '{$tilrivirow["hyllynro"]}', '{$tilrivirow["hyllyvali"]}', '{$tilrivirow["hyllytaso"]}')";
 						$sarjares1 = mysql_query($query) or pupe_error($query);
-						
+						$uusisarjatunnus = mysql_insert_id();
+
+						//	Päivitetään sarjanumerolle lisätiedot jos meillä on ne käytössä
+						if(table_exists("sarjanumeron_lisatiedot") and file_exists("generoi_sarjanumeron_lisatiedot.inc")) {
+							require("generoi_sarjanumeron_lisatiedot.inc");
+						}
 						tulosta_tilaustuotetarrat(0, $uusrivitunnus, "OPTIMOI");
 					}
 				}

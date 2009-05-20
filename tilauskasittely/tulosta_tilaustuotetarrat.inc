@@ -62,7 +62,10 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
 			while($row = mysql_fetch_array($result)) {
 				
 				//	Ratkaistaan tulostusmäärä
-				if(in_array(strtoupper($row["yksikko"]), array("KPL"))) {
+				if(in_array($row["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+					$tarra_kpl = 1;
+				}
+				elseif(in_array(strtoupper($row["yksikko"]), array("KPL"))) {
 					$tarra_kpl = $row["kpl"];
 				}
 				else {
@@ -78,13 +81,11 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
 					$alres = mysql_query($query) or pupe_error($query);
 					$aikarow = mysql_fetch_array($alres);
 					
-					if(in_array($row["sarjanumeroseuranta"], array("E", "F", "G"))) {
-						$query = "	SELECT era_kpl
-									FROM sarjanumeroseuranta
-									WHERE yhtio='$kukarow[yhtio]' and ostorivitunnus = '$row[ostorivitunnus]' and sarjanumero = '$row[sarjanumero]' and tuoteno = '$row[tuoteno]'";
-						$sarjares = mysql_query($query) or pupe_error($query);
-						$sarjarow = mysql_fetch_array($sarjares);
-					}
+					$query = "	SELECT *
+								FROM sarjanumeroseuranta
+								WHERE yhtio='$kukarow[yhtio]' and ostorivitunnus = '$row[ostorivitunnus]' and sarjanumero = '$row[sarjanumero]' and tuoteno = '$row[tuoteno]'";
+					$sarjares = mysql_query($query) or pupe_error($query);
+					$sarjarow = mysql_fetch_array($sarjares);
 					
 					if(table_exists("sarjanumeron_lisatiedot")) {
 						$query = "	SELECT *
@@ -123,6 +124,25 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
 							$pdf->write($h, 1, 0, 15,   $row["otunnus"], "norm", "L", "");
 							$pdf->write($h, 1, 20, 45,	$row["sarjanumero"], "norm", "L", "");
 							$pdf->write($h, 1, 50, 68,	$sarjarow["kpl"].strtolower($row["yksikko"]), "norm", "L", "");
+							if($lisarow["pituus"]>0) {
+								$pdf->write($h, 1, 73, 93,	$lisarow["pituus"], "norm", "L", "");
+							}
+							$h-=$pdf->ln(1.5);
+							
+							$pdf->write($h, 1, 0, 15, 	"Lisätiedot", "norm", "L", "B");
+							$h-=$pdf->ln(1.25);
+							$pdf->write($h, 1, 0, 0,	"$row[lisatieto]", "norm", "L", "");
+						}
+						elseif(in_array($row["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+							$pdf->write($h, 1, 0, 15, 	"Tilaus", "norm", "L", "B");
+							$pdf->write($h, 1, 20, 45, 	"S:nro", "norm", "L", "B");
+							if($lisarow["pituus"]>0) {
+								$pdf->write($h, 1, 73, 93, 	"Pituus", "norm", "L", "B");
+							}
+							$h-=$pdf->ln(1.25);
+														
+							$pdf->write($h, 1, 0, 15,   $row["otunnus"], "norm", "L", "");
+							$pdf->write($h, 1, 20, 45,	$row["sarjanumero"], "norm", "L", "");
 							if($lisarow["pituus"]>0) {
 								$pdf->write($h, 1, 73, 93,	$lisarow["pituus"], "norm", "L", "");
 							}

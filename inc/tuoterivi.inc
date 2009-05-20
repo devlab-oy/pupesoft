@@ -193,17 +193,14 @@
 
 	if (mysql_field_name($result, $i) == "vaaditaan_kpl2") {
 
-		$sel = $sela = "";
-		if ($trow[$i] != '') {
-			$sel = "SELECTED";
-		}
-		else {
-			$sela = "SELECTED";
-		}
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value = '' $sela>".t("Normaalikäsittely")."</option>";
-		$ulos .= "<option value = 'P' $sel>".t("Määrä on perheen isän position pituus")."</option>";
+		$ulos .= "<option value = '' {$sel[""]}>".t("Normaalikäsittely")."</option>";
+		$ulos .= "<option value = 'P' {$sel["P"]}>".t("Hintakerroin on perheen isän position pituus")."</option>";
+		$ulos .= "<option value = 'K' {$sel["K"]}>".t("Määräkerroin on perheen isän pituus")."</option>";	
+		$ulos .= "<option value = 'M' {$sel["M"]}>".t("Manuaalisesti syötettävä pituus")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

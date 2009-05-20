@@ -157,6 +157,8 @@ else {
 	if ($kertakassa != '') {
 		$query = "UPDATE lasku SET kassalipas = '$kertakassa' where yhtio='$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]'";
 		$result = mysql_query($query) or pupe_error($query);
+		
+		$laskurow['kassalipas'] = $kertakassa;
 	}
 
 	// Aktivoituiko "Odottaa jt-rivej‰" tilaus?
@@ -185,6 +187,9 @@ else {
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus = '$laskurow[tunnus]'";
 		$result = mysql_query($query) or pupe_error($query);
+		
+		$laskurow['h1time'] = date('Y-m-d H:i:s');
+		$laskurow['hyvak1'] = $kukarow["kuka"];
 	}	
 	
 	//p‰ivitet‰‰n tilaus valmisaika, kun painetaan ekan kerran tilaus valmiiksi
@@ -195,10 +200,13 @@ else {
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus = '$laskurow[tunnus]'";
 		$result = mysql_query($query) or pupe_error($query);
+		
+		$laskurow['h2time'] = date('Y-m-d H:i:s');
+		$laskurow['hyvak2'] = $kukarow["kuka"];
 	}
 
 	// otetaan maksuehto t‰ss‰ heti alussa selville.. k‰teinen ja itsetulostus muuttaa asioita
-	$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+	$query = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	$kateinen = "";
@@ -852,10 +860,7 @@ else {
 								break;	
 							case 'ultilno':
 								$values .= ", '$ultilno'";
-								break;	
-							case 'h1time':
-								$values .= ", now()";
-								break;
+								break;							
 							default:
 								$values .= ", '".$laskurow[$fieldname]."'";
 						}

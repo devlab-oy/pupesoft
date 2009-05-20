@@ -54,7 +54,7 @@
 			$varow = mysql_fetch_array($result);
 			
 			//katotaan tarvetta
-			$query = "SELECT tuotepaikat.*, tuotepaikat.halytysraja-tuotepaikat.saldo tarve, concat_ws('-',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka, tuote.nimitys
+			$query = "SELECT tuotepaikat.*, tuotepaikat.halytysraja, concat_ws('-',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka, tuote.nimitys
 						FROM tuotepaikat
 						JOIN tuote on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno $lisa)
 						$abcjoin
@@ -100,8 +100,11 @@
 					$vanresult = mysql_query($query) or pupe_error($query);
 					$vanhatrow = mysql_fetch_array($vanresult);
 
-					if ($pairow['tilausmaara'] > 0 and $pairow['tarve'] > 0) {
-						$pairow['tarve'] = $pairow['tilausmaara'];
+					list( , , $saldo_myytavissa_kohde) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $kohdevarasto);
+					$tarve_kohdevarasto = $pairow['halytysraja']-$saldo_myytavissa_kohde;
+					
+					if ($pairow['tilausmaara'] > 0 and $tarve_kohdevarasto > 0) {
+						$tarve_kohdevarasto = $pairow['tilausmaara'];
 					}
 				
 					//ja vähennetään se tarpeesta
@@ -109,21 +112,26 @@
 				
 					//ei lähetetä lisää jos on jo matkalla
 					if ($vanhatrow['varattu'] > 0) {
-						$pairow['tarve'] = 0;
+						$tarve_kohdevarasto = 0;
 					}
 
 					//katotaan myytävissä määrä
-					list(, , $saldo_myytavissa) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto);
+					list( , , $saldo_myytavissa) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto);
 				
 					$saldo_myytavissa = (float) $saldo_myytavissa;
-				
-					if ($saldo_myytavissa > 0 and $pairow['tarve'] > 0) {
+					
+					if ($saldo_myytavissa > 0 and $tarve_kohdevarasto > 0) {
 			
-						if ($pairow['tarve'] >= $saldo_myytavissa) {
-							$siirretaan = floor($saldo_myytavissa / 2);
+						if ($tarve_kohdevarasto >= $saldo_myytavissa) {
+							if ($saldo_myytavissa == 1) {
+								$siirretaan = $saldo_myytavissa;
+							}
+							else {
+								$siirretaan = floor($saldo_myytavissa / 2);
+							}
 						}
 						else {
-							$siirretaan = $pairow['tarve'];
+							$siirretaan = $tarve_kohdevarasto;
 						}
 
 						if ($siirretaan > 0) {

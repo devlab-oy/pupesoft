@@ -840,6 +840,10 @@ if (!function_exists('rivi_kerayslista')) {
 					$oikpos = $pdf->strlen($rivipaikkahyllyssa, $norm);
 					$pdf->draw_text(465-$oikpos, $kala, $rivipaikkahyllyssa,	$thispage, $norm);
 				}
+				
+				if ($tyyppi == "SIIRTOLISTA") {
+					list(, $kohde_hyllyssa, ) = saldo_myytavissa($trow["tuoteno"], '', $laskurow["clearing"]);					
+				}
 			}
 
 			$oikpos = $pdf->strlen(($row["tilkpl"]*1), $boldi);
@@ -869,7 +873,11 @@ if (!function_exists('rivi_kerayslista')) {
 			$kala = $kala - $rivinkorkeus + 5;
 
 			$pdf->draw_text(125, $kala, $row["nimitys"], 											$thispage, $norm);
-
+			
+			if ($tyyppi == "SIIRTOLISTA") {
+				$pdf->draw_text(465-$oikpos, $kala, $kohde_hyllyssa, 								$thispage, $norm);
+			}
+			
 			if($trow["tuotemassa"] > 0) {
 				$ypaino = (float) round(($row['varattu']+$row['kpl'])*$trow["tuotemassa"], 2);
 

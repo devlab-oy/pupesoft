@@ -351,10 +351,11 @@ if ((int) $kukarow["kesken"] != 0) {
 					FROM lasku
 					WHERE tunnus = '$kukarow[kesken]' AND yhtio = '$kukarow[yhtio]' AND tila in ('G','S','C','T','V','N','E','L','0','R') AND (alatila != 'X' or tila = '0')";
 	}
-	$result  	= mysql_query($query) or pupe_error($query);
+	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<br><br><br>".t("VIRHE: Tilaustasi ei löydy tai se on mitätöity/laskutettu")."! ($kukarow[kesken])<br><br><br>";
+		
 		$query = "	UPDATE kuka
 					SET kesken = 0
 					WHERE yhtio = '$kukarow[yhtio]' AND
@@ -362,9 +363,9 @@ if ((int) $kukarow["kesken"] != 0) {
 		$result = mysql_query($query) or pupe_error($query);
 		exit;
 	}
-
 	$laskurow = mysql_fetch_array($result);
-	if($yhtiorow["tilauksen_kohteet"] == "K") {
+	
+	if ($yhtiorow["tilauksen_kohteet"] == "K") {
 		$query 	= "	SELECT *
 					from laskun_lisatiedot
 					where otunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
@@ -377,7 +378,7 @@ if ((int) $kukarow["kesken"] != 0) {
 	}
 
 	if ($laskurow["toim_maa"] == "") $laskurow["toim_maa"] = $yhtiorow['maa'];
-	}
+}
 
 //tietyissä keisseissä tilaus lukitaan (ei syöttöriviä eikä muota muokkaa/poista-nappuloita)
 $muokkauslukko = $state = "";

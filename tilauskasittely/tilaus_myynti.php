@@ -2319,7 +2319,7 @@ if ($tee == '') {
 			$lisaalisa = " positio = '$positio',";
 		}
 
-		$query = "	SELECT tilausrivi.tunnus, tuote.vaaditaan_kpl2,
+		$query = "	SELECT 	tilausrivi.tunnus, tuote.vaaditaan_kpl2,
 							if(tilausrivin_lisatiedot.pituus>0, tilausrivi.hinta/(tilausrivin_lisatiedot.pituus/1000), tilausrivi.hinta) yksikkohinta,
 							if(tilausrivin_lisatiedot.pituus>0, tilausrivi.tilkpl/(tilausrivin_lisatiedot.pituus/1000), tilausrivi.tilkpl) yksikkotilkpl,
 							if(tilausrivin_lisatiedot.pituus>0, tilausrivi.varattu/(tilausrivin_lisatiedot.pituus/1000), tilausrivi.varattu) yksikkovarattu
@@ -2344,8 +2344,8 @@ if ($tee == '') {
 			$result = mysql_query($query) or pupe_error($query);
 			
 			//	Fiksataan m‰‰r‰‰ tai hinta
-			if(in_array($lapsi["vaaditaan_kpl2"], array("P","K","M")) and isset($asiakkaan_positio)) {
-				
+			if(in_array($lapsi["vaaditaan_kpl2"], array("P","K","M")) and (isset($asiakkaan_positio) or isset($pituus))) {
+
 				//	Lasketaan kertoimet, ekana tulee aina perheen faija
 				if(!isset($uusiPituus)) {
 					if($lapsi["vaaditaan_kpl2"] == "P") {

@@ -617,8 +617,10 @@
 
 			foreach ($mul_osasto as $osx) {
 				if (trim($osx) != '') {
-					$osx = trim(mysql_real_escape_string($osx));
-					$osastot .= "'$osx',";
+					if (trim($osx) != "PUPEKAIKKIMUUT") {
+						$osx = trim(mysql_real_escape_string($osx));
+						$osastot .= "'$osx',";
+					}					
 				}
 			}
 
@@ -636,8 +638,10 @@
 
 			foreach ($mul_try as $tryx) {
 				if (trim($tryx) != '') {
-					$tryx = trim(mysql_real_escape_string($tryx));
-					$tryt .= "'$tryx',";
+					if (trim($tryx) != "PUPEKAIKKIMUUT") {
+						$tryx = trim(mysql_real_escape_string($tryx));
+						$tryt .= "'$tryx',";
+					}					
 				}
 			}
 
@@ -655,8 +659,10 @@
 
 			foreach ($mul_tme as $tmex) {
 				if (trim($tmex) != '') {
-					$tmex = trim(mysql_real_escape_string(urldecode($tmex)));
-					$tmet .= "'$tmex',";
+					if (trim($tmex) != "PUPEKAIKKIMUUT") {
+						$tmex = trim(mysql_real_escape_string(urldecode($tmex)));
+						$tmet .= "'$tmex',";
+					}					
 				}
 			}
 
@@ -677,8 +683,11 @@
 					if (count($_GET['mul_malli']) > 0) {
 						$mallix = rawurldecode($mallix);
 					}
-					$mallit .= "'".mysql_real_escape_string($mallix)."',";
-					$ulisa .= "&mul_malli[]=".rawurlencode($mallix);
+					
+					if (trim($mallix) != "PUPEKAIKKIMUUT") {
+						$mallit .= "'".mysql_real_escape_string($mallix)."',";
+						$ulisa .= "&mul_malli[]=".rawurlencode($mallix);
+					}					
 				}
 			}
 
@@ -698,8 +707,11 @@
 					if (count($_GET['mul_mallitarkenne']) > 0) {
 						$mallitarkennex = rawurldecode($mallitarkennex);
 					}
-					$mallitarkenteet .= "'".mysql_real_escape_string($mallitarkennex)."',";
-					$ulisa .= "&mul_mallitarkenne[]=".rawurlencode($mallitarkennex);
+					
+					if (trim($mallitarkennex) != "PUPEKAIKKIMUUT") {
+						$mallitarkenteet .= "'".mysql_real_escape_string($mallitarkennex)."',";
+						$ulisa .= "&mul_mallitarkenne[]=".rawurlencode($mallitarkennex);
+					}					
 				}
 			}
 
@@ -730,8 +742,16 @@
 	echo "<table style='display:inline;'>";
 	echo "<tr><th>",t("Osasto"),"</th></tr>";
 	echo "<tr><td nowrap valign='top' class='back'><select name='mul_osasto[]' multiple size='7' onchange='submit();'>";
+	$mul_check = "";
+	if ($mul_try!="") {
+		if (in_array("PUPEKAIKKIMUUT", $mul_osasto)) {
+			$mul_check = 'SELECTED';
+		}
+	}
+		
+	echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Näytä kaikki")."</option>";
 	echo "<option value=''>".t("Ei valintaa")."</option>";
-
+	
 	while($sxrow = mysql_fetch_array ($sresult)){
 		$sel = '';
 
@@ -787,6 +807,13 @@
 
 	echo "<table style='display:inline;'><tr><th>",t("Tuoteryhmä"),"</th></tr>";
 	echo "<tr><td nowrap valign='top' class='back'><select name='mul_try[]' onchange='submit();' multiple='TRUE' size='7'>";
+	$mul_check = '';
+	if ($mul_try!="") {
+		if (in_array("PUPEKAIKKIMUUT", $mul_try)) {
+			$mul_check = 'SELECTED';
+		}
+	}
+	echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Näytä kaikki")."</option>";
 	echo "<option value=''>".t("Ei valintaa")."</option>";
 
 	while($srow = mysql_fetch_array ($sresult)){
@@ -805,15 +832,8 @@
 	echo "</select></td>";
 	echo "</tr></table>";
 
-	if ($lisa_haku_osasto == "" and $lisa_haku_try == "") {
-		$query = "	SELECT avainsana.selite, avainsana.selitetark		         
-		            FROM avainsana
-		            WHERE avainsana.yhtio 	= '$kukarow[yhtio]'
-		            and avainsana.laji 		= 'TUOTEMERKKI'
-		            $avainlisa
-		            ORDER BY avainsana.jarjestys, avainsana.selite";
-	}
-	else {
+	if (($lisa_haku_osasto != "" and $lisa_haku_try != "") or ($lisa_haku_osasto != "" and in_array("PUPEKAIKKIMUUT", $mul_try)) or ($lisa_haku_try != "" and in_array("PUPEKAIKKIMUUT", $mul_osasto))) {
+		
 		$query = "	SELECT distinct avainsana.selite, avainsana.selitetark
 					FROM tuote
 					JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' $avainlisa)
@@ -824,31 +844,37 @@
 					$extra_poislisa
 					$poislisa_mulsel
 					ORDER BY avainsana.jarjestys, avainsana.selite";
-	}
-	$sresult = mysql_query($query) or pupe_error($query);
+	
+		$sresult = mysql_query($query) or pupe_error($query);
 
-	if (mysql_num_rows($sresult) > 0) {
-		echo "<table style='display:inline;'><tr><th>",t("Tuotemerkki"),"</th></tr>";
-		echo "<tr><td nowrap valign='top' class='back'>";
-		echo "<select name='mul_tme[]' multiple='TRUE' size='7' onchange='submit();'>";
-		echo "<option value=''>",t("Ei valintaa"),"</option>";
+		if (mysql_num_rows($sresult) > 0) {
+			echo "<table style='display:inline;'><tr><th>",t("Tuotemerkki"),"</th></tr>";
+			echo "<tr><td nowrap valign='top' class='back'>";
+			echo "<select name='mul_tme[]' multiple='TRUE' size='7' onchange='submit();'>";
+			$mul_check = '';
+			if ($mul_tme!="") {
+				if (in_array("PUPEKAIKKIMUUT", $mul_tme)) {
+					$mul_check = 'SELECTED';
+				}
+			}
+			echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Näytä kaikki")."</option>";
+			echo "<option value=''>",t("Ei valintaa"),"</option>";
 
-		while($srow = mysql_fetch_array ($sresult)){
-			$sel = '';
+			while($srow = mysql_fetch_array ($sresult)){
+				$sel = '';
 
-			if (count($mul_tme) > 0 and in_array(trim($srow['selite']), $mul_tme)) {
-				$sel = 'SELECTED';
+				if (count($mul_tme) > 0 and in_array(trim($srow['selite']), $mul_tme)) {
+					$sel = 'SELECTED';
+				}
+
+				echo "<option value='$srow[selite]' $sel>$srow[selite]</option>";
 			}
 
-			echo "<option value='$srow[selite]' $sel>$srow[selite]</option>";
+			echo "</select></td>";
+			echo "</tr></table>";
 		}
 
-		echo "</select></td>";
-		echo "</tr></table>";
-	}
-
-	// malli ja mallitarkenne dropdownit
-	if ($lisa_haku_tme != '' or  $lisa_haku_try != '') {
+		// malli ja mallitarkenne dropdownit
 		$query = "	SELECT DISTINCT tuote.malli
 					FROM tuote
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -866,6 +892,13 @@
 			echo "<table style='display:inline;'><tr><th>",t("Malli"),"</th></tr>";
 			echo "<tr><td nowrap valign='top' class='back'>";
 			echo "<select name='mul_malli[]' multiple='TRUE' size='7' onchange='submit();'>";
+			$mul_check = '';
+			if ($mul_malli!="") {
+				if (in_array("PUPEKAIKKIMUUT", $mul_malli)) {
+					$mul_check = 'SELECTED';
+				}
+			}
+			echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Näytä kaikki")."</option>";
 			echo "<option value=''>",t("Ei valintaa"),"</option>";
 
 			while($mallirow = mysql_fetch_array ($sxresult)){
@@ -882,9 +915,7 @@
 			echo "</td>";
 			echo "</tr></table>";
 		}
-	}
 
-	if ($lisa_haku_malli != '') {
 		$query = "	SELECT DISTINCT tuote.mallitarkenne
 					FROM tuote
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -903,6 +934,13 @@
 			echo "<table style='display:inline;'><tr><th>",t("Mallitarkenne"),"</th></tr>";
 			echo "<tr><td nowrap valign='top' class='back'>";
 			echo "<select name='mul_mallitarkenne[]' multiple='TRUE' size='7' onchange='submit();'>";
+			$mul_check = '';
+			if ($mul_mallitarkenne!="") {
+				if (in_array("PUPEKAIKKIMUUT", $mul_mallitarkenne)) {
+					$mul_check = 'SELECTED';
+				}
+			}
+			echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Näytä kaikki")."</option>";
 			echo "<option value=''>",t("Ei valintaa"),"</option>";
 
 			while($mallitarkennerow = mysql_fetch_array ($sxresult)){
@@ -997,7 +1035,7 @@
 					ORDER BY $jarjestys $sort
 					LIMIT 500";
 		$result = mysql_query($query) or pupe_error($query);
-
+		
 		if (mysql_num_rows($result) > 0) {
 
 			$rows = array();

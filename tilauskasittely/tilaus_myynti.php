@@ -1688,7 +1688,18 @@ if ($tee == '') {
 
 		echo "</tr>";
 		
-		
+		//	Tarkistetaan, ettei asiakas ole prospekti, tarjoukselle voi liitt‰‰ prospektiasiakkaan, josta voi tehd‰ suoraan tilauksen. Herjataan siis jos asiakas pit‰‰ p‰ivitt‰‰ ja tarkistaa
+		$prosque = "	SELECT tunnus
+						FROM asiakas
+						WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]' and laji='R'";
+		$prosres = mysql_query($prosque) or pupe_error($prosque);
+		if(mysql_num_rows($prosres)==1) {
+			$asiakasOnProspekti = "JOO";
+			echo "<tr>$jarjlisa
+					<td class='back' colspan='10'><br><font class='error'>".t("HUOM!!! Asiakas on prosketiasiakas, tarkista asiakasrekisteriss‰ asiakkaan tiedot ja p‰ivit‰ tiedot tilauksen otsikolle.")."</font><br></td>
+				</tr>";
+		}
+
 		// aivan karseeta, mutta joskus pit‰‰ olla n‰in asiakasyst‰v‰llinen... toivottavasti ei h‰iritse ket‰‰n
 		if ($kukarow["extranet"] == "" and $kukarow["yhtio"] == "allr") {
 			
@@ -2316,7 +2327,7 @@ if ($tee == '') {
 					and tilausrivi.otunnus = '$kukarow[kesken]'
 					and (tilausrivi.tunnus = '$rivitunnus' or (tilausrivi.perheid!=0 and tilausrivi.perheid = '$rivitunnus' and tilausrivin_lisatiedot.ei_nayteta = 'P') or (tilausrivi.perheid2!=0 and tilausrivi.perheid2 = '$rivitunnus' and tilausrivin_lisatiedot.ei_nayteta = 'P'))";
 		$lapsires = mysql_query($query) or pupe_error($query);
-
+			
 		while($lapsi = mysql_fetch_array($lapsires)) {
 			$query = "	UPDATE tilausrivin_lisatiedot
 						SET $lisaalisa
@@ -2325,26 +2336,26 @@ if ($tee == '') {
 						WHERE yhtio			 = '$kukarow[yhtio]'
 						and tilausrivitunnus = '$lapsi[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
-
+			
 			//	Korjataan tuotteen yksikkˆhinta.. tuo em homma on se tapa jolla se kuuluisi tehd‰, mutta nyt k‰ytˆnnˆss‰ se on aika vaikea toteuttaa..
-			if($lapsi["vaaditaan_kpl2"] == "P") {
+					if($lapsi["vaaditaan_kpl2"] == "P") {
 
-				$query  = "	SELECT pituus
-							FROM asiakkaan_positio
-							WHERE yhtio			 = '$kukarow[yhtio]'
-							and tunnus = '$asiakkaan_positio'";
-				$posres = mysql_query($query) or pupe_error($query);
-				$posrow = mysql_fetch_array($posres);
+						$query  = "	SELECT pituus
+									FROM asiakkaan_positio
+									WHERE yhtio			 = '$kukarow[yhtio]'
+									and tunnus = '$asiakkaan_positio'";
+						$posres = mysql_query($query) or pupe_error($query);
+						$posrow = mysql_fetch_array($posres);
 				if((int)$posrow["pituus"] == 0) {
 					$posrow["pituus"] = 1000;
-				}
-				$uhinta = round(($posrow["pituus"] * $lapsi["yksikkohinta"])/1000, $yhtiorow['hintapyoristys']);
-
-				$query = "	UPDATE tilausrivi
-							SET hinta = '$uhinta'
-							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '{$lapsi["tunnus"]}'";
-				$updre = mysql_query($query) or pupe_error($query);
-
+					}
+					$uhinta = round(($posrow["pituus"] * $lapsi["yksikkohinta"])/1000, $yhtiorow['hintapyoristys']);
+					
+					$query = "	UPDATE tilausrivi
+								SET hinta = '$uhinta'
+								WHERE yhtio = '$kukarow[yhtio]' and tunnus = '{$lapsi["tunnus"]}'";
+					$updre = mysql_query($query) or pupe_error($query);					
+					
 				$query = "	UPDATE tilausrivin_lisatiedot
 							SET pituus 	= '{$posrow["pituus"]}',
 							muutospvm	= now(),
@@ -3724,7 +3735,7 @@ if ($tee == '') {
 
 					if($row["ei_nayteta"] == "") {
 
-						$trivityyulos = "";
+						$trivityyulos = "";						
 
 						if (mysql_num_rows($trivityyppi_result) > 0) {
 							//annetaan valita tilausrivin tyyppi
@@ -3781,25 +3792,25 @@ if ($tee == '') {
 				}
 				elseif ($yhtiorow['tilauksen_kohteet'] == 'K' and $row["tyyppi"] == "W") {
 					
-					$valitse_positio_return_url = urlencode("tilauskasittely/tilaus_myynti.php?toim=$toim&lopetus=$lopetus&projektilla=$projektilla&tilausnumero=$tilausnumero&rivitunnus=$row[tunnus]&rivilaadittu=$row[laadittu]&menutila=$menutila&tila=LISATIETOJA_RIVILLE&asiakkaan_positio");
-					
-					$posq = "	SELECT asiakkaan_positio.positio, concat_ws(' - ', asiakkaan_kohde.kohde, asiakkaan_positio.positio) positio_tarkenne
-								FROM asiakkaan_positio
-								LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=asiakkaan_positio.yhtio and asiakkaan_kohde.tunnus=asiakkaan_positio.asiakkaan_kohde 
-								WHERE asiakkaan_positio.yhtio = '$kukarow[yhtio]' and asiakkaan_positio.tunnus = '$row[asiakkaan_positio]' and asiakkaan_positio.tunnus";
-					$posres = mysql_query($posq) or pupe_error($posq);
+						$valitse_positio_return_url = urlencode("tilauskasittely/tilaus_myynti.php?toim=$toim&lopetus=$lopetus&projektilla=$projektilla&tilausnumero=$tilausnumero&rivitunnus=$row[tunnus]&rivilaadittu=$row[laadittu]&menutila=$menutila&tila=LISATIETOJA_RIVILLE&asiakkaan_positio");
 
-					if(mysql_num_rows($posres) == 1) {
-						$posrow = mysql_fetch_array($posres);								
+						$posq = "	SELECT asiakkaan_positio.positio, concat_ws(' - ', asiakkaan_kohde.kohde, asiakkaan_positio.positio) positio_tarkenne
+									FROM asiakkaan_positio
+									LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=asiakkaan_positio.yhtio and asiakkaan_kohde.tunnus=asiakkaan_positio.asiakkaan_kohde 
+									WHERE asiakkaan_positio.yhtio = '$kukarow[yhtio]' and asiakkaan_positio.tunnus = '$row[asiakkaan_positio]' and asiakkaan_positio.tunnus";
+						$posres = mysql_query($posq) or pupe_error($posq);
+
+						if(mysql_num_rows($posres) == 1) {
+							$posrow = mysql_fetch_array($posres);								
+						}
+						else {
+							$posrow["positio"] = "Valitse positio";
+						}
+
+
+						$trivityyulos .= "<button onclick=\"popUp(event, 'positioselain_DIV', 0, 0, '../positioselain.php?kohde={$lasklisatied_row["asiakkaan_kohde"]}&valitse_positio_return_url=$valitse_positio_return_url'); return false;\" title='$posrow[positio_tarkenne]' $state>$posrow[positio]</button>";
+						$trivityyulos .= "<img src='$palvelin2/pics/lullacons/info-grey-bg.png' class='info' style='float: right; border: 1px solid; margin: 2px; vertical-align: top;' onclick=\"popUp(event, 'positioselain_DIV', 0, 0, '../positioselain.php?tee=nayta_positio&positio=$row[asiakkaan_positio]');\">";
 					}
-					else {
-						$posrow["positio"] = "Valitse positio";
-					}
-					
-					
-					$trivityyulos .= "<button onclick=\"popUp(event, 'positioselain_DIV', 0, 0, '../positioselain.php?kohde={$lasklisatied_row["asiakkaan_kohde"]}&valitse_positio_return_url=$valitse_positio_return_url'); return false;\" title='$posrow[positio_tarkenne]' $state>$posrow[positio]</button>";
-					$trivityyulos .= "<img src='$palvelin2/pics/lullacons/info-grey-bg.png' class='info' style='float: right; border: 1px solid; margin: 2px; vertical-align: top;' onclick=\"popUp(event, 'positioselain_DIV', 0, 0, '../positioselain.php?tee=nayta_positio&positio=$row[asiakkaan_positio]');\">";
-				}
 				elseif($yhtiorow['tilauksen_kohteet'] == "K") {
 					$trivityyulos .= "&nbsp;";
 				}
@@ -5278,7 +5289,7 @@ if ($tee == '') {
 		}
 
 		//N‰ytet‰‰n tilaus valmis nappi
-		if (($muokkauslukko == "" or $toim=="PROJEKTI" or $toim=="YLLAPITO") and $laskurow["liitostunnus"] > 0 and $tilausok == 0 and $rivilaskuri > 0) {
+		if (($muokkauslukko == "" or $toim=="PROJEKTI" or $toim=="YLLAPITO") and $laskurow["liitostunnus"] > 0 and $tilausok == 0 and $rivilaskuri > 0 and $asiakasOnProspekti!="JOO") {
 
 			// Jos myyj‰ myy todella pienell‰ summalta varastosta joka sijaitsee ulkmailla niin herjataan heiman
 			$javalisa = "";

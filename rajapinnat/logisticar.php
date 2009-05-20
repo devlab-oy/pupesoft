@@ -416,6 +416,13 @@
 		if (! $fp = fopen($path_tapahtumat, 'w+')) {
 			die("Ei voitu avata filea $path_tapahtumat");
 		}
+		
+		if ($where_logisticar["paiva_ajo"] != "") {
+			$pvmlisa = " and tilausrivi.laskutettuaika >= date_sub(now(), interval 30 day) ";
+		}
+		else {
+			$pvmlisa = " and tilausrivi.laskutettuaika > '0000-00-00' ";
+		}
 
 	    $query = "	SELECT 
 					tilausrivi.tuoteno 			nimiketunnus,
@@ -441,7 +448,7 @@
 					and varastopaikat.yhtio=tuotepaikat.yhtio
 					LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
 					WHERE tilausrivi.tyyppi IN ('L', 'O') 
-					and tilausrivi.laskutettuaika > '0000-00-00' 
+					$pvmlisa
 					and tilausrivi.yhtio = '$yhtio'
 					ORDER BY tilausrivi.laskutettuaika
 					$limit";
@@ -572,7 +579,7 @@
 					and varastopaikat.yhtio=tuotepaikat.yhtio
 					LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
 					WHERE tilausrivi.varattu != 0
-					AND tilausrivi.tyyppi IN ('L', 'O')
+					AND tilausrivi.tyyppi IN ('L','O')
 					AND tilausrivi.laskutettuaika = '0000-00-00' 
 					AND tilausrivi.yhtio = '$yhtio'
 					ORDER BY tilausrivi.laadittu

@@ -4926,20 +4926,20 @@ var popUp_timeout=0;
 var poUp_closeTimeOut=new Array();
 
 function closeOnExit(event, oi) {
-
+	
 
 	recurce=true;
 	r=event.relatedTarget;
 	r_orog = r;
 	while(recurce) {
-
+		
 		x=r.childNodes;
-
+		
 		if(r.id == oi) {
 			recurce = false;
 			return true;
 		}
-
+		
 		for (i=0;i<x.length;i++) {
 
 			if(x[i].id==oi) {
@@ -4948,7 +4948,7 @@ function closeOnExit(event, oi) {
 			}
 		}
 
-		r=r.parentNode;
+		r=r.parentNode;		
 		if(r == null || r.tagName == "BODY") {
 
 
@@ -4962,7 +4962,7 @@ function closeOnExit(event, oi) {
 }
 
 function closePopUp(oi) {
-	poUp_closeTimeOut[oi] = setTimeout("document.body.removeChild(document.getElementById('"+oi+"'));", 400);
+	//poUp_closeTimeOut[oi] = setTimeout("document.body.removeChild(document.getElementById('"+oi+"'));", 400);
 	//alert(poUp_closeTimeOut[oi]);
 }
 function stopClose(oi) {
@@ -5004,7 +5004,7 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass, closeOnExit) {
 		myDiv.setAttribute('id', oi);
 		myDiv.setAttribute('name', 'dynamic_'+oi);
 		myDiv.style.display = 'block';
-
+		
 		//caller = getEventCaller(e);
 
 		//	Suljetaan n‰‰ aina kun menn‰‰ pois divist‰
@@ -5017,7 +5017,7 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass, closeOnExit) {
 				myDiv.setAttribute("onMouseOver", "stopClose('"+oi+"');");
 			}
 		}
-
+		
 		document.body.appendChild(myDiv);
 	}
 
@@ -5139,15 +5139,20 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass, closeOnExit) {
 
 			//	Jos saimme riitt‰v‰sti tietoa voimme kalkuloida oikean position
 			if(eh != null && ew != null && x != null && y != null) {
-
-				c=0;
+				
+				//alert('x: '+x+' y: '+y);
+				
 				//	Riitt‰‰kˆ leveys
-				if(x-scrollX+ew+2>ww) {
-					c=(x-scrollX+ew+2)-ww;
-					x-=c;
+				if((x-scrollX)+ew+30>ww) {
+					//	Siirret‰‰n t‰m‰ ihan oikeaan laitaan..
+					x=ww-ew-30+scrollX;
+				}
+				else {
+					//x+=scrollX;
 				}
 
-				if (wh - y - eh < -10 && c > 10) {
+
+				if (y+eh+30>wh) {
 					y -= eh + 22;
 				}
 				else if(y - scrollY + eh + 10 > wh) {
@@ -5161,6 +5166,7 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass, closeOnExit) {
 				if(y<10) {
 					y=10;
 				}
+				//alert('ww:'+ww+' wh:'+wh+' eh:'+eh+' ew:'+ew+' scrollY:'+scrollY+' scrollX:'+scrollX+' y:'+y+' x:'+x);
 			}
 		}
 

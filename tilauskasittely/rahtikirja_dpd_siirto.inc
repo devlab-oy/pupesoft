@@ -80,8 +80,9 @@ if ($kollityht > 0) {
 			if($r=="asiakkaan_viite" and $v == "") {
 				$v = $laskurow["viite"];
 			}
-
-			$parcelOrder[$r] = $v;
+			
+			//	Poistetaan aina kaikki turhat merkit ja välilyönnit
+			$parcelOrder[$r] = trim(str_replace(array("\r\n", "\r", "\n"), " ", $v));
 		}
 
 		//	Luotamme vahvasti siihen, että meillä on rakir_res tallella.. Täältä tulee jotain hyödyllistä kumminkin..

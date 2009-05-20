@@ -122,7 +122,7 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
 														
 							$pdf->write($h, 1, 0, 15,   $row["otunnus"], "norm", "L", "");
 							$pdf->write($h, 1, 20, 45,	$row["sarjanumero"], "norm", "L", "");
-							$pdf->write($h, 1, 50, 68,	$sarjarow["era_kpl"].strtolower($row["yksikko"]), "norm", "L", "");
+							$pdf->write($h, 1, 50, 68,	$sarjarow["kpl"].strtolower($row["yksikko"]), "norm", "L", "");
 							if($lisarow["pituus"]>0) {
 								$pdf->write($h, 1, 73, 93,	$lisarow["pituus"], "norm", "L", "");
 							}

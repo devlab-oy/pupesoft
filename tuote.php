@@ -1391,7 +1391,12 @@
 
 				if (mysql_num_rows($sarjares) > 0) {
 					echo "<table>";
-					echo "<tr><th colspan='4'>".t("Varasto").":</th></tr>";
+					if ($tuoterow["sarjanumeroseuranta"] == "F") {
+						echo "<tr><th colspan='4'>".t("Varasto").":</th></tr>";
+					}
+					else {
+						echo "<tr><th colspan='3'>".t("Varasto").":</th></tr>";
+					}
 					echo "<th>".t("Er‰numero")."</th>";
 
 					if ($tuoterow["sarjanumeroseuranta"] == "F") {
@@ -1411,9 +1416,18 @@
 
 						echo "<td align='right'>$sarjarow[kpl]</td>";
 
-
-
-						echo "<td>$sarjarow[lisatieto]</td></tr>";
+						echo "<td>$sarjarow[lisatieto]</td>";
+						
+						//	Katsotaan jos meid‰n pit‰isi liitt‰‰ jotain infoa lis‰tiedoista
+						if(file_exists("inc/generoi_sarjanumeron_info.inc")) {
+							require("inc/generoi_sarjanumeron_info.inc");
+							$sarjainfo = generoi_sarjanumeron_info($sarjarow["sarjanumero"]);
+							if($sarjainfo!="") {
+								echo "<td class='back'>$sarjainfo</td>";
+							}
+						}
+						
+						echo "</tr>";
 					}
 
 					echo "</table><br>";

@@ -214,7 +214,7 @@
 	$paikat	= "";
 
 	//Tässä on kaikki saldoihin ja varastopaikkoihin liittyvät tsekit, eli EI tehdä saldottomille tuotteille
-	if ($trow["ei_saldoa"] == "" and $row["tyyppi"] != "E") {
+	if ($trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $row["tyyppi"] != "W") {
 		// tarkistetaan varaston tyyppi
 		$query = "	SELECT *
 					FROM varastopaikat
@@ -517,7 +517,7 @@
 	}
 	
 	/*
-	elseif ($trow["ei_saldoa"] != "" and $row["tyyppi"] != "E" and $kpl_st > 0 and $row["tunnus"] == $row["perheid"] and in_array($row["var"], array('S','P','J'))) {
+	elseif ($trow["ei_saldoa"] != "" and $row["tyyppi"] != "E" and $row["tyyppi"] != "W" and $kpl_st > 0 and $row["tunnus"] == $row["perheid"] and in_array($row["var"], array('S','P','J'))) {
 
 		// Suoratoimitushäkki
 		$query = "	SELECT sum(if(var='S', 1, 0)) suoria, count(*) lapsia, count(distinct tilaajanrivinro) toimittajia, group_concat(distinct tilaajanrivinro) toimittaja

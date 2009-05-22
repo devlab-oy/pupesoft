@@ -854,7 +854,7 @@
 						FROM lasku use index (tila_index)
 						$seurantalisa
 						$kohdelisa
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila IN ('R','L','N') and alatila NOT IN ('X')
+						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila IN ('R','L','N','A') and alatila NOT IN ('X')
 						$haku
 						ORDER by lasku.tunnusnippu desc, tunnus asc
 						$rajaus";
@@ -1239,8 +1239,13 @@
 						$aputoim2 = "";
 						$lisa2 = "";
 					}
-					elseif($toim=="PROJEKTI" and $row["tila"] != "R") {
-						$aputoim1 = "RIVISYOTTO";
+					elseif($toim=="PROJEKTI") {
+						if($row["tila"] == "A") {
+							$aputoim1 = "TYOMAARAYS";
+						}
+						elseif($row["tila"] != "R") {
+							$aputoim1 = "RIVISYOTTO";
+						}
 
 						$lisa1 = t("Rivisyöttöön");
 					}
@@ -1285,7 +1290,11 @@
 					else {
 						echo "<form method='post' action='tilauskasittely/tilaus_myynti.php' $javalisa>";
 					}
-
+					
+					//	Projektilla hypätään aina pääotsikolle..
+					if($toim == "PROJEKTI") {
+						echo "	<input type='hidden' name='projektilla' value='{$row["tunnusnippu"]}'>";
+					}
 					echo "	<input type='hidden' name='toim' value='$aputoim1'>
 							<input type='hidden' name='tee' value='AKTIVOI'>
 							<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";

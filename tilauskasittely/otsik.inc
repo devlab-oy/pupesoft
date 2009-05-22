@@ -3008,7 +3008,7 @@
 		// varmistetaan, että meillä on kukarow
 		if ((int) $kukarow["kesken"] != 0) {
 
-			if ($tunnusnippu == "" and $toim == "PROJEKTI" or ($toim=="TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"] != "") or (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $yhtiorow["myyntitilaus_osatoimitus"] != "")) {
+			if ($tunnusnippu == "" and $toim == "PROJEKTI" or ($toim=="TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"] != "") or (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $yhtiorow["myyntitilaus_osatoimitus"] != "")) {
 				$query = "	UPDATE lasku
 							SET tunnusnippu = '$kukarow[kesken]'
 							WHERE tunnus = '$kukarow[kesken]' and tunnusnippu = 0";
@@ -3060,7 +3060,7 @@
 				$result = mysql_query($query2) or pupe_error($query2);
 			}
 
-			if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $vienti =='K' or ($yhtiorow["tilauksen_seuranta"] != "" and in_array($toim, array("PROJEKTI","RIVISYOTTO","PIKATILAUS")))) {
+			if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $vienti =='K' or ($yhtiorow["tilauksen_seuranta"] != "" and in_array($toim, array("PROJEKTI","RIVISYOTTO","PIKATILAUS","TYOMAARAYS")))) {
 				$query3 .= "laskun_lisatiedot SET
 							yhtio						= '$kukarow[yhtio]',
 							kolm_ovttunnus				= '$kolm_ovttunnus',

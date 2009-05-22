@@ -56,8 +56,9 @@
 		$ehdotusnappi = '';
 	}
 	elseif ($tee == "paivita" and $valmis == "TILAA") {
+		
 		$valitutyhtiot = unserialize(urldecode($valitutyhtiot));
-		$tuoteno = str_replace(t("Tee ostotilaus")." ","",$valmis);
+		$tuoteno = $lisaa_tuote;
 		$temp_ytunnus = $ytunnus;
 		
 		//p‰ivitet‰‰n kukarow[kesken] kun k‰ytt‰j‰ tekee uutta tilausta
@@ -69,7 +70,10 @@
 		$kukarow['kesken'] 	= 0;
 		$tilausnumero 		= 0;
 	
-		$query	= "SELECT *, tunnus liitostunnus from toimi where yhtio='$kukarow[yhtio]' and tunnus='$toimittajien_liitostunnukset[$tuoteno]'";
+		$query	= "	SELECT *, tunnus liitostunnus 
+					from toimi 
+					where yhtio = '$kukarow[yhtio]' 
+					and tunnus = '$toimittajien_liitostunnukset[$tuoteno]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$srow 	= mysql_fetch_array($result);
 		
@@ -169,22 +173,22 @@
 	
 	
 		// haetaan oletuspaikan tiedot niin laitetaan se riville
-		$query = "select * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and oletus!=''";
+		$query = "SELECT * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and oletus!=''";
 		$jtsre = mysql_query($query) or pupe_error($query);
 		$jtstu = mysql_fetch_array($jtsre);
 	
 		//haetaan tuotteen ostohinta
-		$query = "select * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and liitostunnus='$toimittajien_liitostunnukset[$tuoteno]'";
+		$query = "SELECT * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and liitostunnus='$toimittajien_liitostunnukset[$tuoteno]'";
 		$ossre = mysql_query($query) or pupe_error($query);
 		$osstu = mysql_fetch_array($ossre);
 
 		//haetaan tuotteen ostohinta
-		$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+		$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
 		$tuotere = mysql_query($query) or pupe_error($query);
 		$tuoterow = mysql_fetch_array($tuotere);
 	
 		// lis‰t‰‰n ostotilausrivi
-		$query = "	insert into tilausrivi
+		$query = "	INSERT into tilausrivi
 					(hinta, ale, nimitys, tuoteno, try, osasto, tilkpl, varattu, yksikko, otunnus, yhtio, tyyppi, kommentti, toimaika, kerayspvm,hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro, laatija, laadittu) values
 					('$osstu[ostohinta]', '$osstu[alennus]','$tuoterow[nimitys]', '$tuoteno', '$tuoterow[try]', '$tuoterow[osasto]', '$ostettavat[$tuoteno]', '$ostettavat[$tuoteno]', '$tuoterow[yksikko]', '$tilausnumero', '$kukarow[yhtio]', 'O','', now(), now(), '$jtstu[hyllyalue]','$jtstu[hyllynro]','$jtstu[hyllyvali]','$jtstu[hyllytaso]', '$rivi','$kukarow[kuka]', now())";
 		$updre = mysql_query($query) or pupe_error($query);
@@ -619,8 +623,8 @@
 		
 		//itse rivit
 		echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
-					function submit_juppe(valmis, ankkuri) {												
-						document.ostoehdotuscs.action='$PHP_SELF?valmis='+valmis+'#A_'+ankkuri;
+					function submit_juppe(valmis, ltuoteno, ankkuri) {												
+						document.ostoehdotuscs.action='$PHP_SELF?lisaa_tuote='+ltuoteno+'&valmis='+valmis+'#A_'+ankkuri;
 						document.ostoehdotuscs.submit();
 					}
 				</SCRIPT>";
@@ -793,7 +797,7 @@
 				echo "<td valign='top' $bbr>".tv1dateconv(date("Y-m-d",mktime(0, 0, 0, date("m"), date("d")+$toimirow["toimitusaika"], date("Y"))))."</td>";
 			
 				if ($useampi_yhtio == 1 and $toimirow['toimittaja'] != '' and $yhtiorow['yhtio'] == $row['yhtio']) {
-					echo "<td valign='top' align='right'><input type='submit' value='".t("Tilaa tuotetta")."' onclick=\"submit_juppe('TILAA', $indeksi);\"></td>";
+					echo "<td valign='top' align='right'><input type='submit' value='".t("Tilaa tuotetta")."' onclick=\"submit_juppe('TILAA', '$row[tuoteno]', $indeksi);\"></td>";
 				}
 				else {
 					echo "<td></td>";
@@ -841,7 +845,7 @@
 		echo "<tr><td colspan ='8'>";
 	
 		if ($useampi_yhtio == 1) {
-			echo "<input type='submit' value='".t("P‰ivit‰")."' onclick=\"submit_juppe('PAIVITA', 0);\">";
+			echo "<input type='submit' value='".t("P‰ivit‰")."' onclick=\"submit_juppe('PAIVITA','', 0);\">";
 		}	
 
 		echo "<input type='hidden' name='mul_osasto' value='".urlencode(serialize($paivitys_mul_osasto))."'>";

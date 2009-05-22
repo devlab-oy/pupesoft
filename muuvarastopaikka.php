@@ -796,7 +796,7 @@
 				<input type = 'hidden' name = 'tuoteno' value = '$tuoteno'>";
 
 		echo "<table>";
-		echo "<tr><th>".t("Varastopaikka")."</th><th>".t("Saldo")."</th><th>".t("Oletuspaikka")."</th><th>".t("H‰lyraja")."</th><th>".t("Tilausm‰‰r‰")."</th><th>".t("Poista")."</th></tr>";
+		echo "<tr><th>".t("Varastopaikka")."</th><th>".t("Saldo")."</th><th>",t("Hyllyss‰"),"</th><th>",t("Myyt‰viss‰"),"</th><th>".t("Oletuspaikka")."</th><th>".t("H‰lyraja")."</th><th>".t("Tilausm‰‰r‰")."</th><th>".t("Poista")."</th></tr>";
 
 		
 		if (mysql_num_rows($paikatresult1) > 0) {
@@ -820,7 +820,7 @@
 				
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 				
-				echo "<tr><td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td><td align='right'>$saldo</td>";
+				echo "<tr><td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td><td align='right'>$saldo</td><td align='right'>$hyllyssa</td><td align='right'>$myytavissa</td>";
 					
 				if (kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"])) {	
 					echo "<td><input type = 'radio' name='oletus' value='$saldorow[tunnus]' $checked></td>

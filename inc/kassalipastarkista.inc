@@ -42,6 +42,26 @@ if(!function_exists("kassalipastarkista")) {
 			}
 		}
 
+		if (mysql_field_name($result, $i) == "nimi") {
+
+			if ($t[$i] == '') {
+				$virhe[$i] = t("Nimi on syötettävä");
+			}
+
+			$query = "	SELECT *
+						FROM kassalipas
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus != '$tunnus'";
+			$sresult = mysql_query($query) or pupe_error($query);
+
+			while ($srow = mysql_fetch_array($sresult)) {
+				if (strpos(strtoupper($t[$i]), strtoupper($srow["nimi"])) !== FALSE or strpos(strtoupper($srow["nimi"]), strtoupper($t[$i])) !== FALSE) {
+					$virhe[$i] = t("Nimi on jo käytössä").": $srow[nimi]";
+					break;
+				}
+			}
+		}
+
 	}
 }
 

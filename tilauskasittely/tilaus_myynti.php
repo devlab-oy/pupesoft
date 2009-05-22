@@ -2496,9 +2496,6 @@ if ($tee == '') {
 				}
 			}
 
-			// Nollataan sarjanumerolinkit ja dellataan ostorivit
-			vapauta_sarjanumerot($toim, $kukarow["kesken"], " and tilausrivi.tunnus = '$rivitunnus' ");
-
 			// Poistetaan muokattava tilausrivi
 			$query = "	DELETE FROM tilausrivi
 						WHERE tunnus = '$rivitunnus'";

@@ -172,7 +172,7 @@
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus in ($sarrow[ostorivitunnus], $sarrow[myyntirivitunnus])
 								and laskutettuaika='0000-00-00'
-								and alv <= 500";
+								and alv < 500";
 					$sarjares = mysql_query($query) or pupe_error($query);
 				}
 				else {

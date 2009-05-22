@@ -1940,7 +1940,7 @@ if ($tee == '') {
 				}
 
 				//	Pidetään tämä vielä piilossa, en tiedä onko tästä muille haittaa vai hyötyä.
-				if ($yhtiorow["asiakkaan_kohde"] == "K") {
+				if ($yhtiorow["tilauksen_kohteet"] == "K") {
 					echo "<option value='TYOMAARAYS'>".T("Työmääräys")."</option>";
 					echo "<option value='REKLAMAATIO'>".T("Reklamaatio")."</option>";
 					echo "<option value='VALMISTAVARASTOON'>".T("Valmistus")."</option>";

@@ -100,9 +100,9 @@
 		$query = "	SELECT tilausrivi.tunnus, lasku.tunnus laskutunnus, lasku.tila, lasku.tunnusnippu
 					from lasku
 					left join tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-					where lasku.yhtio = '$kukarow[yhtio]' and
-					lasku.tila in ('N','E')
-					having tilausrivi.tunnus is null";
+					where lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tila in ('N','E')
+					and tilausrivi.tunnus is null";
 		$result = mysql_query($query) or die($query);
 
 		while ($row = mysql_fetch_array($result)) {
@@ -160,7 +160,7 @@
 
 		$laskuri = 0;
 		
-		// Merkitään rivit mitätöidyksi joiden otsikot on mitätöity
+		// Merkitään rivit mitätöidyksi joiden otsikot on mitätöity (ei puuterivejä)
 		$query = "	SELECT lasku.tunnus laskutunnus
 					from lasku
 					join tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi!='D'
@@ -172,7 +172,7 @@
 		while ($row = mysql_fetch_array($result)) {
 			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php (1.5)")."<br>";
 
-			$query = "UPDATE tilausrivi set tyyppi='D'  where yhtio = '$kukarow[yhtio]' and otunnus = '$row[laskutunnus]'";
+			$query = "UPDATE tilausrivi set tyyppi='D' where yhtio = '$kukarow[yhtio]' and otunnus = '$row[laskutunnus]' and var != 'P'";
 			$deler = mysql_query($query) or die($query);
 			$laskuri ++;
 		}

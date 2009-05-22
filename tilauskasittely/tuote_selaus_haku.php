@@ -147,7 +147,7 @@
 				</form>";
 		echo "</td></tr></table>";
 	}
-	elseif ($kukarow["kuka"] != "" and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "T" or $laskurow["tila"] == "A" or $laskurow["tila"] == "S")) {
+	elseif ($kukarow["kuka"] != "" and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "T" or $laskurow["tila"] == "A" or $laskurow["tila"] == "S"  or $laskurow["tila"] == "G")) {
 
 		if ($kukarow["extranet"] != "") {
 			$toim_kutsu = "EXTRANET";

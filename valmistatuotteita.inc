@@ -519,7 +519,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 				$uusiarvo = round($uusiarvo * ($isavarattu/$kaikenkaikkiaan), 6);
 			}
 			
-			if($isarow["sarjanumeroseuranta"] == "S" or $isarow["sarjanumeroseuranta"] == "S" or $isarow["sarjanumeroseuranta"] == "G") {
+			if($isarow["sarjanumeroseuranta"] == "S" or $isarow["sarjanumeroseuranta"] == "U" or $isarow["sarjanumeroseuranta"] == "G") {
 				$kehahin = 0;
 				$selite = "".t("Valmistettiin tuotetta työmääräyksellä")." $tilrivirow[otunnus] ($uusiarvo)";
 			}

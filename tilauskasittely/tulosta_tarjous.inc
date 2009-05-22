@@ -1,11 +1,18 @@
 <?php
 
 if (@include_once("pdflib/phppdflib.class.php")) {
-	include_once("viivakoodi/Barcode.php");
 }
 else {
 	include_once("phppdflib.class.php");
-	include_once("Barcode.php");
+}
+
+// jos php-gd on installoitu niin loidataab barcode library
+if (in_array("gd", get_loaded_extensions())) {
+	if (@include_once("viivakoodi/Barcode.php")) {
+	}
+	else {
+		include_once("Barcode.php");
+	}
 }
 
 if ($kieli== '') {
@@ -288,23 +295,25 @@ if (!function_exists('alku_tarjous')) {
 		else {
 			$kala = 560;
 		}
-		
-		//viivakoodi
-		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
-			
-		imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
 
-		$fh = fopen($nimi, "r");
-		$data = fread($fh, filesize($nimi));
-		fclose($fh);
+		if (class_exists("Image_Barcode")) {
+			//viivakoodi
+			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
-		$image = $pdf_tarjous->jfif_embed($data);
-		$pdf_tarjous->image_place($image, 805, 440, $page_tarjous);
-				
-		system("rm -f $nimi");
-			
+			imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
+
+			$fh = fopen($nimi, "r");
+			$data = fread($fh, filesize($nimi));
+			fclose($fh);
+
+			$image = $pdf_tarjous->jfif_embed($data);
+			$pdf_tarjous->image_place($image, 805, 440, $page_tarjous);
+
+			system("rm -f $nimi");
+		}
+
 		tarjous_rivi_otsikot($pdf_tarjous, $page_tarjous, $kieli, $kala);
-		
+
 		return array($page_tarjous, $kala);
 	}
 }

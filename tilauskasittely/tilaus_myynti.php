@@ -1689,15 +1689,17 @@ if ($tee == '') {
 		echo "</tr>";
 		
 		//	Tarkistetaan, ettei asiakas ole prospekti, tarjoukselle voi liitt‰‰ prospektiasiakkaan, josta voi tehd‰ suoraan tilauksen. Herjataan siis jos asiakas pit‰‰ p‰ivitt‰‰ ja tarkistaa
-		$prosque = "	SELECT tunnus
-						FROM asiakas
-						WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]' and laji='R'";
-		$prosres = mysql_query($prosque) or pupe_error($prosque);
-		if(mysql_num_rows($prosres)==1) {
-			$asiakasOnProspekti = "JOO";
-			echo "<tr>$jarjlisa
-					<td class='back' colspan='10'><br><font class='error'>".t("HUOM!!! Asiakas on prosketiasiakas, tarkista asiakasrekisteriss‰ asiakkaan tiedot ja p‰ivit‰ tiedot tilauksen otsikolle.")."</font><br></td>
-				</tr>";
+		if($toim != "TARJOUS") {
+			$prosque = "	SELECT tunnus
+							FROM asiakas
+							WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]' and laji='R'";
+			$prosres = mysql_query($prosque) or pupe_error($prosque);
+			if(mysql_num_rows($prosres)==1) {
+				$asiakasOnProspekti = "JOO";
+				echo "<tr>$jarjlisa
+						<td class='back' colspan='10'><br><font class='error'>".t("HUOM!!! Asiakas on prosketiasiakas, tarkista asiakasrekisteriss‰ asiakkaan tiedot ja p‰ivit‰ tiedot tilauksen otsikolle.")."</font><br></td>
+					</tr>";
+			}
 		}
 
 		// aivan karseeta, mutta joskus pit‰‰ olla n‰in asiakasyst‰v‰llinen... toivottavasti ei h‰iritse ket‰‰n

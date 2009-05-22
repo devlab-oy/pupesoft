@@ -163,8 +163,31 @@ if ($kukarow['taso'] != 1) {
 		$query = "UPDATE lasku set ultilno='$ultilno', swift='$swift',
 						comments = '$kommentti' WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
-		$tee='E';
-		$tila='X';
+		$tee  = 'E';
+		$tila = 'X';
+	}
+	
+	// Jaaha tarkastamme viestin!
+	if ($tila == 'MVIESTI') {
+		$viesti = trim($viesti);
+				
+		if ($viesti == "") {
+			echo "<font class='error'>".t("Viesti ei saa olla tyhj‰")."</font><br>";
+			$tee  = 'E';
+			$tila = '';
+		}
+	}
+
+	// Jaaha p‰ivit‰mme viestin!
+	if ($tila == 'MVIESTI') {
+		//P‰ivitet‰‰n lasku
+		$query = "	UPDATE lasku 
+					set viesti='$viesti'
+					WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		$tee = 'E';
+		$tila = 'X';
 	}
 	
 	//T‰‰ll‰ tarkistetaan pvm
@@ -1046,12 +1069,21 @@ if ($tila == '') {
 			echo "<form action = '$PHP_SELF?tee=M&tila=TU' method='post'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name='tunnus' value='$tunnus'>
-					<tr><th>".t('Muuta toimitajan ulkomaanmaksutili‰')."</th>
+					<tr><th>".t('Muuta toimittajan ulkomaanmaksutili‰')."</th>
 					<td><input type = 'text' name = 'ultilno' size='40' value = '$trow[ultilno]'></td><td></td></tr>
 					<tr><th>".t('SWIFT')."</th>
 					<td><input type = 'text' name = 'swift' size='40' value = '$trow[swift]'></td>
 					<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td></tr></form>";
-		}
+		}		
+	}
+	
+	if ($trow['tila'] == 'H' and $kukarow['taso'] != 1) {
+		echo "<form action = '$PHP_SELF?tee=M&tila=MVIESTI' method='post'>
+				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+				<input type = 'hidden' name='tunnus' value='$tunnus'>
+				<tr><th>".t('Muuta laskun viesti‰')."</th>
+				<td><input type = 'text' name = 'viesti' size='40' value = '$trow[viesti]'></td>
+				<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td></tr></form>";	
 	}
 	
 	if ($trow["tila"] == "Q" and $kukarow['taso'] !=1) {

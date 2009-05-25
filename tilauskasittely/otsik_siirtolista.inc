@@ -140,7 +140,9 @@
 			while ($varow = mysql_fetch_array($vares)) {
 
 				$sel='';
-				if ($varow['tunnus']==$srow["clearing"]) $sel = 'selected';
+				if ($varow['tunnus']==$srow["clearing"] or ((int)$kukarow["kesken"]==0 and $varow['tunnus'] == $kukarow["varasto"])) {
+					$sel = 'selected';
+				}
 
 				$varastomaa = '';
 				if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {

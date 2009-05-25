@@ -230,9 +230,9 @@
 		$valkoodi  = "";
 		$valkoodi2 = "";
 
-		if (isset($_POST['savalkoodi']) and $_POST['savalkoodi'] != '') {
-			$valkoodi1 = $valkoodi = " and lasku.valkoodi = '{$_POST['savalkoodi']}'";
-			$valkoodi2 = " and suoritus.valkoodi = '{$_POST['savalkoodi']}'";
+		if (isset($savalkoodi) and $savalkoodi != '') {
+			$valkoodi1 = $valkoodi = " and lasku.valkoodi = '$savalkoodi'";
+			$valkoodi2 = " and suoritus.valkoodi = '$savalkoodi'";
 		}
 
 		if ($ojarj != "") {
@@ -302,8 +302,11 @@
 			
 			while ($trow = mysql_fetch_array ($result)) {
 				if ($trow['avoinsaldo'] != 0) {
-
+					
+					// Yrityksen valuutassa
 					$summa += $trow['avoinsaldo'];
+
+					// Laskun valuutassa
 					$summa2+= $trow['summa'];
 					
 					echo "<tr class='aktiivi'>";
@@ -328,10 +331,12 @@
 					echo "<td>".tv1dateconv($trow["erpcm"])."</td>";
 
 					if ($valuutassako == "V") {
+						// Laskun valuutassa
 						echo "<td align='right'>$trow[summa]</td>";
 						echo "<td align='right'>$trow[valkoodi]</td>";
 					}
 					else {
+						// Yrityksen valuutassa
 						echo "<td align='right'>$trow[avoinsaldo]</td>";
 						echo "<td align='right'>$yhtiorow[valkoodi]</td>";
 					}
@@ -340,7 +345,8 @@
 				}
 			}
 
-        	$query = "	SELECT sum(summa) saldo FROM tiliointi
+        	$query = "	SELECT sum(summa) saldo 
+						FROM tiliointi
 						WHERE yhtio	 = '$kukarow[yhtio]'
 						and korjattu = ''
 						and tapvm	>= '$tilikausirow[tilikausi_alku]'
@@ -348,29 +354,22 @@
 						and tilino	IN ($tili)";
 			$result = mysql_query($query) or pupe_error($query);
 			$trow = mysql_fetch_array ($result);
-			
-			if ($valuutassako != "V" and $savalkoodi != '') {
-				$summa2 = '';
-				$lisaval = '';
+						
+			// Laskun valuutassa
+			if ($valuutassako == "V" and $savalkoodi != '') {
+				$summa2 = "/ ".$summa2;
+				$lisaval = "/ ".$savalkoodi;								
 			}
 			else {
-				$summa2 = "/".$summa2;
-				$lisaval = "/".$savalkoodi;
+				$summa2 = '';
+				$lisaval = '';
 			}
 			
 			$erotus = $trow['saldo']+$summa;
 
-			$summa = sprintf("%01.2f", $summa);
-			$summa = str_replace('.',',',$summa);
-			echo "<tr><th colspan='7'>".t("Avoimet yhteensä").":</th><th align='right' nowrap>$summa $summa2</th><th>$yhtiorow[valkoodi] $lisaval</th></tr>";
-
-			$summa = sprintf("%01.2f", $trow['saldo']);
-			$summa = str_replace('.',',',$summa);
-			echo "<tr><th colspan='7'>".t("Tili %s yhteensä", "", $tili).":</th><th align='right' nowrap>$summa</th><th>$yhtiorow[valkoodi]</th></tr>";
-
-			$summa = sprintf("%01.2f", $erotus);
-			$summa = str_replace('.',',',$summa);
-			echo "<tr><th colspan='7'>".t("Ero").":</th><th align='right' nowrap>$summa</th><th>$yhtiorow[valkoodi]</th></tr>";
+			echo "<tr><th colspan='7'>".t("Avoimet yhteensä").":</th><th align='right' nowrap>".sprintf("%01.2f", $summa)." $summa2</th><th>$yhtiorow[valkoodi] $lisaval</th></tr>";
+			echo "<tr><th colspan='7'>".t("Tili %s yhteensä", "", $tili).":</th><th align='right' nowrap>".sprintf("%01.2f", $trow['saldo'])."</th><th>$yhtiorow[valkoodi]</th></tr>";
+			echo "<tr><th colspan='7'>".t("Ero").":</th><th align='right' nowrap>".sprintf("%01.2f", $erotus)."</th><th>$yhtiorow[valkoodi]</th></tr>";
 		}
 		elseif (substr($laji,0,1) == 'M') {
 
@@ -392,8 +391,8 @@
 			}
 
 			$maa = '';
-			if (isset($_POST['maa']) and $_POST['maa'] != '') {
-				$maa = " and lasku.maa = '{$_POST['maa']}'";
+			if (isset($maa) and $maa != '') {
+				$maa = " and lasku.maa = '$maa'";
 			}
 
 			if ($lasku_ytunnus != "") {

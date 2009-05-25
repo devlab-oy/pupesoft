@@ -357,19 +357,17 @@
 						
 			// Laskun valuutassa
 			if ($valuutassako == "V" and $savalkoodi != '') {
-				$summa2 = "/ ".$summa2;
-				$lisaval = "/ ".$savalkoodi;								
-			}
-			else {
-				$summa2 = '';
-				$lisaval = '';
+				echo "<tr><th colspan='7'>".t("Avoimet yhteensä").":</th><th align='right' nowrap>".sprintf("%01.2f", $summa2)."</th><th>$savalkoodi</th></tr>";							
 			}
 			
 			$erotus = $trow['saldo']+$summa;
 
-			echo "<tr><th colspan='7'>".t("Avoimet yhteensä").":</th><th align='right' nowrap>".sprintf("%01.2f", $summa)." $summa2</th><th>$yhtiorow[valkoodi] $lisaval</th></tr>";
-			echo "<tr><th colspan='7'>".t("Tili %s yhteensä", "", $tili).":</th><th align='right' nowrap>".sprintf("%01.2f", $trow['saldo'])."</th><th>$yhtiorow[valkoodi]</th></tr>";
-			echo "<tr><th colspan='7'>".t("Ero").":</th><th align='right' nowrap>".sprintf("%01.2f", $erotus)."</th><th>$yhtiorow[valkoodi]</th></tr>";
+			echo "<tr><th colspan='7'>".t("Avoimet yhteensä").":</th><th align='right' nowrap>".sprintf("%01.2f", $summa)."</th><th>$yhtiorow[valkoodi]</th></tr>";
+			
+			if ($savalkoodi == '') {
+				echo "<tr><th colspan='7'>".t("Tili %s yhteensä", "", $tili).":</th><th align='right' nowrap>".sprintf("%01.2f", $trow['saldo'])."</th><th>$yhtiorow[valkoodi]</th></tr>";
+				echo "<tr><th colspan='7'>".t("Ero").":</th><th align='right' nowrap>".sprintf("%01.2f", $erotus)."</th><th>$yhtiorow[valkoodi]</th></tr>";
+			}
 		}
 		elseif (substr($laji,0,1) == 'M') {
 

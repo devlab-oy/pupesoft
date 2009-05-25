@@ -707,12 +707,23 @@
 				$ennaa_yht += $row["arvo"];
 			}
 			else {				
-				if ($row["osto_vai_hyvitys"] != "O" and ($laskurow["tapvm"] == '0000-00-00' or ($row["var"] != "P" and $row["var"] != "J" and $row["var"] != "S"))) {
-					$rihin_yht += $row["rivihinta"];
+								
+				if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+					if ($row["osto_vai_hyvitys"] != "O" and ($laskurow["tapvm"] == '0000-00-00' or ($row["var"] != "P" and $row["var"] != "J" and $row["var"] != "S"))) {
+						$rihin_yht += laskuval($row["rivihinta"], $laskurow["vienti_kurssi"]);
+					}
+					
+					$arvo_yht  += laskuval($row["arvo"], $laskurow["vienti_kurssi"]);
+					$summa_yht += laskuval($row["summa"], $laskurow["vienti_kurssi"]);
 				}
-				
-				$arvo_yht  += $row["arvo"];
-				$summa_yht += $row["summa"];
+				else {
+					if ($row["osto_vai_hyvitys"] != "O" and ($laskurow["tapvm"] == '0000-00-00' or ($row["var"] != "P" and $row["var"] != "J" and $row["var"] != "S"))) {
+						$rihin_yht += $row["rivihinta"];
+					}
+					
+					$arvo_yht  += $row["arvo"];
+					$summa_yht += $row["summa"];
+				}								
 			}
 
 			$tquery	= "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";

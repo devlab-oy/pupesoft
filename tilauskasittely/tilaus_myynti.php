@@ -3275,6 +3275,7 @@ if ($tee == '') {
 					tuote.kehahin,
 					tuote.sarjanumeroseuranta,
 					tuote.vaaditaan_kpl2,
+					tuote.yksikko,
 					$sorttauskentta
 					FROM tilausrivi use index (yhtio_otunnus)
 					LEFT JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno)
@@ -4197,9 +4198,12 @@ if ($tee == '') {
 							echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle</td>";
 						}
 					}
+					elseif($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
+						echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle".strtolower($row["yksikko"])."</td>";
+					}
 					else {
 						echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle</td>";
-					}
+					}					
 				}
 
 				if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {

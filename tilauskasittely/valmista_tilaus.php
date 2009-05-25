@@ -618,7 +618,8 @@
 		$query = "	SELECT
 					GROUP_CONCAT(DISTINCT lasku.tunnus SEPARATOR ', ') 'Tilaus',
 					GROUP_CONCAT(DISTINCT lasku.nimi SEPARATOR ', ') 'Asiakas/Nimi',
-					GROUP_CONCAT(DISTINCT lasku.ytunnus SEPARATOR ', ') 'Ytunnus'
+					GROUP_CONCAT(DISTINCT lasku.ytunnus SEPARATOR ', ') 'Ytunnus',
+					GROUP_CONCAT(DISTINCT lasku.tilaustyyppi SEPARATOR ', ') 'Tilaustyyppi'
 					FROM tilausrivi, lasku
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and	tilausrivi.tunnus in ($valmistettavat)
@@ -663,10 +664,26 @@
 		}
 
 		echo "<table>";
-		for ($i=0; $i < mysql_num_fields($result); $i++) {
+		for ($i=0; $i < mysql_num_fields($result)-1; $i++) {
 			echo "<tr><th align='left'>" . t(mysql_field_name($result,$i)) ."</th><td>$row[$i]</td></tr>";
 		}
+		
+		//	Voidaan hypätä suoraan muokkaamaan tilausta
+		if($toim == "" and $tulin == "VALINNASTA" and strpos($row["Tilaus"], ",") === false and $row["Tilaustyyppi"] == "W") {
+
+			echo "	<tr>
+						<td class='back' colspan='2'>
+						<form method='post' action='tilaus_myynti.php'>
+						<input type='hidden' name='toim' value='VALMISTAVARASTOON'>
+						<input type='hidden' name='tee' value='AKTIVOI'>
+						<input type='hidden' name='tilausnumero' value='$row[Tilaus]'>
+						<input type='submit' value='".t("Muokkaa tilausta")."'>
+						</form>
+						</td>
+					</tr>";
+		}
 		echo "</table><br>";
+		
 
 		//Haetaan valmistettavat valmisteet ja käytettävät raaka-aineet
 		$query = "	SELECT tilausrivi.nimitys,
@@ -689,6 +706,7 @@
 					tuote.ei_saldoa,
 					tilausrivi.kommentti,
 					tuote.sarjanumeroseuranta,
+					tuote.yksikko,
 					tilausrivi.varattu,
 					tilausrivi.var,
 					tilausrivi.hyllyalue,
@@ -795,13 +813,13 @@
 			
 			$sarjavalinta = "";
 			if($prow["tyyppi"] == "V" and $prow["toimitettuaika"] == "0000-00-00 00:00:00") {
-				$sarjavalinta = naytaValinta($laskurow, $prow, "myyntirivitunnus", "myyntirivitunnus", array("D","O"), "VALMISTUS", "&otunnus=$laskurow[tunnus]&valmistettavat=$valmistettavat");
+				$sarjavalinta = "<span style='float: left;'> ".naytaValinta($laskurow, $prow, "myyntirivitunnus", "myyntirivitunnus", array("D","O"), "VALMISTUS", "&otunnus=$laskurow[tunnus]&valmistettavat=$valmistettavat")."</span>";
 			}
 			
 			echo "<td class='$class' valign='top'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
 			echo "<td class='$class' valign='top'><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a> $sarjalinkkilisa</td>";
 			echo "<input type='hidden' name='tuotenumerot[$prow[tunnus]]' value='$prow[tuoteno]'>";
-			echo "<td class='$class' valign='top' align='right'>$prow[tilattu] $sarjavalinta</td>";
+			echo "<td class='$class' valign='top' align='right'>$sarjavalinta <span style='float: right; width: 80px;'>$prow[tilattu]".strtolower($prow["yksikko"])."</span></td>";
 
 
 			if ($toim == "KORJAA" and  $prow["tyyppi"] == 'V') {

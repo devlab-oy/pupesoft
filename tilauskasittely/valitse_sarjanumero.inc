@@ -229,7 +229,7 @@ function naytaValinta($laskurow, $row, $tunken1, $tunken2, $lisaaTilausriviTyypi
 			$subbari = "";
 		}
 
-		$ulos = "	<select name='era_new_paikka[$row[tunnus]]' $subbari>
+		$ulos = "	<select name='era_new_paikka[$row[tunnus]]' $subbari style='width: 230px;'>
 						$paikat
 					</select>
 					<input type='hidden' name='era_old_paikka[$row[tunnus]]' value='$selpaikka'>

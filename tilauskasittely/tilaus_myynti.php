@@ -3880,6 +3880,9 @@ if ($tee == '') {
 						$trivityyulos .= "<button onclick=\"popUp(event, 'positioselain_DIV', 0, 0, '../positioselain.php?kohde={$lasklisatied_row["asiakkaan_kohde"]}&valitse_positio_return_url=$valitse_positio_return_url'); return false;\" title='$posrow[positio_tarkenne]' $state>$posrow[positio]</button>";
 						$trivityyulos .= "<img src='$palvelin2/pics/lullacons/info-grey-bg.png' class='info' style='float: right; border: 1px solid; margin: 2px; vertical-align: top;' onclick=\"popUp(event, 'positioselain_DIV', 0, 0, '../positioselain.php?tee=nayta_positio&positio=$row[asiakkaan_positio]');\">";
 					}
+					else {
+						$trivityyulos .= "&nbsp;";
+					}
 				}
 				elseif($yhtiorow['tilauksen_kohteet'] == "K") {
 					$trivityyulos .= "&nbsp;";

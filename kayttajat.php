@@ -475,7 +475,7 @@
 			else {
 				echo "<input type='hidden' name='tee' value='UUSI'>";
 				echo "<tr><th align='left'>".t("Käyttäjätunnus").":</th>
-				<td><input type='text' size='50' maxlenght='30' name='ktunnus'></td></tr>";
+				<td><input type='text' size='50' maxlenght='10' name='ktunnus'></td></tr>";
 			}
 			echo "<tr><th align='left'>".t("Salasana").":</th><td><input type='text' size='50' maxlenght='30' name='password' value='$generoitupass'></td><td class='back'> <a href='?generatepass=y&selkuka=$selkuka&toim=$toim'>".t("Generoi salasana")."</a></td></tr>";
 			echo "<tr><th align='left'>".t("Nimi").":</th><td><input type='text' size='50' value='$krow[nimi]' maxlenght='30' name='firname'></td></tr>";

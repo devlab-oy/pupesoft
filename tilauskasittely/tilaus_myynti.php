@@ -3680,7 +3680,6 @@ if ($tee == '') {
 							}
 						}
 					}
-					
 					echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$echorivino </td>";
 				}
 				elseif($row["perheid"] == 0 and $row["perheid2"] == 0) {
@@ -4636,6 +4635,10 @@ if ($tee == '') {
 
 					if ($toim == "VALMISTAVARASTOON") {
 						$cspan -= 6;
+						
+						if($yhtiorow["tilauksen_kohteet"] == "K") {
+							$cspan--;
+						}
 					}
 
 					if ($toim == "SIIRTOLISTA") {

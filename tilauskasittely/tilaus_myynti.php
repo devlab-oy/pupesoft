@@ -3520,7 +3520,7 @@ if ($tee == '') {
 					$row["hyllyvali"] = "";
 					$row["hyllytaso"] = "";
 				}
-
+				
 				if ($row["var"] == "P") {
 					$class = " class='spec' ";
 				}
@@ -3530,7 +3530,7 @@ if ($tee == '') {
 				elseif($yhtiorow["puute_jt_oletus"] == "H") {
 					//	Tarkastetaan saldo ja informoidaan k‰ytt‰j‰‰
 					list(, , $tsek_myytavissa) = saldo_myytavissa($trow["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
-
+										
 					if ($tsek_myytavissa < 0) {
 						$class = " class='spec' ";
 					}
@@ -3538,22 +3538,23 @@ if ($tee == '') {
 						$class = '';
 					}
 				}
-				else {
+				else {					
 					$class = '';
 				}
-
-				if ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
-
+				
+				if ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {					
 					if ($row["tyyppi"] == "W") {
 						$class = " class='spec' ";
+					}
+					else {
+						$class = ""; 
 					}
 
 					if ($vanhaid != $row["perheid"] and $vanhaid != 'KALA') {
 						echo "<tr>$jarjlisa<td class='back' colspan='10'><br></td></tr>";
 					}
 				}
-
-
+				
 				if($yhtiorow["tilauksen_jarjestys_suunta"] == "ASC") {
 					$rivino++;
 				}

@@ -32,12 +32,6 @@
 		echo "<tr><th>".t("Näytä vain tämä nimi").":</th><td valign='top'><input type='text' name='sanimi' size ='15' value='$sanimi'></td></tr>";
 		echo "<tr><th>".t("Näytä vain ne joilla saatavaa on yli").":</th><td valign='top'><input type='text' name='yli' size ='15' value='$yli'></td></tr>";
 
-/*
-		echo "<tr>
-				<th>".t("Näytä tilanne").":</th>
-				<td valign='top'><input type='text' name='sappl' value='$sappl' size='3'><input type='text' name='sakkl' value='$sakkl' size='3'><input type='text' name='savvl' value='$savvl' size='5'></td>
-			</tr>";
-*/
 		$chk = '';
 
 		if ($ylilimiitin != '') {
@@ -103,7 +97,6 @@
 	if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 
 		$lisa = '';
-		$useindex = " use index (yhtio_tila_mapvm) ";
 
 		if ($sanimi != '') {
 			$lisa .= " and lasku.nimi like '%$sanimi%' ";
@@ -112,11 +105,9 @@
 			$query = "SELECT ifnull(group_concat(tunnus), 0) FROM asiakas WHERE yhtio = '$kukarow[yhtio]' AND ytunnus = '$sytunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$row = mysql_fetch_array($result);
-
 			$lisa .= " and lasku.liitostunnus in ($row[0]) ";
-			$useindex = " use index (yhtio_tila_liitostunnus_tapvm) ";
 		}
-		
+
 		$yli = str_replace(',','.', $yli);
 
 		if ($yli != 0) {
@@ -172,11 +163,10 @@
 					$selecti,
 					$summalisa,
 					min(liitostunnus) litu
-					FROM lasku $useindex
+					FROM lasku use index (yhtio_tila_mapvm)
 					WHERE tila	= 'U'
 					and alatila	= 'X'
-					and (lasku.mapvm > '$savvl-$sakkl-$sappl' or lasku.mapvm='0000-00-00')
-					and lasku.tapvm <= '$savvl-$sakkl-$sappl'
+					and lasku.mapvm = '0000-00-00'
 					$lisa
 					$salisa
 					and lasku.yhtio = '$kukarow[yhtio]'
@@ -361,7 +351,7 @@
 					$ffy 		+= $row["ff"];
 					$kky 		+= $surow["summa"];
 					$lly 		+= $row["ll"];
-					
+
 					// Muutettu ylikolkyt --> yliviistoista, mutta muuttujan nimi on edelleen ylikolkyt
 					$ylikolkyt	+= $row["bb"];
 					$ylikolkyt	+= $row["cc"];

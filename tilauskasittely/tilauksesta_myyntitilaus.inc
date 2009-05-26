@@ -7,7 +7,7 @@
 	// $syot_var voidaan ohjata var-kentt‰‰
 
 	if (!function_exists("tilauksesta_myyntitilaus")) {
-		function tilauksesta_myyntitilaus($otunnus, $tilrivilisa, $syot_varasto, $syot_var, $varataan_saldoa = "", $kopioi_paikat = "", $perusta_projekti="") {
+		function tilauksesta_myyntitilaus($otunnus, $tilrivilisa, $syot_varasto, $syot_var, $varataan_saldoa = "", $kopioi_paikat = "", $perusta="") {
 			global $yhtiorow, $kukarow;
 
 			$tilauksesta_myyntitilaus = "";
@@ -45,7 +45,12 @@
 						$values .= ", ''";
 						break;
 					case 'tila':
-						$values .= ", 'N'";
+						if($perusta == "TYOMAARAYS") {
+							$values .= ", 'A'";
+						}
+						else {
+							$values .= ", 'N'";
+						}
 						break;
 					case 'tilaustyyppi':
 						if ($monistarow["tila"] == "T") {
@@ -108,7 +113,7 @@
 			*/
 			
 			$tunnusnippu=$ptunnus=0;
-			if($perusta_projekti != "" and $monistarow["tunnusnippu"] > 0 and $monistarow["tila"] == "T") {
+			if($perusta == "PROJEKTI" and $monistarow["tunnusnippu"] > 0 and $monistarow["tila"] == "T") {
 				$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 				$insres  = mysql_query($kysely) or pupe_error($kysely);
 				$ptunnus = mysql_insert_id();
@@ -123,10 +128,18 @@
 				
 				$tilauksesta_myyntitilaus = "<font class='message'>".t("PERUSTETTIIN PROJEKTI").": $ptunnus</font><br><br>";
 			}
-			
+
 			$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 			$insres  = mysql_query($kysely) or pupe_error($kysely);
 			$utunnus = mysql_insert_id();
+
+			if($perusta == "TYOMAARAYS") {
+				//	Tehd‰‰n tyhj‰ pohja tyˆm‰‰r‰ykselle..
+				$kysely  = "INSERT into tyomaarays SET
+				 				yhtio = '$kukarow[yhtio]',
+								otunnus = '$utunnus'";
+				$insres  = mysql_query($kysely) or pupe_error($kysely);
+			}
 			
 			/*
 				T‰‰ voi olla hassua, mutta n‰in t‰m‰ haluttiin!

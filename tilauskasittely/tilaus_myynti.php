@@ -422,7 +422,7 @@ if ($kukarow["extranet"] == "" and $tee == "HYVAKSYTARJOUS" and $muokkauslukko =
 	// Kopsataan valitut rivit uudelle myyntitilaukselle
 	require("tilauksesta_myyntitilaus.inc");
 
-	$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], '', '', '', '', '', $perusta_projekti);
+	$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], '', '', '', '', '', $perusta_tilaustyyppi);
 	if ($tilauksesta_myyntitilaus != '') echo "$tilauksesta_myyntitilaus<br><br>";
 
 	$query = "UPDATE lasku SET alatila='B' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
@@ -5336,7 +5336,13 @@ if ($tee == '') {
 				$projektitarkres = mysql_query($query) or pupe_error($query);
 
 				if(mysql_num_rows($projektitarkres) == 1 and $laskurow["tunnusnippu"] > 0) {
-					$tarjouslisa=t("Perusta tilaukselle projekti").":<input type='checkbox' name='perusta_projekti'><br>";
+					
+					$tarjouslisa="	<font class='message'>".t("Perusta tilauksesta")."</font><br>
+									<select name='perusta_tilaustyyppi'>
+										<option value=''>".t("Normaalitilaus")."</option>
+										<option value='PROJEKTI'>".t("Projekti")."</option>
+										<option value='TYOMAARAYS'>".t("Työmääräin")."</option>
+									</select><br>";
 				}
 				else {
 					$tarjouslisa="";

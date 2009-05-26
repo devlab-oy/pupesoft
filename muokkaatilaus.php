@@ -1243,7 +1243,10 @@
 						if($row["tila"] == "A") {
 							$aputoim1 = "TYOMAARAYS";
 						}
-						elseif($row["tila"] != "R") {
+						elseif($row["tila"] == "R") {
+							$aputoim1 = "PROJEKTI";
+						}
+						else {
 							$aputoim1 = "RIVISYOTTO";
 						}
 

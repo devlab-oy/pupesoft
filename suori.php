@@ -456,11 +456,33 @@
 		// Jos meitä on kutsuttu tiliotteella niin meillä voisi olla summakin
 		$summahakuok=0;
 
+		if (isset($order) and $order != '') {
+			$order = mysql_real_escape_string($order);
+		}
+		else {
+			if ($tiliotesumma != 0) {
+				$order = "ytunnus";
+			}
+			elseif ($tiliotesumma == 0 or $summahakuok == 0) {
+				$order = "erpcm, ytunnus";
+			}
+			else {
+				$order = 'ytunnus';
+			}
+		}
+
+		if (isset($jarj) and $jarj != '') {
+			$jarj = $jarj == 'ASC' ? 'DESC' : 'ASC';
+		}
+		else {
+			$jarj = 'ASC';
+		}
+
 		if ($tiliotesumma != 0) {
-			$query = "	SELECT tunnus, nimi, tapvm, round((summa - if(alatila='K', kasumma, 0)) * vienti_kurssi, 2) kotisumma, concat_ws(' ',summa - if(alatila='K', kasumma, 0),valkoodi, if(alatila='K', '(K)','')) summa, ebid, valkoodi
+			$query = "	SELECT tunnus, nimi, tapvm, round((summa - if(alatila='K', kasumma, 0)) * vienti_kurssi, 2) kotisumma, concat_ws(' ',summa - if(alatila='K', kasumma, 0),valkoodi, if(alatila='K', '(K)','')) summa, ebid, valkoodi, viite, kasumma, olmapvm, popvm
 					  	FROM lasku
 					  	WHERE yhtio = '$kukarow[yhtio]' and maksu_tili='$mtili' and tila='Q' and round((summa - if(alatila='K', kasumma, 0)) * vienti_kurssi, 2) = '$tiliotesumma'
-					  	ORDER BY ytunnus";
+					  	ORDER BY $order $jarj";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) == 0)
@@ -470,10 +492,10 @@
 		}
 
 		if ($tiliotesumma == 0 or $summahakuok == 0) {
-			$query = "	SELECT tunnus, nimi, tapvm, round((summa - if(alatila='K', kasumma, 0)) * vienti_kurssi, 2) 'kotisumma', concat_ws(' ',summa - if(alatila='K', kasumma, 0),valkoodi, if(alatila='K', '(K)','')) summa, ebid, valkoodi, erpcm
+			$query = "	SELECT tunnus, nimi, tapvm, round((summa - if(alatila='K', kasumma, 0)) * vienti_kurssi, 2) 'kotisumma', concat_ws(' ',summa - if(alatila='K', kasumma, 0),valkoodi, if(alatila='K', '(K)','')) summa, ebid, valkoodi, erpcm, viite, kasumma, olmapvm, popvm
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]' and maksu_tili='$mtili' and tila='Q'
-						ORDER BY erpcm, ytunnus";
+						ORDER BY $order $jarj";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) == 0) {
@@ -483,14 +505,19 @@
 
 		echo "<table>";
 		echo "<tr>";		
-		echo "<th>".t("Nimi")."</th>";
-		echo "<th>".t("Tapvm")."</th>";
-		echo "<th>".t("Erpvm")."</th>";
-		echo "<th style='text-align:right;'>".t("Summa")."<br>$yhtiorow[valkoodi]</th>";
-		echo "<th style='text-align:right;'>".t('Summa')."<br>".t('valuutassa')."</th>";
-		echo "<th>".t("Ebid")."</th>";
-		echo "<th style='text-align:right;'>".t('Summa')."<br>$yhtiorow[valkoodi]</th>";
-		echo "<th style='text-align:right;'>".t('Summa')."<br>".t('valuutassa')."</th>";
+		echo "<th><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=nimi&jarj=$jarj'>",t("Nimi"),"</a></th>";
+		echo "<th><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=tapvm&jarj=$jarj'>",t("Tapvm"),"</a></th>";
+		echo "<th><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=erpcm&jarj=$jarj'>",t("Erpvm"),"</a></th>";
+		echo "<th><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=mapvm&jarj=$jarj'>",t("Mapvm"),"</a></th>";
+		echo "<th><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=popvm&jarj=$jarj'>",t("Popvm"),"</a></th>";
+		echo "<th>",t("Viite"),"</th>";
+		echo "<th style='text-align:right;'>",t("Summa"),"<br>$yhtiorow[valkoodi]</th>";
+		echo "<th style='text-align:right;'>",t('Summa'),"<br>".t('valuutassa')."</th>";
+		echo "<th style='text-align:right;'>",t('Kassa-ale'),"<br>$yhtiorow[valkoodi]</th>";
+		echo "<th>",t("Ebid"),"</th>";
+		echo "<th>",t("Tiliöinti"),"</th>";
+		echo "<th style='text-align:right;'>",t('Summa'),"<br>$yhtiorow[valkoodi]</th>";
+		echo "<th style='text-align:right;'>",t('Summa'),"<br>".t('valuutassa')."</th>";
 
 		echo "<th>".t("Suoritus")."<br>".t("selvittelytililtä")."</th>";
 		echo "<th></th>";
@@ -501,11 +528,16 @@
 			echo "<td valign='top'>$trow[nimi]</td>";
 			echo "<td nowrap valign='top'>".tv1dateconv($trow["tapvm"])."</td>";
 			echo "<td nowrap valign='top'>".tv1dateconv($trow["erpcm"])."</td>";
+			echo "<td nowrap valign='top'>".tv1dateconv($trow["olmapvm"])."</td>";
+			echo "<td nowrap valign='top'>".tv1dateconv($trow["popvm"])."</td>";
+			echo "<td nowrap valign='top'>{$trow['viite']}</td>";
 			echo "<td nowrap valign='top' align='right'>$trow[kotisumma] $yhtiorow[valkoodi]</td>";
 			echo "<td nowrap valign='top' align='right'>$trow[summa]</td>";
+			echo "<td nowrap valign='top' align='right'>$trow[kasumma]</td>";
 
 			// tehdään lasku linkki
 			echo "<td nowrap valign='top'>".ebid($trow['tunnus']) ."</td>";
+			echo "<td nowrap valign='top'><a href='muutosite.php?tee=E&tunnus={$trow['tunnus']}'>",t("Näytä tiliöinti"),"</a></td>";
 
 			echo "<td valign='top'><form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tee' value='V'>

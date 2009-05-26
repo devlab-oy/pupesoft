@@ -394,19 +394,16 @@
 	}
 	echo "</select></td>";
 	echo "</tr></table>";
-
 	echo "<br/>";
-
 	echo "<table style='display:inline;'>";
 	echo "<tr>";
 	echo "<th>".t("Syötä viimeinen saapumispäivä").":</th>";
 	echo "	<td><input type='text' name='saapumispp' value='$saapumispp' size='2'>
 			<input type='text' name='saapumiskk' value='$saapumiskk' size='2'>
-			<input type='text' name='saapumisvv' value='$saapumisvv'size='4'></td><td></td></tr>";
+			<input type='text' name='saapumisvv' value='$saapumisvv'size='4'></td></tr>";
 	
 	echo "<tr>";
 	echo "<th>".t("Taso").":</th>";
-	echo "<td></td>";
 	
 	if ($lisatiedot != '') $sel = "selected";
 	else $sel = "";
@@ -423,33 +420,28 @@
 	
 	if (count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_tme) > 0 or count($mul_tuotemyyja) > 0 or count($mul_tuoteostaja) > 0  or count($mul_malli) > 0 or (trim($saapumispp) != '' and trim($saapumiskk) != '' and trim($saapumisvv) != '')) {
 
-		$valinta = 'luokka';
-		$valintalisa = "";
+		$valinta 		= 'luokka';
+		$valintalisa 	= "";
 
-		if ($osasto != '') {
-			$valintalisa .= " and osasto='$osasto' ";
+		if (count($mul_osasto) == 1) {
 			$valinta = "luokka_osasto";
 		}
-		if ($try != '') {
-			$valintalisa .= " and try='$try' ";
+		if (count($mul_try) == 1) {
 			$valinta = "luokka_try";
 		}
-		if ($tuotemerkki != '') {
-			$valintalisa .= " and tuotemerkki='$tuotemerkki' ";
+		if (count($mul_tme) == 1) {
 			$valinta = "luokka_try";
 		}
-		if ($tuotemyyja != '') {
-			$valintalisa .= " and myyjanro='$tuotemyyja' ";
+		if (count($mul_tuotemyyja) == 1) {
 			$valinta = "luokka_try";
 		}
-		if ($tuoteostaja != '') {
-			$valintalisa .= " and ostajanro='$tuoteostaja' ";
+		if (count($mul_tuoteostaja) == 1) {
 			$valinta = "luokka_try";
 		}
-		if ($tuotemalli != '') {
-			$valintalisa .= " and malli='$tuotemalli' ";
+		if (count($mul_malli) == 1) {
 			$valinta = "luokka_try";
 		}
+		
 		if (trim($saapumispp) != '' and trim($saapumiskk) != '' and trim($saapumisvv) != '') {
 			$saapumispvm = "$saapumisvv-$saapumiskk-$saapumispp";
 			$valintalisa .= " and saapumispvm <= '$saapumispvm' ";

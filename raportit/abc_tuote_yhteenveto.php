@@ -386,19 +386,16 @@
 	}
 	echo "</select></td>";
 	echo "</tr></table>";
-
 	echo "<br>";
-
 	echo "<table style='display:inline;'>";
 	echo "<tr>";
 	echo "<th>".t("Syötä viimeinen saapumispäivä").":</th>";
 	echo "	<td nowrap><input type='text' name='saapumispp' value='$saapumispp' size='2'>
 			<input type='text' name='saapumiskk' value='$saapumiskk' size='2'>
-			<input type='text' name='saapumisvv' value='$saapumisvv'size='4'></td><td></td></tr>";
+			<input type='text' name='saapumisvv' value='$saapumisvv'size='4'></td></tr>";
 
 	echo "<tr>";
 	echo "<th>".t("Taso").":</th>";
-	echo "<td></td>";
 
 	if ($lisatiedot == 'TARK') {
 		$sel1 = "selected";

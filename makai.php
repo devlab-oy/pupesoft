@@ -318,8 +318,9 @@
 						}
 					}
 
-					$query = "	UPDATE lasku
-								SET tila = 'Q'
+					$query = "	UPDATE lasku SET 
+								tila = 'Q',
+								popvm = now()
 					          	WHERE yhtio 	= '$kukarow[yhtio]'
 					          	and tila 		= 'P'
 								and maa		 	= '$kotimaa'
@@ -545,7 +546,9 @@
 								$maksulk += $ulklaskusumma;	//viritet‰‰n bgutrivi.inc-failissa
 							}
 
-							$query = "	UPDATE lasku SET tila = 'Q'
+							$query = "	UPDATE lasku SET 
+										tila = 'Q',
+										popvm = now()
 										WHERE lasku.yhtio = '$kukarow[yhtio]'
 										and tila = 'P'
 										and maa <> '$kotimaa'
@@ -746,7 +749,9 @@
 						echo "</tr>";
 					}
 
-					$query = "	UPDATE lasku SET tila = 'Q'
+					$query = "	UPDATE lasku SET 
+								tila = 'Q',
+								popvm = now()
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
 								and tila = 'P'
 								and maa <> '$kotimaa'

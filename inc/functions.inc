@@ -3951,7 +3951,7 @@ if (!function_exists('ebid')) {
 			$res = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_array($res)) {
-				$out .= "<a $target href='".$palvelin2."view.php?id={$row['tunnus']}'>". t('Näytä liite') ."</a> ";
+				$out .= " <a $target href='".$palvelin2."view.php?id={$row['tunnus']}'>". t('Näytä liite') ."</a> ";
 			}
 
 			return $out;
@@ -3966,6 +3966,13 @@ if (!function_exists('ebid')) {
 			elseif ($laskurow['chn'] == '111') $out = t("Elma EDI-inhouse")."-".t("lasku");
 			elseif ($laskurow['chn'] == '666') $out = t("Sähköposti")."-".t("lasku");
 			elseif ($laskurow['chn'] == '667') $out = t("Sisäinen")."-".t("lasku");
+			
+			$query = "SELECT tunnus from liitetiedostot where liitostunnus='{$laskurow['tunnus']}' and liitos='lasku' and yhtio='{$kukarow['yhtio']}'";
+			$res = mysql_query($query) or pupe_error($query);
+
+			while ($row = mysql_fetch_array($res)) {
+				$out .= " <a $target href='".$palvelin2."view.php?id={$row['tunnus']}'>". t('Näytä liite') ."</a> ";
+			}
 			
 			return $out;
 	    }

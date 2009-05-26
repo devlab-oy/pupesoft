@@ -95,7 +95,7 @@
 					$isumma[$maara]  = (float) str_replace(",", ".", $kentat[3]);
 				}
 				else {
-					$isumma[$maara]  = (float) str_replace(",", ".", $kentat[4]);
+					$isumma[$maara]  = ((float) str_replace(",", ".", $kentat[4])) * -1;
 				}
 			
 				//Tositepvm

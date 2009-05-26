@@ -3922,7 +3922,7 @@ if (!function_exists('ebid')) {
 				}
 
 				if ($url_only) {
-					return $url;
+					return array($url);
 				}
 
 				return "<a href='$url'>". t('Näytä lasku')."</a>";
@@ -3942,7 +3942,7 @@ if (!function_exists('ebid')) {
 			$url	 = $urlhead.$urlmain."&DIGEST=$digest";
 
 			if ($url_only) {
-				return $url;
+				return array($url);
 			}
 
 			$out = "<a href='$url'>". t('Näytä lasku')."</a> ";
@@ -3982,13 +3982,11 @@ if (!function_exists('ebid')) {
 			$res = mysql_query($query) or pupe_error($query);
 
 			if ($url_only) {
-				
 				$out = array();
 			}
 			else {
 				$out = '';
 			}
-			
 			
 			while ($row = mysql_fetch_array($res)) {
 				if ($url_only) {

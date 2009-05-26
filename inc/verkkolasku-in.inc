@@ -41,7 +41,7 @@
 			}
 
 			// generic error messagen alku
-			$return  = "Tiedosto: $file\nLaskunro: $laskun_numero\nPäivä: $laskun_paiva\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEpäonnistumisen syy: ";
+			$return  = "Tiedosto: $file\nLaskunro: $laskun_numero\nPäivä: $laskun_paiva\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\n";
 			$komm = "";
 
 			// $yhtio:ssa on nyt laskun VASTAANOTTAJAN ovt-tunnus ja $verkkotunnus_vas:ssa on VASTAANOTTAJAN verkkolaskutunnus
@@ -158,7 +158,7 @@
 				$query = "SELECT distinct alert_email, postittaja_email FROM yhtion_parametrit WHERE alert_email != '' and postittaja_email != ''";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
-				$return .= "Laskun vastaanottajaa ei löytynyt ovt-tunnuksella '$yhtio' eikä verkkotunnuksella '$verkkotunnus_vas'! $_SERVER[SERVER_ADDR]\n";
+				$return .= "\nEpäonnistumisen syy: Laskun vastaanottajaa ei löytynyt ovt-tunnuksella '$yhtio' eikä verkkotunnuksella '$verkkotunnus_vas'! $_SERVER[SERVER_ADDR]\n";
 
 				while ($yhtiorow = mysql_fetch_array($result)) {
 					mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[alert_email]>\n", "-f $yhtiorow[postittaja_email]");
@@ -320,7 +320,7 @@
 			}
 
 			if (!isset($trow)) {
-				$return .= "Emme löytäneet toimittajaa! Etsittiin tiedoilla: Ovt/Nimi/Vat $laskuttajan_ovt/$laskuttajan_nimi/$laskuttajan_vat yhtiöltä: $yhtiorow[nimi] '$yhtio'\n\n";				
+				$return .= "\nEpäonnistumisen syy: Emme löytäneet toimittajaa! Etsittiin tiedoilla: Ovt/Nimi/Vat $laskuttajan_ovt/$laskuttajan_nimi/$laskuttajan_vat yhtiöltä: $yhtiorow[nimi] '$yhtio'\n\n";				
 
 				$urlmain = "/view/ebs-2.0/$yhtiorow[verkkotunnus_vas]/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=".gmdate("YmdHis")."Z&VERSION=ebs-2.0";                
 				$digest	 = md5($urlmain . "&" . $yhtiorow['verkkosala_vas']);
@@ -331,6 +331,9 @@
 				mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 				
 				return ($return);
+			}
+			else {
+				$return  .= "Toimittaja: $trow[ytunnus]/$trow[ovttunnus] - $trow[nimi]\nEpäonnistumisen syy: ";
 			}
 		
 			// katotaan pitääks vaihtaa oletus_vientiä

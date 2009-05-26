@@ -492,7 +492,19 @@
 		}
 
 		if ($tiliotesumma == 0 or $summahakuok == 0) {
-			$query = "	SELECT tunnus, nimi, tapvm, round((summa - if(alatila='K', kasumma, 0)) * vienti_kurssi, 2) 'kotisumma', concat_ws(' ',summa - if(alatila='K', kasumma, 0),valkoodi, if(alatila='K', '(K)','')) summa, ebid, valkoodi, erpcm, viite, kasumma, olmapvm, popvm
+			$query = "	SELECT tunnus, 
+						nimi, 
+						tapvm, 
+						round((summa - kasumma) * vienti_kurssi, 2) ka_summa, 
+						summa - kasumma ka_summa_valuutassa,
+						round(summa * vienti_kurssi, 2) summa,
+						summa summa_valuutassa,
+						ebid, 
+						valkoodi, 
+						erpcm, 
+						viite, 
+						olmapvm, 
+						popvm
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]' and maksu_tili='$mtili' and tila='Q'
 						ORDER BY $order $jarj";
@@ -505,39 +517,56 @@
 
 		echo "<table>";
 		echo "<tr>";		
-		echo "<th><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=nimi&jarj=$jarj'>",t("Nimi"),"</a></th>";
-		echo "<th><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=tapvm&jarj=$jarj'>",t("Tapvm"),"</a></th>";
-		echo "<th><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=erpcm&jarj=$jarj'>",t("Erpvm"),"</a></th>";
-		echo "<th><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=mapvm&jarj=$jarj'>",t("Mapvm"),"</a></th>";
-		echo "<th><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=popvm&jarj=$jarj'>",t("Popvm"),"</a></th>";
-		echo "<th>",t("Viite"),"</th>";
-		echo "<th style='text-align:right;'>",t("Summa"),"<br>$yhtiorow[valkoodi]</th>";
-		echo "<th style='text-align:right;'>",t('Summa'),"<br>".t('valuutassa')."</th>";
-		echo "<th style='text-align:right;'>",t('Kassa-ale'),"<br>$yhtiorow[valkoodi]</th>";
-		echo "<th>",t("Ebid"),"</th>";
-		echo "<th>",t("Tiliöinti"),"</th>";
-		echo "<th style='text-align:right;'>",t('Summa'),"<br>$yhtiorow[valkoodi]</th>";
-		echo "<th style='text-align:right;'>",t('Summa'),"<br>".t('valuutassa')."</th>";
+		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=nimi&jarj=$jarj'>",t("Nimi"),"</a></th>";
+		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=tapvm&jarj=$jarj'>",t("Tapvm"),"</a></th>";
+		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=erpcm&jarj=$jarj'>",t("Erpvm"),"</a></th>";
+		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=popvm&jarj=$jarj'>",t("Popvm"),"</a></th>";
+		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=olmapvm&jarj=$jarj'>",t("Olmapvm"),"</a></th>";
+		echo "<th valign='top'>",t("Viite"),"</th>";
+		echo "<th valign='top' style='text-align:right;'>",t("Summa"),"</th>";
+		echo "<th valign='top' style='text-align:right;'>",t('Kasumma'),"</th>";
+		echo "<th valign='top'>",t("Ebid"),"</th>";
+		echo "<th valign='top' style='text-align:right;'>",t('Summa'),"<br>$yhtiorow[valkoodi]</th>";
+		echo "<th valign='top' style='text-align:right;'>",t('Summa'),"<br>".t('valuutassa')."</th>";
 
-		echo "<th>".t("Suoritus")."<br>".t("selvittelytililtä")."</th>";
-		echo "<th></th>";
+		echo "<th colspan='2'>".t("Suoritus")."<br>".t("selvittelytililtä")."</th>";
 		echo "</tr>";
 
 		while ($trow = mysql_fetch_array ($result)) {
 			echo "<tr class='aktiivi'>";
 			echo "<td valign='top'>$trow[nimi]</td>";
-			echo "<td nowrap valign='top'>".tv1dateconv($trow["tapvm"])."</td>";
-			echo "<td nowrap valign='top'>".tv1dateconv($trow["erpcm"])."</td>";
-			echo "<td nowrap valign='top'>".tv1dateconv($trow["olmapvm"])."</td>";
-			echo "<td nowrap valign='top'>".tv1dateconv($trow["popvm"])."</td>";
-			echo "<td nowrap valign='top'>{$trow['viite']}</td>";
-			echo "<td nowrap valign='top' align='right'>$trow[kotisumma] $yhtiorow[valkoodi]</td>";
-			echo "<td nowrap valign='top' align='right'>$trow[summa]</td>";
-			echo "<td nowrap valign='top' align='right'>$trow[kasumma]</td>";
+			echo "<td nowrap valign='top'><a href='muutosite.php?tee=E&tunnus={$trow['tunnus']}'>".tv1dateconv($trow["tapvm"], "", "LYHYT")."</a></td>";
+			echo "<td nowrap valign='top'>".tv1dateconv($trow["erpcm"], "", "LYHYT")."</td>";
+			echo "<td nowrap valign='top'>".tv1dateconv($trow["popvm"], "", "LYHYT")."</td>";
+			echo "<td nowrap valign='top'>".tv1dateconv($trow["olmapvm"], "", "LYHYT")."</td>";
+			echo "<td valign='top'>{$trow['viite']}</td>";
+
+			if ($trow["summa"] != $trow["summa_valuutassa"]) {
+				echo "<td nowrap valign='top' align='right'>$trow[summa] $yhtiorow[valkoodi]<br>$trow[summa_valuutassa] $trow[valkoodi]</td>";
+			}
+			else {
+				echo "<td nowrap valign='top' align='right'>$trow[summa] $yhtiorow[valkoodi]<br></td>";
+			}
+
+			if ($trow["ka_summa"] != $trow["summa"]) {
+				if ($trow["summa"] != $trow["summa_valuutassa"]) {
+					echo "<td nowrap valign='top' align='right'>$trow[ka_summa] $yhtiorow[valkoodi]<br>$trow[ka_summa_valuutassa] $trow[valkoodi]</td>";
+				}
+				else {
+					echo "<td nowrap valign='top' align='right'>$trow[ka_summa] $yhtiorow[valkoodi]<br></td>";
+				}				
+			}
+			else {
+				echo "<td nowrap valign='top' align='right'></td>";
+			}
 
 			// tehdään lasku linkki
-			echo "<td nowrap valign='top'>".ebid($trow['tunnus']) ."</td>";
-			echo "<td nowrap valign='top'><a href='muutosite.php?tee=E&tunnus={$trow['tunnus']}'>",t("Näytä tiliöinti"),"</a></td>";
+			echo "<td nowrap valign='top'>";
+			$lasku_urlit = ebid($trow['tunnus'], true);
+			foreach ($lasku_urlit as $lasku_url) {
+				echo "<a href='$lasku_url'>Näytä liite</a><br>";
+			}
+			echo "</td>";
 
 			echo "<td valign='top'><form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tee' value='V'>

@@ -92,10 +92,10 @@
 				
 				// Summa
 				if (trim($kentat[3]) != "") {
-					$isumma[$maara]  = (float) $kentat[3];
+					$isumma[$maara]  = (float) str_replace(",", ".", $kentat[3]);
 				}
 				else {
-					$isumma[$maara]  = (float) $kentat[4];
+					$isumma[$maara]  = (float) str_replace(",", ".", $kentat[4]);
 				}
 			
 				//Tositepvm

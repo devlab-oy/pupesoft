@@ -101,11 +101,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	}
 	
 	//	Nämä ovat pakollisia dummysarakkeita jotka ohitetaan lopussa automaattisesti!
-	if(in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat"))) {
+	if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat"))) {
 		$abu_sarakkeet = array("YTUNNUS");
 	}
 	
-	if(count($abu_sarakkeet)>0) {
+	if (count($abu_sarakkeet)>0) {
 		foreach($abu_sarakkeet as $s) {
 			$trows[] 	= $s;
 			$ttype[]	= "";
@@ -240,7 +240,6 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			echo ") !</font><br>";
 		}
 
-
 		die("<font class='error'>".t("Virheitä löytyi. Ei voida jatkaa")."!<br></font>");
 	}
 
@@ -292,13 +291,16 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		}
 		fclose($file);
 	}
-
+	
+	$rivilaskuri = 1;
+	
 	foreach ($excelrivi as $erivi) {
 		$hylkaa    = 0;
 		$tila      = "";
 		$tee       = "";
 		$eilisataeikamuuteta = "";
-
+		$rivilaskuri++;
+		
 		//asiakashinta/asiakasalennus spessuja
 		$chasiakas_ryhma 	= '';
 		$chytunnus 			= '';
@@ -310,11 +312,16 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		$ashinaletuo 		= 0;
 		$and 				= '';
 		$tpupque 			= '';
+		
+		if ($rivilaskuri % 500 == 0) {
+			echo "<font class='message'>Käsitellään riviä: $rivilaskuri</font><br>";
+			flush();
+		}
 
 		if ($eiyhtiota == "") {
 			$valinta   = " YHTIO='$kukarow[yhtio]'";
 		}
-		elseif($eiyhtiota == "TRIP") {
+		elseif ($eiyhtiota == "TRIP") {
 			$valinta   = " TUNNUS>0 ";
 		}
 
@@ -374,8 +381,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			// jos pakollinen tieto puuttuu kokonaan
 			if (strlen(trim($rivi[$j])) == 0 and in_array($otsikot[$j], $pakolliset)) {
 				$tila = 'ohita';
-			}
-			
+			}			
 		}
 
 		// jos ei ole puuttuva tieto etsitään riviä
@@ -399,7 +405,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 					}
 					if (mysql_num_rows($tpres) != 1) {
-						echo t("Toimittajaa/Asiakasta")." '".$rivi[array_search("YTUNNUS", $otsikot)]."' ".t("ei löydy! Tai samalla ytunnuksella löytyy useita toimittajia! Lisää toimittajan tunnus LIITOSTUNNUS-sarakkeeseen. Riviä ei päivitetty/lisätty")."!<br>";
+						echo t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa/Asiakasta")." '".$rivi[array_search("YTUNNUS", $otsikot)]."' ".t("ei löydy! Tai samalla ytunnuksella löytyy useita toimittajia! Lisää toimittajan tunnus LIITOSTUNNUS-sarakkeeseen. Riviä ei päivitetty/lisätty")."!<br>";
 						$hylkaa++; // ei päivitetä tätä riviä
 					}
 					else {
@@ -417,7 +423,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					}
 				}
 				else {
-					echo t("Yhteyshenkilöä ei voi lisätä jos ei tiedetä ainakin YTUNNUSTA!")."<br>";
+					echo t("Virhe rivillä").": $rivilaskuri ".t("Yhteyshenkilöä ei voi lisätä jos ei tiedetä ainakin YTUNNUSTA!")."<br>";
 					$hylkaa++;
 				}
 			}
@@ -430,7 +436,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
 				if (mysql_num_rows($fresult) != 0 ) {
 					if ($table != 'asiakasalennus' and $table != 'asiakashinta') {
-						echo "<font class='error'>".t("VIRHE:")." ".t("Rivi on jo olemassa, ei voida perustaa uutta!")."</font> $valinta<br>";
+						echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("VIRHE:")." ".t("Rivi on jo olemassa, ei voida perustaa uutta!")."</font> $valinta<br>";
 						$tila = 'ohita';
 					}
 				}
@@ -438,18 +444,18 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			elseif (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
 				if (mysql_num_rows($fresult) == 0) {
 					if ($table != 'asiakasalennus' and $table != 'asiakashinta') {
-						echo "<font class='error'>".t("Riviä ei voida muuttaa, koska sitä ei löytynyt!")."</font><br>$valinta<br>";
+						echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei voida muuttaa, koska sitä ei löytynyt!")."</font> $valinta<br>";
 						$tila = 'ohita';
 					}
 				}
 			}
 			else {
-				echo "<font class='error'>".t("Riviä ei voida käsitellä koska siltä puuttuu toiminto!")."</font><br>$valinta<br>";
+				echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei voida käsitellä koska siltä puuttuu toiminto!")."</font> $valinta<br>";
 				$tila = 'ohita';
 			}
 		}
 		else {
-			echo "<font class='error'>".t("Pakollista tietoa puuttuu/tiedot ovat virheelliset!")."</font><br>$valinta<br>";
+			echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Pakollista tietoa puuttuu/tiedot ovat virheelliset!")."</font> $valinta<br>";
 		}		
 		
 		// lisätään rivi
@@ -493,13 +499,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							($ikenpituus[$r] == 4 and ($rivi[$r] > 4294967295 or $rivi[$r] < -2147483648))
 							) {
 							
-							echo "<font class='error'>".t("VIRHE").": ".$otsikot[$r]." ".t("Luku on liian suuri eikä se mahdu kenttään")."!</font> $rivi[$r]: ".strlen($rivi[$r])." > (int) ".$ikenpituus[$r]."!<br>";
+							echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("VIRHE").": ".$otsikot[$r]." ".t("Luku on liian suuri eikä se mahdu kenttään")."!</font> $rivi[$r]: ".strlen($rivi[$r])." > (int) ".$ikenpituus[$r]."!<br>";
 							$hylkaa++; // ei päivitetä tätä riviä							
 						} 
 						
 					}
 					elseif ((int) $ikenpituus[$r] > 0 and strlen($rivi[$r]) > $ikenpituus[$r] and ($table != "tuotepaikat" and $otsikot[$r] != "OLETUS" and $rivi[$r] != 'XVAIHDA')) {
-						echo "<font class='error'>".t("VIRHE").": ".$otsikot[$r]." ".t("kentässä on liian pitkä tieto")."!</font> $rivi[$r]: ".strlen($rivi[$r])." > ".$ikenpituus[$r]."!<br>";
+						echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("VIRHE").": ".$otsikot[$r]." ".t("kentässä on liian pitkä tieto")."!</font> $rivi[$r]: ".strlen($rivi[$r])." > ".$ikenpituus[$r]."!<br>";
 						$hylkaa++; // ei päivitetä tätä riviä
 					}
 
@@ -520,10 +526,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 								if (mysql_num_rows($cnres) == 0) {
 									$hylkaa++; // ei päivitetä tätä riviä
-									echo t("Tullinimike")." '$rivi[$r]' ".t("on väärin! Riviä ei päivitetty/lisätty")."!<br>";
+									echo t("Virhe rivillä").": $rivilaskuri ".t("Tullinimike")." '$rivi[$r]' ".t("on väärin! Riviä ei päivitetty/lisätty")."!<br>";
 								}
 								else {
-									echo t("Tullinimike")." '$varafat' ".t("on väärin! Se muokattiin muotoon:")." ".$rivi[$r]."!<br>";
+									echo t("Virhe rivillä").": $rivilaskuri ".t("Tullinimike")." '$varafat' ".t("on väärin! Se muokattiin muotoon:")." ".$rivi[$r]."!<br>";
 								}
 							}
 						}
@@ -536,7 +542,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 
 						if (mysql_num_rows($tpres) == 0) {
-							echo t("Tuotetta")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
+							echo t("Virhe rivillä").": $rivilaskuri ".t("Tuotetta")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
 							$hylkaa++; // ei päivitetä tätä riviä
 						}
 					}
@@ -552,7 +558,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 
 						if (mysql_num_rows($tpres) == 0) {
-							echo t("$otsikot[$r]")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
+							echo t("Virhe rivillä").": $rivilaskuri ".t("$otsikot[$r]")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
 							$hylkaa++; // ei päivitetä tätä riviä
 						}
 					}
@@ -563,7 +569,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 
 						if (mysql_num_rows($tpres) == 0) {
-							echo t("$otsikot[$r]")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
+							echo t("Virhe rivillä").": $rivilaskuri ".t("$otsikot[$r]")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
 							$hylkaa++; // ei päivitetä tätä riviä
 						}
 					}
@@ -578,7 +584,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 
 						if (mysql_num_rows($tpres) == 0) {
-							echo t("$otsikot[$r]")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
+							echo t("Virhe rivillä").": $rivilaskuri ".t("$otsikot[$r]")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
 							$hylkaa++; // ei päivitetä tätä riviä
 						}
 					}
@@ -596,7 +602,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						}
 												
 						if (mysql_num_rows($tpres) == 0) {
-							//echo t("Mallia")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
+							//echo t("Virhe rivillä").": $rivilaskuri ".t("Mallia")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
 							//$hylkaa++; // ei päivitetä tätä riviä
 						}
 					}
@@ -611,21 +617,21 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 						if (mysql_num_rows($tpres) == 0) {
 							$rivi[$r] = "X"; // jos yhtään varastopaikkaa ei löydy, pakotetaan oletus
-							echo t("Tuotteella")." '$tuoteno' ".t("ei ole yhtään varastopaikkaa, pakotetaan tästä oletus").".<br>";
+							echo t("Virhe rivillä").": $rivilaskuri ".t("Tuotteella")." '$tuoteno' ".t("ei ole yhtään varastopaikkaa, pakotetaan tästä oletus").".<br>";
 						}
 						else {
 							$tprow = mysql_fetch_array($tpres);
 							if ($rivi[$r] == 'XVAIHDA' and $tprow['oletus'] > 0) {
 								//vaihdetaan tämä oletukseksi
-								echo t("Tuotteelle")." '$tuoteno' ".t("Vaihdetaan annettu paikka oletukseksi").".<br>";
+								echo t("Virhe rivillä").": $rivilaskuri ".t("Tuotteelle")." '$tuoteno' ".t("Vaihdetaan annettu paikka oletukseksi").".<br>";
 							}
 							elseif ($rivi[$r] != '' and $tprow['oletus'] > 0) {
 								$rivi[$r] = ""; // tällä tuotteella on jo oletuspaikka, nollataan tämä
-								echo t("Tuotteella")." '$tuoteno' ".t("on jo oletuspaikka, ei päivitetty oletuspaikkaa")."!<br>";
+								echo t("Virhe rivillä").": $rivilaskuri ".t("Tuotteella")." '$tuoteno' ".t("on jo oletuspaikka, ei päivitetty oletuspaikkaa")."!<br>";
 							}
 							elseif ($rivi[$r] == '' and $tprow['oletus'] == 0) {
 								$rivi[$r] = "X"; // jos yhtään varastopaikkaa ei löydy, pakotetaan oletus
-								echo t("Tuotteella")." '$tuoteno' ".t("ei ole yhtään oletuspaikkaa! Tätä EI PITÄISI tapahtua! Tehdään nyt tästä oletus").".<br>";
+								echo t("Virhe rivillä").": $rivilaskuri ".t("Tuotteella")." '$tuoteno' ".t("ei ole yhtään oletuspaikkaa! Tätä EI PITÄISI tapahtua! Tehdään nyt tästä oletus").".<br>";
 							}
 						}
 					}
@@ -683,7 +689,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 
 						if (mysql_num_rows($tpres) != 1) {
-							echo t("Toimittajaa")." '$rivi[$r]' ".t("ei löydy! Tai samalla ytunnuksella löytyy useita toimittajia! Lisää toimittajan tunnus LIITOSTUNNUS-sarakkeeseen. Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>";
+							echo t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa")." '$rivi[$r]' ".t("ei löydy! Tai samalla ytunnuksella löytyy useita toimittajia! Lisää toimittajan tunnus LIITOSTUNNUS-sarakkeeseen. Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>";
 							$hylkaa++; // ei päivitetä tätä riviä
 						}
 						else {
@@ -701,7 +707,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 
 						if (mysql_num_rows($tpres) != 1) {
-							echo t("Toimittajaa")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>";
+							echo t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>";
 							$hylkaa++; // ei päivitetä tätä riviä
 						}
 						else {
@@ -709,7 +715,6 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 						}
 					}
-		
 					elseif(in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat")) and $otsikot[$r] == 'LIITOSTUNNUS') {
 						
 						if($rivi[array_search("TYYPPI", $otsikot)] == "T") {
@@ -729,7 +734,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						}
 						
 						if (mysql_num_rows($tpres) != 1) {
-							echo t("Toimittajaa/Asiakasta")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
+							echo t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa/Asiakasta")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
 							$hylkaa++; // ei päivitetä tätä riviä
 						}
 					}
@@ -743,7 +748,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 										WHERE yhtio='$kukarow[yhtio]' and ryhma = '$rivi[$r]'";
 							$xresult = mysql_query($xquery) or pupe_error($xquery);
 							if (mysql_num_rows($xresult) != 1) {
-								echo t("Aleryhmää")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! $otsikot[$r] = $rivi[$r]<br>";
+								echo t("Virhe rivillä").": $rivilaskuri ".t("Aleryhmää")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! $otsikot[$r] = $rivi[$r]<br>";
 								$hylkaa++; // ei päivitetä tätä riviä
 							}
 						}
@@ -755,7 +760,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 										WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$rivi[$r]'";
 							$xresult = mysql_query($xquery) or pupe_error($xquery);
 							if (mysql_num_rows($xresult) != 1) {
-								echo t("Tuotetta")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! $otsikot[$r] = $rivi[$r]<br>";
+								echo t("Virhe rivillä").": $rivilaskuri ".t("Tuotetta")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! $otsikot[$r] = $rivi[$r]<br>";
 								$hylkaa++; // ei päivitetä tätä riviä
 							}
 						}
@@ -767,7 +772,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 										WHERE yhtio='$kukarow[yhtio]' and laji = 'ASIAKASRYHMA' and selite = '$rivi[$r]'";
 							$xresult = mysql_query($xquery) or pupe_error($xquery);
 							if (mysql_num_rows($xresult) == 0) {
-								echo t("Asiakasryhmää")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! $otsikot[$r] = $rivi[$r]<br>";
+								echo t("Virhe rivillä").": $rivilaskuri ".t("Asiakasryhmää")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! $otsikot[$r] = $rivi[$r]<br>";
 								$hylkaa++; // ei päivitetä tätä riviä
 							}
 						}
@@ -779,7 +784,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 										WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$rivi[$r]'";
 							$xresult = mysql_query($xquery) or pupe_error($xquery);
 							if (mysql_num_rows($xresult) == 0) {
-								echo t("Asiakasta")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! $otsikot[$r] = $rivi[$r]<br>";
+								echo t("Virhe rivillä").": $rivilaskuri ".t("Asiakasta")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! $otsikot[$r] = $rivi[$r]<br>";
 								$hylkaa++; // ei päivitetä tätä riviä
 							}
 						}
@@ -817,11 +822,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 											WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$rivi[$r]'";
 								$x2result = mysql_query($x2query) or pupe_error($x2query);
 								if (mysql_num_rows($x2result) == 0) {
-									echo t("Asiakasta")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! $otsikot[$r] = $rivi[$r]<br>";
+									echo t("Virhe rivillä").": $rivilaskuri ".t("Asiakasta")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! $otsikot[$r] = $rivi[$r]<br>";
 									$hylkaa++; // ei päivitetä tätä riviä
 								}
 								elseif (mysql_num_rows($x2result) > 1) {
-									echo t("Asiakasta")." '$rivi[$r]' ".t("löytyi monia! Riviä ei päivitetty/lisätty")."! $otsikot[$r] = $rivi[$r]<br>";
+									echo t("Virhe rivillä").": $rivilaskuri ".t("Asiakasta")." '$rivi[$r]' ".t("löytyi monia! Riviä ei päivitetty/lisätty")."! $otsikot[$r] = $rivi[$r]<br>";
 									$hylkaa++; // ei päivitetä tätä riviä
 								}
 								else {
@@ -844,7 +849,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 								$query .= ", $otsikot[$r]='$rivi[$r]' ";
 							}
 							elseif($rivi[$r] == 0) {
-								echo t("Saldoa ei saa nollata!")."<br>";
+								echo t("Virhe rivillä").": $rivilaskuri ".t("Saldoa ei saa nollata!")."<br>";
 							}
 						}
 						elseif ($table=='asiakashinta' and $otsikot[$r] == 'HINTA') {
@@ -852,7 +857,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 								$query .= ", $otsikot[$r]='$rivi[$r]' ";
 							}
 							elseif($rivi[$r] == 0) {
-								echo t("Hintaa ei saa nollata!")."<br>";
+								echo t("Virhe rivillä").": $rivilaskuri ".t("Hintaa ei saa nollata!")."<br>";
 							}
 						}
 						elseif ($table=='avainsana' and $otsikot[$r] == 'SELITE') {
@@ -860,7 +865,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 								$query .= ", $otsikot[$r]='$rivi[$r]' ";
 							}
 							elseif($rivi[$r] == 0) {
-								echo t("Selite ei saa olla tyhjä!")."<br>";
+								echo t("Virhe rivillä").": $rivilaskuri ".t("Selite ei saa olla tyhjä!")."<br>";
 							}
 						}
 						elseif ($table=='tuotepaikat' and $otsikot[$r] == 'OLETUS' and $rivi[$r] == 'XVAIHDA') {
@@ -872,7 +877,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							$query .= ", $otsikot[$r]='$rivi[$r]' ";
 						}
 						elseif ($table=='tuotepaikat' and $otsikot[$r] == 'OLETUS') {
-							//echo "Oletusta ei voi muuttaa!<br>";
+							//echo t("Virhe rivillä").": $rivilaskuri Oletusta ei voi muuttaa!<br>";
 						}
 						else {
 							if ($eilisataeikamuuteta == "") {
@@ -899,11 +904,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			}
 
 			if (($table == 'asiakasalennus' or $table == 'asiakashinta') and ($ashinaleas > 1 or $ashinaletuo > 1)) {
-				echo t("Annoit liikaa tietoja. Riviä ei päivitetty/lisätty")."! ytunnus=$chytunnus | asiakas_ryhma=$chasiakas_ryhma | tuoteno=$chtuoteno | ryhma=$chryhma<br>";
+				echo t("Virhe rivillä").": $rivilaskuri ".t("Annoit liikaa tietoja. Riviä ei päivitetty/lisätty")."! ytunnus=$chytunnus | asiakas_ryhma=$chasiakas_ryhma | tuoteno=$chtuoteno | ryhma=$chryhma<br>";
 				$hylkaa++; // ei päivitetä tätä riviä
 			}
 			elseif (($table == 'asiakasalennus' or $table == 'asiakashinta') and ($ashinaleas < 1 or $ashinaletuo < 1)) {
-				echo t("Et antanut tarpeeksi tietoja. Riviä ei päivitetty/lisätty")."! ytunnus=$chytunnus | asiakas_ryhma=$chasiakas_ryhma | tuoteno=$chtuoteno | ryhma=$chryhma<br>";
+				echo t("Virhe rivillä").": $rivilaskuri ".t("Et antanut tarpeeksi tietoja. Riviä ei päivitetty/lisätty")."! ytunnus=$chytunnus | asiakas_ryhma=$chasiakas_ryhma | tuoteno=$chtuoteno | ryhma=$chryhma<br>";
 				$hylkaa++; // ei päivitetä tätä riviä
 			}
 
@@ -930,11 +935,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				$dsresult = mysql_query($aquery) or pupe_error($aquery);
 
 				if (mysql_num_rows($dsresult) > 0 and strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
-					echo t("Rivi on jo olemassa, ei voida perustaa uutta!")." ytunnus=$chytunnus | asiakas_ryhma=$chasiakas_ryhma | tuoteno=$chtuoteno | ryhma=$chryhma | alkupvm=$chalkupvm | loppupvm=$chloppupvm<br>";
+					echo t("Virhe rivillä").": $rivilaskuri ".t("Rivi on jo olemassa, ei voida perustaa uutta!")." ytunnus=$chytunnus | asiakas_ryhma=$chasiakas_ryhma | tuoteno=$chtuoteno | ryhma=$chryhma | alkupvm=$chalkupvm | loppupvm=$chloppupvm<br>";
 					$hylkaa ++;
 				}
 				elseif (mysql_num_rows($dsresult) == 0 and strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
-					echo t("Riviä ei voida muuttaa, koska sitä ei löytynyt!")." ytunnus=$chytunnus | asiakas_ryhma=$chasiakas_ryhma | tuoteno=$chtuoteno | ryhma=$chryhma | alkupvm=$chalkupvm | loppupvm=$chloppupvm<br>";
+					echo t("Virhe rivillä").": $rivilaskuri ".t("Riviä ei voida muuttaa, koska sitä ei löytynyt!")." ytunnus=$chytunnus | asiakas_ryhma=$chasiakas_ryhma | tuoteno=$chtuoteno | ryhma=$chryhma | alkupvm=$chalkupvm | loppupvm=$chloppupvm<br>";
 					$hylkaa ++;
 				}
 			}
@@ -973,7 +978,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$tarkrow = mysql_fetch_array($result);
 			$tunnus = $tarkrow["tunnus"];
 			
-			if($table == "tuotteen_toimittajat") {
+			if ($table == "tuotteen_toimittajat") {
 						
 				$tee = "tarkistus";
 				$tuoteno = $erivi[array_search("TUOTENO", $otsikot)];
@@ -989,7 +994,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				$result = $lue_data_result;
 
 				if(count($toimerrorit[$toimtunnus]) > 0) {
-					echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".implode("<br>", $toimerrorit[$toimtunnus])."</font><br>";
+					echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".implode("<br>", $toimerrorit[$toimtunnus])."</font><br>";
 					$errori = 1;
 				}				
 			}
@@ -998,11 +1003,18 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 					// Tarkistetaan saako käyttäjä päivittää tätä kenttää
 					$Lindexi = array_search(strtoupper(mysql_field_name($result, $i)), $otsikot);
-					if(isset($erivi[$Lindexi]) and $Lindexi !== false) {
+					
+					if (isset($erivi[$Lindexi]) and $Lindexi !== false) {
 						$t[$i] = $erivi[$Lindexi];
+						
+						// Tämä rivi on excelissä
+						$tassafailissa = TRUE;
 					}
 					else {
 						$t[$i] = $tarkrow[strtolower(mysql_field_name($result, $i))];
+						
+						// Tämä rivi ei oo excelissä
+						$tassafailissa = FALSE;						
 					}
 					
 					$funktio = $table."tarkista";
@@ -1013,11 +1025,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					
 					unset($virhe);
 					
-					if(function_exists($funktio)) {
+					if (function_exists($funktio)) {
 						$funktio($t, $i, $result, $tunnus, &$virhe, $tarkrow);
 					}
 					
-					if($virhe[$i] != "") {
+					// Ignoorataan virhe jos se ei koske tässä failissa olutta saraketta
+					if ($tassafailissa and $virhe[$i] != "") {
 						switch ($table) {
 							case "tuote":
 								$virheApu = t("Tuote")." ".$tarkrow["tuoteno"].": ";
@@ -1025,10 +1038,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							default:
 								$virheApu = "";
 						}
-						echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>$virheApu".mysql_field_name($result, $i).": ".$virhe[$i]." ($t[$i])</font><br>";
+						echo t("Virhe rivillä").": $rivilaskuri <font class='error'>$virheApu".mysql_field_name($result, $i).": ".$virhe[$i]." ($t[$i])</font><br>";
 						$errori = 1;
 					}					
-				}				
+				}			
 			}
 
 			if($errori != "") {
@@ -1091,12 +1104,13 @@ else {
 			<table>
 			<tr>
 				<td>".t("Valitse tietokannan taulu").":</td>
-				<td><select name='table'>
+				<td><select name='table'>					
 					<option value='asiakas'>".t("Asiakas")."</option>
 					<option value='asiakasalennus'>".t("Asiakasalennukset")."</option>
 					<option value='asiakashinta'>".t("Asiakashinnat")."</option>
 					<option value='asiakaskommentti'>".t("Asiakaskommentit")."</option>
 					<option value='asiakkaan_avainsanat'>".t("Asiakkaan avainsanat")."</option>
+					<option value='abc_parametrit'>".t("ABC-parametrit")."</option>
 					<option value='autodata'>".t("Autodatatiedot")."</option>
 					<option value='autodata_tuote'>".t("Autodata tuotetiedot")."</option>
 					<option value='avainsana'>".t("Avainsanat")."</option>
@@ -1129,7 +1143,6 @@ else {
 					<option value='yhteensopivuus_mp'>".t("Yhteensopivuus mp-mallit")."</option>
 					<option value='yhteensopivuus_tuote'>".t("Yhteensopivuus tuotteet")."</option>
 					<option value='yhteyshenkilo'>".t("Yhteyshenkilöt")."</option>
-					<option value='abc_parametrit'>".t("ABC-parametrit")."</option>
 					</select></td>
 			</tr>
 

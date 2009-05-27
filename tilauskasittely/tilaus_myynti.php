@@ -3943,7 +3943,7 @@ if ($tee == '') {
 
 						echo "<form action='$PHP_SELF' method='post' name='paikat'>
 										<input type='hidden' name='toim' 			value = '$toim'>
-										<input type='hidden' name='lopetus' 		value='$lopetus'>
+										<input type='hidden' name='lopetus' 		value = '$lopetus'>
 										<input type='hidden' name='projektilla' 	value = '$projektilla'>
 										<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 										<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
@@ -3953,19 +3953,18 @@ if ($tee == '') {
 										<input type='hidden' name='tila' 			value = 'MUUTA'>
 										<input type='hidden' name='tapa' 			value = 'VAIHDA'>
 										$paikat
-									</form>
-								</td>";
+									</form>";
 					}
 					else {
-
+						
 						if ($varow['maa'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
-							echo "<td $class align='left' valign='top'><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font>";
+							echo "<td $class align='left' valign='top'><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa)</font>";
 						}
 						elseif ($varow['maa'] != '' and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
-							echo "<td $class align='left' valign='top'><font class='error'>".strtoupper($varow['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font>";
+							echo "<td $class align='left' valign='top'><font class='error'>".strtoupper($varow['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa)</font>";
 						}
 						else {
-							echo "<td $class align='left' valign='top'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";
+							echo "<td $class align='left' valign='top'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) ";
 						}
 
 						if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and !in_array($row["var"], array('P','J','S','T','U'))) {
@@ -3983,10 +3982,16 @@ if ($tee == '') {
 							if ($trow["sarjanumeroseuranta"] == "F") {
 								echo " ".tv1dateconv($sarjarow["parasta_ennen"]);
 							}
-						}
-
-						echo "</td>";
+						}						
 					}
+					
+					if ($toim == "SIIRTOLISTA") {
+						list(,, $kohde_myyssa) = saldo_myytavissa($row["tuoteno"], '', $laskurow["clearing"]);
+						
+						if ($kohde_myyssa != 0) echo "<br>".t("Kohdevarastossa")." ($kohde_myyssa)";					
+					}
+					
+					echo "</td>";
 				}
 				elseif (($toim != "TARJOUS" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $muokkauslukko_rivi == "" and $kukarow['extranet'] == '') {
 					if ($paikat != '') {

@@ -1276,8 +1276,13 @@ if($tee == "") {
 			$alatila = array("", "A");
 		}
 		
-		if(count($seuranta) > 0) {
-			$lisatiedot_rajaus .= " and laskun_lisatiedot.seuranta IN ('".implode("','", $seuranta)."')";
+		if($setti == "viikkis") {
+			lisatiedot_rajaus .= " and laskun_lisatiedot.seuranta NOT IN ('TK')";
+		}
+		else {
+			if(count($seuranta) > 0) {
+				$lisatiedot_rajaus .= " and laskun_lisatiedot.seuranta IN ('".implode("','", $seuranta)."')";
+			}
 		}
 		
 		if(count($laatija) > 0) {

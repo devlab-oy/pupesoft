@@ -153,7 +153,7 @@
 			$toim_kutsu = "EXTRANET";
 		}
 
-		echo "	<form method='post' action='tilaus_myynti.php'>
+		echo "	<form method='post' action='".$palvelin2."tilauskasittely/tilaus_myynti.php'>
 				<input type='hidden' name='toim' value='$toim_kutsu'>
 				<input type='hidden' name='aktivoinnista' value='true'>
 				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
@@ -162,7 +162,7 @@
 	}
 	elseif ($kukarow["kuka"] != "" and $laskurow["tila"] == "O") {
 
-		echo "	<form method='post' action='tilaus_osto.php'>
+		echo "	<form method='post' action='".$palvelin2."tilauskasittely/tilaus_osto.php'>
 				<input type='hidden' name='aktivoinnista' value='true'>
 				<input type='hidden' name='tee' value='AKTIVOI'>
 				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>

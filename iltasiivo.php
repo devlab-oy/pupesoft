@@ -131,8 +131,8 @@
 
 		$laskuri = 0;
 		
-		// Merkitään laskut mitätöidyksi joilla on pelkästään mitätöityjä rivejä.
-		$query = "	SELECT lasku.tunnus laskutunnus, lasku.tila, count(*) kaikki, sum(if(tilausrivi.tyyppi='D',1,0)) dellatut
+		// Merkitään laskut mitätöidyksi joilla on pelkästään mitätöityjä rivejä / pelkästään puuterivejä.
+		$query = "	SELECT lasku.tunnus laskutunnus, lasku.tila, count(*) kaikki, sum(if(tilausrivi.tyyppi='D' or tilausrivi.var='P', 1, 0)) dellatut
 					from lasku
 					join tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 					where lasku.yhtio = '$kukarow[yhtio]' 
@@ -160,10 +160,10 @@
 
 		$laskuri = 0;
 		
-		// Merkitään rivit mitätöidyksi joiden otsikot on mitätöity (ei puuterivejä)
+		// Merkitään rivit mitätöidyksi joiden otsikot on mitätöity (ei mitätöidä puuterivejä)
 		$query = "	SELECT lasku.tunnus laskutunnus
 					from lasku
-					join tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi!='D'
+					join tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi!='D' and tilausrivi.var!='P'
 					where lasku.yhtio = '$kukarow[yhtio]' 
 					and lasku.tila = 'D'
 					GROUP BY 1";

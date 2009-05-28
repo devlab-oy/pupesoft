@@ -3,7 +3,7 @@
 require('inc/parametrit.inc');
 
 if ($tee == "lataa_tiedosto") {
-	readfile("/tmp/".$filenimi);
+	echo file_get_contents("/tmp/".$tmpfilenimi);
 	exit;
 }
 
@@ -129,12 +129,13 @@ if ($tee == "VSRALVYV") {
 
 		$query = "	SELECT
 		 			tuote.tuotetyyppi,
+					if(tuote.tuotetyyppi in ('','R'), 'JOO', 'EI') tav_pal,
 					lasku.ytunnus, 
 					asiakas.nimi, 
 					if(lasku.maa='', asiakas.maa, lasku.maa) as maa,					
 					if(lasku.maa='','X','') asiakkaan_maa,				
 					round(sum(rivihinta),2) summa, 
-					round(sum(round(rivihinta*100,0)),2) arvo, 
+					round(sum(rivihinta)*100,0) arvo, 
 					count(distinct(lasku.tunnus)) laskuja										
 					FROM lasku USE INDEX (yhtio_tila_tapvm)
 					JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
@@ -145,27 +146,41 @@ if ($tee == "VSRALVYV") {
 					and lasku.tapvm >= '$alkupvm' 
 					and lasku.tapvm < '$loppupvm'
 					and lasku.vienti = 'E'
-					and tuote.tuotetyyppi in ('','R')
-					GROUP BY 1,2,3,4,5
-					ORDER by 1,2";
+					GROUP BY 1,2,3,4,5,6
+					ORDER BY tav_pal DESC, tuote.tuotetyyppi, lasku.ytunnus, asiakas.nimi ";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$ok=0;
 
 		if (mysql_num_rows($result) > 0) {
 
-			$summa 			= 0;
-			$arvo 			= 0;
-			$osatiedot 		= "";
-			$i				= 0;
+			$arvo 		= 0;
+			$summa_tav	= 0;
+			$summa_pal	= 0;
+			
+			$osatiedot 	= "";
+			$i			= 0;
+			$edtav_pal	= "XXX";
 			
 			echo "<table>";
-			echo "<tr><th>".t("Tuotetyyppi")."</th><th>".t("Maatunnus")."</th><th>".t("Ytunnus")."</th><th>".t("Asiakas")."</th><th>".t("Arvo")."</th><th>".t("Laskuja")."</th></tr>";
 			
 			$ttyyppi = array('A' => t("Päiväraha"), 'B' => t("Muu kulu"), ''  => t("Normaali / Valmiste"), 'R' => t("Raaka-aine"), 'K' => t("Palvelu"), 'M' => t("Muu/Informatiivinen"));
 			
-			while ($row=mysql_fetch_array($result)) {
+			while ($row = mysql_fetch_array($result)) {
+				
+				if ($row["tav_pal"] != $edtav_pal or $edtav_pal == "XXX") {
 					
+					if ($edtav_pal != "XXX") echo "<tr><th colspan='4'></th><td class='tumma' align='right'>".sprintf("%.2f", $summa_tav)."</th><th></th></tr>";
+					
+					if ($edtav_pal != "XXX") {
+						echo "<tr><td class='back' colspan='6'><br><br><br>Palvelutuotteet (ei ilmoiteta verottajalle):</td></tr>";
+					}
+					
+					echo "<tr><th>".t("Tuotetyyppi")."</th><th>".t("Maatunnus")."</th><th>".t("Ytunnus")."</th><th>".t("Asiakas")."</th><th>".t("Arvo")."</th><th>".t("Laskuja")."</th></tr>";
+				}
+				
+				$edtav_pal = $row["tav_pal"];
+				
 				if ($row["maa"] == "") {
 					$query = "	SELECT distinct koodi, nimi
 								FROM maat
@@ -201,25 +216,30 @@ if ($tee == "VSRALVYV") {
 					echo "<tr><td>".$ttyyppi[strtoupper($row["tuotetyyppi"])]."</td><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td></tr>";
 				}
 
-				if ($row["maa"] != "") {
-					$i++;
-					$arvo+=$row["arvo"];
-					$summa+=$row["summa"];
-					
-					$osatiedot .= "102:$row[maa]\n";
-					$osatiedot .= "103:".sprintf("%012.12s",str_replace(array($row["maa"],"-","_"), "", $row["ytunnus"]))."\n";
-					$osatiedot .= "210:$row[arvo]\n";
-					$osatiedot .= "104:\n";
-					$osatiedot .= "009:$i\n";
+				if ($row["maa"] != "") {										
+					if ($row["tav_pal"] == "JOO") {
+						$i++;
+						
+						$arvo+=$row["arvo"];
+						$summa_tav+=$row["summa"];
+						
+						$osatiedot .= "102:$row[maa]\n";
+						$osatiedot .= "103:".sprintf("%012.12s",str_replace(array($row["maa"],"-","_"), "", $row["ytunnus"]))."\n";
+						$osatiedot .= "210:$row[arvo]\n";
+						$osatiedot .= "104:\n";
+						$osatiedot .= "009:$i\n";
+					}
+					else {
+						$summa_pal+=$row["summa"];
+					}						
 				}
-
 			}
 			
-			
-			echo "<tr><th colspan='4'></th><th>$summa</th><th></th></tr>";
+			echo "<tr><th colspan='4'></th><td class='tumma' align='right'>".sprintf("%.2f", $summa_pal)."</th><th></th></tr>";
+			echo "<tr><th colspan='4'></th><td class='tumma' align='right'>".sprintf("%.2f", ($summa_tav+$summa_pal))."</th><th></th></tr>";
 			echo "</table>";
 
-			if ($ok==0) {
+			if ($ok == 0) {
 
 				$file = "000:$tee\n";
 				$file .= "100:".date("dmY")."\n";
@@ -243,14 +263,12 @@ if ($tee == "VSRALVYV") {
 						<input type='hidden' name='kausi' value='$kausi'>
 						<input type='hidden' name='lataa_tiedosto' value='1'>
 						<input type='hidden' name='kaunisnimi' value='".t("Arvonlisaveron_yhteenvetoilmoitus-$kvarttaali$vuosi")."'>
-						<input type='hidden' name='filenimi' value='$filenimi'>
+						<input type='hidden' name='tmpfilenimi' value='$filenimi'>
 						<input type='submit' name='tallenna' value='".t("Tallenna tiedosto")."'></form>";
 			}
 			else {
 				echo "<br><font class='error'>".t("Korjaa virheet maat ennen ilmoituksen lähettämistä")."</font>";
 			}
-			
-
 		}
 		else {
 			echo "<br><font class='message'>".t("Ei aineistoa valitulla kaudella")."</font>";
@@ -268,4 +286,5 @@ if ($tee == "") {
 }
 
 require ("inc/footer.inc");
+
 ?>

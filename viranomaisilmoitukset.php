@@ -3,7 +3,7 @@
 require('inc/parametrit.inc');
 
 if ($tee == "lataa_tiedosto") {
-	readfile("dataout/".$filenimi);
+	readfile("/tmp/".$filenimi);
 	exit;
 }
 
@@ -16,8 +16,48 @@ if ($tee == "VSRALVKK") {
 
 if ($tee == "VSRALVYV") {
 
-	echo "<font class='message'></font>".t("Arvonlisäveron yhteenvetoilmoitus");
+	echo "<font class='message'></font>".t("Arvonlisäveron yhteenvetoilmoitus kaudelta").":";
 
+	//	Haetaan alkupiste
+	$query = "SELECT ((year(now())-year(min(tilikausi_alku)))*4), quarter(now()) from tilikaudet where tilikausi_alku != '0000-00-00' and yhtio='$kukarow[yhtio]'";
+	$result = mysql_query($query) or pupe_error($query);
+	$row = mysql_fetch_array($result);
+
+	$kausia = $row[0]+$row[1]+1;
+	$kvarttaali = $row[1];
+	$vuosi = date("Y");
+
+	//	Ei näytetä ihan kaikeka
+	if ($kausia > 10) $kausia = 10;
+
+	echo "<form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
+			<input type='hidden' name='tee' value='$tee'>
+			<select name='kohdekausi' onchange='submit();'>
+				<option value = ''>".t('Valitse kohdekausi')."</option>";
+
+	for ($i=1; $i<$kausia; $i++) {
+		
+		if ($kohdekausi == $kvarttaali."/".$vuosi) {
+			$sel = "SELECTED";
+		}
+		else {
+			$sel = "";
+		}
+		
+		echo "<option value='$kvarttaali/$vuosi' $sel>$kvarttaali/$vuosi</option>";
+
+		if ($kvarttaali == 1) {
+			$kvarttaali = 4;
+			$vuosi--;
+		}
+		else {
+			$kvarttaali--;
+		}
+
+	}
+	echo "</select></form>";
+	
+	
 	if (strtoupper($yhtiorow["maa"])== 'FI') {
 		//muutetaan ytunnus takas oikean näköseks
 		$ytunpit = 8-strlen($yhtiorow["ytunnus"]);
@@ -62,11 +102,7 @@ if ($tee == "VSRALVYV") {
 			default:
 				die("Kohdekausi on väärä!!!");
 		}
-
-		if ($kohdekausi != "") {
-			echo " - ".t("kaudelta")." $kohdekausi.";
-		}
-
+		
 		echo "</font><br><hr>";
 
 		if ($ytunnus != "") {
@@ -91,39 +127,45 @@ if ($tee == "VSRALVYV") {
 		$row = mysql_fetch_array($result);
 		$eumaat = $row[0];
 
-		$query = "	SELECT lasku.ytunnus, 
-					if(lasku.maa='', asiakas.maa, lasku.maa) as maa,
+		$query = "	SELECT
+		 			tuote.tuotetyyppi,
+					lasku.ytunnus, 
 					asiakas.nimi, 
-					sum(rivihinta) summa, 
-					sum(round(rivihinta*100,0)) arvo, 
-					count(distinct(lasku.tunnus)) laskuja, 
-					lasku.liitostunnus, 
-					if(lasku.maa='','X','') asiakkaan_maa
+					if(lasku.maa='', asiakas.maa, lasku.maa) as maa,					
+					if(lasku.maa='','X','') asiakkaan_maa,				
+					round(sum(rivihinta),2) summa, 
+					round(sum(round(rivihinta*100,0)),2) arvo, 
+					count(distinct(lasku.tunnus)) laskuja										
 					FROM lasku USE INDEX (yhtio_tila_tapvm)
 					JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
-					JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuotetyyppi = '')
+					JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
 					LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and lasku.liitostunnus = asiakas.tunnus)
 					WHERE lasku.yhtio = '$kukarow[yhtio]' 
 					and lasku.tila = 'U'
 					and lasku.tapvm >= '$alkupvm' 
 					and lasku.tapvm < '$loppupvm'
 					and lasku.vienti = 'E'
-					GROUP BY lasku.ytunnus
-					HAVING maa IN ('','$eumaat')";
+					and tuote.tuotetyyppi in ('','R')
+					GROUP BY 1,2,3,4,5
+					ORDER by 1,2";
 		$result = mysql_query($query) or pupe_error($query);
-		$row = mysql_fetch_array($result);
+
 		$ok=0;
 
 		if (mysql_num_rows($result) > 0) {
 
-			$summa = 0;
-			$osatiedot = "";
-			$i=0;
-
-			echo "<table cellpadding='1'><tr><th>".t("Maatunnus")."</th><th>".t("Ytunnus")."</th><th>".t("Asiakas")."</th><th>".t("Arvo")."</th><th>".t("Laskuja")."</th></tr>";
-
+			$summa 			= 0;
+			$arvo 			= 0;
+			$osatiedot 		= "";
+			$i				= 0;
+			
+			echo "<table>";
+			echo "<tr><th>".t("Tuotetyyppi")."</th><th>".t("Maatunnus")."</th><th>".t("Ytunnus")."</th><th>".t("Asiakas")."</th><th>".t("Arvo")."</th><th>".t("Laskuja")."</th></tr>";
+			
+			$ttyyppi = array('A' => t("Päiväraha"), 'B' => t("Muu kulu"), ''  => t("Normaali / Valmiste"), 'R' => t("Raaka-aine"), 'K' => t("Palvelu"), 'M' => t("Muu/Informatiivinen"));
+			
 			while ($row=mysql_fetch_array($result)) {
-
+					
 				if ($row["maa"] == "") {
 					$query = "	SELECT distinct koodi, nimi
 								FROM maat
@@ -153,15 +195,17 @@ if ($tee == "VSRALVYV") {
 					$ok = 1;
 				}
 				elseif($row["maa"] != "" and $row["asiakkaan_maa"] == "X") {
-					echo "<tr><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td>$row[summa]</td><td>$row[laskuja]</td><td class='back'><font class='info'>".t("HUOM! Maa haettu asiakkaan tiedoista")."</font></td></tr>";
+					echo "<tr><td>".$ttyyppi[strtoupper($row["tuotetyyppi"])]."</td><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td><td class='back'><font class='info'>".t("HUOM! Maa haettu asiakkaan tiedoista")."</font></td></tr>";
 				}
 				else {
-					echo "<tr><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td>$row[summa]</td><td>$row[laskuja]</td></tr>";
+					echo "<tr><td>".$ttyyppi[strtoupper($row["tuotetyyppi"])]."</td><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td></tr>";
 				}
 
 				if ($row["maa"] != "") {
 					$i++;
-					$summa+=$row["arvo"];
+					$arvo+=$row["arvo"];
+					$summa+=$row["summa"];
+					
 					$osatiedot .= "102:$row[maa]\n";
 					$osatiedot .= "103:".sprintf("%012.12s",str_replace(array($row["maa"],"-","_"), "", $row["ytunnus"]))."\n";
 					$osatiedot .= "210:$row[arvo]\n";
@@ -170,6 +214,10 @@ if ($tee == "VSRALVYV") {
 				}
 
 			}
+			
+			
+			echo "<tr><th colspan='4'></th><th>$summa</th><th></th></tr>";
+			echo "</table>";
 
 			if ($ok==0) {
 
@@ -179,70 +227,34 @@ if ($tee == "VSRALVYV") {
 				$file .= "010:$uytunnus\n";
 				$file .= "053:$kohdekausi\n";
 				$file .= "098:1\n";
-				$file .= "101:$summa\n";
+				$file .= "101:$arvo\n";
 				$file .= "001:$i\n";
 				$file .= $osatiedot;
 				$file .= "999:1\n";
 
 				$filenimi = "VSRALVYV-$kvarttaali$vuosi	".date("dmy-His").".txt";
-				$fh = fopen("dataout/".$filenimi, "w");
+				$fh = fopen("/tmp/".$filenimi, "w");
+				
 				if (fwrite($fh, $file) === FALSE) die("Kirjoitus epäonnistui $filenimi");
 				fclose($fh);
 
-				echo "<tr><td colspan='4' class='back'>
-						<form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
+				echo "<br><form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
 						<input type='hidden' name='tee' value='lataa_tiedosto'>
 						<input type='hidden' name='kausi' value='$kausi'>
 						<input type='hidden' name='lataa_tiedosto' value='1'>
 						<input type='hidden' name='kaunisnimi' value='".t("Arvonlisaveron_yhteenvetoilmoitus-$kvarttaali$vuosi")."'>
 						<input type='hidden' name='filenimi' value='$filenimi'>
-						<input type='submit' name='tallenna' value='".t("Tallenna tiedosto")."'></form>
-						</td></tr>";
+						<input type='submit' name='tallenna' value='".t("Tallenna tiedosto")."'></form>";
 			}
 			else {
-				echo "<tr><td colspan='4' class='back'><font class='error'>".t("Korjaa virheet maat ennen ilmoituksen lähettämistä")."</font></td></tr>";
+				echo "<br><font class='error'>".t("Korjaa virheet maat ennen ilmoituksen lähettämistä")."</font>";
 			}
-			echo "</table>";
+			
 
 		}
 		else {
-			echo "<font class='message'>".t("Ei aineistoa valitulla kaudella")."</font>";
+			echo "<br><font class='message'>".t("Ei aineistoa valitulla kaudella")."</font>";
 		}
-
-		//
-	}
-	else {
-		//	Haetaan alkupiste
-		$query = "SELECT ((year(now())-year(min(tilikausi_alku)))*4), quarter(now()) from tilikaudet where tilikausi_alku != '0000-00-00' and yhtio='$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
-		$row = mysql_fetch_array($result);
-
-		$kausia = $row[0]+$row[1]+1;
-		$kvarttaali = $row[1];
-		$vuosi = date("Y");
-
-		//	Ei näytetä ihan kaikeka
-		if ($kausia > 10) $kausia = 10;
-
-		echo "<form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
-				<input type='hidden' name='tee' value='$tee'>
-				<select name='kohdekausi' onchange='submit();'>
-					<option value = ''>".t('Valitse kohdekausi')."</option>";
-
-		for ($i=1; $i<$kausia; $i++) {
-
-			echo "<option value='$kvarttaali/$vuosi'>$kvarttaali/$vuosi</option>";
-
-			if ($kvarttaali == 1) {
-				$kvarttaali = 4;
-				$vuosi--;
-			}
-			else {
-				$kvarttaali--;
-			}
-
-		}
-		echo "</select>";
 	}
 }
 

@@ -1276,13 +1276,8 @@ if($tee == "") {
 			$alatila = array("", "A");
 		}
 		
-		if($setti == "viikkis") {
-			$lisatiedot_rajaus .= " and laskun_lisatiedot.seuranta NOT IN ('TK')";
-		}
-		else {
-			if(count($seuranta) > 0) {
-				$lisatiedot_rajaus .= " and laskun_lisatiedot.seuranta IN ('".implode("','", $seuranta)."')";
-			}
+		if(count($seuranta) > 0) {
+			$lisatiedot_rajaus .= " and laskun_lisatiedot.seuranta IN ('".implode("','", $seuranta)."')";
 		}
 		
 		if(count($laatija) > 0) {
@@ -1513,7 +1508,7 @@ if($tee == "") {
 					LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde
 					$myyja_join
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tila IN ($laskutilat) and lasku.tunnus = lasku.tunnusnippu
+					and lasku.tila IN ($laskutilat) and lasku.tunnus = lasku.tunnusnippu and lasku.tilaustyyppi!='9'
 					$lasku_rajaus
 					$having_rajaus
 					$group_by

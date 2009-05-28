@@ -854,7 +854,7 @@
 						FROM lasku use index (tila_index)
 						$seurantalisa
 						$kohdelisa
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila IN ('R','L','N','A') and alatila NOT IN ('X')
+						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila IN ('R','L','N','A') and alatila NOT IN ('X') and lasku.tilaustyyppi!='9'
 						$haku
 						ORDER by lasku.tunnusnippu desc, tunnus asc
 						$rajaus";

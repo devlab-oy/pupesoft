@@ -1277,7 +1277,7 @@ if($tee == "") {
 		}
 		
 		if($setti == "viikkis") {
-			lisatiedot_rajaus .= " and laskun_lisatiedot.seuranta NOT IN ('TK')";
+			$lisatiedot_rajaus .= " and laskun_lisatiedot.seuranta NOT IN ('TK')";
 		}
 		else {
 			if(count($seuranta) > 0) {

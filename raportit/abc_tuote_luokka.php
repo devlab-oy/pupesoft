@@ -39,134 +39,132 @@
 	$ulisa_ilman_try = '';
 
 	// jos on valittu jotakin dropdowneista (muu kuin osasto) niin tehdään niillä rajaukset muihin dropdowneihin
-	if (count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_tme) > 0) {
-		if (count($mul_osasto) > 0) {
-			$osastot = '';
+	if (count($mul_osasto) > 0) {
+		$osastot = '';
 
-			foreach ($mul_osasto as $osx) {
-				if (trim($osx) != '') {
-					$osx = trim(mysql_real_escape_string($osx));
-					$osastot .= "'$osx',";
-				}
+		foreach ($mul_osasto as $osx) {
+			if (trim($osx) != '') {
+				$osx = trim(mysql_real_escape_string($osx));
+				$osastot .= "'$osx',";
 			}
+		}
 
-			$osastot = substr($osastot, 0, -1);
+		$osastot = substr($osastot, 0, -1);
+	
+		if (trim($osastot) != '') {
+			$lisa_haku_osasto = " and tuote.osasto in ($osastot) ";
+			$lisa .= " and abc_aputaulu.osasto in ($osastot) ";
+			$ulisa .= "&mul_osasto[]=".urlencode($osastot);
+		}
+	}
+
+	if (count($mul_try) > 0) {
+		$tryt = '';
+
+		foreach ($mul_try as $tryx) {
+			if (trim($tryx) != '') {
+				$tryx = trim(mysql_real_escape_string($tryx));
+				$tryt .= "'$tryx',";
+			}
+		}
+
+		$tryt = substr($tryt, 0, -1);
+	
+		if (trim($tryt) != '') {
+			$lisa_haku_try = " and tuote.try in ($tryt) ";
+			$lisa .= " and abc_aputaulu.try in ($tryt) ";
+			$ulisa .= "&mul_try[]=".urlencode($tryt);
+			$ulisa_ilman_os .= "&mul_try[]=".urlencode($tryt);
+		}
+	}
+
+	if (count($mul_tme) > 0) {
+		$tmet = '';
+
+		foreach ($mul_tme as $tmex) {
+			if (trim($tmex) != '') {
+				$tmex = trim(mysql_real_escape_string(urldecode($tmex)));
+				$tmet .= "'$tmex',";
+			}
+		}
+
+		$tmet = substr($tmet, 0, -1);
+	
+		if (trim($tmet) != '') {
+			$lisa_haku_tme = " and tuote.tuotemerkki in ($tmet) ";
+			$lisa .= " and abc_aputaulu.tuotemerkki in ($tmet) ";
+			$ulisa .= "&mul_tme[]=".urlencode($tmet);
+			$ulisa_ilman_os .= "&mul_tme[]=".urlencode($tmet);
+			$ulisa_ilman_try .= "&mul_tme[]=".urlencode($tmet);	
+		}
+	}
+
+	if (count($mul_malli) > 0) {
+		$mallit = '';
+
+		foreach ($mul_malli as $mallix) {
+			if (trim($mallix) != '') {
+				if (count($_GET['mul_malli']) > 0) {
+					$mallix = rawurldecode($mallix);
+				}
+				$mallit .= "'".mysql_real_escape_string($mallix)."',";
+				$ulisa .= "&mul_malli[]=".rawurlencode($mallix);
+				$ulisa_ilman_os .= "&mul_malli[]=".rawurlencode($mallix);
+				$ulisa_ilman_try .= "&mul_malli[]=".rawurlencode($mallix);
+			}
+		}
+
+		$mallit = substr($mallit, 0, -1);
 		
-			if (trim($osastot) != '') {
-				$lisa_haku_osasto = " and tuote.osasto in ($osastot) ";
-				$lisa .= " and abc_aputaulu.osasto in ($osastot) ";
-				$ulisa .= "&mul_osasto[]=".urlencode($osastot);
+		if (trim($mallit) != '') {
+			$lisa_haku_malli = " and tuote.malli in ($mallit) ";
+			$lisa .= " and abc_aputaulu.malli in ($mallit) ";
+		}
+	}
+
+	if (count($mul_tuotemyyja) > 0) {
+		$tuotemyyjat = '';
+
+		foreach ($mul_tuotemyyja as $tuotemyyjax) {
+			if (trim($tuotemyyjax) != '') {
+				if (count($_GET['mul_tuotemyyja']) > 0) {
+					$tuotemyyjax = rawurldecode($tuotemyyjax);
+				}
+				$tuotemyyjat .= "'".mysql_real_escape_string($tuotemyyjax)."',";
+				$ulisa .= "&mul_tuotemyyja[]=".rawurlencode($tuotemyyjax);
+				$ulisa_ilman_os .= "&mul_tuotemyyja[]=".rawurlencode($tuotemyyjax);
+				$ulisa_ilman_try .= "&mul_tuotemyyja[]=".rawurlencode($tuotemyyjax);
 			}
 		}
 
-		if (count($mul_try) > 0) {
-			$tryt = '';
-
-			foreach ($mul_try as $tryx) {
-				if (trim($tryx) != '') {
-					$tryx = trim(mysql_real_escape_string($tryx));
-					$tryt .= "'$tryx',";
-				}
-			}
-
-			$tryt = substr($tryt, 0, -1);
+		$tuotemyyjat = substr($tuotemyyjat, 0, -1);
 		
-			if (trim($tryt) != '') {
-				$lisa_haku_try = " and tuote.try in ($tryt) ";
-				$lisa .= " and abc_aputaulu.try in ($tryt) ";
-				$ulisa .= "&mul_try[]=".urlencode($tryt);
-				$ulisa_ilman_os .= "&mul_try[]=".urlencode($tryt);
+		if (trim($tuotemyyjat) != '') {
+			$lisa_haku_myyja = " and kuka.myyja in ($tuotemyyjat) ";
+			$lisa .= " and abc_aputaulu.myyjanro in ($tuotemyyjat) ";
+		}
+	}
+
+	if (count($mul_tuoteostaja) > 0) {
+		$tuoteostajat = '';
+
+		foreach ($mul_tuoteostaja as $tuoteostajax) {
+			if (trim($tuoteostajax) != '') {
+				if (count($_GET['mul_tuoteostaja']) > 0) {
+					$tuoteostajax = rawurldecode($tuoteostajax);
+				}
+				$tuoteostajat .= "'".mysql_real_escape_string($tuoteostajax)."',";
+				$ulisa .= "&mul_tuoteostaja[]=".rawurlencode($tuoteostajax);
+				$ulisa_ilman_os .= "&mul_tuoteostaja[]=".rawurlencode($tuoteostajax);
+				$ulisa_ilman_try .= "&mul_tuoteostaja[]=".rawurlencode($tuoteostajax);
 			}
 		}
 
-		if (count($mul_tme) > 0) {
-			$tmet = '';
-
-			foreach ($mul_tme as $tmex) {
-				if (trim($tmex) != '') {
-					$tmex = trim(mysql_real_escape_string(urldecode($tmex)));
-					$tmet .= "'$tmex',";
-				}
-			}
-
-			$tmet = substr($tmet, 0, -1);
+		$tuoteostajat = substr($tuoteostajat, 0, -1);
 		
-			if (trim($tmet) != '') {
-				$lisa_haku_tme = " and tuote.tuotemerkki in ($tmet) ";
-				$lisa .= " and abc_aputaulu.tuotemerkki in ($tmet) ";
-				$ulisa .= "&mul_tme[]=".urlencode($tmet);
-				$ulisa_ilman_os .= "&mul_tme[]=".urlencode($tmet);
-				$ulisa_ilman_try .= "&mul_tme[]=".urlencode($tmet);	
-			}
-		}
-
-		if (count($mul_malli) > 0) {
-			$mallit = '';
-
-			foreach ($mul_malli as $mallix) {
-				if (trim($mallix) != '') {
-					if (count($_GET['mul_malli']) > 0) {
-						$mallix = rawurldecode($mallix);
-					}
-					$mallit .= "'".mysql_real_escape_string($mallix)."',";
-					$ulisa .= "&mul_malli[]=".rawurlencode($mallix);
-					$ulisa_ilman_os .= "&mul_malli[]=".rawurlencode($mallix);
-					$ulisa_ilman_try .= "&mul_malli[]=".rawurlencode($mallix);
-				}
-			}
-
-			$mallit = substr($mallit, 0, -1);
-			
-			if (trim($mallit) != '') {
-				$lisa_haku_malli = " and tuote.malli in ($mallit) ";
-				$lisa .= " and abc_aputaulu.malli in ($mallit) ";
-			}
-		}
-
-		if (count($mul_tuotemyyja) > 0) {
-			$tuotemyyjat = '';
-
-			foreach ($mul_tuotemyyja as $tuotemyyjax) {
-				if (trim($tuotemyyjax) != '') {
-					if (count($_GET['mul_tuotemyyja']) > 0) {
-						$tuotemyyjax = rawurldecode($tuotemyyjax);
-					}
-					$tuotemyyjat .= "'".mysql_real_escape_string($tuotemyyjax)."',";
-					$ulisa .= "&mul_tuotemyyja[]=".rawurlencode($tuotemyyjax);
-					$ulisa_ilman_os .= "&mul_tuotemyyja[]=".rawurlencode($tuotemyyjax);
-					$ulisa_ilman_try .= "&mul_tuotemyyja[]=".rawurlencode($tuotemyyjax);
-				}
-			}
-
-			$tuotemyyjat = substr($tuotemyyjat, 0, -1);
-			
-			if (trim($tuotemyyjat) != '') {
-				$lisa_haku_myyja = " and kuka.myyja in ($tuotemyyjat) ";
-				$lisa .= " and abc_aputaulu.myyjanro in ($tuotemyyjat) ";
-			}
-		}
-
-		if (count($mul_tuoteostaja) > 0) {
-			$tuoteostajat = '';
-
-			foreach ($mul_tuoteostaja as $tuoteostajax) {
-				if (trim($tuoteostajax) != '') {
-					if (count($_GET['mul_tuoteostaja']) > 0) {
-						$tuoteostajax = rawurldecode($tuoteostajax);
-					}
-					$tuoteostajat .= "'".mysql_real_escape_string($tuoteostajax)."',";
-					$ulisa .= "&mul_tuoteostaja[]=".rawurlencode($tuoteostajax);
-					$ulisa_ilman_os .= "&mul_tuoteostaja[]=".rawurlencode($tuoteostajax);
-					$ulisa_ilman_try .= "&mul_tuoteostaja[]=".rawurlencode($tuoteostajax);
-				}
-			}
-
-			$tuoteostajat = substr($tuoteostajat, 0, -1);
-			
-			if (trim($tuoteostajat) != '') {
-				$lisa_haku_ostaja = " and kuka.myyja in ($tuoteostajat) ";
-				$lisa .= " and abc_aputaulu.ostajanro in ($tuoteostajat) ";
-			}
+		if (trim($tuoteostajat) != '') {
+			$lisa_haku_ostaja = " and kuka.myyja in ($tuoteostajat) ";
+			$lisa .= " and abc_aputaulu.ostajanro in ($tuoteostajat) ";
 		}
 	}
 

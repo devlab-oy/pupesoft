@@ -101,7 +101,7 @@
 			$fi206 = laskeveroja('fi206','veronmaara') + $fi205;
 
 			// 207 sääntö fi207
-			$fi207 = 0.0;
+			$fi207 = laskeveroja('fi207','summa');
 
 			// 208 laskennallinen
 			$fi208 = $fi201 + $fi202 + $fi203 + $fi205 - $fi206 - $fi207;
@@ -392,7 +392,12 @@
 				echo "<td valign='top'>$trow[maa]</td>";
 				echo "<td valign='top'>$trow[valuutta]</td>";
 				echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-				echo "<td valign='top'>$trow[tilino]</td>";
+				
+				if ($trow['kpl'] > 1000)
+					echo "<td valign='top'>$trow[tilino]</td>";
+				else
+					echo "<td valign='top'><a href='../raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk'>$trow[tilino]</a></td>";
+
 				echo "<td valign='top'>$trow[nimi]</td>";
 				echo "<td valign='top' align='right' nowrap>$trow[bruttosumma]</td>";
 				echo "<td valign='top' align='right' nowrap>$trow[verot]</td>";

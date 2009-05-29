@@ -27,13 +27,13 @@
 				sum(pyoristys_valuutassa) pyoristys_valuutassa,
 				sum(kate) kate,
 				sum(bruttopaino) bruttopaino,
-				group_concat(distinct trim(comments) 				SEPARATOR ' / ') comments,
-				group_concat(distinct trim(sisviesti1) 				SEPARATOR ' / ') sisviestit1,
-				group_concat(distinct trim(sisviesti2) 				SEPARATOR ' / ') sisviestit2,
-				group_concat(distinct trim(viesti) 					SEPARATOR ' / ') viestit,
-				group_concat(distinct trim(tilausyhteyshenkilo) 	SEPARATOR ' / ') tilausyhteyshenkilo,
-				group_concat(distinct trim(asiakkaan_tilausnumero) 	SEPARATOR ' / ') asiakkaan_tilausnumero,
-				group_concat(distinct trim(kohde) 					SEPARATOR ' / ') kohde
+				group_concat(distinct if(trim(comments)='', NULL, trim(comments)) 								SEPARATOR ' / ') comments,
+				group_concat(distinct if(trim(sisviesti1)='', NULL, trim(sisviesti1)) 							SEPARATOR ' / ') sisviestit1,
+				group_concat(distinct if(trim(sisviesti2)='', NULL, trim(sisviesti2)) 							SEPARATOR ' / ') sisviestit2,
+				group_concat(distinct if(trim(viesti)='', NULL, trim(viesti)) 									SEPARATOR ' / ') viestit,
+				group_concat(distinct if(trim(tilausyhteyshenkilo)='', NULL, trim(tilausyhteyshenkilo)) 		SEPARATOR ' / ') tilausyhteyshenkilo,
+				group_concat(distinct if(trim(asiakkaan_tilausnumero)='', NULL, trim(asiakkaan_tilausnumero)) 	SEPARATOR ' / ') asiakkaan_tilausnumero,
+				group_concat(distinct if(trim(kohde)='', NULL, trim(kohde)) 									SEPARATOR ' / ') kohde
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus in ($tunnukset)";

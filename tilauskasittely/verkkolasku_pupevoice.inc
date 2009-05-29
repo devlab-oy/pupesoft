@@ -145,7 +145,7 @@ if (!function_exists('pupevoice_otsik')) {
 		xml_add("CashDiscountBaseAmount",				$lasrow['summa'],			 					$tootxml);
 		xml_add("CashDiscountPercent",					$masrow['kassa_alepros'],	 					$tootxml);
 		xml_add("CashDiscountAmount",					$lasrow['kasumma'],			 					$tootxml);
-		xml_add("InvoiceReferenceFreeText",				$lasrow['viesti'],								$tootxml);
+		xml_add("InvoiceReferenceFreeText",				substr($lasrow['viesti'],0,35),					$tootxml);
 		xml_add("InvoiceFreeText",						$lasrow['sisviesti1'],							$tootxml);
 	}
 }

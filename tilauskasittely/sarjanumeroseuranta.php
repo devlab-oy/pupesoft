@@ -35,6 +35,17 @@
 	$sarjatestres = mysql_query($query);
 
 	if (mysql_error() == "") {
+		
+		$oletussarja = "";
+		
+		//	Tutkitaan onko meillä venelisätiedot vai ei..
+		while($sarjatarkrow = mysql_fetch_array($sarjatestres)) {
+			
+			if($sarjatarkrow["field"] == "Suurin_henkiloluku") {
+				$oletussarja = "JOO";
+			}	
+		}
+		
 		$sarjanumeronLisatiedot = "OK";
 	}
 	else {
@@ -429,7 +440,7 @@
 
 			$tun = mysql_insert_id();
 
-			if($sarjanumeronLisatiedot == "OK" and ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "U" or $rivirow["sarjanumeroseuranta"] == "V")) {
+			if($sarjanumeronLisatiedot == "OK" and $oletussarja == "JOO" and ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "U" or $rivirow["sarjanumeroseuranta"] == "V")) {
 				$query = "	SELECT *
 							FROM tuote
 							WHERE yhtio = '$kukarow[yhtio]'

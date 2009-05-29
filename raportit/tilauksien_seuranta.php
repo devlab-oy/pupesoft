@@ -104,7 +104,7 @@ if($tee=="") {
 		$opt .= "</select>";
 		
 		echo "<font class='message'>Korjaa ensin puuttuvat seurannat!</font><br>";
-		echo "<table><tr><th>".t("Tilaus")."</th><th>".t("Tyyppi")."</th><th>".t("Asiakas")."</th><th>".t("Oikea seuranta")."</th></tr>";
+		echo "<table><tr><th>".t("Tilaus")."</th><th>".t("Tyyppi")."</th><th>".t("Asiakas")."</th><th>".t("Korjattu seuranta")."</th></tr>";
 		while($row=mysql_fetch_array($result)) {
 			echo "	<tr class='aktiivi'>";
 			

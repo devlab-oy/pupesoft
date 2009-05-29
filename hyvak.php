@@ -219,7 +219,7 @@
 
 		$trow = mysql_fetch_array ($result);
 
-		if ($trow["tapvm"] > $yhtiorow["ostoreskontrakausi_alku"] or ($trow["tapvm"]=="0000-00-00" and $trow["laskutyyppi"] == "M")) {
+		if ($trow["tapvm"] >= $yhtiorow["ostoreskontrakausi_alku"] or ($trow["tapvm"]=="0000-00-00" and $trow["laskutyyppi"] == "M")) {
 
 			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Poisti laskun")."<br>" . $trow['comments'];
 
@@ -930,7 +930,7 @@
 		$query = "SELECT laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";
 		$keikres = mysql_query($query) or pupe_error($query);
 
-		if (($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') and $oikeurow['paivitys'] == '1' and mysql_num_rows($keikres) == 0 and $laskurow["tapvm"] > $yhtiorow["ostoreskontrakausi_alku"]) {
+		if (($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') and $oikeurow['paivitys'] == '1' and mysql_num_rows($keikres) == 0 and $laskurow["tapvm"] >= $yhtiorow["ostoreskontrakausi_alku"]) {
 
 			echo "	<td class='back'><form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
 					<input type='hidden' name='tee' value='D'>
@@ -1794,7 +1794,7 @@
 						<td class='back' valign='top'><input type='Submit' value='".t("Lisää kommentti")."'></td></form>";
 				}
 
-				if ($oikeurow['paivitys'] == '1' and mysql_num_rows($keikres) == 0 and $trow["tapvm"] > $yhtiorow["ostoreskontrakausi_alku"]) {
+				if ($oikeurow['paivitys'] == '1' and mysql_num_rows($keikres) == 0 and $trow["tapvm"] >= $yhtiorow["ostoreskontrakausi_alku"]) {
 					echo "<form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
 							 <input type='hidden' name='tee' value='D'>
 							 <input type='hidden' name = 'nayta' value='$nayta'>

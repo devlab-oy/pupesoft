@@ -182,9 +182,9 @@
 		}
 
 		echo "</select>";
-
 		echo "</td>";
 		echo "</tr>";
+		
 		echo "<tr><th>".t("Vain kohde")."</th>";
 	 	$query = "SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -201,6 +201,7 @@
 		}
 		echo "</select></td>";
 		echo "</tr>";
+		
 		echo "<tr><th>".t("Vain projekti")."</th>";
 		$query = "SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -217,9 +218,29 @@
 		}
 		echo "</select></td>";
 		echo "</tr>";
+		
 		echo "<tr><th>".t("Vain asiakas")."</th><td><input type='text' name='asia_ytunnus' value='$asiakasrow[ytunnus]'> $asiakasrow[nimi] <input type='hidden' name='asiakasid' value='$asiakasid'></td></tr>";
 		echo "<tr><th>".t("Vain toimittaja")."</th><td><input type='text' name='toim_ytunnus' value='$toimittajarow[ytunnus]'> $toimittajarow[nimi] <input type='hidden' name='toimittajaid' value='$toimittajaid'></td></tr>";
+		
+		echo "<tr><th>".t("Vain alv%")."</th>";
+		$query = "SELECT selite, selitetark
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'ALV'
+					ORDER BY jarjestys";
+		$vresult = mysql_query($query) or pupe_error($query);
+		echo "<td><select name='alv'><option value='tyhja'>".t("Ei valintaa")."";
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[1] == '$alv') {
+				$sel = "selected";
+			}
+			echo "<option value = '$vrow[0]' $sel>$vrow[0]";
+		}
+		echo "</select></td>";
+		echo "</tr>";
+		
 		echo "<tr><th>".t("Vain käsin viedyt")."</th><td><input type='checkbox' name='kasin'></td></tr>";
+		
 		echo "<tr><th>".t("Tee Excel")."</th><td><input type='checkbox' name='excel' value = 'YES'></td></tr>";
 		echo "</table><br>
 		      <input type = 'submit' value = '".t("Näytä")."'></form>";
@@ -368,6 +389,10 @@
 
 	if ($toimittajaid != "") {
 		$lisa .= " and lasku.liitostunnus='$toimittajaid' and tila in ('H','Y','M','P','Q') ";
+	}
+	
+	if ($alv != 'tyhja') {
+		$lisa .= " and vero='$alv' ";
 	}
 
 	$query = "	SELECT $alku , kustp.nimi kustp, kohde.nimi kohde, projekti.nimi projekti, CONCAT_WS(' ', selite, lasku.nimi) selite, tiliointi.summa, vero, tiliointi.ltunnus, tiliointi.tilino xtilino, tiliointi.summa_valuutassa, tiliointi.valkoodi
@@ -607,5 +632,10 @@
 
 	echo "</tr>";
 
-	echo "</table><br>";
+	echo "</table>";
+	
+	if ($lopetus != '') {
+		echo "<br><br>";
+		lopetus($lopetus);
+	}
 ?>

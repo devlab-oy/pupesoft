@@ -520,17 +520,19 @@ if ($ytunnus!='') {
 			
 			$taulu  = "";
 			
-			if($aletaulu != "" or $tee == "eposti") {
-				$tuotejoin = " JOIN tuote ON tuote.yhtio=perusalennus.yhtio and tuote.aleryhma=perusalennus.ryhma and osasto != 0 and try != 0 and hinnastoon != 'E' and status != 'P' ";
+			if ($aletaulu != "" or $tee == "eposti") {
+				$tuotejoin 	= " JOIN tuote ON tuote.yhtio=perusalennus.yhtio and tuote.aleryhma=perusalennus.ryhma and osasto != 0 and try != 0 and hinnastoon != 'E' ";
+				$tuotewhere = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
 				$tuotegroup = " GROUP BY try, osasto, aleryhma ";
-				$tuotecols = ", osasto, try";
-				$order = " osasto+0, try+0, alennusryhmä+0, tuoteno, prio ";
+				$tuotecols 	= ", osasto, try";
+				$order 		= " osasto+0, try+0, alennusryhmä+0, tuoteno, prio ";
 			}
 			else {
-				$tuotejoin = "";
-				$tuotegroup = "";
-				$tuotecols = "";
-				$order = "alennusryhmä+0 , prio , asiakasryhmä";				
+				$tuotejoin	= "";
+				$tuotewhere	= "";
+				$tuotegroup	= "";				
+				$tuotecols 	= "";				
+				$order 		= "alennusryhmä+0 , prio , asiakasryhmä";				
 			}
 			
 			$query = "
@@ -550,9 +552,13 @@ if ($ytunnus!='') {
 							FROM asiakasalennus
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma						
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and osasto != 0 and try != 0 and hinnastoon != 'E' and status != 'P'
-							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus' and asiakas_ryhma='' and asiakasalennus.tuoteno!=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and osasto != 0 and try != 0 and hinnastoon != 'E'
+							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' 
+							and ytunnus='$ytunnus' 
+							and asiakas_ryhma='' 
+							and asiakasalennus.tuoteno!=''
+							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						)
 						UNION
 						/*	Asiakasalennus ytunnuksella	 ryhma*/	
@@ -572,8 +578,12 @@ if ($ytunnus!='') {
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma						
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							$tuotejoin
-							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus' and asiakas_ryhma='' and asiakasalennus.tuoteno=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' 
+							and ytunnus='$ytunnus' 
+							and asiakas_ryhma='' 
+							and asiakasalennus.tuoteno=''
+							$tuotewhere
+							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							$tuotegroup
 						)
 						UNION
@@ -595,9 +605,14 @@ if ($ytunnus!='') {
 							FROM asiakasalennus
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma						
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
-							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and osasto != 0 and try != 0 and hinnastoon != 'E' and status != 'P'
-							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma != '' and ytunnus='' and asiakasalennus.tuoteno!=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and osasto != 0 and try != 0 and hinnastoon != 'E'
+							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' 
+							and asiakas_ryhma = '$asiakasrow[ryhma]' 
+							and asiakas_ryhma != '' 
+							and ytunnus='' 
+							and asiakasalennus.tuoteno!=''
+							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)							
+							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						)
 						UNION
 						/*	Asiakasalennus Ryhmällä	ryhma */
@@ -618,8 +633,13 @@ if ($ytunnus!='') {
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma						
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							$tuotejoin
-							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma != '' and ytunnus='' and asiakasalennus.tuoteno=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' 
+							and asiakas_ryhma = '$asiakasrow[ryhma]' 
+							and asiakas_ryhma != '' 
+							and ytunnus='' 
+							and asiakasalennus.tuoteno=''
+							$tuotewhere
+							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							$tuotegroup
 						)
 							UNION
@@ -638,7 +658,9 @@ if ($ytunnus!='') {
 								'perusale' tyyppi $tuotecols
 							FROM perusalennus
 							$tuotejoin
-							WHERE perusalennus.yhtio='$kukarow[yhtio]' and alennus>0
+							WHERE perusalennus.yhtio='$kukarow[yhtio]' 
+							and alennus>0
+							$tuotewhere
 							$tuotegroup
 						)	
 						ORDER BY $order";
@@ -717,11 +739,17 @@ if ($ytunnus!='') {
 				$tyhja = 0;
 				//	Onko perusalessa tyhjä ryhmä?
 				if($asrow["prio"] == 5) {
-					$query = "	SELECT tunnus
+					$query = "	SELECT tuote.tunnus
 								FROM tuote
-								WHERE yhtio='{$kukarow["yhtio"]}' and aleryhma = '{$asrow["alennusryhmä"]}' and hinnastoon != 'E' and status != 'P' and osasto != 0 and try != 0
+								WHERE tuote.yhtio='$kukarow[yhtio]' 
+								and tuote.aleryhma = '$asrow[alennusryhmä]' 
+								and tuote.hinnastoon != 'E' 
+								and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)								
+								and tuote.osasto != 0 
+								and tuote.try != 0
 								LIMIT 1";
 					$testres = mysql_query($query) or pupe_error($query);
+					
 					if(mysql_num_rows($testres) == 0) {
 						$tyhja = 1;
 					}

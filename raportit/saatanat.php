@@ -309,6 +309,13 @@
 					echo "<td valign='top' align='right'>".str_replace(".",",",$asrow["luottoraja"])."</td>";
 					echo "</tr>";
 
+					if ($asrow['luottoraja'] > 0 and ($row["ll"]-$surow["summa"]) > $asrow['luottoraja']) {
+						$luottorajavirhe = 'kyll‰';
+					}
+					else {
+						$luottorajavirhe = '';
+					}
+
 					if(isset($workbook)) {
 						$excelsarake = 0;
 
@@ -409,6 +416,58 @@
 			}
 
 			echo "</table>";
+
+			if ($sytunnus != '') {
+				$query = "	SELECT jv
+							FROM asiakas
+							JOIN maksuehto ON (maksuehto.yhtio = asiakas.yhtio and maksuehto.tunnus = asiakas.maksuehto and maksuehto.kaytossa = '' and maksuehto.jv != '')
+							WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+							AND asiakas.ytunnus = '$sytunnus'
+							LIMIT 1";
+				$maksuehto_chk_res = mysql_query($query) or pupe_error($query);
+
+				$maksuehto_chk_row = mysql_fetch_assoc($maksuehto_chk_res);
+
+				if ($maksuehto_chk_row['jv'] != '') {
+					$jvvirhe = 'kyll‰';
+
+					if ($eiliittymaa != 'ON') {
+						echo "<br/>";
+						echo "<font class='error'>",t("HUOM! T‰m‰ on j‰lkivaatimusasiakas"),"</font>";
+						echo "<br/>";
+					}
+				}
+
+				if ($eiliittymaa != 'ON' and $luottorajavirhe != '') {
+					echo "<br/>";
+					echo "<font class='error'>",t("HUOM! Luottoraja ylittynyt"),"</font>";
+					echo "<br/>";
+				}
+
+				//katsotaan onko asiakkaalla maksamattomia trattoja, jos on niin ei anneta tehd‰ tilausta
+				$query = " 	SELECT count(lasku.tunnus) kpl 
+							FROM karhu_lasku 
+							JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.yhtio = '$kukarow[yhtio]' and lasku.mapvm = '0000-00-00' and lasku.ytunnus = '$sytunnus') 
+							JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = 'T')";
+				$trattares = mysql_query($query) or pupe_error($query);
+				$tratat = mysql_fetch_array($trattares);
+
+				if ($tratat['kpl'] > 0) {
+					$trattavirhe = 'kyll‰';
+
+					if ($eiliittymaa != 'ON') {
+						echo "<br/>";
+						echo "<font class='error'>".t("HUOM! Asiakkaalla on maksamattomia trattoja")."</font>";
+						echo "<br/>";
+					}
+				}
+
+				if ($ylikolkyt > 0 and $eiliittymaa != 'ON') {
+					echo "<br/>";
+					echo "<font class='error'>".t("HUOM! Asiakkaalla on yli 15 p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan")."</font>";
+					echo "<br/>";
+				}
+			}
 
 			if(isset($workbook)) {
 

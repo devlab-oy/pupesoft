@@ -46,7 +46,11 @@
 		<input type='hidden' name='naytanimitys' value='$naytanimitys'>
 		<input type='hidden' name='ippa' value='$ippa'>
 		<input type='hidden' name='ikka' value='$ikka'>
-		<input type='hidden' name='ivva' value='$ivva'>";
+		<input type='hidden' name='ivva' value='$ivva'>
+		<input type='hidden' name='sorttauskentan_jarjestys1' value='$sorttauskentan_jarjestys1'>
+		<input type='hidden' name='sorttauskentan_jarjestys2' value='$sorttauskentan_jarjestys2'>
+		<input type='hidden' name='sorttauskentan_jarjestys3' value='$sorttauskentan_jarjestys3'>
+		<input type='hidden' name='sorttauskentan_jarjestys4' value='$sorttauskentan_jarjestys4'>";
 
 		if ($nappikeikalle == 'menossa') {
 			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";

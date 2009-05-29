@@ -2138,6 +2138,11 @@ if ($tee == '') {
 		$sytunnus 	 = $laskurow['ytunnus'];
 		$eiliittymaa = 'ON';
 
+		$luottorajavirhe = '';
+		$jvvirhe = '';
+		$ylikolkyt = '';
+		$trattavirhe = '';
+
 		ob_start();
 		require ("../raportit/saatanat.php");
 		$retval = ob_get_contents();
@@ -2146,54 +2151,29 @@ if ($tee == '') {
 		if (trim ($retval) != "") {
 			echo "<br>$retval";
 		}
-				
-		if ($ylikolkyt > 0) {
-			echo "<br>";
-			echo "	<table>
-					<tr>$jarjlisa
-					<td class='back' align = 'left'><font class='error'>".t("HUOM!!!!!! Asiakkaalla on yli 15 p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan")."!!!!!<br></font>$menuset</td>
-					</tr>
-					<tr>$jarjlisa
-					<td class='back'><hr></td>
-					</tr>
-					</table>";
+
+		if ($luottorajavirhe != '') {
+			echo "<br/>";
+			echo "<font class='error'>",t("HUOM!!!!!! Luottoraja ylittynyt"),"!!!!!</font>";
+			echo "<br/>";
 		}
 
-		//katsotaan onko asiakkaalla maksamattomia trattoja, jos on niin ei anneta tehd‰ tilausta
-		$query = " 	SELECT count(lasku.tunnus) kpl 
-					FROM karhu_lasku 
-					JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.yhtio = '$kukarow[yhtio]' and lasku.mapvm = '0000-00-00' and lasku.ytunnus = '$laskurow[ytunnus]') 
-					JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = 'T')";
-		$trattares = mysql_query($query) or pupe_error($query);
-		$tratat = mysql_fetch_array($trattares);
+		if ($jvvirhe != '') {
+			echo "<br/>";
+			echo "<font class='error'>",t("HUOM!!!!!! T‰m‰ on j‰lkivaatimusasiakas"),"!!!!!</font>";
+			echo "<br/>";
+		}
+			
+		if ($ylikolkyt > 0) {
+			echo "<br/>";
+			echo "<font class='error'>".t("HUOM!!!!!! Asiakkaalla on yli 15 p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan")."!!!!!</font>";
+			echo "<br/>";
+		}
 
-		if ($tratat['kpl'] > 0) {
-			echo "	<table>
-					<tr>$jarjlisa
-					<td class='back' align = 'left'><font class='error'>".t("HUOM!!!!!! Asiakkaalla on maksamattomia trattoja")."!!!!!<br></font>$menuset</td>
-					</tr>
-					<tr>$jarjlisa
-					<td class='back'><hr></td>
-					</tr>
-					</table>";
-			/*							
-			echo "<td align='right' class='back' valign='top'>
-					<form name='mitatoikokonaan' action='$PHP_SELF' method='post' onSubmit = 'return verify()'>
-					<input type='hidden' name='toim' value='$toim'>
-					<input type='hidden' name='lopetus' value='$lopetus'>
-					<input type='hidden' name='projektilla' value='$projektilla'>
-					<input type='hidden' name='tee' value='POISTA'>
-					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-					<input type='submit' value='* ".t("Mit‰tˆi koko")." $otsikko *'>
-					</form></td>";
-		
-			if (file_exists("../inc/footer.inc")) {
-				require ("../inc/footer.inc");
-			}
-			else {
-				require ("footer.inc");
-			}
-			exit;*/
+		if ($trattavirhe != '') {
+			echo "<br/>";
+			echo "<font class='error'>".t("HUOM!!!!!! Asiakkaalla on maksamattomia trattoja")."!!!!!<br></font>";
+			echo "<br/>";
 		}
 
 		if ($yhtiorow["myyntitilaus_asiakasmemo"] == "K") {

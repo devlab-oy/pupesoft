@@ -573,6 +573,8 @@
 			$limit = "";
 		}
 
+		$saatanat_chk = array();
+
 		switch($jarj) {
 			case "ytunnus":
 				$order = " ORDER BY lasku.ytunnus, tuote.tuoteno";
@@ -612,13 +614,11 @@
 							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
 							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, 
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika, 
-							lasku.toimvko, maksuehto.jv, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi
+							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila='E' and lasku.alatila='A' $laskulisa)							
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
 							$toimittajalisa
-							LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-							LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = asiakas.maksuehto)
 							WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
 							and tilausrivi.tyyppi 			= 'E'
 							and tilausrivi.laskutettuaika 	= '0000-00-00'
@@ -633,13 +633,11 @@
 							lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
 							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, 
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika, 
-							lasku.toimvko, maksuehto.jv, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi
+							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and ((lasku.tila = 'N' and lasku.alatila != '') or lasku.tila != 'N') $laskulisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
 							$toimittajalisa
-							LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-							LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = asiakas.maksuehto)
 							WHERE tilausrivi.yhtio 	= '$kukarow[yhtio]'
 							and tilausrivi.tyyppi in ('L','G')
 							and tilausrivi.var 				= 'J'
@@ -1060,8 +1058,48 @@
 
 									echo "$jtrow[toim_nimi]";
 
-									if ($jtrow["jv"] != "") {
-										echo "<br><br><font class='message'>".t("J‰lkivaatimusasiakas")."!</font><br><br>";
+									if (!isset($saatanat_chk[$jtrow['ytunnus']])) {
+				
+										$sytunnus 	 = $jtrow['ytunnus'];
+										$eiliittymaa = 'ON';
+
+										$luottorajavirhe = '';
+										$jvvirhe = '';
+										$ylikolkyt = '';
+										$trattavirhe = '';
+
+										ob_start();
+										require ("../raportit/saatanat.php");
+										ob_end_clean();
+
+										$saatanat_chk[$sytunnus] = array($luottorajavirhe, $jvvirhe, $ylikolkyt, $trattavirhe);
+									}
+									else {
+										list($luottorajavirhe, $jvvirhe, $ylikolkyt, $trattavirhe) = $saatanat_chk[$jtrow['ytunnus']];
+									}
+
+									if ($luottorajavirhe != '' or $jvvirhe != '' or $ylikolkyt > 0 or $trattavirhe != '') {
+										echo "<br/>";
+									}
+
+									if ($luottorajavirhe != '') {
+										echo "<br/>";
+										echo "<font class='message'>",t("Luottoraja ylittynyt"),"</font>";
+									}
+
+									if ($jvvirhe != '') {
+										echo "<br/>";
+										echo "<font class='message'>",t("T‰m‰ on j‰lkivaatimusasiakas"),"</font>";
+									}
+
+									if ($ylikolkyt > 0) {
+										echo "<br/>";
+										echo "<font class='message'>".t("Yli 15 pv sitten er‰‰ntyneit‰ laskuja")."</font>";
+									}
+
+									if ($trattavirhe != '') {
+										echo "<br/>";
+										echo "<font class='message'>".t("Asiakkaalla on maksamattomia trattoja")."<br></font>";
 									}
 
 									echo "</td>";

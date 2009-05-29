@@ -40,9 +40,42 @@
 
 		$kutsu = "";
 
+		$sorttauskentan_jarjestys = "";
+
+		if (!isset($sorttauskentan_jarjestys1) or !isset($sorttauskentan_jarjestys2) or !isset($sorttauskentan_jarjestys3) or !isset($sorttauskentan_jarjestys4)) {
+			$sorttauskentan_jarjestys = "concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0'))";
+		}
+		else {
+			$sorttauskentan_jarjestys = 'concat(';
+
+			if ($sorttauskentan_jarjestys1 != '') {
+				$sorttauskentan_jarjestys1 = mysql_real_escape_string($sorttauskentan_jarjestys1);
+				$sorttauskentan_jarjestys .= "lpad(upper(tuotepaikat.$sorttauskentan_jarjestys1), 5, '0'),";
+			}
+
+			if ($sorttauskentan_jarjestys2 != '') {
+				$sorttauskentan_jarjestys2 = mysql_real_escape_string($sorttauskentan_jarjestys2);
+				$sorttauskentan_jarjestys .= "lpad(upper(tuotepaikat.$sorttauskentan_jarjestys2), 5, '0'),";
+			}
+
+			if ($sorttauskentan_jarjestys3 != '') {
+				$sorttauskentan_jarjestys3 = mysql_real_escape_string($sorttauskentan_jarjestys3);
+				$sorttauskentan_jarjestys .= "lpad(upper(tuotepaikat.$sorttauskentan_jarjestys3), 5, '0'),";
+			}
+
+			if ($sorttauskentan_jarjestys4 != '') {
+				$sorttauskentan_jarjestys4 = mysql_real_escape_string($sorttauskentan_jarjestys4);
+				$sorttauskentan_jarjestys .= "lpad(upper(tuotepaikat.$sorttauskentan_jarjestys4), 5, '0'),";
+			}
+
+			$sorttauskentan_jarjestys = substr($sorttauskentan_jarjestys, 0, -1);
+
+			$sorttauskentan_jarjestys .= ')';
+		}
+
 		//hakulause, tämä on samam kaikilla vaihtoehdolilla  ja gorup by lauyse joka on sama kaikilla
 		$select  = " tuote.tuoteno, tuote.sarjanumeroseuranta, group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo,
-		concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta";
+		$sorttauskentan_jarjestys sorttauskentta";
 		$groupby = " tuote.tuoteno, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, varastopaikka, inventointiaika, tuotepaikat.saldo ";
 
 		if(($try != '' and $osasto != '') or ($ahyllyalue != '' and $lhyllyalue != '') or ($toimittaja != '') or ($tuotemerkki != '')) {
@@ -668,10 +701,103 @@
 		}
 
 		echo "<td><select name='jarjestys'>";
-		echo "<option value=''  $sel4>".t("Osoitejärjestykseen")."</option>";
+		echo "<option value=''  $sel3>".t("Osoitejärjestykseen")."</option>";
 		echo "<option value='tuoteno' $sel4>".t("Tuotenumerojärjestykseen")."</option>";
 
 		echo "</td></tr>";
+
+		echo "<tr><th>",t("Järjestä sorttauskenttä"),":</th>";
+
+		$selsorttaus = array();
+
+		if ($sorttauskentan_jarjestys1 == 'hyllytaso') {
+			$selsorttaus['hyllytaso'] = "SELECTED";
+		}
+		elseif ($sorttauskentan_jarjestys1 == 'hyllynro') {
+			$selsorttaus['hyllynro'] = "SELECTED";
+		}
+		elseif ($sorttauskentan_jarjestys1 == 'hyllyvali') {
+			$selsorttaus['hyllyvali'] = "SELECTED";
+		}
+		else {
+			$selsorttaus['hyllyalue'] = "SELECTED";
+		}
+
+		echo "<td><select name='sorttauskentan_jarjestys1'>";
+		echo "<option value='hyllyalue'  $selsorttaus[hyllyalue]>".t("Hyllyalue")."</option>";
+		echo "<option value='hyllynro' $selsorttaus[hyllynro]>".t("Hyllynro")."</option>";
+		echo "<option value='hyllyvali' $selsorttaus[hyllyvali]>".t("Hyllyvali")."</option>";
+		echo "<option value='hyllytaso' $selsorttaus[hyllytaso]>".t("Hyllytaso")."</option>";
+		echo "</select>";
+
+		$selsorttaus = array();
+
+		if ($sorttauskentan_jarjestys2 == 'hyllytaso') {
+			$selsorttaus['hyllytaso'] = "SELECTED";
+		}
+		elseif ($sorttauskentan_jarjestys2 == 'hyllyalue') {
+			$selsorttaus['hyllyalue'] = "SELECTED";
+		}
+		elseif ($sorttauskentan_jarjestys2 == 'hyllyvali') {
+			$selsorttaus['hyllyvali'] = "SELECTED";
+		}
+		else {
+			$selsorttaus['hyllynro'] = "SELECTED";
+		}
+
+		echo "<select name='sorttauskentan_jarjestys2'>";
+		echo "<option value='hyllyalue'  $selsorttaus[hyllyalue]>".t("Hyllyalue")."</option>";
+		echo "<option value='hyllynro' $selsorttaus[hyllynro]>".t("Hyllynro")."</option>";
+		echo "<option value='hyllyvali' $selsorttaus[hyllyvali]>".t("Hyllyvali")."</option>";
+		echo "<option value='hyllytaso' $selsorttaus[hyllytaso]>".t("Hyllytaso")."</option>";
+		echo "</select>";
+
+		$selsorttaus = array();
+
+		if ($sorttauskentan_jarjestys3 == 'hyllytaso') {
+			$selsorttaus['hyllytaso'] = "SELECTED";
+		}
+		elseif ($sorttauskentan_jarjestys3 == 'hyllynro') {
+			$selsorttaus['hyllynro'] = "SELECTED";
+		}
+		elseif ($sorttauskentan_jarjestys3 == 'hyllyalue') {
+			$selsorttaus['hyllyalue'] = "SELECTED";
+		}
+		else {
+			$selsorttaus['hyllyvali'] = "SELECTED";
+		}
+
+		echo "<select name='sorttauskentan_jarjestys3'>";
+		echo "<option value='hyllyalue'  $selsorttaus[hyllyalue]>".t("Hyllyalue")."</option>";
+		echo "<option value='hyllynro' $selsorttaus[hyllynro]>".t("Hyllynro")."</option>";
+		echo "<option value='hyllyvali' $selsorttaus[hyllyvali]>".t("Hyllyvali")."</option>";
+		echo "<option value='hyllytaso' $selsorttaus[hyllytaso]>".t("Hyllytaso")."</option>";
+		echo "</select>";
+
+		$selsorttaus = array();
+
+		if ($sorttauskentan_jarjestys4 == 'hyllyalue') {
+			$selsorttaus['hyllyalue'] = "SELECTED";
+		}
+		elseif ($sorttauskentan_jarjestys4 == 'hyllynro') {
+			$selsorttaus['hyllynro'] = "SELECTED";
+		}
+		elseif ($sorttauskentan_jarjestys4 == 'hyllyvali') {
+			$selsorttaus['hyllyvali'] = "SELECTED";
+		}
+		else {
+			$selsorttaus['hyllytaso'] = "SELECTED";
+		}
+
+		echo "<select name='sorttauskentan_jarjestys4'>";
+		echo "<option value='hyllyalue'  $selsorttaus[hyllyalue]>".t("Hyllyalue")."</option>";
+		echo "<option value='hyllynro' $selsorttaus[hyllynro]>".t("Hyllynro")."</option>";
+		echo "<option value='hyllyvali' $selsorttaus[hyllyvali]>".t("Hyllyvali")."</option>";
+		echo "<option value='hyllytaso' $selsorttaus[hyllytaso]>".t("Hyllytaso")."</option>";
+		echo "</select>";
+		echo "</td>";
+
+		echo "</tr>";
 
 		echo "</table>";
 

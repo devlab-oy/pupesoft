@@ -139,7 +139,7 @@ if ($tee == "VSRALVYV") {
 					count(distinct(lasku.tunnus)) laskuja										
 					FROM lasku USE INDEX (yhtio_tila_tapvm)
 					JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
-					JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+					JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]')
 					LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and lasku.liitostunnus = asiakas.tunnus)
 					WHERE lasku.yhtio = '$kukarow[yhtio]' 
 					and lasku.tila = 'U'

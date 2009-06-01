@@ -954,6 +954,12 @@
 								if ($trow["tilausrivi_kommentti"] != "" and (int) $rivitunnus == 0) {
 									$kommentti = trim($trow["tilausrivi_kommentti"]."\n".$kommentti);
 								}
+								
+								if ((int) $rivitunnus == 0 and ($trow["status"] == "P" or $trow["status"] == "X")) {
+									if (trim($kommentti) != "")	$kommentti .= "\n";
+
+									$kommentti .= t("Poistuva tuote");
+								}
 
 								// jos meill‰ on vanha laadittuaikaa, niin k‰ytet‰‰ sit‰
 								if ($rivilaadittu != "" and (int) $rivitunnus != 0) {
@@ -1616,6 +1622,12 @@
 
 			if ($trow["tilausrivi_kommentti"] != "" and (int) $rivitunnus == 0) {
 				$kommentti = $trow["tilausrivi_kommentti"]."\n".$kommentti;
+			}
+			
+			if ((int) $rivitunnus == 0 and ($trow["status"] == "P" or $trow["status"] == "X")) {
+				if (trim($kommentti) != "")	$kommentti .= "\n";
+				
+				$kommentti .= t("Poistunut tuote");
 			}
 
 			// jos meill‰ on vanha laadittuaikaa, niin k‰ytet‰‰ sit‰

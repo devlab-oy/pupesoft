@@ -384,6 +384,7 @@
 									maa   				= '$otsikrow[maa]',
 									chn					= '$otsikrow[chn]',
 									verkkotunnus		= '$otsikrow[verkkotunnus]',
+									vienti				= '$otsikrow[vienti]',
 									toim_ovttunnus 		= '$otsikrow[toim_ovttunnus]',
 									toim_nimi      		= '$otsikrow[toim_nimi]',
 									toim_nimitark  		= '$otsikrow[toim_nimitark]',

@@ -641,7 +641,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 								nimitys 		= '$tilrivirow[nimitys]',
 								otunnus 		= '$tilrivirow[otunnus]',
 								uusiotunnus		= '$tilrivirow[uusiotunnus]',
-								tyyppi 			= 'O',
+								tyyppi 			= '$tilausriviTyyppi',
 								keratty	 		= '$kukarow[kuka]',
 								kerattyaika		= now(),
 								toimaika 		= '$tilrivirow[toimaika]',
@@ -705,7 +705,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 							
 							for($i=1;$i<=$puuttuva_sarjanumerot;$i++) {
 								//	Arvotaan uniikki sarjanumero
-								$query = "	SELECT count(*) kpl
+								$query = "	SELECT count(distinct(sarjanumero)) kpl
 											FROM sarjanumeroseuranta
 											WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '{$tilrivirow["tuoteno"]}'";
 								$sarjares = mysql_query($query) or pupe_error($query);
@@ -714,7 +714,6 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 								
 								// varmistetaan, että tämä on uniikki!
 								$onUniikki = false;
-								$x=0;
 								while($onUniikki === false) {
 									$sarjanro = "{$tilrivirow["tuoteno"]}-$sarja";
 									$query = "	SELECT tunnus
@@ -724,13 +723,6 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 									if(mysql_num_rows($sarjares) == 0) {
 										$onUniikki = true;
 									}
-									
-									if($x > 50) {
-										echo "<font class='error'>".t("VIRHE: Uniikkia sarjanumeroa ei meinaa löytyä! Ota yhteys ylläpitoon.")."</font><br>";
-										die();
-									}
-
-									$x++;
 								}
 								
 								$query = "	INSERT INTO sarjanumeroseuranta
@@ -760,7 +752,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 						$upparesult = mysql_query($query) or pupe_error($query);
 						
 						//	Arvotaan uniikki sarjanumero
-						$query = "	SELECT count(*) kpl
+						$query = "	SELECT count(distinct(sarjanumero)) kpl
 									FROM sarjanumeroseuranta
 									WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '{$tilrivirow["tuoteno"]}'";
 						$sarjares = mysql_query($query) or pupe_error($query);
@@ -769,7 +761,6 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 						
 						// varmistetaan, että tämä on uniikki!
 						$onUniikki = false;
-						$x=0;
 						while($onUniikki === false) {
 							$sarjanro = "{$tilrivirow["tuoteno"]}-$sarja";
 							$query = "	SELECT tunnus
@@ -779,13 +770,6 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 							if(mysql_num_rows($sarjares) == 0) {
 								$onUniikki = true;
 							}
-							
-							if($x > 50) {
-								echo "<font class='error'>".t("VIRHE: Uniikkia sarjanumeroa ei meinaa löytyä! Ota yhteys ylläpitoon.")."</font><br>";
-								die();
-							}
-
-							$x++;
 						}
 						
 						//	Generoidaan eränumerot! näitä ei siis edes pitäisi voida tehdä  mistään käyttöliittymästä!

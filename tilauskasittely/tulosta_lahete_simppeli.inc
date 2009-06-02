@@ -415,7 +415,29 @@ if (!function_exists('tulosta_lahete')) {
 							$h-=$pdf->ln();						
 						}
 					}
+					
+					//  Oisko sarjanumeroita
+					if ($row["kpl"]+$row["varattu"] > 0){
+						$sarjanutunnus = "myyntirivitunnus";
+					}
+					else {
+						$sarjanutunnus = "ostorivitunnus";
+					}
 
+					$query = "  select *
+								from sarjanumeroseuranta
+								where yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$row[tuoteno]'
+								and $sarjanutunnus='$row[tunnus]'
+								and sarjanumero != ''";
+					$sarjares = mysql_query($query) or pupe_error($query);					
+					if (mysql_num_rows($sarjares) > 0){
+						while($sarjarow = mysql_fetch_array($sarjares)) {
+							$pdf->write($h, 1, 5, 0, t("SN", $kieli).": $sarjarow[sarjanumero]", "snadi", "L", "I");
+							$h-=$pdf->ln();
+						}
+					}
+					
 					if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
 						$pdf->write($h, 1, 5, 0, t("RS-koodi", $kieli).": $laskurow[asiakkaan_kohde]-$row[asiakkaan_positio]", "snadi", "L", "I");
 						$h-=$pdf->ln();

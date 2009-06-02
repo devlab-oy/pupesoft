@@ -16,8 +16,8 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
 							tuote.sarjanumeroseuranta, tuote.yksikko, if(tuote.tarrakpl>0, tarrakpl, 1) tarrakpl, tuote.yksikko,
 							sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.myyntirivitunnus, sarjanumeroseuranta.lisatieto, sarjanumeroseuranta.tunnus sarjatunnus
 					FROM tilausrivi
-					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' and tuote.sarjanumeroseuranta!=''
-					JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio=tilausrivi.yhtio and sarjanumeroseuranta.ostorivitunnus = tilausrivi.tunnus and sarjanumeroseuranta.myyntirivitunnus=0
+					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' and tuote.sarjanumeroseuranta!='' and tuote.tarratyyppi!=''
+					LEFT JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio=tilausrivi.yhtio and sarjanumeroseuranta.ostorivitunnus = tilausrivi.tunnus and sarjanumeroseuranta.myyntirivitunnus=0
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]' and $lisa tilausrivi.tyyppi = 'O'";
 		$result = mysql_query($query) or pupe_error($query);
 		
@@ -73,8 +73,8 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
 				}
 				
 				for($i=0;$i<$tarra_kpl;$i++) {
-					$pdf = alku($pdf, $row);
 					
+					//	Haetaan perustietoja
 					$query = "	SELECT laskutettuaika
 								FROM tilausrivi
 								WHERE yhtio='$kukarow[yhtio]' and tunnus = '$row[ostorivitunnus]'";
@@ -96,63 +96,8 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
 						$lisarow = mysql_fetch_array($lisares);
 					}
 					
-					//	tälle on jokin speciaali tuotetarratyyppi
-					if($row["tuotetarratyyppi"] != "") {
-						require($row["tuotetarratyyppi"]);
-					}
-					else {
+					require($row["tuotetarratyyppi"]);
 
-						$pdf->write($h, 1, 0, 75, $yhtiorow[nimi], "BIG", "L", "B");
-						$pdf->write($h, 1, 80, 92,	tv1dateconv($aikarow["laskutettuaika"]), "norm", "R", "");
-						
-						$h-=$pdf->ln(2);
-
-						$pdf->write($h, 1, 0, 20, "Tuote", "norm", "L", "B");
-						$pdf->write($h, 1, 20, 0, "$row[tuoteno] - $row[nimitys]", "norm", "L", "");
-						$h-=$pdf->ln(1.4);
-
-						if(in_array($row["sarjanumeroseuranta"], array("E", "F", "G"))) {
-							
-							$pdf->write($h, 1, 0, 15, 	"Tilaus", "norm", "L", "B");
-							$pdf->write($h, 1, 20, 45, 	"Erä", "norm", "L", "B");
-							$pdf->write($h, 1, 50, 68, 	"Eräkoko", "norm", "L", "B");
-							if($lisarow["pituus"]>0) {
-								$pdf->write($h, 1, 73, 93, 	"Pituus", "norm", "L", "B");
-							}
-							$h-=$pdf->ln(1.25);
-														
-							$pdf->write($h, 1, 0, 15,   $row["otunnus"], "norm", "L", "");
-							$pdf->write($h, 1, 20, 45,	$row["sarjanumero"], "norm", "L", "");
-							$pdf->write($h, 1, 50, 68,	$sarjarow["kpl"].strtolower($row["yksikko"]), "norm", "L", "");
-							if($lisarow["pituus"]>0) {
-								$pdf->write($h, 1, 73, 93,	$lisarow["pituus"], "norm", "L", "");
-							}
-							$h-=$pdf->ln(1.5);
-							
-							$pdf->write($h, 1, 0, 15, 	"Lisätiedot", "norm", "L", "B");
-							$h-=$pdf->ln(1.25);
-							$pdf->write($h, 1, 0, 0,	"$row[lisatieto]", "norm", "L", "");
-						}
-						elseif(in_array($row["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
-							$pdf->write($h, 1, 0, 15, 	"Tilaus", "norm", "L", "B");
-							$pdf->write($h, 1, 20, 45, 	"S:nro", "norm", "L", "B");
-							if($lisarow["pituus"]>0) {
-								$pdf->write($h, 1, 73, 93, 	"Pituus", "norm", "L", "B");
-							}
-							$h-=$pdf->ln(1.25);
-														
-							$pdf->write($h, 1, 0, 15,   $row["otunnus"], "norm", "L", "");
-							$pdf->write($h, 1, 20, 45,	$row["sarjanumero"], "norm", "L", "");
-							if($lisarow["pituus"]>0) {
-								$pdf->write($h, 1, 73, 93,	$lisarow["pituus"], "norm", "L", "");
-							}
-							$h-=$pdf->ln(1.5);
-							
-							$pdf->write($h, 1, 0, 15, 	"Lisätiedot", "norm", "L", "B");
-							$h-=$pdf->ln(1.25);
-							$pdf->write($h, 1, 0, 0,	"$row[lisatieto]", "norm", "L", "");
-						}
-					}
 				}
 			
 				if($komento=="OPTIMOI") {

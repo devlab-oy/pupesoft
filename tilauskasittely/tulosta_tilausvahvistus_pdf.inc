@@ -285,7 +285,7 @@
 							JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila in ('L','G','E','V','W','N','R','A')
 							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 							WHERE tilausrivi.otunnus IN ($tunnukset)
-							and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
+							and ((tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0) or (tilausrivi.perheid=tilausrivi.tunnus or tilausrivi.perheid2=tilausrivi.tunnus) or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.tyyppi!='D'
 							$ennakkolisa
@@ -327,8 +327,22 @@
 							$style_rivi2 = "snadi";
 							$style_komm = "snadi";
 							//  Jos meillä on isätuote fiksataan yksikköhinta
+							
 							if($row["perheid"]==$row["tunnus"]) {
-								$row["hinta"] = round(($row["rivihinta"]/$row["kpl"]),$yhtiorow['hintapyoristys']);
+								
+								if($row["ei_nayteta"] == "E") {
+									//	Lasketaan paketin hinta
+									$query = "	SELECT round(sum($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))), $yhtiorow[hintapyoristys]) yhteishinta
+												FROM tilausrivi
+												WHERE yhtio='$kukarow[yhtio]' and otunnus = '$row[otunnus]' and (perheid>0 and perheid='$row[tunnus]' or perheid2>0 and perheid2='$row[tunnus]' )";
+									$perhesummares = mysql_query($query) or pupe_error($query);
+									$perhesummarow = mysql_fetch_array($perhesummares);
+									$row["rivihinta"] = $perhesummarow["yhteishinta"];
+									$row["hinta"] = round(($row["rivihinta"]/$row["kpl"]),$yhtiorow['hintapyoristys']);
+								}
+								else {
+									$row["hinta"] = round(($row["rivihinta"]/$row["kpl"]),$yhtiorow['hintapyoristys']);
+								}
 
 								//  Ale 100 on varmaan feikki joten se piilotetaan..
 								if($row["ale"] == 100) {
@@ -336,6 +350,8 @@
 								}
 							}
 							$rivi="isa";
+							
+							
 						}
 						//  Meillä on lapsituote
 						else{
@@ -432,13 +448,15 @@
 						$h-=$pdf->ln(5);
 					}
 				}
-
-				if($laskurow["sisviesti1"] != "") {
+				
+				$teksti = trim($laskurow["sisviesti1"]."\n\n".$laskurow["comments"]);
+				
+				if($teksti != "") {
 					//  Maksusopimus
 					$pdf->write($h, 1, 0, 0, t("LISÄTIEDOT", $kieli), "norm", "L", "B");
 					$h-=$pdf->ln(1.25);
-					$nb=$pdf->countParagraphHeight($laskurow["sisviesti1"], "norm");
-					$pdf->write($h, $nb, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
+					$nb=$pdf->countParagraphHeight($teksti, "norm");
+					$pdf->write($h, $nb, 0, 0, $teksti, "norm", "L", "I");
 					$h-=$pdf->ln($nb+2);
 				}
 

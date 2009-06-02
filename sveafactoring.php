@@ -354,7 +354,7 @@
 
 				$oma_viite .= $laskurow["sisviesti1"];
 				$oma_viite = str_replace("\r", "\n", $oma_viite);
-				$oma_viite = str_replace("\n", ";", $oma_viite);
+				$oma_viite = str_replace("\n", " ", $oma_viite);
 				$ulos .= sprintf ('%-32.32s', $oma_viite); // Meidän viitteemme, tässä siis kohde + sisviesti1
 
 				$laskun_viite = $laskurow["viesti"];
@@ -372,7 +372,7 @@
 				$ulos .= sprintf ('%-32.32s', $tilausnumero); // Tilausnumero
 				$ulos .= sprintf ('%011.11s', abs($laskurow["summa"])); // Invoice amount
 
-				if ($laskurow["summa"] < 0) {
+				if ($laskurow["tyyppi"] == "02") {
 					$ulos .= "-";
 				}
 				else {
@@ -382,7 +382,7 @@
 				$alvi = $laskurow["summa"] - $laskurow["arvo"];
 				$ulos .= sprintf ('%011.11s', abs($alvi));
 
-				if ($alvi < 0) {
+				if ($laskurow["tyyppi"] == "02") {
 					$ulos .= "-";
 				}
 				else {
@@ -425,7 +425,7 @@
 				$laskurivires = mysql_query ($query) or pupe_error($query);
 
 				if (mysql_num_rows($laskurivires) > 0) {
-					while ($laskurivi = mysql_fetch_array($laskurivires)) {
+						while ($laskurivi = mysql_fetch_array($laskurivires)) {
 						$ulos .= sprintf ('%-2.2s', "11"); // Record type
 						$ulos .= sprintf ('%07.7s', $frow["sopimusnumero"]);
 						$ulos .= sprintf ('%010.10s', $laskurow["laskunro"]);
@@ -472,31 +472,38 @@
 
 						// Jos kyseessä on kommentti...
 						if ($laskurivi['kommentti'] != "") {
-							$ulos .= sprintf ('%-2.2s', "11"); // Record type
-							$ulos .= sprintf ('%07.7s', $frow["sopimusnumero"]);
-							$ulos .= sprintf ('%010.10s', $laskurow["laskunro"]);
-							$ulos .= sprintf ('%03.3s', 0);
-							$ulos .= sprintf ('%010.10s', $asirow["asiakasnro"]);
-							$ulos .= sprintf ('%-1.1s', "T"); // Row type, T = Text row
-							$ulos .= sprintf ('%-15.15s', "");
-							$ulos .= sprintf ('%-9.9s', ""); // Quantity
-							$ulos .= " ";
 
 							$kommentti = $laskurivi['kommentti'];
-							$kommentti = str_replace("\r", "\n", $kommentti);
-							$kommentti = str_replace("\n", ";", $kommentti);
-							$ulos .= sprintf ('%-40.40s', $kommentti);
 
-							$ulos .= sprintf ('%-11.11s', "");
-							$ulos .= sprintf ('%-2.2s', "");
-							$ulos .= sprintf ('%-11.11s', "");
-							$ulos .= " ";
+							while (strlen($kommentti) > 0) {
+								$ulos .= sprintf ('%-2.2s', "11"); // Record type
+								$ulos .= sprintf ('%07.7s', $frow["sopimusnumero"]);
+								$ulos .= sprintf ('%010.10s', $laskurow["laskunro"]);
+								$ulos .= sprintf ('%03.3s', 0);
+								$ulos .= sprintf ('%010.10s', $asirow["asiakasnro"]);
+								$ulos .= sprintf ('%-1.1s', "T"); // Row type, T = Text row
+								$ulos .= sprintf ('%-15.15s', "");
+								$ulos .= sprintf ('%-9.9s', ""); // Quantity
+								$ulos .= " ";
 
-							$ulos .= sprintf ('%-4.4s', ""); // VAT percentage
-							$ulos .= sprintf ('%-11.11s', "");
-							$ulos .= " ";
-							$ulos .= sprintf ('%-4.4s', ""); // Units
-							$ulos .= "\r\n";
+								$kommentti = $laskurivi['kommentti'];
+								$kommentti = str_replace("\r", "\n", $kommentti);
+								$kommentti = str_replace("\n", " ", $kommentti);
+
+								$ulos .= sprintf ('%-40.40s', $kommentti);
+								$kommentti = substr($kommentti, 40, strlen($kommentti) - 40); // Poistetaan 40 merkkiä alusta
+
+								$ulos .= sprintf ('%-11.11s', "");
+								$ulos .= sprintf ('%-2.2s', "");
+								$ulos .= sprintf ('%-11.11s', "");
+								$ulos .= " ";
+
+								$ulos .= sprintf ('%-4.4s', ""); // VAT percentage
+								$ulos .= sprintf ('%-11.11s', "");
+								$ulos .= " ";
+								$ulos .= sprintf ('%-4.4s', ""); // Units
+								$ulos .= "\r\n";
+							}
 						}
 					}
 				}

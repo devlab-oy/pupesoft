@@ -780,18 +780,22 @@
 						$thispage    = $page[$sivu];
 					}
 
-					$pdf->draw_text(25,  $kala, $rivinumerot[$row["tunnus"]],							$thispage, $pieni);
+					$pdf->draw_text(25,  $kala, $rivinumerot[$row["tunnus"]],				$thispage, $pieni);
 
 					if ($toim == "HAAMU") {
-						//$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],									$thispage, $norm);
-						$pdf->draw_text(45, $kala, $row["tuoteno"],								$thispage, $norm);
+						//$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],					$thispage, $norm);
+						$pdf->draw_text(45, $kala, $row["tuoteno"],							$thispage, $norm);
 					}
 					else {
-						$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],									$thispage, $norm);
-						$pdf->draw_text(170, $kala, "(".$row["tuoteno"].")",								$thispage, $norm);
+						$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],					$thispage, $norm);
+												
+						if (strtoupper($row["toim_tuoteno"]) != strtoupper($row["tuoteno"])) {
+							$oikpos = $pdf->strlen("(".$row["tuoteno"].")", $pieni);						
+							$pdf->draw_text(290-$oikpos, $kala, "(".$row["tuoteno"].")",		$thispage, $pieni);
+						}
 					}
 
-					$pdf->draw_text(300, $kala, tv1dateconv($row["toimaika"]),							$thispage, $norm);
+					$pdf->draw_text(300, $kala, tv1dateconv($row["toimaika"]),				$thispage, $norm);
 
 					//	Tarkastetaan olisiko toimittajalla yksikkö!
 					$query = "	SELECT toim_yksikko
@@ -812,11 +816,11 @@
 					$pdf->draw_text(415-$oikpos, $kala, ($row["varattu"]*1)." ".ta($kieli, "Y", $row["yksikko"]), 		$thispage, $norm);
 
 					$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), $norm);
-					$pdf->draw_text(470-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), 					$thispage, $norm);
+					$pdf->draw_text(475-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), 					$thispage, $norm);
 
 					if ($row["ale"] != 0) {
 						$oikpos = $pdf->strlen(($row["ale"]*1)."%", $norm);
-						$pdf->draw_text(515-$oikpos, $kala, ($row["ale"]*1)."%", 						$thispage, $norm);
+						$pdf->draw_text(510-$oikpos, $kala, ($row["ale"]*1)."%", 						$thispage, $norm);
 					}
 
 					$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["rivihinta"]), $norm);

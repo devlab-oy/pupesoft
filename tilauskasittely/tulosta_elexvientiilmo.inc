@@ -65,8 +65,7 @@
 	// varmistetaan, että löydettiin otsikoita
 	if (mysql_num_rows($uresult) > 0) {
 
-		$urow = mysql_fetch_array($uresult);
-		
+		$urow = mysql_fetch_assoc($uresult);
 		
 		$otunnarit = explode(",", $urow["tilaukset"]);
 		
@@ -75,7 +74,7 @@
 					WHERE laskun_lisatiedot.otunnus = '$otunnarit[0]'
 					and laskun_lisatiedot.yhtio='$kukarow[yhtio]'";
 		$lisres = mysql_query($query) or pupe_error($query);
-		$lisrow = mysql_fetch_array($lisres);
+		$lisrow = mysql_fetch_assoc($lisres);
 		
 		
 		//haetaan kollimäärä ja bruttopaino
@@ -96,7 +95,7 @@
 		
 		$pakkauslask = 1;
 		
-		while($rahtirow = mysql_fetch_array($rahtiresult)) {
+		while($rahtirow = mysql_fetch_assoc($rahtiresult)) {
 			// Pakkaukset
 			$pakkaus[$pakkauslask] = $rahtirow["pakkaus"];			
 			$pakkaus_maara[$pakkauslask] = $rahtirow["kollit"];
@@ -125,7 +124,7 @@
 		$varresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($varresult) > 0) {
-			$varrow = mysql_fetch_array($varresult);
+			$varrow = mysql_fetch_assoc($varresult);
 			$sijaintipaikka = $varrow["osoite"];
 		}
 		else {
@@ -162,20 +161,34 @@
 			$tavaraerittelyt = mysql_num_rows($riviresult);
 			$tavaraera = 1;
 
+			// Tehään xml entiteetit
+			foreach ($laskurow as $ind => $val) {
+				$laskurow[$ind] = htmlspecialchars($val);
+			}
+			// Tehään xml entiteetit
+			foreach ($yhtiorow as $ind => $val) {
+				$yhtiorow[$ind] = htmlspecialchars($val);
+			}
+			// Tehään xml entiteetit
+			foreach ($kukarow as $ind => $val) {
+				$kukarow[$ind] = htmlspecialchars($val);
+			}
+
 			// create a new XML document
 			$xml = new DomDocument('1.0');
+			$xml->encoding = 'UTF-8';
 
 			// Vienti-ilmoituksen rootti
 			$FIExportDeclaration = $xml->createElement('FIExportDeclaration');
 			$FIExportDeclaration = $xml->appendChild($FIExportDeclaration);
 
 				$Message = $FIExportDeclaration->appendChild($xml->createElement('Message'));	
-					$Message->appendChild($xml->createElement('sender', substr($yhtiorow['ovttunnus'], 0, 12))); 				// Rekisterin ylläpitäjän ICD-koodin jälkeen ilmoitetaan yritystunnus ilman väliviivaa tarkistusnumeroineen.
-					$Message->appendChild($xml->createElement('recipient', '003702454428-TESTI')); 				// Tunnisteena käytetään Tullihallituksen OVT-tunnusta 003702454428
-					$Message->appendChild($xml->createElement('issue', date('Y-m-d')."T".date('H:i:s').".0Z")); // Ilmoitetaan sanoman lähetyspäivä ja -aika
-					$Message->appendChild($xml->createElement('reference', $laskurow["tunnus"])); 				// Asiakkaan antama tunnus ilmoitussanomalle. Asiakas voi tämän tunnuksen avulla kohdentaa vastaussanoman omaan tapahtumaansa
+					$Message->appendChild($xml->createElement('sender', substr($yhtiorow['ovttunnus'], 0, 12)));
+					$Message->appendChild($xml->createElement('recipient', '003702454428-TESTI'));
+					$Message->appendChild($xml->createElement('issue', date('Y-m-d')."T".date('H:i:s').".0Z"));
+					$Message->appendChild($xml->createElement('reference', $laskurow["tunnus"]));
 					//$Message->appendChild($xml->createElement('controlReference', ''));
-					//$Message->appendChild($xml->createElement('version', '1.0')); 								// Ilmoitetaan sanomaskeeman versionumero  		
+					//$Message->appendChild($xml->createElement('version', '1.0')); 
 
 				$Declaration = $FIExportDeclaration->appendChild($xml->createElement('Declaration'));
 					$Exporter =	$Declaration->appendChild($xml->createElement('Exporter')); 			
@@ -225,14 +238,19 @@
 						packaging ($xml, $DeclarationPackaging, $params);	
 
 					$Declaration->appendChild($xml->createElement('issue', date("Y-m-d")));
-					$Declaration->appendChild($xml->createElement('function', '9')); // Ilmoitetaan sanoman tarkoitus (koodiluettelo 0093).
+					$Declaration->appendChild($xml->createElement('function', $laskurow["sanoman_tarkoitus"]));
 					$Declaration->appendChild($xml->createElement('customsReference', ''));
-					$Declaration->appendChild($xml->createElement('typePartOne', 'EX'));
-					$Declaration->appendChild($xml->createElement('typePartTwo', 'A'));
+					$Declaration->appendChild($xml->createElement('typePartOne', $laskurow["ilmoitustyyppi"]));
+					$Declaration->appendChild($xml->createElement('typePartTwo', $laskurow["ilmoitus"]));
 					$Declaration->appendChild($xml->createElement('goodsItem', $tavaraerittelyt));
 					$Declaration->appendChild($xml->createElement('totalGrossMass', $kilot));
 					//$Declaration->appendChild($xml->createElement('sealsAffixed', ''));
-					//$Declaration->appendChild($xml->createElement('predeclarationDateTime', ''));
+					
+					
+					if ($laskurow["ilmoitus"] == "D" or $laskurow["ilmoitus"] == "E" or $laskurow["ilmoitus"] == "M") {
+						$Declaration->appendChild($xml->createElement('predeclarationDateTime', substr($laskurow["ennakkoilm_pvm"],0,10)."T".substr($laskurow["ennakkoilm_pvm"],11,8).".0"));
+					}
+					
 					//$Declaration->appendChild($xml->createElement('exportPointDate', ''));
 					$Declaration->appendChild($xml->createElement('language', 'FI'));
 
@@ -284,6 +302,24 @@
 						
 						document ($xml, $AdditionalDocument, $params);
 
+					// Muut liitetiedostot
+					$liitteet = explode("\n", $laskurow["liiteasiakirja"]);
+
+					for ($li=1; $li<count($liitteet); $li++) {
+						if ($liitteet[$li-1] != "") {
+							list($a,$l,$p) = explode("#!#", $liitteet[$li-1]);			
+						
+							if ($a != "" and $l != "" and $p != "") {
+									$params = array();
+									$params['type']			= $a;
+									$params['reference']	= $l;
+									$params['issue']		= $p;
+								
+									document ($xml, $AdditionalDocument, $params);					
+							}
+						}
+					}	
+
 					$AdditionalInformation = $GoodsShipment->appendChild($xml->createElement('AdditionalInformation'));
 						$AdditionalInformation->appendChild($xml->createElement('statement', '30400'));
 						//$AdditionalInformation->appendChild($xml->createElement('statementDescription', ''));
@@ -298,7 +334,12 @@
 					$GoodsShipment->appendChild($xml->createElement('transactionNature', $laskurow["kauppatapahtuman_luonne"]));
 					$GoodsShipment->appendChild($xml->createElement('exportationCountry', 'FI'));
 
-			while ($rivirow = mysql_fetch_array($riviresult)) {
+			while ($rivirow = mysql_fetch_assoc($riviresult)) {
+				
+				// Tehään xml entiteetit
+				foreach ($rivirow as $ind => $val) {
+					$rivirow[$ind] = htmlspecialchars($val);
+				}
 				
 				$CustomsGoodsItem = $FIExportDeclaration->appendChild($xml->createElement('CustomsGoodsItem'));
 					$CustomsGoodsItem->appendChild($xml->createElement('sequence', $tavaraera));
@@ -421,7 +462,6 @@
 		}
 	}		
 	
-	
 	/*
 	if(!$xml->schemaValidate('/Users/juppe/Desktop/xsd/FIExportDeclaration.xsd')) {
 		echo "NOT VALID XML!";
@@ -430,11 +470,13 @@
 	*/
 	
 	$out = $xml->saveXML();
-	$out = preg_replace("/<[a-z0-9]*?> *?<\/[a-z0-9]*?>/i", "", $out);
-	$out = preg_replace("/<[a-z0-9]*?> *?<\/[a-z0-9]*?>/i", "", $out);
 	
+	$out = preg_replace("/<[a-z0-9]*?> *?<\/[a-z0-9]*?>/i", "", $out);
+	$out = preg_replace("/<[a-z0-9]*?> *?<\/[a-z0-9]*?>/i", "", $out);
 	$out = preg_replace("/></", ">\n<", $out);
-	
+
+	file_put_contents("/Users/juppe/Desktop/PUPE.xml" , utf8_encode($out));
+		
 	echo "<pre>".htmlentities($out)."</pre>";
 	
 ?>

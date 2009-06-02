@@ -478,7 +478,7 @@
 		$sel = array($trow[$i] => "SELECTED");
 
 		$ulos .= "<option value = ''>".t("Valmistukset ker‰t‰‰n")."</option>";
-		$ulos .= "<option value = 'E' {$sel[S]}>".t("Valmistuksia ei ker‰t‰")."</option>";
+		$ulos .= "<option value = 'E' {$sel[E]}>".t("Valmistuksia ei ker‰t‰")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

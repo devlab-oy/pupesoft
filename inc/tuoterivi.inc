@@ -686,4 +686,29 @@
 		}
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "tarratyyppi") {
+
+		$sel=array($trow[$i] => "SELECTED");
+				
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND laji = 'TARRATYYPPI'
+					ORDER BY selite";
+		$vresult = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($vresult)>0) {
+			$ulos = "<td><select name='$nimi'>
+							<option value=''>".t("Ei tilaustuotetarraa")."</option>";
+			while ($vrow = mysql_fetch_array($vresult)) {
+				$ulos .= "<option value='$vrow[selite]' ".$sel[$vrow["selite"]].">$vrow[selitetark]</option>";
+			}
+			$ulos .= "</select></td>";
+		}
+		else {
+			$tyyppi = 0;
+		}
+		
+		$jatko = 0;
+	}
 ?>

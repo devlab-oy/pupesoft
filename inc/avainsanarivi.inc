@@ -57,6 +57,7 @@
 		$ulos .= "<option value='TRY_DE' {$avain_sel['TRY_DE']}>						".t("Saksankielinen tuoteryhmä")."</option>";
 		$ulos .= "<option value='OSASTO_DE' {$avain_sel['OSASTO_DE']}>					".t("Saksankielinen tuoteosasto")."</option>";
 		$ulos .= "<option value='PARAMETRI' {$avain_sel['PARAMETRI']}>					".t("Tuotteen parametri")."</option>";
+		$ulos .= "<option value='TARRATYYPPI' {$avain_sel['TARRATYYPPI']}>				".t("Tuotteen tarratyyppi")."</option>";
 		$ulos .= "</optgroup>";
 
 		$ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";
@@ -228,6 +229,31 @@
 
 		while ($file = readdir($handle)) {
 			if (substr($file,0,10) == 'rahtikirja') {
+				$sel = "";
+
+				if ($file == $trow[$i]) {
+					$sel = "SELECTED";
+				}
+
+				$ulos .= "<option value='$file' $sel>".t($file)."</option>";
+			}
+		}
+		closedir($handle);
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "selite" and $avain_sel["TARRATYYPPI"] == "SELECTED") {
+
+		$handle = opendir("tilauskasittely");
+
+		$ulos  = "<td><select name='$nimi'>";
+
+		$ulos .= "<option value=''></option>";
+
+		while ($file = readdir($handle)) {
+			if (substr($file,0,16) == 'tilaustuotetarra') {
 				$sel = "";
 
 				if ($file == $trow[$i]) {

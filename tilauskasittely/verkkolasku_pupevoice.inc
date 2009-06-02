@@ -79,74 +79,74 @@ if (!function_exists('pupevoice_otsik')) {
 			$y_kotipaikka	= $yhtiorow["kotipaikka"];
 			$y_vatnumero	= $yhtiorow["ovttunnus"];
 		}
-		
+
 		// haetaan toimipaikan tiedot
 		$asquery = "SELECT * from asiakas where yhtio='$lasrow[yhtio]' and tunnus='$lasrow[liitostunnus]'";
 		$asiakasre = mysql_query($asquery) or pupe_error($asquery);
 		$asiakasrow = mysql_fetch_array($asiakasre);
-		
-		xml_add("SellerPartyIdentifier", 				$yhtiorow['ovttunnus'],							$tootxml);
-		xml_add("SellerPartyDomicile", 					$y_kotipaikka,									$tootxml);
-		xml_add("SellerPartyVat", 						$y_vatnumero,									$tootxml);
-		xml_add("SellerOrganisationName", 				$y_nimi, 										$tootxml);
-		xml_add("SellerStreetName", 					$y_osoite, 										$tootxml);
-		xml_add("SellerPostCode", 						$y_postino, 									$tootxml);
-		xml_add("SellerTownName", 						$y_postitp, 									$tootxml);
-		xml_add("SellerCountryName", 					$y_maa,											$tootxml);
-		xml_add("SellerPhoneNumber", 					$y_puhelin, 									$tootxml);
-		xml_add("SellerFaxNumber", 						$y_fax, 										$tootxml);
-		xml_add("SellerEmail", 							$y_email, 										$tootxml);
 
-		xml_add("SellerAccountName1", 					$pankkitiedot['pankkinimi1'],					$tootxml);
-		xml_add("SellerAccountID1", 					$pankkitiedot['pankkitili1'],					$tootxml);
-		xml_add("SellerAccountName2", 					$pankkitiedot['pankkinimi2'],					$tootxml);
-		xml_add("SellerAccountID2", 					$pankkitiedot['pankkitili2'],					$tootxml);
-		xml_add("SellerAccountName3", 					$pankkitiedot['pankkinimi3'],					$tootxml);
-		xml_add("SellerAccountID3", 					$pankkitiedot['pankkitili3'],					$tootxml);
+		xml_add("SellerPartyIdentifier", 				$yhtiorow['ovttunnus'],								$tootxml);
+		xml_add("SellerPartyDomicile", 					$y_kotipaikka,										$tootxml);
+		xml_add("SellerPartyVat", 						$y_vatnumero,										$tootxml);
+		xml_add("SellerOrganisationName", 				$y_nimi, 											$tootxml);
+		xml_add("SellerStreetName", 					$y_osoite, 											$tootxml);
+		xml_add("SellerPostCode", 						$y_postino, 										$tootxml);
+		xml_add("SellerTownName", 						$y_postitp, 										$tootxml);
+		xml_add("SellerCountryName", 					$y_maa,												$tootxml);
+		xml_add("SellerPhoneNumber", 					$y_puhelin, 										$tootxml);
+		xml_add("SellerFaxNumber", 						$y_fax, 											$tootxml);
+		xml_add("SellerEmail", 							$y_email, 											$tootxml);
 
-		xml_add("SellerVatRegistrationText", 			t("Alv.Rek"), 									$tootxml);
-		xml_add("SellerContactPerson", 					$myyrow['nimi'],								$tootxml);
+		xml_add("SellerAccountName1", 					$pankkitiedot['pankkinimi1'],						$tootxml);
+		xml_add("SellerAccountID1", 					$pankkitiedot['pankkitili1'],						$tootxml);
+		xml_add("SellerAccountName2", 					$pankkitiedot['pankkinimi2'],						$tootxml);
+		xml_add("SellerAccountID2", 					$pankkitiedot['pankkitili2'],						$tootxml);
+		xml_add("SellerAccountName3", 					$pankkitiedot['pankkinimi3'],						$tootxml);
+		xml_add("SellerAccountID3", 					$pankkitiedot['pankkitili3'],						$tootxml);
+
+		xml_add("SellerVatRegistrationText", 			t("Alv.Rek"), 										$tootxml);
+		xml_add("SellerContactPerson", 					$myyrow['nimi'],									$tootxml);
 
 		fputs($tootxml, "</SellerPartyInformation>\n");
 		fputs($tootxml, "<InvoiceDetails>\n");
 
-		xml_add("InvoiceType",							$tyyppi, 										$tootxml);
-		xml_add("InvoicedPartyIdentifier",				$lasrow['ytunnus'], 							$tootxml);
-		xml_add("InvoicedPartyOVT",						$lasrow['ovttunnus'],							$tootxml);
-		xml_add("InvoicedPartyEBA",						$lasrow['verkkotunnus'], 						$tootxml);
-		xml_add("InvoicedCustNumber",					$asiakasrow['asiakasnro'], 						$tootxml);
-		xml_add("InvoicedOrganisationName",				$lasrow['nimi']." ".$lasrow['nimitark'], 		$tootxml);
-		xml_add("InvoicedStreetName",					$lasrow['osoite'], 								$tootxml);
-		xml_add("InvoicedPostCode",						$lasrow['postino'],								$tootxml);
-		xml_add("InvoicedTownName",						$lasrow['postitp'],								$tootxml);
-		xml_add("InvoicedCountryName",					$lasrow['maa'], 								$tootxml);
-		xml_add("InvoiceNumber",						$lasrow['laskunro'],							$tootxml);
-		xml_add("InvoiceCurrency",						$lasrow['valkoodi'],							$tootxml);
-		xml_add("InvoicePaymentReference",				$lasrow['viite'], 								$tootxml);
-		xml_add("InvoiceDate",							vlas_dateconv($lasrow['tapvm']), 				$tootxml);
-		xml_add("OrderIdentifier",						$lasrow['asiakkaan_tilausnumero'],				$tootxml); //Ostajan tilausnumero, eii oo vielä olemassa
+		xml_add("InvoiceType",							$tyyppi, 											$tootxml);
+		xml_add("InvoicedPartyIdentifier",				$lasrow['ytunnus'], 								$tootxml);
+		xml_add("InvoicedPartyOVT",						$lasrow['ovttunnus'],								$tootxml);
+		xml_add("InvoicedPartyEBA",						$lasrow['verkkotunnus'], 							$tootxml);
+		xml_add("InvoicedCustNumber",					$asiakasrow['asiakasnro'], 							$tootxml);
+		xml_add("InvoicedOrganisationName",				$lasrow['nimi']." ".$lasrow['nimitark'], 			$tootxml);
+		xml_add("InvoicedStreetName",					$lasrow['osoite'], 									$tootxml);
+		xml_add("InvoicedPostCode",						$lasrow['postino'],									$tootxml);
+		xml_add("InvoicedTownName",						$lasrow['postitp'],									$tootxml);
+		xml_add("InvoicedCountryName",					$lasrow['maa'], 									$tootxml);
+		xml_add("InvoiceNumber",						$lasrow['laskunro'],								$tootxml);
+		xml_add("InvoiceCurrency",						$lasrow['valkoodi'],								$tootxml);
+		xml_add("InvoicePaymentReference",				$lasrow['viite'], 									$tootxml);
+		xml_add("InvoiceDate",							vlas_dateconv($lasrow['tapvm']), 					$tootxml);
+		xml_add("OrderIdentifier",						substr($lasrow['asiakkaan_tilausnumero'], 0, 35),	$tootxml);
 		xml_add("DeliveredPartyName",					$lasrow['toim_nimi']." ".$lasrow['toim_nimitark'],	$tootxml);
-		xml_add("DeliveredPartyStreetName",				$lasrow['toim_osoite'], 						$tootxml);
-		xml_add("DeliveredPartyPostCode",				$lasrow['toim_postino'], 						$tootxml);
-		xml_add("DeliveredPartyTownName",				$lasrow['toim_postitp'], 						$tootxml);
-		xml_add("DeliveredPartyCountryName",			$lasrow['toim_maa'], 							$tootxml);
-		xml_add("DeliveredPartyOVT",					$lasrow['toim_ovttunnus'], 						$tootxml);
-		xml_add("DueDate",								vlas_dateconv($lasrow['erpcm']),				$tootxml);
-		xml_add("InvoiceTotalVatExcludedAmount",		$lasrow['arvo'],								$tootxml);
-		xml_add("InvoiceTotalVatAmount",				round($lasrow['summa']-$lasrow['arvo'], 2),		$tootxml);
-		xml_add("InvoiceTotalVatIncludedAmount",		$lasrow['summa'],								$tootxml);
-		xml_add("PaymentTerms",							$masrow['teksti']." ".$masrow['kassa_teksti'],	$tootxml);
-		xml_add("PaymentOverDueFinePercent",			$lasrow['viikorkopros'], 						$tootxml);
-		xml_add("InvoiceDeliveryMethod",				$lasrow['toimitustapa'], 						$tootxml);
-		xml_add("InvoiceDeliveryTerm",					$lasrow['toimitusehto'], 						$tootxml);
+		xml_add("DeliveredPartyStreetName",				$lasrow['toim_osoite'], 							$tootxml);
+		xml_add("DeliveredPartyPostCode",				$lasrow['toim_postino'], 							$tootxml);
+		xml_add("DeliveredPartyTownName",				$lasrow['toim_postitp'], 							$tootxml);
+		xml_add("DeliveredPartyCountryName",			$lasrow['toim_maa'], 								$tootxml);
+		xml_add("DeliveredPartyOVT",					$lasrow['toim_ovttunnus'], 							$tootxml);
+		xml_add("DueDate",								vlas_dateconv($lasrow['erpcm']),					$tootxml);
+		xml_add("InvoiceTotalVatExcludedAmount",		$lasrow['arvo'],									$tootxml);
+		xml_add("InvoiceTotalVatAmount",				round($lasrow['summa']-$lasrow['arvo'], 2),			$tootxml);
+		xml_add("InvoiceTotalVatIncludedAmount",		$lasrow['summa'],									$tootxml);
+		xml_add("PaymentTerms",							$masrow['teksti']." ".$masrow['kassa_teksti'],		$tootxml);
+		xml_add("PaymentOverDueFinePercent",			$lasrow['viikorkopros'], 							$tootxml);
+		xml_add("InvoiceDeliveryMethod",				$lasrow['toimitustapa'], 							$tootxml);
+		xml_add("InvoiceDeliveryTerm",					$lasrow['toimitusehto'], 							$tootxml);
 
 		//Laitetaan kassa-alennustietoja
-		xml_add("CashDiscountDate",						vlas_dateconv($lasrow['kapvm']), 				$tootxml);
-		xml_add("CashDiscountBaseAmount",				$lasrow['summa'],			 					$tootxml);
-		xml_add("CashDiscountPercent",					$masrow['kassa_alepros'],	 					$tootxml);
-		xml_add("CashDiscountAmount",					$lasrow['kasumma'],			 					$tootxml);
-		xml_add("InvoiceReferenceFreeText",				substr($lasrow['viesti'],0,35),					$tootxml);
-		xml_add("InvoiceFreeText",						$lasrow['sisviesti1'],							$tootxml);
+		xml_add("CashDiscountDate",						vlas_dateconv($lasrow['kapvm']), 					$tootxml);
+		xml_add("CashDiscountBaseAmount",				$lasrow['summa'],			 						$tootxml);
+		xml_add("CashDiscountPercent",					$masrow['kassa_alepros'],	 						$tootxml);
+		xml_add("CashDiscountAmount",					$lasrow['kasumma'],			 						$tootxml);
+		xml_add("InvoiceReferenceFreeText",				substr($lasrow['viesti'], 0, 35),					$tootxml);
+		xml_add("InvoiceFreeText",						$lasrow['sisviesti1'],								$tootxml);
 	}
 }
 

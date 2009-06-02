@@ -471,6 +471,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "valmistuksia_ei_kerata") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array($trow[$i] => "SELECTED");
+
+		$ulos .= "<option value = ''>".t("Valmistukset ker‰t‰‰n")."</option>";
+		$ulos .= "<option value = 'E' {$sel[S]}>".t("Valmistuksia ei ker‰t‰")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "kerayslistojen_yhdistaminen") {
 
 		$ulos = "<td><select name='$nimi'>";

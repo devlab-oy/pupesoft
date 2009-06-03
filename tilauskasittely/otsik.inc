@@ -3060,7 +3060,7 @@
 				$result = mysql_query($query2) or pupe_error($query2);
 			}
 
-			if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $vienti =='K' or ($yhtiorow["tilauksen_seuranta"] != "" and in_array($toim, array("PROJEKTI","RIVISYOTTO","PIKATILAUS","TYOMAARAYS")))) {
+			if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $vienti =='K' or ($yhtiorow["tilauksen_seuranta"] != "" and in_array($toim, array("PROJEKTI","RIVISYOTTO","PIKATILAUS","TYOMAARAYS", "REKLAMAATIO")))) {
 				$query3 .= "laskun_lisatiedot SET
 							yhtio						= '$kukarow[yhtio]',
 							kolm_ovttunnus				= '$kolm_ovttunnus',

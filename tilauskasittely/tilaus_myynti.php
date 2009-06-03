@@ -2581,7 +2581,12 @@ if ($tee == '') {
 			$rivinumero	= $tilausrivi['tilaajanrivinro'];
 			$jaksotettu = $tilausrivi['jaksotettu'];
 			$perheid2 	= $tilausrivi["perheid2"];
-
+			
+			// useamman valmisteen reseptit...
+			if ($tilausrivi['tyyppi'] == "W" and $tilausrivi["tunnus"] != $tilausrivi["perheid"]) {
+				$perheid2 = "W";
+			}
+						
 			if ($tilausrivi['hinta'] == '0.00') $hinta = '';
 
 			if ($tapa == "MUOKKAA") {

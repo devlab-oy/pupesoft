@@ -154,6 +154,7 @@
 		}
 		
 		// Sortataan array niin että omat privaatit lisäykset tulee sopivaan rakoon referenssiin nähden
+		$jarj0 = $jarj1 = $jarj2 = array();
 		foreach ($rows as $key => $row) {
 			$jarj0[$key] = $row['sovellus'];
 		    $jarj1[$key] = $row['jarjestys'];

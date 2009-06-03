@@ -93,7 +93,7 @@
 			if ($tee != 'KORJAA') {
 				echo "<tr>";				
 				echo "<td class='back' valign='top'><table>";
-				echo "<tr><th>".t("Tuoteno").":</th>			<td>$rivirow[tuoteno]</td></tr>";
+				echo "<tr><th>".t("Tuoteno").":</th>			<td><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=$rivirow[tuoteno]'>$rivirow[tuoteno]</a></td></tr>";
 				echo "<tr><th>".t("Tilattu").":</th>			<td>$rivirow[tilkpl]</td></tr>";
 				echo "<tr><th>".t("Varattu").":</th>			<td>$rivirow[varattu]</td></tr>";
 				echo "<tr><th>".t("Valmistettu").":</th>		<td>$valmkpl</td></tr>";
@@ -145,7 +145,7 @@
 				
 				if ($tee != 'KORJAA') {
 					echo "<td class='back' valign='top'><table>";
-					echo "<tr><th>".t("Tuoteno").":</th><td>$taparow[tuoteno]</td></tr>";
+					echo "<tr><th>".t("Tuoteno").":</th><td><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=$taparow[tuoteno]'>$taparow[tuoteno]</a></td></tr>";
 					echo "<tr><th>".t("Kpl").":</th><td>$taparow[kpl]</td></tr>";
 					echo "<tr><th>".t("Laatija")." ".t("Laadittu").":</th><td>$taparow[laatija] $taparow[laadittu]</td></tr>";
 					echo "<tr><th>".t("Selite").":</th><td>$taparow[selite]</td></tr>";
@@ -230,10 +230,9 @@
 					$korjres = mysql_query($query) or pupe_error($query);
 					
 					echo "$rivirow[tuoteno]: ".t("Poistetaan tapahtuma")."!<br>";			
-					
-																								
+																													
 					//Haetaan valmistetut tuotteet ja poistetaan informativinen valmistusrivi
-					if ($perutaan[$rivirow["tunnus"]] == $rivirow["tunnus"] and $perutaan[$rivirow["tunnus"]] != 0) {
+					if ($taparow["laji"] == "valmistus") {
 						$query = "	SELECT * 
 									from tilausrivi
 									where yhtio = '$kukarow[yhtio]' 
@@ -244,7 +243,7 @@
 						$valm_res = mysql_query($query) or pupe_error($query);
 											
 						while($valm_row = mysql_fetch_array($valm_res)) {
-							//Poistetaan tapahtuma			
+							//Poistetaan tilausrivi			
 							$query = "	DELETE from tilausrivi							
 										where yhtio	 = '$kukarow[yhtio]' 
 										and otunnus	 = '$laskurow[tunnus]'
@@ -256,7 +255,7 @@
 					}
 					
 					//Laitetaan valmistetut kappaleet takaisin valmistukseen
-					if($perutaan[$rivirow["tunnus"]] == $rivirow["tunnus"]) {
+					if ($taparow["laji"] == "valmistus") {
 						$palkpl = $taparow["kpl"];
 					}
 					else {
@@ -271,8 +270,7 @@
 								and tunnus  = '$rivirow[tunnus]'";
 					$korjres = mysql_query($query) or pupe_error($query);
 					
-					echo "$rivirow[tuoteno]: ".t("Palautetaan")." $palkpl ".t("kappaletta")." ".t("takaisin valmistukseen")."!<br>";	
-					
+					echo "$rivirow[tuoteno]: ".t("Palautetaan")." $palkpl ".t("kappaletta")." ".t("takaisin valmistukseen")."!<br>";
 					
 					// Laitetaan takas saldoille
 					if ($tuoterow["ei_saldoa"] == "") {
@@ -359,7 +357,6 @@
 						echo "$rivirow[tuoteno]: ".t("Päivitetään tuotteen keskihankintahinta")." ($taparow[hinta] --> $taparow3[hinta]) ".t("takaisin edelliseen arvoon")."!<br>";
 					}
 					
-
 					//Päivitetään rivit takaisin keskeneräiseksi ja siivotaan samalla hieman pyöristyseroja jotka on tapahtunut perumisprosessissa
 					$query = "	UPDATE tilausrivi 
 								set toimitettu = '', toimitettuaika='0000-00-00 00:00:00'

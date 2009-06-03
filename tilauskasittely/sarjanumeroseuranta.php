@@ -103,7 +103,7 @@
 			$rivirow["varattu"] = $rivirow["kpl"];
 		}
 
-		if ($rivirow["varattu"] < 0 and ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA")) {
+		if ($rivirow["varattu"] < 0 and ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "REKLAMAATIO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA")) {
 			// tässä muutetaan myyntirivitunnus ostorivitunnukseksi jos $rivirow["varattu"] eli kappalemäärä on negatiivinen
 			$tunnuskentta 		= "ostorivitunnus";
 			$rivirow["varattu"] = abs($rivirow["varattu"]);
@@ -798,7 +798,7 @@
 				varastopaikat.nimitys								varastonimi,
 				concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka";
 
-	if ((($from == "riviosto" or $from == "valmistus" or $from == "VALMISTAASIAKKAALLE" or $from == "VALMISTAVARASTOON" or $from == "kohdista") and $ostonhyvitysrivi == "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or ($from == "KERAA" and $aputoim == "") or $from == "KORJAA") and $hyvitysrivi != "ON")) {
+	if ((($from == "riviosto" or $from == "valmistus" or $from == "VALMISTAASIAKKAALLE" or $from == "VALMISTAVARASTOON" or $from == "kohdista") and $ostonhyvitysrivi == "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "REKLAMAATIO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or ($from == "KERAA" and $aputoim == "") or $from == "KORJAA") and $hyvitysrivi != "ON")) {
 		//Myydään sarjanumeroita
 		$query .= "	FROM sarjanumeroseuranta
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -866,7 +866,7 @@
 					ORDER BY sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus";
 		$sarjaresiso = mysql_query($query) or pupe_error($query);
 	}
-	elseif((($from == "riviosto" or $from == "valmistus" or $from == "VALMISTAASIAKKAALLE" or $from == "VALMISTAVARASTOON" or $from == "kohdista") and $ostonhyvitysrivi != "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA") and $hyvitysrivi == "ON")) {
+	elseif((($from == "riviosto" or $from == "valmistus" or $from == "VALMISTAASIAKKAALLE" or $from == "VALMISTAVARASTOON" or $from == "kohdista") and $ostonhyvitysrivi != "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "REKLAMAATIO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA") and $hyvitysrivi == "ON")) {
 		// Ostetaan sarjanumeroita
 		$query .= "	FROM sarjanumeroseuranta
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -1155,7 +1155,7 @@
 				if ($tunnuskentta == "ostorivitunnus" and $sarjarow["kpl"] != 0) {
 					echo "<td valign='top'>".t("Lukittu")."</td>";
 				}
-				elseif ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA" or $from == "riviosto" or $from == "valmistus" or $from == "VALMISTAASIAKKAALLE" or $from == "VALMISTAVARASTOON" or $from == "kohdista" or $from == "INVENTOINTI") {
+				elseif ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "REKLAMAATIO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA" or $from == "riviosto" or $from == "valmistus" or $from == "VALMISTAASIAKKAALLE" or $from == "VALMISTAVARASTOON" or $from == "kohdista" or $from == "INVENTOINTI") {
 						if (($from != "SIIRTOTYOMAARAYS" and $laskurow["tila"] != "G" and $from != "SIIRTOLISTA" and $sarjarow["siirtorivitunnus"] > 0) or (($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON" and $sarjarow["osto_laskaika"] > '0000-00-00' and ($sarjarow["siirtorivitunnus"] > 0 or $sarjarow["myyntirivitunnus"] > 0)) or ($from == "SIIRTOTYOMAARAYS" and $sarjarow["ostorivitunnus"] == 0)) {						$dis = "DISABLED";
 					}
 					else {
@@ -1367,7 +1367,7 @@
 
 	echo "<br>";
 
-	if ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "VALMISTAASIAKKAALLE" or $from == "VALMISTAVARASTOON") {
+	if ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "REKLAMAATIO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "VALMISTAASIAKKAALLE" or $from == "VALMISTAVARASTOON") {
 		echo "<form method='post' action='tilaus_myynti.php'>
 			<input type='hidden' name='toim' value='$from'>
 			<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>

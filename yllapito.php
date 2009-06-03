@@ -106,7 +106,39 @@
 	}
 
 	echo "<font class='head'>".t("$otsikko")."</font><hr>";
+	
+	if($from == "yllapito") {
+		echo "
+		<script LANGUAGE='JavaScript'>
+			function resizeIframe(frameid, offset){
 
+				var currentfr=window.parent.document.getElementById(frameid);
+				if(!offset) offset=0;
+
+				if (currentfr && !window.opera){
+
+					var height = 100;
+
+					try {
+						height = currentfr.contentDocument.body.offsetHeight;
+					}
+					catch (err) {
+						height = currentfr.Document.body.scrollHeight;
+					}
+
+					currentfr.height = height+offset;
+					currentfr.style.height = height+offset;
+
+					setTimeout(\"window.parent.document.getElementById('\"+frameid+\"').style.display='block';\", 300);
+
+					//ns6 syntax
+				}
+			}
+
+		</script><br>";
+		
+	}
+	
 	// Saako paivittaa
 	if ($oikeurow['paivitys'] != '1') {
 		if ($uusi == 1) {
@@ -184,7 +216,7 @@
 					WHERE tunnus = '$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
-
+				
 		//	Tehd‰‰n muuttujista linkit jolla luomme otsikolliset avaimet!
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
 			if($t["{$i}_uusi"] != "") {
@@ -575,6 +607,12 @@
     	$jarjestys = $ojarj." ";
     }
 	
+	//	S‰ilytet‰‰n ohjeen tila
+	if($from == "yllapito") {
+		$ulisa.="&ohje=off&from=$from&lukitse_avaimeen=$lukitse_avaimeen";
+	}
+	
+
 	// Nyt selataan
 	if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 		
@@ -704,30 +742,40 @@
 				<input type = 'hidden' name = 'limit' value = '$limit'>
 				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>";
-
-		for ($i = 1; $i < mysql_num_fields($result); $i++) {			
-			if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {		
-				echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&ojarj=".mysql_field_name($result,$i).$ulisa."&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
-
-				if 	(mysql_field_len($result,$i)>10) $size='15';
-				elseif	(mysql_field_len($result,$i)<5)  $size='5';
-				else	$size='10';
-
-				// jos meid‰n kentt‰ ei ole subselect niin tehd‰‰n hakukentt‰
-				if (strpos(strtoupper($array[$i]), "SELECT") === FALSE) {
-					echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+		
+		if($from == "yllapito") {
+			for ($i = 1; $i < mysql_num_fields($result); $i++) {			
+				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {		
+					echo "<th valign='top'>".t(mysql_field_name($result,$i))."<th>";
 				}
-				echo "</th>";
 			}
 		}
-		
-		if (($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
-			echo "<th valign='top'>".t("Poista")."</th>";
+		else {
+			for ($i = 1; $i < mysql_num_fields($result); $i++) {			
+				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {		
+					echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&ojarj=".mysql_field_name($result,$i).$ulisa."&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
+
+					if 	(mysql_field_len($result,$i)>10) $size='15';
+					elseif	(mysql_field_len($result,$i)<5)  $size='5';
+					else	$size='10';
+
+					// jos meid‰n kentt‰ ei ole subselect niin tehd‰‰n hakukentt‰
+					if (strpos(strtoupper($array[$i]), "SELECT") === FALSE) {
+						echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+					}
+					echo "</th>";
+				}
+			}
+
+			if (($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
+				echo "<th valign='top'>".t("Poista")."</th>";
+			}
+			
+			echo "<td class='back' valign='bottom'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></form>";
+			echo "</tr>";
+			
 		}
-		
-		echo "<td class='back' valign='bottom'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></form>";
-		echo "</tr>";
-				
+						
 		if (($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
 			echo "<tr><form action='yllapito.php?ojarj=$ojarj$ulisa' name='ruksaus' method='post' onSubmit = 'return verifyMulti()'>
 					    <input type = 'hidden' name = 'toim' value = '$aputoim'>
@@ -823,6 +871,11 @@
 					WHERE tunnus = '$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
+		
+		//	J‰ljem‰‰n‰ tarttetaan joskus tiet‰‰ mit‰ muutetaan
+		if($toim == "tuote") {
+			$lukitse_avaimeen = $trow["tuoteno"];
+		}
 		
 		echo "<table><tr><td class='back' valign='top'>";
 		echo "<table>";
@@ -1032,6 +1085,12 @@
 		
 		if ($errori == '' and $toim == "tuote" and $laji != "V") {
 			require ("inc/tuotteen_toimittajat.inc");
+			
+			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='tuotteen_avainsanat' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
+			$res = mysql_query($queryoik) or pupe_error($queryoik);
+			if(mysql_num_rows($res) > 0) {
+				echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=tuotteen_avainsanat&from=yllapito&ohje=off&haku[1]=$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
+			}
 		}
 		
 		if ($errori == '' and $toim == "avainsana") {
@@ -1137,6 +1196,12 @@
 		
 		
 	}
-
-	require ("inc/footer.inc");
+	
+	if($from == "yllapito" and $toim == "tuotteen_avainsanat") {
+		echo "<br><br><script LANGUAGE='JavaScript'>resizeIframe('tuotteen_avainsanat_iframe');</script>";
+	}
+	elseif($from != "yllapito") {
+		require ("inc/footer.inc");
+	}
+	
 ?>

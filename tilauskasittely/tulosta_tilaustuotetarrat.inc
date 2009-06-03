@@ -13,15 +13,18 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
 		
 		//	Haetaan tilausrivit
 		$query = "	SELECT 	tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kpl, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,
-							tuote.sarjanumeroseuranta, tuote.yksikko, if(tuote.tarrakpl>0, tarrakpl, 1) tarrakpl, tuote.yksikko, tuote.tarratyyppi,
-							sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.myyntirivitunnus, sarjanumeroseuranta.lisatieto, sarjanumeroseuranta.tunnus sarjatunnus
+							tuote.sarjanumeroseuranta, tuote.yksikko, if(tuote.tarrakpl>0, tarrakpl, 1) tarrakpl, tuote.yksikko, 
+							sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.myyntirivitunnus, sarjanumeroseuranta.lisatieto, sarjanumeroseuranta.tunnus sarjatunnus,
+							tarratyyppi.selite tarratyyppi
 					FROM tilausrivi
-					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' and tuote.sarjanumeroseuranta!='' and tuote.tarratyyppi!=''
+					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' and tuote.sarjanumeroseuranta!=''
 					LEFT JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio=tilausrivi.yhtio and sarjanumeroseuranta.ostorivitunnus = tilausrivi.tunnus and sarjanumeroseuranta.myyntirivitunnus=0
+					LEFT JOIN tuotteen_avainsanat tarratyyppi ON tarratyyppi.yhtio=tilausrivi.yhtio and tarratyyppi.tuoteno = tilausrivi.tuoteno and tarratyyppi.laji='tarratyyppi'
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]' and $lisa tilausrivi.tyyppi = 'O'";
 		$result = mysql_query($query) or pupe_error($query);
-		if(mysql_num_rows($result) > 0) {
 
+		if(mysql_num_rows($result) > 0) {
+			
 			require_once('pdflib/pupepdf.class.php');
 			
 			if (!function_exists('alku')) {

@@ -85,7 +85,7 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 		$litety = "<td>&nbsp;</td>";		
 	}
 	//	Nämä ovat varmaankin sitten itse tilauksia?
-	elseif(in_array($laskurow['tila'], array("L","N","R","E","T","U","0"))) {
+	elseif(in_array($laskurow['tila'], array("L","N","R","E","T","U","0","A"))) {
 		$ok = true;
 
 		//	Näille voidaan laittaa myös minkä lajin liite on kyseessä

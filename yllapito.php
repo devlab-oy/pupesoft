@@ -603,7 +603,6 @@
 			$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
     	}
     }
-echo $lisa;
 
     if (strlen($ojarj) > 0) {
     	$jarjestys = $ojarj." ";

@@ -631,7 +631,7 @@
 					$result = mysql_query($query) or pupe_error($query);
 				}
 				else {
-					if($yhtiorow["valmistuksia_ei_kerata"] != "") {
+					if ($yhtiorow["kerataanko_valmistukset"] == "E") {
 						$query = "	UPDATE lasku
 									SET alatila='C', lahetepvm=now()
 									where yhtio='$kukarow[yhtio]'

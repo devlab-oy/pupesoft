@@ -471,7 +471,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "valmistuksia_ei_kerata") {
+	if (mysql_field_name($result, $i) == "kerataanko_valmistukset") {
 
 		$ulos = "<td><select name='$nimi'>";
 

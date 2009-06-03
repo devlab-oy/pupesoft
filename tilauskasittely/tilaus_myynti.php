@@ -3064,7 +3064,7 @@ if ($tee == '') {
 								WHERE tuote.yhtio ='$kukarow[yhtio]' and ".$myyntimenu[$menutila]["query"];
 								$tuoteresult = mysql_query($query) or pupe_error($query);
 
-					$ulos = "<select style='width: 230px; font-size: 8pt; padding: 0' name='tuoteno' multiple ='TRUE'><option value=''>Valitse tuote</option>";
+					$ulos = "<select name='tuoteno'  multiple='TRUE' size='6' style='width: 350px;><option value=''>Valitse tuote</option>";
 
 					if (mysql_num_rows($tuoteresult) > 0) {
 						while($row=mysql_fetch_array($tuoteresult)) {

@@ -226,7 +226,7 @@
 		onkokaikkivalmistettu ($valmisteet_chk);				
 	}
 
-	if ($tee == 'TEEVALMISTUS' and $vakisinhyvaksy == '') {
+	if ($tee == 'TEEVALMISTUS') {
 
 		if (isset($tuotenumerot) and is_array($tuotenumerot) and count($tuotenumerot) > 0) {
 
@@ -281,86 +281,100 @@
 			foreach ($valmkpllat as $rivitunnus => $valmkpl) {
 
 				$valmkpl = str_replace(',','.',$valmkpl);
+				
 				//Haetaan tilausrivi
 				$query = "	SELECT tilausrivi.*, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.sarjanumeroseuranta
 							FROM tilausrivi
 							JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tilausrivi.tunnus = '$rivitunnus'
+							and tilausrivi.perheid = '$rivitunnus'
 							and tilausrivi.tyyppi in ('W','M')
 							and tilausrivi.toimitettuaika = '0000-00-00 00:00:00'";
 				$roxresult = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($roxresult) == 1) {
-					$tilrivirow = mysql_fetch_array($roxresult);
-					
-					//	Tarkastetaan, että sarjanumeroseurattuja tuotteita valmistetaan tasamäärä.
-					if(($tilrivirow["sarjanumeroseuranta"] == "S" or $tilrivirow["sarjanumeroseuranta"] == "U") and $valmkpl != (int) $valmkpl) {
-						echo "<font class='error'>".t("VIRHE: Sarjanumeroseurattua tuotetta ei voi valmistaa vain osittain!")."</font><br>";
-						$tee = "VALMISTA";
-					}
-					elseif (($valmkpl > 0 and $valmkpl <= $tilrivirow["varattu"]) or ($kokopros > 0 and $kokopros <= 100) or isset($kokovalmistus)) {
+				if (mysql_num_rows($roxresult) > 0) {
+					while($tilrivirow = mysql_fetch_array($roxresult)) {
+												 											
+						if ($valmkpl < 0 or $tilrivirow["varattu"] < 0) {
+							echo "<font class='error'>".t("VIRHE: Negatiivista kappalemäärää ei voi valmistaa")."!</font><br>";
+							$virheitaoli 	= "JOO";
+							$tee 			= "VALMISTA";
+						}
+						elseif (($tilrivirow["sarjanumeroseuranta"] == "S" or $tilrivirow["sarjanumeroseuranta"] == "U") and $valmkpl != (int) $valmkpl) {
+							//	Tarkastetaan, että sarjanumeroseurattuja tuotteita valmistetaan tasamäärä.
+							echo "<font class='error'>".t("VIRHE: Sarjanumeroseurattua tuotetta ei voi valmistaa vain osittain!")."</font><br>";
+							$virheitaoli 	= "JOO";
+							$tee 			= "VALMISTA";
+						}
+						elseif (($valmkpl > 0 and $valmkpl <= $tilrivirow["varattu"]) or ($kokopros > 0 and $kokopros <= 100) or isset($kokovalmistus)) {
 
-						if ($valmkpl > 0) {
-							$atil = round($valmkpl, 2);
-						}
-						elseif($valmkpl == "") {
-							$atil =  $tilrivirow["varattu"];
-						}
+							if ($valmkpl > 0) {
+								$atil = round($valmkpl, 2);
+							}
+							elseif($valmkpl == "") {
+								$atil =  $tilrivirow["varattu"];
+							}
 
-						if ($kokopros > 0) {
-							$atil = round($kokopros / 100 * $tilrivirow["varattu"],2);
-						}
+							if ($kokopros > 0) {
+								$atil = round($kokopros / 100 * $tilrivirow["varattu"],2);
+							}
 						
-						$akerroin = $atil / $tilrivirow["varattu"];
+							$akerroin = $atil / $tilrivirow["varattu"];
 
-						//käytetään tilausriveillä olevia tuotteita
-						$query = "	SELECT tilausrivi.*, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.ei_saldoa, tuote.sarjanumeroseuranta
-									FROM tilausrivi
-									JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-									and tilausrivi.otunnus = '$tilrivirow[otunnus]'
-									and tilausrivi.perheid = '$tilrivirow[perheid]'
-									and tilausrivi.tyyppi = 'V'
-									ORDER by tilausrivi.tuoteno";
-						$perheresult = mysql_query($query) or pupe_error($query);
+							//käytetään tilausriveillä olevia tuotteita
+							$query = "	SELECT tilausrivi.*, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.ei_saldoa, tuote.sarjanumeroseuranta
+										FROM tilausrivi
+										JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+										WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+										and tilausrivi.otunnus = '$tilrivirow[otunnus]'
+										and tilausrivi.perheid = '$tilrivirow[perheid]'
+										and tilausrivi.tyyppi = 'V'
+										ORDER by tilausrivi.tuoteno";
+							$perheresult = mysql_query($query) or pupe_error($query);
 
-						//jos tuoteperhe on olemassa
-						if (mysql_num_rows($perheresult) > 0) {
-							while ($perherow = mysql_fetch_array($perheresult)) {
-								if ($perherow["ei_saldoa"] == "") {
+							//jos tuoteperhe on olemassa
+							if (mysql_num_rows($perheresult) > 0) {
+								while ($perherow = mysql_fetch_array($perheresult)) {
+									if ($perherow["ei_saldoa"] == "") {
 									
-									//Näin paljon haluamme käyttää raaka-ainetta
-									if ($kulukpllat[$perherow["tunnus"]] != 0) {
-										$varataankpl = $kulukpllat[$perherow["tunnus"]];
-									}
-									else {
-										$varataankpl = $perherow['varattu'] * $akerroin;
-									}									
+										//Näin paljon haluamme käyttää raaka-ainetta
+										if ($kulukpllat[$perherow["tunnus"]] != 0) {
+											$varataankpl = $kulukpllat[$perherow["tunnus"]];
+										}
+										else {
+											$varataankpl = $perherow['varattu'] * $akerroin;
+										}
+										
+										if ($varataankpl < 0) {
+											echo "<font class='error'>".t("VIRHE: Raaka-aineen")." ".$perherow["tuoteno"]." ".t("kulutus ei voi olla negatiivinen")."!</font><br>";
+											$virheitaoli 	= "JOO";
+											$tee 			= "VALMISTA";	
+										}									
 									
-									//katotaan kanssa, että perheenjäsenet löytyy kannasta ja niitä on riittävästi
-									if ($saldot_valm[$perherow["tuoteno"]] < $varataankpl) {
-										echo "<font class='error'>Saldo ".$saldot[$perherow["tuoteno"]]." ei riitä! Tuotetta $perherow[tuoteno] kulutetaan $varataankpl ".ta($kieli, "Y", $perherow["yksikko"]).".</font><br>";
-										$virheitaoli 	= "JOO";
-										$tee 			= "VALMISTA";
-									}
+										//katotaan kanssa, että perheenjäsenet löytyy kannasta ja niitä on riittävästi
+										if ($vakisinhyvaksy == '' and $saldot_valm[$perherow["tuoteno"]] < $varataankpl) {
+											echo "<font class='error'>Saldo ".$saldot[$perherow["tuoteno"]]." ei riitä! Tuotetta $perherow[tuoteno] kulutetaan $varataankpl ".ta($kieli, "Y", $perherow["yksikko"]).".</font><br>";
+											$virheitaoli 	= "JOO";
+											$tee 			= "VALMISTA";
+										}
 									
-																		// Tän verran saldoa käytetään
-									$saldot_valm[$perherow["tuoteno"]] -= $kpl_chk;
+																			// Tän verran saldoa käytetään
+										$saldot_valm[$perherow["tuoteno"]] -= $kpl_chk;
 									
-									//	Tarkistetaan sarjanumerot 
-									if(tarkistaSarjanumerot(0, $perherow["tunnus"], "ostorivitunnus") > 0) {
-										$virheitaoli 	= "JOO";
-										$tee 			= "VALMISTA";
+										//	Tarkistetaan sarjanumerot 
+										if (tarkistaSarjanumerot(0, $perherow["tunnus"], "ostorivitunnus") > 0) {
+											$virheitaoli 	= "JOO";
+											$tee 			= "VALMISTA";
+										}
 									}
 								}
 							}
 						}
-					}
-					elseif ($valmkpl > 0) {
-						echo "<font class='error'>VIRHE: Syötit liian ison kappalemäärän!</font><br>";
-						$virheitaoli 	= "JOO";
-						$tee 			= "VALMISTA";
+						elseif ($valmkpl > 0) {
+							echo "<font class='error'>VIRHE: Syötit liian ison kappalemäärän!</font><br>";
+							$virheitaoli 	= "JOO";
+							$tee 			= "VALMISTA";
+						}
 					}
 				}
 			}
@@ -1071,7 +1085,7 @@
 		$tilre = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($tilre) > 0) {
-			echo "<table>";
+			echo "<br><br><table>";
 
 			if ($toim == "KORJAA") {
 				echo "<tr><th>".t("Valmistus")."</th><th>".t("Tyyppi")."</th><th>".t("Asiakas/Varasto")."</th><th>".t("Ytunnus")."</th><th>".t("Valmiste")."</th><tr>";

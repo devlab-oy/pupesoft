@@ -255,7 +255,8 @@
 									FROM asiakkaan_avainsanat
 									WHERE yhtio = '{$kukarow['yhtio']}'
 									AND laji = 'yhteensopivuus'
-									AND avainsana in ($yhtsoptun)";
+									AND avainsana in ($yhtsoptun)
+									AND liitostunnus != ''";
 				$yht_as_res = mysql_query($yht_as_query) or pupe_error($yht_as_query);
 
 				if (mysql_num_rows($yht_as_res) > 0) {

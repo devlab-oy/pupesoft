@@ -30,8 +30,8 @@ else {
 }
 
 $query = "	SELECT
-			sum(if(varattu+jt>0, $hinta_riv * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) plus_summa,
-			sum(if(varattu+jt<0, $hinta_riv * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) nega_summa
+			sum(if(varattu+jt>0, $hinta_riv * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) plus_summa,
+			sum(if(varattu+jt<0, $hinta_riv * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) nega_summa
 			FROM tilausrivi
 			WHERE yhtio = '$kukarow[yhtio]'
 			and otunnus = '$tilausnumero'
@@ -80,13 +80,21 @@ else {
 		if (mysql_num_rows($rhire) == 1) {
 			$trow  = mysql_fetch_array($rhire);
 
-			$hinta		 = round(($summa - $jysum),$yhtiorow['hintapyoristys']);
+			$hinta		 = round(($plus_summa+$nega_summa - $jysum),$yhtiorow['hintapyoristys']);
 			$trow["alv"] = $laskurow["alv"];
 			$nimitys	 = $trow["nimitys"];
 
 			list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-			$query  = "INSERT INTO tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) VALUES (now(), '$hinta', 'N', '-1', '-1', '$tilausnumero', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
+			if($laskurow["tila"] == "T") {
+				$rivityyppi = "T";
+			}
+			else {
+				$rivityyppi = "L";
+			}
+			
+			
+			$query  = "INSERT INTO tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) VALUES (now(), '$hinta', 'N', '-1', '-1', '$tilausnumero', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', '$rivityyppi', '$alv', '')";
 			$addtil = mysql_query($query) or pupe_error($query);
 		}
 		else {

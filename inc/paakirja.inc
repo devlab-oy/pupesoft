@@ -390,7 +390,8 @@
 	if ($toimittajaid != "") {
 		$lisa .= " and lasku.liitostunnus='$toimittajaid' and tila in ('H','Y','M','P','Q') ";
 	}
-	
+
+	if (!isset($alv)) $alv='tyhja';
 	if ($alv != 'tyhja') {
 		$lisa .= " and vero='$alv' ";
 	}

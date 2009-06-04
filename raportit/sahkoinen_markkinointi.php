@@ -250,6 +250,17 @@
 
 			if (trim($yhtsoptun) != '') {
 				$yhtsoptun = trim($yhtsoptun);
+				if (preg_match_all('/([0-9]+)/', $yhtsoptun, $match)) {
+					$yhtsoptun = '';
+					foreach ($match[0] as $key => $val) {
+						$yhtsoptun .= "$val,";
+					}
+					$yhtsoptun = substr($yhtsoptun, 0, -1);
+				}
+				else {
+					echo "<font class='error'>",t("Syötit virheellisen yhteensopivuustunnuksen"),"</font>";
+					exit;
+				}
 
 				$yht_as_query = "	SELECT DISTINCT liitostunnus
 									FROM asiakkaan_avainsanat

@@ -1530,7 +1530,7 @@
 			}
 			else {
 				$maara = "LIMIT 20";
-				$ehto  = " and tapahtuma.laadittu >= date_sub(now(), interval 6 month) ";
+				$ehto  = "";
 			}
 
 			$query = "	SELECT tapahtuma.tuoteno, tapahtuma.laatija, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,

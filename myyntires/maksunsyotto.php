@@ -388,10 +388,27 @@ if ($ytunnus != '' and $tee == "") {
 		<th>".t("Saajan tilinumero")."</th>
 		<td>";
 
+	$haluttuselvittely = 0;
+	if (isset($mtili)) {
+		$query  = "	SELECT * 
+					FROM yriti 
+					WHERE yhtio  = '$kukarow[yhtio]'
+					and kaytossa = ''
+					and tunnus = '$mtili'
+				order by oletus_rahatili, nimi";
+		$result = mysql_query($query) or pupe_error($query);
+		if (mysql_num_rows($result) == 1) {
+			$row = mysql_fetch_array($result);
+			$haluttuselvittely = $row['oletus_selvittelytili'];
+		}
+	}
+	if ($haluttuselvittely == 0) $haluttuselvittely = $yhtiorow['selvittelytili'];
+
 	$query  = "	SELECT * 
 				FROM yriti 
 				WHERE yhtio  = '$kukarow[yhtio]'
-				and kaytossa = ''";
+				and kaytossa = ''
+				order by tilino";
 	$result = mysql_query($query) or pupe_error($query);
 
 	$sel='';
@@ -399,8 +416,12 @@ if ($ytunnus != '' and $tee == "") {
 	echo "<option value='0'>".t("Valitse")."</option>\n";
 
 	while ($row = mysql_fetch_array($result)) {
-		if ($tilino == 0 and $row['oletus_rahatili'] == $yhtiorow['selvittelytili']) $sel='selected';
-		if ($tilino == $row['tilino']) $sel='selected';
+		if (!isset($tilino)) {
+			if ($row['oletus_rahatili'] == $haluttuselvittely) $sel='selected';
+		}
+		else {
+			if ($tilino == $row['tilino']) $sel='selected';
+		}
 		echo "<option value='$row[tunnus]' $sel>$row[nimi] ".tilinumero_print($row['tilino'])." $row[valkoodi]</option>\n";
 		$sel='';
 	}

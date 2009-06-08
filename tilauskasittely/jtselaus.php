@@ -191,10 +191,9 @@
 			}
 			
 			//	T‰t‰ kutsutaan joskus funktiosta eik‰ sms_jt_muuttujaa kuitenkaan muisteta laittaa globaaliksi. Koitetaan silloin hakea se GLOBALS:st
-			if($sms_jt=="") $sms_jt == $GLOBALS["sms_jt"];
 			
 			//	Katsotaan toimitettiinko jotain mist‰ meid‰n tulee laittaa viesti‰
-			if($sms_jt == "kaikki_toimitettu") {
+			if(sms_jt == "kaikki_toimitettu") {
 				
 				//	Haetaan kaikki alkuper‰iset tilaukset joilla ei ole en‰‰ mit‰‰n j‰lkk‰riss‰
 				$query = "	SELECT tilausrivin_lisatiedot.vanha_otunnus, sum(alkup_tilaus.jt) jt
@@ -205,7 +204,7 @@
 							GROUP BY tilausrivin_lisatiedot.vanha_otunnus
 							HAVING jt = 0 or jt IS NULL";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				while ($row = mysql_fetch_array($result)) {
 					
 					$smsviesti = "Tilauksenne $row[vanha_otunnus] on valmis noudettavaksi. Viestiin ei tarvitse vastata. - $yhtiorow[nimi]";

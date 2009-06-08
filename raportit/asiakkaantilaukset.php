@@ -7,66 +7,70 @@
 	$til = "";
 	if ($toim == 'MYYNTI') {
 		echo "<font class='head'>".t("Asiakkaan tilaukset").":</font><hr>";
-		
+
 		$til = " tila in ('L','U','N','R','E') ";
 	}
 	if ($toim == 'VALMISTUSMYYNTI') {
 		echo "<font class='head'>".t("Asiakkaan tilaukset ja valmistukset").":</font><hr>";
-		
+
 		$til = " tila in ('L','U','N','R','E','V') ";
 	}
 	if ($toim == 'OSTO') {
 		echo "<font class='head'>".t("Toimittajan tilaukset").":</font><hr>";
-		
+
 		$til = " (tila = 'O' or (tila = 'K' and vanhatunnus=0)) ";
 	}
 	if ($toim == 'TARJOUS') {
 		echo "<font class='head'>".t("Asiakkaan tarjoukset").":</font><hr>";
-		
+
 		$til = " tila = 'T' ";
 	}
 	if ($toim == 'YLLAPITO') {
 		echo "<font class='head'>".t("Asiakkaan yll‰pitosopimukset").":</font><hr>";
-		
+
 		$til = " tila in ('L','0') ";
 	}
 	if ($toim == 'REKLAMAATIO') {
 		echo "<font class='head'>".t("Asiakkaan reklamaatiot").":</font><hr>";
-		
+
 		$til = " tila in ('L','N','C') and tilaustyyppi='R' ";
 	}
-	
+
 	//	Voidaan n‰ytt‰‰ vain tilaus ilman hakuja yms. Haluamme kuitenkin tarkastaa oikeudet.
 	if($tee=="NAYTA" and $til != "") {
 		require ("raportit/naytatilaus.inc");
 		require ("inc/footer.inc");
 		die();
 	}
-	
+
+	// scripti balloonien tekemiseen
+	js_popup();
+	enable_ajax();
+
 	if ($ytunnus == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {
-	
+
 		$query = "SELECT ytunnus, liitostunnus FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[kesken]' and $til";
 		$keskenresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($keskenresult) == 1) {
-			$keskenrow = mysql_fetch_array($keskenresult);	
-		
+			$keskenrow = mysql_fetch_array($keskenresult);
+
 			$ytunnus = $keskenrow['ytunnus'];
-			
+
 			if ($toim == 'OSTO') {
 				$toimittajaid 	= $keskenrow['liitostunnus'];
 			}
 			else {
 				$asiakasid 		= $keskenrow['liitostunnus'];
 			}
-					
+
 			if (!isset($kka))
 				$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 			if (!isset($vva))
 				$vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 			if (!isset($ppa))
 				$ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-			
+
 			if (!isset($kkl))
 				$kkl = date("m");
 			if (!isset($vvl))
@@ -135,12 +139,12 @@
 		echo "<hr>";
 		$tee = "TULOSTA";
 	}
-	
+
 	if ($ytunnus != '' and ($otunnus == '' and $laskunro == '' and $sopimus == '')) {
 		if ($toim == 'MYYNTI' or $toim == "TARJOUS" or $toim == 'REKLAMAATIO' or $toim == 'VALMISTUSMYYNTI') {
 			require ("../inc/asiakashaku.inc");
 		}
-		
+
 		if ($toim == 'OSTO') {
 			require ("../inc/kevyt_toimittajahaku.inc");
 		}
@@ -157,18 +161,18 @@
 					and yhtio = '$kukarow[yhtio]')";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
-		
+
 		if ($row["laskunro"] > 0) {
 			$laskunro = $row["laskunro"];
 		}
 		$ytunnus   = $row["ytunnus"];
-		
+
 		if ($toim == 'OSTO') {
-			$toimittajaid 	= $row["liitostunnus"];	
+			$toimittajaid 	= $row["liitostunnus"];
 		}
 		else {
-			$asiakasid 		= $row["liitostunnus"];	
-		}		
+			$asiakasid 		= $row["liitostunnus"];
+		}
 	}
 	elseif($sopimus > 0) {
 		$query = "	SELECT laskunro, ytunnus, liitostunnus
@@ -180,12 +184,12 @@
 
 		$laskunro = $row["laskunro"];
 		$ytunnus  = $row["ytunnus"];
-		
+
 		if ($toim == 'OSTO') {
-			$toimittajaid 	= $row["liitostunnus"];	
+			$toimittajaid 	= $row["liitostunnus"];
 		}
 		else {
-			$asiakasid 		= $row["liitostunnus"];	
+			$asiakasid 		= $row["liitostunnus"];
 		}
 	}
 	elseif($laskunro > 0) {
@@ -201,7 +205,7 @@
 
 			$laskunro 		= $row["laskunro"];
 			$ytunnus  		= $row["ytunnus"];
-			$toimittajaid 	= $row["liitostunnus"];	
+			$toimittajaid 	= $row["liitostunnus"];
 		}
 		else {
 			$query = "	SELECT laskunro, ytunnus, liitostunnus
@@ -215,7 +219,7 @@
 
 			$laskunro 		= $row["laskunro"];
 			$ytunnus  		= $row["ytunnus"];
-			$asiakasid 		= $row["liitostunnus"];	
+			$asiakasid 		= $row["liitostunnus"];
 		}
 	}
 	elseif($astilnro != '') {
@@ -225,7 +229,7 @@
 					and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
-		
+
 		if ($row["laskunro"] > 0) {
 			$laskunro = $row["laskunro"];
 		}
@@ -233,15 +237,15 @@
 			$otunnus = $row["tunnus"];
 		}
 		$ytunnus   = $row["ytunnus"];
-		
+
 		if ($toim == 'OSTO') {
-			$toimittajaid 	= $row["liitostunnus"];	
+			$toimittajaid 	= $row["liitostunnus"];
 		}
 		else {
-			$asiakasid 		= $row["liitostunnus"];	
+			$asiakasid 		= $row["liitostunnus"];
 		}
 	}
-		
+
 	if ($ytunnus != '') {
 		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
 			<input type='hidden' name='ytunnus' value='$ytunnus'>
@@ -251,23 +255,23 @@
 			<input type='hidden' name='nimi' value='$nimi'>
 			<input type='hidden' name='tee' value='TULOSTA'>";
 
-		
+
 		if ($asiakasid > 0) {
 			$query  = "SELECT concat_ws(' ', nimi, nimitark) nimi FROM asiakas WHERE yhtio='$kukarow[yhtio]' and tunnus='$asiakasid'";
 			$result = mysql_query($query) or pupe_error($query);
 			$asiakasrow 	= mysql_fetch_array($result);
-		
+
 			echo "<table><tr><th>".t("Valittu asiakas").":</th><td>$asiakasrow[nimi]</td></tr></table><br>";
 		}
 		elseif ($toimittajaid > 0) {
 			$query  = "SELECT concat_ws(' ', nimi, nimitark) nimi FROM toimi WHERE yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
 			$result = mysql_query($query) or pupe_error($query);
 			$asiakasrow 	= mysql_fetch_array($result);
-			
+
 			echo "<table><tr><th>".("Valittu toimittaja").":</th><td>$asiakasrow[nimi]</td></tr></table><br>";
 		}
-		
-		
+
+
 		echo "<table>";
 
 		if (!isset($kka))
@@ -300,7 +304,7 @@
 		else {
 			$jarj = "ORDER BY 2 desc, 1 asc";
 		}
-		
+
 		if ($toim == 'OSTO') {
 			$litunn = $toimittajaid;
 		}
@@ -310,7 +314,7 @@
 
 		if ($otunnus > 0 or $laskunro > 0 or $sopimus > 0) {
 			if ($laskunro > 0) {
-				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
+				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.liitostunnus = '$litunn'
@@ -318,14 +322,14 @@
 							and lasku.laskunro='$laskunro'";
 			}
 			elseif($sopimus > 0) {
-				$query = "	(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
+				$query = "	(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.liitostunnus = '$litunn'
 							and $til
 							and tunnus='$sopimus')
 							UNION
-							(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
+							(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.liitostunnus = '$litunn'
@@ -334,14 +338,14 @@
 							and lasku.swift='$sopimus')";
 			}
 			else {
-				$query = "	(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
+				$query = "	(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.liitostunnus = '$litunn'
 							and $til
 							and lasku.tunnus='$otunnus')
 							UNION
-							(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
+							(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.liitostunnus = '$litunn'
@@ -354,12 +358,12 @@
 		else {
 			// jos on iiiiso n‰yttˆ niin n‰ytet‰‰n myˆs viite
 			if ($kukarow['resoluutio'] == 'I') {
-				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, viesti, tila, alatila
+				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, viesti, tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
 							FROM lasku use index (yhtio_tila_luontiaika)
 							WHERE lasku.yhtio = '$kukarow[yhtio]' ";
 			}
 			else {
-				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
+				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
 							FROM lasku use index (yhtio_tila_luontiaika)
 							WHERE lasku.yhtio = '$kukarow[yhtio]' ";
 			}
@@ -374,20 +378,20 @@
 			else {
 				$query .= "	and lasku.liitostunnus	= '$litunn'";
 			}
-			
+
 			$query .= "	and $til
 						and lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00'
 						and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59'
 						$jarj";
 		}
-		
+
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result)!=0) {
 
 			echo "<br><table>";
 			echo "<tr>";
-			for ($i=0; $i < mysql_num_fields($result)-2; $i++) {
+			for ($i=0; $i < mysql_num_fields($result)-7; $i++) {
 				echo "<th align='left'><a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=".mysql_field_name($result,$i)."'>".t(mysql_field_name($result,$i))."</a></th>";
 			}
 			echo "<th align='left'>".t("Tyyppi")."</th>";
@@ -399,7 +403,7 @@
 				if ($tunnus==$row['tilaus']) $ero = "th";
 
 				echo "<tr class='aktiivi'>";
-				
+
 				// Laatikot laskujen ymp‰rille
 				if ($row["laskunro"] > 0 and $row["laskunro"] != $edlaskunro) {
 					$query = "	SELECT count(*)
@@ -418,7 +422,7 @@
 					$pknum			= 1;
 					$pkrow[0] 		= 1;
 				}
-								
+
 				$lask--;
 				$classlisa = "";
 
@@ -450,15 +454,25 @@
 
 					$borderlask--;
 				}
-				
+
 				if ($row["tila"] == "U") {
 					echo "<$ero valign='top' $classalku></$ero>";
 				}
 				else {
-					echo "<$ero valign='top' $classalku>$row[0]</$ero>";	
+					if (trim($row["hyvak2"]) != "") {
+						echo "<div id='kommentti$row[0]' class='popup' style='width: 500px;'>";
+						echo t("Tilaus laadittu")." $row[laatija] @ ".tv1dateconv($row["luontiaika"], 'X')."<br>";
+						echo t("Tilaus valmis")." $row[hyvak1] @ ".tv1dateconv($row["h1time"], 'X')."<br>";
+						echo t("Tilaus hyv‰ksytty")." $row[hyvak2] @ ".tv1dateconv($row["h2time"], 'X');
+						echo "</div>";
+						echo "<$ero valign='top' $classalku><a class='menu' onmouseout=\"popUp(event,'kommentti$row[0]')\" onmouseover=\"popUp(event,'kommentti$row[0]')\">$row[0]</a></$ero>";
+					}
+					else {
+						echo "<$ero valign='top' $classalku>$row[0]</$ero>";
+					}
 				}
-				
-				for ($i=1; $i<mysql_num_fields($result)-2; $i++) {					
+
+				for ($i=1; $i<mysql_num_fields($result)-7; $i++) {
 					if (mysql_field_name($result,$i) == 'toimaika') {
 						echo "<$ero valign='top' $class>".tv1dateconv($row[$i])."</$ero>";
 					}
@@ -466,7 +480,7 @@
 						echo "<$ero valign='top' nowrap align='right' $class>$row[$i]</$ero>";
 					}
 					else {
-						echo "<$ero valign='top' $class>$row[$i]</$ero>";						
+						echo "<$ero valign='top' $class>$row[$i]</$ero>";
 					}
 				}
 
@@ -483,9 +497,9 @@
 						<input type='hidden' name='toim' 			value = '$toim'>
 						<input type='hidden' name='asiakasid' 		value = '$asiakasid'>
 						<input type='hidden' name='toimittajaid' 	value = '$toimittajaid'>
-						<input type='hidden' name='laskunro'	 	value = '$laskunro'>		
+						<input type='hidden' name='laskunro'	 	value = '$laskunro'>
 						<input type='hidden' name='tunnus' 			value = '$row[tilaus]'>";
-				
+
 				//	Pysyt‰‰n projektilla jos valitaan vain projekti
 				if($row["tila"] == "R" or $nippu > 0) {
 					if($nippu>0) {
@@ -494,7 +508,7 @@
 					}
 					else {
 						echo "<input type='hidden' name='otunnus' value='$otunnus'>";
-						echo "<input type='hidden' name='nippu' value='$otunnus'>";						
+						echo "<input type='hidden' name='nippu' value='$otunnus'>";
 					}
 				}
 				elseif($sopimus>0) {
@@ -513,7 +527,7 @@
 						<input type='submit' value='".t("N‰yt‰ tilaus")."'></td></form>";
 
 				echo "</tr>";
-				
+
 				$edlaskunro = $row["laskunro"];
 			}
 			echo "</table>";
@@ -528,7 +542,7 @@
 		echo "<br><table>";
 		echo "<form action = '$PHP_SELF' method = 'post'>
 			<input type='hidden' name='toim' value='$toim'>";
-    	
+
 		if ($toim == "OSTO") {
 			echo "<tr><th>".t("Toimittajan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
 		}
@@ -546,7 +560,7 @@
 			echo "<tr><th>".t("Asiakkaan tilausnumero")."</th><td class='back'></td><td><input type='text' size='10' name='astilnro'></td></tr>";
 		}
 		echo "</table>";
-    	
+
 		echo "<br><input type='submit' value='".t("Etsi")."'>";
 		echo "</form>";
 	}
@@ -557,6 +571,6 @@
 		echo "<br><input type='submit' value='".t("Tee uusi haku")."'>";
 		echo "</form>";
 	}
-	
+
 	require ("../inc/footer.inc");
 ?>

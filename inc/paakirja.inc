@@ -130,6 +130,69 @@
 				<option value = '29'>29
 				<option value = '30'>30
 				<option value = '31'>31
+				</select>
+				</td>
+				<tr>
+				<th>".t("Poikkeava loppuaika")."</th>
+				<td>
+				<select name='llvv'>
+					<option value=''>".t("")."</option>
+				";
+
+				for ($i = date("Y")+1; $i >= date("Y")-6; $i--) {
+					echo "<option value='$i' $sel>$i</option>";
+				}
+
+				echo "
+				</select>
+				<select name='llvk'>
+				<option value = '0'>
+				<option value = '1'>01
+				<option value = '2'>02
+				<option value = '3'>03
+				<option value = '4'>04
+				<option value = '5'>05
+				<option value = '6'>06
+				<option value = '7'>07
+				<option value = '8'>08
+				<option value = '9'>09
+				<option value = '10'>10
+				<option value = '11'>11
+				<option value = '12'>12
+				</select>
+				<select name='llvp'>
+				<option value = '0'>
+				<option value = '1'>01
+				<option value = '2'>02
+				<option value = '3'>03
+				<option value = '4'>04
+				<option value = '5'>05
+				<option value = '6'>06
+				<option value = '7'>07
+				<option value = '8'>08
+				<option value = '9'>09
+				<option value = '10'>10
+				<option value = '11'>11
+				<option value = '12'>12
+				<option value = '13'>13
+				<option value = '14'>14
+				<option value = '15'>15
+				<option value = '16'>16
+				<option value = '17'>17
+				<option value = '18'>18
+				<option value = '19'>19
+				<option value = '20'>20
+				<option value = '21'>21
+				<option value = '22'>22
+				<option value = '23'>23
+				<option value = '24'>24
+				<option value = '25'>25
+				<option value = '26'>26
+				<option value = '27'>27
+				<option value = '28'>28
+				<option value = '29'>29
+				<option value = '30'>30
+				<option value = '31'>31
 				</select></td>
 				</tr>";
 
@@ -257,36 +320,48 @@
 	$alvk = (int) $alvk;
 	$alvp = (int) $alvp;
 	$tkausi = (int) $tkausi;
-
+	
+	$llvv = (int) $llvv;
+	$llvk = (int) $llvk;
+	$llvp = (int) $llvp;
+ 
 	// Tutkitaan ensiksi, mille tilikaudelle pyydettävä lista löytyy, jos lista on sopiva
 	$blvk = 0;
 	$blvp = 0;
 
-	if ($tkausi == 0) {
-		$blvk = $alvk;
-		$blvp = $blvk;
-
-		if ($blvk == 0) $blvk = 1;
-		if ($blvp == 0) $blvp = 1;
-
-		$query = "	SELECT *
-					FROM tilikaudet
-					WHERE yhtio = '$kukarow[yhtio]' and '$alvv-$blvk-$blvp' >= tilikausi_alku and '$alvv-$blvk-$blvp' <= tilikausi_loppu";
-		$result = mysql_query($query) or pupe_error($query);
+	if($llvv >0) {
+		if($alvv == 0 or $alvk == 0 or $alvp == 0 or $llvv == 0 or $llvk == 0 or $llvp == 0) {
+			echo "<font class='error'>".t("Haettaessa aikaväliltä pitää valita tarkka alku ja loppupäivä.")."</font>";
+			exit;
+		}
 	}
 	else {
-		$query = "	SELECT *
-					FROM tilikaudet
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
-		$result = mysql_query($query) or pupe_error($query);
-	}
+		if ($tkausi == 0) {
+			$blvk = $alvk;
+			$blvp = $blvk;
 
-	if (mysql_num_rows($result) != 1) {
-		echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei löytynyt")."</font>";
-		exit;
-	}
-	$tilikaudetrow=mysql_fetch_array($result);
+			if ($blvk == 0) $blvk = 1;
+			if ($blvp == 0) $blvp = 1;
 
+			$query = "	SELECT *
+						FROM tilikaudet
+						WHERE yhtio = '$kukarow[yhtio]' and '$alvv-$blvk-$blvp' >= tilikausi_alku and '$alvv-$blvk-$blvp' <= tilikausi_loppu";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+		else {
+			$query = "	SELECT *
+						FROM tilikaudet
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+
+		if (mysql_num_rows($result) != 1) {
+			echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei löytynyt")."</font>";
+			exit;
+		}
+		$tilikaudetrow=mysql_fetch_array($result);
+	}
+	
 	$lisa  = ''; // aineiston hakemiseen
 	$lisa2 = ''; // alkusaldon laskemiseen
 
@@ -305,6 +380,13 @@
         echo "<font class='head'>$nimi ".t("tilikaudelta")." $tilikaudetrow[tilikausi_alku] - $tilikaudetrow[tilikausi_loppu]</font><hr>";
 		$lisa  = "tiliointi.tapvm <= '$tilikaudetrow[tilikausi_loppu]' and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'";
 		$lisa2 = "tiliointi.tapvm < '$tilikaudetrow[tilikausi_alku]'"; //hassua hassua
+	}
+	elseif ($llvv > 0) {
+		echo "<font class='head'>$nimi ".t("ajalta")." $alvv</font><hr>";
+		$alkupvm  = date("Y-m-d", mktime(0, 0, 0, $alvk, $alvp, $alvv));
+		$loppupvm = date("Y-m-d", mktime(0, 0, 0, $llvk, $llvp, $llvv));
+		$lisa  = "tiliointi.tapvm >= '$alkupvm' AND tiliointi.tapvm <= '$loppupvm'";
+		$lisa2 = "tiliointi.tapvm < '$alkupvm'";
 	}
 	elseif ($alvk == '0') {
 		echo "<font class='head'>$nimi ".t("kalenterivuodelta")." $alvv</font><hr>";
@@ -419,7 +501,7 @@
 		}
 	}
 
-	if (strlen(trim($tili)) > 0) {
+	if (strlen(trim($tili)) > 0 and isset($tilikaudetrow)) {
 		echo "<th>".t("kum. summa")."</th>";
 
 		if(isset($workbook)) {
@@ -468,7 +550,7 @@
 				}
 
 				//jos tili on valittu lasketaan sen alkusaldo
-				if (strlen(trim($tili)) > 0 and $edtili != $trow["xtilino"]) {
+				if (strlen(trim($tili)) > 0 and $edtili != $trow["xtilino"] and isset($tilikaudetrow)) {
 					$query = "	SELECT sum(summa) saldo
 								FROM tiliointi
 								WHERE tiliointi.yhtio 	= '$kukarow[yhtio]'

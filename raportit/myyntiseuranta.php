@@ -663,6 +663,10 @@
 					$trlisatiedot = "";
 				}
 
+				if ($naytaennakko == "") {
+					$lisa .= " and tilausrivi.tuoteno !='$yhtiorow[ennakkomaksu_tuotenumero]'";
+				}
+
 				// Jos ei olla valittu mitään
 				if ($group == "") {
 					$select = "tuote.yhtio, ";
@@ -1918,7 +1922,8 @@
 			if ($piilota_kate != '')		$piilota_kate_sel 		= "CHECKED";
 			if ($piilota_kappaleet != '')	$piilota_kappaleet_sel 	= "CHECKED";
 			if ($piilotanollarivit != '')	$einollachk 			= "CHECKED";
-
+			if ($naytaennakko != '')		$naytaennakkochk 		= "CHECKED";
+			
 			echo "<table>
 				<tr>
 				<th>".t("Lisärajaus")."</th>
@@ -2164,6 +2169,12 @@
 				<tr>
 				<th>".t("Piilota nollarivit")."</th>
 				<td><input type='checkbox' name='piilotanollarivit' $einollachk></td>
+				<td></td>
+				<td class='back'></td>
+				</tr>
+				<tr>
+				<th>".t("Näytä myös ennakkolaskutus")."</th>
+				<td><input type='checkbox' name='naytaennakko' $naytaennakkochk></td>
 				<td></td>
 				<td class='back'></td>
 				</tr>

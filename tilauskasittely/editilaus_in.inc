@@ -232,6 +232,7 @@ while (!feof ($fd)) {
 			}
 
 			$kukarow['yhtio'] = $yhtiorow['yhtio']; // T‰m‰ on vaarallista, mutta t‰t‰ ilman ei mik‰n toimi!
+			$kukarow['kuka'] = $edi_laatija;
 
 			// nollataan argv ja laitetaan ensimm‰iseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
 			$argv = array();
@@ -903,10 +904,6 @@ while (!feof ($fd)) {
 			// Sallitaan JT-Rivit
 			if ($tieto == '1') {
 				$sallitaanjt = '1';
-
-				if ($edi_tyyppi == "magento") {
-					$tilaus_hyvaksyntaan = "kyll‰";
-				}
 			}
 			else {
 				$sallitaanjt = '0';
@@ -964,10 +961,54 @@ while (!feof ($fd)) {
 					if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "") {
 						list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno);
 
+						$laskurow["varasto"] = ""; // spooffaillaan laskurow varastoa verkkokaupan takia
+
+						// jos saldo ei riit‰ normivarastoista, pit‰‰ katsoa miss‰ varastossa riitt‰‰ ja myyd‰‰n sielt‰ (koska jossain riitt‰‰, muuten tilaus ei olisi edes tullu t‰nne asti)
 						if ($chk_myytavissa < $kpl) {
-							$var = "H";
+							$query = "	SELECT distinct varastopaikat.tunnus varasto, CASE maa WHEN 'FI' THEN '1' WHEN 'SE' THEN '2' ELSE '3' END sorttauskentta
+										FROM tuotepaikat
+										JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+											AND varastopaikat.tyyppi != ''
+											AND varastopaikat.maa = 'FI'
+											AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+											AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0')))
+										WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+										AND tuotepaikat.tuoteno = '$tuoteno'
+										ORDER BY sorttauskentta";
+							$sres = mysql_query($query) or pupe_error($query);
+
+							$erikoisvarastojen_saldot = array();
+							$erikois_i = 0;
+
+							while ($erikoisasaldo_row = mysql_fetch_assoc($sres)) {
+								list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, '', $erikoisasaldo_row["varasto"]);
+								if ($chk_myytavissa >= $kpl) {
+									$erikoisvarastojen_saldot[$erikois_i]["varasto"] = (int) $erikoisasaldo_row["varasto"];
+									$erikoisvarastojen_saldot[$erikois_i]["myytavissa"] = (float) $chk_myytavissa;
+									$erikoisvarastojen_saldot[$erikois_i]["sorttauskentta"] = (int) $erikoisasaldo_row["sorttauskentta"];
+									$erikois_i++;
+								}
+							}
+
+							if (count($erikoisvarastojen_saldot) > 0) {
+								// Sortataan 2 dimensoinen array. pit‰‰ ensiksi tehd‰ sortattavista keyst‰ omat arrayt
+								$apusort_jarj0 = $apusort_jarj1 = array();
+								foreach ($erikoisvarastojen_saldot as $apusort_key => $apusort_row) {
+									$apusort_jarj0[$apusort_key] = $apusort_row['myytavissa'];
+								    $apusort_jarj1[$apusort_key] = $apusort_row['sorttauskentta'];
+								}
+
+								// sortataan by myytavissa, sorttauskentt‰
+								array_multisort($apusort_jarj0, SORT_DESC, $apusort_jarj1, SORT_ASC, $erikoisvarastojen_saldot);
+
+								$varasto = $erikoisvarastojen_saldot[0]["varasto"]; // ekassa varastossa on siis suurin saldo
+								$laskurow["varasto"] = $varasto; // joudutaan spooffaamaan laskurow varasto
+							}
+							else {
+								$var = "H";
+							}
+
 							$kommentti = t("Huom: Tuote toimitetaan erikoisvarastosta!");
-							$tilaus_hyvaksyntaan = "kyll‰";
 						}
 					}
 
@@ -980,32 +1021,6 @@ while (!feof ($fd)) {
 					}
 
 					require ("lisaarivi.inc");
-
-					// Katsotaan verkkokauppatilauksissa kuuluuko joku tilausrivi erikoisvarastoon. Pakotetaan tilaus hyv‰ksynt‰‰n.
-					if ($edi_tyyppi == "magento") {
-						foreach ($lisatyt_rivit1 as $lisatty_rivitunnus) {
-							$query = "	SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
-										FROM tilausrivi
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND tunnus = '$lisatty_rivitunnus'";
-							$edi_varastopaikka_res = mysql_query($query) or pupe_error($query);
-							$edi_varastopaikka_row = mysql_fetch_array($edi_varastopaikka_res);
-
-							$varastoon_tunnus = kuuluukovarastoon($edi_varastopaikka_row["hyllyalue"], $edi_varastopaikka_row["hyllynro"]);
-
-							$query = "	SELECT tyyppi
-										FROM varastopaikat
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND tunnus = '$varastoon_tunnus'";
-							$edi_varastopaikka_res = mysql_query($query) or pupe_error($query);
-							$edi_varastopaikka_row = mysql_fetch_array($edi_varastopaikka_res);
-
-							if ($edi_varastopaikka_row["tyyppi"] != '') {
-								$tilaus_hyvaksyntaan = "kyll‰";
-								break;
-							}
- 						}
-					}
 
 					// jos meill‰ on tiedossa tuotteen sarjanumero, lis‰t‰‰n se
 					if ($edi_sarjanumero != "") {
@@ -1176,15 +1191,27 @@ while (!feof ($fd)) {
 									alatila = 'A',
 									chn = '999',
 									varasto = '$varasto_row[tunnus]',
-									sisviesti2 = 'Verkkokauppatilaus! Ker‰yslistan tuotteet voivat kuulua useaan varastoon.',
+									sisviesti2 = 'Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa.',
 									tulostusalue = '$tulostusalue'
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus = '$editilaus_lasku_tunnus'";
 						$magento_maksettu_res = mysql_query($query) or pupe_error($query);
+
+						// haetaan tilauksen tiedot
+						$query    = "SELECT * FROM lasku WHERE tunnus = '$editilaus_lasku_tunnus' AND yhtio = '$kukarow[yhtio]'";
+						$result   = mysql_query($query) or die($query);
+						$laskurow = mysql_fetch_array($result);
+
+						// ei haluta k‰sitell‰ t‰t‰ toista kertaa kassamyyntin‰, koska se est‰‰ splittauksen
+						$kukarow["kassamyyja"] = $editilaus_kassalipas = "";
+
+						// kutsutaan uudestaan tilaukselle tilaus-valmis, niin saadaan splitattua se varastoihin
+						$silent = "SILENT";
+						require ("tilaus-valmis.inc");
 					}
 
-					// Verkkokauppatilaus halutaan hyv‰ksynn‰n kautta!
-					if ($edi_tyyppi == "magento" and $tilaus_hyvaksyntaan != "") {
+					// Halutaanko tilaus hyv‰ksynn‰n kautta!
+					if ($tilaus_hyvaksyntaan != "") {
 						$query = "	UPDATE lasku SET
 									alatila = 'F'
 									WHERE yhtio = '$kukarow[yhtio]'

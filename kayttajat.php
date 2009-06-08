@@ -464,6 +464,11 @@
 			}
 
 			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+			if ($toim == 'extranet') {
+				echo "<table>";
+				echo "<tr><td>";
+			}
+
 			echo "<table>";
 
 			if ($selkuka != "UUSI") {
@@ -1025,6 +1030,16 @@
 			}
 
 			echo "</table>";
+			echo "</td>";
+
+			if ($toim == 'extranet') {
+				require ("inc/extranet_kayttajan_lisatiedot.inc");
+				echo "<td class='back'>"; // 
+				echo "<iframe id='extranet_lisatiedot_iframe' name='extranet_lisatiedot_iframe' src='yllapito.php?toim=extranet_kayttajan_lisatiedot&from=yllapito&liitostunnus=$selkuka&ohje=off&haku[4]=$selkuka&lukitse_avaimeen=$lukitse_avaimeen' style='height: 100%; width: 700px; border: 0px; display: inline;' scrolling='yes' border='0' frameborder='0'></iFrame>";
+				echo "</td>";
+				echo "</tr>";
+				echo "</table>";
+			}
 
 			if ($selkuka == "UUSI") {
 				echo "<br><input type='submit' value='".t("Perusta uusi käyttäjä")."'></form>";

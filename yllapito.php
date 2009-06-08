@@ -655,7 +655,9 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		if ($toim != "yhtio" and $toim != "yhtion_parametrit") {
-			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
+			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
+			if ($liitostunnus) echo "&liitostunnus=$liitostunnus";
+			echo "' method = 'post'>
 					<input type = 'hidden' name = 'uusi' value = '1'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
 					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
@@ -1186,7 +1188,9 @@
 	}
 	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit") {
 		echo "<br>
-				<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
+				<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
+				if ($liitostunnus) echo "&liitostunnus=$liitostunnus";
+				echo "' method = 'post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
 				<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 				<input type = 'hidden' name = 'limit' value = '$limit'>

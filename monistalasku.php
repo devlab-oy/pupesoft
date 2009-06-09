@@ -591,6 +591,46 @@ if ($tee == 'MONISTA') {
 				echo t("Uusi tilausnumero on")." $utunnus<br><br>";
 			}
 			
+			//	Päivitetään myös tunnusnippu jotta tätä voidaan versioida..
+			if($toim == "TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"] != "") {
+				$kysely  = "UPDATE lasku SET 
+								tunnusnippu = tunnus
+							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$utunnus'";
+				$updres  = mysql_query($kysely) or pupe_error($kysely);
+			}
+			
+			if($toim == "TARJOUS") {
+				// Oliko meillä maksusopparia?
+				$query = "	SELECT *
+							FROM maksupositio
+							WHERE yhtio = '$kukarow[yhtio]'
+							and otunnus = '$lasku'";
+				$copresult = mysql_query($query) or pupe_error($query);
+				if (mysql_num_rows($copresult) > 0) {
+
+					$fields = "yhtio";
+					$values = "'$kukarow[yhtio]'";
+
+					// Ei monisteta tunnusta
+					for($i=1; $i < mysql_num_fields($monistalisres)-1; $i++) { 
+
+						$fields .= ", ".mysql_field_name($monistalisres,$i);
+
+						switch (mysql_field_name($monistalisres,$i)) {
+							case 'otunnus':
+								$values .= ", '$utunnus'";
+								break;
+							default:
+								$values .= ", '".$monistalisrow[$i]."'";
+						}
+					}
+
+					$kysely  = "INSERT into maksupositio ($fields) VALUES ($values)";
+					$insres3 = mysql_query($kysely) or pupe_error($kysely);
+
+				}
+			}
+			
 			//Kopioidaan otsikon lisatiedot
 			$query = "	SELECT * 
 						FROM laskun_lisatiedot 

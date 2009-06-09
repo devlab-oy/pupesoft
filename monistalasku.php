@@ -474,7 +474,6 @@ if ($tee == 'MONISTA') {
 					case 'jaksotettu':
 					case 'factoringsiirtonumero':					
 					case 'vanhatunnus':
-					case 'tunnusnippu':										
 					case 'laskutuspvm':										
 					case 'maksuaika':					
 					case 'maa_maara':
@@ -488,6 +487,14 @@ if ($tee == 'MONISTA') {
 						break;
 					case 'laatija':
 						$values .= ", '$kukarow[kuka]'";
+						break;
+					case 'tunnusnippu':
+						if($toim == "TARJOUS") {
+							$values .= ", ''";
+						}
+						else {
+							$values .= ", '".$monistarow[$i]."'";
+						}
 						break;
 					case 'eilahetetta':
 						if ($slask == 'on') {

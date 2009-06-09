@@ -114,11 +114,24 @@
 			$where = "(". $where1." and ".$where2.")  and ";
 		}
 
+		$query  = "	SELECT if(toim_maa != '', toim_maa, maa) sallitut_maat
+					FROM asiakas
+					WHERE yhtio='$kukarow[yhtio]' and tunnus='$asiakas'";
+		$maa_result = mysql_query($query) or pupe_error($query);
+		$asiakas_maa_row = mysql_fetch_array($maa_result);
+
+		$kieltolisa = '';
+
+		if ($asiakas_maa_row["sallitut_maat"] != "") {
+			$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$asiakas_maa_row[sallitut_maat]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$asiakas_maa_row[sallitut_maat]%' ";
+		}
+
 		if ((strlen($where) > 0 or $checkall != "") and $ytunnus != '' and $asiakas != '') {
 			$query = "	SELECT *
 						FROM tuote
 						WHERE $where tuote.yhtio='$kukarow[yhtio]' 
 						and tuote.status NOT IN ('P','X') and hinnastoon != 'E'
+						$kieltolisa
 						ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
 			$rresult = mysql_query($query) or pupe_error($query);
 
@@ -134,15 +147,21 @@
 			echo "<br>";
 			flush();
 
-			$rivi  = t("Tuotenumero")."\t";
+			$rivi = t("Ytunnus").": $ytunnus";
+			$rivi .= "\r\n";
+			$rivi .= t("Asiakas").": $asiakasrow[nimi] $asiakasrow[nimitark]";
+			$rivi .= "\r\n";
+			$rivi .= t("Tuotenumero")."\t";
+			$rivi .= t("EAN-koodi")."\t";
 			$rivi .= t("Osasto")."\t";
 			$rivi .= t("Tuoteryhmä")."\t";
 			$rivi .= t("Nimitys")."\t";
 			$rivi .= t("Yksikkö")."\t";
 			$rivi .= t("Aleryhmä")."\t";
-			$rivi .= t("Myyntihinta")."\t";
+			$rivi .= t("Verollinen Myyntihinta")."\t";
 			$rivi .= t("Alennus")."\t";
-			$rivi .= t("Sinun hinta")."\t";
+			$rivi .= t("Sinun veroton hinta")."\t";
+			$rivi .= t("Sinun verollinen hinta")."\t";
 			$rivi .= "\r\n";
 			fwrite($fh, $rivi);
 
@@ -155,8 +174,11 @@
 				//haetaan asiakkaan oma hinta
 				$laskurow["ytunnus"] = $ytunnus;
 				$laskurow["liitostunnus"] = $asiakas;
+				$laskurow["vienti"] = '';
+				$laskurow["alv"] = '';
 				
 				list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $rrow, 1, '', '', '');
+				list($hinta, $lis_alv) = alv($laskurow, $rrow, $hinta, '', $alehinta_alv);
 				
 				if ($rrow["hinnastoon"] == "V" and $hinta == 0 and $ale == 0) {
 					continue;
@@ -177,13 +199,29 @@
 					$asiakashinta = $hinta;
 				}
 
+				$asiakashinta_veroton = 0;
+				$asiakashinta_verollinen = 0;
+				$verollinen = 0;
+
+				if ($yhtiorow["alv_kasittely"] == "") {
+					$verollinen = $rrow["myyntihinta"];
+					$asiakashinta_veroton = $asiakashinta;
+					$asiakashinta_verollinen = round(($asiakashinta*(1+$rrow['alv']/100)),2);
+				}
+				else {
+					$verollinen = round(($rrow["myyntihinta"]*(1+$rrow['alv']/100)),2);
+					$asiakashinta_veroton = round(($asiakashinta/(1+$rrow['alv']/100)),2);
+					$asiakashinta_verollinen = $asiakashinta;
+				}
+
 				$rivi  = $rrow["tuoteno"]."\t";
+				$rivi .= $rrow["eankoodi"]."\t";
 				$rivi .= $rrow["osasto"]."\t";
 				$rivi .= $rrow["try"]."\t";
 				$rivi .= $rrow["nimitys"]."\t";
 				$rivi .= ta($kieli, "Y", $rrow["yksikko"])."\t";
 				$rivi .= $rrow["aleryhma"]."\t";
-				$rivi .= str_replace(".",",",$rrow["myyntihinta"])."\t";
+				$rivi .= str_replace(".",",",$verollinen)."\t";
 
 				if ($netto == "") {
 					$rivi .= str_replace(".",",",sprintf('%.2f',$ale))."\t";
@@ -192,7 +230,8 @@
 					$rivi .= $ale."\t";
 				}
 
-				$rivi .= str_replace(".",",",sprintf("%.".$yhtiorow['hintapyoristys']."f",$asiakashinta))."\t";
+				$rivi .= str_replace(".",",",sprintf("%.".$yhtiorow['hintapyoristys']."f",$asiakashinta_veroton))."\t";
+				$rivi .= str_replace(".",",",sprintf("%.".$yhtiorow['hintapyoristys']."f",$asiakashinta_verollinen))."\t";
 				$rivi .= "\r\n";
 				
 				fwrite($fh, $rivi);

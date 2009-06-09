@@ -1045,12 +1045,12 @@
 					min(lasku.lahetepvm) lahetepvm,	
 					min(lasku.kerayspvm) kerayspvm,	
 					min(lasku.tunnus) mintunnus,
-					if(lasku.tila='L',GROUP_CONCAT(distinct concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) order by concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) SEPARATOR '<br>'), GROUP_CONCAT(distinct nimi)) nimi,
+					if(lasku.tila='L',GROUP_CONCAT(distinct concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) order by concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) SEPARATOR '<br>'), GROUP_CONCAT(distinct lasku.nimi)) nimi,
 					GROUP_CONCAT(distinct lasku.laatija order by lasku.laatija SEPARATOR '<br>') laatija,																									
 					group_concat(DISTINCT concat_ws('\n\n', if(comments!='',concat('".t("Lähetteen lisätiedot").":\n',comments),NULL), if(sisviesti2!='',concat('".t("Keräyslistan lisätiedot").":\n',sisviesti2),NULL)) SEPARATOR '\n') ohjeet,
 					min(if(lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
 					min(if(lasku.clearing = '', 'N', if(lasku.clearing = 'JT-TILAUS', 'J', if(lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,					
-					(select nimitys from varastopaikat where varastopaikat.tunnus=min(lasku.varasto)) varastonimi,
+					GROUP_CONCAT(DISTINCT varastopaikat.nimitys) varastonimi,
 					GROUP_CONCAT(lasku.pakkaamo order by lasku.tunnus) pakkaamot,
 					sum(rahtikirjat.kollit) kollit,					
 					count(distinct lasku.tunnus) tunnukset_lkm					
@@ -1059,6 +1059,7 @@
 					$joinmaksuehto
 					LEFT JOIN toimitustapa use index (selite_index) ON toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa
 					LEFT JOIN rahtikirjat use index (otsikko_index) ON rahtikirjat.otsikkonro=lasku.tunnus and rahtikirjat.yhtio=lasku.yhtio
+					LEFT JOIN varastopaikat on varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = '$tila'
 					and lasku.alatila = 'C'

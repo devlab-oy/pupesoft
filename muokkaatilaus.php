@@ -1094,20 +1094,22 @@
 							$ares = mysql_query($query_comments) or pupe_error($query_comments);
 							if (mysql_num_rows($ares) > 0) {	
 								$arow = mysql_fetch_array($ares);
-
-								//	Olisiko meillä kalenterissa kommentteja?
-								$query_comments = "	SELECT tunnus
-													FROM kalenteri
-													WHERE yhtio = '$kukarow[yhtio]'
-													AND tyyppi = 'Memo'
-													AND otunnus IN ($arow[0])";
-								$result_comments = mysql_query($query_comments) or pupe_error($query_comments);
-								//echo "$query_comments<br>";
-								$nums="";
-								if (mysql_num_rows($result_comments) > 0) {
-									$img = "info.png";
-									$linkkilisa = "onmouseover=\"popUp(event, 'asiakasmemo_$row[$i]', '0', '0', '{$palvelin2}crm/asiakasmemo.php?tee=NAYTAMUISTIOT&liitostunnus=$row[liitostunnus]&tunnusnippu=$row[tunnusnippu]', false, true); return false;\" onmouseout=\"popUp(event, 'asiakasmemo_$row[$i]'); return false;\"";
-								}							
+								
+								if($arow[0] != "") {
+									//	Olisiko meillä kalenterissa kommentteja?
+									$query_comments = "	SELECT tunnus
+														FROM kalenteri
+														WHERE yhtio = '$kukarow[yhtio]'
+														AND tyyppi = 'Memo'
+														AND otunnus IN ($arow[0])";
+									$result_comments = mysql_query($query_comments) or pupe_error($query_comments);
+									//echo "$query_comments<br>";
+									$nums="";
+									if (mysql_num_rows($result_comments) > 0) {
+										$img = "info.png";
+										$linkkilisa = "onmouseover=\"popUp(event, 'asiakasmemo_$row[$i]', '0', '0', '{$palvelin2}crm/asiakasmemo.php?tee=NAYTAMUISTIOT&liitostunnus=$row[liitostunnus]&tunnusnippu=$row[tunnusnippu]', false, true); return false;\" onmouseout=\"popUp(event, 'asiakasmemo_$row[$i]'); return false;\"";
+									}
+								}
 							}
 							
 							

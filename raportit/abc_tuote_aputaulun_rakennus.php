@@ -413,10 +413,11 @@ if ($tee == 'YHTEENVETO') {
 				and tyyppi = '$abcchar'";
 	$ires = mysql_query($query) or pupe_error($query);
 
-	// päivitetään ensiks kaikki osastot ja tuoteryhmät I-luokkaan ja käydään sitten päivittämässä niitä oikeisiin luokkiin
+	// päivitetään ensiks kaikki osastot, tuoteryhmät ja tuotemerkit I-luokkaan ja käydään sitten päivittämässä niitä oikeisiin luokkiin
 	$query = "	UPDATE abc_aputaulu SET
 				luokka_osasto = '$i_luokka',
-				luokka_try = '$i_luokka'
+				luokka_try = '$i_luokka',
+				luokka_tuotemerkki = '$i_luokka'
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tyyppi = '$abcchar'";
 	$ires = mysql_query($query) or pupe_error($query);
@@ -563,6 +564,77 @@ if ($tee == 'YHTEENVETO') {
 			}
 		}
 
+	}
+
+	// haetaan kaikki tuotemerkit
+	$query = "	SELECT DISTINCT tuotemerkki FROM abc_aputaulu USE INDEX (yhtio_tyyppi_tuotemerkki)
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tyyppi = '$abcchar'
+				ORDER BY tuotemerkki";
+	$kaikres = mysql_query($query) or pupe_error($query);
+
+	// tehdään try kohtaiset luokat
+	while ($arow = mysql_fetch_array($kaikres)) {
+
+		//haetaan luokan myynti yhteensä
+		$query = "	SELECT
+					sum(rivia) rivia,
+					sum(summa) summa,
+					sum(kpl)   kpl,
+					sum(kate)  kate
+					FROM abc_aputaulu use index (yhtio_tyyppi_tuotemerkki)
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi = '$abcchar'
+					and tuotemerkki = '$arow[tuotemerkki]'
+					and $abcwhat > 0";
+		$resi 	= mysql_query($query) or pupe_error($query);
+		$yhtrow = mysql_fetch_array($resi);
+
+		//rakennetaan aliluokat
+		$query = "	SELECT
+					rivia,
+					summa,
+					kate,
+					kpl,
+					tunnus
+					FROM abc_aputaulu use index (yhtio_tyyppi_tuotemerkki)
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi = '$abcchar'
+					and tuotemerkki = '$arow[tuotemerkki]'
+					and $abcwhat > 0
+					ORDER BY $abcwhat desc";
+		$res = mysql_query($query) or pupe_error($query);
+
+		$i			 = 0;
+		$ryhmaprossa = 0;
+
+		while ($row = mysql_fetch_array($res)) {
+
+			// tuotteen osuus yhteissummasta
+			if ($yhtrow["${abcwhat}"] != 0) $tuoteprossa = ($row["${abcwhat}"] / $yhtrow["${abcwhat}"]) * 100;
+			else $tuoteprossa = 0;
+
+			//muodostetaan ABC-luokka ryhmäprossan mukaan
+			$ryhmaprossa += $tuoteprossa;
+
+			$query = "	UPDATE abc_aputaulu
+						SET luokka_tuotemerkki = '$i'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tyyppi = '$abcchar'
+						and tunnus  = '$row[tunnus]'";
+			$insres = mysql_query($query) or pupe_error($query);
+
+			//luokka vaihtuu
+			if (round($ryhmaprossa,2) >= $ryhmaprossat[$i]) {
+				$ryhmaprossa = 0;
+				$i++;
+
+				// ei mennä ikinä tokavikaa-luokkaa pidemmälle
+				if ($i == $i_luokka) {
+					$i = $i_luokka-1;
+				}
+			}
+		}
 	}
 
 	$query = "OPTIMIZE table abc_aputaulu";

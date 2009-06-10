@@ -599,35 +599,44 @@ if ($tee == 'MONISTA') {
 				$updres  = mysql_query($kysely) or pupe_error($kysely);
 			}
 			
-			if($toim == "TARJOUS") {
+			if($toim == "TARJOUS" and $monistarow["jaksotettu"] > 0) {
+
 				// Oliko meillä maksusopparia?
 				$query = "	SELECT *
 							FROM maksupositio
 							WHERE yhtio = '$kukarow[yhtio]'
-							and otunnus = '$lasku'";
-				$copresult = mysql_query($query) or pupe_error($query);
-				if (mysql_num_rows($copresult) > 0) {
+							and otunnus = '$monistarow[jaksotettu]'";
+				$sompmonres = mysql_query($query) or pupe_error($query);
+				if (mysql_num_rows($sompmonres) > 0) {
+					
+					while($sopmonrow = mysql_fetch_array($sompmonres)) {
 
-					$fields = "yhtio";
-					$values = "'$kukarow[yhtio]'";
+						$fields = "yhtio";
+						$values = "'$kukarow[yhtio]'";
 
-					// Ei monisteta tunnusta
-					for($i=1; $i < mysql_num_fields($monistalisres)-1; $i++) { 
+						// Ei monisteta tunnusta
+						for($i=1; $i < mysql_num_fields($sompmonres)-1; $i++) { 
 
-						$fields .= ", ".mysql_field_name($monistalisres,$i);
+							$fields .= ", ".mysql_field_name($sompmonres,$i);
 
-						switch (mysql_field_name($monistalisres,$i)) {
-							case 'otunnus':
-								$values .= ", '$utunnus'";
-								break;
-							default:
-								$values .= ", '".$monistalisrow[$i]."'";
+							switch (mysql_field_name($sompmonres,$i)) {
+								case 'otunnus':
+									$values .= ", '$utunnus'";
+									break;
+								default:
+									$values .= ", '".$monistalisrow[$i]."'";
+							}
 						}
+
+						$kysely  = "INSERT into maksupositio ($fields) VALUES ($values)";
+						$insres3 = mysql_query($kysely) or pupe_error($kysely);
 					}
-
-					$kysely  = "INSERT into maksupositio ($fields) VALUES ($values)";
-					$insres3 = mysql_query($kysely) or pupe_error($kysely);
-
+					
+					//	Päivitetään jaksotettu myös laskulle
+					$kysely  = "UPDATE lasku SET 
+									jaksotettu = '$utunnus'
+								WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$utunnus'";
+					$updres  = mysql_query($kysely) or pupe_error($kysely);
 				}
 			}
 			

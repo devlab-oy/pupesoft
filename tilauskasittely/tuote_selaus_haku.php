@@ -147,7 +147,16 @@
 				</form>";
 		echo "</td></tr></table>";
 	}
-	elseif ($kukarow["kuka"] != "" and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "T" or $laskurow["tila"] == "A" or $laskurow["tila"] == "S"  or $laskurow["tila"] == "G")) {
+	elseif ($kukarow["kuka"] != "" and $laskurow["tila"] == "O") {
+
+		echo "	<form method='post' action='".$palvelin2."tilauskasittely/tilaus_osto.php'>
+				<input type='hidden' name='aktivoinnista' value='true'>
+				<input type='hidden' name='tee' value='AKTIVOI'>
+				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
+				<input type='submit' value='".t("Takaisin tilaukselle")."'>
+				</form><br><br>";
+	}
+	elseif ($kukarow["kuka"] != "" and $laskurow["tila"] != "" and $toim_kutsu != "") {
 
 		if ($kukarow["extranet"] != "") {
 			$toim_kutsu = "EXTRANET";
@@ -156,15 +165,6 @@
 		echo "	<form method='post' action='".$palvelin2."tilauskasittely/tilaus_myynti.php'>
 				<input type='hidden' name='toim' value='$toim_kutsu'>
 				<input type='hidden' name='aktivoinnista' value='true'>
-				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
-				<input type='submit' value='".t("Takaisin tilaukselle")."'>
-				</form><br><br>";
-	}
-	elseif ($kukarow["kuka"] != "" and $laskurow["tila"] == "O") {
-
-		echo "	<form method='post' action='".$palvelin2."tilauskasittely/tilaus_osto.php'>
-				<input type='hidden' name='aktivoinnista' value='true'>
-				<input type='hidden' name='tee' value='AKTIVOI'>
 				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
 				<input type='submit' value='".t("Takaisin tilaukselle")."'>
 				</form><br><br>";

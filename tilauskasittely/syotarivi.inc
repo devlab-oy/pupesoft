@@ -23,8 +23,8 @@
 		// Pikatilauksen syöttörivi
 		echo "<table><tr>$jarjlisa";
 				
-		if ($tila == "LISAARESEPTIIN") {
-			echo "<th align='left'>".t("Perhe")."</th>";
+		if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
+			echo "<th align='left'>".t("Reseptiin")."</th>";
 		}		
 				
 		echo "	<th align='left'>".t("Tuotenumero")."</th>
@@ -38,8 +38,14 @@
 		
 		echo "<tr>$jarjlisa";
 
+		if ($tila == "LISAAKERTARESEPTIIN") {
+			echo "<td valign='top' style='color: #00FF00;'>".t("Raaka-Aine")."</td>";
+		}
+		if ($tila == "LISAAISAKERTARESEPTIIN") {
+			echo "<td valign='top' style='color: #00FF00;'>".t("Valmiste")."</td>";
+		}
 		if ($tila == "LISAARESEPTIIN") {
-			echo "<td valign='top' style='color: #00FF00;'>$perheid $perheid2</td>";
+			echo "<td valign='top' style='color: #00FF00;'>".t("Tuote")."</td>";
 		}
 		
 		if ($ulos == '') {
@@ -125,7 +131,7 @@
 			
 		if ($rivitunnus!='' or $toim == "SIIRTOTYOMAARAYS") {	
 			
-			if ($tila == "LISAARESEPTIIN") {
+			if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
 				$colspan = '7';
 			}
 			else {
@@ -163,8 +169,13 @@
 	elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS" or $aputoim == "RIVISYOTTO" or $toim == "YLLAPITO" or $toim == "TARJOUS" or $toim == "REKLAMAATIO")) {
 		// Rivisyötön syöttörivi
 		echo "<table>
-				<tr>$jarjlisa
-				<th align='left'>".t("Tuoteno")."</th>
+				<tr>$jarjlisa";
+				
+		if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
+			echo "<th align='left'>".t("Reseptiin")."</th>";
+		}		
+					
+		echo "	<th align='left'>".t("Tuoteno")."</th>
 				<th align='left'>".t("Määrä")."</th>
 				<th align='left'>".t("Var")."</th>
 				<th align='left'>".t("Hinta")."</th>
@@ -173,14 +184,22 @@
 				<th align='left'>".t("Alv")."</th>";
 		
 		if ($yhtiorow['rivinumero_syotto'] != '') {
-			echo 	"<th align='left'></th>";
+			echo "<th align='left'></th>";
 		}
 		
-		echo	"<td valign='top' class='back'></td>
-				</tr>";
-
+		echo "<td valign='top' class='back'></td></tr>";
 
 		echo "<tr>$jarjlisa";
+
+		if ($tila == "LISAAKERTARESEPTIIN") {
+			echo "<td valign='top' style='color: #00FF00;'>".t("Raaka-Aine")."</td>";
+		}
+		if ($tila == "LISAAISAKERTARESEPTIIN") {
+			echo "<td valign='top' style='color: #00FF00;'>".t("Valmiste")."</td>";
+		}
+		if ($tila == "LISAARESEPTIIN") {
+			echo "<td valign='top' style='color: #00FF00;'>".t("Tuote")."</td>";
+		}
 
 		if ($ulos == '') {
 			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
@@ -189,8 +208,7 @@
 			echo "<td valign='top'>$ulos</td>";
 		}
 
-		echo "
-			<td valign='top'><input type='text' size='5' name='kpl' maxlength='13' value='$kpl'></td>";
+		echo "<td valign='top'><input type='text' size='5' name='kpl' maxlength='13' value='$kpl'></td>";
 
 		$selh = $selj = $selp = "";
 
@@ -251,8 +269,13 @@
 
 		echo "<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
-		echo "<tr>$jarjlisa
-				<th align='left'>".t("Keräysaika")."</th>
+		echo "<tr>$jarjlisa";
+		
+		if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
+			echo "<th></th>";
+		}
+		
+		echo "	<th align='left'>".t("Keräysaika")."</th>
 				<th align='left' colspan='2'>".t("Toimitusaika")."</th>
 				<th colspan='4' align='left'>".t("Kommentti")."</th>";
 		
@@ -260,9 +283,12 @@
 			echo "<th align='left'>".t("Rivinumero")."</th>";
 		}
 		
-		echo	"<td valign='top' class='back'></td>
-				</tr>";
+		echo "<td valign='top' class='back'></td></tr>";
 		echo "<tr>$jarjlisa";
+		
+		if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
+			echo "<td></td>";
+		}
 		
 		if ($toimaika == "" or $toimaika == "0000-00-00") {
 			$toimaika = $laskurow["toimaika"];
@@ -334,8 +360,8 @@
 		echo "<table>
 				<tr>$jarjlisa";
 
-		if ($tila == "LISAARESEPTIIN") {
-			echo "<th align='left'>".t("Perhe")."</th>";
+		if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
+			echo "<th align='left'>".t("Reseptiin")."</th>";
 		}
 
 		echo "	<th align='left'>".t("Tuoteno")."</th>
@@ -345,10 +371,16 @@
 
 		echo "<tr>$jarjlisa";
 
-		if ($tila == "LISAARESEPTIIN") {
-			echo "<td valign='top' style='color: #00FF00;'>$perheid $perheid2</td>";
+		if ($tila == "LISAAKERTARESEPTIIN") {
+			echo "<td valign='top' style='color: #00FF00;'>".t("Raaka-Aine")."</td>";
 		}
-
+		if ($tila == "LISAAISAKERTARESEPTIIN") {
+			echo "<td valign='top' style='color: #00FF00;'>".t("Valmiste")."</td>";
+		}
+		if ($tila == "LISAARESEPTIIN") {
+			echo "<td valign='top' style='color: #00FF00;'>".t("Tuote")."</td>";
+		}
+		
 		if ($ulos == '') {
 			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
 		}
@@ -363,7 +395,7 @@
 		
 		echo "<tr>$jarjlisa";
 		
-		if ($tila == "LISAARESEPTIIN") {
+		if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
 			echo "<th></th>";
 		}
 		
@@ -372,7 +404,7 @@
 				</tr>";
 		echo "<tr>$jarjlisa";
 		
-		if ($tila == "LISAARESEPTIIN") {
+		if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
 			echo "<td valign='top'></td>";
 		}
 
@@ -411,7 +443,7 @@
 		
 		echo "<tr>$jarjlisa";
 		
-		if ($tila == "LISAARESEPTIIN") {
+		if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
 			echo "<th></th>";
 		}
 		
@@ -420,7 +452,7 @@
 
 		echo "<tr>$jarjlisa";
 		
-		if ($tila == "LISAARESEPTIIN") {
+		if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
 			echo "<td valign='top'></td>";
 		}
 				

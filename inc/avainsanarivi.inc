@@ -29,8 +29,22 @@
 	
 	if (mysql_field_name($result, $i) == "laji") {
 		
-		if($lukitse_laji != "") {
-			$ulos = "<td><input type='hidden' name='$nimi' value='$lukitse_laji'>$lukitse_laji</td>";
+		if($lukitse_laji == "MEHTOTXT") {
+			
+			$ulos = "<td><select name='$nimi'>";
+			$ulos .= "<option value='MEHTOTXT_SE' {$avain_sel['MEHTOTXT_SE']}>				".t("Ruotsinkielinen maksuehdon teksti")."</option>";
+			$ulos .= "<option value='MEHTOTXT_EN' {$avain_sel['MEHTOTXT_EN']}>				".t("Englanninkielinen maksuehdon teksti")."</option>";
+			$ulos .= "<option value='MEHTOTXT_FR' {$avain_sel['MEHTOTXT_FR']}>				".t("Ranskankielinen maksuehdon teksti")."</option>";
+			$ulos .= "</select></td>";
+			$jatko = 0;
+		}
+		elseif($lukitse_laji == "MEHTOKATXT") {
+			
+			$ulos = "<td><select name='$nimi'>";
+			$ulos .= "<option value='MEHTOKATXT_SE' {$avain_sel['MEHTOTXT_SE']}>				".t("Ruotsinkielinen maksuehdon teksti")."</option>";
+			$ulos .= "<option value='MEHTOKATXT_EN' {$avain_sel['MEHTOTXT_EN']}>				".t("Englanninkielinen maksuehdon teksti")."</option>";
+			$ulos .= "<option value='MEHTOKATXT_FR' {$avain_sel['MEHTOTXT_FR']}>				".t("Ranskankielinen maksuehdon teksti")."</option>";
+			$ulos .= "</select></td>";
 			$jatko = 0;
 		}
 		else {
@@ -142,7 +156,6 @@
 			$ulos .= "<option value='TRIVITYYPPI' {$avain_sel['TRIVITYYPPI']}>				".t("Tilausrivin tyyppi")."</option>";
 			$ulos .= "<option value='LASKUTUS_SAATE' {$avain_sel['LASKUTUS_SAATE']}>		".t("Laskun sähköpostisaatekirje asiakkaalle")."</option>";
 			$ulos .= "<option value='TV_LISATIETO' {$avain_sel['TV_LISATIETO']}>			".t("Tilausvahvistuksen lisätiedot")."</option>";
-
 
 			$ulos .= "</select></td>";
 			$jatko = 0;

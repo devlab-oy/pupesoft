@@ -108,43 +108,73 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 		}
 	}
 	
+	$rivsum = 0;
+	$tilsum = 0;
+	$eursum = 0;
+	
 	while ($tulrow = mysql_fetch_array($result)) {
 		echo "<tr>";
 		echo "<td><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$tulrow[tunnus]&ytunnus=$ytunnus&suunta=$suunta'>$tulrow[tunnus]</a></td>";
 		echo "<td>$tulrow[ytunnus]</td>";
 		echo "<td>$tulrow[nimi]</td>";
 		echo "<td>".tv1dateconv($tulrow["toimaika"])."</td>";
-		echo "<td align='right'>$tulrow[maara]</td>";
-		echo "<td align='right'>$tulrow[tilattu]</td>";
-		echo "<td align='right'>$tulrow[arvo]</td>";
+		echo "<td align='right'>".sprintf("%.0f", $tulrow["maara"])."</td>";
+		echo "<td align='right'>".sprintf("%.2f", $tulrow["tilattu"])."</td>";
+		echo "<td align='right'>".sprintf("%.2f", $tulrow["arvo"])."</td>";
 		echo "<td>$tulrow[valkoodi]</td>";
 		echo "</tr>";
+				
+		$rivsum += $tulrow["maara"];
+		$tilsum += $tulrow["tilattu"];
+		$eursum += $tulrow["arvo"];
 		
 		if(isset($workbook)) {
 			$excelsarake = 0;
 
-			$worksheet->writeString($excelrivi, $excelsarake, $tulrow[tunnus], $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake, $tulrow["tunnus"]);
 			$excelsarake++;
-			$worksheet->writeString($excelrivi, $excelsarake, $tulrow[ytunnus], $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake, $tulrow["ytunnus"]);
 			$excelsarake++;
-			$worksheet->writeString($excelrivi, $excelsarake, $tulrow[nimi], $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake, $tulrow["nimi"]);
 			$excelsarake++;
-			$worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($tulrow["toimaika"]), $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($tulrow["toimaika"]));
 			$excelsarake++;
-			$worksheet->writeNumber($excelrivi, $excelsarake, $tulrow[maara], $format_bold);
+			$worksheet->writeNumber($excelrivi, $excelsarake, $tulrow["maara"]);
 			$excelsarake++;
-			$worksheet->writeNumber($excelrivi, $excelsarake, $tulrow[tilattu], $format_bold);
+			$worksheet->writeNumber($excelrivi, $excelsarake, $tulrow["tilattu"]);
 			$excelsarake++;
-			$worksheet->writeNumber($excelrivi, $excelsarake, $tulrow[arvo], $format_bold);
+			$worksheet->writeNumber($excelrivi, $excelsarake, $tulrow["arvo"]);
 			$excelsarake++;
-			$worksheet->writeString($excelrivi, $excelsarake, $tulrow[valkoodi], $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake, $tulrow["valkoodi"]);
 			
 			$excelsarake = 0;
 			$excelrivi++;
 		}
 	}
-
+	
+	echo "<tr>";
+	echo "<th colspan='4'>".t("Yhteensä").":</th>";
+	echo "<td class='tumma' align='right'>$rivsum</td>";
+	echo "<td class='tumma' align='right'>$tilsum</td>";
+	echo "<td class='tumma' align='right'>$eursum</td>";
+	echo "<th></th>";
+	echo "</tr>";
 	echo "</table>";
+	
+	if(isset($workbook)) {
+		$excelsarake = 0;
+
+		$excelsarake++;
+		$excelsarake++;
+		$excelsarake++;
+		$excelsarake++;
+		$worksheet->writeNumber($excelrivi, $excelsarake, $rivsum, $format_bold);
+		$excelsarake++;
+		$worksheet->writeNumber($excelrivi, $excelsarake, $tilsum, $format_bold);
+		$excelsarake++;
+		$worksheet->writeNumber($excelrivi, $excelsarake, $eursum, $format_bold);		
+		$excelrivi++;
+	}
 	
 	if(isset($workbook)) {
 

@@ -61,12 +61,12 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 				from tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 				JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 				where tilausrivi.yhtio	= '$kukarow[yhtio]' 
-				and tilausrivi.varattu 	> '0' 
+				and tilausrivi.varattu 	> 0 
 				and tilausrivi.tyyppi 	= 'L'
 				and tilausrivi.laskutettuaika = '0000-00-00' 
 				$lisa
 				group by 1,2,3,4
-				order by tilausrivi.toimaika  $suunta, lasku.nimi, tilausrivi.tuoteno";
+				order by tilausrivi.toimaika $suunta, lasku.nimi, tilausrivi.tuoteno";
 	$result = mysql_query($query) or pupe_error($query);
 	
 	if (($vain_excel != '' or $vain_excel_kaikki != '') and @include('Spreadsheet/Excel/Writer.php')) {

@@ -155,21 +155,6 @@
 					}
 				}
 				else {
-					/*
-					$query = "	SELECT count(*) kpl
-								FROM sarjanumeroseuranta
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tuoteno = '$toimrow[tuoteno]'
-								and myyntirivitunnus = '$toimrow[tunnus]'";
-					$sarjares2 = mysql_query($query) or pupe_error($query);
-					$sarjarow = mysql_fetch_array($sarjares2);
-
-					if ($sarjarow["kpl"] != 1) {
-						//echo "<font class='error'>".t("Er‰numeroseurannassa oleville tuotteille on liitett‰v‰ er‰numero ennen ker‰yst‰")."! ".t("Tuote").": $toimrow[tuoteno].</font><br>";
-						$keraysvirhe++;
-					}
-					*/
-
 					// Muutetaanko er‰seurattavan tuotteen kappalem‰‰r‰‰
 					if (trim($maara[$toimrow["tunnus"]]) != '') {
 
@@ -210,8 +195,7 @@
 						}
 					}
 
-					// P‰ivitet‰‰n er‰
-					
+					// P‰ivitet‰‰n er‰					
 					if ($era_new_paikka[$toimrow["tunnus"]] != $era_old_paikka[$toimrow["tunnus"]]) {
 
 						list($myy_hyllyalue, $myy_hyllynro, $myy_hyllyvali, $myy_hyllytaso, $myy_era) = explode("#", $era_new_paikka[$toimrow["tunnus"]]);
@@ -281,21 +265,21 @@
 										and tunnus		= '$toimrow[tunnus]'";
 							$lisa_res = mysql_query($query) or pupe_error($query);
 						}
-
-						//$keraysvirhe++;
 					}
-				
-					$query = "	SELECT count(*) kpl
-								FROM sarjanumeroseuranta
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tuoteno = '$toimrow[tuoteno]'
-								and myyntirivitunnus = '$toimrow[tunnus]'";
-					$sarjares2 = mysql_query($query) or pupe_error($query);
-					$sarjarow = mysql_fetch_array($sarjares2);
+					
+					if ($toimrow["varattu"] != 0) {
+						$query = "	SELECT count(*) kpl
+									FROM sarjanumeroseuranta
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tuoteno = '$toimrow[tuoteno]'
+									and myyntirivitunnus = '$toimrow[tunnus]'";
+						$sarjares2 = mysql_query($query) or pupe_error($query);
+						$sarjarow = mysql_fetch_array($sarjares2);
 
-					if ($sarjarow["kpl"] != 1) {
-						echo "<font class='error'>".t("Er‰numeroseurannassa oleville tuotteille on liitett‰v‰ er‰numero ennen ker‰yst‰")."! ".t("Tuote").": $toimrow[tuoteno].</font><br>";
-						$keraysvirhe++;
+						if ($sarjarow["kpl"] != 1) {
+							echo "<font class='error'>".t("Er‰numeroseurannassa oleville tuotteille on liitett‰v‰ er‰numero ennen ker‰yst‰")."! ".t("Tuote").": $toimrow[tuoteno].</font><br>";
+							$keraysvirhe++;
+						}
 					}
 				}
 			}

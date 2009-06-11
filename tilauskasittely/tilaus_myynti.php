@@ -483,8 +483,8 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS" and $muokkauslukko ==
 
 			//Nollataan sarjanumerolinkit
 			vapauta_sarjanumerot($toim, $row["tunnus"]);
-					}
-				}
+		}
+	}
 
 	$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -2475,20 +2475,21 @@ if ($tee == '') {
 					$myy_sarjatunnus = $sarjarow["tunnukset"];
 				}
 			}
-
-			// Poistetaan muokattava tilausrivi
-			$query = "	DELETE FROM tilausrivi
-						WHERE tunnus = '$rivitunnus'";
-			$result = mysql_query($query) or pupe_error($query);
+			
+			if ($tapa == "VAIHDA" and ($tilausrivi["sarjanumeroseuranta"] == "E" or $tilausrivi["sarjanumeroseuranta"] == "F" or $tilausrivi["sarjanumeroseuranta"] == "G")) {
+				// Nollataan sarjanumerolinkit
+				vapauta_sarjanumerot($toim, $kukarow["kesken"], " and tilausrivi.tunnus = '$rivitunnus' ");
+			}
 
 			// Poistetaan myös tuoteperheen lapset
 			if ($tapa != "VAIHDA") {
 				
-				// Nollataan sarjanumerolinkit ja dellataan ostorivit
-				vapauta_sarjanumerot($toim, $kukarow["kesken"], " and tilausrivi.perheid = '$rivitunnus' ");
+				// Nollataan sarjanumerolinkit lapsien ja isän ja dellataan ostorivit
+				vapauta_sarjanumerot($toim, $kukarow["kesken"], " and (tilausrivi.tunnus = '$rivitunnus' or tilausrivi.perheid = '$rivitunnus') ");
 				
 				$query = "	DELETE FROM tilausrivi
 							WHERE perheid 	= '$rivitunnus'
+							and tunnus	   != '$rivitunnus'
 							and otunnus		= '$kukarow[kesken]'
 							and yhtio		= '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
@@ -2502,10 +2503,16 @@ if ($tee == '') {
 				
 				$query = "	DELETE FROM tilausrivi
 							WHERE perheid2 	= '$rivitunnus'
+							and tunnus	   != '$rivitunnus'
 							and otunnus		= '$kukarow[kesken]'
 							and yhtio		= '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
+			
+			// Poistetaan muokattava tilausrivi
+			$query = "	DELETE FROM tilausrivi
+						WHERE tunnus = '$rivitunnus'";
+			$result = mysql_query($query) or pupe_error($query);
 
 			// Jos muokkaamme tilausrivin paikkaa ja se on speciaalikeissi, S,T,V niin laitetaan $paikka-muuttuja kuntoon
 			if ($tapa != "VAIHDA" and $tilausrivi["var"] == "S" and substr($paikka,0,3) != "@@@") {

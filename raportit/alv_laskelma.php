@@ -7,38 +7,56 @@
 			global $kukarow, $startmonth, $endmonth;
 
 			if ($tulos == '22' or $tulos == 'veronmaara' or $tulos == 'summa') {
-				$query = "SELECT group_concat(tilino) tilit
-						FROM tili
-						WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%$taso%'";
-				$tilires = mysql_query($query) or pupe_error($query);
-
-				$vero = 0.0;
-
-				$tilirow = mysql_fetch_array($tilires);
 				
-				$vainsuomi = '';
-				if ($taso == 'fi206') $vainsuomi = "JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.maa in ('FI', '')";
+				if ($taso == 'fi206') { 
+					$vainsuomi = "JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.maa in ('FI', '')";
+				}
+				else {
+					$vainsuomi = '';					
+				}
+								
+				if ($taso == 'fi209') {
+					$_209lisa 	 = " or alv_taso like '%fi200%' ";
+					$vainveroton = " and tiliointi.vero = 0 ";
+				}
+				else {
+					$_209lisa	 = "";
+					$vainveroton = '';	
+				}
+								
+				$query = "	SELECT ifnull(group_concat(if(alv_taso like '%fi200%', tilino, NULL)), '') tilit200, 
+							ifnull(group_concat(if(alv_taso not like '%fi200%', tilino, NULL)), '') tilitMUU
+							FROM tili
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and (alv_taso like '%$taso%' $_209lisa)";
+				$tilires = mysql_query($query) or pupe_error($query);
+				$tilirow = mysql_fetch_array($tilires);
+								
+				$vero = 0.0;
+								
+				if ($tilirow['tilit200'] != '' or $tilirow['tilitMUU'] != '') {
+					$query = "	SELECT sum(round(tiliointi.summa * if('$tulos'='22', 22, vero) / 100, 2)) veronmaara,
+								sum(tiliointi.summa) summa,
+					 			count(*) kpl
+								FROM tiliointi
+								$vainsuomi
+								WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+								AND korjattu = ''
+								AND (";
+								
+					if ($tilirow["tilit200"] != "") $query .= "	(tilino in ($tilirow[tilit200]) $vainveroton)";
+					if ($tilirow["tilit200"] != "" and $tilirow["tilitMUU"] != "") $query .= " or ";
+					if ($tilirow["tilitMUU"] != "") $query .= "	 tilino in ($tilirow[tilitMUU])";
 
-				if ($tilirow['tilit']!='') {
-					$query = "SELECT sum(round(tiliointi.summa * if('$tulos'='22',22,vero) / 100, 2)) veronmaara,
-							sum(tiliointi.summa) summa,
-					 		count(*) kpl
-							FROM tiliointi
-							$vainsuomi
-							WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-							AND korjattu = ''
-							AND tilino in ($tilirow[tilit])
-							AND tiliointi.tapvm >= '$startmonth'
-							AND tiliointi.tapvm <= '$endmonth'";
-
+					$query .= "	)
+								AND tiliointi.tapvm >= '$startmonth'
+								AND tiliointi.tapvm <= '$endmonth'";
 					$verores = mysql_query($query) or pupe_error($query);
 
 					while ($verorow = mysql_fetch_array ($verores)) {
-	//					echo "$verorow[veronmaara] $verorow[summa] $verorow[kpl] / ";
 						if ($tulos == '22') $tulos = 'veronmaara';
 						$vero += $verorow[$tulos];
 					}
-
 				}
 			}
 			else {
@@ -124,7 +142,8 @@
 
 			echo "<br><table>";
 			echo "<tr><th>Ilmoittava yritys</th><th>$uytunnus</th></tr>";
-			echo "<tr><th>Ilmoitettava kausi</th><th>$startmonth</th></tr>";
+			echo "<tr><th>Ilmoitettava kausi</th><th>".substr($startmonth,0,4)."/".substr($startmonth,5,2)."</th></tr>";
+			
 			if (basename($_SERVER["SCRIPT_FILENAME"]) == 'alv_laskelma.php') {
 				echo "<tr><th colspan='2'>Vero kotimaan myynnistä verokannoittain</th></tr>";
 				echo "<tr><td><a href = '?tee=erittele&ryhma=fi201&vv=$vv&kk=$kk'>201</a> 22% :n vero</td><td align='right'>".sprintf('%.2f',$fi201)."</td></tr>";
@@ -277,44 +296,42 @@
 	}
 
 	if (basename($_SERVER["SCRIPT_FILENAME"]) == 'alv_laskelma.php') {
+		
 		require("../inc/parametrit.inc");
-		if ($tee=='erittele') {
-			if (($ryhma == 'fi201') or ($ryhma == 'fi202') or ($ryhma == 'fi203'))
+		
+		if ($tee == 'erittele') {
+			
+			$alvv			= $vv;
+			$alvk			= $kk;
+			$alvp			= 0;
+			$tiliointilisa 	= '';
+			$alkupvm  		= date("Y-m-d", mktime(0, 0, 0, $alvk,   1, $alvv));
+			$loppupvm 		= date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
+			$vainveroton 	= "";
+			
+			if ($ryhma == 'fi201' or $ryhma == 'fi202' or $ryhma == 'fi203') {
 				$taso = 'fi200';
-			else
+			}
+			elseif ($ryhma == 'fi209') {
+				$taso = "fi209%' or alv_taso like '%fi200";
+				$vainveroton = " and tiliointi.vero = 0 ";
+			}
+			else {
 				$taso = $ryhma;
-
-			$query = "SELECT group_concat(tilino) tilit
-				FROM tili
-				WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%$taso'";
-
+			}
+			
+			$query = "	SELECT ifnull(group_concat(if(alv_taso like '%fi200%', tilino, NULL)), '') tilit200, 
+						ifnull(group_concat(if(alv_taso not like '%fi200%', tilino, NULL)), '') tilitMUU
+						FROM tili
+						WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%$taso'";
 			$tilires = mysql_query($query) or pupe_error($query);
 			$tilirow = mysql_fetch_array($tilires);
-			$tili= $tilirow['tilit'];
-
-			$alvv=$vv;
-			$alvk=$kk;
-			$alvp=0;
-			echo "<table>";
-			echo "<tr>";
-
-			$alkupvm  = date("Y-m-d", mktime(0, 0, 0, $alvk,   1, $alvv));
-			$loppupvm = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
-
-			if (($ryhma == 'fi201') or ($ryhma == 'fi202') or ($ryhma == 'fi203'))
-				$taso = 'fi200';
-			else
-				$taso = $ryhma;
+						
+			if ($tilirow['tilit200'] != '' or $tilirow['tilitMUU'] != '') {
 				
-			$tiliointilisa = '';
-			$query = "SELECT group_concat(tilino) tilit
-				FROM tili
-				WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%$taso%'";
-
-			$tilires = mysql_query($query) or pupe_error($query);
-			$tilirow = mysql_fetch_array($tilires);
-			if ($tilirow['tilit'] != '') {
-				$tiliointilisa= "and tiliointi.tilino in (".$tilirow['tilit'].")";
+				echo "<table>";
+				echo "<tr>";
+								
 				switch ($ryhma) {
 					case 'fi201' :
 						$tiliointilisa .= " and tiliointi.vero = '22' ";
@@ -326,132 +343,140 @@
 						$tiliointilisa .= " and tiliointi.vero = '8' ";
 						break;
 				}
-			}
-			if ($ryhma == 'fi206') $tiliointilisa .= " and tiliointi.vero > 0 ";
+						
+				if ($ryhma == 'fi206') $tiliointilisa .= " and tiliointi.vero > 0 ";
 
-			echo "<br><font class='head'>".t("Arvonlisäveroerittely kaudelta")." $alvv-$alvk</font><hr>";
+				echo "<br><font class='head'>".t("Arvonlisäveroerittely kaudelta")." $alvv-$alvk</font><hr>";
 
-			$query = "	SELECT if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
-						if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
-						tiliointi.vero,
-						tiliointi.tilino,
-						tili.nimi,
-						sum(round(tiliointi.summa * (1 + tiliointi.vero / 100), 2)) bruttosumma,
-						sum(round(tiliointi.summa * if ('$ryhma'='fi205', 0.22, tiliointi.vero / 100), 2)) verot,
-						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100), 2)) bruttosumma_valuutassa,
-						sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) verot_valuutassa,
-						count(*) kpl
-						FROM tiliointi
-						LEFT JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
-						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
-						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-						AND tiliointi.korjattu = ''
-						AND tiliointi.tapvm >= '$alkupvm'
-						AND tiliointi.tapvm <= '$loppupvm'
-						$tiliointilisa
-						GROUP BY maa, valuutta, vero, tilino, nimi
-						ORDER BY maa, valuutta, vero, tilino, nimi";
-			$result = mysql_query($query) or pupe_error($query);
+				$query = "	SELECT if(lasku.maa = '', '$yhtiorow[maa]', lasku.maa) maa,
+							if(lasku.valkoodi = '', '$yhtiorow[valkoodi]', lasku.valkoodi) valuutta,
+							tiliointi.vero,
+							tiliointi.tilino,
+							tili.nimi,
+							sum(round(tiliointi.summa * (1 + tiliointi.vero / 100), 2)) bruttosumma,
+							sum(round(tiliointi.summa * if ('$ryhma'='fi205', 0.22, tiliointi.vero / 100), 2)) verot,
+							sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100), 2)) bruttosumma_valuutassa,
+							sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) verot_valuutassa,
+							count(*) kpl
+							FROM tiliointi
+							LEFT JOIN lasku ON (lasku.yhtio = tiliointi.yhtio AND lasku.tunnus = tiliointi.ltunnus)
+							LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio AND tiliointi.tilino = tili.tilino)
+							WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+							AND tiliointi.korjattu = ''
+							AND tiliointi.tapvm >= '$alkupvm'
+							AND tiliointi.tapvm <= '$loppupvm'
+							$tiliointilisa
+							AND (";
+						
+				if ($tilirow["tilit200"] != "") $query .= "	(tiliointi.tilino in ($tilirow[tilit200]) $vainveroton)";
+				if ($tilirow["tilit200"] != "" and $tilirow["tilitMUU"] != "") $query .= " or ";
+				if ($tilirow["tilitMUU"] != "") $query .= " tiliointi.tilino in ($tilirow[tilitMUU])";
 
-			echo "<table><tr>";
-			echo "<th valign='top'>" . t("Maa") . "</th>";
-			echo "<th valign='top'>" . t("Val") . "</th>";
-			echo "<th valign='top'>" . t("Vero") . "</th>";
-			echo "<th valign='top'>" . t("Tili") . "</th>";
-			echo "<th valign='top'>" . t("Nimi") . "</th>";
-			echo "<th valign='top'>" . t("Verollinen summa") . "</th>";
-			echo "<th valign='top'>" . t("Verot") . "</th>";
-			echo "<th valign='top'>" . t("Verollinen summa valuutassa") . "</th>";
-			echo "<th valign='top'>" . t("Verot valuutassa") . "</th>";
-			echo "<th valign='top'>" . t("Kpl") . "</th>";
-			echo "</tr>";
-
-			$verosum = 0.0;
-			$kplsum  = 0;
-			$verotot = 0.0;
-			$kpltot  = 0;
-			$kantasum = 0.0;
-			$kantatot = 0.0;
-
-			while ($trow = mysql_fetch_array ($result)) {
-
-				if (isset($edvero) and ($edvero != $trow["vero"] or $edmaa != $trow["maa"])) { // Vaihtuiko verokanta?
-					echo "<tr>
-							<td colspan='5' align='right'>".t("Yhteensä").":</td>
-							<td align = 'right'>".sprintf('%.2f', $kantasum)."</td>
-							<td align = 'right'>".sprintf('%.2f', $verosum)."</td>
-							<td colspan='2'></td>
-							<td align = 'right'>$kplsum</td></tr>";
-
-					$verosum 	= 0.0;
-					$kplsum 	= 0;
-					$kantasum	= 0.0;
-				}
-
-				echo "<tr>";
-				echo "<td valign='top'>$trow[maa]</td>";
-				echo "<td valign='top'>$trow[valuutta]</td>";
-				echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
-				
-				if ($trow['kpl'] > 1000)
-					echo "<td valign='top'>$trow[tilino]</td>";
-				else
-					echo "<td valign='top'><a href='../raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk'>$trow[tilino]</a></td>";
-
-				echo "<td valign='top'>$trow[nimi]</td>";
-				echo "<td valign='top' align='right' nowrap>$trow[bruttosumma]</td>";
-				echo "<td valign='top' align='right' nowrap>$trow[verot]</td>";
-
-				if (strtoupper($trow["maa"]) != strtoupper($yhtiorow["maa"])) {
-					echo "<td valign='top' align='right' nowrap>$trow[bruttosumma_valuutassa]</td>";
-					echo "<td valign='top' align='right' nowrap>$trow[verot_valuutassa]</td>";
-				}
-				else {
-					echo "<td valign='top' align='right'></td>";
-					echo "<td valign='top' align='right'></td>";
-				}
-
-				echo "<td valign='top' align='right' nowrap>$trow[kpl]</td>";
+				$query .= "	)
+							GROUP BY maa, valuutta, vero, tilino, nimi
+							ORDER BY maa, valuutta, vero, tilino, nimi";
+				$result = mysql_query($query) or pupe_error($query);
+													
+				echo "<table><tr>";
+				echo "<th valign='top'>" . t("Maa") . "</th>";
+				echo "<th valign='top'>" . t("Val") . "</th>";
+				echo "<th valign='top'>" . t("Vero") . "</th>";
+				echo "<th valign='top'>" . t("Tili") . "</th>";
+				echo "<th valign='top'>" . t("Nimi") . "</th>";
+				echo "<th valign='top'>" . t("Verollinen summa") . "</th>";
+				echo "<th valign='top'>" . t("Verot") . "</th>";
+				echo "<th valign='top'>" . t("Verollinen summa valuutassa") . "</th>";
+				echo "<th valign='top'>" . t("Verot valuutassa") . "</th>";
+				echo "<th valign='top'>" . t("Kpl") . "</th>";
 				echo "</tr>";
 
-				$verosum += $trow['verot'];
-				$kplsum  += $trow['kpl'];
-				$verotot += $trow['verot'];
-				$kpltot  += $trow['kpl'];
-				$kantasum += $trow['bruttosumma'];
-				$kantatot += $trow['bruttosumma'];
-				$edvero = $trow["vero"];
-				$edmaa 	= $trow["maa"];
-			}
-			echo "<tr><td colspan='5' align='right'>".t("Yhteensä").":</td><td align = 'right'>".sprintf('%.2f', $kantasum)."</td><td align = 'right'>".sprintf('%.2f', $verosum)."</td><td colspan='2'></td><td align = 'right'>$kplsum</td></tr>";
+				$verosum = 0.0;
+				$kplsum  = 0;
+				$verotot = 0.0;
+				$kpltot  = 0;
+				$kantasum = 0.0;
+				$kantatot = 0.0;
 
-			if ($ryhma=='fi206') {
-				$query = "SELECT group_concat(tilino) tilit
-					FROM tili
-					WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%fi205%'";
-				$tilires = mysql_query($query) or pupe_error($query);
-				$tilirow = mysql_fetch_array($tilires);
-				$vero = 0.0;
-				if ($tilirow['tilit']!='') {
-					$query = "SELECT sum(round(summa * 0.22, 2)) veronmaara
-							FROM tiliointi
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND korjattu = ''
-							AND tilino in ($tilirow[tilit])
-							AND tapvm >= '$alkupvm'
-							AND tapvm <= '$loppupvm'";
-					$verores = mysql_query($query) or pupe_error($query);
+				while ($trow = mysql_fetch_array ($result)) {
 
-					while ($verorow = mysql_fetch_array ($verores)) {
-						$vero += $verorow['veronmaara'];
+					if (isset($edvero) and ($edvero != $trow["vero"] or $edmaa != $trow["maa"])) { // Vaihtuiko verokanta?
+						echo "<tr>
+								<td colspan='5' align='right'>".t("Yhteensä").":</td>
+								<td align = 'right'>".sprintf('%.2f', $kantasum)."</td>
+								<td align = 'right'>".sprintf('%.2f', $verosum)."</td>
+								<td colspan='2'></td>
+								<td align = 'right'>$kplsum</td></tr>";
+
+						$verosum 	= 0.0;
+						$kplsum 	= 0;
+						$kantasum	= 0.0;
 					}
-				echo "<tr><td colspan='5' align='right'>".t("Vero tavaraostoista muista EU-maista").":</td><td></td><td align = 'right'>".sprintf('%.2f', $vero)."</td><td colspan='2'></td><td></td></tr>";
-				$verotot+=$vero;
-				}
-			}
-			echo "<tr><td colspan='5' align='right'>".t("Verokannat yhteensä").":</td><td align = 'right'>".sprintf('%.2f', $kantatot)."</td><td align = 'right'>".sprintf('%.2f', $verotot)."</td><td colspan='2'></td><td align = 'right'>$kpltot</td></tr>";
 
-			echo "</table><br>";
+					echo "<tr>";
+					echo "<td valign='top'>$trow[maa]</td>";
+					echo "<td valign='top'>$trow[valuutta]</td>";
+					echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
+				
+					if ($trow['kpl'] > 1000)
+						echo "<td valign='top'>$trow[tilino]</td>";
+					else
+						echo "<td valign='top'><a href='../raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk'>$trow[tilino]</a></td>";
+
+					echo "<td valign='top'>$trow[nimi]</td>";
+					echo "<td valign='top' align='right' nowrap>$trow[bruttosumma]</td>";
+					echo "<td valign='top' align='right' nowrap>$trow[verot]</td>";
+
+					if (strtoupper($trow["maa"]) != strtoupper($yhtiorow["maa"])) {
+						echo "<td valign='top' align='right' nowrap>$trow[bruttosumma_valuutassa]</td>";
+						echo "<td valign='top' align='right' nowrap>$trow[verot_valuutassa]</td>";
+					}
+					else {
+						echo "<td valign='top' align='right'></td>";
+						echo "<td valign='top' align='right'></td>";
+					}
+
+					echo "<td valign='top' align='right' nowrap>$trow[kpl]</td>";
+					echo "</tr>";
+
+					$verosum += $trow['verot'];
+					$kplsum  += $trow['kpl'];
+					$verotot += $trow['verot'];
+					$kpltot  += $trow['kpl'];
+					$kantasum += $trow['bruttosumma'];
+					$kantatot += $trow['bruttosumma'];
+					$edvero = $trow["vero"];
+					$edmaa 	= $trow["maa"];
+				}
+				echo "<tr><td colspan='5' align='right'>".t("Yhteensä").":</td><td align = 'right'>".sprintf('%.2f', $kantasum)."</td><td align = 'right'>".sprintf('%.2f', $verosum)."</td><td colspan='2'></td><td align = 'right'>$kplsum</td></tr>";
+
+				if ($ryhma=='fi206') {
+					$query = "SELECT group_concat(tilino) tilit
+						FROM tili
+						WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%fi205%'";
+					$tilires = mysql_query($query) or pupe_error($query);
+					$tilirow = mysql_fetch_array($tilires);
+					$vero = 0.0;
+					if ($tilirow['tilit']!='') {
+						$query = "SELECT sum(round(summa * 0.22, 2)) veronmaara
+								FROM tiliointi
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND korjattu = ''
+								AND tilino in ($tilirow[tilit])
+								AND tapvm >= '$alkupvm'
+								AND tapvm <= '$loppupvm'";
+						$verores = mysql_query($query) or pupe_error($query);
+
+						while ($verorow = mysql_fetch_array ($verores)) {
+							$vero += $verorow['veronmaara'];
+						}
+					echo "<tr><td colspan='5' align='right'>".t("Vero tavaraostoista muista EU-maista").":</td><td></td><td align = 'right'>".sprintf('%.2f', $vero)."</td><td colspan='2'></td><td></td></tr>";
+					$verotot+=$vero;
+					}
+				}
+				echo "<tr><td colspan='5' align='right'>".t("Verokannat yhteensä").":</td><td align = 'right'>".sprintf('%.2f', $kantatot)."</td><td align = 'right'>".sprintf('%.2f', $verotot)."</td><td colspan='2'></td><td align = 'right'>$kpltot</td></tr>";
+
+				echo "</table><br>";
+			}
 		}
 		
 		alvlaskelma($kk, $vv);

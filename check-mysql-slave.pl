@@ -15,13 +15,13 @@ $sth->execute();
 $result = $sth->fetchrow_hashref();
 
 if ($result->{Seconds_Behind_Master} eq "") {
-        print "ERROR: MySQL replikointi on jotenkin rikki, Seconds_Behind_Master parametriä ei löydy! SHOW SLAVE STATUS:\n";
-        print Dumper($result);
+	print "ERROR: MySQL replikointi on jotenkin rikki, Seconds_Behind_Master parametriä ei löydy! SHOW SLAVE STATUS:\n";
+	print Dumper($result);
 }
 
 if ($result->{Seconds_Behind_Master} >= $limit) {
-        $minutes = $result->{Seconds_Behind_Master} / 60;
-        printf("ERROR: MySQL Slave on %i minuuttia jäljessä Master Serveriä!\n", $minutes);
+	$minutes = $result->{Seconds_Behind_Master} / 60;
+	printf("ERROR: MySQL Slave on %i minuuttia jäljessä Master Serveriä!\n", $minutes);
 }
 
 exit;

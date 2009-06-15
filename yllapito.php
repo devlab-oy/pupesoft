@@ -1197,6 +1197,7 @@
 			$toim == "varaston_tulostimet" or
 			$toim == "pakkaamo" or
 			$toim == "autodata_tuote" or
+			$toim == "extranet_kayttajan_lisatiedot" or
 			($toim == "tuote" and $sdtchk == "OK") or
 			($toim == "toimi" and $kukarow["taso"] == "3")) {
 

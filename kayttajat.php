@@ -1038,7 +1038,7 @@
 				if (mysql_num_rows($res) > 0) {
 					require ("inc/extranet_kayttajan_lisatiedot.inc");
 					echo "<td class='back'>";
-					echo "<iframe id='extranet_lisatiedot_iframe' name='extranet_lisatiedot_iframe' src='yllapito.php?toim=extranet_kayttajan_lisatiedot&from=yllapito&liitostunnus=$selkuka&ohje=off&haku[4]=$selkuka&lukitse_avaimeen=$lukitse_avaimeen' style='height: 100%; width: 700px; border: 0px; display: inline;' scrolling='yes' border='0' frameborder='0'></iFrame>";
+					echo "<iframe id='extranet_lisatiedot_iframe' name='extranet_lisatiedot_iframe' src='yllapito.php?toim=extranet_kayttajan_lisatiedot&from=yllapito&liitostunnus=$selkuka&ohje=off&haku[4]=$selkuka&lukitse_avaimeen=$lukitse_avaimeen' style='height: 700px; width: 700px; border: 0px; display: inline;' scrolling='yes' border='0' frameborder='0'></iFrame>";
 					echo "</td>";
 				}
 				echo "</tr>";

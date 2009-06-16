@@ -424,14 +424,10 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			$charset = "iso-8859-1";
 		}
 
-		if(!headers_sent()) {
+		if (!headers_sent()) {
 			header("Content-Type: text/html; charset=$charset");
 		}
-
-		if($verkkokauppa != "") {
-			echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
-		}
-
+		
 		if ($_GET["no_head"] != "yes") {
 
 			echo "<html>";

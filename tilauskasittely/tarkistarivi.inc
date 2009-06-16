@@ -6,7 +6,7 @@
 	$saako_jalkitoimittaa 	= 0;
 	$varaosavirhe 			= "";
 
-	$tquery	= "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
+	$tquery	= "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
 	$tres	= mysql_query($tquery) or pupe_error($tquery);
 	$trow 	= mysql_fetch_array($tres); // haetaan tuotteen tiedot..
 
@@ -472,7 +472,7 @@
 				}
 
 				if ($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Y" or ($yhtiorow["tee_osto_myyntitilaukselta"] == "W" and $suoratoim_tuote_row["suoratoimitus"] != '')) {
-					
+														
 					if ($row["toimittajan_tunnus"] == $krow["liitostunnus"] and $row["hyllyalue"] == "" and $row["hyllynro"] == "") {
 						if ($row["var"] == 'T' or ($row["var"] == "J" and $row["suoraan_laskutukseen"] == "")) {
 							$sel1 = "SELECTED";

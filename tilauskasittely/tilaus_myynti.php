@@ -2594,7 +2594,12 @@ if ($tee == '') {
 				$perheid2 = "W";
 			}
 						
-			if ($tilausrivi['hinta'] == '0.00') $hinta = '';
+			if ($tilausrivi['hinta'] == '0.00') $hinta = '';			
+			
+			// Tehdaslisävarusteperhe-keississä muistetaan myös valittu paikka
+			if ($tapa != "VAIHDA" and $perheid2 > 0 and $hyllyalue != '') {
+				$paikka = $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;								
+			}
 
 			if ($tapa == "MUOKKAA") {
 				$var	= $tilausrivi["var"];
@@ -2610,7 +2615,7 @@ if ($tee == '') {
 				$var 		= "J";
 
 				if ($hyllyalue != '') {
-					$paikka		= $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
+					$paikka	= $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
 				}
 
 				$tila		= "";
@@ -2619,7 +2624,7 @@ if ($tee == '') {
 				$var 		= "P";
 
 				if ($hyllyalue != '') {
-					$paikka		= $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
+					$paikka	= $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
 				}
 
 				$tila		= "";
@@ -2730,7 +2735,7 @@ if ($tee == '') {
 		$kayttajan_alv		= $alv;
 		$kayttajan_paikka	= $paikka;
 		$lisatty 			= 0;
-
+				
 		// Valmistuksissa haetaan perheiden perheitä mukaan valmistukseen!!!!!!
 		if ($laskurow['tila'] == 'V' and $var != "W" and $yhtiorow["rekursiiviset_reseptit"] == "Y") {
 
@@ -2841,16 +2846,15 @@ if ($tee == '') {
 				}
 				elseif ($kukarow['extranet'] != '' and $trow['hinnastoon'] == 'V') {
 					//	katsotaan löytyyko asiakasalennus / asikakashinta						
-						$hinnat = alehinta($laskurow, $trow, 1, '', '', '',"hintaperuste,aleperuste");
-						
-						if (($hinnat["hintaperuste"] < 2 or $hinnat["hintaperuste"] > 12) and ($hinnat["aleperuste"] < 5 or $hinnat["aleperuste"] > 8)) {
-							$varaosavirhe .= t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
-							$trow 	 = "";
-							$tuoteno = "";
-							$kpl	 = 0;
-							$kielletty++;
-			}
-
+					$hinnat = alehinta($laskurow, $trow, 1, '', '', '',"hintaperuste,aleperuste");
+					
+					if (($hinnat["hintaperuste"] < 2 or $hinnat["hintaperuste"] > 12) and ($hinnat["aleperuste"] < 5 or $hinnat["aleperuste"] > 8)) {
+						$varaosavirhe .= t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
+						$trow 	 = "";
+						$tuoteno = "";
+						$kpl	 = 0;
+						$kielletty++;
+					}
 				}
 			}
 			elseif ($kukarow["extranet"] != '') {
@@ -2972,7 +2976,21 @@ if ($tee == '') {
 						perheid2	= '$perheid2'
 						where yhtio = '$kukarow[yhtio]'
 						and tunnus 	= '$perheid2'";
-			$updres = mysql_query($query) or pupe_error($query);
+			$updres = mysql_query($query) or pupe_error($query);		
+		}
+		
+		if ($tapa == "VAIHDA" and $perheid2 > 0 and $kayttajan_paikka != "" and substr($kayttajan_paikka,0,3) != "¡¡¡" and substr($kayttajan_paikka,0,3) != "!!!") {
+			//Päivitetään tehdaslisävarusteille kanssa sama varastopaikka kuin isätuotteelle
+			$p2paikka = explode("#", $kayttajan_paikka);
+			
+			$query = "	UPDATE tilausrivi set
+						hyllyalue = '$p2paikka[0]',
+						hyllynro = '$p2paikka[1]',
+						hyllyvali = '$p2paikka[2]',
+						hyllytaso = '$p2paikka[3]'
+						where yhtio  = '$kukarow[yhtio]'
+						and perheid2 = '$perheid2'";
+			$updres = mysql_query($query) or pupe_error($query);			
 		}
 
 		unset($ale);

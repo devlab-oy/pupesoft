@@ -519,9 +519,9 @@
 
 					if ($lisaarivi_debug==1) echo "Saldo_myytävissä funktio sanoo $tuoteno: $zrow[hyllyalue], $zrow[hyllynro], $zrow[hyllyvali], $zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta (Erä: $zrow[era]) PVM: $saldoaikalisa<br>";
 
-					//Tutkitaan myydäänkö tiettyä jo varattua lisävarustetta
+					// Tutkitaan myydäänkö tiettyä jo varattua lisävarustetta, silloin annetaan AINA riittävä saldo
 					if ($perheid2 > 0 and $perheid2!=$rivitunnus and strtoupper($zrow["hyllyalue"]."#".$zrow["hyllynro"]."#".$zrow["hyllyvali"]."#".$zrow["hyllytaso"]) == strtoupper($paikka)) {
-						$myytavissa += $toimittamatta;
+						$myytavissa = $toimittamatta;								
 					}
 
 					// hoidetaan pois problematiikka jos meillä on orpoja (tuotepaikattomia) tuotteita varaamassa saldoa
@@ -1524,7 +1524,7 @@
 				$p_hyllyalue	= $paikat[0];
 				$p_hyllynro		= $paikat[1];
 				$p_hyllyvali	= $paikat[2];
-				$p_hyllytaso	= $paikat[3];
+				$p_hyllytaso	= $paikat[3];							
 			}
 			else {
 				// haetaan vielä tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa
@@ -1677,7 +1677,7 @@
 			}
 			$result = mysql_query($query) or die($query);
 			$lisatty_tun = mysql_insert_id();
-
+						
 			@include("trivityyppivalinta.inc");
 
 			$query  = "	SELECT *

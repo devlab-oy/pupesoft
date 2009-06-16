@@ -517,7 +517,7 @@
 					}
 
 					// jos ollaan ajettu tälle päivälle voidaan echota errori avoimesta saldosta
-					if ($onkotanaan == "" and $trow["tiliointiavoinsaldo"] != $trow["laskuavoinsaldo"]) {
+					if ($onkotanaan == "" and abs($trow["tiliointiavoinsaldo"] - $trow["laskuavoinsaldo"]) >=0.05) {
 						echo "<td class='back' nowrap><font class='error'>VIRHE: Lasku / Kirjanpito avoimet summat heittävät!</font> ($trow[laskuavoinsaldo] / <a href='muutosite.php?tee=E&tunnus=$trow[laskutunnus]'>$trow[tiliointiavoinsaldo]</a>)</td>";
 					}
 

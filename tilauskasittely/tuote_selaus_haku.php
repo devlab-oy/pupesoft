@@ -1323,8 +1323,8 @@
 
 				// Peek ahead
 				$row_seuraava = next($rows);
-
-				if ($row["tuoteperhe"] == $row["tuoteno"] and $row["tuoteperhe"] != $row_seuraava["tuoteperhe"]) {
+				
+				if ($row["tuoteperhe"] == $row["tuoteno"] and $row["tuoteperhe"] != $row_seuraava["tuoteperhe"] and $row_seuraava["tuoteperhe"] != "") {
 					$classleft = "";
 					$classmidl = "";
 					$classrigh = "";
@@ -1349,7 +1349,7 @@
 					$classmidl = "";
 					$classrigh = "";
 				}
-
+				
 				$linkkilisa = "";
 
 				//	Liitet‰‰n originaalitietoja
@@ -1483,7 +1483,7 @@
 
 				$edtuoteno = $row["korvaavat"];
 
-				if ($row["tuoteperhe"] == $row["tuoteno"]) {
+				if ($row["tuoteperhe"] == $row["tuoteno"] and $row["sarjanumeroseuranta"] != "S") {
 					// Tuoteperheen is‰
 					if ($kukarow["extranet"] != "") {
 						$saldot = tuoteperhe_myytavissa($row["tuoteno"], "KAIKKI", "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);

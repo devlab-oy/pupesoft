@@ -190,10 +190,17 @@
 				$kerayslistatunnus = 0;
 			}
 
+			$ei_pakkaamoa_lisaviesti = '';
+
+			if ($ei_pakkaamoa_selected == 'checked' and $ei_pakkaamoa == '') {
+				$ei_pakkaamoa_lisaviesti = ", sisviesti2 = concat(sisviesti2, ' $kukarow[kuka] ".t("halusi tilauksen pakkaamolokeroihin")." ".tv1dateconv(date("Y-m-d H:i:s"))."')";
+			}
+
 			$query = "	UPDATE lasku SET
 						tila = 'L',
 						lahetepvm = now(),
 						kerayslista = '$kerayslistatunnus'
+						$ei_pakkaamoa_lisaviesti
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus in ($tilausnumeroita)";
 			$result = mysql_query($query) or pupe_error($query);

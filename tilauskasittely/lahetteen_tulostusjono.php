@@ -339,8 +339,8 @@
 
 					echo "<tr>";
 					echo "<th>",t("Ei lokeroa"),"</th>";
-					echo "<td valign='top'><input type='checkbox' name='ei_pakkaamoa' id='ei_pakkaamoa' value='EI'";
-
+					
+					$ei_pakkaamoa_sel = '';
 					if ($tila == 'N' or ($toim == 'SIIRTOLISTA' and $tila == "G")) {
 						
 						if (mysql_num_rows($tilre) > 0) {
@@ -357,10 +357,13 @@
 						$ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
 						
 						if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1' or $tilrow["t_tyyppi"] == "E") {
-							echo " checked";
+							$ei_pakkaamoa_sel = "checked";
 						}
 					}
-					echo "></td>";
+
+					echo "<td valign='top'><input type='checkbox' name='ei_pakkaamoa' id='ei_pakkaamoa' value='EI' $ei_pakkaamoa_sel>";
+					echo "<input type='hidden' name='ei_pakkaamoa_selected' id='ei_pakkaamoa_selected' value='$ei_pakkaamoa_sel'>";
+					echo "</td>";
 					echo "</tr>";				
 				}
 				
@@ -669,7 +672,7 @@
 					count(distinct otunnus) tilauksia, 
 					count(*) riveja,					
 					group_concat(DISTINCT concat_ws('\n\n', if(comments!='',concat('".t("Lähetteen lisätiedot").":\n',comments),NULL), if(sisviesti2!='',concat('".t("Keräyslistan lisätiedot").":\n',sisviesti2),NULL)) SEPARATOR '\n') ohjeet,					
-					GROUP_CONCAT(if(kommentti='',NULL,kommentti) separator '<br>') AS kommentit,
+					GROUP_CONCAT(DISTINCT if(kommentti='',NULL,kommentti) separator '\n') AS kommentit,
 					lasku.mapvm				
 					FROM lasku
 					JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus
@@ -739,12 +742,12 @@
 					echo "<div id='$tilrow[otunnus]' class='popup' style='width:500px;'>";
 					if (trim($tilrow["ohjeet"]) != "") {
 						echo t("Lisätiedot").":<br>";
-						echo $tilrow["ohjeet"];
+						echo str_replace("\n", "<br>", $tilrow["ohjeet"]);
 						echo "<br>";
 					}
 					if (trim($tilrow['kommentit'] != '')) {
 						echo t("Rivikommentit").":<br>";
-						echo $tilrow["kommentit"];
+						echo str_replace("\n", "<br>", $tilrow["kommentit"]);
 						echo "<br>";
 					}
 					echo "</div>";
@@ -832,7 +835,7 @@
 
 					if ($yhtiorow["pakkaamolokerot"] == "K") {
 
-						echo "<$ero valign='top'><input type='checkbox' name='ei_pakkaamoa' id='ei_pakkaamoa' value='$tilaus'";
+						$ei_pakkaamoa_sel = '';
 
 						if ($tila == 'N' or ($toim == 'SIIRTOLISTA' and $tila == "G")) {
 							$query = "	SELECT ei_pakkaamoa	
@@ -844,10 +847,12 @@
 							$ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
 
 							if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1' or $tilrow["t_tyyppi"] == "E") {
-								echo " checked";
+								$ei_pakkaamoa_sel = "checked";
 							}
 						}
-						echo "></$ero>";				
+						echo "<$ero valign='top'><input type='checkbox' name='ei_pakkaamoa' id='ei_pakkaamoa' value='$tilaus' $ei_pakkaamoa_sel>";
+						echo "<input type='hidden' name='ei_pakkaamoa_selected' id='ei_pakkaamoa_selected' value='$ei_pakkaamoa_sel'>";
+						echo "</$ero>";
 					}
 
 					$query = "	SELECT *

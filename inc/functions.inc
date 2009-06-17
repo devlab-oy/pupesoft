@@ -6416,18 +6416,20 @@ if(!function_exists("nayta_asiakashaku")) {
 }
 
 if(!function_exists("sendSMS")) {
-	function sendSMS($smsnumero, $smsviesti) {
+	function sendSMS($smsnumero, $smsviesti, $animi = "") {
 		global $sms_palvelin, $sms_user, $sms_pass;
 
 		if($sms_palvelin != "" and $sms_user != "" and $sms_pass != "" and $smsnumero != "" and $smsviesti != "") {
-
 			$smsviesti = urlencode($smsviesti);
 
 			$retval = file_get_contents("$sms_palvelin?user=$sms_user&pass=$sms_pass&numero=$smsnumero&viesti=$smsviesti");
 			$smsviesti = urldecode($smsviesti);
 
 			if(trim($retval) == "0") {
-				echo "<font class='info'>SMS-viesti lähetetty numeroon $smsnumero</font><br>";
+				if ($animi != "") {
+					$animi = "($animi)";
+				}
+				echo "<font class='info'>SMS-viesti lähetetty numeroon $smsnumero $animi</font><br>";
 			}
 		}
 	}

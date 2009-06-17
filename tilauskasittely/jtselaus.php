@@ -204,7 +204,7 @@
 							GROUP BY tilausrivin_lisatiedot.vanha_otunnus
 							HAVING jt = 0 or jt IS NULL";
 				$result = mysql_query($query) or pupe_error($query);
-
+	
 				while ($row = mysql_fetch_array($result)) {
 					
 					$smsviesti = "Tilauksenne $row[vanha_otunnus] on valmis noudettavaksi. Viestiin ei tarvitse vastata. - $yhtiorow[nimi]";
@@ -214,13 +214,15 @@
 					if($smsnumero == "") {
 						
 						//	Haetaan sen orginaalilaskun tiedot, koska siell‰ ne on ainakin oikein
-						$query = "	SELECT lasku.liitostunnus, lasku.nimitark, maksuehto.kateinen
+						$query = "	SELECT lasku.liitostunnus, lasku.nimitark, maksuehto.kateinen, lasku.nimi
 									FROM lasku
 									LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and maksuehto.tunnus=lasku.maksuehto
 									WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnus='$row[vanha_otunnus]'";
 						$result = mysql_query($query) or pupe_error($query);
 						$vanhalaskurow = mysql_fetch_array($result);
-
+						$animi = $vanhalaskurow["nimi"];
+						
+						
 						//	Oletyksena asiakkaan on gsm-numero						
 						if($smsnumero == "") {
 							
@@ -231,24 +233,28 @@
 							$asrow = mysql_fetch_array($result);
 
 							$n = on_puhelinnumero($asrow["gsm"]);
+							
+							
 							if($n != "") {
 								$smsnumero = $n;
+																
 							}
 						}
 
 						//	Jos meill‰ on k‰teismyynti voidaan otsikon nimitarkenteessa sis‰llytt‰‰ puhelinnumero
 						if($smsnumero == "" and $vanhalaskurow["kateinen"] != "" and $vanhalaskurow["nimitark"] != "") {
-
+							
 							// jos t‰m‰ oli numero
 							$n = on_puhelinnumero($vanhalaskurow["nimitark"]);
-							if($n != "") {
+							
+							if($n != "" ) {
 								$smsnumero = $n;
 							}
 						}
 						
 						//	Ja l‰hetet‰‰n itse SMS
 						if($smsnumero!="") {
-							sendSMS($smsnumero, $smsviesti, $smsliitos);
+							sendSMS($smsnumero, $smsviesti, $animi);
 						}
 					}
 				}

@@ -2333,9 +2333,8 @@
 		//otetaan käyttöliittymästä tullut alv talteen
 		$laskunalv = $alv;
 
-		// HUOM!!! Asiakkaanvaihto ei nyt tällä hetkellä mene tähän haaraan. Vaatii redesignin!!!!!
-		//tutkitaan onko ytunnus-, alvi- tai vienti-kenttä vaihtunut		
-		if ((int) $kukarow["kesken"] != 0 and ($from == 'vaihdaasiakas' or $apuro['liitostunnus'] != $asiakasid or $apuro['alv'] != $alv or $apuro['vienti'] != $vienti)) {
+		// Tutkitaan onko ytunnus-, alvi- tai vienti-kenttä vaihtunut (Poislukien tarjoukset)
+		if ($apuro["tila"] != "T" and (int) $kukarow["kesken"] != 0 and ($from == 'vaihdaasiakas' or $apuro['liitostunnus'] != $asiakasid or $apuro['alv'] != $alv or $apuro['vienti'] != $vienti)) {
 						
 			// Nyt alennukset ja hinnat ja alvi lasketaan automaattisesti uudestaan
 			// Netotettuja rivejä ei päivitetä

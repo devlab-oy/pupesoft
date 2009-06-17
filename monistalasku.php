@@ -898,20 +898,23 @@ if ($tee == 'MONISTA') {
 					$insres2 = mysql_query($kysely) or pupe_error($kysely);					
 				}
 				
-				// Kopsataan sarjanumerot kuntoon jos tilauskella oli sellaisia
+				// Kopsataan sarjanumerot kuntoon jos tilauksella oli sellaisia
 				if ($kumpi == 'HYVITA' and $kukarow["yhtio"] == $monistarow["yhtio"]) {
 					if ($rivirow["kpl"] > 0) {
 						$tunken = "myyntirivitunnus";
+						$tunken2 = "ostorivitunnus";
 					}
 					else {
 						$tunken = "ostorivitunnus";
+						$tunken2 = "myyntirivitunnus";
 					}
 
 					$query = "	SELECT * 
 								FROM sarjanumeroseuranta 
 								WHERE yhtio ='$kukarow[yhtio]' 
 								and tuoteno ='$rivirow[tuoteno]' 
-								and $tunken ='$rivirow[tunnus]'";
+								and $tunken ='$rivirow[tunnus]'
+								and $tunken2 = 0";
 					$sarjares = mysql_query($query) or pupe_error($query);
 										
 					while($sarjarow = mysql_fetch_array($sarjares)) {
@@ -927,7 +930,6 @@ if ($tee == 'MONISTA') {
 						$query = "SELECT sarjanumeroseuranta FROM tuote WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$rivirow[tuoteno]'";
 						$sarjatuoteres = mysql_query($query) or pupe_error($query);
 						$sarjatuoterow = mysql_fetch_array($sarjatuoteres);
-						
 						
 						if ($sarjatuoterow["sarjanumeroseuranta"] == "E" or $sarjatuoterow["sarjanumeroseuranta"] == "F" or $sarjatuoterow["sarjanumeroseuranta"] == "G") {
 							$query = "	INSERT INTO sarjanumeroseuranta

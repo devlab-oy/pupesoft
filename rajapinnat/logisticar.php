@@ -483,7 +483,7 @@
 	    while ($trow = mysql_fetch_assoc($res)) {
 			$row++;
 
-			switch($trow['tapahtumalaji']) {
+			switch(strtoupper($trow['tapahtumalaji'])) {
 				// ostot
 				case 'O':
 
@@ -508,10 +508,8 @@
 					// 2 = otto tai myynninpalautus
 					$trow['tapahtumalaji'] = 2;
 
-					$trow['myyntiarvo'] = $trow['hinta'];
-
 					// ostoarvo
-					$trow['ostoarvo'] = $trow['hinta'] - $trow['kate'];
+					$trow['ostoarvo'] = $trow['myyntiarvo'] - $trow['kate'];
 
 					// tämä on myynninpalautus eli myyntiarvo on negatiivinen
 					if ($trow['tapahtumamaara'] < 0) {

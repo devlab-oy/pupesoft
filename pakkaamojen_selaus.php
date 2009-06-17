@@ -128,10 +128,10 @@
 				echo "<th valign='top'>".t("Kerätty")."</th>";
 				echo "<th valign='top'><input type='submit' value='".t("Nollaa")."'></th>";
 
-				echo "<tr><td>".$row['lokero']."</td>";
+				echo "<tr class='aktiivi'><td>".$row['lokero']."</td>";
 			}
 			else {
-				echo "<tr><td></td>";
+				echo "<tr class='aktiivi'><td></td>";
 			}
 
 			$query = "	SELECT min(tilausrivi.kerattyaika) kerayspvm

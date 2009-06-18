@@ -1715,7 +1715,7 @@
 					}
 				}
 				elseif($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {
-					if ($silent == "") {
+					if ($silent == "" or $silent == "VIENTI") {
 						$tulos_ulos .= "<br><br>\n".t("FTP-siirto iPost Finvoice:")."<br>\n";
 					}
 

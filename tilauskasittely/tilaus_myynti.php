@@ -5339,7 +5339,7 @@ if ($tee == '') {
 			//	Onko vielä optiorivejä?
 			$query  = "	SELECT tilausrivin_lisatiedot.tunnus
 						FROM lasku
-						JOIN tilausrivi ON tilausrivi.otunnus = lasku.tunnus
+						JOIN tilausrivi ON  tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 						JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus and tilausrivin_lisatiedot.positio = 'Optio'
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$kukarow[kesken]'";
 			$optiotarkres = mysql_query($query) or pupe_error($query);

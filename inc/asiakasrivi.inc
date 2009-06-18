@@ -120,12 +120,12 @@
 		$sel[$apu] = "SELECTED";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='100' $sel[100]>".t("Paperilasku")."</option>";
+		$ulos .= "<option value='100' $sel[100]>".t("Paperilasku, tulostuspalvelu")."</option>";
 		$ulos .= "<option value='010' $sel[010]>".t("eInvoice")."</option>";
 		$ulos .= "<option value='020' $sel[020]>".t("Vienti eInvoice")."</option>";
 		$ulos .= "<option value='111' $sel[111]>".t("Elma EDI-inhouse")."</option>";
 		$ulos .= "<option value='666' $sel[666]>".t("Sähköposti")."</option>";
-		$ulos .= "<option value='667' $sel[667]>".t("Sisäinen")."</option>";
+		$ulos .= "<option value='667' $sel[667]>".t("Sisäinen, käsitellään manuaalisesti")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -502,6 +502,10 @@ if (!function_exists('tulosta_lahete')) {
 			$pdf->write($h, 1, $s[2], 0, money_format('%i',$kaikkiyhteensa), "norm", "R", "B");
 		}		
 		
+		if($h < 40) {
+			$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli, $lahete_param, "JOO");
+			$h = 190;
+		}
 		
 		//	Olisiko jo pakkaustietoja
 		$query = "	SELECT sum(kollit) kollit, round(sum(kilot), 2) kilot, round(sum(kuutiot), 2) kuutiot, round(sum(lavametri), 2) lavametrit, round(sum(nettopaino), 2) nettopaino, concat_ws(' ',pakkaus, pakkauskuvaus, lisatiedot) tiedot, toimitustapa

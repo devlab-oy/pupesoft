@@ -621,7 +621,11 @@ if (!function_exists('tulosta_lasku')) {
 			}
 		}
 		$h-=$pdf->ln(3);			
-				
+		
+		if($h < 50) {
+			$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli);
+		}
+		
 		// Alv erittely!
 		$s=$pdf->teeSarakkeet(array(140,15,35));
 		if($toim == "PROFORMA") {
@@ -738,7 +742,8 @@ if (!function_exists('tulosta_lasku')) {
 			$h-=$pdf->ln(1.25);
 			$nb=$pdf->countParagraphHeight($laskurow["sisviesti1"], "norm");
 			$pdf->write($h, $nb, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
-			$h-=$pdf->ln($nb);					
+			$h-=$pdf->ln($nb);
+			$h-=$pdf->ln(2);
 		}
 			
 		if($h < 70) {

@@ -537,6 +537,53 @@
 				if ($hyvrow["nollarivi"] > 0) {
 					echo "<td class='back'>&nbsp;<font class='error'>".t("Huom! Tilauksella on nollahintaisia rivejä!")."</font></td>";
 				}
+								
+				//	Tarkistetaan voisimmeko toimittaa sähköisesti!
+				if (in_array($row["chn"], array("100", "666", ""))) {
+					$query = "	SELECT chn
+								FROM asiakas
+								WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[liitostunnus]' and chn = '010'";
+					$asres = mysql_query($query) or pupe_error($query);
+					if(mysql_num_rows($asres) == 1) {
+						$asrow = mysql_fetch_array($asres);
+						$query = "	UPDATE lasku SET
+						 				chn				= '$asrow[chn]',
+										verkkotunnus	= ''
+									WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[tunnus]' and verkkotunnus=''";
+						$upres = mysql_query($query) or pupe_error($query);
+					}
+				}
+				
+				if ($row["chn"] == "010") {
+					$eLisa = "";
+					//Varmistetaan, että meillä on verkkotunnus laskulla jos pitäisi lähettää verkkolaskuja!
+					if($row["verkkotunnus"] == "") {
+						$query = "	SELECT verkkotunnus
+									FROM asiakas
+									WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[liitostunnus]' and verkkotunnus!=''";
+						$asres = mysql_query($query) or pupe_error($query);
+						if(mysql_num_rows($asres) == 1) {
+							$asrow = mysql_fetch_array($asres);
+							$query = "	UPDATE lasku SET
+							 				verkkotunnus = '$asrow[verkkotunnus]'
+										WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[tunnus]' and verkkotunnus=''";
+							$upres = mysql_query($query) or pupe_error($query);
+						}
+						else {
+							$eLisa = "<td class='back'>&nbsp;<font class='error'>".t("VIRHE: Verkkotunnus puuttuu asiakkaalta ja laskulta!")."</font></td>";
+						}
+					}
+					
+					echo "<td class='back'>&nbsp;<font class='message'>".t("Verkkolasku")." $eLisa</font></td>";
+				}
+
+				if ($row["chn"] == "020") {
+					echo "<td class='back'>&nbsp;<font class='message'>".t("Vienti eInvoice")."</font></td>";
+				}
+
+				if ($row["chn"] == "111") {
+					echo "<td class='back'>&nbsp;<font class='message'>".t("Elma EDI-inhouse")."</font></td>";
+				}
 
 				echo "</tr>";
 			}

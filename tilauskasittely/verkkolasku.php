@@ -1729,10 +1729,10 @@
 					
 					// t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
 					$cmd = "mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile);
-
+					
 					require ("inc/ftp-send.inc");
 
-					if ($silent == "") {
+					if ($silent == "" or $silent == "VIENTI") {
 						$tulos_ulos .= $tulos_ulos_ftp;
 					}					
 				}

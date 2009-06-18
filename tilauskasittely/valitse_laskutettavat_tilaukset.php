@@ -537,25 +537,8 @@
 				if ($hyvrow["nollarivi"] > 0) {
 					echo "<td class='back'>&nbsp;<font class='error'>".t("Huom! Tilauksella on nollahintaisia rivejä!")."</font></td>";
 				}
-								
-				//	Tarkistetaan voisimmeko toimittaa sähköisesti!
-				if (in_array($row["chn"], array("100", "666", ""))) {
-					$query = "	SELECT chn
-								FROM asiakas
-								WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[liitostunnus]' and chn = '010'";
-					$asres = mysql_query($query) or pupe_error($query);
-					if(mysql_num_rows($asres) == 1) {
-						$asrow = mysql_fetch_array($asres);
-						$query = "	UPDATE lasku SET
-						 				chn				= '$asrow[chn]',
-										verkkotunnus	= ''
-									WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[tunnus]' and verkkotunnus=''";
-						$upres = mysql_query($query) or pupe_error($query);
-					}
-				}
 				
 				if ($row["chn"] == "010") {
-					$eLisa = "";
 					//Varmistetaan, että meillä on verkkotunnus laskulla jos pitäisi lähettää verkkolaskuja!
 					if($row["verkkotunnus"] == "") {
 						$query = "	SELECT verkkotunnus
@@ -570,19 +553,9 @@
 							$upres = mysql_query($query) or pupe_error($query);
 						}
 						else {
-							$eLisa = "<td class='back'>&nbsp;<font class='error'>".t("VIRHE: Verkkotunnus puuttuu asiakkaalta ja laskulta!")."</font></td>";
+							echo "<td class='back'>&nbsp;<font class='message'>".t("VIRHE: Verkkotunnus puuttuu asiakkaalta ja laskulta!")."</font></td>";
 						}
-					}
-					
-					echo "<td class='back'>&nbsp;<font class='message'>".t("Verkkolasku")." $eLisa</font></td>";
-				}
-
-				if ($row["chn"] == "020") {
-					echo "<td class='back'>&nbsp;<font class='message'>".t("Vienti eInvoice")."</font></td>";
-				}
-
-				if ($row["chn"] == "111") {
-					echo "<td class='back'>&nbsp;<font class='message'>".t("Elma EDI-inhouse")."</font></td>";
+					}					
 				}
 
 				echo "</tr>";
@@ -794,11 +767,35 @@
 		else {
 			$ketjutus_group = "";
 		}
-
+		
+		//	Tarkistetaan voisimmeko joitain laskuja sähköisesti!
+		$query = "	SELECT lasku.tunnus, asiakas.chn
+					FROM lasku use index (tila_index)
+					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'
+					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
+					JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.chn ='010'
+					LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tila = 'L'
+					and lasku.chn	IN ('100','666','')
+					$alatilat
+					$vientilisa
+					$muutlisa
+					$haku";
+		$asres = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($asres) == 1) {
+			$asrow = mysql_fetch_array($asres);
+			$query = "	UPDATE lasku SET
+			 				chn				= '$asrow[chn]',
+							verkkotunnus	= ''
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$asrow[tunnus]'";
+			$upres = mysql_query($query) or pupe_error($query);			
+		}
+		
 		// GROUP BY pitäää olla sama kun verkkolasku.php:ssä rivillä 536
 		$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
 					lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
-					lasku.maksuehto,
+					lasku.maksuehto, lasku.chn,
 					lasku.tila, lasku.alatila,
 					maksuehto.teksti meh,
 					maksuehto.kassa_teksti mehka,
@@ -829,7 +826,7 @@
 
 		if (mysql_num_rows($tilre) > 0) {
 			echo "<table>";
-			echo "<tr><th>".t("Tilaukset")."</th><th>".t("Asiakas")."</th><th>".t("Ytunnus")."</th><th>".t("Tilauksia")."</th><th>".t("Rivejä")."</th><th>".t("Arvo")."</th><th>".t("Maksuehto")."</th><th>".t("Tyyppi")."</th></tr>";
+			echo "<tr><th>".t("Tilaukset")."</th><th>".t("Asiakas")."</th><th>".t("Ytunnus")."</th><th>".t("Tilauksia")."</th><th>".t("Rivejä")."</th><th>".t("Arvo")."</th><th>".t("Maksuehto")."</th><th>".t("Toimitus")."</th><th>".t("Tyyppi")."</th></tr>";
 
 			$arvoyhteensa = 0;
 			$tilauksiayhteensa = 0;
@@ -841,7 +838,15 @@
 
 				//tehdään selväkielinen tila/alatila
 				require "../inc/laskutyyppi.inc";
-
+				
+				$toimitusselite = "";
+				if ($tilrow["chn"] == '100') $toimitusselite = t("Paperilasku");
+				if ($tilrow["chn"] == '010') $toimitusselite = t("eInvoice");
+				if ($tilrow["chn"] == '020') $toimitusselite = t("Vienti eInvoice");
+				if ($tilrow["chn"] == '111') $toimitusselite = t("Elma EDI-inhouse");
+				if ($tilrow["chn"] == '666') $toimitusselite = t("Sähköpostiin");
+				if ($tilrow["chn"] == '667') $toimitusselite = t("Sisäinen");
+				
 				echo "	<tr class='aktiivi'>
 						<td valign='top'>$tilrow[tunnukset_ruudulle]</td>
 						<td valign='top'>$tilrow[ytunnus]</td>
@@ -850,6 +855,7 @@
 						<td valign='top'>$tilrow[riveja]</td>
 						<td valign='top' align='right'>$tilrow[arvo]</td>
 						<td valign='top'>$tilrow[mehka] $tilrow[meh]</td>
+						<td valign='top'>$toimitusselite</td>
 						<td valign='top'>".t($laskutyyppi)." ".t($alatila)."</td>";
 
 				echo "	<td class='back' valign='top'>

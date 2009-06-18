@@ -620,6 +620,13 @@
 		$ulisa.="&ohje=off&from=$from&lukitse_avaimeen=$lukitse_avaimeen&lukitse_laji=$lukitse_laji";
 	}
 	
+	//	Pidetään oletukset tallessa!
+	if(is_array($oletus)){
+		foreach($oletus as $o => $a) {
+			$ulisa.="&oletus[$o]=$a";
+		}
+	}
+	
 
 	// Nyt selataan
 	if ($tunnus == 0 and $uusi == 0 and $errori == '') {
@@ -903,7 +910,13 @@
 			if (isset($t[$i])) {
 				$trow[$i] = $t[$i];
 			}
-
+			// Haetaan passatut oletukset arvoiksi!
+			elseif($uusi == 1) {
+				$trow[$i] = $oletus[mysql_field_name($result, $i)];
+			}
+			
+			
+			
 			if (strlen($trow[$i]) > 35) {
 				$size = strlen($trow[$i])+2;
 			}
@@ -916,7 +929,7 @@
 			else {
 				$size = '10';
 			}
-
+						
 			$maxsize = mysql_field_len($result,$i); // Jotta tätä voidaan muuttaa
 
 			require ("inc/$toim"."rivi.inc");

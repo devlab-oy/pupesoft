@@ -44,7 +44,7 @@ $rivinkorkeus			= 15;
 //muutamat funktiot...
 if (!function_exists('alku')) {
 	function alku($tyyppi = "") {
-		global $pdf, $sivu, $lahetetyyppi, $laskurow, $yhtiorow, $viite, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kala, $rectparam, $kukarow, $kieli, $asrow, $useita;
+		global $pdf, $sivu, $lahetetyyppi, $laskurow, $yhtiorow, $viite, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kala, $rectparam, $kukarow, $kieli, $asrow, $useita, $extranet_tilausvahvistus;
 
 		//PDF parametrit
 		if (!isset($pdf)) {
@@ -277,8 +277,10 @@ if (!function_exists('alku')) {
 
 
 		$pdf->draw_rectangle(737, 300, 716, 420, $thispage, $rectparam);
-		$pdf->draw_text(310, 729, t("Toimitustapa", $kieli), 		$thispage, $pieni);
-		$pdf->draw_text(310, 719, $laskurow["toimitustapa"],	 	$thispage, $boldi);
+		if ($extranet_tilausvahvistus != 1) {
+			$pdf->draw_text(310, 729, t("Toimitustapa", $kieli), 		$thispage, $pieni);
+			$pdf->draw_text(310, 719, $laskurow["toimitustapa"],	 	$thispage, $boldi);
+		}
 
 		//etsitään löytyykö rahtisopimusta
 		$rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"]);
@@ -295,7 +297,8 @@ if (!function_exists('alku')) {
 		$pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
 
 		//maksuehto tekstinä jos on jokin muu kuin hinnaton maksuehto
-		if (str_replace("perhe_", "", $lahetetyyppi) != "tulosta_lahete_eiale_eihinta.inc") {
+		// extranet tilausvahvistuksessa ei näytetä maksuehtoa (jos halutaan näyttää niin setataan muuttuja nollaksi)
+		if (str_replace("perhe_", "", $lahetetyyppi) != "tulosta_lahete_eiale_eihinta.inc" and $extranet_tilausvahvistus != 1) {
 
 			// haetaan maksuehdon tiedot
 			$query  = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
@@ -607,7 +610,7 @@ if (!function_exists('uusi_sivu')) {
 
 if (!function_exists('rivi_otsikot')) {
 	function rivi_otsikot($thispage) {
-		global $pdf, $kieli, $lahetetyyppi, $norm, $rectparam, $kala;
+		global $pdf, $kieli, $lahetetyyppi, $norm, $rectparam, $kala, $extranet_tilausvahvistus;
 
 		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc") {
 			// tulosta_lahete.inc
@@ -664,7 +667,9 @@ if (!function_exists('rivi_otsikot')) {
 			$pdf->draw_text(330, $kala+15, t("Tilattu", $kieli),		$thispage, $norm);
 			$pdf->draw_text(375, $kala+15, t("Toimitus", $kieli),		$thispage, $norm);
 			$pdf->draw_text(425, $kala+15, t("Yks.hinta", $kieli),		$thispage, $norm);
-			$pdf->draw_text(473, $kala+15, t("Alekoodi", $kieli),		$thispage, $norm);
+			if ($extranet_tilausvahvistus != 1) {
+				$pdf->draw_text(473, $kala+15, t("Alekoodi", $kieli),		$thispage, $norm);
+			}
 			$pdf->draw_text(530, $kala+15, t("Rivihinta", $kieli),		$thispage, $norm);
 		}
 		elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_viivakoodi.inc") {
@@ -1106,7 +1111,7 @@ if (!function_exists('rivi')) {
 
 if (!function_exists('rivi_hinta_ale')) {
 	function rivi_hinta_ale($thispage) {
-		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $yhtiorow;
+		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $yhtiorow, $extranet_tilausvahvistus;
 
 		if (trim($row["perhe_kommentti"]) != '') {
 			$pohja = $pdf->draw_paragraph($kala+$norm["height"], 45, 60, 480, $row["perhe_kommentti"],	$thispage, $norm);
@@ -1225,7 +1230,7 @@ if (!function_exists('rivi_ei_ale_ei_hinta')) {
 
 if (!function_exists('rivi_eialeja')) {
 	function rivi_eialeja($thispage) {
-		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $yhtiorow;
+		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $yhtiorow, $extranet_tilausvahvistus;
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],							$thispage, $pieni);
 
@@ -1246,7 +1251,9 @@ if (!function_exists('rivi_eialeja')) {
 		$oikpos = $pdf->strlen($row["myyntihinta"], $norm);
 		$pdf->draw_text(465-$oikpos, $kala, $row["myyntihinta"], 							$thispage, $norm);
 
-		$pdf->draw_text(475, $kala, $row["aleryhma"],										$thispage, $norm);
+		if ($extranet_tilausvahvistus != 1) {
+			$pdf->draw_text(475, $kala, $row["aleryhma"],										$thispage, $norm);
+		}
 
 		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["brutto_rivihinta"]), $norm);
 		$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["brutto_rivihinta"]), 		$thispage, $norm);

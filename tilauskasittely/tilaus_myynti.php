@@ -5567,7 +5567,7 @@ if ($tee == '') {
 						<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
 						<input type='hidden' name='toim' value='TILAUSVAHVISTUS'>
 						<input type='hidden' name='tee' value='NAYTATILAUS'>
-						<input type='hidden' name='naytatvale' value='2'>
+						<input type='hidden' name='extranet_tilausvahvistus' value='1'>
 						<input type='submit' name='NAYTATILAUS' value='".t("Näytä Tilausvahvistus")."'>
 						</form>
 						</td>

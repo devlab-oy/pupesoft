@@ -4,11 +4,15 @@
 	$hakukentat = "tunnus, ytunnus, nimi/nimitark, postitp/maa, tilino/ultilno, oletus_valkoodi";
 
 	if ($alias_set == "KAYTTAJA") {
-		$otsikko = ' Käyttäjätiedot';
+		$otsikko = 'Käyttäjätiedot';
+		$otsikko_nappi = "käyttäjätiedot";
+		
 		$rajauslisa = " and toimi.tyyppi IN ('K') ";
 	}
 	else {
 		$otsikko 	= "Toimittajat";
+		$otsikko_nappi = "toimittaja";
+		
 		$rajauslisa = " and toimi.tyyppi NOT IN ('K') ";
 	}
 	

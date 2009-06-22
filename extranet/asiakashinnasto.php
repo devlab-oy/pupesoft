@@ -2,34 +2,36 @@
 
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	$useslave = 1;
-	
+
 	if (file_exists('parametrit.inc')) {
 		require('parametrit.inc');
 	}
 	else {
 		require('../inc/parametrit.inc');
 	}
-	
+
 	echo "<font class='head'>".t("Hinnasto asiakashinnoin")."</font><hr>";
 
 	if ($kukarow["eposti"] == "") {
 		echo "<font class='error'>".t("Sinulle ei ole määritelty sähköpostiosoitetta. Et voi ajaa tätä raporttia.")."</font><br>";
 	}
-	
+
+	$ytunnus = trim($ytunnus);
+
 	if ($tee != '' and $ytunnus != '' and (int) $asiakas == 0 and $kukarow["extranet"] == '') {
-		
+
 		if (isset($muutparametrit)) {
 			$muutparametrit = unserialize(urldecode($muutparametrit));
 			$osasto 	= $muutparametrit[0];
 			$try 		= $muutparametrit[1];
 			$checkall	= $muutparametrit[2];
 		}
-		
+
 		$muutparametrit = array($osasto, $try, $checkall);
 		$muutparametrit = urlencode(serialize($muutparametrit));
-			
+
 		require("../inc/asiakashaku.inc");
-		
+
 		$asiakas = $asiakasrow["tunnus"];
 		$ytunnus = $asiakasrow["ytunnus"];
 	}
@@ -42,7 +44,7 @@
 
 		if (mysql_num_rows($result) == 1) {
 			$asiakasrow = mysql_fetch_array($result);
-			
+
 			$ytunnus = $asiakasrow["ytunnus"];
 			$asiakas = $asiakasrow["tunnus"];
 		}
@@ -51,7 +53,7 @@
 			exit;
 		}
 	}
-	
+
 	if ($tee != '' and $kukarow["eposti"] != "" and $asiakas > 0) {
 		$where1 = '';
 		$where2 = '';
@@ -129,7 +131,7 @@
 		if ((strlen($where) > 0 or $checkall != "") and $ytunnus != '' and $asiakas != '') {
 			$query = "	SELECT *
 						FROM tuote
-						WHERE $where tuote.yhtio='$kukarow[yhtio]' 
+						WHERE $where tuote.yhtio='$kukarow[yhtio]'
 						and tuote.status NOT IN ('P','X') and hinnastoon != 'E'
 						$kieltolisa
 						ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
@@ -176,14 +178,14 @@
 				$laskurow["liitostunnus"] = $asiakas;
 				$laskurow["vienti"] = '';
 				$laskurow["alv"] = '';
-				
+
 				list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $rrow, 1, '', '', '');
 				list($hinta, $lis_alv) = alv($laskurow, $rrow, $hinta, '', $alehinta_alv);
-				
+
 				if ($rrow["hinnastoon"] == "V" and $hinta == 0 and $ale == 0) {
 					continue;
 				}
-				
+
 				if ($netto != '') {
 					$ale = t("Netto");
 				}
@@ -191,7 +193,7 @@
 				if ($hinta == 0) {
 					$hinta = $rrow["myyntihinta"];
 				}
-				
+
 				if ($netto == "") {
 					$asiakashinta = round($hinta * (1-($ale/100)),$yhtiorow['hintapyoristys']);
 				}
@@ -233,14 +235,14 @@
 				$rivi .= str_replace(".",",",sprintf("%.".$yhtiorow['hintapyoristys']."f",$asiakashinta_veroton))."\t";
 				$rivi .= str_replace(".",",",sprintf("%.".$yhtiorow['hintapyoristys']."f",$asiakashinta_verollinen))."\t";
 				$rivi .= "\r\n";
-				
+
 				fwrite($fh, $rivi);
 			}
 			fclose($fh);
 
 			//pakataan faili
 			$cmd = "cd /tmp/;/usr/bin/zip $ytunnus-price.zip $filenimi";
-			
+
 			$palautus = exec($cmd);
 
 			$liite = "/tmp/$ytunnus-price.zip";
@@ -273,7 +275,7 @@
 			echo "<font class='message'>".t("Hinnasto lähetetty sähköpostiosoitteeseen").": $kukarow[eposti]</font><br>";
 		}
 	}
-	
+
 	//Käyttöliittymä
 	echo "<br>";
 
@@ -282,7 +284,7 @@
 	echo "<table><form method='post' action='$PHP_SELF'>";
 	echo "<input type='hidden' name='tee' value='kaikki'>";
 
-	if ($kukarow["extranet"] == '') {		
+	if ($kukarow["extranet"] == '') {
 		if ($asiakas > 0) {
 			echo "<tr><th>".t("Asiakkaan ytunnus").":</th><td><input type='hidden' name='ytunnus' value='$ytunnus'>$ytunnus</td></tr>";
 			echo "<input type='hidden' name='asiakas' value='$asiakas'></td></tr>";
@@ -294,23 +296,23 @@
 
 	echo "<tr><th>".t("Osasto").":</th><td><input type='text' name='osasto' value='$osasto' size='15'></td></tr>";
 	echo "<tr><th>".t("Tuoteryhmä").":</th><td><input type='text' name='try' value='$try' size='15'></td></tr>";
-	
+
 	if (isset($checkall) !== FALSE) {
 		$chk='CHECKED';
 	}
-	
+
 	echo "<tr><th>".t("Kaikki osastot ja tuoteryhmät").":</th><td><input type='checkbox' name='checkall' $chk></td></tr>";
 
 	echo "</table><br>";
 	echo "<input type='submit' value='Aja hinnasto'>";
 	echo "</form>";
-	
+
 	if ($kukarow["extranet"] == '' and $asiakas > 0) {
 		echo "<form method='post' action='$PHP_SELF'>";
 		echo "<input type='submit' value='Valitse uusi asiakas'>";
 		echo "</form>";
 	}
-	
+
 	if (file_exists('parametrit.inc')) {
 		require ("footer.inc");
 	}

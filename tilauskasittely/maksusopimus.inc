@@ -9,7 +9,7 @@
 		$sallitut_tilat = "'T'";
 	}
 	else {
-		$sallitut_tilat = "'L','G','E','V','W','N','A";
+		$sallitut_tilat = "'L','G','E','V','W','N','A'";
 	}
 	
 	if($tila == "lisaa_kaikki_jaksotukseen") {

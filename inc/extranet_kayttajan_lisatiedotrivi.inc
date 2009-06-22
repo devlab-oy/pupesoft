@@ -19,18 +19,24 @@
 
 	if (mysql_field_name($result, $i) == "laji") {
 
-		$liitostunnus = $liitostunnus != '' ? $liitostunnus : ($haku[4] != '' ? $haku[4] : '');
-
-		$query = "	SELECT laji
-					FROM extranet_kayttajan_lisatiedot
-					WHERE yhtio = '{$kukarow['yhtio']}' 
-					AND laji = '{$trow['laji']}'
-					AND liitostunnus = '$liitostunnus'";
+		$query = "	SELECT selite
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND laji = 'EXTASAVAINSANA'
+					AND selite != ''";
 		$sresult = mysql_query($query) or pupe_error($query);
 
-		$srow = mysql_fetch_array($sresult);
+		$ulos .= "<td><select name='$nimi'>";
 
-		$ulos .= "<td><input type='text' name='$nimi' id='$nimi' value='{$srow['laji']}'></td>";
+		while ($srow = mysql_fetch_array($sresult)) {
+			$sel = '';
+			if ($srow['selite'] == $trow['laji']) {
+				$sel = 'selected';
+			}
+			$ulos .= "<option value='{$srow['selite']}' $sel>{$srow['selite']}</option>";
+		}
+
+		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
 

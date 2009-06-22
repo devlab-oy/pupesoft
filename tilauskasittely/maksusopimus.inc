@@ -24,7 +24,7 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and if(tunnusnippu = 0,tunnus=$laskurow[tunnus], tunnusnippu=$laskurow[tunnusnippu])
 						and jaksotettu = 0
-						and tila in ('N','L','T','R')
+						and tila in ('N','L','T','R','A')
 						and alatila != 'X'";
 			$result = mysql_query($query) or pupe_error($query);
 

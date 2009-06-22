@@ -845,14 +845,14 @@ if($tee == "") {
 			if($toim == "TARJOUSHAKUKONE") {
 				echo "  
 						<tr>
-							<th>".t("Seuranta")."</th><th>".t("Laatija")."</th><th>".t("Myyjä")."</th>
+							<th>".t("Seuranta")."</th><th>".t("Laatija")."</th><th>".t("Myyjä")."</th><th>".t("Asiakas")."</th>
 						</tr>
 						<tr>";
 			}
 			elseif($toim == "TILAUSHAKUKONE") {
 				echo "
 						<tr>
-							<th>".t("Seuranta")."</th><th>".t("Laatija")."</th><th>".t("Myyjä")."</th>
+							<th>".t("Seuranta")."</th><th>".t("Laatija")."</th><th>".t("Myyjä")."</th><th>".t("Asiakas")."</th>
 						</tr>
 						<tr>";
 			}
@@ -901,7 +901,7 @@ if($tee == "") {
 			
 						</td>";
 
-			$query = "  SELECT distinct(lasku.myyja) myyja, kuka.nimi
+			$query = "  SELECT distinct(lasku.nimi) myyja, kuka.nimi
 						FROM lasku
 						JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.tunnus = lasku.myyja
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila IN ($laskutilat)";
@@ -918,11 +918,30 @@ if($tee == "") {
 			echo "          </select>
 							<br>
 							".t("Myyjittäin").": <input type='checkbox' name='group[lasku.myyja]' value='checked' {$group["lasku.myyja"]}> prio: <input type='text' name='prio[lasku.myyja]' value='{$prio["lasku.myyja"]}' size='2'>
-						</td>
-						</tr>
-						</table>
-						<br>
-						<table width='600px'>";
+						</td>";
+
+			$query = "  SELECT tunnus, concat_ws(' ', nimi, nimitark) nimi
+						FROM asiakas
+						WHERE yhtio = '$kukarow[yhtio]' and laji NOT IN ('P','R')
+						ORDER BY nimi";
+			$abures = mysql_query($query) or pupe_error($query);
+			echo "      <td>
+							<select name='asiakas[]' multiple='TRUE' size='8'>";
+			while($row = mysql_fetch_array($abures)) {
+				$sel = "";
+				if (array_search($row[0], $asiakas) !== false) {
+					$sel = 'selected';
+				}
+				echo "      <option value='$row[0]' $sel>$row[1]</option>";
+			}
+			echo "          </select>
+							<br>
+							".t("Asiakkaittain").": <input type='checkbox' name='group[asiakas.tunnus]' value='checked' {$group["asiakas.tunnus"]}> prio: <input type='text' name='prio[asiakas.tunnus]' value='{$prio["asiakas.tunnus"]}' size='2'>
+						</td>						
+				</tr>
+				</table>
+				<br>
+				<table width='600px'>";
 
 
 			if($toim == "TARJOUSHAKUKONE") {
@@ -1284,6 +1303,10 @@ if($tee == "") {
 			$lasku_rajaus .= " and lasku.laatija IN ('".implode("','", $laatija)."')";
 		}
 
+		if(count($asiakas) > 0) {
+			$lasku_rajaus .= " and asiakas.tunnus IN ('".implode("','", $asiakas)."')";
+		}
+
 		if(count($myyja) > 0) {
 			$lasku_rajaus .= " and lasku.myyja IN ('".implode("','", $myyja)."')";
 		}
@@ -1488,6 +1511,7 @@ if($tee == "") {
 					FROM lasku
 					JOIN lasku versio ON versio.yhtio = lasku.yhtio and versio.tunnus = if(lasku.tunnusnippu>0,(select max(l.tunnus) from lasku l where l.yhtio = lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu),lasku.tunnus) $versio_rajaus
 					JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = versio.yhtio and laskun_lisatiedot.otunnus=versio.tunnus $lisatiedot_rajaus
+					LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
 					LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde
 					$myyja_join
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -1505,6 +1529,7 @@ if($tee == "") {
 							$viimeisin_kaletapahtuma
 					FROM lasku
 					JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus $lisatiedot_rajaus
+					LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
 					LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde
 					$myyja_join
 					WHERE lasku.yhtio = '$kukarow[yhtio]'

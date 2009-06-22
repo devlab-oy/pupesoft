@@ -16,7 +16,7 @@
 		echo "<font class='error'>".t("Sinulle ei ole määritelty sähköpostiosoitetta. Et voi ajaa tätä raporttia.")."</font><br>";
 	}
 	
-	if ($tee != '' and $ytunnus != '' and $kukarow["extranet"] == '') {
+	if ($tee != '' and $ytunnus != '' and (int) $asiakas == 0 and $kukarow["extranet"] == '') {
 		
 		if (isset($muutparametrit)) {
 			$muutparametrit = unserialize(urldecode($muutparametrit));
@@ -240,6 +240,7 @@
 
 			//pakataan faili
 			$cmd = "cd /tmp/;/usr/bin/zip $ytunnus-price.zip $filenimi";
+			
 			$palautus = exec($cmd);
 
 			$liite = "/tmp/$ytunnus-price.zip";
@@ -281,8 +282,14 @@
 	echo "<table><form method='post' action='$PHP_SELF'>";
 	echo "<input type='hidden' name='tee' value='kaikki'>";
 
-	if ($kukarow["extranet"] == '') {
-		echo "<tr><th>".t("Syötä asiakkaan ytunnus").":</th><td><input type='text' name='ytunnus' size='15' value='$ytunnus'></td></tr>";
+	if ($kukarow["extranet"] == '') {		
+		if ($asiakas > 0) {
+			echo "<tr><th>".t("Asiakkaan ytunnus").":</th><td><input type='hidden' name='ytunnus' value='$ytunnus'>$ytunnus</td></tr>";
+			echo "<input type='hidden' name='asiakas' value='$asiakas'></td></tr>";
+		}
+		else {
+			echo "<tr><th>".t("Syötä asiakkaan ytunnus").":</th><td><input type='text' name='ytunnus' size='15' value='$ytunnus'></td></tr>";
+		}
 	}
 
 	echo "<tr><th>".t("Osasto").":</th><td><input type='text' name='osasto' value='$osasto' size='15'></td></tr>";
@@ -297,6 +304,12 @@
 	echo "</table><br>";
 	echo "<input type='submit' value='Aja hinnasto'>";
 	echo "</form>";
+	
+	if ($kukarow["extranet"] == '' and $asiakas > 0) {
+		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<input type='submit' value='Valitse uusi asiakas'>";
+		echo "</form>";
+	}
 	
 	if (file_exists('parametrit.inc')) {
 		require ("footer.inc");

@@ -8,6 +8,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 		
 		if (mysql_field_name($result, $i) == "tuoteno") {
 			$chtuoteno = $t[$i];
+			
 			if ($chtuoteno != '') {
 				$query = "	SELECT tuoteno
 							FROM tuote
@@ -38,7 +39,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 		
 		if (mysql_field_name($result, $i) == "laji") {
 			if ($t[$i] == '') {
-				$virhe[$i] = "".t("Lajia ei voi j‰tt‰‰ tyhj‰ksi. Skarppaa!")."";
+				$virhe[$i] = t("Lajia ei voi j‰tt‰‰ tyhj‰ksi")."!";
 			}
 		}
 

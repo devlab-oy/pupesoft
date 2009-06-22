@@ -42,7 +42,7 @@
 
 		$sorttauskentan_jarjestys = "";
 
-		if (!isset($sorttauskentan_jarjestys1) or !isset($sorttauskentan_jarjestys2) or !isset($sorttauskentan_jarjestys3) or !isset($sorttauskentan_jarjestys4)) {
+		if ($sorttauskentan_jarjestys1 == '' or $sorttauskentan_jarjestys2 == '' or $sorttauskentan_jarjestys3 == '' or $sorttauskentan_jarjestys4 == '') {
 			$sorttauskentan_jarjestys = "concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0'))";
 		}
 		else {

@@ -1487,6 +1487,9 @@ if($tee == "") {
 			elseif($k == "lasku.vienti") {
 				$k = "if(lasku.vienti='E', '".t("Eurooppa")."', if(lasku.vienti='K', '".t("Kaukomaat")."', 'Kotimaa')) vienti";
 			}
+			elseif($k == "asiakas.tunnus") {
+				$k = "concat_ws(' ', asiakas.nimi, asiakas.nimitark) asiakastunnus";
+			}
 			
 			$q .= "$k, ";
 		}
@@ -1574,6 +1577,7 @@ if($tee == "") {
 			for($i=0;$i<=$c; $i++) {
 				
 				if(is_null($laskurow[$i]) and isset($ed[$i]) and $group_by != ""){
+					
 					if($i == 0) {
 						echo "<td align='right' class='tumma'>".t("Kaikki yhteensä").":</td>";
 

@@ -965,16 +965,16 @@ while (!feof ($fd)) {
 
 						// jos saldo ei riit‰ normivarastoista, pit‰‰ katsoa miss‰ varastossa riitt‰‰ ja myyd‰‰n sielt‰ (koska jossain riitt‰‰, muuten tilaus ei olisi edes tullu t‰nne asti)
 						if ($chk_myytavissa < $kpl) {
-							$query = "	SELECT distinct varastopaikat.tunnus varasto, CASE maa WHEN 'FI' THEN '1' WHEN 'SE' THEN '2' ELSE '3' END sorttauskentta
+							$query = "	SELECT distinct varastopaikat.tunnus varasto, varastopaikat.prioriteetti
 										FROM tuotepaikat
 										JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
 											AND varastopaikat.tyyppi != ''
-											AND varastopaikat.maa = 'FI'
+											AND varastopaikat.prioriteetti > 0
 											AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 											AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0')))
 										WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 										AND tuotepaikat.tuoteno = '$tuoteno'
-										ORDER BY sorttauskentta";
+										ORDER BY prioriteetti";
 							$sres = mysql_query($query) or pupe_error($query);
 
 							$erikoisvarastojen_saldot = array();
@@ -985,7 +985,7 @@ while (!feof ($fd)) {
 								if ($chk_myytavissa >= $kpl) {
 									$erikoisvarastojen_saldot[$erikois_i]["varasto"] = (int) $erikoisasaldo_row["varasto"];
 									$erikoisvarastojen_saldot[$erikois_i]["myytavissa"] = (float) $chk_myytavissa;
-									$erikoisvarastojen_saldot[$erikois_i]["sorttauskentta"] = (int) $erikoisasaldo_row["sorttauskentta"];
+									$erikoisvarastojen_saldot[$erikois_i]["prioriteetti"] = (int) $erikoisasaldo_row["prioriteetti"];
 									$erikois_i++;
 								}
 							}
@@ -994,14 +994,14 @@ while (!feof ($fd)) {
 								// Sortataan 2 dimensoinen array. pit‰‰ ensiksi tehd‰ sortattavista keyst‰ omat arrayt
 								$apusort_jarj0 = $apusort_jarj1 = array();
 								foreach ($erikoisvarastojen_saldot as $apusort_key => $apusort_row) {
-									$apusort_jarj0[$apusort_key] = $apusort_row['myytavissa'];
-								    $apusort_jarj1[$apusort_key] = $apusort_row['sorttauskentta'];
+								    $apusort_jarj0[$apusort_key] = $apusort_row['prioriteetti'];
+									$apusort_jarj1[$apusort_key] = $apusort_row['myytavissa'];
 								}
 
 								// sortataan by myytavissa, sorttauskentt‰
-								array_multisort($apusort_jarj0, SORT_DESC, $apusort_jarj1, SORT_ASC, $erikoisvarastojen_saldot);
+								array_multisort($apusort_jarj0, SORT_ASC, $apusort_jarj1, SORT_DESC, $erikoisvarastojen_saldot);
 
-								$varasto = $erikoisvarastojen_saldot[0]["varasto"]; // ekassa varastossa on siis suurin saldo
+								$varasto = $erikoisvarastojen_saldot[0]["varasto"]; // ekassa varastossa on pienin prioriteetti
 								$laskurow["varasto"] = $varasto; // joudutaan spooffaamaan laskurow varasto
 							}
 							else {

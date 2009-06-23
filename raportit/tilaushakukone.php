@@ -914,7 +914,7 @@ if($tee == "") {
 			}
 			echo "          </select>
 							<br>
-							".t("Myyjittäin").": <input type='checkbox' name='group[lasku.myyja]' value='checked' {$group["lasku.myyja"]}> prio: <input type='text' name='prio[lasku.myyja]' value='{$prio["lasku.myyja"]}' size='2'>
+							".t("Myyjittäin").": <input type='checkbox' name='group[myyja.nimi]' value='checked' {$group["myyja.nimi"]}> prio: <input type='text' name='prio[myyja.nimi]' value='{$prio["myyja.nimi"]}' size='2'>
 						</td>";
 
 			$query = "  SELECT tunnus, concat_ws(' ', nimi, nimitark) nimi
@@ -1220,7 +1220,7 @@ if($tee == "") {
 												<option value='seuranta' {$sel["seuranta"]}>".t("Seuranta")."</option>
 												<option value='laskun_lisatiedot.asiakkaan_kohde' {$sel["laskun_lisatiedot.asiakkaan_kohde"]}>".t("Kohde")."</option>
 												<option value='lasku.laatija' {$sel["lasku.laatija"]}>".t("Laatija")."</option>
-												<option value='lasku.myyja' {$sel["lasku.myyja"]}>".t("Myyja")."</option>                                                                                                                                           
+												<option value='myyja.nimi' {$sel["myyja.nimi"]}>".t("Myyja")."</option>                                                                                                                                           
 												<option value='summa_' {$sel["summa_"]}>".t("Summa")."</option>
 												<option value='pva' {$sel["pva"]}>".t("Voimassa")."</option>
 												<option value='maa' {$sel["maa"]}>".t("Maa")."</option>
@@ -1491,12 +1491,12 @@ if($tee == "") {
 
 		$q = "";
 		foreach($g as $k) {
-			if($k == "lasku.myyja") {
-				$k = "myyja.nimi myyja";
+			if($k == "myyja.nimi") {
+				$k = "if(myyja.nimi IS NULL, concat('**Myyjä puuttuu [',lasku.myyja,']**'), myyja.nimi) myyjä";
 				$myyja_join = " LEFT JOIN kuka myyja ON myyja.yhtio=lasku.yhtio and myyja.tunnus=lasku.myyja";
 			}
 			elseif($k == "lasku.vienti") {
-				$k = "if(lasku.vienti='E', '".t("Eurooppa")."', if(lasku.vienti='K', '".t("Kaukomaat")."', 'Kotimaa')) vienti";
+				$k = "if(lasku.vienti='E', '".t("Eurooppa")."', if(lasku.vienti='K', '".t("Kaukomaat")."', if(lasku.vienti='', 'Kotimaa', NULL))) vienti";
 			}
 			elseif($k == "asiakas.tunnus") {
 				$k = "concat_ws(' ', asiakas.nimi, asiakas.nimitark) asiakastunnus";
@@ -1532,8 +1532,8 @@ if($tee == "") {
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila IN ($laskutilat) and lasku.tunnus = lasku.tunnusnippu
 					$lasku_rajaus
-					$having_rajaus
 					$group_by
+					$having_rajaus
 					$order
 					$lkm_rajaus";
 	}
@@ -1551,8 +1551,8 @@ if($tee == "") {
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila IN ($laskutilat) and lasku.tunnus = lasku.tunnusnippu and lasku.tilaustyyppi!='9'
 					$lasku_rajaus
-					$having_rajaus
 					$group_by
+					$having_rajaus
 					$order
 					$lkm_rajaus";
 	}

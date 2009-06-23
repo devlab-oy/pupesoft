@@ -114,7 +114,7 @@
 	
 	echo "<font class='head'>".t("$otsikko")."</font><hr>";
 	
-	if($from == "yllapito") {
+	if ($from == "yllapito") {
 		echo "
 		<script LANGUAGE='JavaScript'>
 			function resizeIframe(frameid, offset){
@@ -133,8 +133,8 @@
 						height = currentfr.Document.body.scrollHeight;
 					}
 
-					currentfr.height = height+offset;
-					currentfr.style.height = height+offset;
+					currentfr.height = height+offset+10;
+					currentfr.style.height = height+offset+10;
 
 					setTimeout(\"window.parent.document.getElementById('\"+frameid+\"').style.display='block';\", 300);
 
@@ -1080,7 +1080,7 @@
 			$nimi = t("Päivitä $otsikko_nappi");
 		}
 		
-		if($ajax_menu_yp!="") {
+		if ($ajax_menu_yp!="") {
 			echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi' onClick=\"$ajax_post\">";
 		}
 		else {
@@ -1096,9 +1096,7 @@
 			echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type = 'submit' name='paluunappi' value = '".t("Palaa avainsanoihin")."'>";
 		}
 
-
 		echo "</td>";
-
 		echo "<td class='back' valign='top'>";
 		
 		if ($errori == '' and $toim == "sarjanumeron_lisatiedot") {
@@ -1121,8 +1119,19 @@
 		}
 
 		if ($errori == '' and ($toim == "toimi" or $toim == "asiakas")) {
-			require ("inc/toimittajan_yhteyshenkilo.inc");
+			
+			if ($toim == "asiakas") {
+				$laji = "A";
+			}
+			elseif ($toim == "toimi") {
+				$laji = "T";
+			}
 
+			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='yhteyshenkilo' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
+			$res = mysql_query($queryoik) or pupe_error($queryoik);
+			
+			if(mysql_num_rows($res) > 0) echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=yhteyshenkilo&from=yllapito&laji=$laji&ohje=off&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
+						
 			if ($toim == "asiakas") {
 				include ("inc/asiakkaan_avainsanat.inc");
 			}
@@ -1132,25 +1141,28 @@
 			require ("inc/liitaliitetiedostot.inc");
 		}
 		
-		//	Linkitetään rekkareita!
-		if($from!="yllapito" and $errori == "") {
+		if ($from != "yllapito" and $errori == "") {
 			if ($toim == "tuote" and $laji != "V") {
-				require ("inc/tuotteen_toimittajat.inc");
 				
 				$lukitse_avaimeen = $tuoteno;
+									
+				$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='tuotteen_toimittajat' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
+				$res = mysql_query($queryoik) or pupe_error($queryoik);
 				
+				if(mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_toimittajat_iframe' name='tuotteen_toimittajat_iframe' src='yllapito.php?toim=tuotteen_toimittajat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
+																						
 				$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='tuotteen_avainsanat' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 				$res = mysql_query($queryoik) or pupe_error($queryoik);
-				if(mysql_num_rows($res) > 0) {
-					echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=tuotteen_avainsanat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
-				}
+				
+				if(mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=tuotteen_avainsanat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
 			}
 
 			if ($toim == "maksuehto" and $laji != "V") {
 								
 				$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='avainsana' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 				$res = mysql_query($queryoik) or pupe_error($queryoik);
-				if(mysql_num_rows($res) > 0) {
+				
+				if (mysql_num_rows($res) > 0) {
 					
 					//	Maksuehdon teksti
 					$lukitse_laji = "MEHTOTXT";
@@ -1158,7 +1170,7 @@
 					
 					echo "<iframe id='avainsanat_mehtotxt_iframe' name='avainsanat_mehtotxt_iframe' src='yllapito.php?toim=avainsana&from=yllapito&ohje=off&haku[2]=$lukitse_laji&haku[3]=$lukitse_avaimeen&lukitse_laji=$lukitse_laji&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
 					
-					if($kateksti != "") {
+					if ($kateksti != "") {
 						//	Maksuehdon kassateksti
 						$lukitse_laji = "MEHTOKATXT";
 						$lukitse_avaimeen = $kateksti;
@@ -1257,12 +1269,22 @@
 		
 	}
 	
-	if($from == "yllapito" and $toim == "tuotteen_avainsanat") {
-		echo "<br><br><script LANGUAGE='JavaScript'>resizeIframe('tuotteen_avainsanat_iframe');</script>";
+	
+	if ($from == "yllapito" and $toim == "yhteyshenkilo") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('yhteyshenkilo_iframe');</script>";
 	}
+	
+	if($from == "yllapito" and $toim == "tuotteen_avainsanat") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_avainsanat_iframe');</script>";
+	}
+	
+	if($from == "yllapito" and $toim == "tuotteen_toimittajat") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_toimittajat_iframe');</script>";
+	}
+	
 	if($from == "yllapito" and $toim == "avainsana") {
-		echo "<br><br><script LANGUAGE='JavaScript'>resizeIframe('avainsanat_mehtotxt_iframe');</script>";
-		echo "<br><br><script LANGUAGE='JavaScript'>resizeIframe('avainsanat_mehtokatxt_iframe');</script>";		
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('avainsanat_mehtotxt_iframe');</script>";
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('avainsanat_mehtokatxt_iframe');</script>";		
 	}
 	elseif($from != "yllapito") {
 		require ("inc/footer.inc");

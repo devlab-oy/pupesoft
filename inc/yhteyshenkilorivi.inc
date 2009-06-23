@@ -8,7 +8,10 @@
 	}
 	
 	if (mysql_field_name($result, $i) == "liitostunnus") {
-		if ($liitostunnus != ''){
+		if ($lukitse_avaimeen != "") {
+			$trow[$i] = $lukitse_avaimeen;
+		}
+		elseif ($liitostunnus != ''){
 			$trow[$i] = $liitostunnus;
 		}
 		$tyyppi = 3;
@@ -24,18 +27,14 @@
 	}
 
 	if (mysql_field_name($result, $i) == "tyyppi") {
-		if($trow[$i] == "") {
-			if($yhtyyppi == "asiakas") {
-				$trow[$i]="A";
-			}
-			elseif($yhtyyppi == "toimi") {
-				$trow[$i]="T";
-			}
-			$tyyppi=4;
+		if($laji == "A") {
+			$trow[$i] = "A";
 		}
-		else {
-			$tyyppi=0;
+		elseif($laji == "T") {
+			$trow[$i] = "T";
 		}
+					
+		$tyyppi=4;
 	}
 	
 	if (mysql_field_name($result, $i) == "rooli") {
@@ -81,13 +80,11 @@
 	}
 	
 	if (mysql_field_name($result, $i) == "tilausyhteyshenkilo") {
-		
-		
-		if ($trow[$i] == "o") {
+				
+		if ($trow[$i] != "") {
 			$sel = "SELECTED";
 		}
-		
-		
+				
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value='' >".t("Ei")."</option>";
 		$ulos .= "<option value='K' $sel>".t("Kyllä")."</option>";
@@ -97,14 +94,15 @@
 	
 	if (mysql_field_name($result, $i) == "oletusyhteyshenkilo") {
 		
-		
-		if ($trow[$i] == "o") {
-			$sel = "CHECKED";
+		if ($trow[$i] != "") {
+			$sel = "SELECTED";
 		}
-		
-		
-		$ulos = "<td><input type='checkbox' name='oletusyhteyshenkilo' $sel $state></td>";
+				
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value='' >".t("Ei")."</option>";
+		$ulos .= "<option value='K' $sel>".t("Kyllä")."</option>";
+		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+		
 ?>

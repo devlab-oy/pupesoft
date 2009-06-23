@@ -250,6 +250,14 @@
 				echo "<font class='error'>".t("Tositteen summat eivät mene tasan")."</font><br>";
 		}
 
+		// jos loppusumma on isompi kuin tietokannassa oleva tietuen koko (10 numeroa + 2 desimaalia), niin herjataan
+		if ($summa != '' and abs($summa) > 0) {
+			if (abs($summa) > 9999999999.99) {
+				echo "<font class='error'>".t("VIRHE: liian iso summa")."!</font><br/>";
+				$gok=1;
+			}
+		}
+
  		// Jossain tapahtui virhe
 		if ($gok == 1) {
 			echo "<font class='error'>".t("Jossain oli virheitä/muutoksia")."!</font><br><br>";

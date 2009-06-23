@@ -472,6 +472,40 @@ if (isset($muut_siirrettavat)) {
 	}
 }
 
+// jos loppusumma on isompi kuin tietokannassa oleva tietuen koko (10 numeroa + 2 desimaalia), niin herjataan
+if ($tila == 'tee_kohdistus' and is_array($rivi_hinta) !== FALSE and is_array($rivi_kpl) !== FALSE) {
+
+	foreach ($rivi_hinta as $tun => $hinta_chk) {
+		$loppusumma_check = $rivi_kpl[$tun] * $hinta_chk;
+
+		if (count($rivi_valitut_tunnukset) > 0 or count(rivi_kaikki_tunnukset) > 0) {
+
+			if ($kohdista_koko_sivu != "") {
+				$rivi_valitut_tunnukset = $rivi_kaikki_tunnukset;
+			}
+			elseif ($ala_kohdista_mitaan != "") {
+				unset($rivi_valitut_tunnukset);
+			}
+
+			if (isset($rivi_valitut_tunnukset) and count($rivi_valitut_tunnukset) > 0) {
+
+				foreach ($rivi_valitut_tunnukset as $valittu) {
+
+					list($valittutunnus, $valittuotunnus) = explode("###", $valittu);
+				
+					if ($valittutunnus == $tun) {
+						if (abs($loppusumma_check) > 9999999999.99) {
+							echo "<font class='error'>",t("VIRHE: liian iso loppusumma"),"!</font><br/>";
+							$tila = '';
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 //kohdistetaan rivej‰ laskulle
 if ($tila == 'tee_kohdistus') {
 
@@ -485,6 +519,7 @@ if ($tila == 'tee_kohdistus') {
 	
 	//Tehd‰‰n uusia lis‰varusterivej‰
 	if(is_array($lisavarusterivi_kpl)) {
+
 		foreach ($lisavarusterivi_kpl as $tunnus => $kpl) {
 			$kpl	  = str_replace(",",".", $kpl);
 			$perheid2 = substr($tunnus, 0, strpos($tunnus,'##'));
@@ -679,7 +714,7 @@ if ($tila == '') {
 	$hintarow = mysql_fetch_array($result);
 
 	// p‰ivitet‰‰n samantien t‰m‰ tieto laskulle
-	$query   = "update lasku set summa='$hintarow[hinta]', kohdistettu='' where yhtio ='$kukarow[yhtio]' and tunnus='$otunnus'";
+	$query   = "UPDATE lasku set summa='$hintarow[hinta]', kohdistettu='' where yhtio ='$kukarow[yhtio]' and tunnus='$otunnus'";
 	$hinresu = mysql_query($query) or pupe_error($query);
 
 
@@ -869,7 +904,7 @@ if ($tila == '') {
 	// jos kululaskua ei ole viel‰ liitetty, oletetaan ett‰ k‰ytet‰‰n toimittajan oletus valuuttaa
 	if ($kulurow["valkoodi"] == "") $kulurow["valkoodi"] = $laskurow["valkoodi"];
 
-	$query  = "select sum(kpl+varattu) kappaleet, count(*) rivit from tilausrivi where yhtio='$kukarow[yhtio]' and uusiotunnus='$laskurow[tunnus]' and tyyppi='O'";
+	$query  = "SELECT sum(kpl+varattu) kappaleet, count(*) rivit from tilausrivi where yhtio='$kukarow[yhtio]' and uusiotunnus='$laskurow[tunnus]' and tyyppi='O'";
 	$kappaleetres = mysql_query($query) or pupe_error($query);
 	$kappaleetrow = mysql_fetch_array($kappaleetres);
 		
@@ -900,7 +935,7 @@ if ($tila == '') {
 
 	js_popup();
 
-	$query = "	select l2.ebid, l2.nimi, l2.summa, l2.tunnus
+	$query = "	SELECT l2.ebid, l2.nimi, l2.summa, l2.tunnus
 				FROM lasku l1
 				JOIN lasku l2 ON l1.yhtio=l2.yhtio and l1.vanhatunnus=l2.tunnus and l2.ebid!=''
 				WHERE l1.yhtio		= '$kukarow[yhtio]'
@@ -1138,7 +1173,7 @@ if ($tila == '') {
 
 		// Tuoteperheiden lapsille ei n‰ytet‰ rivinumeroa
 		if ($rivirow["perheid"] == $rivirow["rivitunnus"] or ($rivirow["perheid2"] == $rivirow["rivitunnus"] and $rivirow["perheid"] == 0)) {
-			$query = "	select count(*)
+			$query = "	SELECT count(*)
 						from tilausrivi
 						where yhtio = '$kukarow[yhtio]'
 						and otunnus in ($rivirow[otunnus],$otunnus)
@@ -1200,7 +1235,7 @@ if ($tila == '') {
 			echo "<a name='$rivirow[rivitunnus]'>";
 
 			//tsekataan is‰n status
-			$query = "	select kpl
+			$query = "	SELECT kpl
 						from tilausrivi
 						where yhtio = '$kukarow[yhtio]'
 						and tunnus = '$rivirow[perheid2]'";
@@ -1408,9 +1443,9 @@ if ($tila == '') {
 	echo "<table>";
 	echo "<tr>";
 
-	echo "<td class='back'><input type='submit' value='".t("Tallenna muutokset")."'></td>";
-	echo "<td class='back'><input type='submit' name='kohdista_koko_sivu' onclick='submit();' value='".t("Kohdista kaikki rivit")."'></td>";
-	echo "<td class='back'><input type='submit' name='ala_kohdista_mitaan' value='".t("Poista kaikki kohdistukset")."'></td>";
+	echo "<td class='back'><input type='button' onclick='submit_tallenna();' value='".t("Tallenna muutokset")."'></td>";
+	echo "<td class='back'><input type='button' onclick='submit_kohd_kaikki();' value='".t("Kohdista kaikki rivit")."'></td>";
+	echo "<td class='back'><input type='button' onclick='submit_kohd_eimit();' value='".t("Poista kaikki kohdistukset")."'></td>";
 
 	echo "</form>";
 

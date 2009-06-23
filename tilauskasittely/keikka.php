@@ -204,13 +204,13 @@ if ($toiminto == "yhdista") {
 if ($toiminto == "poista") {
 	$eisaapoistaa = 0;
 
-	$query  = "select tunnus from tilausrivi where yhtio='$kukarow[yhtio]' and uusiotunnus='$tunnus' and tyyppi='O'";
+	$query  = "SELECT tunnus from tilausrivi where yhtio='$kukarow[yhtio]' and uusiotunnus='$tunnus' and tyyppi='O'";
 	$delres = mysql_query($query) or pupe_error($query);
 	if (mysql_num_rows($delres) != 0) {
 		$eisaapoistaa++;
 	}
 
-	$query = "	select tunnus
+	$query = "	SELECT tunnus
 				from lasku
 				where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus<>0 and laskunro='$laskunro'";
 	$delres2 = mysql_query($query) or pupe_error($query);
@@ -511,18 +511,18 @@ if ($toiminto == "" and ($ytunnus == "" and $keikka == "")) {
 // perustetaan uusi keikka toimittajalle $ytunnus
 if ($toiminto == "uusi" and $toimittajaid > 0) {
 	// haetaan seuraava vapaa keikkaid
-	$query  = "select max(laskunro) from lasku where yhtio='$kukarow[yhtio]' and tila='K'";
+	$query  = "SELECT max(laskunro) from lasku where yhtio='$kukarow[yhtio]' and tila='K'";
 	$result = mysql_query($query) or pupe_error($query);
 	$row    = mysql_fetch_array($result);
 	$id		= $row[0]+1;
 
-	$query  = "select kurssi from valuu where nimi='$toimittajarow[oletus_valkoodi]' and yhtio='$kukarow[yhtio]'";
+	$query  = "SELECT kurssi from valuu where nimi='$toimittajarow[oletus_valkoodi]' and yhtio='$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$row    = mysql_fetch_array($result);
 	$kurssi = $row["kurssi"];
 
 	// meill‰ on $toimittajarow haettuna ylh‰‰ll‰
-	$query = "	insert into lasku set
+	$query = "	INSERT into lasku set
 				yhtio        = '$kukarow[yhtio]',
 				laskunro     = '$id',
 				ytunnus	     = '$toimittajarow[ytunnus]',

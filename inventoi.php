@@ -406,6 +406,17 @@
 								$summa = round($erotus * $row['kehahin'],2);
 							}
 							
+							// jos loppusumma on isompi kuin tietokannassa oleva tietuen koko (10 numeroa + 2 desimaalia), niin herjataan
+							if ($summa != '' and abs($summa) > 0) {
+								$ylitettava_summa_chk = $cursaldo*$summa;
+
+								if (abs($ylitettava_summa_chk) > 9999999999.99) {
+									echo "<font class='error'>".t("VIRHE: liian iso loppusumma")."!<br/>",t("Tuote"),": $tuoteno ",t("lopullinen kappalem‰‰r‰")," $kpl (",t("loppusumma"),": $ylitettava_summa_chk)</font><br>";
+									$virhe = 1;
+									break;
+								}
+							}
+							
 							if ($tee2 == "") {
 								///* Tehd‰‰n tapahtuma *///
 								$query = "	INSERT into tapahtuma set

@@ -36,6 +36,16 @@ if ($tee == 'J') {
 	require "inc/jaksota.inc";
 }
 
+// jos loppusumma on isompi kuin tietokannassa oleva tietuen koko (10 numeroa + 2 desimaalia), niin herjataan
+if ($tee == 'U' and $summa != '' and abs($summa) > 0) {
+	if (abs($summa) > 9999999999.99) {
+		$tee = 'E';
+		$tila = '';
+		$virhe = t("VIRHE: liian iso summa")."!";
+		$ok = 1;
+	}
+}
+
 // Otsikon muutokseen
 if ($tee == 'M') {
 	require "inc/muutosite.inc";

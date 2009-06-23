@@ -1145,6 +1145,14 @@
 			echo "</table>";
 
 
+			// jos loppusumma on isompi kuin tietokannassa oleva tietuen koko (10 numeroa + 2 desimaalia), niin herjataan
+			if ($yhteensa != '' and abs($yhteensa) > 0) {			
+				if (abs($yhteensa) > 9999999999.99) {
+					echo "<font class='error'>".t("VIRHE: liian iso loppusumma")."!</font><br>";
+					$tilausok++;
+				}
+			}
+
 			echo "<br><br><table width='100%'><tr>";
 
 			if ($rivienmaara > 0 and $laskurow["liitostunnus"] != '' and $tilausok == 0) {

@@ -4829,7 +4829,7 @@ if ($tee == '') {
 								while($sarjarow = mysql_fetch_array($sarjares)) {
 
 									// Haetaan hyvitettävien myyntirivien kautta alkuperäiset ostorivit
-									$query  = "	select tilausrivi.rivihinta/tilausrivi.kpl ostohinta
+									$query  = "	SELECT tilausrivi.rivihinta/tilausrivi.kpl ostohinta
 												FROM sarjanumeroseuranta
 												JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
 												WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]'
@@ -4891,6 +4891,14 @@ if ($tee == '') {
 						$kotiarvo_eieri	+= $arow["kotirivihinta_ei_erikoisaletta"];
 						$kate			+= $rivikate;
 						$kate_eieri		+= $rivikate_eieri;
+					}
+				}
+
+				// jos loppusumma on isompi kuin tietokannassa oleva tietuen koko (10 numeroa + 2 desimaalia), niin herjataan
+				if ($arvo_eieri != '' and abs($arvo_eieri) > 0) {			
+					if (abs($arvo_eieri) > 9999999999.99) {
+						echo "<font class='error'>",t("VIRHE: liian iso loppusumma"),"!</font><br>";
+						$tilausok++;
 					}
 				}
 

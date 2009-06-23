@@ -379,8 +379,6 @@ if($tee == "NAYTA") {
 	$select     = " ";
 
 	$select2    = " kalenteri.laatija   laatija, kalenteri.tunnus   tunnus";
-
-	$qlisa = "";
 	
 	$data = kalequery();
 		
@@ -798,8 +796,7 @@ if($tee == "") {
 		}
 		
 		if($setti == "viikkis") {
-			$alatila_tilaus     = array("A", "B", "C", "D", "E", "V", "J", "F", "T", "U");
-			$alatila_projekti   = array("", "A", "B");                      
+			$alatila_tilaus     = array("KESKEN","TUOTANNOSSA");
 			$hakupalkki         = "OHI";
 			$hakumuisti         = "";
 		}
@@ -954,7 +951,7 @@ if($tee == "") {
 			elseif($toim == "TILAUSHAKUKONE") {
 				echo "
 						<tr>
-							<th>".t("Tilauksen tila")."</th><th>".t("Projektin tila")."</th><th>".t("Vienti")."</th><th>".t("Maa")."</th>
+							<th>".t("Tilauksen tila")."</th><th>".t("Vienti")."</th><th>".t("Maa")."</th>
 						</tr>
 						<tr>";
 			}
@@ -986,40 +983,13 @@ if($tee == "") {
 				}
 								
 				echo "      <td>
-								<select name='alatila_tilaus[]' multiple='TRUE' size='8'>
-								<optgroup label='".("Myyntitilaus tuotannossa")."'>
-									<option value='A' {$sel["A"]}>".t("Keräyslista tulostettu/tulostusjonossa")."</option>
-									<option value='B' {$sel["B"]}>".t("Rahtikirjatiedot syötetty")."</option>
-									<option value='C' {$sel["C"]}>".t("Kerätty")."</option>
-									<option value='D' {$sel["D"]}>".t("Toimitettu")."</option>
-									<option value='E' {$sel["E"]}>".t("Vientitiedot syötetty")."</option>
-									<option value='V' {$sel["V"]}>".t("Laskutusvalmis")."</option>
-									<option value='X' {$sel["X"]}>".t("Laskutettu")."</option>                                                                                                                              
-								</optgroup>
-								<optgroup label='".("Myyntitilaus kesken")."'>
-									<option value='' {$sel[""]}>".t("Kesken")."</option>
-									<option value='J' {$sel["J"]}>".t("JT Poiminnassa")."</option>
-									<option value='E' {$sel["E"]}>".t("Ennakko poiminnassa")."</option>
-									<option value='F' {$sel["F"]}>".t("Odottaa hyväksyntää")."</option>
-									<option value='T' {$sel["T"]}>".t("Odottaa JT-tuotteita")."</option>
-									<option value='U' {$sel["U"]}>".t("Kokonaistoimitus odottaa JT-tuotteita")."</option>
-								</optgroup>
+								<select name='alatila_tilaus[]' multiple='TRUE' size='8' style='width: 180px;'>
+									<option value='KESKEN' {$sel["KESKEN"]}>".t("Vahvistamatta")."</option>
+									<option value='TUOTANNOSSA' {$sel["TUOTANNOSSA"]}>".t("Tuotannossa")."</option>
+									<option value='SULJETTU' {$sel["SULJETTU"]}>".t("Loppuun käsitelty")."</option>
 								</select>
 							</td>";
 				$sel =  array();
-				if(count($alatila_projekti) > 0) {
-					foreach($alatila_projekti as $t) {
-						$sel[$t] = "SELECTED";
-					}       
-				}
-				echo "      <td>
-								<select name='alatila_projekti[]' multiple='TRUE' size='8'>
-								<option value='' {$sel[""]}>".t("Projekti kesken")."</option>
-								<option value='A' {$sel["A"]}>".t("Projekti aktiivisena")."</option>
-								<option value='B' {$sel["B"]}>".t("Projekti valmis")."</option>
-								<option value='X' {$sel["X"]}>".t("Projekti suljettu")."</option>
-								</select>
-							</td>";                         
 			}
 			
 			$sel =  array();
@@ -1030,7 +1000,7 @@ if($tee == "") {
 			}
 			
 			echo "      <td>
-							<select name='vienti[]' multiple='TRUE' size='8'>
+							<select name='vienti[]' multiple='TRUE' size='8' style='width: 150px;'>
 							<option value='' {$sel[""]}>".t("Kotimaa")."</option>
 							<option value='E' {$sel["E"]}>".t("Eu")."</option>
 							<option value='K' {$sel["K"]}>".t("Ei-Eu")."</option>
@@ -1056,7 +1026,7 @@ if($tee == "") {
 				}       
 			}
 			echo "      <td>
-							<select name='maa[]' multiple='TRUE' size='8'>
+							<select name='maa[]' multiple='TRUE' size='8' style='width: 200px;'>
 							$maat
 							</select>
 							<br>
@@ -1131,6 +1101,7 @@ if($tee == "") {
 										<td colspan = '2'>
 											<select name='tapahtuma'>
 											<option value='A' {$sel2["A"]}>".t("Tilaus avattu")."</option>
+											<option value='L' {$sel2["L"]}>".t("Tilaus loppuun käsitelty")."</option>
 											<option value='K' {$sel2["K"]}>".t("Viimeisin kalenteritapahtuma")."</option>                                       
 											</select>
 										</td>";                                 
@@ -1286,7 +1257,7 @@ if($tee == "") {
 			</div><br>";
 		}
 		
-		$lasku_rajaus = $lisatiedot_rajaus = $versio_rajaus = $having_rajaus = $lkm_rajaus = "";
+		$lasku_rajaus = $lisatiedot_rajaus = $versio_rajaus = $having_rajaus = $lkm_rajaus = $qlisa = $virhe = "";
 		
 		if(is_numeric($voimassa)) {
 			$having_rajaus .= " and pva < ".($voimassa * 7);
@@ -1315,16 +1286,30 @@ if($tee == "") {
 			$lasku_rajaus .= " and lasku.alatila IN ('".implode("','", $alatila)."')";
 		}
 		
-		if(count($alatila_tilaus) > 0 and count($alatila_projekti) > 0) {
-			$lasku_rajaus .= " and  ((lasku.tila IN ('N', 'L') and lasku.alatila IN ('".implode("','", $alatila_tilaus)."')) 
-										or 
-									(lasku.tila = 'R' and lasku.alatila IN ('".implode("','", $alatila_projekti)."')))";
-		}
-		elseif(count($alatila_tilaus) > 0) {
-			$lasku_rajaus .= " and  lasku.tila IN ('N', 'L') and lasku.alatila IN ('".implode("','", $alatila_tilaus)."') and lasku.tila != 'R'";
-		}
-		elseif(count($alatila_projekti) > 0) {
-			$lasku_rajaus .= " and  lasku.tila = 'R' and lasku.alatila IN ('".implode("','", $alatila_projekti)."') and lasku.tila NOT IN ('N','L')";
+		if(count($alatila_tilaus) > 0) {
+			$at = implode("_", $alatila_tilaus);
+			
+			if($at == "KESKEN") {
+				$lasku_rajaus .= " and  lasku.tila IN ('N','R') and lasku.alatila = ''";
+			}
+			elseif($at == "TUOTANNOSSA") {
+				$qlisa .= ", (SELECT count(*) FROM lasku lt where lasku.yhtio=lt.yhtio and lt.tila IN ('N','L','R','A') and lt.alatila != 'X' and lasku.tunnusnippu=lt.tunnusnippu and lt.tunnusnippu>0) kesken";
+				$lasku_rajaus .= " and lasku.alatila != ''";
+				$having_rajaus .= " and kesken > 0";
+			}
+			elseif($at == "KESKEN_TUOTANNOSSA") {
+				$qlisa .= ", (SELECT count(*) FROM lasku lt where lasku.yhtio=lt.yhtio and lt.tila IN ('N','L','R','A') and lt.alatila != 'X' and lasku.tunnusnippu=lt.tunnusnippu and lt.tunnusnippu>0) kesken";
+				$lasku_rajaus .= "";
+				$having_rajaus .= " and kesken > 0";
+			}
+			elseif($at == "SULJETTU") {
+				$qlisa .= ", (SELECT count(*) FROM lasku lt where lasku.yhtio=lt.yhtio and lt.tila IN ('N','L','R','A') and lt.alatila != 'X' and lasku.tunnusnippu=lt.tunnusnippu and lt.tunnusnippu>0) kesken";
+				$lasku_rajaus .= "";
+				$having_rajaus .= " and kesken = 0";
+			}
+			else {
+				$virhe .= "<font class='error'>".t("Tilavalinta ei kelpaa")."</font><br>";
+			}
 		}
 		
 		if(count($vienti) > 0) {
@@ -1334,13 +1319,25 @@ if($tee == "") {
 		if(count($maa) > 0) {
 			$lasku_rajaus .= " and lasku.maa IN ('".implode("','", $maa)."')";
 		}
-
+		
+		if($tapahtuma == "L" and $at != "SULJETTU") {
+			$virhe .= "<font class='error'>".t("Valitse loppuunkäsitellyt laskut hakiessa tilauksia sulkemisajan mukaan.")."</font><br>";	
+		}
+		
 		if($viimeisin > 0) {
 			if($tapahtuma == "A") {
 				$lasku_rajaus .= " and lasku.luontiaika >= DATE_SUB(now(), INTERVAL $viimeisin WEEK)";
 			}
 			elseif($tapahtuma == "K") {
 				$having_rajaus .= " and viimeisin_kaletapahtuma >= DATE_SUB(now(), INTERVAL $viimeisin WEEK)";
+				$viimeisin_kaletapahtuma = "OK";
+			}
+			elseif($tapahtuma == "L") {
+				$qlisa .= ", (SELECT max(mapvm) FROM lasku lt where lasku.yhtio=lt.yhtio and lt.tila IN ('U') and lasku.tunnusnippu=lt.tunnusnippu and lt.tunnusnippu>0) laskutettu";
+				$having_rajaus .= " and laskutettu >= DATE_SUB(now(), INTERVAL $viimeisin WEEK)";
+			}			
+			elseif($tapahtuma == "X") {
+				$having_rajaus .= " and if() >= DATE_SUB(now(), INTERVAL $viimeisin WEEK)";
 				$viimeisin_kaletapahtuma = "OK";
 			}
 			else {
@@ -1360,6 +1357,10 @@ if($tee == "") {
 				$having_rajaus .= " and viimeisin_kaletapahtuma >= '$vva-$kka-$ppa'";
 				$viimeisin_kaletapahtuma = "OK";
 			}
+			elseif($tapahtuma == "L") {
+				$qlisa .= ", (SELECT max(mapvm) FROM lasku lt where lasku.yhtio=lt.yhtio and lt.tila IN ('U') and lasku.tunnusnippu=lt.tunnusnippu and lt.tunnusnippu>0) laskutettu";
+				$having_rajaus .= " and laskutettu >= '$vva-$kka-$ppa'";
+			}			
 			else {
 				$versio_rajaus .= " and versio.luontiaika >= '$vva-$kka-$ppa'";
 			}
@@ -1375,6 +1376,12 @@ if($tee == "") {
 				$having_rajaus .= " and viimeisin_kaletapahtuma <= '$vvl-$kkl-$ppl'";
 				$viimeisin_kaletapahtuma = "OK";
 			}
+			elseif($tapahtuma == "L") {
+				if($ppa == "") {
+					$qlisa .= ", (SELECT max(mapvm) FROM lasku lt where lasku.yhtio=lt.yhtio and lt.tila IN ('U') and lasku.tunnusnippu=lt.tunnusnippu and lt.tunnusnippu>0) laskutettu";
+				}
+				$having_rajaus .= " and laskutettu <= '$vvl-$kkl-$ppl'";
+			}			
 			else {
 				$versio_rajaus .= " and versio.luontiaika <= '$vvl-$kkl-$ppl'";
 			}
@@ -1393,6 +1400,10 @@ if($tee == "") {
 
 	if($lasku_rajaus == "" and $lisatiedot_rajaus == "" and $versio_rajaus == "" and $having_rajaus == "") {
 		die("Tee edes jotain valintoja!");
+	}
+	
+	if($virhe != "") {
+		die($virhe);
 	}
 	
 	if($having_rajaus != "") {
@@ -1468,10 +1479,10 @@ if($tee == "") {
 	elseif($toim == "TILAUSHAKUKONE") {
 		$summa = "(
 			SELECT sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))
-			FROM lasku l
-			JOIN tilausrivi ON tilausrivi.yhtio=l.yhtio and tilausrivi.otunnus=l.tunnus and tyyppi != 'D' and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'
+			FROM lasku l USE INDEX (yhtio_tunnusnippu,tila_index)
+			JOIN tilausrivi USE INDEX (yhtio_otunnus) ON tilausrivi.yhtio=l.yhtio and tilausrivi.otunnus=l.tunnus and tyyppi != 'D' and tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]'
 		
-			WHERE lasku.yhtio=lasku.yhtio and tunnusnippu=lasku.tunnusnippu and lasku.tila IN ('R','L','N')
+			WHERE l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu and l.tila IN ('R','L','N','A')
 		)";
 	}
 	
@@ -1511,9 +1522,10 @@ if($tee == "") {
 		$query = "  SELECT  $q
 							lasku.tila, lasku.alatila, lasku.tunnus
 							$viimeisin_kaletapahtuma
-					FROM lasku
+							$qlisa
+					FROM lasku USE INDEX (tila_index)
 					JOIN lasku versio ON versio.yhtio = lasku.yhtio and versio.tunnus = if(lasku.tunnusnippu>0,(select max(l.tunnus) from lasku l where l.yhtio = lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu),lasku.tunnus) $versio_rajaus
-					JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = versio.yhtio and laskun_lisatiedot.otunnus=versio.tunnus $lisatiedot_rajaus
+					JOIN laskun_lisatiedot USE INDEX (yhtio_otunnus)ON laskun_lisatiedot.yhtio = versio.yhtio and laskun_lisatiedot.otunnus=versio.tunnus $lisatiedot_rajaus
 					LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
 					LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde
 					$myyja_join
@@ -1530,8 +1542,9 @@ if($tee == "") {
 		$query = "  SELECT  $q
 							lasku.tila, lasku.alatila, lasku.tunnus
 							$viimeisin_kaletapahtuma
-					FROM lasku
-					JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus $lisatiedot_rajaus
+							$qlisa
+					FROM lasku USE INDEX (tila_index)
+					JOIN laskun_lisatiedot USE INDEX (yhtio_otunnus) ON laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus $lisatiedot_rajaus
 					LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
 					LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde
 					$myyja_join

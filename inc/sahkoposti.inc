@@ -13,7 +13,7 @@
 
 	if (substr($komento,0,12) == 'asiakasemail') {
 		$varaposti = $kukarow['eposti'];
-		$kukarow['eposti'] = substr($komento,12);
+		$kukarow['eposti'] = substr($komento, 12);
 	}
 
 	$bound = uniqid(time()."_") ;

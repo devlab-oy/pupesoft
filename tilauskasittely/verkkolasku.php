@@ -1368,9 +1368,10 @@
 
 							// Hoidetaan pyöristys sekä valuuttakäsittely
 							if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-								$lasrow["kasumma"] 	= $lasrow["kasumma_valuutassa"];
-								$lasrow["summa"] 	= sprintf("%.2f", $lasrow["summa_valuutassa"] - $lasrow["pyoristys_valuutassa"]);
-								$lasrow["arvo"]		= $lasrow["arvo_valuutassa"];
+								$lasrow["kasumma"] 	 = $lasrow["kasumma_valuutassa"];
+								$lasrow["summa"] 	 = sprintf("%.2f", $lasrow["summa_valuutassa"] - $lasrow["pyoristys_valuutassa"]);
+								$lasrow["arvo"]		 = $lasrow["arvo_valuutassa"];
+								$lasrow["pyoristys"] = $lasrow["pyoristys_valuutassa"];
 							}
 							else {
 								$lasrow["summa"] 	= sprintf("%.2f", $lasrow["summa"] - $lasrow["pyoristys"]);

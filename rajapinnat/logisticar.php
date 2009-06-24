@@ -94,6 +94,8 @@
 	function nimike($limit = '') {
 		global $path_nimike, $yhtio, $where_logisticar;
 
+		echo "Tuotteet ...";
+
 		$query = "	SELECT 
 					tuote.tuoteno        	nimiketunnus,
         			tuote.nimitys           nimitys,
@@ -196,11 +198,11 @@
 				$hash .= "#";
 			}
 
-			echo sprintf("%s  |%-40s|\r", $str, $hash);
+//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 		}
 
 		fclose($fp);
-		echo "\nDone.\n";
+		echo "Done.\n";
 	}
 
 	function asiakas($limit = '') {
@@ -257,7 +259,7 @@
 				$hash .= "#";
 			}
 
-			echo sprintf("%s  |%-40s|\r", $str, $hash);
+//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 		}
 
 		fclose($fp);
@@ -312,7 +314,7 @@
 				$hash .= "#";
 			}
 
-			echo sprintf("%s  |%-40s|\r", $str, $hash);
+//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 		}
 
 		fclose($fp);
@@ -401,7 +403,7 @@
 				$hash .= "#";
 			}
 
-			echo sprintf("%s  |%-40s|\r", $str, $hash);
+//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 		}
 
 		fclose($fp);
@@ -538,7 +540,7 @@
 				$hash .= "#";
 			}
 
-			echo sprintf("%s  |%-40s|\r", $str, $hash);
+//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 	    }
 
 		fclose($fp);
@@ -638,7 +640,7 @@
 				$hash .= "#";
 			}
 
-			echo sprintf("%s  |%-40s|\r", $str, $hash);
+//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 	    }
 
 		fclose($fp);

@@ -704,6 +704,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						}
 						else {
 							$tpttrow = mysql_fetch_array($tpres);
+							
+							// Tarvitaan tarkista.inc failissa
+							$toimi_liitostunnus = $tpttrow["tunnus"];
+							
 							$query .= ", liitostunnus='$tpttrow[tunnus]' ";
 							$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 						}

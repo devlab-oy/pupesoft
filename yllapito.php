@@ -64,7 +64,6 @@
 	$aputoim = $toim;
 	list($toim, $alias_set, $rajattu_nakyma) = explode('!!!', $toim);
 
-
 	// Tutkitaan vähän alias_settejä ja rajattua näkymää
 	$al_lisa = " and selitetark_2 = '' ";
 	
@@ -98,10 +97,10 @@
 
 	require ("inc/$toim.inc");
 	
-	if($lukitse_laji == "MEHTOTXT") {
+	if ($lukitse_laji == "MEHTOTXT") {
 		$otsikko = "Maksuehdon käännökset";
 	}
-	elseif($lukitse_laji == "MEHTOKATXT") {
+	elseif ($lukitse_laji == "MEHTOKATXT") {
 		$otsikko = "Kassatekstin käännökset";
 	}
 	
@@ -142,8 +141,7 @@
 				}
 			}
 
-		</script><br>";
-		
+		</script><br>";	
 	}
 	
 	// Saako paivittaa
@@ -554,8 +552,8 @@
 
 	$count = count($array);
 
-	for ($i=0; $i<=$count; $i++) {
-    	if (strlen($haku[$i]) > 0) {
+	for ($i=0; $i<=$count; $i++) {    			
+		if (strlen($haku[$i]) > 0) {
 			
 			if (($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
 				
@@ -574,6 +572,24 @@
 				}
 				else {
 					$lisa .= " and " . $array[$i] . " = '" . $haku[$i] . "'";
+				}
+			}
+			elseif ($toim == 'tuotteen_toimittajat' and trim($array[$i]) == 'nimi') {								
+				if (!is_numeric($haku[$i])) {
+					// haetaan laskutus-asiakas
+					$ashak = "SELECT group_concat(ytunnus) tunnukset FROM toimi WHERE yhtio='$kukarow[yhtio]' and nimi like '%" . $haku[$i] . "%'";
+					$ashakres = mysql_query($ashak) or pupe_error($ashak);
+					$ashakrow = mysql_fetch_array($ashakres);
+										
+					if ($ashakrow["tunnukset"] != "") {
+						$lisa .= " and toimittaja in (" . $ashakrow["tunnukset"] . ")";						
+					}
+					else {
+						$lisa .= " and toimittaja = NULL ";							
+					}
+				}
+				else {
+					$lisa .= " and toimittaja = '" . $haku[$i] . "'";
 				}
 			}
 			elseif (($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'ytunnus') {

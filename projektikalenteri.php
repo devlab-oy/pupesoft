@@ -30,11 +30,11 @@ if($projekti > 0) {
 		$kalenteri["laskutilat"]			= "'L','R','N'";
 		
 
-		$kalenteri["kalenteri_tyypit"]				= array("kalenteri", "Muistutus", "projektitapahtuma", );
+		$kalenteri["kalenteri_tyypit"]				= array("kalenteri", "Muistutus", "projektitapahtuma");
 		$kalenteri["kalenteri_nayta_tyyppi"]		= array("projektitapahtuma");
 		
-		$kalenteri["kalenteri_tilausdata"]			= array("tilaus", "kerays", "toimitus");
-		$kalenteri["kalenteri_nayta_tilausdata"]	= array("kerays", "toimitus");
+		$kalenteri["kalenteri_tilausdata"]			= array("tilaus", "kerays", "toimitus", "valmistus", "tyomaarays");
+		$kalenteri["kalenteri_nayta_tilausdata"]	= array("kerays", "toimitus", "valmistus", "tyomaarays");
 		
 		$kalenteri["kalenteri_ketka"]		= array("kaikki");
 		$kalenteri["kalenteri_nayta_kuka"]	= array("");
@@ -67,7 +67,8 @@ else {
 				LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=lasku.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde
 				WHERE lasku.yhtio = '$kukarow[yhtio]' 
 				and lasku.tila = 'R' 
-				and lasku.alatila != 'X'";
+				and lasku.alatila != 'X'
+				ORDER BY tunnusnippu DESC";
 	$result = mysql_query($query) or pupe_error($query);
 	
 	if(mysql_num_rows($result) > 0) {
@@ -80,7 +81,7 @@ else {
 						<th>".t("Projektipäällikkö")."</th>
 					</tr>";
 		while($row = mysql_fetch_array($result)) {
-			echo "<tr>
+			echo "<tr class='aktiivi'>
 						<td>$row[tunnus]</td>
 						<td>$row[seuranta]</td>
 						<td>$row[asiakas]</td>

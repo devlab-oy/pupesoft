@@ -137,7 +137,7 @@
 
 	if(!function_exists("color_code")) {
 		// scripti javascript menujen tekemiseen
-		function color_code ($arvo, $maxvalue, $values="") {
+		function color_code ($arvo, $maxvalue, $values="", $scheme="green") {
 			$porras = 200/$maxvalue;
 			if($arvo < 0) $arvo = 0;
 			if($arvo > $maxvalue) $arvo = $maxvalue;
@@ -162,7 +162,7 @@
 				return "rgba($r,$g, 0, 0.4);";
 			}
 			else {
-				return array("red" => ($r/255), "green" => ($g/255), "blue" => 0, "alpha" => 0.4);
+				return array("red" => (int) ($r/255), "green" => (int) ($g/255), "blue" => (int) 0, "alpha" => 0.4);
 			}			
 		}
 	}
@@ -472,6 +472,7 @@
 				$row = mysql_fetch_array($res);
 				
 				$viesti = "";
+				$menu = array();
 				if($row["tila"] == "T") {
 					
 					$abuq = "	SELECT tunnus
@@ -502,15 +503,43 @@
 						$viesti = t("Tilausta %s laskutettu, laskunro %s", $kieli, $row["tunnusnippu"], $row["laskunro"]);
 					}
 					elseif($lajitark == "toimitus") {
-						$viesti = t("Toimitus %s toimitus", $kieli, $row["tunnusnippu"]);
+						$viesti = t("Toimitus %s toimitus", $kieli, $row["tunnus"]);
+						
+						//	Voimmeko viel‰ muokata toimitusaikoja?
+						if(!in_array($row["alatila"], array("D","J","E","V","X"))) {
+							$menu[] = array("TEKSTI" => t("Muokkaa aikaa"), 		"HREF" => $kalenteri["URL"]."?kaletee=MUOKKAAKERAYSPAIVAA&otunnus=$row[tunnus]");
+						}						
 					}
 					elseif($lajitark == "kerays") {
-						$viesti = t("Toimituksen %s ker‰ys", $kieli, $row["tunnusnippu"]);
+						$viesti = t("Toimituksen %s ker‰ys", $kieli, $row["tunnus"]);
+						
+						//	Voimmeko viel‰ muokata toimitusaikoja?
+						if(!in_array($row["alatila"], array("D","J","E","V","X"))) {
+							$menu[] = array("TEKSTI" => t("Muokkaa aikaa"), 		"HREF" => $kalenteri["URL"]."?kaletee=MUOKKAAKERAYSPAIVAA&otunnus=$row[tunnus]");
+						}
 					}
 					else {
 						$viesti = $lajitark;
 					}
 				}				
+				elseif(in_array($row["tila"], array("V"))) {
+					$atoim = "MYYNTI";
+					if($lajitark == "valmistus") {
+						$viesti = t("Valmistus %s", $kieli, $row["tunnus"]);
+					}
+				}				
+				elseif(in_array($row["tila"], array("A"))) {
+					$atoim = "MYYNTI";
+					if($lajitark == "tyomaarays") {
+						$viesti = t("Tyomaarays %s", $kieli, $row["tunnus"]);
+					}
+
+					$menu[] = array("TEKSTI" => t("Muokkaa aikaa"), 		"HREF" => $kalenteri["URL"]."?kaletee=MUOKKAAKERAYSPAIVAA&otunnus=$row[tunnus]");
+				}				
+				
+				if(!in_array($row["alatila"], array("X"))) {
+					$menu[] = array("TEKSTI" => t("Muokkaa tilausta")." (ei viel toiminnassa..)", 		"HREF" => "");
+				}
 				
 				$row["otsikko"] = $viesti;
 				
@@ -522,6 +551,10 @@
 					$row["viesti"] = " <a href='#' onclick=\"popUp(event, 'toimitus', '300', '-20', 'raportit/asiakkaantilaukset.php?tee=NAYTA&toim=$atoim&h&tunnus=$row[tunnus]'); return false;\" class='kale' $poppari>$viesti</a>";
 				}
 				
+				//	Duunataan mmuokkausmenu jos tarvetta
+				if(is_array($menu) and count($menu) > 0) {
+					$row["viesti"] .= "<div align='right' style='float: right; width: 25px;'>".tee_menu($menu, "<img src='pics/lullacons/folder-open-green.png' class='edit'>")."</div>";
+				}
 			}
 			elseif($laji == "liite") {
 				
@@ -743,10 +776,10 @@
 						UNION
 						/*	Tilaus kirjattu	*/	
 						(	
-							SELECT 'lasku' laji, 'tilaus' laji_tark, UNIX_TIMESTAMP(date(lasku.luontiaika)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
+							SELECT distinct 'lasku' laji, 'tilaus' laji_tark, UNIX_TIMESTAMP(date(lasku.luontiaika)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
 							FROM lasku
 							$asiakas_join
-							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnusnippu = lasku.tunnus and lasku.tila IN ('R','L','N') $wherelisa
+							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = lasku.tunnusnippu and lasku.tila IN ('R','L','N','A') $wherelisa
 						)
 						";						
 					}
@@ -755,10 +788,10 @@
 						UNION
 						/*	Toimituksen l‰hetys	*/	
 						(	
-							SELECT 'lasku' laji, 'toimitus' laji_tark, UNIX_TIMESTAMP(date(lasku.toimaika)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
+							SELECT distinct 'lasku' laji, 'toimitus' laji_tark, UNIX_TIMESTAMP(date(lasku.toimaika)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
 							FROM lasku
 							$asiakas_join
-							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnusnippu = lasku.tunnus and lasku.tila IN ('R','L','N') $wherelisa
+							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila IN ('L','N') $wherelisa
 						)
 						";
 					}
@@ -767,10 +800,34 @@
 						UNION
 						/*	Toimituksen ker‰ys	*/	
 						(	
-							SELECT 'lasku' laji, 'kerays' laji_tark, UNIX_TIMESTAMP(date(lasku.kerayspvm)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
+							SELECT distinct 'lasku' laji, 'kerays' laji_tark, UNIX_TIMESTAMP(date(lasku.kerayspvm)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
 							FROM lasku
 							$asiakas_join
-							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnusnippu = lasku.tunnus and lasku.tila IN ('R','L','N') $wherelisa
+							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila IN ('L','N') $wherelisa
+						)
+						";
+					}
+					elseif($tdata == "valmistus") {
+						$query .= "
+						UNION
+						/*	Tilauksen valmistua	*/	
+						(	
+							SELECT distinct 'lasku' laji, 'toimitus' laji_tark, UNIX_TIMESTAMP(date(lasku.toimaika)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
+							FROM lasku
+							$asiakas_join
+							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila IN ('V') $wherelisa
+						)
+						";
+					}
+					elseif($tdata == "tyomaarays") {
+						$query .= "
+						UNION
+						/*	Tyˆm‰‰r‰ys	*/	
+						(	
+							SELECT distinct 'lasku' laji, 'tyomaarays' laji_tark, UNIX_TIMESTAMP(date(lasku.kerayspvm)) aika, lasku.luontiaika, DATEDIFF(toimaika, kerayspvm) vali, lasku.laatija laatija, lasku.tunnus tunnus
+							FROM lasku
+							$asiakas_join
+							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila IN ('A') $wherelisa
 						)
 						";
 					}
@@ -1493,8 +1550,14 @@
 							
 							$row = $event[$aikastr];
 							if(!isset($tcolor[$row["tunnus"]])) {
-								$tcolor[$row["tunnus"]] = color_code(count($tcolor)*13+55, 100);
-								$colorRGPFill = color_code(count($tcolor)*13+55, 100, 1);
+								if($row["laji_tark"] == "tyomaarays") {
+									$tcolor[$row["tunnus"]] = "rgba(250, 250, 0, 0.8);";
+								}
+								else {
+									$tcolor[$row["tunnus"]] = "rgba(50, 200, 0, 0.8);";
+								}
+								
+								$colorRGPFill = "rgba(50, 200, 0, 0.8);";
 							}
 							
 							$stylelisa = "background-color: ".$tcolor[$row["tunnus"]];
@@ -1504,7 +1567,6 @@
 							}
 							
 							if($kaletee == "printPDF") {
-
 								$param["width"] = 1; // PDF units
 								$param["strokecolor"] = $pdf->get_color('black');
 								$param["fillcolor"] = $colorRGPFill;
@@ -1879,6 +1941,82 @@
 		
 		die("</body></html>");
 	}
+
+	if($kaletee == "MUOKKAAKERAYSPAIVAA") {
+		$kalenteri = muistista("kalenteri", "kalenteri");
+		if(!is_array($kalenteri)) {
+			die("OHO! Kalenterin meni rikki!");
+		}
+		
+		$query = "	SELECT date(toimaika) toimaika, date(kerayspvm) kerayspvm
+					FROM lasku
+					WHERE yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+		$row = mysql_fetch_array($result);
+		list($toimvv, $toimkk, $toimpp) = explode("-", $row["toimaika"]);
+		list($kervv, $kerkk, $kerpp) = explode("-", $row["kerayspvm"]);
+		echo "
+			<form id = 'aikaForm' name = 'aikaForm' onSubmit=\"ajaxPost('aikaForm', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."' , 'ajax_menu'); return false;\">
+			<input type = 'hidden' name='kaletee' value='PAIVITAOTSIKKO'>
+			<input type = 'hidden' name='otunnus' value='$otunnus'>
+			<table width='400'>
+				<tr>
+					<th>".t("Ker‰ysp‰iv‰")."</th><th>".t("Toimitusaika")."</th><td class='back'></td>
+				</tr>
+				<tr>
+					<td><input type = 'text' name='kerpp' value='$kerpp' size='3'> <input type = 'text' name='kerkk' value='$kerkk' size='3'> <input type = 'text' name='kervv' value='$kervv' size='5'></td>
+					<td><input type = 'text' name='toimpp' value='$toimpp' size='3'> <input type = 'text' name='toimkk' value='$toimkk' size='3'> <input type = 'text' name='toimvv' value='$toimvv' size='5'></td>
+					<td class='back'><input type = 'submit' value='".t("P‰ivit‰")."' onclick = \"ajaxPost('kuittausForm', '$kalenteri[URL]?' , 'ajax_menu'); return false;\"></td>
+				</tr>
+			</table>
+			</form>";
+		
+		die("</body></html>");
+	}
+
+	if($kaletee == "PAIVITAOTSIKKO") {
+		$kalenteri = muistista("kalenteri", "kalenteri");
+		if(!is_array($kalenteri)) {
+			die("OHO! Kalenterin meni rikki!");
+		}
+		
+		//	P‰ivitet‰‰n ker‰ysaika
+		if($kerpp != "" and $kerkk != "" and $kervv != "") {
+			$kerpp = sprintf("%02s", $kerpp);
+			$kerkk = sprintf("%02s", $kerkk);
+			$kervv = sprintf("%04s", $kervv);
+			
+			$query = "	UPDATE lasku
+						SET kerayspvm = '".$kervv."-".$kerkk."-".$kerpp."'
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$otunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			$query = "	UPDATE tilausrivi
+						SET kerayspvm = '".$kervv."-".$kerkk."-".$kerpp."'
+						WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+		//	P‰ivitet‰‰n toimitusaika
+		if($toimpp != "" and $toimkk != "" and $toimvv != "") {
+			$toimpp = sprintf("%02s", $toimpp);
+			$toimkk = sprintf("%02s", $toimkk);
+			$toimvv = sprintf("%04s", $toimvv);
+			
+			$query = "	UPDATE lasku
+						SET toimaika = '".$toimvv."-".$toimkk."-".$toimpp."'
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$otunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+			
+			$query = "	UPDATE tilausrivi
+						SET toimaika = '".$toimvv."-".$toimkk."-".$toimpp."'
+						WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+				
+		die("<script LANGUAGE='JavaScript'>sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false); pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none';</script></body></html>");
+		
+	}
+	
 	
 	if($kaletee == "KUITTAA") {
 		$kalenteri = muistista("kalenteri", "kalenteri");

@@ -71,7 +71,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {
-			echo "<b>".t("Haulla ei löytynyt yhtä laskua")."</b>$query";
+			echo "<b>".t("Haulla ei löytynyt yhtä laskua")."</b>";
 
 			require ("inc/footer.inc");
 			exit;

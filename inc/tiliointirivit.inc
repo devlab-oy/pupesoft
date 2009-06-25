@@ -2,9 +2,18 @@
 
 	// Annetaan mahdollisuus tehdä uusi tiliöinti, jos siihen on oikeus
 	require "alvpopup.inc";
-
-	echo "<table><tr>";
-			// Selaajatarkista.php:n yhteydessä selite omalle riville
+	
+	// Onko tosite liitetty keikkaan 
+	$query = "SELECT laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";
+	$keikres = mysql_query($query) or pupe_error($query);
+	
+	if (mysql_num_rows($keikres) > 0) {
+		echo "<br><br><font class='message'>".t("Tiliöinnit lukittu koska lasku on liitetty keikkaan")."!</font>";
+	}
+	
+	echo "<br><br><table><tr>";
+	
+	// Selaajatarkista.php:n yhteydessä selite omalle riville
 	if (isset($seutunnus)) {
 		echo "<th>".t("Tili")."</th><th>".t("Tarkenne")."</th><th>".t("Summa")."</th><th>".t("Vero")."</th>";
 		if ($viivatut == 'on') echo "<th></th>";
@@ -27,7 +36,7 @@
 	}
 	echo "</tr>";
 
-	if ($oikeurow['paivitys'] == 1 and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
+	if (mysql_num_rows($keikres) == 0  and $oikeurow['paivitys'] == 1 and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
 
 		if ($ok != 1) {
 			// Annetaan tyhjät tiedot, jos rivi oli virheetön
@@ -279,7 +288,7 @@
 		$tilikausi_alku = strtotime($yhtiorow['tilikausi_alku']);
 		$tiliointi_pvm = strtotime($trow['tapvm']);
 
-		if (($tiliointi_pvm <= $tilikausi_loppu and $tiliointi_pvm >= $tilikausi_alku) and ($trow["lukko"] == "" or $kukarow["taso"] == 3) and $trow["poistettu"] == "" and $maara > 1 and $oikeurow["paivitys"] == 1 and ($kukarow["taso"] == 2 or $kukarow["taso"] == 3)) {
+		if (mysql_num_rows($keikres) == 0  and ($tiliointi_pvm <= $tilikausi_loppu and $tiliointi_pvm >= $tilikausi_alku) and ($trow["lukko"] == "" or $kukarow["taso"] == 3) and $trow["poistettu"] == "" and $maara > 1 and $oikeurow["paivitys"] == 1 and ($kukarow["taso"] == 2 or $kukarow["taso"] == 3)) {
 			// Eli ei näytetä muuta-nappia, jos ei oikeuksia,
 			//jos rivi on poistettu TAI se on tiliöinnin viimeinen TAI se on lukittu,
 			//jos sen saa poistaa niin on hankalaa löytää heittävät tositteet...

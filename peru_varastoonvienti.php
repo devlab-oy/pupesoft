@@ -72,7 +72,7 @@
 				echo "<tr>";
 
 				echo "<td class='back' valign='top'><table>";
-				echo "<tr><th>Tuoteno:</th>			<td>$rivirow[tuoteno]</td></tr>";
+				echo "<tr><th>Tuoteno:</th>			<td><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=$rivirow[tuoteno]'>$rivirow[tuoteno]</a></td></tr>";
 				echo "<tr><th>Varattu:</th>			<td>$rivirow[varattu]</td></tr>";
 				echo "<tr><th>Kpl:</th>				<td>$rivirow[kpl]</td></tr>";
 				echo "<tr><th>Viety varastoon:</th>	<td>$rivirow[laskutettuaika]</td></tr>";
@@ -117,7 +117,7 @@
 
 				if ($tee != 'KORJAA') {
 					echo "<td class='back' valign='top'><table>";
-					echo "<tr><th>Tuoteno:</th><td>$taparow[tuoteno]</td></tr>";
+					echo "<tr><th>Tuoteno:</th><td><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=$taparow[tuoteno]'>$taparow[tuoteno]</a></td></tr>";
 					echo "<tr><th>Kpl:</th><td>$taparow[kpl]</td></tr>";
 					echo "<tr><th>Laatija:</th><td>$taparow[laatija]</td></tr>";
 					echo "<tr><th>Laadittu:</th><td>$taparow[laadittu]</td></tr>";

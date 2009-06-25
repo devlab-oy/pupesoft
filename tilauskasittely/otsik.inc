@@ -2922,6 +2922,12 @@
 								case "luontiaika";
 									$values .= ", now()";
 									break;
+								case "kerayspvm";
+									$values .= ", '$kervv-$kerkk-$kerpp'";
+									break;
+								case "toimaika";
+									$values .= ", '$toimvv-$toimkk-$toimpp'";
+									break;
 								default;
 									$values .= ", '$monistarow[$i]'";
 									break;

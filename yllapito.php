@@ -1269,7 +1269,7 @@
 			}
 		}
 	}
-	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit") {
+	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit" and $from != "yllapito") {
 		echo "<br>
 				<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
 				if ($liitostunnus) echo "&liitostunnus=$liitostunnus";

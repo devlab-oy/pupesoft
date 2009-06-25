@@ -351,6 +351,7 @@
 			
 			if (mysql_num_rows($res) > 0) {
 				mysql_data_seek($res,0);
+				
 				$rivi = mysql_fetch_array($res);
 
 				//vikat pilkut pois
@@ -567,48 +568,34 @@
 				// Tulostetaan osoitelappu
 				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE) {
 					if ($valittu_oslapp_tulostin != "" and $oslapp != '') {
-
+						
+						$rahtikirja_tulostus = "yep";
 						$tunnus = $lotsikot[0];
 
 						$query = "	SELECT GROUP_CONCAT(distinct if(viesti!='',viesti,NULL) separator '. ') viesti
 									from lasku
-									where yhtio			= '$kukarow[yhtio]'
-									and tunnus		in ($otunnukset)";
+									where yhtio = '$kukarow[yhtio]'
+									and tunnus	in ($otunnukset)";
 						$viestirar = mysql_query($query) or pupe_error($query);
-
 						$viestirarrow = mysql_fetch_array($viestirar);	
-
+						
 						for ($s=1; $s <= $kollityht; $s++) { 
+							if (($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") and $toitarow["toim_nimi"] != '') {
+								$tiedot = "toimitusta";
+							}
+																					
 							if ($toitarow['osoitelappu'] == 'intrade') {
 								require('tilauskasittely/osoitelappu_intrade_pdf.inc');
 							}
-							else {
-								$rahtikirja_tulostus = "yep";
+							else {								
 								require ("tilauskasittely/osoitelappu_pdf.inc");							
-							}
-
-							if (($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") and $toitarow["toim_nimi"] != '') {
-
-								$tiedot = "toimitusta";
-
-								if ($toitarow['osoitelappu'] == 'intrade') {
-									require('tilauskasittely/osoitelappu_intrade_pdf.inc');
-								}
-								else {
-									$rahtikirja_tulostus = "yep";
-									require ("tilauskasittely/osoitelappu_pdf.inc");							
-								}
-							}
-						}
+							}								
+						}						
 					}
-				}
-				
-
+				}				
 			}
 			echo "<br>";
-
 		} // end while haetaan kaikki distinct rahtikirjat..
-
 
 		// poistetaan lukko
 		$query = "UNLOCK TABLES";

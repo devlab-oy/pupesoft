@@ -206,6 +206,7 @@ if ($toiminto == "poista") {
 
 	$query  = "SELECT tunnus from tilausrivi where yhtio='$kukarow[yhtio]' and uusiotunnus='$tunnus' and tyyppi='O'";
 	$delres = mysql_query($query) or pupe_error($query);
+	
 	if (mysql_num_rows($delres) != 0) {
 		$eisaapoistaa++;
 	}
@@ -214,12 +215,16 @@ if ($toiminto == "poista") {
 				from lasku
 				where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus<>0 and laskunro='$laskunro'";
 	$delres2 = mysql_query($query) or pupe_error($query);
+	
 	if (mysql_num_rows($delres2) != 0) {
 		$eisaapoistaa++;
 	}
 
 	if ($eisaapoistaa == 0) {
-		$query  = "UPDATE lasku SET alatila = tila, tila = 'D' where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkaid'";
+		
+		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöitiin ohjelmassa keikka.php")."<br>";
+		
+		$query  = "UPDATE lasku SET alatila = tila, tila = 'D', comments = '$komm' where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkaid'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// formissa on tullut myös $ytunnus, joten näin päästään takaisin selaukseen

@@ -645,7 +645,7 @@ if ($tila == 'W') {
 		$tila = '';
 	}
 
-	$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$trow[tunnus]'";
+	$query = "SELECT laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$trow[tunnus]'";
 	$keikres = mysql_query($query) or pupe_error($query);
 
 	if (!(($trow['tila'] == 'H' or $trow['tila'] == 'M' or $trow['tila'] == 'P' or $trow['tila'] == 'Q' or $trow['tila'] == 'Y') and mysql_num_rows($keikres) == 0 and $trow['tapvm'] >= $yhtiorow['tilikausi_alku'])) {
@@ -796,6 +796,10 @@ if ($tila == 'KK') {
 }
 
 if ($tila == '') {
+	
+	// katotaan onko lasku liitetty keikkaan
+	$query = "SELECT laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$trow[tunnus]'";
+	$keikres = mysql_query($query) or pupe_error($query);
 
 	$tila = 'E';
 	echo "<table>";
@@ -836,7 +840,7 @@ if ($tila == '') {
 		if (($trow['tila'] < 'N') or ($trow['suoraveloitus']!='')) {
 
 			// ei myyntitilaus
-			if  ($trow['tila'] != 'L' and $trow['tila'] != 'U') {
+			if  ($trow['tila'] != 'L' and $trow['tila'] != 'U' and mysql_num_rows($keikres) == 0) {
 
 				if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
 					echo "<form action = '$PHP_SELF' method='post'>
@@ -945,11 +949,7 @@ if ($tila == '') {
 				<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
 		}
 	}
-
-	// katotaan onko lasku liitetty keikkaan
-	$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$trow[tunnus]'";
-	$keikres = mysql_query($query) or pupe_error($query);
-
+	
 	if (($trow['tila'] == 'H' or $trow['tila'] == 'M' or $trow['tila'] == 'P' or $trow['tila'] == 'Q' or $trow['tila'] == 'Y') and mysql_num_rows($keikres) == 0 and $trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
 
 		if ($trow['vienti']=='A') $vientia='selected';

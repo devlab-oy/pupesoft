@@ -632,7 +632,6 @@
 
 	}
 
-
 	//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 	$pdffilenimi = "/tmp/rahtikirja-".md5(uniqid(rand(),true)).".pdf";
 
@@ -651,7 +650,6 @@
 		//itse print komento...
 		$line = exec("$kirjoitin $pdffilenimi");
 	}
-
 
 	system("rm -f $pdffilenimi");
 

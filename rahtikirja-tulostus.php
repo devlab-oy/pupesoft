@@ -123,12 +123,12 @@
 		$varasto 		= (int) $varasto;
 
 		// haetaan toimitustavan tiedot
-		$query    = "select * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
+		$query    = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
 		$toitares = mysql_query($query) or pupe_error($query);
 		$toitarow = mysql_fetch_array($toitares);
 
 		// haetaan rahtikirjan tyyppi
-		$query    = "select * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'RAHTIKIRJA' and selite = '$toitarow[rahtikirja]'";
+		$query    = "SELECT * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'RAHTIKIRJA' and selite = '$toitarow[rahtikirja]'";
 		$avainres = mysql_query($query) or pupe_error($query);
 		$avainrow = mysql_fetch_array($avainres);
 		
@@ -161,8 +161,7 @@
 		$print = mysql_fetch_array($pres);
 		
 		if ($komento != "") {
-			$kirjoitin_tunnus = (int) $komento; // jos ollaan valittu oma printteri
-			
+			$kirjoitin_tunnus = (int) $komento; // jos ollaan valittu oma printteri			
 		}
 		elseif ($avainrow["selitetark_2"] == "1") {
 			$kirjoitin_tunnus = $print["printteri6"]; // Rahtikirja A4
@@ -184,7 +183,7 @@
 		}
 
 		// haetaan printterille tulostuskomento
-		$query = "select * from kirjoittimet where yhtio = '$kukarow[yhtio]' and tunnus = '$kirjoitin_tunnus'";
+		$query = "SELECT * from kirjoittimet where yhtio = '$kukarow[yhtio]' and tunnus = '$kirjoitin_tunnus'";
 		$pres  = mysql_query($query) or pupe_error($query);
 		$print = mysql_fetch_array($pres);
 
@@ -192,10 +191,10 @@
 		$merkisto  = $print['merkisto'];
 		$pvm       = date("j.n.Y");
 		
-		if ($valittu_oslapp_tulostin != '') {
+		if ($valittu_rakiroslapp_tulostin != '') {
 			//haetaan osoitelapun tulostuskomento
-			if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE) {
-				$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$valittu_oslapp_tulostin'";
+			if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE) {
+				$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$valittu_rakiroslapp_tulostin'";
 				$kirres = mysql_query($query) or pupe_error($query);
 				$kirrow = mysql_fetch_array($kirres);
 				$oslapp = $kirrow['komento'];
@@ -243,13 +242,23 @@
 					lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
 					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja
 					FROM rahtikirjat
-					JOIN lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B' $ltun_querylisa
+					JOIN lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') ";
+
+		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+			$query .= " and lasku.alatila = 'B' ";
+		}
+		
+		$query .= " $ltun_querylisa)
 					$vainvakilliset
 					LEFT JOIN maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
 					LEFT JOIN rahtisopimukset on lasku.ytunnus = rahtisopimukset.ytunnus and rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa and rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus
-					WHERE rahtikirjat.tulostettu	= '0000-00-00 00:00:00'
-					and rahtikirjat.yhtio			= '$kukarow[yhtio]'
-					and rahtikirjat.toimitustapa	= '$toimitustapa'
+					WHERE rahtikirjat.yhtio	= '$kukarow[yhtio]' ";
+					
+		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+			$query .= " and rahtikirjat.tulostettu	= '0000-00-00 00:00:00' ";
+		}
+					
+		$query .= "	and rahtikirjat.toimitustapa	= '$toimitustapa'
 					and rahtikirjat.tulostuspaikka	= '$varasto'
 					$jvehto
 					order by lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus";
@@ -322,11 +331,21 @@
 			// haetaan tälle rahtikirjalle kuuluvat tunnukset
 			$query = "	SELECT rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.asiakkaan_tilausnumero
 						FROM rahtikirjat
-						join lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B' $ltun_querylisa
+						join lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') ";
+						
+			if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+				$query .= " and lasku.alatila = 'B' ";
+			}			
+			
+			$query .= " $ltun_querylisa)
 						left join maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
-						WHERE rahtikirjat.tulostettu	= '0000-00-00 00:00:00'
-						and rahtikirjat.yhtio			= '$kukarow[yhtio]'
-						and rahtikirjat.toimitustapa	= '$toimitustapa'
+						WHERE rahtikirjat.yhtio			= '$kukarow[yhtio]' ";
+						
+			if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+				$query .= " and rahtikirjat.tulostettu	= '0000-00-00 00:00:00' ";
+			}
+						
+			$query .= "	and rahtikirjat.toimitustapa	= '$toimitustapa'
 						and rahtikirjat.tulostuspaikka	= '$varasto'
 						$asiakaslisa
 						and rahtikirjat.merahti			= '$rakir_row[merahti]'
@@ -391,14 +410,16 @@
 				$tulostuskpl = $kollityht;
 				
 				// merkataan tilausrivit toimitetuiksi..
-				$query = "	UPDATE tilausrivi
-							set toimitettu = '$kukarow[kuka]', toimitettuaika=now()
-							where otunnus in ($otunnukset)
-							and yhtio = '$kukarow[yhtio]'
-							and var not in ('P','J')
-							and tyyppi = 'L'";
-				$ures  = mysql_query($query) or pupe_error($query);
-
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+					$query = "	UPDATE tilausrivi
+								set toimitettu = '$kukarow[kuka]', toimitettuaika=now()
+								where otunnus in ($otunnukset)
+								and yhtio = '$kukarow[yhtio]'
+								and var not in ('P','J')
+								and tyyppi = 'L'";
+					$ures  = mysql_query($query) or pupe_error($query);
+				}
+					
 				//haetaan rahtikirjan kaikki vakkoodit arrayseen
 				$query = "	SELECT distinct(vakkoodi)
 							from tilausrivi,tuote
@@ -432,12 +453,13 @@
 				// tulostetaan rahtikirja
 				
 				// merkataan rahtikirjat tulostetuksi..
-				$query = "	UPDATE rahtikirjat
-							set tulostettu=now()
-							where tunnus in ($tunnukset)
-							and yhtio = '$kukarow[yhtio]'";
-				$ures  = mysql_query($query) or pupe_error($query);
-
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+					$query = "	UPDATE rahtikirjat
+								set tulostettu=now()
+								where tunnus in ($tunnukset)
+								and yhtio = '$kukarow[yhtio]'";
+					$ures  = mysql_query($query) or pupe_error($query);
+				}
 
 				// näitä tarvitaan vain JV-keiseissa, mutta pitää nollata tietty joka luupilla
 				$lasno		= "";
@@ -449,8 +471,8 @@
 				$aputeksti	= "";
 				$rahinta 	= "";
 				
-				// jos kyseessä on jälkivaatimus
-				if ($rakir_row['jv'] != '') {
+				// jos kyseessä on jälkivaatimus				
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and $rakir_row['jv'] != '') {
 					// jos toimitustapa hanskaa monivarastojälkivaatimukset
 					if ($toitarow["multi_jv"] != "") {
 						require ("rahtikirja-tulostus-jv-multi.inc");
@@ -526,14 +548,16 @@
 					echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";
 				}
 				
-				$query = "	UPDATE rahtikirjat
-							set rahtikirjanro='$rahtikirjanro'
-							where tunnus in ($tunnukset)
-							and yhtio = '$kukarow[yhtio]'";
-				$ures  = mysql_query($query) or pupe_error($query);
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+					$query = "	UPDATE rahtikirjat
+								set rahtikirjanro='$rahtikirjanro'
+								where tunnus in ($tunnukset)
+								and yhtio = '$kukarow[yhtio]'";
+					$ures  = mysql_query($query) or pupe_error($query);
+				}
 				
 				// jos ei JV merkataan rahtikirjat tulostetuksi otsikollekkin..
-				if ($rakir_row['jv'] == '') {
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and $rakir_row['jv'] == '') {
 					// kotimaan myynti menee alatilaan D
 					$query = "UPDATE lasku set alatila = 'D' where tunnus in ($otunnukset) and vienti = '' and yhtio='$kukarow[yhtio]'";
 					$ures  = mysql_query($query) or pupe_error($query);
@@ -566,8 +590,8 @@
 				}
 				
 				// Tulostetaan osoitelappu
-				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE) {
-					if ($valittu_oslapp_tulostin != "" and $oslapp != '') {
+				if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE) {
+					if ($valittu_rakiroslapp_tulostin != "" and $oslapp != '') {
 						
 						$rahtikirja_tulostus = "yep";
 						$tunnus = $lotsikot[0];
@@ -601,11 +625,13 @@
 		$query = "UNLOCK TABLES";
 		$res   = mysql_query($query) or pupe_error($query);
 
-		if ($toitarow['tulostustapa'] == 'H' or $toitarow['tulostustapa'] == 'K') {
-			$tee = 'XXX';
-		}
-		else {
-			$tee = '';
+		if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
+			if ($toitarow['tulostustapa'] == 'H' or $toitarow['tulostustapa'] == 'K') {
+				$tee = 'XXX';
+			}
+			else {
+				$tee = '';
+			}
 		}
 
 		echo "<br>";
@@ -739,7 +765,7 @@
 			mysql_data_seek($kires, 0);
 			
 			echo "<td>";
-			echo "<select name='valittu_oslapp_tulostin'>";
+			echo "<select name='valittu_rakiroslapp_tulostin'>";
 			echo "<option value=''>",t("Ei tulosteta"),"</option>";
 			
 			while ($kirrow = mysql_fetch_array($kires)) {

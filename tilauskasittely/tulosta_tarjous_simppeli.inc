@@ -169,7 +169,7 @@ if (!function_exists('tulosta_tarjous')) {
 		//	Voidaanko näyttää alet?
 		$query = "select tunnus from tilausrivi where yhtio = '$kukarow[yhtio]' and ale > 0 and otunnus IN ({$laskurow["tunnus"]})";
 		$abures = mysql_query($query) or pupe_error($query);
-		if(mysql_num_rows($abures) > 0) {
+		if(mysql_num_rows($abures) > 0 and $laskurow["rivihintoja_ei_nayteta"] == "") {
 			$alenaytetaan="OK";
 		}
 		else {

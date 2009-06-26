@@ -528,8 +528,10 @@
 				
 				foreach($lotsikot as $doit) {
 					echo "$doit ";
-					$kaikki_lotsikot .= $doit." "; 
+					$kaikki_lotsikot .= $doit.", "; 
 				}
+				
+				$kaikki_lotsikot = substr($kaikki_lotsikot ,0 ,-2);
 
 				echo "$rahinta $jvtext";
 

@@ -36,6 +36,7 @@
 	system("rm -rf /tmp/$dbkanta");
 	
 	// Siivotaan yli 30pv vanhat backupit pois
+	chdir($cp_dir);
 	system("find $cp_dir -mtime +30 -exec rm -f {} \;");
 	                                           
 	echo date("d.m.Y @ G:i:s")." - All done.\n";                                              

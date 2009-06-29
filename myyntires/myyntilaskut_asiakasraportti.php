@@ -650,7 +650,7 @@
 				}
 
 				$selectit = "	laskunro, tapvm, erpcm, summa-pyoristys-saldo_maksettu summa, summa_valuutassa-pyoristys_valuutassa-saldo_maksettu_valuutassa summa_valuutassa, kapvm, kasumma, kasumma_valuutassa, mapvm,
-									TO_DAYS(mapvm) - TO_DAYS(erpcm) ika, if(mapvm != '0000-00-00', round((viikorkopros * (TO_DAYS(mapvm) - TO_DAYS(erpcm)) * summa / 36500),2), 0) as korko, olmapvm korkolaspvm, lasku.tunnus, saldo_maksettu, saldo_maksettu_valuutassa, valkoodi" ;
+									TO_DAYS(if(mapvm!='0000-00-00', mapvm, now())) - TO_DAYS(erpcm) ika, round((viikorkopros * (TO_DAYS(if(mapvm!='0000-00-00', mapvm, now())) - TO_DAYS(erpcm)) * summa / 36500),2) as korko, olmapvm korkolaspvm, lasku.tunnus, saldo_maksettu, saldo_maksettu_valuutassa, valkoodi" ;
 
 				$query = "	SELECT
 							$selectit
@@ -779,7 +779,7 @@
 
 					echo "<td align='right'>$maksurow[ika]</td>";
 
-					if ($maksurow["korko"] != 0) echo "<td align='right'>$maksurow[korko]</td>";
+					if ($maksurow["korko"] > 0) echo "<td align='right'>$maksurow[korko]</td>";
 					else echo "<td></td>";
 
 					if ($maksurow["korkolaspvm"] != '0000-00-00') echo "<td align='right'>".tv1dateconv($maksurow["korkolaspvm"])."</td>";

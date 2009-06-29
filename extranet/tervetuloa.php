@@ -55,7 +55,7 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 		$ale 		     = "";
 		$alv		     = "";
 		$var			 = "";
-		$varasto 	     = "";
+		$varasto 	     = $laskurow["varasto"];
 		$rivitunnus		 = "";
 		$korvaavakielto	 = "";
 		$jtkielto 		 = $laskurow['jtkielto'];

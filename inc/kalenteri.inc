@@ -1067,7 +1067,7 @@
 			$kalejako = "";
 			if(is_array($kalenteri["kalenteri_nayta_kuka"])) {
 				$kalejako = "
-					<br><table border='1' width='140'>
+						<table border='1' width='140'>
 						<caption>".t("Valitse henkilˆt")."</caption>";
 						
 				$lisa = "";
@@ -1204,11 +1204,14 @@
 				}
 			}
 			
-			//	Piirret‰‰n koko palkki
-			$kale = "<center>".implode("&nbsp;&nbsp;-&nbsp;&nbsp;", $palkki)."</center><br><br>";
-			
+			//	valmistellaan palakki
+			$tmenut = implode("&nbsp;&nbsp;-&nbsp;&nbsp;", $palkki);
+			$kale = "<table align='center' border='0'><tr><td class='back'>";
 			if($nakyma == "KALENTERINAKYMA" or $nakyma == "KUUKAUSINAKYMA") {
-
+				
+				$kale .= "
+				<table align='center'>";
+				
 				if($nakyma == "KUUKAUSINAKYMA") {
 										
 					$kaleaika = mktime(0, 0, 0, date("m", $kaleaika), 1, date("Y", $kaleaika));
@@ -1218,7 +1221,7 @@
 					$edellinen 	= strtotime("-1 months", $kaleaika);
 					$otsikko	= t("Kausi")." ".date("m", $kaleaika)." - ".date("Y", $kaleaika);
 					
-					$kale .= "<caption><a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$edellinen".url_params($kalenteri)."', '$kalenteri[div]', false);\">&lt;&lt;&nbsp;</a>&nbsp;&nbsp;$otsikko&nbsp;&nbsp;&nbsp;<a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$seuraava".url_params($kalenteri)."', '$kalenteri[div]', false);\">&gt;&gt;</a></caption>";
+					$kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; float: left; margin-left: 20px'><a href=\"#\">&lt;&lt;&nbsp;</a>&nbsp;&nbsp;$otsikko&nbsp;&nbsp;&nbsp;<a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$seuraava".url_params($kalenteri)."', '$kalenteri[div]', false);\">&gt;&gt;</div></a>$tmenut</caption>";
 					
 				}
 				else {
@@ -1256,8 +1259,6 @@
 				
 				//	Tehd‰‰n otsikot
 				$kale .= "
-				<div style='float: left;'>
-				<table>
 				<tr>
 					<th>".t("Vko")."</th><th>".t("Ma")."</th><th>".t("Ti")."</th><th>".t("Ke")."</th><th>".t("To")."</th><th>".t("Pe")."</th><th>".t("La")."</th><th>".t("Su")."</th>
 				</tr>";
@@ -1356,10 +1357,14 @@
 				}			
 
 				$kale .= "</table>
-						</div>
-						<div style='float: left; position: relative; left: 20px;'>$kalejako</div>";
+						<td class='back'>$kalejako";
 			}
 			elseif(in_array($nakyma, array("RIVINAKYMA_PAIVA", "RIVINAKYMA_VIIKKO"))) {
+				
+				$kale .= "
+				<table>";
+				
+				$kale .= "<caption style='margin-bottom: 5px;'>$tmenut</caption>";
 				
 				//	K‰sitell‰‰n maksimiajankohta
 				$query = " SELECT DATEDIFF('".date("Y-m-d", $data["tiedot"]["loppustr"])."', '".date("Y-m-d", $data["tiedot"]["alkustr"])."') paivia";
@@ -1411,11 +1416,9 @@
 				
 				//	Tehd‰‰n otsikot
 				$kale .= "
-				<div style='float: left;'>
-				<table>
 				<tr><td class='back'></td>";
 				
-				if($kaletee == "printPDF") {					
+				if($kaletee == "printPDF") {
 					//	Meid‰n pit‰‰ tehd‰ taulukko t‰t‰ varten, samalla selvi‰‰ mink‰ kokoinen sivu pit‰‰ olla
 					$pdfCellWidth = 20;
 					$pageWidth = (($paivia+2) * mm_pt($pdfCellWidth)) + mm_pt(50)+100;
@@ -1611,8 +1614,8 @@
 							</td>
 						</tr>
 						</table>
-						</div>
-						<div style='float: left; position: relative; left: 20px;'>$kalejako</div>";
+						</td>
+						<td>$kalejako";
 						
 				if($kaletee == "printPDF") {
 					$pdffilenimi = "/tmp/projektikalenteri.pdf";
@@ -1624,7 +1627,9 @@
 				
 				$kale .= "	<div style='width: 750px;'>
 							<div style='float: right; position: relative; left: 20px;'>$kalejako</div>
-							<table width = '600' align='left'>";
+							<table width = '600' align='left'>
+							<caption style='margin-bottom: 5px;'>$tmenut</caption>";
+							
 				
 				krsort($data["lista"]);
 				
@@ -1726,9 +1731,8 @@
 				//echo "<pre>kalenteri".print_r($kalenteri, true)."</pre><br>".url_params($kalenteri);
 				
 				$kale .= "
-				<div style='float: left;'>
 					<table width='".(($days*$w)-40)."' cellpadding='1' cellspacing='10'>
-					<caption><br><a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$edellinen".url_params($kalenteri)."', '$kalenteri[div]', false);\">&lt;&lt;&nbsp;</a>&nbsp;&nbsp;$otsikko&nbsp;&nbsp;&nbsp;<a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$seuraava".url_params($kalenteri)."', '$kalenteri[div]', false);\">&gt;&gt;</a></caption>
+					<caption style='margin-bottom: 5px;'><div style='text-align: left; float: left; margin-left: 20px'><a href=\"#\">&lt;&lt;&nbsp;</a>&nbsp;&nbsp;$otsikko&nbsp;&nbsp;&nbsp;<a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$seuraava".url_params($kalenteri)."', '$kalenteri[div]', false);\">&gt;&gt;</div></a>$tmenut</caption>
 					<tr>
 						<th width='40'>".t("Klo")."</th>";
 					
@@ -1887,13 +1891,17 @@
 					}
 				}
 
-				$kale .= "</table><br><br>
-						</div>
-						<div style='float: left; position: relative; left: 20px;'>$kalejako</div>";
+				$kale .= "	</table>
+							</td>
+							<td>
+							$kalejako";
 			}
 			else {
 				echo "N‰kym‰‰ '$nakyma' ei viel‰ osata!";
 			}
+			
+			$kale .="</td></tr></table>";
+			
 			return $kale;
 		}
 	}	

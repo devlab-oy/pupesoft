@@ -380,6 +380,7 @@
 
 
 		// Tässä luodaan uusi raporttiprofiili
+		/*
 		if ($tee == "RAPORTOI" and $uusirappari != '') {
 
 			$rappari = $kukarow["kuka"]."##".$uusirappari;
@@ -389,11 +390,12 @@
 				$res = mysql_query($query) or pupe_error($query);
 			}
 		}
-
+		*/
 
 		//Ajetaan itse raportti
 		if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 
+			/*
 			if ($rappari != '') {
 				$query = "DELETE FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='HALYRAP' and selite='$rappari'";
 				$res = mysql_query($query) or pupe_error($query);
@@ -403,6 +405,7 @@
 					$res = mysql_query($query) or pupe_error($query);
 				}
 			}
+			*/
 
 			$osasto = '';
 			$osasto2 = '';

@@ -148,9 +148,9 @@
 		$sarakkeet["SARAKE4"] 	= t("Tähti")."\t"; // tahtituote
 		$sarakkeet["SARAKE4B"] 	= t("Status")."\t";
 		$sarakkeet["SARAKE4C"] 	= t("ABC")."\t";
-		$sarakkeet["SARAKE4CA"] = t("ABC Os")."\t";
-		$sarakkeet["SARAKE4CB"] = t("ABC Try")."\t";
-		$sarakkeet["SARAKE4CC"] = t("ABC Tme")."\t";
+		$sarakkeet["SARAKE4CA"] = t("ABC")."\n".t("Os")."\t";
+		$sarakkeet["SARAKE4CB"] = t("ABC")."\n".t("Try")."\t";
+		$sarakkeet["SARAKE4CC"] = t("ABC")."\n".t("Tme")."\t";
 		$sarakkeet["SARAKE4D"] 	= t("Luontiaika")."\t";
 		$sarakkeet["SARAKE5"] 	= t("Saldo")."\t";
 		$sarakkeet["SARAKE5A"] 	= t("Saldo2")."\t";
@@ -179,32 +179,32 @@
 			$ehd_kausi_o3	= $lo;
 		}
 
-		$sarakkeet["SARAKE10A"] 	= "Os 1A\t"; // Ostoehdotus KAUSI1
-		$sarakkeet["SARAKE11A"] 	= "Os 1B\t";
-		$sarakkeet["SARAKE12A"] 	= "Os 1C\t";
+		$sarakkeet["SARAKE10A"] 	= "Os\n1A\t"; // Ostoehdotus KAUSI1
+		$sarakkeet["SARAKE11A"] 	= "Os\n1B\t";
+		$sarakkeet["SARAKE12A"] 	= "Os\n1C\t";
 
-		$sarakkeet["SARAKE10B"] 	= "Os 2A\t"; // Ostoehdotus kausi2
-		$sarakkeet["SARAKE11B"] 	= "Os 2B\t";
-		$sarakkeet["SARAKE12B"] 	= "Os 2C\t";
+		$sarakkeet["SARAKE10B"] 	= "Os\n2A\t"; // Ostoehdotus kausi2
+		$sarakkeet["SARAKE11B"] 	= "Os\n2B\t";
+		$sarakkeet["SARAKE12B"] 	= "Os\n2C\t";
 
-		$sarakkeet["SARAKE10C"] 	= "Os 3A\t"; // ostoehdotus kausi3
-		$sarakkeet["SARAKE11C"] 	= "Os 3B\t";
-		$sarakkeet["SARAKE12C"] 	= "Os 3C\t";
+		$sarakkeet["SARAKE10C"] 	= "Os\n3A\t"; // ostoehdotus kausi3
+		$sarakkeet["SARAKE11C"] 	= "Os\n3B\t";
+		$sarakkeet["SARAKE12C"] 	= "Os\n3C\t";
 
-		$sarakkeet["SARAKE10D"] 	= "Ostoehdotus 4A\t"; // ostoehdotus kausi 4
-		$sarakkeet["SARAKE11D"] 	= "Ostoehdotus 4B\t";
-		$sarakkeet["SARAKE12D"] 	= "Ostoehdotus 4C\t";
+		$sarakkeet["SARAKE10D"] 	= "Os\n4A\t"; // ostoehdotus kausi 4
+		$sarakkeet["SARAKE11D"] 	= "Os\n4B\t";
+		$sarakkeet["SARAKE12D"] 	= "Os\n4C\t";
 
-		$sarakkeet["SARAKE13A"] 	= t("Ost haly 1")."\t"; // ostettava haly kausi1
-		$sarakkeet["SARAKE13B"] 	= t("Ost haly 2")."\t";
-		$sarakkeet["SARAKE13C"] 	= t("Ost haly 3")."\t";
-		$sarakkeet["SARAKE13D"] 	= t("Ost haly 4")."\t";
-		$sarakkeet["SARAKE14"] 	= t("Osto_era")."\t";
-		$sarakkeet["SARAKE15"] 	= t("Myynti_era")."\t";
+		$sarakkeet["SARAKE13A"] 	= t("Ost\nhaly 1")."\t"; // ostettava haly kausi1
+		$sarakkeet["SARAKE13B"] 	= t("Ost\nhaly 2")."\t";
+		$sarakkeet["SARAKE13C"] 	= t("Ost\nhaly 3")."\t";
+		$sarakkeet["SARAKE13D"] 	= t("Ost\nhaly 4")."\t";
+		$sarakkeet["SARAKE14"] 	= t("Osto\nera")."\t";
+		$sarakkeet["SARAKE15"] 	= t("Myynti\nera")."\t";
 		$sarakkeet["SARAKE16"] 	= t("Toim")."\t"; // toimittaja
-		$sarakkeet["SARAKE17"] 	= t("Toim_tuoteno")."\t";
+		$sarakkeet["SARAKE17"] 	= t("Toim\ntuoteno")."\t";
 		$sarakkeet["SARAKE18"] 	= t("Nimitys")."\t";
-		$sarakkeet["SARAKE18B"] = t("Toim_nimitys")."\t";
+		$sarakkeet["SARAKE18B"] = t("Toim\nnimitys")."\t";
 		$sarakkeet["SARAKE18C"] = t("Kuvaus")."\t";
 
 		$sarakkeet["SARAKE18D"] = t("Lyhytkuvaus")."\t";
@@ -213,7 +213,7 @@
 		$sarakkeet["SARAKE18G"] = t("Syvyys")."\t"; // tuotesyvyys
 		$sarakkeet["SARAKE18H"] = t("Massa")."\t"; // tuotemassa
 		$sarakkeet["SARAKE18I"] = t("Hinnastoon")."\t";
-		$sarakkeet["SARAKE18J"] = t("Ei_varastoida")."\t";
+		$sarakkeet["SARAKE18J"] = t("Ei\nvarastoida")."\t";
 
 		$sarakkeet["SARAKE19"] 	= t("Ostohinta")."\t";
 		$sarakkeet["SARAKE20"] 	= t("Myyntihinta")."\t";
@@ -247,68 +247,68 @@
 			$kausied4 = t("Ed. Kausi 4");
 		}
 
-		$sarakkeet["SARAKE25"] = t("puut.")." $kausi1\t"; // puutteet
-		$sarakkeet["SARAKE26"] = t("puut.")." $kausi2\t";
-		$sarakkeet["SARAKE27"] = t("puut.")." $kausi3\t";
-		$sarakkeet["SARAKE28"] = t("puut.")." $kausi4\t";
+		$sarakkeet["SARAKE25"] = t("puut.")."\n$kausi1\t"; // puutteet
+		$sarakkeet["SARAKE26"] = t("puut.")."\n$kausi2\t";
+		$sarakkeet["SARAKE27"] = t("puut.")."\n$kausi3\t";
+		$sarakkeet["SARAKE28"] = t("puut.")."\n$kausi4\t";
 
 		//Myydyt kappaleet
-		$sarakkeet["SARAKE29"] = t("myynti")." $kausi1\t";
-		$sarakkeet["SARAKE30"] = t("myynti")." $kausi2\t";
-		$sarakkeet["SARAKE31"] = t("myynti")." $kausi3\t";
-		$sarakkeet["SARAKE32"] = t("myynti")." $kausi4\t";
+		$sarakkeet["SARAKE29"] = t("myynti")."\n$kausi1\t";
+		$sarakkeet["SARAKE30"] = t("myynti")."\n$kausi2\t";
+		$sarakkeet["SARAKE31"] = t("myynti")."\n$kausi3\t";
+		$sarakkeet["SARAKE32"] = t("myynti")."\n$kausi4\t";
 
-		$sarakkeet["SARAKE33"] = t("myynti")." $kausied1\t";
-		$sarakkeet["SARAKE34"] = t("myynti")." $kausied2\t";
-		$sarakkeet["SARAKE35"] = t("myynti")." $kausied3\t";
-		$sarakkeet["SARAKE36"] = t("myynti")." $kausied4\t";
+		$sarakkeet["SARAKE33"] = t("myynti")."\n$kausied1\t";
+		$sarakkeet["SARAKE34"] = t("myynti")."\n$kausied2\t";
+		$sarakkeet["SARAKE35"] = t("myynti")."\n$kausied3\t";
+		$sarakkeet["SARAKE36"] = t("myynti")."\n$kausied4\t";
 
 		// Ennakkomyynti
-		$sarakkeet["SARAKE29E"] = t("enn.my.")." $kausi1\t"; // ennakkomyynti
-		$sarakkeet["SARAKE30E"] = t("enn.my.")." $kausi2\t";
-		$sarakkeet["SARAKE31E"] = t("enn.my.")." $kausi3\t";
-		$sarakkeet["SARAKE32E"] = t("enn.my.")." $kausi4\t";
+		$sarakkeet["SARAKE29E"] = t("enn.my.")."\n$kausi1\t"; // ennakkomyynti
+		$sarakkeet["SARAKE30E"] = t("enn.my.")."\n$kausi2\t";
+		$sarakkeet["SARAKE31E"] = t("enn.my.")."\n$kausi3\t";
+		$sarakkeet["SARAKE32E"] = t("enn.my.")."\n$kausi4\t";
 
-		$sarakkeet["SARAKE33E"] = t("enn.my.")." $kausied1\t";
-		$sarakkeet["SARAKE34E"] = t("enn.my.")." $kausied2\t";
-		$sarakkeet["SARAKE35E"] = t("enn.my.")." $kausied3\t";
-		$sarakkeet["SARAKE36E"] = t("enn.my.")." $kausied4\t";
+		$sarakkeet["SARAKE33E"] = t("enn.my.")."\n$kausied1\t";
+		$sarakkeet["SARAKE34E"] = t("enn.my.")."\n$kausied2\t";
+		$sarakkeet["SARAKE35E"] = t("enn.my.")."\n$kausied3\t";
+		$sarakkeet["SARAKE36E"] = t("enn.my.")."\n$kausied4\t";
 
 		//Kulutetut kappaleet
-		$sarakkeet["SARAKE29K"] = t("kul")." $kausi1\t"; // kulutus
-		$sarakkeet["SARAKE30K"] = t("kul")." $kausi2\t";
-		$sarakkeet["SARAKE31K"] = t("kul")." $kausi3\t";
-		$sarakkeet["SARAKE32K"] = t("kul")." $kausi4\t";
-		$sarakkeet["SARAKE33K"] = t("kul")." $kausied1\t";
-		$sarakkeet["SARAKE34K"] = t("kul")." $kausied2\t";
-		$sarakkeet["SARAKE35K"] = t("kul")." $kausied3\t";
-		$sarakkeet["SARAKE36K"] = t("kul")." $kausied4\t";
+		$sarakkeet["SARAKE29K"] = t("kul")."\n$kausi1\t"; // kulutus
+		$sarakkeet["SARAKE30K"] = t("kul")."\n$kausi2\t";
+		$sarakkeet["SARAKE31K"] = t("kul")."\n$kausi3\t";
+		$sarakkeet["SARAKE32K"] = t("kul")."\n$kausi4\t";
+		$sarakkeet["SARAKE33K"] = t("kul")."\n$kausied1\t";
+		$sarakkeet["SARAKE34K"] = t("kul")."\n$kausied2\t";
+		$sarakkeet["SARAKE35K"] = t("kul")."\n$kausied3\t";
+		$sarakkeet["SARAKE36K"] = t("kul")."\n$kausied4\t";
 
-		$sarakkeet["SARAKE37"] = t("Kate")." $yhtiorow[valkoodi] $kausi1\t";
-		$sarakkeet["SARAKE38"] = t("Kate")." $yhtiorow[valkoodi] $kausi2\t";
-		$sarakkeet["SARAKE39"] = t("Kate")." $yhtiorow[valkoodi] $kausi3\t";
-		$sarakkeet["SARAKE40"] = t("Kate")." $yhtiorow[valkoodi] $kausi4\t";
-		$sarakkeet["SARAKE41"] = t("Kate %")." $kausi1\t";
-		$sarakkeet["SARAKE42"] = t("Kate %")." $kausi2\t";
-		$sarakkeet["SARAKE43"] = t("Kate %")." $kausi3\t";
-		$sarakkeet["SARAKE44"] = t("Kate %")." $kausi4\t";
+		$sarakkeet["SARAKE37"] = t("Kate")." $yhtiorow[valkoodi]\n$kausi1\t";
+		$sarakkeet["SARAKE38"] = t("Kate")." $yhtiorow[valkoodi]\n$kausi2\t";
+		$sarakkeet["SARAKE39"] = t("Kate")." $yhtiorow[valkoodi]\n$kausi3\t";
+		$sarakkeet["SARAKE40"] = t("Kate")." $yhtiorow[valkoodi]\n$kausi4\t";
+		$sarakkeet["SARAKE41"] = t("Kate %")."\n$kausi1\t";
+		$sarakkeet["SARAKE42"] = t("Kate %")."\n$kausi2\t";
+		$sarakkeet["SARAKE43"] = t("Kate %")."\n$kausi3\t";
+		$sarakkeet["SARAKE44"] = t("Kate %")."\n$kausi4\t";
 
 		$sarakkeet["SARAKE45"] 	= t("tuotekerroin")."\t";
-		$sarakkeet["SARAKE46"] 	= t("ennakkotilauksessa")."\t";
+		$sarakkeet["SARAKE46"] 	= t("enntil")."\t";
 		$sarakkeet["SARAKE47"] 	= t("aleryhmä")."\t";
 		$sarakkeet["SARAKE47B"] = t("kehahin")."\t";
 
 		if ($temp_asiakasosasto != '' or $asiakasosasto != '') {
-			$sarakkeet["SARAKE48"] = t("myynti as.os")." $asiakasosasto $kausi1\t"; // asiakasosasto
-			$sarakkeet["SARAKE49"] = t("myynti as.os")." $asiakasosasto $kausi2\t";
-			$sarakkeet["SARAKE50"] = t("myynti as.os")." $asiakasosasto $kausi3\t";
-			$sarakkeet["SARAKE51"] = t("myynti as.os")." $asiakasosasto $kausi4\t";
+			$sarakkeet["SARAKE48"] = t("myynti as.os")."\n$asiakasosasto $kausi1\t"; // asiakasosasto
+			$sarakkeet["SARAKE49"] = t("myynti as.os")."\n$asiakasosasto $kausi2\t";
+			$sarakkeet["SARAKE50"] = t("myynti as.os")."\n$asiakasosasto $kausi3\t";
+			$sarakkeet["SARAKE51"] = t("myynti as.os")."\n$asiakasosasto $kausi4\t";
 		}
 		if ($temp_asiakasno != '' or $asiakasno != '') {
-			$sarakkeet["SARAKE52"] = t("myynti as.")." $asiakasno $kausi1\t";
-			$sarakkeet["SARAKE53"] = t("myynti as.")." $asiakasno $kausi2\t";
-			$sarakkeet["SARAKE54"] = t("myynti as.")." $asiakasno $kausi3\t";
-			$sarakkeet["SARAKE55"] = t("myynti as.")." $asiakasno $kausi4\t";
+			$sarakkeet["SARAKE52"] = t("myynti as.")."\n$asiakasno $kausi1\t";
+			$sarakkeet["SARAKE53"] = t("myynti as.")."\n$asiakasno $kausi2\t";
+			$sarakkeet["SARAKE54"] = t("myynti as.")."\n$asiakasno $kausi3\t";
+			$sarakkeet["SARAKE55"] = t("myynti as.")."\n$asiakasno $kausi4\t";
 		}
 
 		// aika karseeta, mutta katotaan voidaanko tällästä optiota näyttää yks tosi firma specific juttu
@@ -320,7 +320,7 @@
 			$res = mysql_query($query);
 			$row = mysql_fetch_array($res);
 			if ($row["kpl"] > 0) {
-				$sarakkeet["SARAKE64"] = "Rek. kpl\t"; // Rekisteröidyt kpl
+				$sarakkeet["SARAKE64"] = t("Rek.")."\n".t("kpl")."\t"; // Rekisteröidyt kpl
 			}
 		}
 
@@ -360,14 +360,14 @@
 			array_splice($valitut,$offset,0,$abuArray);
 		}
 
-		$sarakkeet["SARAKE56"] = t("Korv Tuoteno")."\t"; // Korvaavat Tuoteno
-		$sarakkeet["SARAKE57"] = t("Korv Saldo")."\t"; // Korvaavat Saldo
-		$sarakkeet["SARAKE58"] = t("Korv Ennpois")."\t"; // Korvaavat Ennpois
-		$sarakkeet["SARAKE59"] = t("Korv Til")."\t"; // Korvaavat Tilauksessa
-		$sarakkeet["SARAKE60"] = t("Korv Myyty")." $kausi1\t"; // Korvaavat Myyty kausi1
-		$sarakkeet["SARAKE61"] = t("Korv Myyty")." $kausi2\t"; // Korvaavat Myyty kausi2
-		$sarakkeet["SARAKE62"] = t("Korv Myyty")." $kausi3\t"; // Korvaavat Myyty kausi3
-		$sarakkeet["SARAKE63"] = t("Korv Myyty")." $kausi4\t"; // Korvaavat Myyty kausi4
+		$sarakkeet["SARAKE56"] = t("Korv")."\n".t("Tuoteno")."\t"; // Korvaavat Tuoteno
+		$sarakkeet["SARAKE57"] = t("Korv")."\n".t("Saldo")."\t"; // Korvaavat Saldo
+		$sarakkeet["SARAKE58"] = t("Korv")."\n".t("Ennpois")."\t"; // Korvaavat Ennpois
+		$sarakkeet["SARAKE59"] = t("Korv")."\n".t("Til")."\t"; // Korvaavat Tilauksessa
+		$sarakkeet["SARAKE60"] = t("Korv")."\n".t("Myyty")."\n$kausi1\t"; // Korvaavat Myyty kausi1
+		$sarakkeet["SARAKE61"] = t("Korv")."\n".t("Myyty")."\n$kausi2\t"; // Korvaavat Myyty kausi2
+		$sarakkeet["SARAKE62"] = t("Korv")."\n".t("Myyty")."\n$kausi3\t"; // Korvaavat Myyty kausi3
+		$sarakkeet["SARAKE63"] = t("Korv")."\n".t("Myyty")."\n$kausi4\t"; // Korvaavat Myyty kausi4
 
 		//Jos halutaan tallentaa päivämäärät profiilin taakse
 		if ($valitut["TALLENNAPAIVAM"] == "TALLENNAPAIVAM") {

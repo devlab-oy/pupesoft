@@ -114,7 +114,8 @@
 			$ulos .= "<option value='LAHETETYYPPI_SE' {$avain_sel['LAHETETYYPPI_SE']}>		".t("Ruotsinkielinen lähetetyyppi")."</option>";
 			$ulos .= "<option value='TV_SE' {$avain_sel['TV_SE']}>							".t("Ruotsinkielinen tilausvahvistus")."</option>";
 			$ulos .= "<option value='RAHTIKIRJA_SE' {$avain_sel['RAHTIKIRJA_SE']}>			".t("Ruotsinkielinen rahtikirjatyyppi")."</option>";
-			$ulos .= "<option value='PAKKAUS_SE' {$avain_sel['PAKKAUS_SE']}>				".t("Ruotsinkielinen pakkaus")."</option>";			
+			$ulos .= "<option value='PAKKAUS_SE' {$avain_sel['PAKKAUS_SE']}>				".t("Ruotsinkielinen pakkaus")."</option>";
+			$ulos .= "<option value='KVERITTELY' {$avain_sel['KVERITTELY']}>				".t("Kulunvalvonnan erittely")."</option>";			
 			$ulos .= "</optgroup>";
 
 			$ulos .= "<optgroup label='".t("Työmääräysten avainsanat")."'>";

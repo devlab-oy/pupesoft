@@ -309,11 +309,14 @@
 		else {
 			if ($maara > 1) {
 
-				if ($trow['lukko'] != '' or $oikeurow['paivitys'] != 1 or ($kukarow["taso"] != 2 and $kukarow["taso"] != 3) or ($tiliointi_pvm > $tilikausi_loppu or $tiliointi_pvm < $tilikausi_alku)) {
-					echo "<td><img src=pics/lullacons/error.png>";
+				if (mysql_num_rows($keikres) != 0 or $trow['lukko'] != '' or $oikeurow['paivitys'] != 1 or ($kukarow["taso"] != 2 and $kukarow["taso"] != 3) or ($tiliointi_pvm > $tilikausi_loppu or $tiliointi_pvm < $tilikausi_alku)) {
+					echo "<td>";
 					//Rivi on poistettu
 					if ($trow['poistettu'] != '') {
 						echo "<img src=pics/lullacons/mini-trash.png>";
+					}
+					else {
+						echo "<img src=pics/lullacons/error.png>";
 					}
 					echo "</td></tr>";
 				}

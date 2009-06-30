@@ -34,7 +34,7 @@ if($projekti > 0) {
 		$kalenteri["kalenteri_nayta_tyyppi"]		= array("projektitapahtuma");
 		
 		$kalenteri["kalenteri_tilausdata"]			= array("tilaus", "kerays", "toimitus", "valmistus", "tyomaarays");
-		$kalenteri["kalenteri_nayta_tilausdata"]	= array("kerays", "toimitus", "valmistus", "tyomaarays");
+		$kalenteri["kalenteri_nayta_tilausdata"]	= array("tilaus", "kerays", "toimitus", "valmistus", "tyomaarays");
 		
 		$kalenteri["kalenteri_ketka"]		= array("kaikki");
 		$kalenteri["kalenteri_nayta_kuka"]	= array("");

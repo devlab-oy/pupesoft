@@ -32,7 +32,7 @@ if($toim == "TARJOUSHAKUKONE") {
 	$hakumuisti = "tarjoushakukone";
 }
 elseif ($toim == "TILAUSHAKUKONE") {
-	$laskutilat = "'R','L','N'";
+	$laskutilat = "'R','L','N','A'";
 	$hakumuisti = "tilaushakukone";
 }
 
@@ -311,7 +311,7 @@ if($tee == "NAYTA") {
 		$kalenteri["URL"]               = "tilaushakukone.php";
 		$kalenteri["url_params"]        = array("toim", "setti", "tarjous", "tee");
 		$kalenteri["nakyma"]            = "TAPAHTUMALISTAUS";   
-		$kalenteri["sallittu_nakyma"]   = array("TAPAHTUMALISTAUS", "KUUKAUSINAKYMA", "VIIKKONAKYMA", "PAIVANAKYMA");
+		$kalenteri["sallittu_nakyma"]   = array("TAPAHTUMALISTAUS", "KUUKAUSINAKYMA", "VIIKKONAKYMA", "PAIVANAKYMA", "RIVINAKYMA_VIIKKO", "RIVINAKYMA_PAIVA");
 		$kalenteri["laskutilat"]        = $laskutilat;
 		$kalenteri["tunnusnippu"]       = $tarjous;
 		
@@ -322,11 +322,11 @@ if($tee == "NAYTA") {
 			$kalenteri["kalenteri_nayta_tilausdata"]    = array("tarjous", "tarjouskontaktointi");
 		}       
 		else {
-			$kalenteri["kalenteri_tilausdata"]          = array("tilaus", "toimitus", "kerays", "laskutus");
-			$kalenteri["kalenteri_nayta_tilausdata"]    = array("");
+			$kalenteri["kalenteri_tilausdata"]          = array("tilaus", "toimitus", "kerays", "laskutus", "tyomaarays");
+			$kalenteri["kalenteri_nayta_tilausdata"]    = array("tilaus", "toimitus");
 		}
 		
-		$kalenteri["kalenteri_tyypit"]      = array("kalenteri", "Memo", "Muistutus");
+		$kalenteri["kalenteri_tyypit"]      = array("kalenteri", "Memo", "Muistutus", "projektitapahtuma");
 		$kalenteri["kalenteri_nayta_tyyppi"]= array("Memo");
 		
 		$kalenteri["kalenteri_jako"]    = array("tilaus");
@@ -609,12 +609,17 @@ if($tee == "NAYTA") {
 	
 	if($laji == "TILAUS") {
 		$summaquery = "sum(tilausrivi.hinta * if(tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))";
-		$query = "  SELECT $summaquery summa
+		$query = "  SELECT $summaquery summa, group_concat(distinct lasku.alv) alv
 					FROM lasku
 					LEFT JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi != 'D'
 					WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnusnippu = '$tarjous' and lasku.tila IN ($laskutilat)";
 		$summares = mysql_query($query) or pupe_error($query);
 		$summarow = mysql_fetch_array($summares);
+		
+		$lisaHuom = "";
+		if($summarow["alv"] != 0) {
+			$lisaHuom = "<font class='error'>".t("HUOM! Summat sisältävät arvonlisäveron")."</font>";
+		}
 
 		echo "
 			<table width='600'>
@@ -638,7 +643,8 @@ if($tee == "NAYTA") {
 				<td align='right'>".number_format($summa_laskutettu-$summa_saatu, 2, ',', ' ')."</td>
 			</tr>
 			<tr class='aktiivi'>
-				<td class='back' colspan='7' align='right'><a href=\"javascript:showhide('maksuerittely_{$laskurow["tunnus"]}');\">".t("Näytä/Piilota maksuerittely")."</a></td>
+				<td class='back' colspan='2' align='left'>$lisaHuom</td>
+				<td class='back' colspan='5' align='right'><a href=\"javascript:showhide('maksuerittely_{$laskurow["tunnus"]}');\">".t("Näytä/Piilota maksuerittely")."</a></td>
 			</tr>
 			</table>";
 
@@ -740,7 +746,7 @@ if($tee == "NAYTA") {
 	
 	$data["tiedot"]["menut"][] = tee_menu($menu, "<font class='$class'>".t("Liitetiedostot")."</font>");
 	
-	echo "<table>
+	echo "<br><table>
 		<tr>
 			<td class='back'>".kalenteri($data)."</td>
 		</tr>
@@ -1505,7 +1511,7 @@ if($tee == "") {
 			$q .= "$k, ";
 		}
 		
-		$q .= "sum($summa) Yhteensä, count(*) Kpl, ";
+		$q .= "sum($summa) Yhteensä , count(*) Kpl, ";
 		$c = count($group);
 	}
 	elseif($toim == "TARJOUSHAKUKONE") {
@@ -1513,7 +1519,7 @@ if($tee == "") {
 		$c = 6;
 	}
 	elseif($toim == "TILAUSHAKUKONE") {
-		$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws(' ',lasku.nimi, lasku.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, $summa Yhteensä, ";
+		$q = "lasku.tunnus tarjous, laskun_lisatiedot.seuranta, concat_ws(' ',lasku.nimi, lasku.nimitark) asiakas, asiakkaan_kohde.kohde, lasku.laatija, $summa Yhteensä_alv_0, ";
 		$c = 6;     
 	}
 	
@@ -1758,7 +1764,7 @@ if($tee == "") {
 			
 			echo "<br><br><table width = '800'>
 					<caption>".t("Saadut suoritukset 30 päivän ajalta")."</caption>
-					<tr><th>".t("Asiakas")."</th><th>".t("Summa")."</th><th>".t("Eräpäivä")."</th><th>".t("Maksettu")."</th><th>".t("Pva")."</th></tr>";
+					<tr><th>".t("Asiakas")."</th><th>".t("Summa sis. alv")."</th><th>".t("Eräpäivä")."</th><th>".t("Maksettu")."</th><th>".t("Pva")."</th></tr>";
 				
 			$query = "  SELECT concat_ws(' ', nimi, nimitark) asiakas, summa, date_format(erpcm, '%d. %m. %Y') erpcm, date_format(mapvm, '%d. %m. %Y') mapvm, datediff(erpcm, mapvm) pva
 						FROM lasku

@@ -159,10 +159,14 @@
 	elseif ($kukarow["kuka"] != "" and $laskurow["tila"] != "" and $toim_kutsu != "") {
 
 		if ($kukarow["extranet"] != "") {
-			$toim_kutsu = "EXTRANET";
+			$toim_kutsu 	 = "EXTRANET";
+			$tilauskasittely = "";
+		}
+		else {
+			$tilauskasittely = "tilauskasittely/";
 		}
 
-		echo "	<form method='post' action='".$palvelin2."tilauskasittely/tilaus_myynti.php'>
+		echo "	<form method='post' action='".$palvelin2.$tilauskasittely."tilaus_myynti.php'>
 				<input type='hidden' name='toim' value='$toim_kutsu'>
 				<input type='hidden' name='aktivoinnista' value='true'>
 				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>

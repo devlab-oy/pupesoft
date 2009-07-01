@@ -2,6 +2,65 @@
 
 	enable_ajax();
 
+	if ($toim_tee == "kululasku") {
+
+		$tunnus = mysql_real_escape_string($tunnus);
+
+		// Haetaan lasku
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$tunnus'
+					and lasku.tila in ('H','Y','M','P','Q')
+					and lasku.vienti in ('B','C','J','E','F','K','H','I','L')
+					and lasku.tapvm >= '$yhtiorow[tilikausi_alku]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if ($laskurow = mysql_fetch_array($result)) {
+
+			$vienti = "";
+
+			// kotimaa
+			if (in_array($laskurow["vienti"], array('B', 'C', 'J'))) {
+				$vienti = "A";
+			}
+			// eu
+			if (in_array($laskurow["vienti"], array('E', 'F', 'K'))) {
+				$vienti = "D";
+			}
+			// ei-eu
+			if (in_array($laskurow["vienti"], array('H', 'I', 'L'))) {
+				$vienti = "G";
+			}
+
+			if ($vienti != "") {
+				// Poistetaan kirjanpidosta varastoviennit
+				$query = "	UPDATE tiliointi
+							SET korjattu = '$kukarow[kuka]',
+							korjausaika = now()
+							WHERE yhtio ='$kukarow[yhtio]'
+							and ltunnus = '$tunnus'
+							and korjattu = ''
+							and tilino in ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]')";
+				$updres = mysql_query($query) or pupe_error($query);
+
+				// P‰ivitet‰‰n laskun tila
+				$query = "	UPDATE lasku
+							SET vienti = '$vienti'
+							where yhtio = '$kukarow[yhtio]'
+							and tunnus = '$tunnus'";
+				$updres = mysql_query($query) or pupe_error($query);
+			}
+			else {
+				echo "<font class='error'>".t("Lasku on jo kululasku")."!</font><br><br>";
+			}
+		}
+		else {
+			echo "<font class='error'>".t("Laskua ei voida muuttaa")."!</font><br><br>";
+		}
+
+	}
+
 	echo "<font class='head'>".t("Varastonarvo selvittely‰")."</font><hr>";
 
 	if (!isset($app)) $app = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -48,7 +107,12 @@
 	if (mysql_num_rows($result) > 0 ) {
 		echo mysql_num_rows($result)." laskua. <a href=\"javascript:toggleGroup('eee')\">N‰yt‰ / Piilota</a><br><br>";
 
-		echo "<div id='eee' style='display:none'>";
+		if ($toim_tee != "") {
+			echo "<div id='eee' style='display:block'>";
+		}
+		else {
+			echo "<div id='eee' style='display:none'>";
+		}
 
 		echo "<table>";
 		echo "<tr>";
@@ -61,29 +125,52 @@
 		echo "</tr>";
 
 		$yhteesa = 0;
+		$edellinen = 0;
 
 		while ($trow = mysql_fetch_array($result)) {
 
 			$vienti = $trow["vienti"];
+			if ($trow["vienti"] == 'A') $vienti = t('Kotimaa');
 			if ($trow["vienti"] == 'B') $vienti = t('Kotimaa huolinta/rahti');
 			if ($trow["vienti"] == 'C') $vienti = t('Kotimaa vaihto-omaisuus');
 			if ($trow["vienti"] == 'J') $vienti = t('Kotimaa raaka-aine');
+			if ($trow["vienti"] == 'D') $vienti = t('EU');
 			if ($trow["vienti"] == 'E') $vienti = t('EU huolinta/rahti');
 			if ($trow["vienti"] == 'F') $vienti = t('EU vaihto-omaisuus');
 			if ($trow["vienti"] == 'K') $vienti = t('EU raaka-aine');
+			if ($trow["vienti"] == 'G') $vienti = t('ei-EU');
 			if ($trow["vienti"] == 'H') $vienti = t('ei-EU huolinta/rahti');
 			if ($trow["vienti"] == 'I') $vienti = t('ei-EU vaihto-omaisuus');
 			if ($trow["vienti"] == 'L') $vienti = t('ei-EU raaka-aine');
 
 			echo "<tr class='aktiivi'>";
-			echo "<td><a href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
+			echo "<td><a name='$trow[latunnus]' href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
 			echo "<td>$trow[nimi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
 			echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
 			echo "<td>$vienti</td>";
+
+			// jos lasku on kuluvalla tilikaudella, annetaan mahdollisuus muuttaa tila
+			if ($trow["tapvm"] >= $yhtiorow["tilikausi_alku"] and ($kukarow["taso"] == "2" or $kukarow["taso"] == "3")) {
+				echo "<td class='back'>";
+				echo "<form method='post' action='#$edellinen' onSubmit='return confirm(\"$trow[nimi]\\n$vienti\\n".tv1dateconv($trow["tapvm"])."\\n$trow[summa] $trow[valkoodi]\\n\\n".t("Oletko varma, ett‰ haluat muuttaa laskun kululaskuksi")."?\")'>";
+			 	echo "<input type='hidden' name='toim' value='$toim'>";
+			 	echo "<input type='hidden' name='toim_tee' value='kululasku'>";
+			 	echo "<input type='hidden' name='tunnus' value='$trow[latunnus]'>";
+				echo "<input type='hidden' name='app' value='$app'>";
+				echo "<input type='hidden' name='akk' value='$akk'>";
+				echo "<input type='hidden' name='lpp' value='$lpp'>";
+				echo "<input type='hidden' name='lkk' value='$lkk'>";
+				echo "<input type='hidden' name='lvv' value='$lvv'>";
+				echo "<input type='submit' value='".t("Muuta kululaskuksi")."'>";
+				echo "</form>";
+				echo "</td>";
+			}
+
 			echo "</tr>";
 
+			$edellinen = $trow["latunnus"];
 			$yhteesa += $trow["summaeur"];
 		}
 

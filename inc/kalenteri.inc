@@ -3,7 +3,7 @@
 	/*
 		Melko geneerisiä kalenterifunktioita
 	*/
-	
+		
 	if($nayta_pdf != 1) {
 		?>
 		<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
@@ -553,7 +553,7 @@
 				
 				//	Duunataan mmuokkausmenu jos tarvetta
 				if(is_array($menu) and count($menu) > 0) {
-					$row["viesti"] .= "<div align='right' style='float: right; width: 25px;'>".tee_menu($menu, "<img src='pics/lullacons/folder-open-green.png' class='edit'>")."</div>";
+					$row["viesti"] .= "<div align='right' style='float: right; width: 25px;'>".tee_menu($menu, "<img src='$kalenteri[picsDirPath]/lullacons/folder-open-green.png' class='edit'>")."</div>";
 				}
 			}
 			elseif($laji == "liite") {
@@ -644,7 +644,7 @@
 						//	Meidän pitää tarkistaa onko tämä nippu!
 						$abuq = "	SELECT GROUP_CONCAT(tunnus) nippu
 									FROM lasku
-									WHERE yhtio='$kukarow[yhtio]' and tunnusnippu = '{$kalenteri["tunnusnippu"]}' and tila in ('R','L','N','T')";
+									WHERE yhtio='$kukarow[yhtio]' and tunnusnippu = '{$kalenteri["tunnusnippu"]}' and tila in ('R','L','N','T','A')";
 						$res = mysql_query($abuq) or pupe_error($abuq);
 						$row = mysql_fetch_array($res);
 						
@@ -666,10 +666,18 @@
 			
 			if($kalenteri["div"] == "") die("Kalenterin DIV puuttuu");
 			
+			//	Arvotaan missä meidän pics kansio on?
+			if(file_exists("pics/")) {
+				$kalenteri["picsDirPath"] = "pics/";
+			}
+			else {
+				$kalenteri["picsDirPath"] = "../pics/";
+			}
+			
 			//	Aloitetaan kalenteri, tallennetaan sen parametrit muistiin..
 			if(!muistiin("kalenteri", "kalenteri", $kalenteri)) {
 				die("OHO! Kalenterin käyttönotto ei nyt vaan onnistu!");
-			}
+			}			
 		} 
 	}
 	
@@ -1031,7 +1039,7 @@
 	//	Luodaan kalenterinäkymiä annetusta datasta
 	if(!function_exists("kalenteri")) {
 		function kalenteri ($data) {
-			global $kukarow, $yhtiorow, $nakyma, $kaleaika, $kaletee;
+			global $kukarow, $yhtiorow, $nakyma, $kaleaika, $kaletee, $kalenteri;
 			
 			//echo "<hr>data:<pre>".print_r($data, true)."</pre>";
 			$kalenteri = muistista("kalenteri", "kalenteri");
@@ -1366,262 +1374,265 @@
 				
 				$kale .= "<caption style='margin-bottom: 5px;'>$tmenut</caption>";
 				
-				//	Käsitellään maksimiajankohta
-				$query = " SELECT DATEDIFF('".date("Y-m-d", $data["tiedot"]["loppustr"])."', '".date("Y-m-d", $data["tiedot"]["alkustr"])."') paivia";
-				$abures = mysql_query($query) or pupe_error($query);
-				$aburow = mysql_fetch_array($abures);
-				$paivia = $aburow["paivia"];
-				$kaleaika = $data["tiedot"]["alkustr"];
-
-				//	Tän viikon eka päivä
-				if(date("N", $kaleaika) == 1) {
-					$maanantai = $kaleaika;
-				}
-				elseif(date("N", $kaleaika)<1) {
-					$maanantai = strtotime("-1 monday", $kaleaika);
+				if(count($data["lista"]) == 0) {
+					$kale .= "	<tr>
+									<td width='600' align='center'><br><br><br><font class='error'>".t("Ei kalenterimerkintöjä")."</font></td>
+									<td>".$kalejako;
 				}
 				else {
-					$maanantai = strtotime("+1 monday", $kaleaika);
-				}
-				
-				//	varmistetaan että päätytään sunnuntaihin
-				$vikapaiva = strtotime("+$paivia days", $kaleaika);
-				if(date("N", $vikapaiva)!=0) {
-					$vikapaiva = strtotime("sunday", $vikapaiva);
-				}
-	
-				$query = " SELECT DATEDIFF('".date("Y-m-d", $vikapaiva)."', '".date("Y-m-d", $maanantai)."') paivia";
-				$abures = mysql_query($query) or pupe_error($query);
-				$aburow = mysql_fetch_array($abures);
+					//	Käsitellään maksimiajankohta
+					$query = " SELECT DATEDIFF('".date("Y-m-d", $data["tiedot"]["loppustr"])."', '".date("Y-m-d", $data["tiedot"]["alkustr"])."') paivia";
+					$abures = mysql_query($query) or pupe_error($query);
+					$aburow = mysql_fetch_array($abures);
+					$paivia = $aburow["paivia"];
+					$kaleaika = $data["tiedot"]["alkustr"];
 
-				if($nakyma == "RIVINAKYMA_PAIVA") {
-					$paivia = $aburow["paivia"]+1;
-				}
-				else {
-					$paivia = ($aburow["paivia"]/7)+1;
-				}
-				
-				$dataByEvent = array();
-				foreach($data["lista"] as $date => $events) {
-					foreach($events as $key => $event) {
-						
-						if($nakyma == "RIVINAKYMA_PAIVA") {
-							$dataByEvent[$event["laji_tark"].$event["tunnus"]][$date] = $event;
-						}
-						else {
-							$dataByEvent[$event["laji_tark"].$event["tunnus"]][strtotime("monday", $date)] = $event;
-						}
+					//	Tän viikon eka päivä
+					if(date("N", $kaleaika) == 1) {
+						$maanantai = $kaleaika;
 					}
-				}
-				
-				//	Tehdään otsikot
-				$kale .= "
-				<tr><td class='back'></td>";
-				
-				if($kaletee == "printPDF") {
-					//	Meidän pitää tehdä taulukko tätä varten, samalla selviää minkä kokoinen sivu pitää olla
-					$pdfCellWidth = 20;
-					$pageWidth = (($paivia+2) * mm_pt($pdfCellWidth)) + mm_pt(50)+100;
-					$pageHeight = count(dataByEvent) * mm_pt(10) + 200;
-					
-					$pdf = new pdf;
-					$pdf->addPage($pageWidth."x".$pageHeight);
+					elseif(date("N", $kaleaika)<1) {
+						$maanantai = strtotime("-1 monday", $kaleaika);
+					}
+					else {
+						$maanantai = strtotime("+1 monday", $kaleaika);
+					}
 
-					$pdf->set_default('margin-top', 	mm_pt(10));
-					$pdf->set_default('margin-bottom', 	mm_pt(10));
-					$pdf->set_default('margin-left', 	0);
-					$pdf->set_default('margin-right',	0);
+					//	varmistetaan että päätytään sunnuntaihin
+					$vikapaiva = strtotime("+$paivia days", $kaleaika);
+					if(date("N", $vikapaiva)!=0) {
+						$vikapaiva = strtotime("sunday", $vikapaiva);
+					}
 
-					//tehdään sarakkeet jotta piirtäminen on snadisti helpompaa
-					$sarray = array_fill(0,$paivia+1, $pdfCellWidth);
-					array_unshift($sarray, "50");
-					$sarakkeet = $pdf->teeSarakkeet($sarray);
+					$query = " SELECT DATEDIFF('".date("Y-m-d", $vikapaiva)."', '".date("Y-m-d", $maanantai)."') paivia";
+					$abures = mysql_query($query) or pupe_error($query);
+					$aburow = mysql_fetch_array($abures);
 
-					//echo "leveys: $pageWidth korkeus: $pageHeight<br>";
-
-					$h = $pdf->pt_mm($pageHeight) - 30;
-
-					$pdf->write($h, 1, 0, 0, t("PROJEKTIKALENTERI")." - ".$kalenteri["tunnusnippu"], "BIG", "C", "B");
-					$h-=20;
-				}
-				
-				$d = 0;
-				for($i=0;$i<$paivia;$i++) {
-					
 					if($nakyma == "RIVINAKYMA_PAIVA") {
-						if($d == 7) $d = 0;
-
-						switch ($d) {
-							case 0:
-								$day = "Ma";
-								break;
-							case 1:
-								$day = "Ti";
-								break;
-							case 2:
-								$day = "Ke";
-								break;
-							case 3:
-								$day = "To";
-								break;
-							case 4:
-								$day = "Pe";
-								break;
-							case 5:
-								$day = "La";
-								break;
-							case 6:
-								$day = "Su";
-								break;
-						}
-						
-						$kale .= "<th style = 'text-align: center; width: 60px;'>".t($day)." ".date("d.m.", strtotime("+$i days", $maanantai))."</th>";
-
-						if($kaletee == "printPDF") {
-							$pdf->write($h, 1, $sarakkeet[$i], $sarakkeet[($i+1)], t($day)." ".date("d.m.", strtotime("+$i days", $maanantai)), "norm", "C", "");
-						}
-						
-						$d++;
+						$paivia = $aburow["paivia"]+1;
 					}
 					else {
-						$kale .= "<th style = 'text-align: center; width: 25px;'>".date("W", strtotime("+$i weeks", $maanantai))."</th>";
-						
-						if($kaletee == "printPDF") {
-							$pdf->write($h, 1, $sarakkeet[$i], $sarakkeet[$i+1], date("W", strtotime("+$i weeks", $maanantai)), "norm", "C", "");
-						}
-						
+						$paivia = ($aburow["paivia"]/7)+1;
 					}
-				}
-				
-				if($kaletee == "printPDF") {
-					$h-=$pdf->ln(0.5);
-				}
-				
-				$kale .= "	</tr>";	
-				
-				$leveys = $paivia;
-				$height = 15;
-								
-				foreach($dataByEvent as $event) {
-					
-					$e = &current($event);
-					
-					$lisatiedot = hae_lisatiedot(current($event), 0);
-					//echo "<pre>lisatiedot: ".print_r($lisatiedot, true)."</pre><br>";
-					//echo "<pre>lisatiedot: ".print_r($e, true)."</pre><br>";
-					
-					
-					
-					if($e["laji_tark"] == "kalenteri") {
-						$kale .= "<tr class='aktiivi'><td NOWRAP>$lisatiedot[viesti], $lisatiedot[kuka_nimi]</td>";
-						
-						if($kaletee == "printPDF") {
-							$h-=$pdf->ln();
-							$pdf->write($h, 1, 0, $sarakkeet[0], "$lisatiedot[otsikko], $lisatiedot[kuka_nimi]", "norm", "L", "");
-						}
-					}
-					else {
-						$kale .= "<tr class='aktiivi'><th NOWRAP>$lisatiedot[viesti]</th>";
-						
-						if($kaletee == "printPDF") {
-							$h-=$pdf->ln();
-							$pdf->write($h, 1, 0, $sarakkeet[0], $lisatiedot["otsikko"], "norm", "L", "");
+
+					$dataByEvent = array();
+					foreach($data["lista"] as $date => $events) {
+						foreach($events as $key => $event) {
+
+							if($nakyma == "RIVINAKYMA_PAIVA") {
+								$dataByEvent[$event["laji_tark"].$event["tunnus"]][$date] = $event;
+							}
+							else {
+								$dataByEvent[$event["laji_tark"].$event["tunnus"]][strtotime("monday", $date)] = $event;
+							}
 						}
 					}
 
-					$tcolor = array();
-					
+					//	Tehdään otsikot
+					$kale .= "
+					<tr><td class='back'></td>";
+
+					if($kaletee == "printPDF") {
+						//	Meidän pitää tehdä taulukko tätä varten, samalla selviää minkä kokoinen sivu pitää olla
+						$pdfCellWidth = 20;
+						$pageWidth = (($paivia+2) * mm_pt($pdfCellWidth)) + mm_pt(50)+100;
+						$pageHeight = count(dataByEvent) * mm_pt(10) + 200;
+
+						$pdf = new pdf;
+						$pdf->addPage($pageWidth."x".$pageHeight);
+
+						$pdf->set_default('margin-top', 	mm_pt(10));
+						$pdf->set_default('margin-bottom', 	mm_pt(10));
+						$pdf->set_default('margin-left', 	0);
+						$pdf->set_default('margin-right',	0);
+
+						//tehdään sarakkeet jotta piirtäminen on snadisti helpompaa
+						$sarray = array_fill(0,$paivia+1, $pdfCellWidth);
+						array_unshift($sarray, "50");
+						$sarakkeet = $pdf->teeSarakkeet($sarray);
+
+						//echo "leveys: $pageWidth korkeus: $pageHeight<br>";
+
+						$h = $pdf->pt_mm($pageHeight) - 30;
+
+						$pdf->write($h, 1, 0, 0, t("PROJEKTIKALENTERI")." - ".$kalenteri["tunnusnippu"], "BIG", "C", "B");
+						$h-=20;
+					}
+
+					$d = 0;
 					for($i=0;$i<$paivia;$i++) {
+
 						if($nakyma == "RIVINAKYMA_PAIVA") {
-							$aikastr = strtotime("+$i days", $maanantai);
-						}
-						else {
-							$aikastr = strtotime("+$i weeks", $maanantai);
-						}
+							if($d == 7) $d = 0;
 
-						if(date("Ymd", $aikastr) == date("Ymd")) {
-							$color = "rgba(252,245,22,0.5)";
-						}
-						else {
-							$color = "inherit";
-						}
-						
-						$stylelisa = "";
-						$ulos = "";
-						//echo "<pre>tdata $key".print_r($tdata[$aikastr], true)."</pre><br>";
-						if(is_array($event[$aikastr])) {
-							
-							$row = $event[$aikastr];
-							if(!isset($tcolor[$row["tunnus"]])) {
-								if($row["laji_tark"] == "tyomaarays") {
-									$tcolor[$row["tunnus"]] = "rgba(250, 250, 0, 0.8);";
-								}
-								else {
-									$tcolor[$row["tunnus"]] = "rgba(50, 200, 0, 0.8);";
-								}
-								
-								$colorRGPFill = "rgba(50, 200, 0, 0.8);";
+							switch ($d) {
+								case 0:
+									$day = "Ma";
+									break;
+								case 1:
+									$day = "Ti";
+									break;
+								case 2:
+									$day = "Ke";
+									break;
+								case 3:
+									$day = "To";
+									break;
+								case 4:
+									$day = "Pe";
+									break;
+								case 5:
+									$day = "La";
+									break;
+								case 6:
+									$day = "Su";
+									break;
 							}
-							
-							$stylelisa = "background-color: ".$tcolor[$row["tunnus"]];
-							
-							if(($nakyma == "RIVINAKYMA_PAIVA" and $row["aika"] == $aikastr) or ($nakyma == "RIVINAKYMA_VIIKKO" and strtotime("monday", $row["aika"]) == $aikastr)) {
-								$ulos = $lisatiedot["viesti"];
-							}
-							
-							if($kaletee == "printPDF") {
-								$param["width"] = 1; // PDF units
-								$param["strokecolor"] = $pdf->get_color('black');
-								$param["fillcolor"] = $colorRGPFill;
-								$param["mode"] = "fill+stroke";
-								$pdf->drawRectangle($h, $sarakkeet[$i], ($h-$pdf->ln()), $sarakkeet[($i+1)], $param);
-							}
-							
-						}
-						else {
-							if($kaletee == "printPDF") {
-								$param["width"] = 1; // PDF units
-								$param["strokecolor"] = $pdf->get_color('black');
-								$param["fillcolor"] = $pdf->get_color('white');
-								$param["mode"] = "fill+stroke";
-								$pdf->drawRectangle($h, $sarakkeet[$i], ($h-$pdf->ln()), $sarakkeet[($i+1)], $param);
-							}
-							$ulos = "&nbsp;";
-						}
-						
-						$kale .= "	<td height = '$height' style='background-color: $color; $stylelisa'>
-										$ulos
-									</td>";
 
+							$kale .= "<th style = 'text-align: center; width: 60px;'>".t($day)." ".date("d.m.", strtotime("+$i days", $maanantai))."</th>";
+
+							if($kaletee == "printPDF") {
+								$pdf->write($h, 1, $sarakkeet[$i], $sarakkeet[($i+1)], t($day)." ".date("d.m.", strtotime("+$i days", $maanantai)), "norm", "C", "");
+							}
+
+							$d++;
+						}
+						else {
+							$kale .= "<th style = 'text-align: center; width: 25px;'>".date("W", strtotime("+$i weeks", $maanantai))."</th>";
+
+							if($kaletee == "printPDF") {
+								$pdf->write($h, 1, $sarakkeet[$i], $sarakkeet[$i+1], date("W", strtotime("+$i weeks", $maanantai)), "norm", "C", "");
+							}
+
+						}
 					}
-					
-					$kale .= "</tr>";
-				}
-				
-				$menu = array();
-				$menu[] = array("TEKSTI" => t("Lisää kalenteriisi"), 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
-				$menu[] = array("TEKSTI" => t("Lisää muistutus"), 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
-				$menu[] = array("TEKSTI" => t("Lisää asiakasmuistio"), 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
-				
-				if(in_array("projektitapahtuma", $kalenteri["kalenteri_tyypit"])) {
-					$menu[] = array("TEKSTI" => t("Lisää projektitapahtuma"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=projektitapahtuma&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
-				}
-				
-				$kale .= "
-						<tr>
-							<td>
-								".tee_menu($menu, "<font class='kaleinfo'>".t("Toiminnot")."</font>")."
+
+					if($kaletee == "printPDF") {
+						$h-=$pdf->ln(0.5);
+					}
+
+					$kale .= "	</tr>";	
+
+					$leveys = $paivia;
+					$height = 15;
+
+					foreach($dataByEvent as $event) {
+
+						$e = &current($event);
+
+						$lisatiedot = hae_lisatiedot(current($event), 0);
+
+						if($e["laji_tark"] == "kalenteri") {
+							$kale .= "<tr class='aktiivi'><td NOWRAP>$lisatiedot[viesti], $lisatiedot[kuka_nimi]</td>";
+
+							if($kaletee == "printPDF") {
+								$h-=$pdf->ln();
+								$pdf->write($h, 1, 0, $sarakkeet[0], "$lisatiedot[otsikko], $lisatiedot[kuka_nimi]", "norm", "L", "");
+							}
+						}
+						else {
+							$kale .= "<tr class='aktiivi'><th NOWRAP>$lisatiedot[viesti]</th>";
+
+							if($kaletee == "printPDF") {
+								$h-=$pdf->ln();
+								$pdf->write($h, 1, 0, $sarakkeet[0], $lisatiedot["otsikko"], "norm", "L", "");
+							}
+						}
+
+						$tcolor = array();
+
+						for($i=0;$i<$paivia;$i++) {
+							if($nakyma == "RIVINAKYMA_PAIVA") {
+								$aikastr = strtotime("+$i days", $maanantai);
+							}
+							else {
+								$aikastr = strtotime("+$i weeks", $maanantai);
+							}
+
+							if(date("Ymd", $aikastr) == date("Ymd")) {
+								$color = "rgba(252,245,22,0.5)";
+							}
+							else {
+								$color = "inherit";
+							}
+
+							$stylelisa = "";
+							$ulos = "";
+							//echo "<pre>tdata $key".print_r($tdata[$aikastr], true)."</pre><br>";
+							if(is_array($event[$aikastr])) {
+
+								$row = $event[$aikastr];
+								if(!isset($tcolor[$row["tunnus"]])) {
+									if($row["laji_tark"] == "tyomaarays") {
+										$tcolor[$row["tunnus"]] = "rgba(250, 250, 0, 0.8);";
+									}
+									else {
+										$tcolor[$row["tunnus"]] = "rgba(50, 200, 0, 0.8);";
+									}
+
+									$colorRGPFill = "rgba(50, 200, 0, 0.8);";
+								}
+
+								$stylelisa = "background-color: ".$tcolor[$row["tunnus"]];
+
+								if(($nakyma == "RIVINAKYMA_PAIVA" and $row["aika"] == $aikastr) or ($nakyma == "RIVINAKYMA_VIIKKO" and strtotime("monday", $row["aika"]) == $aikastr)) {
+									$ulos = $lisatiedot["viesti"];
+								}
+
+								if($kaletee == "printPDF") {
+									$param["width"] = 1; // PDF units
+									$param["strokecolor"] = $pdf->get_color('black');
+									$param["fillcolor"] = $colorRGPFill;
+									$param["mode"] = "fill+stroke";
+									$pdf->drawRectangle($h, $sarakkeet[$i], ($h-$pdf->ln()), $sarakkeet[($i+1)], $param);
+								}
+
+							}
+							else {
+								if($kaletee == "printPDF") {
+									$param["width"] = 1; // PDF units
+									$param["strokecolor"] = $pdf->get_color('black');
+									$param["fillcolor"] = $pdf->get_color('white');
+									$param["mode"] = "fill+stroke";
+									$pdf->drawRectangle($h, $sarakkeet[$i], ($h-$pdf->ln()), $sarakkeet[($i+1)], $param);
+								}
+								$ulos = "&nbsp;";
+							}
+
+							$kale .= "	<td height = '$height' style='background-color: $color; $stylelisa'>
+											$ulos
+										</td>";
+
+						}
+
+						$kale .= "</tr>";
+					}
+
+					$menu = array();
+					$menu[] = array("TEKSTI" => t("Lisää kalenteriisi"), 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
+					$menu[] = array("TEKSTI" => t("Lisää muistutus"), 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
+					$menu[] = array("TEKSTI" => t("Lisää asiakasmuistio"), 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
+
+					if(in_array("projektitapahtuma", $kalenteri["kalenteri_tyypit"])) {
+						$menu[] = array("TEKSTI" => t("Lisää projektitapahtuma"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=projektitapahtuma&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+					}
+
+					$kale .= "
+							<tr>
+								<td>
+									".tee_menu($menu, "<font class='kaleinfo'>".t("Toiminnot")."</font>")."
+								</td>
+							</tr>
+							</table>
 							</td>
-						</tr>
-						</table>
-						</td>
-						<td>$kalejako";
-						
-				if($kaletee == "printPDF") {
-					$pdffilenimi = "/tmp/projektikalenteri.pdf";
-					
-					die($pdf->generate());
-				}
+							<td>$kalejako";
+
+					if($kaletee == "printPDF") {
+						$pdffilenimi = "/tmp/projektikalenteri.pdf";
+
+						die($pdf->generate());
+					}
+				}				
 			}
 			elseif($nakyma == "TAPAHTUMALISTAUS") {
 				

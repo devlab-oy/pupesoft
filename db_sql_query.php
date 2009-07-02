@@ -131,64 +131,85 @@
 						$order";
 			$result = mysql_query($sqlhaku) or pupe_error($sqlhaku);
 		
-			echo "<font class='message'>$sqlhaku<br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br>";
+			echo "<font class='message'>$sqlhaku<br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br><br>";
 		
 			if (mysql_num_rows($result) > 0) {
-			
-				if(include('Spreadsheet/Excel/Writer.php')) {
-			
-					//keksitään failille joku varmasti uniikki nimi:
-					list($usec, $sec) = explode(' ', microtime());
-					mt_srand((float) $sec + ((float) $usec * 100000));
-					$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-			
-					$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-					$workbook->setVersion(8);
-					$worksheet = $workbook->addWorksheet('Sheet 1');
+				
+				if (include('Spreadsheet/Excel/Writer.php')) {
+				
+					function tee_excel ($result) {			
+						global $excelrivi, $excelnimi;
+						
+						//keksitään failille joku varmasti uniikki nimi:
+						list($usec, $sec) = explode(' ', microtime());
+						mt_srand((float) $sec + ((float) $usec * 100000));
+						$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
 		
-					$format_bold = $workbook->addFormat();
-					$format_bold->setBold();
-		
-					$excelrivi = 0;
-				}
-        
-				if(isset($workbook)) {
-					for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
-					$worksheet->write($excelrivi, $i, "TOIMINTO", $format_bold);
-					$excelrivi++;
-				}
-        
-				while ($row = mysql_fetch_array($result)) {
-					for ($i=0; $i<mysql_num_fields($result); $i++) {
-						if (mysql_field_type($result,$i) == 'real') {
-							if(isset($workbook)) {
+						$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+						$workbook->setVersion(8);
+						$worksheet = $workbook->addWorksheet('Sheet 1');
+	
+						$format_bold = $workbook->addFormat();
+						$format_bold->setBold();
+	
+						$excelrivi = 0;
+       
+						for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+						$worksheet->write($excelrivi, $i, "TOIMINTO", $format_bold);
+						$excelrivi++;
+						
+						
+						return(array($workbook, $worksheet, $excelrivi));					
+					}
+					
+					function sulje_excel ($filelask) {			
+						global $workbook, $excelnimi, $table;
+
+						// We need to explicitly close the workbook
+						$workbook->close();
+						
+						$loprivi = $filelask*65000;
+						$alkrivi = ($loprivi-65000)+1;						
+						
+						echo "<table>";
+						echo "<tr><th>".t("Tallenna tulos")." (".t("Rivit")." $alkrivi-$loprivi):</th>";
+						echo "<form method='post' action='$PHP_SELF'>";
+						echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+						echo "<input type='hidden' name='kaunisnimi' value='SQLhaku_".$table."_".$filelask.".xls'>";
+						echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+						echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+						echo "</table><br>";											
+					}
+								
+					$lask = 0;
+					$filelask = 1;
+					
+					list($workbook, $worksheet, $excelrivi) = tee_excel($result);
+					
+					while ($row = mysql_fetch_array($result)) {
+						$lask++;
+						
+						if ($lask % 65000 == 0) {							
+							sulje_excel($filelask);
+							$filelask++;
+							
+							list($workbook, $worksheet, $excelrivi) = tee_excel($result);							
+						}
+						
+						for ($i=0; $i<mysql_num_fields($result); $i++) {
+							if (mysql_field_type($result,$i) == 'real') {
 								$worksheet->writeNumber($excelrivi, $i, $row[$i]);
 							}
-						}
-						else {						
-							if(isset($workbook)) {
+							else {						
 								$worksheet->writeString($excelrivi, $i, $row[$i]);
 							}
 						}
+						$worksheet->writeString($excelrivi, $i, "MUUTA");
+						$excelrivi++;
 					}
-					$worksheet->writeString($excelrivi, $i, "MUUTA");
-					$excelrivi++;
-				}
-        
-				if(isset($workbook)) {
-			
-					// We need to explicitly close the workbook
-					$workbook->close();
-			
-					echo "<table>";
-					echo "<tr><th>".t("Tallenna tulos").":</th>";
-					echo "<form method='post' action='$PHP_SELF'>";
-					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-					echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xls'>";
-					echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-					echo "</table><br>";
-				}
+					
+					sulje_excel($filelask);
+				}        			
 			}
 		}
 

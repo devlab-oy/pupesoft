@@ -228,7 +228,11 @@
 										"kontakti_1"	=> t("1. kontaktointi"),
 										"kontakti_2"	=> t("2. kontaktointi"),
 										"kontakti_3"	=> t("Viimeinen voitelu"),
-										"tarjouskontaktointi" => t("Tarjouskontaktointi"),
+										"tarjouskontaktointi"	=> t("Tarjouskontaktointi"),
+										"projektitapahtuma"		=> t("Projektitapahtuma"),
+										"tyomaarays" 	=> t("Työmääräys"),
+										"valmistus" 	=> t("Valmistus"),
+										"tunnit" 		=> t("Työtunnit"),
 									);
 				
 			}
@@ -337,7 +341,7 @@
 	if(!function_exists("hae_lisatiedot")) {
 		function hae_lisatiedot(&$krow, $viestipituus="") {
 			global $kukarow, $kalenteri;
-			
+
 			$laji		= $krow["laji"];
 			$lajitark	= $krow["laji_tark"];
 			$tunnus		= $krow["tunnus"];
@@ -568,8 +572,36 @@
 				$row["viesti"] .= $row["kayttotarkoitus_nimi"].":&nbsp;<a href='../view.php?id=$tunnus' target='_blank'>{$row["selite"]}</a>";	
 
 			}
-			elseif($laji == "") {
-				echo "<pre>Tuntematon laji ".print_r($krow, true)."</pre><br>";
+			elseif($laji == "kulunvalvonta") {
+				$query = "	SELECT avainsana.selitetark erittely, kuka.nimi, minuuttimaara
+							FROM kulunvalvonta
+							LEFT JOIN avainsana ON avainsana.yhtio=kulunvalvonta.yhtio and avainsana.laji='KVERITTELY' and avainsana.selite=kulunvalvonta.tyyppi
+							LEFT JOIN kuka ON kuka.yhtio=kulunvalvonta.yhtio and kuka.kuka=kulunvalvonta.kuka
+							WHERE kulunvalvonta.yhtio = '$kukarow[yhtio]' and kulunvalvonta.tunnus = '$krow[tunnus]'";
+				$abures = mysql_query($query) or pupe_error($query);
+				$row = mysql_fetch_array($abures);
+				//	Nimestä vaan etukirjaimet
+				foreach(explode(" ", $row["nimi"]) as $npart) {
+					$row["viesti"] .= strtoupper($npart{0});
+				}
+				$row["viesti"] .= " - $row[erittely]";
+				$id=uniqid();
+				$div = "
+				<div id='$id' class='popup'>
+					<table width='150'>
+						<tr>
+							<td>
+								$row[nimi]<br>
+								Työaika: ".sprintf("%02d", floor($row["minuuttimaara"]/60)).":".sprintf("%02d", floor($row["minuuttimaara"]%60))."
+							</td>
+						</tr>
+					</table>
+				</div>";	
+				
+				$row["viesti"] = "$div<div onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\">".$row["viesti"]."</div>";
+			}
+			else {
+				echo "<pre>Tuntematon laji $laji ".print_r($krow, true)."</pre><br>";
 				return false;
 			}
 			
@@ -776,7 +808,7 @@
 				if($asiakas_join != "") {
 					$asiakas_join = "JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus=lasku.liitostunnus $asiakas_join";
 				}
-				
+
 				foreach($kalenteri["kalenteri_nayta_tilausdata"] as $tdata) {
 										
 					if($tdata == "tilaus") {
@@ -955,6 +987,29 @@
 						";
 					}
 				}
+			}
+			
+			if(count($kalenteri["kalenteri_nayta_tuntidata"])>0) {
+				if($kukat != "") {
+					$wherelisa = " and kuka IN ('$kukat')";
+				}
+				else {
+					$wherelisa = "";
+				}
+				
+				foreach($kalenteri["kalenteri_nayta_tuntidata"] as $tdata) {
+					if($tdata == "tunnit") {
+						$query .= "
+						UNION
+						/*	Tehty työtunteja	*/	
+						(	
+							SELECT distinct 'kulunvalvonta' laji, 'tunnit' laji_tark, UNIX_TIMESTAMP(date(kulunvalvonta.aika)) aika, kulunvalvonta.aika luontiaika, '0' vali, kulunvalvonta.kuka laatija, kulunvalvonta.tunnus tunnus
+							FROM kulunvalvonta
+							WHERE kulunvalvonta.yhtio = '$kukarow[yhtio]' and kulunvalvonta.otunnus='{$kalenteri["tunnusnippu"]}' $wherelisa
+						)
+						";
+					}
+				}				
 			}
 			
 			//	Laitetaan tämä vaikka ei ole tyyppejä jotta ei tule SQL-erroria
@@ -1158,7 +1213,32 @@
 					$kalejako .= "
 					</table>";
 			}
-					
+			
+			if(count($kalenteri["kalenteri_tuntidata"])>0) {
+				$kalejako .= "
+					<br>
+					<table border='1' width='140'>
+						<caption>".t("Näytä työtunnit")."</caption>";
+
+					foreach($kalenteri["kalenteri_tuntidata"] as $tyyppi) {
+						
+						$kalejako .= "<tr>";
+						
+						if(in_array($tyyppi, $kalenteri["kalenteri_nayta_tuntidata"])) {
+							$kalejako .= "
+								<td><div style='float: left;'><font class='info'>".kaleotsikko($tyyppi)."</font></div><div style='float: right;'><input type='checkbox' name='' onclick=\"sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kalepoisto[kalenteri_nayta_tuntidata]=$tyyppi".url_params($kalenteri)."', '$kalenteri[div]', false);\" checked></div></td>";
+						}
+						else {
+							$kalejako .= "
+								<td><div style='float: left;'><font class='info'>".kaleotsikko($tyyppi)."</font></div><div style='float: right;'><input type='checkbox' name='' onclick=\"sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kalelisaa[kalenteri_nayta_tuntidata]=$tyyppi".url_params($kalenteri)."', '$kalenteri[div]', false);\"></div></td>";
+						}
+						
+						$kalejako .= "</tr>";
+					}
+
+					$kalejako .= "
+					</table>";
+			}					
 			
 			//	Piirretään header
 			if($kalenteri["vain_luku"] != true) {
@@ -1565,6 +1645,9 @@
 								if(!isset($tcolor[$row["tunnus"]])) {
 									if($row["laji_tark"] == "tyomaarays") {
 										$tcolor[$row["tunnus"]] = "rgba(250, 250, 0, 0.8);";
+									}
+									elseif($row["laji"] == "kulunvalvonta") {
+										$tcolor[$row["tunnus"]] = "rgba(50, 200, 200, 0.8);";
 									}
 									else {
 										$tcolor[$row["tunnus"]] = "rgba(50, 200, 0, 0.8);";

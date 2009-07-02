@@ -33,7 +33,7 @@ if($projekti > 0) {
 		$kalenteri["kalenteri_tyypit"]				= array("kalenteri", "Muistutus", "projektitapahtuma");
 		$kalenteri["kalenteri_nayta_tyyppi"]		= array("projektitapahtuma");
 
-		$kalenteri["kalenteri_tuntidata"]			= array("tunnit");
+		$kalenteri["kalenteri_tuntidata"]			= array("projektitunnit");
 		$kalenteri["kalenteri_nayta_tuntidata"]		= array("");
 		
 		$kalenteri["kalenteri_tilausdata"]			= array("tilaus", "kerays", "toimitus", "valmistus", "tyomaarays");

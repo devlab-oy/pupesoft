@@ -174,7 +174,7 @@
 		echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
 
 		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS') and $asrow['email'] != '') {
-			echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin")." $asrow[email]</option>";
+			echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
 		}
 
 		$querykieli = "	select *

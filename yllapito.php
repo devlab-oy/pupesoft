@@ -776,14 +776,14 @@
 				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>";
 		
-		if($from == "yllapito") {
+		if ($from == "yllapito" and mysql_num_rows($result) > 0) {
 			for ($i = 1; $i < mysql_num_fields($result); $i++) {			
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {		
 					echo "<th valign='top'>".t(mysql_field_name($result,$i))."</th>";
 				}
 			}
 		}
-		else {
+		elseif($from != "yllapito") {
 			for ($i = 1; $i < mysql_num_fields($result); $i++) {			
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {		
 					echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&ojarj=".mysql_field_name($result,$i).$ulisa."&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";

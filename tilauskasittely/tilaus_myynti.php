@@ -3283,6 +3283,7 @@ if ($tee == '') {
 
 		// Tilausrivit
 		$query  = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*,
+					if (tilausrivi.laskutettuaika!='0000-00-00', kpl, varattu) varattu,
 					if (tuotetyyppi='K','Työ','Varaosa') tuotetyyppi,
 					tuote.myyntihinta,
 					tuote.kehahin,

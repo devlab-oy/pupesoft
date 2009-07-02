@@ -71,7 +71,7 @@
 		$uusiarvo += $arvo;
 
 		//Tutkitan onko raaka-aineiden käyttömääriä muutettu
-		if($perherow["kpl"] != $perherow["varattu"]) {
+		if ($perherow["kpl"] != $perherow["varattu"]) {
 			echo "<br><font class='message'>Raaka aineen $perherow[tuoteno] kulutusta muutettu! $perherow[kpl] --> $perherow[varattu]. Teemme jälkilaskennan raaka-aineelle.</font><br>";
 
 			//Suoritetaan jälkilaskenta
@@ -83,16 +83,16 @@
 
 			$osavalm_lukumaara = mysql_num_rows($res);
 
-			//Lasketaan kääntöpisteen saldomuutos joka johtuu raaka-aineen kulutuksen muutokseta
-			$kaantopisteen_saldomuutos = ($perherow["kpl"] - $perherow["varattu"]) / $osavalm_lukumaara;
+			//Lasketaan kääntöpisteen saldomuutos joka johtuu raaka-aineen kulutuksen muutoksesta
+			$kaantopisteen_saldomuutos = round(($perherow["kpl"] - $perherow["varattu"]) / $osavalm_lukumaara, 2);
 			
-			while($taparow = mysql_fetch_array($res)) {
+			while ($taparow = mysql_fetch_array($res)) {
 
 				//Etsitään kääntöpiste
 				$query = "SELECT * FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and tuoteno='$taparow[tuoteno]' and laji in ('tulo','valmistus') and laadittu >= '$taparow[laadittu]' LIMIT 1";
 				$kaantopisteres = mysql_query($query) or pupe_error($query);
 
-				if(mysql_num_rows($kaantopisteres) > 0) {
+				if (mysql_num_rows($kaantopisteres) > 0) {
 					$kaantopisterow = mysql_fetch_array($kaantopisteres);
 
 					$uusihinta 		 = $kaantopisterow["kplhinta"];
@@ -173,24 +173,78 @@
 		$updresult = mysql_query($query) or pupe_error($query);
 	}
 	else {
+				
 		// Suoritetaan jälkilaskenta valmisteelle
-		$query   = "SELECT *
+		$query = "	SELECT *
 					from tapahtuma
 					where yhtio='$kukarow[yhtio]' and laji='valmistus' and rivitunnus='$tilrivirow[tunnus]'
 					order by tunnus";
-		$res     = mysql_query($query) or pupe_error($query);
-
-		while($taparow = mysql_fetch_array($res)) {
+		$res = mysql_query($query) or pupe_error($query);
+		
+		$osavalm_lukumaara = mysql_num_rows($res);
+		
+		$query = "	SELECT sum(kpl) valmistetut
+					FROM tilausrivi
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.otunnus = '$tilrivirow[otunnus]'
+					and tilausrivi.perheid = '$tilrivirow[perheid]'
+					and tilausrivi.tyyppi = 'D'";
+		$resisa = mysql_query($query) or pupe_error($query);
+		$rowisa = mysql_fetch_array($resisa);
+		
+		while ($taparow = mysql_fetch_array($res)) {
 
 			$uusihinta 		 = round($uusiarvo / $valmkpl,6);
 			$tuoteno		 = $taparow["tuoteno"];
 			$pvm			 = $taparow["laadittu"];
 			$rivitunnus 	 = $taparow["rivitunnus"];
 			$tapahtumatunnus = $taparow["tunnus"];
+			
+			// Lasketaan kääntöpisteen saldomuutos
+			$kaantopisteen_saldomuutos = round(($taparow["kpl"] * ($valmkpl/$rowisa["valmistetut"]))-$taparow["kpl"], 2);
 
-			echo "<br><font class='message'>Korjataan tuotteen $tuoteno tapahtumat $pvm ($rivitunnus) lähtien. Uusi ostohinta $uusihinta.</font><br>";
+			echo "<br><font class='message'>Korjataan tuotteen $tuoteno tapahtumat $pvm ($rivitunnus) lähtien. Uusi ostohinta $uusihinta. ";
+			
+			if ($kaantopisteen_saldomuutos != 0) echo "Valmisteen kappalemuutos: $kaantopisteen_saldomuutos.";
+			
+			echo "</font><br>";
+													
+			require("jalkilaskenta.inc");		
+			
+			if ($kaantopisteen_saldomuutos != 0) {			
+				//Päivitetään myös tapahtuman kappalemäärä
+				$query = "	UPDATE tapahtuma
+							SET kpl	= kpl+$kaantopisteen_saldomuutos,
+							selite  = concat(selite,'\nValmistus korjattu. Valmisteen kappalemuutos: $kaantopisteen_saldomuutos.')
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus 	= '$taparow[tunnus]'";
+				$updresult = mysql_query($query) or pupe_error($query);
 
-			require("jalkilaskenta.inc");
+				$query = "	UPDATE tuotepaikat
+							SET saldo=saldo+$kaantopisteen_saldomuutos
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$taparow[tuoteno]'
+							and oletus != ''
+							LIMIT 1";
+				$result = mysql_query($query) or pupe_error($query);				
+			}	
+		}
+		
+		if ($valmkpl != $rowisa["valmistetut"]) {
+			$query = "	UPDATE tilausrivi
+						SET varattu = 0
+						WHERE yhtio = '$kukarow[yhtio]'
+						and otunnus = '$tilrivirow[otunnus]'
+						and tunnus  = '$tilrivirow[tunnus]'";
+			$updresult = mysql_query($query) or pupe_error($query);
+		
+			$query = "	UPDATE tilausrivi
+						SET kpl=round(kpl*($valmkpl/$rowisa[valmistetut]),2), varattu=kpl
+						WHERE yhtio = '$kukarow[yhtio]'
+						and otunnus = '$tilrivirow[otunnus]'
+						and perheid = '$tilrivirow[tunnus]'
+						and tyyppi  = 'D'";
+			$updresult = mysql_query($query) or pupe_error($query);
 		}
 	}
 ?>

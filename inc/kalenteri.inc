@@ -575,7 +575,7 @@
 			elseif($laji == "kulunvalvonta") {
 				
 				if($lajitark != "kuka") {
-					$query = "	SELECT avainsana.selitetark erittely, kuka.nimi, minuuttimaara
+					$query = "	SELECT avainsana.selitetark erittely, kuka.nimi, minuuttimaara, kulunvalvonta.otunnus
 								FROM kulunvalvonta
 								LEFT JOIN avainsana ON avainsana.yhtio=kulunvalvonta.yhtio and avainsana.laji='KVERITTELY' and avainsana.selite=kulunvalvonta.tyyppi
 								LEFT JOIN kuka ON kuka.yhtio=kulunvalvonta.yhtio and kuka.kuka=kulunvalvonta.kuka

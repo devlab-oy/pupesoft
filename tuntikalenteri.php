@@ -27,7 +27,7 @@ if($kaleID != $kaleDIV) {
 
 	$kalenteri["kalenteri_tuntidata"]			= array("tyotunnit");
 	$kalenteri["kalenteri_nayta_tuntidata"]		= array("tyotunnit");
-	$kalenteri["kalenteri_ketka"]		= array("kaikki");
+	$kalenteri["kalenteri_ketka"]		= array("aivan_kaikki");
 	$kalenteri["kalenteri_nayta_kuka"]	= array("");
 	
 	alusta_kalenteri($kalenteri);

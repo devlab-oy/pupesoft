@@ -658,7 +658,7 @@
 				$kalenteri["kalenteri_ketka"] = array();
 				$kukalisa = "";
 				
-				if($k[0] != "kaikki") {
+				if($k[0] != "kaikki" and $k[0] != "aivan_kaikki") {
 					foreach($k as $kj) {
 						if($kukalisa == "") {
 							$kukalisa = " and (";
@@ -682,11 +682,20 @@
 					}
 				}
 				
-				$query = "	SELECT DISTINCT kuka.kuka
-							FROM kuka
-							JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php'
-							WHERE kuka.yhtio = '$kukarow[yhtio]' $kukalisa";
-				$result = mysql_query($query) or pupe_error($query);
+				//	Joissain caseissa halutaan myös ne jotka eivät ole kalenterikäyttäjiä
+				if($k[0] == "aivan_kaikki") {
+					$query = "	SELECT DISTINCT kuka.kuka
+								FROM kuka
+								WHERE yhtio = '$kukarow[yhtio]'";
+					$result = mysql_query($query) or pupe_error($query);
+				}
+				else {
+					$query = "	SELECT DISTINCT kuka.kuka
+								FROM kuka
+								JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php'
+								WHERE kuka.yhtio = '$kukarow[yhtio]' $kukalisa";
+					$result = mysql_query($query) or pupe_error($query);
+				}
 
 				while($row = mysql_fetch_array($result)) {
 					$kalenteri["kalenteri_ketka"][] = $row["kuka"];
@@ -1190,7 +1199,7 @@
 				$query = " 	SELECT *
 							FROM kuka
 							WHERE yhtio='$kukarow[yhtio]' and kuka IN ('".implode("','", $kalenteri["kalenteri_ketka"])."')
-							ORDER BY kuka IN('{$kukarow["kuka"]}') DESC, nimi ";
+							ORDER BY kuka IN('{$kukarow["kuka"]}') DESC, kuka.nimi ASC ";
 				$result = mysql_query($query) or pupe_error($query);
 				if(mysql_num_rows($result)>0) {
 					while($row = mysql_fetch_array($result)) {

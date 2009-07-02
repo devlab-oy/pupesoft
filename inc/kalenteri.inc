@@ -232,7 +232,7 @@
 										"projektitapahtuma"		=> t("Projektitapahtuma"),
 										"tyomaarays" 	=> t("Työmääräys"),
 										"valmistus" 	=> t("Valmistus"),
-										"tunnit" 		=> t("Työtunnit"),
+										"projektitunnit"		=> t("Projektitunnit"),
 									);
 				
 			}
@@ -573,32 +573,62 @@
 
 			}
 			elseif($laji == "kulunvalvonta") {
-				$query = "	SELECT avainsana.selitetark erittely, kuka.nimi, minuuttimaara
-							FROM kulunvalvonta
-							LEFT JOIN avainsana ON avainsana.yhtio=kulunvalvonta.yhtio and avainsana.laji='KVERITTELY' and avainsana.selite=kulunvalvonta.tyyppi
-							LEFT JOIN kuka ON kuka.yhtio=kulunvalvonta.yhtio and kuka.kuka=kulunvalvonta.kuka
-							WHERE kulunvalvonta.yhtio = '$kukarow[yhtio]' and kulunvalvonta.tunnus = '$krow[tunnus]'";
-				$abures = mysql_query($query) or pupe_error($query);
-				$row = mysql_fetch_array($abures);
-				//	Nimestä vaan etukirjaimet
-				foreach(explode(" ", $row["nimi"]) as $npart) {
-					$row["viesti"] .= strtoupper($npart{0});
-				}
-				$row["viesti"] .= " - $row[erittely]";
-				$id=uniqid();
-				$div = "
-				<div id='$id' class='popup'>
-					<table width='150'>
-						<tr>
-							<td>
-								$row[nimi]<br>
-								Työaika: ".sprintf("%02d", floor($row["minuuttimaara"]/60)).":".sprintf("%02d", floor($row["minuuttimaara"]%60))."
-							</td>
-						</tr>
-					</table>
-				</div>";	
 				
-				$row["viesti"] = "$div<div onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\">".$row["viesti"]."</div>";
+				if($lajitark != "kuka") {
+					$query = "	SELECT avainsana.selitetark erittely, kuka.nimi, minuuttimaara
+								FROM kulunvalvonta
+								LEFT JOIN avainsana ON avainsana.yhtio=kulunvalvonta.yhtio and avainsana.laji='KVERITTELY' and avainsana.selite=kulunvalvonta.tyyppi
+								LEFT JOIN kuka ON kuka.yhtio=kulunvalvonta.yhtio and kuka.kuka=kulunvalvonta.kuka
+								WHERE kulunvalvonta.yhtio = '$kukarow[yhtio]' and kulunvalvonta.tunnus = '$krow[tunnus]'";
+					$abures = mysql_query($query) or pupe_error($query);
+					$row = mysql_fetch_array($abures);
+					//	Nimestä vaan etukirjaimet
+					foreach(explode(" ", $row["nimi"]) as $npart) {
+						$row["viesti"] .= strtoupper($npart{0});
+					}
+					$row["viesti"] .= " - $row[erittely]";
+					$id=uniqid();
+					$div = "
+					<div id='$id' class='popup'>
+						<table width='150'>
+							<tr>
+								<td>
+									$row[nimi]<br>
+									Työaika: ".sprintf("%02d", floor($row["minuuttimaara"]/60)).":".sprintf("%02d", floor($row["minuuttimaara"]%60))."
+								</td>
+							</tr>
+						</table>
+					</div>";	
+
+					$row["viesti"] = "$div<div onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\">".$row["viesti"]."</div>";
+				}
+				else {
+					$query = "	SELECT nimi
+								FROM kuka
+								WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$krow[tunnus]'";
+					$abures = mysql_query($query) or pupe_error($query);
+					$row = mysql_fetch_array($abures);
+					//	Nimestä vaan etukirjaimet
+					foreach(explode(" ", $row["nimi"]) as $npart) {
+						$row["viesti"] .= strtoupper($npart{0});
+					}
+					$row["viesti"] .= " - ei tunteja";
+					
+					$id=uniqid();
+					$div = "
+					<div id='$id' class='popup'>
+						<table width='150'>
+							<tr>
+								<td>
+									$row[nimi]<br>
+								</td>
+							</tr>
+						</table>
+					</div>";	
+
+					$row["viesti"] = "$div<div onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\">".$row["viesti"]."</div>";
+					
+				}
 			}
 			else {
 				echo "<pre>Tuntematon laji $laji ".print_r($krow, true)."</pre><br>";
@@ -990,25 +1020,46 @@
 			}
 			
 			if(count($kalenteri["kalenteri_nayta_tuntidata"])>0) {
-				if($kukat != "") {
-					$wherelisa = " and kuka IN ('$kukat')";
-				}
-				else {
-					$wherelisa = "";
-				}
 				
 				foreach($kalenteri["kalenteri_nayta_tuntidata"] as $tdata) {
-					if($tdata == "tunnit") {
+					if($tdata == "projektitunnit") {
+						if($kukat != "") {
+							$wherelisa = " and kulunvalvonta.kuka IN ('$kukat')";
+						}
+						else {
+							$wherelisa = "";
+						}
+						
 						$query .= "
 						UNION
-						/*	Tehty työtunteja	*/	
+						/*	Tehty tunteja projektille	*/	
 						(	
-							SELECT distinct 'kulunvalvonta' laji, 'tunnit' laji_tark, UNIX_TIMESTAMP(date(kulunvalvonta.aika)) aika, kulunvalvonta.aika luontiaika, '0' vali, kulunvalvonta.kuka laatija, kulunvalvonta.tunnus tunnus
+							SELECT distinct 'kulunvalvonta' laji, 'projektitunnit' laji_tark, UNIX_TIMESTAMP(date(kulunvalvonta.aika)) aika, kulunvalvonta.aika luontiaika, '0' vali, kulunvalvonta.kuka laatija, kulunvalvonta.tunnus tunnus
 							FROM kulunvalvonta
 							WHERE kulunvalvonta.yhtio = '$kukarow[yhtio]' and kulunvalvonta.otunnus='{$kalenteri["tunnusnippu"]}' $wherelisa
 						)
 						";
 					}
+					elseif($tdata == "tyotunnit") {
+						if($kukat != "") {
+							$wherelisa = " and kuka.kuka IN ('$kukat')";
+						}
+						else {
+							$wherelisa = "";
+						}
+						
+						$query .= "
+						UNION
+						/*	Tehty työtunteja	*/	
+						(	
+							SELECT distinct 'kulunvalvonta' laji, if(kulunvalvonta.tunnus IS NULL, 'kuka', 'tunnit') laji_tark, UNIX_TIMESTAMP(date(if(kulunvalvonta.aika IS NULL, now(), kulunvalvonta.aika))) aika, kulunvalvonta.aika luontiaika, '0' vali, kulunvalvonta.kuka laatija, if(kulunvalvonta.tunnus IS NULL, kuka.tunnus, kulunvalvonta.tunnus) tunnus
+							FROM kuka
+							LEFT JOIN kulunvalvonta ON kulunvalvonta.yhtio=kuka.yhtio and kulunvalvonta.kuka=kuka.kuka
+							WHERE kuka.yhtio = '$kukarow[yhtio]' and osasto != '' $wherelisa
+						)
+						";
+					}
+					
 				}				
 			}
 			
@@ -1471,11 +1522,11 @@
 					if(date("N", $kaleaika) == 1) {
 						$maanantai = $kaleaika;
 					}
-					elseif(date("N", $kaleaika)<1) {
-						$maanantai = strtotime("-1 monday", $kaleaika);
+					elseif(date("N", $kaleaika)>3) {
+						$maanantai = strtotime("+1 monday", $kaleaika);
 					}
 					else {
-						$maanantai = strtotime("+1 monday", $kaleaika);
+						$maanantai = strtotime("-1 monday", $kaleaika);
 					}
 
 					//	varmistetaan että päätytään sunnuntaihin
@@ -1486,6 +1537,7 @@
 
 					$query = " SELECT DATEDIFF('".date("Y-m-d", $vikapaiva)."', '".date("Y-m-d", $maanantai)."') paivia";
 					$abures = mysql_query($query) or pupe_error($query);
+
 					$aburow = mysql_fetch_array($abures);
 
 					if($nakyma == "RIVINAKYMA_PAIVA") {
@@ -1622,6 +1674,7 @@
 						$tcolor = array();
 
 						for($i=0;$i<$paivia;$i++) {
+
 							if($nakyma == "RIVINAKYMA_PAIVA") {
 								$aikastr = strtotime("+$i days", $maanantai);
 							}
@@ -1640,14 +1693,23 @@
 							$ulos = "";
 							//echo "<pre>tdata $key".print_r($tdata[$aikastr], true)."</pre><br>";
 							if(is_array($event[$aikastr])) {
-
+								
+								if($row["laji_tark"] != "kuka") {
+									
+								}
+								
 								$row = $event[$aikastr];
 								if(!isset($tcolor[$row["tunnus"]])) {
 									if($row["laji_tark"] == "tyomaarays") {
 										$tcolor[$row["tunnus"]] = "rgba(250, 250, 0, 0.8);";
 									}
 									elseif($row["laji"] == "kulunvalvonta") {
-										$tcolor[$row["tunnus"]] = "rgba(50, 200, 200, 0.8);";
+										if($row["laji_tark"] == "kuka") {
+											$tcolor[$row["tunnus"]] = "rgba(255, 100, 100, 0.9);";
+										}
+										else {
+											$tcolor[$row["tunnus"]] = "rgba(50, 200, 200, 0.7);";
+										}
 									}
 									else {
 										$tcolor[$row["tunnus"]] = "rgba(50, 200, 0, 0.8);";
@@ -1655,7 +1717,8 @@
 
 									$colorRGPFill = "rgba(50, 200, 0, 0.8);";
 								}
-
+								
+								
 								$stylelisa = "background-color: ".$tcolor[$row["tunnus"]];
 
 								if(($nakyma == "RIVINAKYMA_PAIVA" and $row["aika"] == $aikastr) or ($nakyma == "RIVINAKYMA_VIIKKO" and strtotime("monday", $row["aika"]) == $aikastr)) {
@@ -1669,7 +1732,6 @@
 									$param["mode"] = "fill+stroke";
 									$pdf->drawRectangle($h, $sarakkeet[$i], ($h-$pdf->ln()), $sarakkeet[($i+1)], $param);
 								}
-
 							}
 							else {
 								if($kaletee == "printPDF") {

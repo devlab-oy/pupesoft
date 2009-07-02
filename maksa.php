@@ -5,7 +5,7 @@
 	echo "<font class='head'>".t("Laskujen maksatus")."</font><hr>";
 	
 	if (count($_POST) == 0) {
-		// Tarkistetaan  laskujen oletusmaksupvm, eli poistetaan vanhentuneet kassa-alet. tehd‰‰n ta‰m‰ aina kun aloitetaan maksatus
+		// Tarkistetaan laskujen oletusmaksupvm, eli poistetaan vanhentuneet kassa-alet. tehd‰‰n ta‰m‰ aina kun aloitetaan maksatus
 		$query = "	UPDATE lasku use index (yhtio_tila_mapvm)
 	           		SET olmapvm = if(kapvm < now(), erpcm, kapvm)
 	            	WHERE yhtio = '$kukarow[yhtio]' 
@@ -821,10 +821,10 @@
 				$hyvitysrow = mysql_fetch_array ($hyvitysresult);
 
 				if ($hyvitysrow[0] > 0) {
-					echo "<td valign='top'><a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'><font class='error'>$trow[nimi]</font></a></td>";
+					echo "<td valign='top'><a href='muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////tee=S//valuu=$valuu//erapvm=$erapvm//nimihaku=$nimihaku///$tunnus'><font class='error'>$trow[nimi]</font></a></td>";
 				}
 				else {
-					echo "<td valign='top'><a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'>$trow[nimi]</a></td>";
+					echo "<td valign='top'><a href='muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////tee=S//valuu=$valuu//erapvm=$erapvm//nimihaku=$nimihaku///$tunnus'>$trow[nimi]</a></td>";
 				}
 				echo "<td valign='top'>".tilinumero_print($trow["tilinumero"])."</td>";
 				
@@ -977,10 +977,10 @@
 				echo "<td valign='top'><a name='$trow[tunnus]'>";
 				
 				if ($hyvitysrow[0] > 0) {
-					echo "<a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'><font class='error'>$trow[nimi]</font></a></td>";
+					echo "<a href='muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////tee=S//valuu=$valuu//erapvm=$erapvm//nimihaku=$nimihaku///$tunnus'><font class='error'>$trow[nimi]</font></a></td>";
 				}
 				else {
-					echo "<a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'>$trow[nimi]</a></td>";
+					echo "<a href='muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////tee=S//valuu=$valuu//erapvm=$erapvm//nimihaku=$nimihaku///$tunnus'>$trow[nimi]</a></td>";
 				}
 				echo "<td valign='top'>".tilinumero_print($trow["tilinumero"])."</td>";
 				

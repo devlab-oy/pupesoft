@@ -594,7 +594,8 @@
 							<tr>
 								<td>
 									$row[nimi]<br>
-									Työaika: ".sprintf("%02d", floor($row["minuuttimaara"]/60)).":".sprintf("%02d", floor($row["minuuttimaara"]%60))."
+									Työaika: ".sprintf("%02d", floor($row["minuuttimaara"]/60)).":".sprintf("%02d", floor($row["minuuttimaara"]%60))."<br>
+									projekti: $row[otunnus]
 								</td>
 							</tr>
 						</table>
@@ -1036,7 +1037,7 @@
 						(	
 							SELECT distinct 'kulunvalvonta' laji, 'projektitunnit' laji_tark, UNIX_TIMESTAMP(date(kulunvalvonta.aika)) aika, kulunvalvonta.aika luontiaika, '0' vali, kulunvalvonta.kuka laatija, kulunvalvonta.tunnus tunnus
 							FROM kulunvalvonta
-							WHERE kulunvalvonta.yhtio = '$kukarow[yhtio]' and kulunvalvonta.otunnus='{$kalenteri["tunnusnippu"]}' $wherelisa
+							WHERE kulunvalvonta.yhtio = '$kukarow[yhtio]' and kulunvalvonta.otunnus='{$kalenteri["tunnusnippu"]}' and suunta ='' $wherelisa
 						)
 						";
 					}
@@ -1054,7 +1055,7 @@
 						(	
 							SELECT distinct 'kulunvalvonta' laji, if(kulunvalvonta.tunnus IS NULL, 'kuka', 'tunnit') laji_tark, UNIX_TIMESTAMP(date(if(kulunvalvonta.aika IS NULL, now(), kulunvalvonta.aika))) aika, kulunvalvonta.aika luontiaika, '0' vali, kulunvalvonta.kuka laatija, if(kulunvalvonta.tunnus IS NULL, kuka.tunnus, kulunvalvonta.tunnus) tunnus
 							FROM kuka
-							LEFT JOIN kulunvalvonta ON kulunvalvonta.yhtio=kuka.yhtio and kulunvalvonta.kuka=kuka.kuka
+							LEFT JOIN kulunvalvonta ON kulunvalvonta.yhtio=kuka.yhtio and kulunvalvonta.kuka=kuka.kuka and suunta =''
 							WHERE kuka.yhtio = '$kukarow[yhtio]' and osasto != '' $wherelisa
 						)
 						";

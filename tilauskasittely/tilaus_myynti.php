@@ -599,11 +599,11 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 	$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 	$result = mysql_query($query) or pupe_error($query);
 
-	if($kukarow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and ($toim != "TARJOUS" or ($toim == "TARJOUS" and $laskurow["tunnusnippu"] != $laskurow["tunnus"])) and $toim != "PROJEKTI") {
+	if ($kukarow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and ($toim != "TARJOUS" or ($toim == "TARJOUS" and $laskurow["tunnusnippu"] != $laskurow["tunnus"])) and $toim != "PROJEKTI") {
 
 		$aika = date("d.m.y @ G:i:s", time());
 
-		if($projektilla > 0 and ($laskurow["tunnusnippu"] > 0 and $laskurow["tunnusnippu"] != $laskurow["tunnus"])) {
+		if ($projektilla > 0 and ($laskurow["tunnusnippu"] > 0 and $laskurow["tunnusnippu"] != $laskurow["tunnus"])) {
 
 			echo "<font class='message'>".t("Osatoimitus")." ($aika) $kukarow[kesken] ".t("mitätöity")."!</font><br><br>";
 
@@ -612,7 +612,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 			//	Hypätään takaisin otsikolle
 			echo "<font class='info'>".t("Palataan projektille odota hetki..")."</font><br>";
 
-			if($projektilla > 0) {
+			if ($projektilla > 0) {
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$PHP_SELF?toim=PROJEKTI&valitsetoimitus=$tilausnumero'>";
 			}
 			else {
@@ -621,7 +621,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 
 			exit;
 		}
-		elseif($toim == "TARJOUS" and $laskurow["tunnusnippu"] > 0) {
+		elseif ($toim == "TARJOUS" and $laskurow["tunnusnippu"] > 0) {
 
 			echo "<font class='message'>".t("Tarjous")." ($aika) $kukarow[kesken] ".t("mitätöity")."!</font><br><br>";
 
@@ -1921,8 +1921,11 @@ if ($tee == '') {
 				 	require ("../inc/laskutyyppi.inc");
 
 					if($row["varasto"] == "") $row["varasto"] = "oletus";
-
-					echo "<option value ='$row[tunnus]' $sel>".t("$laskutyyppi")." $row[tilaus] ".t("$alatila")." - $row[varasto]</option>";
+						
+					if($row["alatila"] == "X") $disabled = "DISABLED";
+					else $disabled = "";
+										
+					echo "<option value ='$row[tunnus]' $sel $disabled>".t("$laskutyyppi")." $row[tilaus] ".t("$alatila")." - $row[varasto]</option>";
 				}
 			}
 			echo "<optgroup label='".t("Perusta uusi")."'>";
@@ -3175,7 +3178,7 @@ if ($tee == '') {
 				echo "<tr>$jarjlisa<th>".t("Viimeisin hinta")."/".t("alennus")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $viimhinta[hinta])." $yhtiorow[valkoodi] / $viimhinta[ale]</td></tr>";
 				echo "<tr>$jarjlisa<th>".t("Tilausnumero")."</th><td align='right'>$viimhinta[otunnus]</td></tr>";
 				
-				echo "<tr>$jarjlisa<th>".t("Laskutettu")."</th><td align='right'>".tv1dateconv($viimhinta[laskutettuaika])."</td></tr>";
+				echo "<tr>$jarjlisa<th>".t("Laskutettu")."</th><td align='right'>".tv1dateconv($viimhinta["laskutettuaika"])."</td></tr>";
 				
 			}		
 					
@@ -3572,7 +3575,7 @@ if ($tee == '') {
 					$rivino--;
 				}
 
-				if($yhtiorow["tilauksen_jarjestys"] == "M" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
+				if ($muokkauslukko_rivi == "" and $yhtiorow["tilauksen_jarjestys"] == "M" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
 
 					$buttonit =  "
 									<div align='center'><form action='$PHP_SELF#rivi_$rivino' name='siirra_$rivino' method='post'>
@@ -3657,8 +3660,8 @@ if ($tee == '') {
 						}
 					}
 					
-					if($toim != "TARJOUS") {
-						if ($row["toimitettuaika"] == '0000-00-00 00:00:00' and $row["uusiotunnus"] == 0 and $laskurow["tunnusnippu"] > 0 and $yhtiorow["splittauskielto"] != "K") {
+					if ($toim != "TARJOUS") {
+						if ($muokkauslukko_rivi == "" and $row["toimitettuaika"] == '0000-00-00 00:00:00' and $row["uusiotunnus"] == 0 and $laskurow["tunnusnippu"] > 0 and $yhtiorow["splittauskielto"] != "K") {
 							$query = " 	SELECT lasku.tunnus
 										FROM lasku
 										WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -3667,7 +3670,7 @@ if ($tee == '') {
 										and lasku.alatila != 'X'";
 							$toimres = mysql_query($query) or pupe_error($query);
 
-							if(mysql_num_rows($toimres) > 1) {
+							if (mysql_num_rows($toimres) > 1) {
 								$echorivino .= "	<form action='$PHP_SELF' method='post'>
 										<input type='hidden' name='toim' 			value = '$toim'>
 										<input type='hidden' name='lopetus' 		value = '$lopetus'>
@@ -3691,7 +3694,11 @@ if ($tee == '') {
 								$echorivino .= "</select></form>";
 							}
 						}
+						elseif ($muokkauslukko_rivi != ""and $laskurow["tunnusnippu"] > 0 and $yhtiorow["splittauskielto"] != "K") {
+							$echorivino .= " $row[otunnus]";
+						}
 					}
+					
 					echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$echorivino </td>";
 				}
 				elseif($row["perheid"] == 0 and $row["perheid2"] == 0) {
@@ -3721,8 +3728,8 @@ if ($tee == '') {
 						echo "<td valign='top'>$echorivino";
 					}
 
-					if($toim != "TARJOUS") {
-						if ($row["toimitettuaika"] == '0000-00-00 00:00:00' and $row["uusiotunnus"] == 0 and $laskurow["tunnusnippu"] > 0 and $yhtiorow["splittauskielto"] != "K") {
+					if ($toim != "TARJOUS") {
+						if ($muokkauslukko_rivi == "" and $row["toimitettuaika"] == '0000-00-00 00:00:00' and $row["uusiotunnus"] == 0 and $laskurow["tunnusnippu"] > 0 and $yhtiorow["splittauskielto"] != "K") {
 							$query = " 	SELECT lasku.tunnus
 										FROM lasku
 										WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -3731,7 +3738,7 @@ if ($tee == '') {
 										and lasku.alatila != 'X'";
 							$toimres = mysql_query($query) or pupe_error($query);
 
-							if(mysql_num_rows($toimres) > 1) {
+							if (mysql_num_rows($toimres) > 1) {
 								echo "	<form action='$PHP_SELF' method='post'>
 										<input type='hidden' name='toim' 			value = '$toim'>
 										<input type='hidden' name='lopetus' 		value = '$lopetus'>
@@ -3754,6 +3761,9 @@ if ($tee == '') {
 
 								echo "</select></form>";
 							}
+						}
+						elseif ($muokkauslukko_rivi != ""and $laskurow["tunnusnippu"] > 0 and $yhtiorow["splittauskielto"] != "K") {
+							echo " $row[otunnus]";
 						}
 					}
 
@@ -3794,13 +3804,11 @@ if ($tee == '') {
 					$borderlask--;
 				}
 
-				$vanhaid = $row["perheid"];
-
+				$vanhaid 	  = $row["perheid"];
+				$trivityyulos = "";
+				
 				if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K') {
-
-					if($row["ei_nayteta"] == "") {
-						$trivityyulos = "";						
-
+					if ($muokkauslukko_rivi == "" and $row["ei_nayteta"] == "") {		
 						if (mysql_num_rows($trivityyppi_result) > 0) {
 							//annetaan valita tilausrivin tyyppi
 							$trivityyulos .= "	<form action='$PHP_SELF' method='post' name='lisatietoja'>
@@ -3828,8 +3836,8 @@ if ($tee == '') {
 						$trivityyulos = "&nbsp;";
 					}
 				}
-				
-				if($yhtiorow['tilauksen_kohteet'] == 'K' and in_array($toim, array("TARJOUS", "RIVISYOTTO", "PIKATILAUS", "PROJEKTI"))) {
+								
+				if ($muokkauslukko_rivi == "" and $yhtiorow['tilauksen_kohteet'] == 'K' and in_array($toim, array("TARJOUS", "RIVISYOTTO", "PIKATILAUS", "PROJEKTI"))) {
 					
 					$valitse_positio_return_url = urlencode("tilauskasittely/tilaus_myynti.php?toim=$toim&lopetus=$lopetus&projektilla=$projektilla&tilausnumero=$tilausnumero&rivitunnus=$row[tunnus]&rivilaadittu=$row[laadittu]&menutila=$menutila&tila=LISATIETOJA_RIVILLE&asiakkaan_positio");
 					
@@ -3854,10 +3862,10 @@ if ($tee == '') {
 						$trivityyulos .= t("Valitse kohde otsikolta");
 					}
 				}
-				elseif ($yhtiorow['tilauksen_kohteet'] == 'K' and $row["tyyppi"] == "W") {
+				elseif ($muokkauslukko_rivi == "" and $yhtiorow['tilauksen_kohteet'] == 'K' and $row["tyyppi"] == "W") {
 					
 					//	Voidaan manuaalisesti määritellä tuotteen pituus
-					if($row["vaaditaan_kpl2"] == "M") {
+					if ($row["vaaditaan_kpl2"] == "M") {
 						$trivityyulos .= "	<form action='$PHP_SELF' method='post' name='lisatietoja'>
 												<input type='hidden' name='toim' value='$toim'>
 												<input type='hidden' name='lopetus' value='$lopetus'>
@@ -4102,10 +4110,10 @@ if ($tee == '') {
 					$sarjares = mysql_query($query) or pupe_error($query);
 					$sarjarow = mysql_fetch_array($sarjares);
 					
-					if ($sarjarow["kpl"] == abs($row["varattu"]+$row["jt"])) {
+					if ($muokkauslukko_rivi == "" and $sarjarow["kpl"] == abs($row["varattu"]+$row["jt"])) {
 						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&$tunken2=$row[tunnus]&from=$toim#".urlencode($sarjarow["sarjanumero"])."' style='color:00FF00'>$snro_ok</font></a>)";
 					}
-					else {
+					elseif($muokkauslukko_rivi == "") {
 						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&$tunken2=$row[tunnus]&from=$toim'>$snro</a>)";
 						
 						if ($laskurow['sisainen'] != '' or $laskurow['ei_lahetetta'] != '') {
@@ -4145,7 +4153,7 @@ if ($tee == '') {
 					}
 
 
-					if ($kpl_ruudulle < 0 and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "G")) {
+					if ($muokkauslukko_rivi == "" and $kpl_ruudulle < 0 and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "G")) {
 
 						echo "<td $class align='right' valign='top' nowrap>";
 
@@ -4182,7 +4190,7 @@ if ($tee == '') {
 						$muutares = mysql_query($query) or pupe_error($query);
 						$muutarow = mysql_fetch_array($muutares);
 
-						if ($muutarow["kaytetty"] != "") {
+						if ($muokkauslukko_rivi == "" and $muutarow["kaytetty"] != "") {
 							echo "<td $class align='right' valign='top' nowrap>";
 
 							$sel1 = $sel2 = "";
@@ -4560,11 +4568,14 @@ if ($tee == '') {
 								</form> ";
 					}
 				}
+				elseif($row["laskutettuaika"] != '0000-00-00') {
+					echo "<font class='info'>".t("Laskutettu").": ".tv1dateconv($row["laskutettuaika"])."</font>";
+				}
 				elseif($row["toimitettuaika"] != '0000-00-00 00:00:00') {
-					echo "<font class='info'>".t("Toimitettu").": ".$row["toimitettuaika"]."</font>";
+					echo "<font class='info'>".t("Toimitettu").": ".tv1dateconv($row["toimitettuaika"], "P")."</font>";
 				}
 
-				if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "SIIRTOTYOMAARAYS") and $riviok == 0) {
+				if ($muokkauslukko_rivi == "" and $kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "SIIRTOTYOMAARAYS") and $riviok == 0) {
 					//Tutkitaan tuotteiden lisävarusteita
 					$query  = "	SELECT *
 								FROM tuoteperhe
@@ -4938,7 +4949,6 @@ if ($tee == '') {
 					$ycspan++;
 				}
 				if($trivityyulos != "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
-
 					$ycspan++;
 				}
 				if($kukarow["extranet"] != "" and $yhtiorow['varastopaikan_lippu'] != '') {

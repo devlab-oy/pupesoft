@@ -74,8 +74,9 @@ if (!function_exists("lopetus")) {
 		global $kukarow, $palvelin2;
 
 		// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
-		$lopetus = str_replace('////','?', $lopetus);
-		$lopetus = preg_replace('/([^:])\/\//','\\1&',  $lopetus);
+		$lopetus = str_replace('////','?',               $lopetus);
+		$lopetus = preg_replace('/([^:])\/\/\//','\\1#', $lopetus);
+		$lopetus = preg_replace('/([^:])\/\//','\\1&',   $lopetus);
 
 		if ($meta != "") {
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$lopetus'>";

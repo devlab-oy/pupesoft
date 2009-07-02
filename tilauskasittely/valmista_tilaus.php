@@ -2,7 +2,6 @@
 	require ("../inc/parametrit.inc");
 	require ("valitse_sarjanumero.inc");
 	
-	
 	if ($toim == 'KORJAA') {
 		echo "<font class='head'>".t("Korjaa valmistus").":</font><hr>";		
 	}
@@ -184,7 +183,7 @@
 
 	if ($tee == 'alakorjaa') {
 		//P‰ivitet‰‰n lasku niin, ett‰ se on takaisin tilassa valmistettu
-		$query = "	SELECT lasku.tunnus, lasku.tila
+		$query = "	SELECT distinct lasku.tunnus, lasku.tila
 					FROM tilausrivi, lasku
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and	tilausrivi.tunnus in ($valmistettavat)
@@ -431,7 +430,7 @@
 				$ylatilat	= " 'V' ";
 				$alatilat 	= " 'C' ";
 			}
-
+			
 			$query = "	SELECT distinct lasku.tunnus
 						FROM tilausrivi, lasku
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -445,15 +444,16 @@
 				$lasrow = mysql_fetch_array($result);
 
 				//Haluaako k‰ytt‰j‰ muuttaa rivill‰ olevaa m‰‰r‰‰
-				if($edtilkpllat[$rivitunnus] != $tilkpl) {
+				if ($edtilkpllat[$rivitunnus] != $tilkpl) {
 
 					//	Lasketaan kerroin jos teemme rekursiivisesti
-					if($rekru[$rivitunnus] != "") {
+					if ($rekru[$rivitunnus] != "") {
 						//	Varmistetaan, ett‰ t‰m‰ on perheen is‰
 						$query = "	SELECT tunnus
 									FROM tilausrivi
 									WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$rivitunnus' and tunnus = perheid";
 						$result = mysql_query($query) or pupe_error($query);
+						
 						if(mysql_num_rows($result) <> 1) {
 							$virhe[$rivitunnus] = "<font class='message'>".t("Tuote ei ole perheen is‰. Rekursiivinen p‰ivitys ei onnistu.")."!</font>";
 						}
@@ -488,14 +488,14 @@
 				break;
 			}
 		}
-
+		
 		// Jatketaan valmistusta
 		if ($tee == "TEEVALMISTUS") {
 			if ($toim == "KORJAA") {
 				foreach ($valmkpllat as $rivitunnus => $valmkpl) {
 
 					$valmkpl = str_replace(',','.',$valmkpl);
-
+										
 					$query = "	SELECT *, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]'
@@ -520,14 +520,32 @@
 						require ("korjaa_valmistus.inc");
 					}
 				}
-				//P‰ivitet‰‰n lasku niin, ett‰ se on tilassa valmistettu
-				$query = "	UPDATE lasku
-							SET alatila	= 'V'
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tunnus  = '$tilrivirow[otunnus]'
-							and tila	= 'V'
-							and alatila = 'K'";
-				$chkresult4 = mysql_query($query) or pupe_error($query);
+												
+				//P‰ivitet‰‰n lasku niin, ett‰ se on takaisin tilassa valmistettu/laskutettu
+				$query = "	SELECT distinct lasku.tunnus, lasku.tila
+							FROM tilausrivi, lasku
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							and	tilausrivi.tunnus in ($valmistettavat)
+							and lasku.tunnus=tilausrivi.otunnus
+							and lasku.yhtio=tilausrivi.yhtio";
+				$result = mysql_query($query) or pupe_error($query);
+
+				while ($row = mysql_fetch_array($result)) {
+					if ($row["tila"] == "L") {
+						$kalatila = "X";
+					}
+					else {
+						$kalatila = "V";
+					}
+
+					$query = "	UPDATE lasku
+								SET alatila	= '$kalatila'
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus 	= '$row[tunnus]'
+								and tila	= '$row[tila]'
+								and alatila = 'K'";
+					$chkresult4 = mysql_query($query) or pupe_error($query);
+				}
 
 				echo "<br><br><font class='message'>Valmistus korjattu!</font><br>";
 			}
@@ -623,9 +641,9 @@
 				onkokaikkivalmistettu ($valmkpllat);	
 			}
 
-						$tee	 		= "";
-					}
-					}
+			$tee = "";
+		}
+	}
 
 	if ($tee == "VALMISTA" and $valmistettavat != "") {
 		//Haetaan otsikoiden tiedot
@@ -660,7 +678,7 @@
 						and alatila in ('V','X')";
 			$chkresult4 = mysql_query($query) or pupe_error($query);
 			
-			$korjataan = " and tilausrivi.toimitettu != '' ";
+			$korjataan = " and (tilausrivi.toimitettu != '' or tilausrivi.tyyppi='D') ";
 		}
 
 		//Jos valmistetaan per tuote niin valinnasta/hausta tulee vain valmisteiden tunnukset, tarvitsemme kuitenkin myˆs raaka-aineiden tunnukset joten haetaan ne t‰ss‰
@@ -678,6 +696,7 @@
 		}
 
 		echo "<table>";
+		
 		for ($i=0; $i < mysql_num_fields($result)-1; $i++) {
 			echo "<tr><th align='left'>" . t(mysql_field_name($result,$i)) ."</th><td>$row[$i]</td></tr>";
 		}
@@ -826,6 +845,7 @@
 			}
 			
 			$sarjavalinta = "";
+			
 			if($prow["tyyppi"] == "V" and $prow["toimitettuaika"] == "0000-00-00 00:00:00") {
 				$sarjavalinta = "<span style='float: left;'>†".naytaValinta($laskurow, $prow, "myyntirivitunnus", "myyntirivitunnus", array("D","O"), "VALMISTUS", "&otunnus=$laskurow[tunnus]&valmistettavat=$valmistettavat")."</span>";
 			}
@@ -835,7 +855,6 @@
 			echo "<input type='hidden' name='tuotenumerot[$prow[tunnus]]' value='$prow[tuoteno]'>";
 			echo "<td class='$class' valign='top' align='right'>$sarjavalinta <span style='float: right; width: 80px;'>$prow[tilattu]".strtolower($prow["yksikko"])."</span></td>";
 
-
 			if ($toim == "KORJAA" and  $prow["tyyppi"] == 'V') {
 				echo "<td valign='top' class='$class' align='left'>
 					<input type='hidden' name='edtilkpllat[$prow[tunnus]]'  value='$prow[korjataan]'>
@@ -843,7 +862,13 @@
 				echo "</td>";
 
 				echo "<td valign='top' class='$class' align='left'>$prow[valmistettu_valmiiksi]</td>";
-			}
+			}			
+			elseif ($toim == "KORJAA" and  $prow["tyyppi"] == 'W') {
+				echo "<td valign='top' class='$class' align='left'>
+						<input type='hidden' name='edtilkpllat[$prow[tunnus]]'  value='$prow[valmistetaan]'>
+						<input type='text' size='8' name='tilkpllat[$prow[tunnus]]' value='$prow[valmistetaan]'></td>";
+				echo "<td valign='top' class='$class'></td>";
+			}			
 			elseif ($prow["tyyppi"] == 'L' or $prow["tyyppi"] == 'D' or $prow["perheid"] == 0) {
 				echo "<td valign='top' class='$class' align='left'></td>";
 				echo "<td valign='top' class='$class' align='left'>$prow[valmistettu]</td>";
@@ -874,7 +899,7 @@
 			echo "<td valign='top' class='$class' align='right'>".tv1dateconv($prow["toimaika"])."</td>";
 			echo "<td valign='top' class='$class' align='right'>".tv1dateconv($prow["kerayspvm"])."</td>";
 
-			if($prow["tunnus"] != $prow["perheid"] and $prow["perheid"] > 0 and $prow["tyyppi"] == "V" and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
+			if ($prow["tunnus"] != $prow["perheid"] and $prow["perheid"] > 0 and $prow["tyyppi"] == "V" and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
 
 				if ($valmkpllat2[$prow["perheid"]] != 0) {
 					$lapsivalue = $kulukpllat[$prow["tunnus"]];
@@ -918,14 +943,31 @@
 				$slrow = mysql_fetch_array($slres);
 
 				if ($sumrow["valmistetut"] != 0 and $slrow["laskuja"] == 0) {
-					echo "<td valign='top'><input type='hidden' name='valmkpllat[$prow[tunnus]]' value='$sumrow[valmistetut]'>";
+					
+					
+					if ((float) $prow["valmistetaan"] > 0) {
+						echo "<td valign='top'><input type='hidden' name='valmkpllat[$prow[tunnus]]' value='$prow[valmistetaan]'>";
+					}
+					else {
+						echo "<td valign='top'><input type='hidden' name='valmkpllat[$prow[tunnus]]' value='$sumrow[valmistetut]'>";
+					}
+					
+					
 					echo "<input type='checkbox' name='perutamakorj[$prow[tunnus]]' value='$prow[tunnus]'> Peru t‰m‰ valmistus.";
 
 					$voikokorjata++;
 				}
 				elseif($sumrow["valmistetut"] != 0 and $slrow["laskuja"] > 0) {
 					echo "<td valign='top' class='back'><font class='error'>Rivi‰ ei voida perua!</font>";
-					echo "<input type='hidden' name='valmkpllat[$prow[tunnus]]' value='$sumrow[valmistetut]'>";
+					
+					if ((float) $prow["valmistetaan"] > 0) {
+						echo "<input type='hidden' name='valmkpllat[$prow[tunnus]]' value='$prow[valmistetaan]'>";
+					}
+					else {
+						echo "<input type='hidden' name='valmkpllat[$prow[tunnus]]' value='$sumrow[valmistetut]'>";	
+					}
+					
+					
 					$voikokorjata++;
 				}
 				else {
@@ -964,7 +1006,7 @@
 			echo "<tr><td colspan='8'>Siirr‰ valitut valmisteet uudelle tilaukselle:</td><td><input type='submit' name='osatoimitus' id='osatoimitus' value='".t("Osatoimita")."'></td>$osatoimitus_force</tr>";
 			echo "<tr><td colspan='8'>Valmista koko tilaus:</td><td><input type='submit' name='kokovalmistus' id='kokovalmistus' value='".t("Valmista")."'></td>$kokovalmistus_force";
 		}
-		elseif($toim == 'KORJAA' and $voikokorjata > 0) {
+		elseif ($toim == 'KORJAA' and $voikokorjata > 0) {
 			echo "<tr><td colspan='8'>Korjaa koko valmistus:</td><td class='back'><input type='submit' name='' value='".t("Korjaa")."'></td>";
 		}
 
@@ -974,6 +1016,7 @@
 
 		echo "	<form method='post' action='$PHP_SELF' autocomplete='off'>";
 		echo "<input type='hidden' name='toim'  value='$toim'>";
+		
 		if ($toim != 'KORJAA') {
 			echo "<input type='hidden' name='tee' value=''>";
 			echo "<input type='submit' name='' value='".t("Valmis")."'>";
@@ -1038,10 +1081,10 @@
 							GROUP_CONCAT(DISTINCT tilausrivi.tunnus SEPARATOR ',') valmistettavat";
 
 			$grouppi	= " GROUP BY lasku.tunnus";
-			$ylatilat	= " 'V' ";
-			$alatilat 	= " 'V', 'K' ";
+			$ylatilat	= " 'V', 'L' ";
+			$alatilat 	= " 'V', 'K', 'X' ";
 			$orderby 	= " order by lasku.tunnus desc";
-			$lisa 		= " and tilausrivi.toimitettu != '' ";
+			$lisa 		= " and (tilausrivi.toimitettu != '' or tilausrivi.tyyppi='D') and lasku.tilaustyyppi in ('V','W') ";
 			$limit 		= " LIMIT 100 ";
 		}
 		elseif ($toim == "TUTKAA") {

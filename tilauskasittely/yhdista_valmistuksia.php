@@ -316,7 +316,7 @@
 			echo "<tr>";
 			echo "<td>$prow[otunnus]</td>";			
 			echo "<td align='left'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."$kommentti</td>";
-			echo "<td><a href='../tuote.php?tee=Z&tuoteno=$prow[$i]'>$prow[tuoteno]</a>$linkki</td>";
+			echo "<td><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow[$i])."'>$prow[tuoteno]</a>$linkki</td>";
 			echo "<td align='right'>$prow[tilattu]</td>";
 			echo "<td align='right'>$prow[kerayspvm]</td>";
 			echo "<td align='right'>$prow[toimaika]</td>";			

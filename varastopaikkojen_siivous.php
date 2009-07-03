@@ -270,7 +270,7 @@
 			$saldolliset = array();
 
 			while ($lrow = mysql_fetch_array($result)) {
-				echo "<td><a href='tuote.php?tee=Z&tuoteno=$lrow[tuoteno]'>$lrow[tuoteno]</a></td><td>$lrow[oletukset]</td></tr>";
+				echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($lrow["tuoteno"])."'>$lrow[tuoteno]</a></td><td>$lrow[oletukset]</td></tr>";
 			}
 
 			echo "<tr><tdclass='back'><br><br></td></tr>";
@@ -310,7 +310,7 @@
 			$saldolliset = array();
 
 			while ($lrow = mysql_fetch_array($result)) {
-				echo "<td><a href='tuote.php?tee=Z&tuoteno=$lrow[tuoteno]'>$lrow[tuoteno]</a></td><td>".asana('nimitys_',$lrow['tuoteno'],$lrow['nimitys'])."</td><td>$lrow[saldo]</td><td>$lrow[paikka]</td><td>$lrow[lukumaara]</td></tr>";
+				echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($lrow["tuoteno"])."'>$lrow[tuoteno]</a></td><td>".asana('nimitys_',$lrow['tuoteno'],$lrow['nimitys'])."</td><td>$lrow[saldo]</td><td>$lrow[paikka]</td><td>$lrow[lukumaara]</td></tr>";
 			}
 
 			echo "<tr><td colspan='7' class='back'><br><br></td></tr>";
@@ -351,7 +351,7 @@
 
 				echo "<input type='hidden' name='paikkatunnus[$lrow[ttun]]' value='$lrow[ttun]'>";
 
-				echo "<td><a href='tuote.php?tee=Z&tuoteno=$lrow[tuoteno]'>$lrow[tuoteno]</a></td><td>$lrow[saldo]</td><td>$lrow[paikka]</td></tr>";
+				echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($lrow["tuoteno"])."'>$lrow[tuoteno]</a></td><td>$lrow[saldo]</td><td>$lrow[paikka]</td></tr>";
 			}
 
 			echo "<tr><td colspan='3' class='back'><br><br></td></tr>";
@@ -400,7 +400,7 @@
 
 				echo "<input type='hidden' name='paikkatunnus[$lrow[ttun]]' value='$lrow[ttun]'>";
 
-				echo "<td><a href='tuote.php?tee=Z&tuoteno=$lrow[tuoteno]'>$lrow[tuoteno]</a></td><td>$lrow[saldo]</td><td>$lrow[paikka]</td></tr>";
+				echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($lrow["tuoteno"])."'>$lrow[tuoteno]</a></td><td>$lrow[saldo]</td><td>$lrow[paikka]</td></tr>";
 			}
 
 			echo "<tr><td colspan='3' class='back'><br><br></td></tr>";
@@ -526,7 +526,7 @@
 					echo "<td></td>";
 				}
 
-				echo "<td><a href='tuote.php?tee=Z&tuoteno=$lrow[tuoteno]'>$lrow[tuoteno]</a></td><td>".asana('nimitys_',$lrow['tuoteno'],$lrow['nimitys'])."</td><td>$lrow[saldo]</td><td>".substr($lrow["saldoaika"],0,10)."</td><td>$lrow[paikka]</td><td>$lrow[varasto]</td></tr>";
+				echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($lrow["tuoteno"])."'>$lrow[tuoteno]</a></td><td>".asana('nimitys_',$lrow['tuoteno'],$lrow['nimitys'])."</td><td>$lrow[saldo]</td><td>".substr($lrow["saldoaika"],0,10)."</td><td>$lrow[paikka]</td><td>$lrow[varasto]</td></tr>";
 			}
 
 			echo "<tr><td colspan='7' class='back'><br><br></td></tr>";

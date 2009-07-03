@@ -538,7 +538,7 @@
 				while ($row = mysql_fetch_array($korva2result)) {
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
 
-					echo "<tr><td><a href='$PHP_SELF?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td><td>$myytavissa</td></tr>";
+					echo "<tr><td><a href='$PHP_SELF?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td><td>$myytavissa</td></tr>";
 				}
 			}
 
@@ -571,7 +571,7 @@
 						if ($yhtrow["tyyppi"] == "HA") $yhttoim = "";
 						else $yhttoim = $yhtrow["tyyppi"];
 						
-						echo "<tr><td><a href='yhteensopivuus_tuote.php?toim=$yhttoim&tee=etsi&tuoteno=$tuoteno'>Siirry tuotteen $yhttoim yhteensopivuuksiin</a></td></tr>";
+						echo "<tr><td><a href='yhteensopivuus_tuote.php?toim=$yhttoim&tee=etsi&tuoteno=".urlencode($tuoteno)."'>Siirry tuotteen $yhttoim yhteensopivuuksiin</a></td></tr>";
 					}
 				}
 
@@ -955,7 +955,7 @@
 
 					echo "<tr>
 							<td>$jtrow[nimi]</td>
-							<td><a href='$PHP_SELF?tuoteno=$tuoteno&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]'>$jtrow[tunnus]</a>$keikka</td>
+							<td><a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]'>$jtrow[tunnus]</a>$keikka</td>
 							<td>$tyyppi</td>
 							<td>".tv1dateconv($jtrow["pvm"])."$vahvistettu</td>
 							<td align='right'>$merkki".abs($jtrow["kpl"])."</td>
@@ -1349,7 +1349,7 @@
 
 							if ($siirow["tyyppi"] == "O") {
 								// pultattu kiinni johonkin
-								$fnlina1 = " <font class='message'>(".t("Varattu lisävarusteena").": $siirow[tuoteno] <a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$siirow[tuoteno]&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>)</font>";
+								$fnlina1 = " <font class='message'>(".t("Varattu lisävarusteena").": $siirow[tuoteno] <a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($siirow["tuoteno"])."&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>)</font>";
 							}
 							elseif ($siirow["tyyppi"] == "G") {
 								// jos tämä on jollain siirtolistalla
@@ -1359,7 +1359,7 @@
 						
 						echo "<tr>
 								<td>$sarjarow[nimitys]</td>
-								<td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$tuoterow[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td>
+								<td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($tuoterow["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td>
 								<td>$sarjarow[hyllyalue] $sarjarow[hyllynro] $sarjarow[hyllyvali] $sarjarow[hyllytaso]</td>
 								<td align='right'>".sprintf('%.2f', sarjanumeron_ostohinta("tunnus", $sarjarow["sarjatunnus"]))."</td>
 								<td>$sarjarow[myynimi] $fnlina1</td></tr>";
@@ -1400,7 +1400,7 @@
 
 					while($sarjarow = mysql_fetch_array($sarjares)) {
 						echo "<tr>
-								<td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$tuoterow[tuoteno]&sarjanumero_haku=$sarjarow[sarjanumero]'>$sarjarow[sarjanumero]</a></td>";
+								<td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($tuoterow["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td>";
 
 						if ($tuoterow["sarjanumeroseuranta"] == "F") {
 							echo "<td>".tv1dateconv($sarjarow["parasta_ennen"])."</td>";
@@ -1592,7 +1592,7 @@
 						echo "<a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";
 					}
 					elseif ($prow["laji"] == "siirto" and $prow["laskutunnus"] != "") {
-						echo "<a href='$PHP_SELF?tuoteno=$tuoteno&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";
+						echo "<a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";
 					}
 					else {
 						echo t("$prow[laji]");

@@ -279,7 +279,7 @@
 
 					$vapaana = $alkurow["alkusaldo"] - $varatutrow["varattu"];
 
-					echo "<tr><td><a href='$PHP_SELF?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td><td>$vapaana</td></tr>";
+					echo "<tr><td><a href='$PHP_SELF?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td><td>$vapaana</td></tr>";
 				}
 
 			}

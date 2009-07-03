@@ -666,7 +666,7 @@
 								order by isatuoteno, tuoteno";
 					$res   = mysql_query($query) or pupe_error($query);
 					
-					echo "<tr><td><a href='$PHP_SELF?toim=$toim&isatuoteno=$row[isatuoteno]&hakutuoteno=$row[isatuoteno]'>$row[isatuoteno]</a></td>";
+					echo "<tr><td><a href='$PHP_SELF?toim=$toim&isatuoteno=".urlencode($row["isatuoteno"])."&hakutuoteno=".urlencode($row["isatuoteno"])."'>$row[isatuoteno]</a></td>";
 					
 					while($prow = mysql_fetch_array($res)) {
 						echo "<td>$prow[tuoteno]</td>";

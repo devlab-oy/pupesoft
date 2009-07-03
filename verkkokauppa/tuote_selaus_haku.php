@@ -763,7 +763,7 @@
 					echo "<td valign='top' class='$vari'>$lisakala $row[tuoteno]$linkkilisa</td>";
 				}
 				else {
-					echo "<td valign='top' class='$vari'><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z'>$lisakala $row[tuoteno]</a>$linkkilisa</td>";
+					echo "<td valign='top' class='$vari'><a href='../tuote.php?tuoteno=".urlencode($row["tuoteno"])."&tee=Z'>$lisakala $row[tuoteno]</a>$linkkilisa</td>";
 				}
 				echo "<td valign='top' class='$vari'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
 
@@ -991,7 +991,7 @@
 
 						echo "<tr>
 								<td class='$vari' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\" nowrap>
-								<a href='sarjanumeroseuranta.php?tuoteno_haku=$row[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a>
+								<a href='sarjanumeroseuranta.php?tuoteno_haku=".urlencode($row["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a>
 								</td>";
 
 						if ($kukarow["kesken"] != 0 or is_numeric($ostoskori)) {

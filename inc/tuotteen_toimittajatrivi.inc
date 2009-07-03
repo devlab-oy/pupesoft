@@ -25,8 +25,7 @@
 						from toimi 
 						where yhtio = '$kukarow[yhtio]'
 						and tyyppi != 'P' 
-						and tunnus = ".(int) $trow["liitostunnus"]."
-						ORDER by nimi";
+						and tunnus = ".(int) $trow["liitostunnus"];
 			$sresult = mysql_query($query) or pupe_error($query);
 			
 			if (mysql_num_rows($sresult) == 1) {
@@ -35,7 +34,7 @@
 				$ulos = "<td>
 						<input type='hidden' name='toimi_liitostunnus' value='$srow[tunnus]'>
 						<input type='hidden' name='toimi_ytunnus' value='$srow[ytunnus]'>
-						<input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'> $srow[nimi]</td>";
+						<input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'> $srow[nimi] $srow[nimitark]</td>";
 				$jatko=0;
 			}	
 		}

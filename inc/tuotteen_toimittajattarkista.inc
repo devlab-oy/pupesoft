@@ -51,7 +51,7 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 							and tunnus = ".(int) $toimi_liitostunnus."
 							ORDER by nimi";
 				$sresult = mysql_query($query) or pupe_error($query);
-								
+												
 				if (mysql_num_rows($sresult) == 1) {
 					$srow = mysql_fetch_assoc($sresult);
 					
@@ -112,7 +112,7 @@ if(!function_exists("tuotteen_toimittajattarkista")) {
 										<select name='toimi_liitostunnus'>";
 										
 						while ($srow = mysql_fetch_assoc($sresult)) {
-							$alasveto[$i] .= "<option value='$srow[tunnus]'>$srow[ytunnus] $srow[nimi]</option>";
+							$alasveto[$i] .= "<option value='$srow[tunnus]'>$srow[ytunnus] $srow[nimi] $srow[nimitark]</option>";
 						}
 					
 						$alasveto[$i] .= "</select>";

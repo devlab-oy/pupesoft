@@ -22,6 +22,7 @@
 		elseif (strtoupper($yhtiorow['maa']) == 'SE') {
 			$kotimaa = "SE";
 		}
+
 		if (strtoupper($yhtiorow['maa']) != 'FI' and strtoupper($yhtiorow['maa']) != 'SE') {
 			echo "<font class='error'>".t("Yrityksen maa ei ole sallittu")." (FI, SE) '$yhtiorow[maa]'</font><br>";
 			exit;
@@ -60,7 +61,6 @@
 				elseif ($row["tilino"] != $pankkitili) {
 					$query = "UPDATE yriti SET tilino = '$pankkitili' WHERE tunnus = $row[tunnus]";
 					$xresult = mysql_query($query) or pupe_error($query);
-
 					echo "Päivitin tilin $row[nimi]<br><br>";
 				}
 
@@ -70,8 +70,7 @@
 		}
 
 		// --- LM03/Eli kotimaan maksujen aineisto
-
-		//Tutkitaan onko kotimaan aineistossa monta maksupäivää?
+		// Tutkitaan onko kotimaan aineistossa monta maksupäivää?
 		$query = "	SELECT distinct(olmapvm)
 					FROM lasku
 					WHERE yhtio 	= '$kukarow[yhtio]'
@@ -87,13 +86,13 @@
 
 			//Päätetääm maksuaineston tiedostonimi
 			if ($kotimaa == "FI") {
-				$kaunisnimi = "lm03-$kukarow[yhtio]-" . date("d.m.y.H.i.s") . "-". $generaatio . ".txt";
+				$kaunisnimi = "lm03-$kukarow[yhtio]-".date("d.m.y.H.i.s")."-".$generaatio.".txt";
 			}
 			else {
-				$kaunisnimi = "bg-$kukarow[yhtio]-" . date("d.m.y.H.i.s") . "-" . $generaatio . ".txt";
+				$kaunisnimi = "bg-$kukarow[yhtio]-".date("d.m.y.H.i.s")."-".$generaatio.".txt";
 			}
 
-			$toot = fopen("dataout/".$kaunisnimi,"w+");
+			$toot = fopen("dataout/".$kaunisnimi, "w+");
 
 			if (!$toot) {
 				echo t("En saanut tiedostoa auki! Tarkista polku")." dataout/$kaunisnimi !";
@@ -112,6 +111,7 @@
 		$totsumma	= 0;
 
 		while ($pvmrow = mysql_fetch_array($pvmresult)) {
+
 			echo "<tr><th>".t("Maksupäivä").":</th><td>".tv1dateconv($pvmrow["olmapvm"])."</td></tr>";
 
 			$makskpl 	 = 0;
@@ -132,6 +132,7 @@
 
 			//Löytyykö hyvityksiä?
 			if (mysql_num_rows($result) != 0) {
+
 				echo "<tr><th colspan='2'>".t("Tarkistan hyvityslaskut!")."</th></tr>";
 
 				while ($laskurow = mysql_fetch_array ($result)) {
@@ -146,8 +147,9 @@
 								and olmapvm 	= '$pvmrow[olmapvm]'";
 					$xresult = mysql_query($query) or pupe_error($query);
 
-					$hyvityssumma=0;
-					while ($hyvitysrow=mysql_fetch_array ($xresult)) {
+					$hyvityssumma = 0;
+
+					while ($hyvitysrow = mysql_fetch_array($xresult)) {
 						//Meneekö tilitys plussalle??
 						if ($hyvitysrow['alatila'] == 'K') { // maksetaan käteisalennuksella
 							$hyvityssumma += $hyvitysrow['summa'] - $hyvitysrow['kasumma'];
@@ -166,7 +168,9 @@
 						exit;
 					}
 				}
+
 				echo "<tr><th>".t("Hyvityslaskut").":</th><td>Status OK!</td></tr>";
+
 			}
 
 			// --- LM03 AINEISTO MAKSUTILIT
@@ -192,15 +196,17 @@
 					$yritysnimi 	= $yhtiorow['nimi'];
 
 					if (!is_resource($toot)) {
+
 						$generaatio++;
+
 						if ($kotimaa == "FI") {
-							$kaunisnimi = "lm03-$kukarow[yhtio]-" . date("d.m.y.H.i.s") . "-". $generaatio . ".txt";
+							$kaunisnimi = "lm03-$kukarow[yhtio]-".date("d.m.y.H.i.s")."-".$generaatio.".txt";
 						}
 						else {
-							$kaunisnimi = "bg-$kukarow[yhtio]-" . date("d.m.y.H.i.s") . "-" . $generaatio . ".txt";
+							$kaunisnimi = "bg-$kukarow[yhtio]-".date("d.m.y.H.i.s")."-".$generaatio.".txt";
 						}
 
-						$toot = fopen("dataout/".$kaunisnimi,"w+");
+						$toot = fopen("dataout/".$kaunisnimi, "w+");
 
 						if (!$toot) {
 							echo t("En saanut tiedostoa auki! Tarkista polku")." dataout/$kaunisnimi !";
@@ -208,7 +214,8 @@
 						}
 					}
 
-					if($kotimaa == "FI") {
+					if ($kotimaa == "FI") {
+
 						//haetaan tämän tilin tiedot
 						if(isset($pankkitiedot[$yritystilino])) {
 							foreach($pankkitiedot[$yritystilino] as $key => $value) {
@@ -287,7 +294,7 @@
 						$totsumma += $laskusumma;
 					}
 
-					if($kotimaa == "FI") {
+					if ($kotimaa == "FI") {
 						require("inc/lm03summa.inc");
 					}
 					else{
@@ -318,7 +325,7 @@
 						}
 					}
 
-					$query = "	UPDATE lasku SET 
+					$query = "	UPDATE lasku SET
 								tila = 'Q',
 								popvm = now()
 					          	WHERE yhtio 	= '$kukarow[yhtio]'
@@ -390,7 +397,7 @@
 		$maksulk 	= 0;
 		$totkpl 	= 0;
 		$totsumma 	= 0;
-		$generaatio=1;
+		$generaatio = 1;
 
 		//Etsitään aineistot
 		$query = "	SELECT maksu_tili, lasku.valkoodi, yriti.tilino ytilino
@@ -412,11 +419,12 @@
 
 				if ($yhtiorow['pankkitiedostot'] != '' or !(is_resource($toot))) {
 					if ($kotimaa == "FI") {
-						$kaunisnimi = "lum3-$kukarow[yhtio]-" . date("d.m.y.H.i.s") . "-". $generaatio . ".txt";
+						$kaunisnimi = "lum3-$kukarow[yhtio]-".date("d.m.y.H.i.s")."-".$generaatio.".txt";
 					}
 					else {
-						$kaunisnimi = "bgut-$kukarow[yhtio]-" . date("d.m.y.H.i.s") . "-". $generaatio . ".txt";
+						$kaunisnimi = "bgut-$kukarow[yhtio]-".date("d.m.y.H.i.s")."-".$generaatio.".txt";
 					}
+
 					$generaatio++;
 					$toot = fopen("dataout/".$kaunisnimi,"w+");
 				}
@@ -450,7 +458,7 @@
 
 					echo "<tr><th>".t("Maksan hyvityslaskut").":</th><td>".mysql_num_rows($hyvitysresult)."</td></tr>";
 
-					while ($hyvitysrow=mysql_fetch_array($hyvitysresult)) {
+					while ($hyvitysrow = mysql_fetch_array($hyvitysresult)) {
 						$query = "	SELECT maksu_tili,
 									left(concat_ws(' ', lasku.nimi, nimitark),45) nimi,
 									left(concat_ws(' ', osoite, osoitetark),45) osoite,
@@ -546,7 +554,7 @@
 								$maksulk += $ulklaskusumma;	//viritetään bgutrivi.inc-failissa
 							}
 
-							$query = "	UPDATE lasku SET 
+							$query = "	UPDATE lasku SET
 										tila = 'Q',
 										popvm = now()
 										WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -637,7 +645,7 @@
 								die(t("Kadotin tämän pankin maksuaineistotiedot!"));
 							}
 
-							if($lum_eumaksu != "") {
+							if ($lum_eumaksu != "") {
 								//haetaan automaagisesti EU maksu jos ehdot täyttyvät, muuten normaalilla maksumääräkysenä
 								//Tämä siis siksi että myös OP osaa ottaa laskut maksuun...
 
@@ -749,7 +757,7 @@
 						echo "</tr>";
 					}
 
-					$query = "	UPDATE lasku SET 
+					$query = "	UPDATE lasku SET
 								tila = 'Q',
 								popvm = now()
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -790,4 +798,5 @@
 
 		require ("inc/footer.inc");
 	}
+
 ?>

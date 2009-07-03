@@ -93,7 +93,7 @@
 			if ($tee != 'KORJAA') {
 				echo "<tr>";				
 				echo "<td class='back' valign='top'><table>";
-				echo "<tr><th>".t("Tuoteno").":</th>			<td><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=$rivirow[tuoteno]'>$rivirow[tuoteno]</a></td></tr>";
+				echo "<tr><th>".t("Tuoteno").":</th>			<td><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"])."'>$rivirow[tuoteno]</a></td></tr>";
 				echo "<tr><th>".t("Tilattu").":</th>			<td>$rivirow[tilkpl]</td></tr>";
 				echo "<tr><th>".t("Varattu").":</th>			<td>$rivirow[varattu]</td></tr>";
 				echo "<tr><th>".t("Valmistettu").":</th>		<td>$valmkpl</td></tr>";
@@ -145,7 +145,7 @@
 				
 				if ($tee != 'KORJAA') {
 					echo "<td class='back' valign='top'><table>";
-					echo "<tr><th>".t("Tuoteno").":</th><td><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=$taparow[tuoteno]'>$taparow[tuoteno]</a></td></tr>";
+					echo "<tr><th>".t("Tuoteno").":</th><td><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=".urlencode($taparow["tuoteno"])."'>$taparow[tuoteno]</a></td></tr>";
 					echo "<tr><th>".t("Kpl").":</th><td>$taparow[kpl]</td></tr>";
 					echo "<tr><th>".t("Laatija")." ".t("Laadittu").":</th><td>$taparow[laatija] $taparow[laadittu]</td></tr>";
 					echo "<tr><th>".t("Selite").":</th><td>$taparow[selite]</td></tr>";

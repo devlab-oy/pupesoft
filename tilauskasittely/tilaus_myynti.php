@@ -4061,7 +4061,7 @@ if ($tee == '') {
 				}
 
 				if($kukarow['extranet'] == '') {
-					echo "<td $class valign='top'><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]&toim_kutsu=$toim'>$row[tuoteno]</a>";
+					echo "<td $class valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."&toim_kutsu=$toim'>$row[tuoteno]</a>";
 				}
 				else {
 
@@ -4112,10 +4112,10 @@ if ($tee == '') {
 					$sarjarow = mysql_fetch_array($sarjares);
 					
 					if ($muokkauslukko_rivi == "" and $sarjarow["kpl"] == abs($row["varattu"]+$row["jt"])) {
-						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&$tunken2=$row[tunnus]&from=$toim#".urlencode($sarjarow["sarjanumero"])."' style='color:00FF00'>$snro_ok</font></a>)";
+						echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($row["tuoteno"])."&$tunken2=$row[tunnus]&from=$toim#".urlencode($sarjarow["sarjanumero"])."' style='color:00FF00'>$snro_ok</font></a>)";
 					}
 					elseif($muokkauslukko_rivi == "") {
-						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&$tunken2=$row[tunnus]&from=$toim'>$snro</a>)";
+						echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($row["tuoteno"])."&$tunken2=$row[tunnus]&from=$toim'>$snro</a>)";
 						
 						if ($laskurow['sisainen'] != '' or $laskurow['ei_lahetetta'] != '') {
 							$sarjapuuttuu++;

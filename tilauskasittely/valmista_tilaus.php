@@ -832,10 +832,10 @@
 				$sarjarow = mysql_fetch_array($sarjares);
 
 				if ($sarjarow["kpl"] == abs($prow["varattu"]+$prow["jt"])) {
-					$sarjalinkkilisa = " (<a href='sarjanumeroseuranta.php?tuoteno=$prow[tuoteno]&ostorivitunnus=$prow[tunnus]&return=valmistus&from=valmistus#".urlencode($sarjarow["sarjanumero"])."' style='color:00FF00'>".t("S:nro ok")."</font></a>)";
+					$sarjalinkkilisa = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&return=valmistus&from=valmistus#".urlencode($sarjarow["sarjanumero"])."' style='color:00FF00'>".t("S:nro ok")."</font></a>)";
 				}
 				else {
-					$sarjalinkkilisa = " (<a href='sarjanumeroseuranta.php?tuoteno=$prow[tuoteno]&ostorivitunnus=$prow[tunnus]&return=valmistus&from=valmistus'>".t("S:nro")."</a>)";
+					$sarjalinkkilisa = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&return=valmistus&from=valmistus'>".t("S:nro")."</a>)";
 
 					if ($laskurow['sisainen'] != '' or $laskurow['ei_lahetetta'] != '') {
 						$sarjapuuttuu++;
@@ -851,7 +851,7 @@
 			}
 			
 			echo "<td class='$class' valign='top'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
-			echo "<td class='$class' valign='top'><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a> $sarjalinkkilisa</td>";
+			echo "<td class='$class' valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."'>$prow[tuoteno]</a> $sarjalinkkilisa</td>";
 			echo "<input type='hidden' name='tuotenumerot[$prow[tunnus]]' value='$prow[tuoteno]'>";
 			echo "<td class='$class' valign='top' align='right'>$sarjavalinta <span style='float: right; width: 80px;'>$prow[tilattu]".strtolower($prow["yksikko"])."</span></td>";
 

@@ -146,7 +146,7 @@
 					
 					}
 					elseif (mysql_field_name($result,$i) == 'Tuotenumero') {
-						echo "<$ero valign='top'><a href='../tuote.php?tee=Z&tuoteno=$prow[$i]'>$prow[$i]</$ero>";
+						echo "<$ero valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow[$i])."'>$prow[$i]</$ero>";
 					}
 					elseif (mysql_field_name($result,$i) == 'Nimi/Toim. nimi' and substr($prow[$i],-4) == '<br>') {
 						echo "<$ero valign='top'>".substr($prow[$i],0,-4)."</$ero>";

@@ -648,7 +648,7 @@
 				echo "<tr>";
 				echo "<td>".$ryhmanimet[$row[$valinta]]."</td>";
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&luokka=$l$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot'>".$ryhmanimet[$row["luokka"]]."</a></td>";
-				echo "<td valign='top'><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
+				echo "<td valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
 				echo "<td valign='top'>$row[nimitys]  $row[ei_varastoida]</td>";
 				echo "<td valign='top' nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&mul_osasto[]=$row[osasto]&mul_tme[]=$row[tuotemerkki]$ulisa_ilman_os&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot'>$row[osasto] $keyosa[selitetark]</a></td>";
 				echo "<td valign='top' nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&mul_osasto[]=$row[osasto]&mul_try[]=$row[try]&mul_tme[]=$row[tuotemerkki]$ulisa_ilman_try&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot'>$row[try] $keytry[selitetark]</a></td>";

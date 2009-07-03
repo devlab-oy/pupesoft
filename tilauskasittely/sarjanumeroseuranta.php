@@ -1048,7 +1048,7 @@
 			}
 
 			echo "</td>";
-			echo "<td colspan='2' valign='top'><a href='../tuote.php?tee=Z&tuoteno=$sarjarow[tuoteno]'>$sarjarow[tuoteno]</a><br>$sarjarow[nimitys]";
+			echo "<td colspan='2' valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($sarjarow["tuoteno"])."'>$sarjarow[tuoteno]</a><br>$sarjarow[nimitys]";
 
 			if ($sarjarow["takuu_alku"] != '' and $sarjarow["takuu_alku"] != '0000-00-00') {
 				echo "<br>".t("Takuu").": ".tv1dateconv($sarjarow["takuu_alku"])." - ".tv1dateconv($sarjarow["takuu_loppu"]);
@@ -1124,7 +1124,7 @@
 				if ($siirow["tyyppi"] == "O") {
 					// pultattu kiinni johonkin
 					$fnlina1 .= "";
-					$fnlina2 .= "<br><br>".t("Varattu lis‰varusteena").":<br>".$siirow["tuoteno"]." <a href='sarjanumeroseuranta.php?tuoteno_haku=$siirow[tuoteno]&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>";
+					$fnlina2 .= "<br><br>".t("Varattu lis‰varusteena").":<br>".$siirow["tuoteno"]." <a href='sarjanumeroseuranta.php?tuoteno_haku=".urlencode($siirow["tuoteno"])."&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>";
 				}
 				elseif ($siirow["tyyppi"] == "G") {
 					// jos t‰m‰ on jollain siirtolistalla
@@ -1174,7 +1174,7 @@
 
 			//jos saa muuttaa niin n‰ytet‰‰n muokkaa linkki
 			if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== FALSE or $PHP_SELF == "sarjanumeroseuranta.php") {
-				echo "<a href='$PHP_SELF?toiminto=MUOKKAA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku&muut_siirrettavat=$muut_siirrettavat'>".t("Muokkaa")."</a>";
+				echo "<a href='$PHP_SELF?toiminto=MUOKKAA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=".urlencode($tuoteno_haku)."&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku&muut_siirrettavat=$muut_siirrettavat'>".t("Muokkaa")."</a>";
 			}
 
 			if ($sarjarow['ostorivitunnus'] > 0 and ($from == "" or $from == "SIIRTOTYOMAARAYS") and ($sarjarow["myynti_laskaika"] == "0000-00-00" or $sarjarow["myynti_laskaika"] == "" or ($sarjarow['myynti_laskaika'] <= $yhtiorow["tilikausi_loppu"] and $sarjarow['myynti_laskaika'] >= $yhtiorow["tilikausi_alku"]))) {

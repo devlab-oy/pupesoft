@@ -937,19 +937,19 @@
 						echo "</ul>";
 						echo "</div>";
 						if ($toim != "HAAMU") {
-							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]&toim_kutsu=RIVISYOTTO' onmouseout=\"popUp(event,'$prow[tunnus]')\" onmouseover=\"popUp(event,'$prow[tunnus]')\">$prow[tuoteno]</a>";
+							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO' onmouseout=\"popUp(event,'$prow[tunnus]')\" onmouseover=\"popUp(event,'$prow[tunnus]')\">$prow[tuoteno]</a>";
 						}
 						else {
-							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]' onmouseout=\"popUp(event,'$prow[tunnus]')\" onmouseover=\"popUp(event,'$prow[tunnus]')\">$prow[tuoteno]</a>";
+							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."' onmouseout=\"popUp(event,'$prow[tunnus]')\" onmouseover=\"popUp(event,'$prow[tunnus]')\">$prow[tuoteno]</a>";
 						}
 						
 					}
 					else {
 						if ($toim != "HAAMU") {
-							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]&toim_kutsu=RIVISYOTTO'>$prow[tuoteno]</a>";
+							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."&toim_kutsu=RIVISYOTTO'>$prow[tuoteno]</a>";
 						}
 						else {
-							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a>";
+							echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."'>$prow[tuoteno]</a>";
 						}						
 					}
 
@@ -961,10 +961,10 @@
 						$sarjarow = mysql_fetch_array($sarjares);
 
 						if ($sarjarow["kpl"] == abs($prow["varattukpl"])) {
-							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$prow[tuoteno]&ostorivitunnus=$prow[tunnus]&from=riviosto' style='color:00FF00'>".t("S:nro ok")."</font></a>)";
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto' style='color:00FF00'>".t("S:nro ok")."</font></a>)";
 						}
 						else {
-							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$prow[tuoteno]&ostorivitunnus=$prow[tunnus]&from=riviosto'>".t("S:nro")."</a>)";
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto'>".t("S:nro")."</a>)";
 						}						
 					}
 

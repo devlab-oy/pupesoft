@@ -286,7 +286,7 @@
 
 			for ($i=0; $i < mysql_num_fields($presult)-$miinus; $i++) {
 				if (mysql_field_name($presult,$i) == 'tuoteno') {															
-					echo "<td><a href='../tuote.php?tee=Z&tuoteno=$prow[$i]'>$prow[$i]</a></td>";
+					echo "<td><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow[$i])."'>$prow[$i]</a></td>";
 				}
 				elseif(mysql_field_name($presult,$i) == 'toimaika') {										
 					echo "<td align='right'><input type='text' name='toimaikarivi[$prow[tunnus]]' value='$prow[$i]' size='10'></td>";

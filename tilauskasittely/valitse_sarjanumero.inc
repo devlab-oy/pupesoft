@@ -233,7 +233,7 @@ function naytaValinta($laskurow, $row, $tunken1, $tunken2, $lisaaTilausriviTyypi
 						$paikat
 					</select>
 					<input type='hidden' name='era_old_paikka[$row[tunnus]]' value='$selpaikka'>
-					(<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&$tunken2=$row[tunnus]&from=$from&aputoim=$toim$loppu#".urlencode($sarjarow["sarjanumero"])."'>".t("E:nro")."</a>)";
+					(<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($row["tuoteno"])."&$tunken2=$row[tunnus]&from=$from&aputoim=$toim$loppu#".urlencode($sarjarow["sarjanumero"])."'>".t("E:nro")."</a>)";
 
 		
 	}	

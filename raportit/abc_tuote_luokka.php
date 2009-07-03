@@ -630,7 +630,7 @@
 			
 			echo "<tr>";
 			echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot'>".$ryhmanimet[$row["luokka"]]."</a></td>";
-			echo "<td valign='top'><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
+			echo "<td valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
 			echo "<td valign='top'>$row[nimitys] $row[ei_varastoida]</td>";		
 			echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY$ulisa_ilman_os&mul_osasto[]=$row[osasto]&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot'>$row[osasto]</a></td>";
 			echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY$ulisa_ilman_try&mul_osasto[]=$row[osasto]&mul_try[]=$row[try]&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot'>$row[try]</a></td>";

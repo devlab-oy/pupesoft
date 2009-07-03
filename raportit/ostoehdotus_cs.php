@@ -745,10 +745,10 @@
 
 				if ($useampi_yhtio > 1) {
 					echo "<td valign='top' $btl>$row[yhtio]</td>";
-					echo "<td valign='top' $bt><a name='A_$indeksi'><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
+					echo "<td valign='top' $bt><a name='A_$indeksi'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
 				}
 				else {
-					echo "<td valign='top' $btl><a name='A_$indeksi'><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
+					echo "<td valign='top' $btl><a name='A_$indeksi'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
 				}
 
 				echo "<td valign='top' $bt  align='right'>".(float) $row["varmuus_varasto"]."</td>";

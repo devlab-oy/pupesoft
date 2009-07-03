@@ -259,7 +259,7 @@
 				if ($toim == 'OSTO' and $pvmtapa == 'toimaika') {
 					$pvmtapa_url = "&pvmtapa=toimaika";
 				}
-				echo "<th align='left'><a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&tuoteno=$tuoteno&ytunnus=$ytunnus&asiakasid=$asiakasid&jarj=".mysql_field_name($result,$i)."$pvmtapa_url'>".t(mysql_field_name($result,$i))."</a></th>";
+				echo "<th align='left'><a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&tuoteno=".urlencode($tuoteno)."&ytunnus=$ytunnus&asiakasid=$asiakasid&jarj=".mysql_field_name($result,$i)."$pvmtapa_url'>".t(mysql_field_name($result,$i))."</a></th>";
 
 				if(isset($workbook)) {
 					$worksheet->write($excelrivi, ($i-1), ucfirst(t(mysql_field_name($result,$i))), $format_bold);

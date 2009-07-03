@@ -63,7 +63,7 @@
 				
 				if (($row["sarjanumeroseuranta"] == "S" and (float) $saldo != (float) $sarjarow["kpl"]) or (($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") and (float) $saldo != (float) $sarjarow["era_kpl"])) {
 					echo "<tr>
-							<td valign='top'><a href='../inventoi.php?tee=INVENTOI&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td><td valign='top'>$row[nimitys]</td>
+							<td valign='top'><a href='../inventoi.php?tee=INVENTOI&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td><td valign='top'>$row[nimitys]</td>
 							<td valign='top'>$saldorow[nimitys] $saldorow[tyyppi]</td>
 							<td valign='top'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td>";
 							

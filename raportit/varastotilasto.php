@@ -208,7 +208,7 @@
 							
 							// jos kyseessa on tuote
 							if (mysql_field_name($result, $i) == "tuoteno") {
-								$row[$i] = "<a href='../tuote.php?tee=Z&tuoteno=$row[$i]'>$row[$i]</a>";
+								$row[$i] = "<a href='../tuote.php?tee=Z&tuoteno=".urlencode($row[$i])."'>$row[$i]</a>";
 							}							
 							
 

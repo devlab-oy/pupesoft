@@ -556,7 +556,7 @@
 				$prow["kommentti"] .= "<br>";
 			}
 			while($sarjarow = mysql_fetch_array($sarjares)) {
-				$prow["kommentti"] .= "# <a href='".$palvelin2."tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$prow[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a><br>";
+				$prow["kommentti"] .= "# <a href='".$palvelin2."tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($prow["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a><br>";
 			}
 
 			if ($prow["kommentti"] != '') {
@@ -778,7 +778,7 @@
 			
 			while($sarjarow = mysql_fetch_array($sarjares)) {
 				if($kukarow['extranet'] == '') {
-					$row["kommentti"] .= "# <a href='".$palvelin2."tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$row[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a><br>";
+					$row["kommentti"] .= "# <a href='".$palvelin2."tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($row["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a><br>";
 				}
 				else {
 					$row["kommentti"] .= "# $sarjarow[sarjanumero]<br>";

@@ -1040,7 +1040,7 @@
 								}
 
 								if ($kukarow["extranet"] == "") {
-									echo "<td valign='top' $class>$ins <a href='../tuote.php?tee=Z&tuoteno=$jtrow[tuoteno]'>$jtrow[tuoteno]</a>";
+									echo "<td valign='top' $class>$ins <a href='../tuote.php?tee=Z&tuoteno=".urlencode($jtrow["tuoteno"])."'>$jtrow[tuoteno]</a>";
 								}
 								else {
 									echo "<td valign='top' $class>$ins $jtrow[tuoteno]";
@@ -1503,7 +1503,7 @@
 									}
 
 									if ($kukarow["extranet"] == "") {
-										echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=$perherow[tuoteno]'>$perherow[tuoteno]</a>";
+										echo "<td valign='top' $class><a href='../tuote.php?tee=Z&tuoteno=".urlencode($perherow["tuoteno"])."'>$perherow[tuoteno]</a>";
 									}
 									else {
 										echo "<td valign='top' $class>$perherow[tuoteno]";

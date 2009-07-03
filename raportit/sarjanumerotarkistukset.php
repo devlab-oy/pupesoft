@@ -195,7 +195,7 @@
 							
 				echo "<tr>
 						<td valign='top'><a name='$vrow[ostotunnus]'><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[otunnus]'>$vrow[otunnus]</a><br><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[ostotilaus]'>$vrow[ostotilaus]</a></td>
-						<td valign='top'><a href='../tuote.php?tee=Z&tuoteno=$vrow[tuoteno]'>$vrow[tuoteno]</a></td>
+						<td valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($vrow["tuoteno"])."'>$vrow[tuoteno]</a></td>
 						<td valign='top'>$vrow[nimitys]<br><font class='message'>$vrow[viesti]</font></td>
 						<td valign='top' align='right'>$vrow[rivihinta]<br>".sprintf('%.2f', $ostohinta)."</td>";
 				
@@ -258,7 +258,7 @@
 				}
 								
 				if ($vrow["sarjatunnus"] != "" and $vrow["css"] == abs($vrow["kpl"])) {
-					echo "<td valign='top'><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$vrow[tuoteno]&sarjanumero_haku=$vrow[sarjanumero]'>$vrow[sarjanumero]</a><br>$vrow[kaytetty]</td></tr>";
+					echo "<td valign='top'><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($vrow["tuoteno"])."&sarjanumero_haku=$vrow[sarjanumero]'>$vrow[sarjanumero]</a><br>$vrow[kaytetty]</td></tr>";
 				}
 				else {
 					if ($vrow["kpl"] > 0 and $tyyppi == "myynti") {
@@ -267,7 +267,7 @@
 					else {
 						$lisays = "ostorivitunnus=$vrow[ostotunnus]";
 					}
-					echo "<td valign='top'><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno=$vrow[tuoteno]&$lisays&from=KORJAA&lopetus=ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//jarjestys_1=$jarjestys_1//jarjestys_2=$jarjestys_2//jarjestys_3=$jarjestys_3//jarjestys_4=$jarjestys_4//jarjestys_5=$jarjestys_5//jarjestys_6=$jarjestys_6//jarjestys_7=$jarjestys_7'>Sarjanumero</a><br>&nbsp;</tr>";
+					echo "<td valign='top'><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($vrow["tuoteno"])."&$lisays&from=KORJAA&lopetus=ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//jarjestys_1=$jarjestys_1//jarjestys_2=$jarjestys_2//jarjestys_3=$jarjestys_3//jarjestys_4=$jarjestys_4//jarjestys_5=$jarjestys_5//jarjestys_6=$jarjestys_6//jarjestys_7=$jarjestys_7'>Sarjanumero</a><br>&nbsp;</tr>";
 				}
 			}
 	

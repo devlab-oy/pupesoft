@@ -1399,7 +1399,7 @@
 					echo "<td valign='top' class='$vari' $classleft>$lisakala $row[tuoteno] $linkkilisa ";
 				}
 				else {
-					echo "<td valign='top' class='$vari' $classleft><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z'>$lisakala $row[tuoteno]</a>$linkkilisa ";
+					echo "<td valign='top' class='$vari' $classleft><a href='../tuote.php?tuoteno=".urlencode($row["tuoteno"])."&tee=Z'>$lisakala $row[tuoteno]</a>$linkkilisa ";
 				}
 
 				if ($lisatiedot != "") {

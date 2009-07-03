@@ -238,7 +238,7 @@
 			else {
 				echo "<td class='$vari' style='vertical-align:top'>$row[try]</td>";
 				echo "<td class='$vari' style='vertical-align:top'><a href='asiakasinfo.php?ytunnus=$row[ytunnus]'>$row[ytunnus]</a><br>$row[asiakasnro]</td>";
-				echo "<td class='$vari' style='vertical-align:top'><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z'>$row[tuoteno]</a><br>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
+				echo "<td class='$vari' style='vertical-align:top'><a href='../tuote.php?tuoteno=".urlencode($row["tuoteno"])."&tee=Z'>$row[tuoteno]</a><br>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
 
 
 				if(isset($workbook)) {

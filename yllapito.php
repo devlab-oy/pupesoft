@@ -19,7 +19,7 @@
 	if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 		require ("inc/parametrit.inc");
 	}
-	
+
 	if(!function_exists("vaihtoehdot")) {
 		function vaihtoehdot($i, $taulu, $value, $text, $selected, $opts="") {
 			global  $yhtiorow, $kukarow;
@@ -66,7 +66,7 @@
 
 	// Tutkitaan v‰h‰n alias_settej‰ ja rajattua n‰kym‰‰
 	$al_lisa = " and selitetark_2 = '' ";
-	
+
 	if ($alias_set != '') {
 		if ($rajattu_nakyma != '') {
 			$al_lisa = " and selitetark_2 = '$alias_set' ";
@@ -96,23 +96,23 @@
 	$rajauslisa	= "";
 
 	require ("inc/$toim.inc");
-	
+
 	if ($lukitse_laji == "MEHTOTXT") {
 		$otsikko = "Maksuehdon k‰‰nnˆkset";
 	}
 	elseif ($lukitse_laji == "MEHTOKATXT") {
 		$otsikko = "Kassatekstin k‰‰nnˆkset";
 	}
-	
+
 	if ($otsikko == "") {
 		$otsikko = $toim;
 	}
 	if ($otsikko_nappi == "") {
 		$otsikko_nappi = $toim;
 	}
-	
+
 	echo "<font class='head'>".t("$otsikko")."</font><hr>";
-	
+
 	if ($from == "yllapito") {
 		echo "
 		<script LANGUAGE='JavaScript'>
@@ -141,9 +141,9 @@
 				}
 			}
 
-		</script><br>";	
+		</script><br>";
 	}
-	
+
 	// Saako paivittaa
 	if ($oikeurow['paivitys'] != '1') {
 		if ($uusi == 1) {
@@ -194,7 +194,7 @@
 	}
 
 	if ($del == 2) {
-		
+
 		if (count($poista_check) > 0) {
 			foreach ($poista_check as $poista_tunnus) {
 				$query = "	SELECT *
@@ -209,7 +209,7 @@
 
 				synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
 			}
-		}					
+		}
 	}
 
 	// Jotain p‰ivitet‰‰n tietokontaan
@@ -221,7 +221,7 @@
 					WHERE tunnus = '$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
-				
+
 		//	Tehd‰‰n muuttujista linkit jolla luomme otsikolliset avaimet!
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
 			if($t["{$i}_uusi"] != "") {
@@ -294,9 +294,9 @@
 		}
 
 		// Jos toimittaja/asiakas merkataan poistetuksi niin unohdetaan kaikki errortsekit...
-		if (($toimtyyppi == "P" or $toimtyyppi == "PP" or $asiak_laji == "P") and $errori != '') {						
+		if (($toimtyyppi == "P" or $toimtyyppi == "PP" or $asiak_laji == "P") and $errori != '') {
 			unset($virhe);
-			$errori = "";				
+			$errori = "";
 		}
 		elseif ($errori != '') {
 			echo "<font class='error'>".t("Jossain oli jokin virhe! Ei voitu paivitt‰‰!")."</font>";
@@ -310,19 +310,19 @@
 
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
 					if (isset($t[$i])) {
-						
+
 						if(is_array($_FILES["liite_$i"])) {
 							$id = tallenna_liite("liite_$i", "Yllapito", 0, "Yhtio", "$toim.".mysql_field_name($result,$i), $t[$i]);
 							if($id !== false) {
 								$t[$i] = $id;
 							}
 						}
-						
+
 						if(mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
 
 						$query .= ", ". mysql_field_name($result,$i)."='".$t[$i]."' ";
 					}
-				}				
+				}
 			}
 			// P‰ivitet‰‰n
 			else {
@@ -399,7 +399,7 @@
 					$laskuores = mysql_query($query) or pupe_error($query);
 
 					while ($laskuorow = mysql_fetch_array($laskuores)) {
-						
+
 						if (trim($otsikrow["toim_nimi"]) == "") {
 							$otsikrow["toim_nimi"]		= $otsikrow["nimi"];
 							$otsikrow["toim_nimitark"]	= $otsikrow["nimitark"];
@@ -408,8 +408,8 @@
 							$otsikrow["toim_postitp"]	= $otsikrow["postitp"];
 							$otsikrow["toim_maa"]		= $otsikrow["maa"];
 						}
-						
-						
+
+
 						$query = "	UPDATE lasku
 									SET ytunnus			= '$otsikrow[ytunnus]',
 									ovttunnus			= '$otsikrow[ovttunnus]',
@@ -446,7 +446,7 @@
 									laskutus_osoite  	= '$otsikrow[laskutus_osoite]',
 									laskutus_postino  	= '$otsikrow[laskutus_postino]',
 									laskutus_postitp 	= '$otsikrow[laskutus_postitp]',
-									laskutus_maa    	= '$otsikrow[laskutus_maa]'									
+									laskutus_maa    	= '$otsikrow[laskutus_maa]'
 									WHERE yhtio 		= '$kukarow[yhtio]'
 									and otunnus			= '$laskuorow[tunnus]'";
 						$updaresult = mysql_query($query) or pupe_error($query);
@@ -457,19 +457,19 @@
 
 			//	T‰m‰ funktio tekee myˆs oikeustarkistukset!
 			synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
-			
+
 			if(in_array(strtoupper($toim), array("ASIAKAS", "ASIAKKAAN_KOHDE")) and $yhtiorow["dokumentaatiohallinta"] != "") {
 				svnSyncMaintenanceFolders(strtoupper($toim), $tunnus, $trow);
 			}
-			
-			
+
+
 			// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
 			if ($lopetus != '' and (isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset))) {
-				
+
 				// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
 				$lopetus = str_replace('////','?', $lopetus);
 				$lopetus = preg_replace('/([^:])\/\//','\\1&',  $lopetus);
-				
+
 
 				if (strpos($lopetus, "?") === FALSE) {
 					$lopetus .= "?";
@@ -480,22 +480,22 @@
 
 				$lopetus .= "yllapidossa=$toim&yllapidontunnus=$tunnus";
 
-				
+
 				if (isset($paivita_myos_avoimet_tilaukset)) {
 					$lopetus.= "&tiedot_laskulta=YES";
 				}
 				elseif (strpos($lopetus, "tilaus_myynti.php") !== FALSE and $toim == "asiakas") {
 					$lopetus.= "&asiakasid=$tunnus";
 				}
-			
+
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
 				exit;
 			}
-			
+
 			if($ajax_menu_yp != "") {
 				$suljeYllapito = $ajax_menu_yp;
 			}
-			
+
 			if(substr($suljeYllapito, 0, 15) == "asiakkaan_kohde") {
 				$query = "SELECT kohde from asiakkaan_kohde where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
@@ -525,16 +525,16 @@
 			$uusi = 0;
 
 			if (isset($yllapitonappi) and $lukossa != "ON" or isset($paluunappi)) {
-				
+
 				$tmp_tuote_tunnus  = 0;
-				
+
 				if ($toim == "tuote") {
-					$tmp_tuote_tunnus  = $tunnus;					
+					$tmp_tuote_tunnus  = $tunnus;
 				}
-								
+
 				$tunnus  = 0;
 				$kikkeli = 0;
-								
+
 			}
 			else {
 				$kikkeli = 1;
@@ -552,40 +552,40 @@
 
 	$count = count($array);
 
-	for ($i=0; $i<=$count; $i++) {    			
+	for ($i=0; $i<=$count; $i++) {
 		if (strlen($haku[$i]) > 0) {
-			
+
 			if (($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
-				
+
 				if (!is_numeric($haku[$i])) {
 					// haetaan laskutus-asiakas
 					$ashak = "SELECT group_concat(tunnus) tunnukset FROM asiakas WHERE yhtio='$kukarow[yhtio]' and nimi like '%" . $haku[$i] . "%'";
 					$ashakres = mysql_query($ashak) or pupe_error($ashak);
 					$ashakrow = mysql_fetch_array($ashakres);
-										
+
 					if ($ashakrow["tunnukset"] != "") {
-						$lisa .= " and " . $array[$i] . " in (" . $ashakrow["tunnukset"] . ")";						
+						$lisa .= " and " . $array[$i] . " in (" . $ashakrow["tunnukset"] . ")";
 					}
 					else {
-						$lisa .= " and " . $array[$i] . " = NULL ";							
+						$lisa .= " and " . $array[$i] . " = NULL ";
 					}
 				}
 				else {
 					$lisa .= " and " . $array[$i] . " = '" . $haku[$i] . "'";
 				}
 			}
-			elseif ($toim == 'tuotteen_toimittajat' and trim($array[$i]) == 'nimi') {								
+			elseif ($toim == 'tuotteen_toimittajat' and trim($array[$i]) == 'nimi') {
 				if (!is_numeric($haku[$i])) {
 					// haetaan laskutus-asiakas
 					$ashak = "SELECT group_concat(ytunnus) tunnukset FROM toimi WHERE yhtio='$kukarow[yhtio]' and nimi like '%" . $haku[$i] . "%'";
 					$ashakres = mysql_query($ashak) or pupe_error($ashak);
 					$ashakrow = mysql_fetch_array($ashakres);
-										
+
 					if ($ashakrow["tunnukset"] != "") {
-						$lisa .= " and toimittaja in (" . $ashakrow["tunnukset"] . ")";						
+						$lisa .= " and toimittaja in (" . $ashakrow["tunnukset"] . ")";
 					}
 					else {
-						$lisa .= " and toimittaja = NULL ";							
+						$lisa .= " and toimittaja = NULL ";
 					}
 				}
 				else {
@@ -593,18 +593,18 @@
 				}
 			}
 			elseif (($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'ytunnus') {
-				
+
 				if (!is_numeric($haku[$i])) {
 					// haetaan laskutus-asiakas
 					$ashak = "SELECT group_concat(distinct concat('\'',ytunnus,'\'')) tunnukset FROM asiakas WHERE yhtio='$kukarow[yhtio]' and (nimi like '%" . $haku[$i] . "%' or ytunnus like '%" . $haku[$i] . "%')";
 					$ashakres = mysql_query($ashak) or pupe_error($ashak);
 					$ashakrow = mysql_fetch_array($ashakres);
-										
+
 					if ($ashakrow["tunnukset"] != "") {
 						$lisa .= " and " . $array[$i] . " in (" . $ashakrow["tunnukset"] . ")";
 					}
 					else {
-						$lisa .= " and " . $array[$i] . " = NULL ";	
+						$lisa .= " and " . $array[$i] . " = NULL ";
 					}
 				}
 				else {
@@ -623,30 +623,31 @@
 				$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
 			}
 
-			$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+			$ulisa .= "&haku[$i]=".urlencode($haku[$i]);
+			
     	}
     }
-	
+
     if (strlen($ojarj) > 0) {
     	$jarjestys = $ojarj." ";
     }
-	
+
 	//	S‰ilytet‰‰n ohjeen tila
-	if($from == "yllapito") {
-		$ulisa.="&ohje=off&from=$from&lukitse_avaimeen=$lukitse_avaimeen&lukitse_laji=$lukitse_laji";
+	if ($from == "yllapito") {
+		$ulisa .= "&ohje=off&from=$from&lukitse_avaimeen=".urlencode($lukitse_avaimeen)."&lukitse_laji=$lukitse_laji";
 	}
-	
+
 	//	Pidet‰‰n oletukset tallessa!
 	if(is_array($oletus)){
 		foreach($oletus as $o => $a) {
 			$ulisa.="&oletus[$o]=$a";
 		}
 	}
-	
+
 
 	// Nyt selataan
 	if ($tunnus == 0 and $uusi == 0 and $errori == '') {
-		
+
 		if ($toim == "asiakasalennus" or $toim == "asiakashinta") {
 			print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 				<!--
@@ -657,7 +658,7 @@
 					var isChecked = toggleBox.checked;
 					var nimi = toggleBox.name;
 
-					for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {											
+					for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
 						if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,3) == nimi) {
 							currForm.elements[elementIdx].checked = isChecked;
 						}
@@ -668,11 +669,11 @@
 					msg = '".t("Haluatko todella poistaa tietueet?")."';
 					return confirm(msg);
 				}
-						
+
 				//-->
 				</script>";
 		}
-		
+
 		if ($limit != "NO") {
 			$limiitti = " LIMIT 350";
 		}
@@ -706,7 +707,7 @@
 					<input type = 'hidden' name = 'laji' value = '$laji'>
 					<input type = 'submit' value = '".t("N‰yt‰ kaikki")."'></form>";
 		}
-		
+
 		echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
 				<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
@@ -714,9 +715,9 @@
 				<input type = 'hidden' name = 'nayta_poistetut' value = 'YES'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>
 				<input type = 'submit' value = '".t("N‰yt‰ poistetut")."'></form>";
-				
+
 		if ($toim == "tuote" and $uusi != 1 and $errori == '' and $tmp_tuote_tunnus > 0) {
-		
+
 			$query = "	SELECT *
 						FROM tuote
 						WHERE tunnus = '$tmp_tuote_tunnus'";
@@ -732,7 +733,7 @@
 			$noperes = mysql_query($query) or pupe_error($query);
 			$noperow = mysql_fetch_array($noperes);
 
-			
+
 			echo "<form action = 'yllapito.php' method = 'post'>";
 			echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 			echo "<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>";
@@ -765,9 +766,9 @@
 			echo "<input type = 'hidden' name = 'tunnus' value = '".$yesrow[tunnus]."'>";
 			echo " <input type='submit' value='".t("Seuraava tuote")."'>";
 			echo "</form>";
-			
+
 		}
-			
+
 		echo "	<br><br><table><tr class='aktiivi'>
 				<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
@@ -775,17 +776,17 @@
 				<input type = 'hidden' name = 'limit' value = '$limit'>
 				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>";
-		
+
 		if ($from == "yllapito" and mysql_num_rows($result) > 0) {
-			for ($i = 1; $i < mysql_num_fields($result); $i++) {			
-				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {		
+			for ($i = 1; $i < mysql_num_fields($result); $i++) {
+				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 					echo "<th valign='top'>".t(mysql_field_name($result,$i))."</th>";
 				}
 			}
 		}
 		elseif($from != "yllapito") {
-			for ($i = 1; $i < mysql_num_fields($result); $i++) {			
-				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {		
+			for ($i = 1; $i < mysql_num_fields($result); $i++) {
+				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 					echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&ojarj=".mysql_field_name($result,$i).$ulisa."&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
 
 					if 	(mysql_field_len($result,$i)>10) $size='15';
@@ -803,12 +804,12 @@
 			if (($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
 				echo "<th valign='top'>".t("Poista")."</th>";
 			}
-			
+
 			echo "<td class='back' valign='bottom'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></form>";
 			echo "</tr>";
-			
+
 		}
-						
+
 		if (($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
 			echo "<tr><form action='yllapito.php?ojarj=$ojarj$ulisa' name='ruksaus' method='post' onSubmit = 'return verifyMulti()'>
 					    <input type = 'hidden' name = 'toim' value = '$aputoim'>
@@ -818,15 +819,15 @@
 						<input type = 'hidden' name = 'laji' value = '$laji'>
 						<input type = 'hidden' name = 'del' value = '2'></tr>";
 		}
-		
+
 		while ($trow = mysql_fetch_array($result)) {
 			echo "<tr class='aktiivi'>";
-						
+
 			if (($toim == "asiakas" and $trow["HIDDEN_laji"] == "P") or
 				($toim == "toimi" and $trow["HIDDEN_tyyppi"] == "P") or
 				(($toim == "yriti" or $toim == 'maksuehto') and $trow["HIDDEN_kaytossa"] == "E") or
 				($toim == "tuote" and $trow["HIDDEN_status"] == "P")) {
-					
+
 				$fontlisa1 = "<font style='text-decoration: line-through'>";
 				$fontlisa2 = "</font>";
 			}
@@ -834,7 +835,7 @@
 				$fontlisa1 = "";
 				$fontlisa2 = "";
 			}
-			
+
 			for ($i=1; $i < mysql_num_fields($result); $i++) {
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 					if ($i == 1) {
@@ -846,7 +847,7 @@
 							echo "<td valign='top' align='right'>$fontlisa1 $trow[$i] $fontlisa2</td>";
 						}
 						elseif (mysql_field_type($result,$i) == 'date') {
-							echo "<td valign='top'>$fontlisa1 ".tv1dateconv($trow[$i])." $fontlisa2</td>";	
+							echo "<td valign='top'>$fontlisa1 ".tv1dateconv($trow[$i])." $fontlisa2</td>";
 						}
 						else {
 							echo "<td valign='top'>$fontlisa1 $trow[$i] $fontlisa2</td>";
@@ -854,26 +855,26 @@
 					}
 				}
 			}
-			
+
 			if (($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
 				echo "<td><input type = 'checkbox' name = 'poista_check[]' value = '{$trow[0]}'></td>";
-				
+
 			}
-			
+
 			echo "</tr>";
 		}
-		
+
 		if (($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
 			$span = mysql_num_fields($result)-2;
 			echo "<tr>";
 			echo "<td class='tumma'><input type = 'submit' value = '".t("Poista ruksatut tietueet")."'></td>";
 			echo "<td class='tumma' colspan='$span' align='right'>".t("Ruksaa kaikki")."</td>";
 			echo "<td class='tumma'><input type = 'checkbox' name = 'poi' onclick='toggleAll(this)'></td>";
-			echo "</tr>";	
-						
-			echo "</form>";			
+			echo "</tr>";
+
+			echo "</form>";
 		}
-		
+
 		echo "</table>";
 	}
 
@@ -882,11 +883,11 @@
 		if ($oikeurow['paivitys'] != 1) {
 			echo "<b>".t("Sinulla ei ole oikeuksia p‰ivitt‰‰ t‰t‰ tietoa")."</b><br>";
 		}
-		
+
 		if($ajax_menu_yp!="") {
 			$ajax_post="ajaxPost('mainform', '{$palvelin2}yllapito.php?ojarj=$ojarj$ulisa#$tunnus' , 'ajax_menu_yp'); return false;";
 		}
-		
+
 		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa#$tunnus' name='mainform' id='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data' onSubmit=\"$ajax_post\">";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 		echo "<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>";
@@ -904,7 +905,7 @@
 					WHERE tunnus = '$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
-		
+
 		echo "<table><tr><td class='back' valign='top'>";
 
 		if($from != "yllapito") {
@@ -914,11 +915,11 @@
 			elseif($toim == "maksuehto") {
 				$teksti = $trow["teksti"];
 				$kateksti = $trow["kassa_teksti"];
-			}			
+			}
 		}
-		
+
 		echo "<table>";
-		
+
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
 
 			$nimi = "t[$i]";
@@ -930,9 +931,9 @@
 			elseif($uusi == 1) {
 				$trow[$i] = $oletus[mysql_field_name($result, $i)];
 			}
-			
-			
-			
+
+
+
 			if (strlen($trow[$i]) > 35) {
 				$size = strlen($trow[$i])+2;
 			}
@@ -945,7 +946,7 @@
 			else {
 				$size = '10';
 			}
-						
+
 			$maxsize = mysql_field_len($result,$i); // Jotta t‰t‰ voidaan muuttaa
 
 			require ("inc/$toim"."rivi.inc");
@@ -1095,7 +1096,7 @@
 		else {
 			$nimi = t("P‰ivit‰ $otsikko_nappi");
 		}
-		
+
 		if ($ajax_menu_yp!="") {
 			echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi' onClick=\"$ajax_post\">";
 		}
@@ -1114,18 +1115,18 @@
 
 		echo "</td>";
 		echo "<td class='back' valign='top'>";
-		
+
 		if ($errori == '' and $toim == "sarjanumeron_lisatiedot") {
 			@include ("inc/arviokortti.inc");
 		}
-		
+
 		// Yll‰pito.php:n formi kiinni vasta t‰ss‰
 		echo "</form>";
-		
+
 		if ($errori == '' and $uusi != 1) {
 			include ("inc/yllapito_linkit.inc");
 		}
-				
+
 		if ($errori == '' and $toim == "avainsana" and $from != "yllapito") {
 			require ("inc/avainsanaperhe.inc");
 		}
@@ -1135,7 +1136,7 @@
 		}
 
 		if ($errori == '' and ($toim == "toimi" or $toim == "asiakas")) {
-			
+
 			if ($toim == "asiakas") {
 				$laji = "A";
 			}
@@ -1145,9 +1146,9 @@
 
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='yhteyshenkilo' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
-			
+
 			if(mysql_num_rows($res) > 0) echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=yhteyshenkilo&from=yllapito&laji=$laji&ohje=off&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
-						
+
 			if ($toim == "asiakas") {
 				include ("inc/asiakkaan_avainsanat.inc");
 			}
@@ -1156,70 +1157,69 @@
 		if ($errori == '' and ($toim == "sarjanumeron_lisatiedot" or ($toim == "tuote" and $laji != "V") or (($toim == "avainsana") and (strtolower($laji) == "osasto" or strtolower($laji) == "try" or strtolower($laji) == "tuotemerkki")))) {
 			require ("inc/liitaliitetiedostot.inc");
 		}
-		
+
 		if ($from != "yllapito" and $errori == "") {
 			if ($toim == "tuote" and $laji != "V") {
-				
-				$lukitse_avaimeen = $tuoteno;
-									
+
+				$lukitse_avaimeen = urlencode($tuoteno);
+
 				$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='tuotteen_toimittajat' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 				$res = mysql_query($queryoik) or pupe_error($queryoik);
-				
+
 				if(mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_toimittajat_iframe' name='tuotteen_toimittajat_iframe' src='yllapito.php?toim=tuotteen_toimittajat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
-																						
+
 				$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='tuotteen_avainsanat' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 				$res = mysql_query($queryoik) or pupe_error($queryoik);
-				
+
 				if(mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=tuotteen_avainsanat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
 			}
 
 			if ($toim == "maksuehto" and $laji != "V") {
-								
+
 				$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='avainsana' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 				$res = mysql_query($queryoik) or pupe_error($queryoik);
-				
+
 				if (mysql_num_rows($res) > 0) {
-					
+
 					//	Maksuehdon teksti
 					$lukitse_laji = "MEHTOTXT";
 					$lukitse_avaimeen = $teksti;
-					
+
 					echo "<iframe id='avainsanat_mehtotxt_iframe' name='avainsanat_mehtotxt_iframe' src='yllapito.php?toim=avainsana&from=yllapito&ohje=off&haku[2]=$lukitse_laji&haku[3]=$lukitse_avaimeen&lukitse_laji=$lukitse_laji&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
-					
+
 					if ($kateksti != "") {
 						//	Maksuehdon kassateksti
 						$lukitse_laji = "MEHTOKATXT";
 						$lukitse_avaimeen = $kateksti;
 
 						echo "<iframe id='avainsanat_mehtokatxt_iframe' name='avainsanat_mehtokatxt_iframe' src='yllapito.php?toim=avainsana&from=yllapito&ohje=off&haku[2]=$lukitse_laji&haku[3]=$lukitse_avaimeen&lukitse_laji=$lukitse_laji&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
-						
 					}
 				}
 			}
 		}
-		
+
 		echo "</td></tr>";
 		echo "</table>";
-		
-		
+
+
 		// Tuotteen saa poistaa mik‰li sill‰ ei ole yht‰‰n tapahtumaa
 		$sdtchk = "";
-		
-		if ($toim == "tuote") {			 			
+
+		if ($toim == "tuote") {
 			$query = "SELECT yhtio FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
 			$sdtres = mysql_query($query) or pupe_error($query);
-						
+
 			if (mysql_num_rows($sdtres) == 0) {
 				$query = "SELECT yhtio FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and tyyppi!='D'";
 				$sdtres = mysql_query($query) or pupe_error($query);
-								
+
 				if (mysql_num_rows($sdtres) == 0) {
 					$sdtchk = "OK";
 				}
 			}
 		}
-		
-		
+
+
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
 		if ($toim == "avainsana" or
 			$toim == "tili" or
@@ -1281,30 +1281,27 @@
 				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>
 				<input type = 'hidden' name = 'uusi' value = '1'>
-				<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
-		
-		
+				<input type = 'submit' value = '".t("Uusi $otsikko_nappi kalalalal")."'></form>";
 	}
-	
-	
+
 	if ($from == "yllapito" and $toim == "yhteyshenkilo") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('yhteyshenkilo_iframe');</script>";
 	}
-	
+
 	if($from == "yllapito" and $toim == "tuotteen_avainsanat") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_avainsanat_iframe');</script>";
 	}
-	
+
 	if($from == "yllapito" and $toim == "tuotteen_toimittajat") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_toimittajat_iframe');</script>";
 	}
-	
+
 	if($from == "yllapito" and $toim == "avainsana") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('avainsanat_mehtotxt_iframe');</script>";
-		echo "<script LANGUAGE='JavaScript'>resizeIframe('avainsanat_mehtokatxt_iframe');</script>";		
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('avainsanat_mehtokatxt_iframe');</script>";
 	}
 	elseif($from != "yllapito") {
 		require ("inc/footer.inc");
 	}
-	
+
 ?>

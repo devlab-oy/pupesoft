@@ -132,8 +132,8 @@
 						height = currentfr.Document.body.scrollHeight;
 					}
 
-					currentfr.height = height+offset+10;
-					currentfr.style.height = height+offset+10;
+					currentfr.height = height+offset+20;
+					currentfr.style.height = height+offset+20;
 
 					setTimeout(\"window.parent.document.getElementById('\"+frameid+\"').style.display='block';\", 300);
 
@@ -887,8 +887,15 @@
 		if($ajax_menu_yp!="") {
 			$ajax_post="ajaxPost('mainform', '{$palvelin2}yllapito.php?ojarj=$ojarj$ulisa#$tunnus' , 'ajax_menu_yp'); return false;";
 		}
+		
+		if ($from == "") {
+			$ankkuri = "#$tunnus";
+		}
+		else {
+			$ankkuri = "";	
+		}
 
-		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa#$tunnus' name='mainform' id='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data' onSubmit=\"$ajax_post\">";
+		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa$ankkuri' name='mainform' id='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data' onSubmit=\"$ajax_post\">";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 		echo "<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>";
 		echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
@@ -1147,7 +1154,7 @@
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='yhteyshenkilo' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
 
-			if(mysql_num_rows($res) > 0) echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=yhteyshenkilo&from=yllapito&laji=$laji&ohje=off&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
+			if(mysql_num_rows($res) > 0) echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=yhteyshenkilo&from=yllapito&laji=$laji&ohje=off&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 
 			if ($toim == "asiakas") {
 				include ("inc/asiakkaan_avainsanat.inc");
@@ -1166,12 +1173,12 @@
 				$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='tuotteen_toimittajat' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 				$res = mysql_query($queryoik) or pupe_error($queryoik);
 
-				if(mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_toimittajat_iframe' name='tuotteen_toimittajat_iframe' src='yllapito.php?toim=tuotteen_toimittajat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
+				if(mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_toimittajat_iframe' name='tuotteen_toimittajat_iframe' src='yllapito.php?toim=tuotteen_toimittajat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 
 				$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='tuotteen_avainsanat' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 				$res = mysql_query($queryoik) or pupe_error($queryoik);
 
-				if(mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=tuotteen_avainsanat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
+				if(mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=tuotteen_avainsanat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 
 			if ($toim == "maksuehto" and $laji != "V") {
@@ -1185,14 +1192,14 @@
 					$lukitse_laji = "MEHTOTXT";
 					$lukitse_avaimeen = $teksti;
 
-					echo "<iframe id='avainsanat_mehtotxt_iframe' name='avainsanat_mehtotxt_iframe' src='yllapito.php?toim=avainsana&from=yllapito&ohje=off&haku[2]=$lukitse_laji&haku[3]=$lukitse_avaimeen&lukitse_laji=$lukitse_laji&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
+					echo "<iframe id='avainsanat_mehtotxt_iframe' name='avainsanat_mehtotxt_iframe' src='yllapito.php?toim=avainsana&from=yllapito&ohje=off&haku[2]=$lukitse_laji&haku[3]=$lukitse_avaimeen&lukitse_laji=$lukitse_laji&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 
 					if ($kateksti != "") {
 						//	Maksuehdon kassateksti
 						$lukitse_laji = "MEHTOKATXT";
 						$lukitse_avaimeen = $kateksti;
 
-						echo "<iframe id='avainsanat_mehtokatxt_iframe' name='avainsanat_mehtokatxt_iframe' src='yllapito.php?toim=avainsana&from=yllapito&ohje=off&haku[2]=$lukitse_laji&haku[3]=$lukitse_avaimeen&lukitse_laji=$lukitse_laji&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' scrolling='no' border='0' frameborder='0'></iFrame>";
+						echo "<iframe id='avainsanat_mehtokatxt_iframe' name='avainsanat_mehtokatxt_iframe' src='yllapito.php?toim=avainsana&from=yllapito&ohje=off&haku[2]=$lukitse_laji&haku[3]=$lukitse_avaimeen&lukitse_laji=$lukitse_laji&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 					}
 				}
 			}
@@ -1281,7 +1288,7 @@
 				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>
 				<input type = 'hidden' name = 'uusi' value = '1'>
-				<input type = 'submit' value = '".t("Uusi $otsikko_nappi kalalalal")."'></form>";
+				<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
 	}
 
 	if ($from == "yllapito" and $toim == "yhteyshenkilo") {

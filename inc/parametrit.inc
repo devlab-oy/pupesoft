@@ -524,6 +524,11 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 				}
 			}
 		}
+		
+		if ($lopetus != '') {			
+			lopetus($lopetus);
+			echo "<br><br>";
+		}
 	}
 
 	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan

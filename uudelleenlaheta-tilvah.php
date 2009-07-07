@@ -1,6 +1,6 @@
 <?php
 
-print "<font class='head'>Uudelleenlähetä tilausvahvistus</font><hr>";
+print "<font class='head'>".t("Uudelleenlähetä tilausvahvistus")."</font><hr>";
 
 require ("inc/parametrit.inc");
 
@@ -13,7 +13,7 @@ if ($tee == "laheta" and $tunnukset != "") {
 
 		while ($laskurow = mysql_fetch_array($result)) {
 
-			echo "Uudelleenlähetetään tilausvahvistus ($laskurow[tilausvahvistus]): $laskurow[nimi]<br>";
+			echo t("Uudelleenlähetetään tilausvahvistus")." ($laskurow[tilausvahvistus]): $laskurow[nimi]<br>";
 
 			chdir("tilauskasittely");
 
@@ -23,15 +23,15 @@ if ($tee == "laheta" and $tunnukset != "") {
 
 	}
 	else {
-		print "<font class='error'>Tilauksia ei löytynyt: $tunnukset!</font><br>";
+		print "<font class='error'>".t("Tilauksia ei löytynyt").": $tunnukset!</font><br>";
 	}
 }
 else {
-	echo "<font class='message'>Anna tilausnumerot pilkulla eroteltuna</font><br>";
+	echo "<font class='message'>".t("Anna tilausnumerot pilkulla eroteltuna")."</font><br>";
 	echo "<form method='post'>";
 	echo "<input type='hidden' name='tee' value='laheta'>";
 	echo "<input name='tunnukset' type='text' size='60'>";
-	echo "<input type='submit' value='Lähetä tilausvahvistukset'>";
+	echo "<input type='submit' value='".t("Lähetä tilausvahvistukset")."'>";
 	echo "</form>";
 }
 

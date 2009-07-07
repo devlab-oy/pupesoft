@@ -62,6 +62,7 @@ if ($tee == 'I') {
 	// koska, jos tulee virheit‰ tiedosto katoaa. Kun kaikki on ok, annetaan sille oikea nimi
 	if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		$kuva = false;
+		
 		// otetaan file extensio
 		$path_parts = pathinfo($_FILES['userfile']['name']);
 		$ext = $path_parts['extension'];
@@ -79,17 +80,6 @@ if ($tee == 'I') {
 			$tee = "E";
 			$fnimi = "";
 		}
-		// Talletetaan laskun kuva oikeaan paikkaan
-		/*
-		elseif (!move_uploaded_file($_FILES['userfile']['tmp_name'] , $lopnimi)) {
-			$errormsg .= t("Laskun")." ".$_FILES['userfile']['tmp_name']." ".t("tallennus ep‰onnistui paikkaan")." $fnimi<br>";
-			$tee = "E";
-			$fnimi = "";
-		}
-		*/
-		$filetype = $_FILES['userfile']['type'];
-		$filesize = $_FILES['userfile']['size'];
-		$filename = $_FILES['userfile']['name'];
 
 		$query = "SHOW variables like 'max_allowed_packet'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -102,22 +92,7 @@ if ($tee == 'I') {
 
 		// jos ei virheit‰..
 		if ($tee == "I") {
-			$data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
-
-			// lis‰t‰‰n kuva
-			$query = "	insert into liitetiedostot set
-						yhtio      = '{$kukarow['yhtio']}',
-						liitos     = 'lasku',
-						laatija    = '{$kukarow['kuka']}',
-						luontiaika = now(),
-						data       = '$data',
-						selite     = '$selite',
-						filename   = '$filename',
-						filesize   = '$filesize',
-						filetype   = '$filetype'";
-			$result = mysql_query($query) or pupe_error($query);
-			$liitostunnus = mysql_insert_id();
-			$kuva = $liitostunnus;
+			$kuva = tallenna_liite("userfile", "lasku", 0, "", "", 0, 0, "");					
 		}
 	}
 	elseif (isset($_FILES['userfile']['error']) and $_FILES['userfile']['error'] != 4) {
@@ -1260,7 +1235,7 @@ if ($tee == 'I') {
 
 	if ($kuva) {
 		// p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
-		$query = "update liitetiedostot set liitostunnus='$tunnus', selite='{$trow['nimi']} $summa $valkoodi' where tunnus='$kuva'";
+		$query = "UPDATE liitetiedostot set liitostunnus='$tunnus', selite='{$trow['nimi']} $summa $valkoodi' where tunnus='$kuva'";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 

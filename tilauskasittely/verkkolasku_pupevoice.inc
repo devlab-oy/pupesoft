@@ -135,6 +135,7 @@ if (!function_exists('pupevoice_otsik')) {
 		xml_add("InvoiceTotalVatExcludedAmount",		$lasrow['arvo'],									$tootxml);
 		xml_add("InvoiceTotalVatAmount",				round($lasrow['summa']-$lasrow['arvo'], 2),			$tootxml);
 		xml_add("InvoiceTotalVatIncludedAmount",		$lasrow['summa'],									$tootxml);
+		xml_add("InvoiceTotalRounding",					$lasrow['pyoristys'] * -1,							$tootxml);
 		xml_add("PaymentTerms",							$masrow['teksti']." ".$masrow['kassa_teksti'],		$tootxml);
 		xml_add("PaymentOverDueFinePercent",			$lasrow['viikorkopros'], 							$tootxml);
 		xml_add("InvoiceDeliveryMethod",				$lasrow['toimitustapa'], 							$tootxml);

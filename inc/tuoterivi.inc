@@ -207,7 +207,7 @@
 
 	if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' Style=\"width: 300px;\">";
 
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
@@ -363,7 +363,7 @@
 			$selv = "SELECTED";
 		}
 
-		$ulos = "<td><select name = '$nimi'>
+		$ulos = "<td><select name = '$nimi' Style=\"width: 300px;\">
 			<option value=''>".t("Tuote n‰ytet‰‰n hinnastossa, mutta ei verkkokaupassa")."</option>
 			<option value='E' $sele>".t("Tuotetta ei n‰ytet‰ hinnastossa, eik‰ verkkokaupassa")."</option>
 			<option value='W' $selw>".t("Tuote n‰kyy hinnastossa ja verkkokaupassa")."</option>

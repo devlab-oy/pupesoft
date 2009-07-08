@@ -77,57 +77,60 @@ if (!function_exists("lopetus")) {
 		
 		$lask = 0;
 				
-		foreach ($lopetukset as $lopetus) {		
-			// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
-			$lopetus = str_replace('////','?',               $lopetus);
-			$lopetus = preg_replace('/([^:])\/\/\//','\\1#', $lopetus);
-			$lopetus = preg_replace('/([^:])\/\//','\\1&',   $lopetus);
+		foreach ($lopetukset as $lopetus) {			
+			if ($lopetus != "") { 
+			
+				// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
+				$lopetus = str_replace('////','?',               $lopetus);
+				$lopetus = preg_replace('/([^:])\/\/\//','\\1#', $lopetus);
+				$lopetus = preg_replace('/([^:])\/\//','\\1&',   $lopetus);
 
-			if ($meta != "") {
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$lopetus'>";
-				exit;
-			}
-			else {
-
-				preg_match("/^([^\?&]*)\??/i", $lopetus, $nimi);
-				preg_match("/toim=([^&]*)&?/i", $lopetus, $alanimi);
-
-				$nimet = explode("/", str_replace($palvelin2, "", $nimi[1]));
-
-				for($i=0; $i<count($nimet); $i++) {
-
-					$nimi = "";
-
-					for($j = $i; $j<count($nimet); $j++) {
-						$nimi .= $nimet[$j]."/";
-					}
-
-					$nimi = substr($nimi,0,-1);
-
-					$query = "	SELECT nimitys
-								FROM oikeu
-								WHERE yhtio 	= '$kukarow[yhtio]'
-								and kuka 		= ''
-								and nimi		= '$nimi'
-								and alanimi		= '$alanimi[1]'
-								LIMIT 1";
-					$res = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($res) > 0) {
-						$row = mysql_fetch_array($res);
-						break;
-					}
+				if ($meta != "") {
+					echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$lopetus'>";
+					exit;
 				}
+				else {
+
+					preg_match("/^([^\?&]*)\??/i", $lopetus, $nimi);
+					preg_match("/toim=([^&]*)&?/i", $lopetus, $alanimi);
+
+					$nimet = explode("/", str_replace($palvelin2, "", $nimi[1]));
+
+					for($i=0; $i<count($nimet); $i++) {
+
+						$nimi = "";
+
+						for($j = $i; $j<count($nimet); $j++) {
+							$nimi .= $nimet[$j]."/";
+						}
+
+						$nimi = substr($nimi,0,-1);
+
+						$query = "	SELECT nimitys
+									FROM oikeu
+									WHERE yhtio 	= '$kukarow[yhtio]'
+									and kuka 		= ''
+									and nimi		= '$nimi'
+									and alanimi		= '$alanimi[1]'
+									LIMIT 1";
+						$res = mysql_query($query) or pupe_error($query);
+
+						if (mysql_num_rows($res) > 0) {
+							$row = mysql_fetch_array($res);
+							break;
+						}
+					}
 				
-				if ($lask > 0) {
-					$lopetus .= "&lopetus=$lopetukset[0]";
-				}
+					if ($lask > 0) {
+						$lopetus .= "&lopetus=$lopetukset[0]";
+					}
 
-				if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": $row[nimitys]</a><br>";
-				else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
-			}
+					if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": $row[nimitys]</a><br>";
+					else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
+				}
 		
-			$lask++;
+				$lask++;
+			}
 		}
 	}
 }

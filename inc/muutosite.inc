@@ -797,7 +797,7 @@ if ($tila == 'KK') {
 
 if ($tila == 'jako') {
 	require('inc/jaaostolasku.inc');
-	
+
 	if (jaalasku($tunnus, $syotetty_jakosumma)) {
 		$tee = 'E';
 		$tila = 'X';
@@ -1006,18 +1006,16 @@ if ($tila == '') {
 				<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
 	}
 
-	/*
 	if ($trow['tila'] == 'M' or $trow['tila'] == 'H')  {
 		echo "<form action = '$PHP_SELF' method='post'>
 				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type = 'hidden' name='tila' value='jako'>
 				<input type = 'hidden' name='tee' value='M'>
 				<input type = 'hidden' name='tunnus' value='$tunnus'>
-				<tr><th>".t("Jaa ostolasku kahteen osaan")."<br>".t("Syötä uuden laskun summa")."</th><td>
-				<input type='text' name='syotetty_jakosumma' value=''></td>
+				<tr><th>".t("Jaa ostolasku kahteen osaan").".<br>".t("Syötä uuden laskun summa")."</th><td>
+				<input type='text' name='syotetty_jakosumma' value=''> $trow[valkoodi]</td>
 				<td><input type = 'submit' value = '".t("Jaa")."'></td></tr></form>";
 	}
-	*/
 
 	// jos meillä on suoraveloitus jolla ei ole maksutiliä (eli tiliöintejä ei ole tehty), se voidaan poistaa jos hyväksyttävänä, valmismaksatukseen tai odottaa suoritusta
 	if ($trow['suoraveloitus'] != "" and $trow["maksu_tili"] == "" and in_array($trow['tila'], array('Q','M','H'))) {

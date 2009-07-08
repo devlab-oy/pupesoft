@@ -113,8 +113,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 	$query  = "	UPDATE lasku SET
 				summa = $jaettavalaskurow[summa] - $vahennettavasumma_valuutassa,
 				arvo = $alkuperainen_summa,
-				vanhatunnus = $alkuperainen_tunnus,
-				kasumma = 0.00
+				vanhatunnus = $alkuperainen_tunnus
 				WHERE yhtio = '{$kukarow['yhtio']}'
 				AND tunnus = '{$jaettavalaskurow['tunnus']}'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -355,8 +354,6 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 				AND liitostunnus = '{$jaettavalaskurow['tunnus']}'
 				AND liitos = 'lasku'";
 	$insert_res = mysql_query($query) or pupe_error($query);
-
-	echo "<a href='muutosite.php?tee=E&tunnus=$utunnus&lopetus=",$palvelin2,"muutosite.php////tee=E//tunnus={$jaettavalaskurow['tunnus']}'>",t("P‰‰set uudelle ostolaskulle t‰st‰"),"</a><br/><br/>";
 
 	return true;
 

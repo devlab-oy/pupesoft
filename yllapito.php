@@ -829,7 +829,7 @@
 								list($liitedata1, $liitedata2) = explode("/", $trow[1]);
 							
 								if (file_exists("pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico")) {
-									echo "<img src='".$palvelin2."pics/tiedostotyyppiikonit/$liitedata2.ico'>";
+									echo "<img src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico'>";
 								}
 								else {
 									echo $trow[1];

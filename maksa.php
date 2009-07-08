@@ -787,7 +787,7 @@
 					lasku.tunnus peru,
 					yriti.tilino,
 					yriti.nimi tilinimi,
-					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus, lasku.viite, lasku.viesti
+					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus, lasku.viite, lasku.viesti, lasku.vanhatunnus, lasku.arvo
 					FROM lasku, valuu, yriti
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and valuu.yhtio = lasku.yhtio
@@ -839,7 +839,7 @@
 					echo "<br>";
 					echo "$hyvitysrow[1]";
 					echo "</div>";
-					echo " <a onmouseout=\"popUp(event,'$trow[tunnus]')\" onmouseover=\"popUp(event,'$trow[tunnus]')\"><img src='$palvelin2/pics/lullacons/alert.png'></a>";
+					echo " <a onmouseout=\"popUp(event,'$trow[tunnus]')\" onmouseover=\"popUp(event,'$trow[tunnus]')\"><img src='$palvelin2/pics/lullacons/info.png'></a>";
 				}
 
 				echo "</td>";
@@ -883,7 +883,29 @@
 
 				echo "</td>";
 				echo "<td valign='top'>$trow[tilinimi]<br>".tilinumero_print($trow["tilino"])."</td>";
-				echo "<td valign='top'>$trow[viite] $trow[viesti]</td>";
+				echo "<td valign='top'>$trow[viite] $trow[viesti]";
+
+				if ($trow["vanhatunnus"] != 0) {
+					$query = "	SELECT summa, valkoodi
+								from lasku
+								where yhtio = '$kukarow[yhtio]'
+								and tila in ('H','Y','M','P','Q')
+								and vanhatunnus = '$trow[vanhatunnus]'";
+					$jaetutres = mysql_query($query) or pupe_error($query);
+					
+					echo "<div id='$trow[tunnus]' class='popup'>";
+					printf(t("Lasku on jaettu %s osaan!"), mysql_num_rows($jaetutres));
+					echo "<br>".t("Alkuper‰inen summa")." $trow[arvo] $trow[valkoodi]<br>";
+					$osa = 1;
+					while ($jaetutrow = mysql_fetch_array ($jaetutres)) {
+						echo "$osa: $jaetutrow[summa] $jaetutrow[valkoodi]<br>";
+						$osa++;
+					}
+					echo "</div>";
+					echo " <a onmouseout=\"popUp(event,'$trow[tunnus]')\" onmouseover=\"popUp(event,'$trow[tunnus]')\"><img src='$palvelin2/pics/lullacons/alert.png'></a>";
+				}
+
+				echo "</td>";
 
 				// tehd‰‰n lasku linkki
 				echo "<td nowrap valign='top'>";
@@ -957,7 +979,7 @@
 					h3time,
 					h4time,
 					h5time,
-					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus, lasku.viesti, lasku.comments, lasku.viite
+					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus, lasku.viesti, lasku.comments, lasku.viite, lasku.vanhatunnus, lasku.arvo
 					FROM lasku use index (yhtio_tila_mapvm)
 					JOIN valuu ON lasku.yhtio=valuu.yhtio and lasku.valkoodi = valuu.nimi
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -1012,7 +1034,7 @@
 					echo "<br>";
 					echo "$hyvitysrow[1]";
 					echo "</div>";
-					echo " <a onmouseout=\"popUp(event,'$trow[tunnus]')\" onmouseover=\"popUp(event,'$trow[tunnus]')\"><img src='$palvelin2/pics/lullacons/alert.png'></a>";
+					echo " <a onmouseout=\"popUp(event,'$trow[tunnus]')\" onmouseover=\"popUp(event,'$trow[tunnus]')\"><img src='$palvelin2/pics/lullacons/info.png'></a>";
 				}
 
 				echo "</td>";
@@ -1055,7 +1077,29 @@
 
 				echo "</td>";
 
-				echo "<td valign='top'>$trow[viite] $trow[viesti]</td>";
+				echo "<td valign='top'>$trow[viite] $trow[viesti]";
+
+				if ($trow["vanhatunnus"] != 0) {
+					$query = "	SELECT summa, valkoodi
+								from lasku
+								where yhtio = '$kukarow[yhtio]'
+								and tila in ('H','Y','M','P','Q')
+								and vanhatunnus = '$trow[vanhatunnus]'";
+					$jaetutres = mysql_query($query) or pupe_error($query);
+					
+					echo "<div id='$trow[tunnus]' class='popup'>";
+					printf(t("Lasku on jaettu %s osaan!"), mysql_num_rows($jaetutres));					
+					echo "<br>".t("Alkuper‰inen summa")." $trow[arvo] $trow[valkoodi]<br>";
+					$osa = 1;
+					while ($jaetutrow = mysql_fetch_array ($jaetutres)) {
+						echo "$osa: $jaetutrow[summa] $jaetutrow[valkoodi]<br>";
+						$osa++;
+					}
+					echo "</div>";
+					echo " <a onmouseout=\"popUp(event,'$trow[tunnus]')\" onmouseover=\"popUp(event,'$trow[tunnus]')\"><img src='$palvelin2/pics/lullacons/alert.png'></a>";
+				}
+
+				echo "</td>";
 
 				// tehd‰‰n lasku linkki
 				echo "<td nowrap valign='top'>";

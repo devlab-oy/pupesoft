@@ -10,8 +10,13 @@
 	$otsikko_nappi = "liite";
 	
 	//	Oletuksena emme salli mitään!
-	$uusilukko = "ON";
-	$poistolukko   = "ON";
+	$uusilukko   = "ON";
+	$poistolukko = "ON";
+	
+	if ($lukitse_laji == "") {
+		// Ei näytetä mitään
+		$rajauslisa = " and liitetiedostot.tunnus = -1 ";
+	}
 	
 	if ($lukitse_laji == "tuote" and $lukitse_avaimeen > 0) {
 		$uusilukko = "";

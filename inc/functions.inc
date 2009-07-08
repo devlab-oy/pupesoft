@@ -3568,7 +3568,7 @@ if (!function_exists('ebid')) {
 					return array($url);
 				}
 
-				return "<a href='$url'>". t('Näytä lasku')."</a>";
+				return "<a href='$url' target='Attachment'>". t('Näytä lasku')."</a>";
 			}
 
 			$ebid = $laskurow['ebid'];
@@ -3588,7 +3588,7 @@ if (!function_exists('ebid')) {
 				return array($url);
 			}
 
-			$out = "<a href='$url'>". t('Näytä lasku')."</a> ";
+			$out = "<a href='$url' target='Attachment'>". t('Näytä lasku')."</a> ";
 
 			$query = "SELECT tunnus from liitetiedostot where liitostunnus='{$laskurow['tunnus']}' and liitos='lasku' and yhtio='{$kukarow['yhtio']}'";
 			$res = mysql_query($query) or pupe_error($query);

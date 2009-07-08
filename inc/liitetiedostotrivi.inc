@@ -1,0 +1,135 @@
+<?php
+
+	$ulos = "";
+	$jatko = 1; // oletetaan normaali käsittely
+	$tyyppi = 1; // oletetaan rivin näkyvyys
+
+	if ($i == 0) { //yhtiötä ei näytetä
+		$tyyppi = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "filename" or
+		mysql_field_name($result, $i) == "filesize" or
+		mysql_field_name($result, $i) == "filetype" or
+		mysql_field_name($result, $i) == "image_width" or
+		mysql_field_name($result, $i) == "image_height" or
+		mysql_field_name($result, $i) == "image_bits" or
+		mysql_field_name($result, $i) == "image_channels") {
+		$tyyppi = 2;
+	}
+	
+	if (mysql_field_name($result, $i) == "liitos") {		
+		$tyyppi = 4;
+			
+		if ($lukitse_laji != "") {
+			$ulos = "<input type='hidden' name='$nimi' value='$lukitse_laji'>";
+			$jatko = 0;
+		}
+	}
+	
+	if (mysql_field_name($result, $i) == "liitostunnus") {
+		$tyyppi = 4;
+			
+		if ($lukitse_avaimeen != "") {
+			$ulos = "<input type='hidden' name='$nimi' value='$lukitse_avaimeen'>";
+			$jatko = 0;
+		}		
+	}
+	
+	if (mysql_field_name($result, $i) == "kieli") {
+
+			$ulos = "<td><select name='$nimi'>";
+			$sel  = "";
+
+			$query  = "show columns from sanakirja";
+			$fields =  mysql_query($query);
+
+			while ($apurow = mysql_fetch_array($fields)) {
+				if (strlen($apurow[0]) == 2) {
+					$sel = "";
+					if ($trow[$i] == $apurow[0]) {
+						$sel = "selected";
+					}
+					elseif ($trow[$i] == "" and $apurow[0] == $yhtiorow["kieli"]) {
+						$sel = "selected";
+					}
+
+					if ($apurow[0] != "tunnus") {
+						$query = "select distinct nimi from maat where koodi='$apurow[0]'";
+						$maare = mysql_query($query);
+						$maaro = mysql_fetch_array($maare);
+						$maa   = strtolower($maaro["nimi"]);
+						if ($maa=="") $maa = $apurow[0];
+						$ulos .= "<option value='$apurow[0]' $sel>".t("$maa")."</option>";
+					}
+				}
+			}
+
+			$ulos .= "</select></td>";
+
+			$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "kayttotarkoitus") {
+
+			$ulos = "<td><select name='$nimi'>";
+			$sel  = "";
+			
+			if ($lukitse_laji == "tuote") {			
+				$query = "	SELECT selite, selitetark
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]' and laji = 'LITETY'
+							ORDER BY jarjestys, selite";
+				$kires = mysql_query($query) or pupe_error($query);	
+			}
+			elseif($lukitse_laji == "lasku" and !in_array($lasrow['tila'], array("H","Y","M","P","Q","X"))) {
+				$liitemuok_ok = true;
+
+				//	Näille voidaan laittaa myös minkä lajin liite on kyseessä
+				$query = "	SELECT selite, if(selitetark_2='PAKOLLINEN', concat('* ', selitetark), concat('&nbsp;&nbsp;', selitetark)) selitetark
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]' and laji = 'TIL-LITETY'
+							ORDER BY selitetark_2 DESC, jarjestys, selite";
+				$kires = mysql_query($query) or pupe_error($query);
+			}
+		
+			if (is_resource($kires)) { 
+				while ($kirow = mysql_fetch_array($kires)) {
+					if ($kirow["selite"] == $trow[$i]) $select='SELECTED';
+					else $select = '';
+
+					$ulos .= "<option value='$kirow[selite]' $select>$kirow[selitetark]</option>";
+				}
+			}
+			else {
+				$ulos .= "<option value= ''>".t("Yleinen")."</option>";
+			}
+			
+			$ulos .= "</select></td>";
+			$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "filesize" and $tunnus != "") {
+		$ulos = "<td>".size_readable($trow[$i])."</td>";
+		$jatko = 0;		
+	}
+	
+	if (mysql_field_name($result, $i) == "data") {
+		
+		$path_parts = pathinfo($trow['filename']);
+		$ext = $path_parts['extension'];
+		
+		if (strtoupper($ext) == "JPEG" or strtoupper($ext) == "JPG" or strtoupper($ext) == "GIF" or strtoupper($ext) == "PNG") {
+			$ulos = "<td><a href='view.php?id=$trow[tunnus]' target='Attachment'><img src='view.php?id=$trow[tunnus]' height='80px'></a>";
+		}
+		else {
+			$ulos = "<td><a href='view.php?id=$trow[tunnus]' target='Attachment'>$trow[filename]</a>";
+		}
+		
+		if ($uusilukko == "" and $poistolukko == "") {
+			$ulos .= "<input type = 'file' name = 'liite_data'></td>";
+		}
+		
+		$jatko = 0;
+	}
+?>

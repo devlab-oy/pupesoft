@@ -378,91 +378,7 @@
 		}
 
 	}
-
-	// Liitetiedosto
-	// Talletetaan k‰ytt‰j‰n nimell‰ tositteen/liitteen kuva, jos sellainen tuli
-	// koska, jos tulee virheit‰ tiedosto katoaa. Kun kaikki on ok, annetaan sille oikea nimi
-	$errormsg = "";
-	if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
-		$kuva = false;
-		// otetaan file extensio
-		$path_parts = pathinfo($_FILES['userfile']['name']);
-		$ext = $path_parts['extension'];
-
-		if (strtoupper($ext) == "JPEG") {
-			$ext = "jpg";
-		}
-
-		// extensio pit‰‰ olla oikein
-		if (strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF" and strtoupper($ext) != "TXT" and strtoupper($ext) != "XLS" and strtoupper($ext) != "RTF" and strtoupper($ext) != "DOC") {
-			$errormsg .= "<font class='error'>".t("Ainoastaan .jpg .gif .png .pdf .txt .xls .rtf .doc tiedostot sallittuja")."!</font>";
-			unset($jatka);
-			$fnimi = "";
-		}
-		// ja file jonkun kokonen
-		elseif ($_FILES['userfile']['size'] == 0) {
-			$errormsg .= "<font class='error'>".t("Tiedosto on tyhj‰")."!</font>";
-			unset($jatka);
-			$fnimi = "";
-		}
-		// Talletetaan laskun kuva oikeaan paikkaan
-		$filetype = $_FILES['userfile']['type'];
-		$filesize = $_FILES['userfile']['size'];
-		$filename = $_FILES['userfile']['name'];
-
-		$query = "SHOW variables like 'max_allowed_packet'";
-		$result = mysql_query($query) or pupe_error($query);
-		$varirow = mysql_fetch_array($result);
-
-		if ($filesize > $varirow[1]) {
-			$errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! (mysql: $varirow[1]) </font>";
-			unset($jatka);
-		}
-	}
-	elseif (isset($_FILES['userfile']['error']) and $_FILES['userfile']['error'] != 0 and $_FILES['userfile']['error'] != 4) {
-		// nelonen tarkoittaa, ettei mit‰‰n file‰ uploadattu.. eli jos on joku muu errori niin ei p‰‰stet‰ eteenp‰in
-		if ($_FILES['userfile']['error'] == 1) {
-			$errormsg .=  "<font class='error'>".t("Liitetiedosto on liian suuri")."! (php: (".ini_get("upload_max_filesize")."))</font><br>";
-		}
-		else {
-			$errormsg .=  "<font class='error'>".t("Liitetiedoston l‰hetys ep‰onnistui")."! (Error: ".$_FILES['userfile']['error'].")</font><br>";
-		}
-		unset($jatka);
-	}			
 	
-	if (isset($jatka) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
-		$data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
-
-		if (strtoupper($ext) == "JPEG" or strtoupper($ext) == "JPG" or strtoupper($ext) == "GIF" or strtoupper($ext) == "PNG") {
-			$size = getimagesize($_FILES['userfile']['tmp_name'], $imageinfo);
-			
-			$liitetiedosto_image_width 		= $size[0];
-			$liitetiedosto_image_height 	= $size[1];
-			$liitetiedosto_image_bits   	= $size["bits"];
-			$liitetiedosto_image_channels   = $size["channels"];
-		}
-
-		// lis‰t‰‰n liitetiedosto
-		$query = "	INSERT into liitetiedostot set
-					yhtio      = '{$kukarow['yhtio']}',
-					liitos     = 'myyntilasku',
-					laatija    = '{$kukarow['kuka']}',
-					luontiaika = now(),
-					data       = '$data',
-					selite     = '$selite',
-					filename   = '$filename',
-					filesize   = '$filesize',
-					filetype   = '$filetype'";
-					
-		if (!empty($liitetiedosto_image_width) and !empty($liitetiedosto_image_height) and !empty($liitetiedosto_image_bits) and !empty($liitetiedosto_image_channels)) {
-			$query .= ", image_width = '$image_width', image_height = '$image_height', image_bits = '$image_bits', image_channels = '$image_channels'";
-		}
-		
-		$result = mysql_query($query) or pupe_error($query);
-		$liitetiedostotunnus = mysql_insert_id();
-		$kuva = $liitetiedostotunnus;
-	}
-
 	if ($tila == "" and !isset($jatka)) {
 		if ($toim == "TYOMAARAYS") {
 			echo "<font class='head'>".t("Tyˆm‰‰r‰yksen otsikko")."</font><hr>";
@@ -2234,12 +2150,7 @@
 				echo "<tr><th colspan='3'>".t("Tilauksen kommentit").":</th></tr>";
 			}
 
-			echo "<tr><td>".t("Liitetiedosto").":</td><td colspan='2'>";
-			echo "<input type='hidden' name='MAX_FILE_SIZE' value='8000000'>";
-			echo "<input name='userfile' type='file'>";
-			echo "</td></tr>";
-
-			if($yhtiorow["tilauksen_yhteyshenkilot"] != "K") {
+			if ($yhtiorow["tilauksen_yhteyshenkilot"] != "K") {
 				echo "<tr><td>".t("Tilausyhteyshenkilˆ").":</td>";
 
 				$yhteysquery = "SELECT * FROM yhteyshenkilo where yhtio = '$kukarow[yhtio]' and liitostunnus = '$srow[liitostunnus]' and tyyppi = 'A' and tilausyhteyshenkilo != ''";
@@ -2862,12 +2773,6 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$id = mysql_insert_id();
 		
-		// laitetaan liitetiedostolle tunnus
-		if ($liitetiedostotunnus != '') {
-			$liitequery = "UPDATE liitetiedostot SET liitostunnus=$id WHERE yhtio='$kukarow[yhtio]' AND tunnus=$kuva";
-			$liiteres = mysql_query($liitequery) or pupe_error($liitequery);
-		}
-
 		if ((int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
 
 			$query = "	UPDATE kuka

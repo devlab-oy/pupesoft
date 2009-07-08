@@ -123,6 +123,7 @@
 			$silent 		= "JOO";
 			$laskutunnus 	= $tunnus;
 			$keikanalatila	= "";
+			$tee_kululaskut = $tee;
 
 			if ($tee == "liita") {
 				if(count($liita) > 0) {

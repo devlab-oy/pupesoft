@@ -59,7 +59,7 @@
 			return $ulos;
 		}
 	}
-
+	
 	//Jotta määritelty rajattu näkymä olisi myös käyttöoikeudellisesti tiukka
 	$aputoim = $toim;
 	list($toim, $alias_set, $rajattu_nakyma) = explode('!!!', $toim);
@@ -113,6 +113,10 @@
 
 	echo "<font class='head'>".t("$otsikko")."</font><hr>";
 
+	if ($otsikko_lisatiedot != "") {
+		echo $otsikko_lisatiedot;
+	}
+	
 	if ($from == "yllapito") {
 		echo "
 		<script LANGUAGE='JavaScript'>
@@ -186,15 +190,9 @@
 		else $tunnus = 0;
 
 		$seuraavatunnus = 0;
-
-		// Siirrytään takaisin sieltä mistä tultiin
-		if ($lopetus != '') {
-			lopetus($lopetus, "META");
-		}
 	}
 
 	if ($del == 2) {
-
 		if (count($poista_check) > 0) {
 			foreach ($poista_check as $poista_tunnus) {
 				$query = "	SELECT *
@@ -284,8 +282,9 @@
 			}
 
 			//	Tarkastammeko liitetiedoston?
-			if(is_array($tiedostopaate) and is_array($_FILES["liite_$i"])) {
+			if (is_array($tiedostopaate) and is_array($_FILES["liite_$i"]) and $_FILES["liite_$i"]["size"] > 0) {
 				$viesti = tarkasta_liite("liite_$i", $tiedostopaate);
+				
 				if($viesti !== true) {
 					$virhe[$i] = $viesti;
 					$errori = 1;
@@ -311,8 +310,9 @@
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
 					if (isset($t[$i])) {
 
-						if(is_array($_FILES["liite_$i"])) {
+						if (is_array($_FILES["liite_$i"]) and $_FILES["liite_$i"]["size"] > 0) {
 							$id = tallenna_liite("liite_$i", "Yllapito", 0, "Yhtio", "$toim.".mysql_field_name($result,$i), $t[$i]);
+							
 							if($id !== false) {
 								$t[$i] = $id;
 							}
@@ -328,7 +328,7 @@
 			else {
 
 				//	Jos poistettiin jokin liite, poistetaan se nyt
-				if(is_array($poista_liite)) {
+				if (is_array($poista_liite)) {
 					foreach($poista_liite as $key => $val) {
 						if($val > 0) {
 							$delquery = " DELETE FROM liitetiedostot WHERE yhtio = '{$kukarow["yhtio"]}' and liitos = 'Yllapito' and tunnus = '$val'";
@@ -346,7 +346,7 @@
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
 					if (isset($t[$i]) or is_array($_FILES["liite_$i"])) {
 
-						if(is_array($_FILES["liite_$i"])) {
+						if (is_array($_FILES["liite_$i"]) and $_FILES["liite_$i"]["size"] > 0) {
 							$id = tallenna_liite("liite_$i", "Yllapito", 0, "Yhtio", "$toim.".mysql_field_name($result,$i), $t[$i]);
 							if($id !== false) {
 								$t[$i] = $id;
@@ -372,7 +372,7 @@
 				//	Javalla tieto että tätä muokattiin..
 				$wanha = "P_";
 			}
-
+			
 			if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "asiakas") {
 
 				$query = "	SELECT *
@@ -460,36 +460,6 @@
 
 			if(in_array(strtoupper($toim), array("ASIAKAS", "ASIAKKAAN_KOHDE")) and $yhtiorow["dokumentaatiohallinta"] != "") {
 				svnSyncMaintenanceFolders(strtoupper($toim), $tunnus, $trow);
-			}
-
-
-			// Siirrytään takaisin sieltä mistä tultiin
-			if ($lopetus != '' and (isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset))) {
-
-				// Jotta urlin parametrissa voisi päässätä toisen urlin parametreineen
-				$lopetus = str_replace('////','?', $lopetus);
-				$lopetus = preg_replace('/([^:])\/\//','\\1&',  $lopetus);
-
-
-				if (strpos($lopetus, "?") === FALSE) {
-					$lopetus .= "?";
-				}
-				else {
-					$lopetus .= "&";
-				}
-
-				$lopetus .= "yllapidossa=$toim&yllapidontunnus=$tunnus";
-
-
-				if (isset($paivita_myos_avoimet_tilaukset)) {
-					$lopetus.= "&tiedot_laskulta=YES";
-				}
-				elseif (strpos($lopetus, "tilaus_myynti.php") !== FALSE and $toim == "asiakas") {
-					$lopetus.= "&asiakasid=$tunnus";
-				}
-
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
-				exit;
 			}
 
 			if($ajax_menu_yp != "") {
@@ -685,12 +655,13 @@
         $query .= "$ryhma ORDER BY $jarjestys $limiitti";
 		$result = mysql_query($query) or pupe_error($query);
 
-		if ($toim != "yhtio" and $toim != "yhtion_parametrit") {
+		if ($toim != "yhtio" and $toim != "yhtion_parametrit" and $uusilukko == "") {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
 			if ($liitostunnus) echo "&liitostunnus=$liitostunnus";
 			echo "' method = 'post'>
 					<input type = 'hidden' name = 'uusi' value = '1'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
+					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 					<input type = 'hidden' name = 'limit' value = '$limit'>
 					<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
@@ -701,21 +672,25 @@
 		if (mysql_num_rows($result) >= 350) {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
+					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 					<input type = 'hidden' name = 'limit' value = 'NO'>
 					<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 					<input type = 'hidden' name = 'laji' value = '$laji'>
 					<input type = 'submit' value = '".t("Näytä kaikki")."'></form>";
 		}
-
-		echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
-				<input type = 'hidden' name = 'toim' value = '$aputoim'>
-				<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
-				<input type = 'hidden' name = 'limit' value = '$limit'>
-				<input type = 'hidden' name = 'nayta_poistetut' value = 'YES'>
-				<input type = 'hidden' name = 'laji' value = '$laji'>
-				<input type = 'submit' value = '".t("Näytä poistetut")."'></form>";
-
+		
+		if ($toim == "asiakas" or $toim == "maksuehto" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti") {
+			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
+					<input type = 'hidden' name = 'toim' value = '$aputoim'>
+					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
+					<input type = 'hidden' name = 'limit' value = '$limit'>
+					<input type = 'hidden' name = 'nayta_poistetut' value = 'YES'>
+					<input type = 'hidden' name = 'laji' value = '$laji'>
+					<input type = 'submit' value = '".t("Näytä poistetut")."'></form>";
+		}
+		
 		if ($toim == "tuote" and $uusi != 1 and $errori == '' and $tmp_tuote_tunnus > 0) {
 
 			$query = "	SELECT *
@@ -742,7 +717,7 @@
 			echo "<input type = 'hidden' name = 'laji' value = '$laji'>";
 			echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 			echo "<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>";
-			echo "<input type = 'hidden' name = 'tunnus' value = '".$noperow[tunnus]."'>";
+			echo "<input type = 'hidden' name = 'tunnus' value = '$noperow[tunnus]'>";
 			echo " <input type='submit' value='".t("Edellinen tuote")."'>";
 			echo "</form>";
 
@@ -763,7 +738,7 @@
 			echo "<input type = 'hidden' name = 'laji' value = '$laji'>";
 			echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 			echo "<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>";
-			echo "<input type = 'hidden' name = 'tunnus' value = '".$yesrow[tunnus]."'>";
+			echo "<input type = 'hidden' name = 'tunnus' value = '$yesrow[tunnus]'>";
 			echo " <input type='submit' value='".t("Seuraava tuote")."'>";
 			echo "</form>";
 
@@ -772,6 +747,7 @@
 		echo "	<br><br><table><tr class='aktiivi'>
 				<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
+				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
 				<input type = 'hidden' name = 'limit' value = '$limit'>
 				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
@@ -787,7 +763,7 @@
 		elseif($from != "yllapito") {
 			for ($i = 1; $i < mysql_num_fields($result); $i++) {
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
-					echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&ojarj=".mysql_field_name($result,$i).$ulisa."&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
+					echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".mysql_field_name($result,$i).$ulisa."&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
 
 					if 	(mysql_field_len($result,$i)>10) $size='15';
 					elseif	(mysql_field_len($result,$i)<5)  $size='5';
@@ -812,12 +788,13 @@
 
 		if (($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
 			echo "<tr><form action='yllapito.php?ojarj=$ojarj$ulisa' name='ruksaus' method='post' onSubmit = 'return verifyMulti()'>
-					    <input type = 'hidden' name = 'toim' value = '$aputoim'>
-						<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
-						<input type = 'hidden' name = 'limit' value = '$limit'>
-						<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
-						<input type = 'hidden' name = 'laji' value = '$laji'>
-						<input type = 'hidden' name = 'del' value = '2'></tr>";
+					<input type = 'hidden' name = 'toim' value = '$aputoim'>
+					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+					<input type = 'hidden' name = 'ajax_menu_yp' value = '$ajax_menu_yp'>
+					<input type = 'hidden' name = 'limit' value = '$limit'>
+					<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
+					<input type = 'hidden' name = 'laji' value = '$laji'>
+					<input type = 'hidden' name = 'del' value = '2'></tr>";
 		}
 
 		while ($trow = mysql_fetch_array($result)) {
@@ -840,15 +817,41 @@
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 					if ($i == 1) {
 						if (trim($trow[1]) == '' or (is_numeric($trow[1]) and $trow[1] == 0)) $trow[1] = "".t("*tyhjä*")."";
-						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>$trow[1]</a></td>";
+						
+						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&lopetus=$lopetus&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>";						
+						
+						if (mysql_field_name($result,$i) == 'liitedata') {
+							
+							if ($lukitse_laji == "tuote" and $lukitse_avaimeen > 0) {
+								echo "<img src='".$palvelin2."view.php?id=$trow[0]' height='80px'>";
+							}
+							else {
+								list($liitedata1, $liitedata2) = explode("/", $trow[1]);
+							
+								if (file_exists("pics/tiedostotyyppiikonit/$liitedata2.ico")) {
+									echo "<img src='".$palvelin2."pics/tiedostotyyppiikonit/$liitedata2.ico'>";
+								}
+								else {
+									echo $trow[1];
+								}
+							}
+						}
+						else {
+							echo $trow[1];
+						}
+
+						echo "</a></td>";
 					}
 					else {
 						if (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int') {
 							echo "<td valign='top' align='right'>$fontlisa1 $trow[$i] $fontlisa2</td>";
 						}
+						elseif (mysql_field_name($result,$i) == 'koko') {
+							echo "<td valign='top'>$fontlisa1 ".size_readable($trow[$i])." $fontlisa2</td>";
+						}
 						elseif (mysql_field_type($result,$i) == 'date') {
 							echo "<td valign='top'>$fontlisa1 ".tv1dateconv($trow[$i])." $fontlisa2</td>";
-						}
+						}						
 						else {
 							echo "<td valign='top'>$fontlisa1 $trow[$i] $fontlisa2</td>";
 						}
@@ -939,8 +942,6 @@
 				$trow[$i] = $oletus[mysql_field_name($result, $i)];
 			}
 
-
-
 			if (strlen($trow[$i]) > 35) {
 				$size = strlen($trow[$i])+2;
 			}
@@ -981,7 +982,7 @@
 				$al_row = mysql_fetch_array($al_res);
 
 				if ($al_row["selitetark"] != '') {
-					$otsikko = t($al_row["selitetark"]);
+					$otsikko = str_ireplace("(BR)", "<br>", t($al_row["selitetark"]));
 				}
 				else {
 					$otsikko = t(mysql_field_name($result, $i));
@@ -1026,22 +1027,27 @@
 			// $tyyppi --> 0 riviä ei näytetä ollenkaan
 			// $tyyppi --> 1 rivi näytetään normaalisti
 			// $tyyppi --> 1.5 rivi näytetään normaalisti ja se on päivämääräkenttä
-			// $tyyppi --> 2 rivi näytetään, mutta sitä ei voida muokata, eikä sen arvoa pävitetä
-			// $tyyppi --> 3 rivi näytetään, mutta sitä ei voida muokata, mutta sen arvo päivitetään
+			// $tyyppi --> 2 rivi näytetään, mutta sitä ei voida muokata, eikä sen arvoa pävitetä (riviä ei näytetä kun tehdään uusi)
+			// $tyyppi --> 3 rivi näytetään, mutta sitä ei voida muokata, mutta sen arvo päivitetään (riviä ei näytetä kun tehdään uusi)
 			// $tyyppi --> 4 riviä ei näytetä ollenkaan, mutta sen arvo päivitetään
 			// $tyyppi --> 5 liitetiedosto
 
-			if (($tyyppi > 0 and $tyyppi < 4) or $tyyppi == 5) {
+			if ($tyyppi == 1 or 
+				$tyyppi == 1.5 or 				
+				($tyyppi == 2 and $tunnus!="") or 
+				($tyyppi == 3 and $tunnus!="")  or 				
+				$tyyppi == 5) {
 				echo "<tr>";
 				echo "<th align='left'>$otsikko</th>";
 			}
 
 			if ($jatko == 0) {
-				if($yllapito_tarkista_oikeellisuus!="") {
+				if ($yllapito_tarkista_oikeellisuus != "") {
 					//	Tehdään tarkastuksia, Tämä sallisi myös muiden tagien "oikeellisuuden" määrittelemisen suhteellisen helposti
 					//	Jostainsyystä multiline ei toimi kunnolla?
 					$search = "/.*<(select)[^>]*>(.*)<\/select>.*/mi";
 					preg_match($search, $ulos, $matches);
+					
 					if(strtolower($matches[1]) == "select") {
 						$search = "/\s+selected\s*>/i";
 						preg_match($search, $matches[2], $matches2);
@@ -1065,10 +1071,10 @@
 						<input type = 'text' name = 'tkk[$i]' value = '$kka' size='3' maxlength='2'>
 						<input type = 'text' name = 'tvv[$i]' value = '$vva' size='5' maxlength='4'></td>";
 			}
-			elseif ($tyyppi == 2) {
+			elseif ($tyyppi == 2 and $tunnus != "") {
 				echo "<td>$trow[$i]</td>";
 			}
-			elseif($tyyppi == 3) {
+			elseif($tyyppi == 3 and $tunnus != "") {
 				echo "<td>$trow[$i]<input type = 'hidden' name = '$nimi' value = '$trow[$i]'></td>";
 			}
 			elseif($tyyppi == 4) {
@@ -1077,8 +1083,8 @@
 			elseif($tyyppi == 5) {
 				echo "<td>";
 
-				if($trow[$i] > 0) {
-					echo "<a href='view.php?id=".$trow[$i]."'>".t("Näytä liitetiedosto")."</a><input type = 'hidden' name = '$nimi' value = '$trow[$i]'> ".("Poista").": <input type = 'checkbox' name = 'poista_liite[$i]' value = '{$trow[$i]}'>";
+				if ($trow[$i] > 0) {
+					echo "<a href='view.php?id=".$trow[$i]."' target='Attachment'>".t("Näytä liitetiedosto")."</a><input type = 'hidden' name = '$nimi' value = '$trow[$i]'> ".("Poista").": <input type = 'checkbox' name = 'poista_liite[$i]' value = '{$trow[$i]}'>";
 				}
 				else {
 					echo "<input type = 'text' name = '$nimi' value = '$trow[$i]'>";
@@ -1090,8 +1096,12 @@
 			if (isset($virhe[$i])) {
 				echo "<td class='back'><font class='error'>$virhe[$i]</font></td>\n";
 			}
-
-			if (($tyyppi > 0 and $tyyppi < 4) or $tyyppi == 5) {
+			
+			if ($tyyppi == 1 or 
+				$tyyppi == 1.5 or 				
+				($tyyppi == 2 and $tunnus!="") or 
+				($tyyppi == 3 and $tunnus!="")  or 				
+				$tyyppi == 5) {
 				echo "</tr>";
 			}
 		}
@@ -1162,7 +1172,10 @@
 		}
 
 		if ($errori == '' and ($toim == "sarjanumeron_lisatiedot" or ($toim == "tuote" and $laji != "V") or (($toim == "avainsana") and (strtolower($laji) == "osasto" or strtolower($laji) == "try" or strtolower($laji) == "tuotemerkki")))) {
-			require ("inc/liitaliitetiedostot.inc");
+			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='liitetiedostot' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
+			$res = mysql_query($queryoik) or pupe_error($queryoik);
+
+			if(mysql_num_rows($res) > 0) echo "<iframe id='liitetiedostot_iframe' name='liitetiedostot_iframe' src='yllapito.php?toim=liitetiedostot&from=yllapito&ohje=off&haku[7]=@$toim&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=$toim' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";			
 		}
 
 		if ($from != "yllapito" and $errori == "") {
@@ -1247,6 +1260,7 @@
 			$toim == "autodata_tuote" or
 			$toim == "tuotteen_toimittajat" or
 			$toim == "extranet_kayttajan_lisatiedot" or
+			($toim == "liitetiedostot" and $poistolukko == "") or
 			($toim == "tuote" and $sdtchk == "OK") or
 			($toim == "toimi" and $kukarow["taso"] == "3")) {
 
@@ -1277,7 +1291,7 @@
 			}
 		}
 	}
-	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit" and $from != "yllapito") {
+	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit"  and $uusilukko == "" and $from != "yllapito") {
 		echo "<br>
 				<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
 				if ($liitostunnus) echo "&liitostunnus=$liitostunnus";
@@ -1287,6 +1301,7 @@
 				<input type = 'hidden' name = 'limit' value = '$limit'>
 				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>
+				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type = 'hidden' name = 'uusi' value = '1'>
 				<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
 	}
@@ -1295,19 +1310,23 @@
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('yhteyshenkilo_iframe');</script>";
 	}
 
-	if($from == "yllapito" and $toim == "tuotteen_avainsanat") {
+	if ($from == "yllapito" and $toim == "tuotteen_avainsanat") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_avainsanat_iframe');</script>";
 	}
 
-	if($from == "yllapito" and $toim == "tuotteen_toimittajat") {
+	if ($from == "yllapito" and $toim == "tuotteen_toimittajat") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_toimittajat_iframe');</script>";
 	}
+	
+	if ($from == "yllapito" and $toim == "liitetiedostot") {
+		echo "<script LANGUAGE='JavaScript'>resizeIframe('liitetiedostot_iframe');</script>";
+	}
 
-	if($from == "yllapito" and $toim == "avainsana") {
+	if ($from == "yllapito" and $toim == "avainsana") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('avainsanat_mehtotxt_iframe');</script>";
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('avainsanat_mehtokatxt_iframe');</script>";
 	}
-	elseif($from != "yllapito") {
+	elseif ($from != "yllapito") {
 		require ("inc/footer.inc");
 	}
 

@@ -104,7 +104,7 @@ if ($laskurow["tilaustyyppi"] == 'E') {
 
 		$_FILES['tilvah_liite'] = $file;
 
-		$liitetied_id = tallenna_liite('tilvah_liite', 'myyntilasku', $laskurow['tunnus'], 'Myyntilaskun tilausvahvistus');
+		$liitetied_id = tallenna_liite('tilvah_liite', 'lasku', $laskurow['tunnus'], t('Myyntilaskun tilausvahvistus'));
 
 		//poistetaan tmp file samantien kuleksimasta...
 		system("rm -f ".basename($tilausvahvistus_tallenna));
@@ -689,18 +689,7 @@ else {
 
 					$_FILES['tilvah_liite'] = $file;
 
-					$liitetied_tunnus = '';
-
-					$lquer = "SELECT tunnus FROM liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and liitos = 'myyntilasku' and liitostunnus = '$laskurow[tunnus]' and filename = '".basename($tilausvahvistus_tallenna)."'";
-					$lres = mysql_query($lquer) or pupe_error($lquer);
-
-					$lro = mysql_fetch_array($lres);
-
-					if ($lro['tunnus'] != '' and $lro['tunnus'] > 0) {
-						$liitetied_tunnus = $lro['tunnus'];
-					}
-
-					$liitetied_id = tallenna_liite('tilvah_liite', 'myyntilasku', $laskurow['tunnus'], 'Myyntilaskun tilausvahvistus', '', $liitetied_tunnus, '');
+					$liitetied_id = tallenna_liite('tilvah_liite', 'lasku', $laskurow['tunnus'], t('Myyntilaskun tilausvahvistus'));
 
 					//poistetaan tmp file samantien kuleksimasta...
 					system("rm -f ".basename($tilausvahvistus_tallenna));
@@ -1038,18 +1027,7 @@ else {
 
 					$_FILES['tilvah_liite'] = $file;
 
-					$liitetied_tunnus = '';
-
-					$lquer = "SELECT tunnus FROM liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and liitos = 'myyntilasku' and liitostunnus = '$laskurow[tunnusnippu]' and filename = '".basename($tilausvahvistus_tallenna)."'";
-					$lres = mysql_query($lquer) or pupe_error($lquer);
-
-					$lro = mysql_fetch_array($lres);
-
-					if ($lro['tunnus'] != '' and $lro['tunnus'] > 0) {
-						$liitetied_tunnus = $lro['tunnus'];
-					}
-
-					$liitetied_id = tallenna_liite('tilvah_liite', 'myyntilasku', $laskurow['tunnusnippu'], 'Myyntilaskun tilausvahvistus', '', $liitetied_tunnus, '');
+					$liitetied_id = tallenna_liite('tilvah_liite', 'lasku', $laskurow['tunnusnippu'], t('Myyntilaskun tilausvahvistus'));
 										
 					//poistetaan tmp file samantien kuleksimasta...
 					system("rm -f ".basename($tilausvahvistus_tallenna));
@@ -1146,18 +1124,7 @@ else {
 
 							$_FILES['tilvah_liite'] = $file;
 
-							$liitetied_tunnus = '';
-
-							$lquer = "SELECT tunnus FROM liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and liitos = 'myyntilasku' and liitostunnus = '$laskurow[tunnus]' and filename = '".basename($tilausvahvistus_tallenna)."'";
-							$lres = mysql_query($lquer) or pupe_error($lquer);
-
-							$lro = mysql_fetch_array($lres);
-
-							if ($lro['tunnus'] != '' and $lro['tunnus'] > 0) {
-								$liitetied_tunnus = $lro['tunnus'];
-							}
-
-							$liitetied_id = tallenna_liite('tilvah_liite', 'myyntilasku', $laskurow['tunnus'], 'Myyntilaskun tilausvahvistus', '', $liitetied_tunnus, '');
+							$liitetied_id = tallenna_liite('tilvah_liite', 'lasku', $laskurow['tunnus'], t('Myyntilaskun tilausvahvistus'));
 
 							//poistetaan tmp file samantien kuleksimasta...
 							system("rm -f ".basename($tilausvahvistus_tallenna));

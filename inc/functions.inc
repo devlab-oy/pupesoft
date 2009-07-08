@@ -72,50 +72,62 @@ if (!function_exists("tv1dateconv")) {
 if (!function_exists("lopetus")) {
 	function lopetus($lopetus, $meta="") {
 		global $kukarow, $palvelin2;
+		
+		$lopetukset = explode("/SPLIT/", $lopetus);
+		
+		$lask = 0;
+				
+		foreach ($lopetukset as $lopetus) {		
+			// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
+			$lopetus = str_replace('////','?',               $lopetus);
+			$lopetus = preg_replace('/([^:])\/\/\//','\\1#', $lopetus);
+			$lopetus = preg_replace('/([^:])\/\//','\\1&',   $lopetus);
 
-		// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
-		$lopetus = str_replace('////','?',               $lopetus);
-		$lopetus = preg_replace('/([^:])\/\/\//','\\1#', $lopetus);
-		$lopetus = preg_replace('/([^:])\/\//','\\1&',   $lopetus);
-
-		if ($meta != "") {
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$lopetus'>";
-			exit;
-		}
-		else {
-
-			preg_match("/^([^\?&]*)\??/i", $lopetus, $nimi);
-			preg_match("/toim=([^&]*)&?/i", $lopetus, $alanimi);
-
-			$nimet = explode("/", str_replace($palvelin2, "", $nimi[1]));
-
-			for($i=0; $i<count($nimet); $i++) {
-
-				$nimi = "";
-
-				for($j = $i; $j<count($nimet); $j++) {
-					$nimi .= $nimet[$j]."/";
-				}
-
-				$nimi = substr($nimi,0,-1);
-
-				$query = "	SELECT nimitys
-							FROM oikeu
-							WHERE yhtio 	= '$kukarow[yhtio]'
-							and kuka 		= ''
-							and nimi		= '$nimi'
-							and alanimi		= '$alanimi[1]'
-							LIMIT 1";
-				$res = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($res) > 0) {
-					$row = mysql_fetch_array($res);
-					break;
-				}
+			if ($meta != "") {
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$lopetus'>";
+				exit;
 			}
+			else {
 
-			if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": $row[nimitys]</a><br>";
-			else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
+				preg_match("/^([^\?&]*)\??/i", $lopetus, $nimi);
+				preg_match("/toim=([^&]*)&?/i", $lopetus, $alanimi);
+
+				$nimet = explode("/", str_replace($palvelin2, "", $nimi[1]));
+
+				for($i=0; $i<count($nimet); $i++) {
+
+					$nimi = "";
+
+					for($j = $i; $j<count($nimet); $j++) {
+						$nimi .= $nimet[$j]."/";
+					}
+
+					$nimi = substr($nimi,0,-1);
+
+					$query = "	SELECT nimitys
+								FROM oikeu
+								WHERE yhtio 	= '$kukarow[yhtio]'
+								and kuka 		= ''
+								and nimi		= '$nimi'
+								and alanimi		= '$alanimi[1]'
+								LIMIT 1";
+					$res = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($res) > 0) {
+						$row = mysql_fetch_array($res);
+						break;
+					}
+				}
+				
+				if ($lask > 0) {
+					$lopetus .= "&lopetus=$lopetukset[0]";
+				}
+
+				if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": $row[nimitys]</a><br>";
+				else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
+			}
+		
+			$lask++;
 		}
 	}
 }
@@ -3579,7 +3591,7 @@ if (!function_exists('ebid')) {
 			$res = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_array($res)) {
-				$out .= " <a $target href='".$palvelin2."view.php?id={$row['tunnus']}'>". t('N‰yt‰ liite') ."</a> ";
+				$out .= " <a $target href='".$palvelin2."view.php?id={$row['tunnus']}' target='Attachment'>". t('N‰yt‰ liite') ."</a> ";
 			}
 
 			return $out;
@@ -3599,7 +3611,7 @@ if (!function_exists('ebid')) {
 			$res = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_array($res)) {
-				$out .= " <a $target href='".$palvelin2."view.php?id={$row['tunnus']}'>". t('N‰yt‰ liite') ."</a> ";
+				$out .= " <a $target href='".$palvelin2."view.php?id={$row['tunnus']}' target='Attachment'>". t('N‰yt‰ liite') ."</a> ";
 			}
 
 			return $out;
@@ -3621,7 +3633,7 @@ if (!function_exists('ebid')) {
 					$out[] = $palvelin2."view.php?id={$row['tunnus']}";
 				}
 				else {
-					$out .= "<a $target href='".$palvelin2."view.php?id={$row['tunnus']}'>". t('N‰yt‰ lasku') ."</a> ";
+					$out .= "<a $target href='".$palvelin2."view.php?id={$row['tunnus']}' target='Attachment'>". t('N‰yt‰ lasku') ."</a> ";
 				}
 
 			}
@@ -3707,6 +3719,38 @@ if (!function_exists("sarjanumeron_ostohinta")) {
 					$ostohinta	+= $kulukulurow["kulusumma"];
 				}
 			}
+		}
+
+	    return round($ostohinta, 6);
+	}
+}
+
+if (!function_exists("liitettyjen_kululaskujen_summa")) {
+	function liitettyjen_kululaskujen_summa($otunnus) {
+		global $kukarow, $yhtiorow;
+		
+		// Katsotaan onko tilaukselle liitetty kulukeikka ja palatetaan laskujen summat yhtiˆn valuutassa
+		$query  = "	SELECT laskunro
+					FROM lasku 
+					WHERE yhtio 		= '$kukarow[yhtio]'
+					and liitostunnus	= '$otunnus'
+					and ytunnus			= '$otunnus'
+					and tila 			= 'K' 
+					and alatila 		= 'T'";
+		$keikkares = mysql_query($query) or pupe_error($query);
+
+		while($kulukeikkarow = mysql_fetch_array($keikkares)) {
+			// Haetaan kaikki keikkaan liitettyjen laskujen summa
+			$query = "	SELECT sum(arvo*if (maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)) kulusumma
+						FROM lasku
+						WHERE yhtio		= '$kukarow[yhtio]'
+						and tila 		IN ('K','X')
+						and laskunro 	= '$kulukeikkarow[laskunro]'
+						and vanhatunnus <> 0";
+			$result = mysql_query($query) or pupe_error($query);
+			$kulukulurow = mysql_fetch_array($result);
+
+			$ostohinta	+= $kulukulurow["kulusumma"];
 		}
 
 	    return round($ostohinta, 6);
@@ -5383,11 +5427,89 @@ if (!function_exists("nayta_kyselyt")) {
 	}
 }
 
+if (!function_exists('muuta_kuvan_koko')) {
+	function muuta_kuvan_koko ($ykoko, $xkoko, $type, $taulu, $upfile1) {
+		global $kukarow, $yhtiorow, $_FILES;
+
+		if ($yhtiorow['kuvapankki_polku'] != "") $dirri = $yhtiorow['kuvapankki_polku']."/".$kukarow['yhtio']."/".$taulu."/".$type."/";
+		else $dirri = "/tmp/";
+
+		list($usec, $sec) = explode(" ",microtime());
+
+		$nimi      = $usec+$sec; // uniikki nimi
+		$resize    = ""; // resize komento
+		$crop      = ""; // crop komento
+		$upfileall = ""; // palautus
+
+		$filetsu = $_FILES[$upfile1];
+
+		$path_parts = pathinfo($filetsu["name"]);
+		$ext = strtolower($path_parts['extension']);
+
+		$image = getimagesize($filetsu["tmp_name"], $imageinfo);	// l‰hetetty kuva
+		$leve = $image[0];
+		$kork = $image[1];
+
+		// eih‰n molemmat (y ja x) ole nollia?!
+		if ($ykoko > 0 or $xkoko > 0) {
+			/* skaaltaanko x:n vai y:n mukaan, jos xkoko tai ykoko == 0, skaalataan != 0 mukaan */
+			if ($ykoko > 0 and $kork > $ykoko) {
+				$upfilesgh = strtolower("/tmp/$nimi"."1.".$ext);
+
+				// skaalataan kuva oikenakokoiseksi y:n mukaan
+		    	exec("nice -n 20 convert -resize x$ykoko -quality 80 $filetsu[tmp_name] $upfilesgh", $output);
+		    }
+			elseif ($xkoko > 0 and $leve > $xkoko) {
+				$upfilesgh = strtolower("/tmp/$nimi"."1.".$ext);
+
+				// skaalataan kuva oikenakokoiseksi x:n mukaan
+		  		exec("nice -n 20 convert -resize $xkoko -quality 80 $filetsu[tmp_name] $upfilesgh", $output);
+		    }
+			else {
+				return $upfile1;
+		    }
+
+			$uusnimi = $dirri.$filetsu["name"];
+
+			if (!copy($upfilesgh, $uusnimi)) {
+		    	echo "Kopiointi ep‰onnistui $upfilesgh -> $uusnimi<br>";
+
+				$upfileall = "";
+			}
+			else {
+				$upfileall = $uusnimi;
+			}
+
+			$a = getimagesize($uusnimi);
+
+			$file["name"] 		= basename($uusnimi);
+			$file["type"] 		= $a["mime"];
+			$file["tmp_name"] 	= $uusnimi;
+			$file["error"] 		= 0;
+			$file["size"] 		= filesize($uusnimi);
+
+			$_FILES[$upfile1] = $file;
+
+			// poistetaan file
+			system("rm -f $upfilesgh");
+		}
+		else {
+			$upfileall = "";
+		}
+
+		return $upfileall;
+	}
+}
+
 if (!function_exists('tallenna_liite')) {
-	function tallenna_liite($userfile, $liitos, $liitostunnus, $selite, $kayttotarkoitus="", $tunnus=0, $jarjestys = 0) {
-		global $kukarow, $yhtiorow, $_FILES, $kieli;
+	function tallenna_liite($userfile, $liitos, $liitostunnus, $selite, $kayttotarkoitus="", $tunnus=0, $jarjestys=0, $kieli="") {
+		global $kukarow, $yhtiorow, $_FILES;
 
 		$file = array();
+		
+		if ($kieli == "") {
+			$kieli = $yhtiorow["kieli"];
+		}
 
 		if (is_array($_FILES[$userfile])) {
 			$file = $_FILES[$userfile];
@@ -5449,21 +5571,21 @@ if (!function_exists('tallenna_liite')) {
 		// lis‰t‰‰n kuva
 		if ($tunnus > 0) {
 			$query = "	UPDATE liitetiedostot SET
-							data     		= '$data',
-							selite   		= '".trim($selite)."',
-							filename 		= '$filename',
-							filesize 		= '$filesize',
-							filetype 		= '$filetype',
-							image_width		= '$image_width',
-							image_height	= '$image_height',
-							image_bits		= '$image_bits',
-							image_channels	= '$image_channels',
-							kayttotarkoitus	= '$teetyyppi',
-							jarjestys		= '$jarjestys',
-							laatija			= '$kukarow[kuka]',
-							luontiaika		= now()
+						data     		= '$data',
+						selite   		= trim('$selite'),
+						filename 		= '$filename',
+						filesize 		= '$filesize',
+						filetype 		= '$filetype',
+						image_width		= '$image_width',
+						image_height	= '$image_height',
+						image_bits		= '$image_bits',
+						image_channels	= '$image_channels',
+						kayttotarkoitus	= '$teetyyppi',
+						jarjestys		= '$jarjestys',
+						laatija			= '$kukarow[kuka]',
+						luontiaika		= now()
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = mysql_query($query) or pupe_error($query);			
 			$id = $tunnus;
 		}
 		else {
@@ -5484,7 +5606,7 @@ if (!function_exists('tallenna_liite')) {
 					  	liitos   		= '$liitos',
 					  	liitostunnus 	= '$liitostunnus',
 					  	data     		= '$data',
-					  	selite   		= '".trim($selite)."',
+					  	selite   		= trim('$selite'),
 						kieli			= '$kieli',
 					  	filename 		= '$filename',
 					  	filesize 		= '$filesize',
@@ -5498,8 +5620,9 @@ if (!function_exists('tallenna_liite')) {
 					  	laatija			= '$kukarow[kuka]',
 					  	luontiaika		= now()";
 			$result = mysql_query($query) or pupe_error($query);
-			$id = mysql_insert_id();
+			$id = mysql_insert_id();	
 		}
+		
 		return $id;
 	}
 }
@@ -5508,7 +5631,7 @@ if (!function_exists('tarkasta_liite')) {
 	function tarkasta_liite($userfile, $sallitut_tiedostot="") {
 		global $kukarow, $yhtiorow, $_FILES, $kieli;
 
-		if (!is_array($_FILES[$userfile])) {
+		if (!is_array($_FILES[$userfile])) {						
 			return false;
 		}
 
@@ -5527,8 +5650,11 @@ if (!function_exists('tarkasta_liite')) {
 		}
 
 		//	Ei saatu erroreita. jatketaan..
-		if ($file["error"] == 0) {
-
+		if ($file["size"] == 0) {
+			return "<font class='error'>".t("VIRHE! Tiedosto on tyhj‰")."</font><br><br>";				
+		}
+		elseif ($file["error"] == 0) {
+						
 			//	Paketti riitt‰v‰n pieni mysql:lle
 			$query = "SHOW variables like 'max_allowed_packet'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -6548,12 +6674,11 @@ if (!function_exists("laheta_tilausvahvistus")) {
 
 			$_FILES['tilvah_liite'] = $file;
 
-			$liitetied_id = tallenna_liite('tilvah_liite', 'myyntilasku', $laskurow['tunnus'], 'Myyntilaskun tilausvahvistus');
+			$liitetied_id = tallenna_liite('tilvah_liite', 'lasku', $laskurow['tunnus'], t('Myyntilaskun tilausvahvistus'));
 
 			//poistetaan tmp file samantien kuleksimasta...
 			system("rm -f ".basename($tilausvahvistus_tallenna));
 		}
-
 	}
 }
 

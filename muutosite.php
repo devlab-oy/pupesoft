@@ -929,18 +929,14 @@ if ($tee == 'E' or $tee == 'F') {
 				</form>";
 	}
 
-	$queryoik = "SELECT tunnus from oikeu where nimi like '%liitetiedostot.php' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
+	$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='liitetiedostot' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 	$res = mysql_query($queryoik) or pupe_error($queryoik);
 
-	//nyt voidaan laittaa verkkolaskuihin liitetiedostoja
-	//if (mysql_num_rows($res) == 1 and $trow["ebid"] == "") {
-	if (mysql_num_rows($res) == 1) {
-		echo "<form method='get' action='liitetiedostot.php?liitos=lasku&id=$tunnus'>
-			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-			<input type='hidden' name='id' value='$tunnus'>
-			<input type='hidden' name='liitos' value='lasku'>
-			<input type='submit' value='" . t('Muokkaa liitteit‰')."'>
-			</form>";
+	if (mysql_num_rows($res) > 0) {			
+		echo "<form method='POST' action='".$palvelin2."yllapito.php?toim=liitetiedostot&from=yllapito&ohje=off&haku[7]=@lasku&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=lasku'>
+				<input type = 'hidden' name = 'lopetus' value = '$lopetus/SPLIT/".$palvelin2."muutosite.php////tee=E//tunnus=$tunnus'>
+				<input type = 'submit' value='" . t('Muokkaa liitteit‰')."'>
+				</form>";
 	}
 
 	// N‰ytet‰‰n nappi vain jos tieoja on

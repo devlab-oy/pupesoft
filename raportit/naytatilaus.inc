@@ -347,17 +347,16 @@
 	// Katsotaan onko liitetiedostoja
 	$liitequery = "	SELECT tunnus
 					FROM liitetiedostot USE INDEX (yhtio_liitos_liitostunnus)
-					WHERE yhtio='$kukarow[yhtio]'
-					AND liitos='myyntilasku'
-					AND liitostunnus='$laskurow[tunnus]'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND liitos = 'lasku'
+					AND liitostunnus = '$laskurow[tunnus]'";
 	$liiteres = mysql_query($liitequery) or pupe_error($liitequery);
 
 	if (mysql_num_rows($liiteres) > 0) {
 		$liitemaara = 1;
 		echo "<tr><th>".t("Liitetiedosto")."</th><td colspan='8'>";
 		while ($liiterow = mysql_fetch_array($liiteres)) {
-			$kuvapalvelin = substr($palvelin2, 0, -1);
-			echo "<a href='$kuvapalvelin/view.php?id=$liiterow[tunnus]' target='_blank'>".t("Liite")." $liitemaara</a> ";
+			echo "<a href='".$palvelin2."view.php?id=$liiterow[tunnus]' target='Attachment'>".t("Liite")." $liitemaara</a> ";
 			$liitemaara++;
 		}
 		echo "</td></tr>";

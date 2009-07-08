@@ -914,7 +914,7 @@
 					echo t("Paperilasku");
 				}
 				foreach ($lasku_urlit as $lasku_url) {
-					echo "<a href='$lasku_url'>Näytä liite</a><br>";
+					echo "<a href='$lasku_url' target='Attachment'>Näytä liite</a><br>";
 				}
 				echo "</td>";
 
@@ -1108,7 +1108,7 @@
 					echo t("Paperilasku");
 				}
 				foreach ($lasku_urlit as $lasku_url) {
-					echo "<a href='$lasku_url'>Näytä liite</a><br>";
+					echo "<a href='$lasku_url' target='Attachment'>Näytä liite</a><br>";
 				}
 				echo "</td>";
 
@@ -1249,27 +1249,30 @@
 
 		echo "<select name='valuu'>";
 
-		$kaikaval = 0;
-		while ($valuurow = mysql_fetch_array ($result)) {
-			$kaikaval += $valuurow[1];
+		if (mysql_num_rows($result) > 0) {
+			$kaikaval = 0;
+			while ($valuurow = mysql_fetch_array ($result)) {
+				$kaikaval += $valuurow[1];
+			}
 		}
-
+		
 		echo "<option value=''>".t("Kaikki valuutat")." ($kaikaval)";
+		
+		if (mysql_num_rows($result) > 0) {
+			mysql_data_seek($result, 0);
 
-		mysql_data_seek($result, 0);
+			while ($valuurow = mysql_fetch_array ($result)) {
+				if ($valuurow[0] == $valuu) {
+					$sel = "SELECTED";
+				}
+				else{
+					$sel = "";
+				}
 
-		while ($valuurow = mysql_fetch_array ($result)) {
-			if ($valuurow[0] == $valuu) {
-				$sel = "SELECTED";
+				echo "<option value='$valuurow[0]' $sel>$valuurow[0] ($valuurow[1])";
 			}
-			else{
-				$sel = "";
-			}
-
-
-			echo "<option value='$valuurow[0]' $sel>$valuurow[0] ($valuurow[1])";
 		}
-
+	
 		echo "</select></td>";
 		echo "<td></td>";
 		echo "</tr>";
@@ -1285,27 +1288,31 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<td><select name='erapvm'>";
-
-		$kaikaval = 0;
-		while ($laskurow = mysql_fetch_array ($result)) {
-			$kaikaval += $laskurow[1];
+		
+		if (mysql_num_rows($result) > 0) {
+			$kaikaval = 0;
+			while ($laskurow = mysql_fetch_array ($result)) {
+				$kaikaval += $laskurow[1];
+			}
 		}
 
 		echo "<option value=''>".t("Kaikki eräpäivät")." ($kaikaval)";
 
-		mysql_data_seek($result, 0);
+		if (mysql_num_rows($result) > 0) {
+			mysql_data_seek($result, 0);
 
-		while ($laskurow = mysql_fetch_array ($result)) {
-			if ($laskurow[0] == $erapvm) {
-				$sel = "SELECTED";
+			while ($laskurow = mysql_fetch_array ($result)) {
+				if ($laskurow[0] == $erapvm) {
+					$sel = "SELECTED";
+				}
+				else{
+					$sel = "";
+				}
+				
+				echo "<option value = '$laskurow[0]' $sel>".tv1dateconv($laskurow[0])." ($laskurow[1])";
 			}
-			else{
-				$sel = "";
-			}
-
-			echo "<option value = '$laskurow[0]' $sel>".tv1dateconv($laskurow[0])." ($laskurow[1])";
 		}
-
+		
 		echo "</select></td>";
 
 		if ($kaikki != "") {

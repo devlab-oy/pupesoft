@@ -24,7 +24,7 @@
 
 			// Mihin t‰m‰ on listattu Listataan
 			//	Jos meill‰ ei ole viel‰ toimittajaa valitaan ensin se
-			if($toimittajaid != "" or $ytunnus != "") {
+			if ($toimittajaid != "" or $ytunnus != "") {
 				$keikkamonta = 0;
 				$hakutunnus = $ytunnus;
 				$hakuid		= $toimittajaid;
@@ -34,31 +34,33 @@
 				require ("inc/kevyt_toimittajahaku.inc");
 			}
 
-			if($toimittajaid != "") {
+			if ($toimittajaid != "") {
 				echo "<table><tr><th>".t("Valittu toimittaja")."</th><td>{$toimittajarow["nimi"]} {$toimittajarow["osoite"]} {$toimittajarow["postino"]} {$toimittajarow["postitp"]} ({$toimittajarow["ytunnus"]})</td><td class='back'><a href = 'javascript:sndReq(\"keikka\", \"hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus&toimittajaid=\");'>Vaihda toimittaja</a></td></tr></table><br>";
 
 				//	Listataan keikat
 				$query = "	SELECT comments, lasku.tunnus otunnus, lasku.laskunro keikka, sum(tilausrivi.rivihinta) varastossaarvo, count(distinct tilausrivi.tunnus) kpl, sum(if(kpl = 0, 0, 1)) varastossa
 							FROM lasku
 							LEFT JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
-							WHERE lasku.yhtio = '$kukarow[yhtio]' and
-							lasku.tila = 'K' and
-							lasku.alatila = '' and
-							lasku.liitostunnus = '$toimittajaid'
+							WHERE lasku.yhtio = '$kukarow[yhtio]' 
+							and lasku.tila = 'K'
+							and lasku.alatila = ''
+							and lasku.liitostunnus = '$toimittajaid'
 							and lasku.vanhatunnus = 0
 							GROUP BY lasku.laskunro
-							ORDER BY luontiaika";
+							ORDER BY lasku.luontiaika";
 				$result = mysql_query($query) or pupe_error($query);
-				if(mysql_num_rows($result)>0) {
+				
+				if (mysql_num_rows($result) > 0) {
 					//	Haetaan vientitieto..
 
 					//	Kululaskun voi kohdistaa useaan keikkaan
-					if(in_array($laskurow["vienti"], array("B","E","H"))) {
+					if (in_array($laskurow["vienti"], array("B","E","H"))) {
 						echo "<form id='liita' action='hyvak.php?keikalla=on' method='post' autocomplete='off'>";
 						echo "<input type='hidden' name='tee' value = 'liita'>";
 						echo "<input type='hidden' name='tunnus' value = '$tunnus'>";
 						echo "<input type='hidden' name='toimittajaid' value = '$toimittajaid'>";
 						echo "<table><tr><th>".t("Keikka")."</th><th>".t("Kommentit")."</th><th>".t("Rivej‰")."/".t("varasossa")."</th><th>".t("Varastonarvo")."</th><th>".t("Summa")."</th></tr>";
+						
 						while($row = mysql_fetch_array($result)) {
 							echo "<tr><td>{$row["keikka"]}</td><td>{$row["comments"]}</td><td align='right'>{$row["kpl"]}/{$row["varastossa"]}</td><td align='right'>{$row["varastossaarvo"]}</td><td>";
 							echo "<input type='text' name='liita[".$row["otunnus"]."][liitasumma]' value='$liitasumma' size='10'>";
@@ -70,7 +72,7 @@
 						echo "<table><tr><th>".t("Keikka")."</th><th>".t("Kommentit")."</th><th>".t("Rivej‰")."/".t("varasossa")."</th><th>".t("Varastonarvo")."</th></tr>";
 						while($row = mysql_fetch_array($result)) {
 
-							$query = "	select sum(summa) summa
+							$query = "	SELECT sum(summa) summa
 										from tiliointi
 										where yhtio	= '$kukarow[yhtio]'
 										and ltunnus	= '$tunnus'
@@ -114,21 +116,23 @@
 
 			die("</body></html>");
 		}
-		elseif($toimittajaid > 0) {
+		elseif ($toimittajaid > 0) {
 
 			//	swapataan oikea tunnus talteen
-			$o_tunnus 	= $tunnus;
-			$silent 	= "JOO";
-			$laskutunnus = $tunnus;
+			$o_tunnus 		= $tunnus;
+			$silent 		= "JOO";
+			$laskutunnus 	= $tunnus;
+			$keikanalatila	= "";
 
-			if($tee == "liita") {
+			if ($tee == "liita") {
 				if(count($liita) > 0) {
 					foreach($liita as $l => $v) {
 						//	Otetaan originaali laskurow talteen..
-						$olaskurow = $laskurow;
-						$otunnus = $l;
-						$liitasumma = $v["liitasumma"];
-						if($liitasumma <> 0 or !in_array($laskurow["vienti"], array("B","E","H"))) {
+						$olaskurow 		= $laskurow;
+						$otunnus 		= $l;
+						$liitasumma 	= $v["liitasumma"];						
+						
+						if ($liitasumma <> 0 or !in_array($laskurow["vienti"], array("B","E","H"))) {
 							require("tilauskasittely/kululaskut.inc");
 						}
 
@@ -1118,12 +1122,13 @@
 
 		echo "</tr></table>";
 
-		if(in_array($laskurow["vienti"], array("B","E","H","C","J","F","K","I","L"))) {
+		if (in_array($laskurow["vienti"], array("B","E","H","C","J","F","K","I","L"))) {
 			enable_ajax();
 
 			echo "<br><table>";
 			echo "<tr><th>".t("Laskusta k‰ytetty keikoilla")."</th><th>".t("Summa")."</th></tr>";
-			$query = "	select sum(summa) summa
+
+			$query = "	SELECT sum(summa) summa
 						from tiliointi
 						where yhtio	= '$kukarow[yhtio]'
 						and ltunnus	= '$tunnus'
@@ -1134,7 +1139,7 @@
 
 			$jaljella = round((float) $laskurow["summa"] - (float) $alvirow["summa"], 2);
 
-			$query = "	SELECT lasku.laskunro, keikka.nimi, lasku.summa, keikka.comments, keikka.vanhatunnus vanhatunnus, keikka.tunnus tunnus, keikka.liitostunnus toimittajaid, keikka.alatila
+			$query = "	SELECT lasku.laskunro, keikka.nimi, lasku.summa, lasku.arvo, keikka.comments, keikka.vanhatunnus vanhatunnus, keikka.tunnus tunnus, keikka.liitostunnus toimittajaid, keikka.alatila
 						FROM lasku
 						JOIN lasku keikka ON keikka.yhtio = lasku.yhtio and keikka.laskunro = lasku.laskunro and keikka.tila = 'K'
 						WHERE lasku.yhtio	= '$kukarow[yhtio]'
@@ -1165,7 +1170,7 @@
 						echo "<tr><td>$apurow[laskunro] $apurow[nimi]$apurow[comments]</td><td>$apurow[summa]</td><td class='back'>".t("Lukittu")."</tr>";
 					}
 
-					$jaljella -= $apurow["summa"];
+					$jaljella -= $apurow["arvo"];
 				}
 			}
 			else {
@@ -1176,18 +1181,22 @@
 			
 			// Roundataan...
 			$jaljella = round($jaljella, 2);
-
-			$lisa = "";
 			
-			if($jaljella > 0) {
+			if ($jaljella > 0) {				
 				//	Vaihtoomaisuuslaskuille ei tarvitse hakea toimittajaa, sen me tied‰mme jo!
-				if(!in_array($laskurow["vienti"], array("B","E","H")) and $jaljella > 0) {
+				if (!in_array($laskurow["vienti"], array("B","E","H"))) {
 					if($toimittajaid == "") $toimittajaid = $laskurow["liitostunnus"];
-					$lisa = "<script>javascript:sndReq(\"keikka\", \"hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus&toimittajaid=$toimittajaid\");</script>";
+					
+					$toimilisa = "&toimittajaid=$toimittajaid";
 				}
 				else {
-					$lisa = "<a id='uusi' href='javascript:sndReq(\"keikka\", \"hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus\");'>".t("Liit‰ keikkaan")."</a>";
+					$toimilisa = "";
 				}
+												
+				$lisa = "<a id='uusi' href='javascript:sndReq(\"keikka\", \"hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus$toimilisa\");'>".t("Liit‰ keikkaan")."</a>";				
+			}
+			else {
+				$lisa = "";
 			}
 
 			echo "<tr><th>".t("J‰ljell‰")."</th><th>$jaljella $laskurow[valkoodi]</th><td class='back'>$lisa</td></tr>";
@@ -1555,65 +1564,8 @@
 
 				}
 			}
-
-			//	Onko kuva tietokannassa?
-			$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
-			$liiteres = mysql_query($query) or pupe_error($query);
-
-			// yli yks tehd‰‰n dropdowni
-			if (mysql_num_rows($liiteres) > 1) {
-				echo "<form action = '$PHP_SELF' method='post'>
-		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
-		  				<input type='hidden' name = 'iframe' value='yes'>
-		  				<input type='hidden' name = 'nayta' value='$nayta'>
-		  				<input type='hidden' name = 'tee' value = ''>
-						<td>".t("N‰yt‰ tilauksen lasku")."</td>
-		  				<td class='back'><select name='id' onchange='submit();'>
-							<option value=''>Valitse lasku</option>";
-
-				while ($liiterow = mysql_fetch_array($liiteres)) {
-					if ($id == $liiterow["tunnus"]) $sel = "selected";
-					else $sel = "";
-					echo "<option value='{$liiterow["tunnus"]}' $sel>{$liiterow["selite"]}</option>";
-				}
-				echo "	</select>
-						</td>
-					</form>";
-			}
-			elseif (mysql_num_rows($liiteres) == 1) {
-				$liiterow = mysql_fetch_array($liiteres);
-				$id = $liiterow["tunnus"];
-			}
-
-			// jos vain yks tai verkkolasku niin tehd‰‰n nappej‰
-			if ($iframe == "" and ($laskurow["ebid"] != "" or mysql_num_rows($liiteres) == 1)) {
-
-				// <input type='hidden' name = 'iframe' value = '$iframe'>
-		  		echo "<form action = '$PHP_SELF' method='post'>
-		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
-						<input type='hidden' name = 'id' value = '$id'>
-		  				<input type='hidden' name = 'iframe' value='yes'>
-		  				<input type='hidden' name = 'nayta' value='$nayta'>
-		  				<input type='hidden' name = 'tee' value = ''>
-		  				<td class='back'><input type='Submit' value='".t("Avaa lasku t‰h‰n ikkunaan")."'></td>
-						</form>";
-			}
-			elseif ($iframe == 'yes' and ($laskurow["ebid"] != "" or mysql_num_rows($liiteres) == 1)) {
-
-				// <input type='hidden' name = 'iframe' value = '$iframe'>
-
-		  		echo "<form action = '$PHP_SELF' method='post'>
-		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
-						<input type='hidden' name = 'id' value = '$id'>
-		  				<input type='hidden' name = 'iframe' value=''>
-		  				<input type='hidden' name = 'nayta' value='$nayta'>
-		  				<input type='hidden' name = 'tee' value = ''>
-		  				<td class='back'><input type='Submit' value='".t("Sulje lasku")."'></td>
-						</form>";
-			}
-
+			
 			echo "</tr></table>";
-
 		}
 
 		if ($kukarow['taso'] == 9) {
@@ -1632,48 +1584,65 @@
 					<input type='hidden' name='tunnus' value='$tunnus'>
 					<td class='back'><input type='Submit' value='".t("Pys‰yt‰ laskun k‰sittely")."'></td>
 					</form>";
-
-			if ($iframe == "" and $laskurow["ebid"] != "") {
-
-		  		echo "<form action = '$PHP_SELF' method='post'>
-		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
-		  				<input type='hidden' name = 'iframe' value='yes'>
-		  				<input type='hidden' name = 'nayta' value='$nayta'>
-		  				<input type='hidden' name = 'tee' value = ''>
-		  				<td class='back'><input type='Submit' value='".t("Avaa lasku t‰h‰n ikkunaan")."'></td>
-						</form>";
-			}
-			elseif ($iframe == 'yes' and $laskurow["ebid"] != "") {
-
-		  		echo "<form action = '$PHP_SELF' method='post'>
-		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
-		  				<input type='hidden' name = 'iframe' value=''>
-		  				<input type='hidden' name = 'nayta' value='$nayta'>
-		  				<input type='hidden' name = 'tee' value = ''>
-		  				<td class='back'><input type='Submit' value='".t("Sulje lasku")."'></td>
-						</form>";
-			}
-
+					
 			echo "</tr></table><br>";
 		}
 
-		if ($iframe == 'yes' and ($laskurow["ebid"] != "" or $id > 0)) {
-		    if ($_POST['id'] > 0) {
-				$_POST['id'] = (int) $_POST['id'];
-				$url = "view.php?id={$_POST['id']}";
-			}
-			elseif ($id > 0) {
-				$id = (int) $id;
-				$url = "view.php?id={$id}";
+		
+		echo "<br><table><tr>";
+		
+		//	Onko kuva tietokannassa?
+		$liitteet = ebid($laskurow["tunnus"], true);
+		
+		if (is_array($liitteet) and count($liitteet) > 0) {
+			echo "<form action = '$PHP_SELF' method='post'>
+	  				<input type='hidden' name = 'tunnus' value='$tunnus'>
+	  				<input type='hidden' name = 'iframe' value='yes'>
+	  				<input type='hidden' name = 'nayta' value='$nayta'>
+	  				<input type='hidden' name = 'tee' value = ''>
+					<th>".t("Avaa lasku t‰h‰n ikkunaan")."</th>
+	  				<td>";
+			
+			
+			if (is_array($liitteet) and count($liitteet) == 1) {
+				echo "<input type='hidden' name = 'id' value='$liitteet[0]'>
+						<input type='Submit' value='".t("Avaa")."'>";
 			}
 			else {
-				$url = ebid($laskurow['tunnus'], 'alaikkuna');
+				echo "<select name='id' onchange='submit();'>
+						<option value=''>Valitse lasku</option>";
+					
+				$liicoint = 1;
+				foreach($liitteet as $liite) {
+					if ($id == $liite) $sel = "selected";
+					else $sel = "";
+				
+					echo "<option value='$liite' $sel>".t("Liite")." $liicoint</option>";
+					
+					$liicoint++;
+				}
+				echo "</select>";
 			}
-
-			echo "<iframe src='$url' name='alaikkuna' width='100%' height='60%' align='bottom' scrolling='auto'></iframe>";
+			
+			echo "</td></form>";		
+		}
+		
+		if ($iframe == 'yes') {
+	  		echo "<td>
+					<form action = '$PHP_SELF' method='post'>
+	  				<input type='hidden' name = 'tunnus' value='$tunnus'>
+	  				<input type='hidden' name = 'nayta' value='$nayta'>
+	  				<input type='Submit' value='".t("Sulje lasku")."'>
+					</form></td>";
+		}
+		
+		echo "</tr></table>";
+		
+		if ($iframe == 'yes' and $id != '') {
+			echo "<iframe src='$id' name='alaikkuna' width='100%' height='60%' align='bottom' scrolling='auto'></iframe>";
 		}
 	}
-	elseif($kutsuja=="") {
+	elseif ($kutsuja=="") {
 
 		// T‰ll‰ ollaan, jos olemme vasta valitsemassa laskua
 		if ($nayta == '') {

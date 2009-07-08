@@ -334,9 +334,10 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
 		$laskures = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_assoc($laskures);
 
-		$tee = 'liita';
-		$otunnus = $laskurow['tunnus'];
-		$silent = 'jee';
+		$tee_kululaskut = 'liita';
+		$otunnus 		= $laskurow['tunnus'];
+		$silent 		= 'jee';
+		$keikanalatila 	= "";
 
 		$laskutunnus = $jaettavalaskurow['tunnus'];
 		require('tilauskasittely/kululaskut.inc');

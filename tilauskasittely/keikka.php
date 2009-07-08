@@ -312,6 +312,8 @@ if ($toiminto == "varastopaikat") {
 
 // lis‰ill‰‰n keikkaan kululaskuja
 if ($toiminto == "kululaskut") {
+	$keikanalatila 	= "";
+	
 	require('kululaskut.inc');
 }
 

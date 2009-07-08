@@ -827,8 +827,9 @@
 							}
 							else {
 								list($liitedata1, $liitedata2) = explode("/", $trow[1]);
+								$dirikka = getcwd();
 							
-								if (file_exists("pics/tiedostotyyppiikonit/$liitedata2.ico")) {
+								if (file_exists($dirikka."/pics/tiedostotyyppiikonit/$liitedata2.ico")) {
 									echo "<img src='".$palvelin2."pics/tiedostotyyppiikonit/$liitedata2.ico'>";
 								}
 								else {

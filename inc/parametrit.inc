@@ -428,7 +428,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			header("Content-Type: text/html; charset=$charset");
 		}
 		
-		if ($_GET["no_head"] != "yes") {
+		if (isset($no_head) and $no_head != "yes") {
 
 			echo "<html>";
 			echo "<head>";

@@ -870,9 +870,9 @@
 		if (($toim == "asiakasalennus" or $toim == "asiakashinta") and $oikeurow['paivitys'] == 1) {
 			$span = mysql_num_fields($result)-2;
 			echo "<tr>";
-			echo "<td class='tumma'><input type = 'submit' value = '".t("Poista ruksatut tietueet")."'></td>";
-			echo "<td class='tumma' colspan='$span' align='right'>".t("Ruksaa kaikki")."</td>";
-			echo "<td class='tumma'><input type = 'checkbox' name = 'poi' onclick='toggleAll(this)'></td>";
+			echo "<td class='back'><input type = 'submit' value = '".t("Poista ruksatut tietueet")."'></td>";
+			echo "<td class='back' colspan='$span' align='right'>".t("Ruksaa kaikki")."</td>";
+			echo "<td class='back'><input type = 'checkbox' name = 'poi' onclick='toggleAll(this)'></td>";
 			echo "</tr>";
 
 			echo "</form>";

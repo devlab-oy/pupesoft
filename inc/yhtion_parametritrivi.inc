@@ -1942,4 +1942,19 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "myytitilauksen_kululaskut") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Myyntitilauksiin ei voida liitt‰‰ kululaskuja")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilauksiin voi liitt‰‰ kululaskuja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

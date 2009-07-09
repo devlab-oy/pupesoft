@@ -100,7 +100,7 @@
 		}
 
 		echo "<tr>
-				<td><form name = 'uusi' action = '$PHP_SELF#$tunnus' method='post'>
+				<td valign='top'><form name = 'uusi' action = '$PHP_SELF#$tunnus' method='post'>
 				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type='hidden' name='tee' value = 'U'>
 				<input type='hidden' name='tunnus' value = '$tunnus'>
@@ -118,8 +118,8 @@
 		}
 
 		echo "</td>
-			<td>$ulos</td>
-			<td>
+			<td valign='top'>$ulos</td>
+			<td valign='top'>
 			<input type='text' name='summa' value = '$summa' size='8'>
 			<input type='hidden' name='vanhasumma' value = '$summa'>
 			<input type='hidden' name='vanhasumma_valuutassa' value = '$summa_valuutassa'>
@@ -132,17 +132,17 @@
 			// Jos alvit on hardkoodattu tileihin (hui, kauheaa, mutta joku niin tahtoo), niin salasanat.php:ssä
 			// on määritettävä $hardcoded_alv=1;
 			if ($hardcoded_alv != 1) {
-				echo "<td>".alv_popup('vero', $vero)."</td>";
+				echo "<td align='right' valign='top'>".alv_popup('vero', $vero)."</td>";
 			}
 			else {
-				echo "<td></td>";
+				echo "<td align='right' valign='top'></td>";
 			}
 		}
 		else {
-			echo "<td><input type='hidden' name='vero' value='0'>0</td>";
+			echo "<td align='right' valign='top'><input type='hidden' name='vero' value='0'>0</td>";
 		}
 
-		echo "<td>";
+		echo "<td valign='top'>";
 		// haetaan kaikki tiliöintien tapahtumapäivät plus unionilla tämä päivä mukaan
 		$query = "	(SELECT distinct(tapvm) pvm
 					FROM tiliointi
@@ -174,7 +174,7 @@
 		}
 		echo "</td>";
 
-		echo "<td>";
+		echo "<td valign='top'>";
 		echo "<input type='text' name='selite' value = '$selite'>";
 		echo "</td>";
 
@@ -184,8 +184,8 @@
 
 		if ($virhe != "") $virhe .= "<br>";
 
-		echo "<td><input type='Submit' value = '".t("Lisää")."'></td>";
-		echo "<td class='back' nowrap><font class='error'>$virhe</font><input type='checkbox' name = 'jaksota'>".t("Jaksota")."</td>";
+		echo "<td valign='top'><input type='Submit' value = '".t("Lisää")."'></td>";
+		echo "<td valign='top' class='back' nowrap><font class='error'>$virhe</font><input type='checkbox' name = 'jaksota'>".t("Jaksota")."</td>";
 		echo "</tr>";
 		echo "</form>";
 		$formi = 'uusi';
@@ -233,19 +233,19 @@
 		}
 
 		echo "<tr class='aktiivi'>";
-		echo "<td class='$class' nowrap>$trow[tilino] &raquo; $trow[tilinimi]</td>";
-		echo "<td class='$class'>$trow[tarkenne]</td>";
-		echo "<td class='$class' align='right' nowrap>$trow[summa]</td>";
-		echo "<td class='$class' align='right'>". (float) $trow["vero"]. "</td>";
-		echo "<td class='$class'>".tv1dateconv($trow["tapvm"])."</td>";
-		echo "<td class='$class'>$trow[selite]";
+		echo "<td valign='top' class='$class' nowrap>$trow[tilino] &raquo; $trow[tilinimi]</td>";
+		echo "<td valign='top' class='$class'>$trow[tarkenne]</td>";
+		echo "<td valign='top' class='$class' align='right' nowrap>$trow[summa]</td>";
+		echo "<td valign='top' class='$class' align='right'>". (float) $trow["vero"]. "</td>";
+		echo "<td align='center' valign='top' class='$class'>".tv1dateconv($trow["tapvm"])."</td>";
+		echo "<td valign='top' class='$class'>$trow[selite]";
 		if ($trow["summa_valuutassa"] != 0 and $trow["valkoodi"] != "" and $trow["valkoodi"] != $yhtiorow["valkoodi"]) {
 			echo " ($trow[summa_valuutassa] $trow[valkoodi])";
 		}
 		echo "</td>";
 
 		if ($viivatut == "on") {
-			echo "<td class='$class'>".tv1dateconv($trow["laadittu"], "pitkä")." &raquo; $trow[laatija_nimi]";
+			echo "<td class='$class' valign='top'>".tv1dateconv($trow["laadittu"], "pitkä")." &raquo; $trow[laatija_nimi]";
 			if ($trow["korjattu"] != "") {
 				echo "<br>".tv1dateconv($trow["korjausaika"], "pitkä")." &raquo; $trow[korjattu_nimi]";
 			}
@@ -312,24 +312,24 @@
 
 	if ($viivatut == 'on') {
 		$viivatut = 'checked';
-		$colspan = '4';
+		$colspan = '3';
 	}
 	else {
 		$viivatut = '';
-		$colspan = '3';
+		$colspan = '2';
 	}
 
 	echo "<tr>";
 	echo "<td colspan='2'><font class='$class'>$yhtok</font></td>";
 	echo "<td align='right'><font class='$class'>". sprintf("%.02f", $yhtsum) . "</font></td>";
-	echo "<td></td>";
+	echo "<td colspan='2'></td>";
 	echo "<td colspan='$colspan'>";
 	echo "<form action = '$PHP_SELF#$tunnus' method='post'>";
 	echo "<input type='hidden' name='tee' value='E'>";
 	echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 	echo "<input type='hidden' name='tunnus' value = '$tunnus'>";
-	echo t('Näytä poistetut');
 	echo "<input type='checkbox' name='viivatut' onclick='submit();' $viivatut>";
+	echo t('Näytä poistetut');
 	echo "</form>";
 	echo "</td>";
 

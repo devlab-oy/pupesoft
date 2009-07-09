@@ -12,6 +12,9 @@
 	
 	echo "<font class='head'>".t("Tiliöintien muutos/selailu")."</font><hr>";
 
+	echo "Toistaiseksi pois käytöstä!";
+	exit;
+
 	if ((($tee == 'U') or ($tee == 'P') or ($tee == 'M') or ($tee == 'J')) and ($oikeurow['paivitys'] != 1)) {
 		echo "<b>".t("Yritit päivittää vaikka simulla ei ole siihen oikeuksia")."</b>";
 		exit;

@@ -2,41 +2,30 @@
 
 	// Annetaan mahdollisuus tehdä uusi tiliöinti, jos siihen on oikeus
 	require "alvpopup.inc";
-	
-	// Onko tosite liitetty keikkaan 
+
+	// Onko tosite liitetty keikkaan
 	$query = "SELECT laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";
 	$keikres = mysql_query($query) or pupe_error($query);
-	
+
 	if (mysql_num_rows($keikres) > 0) {
-		echo "<br><br><font class='message'>".t("Tiliöinnit lukittu koska lasku on liitetty keikkaan")."!</font>";
-	}
-	
-	echo "<br><br><table><tr>";
-	
-	// Selaajatarkista.php:n yhteydessä selite omalle riville
-	if (isset($seutunnus)) {
-		echo "<th>".t("Tili")."</th><th>".t("Tarkenne")."</th><th>".t("Summa")."</th><th>".t("Vero")."</th>";
-		if ($viivatut == 'on') echo "<th></th>";
-		echo "</tr><tr><th colspan='3'>".t("Tapvm/Selite")."</th>";
-	}
-	else {
-		echo "<th>".t("Tili")."</th><th>".t("Tarkenne")."</th><th>".t("Summa")."</th><th>".t("Vero")."</th><th>".t("Tapvm/Selite")."</th>";
+		echo "<br><br><font class='message'>".t("Lasku on liitetty keikkaan, alv tiliöintejä ei voi muuttaa")."!</font>";
 	}
 
+	echo "<br><br>";
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>".t("Tili")."</th>";
+	echo "<th>".t("Tarkenne")."</th>";
+	echo "<th>".t("Summa")."</th>";
+	echo "<th>".t("Vero")."</th>";
+	echo "<th>".t("Tapvm")." / ".t("Selite")."</th>";
 	if ($viivatut == 'on') {
-		echo "<th>Poistettu/Laadittu</th>";
+		echo "<th>".t("Laadittu")." / ".t("Poistettu")."</th>";
 	}
-
-	// Tämä toimii vain selaajatarkista.php:n yhteydessä
-	if (isset($seutunnus)) {
-		echo "<th><a href = '$PHP_SELF?tee=E&tunnus=$seutunnus&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut#$seutunnus'>>></a></th>";
-	}
-	else {
-		echo "<th></th>";
-	}
+	echo "<th></th>";
 	echo "</tr>";
 
-	if (mysql_num_rows($keikres) == 0  and $oikeurow['paivitys'] == 1 and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
+	if ($oikeurow['paivitys'] == 1 and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
 
 		if ($ok != 1) {
 			// Annetaan tyhjät tiedot, jos rivi oli virheetön
@@ -50,7 +39,7 @@
 			$selite = '';
 		}
 
-		$query = "SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
 					ORDER BY nimi";
@@ -59,14 +48,14 @@
 
 		while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
 			$valittu = "";
-			if ($kustannuspaikkarow[0] == $kustp) {
+			if ($kustannuspaikkarow["tunnus"] == $kustp) {
 				$valittu = "selected";
 			}
-			$ulos .= "<option value = '$kustannuspaikkarow[0]' $valittu>$kustannuspaikkarow[1]";
+			$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
 		}
 		$ulos .= "</select><br>";
 
-		$query = "SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
 					ORDER BY nimi";
@@ -75,26 +64,27 @@
 
 		while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
 			$valittu = "";
-			if ($kustannuspaikkarow[0] == $kohde) {
+			if ($kustannuspaikkarow["tunnus"] == $kohde) {
 				$valittu = "selected";
 			}
-			$ulos .= "<option value = '$kustannuspaikkarow[0]' $valittu>$kustannuspaikkarow[1]";
+			$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
 		}
 		$ulos .= "</select><br>";
 
-		$query = "SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi = 'P'
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$ulos .= "<select name = 'projekti' style='width: 200px'><option value = ' '>".t("Ei projektia");
 
 		while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
 			$valittu = "";
-			if ($kustannuspaikkarow[0] == $projekti) {
+			if ($kustannuspaikkarow["tunnus"] == $projekti) {
 				$valittu = "selected";
 			}
-			$ulos .= "<option value = '$kustannuspaikkarow[0]' $valittu>$kustannuspaikkarow[1]";
+			$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
 		}
 		$ulos .= "</select>";
 
@@ -116,32 +106,30 @@
 			echo "$tiliulos";
 		}
 
-		list($laspvm,$suopvm) = split(" / ",$laskunpvm);
-
 		// haetaan kaikki tiliöintien tapahtumapäivät plus unionilla tämä päivä mukaan
-		$query = "	(SELECT distinct(tapvm)
+		$query = "	(SELECT distinct(tapvm) pvm
 					FROM tiliointi
 					WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and korjattu = '' and tapvm >= '$yhtiorow[tilikausi_alku]')
 					UNION
-					(SELECT CURDATE())
+					(SELECT CURDATE() pvm)
 					UNION
-					(SELECT if('$laspvm' >= '$yhtiorow[tilikausi_alku]', '$laspvm', CURDATE()))
+					(SELECT if ('$trow[tapvm]' >= '$yhtiorow[tilikausi_alku]', '$trow[tapvm]', CURDATE()) pvm)
 					UNION
-					(SELECT mapvm FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus' and mapvm >= '$yhtiorow[tilikausi_alku]')";
+					(SELECT mapvm pvm FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus' and mapvm >= '$yhtiorow[tilikausi_alku]')";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 1) {
 			echo "<br>".t("Tapvm");
 			echo ": <select name = 'tiliointipvm'>";
 
-			while ($tiliointirow=mysql_fetch_array($result)) {
+			while ($tiliointirow = mysql_fetch_array($result)) {
 				$valittu = "";
 				$pselite = "";
-				if ($tiliointirow[0] == $tiliointipvm) $valittu = "selected";
-				if ($tiliointirow[0] == $laspvm) $pselite = t("Laskun pvm");
-				if ($tiliointirow[0] == $suopvm) $pselite = t("Suoritus pvm");
-				if ($tiliointirow[0] == date("Y-m-d")) $pselite = t("Tämä pvm");
-				echo "<option value = '$tiliointirow[0]' $valittu>$tiliointirow[0] $pselite</option>";
+				if ($tiliointirow["pvm"] == $tiliointipvm) $valittu = "selected";
+				if ($tiliointirow["pvm"] == $trow["tapvm"]) $pselite = t("Laskun pvm");
+				if ($tiliointirow["pvm"] == $trow["mapvm"]) $pselite = t("Suoritus pvm");
+				if ($tiliointirow["pvm"] == date("Y-m-d")) $pselite = t("Tämä pvm");
+				echo "<option value = '$tiliointirow[pvm]' $valittu>$tiliointirow[pvm] $pselite</option>";
 			}
 			echo "</select>";
 		}
@@ -149,11 +137,11 @@
 			$tiliointirow = mysql_fetch_array($result);
 
 			// tapahtumapäivä on vanhalla tilikaudella, ei anneta lisätä kun tälle päivälle
-			if (strtotime($tiliointirow[0]) < strtotime($yhtiorow['tilikausi_alku'])) {
-				$tiliointirow[0] = date("Y-m-d");
+			if (strtotime($tiliointirow["pvm"]) < strtotime($yhtiorow['tilikausi_alku'])) {
+				$tiliointirow["pvm"] = date("Y-m-d");
 			}
 
-			echo " ".t("Tapvm").": $tiliointirow[0]<input type='hidden' name='tiliointipvm' value ='$tiliointirow[0]'>";
+			echo " ".t("Tapvm").": $tiliointirow[pvm]<input type='hidden' name='tiliointipvm' value ='$tiliointirow[pvm]'>";
 		}
 		echo "</td>
 			<td>$ulos</td>
@@ -165,25 +153,22 @@
 			<input type='hidden' name='alv_tili' value = '$alv_tili'>
 			</td>";
 
-		// Jos alvit on hardkoodattu tileihin (hui, kauheaa, mutta joku niin tahtoo), niin salasanat.php:ssä
-		// on määritettävä $hardcoded_alv=1;
-		if ($hardcoded_alv != 1) {
-			echo "<td>".alv_popup('vero', $vero)."</td>";
+		// jos ollaan liitetty lasku keikkaan, ei anneta laittaa veroa
+		if (mysql_num_rows($keikres) == 0) {
+			// Jos alvit on hardkoodattu tileihin (hui, kauheaa, mutta joku niin tahtoo), niin salasanat.php:ssä
+			// on määritettävä $hardcoded_alv=1;
+			if ($hardcoded_alv != 1) {
+				echo "<td>".alv_popup('vero', $vero)."</td>";
+			}
+			else {
+				echo "<td></td>";
+			}
 		}
 		else {
-			echo "<td></td>";
+			echo "<td><input type='hidden' name='vero' value='0'>0 %</td>";
 		}
 
-
-		// Selaajatarkista.php:n yhteydessä selite omalle riville
-		if (isset($seutunnus)) {
-			if ($viivatut == 'on') echo "<td></td>";
-			echo "</tr><tr><td colspan='3'>";
-		}
-		else {
-			echo "<td>";
-		}
-
+		echo "<td>";
 		echo "<input type='text' name='selite' value = '$selite'>
 				<br>".t("Jaksota")."<input type='checkbox' name = 'jaksota'></td>";
 
@@ -196,31 +181,30 @@
 		$kentta = 'tili';
 	}
 
-	$lisa='';
-	$slisa='';
-
+	$lisa = '';
 	if ($viivatut != 'on') {
-		$lisa = " and tiliointi.korjattu=''";
-	}
-	else {
-		$slisa = ", if(tiliointi.korjattu='',concat_ws('@', tiliointi.laatija, tiliointi.laadittu),concat_ws('@', tiliointi.korjattu, tiliointi.korjausaika)) korjaus, tiliointi.korjattu poistettu";
+		$lisa = " and tiliointi.korjattu = ''";
 	}
 
-	$slAsa = "concat_ws('/',tiliointi.tilino,tili.nimi)";
-
-	if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
-		$slAsa = "concat_ws('/',if(tosite<>0,concat_ws('-',left(tosite,2), 1*right(tosite,6)), '".t('#NA')."'),tiliointi.tilino,tili.nimi)";
-	}
-
-	$query = "	SELECT lukko, tiliointi.tunnus, $slAsa, concat_ws('/', a.nimi, b.nimi, c.nimi),
-				tiliointi.summa, vero, concat_ws('/', tapvm, selite) selite
-				$slisa, tapvm, tiliointi.summa_valuutassa, tiliointi.valkoodi
+	$query = "	SELECT *,
+				concat_ws(' / ', a.nimi, b.nimi, c.nimi) tarkenne,
+				tili.nimi tilinimi,
+				tiliointi.selite selite,
+				tiliointi.laatija laatija,
+				tiliointi.laadittu laadittu,
+				tiliointi.tunnus tunnus,
+				la.nimi laatija_nimi,
+				ko.nimi korjattu_nimi
 				FROM tiliointi
 				LEFT JOIN tili ON tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
 				LEFT JOIN kustannuspaikka a ON a.yhtio = '$kukarow[yhtio]' and a.tunnus = tiliointi.kustp and a.tyyppi = 'K'
 				LEFT JOIN kustannuspaikka b ON b.yhtio = '$kukarow[yhtio]' and b.tunnus = tiliointi.kohde and b.tyyppi = 'O'
 				LEFT JOIN kustannuspaikka c ON c.yhtio = '$kukarow[yhtio]' and c.tunnus = tiliointi.projekti and c.tyyppi = 'P'
-				WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tiliointi.ltunnus = '$tunnus' $lisa
+				LEFT JOIN kuka la ON (la.yhtio = tiliointi.yhtio and la.kuka = tiliointi.laatija)
+				LEFT JOIN kuka ko ON (ko.yhtio = tiliointi.yhtio and ko.kuka = tiliointi.korjattu)
+				WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+				and tiliointi.ltunnus = '$tunnus'
+				$lisa
 				ORDER BY tiliointi.tapvm, tiliointi.tilino, tiliointi.tunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -231,66 +215,43 @@
 	$maara = mysql_num_rows($result);
 
 	while ($trow = mysql_fetch_array ($result)) {
-		//Taas näitä null-juttuja
-		if ($trow['korjattu'] == '@0000-00-00 00:00:00') $trow['korjattu'] = '';
-		if ($trow['korjattu'] == '0000-00-00 00:00:00') $trow['korjattu'] = '';
+
+		$class = "";
+		if ($trow["korjattu"] != '') {
+			$class = "tumma";
+		}
 
 		echo "<tr class='aktiivi'>";
-
-		if ($viivatut == 'on') {
-			$poistasarake = 4;
+		echo "<td class='$class'>$trow[tilino] &raquo; $trow[tilinimi]</td>";
+		echo "<td class='$class'>$trow[tarkenne]</td>";
+		echo "<td class='$class' align='right'>$trow[summa]</td>";
+		echo "<td class='$class' align='right'>". (float) $trow["vero"]. "</td>";
+		echo "<td class='$class'>&nbsp;".tv1dateconv($trow["tapvm"]);
+		if ($trow["selite"] != "") {
+	 		echo " &raquo; $trow[selite]";
 		}
-		else {
-			$poistasarake = 3;
+		if ($trow["summa_valuutassa"] != 0 and $trow["valkoodi"] != "" and $trow["valkoodi"] != $yhtiorow["valkoodi"]) {
+			echo " ($trow[summa_valuutassa] $trow[valkoodi])";
+		}
+		echo "</td>";
+
+		if ($viivatut == "on") {
+			echo "<td class='$class'>".tv1dateconv($trow["laadittu"], "pitkä")." &raquo; $trow[laatija_nimi]";
+			if ($trow["korjattu"] != "") {
+				echo "<br>".tv1dateconv($trow["korjausaika"], "pitkä")." &raquo; $trow[korjattu_nimi]";
+			}
+			echo "</td>";
 		}
 
-		for ($i=2; $i < mysql_num_fields($result)-$poistasarake; $i++) {
-
-			// Tämä toimii vain selaajatarkista.php:n yhteydessä
-			if (isset($seutunnus) and mysql_field_name($result,$i)=='selite') {
-				if ($viivatut == 'on' and $trow['poistettu'] != '') {
-					echo "<th></th></tr><tr class='aktiivi'><th colspan='3'>";
-				}
-				else {
-					echo "<td></td></tr><tr><td colspan='3'>";
-				}
-
-			}
-			else {
-				if ($viivatut == 'on' and $trow['poistettu'] != '') {
-					echo "<th>";
-				}
-				elseif (mysql_field_name($result,$i) == 'summa' or mysql_field_name($result,$i) == 'vero') {
-					echo "<td align='right'>";
-				}
-				else {
-					echo "<td>";
-				}
-			}
-
-
-			echo $trow[$i];
-			
-			if (mysql_field_name($result,$i) == 'selite' and $trow["summa_valuutassa"] != 0 and $trow["valkoodi"] != "" and $trow["valkoodi"] != $yhtiorow["valkoodi"]) {
-				echo " ($trow[summa_valuutassa] $trow[valkoodi])";
-			}
-
-			if ($viivatut == 'on' and $trow['poistettu'] != '') {
-				echo "</th>";
-			}
-			else {
-				echo "</td>";
-			}
-
-		}
 
 		$tilikausi_loppu = strtotime($yhtiorow['tilikausi_loppu']);
 		$tilikausi_alku = strtotime($yhtiorow['tilikausi_alku']);
 		$tiliointi_pvm = strtotime($trow['tapvm']);
 
-		if (mysql_num_rows($keikres) == 0  and ($tiliointi_pvm <= $tilikausi_loppu and $tiliointi_pvm >= $tilikausi_alku) and ($trow["lukko"] == "" or $kukarow["taso"] == 3) and $trow["poistettu"] == "" and $maara > 1 and $oikeurow["paivitys"] == 1 and ($kukarow["taso"] == 2 or $kukarow["taso"] == 3)) {
-			// Eli ei näytetä muuta-nappia, jos ei oikeuksia,
+		if ((mysql_num_rows($keikres) == 0 or $trow["vero"] == 0) and ($tiliointi_pvm <= $tilikausi_loppu and $tiliointi_pvm >= $tilikausi_alku) and ($trow["lukko"] == "" or $kukarow["taso"] == 3) and $trow["korjattu"] == "" and $maara > 1 and $oikeurow["paivitys"] == 1 and ($kukarow["taso"] == 2 or $kukarow["taso"] == 3)) {
+			//Eli ei näytetä muuta-nappia, jos ei oikeuksia,
 			//jos rivi on poistettu TAI se on tiliöinnin viimeinen TAI se on lukittu,
+			//jos lasku on liitetty keikkaan ja rivillä on veroa
 			//jos sen saa poistaa niin on hankalaa löytää heittävät tositteet...
 			echo "<td>
 					<form action = '$PHP_SELF#$tunnus' method='post'>
@@ -301,10 +262,9 @@
 					<input type='hidden' name='laji' value = '$laji'>
 					<input type='hidden' name='vv' value = '$vv'>
 					<input type='hidden' name='kk' value = '$kk'>
-					<input type='hidden' name='ptunnus' value = '$trow[1]'>
+					<input type='hidden' name='ptunnus' value = '$trow[tunnus]'>
 					<input type='Submit' value = '".t("Muuta")."'>
 					</td></tr></form>"; // Tuossa tarkkana
-
 		}
 		else {
 			if ($maara > 1) {
@@ -312,7 +272,7 @@
 				if (mysql_num_rows($keikres) != 0 or $trow['lukko'] != '' or $oikeurow['paivitys'] != 1 or ($kukarow["taso"] != 2 and $kukarow["taso"] != 3) or ($tiliointi_pvm > $tilikausi_loppu or $tiliointi_pvm < $tilikausi_alku)) {
 					echo "<td>";
 					//Rivi on poistettu
-					if ($trow['poistettu'] != '') {
+					if ($trow['korjattu'] != '') {
 						echo "<img src=pics/lullacons/mini-trash.png>";
 					}
 					else {
@@ -329,53 +289,35 @@
 			}
 		}
 
-		list($kala,$selite) = split("/", $trow['selite']);
-
-		if (strpos($trow['Tapvm/Selite'], "/") === FALSE) {
-			$selite="";
-		}
-
-		if ($trow['poistettu'] == '') {
+		if ($trow['korjattu'] == '') {
 			$yhtsum += $trow['summa']; //Riviä ei ole poistettu
 		}
 	}
 
-	$yhtok = "".t("Tiliöinti kesken")."...";
-	if (round($yhtsum,2) == 0) {
-		$yhtok = "".t("Tiliöinti ok")."!";
+	$yhtok = t("Tiliöinti kesken")."...";
+	$class = "error";
+	if (round($yhtsum, 2) == 0) {
+		$yhtok = t("Tiliöinti ok")."!";
+		$class = "ok";
 	}
 
-	if (isset($seutunnus)) {
-		echo "<tr><td>$yhtok</td><td></td><td>" . round($yhtsum,2) . "</td>";
-	}
-	else {
-		echo "<tr><td>$yhtok</td><td></td><td>";
-		if (round($yhtsum,2) == 0) {
-			echo abs(round($yhtsum,2));
-		}
-		else {
-			echo round($yhtsum,2);
-		}
-		echo "</td><td></td>";
-	}
-
-	echo "<td>";
-	// Tehdään boxi, jolla saadaan poistetut näkyviin
-	echo "<form action = '$PHP_SELF#$tunnus' method='post'><input type='hidden' name=tee value='E'>
-			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-			<input type='hidden' name=tunnus value = '$tunnus'>";
-
-	echo t('Näytä poistetut');
+	echo "<tr>";
+	echo "<td colspan='2'>$yhtok</td>";
+	echo "<td align='right'><font class='$class'>". sprintf("%.02f", $yhtsum) . "</font></td>";
+	echo "<td></td>";
+	echo "<td colspan='3'>";
+	echo "<form action = '$PHP_SELF#$tunnus' method='post'>";
+	echo "<input type='hidden' name='tee' value='E'>";
+	echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
+	echo "<input type='hidden' name='tunnus' value = '$tunnus'>";
 
 	if ($viivatut == 'on') $viivatut='checked';
 	else $viivatut='';
 
-	echo "<input type='checkbox' name='viivatut' onclick='submit();' $viivatut></form>";
+	echo t('Näytä poistetut');
+	echo "<input type='checkbox' name='viivatut' onclick='submit();' $viivatut>";
+	echo "</form>";
 	echo "</td>";
-
-	if ($viivatut != '') echo "<td></td>";
-
-	if (!isset($seutunnus)) echo "<td></td>";
 
 	echo "</tr>";
 
@@ -395,16 +337,22 @@
 				and nimi	= 'matkalasku.php'
 				and alanimi = 'SUPER'";
 	$oires = mysql_query($query) or pupe_error($query);
-	if(mysql_num_rows($oires) > 0) {
+
+	if (mysql_num_rows($oires) > 0) {
 		$su = "SUPER";
 	}
 	else {
 		$su = "";
 	}
 
-	$query = "select tunnus from toimi where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]' and laskun_erittely != ''";
+	$query = "	SELECT tunnus
+				FROM toimi
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tunnus = '$laskurow[liitostunnus]'
+				AND laskun_erittely != ''";
 	$toimires = mysql_query($query) or pupe_error($query);
-	if(mysql_num_rows($toimires)==1) {
+
+	if (mysql_num_rows($toimires)==1) {
 		echo "	<td class='back'><form action = 'matkalasku.php' method='get'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type='hidden' name = 'tilausnumero' value='$tunnus'>
@@ -416,7 +364,7 @@
 				</td>";
 	}
 
-	if($laskurow["tilaustyyppi"] == "M") {
+	if ($laskurow["tilaustyyppi"] == "M") {
 		echo "<td class='back'><form action = 'matkalasku.php' method='post'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type='hidden' name = 'tilausnumero' value='$tunnus'>

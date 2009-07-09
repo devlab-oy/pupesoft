@@ -618,9 +618,6 @@ if ($tee == 'E' or $tee == 'F') {
 		}
 	}
 
-	$laskuntila = $trow['tila'];
-	$laskunpvm  = $trow[11];
-
 	// Myyntilaskut
 	if ($trow['tila'] == 'U' or $trow['tila'] == 'L') {
 
@@ -904,6 +901,11 @@ if ($tee == 'E' or $tee == 'F') {
 
 		echo "<table>";
 
+		$laskutyyppi = $trow["tila"];
+		$alatila = $trow["alatila"];
+		require ("inc/laskutyyppi.inc");
+
+		echo "<tr><th>".t("Tila")."</th><td nowrap>$laskutyyppi $alatila</td></tr>";
 		echo "<tr><th>".t("Laatija")."</th><td nowrap>".tv1dateconv($trow["luontiaika"], "PITKÄ")." &raquo; $trow[laatija_nimi]</td></tr>";
 		echo "<tr><th>".t("Hyväksyjä1")."</th><td nowrap>".tv1dateconv($trow["h1time"], "PITKÄ")." &raquo; $trow[hyvak1_nimi]</td></tr>";
 		if ($trow["hyvak2"] != "") echo "<tr><th>".t("Hyväksyjä2")."</th><td nowrap>".tv1dateconv($trow["h2time"], "PITKÄ")." &raquo; $trow[hyvak2_nimi]</td></tr>";

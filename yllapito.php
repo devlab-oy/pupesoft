@@ -92,6 +92,9 @@
 	if ($_POST["toim"] == "tuote" and isset($aputuotteen_parametrit)) {
 		$t[$tuotteen_parametriti] = $aputuotteen_parametrit;
 	}
+	
+	// pikku javascripti
+	js_alasvetoMuutakoko();
 
 	$rajauslisa	= "";
 

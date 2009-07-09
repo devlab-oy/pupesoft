@@ -242,7 +242,7 @@
 		}
 
 		$ulos .= "<input type='text' name='$nimi' id='$nimi' value='$trow[$i]'>";
-		$ulos .= "<input type='button' name='etsi_vapasno' id='etsi_vapasno' value='".t("Etsi seuraava vapaa asiakasnumero")."' onClick='javascript:document.getElementById(\"etsi_vapasno\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapasno\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=asiakasnro&ohje=off&pointer=$i\", \"asiakasnumero_etsi\", false, false)'>";
+		$ulos .= "<input type='button' name='etsi_vapasno' id='etsi_vapasno' value='".t("Etsi vapaa asiakasnumero")."' onClick='javascript:document.getElementById(\"etsi_vapasno\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapasno\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=asiakasnro&ohje=off&pointer=$i\", \"asiakasnumero_etsi\", false, false)'>";
 		$ulos .= "</div>";
 		$ulos .= "</td>";
 		$jatko = 0;
@@ -255,7 +255,7 @@
 		$ulos .= "<input type='text' name='$nimi' id='$nimi' value='$trow[$i]'>";
 
 		if ($alias_set == "VAHITTAISMYYNTI" or $laji == "R") {
-			$ulos .= "<input type='button' name='etsi_vapytunnus' id='etsi_vapytunnus' value='".t("Etsi seuraava vapaa asiakasnumero")."' onClick='javascript:document.getElementById(\"etsi_vapytunnus\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapytunnus\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=ytunnus&ohje=off&pointer=$i\", \"ytunnus_etsi\", false, false)'>";
+			$ulos .= "<input type='button' name='etsi_vapytunnus' id='etsi_vapytunnus' value='".t("Etsi vapaa asiakasnumero")."' onClick='javascript:document.getElementById(\"etsi_vapytunnus\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapytunnus\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=ytunnus&ohje=off&pointer=$i\", \"ytunnus_etsi\", false, false)'>";
 		}
 
 		$ulos .= "</div>";
@@ -485,7 +485,7 @@
 					ORDER BY avainsana.jarjestys, avainsana.selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' id = '$nimi' Style=\"width: 300px;\" onmousedown=\"alasvetoMuutakoko('$nimi', 0);\" onblur=\"alasvetoMuutakoko('$nimi', 300);\">";
 
 		while($row = mysql_fetch_array($vresult)) {
 			$sel = "";
@@ -1037,7 +1037,7 @@
 	if (mysql_field_name($result, $i) == "lahetteen_jarjestys" or 
 		mysql_field_name($result, $i) == "laskun_jarjestys") {
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' id = '$nimi' Style=\"width: 300px;\" onmousedown=\"alasvetoMuutakoko('$nimi', 0);\" onblur=\"alasvetoMuutakoko('$nimi', 300);\">";
 
 		$sel = array();
 		$sel[$trow[$i]] = "selected";

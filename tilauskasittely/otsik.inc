@@ -5,6 +5,7 @@
 	
 	// toimehtoTarkenne javascript funktio
 	js_toimehtoTarkenne();
+	js_alasvetoMuutakoko();
 	
 	//t‰ss‰ joko tehd‰‰n uutta otsikkoa tai muutetaan olemassa olevaa
 	if ($tee == '' or $kopioitava_otsikko != 0) {
@@ -1552,7 +1553,7 @@
 						ORDER BY jarjestys, selite";
 			$tresult = mysql_query($query) or pupe_error($query);
 			
-			echo "<select id='toimitusehto' name='toimitusehto' Style='width: 55px; font-size: 8pt; padding: 0' onchange='toimehtoTarkenne(\"toimitusehto\");'>";
+			echo "<select id='toimitusehto' name='toimitusehto' Style='width: 60px;' onmousedown=\"alasvetoMuutakoko('toimitusehto', 0);\" onblur=\"alasvetoMuutakoko('toimitusehto', 60);\" onchange='toimehtoTarkenne(\"toimitusehto\");'>";
 			
 			$kasisel = "";
 			
@@ -1609,7 +1610,7 @@
 							ORDER BY jarjestys, selite";
 				$tresult = mysql_query($query) or pupe_error($query);
 
-				echo "<select id='toimitusehto2' name='toimitusehto2' Style='width: 55px; font-size: 8pt; padding: 0' onchange='toimehtoTarkenne(\"toimitusehto2\");'>";
+				echo "<select id='toimitusehto2' name='toimitusehto2' Style='width: 60px;' onmousedown=\"alasvetoMuutakoko('toimitusehto2', 0);\" onblur=\"alasvetoMuutakoko('toimitusehto2', 60);\" onchange='toimehtoTarkenne(\"toimitusehto2\");'>";
 				
 				$kasisel = "";
 

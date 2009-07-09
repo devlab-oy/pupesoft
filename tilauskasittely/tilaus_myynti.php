@@ -281,6 +281,9 @@ else {
 	$otsikko = t("Myyntitilaus");
 }
 
+// pikku javascripti
+js_alasvetoMuutakoko();
+
 //korjataan hintaa ja aleprossaa
 $hinta	= str_replace(',','.',$hinta);
 $ale 	= str_replace(',','.',$ale);
@@ -1931,7 +1934,7 @@ if ($tee == '') {
 
 		if ($laskurow["tunnusnippu"] > 0) {
 
-			echo "<td><select Style=\"width: 200px; font-size: 8pt; padding: 0\" name='valitsetoimitus' onchange='submit();'>";
+			echo "<td><select name='valitsetoimitus' id = 'valitsetoimitus' Style=\"width: 250px;\" onmousedown=\"alasvetoMuutakoko('valitsetoimitus', 0);\" onblur=\"alasvetoMuutakoko('valitsetoimitus', 250);\" onchange='submit();'>";
 
 			// Listataan kaikki toimitukset ja liitet‰‰n tarjous mukaan jos se tiedet‰‰n
 			$hakulisa = "";
@@ -2043,7 +2046,7 @@ if ($tee == '') {
 						ORDER BY avainsana.jarjestys, avainsana.selite";
 			$tresult = mysql_query($query) or pupe_error($query);
 
-			echo "<td><select name='tilausvahvistus' onchange='submit()' $state>";
+			echo "<td><select name='tilausvahvistus'  id = 'tilausvahvistus' Style=\"width: 250px;\" onmousedown=\"alasvetoMuutakoko('tilausvahvistus', 0);\" onblur=\"alasvetoMuutakoko('tilausvahvistus', 250);\" onchange='submit()' $state>";
 			echo "<option value=' '>".t("Ei Vahvistusta")."</option>";
 
 			while($row = mysql_fetch_array($tresult)) {

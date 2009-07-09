@@ -918,7 +918,7 @@ if ($tee == 'E' or $tee == 'F') {
 		if ($trow['maksajanpankkitili'] != '') echo "<tr><th>".t("Oma pankkitili")."</th><td>$trow[maksajanpankkitili] ($trow[maksajanpankkitilinro])</td></tr>";
 
 		// tehdään laskulinkit
-		echo "<tr><th nowrap>".t("Laskun litteet")."</th><td>".ebid($tunnus)."</td></tr>";
+		echo "<tr><th nowrap>".t("Liitteet")."</th><td>".ebid($tunnus)."</td></tr>";
 		echo "</table>";
 
 		// Lopetetaan oikea sarake

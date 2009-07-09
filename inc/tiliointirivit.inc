@@ -18,7 +18,9 @@
 	echo "<th>".t("Tarkenne")."</th>";
 	echo "<th>".t("Summa")."</th>";
 	echo "<th>".t("Vero")."</th>";
-	echo "<th>".t("Tapvm")." / ".t("Selite")."</th>";
+	echo "<th>".t("Tapvm")."</th>";
+	echo "<th>".t("Selite")."</th>";
+
 	if ($viivatut == 'on') {
 		echo "<th>".t("Laadittu")." / ".t("Poistettu")."</th>";
 	}
@@ -44,32 +46,38 @@
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
-		$ulos = "<select name = 'kustp' style='width: 200px'><option value = ' '>".t("Ei kustannuspaikkaa");
 
-		while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
-			$valittu = "";
-			if ($kustannuspaikkarow["tunnus"] == $kustp) {
-				$valittu = "selected";
+		if (mysql_num_rows($result) > 0) {
+			$ulos = "<select name = 'kustp' style='width: 140px'><option value = ' '>".t("Ei kustannuspaikkaa");
+
+			while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
+				$valittu = "";
+				if ($kustannuspaikkarow["tunnus"] == $kustp) {
+					$valittu = "selected";
+				}
+				$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
 			}
-			$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
+			$ulos .= "</select><br>";
 		}
-		$ulos .= "</select><br>";
 
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
-		$ulos .= "<select name = 'kohde' style='width: 200px'><option value = ' '>".t("Ei kohdetta");
 
-		while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
-			$valittu = "";
-			if ($kustannuspaikkarow["tunnus"] == $kohde) {
-				$valittu = "selected";
+		if (mysql_num_rows($result) > 0) {
+			$ulos .= "<select name = 'kohde' style='width: 140px'><option value = ' '>".t("Ei kohdetta");
+
+			while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
+				$valittu = "";
+				if ($kustannuspaikkarow["tunnus"] == $kohde) {
+					$valittu = "selected";
+				}
+				$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
 			}
-			$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
+			$ulos .= "</select><br>";
 		}
-		$ulos .= "</select><br>";
 
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -77,16 +85,19 @@
 					and tyyppi = 'P'
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
-		$ulos .= "<select name = 'projekti' style='width: 200px'><option value = ' '>".t("Ei projektia");
 
-		while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
-			$valittu = "";
-			if ($kustannuspaikkarow["tunnus"] == $projekti) {
-				$valittu = "selected";
+		if (mysql_num_rows($result) > 0) {
+			$ulos .= "<select name = 'projekti' style='width: 140px'><option value = ' '>".t("Ei projektia");
+
+			while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
+				$valittu = "";
+				if ($kustannuspaikkarow["tunnus"] == $projekti) {
+					$valittu = "selected";
+				}
+				$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
 			}
-			$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
+			$ulos .= "</select>";
 		}
-		$ulos .= "</select>";
 
 		echo "<tr>
 				<td><form name = 'uusi' action = '$PHP_SELF#$tunnus' method='post'>
@@ -100,49 +111,12 @@
 				<input type='hidden' name='kk' value = '$kk'>";
 
 		if ($tiliulos == '') {
-			echo "<input type='text' name='tili' value = '$tili' size='8'>";
+			echo "<input type='text' name='tili' value = '$tili' size='12'>";
 		}
 		else {
 			echo "$tiliulos";
 		}
 
-		// haetaan kaikki tiliöintien tapahtumapäivät plus unionilla tämä päivä mukaan
-		$query = "	(SELECT distinct(tapvm) pvm
-					FROM tiliointi
-					WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and korjattu = '' and tapvm >= '$yhtiorow[tilikausi_alku]')
-					UNION
-					(SELECT CURDATE() pvm)
-					UNION
-					(SELECT if ('$trow[tapvm]' >= '$yhtiorow[tilikausi_alku]', '$trow[tapvm]', CURDATE()) pvm)
-					UNION
-					(SELECT mapvm pvm FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus' and mapvm >= '$yhtiorow[tilikausi_alku]')";
-		$result = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($result) > 1) {
-			echo "<br>".t("Tapvm");
-			echo ": <select name = 'tiliointipvm'>";
-
-			while ($tiliointirow = mysql_fetch_array($result)) {
-				$valittu = "";
-				$pselite = "";
-				if ($tiliointirow["pvm"] == $tiliointipvm) $valittu = "selected";
-				if ($tiliointirow["pvm"] == $trow["tapvm"]) $pselite = t("Laskun pvm");
-				if ($tiliointirow["pvm"] == $trow["mapvm"]) $pselite = t("Suoritus pvm");
-				if ($tiliointirow["pvm"] == date("Y-m-d")) $pselite = t("Tämä pvm");
-				echo "<option value = '$tiliointirow[pvm]' $valittu>$tiliointirow[pvm] $pselite</option>";
-			}
-			echo "</select>";
-		}
-		else {
-			$tiliointirow = mysql_fetch_array($result);
-
-			// tapahtumapäivä on vanhalla tilikaudella, ei anneta lisätä kun tälle päivälle
-			if (strtotime($tiliointirow["pvm"]) < strtotime($yhtiorow['tilikausi_alku'])) {
-				$tiliointirow["pvm"] = date("Y-m-d");
-			}
-
-			echo " ".t("Tapvm").": $tiliointirow[pvm]<input type='hidden' name='tiliointipvm' value ='$tiliointirow[pvm]'>";
-		}
 		echo "</td>
 			<td>$ulos</td>
 			<td>
@@ -165,18 +139,55 @@
 			}
 		}
 		else {
-			echo "<td><input type='hidden' name='vero' value='0'>0 %</td>";
+			echo "<td><input type='hidden' name='vero' value='0'>0</td>";
 		}
 
 		echo "<td>";
-		echo "<input type='text' name='selite' value = '$selite'>
-				<br>".t("Jaksota")."<input type='checkbox' name = 'jaksota'></td>";
+		// haetaan kaikki tiliöintien tapahtumapäivät plus unionilla tämä päivä mukaan
+		$query = "	(SELECT distinct(tapvm) pvm
+					FROM tiliointi
+					WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and korjattu = '' and tapvm >= '$yhtiorow[tilikausi_alku]')
+					UNION
+					(SELECT CURDATE() pvm)
+					UNION
+					(SELECT if ('$trow[tapvm]' >= '$yhtiorow[tilikausi_alku]', '$trow[tapvm]', CURDATE()) pvm)
+					UNION
+					(SELECT mapvm pvm FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus' and mapvm >= '$yhtiorow[tilikausi_alku]')";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) > 1) {
+			echo "<select name = 'tiliointipvm'>";
+			while ($tiliointirow = mysql_fetch_array($result)) {
+				$valittu = "";
+				if ($tiliointirow["pvm"] == $tiliointipvm) $valittu = "selected";
+				echo "<option value = '$tiliointirow[pvm]' $valittu>".tv1dateconv($tiliointirow["pvm"])."</option>";
+			}
+			echo "</select>";
+		}
+		else {
+			$tiliointirow = mysql_fetch_array($result);
+			// tapahtumapäivä on vanhalla tilikaudella, ei anneta lisätä kun tälle päivälle
+			if (strtotime($tiliointirow["pvm"]) < strtotime($yhtiorow['tilikausi_alku'])) {
+				$tiliointirow["pvm"] = date("Y-m-d");
+			}
+			echo tv1dateconv($tiliointirow["pvm"])."<input type='hidden' name='tiliointipvm' value ='$tiliointirow[pvm]'>";
+		}
+		echo "</td>";
+
+		echo "<td>";
+		echo "<input type='text' name='selite' value = '$selite'>";
+		echo "</td>";
 
 		if ($viivatut == 'on') {
 			echo "<td></td>";
 		}
 
-		echo "<td><font class='error'>$virhe</font><input type='Submit' value = '".t("Lisää")."'></td></form></tr>";
+		if ($virhe != "") $virhe .= "<br>";
+
+		echo "<td><input type='Submit' value = '".t("Lisää")."'></td>";
+		echo "<td class='back' nowrap><font class='error'>$virhe</font><input type='checkbox' name = 'jaksota'>".t("Jaksota")."</td>";
+		echo "</tr>";
+		echo "</form>";
 		$formi = 'uusi';
 		$kentta = 'tili';
 	}
@@ -222,14 +233,12 @@
 		}
 
 		echo "<tr class='aktiivi'>";
-		echo "<td class='$class'>$trow[tilino] &raquo; $trow[tilinimi]</td>";
+		echo "<td class='$class' nowrap>$trow[tilino] &raquo; $trow[tilinimi]</td>";
 		echo "<td class='$class'>$trow[tarkenne]</td>";
-		echo "<td class='$class' align='right'>$trow[summa]</td>";
+		echo "<td class='$class' align='right' nowrap>$trow[summa]</td>";
 		echo "<td class='$class' align='right'>". (float) $trow["vero"]. "</td>";
-		echo "<td class='$class'>&nbsp;".tv1dateconv($trow["tapvm"]);
-		if ($trow["selite"] != "") {
-	 		echo " &raquo; $trow[selite]";
-		}
+		echo "<td class='$class'>".tv1dateconv($trow["tapvm"])."</td>";
+		echo "<td class='$class'>$trow[selite]";
 		if ($trow["summa_valuutassa"] != 0 and $trow["valkoodi"] != "" and $trow["valkoodi"] != $yhtiorow["valkoodi"]) {
 			echo " ($trow[summa_valuutassa] $trow[valkoodi])";
 		}
@@ -270,7 +279,7 @@
 			if ($maara > 1) {
 
 				if (mysql_num_rows($keikres) != 0 or $trow['lukko'] != '' or $oikeurow['paivitys'] != 1 or ($kukarow["taso"] != 2 and $kukarow["taso"] != 3) or ($tiliointi_pvm > $tilikausi_loppu or $tiliointi_pvm < $tilikausi_alku)) {
-					echo "<td>";
+					echo "<td class='$class'>";
 					//Rivi on poistettu
 					if ($trow['korjattu'] != '') {
 						echo "<img src=pics/lullacons/mini-trash.png>";
@@ -281,11 +290,11 @@
 					echo "</td></tr>";
 				}
 				else {
-					echo "<td><img src=pics/lullacons/mini-trash.png></td></tr>";
+					echo "<td class='$class'><img src=pics/lullacons/mini-trash.png></td></tr>";
 				}
 			}
 			else {
-				echo "<td>".t("Viimeinen")."</td></tr>";
+				echo "<td class='$class'>".t("Viimeinen")."</td></tr>";
 			}
 		}
 
@@ -294,26 +303,31 @@
 		}
 	}
 
-	$yhtok = t("Tiliöinti kesken")."...";
+	$yhtok = t("Tiliöinti kesken");
 	$class = "error";
 	if (round($yhtsum, 2) == 0) {
-		$yhtok = t("Tiliöinti ok")."!";
+		$yhtok = t("Tiliöinti ok");
 		$class = "ok";
 	}
 
+	if ($viivatut == 'on') {
+		$viivatut = 'checked';
+		$colspan = '4';
+	}
+	else {
+		$viivatut = '';
+		$colspan = '3';
+	}
+
 	echo "<tr>";
-	echo "<td colspan='2'>$yhtok</td>";
+	echo "<td colspan='2'><font class='$class'>$yhtok</font></td>";
 	echo "<td align='right'><font class='$class'>". sprintf("%.02f", $yhtsum) . "</font></td>";
 	echo "<td></td>";
-	echo "<td colspan='3'>";
+	echo "<td colspan='$colspan'>";
 	echo "<form action = '$PHP_SELF#$tunnus' method='post'>";
 	echo "<input type='hidden' name='tee' value='E'>";
 	echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 	echo "<input type='hidden' name='tunnus' value = '$tunnus'>";
-
-	if ($viivatut == 'on') $viivatut='checked';
-	else $viivatut='';
-
 	echo t('Näytä poistetut');
 	echo "<input type='checkbox' name='viivatut' onclick='submit();' $viivatut>";
 	echo "</form>";

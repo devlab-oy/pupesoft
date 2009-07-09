@@ -4469,6 +4469,32 @@ function show(layer_ref, type) {
 	}
 }
 
+if (!function_exists("js_alasvetoMuutakoko")) {
+	function js_alasvetoMuutakoko() {
+?>
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+<!--
+function alasvetoMuutakoko(alasveto, leveys) {
+	
+	var browser=navigator.appName.toUpperCase();
+	
+	var loytyyko = browser.indexOf("EXPLORER");
+	
+	if (loytyyko >= 0) {
+		if (leveys > 0) {
+			document.getElementById(alasveto).style.width=leveys;
+		}
+		else {
+			document.getElementById(alasveto).style.width='auto';
+		}
+	}
+}
+//-->
+</script>
+<?php
+	}
+}
+
 if (!function_exists("js_toimehtoTarkenne")) {
 	function js_toimehtoTarkenne() {
 ?>

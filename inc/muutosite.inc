@@ -837,6 +837,7 @@ if ($tila == '') {
 	else {
 		if (($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) and ($kukarow['taso'] !=1 )) {
 			$pvm = erottele($trow['tapvm']);
+			
 			echo "<form action = '$PHP_SELF' method='post'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name='tila' value='P'>
@@ -850,10 +851,10 @@ if ($tila == '') {
 		}
 
 		// Lasku on maksamatta tai suoraveloitus
-		if (($trow['tila'] < 'N') or ($trow['suoraveloitus']!='')) {
+		if ($trow['tila'] < 'N' or $trow['suoraveloitus']!='') {
 
 			// ei myyntitilaus
-			if  ($trow['tila'] != 'L' and $trow['tila'] != 'U' and mysql_num_rows($keikres) == 0) {
+			if ($trow['tila'] != 'L' and $trow['tila'] != 'U' and mysql_num_rows($keikres) == 0) {
 
 				if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
 					echo "<form action = '$PHP_SELF' method='post'>
@@ -863,10 +864,12 @@ if ($tila == '') {
 						<input type = 'hidden' name='tunnus' value='$tunnus'>
 						<tr><th>".t("Muuta summa")."</th><td><input type = 'text' name = 'summa' value='$trow[summa]'>
 						<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
-				}
-
+				}				
+			}
+			elseif ($trow['tila'] != 'L' and $trow['tila'] != 'U') {
+				
 				$pvm = erottele($trow['kapvm']);
-
+				
 				echo "<form action = '$PHP_SELF' method='post'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 						<input type = 'hidden' name='tila' value='C'>

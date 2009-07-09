@@ -1439,55 +1439,56 @@ if ($tila == '') {
 
 	echo "<br>";
 	
-
 	echo "<table>";
 	echo "<tr>";
-
-	echo "<td class='back'><input type='button' onclick='submit_tallenna();' value='".t("Tallenna muutokset")."'></td>";
-	echo "<td class='back'><input type='button' onclick='submit_kohd_kaikki();' value='".t("Kohdista kaikki rivit")."'></td>";
-	echo "<td class='back'><input type='button' onclick='submit_kohd_eimit();' value='".t("Poista kaikki kohdistukset")."'></td>";
-
+	echo "<td class='back'><input type='submit' value='".t("Tallenna muutokset")."'></td>";
+	echo "<td class='back'><input type='submit' name='kohdista_koko_sivu'  value='".t("Kohdista kaikki rivit")."'></td>";
+	echo "<td class='back'><input type='submit' name='ala_kohdista_mitaan' value='".t("Poista kaikki kohdistukset")."'></td>";
 	echo "</form>";
 
+	echo "<td class='back'>
+			<form action='$PHP_SELF' method='post'>
+			<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+			<input type='hidden' name='toiminto' value='kohdista'>
+			<input type='hidden' name='tila' value='uusirivi'>
+			<input type='hidden' name='tee' value='K'>
+			<input type='hidden' name='alku' value='$alku'>
+			<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>
+			<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>
+			<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>
+			$hiddenit
+			<input type='hidden' name='ojarj' value=\"$ojarj\">
+			<input type='hidden' name='otunnus' value='$otunnus'>
+			<input type='submit' value='".t("Tee uusi rivi")."'>
+			</form>
+			</td>";
 
-	echo "<form action='$PHP_SELF' method='post'>";
-	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-	echo "<input type='hidden' name='toiminto' value='kohdista'>";
-	echo "<input type='hidden' name='tila' value='uusirivi'>";
-	echo "<input type='hidden' name='tee' value='K'>";
-	echo "<input type='hidden' name='alku' value='$alku'>";
-	echo "<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>";
-	echo "<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>";
-	echo "<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>";
-	echo $hiddenit;
-	echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
-	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
-	echo "<td class='back'><input type='submit' value='".t("Tee uusi rivi")."'></td></form>";
-	
-	//n‰ytet‰‰n mitk‰ n‰ytet‰‰n
-	echo "<form action='$PHP_SELF' name='formi' method='post'>";
-	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-	echo "<input type='hidden' name='toiminto' value='kohdista'>";
-	echo "<input type='hidden' name='alku' value='$alku'>";
-	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
-	echo "<input type='hidden' name='tee' value='$tee'>";
-	echo "<input type='hidden' name='tila' value='FAILISTA'>";
-	echo $hiddenit;
-	echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
-	//echo "<th>".t("Kohdista tiedostosta").":</th><td><input type='submit' value='".t("Tee se")."'></td></tr>";
-	echo "<td class='back' colspan='2' align='right'><input type='submit' value='".t("Kohdista tiedostosta")."'></td>";
-	echo "</form>";
+	echo "<td class='back' colspan='2' align='right'>
+			<form action='$PHP_SELF' name='formi' method='post'>
+			<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+			<input type='hidden' name='toiminto' value='kohdista'>
+			<input type='hidden' name='alku' value='$alku'>
+			<input type='hidden' name='otunnus' value='$otunnus'>
+			<input type='hidden' name='tee' value='$tee'>
+			<input type='hidden' name='tila' value='FAILISTA'>
+			$hiddenit
+			<input type='hidden' name='ojarj' value=\"$ojarj\">
+			<input type='submit' value='".t("Kohdista tiedostosta")."'>
+			</form>
+			</td>";
 
-	echo "<form action='$PHP_SELF' method='post'>";
-	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-	echo "<input type='hidden' name='toiminto' value='kohdista'>";
-	echo "<input type='hidden' name='laskunsumma' value='$laskunsumma'>";
-	echo "<input type='hidden' name='tee' value='K'>";
-	echo "<input type='hidden' name='tila' value='valmis'>";
-	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
-	echo "<td class='back'><input type='submit' value='".t("Kohdistus valmis")."'></td></form>";
+	echo "<td class='back'><input type='submit' value='".t("Kohdistus valmis")."'>
+			<form action='$PHP_SELF' method='post'>
+			<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+			<input type='hidden' name='toiminto' value='kohdista'>
+			<input type='hidden' name='laskunsumma' value='$laskunsumma'>
+			<input type='hidden' name='tee' value='K'>
+			<input type='hidden' name='tila' value='valmis'>
+			<input type='hidden' name='otunnus' value='$otunnus'>
+			</form>
+			</td>";
 
-	$tila="eityhja";
+	$tila = "eityhja";
 
 	echo "</tr></table>";
 }

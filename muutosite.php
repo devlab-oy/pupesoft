@@ -565,7 +565,9 @@ if ($tee == 'E' or $tee == 'F') {
 				ifnull(h3.nimi, lasku.hyvak3) hyvak3_nimi,
 				ifnull(h4.nimi, lasku.hyvak4) hyvak4_nimi,
 				ifnull(h5.nimi, lasku.hyvak5) hyvak5_nimi,
-				ifnull(ma.nimi, lasku.maksaja) maksaja_nimi
+				ifnull(ma.nimi, lasku.maksaja) maksaja_nimi,
+				yriti.nimi maksajanpankkitili,
+				yriti.tilino maksajanpankkitilinro
 				FROM lasku
 				LEFT JOIN yriti ON (lasku.yhtio = yriti.yhtio and maksu_tili = yriti.tunnus)
 				LEFT JOIN kuka la ON (lasku.yhtio = la.yhtio and lasku.laatija = la.kuka)
@@ -634,7 +636,7 @@ if ($tee == 'E' or $tee == 'F') {
 		if ($trow["osoitetark"] != "") echo "<tr><th>".t("Osoitetark")."</th><td>$trow[osoitetark]</td></tr>";
 		echo "<tr><th>".t("Postino")."</th><td>$trow[postino], $trow[postitp], $trow[maa]</td></tr>";
 
-		if ($trow["toim_nimi"] != $trow["nimi"] or $trow["toim_nimitark"] != $trow["nimitark"] or $trow["toim_osoite"] != $trow["osoite"]) {
+		if (($trow["toim_nimi"] != $trow["nimi"] or $trow["toim_nimitark"] != $trow["nimitark"] or $trow["toim_osoite"] != $trow["osoite"]) and ($trow["toim_nimi"] != "" or $trow["toim_nimitark"] != "" or $trow["toim_osoite"] != "")) {
 			echo "<tr><td><br></td></tr>";
 			echo "<tr><th>".t("Toim_nimi")."</th><td>$trow[toim_nimi]</td></tr>";
 			if ($trow["toim_nimitark"] != "") echo "<tr><th>".t("Toim_nimitark")."</th><td>$trow[toim_nimitark]</td></tr>";
@@ -664,7 +666,7 @@ if ($tee == 'E' or $tee == 'F') {
 
 		echo "<table>";
 
-		echo "<tr><th>".t("Laatija")."</th><td nowrap>".tv1dateconv($trow["luontiaika"], "PITKÄ")." $trow[laatija_nimi]</td></tr>";
+		echo "<tr><th>".t("Laatija")."</th><td nowrap>".tv1dateconv($trow["luontiaika"], "PITKÄ")." &raquo; $trow[laatija_nimi]</td></tr>";
 
 		// Onko laskua karhuttu?
 		$karhu_query = "	SELECT liitostunnus
@@ -709,7 +711,7 @@ if ($tee == 'E' or $tee == 'F') {
 			}
 		}
 
-		echo "<tr><th>".t("Maksutieto")."</th><td>".wordwrap($trow["viite"]." ".$trow["viesti"]." ".$trow["sisviesti1"], 50, "<br>")."</td></tr>";
+		echo "<tr><th>".t("Maksutieto")."</th><td>".wordwrap($trow["viite"]." ".$trow["viesti"]." ".$trow["sisviesti1"], 45, "<br>")."</td></tr>";
 
 
 		// katsotaan onko tästä laskusta tehty korkolasku
@@ -774,6 +776,13 @@ if ($tee == 'E' or $tee == 'F') {
 			echo "</td></tr>";
 		}
 
+		// tehdään laskulinkki
+		echo "<tr><th>".t("Laskun kuva")."</th><td>".ebid($tunnus)."</td></tr>";
+		echo "</table>";
+
+		// Lopetaaan oikea sarake
+		echo "</td></tr>";
+
 		$query = "	SELECT fakta
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus='$trow[liitostunnus]'";
@@ -781,15 +790,10 @@ if ($tee == 'E' or $tee == 'F') {
 		$faktarow = mysql_fetch_assoc($faktares);
 
 		if (trim($faktarow["fakta"]) != "") {
-			echo "<tr><th>".t("Fakta")."</th><td>".wordwrap($faktarow["fakta"], 50, "<br>")."</td></tr>";
+			echo "<tr><th colspan='3'>".t("Fakta")."</th></tr>";
+			echo "<tr><td colspan='3'>".wordwrap($faktarow["fakta"], 120, "<br>")."</td></tr>";
 		}
 
-		// tehdään laskulinkki
-		echo "<tr><th>".t("Laskun kuva")."</th><td>".ebid($tunnus)."</td></tr>";
-		echo "</table>";
-
-		// Lopetaaan oikea sarake
-		echo "</td></tr>";
 		// Lopetaaan koko table
 		echo "</table>";
 
@@ -821,16 +825,14 @@ if ($tee == 'E' or $tee == 'F') {
 		//Ulkomaan ostolaskuille
 		if (strtoupper($trow["maa"]) != 'FI') {
 			echo "<tr><th>".t("Tilinumero")."</th><td>$trow[ultilno]</td></tr>";
-			echo "<tr><th>".t("Pankkitieto")."</th><td>$trow[pankki2]</td></tr>";
-			echo "<tr><th>".t("Pankkitieto")."</th><td>$trow[pankki3]</td></tr>";
-			echo "<tr><th>".t("Swift")."</th><td>$trow[swift]</td></tr>";
+			if ($trow["pankki2"] != "") echo "<tr><th>".t("Pankkitieto")."</th><td>$trow[pankki2]</td></tr>";
+			if ($trow["pankki3"] != "") echo "<tr><th>".t("Pankkitieto")."</th><td>$trow[pankki3]</td></tr>";
+			if ($trow["swift"] != "") echo "<tr><th>".t("Swift")."</th><td>$trow[swift]</td></tr>";
 		}
 		else {
 			echo "<tr><th>".t("Tilinumero")."</th><td>$trow[tilinumero]</td></tr>";
 		}
-
-		if ($trow['maksajanpankkitili'] != '') echo "<tr><th>".t("Oma pankkitili")."</th><td>$trow[maksajanpankkitili]</td></tr>";
-		echo "<tr><th>".t("Maksutieto")."</th><td>".wordwrap($trow["viite"]." ".$trow["viesti"]." ".$trow["sisviesti1"], 50, "<br>")."</td></tr>";
+		echo "<tr><th>".t("Maksutieto")."</th><td>".wordwrap($trow["viite"]." ".$trow["viesti"]." ".$trow["sisviesti1"], 40, "<br>")."</td></tr>";
 
 		echo "</table>";
 
@@ -843,10 +845,10 @@ if ($tee == 'E' or $tee == 'F') {
 			if ($kurssi == 0) $kurssi = $trow["vienti_kurssi"];
 
 			echo "<table>";
-			echo "<tr><th>".t("Tapvm")."</th><td>".tv1dateconv($trow["tapvm"])."</td></tr>";
-			echo "<tr><th>".t("Eräpvm")."</th><td>".tv1dateconv($trow["erpcm"])."</td></tr>";
-			echo "<tr><th>".t("Olmapvm")."</th><td>".tv1dateconv($trow["olmapvm"])."</td></tr>";
-			echo "<tr><th>".t("Mapvm")."</th><td>".tv1dateconv($trow["mapvm"])."</td></tr>";
+			echo "<tr><th>".t("Tapvm")."</th><td align='right'>".tv1dateconv($trow["tapvm"])."</td></tr>";
+			echo "<tr><th>".t("Eräpvm")."</th><td align='right'>".tv1dateconv($trow["erpcm"])."</td></tr>";
+			echo "<tr><th>".t("Olmapvm")."</th><td align='right'>".tv1dateconv($trow["olmapvm"])."</td></tr>";
+			echo "<tr><th>".t("Mapvm")."</th><td align='right'>".tv1dateconv($trow["mapvm"])."</td></tr>";
 			echo "<tr><th nowrap>".t("Summa")." $trow[valkoodi]</th><td align='right'><strong>$trow[summa]</strong></td></tr>";
 			if ($trow["kasumma"] != 0) echo "<tr><th nowrap>".t("Kassa-ale")." $trow[valkoodi]</th><td align='right'>$trow[kasumma]</td></tr>";
 			if ($trow["valkoodi"] != $yhtiorow["valkoodi"]) {
@@ -913,9 +915,14 @@ if ($tee == 'E' or $tee == 'F') {
 		if ($trow["hyvak4"] != "") echo "<tr><th>".t("Hyväksyjä4")."</th><td nowrap>".tv1dateconv($trow["h4time"], "PITKÄ")." &raquo; $trow[hyvak4_nimi]</td></tr>";
 		if ($trow["hyvak5"] != "") echo "<tr><th>".t("Hyväksyjä5")."</th><td nowrap>".tv1dateconv($trow["h5time"], "PITKÄ")." &raquo; $trow[hyvak5_nimi]</td></tr>";
 		echo "<tr><th>".t("Poimittu")."</th><td nowrap>".tv1dateconv($trow["maksuaika"], "PITKÄ", "")." &raquo; $trow[maksaja_nimi]</td></tr>";
+		if ($trow['maksajanpankkitili'] != '') echo "<tr><th>".t("Oma pankkitili")."</th><td>$trow[maksajanpankkitili] ($trow[maksajanpankkitilinro])</td></tr>";
 
 		// tehdään laskulinkit
 		echo "<tr><th nowrap>".t("Laskun litteet")."</th><td>".ebid($tunnus)."</td></tr>";
+		echo "</table>";
+
+		// Lopetetaan oikea sarake
+		echo "</td></tr>";
 
 		$query = "	SELECT fakta
 					FROM toimi
@@ -924,14 +931,9 @@ if ($tee == 'E' or $tee == 'F') {
 		$faktarow = mysql_fetch_assoc($faktares);
 
 		if (trim($faktarow["fakta"]) != "") {
-			echo "<tr><th>".t("Fakta")."</th><td>".wordwrap($faktarow["fakta"], 50, "<br>")."</td></tr>";
+			echo "<tr><th colspan='3'>".t("Fakta")."</th></tr>";
+			echo "<tr><td colspan='3'>".wordwrap($faktarow["fakta"], 120, "<br>")."</td></tr>";
 		}
-
-		echo "</table>";
-
-
-		// Lopetetaan oikea sarake
-		echo "</td></tr>";
 
 		// Lopetetaan koko otsikko
 		echo "</table>";

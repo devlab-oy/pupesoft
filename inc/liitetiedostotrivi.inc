@@ -7,7 +7,7 @@
 	if ($i == 0) { //yhtiötä ei näytetä
 		$tyyppi = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "filename" or
 		mysql_field_name($result, $i) == "filesize" or
 		mysql_field_name($result, $i) == "filetype" or
@@ -17,25 +17,25 @@
 		mysql_field_name($result, $i) == "image_channels") {
 		$tyyppi = 2;
 	}
-	
-	if (mysql_field_name($result, $i) == "liitos") {		
+
+	if (mysql_field_name($result, $i) == "liitos") {
 		$tyyppi = 4;
-			
+
 		if ($lukitse_laji != "") {
 			$ulos = "<input type='hidden' name='$nimi' value='$lukitse_laji'>";
 			$jatko = 0;
 		}
 	}
-	
+
 	if (mysql_field_name($result, $i) == "liitostunnus") {
 		$tyyppi = 4;
-			
+
 		if ($lukitse_avaimeen != "") {
 			$ulos = "<input type='hidden' name='$nimi' value='$lukitse_avaimeen'>";
 			$jatko = 0;
-		}		
+		}
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kieli") {
 
 			$ulos = "<td><select name='$nimi'>";
@@ -69,18 +69,18 @@
 
 			$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kayttotarkoitus") {
 
 			$ulos = "<td><select name='$nimi'>";
 			$sel  = "";
-			
-			if ($lukitse_laji == "tuote") {			
+
+			if ($lukitse_laji == "tuote") {
 				$query = "	SELECT selite, selitetark
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]' and laji = 'LITETY'
 							ORDER BY jarjestys, selite";
-				$kires = mysql_query($query) or pupe_error($query);	
+				$kires = mysql_query($query) or pupe_error($query);
 			}
 			elseif($lukitse_laji == "lasku" and !in_array($lasrow['tila'], array("H","Y","M","P","Q","X"))) {
 				$liitemuok_ok = true;
@@ -92,8 +92,8 @@
 							ORDER BY selitetark_2 DESC, jarjestys, selite";
 				$kires = mysql_query($query) or pupe_error($query);
 			}
-		
-			if (is_resource($kires)) { 
+
+			if (is_resource($kires)) {
 				while ($kirow = mysql_fetch_array($kires)) {
 					if ($kirow["selite"] == $trow[$i]) $select='SELECTED';
 					else $select = '';
@@ -104,32 +104,32 @@
 			else {
 				$ulos .= "<option value= ''>".t("Yleinen")."</option>";
 			}
-			
+
 			$ulos .= "</select></td>";
 			$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "filesize" and $tunnus != "") {
 		$ulos = "<td>".size_readable($trow[$i])."</td>";
-		$jatko = 0;		
+		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "data") {
-		
+
 		$path_parts = pathinfo($trow['filename']);
 		$ext = $path_parts['extension'];
-		
+
 		if (strtoupper($ext) == "JPEG" or strtoupper($ext) == "JPG" or strtoupper($ext) == "GIF" or strtoupper($ext) == "PNG") {
 			$ulos = "<td><a href='view.php?id=$trow[tunnus]' target='Attachment'><img src='view.php?id=$trow[tunnus]' height='80px'></a>";
 		}
 		else {
 			$ulos = "<td><a href='view.php?id=$trow[tunnus]' target='Attachment'>$trow[filename]</a>";
 		}
-		
-		if ($uusilukko == "" and $poistolukko == "") {
+
+		if ($uusilukko == "" and ($poistolukko == "" or $tunnus == "")) {
 			$ulos .= "<input type = 'file' name = 'liite_data'></td>";
 		}
-		
+
 		$jatko = 0;
 	}
 ?>

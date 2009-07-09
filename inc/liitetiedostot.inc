@@ -1,8 +1,8 @@
 <?php
 	
-	$kentat = "tunnus, filetype liitedata, concat('<a href=\'view.php?id=', tunnus,'\' target=\'Attachment\'>','".t("Näytä liite")."','</a>') tiedosto, selite, filesize koko, kieli, (SELECT selitetark from avainsana where avainsana.yhtio=liitetiedostot.yhtio and avainsana.laji like '%litety' and avainsana.selite=liitetiedostot.kayttotarkoitus LIMIT 1) Tyyppi, liitos liitos_hidden, liitostunnus liitostunnus_hidden";    
+	$kentat = "tunnus, filetype liitedata, concat('<a href=\'view.php?id=', tunnus,'\' target=\'Attachment\'>','".t("Näytä liite")."','</a>') liite, selite, filename nimi, filesize koko, kieli, (SELECT selitetark from avainsana where avainsana.yhtio=liitetiedostot.yhtio and avainsana.laji like '%litety' and avainsana.selite=liitetiedostot.kayttotarkoitus LIMIT 1) Tyyppi, liitos liitos_hidden, liitostunnus liitostunnus_hidden";    
 	
-	// HUOM: ethän muut näitä ilman, että korjaat myös iframen lukitse_avaimeen muuttujat
+	// HUOM: ethän muuta näitä ilman, että korjaat myös iframen lukitse_avaimeen muuttujat
 	$hakukentat = "tunnus, filetype, filetype, selite, filesize, kieli, kayttotarkoitus, liitos, liitostunnus";    
 	$jarjestys  = "liitos, liitostunnus, jarjestys";
 	

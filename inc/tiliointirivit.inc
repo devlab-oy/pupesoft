@@ -185,7 +185,7 @@
 		if ($virhe != "") $virhe .= "<br>";
 
 		echo "<td valign='top'><input type='Submit' value = '".t("Lisää")."'></td>";
-		echo "<td valign='top' class='back' nowrap><font class='error'>$virhe</font><input type='checkbox' name = 'jaksota'>".t("Jaksota")."</td>";
+		echo "<td valign='top' class='back' nowrap><font class='error'>$virhe</font><input type='checkbox' name = 'jaksota'> ".t("Jaksota")."</td>";
 		echo "</tr>";
 		echo "</form>";
 		$formi = 'uusi';
@@ -328,7 +328,7 @@
 	echo "<input type='hidden' name='tee' value='E'>";
 	echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 	echo "<input type='hidden' name='tunnus' value = '$tunnus'>";
-	echo "<input type='checkbox' name='viivatut' onclick='submit();' $viivatut>";
+	echo "<input type='checkbox' name='viivatut' onclick='submit();' $viivatut> ";
 	echo t('Näytä poistetut');
 	echo "</form>";
 	echo "</td>";

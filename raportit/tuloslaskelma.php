@@ -66,6 +66,7 @@
 				$kirjain 	= "U";
 				$aputyyppi 	= 1;
 				$tilikarttataso = "ulkoinen_taso";
+				$luku_kerroin = 1;
 			}
 			elseif ($tyyppi == "2") {
 				// Vastattavaa Velat
@@ -73,6 +74,7 @@
 				$kirjain 	= "U";
 				$aputyyppi 	= 2;
 				$tilikarttataso = "ulkoinen_taso";
+				$luku_kerroin = 1;
 			}
 			elseif ($tyyppi == "3") {
 				// Ulkoinen tuloslaskelma
@@ -80,6 +82,7 @@
 				$kirjain 	= "U";
 				$aputyyppi 	= 3;
 				$tilikarttataso = "ulkoinen_taso";
+				$luku_kerroin = -1;
 			}
 			else {
 				// Sisäinen tuloslaskelma
@@ -87,6 +90,7 @@
 				$kirjain 	= "S";
 				$aputyyppi 	= 3;
 				$tilikarttataso = "sisainen_taso";
+				$luku_kerroin = -1;
 			}
 
 			// edellinen taso
@@ -465,7 +469,7 @@
 							$tulos = 0;
 
 							for ($tilii = $alkukausi + 1; $tilii < mysql_num_fields($summares); $tilii++) {
-								$apu = sprintf($muoto, $summarow[$tilii] * -1 / $tarkkuus);
+								$apu = sprintf($muoto, $summarow[$tilii] * $luku_kerroin / $tarkkuus);
 								if ($apu == 0) $apu = "";
 
 								$tilirivi2 .= "<td align='right' nowrap>".number_format($apu, $desi, ',', ' ')."</td>";
@@ -509,7 +513,7 @@
 						}
 
 						// formatoidaan luku toivottuun muotoon
-						$apu = sprintf($muoto, $summa[$kaudet[$i]][$key] * -1 / $tarkkuus);
+						$apu = sprintf($muoto, $summa[$kaudet[$i]][$key] * $luku_kerroin / $tarkkuus);
 
 						if ($apu == 0) {
 							$apu = ""; // nollat spaseiks
@@ -538,7 +542,7 @@
 						$left = $vaslev;
 
 						for ($i = $alkukausi; $i < count($kaudet); $i++) {
-							$oikpos = $pdf->strlen(number_format($summa[$kaudet[$i]][$key] * -1 / $tarkkuus, $desi, ',', ' '), $p);
+							$oikpos = $pdf->strlen(number_format($summa[$kaudet[$i]][$key] * $luku_kerroin / $tarkkuus, $desi, ',', ' '), $p);
 
 							if($i+1 == count($kaudet) and $eiyhteensa == "") {
 								$lev = $yhteensasaraklev;
@@ -547,7 +551,7 @@
 								$lev = $saraklev;
 							}
 
-							$pdf->draw_text($left-$oikpos+$lev, $bottom, number_format($summa[$kaudet[$i]][$key] * -1 / $tarkkuus, $desi, ',', ' '), $firstpage, $p);
+							$pdf->draw_text($left-$oikpos+$lev, $bottom, number_format($summa[$kaudet[$i]][$key] * $luku_kerroin / $tarkkuus, $desi, ',', ' '), $firstpage, $p);
 							$left += $saraklev;
 						}
 

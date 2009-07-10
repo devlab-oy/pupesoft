@@ -20,15 +20,15 @@
 		require ("inc/parametrit.inc");
 	}
 
-	if(!function_exists("vaihtoehdot")) {
+	if (!function_exists("vaihtoehdot")) {
 		function vaihtoehdot($i, $taulu, $value, $text, $selected, $opts="") {
 			global  $yhtiorow, $kukarow;
 
-			if($opts["where"] != "") {
+			if ($opts["where"] != "") {
 				$where = " and ".$opts["where"];
 			}
 
-			if($opts["perustauusi"] != "") {
+			if ($opts["perustauusi"] != "") {
 				$pretext = t("Valitse jo perustettu listalta").":<br>";
 				$posttext = "<br><br>".t("Tai perusta uusi").":<br><input type='text' name='t[{$i}_uusi]' value=''>";
 			}
@@ -41,9 +41,9 @@
 						FROM $taulu
 						WHERE yhtio='$kukarow[yhtio]' and ($value != '' or $text != '') $where";
 			$result = mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($result)>0) {
+			if (mysql_num_rows($result)>0) {
 				while($row = mysql_fetch_array($result)) {
-					if($selected == $row["value"]) {
+					if ($selected == $row["value"]) {
 						$sel = "SELECTED";
 					}
 					else {
@@ -59,7 +59,7 @@
 			return $ulos;
 		}
 	}
-	
+
 	//Jotta määritelty rajattu näkymä olisi myös käyttöoikeudellisesti tiukka
 	$aputoim = $toim;
 	list($toim, $alias_set, $rajattu_nakyma) = explode('!!!', $toim);
@@ -92,7 +92,7 @@
 	if ($_POST["toim"] == "tuote" and isset($aputuotteen_parametrit)) {
 		$t[$tuotteen_parametriti] = $aputuotteen_parametrit;
 	}
-	
+
 	// pikku javascripti
 	js_alasvetoMuutakoko();
 
@@ -119,14 +119,14 @@
 	if ($otsikko_lisatiedot != "") {
 		echo $otsikko_lisatiedot;
 	}
-	
+
 	if ($from == "yllapito") {
 		echo "
 		<script LANGUAGE='JavaScript'>
 			function resizeIframe(frameid, offset){
 
 				var currentfr=window.parent.document.getElementById(frameid);
-				if(!offset) offset=0;
+				if (!offset) offset=0;
 
 				if (currentfr && !window.opera){
 
@@ -189,7 +189,7 @@
 		synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
 
 		//	Jos poistetaan perheen osa palataan perheelle
-		if($seuraavatunnus > 0) $tunnus = $seuraavatunnus;
+		if ($seuraavatunnus > 0) $tunnus = $seuraavatunnus;
 		else $tunnus = 0;
 
 		$seuraavatunnus = 0;
@@ -225,7 +225,7 @@
 
 		//	Tehdään muuttujista linkit jolla luomme otsikolliset avaimet!
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
-			if($t["{$i}_uusi"] != "") {
+			if ($t["{$i}_uusi"] != "") {
 				$t[$i] = $t["{$i}_uusi"];
 			}
 			$t[mysql_field_name($result, $i)] = &$t[$i];
@@ -241,7 +241,7 @@
 
 				$t[$i] = sprintf('%04d', $tvv[$i])."-".sprintf('%02d', $tkk[$i])."-".sprintf('%02d', $tpp[$i]);
 
-				if(!@checkdate($tkk[$i],$tpp[$i],$tvv[$i]) and ($tkk[$i]!= 0 or $tpp[$i] != 0)) {
+				if (!@checkdate($tkk[$i],$tpp[$i],$tvv[$i]) and ($tkk[$i]!= 0 or $tpp[$i] != 0)) {
 					$virhe[$i] = t("Virheellinen päivämäärä");
 					$errori = 1;
 				}
@@ -258,7 +258,7 @@
 						$al_lisa";
 			$al_res = mysql_query($query) or pupe_error($query);
 
-			if(mysql_num_rows($al_res) == 0 and $rajattu_nakyma != '' and isset($t[$i])) {
+			if (mysql_num_rows($al_res) == 0 and $rajattu_nakyma != '' and isset($t[$i])) {
 				$virhe[$i] = t("Sinulla ei ole oikeutta päivittää tätä kenttää");
 				$errori = 1;
 			}
@@ -267,11 +267,11 @@
 
 			$funktio = $toim."tarkista";
 
-			if(!function_exists($funktio)) {
+			if (!function_exists($funktio)) {
 				require("inc/$funktio.inc");
 			}
 
-			if(function_exists($funktio)) {
+			if (function_exists($funktio)) {
 				if ($toim == "tuote") {
 					@$funktio($t, $i, $result, $tunnus, &$virhe, $trow, $tuotteen_parametrit_keys, $tuotteen_parametrit_vals);
 				}
@@ -280,15 +280,15 @@
 				}
 			}
 
-			if($virhe[$i] != "") {
+			if ($virhe[$i] != "") {
 				$errori = 1;
 			}
 
 			//	Tarkastammeko liitetiedoston?
 			if (is_array($tiedostopaate) and is_array($_FILES["liite_$i"]) and $_FILES["liite_$i"]["size"] > 0) {
 				$viesti = tarkasta_liite("liite_$i", $tiedostopaate);
-				
-				if($viesti !== true) {
+
+				if ($viesti !== true) {
 					$virhe[$i] = $viesti;
 					$errori = 1;
 				}
@@ -315,13 +315,13 @@
 
 						if (is_array($_FILES["liite_$i"]) and $_FILES["liite_$i"]["size"] > 0) {
 							$id = tallenna_liite("liite_$i", "Yllapito", 0, "Yhtio", "$toim.".mysql_field_name($result,$i), $t[$i]);
-							
-							if($id !== false) {
+
+							if ($id !== false) {
 								$t[$i] = $id;
 							}
 						}
 
-						if(mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
+						if (mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
 
 						$query .= ", ". mysql_field_name($result,$i)."='".$t[$i]."' ";
 					}
@@ -333,10 +333,10 @@
 				//	Jos poistettiin jokin liite, poistetaan se nyt
 				if (is_array($poista_liite)) {
 					foreach($poista_liite as $key => $val) {
-						if($val > 0) {
+						if ($val > 0) {
 							$delquery = " DELETE FROM liitetiedostot WHERE yhtio = '{$kukarow["yhtio"]}' and liitos = 'Yllapito' and tunnus = '$val'";
 							$delres = mysql_query($delquery);
-							if(mysql_affected_rows() == 1) {
+							if (mysql_affected_rows() == 1) {
 								$t[$key] = "";
 							}
 						}
@@ -351,12 +351,12 @@
 
 						if (is_array($_FILES["liite_$i"]) and $_FILES["liite_$i"]["size"] > 0) {
 							$id = tallenna_liite("liite_$i", "Yllapito", 0, "Yhtio", "$toim.".mysql_field_name($result,$i), $t[$i]);
-							if($id !== false) {
+							if ($id !== false) {
 								$t[$i] = $id;
 							}
 						}
 
-						if(mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
+						if (mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
 						$query .= ", ". mysql_field_name($result,$i)."='".$t[$i]."' ";
 
 					}
@@ -375,7 +375,7 @@
 				//	Javalla tieto että tätä muokattiin..
 				$wanha = "P_";
 			}
-			
+
 			if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "asiakas") {
 
 				$query = "	SELECT *
@@ -461,15 +461,15 @@
 			//	Tämä funktio tekee myös oikeustarkistukset!
 			synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
 
-			if(in_array(strtoupper($toim), array("ASIAKAS", "ASIAKKAAN_KOHDE")) and $yhtiorow["dokumentaatiohallinta"] != "") {
+			if (in_array(strtoupper($toim), array("ASIAKAS", "ASIAKKAAN_KOHDE")) and $yhtiorow["dokumentaatiohallinta"] != "") {
 				svnSyncMaintenanceFolders(strtoupper($toim), $tunnus, $trow);
 			}
 
-			if($ajax_menu_yp != "") {
+			if ($ajax_menu_yp != "") {
 				$suljeYllapito = $ajax_menu_yp;
 			}
 
-			if(substr($suljeYllapito, 0, 15) == "asiakkaan_kohde") {
+			if (substr($suljeYllapito, 0, 15) == "asiakkaan_kohde") {
 				$query = "SELECT kohde from asiakkaan_kohde where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 				$aburow = mysql_fetch_array($result);
@@ -478,7 +478,7 @@
 				exit;
 			}
 
-			if(substr($suljeYllapito, 0, 17) == "asiakkaan_positio") {
+			if (substr($suljeYllapito, 0, 17) == "asiakkaan_positio") {
 				$query = "SELECT positio from asiakkaan_positio where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 				$aburow = mysql_fetch_array($result);
@@ -487,7 +487,7 @@
 				exit;
 			}
 
-			if(substr($suljeYllapito, 0, 13) == "yhteyshenkilo") {
+			if (substr($suljeYllapito, 0, 13) == "yhteyshenkilo") {
 				$query = "SELECT nimi from yhteyshenkilo where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 				$aburow = mysql_fetch_array($result);
@@ -597,7 +597,7 @@
 			}
 
 			$ulisa .= "&haku[$i]=".urlencode($haku[$i]);
-			
+
     	}
     }
 
@@ -611,7 +611,7 @@
 	}
 
 	//	Pidetään oletukset tallessa!
-	if(is_array($oletus)){
+	if (is_array($oletus)){
 		foreach($oletus as $o => $a) {
 			$ulisa.="&oletus[$o]=$a";
 		}
@@ -682,7 +682,7 @@
 					<input type = 'hidden' name = 'laji' value = '$laji'>
 					<input type = 'submit' value = '".t("Näytä kaikki")."'></form>";
 		}
-		
+
 		if ($toim == "asiakas" or $toim == "maksuehto" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti") {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
@@ -693,7 +693,7 @@
 					<input type = 'hidden' name = 'laji' value = '$laji'>
 					<input type = 'submit' value = '".t("Näytä poistetut")."'></form>";
 		}
-		
+
 		if ($toim == "tuote" and $uusi != 1 and $errori == '' and $tmp_tuote_tunnus > 0) {
 
 			$query = "	SELECT *
@@ -763,7 +763,7 @@
 				}
 			}
 		}
-		elseif($from != "yllapito") {
+		elseif ($from != "yllapito") {
 			for ($i = 1; $i < mysql_num_fields($result); $i++) {
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 					echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".mysql_field_name($result,$i).$ulisa."&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
@@ -820,17 +820,17 @@
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 					if ($i == 1) {
 						if (trim($trow[1]) == '' or (is_numeric($trow[1]) and $trow[1] == 0)) $trow[1] = "".t("*tyhjä*")."";
-						
-						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&lopetus=$lopetus&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>";						
-						
+
+						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&lopetus=$lopetus&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>";
+
 						if (mysql_field_name($result,$i) == 'liitedata') {
-							
+
 							if ($lukitse_laji == "tuote" and $lukitse_avaimeen > 0) {
 								echo "<img src='".$palvelin2."view.php?id=$trow[0]' height='80px'>";
 							}
 							else {
 								list($liitedata1, $liitedata2) = explode("/", $trow[1]);
-							
+
 								if (file_exists("pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico")) {
 									echo "<img src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico'>";
 								}
@@ -854,7 +854,7 @@
 						}
 						elseif (mysql_field_type($result,$i) == 'date') {
 							echo "<td valign='top'>$fontlisa1 ".tv1dateconv($trow[$i])." $fontlisa2</td>";
-						}						
+						}
 						else {
 							echo "<td valign='top'>$fontlisa1 $trow[$i] $fontlisa2</td>";
 						}
@@ -890,15 +890,15 @@
 			echo "<b>".t("Sinulla ei ole oikeuksia päivittää tätä tietoa")."</b><br>";
 		}
 
-		if($ajax_menu_yp!="") {
+		if ($ajax_menu_yp!="") {
 			$ajax_post="ajaxPost('mainform', '{$palvelin2}yllapito.php?ojarj=$ojarj$ulisa#$tunnus' , 'ajax_menu_yp'); return false;";
 		}
-		
+
 		if ($from == "") {
 			$ankkuri = "#$tunnus";
 		}
 		else {
-			$ankkuri = "";	
+			$ankkuri = "";
 		}
 
 		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa$ankkuri' name='mainform' id='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data' onSubmit=\"$ajax_post\">";
@@ -921,11 +921,11 @@
 
 		echo "<table><tr><td class='back' valign='top'>";
 
-		if($from != "yllapito") {
-			if($toim == "tuoteno") {
+		if ($from != "yllapito") {
+			if ($toim == "tuoteno") {
 				$tuoteno = $trow["tuoteno"];
 			}
-			elseif($toim == "maksuehto") {
+			elseif ($toim == "maksuehto") {
 				$teksti = $trow["teksti"];
 				$kateksti = $trow["kassa_teksti"];
 			}
@@ -941,7 +941,7 @@
 				$trow[$i] = $t[$i];
 			}
 			// Haetaan passatut oletukset arvoiksi!
-			elseif($uusi == 1) {
+			elseif ($uusi == 1) {
 				$trow[$i] = $oletus[mysql_field_name($result, $i)];
 			}
 
@@ -981,7 +981,7 @@
 						$al_lisa";
 			$al_res = mysql_query($query) or pupe_error($query);
 
-			if(mysql_num_rows($al_res) > 0) {
+			if (mysql_num_rows($al_res) > 0) {
 				$al_row = mysql_fetch_array($al_res);
 
 				if ($al_row["selitetark"] != '') {
@@ -1035,10 +1035,10 @@
 			// $tyyppi --> 4 riviä ei näytetä ollenkaan, mutta sen arvo päivitetään
 			// $tyyppi --> 5 liitetiedosto
 
-			if ($tyyppi == 1 or 
-				$tyyppi == 1.5 or 				
-				($tyyppi == 2 and $tunnus!="") or 
-				($tyyppi == 3 and $tunnus!="")  or 				
+			if ($tyyppi == 1 or
+				$tyyppi == 1.5 or
+				($tyyppi == 2 and $tunnus!="") or
+				($tyyppi == 3 and $tunnus!="")  or
 				$tyyppi == 5) {
 				echo "<tr>";
 				echo "<th align='left'>$otsikko</th>";
@@ -1050,11 +1050,11 @@
 					//	Jostainsyystä multiline ei toimi kunnolla?
 					$search = "/.*<(select)[^>]*>(.*)<\/select>.*/mi";
 					preg_match($search, $ulos, $matches);
-					
-					if(strtolower($matches[1]) == "select") {
+
+					if (strtolower($matches[1]) == "select") {
 						$search = "/\s+selected\s*>/i";
 						preg_match($search, $matches[2], $matches2);
-						if(count($matches2)==0) {
+						if (count($matches2)==0) {
 							$ulos .= "<td class='back'><font class='error'>OBS!! '".$trow[$i]."'</font></td>";
 						}
 					}
@@ -1077,13 +1077,13 @@
 			elseif ($tyyppi == 2 and $tunnus != "") {
 				echo "<td>$trow[$i]</td>";
 			}
-			elseif($tyyppi == 3 and $tunnus != "") {
+			elseif ($tyyppi == 3 and $tunnus != "") {
 				echo "<td>$trow[$i]<input type = 'hidden' name = '$nimi' value = '$trow[$i]'></td>";
 			}
-			elseif($tyyppi == 4) {
+			elseif ($tyyppi == 4) {
 				echo "<input type = 'hidden' name = '$nimi' value = '$trow[$i]'>";
 			}
-			elseif($tyyppi == 5) {
+			elseif ($tyyppi == 5) {
 				echo "<td>";
 
 				if ($trow[$i] > 0) {
@@ -1099,11 +1099,11 @@
 			if (isset($virhe[$i])) {
 				echo "<td class='back'><font class='error'>$virhe[$i]</font></td>\n";
 			}
-			
-			if ($tyyppi == 1 or 
-				$tyyppi == 1.5 or 				
-				($tyyppi == 2 and $tunnus!="") or 
-				($tyyppi == 3 and $tunnus!="")  or 				
+
+			if ($tyyppi == 1 or
+				$tyyppi == 1.5 or
+				($tyyppi == 2 and $tunnus!="") or
+				($tyyppi == 3 and $tunnus!="")  or
 				$tyyppi == 5) {
 				echo "</tr>";
 			}
@@ -1128,7 +1128,7 @@
 			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille tilauksille")."'>";
 		}
 
-		if($lukossa == "ON") {
+		if ($lukossa == "ON") {
 			echo "<input type='hidden' name='lukossa' value = '$lukossa'>";
 			echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type = 'submit' name='paluunappi' value = '".t("Palaa avainsanoihin")."'>";
 		}
@@ -1164,10 +1164,10 @@
 				$laji = "T";
 			}
 
-			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='yhteyshenkilo' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
+			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi = 'yhteyshenkilo' and kuka = '{$kukarow['kuka']}' and yhtio = '{$yhtiorow['yhtio']}'";
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
 
-			if(mysql_num_rows($res) > 0) echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=yhteyshenkilo&from=yllapito&laji=$laji&ohje=off&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			if (mysql_num_rows($res) > 0) echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=yhteyshenkilo&from=yllapito&laji=$laji&ohje=off&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 
 			if ($toim == "asiakas") {
 				include ("inc/asiakkaan_avainsanat.inc");
@@ -1178,7 +1178,7 @@
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='liitetiedostot' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
 
-			if(mysql_num_rows($res) > 0) echo "<iframe id='liitetiedostot_iframe' name='liitetiedostot_iframe' src='yllapito.php?toim=liitetiedostot&from=yllapito&ohje=off&haku[7]=@$toim&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=$toim' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";			
+			if (mysql_num_rows($res) > 0) echo "<iframe id='liitetiedostot_iframe' name='liitetiedostot_iframe' src='yllapito.php?toim=liitetiedostot&from=yllapito&ohje=off&haku[7]=@$toim&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=$toim' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 		}
 
 		if ($from != "yllapito" and $errori == "") {
@@ -1189,12 +1189,12 @@
 				$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='tuotteen_toimittajat' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 				$res = mysql_query($queryoik) or pupe_error($queryoik);
 
-				if(mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_toimittajat_iframe' name='tuotteen_toimittajat_iframe' src='yllapito.php?toim=tuotteen_toimittajat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				if (mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_toimittajat_iframe' name='tuotteen_toimittajat_iframe' src='yllapito.php?toim=tuotteen_toimittajat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 
 				$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='tuotteen_avainsanat' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 				$res = mysql_query($queryoik) or pupe_error($queryoik);
 
-				if(mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=tuotteen_avainsanat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+				if (mysql_num_rows($res) > 0) echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=tuotteen_avainsanat&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 			}
 
 			if ($toim == "maksuehto" and $laji != "V") {
@@ -1321,7 +1321,7 @@
 	if ($from == "yllapito" and $toim == "tuotteen_toimittajat") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('tuotteen_toimittajat_iframe');</script>";
 	}
-	
+
 	if ($from == "yllapito" and $toim == "liitetiedostot") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('liitetiedostot_iframe');</script>";
 	}

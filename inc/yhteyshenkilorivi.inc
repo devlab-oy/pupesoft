@@ -9,12 +9,12 @@
 	
 	if (mysql_field_name($result, $i) == "liitostunnus") {
 		if ($lukitse_avaimeen != "") {
-			$trow[$i] = $lukitse_avaimeen;
+			$tyyppi = 4;
+			if ($lukitse_avaimeen != "") {
+				$ulos = "<input type='hidden' name='$nimi' value='$lukitse_avaimeen'>";
+				$jatko = 0;
+			}
 		}
-		elseif ($liitostunnus != ''){
-			$trow[$i] = $liitostunnus;
-		}
-		$tyyppi = 3;
 	}
 	
 	if(!($popparista or $ajax_menu_yp != "")) {

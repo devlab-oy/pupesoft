@@ -1,5 +1,22 @@
 <?php
 
+if ($keikanalatila == "T") {
+	$query = "SELECT * from oikeu where yhtio='{$kukarow['yhtio']}' and kuka='{$kukarow['kuka']}' and nimi LIKE '%ulask.php'";
+	$res = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($res) > 0) {
+		echo "<font class='message'>".t("Syötä uusi lasku")." <form method='POST' action='".$palvelin2."ulask.php'>					
+				<input type='hidden' name='lopetus' value='$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=kululaskut//toiminto=kululaskut//projektilla=$projektilla//from=VALITSETOIMITUS//tilausnumero=$tilausnumero//keikanalatila=T//otunnus=$otunnus/NIMILISA=Liitä kululasku/'>
+				<input type='submit' value='" . t('Syötä lasku')."'>
+				</form><br><br>";
+				
+		echo "<font class='message'>".t("Syötä uusi matkalasku")." <form method='POST' action='".$palvelin2."matkalasku.php'>					
+				<input type='hidden' name='lopetus' value='$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=kululaskut//toiminto=kululaskut//projektilla=$projektilla//from=VALITSETOIMITUS//tilausnumero=$tilausnumero//keikanalatila=T//otunnus=$otunnus/NIMILISA=Liitä kululasku/'>
+				<input type='submit' value='" . t('Syötä lasku')."'>
+				</form><br><br>";		
+	}
+}
+
 $query  = "	SELECT *
 			from lasku
 			where tunnus	= '$otunnus'
@@ -285,7 +302,7 @@ if ($silent == "") {
 
 				echo "<tr>
 						<td valign='top'>$llrow[nimi]$comments</td>
-						<td valign='top'>$llrow[tapvm]</td>
+						<td valign='top'>".tv1dateconv($llrow["tapvm"])."</td>
 						<td valign='top' align='right'>$llrow[summa]</td>
 						<td valign='top' align='right'>$llrow[arvo]</td>
 						<td valign='top'>$llrow[valkoodi]</td>
@@ -685,28 +702,21 @@ if ($silent == "") {
 		}
 	}
 
-	if ($toiminto != "") {
+	if ($toiminto != "" and $lopetus == '') {
 
 		echo "<hr>";
+		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='toiminto' value=''>";
+		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
 
-		if ($lopetus != '') {
-			echo "<br><br>";
-			lopetus($lopetus);
+		if ($nappikeikalle == 'menossa') {
+			echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
 		}
-		else {
-			echo "<form action='$PHP_SELF' method='post'>";
-			echo "<input type='hidden' name='toiminto' value=''>";
-			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-			echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
 
-			if ($nappikeikalle == 'menossa') {
-				echo "<input type='hidden' name='otunnus' value='$otunnus'>";
-				echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
-			}
-
-			echo "<input type='submit' value='".t("Takaisin keikalle")."'>";
-			echo "</form>";
-		}
+		echo "<input type='submit' value='".t("Takaisin keikalle")."'>";
+		echo "</form>";
 	}
 }
 

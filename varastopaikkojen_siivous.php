@@ -176,11 +176,14 @@
 	}
 
 	if ($tee == 'CLEANTUOTTEETTOMAT') {
- 		$query = "	DELETE
-					FROM tuotepaikat
- 					WHERE yhtio = '$kukarow[yhtio]'
- 					and tunnus  in (".implode(",", $paikkatunnus).")";
- 		$presult = mysql_query($query) or pupe_error($query);
+
+		foreach ($paikkatunnus as $tunnus) {
+	 		$query = "	DELETE
+						FROM tuotepaikat
+	 					WHERE yhtio = '$kukarow[yhtio]'
+	 					and tunnus = '$tunnus'";
+	 		$presult = mysql_query($query) or pupe_error($query);
+		}
 
 		$tee = "";
 	}
@@ -418,9 +421,9 @@
 
 		$query = "	SELECT tuotepaikat.tunnus ttun, tuotepaikat.tuoteno, tuotepaikat.saldo, tuotepaikat.oletus, concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) paikka, tuote.tunnus
 		 			FROM tuotepaikat
-					LEFT JOIN tuote ON tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
+					LEFT JOIN tuote ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
 					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-					and tuote.tunnus is null or (tuote.ei_saldoa != '' and tuotepaikat.saldo = 0)
+					and (tuote.tunnus is null or tuote.ei_saldoa != '')
 					ORDER BY tuotepaikat.tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -436,7 +439,7 @@
 
 			while ($lrow = mysql_fetch_array($result)) {
 
-				echo "<input type='hidden' name='paikkatunnus[$lrow[ttun]]' value='$lrow[ttun]'>";
+				echo "<input type='hidden' name='paikkatunnus[]' value='$lrow[ttun]'>";
 
 				echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($lrow["tuoteno"])."'>$lrow[tuoteno]</a></td><td>$lrow[saldo]</td><td>$lrow[paikka]</td></tr>";
 			}
@@ -655,7 +658,12 @@
 		if ($laskuri > 0) {
 			echo "<br><input type='submit' value='".t("Päivitä tilausriveille oletuspaikka")."'>";
 		}
+		else {
+			echo t("Yhtään tuotetta ei löytynyt")."!<br><br>";
+		}
 		echo "</form>";
+
+		$tee = "";
 
 	}
 

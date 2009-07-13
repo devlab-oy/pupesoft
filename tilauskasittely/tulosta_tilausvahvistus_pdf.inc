@@ -106,6 +106,7 @@
 								//  Onko nippulla projektia?
 								$query = "select tunnus from lasku where yhtio ='$kukarow[yhtio]' and tunnusnippu='$laskurow[projekti]' and tila = 'R'";
 								$abures = mysql_query($query) or pupe_error($query);
+								
 								if(mysql_num_rows($abures)>0) {
 									if($laskurow["projekti"] == $laskurow["tunnus"]) {
 										$kentat = array("projekti", "päiväys", "valuutta", "toimitustapa", "toimitusehto", "asiakkaan_VAT");
@@ -727,22 +728,29 @@
 			$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W') ";
 		}
 
-		if($laskurow["tunnusnippu"] > 0) {
+		if ($laskurow["tunnusnippu"] > 0) {
 			$query = "  SELECT group_concat(tunnus) tunnukset
 						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '{$laskurow["tunnusnippu"]}' and tunnusnippu > 0 and tila IN ('N','L')
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and tunnusnippu = '$laskurow[tunnusnippu]' 
+						and tunnusnippu > 0 
+						and tila IN ('N','L','A')
 						GROUP BY tunnusnippu";
 			$abures = mysql_query($query) or pupe_error($query);
 			$aburow = mysql_fetch_array($abures);
-
-			$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
-
-			//  Laitetaan tämä tässä talteen!
-			$laskurow["nippu"] = $aburow["tunnukset"];
+			
+			if ($aburow["tunnukset"] != "") {
+				$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
+				$laskurow["nippu"] = $aburow["tunnukset"];
+			}
+			else {
+				$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+				$laskurow["nippu"] = $laskurow["tunnus"];
+			}		
 		}
 		else {
 			$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
-			$laskurow["nippu"] = $aburow["tunnus"];
+			$laskurow["nippu"] = $laskurow["tunnus"];
 		}
 
 		// generoidaan lähetteelle ja keräyslistalle rivinumerot

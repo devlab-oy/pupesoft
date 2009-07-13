@@ -2,6 +2,8 @@
 
 require ("inc/parametrit.inc");
 
+echo "<font class='head'>".t("Tervetuloa pupesoft-j‰rjestelm‰‰n")."</font><hr><br>";
+
 if (!isset($tee) or $tee == '') {
 
 	if (file_exists("tervetuloa_".$kukarow["yhtio"].".inc")) {

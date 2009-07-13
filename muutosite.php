@@ -930,9 +930,13 @@ if ($tee == 'E' or $tee == 'F') {
 		$faktares = mysql_query($query) or pupe_error($query);
 		$faktarow = mysql_fetch_assoc($faktares);
 
-		if (trim($faktarow["fakta"]) != "") {
-			echo "<tr><th colspan='3'>".t("Fakta")."</th></tr>";
-			echo "<tr><td colspan='3'>".wordwrap($faktarow["fakta"], 120, "<br>")."</td></tr>";
+		if (trim($faktarow["fakta"]) != "" or $trow["comments"] != "") {
+			$vali = " ";
+			if ($faktarow["fakta"] != "" and $trow["comments"] != "") {
+				$vali = "<br>";
+			}
+			echo "<tr><th colspan='3'>".t("Fakta")." / ".t("Kommentit")."</th></tr>";
+			echo "<tr><td colspan='3'>".wordwrap($faktarow["fakta"].$vali.$trow["comments"], 120, "<br>")."</td></tr>";
 		}
 
 		// Lopetetaan koko otsikko

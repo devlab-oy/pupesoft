@@ -527,7 +527,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		
 		if ($lopetus != '') {			
 			lopetus($lopetus);
-			echo "<br><br>";
+			echo "<br>";
 		}
 	}
 

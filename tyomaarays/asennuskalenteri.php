@@ -223,6 +223,7 @@
 		echo "<table>";
 		
 		echo "<form method='POST' action='$PHP_SELF'>
+				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='tee'  			value='LISAA'>
 				<input type='hidden' name='year'  			value='$year'>
 				<input type='hidden' name='month'  			value='$month'>
@@ -280,6 +281,7 @@
 		
 		if ($tyotunnus > 0) {
 			echo "<br><br><br><form method='POST' action='$PHP_SELF'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='tee'  			value='POISTA'>
 					<input type='hidden' name='year'  			value='$year'>
 					<input type='hidden' name='month'  			value='$month'>
@@ -296,9 +298,10 @@
 	if ($tee == "") {
 		echo "<table>";
 		echo "<th>".t("Kuukausi").":</th>";
-		echo "<td><a class='menu' href='$PHP_SELF?day=1&month=$backmmonth&year=$backymonth&tyojono=$tyojono&liitostunnus=$liitostunnus&tyotunnus=$tyotunnus'> << </a></td>";
+		echo "<td><a class='menu' href='$PHP_SELF?day=1&month=$backmmonth&year=$backymonth&tyojono=$tyojono&liitostunnus=$liitostunnus&tyotunnus=$tyotunnus&lopetus=$lopetus'> << </a></td>";
 		echo "<td>
 				<form method='POST' action='$PHP_SELF'>
+				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='liitostunnus'  value='$liitostunnus'>
 				<input type='hidden' name='tyotunnus'  value='$tyotunnus'>
 				<select name='month' Onchange='submit();'>";
@@ -316,7 +319,7 @@
 		}
 	
 		echo "</select></td>";
-		echo "<td><a class='menu' href='$PHP_SELF?day=1&month=$nextmmonth&year=$nextymonth&tyojono=$tyojono&liitostunnus=$liitostunnus&tyotunnus=$tyotunnus'> >> </a></td>";
+		echo "<td><a class='menu' href='$PHP_SELF?day=1&month=$nextmmonth&year=$nextymonth&tyojono=$tyojono&liitostunnus=$liitostunnus&tyotunnus=$tyotunnus&lopetus=$lopetus'> >> </a></td>";
 		
 		echo "<th>".t("Työjono").":</th><td>";
 				
@@ -465,10 +468,10 @@
 								$zul = $tapa;	
 							}
 							
-							echo "<td align='center' width='40px'><a class='td' href='tyojono.php?myyntitilaus_haku=$tilausnumero' onmouseout=\"popUp(event,'$tilausnumero')\" onmouseover=\"popUp(event,'$tilausnumero')\">$zul</a></th>";
+							echo "<td align='center' width='40px'><a class='td' href='tyojono.php?myyntitilaus_haku=$tilausnumero&lopetus=$lopetus' onmouseout=\"popUp(event,'$tilausnumero')\" onmouseover=\"popUp(event,'$tilausnumero')\">$zul</a></th>";
 						}
 						elseif($liitostunnus > 0 and $tyojono != "") {
-		                    echo "<td align='center' width='40px'><a class='td' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&asentaja=$b&aika=$a&tee=VARAA'>&nbsp;</a></th>";			
+		                    echo "<td align='center' width='40px'><a class='td' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&asentaja=$b&aika=$a&tee=VARAA&lopetus=$lopetus'>&nbsp;</a></th>";			
 		                }				
 						else {
 							echo "<td align='center' width='40px'>&nbsp;</th>";

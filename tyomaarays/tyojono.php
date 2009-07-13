@@ -11,14 +11,17 @@
 	$DAY_ARRAY = array("Maanantai", "Tiistai", "Keskiviikko", "Torstai", "Perjantai");
 	
 	echo "<form name='haku' action='$PHP_SELF' method='post'>";
+	echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 	
 	$chk = "";
 	if (trim($konserni) != '') {
 		$chk = "CHECKED";
 	}
 	
-	echo t("Näytä konsernin työmäräykset").":<input type='checkbox' name='konserni' $chk onclick='submit();'><br><br>";
-			
+	if ($yhtiorow["konserni"] != "") {
+		echo t("Näytä konsernin työmäräykset").":<input type='checkbox' name='konserni' $chk onclick='submit();'><br><br>";
+	}
+	
 	echo "<table>";	
 	echo "<tr>";
 			
@@ -192,7 +195,7 @@
 				
 				list($a, $l, $s, $t) = explode("##", $asekale);
 				
-				echo "<a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&tyotunnus=$t&tee=MUOKKAA'>".tv1dateconv($a, "P")." - ".tv1dateconv($l, "P")." $s</a><br>";
+				echo "<a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&tyotunnus=$t&tee=MUOKKAA&lopetus=$lopetus/SPLIT/$PHP_SELF////konserni=$konserni'>".tv1dateconv($a, "P")." - ".tv1dateconv($l, "P")." $s</a><br>";
 			}
 		}
 		
@@ -201,7 +204,7 @@
 		echo "</td>";
 				
 		if ($vrow["tyojono"] != "") {
-			echo "<td valign='top'><a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]'>".tv1dateconv($vrow["toimaika"])."</a></td>";
+			echo "<td valign='top'><a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&lopetus=$lopetus/SPLIT/$PHP_SELF////konserni=$konserni'>".tv1dateconv($vrow["toimaika"])."</a></td>";
 		}
 		else {
 			echo "<td valign='top'>".tv1dateconv($vrow["toimaika"])."</td>";	
@@ -211,10 +214,10 @@
 				<td valign='top'>$vrow[tyojono]<br>$vrow[tyostatus]</td>";
 		
 		if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {		
-			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&lopetus=../tyomaarays/tyojono.php////user=$kukarow[kuka]//pass=$kukarow[salasana]//yhtio=$kukarow[yhtio]//konserni=$konserni'>".t("Muokkaa")."</a></td>";
+			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."tyomaarays/tyojono.php////konserni=$konserni'>".t("Muokkaa")."</a></td>";
 		}
 		else {
-			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&lopetus=../tyomaarays/tyojono.php////konserni=$konserni'>".t("Muokkaa")."</a></td>";
+			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."tyomaarays/tyojono.php////konserni=$konserni'>".t("Muokkaa")."</a></td>";
 		}
 				
 		echo "</tr>";

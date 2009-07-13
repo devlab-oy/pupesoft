@@ -317,7 +317,24 @@ while (!feof ($fd)) {
 			$edi_kommentti .= $tieto . ' ';
 			break;
 
-		case 'OBGMINUMB' :
+		case 'ODTM2__DT' :
+		// Toimitusp‰iv‰
+			$type = split("@", $tieto);
+
+			// 102 on p‰iv‰m‰‰r‰, 616 on viikkonumero
+			if (trim($type[1]) == "102") {
+				$tieto = trim($type[0]);
+				$editilaus_toimitusvv = substr($tieto, 0, 4);
+				$editilaus_toimituskk = substr($tieto, 4, 2);
+				$editilaus_toimituspp = substr($tieto, 6, 2);
+				if (checkdate($editilaus_toimituskk, $editilaus_toimituspp, $editilaus_toimitusvv)) {
+					$toimpvm = "$editilaus_toimitusvv-$editilaus_toimituskk-$editilaus_toimituspp";
+				}
+			}
+
+			break;
+
+		case 'ORFFVN_NU' :
 		case 'OSTOTIL.OT_NRO' :
 		//Asiakkkaan tilausnumero
 			$asiakkaan_tilausnumero = $tieto;
@@ -339,6 +356,7 @@ while (!feof ($fd)) {
 			$edi_kommentti .= $tieto . ' ';
 			break;
 
+		case 'OBGMINUMB' :
 		case 'ORFFABONU' :
 		case 'OSTOTIL.OT_VIITTEEMME' :
 		//Asiakkaan viite
@@ -1234,6 +1252,7 @@ while (!feof ($fd)) {
 
 			// nollataan kaikki laskun muuttujat (kaikki n‰m‰ samat pit‰‰ nollata filen alussa)
 			unset($arow);
+			$toimpvm				= date("Y-n-j");
 			$editilaus_tila       	= "N"; // laskun tila
 			$editilaus_alatila		= "";
 			$editilaus_tyyppi     	= "L"; // tilausrivi tyyppi

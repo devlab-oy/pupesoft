@@ -11,7 +11,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) {
 }
 
 if ($toim == "") {
-	echo "<font class='head'>".t("Intra Uutiset")."</font><hr>";
+	if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) echo "<font class='head'>".t("Intra Uutiset")."</font><hr>";
 	$tyyppi = "uutinen";
 }
 elseif ($toim == "EXTRANET") {

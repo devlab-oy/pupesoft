@@ -287,6 +287,7 @@
 			}
 		}
 
+		$tee = "";
 	}
 
 	if ($tee == 'LISTAAOLETUKSET') {
@@ -660,10 +661,9 @@
 		}
 		else {
 			echo t("Yhtään tuotetta ei löytynyt")."!<br><br>";
+			$tee = "";
 		}
 		echo "</form>";
-
-		$tee = "";
 
 	}
 

@@ -158,7 +158,7 @@
 					
 					$tiliointilisa = "document.getElementById('tilioinnit').src='muutosite.php?tee=E&tunnus=$trow[tunnus]';";
 					if($trow["tarkistettu"] == "") {
-						$seuraavalinkkilisa = "document.getElementById('kuittaus').innerHTML=unescape('%3Ccenter%3E%3Cbr%3E%3Ca%20href%3D%27$PHP_SELF%3Ftee%3Dkuittaa%26tunnus%3D$trow[tunnus]%26laji%3D$laji%27%3E%3Cfont%20class%3D%27error%27%3EKuittaa%20tarkastetuksi%20ja%20valitse%20seuraava%3C%2Ffont%3E%3C%2Fa%3E%3C%2Fcenter%3E%3Cbr%3E');";
+						$seuraavalinkkilisa = "document.getElementById('kuittaus').innerHTML=unescape('%3Ccenter%3E%3Cbr%3E%3Ca%20href%3D%27$PHP_SELF%3Ftee%3Dkuittaa%26tunnus%3D$trow[tunnus]%26laji%3D$laji%26vv%3D$vv%26kk%3D$kk%27%3E%3Cfont%20class%3D%27error%27%3EKuittaa%20tarkastetuksi%20ja%20valitse%20seuraava%3C%2Ffont%3E%3C%2Fa%3E%3C%2Fcenter%3E%3Cbr%3E');";
 					}
 					else {
 						$seuraavalinkkilisa = "document.getElementById('kuittaus').innerHTML=unescape('%3Ccenter%3E%3Cbr%3E%3Cfont%20class%3D%27message%27%3ELasku%20on%20tarkistettu%20$trow[tarkistettu]%3C%2Ffont%3E%3Cbr%3E%3C%2Fcenter%3E%3Cbr%3E');";

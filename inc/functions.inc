@@ -4231,6 +4231,31 @@ if (!function_exists("enable_ajax")) {
 	}
 }
 
+if (!function_exists("js_selectAllCheckboxesByName")) {
+	function js_selectAllCheckboxesByName() {
+		?>
+		<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+			
+			<!--
+			function selectAllCheckboxesByName(suunta, name) {
+				list=document.getElementsByTagName("input")
+				if(list.length > 0) {
+										
+					for(i=0;i<=list.length;i++){
+						if(list[i].type == "checkbox") {
+							if(list[i].name.substr(0, name.length) == name) {
+								list[i].checked=suunta;
+							}
+						}
+					}
+				}
+			}
+			//-->
+		</SCRIPT>
+		<?php
+	}
+}
+
 if (!function_exists("js_yllapito")) {
 	function js_yllapito() {
 ?>

@@ -107,7 +107,8 @@
     	(mysql_field_name($result, $i) == "oletus_hyvak3") or
     	(mysql_field_name($result, $i) == "oletus_hyvak4") or
     	(mysql_field_name($result, $i) == "oletus_hyvak5")) { //hyväksyjät
-		$query = "SELECT kuka, nimi
+
+		$query = "	SELECT kuka, nimi
 					FROM kuka
 					WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja = 'o'
 					ORDER BY nimi";
@@ -125,6 +126,31 @@
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[kuka]' $sel>$vrow[nimi]";
+		}
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "nimi" and $alias_set == "KAYTTAJA") {
+
+		$query = "	SELECT nimi
+					FROM kuka
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY nimi";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		$sel="";
+		if (trim($trow[$i]) == "") {
+			$sel = "selected";
+		}
+		$ulos = "<td><select name='$nimi'>";
+
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow['nimi']) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value = '$vrow[nimi]' $sel>$vrow[nimi]";
 		}
 		$ulos .= "</select></td>";
 		$jatko = 0;

@@ -79,6 +79,7 @@ if ($monta > 1 and $monta <= $limit) {
 			
 		echo "<td class='back'>";
 		echo "<form id='toimittaja_$toimittaja[tunnus]' name='toimittaja_$toimittaja[tunnus]' action=\"$PHP_SELF\" method='post'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittaja[tunnus]'>";
 		echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
 		echo "<input type='hidden' name='tee' value='$tee'>";

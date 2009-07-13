@@ -45,7 +45,7 @@
 						$values .= ", ''";
 						break;
 					case 'tila':
-						if($perusta == "TYOMAARAYS") {
+						if ($perusta == "TYOMAARAYS") {
 							$values .= ", 'A'";
 						}
 						else {
@@ -53,7 +53,10 @@
 						}
 						break;
 					case 'tilaustyyppi':
-						if ($monistarow["tila"] == "T") {
+						if ($perusta == "TYOMAARAYS") {
+							$values .= ", 'A'";
+						}
+						elseif ($monistarow["tila"] == "T") {
 							$values .= ", 'T'";
 						}
 						else {
@@ -113,7 +116,7 @@
 			*/
 			
 			$tunnusnippu=$ptunnus=0;
-			if($perusta == "PROJEKTI" and $monistarow["tunnusnippu"] > 0 and $monistarow["tila"] == "T") {
+			if ($perusta == "PROJEKTI" and $monistarow["tunnusnippu"] > 0 and $monistarow["tila"] == "T") {
 				$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 				$insres  = mysql_query($kysely) or pupe_error($kysely);
 				$ptunnus = mysql_insert_id();
@@ -261,7 +264,14 @@
 			$kukarowkesken 		= $kukarow["kesken"];
 			$kukarow["kesken"]	= $utunnus;
 
-			$tilauksesta_myyntitilaus .= "<font class='message'>Lis‰t‰‰n valitut rivit myyntitilaukselle: $utunnus</font><br>";
+			if ($perusta == "TYOMAARAYS") {
+				$tymlisa = t("tyˆm‰‰r‰ykselle");
+			}
+			else {
+				$tymlisa = t("myyntitilaukselle");
+			}
+
+			$tilauksesta_myyntitilaus .= "<font class='message'>".t("Lis‰t‰‰n valitut rivit")." $tymlisa: $utunnus</font><br>";
 
 			$query    = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$utunnus'";
 			$laskures = mysql_query($query);

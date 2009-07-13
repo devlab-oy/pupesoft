@@ -568,6 +568,7 @@ if ($tee == 'P' or $tee == 'E') {
 		echo "<tr><th colspan='2'>".t("Tilitiedot")."</th></tr>";
 
 		echo "<form name = 'lasku' action = '$PHP_SELF?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
 		if (strtoupper($trow['maa']) != strtoupper($yhtiorow['maa'])) {
 
@@ -650,6 +651,7 @@ if ($tee == 'P' or $tee == 'E') {
 
  		// jaaha, ei ollut toimittajaa, joten pyydetään syöttämään tiedot
 		echo "<form name = 'lasku' action = '$PHP_SELF?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='oma' value='1'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 
@@ -1710,6 +1712,7 @@ if (strlen($tee) == 0) {
 	echo "<table>";
 
 	echo "<tr><td><form name = 'viivat' action = '$PHP_SELF?tee=VIIVA' method='post'>".t("Perusta lasku viivakoodilukijalla")."</td>
+		<input type='hidden' name='lopetus' value='$lopetus'>
 		<td><input type = 'text' name = 'nimi' size='8'></td>
 		<td>".t("tiliöintirivejä").":</td>
 		<td><select name='maara'><option value ='2'>1
@@ -1721,6 +1724,7 @@ if (strlen($tee) == 0) {
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
 	echo "<tr><td><form action = '$PHP_SELF?tee=Y' method='post'>".t("Perusta lasku toimittajan Y-tunnuksen/nimen perusteella")."</td>
+		<input type='hidden' name='lopetus' value='$lopetus'>
 		<td><input type = 'text' name = 'ytunnus' size='8' maxlength='15'></td>
 		<td>".t("tiliöintirivejä").":</td>
 		<td><select name='maara'><option value ='2'>1
@@ -1732,6 +1736,7 @@ if (strlen($tee) == 0) {
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
 	echo "<td><form action = '$PHP_SELF?tee=P' method='post'>".t("Perusta lasku ilman toimittajatietoja")."</td>
+		<input type='hidden' name='lopetus' value='$lopetus'>
 		<td>
 		<select name='tyyppi'>
 		<option value =".strtoupper($yhtiorow['maa']).">".t("Kotimaa")."
@@ -1757,6 +1762,7 @@ if (strlen($tee) == 0) {
 			$row = mysql_fetch_array($result);
 
 			echo "<td><form action = '$PHP_SELF?tee=Y' method='post'>".t("Perusta lasku toimittajalle")." $row[nimi]</td>
+			<input type='hidden' name='lopetus' value='$lopetus'>
 			<td><input type='hidden'  name='toimittajaid' value='$toimittajaid'></td>
 			<td>".t("tiliöintirivejä").":</td>
 			<td><select name='maara'><option value ='2'>1

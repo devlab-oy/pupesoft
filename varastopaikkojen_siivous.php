@@ -248,6 +248,44 @@
 		$tee = "";
 	}
 
+	if ($tee == 'CLEANRIVIT') {
+
+		foreach ($rivitunnus as $tunnus) {
+
+			// haetaan tilausrivi
+			$query = "	SELECT *
+						FROM tilausrivi
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus = '$tunnus'";
+ 			$presult = mysql_query($query) or pupe_error($query);
+			$rivirow = mysql_fetch_array($presult);
+
+			// haetaan oletuspaikka
+			$query = "	SELECT *
+						FROM tuotepaikat
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$rivirow[tuoteno]'
+						and oletus != ''";
+	 		$presult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($presult) == 1) {
+				$paikkarow = mysql_fetch_array($presult);
+				$query = "	UPDATE tilausrivi
+		  					SET hyllyalue = '$paikkarow[hyllyalue]',
+							hyllynro = '$paikkarow[hyllynro]',
+							hyllyvali = '$paikkarow[hyllyvali]',
+							hyllytaso = '$paikkarow[hyllytaso]'
+		 					WHERE yhtio = '$kukarow[yhtio]'
+		 					and tunnus = '$tunnus'";
+		 		$presult = mysql_query($query) or pupe_error($query);
+			}
+			else {
+				echo "Tuotteelle $rivirow[tuoteno] ei löytynyt oletuspaikkaa!<br>";
+			}
+		}
+
+	}
+
 	if ($tee == 'LISTAAOLETUKSET') {
 
 		$query = "	SELECT tuoteno, sum(if(oletus!='', 1, 0)) oletukset
@@ -289,7 +327,7 @@
 
 		$query = "	SELECT tuoteno, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, min(tunnus) mintunnus, group_concat(tunnus order by tunnus) tunnukset, count(*) lukumaara, sum(saldo) saldo
 					FROM tuotepaikat
-					WHERE yhtio='$kukarow[yhtio]'
+					WHERE yhtio = '$kukarow[yhtio]'
 					GROUP BY tuoteno, paikka
 					HAVING lukumaara > 1
 					ORDER BY tuoteno";
@@ -333,7 +371,7 @@
 					and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 					and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-					HAVING varastopaikat.tunnus is null
+					AND varastopaikat.tunnus is null
 					ORDER BY tuotepaikat.tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -556,6 +594,71 @@
 		}
 	}
 
+	if ($tee == "LISTAAVIRHEELLISETRIVIT") {
+
+		$laskuri = 0;
+
+		// haetaan kaikki tuotteet, jotka varaa saldoa
+		$query = "	SELECT tilausrivi.tuoteno
+					FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
+					JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					AND tilausrivi.tyyppi in ('L','G','V')
+					AND tilausrivi.laskutettuaika = '0000-00-00'
+					AND (tilausrivi.varattu != 0 or tilausrivi.jt != 0)
+					ORDER BY tilausrivi.tuoteno";
+		$tilrivires = mysql_query($query) or die($query);
+
+		echo "<table>";
+		echo "<tr><th>".t("Tuoteno")."</th>";
+		echo "<th>".t("Varattu")."</th>";
+		echo "<th>".t("Varastopaikka")."</th></tr>";
+
+		echo "<form method='POST' action='$PHP_SELF'>";
+		echo "<input type='hidden' name='tee' value='CLEANRIVIT'>";
+
+ 		while ($tilrivirow = mysql_fetch_array($tilrivires)) {
+
+			// ekaks haetaan ihan kaikki nykyiset paikat suoraan mysql muotoon
+			$query = "	SELECT group_concat(\"'\",rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'),\"'\") paikat
+						FROM tuotepaikat
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$tilrivirow[tuoteno]'
+						GROUP BY tuoteno";
+			$paikatres = mysql_query($query) or die($query);
+
+	 		while ($paikatrow = mysql_fetch_array($paikatres)) {
+				// etsitään varatut kaikilta paikoilla jolla on joku muu varastopaikka (NOT IN)
+				$query = "	SELECT *, concat_ws('-', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka, jt+varattu varattu
+							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							AND tilausrivi.tyyppi in ('L','G','V')
+							AND tilausrivi.tuoteno = '$tilrivirow[tuoteno]'
+							AND (tilausrivi.varattu != 0 or tilausrivi.jt != 0)
+							AND concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) NOT IN ($paikatrow[paikat])";
+				$tuoteresult = mysql_query($query) or die($query);
+
+				while ($tuoterow = mysql_fetch_array($tuoteresult)) {
+					echo "<input type='hidden' name='rivitunnus[]' value='$tuoterow[tunnus]'>";
+					echo "<tr>";
+					echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($tuoterow["tuoteno"])."'>$tuoterow[tuoteno]</a></td>";
+					echo "<td>$tuoterow[varattu]</td>";
+					echo "<td>$tuoterow[paikka]</td>";
+					echo "</tr>";
+					$laskuri++;
+				}
+			}
+		}
+
+		echo "</table>";
+
+		if ($laskuri > 0) {
+			echo "<br><input type='submit' value='".t("Päivitä tilausriveille oletuspaikka")."'>";
+		}
+		echo "</form>";
+
+	}
+
 	if ($tee == "") {
 		//Käyttöliittymä
 
@@ -643,32 +746,38 @@
 		echo "</select></td><td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
 		echo "</form>";
 
-
-		echo "<tr><td class='back'><br></tr>";
 		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<tr><td class='back'><br></tr>";
 		echo "<input type='hidden' name='tee' value='LISTAARIKKINAISET'>";
 		echo "<tr><th>".t("Listaa tuotteet joilla on virheellisiä varastopaikkoja")."</th><td></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
 		echo "</form>";
 
-		echo "<tr><td class='back'><br></tr>";
 		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<tr><td class='back'><br></tr>";
 		echo "<input type='hidden' name='tee' value='LISTAAOLETUKSET'>";
 		echo "<tr><th>".t("Listaa tuotteet joilla on virheellisiä oletuspaikkoja")."</th><td></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
 		echo "</form>";
 
-		echo "<tr><td class='back'><br></tr>";
 		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<tr><td class='back'><br></tr>";
 		echo "<input type='hidden' name='tee' value='LISTAATUNTEMATTOMAT'>";
 		echo "<tr><th>".t("Listaa tuotteet joiden varastopaikka ei kuulu mihinkään varastoon")."</th><td></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
 		echo "</form>";
 
-		echo "<tr><td class='back'><br></tr>";
 		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<tr><td class='back'><br></tr>";
 		echo "<input type='hidden' name='tee' value='LISTAATUOTTEETTOMAT'>";
 		echo "<tr><th>".t("Listaa tuotepaikat joiden tuotetta ei löydy")."</th><td></td>";
+		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
+		echo "</form>";
+
+		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<tr><td class='back'><br></tr>";
+		echo "<input type='hidden' name='tee' value='LISTAAVIRHEELLISETRIVIT'>";
+		echo "<tr><th>".t("Listaa tilausrivit joiden tuotepaikkoja ei löydy")."</th><td></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
 		echo "</form>";
 

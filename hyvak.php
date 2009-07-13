@@ -7,6 +7,7 @@
 	if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php")  !== FALSE) {
 		require ("inc/parametrit.inc");
 	}
+	
 	require ("inc/alvpopup.inc");
 	require_once ("inc/tilinumero.inc");
 
@@ -156,7 +157,7 @@
 		}
 	}
 
-	echo "<font class='head'>".t('Hyväksyttävät laskusi')."</font><hr><br>";
+	if ($kutsuja != "MATKALASKU") echo "<font class='head'>".t('Hyväksyttävät laskusi')."</font><hr><br>";
 
 	$onko_eka_hyvaksyja = FALSE;
 
@@ -180,7 +181,7 @@
 	}
 
 	// halutaan nähdä otsikko, tai ollaan eka hyväksyjä ja ei olla hyväksymässä laskua
-	if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H' and ($kukarow['taso'] == '2' or $kukarow["taso"] == '3'))) {
+	if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H' and $tee != 'D' and ($kukarow['taso'] == '2' or $kukarow["taso"] == '3'))) {
 		$query = "	SELECT *
 					FROM lasku
 					WHERE hyvaksyja_nyt = '$kukarow[kuka]'
@@ -246,7 +247,7 @@
 						yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			echo "<font class='error'>".sprintf(t('Poistit %s:n laskun tunnuksella %d.'), $trow['nimi'],$tunnus)."</font><br>";
+			echo "<font class='error'>".sprintf(t('Poistit %s:n laskun tunnuksella %d.'), $trow['nimi'], $tunnus)."</font><br>";
 		}
 		else {
 			echo "<font class='error'>".t('Laskua ei voitu poistaa, se kuuluu lukitulle tilikaudelle')."!</font><br><br>";
@@ -256,7 +257,7 @@
 		$tee = '';
 	}
 
-	if($tee == "palauta") {
+	if ($tee == "palauta") {
 
 		$query = "	SELECT *
 					FROM lasku
@@ -671,7 +672,7 @@
 		// Olemassaolevaa tiliöintiä muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
 		$query = "	SELECT *
 					FROM tiliointi
-					WHERE tunnus = '$rtunnus' and
+					WHERE tunnus = '$ptunnus' and
 					yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -698,7 +699,7 @@
 		// Etsitään kaikki tiliöintirivit, jotka kuuluvat tähän tiliöintiin ja lasketaan niiden summa
 		$query = "	SELECT sum(summa)
 					FROM tiliointi
-					WHERE aputunnus = '$rtunnus' and
+					WHERE aputunnus = '$ptunnus' and
 					yhtio = '$kukarow[yhtio]' and
 					korjattu = ''
 					GROUP BY aputunnus";
@@ -711,7 +712,7 @@
 			$query = "	UPDATE tiliointi SET
 						korjattu = '$kukarow[kuka]',
 						korjausaika = now()
-						WHERE aputunnus = '$rtunnus' and
+						WHERE aputunnus = '$ptunnus' and
 						yhtio = '$kukarow[yhtio]' and
 						korjattu = ''";
 			$result = mysql_query($query) or pupe_error($query);
@@ -720,7 +721,7 @@
 		$query = "	UPDATE tiliointi SET
 					korjattu = '$kukarow[kuka]',
 					korjausaika = now()
-					WHERE tunnus = '$rtunnus' and
+					WHERE tunnus = '$ptunnus' and
 					yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$tee = "E"; // Näytetään miltä tosite nyt näyttää
@@ -876,11 +877,11 @@
 
 			echo "<td><a href='$PHP_SELF?tee=M&tunnus=$tunnus";
 
-			if (isset($id)) {
-				echo "&id=$id";
+			if (isset($iframe_id)) {
+				echo "&iframe_id=$iframe_id";
 			}
-			elseif ($_POST['id'] != '') {
-				echo "&id=".mysql_real_escape_string($_POST['id']);
+			elseif ($_POST['iframe_id'] != '') {
+				echo "&iframe_id=".mysql_real_escape_string($_POST['iframe_id']);
 			}
 
 			if (isset($iframe) and $iframe == 'yes') {
@@ -998,7 +999,7 @@
 					<input type='hidden' name = 'nayta' value='$nayta'>
 					<input type='hidden' name='tunnus' value = '$tunnus'>
 					<input type='hidden' name='iframe' value = '$iframe'>
-					<input type='hidden' name='id' value = '$id'>";
+					<input type='hidden' name='iframe_id' value = '$iframe_id'>";
 
 			echo "	<tr>
 					<th colspan='2'>".t("Lisää kommentti")."</th>
@@ -1032,7 +1033,7 @@
 					 <input type='hidden' name='nayta' value='$nayta'>
 					 <input type='hidden' name='tunnus' value='$tunnus'>
 					 <input type='hidden' name='iframe' value = '$iframe'>
-					 <input type='hidden' name='id' value = '$id'>";
+					 <input type='hidden' name='iframe_id' value = '$iframe_id'>";
 
 			echo "<tr><th colspan='2'>".t("Hyväksyjät")."</th></tr>";
 
@@ -1221,312 +1222,24 @@
 
 		// Tätä ei siis tehdä jos kyseessä on kevenetty versio
 		if ($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') {
-
-			echo "<br><table>
-					<tr>
-					<th colspan='2'>".t("Tili")."</th>
-					<th>".t("Tarkenne")."</th>
-					<th>".t("Summa")."</th>
-					<th>".t("Vero")."</th>
-					<th>".t("Selite")."</th>
-					<th>".t("Tee")."</th></tr>";
-
-			// vaan kakkostasolla saa tehdä muutoksia
-			if ($kukarow["taso"] == '2' or $kukarow["taso"] == '3') {
-
-				$query = "	SELECT tunnus, nimi
-							FROM kustannuspaikka
-							WHERE yhtio = '$kukarow[yhtio]' and
-							tyyppi = 'K' and
-							kaytossa <> 'E'
-							ORDER BY nimi";
-				$result = mysql_query($query) or pupe_error($query);
-
-				$ulos = "<select name = 'kustp'><option value = ' '>".t("Ei kustannuspaikkaa")."";
-
-				while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
-					$valittu = "";
-					if ($kustannuspaikkarow['tunnus'] == $kustp) {
-						$valittu = "selected";
-					}
-					$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
-				}
-
-				$ulos .= "</select><br>";
-
-				$query = "	SELECT tunnus, nimi
-							FROM kustannuspaikka
-							WHERE yhtio = '$kukarow[yhtio]' and
-							tyyppi = 'O' and
-							kaytossa <> 'E'
-							ORDER BY nimi";
-				$result = mysql_query($query) or pupe_error($query);
-
-				$ulos .= "<select name = 'kohde'><option value = ' '>".t("Ei kohdetta")."";
-
-				while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
-					$valittu = "";
-					if ($kustannuspaikkarow['tunnus'] == $kohde) {
-						$valittu = "selected";
-					}
-					$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
-				}
-
-				$ulos .= "</select><br>";
-
-				$query = "	SELECT tunnus, nimi
-							FROM kustannuspaikka
-							WHERE yhtio = '$kukarow[yhtio]' and
-							tyyppi = 'P' and
-							kaytossa <> 'E'
-							ORDER BY nimi";
-				$result = mysql_query($query) or pupe_error($query);
-
-				$ulos .= "<select name = 'projekti'><option value = ' '>".t("Ei projektia")."";
-
-				while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
-					$valittu = "";
-					if ($kustannuspaikkarow['tunnus'] == $projekti) {
-						$valittu = "selected";
-					}
-					$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
-				}
-				$ulos .= "</select>";
-
-				echo "	<form name='uusi' id='uusi' action = '$PHP_SELF' method='post'>
-						<input type='hidden' name='tee' value = 'U'>
-						<input type='hidden' name='nayta' value = '$nayta'>
-						<input type='hidden' name='tunnus' value = '$tunnus'>
-						<input type='hidden' name='iframe' value = '$iframe'>
-						<input type='hidden' name='id' value = '$id'>";
-
-				echo "<tr><td colspan='2'>";
-
-				if ($tiliulos == '') {
-					echo "<input type='text' name='tili' value = '$tili' size='12'>";
-				}
-				else {
-					echo "$tiliulos";
-				}
-				echo "	</td>
-						<td>
-							$ulos
-						</td>
-						<td>
-							<input type='text' name='summa' value = '$summa'>
-						</td>";
-
-				// Jos alvit on hardkoodattu tileihin (hui, kauheaa, mutta joku niin tahtoo), niin salasanat.php:ssä
-				// on määritettävä $hardcoded_alv=1;
-				if ($hardcoded_alv != 1) {
-					echo "<td>".alv_popup('vero',$vero)."</td>";
-				}
-				else {
-					echo "<td></td>";
-				}
-
-				echo "
-						<td>
-							<input type='text' name='selite' size = '8' value = '$selite'>
-						</td>
-						<td align='center'>
-							$virhe <input type='Submit' value = '".t("Lisää")."'>
-						</td>
-					</tr></form>";
-
-				// jos ei kuulu tilikauteen disabloidaan uusi-formi
-				if ($laskurow["tapvm"] < $yhtiorow["ostoreskontrakausi_alku"]) {
-					echo "<script>
-							obj = document.getElementById(\"uusi\");
-					 		for (i=0; i<obj.length; i++) {
-								obj.elements[i].disabled = true;
-							}
-						</script>";
-				}
-
-			}
-
-			$formi = "uusi";
-			$kentta = "tili";
-
-			// Näytetään vanhat tiliöinnit muutosta varten
-			$naytalisa = '';
-			if ($nayta == '') $naytalisa = "and tapvm='" . $laskurow['tapvm'] . "'";
-
-			$query = "	SELECT tiliointi.tunnus, tiliointi.tilino, tili.nimi, kustp, kohde, projekti, summa, vero, selite, lukko, tapvm
-					  	FROM tiliointi
-						LEFT JOIN tili USING  (yhtio,tilino)
-					  	WHERE ltunnus = '$tunnus' and
-						tiliointi.yhtio = '$kukarow[yhtio]' and
-						korjattu = ''
-						$naytalisa";
-			$result = mysql_query($query) or pupe_error($query);
-
-			while ($tiliointirow=mysql_fetch_array ($result)) {
-
-				echo "<tr>";
-
-				// Ei näytetä ihan kaikkea
-				for ($i=1; $i<mysql_num_fields($result)-2 ; $i++) {
-
-					 // huh mikä häkki, mutta tarkoituksena saada aikaan yksi kenttä
-					if ($i == 3) {
-
-						echo "<td>";
-
-						// Meillä on kustannuspaikka
-						if (strlen($tiliointirow[$i]) > 0) {
-							$query = "	SELECT nimi
-										FROM kustannuspaikka
-										WHERE yhtio = '$kukarow[yhtio]' and
-										tunnus = '$tiliointirow[$i]' and
-										tyyppi = 'K'";
-							$xresult = mysql_query($query) or pupe_error($query);
-							$xrow = mysql_fetch_array ($xresult);
-							echo "$xrow[nimi]/";
-						}
-
-						$i++;
-
-						// Meillä on kohde
-						if (strlen($tiliointirow[$i]) > 0) {
-							$query = "	SELECT nimi
-										FROM kustannuspaikka
-										WHERE yhtio = '$kukarow[yhtio]' and
-										tunnus = '$tiliointirow[$i]' and
-										tyyppi = 'O'";
-							$xresult = mysql_query($query) or pupe_error($query);
-							$xrow = mysql_fetch_array ($xresult);
-							echo "$xrow[nimi]/";
-						}
-
-						$i++;
-
-						 // Meillä on projekti
-						if (strlen($tiliointirow[$i]) > 0) {
-							$query = "	SELECT nimi
-										FROM kustannuspaikka
-										WHERE yhtio = '$kukarow[yhtio]' and
-										tunnus = '$tiliointirow[$i]' and
-										tyyppi = 'P'";
-							$xresult = mysql_query($query) or pupe_error($query);
-							$xrow = mysql_fetch_array ($xresult);
-							echo "$xrow[nimi]/";
-						}
-						echo "</td>";
-					}
-					else {
-						echo "<td>$tiliointirow[$i]</td>";
-					}
-					if ($i == 6) {
-						$totsum += $tiliointirow[$i];
-					}
-
-				}
-
-				// Riviä saa muuttaa vaan jos taso 2
-				if ($tiliointirow['lukko'] != 1 and $tiliointirow['tapvm'] == $laskurow['tapvm'] and ($kukarow["taso"] == '2' or $kukarow["taso"] == '3') and $laskurow["tapvm"] >= $yhtiorow["ostoreskontrakausi_alku"]) {
-					echo "	<form action = '$PHP_SELF' method='post' >
-							<input type='hidden' name = 'nayta' value='$nayta'>
-							<input type='hidden' name='tunnus' value = '$tunnus'>
-							<input type='hidden' name='iframe' value = '$iframe'>
-							<input type='hidden' name='id' value = '$id'>
-							<input type='hidden' name='rtunnus' value = '$tiliointirow[tunnus]'>
-							<input type='hidden' name='tee' value = 'P'>
-							<input type='hidden' name = 'nayta' value='$nayta'>
-							<td align='center'><input type='Submit' value = '".t("Muuta")."'></td>
-							</tr></form>";
-				}
-				else {
-					echo "	<td>".t("Tiliöinti on lukittu")."</td>
-							</tr>";
-				}
-			}
-
-			// Täsmääkö tiliöinti laskun kanssa??
-			$yhtok = t("Tiliöinti kesken");
-			$ok = 0;
-
-			if (round($totsum,2) == 0) {
-				$yhtok = "".t("Tiliöinti ok")."!";
-				$ok = 1;
-			}
-
-			$totsum = sprintf("%.2f", $totsum * -1);
-			$tila = '';
-
-			if ($nayta == 'on') $tila = 'checked';
-
-			echo "	<tr>
-					<td colspan='2'>".t("Yhteensä")."</td>
-					<td>$yhtok</td>
-					<td>$totsum</td>
-					<td></td>
-					<td>Näytä kaikki</td>
-					<form action = '$PHP_SELF' method='post' onchange='submit()'>
-					<input type='hidden' name = 'tunnus' value='$tunnus'>
-					<input type='hidden' name='iframe' value = '$iframe'>
-					<input type='hidden' name='id' value = '$id'>
-					<input type='hidden' name='tee' value = ''>
-					<td><input type='checkbox' onclick='submit();' name = 'nayta' $tila></td>
-					</form>
-					</tr>";
-			echo "</table>";
-
-			// Onko tiliöinti ok?
-			echo "<table><tr>";
-
-			$query = "select tunnus from toimi where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]' and laskun_erittely != ''";
-			$toimires = mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($toimires)==1) {
-				echo "<td class='back'><form action = 'matkalasku.php' method='get'>
-							<input type='hidden' name = 'tilausnumero' value='$tunnus'>
-							<input type='hidden' name = 'tee' value='ERITTELE'>
-							<input type='hidden' name = 'lopetus' value='".urlencode("hyvak.php?tunnus={$laskurow["tunnus"]}")."'>
-							<input type='Submit' value='".t("Kululaskun erittely")."'>
-							</form></td>";
-			}
-
-			if($laskurow["tilaustyyppi"] == "M") {
-				
-				//	Saadaanko muokata superina?
-				$query = "	SELECT yhtio
-							FROM oikeu
-							WHERE yhtio	= '$kukarow[yhtio]'
-							and kuka	= '$kukarow[kuka]'
-							and nimi	= 'matkalasku.php'
-							and alanimi = 'SUPER'";
-				$oires = mysql_query($query) or pupe_error($query);
-				if(mysql_num_rows($oires) > 0) {
-					$su = "SUPER";
-				}
-				else {
-					$su = "";
-				}
-				
-				echo "<td class='back'><form action = 'matkalasku.php' method='post'>
-							<input type='hidden' name = 'tilausnumero' value='$tunnus'>
-							<input type='hidden' name = 'tee' value='MUOKKAA'>
-							<input type='hidden' name = 'toim' value='$su'>
-							<input type='hidden' name = 'lopetus' value='".urlencode("hyvak.php?tunnus={$laskurow["tunnus"]}")."'>
-							<input type='Submit' value='".t("Tarkastele matkalaskua")."'>
-							</form></td>";
-			}
-
+			
+			// Tositteen tiliöintirivit...
+			require ("inc/tiliointirivit.inc");
+						
 			if ($ok == 1) {
-				echo "<td class='back'><form action = '$PHP_SELF' method='post'>
-							<input type='hidden' name = 'tunnus' value='$tunnus'>
-							<input type='hidden' name = 'tee' value='H'>
-							<input type='Submit' value='".t("Hyväksy tiliöinti ja lasku")."'>
-							</form></td>";
+				echo "<form action = '$PHP_SELF' method='post'>
+						<input type='hidden' name = 'tunnus' value='$tunnus'>
+						<input type='hidden' name = 'tee' value='H'>
+						<input type='Submit' value='".t("Hyväksy tiliöinti ja lasku")."'>
+						</form><br>";
 			}
 
-			if($laskurow["h1time"] != "0000-00-00 00:00:00") {
+			if ($laskurow["h1time"] != "0000-00-00 00:00:00") {
 				echo "<form action = '$PHP_SELF' method='post'>
 						<input type='hidden' name='tee' value='palauta'>
 						<input type='hidden' name='tunnus' value='$tunnus'>
-						<td class='back'><input type='Submit' value='".t("Palauta lasku edelliselle hyväksyjälle")."'></td>
-						</form>";
+						<input type='Submit' value='".t("Palauta lasku edelliselle hyväksyjälle")."'>
+						</form><br>";
 			}
 
 			// Näytetään alv-erittely, jos on useita kantoja.
@@ -1541,7 +1254,7 @@
 
 				if (mysql_num_rows($result) > 1) {
 
-					echo "<td class='back'><table><tr>";
+					echo "<br><table><tr>";
 
 					for ($i = 0; $i < mysql_num_fields($result); $i++) {
 						echo "<th>" . t(mysql_field_name($result,$i))."</th>";
@@ -1561,12 +1274,10 @@
 
 					}
 
-					echo "</table></td>";
+					echo "</table>";
 
 				}
-			}
-			
-			echo "</tr></table>";
+			}			
 		}
 
 		if ($kukarow['taso'] == 9) {
@@ -1594,7 +1305,7 @@
 		
 		//	Onko kuva tietokannassa?
 		$liitteet = ebid($laskurow["tunnus"], true);
-		
+				
 		if (is_array($liitteet) and count($liitteet) > 0) {
 			echo "<form action = '$PHP_SELF' method='post'>
 	  				<input type='hidden' name = 'tunnus' value='$tunnus'>
@@ -1606,16 +1317,16 @@
 			
 			
 			if (is_array($liitteet) and count($liitteet) == 1) {
-				echo "<input type='hidden' name = 'id' value='$liitteet[0]'>
+				echo "<input type='hidden' name = 'iframe_id' value='$liitteet[0]'>
 						<input type='Submit' value='".t("Avaa")."'>";
 			}
 			else {
-				echo "<select name='id' onchange='submit();'>
+				echo "<select name='iframe_id' onchange='submit();'>
 						<option value=''>Valitse lasku</option>";
 					
 				$liicoint = 1;
 				foreach($liitteet as $liite) {
-					if ($id == $liite) $sel = "selected";
+					if ($iframe_id == $liite) $sel = "selected";
 					else $sel = "";
 				
 					echo "<option value='$liite' $sel>".t("Liite")." $liicoint</option>";
@@ -1639,8 +1350,8 @@
 		
 		echo "</tr></table>";
 		
-		if ($iframe == 'yes' and $id != '') {
-			echo "<iframe src='$id' name='alaikkuna' width='100%' height='60%' align='bottom' scrolling='auto'></iframe>";
+		if ($iframe == 'yes' and $iframe_id != '') {
+			echo "<iframe src='$iframe_id' name='alaikkuna' width='100%' height='60%' align='bottom' scrolling='auto'></iframe>";
 		}
 	}
 	elseif ($kutsuja=="") {

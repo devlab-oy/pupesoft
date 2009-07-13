@@ -84,6 +84,9 @@ if (!function_exists("lopetus")) {
 				$lopetus = str_replace('////','?',               $lopetus);
 				$lopetus = preg_replace('/([^:])\/\/\//','\\1#', $lopetus);
 				$lopetus = preg_replace('/([^:])\/\//','\\1&',   $lopetus);
+				
+				preg_match('/\/NIMILISA=(.*?)\//',$lopetus, $nimilisa);
+				$lopetus = preg_replace('/\/NIMILISA=(.*?)\//','',   $lopetus);
 
 				if ($meta != "") {
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$lopetus'>";
@@ -124,8 +127,15 @@ if (!function_exists("lopetus")) {
 					if ($lask > 0) {
 						$lopetus .= "&lopetus=$lopetukset[0]";
 					}
+					
+					if ($nimilisa[1] != "") {
+						$nlisa = " / ".$nimilisa[1];						
+					}
+					else {
+						$nlisa = "";
+					}
 
-					if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": $row[nimitys]</a><br>";
+					if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": $row[nimitys]$nlisa</a><br>";
 					else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
 				}
 		

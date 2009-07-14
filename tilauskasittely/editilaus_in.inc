@@ -334,7 +334,7 @@ while (!feof ($fd)) {
 
 			break;
 
-		case 'ORFFVN_NU' :
+		case 'OBGMINUMB' :
 		case 'OSTOTIL.OT_NRO' :
 		//Asiakkkaan tilausnumero
 			$asiakkaan_tilausnumero = $tieto;
@@ -356,7 +356,6 @@ while (!feof ($fd)) {
 			$edi_kommentti .= $tieto . ' ';
 			break;
 
-		case 'OBGMINUMB' :
 		case 'ORFFABONU' :
 		case 'OSTOTIL.OT_VIITTEEMME' :
 		//Asiakkaan viite

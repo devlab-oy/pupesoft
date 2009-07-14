@@ -969,7 +969,7 @@ if($tee == "") {
 			echo "	<form action='$PHP_SELF' method='post' name='vie_tiedostoon'>
 						<input type='submit' value='".t("Vie valittujen sähköpostiosoitteet")."'>
 						<input type='hidden' name='tee' value='tallenna_ja_laheta_mailiin'>
-						<input type='hidden' name='kaunisnimi' value='".$kukarow['yhtio']."Asiakkaiden_yhteyshenkilot_".date('d_m_Y_H_i').".xls'>";
+						<input type='hidden' name='kaunisnimi' value='Asiakkaiden_yhteyshenkilot_".date('d_m_Y_H_i').".xls'>";
 		}
 					
 		$rivejatiedostoon = 0;

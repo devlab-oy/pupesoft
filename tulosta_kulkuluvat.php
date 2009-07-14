@@ -1,1 +1,0 @@
-/Users/tuomas/Sites/runtech_private/tulosta_kulkuluvat.php

@@ -79,13 +79,7 @@ if($tee == "tulosta") {
 
 						//viivakoodi
 						$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
-						imagejpeg(Image_Barcode::draw($row["avain"], 'Code128', 'jpg', false, 1, 25), $nimi, 100);
-
-						$fh = fopen($nimi, "r");
-						$data = fread($fh, filesize($nimi));
-						fclose($fh);
-
-						$image = $pdf->jfif_embed($data);
+						imagejpeg(Image_Barcode::draw($row["avain"], 'code128', 'jpg', false, 1, 25), $nimi, 100);
 
 						$pdf->placeImage($h, $wk, $nimi);
 

@@ -360,10 +360,41 @@ else {
 		}
 	}
 	else {
-		//tässä käydään läpi vähän näitä rahtijuttuja
-		//jos rahtihinnoittelu tapahtuu tilauksen hinnan (alviton) perusteella
-		//tai rahtihinnoittelu tapahtuu tilauksen painon mukaan automaattisesti niin tehdään se tässä
-		if ($yhtiorow["rahti_hinnoittelu"] == "o" or $yhtiorow["rahti_hinnoittelu"] == "P") {
+		// tässä käydään läpi vähän näitä rahtijuttuja
+		// katotaan saadaanko tilaus ilmaseks jos ollaan yli rajojen
+		// haetaan asiakkaan alarajasumma
+		$as_que = "	SELECT rahtivapaa_alarajasumma
+					FROM asiakas
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$laskurow[liitostunnus]'
+					AND rahtivapaa_alarajasumma > 0";
+		$as_res = mysql_query($as_que) or pupe_error($as_que);
+
+		$rahtivapaa_alarajasumma = 0;
+
+		if (mysql_num_rows($as_res) == 1) {
+			$as_row = mysql_fetch_array($as_res);
+			$rahtivapaa_alarajasumma = (float) $as_row["rahtivapaa_alarajasumma"];
+		}
+		else {
+			$rahtivapaa_alarajasumma = (float) $yhtiorow["rahtivapaa_alarajasumma"];
+		}
+
+		if (isset($kaikkiyhteensa) and (float) $kaikkiyhteensa != 0) {
+			$kaikkiyhteensa = yhtioval($kaikkiyhteensa, $laskurow["vienti_kurssi"]); // käännetään yhteensäsumma yhtiövaluuttaan
+		}
+		else {
+			$kaikkiyhteensa = 0;
+		}
+
+		if ($kaikkiyhteensa > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) {
+			$tilaus_valmis_ulos .= t("Tilauksen arvo ylitti rahtivapaasumman! Merkattiin tilaus rahtivapaaksi.")."<br>";
+			$query = "UPDATE lasku SET rahtivapaa = 'o' WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[tunnus]'";
+			$rahtivapres = mysql_query($query) or pupe_error($query);
+		}
+		elseif ($yhtiorow["rahti_hinnoittelu"] == "o" or $yhtiorow["rahti_hinnoittelu"] == "P") {
+			// jos rahtihinnoittelu tapahtuu tilauksen hinnan (alviton) perusteella
+			// tai rahtihinnoittelu tapahtuu tilauksen painon mukaan automaattisesti niin tehdään se tässä
 
 			// tähän kerätään tilausnumerot, joista lasketaan rahti
 			$rahtimaksu_tunnukset = "";
@@ -481,6 +512,7 @@ else {
 		}
 		else {
 			// meillä on rahdituksessa syötettävään painoon perustuva rahtimaksu
+			// katsotaan onko rahtituotenumero syötetty jo käsin
 			$query = "	SELECT tunnus
 						from tilausrivi
 						where yhtio = '$kukarow[yhtio]'

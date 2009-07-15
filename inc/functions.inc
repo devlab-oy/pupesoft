@@ -6289,30 +6289,6 @@ if (!function_exists("hae_rahtimaksu")) {
 			$kyht = $pakka["kilot"];
 		}
 
-		// katotaan saadaanko siltikin ilmaseks jos ollaan yli rajojen
-		// haetaan asiakkaan alarajasumma
-		$as_que = "	SELECT rahtivapaa_alarajasumma
-					FROM asiakas
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND tunnus = '$laskurow[liitostunnus]'
-					AND rahtivapaa_alarajasumma > 0";
-		$as_res = mysql_query($as_que) or pupe_error($as_que);
-
-		$rahtivapaa_alarajasumma = 0;
-
-		if (mysql_num_rows($as_res) == 1) {
-			$as_row = mysql_fetch_array($as_res);
-			$rahtivapaa_alarajasumma = $as_row["rahtivapaa_alarajasumma"];
-		}
-		else {
-			$rahtivapaa_alarajasumma = $yhtiorow["rahtivapaa_alarajasumma"];
-		}
-
-		if ($kyht > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) {
-			// jos ollaan yli rajojen return nolla
-			return 0;
-		}
-
 		// haetaan ensimmäinen (pienimmällä postinumerolla) etäisyys
 		$query = "	SELECT
 					etaisyydet.km, etaisyydet.postino

@@ -5117,28 +5117,38 @@ if ($tee == '') {
 
 				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 
-				if ($yhtiorow["rahti_hinnoittelu"] == "P" and $laskurow["rahtivapaa"] == "") {
+				$as_que = "	SELECT rahtivapaa_alarajasumma
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus = '$laskurow[liitostunnus]'
+							AND rahtivapaa_alarajasumma > 0";
+				$as_res = mysql_query($as_que) or pupe_error($as_que);
 
+				$rahtivapaa_alarajasumma = 0;
+
+				if (mysql_num_rows($as_res) == 1) {
+					$as_row = mysql_fetch_array($as_res);
+					$rahtivapaa_alarajasumma = (float) $as_row["rahtivapaa_alarajasumma"];
+				}
+				else {
+					$rahtivapaa_alarajasumma = (float) $yhtiorow["rahtivapaa_alarajasumma"];
+				}
+
+				if (isset($summa) and (float) $summa != 0) {
+					$kaikkiyhteensa = yhtioval($summa, $laskurow["vienti_kurssi"]); // k‰‰nnet‰‰n yhteens‰summa yhtiˆvaluuttaan
+				}
+				else {
+					$kaikkiyhteensa = 0;
+				}
+
+				if (($kaikkiyhteensa > $rahtivapaa_alarajasumma and $rahtivapaa_alarajasumma != 0) or $laskurow["rahtivapaa"] != "") {
+					echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu").":</th><td class='spec' align='right'>0.00</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
+				}
+				elseif ($yhtiorow["rahti_hinnoittelu"] == "P" or $yhtiorow["rahti_hinnoittelu"] == "o") {
 					$rahtihinta = hae_rahtimaksu($laskurow["tunnus"]);
-
-					if ($rahtihinta != 0) {
-						$rahti = mysql_fetch_array($rares);
-
-						echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>&nbsp;</th><td>&nbsp;</td><td>&nbsp;</td></tr>";
-						echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Rahdin paino yhteens‰").":</th><td class='spec' align='right'>$painorow[massa]</td><td class='spec'>Kg</td></tr>";
-
-						if (trim($yhtiorow["rahti_tuotenumero"]) == "") {
-							$tuotska = t("Rahtikulu");
-						}
-						else {
-							$tuotska = $yhtiorow["rahti_tuotenumero"];
-						}
-
-						echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtihinta yhteens‰").":</th><td class='spec' align='right'>$rahtihinta</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
-						echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>&nbsp;</th><td>&nbsp;</td><td>&nbsp;</td></tr>";
-						echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Loppusumma").":</th><td class='spec' align='right'>".sprintf("%.2f",$summa+$rahtihinta)."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
-					}
-				}																
+					echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu").":</th><td class='spec' align='right'>".sprintf("%.2f",$rahtihinta)."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
+					echo "<tr>$jarjlisa<td class='back' colspan='$ycspan'>&nbsp;</td><th colspan='5' align='right'>".t("Loppusumma").":</th><td class='spec' align='right'>".sprintf("%.2f",$summa+$rahtihinta)."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
+				}
 
 				//annetaan mahdollisuus antaa loppusumma joka jyvitet‰‰n riveille arvoosuuden mukaan
 				if ($kukarow["extranet"] == "" and (($yhtiorow["salli_jyvitys_myynnissa"] == "" and $kukarow['kassamyyja'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "K") or $toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI")) {

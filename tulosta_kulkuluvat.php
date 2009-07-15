@@ -54,7 +54,7 @@ if($tee == "tulosta") {
 	$i=0;
 	foreach($ketka as $kuka => $x) {
 		if($x!="") {
-			$query = "	SELECT nimi, encrypt(concat(yhtio,kuka), ".salt_kv.") avain
+			$query = "	SELECT nimi, encrypt(concat(tunnus,kuka), ".salt_kv.") avain
 						FROM kuka
 						WHERE yhtio='$kukarow[yhtio]' and tunnus='$kuka'";
 			$result = mysql_query($query) or pupe_error($query);

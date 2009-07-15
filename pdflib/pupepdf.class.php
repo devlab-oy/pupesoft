@@ -406,12 +406,12 @@ class PDF extends pdffile {
 				$this->image_place($image,$top,$width,$this->currentPage["oid"]);
 			}
 			else {
-				echo "Kuvavirhe!";
+				echo "Kuvavirhe 1!";
 				return false;
 			}			
 		}
 		else {
-			echo "Kuvavirhe!";
+			echo "Kuvavirhe 2!";
 			return false;
 		}
 	}
@@ -456,12 +456,12 @@ class PDF extends pdffile {
 				$this->template->image($template, $left, $bottom, $width, $height, $image);
 			}
 			else {
-				echo "Kuvavirhe!";
+				echo "Kuvavirhe 3!";
 				return false;
 			}			
 		}
 		else {
-			echo "Kuvavirhe!";
+			echo "Kuvavirhe 4!";
 			return false;
 		}
 	}

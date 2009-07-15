@@ -911,7 +911,6 @@
 						WHERE maksupositio.yhtio ='$kukarow[yhtio]'
 						and maksupositio.otunnus ='$srow[jaksotettu]'";
 			$result = mysql_query($query) or pupe_error($query);
-
 			echo "<tr><td>".t("Maksuehto").":</td>";
 
 			if(mysql_num_rows($result) > 0) {
@@ -2529,7 +2528,15 @@
 			$erprow = mysql_fetch_array($erpres);
 			$maksuehto = $erprow["tunnus"]; // valitaan t‰‰ maksuehdoks
 		}
-
+		
+		//	Tarkistetaan, ett‰ meill‰ on jaksotettu maksuehto jos lasku on jaksotettu, p‰ivitet‰‰n joku jos n‰in ei ole
+		if ($jaksotettu > 0 and $meapurow["jaksotettu"] == "") {
+			$jaksquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and jaksotettu != '' and kaytossa = '' order by tunnus limit 1";
+			$jaksres = mysql_query($jaksquery) or pupe_error($jaksquery);
+			$jaksrow = mysql_fetch_array($jaksres);
+			$maksuehto = $jaksrow["tunnus"]; // valitaan t‰‰ maksuehdoks
+		}
+		
 		// jos ollaan valittu rahdinmaksajaksi oletus, haetaan oletusmaksaja toimitustavalta
 		if ($maksaja == "O") {
 			$apuqu = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";

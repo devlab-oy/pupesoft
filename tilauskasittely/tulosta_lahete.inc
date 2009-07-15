@@ -1606,10 +1606,16 @@ if (!function_exists('print_pdf')) {
 		// itse print komento...
 		if ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
 			$liite = $pdffilenimi;
+			$content_body = "";
 
 			if ($tyyppi == "TILAUSVAHVISTUS") {
 				$kutsu = "Tilausvahvistus";
 				echo t("Tilausvahvistus tulostuu")." $laskurow[tunnus]...<br>";
+				$content_body = t("Kiitos tilauksestanne", $kieli).",\n\n";
+				$content_body .= t("Tilausnumeronne on", $kieli)." $laskurow[tunnus]\n\n";
+				$content_body .= t("Tämä on automaattinen vahvistus tilauksestanne, tähän sähköpostiin ei tarvitse vastata.", $kieli)."\n\n";
+				$content_body .= t("Ystävällisin terveisin", $kieli).",\n";
+				$content_body .= $yhtiorow["nimi"]."\n";
 			}
 			elseif ($tyyppi == "YLLAPITOSOPIMUS") {
 				$kutsu = "Ylläpitosopimus";

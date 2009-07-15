@@ -801,37 +801,40 @@
 					$rivit .= sprintf("%-20.s",$tvtilausrivirow['tuoteno']);
 					$rivit .= sprintf("%8.s"  ,$tvtilausrivirow['tilkpl']);
 					$rivit .= sprintf("%23.s"  ,$tvtilausrivirow['varattu']);
-					$rivit .= "\r\n";
+					$rivit .= "\n";
 
 					if ($nimitysloput != '') {
 						$rivit .= sprintf("%-75.s",$nimitysloput);
-						$rivit .= "\r\n";
+						$rivit .= "\n";
 					}
 				}
 
-				$header = "From: <$yhtiorow[postittaja_email]>\r\n";
+				$header = "From: <$yhtiorow[postittaja_email]>\n";
 
-				$ulos  = sprintf("%-50.s",$yhtiorow['nimi'])								."".t("Keräyspoikkeamat", $kieli)."\r\n";
-				$ulos .= sprintf("%-50.s",$yhtiorow['osoite'])								."\r\n";
-				$ulos .= sprintf("%-50.s",$yhtiorow['postino']." ".$yhtiorow['postitp'])	.tv1dateconv($laskurow['luontiaika'])."\r\n";
-				$ulos .= "\r\n";
-				$ulos .= sprintf("%-50.s","".t("Tilaaja", $kieli).":")										."".t("Toimitusosoite", $kieli).":\r\n";
-				$ulos .= sprintf("%-50.s",$laskurow['nimi'])								.$laskurow['toim_nimi']."\r\n";
-				$ulos .= sprintf("%-50.s",$laskurow['nimitark'])							.$laskurow['toim_nimitark']."\r\n";
-				$ulos .= sprintf("%-50.s",$laskurow['osoite'])								.$laskurow['toim_osoite']."\r\n";
-				$ulos .= sprintf("%-50.s",$laskurow['postino']." ".$laskurow['postitp'])	.$laskurow['toim_postino']." ".$laskurow['toim_postitp']."\r\n";
-				$ulos .= "\r\n";
-				$ulos .= sprintf("%-50.s","".t("Toimitus", $kieli).": ".$laskurow['toimitustapa'])			."".t("Tilausnumero", $kieli).": ".$laskurow['tunnus']."\r\n";
-				$ulos .= sprintf("%-50.s","".t("Tilausviite", $kieli).": ".$laskurow['viesti'])				."".t("Myyjä", $kieli).": ".$laskurow['kukanimi']."\r\n";
+				$ulos  = sprintf("%-50.s",$yhtiorow['nimi'])								."".t("Keräyspoikkeamat", $kieli)."\n";
+				$ulos .= sprintf("%-50.s",$yhtiorow['osoite'])								."\n";
+				$ulos .= sprintf("%-50.s",$yhtiorow['postino']." ".$yhtiorow['postitp'])	.tv1dateconv($laskurow['luontiaika'])."\n";
+				$ulos .= "\n";
+				$ulos .= sprintf("%-50.s","".t("Tilaaja", $kieli).":")										."".t("Toimitusosoite", $kieli).":\n";
+				$ulos .= sprintf("%-50.s",$laskurow['nimi'])								.$laskurow['toim_nimi']."\n";
+				$ulos .= sprintf("%-50.s",$laskurow['nimitark'])							.$laskurow['toim_nimitark']."\n";
+				$ulos .= sprintf("%-50.s",$laskurow['osoite'])								.$laskurow['toim_osoite']."\n";
+				$ulos .= sprintf("%-50.s",$laskurow['postino']." ".$laskurow['postitp'])	.$laskurow['toim_postino']." ".$laskurow['toim_postitp']."\n";
+				$ulos .= "\n";
+				$ulos .= sprintf("%-50.s","".t("Toimitus", $kieli).": ".$laskurow['toimitustapa'])			."".t("Tilausnumero", $kieli).": ".$laskurow['tunnus']."\n";
+				$ulos .= sprintf("%-50.s","".t("Tilausviite", $kieli).": ".$laskurow['viesti'])				."".t("Myyjä", $kieli).": ".$laskurow['kukanimi']."\n";
 
 				if ($laskurow['comments'] != '') {
 					$ulos .= "".t("Kommentti", $kieli).": ".$laskurow['comments']."\n";
 				}
 
-				$ulos .= "\r\n";
-				$ulos .= "".t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."          ".t("Tilattu", $kieli)."            ".t("Toimitetaan", $kieli)."\r\n";
-				$ulos .= "---------------------------------------------------------------------------------\r\n";
-				$ulos .= $rivit."\r\n";
+				$ulos .= "\n";
+				$ulos .= "".t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."          ".t("Tilattu", $kieli)."            ".t("Toimitetaan", $kieli)."\n";
+				$ulos .= "---------------------------------------------------------------------------------\n";
+				$ulos .= $rivit."\n";
+
+				$ulos .= "\n\n";
+				$ulos .= t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.", $kieli)."\n";
 
 				// Lähetetään keräyspoikkeama asiakkaalle
 				if ($laskurow["email"] != '' and $laskurow["kerayspoikkeama"] == 0) {
@@ -842,16 +845,16 @@
 				// Lähetetään keräyspoikkeama myyjälle
 				if ($laskurow["kukamail"] != '' and ($laskurow["kerayspoikkeama"] == 0 or $laskurow["kerayspoikkeama"] == 2)) {
 					if (($laskurow["email"] == '' or $boob === FALSE) and $laskurow["kerayspoikkeama"] == 0) {
-						$ulos = t("Asiakkaalta puuttuu sähköpostiosoite! Keräyspoikkeamia ei voitu lähettää!")."\r\n\r\n\r\n".$ulos;
+						$ulos = t("Asiakkaalta puuttuu sähköpostiosoite! Keräyspoikkeamia ei voitu lähettää!")."\n\n\n".$ulos;
 					}
 					elseif ($laskurow["kerayspoikkeama"] == 2) {
-						$ulos = t("Asiakkaalle on merkitty että hän ei halua keräyspoikkeama ilmoituksia!")."\r\n\r\n\r\n".$ulos;
+						$ulos = t("Asiakkaalle on merkitty että hän ei halua keräyspoikkeama ilmoituksia!")."\n\n\n".$ulos;
 					}
 					else {
-						$ulos = t("Tämä viesti on lähetetty myös asiakkaalle")."!\r\n\r\n\r\n".$ulos;
+						$ulos = t("Tämä viesti on lähetetty myös asiakkaalle")."!\n\n\n".$ulos;
 					}
 
-					$ulos = t("Tilauksen keräsi").": $keraaja[nimi]\r\n\r\n".$ulos;
+					$ulos = t("Tilauksen keräsi").": $keraaja[nimi]\n\n".$ulos;
 
 					$boob = mail($laskurow["kukamail"],  "$yhtiorow[nimi] - ".t("Keräyspoikkeamat")."", $ulos, $header, "-f $yhtiorow[postittaja_email]");
 					if ($boob===FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";

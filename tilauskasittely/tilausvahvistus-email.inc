@@ -252,6 +252,9 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 			$liite .= "\n";
 		}
 
+		$ulos .= "\n\n";
+		$ulos .= t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.", $kieli)."\n";
+
 		if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
 			$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".txt";
 			file_put_contents($tilausvahvistus_tallenna, $ulos);

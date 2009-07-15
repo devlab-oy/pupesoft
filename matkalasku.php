@@ -2117,10 +2117,11 @@ if ($tee == "") {
 	if (mysql_num_rows($result)) {
 
 		echo "<br><br><font class='message'>".t("Avoimet matkalaskusi")."</font><hr>";
-		echo "<table><tr><th>".t("Asiakas")."</th><th>".t("Viesti")."</th><th>".t("Summa")."</th><tr>";
+		echo "<table><tr><th>".t("Henkilö")."</th><th>".t("Asiakas")."</th><th>".t("Viesti")."</th><th>".t("Summa")."</th><tr>";
 		
 		while ($row = mysql_fetch_array($result)) {
 			echo "<tr>";
+			echo "<td>$row[nimi]</td>";
 			echo "<td>$row[toim_nimi]</td>";
 			echo "<td>$row[viite]</td>";
 			echo "<td>$row[summa]</td>";

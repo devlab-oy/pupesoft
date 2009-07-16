@@ -263,13 +263,8 @@
 	}
 
 	if (mysql_field_name($result, $i) == "kauppatapahtuman_luonne") {
-
-		$query = "	SELECT avainsana.selite, ".avain('select')."
-					FROM avainsana
-					".avain('join','KT_')."
-					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KT'
-					ORDER BY avainsana.jarjestys, avainsana.selite";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = t_avainsana("KT");
+		
 		$ulos = "<td><select name='$nimi'>";
 
 		$sel="";
@@ -280,10 +275,10 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
+			if (strtoupper($trow[$i]) == strtoupper($vrow["selite"])) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>$vrow[1]</option>";
+			$ulos .= "<option value = '".strtoupper($vrow["selite"])."' $sel>$vrow[selitetark]</option>";
 		}
 
 		$ulos .= "</select></td>";
@@ -291,12 +286,8 @@
 	}
 
 	if (mysql_field_name($result, $i) == "kuljetusmuoto") {
-		$query = "	SELECT avainsana.selite, ".avain('select')."
-					FROM avainsana
-					".avain('join','KM_')."
-					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KM'
-					ORDER BY avainsana.jarjestys, avainsana.selite";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = t_avainsana("KM");
+			
 		$ulos = "<td><select name='$nimi'>";
 
 		$sel="";
@@ -307,10 +298,10 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
+			if (strtoupper($trow[$i]) == strtoupper($vrow["selite"])) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>$vrow[1]</option>";
+			$ulos .= "<option value = '".strtoupper($vrow["selite"])."' $sel>$vrow[selitetark]</option>";
 		}
 
 		$ulos .= "</select></td>";

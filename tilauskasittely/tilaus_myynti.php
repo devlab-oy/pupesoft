@@ -1874,7 +1874,7 @@ if ($tee == '') {
 					$sel = 'selected';
 				}
 
-				echo "<option value='$row[selite]' $sel>".asana('TOIMITUSTAPA_',$row['selite'])."</option>";
+				echo "<option value='$row[selite]' $sel>$row[selite]</option>";
 			}
 			echo "</select>";
 
@@ -2003,28 +2003,24 @@ if ($tee == '') {
 
 		if ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
 			$extralisa = "";
+			
 			if ($kukarow["extranet"] != "") {
-				$extralisa = "  and avainsana.selite not like '%E%' and avainsana.selite not like '%O%' ";
+				$extralisa .= " and avainsana.selite not like '%E%' and avainsana.selite not like '%O%' ";
 
 				if ($kukarow['hinnat'] == 1) {
-					$hinnatlisa = " and avainsana.selite not like '1%' ";
+					$extralisa .= " and avainsana.selite not like '1%' ";
 				}
 			}
-
-			$query = "	SELECT avainsana.selite, ".avain('select')."
-						FROM avainsana use index (yhtio_laji_selite)
-						".avain('join','TV_')."
-						WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'TV' $extralisa $hinnatlisa
-						ORDER BY avainsana.jarjestys, avainsana.selite";
-			$tresult = mysql_query($query) or pupe_error($query);
-
+			
+			$tresult = t_avainsana("TV","", $extralisa);
+			
 			echo "<td><select name='tilausvahvistus'  id = 'tilausvahvistus' Style=\"width: 250px;\" onmousedown=\"alasvetoMuutakoko('tilausvahvistus', 0);\" onblur=\"alasvetoMuutakoko('tilausvahvistus', 250);\" onchange='submit()' $state>";
 			echo "<option value=' '>".t("Ei Vahvistusta")."</option>";
 
 			while($row = mysql_fetch_array($tresult)) {
 				$sel = "";
-				if ($row[0]== $laskurow["tilausvahvistus"]) $sel = 'selected';
-				echo "<option value='$row[0]' $sel>$row[1]</option>";
+				if ($row["selite"]== $laskurow["tilausvahvistus"]) $sel = 'selected';
+				echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 			}
 			echo "</select></td>";
 		}
@@ -3122,7 +3118,8 @@ if ($tee == '') {
 					$query = " SELECT distinct(tuote.tuoteno), nimitys
 								FROM tuote
 								LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno and tuote.status != 'P'
-								WHERE tuote.yhtio ='$kukarow[yhtio]' and ".$myyntimenu[$menutila]["query"];
+								WHERE tuote.yhtio ='$kukarow[yhtio]' 
+								and ".$myyntimenu[$menutila]["query"];
 								$tuoteresult = mysql_query($query) or pupe_error($query);
 
 					$ulos = "<select name='tuoteno'  multiple='TRUE' size='6' style='width: 350px;><option value=''>Valitse tuote</option>";
@@ -3131,7 +3128,7 @@ if ($tee == '') {
 						while($row=mysql_fetch_array($tuoteresult)) {
 							$sel='';
 							if($tuoteno==$row['tuoteno']) $sel='SELECTED';
-							$ulos .= "<option value='$row[tuoteno]' $sel>$row[tuoteno] - ".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</option>";
+							$ulos .= "<option value='$row[tuoteno]' $sel>$row[tuoteno] - ".t_tuotteen_avainsanat($row, 'nimitys')."</option>";
 						}
 						$ulos .= "</select>";
 					}
@@ -3444,12 +3441,7 @@ if ($tee == '') {
 			echo "<tr>$jarjlisa<th>".t("#")."</th>";
 
 			if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or ($yhtiorow['tilauksen_kohteet'] == 'K' and in_array($toim, array("RIVISYOTTO", "TYOMAARAYS")))) {
-
-				$query = "	SELECT selite, selitetark
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]' and laji = 'TRIVITYYPPI'
-							ORDER BY jarjestys, selite";
-				$trivityyppi_result = mysql_query($query) or pupe_error($query);
+				$trivityyppi_result = t_avainsana("TRIVITYYPPI");
 
 				if (mysql_num_rows($trivityyppi_result) > 0) {
 					echo "<th>".t("Tyyppi")."</th>";
@@ -3947,30 +3939,8 @@ if ($tee == '') {
 				}
 				
 				// Tuotteen nimitys näytetään vain jos käyttäjän resoluution on iso
-				if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
-					if (strtolower($kukarow["kieli"]) != strtolower($yhtiorow["kieli"])) {
-						$query = "	SELECT selite
-									from tuotteen_avainsanat
-									where yhtio = '$kukarow[yhtio]'
-									and tuoteno = '$row[tuoteno]'
-									and laji	= 'nimitys_".$kukarow["kieli"]."'
-									and selite != ''
-									LIMIT 1";
-						$pkres = mysql_query($query) or pupe_error($query);
-
-						if (mysql_num_rows($pkres) > 0) {
-							$pkrow = mysql_fetch_array($pkres);
-							$nimitys = $pkrow["selite"];
-						}
-						else {
-							$nimitys = $row["nimitys"];
-						}
-					}
-					else {
-						$nimitys = $row["nimitys"];
-					}
-
-					echo "<td $class align='left' valign='top'>$nimitys</td>";
+				if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {						
+					echo "<td $class align='left' valign='top'>".t_tuotteen_avainsanat($row, "nimitys")."</td>";
 				}
 
 				if ($kukarow['extranet'] == '' and $toim == "MYYNTITILI" and $laskurow["alatila"] == "V") {

@@ -465,7 +465,7 @@
 
 				}
 			}
-			echo "<br>$tuoterow[tuotemerkki]</td><td>".ta($kieli, "Y", $tuoterow["yksikko"])."</td><td>$tuoterow[eankoodi]</td><td colspan='2'>".substr(asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']),0,100)."</td><td>$tuoterow[hinnastoon]</td></tr>";
+			echo "<br>".t_avainsana("TUOTEMERKKI", "", " and avainsana.selite='$tuoterow[tuotemerkki]'", "", "", "selitetark")."</td><td>".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."</td><td>$tuoterow[eankoodi]</td><td colspan='2'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td><td>$tuoterow[hinnastoon]</td></tr>";
 
 			//2
 			echo "<tr><th>".t("Osasto/try")."</th><th>".t("Toimittaja")."</th><th>".t("Aleryhmä")."</th><th>".t("Tähti")."</th><th>".t("Perusalennus")."</th><th>".t("VAK")."</th></tr>";
@@ -1037,10 +1037,10 @@
 						<td align='right' nowrap>$lrow[summaEDV] $yhtiorow[valkoodi]</td></tr>";
 
 				echo "<tr><th align='left'>".t("Myykpl").":</th>
-						<td align='right' nowrap>$lrow[kpl30] ".ta($kieli, "Y", $tuoterow["yksikko"])."</td>
-						<td align='right' nowrap>$lrow[kpl90] ".ta($kieli, "Y", $tuoterow["yksikko"])."</td>
-						<td align='right' nowrap>$lrow[kplVA] ".ta($kieli, "Y", $tuoterow["yksikko"])."</td>
-						<td align='right' nowrap>$lrow[kplEDV] ".ta($kieli, "Y", $tuoterow["yksikko"])."</td></tr>";
+						<td align='right' nowrap>$lrow[kpl30]  ".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."</td>
+						<td align='right' nowrap>$lrow[kpl90]  ".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."</td>
+						<td align='right' nowrap>$lrow[kplVA]  ".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."</td>
+						<td align='right' nowrap>$lrow[kplEDV] ".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."</td></tr>";
 
 				echo "<tr><th align='left'>".t("Kate").":</th>
 						<td align='right' nowrap>$lrow[kate30] $yhtiorow[valkoodi]</td>
@@ -1190,7 +1190,7 @@
 						}
 
 						if($muutos_abs<>0) {
-							$muutos = "edellinen: ".(int)$lrow["ed_".$key]."{".ta($kieli, "Y", $tuoterow["yksikko"])."} muutos: $muutos_abs{".ta($kieli, "Y", $tuoterow["yksikko"])."}";
+							$muutos = "edellinen: ".(int)$lrow["ed_".$key]."{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."} muutos: $muutos_abs{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."}";
 						}
 
 						if($muutos_suht<>0 and $lrow[$key]<>0 and $lrow["ed_".$key] <> 0) {
@@ -1222,7 +1222,7 @@
 					}
 
 					if($muutos_abs<>0) {
-						$muutos = "edellinen: ".(int)$ed_summa."{".ta($kieli, "Y", $tuoterow["yksikko"])."} muutos: $muutos_abs{".ta($kieli, "Y", $tuoterow["yksikko"])."}";
+						$muutos = "edellinen: ".(int)$ed_summa."{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."} muutos: $muutos_abs{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."}";
 					}
 
 					if($muutos_suht<>0 and $summa<>0 and $ed_summa<>0) {
@@ -1259,7 +1259,7 @@
 					}
 
 					if($muutos_abs<>0) {
-						$muutos = "edellinen: ".(int)$ed_erittely[$kk]."{".ta($kieli, "Y", $tuoterow["yksikko"])."} muutos: $muutos_abs{".ta($kieli, "Y", $tuoterow["yksikko"])."";
+						$muutos = "edellinen: ".(int)$ed_erittely[$kk]."{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."} muutos: $muutos_abs{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."";
 					}
 
 					if($muutos_suht<>0 and $erittely[$kk]<>0 and $ed_erittely[$kk]<>0) {
@@ -1287,7 +1287,7 @@
 				}
 
 				if($muutos_abs<>0) {
-					$muutos = "edellinen: ".(int)$ed_gt."{".ta($kieli, "Y", $tuoterow["yksikko"])."} muutos: $muutos_abs{".ta($kieli, "Y", $tuoterow["yksikko"])."}";
+					$muutos = "edellinen: ".(int)$ed_gt."{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."} muutos: $muutos_abs{".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."}";
 				}
 
 				if($muutos_suht<>0 and $gt<>0 and $ed_gt <> 0) {

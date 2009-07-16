@@ -290,7 +290,7 @@
 						require ("lisaarivi.inc");
 					}
 
-					echo "<font class='message'>".t("Lisättiin")." $kpl_echo ".ta($kieli, "Y", $trow["yksikko"])." ".t("tuotetta")." $tiltuoteno[$yht_i].</font><br>";
+					echo "<font class='message'>".t("Lisättiin")." $kpl_echo ".t_avainsana("Y", "", " and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("tuotetta")." $tiltuoteno[$yht_i].</font><br>";
 
 					//Hanskataan sarjanumerollisten tuotteiden lisävarusteet
 					if ($tilsarjatunnus[$yht_i] > 0 and $lisatty_tun > 0) {
@@ -1422,7 +1422,7 @@
 
 				echo "</td>";
 
-				echo "<td valign='top' class='$vari' $classmidl>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
+				echo "<td valign='top' class='$vari' $classmidl>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
 				echo "<td valign='top' class='$vari' $classmidl>$row[osasto]<br>$row[try]</td>";
 
 				$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["myyntihinta"]). " $yhtiorow[valkoodi]";
@@ -1529,7 +1529,7 @@
 						foreach ($saldot as $varaso => $saldo) {
 							if ($saldo != 0) {
 								$ei_tyhja = 'yes';
-								echo "<tr><td class='$vari' nowrap>$varaso</td><td class='$vari' align='right' nowrap>".sprintf("%.2f", $saldo)." ".ta($kieli, "Y", $row["yksikko"])."</td></tr>";
+								echo "<tr><td class='$vari' nowrap>$varaso</td><td class='$vari' align='right' nowrap>".sprintf("%.2f", $saldo)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td></tr>";
 							}
 						}
 
@@ -1673,7 +1673,7 @@
 								if ($myytavissa != 0 or ($lisatiedot != "" and $kukarow["extranet"] == "" and $hyllyssa != 0)) {
 									echo "	<tr>
 											<td class='$vari' nowrap>$saldorow[nimitys] $saldorow[tyyppi]</td>
-											<td class='$vari' align='right' nowrap>".sprintf("%.2f", $myytavissa)." ".ta($kieli, "Y", $row["yksikko"])."</td>
+											<td class='$vari' align='right' nowrap>".sprintf("%.2f", $myytavissa)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td>
 											</tr>";
 								}
 

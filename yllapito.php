@@ -233,6 +233,8 @@
 
 		// Tarkistetaan
 		$errori = '';
+		$virhe  = array();
+		
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
 
 			//P‰iv‰m‰‰r‰ spesiaali
@@ -1223,26 +1225,7 @@
 
 		echo "</td></tr>";
 		echo "</table>";
-
-
-		// Tuotteen saa poistaa mik‰li sill‰ ei ole yht‰‰n tapahtumaa
-		$sdtchk = "";
-
-		if ($toim == "tuote") {
-			$query = "SELECT yhtio FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
-			$sdtres = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($sdtres) == 0) {
-				$query = "SELECT yhtio FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and tyyppi!='D'";
-				$sdtres = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($sdtres) == 0) {
-					$sdtchk = "OK";
-				}
-			}
-		}
-
-
+		
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
 		if ($toim == "avainsana" or
 			$toim == "tili" or
@@ -1265,7 +1248,7 @@
 			$toim == "tuotteen_toimittajat" or
 			$toim == "extranet_kayttajan_lisatiedot" or
 			($toim == "liitetiedostot" and $poistolukko == "") or
-			($toim == "tuote" and $sdtchk == "OK") or
+			($toim == "tuote" and $poistolukko == "") or
 			($toim == "toimi" and $kukarow["taso"] == "3")) {
 
 			// Tehd‰‰n "poista tietue"-nappi

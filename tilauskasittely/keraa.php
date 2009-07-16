@@ -779,28 +779,30 @@
 
 				$kieli = $laskurow["kieli"];
 
-				$query = "	SELECT tilausrivi.*, ".nimitys('select','tilausrivi', $kieli)."
+				$query = "	SELECT *
 							FROM tilausrivi
-							".nimitys('join','tilausrivi', $kieli)."
-							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tilausrivi.otunnus = '$otsrow[otunnus]'
-							and tilausrivi.tunnus in ($mitkamuuttu)";
+							WHERE yhtio = '$kukarow[yhtio]'
+							and otunnus = '$otsrow[otunnus]'
+							and tunnus in ($mitkamuuttu)";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$rivit = '';
+				
 				while ($tvtilausrivirow = mysql_fetch_array($result)) {
 
 					$nimitysloput = '';
-
+					
+					$tvtilausrivirow['nimitys'] = t_tuotteen_avainsanat($tvtilausrivirow, 'nimitys');
+					
 					if (strlen($tvtilausrivirow['nimitys']) > 27) {
 						$nimitysloput = substr($tvtilausrivirow['nimitys'], 28);
 						$tvtilausrivirow['nimitys'] = substr($tvtilausrivirow['nimitys'], 0, 28);
 					}
 
-					$rivit .= sprintf("%-30.s",$tvtilausrivirow['nimitys']);
-					$rivit .= sprintf("%-20.s",$tvtilausrivirow['tuoteno']);
-					$rivit .= sprintf("%8.s"  ,$tvtilausrivirow['tilkpl']);
-					$rivit .= sprintf("%23.s"  ,$tvtilausrivirow['varattu']);
+					$rivit .= sprintf("%-30.s", $tvtilausrivirow['nimitys']);
+					$rivit .= sprintf("%-20.s", $tvtilausrivirow['tuoteno']);
+					$rivit .= sprintf("%8.s",   $tvtilausrivirow['tilkpl']);
+					$rivit .= sprintf("%23.s",  $tvtilausrivirow['varattu']);
 					$rivit .= "\n";
 
 					if ($nimitysloput != '') {
@@ -829,7 +831,7 @@
 				}
 
 				$ulos .= "\n";
-				$ulos .= "".t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."          ".t("Tilattu", $kieli)."            ".t("Toimitetaan", $kieli)."\n";
+				$ulos .= t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."          ".t("Tilattu", $kieli)."            ".t("Toimitetaan", $kieli)."\n";
 				$ulos .= "---------------------------------------------------------------------------------\n";
 				$ulos .= $rivit."\n";
 
@@ -1391,7 +1393,7 @@
 				$sel = 'selected';
 				$tutoimtapa = $row[0];
 			}
-			echo "<option value='$row[0]' $sel>".asana('TOIMITUSTAPA_',$row[0])."</option>";
+			echo "<option value='$row[0]' $sel>$row[0]</option>";
 		}
 
 		echo "</select></td>";

@@ -444,7 +444,7 @@
 
 	if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
 		// Keikat ja ostotilausket
-		$query = "	SELECT otunnus tilaus, ".nimitys('select','tilausrivi').", concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
+		$query = "	SELECT otunnus tilaus, tilausrivi.nimitys, concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 					tilausrivi.tuoteno, toim_tuoteno,
 					concat_ws('<br>', round(tilkpl,4), round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
 					concat_ws('<br>', round(varattu,4),round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tulossa sis/ulk',
@@ -459,7 +459,6 @@
 					$sorttauskentta
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
-					".nimitys('join','tilausrivi')."
 					LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$laskurow[liitostunnus]'
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
 					WHERE $where
@@ -964,29 +963,7 @@
 
 			// Tuotteen nimitys näytetään vain jos käyttäjän resoluution on iso
 			if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
-				if (strtolower($kukarow["kieli"]) != strtolower($yhtiorow["kieli"])) {
-					$query = "	SELECT selite
-								from tuotteen_avainsanat
-								where yhtio = '$kukarow[yhtio]'
-								and tuoteno = '$row[tuoteno]'
-								and laji	= 'nimitys_".$kukarow["kieli"]."'
-								and selite != ''
-								LIMIT 1";
-					$pkres = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($pkres) > 0) {
-						$pkrow = mysql_fetch_array($pkres);
-						$nimitys = $pkrow["selite"];
-					}
-					else {
-						$nimitys = $row["nimitys"];
-					}
-				}
-				else {
-					$nimitys = $row["nimitys"];
-				}
-
-				echo "<td $class align='left' valign='top'>$nimitys</td>";
+				echo "<td $class align='left' valign='top'>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
 			}
 
 			if (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $kukarow['extranet'] == '') {

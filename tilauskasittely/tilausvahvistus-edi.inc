@@ -14,36 +14,32 @@ if (!file_exists($tilvahvfilenimi)) {
 
 	if (!$toot = fopen($tilvahvfilenimi, "w")) die("TILAUSVAHVISTUS: Tiedoston luonti ei onnistu!");
 
-	$query = "SELECT tilausrivi.tunnus, eankoodi,
-			tilausrivi.tuoteno, varattu, toimaika, kommentti, tilkpl, tilausrivi.alv, ".nimitys('select','tilausrivi', $kieli).",
-			tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro
-			FROM tilausrivi
-			LEFT JOIN tuote USING (yhtio, tuoteno)
-			".nimitys('join','tilausrivi', $kieli)."
-			WHERE otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]'
-			ORDER BY tunnus";
+	$query = "	SELECT tilausrivi.tunnus, eankoodi,
+				tilausrivi.tuoteno, varattu, toimaika, kommentti, tilkpl, tilausrivi.alv, tilausrivi.nimitys,
+				tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro
+				FROM tilausrivi
+				LEFT JOIN tuote USING (yhtio, tuoteno)
+				WHERE otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]'
+				ORDER BY tunnus";
 	$tilvahresult = mysql_query($query) or pupe_error($query);
 
 	//Myyjän email
-
 	$query = "SELECT * FROM kuka WHERE tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
 	$kukaresult = mysql_query($query) or pupe_error($query);
 	$myyjarow = mysql_fetch_array($kukaresult);
 
 	//Maskuehto
-
-	$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+	$query = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 	$xresult = mysql_query($query) or pupe_error($query);
-	if (mysql_num_rows($xresult) == 0)
-	{
+
+	if (mysql_num_rows($xresult) == 0) {
 		echo "TILAUSVAHVISTUS: Maksuehto on kateissa!<br><br>";
 	}
 	else {
 		$mehtorow=mysql_fetch_array($xresult);
 	}
 
-	if (mysql_num_rows($tilvahresult) > 0)
-	{
+	if (mysql_num_rows($tilvahresult) > 0) {
 		$ulos  = "ICHGSTART:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
 		$ulos .= "ICHG_TYPE:POS\n";
 		$ulos .= "RMSGSTART:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
@@ -109,7 +105,7 @@ if (!file_exists($tilvahvfilenimi)) {
 			$ulos .= "RLINABORF:                                   @ " . $tvtilausrivirow['tilaajanrivinro'] . "\n"; //Futursoftin tilauksen rivinumero
 			$ulos .= "RLINSA_NU:" . $tvtilausrivirow['tuoteno'] . "\n";
 			$ulos .= "RLINEN_NU:" . $tvtilausrivirow['eankoodi'] . "\n";
-			$ulos .= "RLIN8__IF:" . $tvtilausrivirow['nimitys'] . "\n";
+			$ulos .= "RLIN8__IF:" . t_tuotteen_avainsanat($tvtilausrivirow, 'nimitys', $kieli) . "\n";
 
 			$laskurow['valkoodi'] = sprintf("%-3.s",$laskurow['valkoodi']);
 

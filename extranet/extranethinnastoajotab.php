@@ -42,12 +42,11 @@
 		}
 		
 		$rivi = '';
-		$query = "	select a.tuoteno, ".nimitys('select').", a.lyhytkuvaus, a.tuotemerkki, a.myyntihinta hinta_veroll, a.alv,
+		$query = "	select a.tuoteno, a.nimitys, a.lyhytkuvaus, a.tuotemerkki, a.myyntihinta hinta_veroll, a.alv,
 					if(b.alennus is null,'0,00', alennus) 'alepros', a.aleryhma
 					from tuote a
 					join asiakas c on a.yhtio = c.yhtio and c.ytunnus = '$ytunnus'
 					left join asiakasalennus b on a.yhtio = b.yhtio and a.aleryhma = b.ryhma and b.ytunnus = c.ytunnus
-					".nimitys('join','a')."
 					where a.yhtio = '$kukarow[yhtio]' and a.status in ('','a') and hinnastoon != 'E'
 					$lisa
 					order by 1";
@@ -69,7 +68,7 @@
 		while ($tuoterow = mysql_fetch_array($result)) {
 
 			$rivi .= "$tuoterow[tuoteno]\t";
-			$rivi .= "$tuoterow[nimitys]\t";
+			$rivi .= t_tuotteen_avainsanat($tuoterow, 'nimitys')."\t";
 			$rivi .= "$tuoterow[lyhytkuvaus]\t";
 			$rivi .= "$tuoterow[tuotemerkki]\t";
 			$rivi .= str_replace(".",",",$tuoterow['hinta_veroll'])."\t";
@@ -143,7 +142,7 @@
 	echo "<th>".t("Valitse tuoteosasto")."</th>";
 
 	// tehd‰‰n avainsana query
-	$result = avainsana("OSASTO", $kukarow['kieli']);
+	$result = t_avainsana("OSASTO");
 
 	echo "<td><select name='tuoteosasto'>";
 	echo "<option value='kaikki' $tuoteosastosel>".t("Kaikki")."</option>";
@@ -158,7 +157,7 @@
 	echo "<tr><th>".t("tai tuoteryhm‰")."</th>";
 
 	// tehd‰‰n avainsana query
-	$result = avainsana("TRY", $kukarow['kieli']);
+	$result = t_avainsana("TRY");
 
 	echo "<td><select name='tuoteryhma'>";
 	echo "<option value='kaikki' $tuoteryhmasel>".t("Kaikki")."</option>";

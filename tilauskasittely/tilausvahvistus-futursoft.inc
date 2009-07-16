@@ -14,14 +14,13 @@ if (!file_exists($tilvahvfilenimi)) {
 
 	if (!$toot = fopen($tilvahvfilenimi, "w")) die("TILAUSVAHVISTUS: Tiedoston luonti ei onnistu!");
 
-	$query = "SELECT tilausrivi.tunnus, eankoodi,
-			tilausrivi.tuoteno, if(var='j',0,varattu) varattu, if(var='j',jt+varattu,0) jt, toimaika, kommentti, tilkpl, tilausrivi.alv, ".nimitys('select','tilausrivi', $kieli).",
-			tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro
-			FROM tilausrivi
-			LEFT JOIN tuote USING (yhtio, tuoteno)
-			".nimitys('join','tilausrivi', $kieli)."
-			WHERE otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]'
-			ORDER BY tunnus";
+	$query = "	SELECT tilausrivi.tunnus, eankoodi,
+				tilausrivi.tuoteno, if(var='j',0,varattu) varattu, if(var='j',jt+varattu,0) jt, toimaika, kommentti, tilkpl, tilausrivi.alv,
+				tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro
+				FROM tilausrivi
+				LEFT JOIN tuote USING (yhtio, tuoteno)
+				WHERE otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]'
+				ORDER BY tunnus";
 	$tilvahresult = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($tilvahresult) > 0) {

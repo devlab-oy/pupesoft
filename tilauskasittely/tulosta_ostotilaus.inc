@@ -189,7 +189,11 @@
 
 							$h-=$pdf->ln(1.5);
 
-							$pdf->write($h, 1, 0, 0, t("Merkitk‰‰ tilausnumero, tilaaja sek‰ viite l‰hetteeseen, laskuun sek‰ muihin dokumentteihin. Hinnat eiv‰t sis‰ll‰ arvonlis‰veroa.", $kieli), "norm", "L", "");
+							$pdf->write($h, 1, 0, 0, t("Merkitk‰‰ tilausnumero, tilaaja sek‰ viite l‰hetteeseen,laskuun sek‰ muihin dokumentteihin.", $kieli), "norm", "L", "");
+							$h-=$pdf->ln();
+							$pdf->write($h, 1, 0, 0, t("Hinnat eiv‰t sis‰ll‰ arvonlis‰veroa.", $kieli), "norm", "L", "");
+							$h-=$pdf->ln();
+
 
 							return $pdf;
 						}
@@ -232,7 +236,7 @@
 						}
 
 						$summa = 0;
-						$h-=$pdf->ln(3);
+						$h-=$pdf->ln(4);
 						$s=$pdf->teeSarakkeet(array(100,20,25));
 						$pdf->write($h, 1, 0, $s[0], t("Tuote", $kieli), "norm", "L", "B");
 						$pdf->write($h, 1, $s[0], $s[1], t("M‰‰r‰", $kieli), "norm", "R", "B");

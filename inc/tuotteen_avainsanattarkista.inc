@@ -12,7 +12,8 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 			if ($chtuoteno != '') {
 				$query = "	SELECT tuoteno
 							FROM tuote
-							WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
+							WHERE yhtio = '$kukarow[yhtio]' 
+							AND tuoteno = '$t[$i]'";
 				$sresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sresult) != 1) {
@@ -43,15 +44,12 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "selite" and $lajitalteen == "SISTOIMITTAJA") {
-			if ($t[$i] == '') {
-				$virhe[$i] = t("Selitettä ei voi jättää tyhjäksi. Skarppaa!")."";
-			}
-			else {
+		if (mysql_field_name($result, $i) == "selite") {
+			if ($lajitalteen == "SISTOIMITTAJA") {
 				// salitaan vaan konserniyhtiö joka ei ole me itse
-				$query = "SELECT *
-						FROM yhtio
-						WHERE yhtio = '$t[$i]' and konserni='$yhtiorow[konserni]' and yhtio!='$kukarow[yhtio]'";
+				$query = "	SELECT *
+							FROM yhtio
+							WHERE yhtio = '$t[$i]' and konserni='$yhtiorow[konserni]' and yhtio!='$kukarow[yhtio]'";
 				$sresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sresult) == 0) {

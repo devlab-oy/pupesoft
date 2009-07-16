@@ -76,17 +76,25 @@ if($tee == "aja") {
 	}
 	
 	echo "<hr>";
+	
+	$kuluALV = "	SELECT if(tuotteen_alv.alv IS NULL, 0, tuotteen_alv.alv)
+					FROM tilausrivi
+					LEFT JOIN tuotteen_alv ON tuotteen_alv.yhtio=tilausrivi.yhtio and tuotteen_alv.tuoteno=tilausrivi.tuoteno
+					WHERE tilausrivi.yhtio=tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus=tilausrivin_lisatiedot.tilausrivitunnus
+					LIMIT 1";
+					
 	$query = "	SELECT tiliointi.*,
 				date_format(tiliointi.tapvm, '%d.%m.%Y') tapvm,
-				round(summa*(1-(kulun_kohdemaan_alv/100)),2) veroton_osuus,
+				round(summa*(1-(if(kulun_kohdemaan_alv=0, ($kuluALV), kulun_kohdemaan_alv)/100)),2) veroton_osuus,
 				concat_ws('/',kustp.nimi,kohde.nimi,projekti.nimi) kustannuspaikka,
 				tilausrivin_lisatiedot.kulun_kohdemaa,
-				tilausrivin_lisatiedot.kulun_kohdemaan_alv
+				if(kulun_kohdemaan_alv=0, ($kuluALV), kulun_kohdemaan_alv) kulun_kohdemaan_alv
 				FROM tiliointi
 				JOIN tilausrivin_lisatiedot ON tiliointi.yhtio=tilausrivin_lisatiedot.yhtio and tiliointi.tunnus=tilausrivin_lisatiedot.tiliointirivitunnus and kulun_kohdemaa!='{$yhtiorow["maa"]}' {$lisa["lisatiedot"]}
 				LEFT JOIN kustannuspaikka kustp ON tiliointi.yhtio=kustp.yhtio and tiliointi.kustp=kustp.tunnus
 				LEFT JOIN kustannuspaikka projekti ON tiliointi.yhtio=projekti.yhtio and tiliointi.projekti=projekti.tunnus
 				LEFT JOIN kustannuspaikka kohde ON tiliointi.yhtio=kohde.yhtio and tiliointi.kohde=kohde.tunnus
+				
 				WHERE tiliointi.yhtio='$kukarow[yhtio]' and 
 				tapvm>='$alku' and
 				tapvm<='$loppu'
@@ -94,6 +102,7 @@ if($tee == "aja") {
 				and kulun_kohdemaa NOT IN ('','{$yhtiorow[maa]}')
 				ORDER BY kulun_kohdemaa, tapvm";
 	$result = mysql_query($query) or pupe_error($query);
+
 	if(mysql_num_rows($result)>0) {
 		$summat=array();
 		echo "<table>

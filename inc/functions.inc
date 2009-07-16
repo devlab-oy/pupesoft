@@ -6849,9 +6849,10 @@ if (!function_exists("t_avainsana")) {
 					IFNULL((SELECT avainsana_kieli.selitetark
 					FROM avainsana as avainsana_kieli
 					WHERE avainsana_kieli.yhtio = avainsana.yhtio
-					and avainsana_kieli.laji = avainsana.laji
-					and avainsana_kieli.perhe = avainsana.perhe
-					and avainsana_kieli.perhe > 0
+					and avainsana_kieli.laji = avainsana.laji					
+					and avainsana_kieli.selite = avainsana.selite
+					#and avainsana_kieli.perhe = avainsana.perhe
+					#and avainsana_kieli.perhe > 0
 					and avainsana_kieli.kieli = '$kieli' LIMIT 1), avainsana.selitetark) selitetark
 					FROM avainsana
 					WHERE $yhtiolisa
@@ -6861,7 +6862,7 @@ if (!function_exists("t_avainsana")) {
 					ORDER BY avainsana.jarjestys, avainsana.selite+0
 					$limitlisa";
 		$result = mysql_query($query) or pupe_error($query);
-
+		
 		if ($return != "") {
 			$row = mysql_fetch_assoc($result);
 			return $row[$return];

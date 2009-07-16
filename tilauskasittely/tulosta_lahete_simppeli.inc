@@ -138,10 +138,10 @@ if (!function_exists('tulosta_lahete')) {
 						$query = "select tunnus from lasku where yhtio ='$kukarow[yhtio]' and tunnusnippu='$laskurow[projekti]' and tila = 'R'";
 						$abures = mysql_query($query) or pupe_error($query);
 						if(mysql_num_rows($abures)>0) {
-							$kentat = array("toimitus", "projekti", "toimitusaika", "käsittelijä", "käsitelty", "toimitustapa", "toimitusehto", "asiakkaan_VAT");							
+							$kentat = array("projekti", "toimitus", "toimitusaika", "käsittelijä", "käsitelty", "toimitustapa", "toimitusehto", "asiakkaan_VAT");							
 						}
 						else {
-							$kentat = array("tilaus", "toimitusaika", "käsittelijä", "käsitelty", "toimitustapa", "toimitusehto", "asiakkaan_VAT");
+							$kentat = array("tilaus", "toimitus", "toimitusaika", "käsittelijä", "käsitelty", "toimitustapa", "toimitusehto", "asiakkaan_VAT");
 						}
 					}
 					else {

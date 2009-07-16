@@ -9,7 +9,7 @@ if (isset($_POST['filenimi']) and $_POST['filenimi'] != '') {
 
 	$filenimi = '/tmp/' . basename($_POST['filenimi']);
 	readfile($filenimi);
-    
+
     // tuhotaan edellinen
 	unlink('/tmp/' . basename($filenimi));
 	exit;
@@ -52,7 +52,7 @@ if ($tee != '') {
 		if ($where1 != '') {
 			$where1 = " osasto in (".$where1.") ";
 		}
-		
+
     }
 
 
@@ -81,7 +81,7 @@ if ($tee != '') {
 		if ($where2 != '') {
 			$where2 = " try in (".$where2.") ";
 		}
-		
+
 	}
 
 	if (strlen($where1) > 0) {
@@ -100,11 +100,11 @@ if ($tee != '') {
 			$where .= "tuote.muutospvm >= '" . $pvm . "' and ";
 		}
 	}
-    
+
     if (isset($_POST['tuotemerkki']) and strlen($_POST['tuotemerkki']) > 0) {
         $where .= "tuote.tuotemerkki = '" . mysql_real_escape_string($_POST['tuotemerkki']) . "' and ";
     }
-    
+
 	// jos ei olla extranetissa niin otetaan valuuttatiedot yhtiolta
 	// maa, valkoodi, ytunnus
 	if (empty($kukarow['extranet'])) {
@@ -128,19 +128,19 @@ if ($tee != '') {
 
 	// asetetaan vienti kurssi
 	$laskurowfake['vienti_kurssi'] = $kurssi['kurssi'];
-	
+
 	if ($kl_hinnastoon != "" and $kukarow['extranet'] == '') {
 		$kl_lisa = " ";
 	}
 	else {
-		$kl_lisa = " and tuote.hinnastoon!='E' ";	
+		$kl_lisa = " and tuote.hinnastoon!='E' ";
 	}
 
 	$query = "	SELECT tuote.*, korvaavat.id, sum(tuotepaikat.saldo) saldo
 				FROM tuote
 				LEFT JOIN korvaavat use index (yhtio_tuoteno) ON (tuote.tuoteno=korvaavat.tuoteno and tuote.yhtio=korvaavat.yhtio)
 				LEFT JOIN tuotepaikat ON tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno
-				WHERE $where tuote.yhtio='$kukarow[yhtio]' 
+				WHERE $where tuote.yhtio='$kukarow[yhtio]'
 				$kl_lisa
 				and ((tuote.vienti = '' or tuote.vienti like '%-{$laskurowfake['maa']}%' or tuote.vienti like '%+%')
 				and tuote.vienti not like '%+{$laskurowfake['maa']}%')
@@ -153,7 +153,7 @@ if ($tee != '') {
 		echo t('Yht‰‰n tuotetta ei lˆytynyt hinnastoon.') . '<br />';
 		die();
 	}
-	
+
 	flush();
 
 	// kirjoitetaan tmp file
@@ -180,44 +180,41 @@ if ($tee != '') {
 	}
 
 	while ($tuoterow = mysql_fetch_array($result)) {
-		
+
 		$ohitus = 0;
 		if (!empty($kukarow['extranet'])) {
-			$query = "  SELECT selite 
-						FROM tuotteen_avainsanat 
+			$query = "  SELECT selite
+						FROM tuotteen_avainsanat
 						WHERE yhtio = '{$kukarow['yhtio']}' and laji like '%{$laskurowfake['maa']}%' and tuoteno = '{$tuoterow['tuoteno']}'";
-
 			$avresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($avresult) > 0) {
 				$avainrow = mysql_fetch_array($avresult);
-
-				$tuoterow['nimitys'] = $avainrow['selite'];			
+				$tuoterow['nimitys'] = $avainrow['selite'];
 			}
-			
+
 			$query = "SELECT * FROM asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
 			$asiakastempres = mysql_query($query);
 			$asiakastemprow = mysql_fetch_array($asiakastempres);
-			
-			$temp_laskurowwi = array();							
+
+			$temp_laskurowwi = array();
 			$temp_laskurowwi['liitostunnus']	= $asiakastemprow['tunnus'];
 			$temp_laskurowwi['ytunnus']			= $asiakastemprow['ytunnus'];
 			$temp_laskurowwi['valkoodi']		= $asiakastemprow['valkoodi'];
 			$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
-			
-		
+
 			$hinnat = alehinta($temp_laskurowwi, $tuoterow, 1, '', '', '', "hintaperuste,aleperuste");
-			
-			if 	($tuoterow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] < 2 or $hinnat["hintaperuste"] > 12) and ($hinnat["aleperuste"] < 5 or $hinnat["aleperuste"] > 8)) {
+
+			if ($tuoterow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] == false) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] == false)) {
 				$ohitus = 1;
 			}
 		}
-						 		
+
 		// tehd‰‰n yksi rivi
 		if ($ohitus == 0) {
 			$ulos = hinnastorivi($tuoterow, $laskurowfake);
 			fwrite($fh, $ulos);
-		}		
+		}
 	}
 
 	fclose($fh);
@@ -225,7 +222,7 @@ if ($tee != '') {
 	//pakataan faili
 	$cmd = "/usr/bin/zip -j /tmp/{$kukarow['yhtio']}.{$kukarow['kuka']}.zip /tmp/$filenimi";
 	$palautus = exec($cmd);
-	
+
     // poistetaan tmp file
 	unlink('/tmp/' . $filenimi);
 
@@ -305,8 +302,8 @@ else {
 
 	// k‰ytet‰‰n t‰t‰ laskurowna
 	$asmaa = mysql_fetch_array($res);
-	
-	
+
+
 	$query = "	SELECT distinct tuotemerkki
 				FROM tuote
 				WHERE yhtio='{$kukarow['yhtio']}' and tuotemerkki != ''

@@ -623,17 +623,17 @@
 				if (trim($osx) != '') {
 					if (trim($osx) != "PUPEKAIKKIMUUT") {
 						$osx = trim(mysql_real_escape_string($osx));
-						$osastot .= "'$osx',";
+						$osastot .= "'$osx',";								
+						$ulisa .= "&mul_osasto[]=".rawurlencode($osx);
 					}					
 				}
 			}
 
 			$osastot = substr($osastot, 0, -1);
-			
+
 			if (trim($osastot) != '') {
 				$lisa_haku_osasto = " and tuote.osasto in ($osastot) ";
-				$lisa .= $lisa_haku_osasto;
-				$ulisa .= "&mul_osasto[]=".urlencode($osastot);
+				$lisa .= $lisa_haku_osasto;						
 			}
 		}
 
@@ -645,16 +645,16 @@
 					if (trim($tryx) != "PUPEKAIKKIMUUT") {
 						$tryx = trim(mysql_real_escape_string($tryx));
 						$tryt .= "'$tryx',";
+						$ulisa .= "&mul_try[]=".rawurlencode($tryx);
 					}					
 				}
 			}
 
 			$tryt = substr($tryt, 0, -1);
-			
+
 			if (trim($tryt) != '') {
 				$lisa_haku_try = " and tuote.try in ($tryt) ";
-				$lisa .= $lisa_haku_try;
-				$ulisa .= "&mul_try[]=".urlencode($tryt);
+				$lisa .= $lisa_haku_try;						
 			}
 		}
 
@@ -664,18 +664,18 @@
 			foreach ($mul_tme as $tmex) {
 				if (trim($tmex) != '') {
 					if (trim($tmex) != "PUPEKAIKKIMUUT") {
-						$tmex = trim(mysql_real_escape_string(urldecode($tmex)));
+						$tmex = trim(mysql_real_escape_string($tmex));
 						$tmet .= "'$tmex',";
+						$ulisa .= "&mul_tme[]=".rawurlencode($tmex);
 					}					
 				}
 			}
 
 			$tmet = substr($tmet, 0, -1);
-			
+
 			if (trim($tmet) != '') {
 				$lisa_haku_tme = " and tuote.tuotemerkki in ($tmet) ";
-				$lisa .= $lisa_haku_tme;
-				$ulisa .= "&mul_tme[]=".urlencode($tmet);
+				$lisa .= $lisa_haku_tme;						
 			}
 		}
 
@@ -684,19 +684,16 @@
 
 			foreach ($mul_malli as $mallix) {
 				if (trim($mallix) != '') {
-					if (count($_GET['mul_malli']) > 0) {
-						$mallix = rawurldecode($mallix);
-					}
-					
 					if (trim($mallix) != "PUPEKAIKKIMUUT") {
-						$mallit .= "'".mysql_real_escape_string($mallix)."',";
+						$mallix = trim(mysql_real_escape_string($mallix));
+						$mallit .= "'$mallix',";
 						$ulisa .= "&mul_malli[]=".rawurlencode($mallix);
 					}					
 				}
 			}
 
 			$mallit = substr($mallit, 0, -1);
-			
+
 			if (trim($mallit) != '') {
 				$lisa_haku_malli = " and tuote.malli in ($mallit) ";
 				$lisa .= $lisa_haku_malli;
@@ -708,19 +705,16 @@
 
 			foreach ($mul_mallitarkenne as $mallitarkennex) {
 				if (trim($mallitarkennex) != '') {
-					if (count($_GET['mul_mallitarkenne']) > 0) {
-						$mallitarkennex = rawurldecode($mallitarkennex);
-					}
-					
 					if (trim($mallitarkennex) != "PUPEKAIKKIMUUT") {
-						$mallitarkenteet .= "'".mysql_real_escape_string($mallitarkennex)."',";
+						$mallitarkennex = trim(mysql_real_escape_string($mallitarkennex));
+						$mallitarkenteet .= "'$mallitarkennex',";
 						$ulisa .= "&mul_mallitarkenne[]=".rawurlencode($mallitarkennex);
 					}					
 				}
 			}
 
 			$mallitarkenteet = substr($mallitarkenteet, 0, -1);
-			
+
 			if (trim($mallitarkenteet) != '') {
 				$lisa_haku_mallitarkenne = " and tuote.mallitarkenne in ($mallitarkenteet) ";
 				$lisa .= $lisa_haku_mallitarkenne;

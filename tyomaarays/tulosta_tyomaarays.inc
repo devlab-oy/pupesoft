@@ -254,7 +254,7 @@ if (!function_exists('alku')) {
 			
 			list($kanta, $kentta) = explode(".", $al_row["selite"]);
 
-			if (trim($laskurow[$kentta]) != '' and trim($laskurow[$kentta]) != '0000-00-00') {
+			if (((!is_numeric($laskurow[$kentta]) and trim($laskurow[$kentta]) != '') or (is_numeric($laskurow[$kentta]) and $laskurow[$kentta] != 0)) and trim($laskurow[$kentta]) != '0000-00-00') {
 				if (strtoupper($al_row["selitetark_2"]) == "TEXT") {					
 					$al_komm .= "\n$al_row[selitetark]:###".wordwrap(str_replace("\n","\n###", $laskurow[$kentta]), 90, "\n###");
 				}
@@ -477,7 +477,7 @@ if (!function_exists('uusi_sivu')) {
 		}
 
 		// haetaan maksuehdon tiedot
-		$query  = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+		$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 		$masresult = mysql_query($query) or pupe_error($query);
 		$masrow = mysql_fetch_array($masresult);
 
@@ -590,11 +590,11 @@ if (!function_exists('rivi_otsikot')) {
 		
 		$pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
 
-		if ($tuotetyyppi == "TT") {
+		if ($tuotetyyppi == "2 Työt") {
 			$pdf->draw_text(25,  $kala+35, t("Työt ja palvelut", $kieli),			$thispage, $boldi);
 		}
 		else {
-			$pdf->draw_text(25,  $kala+35, t("Varaosat ja tarvikkeet", $kieli),		$thispage, $boldi);
+			$pdf->draw_text(25,  $kala+35, t("Osat ja tarvikkeet", $kieli),		$thispage, $boldi);
 		}
 		
 		if ($tyyppi == "") {
@@ -667,7 +667,7 @@ if (!function_exists('rivi')) {
 		}
 		
 		if ($row["tuotetyyppi"] != $edtuotetyyppi or $uudehko == "ON") {
-			$kala -= $rivinkorkeus*2;
+			$kala -= $rivinkorkeus*3;
 			rivi_otsikot($thispage, $row["tuotetyyppi"], $tyyppi);
 		}
 
@@ -754,7 +754,6 @@ if (!function_exists('rivi')) {
 				$row["kpl"] 	= "";
 			}
 		}
-		
 		
 		if ($tyyppi == "") {			
 			$pdf->draw_text(45,  $kala, $row["tuoteno"],										$thispage, $norm);

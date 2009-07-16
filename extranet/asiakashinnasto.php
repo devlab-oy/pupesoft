@@ -144,7 +144,7 @@
 					die("filen luonti epäonnistui!");
 
 			echo "<font class='message'>";
-			echo t("Asiakashinnastoa ajetaan...");
+			echo t("Asiakashinnastoa luodaan...");
 			echo "</font>";
 			echo "<br>";
 			flush();
@@ -179,10 +179,18 @@
 				$laskurow["vienti"] = '';
 				$laskurow["alv"] = '';
 
-				list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $rrow, 1, '', '', '');
+				$hinnat = alehinta($laskurow, $rrow, 1, '', '', '', "hinta,netto,ale,alehinta_alv,alehinta_val,hintaperuste,aleperuste");
+
+				$hinta = $hinnat["hinta"];
+				$netto = $hinnat["netto"];
+				$ale = $hinnat["ale"];
+				$alehinta_alv = $hinnat["alehinta_alv"];
+				$alehinta_val = $hinnat["alehinta_val"];
+
 				list($hinta, $lis_alv) = alv($laskurow, $rrow, $hinta, '', $alehinta_alv);
 
-				if ($rrow["hinnastoon"] == "V" and $hinta == 0 and $ale == 0) {
+				// katsotaan löytyyko asiakasalennus / asikakashinta
+				if ($rrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] == false) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] == false)) {
 					continue;
 				}
 

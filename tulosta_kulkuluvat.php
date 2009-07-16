@@ -6,10 +6,6 @@ if($_POST["tee"] == "tulosta") {
 
 require("inc/parametrit.inc");
 
-if(!defined("salt_kv")) {
-	define("salt_kv", 313);
-}
-
 if($tee == "tulosta") {
 	// jos php-gd on installoitu niin loidataab barcode library
 	if (in_array("gd", get_loaded_extensions())) {
@@ -54,7 +50,7 @@ if($tee == "tulosta") {
 	$i=0;
 	foreach($ketka as $kuka => $x) {
 		if($x!="") {
-			$query = "	SELECT nimi, encrypt(concat(tunnus,kuka), ".salt_kv.") avain
+			$query = "	SELECT nimi, left(md5(concat(tunnus,kuka)), 16) avain
 						FROM kuka
 						WHERE yhtio='$kukarow[yhtio]' and tunnus='$kuka'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -64,11 +60,11 @@ if($tee == "tulosta") {
 					
 					if($i==0) {
 						$w = 15;
-						$wk = 15;
+						$wk = 10;
 					}
 					else {
 						$w = 115;
-						$wk = 115;						
+						$wk = 110;						
 						$i=-1;
 					}
 

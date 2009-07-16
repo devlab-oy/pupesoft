@@ -6811,7 +6811,7 @@ if (!function_exists("t")) {
 
 // Tämä funktio hakee ja kääntää avainsanoja
 if (!function_exists("t_avainsana")) {
-	function t_avainsana($laji, $kieli = '', $selite = '', $yhtio = '', $limit = '', $selitetark = "", $selitetark_2 = "", $selitetark_3 = "", $return = "") {
+	function t_avainsana($laji, $kieli = '', $where = '', $yhtio = '', $limit = '', $return = "") {
 		global $kukarow, $yhtiorow;
 
 		$laji = mysql_real_escape_string($laji);
@@ -6823,43 +6823,12 @@ if (!function_exists("t_avainsana")) {
 		else {
 			$kieli = mysql_real_escape_string($kieli);
 		}
-
-		$querylisa = "";
-
-		if ($selite != "") {
-			if (strpos($selite, "%") !== false) {
-				$querylisa .= " and avainsana.selite LIKE ('".mysql_real_escape_string($selite)."') ";
-			}
-			else {
-				$querylisa .= " and avainsana.selite = '".mysql_real_escape_string($selite)."' ";
-			}
+		
+		if ($where != "") {
+			$wherelisa = $where;
 		}
-
-		if ($selitetark != "") {
-			if (strpos($selitetark, "%") !== false) {
-				$querylisa .= " and avainsana.selitetark LIKE ('".mysql_real_escape_string($selitetark)."') ";
-			}
-			else {
-				$querylisa .= " and avainsana.selitetark = '".mysql_real_escape_string($selitetark)."' ";
-			}
-		}
-
-		if ($selitetark_2 != "") {
-			if (strpos($selitetark_2, "%") !== false) {
-				$querylisa .= " and avainsana.selitetark_2 LIKE ('".mysql_real_escape_string($selitetark_2)."') ";
-			}
-			else {
-				$querylisa .= " and avainsana.selitetark_2 = '".mysql_real_escape_string($selitetark_2)."' ";
-			}
-		}
-
-		if ($selitetark_3 != "") {
-			if (strpos($selitetark_3, "%") !== false) {
-				$querylisa .= " and avainsana.selitetark_3 LIKE ('".mysql_real_escape_string($selitetark_2)."') ";
-			}
-			else {
-				$querylisa .= " and avainsana.selitetark_3 = '".mysql_real_escape_string($selitetark_2)."' ";
-			}
+		else {
+			$wherelisa = "";
 		}
 
 		if ($yhtio != "") {
@@ -6882,12 +6851,13 @@ if (!function_exists("t_avainsana")) {
 					WHERE avainsana_kieli.yhtio = avainsana.yhtio
 					and avainsana_kieli.laji = avainsana.laji
 					and avainsana_kieli.perhe = avainsana.perhe
+					and avainsana_kieli.perhe > 0
 					and avainsana_kieli.kieli = '$kieli' LIMIT 1), avainsana.selitetark) selitetark
 					FROM avainsana
 					WHERE $yhtiolisa
 					and avainsana.laji = '$laji'
 					and avainsana.kieli in ('$yhtiorow[kieli]', '')
-					$querylisa
+					$wherelisa
 					ORDER BY avainsana.jarjestys, avainsana.selite+0
 					$limitlisa";
 		$result = mysql_query($query) or pupe_error($query);

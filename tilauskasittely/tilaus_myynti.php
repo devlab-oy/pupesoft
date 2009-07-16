@@ -2870,12 +2870,17 @@ if ($tee == '') {
 						$kielletty++;
 					}
 				}
-				elseif ($kukarow['extranet'] != '' and $trow['hinnastoon'] == 'V') {
+				elseif ($trow['hinnastoon'] == 'V') {
 					//	katsotaan löytyyko asiakasalennus / asikakashinta						
 					$hinnat = alehinta($laskurow, $trow, 1, '', '', '',"hintaperuste,aleperuste");
-					
-					if (($hinnat["hintaperuste"] < 2 or $hinnat["hintaperuste"] > 12) and ($hinnat["aleperuste"] < 5 or $hinnat["aleperuste"] > 8)) {
-						$varaosavirhe .= t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
+
+					if (($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] == false) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] == false)) {
+						if ($kukarow['extranet'] != '') {
+							$varaosavirhe .= t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
+						}
+						else {
+							$varaosavirhe .= t("VIRHE: Tuotetta ei saa myydä tälle asiakkaalle!")."<br>";
+						}
 						$trow 	 = "";
 						$tuoteno = "";
 						$kpl	 = 0;

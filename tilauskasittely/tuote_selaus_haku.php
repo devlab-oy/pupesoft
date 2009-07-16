@@ -1271,28 +1271,42 @@
 			}
 
 			foreach($rows as $row) {
-				
+
 				if ($kukarow['extranet'] != '') {
-					$query    = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
+					$hae_ja_selaa_asiakas = $kukarow['oletus_asiakas'];
+				}
+				else {
+					$hae_ja_selaa_asiakas = $laskurow['liitostunnus'];
+				}
+
+				if ($hae_ja_selaa_asiakas != 0) {
+					$query = "	SELECT * 
+								FROM tuote 
+								WHERE yhtio = '$kukarow[yhtio]' 
+								AND tuoteno = '$row[tuoteno]'";
 					$tuotetempres = mysql_query($query);
 					$temptrow = mysql_fetch_array($tuotetempres);
 
 					$temp_laskurowwi = $laskurow;
-					
+
 					if (!is_array($temp_laskurowwi)) {
-						$query = "SELECT * FROM asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
+						$query = "	SELECT * 
+									FROM asiakas 
+									WHERE yhtio = '$kukarow[yhtio]' 
+									AND tunnus = '$kukarow[oletus_asiakas]'";
 						$asiakastempres = mysql_query($query);
 						$asiakastemprow = mysql_fetch_array($asiakastempres);
-												
+
 						$temp_laskurowwi['liitostunnus']	= $asiakastemprow['tunnus'];
 						$temp_laskurowwi['ytunnus']			= $asiakastemprow['ytunnus'];
 						$temp_laskurowwi['valkoodi']		= $asiakastemprow['valkoodi'];
 						$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
 					}
-				
+
 					$hinnat = alehinta($temp_laskurowwi, $temptrow, 1, '', '', '', "hintaperuste,aleperuste");
-					
-					if 	($temptrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] < 2 or $hinnat["hintaperuste"] > 12) and ($hinnat["aleperuste"] < 5 or $hinnat["aleperuste"] > 8)) {
+
+					// jos tuote saadaan näyttää vain mikäli asiakkaalla on alehinta, niin sanotaan continue jos joku hinta/ale löytyy
+					if ($temptrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] == false) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] == false)) {
 						continue;
 					}
 				}

@@ -129,11 +129,16 @@ if ($tee != '') {
 	// asetetaan vienti kurssi
 	$laskurowfake['vienti_kurssi'] = $kurssi['kurssi'];
 
-	if ($kl_hinnastoon != "" and $kukarow['extranet'] == '') {
-		$kl_lisa = " ";
+	if ($kukarow['extranet'] == '') {
+		if ($kl_hinnastoon != "") {
+			$kl_lisa = " ";
+		}
+		else {
+			$kl_lisa = " and tuote.hinnastoon not in ('v', 'e') ";
+		}
 	}
 	else {
-		$kl_lisa = " and tuote.hinnastoon!='E' ";
+		$kl_lisa = " and tuote.hinnastoon != 'E' ";
 	}
 
 	$query = "	SELECT tuote.*, korvaavat.id, sum(tuotepaikat.saldo) saldo
@@ -327,7 +332,7 @@ echo "</select></td></tr>";
 
 if ($kukarow['extranet'] == '') {
 	echo "<tr><th>".t("Listaa kaikki tuotteet").":</th>
-			<td><input type='checkbox' name='kl_hinnastoon'> (".t("muuten hinnastoon flägi <> E").")</td></tr>";
+			<td><input type='checkbox' name='kl_hinnastoon'> (".t("muuten hinnastoon flägi <> E ja V").")</td></tr>";
 
 
 	echo "<tr><th>".t("Näytä aleryhmän tunnus").":</th>

@@ -921,20 +921,20 @@
 
 				echo "<td><select name='maksuehto'>";
 
-				$query = "	SELECT tunnus, teksti
+				$query = "	SELECT *
 							FROM maksuehto
-							WHERE yhtio 	= '$kukarow[yhtio]'
-							and kaytossa 	= ''
+							WHERE yhtio = '$kukarow[yhtio]'
+							and kaytossa = ''
 							and (sallitut_maat = '' or sallitut_maat like '%$srow[maa]%')
 							order by jarjestys, teksti, tunnus";
 				$mresult = mysql_query($query) or pupe_error($query);
 
-				while($row=mysql_fetch_array($mresult)) {
+				while ($row = mysql_fetch_array($mresult)) {
 					$sel = "";
 					if ($row["tunnus"] == $srow["maksuehto"]) {
 						$sel = 'selected';
 					}
-					echo "<option value='$row[tunnus]' $sel>$row[teksti]</option>";
+					echo "<option value='$row[tunnus]' $sel>$row[teksti] $row[kassa_teksti]</option>";
 				}
 				echo "</select></td>";
 			}

@@ -684,22 +684,8 @@ if (!function_exists('rivi_original')) {
 			$page[$sivu] = uusi_sivu();
 			$thispage    = $page[$sivu];
 		}
-
-		if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
-			$query = "	SELECT selite
-						FROM tuotteen_avainsanat
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji 	= 'nimitys_".strtolower($kieli)."'
-						and tuoteno = '$row[tuoteno]'
-						and selite != ''
-						LIMIT 1";
-			$nimresult = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($nimresult) > 0) {
-				$nimrow = mysql_fetch_array($nimresult);
-				$row['nimitys'] = $nimrow['selite'];
-			}
-		}
+		
+		$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
 
 		$query = "	SELECT vienti_kurssi
 					FROM lasku
@@ -788,7 +774,7 @@ if (!function_exists('rivi_original')) {
 		$kala = $kala - 10;
 
 		//Yksikkö
-		$pdf->draw_text(340, $kala, ta($kieli, "Y", $row["yksikko"], "selitetark"),		$thispage, $pieni);
+		$pdf->draw_text(340, $kala, t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selitetark"),		$thispage, $pieni);
 
 		//Toimitusaika
 		if (substr($row["toimitettuaika"],0,10) != "0000-00-00") {
@@ -934,21 +920,7 @@ if (!function_exists('rivi_plain')) {
 			$thispage    = $page[$sivu];
 		}
 
-		if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
-			$query = "	SELECT selite
-						FROM tuotteen_avainsanat
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji 	= 'nimitys_".strtolower($kieli)."'
-						and tuoteno = '$row[tuoteno]'
-						and selite != ''
-						LIMIT 1";
-			$nimresult = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($nimresult) > 0) {
-				$nimrow = mysql_fetch_array($nimresult);
-				$row['nimitys'] = $nimrow['selite'];
-			}
-		}
+		$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
 
 		$query = "	SELECT vienti_kurssi
 					FROM lasku
@@ -1066,21 +1038,7 @@ if (!function_exists('rivi_plain_2')) {
 			$thispage    = $page[$sivu];
 		}
 
-		if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
-			$query = "	SELECT selite
-						FROM tuotteen_avainsanat
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji 	= 'nimitys_".strtolower($kieli)."'
-						and tuoteno = '$row[tuoteno]'
-						and selite != ''
-						LIMIT 1";
-			$nimresult = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($nimresult) > 0) {
-				$nimrow = mysql_fetch_array($nimresult);
-				$row['nimitys'] = $nimrow['selite'];
-			}
-		}
+		$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
 
 		$query = "	SELECT vienti_kurssi
 					FROM lasku
@@ -1215,21 +1173,7 @@ if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
 			$thispage    = $page[$sivu];
 		}
 
-		if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
-			$query = "	SELECT selite
-						FROM tuotteen_avainsanat
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji 	= 'nimitys_".strtolower($kieli)."'
-						and tuoteno = '$row[tuoteno]'
-						and selite != ''
-						LIMIT 1";
-			$nimresult = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($nimresult) > 0) {
-				$nimrow = mysql_fetch_array($nimresult);
-				$row['nimitys'] = $nimrow['selite'];
-			}
-		}
+		$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
 
 		$query = "	SELECT vienti_kurssi
 					FROM lasku
@@ -1318,7 +1262,7 @@ if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
 		$kala = $kala - 10;
 
 		//Yksikkö
-		$pdf->draw_text(340, $kala, ta($kieli, "Y", $row["yksikko"], "selitetark"),		$thispage, $pieni);
+		$pdf->draw_text(340, $kala, t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selitetark"),		$thispage, $pieni);
 
 		//Toimitusaika
 		if (substr($row["toimitettuaika"],0,10) != "0000-00-00") {

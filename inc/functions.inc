@@ -6844,16 +6844,27 @@ if (!function_exists("t_avainsana")) {
 		else {
 			$limitlisa = "";
 		}
+		
+		if ($return != "") {
+			$kielilisa = $return;
+			
+			if ($return != "selite") {
+				$fallback = "";
+			}
+		}
+		else {
+			$kielilisa = "selitetark";
+		}
 
 		$query = "	SELECT DISTINCT avainsana.*,
-					IFNULL((SELECT avainsana_kieli.selitetark
+					IFNULL((SELECT if(avainsana_kieli.$kielilisa = '', NULL, avainsana_kieli.$kielilisa)
 					FROM avainsana as avainsana_kieli
 					WHERE avainsana_kieli.yhtio = avainsana.yhtio
 					and avainsana_kieli.laji = avainsana.laji					
-					and avainsana_kieli.selite = avainsana.selite
-					#and avainsana_kieli.perhe = avainsana.perhe
-					#and avainsana_kieli.perhe > 0
-					and avainsana_kieli.kieli = '$kieli' LIMIT 1), avainsana.selitetark) selitetark
+					#and avainsana_kieli.selite = avainsana.selite
+					and avainsana_kieli.perhe = avainsana.perhe
+					and avainsana_kieli.perhe > 0
+					and avainsana_kieli.kieli = '$kieli' LIMIT 1), avainsana.$kielilisa) $kielilisa
 					FROM avainsana
 					WHERE $yhtiolisa
 					and avainsana.laji = '$laji'
@@ -6869,7 +6880,6 @@ if (!function_exists("t_avainsana")) {
 		}
 
 		return $result;
-
 	}
 }
 

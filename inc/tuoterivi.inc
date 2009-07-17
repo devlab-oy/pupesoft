@@ -74,52 +74,28 @@
 		}
 	}
 
-	if (mysql_field_name($result, $i) == "try") {
+	if (mysql_field_name($result, $i) == "try"
+		or mysql_field_name($result, $i) == "osasto"
+		or mysql_field_name($result, $i) == "tuotemerkki"
+		or mysql_field_name($result, $i) == "malli"
+		or mysql_field_name($result, $i) == "mallitarkenne") {
+
 		// tehd‰‰n avainsana query
-		$sresult = avainsana("TRY", $kukarow['kieli']);
+		$sresult = avainsana(mysql_field_name($result, $i), $kukarow['kieli']);
 
-		$ulos = "<td><select name='$nimi'>";
-		while ($srow = mysql_fetch_array($sresult)) {
-			$sel = '';
-			if ($trow[$i] == $srow["selite"]) {
-				$sel = "selected";
+		// jos avainsanoja on perustettu tehd‰‰n dropdown
+		if (mysql_num_rows($sresult) > 0) {
+			$ulos = "<td><select name='$nimi' WIDTH='300' STYLE='width: 300px'>";
+			while ($srow = mysql_fetch_array($sresult)) {
+				$sel = '';
+				if ($trow[$i] == $srow["selite"]) {
+					$sel = "selected";
+				}
+				$ulos .= "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
 			}
-			$ulos .= "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
+			$ulos .= "</select></td>";
+			$jatko = 0;
 		}
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-	
-	if (mysql_field_name($result, $i) == "tuotemerkki") {
-		// tehd‰‰n avainsana query
-		$sresult = avainsana("TUOTEMERKKI", $kukarow['kieli']);
-
-		$ulos = "<td><select name='$nimi'>";
-		while ($srow = mysql_fetch_array($sresult)) {
-			$sel = '';
-			if ($trow[$i] == $srow["selite"]) {
-				$sel = "selected";
-			}
-			$ulos .= "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
-		}
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
-	if (mysql_field_name($result, $i) == "osasto") {
-		// tehd‰‰n avainsana query
-		$sresult = avainsana("OSASTO", $kukarow['kieli']);
-
-		$ulos = "<td><select name='$nimi'>";
-		while ($srow = mysql_fetch_array($sresult)) {
-			$sel = '';
-			if ($trow[$i] == $srow["selite"]) {
-				$sel = "selected";
-			}
-			$ulos .= "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
-		}
-		$ulos .= "</select></td>";
-		$jatko = 0;
 	}
 
 	if (mysql_field_name($result, $i) == "valuutta") {

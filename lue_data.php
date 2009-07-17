@@ -650,14 +650,25 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						}
 					}
 
-					if (($otsikot[$r] == 'OSASTO' or $otsikot[$r] == 'TRY') and  $table == 'tuote' and $rivi[$r] != "") {
+					if (($otsikot[$r] == 'OSASTO' 
+						or $otsikot[$r] == 'TRY'
+						or $otsikot[$r] == 'TUOTEMERKKI'
+						or $otsikot[$r] == 'MALLI'
+						or $otsikot[$r] == 'MALLITARKENNE') 
+						and $table == 'tuote' 
+						and $rivi[$r] != "") {
 
-						$tpque = "select tunnus from avainsana where yhtio='$kukarow[yhtio]' and laji='$otsikot[$r]' and selite='$rivi[$r]'";
+						$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '$otsikot[$r]'";
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 
-						if (mysql_num_rows($tpres) == 0) {
-							echo t("Virhe rivillä").": $rivilaskuri ".t("$otsikot[$r]")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
-							$hylkaa++; // ei päivitetä tätä riviä
+						if (mysql_num_rows($tpres) > 0) {
+							$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '$otsikot[$r]' and SELITE = '$rivi[$r]'";
+							$tpres = mysql_query($tpque) or pupe_error($tpque);
+
+							if (mysql_num_rows($tpres) == 0) {
+								echo t("Virhe rivillä").": $rivilaskuri ".t("$otsikot[$r]")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
+								$hylkaa++; // ei päivitetä tätä riviä
+							}
 						}
 					}
 

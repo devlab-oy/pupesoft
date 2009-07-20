@@ -4110,13 +4110,13 @@ if (!function_exists("enable_ajax")) {
 		}
 
 		this.doPost = function() {
-			http.open('post', urli, true);
+			http.open('post', urli + 'ohje=off', true);
 			http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 			http.send(data);
 		}
 
 		this.doGet = function() {
-			http.open('get', urli + '&' + data);
+			http.open('get', urli + '&' + data + '&ohje=off');
 			http.send(null);
 		}
 

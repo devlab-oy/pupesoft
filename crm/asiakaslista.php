@@ -267,12 +267,7 @@
 			<form action='$PHP_SELF' method='post'>
 			<input type='hidden' name='voipcall' value='kala'>";
 	
-	
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','ASOSASTO_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASOSASTO' order by avainsana.selite+0";
-	$asosresult = mysql_query($query) or pupe_error($query);
+	$asosresult = t_avainsana("ASIAKASOSASTO");
 	
 	echo "<tr><th>".t("Valitse asiakkaan osasto").":</th><td><select name='asos' onchange='submit();'>";
 	echo "<option value=''>".t("Kaikki osastot")."</option>";
@@ -295,29 +290,22 @@
 	echo "<th>".t("Näytä konsernin kaikki asiakkaat").":</th><td><input type='checkbox' name='konserni' $chk onclick='submit();'></td>";
 	echo "</tr>\n\n";
 	
-	$query = "	SELECT distinct piiri, selitetark
-				FROM asiakas
-				LEFT JOIN avainsana ON avainsana.yhtio=asiakas.yhtio and avainsana.laji='PIIRI' and selite = piiri
-				WHERE asiakas.yhtio='$kukarow[yhtio]' and piiri != '' order by piiri+0";
-	$asosresult = mysql_query($query) or pupe_error($query);
+	$asosresult = t_avainsana("PIIRI");
 	
 	echo "<tr><th>".t("Valitse asiakkaan piiri").":</th><td><select name='aspiiri' onchange='submit();'>";
 	echo "<option value=''>".t("Kaikki piirit")."</option>";
 	
 	while ($asosrow = mysql_fetch_array($asosresult)) {
 		$sel2 = '';
-		if ($aspiiri == $asosrow["piiri"]) {
+		if ($aspiiri == $asosrow["selite"]) {
 			$sel2 = "selected";
 		}
-		echo "<option value='$asosrow[piiri]' $sel2>$asosrow[piiri] - $asosrow[selitetark]</option>";
+		echo "<option value='$asosrow[selite]' $sel2>$asosrow[selite] - $asosrow[selitetark]</option>";
 	}
 	echo "</select></td>";
 	
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','ASRYHMA_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASRYHMA' order by avainsana.selite+0";
-	$asosresult = mysql_query($query) or pupe_error($query);
+
+	$asosresult = t_avainsana("ASIAKASRYHMA");
 	
 	echo "<th>".t("Valitse asiakkaan ryhmä").":</th><td><select name='asryhma' onchange='submit();'>";
 	echo "<option value=''>".t("Kaikki ryhmät")."</option>";
@@ -352,11 +340,7 @@
 	
 	echo "</select></td>\n\n";				
 
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','ASTILA_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASTILA' order by avainsana.selite+0";
-	$asosresult = mysql_query($query) or pupe_error($query);
+	$asosresult = t_avainsana("ASIAKASTILA");
 
 	echo "<th>".t("Valitse asiakkaan tila").":</th><td><select name='astila' onchange='submit();'>";
 	echo "<option value=''>".t("Kaikki tilat")."</option>";
@@ -369,16 +353,11 @@
 		echo "<option value='$asosrow[selite]' $sel2>$asosrow[selite] - $asosrow[selitetark]</option>";
 	}
 	
-	echo "</select></td></tr>\n\n";
-
-					
-					
+	echo "</select></td></tr>\n\n";			
 	echo "</table><br><table>";
-	
-	
+
 	echo "<tr>";
-	
-	
+		
 	for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
 		echo "<th><a href='$PHP_SELF?asos=$asos&asryhma=$asryhma&astila=$astila&aspiiri=$aspiiri&konserni=$konserni&asmyyja=$asmyyja&ojarj=".mysql_field_name($result,$i).$ulisa."'>" . t(mysql_field_name($result,$i)) . "</a>";
 
@@ -422,11 +401,7 @@
 
 	echo "<br/>";
 
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','ASTILA_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASTILA' order by avainsana.selite+0";
-	$asosresult = mysql_query($query) or pupe_error($query);
+	$asosresult = t_avainsana("ASIAKASTILA");
 
 	echo t("Vaihda asiakkaiden tila").": <select name='astila_vaihto'>";
 	
@@ -444,4 +419,5 @@
 	echo "</form>";
 
 	require ("../inc/footer.inc");
+
 ?>

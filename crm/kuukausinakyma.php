@@ -356,6 +356,7 @@
 					GROUP BY laji";
 		$abures = mysql_query($query) or pupe_error($query);
 		$aburow = mysql_fetch_array($abures);
+		
 		if($aburow["lajit"] != "") {
 			$lajilisa = " and seuranta IN ('','{$aburow["lajit"]}')";
 		}

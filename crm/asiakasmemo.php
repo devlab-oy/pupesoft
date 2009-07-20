@@ -538,14 +538,9 @@
 				echo "<select name='astila' Onchange='submit();'>";
 				echo "<option value=''>".t("Ei tilaa")."</option>";
 
-				$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-	                       	FROM avainsana
-        	                ".avain('join','ASTILA_')."
-                	        WHERE avainsana.yhtio='$kukarow[yhtio]' 
-							and avainsana.laji='ASIAKASTILA' 
-							order by avainsana.selite+0";
-				$asosresult = mysql_query($query) or pupe_error($query);
 
+				$asosresult = t_avainsana("ASIAKASTILA");
+				
 				if ($tee2 == "") {
 					$astila = $asiakasrow['tila'];
 				}
@@ -741,21 +736,17 @@
 				
 				echo "<tr><th>".t("Tapa:")."</th>";
 
-				$query = "	SELECT selite, selitetark
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]' and laji = 'KALETAPA'
-							ORDER BY jarjestys, selite";
-				$vresult = mysql_query($query) or pupe_error($query);
+				$vresult = t_avainsana("KALETAPA");
 
 				echo "<td colspan='2'><select name='tapa'>";
 
-				while ($vrow=mysql_fetch_row($vresult)) {
+				while ($vrow = mysql_fetch_array($vresult)) {
 					$sel="";
 
-					if ($tapa == $vrow[1]) {
+					if ($tapa == $vrow["selitetark"]) {
 						$sel = "selected";
 					}
-					echo "<option value = '$vrow[1]' $sel>$vrow[1]";
+					echo "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark]</option>";
 				}
 
 				echo "</select></td></tr>";

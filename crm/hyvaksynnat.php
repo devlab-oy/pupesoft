@@ -31,23 +31,19 @@
 		echo "<tr>";
 		echo "<td>".t("Valitse osasto").":</td>";
 		
-		
 		echo "<form action='$PHP_SELF' method='POST'>";
 		echo "<td><select name='osasto' onchange='submit()'><option value=''>".t("Ei osastoa")."</option>";
 
-		$query  = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='HENKILO_OSASTO'";
-		$vares = mysql_query($query) or pupe_error($query);
+		$vares = t_avainsana("HENKILO_OSASTO");
 
-		while ($varow = mysql_fetch_array($vares))
-		{
+		while ($varow = mysql_fetch_array($vares)) {
 			$sel='';
 			if ($varow['selite']==$osasto) $sel = 'selected';
-			echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
+			echo "<option value='$varow[selite]' $sel>$varow[selite] - $varow[selitetark]</option>";
 		}
 
 		echo "</select></td></tr>";
 	
-		
 		if ($kuitatut != '')  {
 			$chk1 = "CHECKED";
 			$lisa1 = "";

@@ -61,13 +61,8 @@ if ($tee == '') {
 
 	echo "<br><table>
 			<form action='$PHP_SELF' method='post'>";
-	
-	
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','ASOSASTO_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASOSASTO' order by avainsana.selite+0";
-	$asosresult = mysql_query($query) or pupe_error($query);
+
+	$asosresult = t_avainsana("ASIAKASOSASTO");
 	
 	echo "<tr><th>".t("Valitse asiakkaan osasto").":</th><td colspan='3'><select name='asos'>";
 	echo "<option value=''>".t("Kaikki osastot")."</option>";
@@ -77,32 +72,25 @@ if ($tee == '') {
 		if ($asos == $asosrow["selite"]) {
 			$sel2 = "selected";
 		}
-		echo "<option value='$asosrow[selite]' $sel2>$asosrow[selite] $asosrow[selitetark]</option>";
+		echo "<option value='$asosrow[selite]' $sel2>$asosrow[selite] - $asosrow[selitetark]</option>";
 	}
 	echo "</select></td></tr>";
 	
-	$query = "	SELECT distinct piiri
-				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and piiri != '' order by piiri+0";
-	$asosresult = mysql_query($query) or pupe_error($query);
+	$asosresult = t_avainsana("PIIRI");
 	
 	echo "<tr><th>".t("Valitse asiakkaan piiri").":</th><td colspan='3'><select name='aspiiri'>";
 	echo "<option value=''>".t("Kaikki piirit")."</option>";
 	
 	while ($asosrow = mysql_fetch_array($asosresult)) {
 		$sel2 = '';
-		if ($aspiiri == $asosrow["piiri"]) {
+		if ($aspiiri == $asosrow["selite"]) {
 			$sel2 = "selected";
 		}
-		echo "<option value='$asosrow[piiri]' $sel2>$asosrow[piiri]</option>";
+		echo "<option value='$asosrow[selite]' $sel2>$asosrow[selite] - $asosrow[selitetark]</option>";
 	}
 	echo "</select></td></tr>";
 	
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','ASRYHMA_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASRYHMA' order by avainsana.selite+0";
-	$asosresult = mysql_query($query) or pupe_error($query);
+	$asosresult = t_avainsana("ASIAKASRYHMA");
 	
 	echo "<tr><th>".t("Valitse asiakkaan ryhmä").":</th><td colspan='3'><select name='asryhma'>";
 	echo "<option value=''>".t("Kaikki ryhmät")."</option>";
@@ -112,7 +100,7 @@ if ($tee == '') {
 		if ($asryhma == $asosrow["selite"]) {
 			$sel2 = "selected";
 		}
-		echo "<option value='$asosrow[selite]' $sel2>$asosrow[selite] $asosrow[selitetark]</option>";
+		echo "<option value='$asosrow[selite]' $sel2>$asosrow[selite] - $asosrow[selitetark]</option>";
 	}
 	
 	echo "	</select>

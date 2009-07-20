@@ -213,96 +213,68 @@ if($tee == "") {
 				</tr>
 				<tr>";			
 
-		//	Piirit
-		$query = "	SELECT selite, concat_ws(' - ',selite, selitetark)
-					FROM avainsana
-					WHERE yhtio='$kukarow[yhtio]' and laji='PIIRI'
-					ORDER BY jarjestys, selite";
-		$mryresult = mysql_query($query) or pupe_error($query);		
-		echo "		<td NOWRAP>
-						<select name='piiri[]' multiple='TRUE' size='6' style='width: 100%;' style='width: 100%;'>";
+		//	Piirit	
+		$mryresult = t_avainsana("PIIRI");
+	
+		echo "<td NOWRAP><select name='piiri[]' multiple='TRUE' size='6' style='width: 100%;' style='width: 100%;'>";
+		
 		while($row = mysql_fetch_array($mryresult)) {
 			$sel = "";
-			if (array_search($row[0], $piiri) !== false) {
+			if (array_search($row["selite"], $piiri) !== false) {
 				$sel = 'selected';
 			}
-			echo "		<option value='$row[0]' $sel>$row[1]</option>";
+			echo "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark]</option>";
 		}
 
-		echo "			</select>
-						<br>
-						".t("Piireittäin").": <input type='checkbox' name='group[piiri]' value='checked' {$group["piiri"]}> prio: <input type='text' name='prio[piiri]' value='{$prio["piiri"]}' size='2'>
-					</td>";
+		echo "</select><br>".t("Piireittäin").": <input type='checkbox' name='group[piiri]' value='checked' {$group["piiri"]}> prio: <input type='text' name='prio[piiri]' value='{$prio["piiri"]}' size='2'></td>";
 
 		//	Luokat
-		$query = "	SELECT selite, concat_ws(' - ',selite, selitetark)
-					FROM avainsana
-					WHERE yhtio='$kukarow[yhtio]' and laji='ASIAKASLUOKKA'
-					ORDER BY jarjestys, selite";
-		$abures = mysql_query($query) or pupe_error($query);
-		echo "		<td NOWRAP>
-						<select name='asiakasluokka[]' multiple='TRUE' size='6' style='width: 100%;'>";
+		$abures = t_avainsana("ASIAKASLUOKKA");
+		
+		echo "<td NOWRAP><select name='asiakasluokka[]' multiple='TRUE' size='6' style='width: 100%;'>";
+		
 		while($row = mysql_fetch_array($abures)) {
 			$sel = "";
-			if (array_search($row[0], $asiakasluokka) !== false) {
+			if (array_search($row["selite"], $asiakasluokka) !== false) {
 				$sel = 'selected';
 			}
-			echo "		<option value='$row[0]' $sel>$row[1]</option>";
+			echo "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark]</option>";
 		}
 
-		echo "			</select>
-						<br>
-						".t("Luokittain").": <input type='checkbox' name='group[asiakasluokka]' value='checked' {$group["asiakasluokka"]}> prio: <input type='text' name='prio[asiakasluokka]' value='{$prio["asiakasluokka"]}' size='2'>
-					</td>";
+		echo "</select><br>".t("Luokittain").": <input type='checkbox' name='group[asiakasluokka]' value='checked' {$group["asiakasluokka"]}> prio: <input type='text' name='prio[asiakasluokka]' value='{$prio["asiakasluokka"]}' size='2'></td>";
 
 		//	Asiakasryhmä
-		$query = "	SELECT selite, concat_ws(' - ',selite, selitetark)
-					FROM avainsana
-					WHERE yhtio='$kukarow[yhtio]' and laji='ASIAKASRYHMA'
-					ORDER BY jarjestys, selite";
-		$abures = mysql_query($query) or pupe_error($query);
-		echo "		<td NOWRAP>
-						<select name='asiakasryhma[]' multiple='TRUE' size='6' style='width: 100%;'>";
+		$abures = t_avainsana("ASIAKASRYHMA");
+		
+		echo "<td NOWRAP><select name='asiakasryhma[]' multiple='TRUE' size='6' style='width: 100%;'>";
+		
 		while($row = mysql_fetch_array($abures)) {
 			$sel = "";
-			if (array_search($row[0], $asiakasryhma) !== false) {
+			if (array_search($row["selite"], $asiakasryhma) !== false) {
 				$sel = 'selected';
 			}
-			echo "		<option value='$row[0]' $sel>$row[1]</option>";
+			echo "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark]</option>";
 		}
-		echo "			</select>
-						<br>
-						".t("Ryhmittäin").": <input type='checkbox' name='group[asiakasryhma]' value='checked' {$group["asiakasryhma"]}> prio: <input type='text' name='prio[asiakasryhma]' value='{$prio["asiakasryhma"]}' size='2'>
-					</td>";
+		
+		echo "</select><br>".t("Ryhmittäin").": <input type='checkbox' name='group[asiakasryhma]' value='checked' {$group["asiakasryhma"]}> prio: <input type='text' name='prio[asiakasryhma]' value='{$prio["asiakasryhma"]}' size='2'></td>";
 
 		//	Osastot
-		$query = "	SELECT selite, concat_ws(' - ',selite, selitetark)
-					FROM avainsana
-					WHERE yhtio='$kukarow[yhtio]' and laji='ASIAKASOSASTO'
-					ORDER BY jarjestys, selite";
-		$abures = mysql_query($query) or pupe_error($query);
-		echo "		<td NOWRAP>
-						<select name='asiakasosasto[]' multiple='TRUE' size='6' style='width: 100%;'>";
+		$abures = t_avainsana("ASIAKASOSASTO");
+		
+		echo "<td NOWRAP><select name='asiakasosasto[]' multiple='TRUE' size='6' style='width: 100%;'>";
+		
 		while($row = mysql_fetch_array($abures)) {
 			$sel = "";
-			if (array_search($row[0], $asiakasosasto) !== false) {
+			if (array_search($row["selite"], $asiakasosasto) !== false) {
 				$sel = 'selected';
 			}
-			echo "		<option value='$row[0]' $sel>$row[1]</option>";
+			echo "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark]</option>";
 		}
-		echo "			</select>
-						<br>
-						".t("Osastoittain").": <input type='checkbox' name='group[asiakasosasto]' value='checked' {$group["asiakasosasto"]}> prio: <input type='text' name='prio[asiakasosasto]' value='{$prio["asiakasosasto"]}' size='2'>
-
-					</td>";
+		echo "</select><br>".t("Osastoittain").": <input type='checkbox' name='group[asiakasosasto]' value='checked' {$group["asiakasosasto"]}> prio: <input type='text' name='prio[asiakasosasto]' value='{$prio["asiakasosasto"]}' size='2'></td>";
 		
-		echo "
-				</tr>
-			</table>
-			<br>";
+		echo "</tr></table><br>";
 
-		echo "	
-				<table width='750px'>
+		echo "<table width='750px'>
 				<tr>
 					<th>".t("As. Maa")."</th><th>".t("As. Postipaikka")."</th><th>".t("Tm. Maa")."</th><th>".t("Tm. Postipaikka")."</th>
 				</tr>
@@ -326,7 +298,7 @@ if($tee == "") {
 			if (array_search($maarow[0], $maa) !== false) {
 				$sel = 'selected';
 			}
- 			echo "			<option value='$maarow[maa]' $sel>".maa($maarow[maa])."</option>";
+ 			echo "			<option value='$maarow[maa]' $sel>".maa($maarow["maa"])."</option>";
 		}
 						
 		echo "

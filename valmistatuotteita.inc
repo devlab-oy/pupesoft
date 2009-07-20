@@ -492,11 +492,11 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 				}
 			}
 			
-			echo "<font class='message'>".t("Varastosta k‰ytettiin tuotetta")." $perherow[tuoteno] $kpl ".ta($kieli, "Y", $tuoterow["yksikko"])."</font><br>";
+			echo "<font class='message'>".t("Varastosta k‰ytettiin tuotetta")." $perherow[tuoteno] $kpl ".t_avainsana("Y", $kieli, "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."</font><br>";
 
 		}
 		else {
-			echo "<font class='message'>".t("K‰ytettiin tuotetta")." $perherow[tuoteno] $kpl ".ta($kieli, "Y", $tuoterow["yksikko"])."</font><br>";
+			echo "<font class='message'>".t("K‰ytettiin tuotetta")." $perherow[tuoteno] $kpl ".t_avainsana("Y", $kieli, "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."</font><br>";
 		}
 
 		//p‰ivitet‰‰n tilausrivi k‰ytetyksi
@@ -793,7 +793,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 			}
 
 			//printataan pikku raporttia mit‰ tulikaan tehty‰
-			echo "<font class='message'>".t("Valmistettiin tuotetta")." $isatuoteno $isavarattu ".ta($kieli, "Y", $isarow["yksikko"])."</font><br>";
+			echo "<font class='message'>".t("Valmistettiin tuotetta")." $isatuoteno $isavarattu ".t_avainsana("Y", $kieli, "and avainsana.selite='$isarow[yksikko]'", "", "", "selite")."</font><br>";
 		}
 	}
 

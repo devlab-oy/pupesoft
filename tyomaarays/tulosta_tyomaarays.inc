@@ -740,7 +740,7 @@ if (!function_exists('rivi')) {
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],	$thispage, $pieni);
 		
 		if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
-			$row['varattu'] = ($row['varattu']+$row['kpl'])." ".ta($kieli, "Y", $row["yksikko"]);
+			$row['varattu'] = ($row['varattu']+$row['kpl'])." ".t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 		}
 		else {	
 			if ($row["var"] == 'J') { // jälkitoimitus
@@ -758,8 +758,10 @@ if (!function_exists('rivi')) {
 		if ($tyyppi == "") {			
 			$pdf->draw_text(45,  $kala, $row["tuoteno"],										$thispage, $norm);
 			
-			$oikpos = $pdf->strlen($row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), $norm);
-			$pdf->draw_text(365-$oikpos, $kala, $row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), $thispage, $norm);
+			$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+			
+			$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
+			$pdf->draw_text(365-$oikpos, $kala, $row["tilkpl"]." ".$omyks, $thispage, $norm);
 
 			$oikpos = $pdf->strlen($row["varattu"], $norm);
 			$pdf->draw_text(415-$oikpos, $kala, $row["varattu"], 								$thispage, $norm);
@@ -780,8 +782,10 @@ if (!function_exists('rivi')) {
 			$pdf->draw_text(42,  $kala, $varastopaikka,											$thispage, $norm);
 			$pdf->draw_text(125,  $kala, $row["tuoteno"],										$thispage, $norm);
 
-			$oikpos = $pdf->strlen($row['tilkpl']." ".ta($kieli, "Y", $row["yksikko"]), $norm);
-			$pdf->draw_text(575-$oikpos, $kala, $row['tilkpl']." ".ta($kieli, "Y", $row["yksikko"]),$thispage, $norm);
+			$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+			
+			$oikpos = $pdf->strlen($row['tilkpl']." ".$omyks, $norm);
+			$pdf->draw_text(575-$oikpos, $kala, $row['tilkpl']." ".$omyks, $thispage, $norm);
 
 			$kala = $kala - $rivinkorkeus + 5;
 

@@ -378,34 +378,8 @@
 			}
 		}
 
-
-		// Tässä luodaan uusi raporttiprofiili
-		/*
-		if ($tee == "RAPORTOI" and $uusirappari != '') {
-
-			$rappari = $kukarow["kuka"]."##".$uusirappari;
-
-			foreach($valitut as $val) {
-				$query = "INSERT INTO avainsana set yhtio='$kukarow[yhtio]', laji='HALYRAP', selite='$rappari', selitetark='$val'";
-				$res = mysql_query($query) or pupe_error($query);
-			}
-		}
-		*/
-
 		//Ajetaan itse raportti
 		if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
-
-			/*
-			if ($rappari != '') {
-				$query = "DELETE FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='HALYRAP' and selite='$rappari'";
-				$res = mysql_query($query) or pupe_error($query);
-
-				foreach($valitut as $val) {
-					$query = "INSERT INTO avainsana set yhtio='$kukarow[yhtio]', laji='HALYRAP', selite='$rappari', selitetark='$val'";
-					$res = mysql_query($query) or pupe_error($query);
-				}
-			}
-			*/
 
 			$osasto = '';
 			$osasto2 = '';
@@ -426,13 +400,7 @@
 
 				$try = substr($try, 0, -1);
 
-				$query = "	SELECT distinct selite, selitetark
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]'
-							and laji='TRY'
-							and kieli = '{$kukarow['kieli']}'
-							and selite  in ($try)";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = t_avainsana("TRY", "", "and avainsana.selite  in ($try)");
 
 				while ($srow = mysql_fetch_array($sresult)) {
 					$try2 .= "{$srow['selite']} {$srow['selitetark']}<br>";
@@ -450,13 +418,7 @@
 
 				$osasto = substr($osasto, 0, -1);
 
-				$query = "	SELECT distinct selite, selitetark
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]'
-							and laji='OSASTO'
-							and kieli = '{$kukarow['kieli']}'
-							and selite  in ($osasto)";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = t_avainsana("OSASTO", "", "and avainsana.selite  in ($osasto)");
 
 				while($trow = mysql_fetch_array($sresult)) {
 					$osasto2 .= "{$trow['selite']} {$trow['selitetark']}<br>";
@@ -473,13 +435,7 @@
 
 				$tme = substr($tme, 0, -1);
 
-				$query = "	SELECT distinct selite
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]'
-							and laji='TUOTEMERKKI'
-							and kieli = '{$kukarow['kieli']}'
-							and selite  in ($tme)";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = t_avainsana("TUOTEMERKKI", "", "and avainsana.selite  in ($tme)");
 
 				while ($tmerow = mysql_fetch_array($sresult)) {
 					$tme2 .= "{$tmerow['selite']}<br>";
@@ -2758,21 +2714,7 @@
 					<input type='hidden' name='tee' id='tee' value=''>
 					<br/>",t("Valitse vähintään yksi seuraavista:"),"<br/>";
 
-			// name='osasto'
-			$query = "	SELECT DISTINCT avainsana.selite,
-			            IFNULL((SELECT avainsana_kieli.selitetark
-			            FROM avainsana as avainsana_kieli
-			            WHERE avainsana_kieli.yhtio = avainsana.yhtio
-			            and avainsana_kieli.laji = avainsana.laji
-			            and avainsana_kieli.selite = avainsana.selite
-			            and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selitetark) selitetark
-			            FROM avainsana
-			            WHERE avainsana.yhtio = '$kukarow[yhtio]'
-			            and avainsana.laji = 'OSASTO'
-			            and avainsana.kieli in ('$yhtiorow[kieli]', '')
-			            $avainlisa
-			            $orderlisa";
-			$sresult = mysql_query($query) or pupe_error($query);
+			$sresult = t_avainsana("OSASTO");
 
 			echo "<table style='display:inline;'>";
 			echo "<tr><th>",t("Osasto"),"</th></tr>";
@@ -2805,21 +2747,8 @@
 			echo "</select></td>";
 			echo "</tr></table>";
 
-			// name='tuoryh'
 			if ($lisa_haku_osasto == "") {
-				$query = "	SELECT DISTINCT avainsana.selite,
-				            IFNULL((SELECT avainsana_kieli.selitetark
-				            FROM avainsana as avainsana_kieli
-				            WHERE avainsana_kieli.yhtio = avainsana.yhtio
-				            and avainsana_kieli.laji = avainsana.laji
-				            and avainsana_kieli.selite = avainsana.selite
-				            and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selitetark) selitetark
-				            FROM avainsana
-				            WHERE avainsana.yhtio = '$kukarow[yhtio]'
-				            and avainsana.laji = 'TRY'
-				            and avainsana.kieli in ('$yhtiorow[kieli]', '')
-				            $avainlisa
-				            $orderlisa";
+				$sresult = t_avainsana("TRY");
 			}
 			else {
 				$query = "	SELECT distinct avainsana.selite,
@@ -2830,16 +2759,11 @@
 					        and avainsana_kieli.selite = avainsana.selite
 					        and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selitetark) selitetark
 							FROM tuote
-							JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+							JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' and avainsana.kieli in ('$yhtiorow[kieli]', ''))
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
-							$lisa_haku_osasto
-							$kieltolisa
-							$extra_poislisa
-							$poislisa_mulsel
-							$orderlisa";
+							$lisa_haku_osasto";
+				$sresult = mysql_query($query) or pupe_error($query);
 			}
-
-			$sresult = mysql_query($query) or pupe_error($query);
 
 			echo "<table style='display:inline;'><tr><th>",t("Tuoteryhmä"),"</th></tr>";
 			echo "<tr><td nowrap valign='top' class='back'><select name='mul_try[]' onchange='document.getElementById(\"tee\").value=\"ei_menna\";submit();' multiple='TRUE' size='7'>";
@@ -2871,15 +2795,11 @@
 			//name='tuotemerkki'
 			$query = "	SELECT distinct avainsana.selite, avainsana.selitetark
 						FROM tuote
-						JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' $avainlisa)
+						JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI')
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						$lisa_haku_osasto
 						$lisa_haku_try
-						$kieltolisa
-						$extra_poislisa
-						$poislisa_mulsel
 						ORDER BY avainsana.jarjestys, avainsana.selite";
-
 			$sresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($sresult) > 0) {
@@ -2998,13 +2918,8 @@
 				$try = '';
 
 				foreach ($mul_try as $tr) {
-					$query = "	SELECT selitetark
-								FROM avainsana
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND selite = '$tr'
-								AND kieli = '{$kukarow['kieli']}'
-								AND laji = 'TRY'";
-					$res = mysql_query($query) or pupe_error($query);
+					$res = t_avainsana("TRY", "", "and avainsana.selite = '$tr'");
+					
 					$row_tr = mysql_fetch_assoc($res);
 					$try .= "$tr {$row_tr['selitetark']}<br>";
 				}
@@ -3016,13 +2931,8 @@
 				$osasto = '';
 
 				foreach ($mul_osasto as $os) {
-					$query = "	SELECT selitetark
-								FROM avainsana
-								WHERE yhtio = '{$kukarow['yhtio']}'
-								AND selite = '$os'
-								AND kieli = '{$kukarow['kieli']}'
-								AND laji = 'OSASTO'";
-					$res = mysql_query($query) or pupe_error($query);
+					$res = t_avainsana("OSASTO", "", "and avainsana.selite = '$os'");
+					
 					$row_os = mysql_fetch_assoc($res);
 					$osasto .= "$os {$row_os['selitetark']}<br>";
 				}
@@ -3095,22 +3005,6 @@
 					<td class='back'></td><th colspan='3'>".t("Alkupäivämäärä (pp-kk-vvvv)")."</th>
 					<td class='back'></td><th colspan='3'>".t("Loppupäivämäärä (pp-kk-vvvv)")."</th></tr>";
 
-/*
-			$query = "	SELECT selitetark
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji	= 'HALYRAP'
-						and selite	= '$rappari'
-						and selitetark like 'PAIVAM##%'";
-			$sresult = mysql_query($query) or pupe_error($query);
-
-			while($srow = mysql_fetch_array($sresult)) {
-				list($etuliite, $nimi, $paivamaara) = explode('##',$srow["selitetark"]);
-
-				${$nimi} = $paivamaara;
-			}
-*/
-
 			echo "	<tr><th>".t("Kausi 1")."</th>
 					<td><input type='text' name='ppa1' value='$ppa1' size='5'></td>
 					<td><input type='text' name='kka1' value='$kka1' size='5'></td>
@@ -3151,17 +3045,6 @@
 					<td><input type='text' name='vvl4' value='$vvl4' size='5'></td>";
 			echo "</tr>";
 
-/*
-			$query = "	SELECT selitetark
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji	= 'HALYRAP'
-						and selite	= '$rappari'
-						and selitetark = 'TALLENNAPAIVAM'";
-			$sresult = mysql_query($query) or pupe_error($query);
-			$srow = mysql_fetch_array($sresult);
-
-			*/
 			$chk = "";
 			// ($srow["selitetark"] == "TALLENNAPAIVAM" and $tee == "JATKA") or 
 			if ($valitut["TALLENNAPAIVAM"] != '') {
@@ -3183,16 +3066,6 @@
 				echo "<tr><th>Ostoehdotus $kaunimi:</th><td colspan='3'><select name='valitut[KAUSI$kaulas]'>";
 
 				foreach ($kaudet_kaikki as $kausi2) {
-					/*
-					$query = "	SELECT selitetark
-								FROM avainsana
-								WHERE yhtio = '$kukarow[yhtio]'
-								and laji	= 'HALYRAP'
-								and selite	= '$rappari'
-								and selitetark = 'KAUSI$kaulas##$kausi2'";
-					$sresult = mysql_query($query) or pupe_error($query);
-					$srow = mysql_fetch_array($sresult);
-					*/
 
 					$chk = "";
 
@@ -3214,9 +3087,11 @@
 
 			echo "<tr><th>",t("Luokkakertoimet"),"</th></tr>";
 			echo "<tr><th>";
+			
 			foreach ($ryhmanimet as $ryhma_kirjain) {
 				echo $ryhma_kirjain{0}," <input type='text' name='luokkakerroin_",$ryhma_kirjain{0},"' size='3' value='",${"luokkakerroin_".$ryhma_kirjain{0}},"'> ";
 			}
+			
 			echo "</th></tr>";
 
 			echo "<tr><td class='back'><br></td></tr>";
@@ -3237,18 +3112,7 @@
 
 			if (mysql_num_rows($presult) > 0) {
 				while ($prow = mysql_fetch_array($presult)) {
-					/*
-					$query = "	SELECT selitetark
-								FROM avainsana
-								WHERE yhtio = '$kukarow[yhtio]'
-								and laji	= 'HALYRAP'
-								and selite	= '$rappari'
-								and selitetark = 'YHTIO##$prow[yhtio]'";
-					$sresult = mysql_query($query) or pupe_error($query);
-					$srow = mysql_fetch_array($sresult);
 
-					("YHTIO##".$prow["yhtio"] == $srow["selitetark"] and $tee == "JATKA") or $valitut["YHTIO##$prow[yhtio]"] != '' or 
-					*/
 					$chk = "";
 					if ($prow["yhtio"] == $kukarow["yhtio"]) {
 						$chk = "CHECKED";
@@ -3279,18 +3143,6 @@
 			}
 
 			//Ajetaanko varastopaikoittain
-			/*
-			$query = "	SELECT selitetark
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
-						and selite	= '$rappari'
-						and selitetark = 'PAIKOITTAIN'";
-			$sresult = mysql_query($query) or pupe_error($query);
-			$srow = mysql_fetch_array($sresult);
-
-			($srow["selitetark"] == "PAIKOITTAIN" and $tee == "JATKA") or 
-			*/
 			$chk = "";
 			if ($valitut["paikoittain"] != '') {
 				$chk = "CHECKED";
@@ -3300,19 +3152,6 @@
 
 
 			//Näytetäänkö poistetut tuotteet
-			/*
-			$query = "	SELECT selitetark
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
-						and selite	= '$rappari'
-						and selitetark = 'POISTETUT'";
-			$sresult = mysql_query($query) or pupe_error($query);
-			$srow = mysql_fetch_array($sresult);
-
-			($srow["selitetark"] == "POISTETUT" and $tee == "JATKA") or 
-			*/
-
 			$chk = "";
 			if ($valitut["poistetut"] != '' or $defaultit == "PÄÄLLE") {
 				$chk = "CHECKED";
@@ -3321,19 +3160,6 @@
 			echo "<tr><th>".t("Älä näytä poistettuja tuotteita")."</th><td colspan='3'><input type='checkbox' name='valitut[poistetut]' value='POISTETUT' $chk></td></tr>";
 
 			//Näytetäänkö poistetut tuotteet
-			/*
-			$query = "	SELECT selitetark
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
-						and selite	= '$rappari'
-						and selitetark = 'POISTUVAT'";
-			$sresult = mysql_query($query) or pupe_error($query);
-			$srow = mysql_fetch_array($sresult);
-
-			($srow["selitetark"] == "POISTUVAT" and $tee == "JATKA") or 
-			*/
-
 			$chk = "";
 			if ($valitut["poistuvat"] != '' or $defaultit == "PÄÄLLE") {
 				$chk = "CHECKED";
@@ -3343,19 +3169,6 @@
 
 
 			//Näytetäänkö poistetut tuotteet
-			/*
-			$query = "	SELECT selitetark
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
-						and selite	= '$rappari'
-						and selitetark = 'EIHINNASTOON'";
-			$sresult = mysql_query($query) or pupe_error($query);
-			$srow = mysql_fetch_array($sresult);
-
-			($srow["selitetark"] == "EIHINNASTOON" and $tee == "JATKA") or 
-			*/
-
 			$chk = "";
 			if ($valitut["EIHINNASTOON"] != '' or $defaultit == "PÄÄLLE") {
 				$chk = "CHECKED";
@@ -3364,18 +3177,6 @@
 			echo "<tr><th>".t("Älä näytä tuotteita joita ei näytetä hinnastossa")."</th><td colspan='3'><input type='checkbox' name='valitut[EIHINNASTOON]' value='EIHINNASTOON' $chk></td></tr>";
 
 			//Näytetäänkö ei varastoitavat tuotteet
-			/*
-			$query = "	SELECT selitetark
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
-						and selite	= '$rappari'
-						and selitetark = 'EIVARASTOITAVA'";
-			$sresult = mysql_query($query) or pupe_error($query);
-			$srow = mysql_fetch_array($sresult);
-			($srow["selitetark"] == "EIVARASTOITAVA" and $tee == "JATKA") or 
-			*/
-
 			$chk = "";
 			if ($valitut["EIVARASTOITAVA"] != '') {
 				$chk = "CHECKED";
@@ -3384,18 +3185,6 @@
 			echo "<tr><th>".t("Älä näytä tuotteita joita ei varastoida")."</th><td colspan='3'><input type='checkbox' name='valitut[EIVARASTOITAVA]' value='EIVARASTOITAVA' $chk></td></tr>";
 
 			//Näytetäänkö poistuvat tuotteet
-			/*
-			$query = "	SELECT selitetark
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
-						and selite	= '$rappari'
-						and selitetark = 'EHDOTETTAVAT'";
-			$sresult = mysql_query($query) or pupe_error($query);
-			$srow = mysql_fetch_array($sresult);
-			($srow["selitetark"] == "EHDOTETTAVAT" and $tee == "JATKA") or 
-			*/
-
 			$chk = "";
 			if ($valitut["EHDOTETTAVAT"] != '') {
 				$chk = "CHECKED";
@@ -3405,18 +3194,6 @@
 
 
 			//Näytetäänkö ostot varastoittain
-			/*
-			$query = "	SELECT selitetark
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
-						and selite	= '$rappari'
-						and selitetark = 'OSTOTVARASTOITTAIN'";
-			$sresult = mysql_query($query) or pupe_error($query);
-			$srow = mysql_fetch_array($sresult);
-			($srow["selitetark"] == "OSTOTVARASTOITTAIN" and $tee == "JATKA") or 
-			*/
-
 			$chk = "";
 			if ($valitut["OSTOTVARASTOITTAIN"] != '') {
 				$chk = "CHECKED";
@@ -3429,18 +3206,6 @@
 				echo "<tr><th colspan='4'>".t("ABC-rajaus")." $ryhmanimet[$abcrajaus]</th></tr>";
 
 				//näytetäänkö uudet tuotteet
-				/*
-				$query = "	SELECT selitetark
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]'
-							and laji = 'HALYRAP'
-							and selite	= '$rappari'
-							and selitetark = 'UUDETTUOTTEET'";
-				$sresult = mysql_query($query) or pupe_error($query);
-				$srow = mysql_fetch_array($sresult);
-				($srow["selitetark"] == "UUDETTUOTTEET" and $tee == "JATKA") or 
-				*/
-
 				$chk = "";
 				if ($valitut["UUDETTUOTTEET"] != '') {
 					$chk = "CHECKED";
@@ -3449,18 +3214,6 @@
 				echo "<tr><th>".t("Älä listaa 12kk sisällä perustettuja tuotteita")."</th><td colspan='3'><input type='checkbox' name='valitut[UUDETTUOTTEET]' value='UUDETTUOTTEET' $chk></td></tr>";
 
 				//näytetäänkö uudet tuotteet
-				/*
-				$query = "	SELECT selitetark
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]'
-							and laji = 'HALYRAP'
-							and selite	= '$rappari'
-							and selitetark = 'VAINUUDETTUOTTEET'";
-				$sresult = mysql_query($query) or pupe_error($query);
-				$srow = mysql_fetch_array($sresult);
-				($srow["selitetark"] == "VAINUUDETTUOTTEET" and $tee == "JATKA") or 
-				*/
-
 				$chk = "";
 				if ($valitut["VAINUUDETTUOTTEET"] != '') {
 					$chk = "CHECKED";
@@ -3490,17 +3243,6 @@
 			$vlask = 0;
 
 			while ($vrow = mysql_fetch_array($vtresult)) {
-				/*
-				$query = "	SELECT selitetark
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]'
-							and laji = 'HALYRAP'
-							and selite	= '$rappari'
-							and selitetark = 'VARASTO##$vrow[tunnus]'";
-				$sresult = mysql_query($query) or pupe_error($query);
-				$srow = mysql_fetch_array($sresult);
-				*/
-
 				$chk = "";
 				$chk2 = "";
 				// or ($defaultit == "PÄÄLLE" and $vrow["yhtio"] == $kukarow["yhtio"])
@@ -3537,15 +3279,6 @@
 			echo "<tr><th>".t("Valitse raportti").":</th><td colspan='3'>";
 
 			//Haetaan tallennetut hälyrapit
-			/*
-			$query = "	SELECT distinct selite, concat('(',replace(selite, '##',') ')) nimi
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji = 'HALYRAP'
-						ORDER BY selite";
-			$sresult = mysql_query($query) or pupe_error($query);
-			*/
-
 			echo "<select name='rappari' onchange='submit()' disabled>";
 			echo "<option value=''>".t("Näytä kaikki")."</option>";
 
@@ -3566,16 +3299,6 @@
 			echo "<tr>";
 
 			foreach($sarakkeet as $key => $sarake) {
-
-				/*
-				$query = "	SELECT selitetark
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]'
-							and laji	= 'HALYRAP'
-							and selite	= '$rappari'
-							and selitetark = '$key'";
-				$sresult = mysql_query($query) or pupe_error($query);
-				*/
 
 				$sel = "";
 				// mysql_num_rows($sresult) == 1 or 

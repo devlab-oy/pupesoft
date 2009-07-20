@@ -469,7 +469,7 @@
 				$prn .= sprintf ('%-21.21s', 	$row["tuoteno"]);
 				$prn .= sprintf ('%-21.21s', 	$row["toim_tuoteno"]);
 				$prn .= sprintf ('%-10.10s',	$row["kpl"]);
-				$prn .= sprintf ('%-9.9s', 		ta($kieli, "Y", $row["yksikko"]));
+				$prn .= sprintf ('%-9.9s', 		t_avainsana("Y", "", "and avainsana.selite='$row[yksikko]'", "", "", "selite"));
 				$prn .= sprintf ('%-16.16s', 	$row["inventointiaika"]);
 
 				if ($naytanimitys != '') {

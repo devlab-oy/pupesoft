@@ -82,18 +82,9 @@ if (!function_exists('rivi')) {
 		if ($kalakorkeus < 70) {
 			list($page,$kalakorkeus) = alku($pdf);
 		}
-
-		//Kieliversioitu tuotteen nimitys
-		if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
-			$laji = 'nimitys_'.strtolower($kieli);
-			$query = "SELECT selite FROM tuotteen_avainsanat WHERE yhtio = '$yhtiorow[yhtio]' and laji = '$laji' and tuoteno = '$jtrow[tuoteno]' LIMIT 1";
-			$nimresult = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($nimresult) > 0) {
-				$nimrow	= mysql_fetch_array($nimresult);
-				$jtrow['nimitys'] = $nimrow['selite'];
-			}
-		}
+		
+		//Käännetään nimitys
+		$jtrow['nimitys'] = t_tuotteen_avainsanat($jtrow, 'nimitys', $kieli);
 
 		if (strlen($jtrow["nimitys"]) > 60) {
 			$nimitys = substr($jtrow["nimitys"],0,60);

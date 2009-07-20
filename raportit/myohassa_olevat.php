@@ -166,7 +166,7 @@
 			echo "<td>$tulrow[tuoteno]</td>";
 			echo "<td>$tulrow[nimitys]</td>";
 			echo "<td>$tulrow[myydyt]</td>";
-			echo "<td>".ta($kieli, "Y", $tulrow["yksikko"])."</td>";
+			echo "<td>".t_avainsana("Y", "", "and avainsana.selite='$tulrow[yksikko]'", "", "", "selite")."</td>";
 			echo "<td>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tulrow["arvo"])."</td>";
 			if ($yhtiorow['saldo_kasittely'] != '') {
 				echo "<td>$myytavissa ($myytavissa_tul)</td>";
@@ -202,7 +202,7 @@
 				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, $tulrow["myydyt"], $format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, ta($kieli, "Y", $tulrow["yksikko"]), $format_bold);
+				$worksheet->write($excelrivi, $excelsarake, t_avainsana("Y", "", "and avainsana.selite='$tulrow[yksikko]'", "", "", "selite"), $format_bold);
 				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, sprintf("%.".$yhtiorow['hintapyoristys']."f", $tulrow["arvo"]), $format_bold);
 				$excelsarake++;
@@ -261,13 +261,7 @@
 
 	echo "<tr><th>".t("Valitse tuoteryhmä")."</th>";
 
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','TRY_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]'
-				and avainsana.laji='TRY'
-				ORDER BY avainsana.jarjestys, avainsana.selite";
-	$sresult = mysql_query($query) or pupe_error($query);
+	$sresult = t_avainsana("TRY");
 
 	echo "<td>";
 	
@@ -284,12 +278,12 @@
 	while ($rivi = mysql_fetch_array($sresult)) {
 		$mul_check = '';
 		if ($mul_tuoteryhma!="") {
-			if (in_array($rivi[0],$mul_tuoteryhma)) {
+			if (in_array($rivi["selite"],$mul_tuoteryhma)) {
 				$mul_check = 'SELECTED';
 			}
 		}
 
-		echo "<option value='$rivi[0]' $mul_check>$rivi[0] $rivi[1]</option>";
+		echo "<option value='$rivi[selite]' $mul_check>$rivi[selite] - $rivi[selitetark]</option>";
 	}
 
 	echo "</select>";

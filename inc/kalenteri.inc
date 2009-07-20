@@ -1370,7 +1370,7 @@
 					$edellinen 	= strtotime("-1 months", $kaleaika);
 					$otsikko	= t("Kausi")." ".date("m", $kaleaika)." - ".date("Y", $kaleaika);
 					
-					$kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; float: left; margin-left: 20px'><a href=\"#\">&lt;&lt;&nbsp;</a>&nbsp;&nbsp;$otsikko&nbsp;&nbsp;&nbsp;<a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$seuraava".url_params($kalenteri)."', '$kalenteri[div]', false);\">&gt;&gt;</div></a>$tmenut</caption>";
+$kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; float: left; margin-left: 20px'><a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$edellinen".url_params($kalenteri)."', '$kalenteri[div]', false);\">&lt;&lt;&nbsp;</a>&nbsp;&nbsp;$otsikko&nbsp;&nbsp;&nbsp;<a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$seuraava".url_params($kalenteri)."', '$kalenteri[div]', false);\">&gt;&gt;</div></a>$tmenut</caption>";
 					
 				}
 				else {

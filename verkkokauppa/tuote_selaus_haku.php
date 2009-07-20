@@ -906,7 +906,7 @@
 
 					if(mysql_num_rows($jtresult)>0) {
 						$jtrow = mysql_fetch_array($jtresult);
-						$toimlisa = "<font class='info'>$jtrow[kpl] ".ta($kieli, "Y", $jtrow["yksikko"])." $jtrow[pvm]</font>";
+						$toimlisa = "<font class='info'>$jtrow[kpl] ".t_avainsana("Y", $kieli, "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")." $jtrow[pvm]</font>";
 					}
 					elseif((int) $myytavissa <= 0) {
 
@@ -1099,7 +1099,7 @@
 
 								echo "<tr>
 										<td class='$vari' nowrap>$saldorow[nimitys] $saldorow[tyyppi]</td>
-										<td class='$vari' align='right' nowrap>".sprintf("%.2f", $myytavissa)." ".ta($kieli, "Y", $row["yksikko"])."</td>
+										<td class='$vari' align='right' nowrap>".sprintf("%.2f", $myytavissa)." ".t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td>
 										</tr>";
 							}
 						}

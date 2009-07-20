@@ -71,7 +71,7 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 			require ("lisaarivi.inc");
 		}
 
-		echo "<font class='message'>".t("Lisättiin")." $kpl_echo ".ta($kieli, "Y", $trow["yksikko"])." ".t("tuotetta")." $tuoteno.</font><br>";
+		echo "<font class='message'>".t("Lisättiin")." $kpl_echo ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("tuotetta")." $tuoteno.</font><br>";
 
 		
 	} // tuote ok else

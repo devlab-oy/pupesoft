@@ -229,7 +229,7 @@
 				$rivi .= $rrow["osasto"]."\t";
 				$rivi .= $rrow["try"]."\t";
 				$rivi .= $rrow["nimitys"]."\t";
-				$rivi .= ta($kieli, "Y", $rrow["yksikko"])."\t";
+				$rivi .= t_avainsana("Y", "", "and avainsana.selite='$rrow[yksikko]'", "", "", "selite")."\t";
 				$rivi .= $rrow["aleryhma"]."\t";
 				$rivi .= str_replace(".",",",$verollinen)."\t";
 

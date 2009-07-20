@@ -1154,7 +1154,7 @@
 	
 	//	Luodaan kalenterin‰kymi‰ annetusta datasta
 	if(!function_exists("kalenteri")) {
-		function kalenteri ($data) {
+		function kalenteri ($data, $kalePost="") {
 			global $kukarow, $yhtiorow, $nakyma, $kaleaika, $kaletee, $kalenteri;
 			
 			//echo "<hr>data:<pre>".print_r($data, true)."</pre>";
@@ -1778,7 +1778,7 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 									".tee_menu($menu, "<font class='kaleinfo'>".t("Toiminnot")."</font>")."
 								</td>
 							</tr>
-							</table>
+							</table>$kalePost
 							</td>
 							<td>$kalejako";
 
@@ -2047,6 +2047,7 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 						$menu[] = array("TEKSTI" => t("Lis‰‰ asiakasmuistio"), 	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
 
 						$kale .= "<div style='width: {$w}px; text-align: right; z-index: 1;'>".tee_menu($menu, "<font class='kaleinfo'>".t("Lis‰‰")."</font>")."</div>".implode("",$ulos);
+						
 						$kale .= "</td>";
 					}			
 					
@@ -2065,7 +2066,7 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 			else {
 				echo "N‰kym‰‰ '$nakyma' ei viel‰ osata!";
 			}
-			
+						
 			$kale .="</td></tr></table>";
 			
 			return $kale;

@@ -379,19 +379,11 @@
 			}
 			
 			if ($tuoryh != '') {
-				$query = "	SELECT distinct selite, selitetark
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]' and laji='TRY'
-							and selite  = '$tuoryh'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = t_avainsana("TRY", "", "and avainsana.selite  = '$tuoryh'");
 				$srow = mysql_fetch_array($sresult);
 			}
 			if ($osasto != '') {
-				$query = "	SELECT distinct selite, selitetark
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]' and laji='OSASTO'
-							and selite  = '$osasto'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = t_avainsana("OSASTO", "", "and avainsana.selite  = '$osasto'");
 				$trow = mysql_fetch_array($sresult);
 			}
 			if ($toimittajaid != '') {
@@ -2231,13 +2223,8 @@
 					<tr><th>".t("Tuotemerkki")."</th><td>";
 
 			//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
-			$query = "	SELECT avainsana.selite, avainsana.selitetark		         
-			            FROM avainsana
-			            WHERE avainsana.yhtio 	= '$kukarow[yhtio]'
-			            and avainsana.laji 		= 'TUOTEMERKKI'
-			            ORDER BY avainsana.jarjestys, avainsana.selite";
-			$sresult = mysql_query($query) or pupe_error($query);
-
+			$sresult = t_avainsana("TUOTEMERKKI");
+			
 			echo "<select name='tuotemerkki'>";
 			echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
 

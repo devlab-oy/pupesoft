@@ -3,10 +3,10 @@
 
 if(!function_exists("tuotetarkista")) {
 	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow, $tuotteen_parametrit_keys = "", $tuotteen_parametrit_vals = "") {
-		global $kukarow, $yhtiorow, $alias_set, $laji;
+		global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko;
 
-		static $tem_tuoteno, $tem_tullinimike1;
-
+		static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin;
+		
 		if (mysql_field_name($result, $i) == "tuoteno") {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu");
@@ -26,11 +26,14 @@ if(!function_exists("tuotetarkista")) {
 			}
 			$tem_tuoteno = $t[$i];
 		}
+		
+		if (mysql_field_name($result, $i) == "kehahin" and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
+			$tem_kehahin = $t[$i];
+		}
 
 		if (mysql_field_name($result, $i) == "nimitys") {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] .= t("Nimitys puuttuu")."!";
-
 			}
 		}
 
@@ -71,7 +74,8 @@ if(!function_exists("tuotetarkista")) {
 
 			// jos tyhjää laitetaan nollaksi
 			if ($t[$i] == "") $t[$i] = "00";
-/* CHECKKI POIS TOISTAISEKSI, LIIAN JYRKKÄ
+			
+			/* CHECKKI POIS TOISTAISEKSI, LIIAN JYRKKÄ
 			// varmistetaan, että on numeerinen
 			if (!is_numeric($t[$i])) {
 				$virhe[$i] = t("Tullinimike2 tulee olla numeerinen");
@@ -103,7 +107,7 @@ if(!function_exists("tuotetarkista")) {
 					ob_end_clean();
 				}
 			}
-*/
+			*/
 
 		}
 
@@ -165,39 +169,12 @@ if(!function_exists("tuotetarkista")) {
 					$virhe[$i] = t("Tuotteella on varastopaikkoja. Poista ne ensin!");
 				}
 			}
-			else {
-				if ($yhtiorow["tuotteen_oletuspaikka"] != "" and mysql_num_rows($sresult) == 0) {
-					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", $yhtiorow["tuotteen_oletuspaikka"]);
-
-					if ($hyllyalue == "" or !isset($hyllyalue)) {
-						$hyllyalue = 0;
-					}
-					if ($hyllynro == "" or !isset($hyllynro)) {
-						$hyllynro = 0;
-					}
-					if ($hyllyvali == "" or !isset($hyllyvali)) {
-						$hyllyvali = 0;
-					}
-					if ($hyllytaso == "" or !isset($hyllytaso)) {
-						$hyllytaso = 0;
-					}
-
-					$tuotepaikka_query = "	INSERT INTO tuotepaikat set
-					 						yhtio			= '$kukarow[yhtio]',
-								 			tuoteno     	= '$tem_tuoteno',
-								 			oletus      	= 'X',
-						   		 			saldoaika   	= now(),
-											hyllyalue   	= '$hyllyalue',
-											hyllynro    	= '$hyllynro',
-											hyllyvali   	= '$hyllyvali',
-											hyllytaso   	= '$hyllytaso',
-											luontiaika		= now(),
-											laatija			= '$kukarow[kuka]',
-											muutospvm		= now(),
-											muuttaja		= '$kukarow[kuka]'";
-					$tuotepaikka_result = mysql_query($tuotepaikka_query) or pupe_error($tuotepaikka_query);
-				}
+			
+			if ($poistolukko != "" and $t[$i] != $trow["ei_saldoa"]) {
+				$virhe[$i] = t("Tuotteella on tapahtumia. Saldottomuutta ei voi vaihtaa!");
 			}
+			
+			$tem_eisaldoa = $t[$i];
 		}
 
 		if (mysql_field_name($result, $i) == "vienti") {
@@ -248,18 +225,75 @@ if(!function_exists("tuotetarkista")) {
 				}
 			}
 		}
+	
+		//tehdään nää jutu tässä koska tämä on nyt viimeinen sarake tässä taulussa
+		if (mysql_field_name($result, $i) == "ostajanro") {
+			
+			if (count($virhe) == 0 and $tem_eisaldoa == "") {
+				if ($yhtiorow["tuotteen_oletuspaikka"] != "" and mysql_num_rows($sresult) == 0) {
+					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", $yhtiorow["tuotteen_oletuspaikka"]);
 
+					if ($hyllyalue == "" or !isset($hyllyalue)) {
+						$hyllyalue = 0;
+					}
+					if ($hyllynro == "" or !isset($hyllynro)) {
+						$hyllynro = 0;
+					}
+					if ($hyllyvali == "" or !isset($hyllyvali)) {
+						$hyllyvali = 0;
+					}
+					if ($hyllytaso == "" or !isset($hyllytaso)) {
+						$hyllytaso = 0;
+					}
 
-		/*
-		if (mysql_field_name($result, $i) == "tuotekuva" and $t[$i] != '') {
-			if (!file_exists($t[$i])) {
-				$virhe[$i] = t("Tiedosto ei löydy")."!";
+					$tuotepaikka_query = "	INSERT INTO tuotepaikat set
+					 						yhtio			= '$kukarow[yhtio]',
+								 			tuoteno     	= '$tem_tuoteno',
+								 			oletus      	= 'X',
+						   		 			saldoaika   	= now(),
+											hyllyalue   	= '$hyllyalue',
+											hyllynro    	= '$hyllynro',
+											hyllyvali   	= '$hyllyvali',
+											hyllytaso   	= '$hyllytaso',
+											luontiaika		= now(),
+											laatija			= '$kukarow[kuka]',
+											muutospvm		= now(),
+											muuttaja		= '$kukarow[kuka]'";
+					$tuotepaikka_result = mysql_query($tuotepaikka_query) or pupe_error($tuotepaikka_query);
+				}
 			}
+			
+			
+			if (count($virhe) == 0 and $tem_kehahin != "" and $tem_eisaldoa != "" and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
+				$query  = "	SELECT kehahin
+							FROM tuote
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$tem_tuoteno'";
+				$chkressires = mysql_query($query) or pupe_error($query);
+				$chkressirow = mysql_fetch_assoc($chkressires);
+				
+				$tem_kehahin = sprintf("%.6f", $tem_kehahin);
+				
+				if ($tem_kehahin != $chkressirow["kehahin"]) {
+					$query = "	INSERT into tapahtuma set
+								yhtio 		= '$kukarow[yhtio]',
+								tuoteno 	= '$tem_tuoteno',
+								kpl 		= '0',
+								kplhinta	= '$tem_kehahin',
+								hinta 		= '$tem_kehahin',
+								laji 		= 'tulo',
+								hyllyalue	= '',
+								hyllynro 	= '',
+								hyllyvali	= '',
+								hyllytaso	= '',
+								selite 		= '".t("Tuotteen kehahinta vaihdettiin")." $chkressirow[kehahin] --> $tem_kehahin',
+								laatija 	= '$kukarow[kuka]',
+								laadittu 	= now()";
+					$chkressires = mysql_query($query) or pupe_error($query);
+				}
+			}				
 		}
-		*/
-
 	}
 }
-
 
 ?>

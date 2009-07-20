@@ -301,15 +301,7 @@
 					while ($row = mysql_fetch_array($riresult)) {
 
 						//  Etsitään käännöksiä
-						if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
-							$laji = 'nimitys_'.strtolower($kieli);
-							$query = "SELECT selite FROM tuotteen_avainsanat WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$row[tuoteno]' LIMIT 1";
-							$nimresult = mysql_query($query) or pupe_error($query);
-							if (mysql_num_rows($nimresult)>0) {
-								$nimrow=mysql_fetch_array($nimresult);
-								$row['nimitys']=$nimrow['selite'];
-							}
-						}
+						$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
 
 						if($h < 20) {
 							$pdf = alku($pdf, $laskurow,$kieli, "OK");

@@ -6855,6 +6855,13 @@ if (!function_exists("t_avainsana")) {
 		else {
 			$kielilisa = "selitetark";
 		}
+		
+		if (stripos($wherelisa, "ORDER BY") === FALSE) {
+			$orderlisa = " ORDER BY avainsana.jarjestys, avainsana.selite+0 ";
+		}
+		else {
+			$orderlisa = "";
+		}
 
 		$query = "	SELECT DISTINCT avainsana.*,
 					IFNULL((SELECT if(avainsana_kieli.$kielilisa = '', NULL, avainsana_kieli.$kielilisa)
@@ -6870,7 +6877,7 @@ if (!function_exists("t_avainsana")) {
 					and avainsana.laji = '$laji'
 					and avainsana.kieli in ('$yhtiorow[kieli]', '')
 					$wherelisa
-					ORDER BY avainsana.jarjestys, avainsana.selite+0
+					$orderlisa
 					$limitlisa";
 		$result = mysql_query($query) or pupe_error($query);
 		

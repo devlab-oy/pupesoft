@@ -1045,7 +1045,7 @@
 
 							while($sarjarow = mysql_fetch_array($sarjares)) {
 								echo "<tr><td>$sarjalaskk. $sarjarow[sarjanumero]</td>
-										<td>$sarjarow[era_kpl] ".ta($kieli, "Y", $sarjarow["yksikko"])."</td>
+										<td>$sarjarow[era_kpl] ".t_avainsana("Y", "", "and avainsana.selite='$sarjarow[yksikko]'", "", "", "selite")."</td>
 										<td>
 										<input type='hidden' 		name='eranumero_kaikki[$tuoterow[tptunnus]][$sarjarow[tunnus]]' 	value='$sarjarow[tunnus]'>
 										<input type='text' size='5' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' 	value='$sarjarow[era_kpl]'>

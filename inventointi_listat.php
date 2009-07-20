@@ -475,7 +475,7 @@
 				}
 
 				$prn .= sprintf ('%-7.7s', 	"_____");
-				$prn .= sprintf ('%-9.9s', 	ta($kieli, "Y", $tuoterow["yksikko"]));
+				$prn .= sprintf ('%-9.9s', 	t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite"));
 				$prn .= sprintf ('%-8.8d', 	$prow["varattu"]);
 
 				if ($tuoterow["sarjanumeroseuranta"] != "") {

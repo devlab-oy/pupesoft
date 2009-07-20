@@ -5,8 +5,15 @@
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
-	require("../inc/parametrit.inc");
-
+	if (strpos($_SERVER['SCRIPT_NAME'], "tuloslaskelma.php")  !== FALSE) {
+		require ("../inc/parametrit.inc");
+	}
+	else {
+		if($from != "PROJEKTIKALENTERI" or (int) $mul_proj[0] == 0) {
+			die("<font class='error'>Älä edes yritä!</font>");
+		}
+	}
+	
 	if (isset($teetiedosto)) {
 		if ($teetiedosto == "lataa_tiedosto") {
 			readfile("/tmp/".$tmpfilenimi);
@@ -22,7 +29,9 @@
 			exit;
 		}
 		
-		echo "<font class='head'>".t("Tase/tuloslaskelma")."</font><hr>";
+		if($from != "PROJEKTIKALENTERI") {
+			echo "<font class='head'>".t("Tase/tuloslaskelma")."</font><hr>";
+		}
 
 		if ($tltee == "aja") {
 			if ($plvv * 12 + $plvk > $alvv * 12 + $alvk) {
@@ -567,316 +576,325 @@
 			}
 
 			echo "</table>";
-
-			if ($toim == "TASOMUUTOS") {
-				echo "<br><input type='submit' value='".t("Anna tileille taso")."'></form><br><br>";
-			}
-
-			//keksitään uudelle failille joku varmasti uniikki nimi:
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$pdffilenimi = "Tuloslaskelma-".md5(uniqid(mt_rand(), true)).".pdf";
-
-			//kirjoitetaan pdf faili levylle..
-			$fh = fopen("/tmp/".$pdffilenimi, "w");
-			if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF Error $pdffilenimi");
-			fclose($fh);
-
-			echo "<br><table>";
-			echo "<tr><th>".t("Tallenna pdf").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
-			echo "<input type='hidden' name='toim' value='$toim'>";
-			echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='".urlencode($otsikko).".pdf'>";
-			echo "<input type='hidden' name='tmpfilenimi' value='$pdffilenimi'>";
-			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-			echo "</table><br>";
-		}
-
-		// tehdään käyttöliittymä, näytetään aina
-		$sel = array();
-		if ($tyyppi == "") $tyyppi = "4";
-		$sel[$tyyppi] = "SELECTED";
-
-		echo "<br>";
-		echo "	<form action = 'tuloslaskelma.php' method='post'>
-				<input type = 'hidden' name = 'tltee' value = 'aja'>
-				<input type='hidden' name='toim' value='$toim'>
-				<table>";
-
-		echo "	<tr>
-				<th valign='top'>".t("Tyyppi")."</th>
-				<td>";
-
-		echo "	<select name = 'tyyppi'>
-				<option $sel[4] value='4'>".t("Sisäinen tuloslaskelma")."</option>
-				<option $sel[3] value='3'>".t("Ulkoinen tuloslaskelma")."</option>
-				<option $sel[1] value='1'>".t("Vastaavaa")." (".t("Varat").")</option>
-				<option $sel[2] value='2'>".t("Vastattavaa")." (".t("Velat").")</option>
-				</select>";
-
-		echo "</td>
-				</tr>";
-
-		if (!isset($plvv)) $plvv = substr($yhtiorow['tilikausi_alku'], 0, 4);
-		if (!isset($plvk)) $plvk = substr($yhtiorow['tilikausi_alku'], 5, 2);
-
-		echo "	<th valign='top'>".t("Alkukausi")."</th>
-				<td><select name='plvv'>";
-
-		$sel = array();
-		$sel[$plvv] = "SELECTED";
-
-		for ($i = date("Y"); $i >= date("Y")-4; $i--) {
-			echo "<option value='$i' $sel[$i]>$i</option>";
-		}
-
-		echo "</select>";
-
-		$sel = array();
-		$sel[$plvk] = "SELECTED";
-
-		echo "<select name='plvk'>
-				<option $sel[1] value = '1'>01</option>
-				<option $sel[2] value = '2'>02</option>
-				<option $sel[3] value = '3'>03</option>
-				<option $sel[4] value = '4'>04</option>
-				<option $sel[5] value = '5'>05</option>
-				<option $sel[6] value = '6'>06</option>
-				<option $sel[7] value = '7'>07</option>
-				<option $sel[8] value = '8'>08</option>
-				<option $sel[9] value = '9'>09</option>
-				<option $sel[10] value = '10'>10</option>
-				<option $sel[11] value = '11'>11</option>
-				<option $sel[12] value = '12'>12</option>
-				</select></td></tr>";
-
-		echo "<tr>
-			<th valign='top'>".t("Loppukausi")."</th>
-			<td><select name='alvv'>";
-
-		$sel = array();
-		if ($alvv == "") $alvv = date("Y");
-		$sel[$alvv] = "SELECTED";
-
-		for ($i = date("Y")+1; $i >= date("Y")-4; $i--) {
-			echo "<option value='$i' $sel[$i]>$i</option>";
-		}
-
-		$sel = array();
-		if ($alvk == "") $alvk = date("n");
-		$sel[$alvk] = "SELECTED";
-
-		echo "</select>";
-
-		echo "<select name='alvk'>
-				<option $sel[1] value = '1'>01</option>
-				<option $sel[2] value = '2'>02</option>
-				<option $sel[3] value = '3'>03</option>
-				<option $sel[4] value = '4'>04</option>
-				<option $sel[5] value = '5'>05</option>
-				<option $sel[6] value = '6'>06</option>
-				<option $sel[7] value = '7'>07</option>
-				<option $sel[8] value = '8'>08</option>
-				<option $sel[9] value = '9'>09</option>
-				<option $sel[10] value = '10'>10</option>
-				<option $sel[11] value = '11'>11</option>
-				<option $sel[12] value = '12'>12</option>
-				</select></td></tr>";
-
-		echo "<tr><th valign='top'>".t("tai koko tilikausi")."</th>";
-	 	$query = "SELECT *
-					FROM tilikaudet
-					WHERE yhtio = '$kukarow[yhtio]'
-					ORDER BY tilikausi_alku DESC";
-		$vresult = mysql_query($query) or pupe_error($query);
-		echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
-		while ($vrow=mysql_fetch_array($vresult)) {
-			$sel="";
-			if ($trow[$i] == $vrow["tunnus"]) {
-				$sel = "selected";
-			}
-			echo "<option value = '$vrow[tunnus]' $sel>$vrow[tilikausi_alku] - $vrow[tilikausi_loppu]";
-		}
-		echo "</select></td>";
-		echo "</tr>";
-
-		// haetaan kustannuspaikat
-		$query = "	SELECT tunnus, nimi
-					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
-					ORDER BY nimi";
-		$k_result = mysql_query($query) or pupe_error($query);
-
-		// haetaan kohteet
-		$query = "	SELECT tunnus, nimi
-					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
-					ORDER BY nimi";
-		$o_result = mysql_query($query) or pupe_error($query);
-
-		// haetaan projektit
-		$query = "	SELECT tunnus, nimi
-					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
-					ORDER BY nimi";
-		$p_result = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($k_result) > 0 or
-			mysql_num_rows($o_result) > 0 or
-			mysql_num_rows($p_result) > 0) {
-
-			echo "<tr><th valign='top'>";
-
-			// piirretään kustannuspaikat
-			if (mysql_num_rows($k_result) > 0) {
-				echo t("Kustannuspaikka")."<br>";
-			}
-			// piirretään kohde
-			if (mysql_num_rows($o_result) > 0) {
-				echo t("Kohde")."<br>";
-			}
-			// piirretään projekti
-			if (mysql_num_rows($p_result) > 0) {
-				echo t("Projekti")."<br>";
-			}
-
-			echo "</th><td>";
-
-			// piirretään kustannuspaikat
-			if (mysql_num_rows($k_result) > 0) {
-				echo "<select name='mul_kustp[]' multiple='TRUE'>";
-
-				$mul_check = '';
-				if ($mul_kustp!="") {
-					if (in_array("PUPEKAIKKIMUUT", $mul_kustp)) {
-						$mul_check = 'SELECTED';
-					}
+			
+			//	Projektikalenterilla ei sallita PDF tulostusta
+			if($from != "PROJEKTIKALENTERI") {
+				
+				if ($toim == "TASOMUUTOS") {
+					echo "<br><input type='submit' value='".t("Anna tileille taso")."'></form><br><br>";
 				}
+				
+				//keksitään uudelle failille joku varmasti uniikki nimi:
+				list($usec, $sec) = explode(' ', microtime());
+				mt_srand((float) $sec + ((float) $usec * 100000));
+				$pdffilenimi = "Tuloslaskelma-".md5(uniqid(mt_rand(), true)).".pdf";
 
-				echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei valintaa")."</option>";
+				//kirjoitetaan pdf faili levylle..
+				$fh = fopen("/tmp/".$pdffilenimi, "w");
+				if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF Error $pdffilenimi");
+				fclose($fh);
 
-				while ($vrow = mysql_fetch_array($k_result)) {
-					$sel="";
-					if ($trow[$i] == $vrow['tunnus'] or in_array($vrow[tunnus],$mul_kustp)) {
-						$sel = "selected";
-					}
-					echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
-				}
-				echo "</select>";
+				echo "<br><table>";
+				echo "<tr><th>".t("Tallenna pdf").":</th>";
+				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<input type='hidden' name='toim' value='$toim'>";
+				echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
+				echo "<input type='hidden' name='kaunisnimi' value='".urlencode($otsikko).".pdf'>";
+				echo "<input type='hidden' name='tmpfilenimi' value='$pdffilenimi'>";
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table><br>";
 			}
-
-			// piirretään kohteet
-			if (mysql_num_rows($o_result) > 0) {
-				echo "<select name='mul_kohde[]' multiple='TRUE'>";
-
-				$mul_check = '';
-				if ($mul_kohde!="") {
-					if (in_array("PUPEKAIKKIMUUT", $mul_kohde)) {
-						$mul_check = 'SELECTED';
-					}
-				}
-				echo "<option value='PUPEKAIKKIMUUT' $mul_check>Ei valintaa</option>";
-
-				while ($vrow = mysql_fetch_array($o_result)) {
-					$sel="";
-					if ($trow[$i] == $vrow['tunnus'] or in_array($vrow["tunnus"],$mul_kohde)) {
-						$sel = "selected";
-					}
-					echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
-				}
-				echo "</select>";
-			}
-
-			// piirretään projektit
-			if (mysql_num_rows($p_result) > 0) {
-				echo "<select name='mul_proj[]' multiple='TRUE'>";
-
-				$mul_check = '';
-				if ($mul_proj!="") {
-					if (in_array("PUPEKAIKKIMUUT", $mul_proj)) {
-						$mul_check = 'SELECTED';
-					}
-				}
-				echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei valintaa")."</option>";
-
-				while ($vrow=mysql_fetch_array($p_result)) {
-					$sel="";
-					if ($trow[$i] == $vrow['tunnus'] or in_array($vrow["tunnus"],$mul_proj)) {
-						$sel = "selected";
-					}
-					echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
-				}
-				echo "</select>";
-			}
-
-			echo "</td></tr>";
 		}
+		
+		//	UI vain jos sille on tarvetta
+		if($from != "PROJEKTIKALENTERI") {
+			// tehdään käyttöliittymä, näytetään aina
+			$sel = array();
+			if ($tyyppi == "") $tyyppi = "4";
+			$sel[$tyyppi] = "SELECTED";
 
-		$sel = array();
-		$sel[$rtaso] = "SELECTED";
+			echo "<br>";
+			echo "	<form action = 'tuloslaskelma.php' method='post'>
+					<input type = 'hidden' name = 'tltee' value = 'aja'>
+					<input type='hidden' name='toim' value='$toim'>
+					<table>";
 
-		echo "<tr><th valign='top'>".t("Raportointitaso")."</th>
-				<td><select name='rtaso'>";
+			echo "	<tr>
+					<th valign='top'>".t("Tyyppi")."</th>
+					<td>";
 
-		$query = "select max(length(taso)) taso from taso where yhtio = '$kukarow[yhtio]'";
-		$vresult = mysql_query($query) or pupe_error($query);
-		$vrow = mysql_fetch_array($vresult);
-
-		echo "<option value='TILI'>".t("Tili taso")."</option>\n";
-
-		for ($i=$vrow["taso"]-1; $i >= 0; $i--) {
-			echo "<option ".$sel[$i+2]." value='".($i+2)."'>".t("Taso %s",'',$i+1)."</option>\n";
-		}
-
-		echo "</select></td></tr>";
-
-		$sel = array();
-		if ($tarkkuus == "") $tarkkuus = 1;
-		$sel[$tarkkuus] = "SELECTED";
-
-		echo "<tr><th valign='top'>".t("Lukujen taarkkuus")."</th>
-				<td><select name='tarkkuus'>
-					<option $sel[1]    value='1'>".t("Älä jaa lukuja")."</option>
-					<option $sel[1000] value='1000'>".t("Jaa 1000:lla")."</option>
-					<option $sel[10000] value='10000'>".t("Jaa 10 000:lla")."</option>
-					<option $sel[100000] value='100000'>".t("Jaa 100 000:lla")."</option>
-					<option $sel[1000000] value='1000000'>".t("Jaa 1 000 000:lla")."</option>
+			echo "	<select name = 'tyyppi'>
+					<option $sel[4] value='4'>".t("Sisäinen tuloslaskelma")."</option>
+					<option $sel[3] value='3'>".t("Ulkoinen tuloslaskelma")."</option>
+					<option $sel[1] value='1'>".t("Vastaavaa")." (".t("Varat").")</option>
+					<option $sel[2] value='2'>".t("Vastattavaa")." (".t("Velat").")</option>
 					</select>";
 
-		$sel = array();
-		if ($desi == "") $desi = "0";
-		$sel[$desi] = "SELECTED";
+			echo "</td>
+					</tr>";
 
-		echo "<select name='desi'>
-				<option $sel[0] value='0'>0 ".t("desimaalia")."</option>
-				<option $sel[1] value='1'>1 ".t("desimaalia")."</option>
-				<option $sel[2] value='2'>2 ".t("desimaalia")."</option>
-				</select></td></tr>";
+			if (!isset($plvv)) $plvv = substr($yhtiorow['tilikausi_alku'], 0, 4);
+			if (!isset($plvk)) $plvk = substr($yhtiorow['tilikausi_alku'], 5, 2);
 
-		$kauchek = $vchek = $bchek = $ychek = "";
-		if ($kaikkikaudet != "") $kauchek = "SELECTED";
-		if ($vertailued != "") $vchek = "CHECKED";
-		if ($vertailubu != "") $bchek = "CHECKED";
-		if ($eiyhteensa != "") $ychek = "CHECKED";
+			echo "	<th valign='top'>".t("Alkukausi")."</th>
+					<td><select name='plvv'>";
 
-		echo "<tr><th valign='top'>".t("Näkymä")."</th>";
+			$sel = array();
+			$sel[$plvv] = "SELECTED";
 
-		echo "<td><select name='kaikkikaudet'>
-				<option value=''>".t("Näytä vain viimeisin kausi")."</option>
-				<option value='o' $kauchek>".t("Näytä kaikki kaudet")."</option>
-				</select>
-				<br>&nbsp;<input type='checkbox' name='eiyhteensa' $ychek> ".t("Ei yhteensäsaraketta")."
-				</td></tr>";
+			for ($i = date("Y"); $i >= date("Y")-4; $i--) {
+				echo "<option value='$i' $sel[$i]>$i</option>";
+			}
 
-		echo "<tr><th valign='top'>".t("Vertailu")."</th>";
-		echo "<td>";
-		echo "&nbsp;<input type='checkbox' name='vertailued' $vchek> ".t("Edellinen vastaava");
-		echo "<br>&nbsp;<input type='checkbox' name='vertailubu' $bchek> ".t("Budjetti");
-		echo "</td></tr>";
-		echo "</table><br>
-		      <input type = 'submit' value = '".t("Näytä")."'></form>";
+			echo "</select>";
 
-		require("../inc/footer.inc");
+			$sel = array();
+			$sel[$plvk] = "SELECTED";
+
+			echo "<select name='plvk'>
+					<option $sel[1] value = '1'>01</option>
+					<option $sel[2] value = '2'>02</option>
+					<option $sel[3] value = '3'>03</option>
+					<option $sel[4] value = '4'>04</option>
+					<option $sel[5] value = '5'>05</option>
+					<option $sel[6] value = '6'>06</option>
+					<option $sel[7] value = '7'>07</option>
+					<option $sel[8] value = '8'>08</option>
+					<option $sel[9] value = '9'>09</option>
+					<option $sel[10] value = '10'>10</option>
+					<option $sel[11] value = '11'>11</option>
+					<option $sel[12] value = '12'>12</option>
+					</select></td></tr>";
+
+			echo "<tr>
+				<th valign='top'>".t("Loppukausi")."</th>
+				<td><select name='alvv'>";
+
+			$sel = array();
+			if ($alvv == "") $alvv = date("Y");
+			$sel[$alvv] = "SELECTED";
+
+			for ($i = date("Y")+1; $i >= date("Y")-4; $i--) {
+				echo "<option value='$i' $sel[$i]>$i</option>";
+			}
+
+			$sel = array();
+			if ($alvk == "") $alvk = date("n");
+			$sel[$alvk] = "SELECTED";
+
+			echo "</select>";
+
+			echo "<select name='alvk'>
+					<option $sel[1] value = '1'>01</option>
+					<option $sel[2] value = '2'>02</option>
+					<option $sel[3] value = '3'>03</option>
+					<option $sel[4] value = '4'>04</option>
+					<option $sel[5] value = '5'>05</option>
+					<option $sel[6] value = '6'>06</option>
+					<option $sel[7] value = '7'>07</option>
+					<option $sel[8] value = '8'>08</option>
+					<option $sel[9] value = '9'>09</option>
+					<option $sel[10] value = '10'>10</option>
+					<option $sel[11] value = '11'>11</option>
+					<option $sel[12] value = '12'>12</option>
+					</select></td></tr>";
+
+			echo "<tr><th valign='top'>".t("tai koko tilikausi")."</th>";
+		 	$query = "SELECT *
+						FROM tilikaudet
+						WHERE yhtio = '$kukarow[yhtio]'
+						ORDER BY tilikausi_alku DESC";
+			$vresult = mysql_query($query) or pupe_error($query);
+			echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
+			while ($vrow=mysql_fetch_array($vresult)) {
+				$sel="";
+				if ($trow[$i] == $vrow["tunnus"]) {
+					$sel = "selected";
+				}
+				echo "<option value = '$vrow[tunnus]' $sel>$vrow[tilikausi_alku] - $vrow[tilikausi_loppu]";
+			}
+			echo "</select></td>";
+			echo "</tr>";
+
+			// haetaan kustannuspaikat
+			$query = "	SELECT tunnus, nimi
+						FROM kustannuspaikka
+						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+						ORDER BY nimi";
+			$k_result = mysql_query($query) or pupe_error($query);
+
+			// haetaan kohteet
+			$query = "	SELECT tunnus, nimi
+						FROM kustannuspaikka
+						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
+						ORDER BY nimi";
+			$o_result = mysql_query($query) or pupe_error($query);
+
+			// haetaan projektit
+			$query = "	SELECT tunnus, nimi
+						FROM kustannuspaikka
+						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
+						ORDER BY nimi";
+			$p_result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($k_result) > 0 or
+				mysql_num_rows($o_result) > 0 or
+				mysql_num_rows($p_result) > 0) {
+
+				echo "<tr><th valign='top'>";
+
+				// piirretään kustannuspaikat
+				if (mysql_num_rows($k_result) > 0) {
+					echo t("Kustannuspaikka")."<br>";
+				}
+				// piirretään kohde
+				if (mysql_num_rows($o_result) > 0) {
+					echo t("Kohde")."<br>";
+				}
+				// piirretään projekti
+				if (mysql_num_rows($p_result) > 0) {
+					echo t("Projekti")."<br>";
+				}
+
+				echo "</th><td>";
+
+				// piirretään kustannuspaikat
+				if (mysql_num_rows($k_result) > 0) {
+					echo "<select name='mul_kustp[]' multiple='TRUE'>";
+
+					$mul_check = '';
+					if ($mul_kustp!="") {
+						if (in_array("PUPEKAIKKIMUUT", $mul_kustp)) {
+							$mul_check = 'SELECTED';
+						}
+					}
+
+					echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei valintaa")."</option>";
+
+					while ($vrow = mysql_fetch_array($k_result)) {
+						$sel="";
+						if ($trow[$i] == $vrow['tunnus'] or in_array($vrow[tunnus],$mul_kustp)) {
+							$sel = "selected";
+						}
+						echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
+					}
+					echo "</select>";
+				}
+
+				// piirretään kohteet
+				if (mysql_num_rows($o_result) > 0) {
+					echo "<select name='mul_kohde[]' multiple='TRUE'>";
+
+					$mul_check = '';
+					if ($mul_kohde!="") {
+						if (in_array("PUPEKAIKKIMUUT", $mul_kohde)) {
+							$mul_check = 'SELECTED';
+						}
+					}
+					echo "<option value='PUPEKAIKKIMUUT' $mul_check>Ei valintaa</option>";
+
+					while ($vrow = mysql_fetch_array($o_result)) {
+						$sel="";
+						if ($trow[$i] == $vrow['tunnus'] or in_array($vrow["tunnus"],$mul_kohde)) {
+							$sel = "selected";
+						}
+						echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
+					}
+					echo "</select>";
+				}
+
+				// piirretään projektit
+				if (mysql_num_rows($p_result) > 0) {
+					echo "<select name='mul_proj[]' multiple='TRUE'>";
+
+					$mul_check = '';
+					if ($mul_proj!="") {
+						if (in_array("PUPEKAIKKIMUUT", $mul_proj)) {
+							$mul_check = 'SELECTED';
+						}
+					}
+					echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei valintaa")."</option>";
+
+					while ($vrow=mysql_fetch_array($p_result)) {
+						$sel="";
+						if ($trow[$i] == $vrow['tunnus'] or in_array($vrow["tunnus"],$mul_proj)) {
+							$sel = "selected";
+						}
+						echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
+					}
+					echo "</select>";
+				}
+
+				echo "</td></tr>";
+			}
+
+			$sel = array();
+			$sel[$rtaso] = "SELECTED";
+
+			echo "<tr><th valign='top'>".t("Raportointitaso")."</th>
+					<td><select name='rtaso'>";
+
+			$query = "select max(length(taso)) taso from taso where yhtio = '$kukarow[yhtio]'";
+			$vresult = mysql_query($query) or pupe_error($query);
+			$vrow = mysql_fetch_array($vresult);
+
+			echo "<option value='TILI'>".t("Tili taso")."</option>\n";
+
+			for ($i=$vrow["taso"]-1; $i >= 0; $i--) {
+				echo "<option ".$sel[$i+2]." value='".($i+2)."'>".t("Taso %s",'',$i+1)."</option>\n";
+			}
+
+			echo "</select></td></tr>";
+
+			$sel = array();
+			if ($tarkkuus == "") $tarkkuus = 1;
+			$sel[$tarkkuus] = "SELECTED";
+
+			echo "<tr><th valign='top'>".t("Lukujen taarkkuus")."</th>
+					<td><select name='tarkkuus'>
+						<option $sel[1]    value='1'>".t("Älä jaa lukuja")."</option>
+						<option $sel[1000] value='1000'>".t("Jaa 1000:lla")."</option>
+						<option $sel[10000] value='10000'>".t("Jaa 10 000:lla")."</option>
+						<option $sel[100000] value='100000'>".t("Jaa 100 000:lla")."</option>
+						<option $sel[1000000] value='1000000'>".t("Jaa 1 000 000:lla")."</option>
+						</select>";
+
+			$sel = array();
+			if ($desi == "") $desi = "0";
+			$sel[$desi] = "SELECTED";
+
+			echo "<select name='desi'>
+					<option $sel[0] value='0'>0 ".t("desimaalia")."</option>
+					<option $sel[1] value='1'>1 ".t("desimaalia")."</option>
+					<option $sel[2] value='2'>2 ".t("desimaalia")."</option>
+					</select></td></tr>";
+
+			$kauchek = $vchek = $bchek = $ychek = "";
+			if ($kaikkikaudet != "") $kauchek = "SELECTED";
+			if ($vertailued != "") $vchek = "CHECKED";
+			if ($vertailubu != "") $bchek = "CHECKED";
+			if ($eiyhteensa != "") $ychek = "CHECKED";
+
+			echo "<tr><th valign='top'>".t("Näkymä")."</th>";
+
+			echo "<td><select name='kaikkikaudet'>
+					<option value=''>".t("Näytä vain viimeisin kausi")."</option>
+					<option value='o' $kauchek>".t("Näytä kaikki kaudet")."</option>
+					</select>
+					<br>&nbsp;<input type='checkbox' name='eiyhteensa' $ychek> ".t("Ei yhteensäsaraketta")."
+					</td></tr>";
+
+			echo "<tr><th valign='top'>".t("Vertailu")."</th>";
+			echo "<td>";
+			echo "&nbsp;<input type='checkbox' name='vertailued' $vchek> ".t("Edellinen vastaava");
+			echo "<br>&nbsp;<input type='checkbox' name='vertailubu' $bchek> ".t("Budjetti");
+			echo "</td></tr>";
+			echo "</table><br>
+			      <input type = 'submit' value = '".t("Näytä")."'></form>";
+			
+			require("../inc/footer.inc");
+		}
+		
 	}
+	
 ?>

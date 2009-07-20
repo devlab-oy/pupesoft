@@ -1,15 +1,112 @@
 <?php
 
 require('inc/parametrit.inc');
-
+//echo "data:<pre>".print_r($_REQUEST, true)."</pre>"; //muuttujien debuggaus
 if($nayta_pdf != 1) {
 	js_popup();
 	js_showhide();
 	enable_ajax();	
 }
 
-
 require('inc/kalenteri.inc');
+
+if ($tee == "tuntiyhteenveto") {
+	//tsekataan onko projektille uhrattu ihan tuntejakin
+	$query = "	SELECT minuuttimaara, tyyppi, (
+					SELECT sum(minuuttimaara) 
+					FROM kulunvalvonta kv 
+					WHERE kv.yhtio='$kukarow[yhtio]' AND kv.otunnus='$projekti') 
+				AS minuutitsumma, (
+					SELECT nimi 
+					FROM kuka 
+					WHERE kuka=kulunvalvonta.kuka AND yhtio='$kukarow[yhtio]') 
+				AS nimi
+				FROM kulunvalvonta
+				WHERE yhtio='$kukarow[yhtio]' AND otunnus='$projekti'
+				GROUP BY kuka";
+	$result = mysql_query($query) or pupe_error($query);
+	if (mysql_num_rows($result) == 0) {
+		echo "<br><font class='info'>" .t("Ei työtunteja") . "</font>";
+	}
+	else {
+		//tulostetaan tuntiyhteenveto
+		$tuntipalkka = 10;
+		$minuuttipalkka = $tuntipalkka/60;
+		$kokonaiskustannukset = 0;
+		echo "<br><table><tr><th>".t("Nimi") ."</th><th>".t("Työn laatu")."</th><th>".t("Työaika")."</th><th>".t("Kustannus")."(EUR)</th></tr>";
+		while ($tyoerittelyt = mysql_fetch_array($result)) {
+			$tyotunnit = sprintf("%02d",floor($tyoerittelyt["minuuttimaara"]/60));
+			$tyominuutit = sprintf("%02d",$tyoerittelyt["minuuttimaara"]%60);
+			$nimi = $tyoerittelyt["nimi"];
+			$tyonlaatu = $tyoerittelyt["tyyppi"];
+			$minuuttisumma = $tyoerittelyt["minuutitsumma"];
+			$kustannus = round(($minuuttipalkka * $tyoerittelyt["minuuttimaara"]),2);
+			$kokonaiskustannukset = $kokonaiskustannukset + round($kustannus,2);
+			echo "<tr align='center'><td align='left'>$nimi</td><td>$tyonlaatu</td><td>$tyotunnit:$tyominuutit</td><td>". sprintf("%.2f",$kustannus) ."</td></tr>";
+		}
+		$aikayhteensa_tunnit = sprintf("%02d",floor($minuuttisumma/60));
+		$aikayhteensa_minuutit = sprintf("%02d", $minuuttisumma%60);
+		echo "<tr><td colspan='2' align='right'>".t("Yhteensä")."</td><td align='center'>$aikayhteensa_tunnit:$aikayhteensa_minuutit</td><td align='center'>". sprintf("%.2f",$kokonaiskustannukset) . "</td></tr>";
+		echo "</table>";
+	}
+	//tapetaan koska ajaxilla tehty
+	die();
+}
+
+if($tee == "tuloslaskelma") {
+	$query = "	SELECT tiliointi.*
+				FROM laskun_lisatiedot
+				JOIN tiliointi ON tiliointi.yhtio=laskun_lisatiedot.yhtio and tiliointi.projekti=laskun_lisatiedot.projekti
+				WHERE laskun_lisatiedot.yhtio='$kukarow[yhtio]' and laskun_lisatiedot.otunnus='$projekti' and laskun_lisatiedot.projekti > 0
+				ORDER BY laadittu";
+	$result = mysql_query($query) or pupe_error($query);
+	if (mysql_num_rows($result) == 0) {
+		$kikkare = "<font class='info'>" . t("Ei tiliöintejä") . "</font>";
+	}
+	else {
+		$mul_proj[0] = mysql_result($result,0,"projekti");
+		$eka_tiliointi = mysql_result($result,0,"laadittu");
+		
+		$tuloslaskelma = muistista("tuloslaskelma", "tuloslaskelma");
+		
+		if(count($tuloslaskelma) == 0 or $tuloslaskelma === false) {
+			$tuloslaskelma["tyyppi"]	= 3;
+			$tuloslaskelma["rtaso"]		= "5";
+		}
+		
+		if(count($vaihda) > 0) {
+			foreach($vaihda as $v => $a) {
+				$tuloslaskelma[$v] = $a;
+			}
+		}
+		
+		foreach($tuloslaskelma as $v => $a) {
+			$$v = $a;
+		}
+		
+		/*
+			Pakolliset muuttujat
+		*/
+		//eka tiliointivuosi
+		$plvv = substr($eka_tiliointi,0,4); 
+		//eka tiliointikuukausi
+		$plvk = substr($eka_tiliointi,6,2);
+		//vika tiliöintivuosi ja kuukausi NYT
+		$alvv			= date('Y');
+		$alvk			= date('m');
+		$summaatulos	= "yes";
+		$tltee			= "aja";
+		$from			= "PROJEKTIKALENTERI";
+		$tarkkuus 		= 1;
+		$desi 			= 0;
+		
+		require("raportit/tuloslaskelma.php");
+		if(!muistiin("tuloslaskelma", "tuloslaskelma", $tuloslaskelma)) {
+			die("OHO! Joku ei nyt vaan onnistu! (dementia iskee, ei tallennu muistiin)");
+		}
+	}	
+	die();
+}
 
 if($projekti > 0) {
 	//	Tämä on siis kalenteri jota meidän pitäisi käsitellä
@@ -54,7 +151,56 @@ if($projekti > 0) {
 	//echo "data:<pre>".print_r($data, true)."</pre>";
 
 	if($tee_div == "JOO") {
-		echo "<div id='$kaleDIV'>".kalenteri($data)."</div>";
+		//tuloslaskelma 
+		$tuloslaskelma = muistista("tuloslaskelma", "tuloslaskelma");
+		$selTyyppi = array($tuloslaskelma["tyyppi"] => "SELECTED");
+		
+		$selTaso = array($tuloslaskelma["rtaso"] => "SELECTED");
+		
+		$kalePost = "
+			
+				<table>
+					<tr>
+						<td class='back'><a href='#' onclick=\"var a = getElementById('tuloslaskelmaContainer'); if(a.style.display == 'none') { a.style.display =  'block'; } else{ a.style.display = 'none';} return false; \">Näytä/piilota talousdata</a></td>
+						<td class='back'><a href='#' onclick=\"var a = getElementById('tuntiyhteenvetoContainer'); if(a.style.display == 'none') { a.style.display =  'block'; } else{ a.style.display = 'none';} return false; \">Näytä/piilota tuntiyhteenveto</a></td>
+					</tr>
+					<tr>
+						<td class='back'>
+							<div id='tuloslaskelmaContainer' style='display: none; float: left;'>
+								<div id='tuloslaskelma'></div>
+
+									<script type='text/javascript' language='JavaScript'>
+										sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti', false, false); 
+									</script>
+									<table><tr><td colspan='2' class='back'>&nbsp;</td></tr><tr><th>".t("Tyyppi")."</th><th>". t("Taso") . "</th></tr>
+									<tr><td>			
+										<select id='kikkare' onchange=\"sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti&vaihda[tyyppi]='+this.options[this.selectedIndex].value, false, false); return false;\">
+											<option value='1' ".$selTyyppi["1"].">".t("Vastaavaa (varat)")."</option>
+											<option value='2' ".$selTyyppi["2"].">".t("Vastattavaa (velat)")."</option>
+											<option value='3' ".$selTyyppi["3"].">".t("Ulkoinen tuloslaskelma")."</option>
+										</select>
+									</td>
+									<td>
+										<select id='kikkare' onchange=\"sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti&vaihda[rtaso]='+this.options[this.selectedIndex].value, false, false); return false;\">
+											<option value='TILI' ".$selTaso["TILI"]. ">".t("Tilitaso")."</option>
+											<option value='5' ".$selTaso["5"]." >".t("Yhteenveto")."</option>
+										</select>
+									</td></tr>
+									</table>
+							</div>
+						</td>
+						<td class='back'>
+							<div id='tuntiyhteenvetoContainer' style='display: none; float: left;'>
+								<div id='tuntiyhteenveto'></div>
+								<script type='text/javascript' language='JavaScript'>
+									sndReq('tuntiyhteenveto', 'projektikalenteri.php?tee=tuntiyhteenveto&projekti=$projekti', false, false); 
+								</script>
+							</div>
+						</td>
+					</tr>					
+				</table>";
+			
+		echo "<div id='$kaleDIV'>".kalenteri($data, $kalePost)."</div>";		
 	}
 	else {
 		echo kalenteri($data);

@@ -105,6 +105,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				break;
 			case "tuotteen_avainsanat" :
 				$pakolliset = array("TUOTENO", "LAJI");
+				$wherelliset = array("TUOTENO", "LAJI", "KIELI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 			case "kalenteri" :

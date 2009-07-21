@@ -321,7 +321,7 @@
 
 					if($h < 50) {
 						$pdf = alku($pdf, $laskurow,$kieli);
-						$h = 190;
+						$h = 170;
 					}
 
 					if($laskurow["sisviesti1"] != "") {

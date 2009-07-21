@@ -844,7 +844,6 @@
 				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='MYSQLALIAS'>".t("Tietokantasarakkeen nimialias")."</td></tr>
 				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='LASKUKUVAUS'>".t("Maksuposition kuvaus")."</td></tr>
 				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='KERAYSLISTA'>".t("Keräyslista")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='PAKKAUSKUVAUS'>".t("Pakkauskuvauksen tarkenne")."</td></tr>
 				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='ALVULK'>".t("Ulkomaan ALV%")."</td></tr>
 				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='KUKAASEMA'>".t("Käytäjän asema")."</td></tr>
 				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='SEURANTA'>".t("Tilauksen seurantaluokka")."</td></tr>

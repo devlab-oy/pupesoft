@@ -82,7 +82,7 @@
 				else {
 					$selectedi = "";
 				}
-				echo "<option value='$vrow[selite]' ".$selectedi.">".$vrow[selitetark]."</option>";
+				echo "<option value='$vrow[selite]' ".$selectedi.">$vrow[selitetark]</option>";
 			}
 			
 			echo "</select>\n";

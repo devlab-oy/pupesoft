@@ -25,20 +25,15 @@
 	echo "<th>".t("Syötä tai valitse osasto").":</th>";
 	echo "<td><input type='text' name='osasto' size='10'></td>";
 
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','ASOSASTO_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASOSASTO'
-				ORDER BY avainsana.selite+0";
-	$sresult = mysql_query($query) or pupe_error($query);
-
+	$sresult = t_avainsana("ASIAKASOSASTO");
+	
 	echo "<td><select name='osasto2'>";
 	echo "<option value=''>".t("Osasto")."</option>";
 
 	while ($srow = mysql_fetch_array($sresult)) {
-		if ($osasto == $srow[0]) $sel = "selected";
+		if ($osasto == $srow["selite"]) $sel = "selected";
 		else $sel = "";
-		echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
+		echo "<option value='$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
 	}
 
 	echo "</select></td>";
@@ -48,20 +43,15 @@
 	echo "<th>".t("Syötä tai valitse ryhmä").":</th>";
 	echo "<td><input type='text' name='try' size='10'></td>";
 
-	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','ASRYHMA_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASRYHMA'
-				ORDER BY avainsana.selite+0";
-	$sresult = mysql_query($query) or pupe_error($query);
+	$sresult = t_avainsana("ASIAKASRYHMA");
 
 	echo "<td><select name='try2'>";
 	echo "<option value=''>".t("Ryhmä")."</option>";
 
 	while ($srow = mysql_fetch_array($sresult)) {
-		if ($try == $srow[0]) $sel = "selected";
+		if ($try == $srow["selite"]) $sel = "selected";
 		else $sel = "";
-		echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
+		echo "<option value='$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
 	}
 
 	echo "</select></td><td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";

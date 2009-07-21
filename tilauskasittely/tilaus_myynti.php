@@ -1056,6 +1056,12 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 				}
 
 				if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
+				
+				//	Voimme myös tehdä tilaukselta suoraanv valmistuksia!
+				require("tilauksesta_valmistustilaus.inc");
+				$tilauksesta_valmistustilaus = tilauksesta_valmistustilaus($kukarow["kesken"]);
+				
+				if ($tilauksesta_valmistustilaus != '') echo "$tilauksesta_valmistustilaus<br><br>";
 			}
 
 			// katsotaan ollaanko tehty JT-supereita..
@@ -1165,11 +1171,28 @@ if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "REKLAMAAT
 
 //Voidaan tietyissä tapauksissa kopsata tästä suoraan uusi tilaus
 if ($uusitoimitus != "") {
-	$toim 				= $uusitoimitus;
-	$kopioitava_otsikko = $laskurow["tunnusnippu"];
-	$asiakasid 			= $laskurow["liitostunnus"];
-	$tee 				= "OTSIK";
-	$tiedot_laskulta	= "YES";
+	
+	if($uusitoimitus == "VALMISTAVARASTOON" or $valitsetoimitus == "VALMISTAASIAKKAALLE") {
+		$aquery = "	SELECT valmistukset.tunnus
+					FROM lasku
+					JOIN lasku valmistukset ON valmistukset.yhtio=lasku.yhtio and valmistukset.tunnusnippu=lasku.tunnusnippu and valmistukset.tila IN ('W','V')
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus='$tilausnumero' and lasku.tunnusnippu>0";
+		$ares = mysql_query($aquery) or pupe_error($aquery);
+		if(mysql_num_rows($ares) > 0) {
+			$arow = mysql_fetch_array($ares);
+			$kopioitava_otsikko = $arow["tunnus"];
+		}
+	}
+	else {
+		$kopioitava_otsikko = $laskurow["tunnusnippu"];
+	}
+	
+	if($kopioitava_otsikko>0) {
+		$toim 				= $uusitoimitus;
+		$asiakasid 			= $laskurow["liitostunnus"];
+		$tee 				= "OTSIK";
+		$tiedot_laskulta	= "YES";	
+	}
 }
 
 //Muutetaan otsikkoa
@@ -1917,7 +1940,15 @@ if ($tee == '') {
 			elseif($projektilla > 0 and $laskurow["tunnusnippu"] != $projektilla) {
 				$hakulisa =" or lasku.tunnusnippu = '$projektilla'";
 			}
-
+			
+			//	Valmistuksissa ei anneta sotkea myyntiä!
+			if($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
+				$ptilat = "'V','W'";
+			}
+			else {
+				$ptilat = "'L','N','A','T','G','S','O','R'";
+			}
+			
 			$vquery = " SELECT count(*) from lasku l where l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu and l.tunnus<=lasku.tunnus and l.tila='T'";
 
 			$query = " 	SELECT tila, alatila, varastopaikat.nimitys varasto, lasku.toimaika, if(tila='T',if(tunnusnippu>0,concat(lasku.tunnusnippu,'/',($vquery)), concat(lasku.tunnusnippu,'/1')),lasku.tunnus) tilaus, lasku.tunnus tunnus
@@ -1925,7 +1956,7 @@ if ($tee == '') {
 						LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and (lasku.tunnusnippu = '$laskurow[tunnusnippu]' $hakulisa)
-						and lasku.tila IN ('L','N','A','T','G','S','V','W','O','R')
+						and lasku.tila IN ($ptilat)
 						and if('$tila' = 'MUUTA', alatila != 'X', lasku.tunnus=lasku.tunnus)
 						GROUP BY lasku.tunnus";
 			$toimres = mysql_query($query) or pupe_error($query);
@@ -1958,19 +1989,22 @@ if ($tee == '') {
 			}
 			else {
 
-				if ($toim == "PIKATILAUS") {
+				if($yhtiorow["tilauksen_kohteet"] == "K") {
+					if($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
+						echo "<option value='VALMISTAVARASTOON'>".T("Valmistus")."</option>";
+					}
+					else {
+						echo "<option value='RIVISYOTTO'>".T("Toimitus")."</option>";
+						echo "<option value='TYOMAARAYS'>".T("Työmääräys")."</option>";
+						echo "<option value='REKLAMAATIO'>".T("Reklamaatio")."</option>";
+						echo "<option value='SIIRTOLISTA'>".T("Siirtolista")."</option>";
+					}
+				}
+				elseif ($toim == "PIKATILAUS") {
 					echo "<option value='PIKATILAUS'>".T("Toimitus")."</option>";
 				}
 				else {
 					echo "<option value='RIVISYOTTO'>".T("Toimitus")."</option>";
-				}
-
-				//	Pidetään tämä vielä piilossa, en tiedä onko tästä muille haittaa vai hyötyä.
-				if ($yhtiorow["tilauksen_kohteet"] == "K") {
-					echo "<option value='TYOMAARAYS'>".T("Työmääräys")."</option>";
-					echo "<option value='REKLAMAATIO'>".T("Reklamaatio")."</option>";
-					echo "<option value='VALMISTAVARASTOON'>".T("Valmistus")."</option>";
-					echo "<option value='SIIRTOLISTA'>".T("Siirtolista")."</option>";
 				}
 			}
 
@@ -4147,7 +4181,7 @@ if ($tee == '') {
 							$kpl_ruudulle = ($row['jt']+$row['varattu']) * 1;
 						}
 					}
-					elseif ($row["var"] == 'S' or $row["var"] == 'T' or $row["var"] == 'U') {
+					elseif ($row["var"] == 'S' or $row["var"] == 'T' or $row["var"] == 'U'or $row["var"] == 'R') {
 						$kpl_ruudulle = $row['jt'] * 1;
 					}
 					elseif($row["var"] == 'P') {

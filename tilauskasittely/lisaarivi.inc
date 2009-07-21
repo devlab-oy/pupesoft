@@ -260,6 +260,16 @@
 		$toimittajan_tunnus	= "";
 	}
 
+	// Jos kyseessä on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
+	if (substr($paikka,0,3) == "¡¡V") {
+		$var 		 		= "R";
+		$paikka		 		= substr($paikka, 3);;
+	}
+	elseif ($var == "R" and substr($paikka,0,3) != "¡¡V" and substr($paikka,0,3) != "¡¡V") {
+		$var 				= "";
+		$toimittajan_tunnus	= "";
+	}
+
 	// Jos kyseessä on suoratoimitus joka tilataan toisesta firmasta suoraan
 	if (substr($paikka,0,3) == "@@@") {
 
@@ -1450,6 +1460,10 @@
 						$jt 		= 0;
 						break;
 					case 'T' : // Tilataan toimittajalta
+						$varattu 	= 0;
+						$jt 		= $kpl;
+						break;
+					case 'R' : // Valmistetaan asiakkaalle
 						$varattu 	= 0;
 						$jt 		= $kpl;
 						break;

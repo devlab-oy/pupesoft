@@ -274,16 +274,12 @@ if ($tee == "SYOTA") {
 	}
 	echo "</td>";
 	
-	if($toim == "VERKKOKAUPPA") {
-		echo "<tr>
-			<th>".t("Osasto")."</th>
-			<td>";
-		$query = "	SELECT *
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'osasto' and selitetark_2 = 'verkkokauppa'
-					ORDER BY selite";
-		$result = mysql_query($query) or pupe_error($query);
-		if(mysql_num_rows($result)>0) {
+	if ($toim == "VERKKOKAUPPA") {
+		echo "<tr><th>".t("Osasto")."</th><td>";
+
+		$result = t_avainsana("OSASTO", "", "and avainsana.selitetark_2 = 'verkkokauppa'");
+				
+		if (mysql_num_rows($result)>0) {
 			echo "<select name='kentta09'>
 					<option value = ''>".t("Etusivu")."</option>";
 
@@ -297,44 +293,13 @@ if ($tee == "SYOTA") {
 		else {
 			echo t("Yht‰‰n verkkokauppaosasto ei ole m‰‰ritetty")."!!";
 		}	
-		echo "	</td>
-			</tr>";		
+		echo "</td></tr>";		
 	}
-	
-/*
-	echo "<tr>
-		<th>".t("Tuoteryhm‰")."</th>
-		<td>";
-	$query = "	SELECT *, (SELECT tunnus from tuote where yhtio = avainsana.yhtio and try = avainsana.selite and hinnastoon = 'W' and tuotemerkki != '' and status != 'P' limit 1) onvaiei
-				FROM avainsana
-				WHERE yhtio = '$kukarow[yhtio]' and laji = 'try'
-				HAVING onvaiei > 0
-				ORDER BY selite";
-	$result = mysql_query($query) or pupe_error($query);
-	if(mysql_num_rows($result)>0) {
-		echo "<select name='kentta10'>
-				<option value = ''>".t("Osaston etusivu")."</option>";
-		while($orow = mysql_fetch_array($result)) {
-			if($rivi["kentta10"] == $orow["selite"]) $sel = "SELECTED";
-			else $sel = "";
-			echo "<option value='$orow[selite]' $sel>$orow[selite] - $orow[selitetark]</option>";
-		}
-		echo "</select>";
-	}
-	else {
-		echo t("Yht‰‰n verkkokauppaosasto ei ole m‰‰ritetty")."!!";
-	}	
-	echo "	</td>
-		</tr>";
-*/
 	
 	if ($rivi['kokopaiva'] != "") $check = "CHECKED";
 	else $check = "";
 	
-	echo "<tr>
-		<th>".t("Prioriteetti")."</th>
-		<td><input type='checkbox' name='kokopaiva' $check> ".t("N‰ytet‰‰nkˆ uutinen aina p‰‰llimm‰isen‰")."</td>
-	</tr>";
+	echo "<tr><th>".t("Prioriteetti")."</th><td><input type='checkbox' name='kokopaiva' $check> ".t("N‰ytet‰‰nkˆ uutinen aina p‰‰llimm‰isen‰")."</td></tr>";
 
 	if ($yhtiorow['konserni'] != '') {
 		

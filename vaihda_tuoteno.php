@@ -366,7 +366,8 @@ if ($error == 0 and $tee == "file") {
 					
 					if ($jatavanha != '') {
 						if($uusi_on_jo == "") {
-							$query = "select * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'alv' and selitetark = 'o' LIMIT 1";
+							
+							$query = "SELECT * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'alv' and selitetark = 'o' LIMIT 1";
 							$alvresult = mysql_query($query) or pupe_error($query);
 							$alv = '0.00';
 						

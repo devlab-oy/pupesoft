@@ -7,6 +7,25 @@
 
 	require("inc/parametrit.inc");
 
+	print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+		<!--
+
+		function toggleAll(toggleBox) {
+
+			var currForm = toggleBox.form;
+			var isChecked = toggleBox.checked;
+			var nimi = toggleBox.name;
+		
+			for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {											
+				if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,3) == nimi) {
+					currForm.elements[elementIdx].checked = isChecked;
+				}
+			}
+		}
+
+		//-->
+		</script>";
+
 	//Ja tässä laitetaan ne takas
 	$sqlhaku = $sqlapu;
 
@@ -341,7 +360,9 @@
 			foreach ($kala as $rivi) {
 				echo "$rivi";
 			}
-		
+
+			echo "<tr><td class='back'>".t("Ruksaa kaikki")."</td><td class='back'><input type='checkbox' name='ken' onclick='toggleAll(this);'></td></tr>";
+
 			echo "</table>";
 			echo "<br><input type='submit' value='".t("Suorita")."'>";
 			echo "</form>";

@@ -286,18 +286,16 @@
 		echo "<tr><th>".t("Vain toimittaja")."</th><td><input type='text' name='toim_ytunnus' value='$toimittajarow[ytunnus]'> $toimittajarow[nimi] <input type='hidden' name='toimittajaid' value='$toimittajaid'></td></tr>";
 		
 		echo "<tr><th>".t("Vain alv%")."</th>";
-		$query = "SELECT selite, selitetark
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'ALV'
-					ORDER BY jarjestys";
-		$vresult = mysql_query($query) or pupe_error($query);
+
+		$vresult = t_avainsana("ALV");
+		
 		echo "<td><select name='alv'><option value='tyhja'>".t("Ei valintaa")."";
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[1] == '$alv') {
+			if ($trow["selite"] == '$alv') {
 				$sel = "selected";
 			}
-			echo "<option value = '$vrow[0]' $sel>$vrow[0]";
+			echo "<option value = '$vrow[selite]' $sel>$vrow[selite]%</option>";
 		}
 		echo "</select></td>";
 		echo "</tr>";

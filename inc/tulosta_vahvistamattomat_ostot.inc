@@ -165,19 +165,8 @@
 				$h-=$pdf->ln(1.5);
 
 				while ($row = mysql_fetch_array($riresult)) {
-
-					//	Etsitään käännöksiä
-					if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
-						$laji = 'nimitys_'.strtolower($kieli);
-						$query = "SELECT selite FROM tuotteen_avainsanat WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$row[toim_tuoteno]' LIMIT 1";
-						$nimresult = mysql_query($query) or pupe_error($query);
-						if (mysql_num_rows($nimresult)>0) {
-							$nimrow=mysql_fetch_array($nimresult);
-							$row['toim_nimitys']=$nimrow['selite'];
-						}
-					}
-
-					if($h < 37) {
+					
+					if ($h < 37) {
 						$h = 37;
 						
 						$h-=$pdf->ln(1.5);
@@ -254,7 +243,7 @@
 
 					$pdf->write($h, 1, 0, $s[0], $row["toim_tuoteno"]." ".$row["toim_nimitys"], "norm", "L", "");
 					$pdf->write($h, 1, $s[0], $s[1], $row["otunnus"], "norm", "R", "");
-					$pdf->write($h, 1, $s[0], 0, $row["varattu"]." ".ta($kieli, "Y", $row["yksikko"]), "norm", "R", "");
+					$pdf->write($h, 1, $s[0], 0, $row["varattu"]." ".t_avainsana("Y", "", "and avainsana.selite='$row[yksikko]'", "", "", "selite"), "norm", "R", "");
 					$h-=$pdf->ln();
 					$pdf->write($h, 1, $s[0], 0, strftime("%x",strtotime($row["toimaika"])), "snadi", "R", "I");
 					
@@ -391,7 +380,4 @@
 	}
 
 	tulosta_ostotilaus($otunnus, $komento, $kieli = "", $tee);
-
-
-
 ?>

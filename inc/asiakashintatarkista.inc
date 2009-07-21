@@ -78,10 +78,7 @@ if(!function_exists("asiakashintatarkista")) {
 			$chasiakas_ryhma = trim($t[$i]);
 
 			if ($chasiakas_ryhma != '') {
-				$query = "	SELECT tunnus
-							FROM avainsana
-							WHERE yhtio='$kukarow[yhtio]' and laji = 'ASIAKASRYHMA' and selite = '$chasiakas_ryhma'";
-				$sresult = mysql_query($query) or pupe_error($query);
+				$sresult = t_avainsana("ASIAKASRYHMA", "", "and avainsana.selite = '$chasiakas_ryhma'");
 
 				if (mysql_num_rows($sresult) == 0) {
 					$virhe[$i] = t("Asiakasryhmä puuttuu tai sitä ei löydy!");

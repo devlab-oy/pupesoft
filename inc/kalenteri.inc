@@ -2662,26 +2662,27 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 		
 		//	Tavat ja Merkinnät
 		if($tyyppi == "Merkinta") {
-			$qlisa = "%merkinta%";
+			$qlisa = "and avainsana.selitetark_2 like '%merkinta%'";
 			$tapaotsikko = t("Merkintä");
 		}
 		elseif($tyyppi == "Memo" or $tyyppi == "Muistutus") {
-			$qlisa = "%kalenteritapahtuma%";
+			$qlisa = "and avainsana.selitetark_2 like '%kalenteritapahtuma%'";
 			$tapaotsikko = t("Tapahtuma");
 		}
 		elseif($tyyppi == "projektitapahtuma") {
-			$qlisa = "%projektitapahtuma%";
+			$qlisa = "and avainsana.selitetark_2 like '%projektitapahtuma%'";
 			$tapaotsikko = t("Projektitapahtuma");
 		}
 		elseif(substr($tyyppi, 0, 8) == "kontakti") {
-			$qlisa = "%kontakti%";
+			$qlisa = "and avainsana.selitetark_2 like '%kontakti%'";
 			$tapaotsikko = t("Kontaktitapa");			
 		}
 		else {
+			$qlisa = "";
 			$tapaotsikko = t("Kalenteritapahtuma");			
 		}
 
-		$vresult = avainsana("KALETAPA", "", "", "", "", "", $qlisa);
+		$vresult = t_avainsana("KALETAPA", "", $qlisa);
 		
 		$tavat = "<select name='tapa'>";
 		while($taparow = mysql_fetch_array($vresult)) {
@@ -3079,23 +3080,31 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 		//die("<script LANGUAGE='JavaScript'>sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false); pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none';</script></body></html>");		
 	}
 	
-	if($kaletee == "LISAA_LIITE") {
+	if ($kaletee == "LISAA_LIITE") {
 		$kalenteri = muistista("kalenteri", "kalenteri");
+		
 		if(!is_array($kalenteri)) {
 			die("OHO! Kalenterin meni rikki!");
 		}
 		
 		//	Näille voidaan laittaa myös minkä lajin liite on kyseessä
-		$query = "	SELECT selite, if(selitetark_2='PAKOLLINEN', concat('* ', selitetark), concat('&nbsp;&nbsp;', selitetark)) selitetark
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TIL-LITETY'
-					ORDER BY selitetark_2 DESC, jarjestys, selite";
-		$ares = mysql_query($query) or pupe_error($query);
+		$ares = t_avainsana("TIL-LITETY", "", "ORDER BY selitetark_2 DESC, jarjestys, selite");
+		
 		if(mysql_num_rows($ares) > 0) {
 			$litety = "<td><select name ='kayttotarkoitus'>";
+
 			while($a = mysql_fetch_array($ares)) {
-				$litety .= "<option value = '$a[selite]'>$a[selitetark]</option>";
+				
+				if ($a["selitetark_2"] == "PAKOLLINEN") {
+					$paklisa = "*";
+				}
+				else {
+					$paklisa = "";
+				}					
+				
+				$litety .= "<option value = '$a[selite]'>$paklisa $a[selitetark]</option>";
 			}
+
 			$litety .= "</select></td>";
 		}
 		

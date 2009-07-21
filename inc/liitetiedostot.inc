@@ -55,26 +55,8 @@
 			}
 		}
 		//	Nämä ovat varmaankin sitten itse tilauksia?
-		elseif(in_array($lasrow['tila'], array("L","N","R","E","T","U","0","A"))) {
-			
-			$uusilukko = "";
-
-			//	Näille voidaan laittaa myös minkä lajin liite on kyseessä
-			$query = "	SELECT selite, if(selitetark_2='PAKOLLINEN', concat('* ', selitetark), concat('&nbsp;&nbsp;', selitetark)) selitetark
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]' and laji = 'TIL-LITETY'
-						ORDER BY selitetark_2 DESC, jarjestys, selite";
-			$ares = mysql_query($query) or pupe_error($query);
-
-			if(mysql_num_rows($ares) > 0) {
-				$litety = "<td><select name ='kayttotarkoitus'>";
-
-				while($a = mysql_fetch_array($ares)) {
-					$litety .= "<option value = '$a[selite]'>$a[selitetark]</option>";
-				}
-
-				$litety .= "</select></td>";
-			}
+		elseif(in_array($lasrow['tila'], array("L","N","R","E","T","U","0","A"))) {			
+			$uusilukko = "";			
 		}
 		
 		if ($kukarow["taso"] == "3" or !in_array($lasrow['tila'], array('Y','M','P','Q')) or ($lasrow['tila'] == "M" and $lasrow['h1time'] == '0000-00-00 00:00:00' and $lasrow['h2time'] == '0000-00-00 00:00:00' and $lasrow['h3time'] == '0000-00-00 00:00:00' and $lasrow['h4time'] == '0000-00-00 00:00:00' and $lasrow['h5time'] == '0000-00-00 00:00:00')) {			

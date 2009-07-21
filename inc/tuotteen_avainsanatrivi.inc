@@ -21,22 +21,13 @@
 		$ulos .= "<option value='tarratyyppi' $sel[tarratyyppi]>".t("Tuotteen tarratyyppi")."</option>";
 		$ulos .= "<option value='sistoimittaja' $sel[sistoimittaja]>".t("Tuotteen sisäinen toimittaja")."</option>";
 
-		$query = "	SELECT distinct selite, selitetark
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]'
-					and laji = 'TUOTEULK'";
-		$sresult = mysql_query($query) or pupe_error($query);
-
+		$sresult = t_avainsana("TUOTEULK");
+		
 		while ($srow = mysql_fetch_array($sresult)) {
 			$ulos .= "<option value='$srow[selite]' ".$sel[$srow["selite"]].">$srow[selite] $srow[selitetark]</option>";
 		}
-
-		$query = "	SELECT *
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND laji = 'PARAMETRI'
-					ORDER BY selite";
-		$vresult = mysql_query($query) or pupe_error($query);
+		
+		$vresult = t_avainsana("PARAMETRI");
 
 		while ($vrow = mysql_fetch_array($vresult)) {
 			$ulos .= "<option value='parametri_$vrow[selite]' ".$sel["parametri_".$vrow["selite"]].">".t("Tuotteen parametri").": $vrow[selitetark]</option>";
@@ -60,14 +51,10 @@
 	if (mysql_field_name($result, $i) == "selite") {
 
 		if ($trow["laji"] == "tarratyyppi") {
-			$query = "	SELECT *
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND laji = 'TARRATYYPPI'
-						ORDER BY selite";
-			$vresult = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($vresult)>0) {
+			$vresult = t_avainsana("TARRATYYPPI");
+
+			if (mysql_num_rows($vresult) > 0) {
 				$sel = array($trow[$i] => "SELECTED");
 				$ulos = "<td><select name='$nimi'>";
 				$ulos .= "<option value=''>".t("Ei tilaustuotetarraa")."</option>";
@@ -95,7 +82,7 @@
 		$sel  = "";
 
 		//	näytetäään vain kielet joilla on
-		if($perhe > 0) {
+		if ($perhe > 0) {
 			$query = "	SELECT group_concat(kieli) kielet FROM avainsana WHERE yhtio = '$kukarow[yhtio]'";
 			$res = mysql_query($query) or pupe_error($query);
 			$kilerow = mysql_fetch_array($res);

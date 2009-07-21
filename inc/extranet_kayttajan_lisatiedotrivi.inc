@@ -19,13 +19,7 @@
 
 	if (mysql_field_name($result, $i) == "laji") {
 
-		$query = "	SELECT selite
-					FROM avainsana
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND laji = 'EXTASAVAINSANA'
-					AND selite != ''";
-		$sresult = mysql_query($query) or pupe_error($query);
-
+		$sresult = t_avainsana("EXTASAVAINSANA");
 		$ulos .= "<td><select name='$nimi'>";
 
 		while ($srow = mysql_fetch_array($sresult)) {

@@ -10,7 +10,7 @@
 
 	if (mysql_field_name($result, $i) == "try") {
 		// tehd‰‰n avainsana query
-		$sresult = avainsana("TRY", $kukarow['kieli']);
+		$sresult = t_avainsana("TRY");
 
 		$ulos = "<td><select name='$nimi'>";
 
@@ -34,7 +34,7 @@
 
 	if (mysql_field_name($result, $i) == "osasto") {
 		// tehd‰‰n avainsana query
-		$sresult = avainsana("OSASTO", $kukarow['kieli']);
+		$sresult = t_avainsana("OSASTO");
 
 		$ulos = "<td><select name='$nimi'>";
 

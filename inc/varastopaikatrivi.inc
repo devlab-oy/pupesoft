@@ -81,13 +81,8 @@
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = '' >".t("Valitse")."</option>";
 
-		$query = "	SELECT avainsana.selite, ".avain('select')."
-					FROM avainsana
-					".avain('join','KM_')."
-					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KM'
-					ORDER BY avainsana.jarjestys, avainsana.selite";
-		$vresult = mysql_query($query) or pupe_error($query);
-
+		$vresult = t_avainsana("KM");
+		
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['selite']) {
@@ -127,12 +122,7 @@
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = '' >".t("Valitse")."</option>";
 
-		$query = "	SELECT avainsana.selite, ".avain('select')."
-					FROM avainsana
-					".avain('join','KT_')."
-					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KT'
-					ORDER BY avainsana.jarjestys, avainsana.selite";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = t_avainsana("KT");
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -151,11 +141,7 @@
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = ''>".t("Valitse")."</option>";
 
-		$query = "	SELECT selite, selitetark
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji='TULLI'
-					ORDER BY jarjestys, selite";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = t_avainsana("TULLI");
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";

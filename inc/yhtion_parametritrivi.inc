@@ -813,20 +813,16 @@
 
 	if (mysql_field_name($result, $i) == "oletus_toimitusehto") {
 
-		$query = "	SELECT concat(selite, ' ', selitetark) toimehto
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO'
-					ORDER BY jarjestys, selite";
-		$kires = mysql_query($query) or pupe_error($query);
-
+		$kires = t_avainsana("TOIMEHTO");
+		
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Ei oletustoimitusehtoa")."</option>";
 
 		while ($kirow=mysql_fetch_array($kires)) {
-			if ($kirow["toimehto"]==$trow[$i]) $select='SELECTED';
+			if ($kirow["selite"]." ".$kirow["selitetark"] == $trow[$i]) $select='SELECTED';
 			else $select = '';
 
-			$ulos .= "<option value='$kirow[toimehto]' $select>$kirow[toimehto]</option>";
+			$ulos .= "<option value='$kirow[selite] $kirow[selitetark]' $select>$kirow[selite] - $kirow[selitetark]</option>";
 		}
 
 		$ulos .= "</select></td>";
@@ -836,20 +832,16 @@
 
 	if (mysql_field_name($result, $i) == "oletus_toimitusehto2") {
 
-		$query = "	SELECT concat(selite, ' ', selitetark) toimehto
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO'
-					ORDER BY jarjestys, selite";
-		$kires = mysql_query($query) or pupe_error($query);
+		$kires = t_avainsana("TOIMEHTO");
 
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Ei oletustoimitusehtoa vaihtokohteille")."</option>";
 
 		while ($kirow=mysql_fetch_array($kires)) {
-			if ($kirow["toimehto"]==$trow[$i]) $select='SELECTED';
+			if ($kirow["selite"]." ".$kirow["selitetark"] == $trow[$i]) $select='SELECTED';
 			else $select = '';
 
-			$ulos .= "<option value='$kirow[toimehto]' $select>$kirow[toimehto]</option>";
+			$ulos .= "<option value='$kirow[selite] $kirow[selitetark]' $select>$kirow[selite] - $kirow[selitetark]</option>";
 		}
 
 		$ulos .= "</select></td>";

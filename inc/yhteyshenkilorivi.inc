@@ -39,19 +39,14 @@
 	
 	if (mysql_field_name($result, $i) == "rooli") {
 
-			$query = "	SELECT avainsana.selite, avainsana.selitetark
-						FROM avainsana
-						WHERE avainsana.yhtio 	= '$kukarow[yhtio]' 
-						and avainsana.laji 		= 'CRM_ROOLI'
-						ORDER BY avainsana.jarjestys, avainsana.selite";
-			$vresult = mysql_query($query) or pupe_error($query);
+			$vresult = t_avainsana("CRM_ROOLI");
 
 			$ulos = "<td><select name='$nimi'><option value=''>".t("Ei roolia")."</option>";
 
 			while($row = mysql_fetch_array($vresult)) {
 				$sel = "";
-				if ($row[0] == $trow[$i]) $sel = 'selected';
-				echo "<option value='$row[0]' $sel> $row[0] $row[1]</option>";
+				if ($row["selite"] == $trow[$i]) $sel = 'selected';
+				echo "<option value='$row[selite]' $sel> $row[selite] - $row[selitetark]</option>";
 			}
 
 			$ulos .= "</select></td>";
@@ -60,19 +55,14 @@
 	
 	if (mysql_field_name($result, $i) == "suoramarkkinointi") {
 
-			$query = "	SELECT avainsana.selite, avainsana.selitetark
-						FROM avainsana
-						WHERE avainsana.yhtio 	= '$kukarow[yhtio]' 
-						and avainsana.laji 		= 'CRM_SUORAMARKKI'
-						ORDER BY avainsana.jarjestys, avainsana.selite";
-			$vresult = mysql_query($query) or pupe_error($query);
-
+			$vresult = t_avainsana("CRM_SUORAMARKKI");
+			
 			$ulos = "<td><select name='suoramarkkinointi'><option value=''>".t("Ei suoramarkkinointitietoja")."</option>";
 
 			while($row = mysql_fetch_array($vresult)) {
 				$sel = "";
-				if ($row[0] == $trow[$i]) $sel = 'selected';
-				echo "<option value='$row[0]' $sel> $row[0] $row[1]</option>";
+				if ($row["selite"] == $trow[$i]) $sel = 'selected';
+				echo "<option value='$row[selite]' $sel> $row[selite] - $row[selitetark]</option>";
 			}
 
 			$ulos .= "</select></td>";

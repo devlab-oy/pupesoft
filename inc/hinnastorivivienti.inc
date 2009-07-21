@@ -62,8 +62,8 @@ function hinnastorivi($tuote, $laskurow) {
 	$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", tuotteen_myyntihinta($laskurow, $tuote, 1, "ei"));
 
 	$out  = sprintf('%-20.20s'	,$tuote["tuoteno"]);
-	$out .= sprintf('%-60.60s'	,asana('nimitys_',$tuote['tuoteno'],$tuote['nimitys']));
-	$out .= sprintf('%-10.10s'	,ta($kieli, "Y", $tuote["yksikko"]));
+	$out .= sprintf('%-60.60s'	,t_tuotteen_avainsanat($tuote, 'nimitys'));
+	$out .= sprintf('%-10.10s'	,t_avainsana("Y", "", "and avainsana.selite='$tuote[yksikko]'", "", "", "selite"));
 	$out .= sprintf('%-15.15s'	,$aletun);
 	$out .= sprintf('%08d'		,str_replace('.','', $myyntihinta));
 	$out .= sprintf('%08d'		,str_replace('.','', $myyntihinta));

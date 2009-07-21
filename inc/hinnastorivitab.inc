@@ -11,7 +11,7 @@ function hinnastorivi($tuote, $laskurow) {
 	$korvaavat	= '';
 
 	if ($tuote["id"] > 0) {
-		$query = "select * from korvaavat where id='$tuote[id]' and yhtio='$kukarow[yhtio]' order by jarjestys, tuoteno";
+		$query = "SELECT * from korvaavat where id='$tuote[id]' and yhtio='$kukarow[yhtio]' order by jarjestys, tuoteno";
 		$korvaresult = mysql_query($query) or pupe_error($query);
 
 		$lask = 0;
@@ -44,9 +44,9 @@ function hinnastorivi($tuote, $laskurow) {
     			
     // tehd‰‰n tietuetta
 	$out = $tuote['tuoteno']."\t";		// tuotenumero
-	$out .= $tuote['nimitys']."\t";		// tuotteen nimitys
+	$out .= t_tuotteen_avainsanat($tuote, 'nimitys')."\t";		// tuotteen nimitys
 	$out .= $tuote['eankoodi']."\t";	// tuotteen eankoodi alennusryhm‰ kahteen merkkiin asti zeropaddattuna
-	$out .= ta($kieli, "Y", $tuote["yksikko"])."\t";		// tuotteen yksikko
+	$out .= t_avainsana("Y", "", "and avainsana.selite='$tuote[yksikko]'", "", "", "selite")."\t";		// tuotteen yksikko
 	$out .= $tuote['aleryhma']."\t"; 	// tuotteen aleryhm‰
 	$out .= $myyntihinta."\t";	   		// tuotteen luettelohint
 	$out .= $tuote['tuotemerkki']."\t";	// tuotemerkki

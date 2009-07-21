@@ -109,7 +109,6 @@
 			$ulos .= "<option value='HENKILO_OSASTO' {$avain_sel['HENKILO_OSASTO']}>		".t("Henkilöosasto")."</option>";
 			$ulos .= "<option value='RAHTIKIRJA' {$avain_sel['RAHTIKIRJA']}>				".t("Rahtikirjatyyppi")."</option>";
 			$ulos .= "<option value='KERAYSLISTA' {$avain_sel['KERAYSLISTA']}>				".t("Keräyslista")."</option>";
-			$ulos .= "<option value='PAKKAUSKUVAUS' {$avain_sel['PAKKAUSKUVAUS']}>			".t("Pakkauskuvauksen tarkenne")."</option>";
 			$ulos .= "<option value='TOIMITUSTAPA_SE' {$avain_sel['TOIMITUSTAPA_SE']}>		".t("Ruotsinkielinen toimitustapa")."</option>";
 			$ulos .= "<option value='LAHETETYYPPI_SE' {$avain_sel['LAHETETYYPPI_SE']}>		".t("Ruotsinkielinen lähetetyyppi")."</option>";
 			$ulos .= "<option value='TV_SE' {$avain_sel['TV_SE']}>							".t("Ruotsinkielinen tilausvahvistus")."</option>";

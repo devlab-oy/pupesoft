@@ -76,29 +76,27 @@
 			$sel  = "";
 
 			if ($lukitse_laji == "tuote") {
-				$query = "	SELECT selite, selitetark
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]' and laji = 'LITETY'
-							ORDER BY jarjestys, selite";
-				$kires = mysql_query($query) or pupe_error($query);
+				$kires = t_avainsana("LITETY");
 			}
 			elseif($lukitse_laji == "lasku" and !in_array($lasrow['tila'], array("H","Y","M","P","Q","X"))) {
 				$liitemuok_ok = true;
-
-				//	Näille voidaan laittaa myös minkä lajin liite on kyseessä
-				$query = "	SELECT selite, if(selitetark_2='PAKOLLINEN', concat('* ', selitetark), concat('&nbsp;&nbsp;', selitetark)) selitetark
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]' and laji = 'TIL-LITETY'
-							ORDER BY selitetark_2 DESC, jarjestys, selite";
-				$kires = mysql_query($query) or pupe_error($query);
+				
+				$kires = t_avainsana("TIL-LITETY", "", "ORDER BY selitetark_2 DESC, jarjestys, selite");
 			}
 
 			if (is_resource($kires)) {
 				while ($kirow = mysql_fetch_array($kires)) {
 					if ($kirow["selite"] == $trow[$i]) $select='SELECTED';
 					else $select = '';
+					
+					if ($kirow["selitetark_2"] == "PAKOLLINEN") {
+						$paklisa = "*";
+					}
+					else {
+						$paklisa = "";
+					}
 
-					$ulos .= "<option value='$kirow[selite]' $select>$kirow[selitetark]</option>";
+					$ulos .= "<option value='$kirow[selite]' $select>$paklisa $kirow[selitetark]</option>";
 				}
 			}
 			else {

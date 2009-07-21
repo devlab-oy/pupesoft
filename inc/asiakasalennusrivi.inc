@@ -29,13 +29,9 @@
 	}
 	
 	if (mysql_field_name($result, $i) == "asiakas_ryhma") {
-		$query = "	SELECT avainsana.selite, ".avain('select')."
-					FROM avainsana
-					".avain('join','ASRYHMA_')."
-					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji = 'ASIAKASRYHMA'
-					ORDER BY avainsana.jarjestys, avainsana.selite";
-		$vresult = mysql_query($query) or pupe_error($query);
 
+		$vresult = t_avainsana("ASIAKASRYHMA");
+		
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = '' >".t("Ei ryhm‰‰")."</option>";
 

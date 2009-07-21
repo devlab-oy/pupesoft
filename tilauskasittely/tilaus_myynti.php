@@ -2866,8 +2866,8 @@ if ($tee == '') {
 						$kielletty++;
 					}
 				}
-				elseif ($trow['hinnastoon'] == 'V') {
-					//	katsotaan löytyyko asiakasalennus / asikakashinta						
+				elseif ($trow['hinnastoon'] == 'V' and $toim != "SIIRTOLISTA" and $toim != 'VALMISTAVARASTOON') {
+					//	katsotaan löytyyko asiakasalennus / asikakashinta
 					$hinnat = alehinta($laskurow, $trow, 1, '', '', '',"hintaperuste,aleperuste");
 
 					if (($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] == false) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] == false)) {

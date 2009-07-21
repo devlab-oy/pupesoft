@@ -1726,13 +1726,12 @@
 					echo "</select></td>";
 			
 					//	Haetaan listoille erittelyistä
-					$query = "	SELECT * 
-									FROM avainsana
-								  	WHERE yhtio='$kukarow[yhtio]' and laji = 'KVERITTELY'";
-					$kverittelyres = mysql_query($query) or pupe_error($query);
+					$kverittelyres = t_avainsana("KVERITTELY");
+					
 					echo "<td><select name='laatu'>";
 
 					$avainSel = array($eritellyt["tyyppi"] => "SELECTED");
+					
 					while($kverittelyrow = mysql_fetch_array($kverittelyres)) {
 						echo "<option value=$kverittelyrow[selite] ".$avainSel[$kverittelyrow["selite"]].">$kverittelyrow[selitetark]</option>";
 					}
@@ -1848,11 +1847,7 @@
 						echo "</select></td>";
 
 						//avainsanat (tyon laatu) omaan selectlistaan
-						$query = "	SELECT * 
-									FROM avainsana
-									WHERE yhtio='$kukarow[yhtio]' and laji = 'KVERITTELY'";
-
-						$result = mysql_query($query) or pupe_error($query);
+						$result = t_avainsana("KVERITTELY");
 						
 						echo "<td>
 						  		<select name='laatu'>

@@ -678,7 +678,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						if ($otsikot[$r] == 'RYHMA') 	$tyyppi = "ASIAKASRYHMA";
 						if ($otsikot[$r] == 'PIIRI') 	$tyyppi = "PIIRI";
 
-						$tpque = "select tunnus from avainsana where yhtio='$kukarow[yhtio]' and laji='$tyyppi' and selite='$rivi[$r]'";
+						$tpque = "SELECT tunnus from avainsana where yhtio='$kukarow[yhtio]' and laji='$tyyppi' and selite='$rivi[$r]'";
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 
 						if (mysql_num_rows($tpres) == 0) {

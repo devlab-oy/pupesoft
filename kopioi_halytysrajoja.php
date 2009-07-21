@@ -552,7 +552,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	echo "<tr><th>".t("Osasto")."</th><td>";
 
 	// tehd‰‰n avainsana query
-	$sresult = avainsana("OSASTO", $kukarow['kieli']);
+	$sresult = t_avainsana("OSASTO");
 
 	echo "<select name='osasto'>\n";
 	echo "<option value=''>".t("N‰yt‰ kaikki")."</option>\n";
@@ -573,7 +573,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
 
 	// tehd‰‰n avainsana query
-	$sresult = avainsana("TRY", $kukarow['kieli']);
+	$sresult = t_avainsana("TRY");
 
 	echo "<select name='tuoryh'>\n";
 	echo "<option value=''>".t("N‰yt‰ kaikki")."</option>\n";

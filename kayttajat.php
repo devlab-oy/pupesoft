@@ -619,11 +619,9 @@
 				echo "<tr><th align='left'>".t("Osasto").":</td>";
 				echo "<td><select name='osasto'><option value=''>".t("Ei osastoa")."</option>";
 
-				$query  = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='HENKILO_OSASTO' order by selite";
-				$vares = mysql_query($query) or pupe_error($query);
+				$vares = t_avainsana("HENKILO_OSASTO");
 
-				while ($varow = mysql_fetch_array($vares))
-				{
+				while ($varow = mysql_fetch_array($vares)) {
 					$sel='';
 					if ($varow['selite']==$krow["osasto"]) $sel = 'selected';
 					echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
@@ -910,9 +908,8 @@
 				echo "<tr><th align='left'>".t("Asema").":</td>";
 				echo "<td><select name='asema'><option value=''>".t("Ei asemaa")."</option>";
 
-				$query  = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='KUKAASEMA' order by jarjestys, selite";
-				$vares = mysql_query($query) or pupe_error($query);
-
+				$vares = t_avainsana("KUKAASEMA");
+				
 				while ($varow = mysql_fetch_array($vares)) {
 					$sel='';
 					if ($varow['selite']==$krow["asema"]) $sel = 'selected';
@@ -1004,27 +1001,21 @@
 
 
 			if ($toim != 'extranet') {
-				$query = "	SELECT selite, if (selite!=selitetark, concat_ws(' - ', selite, selitetark), selite) selitetark
-							FROM avainsana
-							WHERE yhtio='$kukarow[yhtio]' and laji='PIIRI'
-							ORDER BY jarjestys, selite+0";
-				$pres = mysql_query($query) or pupe_error($query);
 
 				$piirit = explode(',', $krow["piirit"]);
 
 				echo "<tr><th valign='top'>".t("Piirit").":</th><td>";
-
+				
+				$pres = t_avainsana("PIIRI");
+				
 				while ($prow = mysql_fetch_array($pres)) {
 
-
 					$chk = "";
-
 					if(in_array($prow["selite"], $piirit)) {
 						$chk = "CHECKED";
 					}
 
-					echo "<input type='checkbox' name='piiri[]' value='$prow[selite]' $chk>$prow[selitetark]<br>";
-
+					echo "<input type='checkbox' name='piiri[]' value='$prow[selite]' $chk>$prow[selite] - $prow[selitetark]<br>";
 				}
 				echo "</td></tr>";
 			}

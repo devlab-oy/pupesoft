@@ -391,6 +391,7 @@ else {
 			$tilaus_valmis_ulos .= t("Tilauksen arvo ylitti rahtivapaasumman! Merkattiin tilaus rahtivapaaksi.")."<br>";
 			$query = "UPDATE lasku SET rahtivapaa = 'o' WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[tunnus]'";
 			$rahtivapres = mysql_query($query) or pupe_error($query);
+			$laskurow["rahtivapaa"] = 'o';
 		}
 		elseif ($yhtiorow["rahti_hinnoittelu"] == "o" or $yhtiorow["rahti_hinnoittelu"] == "P") {
 			// jos rahtihinnoittelu tapahtuu tilauksen hinnan (alviton) perusteella
@@ -525,6 +526,7 @@ else {
 				$tilaus_valmis_ulos .= t("Tilauksella oli käsin syötetty rahtikulu! Merkattiin tilaus rahtivapaaksi, ettei kulua lisätä enää automaattisesti laskutuksessa.")."<br>";
 				$query = "UPDATE lasku SET rahtivapaa = 'o' WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$laskurow[tunnus]'";
 				$rahtivapres = mysql_query($query) or pupe_error($query);
+				$laskurow["rahtivapaa"] = 'o';				
 			}
 
 		}

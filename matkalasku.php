@@ -803,13 +803,13 @@ if ($tee == "UUSI") {
 		$kayttaja_tsk = $kayttaja;
 	}
 	else {
-		$kayttaja_tsk = $kukarow["nimi"];
+		$kayttaja_tsk = $kukarow["kuka"];
 	}
 	
 	
-	$query = "	SELECT toimi.*, kuka.kuka kuka 
+	$query = "	SELECT toimi.*, kuka.kuka kuka, kuka.nimi kayttajanimi
 				FROM toimi 
-				JOIN kuka on kuka.yhtio=toimi.yhtio and kuka.nimi=toimi.nimi 
+				JOIN kuka on kuka.yhtio=toimi.yhtio and kuka.kuka=toimi.nimi 
 				WHERE toimi.yhtio	= '$kukarow[yhtio]' 
 				and toimi.nimi		= '$kayttaja_tsk'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -868,7 +868,7 @@ if ($tee == "UUSI") {
 						hyvaksyja_nyt 	= '$trow[kuka]',
 						ytunnus 		= '$trow[ytunnus]',
 						tilinumero 		= '$trow[tilinumero]',
-						nimi 			= '$trow[nimi]',
+						nimi 			= '$trow[kayttajanimi]',
 						nimitark 		= '".t("Matkalasku")."',
 						osoite 			= '$trow[osoite]',
 						osoitetark 		= '$trow[osoitetark]',
@@ -2020,7 +2020,11 @@ if ($tee == "") {
 	echo "<br><table>";
 	
 	if ($toim == "SUPER") {
-		$query = "	SELECT * FROM toimi WHERE yhtio='$kukarow[yhtio]' and tyyppi='K' ORDER BY nimi";
+		$query = "	SELECT toimi.nimi kayttaja, kuka.nimi kayttajanimi
+					FROM toimi
+		 			JOIN kuka ON kuka.yhtio=toimi.yhtio and kuka.kuka=toimi.nimi
+		 			WHERE toimi.yhtio='$kukarow[yhtio]' and toimi.tyyppi='K'
+					ORDER BY kayttajanimi";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<tr>";
@@ -2037,7 +2041,7 @@ if ($tee == "") {
 					$valittu = "selected";
 				}
 				
-				echo "<option value = '$krow[nimi]' $valittu>$krow[nimi]</option>";
+				echo "<option value = '$krow[kayttaja]' $valittu>$krow[kayttajanimi]</option>";
 			}
 			
  			echo "</select>";
@@ -2061,7 +2065,7 @@ if ($tee == "") {
 	echo "</form>";
 	echo "</table>";
 	
-	$query = "	SELECT lasku.*, kuka.nimi kayttaja
+	$query = "	SELECT lasku.*, kuka.nimi kayttajanimi
 				FROM lasku
 				LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and kuka.kuka=lasku.hyvak1
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -2082,7 +2086,7 @@ if ($tee == "") {
 		
 		while ($row = mysql_fetch_array($result)) {
 			echo "<tr>";
-			echo "<td>$row[kayttaja]</td>";
+			echo "<td>$row[kayttajanimi]</td>";
 			echo "<td>$row[toim_nimi]</td>";
 			echo "<td>$row[viite]</td>";
 			echo "<td>$row[summa]</td>";

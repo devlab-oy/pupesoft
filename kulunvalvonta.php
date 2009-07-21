@@ -448,12 +448,12 @@
 				if ($edkuka != $hyvaksytyt["kuka"]) {
 					$query = "	SELECT ytunnus 
 								FROM toimi 
-								WHERE yhtio='$kukarow[yhtio]' and nimi='$hyvaksytyt[nimi]' 
+								WHERE yhtio='$kukarow[yhtio]' and nimi='$hyvaksytyt[kuka]' 
 								LIMIT 1";
 					$htunnusresult = mysql_query($query) or pupe_error($query);
 					if(mysql_num_rows($htunnusresult) == 0) {
 						echo "<font class='error'><br>" . t("VIRHE: Käyttäjän ") . $hyvaksytyt["nimi"] . t(" nimeä ja henkilötunnusta ei löydy toimittajista")."<br></font>";
-						$htunnusvirhe = $hyvaksytyt["nimi"]; //ei herjata samasta käyttäjästä kuin kerran
+						$htunnusvirhe = $hyvaksytyt["kuka"]; //ei herjata samasta käyttäjästä kuin kerran
 						$virhe = TRUE;
 					}
 					else {

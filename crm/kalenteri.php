@@ -302,7 +302,7 @@ if($tee == "SYOTA") {
 
 	$lisays .= "</select></td>";
 
-	$vresult = avainsana("KALETAPA", $kukarow["kieli"]);
+	$vresult = t_avainsana("KALETAPA");
 
 	$lisays .= "<tr><td>".t("Tapa").":</td><td><select name='tapa'>";
 

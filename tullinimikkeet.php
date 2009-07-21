@@ -103,11 +103,11 @@ if ($tullinimike1 != "") {
 		while ($rivi = mysql_fetch_array($resul)) {
 			
 			// tehd‰‰n avainsana query
-			$oresult = avainsana("OSASTO", $kukarow['kieli'], $rivi["osasto"]);
+			$oresult = t_avainsana("OSASTO", "", "and avainsana.selite ='$rivi[osasto]'");
 			$os = mysql_fetch_array($oresult);
 			
 			// tehd‰‰n avainsana query
-			$tresult = avainsana("TRY", $kukarow['kieli'], $rivi["try"]);
+			$tresult = t_avainsana("TRY", "", "and avainsana.selite ='$rivi[try]'");
 			$try = mysql_fetch_array($tresult);
 			
 			echo "<tr>";
@@ -115,7 +115,7 @@ if ($tullinimike1 != "") {
 			echo "<td>$rivi[osasto] $os[selitetark]</td>";
 			echo "<td>$rivi[try] $try[selitetark]</td>";
 			echo "<td>$rivi[tuotemerkki]</td>";			
-			echo "<td>".asana('nimitys_',$rivi['tuoteno'],$rivi['nimitys'])."</td>";
+			echo "<td>".t_tuotteen_avainsanat($rivi, 'nimitys')."</td>";
 			echo "<td>$rivi[tullinimike1]</td>";
 			echo "<td>$rivi[tullinimike2]</td>";
 			echo "</tr>";

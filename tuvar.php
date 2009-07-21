@@ -98,11 +98,7 @@
 	echo "<option value=''>".t("Tuotenumero").":</option>";
 	echo "<option value='TOIMTUOTENO'>".t("Toimittajan tuotenumero").":</option>";
 
-	$query = "	SELECT selite, selitetark
-				FROM avainsana
-				WHERE laji = 'TUOTEULK' and yhtio = '$kukarow[yhtio]'
-				ORDER BY jarjestys";
-	$vresult = mysql_query($query) or pupe_error($query);
+	$vresult = t_avainsana("TUOTEULK");
 
 	while ($vrow = mysql_fetch_array($vresult)) {
 		echo "<option value='$vrow[selite]'>$vrow[selitetark]:</option>";

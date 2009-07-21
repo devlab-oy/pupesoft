@@ -2,6 +2,7 @@
 
 ///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 $useslave = 1;
+
 if (isset($_POST['filenimi']) and $_POST['filenimi'] != '') {
 	header("Content-type: application/force-download");
 	header("Content-Disposition: attachment; filename=hinnasto.zip");
@@ -258,7 +259,7 @@ echo "<input type='hidden' name='tee' value='kaikki'>";
 echo "<tr><th>".t("Valitse osasto alasevetovalikosta").":</th>";
 
 // tehd‰‰n avainsana query
-$sresult = avainsana("OSASTO", $kukarow['kieli']);
+$sresult = t_avainsana("OSASTO");
 
 echo "<td><select name='osasto'>";
 echo "<option value='' $sel>".t("N‰yt‰ kaikki")."</option>";
@@ -277,7 +278,7 @@ echo "</select></td><th>".t("tai syˆt‰ k‰sin")."</th><td><input type='text' name
 echo "<tr><th>".t("Valitse tuoteryhm‰ alasevetovalikosta").":</th>";
 
 // tehd‰‰n avainsana query
-$sresult = avainsana("TRY", $kukarow['kieli']);
+$sresult = t_avainsana("TRY");
 
 echo "<td><select name='try'>";
 echo "<option value='' $sel>".t("N‰yt‰ kaikki")."</option>";

@@ -577,33 +577,36 @@
 						GROUP BY ltunnus;";
 		$res 	 = mysql_query($query) or pupe_error();
 		$r = 0;
-		while($a = mysql_fetch_array($res)) {
+		
+		while ($a = mysql_fetch_array($res)) {
 			$r += $a[0];
 		}
 
 		//	T‰m‰ on mik‰ on karhujen keskim‰‰r‰inen kierroskerta
 		$avg = floor(($r/mysql_num_rows($res))+1);
 
-		$query 	 = "	SELECT tunnus
+		$query = "	SELECT tunnus
+					FROM avainsana
+					WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$avg' and kieli = '$kieli'";
+		$res = mysql_query($query) or pupe_error();
+		
+		if (mysql_num_rows($res) == 0) {
+
+			$query = "	SELECT tunnus
 						FROM avainsana
-						WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$avg' and kieli = '$kieli'";
-		$res 	 = mysql_query($query) or pupe_error();
-		if(mysql_num_rows($res) == 0) {
+						WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$avg' and kieli = '$kieli'
+						ORDER BY jarjestys DESC
+						LIMIT 1";
+			$res = mysql_query($query) or pupe_error();
 
-			$query 	 = "	SELECT tunnus
+			if (mysql_num_rows($res) == 0) {
+
+				$query = "	SELECT tunnus
 							FROM avainsana
-							WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$avg' and kieli = '$kieli'
-							ORDER BY jarjestys DESC
+							WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$avg' and kieli = '$kieli'
+							ORDER BY jarjestys ASC
 							LIMIT 1";
-			$res 	 = mysql_query($query) or pupe_error();
-			if(mysql_num_rows($res) == 0) {
-
-				$query 	 = "	SELECT tunnus
-								FROM avainsana
-								WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$avg' and kieli = '$kieli'
-								ORDER BY jarjestys ASC
-								LIMIT 1";
-				$res 	 = mysql_query($query) or pupe_error();
+				$res = mysql_query($query) or pupe_error();
 			}
 		}
 
@@ -611,8 +614,10 @@
 		$karhuviesti = $kv["tunnus"];
 	}
 
-	$query 	 = "SELECT selitetark FROM avainsana WHERE tunnus='$karhuviesti' AND laji = 'KARHUVIESTI' AND yhtio ='{$yhtiorow['yhtio']}'";
-	$res 	 = mysql_query($query) or pupe_error();
+	$query = "	SELECT selitetark 
+				FROM avainsana 
+				WHERE tunnus='$karhuviesti' AND laji = 'KARHUVIESTI' AND yhtio ='{$yhtiorow['yhtio']}'";
+	$res = mysql_query($query) or pupe_error();
 	$viestit = mysql_fetch_array($res);
 
     $karhuviesti = $viestit["selitetark"];

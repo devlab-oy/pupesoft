@@ -25,11 +25,10 @@ if ($kukarow["kirjoitin"] == 0) {
 	$tee = "";
 }
 
-$query = "select * from avainsana where laji = 'KARHUVIESTI' and yhtio ='{$yhtiorow['yhtio']}'";
+$query = "SELECT tunnus from avainsana where laji = 'KARHUVIESTI' and yhtio ='{$yhtiorow['yhtio']}'";
 $res = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($res) == 0) {
-
     echo "<font class='error'>".t("Yhtiöllä ei ole yhtään karhuviestiä tallennettuna. Ei voida karhuta").".</font><br>";
     $tee = '';
 }
@@ -282,7 +281,6 @@ if ($tee == 'KARHUA')  {
 	else {
 		$sorttaus = $yhtiorow["maa"];
 	}
-	
 	
 	$query = "	SELECT *, if(kieli='$sorttaus', concat(1, kieli), kieli) sorttaus
 				from avainsana 

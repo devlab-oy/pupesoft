@@ -222,7 +222,6 @@
 										"tilaus"		=> t("Tilaus/Projekti"),
 										"tarjous" 		=> t("Tarjous"),
 										"toimitus" 		=> t("Toimitus"),
-										"kerays"		=> t("Ker‰ys"),
 										"alku"			=> t("Avattu"),
 										"laskutus"		=> t("Laskutus"),
 										"kontakti_1"	=> t("1. kontaktointi"),
@@ -514,14 +513,6 @@
 							$menu[] = array("TEKSTI" => t("Muokkaa aikaa"), 		"HREF" => $kalenteri["URL"]."?kaletee=MUOKKAAKERAYSPAIVAA&otunnus=$row[tunnus]");
 						}						
 					}
-					elseif($lajitark == "kerays") {
-						$viesti = t("Toimituksen %s ker‰ys", $kieli, $row["tunnus"]);
-						
-						//	Voimmeko viel‰ muokata toimitusaikoja?
-						if(!in_array($row["alatila"], array("D","J","E","V","X"))) {
-							$menu[] = array("TEKSTI" => t("Muokkaa aikaa"), 		"HREF" => $kalenteri["URL"]."?kaletee=MUOKKAAKERAYSPAIVAA&otunnus=$row[tunnus]");
-						}
-					}
 					else {
 						$viesti = $lajitark;
 					}
@@ -531,6 +522,7 @@
 					if($lajitark == "valmistus") {
 						$viesti = t("Valmistus %s", $kieli, $row["tunnus"]);
 					}
+					$menu[] = array("TEKSTI" => t("Muokkaa aikaa"), 		"HREF" => $kalenteri["URL"]."?kaletee=MUOKKAAKERAYSPAIVAA&otunnus=$row[tunnus]");
 				}				
 				elseif(in_array($row["tila"], array("A"))) {
 					$atoim = "MYYNTI";
@@ -868,19 +860,7 @@
 						UNION
 						/*	Toimituksen l‰hetys	*/	
 						(	
-							SELECT distinct 'lasku' laji, 'toimitus' laji_tark, UNIX_TIMESTAMP(date(lasku.toimaika)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
-							FROM lasku
-							$asiakas_join
-							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila IN ('L','N') $wherelisa
-						)
-						";
-					}
-					elseif($tdata == "kerays") {
-						$query .= "
-						UNION
-						/*	Toimituksen ker‰ys	*/	
-						(	
-							SELECT distinct 'lasku' laji, 'kerays' laji_tark, UNIX_TIMESTAMP(date(lasku.kerayspvm)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
+							SELECT distinct 'lasku' laji, 'toimitus' laji_tark, UNIX_TIMESTAMP(date(lasku.kerayspvm)) aika, lasku.luontiaika, DATEDIFF(toimaika, kerayspvm) vali, lasku.laatija laatija, lasku.tunnus tunnus
 							FROM lasku
 							$asiakas_join
 							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila IN ('L','N') $wherelisa
@@ -892,7 +872,7 @@
 						UNION
 						/*	Tilauksen valmistua	*/	
 						(	
-							SELECT distinct 'lasku' laji, 'toimitus' laji_tark, UNIX_TIMESTAMP(date(lasku.toimaika)) aika, lasku.luontiaika, '1' vali, lasku.laatija laatija, lasku.tunnus tunnus
+							SELECT distinct 'lasku' laji, 'valmistus' laji_tark, UNIX_TIMESTAMP(date(lasku.kerayspvm)) aika, lasku.luontiaika, DATEDIFF(toimaika, kerayspvm) vali, lasku.laatija laatija, lasku.tunnus tunnus
 							FROM lasku
 							$asiakas_join
 							WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila IN ('V') $wherelisa
@@ -1527,21 +1507,18 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 					$aburow = mysql_fetch_array($abures);
 					$paivia = $aburow["paivia"];
 					$kaleaika = $data["tiedot"]["alkustr"];
-
+					
 					//	T‰n viikon eka p‰iv‰
 					if(date("N", $kaleaika) == 1) {
 						$maanantai = $kaleaika;
 					}
-					elseif(date("N", $kaleaika)>3) {
-						$maanantai = strtotime("+1 monday", $kaleaika);
-					}
 					else {
 						$maanantai = strtotime("-1 monday", $kaleaika);
 					}
-
+					
 					//	varmistetaan ett‰ p‰‰tyt‰‰n sunnuntaihin
 					$vikapaiva = strtotime("+$paivia days", $kaleaika);
-					if(date("N", $vikapaiva)!=0) {
+					if(date("N", $vikapaiva)!=7) {
 						$vikapaiva = strtotime("sunday", $vikapaiva);
 					}
 
@@ -1556,7 +1533,9 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 					else {
 						$paivia = ($aburow["paivia"]/7)+1;
 					}
-
+					
+					//echo "<pre>data".print_r($data["lista"], true)."</pre><br>";
+					
 					$dataByEvent = array();
 					foreach($data["lista"] as $date => $events) {
 						foreach($events as $key => $event) {
@@ -1565,11 +1544,19 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 								$dataByEvent[$event["laji_tark"].$event["tunnus"]][$date] = $event;
 							}
 							else {
-								$dataByEvent[$event["laji_tark"].$event["tunnus"]][strtotime("monday", $date)] = $event;
+								
+								if(date("N", $date) == 1) {
+									$dataByEvent[$event["laji_tark"].$event["tunnus"]][strtotime("monday", $date)] = $event;
+								}
+								else {
+									$dataByEvent[$event["laji_tark"].$event["tunnus"]][strtotime("-1 monday", $date)] = $event;
+								}
 							}
 						}
 					}
 
+					//echo "<pre>dataByEvent".print_r($dataByEvent, true)."</pre><br>";
+					
 					//	Tehd‰‰n otsikot
 					$kale .= "
 					<tr><td class='back'></td>";
@@ -1701,7 +1688,6 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 
 							$stylelisa = "";
 							$ulos = "";
-							//echo "<pre>tdata $key".print_r($tdata[$aikastr], true)."</pre><br>";
 							if(is_array($event[$aikastr])) {
 								
 								if($row["laji_tark"] != "kuka") {
@@ -1712,6 +1698,9 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 								if(!isset($tcolor[$row["tunnus"]])) {
 									if($row["laji_tark"] == "tyomaarays") {
 										$tcolor[$row["tunnus"]] = "rgba(250, 250, 0, 0.8);";
+									}
+									elseif($row["laji_tark"] == "valmistus") {
+										$tcolor[$row["tunnus"]] = "rgba(250, 10, 200, 0.8);";
 									}
 									elseif($row["laji"] == "kulunvalvonta") {
 										if($row["laji_tark"] == "kuka") {
@@ -1731,7 +1720,13 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 								
 								$stylelisa = "background-color: ".$tcolor[$row["tunnus"]];
 
-								if(($nakyma == "RIVINAKYMA_PAIVA" and $row["aika"] == $aikastr) or ($nakyma == "RIVINAKYMA_VIIKKO" and strtotime("monday", $row["aika"]) == $aikastr)) {
+								if(($nakyma == "RIVINAKYMA_PAIVA" and $row["aika"] == $aikastr) or
+									($nakyma == "RIVINAKYMA_VIIKKO" and (
+											(date("N", $row["aika"]) != 1 and strtotime("-1 monday", $row["aika"]) == $aikastr) or
+											(date("N", $row["aika"]) == 1 and strtotime("monday", $row["aika"]) == $aikastr)
+										)
+									)
+								) {
 									$ulos = $lisatiedot["viesti"];
 								}
 
@@ -1755,7 +1750,7 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 							}
 
 							$kale .= "	<td height = '$height' style='background-color: $color; $stylelisa'>
-											$ulos
+											$ulos 
 										</td>";
 
 						}
@@ -1866,15 +1861,12 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 					if(date("N", $kaleaika) == 1) {
 						$maanantai = $kaleaika;
 					}
-					elseif(date("N", $kaleaika)<1) {
+					else {
 						$maanantai = strtotime("-1 monday", $kaleaika);
 					}
-					else {
-						$maanantai = strtotime("+1 monday", $kaleaika);
-					}
 					
-					$seuraava 	= strtotime("+2 weeks", $maanantai);
-					$edellinen 	= strtotime("-0 weeks", $maanantai);
+					$seuraava 	= strtotime("+1 weeks", $maanantai);
+					$edellinen 	= strtotime("-1 weeks", $maanantai);
 					
 					$paivat 	= array();
 					for($i=0;$i<7;$i++) {
@@ -1898,7 +1890,7 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 				
 				$kale .= "
 					<table width='".(($days*$w)-40)."' cellpadding='1' cellspacing='10'>
-					<caption style='margin-bottom: 5px;'><div style='text-align: left; float: left; margin-left: 20px'><a href=\"#\">&lt;&lt;&nbsp;</a>&nbsp;&nbsp;$otsikko&nbsp;&nbsp;&nbsp;<a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$seuraava".url_params($kalenteri)."', '$kalenteri[div]', false);\">&gt;&gt;</div></a>$tmenut</caption>
+					<caption style='margin-bottom: 5px;'><div style='text-align: left; float: left; margin-left: 20px'><a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$edellinen".url_params($kalenteri)."', '$kalenteri[div]', false);\">&lt;&lt;&nbsp;</a>&nbsp;&nbsp;$otsikko&nbsp;&nbsp;&nbsp;<a href=\"javascript:sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&kaleaika=$seuraava".url_params($kalenteri)."', '$kalenteri[div]', false);\">&gt;&gt;</div></a>$tmenut</caption>
 					<tr>
 						<th width='40'>".t("Klo")."</th>";
 					
@@ -1918,14 +1910,15 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 				$tpos=array();
 				$tcolor = array();
 				
+				//	Haetaan t‰n p‰iv‰n kaikki muistutukset ja memot!
 				for($i=0;$i<$days;$i++) {
 					$ulos = "";
-					
 					if (is_array($data["lista"][$paivat[$i]])) {
+
 						foreach($data["lista"][$paivat[$i]] as $row) {
 							if(in_array($row["laji"], array("kalenteri"))) {
+								
 								if(in_array($row["laji_tark"], array("Muistutus", "Memo"))) {
-
 									if($ulos != "") {
 										$ulos .= "<hr>";
 									}
@@ -1988,7 +1981,7 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 				$h = 07;
 				$m = 00;
 				
-				//	loopataan klo 21 asti
+				//	loopataan klo 21 meid‰n kalenteri!
 				while($h<18) {
 					
 					$h = sprintf("%02d", $h);
@@ -2003,50 +1996,52 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 						
 						//	T‰m‰n hetken kellonaika
 						$aikastr = strtotime("+$h hours +$m minutes", $paivat[$i]);
+						$edaikastr = strtotime("+30 minutes", $aikastr);
 						
 						$kale .= "<td width='$w' height = '10' NOWRAP style='border-style: solid; border-width: 0px; background-color: $color;'>";
 						
 						if(is_array($data["lista"][$paivat[$i]])) {
-							
-							$ulos = array();
+							$ulos = "";
 							foreach($data["lista"][$paivat[$i]] as $row) {
 								if(!in_array($row["laji_tark"], array("Memo", "Muistutus"))) {
 									$lisatiedot = hae_lisatiedot($row);
-									if($lisatiedot["pvmalku"] <= $aikastr and $lisatiedot["pvmloppu"] > $aikastr) {
-
+									if($lisatiedot["pvmalku"] < $edaikastr and $lisatiedot["pvmloppu"] >= $edaikastr) {
+										
 										if(!isset($tcolor[$row["tunnus"]])) {
 											$tcolor[$row["tunnus"]] = color_code(count($tcolor)*13+55, 100);
 											
 											$viesti = $poppari = "";
 											if($nakyma == "VIIKKONAKYMA") {
-												list($viesti, $poppari) = lyhytviesti($lisatiedot["viesti"], 40);
+												$viesti = $lisatiedot["viesti"];
+												lyhytviesti($viesti, 40);
 											}
 											else {
 												$viesti = $lisatiedot["viesti"];
+												lyhytviesti($viesti, 100);
 											}
 
-											$ulos[$tpos[$i][$row["tunnus"]]] = "<div style='width: ".@($w/count($tpos[$i]))."; float: left; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";' $poppari>$viesti</div>";
+											$ulos .= "<div style='width: ".@($w/count($tpos[$i]))."; float: left; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";' $poppari>$viesti</div>";
 										}
 										else {
-											$ulos[$tpos[$i][$row["tunnus"]]] = "<div style='width: ".@($w/count($tpos[$i]))."; float: left; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";'>&nbsp;</div>";
+											$ulos .= "<div style='width: ".@($w/count($tpos[$i]))."; float: left; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";'>&nbsp;</div>";
 										}
 									}
 									else {
-										$ulos[$tpos[$i][$row["tunnus"]]] = "<div style='width: ".@($w/count($tpos[$i]))."; height: 1px; float: left; background-color: inherit;'></div>";
+										$ulos .= "<div style='width: ".@($w/count($tpos[$i]))."; height: 1px; float: left; background-color: inherit;'></div>";
 									}
 								}
 							}
 						}
 						else {
-							$ulos = array("");
+							$ulos = "";
 						}
 												
 						$menu = array();
-						$menu[] = array("TEKSTI" => t("Lis‰‰ kalenteriin"), 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
-						$menu[] = array("TEKSTI" => t("Lis‰‰ muistutus"), 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
-						$menu[] = array("TEKSTI" => t("Lis‰‰ asiakasmuistio"), 	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+						$menu[] = array("TEKSTI" => t("Lis‰‰ kalenteriin"), 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri), 	"OFFSETX" => 350, "OFFSETY" => 30);
+						$menu[] = array("TEKSTI" => t("Lis‰‰ muistutus"), 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri), 	"OFFSETX" => 350, "OFFSETY" => 40);
+						$menu[] = array("TEKSTI" => t("Lis‰‰ asiakasmuistio"), 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$aikastr".url_params($kalenteri), 		"OFFSETX" => 350, "OFFSETY" => 50);
 
-						$kale .= "<div style='width: {$w}px; text-align: right; z-index: 1;'>".tee_menu($menu, "<font class='kaleinfo'>".t("Lis‰‰")."</font>")."</div>".implode("",$ulos);
+						$kale .= "<div style='width: {$w}px; text-align: right; z-index: 1;'>".tee_menu($menu, "<font class='kaleinfo'>".t("Lis‰‰")."</font>")."</div>$ulos";
 						
 						$kale .= "</td>";
 					}			

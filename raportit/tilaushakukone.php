@@ -322,7 +322,7 @@ if($tee == "NAYTA") {
 			$kalenteri["kalenteri_nayta_tilausdata"]    = array("tarjous", "tarjouskontaktointi");
 		}       
 		else {
-			$kalenteri["kalenteri_tilausdata"]          = array("tilaus", "toimitus", "kerays", "laskutus", "tyomaarays");
+			$kalenteri["kalenteri_tilausdata"]          = array("tilaus", "toimitus", "laskutus", "tyomaarays");
 			$kalenteri["kalenteri_nayta_tilausdata"]    = array("tilaus", "toimitus");
 		}
 		

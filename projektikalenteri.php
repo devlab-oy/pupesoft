@@ -136,8 +136,8 @@ if($projekti > 0) {
 		$kalenteri["kalenteri_tuntidata"]			= array("projektitunnit");
 		$kalenteri["kalenteri_nayta_tuntidata"]		= array("");
 		
-		$kalenteri["kalenteri_tilausdata"]			= array("tilaus", "kerays", "toimitus", "valmistus", "tyomaarays");
-		$kalenteri["kalenteri_nayta_tilausdata"]	= array("tilaus", "kerays", "toimitus", "valmistus", "tyomaarays");
+		$kalenteri["kalenteri_tilausdata"]			= array("tilaus", "toimitus", "valmistus", "tyomaarays");
+		$kalenteri["kalenteri_nayta_tilausdata"]	= array("tilaus", "toimitus", "valmistus", "tyomaarays");
 		
 		$kalenteri["kalenteri_ketka"]		= array("kaikki");
 		$kalenteri["kalenteri_nayta_kuka"]	= array("");
@@ -153,68 +153,69 @@ if($projekti > 0) {
 	$data = kalequery();
 	//echo "data:<pre>".print_r($data, true)."</pre>";
 	
+	$tuloslaskelma = muistista("tuloslaskelma", "tuloslaskelma");
+	$selTyyppi = array($tuloslaskelma["tyyppi"] => "SELECTED");
+	$selKaikki = array($tuloslaskelma["kaikkikaudet"] => "SELECTED");
+	$selTaso = array($tuloslaskelma["rtaso"] => "SELECTED");
+	
+	$kalePost = "
+			<table>
+				<tr>
+					<td class='back'><a href='#' onclick=\"var a = getElementById('tuloslaskelmaContainer'); if(a.style.display == 'none') { a.style.display =  'block'; } else{ a.style.display = 'none';} return false; \">Näytä/piilota talousdata</a></td>
+					<td class='back'><a href='#' onclick=\"var a = getElementById('tuntiyhteenvetoContainer'); if(a.style.display == 'none') { a.style.display =  'block'; } else{ a.style.display = 'none';} return false; \">Näytä/piilota tuntiyhteenveto</a></td>
+				</tr>
+				<tr>
+					<td class='back'>
+						<div id='tuloslaskelmaContainer' style='display: none; float: left;'>
+							<div id='tuloslaskelma'></div>
+
+								<script type='text/javascript' language='JavaScript'>
+									sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti', false, false); 
+								</script>
+								<table><tr><td colspan='2' class='back'>&nbsp;</td></tr><tr><th>".t("Tyyppi")."</th><th>". t("Kaudet") . "</th><th>". t("Taso") . "</th></tr>
+								<tr>
+									<td>			
+										<select id='kikkare' onchange=\"sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti&vaihda[tyyppi]='+this.options[this.selectedIndex].value, false, false); return false;\">
+											<option value='1' ".$selTyyppi["1"].">".t("Vastaavaa (varat)")."</option>
+											<option value='2' ".$selTyyppi["2"].">".t("Vastattavaa (velat)")."</option>
+											<option value='3' ".$selTyyppi["3"].">".t("Ulkoinen tuloslaskelma")."</option>
+										</select>
+									</td>
+									<td>			
+										<select id='kikkare' onchange=\"sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti&vaihda[kaikkikaudet]='+this.options[this.selectedIndex].value, false, false); return false;\">
+											<option value='n' ".$selKaikki["n"].">".t("Älä näytä kausia")."</option>
+											<option value='o' ".$selKaikki["o"].">".t("Näytä kaikki kaudet")."</option>
+										</select>
+									</td>
+									<td>
+										<select id='kikkare' onchange=\"sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti&vaihda[rtaso]='+this.options[this.selectedIndex].value, false, false); return false;\">
+											<option value='TILI' ".$selTaso["TILI"]. ">".t("Tilitaso")."</option>
+											<option value='5' ".$selTaso["5"]." >".t("Yhteenveto")."</option>
+										</select>
+									</td>
+								</tr>
+								</table>
+						</div>
+					</td>
+					<td class='back'>
+						<div id='tuntiyhteenvetoContainer' style='display: none; float: left;'>
+							<div id='tuntiyhteenveto'></div>
+							<script type='text/javascript' language='JavaScript'>
+								sndReq('tuntiyhteenveto', 'projektikalenteri.php?tee=tuntiyhteenveto&projekti=$projekti', false, false); 
+							</script>
+						</div>
+					</td>
+				</tr>					
+			</table>";
+	
 	if($tee_div == "JOO") {
 		//tuloslaskelma 
-		$tuloslaskelma = muistista("tuloslaskelma", "tuloslaskelma");
-		$selTyyppi = array($tuloslaskelma["tyyppi"] => "SELECTED");
-		$selKaikki = array($tuloslaskelma["kaikkikaudet"] => "SELECTED");
-		$selTaso = array($tuloslaskelma["rtaso"] => "SELECTED");
-		
-		$kalePost = "
-				<table>
-					<tr>
-						<td class='back'><a href='#' onclick=\"var a = getElementById('tuloslaskelmaContainer'); if(a.style.display == 'none') { a.style.display =  'block'; } else{ a.style.display = 'none';} return false; \">Näytä/piilota talousdata</a></td>
-						<td class='back'><a href='#' onclick=\"var a = getElementById('tuntiyhteenvetoContainer'); if(a.style.display == 'none') { a.style.display =  'block'; } else{ a.style.display = 'none';} return false; \">Näytä/piilota tuntiyhteenveto</a></td>
-					</tr>
-					<tr>
-						<td class='back'>
-							<div id='tuloslaskelmaContainer' style='display: none; float: left;'>
-								<div id='tuloslaskelma'></div>
-
-									<script type='text/javascript' language='JavaScript'>
-										sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti', false, false); 
-									</script>
-									<table><tr><td colspan='2' class='back'>&nbsp;</td></tr><tr><th>".t("Tyyppi")."</th><th>". t("Kaudet") . "</th><th>". t("Taso") . "</th></tr>
-									<tr>
-										<td>			
-											<select id='kikkare' onchange=\"sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti&vaihda[tyyppi]='+this.options[this.selectedIndex].value, false, false); return false;\">
-												<option value='1' ".$selTyyppi["1"].">".t("Vastaavaa (varat)")."</option>
-												<option value='2' ".$selTyyppi["2"].">".t("Vastattavaa (velat)")."</option>
-												<option value='3' ".$selTyyppi["3"].">".t("Ulkoinen tuloslaskelma")."</option>
-											</select>
-										</td>
-										<td>			
-											<select id='kikkare' onchange=\"sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti&vaihda[kaikkikaudet]='+this.options[this.selectedIndex].value, false, false); return false;\">
-												<option value='n' ".$selKaikki["n"].">".t("Älä näytä kausia")."</option>
-												<option value='o' ".$selKaikki["o"].">".t("Näytä kaikki kaudet")."</option>
-											</select>
-										</td>
-										<td>
-											<select id='kikkare' onchange=\"sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti&vaihda[rtaso]='+this.options[this.selectedIndex].value, false, false); return false;\">
-												<option value='TILI' ".$selTaso["TILI"]. ">".t("Tilitaso")."</option>
-												<option value='5' ".$selTaso["5"]." >".t("Yhteenveto")."</option>
-											</select>
-										</td>
-									</tr>
-									</table>
-							</div>
-						</td>
-						<td class='back'>
-							<div id='tuntiyhteenvetoContainer' style='display: none; float: left;'>
-								<div id='tuntiyhteenveto'></div>
-								<script type='text/javascript' language='JavaScript'>
-									sndReq('tuntiyhteenveto', 'projektikalenteri.php?tee=tuntiyhteenveto&projekti=$projekti', false, false); 
-								</script>
-							</div>
-						</td>
-					</tr>					
-				</table>";
 			
 		echo "<font class='head'>".t("Projektikalenteri")."</font><hr><br><br>
 				<div id='$kaleDIV'>".kalenteri($data, $kalePost)."</div>";		
 	}
 	else {
-		echo kalenteri($data);
+		echo kalenteri($data, $kalePost);
 	}	
 }
 
@@ -232,7 +233,7 @@ if($toim == "HAKU") {
 			
 
 }
-else {
+elseif($projekti == 0) {
 	echo "<font class='head'>".t("Avoimet projektit")."</font><hr><br><br>";
 }
 

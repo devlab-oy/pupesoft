@@ -272,7 +272,7 @@ if((int) $projekti == 0 and ($toim != "HAKU" or $projekti != "" or $asiakas != "
 				LEFT JOIN kuka pp ON pp.yhtio=lasku.yhtio and pp.tunnus=laskun_lisatiedot.projektipaallikko
 				LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=lasku.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde 
 				WHERE lasku.yhtio = '$kukarow[yhtio]' 
-				and lasku.tila = 'R' 
+				and lasku.tila = 'R' and lasku.tilaustyyppi!='9'
 				$rajaus
 				orDER BY tunnusnippu DESC";
 				

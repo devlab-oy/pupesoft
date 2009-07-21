@@ -357,7 +357,7 @@
 							}
 
 							// Lasketaan varastonarvon muutos
-							if ($row["sarjanumeroseuranta"] == "S") {
+							if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "G") {
 
 								$varvo_ennen = 0;
 								$varvo_jalke = 0;
@@ -395,7 +395,7 @@
 									exit;
 								}
 								
-								$row['kehahin'] = abs($summa);
+								$row['kehahin'] = round(abs($summa) / abs($erotus), 6);
 							}
 							else {
 								if 		($row['epakurantti100pvm'] != '0000-00-00') $row['kehahin'] = 0;

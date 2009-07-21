@@ -445,7 +445,7 @@
 				}
 				
 				// Jos tuote on sarjanumeroseurannassa niin varastonarvo lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole laskutettu)
-				if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U") {
+				if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "G") {
 
 					// jos summaustaso on per paikka, otetaan varastonarvo vain siltä paikalta
 					if ($summaustaso == "P") {
@@ -577,7 +577,7 @@
 					$lask++;
 
 					// sarjanumerollisilla tuotteilla ei ole keskihankintahintaa
-					if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U") {
+					if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "G") {
 						if ($kpl == 0) {
 							$kehasilloin = 0;
 							$bkehasilloin = 0;

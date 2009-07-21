@@ -264,7 +264,7 @@
 									laadittu = now()";
 					$result = mysql_query($query) or pupe_error($query);
 
-					echo t("Tuote")." $tuoteno ".t("siirrettiin")." $maara ".ta($kieli, "Y", $kehahin_row["yksikko"])." ".t("paikasta")." $lhyllyalue $lhyllynro $lhyllyvali $lhyllytaso --> ".t("paikkaan").": $khyllyalue $khyllynro $khyllyvali $khyllytaso<br>";
+					echo t("Tuote")." $tuoteno ".t("siirrettiin")." $maara ".t_avainsana("Y", "", "and avainsana.selite='$kehahin_row[yksikko]'", "", "", "selite")." ".t("paikasta")." $lhyllyalue $lhyllynro $lhyllyvali $lhyllytaso --> ".t("paikkaan").": $khyllyalue $khyllynro $khyllyvali $khyllytaso<br>";
 				}
 
 				echo "</pre>";

@@ -14,17 +14,11 @@
 	$lis = "";
 	
 	if ($tyojono != '') {
-		$lis = " and (selite = '' or selite = '$tyojono') ";	
+		$lis = " and (avainsana.selite = '' or avainsana.selite = '$tyojono') ";	
 	}
 	
-	$query = "	SELECT selite, selitetark, selitetark_2
-				FROM avainsana
-				WHERE yhtio = '$kukarow[yhtio]' 
-				and laji = 'TYOM_TYOLINJA'
-				$lis
-				ORDER BY jarjestys, selite";
-	$kires = mysql_query($query) or pupe_error($query);
-
+	$kires = t_avainsana("TYOM_TYOLINJA", "", $lis);
+	
 	$ASENTAJA_ARRAY = array();
 	$ASENTAJA_ARRAY_TARK = array();
 
@@ -325,11 +319,7 @@
 				
 		echo "<select name='tyojono' Onchange='submit();'>";
 	
-		$query = "	SELECT *
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TYOM_TYOJONO'
-					ORDER BY jarjestys, selitetark_2";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$vresult = t_avainsana("TYOM_TYOJONO");
 		
 		echo "<option value = ''>".t("Kaikki työjonot")."</option>";
 

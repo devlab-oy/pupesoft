@@ -115,7 +115,7 @@ if (!file_exists($tilvahvfilenimi)) {
 			$ulos .= "RLIN___PA:" . sprintf("%07.2f",  (float) $tvtilausrivirow['ale']) . "\n";
 			$ulos .= "RLIN2__DT:" . tv2dateconv($tvtilausrivirow['toimaika']) . "\n";
 			$ulos .= "RLINVATTX:" . $tvtilausrivirow['alv'] . " S" . "\n";
-			$ulos .= "RLINLINFC:" . $tvtilausrivirow['kommentti'] . "\n";
+			$ulos .= "RLINLINFC:" . str_replace("\n", " ", $tvtilausrivirow['kommentti']) . "\n";
 		//		$ulos .= "RLINLINFC:" . $tvtilausrivirow['kommentti'] . "\n"; // Jälkitoimitusrivitiedot
 			$ulos .= "RLIN__END:" . $rivino . "\n";
 			fputs($toot,$ulos);

@@ -272,15 +272,8 @@ if (!function_exists('alku')) {
 						
 						$laskurow[$kentta] = $row["nimi"];						
 					}
-					elseif ($kentta == "merkki") {												
-						$query = "	SELECT selitetark_2
-									FROM avainsana
-									WHERE yhtio = '$kukarow[yhtio]' 
-									and laji = 'sarjanumeron_li' 
-									and selite = 'MERKKI'
-									and selitetark = '".$laskurow[$kentta]."'
-									LIMIT 1";
-						$yresult = mysql_query($query) or pupe_error($query);
+					elseif ($kentta == "merkki") {
+						$yresult = t_avainsana("SARJANUMERON_LI", $kieli, "and avainsana.selite = 'MERKKI' and avainsana.selitetark = '".$laskurow[$kentta]."'");
 						
 						if (mysql_num_rows($yresult) > 0) {
 							$row = mysql_fetch_array($yresult);	

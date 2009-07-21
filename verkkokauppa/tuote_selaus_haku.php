@@ -576,21 +576,18 @@
 
 				if(count($otsikot) > 0) {
 					foreach($otsikot as $o) {
-						if($o["laji"] == "try") {
-							$query = "	SELECT concat_ws(' - ', selite, selitetark) nimi
-										FROM avainsana
-										WHERE yhtio='{$kukarow["yhtio"]}' and laji = 'TRY' and selite = '{$row["try"]}' LIMIT 1";
-							$tryres = mysql_query($query) or pupe_error($query);
+						if ($o["laji"] == "try") {							
+							$tryres = t_avainsana("TRY", "", "and avainsana.selite = '$row[try]'");							
 							$tryrow = mysql_fetch_array($tryres);
 
-							if($tryrow["nimi"] == "") {
+							if ($tryrow["selite"] == "") {
 								echo "<tr><td class = 'back' colspan = '7' $o[style]><font class='$o[class]'>".t("Lajittelemattomat")."</font></td></tr>";
 							}
 							else {
-								echo "<tr><td class = 'back' colspan = '7' $o[style]><font class='$o[class]'>{$tryrow["nimi"]}</font></td></tr>";
+								echo "<tr><td class = 'back' colspan = '7' $o[style]><font class='$o[class]'>$tryrow[selite] - $tryrow[selitetark]</font></td></tr>";
 							}
 						}
-						elseif($o["laji"] == "merkki") {
+						elseif ($o["laji"] == "merkki") {
 							if($row["tuotemerkki"] == "") {
 								echo "<tr><td class = 'back' colspan = '7' $o[style]><br><font class='$o[class]'>".t("Muut tuotemerkit")."</font></td></tr>";
 							}
@@ -598,18 +595,15 @@
 								echo "<tr><td class = 'back' colspan = '7' $o[style]><br><font class='$o[class]'>{$row["tuotemerkki"]}</font></td></tr>";
 							}
 						}
-						elseif($o["laji"] == "osasto") {
-							$query = "	SELECT concat_ws(' - ', selite, selitetark) nimi
-										FROM avainsana
-										WHERE yhtio='{$kukarow["yhtio"]}' and laji = 'OSASTO' and selite = '{$row["osasto"]}' LIMIT 1";
-							$ores = mysql_query($query) or pupe_error($query);
+						elseif ($o["laji"] == "osasto") {
+							$ores = t_avainsana("OSASTO", "", "and avainsana.selite = '$row[osasto]'");
 							$orow = mysql_fetch_array($ores);
 
-							if($orow["nimi"] == "") {
+							if ($orow["selite"] == "") {
 								echo "<tr><td class = 'back' colspan = '7' $o[style]><br><br><font class='$o[class]'>".t("Muut")."</font></td></tr>";
 							}
 							else {
-								echo "<tr><td class = 'back' colspan = '7' $o[style]><br><br><font class='$o[class]'>{$orow["nimi"]}</font></td></tr>";
+								echo "<tr><td class = 'back' colspan = '7' $o[style]><br><br><font class='$o[class]'>$orow[selite] - $orow[selitetark]</font></td></tr>";
 							}
 						}
 					}

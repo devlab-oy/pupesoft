@@ -298,13 +298,13 @@ if(!function_exists("menu")) {
 		}
 
 		if ($osasto == "") {
-			$val 		=  "<table id='rootMenu' class='menu' style='visibility: hidden;'>
-								<tr class='aktiivi'>
-									<td class='back'><a href='verkkokauppa.php'>".t("Etusivulle")."</a><br><a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=yhteystiedot', false, true);\">".t("Yhteystiedot")."</a></td>
-								</tr>
-								<tr>
-									<td class='back'>
-										<table>
+			$val =  "<table id='rootMenu' class='menu' style='visibility: hidden;'>
+						<tr class='aktiivi'>
+							<td class='back'><a href='verkkokauppa.php'>".t("Etusivulle")."</a><br><a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=yhteystiedot', false, true);\">".t("Yhteystiedot")."</a></td>
+						</tr>
+						<tr>
+							<td class='back'>
+							<table>
 						<tr><td class='back'><font class='info'>Tuotehaku:</font></td></tr>
 						<tr>
 							<td class='back'><form id = 'tuotehaku' name='tuotehaku'  action = \"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, true);\" method = 'post'>
@@ -317,18 +317,14 @@ if(!function_exists("menu")) {
 						</tr>
 					</table><hr></td></tr>";
 
-			$query = "	SELECT selite osasto, selitetark nimi
-			 			FROM avainsana
-						WHERE yhtio='{$kukarow["yhtio"]}' and laji = 'OSASTO' and selitetark_2 = 'verkkokauppa'
-						ORDER BY selitetark";
-			$ores = mysql_query($query) or pupe_error($query);
-
+			$ores = t_avainsana("OSASTO", "", "and avainsana.selitetark_2 = 'verkkokauppa'");			
+			
 			while($orow = mysql_fetch_array($ores)) {
-				$target		= "{$orow["osasto"]}_T";
-				$parent		= "{$orow["osasto"]}_P";
-				$onclick	= "document.getElementById(\"$target\").style.display==\"none\"? sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto={$orow["osasto"]}\", \"\", false) : \"\";";
-				$href 		= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto={$orow["osasto"]}\", \"$parent\", false, true);";
-				$val .=  "<tr class='aktiivi'><td><a class = 'menu' id='$parent' onclick='$onclick' href='$href'>{$orow["nimi"]}</a><div id='$target' style='display: none'></div></td></tr>";
+				$target		= "{$orow["selite"]}_T";
+				$parent		= "{$orow["selite"]}_P";
+				$onclick	= "document.getElementById(\"$target\").style.display==\"none\"? sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto={$orow["selite"]}\", \"\", false) : \"\";";
+				$href 		= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto={$orow["selite"]}\", \"$parent\", false, true);";
+				$val .=  "<tr class='aktiivi'><td><a class = 'menu' id='$parent' onclick='$onclick' href='$href'>{$orow["selitetark"]}</a><div id='$target' style='display: none'></div></td></tr>";
 			}
 			$val .= "</table><script>setTimeout(\"document.getElementById('rootMenu').style.visibility='visible';\", 250)</script>";
 
@@ -461,49 +457,6 @@ if(!function_exists("menu")) {
 		return $val;
 	}
 }
-/*
-if(!function_exists("kuvaus")) {
-	function kuvaus($osasto="", $try="") {
-		global $yhtiorow, $kukarow;
-
-		$val = "<table class='kuvaus'>";
-
-		if($osasto == "") {
-			$query = "	SELECT *
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]' and laji = 'OSASTO' and selitetark_2 = 'verkkokauppa'";
-			$result = mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($result) > 0) {
-				while($row = mysql_fetch_array($result)) {
-					$val .= "<tr><td class = 'back'><font class='head'>{$row["selitetark"]}</font><br>{$row["selitetark_3"]}<br><br></td></tr>";
-				}
-			}
-			else {
-
-			}
-		}
-		elseif($try == "") {
-			$query = "	SELECT distinct selitetark, selitetark_3
-			 			FROM tuote
-						JOIN avainsana ON tuote.yhtio = avainsana.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY'
-						WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try != '' and status != 'P' and hinnastoon = 'W' and tuotemerkki != ''
-						ORDER BY selitetark";
-			$result = mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($result) > 0) {
-				while($row = mysql_fetch_array($result)) {
-					$val .= "<tr><td class = 'back'><font class='head'>{$row["selitetark"]}</font><br>{$row["selitetark_3"]}<br><br></td></tr>";
-				}
-			}
-			else {
-
-			}
-		}
-
-		$val .= "</table>";
-
-		return $val;
-	}
-} */
 
 if(!function_exists("uutiset")) {
 	function uutiset($osasto="", $try="", $yhteystiedot="") {

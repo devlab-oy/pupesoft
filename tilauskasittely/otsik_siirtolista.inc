@@ -53,6 +53,16 @@
 							LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 							WHERE lasku.tunnus = '$kopioitava_otsikko'";
+							
+				//	Tämä on tehtävä, jottemme vain päivitä vanhaa!
+				$query = "	UPDATE kuka
+							SET kesken = 0
+							WHERE session = '$session'";
+				$result = mysql_query($query) or pupe_error($query);
+
+				$kukarow['kesken'] 	= 0;
+				$tilausnumero 		= 0;
+
 			}
 			elseif ($kukarow["kesken"] != 0) {
 				$squery = "	SELECT *, hyvaksynnanmuutos as luokka
@@ -66,7 +76,11 @@
 			// jos meillä on jo alatila ja tila ei muokkailla niitä!
 			$alatila="";
 			$ylatila="";
-			if ($srow['alatila'] != '') $alatila=$srow['alatila'];
+			
+			//	Jos meillä on kopioitu otsikko, ei kopioida alatilaa!
+			if($kopioitava_otsikko == 0 and $srow['alatila'] != '') {
+				$alatila=$srow['alatila'];
+			}
 			if ($srow['tila'] != '')    $ylatila=$srow['tila'];
 		}
 

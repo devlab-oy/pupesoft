@@ -1850,12 +1850,12 @@
 			$print = mysql_fetch_array($pres);
 			
 			// haetaan toimitustavan tiedot
-			$query    = "select * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
+			$query    = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
 			$toitares = mysql_query($query) or pupe_error($query);
 			$toitarow = mysql_fetch_array($toitares);
 
 			// haetaan rahtikirjan tyyppi
-			$query    = "select * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'RAHTIKIRJA' and selite = '$toitarow[rahtikirja]'";
+			$query    = "SELECT * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'RAHTIKIRJA' and selite = '$toitarow[rahtikirja]'";
 			$avainres = mysql_query($query) or pupe_error($query);
 			$avainrow = mysql_fetch_array($avainres);
 			
@@ -2025,14 +2025,6 @@
 
 		echo "<table>";
 
-		$query  = "	SELECT avainsana.selite, ".avain('select')."
-					FROM avainsana
-					".avain('join','PAKKAUS_')."
-					WHERE avainsana.yhtio	= '$kukarow[yhtio]'
-					and avainsana.laji	= 'pakkaus'
-					order by avainsana.jarjestys";
-		$result = mysql_query($query) or pupe_error($query);
-
 		$query  = "	SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
@@ -2087,7 +2079,9 @@
 		echo "<tr><th>".t("Kollia")."</th><th>".t("Kg")."</th><th>m&sup3;</th><th>m</th><th align='left' colspan='3'>".t("Pakkaus")."</th></tr>";
 
 		$i = 0;
-
+		
+		$result = t_avainsana("PAKKAUS");
+		
 		while ($row = mysql_fetch_array($result)) {
 			
 			if (strpos($tunnukset,',') !== false) {
@@ -2132,30 +2126,8 @@
 			<td><input type='text' size='7' value='$kuutiot[$i]' name='kuutiot[$i]'></td>
 			<td><input type='text' size='7' value='$lavametri[$i]' name='lavametri[$i]'></td>
 			<td>$row[selite]</td>
-			<td>$row[selitetark]</td>";
-
-			/*
-			$query = "	SELECT distinct selite, selitetark
-						FROM avainsana
-						WHERE yhtio='$kukarow[yhtio]' and laji='PAKKAUSKUVAUS'
-						ORDER BY selite+0";
-			$pksresult = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($pksresult) > 0) {
-				echo "<td><select name='pakkauskuvaustark[$i]'>";
-				echo "<option value=''>".t("Ei tarkennetta")."</option>";
-
-				while ($pksrow = mysql_fetch_array($pksresult)) {
-					$sel = '';
-					if ($pakkauskuvaustark[$i] == $pksrow[0]) {
-						$sel = "selected";
-					}
-					echo "<option value='$pksrow[0]' $sel>$pksrow[0]</option>";
-				}
-				echo "</select></td>";
-			}
-			*/
-			echo "<td><input type='text' size='10' name='pakkauskuvaustark[$i]' value='$pakkauskuvaustark[$i]'></td>";
+			<td>$row[selitetark]</td>
+			<td><input type='text' size='10' name='pakkauskuvaustark[$i]' value='$pakkauskuvaustark[$i]'></td>";
 
 			echo "</tr>";
 

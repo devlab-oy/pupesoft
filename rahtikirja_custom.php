@@ -384,14 +384,7 @@ if (! isset($_POST['toimitustapa'])) {
 	
 	echo "<table>";
 	
-	$query  = "	SELECT avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','PAKKAUS_')."
-				WHERE avainsana.yhtio	= '". mysql_real_escape_string($kukarow['yhtio']) . "'
-				and avainsana.laji	= 'pakkaus'
-				order by avainsana.jarjestys";
-	
-	$result = mysql_query($query) or pupe_error($query);
+	$result = t_avainsana("PAKKAUS");
 
 	echo "<tr><th>".t("Kollia")."</th><th>".t("Kg")."</th><th>m&sup3;</th><th>m</th><th align='left' colspan='3'>".t("Pakkaus")."</th></tr>";
 

@@ -8,7 +8,7 @@ require ("inc/connect.inc");
 $query  = "show tables from $dbkanta";
 $result =  mysql_query($query);
 
-echo "\nChecking tables from $dbkanta:\n\n";
+echo date("H:i:s").": Checking tables from $dbkanta.\n";
 
 while ($row = mysql_fetch_array($result)) {
 
@@ -16,29 +16,30 @@ while ($row = mysql_fetch_array($result)) {
 
 	// check table for errors
 	$query = "check table $table";
-	echo sprintf("%-50s", $query);
 	$chkre = mysql_query($query);
 	$chkro = mysql_fetch_array($chkre);
-	echo " -> $chkro[Msg_text]\n";
 
 	if ($chkro["Msg_text"] != "OK") {
+		echo "$query -> $chkro[Msg_text]\n";
+
 		// repair table for errors
 		$query = "repair table $table";
-		echo sprintf("%-50s", $query);
 		$chkre = mysql_query($query);
 		$chkro = mysql_fetch_array($chkre);
-		echo " -> $chkro[Msg_text]\n";
+		echo "$query -> $chkro[Msg_text]\n";
 	}
 
 	// optimize table
 	$query = "optimize table $table";
-	echo sprintf("%-50s", $query);
 	$chkre = mysql_query($query);
 	$chkro = mysql_fetch_array($chkre);
-	echo " -> $chkro[Msg_text]\n";
-		
+
+	if ($chkro["Msg_text"] != "OK" and $chkro["Msg_text"] != "Table is already up to date") {
+		echo "$query -> $chkro[Msg_text]\n";
+	}
+
 }
 
-echo "\nDone.\n";
+echo date("H:i:s").": Done.\n";
 
 ?>

@@ -584,7 +584,7 @@
 	
 	//	Onko tätä varattuna siirtolistalla?
 	if ($kukarow["extranet"] == "" and $trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $kpl_st > 0 and in_array($row["var"], array("J","U","T","P","R"))) {
-		$query = "	SELECT kohde.nimitys kohde, lahde.nimitys lahde, tila, alatila, sum(varattu+jt+kpl) kpl, lasku.tunnus
+		$query = "	SELECT kohde.nimitys kohde, lahde.nimitys lahde, tila, alatila, sum(varattu+jt+kpl) kpl, lasku.tunnus, tilausrivi.yksikko
 					FROM lasku USE INDEX (tila_index)
 					RIGHT JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tuoteno = '{$trow["tuoteno"]}')
 					LEFT JOIN varastopaikat lahde USE INDEX (PRIMARY) ON (lahde.yhtio = lasku.yhtio and lahde.tunnus = lasku.varasto)
@@ -600,7 +600,7 @@
 			//tehdään selväkielinen tila/alatila
 			require "inc/laskutyyppi.inc";
 
-			$varaosakommentti .= t("Siirtolistalla").": {$siirtorow["kpl"]} {".ta($kieli, "Y", $trow["yksikko"])."} {$siirtorow["lahde"]} -> {$siirtorow["kohde"]} ($alatila)<br>";
+			$varaosakommentti .= t("Siirtolistalla").": {$siirtorow["kpl"]} {".t_avainsana("Y", "", "and avainsana.selite='$siirtorow[yksikko]'", "", "", "selite")."} {$siirtorow["lahde"]} -> {$siirtorow["kohde"]} ($alatila)<br>";
 		}
 		
 		// katotaan onko vielä ostotilauksella!
@@ -614,7 +614,7 @@
 		$tulossa_row = mysql_fetch_array($tulossa_result);
 
 		if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '' and $tulossa_row["kpl"] > 0) {
-			$varaosakommentti .= "$tulossa_row[kpl] ".ta($kieli, "Y", $tulossa_row["yksikko"])." ".t("Tulossa")." ".tv1dateconv($tulossa_row['paivamaara']);
+			$varaosakommentti .= "$tulossa_row[kpl] ".t_avainsana("Y", "", "and avainsana.selite='$tulossa_row[yksikko]'", "", "", "selite")." ".t("Tulossa")." ".tv1dateconv($tulossa_row['paivamaara']);
 			if ($tulossa_row["paivamaara"] != $tulossa_row["paivamaara2"]) {
 				$varaosakommentti .= " - ".tv1dateconv($tulossa_row['paivamaara2']);
 			}

@@ -386,7 +386,7 @@
 	if (mysql_num_rows($toimires)==1) {
 		echo "	<td class='back'><form action = '".$palvelin2."matkalasku.php' method='get'>
 					<input type='hidden' name = 'tilausnumero' value='$tunnus'>
-					<input type='hidden' name = 'tee' value='MUOKKAA'>
+					<input type='hidden' name = 'tee' value='ERITTELE'>
 					<input type='hidden' name = 'toim' value='$su'>";
 					
 		if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") !== FALSE) {

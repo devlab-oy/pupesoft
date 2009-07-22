@@ -438,10 +438,7 @@
 	
 	if (in_array("MALLI/MALLITARK", $monivalintalaatikot)) {
 		if (($lisa_haku_osasto != "" and $lisa_haku_try != "") or ($lisa_haku_osasto != "" and in_array("PUPEKAIKKIMUUT", $mul_try))) {
-		
-			echo "<br>".t("Lis‰valinnat").":<br>";
-			echo "* ".t("Mik‰li haluat t‰sment‰‰ hakua, k‰yt‰ lis‰ksi alla olevia ryhmi‰")."<br>";
-
+			
 			if ($lisa_haku_tme != '' or  $lisa_haku_try != '') {
 				// malli ja mallitarkenne dropdownit
 				$query = "	SELECT DISTINCT tuote.malli
@@ -458,6 +455,9 @@
 				$sxresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sxresult) > 0) {
+					
+					echo "<br>".t("Lis‰valinnat").":* ".t("Mik‰li haluat t‰sment‰‰ hakua, k‰yt‰ lis‰ksi alla olevia ryhmi‰")."<br>";
+					
 					echo "<table style='display:inline;'><tr><th>",t("Malli"),"</th></tr>";
 					echo "<tr><td nowrap valign='top' class='back'>";
 					echo "<select name='mul_malli[]' multiple='TRUE' size='7' onchange='submit();'>";
@@ -501,7 +501,7 @@
 							ORDER BY mallitarkenne";
 				$sxresult = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($sxresult) > 0) {
+				if (mysql_num_rows($sxresult) > 0) {				
 					echo "<table style='display:inline;'><tr><th>",t("Mallitarkenne"),"</th></tr>";
 					echo "<tr><td nowrap valign='top' class='back'>";
 					echo "<select name='mul_mallitarkenne[]' multiple='TRUE' size='7' onchange='submit();'>";

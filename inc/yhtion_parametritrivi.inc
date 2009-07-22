@@ -596,6 +596,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tee_valmistus_myyntitilaukselta") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Myyntitilaukselta ei voi luoda valmistusrivejä")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilaukselta voi luoda valmistusrivejä")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "automaattinen_jt_toimitus") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1963,5 +1978,6 @@
 
 		$jatko = 0;
 	}
+
 		
 ?>

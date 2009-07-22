@@ -492,36 +492,38 @@
 		}
 		
 		//	Tarkistetaan vielä voisimmeko kenties ehkä mahdollisesti valmistaa tätä asiakkaalle?
-		$query = "	SELECT *
-					FROM tuoteperhe
-					WHERE yhtio='$kukarow[yhtio]' and isatuoteno = '$row[tuoteno]' and tyyppi='R'
-					LIMIT 1";
-		$pres = mysql_query($query) or pupe_error($query);
+		if($yhtiorow["tee_valmistus_myyntitilaukselta"] != "") {
+			$query = "	SELECT *
+						FROM tuoteperhe
+						WHERE yhtio='$kukarow[yhtio]' and isatuoteno = '$row[tuoteno]' and tyyppi='R'
+						LIMIT 1";
+			$pres = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($pres) == 1 and $tanne == "EIKOSKAAN") {
+			if(mysql_num_rows($pres) == 1) {
 
-			$query = "	SELECT varastopaikat.nimitys varasto, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali,tuotepaikat.hyllytaso
-						FROM tuote
-						JOIN tuotepaikat ON tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno
-						JOIN varastopaikat ON varastopaikat.yhtio=tuote.yhtio and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0')) and
-						concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-						WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.tuoteno = '$row[tuoteno]'";
-			$valmpaikatres = mysql_query($query) or pupe_error($query);
-			while ($valmpaikatrow  = mysql_fetch_array($valmpaikatres)) {
+				$query = "	SELECT varastopaikat.nimitys varasto, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali,tuotepaikat.hyllytaso
+							FROM tuote
+							JOIN tuotepaikat ON tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno
+							JOIN varastopaikat ON varastopaikat.yhtio=tuote.yhtio and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0')) and
+							concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+							WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.tuoteno = '$row[tuoteno]'";
+				$valmpaikatres = mysql_query($query) or pupe_error($query);
+				while ($valmpaikatrow  = mysql_fetch_array($valmpaikatres)) {
 
-				$sel = "";					
-				if($row["hyllyalue"] == $valmpaikatrow["hyllyalue"] and $row["hyllynro"] == $valmpaikatrow["hyllynro"] and $row["hyllyvali"] == $valmpaikatrow["hyllyvali"] and $row["hyllytaso"] == $valmpaikatrow["hyllytaso"] and ($row["var"] == "R" or ($row["tilausrivilinkki"] > 0))) {
-					$sel = "SELECTED";
+					$sel = "";					
+					if($row["hyllyalue"] == $valmpaikatrow["hyllyalue"] and $row["hyllynro"] == $valmpaikatrow["hyllynro"] and $row["hyllyvali"] == $valmpaikatrow["hyllyvali"] and $row["hyllytaso"] == $valmpaikatrow["hyllytaso"] and ($row["var"] == "R" or ($row["tilausrivilinkki"] > 0))) {
+						$sel = "SELECTED";
+					}
+
+					// tallennetaan riville toimittajan tunnus
+					$title = "$valmpaikatrow[varasto] --> ".t("valmista");
+
+					$paikat .= "<option value='¡¡V$valmpaikatrow[hyllyalue]#$valmpaikatrow[hyllynro]#$valmpaikatrow[hyllyvali]#$valmpaikatrow[hyllytaso]' title='$title' $sel>$title</option>";
+					$paikatlask++;
+					$paikatlask++;
 				}
-				
-				// tallennetaan riville toimittajan tunnus
-				$title = "$valmpaikatrow[varasto] --> ".t("valmista");
-				
-				$paikat .= "<option value='¡¡V$valmpaikatrow[hyllyalue]#$valmpaikatrow[hyllynro]#$valmpaikatrow[hyllyvali]#$valmpaikatrow[hyllytaso]' title='$title' $sel>$title</option>";
-				$paikatlask++;
-				$paikatlask++;
 			}
-		}			
+		}
 		
 		if ($paikat != "" and $paikatlask > 1 and $row["hyllyalue"] != "!!M") {
 			$paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
@@ -582,7 +584,7 @@
 	
 	//	Onko tätä varattuna siirtolistalla?
 	if ($kukarow["extranet"] == "" and $trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $kpl_st > 0 and in_array($row["var"], array("J","U","T","P","R"))) {
-		$query = "	SELECT kohde.nimitys kohde, lahde.nimitys lahde, tila, alatila, sum(varattu+jt+kpl) kpl, lasku.tunnus, tilausrivi.yksikko
+		$query = "	SELECT kohde.nimitys kohde, lahde.nimitys lahde, tila, alatila, sum(varattu+jt+kpl) kpl, lasku.tunnus
 					FROM lasku USE INDEX (tila_index)
 					RIGHT JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tuoteno = '{$trow["tuoteno"]}')
 					LEFT JOIN varastopaikat lahde USE INDEX (PRIMARY) ON (lahde.yhtio = lasku.yhtio and lahde.tunnus = lasku.varasto)
@@ -598,7 +600,7 @@
 			//tehdään selväkielinen tila/alatila
 			require "inc/laskutyyppi.inc";
 
-			$varaosakommentti .= t("Siirtolistalla").": {$siirtorow["kpl"]} {".t_avainsana("Y", "", "and avainsana.selite='$siirtorow[yksikko]'", "", "", "selite")."} {$siirtorow["lahde"]} -> {$siirtorow["kohde"]} ($alatila)<br>";
+			$varaosakommentti .= t("Siirtolistalla").": {$siirtorow["kpl"]} {".ta($kieli, "Y", $trow["yksikko"])."} {$siirtorow["lahde"]} -> {$siirtorow["kohde"]} ($alatila)<br>";
 		}
 		
 		// katotaan onko vielä ostotilauksella!
@@ -612,7 +614,7 @@
 		$tulossa_row = mysql_fetch_array($tulossa_result);
 
 		if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '' and $tulossa_row["kpl"] > 0) {
-			$varaosakommentti .= "$tulossa_row[kpl] ".t_avainsana("Y", "", "and avainsana.selite='$tulossa_row[yksikko]'", "", "", "selite")." ".t("Tulossa")." ".tv1dateconv($tulossa_row['paivamaara']);
+			$varaosakommentti .= "$tulossa_row[kpl] ".ta($kieli, "Y", $tulossa_row["yksikko"])." ".t("Tulossa")." ".tv1dateconv($tulossa_row['paivamaara']);
 			if ($tulossa_row["paivamaara"] != $tulossa_row["paivamaara2"]) {
 				$varaosakommentti .= " - ".tv1dateconv($tulossa_row['paivamaara2']);
 			}

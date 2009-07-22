@@ -191,22 +191,17 @@ if ($tee == "") {
 		<select NAME='ktapahtuman_luonne'>";
 	echo "<option value=''>".t("Valitse")."</option>";
 
-	$query = "	SELECT avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','KT_')."
-				WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KT'
-				ORDER BY avainsana.jarjestys, avainsana.selite";
-	$result = mysql_query($query) or pupe_error($query);
-
+	$result = t_avainsana("KT");
+	
 	while($row = mysql_fetch_array($result)){
 		$sel = '';
-		if($row[0] == $laskurow["kauppatapahtuman_luonne"]) {
+		if($row["selite"] == $laskurow["kauppatapahtuman_luonne"]) {
 			$sel = 'selected';
 		}
-		elseif($laskurow["kauppatapahtuman_luonne"] == "0" and $row[0] == $toimittaja["kauppatapahtuman_luonne"]) {
+		elseif($laskurow["kauppatapahtuman_luonne"] == "0" and $row["selite"] == $toimittaja["kauppatapahtuman_luonne"]) {
 			$sel = "selected";
 		}
-		echo "<option value='$row[0]' $sel>$row[1]</option>";
+		echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 	}
 	echo "</select></td>";
 	echo "</tr>";
@@ -215,22 +210,17 @@ if ($tee == "") {
 				<select NAME='kuljetusmuoto'>";
 	echo "<option value=''>".t("Valitse")."</option>";
 
-	$query = "	SELECT avainsana.selite, ".avain('select')."
-				FROM avainsana
-				".avain('join','KM_')."
-				WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KM'
-				ORDER BY avainsana.jarjestys, avainsana.selite";
-	$result = mysql_query($query) or pupe_error($query);
+	$result = t_avainsana("KM");
 
 	while($row = mysql_fetch_array($result)){
 		$sel = '';
-		if($row[0] == $laskurow["kuljetusmuoto"]) {
+		if($row["selite"] == $laskurow["kuljetusmuoto"]) {
 			$sel = 'selected';
 		}
-		elseif($laskurow["kuljetusmuoto"] == "0" and $row[0] == $toimittaja["kuljetusmuoto"]) {
+		elseif($laskurow["kuljetusmuoto"] == "0" and $row["selite"] == $toimittaja["kuljetusmuoto"]) {
 			$sel = "selected";
 		}
-		echo "<option value='$row[0]' $sel>$row[1]</option>";
+		echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 	}
 	echo "</select></td>";
 	echo "</tr>";

@@ -2058,23 +2058,19 @@
 				if ($yhtiorow["lahete_tyyppi_tulostus"] != '') {
 					echo " ".t("Lähetetyyppi").": <select name='sellahetetyyppi'>";
 
-					$query = "	SELECT avainsana.selite, ".avain('select')."
-								FROM avainsana
-								".avain('join','LAHETETYYPPI_')."
-								WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'LAHETETYYPPI'
-								ORDER BY avainsana.jarjestys, avainsana.selite";
-					$vresult = mysql_query($query) or pupe_error($query);
-
-					$query2 = 	"SELECT lahetetyyppi FROM lasku 
+					$query2 = "	SELECT lahetetyyppi 
+								FROM lasku 
 								JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$id'";
 					$vresult2 = mysql_query($query2) or pupe_error($query2);
 					$row2 = mysql_fetch_array($vresult2);
+					
+					$vresult = t_avainsana("LAHETETYYPPI");
 
 					while($row = mysql_fetch_array($vresult)) {
 						$sel = "";
-						if ($row[0] == $row2[0]) $sel = 'selected';
-						echo "<option value='$row[0]' $sel>$row[1]</option>";
+						if ($row["selite"] == $row2["lahetetyyppi"]) $sel = 'selected';
+						echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 					}
 
 					echo "</select>";

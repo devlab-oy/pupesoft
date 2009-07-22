@@ -26,7 +26,7 @@
 		}
 		else {
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tapahtuma WRITE, tiliointi WRITE, tilausrivi WRITE, tilausrivi as tilausrivi2 WRITE, sanakirja WRITE, tilausrivi as tilausrivi_osto READ, tuote READ, sarjanumeroseuranta WRITE, tuotepaikat WRITE, tilausrivin_lisatiedot WRITE";
+			$query = "LOCK TABLES lasku WRITE, tapahtuma WRITE, tiliointi WRITE, tilausrivi WRITE, tilausrivi as tilausrivi2 WRITE, sanakirja WRITE, tilausrivi as tilausrivi_osto READ, tuote READ, sarjanumeroseuranta WRITE, tuotepaikat WRITE, tilausrivin_lisatiedot WRITE, avainsana as avainsana_kieli READ";
 			$locre = mysql_query($query) or pupe_error($query);
 			
 			$query = "	SELECT *

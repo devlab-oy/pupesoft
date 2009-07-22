@@ -496,7 +496,7 @@ if (!function_exists('tulosta_lasku')) {
 					$rivi="lapsi";
 				}
 				$pdf->write($h, 1, $offset, $s[0], $row["tuoteno"]." ".$row["nimitys"], $style_rivi, "L", "");
-				$pdf->write($h, 1, $s[0], $s[1], round($row["kpl"], 2)." ".ta($kieli, "Y", $row["yksikko"]), $style_rivi, "R", "");
+				$pdf->write($h, 1, $s[0], $s[1], round($row["kpl"], 2)." ".t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite"), $style_rivi, "R", "");
 				
 				if($rivi=="isa") {
 					if($laskurow["rivihintoja_ei_nayteta"] == "") {

@@ -1265,10 +1265,12 @@ if ($tila == '') {
 		// jos riviä ei ole vielä viety varastoon niin riviä voi muokata
 		if ($rivirow["varastossa_kpl"] == 0) {
 			list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($rivirow["tuoteno"]);
+			$pop_yks = t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite");
+			
 			echo "<div id='tuoteno_$rivirow[rivitunnus]' class='popup' style='width: 400px;'>";
 			echo "<ul>";
-			echo "<li>".t("Saldo").": $saldo ".ta($kieli, "Y", $rivirow["tilyksikko"])."</li><li>".t("Hyllyssä").": $hyllyssa ".ta($kieli, "Y", $rivirow["tilyksikko"])."</li><li>".t("Myytävissä").": $myytavissa ".ta($kieli, "Y", $rivirow["tilyksikko"])."</li>";
-			echo "<li>".t("Tilattu").": $rivirow[tilattu] ".ta($kieli, "Y", $rivirow["tilyksikko"])."</li><li>".t("Varattu").": $rivirow[varattu] ".ta($kieli, "Y", $rivirow["tilyksikko"])."</li>";
+			echo "<li>".t("Saldo").": $saldo $pop_yks</li><li>".t("Hyllyssä").": $hyllyssa $pop_yks</li><li>".t("Myytävissä").": $myytavissa $pop_yks</li>";
+			echo "<li>".t("Tilattu").": $rivirow[tilattu] $pop_yks</li><li>".t("Varattu").": $rivirow[varattu] $pop_yks</li>";
 			echo "<li>".t("Keskihinta").": $rivirow[keskihinta] $rivirow[valuutta]</li><li>".t("Ostohinta").": $rivirow[ostohinta] $rivirow[valuutta]</li>";
 			echo "</ul>";
 			echo "</div>";
@@ -1341,7 +1343,7 @@ if ($tila == '') {
 
 		// jos riviä ei ole vielä viety varastoon, voidaan muuttaa kappaleita
 		if ($rivirow["varattu"] != 0) {
-			echo "<$td $class valign='top' align='right'><input size='5' type='text' name='rivi_kpl[$rivirow[rivitunnus]]' value='". (float) $rivirow["siskpl"]."' style='text-align:right'> ".ta($kieli, "Y", $rivirow["tilyksikko"])."<br>". (float) $rivirow["ulkkpl"]." ".ta($kieli, "Y", $rivirow["toimyksikko"])."</$td>";
+			echo "<$td $class valign='top' align='right'><input size='5' type='text' name='rivi_kpl[$rivirow[rivitunnus]]' value='". (float) $rivirow["siskpl"]."' style='text-align:right'> ".t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite")."<br>". (float) $rivirow["ulkkpl"]." ".t_avainsana("Y", "", "and avainsana.selite='$rivirow[toimyksikko]'", "", "", "selite")."</$td>";
 		}
 		else {
 			echo "<$td $class valign='top' align='right'>". (float) $rivirow["siskpl"]."<br>". (float) $rivirow["ulkkpl"]."</$td>";

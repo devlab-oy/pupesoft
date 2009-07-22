@@ -471,7 +471,7 @@
 		}
 
 
-		$pdf->draw_text(770, $kala, ta($kieli, "Y", $row["yksikko"]), 			$firstpage, $p);
+		$pdf->draw_text(770, $kala, t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite"), 			$firstpage, $p);
 		$apukala = $kala;
 
 		$lisaa = 0;

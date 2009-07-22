@@ -48,7 +48,7 @@
 
 			$sisalto1 .= sprintf ('%-11.9s',substr($row["tuoteno"],0,9));
 			$sisalto2 .= sprintf ('%-11.9s',substr($row["tuoteno"],9,9));
-			$sisalto3 .= sprintf ('%-11.9s',$row["tarrakpl"]." ".ta($kieli, "Y", $row["yksikko"]));
+			$sisalto3 .= sprintf ('%-11.9s',$row["tarrakpl"]." ".t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite"));
 			$laskuri++;
 		}
 	}

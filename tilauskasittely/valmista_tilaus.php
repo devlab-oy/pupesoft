@@ -352,7 +352,7 @@
 									
 										//katotaan kanssa, että perheenjäsenet löytyy kannasta ja niitä on riittävästi
 										if ($vakisinhyvaksy == '' and $saldot_valm[$perherow["tuoteno"]] < $varataankpl) {
-											echo "<font class='error'>Saldo ".$saldot[$perherow["tuoteno"]]." ei riitä! Tuotetta $perherow[tuoteno] kulutetaan $varataankpl ".ta($kieli, "Y", $perherow["yksikko"]).".</font><br>";
+											echo "<font class='error'>Saldo ".$saldot[$perherow["tuoteno"]]." ei riitä! Tuotetta $perherow[tuoteno] kulutetaan $varataankpl ".t_avainsana("Y", $kieli, "and avainsana.selite='$perherow[yksikko]'", "", "", "selite").".</font><br>";
 											$virheitaoli 	= "JOO";
 											$tee 			= "VALMISTA";
 										}

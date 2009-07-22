@@ -1225,7 +1225,7 @@
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 
 										if ($kukarow["extranet"] == "") {
-											echo "<td valign='top' $class>$kokonaismyytavissa ".ta($kieli, "Y", $jtrow["yksikko"])."<br><font style='color:green;'>".t("Riitt‰‰ kaikille")."!</font><br>";
+											echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")."<br><font style='color:green;'>".t("Riitt‰‰ kaikille")."!</font><br>";
 
 											if (!isset($toimpva) and $toimvko > 0) {
 												echo t("Viikko")." $toimvko";
@@ -1300,7 +1300,7 @@
 										$jt_rivilaskuri++;
 									}
 									elseif ($automaaginen == "") {
-										echo "<td valign='top' $class>$kokonaismyytavissa ".ta($kieli, "Y", $jtrow["yksikko"])."<br><font style='color:yellowgreen;'>".t("Ei riit‰ kaikille")."!</font><br>";
+										echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")."<br><font style='color:yellowgreen;'>".t("Ei riit‰ kaikille")."!</font><br>";
 
 										if (!isset($toimpva) and $toimvko > 0) {
 											echo t("Viikko")." $toimvko";
@@ -1370,7 +1370,7 @@
 								// Ei riit‰ koko riville
 								elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa > 0 and $perheok==0) {
 									if ($automaaginen == '') {
-										echo "<td valign='top' $class>$kokonaismyytavissa ".ta($kieli, "Y", $jtrow["yksikko"])."<br><font style='color:orange;'>".t("Ei riit‰ koko riville")."!</font><br>";
+										echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")."<br><font style='color:orange;'>".t("Ei riit‰ koko riville")."!</font><br>";
 
 										if (!isset($toimpva) and $toimvko > 0) {
 											echo t("Viikko")." $toimvko";
@@ -1408,7 +1408,7 @@
 								// Rivi‰ ei voida toimittaa
 								else {
 									if ($automaaginen == '') {
-										echo "<td valign='top' $class>$kokonaismyytavissa ".ta($kieli, "Y", $jtrow["yksikko"])."<br><font style='color:red;'>".t("Rivi‰ ei voida toimittaa")."!</font><br>";
+										echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$jtrow[yksikko]'", "", "", "selite")."<br><font style='color:red;'>".t("Rivi‰ ei voida toimittaa")."!</font><br>";
 
 										if (!isset($toimpva) and $toimvko > 0) {
 											echo t("Viikko")." $toimvko";
@@ -1549,7 +1549,7 @@
 									echo $hinta."<br>$perherow[ale]%</td>";
 									
 									if ($oikeurow['paivitys'] == '1') {
-										echo "<td valign='top' $class>$kokonaismyytavissa ".ta($kieli, "Y", $perherow["yksikko"])."<br></font>";
+										echo "<td valign='top' $class>$kokonaismyytavissa ".t_avainsana("Y", "", "and avainsana.selite='$perherow[yksikko]'", "", "", "selite")."<br></font>";
 
 										if (!isset($toimpva) and $toimvko > 0) {
 											echo t("Viikko")." $toimvko";
@@ -1803,7 +1803,7 @@
 		echo "<th>".t("Tuoteosasto")."</th>";
 
 		// tehd‰‰n avainsana query
-		$result = avainsana("OSASTO", $kukarow['kieli']);
+		$result = t_avainsana("OSASTO");
 
 		echo "<td><select name='tuoteosasto'>";
 		echo "<option value=''>".t("Tuoteosasto")."</option>";
@@ -1821,7 +1821,7 @@
 		echo "<th>".t("Tuoteryhm‰")."</th>";
 
 		// tehd‰‰n avainsana query
-		$result = avainsana("TRY", $kukarow['kieli']);
+		$result = t_avainsana("TRY");
 
 		echo "<td><select name='tuoteryhma'>";
 		echo "<option value=''>".t("Tuoteryhm‰")."</option>";

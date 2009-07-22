@@ -19,7 +19,7 @@
 		if (mysql_num_rows($tila_result) == 1) {
 			
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, rahtikirjat WRITE, tuote WRITE, sarjanumeroseuranta WRITE";
+			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, rahtikirjat WRITE, tuote WRITE, sarjanumeroseuranta WRITE, avainsana as avainsana_kieli READ";
 			$locre = mysql_query($query) or pupe_error($query);
 			
 			// tilaus kesken

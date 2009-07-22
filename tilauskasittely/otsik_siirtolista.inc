@@ -230,29 +230,19 @@
 		}
 
 		//	Olisiko erikseen varastoluokkia?
-		$query = "	SELECT selite, selitetark
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'VARASTOLUOKKA'
-					ORDER BY jarjestys, selite";
-		$tresult = mysql_query($query) or pupe_error($query);
+		$tresult = t_avainsana("VARASTOLUOKKA");
+		
 		if(mysql_num_rows($tresult) == 0) {
-			$query = "	SELECT avainsana.selite, ".avain('select')."
-						FROM avainsana
-						".avain('join','ASLUOKKA_')."
-						WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'ASIAKASLUOKKA'
-						ORDER BY avainsana.jarjestys, avainsana.selite";
-			$tresult = mysql_query($query) or pupe_error($query);
+			$tresult = t_avainsana("ASIAKASLUOKKA");
 		}
 
 		echo "<select name='luokka'><option value=''>".t("Oletus")."</option>";
 
 		while($row = mysql_fetch_array($tresult)) {
 			$sel = "";
+			if ($row["selite"] == $srow["luokka"]) $sel = 'selected';
 
-			if ($row[0] == $srow["luokka"]) $sel = 'selected';
-
-
-			echo "<option value='$row[0]' $sel>$row[0] - $row[1]</option>";
+			echo "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark]</option>";
 		}
 		echo "</select>";
 

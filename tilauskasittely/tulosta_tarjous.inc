@@ -474,17 +474,8 @@ if (!function_exists('rivi_tarjous')) {
 		
 		$rivinkorkeus = 15;
 		
-		//Kieliversioitu tuotteen nimitys
-		if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
-			$laji = 'nimitys_'.strtolower($kieli);
-			$query = "SELECT selite FROM tuotteen_avainsanat WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$row[tuoteno]' LIMIT 1";
-			$nimresult = mysql_query($query) or pupe_error($query);
-			
-			if (mysql_num_rows($nimresult)>0) {
-				$nimrow	= mysql_fetch_array($nimresult);
-				$row['nimitys'] = $nimrow['selite'];
-			}
-		}
+		//K‰‰nnet‰‰n nimitys
+		$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
 		
 		// Trimmataan
 		$row["kommentti"] = trim($row["kommentti"]);
@@ -645,7 +636,7 @@ if (!function_exists('rivi_tarjous')) {
 		}
 		
 		$row["tilkpl"] 	= ($row["tilkpl"]*1);
-		$row["varattu"] = ($row["kpl"]+$row["varattu"]+$row["jt"])." ".ta($kieli, "Y", $row["yksikko"]);
+		$row["varattu"] = ($row["kpl"]+$row["varattu"]+$row["jt"])." ".t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 		$row["kpl"] 	= ($row["kpl"]*1);
 		$kpl_rivilla 	= ($row["kpl"]+$row["varattu"]+$row["jt"]);
 		

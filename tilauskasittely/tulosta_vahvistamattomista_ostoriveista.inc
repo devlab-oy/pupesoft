@@ -274,8 +274,11 @@
 						
 			$pdf->draw_text(295, $kala, tv1dateconv($row["toimaika"]),												$thispage, $norm);
 			
-			$oikpos = $pdf->strlen((float) $row["tilkpl"]."/".(float) $row["ulkkpl"]." ".ta($kieli, "Y", $row["yksikko"])."/".ta($kieli, "Y", $rarrow["toim_yksikko"]), $norm);					
-			$pdf->draw_text(415-$oikpos, $kala, (float) $row["tilkpl"]."/".(float) $row["ulkkpl"]." ".ta($kieli, "Y", $row["yksikko"])."/".ta($kieli, "Y", $rarrow["toim_yksikko"]), 	$thispage, $norm);
+			$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+			$toyks = t_avainsana("Y", $kieli, "and avainsana.selite='$rarrow[toim_yksikko]'", "", "", "selite");
+			
+			$oikpos = $pdf->strlen((float) $row["tilkpl"]."/".(float) $row["ulkkpl"]." $omyks/$toyks", $norm);					
+			$pdf->draw_text(415-$oikpos, $kala, (float) $row["tilkpl"]."/".(float) $row["ulkkpl"]." $omyks/$toyks", 	$thispage, $norm);
 			
 			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), $norm);					
 			$pdf->draw_text(480-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), 		$thispage, $norm);

@@ -230,9 +230,9 @@
 
 			echo "<tr><td>".t("Kuljetus").": </td><td valign='middle'>";
 
-			$query = "select selite from avainsana where yhtio='$kukarow[yhtio]' and laji='TOIMITUSTAPA_OS'";
-			$toimtapares  = mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($toimtapares) > 0) {
+			$toimtapares = t_avainsana("TOIMITUSTAPA_OS");
+			
+			if (mysql_num_rows($toimtapares) > 0) {
 				echo "<select name = 'kuljetus'>";
 				while($toimtaparow  = mysql_fetch_array($toimtapares)) {
 					echo "<option value='$toimtaparow[selite]'>$toimtaparow[selite]</option>";

@@ -191,7 +191,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 		// jos meillä on lasku menossa ulkomaille
 		if ($maa != "" and $maa != $yhtiorow["maa"]) {
 			// tutkitaan ollaanko siellä alv-rekisteröity
-			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$maa' and vat_numero != ''";
+			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$maa' and vat_numero != ''";
 			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 			// ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista
@@ -200,7 +200,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				$alhiro  = mysql_fetch_array($alhire);
 
 				// haetaan maan oletusalvi
-				$query = "select selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark!='' and selitetark_2='$maa' limit 1";
+				$query = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark!='' and selitetark_2='$maa' limit 1";
 				$alhire = mysql_query($query) or pupe_error($query);
 
 				// jos ei löydy niin mennään erroriin

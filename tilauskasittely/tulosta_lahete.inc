@@ -769,18 +769,9 @@ if (!function_exists('rivi')) {
 			$pdf->draw_text(45,  $kala, t("Jälkitoimitukseen", $kieli).":",		$thispage, $norm);
 			$kala = $kala-$rivinkorkeus;
 		}
-
-		//Kieliversioitu tuotteen nimitys
-		if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
-			$laji = 'nimitys_'.strtolower($kieli);
-			$query = "SELECT selite FROM tuotteen_avainsanat WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$row[tuoteno]' LIMIT 1";
-			$nimresult = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($nimresult)>0) {
-				$nimrow	= mysql_fetch_array($nimresult);
-				$row['nimitys'] = $nimrow['selite'];
-			}
-		}
+		
+		//Käännetään nimitys
+		$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
 
 		// Trimmataan
 		$row["kommentti"] = trim($row["kommentti"]);
@@ -965,7 +956,7 @@ if (!function_exists('rivi')) {
 			$kpl_rivilla 	= ($row["kpl"]+$row["varattu"]+$row["jt"]);
 			
 			if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
-				$row['varattu'] = ($row['varattu']+$row['kpl'])." ".ta($kieli, "Y", $row["yksikko"]);
+				$row['varattu'] = ($row['varattu']+$row['kpl'])." ".t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 				$row['varattu_viivakoodi'] = $kpl_rivilla;
 			}
 			else {
@@ -1111,7 +1102,7 @@ if (!function_exists('rivi')) {
 
 if (!function_exists('rivi_hinta_ale')) {
 	function rivi_hinta_ale($thispage) {
-		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $yhtiorow, $extranet_tilausvahvistus;
+		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $yhtiorow, $extranet_tilausvahvistus, $kieli;
 
 		if (trim($row["perhe_kommentti"]) != '') {
 			$pohja = $pdf->draw_paragraph($kala+$norm["height"], 45, 60, 480, $row["perhe_kommentti"],	$thispage, $norm);
@@ -1121,8 +1112,10 @@ if (!function_exists('rivi_hinta_ale')) {
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],							$thispage, $pieni);
 		$pdf->draw_text(45,  $kala, $row["tuoteno"],										$thispage, $norm);
 
-		$oikpos = $pdf->strlen($row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), $norm);
-		$pdf->draw_text(365-$oikpos, $kala, $row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), $thispage, $norm);
+		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+		
+		$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
+		$pdf->draw_text(365-$oikpos, $kala, $row["tilkpl"]." ".$omyks, $thispage, $norm);
 
 		$oikpos = $pdf->strlen($row["varattu"], $norm);
 		$pdf->draw_text(415-$oikpos, $kala, $row["varattu"], 								$thispage, $norm);
@@ -1160,7 +1153,7 @@ if (!function_exists('rivi_hinta_ale')) {
 
 if (!function_exists('rivi_brutto')) {
 	function rivi_brutto($thispage) {
-		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $yhtiorow;
+		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $yhtiorow, $kieli;
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],							$thispage, $pieni);
 
@@ -1170,9 +1163,11 @@ if (!function_exists('rivi_brutto')) {
 		}
 
 		$pdf->draw_text(45,  $kala, $row["tuoteno"],										$thispage, $norm);
-
-		$oikpos = $pdf->strlen($row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), $norm);
-		$pdf->draw_text(465-$oikpos, $kala, $row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), $thispage, $norm);
+		
+		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+		
+		$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
+		$pdf->draw_text(465-$oikpos, $kala, $row["tilkpl"]." ".$omyks, $thispage, $norm);
 
 		$oikpos = $pdf->strlen($row["varattu"], $norm);
 		$pdf->draw_text(515-$oikpos, $kala, $row["varattu"], 								$thispage, $norm);
@@ -1196,7 +1191,7 @@ if (!function_exists('rivi_brutto')) {
 
 if (!function_exists('rivi_ei_ale_ei_hinta')) {
 	function rivi_ei_ale_ei_hinta($thispage) {
-		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus;
+		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $kieli;
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],							$thispage, $pieni);
 
@@ -1206,10 +1201,11 @@ if (!function_exists('rivi_ei_ale_ei_hinta')) {
 		}
 
 		$pdf->draw_text(45,  $kala, $row["tuoteno"],										$thispage, $norm);
-
-
-		$oikpos = $pdf->strlen($row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), $norm);
-		$pdf->draw_text(525-$oikpos, $kala, $row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), $thispage, $norm);
+		
+		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+		
+		$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
+		$pdf->draw_text(525-$oikpos, $kala, $row["tilkpl"]." ".$omyks, $thispage, $norm);
 
 		$oikpos = $pdf->strlen($row["varattu"], $norm);
 		$pdf->draw_text(575-$oikpos, $kala, $row["varattu"], 								$thispage, $norm);
@@ -1230,7 +1226,7 @@ if (!function_exists('rivi_ei_ale_ei_hinta')) {
 
 if (!function_exists('rivi_eialeja')) {
 	function rivi_eialeja($thispage) {
-		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $yhtiorow, $extranet_tilausvahvistus;
+		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $yhtiorow, $extranet_tilausvahvistus, $kieli;
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],							$thispage, $pieni);
 
@@ -1240,9 +1236,11 @@ if (!function_exists('rivi_eialeja')) {
 		}
 
 		$pdf->draw_text(45,  $kala, $row["tuoteno"],										$thispage, $norm);
-
-		$oikpos = $pdf->strlen($row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), $norm);
-		$pdf->draw_text(365-$oikpos, $kala, $row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), $thispage, $norm);
+		
+		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+		
+		$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
+		$pdf->draw_text(365-$oikpos, $kala, $row["tilkpl"]." ".$omyks, $thispage, $norm);
 
 		$oikpos = $pdf->strlen($row["varattu"], $norm);
 		$pdf->draw_text(415-$oikpos, $kala, $row["varattu"], 								$thispage, $norm);
@@ -1274,7 +1272,7 @@ if (!function_exists('rivi_eialeja')) {
 
 if (!function_exists('rivi_viivakoodi')) {
 	function rivi_viivakoodi($thispage) {
-		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $kukarow;
+		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $kukarow, $kieli;
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],								$thispage, $pieni);
 
@@ -1285,8 +1283,10 @@ if (!function_exists('rivi_viivakoodi')) {
 
 		$pdf->draw_text(45,  $kala, $row["tuoteno"],											$thispage, $norm);
 
-		$oikpos = $pdf->strlen($row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), $norm);
-		$pdf->draw_text(525-$oikpos, $kala, $row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), 	$thispage, $norm);
+		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+
+		$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
+		$pdf->draw_text(525-$oikpos, $kala, $row["tilkpl"]." ".$omyks, 	$thispage, $norm);
 
 		$oikpos = $pdf->strlen($row["varattu"], $norm);
 		$pdf->draw_text(575-$oikpos, $kala, $row["varattu"], 									$thispage, $norm);
@@ -1333,7 +1333,7 @@ if (!function_exists('rivi_viivakoodi')) {
 
 if (!function_exists('rivi_asiakviivakoodi')) {
 	function rivi_asiakviivakoodi($thispage) {
-		global $pdf, $row, $laskurow, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $kukarow;
+		global $pdf, $row, $laskurow, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $kukarow, $kieli;
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],								$thispage, $pieni);
 
@@ -1343,9 +1343,11 @@ if (!function_exists('rivi_asiakviivakoodi')) {
 		}
 
 		$pdf->draw_text(45,  $kala, $row["tuoteno"],											$thispage, $norm);
+		
+		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
-		$oikpos = $pdf->strlen($row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), $norm);
-		$pdf->draw_text(525-$oikpos, $kala, $row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), 	$thispage, $norm);
+		$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
+		$pdf->draw_text(525-$oikpos, $kala, $row["tilkpl"]." ".$omyks, 	$thispage, $norm);
 
 		$oikpos = $pdf->strlen($row["varattu"], $norm);
 		$pdf->draw_text(575-$oikpos, $kala, $row["varattu"], 									$thispage, $norm);
@@ -1406,7 +1408,7 @@ if (!function_exists('rivi_asiakviivakoodi')) {
 
 if (!function_exists('rivi_viivakoodi_ean13')) {
 	function rivi_viivakoodi_ean13($thispage) {
-		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $kukarow;
+		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $kukarow, $kieli;
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],								$thispage, $pieni);
 
@@ -1423,8 +1425,10 @@ if (!function_exists('rivi_viivakoodi_ean13')) {
 		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $as_hinta), $norm);
 		$pdf->draw_text(475-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $as_hinta), 			$thispage, $norm);
 
-		$oikpos = $pdf->strlen($row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), $norm);
-		$pdf->draw_text(525-$oikpos, $kala, $row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), 	$thispage, $norm);
+		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+		
+		$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $norm);
+		$pdf->draw_text(525-$oikpos, $kala, $row["tilkpl"]." ".$omyks, 	$thispage, $norm);
 
 		$oikpos = $pdf->strlen($row["varattu"], $norm);
 		$pdf->draw_text(575-$oikpos, $kala, $row["varattu"], 									$thispage, $norm);

@@ -223,7 +223,7 @@
 			<td colspan='3'><input type='text' name='tuotealku' value='$tuotealku' size='15'> - <input type='text' name='tuoteloppu' value='$tuoteloppu' size='15'></td></tr>";
 
 	// tehd‰‰n avainsana query
-	$sresult = avainsana("OSASTO", $kukarow['kieli']);
+	$sresult = t_avainsana("OSASTO");
 	
 	echo "<tr><th>".t("Osasto (Ei pakollinen)")."</th><td colspan='3'>";
 	
@@ -241,7 +241,7 @@
 	echo "</td></tr>";
 	
 	// tehd‰‰n avainsana query
-	$sresult = avainsana("TRY", $kukarow['kieli']);
+	$sresult = t_avainsana("TRY");
 	
 	echo "<tr><th>".t("Tuoteryhm‰ (Ei pakollinen)")."</th><td colspan='3'>";
 	

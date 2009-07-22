@@ -609,8 +609,10 @@ if (!function_exists('rivi_valmistus')) {
 		$pdf->draw_text(125, $kala, $row["tuoteno"],											$thispage, $pb);
 		$pdf->draw_text(405, $kala, $lapskpl, 													$thispage, $pb);
 					
-		$oikpos = $pdf->strlen($row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]), $pb);
-		$pdf->draw_text(515-$oikpos, $kala, $row["tilkpl"]." ".ta($kieli, "Y", $row["yksikko"]),$thispage, $pb);
+		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+		
+		$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $pb);
+		$pdf->draw_text(515-$oikpos, $kala, $row["tilkpl"]." ".$omyks, $thispage, $pb);
 		
 		if ($row["keratty"] != '') {
 			$oikpos = $pdf->strlen($row['varattu'], $pb);

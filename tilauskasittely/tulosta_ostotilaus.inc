@@ -284,7 +284,7 @@
 							}
 							
 							$pdf->write($h, 1, 0, $s[0], $row["toim_tuoteno"]." ".$row["toim_nimitys"], "norm", "L", "");
-							$pdf->write($h, 1, $s[0], $s[1], $row["varattu"]." ".ta($kieli, "Y", $row["yksikko"]), "norm", "R", "");
+							$pdf->write($h, 1, $s[0], $s[1], $row["varattu"]." ".t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite"), "norm", "R", "");
 							$pdf->write($h, 1, $s[1], $s[2], money_format('%!i',$row["hinta"]), "norm", "R", "");
 							$pdf->write($h, 1, $s[2], 0, money_format('%!i',$row["rivihinta"]), "norm", "R", "");
 							$h-=$pdf->ln();
@@ -815,9 +815,11 @@
 					if($rarrow["toim_yksikko"]!= "") {
 						$row["yksikko"] = $rarrow["toim_yksikko"];
 					}
-
-					$oikpos = $pdf->strlen(($row["varattu"]*1)." ".ta($kieli, "Y", $row["yksikko"]), $norm);
-					$pdf->draw_text(415-$oikpos, $kala, ($row["varattu"]*1)." ".ta($kieli, "Y", $row["yksikko"]), 		$thispage, $norm);
+					
+					$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
+					
+					$oikpos = $pdf->strlen(($row["varattu"]*1)." ".$omyks, $norm);
+					$pdf->draw_text(415-$oikpos, $kala, ($row["varattu"]*1)." ".$omyks, $thispage, $norm);
 
 					$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), $norm);
 					$pdf->draw_text(475-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), 					$thispage, $norm);
@@ -831,25 +833,9 @@
 					$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["rivihinta"]), 				$thispage, $norm);
 
 		            if ($nimitykset != "") {
-
-						// jos meill‰ ei ole toimittajan nimityst‰ ja toimittaja kieli on eri kuin meill‰, yritet‰‰n etsi‰ oikeankieliset nimitykset
-		                if (strtoupper($kieli) != strtoupper($yhtiorow["kieli"]) and $row["toim_nimitys"] == "") {
-
-		                    $nimkieli = "nimitys_$kieli";
-
-		                    $query = "	SELECT substring(selite,1,80) selite
-										FROM tuotteen_avainsanat
-										WHERE yhtio = '$kukarow[yhtio]'
-										and laji 	= '$nimkieli'
-										and tuoteno = '$row[tuoteno]'
-										limit 1";
-		                    $resultnim = mysql_query($query) or pupe_error($query);
-
-		                    if (mysql_num_rows($resultnim) == 1) {
-		                        $rownim = mysql_fetch_array($resultnim);
-		                        $row["nimitys"] = $rownim["selite"];
-		                    }
-		                }
+		
+		 				//K‰‰nnet‰‰n nimitys
+						$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
 
 						// jos meill‰ on toimittajan nimitys syˆtetty k‰ytet‰‰n sit‰ aina
 						if ($row["toim_nimitys"] != "") $row["nimitys"] = $row["toim_nimitys"];

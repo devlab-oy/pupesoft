@@ -356,7 +356,7 @@
 						}
 
 						$pdf->write($h, 1, $offset, $s[0], $row["tuoteno"]." ".$row["nimitys"], $style_rivi, "L", "");
-						$pdf->write($h, 1, $offset, $s[1], $row["kpl"]." ".ta($kieli, "Y", $row["yksikko"]), $style_rivi, "R", "");
+						$pdf->write($h, 1, $offset, $s[1], $row["kpl"]." ".t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite"), $style_rivi, "R", "");
 
 						if($rivi=="isa") {
 							if($laskurow["rivihintoja_ei_nayteta"] == "") {
@@ -457,6 +457,7 @@
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]' and laji='TV_LISATIETO' and kieli = '$kieli'";
 				$result = mysql_query($query) or pupe_error($query);
+				
 				if(mysql_num_rows($result) > 0) {
 					$lrow = mysql_fetch_array($result);
 

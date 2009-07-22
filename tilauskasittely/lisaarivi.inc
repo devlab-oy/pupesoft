@@ -909,7 +909,7 @@
 								}
 
 								if ($kutsuja == "EDITILAUS" or $lisaarivi_debug == 1) {
-									$edi_ulos .= " --> ".t("Myyd‰‰n")." $myy_tuoteno[$indeksi] ".t("paikalta")." $myy_hyllyalue[$indeksi]-$myy_hyllynro[$indeksi]-$myy_hyllyvali[$indeksi]-$myy_hyllytaso[$indeksi]: $myy_kpl[$indeksi] ".ta($kieli, "Y", $trow["yksikko"])." ".t("Ale")." $lis_ale% ".t("Hinta")." $lis_hinta $aperuste ".t("ALV")." $lis_alv% $rivikomm\n";
+									$edi_ulos .= " --> ".t("Myyd‰‰n")." $myy_tuoteno[$indeksi] ".t("paikalta")." $myy_hyllyalue[$indeksi]-$myy_hyllynro[$indeksi]-$myy_hyllyvali[$indeksi]-$myy_hyllytaso[$indeksi]: $myy_kpl[$indeksi] ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("Ale")." $lis_ale% ".t("Hinta")." $lis_hinta $aperuste ".t("ALV")." $lis_alv% $rivikomm\n";
 									if ($lisaarivi_debug == 1) echo "$edi_ulos<br>";
 								}
 
@@ -1585,13 +1585,13 @@
 
 			if ($kutsuja == "EDITILAUS" or $lisaarivi_debug == 1) {
 				if ($var == "J") {
-					$edi_ulos .= " --> ".t("JT")." $trow[tuoteno] ".t("paikalta")." $p_hyllyalue-$p_hyllynro-$p_hyllyvali-$p_hyllytaso: $lis_kpl ".ta($kieli, "Y", $trow["yksikko"])." ".t("Ale")." $lis_ale ".t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
+					$edi_ulos .= " --> ".t("JT")." $trow[tuoteno] ".t("paikalta")." $p_hyllyalue-$p_hyllynro-$p_hyllyvali-$p_hyllytaso: $lis_kpl ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("Ale")." $lis_ale ".t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
 				}
 				elseif($var == "P") {
-					$edi_ulos .= " --> ".t("PUUTE")." $trow[tuoteno] ".t("paikalta")." $p_hyllyalue-$p_hyllynro-$p_hyllyvali-$p_hyllytaso: $lis_kpl ".ta($kieli, "Y", $trow["yksikko"])." ".t("Ale")." $lis_ale ".t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
+					$edi_ulos .= " --> ".t("PUUTE")." $trow[tuoteno] ".t("paikalta")." $p_hyllyalue-$p_hyllynro-$p_hyllyvali-$p_hyllytaso: $lis_kpl ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("Ale")." $lis_ale ".t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
 				}
 				elseif($var == "S") {
-					$edi_ulos .= " --> ".t("SUORATOIMITUS")." $trow[tuoteno] ".t("toimittajalta")." $rivinumero: $kpl ".ta($kieli, "Y", $trow["yksikko"])." ".t("Ale")." $lis_ale ".t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
+					$edi_ulos .= " --> ".t("SUORATOIMITUS")." $trow[tuoteno] ".t("toimittajalta")." $rivinumero: $kpl ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("Ale")." $lis_ale ".t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
 				}
 
 				if ($lisaarivi_debug == 1) echo "$edi_ulos<br>";

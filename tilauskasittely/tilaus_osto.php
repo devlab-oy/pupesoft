@@ -929,10 +929,12 @@
 					// tehd‰‰n pop-up divi jos keikalla on kommentti...
 					if ($prow["tunnus"] != "") {
 						list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($prow["tuoteno"]);
+						$pop_yks = t_avainsana("Y", "", "and avainsana.selite='$prow[yksikko]'", "", "", "selite");
+						
 						echo "<div id='$prow[tunnus]' class='popup' style='width: 400px;'>";
 						echo "<ul>";
-						echo "<li>".t("Saldo").": $saldo ".ta($kieli, "Y", $prow["yksikko"])."</li><li>".t("Hyllyss‰").": $hyllyssa ".ta($kieli, "Y", $prow["yksikko"])."</li><li>".t("Myyt‰viss‰").": $myytavissa ".ta($kieli, "Y", $prow["yksikko"])."</li>";
-						echo "<li>".t("Tilattu").": $prow[tilattu] ".ta($kieli, "Y", $prow["yksikko"])."</li><li>".t("Varattu").": $prow[varattukpl] ".ta($kieli, "Y", $prow["yksikko"])."</li>";
+						echo "<li>".t("Saldo").": $saldo $pop_yks</li><li>".t("Hyllyss‰").": $hyllyssa $pop_yks</li><li>".t("Myyt‰viss‰").": $myytavissa $pop_yks</li>";
+						echo "<li>".t("Tilattu").": $prow[tilattu] $pop_yks</li><li>".t("Varattu").": $prow[varattukpl] $pop_yks</li>";
 						echo "<li>".t("Keskihinta").": $prow[keskihinta] $prow[valuutta]</li><li>".t("Ostohinta").": $prow[ostohinta] $prow[valuutta]</li>";
 						echo "</ul>";
 						echo "</div>";

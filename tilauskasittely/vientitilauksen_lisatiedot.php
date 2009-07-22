@@ -119,21 +119,16 @@
 			echo "	<tr><td>26. ".t("Sisämaan kuljetusmuoto").":</td>
 					<td colspan='2'><select NAME='sisamaan_kuljetusmuoto'>";
 
-			$query = "	SELECT avainsana.selite, ".avain('select')."
-						FROM avainsana
-						".avain('join','KM_')."
-						WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KM'
-						ORDER BY avainsana.jarjestys, avainsana.selite";
-			$result = mysql_query($query) or pupe_error($query);
-
+			$result = t_avainsana("KM");
+			
 			echo "<option value=''>".t("Valitse")."</option>";
 
 			while($row = mysql_fetch_array($result)){
 				$sel = '';
-				if($row[0] == $laskurow["sisamaan_kuljetusmuoto"]) {
+				if($row["selite"] == $laskurow["sisamaan_kuljetusmuoto"]) {
 					$sel = 'selected';
 				}
-				echo "<option value='$row[0]' $sel>$row[1]</option>";
+				echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 			}
 			echo "</select></td><td class='back'>".t("Pakollinen kenttä")."</td>";
 			echo "</tr>";
@@ -158,21 +153,16 @@
 		echo "	<tr><td>24. ".t("Kauppatapahtuman luonne").":</td>
 				<td colspan='2'><select NAME='kauppatapahtuman_luonne'>";
 
-		$query = "	SELECT avainsana.selite, ".avain('select')."
-					FROM avainsana
-					".avain('join','KT_')."
-					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KT'
-					ORDER BY avainsana.jarjestys, avainsana.selite";
-		$result = mysql_query($query) or pupe_error($query);
-
+		$result = t_avainsana("KT");
+		
 		echo "<option value=''>".t("Valitse")."</option>";
 
 		while($row = mysql_fetch_array($result)){
 			$sel = '';
-			if($row[0] == $laskurow["kauppatapahtuman_luonne"]) {
+			if($row["selite"] == $laskurow["kauppatapahtuman_luonne"]) {
 				$sel = 'selected';
 			}
-			echo "<option value='$row[0]' $sel>$row[1]</option>";
+			echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 		}
 		echo "</select></td><td class='back'>".t("Pakollinen kenttä")."</td>";
 		echo "</tr>";
@@ -181,43 +171,34 @@
 		echo "	<tr><td>25 ".t("Kuljetusmuoto rajalla").":</td>
 				<td colspan='2'><select NAME='kuljetusmuoto'>";
 
-		$query = "	SELECT avainsana.selite, ".avain('select')."
-					FROM avainsana
-					".avain('join','KM_')."
-					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KM'
-					ORDER BY avainsana.jarjestys, avainsana.selite";
-		$result = mysql_query($query) or pupe_error($query);
+		$result = t_avainsana("KM");
 
 		echo "<option value=''>".t("Valitse")."</option>";
 
 		while($row = mysql_fetch_array($result)){
 			$sel = '';
-			if($row[0] == $laskurow["kuljetusmuoto"]) {
+			if($row["selite"] == $laskurow["kuljetusmuoto"]) {
 				$sel = 'selected';
 			}
-			echo "<option value='$row[0]' $sel>$row[1]</option>";
+			echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 		}
 		echo "</select></td><td class='back'>".t("Pakollinen kenttä")."</td>";
 		echo "</tr>";
 
 		if ($laskurow["vienti"] == "K") {
-			$query = "	SELECT selite, selitetark
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]' and laji = 'TULLI'
-						ORDER BY selitetark";
-			$vresult = mysql_query($query) or pupe_error($query);
-
-
+			
 			echo "<tr><td>29. ".t("Poistumistoimipaikka").":</td>";
 			echo "<td colspan='2'><select name='poistumistoimipaikka'>";
 			echo "<option value = '##'>".t("Ole hyvä ja valitse")."";
+			
+			$vresult = t_avainsana("TULLI");
 
 			while ($vrow = mysql_fetch_array($vresult)) {
 				$sel = "";
-				if ($laskurow["poistumistoimipaikka_koodi"] == $vrow[0]) {
+				if ($laskurow["poistumistoimipaikka_koodi"] == $vrow["selite"]) {
 					$sel = "selected";
 				}
-				echo "<option value = '$vrow[1]##$vrow[0]' $sel>$vrow[1] $vrow[0]";
+				echo "<option value = '$vrow[selitetark]##$vrow[selite]' $sel>$vrow[selitetark] $vrow[selite]";
 			}
 			echo "</select></td><td class='back'>".t("Pakollinen kenttä")."</td></tr>";
 

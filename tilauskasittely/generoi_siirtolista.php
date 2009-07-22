@@ -315,7 +315,7 @@
 		echo "<tr><th>".t("Osasto")."</th><td>";
 
 		// tehd‰‰n avainsana query
-		$sresult = avainsana("OSASTO", $kukarow['kieli']);
+		$sresult = t_avainsana("OSASTO");
 
 		echo "<select name='osasto'>";
 		echo "<option value=''>".t("Kaikki")."</option>";
@@ -334,7 +334,7 @@
 
 		//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
 		// tehd‰‰n avainsana query
-		$sresult = avainsana("TRY", $kukarow['kieli']);
+		$sresult = t_avainsana("TRY");
 
 		echo "<select name='tuoteryhma'>";
 		echo "<option value=''>".t("Kaikki")."</option>";

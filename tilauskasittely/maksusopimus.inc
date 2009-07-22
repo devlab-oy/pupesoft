@@ -304,19 +304,14 @@
 			echo "<tr><th>".t("Maksusopimukseen kuuluvat tilaukset").":</th><td> $rivrow[tilaukset] </td></tr>";
 			echo "</table><br>";
 
-			$query = "	SELECT selite, selitetark
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]' and laji = 'LASKUKUVAUS'
-						ORDER BY jarjestys, selite";
-			$kuvares = mysql_query($query) or pupe_error($query);
 
-			$query = "	SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_').")
-						FROM maksuehto
-						".avain('join','MEHTOKATXT_')."
-						".avain('join2','MEHTOTXT_')."
-						WHERE maksuehto.yhtio = '$kukarow[yhtio]'
-						and maksuehto.jaksotettu=''
-						ORDER BY maksuehto.jarjestys";
+			$kuvares = t_avainsana("LASKUKUVAUS");
+			
+			$query = "	SELECT *
+						FROM maksuehto						
+						WHERE yhtio = '$kukarow[yhtio]'
+						and jaksotettu = ''
+						ORDER BY jarjestys";
 			$mresult = mysql_query($query) or pupe_error($query);
 
 			echo "<table cellspacing='1' cellpadding='2'>
@@ -351,7 +346,7 @@
 						elseif($asiakasrow["maksuehto"] == $prow["tunnus"] and $row["maksuehto"] == "") $sel = "SELECTED";
 						else $sel = "";
 
-						echo "<option value='$prow[0]' $sel>$prow[1]</option>";
+						echo "<option value='$prow[tunnus]' $sel>$prow[teksti] $prow[kassa_teksti]</option>";
 					}
 					echo "</select><br>";
 					
@@ -433,7 +428,7 @@
 					echo "<td>";
 					
 					while($prow = mysql_fetch_array($mresult)) {
-						if($row["maksuehto"] == $prow["tunnus"]) echo $prow[1];
+						if($row["maksuehto"] == $prow["tunnus"]) echo "$row[teksti] $row[kassa_teksti]";
 					}
 					
 					echo "<br>$row[kuvaus]</td>";

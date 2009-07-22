@@ -200,7 +200,7 @@ if (!function_exists('text_rivi')) {
 		
 		$sisalto .= sprintf('%-25.25s', substr($row["nimitys"],0,22));
 		$sisalto .= sprintf('%-8.8s', $row["alv"]);
-		$sisalto .= sprintf('%-12.12s', ta($kieli, "Y", $row["yksikko"]));
+		$sisalto .= sprintf('%-12.12s', t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite"));
 		$sisalto .= sprintf('%-15.15s', substr($row["toimitettuaika"],0,10));
 		$verollinenhinta = round($row["rivihinta"]*(1+($row["alv"]/100)),2);
 		$verollinenhinta = sprintf('%.2f',$verollinenhinta );		

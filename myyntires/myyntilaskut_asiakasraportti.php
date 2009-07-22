@@ -93,7 +93,7 @@
 
 		// lukitaan taulut
 		$unlockquery = "UNLOCK TABLES";
-		$query = "LOCK TABLES yriti READ, yhtio READ, suoritus WRITE, tiliointi WRITE, lasku WRITE, sanakirja WRITE";
+		$query = "LOCK TABLES yriti READ, yhtio READ, suoritus WRITE, tiliointi WRITE, lasku WRITE, sanakirja WRITE, avainsana as avainsana_kieli READ";
 		$result = mysql_query($query) or pupe_error($query);
 
 

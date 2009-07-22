@@ -24,7 +24,7 @@
 	}
 
     function karhu_begin_work() {
-		$query = "LOCK TABLES yriti READ, yhtio READ, tili READ, lasku READ, tilausrivi READ, karhukierros WRITE, karhu_lasku WRITE, sanakirja WRITE";
+		$query = "LOCK TABLES yriti READ, yhtio READ, tili READ, lasku READ, tilausrivi READ, karhukierros WRITE, karhu_lasku WRITE, sanakirja WRITE, avainsana as avainsana_kieli READ";
 		$result = mysql_query($query) or pupe_error($query);
 
 	}

@@ -497,9 +497,9 @@
 					WHERE yhtio='$kukarow[yhtio]' and isatuoteno = '$row[tuoteno]' and tyyppi='R'
 					LIMIT 1";
 		$pres = mysql_query($query) or pupe_error($query);
-		
-		if(mysql_num_rows($pres) == 1) {
-			
+
+		if (mysql_num_rows($pres) == 1 and $tanne == "EIKOSKAAN") {
+
 			$query = "	SELECT varastopaikat.nimitys varasto, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali,tuotepaikat.hyllytaso
 						FROM tuote
 						JOIN tuotepaikat ON tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno

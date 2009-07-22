@@ -1,6 +1,7 @@
 <?php
 
 	if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+
 	require ("inc/connect.inc");
 	require ("inc/functions.inc");
 
@@ -11,14 +12,12 @@
 		$pvm = tv1dateconv($xml->Cube->Cube->attributes()->time);
 		$pvm_mysql = $xml->Cube->Cube->attributes()->time;
 
-		echo "Eurokurssit $pvm\n\n";
-
 		foreach ($xml->Cube->Cube->Cube as $valuutta) {
 
 			$valkoodi = (string) $valuutta->attributes()->currency;
 			$kurssi   = (float)  $valuutta->attributes()->rate;
 
-			echo "$valkoodi ".sprintf("%.9f", (1/$kurssi))." ($kurssi)\n";
+			// echo "$valkoodi ".sprintf("%.9f", (1/$kurssi))." ($kurssi)\n";
 
 	    	$query = "	UPDATE valuu, yhtio SET
 						valuu.kurssi = round(1 / $kurssi, 9),
@@ -35,6 +34,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 		}
 
+		echo date("H:i:s").": Eurokurssit päivitetty $pvm\n\n";
 	}
 	else {
 		echo "Valuuttakurssien haku epäonnistui!\n\n";

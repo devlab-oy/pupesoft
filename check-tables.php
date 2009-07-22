@@ -40,6 +40,6 @@ while ($row = mysql_fetch_array($result)) {
 
 }
 
-echo date("H:i:s").": Done.\n";
+echo date("H:i:s").": Done.\n\n";
 
 ?>

@@ -72,17 +72,17 @@ function alku ($laji = '') {
 		$pdf->draw_text(30,  600, "Tuoteryhmä",			$firstpage, $pieni);
 	}
 
-	$oikpos = $pdf->strlen("Kpl $vvv", $pieni);
-	$pdf->draw_text(330-$oikpos, 600, "Kpl $vvv",			$firstpage, $pieni);
-
 	$oikpos = $pdf->strlen("Kpl $vvt", $pieni);
-	$pdf->draw_text(380-$oikpos, 600, "Kpl $vvt",			$firstpage, $pieni);
+	$pdf->draw_text(330-$oikpos, 600, "Kpl $vvt",			$firstpage, $pieni);
 
-	$oikpos = $pdf->strlen("Ostot $vvv", $pieni);
-	$pdf->draw_text(460-$oikpos, 600, "Ostot $vvv",			$firstpage, $pieni);
+	$oikpos = $pdf->strlen("Kpl $vvv", $pieni);
+	$pdf->draw_text(380-$oikpos, 600, "Kpl $vvv",			$firstpage, $pieni);
 
 	$oikpos = $pdf->strlen("Ostot $vvt", $pieni);
-	$pdf->draw_text(530-$oikpos, 600, "Ostot $vvt",			$firstpage, $pieni);
+	$pdf->draw_text(460-$oikpos, 600, "Ostot $vvt",			$firstpage, $pieni);
+
+	$oikpos = $pdf->strlen("Ostot $vvv", $pieni);
+	$pdf->draw_text(530-$oikpos, 600, "Ostot $vvv",			$firstpage, $pieni);
 
 	$oikpos = $pdf->strlen("Indeksi", $pieni);
 	$pdf->draw_text(575-$oikpos, 600, "Indeksi",			$firstpage, $pieni);
@@ -140,17 +140,17 @@ function rivi ($firstpage, $laji = '') {
 	$pdf->draw_text(30,  $kala, $asananumero, $firstpage, $norm);
 	$pdf->draw_text(55,  $kala, $tryro["selitetark"],$firstpage, $norm);
 
-	$oikpos = $pdf->strlen(sprintf("%.0f", $row["kpled"]), $norm);
-	$pdf->draw_text(330-$oikpos, $kala, sprintf("%.0f", $row["kpled"]), 		$firstpage, $norm);
-
 	$oikpos = $pdf->strlen(sprintf("%.0f", $row["kplva"]), $norm);
-	$pdf->draw_text(380-$oikpos, $kala, sprintf("%.0f", $row["kplva"]), 		$firstpage, $norm);
+	$pdf->draw_text(330-$oikpos, $kala, sprintf("%.0f", $row["kplva"]), 		$firstpage, $norm);
 
-	$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["ed"]), $norm);
-	$pdf->draw_text(460-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["ed"]),			$firstpage, $norm);
+	$oikpos = $pdf->strlen(sprintf("%.0f", $row["kpled"]), $norm);
+	$pdf->draw_text(380-$oikpos, $kala, sprintf("%.0f", $row["kpled"]), 		$firstpage, $norm);
 
 	$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["va"]), $norm);
-	$pdf->draw_text(530-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["va"]), 		$firstpage, $norm);
+	$pdf->draw_text(460-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["va"]),			$firstpage, $norm);
+
+	$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["ed"]), $norm);
+	$pdf->draw_text(530-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["ed"]), 		$firstpage, $norm);
 
 	$oikpos = $pdf->strlen($indexi, $norm);
 	$pdf->draw_text(575-$oikpos, $kala, $indexi, $firstpage, $norm);

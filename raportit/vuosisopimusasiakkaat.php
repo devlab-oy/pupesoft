@@ -82,13 +82,16 @@
 
 		while ($asiakasrow = mysql_fetch_array($result)) {
 
-			$query = "	SELECT tilausrivi.osasto,
+			$query = "	SELECT tuote.osasto,
 						sum(if (tapvm >= '$alkuvv-$alkukk-$alkupp'   and tapvm <= '$loppuvv-$loppukk-$loppupp', tilausrivi.rivihinta, 0)) va,
 						sum(if (tapvm >= '$edalkupvm'                and tapvm <= '$edloppupvm', tilausrivi.rivihinta, 0)) ed,
 						sum(if (tapvm >= '$alkuvv-$alkukk-$alkupp'   and tapvm <= '$loppuvv-$loppukk-$loppupp', tilausrivi.kpl, 0)) kplva,
 						sum(if (tapvm >= '$edalkupvm'                and tapvm <= '$edloppupvm', tilausrivi.kpl, 0)) kpled
 						FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
 						JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.try > 0)
+						JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+						JOIN avainsana avain_osasto ON (avain_osasto.yhtio = lasku.yhtio and avain_osasto.kieli = '$yhtiorow[kieli]' and avain_osasto.laji = 'OSASTO' and avain_osasto.selite = tuote.osasto and avain_osasto.jarjestys < 10000)
+						JOIN avainsana avain_try ON (avain_try.yhtio = lasku.yhtio and avain_try.kieli = '$yhtiorow[kieli]' and avain_try.laji = 'TRY' and avain_try.selite = tuote.try and avain_try.jarjestys < 10000)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.liitostunnus = '$asiakasrow[tunnus]'
 						AND lasku.tapvm >= '$edalkupvm'
@@ -137,13 +140,16 @@
 			// kirjotetaan footer
 			loppu($firstpage, "dontsend");
 
-			$query = "	SELECT tilausrivi.osasto, tilausrivi.try,
+			$query = "	SELECT tuote.osasto, tuote.try,
 						sum(if (tapvm >= '$alkuvv-$alkukk-$alkupp'   and tapvm <= '$loppuvv-$loppukk-$loppupp', tilausrivi.rivihinta, 0)) va,
 						sum(if (tapvm >= '$edalkupvm'                and tapvm <= '$edloppupvm', tilausrivi.rivihinta, 0)) ed,
 						sum(if (tapvm >= '$alkuvv-$alkukk-$alkupp'   and tapvm <= '$loppuvv-$loppukk-$loppupp', tilausrivi.kpl, 0)) kplva,
 						sum(if (tapvm >= '$edalkupvm'                and tapvm <= '$edloppupvm', tilausrivi.kpl, 0)) kpled
 						FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
 						JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.try > 0)
+						JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+						JOIN avainsana avain_osasto ON (avain_osasto.yhtio = lasku.yhtio and avain_osasto.kieli = '$yhtiorow[kieli]' and avain_osasto.laji = 'OSASTO' and avain_osasto.selite = tuote.osasto and avain_osasto.jarjestys < 10000)
+						JOIN avainsana avain_try ON (avain_try.yhtio = lasku.yhtio and avain_try.kieli = '$yhtiorow[kieli]' and avain_try.laji = 'TRY' and avain_try.selite = tuote.try and avain_try.jarjestys < 10000)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						AND lasku.liitostunnus = '$asiakasrow[tunnus]'
 						AND lasku.tapvm >= '$edalkupvm'

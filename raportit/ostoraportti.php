@@ -2543,7 +2543,7 @@
 			$tee		= 'X';
 		}
 
-		if ($tee == "" or $tee == "JATKA") {
+		if (($tee == "" and isset($jatkanappi)) or $tee == "JATKA") {
 
 			if (isset($muutparametrit)) {
 				list($mul_osasto2,$mul_try2,$ytunnus,$mul_tme2,$asiakasosasto,$asiakasno,$toimittaja,$abcrajaus) = explode('#', $muutparametrit);
@@ -2624,210 +2624,19 @@
 			}
 		}
 
-		$tee = $tee == 'ei_menna' ? '' : $tee;
-
 		if ($tee == "") {
-
-			$lisa_haku_osasto 		 = "";
-			$lisa_haku_try 			 = "";
-			$lisa_haku_tme 			 = "";
-
-			if (!isset($mul_osasto)) {
-				$mul_osasto = array();
-			}
-
-			if (!isset($mul_try)) {
-				$mul_try = array();
-			}
-
-			if (!isset($mul_tme)) {
-				$mul_tme = array();
-			}
-
-			// jos on valittu jotakin dropdowneista (muu kuin osasto) niin tehd‰‰n niill‰ rajaukset muihin dropdowneihin
-			if (count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_tme) > 0) {
-				if (count($mul_osasto) > 0) {
-					$osastot = '';
-
-					foreach ($mul_osasto as $osx) {
-						if (trim($osx) != '') {
-							if (trim($osx) != "PUPEKAIKKIMUUT") {
-								$osx = trim(mysql_real_escape_string($osx));
-								$osastot .= "'$osx',";
-							}
-						}
-					}
-
-					$osastot = substr($osastot, 0, -1);
-
-					if (trim($osastot) != '') {
-						$lisa_haku_osasto = " and tuote.osasto in ($osastot) ";
-						$lisa .= " and avainsana.selite in ($osastot) ";
-						$ulisa .= "&mul_osasto[]=".urlencode($osastot);
-					}
-				}
-
-				if (count($mul_try) > 0) {
-					$tryt = '';
-
-					foreach ($mul_try as $tryx) {
-						if (trim($tryx) != '') {
-							if (trim($tryx) != "PUPEKAIKKIMUUT") {
-								$tryx = trim(mysql_real_escape_string($tryx));
-								$tryt .= "'$tryx',";
-							}
-						}
-					}
-
-					$tryt = substr($tryt, 0, -1);
-
-					if (trim($tryt) != '') {
-						$lisa_haku_try = " and tuote.try in ($tryt) ";
-						$lisa .= " and avainsana.selite in ($tryt) ";
-						$ulisa .= "&mul_try[]=".urlencode($tryt);
-					}
-				}
-
-				if (count($mul_tme) > 0) {
-					$tmet = '';
-
-					foreach ($mul_tme as $tmex) {
-						if (trim($tmex) != '') {
-							if (trim($tmex) != "PUPEKAIKKIMUUT") {
-								$tmex = trim(mysql_real_escape_string(urldecode($tmex)));
-								$tmet .= "'$tmex',";
-							}
-						}
-					}
-
-					$tmet = substr($tmet, 0, -1);
-
-					if (trim($tmet) != '') {
-						$lisa_haku_tme = " and tuote.tuotemerkki in ($tmet) ";
-						$lisa .= " and avainsana.selite in ($tmet) ";
-						$ulisa .= "&mul_tme[]=".urlencode($tmet);
-					}
-				}
-			}
 
 			echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
 					<input type='hidden' name='tee' id='tee' value=''>
 					<br/>",t("Valitse v‰hint‰‰n yksi seuraavista:"),"<br/>";
 
-			$sresult = t_avainsana("OSASTO");
+			// Monivalintalaatikot (osasto, try tuotemerkki...)
+			// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
+			$lisa  = "";
+			$ulisa = "";
+			$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
 
-			echo "<table style='display:inline;'>";
-			echo "<tr><th>",t("Osasto"),"</th></tr>";
-			echo "<tr><td nowrap valign='top' class='back'><select name='mul_osasto[]' multiple size='7' onchange='document.getElementById(\"tee\").value=\"ei_menna\";submit();'>";
-			$mul_check = "";
-			if ($mul_try!="") {
-				if (in_array("PUPEKAIKKIMUUT", $mul_osasto)) {
-					$mul_check = 'SELECTED';
-				}
-			}
-
-			echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("N‰yt‰ kaikki")."</option>";
-			echo "<option value=''>".t("Ei valintaa")."</option>";
-
-			while($sxrow = mysql_fetch_array ($sresult)){
-				$sel = '';
-
-				if (count($mul_osasto) > 0) {
-					if (in_array(trim($sxrow['selite']), $mul_osasto)) {
-						$sel = 'SELECTED';
-					}
-				}
-
-				echo "<option value='$sxrow[selite]' $sel>";
-				if ($yhtiorow['naytetaan_kaunis_os_try'] == '') {
-					echo $sxrow['selite']." ";
-				}
-				echo "$sxrow[selitetark]</option>";
-			}
-			echo "</select></td>";
-			echo "</tr></table>";
-
-			if ($lisa_haku_osasto == "") {
-				$sresult = t_avainsana("TRY");
-			}
-			else {
-				$query = "	SELECT distinct avainsana.selite,
-							IFNULL((SELECT avainsana_kieli.selitetark
-					        FROM avainsana as avainsana_kieli
-					        WHERE avainsana_kieli.yhtio = avainsana.yhtio
-					        and avainsana_kieli.laji = avainsana.laji
-					        and avainsana_kieli.selite = avainsana.selite
-					        and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selitetark) selitetark
-							FROM tuote
-							JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' and avainsana.kieli in ('$yhtiorow[kieli]', ''))
-							WHERE tuote.yhtio = '$kukarow[yhtio]'
-							$lisa_haku_osasto";
-				$sresult = mysql_query($query) or pupe_error($query);
-			}
-
-			echo "<table style='display:inline;'><tr><th>",t("Tuoteryhm‰"),"</th></tr>";
-			echo "<tr><td nowrap valign='top' class='back'><select name='mul_try[]' onchange='document.getElementById(\"tee\").value=\"ei_menna\";submit();' multiple='TRUE' size='7'>";
-			$mul_check = '';
-			if ($mul_try!="") {
-				if (in_array("PUPEKAIKKIMUUT", $mul_try)) {
-					$mul_check = 'SELECTED';
-				}
-			}
-			echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("N‰yt‰ kaikki")."</option>";
-			echo "<option value=''>".t("Ei valintaa")."</option>";
-
-			while($srow = mysql_fetch_array ($sresult)){
-				$sel = '';
-
-				if (count($mul_try) > 0 and in_array(trim($srow['selite']), $mul_try)) {
-					$sel = 'SELECTED';
-				}
-
-				echo "<option value='$srow[selite]' $sel>";
-				if ($yhtiorow['naytetaan_kaunis_os_try'] == '') {
-					echo $srow['selite']." ";
-				}
-				echo "$srow[selitetark]</option>";
-			}
-			echo "</select></td>";
-			echo "</tr></table>";
-
-			//name='tuotemerkki'
-			$query = "	SELECT distinct avainsana.selite, avainsana.selitetark
-						FROM tuote
-						JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI')
-						WHERE tuote.yhtio = '$kukarow[yhtio]'
-						$lisa_haku_osasto
-						$lisa_haku_try
-						ORDER BY avainsana.jarjestys, avainsana.selite";
-			$sresult = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($sresult) > 0) {
-				echo "<table style='display:inline;'><tr><th>",t("Tuotemerkki"),"</th></tr>";
-				echo "<tr><td nowrap valign='top' class='back'>";
-				echo "<select name='mul_tme[]' multiple='TRUE' size='7' onchange='document.getElementById(\"tee\").value=\"ei_menna\";submit();'>";
-				$mul_check = '';
-				if ($mul_tme!="") {
-					if (in_array("PUPEKAIKKIMUUT", $mul_tme)) {
-						$mul_check = 'SELECTED';
-					}
-				}
-				echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("N‰yt‰ kaikki")."</option>";
-				echo "<option value=''>",t("Ei valintaa"),"</option>";
-
-				while($srow = mysql_fetch_array ($sresult)){
-					$sel = '';
-
-					if (count($mul_tme) > 0 and in_array(trim($srow['selite']), $mul_tme)) {
-						$sel = 'SELECTED';
-					}
-
-					echo "<option value='$srow[selite]' $sel>$srow[selite]</option>";
-				}
-
-				echo "</select></td>";
-				echo "</tr></table>";
-			}
+			require ("../tilauskasittely/monivalintalaatikot.inc");
 
 			echo "<table>";
 			echo "<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='ytunnus' value='$ytunnus'></td></tr>";
@@ -2906,11 +2715,10 @@
 					<tr><th>".t("Asiakas")."</th><td><input type='text' size='20' name='asiakasno' value='$asiakasno'></td></tr>
 
 					</table><br>
-					<input type='Submit' value = '".t("Jatka")."'>
+					<input type='Submit' name='jatkanappi' value = '".t("Jatka")."'>
 					</form>";
 
 		}
-
 
 		if ($tee == "JATKA" or $tee == "RAPORTOI") {
 
@@ -3320,6 +3128,7 @@
 				<input type='Submit' name='RAPORTOI' value = '".t("Aja h‰lytysraportti")."'>
 				</form>";
 		}
+		
 		require ("../inc/footer.inc");
 	}
 

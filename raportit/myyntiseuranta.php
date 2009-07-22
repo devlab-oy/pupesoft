@@ -125,9 +125,9 @@
 			}
 
 			//	Jos k‰ytt‰j‰ll‰ on valittu piirej‰ niin sallitaan vain ko. piirin/piirien hakeminen
-			if($kukarow["piirit"] != "")	 {
+			if ($kukarow["piirit"] != "")	 {
 				$asiakasrajaus = "and lasku.piiri IN ($kukarow[piirit])";
-				$asiakasrajaus_avainsana = "and selite IN ($kukarow[piirit])";
+				$asiakasrajaus_avainsana = "and avainsana.selite IN ($kukarow[piirit])";
 			}
 			else {
 				$asiakasrajaus="";
@@ -1093,48 +1093,50 @@
 
 								// jos kyseessa on asiakasosasto, haetaan sen nimi
 								if (mysql_field_name($result, $i) == "asos") {
-									$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-												FROM avainsana
-												".avain('join','ASOSASTO_')."
-												WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASOSASTO' and avainsana.selite='$row[$i]'
-												limit 1";
-									$osre = mysql_query($query) or pupe_error($query);
-									if (mysql_num_rows($osre) == 1) {
-										$osrow = mysql_fetch_array($osre);
+									$osre = t_avainsana("ASIAKASOSASTO", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
+									$osrow = mysql_fetch_array($osre);
+									
+									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
+										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
+									}
+								}
+								
+								// jos kyseessa on piiri, haetaan sen nimi
+								if (mysql_field_name($result, $i) == "aspiiri") {
+									$osre = t_avainsana("PIIRI", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
+									$osrow = mysql_fetch_array($osre);
+									
+									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
 										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
 									}
 								}
 
 								// jos kyseessa on asiakasryhma, haetaan sen nimi
 								if (mysql_field_name($result, $i) == "asry") {
-									$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-												FROM avainsana
-												".avain('join','ASRYHMA_')."
-												WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASRYHMA' and avainsana.selite='$row[$i]'
-												limit 1";
-									$osre = mysql_query($query) or pupe_error($query);
-									if (mysql_num_rows($osre) == 1) {
-										$osrow = mysql_fetch_array($osre);
+									$osre = t_avainsana("ASIAKASRYHMA", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
+									$osrow = mysql_fetch_array($osre);
+									
+									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
 										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
 									}
 								}
 
 								// jos kyseessa on tuoteosasto, haetaan sen nimi
 								if (mysql_field_name($result, $i) == "tuos") {
-									// tehd‰‰n avainsana query
-									$osre = avainsana("OSASTO", $kukarow['kieli'], $row[$i], $yhtio, "1");
-									if (mysql_num_rows($osre) == 1) {
-										$osrow = mysql_fetch_array($osre);
+									$osre = t_avainsana("OSASTO", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
+									$osrow = mysql_fetch_array($osre);
+									
+									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
 										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
-									}
+									}																										
 								}
 
 								// jos kyseessa on tuoteosasto, haetaan sen nimi
 								if (mysql_field_name($result, $i) == "tuoteryhm‰") {
-									// tehd‰‰n avainsana query
-									$osre = avainsana("TRY", $kukarow['kieli'], $row[$i], $yhtio, "1");
-									if (mysql_num_rows($osre) == 1) {
-										$osrow = mysql_fetch_array($osre);
+									$osre = t_avainsana("TRY", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
+									$osrow = mysql_fetch_array($osre);
+									
+									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
 										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
 									}
 								}
@@ -1665,13 +1667,8 @@
 			echo "<td valign='top'>";
 
 			// n‰ytet‰‰n soveltuvat asiakasosastot
-			$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-						FROM avainsana
-						".avain('join','ASOSASTO_')."
-						WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASOSASTO'
-						ORDER BY avainsana.jarjestys, avainsana.selite";
-			$res2  = mysql_query($query) or die($query);
-
+			$res2 = t_avainsana("ASIAKASOSASTO", "", "", $yhtio);
+			
 			echo "<select name='mul_oasiakasosasto[]' multiple='TRUE' size='10' style='width:100%;'>";
 
 			$mul_check = '';
@@ -1698,13 +1695,8 @@
 			echo "<td valign='top'>";
 
 			// n‰ytet‰‰n soveltuvat asiakasryhmat
-			$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-						FROM avainsana
-						".avain('join','ASRYHMA_')."
-						WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASRYHMA'
-						ORDER BY avainsana.jarjestys, avainsana.selite";
-			$res2  = mysql_query($query) or die($query);
-
+			$res2 = t_avainsana("ASIAKASRYHMA", "", "", $yhtio);
+			
 			echo "<select name='mul_asiakasryhma[]' multiple='TRUE' size='10' style='width:100%;'>";
 
 			$mul_check = '';
@@ -1731,14 +1723,8 @@
 			echo "<td valign='top'>";
 
 			// n‰ytet‰‰n sallityt piirit
-			$query = "	SELECT *
-						FROM avainsana
-						WHERE yhtio='$kukarow[yhtio]' and
-						laji='piiri'
-						$asiakasrajaus_avainsana
-						order by jarjestys, selite";
-			$res2  = mysql_query($query) or die($query);
-
+			$res2 = t_avainsana("PIIRI", "", $asiakasrajaus_avainsana, $yhtio);
+			
 			echo "<select name='mul_piiri[]' multiple='TRUE' size='10' style='width:100%;'>";
 
 			$mul_check = '';
@@ -1783,7 +1769,7 @@
 
 			// n‰ytet‰‰n soveltuvat osastot
 			// tehd‰‰n avainsana query
-			$res2 = avainsana("OSASTO", $kukarow['kieli']);
+			$res2 = t_avainsana("OSASTO");
 
 			echo "<select name='mul_osasto[]' multiple='TRUE' size='10' style='width:100%;'>";
 
@@ -1813,7 +1799,7 @@
 
 			// n‰ytet‰‰n soveltuvat tryt
 			// tehd‰‰n avainsana query
-			$res2 = avainsana("TRY", $kukarow['kieli']);
+			$res2 = t_avainsana("TRY");
 
 			echo "<select name='mul_try[]' multiple='TRUE' size='10' style='width:100%;'>";
 

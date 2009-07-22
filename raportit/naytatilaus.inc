@@ -624,12 +624,7 @@
 
 		if ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K') {
 
-			$query = "	SELECT selite, selitetark
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]' and laji = 'TRIVITYYPPI'
-						ORDER BY jarjestys, selite";
-			$trivityyppi_result = mysql_query($query) or pupe_error($query);
-
+			$trivityyppi_result = t_avainsana("TRIVITYYPPI");
 
 			if (mysql_num_rows($trivityyppi_result) > 0) {
 				echo "<th>".t("Tyyppi")."</th>";

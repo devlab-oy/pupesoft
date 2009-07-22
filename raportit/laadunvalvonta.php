@@ -65,22 +65,29 @@ echo "</table>";
 if (isset($tuoteryhmittain)) {
 	echo "<table>";
 	echo "<tr><th>".t("Tuoteryhmä")."</th><th>".t("Selite")."</th><th>".t("Aika")."</th><th>".t("Ajallaan")."</th><th>".t("Etuajassa")."</th><th>".t("Myöhässä")."</th></tr>";
+	
 	foreach ($tuoteryh as $key) {
-			// tehdään avainsana query
-			$seliteres = avainsana("TRY", $kukarow['kieli'], $key["try"]);
-			$seliterow = mysql_fetch_array($seliteres);
-			echo "<tr><td align='right'>$key[try]</td><td align='left'>";
-				if ($seliterow[selitetark]) {
-					echo "$seliterow[selitetark]";
-				}
-			echo "</td><td align='left'>$key[toimitettuaika]</td><td align='right'>$key[ajallaan]</td><td align='right'>$key[etuajassa]</td><td align='right'>$key[myohassa]</td></tr>";
-			$ajallaan_summa += $key['ajallaan'];
-			$etuajassa_summa += $key['etuajassa'];
-			$myohassa_summa += $key['myohassa'];
+		// tehdään avainsana query
+		$seliteres = t_avainsana("TRY", $kukarow['kieli'], "and avainsana.selite ='$key[try]'");			
+		$seliterow = mysql_fetch_array($seliteres);
+		
+		echo "<tr><td align='right'>$key[try]</td><td align='left'>";
+		
+		if ($seliterow["selitetark"] != "") {
+			echo "$seliterow[selitetark]";
+		}
+		
+		echo "</td><td align='left'>$key[toimitettuaika]</td><td align='right'>$key[ajallaan]</td><td align='right'>$key[etuajassa]</td><td align='right'>$key[myohassa]</td></tr>";
+		
+		$ajallaan_summa += $key['ajallaan'];
+		$etuajassa_summa += $key['etuajassa'];
+		$myohassa_summa += $key['myohassa'];
 	}
+	
 	echo "<tr><th colspan='3'>".t("Yhteensä")."</th><td class='tumma' align='right'><strong>$ajallaan_summa</strong></td><td class='tumma' align='right'><strong>$etuajassa_summa</strong></td><td class='tumma' align='right'><strong>$myohassa_summa</strong></td></tr>";
 	echo "</table>";
-} else if ($submit != '' and $tuoteryhmittain == '') {
+} 
+elseif ($submit != '' and $tuoteryhmittain == '') {
 
 	echo "<table width='700'>";
 		echo "<tr><th>".t("Toimitukset")."</th><th>".t("Tammikuu")."</th><th>".t("Helmikuu")."</th><th>".t("Maaliskuu")."</th><th>".t("Huhtikuu")."</th><th>".t("Toukokuu")."</th><th>".t("Kesäkuu")."</th><th>".t("Heinäkuu")."</th><th>".t("Elokuu")."</th><th>".t("Syyskuu")."</th><th>".t("Lokakuu")."</th><th>".t("Marraskuu")."</th><th>".t("Joulukuu")."</th><th>".t("Yhteensä")."</th></tr>";
@@ -121,4 +128,5 @@ if (isset($tuoteryhmittain)) {
 }
 
 require("../inc/footer.inc");
+
 ?>

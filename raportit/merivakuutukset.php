@@ -43,16 +43,10 @@
 			echo "<td>$row[ytunnus]</td>";
 			echo "<td>$row[toimitusehto]</td>";
 
-			$query = "	SELECT selite, selitetark
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji='KM'
-						and selite = '$row[kuljetusmuoto]'";
-			$kmresult = mysql_query($query) or pupe_error($query);
+			$kmresult = t_avainsana("KM", "", "and avainsana.selite = '$row[kuljetusmuoto]'");
 			$kmrow = mysql_fetch_array($kmresult);
 
 			echo "<td>$kmrow[selite] - $kmrow[selitetark]</td>";
-
 
 			echo "<td>$row[arvo]</td>";
 			echo "<td>$row[vakarvo]</td>";
@@ -101,18 +95,14 @@
 	echo "<tr><th>".t("Kuljetusmuoto").":</th><td colspan='3'>
 					<select NAME='kuljetusmuoto'>";
 
-	$query = "	SELECT selite, selitetark
-				FROM avainsana
-				WHERE yhtio = '$kukarow[yhtio]' and laji='KM'
-				ORDER BY jarjestys, selite";
-	$result = mysql_query($query) or pupe_error($query);
-
+	$result = t_avainsana("KM");
+	
 	while($row = mysql_fetch_array($result)){
 		$sel = '';
-		if($row[0] == $kuljetusmuoto) {
+		if($row["selite"] == $kuljetusmuoto) {
 			$sel = 'selected';
 		}
-		echo "<option value='$row[0]' $sel>$row[1]</option>";
+		echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 	}
 	echo "</select></td>";
 

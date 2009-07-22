@@ -219,7 +219,7 @@ if ($tee == 'go') {
 					else $kateosuus = 0;
 
 					// tehd‰‰n avainsana query
-					$sresult = avainsana("OSASTO", $kukarow['kieli'], $yhtrow["osasto"]);
+					$sresult = t_avainsana("OSASTO", "", "and avainsana.selite ='$yhtrow[osasto]'");
 					$srow = mysql_fetch_array($sresult);
 
 					echo "<tr>";

@@ -446,50 +446,22 @@
 								$row[$i] = "<a href='../tuote.php?tee=Z&tuoteno=".urlencode($row[$i])."'>$row[$i]</a>";
 							}
 
-							// jos kyseessa on asiakasosasto, haetaan sen nimi
-							if (mysql_field_name($result, $i) == "asos") {
-								$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-											FROM avainsana
-											".avain('join','ASOSASTO_')."
-											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASOSASTO' and avainsana.selite='$row[$i]'
-											limit 1";
-								$osre = mysql_query($query) or pupe_error($query);
-								if (mysql_num_rows($osre) == 1) {
-									$osrow = mysql_fetch_array($osre);
-									$row[$i] = $row[$i] ." ". $osrow['selitetark'];
-								}
-							}
-
-							// jos kyseessa on asiakasryhma, haetaan sen nimi
-							if (mysql_field_name($result, $i) == "asry") {
-								$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-											FROM avainsana
-											".avain('join','ASRYHMA_')."
-											WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASRYHMA' and avainsana.selite='$row[$i]'
-											limit 1";
-								$osre = mysql_query($query) or pupe_error($query);
-								if (mysql_num_rows($osre) == 1) {
-									$osrow = mysql_fetch_array($osre);
-									$row[$i] = $row[$i] ." ". $osrow['selitetark'];
-								}
-							}
-
 							// jos kyseessa on tuoteosasto, haetaan sen nimi
-							if (mysql_field_name($result, $i) == "tuos") {
-								// tehd‰‰n avainsana query
-								$osre = avainsana("OSASTO", $kukarow['kieli'], $row[$i], $yhtio, "1");
-								if (mysql_num_rows($osre) == 1) {
-									$osrow = mysql_fetch_array($osre);
+							if (mysql_field_name($result, $i) == "tuos") {								
+								$osre = t_avainsana("OSASTO", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
+								$osrow = mysql_fetch_array($osre);
+								
+								if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
 									$row[$i] = $row[$i] ." ". $osrow['selitetark'];
-								}
+								}																
 							}
 
 							// jos kyseessa on tuoteosasto, haetaan sen nimi
 							if (mysql_field_name($result, $i) == "tuoteryhm‰") {
-								// tehd‰‰n avainsana query
-								$osre = avainsana("TRY", $kukarow['kieli'], $row[$i], $yhtio, "1");
-								if (mysql_num_rows($osre) == 1) {
-									$osrow = mysql_fetch_array($osre);
+								$osre = t_avainsana("TRY", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
+								$osrow = mysql_fetch_array($osre);
+								
+								if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
 									$row[$i] = $row[$i] ." ". $osrow['selitetark'];
 								}
 							}
@@ -735,7 +707,7 @@
 
 			// n‰ytet‰‰n soveltuvat osastot
 			// tehd‰‰n avainsana query
-			$res2 = avainsana("OSASTO", $kukarow['kieli']);
+			$res2 = t_avainsana("OSASTO");
 
 			echo "<select name='mul_osasto[]' multiple='TRUE' size='10' style='width:100%;'>";
 
@@ -765,7 +737,7 @@
 
 			// n‰ytet‰‰n soveltuvat tryt
 			// tehd‰‰n avainsana query
-			$res2 = avainsana("TRY", $kukarow['kieli']);
+			$res2 = t_avainsana("TRY");
 
 			echo "<select name='mul_try[]' multiple='TRUE' size='10' style='width:100%;'>";
 

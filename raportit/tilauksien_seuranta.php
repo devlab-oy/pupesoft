@@ -84,20 +84,23 @@ if($tee == "KORJAA") {
 
 //	Tarkastetaan että kaikilla on seurannat kun saavutaan tänne ensimmäistä kertaa..
 if($tee=="") {
-	$query = "select GROUP_CONCAT(distinct(selite) SEPARATOR '\',\'') seurannat from avainsana where yhtio='$kukarow[yhtio]' and laji='SEURANTA' group by laji";
+	$query = "SELECT GROUP_CONCAT(distinct(selite) SEPARATOR '\',\'') seurannat from avainsana where yhtio='$kukarow[yhtio]' and laji='SEURANTA' group by laji";
 	$aresult = mysql_query($query) or pupe_error($query);
-	$arow=mysql_fetch_array($aresult);
+	$arow = mysql_fetch_array($aresult);
 
-	$query="select lasku.tunnus, tunnusnippu, nimi, tila, alatila
+	$query="SELECT lasku.tunnus, tunnusnippu, nimi, tila, alatila
 			from lasku use index(tila_index)
 			left join laskun_lisatiedot use index (yhtio_otunnus) on lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 			where lasku.yhtio='$kukarow[yhtio]' and tila IN ($sallitut_tilat) and (laskun_lisatiedot.seuranta NOT IN ('$arow[seurannat]') or laskun_lisatiedot.seuranta IS NULL)
 			order by tunnusnippu, tunnus";
 	$result = mysql_query($query) or pupe_error($query);
+
 	if(mysql_num_rows($result)>0) {
-		$query = "select selite, selitetark from avainsana where yhtio='$kukarow[yhtio]' and laji='SEURANTA'";
-		$aresult = mysql_query($query) or pupe_error($query);
+		
+		$aresult = t_avainsana("SEURANTA");
+		
 		$opt="<select name='uusi_seuranta' onchange='submit();'><option value='' selected>".t("Valitse oikea seuranta")."</option>";
+		
 		while($arow=mysql_fetch_array($aresult)) {
 			$opt .= "<option value='$arow[selite]'>$arow[selite] - $arow[selitetark]</option>";
 		}
@@ -105,6 +108,7 @@ if($tee=="") {
 		
 		echo "<font class='message'>".t("Korjataan puuttuvat seurannat")."</font><br>";
 		echo "<table><tr><th>".t("Tilaus")."</th><th>".t("Tyyppi")."</th><th>".t("Asiakas")."</th><th>".t("Korjattu seuranta")."</th></tr>";
+		
 		while($row=mysql_fetch_array($result)) {
 			echo "	<tr class='aktiivi'>";
 			
@@ -213,12 +217,15 @@ if($tee=="" or $tee=="LASKE") {
 	echo "</select></td></tr>";
 
 	echo "<tr><td>".t("Tai koko tilikausi")."</td>";
-		$query = "SELECT *
+	
+	$query = "	SELECT *
 				FROM tilikaudet
 				WHERE yhtio = '$kukarow[yhtio]'
 				ORDER BY tilikausi_alku";
-		$vresult = mysql_query($query) or pupe_error($query);
+	$vresult = mysql_query($query) or pupe_error($query);
+	
 	echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
+	
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($tkausi == $vrow["tunnus"]) {
@@ -229,19 +236,16 @@ if($tee=="" or $tee=="LASKE") {
 	echo "</select></td></tr>";
 
 	echo "<tr><td>".t("Vain seurannasta")."</td>";
-		$query = "SELECT *
-				FROM avainsana
-				WHERE yhtio = '$kukarow[yhtio]'
-				and laji = 'seuranta'
-				ORDER BY jarjestys, selite";
-	$vresult = mysql_query($query) or pupe_error($query);
 	echo "<td><select name='seuranta'><option value=''>".t("Kaikista")."";
+	
+	$vresult = t_avainsana("SEURANTA");
+	
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($seuranta == $vrow["selite"]) {
 			$sel = "selected";
 		}
-		echo "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]";
+		echo "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
 	}
 	echo "</select></td>";
 	echo "</tr>";

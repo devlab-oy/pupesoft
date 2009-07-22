@@ -841,7 +841,7 @@
 
 			// näytetään soveltuvat osastot
 			// tehdään avainsana query
-			$res2 = avainsana("OSASTO", $kukarow['kieli']);
+			$res2 = t_avainsana("OSASTO");
 
 			if (mysql_num_rows($res2) > 11) {
 				echo "<div style='height:265;overflow:auto;'>";
@@ -875,7 +875,7 @@
 
 			// näytetään soveltuvat tryt
 			// tehdään avainsana query
-			$res2 = avainsana("TRY", $kukarow['kieli']);
+			$res2 = t_avainsana("TRY");
 
 			if (mysql_num_rows($res2) > 11) {
 				echo "<div style='height:265;overflow:auto;'>";

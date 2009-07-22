@@ -418,12 +418,12 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 	// haetaan nimitietoa
 	if ($tuoryh != '') {
 		// tehd‰‰n avainsana query
-		$sresult = avainsana("TRY", $kukarow['kieli'], $tuoryh, $yhtiot);
+		$sresult = t_avainsana("TRY", "", "and avainsana.selite ='$tuoryh'", $yhtiot);
 		$trow1 = mysql_fetch_array($sresult);
 	}
 	if ($osasto != '') {
 		// tehd‰‰n avainsana query
-		$sresult = avainsana("OSASTO", $kukarow['kieli'], $osasto, $yhtiot);
+		$sresult = t_avainsana("OSASTO", "", "and avainsana.selite ='$osasto'", $yhtiot);
 		$trow2 = mysql_fetch_array($sresult);
 	}
 	if ($toimittajaid != '') {
@@ -740,17 +740,8 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
 	echo "<tr><th>".t("Osasto")."</th><td colspan='3'>";
 
-	/*
-	$query = "	SELECT distinct avainsana.selite, group_concat(".avain('selectcon')." SEPARATOR ' / ') selitetark
-				FROM avainsana
-				".avain('join','OSASTO_', $kukarow['kieli'])."
-				WHERE avainsana.yhtio in ($yhtiot) and avainsana.laji='OSASTO' and avainsana.kieli = '$kukarow[kieli]'
-				GROUP BY avainsana.selite
-				ORDER BY avainsana.selite+0";
-	*/
-
 	// tehd‰‰n avainsana query
-	$sresult = avainsana("OSASTO", $kukarow['kieli'], '', $yhtiot);
+	$sresult = t_avainsana("OSASTO", "", "", $yhtiot);
 
 	echo "<select name='osasto'>";
 	echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
@@ -760,25 +751,15 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 		if ($osasto == $srow["selite"]) {
 			$sel = "selected";
 		}
-		echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
+		echo "<option value='$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
 	}
 	echo "</select>";
 
 	echo "</td></tr>
 			<tr><th>".t("Tuoteryhm‰")."</th><td colspan='3'>";
 
-	//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
-	/*
-	$query = "	SELECT distinct avainsana.selite, group_concat(".avain('selectcon')." SEPARATOR ' / ') selitetark
-				FROM avainsana
-				".avain('join','TRY_', $kukarow['kieli'])."
-				WHERE avainsana.yhtio in ($yhtiot) and avainsana.laji = 'TRY' and avainsana.kieli = '$kukarow[kieli]'
-				GROUP BY avainsana.selite
-				ORDER BY avainsana.selite+0";
-	*/
-
 	// tehd‰‰n avainsana query
-	$sresult = avainsana("TRY", $kukarow['kieli'], '', $yhtiot);
+	$sresult = t_avainsana("TRY", "", "", $yhtiot);
 
 	echo "<select name='tuoryh'>";
 	echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
@@ -788,7 +769,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 		if ($tuoryh == $srow["selite"]) {
 			$sel = "selected";
 		}
-		echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
+		echo "<option value='$srow[selite]' $sel>$srow[selite] - $srow[selitetark]</option>";
 	}
 	echo "</select>";
 

@@ -32,48 +32,20 @@ $kausi2  = substr($kausi2,0,4)."-".substr($kausi2,4,2)."-01";
 $kausi2l = substr($kausi2l,0,4)."-".substr($kausi2l,4,2)."-31";
 
 
-if (($kausi1!='') and ($kausi2!='') and ($osasto!='') and ($try!=''))
-{
+if (($kausi1!='') and ($kausi2!='') and ($osasto!='') and ($try!='')) {
     $osastot     = '';
 	$osastonimet = array();
 	$tryt        = '';
     $trynimet    = array();
 
-
-	$query = "	SELECT DISTINCT avainsana.*, 
-				IFNULL((SELECT avainsana_kieli.selitetark
-				FROM avainsana as avainsana_kieli
-				WHERE avainsana_kieli.yhtio = avainsana.yhtio
-				and avainsana_kieli.laji = avainsana.laji
-				and avainsana_kieli.selite = avainsana.selite
-				and avainsana_kieli.kieli = '$kukarow[kieli]'), avainsana.selitetark) selitetark
-				FROM avainsana
-				WHERE avainsana.yhtio = '$kukarow[yhtio]' 
-				and avainsana.laji = 'OSASTO'
-				and avainsana.kieli in ('$yhtiorow[kieli]', '')
-				and avainsana.selite>='$osasto' and avainsana.selite<='$osastol'
-				ORDER BY avainsana.selite+0";
-	$res   = mysql_query ($query) or die("$query<br><br>".mysql_error());
+	$res = t_avainsana("OSASTO", "", "and avainsana.selite>='$osasto' and avainsana.selite<='$osastol'");
 
 	while ($row=mysql_fetch_array($res)) {
 		$osastot .= "'$row[selite]',";
 		$osastonimet[$row['selite']] = $row["selitetark"];
 	}
 
-	$query = "	SELECT DISTINCT avainsana.*, 
-				IFNULL((SELECT avainsana_kieli.selitetark
-				FROM avainsana as avainsana_kieli
-				WHERE avainsana_kieli.yhtio = avainsana.yhtio
-				and avainsana_kieli.laji = avainsana.laji
-				and avainsana_kieli.selite = avainsana.selite
-				and avainsana_kieli.kieli = '$kukarow[kieli]'), avainsana.selitetark) selitetark
-				FROM avainsana
-				WHERE avainsana.yhtio = '$kukarow[yhtio]' 
-				and avainsana.laji = 'TRY'
-				and avainsana.kieli in ('$yhtiorow[kieli]', '')
-				and avainsana.selite>='$try' and avainsana.selite<='$tryl'
-				ORDER BY avainsana.selite+0";
-	$res   = mysql_query ($query) or die("$query<br><br>".mysql_error());
+	$res = t_avainsana("TRY", "", "and avainsana.selite>='$try' and avainsana.selite<='$tryl'");
 
 	while ($row=mysql_fetch_array($res)) {
 		$tryt .= "'$row[selite]',";

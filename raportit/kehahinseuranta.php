@@ -116,7 +116,7 @@
 	echo "<tr><th>".t("Osasto")."</th><td colspan='3'>";
 
 	// tehd‰‰n avainsana query
-	$sresult = avainsana("OSASTO", $kukarow['kieli']);
+	$sresult = t_avainsana("OSASTO");
 
 	echo "<select name='osasto'>";
 	echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
@@ -134,7 +134,7 @@
 			<tr><th>".t("Tuoteryhm‰")."</th><td colspan='3'>";
 
 	// tehd‰‰n avainsana query
-	$sresult = avainsana("TRY", $kukarow['kieli']);
+	$sresult = t_avainsana("TRY");
 
 	echo "<select name='tuoryh'>";
 	echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";

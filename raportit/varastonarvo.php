@@ -47,7 +47,7 @@ if ($valitaan_useita == "") {
 
 	// n‰ytet‰‰n soveltuvat osastot
 	// tehd‰‰n avainsana query
-	$res2 = avainsana("OSASTO");
+	$res2 = t_avainsana("OSASTO");
 
 	$sel = "";
 	if ($osasto == "kaikki") $sel = "selected";
@@ -77,7 +77,7 @@ if ($valitaan_useita == "") {
 
 	// n‰ytet‰‰n soveltuvat tuoteryhm‰t
 	// tehd‰‰n avainsana query
-	$res2 = avainsana("TRY");
+	$res2 = t_avainsana("TRY");
 
 	echo "<tr><th>",t("Tuoteryhm‰"),":</th><td>";
 	echo "<select name='tuoteryhma'>";
@@ -114,7 +114,7 @@ else {
 
 		// n‰ytet‰‰n soveltuvat osastot
 		// tehd‰‰n avainsana query
-		$res2 = avainsana("OSASTO");
+		$res2 = t_avainsana("OSASTO");
 
 		if (mysql_num_rows($res2) > 11) {
 			echo "<div style='height:265;overflow:auto;'>";
@@ -159,7 +159,7 @@ else {
 			echo "<input type='hidden' name='mul_osasto[]' value='$kala'>";
 
 			// tehd‰‰n avainsana query
-			$res3 = avainsana("OSASTO", $kukarow['kieli'], $kala);
+			$res3 = t_avainsana("OSASTO", "", "and avainsana.selite ='$kala'");
 			$selrow = mysql_fetch_array($res3);
 
 			echo "<tr><td>$kala - $selrow[selitetark]</td></tr>";
@@ -177,7 +177,7 @@ else {
 
 		// n‰ytet‰‰n soveltuvat osastot
 		// tehd‰‰n avainsana query
-		$res2 = avainsana("TRY");
+		$res2 = t_avainsana("TRY");
 
 		if (mysql_num_rows($res2) > 11) {
 			echo "<div style='height:265;overflow:auto;'>";
@@ -226,7 +226,7 @@ else {
 			echo "<input type='hidden' name='mul_osasto[]' value='$kala'>";
 
 			// tehd‰‰n avainsana query
-			$res3 = avainsana("OSASTO", $kukarow['kieli'], $kala);
+			$res3 = t_avainsana("OSASTO", "", "and avainsana.selite ='$kala'");
 			$selrow = mysql_fetch_array($res3);
 
 			echo "<tr><td>$kala - $selrow[selitetark]</td></tr>";
@@ -260,7 +260,7 @@ else {
 			echo "<input type='hidden' name='mul_try[]' value='$kala'>";
 
 			// tehd‰‰n avainsana query
-			$res3 = avainsana("TRY", $kukarow['kieli'], $kala);
+			$res3 = t_avainsana("TRY", "", "and avainsana.selite ='$kala'");
 			$selrow = mysql_fetch_array($res3);
 
 			echo "<tr><td>$kala - $selrow[selitetark]</td></tr>";

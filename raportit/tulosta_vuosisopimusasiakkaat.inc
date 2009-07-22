@@ -110,13 +110,13 @@ function rivi ($firstpage, $laji = '') {
 
 	if ($laji == 'osasto') {
 		// tehd‰‰n avainsana query
-		$tryre = avainsana("OSASTO", $kukarow['kieli'], $row["osasto"]);
+		$tryre = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
 		$tryro = mysql_fetch_array($tryre);
 		$asananumero = $row["osasto"];
 	}
 	else {
 		// tehd‰‰n avainsana query
-		$tryre = avainsana("TRY", $kukarow['kieli'], $row["try"]);
+		$tryre = t_avainsana("TRY", "", "and avainsana.selite ='$row[try]'");
 		$tryro = mysql_fetch_array($tryre);
 		$asananumero = $row["try"];
 	}

@@ -43,6 +43,7 @@ $query = "  SELECT group_concat(distinct selite SEPARATOR \"','\") lajit
 			GROUP BY laji";
 $abures = mysql_query($query) or pupe_error($query);
 $aburow = mysql_fetch_array($abures);
+
 if($aburow["lajit"] != "") {
 	$lajilisa = " and seuranta IN ('','{$aburow["lajit"]}')";
 }
@@ -665,6 +666,7 @@ if($tee == "NAYTA") {
 				WHERE yhtio = '$kukarow[yhtio]' and avainsana.laji='TIL-LITETY' and avainsana.selitetark_2='PAKOLLINEN'
 				HAVING liite IS NULL";
 	$liiteres = mysql_query($query) or pupe_error($query);
+	
 	if(mysql_num_rows($liiteres) > 0) {
 		$class = "error";       
 	}
@@ -705,13 +707,17 @@ if($tee == "NAYTA") {
 				WHERE yhtio = '$kukarow[yhtio]' and liitos = 'LASKU' and liitostunnus IN ($laskurow[versiot])
 				ORDER BY kayttotarkoitus";
 	$liiteres = mysql_query($query) or pupe_error($query);
-	if(mysql_num_rows($liiteres)>0) {
+	
+	if (mysql_num_rows($liiteres)>0) {
 		$kayttotarkoitus = "";
+
 		while($liiterow = mysql_fetch_array($liiteres)) {
-			if($edkt != $liiterow["kayttotarkoitus"]) {
-				$query = " select selitetark from avainsanat where yhtio='$kukarow[yhtio]' and laji='TIL-LITETY' and selite = '$liiterow[kayttotarkoitus]'";
+			
+			if ($edkt != $liiterow["kayttotarkoitus"]) {
+				$query = " SELECT selitetark from avainsanat where yhtio='$kukarow[yhtio]' and laji='TIL-LITETY' and selite = '$liiterow[kayttotarkoitus]'";
 				$res = mysql_query($query) or pupe_error($query);
 				$r = mysql_fetch_array($res);
+				
 				$menu[] = array("VALI" => $r["selitetark"]);
 			}
 
@@ -720,7 +726,6 @@ if($tee == "NAYTA") {
 			$edkt = $row["kayttotarkoitus"];
 		}       
 	}
-	
 
 	$menu[] = array("TEKSTI" => "Muokkaa liitteitä", "HREF" => "../liitetiedostot.php?liitos=lasku&id=$tarjous&lopetus=".urlencode("raportit/tilaushakukone.php?toim=$toim&setti=$setti&hakupalkki=OHI&aja_kysely=tmpquery&tarjous=$tarjous"), "TARGET" => "page");
 	
@@ -861,27 +866,23 @@ if($tee == "") {
 			}
 			
 			//seuranta
-			$query = "  SELECT selite, concat_ws(' - ',selite, selitetark)
-						FROM avainsana
-						WHERE yhtio='$kukarow[yhtio]' and laji='SEURANTA'
-						ORDER BY jarjestys, selitetark";
-			$mryresult = mysql_query($query) or pupe_error($query);
+			$mryresult = t_avainsana("SEURANTA");
+			
 			echo "      <td>
 							<select name='seuranta[]' multiple='TRUE' size='8'>";
 			while($row = mysql_fetch_array($mryresult)) {
 				$sel = "";
-				if (array_search($row[0], $seuranta) !== false) {
+				if (array_search($row["selite"], $seuranta) !== false) {
 					$sel = 'selected';
 				}
-				echo "      <option value='$row[0]' $sel>$row[1]</option>";
+				
+				echo "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark]</option>";
 			}
 			
-			echo "          <option value='TYHJA'>".t("Seuranta puuttuu")."</option>
-							</select>
-							<br>
-							".t("Seurannoittain").": <input type='checkbox' name='group[laskun_lisatiedot.seuranta]' value='checked' {$group["laskun_lisatiedot.seuranta"]}> prio: <input type='text' name='prio[laskun_lisatiedot.seuranta]' value='{$prio["laskun_lisatiedot.seuranta"]}' size='2'>
-						</td>";
-
+			echo "<option value='TYHJA'>".t("Seuranta puuttuu")."</option>
+					</select>
+					<br>".t("Seurannoittain").": <input type='checkbox' name='group[laskun_lisatiedot.seuranta]' value='checked' {$group["laskun_lisatiedot.seuranta"]}> prio: <input type='text' name='prio[laskun_lisatiedot.seuranta]' value='{$prio["laskun_lisatiedot.seuranta"]}' size='2'>
+					</td>";
 
 			$query = "  SELECT distinct(kuka) kuka, kuka.nimi nimi
 						FROM lasku

@@ -393,11 +393,11 @@ if ($ytunnus!='') {
 			echo "<td valign='bottom' class='back'>";
 
 			// tehd‰‰n avainsana query
-			$avainresult = avainsana("TRY", $kukarow['kieli'], $sumrow["try"]);
+			$avainresult = t_avainsana("TRY", $kukarow['kieli'], "and avainsana.selite ='$sumrow[try]'");
 			$tryrow = mysql_fetch_array($avainresult);
 
 			// tehd‰‰n avainsana query
-			$avainresult = avainsana("OSASTO", $kukarow['kieli'], $sumrow["osasto"]);
+			$avainresult = t_avainsana("OSASTO", $kukarow['kieli'], "and avainsana.selite ='$sumrow[osasto]'");
 			$osastorow = mysql_fetch_array($avainresult);
 
 			if ($nimet == 'nayta') {
@@ -721,14 +721,14 @@ if ($ytunnus!='') {
 			
 			//	Haetaan osastot ja avainsanat muistiin
 			// tehd‰‰n avainsana query
-			$tryres = avainsana("OSASTO", $kukarow['kieli']);
+			$tryres = t_avainsana("OSASTO");
 
 			while($tryrow = mysql_fetch_array($tryres)) {
 				$osastot[$tryrow["selite"]] = $tryrow["selitetark"];
 			}
 
 			// tehd‰‰n avainsana query
-			$tryres = avainsana("TRY", $kukarow['kieli']);
+			$tryres = t_avainsana("TRY");
 
 			while($tryrow = mysql_fetch_array($tryres)) {
 				$tryt[$tryrow["selite"]] = $tryrow["selitetark"];

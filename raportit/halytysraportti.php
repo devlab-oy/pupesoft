@@ -2184,7 +2184,7 @@
 					<tr><th>".t("Osasto")."</th><td>";
 
 			// tehd‰‰n avainsana query
-			$sresult = avainsana("OSASTO", $kukarow['kieli']);
+			$sresult = t_avainsana("OSASTO");
 
 			echo "<select name='osasto'>";
 			echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
@@ -2204,7 +2204,7 @@
 
 			//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
 			// tehd‰‰n avainsana query
-			$sresult = avainsana("TRY", $kukarow['kieli']);
+			$sresult = t_avainsana("TRY");
 
 			echo "<select name='tuoryh'>";
 			echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
@@ -2327,12 +2327,12 @@
 
 			if ($tuoryh != '') {
 				// tehd‰‰n avainsana query
-				$sresult = avainsana("TRY", $kukarow['kieli'], $tuoryh);
+				$sresult = t_avainsana("TRY", "", "and avainsana.selite ='$tuoryh'");
 				$srow = mysql_fetch_array($sresult);
 			}
 			if ($osasto != '') {
 				// tehd‰‰n avainsana query
-				$sresult = avainsana("OSASTO", $kukarow['kieli'], $osasto);
+				$sresult = t_avainsana("OSASTO", "", "and avainsana.selite ='$osasto'");
 				$trow = mysql_fetch_array($sresult);
 			}
 			if ($toimittajaid != '') {

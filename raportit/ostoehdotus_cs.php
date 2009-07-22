@@ -890,7 +890,7 @@
 	echo "<tr><th>".t("Osasto")."</th><td colspan='3'>";
 
 	// tehd‰‰n avainsana query
-	$res2 = avainsana("OSASTO", $kukarow['kieli'], '', $yhtiot);
+	$res2 = t_avainsana("OSASTO", "", "", $yhtiot);
 
 	echo "<select name='mul_osasto[]' multiple='TRUE' size='10' style='width:100%;'>";
 
@@ -923,7 +923,7 @@
 
 	//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
 	// tehd‰‰n avainsana query
-	$res2 = avainsana("TRY", $kukarow['kieli'], '', $yhtiot);
+	$res2 = t_avainsana("TRY", "", "", $yhtiot);
 
 	echo "<select name='mul_try[]' multiple='TRUE' size='10' style='width:100%;'>";
 

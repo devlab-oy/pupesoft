@@ -179,26 +179,33 @@
 	}
 
 	if ($lasrow["vienti"] != '') {
-		//Laitetaan kollimäärät ja kilot mukaan kommenttiin vientilaskuille
+		// Laitetaan kollimäärät ja kilot mukaan kommenttiin vientilaskuille
 		$query = "	SELECT pakkaus, pakkauskuvaus, pakkauskuvaustark, sum(kilot) kilot, sum(kollit) kollit
 					FROM rahtikirjat
 					WHERE otsikkonro in ($tunnukset)
-					and yhtio='$kukarow[yhtio]'
+					and yhtio = '$kukarow[yhtio]'
 					group by pakkaus, pakkauskuvaus, pakkauskuvaustark
 					having kollit > 0";
 		$rahtiresult = mysql_query($query) or pupe_error($query);
 
-		while($rahtirow = mysql_fetch_array($rahtiresult)) {
-
-			if($rahtirow["pakkaus"] != $rahtirow["pakkauskuvaus"]) {
-				$rahtirow["pakkaus"] .= " ".$rahtirow["pakkauskuvaus"];
+		while ($rahtirow = mysql_fetch_array($rahtiresult)) {
+			
+			$rahtirow_pakkaus = t_avainsana("PAKKAUS", $kielirow["kieli"], "and avainsana.selite  = '$rahtirow[pakkaus]' and avainsana.selitetark  = '$rahtirow[pakkauskuvaus]'", "", "", "selite");
+			
+			if ($rahtirow["pakkauskuvaus"] != "") {
+				$rahtirow_pakkauskuvaus = t_avainsana("PAKKAUS", $kielirow["kieli"], "and avainsana.selite  = '$rahtirow[pakkaus]' and avainsana.selitetark  = '$rahtirow[pakkauskuvaus]'", "", "", "selitetark");
 			}
-
-			if($rahtirow["pakkauskuvaustark"] != '') {
-				$rahtirow["pakkaus"] .= " ".$rahtirow["pakkauskuvaustark"];
+			
+			if ($rahtirow_pakkaus != $rahtirow_pakkauskuvaus) {
+				$rahtirow_pakkaus .= " ".$rahtirow_pakkauskuvaus;
 			}
-
-			$lisa_comments .= "$rahtirow[kollit] ".t("kpl", $kielirow["kieli"]).". $rahtirow[pakkaus] $rahtirow[kilot] kg. \n";
+			
+			// Tämä on käsin syötetty, ei voida kääntää
+			if ($rahtirow["pakkauskuvaustark"] != '') {
+				$rahtirow_pakkaus .= ", ".$rahtirow["pakkauskuvaustark"];
+			}
+			
+			$lisa_comments .= "$rahtirow[kollit] x $rahtirow_pakkaus $rahtirow[kilot] kg. \n";
 		}
 	}
 

@@ -297,7 +297,7 @@
 			if (!$tootedi = fopen($nimiedi, "w")) die("Filen $nimiedi luonti ep‰onnistui!");
 
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, tilausrivin_lisatiedot as tl2 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ";
+			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, tilausrivin_lisatiedot as tl2 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ";
 			$locre = mysql_query($query) or pupe_error($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -1495,20 +1495,9 @@
 
 							while ($tilrow = mysql_fetch_array($tilres)) {
 
-								if (strtolower($laskun_kieli) != strtolower($yhtiorow['kieli'])) {
-									$query = "	SELECT selite
-												FROM tuotteen_avainsanat
-												WHERE yhtio = '$kukarow[yhtio]'
-												and laji 	= 'nimitys_".strtolower($laskun_kieli)."'
-												and tuoteno = '$tilrow[tuoteno]'
-												and selite != ''
-												LIMIT 1";
-									$nimresult = mysql_query($query) or pupe_error($query);
-
-									if (mysql_num_rows($nimresult) > 0) {
-										$nimrow = mysql_fetch_array($nimresult);
-										$tilrow['nimitys'] = $nimrow['selite'];
-									}
+								if (strtolower($laskun_kieli) != strtolower($yhtiorow['kieli'])) {									
+									//K‰‰nnet‰‰n nimitys
+									$tilrow['nimitys'] = t_tuotteen_avainsanat($tilrow, 'nimitys', $laskun_kieli);
 								}
 
 								//K‰ytetyn tavaran myynti

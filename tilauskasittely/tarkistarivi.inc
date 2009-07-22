@@ -420,6 +420,7 @@
 						$kotipaikatlask++;
 					}
 				}
+			
 			}
 		}
 		//	Jos ollaan livahdettu puutteeksi koitetaan josko t‰t‰ voitasiin myyd‰ erikokisvarastosta
@@ -449,6 +450,11 @@
 			if ($row['var'] == 'P' and $trow['ei_varastoida'] != '') {
 				$varaosakommentti .= " ".t("T‰m‰ on tehdastilaustuote ja on saatavilla tilauksena")."!<br>";
 			}
+		}
+		else {
+			// meill‰ on vaan yks paikka..
+			$alkurow = mysql_fetch_array($omavarastores);
+			list(, , $selpaikkamyytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 		}
 
 		// K‰‰yd‰‰n l‰pi tuotteen toimittajat
@@ -543,7 +549,6 @@
 		else {
 			$paikat = "";
 		}
-
 	}
 
 	/*

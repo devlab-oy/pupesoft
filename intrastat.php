@@ -516,7 +516,7 @@
 				}
 
 				$ulos .= "<td valign='top'>".$row["tuoteno"]."</td>";
-				$ulos .= "<td valign='top'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
+				$ulos .= "<td valign='top'>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
 	 			$ulos .= "<td valign='top'><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&kayttajan_valinta_maa=$kayttajan_valinta_maa&vaintullinimike=$row[tullinimike1]&tapahtumalaji=$tapahtumalaji'>$row[tullinimike1]</></td>";	//Tullinimike CN
 				$ulos .= "<td valign='top'>".$row["kauppatapahtuman_luonne"]."</td>";
 				$ulos .= "<td valign='top'>".$row["alkuperamaa"]."</td>";
@@ -543,7 +543,7 @@
 				if(isset($workbook)) {
 					$worksheet->write($excelrivi, 1, $row["laskunro"]);
 					$worksheet->write($excelrivi, 2, $row["tuoteno"]);
-					$worksheet->write($excelrivi, 3, asana('nimitys_',$row['tuoteno'],$row['nimitys']));
+					$worksheet->write($excelrivi, 3, t_tuotteen_avainsanat($row, 'nimitys'));
 					$worksheet->write($excelrivi, 4, $row["tullinimike1"]);
 					$worksheet->write($excelrivi, 5, $row["kauppatapahtuman_luonne"]);
 					$worksheet->write($excelrivi, 6, $row["alkuperamaa"]);

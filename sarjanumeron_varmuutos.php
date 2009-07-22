@@ -222,7 +222,7 @@
 				$sarjares = mysql_query($query) or pupe_error($query);
 
 				echo "<tr>";
-				echo "<td valign='top' class='spec'>$tuoterow[tuoteno]</td><td valign='top' class='spec' nowrap>".asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys'])."</td><td class='spec' valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td><td></td><td></td></tr>";
+				echo "<td valign='top' class='spec'>$tuoterow[tuoteno]</td><td valign='top' class='spec' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td><td class='spec' valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td><td></td><td></td></tr>";
 				
 				if (mysql_num_rows($sarjares) > 0) {
 					

@@ -299,6 +299,7 @@
 			$linkki = "";
 			$query = "SELECT fakta2 FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'R' and isatuoteno = '$prow[tuoteno]' and fakta2 != '' ORDER BY isatuoteno, tuoteno LIMIT 1";
 			$faktares = mysql_query($query) or pupe_error($query);
+			
 			if(mysql_num_rows($faktares) > 0) {
 				$faktarow = mysql_fetch_array($faktares);
 				$id = uniqid();
@@ -315,7 +316,7 @@
 			
 			echo "<tr>";
 			echo "<td>$prow[otunnus]</td>";			
-			echo "<td align='left'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."$kommentti</td>";
+			echo "<td align='left'>".t_tuotteen_avainsanat($prow, 'nimitys')."$kommentti</td>";
 			echo "<td><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow[$i])."'>$prow[tuoteno]</a>$linkki</td>";
 			echo "<td align='right'>$prow[tilattu]</td>";
 			echo "<td align='right'>$prow[kerayspvm]</td>";

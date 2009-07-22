@@ -653,7 +653,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		$headerivi .= "".t("toim tuoteno")."\t";
 		$tuoterivi .= "\"$toimirow[toim_tuoteno]\"\t";
 		$headerivi .= "".t("nimitys")."\t";
-		$tuoterivi .= "\"".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."\"\t";
+		$tuoterivi .= "\"".t_tuotteen_avainsanat($row, 'nimitys')."\"\t";
 		$headerivi .= "".t("toim nimitys")."\t";
 		$tuoterivi .= "\"$toimirow[toim_nimitys]\"\t";
 		$headerivi .= "".t("ostohinta")."\t";

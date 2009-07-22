@@ -850,7 +850,7 @@
 				$sarjavalinta = "<span style='float: left;'> ".naytaValinta($laskurow, $prow, "myyntirivitunnus", "myyntirivitunnus", array("D","O"), "VALMISTUS", "&otunnus=$laskurow[tunnus]&valmistettavat=$valmistettavat")."</span>";
 			}
 			
-			echo "<td class='$class' valign='top'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
+			echo "<td class='$class' valign='top'>".t_tuotteen_avainsanat($prow, 'nimitys')."</td>";
 			echo "<td class='$class' valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($prow["tuoteno"])."'>$prow[tuoteno]</a> $sarjalinkkilisa</td>";
 			echo "<input type='hidden' name='tuotenumerot[$prow[tunnus]]' value='$prow[tuoteno]'>";
 			echo "<td class='$class' valign='top' align='right'>$sarjavalinta <span style='float: right; width: 80px;'>$prow[tilattu]".strtolower($prow["yksikko"])."</span></td>";

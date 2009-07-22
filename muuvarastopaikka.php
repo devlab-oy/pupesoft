@@ -669,7 +669,7 @@
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 		
-		echo "<th>$tuoteno - ".asana('nimitys_',$tuoteno,$trow['nimitys'])."</th>";
+		echo "<th>$tuoteno - ".t_tuotteen_avainsanat($trow, 'nimitys')."</th>";
 		echo "<td>";
 		echo "<input type='Submit' value='".t("Edellinen tuote")."'>";
 		echo "</td>";
@@ -755,7 +755,7 @@
 		echo "<td valign='top'><input type = 'text' name = 'asaldo' size = '3' value ='$asaldo'></td>";
 				
 		if($trow["sarjanumeroseuranta"] != '') {
-			$query	= "	SELECT tilausrivi_osto.nimitys nimitys, sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, 
+			$query	= "	SELECT sarjanumeroseuranta.tuoteno, tilausrivi_osto.nimitys nimitys, sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, 
 						concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
 						FROM sarjanumeroseuranta
 						JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -775,7 +775,7 @@
 				echo "<table width='100%'>";
 				
 				while($sarjarow = mysql_fetch_array($sarjares)) {
-					echo "<tr><td nowrap>".asana('nimitys_',$trow['tuoteno'],$sarjarow['nimitys'])."</td><td nowrap>$sarjarow[sarjanumero]</td><td nowrap>$sarjarow[tuotepaikka]</td><td><input type='checkbox' name='sarjano_array[]' value='$sarjarow[tunnus]'></td></tr>";
+					echo "<tr><td nowrap>".t_tuotteen_avainsanat($sarjarow, 'nimitys')."</td><td nowrap>$sarjarow[sarjanumero]</td><td nowrap>$sarjarow[tuotepaikka]</td><td><input type='checkbox' name='sarjano_array[]' value='$sarjarow[tunnus]'></td></tr>";
 				}
 				echo "</table>";
 				

@@ -510,7 +510,7 @@
 				
 				while ($prow = mysql_fetch_array($res)) {
 					//Tarkistetaan löytyyko tuote enää rekisteristä
-					$query = "select * from tuote where tuoteno='$prow[tuoteno]' and yhtio='$kukarow[yhtio]'";
+					$query = "SELECT * from tuote where tuoteno='$prow[tuoteno]' and yhtio='$kukarow[yhtio]'";
 					$res1   = mysql_query($query) or pupe_error($query);
 					
 					if (mysql_num_rows($res1)==0) { 
@@ -532,7 +532,7 @@
 					$resyht += $lapsiyht;
 					
 					if ($tunnus != $prow["tunnus"]) {												
-						echo "<tr class='aktiivi'><td>$prow[tuoteno] $error</td><td>".asana('nimitys_',$prow['tuoteno'],$tuoterow['nimitys'])."</td>";
+						echo "<tr class='aktiivi'><td>$prow[tuoteno] $error</td><td>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td>";
 						
 						if ($toim != "LISAVARUSTE") {
 							echo "<td>$prow[kerroin]</td>";

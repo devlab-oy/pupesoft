@@ -3216,7 +3216,7 @@ if ($tee == '') {
 
 			echo "<br>
 				<table>
-				<tr>$jarjlisa<th>".t("Nimitys")."</th><td align='right'>".asana('nimitys_',$tuote['tuoteno'],$tuote['nimitys'])."</td></tr>
+				<tr>$jarjlisa<th>".t("Nimitys")."</th><td align='right'>".t_tuotteen_avainsanat($tuote, 'nimitys')."</td></tr>
 				<tr>$jarjlisa<th>".t("Hinta")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['myyntihinta'])." $yhtiorow[valkoodi]</td></tr>
 				<tr>$jarjlisa<th>".t("Nettohinta")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['nettohinta'])." $yhtiorow[valkoodi]</td></tr>";
 
@@ -4647,7 +4647,7 @@ if ($tee == '') {
 							}
 
 							if ($kukarow["resoluutio"] == 'I') {
-								echo "<td valign='top'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
+								echo "<td valign='top'>".t_tuotteen_avainsanat($prow, 'nimitys')."</td>";
 							}
 
 							echo "<input type='hidden' name='tuoteno_array[$prow[tuoteno]]' value='$prow[tuoteno]'>";

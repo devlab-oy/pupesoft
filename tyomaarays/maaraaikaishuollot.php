@@ -170,7 +170,7 @@
 					WHERE yhtio='$kukarow[yhtio]' and malli='$malli' and huolto='$huolto'";
 		$result = mysql_query ($query) or pupe_error($query);		
 		
-		while($row = mysql_fetch_array($result)){
+		while ($row = mysql_fetch_array($result)){
 			
 			$query = "	SELECT tuoteno, nimitys
 						FROM tuote
@@ -179,7 +179,7 @@
 			$row2 = mysql_fetch_array($res2);
 			
 			echo "	<tr>
-					<td>".asana('nimitys_',$row['tuoteno'],$row2['nimitys'])."</td>
+					<td>".t_tuotteen_avainsanat($row2, 'nimitys')."</td>
 					<td>$row[tuoteno]</td>
 					<td>$row[maara]</td>
 					<td>

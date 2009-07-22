@@ -1007,7 +1007,7 @@
 				if (($tuoterow["inventointilista_aika"] == '0000-00-00 00:00:00' and $lista == '') or ($tuoterow["inventointilista"] == $lista and $tuoterow["inventointilista_aika"] != '0000-00-00 00:00:00') or ($tee2=='KORJAA' and $tuoterow["inventointilista"] == $lista)) {
 
 					echo "<tr>";
-					echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']);
+					echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
 
 					if ($tuoterow["sarjanumeroseuranta"] == "S") {
 						if (mysql_num_rows($sarjares) > 0) {
@@ -1103,7 +1103,7 @@
 					}
 
 					echo "<tr>";
-					echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']);
+					echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
 
 					if ($tuoterow["sarjanumeroseuranta"] == "S") {
 						if (mysql_num_rows($sarjares) > 0) {
@@ -1130,7 +1130,7 @@
 				}
 				else {
 					echo "<tr>";
-					echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys'])." </td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
+					echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys')." </td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
 					echo "<td valign='top'>".sprintf(t("Tätä tuotetta inventoidaan listalla %s. Inventointi estetty"), $tuoterow['inventointilista']).".</td>";
 					echo "</tr>";
 				}

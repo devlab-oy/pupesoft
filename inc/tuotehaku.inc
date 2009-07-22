@@ -311,7 +311,7 @@
 					$ulos .= "<option value='$variaatiot[1]'> ** $variaatiot[1] ** </option>";
 				}
 
-				$ulos .= "<option value='$trow[tuoteno]$lisakala3'>$lisakala2 $lisakala1 $trow[tuoteno] ".asana('nimitys_',$trow['tuoteno'],$trow['nimitys'])." ($kokonaismyytavissa)</option>";
+				$ulos .= "<option value='$trow[tuoteno]$lisakala3'>$lisakala2 $lisakala1 $trow[tuoteno] ".t_tuotteen_avainsanat($trow, 'nimitys')." ($kokonaismyytavissa)</option>";
 
 				$edtuoteno = $trow["yhtio"].$trow["korvaavat"];
 				$edvariaatio = $variaatiot[1];

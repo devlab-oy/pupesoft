@@ -612,17 +612,17 @@ if (!function_exists('rivi_valmistus')) {
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 		
 		$oikpos = $pdf->strlen($row["tilkpl"]." ".$omyks, $pb);
-		$pdf->draw_text(515-$oikpos, $kala, $row["tilkpl"]." ".$omyks, $thispage, $pb);
+		$pdf->draw_text(515-$oikpos, $kala, $row["tilkpl"]." ".$omyks, 		$thispage, $pb);
 		
 		if ($row["keratty"] != '') {
 			$oikpos = $pdf->strlen($row['varattu'], $pb);
-			$pdf->draw_text(575-$oikpos, $kala, $row['varattu'], 								$thispage, $pb);				
+			$pdf->draw_text(575-$oikpos, $kala, $row['varattu'], 			$thispage, $pb);				
 		}
 		
 		$kala = $kala - $rivinkorkeus+3;
 		$lask_valm++;
 		
-		$pdf->draw_text(125, $kala, asana('nimitys_', $row['tuoteno'], $row['nimitys']), 		$thispage, $pb);
+		$pdf->draw_text(125, $kala, t_tuotteen_avainsanat($row, 'nimitys'),	$thispage, $pb);
 		
 		if (trim($row["kommentti"]) != '') {
 			

@@ -1337,7 +1337,7 @@ if ($tila == '') {
 				echo "<$td $class valign='top'><input size='15' type='text' name='rivi_nimitys[$rivirow[rivitunnus]]' value='$rivirow[nimitys]'></$td>";
 			}
 			else {
-				echo "<$td $class valign='top'>".asana('nimitys_',$rivirow['tuoteno'],$rivirow['nimitys'])."</$td>";
+				echo "<$td $class valign='top'>".t_tuotteen_avainsanat($rivirow, 'nimitys')."</$td>";
 			}
 		}
 
@@ -1422,7 +1422,7 @@ if ($tila == '') {
 						<$td  valign='top'>$lisavar_row[tuoteno]<br>$lisavar_row[toim_tuoteno]</$td>";
 
 				if ($kukarow["resoluutio"] == 'I') {
-					echo "<$td valign='top'>".asana('nimitys_',$lisavar_row['tuoteno'],$lisavar_row['nimitys'])."</$td>";
+					echo "<$td valign='top'>".t_tuotteen_avainsanat($lisavar_row, 'nimitys')."</$td>";
 				}
 
 				echo "<$td valign='top' align='right'><input size='5' type='text' name='lisavarusterivi_kpl[$rivirow[rivitunnus]##$lisavar_row[tuoteno]#*#$rivirow[otunnus]]' style='text-align:right'></$td>";

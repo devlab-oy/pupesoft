@@ -306,7 +306,7 @@
 				while ($tuoterow = mysql_fetch_array($saldoresult)) {
 					echo "<tr><th colspan='5'>$tuoterow[tuoteno]</th></tr>";
 
-					echo "<td>".asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys'])."</td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td><td>".tv1dateconv($tuoterow["laadittu"], "P")."</td><td>$tuoterow[kpl]</td><td>$tuoterow[inventointipoikkeama]</td></tr>";
+					echo "<td>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td><td>".tv1dateconv($tuoterow["laadittu"], "P")."</td><td>$tuoterow[kpl]</td><td>$tuoterow[inventointipoikkeama]</td></tr>";
 
 					echo "<tr><td colspan='5'>$tuoterow[selite]</td></tr>";
 

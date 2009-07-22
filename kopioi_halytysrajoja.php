@@ -235,10 +235,10 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 
 	while ($ressu = mysql_fetch_array($result)) {
 		if ($ressu['tunnus'] == $kopioitavavarasto) {
-			$kopvarasto = $ressu[nimitys];
+			$kopvarasto = $ressu["nimitys"];
 		}
 		else {
-			$kohvarasto = $ressu[nimitys];
+			$kohvarasto = $ressu["nimitys"];
 		}
 
 	}
@@ -330,22 +330,22 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		echo "<tr>";
 		echo "<td>$row[tuoteno]</td>";
 
-		if ($kopioitavavarasto == $row[tunnus]) {
+		if ($kopioitavavarasto == $row["tunnus"]) {
 			echo "<td>$row[varastonnimi]</td>";
 			echo "<input type='hidden' name='kopioitavaraja[$row[paikkatunnus]]' value='$row[halytysraja]'>";
 			echo "<input type='hidden' name='kopioitavatuoteno[$row[paikkatunnus]]' value='$row[tuoteno]'>";
 
-			if ($edtuoteno != $row[tuoteno]) {
+			if ($edtuoteno != $row["tuoteno"]) {
 				$summa = 0;
 			}
 
-			if ($edtuote == "" or $edtuote == $row[tuoteno]) {
-				$summa += $row[halytysraja];
-				$edtuoteno = $row[tuoteno];
+			if ($edtuote == "" or $edtuote == $row["tuoteno"]) {
+				$summa += $row["halytysraja"];
+				$edtuoteno = $row["tuoteno"];
 			}
 
 		}
-		elseif ($kohdevarasto == $row[tunnus]) {
+		elseif ($kohdevarasto == $row["tunnus"]) {
 			echo "<th>$row[varastonnimi]</th>";
 
 			echo "<input type='hidden' name='kohde[$row[paikkatunnus]]' value='$row[tuoteno]'>";
@@ -355,7 +355,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 			}
 
 
-			if ($edkohdetuoteno == $row[tuoteno]){
+			if ($edkohdetuoteno == $row["tuoteno"]){
 				echo "<input type='hidden' name='kohdehaly[$row[paikkatunnus]]' value='$summa'>";
 
 			}
@@ -370,7 +370,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		}
 
 
-		echo "<td>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
+		echo "<td>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
 		echo "<td>$row[status]</td>";
 
 		if ($abcpaalla == "kylla") {
@@ -414,7 +414,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		echo "<td align='right'>".sprintf("%.2f",$saldo)."<br>";
 
 		// saldo myytävissa tämä varasto
-		list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "KAIKKI", $row[tunnus]);
+		list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "KAIKKI", $row["tunnus"]);
 		echo sprintf("%.2f",$saldo)."</td>";
 
 

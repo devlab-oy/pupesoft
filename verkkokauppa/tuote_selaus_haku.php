@@ -759,7 +759,7 @@
 				else {
 					echo "<td valign='top' class='$vari'><a href='../tuote.php?tuoteno=".urlencode($row["tuoteno"])."&tee=Z'>$lisakala $row[tuoteno]</a>$linkkilisa</td>";
 				}
-				echo "<td valign='top' class='$vari'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
+				echo "<td valign='top' class='$vari'>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
 
 				if ($lisatiedot != "") {
 					echo "<td valign='top' class='$vari'>$row[toim_tuoteno]</td>";
@@ -775,7 +775,7 @@
 				<a id='$row[tuoteno]_P2' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P2\")'>{$row["tuoteno"]}</a>$toimlisa
 				</td>";
 
-				echo "<td valign='top' class='$vari'><a id='$row[tuoteno]_P3' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P3\")'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</a></td>";
+				echo "<td valign='top' class='$vari'><a id='$row[tuoteno]_P3' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P3\")'>".t_tuotteen_avainsanat($row, 'nimitys')."</a></td>";
 			}
 
 			//	Extranetkäyttäjille voidaan näyttää myös se heidän asiakashinta..

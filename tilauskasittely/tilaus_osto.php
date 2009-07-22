@@ -701,7 +701,7 @@
 							while($row=mysql_fetch_array($tuoteresult)) {
 								$sel='';
 								if($tuoteno==$row['tuoteno']) $sel='SELECTED';
-								$ulos .= "<option value='$row[tuoteno]' $sel>$row[tuoteno] - ".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</option>";
+								$ulos .= "<option value='$row[tuoteno]' $sel>$row[tuoteno] - ".t_tuotteen_avainsanat($row, 'nimitys')."</option>";
 							}
 							$ulos .= "</select>";
 						}
@@ -912,7 +912,7 @@
 							echo "<td valign='top' $class>{$prow["toim_tuoteno"]} {$prow["toim_nimitys"]}</td>";
 						}
 						else {
-							echo "<td valign='top' $class>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";	
+							echo "<td valign='top' $class>".t_tuotteen_avainsanat($prow, 'nimitys')."</td>";	
 						}
 					}
 					else {
@@ -1045,7 +1045,7 @@
 								$borderlask--;
 								
 								while ($xprow = mysql_fetch_array($lisaresult)) {
-									echo "<tr><td class='spec'>".asana('nimitys_',$xprow['tuoteno'],$xprow['nimitys'])."</td><td></td>";
+									echo "<tr><td class='spec'>".t_tuotteen_avainsanat($xprow, 'nimitys')."</td><td></td>";
 									echo "<td><input type='hidden' name='tuoteno_array[$xprow[tuoteno]]' value='$xprow[tuoteno]'>$xprow[tuoteno]</td>";
 									echo "<td></td>";
 									echo "<td><input type='text' name='kpl_array[$xprow[tuoteno]]' size='5' maxlength='5'></td>

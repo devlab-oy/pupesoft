@@ -371,10 +371,10 @@
 		}
 
 		if ($mista == "vastaanota") {
-			$pohja = $pdf->draw_paragraph($kala+10, 155, 5, 315, asana('nimitys_',$row['tuoteno'],$row['nimitys']), $firstpage, $pieni);
+			$pohja = $pdf->draw_paragraph($kala+10, 155, 5, 315, t_tuotteen_avainsanat($row, 'nimitys'), $firstpage, $pieni);
 		}
 		else {
-			$pohja = $pdf->draw_paragraph($kala+10, 280, 5, 440, asana('nimitys_',$row['tuoteno'],$row['nimitys']), $firstpage, $boldi);
+			$pohja = $pdf->draw_paragraph($kala+10, 280, 5, 440, t_tuotteen_avainsanat($row, 'nimitys'), $firstpage, $boldi);
 		}
 
 		$lisaa = 0;

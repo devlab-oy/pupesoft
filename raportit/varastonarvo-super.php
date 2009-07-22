@@ -720,7 +720,7 @@
 						$excelsarake++;
 						$worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"]);
 						$excelsarake++;
-						$worksheet->writeString($excelrivi, $excelsarake, asana('nimitys_',$row['tuoteno'],$row['nimitys']));
+						$worksheet->writeString($excelrivi, $excelsarake, t_tuotteen_avainsanat($row, 'nimitys'));
 						$excelsarake++;
 						$worksheet->writeString($excelrivi, $excelsarake, $row["yksikko"]);
 						$excelsarake++;

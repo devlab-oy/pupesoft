@@ -1602,10 +1602,10 @@
 					}
 
 					if($valitut["SARAKE18"] != '') {
-						$rivi .= "\"".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."\"\t";
+						$rivi .= "\"".t_tuotteen_avainsanat($row, 'nimitys')."\"\t";
 
 						if(isset($workbook)) {
-							$worksheet->writeString($excelrivi, $excelsarake, asana('nimitys_',$row['tuoteno'],$row['nimitys']));
+							$worksheet->writeString($excelrivi, $excelsarake, t_tuotteen_avainsanat($row, 'nimitys'));
 							$excelsarake++;
 						}
 					}

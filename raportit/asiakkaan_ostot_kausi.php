@@ -100,13 +100,13 @@ if ($tee == 'go') {
 		echo "\n";
 		while ($row = mysql_fetch_array($result)) {
 			echo "$row[tuoteno]\t";
-			echo asana('nimitys_',$row['tuoteno'],$row['nimitys'])."\t";
-			echo "".str_replace('.',',',$row['summa'])."\t";
-			echo "".str_replace('.',',',$row['kate'])."\t";
-			echo "".str_replace('.',',',$row['kpl'])."\t";
-			echo "".str_replace('.',',',$row['edsumma'])."\t";
-			echo "".str_replace('.',',',$row['edkate'])."\t";
-			echo "".str_replace('.',',',$row['edkpl'])."\t";
+			echo t_tuotteen_avainsanat($row, 'nimitys')."\t";
+			echo str_replace('.',',',$row['summa'])."\t";
+			echo str_replace('.',',',$row['kate'])."\t";
+			echo str_replace('.',',',$row['kpl'])."\t";
+			echo str_replace('.',',',$row['edsumma'])."\t";
+			echo str_replace('.',',',$row['edkate'])."\t";
+			echo str_replace('.',',',$row['edkpl'])."\t";
 			echo "\n";
 		}
 		echo "<br><br><br><br>";

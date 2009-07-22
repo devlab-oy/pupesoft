@@ -3,7 +3,7 @@
 	///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 	$useslave = 1;
 
-	require("inc/parametrit.inc");
+	require("../inc/parametrit.inc");
 	require("tulosta_vuosisopimusasiakkaat.inc");
 
 	echo "<font class='head'>Vuosisopimusasiakkaat</font><hr>";

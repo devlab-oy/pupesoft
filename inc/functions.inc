@@ -5955,7 +5955,7 @@ if (!function_exists("tee_asiakashaku")) {
 				if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
 			}
 
-			if ($monta == 0  and substr($ytunnus,0,1) == "#") {
+			if ($monta <= 5  and substr($ytunnus,0,1) == "#") {
 				// jos eka merkki on # etsitään toimitusnimen perusteella
 
 				// eka merkki pois alusta
@@ -6000,7 +6000,7 @@ if (!function_exists("tee_asiakashaku")) {
 				}
 			}
 
-			if ($monta == 0) {
+			if ($monta <= 5) {
 				// exactihaku
 				$query	= "	(SELECT * FROM asiakas use index (ytunnus_index) WHERE $konsyhtiot and ytunnus = '$ytunnus' and ytunnus!='' and laji != 'P' $asiakasrajaus)
 							UNION
@@ -6015,7 +6015,7 @@ if (!function_exists("tee_asiakashaku")) {
 				$monta  = mysql_num_rows($result);
 			}
 
-			if ($monta == 0) {
+			if ($monta <= 5) {
 				// kokeillaan ytunnuksen alulla
 				$query	= "	SELECT *
 							FROM asiakas use index (ytunnus_index)
@@ -6030,7 +6030,7 @@ if (!function_exists("tee_asiakashaku")) {
 				$monta  = mysql_num_rows($result);
 			}
 
-			if ($monta == 0 and is_string($ytunnus)) {
+			if ($monta <= 5 and is_string($ytunnus)) {
 				// arvailuhaku
 				$query	= "	(SELECT * FROM asiakas use index (asiakasnimi) WHERE $konsyhtiot and nimi like '%$ytunnus%' and nimi!='' and laji != 'P' $asiakasrajaus)
 							UNION

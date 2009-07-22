@@ -130,11 +130,11 @@
 			$kilot  += $rahtirow["kilot"];
 			$kollit += $rahtirow["kollit"];
 		}
-		
+
 		if ($laskurow["bruttopaino"] > 0) {
 			$kilot = $laskurow["bruttopaino"];
 		}
-		
+
 		$query = "	SELECT
 					tuote.tullinimike1,
 					tuote.tullinimike2,
@@ -597,6 +597,26 @@
 		//Kenttä 44 Lisätietoja
 		$pdf2->draw_text(61,  396, "N380 $laskurow[laskunro] - ".tv1dateconv($laskurow["tapvm"]), 	$pages[0], $kymppi);
 		$pdf2->draw_text(61,  386, "30400",					 										$pages[0], $kymppi);
+
+		$sanat = explode(' ', $laskurow["comments"]);
+		$rivit = array();
+		$ind = 0;
+
+		// mahtuu kolme riviä kommenttia
+		foreach($sanat as $sana) {
+			if ($pdf2->strlen($rivit[$ind], $kymppi) > 280) {
+				$rivit[$ind] .= "\n";
+				$ind++;
+				if ($ind > 2) break;
+			}
+			$rivit[$ind] .= "$sana ";
+		}
+
+		$apupointteri = 376;
+		foreach ($rivit as $rivi) {
+			$pdf2->draw_text(61, $apupointteri, $rivi, $pages[0], $kymppi);
+			$apupointteri -= 10;
+		}
 
 		if ($yhtiorow["kotitullauslupa"] != "") {
 			$pdf2->draw_text(61,  377, "Kotitullauslupa ".$yhtiorow["kotitullauslupa"].", Eteläinen tullipiiri",	$pages[0], $kymppi);

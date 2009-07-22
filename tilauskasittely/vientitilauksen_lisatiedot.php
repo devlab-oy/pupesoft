@@ -52,6 +52,7 @@
 						bruttopaino 					= '$rahtirow[kilot]',
 						lisattava_era 					= '$lisattava_era',
 						vahennettava_era 				= '$vahennettava_era',
+						comments						= '$lomake_lisatiedot',
 						ultilno							= '$ultilno'
 						WHERE tunnus = '$otun' and yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -216,6 +217,10 @@
 		echo "	<tr><td>35. ".t("Bruttopaino").":</td>
 				<td colspan='2'>$rahtirow[kilot]</td>
 				<input type='hidden' name='bruttopaino' value='$rahtirow[kilot]'></tr>";
+
+		if ($laskurow["vienti"] == "K") {
+			echo "<tr><td>44. ".t("Lisätiedot")."</td><td colspan='2'><input type='text' name='lomake_lisatiedot' size='25' value='$laskurow[comments]'></td></tr>";
+		}
 
 		echo "<tr><td class='back'></td><td class='back'><input type='submit' value='".t("Päivitä tiedot")."'></td></tr>";
 		echo "</form></table>";

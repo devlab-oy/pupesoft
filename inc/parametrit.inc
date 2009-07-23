@@ -427,7 +427,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		if (!headers_sent()) {
 			header("Content-Type: text/html; charset=$charset");
 		}
-		
+
 		if (!isset($no_head) or (isset($no_head) and $no_head != "yes")) {
 
 			echo "<html>";
@@ -467,12 +467,12 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 
 				$hreffi = "http://www.devlab.fi/wiki/index.php/Ohjeet:".basename($phpnimi).$urltoim;
 
-				echo "<div align='right'><a target='_blank' href='$hreffi'>".t("OHJE")."</a><br></div>";
+				echo "<div style='text-align:right; vertical-align:top;'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
 			}
 			elseif(isset($_GET["sulje"]) and $_GET["sulje"] != "") {
 				echo "<div><a href='#' onclick=\"divi=document.getElementById('{$_GET["sulje"]}'); document.body.removeChild(divi); return false;\"><font style='color: red;'>x</font></a><br></div>";
 			}
-		
+
 			// Autetaan sanakirjan ylläpidossa
 			if ($kukarow["yhtio"] != "" and $kukarow["kuka"] != "") {
 				$query = "	SELECT yhtio
@@ -482,7 +482,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 							and nimi	= 'sanakirja.php'
 							and alanimi = ''";
 				$ksres = mysql_query($query) or pupe_error($query);
-			
+
 				if (mysql_num_rows($ksres) > 0) $kaannetyt_sanat = array();
 			}
 		}
@@ -524,8 +524,8 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 				}
 			}
 		}
-		
-		if ($lopetus != '') {			
+
+		if ($lopetus != '') {
 			lopetus($lopetus);
 			echo "<br>";
 		}

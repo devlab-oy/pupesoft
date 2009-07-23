@@ -164,7 +164,8 @@
 
 			while ($lasrow = mysql_fetch_array($res)) {
 				// Haetaan maksuehdon tiedot
-				$query  = "	select * from maksuehto
+				$query  = "	SELECT * 
+							from maksuehto
 							left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
 							where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$lasrow[maksuehto]'";
 				$result = mysql_query($query) or pupe_error($query);
@@ -179,7 +180,7 @@
 				else {
 					$masrow = mysql_fetch_array($result);
 				}
-
+				
 				//Haetaan factoringsopimuksen tiedot
 				if ($masrow["factoring"] != '') {
 					$query = "	SELECT *
@@ -293,6 +294,10 @@
 					else {
 						$laskun_kieli = "";
 					}
+					
+					//maksuehto tekstinä
+					$maksuehto = $masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $laskun_kieli);
+					$kateistyyppi = $masrow["kateinen"];
 
 					// Laskukohtaiset kommentit kuntoon
 					// Tämä merkki | eli pystyviiva on rivinvaihdon merkki elmalla

@@ -295,7 +295,6 @@
 
 		$query = "	SELECT lasku.*,
 					maksuehto.teksti meh,
-					maksuehto.kassa_teksti mehka,
 					maksuehto.itsetulostus,
 					maksuehto.kateinen,
 					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
@@ -476,7 +475,7 @@
 					$teksti = "Hyvitys";
 				}
 				echo "<td>".t("$teksti")."</td>";
-				echo "<td>$row[mehka] $row[meh]</td>";
+				echo "<td>$row[meh]</td>";
 
 				$rahti_hinta = "";
 
@@ -613,7 +612,7 @@
 						if ($maksuehtorow["tunnus"] == $row["maksuehto"]) {
 							$sel = "selected";
 						}
-						echo "<option value='$maksuehtorow[tunnus]' $sel>{$maksuehtorow['teksti']} {$maksuehtorow['kassa_teksti']}</option>";
+						echo "<option value='$maksuehtorow[tunnus]' $sel>".t_tunnus_avainsanat($maksuehtorow, "teksti", "MAKSUEHTOKV")."</option>";
 					}
 
 					echo "<option value='seka'>Seka</option>";
@@ -798,7 +797,6 @@
 					lasku.maksuehto, lasku.chn,
 					lasku.tila, lasku.alatila,
 					maksuehto.teksti meh,
-					maksuehto.kassa_teksti mehka,
 					group_concat(distinct lasku.tunnus) tunnukset,
 					group_concat(distinct lasku.tunnus separator '<br>') tunnukset_ruudulle,
 					count(distinct lasku.tunnus) tilauksia,
@@ -854,7 +852,7 @@
 						<td valign='top'>$tilrow[tilauksia]</td>
 						<td valign='top'>$tilrow[riveja]</td>
 						<td valign='top' align='right'>$tilrow[arvo]</td>
-						<td valign='top'>$tilrow[mehka] $tilrow[meh]</td>
+						<td valign='top'>$tilrow[meh]</td>
 						<td valign='top'>$toimitusselite</td>
 						<td valign='top'>".t($laskutyyppi)." ".t($alatila)."</td>";
 

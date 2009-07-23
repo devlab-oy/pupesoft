@@ -58,7 +58,7 @@
 			$otunnus = $laskurow["tunnus"];
 			
 			// haetaan maksuehdon tiedot
-			$query  = "	select * 
+			$query  = "	SELECT * 
 						from maksuehto 
 						left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
 						where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$laskurow[maksuehto]'";
@@ -75,7 +75,7 @@
 			}
 			
 			//maksuehto tekstinä
-			$maksuehto      = $masrow["teksti"]." ".$masrow["kassa_teksti"];
+			$maksuehto      = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 			$kateistyyppi   = $masrow["kateinen"];
 			
 			if ($yhtiorow['laskutyyppi'] == 3) {

@@ -204,8 +204,12 @@
 			$tee = 'ETSILASKU';
 		}
 	}
+	
+	if (!isset($kieli) or $kieli == "") {
+		$kieli = $yhtiorow["kieli"];
+	}
 
-	if($tee != 'NAYTATILAUS') {
+	if ($tee != 'NAYTATILAUS') {
 		//syötetään tilausnumero
 		echo "<form method='post' action='$PHP_SELF' autocomplete='off' name='hakuformi'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
@@ -1286,7 +1290,7 @@
 				$otunnus = $laskurow["tunnus"];
 
 				// haetaan maksuehdon tiedot
-				$query  = "	select *
+ 				$query  = "	SELECT pankkiyhteystiedot.*, maksuehto.*
 							from maksuehto
 							left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
 							where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$laskurow[maksuehto]'";
@@ -1303,7 +1307,7 @@
 				}
 
 				//maksuehto tekstinä
-				$maksuehto      = $masrow["teksti"]." ".$masrow["kassa_teksti"];
+				$maksuehto      = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 				$kateistyyppi   = $masrow["kateinen"];
 				
 				if ($yhtiorow['laskutyyppi'] == 3) {

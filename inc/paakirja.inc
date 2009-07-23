@@ -380,7 +380,7 @@
 		$lisa2 = "tiliointi.tapvm < '$tilikaudetrow[tilikausi_alku]'"; //hassua hassua
 	}
 	elseif ($llvv > 0) {
-		echo "<font class='head'>$nimi ".t("ajalta")." $alvv</font><hr>";
+		echo "<font class='head'>$nimi ".t("ajalta")." ".date("d.m.Y", mktime(0, 0, 0, $alvk, $alvp, $alvv))." - ".date("d.m.Y", mktime(0, 0, 0, $llvk, $llvp, $llvv))."</font><hr>";
 		$alkupvm  = date("Y-m-d", mktime(0, 0, 0, $alvk, $alvp, $alvv));
 		$loppupvm = date("Y-m-d", mktime(0, 0, 0, $llvk, $llvp, $llvv));
 		$lisa  = "tiliointi.tapvm >= '$alkupvm' AND tiliointi.tapvm <= '$loppupvm'";

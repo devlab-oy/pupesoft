@@ -110,12 +110,12 @@
 			}
 			
 			/*
-				V‰h‰n glungea taas.. jos halutaan perustaa tarjous insertoidaan ensin pelkk‰ perusotsikko ja sitten t‰m‰ toimitusotsikko
-				
+				V‰h‰n glungea taas.. jos halutaan perustaa tarjous insertoidaan ensin pelkk‰ perusotsikko ja sitten t‰m‰ toimitusotsikko				
 				Korjataan projektiotsikon tiedot insertin j‰lkeen..
 			*/
 			
 			$tunnusnippu=$ptunnus=0;
+			
 			if ($perusta == "PROJEKTI" and $monistarow["tunnusnippu"] > 0 and $monistarow["tila"] == "T") {
 				$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 				$insres  = mysql_query($kysely) or pupe_error($kysely);
@@ -136,9 +136,9 @@
 			$insres  = mysql_query($kysely) or pupe_error($kysely);
 			$utunnus = mysql_insert_id();
 
-			if($perusta == "TYOMAARAYS") {
+			if ($perusta == "TYOMAARAYS") {
 				//	Tehd‰‰n tyhj‰ pohja tyˆm‰‰r‰ykselle..
-				$kysely  = "INSERT into tyomaarays SET
+				$kysely  = " INSERT into tyomaarays SET
 				 				yhtio = '$kukarow[yhtio]',
 								otunnus = '$utunnus'";
 				$insres  = mysql_query($kysely) or pupe_error($kysely);
@@ -205,7 +205,7 @@
 			$kysely  = "INSERT into laskun_lisatiedot ($fields) VALUES ($values)";
 			$insres2 = mysql_query($kysely) or pupe_error($kysely);
 
-			if($ptunnus>0) {
+			if ($ptunnus > 0) {
 				$kysely  = "INSERT into laskun_lisatiedot ($fields) VALUES ($pvalues)";
 				$insres2 = mysql_query($kysely) or pupe_error($kysely);
 				
@@ -250,7 +250,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 				
 				//	P‰ivitet‰‰n projekti
-				if($ptunnus>0) {
+				if ($ptunnus > 0) {
 					$query = "	UPDATE lasku
 								SET jaksotettu 	= '$mtunnus'
 								WHERE yhtio 	= '$kukarow[yhtio]'
@@ -258,6 +258,42 @@
 					$result = mysql_query($query) or pupe_error($query);
 				}				
 			}
+			
+			//Kopioidaan liitetiedostot
+			$query = "	SELECT * 
+						from liitetiedostot 
+						where yhtio			= '$kukarow[yhtio]'
+						and liitostunnus	= '$otunnus'
+						and liitos			= 'lasku'";
+			$liiteres = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($liiteres) > 0) {	
+				
+				while($liiterow = mysql_fetch_assoc($liiteres)) {
+					
+					$liiterow["data"] = mysql_real_escape_string($liiterow["data"]);
+				
+					$query = "	INSERT INTO liitetiedostot SET
+							  	yhtio    		= '$kukarow[yhtio]',
+							  	liitos   		= '$liiterow[liitos]',
+							  	liitostunnus 	= '$utunnus',
+							  	data     		= '$liiterow[data]',
+							  	selite   		= '$liiterow[selite]',
+								kieli			= '$liiterow[kieli]',
+							  	filename 		= '$liiterow[filename]',
+							  	filesize 		= '$liiterow[filesize]',
+							  	filetype 		= '$liiterow[filetype]',
+							  	image_width		= '$liiterow[image_width]',
+							  	image_height	= '$liiterow[image_height]',
+							  	image_bits		= '$liiterow[image_bits]',
+							  	image_channels	= '$liiterow[image_channels]',
+							  	kayttotarkoitus	= '$liiterow[kayttotarkoitus]',
+							  	jarjestys		= '$liiterow[jarjestys]',
+							  	laatija			= '$kukarow[kuka]',
+							  	luontiaika		= now()";
+					$liiteinsres = mysql_query($query) or pupe_error($query);
+				}
+			}	
 			
 			
 			//Siirret‰‰n tilausrivit
@@ -497,7 +533,7 @@
 							and tunnus = '$kukarow[kesken]'";
 				$result = mysql_query($query) or pupe_error($query);
 
-				$query 	= "	select *
+				$query 	= "	SELECT *
 							from lasku
 							where tunnus = '$kukarow[kesken]'
 							and yhtio = '$kukarow[yhtio]'";

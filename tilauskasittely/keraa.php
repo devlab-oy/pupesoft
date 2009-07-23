@@ -59,9 +59,7 @@
 			$yhtiorow['karayksesta_rahtikirjasyottoon'] = '';
 		}		
 	}
-	
-	
-	
+
 	if (isset($real_submit)) {
 		$real_submit = 'yes';
 		

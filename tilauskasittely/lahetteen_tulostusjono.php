@@ -584,12 +584,12 @@
 		
 		echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
 
-		$query = "	SELECT selite, count(*) kpl
+		$query = "	SELECT toimitustapa.tunnus, toimitustapa.selite, count(*) kpl
 					FROM toimitustapa
 					JOIN lasku ON toimitustapa.yhtio=lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.toimitustapa=toimitustapa.selite
 					WHERE toimitustapa.yhtio = '$kukarow[yhtio]'
-					GROUP BY selite
-					ORDER BY selite";
+					GROUP BY 1,2
+					ORDER BY 2";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
@@ -597,7 +597,7 @@
 		$sel=array();
 		$sel[$tutoimtapa] = "selected";
 		while($row = mysql_fetch_array($result)){
-			echo "<option value='$row[0]' ".$sel[$row[0]].">".asana('TOIMITUSTAPA_',$row[0])." ({$row["kpl"]})</option>";
+			echo "<option value='$row[selite]' ".$sel[$row["selite"]].">".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")." ({$row["kpl"]})</option>";
 		}
 
 		echo "</select></td><td></td><td></td>";

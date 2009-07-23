@@ -655,7 +655,7 @@ while (!feof ($fd)) {
 				$editilaus_otsikko_ok = "KYLLA";
 
 				// haetaan tomitustavan oletusmaksajan tiedot
-				$apuqu = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
+				$apuqu = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
 				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 				$apuro = mysql_fetch_array($meapu);
 				$maksaja = $apuro['merahti'];

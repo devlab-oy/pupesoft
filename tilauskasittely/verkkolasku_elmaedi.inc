@@ -60,7 +60,7 @@ if (!function_exists('elmaedi_otsik')) {
 		fputs($tootedi, "ICUX1__CR:$yhtiorow[valkoodi]\n");
 		fputs($tootedi, "IPAT1__DT:13 @".sprintf("%-35.35s",vlas_dateconv($lasrow["erpcm"]))."@102\n");
 		fputs($tootedi, "IPAT1__PC:15 @$lasrow[viikorkopros]\n");
-		fputs($tootedi, "IPAT1__TP:$masrow[teksti] $masrow[kassa_teksti]\n");
+		fputs($tootedi, "IPAT1__TP:$masrow[teksti]\n");
 
 		if ($lasrow["kasumma"] != 0) {
 			fputs($tootedi, "IPAT8__DT:12 @".sprintf("%-35.35s",vlas_dateconv($lasrow["kapvm"]))."@102\n");

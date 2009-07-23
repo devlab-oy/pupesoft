@@ -164,7 +164,7 @@
 
 			while ($lasrow = mysql_fetch_array($res)) {
 				// Haetaan maksuehdon tiedot
-				$query  = "	SELECT * 
+				$query  = "	SELECT pankkiyhteystiedot.*, maksuehto.*
 							from maksuehto
 							left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
 							where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$lasrow[maksuehto]'";
@@ -252,7 +252,7 @@
 					// $masrow array maksuehdon tiedot
 
 					// Etsit‰‰n myyj‰n nimi
-					$mquery  = "select nimi
+					$mquery  = "SELECT nimi
 								from kuka
 								where tunnus='$lasrow[myyja]' and yhtio='$kukarow[yhtio]'";
 					$myyresult = mysql_query($mquery) or pupe_error($mquery);
@@ -336,6 +336,11 @@
 					// Ulkomaisen ytunnuksen korjaus
 					if (substr(trim(strtoupper($lasrow["ytunnus"])),0,2) != strtoupper($lasrow["maa"]) and trim(strtoupper($lasrow["maa"])) != trim(strtoupper($yhtiorow["maa"]))) {
 						$lasrow["ytunnus"] = strtoupper($lasrow["maa"])."-".$lasrow["ytunnus"];
+					}
+					
+					if (strtolower($laskun_kieli) != strtolower($yhtiorow['kieli'])) {									
+						//K‰‰nnet‰‰n maksuehto
+						$masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $laskun_kieli);
 					}
 
 					$query = "	SELECT min(date_format(toimitettuaika, '%Y-%m-%d')) mint, max(date_format(toimitettuaika, '%Y-%m-%d')) maxt

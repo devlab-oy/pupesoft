@@ -1203,7 +1203,8 @@
 						}
 
 						// Haetaan maksuehdon tiedot
-						$query  = "	SELECT * FROM maksuehto
+						$query  = "	SELECT pankkiyhteystiedot.*, maksuehto.*
+									FROM maksuehto
 									LEFT JOIN pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
 									WHERE maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$lasrow[maksuehto]'";
 						$result = mysql_query($query) or pupe_error($query);
@@ -1380,6 +1381,11 @@
 							// Ulkomaisen ytunnuksen korjaus
 							if (substr(trim(strtoupper($lasrow["ytunnus"])),0,2) != strtoupper($lasrow["maa"]) and trim(strtoupper($lasrow["maa"])) != trim(strtoupper($yhtiorow["maa"]))) {
 								$lasrow["ytunnus"] = strtoupper($lasrow["maa"])."-".$lasrow["ytunnus"];
+							}
+							
+							if (strtolower($laskun_kieli) != strtolower($yhtiorow['kieli'])) {									
+								//K‰‰nnet‰‰n maksuehto
+								$masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $laskun_kieli);
 							}
 
 							$query = "	SELECT min(date_format(toimitettuaika, '%Y-%m-%d')) mint, max(date_format(toimitettuaika, '%Y-%m-%d')) maxt
@@ -1778,12 +1784,15 @@
 						else {
 							$asiakas_apu_row = array();
 						}
-
-						if ($asiakas_apu_row["kieli"] != "") {
-							$laskun_kieli = $asiakas_apu_row["kieli"];
+						
+						if ($kieli != "") {
+							$laskun_kieli = trim(strtoupper($kieli));
+						}
+						elseif (trim($asiakas_apu_row["kieli"]) != "") {
+							$laskun_kieli = trim(strtoupper($asiakas_apu_row["kieli"]));
 						}
 						else {
-							$laskun_kieli = $yhtiorow["kieli"];
+							$laskun_kieli = trim(strtoupper($yhtiorow["kieli"]));
 						}
 
 						// jos ei ole valittuna mit‰‰n tulostinta eik‰ haluta l‰hett‰‰ t‰t‰ laskua meillill‰k‰‰n skipataan looppi
@@ -1794,7 +1803,7 @@
 						$otunnus = $laskurow["tunnus"];
 
 						// haetaan maksuehdon tiedot
-						$query  = "	SELECT *
+						$query  = "	SELECT pankkiyhteystiedot.*, maksuehto.*
 									from maksuehto
 									left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
 									where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$laskurow[maksuehto]'";
@@ -1808,8 +1817,8 @@
 						}
 
 						//maksuehto tekstin‰
-						$maksuehto 		= $masrow["teksti"]." ".$masrow["kassa_teksti"];
-						$kateistyyppi	= $masrow["kateinen"];
+						$maksuehto = $masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $laskun_kieli);
+						$kateistyyppi = $masrow["kateinen"];
 
 						if ($yhtiorow['laskutyyppi'] == 3) {
 							
@@ -1829,7 +1838,7 @@
 								ob_end_clean();
 							}
 							else {
-								$querykieli = "	select *
+								$querykieli = "	SELECT *
 												from kirjoittimet
 												where yhtio='$kukarow[yhtio]' and tunnus='$yhtiorow[lasku_tulostin]'";
 								$kires = mysql_query($querykieli) or pupe_error($querykieli);
@@ -1840,12 +1849,10 @@
 						}
 						else {
 
-							// $tulos_ulos .= "Kielivalinta: Pakotettu keili:$kieli / Asiakkaan kieli: $laskun_kieli";
-
 							$varakieli = $kieli;
 
 							if ($kieli == '') {
-								$kieli 	= $laskun_kieli;
+								$kieli = $laskun_kieli;
 							}
 
 							require_once("tulosta_lasku.inc");
@@ -1912,8 +1919,6 @@
 							}
 
 							alvierittely ($page[$sivu]);
-
-							// $tulos_ulos .= " Tulostettiin kielell‰:$kieli";
 
 							$kieli = $varakieli;
 

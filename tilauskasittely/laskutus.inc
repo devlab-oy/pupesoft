@@ -556,7 +556,7 @@
 				$erapvm = "'$laskutuspvm'";
 			}
 
-			if ($xrow['kassa_teksti']!='') {
+			if ($xrow['kassa_abspvm'] != '0000-00-00' or $xrow["kassa_relpvm"] > 0) {
 				if ($xrow['kassa_abspvm'] == '0000-00-00') {
 					$kassa_erapvm = "adddate('$laskutuspvm', interval $xrow[kassa_relpvm] day)";
 				}

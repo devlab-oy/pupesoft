@@ -57,7 +57,7 @@
 				<td>$thfont Tunnit (EUR): </td><td>$thfont Maksuaika:</td></tr>";
 	$yhteensa = 0;
 	
-	while($row = mysql_fetch_row($result)){
+	while ($row = mysql_fetch_array($result)){
 		$query = "	SELECT sum(rivihinta)
 					FROM huoltotiedot
 					WHERE kpl > 0 and id='$row[0]'";
@@ -70,8 +70,8 @@
 		$rresult = mysql_query ($query)
 			or die ("Kysely ei onnistu $query");
 			
-		$prow = mysql_fetch_row($presult);
-		$rrow = mysql_fetch_row($rresult);
+		$prow = mysql_fetch_array($presult);
+		$rrow = mysql_fetch_array($rresult);
 
 		if ($prow[0] + $rrow[0] > 0) {
 			$tunnit = $prow[0] + $rrow[0];

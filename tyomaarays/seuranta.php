@@ -48,14 +48,14 @@
 		$kaikkiyht = 0;
 		$kaikkikpl = 0;
 		
-		while($row = mysql_fetch_row($result)){
+		while($row = mysql_fetch_array($result)){
 			$query = "	SELECT id
 						FROM tyomaarays
 						WHERE month(maksuaika)='$kk' and year(maksuaika)='$vv' and suorittaja='$row[0]'";
 			$yresult = mysql_query ($query) or pupe_error($query);
 			$yhteensa = 0;
 			$kplyht = 0;	
-			while($yrow = mysql_fetch_row($yresult)){
+			while($yrow = mysql_fetch_array($yresult)){
 				$query = "	SELECT sum(rivihinta), sum(kpl)
 							FROM huoltotiedot
 							WHERE kpl > 0 and id='$yrow[0]'";
@@ -65,8 +65,8 @@
 							FROM varaosat
 							WHERE kpl > 0 and osanro='HT295' and id='$yrow[0]'";
 				$rresult = mysql_query ($query) or pupe_error($query);
-				$prow = mysql_fetch_row($presult);
-				$rrow = mysql_fetch_row($rresult);
+				$prow = mysql_fetch_array($presult);
+				$rrow = mysql_fetch_array($rresult);
 		
 				$tunnit = $prow[0] + $rrow[0];
 				$kpl = $prow[1] + $rrow[1];
@@ -88,7 +88,7 @@
 					FROM tuote 
 					WHERE tuoteno='HT295' and yhtio='$yhtio'";
 		$result = mysql_db_query("prospekti", $query) or pupe_error($query);
-		$drow  = mysql_fetch_row($result);
+		$drow  = mysql_fetch_array($result);
 		$thinta = $drow[0];
 		mysql_select_db('tyomaarays')
 			or die ("Tietokanta katosi");
@@ -110,7 +110,7 @@
 		
 		$kaikkiyht = 0;
 		$kaikkikpl = 0;
-		while($yrow = mysql_fetch_row($yresult)){
+		while($yrow = mysql_fetch_array($yresult)){
 			$query = "	SELECT sum(rivihinta), sum(kpl)
 						FROM huoltotiedot
 						WHERE kpl > 0 and id='$yrow[0]'";
@@ -121,8 +121,8 @@
 						WHERE kpl > 0 and osanro='HT295' and id='$yrow[0]'";
 			$rresult = mysql_query ($query)
 				or die ("Kysely ei onnistu $query");
-			$prow = mysql_fetch_row($presult);
-			$rrow = mysql_fetch_row($rresult);
+			$prow = mysql_fetch_array($presult);
+			$rrow = mysql_fetch_array($rresult);
 			
 			$tunnit = $prow[0] + $rrow[0];
 			$kpl = $prow[1] + $rrow[1];
@@ -139,7 +139,7 @@
 					WHERE tuoteno='HT295' and yhtio='$yhtio'";
 		$result = mysql_db_query("prospekti", $query)
 			or die("$query feilas");                
-		$drow  = mysql_fetch_row($result);
+		$drow  = mysql_fetch_array($result);
 		$thinta = $drow[0];
 		mysql_select_db('tyomaarays')
 			or die ("Tietokanta katosi");

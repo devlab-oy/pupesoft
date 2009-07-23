@@ -203,8 +203,18 @@
 	}
 
 	if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
+		
+		if ($poistolukko != "") {
+			$disablointi = "DISABLED";
+			$infoteksti = "<td class='back'><font class='info'>".t("Eräseurantaa ei voi muuttaa, tuotteella on tapahtumia. Vaihda tuotenumero ja perusta uusi tuote.")."</font></td>";
+		}
+		else {
+			$disablointi = "";
+			$infoteksti = "";
+		}
+		
 
-		$ulos = "<td><select name='$nimi' id = '$nimi' Style=\"width: 300px;\" onmousedown=\"alasvetoMuutakoko('$nimi', 0);\" onblur=\"alasvetoMuutakoko('$nimi', 300);\">";
+		$ulos = "<td><select name='$nimi' id = '$nimi' Style=\"width: 300px;\" onmousedown=\"alasvetoMuutakoko('$nimi', 0);\" onblur=\"alasvetoMuutakoko('$nimi', 300);\" $disablointi>";
 
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
@@ -218,7 +228,7 @@
 		$ulos .= "<option value = 'E' $sel[E]>".t("Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (E)</option>";
 		$ulos .= "<option value = 'F' $sel[F]>".t("Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo")." (F)</option>";
 		$ulos .= "<option value = 'G' $sel[G]>".t("Eränumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (G)</option>";
-		$ulos .= "</select></td>";
+		$ulos .= "</select></td>$infoteksti";
 
 		$jatko = 0;
 	}

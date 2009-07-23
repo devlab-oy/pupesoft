@@ -923,14 +923,14 @@
 				
 				if ($row["sarjatunnus"] > 0 and $kukarow["extranet"] == "" and function_exists("sarjanumeronlisatiedot_popup")) {
 					if ($lisatiedot != "") {
-						echo "<tr><td colspan='7' class='back'><br></td></tr>";
+						echo "<tr class='aktiivi'><td colspan='7' class='back'><br></td></tr>";
 					}
 					else {
-						echo "<tr><td colspan='8' class='back'><br></td></tr>";
+						echo "<tr class='aktiivi'><td colspan='8' class='back'><br></td></tr>";
 					}
 				}
 
-				echo "<tr>";
+				echo "<tr class='aktiivi'>";
 
 				if (strtoupper($row["status"]) == "P") {
 					$vari = "tumma";
@@ -1139,12 +1139,12 @@
 						foreach ($saldot as $varaso => $saldo) {
 							if ($saldo != 0) {
 								$ei_tyhja = 'yes';
-								echo "<tr><td class='$vari' nowrap>$varaso</td><td class='$vari' align='right' nowrap>".sprintf("%.2f", $saldo)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td></tr>";
+								echo "<tr class='aktiivi'><td class='$vari' nowrap>$varaso</td><td class='$vari' align='right' nowrap>".sprintf("%.2f", $saldo)." ".t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite")."</td></tr>";
 							}
 						}
 
 						if ($ei_tyhja == '') {
-							echo "<tr><td class='$vari' nowrap colspan='2'>",t("Tuotteella ei ole saldoa"),"</td></tr>";
+							echo "<tr class='aktiivi'><td class='$vari' nowrap colspan='2'>",t("Tuotteella ei ole saldoa"),"</td></tr>";
 						}
 
 						echo "</table></td>";
@@ -1250,7 +1250,7 @@
 					}
 					$varresult = mysql_query($query) or pupe_error($query);
 
-					echo "<td valign='top' $classrigh class='$vari'>";
+					echo "<td valign='top' $classrigh class='$vari' style='padding:0px'>";
 
 					if (mysql_num_rows($varresult) > 0) {
 						$hyllylisa = "";
@@ -1288,7 +1288,7 @@
 								}
 
 								if ($lisatiedot != "" and $kukarow["extranet"] == "" and $hyllyssa != 0) {
-									$hyllylisa .= "	<tr>
+									$hyllylisa .= "	<tr class='aktiivi'>
 													<td class='$vari' align='right' nowrap>".sprintf("%.2f", $hyllyssa)."</td>
 													</tr>";
 								}
@@ -1390,10 +1390,10 @@
 					list($kommentit, $text_output, $kuvalisa_bin, $ostohinta, $tuotemyyntihinta) = sarjanumeronlisatiedot_popup($row["sarjatunnus"], $row["sarjayhtio"], '', '', '100%', '');
 
 					if ($lisatiedot != "") {
-						echo "<tr><td colspan='7'>$kommentit</td></tr>";
+						echo "<tr class='aktiivi'><td colspan='7'>$kommentit</td></tr>";
 					}
 					else {
-						echo "<tr><td colspan='6'>$kommentit</td></tr>";
+						echo "<tr class='aktiivi'><td colspan='6'>$kommentit</td></tr>";
 					}
 				}
 			}

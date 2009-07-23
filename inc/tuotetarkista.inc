@@ -134,28 +134,9 @@ if(!function_exists("tuotetarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
-			// Tyyppiä ei saa vaihtaa, jos tuotteella on saldoa
-			$query  = "	SELECT sarjanumeroseuranta
-		    			FROM tuote
-		    			WHERE yhtio = '$kukarow[yhtio]'
-		    			and tuoteno = '$tem_tuoteno'";
-		    $sresult = mysql_query($query) or pupe_error($query);
-		    $srow = mysql_fetch_array($sresult);
-
-		    if (trim(strtoupper($srow["sarjanumeroseuranta"])) != trim(strtoupper($t[$i]))) {
-		    	$query = "	SELECT count(*) kpl
-		    				FROM tuotepaikat
-		    				WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tem_tuoteno' and saldo != 0";
-		    	$saresult = mysql_query($query) or pupe_error($query);
-				$sarow = mysql_fetch_array($saresult);
-
-				if (($srow["sarjanumeroseuranta"] == "" or $srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F") and (trim(strtoupper($t[$i])) == '' or trim(strtoupper($t[$i])) == 'E' or trim(strtoupper($t[$i])) == 'F')) {
-					//annetaan vaihtaa
-				}
-		    	elseif ($sarow["kpl"] > 0) {
-					$virhe[$i] = t("Seurantatyyppiä ei voida muuttaa, koska tuotteella on saldoa")."!";
-				}
-		    }
+			if ($poistolukko != "" and $t[$i] != $trow["sarjanumeroseuranta"]) {
+				$virhe[$i] = t("Seurantatyyppiä ei voida muuttaa, koska tuotteella on tapahtumia")."!";
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "ei_saldoa") {

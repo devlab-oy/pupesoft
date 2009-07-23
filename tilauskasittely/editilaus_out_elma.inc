@@ -1,17 +1,10 @@
 <?php
 
-if (!function_exists("dateconv")) {
-	function dateconv ($date) {
-		//k‰‰nt‰‰ mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
-		return substr($date,0,4).substr($date,5,2).substr($date,8,2);
-	}
-}
-
 $nimi = "../dataout/elma-order-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 
 if (!$toot = fopen($nimi, "w")) die("Filen $nimi luonti ep‰onnistui!");
 
-$query = "SELECT tilausrivi.tunnus, toim_tuoteno, ostohinta, eankoodi, tilausrivi.tuoteno, round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) varattu, toimaika 
+$query = "SELECT tilausrivi.tunnus, toim_tuoteno, ostohinta, eankoodi, tilausrivi.tuoteno, round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) varattu, toimaika
 			FROM tilausrivi
 			LEFT JOIN tuote USING (yhtio, tuoteno)
 			LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$laskurow[liitostunnus]'
@@ -30,8 +23,8 @@ else {
 	$ulos .= "OBGMITYPE:220\n";
 	$ulos .= "OBGMINUMB:" . $laskurow['tunnus'] . "\n";
 	$ulos .= "OBGMIACKR:NA\n";
-	$ulos .= "ODTM4__DT:" . dateconv($laskurow['luontiaika']) . "\n";
-	$ulos .= "ODTM137DT:" . dateconv($laskurow['luontiaika']) . "\n";
+	$ulos .= "ODTM4__DT:" . tv2dateconv($laskurow['luontiaika']) . "\n";
+	$ulos .= "ODTM137DT:" . tv2dateconv($laskurow['luontiaika']) . "\n";
 	$ulos .= "OFTXDELTX:" . $laskurow['huolitsija'] . "\n";
 	$ulos .= "ONADSE_NA:" . $laskurow['nimi'] . "\n";
 	$ulos .= "ONADSE_NX:" . $laskurow['nimitark'] . "\n";
@@ -62,7 +55,7 @@ else {
 		$ulos .= "OLININ_PI:" . sprintf ('%-36.36s', $tilausrivirow['tuoteno']) . "1" . "\n";
 		$ulos .= "OLIN21_QT:" . sprintf("%013.4f", (float) $tilausrivirow['varattu']) . "\n";
 		$ulos .= "OLINCONIV:" . sprintf("%015.2f", (float) $tilausrivirow['ostohinta']) . " " . $laskurow['valkoodi'] . " " . $tilausrivirow['yksikko'] . "\n";
-		$ulos .= "OLIN2__DT:" . dateconv($tilausrivirow['toimaika']) . "\n";
+		$ulos .= "OLIN2__DT:" . tv2dateconv($tilausrivirow['toimaika']) . "\n";
 		$ulos .= "OLIN__END:" . $rivino . "\n";
 		fputs($toot,$ulos);
 		$rivino++;
@@ -84,20 +77,8 @@ else {
 
 	require ("../inc/ftp-send.inc");
 
-	if ($palautus == 0)
-		echo "<font class='message'>Tilaus l‰hetettiin onnistuneesti!</font><br>";
+	if ($palautus == 0) echo "<font class='message'>Tilaus l‰hetettiin onnistuneesti!</font><br>";
 
-	#// n‰ytet‰‰n faili ruudulla...
-	#$toot = fopen($nimi,"r");
-	#
-	#$contents = "";
-	#while (!feof ($toot)) {
-	#	$buffer = fgets($toot, 4096);
-	#	$contents .= $buffer;
-	#}
-	#fclose ($toot);
-	#
-	#echo "<pre>".htmlentities($contents)."</pre><br><br>";
 }
 
 $nimi  = "";

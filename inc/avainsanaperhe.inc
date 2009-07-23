@@ -63,7 +63,7 @@
 
 		// poistetaan toimittaja
 		if ($tee == "poista") {
-			$query = "delete from avainsana where yhtio='$kukarow[yhtio]' and tunnus='$avaintunnus'";
+			$query = "DELETE from avainsana where yhtio='$kukarow[yhtio]' and tunnus='$avaintunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$tee = "";
 			
@@ -137,8 +137,13 @@
 
 		// selataan vanhoja
 		if ($tee == "") {
-			$query  = "	SELECT * from avainsana 
-						where yhtio='$kukarow[yhtio]' and perhe='$perhe' and tunnus!='$tunnus' and perhe > 0
+			$query  = "	SELECT * 
+						from avainsana 
+						where yhtio	= '$kukarow[yhtio]'
+						and laji 	= '$al_laji'
+						and perhe	= '$perhe' 
+						and tunnus	!='$tunnus' 
+						and perhe 	> 0
 						order by tunnus";
 			$result = mysql_query($query) or pupe_error($query);
 

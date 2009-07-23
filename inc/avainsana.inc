@@ -1,5 +1,9 @@
 <?php
 	$otsikko = 'Avainsanat';
-	$kentat = 'tunnus, kieli, laji, selite, selitetark, selitetark_2, jarjestys';
+	$otsikko_nappi = 'avainsana';
+	
+	$kentat 	= 'tunnus, kieli, laji, selite, selitetark, selitetark_2, jarjestys, perhe HIDDEN_perhe';
+	$hakukentat = 'tunnus, kieli, laji, selite, selitetark, selitetark_2, jarjestys, perhe';
+	
 	$jarjestys = 'kieli, laji, jarjestys, selite, selitetark, selitetark_2';
 ?>

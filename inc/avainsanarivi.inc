@@ -3,166 +3,129 @@
 	$ulos = "";
 	$jatko = 1; // oletetaan normaali käsittely
 	$tyyppi = 1; // oletetaan rivin näkyvyys
-	
+
 	if ($i == 0) { //yhtiötä ei näytetä
 		$tyyppi = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "perhe") {
-		
+
 		// Perhetunnus
-		if($trow[$i] == 0) {
+		if ($lukitse_avaimeen != "") {
+			$trow[$i] = $perhe = $lukitse_avaimeen;
+		}
+		elseif($trow[$i] == 0) {
 			$query = "	SELECT max(perhe) perhe
 			 			FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'";
 			$pres = mysql_query($query) or pupe_error($query);
 			$perse = mysql_fetch_array($pres);
-			
-			$trow[$i] = $perhe = ($perse["perhe"]+1);		
+
+			$trow[$i] = $perhe = ($perse["perhe"]+1);
 		}
 		else {
 			$perhe = $trow[$i];
 		}
-		
-		$tyyppi = 3;
+
+		$tyyppi = 4;
 	}
 	
+	if (mysql_field_name($result, $i) == "selite" and $lukitse_avaimeen != "") {
+		$ulos = "<td><input type='hidden' name='$nimi' value='$lukitse_avaimeen'>$lukitse_avaimeen</td>";
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "laji") {
+
+		$al_laji = $trow[$i];
+
+		$avain_sel[$trow[$i]] = "SELECTED";
+
+		$ulos = "<td><select name='$nimi' onchange='submit();'>";
+
+		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Tuotteiden avainsanat")."'>";
+		if ($lukitse_laji== "" or $lukitse_laji == "Y") 				$ulos .= "<option value='Y' {$avain_sel['Y']}>									".t("Yksikko")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TRY") 				$ulos .= "<option value='TRY' {$avain_sel['TRY']}>								".t("Tuoteryhmä")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "OSASTO") 			$ulos .= "<option value='OSASTO' {$avain_sel['OSASTO']}>						".t("Tuoteosasto")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TUOTEMERKKI") 		$ulos .= "<option value='TUOTEMERKKI' {$avain_sel['TUOTEMERKKI']}>				".t("Tuotemerkki")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "S") 				$ulos .= "<option value='S' {$avain_sel['S']}>									".t("Tuotteen status")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TUOTEULK") 			$ulos .= "<option value='TUOTEULK' {$avain_sel['TUOTEULK']}>					".t("Tuotteiden avainsanojen laji")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "VARASTOLUOKKA") 	$ulos .= "<option value='VARASTOLUOKKA' {$avain_sel['VARASTOLUOKKA']}>			".t("Varastoluokka")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "SARJANUMERON_LI") 	$ulos .= "<option value='SARJANUMERON_LI' {$avain_sel['SARJANUMERON_LI']}>		".t("Sarjanumeron lisätieto")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "PARAMETRI") 		$ulos .= "<option value='PARAMETRI' {$avain_sel['PARAMETRI']}>					".t("Tuotteen parametri")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TARRATYYPPI") 		$ulos .= "<option value='TARRATYYPPI' {$avain_sel['TARRATYYPPI']}>				".t("Tuotteen tarratyyppi")."</option>";
+		if ($lukitse_laji== "") $ulos .= "</optgroup>";
+
+		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";
+		if ($lukitse_laji== "" or $lukitse_laji == "ASIAKASLUOKKA") 	$ulos .= "<option value='ASIAKASLUOKKA' {$avain_sel['ASIAKASLUOKKA']}>			".t("Asiakasluokka")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "ASIAKASOSASTO") 	$ulos .= "<option value='ASIAKASOSASTO' {$avain_sel['ASIAKASOSASTO']}>			".t("Asiakasosasto")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "ASIAKASRYHMA") 		$ulos .= "<option value='ASIAKASRYHMA' {$avain_sel['ASIAKASRYHMA']}>			".t("Asiakasryhma")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "ASIAKASTILA") 		$ulos .= "<option value='ASIAKASTILA' {$avain_sel['ASIAKASTILA']}>				".t("Asiakastila")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "PIIRI") 			$ulos .= "<option value='PIIRI' {$avain_sel['PIIRI']}>							".t("Asiakkaan piiri")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "LASKT_EMAIL") 		$ulos .= "<option value='LASKT_EMAIL' {$avain_sel['LASKT_EMAIL']}>				".t("Laskutustiedot autom. sähköpostitukseen")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "LASKT_EMAIL_SOP") 	$ulos .= "<option value='LASKT_EMAIL_SOP' {$avain_sel['LASKT_EMAIL_SOP']}>		".t("Laskutustiedot autom. sähköpostitukseen (Sopimus)")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "ASAVAINSANA") 		$ulos .= "<option value='ASAVAINSANA' {$avain_sel['ASAVAINSANA']}>				".t("Asiakkaan avainsanojen laji")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "EXTASAVAINSANA") 	$ulos .= "<option value='EXTASAVAINSANA' {$avain_sel['EXTASAVAINSANA']}>		".t("Extranet-asiakkaan avainsanojen laji")."</option>";
+		if ($lukitse_laji== "") $ulos .= "</optgroup>";
+
+		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Yhtiön avainsanat")."'>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TV") 				$ulos .= "<option value='TV' {$avain_sel['TV']}>								".t("Tilausvahvistus")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "LAHETETYYPPI") 		$ulos .= "<option value='LAHETETYYPPI' {$avain_sel['LAHETETYYPPI']}>			".t("Lähetetyyppi")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KALETAPA") 			$ulos .= "<option value='KALETAPA' {$avain_sel['KALETAPA']}>					".t("CRM yhteydenottotapa")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "MYSQLALIAS") 		$ulos .= "<option value='MYSQLALIAS' {$avain_sel['MYSQLALIAS']}>				".t("Tietokantasarakkeen nimialias")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TOIMITUSTAPA_OS") 	$ulos .= "<option value='TOIMITUSTAPA_OS' {$avain_sel['TOIMITUSTAPA_OS']}>		".t("Toimitustapa ostolle (kuljetus)")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KUKAASEMA") 		$ulos .= "<option value='KUKAASEMA' {$avain_sel['KUKAASEMA']}>					".t("Käytäjän asema")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "ALVULK") 			$ulos .= "<option value='ALVULK' {$avain_sel['ALVULK']}>						".t("Ulkomaan ALV%")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "ALV") 				$ulos .= "<option value='ALV' {$avain_sel['ALV']}>								".t("ALV%")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "SEURANTA") 			$ulos .= "<option value='SEURANTA' {$avain_sel['SEURANTA']}>					".t("Tilauksen seurantaluokka")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "pakkaus") 			$ulos .= "<option value='pakkaus' {$avain_sel['pakkaus']}>						".t("Pakkaus")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TOIMEHTO") 			$ulos .= "<option value='TOIMEHTO' {$avain_sel['TOIMEHTO']}>					".t("Toimitusehto")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "HENKILO_OSASTO") 	$ulos .= "<option value='HENKILO_OSASTO' {$avain_sel['HENKILO_OSASTO']}>		".t("Henkilöosasto")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "RAHTIKIRJA") 		$ulos .= "<option value='RAHTIKIRJA' {$avain_sel['RAHTIKIRJA']}>				".t("Rahtikirjatyyppi")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KERAYSLISTA") 		$ulos .= "<option value='KERAYSLISTA' {$avain_sel['KERAYSLISTA']}>				".t("Keräyslista")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TOIMTAPAKV") 		$ulos .= "<option value='TOIMTAPAKV' {$avain_sel['TOIMTAPAKV']}>				".t("Toimitustavan kieliversio")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KVERITTELY") 		$ulos .= "<option value='KVERITTELY' {$avain_sel['KVERITTELY']}>				".t("Kulunvalvonnan erittely")."</option>";
+		if ($lukitse_laji== "") $ulos .= "</optgroup>";
+
+		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Työmääräysten avainsanat")."'>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TYOM_TYOJONO") 		$ulos .= "<option value='TYOM_TYOJONO' {$avain_sel['TYOM_TYOJONO']}>			".t("Työmääräysten työjono")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TYOM_TYOSTATUS") 	$ulos .= "<option value='TYOM_TYOSTATUS' {$avain_sel['TYOM_TYOSTATUS']}>		".t("Työmääräysten työstatus")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TYOM_TYOLINJA") 	$ulos .= "<option value='TYOM_TYOLINJA' {$avain_sel['TYOM_TYOLINJA']}>			".t("Työmääräysten työlinja")."</option>";
+		if ($lukitse_laji== "") $ulos .= "</optgroup>";
+
+		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Viennin avainsanat")."'>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KT") 				$ulos .= "<option value='KT' {$avain_sel['KT']}>								".t("Kauppatapahtuman luonne")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TULLI") 			$ulos .= "<option value='TULLI' {$avain_sel['TULLI']}>							".t("Poistumistoimipaikka")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KM") 				$ulos .= "<option value='KM' {$avain_sel['KM']}>								".t("Kuljetusmuoto")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "C") 				$ulos .= "<option value='C' {$avain_sel['C']}>									".t("CHN tietue")."</option>";
+		if ($lukitse_laji== "") $ulos .= "</optgroup>";
+
+		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Maksuehtojen avainsanat")."'>";
+		if ($lukitse_laji== "" or $lukitse_laji == "LASKUKUVAUS") 		$ulos .= "<option value='LASKUKUVAUS' {$avain_sel['LASKUKUVAUS']}>				".t("Maksuposition kuvaus")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KARHUVIESTI") 		$ulos .= "<option value='KARHUVIESTI' {$avain_sel['KARHUVIESTI']}>				".t("Karhuviesti")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "MAKSUEHTOKV")		$ulos .= "<option value='MAKSUEHTOKV' {$avain_sel['MAKSUEHTOKV']}>				".t("Maksuehdon kieliversio")."</option>";
+		if ($lukitse_laji== "") $ulos .= "</optgroup>";
+
+		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("CRM avainsanat")."'>";
+		if ($lukitse_laji== "" or $lukitse_laji == "CRM_ROOLI") 		$ulos .= "<option value='CRM_ROOLI' {$avain_sel['CRM_ROOLI']}>					".t("Yhteyshenkilön rooli")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "CRM_SUORAMARKKI") 	$ulos .= "<option value='CRM_SUORAMARKKI' {$avain_sel['CRM_SUORAMARKKI']}>		".t("Yhteyshenkilön suoramarkkinointitiedot")."</option>";
+		if ($lukitse_laji== "") $ulos .= "</optgroup>";
+
+		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Muut avainsanat")."'>";
+		if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI") 		$ulos .= "<option value='VAKIOVIESTI' {$avain_sel['VAKIOVIESTI']}>				".t("Vakioviesti")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "LITETY") 			$ulos .= "<option value='LITETY' {$avain_sel['LITETY']}>						".t("Liitetiedostotyyppi")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TIL-LITETY") 		$ulos .= "<option value='TIL-LITETY' {$avain_sel['TIL-LITETY']}>				".t("Tilauksen liitetiedostotyyppi")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "JAKELULISTA") 		$ulos .= "<option value='JAKELULISTA' {$avain_sel['JAKELULISTA']}>				".t("Email jakelulista")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "LUETTELO") 			$ulos .= "<option value='LUETTELO' {$avain_sel['LUETTELO']}>					".t("Luettelotyyppi")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TRIVITYYPPI") 		$ulos .= "<option value='TRIVITYYPPI' {$avain_sel['TRIVITYYPPI']}>				".t("Tilausrivin tyyppi")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "LASKUTUS_SAATE")	$ulos .= "<option value='LASKUTUS_SAATE' {$avain_sel['LASKUTUS_SAATE']}>		".t("Laskun sähköpostisaatekirje asiakkaalle")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TV_LISATIETO") 		$ulos .= "<option value='TV_LISATIETO' {$avain_sel['TV_LISATIETO']}>			".t("Tilausvahvistuksen lisätiedot")."</option>";
+		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 		
-		if($lukitse_laji == "MEHTOTXT") {
-			
-			$ulos = "<td><select name='$nimi'>";
-			$ulos .= "<option value='MEHTOTXT_SE' {$avain_sel['MEHTOTXT_SE']}>				".t("Ruotsinkielinen maksuehdon teksti")."</option>";
-			$ulos .= "<option value='MEHTOTXT_EN' {$avain_sel['MEHTOTXT_EN']}>				".t("Englanninkielinen maksuehdon teksti")."</option>";
-			$ulos .= "<option value='MEHTOTXT_FR' {$avain_sel['MEHTOTXT_FR']}>				".t("Ranskankielinen maksuehdon teksti")."</option>";
-			$ulos .= "</select></td>";
-			$jatko = 0;
-		}
-		elseif($lukitse_laji == "MEHTOKATXT") {
-			
-			$ulos = "<td><select name='$nimi'>";
-			$ulos .= "<option value='MEHTOKATXT_SE' {$avain_sel['MEHTOTXT_SE']}>				".t("Ruotsinkielinen maksuehdon teksti")."</option>";
-			$ulos .= "<option value='MEHTOKATXT_EN' {$avain_sel['MEHTOTXT_EN']}>				".t("Englanninkielinen maksuehdon teksti")."</option>";
-			$ulos .= "<option value='MEHTOKATXT_FR' {$avain_sel['MEHTOTXT_FR']}>				".t("Ranskankielinen maksuehdon teksti")."</option>";
-			$ulos .= "</select></td>";
-			$jatko = 0;
-		}
-		else {
-			$al_laji = $trow[$i];
-
-			$avain_sel[$trow[$i]] = "SELECTED";
-
-			$ulos = "<td><select name='$nimi' onchange='submit();'>";
-
-			$ulos .= "<optgroup label='".t("Tuotteiden avainsanat")."'>";
-			$ulos .= "<option value='Y' {$avain_sel['Y']}>									".t("Yksikko")."</option>";
-			$ulos .= "<option value='TRY' {$avain_sel['TRY']}>								".t("Tuoteryhmä")."</option>";
-			$ulos .= "<option value='OSASTO' {$avain_sel['OSASTO']}>						".t("Tuoteosasto")."</option>";
-			$ulos .= "<option value='TUOTEMERKKI' {$avain_sel['TUOTEMERKKI']}>				".t("Tuotemerkki")."</option>";
-			$ulos .= "<option value='S' {$avain_sel['S']}>									".t("Tuotteen status")."</option>";
-			$ulos .= "<option value='TUOTEULK' {$avain_sel['TUOTEULK']}>					".t("Tuotteiden avainsanojen laji")."</option>";
-			$ulos .= "<option value='VARASTOLUOKKA' {$avain_sel['VARASTOLUOKKA']}>			".t("Varastoluokka")."</option>";
-			$ulos .= "<option value='OSASTO_SE' {$avain_sel['OSASTO_SE']}>					".t("Ruotsinkielinen tuoteosasto")."</option>";
-			$ulos .= "<option value='TRY_SE' {$avain_sel['TRY_SE']}>						".t("Ruotsinkielinen tuoteryhmä")."</option>";
-			$ulos .= "<option value='Y_SE' {$avain_sel['Y_SE']}>							".t("Ruotsinkielinen yksikkö")."</option>";
-			$ulos .= "<option value='S_SE' {$avain_sel['S_SE']}>							".t("Ruotsinkielinen tuotteen status")."</option>";
-			$ulos .= "<option value='SARJANUMERON_LI' {$avain_sel['SARJANUMERON_LI']}>		".t("Sarjanumeron lisätieto")."</option>";
-			$ulos .= "<option value='TRY_EN' {$avain_sel['TRY_EN']}>						".t("Englanninkielinen tuoteryhmä")."</option>";
-			$ulos .= "<option value='OSASTO_EN' {$avain_sel['OSASTO_EN']}>					".t("Englanninkielinen tuoteosasto")."</option>";
-			$ulos .= "<option value='TRY_RU' {$avain_sel['TRY_RU']}>						".t("Venäjänkielinen tuoteryhmä")."</option>";
-			$ulos .= "<option value='OSASTO_RU' {$avain_sel['OSASTO_RU']}>					".t("Venäjänkielinen tuoteosasto")."</option>";
-			$ulos .= "<option value='TRY_EE' {$avain_sel['TRY_EE']}>						".t("Vironkielinen tuoteryhmä")."</option>";
-			$ulos .= "<option value='OSASTO_EE' {$avain_sel['OSASTO_EE']}>					".t("Vironkielinen tuoteosasto")."</option>";
-			$ulos .= "<option value='TRY_DE' {$avain_sel['TRY_DE']}>						".t("Saksankielinen tuoteryhmä")."</option>";
-			$ulos .= "<option value='OSASTO_DE' {$avain_sel['OSASTO_DE']}>					".t("Saksankielinen tuoteosasto")."</option>";
-			$ulos .= "<option value='PARAMETRI' {$avain_sel['PARAMETRI']}>					".t("Tuotteen parametri")."</option>";
-			$ulos .= "<option value='TARRATYYPPI' {$avain_sel['TARRATYYPPI']}>				".t("Tuotteen tarratyyppi")."</option>";
-			$ulos .= "</optgroup>";
-
-			$ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";
-			$ulos .= "<option value='ASIAKASLUOKKA' {$avain_sel['ASIAKASLUOKKA']}>			".t("Asiakasluokka")."</option>";
-			$ulos .= "<option value='ASIAKASOSASTO' {$avain_sel['ASIAKASOSASTO']}>			".t("Asiakasosasto")."</option>";
-			$ulos .= "<option value='ASIAKASRYHMA' {$avain_sel['ASIAKASRYHMA']}>			".t("Asiakasryhma")."</option>";
-			$ulos .= "<option value='ASIAKASTILA' {$avain_sel['ASIAKASTILA']}>				".t("Asiakastila")."</option>";
-			$ulos .= "<option value='PIIRI' {$avain_sel['PIIRI']}>							".t("Asiakkaan piiri")."</option>";
-			$ulos .= "<option value='ASLUOKKA_SE' {$avain_sel['ASLUOKKA_SE']}>				".t("Ruotsinkielinen asiakasluokka")."</option>";
-			$ulos .= "<option value='ASOSASTO_SE' {$avain_sel['ASOSASTO_SE']}>				".t("Ruotsinkielinen asiakasosasto")."</option>";
-			$ulos .= "<option value='ASRYHMA_SE' {$avain_sel['ASRYHMA_SE']}>				".t("Ruotsinkielinen asiakasryhma")."</option>";
-			$ulos .= "<option value='LASKT_EMAIL' {$avain_sel['LASKT_EMAIL']}>				".t("Laskutustiedot autom. sähköpostitukseen")."</option>";
-			$ulos .= "<option value='LASKT_EMAIL_SOP' {$avain_sel['LASKT_EMAIL_SOP']}>		".t("Laskutustiedot autom. sähköpostitukseen (Sopimus)")."</option>";
-			$ulos .= "<option value='ASAVAINSANA' {$avain_sel['ASAVAINSANA']}>				".t("Asiakkaan avainsanojen laji")."</option>";
-			$ulos .= "<option value='EXTASAVAINSANA' {$avain_sel['EXTASAVAINSANA']}>		".t("Extranet-asiakkaan avainsanojen laji")."</option>";
-			$ulos .= "</optgroup>";
-
-			$ulos .= "<optgroup label='".t("Yhtiön avainsanat")."'>";
-			$ulos .= "<option value='TV' {$avain_sel['TV']}>								".t("Tilausvahvistus")."</option>";
-			$ulos .= "<option value='LAHETETYYPPI' {$avain_sel['LAHETETYYPPI']}>			".t("Lähetetyyppi")."</option>";
-			$ulos .= "<option value='KALETAPA' {$avain_sel['KALETAPA']}>					".t("CRM yhteydenottotapa")."</option>";
-			$ulos .= "<option value='MYSQLALIAS' {$avain_sel['MYSQLALIAS']}>				".t("Tietokantasarakkeen nimialias")."</option>";
-			$ulos .= "<option value='TOIMITUSTAPA_OS' {$avain_sel['TOIMITUSTAPA_OS']}>		".t("Toimitustapa ostolle (kuljetus)")."</option>";			
-			$ulos .= "<option value='KUKAASEMA' {$avain_sel['KUKAASEMA']}>					".t("Käytäjän asema")."</option>";
-			$ulos .= "<option value='ALVULK' {$avain_sel['ALVULK']}>						".t("Ulkomaan ALV%")."</option>";			
-			$ulos .= "<option value='ALV' {$avain_sel['ALV']}>								".t("ALV%")."</option>";
-			$ulos .= "<option value='SEURANTA' {$avain_sel['SEURANTA']}>					".t("Tilauksen seurantaluokka")."</option>";	
-			$ulos .= "<option value='pakkaus' {$avain_sel['pakkaus']}>						".t("Pakkaus")."</option>";
-			$ulos .= "<option value='TOIMEHTO' {$avain_sel['TOIMEHTO']}>					".t("Toimitusehto")."</option>";
-			$ulos .= "<option value='HENKILO_OSASTO' {$avain_sel['HENKILO_OSASTO']}>		".t("Henkilöosasto")."</option>";
-			$ulos .= "<option value='RAHTIKIRJA' {$avain_sel['RAHTIKIRJA']}>				".t("Rahtikirjatyyppi")."</option>";
-			$ulos .= "<option value='KERAYSLISTA' {$avain_sel['KERAYSLISTA']}>				".t("Keräyslista")."</option>";
-			$ulos .= "<option value='TOIMITUSTAPA_SE' {$avain_sel['TOIMITUSTAPA_SE']}>		".t("Ruotsinkielinen toimitustapa")."</option>";
-			$ulos .= "<option value='LAHETETYYPPI_SE' {$avain_sel['LAHETETYYPPI_SE']}>		".t("Ruotsinkielinen lähetetyyppi")."</option>";
-			$ulos .= "<option value='TV_SE' {$avain_sel['TV_SE']}>							".t("Ruotsinkielinen tilausvahvistus")."</option>";
-			$ulos .= "<option value='RAHTIKIRJA_SE' {$avain_sel['RAHTIKIRJA_SE']}>			".t("Ruotsinkielinen rahtikirjatyyppi")."</option>";
-			$ulos .= "<option value='PAKKAUS_SE' {$avain_sel['PAKKAUS_SE']}>				".t("Ruotsinkielinen pakkaus")."</option>";
-			$ulos .= "<option value='KVERITTELY' {$avain_sel['KVERITTELY']}>				".t("Kulunvalvonnan erittely")."</option>";			
-			$ulos .= "</optgroup>";
-
-			$ulos .= "<optgroup label='".t("Työmääräysten avainsanat")."'>";
-			$ulos .= "<option value='TYOM_TYOJONO' {$avain_sel['TYOM_TYOJONO']}>			".t("Työmääräysten työjono")."</option>";
-			$ulos .= "<option value='TYOM_TYOSTATUS' {$avain_sel['TYOM_TYOSTATUS']}>		".t("Työmääräysten työstatus")."</option>";
-			$ulos .= "<option value='TYOM_TYOLINJA' {$avain_sel['TYOM_TYOLINJA']}>			".t("Työmääräysten työlinja")."</option>";	
-			$ulos .= "</optgroup>";
-
-			$ulos .= "<optgroup label='".t("Viennin avainsanat")."'>";
-			$ulos .= "<option value='KT' {$avain_sel['KT']}>								".t("Kauppatapahtuman luonne")."</option>";
-			$ulos .= "<option value='TULLI' {$avain_sel['TULLI']}>							".t("Poistumistoimipaikka")."</option>";
-			$ulos .= "<option value='KM' {$avain_sel['KM']}>								".t("Kuljetusmuoto")."</option>";
-			$ulos .= "<option value='KM_SE' {$avain_sel['KM_SE']}>							".t("Ruotsinkielinen kuljetusmuoto")."</option>";
-			$ulos .= "<option value='KT_SE' {$avain_sel['KT_SE']}>							".t("Ruotsinkielinen kauppatapahtuman luonne")."</option>";
-			$ulos .= "<option value='C' {$avain_sel['C']}>									".t("CHN tietue")."</option>";						
-			$ulos .= "</optgroup>";
-
-			$ulos .= "<optgroup label='".t("Maksuehtojen avainsanat")."'>";
-			$ulos .= "<option value='LASKUKUVAUS' {$avain_sel['LASKUKUVAUS']}>				".t("Maksuposition kuvaus")."</option>";
-			$ulos .= "<option value='KARHUVIESTI' {$avain_sel['KARHUVIESTI']}>				".t("Karhuviesti")."</option>";	
-			$ulos .= "<option value='MEHTOTXT_SE' {$avain_sel['MEHTOTXT_SE']}>				".t("Ruotsinkielinen maksuehdon teksti")."</option>";
-			$ulos .= "<option value='MEHTOKATXT_SE' {$avain_sel['MEHTOKATXT_SE']}>			".t("Ruotsinkielinen maksuehdon kassateksti")."</option>";
-			$ulos .= "<option value='MEHTOTXT_EN' {$avain_sel['MEHTOTXT_EN']}>				".t("Englanninkielinen maksuehdon teksti")."</option>";
-			$ulos .= "<option value='MEHTOKATXT_EN' {$avain_sel['MEHTOKATXT_EN']}>			".t("Englanninkielinen maksuehdon kassateksti")."</option>";
-			$ulos .= "<option value='MEHTOTXT_FR' {$avain_sel['MEHTOTXT_FR']}>				".t("Ranskankielinen maksuehdon teksti")."</option>";
-			$ulos .= "<option value='MEHTOKATXT_FR' {$avain_sel['MEHTOKATXT_Fr']}>			".t("Ranskankielinen maksuehdon kassateksti")."</option>";
-			$ulos .= "</optgroup>";
-
-			$ulos .= "<optgroup label='".t("CRM avainsanat")."'>";
-			$ulos .= "<option value='CRM_ROOLI' {$avain_sel['CRM_ROOLI']}>					".t("Yhteyshenkilön rooli")."</option>";	
-			$ulos .= "<option value='CRM_SUORAMARKKI' {$avain_sel['CRM_SUORAMARKKI']}>		".t("Yhteyshenkilön suoramarkkinointitiedot")."</option>";
-			$ulos .= "</optgroup>";
-
-			$ulos .= "<optgroup label='".t("Muut avainsanat")."'>";
-			$ulos .= "<option value='VAKIOVIESTI' {$avain_sel['VAKIOVIESTI']}>				".t("Vakioviesti")."</option>";	
-			$ulos .= "<option value='LITETY' {$avain_sel['LITETY']}>						".t("Liitetiedostotyyppi")."</option>";
-			$ulos .= "<option value='TIL-LITETY' {$avain_sel['TIL-LITETY']}>				".t("Tilauksen liitetiedostotyyppi")."</option>";
-			$ulos .= "<option value='JAKELULISTA' {$avain_sel['JAKELULISTA']}>				".t("Email jakelulista")."</option>";
-			$ulos .= "<option value='LUETTELO' {$avain_sel['LUETTELO']}>					".t("Luettelotyyppi")."</option>";
-			$ulos .= "<option value='TRIVITYYPPI' {$avain_sel['TRIVITYYPPI']}>				".t("Tilausrivin tyyppi")."</option>";
-			$ulos .= "<option value='LASKUTUS_SAATE' {$avain_sel['LASKUTUS_SAATE']}>		".t("Laskun sähköpostisaatekirje asiakkaalle")."</option>";
-			$ulos .= "<option value='TV_LISATIETO' {$avain_sel['TV_LISATIETO']}>			".t("Tilausvahvistuksen lisätiedot")."</option>";
-
-			$ulos .= "</select></td>";
-			$jatko = 0;
-		}
+		$ulos .= "</select></td>";
+		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "nakyvyys") {
 		if ($avain_sel["TRY"] == "SELECTED" or $avain_sel["OSASTO"] == "SELECTED") {
 			$sel = array();
@@ -176,25 +139,25 @@
 		else {
 			$tyyppi = 0;
 		}
-		
+
 		$jatko = 0;
-	}		
-			
+	}
+
 	if (mysql_field_name($result, $i) == "kieli") {
-		
+
 		$kieli = $trow[$i];
-		
+
 		$ulos = "<td><select name='$nimi'>";
 		$sel  = "";
 
-		//	näytetäään vain kielet joilla on 
+		//	näytetäään vain kielet joilla on
 		if($perhe > 0) {
-			$query = "	SELECT group_concat(kieli) kielet FROM avainsana WHERE yhtio = '{$kukarow["yhtio"]}' and perhe='$perhe'";
+			$query = "	SELECT group_concat(kieli) kielet FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and perhe='$perhe'";
 			$res = mysql_query($query) or pupe_error($query);
 			$kilerow = mysql_fetch_array($res);
 			$kielet = $kilerow["kielet"];
 		}
-    	
+
 		$query  = "show columns from sanakirja";
 		$fields =  mysql_query($query);
 
@@ -210,19 +173,14 @@
 				$ulos .= "<option value='$apurow[0]' $sel>$apurow[0] - ".maa($apurow[0])."</option>";
 			}
 		}
-    	
+
 		$ulos .= "</select></td>";
-    	
+
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "selite" and $lukitse_avaimeen != "") {
-		$ulos = "<td><input type='hidden' name='$nimi' value='$lukitse_avaimeen'>$lukitse_avaimeen</td>";
-		$jatko = 0;
-	}
+	if ($sel["KERAYSLISTA"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
-	if (mysql_field_name($result, $i) == "selite" and $sel["KERAYSLISTA"] == "SELECTED") {
-		
 		$handle = opendir("tilauskasittely");
 
 		$ulos  = "<td><select name='$nimi'>";
@@ -243,8 +201,8 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
-	if (mysql_field_name($result, $i) == "selite" and $avain_sel["RAHTIKIRJA"] == "SELECTED") {
+
+	if ($avain_sel["RAHTIKIRJA"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
 		$handle = opendir("tilauskasittely");
 
@@ -269,7 +227,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "selite" and $avain_sel["TARRATYYPPI"] == "SELECTED") {
+	if ($avain_sel["TARRATYYPPI"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
 		$handle = opendir("tilauskasittely");
 
@@ -294,14 +252,14 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "selite" and $avain_sel["SARJANUMERON_LI"] == "SELECTED") {
+	if ($avain_sel["SARJANUMERON_LI"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
 		$selitteet = array(	'ANKKURIVINSSI','JAAKAAPPI','KONEISTUS','KUVATYYPPI','LAATU','MATERIAALI','MERKKI','MOOTTORINMERKKI','MOOTTORINOHJAUS',
 							'PILSSIPUMPPU','SIJAINTI','TIIKKISARJA','TOIMITUSKULUT','TYYNYSARJA','TYYPPI','UUNI','VALONHEITIN','VARIRUNKO','VESSA',
 							'RUNKOTYYPPI', 'SPRINKLERI','KILPI');
 
 		$ulos  = "<td><select name='$nimi'>";
-		
+
 		foreach ($selitteet as $selite) {
 			if (strtoupper($selite) == strtoupper($trow[$i])) {
 				$sel = "SELECTED";
@@ -309,16 +267,16 @@
 			else {
 				$sel = "";
 			}
-			
+
 			$ulos .= "<option value='$selite' $sel>$selite</option>";
-			
+
 		}
-		
+
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-		
-	if (mysql_field_name($result, $i) == "selitetark_2" and $avain_sel["ALVULK"] == "SELECTED") {
+
+	if ($avain_sel["ALVULK"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_2") {
 
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
@@ -348,44 +306,35 @@
 		$tyyppi = 0;
 		$jatko  = 0;
 	}
-	
-	if ($avain_sel["KARHUVIESTI"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark" or
-		$avain_sel["OSASTO"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
-		$avain_sel["TV_LISATIETO"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark" or
-		$avain_sel["TRY"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
-		$avain_sel["TRY_SE"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
-		$avain_sel["TRY_EN"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
-		$avain_sel["TRY_RU"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
-		$avain_sel["TRY_EE"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
-		$avain_sel["TRY_DE"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
-		$avain_sel["OSASTO_SE"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
-		$avain_sel["OSASTO_EN"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
-		$avain_sel["OSASTO_RU"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
-		$avain_sel["OSASTO_EE"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3" or
-		$avain_sel["OSASTO_DE"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_3") {
-			
+
+	if (($avain_sel["KARHUVIESTI"] == "SELECTED" or $avain_sel["TV_LISATIETO"]) and mysql_field_name($result, $i) == "selitetark") {
 		$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "selitetark_2" and $avain_sel['LASKUTUS_SAATE'] == "SELECTED") {
+	if (($avain_sel["OSASTO"] == "SELECTED"  or $avain_sel["TRY"] == "SELECTED") and mysql_field_name($result, $i) == "selitetark_3") {
+		$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
+		$jatko = 0;
+	}
+
+	if ($avain_sel['LASKUTUS_SAATE'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_2") {
 		$ulos = "<td><textarea rows=30 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "selite" and $avain_sel['VAKIOVIESTI'] == "SELECTED") {
+	if ($avain_sel['VAKIOVIESTI'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 		$ulos = "<td><textarea rows=5 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "selite" and $avain_sel['TYOM_TYOLINJA'] == "SELECTED") {
+	if ($avain_sel['TYOM_TYOLINJA'] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
 		$query = "	SELECT selite, selitetark
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TYOM_TYOJONO'
 					ORDER BY jarjestys, selitetark_2";
 		$vresult = mysql_query($query) or pupe_error($query);
-		
+
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = ''>".t("Kaikki työjonot")."</option>";
 
@@ -394,16 +343,16 @@
 			if ($trow[$i] == $vrow[0]) {
 				$sel = "selected";
 			}
-			
+
 			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
 		}
 
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
-	if (mysql_field_name($result, $i) == "selitetark" and $avain_sel['TYOM_TYOLINJA'] == "SELECTED") {
-		
+
+	if ($avain_sel['TYOM_TYOLINJA'] == "SELECTED" and mysql_field_name($result, $i) == "selitetark") {
+
 		$query = "	SELECT distinct kuka, nimi
 					FROM kuka
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -411,7 +360,7 @@
 					and extranet=''
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
-		
+
 		$ulos = "<td><select name='$nimi'>";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
@@ -419,16 +368,15 @@
 			if ($trow[$i] == $vrow[0]) {
 				$sel = "selected";
 			}
-			
+
 			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
 		}
 
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
-	// rahtikirjatyyppi
-	if (mysql_field_name($result, $i) == "selitetark_2" and $avain_sel["RAHTIKIRJA"] == "SELECTED") {
+
+	if ($avain_sel["RAHTIKIRJA"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_2") {
 
 		$sel = array();
 		$sel[$trow[$i]] = "SELECTED";
@@ -442,7 +390,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "jarjestys") {	
+	if (mysql_field_name($result, $i) == "jarjestys") {
 		if($trow[$i] == "" and $ajarjestys != "") {
 			$trow[$i] = $ajarjestys;
 		}

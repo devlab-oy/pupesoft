@@ -1887,12 +1887,14 @@ if (!function_exists("synkronoi")) {
 						}
 
 						//	koitetaan hakea oikean maksuehdon tunnus..
-						$query = "select * from maksuehto where yhtio='$yhtio' and tunnus='$masterrow[maksuehto]'";
+						$query = "SELECT * from maksuehto where yhtio='$yhtio' and tunnus='$masterrow[maksuehto]'";
 						$abures = mysql_query($query) or pupe_error($query);
 						$aburow = mysql_fetch_array($abures);
 
 						//	Melkein kaikki tiedot pitää stemmata!
-						$query = "	select tunnus from maksuehto where yhtio='$kohderow[yhtio]'
+						$query = "	SELECT tunnus 
+									from maksuehto 
+									where yhtio='$kohderow[yhtio]'
 									and abs_pvm				= '$aburow[abs_pvm]'
 									and erapvmkasin			= '$aburow[erapvmkasin]'
 									and factoring			= '$aburow[factoring]'
@@ -1901,7 +1903,6 @@ if (!function_exists("synkronoi")) {
 									and kassa_abspvm		= '$aburow[kassa_abspvm]'
 									and kassa_alepros		= '$aburow[kassa_alepros]'
 									and kassa_relpvm		= '$aburow[kassa_relpvm]'
-									and kassa_teksti		= '$aburow[kassa_teksti]'
 									and kateinen			= '$aburow[kateinen]'
 									and osamaksuehto1		= '$aburow[osamaksuehto1]'
 									and osamaksuehto2		= '$aburow[osamaksuehto2]'
@@ -1921,12 +1922,12 @@ if (!function_exists("synkronoi")) {
 						}
 
 						//	koitetaan hakea oikean toimitustavan tunnus..
-						$query = "select * from toimitustapa where yhtio='$yhtio' and tunnus='$masterrow[toimitustapa]'";
+						$query = "SELECT * from toimitustapa where yhtio='$yhtio' and tunnus='$masterrow[toimitustapa]'";
 						$abures = mysql_query($query) or pupe_error($query);
 						$aburow = mysql_fetch_array($abures);
 
 						//	Melkein kaikki tiedot pitää stemmata!
-						$query = "select tunnus from toimitustapa where yhtio='$kohderow[yhtio]'
+						$query = "	SELECT tunnus from toimitustapa where yhtio='$kohderow[yhtio]'
 									and selite			= '$aburow[selite]'
 									and jvkulu			= '$aburow[jvkulu]'
 									and lauantai		= '$aburow[lauantai]'
@@ -6811,7 +6812,7 @@ if (!function_exists("t")) {
 
 // Tämä funktio hakee ja kääntää avainsanoja
 if (!function_exists("t_avainsana")) {
-	function t_avainsana($laji, $kieli = '', $where = '', $yhtio = '', $limit = '', $return = "") {
+	function t_avainsana($laji, $kieli = '', $where = '', $yhtio = '', $eivielakaytossa = '', $return = "") {
 		global $kukarow, $yhtiorow;
 
 		$laji = mysql_real_escape_string($laji);
@@ -6836,13 +6837,6 @@ if (!function_exists("t_avainsana")) {
 		}
 		else {
 			$yhtiolisa = " avainsana.yhtio = '$kukarow[yhtio]' ";
-		}
-
-		if ($limit != "") {
-			$limitlisa = " limit $limit";
-		}
-		else {
-			$limitlisa = "";
 		}
 		
 		if ($return != "") {
@@ -6876,10 +6870,9 @@ if (!function_exists("t_avainsana")) {
 					and avainsana.laji = '$laji'
 					and avainsana.kieli in ('$yhtiorow[kieli]', '')
 					$wherelisa
-					$orderlisa
-					$limitlisa";
+					$orderlisa";
 		$result = mysql_query($query) or pupe_error($query);
-		
+				
 		if ($return != "") {
 			$row = mysql_fetch_assoc($result);
 			return $row[$return];
@@ -6888,6 +6881,49 @@ if (!function_exists("t_avainsana")) {
 		return $result;
 	}
 }
+
+// Tämä funktio kääntää tuotteen_avainsanoja.
+if (!function_exists('t_tunnus_avainsanat')) {
+	function t_tunnus_avainsanat($row, $laji, $avainsanalaji, $kieli = '') {
+
+		global $kukarow, $yhtiorow;
+
+		$laji = mysql_real_escape_string(trim($laji));
+		$kieli = mysql_real_escape_string(trim($kieli));
+
+		// Jos tyhjää niin unohdetaan koko juttu
+		if (!isset($row["tunnus"]) or $laji == "") {
+			return;
+		}
+
+		if ($kieli == "") $kieli = $kukarow["kieli"];
+		if ($kieli == "") $kieli = $yhtiorow["kieli"];
+
+		//	Jos kielet matchaa niin palautetaan suoraan vastaus
+		if (strtoupper($kieli) == strtoupper($yhtiorow["kieli"])) {
+			return $row[$laji];
+		}
+
+		// Tutkitaan onko meillä käännös
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kieli = '$kieli'
+					and laji = '$avainsanalaji'
+					and selite = '$row[tunnus]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) == 1) {
+			$row = mysql_fetch_assoc($result);
+			// jos löydettiin käännös palautetaan se
+			return $row["selitetark"];
+		}
+
+		// muuten palautetaan se mitä kysyttiin
+		return $row[$laji];
+	}
+}
+
 
 // Tämä funktio kääntää tuotteen_avainsanoja.
 if (!function_exists('t_tuotteen_avainsanat')) {
@@ -6930,360 +6966,5 @@ if (!function_exists('t_tuotteen_avainsanat')) {
 		return $tuoterow[$laji];
 	}
 }
-
-/*
---- NÄMÄ FUNKTIOT TÄSSÄ ALLA POISTETAAN KOHTA! ---
-*/
-
-// Haetaan tuotteen avainsanoista/avainsanoista korvaavuuksia.
-if (!function_exists("asana")) {
-	function asana($laji, $sana, $sana2 = '') {
-
-		global $kukarow, $yhtiorow;
-
-		$laji = $laji.$kukarow["kieli"];
-
-		if (substr($laji,0,8) == 'nimitys_') {
-			$tarvitaan = 0;
-			if ($kukarow["kieli"] != $yhtiorow["kieli"]) {
-				$query = "select selite from tuotteen_avainsanat where yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$sana' LIMIT 1";
-				$result = mysql_query($query) or pupe_error($query);
-				if (mysql_num_rows($result) > 0) {
-					$row = mysql_fetch_array($result);
-					return $row["selite"];
-				}
-				elseif ($sana2 == '') {
-					$tarvitaan++;
-				}
-			}
-			elseif ($sana2 == '') {
-				$tarvitaan++;
-			}
-
-			if ($tarvitaan > 0) {
-				$query = "select nimitys from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$sana' LIMIT 1";
-				$result = mysql_query($query) or pupe_error($query);
-				$row = mysql_fetch_array($result);
-				return $row["nimitys"];
-			}
-			elseif ($sana2 != '') {
-				//return $row["selite"];
-				return $sana2;
-			}
-		}
-		elseif (substr($laji,0,13) == 'TOIMITUSTAPA_') {
-			if ($kukarow["kieli"] != $yhtiorow["kieli"]) {
-				$query = "select selitetark from avainsana where yhtio = '$kukarow[yhtio]' and laji = '$laji' and selite = '$sana' LIMIT 1";
-				$result = mysql_query($query) or pupe_error($query);
-				if (mysql_num_rows($result) > 0) {
-					$row = mysql_fetch_array($result);
-					return $row["selitetark"];
-				}
-				else {
-					return $sana;
-				}
-			}
-			else {
-				return $sana;
-			}
-		}
-		else {
-			if ($kukarow["kieli"] != $yhtiorow["kieli"]) {
-				$query = "select selitetark from avainsana where yhtio = '$kukarow[yhtio]' and laji = '$laji' and selite = '$sana' LIMIT 1";
-				$result = mysql_query($query) or pupe_error($query);
-				if (mysql_num_rows($result) > 0) {
-					$row = mysql_fetch_array($result);
-					return $row["selitetark"];
-				}
-				else {
-					return $sana;
-				}
-			}
-			else {
-				return $sana;
-			}
-		}
-	}
-
-}
-
-// helpotetaan queryn tekoa.
-if (!function_exists("nimitys")) {
-	function nimitys($laji, $joini = '', $kieli = '') {
-
-		global $kukarow, $yhtiorow;
-
-		$returni = "";
-
-		if ($laji == 'select') {
-			if ($joini == '') {
-				$returni = " nimitys ";
-			}
-			else {
-				$returni = "$joini.nimitys";
-			}
-		}
-
-		if ($kieli == '') {
-			$kieli = $kukarow["kieli"];
-		}
-
-		if ($kieli != $yhtiorow["kieli"]) {
-			if ($laji == 'join') {
-				if ($joini != '') {
-					$returni = " LEFT JOIN tuotteen_avainsanat on $joini.yhtio = tuotteen_avainsanat.yhtio and $joini.tuoteno = tuotteen_avainsanat.tuoteno and tuotteen_avainsanat.laji = 'nimitys_$kieli' ";
-				}
-			}
-			elseif ($laji == 'select') {
-				if ($joini == '') {
-					$mika = "nimitys";
-				}
-				else {
-					$mika = "$joini.nimitys";
-				}
-
-				$returni = " if (isnull(tuotteen_avainsanat.selite) or tuotteen_avainsanat.selite='', $mika, tuotteen_avainsanat.selite) nimitys ";
-			}
-		}
-
-		return $returni;
-	}
-
-}
-
-// helpotetaan queryn tekoa.
-if (!function_exists("avain")) {
-	function avain($laji, $joini = '', $kieli = '', $as = '') {
-
-		global $kukarow, $yhtiorow;
-
-		$returni = "";
-
-		if ($kieli == '') {
-			$kieli = $kukarow["kieli"];
-		}
-
-		if ($joini == 'TOIMITUSTAPA_') {
-			$returni = " selite ";
-			$joinaa = "toimitustapa";
-		}
-		elseif ($joini == 'MEHTOTXT_') {
-			$returni = " teksti ";
-			$joinaa = "maksuehto";
-		}
-		elseif ($joini == 'MEHTOKATXT_') {
-			$returni = " kassa_teksti ";
-			$joinaa = "maksuehto";
-		}
-		else {
-			$returni = " selitetark ";
-			$joinaa = "avainsana";
-		}
-
-		if ($as == '') {
-			$as = $returni;
-			$returnas = "";
-		}
-		else {
-			$as = " ".$as." ";
-			$returnas = " as $as";
-		}
-
-		if ($kieli != $yhtiorow["kieli"]) {
-			$returnas = "";
-
-			if ($laji == 'join') {
-				if ($joini != '') {
-					if ($joini == 'Y_') {
-						$joini = 'Y';
-						$returni = " LEFT JOIN avainsana AS a on ".$joinaa.".yhtio = a.yhtio and ".$joinaa.".".trim($returni)." = a.selitetark and a.laji = '".$joini."' and a.kieli = '$kieli'";
-					}
-					else {
-						$returni = " LEFT JOIN avainsana AS a on ".$joinaa.".yhtio = a.yhtio and ".$joinaa.".".trim($returni)." = a.selite and a.laji = '".$joini.$kieli."' ";
-					}
-				}
-			}
-			elseif ($laji == 'join2') {
-				if ($joini != '') {
-					if ($joini == 'Y_') {
-						$joini = 'Y';
-						$returni = " LEFT JOIN avainsana AS b on ".$joinaa.".yhtio = b.yhtio and ".$joinaa.".".trim($returni)." = b.selitetark and b.laji = '".$joini."' and b.kieli = '$kieli'";
-					}
-					else {
-						$returni = " LEFT JOIN avainsana AS b on ".$joinaa.".yhtio = b.yhtio and ".$joinaa.".".trim($returni)." = b.selite and b.laji = '".$joini.$kieli."' ";
-					}
-				}
-			}
-			elseif ($laji == 'select') {
-				$returni = " if (isnull(a.selitetark) or a.selitetark='', ".$joinaa.".".trim($returni).", a.selitetark) as ".trim($as)." ";
-			}
-			elseif ($laji == 'select2') {
-				$returni = " if (isnull(b.selitetark) or b.selitetark='', ".$joinaa.".".trim($returni).", b.selitetark) as ".trim($as)." ";
-			}
-			elseif ($laji == 'selectcon') {
-				$returni = " if (isnull(a.selitetark) or a.selitetark='', ".$joinaa.".".trim($returni).", a.selitetark) ";
-			}
-			elseif ($laji == 'selectcon2') {
-				$returni = " if (isnull(b.selitetark) or b.selitetark='', ".$joinaa.".".trim($returni).", b.selitetark) ";
-			}
-		}
-		elseif ($laji == 'join' or $laji == 'join2') {
-			$returni = '';
-		}
-
-		return $returni.$returnas;
-	}
-
-}
-
-// haetaan avainsanoja
-if (!function_exists("avainsana")) {
-	function avainsana($laji, $kieli = '', $selite = '', $yhtio = '', $limit = '', $selitetark = "", $selitetark_2 = "") {
-		global $kukarow, $yhtiorow;
-
-		$laji = mysql_real_escape_string($laji);
-		$limit = mysql_real_escape_string($limit);
-
-		if ($kieli == "") {
-			$kieli = $kukarow["kieli"];
-		}
-		else {
-			$kieli = mysql_real_escape_string($kieli);
-		}
-
-		if ($selite != "") {
-			$querylisa = " and avainsana.selite = '".mysql_real_escape_string($selite)."' ";
-		}
-		else {
-			$querylisa = "";
-		}
-
-		if ($selitetark_2 != "") {
-			if (strpos($selitetark_2, "%") !== false) {
-				$querylisa .= " and avainsana.selitetark_2 LIKE ('".mysql_real_escape_string($selitetark_2)."') ";
-			}
-			else {
-				$querylisa .= " and avainsana.selitetark_2 = '".mysql_real_escape_string($selitetark_2)."' ";
-			}
-		}
-
-		if ($selitetark != "") {
-			if (strpos($selitetark, "%") !== false) {
-				$querylisa .= " and avainsana.selitetark LIKE ('".mysql_real_escape_string($selitetark)."') ";
-			}
-			else {
-				$querylisa .= " and avainsana.selitetark = '".mysql_real_escape_string($selitetark)."' ";
-			}
-		}
-
-		if ($yhtio != "") {
-			$yhtiolisa = " avainsana.yhtio in ($yhtio) ";
-		}
-		else {
-			$yhtiolisa = " avainsana.yhtio = '$kukarow[yhtio]' ";
-		}
-
-		if ($limit != "") {
-			$limitlisa = " limit $limit";
-		}
-		else {
-			$limitlisa = "";
-		}
-
-		$query = "	SELECT DISTINCT avainsana.*,
-					IFNULL((SELECT avainsana_kieli.selitetark
-					FROM avainsana as avainsana_kieli
-					WHERE avainsana_kieli.yhtio = avainsana.yhtio
-					and avainsana_kieli.laji = avainsana.laji
-					and avainsana_kieli.selite = avainsana.selite
-					and avainsana_kieli.kieli = '$kieli' LIMIT 1), avainsana.selitetark) selitetark
-					FROM avainsana
-					WHERE $yhtiolisa
-					and avainsana.laji = '$laji'
-					and avainsana.kieli in ('$yhtiorow[kieli]', '')
-					$querylisa
-					ORDER BY avainsana.jarjestys, avainsana.selite+0
-					$limitlisa";
-		$result = mysql_query($query) or pupe_error($query);
-
-		return $result;
-	}
-}
-
-// Tämä funktio kääntää avainsanoja. (As in t-funktio)
-if (!function_exists('ta')) {
-	function ta($kieli, $laji, $selite, $return = "selite", $selitetark = "", $selitetark_2 = "", $selitetark_3 = "") {
-		global $kukarow, $yhtiorow;
-
-		// Jos selite on tyhjä niin unohdetaan koko juttu
-		if (trim($selite) == "") {
-			return;
-		}
-
-		if ($kieli == "") $kieli = $kukarow["kieli"];
-		if ($kieli == "") $kieli = $yhtiorow["kieli"];
-
-		//	Jos kielet matchaa niin palautetaan suoraan vastaus
-		if (strtoupper($kieli) == strtoupper($yhtiorow["kieli"]) and $return == "selite") {
-			return $selite;
-		}
-
-		$lisa = "";
-
-		if ($selitetark != "") {
-			$lisa .= " and avainsana.selitetark = '$selitetark'";
-		}
-
-		if ($selitetark_2 != "") {
-			$lisa .= " and avainsana.selitetark_2 = '$selitetark_2'";
-		}
-
-		if ($selitetark_3 != "") {
-			$lisa .= " and avainsana.selitetark_3 = '$selitetark_3'";
-		}
-
-		// Tutkitaan onko käännös
-		$query = "	SELECT a.*
-					FROM avainsana
-					RIGHT JOIN avainsana a ON avainsana.yhtio = a.yhtio and avainsana.laji = a.laji and avainsana.perhe=a.perhe and a.kieli = '$kieli'
-					WHERE avainsana.yhtio = '{$kukarow["yhtio"]}'
-					and avainsana.laji = '$laji'
-					and avainsana.kieli = '{$yhtiorow["kieli"]}'
-					and avainsana.selite = '$selite'
-					$lisa
-					and avainsana.perhe > 0";
-		$result = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($result) == 1) {
-			$row = mysql_fetch_assoc($result);
-
-			if (trim($row[$return]) != "") return $row[$return];
-			else return $selite;
-		}
-		else {
-			// Taaksepäin yhteensopivuus
-			$query = "	SELECT avainsana.selite, ".avain('select', '', $kieli)."
-						FROM avainsana
-						".avain('join',$laji.'_', $kieli)."
-						WHERE avainsana.yhtio 	= '$kukarow[yhtio]'
-						and avainsana.laji		='$laji'
-						and avainsana.selite	='$selite'
-						LIMIT 1";
-			$result = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($result) == 1) {
-				$row = mysql_fetch_assoc($result);
-
-				if (trim($row[$return]) != "") return $row[$return];
-				else return $selite;
-			}
-			else {
-				return $selite;
-			}
-		}
-	}
-}
-
-/* ---- END POISTETTAVAT FUNKTIOT ----  */
 
 ?>

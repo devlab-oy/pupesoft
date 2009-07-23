@@ -124,7 +124,7 @@ function rivi ($firstpage, $laji = '') {
 	if ($edosasto != $row["osasto"] and $laji == "") {
 		$edosasto = $row["osasto"];
 
-		$tryre = avainsana("OSASTO", $kukarow['kieli'], $row["osasto"]);
+		$tryre = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
 		$osrow = mysql_fetch_array($tryre);
 
 		if ($edosasto != "" and $lask > 1) {

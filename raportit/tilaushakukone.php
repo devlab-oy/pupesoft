@@ -545,7 +545,9 @@ if($tee == "NAYTA") {
 		$maksuteksti = t("Toimituksesta");
 		
 		$summaquery = "sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))";
-		$query = "  SELECT  lasku.tunnus,
+		
+		$query = "  SELECT  lasku.tunnus ltunnus,
+							maksuehto.tunnus,
 							maksuehto.teksti,
 							if(lasku.laskutettu>0, myre.summa, (
 								SELECT $summaquery
@@ -580,8 +582,8 @@ if($tee == "NAYTA") {
 			
 				$maksuerittely .= "
 					<tr class='aktiivi'>
-						<td align='center'>{$maksusoprow["tunnus"]}</td>
-						<td>{$maksusoprow["teksti"]}</td>
+						<td align='center'>{$maksusoprow["ltunnus"]}</td>
+						<td>".t_tunnus_avainsanat($maksusoprow, "teksti", "MAKSUEHTOKV")."</td>
 						<td align='right' NOWRAP>".number_format($maksusoprow["summa"], 2, ',', ' ')."</td>
 						<td align='center' NOWRAP>{$maksusoprow["laskunro"]}</td>
 						<td align='center' NOWRAP>{$maksusoprow["tapvm"]}</td>

@@ -43,16 +43,23 @@ echo "</table>";
 
 if (isset($submit)) {
 
-	$query = "SELECT group_concat(tunnus) joukko FROM maksuehto
-				WHERE yhtio='$kukarow[yhtio]' AND factoring='$sopimus'";
+	$query = "	SELECT group_concat(tunnus) joukko 
+				FROM maksuehto
+				WHERE yhtio='$kukarow[yhtio]' 
+				AND factoring='$sopimus'";
 	$maksuehtores = mysql_query($query) or pupe_error($query);
 	$maksuehtorow = mysql_fetch_array($maksuehtores);
 
 	echo "<table>";
 
-	$query = "SELECT SUM(if(summa > 0, summa, 0)) possumma, SUM(if(summa < 0, summa, 0)) negsumma FROM lasku
-				WHERE yhtio='$kukarow[yhtio]' AND tila='U' AND alatila='X' AND tapvm >= '$vva-$kka-$ppa' AND tapvm <= '$vvl-$kkl-$ppl'
- AND maksuehto in ($maksuehtorow[joukko])";
+	$query = "	SELECT SUM(if(summa > 0, summa, 0)) possumma, SUM(if(summa < 0, summa, 0)) negsumma 
+				FROM lasku
+				WHERE yhtio='$kukarow[yhtio]' 
+				AND tila='U' 
+				AND alatila='X' 
+				AND tapvm >= '$vva-$kka-$ppa' 
+				AND tapvm <= '$vvl-$kkl-$ppl'
+ 				AND maksuehto in ($maksuehtorow[joukko])";
 	$laskures = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($laskures);
 
@@ -62,9 +69,18 @@ if (isset($submit)) {
 	$lahteneet+=$laskurow['negsumma'];
 	echo "<tr><th>",t("Lähteneet yhteensä"),"</th><td>$lahteneet</td></tr>";
 
-	$query = "SELECT tiliointi.tilino, SUM(tiliointi.summa) summa, sum(if(lasku.tapvm=tiliointi.tapvm,tiliointi.summa,0)) summa2 FROM tiliointi, lasku
-				WHERE tiliointi.yhtio='$kukarow[yhtio]' AND tiliointi.tapvm >= '$vva-$kka-$ppa' AND tiliointi.tapvm <= '$vvl-$kkl-$ppl'
-AND tiliointi.tilino in ('$yhtiorow[factoringsaamiset]', '$yhtiorow[myynninkassaale]', '$yhtiorow[luottotappiot]', $yhtiorow[alv]) AND korjattu = '' AND lasku.tila='U' AND lasku.alatila='X' AND lasku.tunnus = tiliointi.ltunnus AND lasku.yhtio=tiliointi.yhtio AND lasku.maksuehto in ($maksuehtorow[joukko])
+	$query = "	SELECT tiliointi.tilino, SUM(tiliointi.summa) summa, sum(if(lasku.tapvm=tiliointi.tapvm,tiliointi.summa,0)) summa2 
+				FROM tiliointi, lasku
+				WHERE tiliointi.yhtio='$kukarow[yhtio]' 
+				AND tiliointi.tapvm >= '$vva-$kka-$ppa' 
+				AND tiliointi.tapvm <= '$vvl-$kkl-$ppl'
+				AND tiliointi.tilino in ('$yhtiorow[factoringsaamiset]', '$yhtiorow[myynninkassaale]', '$yhtiorow[luottotappiot]', $yhtiorow[alv]) 
+				AND korjattu = '' 
+				AND lasku.tila='U' 
+				AND lasku.alatila='X' 
+				AND lasku.tunnus = tiliointi.ltunnus 
+				AND lasku.yhtio=tiliointi.yhtio 
+				AND lasku.maksuehto in ($maksuehtorow[joukko])
 				GROUP BY 1";
 	$laskures = mysql_query($query) or pupe_error($query);
 	$suoritukset = -$lahteneet;

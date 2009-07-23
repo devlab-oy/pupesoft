@@ -326,7 +326,7 @@ if ($tila == 'maksuehto') {
 	$mehres = mysql_query($query) or pupe_error($query);
 	$mehrow = mysql_fetch_array($mehres);
 
-	if ($mehrow['kassa_teksti'] != '') {
+	if ($mehrow['kassa_abspvm'] != '0000-00-00' or $mehrow["kassa_relpvm"] > 0) {
 		if ($mehrow['kassa_abspvm'] == '0000-00-00') {
 			$kassa_erapvm = "adddate(tapvm, interval $mehrow[kassa_relpvm] day)";
 		}
@@ -927,14 +927,12 @@ if ($tila == '') {
 
 						echo "<td><select name='maksuehto'>";
 
-						$query = "	SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_').") mehto
+						$query = "	SELECT *
 									FROM maksuehto
-									".avain('join','MEHTOKATXT_')."
-									".avain('join2','MEHTOTXT_')."
-									WHERE maksuehto.yhtio 	= '$kukarow[yhtio]'
-									and maksuehto.kaytossa 	= ''
-									and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$trow[maa]%')
-									order by maksuehto.jarjestys, mehto, maksuehto.tunnus";
+									WHERE yhtio 	= '$kukarow[yhtio]'
+									and kaytossa 	= ''
+									and (sallitut_maat = '' or sallitut_maat like '%$trow[maa]%')
+									order by jarjestys, teksti";
 						$mresult = mysql_query($query) or pupe_error($query);
 
 						while ($row = mysql_fetch_array($mresult)) {
@@ -942,7 +940,7 @@ if ($tila == '') {
 							if ($trow["maksuehto"] == $row["tunnus"]) {
 								$sel = 'selected';
 							}
-							echo "<option value='$row[0]' $sel>$row[1]";
+							echo "<option value='$row[tunnus]' $sel>".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</option>";
 						}
 						echo "</select></td>";
 						echo "<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";

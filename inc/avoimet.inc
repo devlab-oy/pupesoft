@@ -169,24 +169,22 @@
 		echo "<td colspan='3'><select name='maksuehto'>";
 		echo "<option value=''>".t("Ei valintaa")."";
 
-		$query = "	SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_').") mehto
+		$query = "	SELECT *
 					FROM maksuehto
-					".avain('join','MEHTOKATXT_')."
-					".avain('join2','MEHTOTXT_')."
-					WHERE maksuehto.yhtio = '$kukarow[yhtio]'
-					and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$srow[maa]%')
-					order by maksuehto.jarjestys, mehto, maksuehto.tunnus";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and (sallitut_maat = '' or sallitut_maat like '%$srow[maa]%')
+					order by jarjestys, teksti, tunnus";
 		$mresult = mysql_query($query) or pupe_error($query);
 
 		while($row=mysql_fetch_array($mresult)) {
-			if ($row[0] == $maksuehto) {
+			if ($row["tunnus"] == $maksuehto) {
 				$sel = 'selected';
 			}
 			else {
 				$sel = "";
 			}
 
-			echo "<option value='$row[0]' $sel>$row[1]</option>";
+			echo "<option value='$row[tunnus]' $sel>".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</option>";
 		}
 		echo "</select></td></tr>";
 

@@ -50,7 +50,7 @@ if(!function_exists("yhtion_parametrittarkista")) {
 
 			$tuote = trim($t[$i]);
 
-			$query = "	select *
+			$query = "	SELECT *
 						from maksuehto
 						where yhtio	= '$kukarow[yhtio]'
 						and summanjakoprososa2 != 0";

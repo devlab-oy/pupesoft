@@ -242,7 +242,10 @@ if(!function_exists("asiakastarkista")) {
 
 		if (mysql_field_name($result, $i) == "maksuehto" and $t[$i] > 0) {
 
-			$query   = "select tunnus from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$t[$i]'
+			$query = "	SELECT tunnus 
+						from maksuehto 
+						where yhtio='$kukarow[yhtio]' 
+						and tunnus='$t[$i]'
 						and (sallitut_maat = '' or sallitut_maat like '%$apu_maa%')";
 			$sresult = mysql_query($query) or pupe_error($query);
 
@@ -254,7 +257,9 @@ if(!function_exists("asiakastarkista")) {
 
 		if (mysql_field_name($result, $i) == "toimitustapa" and trim($t[$i]) != '') {
 
-			$query   = "select tunnus from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$t[$i]'
+			$query   = "SELECT tunnus 
+						from toimitustapa 
+						where yhtio='$kukarow[yhtio]' and selite='$t[$i]'
 						and (sallitut_maat = '' or sallitut_maat like '%$apu_toim_maa%')";
 			$sresult = mysql_query($query) or pupe_error($query);
 

@@ -209,7 +209,7 @@
 				$sallitut_maat = "($vrow[sallitut_maat])";
 			}
 
-			$ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[teksti] $sallitut_maat</option>";
+			$ulos .= "<option value = '$vrow[tunnus]' $sel>".t_tunnus_avainsanat($vrow, "teksti", "MAKSUEHTOKV")." $sallitut_maat</option>";
 		}
 		$ulos .= "</select></td>";
 		$jatko = 0;
@@ -406,10 +406,10 @@
 	}
 
 	if (mysql_field_name($result, $i) == "toimitustapa") {
-		$query = "	SELECT toimitustapa.tunnus, selite
+		$query = "	SELECT *
 					FROM toimitustapa
-					WHERE toimitustapa.yhtio = '$kukarow[yhtio]'
-					ORDER BY toimitustapa.jarjestys, toimitustapa.selite";
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY jarjestys, selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'>";
 
@@ -418,7 +418,7 @@
 			if ($trow[$i] == $vrow['selite']) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite]</option>";
+			$ulos .= "<option value = '$vrow[selite]' $sel>".t_tunnus_avainsanat($vrow, "selite", "TOIMTAPAKV")."</option>";
 		}
 		$ulos .= "</select></td>";
 		$jatko = 0;

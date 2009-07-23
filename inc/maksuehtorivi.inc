@@ -100,7 +100,7 @@
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = ''>".t("Ei factoroida");
 
-		while ($vrow=mysql_fetch_row($vresult)) {
+		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow[0]) {
 				$sel = "selected";
@@ -113,42 +113,22 @@
 	}
 
 
-	if (mysql_field_name($result, $i) == "osamaksuehto1") {
-		$query = "	SELECT tunnus, concat(teksti,' ',kassa_teksti)
+	if (mysql_field_name($result, $i) == "osamaksuehto1" or mysql_field_name($result, $i) == "osamaksuehto2") {
+		$query = "	SELECT *
 					FROM maksuehto
 					WHERE yhtio = '$kukarow[yhtio]'
-					ORDER BY jarjestys";
+					ORDER BY jarjestys, teksti";
 		$vresult = mysql_query($query) or pupe_error($query);
+		
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = ''>".t("Tämä ei ole moniehto-maksuehto");
 
-		while ($vrow=mysql_fetch_row($vresult)) {
+		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow[0]) {
+			if ($trow[$i] == $vrow["tunnus"]) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]";
-		}
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
-	if (mysql_field_name($result, $i) == "osamaksuehto2") {
-		$query = "	SELECT tunnus, concat(teksti,' ',kassa_teksti)
-					FROM maksuehto
-					WHERE yhtio = '$kukarow[yhtio]'
-					ORDER BY jarjestys";
-		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi'>";
-
-		$ulos .= "<option value = ''>".t("Tämä ei ole moniehto-maksuehto");
-
-		while ($vrow=mysql_fetch_row($vresult)) {
-			$sel="";
-			if ($trow[$i] == $vrow[0]) {
-				$sel = "selected";
-			}
-			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]";
+			$ulos .= "<option value = '$vrow[tunnus]' $sel>".t_tunnus_avainsanat($vrow, "teksti", "MAKSUEHTOKV")."</option>";
 		}
 		$ulos .= "</select></td>";
 		$jatko = 0;

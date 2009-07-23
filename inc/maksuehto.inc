@@ -1,7 +1,7 @@
 <?php
 
 	$otsikko = 'Maksuehdot';
-	$kentat = 'tunnus, teksti, rel_pvm, abs_pvm, kassa_teksti, kassa_relpvm, kassa_abspvm, kassa_alepros, jarjestys, tunnus, kaytossa HIDDEN_kaytossa';
+	$kentat = 'tunnus, teksti, rel_pvm, abs_pvm, kassa_relpvm, kassa_abspvm, kassa_alepros, jarjestys, tunnus, kaytossa HIDDEN_kaytossa';
 	$jarjestys = 'jarjestys, teksti';
 	
 	if ($nayta_poistetut == "") {

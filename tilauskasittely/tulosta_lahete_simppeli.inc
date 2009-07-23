@@ -149,19 +149,32 @@ if (!function_exists('tulosta_lahete')) {
 					}
 
 					foreach($kentat as $key) {
-							$pdf->writeToTemplate($h, 1, $s[0], $s[1], t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);						
+							
 						if($key == "toimitusaika") {
+							$pdf->writeToTemplate($h, 1, $s[0], $s[1], t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);						
 							$pdf->writeToTemplate($h, 1, $s[1]+2, 0, strftime("%x",strtotime($laskurow[$key])), "norm", "L", "", $tid);
+							$h-=$pdf->ln();
 						}
 						elseif($key == "käsitelty") {
 							if($laskurow[$key]!='0000-00-00 00:00:00') {
+								$pdf->writeToTemplate($h, 1, $s[0], $s[1], t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);						
 								$pdf->writeToTemplate($h, 1, $s[1]+2, 0, strftime("%x %T",strtotime($laskurow[$key])), "norm", "L", "", $tid);
+								$h-=$pdf->ln();
+							}
+						}
+						elseif($key == "asiakkaan_VAT") {
+							//	Jos tässä on ei ole yhtään numeroa, skipataan koko rivi, ollaan ehkä jossain kummallisessa maassa jossa ei makseta veroja!
+							if(preg_match("/[0-9]/", $laskurow[$key])) {
+								$pdf->writeToTemplate($h, 1, $s[0], $s[1], t($o, $kieli).":", "norm", "L", "B", $tid);
+								$pdf->writeToTemplate($h, 1, $s[1]+2, 0, $laskurow[$key], "norm", "L", "", $tid);
+								$h-=$pdf->ln();
 							}
 						}
 						else {
+							$pdf->writeToTemplate($h, 1, $s[0], $s[1], t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);						
 							$pdf->writeToTemplate($h, 1, $s[1]+2, 0, $laskurow[$key], "norm", "L", "", $tid);
+							$h-=$pdf->ln();
 						}
-						$h-=$pdf->ln();													
 					}
 					$h-=$pdf->ln(0.5);
 

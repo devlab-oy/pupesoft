@@ -1250,7 +1250,7 @@
 					}
 					$varresult = mysql_query($query) or pupe_error($query);
 
-					echo "<td valign='top' $classrigh>";
+					echo "<td valign='top' $classrigh class='$vari'>";
 
 					if (mysql_num_rows($varresult) > 0) {
 						$hyllylisa = "";
@@ -1300,7 +1300,7 @@
 
 
 					if ($lisatiedot != "" and $kukarow["extranet"] == "") {
-						echo "<td valign='top' $classrigh>";
+						echo "<td valign='top' $classrigh class='$vari'>";
 
 						if (mysql_num_rows($varresult) > 0 and $hyllylisa != "") {
 

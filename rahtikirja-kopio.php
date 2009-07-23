@@ -214,7 +214,7 @@
 			if ($toimitustapa==$row['selite']) $sel=" selected ";
 			else $sel = "";
 
-			echo "<option value='$row[selite]' $sel>".asana('TOIMITUSTAPA_',$row['selite'])."";
+			echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
 		}
 
 		echo "</select></td></tr>";

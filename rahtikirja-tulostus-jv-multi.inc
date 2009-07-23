@@ -108,11 +108,6 @@
 		}
 
 		//haetaan tällä rahtikirjalle rahtimaksu
-		/*
-		$query = "select * from rahtimaksut where toimitustapa='$toimitustapa' and kilotalku<='$kilotyht' and kilotloppu>='$kilotyht' and yhtio='$kukarow[yhtio]'";
-		$rares = mysql_query($query) or pupe_error($query);
-		*/
-
 		$rahtihinta = hae_rahtimaksu($oikeatunnus);
 
 		if ($rahtihinta != 0) {
@@ -144,7 +139,7 @@
 	}
 
 	// kirjoitetaan jv kulurivi ekalle otsikolle
-	$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
+	$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
 	$rhire = mysql_query($query) or pupe_error($query);
 	$trow  = mysql_fetch_array($rhire);
 

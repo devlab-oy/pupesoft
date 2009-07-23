@@ -283,7 +283,7 @@ if ($asiakasid) {
     			}
 			 
 			    ?>
-			<option <?php echo $sel ?> value="<?php echo $toimt['selite'] ?>"><?php echo asana('TOIMITUSTAPA_', $toimt['selite']) ?></option>
+			<option <?php echo $sel ?> value="<?php echo $toimt['selite'] ?>"><?php echo t_tunnus_avainsanat($toimt, "selite", "TOIMTAPAKV") ?></option>
 		<?php endforeach; ?>
 		</select>
 		<input type="hidden" name="ytunnus" value="<?php echo $asiakasrow['ytunnus'] ?>">

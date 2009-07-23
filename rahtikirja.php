@@ -839,7 +839,7 @@
 
 		echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
 
-		$query = "	SELECT selite
+		$query = "	SELECT *
 					FROM toimitustapa
 					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY selite";
@@ -849,11 +849,11 @@
 
 		while($row = mysql_fetch_array($result)){
 			$sel = '';
-			if($row[0] == $tutoimtapa) {
+			if($row["selite"] == $tutoimtapa) {
 				$sel = 'selected';
-				$tutoimtapa = $row[0];
-			}
-			echo "<option value='$row[0]' $sel>".asana('TOIMITUSTAPA_',$row[0])."</option>";
+				$tutoimtapa = $row["selite"];
+			}								
+			echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
 		}
 
 		echo "</select></td>";
@@ -926,7 +926,7 @@
 				$etsire = mysql_query($query) or pupe_error($query);
 				$etsirow = mysql_fetch_array($etsire);	
 
-				if ($etsirow[tunnukset] != '') {
+				if ($etsirow["tunnukset"] != '') {
 					$haku .= "and lasku.tunnus in($etsirow[tunnukset])";
 				}		
 				else {
@@ -1484,7 +1484,7 @@
 
 		echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
 
-		$query = "	SELECT selite
+		$query = "	SELECT *
 					FROM toimitustapa
 					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY selite";
@@ -1494,11 +1494,11 @@
 
 		while($row = mysql_fetch_array($result)){
 			$sel = '';
-			if($row[0] == $tutoimtapa) {
+			if($row["selite"] == $tutoimtapa) {
 				$sel = 'selected';
-				$tutoimtapa = $row[0];
+				$tutoimtapa = $row["selite"];
 			}
-			echo "<option value='$row[0]' $sel>".asana('TOIMITUSTAPA_',$row[0])."</option>";
+			echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
 		}
 
 		echo "</select></td>";
@@ -1704,7 +1704,7 @@
 		echo "<th align='left'>".t("Toimitusosoite")."</th><td>$otsik[toim_nimi] $otsik[toim_nimitark]<br>$otsik[toim_osoite]<br>$otsik[toim_postino] $otsik[toim_postitp]</td></tr>";
 
 		echo "<tr><th align='left'>".t("Kerätty")."</th><td>$otsik[kerayspvm]</td>";
-		echo "<th align='left'>".t("Maksuehto")."</th><td>$marow[teksti]</td></tr>";
+		echo "<th align='left'>".t("Maksuehto")."</th><td>".t_tunnus_avainsanat($marow, "teksti", "MAKSUEHTOKV", $kieli)."</td></tr>";
 
 		if ($otsik["vienti"] == 'K')		$vientit = t("Vientiä EU:n ulkopuolelle");
 		elseif ($otsik["vienti"] == 'E')	$vientit = t("EU Vientiä");
@@ -1737,7 +1737,7 @@
 			}
 			else $select = '';
 
-			echo "<option $select value='$row[selite]'>".asana('TOIMITUSTAPA_',$row['selite'])."</option>\n";
+			echo "<option $select value='$row[selite]'>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>\n";
 		}
 
 		echo "</select></td></tr>\n";

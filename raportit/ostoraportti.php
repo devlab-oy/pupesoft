@@ -7,6 +7,8 @@
 
 	require ("../inc/parametrit.inc");
 
+	echo "<style type='text/css'>TH { vertical-align: top; }</style>";
+
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("/tmp/".$tmpfilenimi);
 		exit;
@@ -176,7 +178,7 @@
 			$ehd_kausi_o3	= $lo;
 		}
 
-		$sarakkeet["SARAKE10A"]	= "Os1A\t"; // Ostoehdotus KAUSI1
+		$sarakkeet["SARAKE10A"]	= "Os1A\t"; // Ostoehdotus kausi1
 		$sarakkeet["SARAKE11A"]	= "Os1B\t";
 		$sarakkeet["SARAKE12A"]	= "Os1C\t";
 		$sarakkeet["SARAKE10B"]	= "Os2A\t"; // Ostoehdotus kausi2
@@ -185,7 +187,7 @@
 		$sarakkeet["SARAKE10C"]	= "Os3A\t"; // ostoehdotus kausi3
 		$sarakkeet["SARAKE11C"]	= "Os3B\t";
 		$sarakkeet["SARAKE12C"]	= "Os3C\t";
-		$sarakkeet["SARAKE10D"]	= "Os4A\t"; // ostoehdotus kausi 4
+		$sarakkeet["SARAKE10D"]	= "Os4A\t"; // ostoehdotus kausi4
 		$sarakkeet["SARAKE11D"]	= "Os4B\t";
 		$sarakkeet["SARAKE12D"]	= "Os4C\t";
 		$sarakkeet["SARAKE13A"]	= t("Osthaly 1")."\t"; // ostettava haly kausi1
@@ -1108,23 +1110,20 @@
 
 					if ($valitut["KAUSI1"] != '') {
 						list($al, $lo) = explode("##", $valitut["KAUSI1"]);
-
 						$ehd_kausi1	= $lo;
 					}
 					if ($valitut["KAUSI2"] != '') {
 						list($al, $lo) = explode("##", $valitut["KAUSI2"]);
-
 						$ehd_kausi2	= $lo;
 					}
 					if ($valitut["KAUSI3"] != '') {
 						list($al, $lo) = explode("##", $valitut["KAUSI3"]);
-
 						$ehd_kausi3	= $lo;
 					}
 
-					${"ostettava1kk".$x}	= ((($laskurow[$indeksi] + $kulutrow[$indeksi]) / $ero * $ehd_kausi1) - ($saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
-					${"ostettava3kk".$x}	= ((($laskurow[$indeksi] + $kulutrow[$indeksi]) / $ero * $ehd_kausi2) - ($saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
-					${"ostettava4kk".$x}	= ((($laskurow[$indeksi] + $kulutrow[$indeksi]) / $ero * $ehd_kausi3) - ($saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
+					${"ostettava1kk".$x} = ((($laskurow[$indeksi] + $kulutrow[$indeksi]) / $ero * $ehd_kausi1) - ($saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
+					${"ostettava3kk".$x} = ((($laskurow[$indeksi] + $kulutrow[$indeksi]) / $ero * $ehd_kausi2) - ($saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
+					${"ostettava4kk".$x} = ((($laskurow[$indeksi] + $kulutrow[$indeksi]) / $ero * $ehd_kausi3) - ($saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
 
 					${"ostettavahaly".$x} = ($row['halytysraja'] - ($saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['jt'])) / $row['osto_era'];
 
@@ -2608,6 +2607,7 @@
 
 			require ("../tilauskasittely/monivalintalaatikot.inc");
 
+			echo "<br><br>";
 			echo "<table>";
 			echo "<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='ytunnus' value='$ytunnus'></td></tr>";
 
@@ -2768,59 +2768,57 @@
 					<input type='hidden' name='abcrajaustapa' value='$abcrajaustapa'>
 					<input type='hidden' name='abcrajausluokka' value='$abcrajausluokka'>
 
-					<table>
-					<tr><th>".t("Osasto")."</th><td colspan='3'>$osasto</td></tr>
-					<tr><th>".t("Tuoteryhmä")."</th><td colspan='3'>$try</td></tr>
-					<tr><th>".t("Toimittaja")."</th><td colspan='3'>$ytunnus {$trow1['nimi']}</td></tr>
-					<tr><th>".t("Tuotemerkki")."</th><td colspan='3'>$tuotemerkki</td></tr>
-					<tr><th>".t("ABC-rajaus")."</th><td colspan='3'>$abcnimi</td></tr>
-					<tr><th>".t("Asiakasosasto")."</th><td colspan='3'>$asiakasosasto</td></tr>
-					<tr><th>".t("Asiakas")."</th><td colspan='3'>$asiakasno {$trow2['nimi']}</td></tr>";
+					<table>";
+
+			if ($osasto != "") echo "<tr><th>".t("Osasto")."</th><td colspan='2'>$osasto</td></tr>";
+			if ($try != "") echo "<tr><th>".t("Tuoteryhmä")."</th><td colspan='2'>$try</td></tr>";
+			if ($ytunnus != "") echo "<tr><th>".t("Toimittaja")."</th><td colspan='2'>$ytunnus {$trow1['nimi']}</td></tr>";
+			if ($tuotemerkki != "") echo "<tr><th>".t("Tuotemerkki")."</th><td colspan='2'>$tuotemerkki</td></tr>";
+			if ($abcnimi != "") echo "<tr><th>".t("ABC-rajaus")."</th><td colspan='2'>$abcnimi</td></tr>";
+			if ($asiakasosasto != "") echo "<tr><th>".t("Asiakasosasto")."</th><td colspan='2'>$asiakasosasto</td></tr>";
+			if ($asiakasno != "") echo "<tr><th>".t("Asiakas")."</th><td colspan='2'>$asiakasno {$trow2['nimi']}</td></tr>";
 
 			echo "	<tr><td class='back'><br></td></tr>";
 
 			echo "	<tr>
-					<td class='back'></td><th colspan='3'>".t("Alkupäivämäärä (pp-kk-vvvv)")."</th>
-					<td class='back'></td><th colspan='3'>".t("Loppupäivämäärä (pp-kk-vvvv)")."</th></tr>";
+					<td class='back'></td>
+					<th>".t("Alkupäivämäärä (pp-kk-vvvv)")."</th>
+					<th>".t("Loppupäivämäärä (pp-kk-vvvv)")."</th></tr>";
 
 			echo "	<tr><th>".t("Kausi 1")."</th>
-					<td><input type='text' name='ppa1' value='$ppa1' size='5'></td>
-					<td><input type='text' name='kka1' value='$kka1' size='5'></td>
-					<td><input type='text' name='vva1' value='$vva1' size='5'></td>
-					<td class='back'> - </td>
-					<td><input type='text' name='ppl1' value='$ppl1' size='5'></td>
-					<td><input type='text' name='kkl1' value='$kkl1' size='5'></td>
-					<td><input type='text' name='vvl1' value='$vvl1' size='5'></td>";
+					<td><input type='text' name='ppa1' value='$ppa1' size='5'>
+					<input type='text' name='kka1' value='$kka1' size='5'>
+					<input type='text' name='vva1' value='$vva1' size='5'></td>
+					<td><input type='text' name='ppl1' value='$ppl1' size='5'>
+					<input type='text' name='kkl1' value='$kkl1' size='5'>
+					<input type='text' name='vvl1' value='$vvl1' size='5'></td>";
 			echo "</tr>";
 
 			echo "	<tr><th>".t("Kausi 2")."</th>
-					<td><input type='text' name='ppa2' value='$ppa2' size='5'></td>
-					<td><input type='text' name='kka2' value='$kka2' size='5'></td>
-					<td><input type='text' name='vva2' value='$vva2' size='5'></td>
-					<td class='back'> - </td>
-					<td><input type='text' name='ppl2' value='$ppl2' size='5'></td>
-					<td><input type='text' name='kkl2' value='$kkl2' size='5'></td>
-					<td><input type='text' name='vvl2' value='$vvl2' size='5'></td>";
+					<td><input type='text' name='ppa2' value='$ppa2' size='5'>
+					<input type='text' name='kka2' value='$kka2' size='5'>
+					<input type='text' name='vva2' value='$vva2' size='5'></td>
+					<td><input type='text' name='ppl2' value='$ppl2' size='5'>
+					<input type='text' name='kkl2' value='$kkl2' size='5'>
+					<input type='text' name='vvl2' value='$vvl2' size='5'></td>";
 			echo "</tr>";
 
 			echo "	<tr><th>".t("Kausi 3")."</th>
-					<td><input type='text' name='ppa3' value='$ppa3' size='5'></td>
-					<td><input type='text' name='kka3' value='$kka3' size='5'></td>
-					<td><input type='text' name='vva3' value='$vva3' size='5'></td>
-					<td class='back'> - </td>
-					<td><input type='text' name='ppl3' value='$ppl3' size='5'></td>
-					<td><input type='text' name='kkl3' value='$kkl3' size='5'></td>
-					<td><input type='text' name='vvl3' value='$vvl3' size='5'></td>";
+					<td><input type='text' name='ppa3' value='$ppa3' size='5'>
+					<input type='text' name='kka3' value='$kka3' size='5'>
+					<input type='text' name='vva3' value='$vva3' size='5'></td>
+					<td><input type='text' name='ppl3' value='$ppl3' size='5'>
+					<input type='text' name='kkl3' value='$kkl3' size='5'>
+					<input type='text' name='vvl3' value='$vvl3' size='5'></td>";
 			echo "</tr>";
 
 			echo "	<tr><th>".t("Kausi 4")."</th>
-					<td><input type='text' name='ppa4' value='$ppa4' size='5'></td>
-					<td><input type='text' name='kka4' value='$kka4' size='5'></td>
-					<td><input type='text' name='vva4' value='$vva4' size='5'></td>
-					<td class='back'> - </td>
-					<td><input type='text' name='ppl4' value='$ppl4' size='5'></td>
-					<td><input type='text' name='kkl4' value='$kkl4' size='5'></td>
-					<td><input type='text' name='vvl4' value='$vvl4' size='5'></td>";
+					<td><input type='text' name='ppa4' value='$ppa4' size='5'>
+					<input type='text' name='kka4' value='$kka4' size='5'>
+					<input type='text' name='vva4' value='$vva4' size='5'></td>
+					<td><input type='text' name='ppl4' value='$ppl4' size='5'>
+					<input type='text' name='kkl4' value='$kkl4' size='5'>
+					<input type='text' name='vvl4' value='$vvl4' size='5'></td>";
 			echo "</tr>";
 
 			$chk = "";
@@ -2829,7 +2827,7 @@
 				$chk = "CHECKED";
 			}
 
-			echo "<tr><th>".t("Tallenna päivämäärät:")."</th><td colspan='8'><input type='checkbox' name='valitut[TALLENNAPAIVAM]' value='TALLENNAPAIVAM' $chk></td></tr>";
+			echo "<tr><th>".t("Tallenna päivämäärät:")."</th><td colspan='2'><input type='checkbox' name='valitut[TALLENNAPAIVAM]' value='TALLENNAPAIVAM' $chk></td></tr>";
 			echo "	<tr><td class='back'><br></td></tr>";
 
 			//Ostokausivalinnat
@@ -2841,14 +2839,10 @@
 
 			foreach ($kaudet_oletus as $kaunimi => $kausi1) {
 
-				echo "<tr><th>Ostoehdotus $kaunimi:</th><td colspan='3'><select name='valitut[KAUSI$kaulas]'>";
+				echo "<tr><th>Ostoehdotus $kaunimi:</th><td colspan='2'><select name='valitut[KAUSI$kaulas]'>";
 
 				foreach ($kaudet_kaikki as $kausi2) {
-
 					$chk = "";
-
-					// ("KAUSI".$kaulas."##".$kausi2 == $srow["selitetark"] and $tee == "JATKA") or
-					//  or ($kausi1 == $kausi2 and $srow["selitetark"] == "")
 					if ($valitut["KAUSI$kaulas##$kausi2"] != '') {
 						$chk = "SELECTED";
 					}
@@ -2863,18 +2857,18 @@
 
 			echo "<tr><td class='back'><br></td></tr>";
 
-			echo "<tr><th>",t("Luokkakertoimet"),"</th></tr>";
-			echo "<tr><th>";
+			echo "<tr><th>",t("Luokkakertoimet"),"</th>";
+			echo "<td colspan='2' nowrap>";
 
 			foreach ($ryhmanimet as $ryhma_kirjain) {
 				echo $ryhma_kirjain{0}," <input type='text' name='luokkakerroin_",$ryhma_kirjain{0},"' size='3' value='",${"luokkakerroin_".$ryhma_kirjain{0}},"'> ";
 			}
 
-			echo "</th></tr>";
+			echo "</td></tr>";
 
 			echo "<tr><td class='back'><br></td></tr>";
 
-			echo "<tr><th>",t("Vuosimalliväli"),"<td><input type='text' name='vm1' size='5' value=''> - <input type='text' name='vm2' size='5' value=''></td></tr>";
+			echo "<tr><th>",t("Vuosimalliväli"),"<td colspan='2'><input type='text' name='vm1' size='10' value=''> - <input type='text' name='vm2' size='10' value=''></td></tr>";
 
 			echo "<tr><td class='back'><br></td></tr>";
 
@@ -2904,7 +2898,7 @@
 						echo "<tr>";
 					}
 
-					echo "<td colspan='3'><input type='checkbox' name='valitut[YHTIO##$prow[yhtio]]' value='YHTIO##$prow[yhtio]' $chk onClick='submit();'> $prow[nimi]</td></tr>";
+					echo "<td colspan='2'><input type='checkbox' name='valitut[YHTIO##$prow[yhtio]]' value='YHTIO##$prow[yhtio]' $chk onClick='submit();'> $prow[nimi]</td></tr>";
 
 					$konsyhtiot .= "'".$prow["yhtio"]."',";
 					$vlask++;
@@ -2926,7 +2920,7 @@
 				$chk = "CHECKED";
 			}
 
-			echo "<tr><th>".t("Aja raportti varastopaikoittain")."</th><td colspan='3'><input type='checkbox' name='valitut[paikoittain]' value='PAIKOITTAIN' $chk></td></tr>";
+			echo "<tr><th>".t("Aja raportti varastopaikoittain")."</th><td colspan='2'><input type='checkbox' name='valitut[paikoittain]' value='PAIKOITTAIN' $chk></td></tr>";
 
 
 			//Näytetäänkö poistetut tuotteet
@@ -2935,7 +2929,7 @@
 				$chk = "CHECKED";
 			}
 
-			echo "<tr><th>".t("Älä näytä poistettuja tuotteita")."</th><td colspan='3'><input type='checkbox' name='valitut[poistetut]' value='POISTETUT' $chk></td></tr>";
+			echo "<tr><th>".t("Älä näytä poistettuja tuotteita")."</th><td colspan='2'><input type='checkbox' name='valitut[poistetut]' value='POISTETUT' $chk></td></tr>";
 
 			//Näytetäänkö poistetut tuotteet
 			$chk = "";
@@ -2943,7 +2937,7 @@
 				$chk = "CHECKED";
 			}
 
-			echo "<tr><th>".t("Älä näytä poistuvia tuotteita")."</th><td colspan='3'><input type='checkbox' name='valitut[poistuvat]' value='POISTUVAT' $chk></td></tr>";
+			echo "<tr><th>".t("Älä näytä poistuvia tuotteita")."</th><td colspan='2'><input type='checkbox' name='valitut[poistuvat]' value='POISTUVAT' $chk></td></tr>";
 
 
 			//Näytetäänkö poistetut tuotteet
@@ -2952,7 +2946,7 @@
 				$chk = "CHECKED";
 			}
 
-			echo "<tr><th>".t("Älä näytä tuotteita joita ei näytetä hinnastossa")."</th><td colspan='3'><input type='checkbox' name='valitut[EIHINNASTOON]' value='EIHINNASTOON' $chk></td></tr>";
+			echo "<tr><th>".t("Älä näytä tuotteita joita ei näytetä hinnastossa")."</th><td colspan='2'><input type='checkbox' name='valitut[EIHINNASTOON]' value='EIHINNASTOON' $chk></td></tr>";
 
 			//Näytetäänkö ei varastoitavat tuotteet
 			$chk = "";
@@ -2960,7 +2954,7 @@
 				$chk = "CHECKED";
 			}
 
-			echo "<tr><th>".t("Älä näytä tuotteita joita ei varastoida")."</th><td colspan='3'><input type='checkbox' name='valitut[EIVARASTOITAVA]' value='EIVARASTOITAVA' $chk></td></tr>";
+			echo "<tr><th>".t("Älä näytä tuotteita joita ei varastoida")."</th><td colspan='2'><input type='checkbox' name='valitut[EIVARASTOITAVA]' value='EIVARASTOITAVA' $chk></td></tr>";
 
 			//Näytetäänkö poistuvat tuotteet
 			$chk = "";
@@ -2968,7 +2962,7 @@
 				$chk = "CHECKED";
 			}
 
-			echo "<tr><th>".t("Näytä vain ostettavaksi ehdotettavat rivit")."</th><td colspan='3'><input type='checkbox' name='valitut[EHDOTETTAVAT]' value='EHDOTETTAVAT' $chk></td></tr>";
+			echo "<tr><th>".t("Näytä vain ostettavaksi ehdotettavat rivit")."</th><td colspan='2'><input type='checkbox' name='valitut[EHDOTETTAVAT]' value='EHDOTETTAVAT' $chk></td></tr>";
 
 
 			//Näytetäänkö ostot varastoittain
@@ -2976,12 +2970,12 @@
 			if ($valitut["OSTOTVARASTOITTAIN"] != '') {
 				$chk = "CHECKED";
 			}
-			echo "<tr><th>".t("Näytä tilatut varastoittain")."</th><td colspan='3'><input type='checkbox' name='valitut[OSTOTVARASTOITTAIN]' $chk></td></tr>";
+			echo "<tr><th>".t("Näytä tilatut varastoittain")."</th><td colspan='2'><input type='checkbox' name='valitut[OSTOTVARASTOITTAIN]' $chk></td></tr>";
 
 			if ($abcrajaus != "") {
 
 				echo "<tr><td class='back'><br></td></tr>";
-				echo "<tr><th colspan='4'>".t("ABC-rajaus")." $ryhmanimet[$abcrajaus]</th></tr>";
+				echo "<tr><th colspan='2'>".t("ABC-rajaus")." $ryhmanimet[$abcrajaus]</th></tr>";
 
 				//näytetäänkö uudet tuotteet
 				$chk = "";
@@ -2989,7 +2983,7 @@
 					$chk = "CHECKED";
 				}
 
-				echo "<tr><th>".t("Älä listaa 12kk sisällä perustettuja tuotteita")."</th><td colspan='3'><input type='checkbox' name='valitut[UUDETTUOTTEET]' value='UUDETTUOTTEET' $chk></td></tr>";
+				echo "<tr><th>".t("Älä listaa 12kk sisällä perustettuja tuotteita")."</th><td colspan='2'><input type='checkbox' name='valitut[UUDETTUOTTEET]' value='UUDETTUOTTEET' $chk></td></tr>";
 
 				//näytetäänkö uudet tuotteet
 				$chk = "";
@@ -2997,7 +2991,7 @@
 					$chk = "CHECKED";
 				}
 
-				echo "<tr><th>".t("Listaa vain 12kk sisällä perustetut tuotteet")."</th><td colspan='3'><input type='checkbox' name='valitut[VAINUUDETTUOTTEET]' value='VAINUUDETTUOTTEET' $chk></td></tr>";
+				echo "<tr><th>".t("Listaa vain 12kk sisällä perustetut tuotteet")."</th><td colspan='2'><input type='checkbox' name='valitut[VAINUUDETTUOTTEET]' value='VAINUUDETTUOTTEET' $chk></td></tr>";
 			}
 
 			echo "<tr><td class='back'><br></td></tr>";
@@ -3041,8 +3035,8 @@
 					echo "<tr>";
 				}
 
-				echo "<td colspan='3'><input type='checkbox' name='valitut[VARASTO##$vrow[tunnus]]' value='VARASTO##$vrow[tunnus]'$chk> $vrow[nimitys] ($vrow[yhtio])</td>";
-				echo "<td colspan='3'><input type='checkbox' name='valitut[VARASTO2##$vrow[tunnus]]' value='VARASTO2##$vrow[tunnus]'$chk2> $vrow[nimitys] ($vrow[yhtio])</td>";
+				echo "<td><input type='checkbox' name='valitut[VARASTO##$vrow[tunnus]]' value='VARASTO##$vrow[tunnus]'$chk> $vrow[nimitys] ($vrow[yhtio])</td>";
+				echo "<td><input type='checkbox' name='valitut[VARASTO2##$vrow[tunnus]]' value='VARASTO2##$vrow[tunnus]'$chk2> $vrow[nimitys] ($vrow[yhtio])</td>";
 				echo "</tr>";
 
 				$vlask++;
@@ -3050,11 +3044,12 @@
 
 			echo "<tr><td class='back'><br></td></tr>";
 
-			echo "</table><br><br>";
+			echo "</table>";
+
 			echo "<table>";
-			echo "<tr><th colspan='4'>".t("Omat ostoraportit")."</th></tr>";
-			echo "<tr><th>".t("Luo uusi oma raportti").":</th><td colspan='3'><input type='text' size='40' name='uusirappari' value='",t("Tämä on poistettu toistaiseksi käytöstä"),"!' disabled></td></tr>";
-			echo "<tr><th>".t("Valitse raportti").":</th><td colspan='3'>";
+			echo "<tr><th colspan='8'>".t("Omat ostoraportit")."</th></tr>";
+			echo "<tr><th colspan='3'>".t("Luo uusi oma raportti").":</th><td colspan='5'><input type='text' size='40' name='uusirappari' value='",t("Tämä on poistettu toistaiseksi käytöstä"),"!' disabled></td></tr>";
+			echo "<tr><th colspan='3'>".t("Valitse raportti").":</th><td colspan='5'>";
 
 			//Haetaan tallennetut hälyrapit
 			echo "<select name='rappari' onchange='submit()' disabled>";
@@ -3079,12 +3074,11 @@
 			foreach ($sarakkeet as $key => $sarake) {
 
 				$sel = "";
-				// mysql_num_rows($sresult) == 1 or
 				if ($rappari == "") {
 					$sel = "CHECKED";
 				}
 
-				if ($lask % 4 == 0 and $lask != 0) {
+				if ($lask % 8 == 0 and $lask != 0) {
 					echo "</tr><tr>";
 				}
 

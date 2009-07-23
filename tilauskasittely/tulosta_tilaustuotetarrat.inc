@@ -60,8 +60,9 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
 					return $pdf;
 				}
 			}
-			
+			$tarrat_tot=0;
 			while($row = mysql_fetch_array($result)) {
+				
 				$tarra_kpl = "";
 
 				if(file_exists($row["tarratyyppi"])) {
@@ -114,12 +115,14 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
 						$kirrow = mysql_fetch_array($kirres);
 						$arvaakirjoitin[$kirrow["printteri2"]]++;
 					}
+					
+					$tarrat_tot+=$tarra_kpl;
 				}
 				
 			}
 			
 			//	Tulostetaan tarra jos meillä on jotain tulostettavaa
-			if($tarra_kpl>0) {
+			if($tarrat_tot>0) {
 
 				//	Haetaan sopivan varaston printteri2
 				if($komento=="OPTIMOI" and is_array($arvaakirjoitin)) {

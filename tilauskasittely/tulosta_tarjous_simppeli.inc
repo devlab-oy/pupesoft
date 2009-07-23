@@ -449,7 +449,7 @@ if (!function_exists('tulosta_tarjous')) {
 		}
 		
 		//	Maksusopimus		
-		$query = "	SELECT round(maksupositio.osuus,0) osuus, maksupositio.kuvaus. maksupositio.lisatiedot, maksuehto.tunnus, maksuehto.teksti
+		$query = "	SELECT round(maksupositio.osuus,0) osuus, maksupositio.kuvaus, maksupositio.lisatiedot, maksuehto.tunnus, maksuehto.teksti
 					FROM maksupositio
 					LEFT JOIN maksuehto ON maksuehto.yhtio=maksupositio.yhtio and maksuehto.tunnus=maksupositio.maksuehto					 
 					WHERE maksupositio.yhtio = '$kukarow[yhtio]' 

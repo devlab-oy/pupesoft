@@ -196,6 +196,7 @@
 	if (isset($jatka)) {
 		$query = "SELECT tunnus FROM maksuehto WHERE yhtio ='{$kukarow["yhtio"]}' and tunnus = '$maksuehto' and jv != ''";
 		$result = mysql_query($query) or pupe_error($query);
+		
 		if(mysql_num_rows($result) > 0) {
 
 			//	Denial by toimitustapa
@@ -908,8 +909,8 @@
 			//Tutkitaan onko laskulla maksupositioita
 			$query = "	SELECT *
 						FROM maksupositio
-						WHERE maksupositio.yhtio ='$kukarow[yhtio]'
-						and maksupositio.otunnus ='$srow[jaksotettu]'";
+						WHERE yhtio ='$kukarow[yhtio]'
+						and otunnus ='$srow[jaksotettu]'";
 			$result = mysql_query($query) or pupe_error($query);
 			echo "<tr><td>".t("Maksuehto").":</td>";
 
@@ -934,7 +935,7 @@
 					if ($row["tunnus"] == $srow["maksuehto"]) {
 						$sel = 'selected';
 					}
-					echo "<option value='$row[tunnus]' $sel>$row[teksti] $row[kassa_teksti]</option>";
+					echo "<option value='$row[tunnus]' $sel>".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</option>";
 				}
 				echo "</select></td>";
 			}
@@ -975,7 +976,7 @@
 			$apu_rahdinmaksaja = $srow["kohdistettu"];
 
 			if ($apu_rahdinmaksaja == "O") {
-				$apuqu = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$srow[toimitustapa]'";
+				$apuqu = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$srow[toimitustapa]'";
 				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 				$apuro = mysql_fetch_array($meapu);
 				$apu_rahdinmaksaja = $apuro['merahti'];
@@ -1021,7 +1022,7 @@
 				if ($row["selite"] == $srow["toimitustapa"]) {
 					$sel = 'selected';
 				}
-				echo "<option value='$row[selite]' $sel>$row[selite]</option>";
+				echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
 			}
 			echo "</select></td>";
 
@@ -2438,7 +2439,7 @@
 		}
 
 		// haetaan maksuehdoen tiedot tarkastuksia varten
-		$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
+		$apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
 		$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 		$meapurow = mysql_fetch_array($meapu);
 
@@ -2447,15 +2448,16 @@
 		// jos kyseess‰ oli k‰teinen
 		if ($meapurow["kateinen"] != "") {
 			// haetaan toimitustavan tiedot tarkastuksia varten
-			$apuqu2 = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
+			$apuqu2 = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
 			$meapu2 = mysql_query($apuqu2) or pupe_error($apuqu2);
 			$meapu2row = mysql_fetch_array($meapu2);
 
 			// ja toimitustapa ei ole nouto laitetaan toimitustavaksi nouto... hakee j‰rjestyksess‰ ekan
 			if ($meapu2row["nouto"] == "") {
-				$apuqu = "select * from toimitustapa where yhtio = '$kukarow[yhtio]' and nouto != '' order by jarjestys limit 1";
+				$apuqu = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and nouto != '' order by jarjestys limit 1";
 				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 				$apuro = mysql_fetch_array($meapu);
+				
 				$toimitustapa = $apuro['selite'];
 			}
 			$kassalipas = $kukarow["kassamyyja"];
@@ -2463,23 +2465,27 @@
 
 		// jos kyseess‰ oli k‰sin syˆtetty er‰p‰iv‰ ja maksuehto on v‰‰rin laitetaan oikea maksuehto... hakee j‰rjestyksess‰ ekan
 		if ($erpcm_kasin == "KYLLA" and $meapurow["erapvmkasin"] == "" and $meapurow["jaksotettu"] == "") {
-			$erpquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' and kaytossa = '' order by tunnus limit 1";
+			
+			$erpquery = "SELECT * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' and kaytossa = '' order by tunnus limit 1";
 			$erpres = mysql_query($erpquery) or pupe_error($erpquery);
 			$erprow = mysql_fetch_array($erpres);
+			
 			$maksuehto = $erprow["tunnus"]; // valitaan t‰‰ maksuehdoks
 		}
 		
 		//	Tarkistetaan, ett‰ meill‰ on jaksotettu maksuehto jos lasku on jaksotettu, p‰ivitet‰‰n joku jos n‰in ei ole
 		if ($jaksotettu > 0 and $meapurow["jaksotettu"] == "") {
-			$jaksquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and jaksotettu != '' and kaytossa = '' order by tunnus limit 1";
+			
+			$jaksquery = "SELECT * from maksuehto where yhtio = '$kukarow[yhtio]' and jaksotettu != '' and kaytossa = '' order by tunnus limit 1";
 			$jaksres = mysql_query($jaksquery) or pupe_error($jaksquery);
 			$jaksrow = mysql_fetch_array($jaksres);
+			
 			$maksuehto = $jaksrow["tunnus"]; // valitaan t‰‰ maksuehdoks
 		}
 		
 		// jos ollaan valittu rahdinmaksajaksi oletus, haetaan oletusmaksaja toimitustavalta
 		if ($maksaja == "O") {
-			$apuqu = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
+			$apuqu = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
 			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 			$apuro = mysql_fetch_array($meapu);
 			$maksaja = $apuro['merahti'];

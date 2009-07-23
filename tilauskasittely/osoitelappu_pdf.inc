@@ -441,7 +441,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	}
 
 	//tänne ohjeisiin tulee lopullisen asiakkaan tiedot jos kyseessä on koontikuljetus
-	$query = "	select tulostustapa
+	$query = "	SELECT tulostustapa
 				from toimitustapa
 				where yhtio = '$kukarow[yhtio]'
 				and selite  = '$laskurow[toimitustapa]'";

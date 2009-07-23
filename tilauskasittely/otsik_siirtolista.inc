@@ -254,7 +254,7 @@
 		if ($toim == "SIIRTOLISTA") {
 			echo "<th>".t("Toimitustapa")."</th><td>";
 
-			$query = "	SELECT selite
+			$query = "	SELECT tunnus, selite
 						FROM toimitustapa
 						WHERE yhtio = '$kukarow[yhtio]'
 						and (sallitut_maat = '' or sallitut_maat like '%$srow[toim_maa]%')
@@ -265,11 +265,9 @@
 
 			while($row = mysql_fetch_array($tresult)) {
 				$sel = "";
-
-				if ($row[0] == $srow["toimitustapa"]) $sel = 'selected';
-
-
-				echo "<option value='$row[0]' $sel>".asana('TOIMITUSTAPA_',$row[0])."</option>";
+				if ($row["selite"] == $srow["toimitustapa"]) $sel = 'selected';
+				
+				echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
 			}
 			echo "</select>";
 

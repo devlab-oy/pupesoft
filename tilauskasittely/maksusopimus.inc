@@ -173,14 +173,14 @@
 		
 		if ($mehto != "") {
 			// haetaan maksuehdoen tiedot tarkastuksia varten
-			$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$mehto'";
+			$apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$mehto'";
 			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 			$meapurow = mysql_fetch_array($meapu);
 		}
 
 		if (($erpcmvv != "" and $erpcmkk != "" and $erpcmpp != "") or $meapurow["erapvmkasin"] != '') {
 
-			$erpquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' order by tunnus limit 1";
+			$erpquery = "SELECT * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' order by tunnus limit 1";
 			$erpres = mysql_query($erpquery) or pupe_error($erpquery);
 
 			$erpcmvv = (int) $erpcmvv;
@@ -304,7 +304,6 @@
 			echo "<tr><th>".t("Maksusopimukseen kuuluvat tilaukset").":</th><td> $rivrow[tilaukset] </td></tr>";
 			echo "</table><br>";
 
-
 			$kuvares = t_avainsana("LASKUKUVAUS");
 			
 			$query = "	SELECT *
@@ -346,7 +345,7 @@
 						elseif($asiakasrow["maksuehto"] == $prow["tunnus"] and $row["maksuehto"] == "") $sel = "SELECTED";
 						else $sel = "";
 
-						echo "<option value='$prow[tunnus]' $sel>$prow[teksti] $prow[kassa_teksti]</option>";
+						echo "<option value='$prow[tunnus]' $sel>".t_tunnus_avainsanat($prow, "teksti", "MAKSUEHTOKV")."</option>";
 					}
 					echo "</select><br>";
 					
@@ -428,7 +427,7 @@
 					echo "<td>";
 					
 					while($prow = mysql_fetch_array($mresult)) {
-						if($row["maksuehto"] == $prow["tunnus"]) echo "$row[teksti] $row[kassa_teksti]";
+						if($row["maksuehto"] == $prow["tunnus"]) echo t_tunnus_avainsanat($prow, "teksti", "MAKSUEHTOKV");
 					}
 					
 					echo "<br>$row[kuvaus]</td>";

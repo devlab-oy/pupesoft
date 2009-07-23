@@ -756,19 +756,17 @@ if (!function_exists('tulosta_lasku')) {
 			$pdf->write($h, 1, 0, $s[1], t("MAKSUTIEDOT", $kieli), "norm", "L", "B");
 			$h-=$pdf->ln(1.25);
 
-			$query = "	SELECT concat_ws(' ', ".avain('selectcon','MEHTOKATXT_', $kieli).",  ".avain('selectcon2','MEHTOTXT_', $kieli).") mehto
+			$query = "	SELECT *
 						FROM maksuehto
-						".avain('join','MEHTOKATXT_', $kieli)."
-						".avain('join2','MEHTOTXT_', $kieli)."
-						WHERE maksuehto.yhtio = '$kukarow[yhtio]' and maksuehto.tunnus = $laskurow[maksuehto]";
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and tunnus = $laskurow[maksuehto]";
 			$result = mysql_query($query) or pupe_error($query);
 			$masrow = mysql_fetch_array($result);
-			$maksuehto = $masrow["mehto"];
+			$maksuehto = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 
 			$h-=$pdf->ln(1.25);			
 
 			$masrow = $row;
-			
 
 			$pdf->write($h, 1, 0, 		$s[0], t("Laskun pvm", $kieli).":", "norm", "L", "");
 			$pdf->write($h, 1, $s[0], 	$s[1], strftime("%x",strtotime($laskurow["tapvm"])), "norm", "L", "");

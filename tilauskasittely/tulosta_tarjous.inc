@@ -868,7 +868,7 @@ if (!function_exists('tulosta_tarjous')) {
 		$masrow = mysql_fetch_array($result);
 
 		//maksuehto tekstinä
-		$laskurow["maksuehto"] = $masrow["teksti"]." ".$masrow["kassa_teksti"];
+		$laskurow["maksuehto"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 
 		$query  = "	SELECT *
 					FROM asiakas

@@ -91,12 +91,12 @@ if (!function_exists('alku_valm')) {
 			}
 
 			// haetaan maksuehdon tiedot
-			$query  = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+			$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 			$masresult = mysql_query($query) or pupe_error($query);
 			$masrow = mysql_fetch_array($masresult);
 
 			//maksuehto tekstinä
-			$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
+			$maksuehto = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 
 			$pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"], 	$thispage, $iso);
 
@@ -351,12 +351,12 @@ if (!function_exists('uusi_sivu_valm')) {
 		}
 		
 		// haetaan maksuehdon tiedot
-		$query  = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+		$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 		$masresult = mysql_query($query) or pupe_error($query);
 		$masrow = mysql_fetch_array($masresult);
 	
 		//maksuehto tekstinä
-		$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
+		$maksuehto = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
 		
 		$pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"], 			$thispage, $iso);
 		

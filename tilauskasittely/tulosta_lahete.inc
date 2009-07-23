@@ -301,12 +301,12 @@ if (!function_exists('alku')) {
 		if (str_replace("perhe_", "", $lahetetyyppi) != "tulosta_lahete_eiale_eihinta.inc" and $extranet_tilausvahvistus != 1) {
 
 			// haetaan maksuehdon tiedot
-			$query  = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+			$query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 			$masresult = mysql_query($query) or pupe_error($query);
 			$masrow = mysql_fetch_array($masresult);
-
-			$pdf->draw_text(310, 687, t("Maksuehto", $kieli), 							$thispage, $pieni);
-			$pdf->draw_text(310, 677, $masrow["teksti"]." ".$masrow["kassa_teksti"], 	$thispage, $boldi);
+			
+			$pdf->draw_text(310, 687, t("Maksuehto", $kieli), 	$thispage, $pieni);
+			$pdf->draw_text(310, 677, t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli), 		$thispage, $boldi);
 		}
 
 		$pdf->draw_rectangle(674, 300, 653, 580, $thispage, $rectparam);

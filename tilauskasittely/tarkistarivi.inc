@@ -187,7 +187,7 @@
 
 	if ($row["var"] == 'S') {
 		// otetaan maksuehto selville..
-		$query = "	select *
+		$query = "	SELECT *
 					from maksuehto
 					where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 		$maksuehtoresult = mysql_query($query) or pupe_error($query);

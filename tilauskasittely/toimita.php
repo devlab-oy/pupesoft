@@ -4,11 +4,13 @@
 	echo "<font class='head'>".t("Toimita tilaus").":</font><hr>";
 
 	if ($tee == 'P' and $maksutapa == 'seka') {
-		$query_maksuehto = " SELECT *
-							 FROM maksuehto
-							 WHERE yhtio='$kukarow[yhtio]' and kateinen != '' and kaytossa = '' and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$maa%')";
+		$query_maksuehto = "SELECT *
+							FROM maksuehto
+							WHERE yhtio='$kukarow[yhtio]' 
+							and kateinen != '' 
+							and kaytossa = '' 
+							and (sallitut_maat = '' or sallitut_maat like '%$maa%')";
 		$maksuehtores = mysql_query($query_maksuehto) or pupe_error($query_maksuehto);
-		
 		$maksuehtorow = mysql_fetch_array($maksuehtores);
 
 		echo "<table><form action='' name='laskuri' method='post'>";
@@ -66,7 +68,7 @@
 		}
 	}
 
-	if($tee=='P') {
+	if ($tee=='P') {
 		
 		// jos kyseessä ei ole nouto tai noutajan nimi on annettu, voidaan merkata tilaus toimitetuksi..
 		if (($nouto != 'yes') or ($noutaja != '')) {
@@ -95,7 +97,12 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			// jos kyseessä on käteismyyntiä, tulostetaaan käteislasku
-			$query  = "SELECT * from lasku, maksuehto where lasku.tunnus='$otunnus' and lasku.yhtio='$kukarow[yhtio]' and maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto";
+			$query  = "	SELECT * 
+						from lasku, maksuehto 
+						where lasku.tunnus='$otunnus' 
+						and lasku.yhtio='$kukarow[yhtio]' 
+						and maksuehto.yhtio=lasku.yhtio 
+						and maksuehto.tunnus=lasku.maksuehto";
 			$result = mysql_query($query) or pupe_error($query);
 			$tilrow = mysql_fetch_array($result);
 
@@ -415,10 +422,9 @@
 						print_pdf($komento);
 					}
 				}
-
-				echo "<br><br>";
 			}
 			
+			echo t("Tilaus toimitettu")."!<br><br>";
 			$id=0;
 		}
 		else {
@@ -436,7 +442,7 @@
 		$boob 	= "";
 		
 		// tehdään etsi valinta
-		echo "<form action='$PHP_SELF' name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form>";
+		echo "<form action='$PHP_SELF' name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form><br><br>";
 
 		$haku='';
 		if (is_string($etsi))  $haku="and lasku.nimi LIKE '%$etsi%'";
@@ -503,18 +509,26 @@
 	}
 
 	if($id != '0') {
-		$query = "	SELECT *, concat_ws(' ',lasku.nimi, nimitark) nimi,  
-					lasku.osoite, concat_ws(' ', lasku.postino, lasku.postitp) postitp, 
-					toim_osoite, concat_ws(' ', toim_postino, toim_postitp) toim_postitp,
-					lasku.tunnus laskutunnus, lasku.liitostunnus
-					FROM lasku, maksuehto
-					WHERE lasku.tunnus='$id' and lasku.yhtio='$kukarow[yhtio]' and tila='L' and (alatila='C' or alatila='B')
-					and maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto";
-
+		$query = "	SELECT lasku.*, 
+					concat_ws(' ',lasku.nimi, nimitark) nimi,  
+					lasku.osoite, 
+					concat_ws(' ', lasku.postino, lasku.postitp) postitp, 
+					toim_osoite, 
+					concat_ws(' ', toim_postino, toim_postitp) toim_postitp,
+					lasku.tunnus laskutunnus, 
+					lasku.liitostunnus, 
+					maksuehto.tunnus,
+					maksuehto.teksti
+					FROM lasku
+					JOIN maksuehto ON maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto
+					WHERE lasku.tunnus	= '$id' 
+					and lasku.yhtio		= '$kukarow[yhtio]' 
+					and lasku.tila		= 'L' 
+					and (lasku.alatila = 'C' or lasku.alatila = 'B')";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result)==0){
-			die(t("Tilausta")." $id ".t("ei voida toimittaa, koska kaikkia tilauksen tietoja ei löydy! Uuuuuuuhhhhhhh")."!");
+			die(t("Tilausta")." $id ".t("ei voida toimittaa, koska kaikkia tilauksen tietoja ei löydy!")."!");
 		}
 
 		$row = mysql_fetch_array($result);
@@ -524,7 +538,7 @@
 		echo "<tr><th>" . t("Asiakas") ."</th><td>$row[nimi]<br>$row[toim_nimi]</td></tr>";
 		echo "<tr><th>" . t("Laskutusosoite") ."</th><td>$row[osoite], $row[postitp]</td></tr>";
 		echo "<tr><th>" . t("Toimitusosoite") ."</th><td>$row[toim_osoite], $row[toim_postitp]</td></tr>";
-		echo "<tr><th>" . t("Maksuehto") ."</th><td>$row[teksti]</td></tr>";	
+		echo "<tr><th>" . t("Maksuehto") ."</th><td>".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</td></tr>";	
 		echo "<tr><th>" . t("Toimitustapa") ."</th><td>$row[toimitustapa]</td></tr>";		
 		echo "</table><br><br>";
 
@@ -647,14 +661,13 @@
 
 				echo "<select name='maksutapa'>";
 
-				while ($maksuehtorow = mysql_fetch_array($maksuehtores)) {
-					
-					$sel = "";
-					
+				while ($maksuehtorow = mysql_fetch_array($maksuehtores)) {					
+					$sel = "";					
 					if ($maksuehtorow["tunnus"] == $row["maksuehto"]) {
 						$sel = "selected";
 					}
-					echo "<option value='$maksuehtorow[tunnus]' $sel>{$maksuehtorow['teksti']} {$maksuehtorow['kassa_teksti']}</option>";
+					
+					echo "<option value='$maksuehtorow[tunnus]' $sel>".t_tunnus_avainsanat($maksuehtorow, "teksti", "MAKSUEHTOKV", $kieli)."</option>";
 				}
 
 				echo "<option value='seka'>Seka</option>";
@@ -666,9 +679,6 @@
 				$maksuehtorow = mysql_fetch_array($maksuehtores);
 				echo "<input type='hidden' name='maksutapa' value='$maksuehtorow[tunnus]'>";
 			}
-			
-			
-			
 			echo "</table><br>";
 		}
 		
@@ -708,7 +718,7 @@
 		}
 
 		echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'></th>";
-		echo "</tr></table>";
+		echo "</tr></table><br><br>";
 
 		echo "$virhe";
 		echo "<input type='submit' value='".t("Merkkaa toimitetuksi")."'></form>";

@@ -747,7 +747,7 @@ if ($tee == "VALMIS" and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") and $k
 				echo "<input type='hidden' name='valittu_kopio_tulostin' value='$valittu_kopio_tulostin'>";
 				echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
 				echo "<input type='hidden' name='toim' value='$toim'>";
-				echo "<td><input type='submit' value='{$maksuehtorow['teksti']} {$maksuehtorow['kassa_teksti']}'></td>";
+				echo "<td><input type='submit' value='".t_tunnus_avainsanat($maksuehtorow, "teksti", "MAKSUEHTOKV")."'></td>";
 				echo "</form>";
 			}
 
@@ -1897,7 +1897,7 @@ if ($tee == '') {
 					$sel = 'selected';
 				}
 
-				echo "<option value='$row[selite]' $sel>$row[selite]</option>";
+				echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
 			}
 			echo "</select>";
 

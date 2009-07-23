@@ -85,7 +85,7 @@ if (!file_exists($tilvahvfilenimi)) {
 		$ulos .= "RNADSE_CC:" . "EB @" . $myyjarow['kuka']. "\n";
 		$ulos .= "RNADSE_EM:" . "SR @" . $myyjarow['eposti'] . "\n";
 
-		$ulos .= "RPAT1__TP:" . $mehtorow['kassa_teksti'] . "\n";
+		$ulos .= "RPAT1__TP:" . $mehtorow['teksti'] . "\n";
 		$ulos .= "RPAT1__PC:" . $mehtorow['kassa_alepros'] . "\n";
 		$ulos .= "RPAT2__TP:" . $mehtorow['teksti'] . "\n";
 		$ulos .= "RPAT2__PC:" . sprintf ("%010.2f", (float) $yhtiorow['viivastyskorko']) . " 15\n";

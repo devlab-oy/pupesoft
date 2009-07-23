@@ -40,7 +40,7 @@
 						and yhtio = '$kukarow[yhtio]'
 						$kirjoitintilrivilisa";
 			$tiresult = mysql_query($query) or pupe_error($query);
-			$tirow = mysql_fetch_row($tiresult);
+			$tirow = mysql_fetch_array($tiresult);
 									
 			for($ir = 0; $ir<$pri; $ir++) {
 				if ($tirow[$ir] > 0) {

@@ -6,13 +6,12 @@
 	$tulos_ulos_ehtosplit = "";
 
 	// otetaan maksuehto tässä heti alussa selville
-	$query = "	select *
+	$query = "	SELECT *
 				from maksuehto
 				where yhtio	= '$kukarow[yhtio]'
 				and tunnus	= '$laskurow[maksuehto]'";
 	$yresult = mysql_query($query) or pupe_error($query);
 	$mrow = mysql_fetch_array($yresult);
-
 
 	//jos ehdot täyttyvät niin jaetaan tilaus kahteen osaan ja jaetaan loppusumma summanjakoprososa2:sen mukaan
 	if ($mrow["summanjakoprososa2"] != 0 and $mrow["osamaksuehto1"] != 0 and $mrow["osamaksuehto2"] != 0) {

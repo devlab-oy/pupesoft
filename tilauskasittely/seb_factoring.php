@@ -33,7 +33,7 @@
 	
 	while ($laskurow = mysql_fetch_array($res)) {
 	
-		$query  = "	select * 
+		$query  = "	SELECT * 
 					from maksuehto 
 					where yhtio		= '$kukarow[yhtio]' 
 					and tunnus		= '$laskurow[maksuehto]'";
@@ -58,12 +58,12 @@
 			
 			$factoring_sisalto .= $sisalto;	
 						
-			$query  = "update lasku set factoringsiirtonumero='$arow[seuraava]' where yhtio='$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]'";
+			$query  = "UPDATE lasku set factoringsiirtonumero='$arow[seuraava]' where yhtio='$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]'";
 			$sult = mysql_query($query) or pupe_error($query);
 			
 		}
 			
-		echo "<tr><td>$factlask</td><td>$laskurow[laskunro]</td><td>$laskurow[tapvm]</td><td>$laskurow[nimi]</td><td>$masrow[teksti]</td><td align='right'>$laskurow[arvo] $laskurow[valkoodi]</td></tr>";	
+		echo "<tr><td>$factlask</td><td>$laskurow[laskunro]</td><td>$laskurow[tapvm]</td><td>$laskurow[nimi]</td><td>".t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV")."</td><td align='right'>$laskurow[arvo] $laskurow[valkoodi]</td></tr>";	
 		$factlask++;
 	}
 	echo "</table><br><br>";

@@ -11,7 +11,7 @@
  	
  	if ($fakt_lahetys == "") {
 		//maksuehto tekstinä
-		$maksuehto 		= $masrow["teksti"]." ".$masrow["kassa_teksti"];
+		$maksuehto 		= t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV");
 		$kateistyyppi	= $masrow["kateinen"];
 		
 		require_once('tulosta_lasku_text.inc');

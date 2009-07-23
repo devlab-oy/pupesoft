@@ -295,21 +295,19 @@ if ($tee == "") {
 	if (!isset($ppl))
 		$ppl = date("d");
 
-	$query = "	SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_').")
+	$query = "	SELECT *
 				FROM maksuehto
-				".avain('join','MEHTOKATXT_')."
-				".avain('join2','MEHTOTXT_')."
-				WHERE maksuehto.yhtio = '$kukarow[yhtio]'
-				ORDER BY maksuehto.jarjestys, maksuehto.teksti";
+				WHERE yhtio = '$kukarow[yhtio]'
+				ORDER BY jarjestys, teksti";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	$ulos = "<select name='vmehto'>";
 
-	while ($vrow = mysql_fetch_row($vresult)) {
+	while ($vrow = mysql_fetch_array($vresult)) {
 		$sel = "";
-		if ($vmehto == $vrow[0]) $sel = "SELECTED";
+		if ($vmehto == $vrow["tunnus"]) $sel = "SELECTED";
 		
-		$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+		$ulos .= "<option value = '$vrow[tunnus]' $sel>".t_tunnus_avainsanat($vrow, "teksti", "MAKSUEHTOKV", $kieli)."</option>";
 	}
 	$ulos .= "</select>";
 

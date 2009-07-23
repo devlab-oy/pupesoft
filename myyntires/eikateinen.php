@@ -6,7 +6,7 @@ echo "<font class='head'>".t("Lasku ei ollutkaan käteistä")."</font><hr>";
 
 if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	// tutkaillaan maksuehtoa
-	$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
+	$query = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {
@@ -20,7 +20,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	}
 	
 	// tutkaillaan laskua
-	$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+	$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {
@@ -44,7 +44,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 		$erapvm = "'$mehtorow[abs_pvm]'";
 	}
 
-	if ($mehtorow['kassa_teksti'] != '') {
+	if ($mehtorow['kassa_abspvm'] != '0000-00-00' or $mehtorow["kassa_relpvm"] > 0) {
 		if ($mehtorow['kassa_abspvm'] == '0000-00-00') {
 			$kassa_erapvm = "adddate('$laskurow[tapvm]', interval $mehtorow[kassa_relpvm] day)";
 		}
@@ -59,24 +59,24 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	}
 
 	// päivitetään lasku	
-	$query = "	update lasku set 
-				mapvm     ='', 
-				maksuehto ='$maksuehto',
+	$query = "	UPDATE lasku set 
+				mapvm     = '', 
+				maksuehto = '$maksuehto',
 				erpcm     = $erapvm,
 				kapvm     = $kassa_erapvm,
-				kasumma   ='$kassa_loppusumma'
-				where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+				kasumma   = '$kassa_loppusumma'
+				where yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_affected_rows() > 0) {
-		echo "<font class='message'>".t("Muutettin laskun")." $laskurow[laskunro] ".t("maksuehdoksi")." $mehtorow[teksti] $mehtorow[kassa_teksti] ".t("ja merkattiin maksu avoimeksi").".</font><br>";	
+		echo "<font class='message'>".t("Muutettin laskun")." $laskurow[laskunro] ".t("maksuehdoksi")." ".t_tunnus_avainsanat($mehtorow, "teksti", "MAKSUEHTOKV")." ".t("ja merkattiin maksu avoimeksi").".</font><br>";	
 	}
 	else {
 		echo "<font class='error'>".t("Laskua")." $laskurow[laskunro] ".t("ei pystytty muuttamaan")."!</font><br>";	
 	}
 
 	// tehdään kirjanpitomuutokset
-	$query = "update tiliointi set tilino='$yhtiorow[myyntisaamiset]', summa='$laskurow[summa]' where yhtio='$kukarow[yhtio]' and ltunnus='$tunnus' and tilino='$yhtiorow[kassa]'";
+	$query = "UPDATE tiliointi set tilino='$yhtiorow[myyntisaamiset]', summa='$laskurow[summa]' where yhtio='$kukarow[yhtio]' and ltunnus='$tunnus' and tilino='$yhtiorow[kassa]'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_affected_rows() > 0) {
@@ -87,7 +87,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 	}
 
 	// yliviivataan kassa-aletiliöinnit
-	$query = "update tiliointi set korjattu='X' where yhtio='$kukarow[yhtio]' and ltunnus='$tunnus' and tilino='$yhtiorow[myynninkassaale]'";
+	$query = "UPDATE tiliointi set korjattu='X' where yhtio='$kukarow[yhtio]' and ltunnus='$tunnus' and tilino='$yhtiorow[myynninkassaale]'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_affected_rows() > 0) {
@@ -99,15 +99,13 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 
 if ((int) $laskuno != 0) {
 	// haetaan lasku. pitää olla maksettu ja maksuehto käteinen
-	$query = "select *, lasku.tunnus ltunnus 
-				from lasku, maksuehto 
-				where lasku.yhtio='$kukarow[yhtio]' 
-				and lasku.yhtio=maksuehto.yhtio
-				and lasku.maksuehto=maksuehto.tunnus
-				and lasku.laskunro='$laskuno' 
-				and tila='U' 
-				and alatila='X' 
-				and kateinen!=''";
+	$query = "	SELECT lasku.*, lasku.tunnus ltunnus, maksuehto.tunnus, maksuehto.teksti
+				from lasku
+				JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen!=''
+				where lasku.yhtio	= '$kukarow[yhtio]' 				
+				and lasku.laskunro	= '$laskuno' 
+				and lasku.tila		= 'U' 
+				and lasku.alatila	= 'X'";
 	$result = mysql_query($query) or pupe_error($query);
 	
 	if (mysql_num_rows($result) == 0) {
@@ -126,31 +124,26 @@ if ((int) $laskuno != 0) {
 			<tr><th>".t("Laskunumero")."</th><td>$laskurow[laskunro]</td></tr>
 			<tr><th>".t("Laskun summa")."</th><td>$laskurow[summa]</td></tr>
 			<tr><th>".t("Laskun summa (veroton)")."</th><td>$laskurow[arvo]</td></tr>
-			<tr><th>".t("Maksuehto")."</th><td>$laskurow[teksti]</td></tr>
+			<tr><th>".t("Maksuehto")."</th><td>".t_tunnus_avainsanat($laskurow, "teksti", "MAKSUEHTOKV")."</td></tr>
 			<tr><th>".t("Tapahtumapäivä")."</th><td>$laskurow[tapvm]</td></tr>
 			<tr><th>".t("Uusi maksuehto")."</th>
 			<td>";
 
 		// haetaan kaikki maksuehdot (paitsi käteinen)
-		$query = "	SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOTXT_').",  ".avain('selectcon2','MEHTOKATXT_').") selite
+		$query = "	SELECT *
 					FROM maksuehto
-					".avain('join','MEHTOTXT_')."
-					".avain('join2','MEHTOKATXT_')."
-					WHERE maksuehto.yhtio = '$kukarow[yhtio]' and maksuehto.kateinen=''
-					ORDER BY maksuehto.jarjestys, maksuehto.teksti";
+					WHERE yhtio = '$kukarow[yhtio]' and kateinen=''
+					ORDER BY jarjestys, teksti";
 		$vresult = mysql_query($query) or pupe_error($query);
 		
 		echo "<select name='maksuehto'>";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
-			echo "<option value='$vrow[tunnus]'>$vrow[selite]</option>";
+			echo "<option value='$vrow[tunnus]'>".t_tunnus_avainsanat($vrow, "teksti", "MAKSUEHTOKV")."</option>";
 		}
+		
 		echo "</select>";
-				
-		echo "</td>
-			</tr>
-			</table><br>";
-
+		echo "</td></tr></table><br>";
 		echo "<input name='subnappi' type='submit' value='".t("Muuta maksuehto")."'></td>";
 		echo "</form>";
 	}
@@ -162,7 +155,7 @@ if ($laskuno == 0) {
 	echo "<table><tr>";
 	echo "<th>".t("Syötä laskunumero")."</th>";
 	echo "<td><input type='text' name='laskuno'></td>";
-	echo "<td class='back'><input name='subnappi' type='submit' value='".t("Pistä etsien")."'></td>";
+	echo "<td class='back'><input name='subnappi' type='submit' value='".t("Etsi")."'></td>";
 	echo "</tr></table>";
 	echo "</form>";
 }

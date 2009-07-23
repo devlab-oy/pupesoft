@@ -6,7 +6,7 @@
 		$firstpage = $pdf->new_page("a4");
 
 		//Haetaan yhteyshenkilon tiedot
-		$apuqu = "	select *
+		$apuqu = "	SELECT *
 					from kuka
 					where yhtio='$kukarow[yhtio]' and tunnus='$yhteyshenkilo'";
 		$yres = mysql_query($apuqu) or pupe_error($apuqu);
@@ -306,7 +306,6 @@
 	$loppusumma = sprintf('%.2f', $summa);
 
 	paperi_loppu($firstpage,$loppusumma, $mehtorow);
-
 
 	if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php') {	
 		//keksit‰‰n uudelle failille joku varmasti uniikki nimi:

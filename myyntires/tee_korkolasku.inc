@@ -17,7 +17,7 @@
 	$asrow = mysql_fetch_array($result);
 
 	//Etsit‰‰n t‰m‰ t‰ss‰ tilanteessa k‰ytett‰v‰ maksuehto
-	$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$vmehto'";
+	$apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$vmehto'";
 	$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 	
 	if (mysql_num_rows($meapu) != 1) {
@@ -30,7 +30,7 @@
 	$comments = str_replace($crlf, " ", $comments);
 
 	//Haetaan tuotteen tiedot
-	$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='Korko'";
+	$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='Korko'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 1) {

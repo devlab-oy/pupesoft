@@ -7,11 +7,11 @@ echo "<font class='head'>".t("Muuta factorointia")."</font><hr>";
 if (isset($maksuehto) and isset($tunnus)) {
 
 	// tutkaillaan maksuehtoa
-	$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto' and factoring!=''";
-	if ($laji == 'pois') {
-		$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto' and factoring=''";
-	}
+	$query = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto' and factoring!=''";
 
+	if ($laji == 'pois') {
+		$query = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto' and factoring=''";
+	}
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {
@@ -47,7 +47,7 @@ if (isset($maksuehto) and isset($tunnus)) {
 		$erapvm = "'$mehtorow[abs_pvm]'";
 	}
 
-	if ($mehtorow['kassa_teksti'] != '') {
+	if ($mehtorow['kassa_abspvm'] != '0000-00-00' or $mehtorow["kassa_relpvm"] > 0) {
 		if ($mehtorow['kassa_abspvm'] == '0000-00-00') {
 			$kassa_erapvm = "adddate('$laskurow[tapvm]', interval $mehtorow[kassa_relpvm] day)";
 		}
@@ -62,7 +62,7 @@ if (isset($maksuehto) and isset($tunnus)) {
 	}
 
 	// p‰ivitet‰‰n lasku	
-	$query = "	update lasku set
+	$query = "	UPDATE lasku set
 				maksuehto ='$maksuehto',
 				erpcm     = $erapvm,
 				kapvm     = $kassa_erapvm,
@@ -71,16 +71,17 @@ if (isset($maksuehto) and isset($tunnus)) {
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_affected_rows() > 0) {
-		echo "<font class='message'>".t("Muutettin laskun")." $laskurow[laskunro] ".t("maksuehdoksi")." $mehtorow[teksti] $mehtorow[kassa_teksti]</font><br>";	
+		echo "<font class='message'>".t("Muutettin laskun")." $laskurow[laskunro] ".t("maksuehdoksi")." ".t_tunnus_avainsanat($mehtorow, "teksti", "MAKSUEHTOKV")."</font><br>";	
 	}
 	else {
 		echo "<font class='error'>".t("Laskua")." $laskurow[laskunro] ".t("ei pystytty muuttamaan")."!</font><br>";	
 	}
 
 	// tehd‰‰n kirjanpitomuutokset
-	$query = "update tiliointi set tilino='$yhtiorow[factoringsaamiset]' where yhtio='$kukarow[yhtio]' and ltunnus='$tunnus' and tilino='$yhtiorow[myyntisaamiset]' and tapvm='$laskurow[tapvm]'";
+	$query = "UPDATE tiliointi set tilino='$yhtiorow[factoringsaamiset]' where yhtio='$kukarow[yhtio]' and ltunnus='$tunnus' and tilino='$yhtiorow[myyntisaamiset]' and tapvm='$laskurow[tapvm]'";
+	
 	if ($laji == 'pois') {
-		$query = "update tiliointi set tilino='$yhtiorow[myyntisaamiset]' where yhtio='$kukarow[yhtio]' and ltunnus='$tunnus' and tilino='$yhtiorow[factoringsaamiset]' and tapvm='$laskurow[tapvm]'";
+		$query = "UPDATE tiliointi set tilino='$yhtiorow[myyntisaamiset]' where yhtio='$kukarow[yhtio]' and ltunnus='$tunnus' and tilino='$yhtiorow[factoringsaamiset]' and tapvm='$laskurow[tapvm]'";
 	}
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -96,27 +97,24 @@ if (isset($maksuehto) and isset($tunnus)) {
 if (isset($laskuno)) {
 
 	// haetaan lasku. pit‰‰ factoroimaton
-	$query = "select *, lasku.tunnus ltunnus 
-				from lasku, maksuehto 
-				where lasku.yhtio='$kukarow[yhtio]' 
-				and lasku.yhtio=maksuehto.yhtio
-				and lasku.maksuehto=maksuehto.tunnus
-				and lasku.laskunro='$laskuno' 
-				and tila='U' 
-				and alatila='X' 
-				and factoring=''
-				and mapvm = '0000-00-00'";
+	$query = "	SELECT lasku.*, lasku.tunnus ltunnus, maksuehto.tunnus, maksuehto.teksti
+				from lasku
+				JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring=''
+				where lasku.yhtio	= '$kukarow[yhtio]' 
+				and lasku.laskunro	= '$laskuno' 
+				and lasku.tila		= 'U' 
+				and lasku.alatila	= 'X' 
+				and lasku.mapvm 	= '0000-00-00'";
+
 	if ($laji == 'pois') {
-		$query = "select *, lasku.tunnus ltunnus 
-			from lasku, maksuehto 
-			where lasku.yhtio='$kukarow[yhtio]' 
-			and lasku.yhtio=maksuehto.yhtio
-			and lasku.maksuehto=maksuehto.tunnus
-			and lasku.laskunro='$laskuno' 
-			and tila='U' 
-			and alatila='X' 
-			and factoring!=''
-			and mapvm = '0000-00-00'";
+		$query = "	SELECT lasku.*, lasku.tunnus ltunnus, maksuehto.tunnus, maksuehto.teksti
+					from lasku
+					JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring!=''
+					where lasku.yhtio	= '$kukarow[yhtio]' 					
+					and lasku.laskunro	= '$laskuno' 
+					and lasku.tila		= 'U' 
+					and lasku.alatila	= 'X' 				
+					and lasku.mapvm 	= '0000-00-00'";
 	}
 	$result = mysql_query($query) or pupe_error($query);
 	
@@ -139,34 +137,29 @@ if (isset($laskuno)) {
 			<tr><th>".t("Laskunumero")."</th><td>$laskurow[laskunro]</td></tr>
 			<tr><th>".t("Laskun summa")."</th><td>$laskurow[summa]</td></tr>
 			<tr><th>".t("Laskun summa (veroton)")."</th><td>$laskurow[arvo]</td></tr>
-			<tr><th>".t("Maksuehto")."</th><td>$laskurow[teksti]</td></tr>
+			<tr><th>".t("Maksuehto")."</th><td>".t_tunnus_avainsanat($laskurow, "teksti", "MAKSUEHTOKV")."</td></tr>
 			<tr><th>".t("Tapahtumap‰iv‰")."</th><td>$laskurow[tapvm]</td></tr>
 			<tr><th>".t("Uusi maksuehto")."</th>
 			<td>";
 
 		// haetaan kaikki factoringmaksuehdot
-		$query = "SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_').") selite
-				FROM maksuehto
-				".avain('join','MEHTOKATXT_')."
-				".avain('join2','MEHTOTXT_')."
-				WHERE maksuehto.yhtio = '$kukarow[yhtio]' and maksuehto.factoring!=''
-				ORDER BY maksuehto.jarjestys, maksuehto.teksti";
+		$query = "	SELECT *
+					FROM maksuehto
+					WHERE yhtio = '$kukarow[yhtio]' and factoring!=''
+					ORDER BY jarjestys, teksti";
 
 		if ($laji == 'pois') {
-			$query = "SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_').") selite
-					FROM maksuehto
-					".avain('join','MEHTOKATXT_')."
-					".avain('join2','MEHTOTXT_')."
-					WHERE maksuehto.yhtio = '$kukarow[yhtio]' and maksuehto.factoring=''
-					ORDER BY maksuehto.jarjestys, maksuehto.teksti";
+			$query = "	SELECT *
+						FROM maksuehto
+						WHERE yhtio = '$kukarow[yhtio]' and factoring=''
+						ORDER BY jarjestys, teksti";
 		}
-
 		$vresult = mysql_query($query) or pupe_error($query);
 		
 		echo "<select name='maksuehto'>";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
-			echo "<option value='$vrow[tunnus]'>$vrow[selite]</option>";
+			echo "<option value='$vrow[tunnus]'>".t_tunnus_avainsanat($vrow, "teksti", "MAKSUEHTOKV")."</option>";
 		}
 		echo "</select>";
 				

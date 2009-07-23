@@ -78,9 +78,9 @@ else {
 			default:
 				$syy = t("Tuntematon errorkoodi")." ($palautus)!!";
 		}
-		
+
 		$cmd = "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile";
-		
+
 		$rivi  = "$PHP_SELF\n";
 		$rivi .= "\n";
 		$rivi .= "".t("Tiedoston")." '$ftpfile' ".t("lähetys epäonnistui")."!\n";
@@ -90,11 +90,10 @@ else {
 		$rivi .= "$syy\n";
 
 		$boob = mail($yhtiorow['alert_email'], "".t("Tiedostonsiirto epäonnistui")."!", $rivi, "From: $yhtiorow[postittaja_email]\n", "-f $yhtiorow[postittaja_email]");
-		$boob = FALSE;
-		
+
 		if ($boob===FALSE) {
 			$tulos_ulos_ftp .= "<font class='error'>\n";
-			$tulos_ulos_ftp .= "".t("Tiedostonsiirto epäonnistui! Ja meilin lähettäminen")." $yhtiorow[alert_email] ".t("epäonnistui myös! Perkele!")."\n";
+			$tulos_ulos_ftp .= "".t("Tiedostonsiirto epäonnistui! Ja meilin lähettäminen")." $yhtiorow[alert_email] ".t("epäonnistui myös!")."\n";
 			$tulos_ulos_ftp .= "</font><br>\n";
 
 			$tulos_ulos_ftp .= "<br><pre>$rivi</pre><br>\n";

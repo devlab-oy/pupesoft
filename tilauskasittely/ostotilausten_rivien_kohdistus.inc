@@ -1479,8 +1479,9 @@ if ($tila == '') {
 			</form>
 			</td>";
 
-	echo "<td class='back'><input type='submit' value='".t("Kohdistus valmis")."'>
+	echo "<td class='back'>
 			<form action='$PHP_SELF' method='post'>
+			<input type='submit' value='".t("Kohdistus valmis")."'>
 			<input type='hidden' name='toimittajaid' value='$toimittajaid'>
 			<input type='hidden' name='toiminto' value='kohdista'>
 			<input type='hidden' name='laskunsumma' value='$laskunsumma'>

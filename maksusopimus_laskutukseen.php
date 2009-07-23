@@ -495,12 +495,12 @@
 
 			while($row = mysql_fetch_array($result)) {
 				// seuraava positio on tämä siis
-				$query = "	SELECT maksupositio.*, maksuehto.teksti
+				$query = "	SELECT maksupositio.*, maksuehto.teksti, maksuehto.teksti
 							FROM maksupositio
 							JOIN maksuehto on maksupositio.yhtio = maksupositio.yhtio and maksupositio.maksuehto = maksuehto.tunnus
 							WHERE maksupositio.yhtio = '$kukarow[yhtio]'
-							and otunnus = '$row[jaksotettu]'
-							and uusiotunnus = 0
+							and maksupositio.otunnus = '$row[jaksotettu]'
+							and maksupositio.uusiotunnus = 0
 							ORDER BY maksupositio.tunnus
 							LIMIT 1";
 				$rahres = mysql_query($query) or pupe_error($query);
@@ -539,7 +539,7 @@
 						</table>";
 
 				// loppulaskutetaan maksusopimus
-				if($row["yhteensa_kpl"] - $row["laskutettu_kpl"] <= 1) {
+				if ($row["yhteensa_kpl"] - $row["laskutettu_kpl"] <= 1) {
 					// tarkastetaan onko kaikki jo toimitettu ja tämä on good to go
 					$query = "	SELECT
 								sum(if(lasku.tila='L' and lasku.alatila IN ('J','X'),1,0)) tilaok,
@@ -557,7 +557,7 @@
 						echo "<td class='back'><font class=message'>Ei valmis</font></td>";
 					}
 					else {
-						$msg = t("Oletko varma, että haluat LOPPULASKUTTAA tilauksen")." $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: $posrow[teksti]";
+						$msg = t("Oletko varma, että haluat LOPPULASKUTTAA tilauksen")." $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: ".t_tunnus_avainsanat($posrow, "teksti", "MAKSUEHTOKV");
 
 						echo "	<form method='post' action='$PHP_SELF' onSubmit='return verify(\"$msg\");'>
 								<input type='hidden' name='toim' value='$toim'>
@@ -568,9 +568,9 @@
 					}
 					echo "</tr>";
 				}
-				elseif($row["tekematta_kpl"] > 1) {
+				elseif ($row["tekematta_kpl"] > 1) {
 					// muuten tämä on vain ennakkolaskutusta
-					$msg = t("Oletko varma, että haluat tehdä ennakkolaskun tilaukselle").": $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: $posrow[teksti]";
+					$msg = t("Oletko varma, että haluat tehdä ennakkolaskun tilaukselle").": $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: ".t_tunnus_avainsanat($posrow, "teksti", "MAKSUEHTOKV");
 
 					echo "<td class='back'><form method='post' name='case' action='$PHP_SELF' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"$msg\");'>
 							<input type='hidden' name='toim' value='$toim'>

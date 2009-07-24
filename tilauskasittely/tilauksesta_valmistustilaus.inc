@@ -27,10 +27,10 @@
 						and tilausrivi.perheid = 0
 						and tilausrivi.perheid2 = 0
 						ORDER BY tilausrivi.tunnus";
-			$result = mysql_query($query) or pupe_error($query);
+			$lsresult = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($result) > 0) {
-				while ($rivi = mysql_fetch_array($result)) {
+			if (mysql_num_rows($lsresult) > 0) {
+				while ($valmlisaarivi = mysql_fetch_array($lsresult)) {
 					
 					$viesti = $myytilrow["tunnusnippu"]." ".$myytilrow["toim_nimi"];
 					
@@ -105,14 +105,14 @@
 					
 					$query = "	SELECT *
 								FROM tuote
-								WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$rivi[tuoteno]'";
+								WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$valmlisaarivi[tuoteno]'";
 					$tresult = mysql_query($query) or pupe_error($query);
 					$trow = mysql_fetch_array($tresult);
 					
 					$kukarow["kesken"] 	= $tunnus;
-					$kpl 				= $rivi["kpl"];
-					$tuoteno			= $rivi["tuoteno"];
-					$toimaika			= $myytilrow["toimaika"];
+					$kpl 				= $valmlisaarivi["kpl"];
+					$tuoteno			= $valmlisaarivi["tuoteno"];
+					$toimaika			= $myytilrow["kerayspvm"];
 					$kerayspvm			= $myytilrow["kerayspvm"];
 					$hinta				= 0;
 					$var 				= "";
@@ -126,10 +126,11 @@
 					
 					//	P‰ivitet‰‰n tilausrivin lisatietoihin tilausrivitunnus
 					$query = "	UPDATE tilausrivin_lisatiedot SET	
-									tilausrivilinkki 	= '$perheid_lisaarivi', 
-									muutospvm			= now(),
-									muuttaja			= '$kukarow[kuka]'
-								WHERE yhtio	= '$kukarow[yhtio]' and tilausrivitunnus = '$rivi[tunnus]'";
+									tilausrivilinkki 		= '$perheid_lisaarivi', 
+									suoraan_laskutukseen	= 'o',
+									muutospvm				= now(),
+									muuttaja				= '$kukarow[kuka]'
+								WHERE yhtio	= '$kukarow[yhtio]' and tilausrivitunnus = '$valmlisaarivi[tunnus]'";
 					$updres = mysql_query($query) or pupe_error($query);
 
 
@@ -160,7 +161,7 @@
 					//	P‰ivitet‰‰n myˆs tilausriville oikeammat tiedot!
 					$query = "	SELECT *
 								FROM tilausrivin_lisatiedot
-								WHERE tilausrivitunnus='$rivi[tunnus]' and yhtio ='$kukarow[yhtio]'";
+								WHERE tilausrivitunnus='$valmlisaarivi[tunnus]' and yhtio ='$kukarow[yhtio]'";
 					$trlisatiedotres = mysql_query($query) or pupe_error($query);
 					$trlisatiedotrow = mysql_fetch_array($trlisatiedotres);
 
@@ -212,7 +213,7 @@
 										muuttaja				= '$kukarow[kuka]'
 										WHERE yhtio			 = '$kukarow[yhtio]'
 										and tilausrivitunnus = '$lapsi[tunnus]'";
-							$result = mysql_query($query) or pupe_error($query);
+							$uresult = mysql_query($query) or pupe_error($query);
 
 							//	Fiksataan m‰‰r‰‰ tai hinta
 							if(in_array($lapsi["vaaditaan_kpl2"], array("P","K","M")) and (isset($asiakkaan_positio) or isset($pituus))) {
@@ -259,10 +260,10 @@
 								}
 
 								//	Tallennetaan t‰m‰ pituus viel‰ lis‰tietoihin
-								$query = "	UPDATE tilausrivin_lisatiedot
-											SET pituus 	= '$uusiPituus',
-											muutospvm	= now(),
-											muuttaja	= '$kukarow[kuka]'
+								$query = "	UPDATE tilausrivin_lisatiedot SET
+												pituus 					= '$uusiPituus',
+												muutospvm				= now(),
+												muuttaja				= '$kukarow[kuka]'
 											WHERE yhtio = '$kukarow[yhtio]' and tilausrivitunnus = '{$lapsi["tunnus"]}'";
 								$updre = mysql_query($query) or pupe_error($query);
 							}
@@ -270,7 +271,7 @@
 					}					
 					
 					//	Tehd‰‰n rivist‰ normi JT
-					$query = "update tilausrivi set var='J' where yhtio='$kukarow[yhtio]' and tunnus='$rivi[tunnus]'";
+					$query = "update tilausrivi set var='J' where yhtio='$kukarow[yhtio]' and tunnus='$valmlisaarivi[tunnus]'";
 					$updre = mysql_query($query) or pupe_error($query);						
 				}
 			}

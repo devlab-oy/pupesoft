@@ -134,13 +134,18 @@
 		$tee = "JATKA";
 	}
 
-	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'TOIMITA') {
+	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and ($tee == 'TOIMITA' or ($tee == 'PAKKOTOIMITA' and $pakkotoimitatilaukset != ""))) {
 		if ($toim == "ENNAKKO") {
 			$query  = "	SELECT *
 						from lasku
 						where yhtio='$kukarow[yhtio]'
 						and laatija='$kukarow[kuka]'
 						and alatila='E' and tila='N'";
+		}
+		elseif ($tee == "PAKKOTOIMITA") {
+			$query  = "	SELECT *
+						from lasku
+						where yhtio='$kukarow[yhtio]' and tunnus IN ($pakkotoimitatilaukset) and tila = 'N' and alatila IN ('J', 'E', 'T', 'U')";
 		}
 		else {
 			$query  = "	SELECT *

@@ -10,7 +10,10 @@ else {
 	require ("functions.inc");
 }
 
-echo "<style type='text/css'>body { margin:0px; padding:0px 0px 0px 2px; } </style>"; // top right bottom left
+echo "<style type='text/css'>
+body { margin:0px; padding:0px 0px 0px 2px; } 
+a.puhdas:hover { border-bottom: 0px; }
+</style>";
 
 unset($isizelogo);	
 if ((int) $yhtiorow["logo"] > 0) {

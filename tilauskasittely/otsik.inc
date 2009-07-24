@@ -700,7 +700,14 @@
 
 		if($srow["liitostunnus"] == 0) {
 			echo "</table><br>";
+			if (is_array($oletus)){
+				foreach($oletus as $o => $a) {
+					echo "<input type='hidden' name='oletus[$o]' value='$a'>";
+				}
+			}
+			
 			echo "<input type='submit' value='".t("Hae")."'>";
+			
 			echo "</form>";
 
 			$formi  = "paaformi";
@@ -1507,7 +1514,7 @@
 			if ($srow['chn'] == '999')      $laskkielto     = 'CHECKED';
 
 			// Tarjouksia ei oletuksena osatoimiteta
-			if ($srow['osatoimitus'] != '' or ($toim == "TARJOUS" and $kukarow["kesken"] == 0)) $osath = 'CHECKED';
+			if ($srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0)) $osath = 'CHECKED';
 
 			echo "<td>".t("Laskuta heti")." (".t("sisäinen")."):</td><td><input type='checkbox' name='sisainen' $sisah></td>";
 			echo "</tr>";

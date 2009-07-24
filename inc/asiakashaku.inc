@@ -368,6 +368,11 @@ if ($monta > 1 and $monta <= $limit) {
 				}
 			}
 
+			if (is_array($oletus)){
+				foreach($oletus as $o => $a) {
+					echo "<input type='hidden' name='oletus[$o]' value='$a'>";
+				}
+			}
 			
 			echo "<input type='submit' value='".t("Valitse")."'>";
 			echo "</td>";

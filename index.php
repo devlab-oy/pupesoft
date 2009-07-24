@@ -23,7 +23,7 @@ if ($go == '') {
 	$goso	= "";
 }
 
-$colwidth = '180';
+$colwidth = '175';
 
 if ($kukarow['resoluutio'] == 'P') {
 	$colwidth = '45';

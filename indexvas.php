@@ -10,21 +10,23 @@ else {
 	require ("functions.inc");
 }
 
+echo "<style type='text/css'>body { margin:0px; padding:0px 0px 0px 2px; } </style>"; // top right bottom left
+
 unset($isizelogo);	
-if( (int) $yhtiorow["logo"] > 0) {
+if ((int) $yhtiorow["logo"] > 0) {
 	$liite = hae_liite($yhtiorow["logo"], "Yllapito", "array");
-	if($liite !== false) {
+	if ($liite !== false) {
 		$isizelogo[0] = $liite["image_width"];
 		$isizelogo[1] = $liite["image_height"];		
 	}
 	unset($liite);
 }
-elseif(@file($yhtiorow["logo"])) {
+elseif (@file($yhtiorow["logo"])) {
 	$isizelogo = getimagesize($yhtiorow["logo"]);
 }
 
 if (is_array($isizelogo)) {
-	if((int) $yhtiorow["logo"] > 0) {
+	if ((int) $yhtiorow["logo"] > 0) {
 		$logo 	= "view.php?id=".$yhtiorow["logo"];
 	}
 	else {
@@ -41,16 +43,20 @@ if (is_array($isizelogo)) {
 	else {
 		$koko = "height='70'";
 	}
+	$yhtio_nimi = "";
 }
 else {
 	$logo = "http://www.pupesoft.com/pupesoft.gif";
 	$koko = "height='70'";
+	$yhtio_nimi = "<font class='info'>$yhtiorow[nimi]</font><br>";
 }
 
-echo "<a class='puhdas' href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' $koko style='padding:1px 3px 7px 3px;'></a><br>";
+echo "<a class='puhdas' href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' $koko style='margin:5px 0px 10px 8px'></a>"; // top right bottom left
 
-echo "$yhtiorow[nimi]<br>";
-echo "$kukarow[nimi]<br><br>";
+echo "<div style='margin:0px 0px 10px 8px'>";  // top right bottom left
+echo $yhtio_nimi;
+echo "<font class='info'>$kukarow[nimi]</font>";
+echo "</div>";
 
 // estetään errorit tyhjästä arraystä
 if (!isset($menu)) $menu = array();
@@ -71,7 +77,9 @@ else {
 // mitä sovelluksia käyttäjä saa käyttää
 $query = "	SELECT distinct sovellus
 			FROM oikeu use index (oikeudet_index)
-			WHERE yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' $extralisa
+			WHERE yhtio = '$kukarow[yhtio]' 
+			and kuka = '$kukarow[kuka]'
+			$extralisa
 			ORDER BY sovellus";
 $result = mysql_query($query) or pupe_error($query);
 
@@ -93,7 +101,7 @@ if (mysql_num_rows($result) > 1) {
 	}
 
 	echo "	<form action='$PHP_SELF' name='vaihdaSovellus' method='POST'>
-			<select name='sovellus' onchange='submit()'>";
+			<select name='sovellus' onchange='submit()' style='margin:0px 0px 10px 8px'>"; // top right bottom left
 
 	$sovellukset = array();
 
@@ -115,7 +123,7 @@ if (mysql_num_rows($result) > 1) {
 		if ($sovellus == '') $sovellus = $key;
 	}
 
-	echo "</select></form><br><br>";
+	echo "</select></form><br>";
 }
 else {
 	// löytyi vaan yksi sovellus, otetaan se
@@ -123,10 +131,10 @@ else {
 	$sovellus = $orow['sovellus'];
 }
 
-echo "<table width='100%'>";
+echo "<table style='padding:0; margin:0; width:135px;'>";
 
 //Näytetään aina exit-nappi
-echo "<tr><td class='back'><a class='menu' href='logout.php' target='main'>".t("Exit")."</a></td></tr>";
+echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='logout.php' target='main'>".t("Exit")."</a></td></tr>";
 
 // Mitä käyttäjä saa tehdä?
 // Valitaan ensin vain ylätaso jarjestys2='0'
@@ -140,7 +148,6 @@ $query = "	SELECT nimi, jarjestys
 			and hidden		= ''
 			ORDER BY jarjestys";
 $result = mysql_query($query) or pupe_error($query);
-
 
 while ($orow = mysql_fetch_array($result)) {
 	
@@ -162,19 +169,19 @@ while ($orow = mysql_fetch_array($result)) {
 	if (mysql_num_rows($xresult) > 1) {
 
 		// jos ykkönen niin näytetään avattu menu itemi
-		if($menu[$mrow['nimitys']] == 1) {
-			echo "<tr><td class='back'><a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=0'>- ".t("$mrow[nimitys]")."</a></td></tr>";
+		if ($menu[$mrow['nimitys']] == 1) {
+			echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=0'>- ".t("$mrow[nimitys]")."</a></td></tr>";
 
 			// tehdään submenu itemit
 			while ($mrow = mysql_fetch_array($xresult)) {
-				echo "<tr><td class='back'><a class='menu' href='$mrow[nimi]";
+				echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='$mrow[nimi]";
 				if ($mrow['alanimi'] != '') echo "?toim=$mrow[alanimi]";
 				echo "' target='main'>  &bull; ".t("$mrow[nimitys]")."</a></td></tr>";
 			}
 		}
 		else {
 			// muuten näytetään suljettu menuotsikko
-			echo "<tr><td class='back'><a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=1'>+ ".t("$mrow[nimitys]")."</a></td></tr>";
+			echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=1'>+ ".t("$mrow[nimitys]")."</a></td></tr>";
 		}
 	}
 	else {
@@ -192,7 +199,7 @@ while ($orow = mysql_fetch_array($result)) {
 			$mrow["alanimi"] = "";
 		}
 
-		echo "<tr><td class='back'><a class='menu' $target href='$mrow[nimi]";
+		echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' $target href='$mrow[nimi]";
 
 		if ($mrow['alanimi'] != '') {				
 				echo "?toim=$mrow[alanimi]";	

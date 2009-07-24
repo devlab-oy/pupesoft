@@ -103,7 +103,16 @@ if($tee == "tuloslaskelma") {
 		$tarkkuus 		= 1;
 		$desi 			= 0;
 		
+		//	Ensin haetaan velat!
+		$tyyppi = 2;
+		echo "<font class='message'>".t("Ennakot")."</font><br>";
 		require("raportit/tuloslaskelma.php");
+		
+		//	Perään isketään tulos!
+		$tyyppi = 3;
+		echo "<br><font class='message'>".t("Tuloslaskelma")."</font><br>";
+		require("raportit/tuloslaskelma.php");
+		
 		if(!muistiin("tuloslaskelma", "tuloslaskelma", $tuloslaskelma)) {
 			die("OHO! Joku ei nyt vaan onnistu! (dementia iskee, ei tallennu muistiin)");
 		}
@@ -154,7 +163,6 @@ if($projekti > 0) {
 	//echo "data:<pre>".print_r($data, true)."</pre>";
 	
 	$tuloslaskelma = muistista("tuloslaskelma", "tuloslaskelma");
-	$selTyyppi = array($tuloslaskelma["tyyppi"] => "SELECTED");
 	$selKaikki = array($tuloslaskelma["kaikkikaudet"] => "SELECTED");
 	$selTaso = array($tuloslaskelma["rtaso"] => "SELECTED");
 	
@@ -167,20 +175,13 @@ if($projekti > 0) {
 				<tr>
 					<td class='back'>
 						<div id='tuloslaskelmaContainer' style='display: none; float: left;'>
-							<div id='tuloslaskelma'></div>
+							<div id='tuloslaskelma' align='right'></div>
 
 								<script type='text/javascript' language='JavaScript'>
 									sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti', false, false); 
 								</script>
-								<table><tr><td colspan='2' class='back'>&nbsp;</td></tr><tr><th>".t("Tyyppi")."</th><th>". t("Kaudet") . "</th><th>". t("Taso") . "</th></tr>
+								<table><tr><td colspan='2' class='back'>&nbsp;</td></tr><tr><th>". t("Kaudet") . "</th><th>". t("Taso") . "</th></tr>
 								<tr>
-									<td>			
-										<select id='kikkare' onchange=\"sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti&vaihda[tyyppi]='+this.options[this.selectedIndex].value, false, false); return false;\">
-											<option value='1' ".$selTyyppi["1"].">".t("Vastaavaa (varat)")."</option>
-											<option value='2' ".$selTyyppi["2"].">".t("Vastattavaa (velat)")."</option>
-											<option value='3' ".$selTyyppi["3"].">".t("Ulkoinen tuloslaskelma")."</option>
-										</select>
-									</td>
 									<td>			
 										<select id='kikkare' onchange=\"sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti&vaihda[kaikkikaudet]='+this.options[this.selectedIndex].value, false, false); return false;\">
 											<option value='n' ".$selKaikki["n"].">".t("Älä näytä kausia")."</option>

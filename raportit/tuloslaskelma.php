@@ -322,73 +322,75 @@
 				$vaslev 			= 160;
 				$rivikork 			= 15;
 			}
+			
+			if(!function_exists("alku")) {
+				function alku () {
+					global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev;
 
-			function alku () {
-				global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev;
-
-				if(count($kaudet) > 5 and $kaikkikaudet != "") {
-					$firstpage = $pdf->new_page("842x595");
-					$bottom = "535";
-				}
-				else {
-					$firstpage = $pdf->new_page("595x842");
-					$bottom = "782";
-				}
-
-				unset($data);
-
-				if ((int) $yhtiorow["lasku_logo"] > 0) {
-					$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
-					$data = $liite["data"];
-					$isizelogo[0] = $liite["image_width"];
-					$isizelogo[1] = $liite["image_height"];
-					unset($liite);
-				}
-				elseif (file_exists($yhtiorow["lasku_logo"])) {
-					$filename = $yhtiorow["lasku_logo"];
-
-					$fh = fopen($filename, "r");
-					$data = fread($fh, filesize($filename));
-					fclose($fh);
-
-					$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
-				}
-
-				if ($data) {
-					$image = $pdf->jfif_embed($data);
-
-					if(!$image) {
-						echo t("Logokuvavirhe");
+					if(count($kaudet) > 5 and $kaikkikaudet != "") {
+						$firstpage = $pdf->new_page("842x595");
+						$bottom = "535";
 					}
 					else {
-						list($height, $width, $scale) = $pdf->scaleImage("$isizelogo[1]x$isizelogo[0]", "40x80");
-
-                        $placement = $pdf->image_place($image, ($bottom+$height-30), 10, $firstpage, array("scale" => $scale));
+						$firstpage = $pdf->new_page("595x842");
+						$bottom = "782";
 					}
-				}
-				else {
-					$pdf->draw_text(10, ($bottom+30),  $yhtiorow["nimi"], $firstpage);
-				}
 
-				$pdf->draw_text(200,  ($bottom+30), $otsikko, $firstpage);
+					unset($data);
 
-				$left = $vaslev;
+					if ((int) $yhtiorow["lasku_logo"] > 0) {
+						$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
+						$data = $liite["data"];
+						$isizelogo[0] = $liite["image_width"];
+						$isizelogo[1] = $liite["image_height"];
+						unset($liite);
+					}
+					elseif (file_exists($yhtiorow["lasku_logo"])) {
+						$filename = $yhtiorow["lasku_logo"];
 
-				for ($i = $alkukausi; $i < count($kaudet); $i++) {
-					$oikpos = $pdf->strlen($kaudet[$i], $b);
-					if($i+1 == count($kaudet) and $eiyhteensa == "") {
-						$lev = $yhteensasaraklev;
+						$fh = fopen($filename, "r");
+						$data = fread($fh, filesize($filename));
+						fclose($fh);
+
+						$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+					}
+
+					if ($data) {
+						$image = $pdf->jfif_embed($data);
+
+						if(!$image) {
+							echo t("Logokuvavirhe");
+						}
+						else {
+							list($height, $width, $scale) = $pdf->scaleImage("$isizelogo[1]x$isizelogo[0]", "40x80");
+
+	                        $placement = $pdf->image_place($image, ($bottom+$height-30), 10, $firstpage, array("scale" => $scale));
+						}
 					}
 					else {
-						$lev = $saraklev;
+						$pdf->draw_text(10, ($bottom+30),  $yhtiorow["nimi"], $firstpage);
 					}
 
-					$pdf->draw_text($left-$oikpos+$lev,  $bottom, $kaudet[$i], $firstpage, $b);
+					$pdf->draw_text(200,  ($bottom+30), $otsikko, $firstpage);
 
-					$left += $saraklev;
+					$left = $vaslev;
+
+					for ($i = $alkukausi; $i < count($kaudet); $i++) {
+						$oikpos = $pdf->strlen($kaudet[$i], $b);
+						if($i+1 == count($kaudet) and $eiyhteensa == "") {
+							$lev = $yhteensasaraklev;
+						}
+						else {
+							$lev = $saraklev;
+						}
+
+						$pdf->draw_text($left-$oikpos+$lev,  $bottom, $kaudet[$i], $firstpage, $b);
+
+						$left += $saraklev;
+					}
+
+					$bottom -= $rivikork;
 				}
-
-				$bottom -= $rivikork;
 			}
 
 			alku();

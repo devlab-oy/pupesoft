@@ -626,7 +626,7 @@ if ($tee == 'E' or $tee == 'F') {
 		// Tämä on koko yläotsikon table
 		echo "<table>";
 		// Aloitetaan vasen sarake
-		echo "<tr><td valign='top'>";
+		echo "<tr><td style='padding: 0px; margin: 0px;'>";
 
 		echo "<table>";
 		echo "<tr><th>".t("Ytunnus")."</th><td>$trow[ytunnus]</td></tr>";
@@ -647,7 +647,7 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "</table>";
 
 		// Lopetettaan vasen sarake, aloitetaan keskisarake
-		echo "</td><td valign='top'>";
+		echo "</td><td style='padding: 0px; margin: 0px;'>";
 
 		echo "<table>";
 		echo "<tr><th>".t("Tapvm")."</th><td>".tv1dateconv($trow["tapvm"])."</td></tr>";
@@ -662,7 +662,7 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "</table>";
 
 		// Lopetataan keskisarake, aloitetaan oikea sarake
-		echo "</td><td valign='top'>";
+		echo "</td><td style='padding: 0px; margin: 0px;'>";
 
 		echo "<table>";
 
@@ -812,7 +812,7 @@ if ($tee == 'E' or $tee == 'F') {
 		// Tämä on koko yläotsikon table
 		echo "<table>";
 		// Aloitetaan vasen sarake
-		echo "<tr><td valign='top'>";
+		echo "<tr><td style='padding: 0px; margin: 0px;'>";
 
 		echo "<table>";
 		echo "<tr><th>".t("Ytunnus")."</th><td>$trow[ytunnus]</td></tr>";
@@ -837,7 +837,7 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "</table>";
 
 		// Lopetaan vasen sarake, aloitetaan keskisarake
-		echo "</td><td valign='top'>";
+		echo "</td><td style='padding: 0px; margin: 0px;'>";
 
 		if ($tee2 != 1) {
 
@@ -899,7 +899,7 @@ if ($tee == 'E' or $tee == 'F') {
 		}
 
 		// Lopetetaan keskisarake, aloitetaan oikea sarake
-		echo "</td><td valign='top'>";
+		echo "</td><td style='padding: 0px; margin: 0px;'>";
 
 		echo "<table>";
 

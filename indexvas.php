@@ -11,16 +11,21 @@ else {
 }
 
 echo "<style type='text/css'>
-body { margin:0px; padding:0px 0px 0px 2px; } 
-a.puhdas:hover { border-bottom: 0px; }
+body {
+	margin: 0px;
+	padding: 0px 0px 0px 2px;
+}
+a.puhdas:hover {
+	text-decoration: none;
+}
 </style>";
 
-unset($isizelogo);	
+unset($isizelogo);
 if ((int) $yhtiorow["logo"] > 0) {
 	$liite = hae_liite($yhtiorow["logo"], "Yllapito", "array");
 	if ($liite !== false) {
 		$isizelogo[0] = $liite["image_width"];
-		$isizelogo[1] = $liite["image_height"];		
+		$isizelogo[1] = $liite["image_height"];
 	}
 	unset($liite);
 }
@@ -34,11 +39,11 @@ if (is_array($isizelogo)) {
 	}
 	else {
 		$image = getimagesize($yhtiorow["logo"]);
-		$logo = $yhtiorow["logo"];		
+		$logo = $yhtiorow["logo"];
 	}
 
 	$ix    = $isizelogo[0];			// kuvan x
-	$iy    = $isizelogo[1];			// kuvan y		
+	$iy    = $isizelogo[1];			// kuvan y
 
 	if ($ix > $iy) {
 		$koko = "width='150'";
@@ -54,7 +59,9 @@ else {
 	$yhtio_nimi = "<font class='info'>$yhtiorow[nimi]</font><br>";
 }
 
-echo "<a class='puhdas' href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' $koko style='margin:5px 0px 10px 8px'></a>"; // top right bottom left
+echo "<div style='margin: 5px 0px 10px 8px;'>";
+echo "<a class='puhdas' href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' $koko ></a>"; // top right bottom left
+echo "</div>";
 
 echo "<div style='margin:0px 0px 10px 8px'>";  // top right bottom left
 echo $yhtio_nimi;
@@ -71,7 +78,7 @@ if ($kukarow["extranet"] != "") {
 	else {
 		$extralisa = " and sovellus='extranet' ";
 	}
-	
+
 }
 else {
 	$extralisa = " ";
@@ -80,7 +87,7 @@ else {
 // mitä sovelluksia käyttäjä saa käyttää
 $query = "	SELECT distinct sovellus
 			FROM oikeu use index (oikeudet_index)
-			WHERE yhtio = '$kukarow[yhtio]' 
+			WHERE yhtio = '$kukarow[yhtio]'
 			and kuka = '$kukarow[kuka]'
 			$extralisa
 			ORDER BY sovellus";
@@ -92,11 +99,11 @@ if (mysql_num_rows($result) > 1) {
 	// jos ollaan tulossa loginista, valitaan oletussovellus...
 	if (isset($goso) and $goso != "") {
 		$query = "	SELECT sovellus
-					FROM oikeu use index (oikeudet_index) 
-					WHERE yhtio = '$kukarow[yhtio]' and 
+					FROM oikeu use index (oikeudet_index)
+					WHERE yhtio = '$kukarow[yhtio]' and
 					kuka = '$kukarow[kuka]' and
 					sovellus = '$goso'
-					ORDER BY sovellus, jarjestys 
+					ORDER BY sovellus, jarjestys
 					LIMIT 1";
 		$gores = mysql_query($query) or pupe_error($query);
 		$gorow = mysql_fetch_array($gores);
@@ -144,28 +151,28 @@ echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href
 
 $query = "	SELECT nimi, jarjestys
 			FROM oikeu use index (sovellus_index)
-			WHERE yhtio		= '$kukarow[yhtio]' 
-			and kuka		= '$kukarow[kuka]' 
-			and sovellus	= '$sovellus' 
-			and jarjestys2	= '0' 
+			WHERE yhtio		= '$kukarow[yhtio]'
+			and kuka		= '$kukarow[kuka]'
+			and sovellus	= '$sovellus'
+			and jarjestys2	= '0'
 			and hidden		= ''
 			ORDER BY jarjestys";
 $result = mysql_query($query) or pupe_error($query);
 
 while ($orow = mysql_fetch_array($result)) {
-	
+
 	// tutkitaan onko meillä alamenuja
 	$query = "SELECT nimi, nimitys, alanimi
 			  FROM oikeu use index (sovellus_index)
-			  WHERE yhtio		= '$kukarow[yhtio]' 
-			  and kuka		= '$kukarow[kuka]' 
-			  and sovellus	= '$sovellus' 
+			  WHERE yhtio		= '$kukarow[yhtio]'
+			  and kuka		= '$kukarow[kuka]'
+			  and sovellus	= '$sovellus'
 			  and jarjestys	= '$orow[jarjestys]'
 			  and hidden		= ''
 			  ORDER BY jarjestys, jarjestys2";
 	$xresult = mysql_query($query) or pupe_error($query);
-	
-	
+
+
 	$mrow = mysql_fetch_array($xresult);
 
 	// alamenuja löytyy, eli tämä on menu
@@ -189,7 +196,7 @@ while ($orow = mysql_fetch_array($result)) {
 	}
 	else {
 		// normaali menuitem
-		
+
 		// voidaan käyttää kukarow muuttujia osoitteissa
 		$mrow["nimi"] = str_replace('$kukarow[kuka]',     "$kukarow[kuka]",     $mrow["nimi"]);
 		$mrow["nimi"] = str_replace('$kukarow[yhtio]',    "$kukarow[yhtio]",    $mrow["nimi"]);
@@ -204,17 +211,17 @@ while ($orow = mysql_fetch_array($result)) {
 
 		echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' $target href='$mrow[nimi]";
 
-		if ($mrow['alanimi'] != '') {				
-				echo "?toim=$mrow[alanimi]";	
-				
+		if ($mrow['alanimi'] != '') {
+				echo "?toim=$mrow[alanimi]";
+
 				if ($tultiin == "futur") {
 					echo "&ostoskori=$ostoskori&tultiin=$tultiin";
-				}						
-		}	
+				}
+		}
 		elseif ($mrow['alanimi'] == '' and $tultiin == "futur") {
 			echo "?ostoskori=$ostoskori&tultiin=$tultiin";
-		}	
-			
+		}
+
 		echo "' target='main'>".t("$mrow[nimitys]")."</a></td></tr>";
 	}
 

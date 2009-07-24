@@ -260,7 +260,7 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if (strtoupper($trow[$i]) == strtoupper($vrow[1])) {
+			if (strtoupper($trow[$i]) == strtoupper($vrow["selite"])) {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
@@ -297,7 +297,7 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if (strtoupper($trow[$i]) == strtoupper($vrow[1])) {
+			if (strtoupper($trow[$i]) == strtoupper($vrow["selite"])) {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";

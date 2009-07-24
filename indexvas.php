@@ -17,6 +17,7 @@ body {
 }
 a.puhdas:hover {
 	text-decoration: none;
+	background-color: transparent;
 }
 </style>";
 

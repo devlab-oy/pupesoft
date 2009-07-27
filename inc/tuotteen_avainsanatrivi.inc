@@ -20,6 +20,7 @@
 		$ulos .= "<option value='mainosteksti' $sel[mainosteksti]>".t("Tuotteen mainosteksti")."</option>";
 		$ulos .= "<option value='tarratyyppi' $sel[tarratyyppi]>".t("Tuotteen tarratyyppi")."</option>";
 		$ulos .= "<option value='sistoimittaja' $sel[sistoimittaja]>".t("Tuotteen sisäinen toimittaja")."</option>";
+		$ulos .= "<option value='oletusvalinta' $sel[oletusvalinta]>".t("Tuotteen tilauksen oletusvalinta")."</option>";
 
 		$sresult = t_avainsana("TUOTEULK");
 		
@@ -66,6 +67,17 @@
 			}
 
 			$jatko = 0;
+		}
+		elseif($trow["laji"] == "oletusvalinta") {
+			$sel = array($trow[$i] => "SELECTED");
+			$ulos = "<td>
+						<select name='$nimi'>
+							<option value=''>".t("Ei oletustoimintoa")."</option>
+							<option value='!!!' ".$sel["!!!"].">".t("Tilataan asiakkaalle")."</option>
+							<option value='¡¡¡' ".$sel["¡¡¡"].">".t("Tilataan varastoon")."</option>
+							<option value='¡¡V' ".$sel["¡¡V"].">".t("Valmistetaan varastoon")."</option>
+						</select>
+					</td>";
 		}
 		else {
 			$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";

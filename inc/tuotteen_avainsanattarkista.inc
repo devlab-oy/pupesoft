@@ -42,6 +42,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 			if ($t[$i] == '') {
 				$virhe[$i] = t("Lajia ei voi jättää tyhjäksi")."!";
 			}
+			$lajitalteen = $t[$i];
 		}
 
 		if (mysql_field_name($result, $i) == "selite") {
@@ -54,6 +55,11 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 
 				if (mysql_num_rows($sresult) == 0) {
 					$virhe[$i] = t("Yhtiötä ei löydy. Skarppaa!");
+				}
+			}
+			elseif (strtoupper($lajitalteen) == "OLETUSVALINTA") {
+				if(!in_array($t[$i], array("", "!!!", "¡¡¡", "¡¡V"))) {
+					$virhe[$i] = t("Tuotteen %s oletusvalinta %s ei kelpaa!", $kieli, $chtuoteno, $t[$i]);
 				}
 			}
 		}

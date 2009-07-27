@@ -330,6 +330,7 @@
 		vko-ylityö perusosa = 5500
 		50% vko ylityö = 5501
 		lomapäivät = ??
+
 	*/
 
 	if($toim == "VIENTI") {
@@ -623,7 +624,6 @@
 			echo "<font class='info'>".t("Ei tunteja")."</font><br>";
 		}
 	}
-	
 	
 	if ($toim == 'MYYNTI') {
 		//JOS VIIVAKOODI ON JO ASETETTU, OLLAAN ASETETTU SE HYVAKSYNNAN KAUTTA, ELI OLLAAN HYVÄKSYJÄ...
@@ -1214,10 +1214,14 @@
 			if(!isset($myyntisisaan_paiva)) 	$myyntisisaan_paiva 	= date("d");
 			if(!isset($myyntisisaan_kuukausi))	$myyntisisaan_kuukausi	= date("m");
 			if(!isset($myyntisisaan_vuosi))		$myyntisisaan_vuosi		= date("Y");
+			if(!isset($myyntisisaan_tunti))		$myyntisisaan_tunti		= "08";
+			if(!isset($myyntisisaan_minuutti))	$myyntisisaan_minuutti	= "00";
 			
 			if(!isset($myyntiulos_paiva))		$myyntiulos_paiva		= date("d");
 			if(!isset($myyntiulos_kuukausi))	$myyntiulos_kuukausi	= date("m");
 			if(!isset($myyntiulos_vuosi))		$myyntiulos_vuosi		= date("Y");
+			if(!isset($myyntiulos_tunti))		$myyntiulos_tunti		= "16";
+			if(!isset($myyntiulos_minuutti))	$myyntiulos_minuutti	= "00";
 			
 			echo "<table><tr><th align='center' colspan='5'>" . t("Aloitusaika")."<th>&nbsp;</th><th align='center' colspan='5'>". t("Lopetusaika")."</th></tr>
 			<tr align='center'><th>" . t("Päivä")."</th><th>" . t("Kuukausi")."</th><th>" . t("Vuosi")."</th><th>" . t("Tunti")."</th><th>" . t("Minuutti")."</th><th>&nbsp;</th>
@@ -1657,6 +1661,7 @@
 			if(mysql_num_rows($kirjausres) == 0) {
 				die("Kirjaus katosi!");
 			}
+			
 			//	Otetaan kirjauksen tiedot talteen.
 			$kirjausrow = mysql_fetch_array($kirjausres);
 			
@@ -1675,7 +1680,7 @@
 			}
 			$erittelematta = ($kirjausrow["tyoaika"] - $kirjausrow["eritelty"] - $ruokatunti);
 		
-			echo "<font class='message'>Työaika: ".sprintf("%02d", floor($kirjausrow["tyoaika"]/60)).":".sprintf("%02d", $kirjausrow["tyoaika"]%60)."</font><br>";
+			echo "<font class='message'>".t("Työaika").": ".sprintf("%02d", floor($kirjausrow["tyoaika"]/60)).":".sprintf("%02d", $kirjausrow["tyoaika"]%60)."</font><br>";
 			
 			if ($erittelematta > 0) {
 				echo  "<font class='message'>".t("Erittelemättä: ").sprintf("%02d", floor($erittelematta/60)).":".sprintf("%02d", $erittelematta%60)."<br><br></font><br>";
@@ -1686,7 +1691,7 @@
 				
 			echo "
 			<table>
-			<tr><th width='280'>Projekti</th><th>Työn laatu</th><th>Tunnit</th><th>Minuutit</th>";
+			<tr><th width='280'>".t("Projekti")."</th><th>".t("Työn laatu")."</th><th>".t("Tunnit")."</th><th>".t("Minuutit")."</th>";
 			if($toim == "HYVAKSYNTA") {
 				echo "<th>" . t("Viimeisin muokkaaja")."</th>";
 				echo "<th>" . t("Muokkausaika")."</th>";

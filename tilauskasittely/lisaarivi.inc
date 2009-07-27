@@ -132,7 +132,7 @@
 	}
 	
 	//	Katsotaan onko tällä tuotteella joku oletusvalinta
-	if( (int)  $rivitunnus == 0) {
+	if( (int)  $rivitunnus == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TARJOUS", "PROJEKTI"))) {
 		$olquery = "SELECT *
 					FROM tuotteen_avainsanat
 					WHERE yhtio = '$kukarow[yhtio]'

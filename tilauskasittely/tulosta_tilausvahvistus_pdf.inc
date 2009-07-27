@@ -136,7 +136,7 @@
 								if($key == "asiakkaan_VAT") {
 									//	Jos tässä on ei ole yhtään numeroa, skipataan koko rivi, ollaan ehkä jossain kummallisessa maassa jossa ei makseta veroja!
 									if(preg_match("/[0-9]/", $laskurow[$key])) {
-										$pdf->writeToTemplate($h, 1, $s[0], $s[1], t($o, $kieli).":", "norm", "L", "B", $tid);
+										$pdf->writeToTemplate($h, 1, $s[0], $s[1], t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
 										$pdf->writeToTemplate($h, 1, $s[1]+2, 0, $laskurow[$key], "norm", "L", "", $tid);
 										$h-=$pdf->ln();
 									}

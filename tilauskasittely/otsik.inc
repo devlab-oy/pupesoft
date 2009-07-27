@@ -510,7 +510,7 @@
 							WHERE tunnus = '$asiakasid'";
 			}
 			elseif ($kopioitava_otsikko > 0) {
-				$squery = "	SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokkaa
+				$squery = "	SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
 							FROM lasku
 							LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
@@ -1530,7 +1530,7 @@
 
 				if ($row["selite"] == $srow["luokka"]) $sel = 'selected';
 
-				echo "<option value='$row[selite]' $sel>$row[selite]</option>";
+				echo "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark]</option>";
 			}
 			echo "</select>";
 

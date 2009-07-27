@@ -311,10 +311,13 @@
 		else {
 			$litunn = $asiakasid;
 		}
+		
+		if ($kukarow['hinnat'] == 0) $summaselli = " summa, ";
+		else $summaselli = "";
 
 		if ($otunnus > 0 or $laskunro > 0 or $sopimus > 0) {
 			if ($laskunro > 0) {
-				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
+				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, $summaselli tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.liitostunnus = '$litunn'
@@ -322,14 +325,14 @@
 							and lasku.laskunro='$laskunro'";
 			}
 			elseif($sopimus > 0) {
-				$query = "	(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
+				$query = "	(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, $summaselli tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.liitostunnus = '$litunn'
 							and $til
 							and tunnus='$sopimus')
 							UNION
-							(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
+							(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, $summaselli tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.liitostunnus = '$litunn'
@@ -338,14 +341,14 @@
 							and lasku.swift='$sopimus')";
 			}
 			else {
-				$query = "	(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
+				$query = "	(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, $summaselli tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.liitostunnus = '$litunn'
 							and $til
 							and lasku.tunnus='$otunnus')
 							UNION
-							(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
+							(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, $summaselli tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.liitostunnus = '$litunn'
@@ -358,12 +361,12 @@
 		else {
 			// jos on iiiiso näyttö niin näytetään myös viite
 			if ($kukarow['resoluutio'] == 'I') {
-				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, viesti, tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
+				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, $summaselli viesti, tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
 							FROM lasku use index (yhtio_tila_luontiaika)
 							WHERE lasku.yhtio = '$kukarow[yhtio]' ";
 			}
 			else {
-				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
+				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, $summaselli tila, alatila, hyvak1, hyvak2, h1time, h2time, luontiaika
 							FROM lasku use index (yhtio_tila_luontiaika)
 							WHERE lasku.yhtio = '$kukarow[yhtio]' ";
 			}

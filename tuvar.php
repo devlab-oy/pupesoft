@@ -130,18 +130,18 @@
 		echo "</form>";
 	}
 	echo "</tr></table><br>";
-	
-	
+
+
 	//tuotteen varastostatus
 	if ($tee == 'Z') {
 		$query = "	SELECT tuote.*, date_format(tuote.muutospvm, '%Y-%m-%d') muutos, date_format(tuote.luontiaika, '%Y-%m-%d') luonti,
 					group_concat(distinct tuotteen_toimittajat.toimittaja order by tuotteen_toimittajat.tunnus separator '<br>') toimittaja,
 					group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '<br>') osto_era,
 					group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
-					group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '<br>') tuotekerroin 
-					FROM tuote 
+					group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '<br>') tuotekerroin
+					FROM tuote
 					LEFT JOIN tuotteen_toimittajat USING (yhtio, tuoteno)
-					WHERE tuote.yhtio = '$kukarow[yhtio]' 
+					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					and tuote.tuoteno = '$tuoteno'
 					GROUP BY tuote.tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
@@ -172,7 +172,7 @@
 			$tulresult = mysql_query($query) or pupe_error($query);
 
 			//korvaavat tuotteet
-			$query  = "select * from korvaavat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+			$query  = "SELECT * from korvaavat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
 			$korvaresult = mysql_query($query) or pupe_error($query);
 
 			//eka laitetaan tuotteen yleiset (aika staattiset) tiedot
@@ -180,18 +180,23 @@
 			echo "<tr><th>".t("Tuoteno")."</th><th colspan='5'>".t("Nimitys")."</th>";
 			echo "<tr><td>$tuoterow[tuoteno]</td><td colspan='5'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td></tr>";
 
-			echo "<tr><th>".t("Os/Try")."</th><th>".t("Toimittaja")."</th><th>".t("Aleryhmä")."</th><th>".t("Tähti")."</th><th colspan='2'>".t("VAK")."</th></tr>";
-			echo "<td>$tuoterow[osasto]/$tuoterow[try]</td><td>$tuoterow[toimittaja]</td>
-					<td>$tuoterow[aleryhma]</td><td>$tuoterow[tahtituote]</td><td colspan='2'>$tuoterow[vakkoodi]</td></tr>";
-			echo "<tr><th>".t("Toimtuoteno")."</th><th>".t("Myyntihinta")."</th><th>".t("Nettohinta")."</th><th colspan='3'>".t("Viimeksi tullut")."</th>";
-			echo "<tr><td>$tuoterow[toim_tuoteno]</td>
-					<td>$tuoterow[myyntihinta]</td><td>$tuoterow[nettohinta]</td><td colspan='3'>$tuoterow[vihapvm]</td></tr>";
-			echo "<tr><th>".t("Hälyraja")."</th><th>".t("Tilerä")."</th><th>".t("Toierä")."</th><th>".t("Kerroin")."</th><th>".t("Tarrakerroin")."</th><th>".t("Tarrakpl")."</th>";
-			echo "<tr><td>$tuoterow[halytysraja]</td>
-					<td>$tuoterow[osto_era]</td><td>$tuoterow[myynti_era]</td><td>$tuoterow[tuotekerroin]</td>
-					<td>$tuoterow[tarrakerroin]</td><td>$tuoterow[tarrakpl]</td></tr>";
-			echo "</table><br>";
+			echo "<tr><th>".t("Osasto/Try")."</th><th>".t("Toimittaja")."</th><th>".t("Aleryhmä")."</th><th>".t("Tähti")."</th><th colspan='2'>".t("VAK")."</th></tr>";
+			echo "<td>$tuoterow[osasto] - ".t_avainsana("OSASTO", "", "and avainsana.selite='$tuoterow[osasto]'", "", "", "selitetark")."<br>$tuoterow[try] - ".t_avainsana("TRY", "", "and avainsana.selite='$tuoterow[try]'", "", "", "selitetark")."</td><td>$tuoterow[toimittaja]</td><td>$tuoterow[aleryhma]</td><td>$tuoterow[tahtituote]</td><td colspan='2'>$tuoterow[vakkoodi]</td></tr>";
 
+			echo "<tr><th>".t("Toimtuoteno")."</th><th>".t("Myyntihinta")."</th><th>".t("Nettohinta")."</th><th colspan='3'>".t("Viimeksi tullut")."</th>";
+			echo "<tr><td>$tuoterow[toim_tuoteno]</td><td>";
+
+			if ($kukarow['hinnat'] >= 0) $tuoterow["myyntihinta"];
+
+			echo "</td><td>";
+
+			if ($kukarow['hinnat'] >= 0) $tuoterow["nettohinta"];
+
+			echo "</td><td colspan='3'>".tv1dateconv($tuoterow["vihapvm"])."</td></tr>";
+
+			echo "<tr><th>".t("Hälyraja")."</th><th>".t("Tilerä")."</th><th>".t("Toierä")."</th><th>".t("Kerroin")."</th><th>".t("Tarrakerroin")."</th><th>".t("Tarrakpl")."</th>";
+			echo "<tr><td>$tuoterow[halytysraja]</td><td>$tuoterow[osto_era]</td><td>$tuoterow[myynti_era]</td><td>$tuoterow[tuotekerroin]</td><td>$tuoterow[tarrakerroin]</td><td>$tuoterow[tarrakpl]</td></tr>";
+			echo "</table><br>";
 
 			// Varastosaldot ja paikat
 			echo "<table><tr><td class='back' valign='top'>";
@@ -279,7 +284,7 @@
 				}
 
 			}
-			
+
 			echo "</table></td></tr></table><br>";
 
 
@@ -319,7 +324,7 @@
 						$tyyppi = t("Varastosiirto");
 						$merkki = "-";
 					}
-					
+
 					echo "<tr>
 							<td>$jtrow[nimi]</td>
 							<td>$jtrow[otunnus] $keikka</td>";
@@ -331,7 +336,7 @@
 
 				echo "</table>";
 			}
-			
+
 			echo "</td></tr><tr><td class='back' valign='top'><br>";
 			echo "<table>";
 			echo "<form action='$PHP_SELF#Tapahtumat' method='post'>";
@@ -352,32 +357,7 @@
 			echo "<option value='3' $chk[3]> ".t("Lähes kaikki")."</option>";
 			echo "</select>";
 			echo "</th>";
-
-
-			if ($tapahtumalaji == "laskutus") 			$sel1="SELECTED";
-			if ($tapahtumalaji == "tulo") 				$sel2="SELECTED";
-			if ($tapahtumalaji == "valmistus") 			$sel3="SELECTED";
-			if ($tapahtumalaji == "siirto") 			$sel4="SELECTED";
-			if ($tapahtumalaji == "kulutus") 			$sel5="SELECTED";
-			if ($tapahtumalaji == "Inventointi") 		$sel6="SELECTED";
-			if ($tapahtumalaji == "Epäkurantti") 		$sel7="SELECTED";
-			if ($tapahtumalaji == "poistettupaikka") 	$sel8="SELECTED";
-			if ($tapahtumalaji == "uusipaikka") 		$sel9="SELECTED";
-
-			echo "<th colspan='2'>".t("Tapahtumalaji").": ";
-			echo "<select name='tapahtumalaji' onchange='submit();'>'";
-			echo "<option value=''>".t("Näytä kaikki")."</option>";
-			echo "<option value='laskutus' $sel1>".t("Laskutukset")."</option>";
-			echo "<option value='tulo' $sel2>".t("Tulot")."</option>";
-			echo "<option value='valmistus' $sel3>".t("Valmistukset")."</option>";
-			echo "<option value='siirto' $sel4>".t("Siirrot")."</option>";
-			echo "<option value='kulutus' $sel5>".t("Kulutukset")."</option>";
-			echo "<option value='Inventointi' $sel6>".t("Inventoinnit")."</option>";
-			echo "<option value='Epäkurantti' $sel7>".t("Epäkuranttiusmerkinnät")."</option>";
-			echo "<option value='poistettupaikka' $sel8>".t("Poistetut tuotepaikat")."</option>";
-			echo "<option value='uusipaikka' $sel9>".t("Perustetut tuotepaikat")."</option>";
-			echo "</select>";
-			echo "</th>";
+			echo "<th colspan='2'></th></tr>";
 
 			echo "<tr>";
 			echo "<th>".t("Käyttäjä@Pvm")."</th>";
@@ -427,10 +407,10 @@
 					echo "<td nowrap>$prow[kuka]</td>";
 					echo "<td nowrap>";
 
-					
-					
+
+
 					echo t("$prow[laji]");
-					
+
 
 					echo "</td>";
 
@@ -440,8 +420,8 @@
 				}
 			}
 			echo "</table>";
-			
-			
+
+
 		}
 		else {
 			echo "<font class='message'>".t("Yhtään tuotetta ei löytynyt")."!<br></font>";

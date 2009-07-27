@@ -45,7 +45,7 @@
 		$kuvares = mysql_query($query) or pupe_error($query);
 
 		echo "<table border='0' cellspacing='5' align='center'";
-		
+
 		if ($maxwidth) {
 			echo "width='$maxwidth'";
 		}
@@ -167,15 +167,15 @@
 	 //syotetaan tuotenumero
 	$formi  = 'formi';
 	$kentta = 'tuoteno';
-	
-	
+
+
 	//Paluu nappi osto/myyntitilaukselle
 	$query    = "SELECT * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 	$result   = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($result);
-	
+
 	if ($kukarow["kuka"] != "" and $laskurow["tila"] == "O") {
-		
+
 		echo "	<form method='post' action='".$palvelin2."tilauskasittely/tilaus_osto.php'>
 				<input type='hidden' name='aktivoinnista' value='true'>
 				<input type='hidden' name='tee' value='AKTIVOI'>
@@ -196,8 +196,8 @@
 				<input type='submit' value='".t("Takaisin tilaukselle")."'>
 				</form><br><br>";
 	}
-	
-	
+
+
 	echo "<table><tr>";
 	echo "<form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
@@ -207,7 +207,7 @@
 	echo "<option value='TOIMTUOTENO'>".t("Toimittajan tuotenumero").":</option>";
 
 	$vresult = t_avainsana("TUOTEULK");
-	
+
 	while ($vrow = mysql_fetch_array($vresult)) {
 		echo "<option value='$vrow[selite]'>$vrow[selitetark]:</option>";
 	}
@@ -238,8 +238,8 @@
 		echo "<input type='Submit' value='".t("Seuraava")."'>";
 		echo "</td>";
 		echo "</form>";
-	}	
-	
+	}
+
 	echo "</tr></table><br>";
 
 
@@ -465,7 +465,7 @@
 
 			//2
 			echo "<tr><th>".t("Osasto/try")."</th><th>".t("Toimittaja")."</th><th>".t("Aleryhm‰")."</th><th>".t("T‰hti")."</th><th>".t("Perusalennus")."</th><th>".t("VAK")."</th></tr>";
-			echo "<td>$tuoterow[osasto]/$tuoterow[try]</td><td>$tuoterow[toimittaja]</td>
+			echo "<td>$tuoterow[osasto] - ".t_avainsana("OSASTO", "", "and avainsana.selite='$tuoterow[osasto]'", "", "", "selitetark")."<br>$tuoterow[try] - ".t_avainsana("TRY", "", "and avainsana.selite='$tuoterow[try]'", "", "", "selitetark")."</td><td>$tuoterow[toimittaja]</td>
 					<td>$tuoterow[aleryhma]</td><td>$tuoterow[tahtituote]</td><td>$peralrow[alennus]%</td><td>$tuoterow[vakkoodi]</td></tr>";
 
 			//3
@@ -474,7 +474,7 @@
 					<td valign='top' align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["myyntihinta"])." $yhtiorow[valkoodi]$valuuttalisa</td>
 					<td valign='top' align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["nettohinta"])."/".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["myymalahinta"])."</td>
 					<td valign='top' align='right'>";
-						
+
 			if ($tuoterow["ostohinta"][0] != '/') {
 				echo $tuoterow["ostohinta"];
 			}
@@ -508,7 +508,7 @@
 
 			//8
 			echo "<tr><th>".t("Muuta")."</th><th colspan='5'>".t("Lyhytkuvaus")."</th></tr>";
-			echo "<tr><td>$tuoterow[muuta]&nbsp;</td><td colspan='5'>$tuoterow[lyhytkuvaus]</td></tr>";			
+			echo "<tr><td>$tuoterow[muuta]&nbsp;</td><td colspan='5'>$tuoterow[lyhytkuvaus]</td></tr>";
 			echo "</table>";
 
 			echo "<table><tr>";
@@ -547,26 +547,26 @@
 
 			if (mysql_error() == "" and file_exists("yhteensopivuus_tuote.php")) {
 
-				$query = "	SELECT tyyppi, count(*) countti 
-							from yhteensopivuus_tuote 
-							where tuoteno = '$tuoteno' 
-							and yhtio = '$kukarow[yhtio]' 
+				$query = "	SELECT tyyppi, count(*) countti
+							from yhteensopivuus_tuote
+							where tuoteno = '$tuoteno'
+							and yhtio = '$kukarow[yhtio]'
 							GROUP BY 1";
 				$yhtresult = mysql_query($query) or pupe_error($query);
-				
+
 				if (mysql_num_rows($yhtresult) > 0) {
 					echo "<td class='back' valign='top' align='left'>";
 					echo "<table>";
 					echo "<tr><th>".t("Yhteensopivuudet")."</th></tr>";
 				}
-				
+
 				while ($yhtrow = mysql_fetch_array($yhtresult)) {
-					
+
 					if ($yhtrow["countti"] > 0) {
-						
+
 						if ($yhtrow["tyyppi"] == "HA") $yhttoim = "";
 						else $yhttoim = $yhtrow["tyyppi"];
-						
+
 						echo "<tr><td><a href='yhteensopivuus_tuote.php?toim=$yhttoim&tee=etsi&tuoteno=".urlencode($tuoteno)."'>Siirry tuotteen $yhttoim yhteensopivuuksiin</a></td></tr>";
 					}
 				}
@@ -582,11 +582,11 @@
 			unset($pdf_exist);
 			unset($filetype);
 
-			$filetype_query = "	SELECT * 
-								FROM liitetiedostot 
-								WHERE yhtio		 = '{$kukarow['yhtio']}' 
-								and liitos		 = 'tuote' 
-								and liitostunnus = '{$tuoterow['tunnus']}' 
+			$filetype_query = "	SELECT *
+								FROM liitetiedostot
+								WHERE yhtio		 = '$kukarow[yhtio]'
+								and liitos		 = 'tuote'
+								and liitostunnus = '$tuoterow[tunnus]'
 								ORDER BY kayttotarkoitus, jarjestys, filename
 								LIMIT 1";
 			$filetype_result = mysql_query($filetype_query) or pupe_error($filetype_query);
@@ -607,7 +607,7 @@
 
 						$apurow = mysql_fetch_array($kuvares);
 						$maxwidth = $apurow["max_width"] + 30;
-						
+
 						if ($maxwidth > 640) {
 							$maxwidth = 640;
 						}
@@ -626,7 +626,7 @@
 			}
 
 			if (isset($images_exist) or isset($pdf_exist)) {
-								
+
 				echo "<td class='back' valign='top' align='left'>";
 				echo "<table>";
 				echo "<tr><th>".t("Tuotekuvat")."</th></tr><tr><td><input type='button' value='";
@@ -706,7 +706,7 @@
 					while ($saldorow = mysql_fetch_array ($sresult)) {
 
 						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $saldoaikalisa, $saldorow["era"]);
-						
+
 						//summataan kokonaissaldoa
 						$kokonaissaldo += $saldo;
 						$kokonaishyllyssa += $hyllyssa;
@@ -1297,10 +1297,10 @@
 
 				echo "<font class='message'>".t("Sarjanumerot")."</font><hr>";
 
-				$query	= "	SELECT sarjanumeroseuranta.*, sarjanumeroseuranta.tunnus sarjatunnus, 
+				$query	= "	SELECT sarjanumeroseuranta.*, sarjanumeroseuranta.tunnus sarjatunnus,
 							tilausrivi_osto.tunnus osto_rivitunnus,
-							tilausrivi_osto.perheid2 osto_perheid2,  
-							tilausrivi_osto.nimitys nimitys, 
+							tilausrivi_osto.perheid2 osto_perheid2,
+							tilausrivi_osto.nimitys nimitys,
 							lasku_myynti.nimi myynimi
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -1322,11 +1322,11 @@
 					echo "<th>".t("Varastopaikka")."</th>";
 					echo "<th>".t("Ostohinta")."</th>";
 					echo "<th>".t("Varattu asiakaalle")."</th></tr>";
-					
+
 					while($sarjarow = mysql_fetch_array($sarjares)) {
-						
+
 						$fnlina1 = "";
-						
+
 						if (($sarjarow["siirtorivitunnus"] > 0) or ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"])) {
 
 							if ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"]) {
@@ -1351,8 +1351,8 @@
 								// jos t‰m‰ on jollain siirtolistalla
 								$fnlina1 = " <font class='message'>(".t("Kesken siirtolistalla").": $siirow[otunnus])</font>";
 							}
-						}																	
-						
+						}
+
 						echo "<tr>
 								<td>$sarjarow[nimitys]</td>
 								<td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($tuoterow["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td>
@@ -1405,7 +1405,7 @@
 						echo "<td align='right'>$sarjarow[kpl]</td>";
 
 						echo "<td>$sarjarow[lisatieto]</td>";
-						
+
 						//	Katsotaan jos meid‰n pit‰isi liitt‰‰ jotain infoa lis‰tiedoista
 						if(file_exists("inc/generoi_sarjanumeron_info.inc")) {
 							require("inc/generoi_sarjanumeron_info.inc");
@@ -1414,7 +1414,7 @@
 								echo "<td class='back'>$sarjainfo</td>";
 							}
 						}
-						
+
 						echo "</tr>";
 					}
 

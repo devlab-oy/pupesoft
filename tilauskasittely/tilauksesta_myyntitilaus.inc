@@ -108,27 +108,27 @@
 						$values .= ", '".$monistarow[$i]."'";
 				}
 			}
-			
+
 			/*
-				Vähän glungea taas.. jos halutaan perustaa tarjous insertoidaan ensin pelkkä perusotsikko ja sitten tämä toimitusotsikko				
+				Vähän glungea taas.. jos halutaan perustaa tarjous insertoidaan ensin pelkkä perusotsikko ja sitten tämä toimitusotsikko
 				Korjataan projektiotsikon tiedot insertin jälkeen..
 			*/
-			
+
 			$tunnusnippu=$ptunnus=0;
-			
+
 			if ($perusta == "PROJEKTI" and $monistarow["tunnusnippu"] > 0 and $monistarow["tila"] == "T") {
 				$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 				$insres  = mysql_query($kysely) or pupe_error($kysely);
 				$ptunnus = mysql_insert_id();
-				
+
 				$kysely = "UPDATE lasku SET tunnusnippu='$ptunnus', tila='R', alatila='' WHERE yhtio='$kukarow[yhtio]' and tunnus='$ptunnus'";
 				$updres=mysql_query($kysely) or pupe_error($kysely);
-				
+
 				// avataan projekti kirjanpitoon
-				$query = " insert into kustannuspaikka set yhtio  = '{$kukarow["yhtio"]}', nimi = '$ptunnus - {$monistarow[nimi]}', tyyppi = 'P', kaytossa = 'o', luontiaika = now(), laatija = '{$kukarow["kuka"]}'";
+				$query = " INSERT into kustannuspaikka set yhtio  = '$kukarow[yhtio]', nimi = '$ptunnus - $monistarow[nimi]', tyyppi = 'P', kaytossa = 'o', luontiaika = now(), laatija = '$kukarow[kuka]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$projekti = mysql_insert_id();
-				
+
 				$tilauksesta_myyntitilaus = "<font class='message'>".t("PERUSTETTIIN PROJEKTI").": $ptunnus</font><br><br>";
 			}
 
@@ -137,21 +137,45 @@
 			$utunnus = mysql_insert_id();
 
 			if ($perusta == "TYOMAARAYS") {
-				//	Tehdään tyhjä pohja työmääräykselle..
-				$kysely  = " INSERT into tyomaarays SET
-				 				yhtio = '$kukarow[yhtio]',
-								otunnus = '$utunnus'";
+				// Kopioidaan työmääräys
+				$query = "SELECT * FROM tyomaarays WHERE otunnus='$otunnus' and yhtio ='$kukarow[yhtio]'";
+				$monistatyomres = mysql_query($query) or pupe_error($query);
+				$monistatyomrow = mysql_fetch_array($monistatyomres);
+
+				$fields = mysql_field_name($monistatyomres,0);
+				$values = "'".$monistatyomrow[0]."'";
+
+				for ($i=1; $i < mysql_num_fields($monistatyomres); $i++) { // Ei monisteta tunnusta
+
+					$fields .= ", ".mysql_field_name($monistatyomres,$i);
+
+					switch (mysql_field_name($monistatyomres,$i)) {
+						case 'luontiaika':
+							$values .= ", now()";
+							break;
+						case 'otunnus':
+							$values .= ", $utunnus";
+							break;
+						case 'laatija':
+							$values .= ", '$kukarow[kuka]'";
+							break;
+						default:
+							$values .= ", '".$monistatyomrow[$i]."'";
+					}
+				}
+
+				$kysely  = "INSERT into tyomaarays ($fields) VALUES ($values)";
 				$insres  = mysql_query($kysely) or pupe_error($kysely);
 			}
-			
+
 			/*
 				Tää voi olla hassua, mutta näin tämä haluttiin!
 				Eli liitetään hyväksytty tarjous uuteen tunnusnippuun eikä jatketa vanhaa.
 				Tämä siksi, että tarjous on laitettu vetämään ehkä puoli vuotta aiemmin ja silloin tämä uusi tilaus ei mene raporteissa "loogisessa" järjestyksessä..
 			*/
-			
-			if($monistarow["tunnusnippu"] > 0 and $monistarow["tila"] == "T") {
-				if($ptunnus > 0) {
+
+			if ($monistarow["tunnusnippu"] > 0 and $monistarow["tila"] == "T") {
+				if ($ptunnus > 0) {
 					$tunnusnippu=$ptunnus;
 				}
 				else {
@@ -159,9 +183,9 @@
 				}
 
 				$query = "update lasku set tunnusnippu = '$tunnusnippu' WHERE yhtio = '$kukarow[yhtio]' and tunnus='$utunnus'";
-				$updres = mysql_query($query) or pupe_error($query);				
+				$updres = mysql_query($query) or pupe_error($query);
 			}
-			
+
 			//Kopioidaan otsikon lisatiedot
 			$query = "SELECT * FROM laskun_lisatiedot WHERE otunnus='$otunnus' and yhtio ='$kukarow[yhtio]'";
 			$monistares2 = mysql_query($query) or pupe_error($query);
@@ -169,10 +193,10 @@
 
 			$fields = mysql_field_name($monistares2,0);
 			$values = "'".$monistarow2[0]."'";
-			
-			//	Samat tiedot tarvitaan myös projektill			
+
+			//	Samat tiedot tarvitaan myös projektill
 			$pvalues = "'".$monistarow2[0]."'";
-			
+
 			for($i=1; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
 
 				$fields .= ", ".mysql_field_name($monistares2,$i);
@@ -198,7 +222,7 @@
 						break;
 					default:
 						$values .= ", '".$monistarow2[$i]."'";
-						$pvalues .= ", '".$monistarow2[$i]."'";	
+						$pvalues .= ", '".$monistarow2[$i]."'";
 				}
 			}
 
@@ -208,18 +232,18 @@
 			if ($ptunnus > 0) {
 				$kysely  = "INSERT into laskun_lisatiedot ($fields) VALUES ($pvalues)";
 				$insres2 = mysql_query($kysely) or pupe_error($kysely);
-				
+
 				if($yhtiorow["dokumentaatiohallinta"] != "") {
 					svnOpenNew($ptunnus, "PROJEKTI");
 					if(svnProjectsQuotationSubDir) {
 						$svnKansio = svnQuotationDirectory($otunnus);
 						if($svnKansio != "") {
 							svnAction("move", $svnKansio, svnFindActiveProject($ptunnus).svnProjectsQuotationSubDir, "Siirrettiin tarjouskansio projektille");
-						}					
+						}
 					}
-				}				
+				}
 			}
-			
+
 			//	Projektin maksusuunnitelma kuuluu projektiotsikolle, ei tilaukselle
 			if($ptunnus>0) {
 				$mtunnus = $ptunnus;
@@ -227,28 +251,28 @@
 			else {
 				$mtunnus = $utunnus;
 			}
-			
+
 			//Siirretään maksusuunnitelma
 			$query = "	SELECT *
 						FROM maksupositio
 						WHERE yhtio = '$kukarow[yhtio]'
 						and otunnus = '$otunnus'";
 			$copresult = mysql_query($query) or pupe_error($query);
-						
-			if (mysql_num_rows($copresult) > 0) {					
+
+			if (mysql_num_rows($copresult) > 0) {
 				$query = "	UPDATE maksupositio
 							SET otunnus = '$mtunnus'
 							WHERE yhtio = '$kukarow[yhtio]'
 							and otunnus = '$otunnus'";
 				$result = mysql_query($query) or pupe_error($query);
-			
+
 				//Päivitetään lasku
 				$query = "	UPDATE lasku
 							SET jaksotettu 	= '$mtunnus'
 							WHERE yhtio 	= '$kukarow[yhtio]'
 							and tunnus 		= '$utunnus'";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				//	Päivitetään projekti
 				if ($ptunnus > 0) {
 					$query = "	UPDATE lasku
@@ -256,23 +280,23 @@
 								WHERE yhtio 	= '$kukarow[yhtio]'
 								and tunnus 		= '$ptunnus'";
 					$result = mysql_query($query) or pupe_error($query);
-				}				
+				}
 			}
-			
+
 			//Kopioidaan liitetiedostot
-			$query = "	SELECT * 
-						from liitetiedostot 
+			$query = "	SELECT *
+						from liitetiedostot
 						where yhtio			= '$kukarow[yhtio]'
 						and liitostunnus	= '$otunnus'
 						and liitos			= 'lasku'";
 			$liiteres = mysql_query($query) or pupe_error($query);
-			
-			if (mysql_num_rows($liiteres) > 0) {	
-				
+
+			if (mysql_num_rows($liiteres) > 0) {
+
 				while($liiterow = mysql_fetch_assoc($liiteres)) {
-					
+
 					$liiterow["data"] = mysql_real_escape_string($liiterow["data"]);
-				
+
 					$query = "	INSERT INTO liitetiedostot SET
 							  	yhtio    		= '$kukarow[yhtio]',
 							  	liitos   		= '$liiterow[liitos]',
@@ -293,9 +317,9 @@
 							  	luontiaika		= now()";
 					$liiteinsres = mysql_query($query) or pupe_error($query);
 				}
-			}	
-			
-			
+			}
+
+
 			//Siirretään tilausrivit
 			$kukarowkesken 		= $kukarow["kesken"];
 			$kukarow["kesken"]	= $utunnus;
@@ -326,14 +350,14 @@
 
 				$tuoteno	= $coprivirow['tuoteno'];
 
-				if ($coprivirow["var"] == "J" or $coprivirow["var"] == "S" or $coprivirow["var"] == "T" or $coprivirow["var"] == "U") {					
+				if ($coprivirow["var"] == "J" or $coprivirow["var"] == "S" or $coprivirow["var"] == "T" or $coprivirow["var"] == "U") {
 					if ($yhtiorow["varaako_jt_saldoa"] == "") {
 						$kpl = $coprivirow['jt'];
 					}
 					else {
 						$kpl = $coprivirow['jt']+$coprivirow['varattu'];
 					}
-					
+
 					$var	= "J";
 				}
 				elseif ($tilausrivi["var"] == "P") {
@@ -364,7 +388,7 @@
 				else {
 					$jaksotettu	= 0;
 				}
-				
+
 				$tuotenimitys = $coprivirow['nimitys'];
 
 				$paikat		= "";
@@ -383,18 +407,18 @@
 				else {
 					$varasto = "";
 				}
-				
-				
+
+
 				if($kopioi_paikat != "") {
 					$paikka	= $coprivirow['hyllyalue']."#".$coprivirow['hyllynro']."#".$coprivirow['hyllyvali']."#".$coprivirow['hyllytaso'];
 				}
 				else {
-					$paikka	= "";	
+					$paikka	= "";
 				}
-				
+
 				$korvaavakielto		= "";
 				$jtkielto 		 	= $laskurow['jtkielto'];
-				
+
 				$query = "SELECT * FROM tuote WHERE yhtio='$kukarow[yhtio]' and tuoteno='$coprivirow[tuoteno]'";
 				$tuote_result = mysql_query($query) or pupe_error($query);
 				$trow = mysql_fetch_array($tuote_result);
@@ -444,7 +468,7 @@
 										LIMIT $lisrow[varattu]";
 							$cores = mysql_query($query) or pupe_error($query);
 						}
-						
+
 						//Kopioidaan tilausrivin lisatiedot
 						$query = "	SELECT *
 									FROM tilausrivin_lisatiedot
@@ -505,7 +529,7 @@
 							and perheid = '$coprivirow[perheid]'";
 				$cores = mysql_query($query) or pupe_error($query);
 			}
-			
+
 			//Korjataan perheid2:t uusilla riveillä
 			$query = "	SELECT perheid2, min(tunnus) uusiperheid2
 						FROM tilausrivi

@@ -578,8 +578,21 @@
 			elseif ($from == "yllapito" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
 				list($a, $b) = explode("/", $haku[$i]);
 
-				if ((int) $a > 0) $lisa .= " asiakas = '$a' ";
-				if ((int) $a > 0) $lisa .= " ytunnus = '$b' ";
+				if ((int) $a > 0) $a_lisa .= " asiakas = '$a' ";
+				else $a_lisa = "";
+				
+				if ((is_numeric($b) and $b > 0) or (!is_numeric($b) and $b != "")) $b_lisa .= " ytunnus = '$b' ";
+				else $b_lisa = "";
+				
+				if ($a_lisa != "" and $b_lisa != "") {
+					$lisa .= " and ($a_lisa or $b_lisa) ";
+				}
+				elseif ($a_lisa != "") {
+					$lisa .= " and $a_lisa ";
+				}
+				else {
+					$lisa .= " and $b_lisa ";
+				}
 			}
 			elseif ($from == "" and $toim == 'tuotteen_toimittajat' and trim($array[$i]) == 'nimi') {
 				if (!is_numeric($haku[$i])) {

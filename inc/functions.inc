@@ -42,7 +42,7 @@ if (!function_exists("pupe_error")) {
 
 if (!function_exists("tv1dateconv")) {
 	function tv1dateconv($date, $pitka = "", $lyhyt = "") {
-
+			
 		global $laskurow;
 
 		//k‰‰nt‰‰ mysqln vvvv-kk-pp muodon muotoon pp.kk.vvvv
@@ -134,6 +134,8 @@ if (!function_exists("lopetus")) {
 					else {
 						$nlisa = "";
 					}
+					
+					$row["nimitys"] = trim(str_ireplace("UUSI", "", $row["nimitys"]));
 
 					if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": $row[nimitys]$nlisa</a><br>";
 					else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";

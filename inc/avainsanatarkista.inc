@@ -3,19 +3,19 @@
 if(!function_exists("avainsanatarkista")) {
 	function avainsanatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray;
-		
+
 		static $seliteerrori, $laji;
 		
 		if (mysql_field_name($result, $i) == "selite" and trim($t[$i]) == '') {
 			$seliteerrori = 1;
 		}
 		
-		if (mysql_field_name($result, $i) == "selite" and !is_numeric($t[$i]) and in_array($laji, array("TRY", "OSASTO", "PIIRI"))) {
-			$seliteerrori = 1;
-		}
-
 		if (mysql_field_name($result, $i) == "laji") {
-			$laji = trim($t[$i]);
+			$laji = trim($t[$i]);	
+		}
+		
+		if (mysql_field_name($result, $i) == "selite" and !is_numeric($t[$i]) and in_array($laji, array("TRY", "OSASTO", "PIIRI"))) {
+			$virhe[$i] = t("Selitteen on oltava numeerinen")."!";
 		}
 
 		if (mysql_field_name($result, $i) == "selite" and $laji == 'VAKIOVIESTI' and trim($t[$i]) == '') {

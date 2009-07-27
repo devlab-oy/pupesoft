@@ -97,7 +97,9 @@
 		// jos avainsanoja on perustettu tehd‰‰n dropdown
 		if (mysql_num_rows($sresult) > 0) {
 			$ulos = "<td><select name='$nimi' id = '$nimi' Style=\"width: 300px;\" onmousedown=\"alasvetoMuutakoko('$nimi', 0);\" onblur=\"alasvetoMuutakoko('$nimi', 300);\">";
-
+			
+			$ulos .= "<option id='option_$nimi' value = ''>".t("Ei valintaa")."</option>";
+			
 			while ($srow = mysql_fetch_array($sresult)) {
 				$sel = '';
 				if ($trow[$i] == $srow["selite"]) {
@@ -106,7 +108,18 @@
 
 				$ulos .= "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
 			}
+			
+			$ulos .= "</select>";
+			$ulos .= " <a href='#' onclick=\"teeostry('iframe_$nimi','".mysql_field_name($result, $i)."');\"><img src='pics/lullacons/database-option-add.png'>".t("Uusi")." ".t(mysql_field_name($result, $i))."</a><div id='iframe_$nimi' style='display: inline;'></div></td>";
 
+			echo "
+			<script LANGUAGE='JavaScript'>
+				function teeostry(tdid, lukitse_laji){
+					var currenttd = document.getElementById(tdid);
+					currenttd.innerHTML = \"<br><br><iframe id='avainsana_iframe' name='avainsana_iframe' src='yllapito.php?toim=avainsana&uusi=1&lukitse_laji=\"+lukitse_laji+\"&laji=\"+tdid+\"&from=yllapito&ohje=off' style='width: 500px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>\";
+				}
+			</script>";
+			
 			$ulos .= "</select></td>";
 			$jatko = 0;
 		}
@@ -237,15 +250,27 @@
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>";
-
-		while ($vrow=mysql_fetch_array($vresult)) {
-			$sel="";
-			if ($trow[$i] == $vrow["ryhma"]) {
+		$ulos .= "<option id='option_$nimi' value = ''>".t("Ei ryhm‰‰")."</option>";
+				
+		while ($srow = mysql_fetch_array($vresult)) {
+			$sel = '';
+			if ($trow[$i] == $srow["ryhma"]) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '$vrow[ryhma]' $sel>$vrow[selitetark]</option>";
+			$ulos .= "<option value='$srow[ryhma]' $sel>$srow[selitetark]</option>";
 		}
-		$ulos .= "</select></td>";
+		
+		$ulos .= "</select>";
+		$ulos .= " <a href='#' onclick=\"teekentta('iframe_$nimi');\"><img src='pics/lullacons/database-option-add.png'>".t("Uusi ryhm‰")."</a><div id='iframe_$nimi' style='display: inline;'></div></td>";
+		
+		echo "
+		<script LANGUAGE='JavaScript'>
+			function teekentta(tdid){
+				var currenttd = document.getElementById(tdid);
+				currenttd.innerHTML = \"<br><br><iframe id='perusalennus_iframe' name='perusalennus_iframe' src='yllapito.php?toim=perusalennus&uusi=1&laji=\"+tdid+\"&from=yllapito&ohje=off' style='width: 400px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>\";
+			}
+		</script>";
+		
 		$jatko = 0;
 	}
 

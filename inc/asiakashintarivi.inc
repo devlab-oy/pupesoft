@@ -3,6 +3,7 @@
 	$ulos = "";
 	$jatko = 1; 	// oletetaan normaali käsittely
 	$tyyppi = 1; 	// oletetaan rivin näkyvyys
+
 	if ($i == 0) { 	//yhtiötä ei näytetä
 		$tyyppi = 0;
 	}
@@ -14,8 +15,8 @@
 					ORDER BY ryhma";
 		$sresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'>";
-		$ulos .= "<option value = '' >".t("Ei ryhmää")."</option>";
-
+		$ulos .= "<option id='option_$nimi' value = ''>".t("Ei ryhmää")."</option>";
+				
 		while ($srow = mysql_fetch_array($sresult)) {
 			$sel = '';
 			if ($trow[$i] == $srow["ryhma"]) {
@@ -23,11 +24,25 @@
 			}
 			$ulos .= "<option value='$srow[ryhma]' $sel>$srow[selitetark]</option>";
 		}
-		$ulos .= "</select></td>";
+		
+		$ulos .= "</select>";
+		$ulos .= " <a href='#' onclick=\"teekentta('iframe_$nimi');\"><img src='pics/lullacons/database-option-add.png'>".t("Uusi ryhmä")."</a><div id='iframe_$nimi' style='display: inline;'></div></td>";
+		
+		echo "
+		<script LANGUAGE='JavaScript'>
+			function teekentta(tdid){
+				var currenttd = document.getElementById(tdid);
+				currenttd.innerHTML = \"<br><br><iframe id='perusalennus_iframe' name='perusalennus_iframe' src='yllapito.php?toim=perusalennus&uusi=1&laji=\"+tdid+\"&from=yllapito&ohje=off' style='width: 500px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>\";
+			}
+		</script>";
+
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "asiakas_ryhma") {
+	if (mysql_field_name($result, $i) == "asiakas_ryhma" and $lukitse_avaimeen != "") {
+		$tyyppi = 4;
+	}
+	elseif (mysql_field_name($result, $i) == "asiakas_ryhma") {
 
 		$vresult = t_avainsana("ASIAKASRYHMA");
 
@@ -45,7 +60,6 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-
 
 	if (mysql_field_name($result, $i) == "valkoodi") {
 		$query = "	SELECT nimi, tunnus
@@ -67,7 +81,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "laji") {
 
 		$chkn = array();
@@ -88,17 +102,25 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
-	if (mysql_field_name($result, $i) == "ytunnus" and isset($alasveto[$i])) {
+
+	if (mysql_field_name($result, $i) == "ytunnus" and $lukitse_avaimeen != "") {
+		$tyyppi = 4;
+	}
+	elseif (mysql_field_name($result, $i) == "ytunnus" and isset($alasveto[$i])) {
 		$ulos = "<td>".$alasveto[$i]."</td>";
 		$jatko = 0;
 	}
-	
-	if (mysql_field_name($result, $i) == "asiakas" and isset($alasveto[$i])) {
+
+	if (mysql_field_name($result, $i) == "asiakas" and $lukitse_avaimeen != "") {
+		$ulos = "<input type='hidden' name='$nimi' value='$lukitse_avaimeen'>";
+		$tyyppi = 4;
+		$jatko = 0;
+	}
+	elseif (mysql_field_name($result, $i) == "asiakas" and isset($alasveto[$i])) {
 		$ulos = "<td>".$alasveto[$i]."</td>";
 		$jatko = 0;
 	}
-	elseif (mysql_field_name($result, $i) == "asiakas") {	
+	elseif (mysql_field_name($result, $i) == "asiakas") {
 		if ((int) $trow[$i] > 0) {
 			$query	= "	SELECT *
 						FROM asiakas
@@ -106,23 +128,22 @@
 			$sresult = mysql_query($query) or pupe_error($query);
 			$srow = mysql_fetch_array($sresult);
 			$ssize = strlen($trow[$i])+2;
-				
+
 			$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$ssize' maxlength='$maxsize'> <table><tr><td>$srow[nimi] $srow[nimitark]</td></tr><tr><td>$srow[toim_nimi] $srow[toim_nimitark]</td></tr></table></td>";
-			$jatko = 0;		
+			$jatko = 0;
 		}
 		else {
 			$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '' size='$size' maxlength='$maxsize'></td>";
-			$jatko = 0;	
+			$jatko = 0;
 		}
 	}
-	
+
+	if (mysql_field_name($result, $i) == "alkupvm" or mysql_field_name($result, $i) == "loppupvm") {
+		$tyyppi = 1.5;
+	}
+
 	if (mysql_field_name($result, $i) == "tuoteno" and isset($alasveto[$i])) {
 		$ulos = "<td>".$alasveto[$i]."</td>";
 		$jatko = 0;
-	}
-	
-	if (mysql_field_name($result, $i) == "alkupvm" or 
-		mysql_field_name($result, $i) == "loppupvm") {
-		$tyyppi = 1.5;
 	}
 ?>

@@ -37,9 +37,9 @@
 
 	if (mysql_field_name($result, $i) == "laji") {
 
-		$al_laji = $trow[$i];
-
-		$avain_sel[$trow[$i]] = "SELECTED";
+		$al_laji 				= $trow[$i];
+		$lukitse_laji 			= trim(strtoupper($lukitse_laji));		
+		$avain_sel[$trow[$i]] 	= "SELECTED";
 
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 

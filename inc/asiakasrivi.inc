@@ -256,13 +256,12 @@
 			$ulos .= "<input type='button' name='etsi_vapytunnus' id='etsi_vapytunnus' value='".t("Etsi vapaa asiakasnumero")."' onClick='javascript:document.getElementById(\"etsi_vapytunnus\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapytunnus\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=ytunnus&ohje=off&pointer=$i\", \"ytunnus_etsi\", false, false)'>";
 		}
 
-		$ulos .= "</div>";
-		$ulos .= "</td>";
-
 		if ($alias_set != "VAHITTAISMYYNTI") {
-			$ulos .= "<td class='back'>".t("Voit tarkistaa ytunnuksen")." <a target='YTJ' href='http://ec.europa.eu/taxation_customs/vies/lang.do?fromWhichPage=vieshome&selectedLanguage=".strtoupper($kukarow["kieli"])."'>".t("t‰‰lt‰")."</td>";
+			$ulos .= " <a target='YTJ' href='http://ec.europa.eu/taxation_customs/vies/lang.do?fromWhichPage=vieshome&selectedLanguage=".strtoupper($kukarow["kieli"])."'>".t("Tarkista ytunnus")."</a>";
 		}
 
+		$ulos .= "</div>";
+		$ulos .= "</td>";
 		$jatko = 0;
 	}
 
@@ -540,7 +539,7 @@
 
 	if (mysql_field_name($result, $i) == "toimitusehto") {
 		$kires = t_avainsana("TOIMEHTO");
-		
+
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Ei oletustoimitusehtoa")."</option>";
 
@@ -613,7 +612,7 @@
 			while($row = mysql_fetch_array($vresult)) {
 				$sel = "";
 				if ($row["selite"] == $trow[$i]) $sel = 'selected';
-				$ulos .= "<option value='$row[selite]' $sel>'$row[selite] - $row[selitetark]</option>";
+				$ulos .= "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark]</option>";
 			}
 
 			$ulos .= "</select></td>";
@@ -658,7 +657,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "lisakulu") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -830,7 +829,7 @@
 
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = '' >".t("Valitse")."</option>";
-		
+
 		$vresult = t_avainsana("KM");
 
 		while ($vrow=mysql_fetch_array($vresult)) {
@@ -961,7 +960,7 @@
 		$sel = array();
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = '-9' {$sel['-9']}>".t("Oletus")."</option>";
+		$ulos .= "<option value = '-9'>".t("Oletus")."</option>";
 		$ulos .= "<option value = '0' $sel[0]>".t("Normaali laskupohja");
 		$ulos .= "<option value = '2' $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)");
 		$ulos .= "<option value = '5' $sel[5]>".t("Normaali laskupohja (Ei n‰ytet‰ verollista rivihintaa)")."</option>";
@@ -974,7 +973,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "lahetteen_jarjestys" or 
+	if (mysql_field_name($result, $i) == "lahetteen_jarjestys" or
 		mysql_field_name($result, $i) == "laskun_jarjestys") {
 
 		$ulos = "<td><select name='$nimi' id = '$nimi' Style=\"width: 300px;\" onmousedown=\"alasvetoMuutakoko('$nimi', 0);\" onblur=\"alasvetoMuutakoko('$nimi', 300);\">";
@@ -992,11 +991,11 @@
 		$ulos .= "<option value = '7' $sel[7]>".t("Tuotenumeroj‰rjestys");
 		$ulos .= "<option value = '8' $sel[8]>".t("Tilausj‰rjestys, tuoteperheet pidet‰‰n yhdess‰");
 		$ulos .= "<option value = '9' $sel[9]>".t("Tilausj‰rjestys");
-		$ulos .= "<option value = 'M' {$sel["M"]}>".t("K‰ytt‰j‰n asettama j‰rjestys");
+		$ulos .= "<option value = 'M' $sel[M]>".t("K‰ytt‰j‰n asettama j‰rjestys");
 
 		if(	mysql_field_name($result, $i) == "valmistus_kerayslistan_jarjestys" or
 			mysql_field_name($result, $i) == "kerayslistan_jarjestys") {
-			$ulos .= "<option value = 'S' {$sel["S"]}>".t("Rivit summattuina");
+			$ulos .= "<option value = 'S' $sel[S]>".t("Rivit summattuina");
 		}
 		$ulos .= "</select></td>";
 
@@ -1004,7 +1003,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "lahetteen_jarjestys_suunta" or
-		mysql_field_name($result, $i) == "laskun_jarjestys_suunta") { 
+		mysql_field_name($result, $i) == "laskun_jarjestys_suunta") {
 
 
 		$ulos = "<td><select name='$nimi'>";

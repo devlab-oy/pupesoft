@@ -590,7 +590,7 @@
 	
 	require ("monivalintalaatikot.inc");
 	
-	echo "<br>";
+	echo "<br><br>";
 	echo "<input type='Submit' name='submit_button' id='submit_button' value = '".t("Etsi")."'></form>";
 	echo "<form><input type='submit' name='submit_button2' id='submit_button2' value = '".t("Tyhjennä")."'></form></td></tr></table><br>";
 

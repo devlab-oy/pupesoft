@@ -561,26 +561,28 @@
 				echo "</select></td></tr>";
 			}
 
-			if ($toim == 'extranet') {
-				$sel0 = $sel1 = "";
+			$sel0 = $sel1 = $sel2 = "";
 
-				if (!isset($krow["hinnat"])) {
-					$sel1 = "SELECTED";
-				}
-
-				if ($krow["hinnat"] == "0") {
-					$sel0 = "SELECTED";
-				}
-				if ($krow["hinnat"] == "1") {
-					$sel1 = "SELECTED";
-				}
-				echo "<tr><th align='left'>".t("Hinnat").":</th>";
-
-				echo "<td><select name='hinnat'>";
-				echo "<option value='0' $sel0>".t("Normaali")."</option>";
-				echo "<option value='1' $sel1>".t("Näytetään vain tuotteen myyntihinta")."</option>";
-				echo "</select></td></tr>";
+			if (!isset($krow["hinnat"]) and $toim == 'extranet') {
+				$sel1 = "SELECTED";
 			}
+			if ($krow["hinnat"] == 0) {
+				$sel0 = "SELECTED";
+			}
+			if ($krow["hinnat"] == 1) {
+				$sel1 = "SELECTED";
+			}
+			if ($krow["hinnat"] == -1) {
+				$sel2 = "SELECTED";
+			}
+			
+			echo "<tr><th align='left'>".t("Hinnat").":</th>";
+
+			echo "<td><select name='hinnat'>";
+			echo "<option value='0'  $sel0>".t("Normaali")."</option>";
+			echo "<option value='1'  $sel1>".t("Näytetään vain tuotteen myyntihinta")."</option>";
+			echo "<option value='-1' $sel2>".t("Hintoja ei näytetä")."</option>";
+			echo "</select></td></tr>";
 
 			if ($toim == 'extranet') {
 				$sel0 = $sel1 = $sel2 = $sel3 = "";
@@ -854,22 +856,16 @@
 				echo "</select></td></tr>";
 
 
-				$sel1 = "SELECTED";
+				$sel1 = $sel2 = $sel3 = "";
 
 				if ($krow['resoluutio'] == "N") {
 					$sel1 = "SELECTED";
-					$sel2 = "";
-					$sel3 = "";
 				}
-				if ($krow['resoluutio'] == "I") {
+				if (!isset($krow["resoluutio"]) or $krow['resoluutio'] == "I") {
 					$sel2 = "SELECTED";
-					$sel1 = "";
-					$sel3 = "";
 				}
 				if ($krow['resoluutio'] == "P") {
 					$sel3 = "SELECTED";
-					$sel1 = "";
-					$sel2 = "";
 				}
 
 				echo "<tr><th align='left'>".t("Näytön koko").":</th>

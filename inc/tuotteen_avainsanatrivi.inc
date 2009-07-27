@@ -70,12 +70,41 @@
 		}
 		elseif($trow["laji"] == "oletusvalinta") {
 			$sel = array($trow[$i] => "SELECTED");
+
+			
 			$ulos = "<td>
 						<select name='$nimi'>
-							<option value=''>".t("Ei oletustoimintoa")."</option>
-							<option value='!!!' ".$sel["!!!"].">".t("Tilataan asiakkaalle")."</option>
-							<option value='¡¡¡' ".$sel["¡¡¡"].">".t("Tilataan varastoon")."</option>
-							<option value='¡¡V' ".$sel["¡¡V"].">".t("Valmistetaan varastoon")."</option>
+							<option value=''>".t("Ei oletustoimintoa")."</option>";
+
+			$olquery = "	SELECT toimi.tunnus, toimi.nimi
+							FROM tuotteen_toimittajat
+							JOIN toimi ON toimi.yhtio=tuotteen_toimittajat.yhtio and toimi.tunnus=tuotteen_toimittajat.liitostunnus
+							WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]' and tuoteno = '$trow[tuoteno]' and liitostunnus > 0";
+			$oltarkres = mysql_query($olquery) or pupe_error($olquery);
+			if(mysql_num_rows($oltarkres) > 0) {
+				while($olrow = mysql_fetch_array($oltarkres)) {
+					$ulos .= "
+						<option value='!!!{$olrow["tunnus"]}' ".$sel["!!!{$olrow["tunnus"]}"].">$olrow[nimi] --> ".t("Tilataan asiakkaalle")."</option>
+						<option value='¡¡¡{$olrow["tunnus"]}' ".$sel["¡¡¡{$olrow["tunnus"]}"].">$olrow[nimi] --> ".t("Tilataan varastoon")."</option>";
+					
+				}
+			}
+			
+			$olquery = "	SELECT tunnus
+							FROM tuoteperhe
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND isatuoteno = '$trow[tuoteno]'
+							AND tyyppi = 'R'
+							LIMIT 1";
+			$oltarkres = mysql_query($olquery) or pupe_error($olquery);
+			if(mysql_num_rows($oltarkres) > 0) {
+				while($olrow = mysql_fetch_array($oltarkres)) {
+					$ulos .= "
+							<option value='¡¡V' ".$sel["¡¡V"].">".t("Valmistetaan varastoon (oletuspaikka)")."</option>";
+					
+				}
+			}
+			$ulos .= "
 						</select>
 					</td>";
 		}

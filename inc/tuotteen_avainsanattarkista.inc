@@ -58,7 +58,7 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 				}
 			}
 			elseif (strtoupper($lajitalteen) == "OLETUSVALINTA") {
-				if(!in_array($t[$i], array("", "!!!", "¡¡¡", "¡¡V"))) {
+				if(!in_array(substr($t[$i], 0, 3), array("", "!!!", "¡¡¡", "¡¡V"))) {
 					$virhe[$i] = t("Tuotteen %s oletusvalinta %s ei kelpaa!", $kieli, $chtuoteno, $t[$i]);
 				}
 			}

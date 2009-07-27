@@ -144,21 +144,21 @@
 		if(mysql_num_rows($olvares)>0) {
 			$olvarow = mysql_fetch_array($olvares);
 			
-			//	Tsekataan onko mahdollista
-			/*
-				<option value=''>".t("Ei oletustoimintoa")."</option>
-				<option value='!!!'>".t("Tilataan asiakkaalle")."</option>
-				<option value='¡¡¡'>".t("Tilataan varastoon")."</option>
-				<option value='¡¡V'>".t("Valmistetaan varastoon")."</option>
-			*/
-			if($olvarow["selite"] == "!!!" or $olvarow["selite"] == "¡¡¡") {
-				$olquery = "SELECT tunnus
+			//	Tarkistukset ja valinta
+			if(substr($olvarow["selite"], 0, 3) == "!!!" or substr($olvarow["selite"], 0, 3) == "¡¡¡") {
+				$olquery = "SELECT toimittaja
 							FROM tuotteen_toimittajat
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tuoteno = '$trow[tuoteno]'
-							AND toimittaja != ''
-							LIMIT 1";
+							AND liitostunnus = '".substr($olvarow["selite"],3)."'";
 				$oltarkres = mysql_query($olquery) or pupe_error($olquery);
+				if(mysql_num_rows($oltarkres) > 0) {
+					$paikka = $olvarow["selite"];
+				}
+				else {
+					echo "<font class='error'>".t("VIRHE:")." ".t("Oletusvalintaa ei voida toteuttaa, tuotteen toimittajaa ei löydy.")."</font><br>";
+				}
+				
 			}
 			elseif($olvarow["selite"] == "¡¡V") {
 				$olquery = "SELECT tunnus
@@ -168,28 +168,27 @@
 							AND tyyppi = 'R'
 							LIMIT 1";
 				$oltarkres = mysql_query($olquery) or pupe_error($olquery);
-			}
-			
-			if(mysql_num_rows($oltarkres) > 0) {
-				//	Myydään aina oletuspaikalta!
-				$olquery = "SELECT concat_ws('#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
-							FROM tuotepaikat
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND tuoteno = '$trow[tuoteno]'
-							AND oletus != ''
-							LIMIT 1";
-				$olpares = mysql_query($olquery) or pupe_error($olquery);
-				if(mysql_num_rows($olpares) > 0) {
-					$olparow = mysql_fetch_array($olpares);
-					$paikka	= $olvarow["selite"].$olparow["olpaikka"];
+				if(mysql_num_rows($oltarkres) > 0) {
+					//	Myydään aina oletuspaikalta!
+					$olquery = "SELECT concat_ws('#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
+								FROM tuotepaikat
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tuoteno = '$trow[tuoteno]'
+								AND oletus != ''
+								LIMIT 1";
+					$olpares = mysql_query($olquery) or pupe_error($olquery);
+					if(mysql_num_rows($olpares) > 0) {
+						$olparow = mysql_fetch_array($olpares);
+						$paikka	= substr($olvarow["selite"], 0, 3).$olparow["olpaikka"];
+					}
+					else {
+						echo "<font class='error'>".t("VIRHE:")." ".t("Tuotteen oletuspaikka puuttuu, oletusvalintaa ei voida suorittaa.")."</font><br>";
+					}
 				}
 				else {
-					echo "<font class='error'>".t("VIRHE:")." ".t("Tuotteen oletuspaikka puuttuu, oletusvalintaa ei voida suorittaa.")."</font><br>";
+					echo "<font class='error'>".t("VIRHE:")." ".t("Oletusvalintaa ei voida toteuttaa tuotteen rakenne puuttuu.")."</font><br>";
 				}
-			}
-			else {
-				echo "<font class='error'>".t("VIRHE:")." ".t("Oletusvalintaa ei voida toteuttaa, tuotteen toimittaja tai rakenne puuttuu.")."</font><br>";
-			}
+			}			
 		}
 	}	
 	

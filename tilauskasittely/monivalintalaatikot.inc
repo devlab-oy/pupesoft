@@ -234,7 +234,7 @@
 		
 		$sresult = mysql_query($query) or pupe_error($query);
 
-		echo "<table style='display:inline;padding-left:4px;'>";
+		echo "<table style='display:inline;padding-right:4px;' valign='top'>";
 		echo "<tr><th>",t("Osasto"),"</th></tr>";
 		echo "<tr><td nowrap style='padding:0px'><select name='mul_osasto[]' multiple size='7' onchange='submit();'>";
 		$mul_check = "";
@@ -324,7 +324,7 @@
 	
 		$sresult = mysql_query($query) or pupe_error($query);
 
-		echo "<table style='display:inline;padding-left:4px;'><tr><th>",t("Tuoteryhm‰"),"</th></tr>";
+		echo "<table style='display:inline;padding-right:4px;' valign='top'><tr><th>",t("Tuoteryhm‰"),"</th></tr>";
 		echo "<tr><td nowrap style='padding:0px'><select name='mul_try[]' onchange='submit();' multiple='TRUE' size='7'>";
 		$mul_check = '';
 		if ($mul_try!="") {
@@ -409,7 +409,7 @@
 		}
 
 		if (is_resource($tmsresult) and mysql_num_rows($tmsresult) > 0) {
-			echo "<table style='display:inline;padding-left:4px;'><tr><th>",t("Tuotemerkki"),"</th></tr>";
+			echo "<table style='display:inline;padding-right:4px;' valign='top'><tr><th>",t("Tuotemerkki"),"</th></tr>";
 			echo "<tr><td nowrap style='padding:0px'>";
 			echo "<select name='mul_tme[]' multiple='TRUE' size='7' onchange='submit();'>";
 			$mul_check = '';
@@ -458,7 +458,7 @@
 					
 					echo "<br>".t("Lis‰valinnat").":* ".t("Mik‰li haluat t‰sment‰‰ hakua, k‰yt‰ lis‰ksi alla olevia ryhmi‰")."<br>";
 					
-					echo "<table style='display:inline;padding-left:4px;'><tr><th>",t("Malli"),"</th></tr>";
+					echo "<table style='display:inline;padding-right:4px;' valign='top'><tr><th>",t("Malli"),"</th></tr>";
 					echo "<tr><td nowrap style='padding:0px'>";
 					echo "<select name='mul_malli[]' multiple='TRUE' size='7' onchange='submit();'>";
 					$mul_check = '';
@@ -502,7 +502,7 @@
 				$sxresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sxresult) > 0) {				
-					echo "<table style='display:inline;padding-left:4px;'><tr><th>",t("Mallitarkenne"),"</th></tr>";
+					echo "<table style='display:inline;padding-right:4px;' valign='top'><tr><th>",t("Mallitarkenne"),"</th></tr>";
 					echo "<tr><td nowrap style='padding:0px'>";
 					echo "<select name='mul_mallitarkenne[]' multiple='TRUE' size='7' onchange='submit();'>";
 					$mul_check = '';
@@ -533,7 +533,7 @@
 	}
 
 	if (in_array("TUOTEMYYJA", $monivalintalaatikot)) {
-		echo "<table style='display:inline;padding-left:4px;'>";
+		echo "<table style='display:inline;padding-right:4px;' valign='top'>";
 		echo "<tr><th>",t("Tuotemyyj‰"),"</th></tr>";
 		echo "<tr>";
 
@@ -564,7 +564,7 @@
 	}
 	
 	if (in_array("TUOTEOSTAJA", $monivalintalaatikot)) {
-		echo "<table style='display:inline;padding-left:4px;'>";
+		echo "<table style='display:inline;padding-right:4px;' valign='top'>";
 		echo "<tr><th>",t("Tuoteostaja"),"</th></tr>";
 		echo "<tr>";
 

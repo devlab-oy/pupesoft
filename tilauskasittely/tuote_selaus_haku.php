@@ -550,11 +550,11 @@
 	}
 	
 	echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
-	
-	echo "<table style='display:inline;' valign='top'>";
-	echo "<tr><th>",t("Tuotenumero"),"</th><td nowrap valign='top' colspan='2'><input type='text' size='25' name='tuotenumero' id='tuotenumero' value = '$tuotenumero'></td></tr>";
-	echo "<tr><th>",t("Toim tuoteno"),"</th><td nowrap valign='top' colspan='2'><input type='text' size='25' name = 'toim_tuoteno' id='toim_tuoteno' value = '$toim_tuoteno'></td></tr>";
-	
+
+	echo "<table style='display:inline;padding-right:4px;' valign='top'>";
+	echo "<tr><th>",t("Tuotenumero"),"</th><td><input type='text' size='25' name='tuotenumero' id='tuotenumero' value = '$tuotenumero'></td></tr>";
+	echo "<tr><th>",t("Toim tuoteno"),"</th><td><input type='text' size='25' name = 'toim_tuoteno' id='toim_tuoteno' value = '$toim_tuoteno'></td></tr>";
+
 	$orginaaalit = FALSE;
 	
 	if (table_exists("tuotteen_orginaalit")) {
@@ -565,22 +565,21 @@
 		$orginaaleja_res = mysql_query($query) or pupe_error($query);
 		
 		if (mysql_num_rows($orginaaleja_res) > 0) {
-			echo "<tr><th>",t("Alkuperäisnumero"),"</th><td nowrap valign='top' colspan='2'><input type='text' size='25' name = 'alkuperaisnumero' id='alkuperaisnumero' value = '$alkuperaisnumero'></td></tr>";
-		
+			echo "<tr><th>",t("Alkuperäisnumero"),"</th><td><input type='text' size='25' name = 'alkuperaisnumero' id='alkuperaisnumero' value = '$alkuperaisnumero'></td></tr>";
 			$orginaaalit = TRUE;
 		}
 	}
 
-	echo "<tr><th>",t("Nimitys"),"</th><td nowrap valign='top' colspan='2'><input type='text' size='25' name='nimitys' id='nimitys' value = '$nimitys'></td></tr>";
+	echo "<tr><th>",t("Nimitys"),"</th><td><input type='text' size='25' name='nimitys' id='nimitys' value = '$nimitys'></td></tr>";
 	
 	if ($kukarow["extranet"] != "") {
-		echo "<tr><th>",t("Tarjoustuotteet"),"</th><td nowrap valign='top' colspan='2'><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
+		echo "<tr><th>",t("Tarjoustuotteet"),"</th><td><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
 	}
 	else {
-		echo "<tr><th>",t("Poistetut"),"</th><td nowrap valign='top' colspan='2'><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
+		echo "<tr><th>",t("Poistetut"),"</th><td><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
 	}	
-	
-	echo "<tr><th>",t("Lisätiedot"),"</th><td nowrap valign='top' colspan='2'><input type='checkbox' name='lisatiedot' id='lisatiedot' $lisacheck></td></tr>";
+
+	echo "<tr><th>",t("Lisätiedot"),"</th><td><input type='checkbox' name='lisatiedot' id='lisatiedot' $lisacheck></td></tr>";
 	echo "</table>";
 
 	// Monivalintalaatikot (osasto, try tuotemerkki...)
@@ -592,7 +591,7 @@
 	
 	echo "<br><br>";
 	echo "<input type='Submit' name='submit_button' id='submit_button' value = '".t("Etsi")."'></form>";
-	echo "<form><input type='submit' name='submit_button2' id='submit_button2' value = '".t("Tyhjennä")."'></form></td></tr></table><br>";
+	echo "&nbsp;<form><input type='submit' name='submit_button2' id='submit_button2' value = '".t("Tyhjennä")."'></form><br>";
 
 	// Halutaanko saldot koko konsernista?
 	$query = "	SELECT *

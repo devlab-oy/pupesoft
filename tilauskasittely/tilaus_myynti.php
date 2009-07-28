@@ -3900,7 +3900,7 @@ if ($tee == '') {
 								
 				if ($muokkauslukko_rivi == "" and $yhtiorow['tilauksen_kohteet'] == 'K' and in_array($toim, array("TARJOUS", "RIVISYOTTO", "PIKATILAUS", "PROJEKTI"))) {
 					
-					$valitse_positio_return_url = urlencode("tilauskasittely/tilaus_myynti.php?toim=$toim&lopetus=$lopetus&projektilla=$projektilla&tilausnumero=$tilausnumero&rivitunnus=$row[tunnus]&rivilaadittu=$row[laadittu]&menutila=$menutila&tila=LISATIETOJA_RIVILLE&asiakkaan_positio");
+					$valitse_positio_return_url = urlencode("tilauskasittely/tilaus_myynti.php////toim=$toim//lopetus=$lopetus//projektilla=$projektilla//tilausnumero=$tilausnumero//rivitunnus=$row[tunnus]//rivilaadittu=$row[laadittu]//menutila=$menutila//tila=LISATIETOJA_RIVILLE//asiakkaan_positio");
 					
 					if($lasklisatied_row["asiakkaan_kohde"] > 0) {
 						$posq = "	SELECT asiakkaan_positio.positio, concat_ws(' - ', asiakkaan_kohde.kohde, asiakkaan_positio.positio) positio_tarkenne

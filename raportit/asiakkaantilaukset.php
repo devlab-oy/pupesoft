@@ -311,7 +311,7 @@
 		else {
 			$litunn = $asiakasid;
 		}
-		
+
 		if ($kukarow['hinnat'] == 0) $summaselli = " summa, ";
 		else $summaselli = "";
 
@@ -547,20 +547,20 @@
 			<input type='hidden' name='toim' value='$toim'>";
 
 		if ($toim == "OSTO") {
-			echo "<tr><th>".t("Toimittajan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
+			echo "<tr><th>".t("Toimittajan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";
 		}
 		else {
-			echo "<tr><th>".t("Asiakkaan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
+			echo "<tr><th>".t("Asiakkaan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";
 		}
 		if($toim=="YLLAPITO") {
-			echo "<tr><th>".t("Sopimusnumero")."</th><td class='back'></td><td><input type='text' size='10' name='sopimus'></td></tr>";
+			echo "<tr><th>".t("Sopimusnumero")."</th><td><input type='text' size='10' name='sopimus'></td></tr>";
 		}
 		else {
-			echo "<tr><th>".t("Tilausnumero")."</th><td class='back'></td><td><input type='text' size='10' name='otunnus'></td></tr>";
+			echo "<tr><th>".t("Tilausnumero")."</th><td><input type='text' size='10' name='otunnus'></td></tr>";
 		}
-		echo "<tr><th>".t("Laskunumero")."</th><td class='back'></td><td><input type='text' size='10' name='laskunro'></td></tr>";
+		echo "<tr><th>".t("Laskunumero")."</th><td><input type='text' size='10' name='laskunro'></td></tr>";
 		if ($toim == "MYYNTI") {
-			echo "<tr><th>".t("Asiakkaan tilausnumero")."</th><td class='back'></td><td><input type='text' size='10' name='astilnro'></td></tr>";
+			echo "<tr><th>".t("Asiakkaan tilausnumero")."</th><td><input type='text' size='10' name='astilnro'></td></tr>";
 		}
 		echo "</table>";
 

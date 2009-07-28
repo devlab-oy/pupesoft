@@ -972,26 +972,26 @@ if ($tee == "TALLENNA") {
 						}
 						else {
 							// lis‰t‰‰n kuva
-							$query = "	insert into liitetiedostot set
-											yhtio    = '$kukarow[yhtio]',
-											liitos   = 'lasku',
-											liitostunnus = '$tilausnumero',
-											data     = '".addslashes(file_get_contents($_FILES['userfile']['tmp_name']))."',
-											selite   = '$kuvaselite',
-											filename = '{$_FILES["userfile"]["name"]}',
-											filesize = '{$_FILES["userfile"]["size"]}',
-											filetype = '{$_FILES["userfile"]["type"]}'";
+							$query = "	INSERT into liitetiedostot set
+										yhtio    = '$kukarow[yhtio]',
+										liitos   = 'lasku',
+										liitostunnus = '$tilausnumero',
+										data     = '".addslashes(file_get_contents($_FILES['userfile']['tmp_name']))."',
+										selite   = '$kuvaselite',
+										filename = '{$_FILES["userfile"]["name"]}',
+										filesize = '{$_FILES["userfile"]["size"]}',
+										filetype = '{$_FILES["userfile"]["type"]}'";
 							$insre = mysql_query($query) or pupe_error($query);
 
 							$kuvaselite = "";
 						}
 						break;
-			}
+					}
 			}
 
 			if ($errormsg != "") {
 				echo "<font class='error'>$errormsg</font><br>";
-		}
+			}
 		}
 
 		$query = "	UPDATE lasku SET

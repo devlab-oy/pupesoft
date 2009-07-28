@@ -179,7 +179,7 @@
 			echo "<div id='$vrow[tunnus]' class='popup' style='width:500px;'>";
 			echo "Työmääräys: $vrow[tunnus]<br><br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"])."<br><a href='#' onclick=\"popUp(event,'$vrow[tunnus]')\">Sulje</a>";
 			echo "</div>";		
-			echo "<td valign='top' class='spec' onmouseout=\"popUp(event,'$vrow[tunnus]')\" onmouseover=\"popUp(event,'$vrow[tunnus]')\">$vrow[tunnus]</td>";
+			echo "<td valign='top'><a onmouseout=\"popUp(event,'$vrow[tunnus]')\" onmouseover=\"popUp(event,'$vrow[tunnus]')\">$vrow[tunnus]</a></td>";
 		}
 		else {
 			echo "<td valign='top'>$vrow[tunnus]<br>$vrow[viesti]</td>";

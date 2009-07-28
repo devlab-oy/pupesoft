@@ -6129,6 +6129,115 @@ if (!function_exists("nayta_asiakashaku")) {
 	}
 }
 
+if (!function_exists("tee_tuotehaku")) {
+	function tee_tuotehaku($haku, $formi, $lopetus="", $div="", $hakuID="", $liitosID="") {
+		global $yhtiorow, $kukarow, $palvelin2;
+		
+		$haku = trim($haku);
+		if(strlen($haku)>=3) {
+			$query = "";
+			$harray = explode(" ", $haku);
+			$i = 0;
+			for($i=0;$i<=count(harray);$i++) {
+				
+				if($query != "") {
+					$query .="\nUNION\n";
+				}
+				$query .= "	(
+								SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, concat_ws(' ', try.selite, try.selitetark) try, concat_ws(' ', osasto.selite, osasto.selitetark) osasto
+								FROM tuote
+								LEFT JOIN avainsana try ON try.yhtio=tuote.yhtio and try.laji='TRY' and try.selite=tuote.try
+								LEFT JOIN avainsana osasto ON osasto.yhtio=tuote.yhtio and osasto.laji='OSASTO' and osasto.selite=tuote.osasto
+								WHERE tuote.yhtio='$kukarow[yhtio]' and concat(tuote.tuoteno,tuote.nimitys) like ('%".implode("%", $harray)."%')
+							)";
+				
+				$jog = array_shift($harray);
+				$harray[] = $jog;
+			}
+
+			$query.="LIMIT 8";
+			//echo "<pre>$query</pre>";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result)) {
+				while($row = mysql_fetch_array($result)) {
+					//ajaxPost('$formi', '$urli?' , '$div', false, true);
+					echo "	<div id='asiakas_valinta_$row[tunnus]' name='selectOptions' onmouseover=\"this.className='liveSearchSelectedItem';\" onmouseout=\"this.className='liveSearchUnSelectedItem';\" onclick=\"eval(document.getElementById('tuote_toiminto_$row[tunnus]').innerHTML);\" class='unSelectedItem' style='width: 500px;'>
+							<table width = '100%' class='liveSearch'>
+								<tr>
+									<th width='100%' class='liveSearch' colspan='3'>
+										$row[tuoteno] $row[nimitys]
+									</th>
+								</tr>
+								<tr>
+									<td width='15%' class='liveSearch'>
+										".t("Osasto")."
+									</td>								
+									<td width='25%' class='liveSearch'>
+										$row[osasto]
+									</td>																
+									<td width='60%' class='liveSearch' rowspan='3'>
+										<font class='info'>Kuvaus:</font><br>
+										<em>$row[kuvaus]</em>
+									</td>
+								</tr>
+								<tr>
+								<td width='15%' class='liveSearch'>
+									".t("Yksikkö")."
+								</td>
+									<td width='25%' class='liveSearch'>
+										$row[yksikko]
+									</td>																	
+								</tr>
+								<tr>
+									<td width='15%' class='liveSearch'>
+										".t("Try")."
+									</td>								
+									<td width='25%' class='liveSearch'>
+										$row[try]
+									</td>								
+								</tr>
+							</table>
+							</div>
+							<div id='tuote_toiminto_$row[tunnus]' name='selectValues' style='display: none;'>document.getElementById('$liitosID').value='$row[tuoteno]'; document.getElementById('$hakuID').value='$row[tuoteno] $row[nimitys]'; document.getElementById('$hakuID').disabled='true'; tuoval=document.getElementById('tuotehaku'); tuoval.innerHTML=''; tuoval.style.display='none';</div>";
+				}
+			}	
+		}
+		else {
+			echo "<font class='info'>".t("Anna vähintään 3 merkkiä.")."</font>";
+		}		
+	}
+}
+
+if (!function_exists("nayta_tuotehaku")) {
+	function nayta_tuotehaku($tuoteno, $formi) {
+		global $kukarow;
+
+		$query = "	SELECT *
+					FROM tuote
+					WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+		$result = mysql_query($query) or pupe_error($query);
+		if (mysql_num_rows($result) == 1) {
+			$tuoterow = mysql_fetch_array($result);
+
+			$disabled 	= "DISABLED";
+			$nimi 		= $tuoterow["tuoteno"]." ".$tuoterow["nimitys"];
+
+		}
+		else {
+			$tuoteno	= "";
+			$disabled 	= "";
+			$nimi 		= "";
+			$id			= "";
+		}
+		
+		$liitosID = "liitosID".uniqid();
+		$hakuID = "haku".uniqid();
+		
+		return "<input type='hidden' id='$liitosID' name='tuoteno' value='$tuoteno'><input type='text' id='$hakuID' value='$nimi' name='haku' size='50' onkeydown=\"return keyhandler(event);\" onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) { popUp(event, 'tuotehaku', '-6', '-30', '{$_SERVER["SCRIPT_NAME"]}?tee=TUOTEHAKU&formi=$formi&url={$_SERVER["SCRIPT_NAME"]}&liitosID=$liitosID&hakuID=$hakuID&haku='+this.value, 'liveSearch'); keyStrokeIndex = -1; }\" $disabled autocomplete='off'>&nbsp;&nbsp;<a href='#' onclick=\"document.getElementById('$hakuID').disabled=false; document.getElementById('$hakuID').value=''; return false;\" onblur=\"document.getElementById('liveSearch').style.display='none';\">".t("Vaihda tuotetta")."</a>";
+	}
+}
+
 if (!function_exists("sendSMS")) {
 	function sendSMS($smsnumero, $smsviesti, $animi = "") {
 		global $sms_palvelin, $sms_user, $sms_pass;

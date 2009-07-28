@@ -512,11 +512,13 @@ if ($yhtiorow["monikayttajakalenteri"] == "" or $kukarow["asema"] == "MP") {
 	}
 
 	//konsernivalinta
-	echo "<form action='$PHP_SELF?valitut=$valitut&year=$year&kuu=$kuu&paiva=$paiva' method='post'>
-			<input type='hidden' name='lopetus' value='$lopetus'>";
-	echo "<input type='checkbox' name='konserni' $ckhk onclick='submit();'> ".t("Kaikkien konserniyritysten merkinnät");
-	echo "</form>";
-
+	if ($yhtiorow["konserni"] != "") {
+		echo "<form action='$PHP_SELF?valitut=$valitut&year=$year&kuu=$kuu&paiva=$paiva' method='post'>
+				<input type='hidden' name='lopetus' value='$lopetus'>";
+		echo "<input type='checkbox' name='konserni' $ckhk onclick='submit();'> ".t("Kaikkien konserniyritysten merkinnät");
+		echo "</form>";
+	}
+	
 	//kalenterivalinnat
 	echo "<br><br>";
 

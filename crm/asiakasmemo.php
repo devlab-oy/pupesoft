@@ -25,7 +25,7 @@
 			echo "<tr>
 					<th>".t("Asiakkaan nimi").": </th>
 					<form action = '$PHP_SELF' method = 'post'>
-					<td class='back'><input type='text' size='30' name='ytunnus'></td>
+					<td><input type='text' size='30' name='ytunnus'></td>
 					<td class='back'><input type='submit' value='".t("Jatka")."'></td>
 					</tr>";
 			echo "</form>";

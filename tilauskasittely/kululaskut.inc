@@ -263,6 +263,66 @@ if ($tee_kululaskut == "poista") {
 	$tee_kululaskut = "";
 }
 
+
+if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kesken"] > 0) {
+	$query  = "	SELECT distinct tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.hinta, tilausrivi.kpl, tilausrivi.kommentti
+				FROM lasku keikka
+				JOIN lasku liitosotsikko ON keikka.yhtio=liitosotsikko.yhtio and keikka.laskunro=liitosotsikko.laskunro and keikka.tila=liitosotsikko.tila and liitosotsikko.alatila='' and liitosotsikko.vanhatunnus!=0
+				JOIN lasku matkalasku ON matkalasku.yhtio=liitosotsikko.yhtio and matkalasku.tunnus=liitosotsikko.vanhatunnus
+				JOIN tilausrivi ON tilausrivi.yhtio=matkalasku.yhtio and tilausrivi.otunnus=matkalasku.tunnus
+				WHERE keikka.yhtio		= '$kukarow[yhtio]'
+				and keikka.tila			= 'K'
+				and keikka.alatila		= 'T'
+				and keikka.liitostunnus	= '$kukarow[kesken]'
+				and keikka.ytunnus		= '$kukarow[kesken]'
+				and matkalasku.tunnus	= $matkalasktunnus
+				and tilausrivi.kpl 		> 0
+				and tilausrivi.tyyppi  != 'D'";
+	$keikkares = mysql_query($query) or pupe_error($query);
+
+	while ($keikkarow = mysql_fetch_array($keikkares)) {
+				
+		$query = "	SELECT tuoteno
+					FROM tilausrivi
+					JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus
+		 			WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
+					and tilausrivi.tyyppi != 'D' 
+					and tilausrivi.otunnus = '$kukarow[kesken]'
+					and tilausrivin_lisatiedot.tilausrivilinkki = '$keikkarow[tunnus]'";
+		$result = mysql_query($query) or pupe_error($query);
+		$kohderow = mysql_fetch_array($result);
+		
+		if ($kohderow["tuoteno"] == "") {
+		
+			$query    = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$keikkarow[tuoteno]'";
+			$tuoteres = mysql_query($query);
+
+			if (mysql_num_rows($tuoteres) == 0) {
+				echo "<font class='error'>".t("Tuotetta")." $tiltuoteno[$yht_i] ".t("ei löydy")."!</font><br>";
+			}
+			else {
+
+				// tuote löytyi ok, lisätään rivi
+				$trow = mysql_fetch_array($tuoteres);
+							
+				$tilausrivilinkki	= $keikkarow["tunnus"];
+				$kpl             	= $keikkarow["kpl"];
+				$tuoteno         	= $keikkarow["tuoteno"];
+				$toimaika 	     	= $laskurow["toimaika"];
+				$kerayspvm	     	= $laskurow["kerayspvm"];
+				$hinta 		     	= $keikkarow["hinta"];
+				$kommentti 		    = $keikkarow["kommentti"];
+
+				require ("lisaarivi.inc");			
+			}
+		}
+	}
+	
+	echo t("Matkalaskun rivit lisättiin tilaukselle")."!<br>";
+	
+	$tyhjenna	= "OK";
+}
+
 if ($silent == "") {
 	if ($toiminto == "kululaskut") {
 
@@ -308,7 +368,7 @@ if ($silent == "") {
 						<td valign='top'>$llrow[valkoodi]</td>
 						<td valign='top'>$llrow[viite]</td>";
 
-				$query  = "	SELECT tunnus
+				$query  = "	SELECT tunnus, tilaustyyppi
 							from lasku
 							where yhtio	= '$kukarow[yhtio]'
 							and tunnus	= '$llrow[vanhatunnus]'";
@@ -351,7 +411,40 @@ if ($silent == "") {
 						<input type='hidden' name='tunnus' value='$llrow[vanhatunnus]'>
 						<input type='hidden' name='poistasumma' value='$llrow[summa]'>
 						<input type='submit' value='".t("Poista")."'></form>
-						</td></tr>";
+						</td>";
+						
+				if ($osresrow["tilaustyyppi"] == 'M' and $keikanalatila == "T") {						
+					
+					$query  = "	SELECT count(distinct matkarivi.tunnus) mrivi, count(distinct tilausrivin_lisatiedot.tunnus) trivi
+								FROM lasku matkalasku								
+								JOIN tilausrivi matkarivi ON matkarivi.yhtio=matkalasku.yhtio and matkarivi.otunnus=matkalasku.tunnus and matkarivi.kpl > 0 and matkarivi.tyyppi  != 'D'
+								LEFT JOIN tilausrivi tilrivi ON tilrivi.yhtio=matkalasku.yhtio and tilrivi.otunnus = '$kukarow[kesken]' and tilrivi.tyyppi  != 'D'
+								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilrivi.tunnus and tilausrivin_lisatiedot.tilausrivilinkki = matkarivi.tunnus
+								WHERE matkalasku.yhtio	= '$kukarow[yhtio]'
+								and matkalasku.tunnus	= $osresrow[tunnus]";
+					$mlrivires = mysql_query($query) or pupe_error($query);
+					$mlrivirow = mysql_fetch_assoc($mlrivires);		
+					
+					if ($mlrivirow["mrivi"] > 0 and $mlrivirow["mrivi"] != $mlrivirow["trivi"]) {
+						echo "<td valign='top' class='back'>
+								<form method='POST' action='$PHP_SELF'>
+								<input type='hidden' name='keikanalatila' value='$keikanalatila'>
+								<input type='hidden' name='lopetus' value='$lopetus'>
+								<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+								<input type='hidden' name='toiminto' value='kululaskut'>
+								<input type='hidden' name='tee_kululaskut' value='lisaa_rivit'>
+								<input type='hidden' name='matkalasktunnus' value='$osresrow[tunnus]'>
+								<input type='hidden' name='tee' value='$tee'>
+								<input type='hidden' name='otunnus' value='$otunnus'>
+								<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+								<input type='hidden' name='toim' value='$toim'>
+								<input type='hidden' name='projektilla' value='$projektilla'>
+								<input type='submit' value='" . t('Lisää matkalaskun rivit tilaukselle')."'></form>
+								</form></td>";
+					}
+				}
+
+				echo "</tr>";
 			}
 			echo "</table>";
 

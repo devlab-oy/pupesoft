@@ -71,7 +71,6 @@
 		exit;
 	}
 
-
 	if ($tee == 'NAYTATILAUS') {
 		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 		require ("raportit/naytatilaus.inc");
@@ -117,6 +116,7 @@
 	if (($tee == 'Z') and ($tyyppi == '')) {
 		require "inc/tuotehaku.inc";
 	}
+	
 	if (($tee == 'Z') and ($tyyppi != '')) {
 
 		if ($tyyppi == 'TOIMTUOTENO') {
@@ -198,11 +198,12 @@
 	}
 
 
-	echo "<table><tr>";
 	echo "<form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
 	echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
-	echo "<td class='back'><select name='tyyppi'>";
+
+	echo "<br><table><tr>";	
+	echo "<th><select name='tyyppi'>";
 	echo "<option value=''>".t("Tuotenumero").":</option>";
 	echo "<option value='TOIMTUOTENO'>".t("Toimittajan tuotenumero").":</option>";
 
@@ -213,9 +214,8 @@
 	}
 
 	echo "</select></th>";
-	echo "<td class='back'><input type='text' name='tuoteno' value=''></td>";
-	echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
-	echo "</form>";
+	echo "<td><input type='text' name='tuoteno' value=''></td>";
+	echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></form></td>";
 
 	//Jos ei haettu, annetaan 'edellinen' & 'seuraava'-nappi
 	if (($ulos=='') and ($tee=='Z')) {

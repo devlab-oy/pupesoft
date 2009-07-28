@@ -91,19 +91,19 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		$ttype[]	= $row[1];
 
 		$tlengthpit = ereg_replace("[^0-9,]", "", $row[1]);
-		
+
 		if (strpos($tlengthpit, ",") !== FALSE) {
-			$tlengthpit = substr($tlengthpit, 0, strpos($tlengthpit, ",")+1)+1;	
+			$tlengthpit = substr($tlengthpit, 0, strpos($tlengthpit, ",")+1)+1;
 		}
-			
+
 		$tlength[]	= $tlengthpit;
 	}
-	
+
 	//	Nämä ovat pakollisia dummysarakkeita jotka ohitetaan lopussa automaattisesti!
 	if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat"))) {
 		$abu_sarakkeet = array("YTUNNUS");
 	}
-	
+
 	if (count($abu_sarakkeet)>0) {
 		foreach($abu_sarakkeet as $s) {
 			$trows[] 	= $s;
@@ -114,29 +114,29 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	if ($table == 'tullinimike') {
 		$tulli_ei_kielta = "";
 		$tulli_ei_toimintoa = "";
-		
+
 		if (in_array("KIELI", $otsikot) === FALSE) {
-			$tulli_ei_kielta = "PUUTTUU"; 
+			$tulli_ei_kielta = "PUUTTUU";
 			$otsikot[] = "KIELI";
 		}
 		if (in_array("TOIMINTO", $otsikot) === FALSE) {
 			$otsikot[] = "TOIMINTO";
-			$tulli_ei_toimintoa = "PUUTTUU"; 
+			$tulli_ei_toimintoa = "PUUTTUU";
 		}
 	}
-	
+
 	//määrittelee onko tämä taulu sellanen jossa ei ole yhtiö-saraketta
 	$eiyhtiota = "";
 
-	require ("inc/pakolliset_sarakkeet.inc");	
+	require ("inc/pakolliset_sarakkeet.inc");
 	list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota) = pakolliset_sarakkeet($table, $otsikot);
-	
+
 	// $trows 		sisältää kaikki taulun sarakkeet tietokannasta
 	// $otsikot 	sisältää kaikki sarakkeet saadusta tiedostosta
 
 	foreach ($otsikot as $key => $column) {
-		
-		$column = strtoupper(trim($column));		
+
+		$column = strtoupper(trim($column));
 		$otsikot[$key] = strtoupper(trim($column)); // trimmataan myös itte otsikot arrayn arvo, sitä käytetään myöhemmin
 
 		if ($column != '') {
@@ -290,16 +290,16 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		}
 		fclose($file);
 	}
-	
+
 	$rivilaskuri = 1;
-	
+
 	for ($eriviindex = 0; $eriviindex < count($excelrivi); $eriviindex++) {
 		$hylkaa    = 0;
 		$tila      = "";
 		$tee       = "";
 		$eilisataeikamuuteta = "";
 		$rivilaskuri++;
-		
+
 		//asiakashinta/asiakasalennus spessuja
 		$chasiakas_ryhma 	= '';
 		$chytunnus 			= '';
@@ -312,7 +312,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		$and 				= '';
 		$tpupque 			= '';
 		$toimi_liitostunnus = '';
-		
+
 		if ($rivilaskuri % 500 == 0) {
 			echo "<font class='message'>Käsitellään riviä: $rivilaskuri</font><br>";
 			flush();
@@ -330,15 +330,15 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		foreach ($excelrivi[$eriviindex] as $eriv) {
 			$rivi[] = $eriv;
 		}
-		
+
 		if ($table == 'tullinimike' and $tulli_ei_kielta != "") {
 			$rivi[] = "FI";
 		}
-		
+
 		if ($table == 'tullinimike' and $tulli_ei_toimintoa != "") {
 			$rivi[] = "LISAA";
 		}
-		
+
 		//Jos eri where-ehto array on määritelty
 		if (is_array($wherelliset)) {
 			$indeksi = array_merge($indeksi, $indeksi_where);
@@ -346,17 +346,17 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		}
 
 		foreach($indeksi as $j) {
-			
+
 			if ($table == 'tullinimike') {
 				if (strtoupper($otsikot[$j]) == "CN") {
 					$rivi[$j] = str_replace(' ','',$rivi[$j]);
 				}
-				
+
 				if (strtoupper($otsikot[$j]) == "CN" and trim($rivi[$j]) == '') {
 					$tila = 'ohita';
 				}
 			}
-			
+
 			if ($otsikot[$j] == "TUOTENO") {
 
 				$tuoteno = trim($rivi[$j]);
@@ -368,7 +368,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				if (in_array("RU", $otsikot)) {
 					$rivi[$j] = iconv("UTF-8", "ISO-8859-1", $rivi[$j]);
 				}
-				
+
 				$valinta .= " and ".$otsikot[$j]."= BINARY '".trim($rivi[$j])."'";
 			}
 			elseif ($table == 'tuotepaikat' and $otsikot[$j] == "OLETUS") {
@@ -381,50 +381,50 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			// jos pakollinen tieto puuttuu kokonaan
 			if (strlen(trim($rivi[$j])) == 0 and in_array($otsikot[$j], $pakolliset)) {
 				$tila = 'ohita';
-			}			
+			}
 		}
 
 		// jos ei ole puuttuva tieto etsitään riviä
 		if($tila != 'ohita') {
-									
+
 			if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri")) and (!in_array("LIITOSTUNNUS", $otsikot) or (in_array("LIITOSTUNNUS", $otsikot) and $rivi[array_search("LIITOSTUNNUS", $otsikot)] == ""))) {
 
 				if ((in_array("YTUNNUS", $otsikot) and ($table == "yhteyshenkilo" or $table == "asiakkaan_avainsanat")) or (in_array("ASIAKAS", $otsikot) and $table == "kalenteri")) {
-					
+
 					if ($rivi[array_search("TYYPPI", $otsikot)] == "T" and $table == "yhteyshenkilo") {
-						$tpque = "	SELECT tunnus 
-									from toimi 
-									where yhtio	= '$kukarow[yhtio]' 
-									and ytunnus	= '".$rivi[array_search("YTUNNUS", $otsikot)]."' 
+						$tpque = "	SELECT tunnus
+									from toimi
+									where yhtio	= '$kukarow[yhtio]'
+									and ytunnus	= '".$rivi[array_search("YTUNNUS", $otsikot)]."'
 									and tyyppi != 'P'";
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 					}
 					elseif (($rivi[array_search("TYYPPI", $otsikot)] == "A" and $table == "yhteyshenkilo") or $table == "asiakkaan_avainsanat") {
-						$tpque = "	SELECT tunnus 
-									from asiakas 
-									where yhtio	= '$kukarow[yhtio]' 
+						$tpque = "	SELECT tunnus
+									from asiakas
+									where yhtio	= '$kukarow[yhtio]'
 									and ytunnus	= '".$rivi[array_search("YTUNNUS", $otsikot)]."'";
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 					}
 					elseif ($table == "kalenteri") {
-						$tpque = "	SELECT tunnus 
-									from asiakas 
-									where yhtio	= '$kukarow[yhtio]' 
+						$tpque = "	SELECT tunnus
+									from asiakas
+									where yhtio	= '$kukarow[yhtio]'
 									and ytunnus	= '".$rivi[array_search("ASIAKAS", $otsikot)]."'";
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 					}
-					
+
 					if (mysql_num_rows($tpres) == 0) {
 						if ($rivi[array_search("TYYPPI", $otsikot)] == "T" and $table == "yhteyshenkilo") {
-							echo t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa")." '".$rivi[array_search("YTUNNUS", $otsikot)]."' ".t("ei löydy")."!<br>";	
+							echo t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa")." '".$rivi[array_search("YTUNNUS", $otsikot)]."' ".t("ei löydy")."!<br>";
 						}
 						elseif (($rivi[array_search("TYYPPI", $otsikot)] == "A" and $table == "yhteyshenkilo") or $table == "asiakkaan_avainsanat") {
 							echo t("Virhe rivillä").": $rivilaskuri ".t("Asiakasta")." '".$rivi[array_search("YTUNNUS", $otsikot)]."' ".t("ei löydy")."!<br>";
 						}
 						else {
 							echo t("Virhe rivillä").": $rivilaskuri ".t("Asiakasta")." '".$rivi[array_search("ASIAKAS", $otsikot)]."' ".t("ei löydy")."!<br>";
-						}							
-						
+						}
+
 						$hylkaa++; // ei päivitetä tätä riviä
 					}
 					elseif (mysql_num_rows($tpres) == 1) {
@@ -434,39 +434,39 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						if (!in_array("LIITOSTUNNUS", $otsikot)) {
 							$otsikot[]	= "LIITOSTUNNUS";
 						}
-						
+
 						$rivi[]		= $tpttrow["tunnus"];
 
 						$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 					}
 					else {
-						
-						if ($ytunnustarkkuus == 2) {						
+
+						if ($ytunnustarkkuus == 2) {
 							$lasind = count($rivi);
-						
+
 							//	Liitetään pakolliset arvot
 							if (!in_array("LIITOSTUNNUS", $otsikot)) {
-								$otsikot[]	= "LIITOSTUNNUS";								
-							}										
-						
+								$otsikot[]	= "LIITOSTUNNUS";
+							}
+
 							$pushlask = 1;
-																		
+
 							while ($tpttrow = mysql_fetch_array($tpres)) {
 
-								$rivi[$lasind] = $tpttrow["tunnus"];							
-														
+								$rivi[$lasind] = $tpttrow["tunnus"];
+
 								if ($pushlask < mysql_num_rows($tpres)) {
 									$excelrivi[] = $rivi;
 								}
-							
+
 								$pushlask++;
 							}
-							
-							$valinta .= " and liitostunnus='$rivi[$lasind]' ";						
+
+							$valinta .= " and liitostunnus='$rivi[$lasind]' ";
 						}
 						else {
 							if ($rivi[array_search("TYYPPI", $otsikot)] == "T" and $table == "yhteyshenkilo") {
-								echo t("Virhe rivillä").": $rivilaskuri ".t("Toimittaja")." '".$rivi[array_search("YTUNNUS", $otsikot)]."' ".t("Samalla ytunnuksella löytyy useita toimittajia! Lisää toimittajan tunnus LIITOSTUNNUS-sarakkeeseen")."!<br>";	
+								echo t("Virhe rivillä").": $rivilaskuri ".t("Toimittaja")." '".$rivi[array_search("YTUNNUS", $otsikot)]."' ".t("Samalla ytunnuksella löytyy useita toimittajia! Lisää toimittajan tunnus LIITOSTUNNUS-sarakkeeseen")."!<br>";
 							}
 							elseif (($rivi[array_search("TYYPPI", $otsikot)] == "A" and $table == "yhteyshenkilo") or $table == "asiakkaan_avainsanat") {
 								echo t("Virhe rivillä").": $rivilaskuri ".t("Asiakas")." '".$rivi[array_search("YTUNNUS", $otsikot)]."' ".t("Samalla ytunnuksella löytyy useita asiakkaita! Lisää asiakkaan tunnus LIITOSTUNNUS-sarakkeeseen")."!<br>";
@@ -474,7 +474,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							else {
 								echo t("Virhe rivillä").": $rivilaskuri ".t("Asiakas")." '".$rivi[array_search("ASIAKAS", $otsikot)]."' ".t("Samalla ytunnuksella löytyy useita asiakkaita! Lisää asiakkaan tunnus LIITOSTUNNUS-sarakkeeseen")."!<br>";
 							}
-						
+
 							$hylkaa++; // ei päivitetä tätä riviä
 						}
 					}
@@ -485,35 +485,35 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				}
 			}
 			elseif(in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri")) and in_array("LIITOSTUNNUS", $otsikot)) {
-				
+
 				if($rivi[array_search("TYYPPI", $otsikot)] == "T" and $table == "yhteyshenkilo") {
-					$tpque = "	SELECT tunnus 
-								from toimi 
-								where yhtio	= '$kukarow[yhtio]' 
-								and tunnus	= '".$rivi[array_search("LIITOSTUNNUS", $otsikot)]."' 
+					$tpque = "	SELECT tunnus
+								from toimi
+								where yhtio	= '$kukarow[yhtio]'
+								and tunnus	= '".$rivi[array_search("LIITOSTUNNUS", $otsikot)]."'
 								and tyyppi != 'P'";
 					$tpres = mysql_query($tpque) or pupe_error($tpque);
 				}
 				elseif(($rivi[array_search("TYYPPI", $otsikot)] == "A" and $table == "yhteyshenkilo") or $table == "asiakkaan_avainsanat" or $table == "kalenteri") {
-					$tpque = "	SELECT tunnus 
-								from asiakas 
-								where yhtio	= '$kukarow[yhtio]' 
+					$tpque = "	SELECT tunnus
+								from asiakas
+								where yhtio	= '$kukarow[yhtio]'
 								and tunnus	= '".$rivi[array_search("LIITOSTUNNUS", $otsikot)]."'";
 					$tpres = mysql_query($tpque) or pupe_error($tpque);
 				}
-								
+
 				if (mysql_num_rows($tpres) != 1) {
 					echo t("Virhe rivillä").": $rivilaskuri ".t("Toimittajaa/Asiakasta")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
 					$hylkaa++; // ei päivitetä tätä riviä
 				}
 				else {
 					$tpttrow = mysql_fetch_array($tpres);
-					
+
 					// Lisätään ehtoon
 					$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 				}
 			}
-								
+
 			$query = "	SELECT tunnus
 						FROM $table
 						WHERE $valinta";
@@ -542,8 +542,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		}
 		else {
 			echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Pakollista tietoa puuttuu/tiedot ovat virheelliset!")."</font> $valinta<br>";
-		}		
-		
+		}
+
 		// lisätään rivi
 		if ($tila != 'ohita') {
 			if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
@@ -554,7 +554,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$query = "INSERT into $table SET laatija='$kukarow[kuka]', luontiaika=now() ";
 				}
 			}
-			
+
 			if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
 				if ($eiyhtiota == "") {
 					$query = "UPDATE $table SET yhtio='$kukarow[yhtio]', muuttaja='$kukarow[kuka]', muutospvm=now() ";
@@ -565,12 +565,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			}
 
 			for ($r=0; $r<count($otsikot); $r++) {
-				
+
 				//	Näitä ei koskaan lisätä
 				if (is_array($abu_sarakkeet) and in_array($otsikot[$r], $abu_sarakkeet)) {
 					continue;
 				}
-				
+
 				if ($r != $postoiminto) {
 					$rivi[$r] = trim(addslashes($rivi[$r]));
 
@@ -578,18 +578,18 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						//korvataan decimal kenttien pilkut pisteillä...
 						$rivi[$r] = str_replace(",",".",$rivi[$r]);
 					}
-					
+
 					if(substr($ityyppi[$r],0,3) == "int") {
 						if(	($ikenpituus[$r] == 1 and ($rivi[$r] > 255 or $rivi[$r] < -128)) or
 							($ikenpituus[$r] == 2 and ($rivi[$r] > 65535 or $rivi[$r] < -32768)) or
 							($ikenpituus[$r] == 3 and ($rivi[$r] > 16777215 or $rivi[$r] < -8388608)) or
 							($ikenpituus[$r] == 4 and ($rivi[$r] > 4294967295 or $rivi[$r] < -2147483648))
 							) {
-							
+
 							echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("VIRHE").": ".$otsikot[$r]." ".t("Luku on liian suuri eikä se mahdu kenttään")."!</font> $rivi[$r]: ".strlen($rivi[$r])." > (int) ".$ikenpituus[$r]."!<br>";
-							$hylkaa++; // ei päivitetä tätä riviä							
-						} 
-						
+							$hylkaa++; // ei päivitetä tätä riviä
+						}
+
 					}
 					elseif ((int) $ikenpituus[$r] > 0 and strlen($rivi[$r]) > $ikenpituus[$r] and ($table != "tuotepaikat" and $otsikot[$r] != "OLETUS" and $rivi[$r] != 'XVAIHDA')) {
 						echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("VIRHE").": ".$otsikot[$r]." ".t("kentässä on liian pitkä tieto")."!</font> $rivi[$r]: ".strlen($rivi[$r])." > ".$ikenpituus[$r]."!<br>";
@@ -650,12 +650,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						}
 					}
 
-					if (($otsikot[$r] == 'OSASTO' 
+					if (($otsikot[$r] == 'OSASTO'
 						or $otsikot[$r] == 'TRY'
 						or $otsikot[$r] == 'TUOTEMERKKI'
 						or $otsikot[$r] == 'MALLI'
-						or $otsikot[$r] == 'MALLITARKENNE') 
-						and $table == 'tuote' 
+						or $otsikot[$r] == 'MALLITARKENNE')
+						and $table == 'tuote'
 						and $rivi[$r] != "") {
 
 						$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '$otsikot[$r]'";
@@ -698,7 +698,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							$tpque = "select tunnus from yhteensopivuus_mp where yhtio='$kukarow[yhtio]' and tunnus='$rivi[$r]' and tyyppi = '".$rivi[$indeksi["TYYPPI"]]."'";
 							$tpres = mysql_query($tpque) or pupe_error($tpque);
 						}
-												
+
 						if (mysql_num_rows($tpres) == 0) {
 							//echo t("Virhe rivillä").": $rivilaskuri ".t("Mallia")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."!<br>";
 							//$hylkaa++; // ei päivitetä tätä riviä
@@ -733,7 +733,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							}
 						}
 					}
-					
+
 					if ($table == 'tuote' and ($otsikot[$r] == 'EPAKURANTTI25PVM' or $otsikot[$r] == 'EPAKURANTTI50PVM' or $otsikot[$r] == 'EPAKURANTTI75PVM' or $otsikot[$r] == 'EPAKURANTTI100PVM')) {
 
 						// $tuoteno pitäs olla jo aktivoitu ylhäällä
@@ -743,14 +743,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						elseif ($tee == "") {
 							$tee = "pois";
 						}
-						
+
 						if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikot[$r] == 'EPAKURANTTI50PVM') {
 							$tee = "puolipaalle";
 						}
 						elseif ($tee == "") {
 							$tee = "pois";
 						}
-						
+
 						if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikot[$r] == 'EPAKURANTTI75PVM') {
 							$tee = "75paalle";
 						}
@@ -779,10 +779,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					// tehdään riville oikeellisuustsekkejä
 					if ($table == 'tuotteen_toimittajat' and $otsikot[$r] == 'TOIMITTAJA' and !in_array("LIITOSTUNNUS", $otsikot)) {
 
-						$tpque = "	SELECT tunnus 
-									from toimi 
-									where yhtio	= '$kukarow[yhtio]' 
-									and ytunnus	= '$rivi[$r]' 
+						$tpque = "	SELECT tunnus
+									from toimi
+									where yhtio	= '$kukarow[yhtio]'
+									and ytunnus	= '$rivi[$r]'
 									and tyyppi != 'P'";
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 
@@ -792,19 +792,19 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						}
 						else {
 							$tpttrow = mysql_fetch_array($tpres);
-							
+
 							// Tarvitaan tarkista.inc failissa
 							$toimi_liitostunnus = $tpttrow["tunnus"];
-							
+
 							$query .= ", liitostunnus='$tpttrow[tunnus]' ";
 							$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 						}
 					}
 					elseif($table == 'tuotteen_toimittajat' and $otsikot[$r] == 'LIITOSTUNNUS') {
-						$tpque = "	SELECT tunnus 
-									from toimi 
-									where yhtio	= '$kukarow[yhtio]' 
-									and tunnus	= '$rivi[$r]' 
+						$tpque = "	SELECT tunnus
+									from toimi
+									where yhtio	= '$kukarow[yhtio]'
+									and tunnus	= '$rivi[$r]'
 									and tyyppi != 'P'";
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 
@@ -814,13 +814,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						}
 						else {
 							$tpttrow = mysql_fetch_array($tpres);
-							
+
 							// Tarvitaan tarkista.inc failissa
 							$toimi_liitostunnus = $tpttrow["tunnus"];
 							$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 						}
 					}
-																				
+
 					//tarkistetaan asiakasalennus ja asiakashinta juttuja
 					if ($table == 'asiakasalennus' or $table == 'asiakashinta') {
 						if ($otsikot[$r] == 'RYHMA' and $rivi[$r] != '') {
@@ -849,12 +849,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 						if ($otsikot[$r] == 'ASIAKAS_RYHMA' and $rivi[$r] != '') {
 							$chasiakas_ryhma = $rivi[$r];
-							
+
 							$xquery = "	SELECT tunnus
 										FROM avainsana
 										WHERE yhtio='$kukarow[yhtio]' and laji = 'ASIAKASRYHMA' and selite = '$rivi[$r]'";
 							$xresult = mysql_query($xquery) or pupe_error($xquery);
-							
+
 							if (mysql_num_rows($xresult) == 0) {
 								echo t("Virhe rivillä").": $rivilaskuri ".t("Asiakasryhmää")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! $otsikot[$r] = $rivi[$r]<br>";
 								$hylkaa++; // ei päivitetä tätä riviä
@@ -863,12 +863,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 						if ($otsikot[$r] == 'YTUNNUS' and $rivi[$r] != '') {
 							$chytunnus = $rivi[$r];
-							
+
 							$xquery = "	SELECT ytunnus
 										FROM asiakas
 										WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$rivi[$r]'";
 							$xresult = mysql_query($xquery) or pupe_error($xquery);
-							
+
 							if (mysql_num_rows($xresult) == 0) {
 								echo t("Virhe rivillä").": $rivilaskuri ".t("Asiakasta")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! $otsikot[$r] = $rivi[$r]<br>";
 								$hylkaa++; // ei päivitetä tätä riviä
@@ -902,14 +902,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 										FROM asiakas
 										WHERE yhtio='$kukarow[yhtio]' and tunnus = '$rivi[$r]'";
 							$xresult = mysql_query($xquery) or pupe_error($xquery);
-							
+
 							if (mysql_num_rows($xresult) == 0) {
-								
+
 								$x2query = "SELECT tunnus
 											FROM asiakas
 											WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$rivi[$r]'";
 								$x2result = mysql_query($x2query) or pupe_error($x2query);
-								
+
 								if (mysql_num_rows($x2result) == 0) {
 									echo t("Virhe rivillä").": $rivilaskuri ".t("Asiakasta")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! $otsikot[$r] = $rivi[$r]<br>";
 									$hylkaa++; // ei päivitetä tätä riviä
@@ -960,9 +960,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						elseif ($table=='tuotepaikat' and $otsikot[$r] == 'OLETUS' and $rivi[$r] == 'XVAIHDA') {
 							//vaihdetaan tämä oletukseksi
 							$rivi[$r] = "X"; // pakotetaan oletus
-							
+
 							$tpupque = "UPDATE tuotepaikat SET oletus = '' where yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
-							
+
 							$query .= ", $otsikot[$r]='$rivi[$r]' ";
 						}
 						elseif ($table=='tuotepaikat' and $otsikot[$r] == 'OLETUS') {
@@ -980,9 +980,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						if ($table=='tuotepaikat' and $otsikot[$r] == 'OLETUS' and $rivi[$r] == 'XVAIHDA') {
 							//vaihdetaan tämä oletukseksi
 							$rivi[$r] = "X"; // pakotetaan oletus
-							
+
 							$tpupque = "UPDATE tuotepaikat SET oletus = '' where yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
-							
+
 							$query .= ", $otsikot[$r]='$rivi[$r]' ";
 						}
 						elseif ($eilisataeikamuuteta == "") {
@@ -1044,16 +1044,16 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 				$query .= " ORDER BY tunnus";
 			}
-			
+
 			//	Tarkastetaan tarkistarivi.incia vastaan..
 			//	Generoidaan oikeat arrayt
 			$errori = "";
 			$t 		= array();
-			$virhe 	= array();	
-			
+			$virhe 	= array();
+
 			//	Otetaan talteen query..
 			$lue_data_query = $query;
-			
+
 			$tarq = "	SELECT *
 						FROM $table";
 			if ($table == 'asiakasalennus' or $table == 'asiakashinta') {
@@ -1062,42 +1062,45 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			}
 			else {
 				$tarq .= " WHERE ".$valinta;
-			}				
+			}
 			$result = mysql_query($tarq) or pupe_error($tarq);
 			$tarkrow = mysql_fetch_array($result);
 			$tunnus = $tarkrow["tunnus"];
-			
+
 			// Tehdään oikeellisuustsekit
-			for ($i=1; $i < mysql_num_fields($result)-1; $i++) {			
+			for ($i=1; $i < mysql_num_fields($result); $i++) {
 
 				// Tarkistetaan saako käyttäjä päivittää tätä kenttää
 				$Lindexi = array_search(strtoupper(mysql_field_name($result, $i)), $otsikot);
-				
-				if (isset($excelrivi[$eriviindex][$Lindexi]) and $Lindexi !== false) {
+
+				if (strtoupper(mysql_field_name($result, $i)) == 'TUNNUS') {
+					$tassafailissa = TRUE;
+				}
+				elseif (isset($excelrivi[$eriviindex][$Lindexi]) and $Lindexi !== false) {
 					$t[$i] = $excelrivi[$eriviindex][$Lindexi];
-					
+
 					// Tämä rivi on excelissä
 					$tassafailissa = TRUE;
 				}
 				else {
 					$t[$i] = $tarkrow[strtolower(mysql_field_name($result, $i))];
-					
+
 					// Tämä rivi ei oo excelissä
-					$tassafailissa = FALSE;						
+					$tassafailissa = FALSE;
 				}
-				
+
 				$funktio = $table."tarkista";
-				
+
 				if(!function_exists($funktio)) {
 					@include("inc/$funktio.inc");
 				}
-				
+
 				unset($virhe);
-				
+
 				if (function_exists($funktio)) {
 					$funktio($t, $i, $result, $tunnus, &$virhe, $tarkrow);
 				}
-				
+
 				// Ignoorataan virhe jos se ei koske tässä failissa olutta saraketta
 				if ($tassafailissa and $virhe[$i] != "") {
 					switch ($table) {
@@ -1109,74 +1112,74 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					}
 					echo t("Virhe rivillä").": $rivilaskuri <font class='error'>$virheApu".mysql_field_name($result, $i).": ".$virhe[$i]." ($t[$i])</font><br>";
 					$errori = 1;
-				}					
-			}			
+				}
+			}
 
 			if ($errori != "") {
 				$hylkaa++;
-			}			
-			
+			}
+
 			//	Palautetaan vanha query..
 			$query = $lue_data_query;
-						
-			if ($hylkaa == 0) {				
-				
+
+			if ($hylkaa == 0) {
+
 				// Haetaan rivi niin kuin se oli ennen muutosta
 				$syncquery = "	SELECT *
 								FROM $table";
-				
+
 				if ($table == 'asiakasalennus' or $table == 'asiakashinta') {
 					$syncquery .= " WHERE yhtio = '$kukarow[yhtio]'";
 					$syncquery .= $and;
 				}
 				else {
 					$syncquery .= " WHERE ".$valinta;
-				}				
+				}
 				$syncres = mysql_query($syncquery) or pupe_error($syncquery);
 				$syncrow = mysql_fetch_array($syncres);
-				
+
 				// tuotepaikkojen oletustyhjennysquery uskalletaan ajaa vasta tässä
 				if ($tpupque != '') {
 					$tpupres = mysql_query($tpupque) or pupe_error($tpupque);
 				}
-								
+
 				$tpupque = "";
-								
+
 				// Itse lue_datan päivitysquery
 				$iresult = mysql_query($query) or pupe_error($query);
-										
+
 				// Synkronoidaan
 				if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
 					$tunnus = mysql_insert_id();
 				}
 				else {
-					$tunnus = $syncrow["tunnus"];										
+					$tunnus = $syncrow["tunnus"];
 				}
-				
+
 				synkronoi($kukarow["yhtio"], $table, $tunnus, $syncrow, "");
-								
+
 				// tehdään epäkunrattijutut
 				if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois") {
 					require("epakurantti.inc");
 				}
-				
+
 				$lask++;
 			}
 		}
 	}
-	
+
 	echo t("Päivitettiin")." $lask ".t("riviä")."!";
 }
 else {
-	
+
 	$sel[$table] = "SELECTED";
-	
+
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
 			<input type='hidden' name='tee' value='file'>
 			<table>
 			<tr>
 				<td>".t("Valitse tietokannan taulu").":</td>
-				<td><select name='table' onchange='submit();'>					
+				<td><select name='table' onchange='submit();'>
 					<option value='asiakas' $sel[asiakas]>".t("Asiakas")."</option>
 					<option value='asiakasalennus' $sel[asiakasalennus]>".t("Asiakasalennukset")."</option>
 					<option value='asiakashinta' $sel[asiakashinta]>".t("Asiakashinnat")."</option>
@@ -1217,7 +1220,7 @@ else {
 					<option value='yhteyshenkilo' $sel[yhteyshenkilo]>".t("Yhteyshenkilöt")."</option>
 					</select></td>
 			</tr>";
-			
+
 		if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri"))) {
 			echo "<tr><td>".t("Ytunnus-tarkkuus").":</td>
 					<td><select name='ytunnustarkkuus'>
@@ -1226,7 +1229,7 @@ else {
 					</select></td>
 			</tr>";
 		}
-		
+
 		echo "	<tr><td>".t("Valitse tiedosto").":</td>
 				<td><input name='userfile' type='file'></td>
 				<td class='back'><input type='submit' value='".t("Lähetä")."'></td>

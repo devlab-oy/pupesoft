@@ -590,7 +590,7 @@
 				elseif ($a_lisa != "") {
 					$lisa .= " and $a_lisa ";
 				}
-				else {
+				elseif ($b_lisa != "") {
 					$lisa .= " and $b_lisa ";
 				}
 			}
@@ -1188,11 +1188,11 @@
 			require ("inc/avainsanaperhe.inc");
 		}
 
-		if ($errori == '' and $uusi != 1 and $toim == "yhtio") {
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "yhtio") {
 			require ("inc/yhtion_toimipaikat.inc");
 		}
 
-		if ($errori == '' and $toim == "asiakas") {
+		if ($trow["tunnus"] > 0 and $errori == '' and $toim == "asiakas") {
 
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi = 'asiakasalennus' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
@@ -1205,7 +1205,7 @@
 			if (mysql_num_rows($res) > 0) echo "<iframe id='asiakashinta_iframe' name='asiakashinta_iframe' src='yllapito.php?toim=asiakashinta&from=yllapito&ohje=off&haku[1]=$trow[tunnus]/$trow[ytunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 		}
 
-		if ($errori == '' and ($toim == "toimi" or $toim == "asiakas")) {
+		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimi" or $toim == "asiakas")) {
 
 			if ($toim == "asiakas") {
 				$laji = "A";
@@ -1224,7 +1224,7 @@
 			}
 		}
 
-		if ($errori == '' and ($toim == "toimitustapa" or $toim == "maksuehto")) {
+		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "toimitustapa" or $toim == "maksuehto")) {
 
 			if ($toim == "toimitustapa") {
 				$laji = "TOIMTAPAKV";
@@ -1239,14 +1239,14 @@
 			if (mysql_num_rows($res) > 0) echo "<iframe id='avainsana_iframe' name='avainsana_iframe' src='yllapito.php?toim=avainsana&from=yllapito&lukitse_laji=$laji&ohje=off&haku[2]=@$laji&haku[3]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 		}
 
-		if ($errori == '' and ($toim == "sarjanumeron_lisatiedot" or ($toim == "tuote" and $laji != "V") or (($toim == "avainsana") and (strtolower($laji) == "osasto" or strtolower($laji) == "try" or strtolower($laji) == "tuotemerkki")))) {
+		if ($trow["tunnus"] > 0 and $errori == '' and ($toim == "sarjanumeron_lisatiedot" or ($toim == "tuote" and $laji != "V") or (($toim == "avainsana") and (strtolower($laji) == "osasto" or strtolower($laji) == "try" or strtolower($laji) == "tuotemerkki")))) {
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='liitetiedostot' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
 
 			if (mysql_num_rows($res) > 0) echo "<iframe id='liitetiedostot_iframe' name='liitetiedostot_iframe' src='yllapito.php?toim=liitetiedostot&from=yllapito&ohje=off&haku[7]=@$toim&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=$toim' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 		}
 
-		if ($from != "yllapito" and $errori == "" and $toim == "tuote" and $laji != "V") {
+		if ($trow["tunnus"] > 0 and $errori == "" and $from != "yllapito" and $toim == "tuote" and $laji != "V") {
 
 			$lukitse_avaimeen = urlencode($tuoteno);
 

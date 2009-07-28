@@ -124,7 +124,7 @@
 				catch (err) {
 					currentfr=document.getElementById(frameid);
 				}
-				
+
 				currentfr.height = 100;
 				currentfr.style.height = 100;
 
@@ -239,7 +239,7 @@
 		$errori = '';
 		$virhe  = array();
 
-		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
+		for ($i=1; $i < mysql_num_fields($result); $i++) {
 
 			//Päivämäärä spesiaali
 			if (isset($tpp[$i])) {
@@ -470,7 +470,7 @@
 			if (in_array(strtoupper($toim), array("ASIAKAS", "ASIAKKAAN_KOHDE")) and $yhtiorow["dokumentaatiohallinta"] != "") {
 				svnSyncMaintenanceFolders(strtoupper($toim), $tunnus, $trow);
 			}
-			
+
 			if ($ajax_menu_yp != "") {
 				$suljeYllapito = $ajax_menu_yp;
 			}
@@ -513,16 +513,16 @@
 			}
 		}
 	}
-	
-	if ($errori == "" and ($del == 1 or $del == 2 or $upd == 1) and substr($laji, 0, 7) == "iframe_") {	
-		
+
+	if ($errori == "" and ($del == 1 or $del == 2 or $upd == 1) and substr($laji, 0, 7) == "iframe_") {
+
 		if ($toim == "perusalennus") {
 			$query = "	SELECT ryhma value, selite text
 						FROM perusalennus
 						WHERE tunnus = '$tmp_tuote_tunnus'
 						and yhtio 	 = '$kukarow[yhtio]'";
 			$otsikres = mysql_query($query) or pupe_error($query);
-			$otsikrow = mysql_fetch_assoc($otsikres); 
+			$otsikrow = mysql_fetch_assoc($otsikres);
 		}
 		elseif ($toim == "avainsana") {
 			$query = "	SELECT selite value, concat_ws(' - ', selite, selitetark) text
@@ -530,17 +530,17 @@
 						WHERE tunnus = '$tmp_tuote_tunnus'
 						and yhtio 	 = '$kukarow[yhtio]'";
 			$otsikres = mysql_query($query) or pupe_error($query);
-			$otsikrow = mysql_fetch_assoc($otsikres);					
+			$otsikrow = mysql_fetch_assoc($otsikres);
 		}
 		else {
 			$otsikrow = array("value" => "", "text" => "");
 		}
-					
-		echo "<script LANGUAGE='JavaScript'>					
+
+		echo "<script LANGUAGE='JavaScript'>
 				window.parent.document.getElementById('option_".substr($laji, 7)."').value = \"".$otsikrow["value"]."\";
 				window.parent.document.getElementById('option_".substr($laji, 7)."').text = \"".$otsikrow["text"]."\";
 				window.parent.document.getElementById('iframe_".substr($laji, 7)."').innerHTML = \"\";
-				</script>";			
+				</script>";
 	}
 
 	// Rakennetaan hakumuuttujat kuntoon
@@ -580,10 +580,10 @@
 
 				if ((int) $a > 0) $a_lisa .= " asiakas = '$a' ";
 				else $a_lisa = "";
-				
+
 				if ((is_numeric($b) and $b > 0) or (!is_numeric($b) and $b != "")) $b_lisa .= " ytunnus = '$b' ";
 				else $b_lisa = "";
-				
+
 				if ($a_lisa != "" and $b_lisa != "") {
 					$lisa .= " and ($a_lisa or $b_lisa) ";
 				}
@@ -647,7 +647,7 @@
 
     	}
     }
-	
+
     if (strlen($ojarj) > 0) {
     	$jarjestys = $ojarj." ";
     }
@@ -663,7 +663,7 @@
 			$ulisa.="&oletus[$o]=$a";
 		}
 	}
-	
+
 	// Nyt selataan
 	if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
@@ -1362,7 +1362,7 @@
 	if ($from == "yllapito" and $toim == "asiakasalennus") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('asiakasalennus_iframe' $jcsmaxheigth);</script>";
 	}
-	
+
 	if ($from == "yllapito" and $toim == "perusalennus") {
 		echo "<script LANGUAGE='JavaScript'>resizeIframe('perusalennus_iframe' $jcsmaxheigth);</script>";
 	}

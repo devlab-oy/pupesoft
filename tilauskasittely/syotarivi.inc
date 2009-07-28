@@ -29,9 +29,11 @@
 				
 		echo "	<th align='left'>".t("Tuotenumero")."</th>
 				<th align='left'>".t("M‰‰r‰")."</th>
-				<th align='left'>".t("Var")."</th>
-				<th align='left'>".t("Hinta")."</th>
-				<th align='left'>".t("Ale")."</th>
+				<th align='left'>".t("Var")."</th>";
+				
+		if ($kukarow['hinnat'] == 0) echo "<th align='left'>".t("Hinta")."</th>";
+		
+		echo "	<th align='left'>".t("Ale")."</th>
 				<th align='left'>".t("Netto")."</th>
 				<td valign='top' class='back'></td>
 				</tr>";
@@ -57,9 +59,11 @@
 
 
 		echo "	<td valign='top'><input type='text' name='kpl' size='5' maxlength='13' value='$kpl'></td>
-				<td valign='top'><input type='text' name='var' size='2' maxlength='1' value='$var'></td>
-				<td valign='top'><input type='text' name='hinta' size='".(5+$yhtiorow['hintapyoristys']-2)."' maxlength='".(12+$yhtiorow['hintapyoristys']-2)."' value='$hinta'></td>
-				<td valign='top'><input type='text' name='ale' size='5' maxlength='6' value='$ale'></td>
+				<td valign='top'><input type='text' name='var' size='2' maxlength='1' value='$var'></td>";
+				
+		if ($kukarow['hinnat'] == 0) echo "<td valign='top'><input type='text' name='hinta' size='".(5+$yhtiorow['hintapyoristys']-2)."' maxlength='".(12+$yhtiorow['hintapyoristys']-2)."' value='$hinta'></td>";
+				
+		echo "	<td valign='top'><input type='text' name='ale' size='5' maxlength='6' value='$ale'></td>
 				<td valign='top'><input type='text' name='netto' size='2' maxlength='1' value='$netto'></td>
 				<td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
 				<td valign='top' class='back'>
@@ -70,13 +74,17 @@
 			</tr>";
 
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
-		if ($rivitunnus!='') {
+		if ($rivitunnus != '') {
 			echo "<tr>$jarjlisa";
 			
-			$nrospanni = '4';
+			$nrospanni = 4;
 			
 			if ($yhtiorow['rivinumero_syotto'] != '') {
-				$nrospanni = '3';
+				$nrospanni--;
+			}
+			
+			if ($kukarow['hinnat'] != 0) {
+				$nrospanni--;
 			}
 			
 			echo "<th align='left' colspan='2'>".t("Ker‰ysaika")."</th>";
@@ -132,14 +140,18 @@
 		if ($rivitunnus!='' or $toim == "SIIRTOTYOMAARAYS") {	
 			
 			if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
-				$colspan = '7';
+				$nrospanni = 7;
 			}
 			else {
-				$colspan = '6';
+				$nrospanni = 6;
 			}
 			
-			echo "<tr>$jarjlisa<th colspan='$colspan' align='left'>".t("Rivikommentti").":</tg></tr>";
-			echo "<tr>$jarjlisa<td valign='top' colspan='$colspan'><textarea name='kommentti' cols='50' rows='2' wrap='soft'>$kommentti</textarea>";
+			if ($kukarow['hinnat'] != 0) {
+				$nrospanni--;
+			}
+			
+			echo "<tr>$jarjlisa<th colspan='$nrospanni' align='left'>".t("Rivikommentti").":</tg></tr>";
+			echo "<tr>$jarjlisa<td valign='top' colspan='$nrospanni'><textarea name='kommentti' cols='50' rows='2' wrap='soft'>$kommentti</textarea>";
 		}
 		
 		if ($rivitunnus!='') {
@@ -177,9 +189,11 @@
 					
 		echo "	<th align='left'>".t("Tuoteno")."</th>
 				<th align='left'>".t("M‰‰r‰")."</th>
-				<th align='left'>".t("Var")."</th>
-				<th align='left'>".t("Hinta")."</th>
-				<th align='left'>".t("Ale")."</th>
+				<th align='left'>".t("Var")."</th>";
+				
+		if ($kukarow['hinnat'] == 0) echo "<th align='left'>".t("Hinta")."</th>";
+		
+		echo "<th align='left'>".t("Ale")."</th>
 				<th align='left'>".t("Netto")."</th>
 				<th align='left'>".t("Alv")."</th>";
 		
@@ -237,8 +251,9 @@
 		
 		echo "</select></td>";
 
-		echo "<td valign='top'><input type='text' size='".(5+$yhtiorow['hintapyoristys']-2)."' name='hinta' value='$hinta'></td>
-			<td valign='top'><input type='text' size='5' name='ale' value='$ale'></td>";
+		if ($kukarow['hinnat'] == 0) echo "<td valign='top'><input type='text' size='".(5+$yhtiorow['hintapyoristys']-2)."' name='hinta' value='$hinta'></td>";
+		
+		echo "<td valign='top'><input type='text' size='5' name='ale' value='$ale'></td>";
 
 		$chke = $chkn = "";
 
@@ -276,8 +291,17 @@
 		}
 		
 		echo "	<th align='left'>".t("Ker‰ysaika")."</th>
-				<th align='left' colspan='2'>".t("Toimitusaika")."</th>
-				<th colspan='4' align='left'>".t("Kommentti")."</th>";
+				<th align='left' colspan='2'>".t("Toimitusaika")."</th>";
+				
+		
+		if ($kukarow['hinnat'] == 0) {
+			$nrospanni = "4";
+		}
+		else {
+			$nrospanni = "3";
+		}	
+				
+		echo "<th colspan='$nrospanni' align='left'>".t("Kommentti")."</th>";
 		
 		if ($yhtiorow['rivinumero_syotto'] != '') {
 			echo "<th align='left'>".t("Rivinumero")."</th>";
@@ -322,7 +346,7 @@
 		
 		echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
 		echo "<td valign='top' colspan='2'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";		
-		echo "<td valign='top' colspan='4'><textarea name='kommentti' cols='32' rows='2' wrap='soft'>$kommentti</textarea></td>";
+		echo "<td valign='top' colspan='$nrospanni'><textarea name='kommentti' cols='32' rows='2' wrap='soft'>$kommentti</textarea></td>";
 		
 		if ($yhtiorow['rivinumero_syotto'] != '') {
 			echo "<td valign='top'><input type='text' size='2' name='tilrivinumero' value='$rivinumero'></td>";

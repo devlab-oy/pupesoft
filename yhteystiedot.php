@@ -1,23 +1,20 @@
 <?php
 
-require ("inc/parametrit.inc");
+	require ("inc/parametrit.inc");
 
-echo "<font class='head'>Yhteystiedot</font><hr>";
+	echo "<font class='head'>Yhteystiedot</font><hr>";
 
 	if ($sort != '') {
 		$sortlisa = "?sort=".$sort;
 	}
-
 	
-	
-	if ($sort == "nimi")				$sort = "order by kuka.nimi,kuka.yhtio";
+	if ($sort == "nimi")			$sort = "order by kuka.nimi,kuka.yhtio";
 	elseif ($sort == "puhno")		$sort = "order by kuka.puhno,kuka.yhtio";
 	elseif ($sort == "eposti")		$sort = "order by kuka.eposti,kuka.yhtio";
 	elseif ($sort == "osasto")		$sort = "order by kuka.osasto,kuka.yhtio";
-	elseif ($sort == "yhtio")			$sort = "order by kuka.yhtio,kuka.nimi";
-	else 								$sort = "order by kuka.yhtio,kuka.nimi"; 
-
-		
+	elseif ($sort == "yhtio")		$sort = "order by kuka.yhtio,kuka.nimi";
+	else 							$sort = "order by kuka.yhtio,kuka.nimi"; 
+	
 	$lisa = "";
 	
 	if ($nimi_haku != "") {
@@ -70,7 +67,7 @@ echo "<font class='head'>Yhteystiedot</font><hr>";
 	echo "<td><input type='text' size='30' name='eposti_haku' 		value='$eposti_haku'></td>";
 	echo "<td><input type='text' size='20' name='osasto_haku' 		value='$osasto_haku'></td>";
 	echo "<td><input type='text' size='20' name='yhtio_haku' 		value='$yhtio_haku'></td>";
-	echo "<td><input type='submit' value='Hae'></td>";
+	echo "<td class='back'><input type='submit' value='Hae'></td>";
 	echo "</tr>";
 	echo "</form>";
 	

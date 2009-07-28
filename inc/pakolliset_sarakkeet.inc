@@ -14,7 +14,14 @@ if (!function_exists("pakolliset_sarakkeet")) {
 		switch ($table) {
 			case "tuote" :
 				$pakolliset = array("TUOTENO");
-				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM","KEHAHIN","VIHAHIN","VIHAPVM");
+				
+				if ($yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
+					$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM","VIHAHIN","VIHAPVM");
+				}
+				else {
+					$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM","KEHAHIN","VIHAHIN","VIHAPVM");	
+				}
+				
 				$wherelliset = array("TUOTENO");
 				break;
 			case "tuotepaikat" :

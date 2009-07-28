@@ -4520,7 +4520,14 @@ function alasvetoMuutakoko(alasveto, leveys) {
 	
 	if (loytyyko >= 0) {
 		if (leveys > 0) {
-			document.getElementById(alasveto).style.width=leveys;
+			cwidth = document.getElementById(alasveto).clientWidth;
+			
+			if (cwidth > leveys) {
+				document.getElementById(alasveto).style.width=leveys+'px';
+			}
+			else {
+				document.getElementById(alasveto).style.width='auto';
+			}
 		}
 		else {
 			document.getElementById(alasveto).style.width='auto';
@@ -4532,6 +4539,13 @@ function alasvetoMuutakoko(alasveto, leveys) {
 <?php
 	}
 }
+
+if (!function_exists("js_alasvetoMaxWidth")) {
+	function js_alasvetoMaxWidth($id, $leveys) {
+		return "id = '".$id."' style='max-width: ".$leveys."px; width:expression(document.getElementById(\"".$id."\").clientWidth > ".$leveys."? \"".$leveys."\": \"auto\");' onmousedown=\"alasvetoMuutakoko('".$id."', 0);\" onblur=\"alasvetoMuutakoko('".$id."', ".$leveys.");\">";
+	}
+}
+
 
 if (!function_exists("js_toimehtoTarkenne")) {
 	function js_toimehtoTarkenne() {

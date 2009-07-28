@@ -44,7 +44,7 @@
 		if (trim($trow[$i]) == "") {
 			$sel = "selected";
 		}
-		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei kustannuspaikkaa")."";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei kustannuspaikkaa")."";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -71,7 +71,7 @@
 		if (trim($trow[$i]) == "") {
 			$sel = "selected";
 		}
-		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei kohdetta")."";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei kohdetta")."";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -98,7 +98,7 @@
 		if (trim($trow[$i]) == "") {
 			$sel = "selected";
 		}
-		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei projektia")."";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei projektia")."";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -119,7 +119,7 @@
 		$apu = $trow[$i];
 		$sel[$apu] = "SELECTED";
 
-		$ulos  = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value='100' $sel[100]>".t("Paperilasku, tulostuspalvelu")."</option>";
 		$ulos .= "<option value='010' $sel[010]>".t("eInvoice")."</option>";
 		$ulos .= "<option value='020' $sel[020]>".t("Vienti eInvoice")."</option>";
@@ -161,7 +161,7 @@
 			$sel = "SELECTED";
 		}
 
-		$ulos  = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' $sel>".t("Yritys")."</option>";
 		$ulos .= "<option value = 'H' $sel1>".t("Yksityishenkilˆ")."</option>";
 		$ulos .= "<option value = 'R' $sel3>".t("Prospekti")."</option>";
@@ -180,7 +180,7 @@
 			$sela = "SELECTED";
 		}
 
-		$ulos  = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' $sela>".t("Ei")."</option>";
 		$ulos .= "<option value = 'o' $selb>".t("Kyll‰")."</option>";
 		$ulos .= "</select></td>";
@@ -195,7 +195,7 @@
 					ORDER BY jarjestys, teksti";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		while ($vrow = mysql_fetch_assoc($vresult)) {
 			$sel="";
@@ -272,7 +272,7 @@
 					WHERE nimi != ''
 					ORDER BY koodi";
 		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		$ulos .= "<option value = '' ></option>";
 
@@ -297,7 +297,7 @@
 					WHERE nimi != ''
 					ORDER BY koodi";
 		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		$ulos .= "<option value = '' ></option>";
 
@@ -322,7 +322,7 @@
 					WHERE nimi != ''
 					ORDER BY koodi";
 		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		$ulos .= "<option value = '' ></option>";
 
@@ -347,7 +347,7 @@
 					WHERE nimi != ''
 					ORDER BY koodi";
 		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		$ulos .= "<option value = '' ></option>";
 
@@ -380,7 +380,7 @@
 							WHERE nimi != ''
 							ORDER BY koodi";
 				$vresult = mysql_query($query) or pupe_error($query);
-				$ulos = "<td><select name='$nimi'>";
+				$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 				$ulos .= "<option value = '' ></option>";
 
@@ -410,7 +410,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY jarjestys, selite";
 		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -445,7 +445,7 @@
 		}
 
 		$ulos = " 	<td>
-					<select name='$nimi'>
+					<select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">
 					<option value='$wtrow[selite]' $sel22>".t("Verollinen myynti")."</option>
 					<option value='0' $sel00>".t("Veroton myynti")."</option>
 					</select>
@@ -459,7 +459,7 @@
 			$sel[$pv]	= " selected";
 
 			$ulos = "<td>
-				<select name='$nimi'>
+				<select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">
 				<option value='0' $sel[0]>".t("Ei laskutusp‰iv‰‰")."</option>
 				<option value='2' $sel[2]>".t("Maanantai")."</option>
 				<option value='3' $sel[3]>".t("Tiistai")."</option>
@@ -476,7 +476,7 @@
 	if (mysql_field_name($result, $i) == "lahetetyyppi") {
 		$vresult = t_avainsana("LAHETETYYPPI");
 
-		$ulos = "<td><select name='$nimi' id = '$nimi' Style=\"width: 300px;\" onmousedown=\"alasvetoMuutakoko('$nimi', 0);\" onblur=\"alasvetoMuutakoko('$nimi', 300);\">";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		while($row = mysql_fetch_array($vresult)) {
 			$sel = "";
@@ -491,7 +491,7 @@
 	if (mysql_field_name($result, $i) == "tilausvahvistus") {
 			$vresult = t_avainsana("TV");
 
-			$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei vahvistusta")."</option>";
+			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value=' '>".t("Ei vahvistusta")."</option>";
 
 			while($row = mysql_fetch_array($vresult)) {
 				$sel = "";
@@ -511,7 +511,7 @@
 		}
 
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value='' >".t("Ei l‰hetet‰")."</option>";
 		$ulos .= "<option value='K' $sel>".t("L‰hetet‰‰n")."</option>";
 		$ulos .= "</select></td>";
@@ -529,7 +529,7 @@
 			}
 
 			$ulos = "<td>
-				<select name='$nimi'>
+				<select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">
 				<option value='0' $sel[0]>".t("L‰hetet‰‰n asiakkaalle ja myyj‰lle")."</option>
 				<option value='2' $sel[2]>".t("L‰hetet‰‰n vain myyj‰lle")."</option>
 				<option value='1' $sel[1]>".t("Ei l‰hetet‰ ollenkaan")."</option>
@@ -540,14 +540,14 @@
 	if (mysql_field_name($result, $i) == "toimitusehto") {
 		$kires = t_avainsana("TOIMEHTO");
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value=''>".t("Ei oletustoimitusehtoa")."</option>";
 
 		while ($kirow = mysql_fetch_array($kires)) {
-			if ($kirow["toimehto"] == $trow[$i]) $select = 'SELECTED';
+			if ($kirow["selite"] == $trow[$i]) $select = 'SELECTED';
 			else $select = '';
 
-			$ulos .= "<option value='$kirow[toimehto]' $select>$kirow[toimehto]</option>";
+			$ulos .= "<option value='$kirow[selite]' $select>$kirow[selite] - $kirow[selitetark]</option>";
 		}
 
 		$ulos .= "</select></td>";
@@ -559,7 +559,7 @@
 
 		$jtksel[$trow[$i]] = "SELECTED";
 
-		$ulos  = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = ''>".t("Asiakkaalle l‰hetet‰‰n j‰lkitoimituksia normaalisti")."</option>";
 		$ulos .= "<option value = 'Y' $jtksel[Y]>".t("Asiakkaan j‰lkitoimituksia ei yhdistet‰ JT-selauksessa")."</option>";
 		$ulos .= "<option value = 'o' $jtksel[o]>".t("Asiakkaalle ei l‰hete‰ j‰lkitoimituksia")."</option>";
@@ -573,7 +573,7 @@
 			$sel[$pv]	= " selected";
 
 			$ulos = "<td>
-				<select name='$nimi'>
+				<select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">
 				<option value='0' $sel[0]>".t("N‰ytet‰‰n")."</option>
 				<option value='1' $sel[1]>".t("Ei n‰ytet‰")."</option>
 				</select></td>";
@@ -596,7 +596,7 @@
 			$sel3 = 'SELECTED';
 		}
 
-		$ulos = "<td><select name='$nimi'>
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">
 				<option value=''  $sel1>".t("Kotimaa")."</option>
 				<option value='E' $sel2>".t("Vienti EU")."</option>
 				<option value='K' $sel3>".t("Vienti ei-EU")."</option>
@@ -607,7 +607,7 @@
 	if (mysql_field_name($result, $i) == "luokka") {
 			$vresult = t_avainsana("ASIAKASLUOKKA");
 
-			$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei luokkaa")."</option>";
+			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value=' '>".t("Ei luokkaa")."</option>";
 
 			while($row = mysql_fetch_array($vresult)) {
 				$sel = "";
@@ -625,7 +625,7 @@
 			if ($trow[$i]=='E') $selb='SELECTED';
 			else $sela = "SELECTED";
 			$ulos = "<td>
-				<select name='$nimi'>
+				<select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">
 				<option value='' $sela>".t("Laskut saa ketjuttaa")."</option>
 				<option value='E' $selb>".t("Ei ketjuteta laskuja")."</option>
 				</select></td>";
@@ -639,7 +639,7 @@
 
 	if (mysql_field_name($result, $i) == "laskunsummapyoristys") {
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		$sel1="";
 		$sel2="";
@@ -660,7 +660,7 @@
 
 	if (mysql_field_name($result, $i) == "lisakulu") {
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		$sel1="";
 		$sel2="";
@@ -681,7 +681,7 @@
 
 	if (mysql_field_name($result, $i) == "kieli") {
 
-			$ulos = "<td><select name='$nimi'>";
+			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 			$sel  = "";
 
 			$query  = "show columns from sanakirja";
@@ -716,7 +716,7 @@
 	if (mysql_field_name($result, $i) == "osasto") {
 		$vresult = t_avainsana("ASIAKASOSASTO");
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' >".t("Ei osastoa")."</option>";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
@@ -734,7 +734,7 @@
 	if (mysql_field_name($result, $i) == "ryhma") {
 		$vresult = t_avainsana("ASIAKASRYHMA");
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' >".t("Ei ryhm‰‰")."</option>";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
@@ -753,7 +753,7 @@
 	if (mysql_field_name($result, $i) == "tila") {
 		$vresult = t_avainsana("ASIAKASTILA");
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' >".t("Ei tilaa")."</option>";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
@@ -774,7 +774,7 @@
 		$query = "SELECT distinct myyja, nimi from kuka where yhtio='$kukarow[yhtio]' and myyja>0 order by myyja";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' >".t("Ei myyj‰‰")."</option>";
 
 		if ($lopetus != '') {
@@ -810,7 +810,7 @@
 	if (mysql_field_name($result, $i) == "piiri") {
 		$vresult = t_avainsana("PIIRI");
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' >".t("Ei piiri‰")."</option>";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
@@ -827,7 +827,7 @@
 
 	if (mysql_field_name($result, $i) == "sisamaan_kuljetusmuoto" or mysql_field_name($result, $i) == "kuljetusmuoto") {
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' >".t("Valitse")."</option>";
 
 		$vresult = t_avainsana("KM");
@@ -846,7 +846,7 @@
 
 	if (mysql_field_name($result, $i) == "kauppatapahtuman_luonne") {
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' >".t("Valitse")."</option>";
 
 		$vresult = t_avainsana("KT");
@@ -865,7 +865,7 @@
 
 	if (mysql_field_name($result, $i) == "poistumistoimipaikka_koodi") {
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = ''>".t("Valitse")."</option>";
 
 		$vresult = t_avainsana("TULLI");
@@ -889,7 +889,7 @@
 	               	ORDER BY jarjestys";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -905,7 +905,7 @@
 
 	if (mysql_field_name($result, $i) == "kontti") {
 
-		$ulos  = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = ''>".t("Valitse")."</option>";
 
 		$chk1 = '';
@@ -939,7 +939,7 @@
 			$chk2 = '';
 		}
 
-		$ulos  = "<td><select name='$nimi'>";
+		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = ''$chk1>".t("Ei")."</option>";
 		$ulos .= "<option value = 'o'$chk2>".t("Kyll‰")."</option>";
 		$ulos .= "</select></td>";
@@ -954,7 +954,7 @@
 
 	if (mysql_field_name($result, $i) == "laskutyyppi") {
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		$apu = $trow[$i];
 		$sel = array();
@@ -976,7 +976,7 @@
 	if (mysql_field_name($result, $i) == "lahetteen_jarjestys" or
 		mysql_field_name($result, $i) == "laskun_jarjestys") {
 
-		$ulos = "<td><select name='$nimi' id = '$nimi' Style=\"width: 300px;\" onmousedown=\"alasvetoMuutakoko('$nimi', 0);\" onblur=\"alasvetoMuutakoko('$nimi', 300);\">";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
@@ -1006,7 +1006,7 @@
 		mysql_field_name($result, $i) == "laskun_jarjestys_suunta") {
 
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		$sel = array();
 		$sel[$trow[$i]] = "selected";

@@ -3,9 +3,9 @@
 if(!function_exists("asiakastarkista")) {
 	function asiakastarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $ytunnus_select, $asiakasnro_select, $toim, $asiak_laji, $errori;
-		
+
 		static $ytunnus_tunnus, $ytunnus, $ovttunnus, $apuverkkotunnus, $apuverkkotunnusi, $apulasku_email, $apulasku_emaili, $apu_maa, $apu_toim_maa;
-		
+
 		if (mysql_field_name($result, $i) == "laji") {
 			$asiak_laji = $t[$i];
 		}
@@ -15,9 +15,9 @@ if(!function_exists("asiakastarkista")) {
 				// Jos selectoitu drop downista niin katotaan, että tämä on vielä vapaa
 				//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
 				$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
-							FROM yhtio 
+							FROM yhtio
 							JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
-							where konserni	 = '$yhtiorow[konserni]' 
+							where konserni	 = '$yhtiorow[konserni]'
 							and synkronoi like '%$toim%'";
 				$sresult = mysql_query($query) or pupe_error($query);
 				$srowapu = mysql_fetch_array($sresult);
@@ -65,16 +65,16 @@ if(!function_exists("asiakastarkista")) {
 				// Jos selectoitu drop downista niin katotaan, että tämä on vielä vapaa
 				//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
 				$query = "	SELECT ifnull(group_concat(concat('\'',yhtio.yhtio,'\'')), '') yhtiot
-							FROM yhtio 
+							FROM yhtio
 							JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
-							where konserni	 = '$yhtiorow[konserni]' 
+							where konserni	 = '$yhtiorow[konserni]'
 							and synkronoi like '%$toim%'";
 				$sresult = mysql_query($query) or pupe_error($query);
 				$srowapu = mysql_fetch_array($sresult);
-				
+
 				if ($srowapu["yhtiot"] != "") {
 					$srowapu = mysql_fetch_array($sresult);
-					
+
 					if ($srowapu["yhtiot"] != '') {
 						$tarkyhtio = $srowapu["yhtiot"];
 					}
@@ -95,23 +95,23 @@ if(!function_exists("asiakastarkista")) {
 				}
 				else {
 					$t[$i] = $asiakasnro_select;
-				}								
+				}
 			}
-			
+
 			if ($yhtiorow['asiakkaan_tarkenne'] != '') {
-				
+
 				if ($asiakasnro_select != '') {
 					$asiakas_numero = $asiakasnro_select;
 				}
 				else {
 					$asiakas_numero = $t[$i];
 				}
-				
+
 				$query   = "select tunnus from asiakas where yhtio = '$kukarow[yhtio]' and ytunnus='$ytunnus' and asiakasnro='$asiakas_numero' and tunnus != '$tunnus'";
 				$sresult = mysql_query($query) or pupe_error($query);
-				
+
 				if (mysql_num_rows($sresult) > 0) {
-					
+
 					if ($alias_set == "VAHITTAISMYYNTI") {
 						$virhe[$i] .= t("Samalla tiedoilla on useita asiakkaita! Lisää tarkenne Asiakasnumeroon/Henkilötunnukseen.");
 						$errori = 1;
@@ -122,11 +122,11 @@ if(!function_exists("asiakastarkista")) {
 					}
 				}
 			}
-		
+
 		}
 
 		if (mysql_field_name($result, $i) == "ovttunnus") {
-			$ovttunnus = $t[$i];	
+			$ovttunnus = $t[$i];
 		}
 
 		if (mysql_field_name($result, $i) == "toim_ovttunnus" and $yhtiorow['asiakkaan_tarkenne'] == '') {
@@ -177,10 +177,10 @@ if(!function_exists("asiakastarkista")) {
 								WHERE yhtio = '$kukarow[yhtio]' and nimi like '%$t[$i]%'
 								ORDER BY tilino";
 					$sresult = mysql_query($query) or pupe_error($query);
-					
+
 					if (mysql_num_rows($sresult) > 0) {
 						$ulosarray[$i] = "<td><select name='t[$i]'><option value = '' $sel>".t("Ei valintaa")."</option>";
-						
+
 						while ($vrow = mysql_fetch_array($sresult)) {
 							$sel = "";
 							if ($trow[$i] == $vrow[0]) {
@@ -188,7 +188,7 @@ if(!function_exists("asiakastarkista")) {
 							}
 							$ulosarray[$i] .= "<option value = '$vrow[tilino]' $sel>$vrow[tilino] $vrow[nimi]</option>";
 						}
-						
+
 						$ulosarray[$i] .= "</select></td>";
 						$virhe[$i] = t("Valitse tili");
 						$errori = 1;
@@ -215,7 +215,7 @@ if(!function_exists("asiakastarkista")) {
 					$errori = 1;
 				}
 
-				// jos ollaan valittu jotain muuta kuin PAPERI tai EMAIL niin verkkotunnus pitää syöttää!				
+				// jos ollaan valittu jotain muuta kuin PAPERI tai EMAIL niin verkkotunnus pitää syöttää!
 				if (trim($t[$i]) != '666' and trim($t[$i]) != '667' and trim($t[$i]) != '100' and $apuverkkotunnus == "") {
 					$virhe[$i] = "".t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhjä! Laskutus ei onnistu")."!";
 					$virhe[$apuverkkotunnusi] = "".t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhjä! Laskutus ei onnistu")."!";
@@ -225,7 +225,7 @@ if(!function_exists("asiakastarkista")) {
 		}
 
 		if ((mysql_field_name($result, $i) == "email" or mysql_field_name($result, $i) == "lasku_email") and trim($t[$i]) != '') {
-			
+
 			// katotaan löytyykö email osoitteen domain...
 			list($nimi, $domain) = split("@", trim($t[$i]));
 
@@ -242,9 +242,9 @@ if(!function_exists("asiakastarkista")) {
 
 		if (mysql_field_name($result, $i) == "maksuehto" and $t[$i] > 0) {
 
-			$query = "	SELECT tunnus 
-						from maksuehto 
-						where yhtio='$kukarow[yhtio]' 
+			$query = "	SELECT tunnus
+						from maksuehto
+						where yhtio='$kukarow[yhtio]'
 						and tunnus='$t[$i]'
 						and (sallitut_maat = '' or sallitut_maat like '%$apu_maa%')";
 			$sresult = mysql_query($query) or pupe_error($query);
@@ -257,8 +257,8 @@ if(!function_exists("asiakastarkista")) {
 
 		if (mysql_field_name($result, $i) == "toimitustapa" and trim($t[$i]) != '') {
 
-			$query   = "SELECT tunnus 
-						from toimitustapa 
+			$query   = "SELECT tunnus
+						from toimitustapa
 						where yhtio='$kukarow[yhtio]' and selite='$t[$i]'
 						and (sallitut_maat = '' or sallitut_maat like '%$apu_toim_maa%')";
 			$sresult = mysql_query($query) or pupe_error($query);
@@ -269,16 +269,16 @@ if(!function_exists("asiakastarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "toim_maa") {	
+		if (mysql_field_name($result, $i) == "toim_maa") {
 			$apu_toim_maa = $t[$i];
 		}
-		
+
 		if (mysql_field_name($result, $i) == "maa") {
-			
+
 			$apu_maa = $t[$i];
-			
+
 			if (strtoupper($t[$i]) == 'FI' and $asiak_laji != "R" and $asiak_laji != "H" and ($yhtiorow["ytunnus_tarkistukset"] == "" or $yhtiorow["ytunnus_tarkistukset"] == "A")) {
-				
+
 				require ("tarkistaytunnus.inc");
 
 				if ($ok == 0) {
@@ -296,5 +296,5 @@ if(!function_exists("asiakastarkista")) {
 		}
 	}
 }
-	
+
 ?>

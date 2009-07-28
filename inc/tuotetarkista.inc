@@ -5,8 +5,8 @@ if(!function_exists("tuotetarkista")) {
 	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow, $tuotteen_parametrit_keys = "", $tuotteen_parametrit_vals = "") {
 		global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko;
 
-		static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin;
-		
+		static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind;
+
 		if (mysql_field_name($result, $i) == "tuoteno") {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu");
@@ -24,11 +24,26 @@ if(!function_exists("tuotetarkista")) {
 					}
 				}
 			}
+
+			// Tuotteen saa poistaa mikäli sillä ei ole yhtään tapahtumaa
+			$query = "SELECT yhtio FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$t[$i]' LIMIT 1";
+			$sdtres = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($sdtres) == 0) {
+				$query = "SELECT yhtio FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$t[$i]' and tyyppi != 'D' LIMIT 1";
+				$sdtres = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($sdtres) == 0) {
+					$poistolukko = "";
+				}
+			}
+
 			$tem_tuoteno = $t[$i];
 		}
-		
+
 		if (mysql_field_name($result, $i) == "kehahin" and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
 			$tem_kehahin = $t[$i];
+			$tem_kehahin_ind = $i;
 		}
 
 		if (mysql_field_name($result, $i) == "nimitys") {
@@ -52,7 +67,7 @@ if(!function_exists("tuotetarkista")) {
 				$virhe[$i] = t("Tili puuttuu tai sitä ei loydy");
 			}
 		}
-		
+
 		if (mysql_field_name($result, $i) == "tilino" and trim($t[$i]) == "" and $laji == "V") {
 			$virhe[$i] = t("Viranomaistuotteella on oltava tili")."!";
 		}
@@ -71,44 +86,8 @@ if(!function_exists("tuotetarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "tullinimike2" and $tem_tullinimike1 != "") {
-
 			// jos tyhjää laitetaan nollaksi
 			if ($t[$i] == "") $t[$i] = "00";
-			
-			/* CHECKKI POIS TOISTAISEKSI, LIIAN JYRKKÄ
-			// varmistetaan, että on numeerinen
-			if (!is_numeric($t[$i])) {
-				$virhe[$i] = t("Tullinimike2 tulee olla numeerinen");
-			}
-			else {
-				// haetaan kaikkien toimittajien alkuperämaat
-				$query = "	SELECT group_concat(distinct concat(\"'\",alkuperamaa,\"'\") separator ','), count(*) kpl
-							FROM tuotteen_toimittajat
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$tem_tuoteno'
-							and alkuperamaa != ''";
-				$sresult = mysql_query($query) or pupe_error($query);
-				$sresrow = mysql_fetch_array($sresult);
-
-				// jos ei ole yhtään toimittajaa ei voida tehdä tätä testiä
-				if ($sresrow["kpl"] > 0) {
-					// käännetään tullinimike 2 pitkäsksi numeroksi nollapädätty
-					$t[$i] = sprintf('%02s', (int) $t[$i]);
-
-					// kokeillaan näillä tiedoilla onko tullinimike1+2 oikein
-					$laskurow["maa_lahetys"] = trim($sresrow[0], "'"); // otetaan eka ja vika hipsu pois, niin ei rikota taricveroperusteet.incciä
-					$tuorow["tullinimike1"] = $tem_tullinimike1;
-					$tuorow["tullinimike2"] = $t[$i];
-					$tuorow["tuoteno"] = $tem_tuoteno;
-
-					ob_start();
-					require("tilauskasittely/taric_veroperusteet.inc");
-					$virhe[$i] = ob_get_contents();
-					ob_end_clean();
-				}
-			}
-			*/
-
 		}
 
 		if (mysql_field_name($result, $i) == "tuotetyyppi") {
@@ -150,11 +129,11 @@ if(!function_exists("tuotetarkista")) {
 					$virhe[$i] = t("Tuotteella on varastopaikkoja. Poista ne ensin!");
 				}
 			}
-			
+
 			if ($poistolukko != "" and $t[$i] != $trow["ei_saldoa"]) {
-				$virhe[$i] = t("Tuotteella on tapahtumia. Saldottomuutta ei voi vaihtaa!");
+				$virhe[$i] = t("Tuotteella on tapahtumia. Saldottomuutta ei voi vaihtaa")."!";
 			}
-			
+
 			$tem_eisaldoa = $t[$i];
 		}
 
@@ -206,10 +185,43 @@ if(!function_exists("tuotetarkista")) {
 				}
 			}
 		}
-	
-		//tehdään nää jutu tässä koska tämä on nyt viimeinen sarake tässä taulussa
-		if (mysql_field_name($result, $i) == "ostajanro") {
-			
+
+		//tehdään nää jutut tässä koska tämä on aina viimeinen sarake
+		if (mysql_field_name($result, $i) == "tunnus") {
+
+			if ($tem_kehahin != "" and $tem_eisaldoa == "") {
+				$virhe[$i] = $virhe[$tem_kehahin_ind] = t("Saldollisen tuotteen hankintahintaa ei voi muuttaa")."!";
+			}
+
+			if (count($virhe) == 0 and $tem_kehahin != "" and $tem_eisaldoa != "" and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
+				$query  = "	SELECT kehahin
+							FROM tuote
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$tem_tuoteno'";
+				$chkressires = mysql_query($query) or pupe_error($query);
+				$chkressirow = mysql_fetch_assoc($chkressires);
+
+				$tem_kehahin = sprintf("%.6f", str_replace(",", ".", $tem_kehahin));
+
+				if ($tem_kehahin != $chkressirow["kehahin"]) {
+					$query = "	INSERT into tapahtuma set
+								yhtio 		= '$kukarow[yhtio]',
+								tuoteno 	= '$tem_tuoteno',
+								kpl 		= '0',
+								kplhinta	= '$tem_kehahin',
+								hinta 		= '$tem_kehahin',
+								laji 		= 'tulo',
+								hyllyalue	= '',
+								hyllynro 	= '',
+								hyllyvali	= '',
+								hyllytaso	= '',
+								selite 		= '".t("Tuotteen kehahinta vaihdettiin")." $chkressirow[kehahin] --> $tem_kehahin',
+								laatija 	= '$kukarow[kuka]',
+								laadittu 	= now()";
+					$chkressires = mysql_query($query) or pupe_error($query);
+				}
+			}
+
 			if (count($virhe) == 0 and $tem_eisaldoa == "") {
 				if ($yhtiorow["tuotteen_oletuspaikka"] != "" and mysql_num_rows($sresult) == 0) {
 					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", $yhtiorow["tuotteen_oletuspaikka"]);
@@ -243,36 +255,6 @@ if(!function_exists("tuotetarkista")) {
 					$tuotepaikka_result = mysql_query($tuotepaikka_query) or pupe_error($tuotepaikka_query);
 				}
 			}
-			
-			
-			if (count($virhe) == 0 and $tem_kehahin != "" and $tem_eisaldoa != "" and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
-				$query  = "	SELECT kehahin
-							FROM tuote
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$tem_tuoteno'";
-				$chkressires = mysql_query($query) or pupe_error($query);
-				$chkressirow = mysql_fetch_assoc($chkressires);
-				
-				$tem_kehahin = sprintf("%.6f", $tem_kehahin);
-				
-				if ($tem_kehahin != $chkressirow["kehahin"]) {
-					$query = "	INSERT into tapahtuma set
-								yhtio 		= '$kukarow[yhtio]',
-								tuoteno 	= '$tem_tuoteno',
-								kpl 		= '0',
-								kplhinta	= '$tem_kehahin',
-								hinta 		= '$tem_kehahin',
-								laji 		= 'tulo',
-								hyllyalue	= '',
-								hyllynro 	= '',
-								hyllyvali	= '',
-								hyllytaso	= '',
-								selite 		= '".t("Tuotteen kehahinta vaihdettiin")." $chkressirow[kehahin] --> $tem_kehahin',
-								laatija 	= '$kukarow[kuka]',
-								laadittu 	= now()";
-					$chkressires = mysql_query($query) or pupe_error($query);
-				}
-			}				
 		}
 	}
 }

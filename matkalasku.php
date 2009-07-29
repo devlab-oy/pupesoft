@@ -868,6 +868,8 @@ if ($tee == "UUSI") {
 						hyvak5 			= '$trow[oletus_hyvak5]',
 						hyvaksyja_nyt 	= '$trow[kuka]',
 						ytunnus 		= '$trow[ytunnus]',
+						ovttunnus 		= '$trow[ovttunnus]',
+						toim_ovttunnus 	= '$trow[kuka]',
 						tilinumero 		= '$trow[tilinumero]',
 						nimi 			= '$trow[kayttajanimi]',
 						nimitark 		= '".t("Matkalasku")."',

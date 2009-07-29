@@ -69,25 +69,25 @@
 	}
 	elseif ($toim == "LAHETE" and $yhtiorow["lahete_tyyppi_tulostus"] != '' and $otunnus != '') {
 		echo "<tr><td>".t("Tulosta")."</td><td><select name='sellahetetyyppi'>";
-		
-		$query2 = "	SELECT lahetetyyppi 
-					FROM lasku 
+
+		$query2 = "	SELECT lahetetyyppi
+					FROM lasku
 					JOIN asiakas on lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$otunnus'";
 		$vresult2 = mysql_query($query2) or pupe_error($query2);
 		$row2 = mysql_fetch_array($vresult2);
-		
+
 		$vresult = t_avainsana("LAHETETYYPPI");
-		
+
 		while($row = mysql_fetch_array($vresult)) {
 			$sel = "";
 			if ($row["selite"] == $row2["lahetetyyppi"]) $sel = 'selected';
-			
+
 			echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 		}
 
 		echo "</select></td></tr>";
-		
+
 		$mista = 'asiakas';
 	}
     else {
@@ -194,7 +194,7 @@
 		echo "</select></td>";
 		echo "</tr>";
 
-		if ($tulostin == 'Työmääräys') {
+		if ($tulostin == 'Työmääräys' and $kukarow['hinnat'] == 0) {
 
 			if ($yhtiorow["tyomaaraystyyppi"] == "") {
 				$seltt = "CHECKED";
@@ -211,21 +211,21 @@
 			echo "<tr><td rowspan='3'>".t("Järjestele purkulista")."</td><td><input type='radio' name='sorttaus' value='tuote'> ".t("tuotenumeron mukaan")."</td></tr>";
 			echo "<tr><td><input type='radio' name='sorttaus' value='toim_tuote' CHECKED> ".t("toimittajan tuotenumeron mukaan")."</td></tr>";
 			echo "<tr><td><input type='radio' name='sorttaus' value='paikka'> ".t("varastopaikan mukaan")."</td></tr>";
-			
+
 			if ($yhtiorow['viivakoodi_purkulistaan'] == 'K') {
 				$span = 4;
 			}
 			else {
 				$span = 3;
 			}
-			
+
 			echo "<tr><td rowspan='$span'>".t("Tulostettavat rivit")."</td><td><input type='radio' name='mitkarivit' value='kaikki'> ".t("kaikki rivit")."</td></tr>";
 			echo "<tr><td><input type='radio' name='mitkarivit' value='viematta' CHECKED> ".t("saldoille viemättä olevat rivit")."</td></tr>";
 			echo "<tr><td><input type='radio' name='mitkarivit' value='viedyt'> ".t("saldoille viedyt rivit")."</td></tr>";
 			if ($yhtiorow['viivakoodi_purkulistaan'] == 'K') {
 				echo "<tr><td><input type='radio' name='mitkarivit' value='koodittomat'> ".t("Viivakoodittomat rivit")."</td></tr>";
 			}
-			
+
 		}
 
 	}

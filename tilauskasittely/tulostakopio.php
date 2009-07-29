@@ -1587,7 +1587,7 @@
 				$sivu  = 1;
 				$paino = 0;
 
-				if ($tyomtyyppi == "P") {
+				if ($tyomtyyppi == "P" or $kukarow['hinnat'] != 0) {
 					$tyyppi = "P";
 				}
 				elseif($tyomtyyppi == "N") {

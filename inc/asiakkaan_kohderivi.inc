@@ -9,11 +9,11 @@
 	}
 
 	if (mysql_field_name($result, $i) == "liitostunnus") {
-
-		if ($liitostunnus != ''){			
-			$trow[$i] = $liitostunnus;
-			
-			$tyyppi = 3; 		
+		if ($lukitse_avaimeen != ''){
+			$trow[$i] = $lukitse_avaimeen;
+			$tyyppi = 4;
+			$ulos = "<input type='hidden' name='$nimi' value='$lukitse_avaimeen'>";
+			$jatko = 0;
 		}
 		elseif($trow[$i] != "" ) {
 			$query = "SELECT nimi FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$trow[$i]' LIMIT 1";

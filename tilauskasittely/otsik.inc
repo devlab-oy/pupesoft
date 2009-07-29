@@ -1249,7 +1249,7 @@
 			//	Jos halutaan niin voidaan liittää hieman yhteyshenkilöitä
 			if($yhtiorow["tilauksen_yhteyshenkilot"] == "K") {
 				echo "<tr><td>".t("Yhteyshenkilö").":</td>
-				<td><select id='yhteyshenkilo_tekninen' name='yhteyshenkilo_tekninen' onchange=\"yllapito('yhteyshenkilo&liitostunnus=$srow[liitostunnus]&yhtyyppi=asiakas',this.id)\">";
+				<td><select id='yhteyshenkilo_tekninen' name='yhteyshenkilo_tekninen' onchange=\"yllapito('yhteyshenkilo&lukitse_avaimeen=$srow[liitostunnus]&yhtyyppi=asiakas',this.id)\">";
 
 				$query = "	SELECT tunnus, if(titteli != '', concat_ws(', ' ,nimi, titteli), nimi) nimi
 							FROM yhteyshenkilo
@@ -1303,7 +1303,7 @@
 				echo "</td></tr>";
 
 				echo "<tr><td>".t("Asiakkaan kaupallinen käsittelijä").":</td>
-				<td><select id='yhteyshenkilo_kaupallinen' name='yhteyshenkilo_kaupallinen' onchange=\"yllapito('yhteyshenkilo&liitostunnus=$srow[liitostunnus]&yhtyyppi=asiakas',this.id)\">";
+				<td><select id='yhteyshenkilo_kaupallinen' name='yhteyshenkilo_kaupallinen' onchange=\"yllapito('yhteyshenkilo&lukitse_avaimeen=$srow[liitostunnus]&yhtyyppi=asiakas',this.id)\">";
 
 				echo "	<option value=''>".t("Ei kaupallista käsittelijää")."</option>";
 				mysql_data_seek($yhresult,0);
@@ -1337,7 +1337,7 @@
 				$kohderesult = mysql_query($query) or pupe_error($query);
 
 				echo "<td>".t("Kohde").":</td>
-					<td><select id='asiakkaan_kohde' name='asiakkaan_kohde' onchange=\"yllapito('asiakkaan_kohde&liitostunnus=$srow[liitostunnus]',this.id)\">";
+					<td><select id='asiakkaan_kohde' name='asiakkaan_kohde' onchange=\"yllapito('asiakkaan_kohde&lukitse_avaimeen=$srow[liitostunnus]',this.id)\">";
 
 				echo "<option value=''>".t("Asiakkaalla ei ole kohdetta")."</option>";
 

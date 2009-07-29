@@ -552,7 +552,9 @@ if ($tee == 'P' or $tee == 'E') {
 			$fakta = "<br><br><font class='message'>$trow[fakta]</font>";
 		}
 
-		echo "<table><tr><td valign='top'>";
+		echo "<table><tr><td valign='top' style='padding: 0px;'>";
+		
+		
 		echo "<table>";
 		echo "<tr><th colspan='2'>".t("Toimittaja")."</th></tr>";
 		echo "<tr><td colspan='2'>$trow[nimi] $trow[nimitark] ($trow[ytunnus])</td></tr>";
@@ -563,7 +565,7 @@ if ($tee == 'P' or $tee == 'E') {
 		echo "</td>";
 
 		// eri tilitiedot riippuen onko suomalainen vai ei
-		echo "<td valign='top'>";
+		echo "<td valign='top' style='padding: 0px;'>";
 		echo "<table>";
 		echo "<tr><th colspan='2'>".t("Tilitiedot")."</th></tr>";
 
@@ -601,13 +603,10 @@ if ($tee == 'P' or $tee == 'E') {
 
 		// tulostetaan mahdolliset errorimessaget
 		if ($errormsg != '') {
-			echo "<td valign='top'>$errormsg</td>";
+			echo "<td class='back' valign='top'>$errormsg</td>";
 		}
 		else {
 			// N‰ytet‰‰n nelj‰ viimeisint‰ laskua, jotta v‰hennet‰‰n duplikaattien tallennusta
-
-			echo "<td valign='top'>";
-
 			$query = "	SELECT tapvm, summa
 						FROM lasku
 						WHERE yhtio='$kukarow[yhtio]' and
@@ -619,7 +618,7 @@ if ($tee == 'P' or $tee == 'E') {
 			$vikatlaskutres = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($vikatlaskutres) > 0) {
-
+				echo "<td valign='top' style='padding: 0px;'>";
 				echo "<table><tr>";
 
 				for ($i = 0; $i < mysql_num_fields($vikatlaskutres); $i++) {
@@ -642,9 +641,10 @@ if ($tee == 'P' or $tee == 'E') {
 				}
 
 				echo "</table>";
+				echo "</td>";
 			}
-			echo "</td>";
 		}
+		
 		echo "</tr></table>";
 	}
 	else {
@@ -660,7 +660,7 @@ if ($tee == 'P' or $tee == 'E') {
 		if ($tyyppi != strtoupper($yhtiorow['maa'])) {
 			echo "
 				<font class='message'>".t("Ulkomaalaisen toimittajan tiedot")."</font>
-				<table border='0'><tr><td class='back' valign='top'>
+				<table><tr><td class='back' valign='top'>
 
 				<table>
 				<tr><th>".t("ytunnus")."</th>	<td><input type='text' name='trow[ytunnus]'    maxlength='16'  size=18 value='$trow[ytunnus]'></td></tr>

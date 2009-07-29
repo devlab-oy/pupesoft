@@ -3311,7 +3311,7 @@ if (!function_exists("alehinta")) {
 		}
 		elseif ($ale == "" and $netto != 'N' and $netto != 'E') {
 
-			$ale = 0;
+			unset($ale);
 
 			// 5. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus)
 			$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
@@ -3323,7 +3323,7 @@ if (!function_exists("alehinta")) {
 						and tuoteno != ''
 						and (minkpl <= '$kpl' or minkpl = 0)
 						and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-						and alennus > 0
+						and alennus >= 0
 						and alennus <= 100)
 
 						UNION
@@ -3337,7 +3337,7 @@ if (!function_exists("alehinta")) {
 						and tuoteno != ''
 						and (minkpl <= '$kpl' or minkpl = 0)
 						and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-						and alennus > 0
+						and alennus >= 0
 						and alennus <= 100)
 
 						ORDER BY prio, minkpl desc, aika, tunnus desc
@@ -3353,7 +3353,7 @@ if (!function_exists("alehinta")) {
 			}
 
 			// 6. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus)
-			if ($ale == 0) {
+			if (!isset($ale)) {
 
 				$query = "	(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus
 							FROM asiakasalennus USE INDEX (yhtio_asiakas_tuoteno)
@@ -3364,7 +3364,7 @@ if (!function_exists("alehinta")) {
 							and ryhma != ''
 							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-							and alennus > 0
+							and alennus >= 0
 							and alennus <= 100)
 
 							UNION
@@ -3378,7 +3378,7 @@ if (!function_exists("alehinta")) {
 							and ryhma != ''
 							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-							and alennus > 0
+							and alennus >= 0
 							and alennus <= 100)
 
 							ORDER BY prio, minkpl desc, aika, tunnus desc
@@ -3395,7 +3395,7 @@ if (!function_exists("alehinta")) {
 			}
 
 			// 7. asiakas.ryhmä tuote.tuoteno aleprosentti (asiakasaleryhmän tuotteen alennus)
-			if ($ale == 0) {
+			if (!isset($ale)) {
 
 				$query = "	SELECT alennus
 							FROM asiakasalennus
@@ -3408,7 +3408,7 @@ if (!function_exists("alehinta")) {
 							and asiakas = 0
 							and (minkpl <= '$kpl' or minkpl = 0)
 							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-							and alennus > 0
+							and alennus >= 0
 							and alennus <= 100
 							ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
 							LIMIT 1";
@@ -3424,7 +3424,7 @@ if (!function_exists("alehinta")) {
 			}
 
 			// 8. asiakas.ryhmä tuote.aleryhmä aleprosentti (asiakasaleryhmän tuotealeryhmän alennus)
-			if ($ale == 0) {
+			if (!isset($ale)) {
 
 				for($aasi = strlen($trow["aleryhma"]); $aasi>0; $aasi--) {
 
@@ -3447,7 +3447,7 @@ if (!function_exists("alehinta")) {
 								and asiakas = 0
 								and (minkpl <= '$kpl' or minkpl = 0)
 								and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-								and alennus > 0
+								and alennus >= 0
 								and alennus <= 100
 								ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), tunnus desc
 								LIMIT 1";
@@ -3465,14 +3465,14 @@ if (!function_exists("alehinta")) {
 			}
 
 			// 9. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus)
-			if ($ale == 0) {
+			if (!isset($ale)) {
 
 				$query = "	SELECT alennus
 							FROM perusalennus
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ryhma = '$trow[aleryhma]'
 							and ryhma != ''
-							and alennus > 0
+							and alennus >= 0
 							and alennus <= 100";
 				$hresult = mysql_query($query) or pupe_error($query);
 
@@ -3486,6 +3486,9 @@ if (!function_exists("alehinta")) {
 			}
 		}
 
+		if (!isset($ale)) {
+			$ale = 0;
+		}
 		if ($ale > 100) {
 			$ale = 100;
 		}

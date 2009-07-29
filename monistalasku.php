@@ -1139,11 +1139,11 @@ if ($tee == '' and $vain_monista == "") {
 	echo "<br><table>";
 	echo "<form action = '$PHP_SELF' method = 'post'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
-	echo "<tr><th>".t("Asiakkaan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
-	echo "<tr><th>".t("Tilausnumero")."</th><td class='back'></td><td><input type='text' size='10' name='otunnus'></td></tr>";
+	echo "<tr><th>".t("Asiakkaan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";
+	echo "<tr><th>".t("Tilausnumero")."</th><td><input type='text' size='10' name='otunnus'></td></tr>";
 
 	if ($toim == '') {
-		echo "<tr><th>".t("Laskunumero")."</th><td class='back'></td><td><input type='text' size='10' name='laskunro'></td></tr>";
+		echo "<tr><th>".t("Laskunumero")."</th><td><input type='text' size='10' name='laskunro'></td></tr>";
 	}
 
 	echo "</table>";
@@ -1161,6 +1161,5 @@ if ($tee == '' and $vain_monista == "") {
 
 	require ('inc/footer.inc');
 }
-
 
 ?>

@@ -1,22 +1,5 @@
 <?php
 
-if ($keikanalatila == "T") {
-	$query = "SELECT * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi LIKE '%ulask.php'";
-	$res = mysql_query($query) or pupe_error($query);
-
-	if (mysql_num_rows($res) > 0) {
-		echo "<font class='message'>".t("Syötä uusi lasku")." <form method='POST' action='".$palvelin2."ulask.php'>
-				<input type='hidden' name='lopetus' value='$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=kululaskut//toiminto=kululaskut//projektilla=$projektilla//from=VALITSETOIMITUS//tilausnumero=$tilausnumero//keikanalatila=T//otunnus=$otunnus/NIMILISA=Liitä kululasku/'>
-				<input type='submit' value='" . t('Syötä lasku')."'>
-				</form><br><br>";
-
-		echo "<font class='message'>".t("Syötä uusi matkalasku")." <form method='POST' action='".$palvelin2."matkalasku.php'>
-				<input type='hidden' name='lopetus' value='$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=kululaskut//toiminto=kululaskut//projektilla=$projektilla//from=VALITSETOIMITUS//tilausnumero=$tilausnumero//keikanalatila=T//otunnus=$otunnus/NIMILISA=Liitä kululasku/'>
-				<input type='submit' value='" . t('Syötä lasku')."'>
-				</form><br><br>";
-	}
-}
-
 $query  = "	SELECT *
 			from lasku
 			where tunnus	= '$otunnus'
@@ -71,6 +54,28 @@ else {
 	else {
 		echo "<font class='error'>".t("Tilaus katosi!")."</font>";
 		exit;
+	}
+}
+
+if ($keikanalatila == "T") {
+	$query = "SELECT * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi LIKE '%ulask.php'";
+	$res = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($res) > 0) {
+		echo "<font class='message'>".t("Syötä uusi lasku")." <form method='POST' action='".$palvelin2."ulask.php'>
+				<input type='hidden' name='lopetus' value='$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=kululaskut//toiminto=kululaskut//projektilla=$projektilla//from=VALITSETOIMITUS//tilausnumero=$tilausnumero//keikanalatila=T//otunnus=$otunnus/NIMILISA=Liitä kululasku/'>
+				<input type='submit' value='" . t('Syötä lasku')."'>
+				</form><br><br>";
+	}
+	
+	$query = "SELECT * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi LIKE '%matkalasku.php'";
+	$res = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($res) > 0) {
+		echo "<font class='message'>".t("Syötä uusi matkalasku")." <form method='POST' action='".$palvelin2."matkalasku.php'>
+				<input type='hidden' name='lopetus' value='$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=kululaskut//toiminto=kululaskut//projektilla=$projektilla//from=VALITSETOIMITUS//tilausnumero=$tilausnumero//keikanalatila=T//otunnus=$otunnus/NIMILISA=Liitä kululasku/'>
+				<input type='submit' value='" . t('Syötä lasku')."'>
+				</form><br><br>";
 	}
 }
 

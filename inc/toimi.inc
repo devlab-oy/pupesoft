@@ -7,6 +7,8 @@
 		$otsikko = 'Käyttäjätiedot';
 		$otsikko_nappi = "käyttäjätiedot";
 		
+		$laji = "K";
+		
 		$rajauslisa = " and toimi.tyyppi IN ('K') ";
 	}
 	else {

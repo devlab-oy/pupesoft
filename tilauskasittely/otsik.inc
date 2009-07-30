@@ -1462,6 +1462,7 @@
 				echo "<option value='N' $sel[N]>".t("Normaalitilaus")."</option>";
 				echo "<option value='E' $sel[E]>".t("Ennakkotilaus")."</option>";
 				echo "<option value='T' $sel[T]>".t("Tarjoustilaus")."</option>";
+				echo "<option value='A' $sel[A]>".t("Työmääräys")."</option>";
 
 				echo "</select></td>";
 			}
@@ -1810,7 +1811,7 @@
 						</tr>";
 			}
 
-			if ($toim == "TYOMAARAYS") {
+			if ($toim == "TYOMAARAYS" or $srow["tilaustyyppi"] == "A") {
 				//Täysin dynaaminen osio
 				$al_res = t_avainsana("MYSQLALIAS","", "and avainsana.selite like 'tyomaarays.%' and avainsana.selitetark != ''");
 
@@ -2896,9 +2897,9 @@
 				}
 			}
 
-			if ($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO" or $toim == "TARJOUS" or $tilaustyyppi == "T") {
+			if ($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or $tilaustyyppi == "A") {
 				//otetaan kantaa pyörän malliin
-				if($merkki2 != 'eimenu' and $merkki2 != ''){
+				if($merkki2 != 'eimenu' and $merkki2 != '') {
 					$merkki = $merkki2;
 				}
 

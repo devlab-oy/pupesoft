@@ -356,7 +356,7 @@
 						
 			if ($kukarow['hinnat'] == 0) $query .= " round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo, round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa, ";
 			 			
-			$query .= "	$toimaikalisa alatila, tila, lasku.tunnus, lasku.mapvm
+			$query .= "	$toimaikalisa alatila, tila, lasku.tunnus, lasku.mapvm, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
@@ -382,7 +382,7 @@
 				$sumrow = mysql_fetch_array($sumresult);
 			}
 			
-			$miinus = 4;
+			$miinus = 5;
 		}
 		elseif ($toim == 'ENNAKKO') {
 			$query = "	SELECT lasku.tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, lasku.laatija, viesti tilausviite,$toimaikalisa alatila, tila, lasku.tunnus
@@ -636,15 +636,24 @@
 			$miinus = 5;
 		}
 		elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYSSUPER") {
+			
+			if ($toim == "TYOMAARAYSSUPER") {
+				$tyomalatlat = " and lasku.alatila != 'X' ";
+			}
+			else {
+				$tyomalatlat = " and lasku.alatila in ('','A','B','C','J') ";
+			}
+			
+			
 			$query = "	SELECT lasku.tunnus tilaus,
 						concat_ws('<br>',lasku.nimi,lasku.tilausyhteyshenkilo,lasku.viesti, concat_ws(' ', ifnull((SELECT selitetark_2 FROM avainsana WHERE avainsana.yhtio=tyomaarays.yhtio and avainsana.laji = 'sarjanumeron_li' and avainsana.selite = 'MERKKI' and avainsana.selitetark=tyomaarays.merkki LIMIT 1), tyomaarays.merkki), tyomaarays.mallivari)) asiakas,
 						lasku.ytunnus, lasku.luontiaika,
-						if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija, $toimaikalisa alatila, lasku.tila, lasku.tunnus
+						if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija, $toimaikalisa alatila, lasku.tila, lasku.tunnus, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
 						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('A','L','N') and lasku.tilaustyyppi='A' and lasku.alatila in ('','A','B','C','J')
+						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('A','L','N') and lasku.tilaustyyppi='A' $tyomalatlat
 						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
@@ -662,7 +671,7 @@
 		    	$sumrow = mysql_fetch_array($sumresult);
 			}
 			
-			$miinus = 3;
+			$miinus = 4;
 		}
 		elseif ($toim == "REKLAMAATIO") {
 			$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, laatija,$toimaikalisa alatila, tila, lasku.tunnus, tilaustyyppi
@@ -910,7 +919,7 @@
 		}
 		else {
 			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,
-						$seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka.extranet extra, lasku.mapvm
+						$seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka.extranet extra, lasku.mapvm, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
 						$seurantalisa
@@ -936,7 +945,7 @@
 				$sumrow = mysql_fetch_array($sumresult);
 			}
 			
-			$miinus = 5;
+			$miinus = 6;
 		}
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -1162,6 +1171,9 @@
 						}
 						elseif(($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "R") {
 							$tarkenne = " (".t("Reklamaatio").") ";
+						}
+						elseif(($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "A") {
+							$laskutyyppi = "Työmääräys";
 						}
 
 						if ($row["varastokpl"] > 0) {

@@ -7,7 +7,7 @@
 			global $kukarow, $yhtiorow, $vva, $kka, $ppa, $vvl, $kkl, $ppl;
 			
 			if ($vva != '' and $kka != '' and $ppa != '' and $vvl != '' and $kkl != '' and $ppl != ''){
-				$lisa = " and lasku.luontiaika >= '$vva-$kka-$ppa' and lasku.luontiaika <= '$vvl-$kkl-$ppl' ";
+				$lisa = " and lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00' and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59' ";
 			}
 
 			if ($asentaja != "") {
@@ -34,13 +34,12 @@
 		
 			if (mysql_num_rows($sresult) > 0) {
 				
-				echo "<tr>
+				echo "$query<tr>
 						<th>".t("Työmääräys").":<br>".t("Nimi").":</th>
 						<th>".t("Työtunnit").":</th>
 						<th>".t("Matkalaskut").":</th>					
 					 </tr>";
-			
-			
+					
 				$kaletunnit = array();
 	
 				while ($row = mysql_fetch_array($sresult)) {
@@ -165,12 +164,12 @@
 		echo "</table><br>";
 	}
 
-	if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-	if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-	if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+	if (!isset($kka)) $kka = date("m");
+	if (!isset($vva)) $vva = date("Y");
+	if (!isset($ppa)) $ppa = "01";
 	if (!isset($kkl)) $kkl = date("m");
 	if (!isset($vvl)) $vvl = date("Y");
-	if (!isset($ppl)) $ppl = date("d");
+	if (!isset($ppl)) $ppl = date("d", mktime(0, 0, 0, date("m")+1, 0, date("Y")));;
 	
 	echo "<table><tr>
 			<form method='post' action='$PHP_SELF'>

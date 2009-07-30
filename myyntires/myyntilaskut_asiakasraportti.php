@@ -523,25 +523,6 @@
 					}
 				}
 
-/*				mysql_data_seek($result,0);
-				echo "<tr>
-					<th>$asiakasrow[postino] $asiakasrow[postitp]</td>
-					<td>".t("Laskuja yhteensä")."</td>";
-
-				if (mysql_num_rows($result) > 1) { // Valuuttasummia
-					$kotisumma = 0;
-					while ($kok = mysql_fetch_array($result)) {
-						echo "<td align='right'>$kok[summa_valuutassa]</td><td>$kok[valkoodi]</td>";
-						$kotisumma += $kok['summa'];
-					}
-					echo "<td align='right'>$kotisumma</td><td>$yhtiorow[valkoodi]</td>";
-				}
-				else {
-					$kok = mysql_fetch_array($result);
-					echo "<td align='right'>$kok[summa]</td></tr>";
-				}
-*/
-
 				echo "<tr>
 					<th>$asiakasrow[postino] $asiakasrow[postitp]</td>
 					<td colspan='2'></td></tr>";
@@ -603,14 +584,23 @@
 				//avoimet laskut
 				$kentat = 'laskunro, tapvm, erpcm, summa, kapvm, kasumma, mapvm, ika, viikorkoeur, olmapvm, tunnus';
 				$kentankoko = array(8,8,8,10,8,8,8,4,4,8);
-
+				
+				$lisa = "";
+				$havlisa = "";
+				
 				$array = split(",", $kentat);
 				$count = count($array);
 
 				for ($i=0; $i<=$count; $i++) {
 					// tarkastetaan onko hakukentässä jotakin
 					if (strlen($haku[$i]) > 0) {
-						$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
+						if (trim($array[$i]) == "ika") {
+							$havlisa = " HAVING abs(ika)='$haku[$i]'";
+						}
+						else {
+							$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";	
+						}
+																		
 						$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
 					}
 				}
@@ -661,6 +651,7 @@
 							$mapvmlisa
 							$lisa
 							$salisa
+							$havlisa
 							ORDER BY $jarjestys";
 				$result = mysql_query($query) or pupe_error($query);
 

@@ -822,7 +822,11 @@
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.ytunnus'>".t("Ytunnus")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.nimi'>".t("Nimi")."</a></th>";
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=pvm'>".t("Pvm")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.toimaika'>".t("Toimaika")."</a></th>";
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.laatija'>".t("Laatija")."</a></th>";
-			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=summa'>".t("Summa")."</a></th>";
+			
+			if ($kukarow['hinnat'] == 0) {
+				echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=summa'>".t("Summa")."</a></th>";
+			}
+			
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.tila,lasku.alatila'>".t("Tyyppi")."</a></th>";
 
 			if ($tila == 'monta') {
@@ -848,8 +852,11 @@
 				echo "<$ero valign='top'>$row[ytunnus]<br>$row[nimi]<br>$row[nimitark]</$ero>";
 				echo "<$ero valign='top'>".tv1dateconv($row["pvm"])."<br>".tv1dateconv($row["toimaika"])."</$ero>";
 				echo "<$ero valign='top'>$row[laatija]</$ero>";
-				echo "<$ero valign='top' align='right'>$row[summa]</$ero>";
-
+				
+				if ($kukarow['hinnat'] == 0) {
+					echo "<$ero valign='top' align='right'>$row[summa]</$ero>";
+				}
+				
 				$laskutyyppi = $row["tila"];
 				$alatila     = $row["alatila"];
 

@@ -2106,7 +2106,7 @@ if ($tee == '') {
 					echo "<font class='error'>".t("HUOM!!!!!! Asiakas on myyntikiellossa")."!!!!!<br></font>";
 				}
 
-				echo "<strong>$faktarow[fakta]</strong>&nbsp;</td></tr>\n";
+				echo "<strong>".wordwrap($faktarow["fakta"], 110, "<br>")."</strong>&nbsp;</td></tr>\n";
 			}
 
 			if ($toim == 'TARJOUS') {
@@ -5288,7 +5288,10 @@ if ($tee == '') {
 										<input type='hidden' name='lopetus' value='$lopetus'>
 										<input type='hidden' name='projektilla' value='$projektilla'>";
 
-						if ($yhtiorow["alv_kasittely"] == "") {
+						if ($laskurow["hinta"] != 0) {
+							$jysum = $laskurow["hinta"];
+						}
+						elseif ($yhtiorow["alv_kasittely"] == "") {
 							$jysum = $summa;
 						}
 						else {

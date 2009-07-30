@@ -3,6 +3,72 @@
 	/*
 		Melko geneerisiä kalenterifunktioita
 	*/
+	
+	//funktio palauttaa solun taustavärin, jos $type='PDF' niin palauttaa hexana
+	function defineColor($row, $type="") {
+		if($row["laji_tark"] == "tyomaarays") {
+			if($type == "PDF") {
+				$color = "#FAFA00";
+			}
+			else {
+				$color = "rgba(250, 250, 0, 0.8);";
+			}
+		}
+		elseif($row["laji_tark"] == "valmistus") {
+			if($type == "PDF") {
+				$color = "#1E5AFF";	
+			}
+			else {
+				$color = "rgba(30, 90, 200, 0.8);";
+			}	
+		}
+		elseif($row["laji"] == "kulunvalvonta") {
+			if($row["laji_tark"] == "kuka") {
+				if($type == "PDF") {
+					$color = "#FF6464";
+				}
+				else {
+					$color = "rgba(255, 100, 100, 0.9);";
+				}	
+			}
+			else {
+				if($type == "PDF") {
+					$color = "#32C8C8";	
+				}
+				else {
+					$color = "rgba(50, 200, 200, 0.7);";
+				}
+			}
+		}
+		elseif($row["laji_tark"] == "Freezing point") {
+			if($type == "PDF") {
+				$color = "#FF0000";	
+			}
+			else {
+				$color = "rgba(255, 0, 0, 0.8);";
+			}	
+		}
+		elseif ($row["laji_tark"] == "projektitapahtuma") {
+			if($type == "PDF") {
+				$color = "#CD7F32";	
+			}
+			else {
+				$color = "rgba(205, 127, 50, 0.8);";
+			}
+		}
+		
+		
+		else { //väri on vihreä
+			if($type == "PDF") {
+				$color = "#32C800";	
+			}
+			else {
+				$color = "rgba(50, 200, 0, 0.8);";
+			}
+		}
+		return $color;
+	}
+	
 		
 	if($nayta_pdf != 1) {
 		?>
@@ -1299,6 +1365,7 @@
 				if(in_array("projektitapahtuma", $kalenteri["kalenteri_tyypit"])) {
 					$menu[] = array("TEKSTI" => t("Lisää projektitapahtuma"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=projektitapahtuma&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
 					$menu[] = array("TEKSTI" => t("Tulosta kalenteri"),					"HREF" => "$kalenteri[URL]?kaletee=printPDF&tyyppi=projektitapahtuma&nayta_pdf=1".url_params($kalenteri), "TARGET" => "_blank");
+					$menu[] = array("TEKSTI" => t("Tulosta kalenteri asiakkaalle"),					"HREF" => "$kalenteri[URL]?kaletee=printPDF&tyyppi=projektitapahtuma&nayta_pdf=1&asiakkaalle=yes".url_params($kalenteri), "TARGET" => "_blank");
 				}
 
 				//$menu[] = array("TEKSTI" => "Lisää merkintä",			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Merkinta&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
@@ -1565,7 +1632,7 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 						//	Meidän pitää tehdä taulukko tätä varten, samalla selviää minkä kokoinen sivu pitää olla
 						$pdfCellWidth = 20;
 						$pageWidth = (($paivia+2) * mm_pt($pdfCellWidth)) + mm_pt(50)+100;
-						$pageHeight = count(dataByEvent) * mm_pt(10) + 200;
+						$pageHeight = count($dataByEvent) * mm_pt(10) + 200;
 
 						$pdf = new pdf;
 						$pdf->addPage($pageWidth."x".$pageHeight);
@@ -1584,10 +1651,64 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 
 						$h = $pdf->pt_mm($pageHeight) - 30;
 
-						$pdf->write($h, 1, 0, 0, t("PROJEKTIKALENTERI")." - ".$kalenteri["tunnusnippu"], "BIG", "C", "B");
-						$h-=20;
-					}
+					
+						//tässä luodaan PDF-tiedoston "kiinteä" kentät
+						
+						$query = "	SELECT (
+										SELECT nimi 
+										FROM kuka 
+										WHERE yhtio='$kukarow[yhtio]' and kuka=laskun_lisatiedot.projektipaallikko) 
+									as projektipaallikko, 
+									concat(lasku.nimi,' ',lasku.nimitark) as asiakasnimi, 
+									kuka.nimi as myyjanimi, 
+									lasku.tilausyhteyshenkilo, 
+									asiakkaan_kohde.kohde kohdenimi, 
+									yhteyshenkilo.nimi as yhteyshenkilo,
+									lasku.sisviesti2 as kommenttivalmistukseen
+									FROM lasku 
+									JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
+								 	LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
+									LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=lasku.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde 
+									LEFT JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=lasku.yhtio and laskun_lisatiedot.yhteyshenkilo_tekninen=yhteyshenkilo.tunnus
+									WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnusnippu = '$kalenteri[tunnusnippu]'";
+						$lisatiedotres = mysql_query($query) or pupe_error($query);
+						$laskun_lisatiedot = mysql_fetch_array($lisatiedotres); 
+						
+						//korjataan liian pitkän rivin ongelma jos sivu lyhyt
+						echo $pageWidth;
+						if ($pageWidth < 500) {
+							$pdf->write($h, 1, 0, 0, t("PROJEKTIKALENTERI")." - ".$kalenteri["tunnusnippu"] . " - ", "BIG", "C", "B");
+							$h-=5;
+							$pdf->write($h, 1, 0, 0, $laskun_lisatiedot["kohdenimi"], "BIG", "C", "B");
+						}
+						else {
+							$pdf->write($h, 1, 0, 0, t("PROJEKTIKALENTERI")." - ".$kalenteri["tunnusnippu"] . " - " .$laskun_lisatiedot["kohdenimi"], "BIG", "C", "B");
+						}
+					
+						$h-=6;
+						
+						$pdf->write($h, 1, 0, 0, t("Aloitus- ja lopetusaika: ") . date('d.m.Y',$data["tiedot"]["alkustr"])." - ".date('d.m.Y',$data["tiedot"]["loppustr"]), "snadi", "L", "");
+						$h-=4;
+						$pdf->write($h, 1, 0, 0, t("Projektipäällikkö: ") . $laskun_lisatiedot["projektipaallikko"], "snadi", "L", "");
+						$h-=4;
+						$pdf->write($h, 1, 0, 0, t("Myyjä: ") . $laskun_lisatiedot["myyjanimi"], "snadi", "L", "");
+						$h-=4;
+						$pdf->write($h, 1, 0, 0, t("Asiakas: ") . $laskun_lisatiedot["asiakasnimi"], "snadi", "L", "");
+						$h-=4;
+						$pdf->write($h, 1, 0, 0, t("Yhteyshenkilö: ") . $laskun_lisatiedot["yhteyshenkilo"], "snadi", "L", "");
+						$h-=15;
+					
+					
+						//ja vielä tuotontoon tarkoitetut kommentit
+						if ($_GET["asiakkaalle"] != 'yes') {
+							$pdf->write(-10,1,1,0,t($laskun_lisatiedot["kommenttivalmistukseen"]), "snadi", "L", "");
+						}
+						
 
+					
+					
+					}
+					
 					$d = 0;
 					for($i=0;$i<$paivia;$i++) {
 
@@ -1650,7 +1771,7 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 						$e = &current($event);
 
 						$lisatiedot = hae_lisatiedot(current($event), 0);
-
+						
 						if($e["laji_tark"] == "kalenteri") {
 							$kale .= "<tr class='aktiivi'><td NOWRAP>$lisatiedot[viesti], $lisatiedot[kuka_nimi]</td>";
 
@@ -1687,34 +1808,18 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 							}
 
 							$stylelisa = "";
-							$ulos = "";
+							$ulos = "";	
 							if(is_array($event[$aikastr])) {
 								
-								if($row["laji_tark"] != "kuka") {
-									
-								}
-								
 								$row = $event[$aikastr];
+								//jos väriä ei ole vielä asetettu tuolle tapahtumalle, katsotaan se
 								if(!isset($tcolor[$row["tunnus"]])) {
-									if($row["laji_tark"] == "tyomaarays") {
-										$tcolor[$row["tunnus"]] = "rgba(250, 250, 0, 0.8);";
-									}
-									elseif($row["laji_tark"] == "valmistus") {
-										$tcolor[$row["tunnus"]] = "rgba(250, 10, 200, 0.8);";
-									}
-									elseif($row["laji"] == "kulunvalvonta") {
-										if($row["laji_tark"] == "kuka") {
-											$tcolor[$row["tunnus"]] = "rgba(255, 100, 100, 0.9);";
-										}
-										else {
-											$tcolor[$row["tunnus"]] = "rgba(50, 200, 200, 0.7);";
-										}
+									if ($lisatiedot["tapa"] == "Freezing point") {
+										$tcolor[$row["tunnus"]] = defineColor(array("laji_tark" => "Freezing point"), "PDF");
 									}
 									else {
-										$tcolor[$row["tunnus"]] = "rgba(50, 200, 0, 0.8);";
+										$tcolor[$row["tunnus"]] = defineColor($row);
 									}
-
-									$colorRGPFill = "rgba(50, 200, 0, 0.8);";
 								}
 								
 								
@@ -1733,7 +1838,12 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 								if($kaletee == "printPDF") {
 									$param["width"] = 1; // PDF units
 									$param["strokecolor"] = $pdf->get_color('black');
-									$param["fillcolor"] = $colorRGPFill;
+									if ($lisatiedot["tapa"] == "Freezing point") {
+										$param["fillcolor"] = $pdf->get_color(defineColor(array("laji_tark" => "Freezing point"), "PDF"));
+									}
+									else {
+										$param["fillcolor"] = $pdf->get_color(defineColor($row, "PDF"));
+									}
 									$param["mode"] = "fill+stroke";
 									$pdf->drawRectangle($h, $sarakkeet[$i], ($h-$pdf->ln()), $sarakkeet[($i+1)], $param);
 								}
@@ -1752,12 +1862,69 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 							$kale .= "	<td height = '$height' style='background-color: $color; $stylelisa'>
 											$ulos 
 										</td>";
-
+							
+							//jos freezing point on määritetty, ja tulostetaan kalenteria asiakkaalle, tulostetaan myös freezing pointin selitys sivun alalaitaan
+							if ($kaletee == "printPDF" and $lisatiedot["tapa"] == "Freezing point" and $_GET["asiakkaalle"] == 'yes') {
+								$pdf->write(-5,1,0,0,t($lisatiedot["kentta01"]), "snadi", "L", "B");	
+							}
 						}
 
 						$kale .= "</tr>";
 					}
+					
+					//taulukon alle väriselitykset
+					$h-=5;
+					if ($kaletee == "printPDF") {
+						$param["width"] = 1; // PDF units
+						$param["mode"] = "fill";
+						
+						//sarake josta näitä lähdetään tulostamaan...
+						$sarake = 50;
+					
+						//vihree
+						$param["fillcolor"] = $pdf->get_color(defineColor(array("laji_tark" => "tilausprojekti"), "PDF"));
+						$pdf->drawRectangle($h, $sarake, $h-3, $sarake+10,$param);
+						$pdf->write($h+1, 1, $sarake+11, 0, t("Tilaus/Projekti"), "snadi", "L", "");
+						//keltainen
+						$param["fillcolor"] = $pdf->get_color(defineColor(array("laji_tark" => "tyomaarays"), "PDF"));
+						$pdf->drawRectangle($h, $sarake+35, $h-3, $sarake+45, $param);
+						$pdf->write($h+1, 1, $sarake+46, 0, t("Työmääräys"), "snadi", "L", "");
 
+						//sininen,punanen,beige(jos vähän päiviä, listaus lyhyt -> menee sivun yli.. korjataan iffillä) 
+						if ($pageWidth < 700) {
+							$param["fillcolor"] = $pdf->get_color(defineColor(array("laji_tark" => "valmistus"), "PDF"));	
+							$pdf->drawRectangle($h-5, $sarake, $h-8, $sarake+10, $param);
+							$pdf->write($h-4, 1, $sarake+11, 0, t("Valmistus"), "snadi", "L", "");
+							$param["fillcolor"] = $pdf->get_color(defineColor(array("laji_tark" => "Freezing point"), "PDF"));
+							$pdf->drawRectangle($h-5, $sarake+35, $h-8, $sarake+45, $param);
+							$pdf->write($h-4, 1, 96, 0, t("Freezing point"), "snadi", "L", "");
+							if ($pageWidth < 500) {
+								$param["fillcolor"] = $pdf->get_color(defineColor(array("laji_tark" => "projektitapahtuma"), "PDF"));
+								$pdf->drawRectangle($h-11, $sarake, $h-14, $sarake+10, $param);
+								$pdf->write($h-10, 1, $sarake+11, 0, t("Projektitapahtuma"), "snadi", "L", "");
+							}
+							else {
+								$param["fillcolor"] = $pdf->get_color(defineColor(array("laji_tark" => "projektitapahtuma"), "PDF"));
+								$pdf->drawRectangle($h-5, $sarake+70, $h-8, $sarake+80, $param);
+								$pdf->write($h-4, 1, $sarake+81, 0, t("Projektitapahtuma"), "snadi", "L", "");
+							}
+							
+						}
+						//tilaa on vaikka muille jakaa, pistetään samaan pötköön vaan kaikki..
+						else {
+							$param["fillcolor"] = $pdf->get_color(defineColor(array("laji_tark" => "valmistus"), "PDF"));
+							$pdf->drawRectangle($h, $sarake+70, $h-3, $sarake+80, $param);
+							$pdf->write($h+1, 1, $sarake+81, 0, t("Valmistus"), "snadi", "L", "");
+							$param["fillcolor"] = $pdf->get_color(defineColor(array("laji_tark" => "Freezing point"), "PDF"));
+							$pdf->drawRectangle($h, $sarake+105, $h-3, $sarake+115, $param);
+							$pdf->write($h+1, 1, $sarake+116, 0, t("Freezing point"), "snadi", "L", "");
+							$param["fillcolor"] = $pdf->get_color(defineColor(array("laji_tark" => "projektitapahtuma"), "PDF"));
+							$pdf->drawRectangle($h, $sarake+140, $h-3, $sarake+150, $param);
+							$pdf->write($h+1, 1, 201, 0, t("Projektitapahtuma"), "snadi", "L", "");
+							
+						}
+					}
+					
 					$menu = array();
 					$menu[] = array("TEKSTI" => t("Lisää kalenteriisi"), 		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
 					$menu[] = array("TEKSTI" => t("Lisää muistutus"), 			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$aikastr".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);

@@ -3474,14 +3474,14 @@ if ($tee == '') {
 
 			echo "<tr>$jarjlisa<th>".t("#")."</th>";
 
-			if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or ($yhtiorow['tilauksen_kohteet'] == 'K' and in_array($toim, array("RIVISYOTTO", "TYOMAARAYS")))) {
+			if ($toim == "TARJOUS" or $toim == "TYOMAARAYS" or $laskurow["tilaustyyppi"] == "T" or ($yhtiorow['tilauksen_kohteet'] == 'K' and in_array($toim, array("RIVISYOTTO")))) {
 				$trivityyppi_result = t_avainsana("TRIVITYYPPI");
 
 				if (mysql_num_rows($trivityyppi_result) > 0) {
 					echo "<th>".t("Tyyppi")."</th>";
 				}
 			}
-			elseif($yhtiorow['tilauksen_kohteet'] == 'K') {
+			elseif ($yhtiorow['tilauksen_kohteet'] == 'K') {
 				echo "<th>".t("Tyyppi")."</th>";
 			}
 
@@ -3885,7 +3885,7 @@ if ($tee == '') {
 				$vanhaid 	  = $row["perheid"];
 				$trivityyulos = "";
 
-				if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K') {
+				if ($toim == "TARJOUS" or $toim == "TYOMAARAYS" or $laskurow["tilaustyyppi"] == "T" or ($yhtiorow['tilauksen_kohteet'] == 'K' and in_array($toim, array("RIVISYOTTO")))) {
 					if ($muokkauslukko_rivi == "" and $row["ei_nayteta"] == "") {
 						if (mysql_num_rows($trivityyppi_result) > 0) {
 							//annetaan valita tilausrivin tyyppi

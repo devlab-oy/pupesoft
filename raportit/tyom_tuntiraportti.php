@@ -27,7 +27,7 @@
 			$query = "	SELECT 
 						lasku.tunnus,
 						lasku.nimi,
-						lasku.luontiaika,
+						lasku.luontiaika,						
 						group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', kuka.nimi, '##', kuka.kuka) ORDER BY kalenteri.pvmalku) asennuskalenteri
 						FROM lasku
 						JOIN yhtio ON lasku.yhtio=yhtio.yhtio
@@ -38,7 +38,7 @@
 						and lasku.tila in ('A','L','N','S')
 						and lasku.alatila != 'X'
 						$lisa
-						GROUP BY 1,2
+						GROUP BY 1,2,3
 						ORDER BY lasku.tunnus";
 			$sresult = mysql_query($query) or pupe_error($query);
 		

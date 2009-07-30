@@ -7,42 +7,38 @@
 
 	require("inc/parametrit.inc");
 
-	print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
-		<!--
-
-		function toggleAll(toggleBox) {
-
-			var currForm = toggleBox.form;
-			var isChecked = toggleBox.checked;
-			var nimi = toggleBox.name;
-		
-			for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {											
-				if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,3) == nimi) {
-					currForm.elements[elementIdx].checked = isChecked;
-				}
-			}
-		}
-
-		//-->
-		</script>";
-
 	//Ja t‰ss‰ laitetaan ne takas
 	$sqlhaku = $sqlapu;
 
 	if (isset($tee)) {
 		if ($tee == "lataa_tiedosto") {
-			readfile("/tmp/".$tmpfilenimi);	
+			readfile("/tmp/".$tmpfilenimi);
 			exit;
 		}
 	}
 	else {
-		
+
+		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+			<!--
+			function toggleAll(toggleBox) {
+				var currForm = toggleBox.form;
+				var isChecked = toggleBox.checked;
+				var nimi = toggleBox.name;
+				for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
+					if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,3) == nimi) {
+						currForm.elements[elementIdx].checked = isChecked;
+					}
+				}
+			}
+			//-->
+			</script>";
+
 		echo "<font class='head'>".t("SQL-raportti").":</font><hr>";
-		
+
 		if ($rtee == "AJA" and isset($ruks_pakolliset)) {
 			require("inc/pakolliset_sarakkeet.inc");
 			list($pakolliset, $kielletyt, $wherelliset) = pakolliset_sarakkeet($table);
-			
+
 			if (!is_array($wherelliset)) {
 				$ruksaa = $pakolliset;
 			}
@@ -53,7 +49,7 @@
 
 		// jos ollaan annettu uusirappari nimi, niin unohdetaan dropdowni!
 		if ($uusirappari != "") $kysely = "";
-		
+
 		// T‰ss‰ luodaan uusi raporttiprofiili
 		if ($rtee == "AJA" and $uusirappari != '' and $kysely == "") {
 
@@ -61,32 +57,32 @@
 
 			foreach($sarakkeet as $val) {
 				if ($kentat[$val] != '' or $operaattori[$val] != '' or $rajaus[$val] != '') {
-								
+
 					$valsarake = $val;
-				
+
 					if ($kentat[$val] != '') {
 						$valsarake .= "**";
 					}
-				
-					$query = "	INSERT INTO avainsana 
-								set yhtio		= '$kukarow[yhtio]', 
-								laji			= 'SQLDBQUERY', 
-								selite			= '$rappari', 
+
+					$query = "	INSERT INTO avainsana
+								set yhtio		= '$kukarow[yhtio]',
+								laji			= 'SQLDBQUERY',
+								selite			= '$rappari',
 								selitetark		= '$valsarake',
 								selitetark_2	= '$operaattori[$val]',
 								selitetark_3	= '$rajaus[$val]',
-								jarjestys		= '$jarjestys[$val]'";								
+								jarjestys		= '$jarjestys[$val]'";
 					$res = mysql_query($query) or pupe_error($query);
 				}
 			}
 		}
-	
+
 		if ($kysely != $edkysely) {
 			$rtee = "";
 		}
-	
+
 		if ($rtee == "AJA" and is_array($kentat)) {
-			
+
 			if ($kysely != '') {
 				$query = "DELETE FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='SQLDBQUERY' and selite='$kysely'";
 				$res = mysql_query($query) or pupe_error($query);
@@ -100,24 +96,24 @@
 							$valsarake .= "**";
 						}
 
-						$query = "	INSERT INTO avainsana 
-									set yhtio		= '$kukarow[yhtio]', 
-									laji			= 'SQLDBQUERY', 
-									selite			= '$kysely', 
+						$query = "	INSERT INTO avainsana
+									set yhtio		= '$kukarow[yhtio]',
+									laji			= 'SQLDBQUERY',
+									selite			= '$kysely',
 									selitetark		= '$valsarake',
 									selitetark_2	= '$operaattori[$val]',
 									selitetark_3	= '$rajaus[$val]',
-									jarjestys		= '$jarjestys[$val]'";						
+									jarjestys		= '$jarjestys[$val]'";
 						$res = mysql_query($query) or pupe_error($query);
 					}
 				}
 			}
-		
+
 			$where = "";
 			$order = "ORDER BY yhtio";
-		
+
 			$oper_array = array('on' => '=', 'not' => '!=', 'in' => 'in','like' => 'like','gt' => '>','lt' => '<','gte' => '>=','lte' => '<=');
-		
+
 			foreach($operaattori as $kentta => $oper) {
 				if ($oper != "") {
 					if ($oper == "in") {
@@ -129,67 +125,67 @@
 					else {
 						$raj = "'".$rajaus[$kentta]."'";
 					}
-					
-					$where .= " and $kentta ".$oper_array[$oper]." ".$raj;				
+
+					$where .= " and $kentta ".$oper_array[$oper]." ".$raj;
 				}
 			}
-			
-			
+
+
 			asort($jarjestys);
-			
-			foreach($jarjestys as $kentta => $jarj) {				
+
+			foreach($jarjestys as $kentta => $jarj) {
 				if ($jarj != "") {
 					$order .= ", $kentta";
 				}
-			}	
-			
-			$sqlhaku = "SELECT $toimintosarake ".implode(",", $kentat)." 
-						FROM $table 
-						WHERE yhtio='$kukarow[yhtio]' 
+			}
+
+			$sqlhaku = "SELECT $toimintosarake ".implode(",", $kentat)."
+						FROM $table
+						WHERE yhtio='$kukarow[yhtio]'
 						$where
 						$order";
 			$result = mysql_query($sqlhaku) or pupe_error($sqlhaku);
-		
+
 			echo "<font class='message'>$sqlhaku<br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("rivi‰").".</font><br><br>";
-		
+
 			if (mysql_num_rows($result) > 0) {
-				
+
 				if (include('Spreadsheet/Excel/Writer.php')) {
-				
-					function tee_excel ($result) {			
+
+					function tee_excel ($result) {
 						global $excelrivi, $excelnimi;
-						
+
 						//keksit‰‰n failille joku varmasti uniikki nimi:
 						list($usec, $sec) = explode(' ', microtime());
 						mt_srand((float) $sec + ((float) $usec * 100000));
 						$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-		
+
 						$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
 						$workbook->setVersion(8);
 						$worksheet = $workbook->addWorksheet('Sheet 1');
-	
+
 						$format_bold = $workbook->addFormat();
 						$format_bold->setBold();
-	
+
 						$excelrivi = 0;
-       
+
 						for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 						$worksheet->write($excelrivi, $i, "TOIMINTO", $format_bold);
 						$excelrivi++;
-						
-						
-						return(array($workbook, $worksheet, $excelrivi));					
+
+
+						return(array($workbook, $worksheet, $excelrivi));
 					}
-					
-					function sulje_excel ($filelask) {			
+
+					function sulje_excel ($filelask) {
 						global $workbook, $excelnimi, $table;
 
 						// We need to explicitly close the workbook
 						$workbook->close();
-						
+
 						$loprivi = $filelask*65000;
-						$alkrivi = ($loprivi-65000)+1;						
-						
+						$alkrivi = ($loprivi-65000)+1;
+
 						echo "<table>";
 						echo "<tr><th>".t("Tallenna tulos")." (".t("Rivit")." $alkrivi-$loprivi):</th>";
 						echo "<form method='post' action='$PHP_SELF'>";
@@ -197,38 +193,38 @@
 						echo "<input type='hidden' name='kaunisnimi' value='SQLhaku_".$table."_".$filelask.".xls'>";
 						echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 						echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-						echo "</table><br>";											
+						echo "</table><br>";
 					}
-								
+
 					$lask = 0;
 					$filelask = 1;
-					
+
 					list($workbook, $worksheet, $excelrivi) = tee_excel($result);
-					
+
 					while ($row = mysql_fetch_array($result)) {
 						$lask++;
-						
-						if ($lask % 65000 == 0) {							
+
+						if ($lask % 65000 == 0) {
 							sulje_excel($filelask);
 							$filelask++;
-							
-							list($workbook, $worksheet, $excelrivi) = tee_excel($result);							
+
+							list($workbook, $worksheet, $excelrivi) = tee_excel($result);
 						}
-						
+
 						for ($i=0; $i<mysql_num_fields($result); $i++) {
 							if (mysql_field_type($result,$i) == 'real') {
 								$worksheet->writeNumber($excelrivi, $i, $row[$i]);
 							}
-							else {						
+							else {
 								$worksheet->writeString($excelrivi, $i, $row[$i]);
 							}
 						}
 						$worksheet->writeString($excelrivi, $i, "MUUTA");
 						$excelrivi++;
 					}
-					
+
 					sulje_excel($filelask);
-				}        			
+				}
 			}
 		}
 
@@ -254,7 +250,7 @@
 
 			echo "<table>";
 			echo "<tr><th colspan='2'>$table</th></tr>";
-		
+
 			echo "<tr><td>".t("Tallenna kysely").":</td><td><input type='text' size='20' name='uusirappari' value=''></td></tr>";
 			echo "<tr><td>".t("Valitse kysely").":</td><td>";
 
@@ -283,18 +279,18 @@
 
 			echo "</td></tr>";
 			echo "</table><br><br>";
-			
+
 			echo "<table>";
-			echo "<tr><td>".t("Ruksaa sis‰‰nluvussa pakolliset kent‰t").":</td><td><input type='submit' name='ruks_pakolliset' value='".t("Ruksaa")."'></td></tr>";	
+			echo "<tr><td>".t("Ruksaa sis‰‰nluvussa pakolliset kent‰t").":</td><td><input type='submit' name='ruks_pakolliset' value='".t("Ruksaa")."'></td></tr>";
 			echo "</table><br><br>";
-			
+
 			echo "<table>";
 			echo "<tr><th>Kentt‰</th><th>Valitse</th><th>Operaattori</th><th>Rajaus</th><th>J‰rjestys</th></tr>";
 
 			$kala = array();
 
 			while ($row = mysql_fetch_array($fields)) {
-			
+
 				if ($kysely != "") {
 					$query = "	SELECT *
 								FROM avainsana
@@ -306,22 +302,22 @@
 					$srow = mysql_fetch_array($sresult);
 
 					if($srow["selitetark"] != '' and substr($srow["selitetark"],-2) == "**") {
-						$kentat[$row[0]] = substr($srow["selitetark"], 0, -2);				
+						$kentat[$row[0]] = substr($srow["selitetark"], 0, -2);
 					}
-			
+
 					if ($srow["selitetark_2"] != '') {
 						$operaattori[$row[0]] = $srow["selitetark_2"];
 					}
-			
+
 					if ($srow["selitetark_3"] != '') {
 						$rajaus[$row[0]] = $srow["selitetark_3"];
 					}
-					
+
 					if ((int) $srow["jarjestys"] > 0) {
 						$jarjestys[$row[0]] = $srow["jarjestys"];
 					}
 				}
-			
+
 				//tehd‰‰n array, ett‰ saadaan sortattua nimen mukaan..
 				if ($kentat[$row[0]] == $row[0]) {
 					$chk = "CHECKED";
@@ -332,10 +328,10 @@
 				else {
 					$chk = "";
 				}
-			
+
 				$sel = array();
 				$sel[$operaattori[$row[0]]] = "SELECTED";
-			
+
 				array_push($kala,"<tr>
 									<td>$row[0]</td>
 									<td><input type='hidden' name='sarakkeet[$row[0]]' value='$row[0]'><input type='checkbox' name='kentat[$row[0]]' value='$row[0]' $chk></td>
@@ -356,7 +352,7 @@
 			}
 
 			//sort($kala);
-		
+
 			foreach ($kala as $rivi) {
 				echo "$rivi";
 			}

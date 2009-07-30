@@ -147,9 +147,11 @@
 
 		if ($poistolukko != "") {
 			$disablointi = "DISABLED";
+			$disablelisa = "<input type='hidden' name='$nimi' value='{$trow[$i]}'>";
 		}
 		else {
 			$disablointi = "";
+			$disablelisa = "";
 		}
 
 		$sel = $sela = "";
@@ -159,11 +161,11 @@
 		else {
 			$sela = "SELECTED";
 		}
-
+		
 		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' $sela $disablointi>".t("Saldollinen tuote")."</option>";
 		$ulos .= "<option value = 'o' $sel $disablointi>".t("Saldoton tuote")."</option>";
-		$ulos .= "</select></td>";
+		$ulos .= "</select>$disablelisa</td>";
 		$jatko = 0;
 	}
 

@@ -177,10 +177,6 @@
 		$tee = "VALMISTA";
 	}
 
-	//HUOMHUOM!!
-	$query = "SET SESSION group_concat_max_len = 100000";
-	$result = mysql_query($query) or pupe_error($query);
-
 	if ($tee == 'alakorjaa') {
 		//P‰ivitet‰‰n lasku niin, ett‰ se on takaisin tilassa valmistettu
 		$query = "	SELECT distinct lasku.tunnus, lasku.tila

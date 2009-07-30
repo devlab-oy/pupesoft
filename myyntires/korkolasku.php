@@ -2,10 +2,6 @@
 
 require("../inc/parametrit.inc");
 
-//HUOMHUOM!!
-$query = "SET SESSION group_concat_max_len = 100000";
-$result = mysql_query($query) or pupe_error($query);
-
 echo "<font class='head'>".t("Korkolaskut")."</font><hr>";
 
 //laskun pit‰‰ olla v‰hint‰‰n n‰in monta p‰iv‰‰ myˆh‰ss‰ maksettu

@@ -9,7 +9,8 @@
 
 	echo "<font class='head'>".t("Asennuskalenteri").":</font><hr><br>";
 
-	$AIKA_ARRAY = array("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00");
+	// Voi tulla myös salasanat.php:stä
+	if (!isset($AIKA_ARRAY)) $AIKA_ARRAY = array("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00");
 
 	$lis = "";
 

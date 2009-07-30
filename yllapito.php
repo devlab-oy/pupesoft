@@ -648,10 +648,6 @@
     	}
     }
 
-    if (strlen($ojarj) > 0) {
-    	$jarjestys = $ojarj." ";
-    }
-
 	//	Säilytetään ohjeen tila
 	if ($from == "yllapito") {
 		$ulisa .= "&ohje=off&from=$from&lukitse_avaimeen=".urlencode($lukitse_avaimeen)."&lukitse_laji=$lukitse_laji";
@@ -698,6 +694,26 @@
 		}
 		else {
 			$limiitti = "";
+		}
+		
+		if (strlen($ojarj) > 0) {
+			
+			list($ojar, $osuu) = explode("_", $ojarj);
+			
+	    	$jarjestys = "$ojar $osuu ";
+	    }
+	
+		
+		if ($osuu == '') {
+			$osuu	= 'asc';
+			$edosuu	= 'asc';			
+		}
+		elseif ($osuu == 'desc') {
+			$edosuu = 'asc';			
+		}
+		else {
+			$osuu 	= 'asc';
+			$edosuu = 'desc';
 		}
 
 		$query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa $prospektlisa";
@@ -812,7 +828,8 @@
 		elseif ($from != "yllapito") {
 			for ($i = 1; $i < mysql_num_fields($result); $i++) {
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
-					echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".mysql_field_name($result,$i).$ulisa."&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
+					
+					echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".($i+1)."_".$edosuu."$ulisa&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
 
 					if 	(mysql_field_len($result,$i)>10) $size='15';
 					elseif	(mysql_field_len($result,$i)<5)  $size='5';

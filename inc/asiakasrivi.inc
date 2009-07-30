@@ -777,9 +777,8 @@
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value = '' >".t("Ei myyj‰‰")."</option>";
 
-		if ($lopetus != '') {
-			$kukamyyja='';
-
+		if ($lopetus != '' and (int) $tunnus == 0) {
+			$kukamyyja = '';
 			$query = "	SELECT myyja
 						FROM kuka
 						WHERE yhtio='$kukarow[yhtio]' and kuka = '$kukarow[kuka]' and myyja != 0";
@@ -791,8 +790,8 @@
 			}
 		}
 
-		while ($vrow=mysql_fetch_array($vresult)) {
-			$sel="";
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$sel = "";
 			if ($trow[$i] == $vrow['myyja']) {
 				$sel = "selected";
 			}

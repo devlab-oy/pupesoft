@@ -111,13 +111,15 @@
 				echo "<tr><td class='spec' valign='top'>".t("Yhteensä").":</td>";
 		
 				echo "<td class='spec' style='padding: 0px;' valign='top'><table width='100%'>";
-		
-				foreach ($kaletunnit as $kuka => $minuutit) {
+				
+				if (count($kaletunnit) > 0) {
+					foreach ($kaletunnit as $kuka => $minuutit) {
 			
-					$tunti		= floor($minuutit/60);				
-					$minuutti	= sprintf('%02d', $minuutit - ($tunti*60));
+						$tunti		= floor($minuutit/60);				
+						$minuutti	= sprintf('%02d', $minuutit - ($tunti*60));
 			
-					echo "<tr><td class='spec'>$kuka:</td><td class='spec' align='right'>$tunti:$minuutti ".t("tuntia")."</td></tr>";
+						echo "<tr><td class='spec'>$kuka:</td><td class='spec' align='right'>$tunti:$minuutti ".t("tuntia")."</td></tr>";
+					}
 				}
 		
 				echo "</table></td>";
@@ -125,9 +127,11 @@
 		
 				echo "<td class='spec' style='padding: 0px;' valign='top'><table width='100%'>";
 		
-				foreach ($matkakulut as $kuka => $matkat) {
-					foreach ($matkat as $tuoteno => $hinta) {
-						echo "<tr><td class='spec'>$kuka:</td><td class='spec'>$tuoteno</td><td class='spec'></td><td class='spec' align='right'>".sprintf("%.2f", $hinta)." $yhtiorow[valkoodi]</td></tr>";
+				if (count($matkakulut) > 0) {
+					foreach ($matkakulut as $kuka => $matkat) {
+						foreach ($matkat as $tuoteno => $hinta) {
+							echo "<tr><td class='spec'>$kuka:</td><td class='spec'>$tuoteno</td><td class='spec'></td><td class='spec' align='right'>".sprintf("%.2f", $hinta)." $yhtiorow[valkoodi]</td></tr>";
+						}
 					}
 				}
 		

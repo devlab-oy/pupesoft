@@ -1300,7 +1300,7 @@
 					$alvi = ($alvrow["alv"]*1)."%";
 				}
 
-				echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."):</td><td align='right' class='back nowrap'>".sprintf('%.2f', $arow["alvrivihinta"])."</td><td class='back'>$alvi</td></tr>";
+				echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."):</td><td align='right' class='back' nowrap>".sprintf('%.2f', $arow["alvrivihinta"])."</td><td class='back'>$alvi</td></tr>";
 			}
 
 			echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Verollinen yhteensä").":</td><td class='back' align='right' nowrap>".sprintf('%.2f',$summa_yht)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";

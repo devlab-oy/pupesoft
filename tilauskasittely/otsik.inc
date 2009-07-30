@@ -634,7 +634,7 @@
 		}
 
 		echo "<table>";
-		echo "<tr><td>";
+		echo "<tr><td style='padding:0px;'>";
 
 		echo "<table>";
 		echo "<tr>
@@ -737,7 +737,7 @@
 //					<input type='hidden' name='maa' 							 value = '$srow[maa]'>
 
 
-			echo "<td valign='top'>";
+			echo "<td valign='top' style='padding:0px;'>";
 			echo "<table>";
 			echo "<tr>
 					<th colspan='2' align='left' valign='top'>".t("Toimitusosoite").":</td></tr>";
@@ -780,7 +780,7 @@
 			echo "</td>";
 
 			if($yhtiorow['laskutyyppi'] == 3) {
-				echo "<td valign='top'>";
+				echo "<td valign='top' style='padding:0px;'>";
 				echo "<table>";
 				echo "<tr>
 						<th colspan='2' align='left' valign='top'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";
@@ -831,7 +831,7 @@
 
 			if ($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T" or $srow["vienti"] =='K') {
 				echo "<table>";
-				echo "<tr><td>";
+				echo "<tr><td style='padding:0px;'>";
 				echo "<table>";
 
 				if ($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") {
@@ -857,7 +857,7 @@
 				echo "</td>";
 
 				if ($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") {
-					echo "<td>";
+					echo "<td style='padding:0px;'>";
 					echo "<table>";
 					echo "<tr>
 							<td valign='top'> ".t("Sähköpostiosoite").": </td>
@@ -1976,7 +1976,7 @@
 				echo "<table>";
 				echo "<tr><th colspan='2'>".t("Valitse ylläpitosopimuksen laskutusaikataulu").":</th></tr>";
 				echo "<tr>";
-				echo "<td>";
+				echo "<td style='padding:0px;'>";
 				echo "<table><tr>";
 				echo "<td><input name='yllapito_kk[]' $disable type='checkbox' $chk[1] value='1'> Tammi </td>";
 				echo "<td><input name='yllapito_kk[]' $disable type='checkbox' $chk[2] value='2'> Helmi </td>";
@@ -1995,7 +1995,7 @@
 				echo "<td><input name='yllapito_kk[]' $disable type='checkbox' $chk[12] value='12'> Joulu </td>";
 				echo "</tr></table>";
 				echo "</td>";
-				echo "<td>";
+				echo "<td style='padding:0px;'>";
 
 				$chk = array();
 				foreach (explode(',', $sopapurow["sopimus_pp"]) as $numi) {

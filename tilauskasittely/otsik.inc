@@ -215,7 +215,7 @@
 			$query = "SELECT maa FROM varastopaikat WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
 			$result = mysql_query($query) or pupe_error($query);
 			$vara = mysql_fetch_array($result);
-			
+
 			if ($vara["maa"] != "" and $vara["maa"] != $yhtiorow["maa"]) {
 				echo "<font class='error'>".t("VIRHE: Jälkitoimitus ei sallittu myytäessä ulkomaille")."</font><br>";
 				$tee	= "OTSIK";
@@ -829,7 +829,7 @@
 			echo "</table><br>";
 
 
-			if ($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T" or $srow["vienti"] =='K') {
+			if ((($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") and $yhtiorow["rinnakkaisostaja_myynnissa"] == "") or $srow["vienti"] =='K') {
 				echo "<table>";
 				echo "<tr><td style='padding:0px;'>";
 				echo "<table>";
@@ -1769,7 +1769,7 @@
 				echo "</tr>";
 			}
 
-			if ($toim == "TYOMAARAYS" or $toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") {
+			if ($toim == "TYOMAARAYS" or (($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
 				echo "<tr><td class='back'><br></td></tr>";
 				echo "<tr><th colspan='4'>".t("Työmääräyksen lisätiedot").":</th></tr>";
 
@@ -1932,24 +1932,24 @@
 				}
 			}
 
-			if ($toim == "REKLAMAATIO" or $toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") {
+			if ($toim == "REKLAMAATIO" or (($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
 				echo "	<tr>
 						<td>".t("Työn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='6' cols='50'>$srow[komm1]</textarea></td>
 						</tr>";
 			}
+
 			if ($toim == 'REKLAMAATIO') {
 				echo "	<tr>
 						<td>".t("Sisäiset kommentit").":</td><td colspan='3'><textarea name='komm2' rows='6' cols='50'>$srow[komm2]</textarea></td>
 						</tr>";
 			}
 
-
 			echo "</table><br>";
 
 			// tehdään ylläpitosopimista varten laskutusaikataulu taulu
 			if ($toim == "YLLAPITO") {
 
-				$query = "select * from laskun_lisatiedot where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
+				$query = "SELECT * from laskun_lisatiedot where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
 				$sopapures = mysql_query($query) or pupe_error($query);
 				$sopapurow = mysql_fetch_array($sopapures);
 
@@ -2147,10 +2147,10 @@
 			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")." + ".t("tarjous")."</td></tr>";
 
 			if ($srow["myynti_kommentti1"] != "") {
-				echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[myynti_kommentti1] $srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")."</td></tr>";
+				echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[myynti_kommentti1] $srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
 			}
 			else {
-				echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")."</td></tr>";
+				echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
 			}
 
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>".t("keräyslista")." + ".t("valmistus")."</td></tr>";

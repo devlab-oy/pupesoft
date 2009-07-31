@@ -179,7 +179,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "varastosiirto_tilausvahvistus") {
 		$apu = $trow[$i];
 		$sel = array();
@@ -478,7 +478,7 @@
 		$sel = array($trow[$i] => "SELECTED");
 
 		$ulos .= "<option value = ''>".t("Valmistukset kerätään")."</option>";
-		$ulos .= "<option value = 'E' {$sel[E]}>".t("Valmistuksia ei kerätä")."</option>";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Valmistuksia ei kerätä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -556,7 +556,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "rahtikirjan_kollit_ja_lajit") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -829,7 +829,7 @@
 	if (mysql_field_name($result, $i) == "oletus_toimitusehto") {
 
 		$kires = t_avainsana("TOIMEHTO");
-		
+
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Ei oletustoimitusehtoa")."</option>";
 
@@ -1049,11 +1049,11 @@
 		$ulos .= "<option value = '7' $sel[7]>".t("Tuotenumerojärjestys");
 		$ulos .= "<option value = '8' $sel[8]>".t("Tilausjärjestys, tuoteperheet pidetään yhdessä");
 		$ulos .= "<option value = '9' $sel[9]>".t("Tilausjärjestys");
-		$ulos .= "<option value = 'M' {$sel["M"]}>".t("Käyttäjän asettama järjestys");
+		$ulos .= "<option value = 'M' $sel[M]>".t("Käyttäjän asettama järjestys");
 
 		if(	mysql_field_name($result, $i) == "valmistus_kerayslistan_jarjestys" or
 			mysql_field_name($result, $i) == "kerayslistan_jarjestys") {
-			$ulos .= "<option value = 'S' {$sel["S"]}>".t("Rivit summattuina");
+			$ulos .= "<option value = 'S' $sel[S]>".t("Rivit summattuina");
 		}
 		$ulos .= "</select></td>";
 
@@ -1440,7 +1440,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "oletus_rahtikirja_lahetekpl") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1469,7 +1469,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "oletus_rahtikirja_oslappkpl") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1498,7 +1498,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "viitteen_kasinsyotto") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1870,7 +1870,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "lisakulun_lisays") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1888,7 +1888,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "viikkosuunnitelma") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1903,7 +1903,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kalenterimerkinnat") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1918,7 +1918,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "tuntikirjausten_erittely") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1963,7 +1963,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "myytitilauksen_kululaskut") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1978,7 +1978,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "palvelutuotteiden_kehahinnat") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -1994,5 +1994,48 @@
 		$jatko = 0;
 	}
 
-		
+	if (mysql_field_name($result, $i) == "rinnakkaisostaja_myynnissa") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Myynnissä voi täyttää rinnakkaisostajan tiedot")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Myynnissä ei voi täyttää rinnakkaisostajan tietoja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "tyomaaraystiedot_tarjouksella") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Tarjoukselle voi lisätä työmääräystietoja")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Tarjoukselle ei voi lisätä työmääräystietoja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "vahinkotiedot_tyomaarayksella") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Työmääräykselle voi lisätä vahinkotiedot")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Työmääräykselle ei voi lisätä vahinkotietoja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

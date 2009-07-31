@@ -1577,7 +1577,7 @@ if ($tee == '') {
 					</form>";
 		}
 
-		if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == 'REKLAMAATIO')) {
+		if ($kukarow["extranet"] == "" and $yhtiorow["vahinkotiedot_tyomaarayksella"] == "" and ($toim == "TYOMAARAYS" or $toim == 'REKLAMAATIO')) {
 			echo "<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 					<input type='hidden' name='tee' value='VAHINKO'>
@@ -1688,7 +1688,7 @@ if ($tee == '') {
 						<input type='hidden' name='projektilla' value='$projektilla'>
 						<input type='submit' value='" . t('Liitä kululasku')."'>
 						</form>";
-			}	
+			}
 		}
 
 		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T")) {
@@ -3500,7 +3500,7 @@ if ($tee == '') {
 			if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
 
 				echo "<th>".t("Netto")."</th>";
-				
+
 				if ($kukarow['hinnat'] >= 0) echo "<th style='text-align:right;'>".t("Svh")."</th>";
 				if ($kukarow['hinnat'] == 0) echo "<th style='text-align:right;'>".t("Ale%")."</th><th style='text-align:right;'>".t("Hinta")."</th>";
 				if ($kukarow['hinnat'] >= 0) echo "<th style='text-align:right;'>".t("Rivihinta")."</th>";
@@ -3508,7 +3508,7 @@ if ($tee == '') {
 				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 					echo "<th style='text-align:right;'>".t("Kate")."</th>";
 				}
-				
+
 				echo "	<th style='text-align:right;'>".t("Alv%")."</th>
 						<td class='back'>&nbsp;</td>
 						<td class='back'>&nbsp;</td>
@@ -3521,22 +3521,22 @@ if ($tee == '') {
 			$vanhaid 		= "KALA";
 			$borderlask		= 0;
 			$pknum			= 0;
-			
+
 			$tuotekyslinkki = "";
 
-			if ($kukarow["extranet"] == "") { 
+			if ($kukarow["extranet"] == "") {
 				$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi='tuote.php' LIMIT 1";
 				$tarkres = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($tarkres) > 0) {
-					$tuotekyslinkki = "tuote.php"; 
+					$tuotekyslinkki = "tuote.php";
 				}
 				else {
 					$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi='tuvar.php' LIMIT 1";
 					$tarkres = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($tarkres) > 0) {
-						$tuotekyslinkki = "tuvar.php"; 
+						$tuotekyslinkki = "tuvar.php";
 					}
 					else {
 						$tuotekyslinkki = "";
@@ -4737,8 +4737,8 @@ if ($tee == '') {
 					if ($kukarow['hinnat'] == -1) {
 						$cspan-=4;
 					}
-					
-					
+
+
 					if($kukarow["resoluutio"] == "I") {
 						$cspan++;
 					}
@@ -5297,9 +5297,9 @@ if ($tee == '') {
 						else {
 							$jysum = $arvo;
 						}
-						
+
 						echo "<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f",$jysum)."' Style='text-align:right'></td>";
-						
+
 						if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 							echo "<td class='spec' align='right'>&nbsp;</td>";
 						}
@@ -5348,7 +5348,7 @@ if ($tee == '') {
 		if ($jt_kayttoliittyma == "kylla" and $laskurow["liitostunnus"] > 0 and $toim != "TYOMAARAYS" and $toim != "REKLAMAATIO" and $toim != "VALMISTAVARASTOON" and $toim != "MYYNTITILI" and $toim != "TARJOUS") {
 
 			//katotaan eka halutaanko asiakkaan jt-rivejä näkyviin
-			$asjtq = "select jtrivit from asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
+			$asjtq = "SELECT jtrivit from asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
 			$asjtapu = mysql_query($asjtq) or pupe_error($asjtq);
 			$asjtrow = mysql_fetch_array($asjtapu);
 
@@ -5465,21 +5465,24 @@ if ($tee == '') {
 
 			if (mysql_num_rows($optiotarkres) == 0) {
 
-				//	Käytetäänkö projekteja?
-				$query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and nimi='tilauskasittely/tilaus_myynti.php' and alanimi='PROJEKTI' LIMIT 1";
-				$projektitarkres = mysql_query($query) or pupe_error($query);
+				if ($laskurow["tunnusnippu"] > 0) {
+					$queryoik = "SELECT tunnus from oikeu where nimi like '%tilaus_myynti.php' and alanimi = 'PROJEKTI' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
+					$projresres = mysql_query($queryoik) or pupe_error($queryoik);
 
-				if (mysql_num_rows($projektitarkres) > 0 and $laskurow["tunnusnippu"] > 0) {
+					$queryoik = "SELECT tunnus from oikeu where nimi like '%tilaus_myynti.php' and alanimi = 'TYOMAARAYS' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
+					$tyomresres = mysql_query($queryoik) or pupe_error($queryoik);
 
-					$tarjouslisa="	<font class='message'>".t("Perusta tilauksesta").":</font><br>
+					$tarjouslisa = "<font class='message'>".t("Perusta tilauksesta").":</font><br>
 									<select name='perusta_tilaustyyppi'>
-										<option value=''>".t("Normaalitilaus")."</option>
-										<option value='PROJEKTI'>".t("Projekti")."</option>
-										<option value='TYOMAARAYS'>".t("Työmääräys")."</option>
-									</select><br><br>";
+									<option value=''>".t("Normaalitilaus")."</option>";
+
+					if (mysql_num_rows($projresres) > 0) $tarjouslisa .= "<option value='PROJEKTI'>".t("Projekti")."</option>";
+					if (mysql_num_rows($tyomresres) > 0) $tarjouslisa .= "<option value='TYOMAARAYS'>".t("Työmääräys")."</option>";
+
+					$tarjouslisa .= "</select><br><br>";
 				}
 				else {
-					$tarjouslisa="";
+					$tarjouslisa = "";
 				}
 
 				echo "	<form name='hyvaksy' action='$PHP_SELF' method='post'>
@@ -5492,7 +5495,7 @@ if ($tee == '') {
 						<input type='submit' value='".t("Hyväksy tarjous")."'>
 						</form>";
 			}
-			else {
+			elseif (mysql_num_rows($optiotarkres) > 0) {
 				echo t("Poista optiot ennen tilauksen tekoa")."<br><br>";
 			}
 

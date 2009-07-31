@@ -387,12 +387,12 @@ $muokkauslukko = $state = "";
 
 //	Projekti voidaan poistaa vain jos meillä ei ole sillä mitään toimituksia
 if ($laskurow["tunnusnippu"] > 0 and $toim == "PROJEKTI") {
-	$query 	= "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tila IN ('L','A','V','N')";
+	$query 	= "SELECT tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tila IN ('L','A','V','N')";
 	$abures = mysql_query($query) or pupe_error($query);
 	$projektilask = (int) mysql_num_rows($abures);
 }
 
-if ($kukarow["extranet"] == "" and ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") or ($toim == "PROJEKTI" and $projektilask > 0) or ($toim == "TARJOUS" and $projektilla > 0) or $laskurow["alatila"] == "X") {
+if ($oikeurow['paivitys'] != '1' or ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") or ($toim == "PROJEKTI" and $projektilask > 0) or ($toim == "TARJOUS" and $projektilla > 0) or $laskurow["alatila"] == "X") {
 	if ($laskurow["tila"] != '0') {
 		$muokkauslukko 	= "LUKOSSA";
 	}
@@ -5298,7 +5298,7 @@ if ($tee == '') {
 							$jysum = $arvo;
 						}
 
-						echo "<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f",$jysum)."' Style='text-align:right'></td>";
+						echo "<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f",$jysum)."' Style='text-align:right' $state></td>";
 
 						if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 							echo "<td class='spec' align='right'>&nbsp;</td>";
@@ -5306,7 +5306,7 @@ if ($tee == '') {
 
 						echo "<td class='spec'>$laskurow[valkoodi]</td>";
 
-						echo "<td class='back' colspan='2'><input type='submit' value='".t("Jyvitä")."'></form></td>";
+						echo "<td class='back' colspan='2'><input type='submit' value='".t("Jyvitä")."' $state></form></td>";
 
 					}
 					echo "</tr>";

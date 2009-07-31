@@ -831,7 +831,7 @@ else {
 					$laskurow["sisamaan_kuljetus_kansallisuus"]		= $aputoimirow["sisamaan_kuljetus_kansallisuus"];
 					$laskurow["vahennettava_era"] 					= $aputoimirow["vahennettava_era"];
 				}
-				elseif ($varaston_row["maa"] == $laskurow["toim_maa"]) {
+				elseif ($varaston_row["maa"] == $laskurow["toim_maa"] and $laskurow["toim_maa"] != "") {
 					// intrastattia ei lähetetä tulliin kun varasto ja toimitusosoite on samassa maassa
 					$laskurow["kauppatapahtuman_luonne"] = '999';
 				}

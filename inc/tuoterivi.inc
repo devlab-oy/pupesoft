@@ -82,7 +82,7 @@
 		$tyyppi = 2;
 	}
 
-	if (mysql_field_name($result, $i) == "kehahin" and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K" and $trow["ei_saldoa"] != "") {
+	if (mysql_field_name($result, $i) == "kehahin" and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K" and ($trow["ei_saldoa"] != "" or $uusi != "")) {
 		$tyyppi = 1;
 	}
 
@@ -144,16 +144,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "ei_saldoa") {
-
-		if ($poistolukko != "") {
-			$disablointi = "DISABLED";
-			$disablelisa = "<input type='hidden' name='$nimi' value='{$trow[$i]}'>";
-		}
-		else {
-			$disablointi = "";
-			$disablelisa = "";
-		}
-
+		
 		$sel = $sela = "";
 		if ($trow[$i] != '') {
 			$sel = "SELECTED";
@@ -162,10 +153,22 @@
 			$sela = "SELECTED";
 		}
 		
-		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-		$ulos .= "<option value = '' $sela $disablointi>".t("Saldollinen tuote")."</option>";
-		$ulos .= "<option value = 'o' $sel $disablointi>".t("Saldoton tuote")."</option>";
-		$ulos .= "</select>$disablelisa</td>";
+		if ($poistolukko != "") {
+			$ulos  = "<td>";
+			
+			if ($sela != "") $ulos .= t("Saldollinen tuote");
+			else $ulos .= t("Saldoton tuote");
+			
+			$ulos .= "<input type='hidden' name='$nimi' value='$trow[$i]'></td>";		
+		}
+		else {
+			$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+			$ulos .= "<option value = '' $sela $disablointi>".t("Saldollinen tuote")."</option>";
+			$ulos .= "<option value = 'o' $sel $disablointi>".t("Saldoton tuote")."</option>";
+			$ulos .= "</select>$disablelisa</td>";
+		}
+
+		
 		$jatko = 0;
 	}
 
@@ -218,29 +221,37 @@
 	}
 
 	if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
-
-		if ($poistolukko != "") {
-			$disablointi = "DISABLED";
-		}
-		else {
-			$disablointi = "";
-		}
-
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-
+		
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
-
-		$ulos .= "<option value = '' $disablointi>".t("Ei seurantaa")."</option>";
-		$ulos .= "<option value = 'S' $sel[S] $disablointi>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (S)</option>";
-		$ulos .= "<option value = 'T' $sel[T] $disablointi>".t("Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo")." (T)</option>";
-		$ulos .= "<option value = 'U' $sel[U] $disablointi>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi")." (U)</option>";
-		$ulos .= "<option value = 'V' $sel[V] $disablointi>".t("Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (V)</option>";
-		$ulos .= "<option value = 'E' $sel[E] $disablointi>".t("Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (E)</option>";
-		$ulos .= "<option value = 'F' $sel[F] $disablointi>".t("Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo")." (F)</option>";
-		$ulos .= "<option value = 'G' $sel[G] $disablointi>".t("Eränumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (G)</option>";
-		$ulos .= "</select></td>";
-
+		
+		if ($poistolukko != "") {
+			$ulos  = "<td>";
+						
+			if ($sel["S"] != "")		$ulos .= t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (S)";
+			elseif ($sel["T"] != "")	$ulos .= t("Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo")." (T)";
+			elseif ($sel["U"] != "")	$ulos .= t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi")." (U)";
+			elseif ($sel["V"] != "")	$ulos .= t("Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (V)";
+			elseif ($sel["E"] != "")	$ulos .= t("Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (E)";
+			elseif ($sel["F"] != "")	$ulos .= t("Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo")." (F)";
+			elseif ($sel["G"] != "")	$ulos .= t("Eränumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (G)";
+			else						$ulos .= t("Ei seurantaa");
+			
+			$ulos .= "<input type='hidden' name='$nimi' value='$trow[$i]'></td>";		
+		}
+		else {			
+			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+			$ulos .= "<option value = '' $disablointi>".t("Ei seurantaa")."</option>";
+			$ulos .= "<option value = 'S' $sel[S] $disablointi>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (S)</option>";
+			$ulos .= "<option value = 'T' $sel[T] $disablointi>".t("Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo")." (T)</option>";
+			$ulos .= "<option value = 'U' $sel[U] $disablointi>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi")." (U)</option>";
+			$ulos .= "<option value = 'V' $sel[V] $disablointi>".t("Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (V)</option>";
+			$ulos .= "<option value = 'E' $sel[E] $disablointi>".t("Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (E)</option>";
+			$ulos .= "<option value = 'F' $sel[F] $disablointi>".t("Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo")." (F)</option>";
+			$ulos .= "<option value = 'G' $sel[G] $disablointi>".t("Eränumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (G)</option>";
+			$ulos .= "</select></td>";
+		}
+		
 		$jatko = 0;
 	}
 

@@ -1033,9 +1033,9 @@ if (!function_exists('rivi')) {
 				rivi_ei_ale_ei_hinta($devnull);
 			}
 		}
-
+		
 		// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
-		if ($kala <= 70) {
+		if ($kala <= 70 or $kala > $kala_nyt) {
 			$sivu++;
 
 			loppu($thispage, 0);
@@ -1046,7 +1046,7 @@ if (!function_exists('rivi')) {
 		else {
 			$kala = $kala_nyt;
 		}
-
+		
 		if(substr($lahetetyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
 			if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc") {
 				// tulosta_lahete.inc

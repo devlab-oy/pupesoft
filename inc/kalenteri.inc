@@ -1659,7 +1659,9 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 										FROM kuka 
 										WHERE yhtio='$kukarow[yhtio]' and kuka=laskun_lisatiedot.projektipaallikko) 
 									as projektipaallikko, 
-									concat(lasku.nimi,' ',lasku.nimitark) as asiakasnimi, 
+									concat(lasku.nimi,' ',lasku.nimitark) as asiakasnimi,
+									concat(toim_nimi,' ',toim_nimitark) as toimitusnimi,
+									concat_ws(' - ', tunnusnippu, asiakkaan_kohde.kohde) otsikko,
 									kuka.nimi as myyjanimi, 
 									lasku.tilausyhteyshenkilo, 
 									asiakkaan_kohde.kohde kohdenimi, 
@@ -1675,27 +1677,35 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 						$laskun_lisatiedot = mysql_fetch_array($lisatiedotres); 
 						
 						//korjataan liian pitkän rivin ongelma jos sivu lyhyt
-						echo $pageWidth;
 						if ($pageWidth < 500) {
-							$pdf->write($h, 1, 0, 0, t("PROJEKTIKALENTERI")." - ".$kalenteri["tunnusnippu"] . " - ", "BIG", "C", "B");
+							$pdf->write($h, 1, 0, 0, t("PROJEKTIKALENTERI")." - ".$laskun_lisatiedot["otsikko"], "BIG", "C", "B");
 							$h-=5;
 							$pdf->write($h, 1, 0, 0, $laskun_lisatiedot["kohdenimi"], "BIG", "C", "B");
 						}
 						else {
-							$pdf->write($h, 1, 0, 0, t("PROJEKTIKALENTERI")." - ".$kalenteri["tunnusnippu"] . " - " .$laskun_lisatiedot["kohdenimi"], "BIG", "C", "B");
+							$pdf->write($h, 1, 0, 0, t("PROJEKTIKALENTERI")." - ".$laskun_lisatiedot["otsikko"], "BIG", "C", "B");
 						}
-					
+						
 						$h-=6;
 						
-						$pdf->write($h, 1, 0, 0, t("Aloitus- ja lopetusaika: ") . date('d.m.Y',$data["tiedot"]["alkustr"])." - ".date('d.m.Y',$data["tiedot"]["loppustr"]), "snadi", "L", "");
+						$pdf->write($h, 1, 0, 26, t("Projektin kesto").":", "snadi", "L", "");
+						$pdf->write($h, 1, 26, 0, date('d.m.Y',$data["tiedot"]["alkustr"])." - ".date('d.m.Y',$data["tiedot"]["loppustr"]), "snadi", "L", "");
 						$h-=4;
-						$pdf->write($h, 1, 0, 0, t("Projektipäällikkö: ") . $laskun_lisatiedot["projektipaallikko"], "snadi", "L", "");
+						$pdf->write($h, 1, 0, 26, t("Projektipäällikkö").":", "snadi", "L", "");
+						$pdf->write($h, 1, 26, 0, $laskun_lisatiedot["projektipaallikko"], "snadi", "L", "");
 						$h-=4;
-						$pdf->write($h, 1, 0, 0, t("Myyjä: ") . $laskun_lisatiedot["myyjanimi"], "snadi", "L", "");
+						$pdf->write($h, 1, 0, 26, t("Myyjä").":", "snadi", "L", "");
+						$pdf->write($h, 1, 26, 0, $laskun_lisatiedot["myyjanimi"], "snadi", "L", "");
 						$h-=4;
-						$pdf->write($h, 1, 0, 0, t("Asiakas: ") . $laskun_lisatiedot["asiakasnimi"], "snadi", "L", "");
+						$pdf->write($h, 1, 0, 26, t("Asiakas").":", "snadi", "L", "");
+						$pdf->write($h, 1, 26, 0, $laskun_lisatiedot["asiakasnimi"], "snadi", "L", "");
 						$h-=4;
-						$pdf->write($h, 1, 0, 0, t("Yhteyshenkilö: ") . $laskun_lisatiedot["yhteyshenkilo"], "snadi", "L", "");
+						if($laskun_lisatiedot["asiakasnimi"] != $laskun_lisatiedot["toimitusnimi"]) {
+							$pdf->write($h, 1, 26, 0, $laskun_lisatiedot["toimitusnimi"], "snadi", "L", "");
+							$h-=4;							
+						}
+						$pdf->write($h, 1, 0, 26, t("Yhteyshenkilö").":", "snadi", "L", "");
+						$pdf->write($h, 1, 26, 0, $laskun_lisatiedot["yhteyshenkilo"], "snadi", "L", "");
 						$h-=15;
 					
 					

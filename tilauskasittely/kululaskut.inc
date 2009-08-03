@@ -268,8 +268,21 @@ if ($tee_kululaskut == "poista") {
 	$tee_kululaskut = "";
 }
 
-
 if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kesken"] > 0) {
+	
+	$laskurow_save["alv"] = $laskurow["alv"];
+	
+	//yhtiön oletusalvi!
+	$wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
+	$wtres  = mysql_query($wquery) or pupe_error($wquery);
+	$wtrow  = mysql_fetch_array($wtres);
+	
+	$query 	= "	SELECT *
+				FROM lasku
+				WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]'";
+	$result = mysql_query($query) or pupe_error($query);
+	$myy_laskrow = mysql_fetch_array($result);
+	
 	$query  = "	SELECT distinct tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.hinta, tilausrivi.kpl, tilausrivi.kommentti
 				FROM lasku keikka
 				JOIN lasku liitosotsikko ON keikka.yhtio=liitosotsikko.yhtio and keikka.laskunro=liitosotsikko.laskunro and keikka.tila=liitosotsikko.tila and liitosotsikko.alatila='' and liitosotsikko.vanhatunnus!=0
@@ -313,11 +326,13 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
 				$tilausrivilinkki	= $keikkarow["tunnus"];
 				$kpl             	= $keikkarow["kpl"];
 				$tuoteno         	= $keikkarow["tuoteno"];
-				$toimaika 	     	= $laskurow["toimaika"];
-				$kerayspvm	     	= $laskurow["kerayspvm"];
+				$toimaika 	     	= $myy_laskrow["toimaika"];
+				$kerayspvm	     	= $myy_laskrow["kerayspvm"];
 				$hinta 		     	= $keikkarow["hinta"];
 				$kommentti 		    = $keikkarow["kommentti"];
-
+				$alv 				= (float) $wtrow["selite"];
+				$laskurow["alv"] 	= $myy_laskrow["alv"];
+								
 				require ("lisaarivi.inc");			
 			}
 		}
@@ -325,7 +340,8 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
 	
 	echo t("Matkalaskun rivit lisättiin tilaukselle")."!<br>";
 	
-	$tyhjenna	= "OK";
+	$tyhjenna		 = "OK";
+	$laskurow["alv"] = $laskurow_save["alv"];
 }
 
 if ($silent == "") {

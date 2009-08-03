@@ -43,6 +43,7 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND laji = '{$trow['laji']}'
 					AND liitostunnus = '$liitostunnus'
+					AND tunnus = '{$trow['tunnus']}'
 					ORDER BY selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 		
@@ -62,6 +63,7 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND laji = '{$trow['laji']}'
 					AND liitostunnus = '$liitostunnus'
+					AND tunnus = '{$trow['tunnus']}'
 					ORDER BY selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 		

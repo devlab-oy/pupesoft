@@ -4018,7 +4018,7 @@ if (!function_exists("enable_ajax")) {
 ?>
 
 <SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
-<!--
+
 	var toggled = Array();
 	function AJAXInteraction(urli, id, data, href) {
 
@@ -4226,7 +4226,6 @@ if (!function_exists("enable_ajax")) {
 		sndReq(minne, urli, href, load, unToggle, method, getstr);
 	}
 
-//-->
 </script>
 <?php
 	}
@@ -4236,8 +4235,6 @@ if (!function_exists("js_selectAllCheckboxesByName")) {
 	function js_selectAllCheckboxesByName() {
 		?>
 		<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
-
-			<!--
 			function selectAllCheckboxesByName(suunta, name) {
 				list=document.getElementsByTagName("input")
 				if(list.length > 0) {
@@ -4251,7 +4248,6 @@ if (!function_exists("js_selectAllCheckboxesByName")) {
 					}
 				}
 			}
-			//-->
 		</SCRIPT>
 		<?php
 	}
@@ -4261,7 +4257,7 @@ if (!function_exists("js_yllapito")) {
 	function js_yllapito() {
 ?>
 <SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
-<!--
+
 function yllapito(url, tag, submitOnSelect) {
 	select=document.getElementById(tag);
 
@@ -4417,7 +4413,7 @@ function suljeYllapito(sID,value,text, fromDiv) {
 
 	}
 }
-//-->
+
 </script>
 <?php
 	}
@@ -4429,7 +4425,6 @@ if (!function_exists("js_showhide")) {
 
 ?>
 <SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
-<!--
 
 function showhide(layer_ref, type) {
 
@@ -4497,8 +4492,6 @@ function show(layer_ref, type) {
 	}
 }
 
-
-//-->
 </script>
 <?php
 
@@ -4509,7 +4502,7 @@ if (!function_exists("js_alasvetoMuutakoko")) {
 	function js_alasvetoMuutakoko() {
 ?>
 <SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
-<!--
+
 function alasvetoMuutakoko(alasveto, leveys) {
 
 	var browser=navigator.appName.toUpperCase();
@@ -4532,7 +4525,7 @@ function alasvetoMuutakoko(alasveto, leveys) {
 		}
 	}
 }
-//-->
+
 </script>
 <?php
 	}
@@ -4549,7 +4542,7 @@ if (!function_exists("js_toimehtoTarkenne")) {
 	function js_toimehtoTarkenne() {
 ?>
 <SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
-<!--
+
 function toimehtoTarkenne(toimehto) {
 	tehto=document.getElementById(toimehto);
 	tehtoLisa=document.getElementById(toimehto+'Lisa');
@@ -4566,7 +4559,7 @@ function toimehtoTarkenne(toimehto) {
 		tehtoLisa.value='';
 	}
 }
-//-->
+
 </script>
 <?php
 	}
@@ -4578,7 +4571,6 @@ if (!function_exists("js_popup")) {
 
 ?>
 <SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
-<!--
 
 function getMouseX(e) {
 	var x = null;
@@ -4861,7 +4853,6 @@ function popUp(e, oi, offsetX, offsetY, html, styleClass, closeOnExit) {
 	}
 }
 
-//-->
 </script>
 <?php
 
@@ -6385,6 +6376,7 @@ if (!function_exists("livesearch_kentta")) {
 							sndReq('livesearch_haku', '{$_SERVER["SCRIPT_NAME"]}?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&ohje=off&livesearch_haku='+this.value);
 							keyStrokeIndex = -1;
 					}\">
+				<div style='break:all'></div>
 				<div id='livesearch_haku' class='liveSearch' name='livesearch_haku' style='width:".($width * 2)."px;'></div>";
 	}
 }

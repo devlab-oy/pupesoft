@@ -31,6 +31,34 @@
 	echo "<br>";
 	echo "<table style='display:inline;'>";
 	echo "<tr>";
+	echo "<th>",t("Näytä"),":</th>";
+	echo "<td nowrap>";
+
+	$nayta_select1 = $nayta_select2 = $nayta_select3 = $nayta_select4 = $nayta_select5 = '';
+	if ($nayta_valinta == 'osastoittain') {
+		$nayta_select1 = 'checked';
+	}
+	elseif ($nayta_valinta == 'tuoteryhmittain') {
+		$nayta_select2 = 'checked';
+	}
+	elseif ($nayta_valinta == 'tuotemerkeittain') {
+		$nayta_select3 = 'checked';
+	}
+	elseif ($nayta_valinta == 'tuotemyyjittain') {
+		$nayta_select4 = 'checked';
+	}
+	elseif ($nayta_valinta == 'tuoteostajittain') {
+		$nayta_select5 = 'checked';
+	}
+	
+	echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='osastoittain' $nayta_select1>",t("Osastoittain"),"<br/>";
+	echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>",t("Tuoteryhmittäin"),"<br/>";
+	echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuotemerkeittain' $nayta_select3>",t("Tuotemerkeittäin"),"<br/>";
+	echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuotemyyjittain' $nayta_select4>",t("Tuotemyyjittäin"),"<br/>";
+	echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteostajittain' $nayta_select5>",t("Tuoteostajittain");
+	echo "</td>";
+	echo "</tr>";
+	echo "<tr>";
 	echo "<th>".t("Syötä viimeinen saapumispäivä").":</th>";
 	echo "	<td nowrap><input type='text' name='saapumispp' value='$saapumispp' size='2'>
 			<input type='text' name='saapumiskk' value='$saapumiskk' size='2'>
@@ -68,6 +96,29 @@
 		echo "<table>";
 
 		echo "<tr>";
+
+		$groupby  = " GROUP BY ";
+
+		if ($nayta_valinta == 'osastoittain') {
+			$osasto = 'KAIKKI';
+			$groupby .= ' osasto,';
+		}
+		elseif ($nayta_valinta == 'tuoteryhmittain') {
+			$try = 'KAIKKI';
+			$groupby .= ' try,';
+		}
+		elseif ($nayta_valinta == 'tuotemerkeittain') {
+			$tuotemerkki = 'KAIKKI';
+			$groupby .= ' tuotemerkki,';
+		}
+		elseif ($nayta_valinta == 'tuotemyyjittain') {
+			$tuotemyyja = 'KAIKKI';
+			$groupby .= ' myyjanro,';
+		}
+		elseif ($nayta_valinta == 'tuoteostajittain') {
+			$tuoteostaja = 'KAIKKI';
+			$groupby .= ' ostajanro,';
+		}
 
 		if (strlen($order) > 0) {
 			$orderurl = $order.",";
@@ -202,7 +253,6 @@
 		}
 
 		$prequery = " SELECT ";
-		$groupby  = " GROUP BY ";
 		$orderby  = " ORDER BY ";
 
 		if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI')  {
@@ -251,7 +301,12 @@
 					sum(kate)/$sumrow[yhtkate] * 100	kateosuus,
 					100 - ((sum(puuterivia)/(sum(puuterivia)+sum(rivia))) * 100) palvelutaso,
 					sum(kate)-sum(kustannus_yht)		total,
-					sum(saldo)							saldo
+					sum(saldo)							saldo,
+					osasto,
+					try,
+					tuotemerkki,
+					myyjanro,
+					ostajanro
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi='$abcchar'

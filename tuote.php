@@ -6,6 +6,13 @@
 		echo js_popup(-100);
 	}
 
+	enable_ajax();
+
+	if ($livesearch_tee == "TUOTEHAKU") {
+		livesearch_tuotehaku();
+		exit;
+	}
+
 	echo "<SCRIPT type='text/javascript'>
 			<!--
 				function picture_popup(tuote_tunnus, maxwidth, totalheight, tuoteno) {
@@ -113,14 +120,13 @@
 
 	echo "<font class='head'>".t("Tuotekysely")."</font><hr>";
 
-	if (($tee == 'Z') and ($tyyppi == '')) {
+	if ($tee == 'Z' and $tyyppi == '') {
 		require "inc/tuotehaku.inc";
 	}
 	
-	if (($tee == 'Z') and ($tyyppi != '')) {
+	if ($tee == 'Z' and $tyyppi != '') {
 
 		if ($tyyppi == 'TOIMTUOTENO') {
-
 			$query = "	SELECT tuotteen_toimittajat.tuoteno, tuote.status, sum(tuotepaikat.saldo) saldo
 						FROM tuotteen_toimittajat
 						JOIN tuote ON tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno
@@ -138,21 +144,6 @@
 			}
 			elseif (mysql_num_rows($result) > 1) {
 				$varaosavirhe = t("VIRHE: Tiedolla löytyi useita tuotteita")."!";
-				$tee = 'Y';
-			}
-			else {
-				$tr = mysql_fetch_array($result);
-				$tuoteno = $tr["tuoteno"];
-			}
-		}
-		elseif ($tyyppi != '') {
-			$query = "	SELECT tuoteno
-						FROM tuotteen_avainsanat
-						WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and laji='$tyyppi'";
-			$result = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($result) != 1) {
-				$varaosavirhe = t("VIRHE: Tiedolla ei löytynyt tuotetta")."!";
 				$tee = 'Y';
 			}
 			else {
@@ -197,28 +188,41 @@
 				</form><br><br>";
 	}
 
+	echo "<br><table>";
 
-	echo "<form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
+	echo "<tr>";	
+	echo "<form action='$PHP_SELF' method='post' name='formi' autocomplete='off'>";
+	echo "<input type='hidden' name='tee' value='Z'>";
+	echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
+	echo "<th style='vertical-align:middle;'>".t("Tuotehaku")."</th>";
+	echo "<td>";
+	livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 300);
+	echo "</td>";
+	echo "<td class='back'>";
+	echo "<input type='Submit' value='".t("Hae")."'></form></td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<form action='$PHP_SELF' method='post' name='formi2' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
 	echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 
-	echo "<br><table><tr>";	
-	echo "<th><select name='tyyppi'>";
-	echo "<option value=''>".t("Tuotenumero").":</option>";
-	echo "<option value='TOIMTUOTENO'>".t("Toimittajan tuotenumero").":</option>";
+	echo "<th style='vertical-align:middle;'>";
+	echo "<input type='hidden' name='tyyppi' value='TOIMTUOTENO'>";
+	echo t("Toimittajan tuotenumero");
+	echo "</th>";
 
-	$vresult = t_avainsana("TUOTEULK");
+	echo "<td>";
+	echo "<input type='text' name='tuoteno' value='' style='width:300px;'>";
+	echo "</td>";
 
-	while ($vrow = mysql_fetch_array($vresult)) {
-		echo "<option value='$vrow[selite]'>$vrow[selitetark]:</option>";
-	}
-
-	echo "</select></th>";
-	echo "<td><input type='text' name='tuoteno' value=''></td>";
-	echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></form></td>";
+	echo "<td class='back'>";
+	echo "<input type='Submit' value='".t("Hae")."'>";
+	echo "</form>";
+	echo "</td>";
 
 	//Jos ei haettu, annetaan 'edellinen' & 'seuraava'-nappi
-	if (($ulos=='') and ($tee=='Z')) {
+	if ($ulos == '' and $tee == 'Z') {
 		echo "<form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='tee' value='E'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
@@ -241,8 +245,6 @@
 	}
 
 	echo "</tr></table><br>";
-
-
 
 	//tuotteen varastostatus
 	if ($tee == 'Z') {
@@ -1681,11 +1683,12 @@
 		}
 		$tee = '';
 	}
+
 	if ($ulos != "") {
 			echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='Z'>";
 			echo "<table><tr>";
-			echo "<td>".t("Valitse listasta").":</td>";
+			echo "<th>".t("Valitse listasta").":</th>";
 			echo "<td>$ulos</td>";
 			echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
 			echo "</tr></table>";

@@ -4189,16 +4189,13 @@ if ($tee == '') {
 					echo "</form>";
 				}
 				else {
-					if ($row["var"] == 'J') {
+					if (in_array($row["var"], array('S','U','T','R', 'J'))) {
 						if ($yhtiorow["varaako_jt_saldoa"] == "") {
 							$kpl_ruudulle = $row['jt'] * 1;
 						}
 						else {
 							$kpl_ruudulle = ($row['jt']+$row['varattu']) * 1;
 						}
-					}
-					elseif ($row["var"] == 'S' or $row["var"] == 'T' or $row["var"] == 'U'or $row["var"] == 'R') {
-						$kpl_ruudulle = $row['jt'] * 1;
 					}
 					elseif($row["var"] == 'P') {
 						$kpl_ruudulle = $row['tilkpl'] * 1;

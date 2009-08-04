@@ -38,7 +38,7 @@
 		$tilausok++;
 	}
 
-	if ($row["var"] == "J" and $row["tyyppi"] != "E") {
+	if (in_array($row["var"], array('S','U','T','R', 'J')) and $row["tyyppi"] != "E") {
 		if (($yhtiorow["varaako_jt_saldoa"] == "") and $row["jt"] == 0) {
 			$varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!")."<br>";
 			$riviok++;
@@ -49,12 +49,6 @@
 			$riviok++;
 			$tilausok++;
 		}
-	}
-
-	if ($row["jt"] == 0 and in_array($row["var"], array('S','U','T','R')) and $row["tyyppi"] != "E") {
-		$varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!")."<br>";
-		$riviok++;
-		$tilausok++;
 	}
 
 	if ($row["hinta"] < 0) {

@@ -1494,6 +1494,9 @@
 			if ($laskurow['tila'] != 'O') {
 				switch ($var) {
 					case 'J' : // Jälkitoimitukseen
+					case 'R' : // Valmistetaan asiakkaalle
+					case 'U' : // Tilataan toimittajalta asiakkaalle
+					case 'S' : // Suoratoimitus-JT			
 						// Yhtiön parametri: varaako JT-rivi saldoja
 						if ($yhtiorow["varaako_jt_saldoa"] == "") {
 							$varattu 	= 0;
@@ -1521,18 +1524,6 @@
 						$jt 		= 0;
 						break;
 					case 'T' : // Tilataan toimittajalta
-						$varattu 	= 0;
-						$jt 		= $kpl;
-						break;
-					case 'R' : // Valmistetaan asiakkaalle
-						$varattu 	= 0;
-						$jt 		= $kpl;
-						break;
-					case 'U' : // Tilataan toimittajalta asiakkaalle
-						$varattu 	= 0;
-						$jt 		= $kpl;
-						break;
-					case 'S' : // Suoratoimitus-JT
 						$varattu 	= 0;
 						$jt 		= $kpl;
 						break;

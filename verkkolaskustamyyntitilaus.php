@@ -72,7 +72,7 @@ if (isset($ebid)) {
 
 						$alv = (float) $xwtrow["selite"];	
 
-						$ytunnus = "WEKAROTO";
+						$ytunnus = "*";
 						$varasto = (int) $kukarow["varasto"];
 						$valkoodi = $yhtiorow["valkoodi"]."##";
 

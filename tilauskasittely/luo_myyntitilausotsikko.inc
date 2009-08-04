@@ -162,7 +162,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 
 			$alv = (float) $xwtrow["selite"];
 
-			$ytunnus = "WEKAROTO";
+			$ytunnus = "*";
 			$varasto = (int) $kukarow["varasto"];
 		}
 

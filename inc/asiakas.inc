@@ -23,7 +23,7 @@
 
 		echo "<input type='text' name='asiakasnro_select' id='t[$pointer]' value='$apu_asiakasnumero'>";
 		echo "<input type='hidden' name='t[$pointer]' value='$apu_asiakasnumero'>";
-		echo "<input type='button' name='etsi_vapasno' id='etsi_vapasno' value='".t("Etsi seuraava vapaa asiakasnumero")."' onClick='javascript:document.getElementById(\"etsi_vapasno\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"t[$pointer]\").disabled = true;javascript:document.getElementById(\"etsi_vapasno\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=asiakasnro&ohje=off&pointer=$pointer\", \"asiakasnumero_etsi\", false, false)'>";
+		echo "<input type='button' name='etsi_vapasno' id='etsi_vapasno' value='".t("Seuraava vapaa")."' onClick='javascript:document.getElementById(\"etsi_vapasno\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"t[$pointer]\").disabled = true;javascript:document.getElementById(\"etsi_vapasno\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=asiakasnro&ohje=off&pointer=$pointer\", \"asiakasnumero_etsi\", false, false)'>";
 		exit;
 	}
 
@@ -50,7 +50,7 @@
 
 		echo "<input type='text' name='ytunnus_select' id='t[$pointer]' value='$apu_asiakasnumero'>";
 		echo "<input type='hidden' name='t[$pointer]' value='$apu_asiakasnumero'>";
-		echo "<input type='button' name='etsi_vapytunnus' id='etsi_vapytunnus' value='".t("Etsi seuraava vapaa ytunnus")."' onClick='javascript:document.getElementById(\"etsi_vapytunnus\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"t[$pointer]\").disabled = true;javascript:document.getElementById(\"etsi_vapytunnus\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=ytunnus&ohje=off&pointer=$pointer\", \"ytunnus_etsi\", false, false)'>";
+		echo "<input type='button' name='etsi_vapytunnus' id='etsi_vapytunnus' value='".t("Seuraava vapaa")."' onClick='javascript:document.getElementById(\"etsi_vapytunnus\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"t[$pointer]\").disabled = true;javascript:document.getElementById(\"etsi_vapytunnus\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=ytunnus&ohje=off&pointer=$pointer\", \"ytunnus_etsi\", false, false)'>";
 		exit;
 	}
 

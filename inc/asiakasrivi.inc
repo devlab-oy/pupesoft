@@ -240,7 +240,7 @@
 		}
 
 		$ulos .= "<input type='text' name='$nimi' id='$nimi' value='$trow[$i]'>";
-		$ulos .= "<input type='button' name='etsi_vapasno' id='etsi_vapasno' value='".t("Etsi vapaa asiakasnumero")."' onClick='javascript:document.getElementById(\"etsi_vapasno\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapasno\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=asiakasnro&ohje=off&pointer=$i\", \"asiakasnumero_etsi\", false, false)'>";
+		$ulos .= "<input type='button' name='etsi_vapasno' id='etsi_vapasno' value='".t("Seuraava vapaa")."' onClick='javascript:document.getElementById(\"etsi_vapasno\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapasno\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=asiakasnro&ohje=off&pointer=$i\", \"asiakasnumero_etsi\", false, false)'>";
 		$ulos .= "</div>";
 		$ulos .= "</td>";
 		$jatko = 0;
@@ -253,7 +253,7 @@
 		$ulos .= "<input type='text' name='$nimi' id='$nimi' value='$trow[$i]'>";
 
 		if ($alias_set == "VAHITTAISMYYNTI" or $laji == "R") {
-			$ulos .= "<input type='button' name='etsi_vapytunnus' id='etsi_vapytunnus' value='".t("Etsi vapaa asiakasnumero")."' onClick='javascript:document.getElementById(\"etsi_vapytunnus\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapytunnus\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=ytunnus&ohje=off&pointer=$i\", \"ytunnus_etsi\", false, false)'>";
+			$ulos .= "<input type='button' name='etsi_vapytunnus' id='etsi_vapytunnus' value='".t("Seuraava vapaa")."' onClick='javascript:document.getElementById(\"etsi_vapytunnus\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"$nimi\").disabled = true;javascript:document.getElementById(\"etsi_vapytunnus\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=ytunnus&ohje=off&pointer=$i\", \"ytunnus_etsi\", false, false)'>";
 		}
 
 		if ($alias_set != "VAHITTAISMYYNTI") {

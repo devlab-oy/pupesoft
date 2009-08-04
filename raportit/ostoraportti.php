@@ -247,14 +247,14 @@
 		$sarakkeet["SARAKE36E"] = t("ennmyed")."4\t";
 
 		//Kulutetut kappaleet
-		$sarakkeet["SARAKE29K"] = t("kululus")."1\t"; // kulutus
-		$sarakkeet["SARAKE30K"] = t("kululus")."2\t";
-		$sarakkeet["SARAKE31K"] = t("kululus")."3\t";
-		$sarakkeet["SARAKE32K"] = t("kululus")."4\t";
-		$sarakkeet["SARAKE33K"] = t("kululused")."1\t";
-		$sarakkeet["SARAKE34K"] = t("kululused")."2\t";
-		$sarakkeet["SARAKE35K"] = t("kululused")."3\t";
-		$sarakkeet["SARAKE36K"] = t("kululused")."4\t";
+		$sarakkeet["SARAKE29K"] = t("kulutus")."1\t"; // kulutus
+		$sarakkeet["SARAKE30K"] = t("kulutus")."2\t";
+		$sarakkeet["SARAKE31K"] = t("kulutus")."3\t";
+		$sarakkeet["SARAKE32K"] = t("kulutus")."4\t";
+		$sarakkeet["SARAKE33K"] = t("kulutused")."1\t";
+		$sarakkeet["SARAKE34K"] = t("kulutused")."2\t";
+		$sarakkeet["SARAKE35K"] = t("kulutused")."3\t";
+		$sarakkeet["SARAKE36K"] = t("kulutused")."4\t";
 
 		$sarakkeet["SARAKE37"] = t("Kate")."$yhtiorow[valkoodi]1\t";
 		$sarakkeet["SARAKE38"] = t("Kate")."$yhtiorow[valkoodi]2\t";

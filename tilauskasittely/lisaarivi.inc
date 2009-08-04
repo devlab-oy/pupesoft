@@ -1497,6 +1497,7 @@
 					case 'R' : // Valmistetaan asiakkaalle
 					case 'U' : // Tilataan toimittajalta asiakkaalle
 					case 'S' : // Suoratoimitus-JT			
+					case 'T' : // Tilataan toimittajalta					
 						// Yhtiön parametri: varaako JT-rivi saldoja
 						if ($yhtiorow["varaako_jt_saldoa"] == "") {
 							$varattu 	= 0;
@@ -1522,10 +1523,6 @@
 					case 'V' : // Tehdaslisävaruste
 						$varattu 	= $kpl;
 						$jt 		= 0;
-						break;
-					case 'T' : // Tilataan toimittajalta
-						$varattu 	= 0;
-						$jt 		= $kpl;
 						break;
 					case '' :
 						$varattu 	= 0;

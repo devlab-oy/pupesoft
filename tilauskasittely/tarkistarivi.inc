@@ -51,6 +51,19 @@
 		}
 	}
 
+	if (in_array($row["var"], array('S','U','T','R', 'J')) and $row["tyyppi"] != "E") {
+		if (($yhtiorow["varaako_jt_saldoa"] == "") and $row["jt"] == 0) {
+			$varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!")."<br>";
+			$riviok++;
+			$tilausok++;
+		}
+		if ($yhtiorow["varaako_jt_saldoa"] != "" and $row["varattu"] == 0) {
+			$varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!")."<br>";
+			$riviok++;
+			$tilausok++;
+		}
+	}
+
 	if ($row["hinta"] < 0) {
 		$varaosavirhe .= t("VIRHE: Hinta ei voi olla negatiivinen!")."<br>";
 		$riviok++;
@@ -644,9 +657,13 @@
 			$siirtorow = mysql_fetch_array($siirtores);
 			if($siirtorow["tila"] == "O") {
 				$tilaustyypilla = t("Ostotilauksella");
+				$varmista_muokkaus .= t("Oletko varma, ett‰ haluat muokata rivi‰?\\n\\nRivist‰ tehty ostorivi poistetaan ja luodaan uudestaan.");
+				$varmista_poisto .= t("Oletko varma, ett‰ haluat poistaan rivin?\\n\\nRivist‰ tehty ostorivi poistetaan.");
 			}
 			elseif($siirtorow["tila"] == "V" or $siirtorow["tila"] == "W") {
 				$tilaustyypilla = t("Valmistuksella");
+				$varmista_muokkaus .= t("Oletko varma, ett‰ haluat muokata rivi‰?\\n\\nRivist‰ tehty valmistus poistetaan ja luodaan uudestaan.");
+				$varmista_poisto .= t("Oletko varma, ett‰ haluat poistaan rivin?\\n\\nRivist‰ tehty valmistus poistetaan.");
 			}
 
 			$varaosakommentti .= "$tilaustyypilla: $siirtorow[nimi] $siirtorow[otunnus]<br>";

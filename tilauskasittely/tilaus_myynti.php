@@ -2585,16 +2585,13 @@ if ($tee == '') {
 
 			$tuoteno 	= $tilausrivi['tuoteno'];
 
-			if ($tilausrivi["var"] == "J") {
+			if (in_array($row["var"], array('S','U','T','R', 'J'))) {
 				if ($yhtiorow["varaako_jt_saldoa"] == "") {
 					$kpl = $tilausrivi['jt'];
 				}
 				else {
 					$kpl = $tilausrivi['jt']+$tilausrivi['varattu'];
 				}
-			}
-			elseif ($tilausrivi["var"] == "S" or $tilausrivi["var"] == "T" or $tilausrivi["var"] == "U") {
-				$kpl	= $tilausrivi['jt'];
 			}
 			elseif ($tilausrivi["var"] == "P") {
 				$kpl	= $tilausrivi['tilkpl'];

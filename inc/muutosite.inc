@@ -808,6 +808,36 @@ if ($tila == 'jako') {
 	}
 }
 
+if ($tila == 'nollaahyvak') {
+	$query = "	UPDATE lasku SET
+				tila = 'H',
+				hyvaksyja_nyt = hyvak1,
+				h1time = '',
+				h2time = '',
+				h3time = '',
+				h4time = '',
+				h5time = ''
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tunnus = '$tunnus'";
+	$result = mysql_query($query) or pupe_error($query);
+
+	// haetaan laskun tiedot uudestaan
+	$query = "	SELECT *
+				FROM lasku
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tunnus = '$tunnus'";
+	$result = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($result) != 1) {
+		echo t("Lasku")." $tunnus ".t("ei löytynytkään")."!";
+		exit;
+	}
+
+	$trow = mysql_fetch_array($result);
+	$tee = 'E';
+	$tila = 'X';
+}
+
 if ($tila == '') {
 
 	// katotaan onko lasku liitetty keikkaan
@@ -1008,7 +1038,7 @@ if ($tila == '') {
 				<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
 	}
 
-	if ($trow['tila'] == 'M' or $trow['tila'] == 'H')  {
+	if (($trow['tila'] == 'M' or $trow['tila'] == 'H') and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3))  {
 		echo "<form action = '$PHP_SELF' method='post'>
 				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type = 'hidden' name='tila' value='jako'>
@@ -1121,6 +1151,16 @@ if ($tila == '') {
 				<td><input type = 'submit' value = '".t("Siirrä")."'></td></tr></form>";
 	}
 
+	if (($trow['tila'] == 'M' or $trow['tila'] == 'H') and ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) and $trow["h1time"] != '0000-00-00 00:00:00')  {
+		echo "<form action = '$PHP_SELF' method='post'>
+				<input type = 'hidden' name='tila' value='nollaahyvak'>
+				<input type = 'hidden' name='tee' value='M'>
+				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+				<input type = 'hidden' name='tunnus' value='$tunnus'>
+				<tr><th>".t("Palauta lasku hyväksyntäkierrokselle")."</th>
+				<td></td>
+				<td><input type = 'submit' value = '".t("Siirrä")."'></td></tr></form>";
+	}
 
 	echo "</table><br><br>";
 }

@@ -4,12 +4,21 @@
 	require('../inc/parametrit.inc');
 
 
+	$query 	= "	SELECT *
+				FROM lasku
+				WHERE tunnus = '$liitostunnus' and yhtio = '$kukarow[yhtio]'";
+	$result = mysql_query($query) or pupe_error($query);
+	$laskurow = mysql_fetch_array($result);
+
+
 	// scripti balloonien tekemiseen
 	js_popup();
 
 	echo "<font class='head'>".t("Asennuskalenteri").":</font><hr><br>";
 
 	// Voi tulla myös salasanat.php:stä
+	if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=>'Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu','Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu');
+	if (!isset($DAY_ARRAY)) $DAY_ARRAY = array("Maanantai", "Tiistai", "Keskiviikko", "Torstai", "Perjantai");
 	if (!isset($AIKA_ARRAY)) $AIKA_ARRAY = array("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00");
 
 	$lis = "";
@@ -28,14 +37,20 @@
 		$ASENTAJA_ARRAY_TARK[] = $kirow["selitetark_2"];
 	}
 
-	//kuukaudet ja päivät ja ajat
-	$MONTH_ARRAY = array(1=>'Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu','Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu');
-	$DAY_ARRAY = array("Maanantai", "Tiistai", "Keskiviikko", "Torstai", "Perjantai");
-
 	// otetaan oletukseksi tämä kuukausi ja tämä vuosi
-	if ($month == '') 	$month = date("n");
-	if ($year == '')  	$year  = date("Y");
-	if ($day == '') 	$day   = date("j");
+	if ($month == '') $month = date("n");
+	else $month = sprintf("%02d", $month);
+
+	if ($year == '') $year = date("Y");
+	else $year = sprintf("%04d", $year);
+
+	if ($day == '') $day = date("j");
+	else $day = sprintf("%02d", $day);
+
+
+	if ($lmonth != '') $lmonth = sprintf("%02d", $lmonth);
+	if ($lyear != '') $lyear = sprintf("%04d", $lyear);
+	if ($lday != '') $lday = sprintf("%02d", $lday);
 
 	//lasketaan edellinen ja seuraava paiva kun siirytään yksi päivä
 	$backmday = date("n",mktime(0, 0, 0, $month, $day-1,  $year));
@@ -99,7 +114,6 @@
 	else {
 		$konsernit = "yhtio = '$kukarow[yhtio]' ";
 	}
-
 
 	if ($tee == "LISAA") {
 
@@ -241,16 +255,24 @@
 
 		echo  "<tr><th nowrap>".t("Työn alku").":</th><td>".tv1dateconv(sprintf('%04d',$year)."-".sprintf('%02d',$month)."-".sprintf('%02d',$day))." - $aika</td></tr>";
 
-		echo  "<tr>
-			<th nowrap>".t("Työn loppu").":</th>
-			<td><input type='text' size='3' name='lday' value='$lday'>
-			<input type='text' size='3' name='lmonth'   value='$lmonth'>
-			<input type='text' size='5' name='lyear'  	value='$lyear'> - <select name='laika'>";
-
 		$whileaika = $AIKA_ARRAY[0];
 		if (!isset($aikaloppu)) $aikaloppu = date("H:i", mktime(substr($aika,0,2), substr($aika,3,2)+60, 0));
 
-		while ($whileaika!='18:00'){
+		list($whlopt, $whlopm) = explode(":", $AIKA_ARRAY[count($AIKA_ARRAY)-1]);
+		$whileloppu = sprintf("%02d", $whlopt+2);
+
+		if ($whileloppu >= 24) $whileloppu= sprintf("%02d", $whileloppu-24);
+
+		$whileloppu = $whileloppu.":".$whlopm;
+
+		echo  "<tr>
+			<th nowrap>$whileloppu".t("Työn loppu").":</th>
+			<td>
+			<input type='text' size='3' name='lday' value='$lday'>
+			<input type='text' size='3' name='lmonth' value='$lmonth'>
+			<input type='text' size='5' name='lyear' value='$lyear'> - <select name='laika'>";
+
+		while ($whileaika != $whileloppu) {
 
 			$sel = '';
 			if ($whileaika == $aikaloppu) {
@@ -372,7 +394,7 @@
 		echo "</td>";
 
 		// Kirjotetaan alkuun tyhjiä soluja
-		if (weekday_number("1", $month, $year) < 5) {
+		if (weekday_number("1", $month, $year) < count($DAY_ARRAY)) {
 			for ($i = 0; $i < weekday_number("1", $month, $year); $i++) {
 				echo "<td class='back'>&nbsp;</td>";
 			}
@@ -395,7 +417,7 @@
 							if(kalenteri.tyyppi='asennuskalenteri', kalenteri.liitostunnus, kalenteri.tunnus) liitostunnus,
 							if(lasku.nimi='', kalenteri.kuka, lasku.nimi) nimi,
 							if(tyomaarays.komm1='' or tyomaarays.komm1 is null, kalenteri.kentta01, tyomaarays.komm1) komm1,
-							tyomaarays.komm2
+							tyomaarays.komm2, lasku.viesti, tyomaarays.tyostatus
 							FROM kalenteri
 							LEFT JOIN avainsana ON kalenteri.yhtio = avainsana.yhtio and avainsana.laji = 'KALETAPA' and avainsana.selitetark = kalenteri.tapa
 							LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and lasku.tunnus=kalenteri.liitostunnus
@@ -425,18 +447,18 @@
 
 										echo "<div id='$vrow[liitostunnus]' class='popup'>";
 
-										if($vrow["tyyppi"] == "asennuskalenteri") {
+										if ($vrow["tyyppi"] == "asennuskalenteri") {
 											echo t("Työmääräys").": $vrow[liitostunnus]";
 										}
 										else {
 											echo t("Kalenterimerkintä").": $vrow[tapa]";
 										}
 
-										echo "<br><br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"])."<br><a href='#' onclick=\"popUp(event,'$vrow[liitostunnus]')\">Sulje</a>";
+										echo "<br><br>$vrow[viesti]<br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"])."<br><a href='#' onclick=\"popUp(event,'$vrow[liitostunnus]')\">Sulje</a>";
 										echo "</div>";
 									}
 
-									$varaukset[$b][$a] = $vrow["nimi"]."|||".$vrow["liitostunnus"]."|||".$vrow["tapa"]."|||".$vrow["tyyppi"];
+									$varaukset[$b][$a] = $vrow["nimi"]."|||".$vrow["liitostunnus"]."|||".$vrow["tapa"]."|||".$vrow["tyyppi"]."|||".$vrow["tyostatus"];
 								}
 							}
 						}
@@ -448,24 +470,41 @@
 
 				foreach($AIKA_ARRAY as $a) {
 					echo "<tr>";
+
 					foreach($ASENTAJA_ARRAY as $b) {
 						if (isset($varaukset[$b][$a])) {
-							list($nimi, $tilausnumero, $tapa, $tyyppi) = explode("|||", $varaukset[$b][$a]);
+							list($nimi, $tilausnumero, $tapa, $tyyppi, $tyostatus) = explode("|||", $varaukset[$b][$a]);
 
 							if ($tyyppi == "asennuskalenteri") {
 								$zul = $tilausnumero;
+
+								$query = "	SELECT selitetark_2
+											FROM avainsana
+											WHERE laji = 'TYOM_TYOSTATUS' and selite='$tyostatus' and yhtio = '$kukarow[yhtio]'";
+								$varires = mysql_query($query) or pupe_error($query);
+								$varirow = mysql_fetch_array($varires);
+
+								if ($varirow["selitetark_2"] != "") {
+									$varilisa = "style='background-color: $varirow[selitetark_2];'";
+								}
+								else {
+									$varilisa = "";
+								}
 							}
 							else {
 								$zul = $tapa;
 							}
 
-							echo "<td align='center' width='40px'><a class='td' href='tyojono.php?myyntitilaus_haku=$tilausnumero&lopetus=$lopetus' onmouseout=\"popUp(event,'$tilausnumero')\" onmouseover=\"popUp(event,'$tilausnumero')\">$zul</a></th>";
+							echo "<td align='center' $varilisa width='40px'><a class='td' href='tyojono.php?myyntitilaus_haku=$tilausnumero&lopetus=$lopetus' onmouseout=\"popUp(event,'$tilausnumero')\" onmouseover=\"popUp(event,'$tilausnumero')\">$zul</a></td>";
 						}
-						elseif($liitostunnus > 0 and $tyojono != "") {
-		                    echo "<td align='center' width='40px'><a class='td' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&asentaja=$b&aika=$a&tee=VARAA&lopetus=$lopetus'>&nbsp;</a></th>";
+						elseif ($liitostunnus > 0 and $tyojono != "" and (float) str_replace("-", "", $laskurow["toimaika"]) < (float) $year.sprintf("%02d", $month).sprintf("%02d", $i)) {
+							echo "<td align='center' class='tumma' width='40px'>&nbsp;</td>";
+						}
+						elseif ($liitostunnus > 0 and $tyojono != "") {
+		                    echo "<td align='center' width='40px'><a class='td' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&asentaja=$b&aika=$a&tee=VARAA&lopetus=$lopetus'>&nbsp;</a></td>";
 		                }
 						else {
-							echo "<td align='center' width='40px'>&nbsp;</th>";
+							echo "<td align='center' width='40px'>&nbsp;</td>";
 						}
 					}
 					echo "</tr>";

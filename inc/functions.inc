@@ -4533,7 +4533,7 @@ function alasvetoMuutakoko(alasveto, leveys) {
 
 if (!function_exists("js_alasvetoMaxWidth")) {
 	function js_alasvetoMaxWidth($id, $leveys) {
-		return "id = '".$id."' style='max-width: ".$leveys."px; width:expression(document.getElementById(\"".$id."\").clientWidth > ".$leveys."? \"".$leveys."\": \"auto\");' onmousedown=\"alasvetoMuutakoko('".$id."', 0);\" onblur=\"alasvetoMuutakoko('".$id."', ".$leveys.");\">";
+		//return "id = '".$id."' style='max-width: ".$leveys."px; width:expression(document.getElementById(\"".$id."\").clientWidth > ".$leveys."? \"".$leveys."\": \"auto\");' onmousedown=\"alasvetoMuutakoko('".$id."', 0);\" onblur=\"alasvetoMuutakoko('".$id."', ".$leveys.");\">";
 	}
 }
 

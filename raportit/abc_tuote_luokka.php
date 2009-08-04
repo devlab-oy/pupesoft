@@ -259,7 +259,7 @@
 				$row['ei_varastoida'] = "";
 			}		
 			
-			echo "<tr>$ulisa";
+			echo "<tr>";
 			echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot'>".$ryhmanimet[$row["luokka"]]."</a></td>";
 			echo "<td valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
 			echo "<td valign='top'>$row[nimitys] $row[ei_varastoida]</td>";		

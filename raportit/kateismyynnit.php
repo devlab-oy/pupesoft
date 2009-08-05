@@ -1,5 +1,5 @@
 <?php
-	
+
 	require('../inc/parametrit.inc');
 
 	echo "<font class='head'>".t("Käteismyynnit")." $myy:</font><hr>";
@@ -67,7 +67,7 @@
 			$tasmatty = array();
 			$tasmatty["ltunnukset"] = $tasmaysrow["ltunnukset"];
 			$tasmatty["kassalipas"] = $row["nimi"];
-			
+
 			return $tasmatty;
 		}
 		else {
@@ -126,7 +126,7 @@
 			if (is_array($kassakone) and count($kassakone) > 0) {
 				$tilit = count($kassakone);
 			}
-			
+
 			for ($ii = 0; $ii < $tilit; $ii++) {
 				$linebreaker .= "-----------";
 				$selite_count += 10;
@@ -140,7 +140,7 @@
 
 					if ($edltunnus != $tasmaysrow["ltunnus"]) {
 
-						$ots  = t("Käteismyynnin tosite")." ({$tasmaysrow["ltunnus"]}) $yhtiorow[nimi] $pp.$kk.$vv\n\n";
+						$ots  = t("Käteismyynnin tosite")." ($tasmaysrow[ltunnus]) $yhtiorow[nimi] $pp.$kk.$vv\n\n";
 						$ots .= sprintf ('%-'.$selite_count.'.'.$selite_count.'s', t("Tapahtuma"));
 						$ots .= sprintf ('%-13.13s', t("Summa"));
 						$ots .= "\n";
@@ -190,7 +190,7 @@
 				$kirrow  = mysql_fetch_array($kirres);
 				$komento = $kirrow['komento'];
 
-				//--no-header 
+				//--no-header
 				$line = exec("a2ps -o $filenimi.ps -R --medium=A4 --chars-per-line=94 --columns=1 --margin=1 --borders=0 $filenimi");
 
 				// itse print komento...
@@ -211,14 +211,14 @@
 		}
 
 		$kassat_temp = substr($kassat_temp,0,-1);
-		
+
 		$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' and tunnus in ($kassat_temp)";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 1) {
-			
+
 			$account_check = array();
-			
+
 			while ($row = mysql_fetch_array($result)) {
 				$account_check["luottokortti"][] = $row["luottokortti"];
 				$account_check["pankkikortti"][] = $row["pankkikortti"];
@@ -296,11 +296,11 @@
 
 	// Aloitetaan tiliöinti
 	if ($tee == "tiliointi") {
-		
+
 		$ktunnukset = "";
-		
+
 		$kassalipas_tunnus = unserialize(urldecode($kassalipas_tunnus));
-		
+
 		if (count($kassalipas_tunnus) > 0) {
 			foreach ($kassalipas_tunnus as $key => $ktunnus) {
 				$ktunnukset .= "'$ktunnus',";
@@ -317,15 +317,15 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$laskuid = mysql_insert_id();
 
-		$maksutapa = "";
-		$kassalipas = "";
-		$tilino = "";
-		$pohjakassa = "";
-		$loppukassa = "";
-		$comments = "";
-		$comments_yht = "";
-		$tyyppi = "";
-		$kustp = "";
+		$maksutapa	 	= "";
+		$kassalipas 	= "";
+		$tilino 		= "";
+		$pohjakassa 	= "";
+		$loppukassa 	= "";
+		$comments 		= "";
+		$comments_yht 	= "";
+		$tyyppi 		= "";
+		$kustp 			= "";
 
 		foreach ($_POST as $kentta => $arvo) {
 
@@ -367,7 +367,7 @@
 					$comments_yht .= "$arvo<br>";
 				}
 			}
-			
+
 			if (stristr($kentta, "loppukassa")) {
 				$loppukassa = $arvo;
 			}
@@ -628,7 +628,7 @@
 			}
 		}
 
-		$myyntisaamiset_tilit = "'{$yhtiorow['kassa']}','{$yhtiorow['pankkikortti']}','{$yhtiorow['luottokortti']}',";
+		$myyntisaamiset_tilit = "'$yhtiorow[kassa]','$yhtiorow[pankkikortti]','$yhtiorow[luottokortti]',";
 
 		if (count($kassakone) > 0) {
 			$kassat_temp = "";
@@ -645,13 +645,13 @@
 			if (mysql_num_rows($result) == count($kassakone)) {
 				while ($row = mysql_fetch_array($result)) {
 					if ($row["kassa"] != $yhtiorow["kassa"]) {
-						$myyntisaamiset_tilit .= "'{$row['kassa']}',";
+						$myyntisaamiset_tilit .= "'$row[kassa]',";
 					}
 					if ($row["pankkikortti"] != $yhtiorow["pankkikortti"]) {
-						$myyntisaamiset_tilit .= "'{$row['pankkikortti']}',";
+						$myyntisaamiset_tilit .= "'$row[pankkikortti]',";
 					}
 					if ($row["luottokortti"] != $yhtiorow["luottokortti"]) {
-						$myyntisaamiset_tilit .= "'{$row['luottokortti']}',";
+						$myyntisaamiset_tilit .= "'$row[luottokortti]',";
 					}
 				}
 			}
@@ -736,7 +736,7 @@
 					$i++;
 				}
 			}
-			
+
 			if (count($ltunnukset) > 0) {
 				tosite_print($vv, $kk, $pp, $ltunnukset);
 				echo "$ltunnukset[kassalipas] ".t("on jo täsmätty. Tosite löytyy myös")." <a href='".$palvelin2."muutosite.php?tee=E&tunnus=$ltunnukset[ltunnukset]'>".t("täältä")."</a><br>";
@@ -770,7 +770,7 @@
 
 				echo "<td align='center' style='width:100px' nowrap>".strtoupper(t("Myynti"))."</td><td align='center' style='width:100px' nowrap>".strtoupper(t("Erotus"))."</td></tr>";
 				echo "</tr>";
-				
+
 				$row = mysql_fetch_array($result);
 
 				echo "<input type='hidden' id='rivipointer$i' name='rivipointer$i' value=''>";
@@ -851,7 +851,7 @@
 					}
 
 					if (stristr($row["tyyppi"], 'kateinen')) {
-						
+
 						$solu = "kateinen";
 
 						if ($edkassa != $row["kassa"] or ($kateinen != $row["tilino"] and $kateinen != '')) {
@@ -1009,7 +1009,7 @@
 						$edkateismaksu = $kateismaksu;
 					}
 				}
-				
+
 				if ($solu != 'kateinen' and ($pankkikortti == true or $luottokortti == $true)) {
 					// jos meillä on vain pankkikortti ja/tai luottokorttitapahtumia eikä yhtään käteistä niin halutaan silti nähdä kassalippaan alku- ja loppukassat yms
 					$edkassa = "halutaan kassalippaan tiedot";
@@ -1766,7 +1766,7 @@
 								}
 
 								solut += Number(obj.elements[i].value.replace(\",\",\".\"));
-								
+
 								solusumma = solut - erotus;
 								document.getElementById('luottokortti soluerotus'+pointer).value = solusumma.toFixed(2);
 
@@ -1797,13 +1797,13 @@
 						document.getElementById('yht_katot').value = yht_katot.toFixed(2);
 						document.getElementById('yht_kattil').value = yht_kattil.toFixed(2);
 						document.getElementById('yht_kasero').value = yht_kasero.toFixed(2);
-					
+
 						if (obj.elements[i].value == 0 && obj.elements[i].id.substring(0,19) != 'kateinen soluerotus' && obj.elements[i].id.substring(0,23) != 'pankkikortti soluerotus' && obj.elements[i].id.substring(0,23) != 'luottokortti soluerotus') {
 							obj.elements[i].value = '';
 						}
-					
+
 					}
-										
+
 //					alert(kala);
 				}
 
@@ -1817,11 +1817,11 @@
 				}
 
 				function verify() {
-					
+
 					var error = false;
-					
+
 					obj = document.getElementById('tasmaytysform');
-					
+
 			 		for (i=0; i < obj.length; i++) {
 						if (obj.elements[i].id.substring(0,10) == ('pohjakassa') || obj.elements[i].id.substring(0,13) == ('kateistilitys') || obj.elements[i].id == 'kaikkiyhteensa' || obj.elements[i].id.substring(0,8) == ('kateinen') || obj.elements[i].id.substring(0,12) == ('pankkikortti') || obj.elements[i].id.substring(0,12) == ('luottokortti') || obj.elements[i].id.substring(0,10) == ('kateisotto')) {
 							if (obj.elements[i].value != '' && obj.elements[i].value != null && isNaN(obj.elements[i].value.replace(\",\",\".\"))) {
@@ -1829,7 +1829,7 @@
 							}
 						}
 					}
-					
+
 					if (error == true) {
 						msg = '".t("Tietueiden täytyy sisältää vain numeroita").".';
 						alert(msg);

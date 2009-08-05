@@ -481,7 +481,7 @@
 										$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
 
 										if ($silent == "" or $silent == "VIENTI") {
-											$tulos_ulos_sarjanumerot .= t("Hyvitettävää riviä ei löydy, ei voida laskuttaa").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
+											$tulos_ulos_sarjanumerot .= t("Hyvitettävää riviä ei löydy, ei voida laskuttaa").": $laskurow[tunnus] $srow1[tuoteno] $sarjarowx[sarjanumero] $laskurow[nimi]!!!<br>\n";
 										}
 									}
 								}

@@ -10,6 +10,7 @@
 
 	echo "<font class='head'>".t("Yll‰pitosopimukset")."</font><hr>";
 
+	js_popup();
 	echo " <SCRIPT TYPE='text/javascript' LANGUAGE='JavaScript'>
 		<!--
 
@@ -306,10 +307,10 @@
 		echo "<th>sopimus</th>";
 		echo "<th>ytunnus</th>";
 		echo "<th>nimi</th>";
-		echo "<th>sopimus alkupvm</th>";
-		echo "<th>sopimus loppupvm</th>";
-		echo "<th>laskutus kk</th>";
-		echo "<th>laskutus pv</th>";
+		echo "<th>alkupvm</th>";
+		echo "<th>loppupvm</th>";
+		echo "<th>kk</th>";
+		echo "<th>pv</th>";
 		echo "<th>arvo</th>";
 		echo "<th>laskutettu (laskunro)</th>";
 		echo "<th>laskuttamatta</th>";
@@ -348,6 +349,7 @@
 
 			// katotaan montakertaa t‰‰ on laskutettu tai laskuttamatta
 			$laskutettu = "";
+			$laskutettu_vika = "";
 			$laskuttamatta = "";
 
 			// splitataan alku ja loppupvm omiin muuttujiin
@@ -402,12 +404,17 @@
 					else {
 						$chkrow = mysql_fetch_array($chkres);
 						$laskutettu .= "$pvmloop_pp.$pvmloop_kk.$pvmloop_vv ($chkrow[laskunro])<br>";
+						$laskutettu_vika = "$pvmloop_pp.$pvmloop_kk.$pvmloop_vv ($chkrow[laskunro])";
 					}
 				}
 
 			}
 
-			echo "<td valign='top' nowrap>$laskutettu</td>";
+			echo "<td nowrap><a onmouseout=\"popUp(event,'$row[laskutunnus]')\" onmouseover=\"popUp(event,'$row[laskutunnus]')\">$laskutettu_vika</a> ";
+			echo "<div id='$row[laskutunnus]' class='popup'>";
+			echo "$laskutettu";
+			echo "</div>";
+			echo "</td>";
 			echo "<td valign='top' nowrap>$laskuttamatta</td>";
 			echo "</tr>";
 		}

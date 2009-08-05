@@ -48,6 +48,8 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "TRY") 				$ulos .= "<option value='TRY' {$avain_sel['TRY']}>								".t("Tuoteryhmä")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "OSASTO") 			$ulos .= "<option value='OSASTO' {$avain_sel['OSASTO']}>						".t("Tuoteosasto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TUOTEMERKKI") 		$ulos .= "<option value='TUOTEMERKKI' {$avain_sel['TUOTEMERKKI']}>				".t("Tuotemerkki")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "MALLI") 			$ulos .= "<option value='MALLI' {$avain_sel['MALLI']}>							".t("Tuotemalli")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "MALLITARKENNE") 	$ulos .= "<option value='MALLITARKENNE' {$avain_sel['MALLITARKENNE']}>			".t("Tuotemallitarkenne")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "S") 				$ulos .= "<option value='S' {$avain_sel['S']}>									".t("Tuotteen status")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TUOTEULK") 			$ulos .= "<option value='TUOTEULK' {$avain_sel['TUOTEULK']}>					".t("Tuotteiden avainsanojen laji")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "VARASTOLUOKKA") 	$ulos .= "<option value='VARASTOLUOKKA' {$avain_sel['VARASTOLUOKKA']}>			".t("Varastoluokka")."</option>";
@@ -62,8 +64,6 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "ASIAKASRYHMA") 		$ulos .= "<option value='ASIAKASRYHMA' {$avain_sel['ASIAKASRYHMA']}>			".t("Asiakasryhma")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "ASIAKASTILA") 		$ulos .= "<option value='ASIAKASTILA' {$avain_sel['ASIAKASTILA']}>				".t("Asiakastila")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PIIRI") 			$ulos .= "<option value='PIIRI' {$avain_sel['PIIRI']}>							".t("Asiakkaan piiri")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "LASKT_EMAIL") 		$ulos .= "<option value='LASKT_EMAIL' {$avain_sel['LASKT_EMAIL']}>				".t("Laskutustiedot autom. sähköpostitukseen")."</option>";
-		if ($lukitse_laji== "" or $lukitse_laji == "LASKT_EMAIL_SOP") 	$ulos .= "<option value='LASKT_EMAIL_SOP' {$avain_sel['LASKT_EMAIL_SOP']}>		".t("Laskutustiedot autom. sähköpostitukseen (Sopimus)")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "ASAVAINSANA") 		$ulos .= "<option value='ASAVAINSANA' {$avain_sel['ASAVAINSANA']}>				".t("Asiakkaan avainsanojen laji")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "EXTASAVAINSANA") 	$ulos .= "<option value='EXTASAVAINSANA' {$avain_sel['EXTASAVAINSANA']}>		".t("Extranet-asiakkaan avainsanojen laji")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
@@ -112,7 +112,7 @@
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Muut avainsanat")."'>";
-		if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI") 		$ulos .= "<option value='VAKIOVIESTI' {$avain_sel['VAKIOVIESTI']}>				".t("Vakioviesti")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI") 		$ulos .= "<option value='VAKIOVIESTI' {$avain_sel['VAKIOVIESTI']}>				".t("Laskun vakioviesti")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LITETY") 			$ulos .= "<option value='LITETY' {$avain_sel['LITETY']}>						".t("Liitetiedostotyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TIL-LITETY") 		$ulos .= "<option value='TIL-LITETY' {$avain_sel['TIL-LITETY']}>				".t("Tilauksen liitetiedostotyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "JAKELULISTA") 		$ulos .= "<option value='JAKELULISTA' {$avain_sel['JAKELULISTA']}>				".t("Email jakelulista")."</option>";

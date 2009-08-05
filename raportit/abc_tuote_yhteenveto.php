@@ -3,8 +3,8 @@
 	echo "<font class='head'>".t("ABC-Analyysi‰: ABC-Luokkayhteenveto")." $yhtiorow[nimi]<hr></font>";
 
 	if (trim($saapumispp) != '' and trim($saapumiskk) != '' and trim($saapumisvv) != '') {
-		$saapumispp = $saapumispp; 
-		$saapumiskk = $saapumiskk;  
+		$saapumispp = $saapumispp;
+		$saapumiskk = $saapumiskk;
 		$saapumisvv	= $saapumisvv;
 	}
 	elseif (trim($saapumispvm) != '') {
@@ -27,7 +27,7 @@
 	$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "TUOTEMYYJA", "TUOTEOSTAJA");
 
 	require ("../tilauskasittely/monivalintalaatikot.inc");
-	
+
 	echo "<br>";
 	echo "<table style='display:inline;'>";
 	echo "<tr>";
@@ -50,7 +50,7 @@
 	elseif ($nayta_valinta == 'tuoteostajittain') {
 		$nayta_select5 = 'checked';
 	}
-	
+
 	echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='osastoittain' $nayta_select1>",t("Osastoittain"),"<br/>";
 	echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>",t("Tuoteryhmitt‰in"),"<br/>";
 	echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuotemerkeittain' $nayta_select3>",t("Tuotemerkeitt‰in"),"<br/>";
@@ -125,27 +125,27 @@
 		}
 
 		if ($osasto == 'KAIKKI') {
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemyyja=$tuotemyyja&tuoteostaja=$tuoteostaja&tuotemalli=$tuotemalli&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=".$orderurl."osasto'>".t("Osasto")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&nayta_valinta=$nayta_valinta&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot$ulisa&order=".$orderurl."osasto'>".t("Osasto")."</a><br>&nbsp;</th>";
 		}
 
 		if ($try == 'KAIKKI') {
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemyyja=$tuotemyyja&tuoteostaja=$tuoteostaja&tuotemalli=$tuotemalli&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=".$orderurl."try'>".t("Tuoteryhm‰")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&nayta_valinta=$nayta_valinta&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot$ulisa&order=".$orderurl."try'>".t("Tuoteryhm‰")."</a><br>&nbsp;</th>";
 		}
 
 		if ($tuotemerkki == 'KAIKKI') {
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemyyja=$tuotemyyja&tuoteostaja=$tuoteostaja&tuotemalli=$tuotemalli&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=".$orderurl."tuotemerkki'>".t("Tuotemerkki")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&nayta_valinta=$nayta_valinta&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot$ulisa&order=".$orderurl."tuotemerkki'>".t("Tuotemerkki")."</a><br>&nbsp;</th>";
 		}
-		
+
 		if ($tuotemyyja == 'KAIKKI') {
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemyyja=$tuotemyyja&tuoteostaja=$tuoteostaja&tuotemalli=$tuotemalli&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=".$orderurl."myyjanro'>".t("Tuotemyyj‰")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&nayta_valinta=$nayta_valinta&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot$ulisa&order=".$orderurl."myyjanro'>".t("Tuotemyyj‰")."</a><br>&nbsp;</th>";
 		}
-		
+
 		if ($tuoteostaja == 'KAIKKI') {
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemyyja=$tuotemyyja&tuoteostaja=$tuoteostaja&tuotemalli=$tuotemalli&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=".$orderurl."ostajanro'>".t("Tuoteostaja")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&nayta_valinta=$nayta_valinta&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot$ulisa&order=".$orderurl."ostajanro'>".t("Tuoteostaja")."</a><br>&nbsp;</th>";
 		}
-		
+
 		if ($tuotemalli == 'KAIKKI') {
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemyyja=$tuotemyyja&tuoteostaja=$tuoteostaja&tuotemalli=$tuotemalli&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=".$orderurl."malli'>".t("Tuotemalli")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&nayta_valinta=$nayta_valinta&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemyyja=$tuotemyyja&tuoteostaja=$tuoteostaja&tuotemalli=$tuotemalli&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=".$orderurl."malli'>".t("Tuotemalli")."</a><br>&nbsp;</th>";
 		}
 
 		if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI')  {
@@ -172,11 +172,11 @@
 		}
 
 		echo "<th nowrap>".t("Varast").".<br>".t("arvo")."<br>".t("nyt")."</th>";
-		
+
 		if ($lisatiedot == "TARK" or $lisatiedot == "OSTONOHJ") {
 			echo "<th nowrap>".t("Saldo")."</th>";
-		}		
-		
+		}
+
 		if ($lisatiedot == "OSTONOHJ") {
 			echo "<th nowrap>".t("Varast")."<br>".t("arvo")."<br>".t("tavoite")."</th>";
 		}
@@ -247,7 +247,7 @@
 					$saapumispvmlisa";
 		$sumres = mysql_query($query) or pupe_error($query);
 		$sumrow = mysql_fetch_array($sumres);
-	
+
 		if ($sumrow["yhtkate"] == 0) {
 			$sumrow["yhtkate"] = 0.01;
 		}
@@ -318,11 +318,11 @@
 
 		$ryhmanimet   = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
 		$ryhmaprossat = array(30.00,20.00,15.00,15.00,10.00,5.00,3.00,2.00,0.00);
-		
+
 		$i = 0;
 
 		while ($row = mysql_fetch_array($res)) {
-			
+
 			if (strtolower($toim) == 'myynti') {
 				$paramtyppi = "TM";
 			}
@@ -338,21 +338,21 @@
 			else {
 				$paramtyppi = "";
 			}
-			
+
 			$query = "SELECT * FROM abc_parametrit WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$paramtyppi' and luokka = '$ryhmanimet[$i]'";
 			$paramres = mysql_query($query) or pupe_error($query);
 			$paramrow = mysql_fetch_array($paramres);
-			
+
 			$i++;
-			
+
 			echo "<tr>";
-			
+
 			if ($osasto == 'KAIKKI') {
 				// tehd‰‰n avainsana query
 				$keyres = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
 				$keyosa = mysql_fetch_array($keyres);
 
-				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]&lisatiedot=$lisatiedot'>$row[osasto] $keyosa[selitetark]</a></td>";
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_osasto[]=$row[osasto]&lisatiedot=$lisatiedot'>$row[osasto] $keyosa[selitetark]</a></td>";
 			}
 
 			if ($try == 'KAIKKI') {
@@ -360,37 +360,37 @@
 				$keyres = t_avainsana("TRY", $kukarow['kieli'], "and avainsana.selite ='$row[try]'");
 				$keytry = mysql_fetch_array($keyres);
 
-				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&try=$row[try]&lisatiedot=$lisatiedot'>$row[try] $keytry[selitetark]</a></td>";
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_try[]=$row[try]&lisatiedot=$lisatiedot'>$row[try] $keytry[selitetark]</a></td>";
 			}
 
 			if ($tuotemerkki == 'KAIKKI') {
-				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&tuotemerkki=$row[tuotemerkki]&lisatiedot=$lisatiedot'>$row[tuotemerkki]</a></td>";
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_tme[]=$row[tuotemerkki]&lisatiedot=$lisatiedot'>$row[tuotemerkki]</a></td>";
 			}
-			
+
 			if ($tuotemyyja == 'KAIKKI') {
 				$keymyyja = "	SELECT nimi FROM kuka WHERE yhtio = '$kukarow[yhtio]' and myyja = '$row[myyjanro]'";
 				$myyjares = mysql_query($keymyyja) or pupe_error($keymyyja);
 				$keytuotemyyja = mysql_fetch_array($myyjares);
-				
-				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&tuotemyyja=$row[myyjanro]&lisatiedot=$lisatiedot'>$keytuotemyyja[nimi]</a></td>";
+
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_tuotemyyja[]=$row[myyjanro]&lisatiedot=$lisatiedot'>$keytuotemyyja[nimi]</a></td>";
 			}
-			
+
 			if ($tuoteostaja == 'KAIKKI') {
 				$keyostaja = "	SELECT nimi FROM kuka WHERE yhtio = '$kukarow[yhtio]' and myyja = '$row[ostajanro]'";
 				$ostajares = mysql_query($keyostaja) or pupe_error($keymyyja);
 				$keytuoteostaja = mysql_fetch_array($ostajares);
-				
-				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&tuoteostaja=$row[ostajanro]&lisatiedot=$lisatiedot'>$keytuoteostaja[nimi]</a></td>";
+
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_tuoteostaja[]=$row[ostajanro]&lisatiedot=$lisatiedot'>$keytuoteostaja[nimi]</a></td>";
 			}
 
 			if ($tuotemalli == 'KAIKKI') {
-				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&tuotemalli=$row[malli]&lisatiedot=$lisatiedot'>$row[malli]</a></td>";
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_malli[]=$row[malli]&lisatiedot=$lisatiedot'>$row[malli]</a></td>";
 			}
 
 			if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI')  {
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$row[luokka]$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot'>".$ryhmanimet[$row["luokka"]]."</a></td>";
 			}
-			
+
 			echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["summa"]));
 			echo "<input type='hidden' name='summa_$i' id='summa_$i' value='$row[summa]'></td>";
 
@@ -412,11 +412,11 @@
 			}
 
 			echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["vararvo"]))."</td>";
-			
+
 			if ($lisatiedot == "TARK" or $lisatiedot == "OSTONOHJ") {
 				echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.0f',$row["saldo"]))."</td>";
 			}
-			
+
 			if ($lisatiedot == "OSTONOHJ") {
 				echo "<td align='right' valign='top' nowrap>";
 				echo "<input type='text' size='10' name='vararvo_$i' id='vararvo_$i' value='' disabled>";
@@ -426,14 +426,14 @@
 
 			echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["kiertonopeus"]))."</td>";
 
-			if ($lisatiedot == "OSTONOHJ") {								
+			if ($lisatiedot == "OSTONOHJ") {
 				if (${'kiertonopeus_input'.$i} == '') {
 					$kntavoitevalue = str_replace(".",",",$paramrow["kiertonopeus_tavoite"]);
 				}
 				else {
 					$kntavoitevalue = ${'kiertonopeus_input'.$i};
 				}
-				
+
 				echo "<td align='center' valign='top' nowrap><input type='text' size='5' name='kiertonopeus_input$i' id='kiertonopeus_input$i' value='$kntavoitevalue' onkeyup='kutsu_update(\"abc_tuote_yhteenveto_form\");'></td>";
 			}
 
@@ -458,12 +458,12 @@
 
 			if ($lisatiedot == "OSTONOHJ") {
 				$ostoera_paivissa = 0;
-				
+
 //				365 p‰iv‰‰ /(( vuosimyynti yht kpl/(ostot yht kp/ ostokerrat ))
 
-//				Jos vuosimyyti on 500 kpl  
+//				Jos vuosimyyti on 500 kpl
 //				ostettu tuotetta 20 kertaa eli yhteens‰ 600 kpl
-				
+
 //				kertaosto keskim‰‰rin 30 kpl
 //				eli noin 22 p‰iv‰‰ suosimyyntiin n‰hden.
 
@@ -481,7 +481,7 @@
 */
 
 				//$ostoera_paivissa = round(($row["osto_kpl"] / $row["osto_kerrat"]) / ($row["kpl"] / 365), 2);
-				
+
 				if ($ryhmanimet[$row["luokka"]] == 'A-30' and 1==2) {
 					echo "<pre>";
 					echo "365 / ($row[kpl] / ($row[osto_kpl] / $row[osto_kerrat]))<br>";
@@ -497,51 +497,51 @@
 
 					echo "$row[tuotenumerot]<br>";
 					echo "KPL: $row[kpl] &#09; OSTO_KPL: $row[osto_kpl] &#09; OSTO_KERRAT: $row[osto_kerrat] &#09; OSTO_RIVIT: $row[osto_rivia]<br>";
-					
+
 					echo "Saapumisten tavoite: ".round(($row["osto_kerrat"]/str_replace(",",".",$row["kiertonopeus"]))*str_replace(",",".",$kntavoite),0)." eli ($row[osto_kerrat]/$row[kiertonopeus])*$kntavoite";
-					
-					
+
+
 					echo "</pre>";
 				}
-				
 
-				
-								
+
+
+
 				if (${'palvelutaso_input'.$i} == '') {
 					$pttvalue = str_replace(".",",",$paramrow["palvelutaso_tavoite"]);
 				}
 				else {
 					$pttvalue = ${'palvelutaso_input'.$i};
 				}
-				
+
 				echo "<td align='center' valign='top' nowrap><input type='text' size='6' name='palvelutaso_input$i' id='palvelutaso_input$i' value='$pttvalue' onkeyup='kutsu_update(\"abc_tuote_yhteenveto_form\");'></td>";
-				
+
 				if (${'varmuusvarasto_input'.$i} == '') {
 					$varmvarvalue = str_replace(".",",",$paramrow["varmuusvarasto_pv"]);
 				}
 				else {
 					$varmvarvalue = ${'varmuusvarasto_input'.$i};
 				}
-				
+
 				echo "<td align='center' valign='top' nowrap><input type='text' size='5' name='varmuusvarasto_input$i' id='varmuusvarasto_input$i' value='$varmvarvalue' onkeyup='kutsu_update(\"abc_tuote_yhteenveto_form\");'></td>";
-				
+
 				if (${'hankintaaika_input'.$i} == '') {
 					$haikavalue = str_replace(".",",",$paramrow["toimittajan_toimitusaika_pv"]);
 				}
 				else {
 					$haikavalue = ${'hankintaaika_input'.$i};
 				}
-				
+
 				echo "<td align='center' valign='top' nowrap><input type='text' size='5' name='hankintaaika_input$i' id='hankintaaika_input$i' value='$haikavalue' onkeyup='kutsu_update(\"abc_tuote_yhteenveto_form\");'></td>";
 				echo "<td align='center' valign='top' nowrap><input type='text' size='5' name='tilauspiste$i' id='tilauspiste$i' value='' disabled></td>";
-				
+
 				echo "<td align='center' valign='top' nowrap><input type='text' size='5' name='keskivarasto$i' id='keskivarasto$i' value='' disabled></td>";
-				
+
 				$ostoera_paivissa = round(((365/$kntavoitevalue)-$varmvarvalue)*2, 2);
-				
+
 				echo "<td align='center' valign='top' nowrap><input type='text' size='6' name='ostoera_pv_$i' id='ostoera_pv_$i' value='$ostoera_paivissa' disabled></td>";
 				echo "<td align='center' valign='top' nowrap><input type='text' size='5' name='saap_lkm_nyt_$i' id='saap_lkm_nyt_$i' value='$row[osto_kerrat]' disabled></td>";
-				
+
 				$saaplkmtavoite = round((365/$ostoera_paivissa)*$row["tuotelkm"],0);
 				echo "<input type='hidden' name='tuote_lkm_$i' id='tuote_lkm_$i' value='$row[tuotelkm]'>";
 				echo "<td align='center' valign='top' nowrap><input type='text' size='5' name='saap_lkm_tavoite_$i' id='saap_lkm_tavoite_$i' value='$saaplkmtavoite' disabled></td>";
@@ -624,15 +624,15 @@
 		if ($tuotemerkki == 'KAIKKI') {
 			$colspan++;
 		}
-		
+
 		if ($tuotemyyja == 'KAIKKI') {
 			$colspan++;
 		}
-		
+
 		if ($tuoteostaja == 'KAIKKI') {
 			$colspan++;
 		}
-		
+
 		if ($tuotemalli == 'KAIKKI') {
 			$colspan++;
 		}
@@ -665,7 +665,7 @@
 		}
 
 		echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$ryhmanvarastonarvoyht))."</td>";
-		
+
 		if ($lisatiedot == "TARK" or $lisatiedot == "OSTONOHJ") {
 			echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.0f',$saldoyht))."</td>";
 		}
@@ -673,7 +673,7 @@
 		if ($lisatiedot == "OSTONOHJ") {
 			echo "<td align='right' valign='top' nowrap><input type='text' size='10' name='vararvo_yht' id='vararvo_yht' value='' disabled></td>";
 		}
-		
+
 		echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$kiertonopeusyht))."</td>";
 
 		if ($lisatiedot == "OSTONOHJ") {
@@ -727,14 +727,14 @@
 
 		echo "	<script type='text/javascript' language='JavaScript'>
 				<!--
-					
+
 					function kutsu_update(ID) {
 						update_kiertonopeus(ID);
 						update_palvelutaso(ID);
 						update_varmuusvarasto(ID);
 						update_hankintaaika(ID);
 					}
-					
+
 					function update_kiertonopeus(ID) {
 						obj = document.getElementById(ID);
 						var summa = 0;
@@ -759,7 +759,7 @@
 										if (!isNaN(obj.elements[i].id.substring(18,20))) {
 											pointer = obj.elements[i].id.substring(18,20);
 											summa += Number(document.getElementById('kiertonopeus_input'+pointer).value.replace(\",\",\".\"));
-											
+
 											myynti = Number(document.getElementById('summa_'+pointer).value.replace(\",\",\".\"));
 											kate = Number(document.getElementById('kate_'+pointer).value.replace(\",\",\".\"));
 											keskivar_tavoite = (myynti - kate) / Number(document.getElementById('kiertonopeus_input'+pointer).value.replace(\",\",\".\"));
@@ -769,7 +769,7 @@
 											//$saaplkmtavoite = round((365/$ostoera_paivissa)*$row[tuotelkm],0);
 											saaplkmtavoite = (365/ostoera_paivissa)*Number(document.getElementById('tuote_lkm_'+pointer).value.replace(\",\",\".\"));
 											ostoera_paivissa = ostoera_paivissa*Number(document.getElementById('palvelutaso_input'+pointer).value.replace(\",\",\".\")) / 100;
-											
+
 											document.getElementById('vararvo_'+pointer).value = keskivar_tavoite.toFixed(1);
 											document.getElementById('ostoera_pv_'+pointer).value = ostoera_paivissa.toFixed(2);
 											document.getElementById('saap_lkm_tavoite_'+pointer).value = saaplkmtavoite.toFixed(0);
@@ -788,7 +788,7 @@
 									if (isNaN(kiertonopeus_summa)) {
 										kiertonopeus_summa = 0;
 									}
-									
+
 									document.getElementById('kiertonopeus_input_yht').value = kiertonopeus_summa.toFixed(1);
 									document.getElementById('kiertonopeus_input_yht').style.color = 'darkgreen';
 								}
@@ -853,13 +853,13 @@
 										if (!isNaN(obj.elements[i].id.substring(20,22))) {
 											pointer = obj.elements[i].id.substring(20,22);
 											summa += Number(document.getElementById('varmuusvarasto_input'+pointer).value.replace(\",\",\".\"));
-											
+
 											//ostoera = Number(document.getElementById('ostoera_pv_'+pointer).value.replace(\",\",\".\"));
 											//keskivar = Number(document.getElementById('varmuusvarasto_input'+pointer).value.replace(\",\",\".\"));
 											//keskivar = keskivar + (ostoera / 2);
 											keskivar = 365 / Number(document.getElementById('kiertonopeus_input'+pointer).value.replace(\",\",\".\"));
 											document.getElementById('keskivarasto'+pointer).value = keskivar.toFixed(1);
-											
+
 											document.getElementById('tilauspiste'+pointer).value = Number(document.getElementById('hankintaaika_input'+pointer).value.replace(\",\",\".\")) + Number(document.getElementById('varmuusvarasto_input'+pointer).value.replace(\",\",\".\"));
 										}
 									}
@@ -886,13 +886,13 @@
 										if (!isNaN(obj.elements[i].id.substring(18,20))) {
 											pointer = obj.elements[i].id.substring(18,20);
 											summa += Number(document.getElementById('hankintaaika_input'+pointer).value.replace(\",\",\".\"));
-											
+
 											varmuusvar = Number(document.getElementById('varmuusvarasto_input'+pointer).value.replace(\",\",\".\"));
 
 											// lasketaan tilauspiste
 											document.getElementById('tilauspiste'+pointer).value = Number(document.getElementById('hankintaaika_input'+pointer).value.replace(\",\",\".\")) + varmuusvar;
 
-											
+
 										}
 									}
 								}
@@ -901,9 +901,9 @@
 							}
 						}
 					}
-					
+
 					kutsu_update(\"abc_tuote_yhteenveto_form\");
-					
+
 				-->
 				</script>";
 

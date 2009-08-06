@@ -222,8 +222,14 @@ if(!function_exists("tuotetarkista")) {
 				}
 			}
 
-			if (count($virhe) == 0 and $tem_eisaldoa == "") {
-				if ($yhtiorow["tuotteen_oletuspaikka"] != "" and mysql_num_rows($sresult) == 0) {
+			if (count($virhe) == 0 and $tem_eisaldoa == "" and $yhtiorow["tuotteen_oletuspaikka"] != "") {
+				
+				$query = "	SELECT *
+							FROM tuotepaikat
+							WHERE tuoteno = '$tem_tuoteno' and yhtio = '$kukarow[yhtio]'";
+				$sresult = mysql_query($query) or pupe_error($query);
+				
+				if (mysql_num_rows($sresult) == 0) {
 					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", $yhtiorow["tuotteen_oletuspaikka"]);
 
 					if ($hyllyalue == "" or !isset($hyllyalue)) {
@@ -238,7 +244,7 @@ if(!function_exists("tuotetarkista")) {
 					if ($hyllytaso == "" or !isset($hyllytaso)) {
 						$hyllytaso = 0;
 					}
-
+					
 					$tuotepaikka_query = "	INSERT INTO tuotepaikat set
 					 						yhtio			= '$kukarow[yhtio]',
 								 			tuoteno     	= '$tem_tuoteno',

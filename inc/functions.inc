@@ -6248,6 +6248,9 @@ if (!function_exists("livesearch_tuotehaku")) {
 			$haku_query = "";
 
 			foreach ($haku_array as $haku) {
+
+				$haku = mysql_real_escape_string($haku);
+
 				$haku_query .= " and (tuote.tuoteno like ('%$haku%') or tuote.nimitys like ('%$haku%')) ";
 			}
 

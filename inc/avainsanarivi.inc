@@ -152,7 +152,16 @@
 
 		//	näytetäään vain kielet joilla on
 		if($perhe > 0) {
-			$query = "	SELECT group_concat(kieli) kielet FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and perhe='$perhe'";
+			if($lukitse_laji != "") {
+				$laji = $lukitse_laji;
+			}
+			else {
+				$laji = $al_laji;
+			}
+			
+			$query = "	SELECT group_concat(kieli) kielet
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]' and perhe='$perhe' and laji = '$laji'";
 			$res = mysql_query($query) or pupe_error($query);
 			$kilerow = mysql_fetch_array($res);
 			$kielet = $kilerow["kielet"];

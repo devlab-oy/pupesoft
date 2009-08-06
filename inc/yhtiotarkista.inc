@@ -15,12 +15,13 @@ if(!function_exists("yhtiotarkista")) {
 			(mysql_field_name($result, $i) == "ostoreskontrakausi_loppu") or
 			(mysql_field_name($result, $i) == "myyntireskontrakausi_alku") or
 			(mysql_field_name($result, $i) == "myyntireskontrakausi_loppu")) {
+			
 			if (trim($t[$i]) == '') {
-				$virhe[$i] = "".t("Tieto puuttuu!")."";
+				$virhe[$i] = t("Tieto puuttuu!");
 			}
 		}
 
-		if ((mysql_field_name($result, $i) == "kassa") or
+		if (((mysql_field_name($result, $i) == "kassa") or
 			(mysql_field_name($result, $i) == "pankkikortti") or
 			(mysql_field_name($result, $i) == "luottokortti") or
 			(mysql_field_name($result, $i) == "myynti") or
@@ -51,8 +52,49 @@ if(!function_exists("yhtiotarkista")) {
 			(mysql_field_name($result, $i) == "konsernisaamiset") or
 			(mysql_field_name($result, $i) == "konsernivelat") or
 			(mysql_field_name($result, $i) == "konserniostovelat") or
-			(mysql_field_name($result, $i) == "konsernimyyntisaamiset")) {
-
+			(mysql_field_name($result, $i) == "konsernimyyntisaamiset")) and trim($t[$i]) == '') {
+				
+			$virhe[$i] = t("Tili puuttuu!");
+		}
+		
+		if (((mysql_field_name($result, $i) == "kassa") or
+			(mysql_field_name($result, $i) == "pankkikortti") or
+			(mysql_field_name($result, $i) == "luottokortti") or
+			(mysql_field_name($result, $i) == "kassaerotus") or
+			(mysql_field_name($result, $i) == "kateistilitys") or
+			(mysql_field_name($result, $i) == "myynti") or
+			(mysql_field_name($result, $i) == "myynti_eu") or
+			(mysql_field_name($result, $i) == "myynti_ei_eu") or
+			(mysql_field_name($result, $i) == "myynti_marginaali") or
+			(mysql_field_name($result, $i) == "osto_eu") or
+			(mysql_field_name($result, $i) == "osto_marginaali") or
+			(mysql_field_name($result, $i) == "myyntisaamiset") or
+			(mysql_field_name($result, $i) == "luottotappiot") or
+			(mysql_field_name($result, $i) == "ostovelat") or
+			(mysql_field_name($result, $i) == "valuuttaero") or
+			(mysql_field_name($result, $i) == "myynninvaluuttaero") or
+			(mysql_field_name($result, $i) == "matkalla_olevat") or
+			(mysql_field_name($result, $i) == "kassaale") or
+			(mysql_field_name($result, $i) == "myynninkassaale") or
+			(mysql_field_name($result, $i) == "muutkulut") or
+			(mysql_field_name($result, $i) == "pyoristys") or
+			(mysql_field_name($result, $i) == "varasto") or
+			(mysql_field_name($result, $i) == "varastonmuutos") or
+			(mysql_field_name($result, $i) == "alv") or
+			(mysql_field_name($result, $i) == "siirtosaamiset") or
+			(mysql_field_name($result, $i) == "siirtovelka") or
+			(mysql_field_name($result, $i) == "factoringsaamiset") or
+			(mysql_field_name($result, $i) == "selvittelytili") or
+			(mysql_field_name($result, $i) == "raaka_ainevarasto") or
+			(mysql_field_name($result, $i) == "raaka_ainevarastonmuutos") or
+			(mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or
+			(mysql_field_name($result, $i) == "konsernisaamiset") or
+			(mysql_field_name($result, $i) == "konsernivelat") or
+			(mysql_field_name($result, $i) == "konserniostovelat") or		
+			(mysql_field_name($result, $i) == "voittotili_tulos") or
+			(mysql_field_name($result, $i) == "voittotili_tase") or
+			(mysql_field_name($result, $i) == "konsernimyyntisaamiset")) and trim($t[$i]) != '') {
+		
 			$query = "	SELECT nimi
 						FROM tili
 						WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
@@ -66,8 +108,10 @@ if(!function_exists("yhtiotarkista")) {
 								WHERE yhtio = '$kukarow[yhtio]' and nimi like '%$t[$i]%'
 								ORDER BY tilino";
 					$sresult = mysql_query($query) or pupe_error($query);
+					
 					if (mysql_num_rows($sresult) > 0) {
 						$ulosarray[$i] = "<td><select name='t[$i]'><option value = '' $sel>".t("Ei valintaa")."</option>";
+						
 						while ($vrow=mysql_fetch_array($sresult)) {
 							$sel="";
 							if ($trow[$i] == $vrow[0]) {
@@ -78,9 +122,8 @@ if(!function_exists("yhtiotarkista")) {
 						$ulosarray[$i] .= "</select></td>";
 						$virhe[$i] = t("Valitse tili");
 					}
-
 				}
-				if ($virhe[$i] == '') $virhe[$i] = t("Tili puuttuu tai sitä ei löydy");
+				if ($virhe[$i] == '') $virhe[$i] = t("Tiliä ei löydy");
 			}
 		}
 
@@ -96,10 +139,7 @@ if(!function_exists("yhtiotarkista")) {
 			}
 		}
 
-
-		if (mysql_field_name($result, $i) == "pankkitili1" or
-			mysql_field_name($result, $i) == "pankkitili2" or
-			mysql_field_name($result, $i) == "pankkitili3") {
+		if (mysql_field_name($result, $i) == "pankkitili1" or mysql_field_name($result, $i) == "pankkitili2" or mysql_field_name($result, $i) == "pankkitili3") {
 
 			if (strtoupper($yhtiorow['maa']) == "FI" and trim($t[$i]) != "") {
 

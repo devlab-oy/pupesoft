@@ -115,24 +115,92 @@
 		(mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or
 		(mysql_field_name($result, $i) == "konsernisaamiset") or
 		(mysql_field_name($result, $i) == "konsernivelat") or
-		(mysql_field_name($result, $i) == "konserniostovelat") or
+		(mysql_field_name($result, $i) == "konserniostovelat") or		
+		(mysql_field_name($result, $i) == "voittotili_tulos") or
+		(mysql_field_name($result, $i) == "voittotili_tase") or
 		(mysql_field_name($result, $i) == "konsernimyyntisaamiset")) {
+		
 		if ($ulosarray[$i] != '') {
 			$ulos=$ulosarray[$i];
 			$jatko = 0;
 		}
 		else {
-			$ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+			$ulos = "<td nowrap valign='top'><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+			
 			$query = "	SELECT nimi
 						FROM tili
 						WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
 			$vresult = mysql_query($query) or pupe_error($query);
 			
 			if (mysql_num_rows($vresult) == 1) {
-				$vrow=mysql_fetch_array($vresult);
-				$ulos .= " " . $vrow[nimi] . "</td>";
-				$jatko = 0;
+				$vrow = mysql_fetch_array($vresult);
+				$ulos .= " $vrow[nimi]";
 			}
+			else {
+				$query = "	SELECT tilino, nimi
+							FROM tili 
+							WHERE yhtio='$kukarow[yhtio]'";
+				
+				
+				if (mysql_field_name($result, $i) == "kassa") 								$query .= " and nimi regexp '(kassa|k.teis)' ";
+				elseif (mysql_field_name($result, $i) == "pankkikortti") 					$query .= " and nimi regexp 'pankki.*kortti' ";
+				elseif (mysql_field_name($result, $i) == "luottokortti") 					$query .= " and nimi regexp 'luotto.*kortti' ";
+				elseif (mysql_field_name($result, $i) == "kassaerotus") 					$query .= " and nimi regexp '(kassa|k.teis)' and nimi regexp 'ero' ";
+				elseif (mysql_field_name($result, $i) == "kateistilitys") 					$query .= " and nimi regexp '(kassa|k.teis)' and nimi regexp 'vara' ";
+				elseif (mysql_field_name($result, $i) == "myynti") 							$query .= " and nimi regexp 'myynti' ";
+				elseif (mysql_field_name($result, $i) == "myynti_eu") 						$query .= " and nimi regexp 'yhteis' and nimi regexp 'myyn' ";
+				elseif (mysql_field_name($result, $i) == "myynti_ei_eu") 					$query .= " and nimi regexp 'yhteis' and nimi regexp 'myyn' ";
+				elseif (mysql_field_name($result, $i) == "myynti_marginaali") 				$query .= " and nimi regexp '(k.ytet|taide)' and nimi regexp 'myyn' ";
+				elseif (mysql_field_name($result, $i) == "osto_eu") 						$query .= " and nimi regexp 'yhteis' and nimi regexp '(osto|hankin)' ";
+				elseif (mysql_field_name($result, $i) == "osto_marginaali") 				$query .= " and nimi regexp '(k.ytet|taide)' and nimi regexp '(osto|hankin)' ";
+				elseif (mysql_field_name($result, $i) == "myyntisaamiset") 					$query .= " and nimi regexp 'myyn' and nimi regexp 'saam' ";			
+				elseif (mysql_field_name($result, $i) == "luottotappiot") 					$query .= " and nimi regexp 'luotto' and nimi regexp 'tapp' ";
+				elseif (mysql_field_name($result, $i) == "ostovelat") 						$query .= " and nimi regexp '(velka|velat)' and nimi regexp '(osto|hankin)' ";
+				elseif (mysql_field_name($result, $i) == "valuuttaero") 					$query .= " and nimi regexp 'valuu' and nimi regexp 'ero' ";
+				elseif (mysql_field_name($result, $i) == "myynninvaluuttaero") 				$query .= " and nimi regexp 'valuu' and nimi regexp 'ero' ";
+				elseif (mysql_field_name($result, $i) == "matkalla_olevat") 				$query .= " and nimi regexp 'matkalla' ";
+				elseif (mysql_field_name($result, $i) == "kassaale") 						$query .= " and nimi regexp '(kassa|k.teis)' and nimi regexp 'ale' ";
+				elseif (mysql_field_name($result, $i) == "myynninkassaale") 				$query .= " and nimi regexp '(kassa|k.teis)' and nimi regexp 'ale' ";
+				elseif (mysql_field_name($result, $i) == "muutkulut") 						$query .= " and nimi regexp 'muut.*kulut' ";
+				elseif (mysql_field_name($result, $i) == "pyoristys") 						$query .= " and nimi regexp 'py.rist' ";
+				elseif (mysql_field_name($result, $i) == "varasto") 						$query .= " and nimi regexp '(varasto|tavarat)' ";
+				elseif (mysql_field_name($result, $i) == "varastonmuutos") 					$query .= " and nimi regexp 'varast.*muut' ";
+				elseif (mysql_field_name($result, $i) == "alv") 							$query .= " and nimi regexp '(alv|arvonlis)' and nimi regexp '((velka|velat)|saam)' ";
+				elseif (mysql_field_name($result, $i) == "siirtosaamiset") 					$query .= " and nimi regexp 'siirto' and nimi regexp 'saam' ";
+				elseif (mysql_field_name($result, $i) == "siirtovelka") 					$query .= " and nimi regexp 'siirto' and nimi regexp '(velka|velat)' ";
+				elseif (mysql_field_name($result, $i) == "factoringsaamiset") 				$query .= " and nimi regexp 'factoring' and nimi regexp 'saam' ";
+				elseif (mysql_field_name($result, $i) == "selvittelytili") 					$query .= " and nimi regexp 'selvittely' ";
+				elseif (mysql_field_name($result, $i) == "raaka_ainevarasto") 				$query .= " and nimi regexp 'raak.*aine' and nimi regexp '(varasto|tavarat)' ";
+				elseif (mysql_field_name($result, $i) == "raaka_ainevarastonmuutos") 		$query .= " and nimi regexp 'raak.*aine' and nimi regexp 'muut' ";
+				elseif (mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") 	$query .= " and nimi regexp 'kosto.*(velka|velat)' ";
+				elseif (mysql_field_name($result, $i) == "konsernisaamiset") 				$query .= " and nimi regexp 'konserni.*saam' ";
+				elseif (mysql_field_name($result, $i) == "konsernivelat") 					$query .= " and nimi regexp 'kons' and nimi regexp '(velka|velat)'  ";
+				elseif (mysql_field_name($result, $i) == "konserniostovelat") 				$query .= " and nimi regexp 'kons' and nimi regexp '(osto|hankin)' and nimi regexp '(velka|velat)'  ";
+				elseif (mysql_field_name($result, $i) == "konsernimyyntisaamiset") 			$query .= " and nimi regexp 'kons' and nimi regexp 'saam' ";
+				elseif (mysql_field_name($result, $i) == "voittotili_tulos") 				$query .= " and nimi regexp 'voitto' ";
+				elseif (mysql_field_name($result, $i) == "voittotili_tase") 				$query .= " and nimi regexp 'voitto' ";
+				else $query = "";
+				
+				if ($query != "") {
+					
+					$query .= " ORDER BY tilino";
+					
+					$vresult = mysql_query($query) or pupe_error($query);
+				
+					if (mysql_num_rows($vresult) > 990) {
+						$ulos .= "<table style='display:inline;'>";				
+						
+						while ($vrow = mysql_fetch_array($vresult)) {
+							$ulos .= "<tr><td>$vrow[tilino]</td><td>$vrow[nimi]</td></tr>";
+						}
+						
+						$ulos .= "</table>";	
+					}
+				}
+			}
+			
+			$ulos .= "</td>";
+			$jatko = 0;
 		}
 	}
 

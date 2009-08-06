@@ -6492,7 +6492,7 @@ if (!function_exists("hae_rahtimaksu")) {
 							AND tuote.tuoteno = tilausrivi.tuoteno
 							AND tuote.ei_saldoa = '')
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						AND tilausrivi.tyyppi = 'L'
+						AND tilausrivi.tyyppi in ('L', 'E')
 						AND tilausrivi.otunnus in ($otsikot)";
 			$painoresult = mysql_query($query) or pupe_error($query);
 			$painorow = mysql_fetch_array($painoresult);
@@ -6505,14 +6505,14 @@ if (!function_exists("hae_rahtimaksu")) {
 				$query = "	SELECT round(((varattu + kpl + jt) * hinta * (1 - (ale / 100))) / (1 + alv / 100), '$yhtiorow[hintapyoristys]') rivihinta, netto
 							FROM tilausrivi
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND tyyppi = 'L'
+							AND tyyppi in ('L', 'E')
 							AND otunnus in ($otsikot)";
 			}
 			else {
 				$query = "	SELECT round(((varattu + kpl + jt) * hinta * (1 - (ale / 100))), '$yhtiorow[hintapyoristys]') rivihinta, netto
 							FROM tilausrivi
 							WHERE yhtio = '$kukarow[yhtio]'
-							AND tyyppi = 'L'
+							AND tyyppi in ('L', 'E')
 							AND otunnus in ($otsikot)";
 			}
 			$presult = mysql_query($query) or pupe_error($query);

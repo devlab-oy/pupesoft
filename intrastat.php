@@ -1,11 +1,11 @@
 <?php
 
 	if (isset($_POST["tee"])) {
-		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+		if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+		if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
-	require('inc/parametrit.inc');
+	require ('inc/parametrit.inc');
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("/tmp/".$tmpfilenimi);
@@ -53,8 +53,8 @@
 
 	if ($tee == "tulosta") {
 
-		if($excel != "") {
-			if(include('Spreadsheet/Excel/Writer.php')) {
+		if ($excel != "") {
+			if (include('Spreadsheet/Excel/Writer.php')) {
 
 				//keksit‰‰n failille joku varmasti uniikki nimi:
 				list($usec, $sec) = explode(' ', microtime());
@@ -101,11 +101,11 @@
 
 		// tuonti vai vienti
 		if ($tapa == "tuonti") {
-			$maalisa = "maamaara = '$maa' and maalahetys in ($eumaat) and maalahetys != '$maa'";
+			$maalisa = "maamaara = '$maa' and maalahetys in ('',$eumaat) and maalahetys != '$maa'";
 		}
 		else {
 			$tapa = "vienti";
-			$maalisa = "maalahetys = '$maa' and maamaara in ($eumaat) and maamaara != '$maa'";
+			$maalisa = "maalahetys = '$maa' and maamaara in ('',$eumaat) and maamaara != '$maa'";
 		}
 
 		if ($lisavar == "S") {
@@ -131,9 +131,9 @@
 		if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "keikka") {
 			$query = "	(SELECT
 						tuote.tullinimike1,
-						if(lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
-						if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
+						if (lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if (alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
+						if (lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 						lasku.kuljetusmuoto,
 						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,						
@@ -142,8 +142,8 @@
 						max(lasku.laskunro) laskunro,
 						max(tuote.tuoteno) tuoteno,												
 						round(sum(tilausrivi.kpl),0) kpl,
-						if(round(sum(if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0) > 0.5, round(sum(if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0), 1) as paino,
-						if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
+						if (round(sum(if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0) > 0.5, round(sum(if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1) * lasku.bruttopaino), 0), 1) as paino,
+						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
 						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet						
@@ -170,9 +170,9 @@
 		if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "lasku") {
 			$query .= "	(SELECT
 						tuote.tullinimike1,
-						if(lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
-						if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
+						if (lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if (alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
+						if (lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 						lasku.kuljetusmuoto,
 						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,
@@ -181,8 +181,8 @@
 						max(lasku.laskunro) laskunro,
 						max(tuote.tuoteno) tuoteno,
 						round(sum(tilausrivi.kpl),0) kpl,						
-						if(round(sum((if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1))*lasku.bruttopaino),0) > 0.5, round(sum((if(lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1))*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
-						if(round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
+						if (round(sum((if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1))*lasku.bruttopaino),0) > 0.5, round(sum((if (lasku.summa > tilausrivi.rivihinta, tilausrivi.rivihinta / lasku.summa, 1))*lasku.bruttopaino),0), if (round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
+						if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
 						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet
@@ -208,9 +208,9 @@
 		if ($tapahtumalaji == "kaikki" or $tapahtumalaji == "siirtolista") {
 			$query .= "	(SELECT
 						tuote.tullinimike1,
-						if(lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
-						if(lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
+						if (lasku.maa_lahetys='', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if (alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
+						if (lasku.maa_maara='', lasku.toim_maa, lasku.maa_maara) maamaara,
 						lasku.kuljetusmuoto,
 						lasku.kauppatapahtuman_luonne,
 						tullinimike.su_vientiilmo su,												
@@ -219,8 +219,8 @@
 						max(lasku.tunnus) laskunro,
 						max(tuote.tuoteno) tuoteno,											
 						round(sum(tilausrivi.kpl),0) kpl,
-						if(count(tilausrivi.tunnus) = count(if(tuote.tuotemassa > 0,1,0)),if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) = 0,1,round(sum(tilausrivi.kpl*tuote.tuotemassa),0)),if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1))) paino,
-						if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
+						if (count(tilausrivi.tunnus) = count(if (tuote.tuotemassa > 0,1,0)),if (round(sum(tilausrivi.kpl*tuote.tuotemassa),0) = 0,1,round(sum(tilausrivi.kpl*tuote.tuotemassa),0)),if (round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if (round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1))) paino,
+						if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 						group_concat(lasku.tunnus) as kaikkitunnukset,
 						group_concat(distinct tilausrivi.perheid2) as perheid2set,
 						group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet
@@ -247,7 +247,7 @@
 		$arvoyht = 0;
 		$virhe   = 0;
 
-		if($outputti == "tilasto") {
+		if ($outputti == "tilasto") {
 			// tehd‰‰n tilastoarvot listausta
 			$tilastoarvot = "<table>
 				<tr>
@@ -265,7 +265,7 @@
 				<th>".t("Laskutusarvo")."</th>
 				</tr>";
 
-				if(isset($workbook)) {
+				if (isset($workbook)) {
 					$worksheet->write($excelrivi, 1, "Tullinimike", $format_bold);
 					$worksheet->write($excelrivi, 2, "Alkuper‰maa", $format_bold);
 					$worksheet->write($excelrivi, 3, "L‰hetysmaa", $format_bold);
@@ -308,7 +308,7 @@
 			$ulos .= "<th>".t("Virhe")."</th>";
 			$ulos .= "</tr>";
 
-			if(isset($workbook)) {
+			if (isset($workbook)) {
 				$worksheet->write($excelrivi, 1, "Laskunro", $format_bold);
 				$worksheet->write($excelrivi, 2, "Tuoteno", $format_bold);
 				$worksheet->write($excelrivi, 3, "Nimitys", $format_bold);
@@ -322,7 +322,7 @@
 				$worksheet->write($excelrivi, 11, "Paino", $format_bold);
 				$worksheet->write($excelrivi, 12, "2. paljous", $format_bold);
 				$worksheet->write($excelrivi, 13, "Kpl", $format_bold);
-				if($lisavar == "S") {
+				if ($lisavar == "S") {
 					$worksheet->write($excelrivi, 12, "Tehdaslis‰varusteet", $format_bold);
 				}
 				$excelrivi++;
@@ -375,19 +375,19 @@
 
 				if ($row["tapa"] != "Keikka") {
 					$query .= "	if (round(sum((tilausrivi.kpl * tilausrivi.hinta * lasku.vienti_kurssi *
-								(SELECT if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno LIMIT 1)
+								(SELECT if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno LIMIT 1)
 								/ lasku.summa) * lasku.bruttopaino), 0) > 0.5,
 								round(sum((tilausrivi.kpl * tilausrivi.hinta * lasku.vienti_kurssi *
-								(SELECT if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno LIMIT 1)
+								(SELECT if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno LIMIT 1)
 								/ lasku.summa) * lasku.bruttopaino), 0), 1) as paino,
-								if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta";
+								if (round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta";
 				}
 				elseif ($row["tapa"] != "Lasku") {
-					$query .= "	if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
-								if(round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta";
+					$query .= "	if (round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if (round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
+								if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta";
 				}
 				else {
-					$query .= "	if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
+					$query .= "	if (round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if (round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
 								round(sum(tilausrivi.rivihinta), 0) rivihinta";
 				}
 
@@ -443,7 +443,7 @@
 			$nim .= sprintf ('%010d', 		$row["rivihinta"]);																					//nimikkeen laskutusarvo
 			$nim .= "\r\n";
 
-			if($outputti == "tilasto") {
+			if ($outputti == "tilasto") {
 				// tehd‰‰n tilastoarvolistausta
 				$tilastoarvot .= "<tr>";
 				$tilastoarvot .= "<td>$lask</td>";																									//j‰rjestysnumero
@@ -477,7 +477,7 @@
 				$tilastoarvot .= "<td>$row[rivihinta]</td>";																						//nimikkeen laskutusarvo
 				$tilastoarvot .= "</tr>";
 
-				if(isset($workbook)) {
+				if (isset($workbook)) {
 					$worksheet->write($excelrivi, 1, $lask);
 					$worksheet->write($excelrivi, 2, $row["tullinimike1"]);
 
@@ -540,7 +540,7 @@
 				$ulos .= "<td valign='top'><font class='error'>".$virhetxt."</font></td>";
 				$ulos .= "</tr>";
 
-				if(isset($workbook)) {
+				if (isset($workbook)) {
 					$worksheet->write($excelrivi, 1, $row["laskunro"]);
 					$worksheet->write($excelrivi, 2, $row["tuoteno"]);
 					$worksheet->write($excelrivi, 3, t_tuotteen_avainsanat($row, 'nimitys'));
@@ -554,7 +554,7 @@
 					$worksheet->write($excelrivi, 11, $row["paino"]);
 					$worksheet->write($excelrivi, 12, $row["su"]);
 					$worksheet->write($excelrivi, 13, $row["kpl"]);
-					if($lisavar == "S") {
+					if ($lisavar == "S") {
 						$worksheet->write($excelrivi, 12, $lisavarrow["paino"]."kg/".$lisavarrow["rivihinta"]."eur");
 					}
 					$excelrivi++;
@@ -575,7 +575,7 @@
 		$sum .= sprintf ('%018d', 		$arvoyht);																								//laskutusarvo yhteens‰
 		$sum .= "\r\n";
 
-		if($outputti == "tilasto") {
+		if ($outputti == "tilasto") {
 			// tehd‰‰n tilaustoarvolistausta
 			$tilastoarvot .= "<tr>";
 			$tilastoarvot .= "<th colspan='7'>".t("Yhteens‰").":</td>";
@@ -584,7 +584,7 @@
 			$tilastoarvot .= "</tr>";
 			$tilastoarvot .= "</table>";
 
-			if(isset($workbook)) {
+			if (isset($workbook)) {
 				$worksheet->write($excelrivi, 8, $arvoyht, $format_bold);
 			}
 		}
@@ -605,7 +605,7 @@
 			$ulos .= "</tr>";
 			$ulos .= "</table>";
 
-			if(isset($workbook)) {
+			if (isset($workbook)) {
 				$worksheet->write($excelrivi, 10, $totsumma, $format_bold);
 				$worksheet->write($excelrivi, 11, $bruttopaino, $format_bold);
 				$worksheet->write($excelrivi, 13, $totkpl, $format_bold);
@@ -740,7 +740,7 @@
 			echo "$ulos";
 		}
 
-		if(isset($workbook) and $virhe == 0) {
+		if (isset($workbook) and $virhe == 0) {
 			// We need to explicitly close the workbook
 			$workbook->close();
 
@@ -768,7 +768,7 @@
 	$sel4[$lisavar]  = "SELECTED";
 	$sel5[$tapahtumalaji] = "SELECTED";
 
-	if($excel != "") {
+	if ($excel != "") {
 		$echecked = "checked";
 	}
 	else {
@@ -875,6 +875,6 @@
 	<input type='submit' value='".t("Luo aineisto")."'>
 	</form>";
 
-	require("inc/footer.inc");
+	require ("inc/footer.inc");
 
 ?>

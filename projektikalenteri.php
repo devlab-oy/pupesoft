@@ -13,6 +13,13 @@ if($nayta_pdf != 1) {
 
 require('inc/kalenteri.inc');
 
+if($toim == "OMATPROJEKTIT" or $toim == "OMATPROJEKTITHAKU") {
+	$tilaustyyppirajaus = "and lasku.tilaustyyppi='9'";
+}
+else {
+	$tilaustyyppirajaus = "and lasku.tilaustyyppi!='9'";
+}
+
 if ($tee == "tuntiyhteenveto") {
 	//tsekataan onko projektille uhrattu ihan tuntejakin
 	$query = "	SELECT minuuttimaara, tyyppi, (
@@ -285,113 +292,142 @@ if ($toim == "OMATPROJEKTIT" and ($projekti == 0 or $tallenna == 'yes')) {
 }
 
 if($projekti > 0) {
-	//	Tämä on siis kalenteri jota meidän pitäisi käsitellä
-	$kaleDIV = "projektikalenteri_$projekti";
-
-	//	Jos kalenteria ei ole vielä määritetty niin se pitää tehdä uudestaan
-	if($kaleID != $kaleDIV) {
-		$otunnus = $projekti;
-		
-		$kaleID 							= $kaleDIV;
-		$kalenteri["div"] 					= $kaleDIV;
-		$kalenteri["URL"] 					= "projektikalenteri.php";
-		$kalenteri["url_params"]			= array("projekti", "otunnus");
-		$kalenteri["liitostunnus"] 			= $liitostunnus;
-		$kalenteri["nakyma"]				= "RIVINAKYMA_VIIKKO";
-		$kalenteri["tunnusnippu"]			= $projekti;	
-		$kalenteri["sallittu_nakyma"]		= array("KUUKAUSINAKYMA", "VIIKKONAKYMA", "PAIVANAKYMA", "RIVINAKYMA_PAIVA", "RIVINAKYMA_VIIKKO");
-		$kalenteri["laskutilat"]			= "'L','R','N'";
-		
-
-		$kalenteri["kalenteri_tyypit"]				= array("kalenteri", "Muistutus", "projektitapahtuma");
-		$kalenteri["kalenteri_nayta_tyyppi"]		= array("projektitapahtuma");
-
-		$kalenteri["kalenteri_tuntidata"]			= array("projektitunnit");
-		$kalenteri["kalenteri_nayta_tuntidata"]		= array("");
-		
-		$kalenteri["kalenteri_tilausdata"]			= array("tilaus", "toimitus", "valmistus", "tyomaarays");
-		$kalenteri["kalenteri_nayta_tilausdata"]	= array("tilaus", "toimitus", "valmistus", "tyomaarays");
-		
-		$kalenteri["kalenteri_ketka"]		= array("kaikki");
-		$kalenteri["kalenteri_nayta_kuka"]	= array("");
-		
-		$kalenteri["kalenteri_jako"]    	= array("tilaus");
-		
-		alusta_kalenteri($kalenteri);
-		$tee_div = "JOO";
-	}
 	
+	//	Tarkistetaan, että tämä projekti on OK
+	$query = "	SELECT tunnus
+				FROM lasku
+				WHERE yhtio = '$kukarow[yhtio]' and tila='R' and tunnus = '$projekti' $tilaustyyppirajaus";
+	$result = mysql_query($query) or pupe_error($query);
+	if(mysql_num_rows($result) > 0) {
 		
-	//	Liitetään tämän käyttäjän tekemät memot yms aina mukaan.
-	$data = kalequery();
-	//echo "data:<pre>".print_r($data, true)."</pre>";
-	
-	$tuloslaskelma = muistista("tuloslaskelma", "tuloslaskelma");
-	$selKaikki = array($tuloslaskelma["kaikkikaudet"] => "SELECTED");
-	$selTaso = array($tuloslaskelma["rtaso"] => "SELECTED");
-	
-	$kalePost = "
-			<table>
-				<tr>
-					<td class='back'><a href='#' onclick=\"var a = getElementById('tuloslaskelmaContainer'); if(a.style.display == 'none') { a.style.display =  'block'; } else{ a.style.display = 'none';} return false; \">Näytä/piilota talousdata</a></td>
-					<td class='back'><a href='#' onclick=\"var a = getElementById('tuntiyhteenvetoContainer'); if(a.style.display == 'none') { a.style.display =  'block'; } else{ a.style.display = 'none';} return false; \">Näytä/piilota tuntiyhteenveto</a></td>
-				</tr>
-				<tr>
-					<td class='back'>
-						<div id='tuloslaskelmaContainer' style='display: none; float: left;'>
-							<div id='tuloslaskelma' align='right'></div>
+		if($kaleID != $kaleDIV) {
+			$otunnus = $projekti;
 
+			$kaleID 							= $kaleDIV;
+			$kalenteri["div"] 					= $kaleDIV;
+			$kalenteri["URL"] 					= "projektikalenteri.php";
+			$kalenteri["url_params"]			= array("projekti", "otunnus");
+			$kalenteri["liitostunnus"] 			= $liitostunnus;
+			$kalenteri["nakyma"]				= "RIVINAKYMA_VIIKKO";
+			$kalenteri["tunnusnippu"]			= $projekti;	
+			$kalenteri["sallittu_nakyma"]		= array("KUUKAUSINAKYMA", "VIIKKONAKYMA", "PAIVANAKYMA", "RIVINAKYMA_PAIVA", "RIVINAKYMA_VIIKKO");
+			$kalenteri["laskutilat"]			= "'L','R','N'";
+
+
+			$kalenteri["kalenteri_tyypit"]				= array("kalenteri", "Muistutus", "projektitapahtuma");
+			$kalenteri["kalenteri_nayta_tyyppi"]		= array("projektitapahtuma");
+
+			$kalenteri["kalenteri_tuntidata"]			= array("projektitunnit");
+			$kalenteri["kalenteri_nayta_tuntidata"]		= array("");
+
+			$kalenteri["kalenteri_tilausdata"]			= array("tilaus", "toimitus", "valmistus", "tyomaarays");
+			$kalenteri["kalenteri_nayta_tilausdata"]	= array("tilaus", "toimitus", "valmistus", "tyomaarays");
+
+			$kalenteri["kalenteri_ketka"]		= array("kaikki");
+			$kalenteri["kalenteri_nayta_kuka"]	= array("");
+
+			$kalenteri["kalenteri_jako"]    	= array("tilaus");
+
+			alusta_kalenteri($kalenteri);
+			$tee_div = "JOO";
+		}
+
+
+		//	Liitetään tämän käyttäjän tekemät memot yms aina mukaan.
+		$data = kalequery();
+		//echo "data:<pre>".print_r($data, true)."</pre>";
+
+		$tuloslaskelma = muistista("tuloslaskelma", "tuloslaskelma");
+		$selKaikki = array($tuloslaskelma["kaikkikaudet"] => "SELECTED");
+		$selTaso = array($tuloslaskelma["rtaso"] => "SELECTED");
+
+		$kalePost = "
+				<table>
+					<tr>
+						<td class='back'><a href='#' onclick=\"var a = getElementById('tuloslaskelmaContainer'); if(a.style.display == 'none') { a.style.display =  'block'; } else{ a.style.display = 'none';} return false; \">Näytä/piilota talousdata</a></td>
+						<td class='back'><a href='#' onclick=\"var a = getElementById('tuntiyhteenvetoContainer'); if(a.style.display == 'none') { a.style.display =  'block'; } else{ a.style.display = 'none';} return false; \">Näytä/piilota tuntiyhteenveto</a></td>
+					</tr>
+					<tr>
+						<td class='back'>
+							<div id='tuloslaskelmaContainer' style='display: none; float: left;'>
+								<div id='tuloslaskelma' align='right'></div>
+
+									<script type='text/javascript' language='JavaScript'>
+										sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti', false, false); 
+									</script>
+									<table><tr><td colspan='2' class='back'>&nbsp;</td></tr><tr><th>". t("Kaudet") . "</th><th>". t("Taso") . "</th></tr>
+									<tr>
+										<td>			
+											<select id='kikkare' onchange=\"sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti&vaihda[kaikkikaudet]='+this.options[this.selectedIndex].value, false, false); return false;\">
+												<option value='n' ".$selKaikki["n"].">".t("Älä näytä kausia")."</option>
+												<option value='o' ".$selKaikki["o"].">".t("Näytä kaikki kaudet")."</option>
+											</select>
+										</td>
+										<td>
+											<select id='kikkare' onchange=\"sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti&vaihda[rtaso]='+this.options[this.selectedIndex].value, false, false); return false;\">
+												<option value='TILI' ".$selTaso["TILI"]. ">".t("Tilitaso")."</option>
+												<option value='5' ".$selTaso["5"]." >".t("Yhteenveto")."</option>
+											</select>
+										</td>
+									</tr>
+									</table>
+							</div>
+						</td>
+						<td class='back'>
+							<div id='tuntiyhteenvetoContainer' style='display: none; float: left;'>
+								<div id='tuntiyhteenveto'></div>
 								<script type='text/javascript' language='JavaScript'>
-									sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti', false, false); 
+									sndReq('tuntiyhteenveto', 'projektikalenteri.php?tee=tuntiyhteenveto&projekti=$projekti', false, false); 
 								</script>
-								<table><tr><td colspan='2' class='back'>&nbsp;</td></tr><tr><th>". t("Kaudet") . "</th><th>". t("Taso") . "</th></tr>
-								<tr>
-									<td>			
-										<select id='kikkare' onchange=\"sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti&vaihda[kaikkikaudet]='+this.options[this.selectedIndex].value, false, false); return false;\">
-											<option value='n' ".$selKaikki["n"].">".t("Älä näytä kausia")."</option>
-											<option value='o' ".$selKaikki["o"].">".t("Näytä kaikki kaudet")."</option>
-										</select>
-									</td>
-									<td>
-										<select id='kikkare' onchange=\"sndReq('tuloslaskelma', 'projektikalenteri.php?tee=tuloslaskelma&projekti=$projekti&vaihda[rtaso]='+this.options[this.selectedIndex].value, false, false); return false;\">
-											<option value='TILI' ".$selTaso["TILI"]. ">".t("Tilitaso")."</option>
-											<option value='5' ".$selTaso["5"]." >".t("Yhteenveto")."</option>
-										</select>
-									</td>
-								</tr>
-								</table>
-						</div>
-					</td>
-					<td class='back'>
-						<div id='tuntiyhteenvetoContainer' style='display: none; float: left;'>
-							<div id='tuntiyhteenveto'></div>
-							<script type='text/javascript' language='JavaScript'>
-								sndReq('tuntiyhteenveto', 'projektikalenteri.php?tee=tuntiyhteenveto&projekti=$projekti', false, false); 
-							</script>
-						</div>
-					</td>
-				</tr>					
-			</table>";
-	
-	if($tee_div == "JOO") {
-		//tuloslaskelma 
-			
-		echo "<font class='head'>".t("Projektikalenteri")."</font><hr><br><br>
-				<div id='$kaleDIV'>".kalenteri($data, $kalePost)."</div>";		
+							</div>
+						</td>
+					</tr>					
+				</table>";
+
+		if($tee_div == "JOO") {
+			//tuloslaskelma 
+
+			echo "<font class='head'>".t("Projektikalenteri")."</font><hr><br><br>
+					<div id='$kaleDIV'>".kalenteri($data, $kalePost)."</div>";		
+		}
+		else {
+			echo kalenteri($data, $kalePost);
+		}		
+		
+		//	Tämä on siis kalenteri jota meidän pitäisi käsitellä
+		$kaleDIV = "projektikalenteri_$projekti";
+
+		//	Jos kalenteria ei ole vielä määritetty niin se pitää tehdä uudestaan
+		
+		die("</body></html>");
 	}
-	else {
-		echo kalenteri($data, $kalePost);
-	}	
 }
 
-if($toim == "HAKU") {
+if($toim == "HAKU" or $toim == "OMATPROJEKTITHAKU") {
+	if($toim == "OMATPROJEKTIT" or $toim == "OMATPROJEKTITHAKU") {
+		$hakulisa = "";
+	}
+	else {
+		$hakulisa = "	<tr><th>".t("Asiakas")."</th><td><input type='text' size='25' name='asiakas' value='$asiakas'></td><td class='back'>&nbsp;</td></tr>
+						<tr><th>".t("Kohde")."</th><td><input type='text' size='25' name='kohde' value='$kohde'></td></tr>
+					";
+	}
+	
+	$hakulisa .= "<tr><th>".t("Seuranta")."</th><td>
+					<select name='seuranta' style='width: 200px;'>
+					<option value=''>".t("Ei seurantaa")."</option>";
+	
+	$mryresult = t_avainsana("SEURANTA");
+	while($mrow = mysql_fetch_array($mryresult)) {
+		$hakulisa .= "<option value='$mrow[selite]'>$mrow[selite] - $mrow[selitetark]</option>";
+	}
+	$hakulisa .= "</select></td><td class='back'>&nbsp;</td><td class='back' colspan='2' align='right'><input type='submit' value='".t("Hae")."'></td></tr>";
+	
 	echo "	<form action='$PHP_SELF?toim=$toim' method='post' name='haku'>
 			<input type='hidden' name='toim' value='$toim'>
 			<table>
-				<tr><th>".t("Projekti")."</th><td><input type='text' size='15' name='projekti' value='$projekti'></td><td class='back'>&nbsp;</td></tr>
-				<tr><th>".t("Asiakas")."</th><td><input type='text' size='15' name='asiakas' value='$asiakas'></td><td class='back'>&nbsp;</td></tr>				
-				<tr><th>".t("Seuranta")."</th><td><input type='text' size='15' name='seuranta' value='$seuranta'></td><td class='back'>&nbsp;</td></tr>
-				<tr><th>".t("Kohde")."</th><td><input type='text' size='15' name='kohde' value='$kohde'></td><td class='back' colspan='2' align='right'><input type='submit' value='".t("Hae")."'></td></tr>
+				<tr><th>".t("Projekti")."</th><td><input type='text' size='25' name='projekti' value='$projekti'></td><td class='back'>&nbsp;</td></tr>				
+				$hakulisa
 			</table>
 			</form>
 			<br><br>";
@@ -401,15 +437,9 @@ elseif($projekti == 0 and $toim != "OMATPROJEKTIT" and $tee != "muutaomanprojekt
 	echo "<font class='head'>".t("Avoimet projektit")."</font><hr><br><br>";
 }
 
-if((int) $projekti == 0 and ($toim != "HAKU" or $projekti != "" or $asiakas != "" or $seuranta != "" or $kohde != "") and $tee != "lisaaomaprojekti" and $tee != "muutaomanprojektintila") {
+if((($toim != "HAKU" and $toim != "OMATPROJEKTITHAKU") or $projekti != "" or $asiakas != "" or $seuranta != "" or $kohde != "") and $tee != "lisaaomaprojekti" and $tee != "muutaomanprojektintila") {
 	
-	//jos tilaustyyppi oletuksena != 9
-	$tilaustyyppirajaus = "and lasku.tilaustyyppi!='9'";
-	if($toim == "OMATPROJEKTIT") {
-		$tilaustyyppirajaus = "and lasku.tilaustyyppi='9'";
-	}
-	
-	if ($toim == 'HAKU') {
+	if ($toim == 'HAKU' or $toim == "OMATPROJEKTITHAKU") {
 		//alustetaan nyt varmuuden vuoks...
 		$rajaus = "";
 
@@ -420,7 +450,7 @@ if((int) $projekti == 0 and ($toim != "HAKU" or $projekti != "" or $asiakas != "
 		$kohde = mysql_escape_string($kohde);
 
 		if ($projekti != "") {
-			$rajaus .= "and lasku.tunnus='$projekti'";
+			$rajaus .= "and lasku.tunnus LIKE ('%$projekti%') ";
 		}
 		if ($seuranta != "") {
 			$rajaus .= "and laskun_lisatiedot.seuranta='$seuranta'";
@@ -444,11 +474,8 @@ if((int) $projekti == 0 and ($toim != "HAKU" or $projekti != "" or $asiakas != "
 				WHERE lasku.yhtio = '$kukarow[yhtio]' 
 				and lasku.tila = 'R' $tilaustyyppirajaus
 				$rajaus
-				orDER BY tunnusnippu DESC";
-				
-				
+				ORDER BY tunnusnippu DESC";
 	$result = mysql_query($query) or pupe_error($query);
-	
 	if(mysql_num_rows($result) > 0) {
 		echo "	<table>
 					<tr>
@@ -456,7 +483,7 @@ if((int) $projekti == 0 and ($toim != "HAKU" or $projekti != "" or $asiakas != "
 						<th>".t("Seuranta")."</th>";
 						
 						
-		if($toim == "OMATPROJEKTIT") {
+		if($toim == "OMATPROJEKTIT" or $toim == "OMATPROJEKTITHAKU") {
 			echo "<th>".t("Projekti")."</th>";
 		}
 		else {

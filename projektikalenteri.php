@@ -416,10 +416,10 @@ if($toim == "HAKU" or $toim == "OMATPROJEKTITHAKU") {
 	$hakulisa .= "<tr><th>".t("Seuranta")."</th><td>
 					<select name='seuranta' style='width: 200px;'>
 					<option value=''>".t("Ei seurantaa")."</option>";
-	
+	$sel = array($seuranta => "SELECTED");
 	$mryresult = t_avainsana("SEURANTA");
 	while($mrow = mysql_fetch_array($mryresult)) {
-		$hakulisa .= "<option value='$mrow[selite]'>$mrow[selite] - $mrow[selitetark]</option>";
+		$hakulisa .= "<option value='$mrow[selite]' ".$sel[$mrow["selite"]].">$mrow[selite] - $mrow[selitetark]</option>";
 	}
 	$hakulisa .= "</select></td><td class='back'>&nbsp;</td><td class='back' colspan='2' align='right'><input type='submit' value='".t("Hae")."'></td></tr>";
 	

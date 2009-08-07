@@ -43,13 +43,15 @@ if ($tee == "tuntiyhteenveto") {
 			$nimi = $tyoerittelyt["nimi"];
 			$tyonlaatu = $tyoerittelyt["tyyppi"];
 			$minuuttisumma = $tyoerittelyt["minuutitsumma"];
-			$kustannus = round(($minuuttipalkka * $tyoerittelyt["minuuttimaara"]),2);
-			$kokonaiskustannukset = $kokonaiskustannukset + round($kustannus,2);
-			echo "<tr align='center'><td align='left'>$nimi</td><td>$tyonlaatu</td><td>$tyotunnit:$tyominuutit</td><td>". sprintf("%.2f",$kustannus) ."</td></tr>";
+			//$kustannus = round(($minuuttipalkka * $tyoerittelyt["minuuttimaara"]),2);
+			//$kustannustd = "<td>". sprintf("%.2f",$kustannus) ."</td>"
+			//$kokonaiskustannukset = $kokonaiskustannukset + round($kustannus,2);
+			echo "<tr align='center'><td align='left'>$nimi</td><td>$tyonlaatu</td><td>$tyotunnit:$tyominuutit</td>$kustannustd</tr>";
 		}
 		$aikayhteensa_tunnit = sprintf("%02d",floor($minuuttisumma/60));
 		$aikayhteensa_minuutit = sprintf("%02d", $minuuttisumma%60);
-		echo "<tr><td colspan='2' align='right'>".t("Yhteens‰")."</td><td align='center'>$aikayhteensa_tunnit:$aikayhteensa_minuutit</td><td align='center'>". sprintf("%.2f",$kokonaiskustannukset) . "</td></tr>";
+		//$kokonaiskustannustd = "<td align='center'>". sprintf("%.2f",$kokonaiskustannukset) . "</td>";
+		echo "<tr><td colspan='2' align='right'>".t("Yhteens‰")."</td><td align='center'>$aikayhteensa_tunnit:$aikayhteensa_minuutit</td>$kokonaiskustannustd</tr>";
 		echo "</table>";
 	}
 	//tapetaan koska ajaxilla tehty
@@ -118,6 +120,168 @@ if($tee == "tuloslaskelma") {
 		}
 	}	
 	die();
+}
+
+if ($tee == "muutaomanprojektintila") {
+	//tallenna muuttuja asetetaan t‰m‰n iffin else-haarassa.muutaomanprojektintila
+	if ($tallenna == 'yes') {
+		//muutetaan projektin tila kantaan
+		$query = "	UPDATE lasku
+					SET alatila='$alatila'
+					WHERE tunnus='$tunnus'";
+		$result = mysql_query($query) or pupe_error($query);	
+		$tee = "";
+		//jos suljettiin projekti, heitet‰‰n pois kalenterista, muuten n‰ytet‰‰n edelleen
+		if ($alatila == "X") {
+			$projekti = 0;
+			$toim = "OMATPROJEKTIT";
+		}
+		else {
+			$projekti = $tunnus;		
+		}
+		
+	}
+	else {
+		//ongitaan projektin tunnus osoterivilt‰ muuttujaan
+		$tunnus = $_GET["tunnus"];
+		
+		//katsotaan projektin nykyinen tila kannasta
+		$query = "	SELECT alatila,tilaustyyppi
+					FROM lasku 
+					WHERE yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+		if (mysql_num_rows($result) == 1) {
+			$alatila = mysql_result($result,0,"alatila");
+			$tilaustyyppi = mysql_result($result,0,"tilaustyyppi");
+		}
+		else {
+			$select1 = "SELECTED";
+		}
+		
+		if ($alatila == "A") {
+			$select2 = "SELECTED";
+		}		
+		elseif ($alatila == "B") {
+			$select3 = "SELECTED";
+		}	
+		elseif ($alatila == "X") {
+			$select4 = "SELECTED";
+		}
+		
+		if ($tilaustyyppi != 9) {
+			echo "<font class='error'>".t("T‰ss‰ voit vaihtaa vain omien projektien tilaa!")."</font>";
+		}
+		else {
+			echo "<font class='head'>".t("Vaihda projektin tila")."</font><hr><br>";
+			echo "	<form action='$PHP_SELF?tee=$tee&tallenna=yes' name='vaihdatilaa' method='post'>
+					<input type='hidden' name='tunnus' value='$tunnus'>
+					<center><table>
+					<tr>
+					<td>
+					<select name='alatila'>
+						<option value='' $select1>".t("Kesken")."</option>
+						<option value='A' $select2>".t("Aktiivi")."</option>
+						<option value='B' $select3>".t("Valmis")."</option>
+						<option value='X' $select4>".t("Suljettu")."</option>
+					</select>
+					</td>
+					<td class='back' align='right'><input type='submit' value='".t("Vaihda tila")."'></td>
+					</tr>
+					</table></center>
+					</form>";
+		}
+	
+	}
+}
+if ($toim == "OMATPROJEKTIT" and ($projekti == 0 or $tallenna == 'yes')) {
+	if ($tallenna == 'yes') {
+		$luontiaika = date("Y-m-d H:i:s");
+		//talletetaan uusi projekti kantaan		
+		$query = "	INSERT INTO lasku(yhtio,nimi,laatija,luontiaika,tila,tilaustyyppi)
+					VALUES('$kukarow[yhtio]','$pnimi','$kukarow[kuka]','$luontiaika','R',9)";
+		$result = mysql_query($query) or pupe_error($query);
+		//juuri lis‰tyn projektin tunnus
+		$uusProjektitunnus = mysql_insert_id();
+		//lis‰t‰‰n viel‰ tunnusnippu
+		$query = "	UPDATE lasku
+					SET tunnusnippu='$uusProjektitunnus'
+					WHERE yhtio='$kukarow[yhtio]' and tunnus='$uusProjektitunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+		
+		//onko projektip‰‰llikkˆ‰ ja seurantaa annettu? kasataan query‰
+		$query = "	INSERT INTO laskun_lisatiedot
+					SET yhtio='$kukarow[yhtio]',otunnus='$uusProjektitunnus',laatija='$kukarow[kuka]',luontiaika='$luontiaika'";
+		if ($ppaallikko != "") {
+			$query .= ",projektipaallikko='$ppaallikko'";
+		}	
+		if ($seuranta != "") {
+			$query .= ",seuranta='$seuranta'";
+		}
+		
+		//talletaan projektipaallikko ja seuranta kantaan jos jompikumpi tai molemmat annettu
+		if ($ppaallikko != "" or $seuranta != "") {
+			$result = mysql_query($query) or pupe_error($query);
+		}
+					
+		$projekti = $uusProjektitunnus;
+		$tee = "";
+	}
+	else {
+		echo "<font class='head'>".t("Omat avoimet projektit")."</font><hr><br>";
+		
+		$lisayslomake = "<form action='$PHP_SELF?toim=$toim&tallenna=yes' method='post' name='lisaaomaprojekti'>
+				<table>
+					<tr>
+						<th>".t("Projektin nimi").":</th>
+						<td><input type='text' name='pnimi'></td>
+						<td class='back'>&nbsp;</td>
+					</tr>
+					<tr>
+						<th>".t("Seuranta").":</th>";
+						
+		//haetaan seurannan avainsanat
+		$query = "	SELECT selite,selitetark
+					FROM avainsana
+					WHERE yhtio='$kukarow[yhtio]' and laji='SEURANTA'";
+		$result = mysql_query($query) or pupe_error($query);			
+		
+		//tehd‰‰n selectlista
+		$lisayslomake .= "<td><select name='seuranta'>";
+		while ($avainsanarow = mysql_fetch_array($result)) {
+			$lisayslomake .= "<option value='$avainsanarow[selite]'>$avainsanarow[selite] - $avainsanarow[selitetark]</option>";
+		}
+		$lisayslomake .= "</select></td>";
+		
+		$lisayslomake .= "<td class='back'>&nbsp;</td>
+				</tr>
+				<tr>
+					<th>".t("Projektip‰‰llikkˆ").":</th>";
+		
+		//haetaan nimet kannasta
+		$query = " 	SELECT nimi,kuka 
+					FROM kuka 
+					WHERE yhtio='$kukarow[yhtio]' and asema='pp'";
+		$result = mysql_query($query) or pupe_error($query);
+		
+		//luodaan selectlista projektip‰‰llikˆist‰
+		
+		$lisayslomake .= "<td><select name='ppaallikko'>";
+		$lisayslomake .= "<option value='' SELECTED>".t("Ei projektip‰‰llikkˆ‰")."</option>";
+		
+		while($nimirow = mysql_fetch_array($result)) {
+			$lisayslomake .= "<option value='$nimirow[kuka]'>$nimirow[nimi]</option>";
+		}
+		$lisayslomake .= "</select></td>";
+		$lisayslomake .= "<td class='back'><input type='submit' value='".t("Lis‰‰ projekti")."'></td>
+					</tr>
+				</table>
+				</form>";
+		echo "<a href='#' onclick=\"document.getElementById('lisayslomake').style.display='block'; return true;\">".t("Lis‰‰ uusi projekti")."</a><br>";
+		
+		echo "<div id='lisayslomake' style='display: none;'>$lisayslomake</div><br>";
+	}
+	
+	
 }
 
 if($projekti > 0) {
@@ -232,13 +396,18 @@ if($toim == "HAKU") {
 			</form>
 			<br><br>";
 			
-
 }
-elseif($projekti == 0) {
+elseif($projekti == 0 and $toim != "OMATPROJEKTIT" and $tee != "muutaomanprojektintila") {
 	echo "<font class='head'>".t("Avoimet projektit")."</font><hr><br><br>";
 }
 
-if((int) $projekti == 0 and ($toim != "HAKU" or $projekti != "" or $asiakas != "" or $seuranta != "" or $kohde != "")) {
+if((int) $projekti == 0 and ($toim != "HAKU" or $projekti != "" or $asiakas != "" or $seuranta != "" or $kohde != "") and $tee != "lisaaomaprojekti" and $tee != "muutaomanprojektintila") {
+	
+	//jos tilaustyyppi oletuksena != 9
+	$tilaustyyppirajaus = "and lasku.tilaustyyppi!='9'";
+	if($toim == "OMATPROJEKTIT") {
+		$tilaustyyppirajaus = "and lasku.tilaustyyppi='9'";
+	}
 	
 	if ($toim == 'HAKU') {
 		//alustetaan nyt varmuuden vuoks...
@@ -270,10 +439,10 @@ if((int) $projekti == 0 and ($toim != "HAKU" or $projekti != "" or $asiakas != "
 	$query = "	SELECT lasku.tunnus, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, laskun_lisatiedot.seuranta, laskun_lisatiedot.projektipaallikko, asiakkaan_kohde.kohde kohde
 				FROM lasku
 				LEFT JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
-				LEFT JOIN kuka pp ON pp.yhtio=lasku.yhtio and pp.tunnus=laskun_lisatiedot.projektipaallikko
+				LEFT JOIN kuka pp ON pp.yhtio=lasku.yhtio and pp.kuka=laskun_lisatiedot.projektipaallikko
 				LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=lasku.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde 
 				WHERE lasku.yhtio = '$kukarow[yhtio]' 
-				and lasku.tila = 'R' and lasku.tilaustyyppi!='9'
+				and lasku.tila = 'R' $tilaustyyppirajaus
 				$rajaus
 				orDER BY tunnusnippu DESC";
 				
@@ -284,9 +453,17 @@ if((int) $projekti == 0 and ($toim != "HAKU" or $projekti != "" or $asiakas != "
 		echo "	<table>
 					<tr>
 						<th>".t("Projekti")."</th>
-						<th>".t("Seuranta")."</th>
-						<th>".t("Asiakas")."</th>
-						<th>".t("Kohde")."</th>
+						<th>".t("Seuranta")."</th>";
+						
+						
+		if($toim == "OMATPROJEKTIT") {
+			echo "<th>".t("Projekti")."</th>";
+		}
+		else {
+			echo "<th>".t("Asiakas")."</th>";
+		}
+						
+		echo "<th>".t("Kohde")."</th>
 						<th>".t("Projektip‰‰llikkˆ")."</th>
 					</tr>";
 		while($row = mysql_fetch_array($result)) {
@@ -295,9 +472,10 @@ if((int) $projekti == 0 and ($toim != "HAKU" or $projekti != "" or $asiakas != "
 						<td>$row[seuranta]</td>
 						<td>$row[asiakas]</td>
 						<td>$row[kohde]</td>
-						<td>$row[ppaall]</td>
+						<td>$row[projektipaallikko]</td>
 						<td class='back'>
 							<form action='$PHP_SELF' method='post'>
+								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='projekti' value='$row[tunnus]'>
 								<input type='submit' value='".t("Avaa kalenteri")."'>
 							</form>

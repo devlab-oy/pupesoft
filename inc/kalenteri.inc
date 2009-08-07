@@ -1361,9 +1361,23 @@
 				$menu[] = array("TEKSTI" => t("Lisää kalenteritapahtuma"),	"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=kalenteri&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 30);
 				$menu[] = array("TEKSTI" => t("Lisää asiakasmuistio"),		"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Memo&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 40);
 				$menu[] = array("TEKSTI" => t("Lisää muistutus"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=Muistutus&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
-
+			
 				if(in_array("projektitapahtuma", $kalenteri["kalenteri_tyypit"])) {
-					$menu[] = array("TEKSTI" => t("Lisää projektitapahtuma"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=projektitapahtuma&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 50);
+					$menu[] = array("TEKSTI" => t("Lisää projektitapahtuma"),			"HREF" => "$kalenteri[URL]?kaletee=KALENTERITAPAHTUMA&tyyppi=projektitapahtuma&tapvm=$kaleaika".url_params($kalenteri), "OFFSETX" => 350, "OFFSETY" => 70);
+					
+					//katsotaan onko projektin numero 9, eli omia projekteja, jos on niin annetaan vaihtoehto vaihtaan projektin tilaa
+					$query = "	SELECT tilaustyyppi
+								FROM lasku
+								WHERE yhtio='$kukarow[yhtio]' and tunnus='$kalenteri[tunnusnippu]'";
+					$result = mysql_query($query) or pupe_error($query);
+					if (mysql_num_rows($result) == 1) {
+						$tilaustyyppi = mysql_result($result,0,"tilaustyyppi");
+						if ($tilaustyyppi == 9) {
+							$menu[] = array("TEKSTI" => t("Vaihda oman projektin tila"),			"HREF" => "$PHP_SELF?tee=muutaomanprojektintila&tunnus=$kalenteri[tunnusnippu]", "OFFSETX" => 350, "OFFSETY" => 60);
+						}
+					}
+				
+					
 					$menu[] = array("TEKSTI" => t("Tulosta kalenteri"),					"HREF" => "$kalenteri[URL]?kaletee=printPDF&tyyppi=projektitapahtuma&nayta_pdf=1".url_params($kalenteri), "TARGET" => "_blank");
 					$menu[] = array("TEKSTI" => t("Tulosta kalenteri asiakkaalle"),					"HREF" => "$kalenteri[URL]?kaletee=printPDF&tyyppi=projektitapahtuma&nayta_pdf=1&asiakkaalle=yes".url_params($kalenteri), "TARGET" => "_blank");
 				}
@@ -1659,7 +1673,7 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 										FROM kuka 
 										WHERE yhtio='$kukarow[yhtio]' and kuka=laskun_lisatiedot.projektipaallikko) 
 									as projektipaallikko, 
-									concat(lasku.nimi,' ',lasku.nimitark) as asiakasnimi,
+									concat(lasku.nimi,' ',lasku.nimitark) as asiakasnimi, 
 									concat(toim_nimi,' ',toim_nimitark) as toimitusnimi,
 									concat_ws(' - ', tunnusnippu, asiakkaan_kohde.kohde) otsikko,
 									kuka.nimi as myyjanimi, 
@@ -1685,7 +1699,7 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 						else {
 							$pdf->write($h, 1, 0, 0, t("PROJEKTIKALENTERI")." - ".$laskun_lisatiedot["otsikko"], "BIG", "C", "B");
 						}
-						
+					
 						$h-=6;
 						
 						$pdf->write($h, 1, 0, 26, t("Projektin kesto").":", "snadi", "L", "");
@@ -2689,7 +2703,7 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 		
 		die("<script LANGUAGE='JavaScript'>sndReq('$kalenteri[div]', '$kalenteri[URL]?ohje=off&".url_params($kalenteri)."', false, false); pop=document.getElementById('ajax_menu'); pop.innerHTML=''; pop.style.display='none';</script></body></html>");
 	}
-	
+
 	if($kaletee == "KALENTERITAPAHTUMA") {
 		
 		$kalenteri = muistista("kalenteri", "kalenteri");

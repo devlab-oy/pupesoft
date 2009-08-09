@@ -411,7 +411,7 @@
 			$lajitark	= $krow["laji_tark"];
 			$tunnus		= $krow["tunnus"];
 			if($laji == "kalenteri" or substr($laji, 0, 8) == "kontakti") {
-				$query = "	SELECT  lasku.*, kalenteri.*, concat_ws(', ', tapa, if(kentta09='', null, kentta09)) tapa, if(kentta01='', '***', kentta01) viesti, kalenteri.tyyppi,
+				$query = "	SELECT  lasku.*, kalenteri.*, concat_ws(', ', tapa, if(kentta09='', null, kentta09)) tapa, if(kentta01='', '***', kentta01) viesti, kalenteri.tyyppi, kentta02 osallistujat,
 									UNIX_TIMESTAMP(pvmalku) pvmalku, 
 									UNIX_TIMESTAMP(pvmloppu) pvmloppu,
 									avainsana.selitetark tyyppi_nimi,
@@ -459,6 +459,24 @@
 					$popup_otsikko .= "<tr><th class=''>".t("Tapa").":</th><td class=''>".kaletapaKaannos($row["tapa"], "fi", $kukarow["kieli"])."</td></tr>";
 					$popup_otsikko .= "<tr><th class=''>".t("Alkaa").":</th><td class=''>".date("d.m.Y H:i", $row["pvmalku"])."</td></tr>";
 					$popup_otsikko .= "<tr><th class=''>".t("Päättyy").":</th><td class=''>".date("d.m.Y H:i", $row["pvmloppu"])."</td></tr>";
+					if($row["osallistujat"] != "") {
+						$abuq = "	SELECT nimi 
+									FROM kuka
+									WHERE yhtio='$kukarow[yhtio]' and kuka IN ('".str_replace(",", "','", substr($row["osallistujat"], 1, -1))."')";
+						$res = mysql_query($abuq) or pupe_error($abuq);
+						if(mysql_num_rows($res)>0) {
+							$popup_otsikko .= "<tr><th rowspan='".mysql_num_rows($res)."'>".t("Osallistujat")."</th>";
+							$ekarivi=true;
+							while($arow = mysql_fetch_array($res)) {
+								if(!$ekarivi) {
+									$popup_otsikko .= "<tr>";
+								}
+								$popup_otsikko .= "<td>$arow[nimi]</td></tr>";
+
+							}
+						}
+						$aburow = mysql_fetch_array($res);
+					}
 				}
 				elseif($lajitark == "Muistutus") {
 					$popup_otsikko .= "<tr><th class=''>".t("Päivälle").":</th><td class=''>".date("d.m.Y", $row["pvmalku"])."</td></tr>";
@@ -1119,6 +1137,22 @@
 				}				
 			}
 			
+			//	Liitetyt projektitapahtumamerkinnät
+			if(in_array("projektitapahtuma", $kalenteri["kalenteri_nayta_tyyppi"])) {
+				$query .= "
+							UNION
+							(
+								SELECT 'kalenteri' laji, kalenteri.tyyppi laji_tark, UNIX_TIMESTAMP(date(pvmalku)) aika,  kalenteri.luontiaika, DATEDIFF(pvmloppu, pvmalku) vali, kalenteri.laatija, kalenteri.tunnus
+								FROM kalenteri
+								WHERE kalenteri.yhtio = '$kukarow[yhtio]' 
+									and kalenteri.tyyppi = 'projektitapahtuma'
+									and kalenteri.kuittaus = ''
+									and kalenteri.kuka != '$kukarow[kuka]'
+									and kalenteri.kentta02 LIKE ('%,$kukarow[kuka],%')
+							)";
+				
+			}
+			
 			//	Laitetaan tämä vaikka ei ole tyyppejä jotta ei tule SQL-erroria
 			if($kukat != "") {
 				$kukalisa = " and kuka.kuka IN ('$kukat')";
@@ -1126,7 +1160,7 @@
 			elseif($kalenteri["kalenteri_rajaus"] == "kayttaja") {
 				$kukalisa = " and kuka.kuka IN ('')";
 			}
-			
+									
 			$q = "	
 				SELECT 'kalenteri' laji, kalenteri.tyyppi laji_tark, UNIX_TIMESTAMP(date(pvmalku)) aika,  kalenteri.luontiaika, DATEDIFF(pvmloppu, pvmalku) vali, kalenteri.laatija, kalenteri.tunnus
 				FROM kalenteri
@@ -2526,6 +2560,12 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 			else $pvm = "now()";
 
 			if($kuka == "") $kuka = $kukarow["kuka"];
+			if(count($osallistuja)>0) {
+				$kentta02 = ",".implode(",", $osallistuja).",";
+			}
+			else {
+				$kentta02="";
+			}
 
 			//Tehdään asiakasmemotapahtuma jos se on tarpeellinen
 			$kysely = "	tapa 			= '$tapa_string',
@@ -2539,6 +2579,7 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 						otunnus  		= '$otunnus',
 						kuittaus  		= '$kuittaus',
 						kentta01 		= '$viesti',
+						kentta02 		= '$kentta02',
 						kentta09 		= '$tapatarkenne',
 						kentta10 		= '$kentta10'";
 			$query .= $kysely.$where;
@@ -2733,6 +2774,13 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 				$tapa 			= $krow["tapa"];
 				$tapatarkenne	= $krow["kentta09"];
 				$kentta10		= $krow["kentta10"];
+				$osallistujat	= substr($krow["kentta02"], 1, -1);
+				if(strpos($osallistujat, ",") !== false) {
+					$osallistujat = explode(",", $osallistujat);
+				}
+				else {
+					$osallistujat = array($osallistujat);
+				}
 				
 				$query = "	SELECT count(*)
 							FROM liitetiedostot
@@ -3155,12 +3203,10 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 		
 		if($jakele) {
 			$mailit = "
-				<td class='back'>
-				<table>
 					<tr>
-						<th>".t("Lähetä sähköpostilla")."</th>
+						<th onclick=\"showhide('emailSelectForm');\">".t("Lähetä sähköpostilla")."</th>
 					</tr>
-					<tr>
+					<tr id='emailSelectForm' style='display: none;'>
 						<td>
 							<select name='jakelu[]' multiple='TRUE' size='18'>
 								<optgroup label='".t("Speciaaliryhmät")."'>
@@ -3192,9 +3238,47 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 			}
 			$mailit .= "</select>
 					</td>
-							</tr>
-						</table>
-					</td>";
+					</tr>";
+		}
+		
+		if($osallistujat !== false) {
+			$valittumaara="";
+
+			if(is_array($osallistujat)) {
+				$valittumaara = " <font class='error'>(".count($osallistujat).")</font>";
+			}
+			
+			$kayttajat = "
+					<tr><td style='height: 5px;' class='back'></td></tr>
+					<tr>
+						<th onclick=\"showhide('userSelectForm');\">".t("Valitse osallistuja")."$valittumaara</th>
+					</tr>
+					<tr id='userSelectForm' style='display: none;'>
+						<td>
+							<select name='osallistuja[]' multiple='TRUE' size='18'>";
+
+			$query = "	SELECT *
+			 			FROM kuka
+						WHERE yhtio = '$kukarow[yhtio]' and eposti!=''";
+			$ares = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($ares)>0) {
+				while($arow = mysql_fetch_array($ares)) {
+					$sel = "";
+					if(array_search($arow["kuka"], $osallistujat) !== false) {
+						$sel = "SELECTED";
+					}
+					
+					$kayttajat .= "<option value='{$arow["kuka"]}' $sel>{$arow["nimi"]}</option>";
+				}
+			}
+			$kayttajat .= "</select>
+					</td>
+					</tr>";
+		}
+
+		if($mailit != "" or $kayttajat != "") {
+			$mailit 	= "<td class='back'><table>".$mailit;
+			$kayttajat	= $kayttajat."</table></td>";
 		}
 						
 		$otsikko = t($otsikko);
@@ -3216,6 +3300,7 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 					<caption>$otsikko</caption>
 					<tr>
 						$mailit
+						$kayttajat
 						<td class='back'>
 							<table>
 								<tr>

@@ -411,7 +411,7 @@
 			$lajitark	= $krow["laji_tark"];
 			$tunnus		= $krow["tunnus"];
 			if($laji == "kalenteri" or substr($laji, 0, 8) == "kontakti") {
-				$query = "	SELECT  lasku.*, kalenteri.*, concat_ws(', ', tapa, if(kentta09='', null, kentta09)) tapa, if(kentta01='', '***', kentta01) viesti, kalenteri.tyyppi, kentta02 osallistujat,
+				$query = "	SELECT  lasku.*, kalenteri.*, kentta09 tarkenne, if(kentta01='', '***', kentta01) viesti, kalenteri.tyyppi, kentta02 osallistujat,
 									UNIX_TIMESTAMP(pvmalku) pvmalku, 
 									UNIX_TIMESTAMP(pvmloppu) pvmloppu,
 									avainsana.selitetark tyyppi_nimi,
@@ -432,7 +432,7 @@
 				$res = mysql_query($query) or pupe_error($query);
 				$row = mysql_fetch_array($res);
 				//var_dump($kalenteri);
-				$otsikko = kaletapaKaannos($row["tapa"], "fi", $kukarow["kieli"]);
+				$otsikko = trim(kaletapaKaannos($row["tapa"], "fi", $kukarow["kieli"])." ".$row["tarkenne"]);
 				$row["otsikko"] = $otsikko;
 				$row["viesti"] = stripslashes($row["viesti"]);
 
@@ -456,7 +456,7 @@
 				}
 				
 				if(in_array($lajitark, array("kalenteri", "projektitapahtuma"))) {
-					$popup_otsikko .= "<tr><th class=''>".t("Tapa").":</th><td class=''>".kaletapaKaannos($row["tapa"], "fi", $kukarow["kieli"])."</td></tr>";
+					$popup_otsikko .= "<tr><th class=''>".t("Tapa").":</th><td class=''>".trim(kaletapaKaannos($row["tapa"], "fi", $kukarow["kieli"])." ".$row["tarkenne"])."</td></tr>";
 					$popup_otsikko .= "<tr><th class=''>".t("Alkaa").":</th><td class=''>".date("d.m.Y H:i", $row["pvmalku"])."</td></tr>";
 					$popup_otsikko .= "<tr><th class=''>".t("Päättyy").":</th><td class=''>".date("d.m.Y H:i", $row["pvmloppu"])."</td></tr>";
 					if($row["osallistujat"] != "") {
@@ -2478,8 +2478,8 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 			$tapa_string = $taparow["selitetark"];
 		}
 		else {
-			echo "<font class='error'>".t("Yhteydenottotapa katosi!")."</font><br>";
-			$ok = 0;
+			$taparow = false;
+			$tapa_string = "";
 		}
 		
 		if($tapa == "yhteyshenkilon_email") {
@@ -2774,12 +2774,14 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 				$tapa 			= $krow["tapa"];
 				$tapatarkenne	= $krow["kentta09"];
 				$kentta10		= $krow["kentta10"];
-				$osallistujat	= substr($krow["kentta02"], 1, -1);
-				if(strpos($osallistujat, ",") !== false) {
-					$osallistujat = explode(",", $osallistujat);
-				}
-				else {
-					$osallistujat = array($osallistujat);
+				if($krow["kentta02"] != "") {
+					$osallistujat	= substr($krow["kentta02"], 1, -1);
+					if(strpos($osallistujat, ",") !== false) {
+						$osallistujat = explode(",", $osallistujat);
+					}
+					else {
+						$osallistujat = array($osallistujat);
+					}
 				}
 				
 				$query = "	SELECT count(*)
@@ -2929,7 +2931,13 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 			
 			$tavat .= "<option value='$taparow[selite]' $sel>$taparow[selitetark]</option>";
 		}
-		$tavat .= "</select>";
+		if(isset($tapa) and $tapa == "") {
+			$selTapa = "SELECTED";
+		}
+		else {
+			$selTapa = "";
+		}
+		$tavat .= "<option value='' $selTapa>".t("Muu tapahtuma")."</option></select>";
 
 		/*
 			Yhteyshenkilölistaus

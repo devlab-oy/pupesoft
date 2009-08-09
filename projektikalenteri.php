@@ -300,6 +300,9 @@ if($projekti > 0) {
 	$result = mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($result) > 0) {
 		
+		//	T‰m‰ on siis kalenteri jota meid‰n pit‰isi k‰sitell‰
+		$kaleDIV = "projektikalenteri_$projekti";
+		
 		if($kaleID != $kaleDIV) {
 			$otunnus = $projekti;
 
@@ -310,7 +313,7 @@ if($projekti > 0) {
 			$kalenteri["liitostunnus"] 			= $liitostunnus;
 			$kalenteri["nakyma"]				= "RIVINAKYMA_VIIKKO";
 			$kalenteri["tunnusnippu"]			= $projekti;	
-			$kalenteri["sallittu_nakyma"]		= array("KUUKAUSINAKYMA", "VIIKKONAKYMA", "PAIVANAKYMA", "RIVINAKYMA_PAIVA", "RIVINAKYMA_VIIKKO");
+			$kalenteri["sallittu_nakyma"]		= array("RIVINAKYMA_PAIVA", "RIVINAKYMA_VIIKKO");
 			$kalenteri["laskutilat"]			= "'L','R','N'";
 
 
@@ -394,9 +397,6 @@ if($projekti > 0) {
 			echo kalenteri($data, $kalePost);
 		}		
 		
-		//	T‰m‰ on siis kalenteri jota meid‰n pit‰isi k‰sitell‰
-		$kaleDIV = "projektikalenteri_$projekti";
-
 		//	Jos kalenteria ei ole viel‰ m‰‰ritetty niin se pit‰‰ tehd‰ uudestaan
 		
 		die("</body></html>");

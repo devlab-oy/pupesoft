@@ -309,7 +309,7 @@ if($projekti > 0) {
 			$kaleID 							= $kaleDIV;
 			$kalenteri["div"] 					= $kaleDIV;
 			$kalenteri["URL"] 					= "projektikalenteri.php";
-			$kalenteri["url_params"]			= array("projekti", "otunnus");
+			$kalenteri["url_params"]			= array("toim", "projekti", "otunnus");
 			$kalenteri["liitostunnus"] 			= $liitostunnus;
 			$kalenteri["nakyma"]				= "RIVINAKYMA_VIIKKO";
 			$kalenteri["tunnusnippu"]			= $projekti;	

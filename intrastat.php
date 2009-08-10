@@ -101,11 +101,11 @@
 
 		// tuonti vai vienti
 		if ($tapa == "tuonti") {
-			$maalisa = "maamaara = '$maa' and maalahetys in ('',$eumaat) and maalahetys != '$maa'";
+			$maalisa = "maamaara in ('', '$maa') and maalahetys in ('',$eumaat) and maalahetys != '$maa'";
 		}
 		else {
 			$tapa = "vienti";
-			$maalisa = "maalahetys = '$maa' and maamaara in ('',$eumaat) and maamaara != '$maa'";
+			$maalisa = "maalahetys in ('', '$maa') and maamaara in ('',$eumaat) and maamaara != '$maa'";
 		}
 
 		if ($lisavar == "S") {

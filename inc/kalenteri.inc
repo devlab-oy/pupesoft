@@ -50,10 +50,10 @@
 		}
 		elseif ($row["laji_tark"] == "projektitapahtuma") {
 			if($type == "PDF") {
-				$color = "#CD7F32";	
+				$color = "#ff8200";	
 			}
 			else {
-				$color = "rgba(205, 127, 50, 0.8);";
+				$color = "rgba(255, 131, 0, 0.8);";
 			}
 		}
 		
@@ -99,10 +99,10 @@
 
 			s=document.getElementById(sel);
 			if(isNaN(s.options[s.selectedIndex].value)) {
-				selectPopper(event, '../yllapito.php?toim=yhteyshenkilo&liitostunnus='+asiakasID+'&yhtyyppi=asiakas', sel);
+				selectPopper(event, '../yllapito.php?toim=yhteyshenkilo&liitostunnus='+asiakasID+'&yhtyyppi=asiakas&', sel);
 			}
 			else {
-				ajaxPost('yhteyshenkiloLista_'+asiakasID, 'asiakasmemo.php?kaleDIV='+kaleDIV , kaleDIV);
+				ajaxPost('yhteyshenkiloLista_'+asiakasID, 'asiakasmemo.php?kaleDIV='+kaleDIV+'&' , kaleDIV);
 			}
 		}
 

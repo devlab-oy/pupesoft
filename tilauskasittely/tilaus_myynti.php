@@ -1460,58 +1460,6 @@ if ($tee == '') {
 			}
 		}
 
-
-		// JT-rivit n‰ytet‰‰n vain jos siihen on oikeus!
-		$query = "	SELECT yhtio
-					FROM oikeu
-					WHERE yhtio	= '$kukarow[yhtio]'
-					and kuka	= '$kukarow[kuka]'
-					and nimi	= 'tilauskasittely/jtselaus.php'
-					and alanimi = ''";
-		$result = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($result) > 0) {
-
-			if ($yhtiorow["varaako_jt_saldoa"] != "") {
-				$lisavarattu = " + tilausrivi.varattu";
-			}
-			else {
-				$lisavarattu = "";
-			}
-
-			$query  = "	SELECT count(*) kpl
-						from tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-						JOIN lasku USE INDEX (primary) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.liitostunnus='$laskurow[liitostunnus]')
-						WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
-						and tilausrivi.tyyppi 			in ('L','G')
-						and tilausrivi.var 				= 'J'
-						and tilausrivi.keratty 			= ''
-						and tilausrivi.uusiotunnus 		= 0
-						and tilausrivi.kpl 				= 0
-						and tilausrivi.jt $lisavarattu	> 0";
-			$jtapuresult = mysql_query($query) or pupe_error($query);
-			$jtapurow = mysql_fetch_array($jtapuresult);
-
-			if ($jtapurow["kpl"] > 0) {
-				echo "	<form action='$PHP_SELF' method='post'>
-						<input type='hidden' name='toim' value='$toim'>
-						<input type='hidden' name='lopetus' value='$lopetus'>
-						<input type='hidden' name='projektilla' value='$projektilla'>
-						<input type='hidden' name='aktivoinnista' value='true'>
-						<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-
-				if ($jt_kayttoliittyma == "kylla") {
-					echo "	<input type='hidden' name='jt_kayttoliittyma' value=''>
-							<input type='submit' value='".t("Piilota JT-rivit")."'>";
-				}
-				else {
-					echo "	<input type='hidden' name='jt_kayttoliittyma' value='kylla'>
-							<input type='submit' value='".t("N‰yt‰ JT-rivit")."'>";
-				}
-				echo "</form>";
-			}
-		}
-
 		// otetaan maksuehto selville.. jaksotus muuttaa asioita
 		$query = " 	SELECT *
 					from maksuehto
@@ -1722,6 +1670,57 @@ if ($tee == '') {
 					<input type='hidden' name='projektilla' value='$projektilla'>
 					<input type='Submit' value='".t("Vakuutushakemus/Rekisteri-ilmoitus")."'>
 					</form>";
+		}
+
+		// JT-rivit n‰ytet‰‰n vain jos siihen on oikeus!
+		$query = "	SELECT yhtio
+					FROM oikeu
+					WHERE yhtio	= '$kukarow[yhtio]'
+					and kuka	= '$kukarow[kuka]'
+					and nimi	= 'tilauskasittely/jtselaus.php'
+					and alanimi = ''";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) > 0) {
+
+			if ($yhtiorow["varaako_jt_saldoa"] != "") {
+				$lisavarattu = " + tilausrivi.varattu";
+			}
+			else {
+				$lisavarattu = "";
+			}
+
+			$query  = "	SELECT count(*) kpl
+						from tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
+						JOIN lasku USE INDEX (primary) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.liitostunnus='$laskurow[liitostunnus]')
+						WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
+						and tilausrivi.tyyppi 			in ('L','G')
+						and tilausrivi.var 				= 'J'
+						and tilausrivi.keratty 			= ''
+						and tilausrivi.uusiotunnus 		= 0
+						and tilausrivi.kpl 				= 0
+						and tilausrivi.jt $lisavarattu	> 0";
+			$jtapuresult = mysql_query($query) or pupe_error($query);
+			$jtapurow = mysql_fetch_array($jtapuresult);
+
+			if ($jtapurow["kpl"] > 0) {
+				echo "	<form action='$PHP_SELF' method='post'>
+						<input type='hidden' name='toim' value='$toim'>
+						<input type='hidden' name='lopetus' value='$lopetus'>
+						<input type='hidden' name='projektilla' value='$projektilla'>
+						<input type='hidden' name='aktivoinnista' value='true'>
+						<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+
+				if ($jt_kayttoliittyma == "kylla") {
+					echo "	<input type='hidden' name='jt_kayttoliittyma' value=''>
+							<input type='submit' value='".t("Piilota JT-rivit")."'>";
+				}
+				else {
+					echo "	<input type='hidden' name='jt_kayttoliittyma' value='kylla'>
+							<input type='submit' value='".t("N‰yt‰ JT-rivit")."'>";
+				}
+				echo "</form>";
+			}
 		}
 
 		// aivan karseeta, mutta joskus pit‰‰ olla n‰in asiakasyst‰v‰llinen... toivottavasti ei h‰iritse ket‰‰n

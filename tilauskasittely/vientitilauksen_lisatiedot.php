@@ -61,18 +61,10 @@
 			echo "<tr><td>$laskurow[ytunnus]</td><td>$laskurow[nimi]</td><td>$laskurow[tapvm]</td><td>$laskurow[summa] $laskurow[valkoodi]</td><td>$laskurow[toimitusehto]</td></tr>";
 			echo "</table><br>";
 
-			if ($laskurow["tila"] == "K") {
-				$query  = "	SELECT sum(tuotemassa) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
-							FROM tilausrivi
-							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.uusiotunnus  in ($otunnus)";
-			}
-			else {
-				$query  = "	SELECT sum(tuotemassa) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
-							FROM tilausrivi
-							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus in ($otunnus)";
-			}
+			$query  = "	SELECT sum(tuotemassa) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
+						FROM tilausrivi
+						JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus in ($otunnus)";
 			$painoresult = mysql_query($query) or pupe_error($query);
 			$painorow = mysql_fetch_array($painoresult);
 
@@ -229,11 +221,16 @@
 		$otunnukset = explode(',',$otunnus);
 
 		foreach($otunnukset as $otun) {
-			$query = "	SELECT sum(kilot) kilot
-						FROM rahtikirjat
-						WHERE otsikkonro = '$otun' and yhtio='$kukarow[yhtio]'";
-			$result   = mysql_query($query) or pupe_error($query);
-			$rahtirow = mysql_fetch_array ($result);
+
+			// lasketaan rahtikirjalta jos miell‰ on nippu tilauksia tai jos bruttopainoa ei ole annettu k‰yttˆliittym‰st‰
+			if (count($otunnukset) > 1 or !isset($bruttopaino) or (int) $bruttopaino == 0) {
+				$query = "	SELECT sum(kilot) kilot
+							FROM rahtikirjat
+							WHERE otsikkonro = '$otun' and yhtio='$kukarow[yhtio]'";
+				$result   = mysql_query($query) or pupe_error($query);
+				$rahtirow = mysql_fetch_array ($result);
+				$bruttopaino = $rahtirow['kilot'];
+			}
 
 			$query = "SELECT varasto from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$otun'";
 			$laskun_res = mysql_query($query) or pupe_error($query);
@@ -258,7 +255,7 @@
 						aktiivinen_kuljetus_kansallisuus= '$aktiivinen_kuljetus_kansallisuus',
 						poistumistoimipaikka 			= '$poistumistoimipaikka',
 						poistumistoimipaikka_koodi 		= '$poistumistoimipaikka_koodi',
-						bruttopaino 					= '$rahtirow[kilot]',
+						bruttopaino 					= '$bruttopaino',
 						lisattava_era 					= '$lisattava_era',
 						vahennettava_era 				= '$vahennettava_era',
 						comments						= '$lomake_lisatiedot',
@@ -269,7 +266,10 @@
 			//p‰ivitet‰‰n alatila vain jos tilaus ei viel‰ ole laskutettu
 			$query = "	UPDATE lasku
 						SET alatila = 'E'
-						WHERE tunnus = '$otun' and tila='L' and yhtio='$kukarow[yhtio]'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus = '$otun'
+						and tila = 'L'
+						and alatila != 'X'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 
@@ -302,9 +302,25 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$rahtirow = mysql_fetch_array($result);
 
+		if ($laskurow["bruttopaino"] == 0) $laskurow["bruttopaino"] = $rahtirow["kilot"];
+
 		$query = "SELECT * from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$asiakasrow = mysql_fetch_array($result);
+
+		$query  = "	SELECT sum(tuotemassa) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
+					FROM tilausrivi
+					JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus in ($otunnus)";
+		$painoresult = mysql_query($query) or pupe_error($query);
+		$painorow = mysql_fetch_array($painoresult);
+
+		if ($painorow["kpl"] > 0) {
+			$osumapros = round($painorow["kplok"] / $painorow["kpl"] * 100, 2);
+		}
+		else {
+			$osumapros = "N/A";
+		}
 
 		// otetaan defaultit asiakkaalta jos laskulla ei ole mit‰‰n
 		if ($laskurow["poistumistoimipaikka_koodi"]       == "") $laskurow["poistumistoimipaikka_koodi"]       = $asiakasrow["poistumistoimipaikka_koodi"];
@@ -519,8 +535,7 @@
 		echo "<tr>";
 		echo "<th>35.</th>";
 		echo "<th>".t("Bruttopaino").":</th>";
-		echo "<td>$rahtirow[kilot]</td>";
-		echo "<input type='hidden' name='bruttopaino' value='$rahtirow[kilot]'>";
+		echo "<td><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]' style='width:300px;'></td>";
 		echo "</tr>";
 
 		if ($laskurow["vienti"] == "K") {
@@ -535,7 +550,8 @@
 		echo "<br><input type='submit' value='".t("P‰ivit‰ tiedot")."'>";
 		echo "</form>";
 
-		echo "<br><br>";
+		echo "<br><br><font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br><br>";
+
 		$tunnus = $otunnus;
 		require ("raportit/naytatilaus.inc");
 	}
@@ -554,11 +570,13 @@
 		if (is_numeric($etsi)) $haku="and tunnus='$etsi'";
 
 		//listataan laskuttamattomat tilausket
-		$query = "	select tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus,
+		$query = "	SELECT tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus,
 					maa_maara, kuljetusmuoto, kauppatapahtuman_luonne, sisamaan_kuljetus, sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, alatila
-					from lasku
-					where yhtio='$kukarow[yhtio]' and tila='L' and alatila in ('B','D','E')
-					and (vienti='K' or vienti='E')
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tila = 'L' 
+					and alatila in ('B','D','E')
+					AND vienti in ('K','E')
 					$haku
 					ORDER by 5,6,7,8,9,10,11,12,13,14";
 

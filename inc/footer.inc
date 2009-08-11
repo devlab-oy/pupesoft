@@ -24,6 +24,7 @@
 				$suoque = "	INSERT INTO suorituskykyloki
 							SET yhtio	 	= '$kukarow[yhtio]',
 							skripti      	= '".$_SERVER['SCRIPT_NAME']."',
+							request			= '".mysql_real_escape_string(serialize($_REQUEST))."',
 							suoritusalku	= '$starttime',
 							suoritusloppu	= '$endtime',
 							suoritusaika 	= '$aika',

@@ -375,7 +375,7 @@
 						HAVING naytetaanko > 0
 						ORDER BY avainsana.selite";
 		}		
-		elseif ($lisa_haku_osasto == "" and $lisa_haku_try == "" and $kukarow['yhtio'] != 'artr') {
+		elseif ($lisa_haku_osasto == "" and $lisa_haku_try == "" and ($kukarow['yhtio'] != 'artr' or count($mul_tme) > 0)) {
 			$query = "	SELECT avainsana.selite as tme, IFNULL((SELECT avainsana_kieli.selite
 	        			FROM avainsana as avainsana_kieli
 	        			WHERE avainsana_kieli.yhtio = avainsana.yhtio

@@ -152,7 +152,7 @@
 				}
 			}
 
-		</script><br>";
+		</script>";
 	}
 
 	// Saako paivittaa
@@ -649,7 +649,7 @@
     }
 
 	//	S‰ilytet‰‰n ohjeen tila
-	if ($from == "yllapito") {
+	if ($from != "") {
 		$ulisa .= "&ohje=off&from=$from&lukitse_avaimeen=".urlencode($lukitse_avaimeen)."&lukitse_laji=$lukitse_laji";
 	}
 
@@ -818,14 +818,14 @@
 				<input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
 				<input type = 'hidden' name = 'laji' value = '$laji'>";
 
-		if ($from == "yllapito" and mysql_num_rows($result) > 0) {
+		if ($from != "" and mysql_num_rows($result) > 0) {
 			for ($i = 1; $i < mysql_num_fields($result); $i++) {
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 					echo "<th valign='top'>".t(mysql_field_name($result,$i))."</th>";
 				}
 			}
 		}
-		elseif ($from != "yllapito") {
+		elseif ($from == "") {
 			for ($i = 1; $i < mysql_num_fields($result); $i++) {
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 					
@@ -987,7 +987,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
 
-		echo "<table><tr><td class='back' valign='top'>";
+		echo "<table><tr><td class='back' valign='top' style='padding: 0px;'>";
 
 		echo "<table>";
 
@@ -1328,12 +1328,13 @@
 						<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>
 						<input type = 'hidden' name = 'del' value ='1'>
 						<input type='hidden' name='seuraavatunnus' value = '$seuraavatunnus'>
-						<input type = 'submit' value = '".t("Poista $otsikko_nappi")."'></form>";
+						<input type = 'submit' value = '".t("Poista $otsikko_nappi")."'>
+						</form>";
 				}
 			}
 		}
 	}
-	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit"  and $uusilukko == "" and $from != "yllapito") {
+	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit"  and $uusilukko == "" and $from == "") {
 		echo "<br>
 				<form action = 'yllapito.php?ojarj=$ojarj$ulisa";
 				if ($liitostunnus) echo "&liitostunnus=$liitostunnus";

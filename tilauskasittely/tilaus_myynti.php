@@ -1591,7 +1591,7 @@ if ($tee == '') {
 					$id = $laskurow["tunnus"];
 				}
 
-				echo "<form method='POST' action='".$palvelin2."yllapito.php?toim=liitetiedostot&from=yllapito&ohje=off&haku[7]=@lasku&haku[8]=@$id&lukitse_avaimeen=$id&lukitse_laji=lasku'>
+				echo "<form method='POST' action='".$palvelin2."yllapito.php?toim=liitetiedostot&from=tilausmyynti&ohje=off&haku[7]=@lasku&haku[8]=@$id&lukitse_avaimeen=$id&lukitse_laji=lasku'>
 						<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//from=VALITSETOIMITUS'>
 						<input type='submit' value='" . t('Tilauksen liitetiedostot')."'>
 						</form>";

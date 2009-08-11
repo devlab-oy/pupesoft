@@ -42,7 +42,7 @@
 			<tr><th>".t('Nimitark')."</th><td>{$lasrow['nimitark']}</td></tr>
 			<tr><th>".t('Osoite')."</th><td>{$lasrow['osoite']}</td></tr>
 			<tr><th>".t('Postitp')."</th><td>{$lasrow['postitp']}</td></tr>
-			</table>";
+			</table><br>";
 	
 		/*	Tarkastetaan käyttäjäoikeuksia hieman eri tavalla eri laskuilla	*/		
 		//	Ostoreskontran laskut

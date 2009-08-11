@@ -1453,6 +1453,7 @@
 							}
 							else {
 								echo "<td valign='top' align='center' $classlisa>&nbsp;</td>";
+								$jt_rivilaskuri++;
 							}
 
 							if ($automaaginen == '') {

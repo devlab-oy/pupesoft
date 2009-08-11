@@ -573,8 +573,8 @@
 		$query = "	SELECT tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus,
 					maa_maara, kuljetusmuoto, kauppatapahtuman_luonne, sisamaan_kuljetus, sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, alatila
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' 
-					and tila = 'L' 
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tila = 'L'
 					and alatila in ('B','D','E')
 					AND vienti in ('K','E')
 					$haku
@@ -623,12 +623,16 @@
 				}
 				else {
 					if ($lask >= 1) {
+						$tunnukset = substr($tunnukset, 0, -1); // Vika pilkku pois
+
 						echo "<form method='post' action='$PHP_SELF'><td class='back'>
 							<input type='hidden' name='otunnus' value='$tunnukset'>
 							<input type='hidden' name='tee' value='K'>
 							<input type='submit' name='tila' value='".t("Ketjuta lisätiedot")."'></td></form>";
 					}
+
 					$tunnukset = $tilrow["tilaus"].",";
+
 					if ($lask != -1) {
 						echo "</tr>\n";
 					}
@@ -680,6 +684,7 @@
 
 			if ($tunnukset != '' and $lask >= 1) {
 				$tunnukset = substr($tunnukset, 0, -1); // Vika pilkku pois
+
 				echo "<form method='post' action='$PHP_SELF'><td class='back'>
 					<input type='hidden' name='otunnus' value='$tunnukset'>
 					<input type='hidden' name='tee' value='K'>

@@ -958,7 +958,7 @@ if ($tee == 'E' or $tee == 'F') {
 	$res = mysql_query($queryoik) or pupe_error($queryoik);
 
 	if (mysql_num_rows($res) > 0) {
-		echo "<form method='POST' action='".$palvelin2."yllapito.php?toim=liitetiedostot&from=yllapito&ohje=off&haku[7]=@lasku&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=lasku'>
+		echo "<form method='POST' action='".$palvelin2."yllapito.php?toim=liitetiedostot&from=muutosite&ohje=off&haku[7]=@lasku&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=lasku'>
 				<input type = 'hidden' name = 'lopetus' value = '$lopetus/SPLIT/".$palvelin2."muutosite.php////tee=E//tunnus=$tunnus'>
 				<input type = 'submit' value='" . t('Muokkaa liitteitä')."'>
 				</form>";

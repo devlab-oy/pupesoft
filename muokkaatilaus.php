@@ -165,9 +165,13 @@
 			}
 			elseif ($toim == "ENNAKKO") {
 				$query = "	SELECT lasku.*
-							FROM lasku use index (tila_index), tilausrivi use index (yhtio_otunnus)
-							WHERE lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-							and lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]')  and lasku.tila='E' and lasku.alatila in ('','A','J') and lasku.tilaustyyppi = 'E' and tilausrivi.tyyppi = 'E'
+							FROM lasku use index (tila_index)
+							LEFT JOIN tilausrivi use index (yhtio_otunnus) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'E')
+							WHERE lasku.yhtio = '$kukarow[yhtio]' 
+							and (lasku.laatija = '$kukarow[kuka]' or lasku.tunnus = '$kukarow[kesken]') 
+							and lasku.tila in ('E', 'N')
+							and lasku.alatila in ('','A','J') 
+							and lasku.tilaustyyppi = 'E' 							
 							GROUP BY lasku.tunnus";
 				$eresult = mysql_query($query) or pupe_error($query);
 			}
@@ -445,9 +449,11 @@
 		}
 		elseif ($toim == 'ENNAKKO') {
 			$query = "	SELECT lasku.tunnus tilaus, concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas, lasku.luontiaika, lasku.laatija, viesti tilausviite, $toimaikalisa alatila, tila, lasku.tunnus, tilausrivi.tyyppi trivityyppi
-						FROM lasku use index (tila_index), tilausrivi use index (yhtio_otunnus)
-						WHERE lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-						and lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='E' and tilausrivi.tyyppi = 'E'
+						FROM lasku use index (tila_index)
+						LEFT JOIN tilausrivi use index (yhtio_otunnus) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'E')
+						WHERE lasku.yhtio = '$kukarow[yhtio]' 
+						and lasku.tila in ('E','N')
+						and lasku.tilaustyyppi = 'E'
 						$haku
 						GROUP BY lasku.tunnus
 						order by lasku.luontiaika desc

@@ -259,7 +259,7 @@
 
 	for ($i=0; $i<=$count; $i++) {
 		if (strlen($haku[$i]) > 0 && $i <= 1) {
-			$lisa .= " and ".$array[$i]." like '%".$haku[$i]."%'";
+			$lisa .= " and ".$array[$i]." like '".$haku[$i]."%'";
 			$ulisa .= "&haku[".$i."]=".$haku[$i];
 		}
 		elseif (strlen($haku[$i]) > 0 && $i == 2) {

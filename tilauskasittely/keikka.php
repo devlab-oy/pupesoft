@@ -159,21 +159,23 @@ if (!function_exists("tsekit")) {
 			$sarjanrot	= "kesken";
 		}
 
-
 		// katotaan onko liitettyjä laskuja
 		// ('C','F','I','J','K','L') // vaihto-omaisuus ja raaka-aine
 		// ('B','C','J','E','F','K','H','I','L') // kaikki
 
 		$query = "	SELECT count(*) num,
-					sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L',1,0)) volasku,
-					sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L',1,0)) kulasku,
-					round(sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L',summa * if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi), 0)),2) vosumma,
-					round(sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L',arvo * if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi), 0)),2) kusumma
+					sum(if(lasku.vienti='C' or lasku.vienti='F' or lasku.vienti='I' or lasku.vienti='J' or lasku.vienti='K' or lasku.vienti='L', 1, 0)) volasku,
+					sum(if(ostores_lasku.tila != 'H' and (lasku.vienti='C' or lasku.vienti='F' or lasku.vienti='I' or lasku.vienti='J' or lasku.vienti='K' or lasku.vienti='L'), 1, 0)) volasku_ok,
+					sum(if(lasku.vienti!='C' and lasku.vienti!='F' and lasku.vienti!='I' and lasku.vienti!='J' and lasku.vienti!='K' and lasku.vienti!='L', 1, 0)) kulasku,
+					sum(if(ostores_lasku.tila != 'H' and lasku.vienti!='C' and lasku.vienti!='F' and lasku.vienti!='I' and lasku.vienti!='J' and lasku.vienti!='K' and lasku.vienti!='L',1,0)) kulasku_ok,
+					round(sum(if(lasku.vienti='C' or lasku.vienti='F' or lasku.vienti='I' or lasku.vienti='J' or lasku.vienti='K' or lasku.vienti='L', lasku.summa * if(lasku.maksu_kurssi!=0, lasku.maksu_kurssi, lasku.vienti_kurssi), 0)),2) vosumma,
+					round(sum(if(lasku.vienti!='C' and lasku.vienti!='F' and lasku.vienti!='I' and lasku.vienti!='J' and lasku.vienti!='K' and lasku.vienti!='L', lasku.arvo * if(lasku.maksu_kurssi!=0, lasku.maksu_kurssi, lasku.vienti_kurssi), 0)),2) kusumma
 					from lasku use index (yhtio_tila_laskunro)
-					where yhtio='$kukarow[yhtio]'
-					and tila='K'
-					and vanhatunnus<>0
-					and laskunro='$row[laskunro]'";
+					JOIN lasku ostores_lasku on (ostores_lasku.yhtio = lasku.yhtio and ostores_lasku.tunnus = lasku.vanhatunnus)
+					where lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tila = 'K'
+					and lasku.vanhatunnus <> 0
+					and lasku.laskunro = '$row[laskunro]'";
 		$llres = mysql_query($query) or pupe_error($query);
 		$llrow = mysql_fetch_array($llres);
 
@@ -688,12 +690,22 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 
 			$laskujen_tiedot = "";
 
+
 			if ($llrow["volasku"] > 0) {
-				$laskujen_tiedot .= "$llrow[volasku] ($llrow[vosumma])";
+				$class = "error";
+				if ($llrow["volasku"] == $llrow["volasku_ok"]) {
+					$class = "ok";
+				}
+				$laskujen_tiedot .= "$llrow[volasku] ($llrow[vosumma]) <font class='$class'>*</font>";
+				
 			}
 			$laskujen_tiedot .= "<br>";
 			if ($llrow["kulasku"] > 0) {
-				$laskujen_tiedot .= "$llrow[kulasku] ($llrow[kusumma])";
+				$class = "error";
+				if ($llrow["kulasku"] == $llrow["kulasku_ok"]) {
+					$class = "ok";					
+				}
+				$laskujen_tiedot .= "$llrow[kulasku] ($llrow[kusumma]) <font class='$class'>*</font>";
 			}
 
 			echo "<td valign='top'>$laskujen_tiedot</td>";
@@ -735,8 +747,8 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 					echo "<option value='kalkyyli'>"     .t("Vie varastoon")."</option>";
 				}
 
-				// jos lisätiedot, kohdistus ja paikat on ok sekä kaikki rivit on viety varastoon, niin saadaan laskea virallinen varastonarvo
-				if ($lisok == 1 and $kohok == 1 and $varok == 1 and $kplyhteensa == $kplvarasto and $sarjanrook == 1) {
+				// jos lisätiedot, kohdistus ja paikat on ok sekä kaikki rivit on viety varastoon, ja kaikki liitetyt laskut on hyväksytty, niin saadaan laskea virallinen varastonarvo
+				if ($lisok == 1 and $kohok == 1 and $varok == 1 and $kplyhteensa == $kplvarasto and $sarjanrook == 1 and $llrow["volasku"] == $llrow["volasku_ok"] and $llrow["kulasku"] == $llrow["kulasku_ok"]) {
 					echo "<option value='kaikkiok'>"     .t("Laske virallinen varastonarvo")."</option>";
 				}
 

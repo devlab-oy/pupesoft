@@ -576,7 +576,6 @@
 				$ennakkosumma += $prow["ostohinta"];
 			}
 			else {
-
 				list($s1, $s2) = explode("<br>", $prow["rivihinta"]);
 
 				list($ss1, $sv1) = explode(" ", trim($s1));
@@ -585,7 +584,6 @@
 				$summa[$sv1] += $ss1;
 				if ($sv2 != "") $summa[$sv2] += $ss2;
 			}
-
 		}
 
 		foreach($summa as $val => $sum) {

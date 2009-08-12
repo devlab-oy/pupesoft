@@ -841,8 +841,14 @@ if ($tila == 'nollaahyvak') {
 if ($tila == '') {
 
 	// katotaan onko lasku liitetty keikkaan
-	$query = "SELECT laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$trow[tunnus]'";
+	$query = "	SELECT lasku.laskunro, keikka.alatila
+				FROM lasku 
+				JOIN lasku keikka ON (keikka.yhtio = lasku.yhtio and keikka.laskunro = lasku.laskunro and keikka.tila = 'K' and keikka.vanhatunnus = 0)
+				WHERE lasku.yhtio = '$kukarow[yhtio]' 
+				AND lasku.tila = 'K' 
+				AND lasku.vanhatunnus = '$trow[tunnus]'";
 	$keikres = mysql_query($query) or pupe_error($query);
+	$keikrow = mysql_fetch_array($keikres);
 
 	$tila = 'E';
 	echo "<table>";
@@ -1151,7 +1157,7 @@ if ($tila == '') {
 				<td><input type = 'submit' value = '".t("Siirrä")."'></td></tr></form>";
 	}
 
-	if (($trow['tila'] == 'M' or $trow['tila'] == 'H') and ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) and $trow["h1time"] != '0000-00-00 00:00:00')  {
+	if (($trow['tila'] == 'M' or $trow['tila'] == 'H') and ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) and $trow["h1time"] != '0000-00-00 00:00:00' and $keikrow["alatila"] != "X") {
 		echo "<form action = '$PHP_SELF' method='post'>
 				<input type = 'hidden' name='tila' value='nollaahyvak'>
 				<input type = 'hidden' name='tee' value='M'>

@@ -24,6 +24,13 @@ if ($tee == 'tulosta_korkoerittely') {
 	exit;
 }
 
+enable_ajax();
+
+if ($livesearch_tee == "TILIHAKU") {
+	livesearch_tilihaku();
+	exit;
+}
+
 echo "<font class='head'>".t("Tiliöintien muutos/selailu")."</font><hr>";
 
 if (($tee == 'U' or $tee == 'P' or $tee == 'M' or $tee == 'J') and ($oikeurow['paivitys'] != 1)) {

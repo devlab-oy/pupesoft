@@ -4,6 +4,13 @@ if (strpos($_SERVER['SCRIPT_NAME'], "ulask.php")  !== FALSE) {
 	require "inc/parametrit.inc";
 }
 
+enable_ajax();
+
+if ($livesearch_tee == "TILIHAKU") {
+	livesearch_tilihaku();
+	exit;
+}
+
 require "inc/alvpopup.inc";
 
 echo "<font class='head'>".t("Uuden laskun perustus")."</font><hr>";
@@ -1009,7 +1016,7 @@ if ($tee == 'P' or $tee == 'E') {
 
  			// Tehaan kentta tai naytetaan popup
 			if ($iulos[$i] == '') {
-				echo "<input type='text' name='itili[$i]' value='$itili[$i]'>";
+				livesearch_kentta("lasku", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT");
 			}
 			else {
 				echo "$iulos[$i]";

@@ -4010,11 +4010,6 @@ if (!function_exists("enable_ajax")) {
 			$imgUrl = $palvelin2."pics/loading_blue_small.gif";
 		}
 
-		/*
-		tätä voidaan käyttää koodista sitte näin:
-		echo "<a href='javascript:sndReq(\"123\", \"tuote.php?tee=Z&tuoteno=a2\")'>tuotekysely a2</a><br>";
-		echo "<br><br><div id='123'></div>";
-		*/
 ?>
 
 <SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
@@ -4226,7 +4221,79 @@ if (!function_exists("enable_ajax")) {
 		sndReq(minne, urli, href, load, unToggle, method, getstr);
 	}
 
+	var keyStrokeIndex=-1;
+
+	function livesearch_keyhandler(event, haku_id, haku_formi, dont_submit_after) {
+
+		var selectOptions = document.getElementsByName('selectOptions'+haku_id);
+
+		for (var iEl = 0; iEl < selectOptions.length; iEl++) {
+			document.getElementById(selectOptions[iEl].id).className='';
+		}
+
+		if (event.keyCode == 40 || event.keyCode == 38) {
+			if (event.keyCode  == 40) {
+				previousKeyStrokeIndex=keyStrokeIndex;
+				keyStrokeIndex++;
+			}
+			else if (event.keyCode == 38){
+				previousKeyStrokeIndex=keyStrokeIndex;
+				keyStrokeIndex--;
+			}
+
+			if (keyStrokeIndex > selectOptions.length-1) {
+				keyStrokeIndex = selectOptions.length-1;
+			}
+			else if (keyStrokeIndex < 0) {
+				keyStrokeIndex = -1;
+				selectOptions[previousKeyStrokeIndex].className='';
+			}
+			else {
+				if (previousKeyStrokeIndex < 0) {
+					previousKeyStrokeIndex = 0;
+				}
+
+				if (previousKeyStrokeIndex != keyStrokeIndex) {
+					selectOptions[previousKeyStrokeIndex].className='';
+				}
+
+				selectOptions[keyStrokeIndex].className='liveSearchSelectedItem';
+			}
+		}
+		else if (event.keyCode == 13) {
+			if (keyStrokeIndex >= 0 && keyStrokeIndex <= selectOptions.length-1) {
+				var selectValues = document.getElementsByName('selectValues'+haku_id);
+				document.getElementById(haku_id).value=selectValues[keyStrokeIndex].id;
+				if (dont_submit_after) {
+					document.getElementById('livesearch_'+haku_id).style.visibility = 'hidden';					
+				}
+				else {
+					document.haku_formi.submit();
+				}
+				keyStrokeIndex=-1;
+			}
+			else {
+				document.haku_formi.submit();
+			}
+
+			return false;
+		}
+		else if (event.keyCode == 27) {
+			selectOptions[keyStrokeIndex].className='';
+			KeyStrokeIndex = -1;
+		}
+		else if (event.keyCode == 9) {
+			document.getElementById('livesearch_'+haku_id).style.visibility = 'hidden';
+			KeyStrokeIndex = -1;
+		}
+
+		if (keyStrokeIndex >= 0 && keyStrokeIndex <= selectOptions.length-1) {
+			selectOptions[keyStrokeIndex].className='liveSearchSelectedItem';
+		}
+	}
+
 </script>
+
 <?php
 	}
 }
@@ -6227,6 +6294,85 @@ if (!function_exists("nayta_tuotehaku")) {
 	}
 }
 
+if (!function_exists("livesearch_tilihaku")) {
+	function livesearch_tilihaku() {
+		global $yhtiorow, $kukarow, $palvelin2;
+
+		$tee = $_REQUEST["livesearch_tee"];
+		$nimi = $_REQUEST["livesearch_nimi"];
+		$formi = $_REQUEST["livesearch_form"];
+		$hakuid = $_REQUEST["livesearch_hakuid"];
+		$submit = $_REQUEST["livesearch_submit"];
+		$haku = trim($_REQUEST["livesearch_haku"]);
+
+		if (strlen($haku) > 2) {
+
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+			</script>";
+
+			$haku_array = explode(" ", $haku);
+			$haku_query = "";
+
+			foreach ($haku_array as $haku) {
+				$haku = mysql_real_escape_string($haku);
+				$haku_query .= " and (tili.tilino like ('%$haku%') or tili.nimi like ('%$haku%')) ";
+			}
+
+			$query = "	SELECT tili.tilino, tili.nimi, tili.tunnus
+						FROM tili
+						WHERE tili.yhtio = '$kukarow[yhtio]'
+						$haku_query";
+			$result = mysql_query($query) or pupe_error($query);
+
+			$limit = 0;
+			if (mysql_num_rows($result) > 0) {
+				while ($row = mysql_fetch_array($result)) {
+					echo "	<div id='tuote_valinta_$hakuid$row[tunnus]'
+								name='selectOptions$hakuid'
+								onmouseover=\"this.className='liveSearchSelectedItem';
+									keyStrokeIndex = -1;
+									var aEls = document.getElementsByName('selectOptions$hakuid');
+									for (var iEl = 0; iEl < aEls.length; iEl++) {
+										if (aEls[iEl].id.substring(0,14) == 'tuote_valinta_$hakuid' && aEls[iEl].id != 'tuote_valinta_$hakuid$row[tunnus]') {
+											document.getElementById(aEls[iEl].id).className='';
+										}
+									} \"
+								onmouseout=\"this.className='';\"
+								onclick=\"document.getElementById('$hakuid').value='$row[tilino]';";
+								if ($submit == "") {
+									echo "document.$formi.submit();";
+								}
+								else {
+									echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+								}
+								echo "\"
+								style='padding:2px;'>
+								<font style='font-weight:bold'>$row[tilino]</font> &raquo; $row[nimi]
+							</div><div name='selectValues$hakuid' id='$row[tilino]'></div>";
+					$limit++;
+					if ($limit > 14) {
+						break;
+					}
+				}
+
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>Haulla löytyi ".mysql_num_rows($result). " tiliä.</font></div>";
+			}
+			else {
+				echo "<div style='padding:2px'><font class='message'>".t("Ei tilejä.")."</font></div>";
+			}
+		}
+		else {
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+				document.getElementById('livesearch_$hakuid').style.innerHTML = '';
+			</script>";
+		}
+	}
+}
+
 if (!function_exists("livesearch_tuotehaku")) {
 	function livesearch_tuotehaku() {
 		global $yhtiorow, $kukarow, $palvelin2;
@@ -6235,22 +6381,21 @@ if (!function_exists("livesearch_tuotehaku")) {
 		$nimi = $_REQUEST["livesearch_nimi"];
 		$formi = $_REQUEST["livesearch_form"];
 		$hakuid = $_REQUEST["livesearch_hakuid"];
+		$submit = $_REQUEST["livesearch_submit"];
 		$haku = trim($_REQUEST["livesearch_haku"]);
 
 		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
 
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
-				document.getElementById('livesearch_haku').style.visibility = 'visible';
+				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
 			</script>";
 
 			$haku_array = explode(" ", $haku);
 			$haku_query = "";
 
 			foreach ($haku_array as $haku) {
-
 				$haku = mysql_real_escape_string($haku);
-
 				$haku_query .= " and (tuote.tuoteno like ('%$haku%') or tuote.nimitys like ('%$haku%')) ";
 			}
 
@@ -6265,21 +6410,27 @@ if (!function_exists("livesearch_tuotehaku")) {
 			if (mysql_num_rows($result) > 0) {
 				while ($row = mysql_fetch_array($result)) {
 					echo "	<div id='tuote_valinta_$row[tunnus]'
-								name='selectOptions'
+								name='selectOptions$hakuid'
 								onmouseover=\"this.className='liveSearchSelectedItem';
 									keyStrokeIndex = -1;
-									var aEls = document.getElementsByName('selectOptions');
+									var aEls = document.getElementsByName('selectOptions$hakuid');
 									for (var iEl = 0; iEl < aEls.length; iEl++) {
 										if (aEls[iEl].id.substring(0,14) == 'tuote_valinta_' && aEls[iEl].id != 'tuote_valinta_$row[tunnus]') {
 											document.getElementById(aEls[iEl].id).className='';
 										}
 									} \"
 								onmouseout=\"this.className='';\"
-								onclick=\"document.getElementById('$hakuid').value='$row[tuoteno]';
-											document.$formi.submit();\"
+								onclick=\"document.getElementById('$hakuid').value='$row[tuoteno]';";
+								if ($submit == "") {
+									echo "document.$formi.submit();";
+								}
+								else {
+									echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+								}
+								echo "\"
 								style='padding:2px;'>
 								<font style='font-weight:bold'>$row[tuoteno]</font> &raquo; $row[nimitys]
-							</div><div name='selectValues' id='$row[tuoteno]'></div>";
+							</div><div name='selectValues$hakuid' id='$row[tuoteno]'></div>";
 					$limit++;
 					if ($limit > 14) {
 						break;
@@ -6295,92 +6446,33 @@ if (!function_exists("livesearch_tuotehaku")) {
 		else {
 			echo "
 			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
-				document.getElementById('livesearch_haku').style.visibility = 'hidden';
+				document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
 			</script>";
 		}
 	}
 }
 
 if (!function_exists("livesearch_kentta")) {
-	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300') {
+	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '') {
 		global $kukarow;
 
 		$hakuID = "haku".uniqid();
 
-		echo "<script TYPE='text/javascript' LANGUAGE='JavaScript'>
-			var keyStrokeIndex=-1;
-
-			function livesearch_keyhandler(event) {
-
-				var selectOptions = document.getElementsByName('selectOptions');
-
-				for (var iEl = 0; iEl < selectOptions.length; iEl++) {
-					document.getElementById(selectOptions[iEl].id).className='';
-				}
-
-				if (event.keyCode == 40 || event.keyCode == 38) {
-					if (event.keyCode  == 40) {
-						previousKeyStrokeIndex=keyStrokeIndex;
-						keyStrokeIndex++;
-					}
-					else if (event.keyCode == 38){
-						previousKeyStrokeIndex=keyStrokeIndex;
-						keyStrokeIndex--;
-					}
-
-					if (keyStrokeIndex > selectOptions.length-1) {
-						keyStrokeIndex = selectOptions.length-1;
-					}
-					else if (keyStrokeIndex < 0) {
-						keyStrokeIndex = -1;
-						selectOptions[previousKeyStrokeIndex].className='';
-					}
-					else {
-
-						if (previousKeyStrokeIndex < 0) {
-							previousKeyStrokeIndex = 0;
-						}
-
-						if (previousKeyStrokeIndex != keyStrokeIndex) {
-							selectOptions[previousKeyStrokeIndex].className='';
-						}
-
-						selectOptions[keyStrokeIndex].className='liveSearchSelectedItem';
-					}
-				}
-				else if (event.keyCode == 13){
-					if (keyStrokeIndex >= 0 && keyStrokeIndex <= selectOptions.length-1) {
-						var selectValues = document.getElementsByName('selectValues');
-						document.getElementById('$hakuID').value=selectValues[keyStrokeIndex].id;
-						document.$formi.submit();
-						keyStrokeIndex=-1;
-					}
-					else {
-						document.$formi.submit();
-					}
-
-					return false;
-				}
-				else if (event.keyCode == 27){
-					selectOptions[keyStrokeIndex].className='';
-					KeyStrokeIndex = -1;
-				}
-
-				if (keyStrokeIndex >= 0 && keyStrokeIndex <= selectOptions.length-1) {
-					selectOptions[keyStrokeIndex].className='liveSearchSelectedItem';
-				}
-			}
-
-		</script>";
-
-		echo "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;'
-					onkeydown=\"return livesearch_keyhandler(event);\"
+		echo "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
+					onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit');\"
 					onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
-							sndReq('livesearch_haku', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&ohje=off&livesearch_haku='+this.value);
+							sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&ohje=off&livesearch_haku='+this.value);
 							keyStrokeIndex = -1;
-					}\">
+					}\"
+					onblur=\"var selectOptions = document.getElementsByName('selectOptions$hakuID'); 
+					for (var iEl = 0; iEl < selectOptions.length; iEl++) {
+						if (document.getElementById(selectOptions[iEl].id).className != '') {
+							return false;
+						}
+					}
+					document.getElementById('livesearch_$hakuID').style.visibility = 'hidden';\">
 				<div style='break:all'></div>
-				<div id='livesearch_haku' class='liveSearch' name='livesearch_haku' style='width:".($width * 2)."px;'></div>";
+				<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:".($width * 2)."px;'></div>";
 	}
 }
 

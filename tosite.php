@@ -1,6 +1,13 @@
 <?php
 	if (!isset($link)) require "inc/parametrit.inc";
-	
+
+	enable_ajax();
+
+	if ($livesearch_tee == "TILIHAKU") {
+		livesearch_tilihaku();
+		exit;
+	}
+
 	require "inc/alvpopup.inc";
 
 	echo "<font class='head'>".t("Uusi muu tosite")."</font><hr>";
@@ -594,7 +601,9 @@
 						$tilinimi = "<br>".$vrow['nimi'];
 					}
 				}
-				echo "<td width='200' valign='top'><input type='text' size='13' name='itili[$i]' value='$itili[$i]''>$tilinimi</td>";
+				echo "<td width='200' valign='top'>";
+				livesearch_kentta("tosite", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT");
+				echo "$tilinimi</td>";
 			}
 			else {
 				echo "<td width='200' valign='top'>$iulos[$i]</td>";

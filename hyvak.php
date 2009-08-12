@@ -8,6 +8,13 @@
 		require ("inc/parametrit.inc");
 	}
 
+	enable_ajax();
+
+	if ($livesearch_tee == "TILIHAKU") {
+		livesearch_tilihaku();
+		exit;
+	}
+
 	require ("inc/alvpopup.inc");
 	require_once ("inc/tilinumero.inc");
 

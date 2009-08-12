@@ -633,7 +633,7 @@ if ($tee == 'E' or $tee == 'F') {
 		// Tämä on koko yläotsikon table
 		echo "<table>";
 		// Aloitetaan vasen sarake
-		echo "<tr><td style='padding: 0px; margin: 0px;'>";
+		echo "<tr><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
 		echo "<table>";
 		echo "<tr><th>".t("Ytunnus")."</th><td>$trow[ytunnus]</td></tr>";
@@ -654,7 +654,7 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "</table>";
 
 		// Lopetettaan vasen sarake, aloitetaan keskisarake
-		echo "</td><td style='padding: 0px; margin: 0px;'>";
+		echo "</td><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
 		echo "<table>";
 		echo "<tr><th>".t("Tapvm")."</th><td>".tv1dateconv($trow["tapvm"])."</td></tr>";
@@ -669,7 +669,7 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "</table>";
 
 		// Lopetataan keskisarake, aloitetaan oikea sarake
-		echo "</td><td style='padding: 0px; margin: 0px;'>";
+		echo "</td><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
 		echo "<table>";
 
@@ -819,7 +819,7 @@ if ($tee == 'E' or $tee == 'F') {
 		// Tämä on koko yläotsikon table
 		echo "<table>";
 		// Aloitetaan vasen sarake
-		echo "<tr><td style='padding: 0px; margin: 0px;'>";
+		echo "<tr><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
 		echo "<table>";
 		echo "<tr><th>".t("Ytunnus")."</th><td>$trow[ytunnus]</td></tr>";
@@ -844,7 +844,7 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "</table>";
 
 		// Lopetaan vasen sarake, aloitetaan keskisarake
-		echo "</td><td style='padding: 0px; margin: 0px;'>";
+		echo "</td><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
 		if ($tee2 != 1) {
 
@@ -880,9 +880,7 @@ if ($tee == 'E' or $tee == 'F') {
 					$osa++;
 				}
 			}
-
 			echo "</table>";
-
 		}
 		else { //Laajennetut
 			echo "<table>";
@@ -890,11 +888,11 @@ if ($tee == 'E' or $tee == 'F') {
 			echo "<tr><th>".t("Lähetysmaa")."</th><td>$keikrow[maa_lahetys]</td></tr>";
 			echo "<tr><th>".t("Kuljetusmuoto")."</th><td>$keikrow[kuljetusmuoto]</td></tr>";
 			echo "<tr><th>".t("KT")."</th><td>$keikrow[kauppatapahtuman_luonne]</td></tr>";
-			if ($trow["rahti"] != 0) echo "<tr><th>".t("Rahti")."</th><td>$keikrow[rahti]</td></tr>";
-			if ($trow["rahti_etu"] != 0) echo "<tr><th>".t("Eturahti")."</th><td>$keikrow[rahti_etu]</td></tr>";
-			if ($trow["rahti_huolinta"] != 0) echo "<tr><th>".t("Huolinta")."</th><td>$keikrow[rahti_huolinta]</td></tr>";
-			if ($trow["erikoisale"] != 0) echo "<tr><th>".t("Alennus")."</th><td>$keikrow[erikoisale]</td></tr>";
-			if ($trow["bruttopaino"] != 0) echo "<tr><th>".t("Paino")."</th><td>$keikrow[bruttopaino]</td></tr>";
+			if ($keikrow["rahti"] != 0) echo "<tr><th>".t("Rahti")."</th><td>$keikrow[rahti]</td></tr>";
+			if ($keikrow["rahti_etu"] != 0) echo "<tr><th>".t("Eturahti")."</th><td>$keikrow[rahti_etu]</td></tr>";
+			if ($keikrow["rahti_huolinta"] != 0) echo "<tr><th>".t("Huolinta")."</th><td>$keikrow[rahti_huolinta]</td></tr>";
+			if ($keikrow["erikoisale"] != 0) echo "<tr><th>".t("Alennus")."</th><td>$keikrow[erikoisale]</td></tr>";
+			if ($keikrow["bruttopaino"] != 0) echo "<tr><th>".t("Paino")."</th><td>$keikrow[bruttopaino]</td></tr>";
 			echo "<tr><th>".t("Toimaika")."</th><td>".tv1dateconv($keikrow["toimaika"])."</td></tr>";
 			echo "<tr><th>".t("Kommentit")."</th><td>$keikrow[comments]</td></tr>";
 			echo "<tr><th>".t("Keikan muut laskut")."</td><td>";
@@ -906,7 +904,7 @@ if ($tee == 'E' or $tee == 'F') {
 		}
 
 		// Lopetetaan keskisarake, aloitetaan oikea sarake
-		echo "</td><td style='padding: 0px; margin: 0px;'>";
+		echo "</td><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
 		echo "<table>";
 

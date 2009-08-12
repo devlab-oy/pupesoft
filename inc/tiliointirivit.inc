@@ -114,7 +114,7 @@
 				<input type='hidden' name = 'iframe_id' value = '$iframe_id'>";
 
 		if ($tiliulos == '') {
-			echo "<input type='text' name='tili' value = '$tili' size='12'>";
+			livesearch_kentta("uusi", "TILIHAKU", "tili", 170, $tili, "EISUBMIT");
 		}
 		else {
 			echo "$tiliulos";

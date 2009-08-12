@@ -184,16 +184,20 @@
 
 					//tehd‰‰n keikka linkki
 					echo "<td valign='top'>";
-					if ($trow["vienti"] == "C" || $trow["vienti"] == "F" || $trow["vienti"] == "I") {
-						$query = " SELECT keikka.laskunro, keikka.tunnus
-						FROM lasku
-						JOIN lasku AS keikka on lasku.yhtio = keikka.yhtio and lasku.laskunro = keikka.laskunro and keikka.tila = 'K' and keikka.vanhatunnus = 0
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.vanhatunnus = '$trow[tunnus]'";
-
+					if ($trow["vienti"] != "A" and $trow["vienti"] != "D" and $trow["vienti"] != "G") {
+						$query = "	SELECT keikka.laskunro, keikka.tunnus
+									FROM lasku
+									JOIN lasku AS keikka on lasku.yhtio = keikka.yhtio
+									AND lasku.laskunro = keikka.laskunro
+									AND keikka.tila = 'K'
+									AND keikka.vanhatunnus = 0
+									WHERE lasku.yhtio = '$kukarow[yhtio]'
+									AND lasku.vanhatunnus = '$trow[tunnus]'";
 						$keikka_res = mysql_query($query) or pupe_error($query);
-						$keikka_row = mysql_fetch_array($keikka_res);
 
-						echo "<a href='tilauskasittely/selaa_tilauksia.php?toim=KEIKKA&tee=tilaus&tunnus=$keikka_row[tunnus]'>".$keikka_row['laskunro']."</a>";
+						while ($keikka_row = mysql_fetch_array($keikka_res)) {
+							echo "<a href='tilauskasittely/selaa_tilauksia.php?toim=KEIKKA&tee=tilaus&tunnus=$keikka_row[tunnus]'>".$keikka_row['laskunro']."</a><br>";
+						}
 					}
 					echo "</td>";
 

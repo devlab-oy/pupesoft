@@ -14,101 +14,90 @@ if ($tee == "muokkaa") {
 	$query  = "SELECT * from todo where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 	$rivi   = mysql_fetch_array($result);
-
-	$prio_sel = array();
-	$prioriteetti = $rivi["prioriteetti"];
-	$prio_sel[$prioriteetti] = "SELECTED";
-
+	
 	echo "<form method='post' action='todo.php?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=$sort&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>
-	<input type='hidden' name='tee' value='paivita'>
-	<input type='hidden' name='tunnus' value='$rivi[tunnus]'>
-	<input type='hidden' name='vanhakuittaus' value='$rivi[kuittaus]'>
-	<table width='1000'>";
+		<input type='hidden' name='tee' value='paivita'>
+		<input type='hidden' name='tunnus' value='$rivi[tunnus]'>
+		<input type='hidden' name='vanhakuittaus' value='$rivi[kuittaus]'>
+		<table>";
 
 	echo "<tr>
-			<th>kuvaus</th>
 			<th>pyytäjä</th>
 			<th>tekijä</th>
 			<th>aika-arvio</th>
 			<th>aika-tot.</th>
 			<th>deadline</th>
 			<th>projekti</th>
-			<th>prio</th>
-			<th>kuittaus</th>
-			<th></th>
+			<th>prio</th>			
 		</tr>
-		<tr>
-			<td><textarea name='kuvaus' cols='55' rows='4'>$rivi[kuvaus]</textarea></td>
-			<td>";
+		<tr><td>";
 
-			$query  = "	SELECT * FROM asiakas WHERE yhtio = '$kukarow[yhtio]' ORDER BY selaus, nimi";
-			$result = mysql_query($query) or pupe_error($query);
+	$query  = "	SELECT * FROM asiakas WHERE yhtio = '$kukarow[yhtio]' ORDER BY selaus, nimi";
+	$result = mysql_query($query) or pupe_error($query);
 
-			echo "<select style='width: 100px;' name='asiakas'>";
-			echo "<option value=''>Ei asiakasta</option>";
+	echo "<select style='width: 100px;' name='asiakas'>";
+	echo "<option value=''>Ei asiakasta</option>";
 
-			while ($asiakas = mysql_fetch_array($result)) {
-				$sel = "";
-				if ($rivi["asiakas"] == $asiakas["tunnus"]) $sel = "SELECTED";
-				echo "<option title='$asiakas[nimi] $asiakas[nimitark] ($asiakas[ytunnus])' value='$asiakas[tunnus]' $sel>$asiakas[nimi] $asiakas[nimitark] ($asiakas[ytunnus])</option>";
-			}
+	while ($asiakas = mysql_fetch_array($result)) {
+		$sel = "";
+		if ($rivi["asiakas"] == $asiakas["tunnus"]) $sel = "SELECTED";
+		echo "<option title='$asiakas[nimi] $asiakas[nimitark] ($asiakas[ytunnus])' value='$asiakas[tunnus]' $sel>$asiakas[nimi] $asiakas[nimitark] ($asiakas[ytunnus])</option>";
+	}
 
-			echo "</select>";
+	echo "</select>";
 
-			echo "<br><input name='pyytaja' type='text' size='13' value='$rivi[pyytaja]'>";
-			echo "</td>";
+	echo "<br><input name='pyytaja' type='text' size='13' value='$rivi[pyytaja]'>";
+	echo "</td>";
 
-			$query  = "	SELECT kuka.*, count(distinct todo.tunnus) kpl, ifnull(sum(kesto_arvio),0) aika
-						FROM kuka
-						LEFT JOIN todo on (todo.yhtio = kuka.yhtio and todo.tekija = kuka.tunnus and todo.kuittaus = '')
-						WHERE kuka.yhtio = '$kukarow[yhtio]'
-						and kuka.myyja != 0
-						GROUP BY kuka.tunnus
-						ORDER BY aika desc";
-			$result = mysql_query($query) or pupe_error($query);
+	$query  = "	SELECT kuka.*, count(distinct todo.tunnus) kpl, ifnull(sum(kesto_arvio),0) aika
+				FROM kuka
+				LEFT JOIN todo on (todo.yhtio = kuka.yhtio and todo.tekija = kuka.tunnus and todo.kuittaus = '')
+				WHERE kuka.yhtio = '$kukarow[yhtio]'
+				and kuka.myyja != 0
+				GROUP BY kuka.tunnus
+				ORDER BY aika desc";
+	$result = mysql_query($query) or pupe_error($query);
 
-			echo "<td><select style='width: 100px;' name='seltekija'>";
-			echo "<option value=''>Ei valittu</option>";
+	echo "<td><select style='width: 100px;' name='seltekija'>";
+	echo "<option value=''>Ei valittu</option>";
 
-			while ($asiakas = mysql_fetch_array($result)) {
-				$sel = "";
-				if ($rivi["tekija"] == $asiakas["tunnus"]) $sel = "SELECTED";
-				echo "<option title='$asiakas[nimi] ($asiakas[kpl] kpl / $asiakas[aika] h)' value='$asiakas[tunnus]' $sel>$asiakas[nimi] ($asiakas[kpl] kpl / $asiakas[aika] h)</option>";
-			}
+	while ($asiakas = mysql_fetch_array($result)) {
+		$sel = "";
+		if ($rivi["tekija"] == $asiakas["tunnus"]) $sel = "SELECTED";
+		echo "<option title='$asiakas[nimi] ($asiakas[kpl] kpl / $asiakas[aika] h)' value='$asiakas[tunnus]' $sel>$asiakas[nimi] ($asiakas[kpl] kpl / $asiakas[aika] h)</option>";
+	}
 
-			echo "</select></td>";
+	echo "</select></td>";
+	
+	${"prio_sel_".$rivi["prioriteetti"]} = "SELECTED";
 
-
-			echo "<td><input name='kesto_arvio' type='text' size='6' value='$rivi[kesto_arvio]'></td>
-			<td><input name='kesto_toteutunut' type='text' size='6' value='$rivi[kesto_toteutunut]'></td>
-			<td><input name='deadline' type='text' size='10' value='$rivi[deadline]'></td>
-			<td><input name='projekti' type='text' size='15' value='$rivi[projekti]'></td>
-
-			<td>
-				<select style='width: 40px;' name='prioriteetti'>
-				<option {$prio_sel["-1"]} value='-1'>tarjouspyyntö</option>
-				<option $prio_sel[0] value='0'>bug</option>
-				<option $prio_sel[1] value='1'>1</option>
-				<option $prio_sel[2] value='2'>2</option>
-				<option $prio_sel[3] value='3'>3</option>
-				<option $prio_sel[4] value='4'>4</option>
-				<option $prio_sel[5] value='5'>5</option>
-				<option $prio_sel[6] value='6'>6</option>
-				<option $prio_sel[7] value='7'>7</option>
-				<option $prio_sel[8] value='8'>8</option>
-				<option $prio_sel[9] value='9'>9</option>
-				<option $prio_sel[10] value='10'>Hyväksynnässä</option>
-				<option $prio_sel[11] value='11'>Testauksessa</option>
-				</select>
-			</td>
-
-			<td><input name='kuittaus' type='text' size='7' value='$rivi[kuittaus]'></td>
-
-			<td><input value='Päivitä' type='submit'></td>
-
-		</tr>
-
+	echo "<td><input name='kesto_arvio' type='text' size='6' value='$rivi[kesto_arvio]'></td>
+		<td><input name='kesto_toteutunut' type='text' size='6' value='$rivi[kesto_toteutunut]'></td>
+		<td><input name='deadline' type='text' size='10' value='$rivi[deadline]'></td>
+		<td><input name='projekti' type='text' size='15' value='$rivi[projekti]'></td>
+		<td>
+		<select name='prioriteetti'>
+		<option value='-1'>tarjouspyyntö</option>
+		<option $prio_sel_0 value='0'>bug</option>
+		<option $prio_sel_1 value='1'>1</option>
+		<option $prio_sel_2 value='2'>2</option>
+		<option $prio_sel_3 value='3'>3</option>
+		<option $prio_sel_4 value='4'>4</option>
+		<option $prio_sel_5 value='5'>5</option>
+		<option $prio_sel_6 value='6'>6</option>
+		<option $prio_sel_7 value='7'>7</option>
+		<option $prio_sel_8 value='8'>8</option>
+		<option $prio_sel_9 value='9'>9</option>
+		<option $prio_sel_10 value='10'>Hyväksynnässä</option>
+		<option $prio_sel_11 value='11'>Testauksessa</option>
+		<option $prio_sel_100 value='100'>Tuotekehitys</option>
+		</select>
+		</td>
+	</tr>
+		<tr><th>kuvaus</th><td colspan='7'><textarea name='kuvaus' cols='100' rows='10'>$rivi[kuvaus]</textarea></td></tr>
+		<tr><th>kuittaus</th><td colspan='7'><input name='kuittaus' type='text' size='45' value='$rivi[kuittaus]'></td>
 	</table>
+	<br><br><input value='Päivitä' type='submit'>
 	</form>";
 }
 
@@ -151,7 +140,7 @@ if ($tee == "paivita") {
 }
 
 if ($tee == "uusi" and $kuvaus != "") {
-	$query  = "insert into todo (yhtio, kuvaus, aika, prioriteetti, projekti, pyytaja, kesto_arvio, laatija, luontiaika, deadline, tekija, asiakas) values ('$kukarow[yhtio]', '$kuvaus', now(), '$prioriteetti', '$projekti', '$pyytaja', '$kesto_arvio', '$kukarow[kuka]', now(), '$deadline', '$tekija', '$asiakas')";
+	$query  = "INSERT into todo (yhtio, kuvaus, aika, prioriteetti, projekti, pyytaja, kesto_arvio, laatija, luontiaika, deadline, tekija, asiakas) values ('$kukarow[yhtio]', '$kuvaus', now(), '$prioriteetti', '$projekti', '$pyytaja', '$kesto_arvio', '$kukarow[kuka]', now(), '$deadline', '$tekija', '$asiakas')";
 	$result = mysql_query($query) or pupe_error($query);
 	$tee = "";
 }
@@ -161,7 +150,7 @@ if ($tee == "uusi" and $kuvaus == "") {
 }
 
 if ($tee == "valmis") {
-	$query  = "update todo set kuittaus='$kuittaus', aika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+	$query  = "UPDATE todo set kuittaus='$kuittaus', aika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 	$tee = "";
 }
@@ -249,6 +238,7 @@ if ($tee == "") {
 				<option value='9' selected>9</option>
 				<option value='10'>Hyväksynnässä</option>
 				<option value='11'>Testauksessa</option>
+				<option value='100'>Tuotekehitys</option>
 				</select>
 			</td>
 
@@ -398,13 +388,17 @@ if ($tee == "") {
 			if ($rivi["prioriteetti"] == -1) {
 				$rivi["prioriteetti"] = "tarjouspyyntö";
 			}
-			
+
 			if ($rivi["prioriteetti"] == 10) {
 				$rivi["prioriteetti"] = "hyväksynnässä";
-			}			
-			
+			}
+
 			if ($rivi["prioriteetti"] == 11) {
 				$rivi["prioriteetti"] = "testauksessa";
+			}
+
+			if ($rivi["prioriteetti"] == 100) {
+				$rivi["prioriteetti"] = "tuotekehitys";
 			}
 
 			$numero ++;
@@ -438,7 +432,7 @@ if ($tee == "") {
 	$tunnit = 0;
 	$numero = 0;
 
-	echo "<table width='1000' cellpadding='2'>";
+	echo "<table>";
 
 	echo "<tr>
 		<th><a href='?asiakas_valittu=$asiakas_valittu&tekija_valittu=$tekija_valittu&sort=tunnus&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku&luonti_haku=$luonti_haku'>#</a></th>
@@ -487,13 +481,17 @@ if ($tee == "") {
 		if ($rivi["prioriteetti"] == -1) {
 			$rivi["prioriteetti"] = "tarjouspyyntö";
 		}
-		
+
 		if ($rivi["prioriteetti"] == 10) {
 			$rivi["prioriteetti"] = "hyväksynnässä";
 		}
 
 		if ($rivi["prioriteetti"] == 11) {
 			$rivi["prioriteetti"] = "testauksessa";
+		}
+
+		if ($rivi["prioriteetti"] == 100) {
+			$rivi["prioriteetti"] = "tuotekehitys";
 		}
 
 		if ($rivi["deadline"] == '9999-12-31') {

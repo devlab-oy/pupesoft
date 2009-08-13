@@ -942,7 +942,12 @@ if ($tila == 'suorituksenvalinta') {
 		}
 
 		echo "</table>";
-		echo "<br><input type='submit' value='".t("Kohdista")."'></form>";
+
+		if ($r > 1) {
+			echo "<br><input type='submit' value='".t("Kohdista")."'>";
+		}
+		echo "</form>";
+
 	}
 	else {
 		if (mysql_num_rows($result) == 1) {
@@ -1077,10 +1082,17 @@ if ($tila == 'kohdistaminen') {
 
 	echo "</table>";
 
+	if ($yhtiorow['myyntireskontrakausi_alku'] > $suoritus['kirjpvm']) {
+		echo "<br><font class='error'>".t("Tilikausi lukittu")."</font>";
+		require ("inc/footer.inc");
+		exit;
+	}
+
 	$pyocheck='';
 	$osacheck='';
 	if ($osasuoritus == '1') $osacheck = 'checked';
 	if ($pyoristys_virhe_ok == '1') $pyocheck = 'checked';
+
 
 	echo "<form method = 'post' name='summat'>";
 	echo "<table>";

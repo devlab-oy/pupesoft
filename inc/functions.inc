@@ -4106,7 +4106,7 @@ if (!function_exists("enable_ajax")) {
 		}
 
 		this.doPost = function() {
-			http.open('post', urli + 'ohje=off', true);
+			http.open('post', urli + '&ohje=off', true);
 			http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 			http.send(data);
 		}

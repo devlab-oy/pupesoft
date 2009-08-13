@@ -87,7 +87,7 @@
 					// tuotteen m‰‰r‰ varastossa nyt
 					$query = "	SELECT sum(saldo) varasto
 								FROM tuotepaikat use index (tuote_index)
-								WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+								WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 								and tuotepaikat.tuoteno = '$row[tuoteno]'";
 					$vres = mysql_query($query) or pupe_error($query);
 					$vrow = mysql_fetch_array($vres);
@@ -382,7 +382,7 @@
 						$select .= "asiakas.konserni, ";
 						$order  .= "konserni,";
 						$gluku++;
-						
+
 						if ($rajaus[$i] != "") {
 							$lisa .= " and asiakas.konserni = '$rajaus[$i]' ";
 						}
@@ -682,7 +682,7 @@
 				}
 
 				$query = "	SELECT $select";
-				
+
 				// Katotaan mist‰ kohtaa query‰ alkaa varsinaiset numerosarakkeet (HUOM: toi ', ' pilkkuspace erottaa sarakket toisistaan)
 				$data_start_index = substr_count($select, ", ");
 
@@ -808,7 +808,7 @@
 									$query .= " (if(tilausrivi.rivihinta != 0, tilausrivi.rivihinta, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) * IFNULL(toimitustapa.kuluprosentti,0)/100)) - ";
 									$query .= " (if(tilausrivi.rivihinta != 0, tilausrivi.rivihinta, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) * IFNULL(yhtio.kuluprosentti,0)/100)) - ";
 									$query .= " (if(tilausrivi.rivihinta != 0, tilausrivi.rivihinta, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) * IFNULL(tuote.kuluprosentti,0)/100)), 0)) / ";
-									$query .= " sum(if(lasku.luontiaika >= '$vvaa-$kka-$ppa 00:00:00' and lasku.luontiaika <= '$vvll-$kkl-$ppl 23:59:59', ";                                                                                                                                                                                                                     
+									$query .= " sum(if(lasku.luontiaika >= '$vvaa-$kka-$ppa 00:00:00' and lasku.luontiaika <= '$vvll-$kkl-$ppl 23:59:59', ";
 									$query .= " (if(tilausrivi.kate != 0, tilausrivi.kate, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) - tuote.kehahin * (tilausrivi.varattu+tilausrivi.jt))) - ";
 									$query .= " (if(tilausrivi.rivihinta != 0, tilausrivi.rivihinta, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) * IFNULL(asiakas.kuluprosentti,0)/100)) - ";
 									$query .= " (if(tilausrivi.rivihinta != 0, tilausrivi.rivihinta, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)) * IFNULL(toimitustapa.kuluprosentti,0)/100)) - ";
@@ -820,7 +820,7 @@
 									$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl',  tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti,0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti,0)/100),0)) / sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl', tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti,0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti,0)/100),0)) nettokateind, ";
 								}
 							}
-							
+
 							//nettokateprossa n‰ytet‰‰n vain jos myynti ja nettokate on valittu myˆs n‰ytett‰v‰ksi
 							if ($piilota_myynti == "" and $piilota_nettokate == "") {
 								//NETTOKATEPROS
@@ -831,7 +831,7 @@
 									$query .= $nettokatelisaed;
 								}
 							}
-							
+
 						}
 
 						if ($piilota_kate == "") {
@@ -1066,17 +1066,17 @@
 
 					while ($row = mysql_fetch_array($result)) {
 						if (mysql_num_rows($result) > $rivilimitti) $bar->increase();
-												
+
 						$piilosumma = 0;
-						
+
 						for ($i=$data_start_index; $i < mysql_num_fields($result); $i++) {
 							if (is_numeric($row[$i])) {
-								$piilosumma += $row[$i];								
+								$piilosumma += $row[$i];
 							}
 						}
 
 						// N‰ytet‰‰n vain jos halutaan n‰hd‰ kaikki rivit tai summa on > 0
-						if ($piilotanollarivit == "" or (float) $piilosumma != 0) {							
+						if ($piilotanollarivit == "" or (float) $piilosumma != 0) {
 							if ($osoitetarrat != "" and $row["astunnus"] > 0) {
 								$tarra_aineisto .= $row["astunnus"].",";
 							}
@@ -1095,18 +1095,18 @@
 								if (mysql_field_name($result, $i) == "asos") {
 									$osre = t_avainsana("ASIAKASOSASTO", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
 									$osrow = mysql_fetch_array($osre);
-									
-									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
+
+									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
 										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
 									}
 								}
-								
+
 								// jos kyseessa on piiri, haetaan sen nimi
 								if (mysql_field_name($result, $i) == "aspiiri") {
 									$osre = t_avainsana("PIIRI", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
 									$osrow = mysql_fetch_array($osre);
-									
-									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
+
+									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
 										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
 									}
 								}
@@ -1115,8 +1115,8 @@
 								if (mysql_field_name($result, $i) == "asry") {
 									$osre = t_avainsana("ASIAKASRYHMA", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
 									$osrow = mysql_fetch_array($osre);
-									
-									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
+
+									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
 										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
 									}
 								}
@@ -1125,18 +1125,18 @@
 								if (mysql_field_name($result, $i) == "tuos") {
 									$osre = t_avainsana("OSASTO", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
 									$osrow = mysql_fetch_array($osre);
-									
-									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
+
+									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
 										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
-									}																										
+									}
 								}
 
 								// jos kyseessa on tuoteosasto, haetaan sen nimi
 								if (mysql_field_name($result, $i) == "tuoteryhm‰") {
 									$osre = t_avainsana("TRY", "", "and avainsana.selite  = '$row[$i]'", $yhtio);
 									$osrow = mysql_fetch_array($osre);
-									
-									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {										
+
+									if ($osrow['selitetark'] != "" and $osrow['selite'] != $osrow['selitetark']) {
 										$row[$i] = $row[$i] ." ". $osrow['selitetark'];
 									}
 								}
@@ -1202,12 +1202,12 @@
 										$row[$i] = round($row["katenyt"] / abs($row["myyntinyt"]) * 100, 2);
 									}
 									else {
-										if ($ajotapa == "tilausauki" and $row["myyntilaskuttamattanyt"] != 0) {											
+										if ($ajotapa == "tilausauki" and $row["myyntilaskuttamattanyt"] != 0) {
 											$row[$i] = round($row["katenyt"] / abs($row["myyntilaskuttamattanyt"]) * 100, 2);
 										}
 										else {
 											$row[$i] = 0;
-										}										
+										}
 									}
 								}
 
@@ -1493,7 +1493,7 @@
 							if ($totsummat["nettokateed"] <> 0) 	$vsum = round($totsummat["nettokatenyt"] / $totsummat["nettokateed"],2);
 						}
 						if ($vnim == "myykplind") {
-							if ($valisummat["myykpled"] <> 0)		$vsum = round($valisummat["myykplnyt"] / $valisummat["myykpled"],2);
+							if ($totsummat["myykpled"] <> 0)		$vsum = round($totsummat["myykplnyt"] / $totsummat["myykpled"],2);
 						}
 
 						if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
@@ -1668,7 +1668,7 @@
 
 			// n‰ytet‰‰n soveltuvat asiakasosastot
 			$res2 = t_avainsana("ASIAKASOSASTO", "", "", $yhtio);
-			
+
 			echo "<select name='mul_oasiakasosasto[]' multiple='TRUE' size='10' style='width:100%;'>";
 
 			$mul_check = '';
@@ -1696,7 +1696,7 @@
 
 			// n‰ytet‰‰n soveltuvat asiakasryhmat
 			$res2 = t_avainsana("ASIAKASRYHMA", "", "", $yhtio);
-			
+
 			echo "<select name='mul_asiakasryhma[]' multiple='TRUE' size='10' style='width:100%;'>";
 
 			$mul_check = '';
@@ -1724,7 +1724,7 @@
 
 			// n‰ytet‰‰n sallityt piirit
 			$res2 = t_avainsana("PIIRI", "", $asiakasrajaus_avainsana, $yhtio);
-			
+
 			echo "<select name='mul_piiri[]' multiple='TRUE' size='10' style='width:100%;'>";
 
 			$mul_check = '';
@@ -1909,7 +1909,7 @@
 			if ($piilota_kappaleet != '')	$piilota_kappaleet_sel 	= "CHECKED";
 			if ($piilotanollarivit != '')	$einollachk 			= "CHECKED";
 			if ($naytaennakko != '')		$naytaennakkochk 		= "CHECKED";
-			
+
 			echo "<table>
 				<tr>
 				<th>".t("Lis‰rajaus")."</th>

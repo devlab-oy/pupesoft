@@ -418,7 +418,7 @@
 						if ($i < ($x + $xx)) {
 							echo "</tr><tr class='aktiivi'>";
 						}
-
+ 
 						$i++;
 					}
 
@@ -434,7 +434,7 @@
 				}
 
 				// LASKUT JOITA EI OLE LIITETTY KEIKKOIHIN
-				$query = "	SELECT lasku.summa * if(lasku.maksu_kurssi <> 0, lasku.maksu_kurssi, lasku.vienti_kurssi) summa_euroissa,
+				$query = "	SELECT lasku.summa, lasku.maksu_kurssi, lasku.vienti_kurssi, lasku.valkoodi,
 							lasku.luontiaika,
 							concat(lasku.asiakkaan_tilausnumero, ' ', lasku.viesti) numero,
 							lasku.tunnus
@@ -449,6 +449,39 @@
 				$ei_liitetyt_res = mysql_query($query) or pupe_error($query);
 
 				while ($ei_liitetyt_row = mysql_fetch_assoc($ei_liitetyt_res)) {
+					// jos meillä on hyvityslasku niin haetaan vaan negatiivisiä alvikirjauksia (en tiedä ollenkaan onko tämä futureprooof) :(
+					if ($ei_liitetyt_row["summa"] < 0) {
+						$alvilisa = "and summa < 0";
+					}
+					else {
+						$alvilisa = "and summa > 0";
+					}
+
+					// Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
+					$query = "	SELECT sum(summa) summa
+								from tiliointi
+								where yhtio	= '$kukarow[yhtio]'
+								and ltunnus	= '$ei_liitetyt_row[tunnus]'
+								and tilino  = '$yhtiorow[alv]'
+								$alvilisa
+								and korjattu = ''";
+					$alvires = mysql_query($query) or pupe_error($query);
+					$alvirow = mysql_fetch_array($alvires);
+
+					// Ostoreskontralaskun veron määrä
+					$alvisumma = $alvirow["summa"];
+					
+					if (strtoupper($ei_liitetyt_row["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
+						if ($ei_liitetyt_row["maksu_kurssi"] != 0) {
+							$alvisumma = $alvirow["summa"] / $ei_liitetyt_row["maksu_kurssi"];
+						}
+						else {
+							$alvisumma = $alvirow["summa"] / $ei_liitetyt_row["vienti_kurssi"];
+						}
+					}
+
+					$ei_liitetyt_row["arvo"] = round((float) $ei_liitetyt_row["summa"] - (float) $alvisumma, 2);
+					
 					echo "<td style='vertical-align: top;'></td>";
 					echo "<td style='vertical-align: top;'></td>";	
 					echo "<td style='vertical-align: top;'></td>";
@@ -458,8 +491,8 @@
 					echo "<td style='vertical-align: top;'></td>";
 					echo "<td style='vertical-align: top;'></td>";
 					echo "<td style='vertical-align: top;'>".tv1dateconv($ei_liitetyt_row['luontiaika'])."</td>";
-					echo "<td style='vertical-align: top; text-align: right;'>".sprintf('%.02f', $ei_liitetyt_row['summa_euroissa'])."</td>";
-					$yht_tavara_summa[$ei_liitetyt_row['tunnus']] = $ei_liitetyt_row['summa_euroissa'];
+					echo "<td style='vertical-align: top; text-align: right;'>".sprintf('%.02f', $ei_liitetyt_row['arvo'])."</td>";
+					$yht_tavara_summa[$ei_liitetyt_row['tunnus']] = $ei_liitetyt_row['arvo'];
 					echo "<td style='vertical-align: top;'>";
 					if (trim($ei_liitetyt_row['numero']) != '') {
 						echo "<div id='$ei_liitetyt_row[tunnus]' class='popup'>";

@@ -51,7 +51,7 @@
 					ORDER BY kayttotarkoitus, jarjestys, filename";
 		$kuvares = mysql_query($query) or pupe_error($query);
 
-		echo "<table border='0' cellspacing='5' align='center'";
+		echo "<table align='center'";
 
 		if ($maxwidth) {
 			echo "width='$maxwidth'";

@@ -3,16 +3,16 @@
 if(!function_exists("tuotteen_avainsanattarkista")) {
 	function tuotteen_avainsanattarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $alasveto;
-		
-		static $chtuoteno, $lajitalteen;
-		
+
+		static $chtuoteno, $lajitalteen, $kielitalteen;
+
 		if (mysql_field_name($result, $i) == "tuoteno") {
 			$chtuoteno = $t[$i];
-			
+
 			if ($chtuoteno != '') {
 				$query = "	SELECT tuoteno
 							FROM tuote
-							WHERE yhtio = '$kukarow[yhtio]' 
+							WHERE yhtio = '$kukarow[yhtio]'
 							AND tuoteno = '$t[$i]'";
 				$sresult = mysql_query($query) or pupe_error($query);
 
@@ -20,13 +20,13 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 
 					if (substr($t[$i], -1) != '*') $tuoteno = $t[$i]."*";
 					else $tuoteno = $t[$i];
-					
+
 					$kutsuja 		= "yllapito.php";
 					$ulos			= "";
 
 					require ("inc/tuotehaku.inc");
 
-					if ($ulos != "") {	
+					if ($ulos != "") {
 						$alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";
 					}
 
@@ -37,12 +37,19 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 				$virhe[$i] = t("Tuotenumero puuttuu!");
 			}
 		}
-		
+
 		if (mysql_field_name($result, $i) == "laji") {
 			if ($t[$i] == '') {
 				$virhe[$i] = t("Lajia ei voi jättää tyhjäksi")."!";
 			}
 			$lajitalteen = $t[$i];
+		}
+
+		if (mysql_field_name($result, $i) == "kieli") {
+			if ($t[$i] == '') {
+				$virhe[$i] = t("Kieltä ei voi jättää tyhjäksi")."!";
+			}
+			$kielitalteen = $t[$i];
 		}
 
 		if (mysql_field_name($result, $i) == "selite") {
@@ -60,6 +67,44 @@ if(!function_exists("tuotteen_avainsanattarkista")) {
 			elseif (strtoupper($lajitalteen) == "OLETUSVALINTA") {
 				if(!in_array(substr($t[$i], 0, 3), array("", "!!!", "¡¡¡", "¡¡V"))) {
 					$virhe[$i] = t("Tuotteen %s oletusvalinta %s ei kelpaa!", $kieli, $chtuoteno, $t[$i]);
+				}
+			}
+
+			// jos kyseessä on tuotteen parametri
+			if (substr(strtoupper($lajitalteen), 0, 10) == "PARAMETRI_") {
+				$query = "	SELECT tunnus
+							from tuotteen_avainsanat
+							where yhtio = '$kukarow[yhtio]'
+							and laji = '$lajitalteen'
+							and kieli = '$kielitalteen'
+							and tuoteno = '$chtuoteno'
+							and tunnus != '$tunnus'";
+				$sresult = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($sresult) > 0) {
+					$virhe[$i] = t("Tuotteella on jo parametri"). " ". substr($lajitalteen, 10);
+				}
+			}
+
+			if (strtoupper($lajitalteen) == "PARAMETRI_VARIAATIO_JAKO") {
+				//Onko meillä moniulotteinen variaatio esim. väri ja koko...
+				$variaatiot = explode(",", $t[$i]);
+
+				foreach ($variaatiot as $variaatio) {
+					$query = "	SELECT tunnus
+								from tuotteen_avainsanat
+								where yhtio = '$kukarow[yhtio]'
+								and kieli = '$yhtiorow[kieli]'
+								and laji = 'parametri_$variaatio'
+								and tuoteno = '$chtuoteno'";
+					$sresult = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($sresult) != 1) {
+						$virhe[$i] .= t("Tuotteella ei ole parametriä"). " '". $variaatio."'";
+					}
+					if ($variaatio == "variaatio" or $variaatio == "variaatio_jako") {
+						$virhe[$i] .= t("Variaatio jako ei voi olla variaatio eikä variaatio_jako"). "!";
+					}
 				}
 			}
 		}

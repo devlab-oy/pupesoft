@@ -32,57 +32,57 @@ echo "</table>";
 
 echo "</form><br>";
 
-if($tee == "NAYTA") {
-	
-	$query = "	SELECT if(kuka.nimi IS NULL, lasku.laatija, kuka.nimi) nimi, if(tuote.tuotteen_parametrit=50, 'Päivärahat  ja ateriakorvaukset', 'Verovapaa kilometrikorvaus') laji, avg(tilausrivi.hinta) hinta, sum(tilausrivi.kpl) kpl, sum(tilausrivi.rivihinta) yhteensa, tuote.tuotteen_parametrit, lasku.laatija
+if ($tee == "NAYTA") {
+
+	$query = "	SELECT if (kuka.nimi IS NULL, lasku.laatija, kuka.nimi) nimi, if (tuote.kuvaus=50, 'Päivärahat  ja ateriakorvaukset', 'Verovapaa kilometrikorvaus') laji, avg(tilausrivi.hinta) hinta, sum(tilausrivi.kpl) kpl, sum(tilausrivi.rivihinta) yhteensa, tuote.kuvaus, lasku.laatija
 				FROM lasku
 				JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus
 				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
-				JOIN tuote ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A', 'B') and tuote.tuotteen_parametrit IN ('50', '56')
+				JOIN tuote ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A', 'B') and tuote.kuvaus IN ('50', '56')
 				WHERE lasku.yhtio='$kukarow[yhtio]' and tila = 'Y' and tilaustyyppi = 'M' and tapvm>= '$vv-01-01' and tapvm<= '$vv-12-31 59:59:59'
-				GROUP BY lasku.laatija, tuote.tuotteen_parametrit";
+				GROUP BY lasku.laatija, tuote.kuvaus";
 	$result = mysql_query($query) or pupe_error($query);
 	//echo $query;
 	$edNimi = md5(uniqid());
-	
-	if(mysql_num_rows($result) > 0) {
+
+	if (mysql_num_rows($result) > 0) {
 		echo "	<table>
 				<tr>
 					<th>".t("Kuka")."</th><th>".t("Verokodi")."</th><th width='300'>".t("Korvaus")."</th><th>".t("Kappaletta")."</th><th>".t("Hinta")."</th><th>".t("Yhteensä")."</th>
 				</tr>";
 		$summat = array();
 		$kappaleet = array();
-		while($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_array($result)) {
 			$nimi = "";
-			if($edNimi != $row["nimi"]) {
-				if(count($summat) > 0) {
-					echo "	
+			if ($edNimi != $row["nimi"]) {
+				if (count($summat) > 0) {
+					echo "
 							<tr>
 								<td class='back'>&nbsp;</td>
 							</tr>";
 				}
 				$nimi = "<font class='message'>$row[nimi]</font>";
 			}
- 			
+
 			echo "	<tr>
 						<td>$nimi</td>
-						<td>$row[tuotteen_parametrit]</td>
+						<td>$row[kuvaus]</td>
 						<td>$row[laji]</td>
 						<td align='right'>".number_format($row["kpl"], 0, ',', ' ')."</td>
 						<td align='right'>".number_format($row["hinta"], 2, ',', ' ')."</td>
 						<td align='right'>".number_format($row["yhteensa"], 2, ',', ' ')."</td>
 					</tr>";
-			
+
 			// erittely
 			$query = "	SELECT tilausrivi.tuoteno, tuote.nimitys, avg(tilausrivi.hinta) hinta, sum(tilausrivi.kpl) kpl, sum(tilausrivi.rivihinta) yhteensa
 						FROM lasku
 						JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus
 						LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
-						JOIN tuote ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A', 'B') and tuote.tuotteen_parametrit = '$row[tuotteen_parametrit]'
+						JOIN tuote ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A', 'B') and tuote.kuvaus = '$row[kuvaus]'
 						WHERE lasku.yhtio='$kukarow[yhtio]' and tila = 'Y' and tilaustyyppi = 'M' and tapvm>= '$vv-01-01' and tapvm<= '$vv-12-31 59:59:59' and lasku.laatija = '$row[laatija]'
 						GROUP BY tuote.tuoteno";
 			$eres = mysql_query($query) or pupe_error($query);
-			while($erow = mysql_fetch_array($eres)) {
+			while ($erow = mysql_fetch_array($eres)) {
 				echo "	<tr>
 							<td></td>
 							<td></td>
@@ -91,13 +91,13 @@ if($tee == "NAYTA") {
 							<td align='right'><font class='info'>".number_format($erow["hinta"], 2, ',', ' ')."</font></td>
 							<td align='right'><font class='info'>".number_format($erow["yhteensa"], 2, ',', ' ')."</font></td>
 						</tr>";
-			}				
-					
+			}
+
 			$edNimi = $row["nimi"];
-			$summat[$row["tuotteen_parametrit"]]+=$row["yhteensa"];
-			$kappaleet[$row["tuotteen_parametrit"]]+=$row["kpl"];
-			
-		}		
+			$summat[$row["kuvaus"]]+=$row["yhteensa"];
+			$kappaleet[$row["kuvaus"]]+=$row["kpl"];
+
+		}
 		echo "		<tr>
 					<td class='back' colspan='6'>&nbsp;</td>
 				</tr>
@@ -105,7 +105,7 @@ if($tee == "NAYTA") {
 					<td class='back'></td>
 					<th class='back'>50</th>
 					<th>".t("Päivärahat  ja ateriakorvaukset yhteensä")."</th>
-					<td align='right'>".number_format($kappaleet[50], 2, ',', ' ')."</td>					
+					<td align='right'>".number_format($kappaleet[50], 2, ',', ' ')."</td>
 					<td colspan='2' align='right'>".number_format($summat[50], 2, ',', ' ')."</td>
 				</tr>
 				<tr>

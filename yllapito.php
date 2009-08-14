@@ -12,10 +12,6 @@
 		unset($apucssextranet);
 	}
 
-	if ($_POST["toim"] == "tuote") {
-		$aputuotteen_parametrit = $_POST["tuotteen_parametrit"];
-	}
-
 	if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 		require ("inc/parametrit.inc");
 	}
@@ -88,9 +84,6 @@
 	}
 	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucssverkkokauppa)) {
 		$t[$cssverkkokauppa] = $apucssverkkokauppa;
-	}
-	if ($_POST["toim"] == "tuote" and isset($aputuotteen_parametrit)) {
-		$t[$tuotteen_parametriti] = $aputuotteen_parametrit;
 	}
 
 	// pikku javascripti
@@ -278,12 +271,7 @@
 			}
 
 			if (function_exists($funktio)) {
-				if ($toim == "tuote") {
-					@$funktio($t, $i, $result, $tunnus, &$virhe, $trow, $tuotteen_parametrit_keys, $tuotteen_parametrit_vals);
-				}
-				else {
-					@$funktio($t, $i, $result, $tunnus, &$virhe, $trow);
-				}
+				@$funktio($t, $i, $result, $tunnus, &$virhe, $trow);
 			}
 
 			if ($virhe[$i] != "") {

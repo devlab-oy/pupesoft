@@ -54,7 +54,7 @@
 	echo "<tr><th>",t("Toimittaja"),"</th><td colspan='2' nowrap><input type='text' name='toimittajahaku' value='$toimittajahaku'></td></tr>";
 
 	echo "<tr><th>",t("P‰iv‰m‰‰r‰v‰li")," (",t("pp-kk-vvvv"),")</th>";
-	
+
 	echo "<td><input type='text' name='ppa' value='$ppa' size='3'>
 	<input type='text' name='kka' value='$kka' size='3'>
 	<input type='text' name='vva' value='$vva' size='5'></td>
@@ -104,15 +104,15 @@
 		while ($toimittajarow = mysql_fetch_assoc($res)) {
 
 			$query = "	SELECT count(*) riveja,
-						sum(if(tilausrivi.kpl != 0, 1, 0)) riveja_varastossa, 
-						sum(tilausrivi.kpl+tilausrivi.varattu) kpl, 
-						sum(tilausrivi.kpl) kpl_varastossa, 
-						sum((tilausrivi.kpl+tilausrivi.varattu)*tilausrivi.hinta*(1-tilausrivi.ale/100)) arvo, 
-						lasku.tunnus ltunnus, 
+						sum(if(tilausrivi.kpl != 0, 1, 0)) riveja_varastossa,
+						sum(tilausrivi.kpl+tilausrivi.varattu) kpl,
+						sum(tilausrivi.kpl) kpl_varastossa,
+						sum((tilausrivi.kpl+tilausrivi.varattu)*tilausrivi.hinta*(1-tilausrivi.ale/100)) arvo,
+						lasku.tunnus ltunnus,
 						lasku.lahetepvm,
 						sum(tuote.tuotemassa*(tilausrivi.varattu+tilausrivi.kpl)) massa,
 						sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
-						FROM lasku 
+						FROM lasku
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
 						JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno)
 						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
@@ -225,18 +225,18 @@
 							}
 						}
 
-						echo "<a href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=OSTO&tunnus=$tilrivi_row[ltunnus]'>$tilrivi_row[ltunnus]</a>";
+						echo "<a href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=OSTO&tunnus=$tilrivi_row[ltunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku'>$tilrivi_row[ltunnus]</a>";
 					}
 					else {
 						echo "&nbsp;";
 					}
 					echo "</td>";
 
-					echo "<td style='vertical-align: top;' rowspan='$x'>".date("W", strtotime($tilrivi_row['lahetepvm']))."/".substr($tilrivi_row['lahetepvm'], 2, 2)."</td>";				
+					echo "<td style='vertical-align: top;' rowspan='$x'>".date("W", strtotime($tilrivi_row['lahetepvm']))."/".substr($tilrivi_row['lahetepvm'], 2, 2)."</td>";
 					echo "<td style='vertical-align: top;' rowspan='$x'>".tv1dateconv($tilrivi_row['lahetepvm'])."</td>";
 
 					$osumapros = '';
-					
+
 					if (round($tilrivi_row["kplok"] / $tilrivi_row["kpl"] * 100, 2) != 100) {
 						$osumapros = "~";
 					}
@@ -247,7 +247,7 @@
 						$yht_paino += $tilrivi_row['massa'];
 					}
 					echo "</td>";
-					
+
 					echo "<td style='vertical-align: top; text-align: right;' rowspan='$x' nowrap>$varastossa_kpl".(float) $tilrivi_row['kpl']."</td>";
 					echo "<td style='vertical-align: top; text-align: right;' rowspan='$x' nowrap>$varastossa_riveja$tilrivi_row[riveja]</td>";
 					echo "<td style='vertical-align: top; text-align: right;' nowrap rowspan='$x'>".sprintf('%.02f', $tilrivi_row['arvo'])."</td>";
@@ -267,14 +267,14 @@
 							echo "<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>";
 						}
 
-						echo "<td style='vertical-align: top;'><a href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=OSTO&tunnus=$keikkarow[tunnus]'>$keikkarow[laskunro]</a></td>";
+						echo "<td style='vertical-align: top;'><a href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=OSTO&tunnus=$keikkarow[tunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku'>$keikkarow[laskunro]</a></td>";
 
 						$query  = "	SELECT liitosotsikko.arvo * if(ostoreskontran_lasku.maksu_kurssi <> 0, ostoreskontran_lasku.maksu_kurssi, ostoreskontran_lasku.vienti_kurssi) summa_euroissa,
 									ostoreskontran_lasku.luontiaika,
 									concat(ostoreskontran_lasku.asiakkaan_tilausnumero, ' ', ostoreskontran_lasku.viesti) numero,
 									ostoreskontran_lasku.tunnus,
 									liitosotsikko.tunnus litunn
-									FROM lasku liitosotsikko 
+									FROM lasku liitosotsikko
 									JOIN lasku ostoreskontran_lasku ON (ostoreskontran_lasku.yhtio=liitosotsikko.yhtio and ostoreskontran_lasku.tunnus=liitosotsikko.vanhatunnus)
 									WHERE liitosotsikko.yhtio		= '$kukarow[yhtio]'
 									AND liitosotsikko.laskunro = '$keikkarow[laskunro]'
@@ -294,7 +294,7 @@
 
 							echo "<td style='vertical-align: top; text-align: right;' nowrap>";
 							while ($ostolaskurow = mysql_fetch_assoc($ostolaskures)) {
-								echo sprintf('%.02f', $ostolaskurow['summa_euroissa'])."<br>";
+								echo "<a href='".$palvelin2."muutosite.php?tee=E&tunnus=$ostolaskurow[tunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku'>".sprintf('%.02f', $ostolaskurow['summa_euroissa'])."</a><br>";
 								$yht_tavara_summa[$ostolaskurow['litunn']] = $ostolaskurow['summa_euroissa'];
 								$tavaralaskusummat += $ostolaskurow['summa_euroissa'];
 							}
@@ -310,7 +310,7 @@
 									echo "</div>";
 									echo " <a onmouseout=\"popUp(event,'$ostolaskurow[tunnus]')\" onmouseover=\"popUp(event,'$ostolaskurow[tunnus]')\"><img src='$palvelin2/pics/lullacons/info.png'></a>";
 								}
-								echo "<br>";								
+								echo "<br>";
 							}
 							echo "</td>";
 						}
@@ -323,7 +323,7 @@
 									concat(ostoreskontran_lasku.asiakkaan_tilausnumero, ' ', ostoreskontran_lasku.viesti) numero,
 									ostoreskontran_lasku.tunnus,
 									liitosotsikko.tunnus litunn
-									FROM lasku liitosotsikko 
+									FROM lasku liitosotsikko
 									JOIN lasku ostoreskontran_lasku ON (ostoreskontran_lasku.yhtio=liitosotsikko.yhtio and ostoreskontran_lasku.tunnus=liitosotsikko.vanhatunnus)
 									WHERE liitosotsikko.yhtio		= '$kukarow[yhtio]'
 									AND liitosotsikko.laskunro = '$keikkarow[laskunro]'
@@ -344,7 +344,7 @@
 
 							echo "<td style='vertical-align: top; text-align: right;' nowrap>";
 							while ($ostolaskurow = mysql_fetch_assoc($ostolaskures)) {
-								echo sprintf('%.02f', $ostolaskurow['summa_euroissa'])."<br>";
+								echo "<a href='".$palvelin2."muutosite.php?tee=E&tunnus=$ostolaskurow[tunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku'>".sprintf('%.02f', $ostolaskurow['summa_euroissa'])."</a><br>";
 								$yht_kulu_summa[$ostolaskurow['litunn']] = $ostolaskurow['summa_euroissa'];
 								$kululaskusummat += $ostolaskurow['summa_euroissa'];
 							}
@@ -389,14 +389,14 @@
 						}
 
 						echo "</td>";
-						
+
 						$query = "	SELECT group_concat(DISTINCT laskutettuaika separator '<br/>') laskettuaika
 									FROM tilausrivi
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND otunnus = $tilrivi_row[ltunnus]
 									AND uusiotunnus = $keikkarow[tunnus]
 									AND tyyppi = 'O'";
-						$saldoille_res = mysql_query($query) or pupe_error($query);						
+						$saldoille_res = mysql_query($query) or pupe_error($query);
 						$saldoille_row = mysql_fetch_assoc($saldoille_res);
 
 						echo "<td style='vertical-align: top;' nowrap>".tv1dateconv($saldoille_row['laskettuaika'])."</td>";
@@ -413,12 +413,12 @@
 							echo "<img src='".$palvelin2."pics/lullacons/bot-plain-green.png'/>";
 						}
 						echo "</td>";
-						
+
 						// and (mysql_num_rows($result) > 1 or count($rows) == end($rows))
 						if ($i < ($x + $xx)) {
 							echo "</tr><tr class='aktiivi'>";
 						}
- 
+
 						$i++;
 					}
 
@@ -470,7 +470,7 @@
 
 					// Ostoreskontralaskun veron m‰‰r‰
 					$alvisumma = $alvirow["summa"];
-					
+
 					if (strtoupper($ei_liitetyt_row["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
 						if ($ei_liitetyt_row["maksu_kurssi"] != 0) {
 							$alvisumma = $alvirow["summa"] / $ei_liitetyt_row["maksu_kurssi"];
@@ -481,9 +481,9 @@
 					}
 
 					$ei_liitetyt_row["arvo"] = round((float) $ei_liitetyt_row["summa"] - (float) $alvisumma, 2);
-					
+
 					echo "<td style='vertical-align: top;'></td>";
-					echo "<td style='vertical-align: top;'></td>";	
+					echo "<td style='vertical-align: top;'></td>";
 					echo "<td style='vertical-align: top;'></td>";
 					echo "<td style='vertical-align: top;'></td>";
 					echo "<td style='vertical-align: top;'></td>";
@@ -491,7 +491,7 @@
 					echo "<td style='vertical-align: top;'></td>";
 					echo "<td style='vertical-align: top;'></td>";
 					echo "<td style='vertical-align: top;'>".tv1dateconv($ei_liitetyt_row['luontiaika'])."</td>";
-					echo "<td style='vertical-align: top; text-align: right;'>".sprintf('%.02f', $ei_liitetyt_row['arvo'])."</td>";
+					echo "<td style='vertical-align: top; text-align: right;'><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$ei_liitetyt_row[tunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku'>".sprintf('%.02f', $ei_liitetyt_row['arvo'])."</a></td>";
 					$yht_tavara_summa[$ei_liitetyt_row['tunnus']] = $ei_liitetyt_row['arvo'];
 					echo "<td style='vertical-align: top;'>";
 					if (trim($ei_liitetyt_row['numero']) != '') {

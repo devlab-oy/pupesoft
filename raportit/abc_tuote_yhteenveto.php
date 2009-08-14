@@ -93,7 +93,7 @@
 
 	if ($tee == "YHTEENVETO") {
 
-		echo "<table>";
+		echo "<br><table>";
 
 		echo "<tr>";
 

@@ -1326,12 +1326,12 @@
 					require_once("tulosta_lasku.inc");
 
 					if ($laskurow["tila"] == 'U') {
-						$where = " tilausrivi.uusiotunnus='$otunnus' ";
-						$where2= " and tilausrivi.tyyppi = 'L' ";
+						$where  = " tilausrivi.uusiotunnus='$otunnus' ";
+						$where2 = " and tilausrivi.tyyppi = 'L' ";
 					}
 					else {
-						$where = " tilausrivi.otunnus='$otunnus' ";
-						$where2= " and tilausrivi.tyyppi in ('L','W','E') ";
+						$where  = " tilausrivi.otunnus='$otunnus' ";
+						$where2 = " and tilausrivi.tyyppi in ('L','W','E') and (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) != 0 ";
 					}
 
 					// katotaan miten halutaan sortattavan
@@ -1356,6 +1356,7 @@
 
 					if ($toim == 'PROFORMA') {
 						$laskurow["tapvm"] = date("Y-m-d");
+						
 						if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
 							$hinta_riv = "(tilausrivi.hinta/$laskurow[vienti_kurssi])";
 						}

@@ -187,7 +187,8 @@ if (!function_exists('alku')) {
 
 		if ($kateistyyppi != '') {
 			$erapaiva = t('MAKSETTU');
-		} else {
+		} 
+		else {
 			$erapaiva = tv1dateconv($laskurow["erpcm"]);
 		}
 
@@ -198,7 +199,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 771, t("Viitenumero", $kieli), 	$thispage, $pieni);
 		$pdf->draw_text(310, 761, $laskurow["viite"], 			$thispage, $boldi);
 		$pdf->draw_text(430, 771, t("Laskun numero", $kieli), 	$thispage, $pieni);
-		$pdf->draw_text(430, 761, $laskurow["laskunro"], 		$thispage, $boldi);
+		if ($laskurow["laskunro"] != 0) $pdf->draw_text(430, 761, $laskurow["laskunro"], 		$thispage, $boldi);
 
 		$pdf->draw_rectangle(758, 300, 737, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(758, 420, 737, 580, $thispage, $rectparam);
@@ -405,7 +406,7 @@ if (!function_exists('alku')) {
 				}
 			}
 
-			foreach($kommentit as $kommentti) {
+			foreach ($kommentit as $kommentti) {
 
 				if (strpos($kommentti, "###") !== false) {
 					list($o, $v) = explode("###", $kommentti);
@@ -656,7 +657,7 @@ if (!function_exists('rivi')) {
 			return;
 		}
 		elseif ($laskutyyppi == 5) {
-			rivi_original_ei_verollinen_rivihinta($thispage);
+			rivi_original($thispage, $laskutyyppi);
 		}
 		else {
 			rivi_original($thispage);
@@ -666,7 +667,7 @@ if (!function_exists('rivi')) {
 }
 
 if (!function_exists('rivi_original')) {
-	function rivi_original ($thispage) {
+	function rivi_original ($thispage, $laskutyyppi = "") {
 		global $yhtiorow, $kukarow, $toim, $pdf, $page, $row, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $boldi, $kala, $laskurow;
 
 		if ($yhtiorow["viivakoodi_laskulle"] == "K") {
@@ -781,8 +782,8 @@ if (!function_exists('rivi_original')) {
 			$pdf->draw_text(390, $kala, tv1dateconv(substr($row["toimitettuaika"],0,10)), 	$thispage, $pieni);
 		}
 
-		//Verollinen rivihinta
-		if ($row["alv"] < 500) {
+		// Verollinen rivihinta		
+		if ($laskutyyppi != 5 and $row["alv"] < 500) {
 			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]*(1+($row["alv"]/100))), $pieni);
 			$pdf->draw_text(535-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]*(1+($row["alv"]/100))), $thispage, $pieni);
 		}
@@ -794,39 +795,13 @@ if (!function_exists('rivi_original')) {
 		$alkupkommentti = $row["kommentti"];
 
 		if (trim($viiterow['viesti']) != '' and trim($viiterow['viesti']) != trim($alkupkommentti)) {
-			$row["kommentti"] = trim($viiterow["viesti"])." ".$row["kommentti"];
+			$row["kommentti"] = trim($viiterow["viesti"])."\n".$row["kommentti"];
 		}
 		if (trim($viiterow['asiakkaan_tilausnumero']) != '' and trim($viiterow['asiakkaan_tilausnumero']) != trim($alkupkommentti)) {
-			$row["kommentti"] = trim($viiterow["asiakkaan_tilausnumero"])." ".$row["kommentti"];
+			$row["kommentti"] = trim($viiterow["asiakkaan_tilausnumero"])."\n".$row["kommentti"];
 		}
 
 		$row["kommentti"] = trim($row["kommentti"]);
-
-		//Jos rivikommentti on pitkä niin teemme siitä kauniimman
-		if ($pdf->strlen($row["kommentti"], $pieni) > 200) {
-
-			$row["kommentti"] = str_replace(' ' ,' ##', $row["kommentti"]);
-			$row["kommentti"] = str_replace('.' ,'.##', $row["kommentti"]);
-			$row["kommentti"] = str_replace(',' ,',##', $row["kommentti"]);
-
-			$sanat = explode('##', $row["kommentti"]);
-
-			$lauseet = array();
-			$ind = 0;
-			foreach($sanat as $sana) {
-				if ($pdf->strlen($lauseet[$ind], $pieni) > 200) {
-					$lauseet[$ind] .= "\n";
-					$ind++;
-				}
-				$lauseet[$ind] .= $sana;
-			}
-
-			$row["kommentti"] = "";
-
-			foreach($lauseet as $lause) {
-				$row["kommentti"] .= $lause;
-			}
-		}
 
 		// Jos ALV no yli 500 niin tiedämme että tämä on marginaaliverotusta
 		if ($row["alv"] >= 500) {
@@ -865,17 +840,60 @@ if (!function_exists('rivi_original')) {
 		//Kommentti
 		if (trim($row["kommentti"]) != '') {
 			$kommentit = explode("\n", trim($row["kommentti"]));
+			
+			foreach($kommentit as $akey => $kommentti) {
+				
+				if ($akey == 0) {
+					$rpit1 = 300;
+					$rpit2 = 250;
+				}
+				else {
+					$rpit1 = 500;
+					$rpit2 = 450;
+				}
+				
+				// Jos rivikommentti on pitkä niin rivitämme sen			
+				if ($pdf->strlen($kommentti, $pieni) > $rpit1) {
 
-			foreach($kommentit as $kommentti) {
-				$pdf->draw_text(35, $kala, $row["otunnus"].": ".$kommentti, $thispage, $pieni);
+					$kommentti = str_replace(' ' ,' ##', $kommentti);
+					$kommentti = str_replace('.' ,'.##', $kommentti);
+					$kommentti = str_replace(',' ,',##', $kommentti);
+
+					$sanat = explode('##', $kommentti);
+					$lause = "";
+
+					foreach ($sanat as $sana) {
+						if ($pdf->strlen($lause, $pieni) > $rpit2) {
+							
+							$pdf->draw_text(35, $kala, $row["otunnus"].": ".$lause, $thispage, $pieni);				
+							$kala = $kala - 10;
+
+							if ($kala <= 180 + $barcode_korkeus) {
+								$sivu++;
+								loppu($thispage);
+								$page[$sivu] = uusi_sivu();
+								$thispage    = $page[$sivu];
+							}
+																					
+							$lause = "";
+						}
+						
+						$lause .= $sana;
+					}
+
+					$kommentti = $lause;
+				}								
 				
-				$kala = $kala - 10;
+				if (trim($kommentti) != "") {
+					$pdf->draw_text(35, $kala, $row["otunnus"].": ".$kommentti, $thispage, $pieni);				
+					$kala = $kala - 10;
 				
-				if ($kala <= 180 + $barcode_korkeus) {
-					$sivu++;
-					loppu($thispage);
-					$page[$sivu] = uusi_sivu();
-					$thispage    = $page[$sivu];
+					if ($kala <= 180 + $barcode_korkeus) {
+						$sivu++;
+						loppu($thispage);
+						$page[$sivu] = uusi_sivu();
+						$thispage    = $page[$sivu];
+					}
 				}
 			}
 			$kala += 10;
@@ -1137,234 +1155,6 @@ if (!function_exists('rivi_plain_2')) {
 		$kala = $kala - 10;
 
 		$pdf->draw_text(20,  $kala, $row["kommentti"],	$thispage, $pieni);
-
-		$kala = $kala - 15;
-
-		$arvo	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) $row["rivihinta"]);
-		
-		// Onko marginaaliverotusta
-		$laskalv = $row["alv"];
-
-		if ($row["alv"] >= 500) {
-			$laskalv = 0;
-		}
-		
-		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) ($row["rivihinta"]*(1+($laskalv/100))));
-	}
-}
-
-if (!function_exists('rivi_original_ei_verollinen_rivihinta')) {
-	function rivi_original_ei_verollinen_rivihinta ($thispage) {
-		global $yhtiorow, $kukarow, $toim, $pdf, $page, $row, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $boldi, $kala, $laskurow;
-
-		if ($yhtiorow["viivakoodi_laskulle"] == "K") {
-			$barcode_korkeus = 50;
-		}
-		else {
-			$barcode_korkeus = 0;
-		}
-
-		if ($kala <= 180 + $barcode_korkeus) {
-			$sivu++;
-
-			loppu($thispage);
-
-			$page[$sivu] = uusi_sivu();
-			$thispage    = $page[$sivu];
-		}
-
-		$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
-
-		$query = "	SELECT vienti_kurssi
-					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]'
-					and tunnus 	= '$row[otunnus]'";
-		$valres = mysql_query($query) or pupe_error($query);
-		$valrow = mysql_fetch_array($valres);
-
-		if ($valrow["vienti_kurssi"] > 0) {
-			$kurssi = $valrow["vienti_kurssi"];
-		}
-		else {
-			$kurssi = 1;
-		}
-
-		//Nimitys
-		list($ff_string, $ff_font) = pdf_fontfit($row["nimitys"], 150, $pdf, $norm);
-		$pdf->draw_text(35,  $kala, $ff_string, $thispage, $ff_font);
-		
-		//Tuoteno
-		$pdf->draw_text(190, $kala, $row["tuoteno"], 									$thispage, $norm);
-
-		//Määrä
-		$pdf->draw_text(340, $kala, $row["kpl"], 										$thispage, $norm);
-
-		// yksikköhinta pitää olla veroton
-		if ($yhtiorow["alv_kasittely"] == '') {
-			
-			// Onko marginaaliverotusta
-			$laskalv = $row["alv"];
-
-			if ($row["alv"] >= 500) {
-				$laskalv = 0;
-			}
-			
-			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-				$veroton_hinta = $row["hinta"] / (1 + $laskalv / 100);
-			}
-			else {
-				$veroton_hinta = round($row["hinta"] / (1 + $laskalv / 100), 2);
-			}
-		}
-		else {
-			$veroton_hinta = $row["hinta"];
-		}
-
-		// A-hinta
-		$pdf->draw_text(390, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($veroton_hinta, $kurssi)),	$thispage, $norm);
-
-		//Alennus
-		if ($row["ale"] != 0) {
-			$pdf->draw_text(450, $kala, ($row["ale"]*1),								$thispage, $norm);
-		}
-
-		//Rivihinta valuutassa
-		if ($toim != "PROFORMA" and $kurssi != 1) {
-			// Tän rivin alviton rivihinta
-			$row["rivihinta"] = laskuval($row["hinta"], $kurssi)*$row["kpl"]*(1-$row["ale"]/100);
-
-			if ($yhtiorow["alv_kasittely"] == '') {
-				
-				// Onko marginaaliverotusta
-				$laskalv = $row["alv"];
-
-				if ($row["alv"] >= 500) {
-					$laskalv = 0;
-				}
-				
-				$row["rivihinta"] = $row["rivihinta"] / (1+$laskalv/100);
-			}
-		}
-
-		//Rivihinta
-		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
-		$pdf->draw_text(535-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), 		$thispage, $norm);
-
-		//Arvonlisävero
-		if ($row["alv"] >= 500) {
-			$pdf->draw_text(550, $kala, t("M.V."),	 									$thispage, $norm);
-		}
-		else {
-			$pdf->draw_text(550, $kala, ($row["alv"]*1)."%",							$thispage, $norm);
-		}
-
-		// Ensimmäinen rivi piirretty
-		$kala = $kala - 10;
-
-		//Yksikkö
-		$pdf->draw_text(340, $kala, t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selitetark"),		$thispage, $pieni);
-
-		//Toimitusaika
-		if (substr($row["toimitettuaika"],0,10) != "0000-00-00") {
-			$pdf->draw_text(390, $kala, tv1dateconv(substr($row["toimitettuaika"],0,10)), 	$thispage, $pieni);
-		}
-
-		$query = "SELECT asiakkaan_tilausnumero, viesti FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$row[otunnus]'";
-		$viiteres = mysql_query($query) or pupe_error($query);
-		$viiterow = mysql_fetch_array($viiteres);
-
-		$alkupkommentti = $row["kommentti"];
-
-		if (trim($viiterow['viesti']) != '' and trim($viiterow['viesti']) != trim($alkupkommentti)) {
-			$row["kommentti"] = trim($viiterow["viesti"])." ".$row["kommentti"];
-		}
-		if (trim($viiterow['asiakkaan_tilausnumero']) != '' and trim($viiterow['asiakkaan_tilausnumero']) != trim($alkupkommentti)) {
-			$row["kommentti"] = trim($viiterow["asiakkaan_tilausnumero"])." ".$row["kommentti"];
-		}
-
-		$row["kommentti"] = trim($row["kommentti"]);
-
-		//Jos rivikommentti on pitkä niin teemme siitä kauniimman
-		if ($pdf->strlen($row["kommentti"], $pieni) > 200) {
-
-			$row["kommentti"] = str_replace(' ' ,' ##', $row["kommentti"]);
-			$row["kommentti"] = str_replace('.' ,'.##', $row["kommentti"]);
-			$row["kommentti"] = str_replace(',' ,',##', $row["kommentti"]);
-
-			$sanat = explode('##', $row["kommentti"]);
-
-			$lauseet = array();
-			$ind = 0;
-			foreach($sanat as $sana) {
-				if ($pdf->strlen($lauseet[$ind], $pieni) > 200) {
-					$lauseet[$ind] .= "\n";
-					$ind++;
-				}
-				$lauseet[$ind] .= $sana;
-			}
-
-			$row["kommentti"] = "";
-
-			foreach($lauseet as $lause) {
-				$row["kommentti"] .= $lause;
-			}
-		}
-
-		// Jos ALV no yli 500 niin tiedämme että tämä on marginaaliverotusta
-		if ($row["alv"] >= 500) {
-			$row["kommentti"] .= "\nEi sisällä vähennettävää veroa.";
-		}
-
-		//Haetan sarjanumeron tiedot
-		if ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and $row["var2"] == "EIOST") {
-			$sarjanutunnus = "ostorivitunnus";
-		}
-		elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0) {
-			$sarjanutunnus = "myyntirivitunnus";
-		}
-		elseif ($row["varattu"]+$row["kpl"] < 0){
-			$sarjanutunnus = "ostorivitunnus";
-		}
-		else {
-			$sarjanutunnus = "myyntirivitunnus";
-		}
-
-		$query = "	SELECT distinct sarjanumero
-					from sarjanumeroseuranta
-					where yhtio = '$kukarow[yhtio]'
-					and tuoteno = '$row[tuoteno]'
-					and $sarjanutunnus='$row[tunnus]'
-					and sarjanumero != ''";
-		$sarjares = mysql_query($query) or pupe_error($query);
-
-		if ($row["kommentti"] != '' and mysql_num_rows($sarjares) > 0){
-			$row["kommentti"] .= "\n";
-		}
-		while($sarjarow = mysql_fetch_array($sarjares)) {
-			$row["kommentti"] .= t("S:nro").": $sarjarow[sarjanumero]\n";
-		}
-
-		//Kommentti
-		if (trim($row["kommentti"]) != '') {
-			$kommentit = explode("\n", trim($row["kommentti"]));
-
-			foreach($kommentit as $kommentti) {
-				$pdf->draw_text(35, $kala, $row["otunnus"].": ".$kommentti, $thispage, $pieni);
-				
-				$kala = $kala - 10;
-				
-				if ($kala <= 180 + $barcode_korkeus) {
-					$sivu++;
-					loppu($thispage);
-					$page[$sivu] = uusi_sivu();
-					$thispage    = $page[$sivu];
-				}
-			}
-			$kala += 10;
-		}
-		else {
-			$pdf->draw_text(35, $kala, $row["otunnus"],	$thispage, $pieni);
-		}
 
 		$kala = $kala - 15;
 
@@ -1975,10 +1765,10 @@ function PalautaPankkiviivakoodi($tilinumero, $laskun_summa = 0, $erapv = "00.00
 		// Jos ylittaa kentan maksimipituuden
 		$konekielinen_summa = 0;
 	}
-	$konekielinen_summa = TaytaEtunollat($konekielinen_summa, 8);
+	$konekielinen_summa = sprintf("%08d", $konekielinen_summa);
 
 	// Viitenumero
-	$konekielinen_viitenumero = TaytaEtunollat($viitenumero, 20);
+	$konekielinen_viitenumero = sprintf("%020d", $viitenumero);
 
 	// Erapaiva
 	$pp = substr($erapv, 0, 2);
@@ -1999,14 +1789,6 @@ function PalautaPankkiviivakoodi($tilinumero, $laskun_summa = 0, $erapv = "00.00
 	include("inc/generoiviite.inc");
 
 	return($viite);
-}
-
-function TaytaEtunollat($numero, $kentan_pituus) {
-	$numero .= "";
-	while (strlen($numero) < $kentan_pituus) {
-		$numero = "0".$numero;
-	}
-	return($numero);
 }
 
 ?>

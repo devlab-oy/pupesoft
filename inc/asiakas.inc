@@ -1,56 +1,56 @@
 <?php
 
 	// ajax funkkari!
-	if ($haku == "asiakasnro") {
-		
+	if ($haku == "asiakasnro" or $haku == "ytunnus") {
+
 		if (isset($asiakasnro_select)) {
 			$apu_asiakasnumero = $asiakasnro_select;
 		}
-		else {
-			$apu_asiakasnumero = $t[$pointer];
-		}
-		
-		unset($vresult);
-		
-		while (!isset($vresult) or mysql_num_rows($vresult) >= 1) {
-			$apu_asiakasnumero++;
-			$query = "	SELECT asiakasnro
-						FROM asiakas USE INDEX (asno_index)
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND asiakasnro = '$apu_asiakasnumero'";
-			$vresult = mysql_query($query) or pupe_error($query);
-		}
-
-		echo "<input type='text' name='asiakasnro_select' id='t[$pointer]' value='$apu_asiakasnumero'>";
-		echo "<input type='hidden' name='t[$pointer]' value='$apu_asiakasnumero'>";
-		echo "<input type='button' name='etsi_vapasno' id='etsi_vapasno' value='".t("Seuraava vapaa")."' onClick='javascript:document.getElementById(\"etsi_vapasno\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"t[$pointer]\").disabled = true;javascript:document.getElementById(\"etsi_vapasno\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=asiakasnro&ohje=off&pointer=$pointer\", \"asiakasnumero_etsi\", false, false)'>";
-		exit;
-	}
-
-	// ajax funkkari!
-	if ($haku == "ytunnus") {
-		
-		if (isset($ytunnus_select)) {
+		elseif (isset($ytunnus_select)) {
 			$apu_asiakasnumero = $ytunnus_select;
 		}
 		else {
 			$apu_asiakasnumero = $t[$pointer];
 		}
 		
+		//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
+		$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
+					FROM yhtio 
+					JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
+					where konserni	 = '$yhtiorow[konserni]' 
+					and synkronoi like '%$toim%'";
+		$vresult2 = mysql_query($query) or pupe_error($query);			
+		$srowapu = mysql_fetch_array($vresult2);
+		
+		if ($srowapu["yhtiot"] != "") {
+			$tarkyhtio = $srowapu["yhtiot"];
+		}
+		else {
+			$tarkyhtio = "'$kukarow[yhtio]'";
+		}
+
 		unset($vresult);
 
 		while (!isset($vresult) or mysql_num_rows($vresult) >= 1) {
 			$apu_asiakasnumero++;
-			$query = "	SELECT ytunnus
-						FROM asiakas USE INDEX (ytunnus_index)
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND ytunnus = '$apu_asiakasnumero'";
+
+			$query = "	SELECT $haku
+						FROM asiakas USE INDEX (asno_index)
+						WHERE yhtio in ($tarkyhtio)
+						AND asiakasnro >= $apu_asiakasnumero";
 			$vresult = mysql_query($query) or pupe_error($query);
 		}
 
-		echo "<input type='text' name='ytunnus_select' id='t[$pointer]' value='$apu_asiakasnumero'>";
-		echo "<input type='hidden' name='t[$pointer]' value='$apu_asiakasnumero'>";
-		echo "<input type='button' name='etsi_vapytunnus' id='etsi_vapytunnus' value='".t("Seuraava vapaa")."' onClick='javascript:document.getElementById(\"etsi_vapytunnus\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"t[$pointer]\").disabled = true;javascript:document.getElementById(\"etsi_vapytunnus\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=ytunnus&ohje=off&pointer=$pointer\", \"ytunnus_etsi\", false, false)'>";
+		if ($haku == 'asiakasnro') {
+			echo "<input type='text' name='asiakasnro_select' id='t[$pointer]' value='$apu_asiakasnumero'>";
+			echo "<input type='hidden' name='t[$pointer]' value='$apu_asiakasnumero'>";
+			echo "<input type='button' name='etsi_vapasno' id='etsi_vapasno' value='".t("Seuraava vapaa")."' onClick='javascript:document.getElementById(\"etsi_vapasno\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"t[$pointer]\").disabled = true;javascript:document.getElementById(\"etsi_vapasno\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=asiakasnro&ohje=off&pointer=$pointer\", \"asiakasnumero_etsi\", false, false)'>";
+		}
+		else {
+			echo "<input type='text' name='ytunnus_select' id='t[$pointer]' value='$apu_asiakasnumero'>";
+			echo "<input type='hidden' name='t[$pointer]' value='$apu_asiakasnumero'>";
+			echo "<input type='button' name='etsi_vapytunnus' id='etsi_vapytunnus' value='".t("Seuraava vapaa")."' onClick='javascript:document.getElementById(\"etsi_vapytunnus\").value = \"".t("Hakua suoritetaan").".\";javascript:document.getElementById(\"t[$pointer]\").disabled = true;javascript:document.getElementById(\"etsi_vapytunnus\").disabled = true;javascript:ajaxPost(\"mainform\", \"?haku=ytunnus&ohje=off&pointer=$pointer\", \"ytunnus_etsi\", false, false)'>";
+		}
 		exit;
 	}
 

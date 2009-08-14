@@ -227,13 +227,38 @@
 				$apu_asiakasnumero = 0;
 			}
 
-			while (!isset($vresult) or mysql_num_rows($vresult) >= 1) {
-				$apu_asiakasnumero++;
-				$query = "	SELECT asiakasnro
-							FROM asiakas USE INDEX (asno_index)
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND asiakasnro = '$apu_asiakasnumero'";
+			//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
+			$query = "	SELECT *
+						FROM yhtio 
+						JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
+						where konserni = '$yhtiorow[konserni]' 
+						and synkronoi like '%$toim%'";
+			$vresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($vresult) > 0) {
+				// haetaan konsernifirmat
+				$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
+							FROM yhtio 
+							JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
+							where konserni = '$yhtiorow[konserni]' 
+							and synkronoi like '%$toim%'";
 				$vresult = mysql_query($query) or pupe_error($query);
+				$srowapu = mysql_fetch_array($vresult);
+				$tarkyhtio = $srowapu["yhtiot"];
+			}
+			else {
+				$tarkyhtio = "'$kukarow[yhtio]'";
+			}
+
+			$query = "	SELECT MAX(asiakasnro+0) asiakasnro
+						FROM asiakas USE INDEX (asno_index)
+						WHERE yhtio in ($tarkyhtio)
+						AND asiakasnro >= $apu_asiakasnumero";
+			$vresult = mysql_query($query) or pupe_error($query);
+			$vrow = mysql_fetch_assoc($vresult);
+
+			if ($vrow['asiakasnro'] != '') {
+				$apu_asiakasnumero = $vrow['asiakasnro'] + 1;
 			}
 
 			$trow[$i] = $apu_asiakasnumero;

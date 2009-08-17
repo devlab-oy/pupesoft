@@ -253,7 +253,7 @@
 			$query = "	SELECT MAX(asiakasnro+0) asiakasnro
 						FROM asiakas USE INDEX (asno_index)
 						WHERE yhtio in ($tarkyhtio)
-						AND asiakasnro >= $apu_asiakasnumero";
+						AND asiakasnro+0 >= $apu_asiakasnumero";
 			$vresult = mysql_query($query) or pupe_error($query);
 			$vrow = mysql_fetch_assoc($vresult);
 

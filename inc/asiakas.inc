@@ -4,13 +4,13 @@
 	if ($haku == "asiakasnro" or $haku == "ytunnus") {
 
 		if (isset($asiakasnro_select)) {
-			$apu_asiakasnumero = $asiakasnro_select;
+			$apu_asiakasnumero = (int) $asiakasnro_select;
 		}
 		elseif (isset($ytunnus_select)) {
-			$apu_asiakasnumero = $ytunnus_select;
+			$apu_asiakasnumero = (int) $ytunnus_select;
 		}
 		else {
-			$apu_asiakasnumero = $t[$pointer];
+			$apu_asiakasnumero = (int) $t[$pointer];
 		}
 		
 		//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
@@ -31,14 +31,45 @@
 
 		unset($vresult);
 
-		while (!isset($vresult) or mysql_num_rows($vresult) >= 1) {
-			$apu_asiakasnumero++;
+		$counteri = 0;
 
-			$query = "	SELECT $haku
+		if ($apu_asiakasnumero == 0) {
+
+			if ($yhtiorow["asiakasnumeroinnin_aloituskohta"] != "") {
+				$apu_asiakasnumero = $yhtiorow["asiakasnumeroinnin_aloituskohta"];
+			}
+			else {
+				$apu_asiakasnumero = 0;
+			}
+
+			$query = "	SELECT MAX($haku+0) $haku
 						FROM asiakas USE INDEX (asno_index)
 						WHERE yhtio in ($tarkyhtio)
-						AND asiakasnro >= $apu_asiakasnumero";
+						AND asiakasnro+0 >= $apu_asiakasnumero";
 			$vresult = mysql_query($query) or pupe_error($query);
+			$vrow = mysql_fetch_assoc($vresult);
+
+			if ($vrow[$haku] != '') {
+				$apu_asiakasnumero = $vrow[$haku] + 1;
+			}
+		}
+		else {
+			while (!isset($vresult) or mysql_num_rows($vresult) >= 1) {
+				$apu_asiakasnumero++;
+
+				$query = "	SELECT $haku
+							FROM asiakas USE INDEX (asno_index)
+							WHERE yhtio in ($tarkyhtio)
+							AND asiakasnro+0 = $apu_asiakasnumero";
+				$vresult = mysql_query($query) or pupe_error($query);
+			
+				$counteri++;
+
+				if ($counteri > 999) {
+					$apu_asiakasnumero = t('Ei löytynyt');
+					break;
+				}
+			}
 		}
 
 		if ($haku == 'asiakasnro') {

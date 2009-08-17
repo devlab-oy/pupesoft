@@ -666,7 +666,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 				echo t("Keikka").": $row[laskunro] / $row[nimi]<br><br>";
 				echo $row["comments"];
 				echo "</div>";
-				echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'$row[laskunro]')\" onmouseover=\"popUp(event,'$row[laskunro]')\">$row[laskunro]</a></td>";
+				echo "<td valign='top'><a onmouseout=\"popUp(event,'$row[laskunro]')\" onmouseover=\"popUp(event,'$row[laskunro]')\">$row[laskunro]</a></td>";
 			}
 			else {
 				echo "<td valign='top'>$row[laskunro]</td>";

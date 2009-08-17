@@ -208,7 +208,7 @@ if ($toiminto == "poista") {
 
 	$query  = "SELECT tunnus from tilausrivi where yhtio='$kukarow[yhtio]' and uusiotunnus='$tunnus' and tyyppi='O'";
 	$delres = mysql_query($query) or pupe_error($query);
-	
+
 	if (mysql_num_rows($delres) != 0) {
 		$eisaapoistaa++;
 	}
@@ -217,15 +217,15 @@ if ($toiminto == "poista") {
 				from lasku
 				where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus<>0 and laskunro='$laskunro'";
 	$delres2 = mysql_query($query) or pupe_error($query);
-	
+
 	if (mysql_num_rows($delres2) != 0) {
 		$eisaapoistaa++;
 	}
 
 	if ($eisaapoistaa == 0) {
-		
+
 		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöitiin ohjelmassa keikka.php")."<br>";
-		
+
 		$query  = "UPDATE lasku SET alatila = tila, tila = 'D', comments = '$komm' where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkaid'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -315,7 +315,7 @@ if ($toiminto == "varastopaikat") {
 // lisäillään keikkaan kululaskuja
 if ($toiminto == "kululaskut") {
 	$keikanalatila 	= "";
-	
+
 	require('kululaskut.inc');
 }
 
@@ -561,7 +561,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 	// näytetään vähä toimittajan tietoja
 	echo "<table>";
 	echo "<tr>";
-	echo "<th colspan='5'>".t("Toimittaja")."</th><th>".t("Uusi keikka")."</th>";
+	echo "<th colspan='5'>".t("Toimittaja")."</th>";
 	echo "</tr><tr>";
 	echo "<td>$toimittajarow[ytunnus]</td>";
 	echo "<td>$toimittajarow[nimi]</td>";
@@ -569,7 +569,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 	echo "<td>$toimittajarow[postino]</td>";
 	echo "<td>$toimittajarow[postitp]</td>";
 
-	echo "<td>";
+	echo "<td class='back' rowspan='4' style='vertical-align:bottom;'>";
 	echo "<form action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='toiminto' value='uusi'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
@@ -580,7 +580,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 	echo "</tr>";
 
 	if (trim($toimittajarow["fakta"]) != "") {
-		echo "<tr><td colspan='5'>$toimittajarow[fakta]</td></tr>";
+		echo "<tr><td colspan='5'>".wordwrap($toimittajarow["fakta"], 100, "<br>")."</td></tr>";
 	}
 
 	echo "</table><br>";
@@ -690,22 +690,40 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 
 			$laskujen_tiedot = "";
 
+			if ($llrow["volasku"] != $llrow["volasku_ok"] or $llrow["kulasku"] != $llrow["kulasku_ok"]) {
+				$query = "	SELECT ostores_lasku.*, kuka.nimi kukanimi
+							from lasku use index (yhtio_tila_laskunro)
+							JOIN lasku ostores_lasku on (ostores_lasku.yhtio = lasku.yhtio and ostores_lasku.tunnus = lasku.vanhatunnus and ostores_lasku.hyvaksyja_nyt != '')
+							LEFT JOIN kuka ON (kuka.yhtio = ostores_lasku.yhtio and kuka.kuka = ostores_lasku.hyvaksyja_nyt)
+							where lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.tila = 'K'
+							and lasku.vanhatunnus <> 0
+							and lasku.laskunro = '$row[laskunro]'";
+				$volasresult = mysql_query($query) or pupe_error($query);
+
+				echo "<div id='lasku_$row[laskunro]' class='popup'>";
+				while ($volasrow = mysql_fetch_array($volasresult)) {
+					echo t("Lasku")." $volasrow[nimi] ($volasrow[summa] $volasrow[valkoodi]) ".t("hyväksyttävänä käyttäjällä")." $volasrow[kukanimi]<br>";
+				}
+				echo "</div>";
+			}
 
 			if ($llrow["volasku"] > 0) {
-				$class = "error";
-				if ($llrow["volasku"] == $llrow["volasku_ok"]) {
-					$class = "ok";
+				if ($llrow["volasku"] != $llrow["volasku_ok"]) {
+					$laskujen_tiedot .= "<a onmouseout=\"popUp(event,'lasku_$row[laskunro]')\" onmouseover=\"popUp(event,'lasku_$row[laskunro]')\">$llrow[volasku] ($llrow[vosumma]) <font class='error'>*</font></a><br>";
 				}
-				$laskujen_tiedot .= "$llrow[volasku] ($llrow[vosumma]) <font class='$class'>*</font>";
-				
+				else {
+					$laskujen_tiedot .= "$llrow[volasku] ($llrow[vosumma]) <font class='ok'>*</font><br>";
+				}
 			}
-			$laskujen_tiedot .= "<br>";
+
 			if ($llrow["kulasku"] > 0) {
-				$class = "error";
-				if ($llrow["kulasku"] == $llrow["kulasku_ok"]) {
-					$class = "ok";					
+				if ($llrow["kulasku"] != $llrow["kulasku_ok"]) {
+					$laskujen_tiedot .= "<a onmouseout=\"popUp(event,'lasku_$row[laskunro]')\" onmouseover=\"popUp(event,'lasku_$row[laskunro]')\">$llrow[kulasku] ($llrow[kusumma]) <font class='error'>*</font></a>";
 				}
-				$laskujen_tiedot .= "$llrow[kulasku] ($llrow[kusumma]) <font class='$class'>*</font>";
+				else {
+					$laskujen_tiedot .= "$llrow[kulasku] ($llrow[kusumma]) <font class='ok'>*</font>";
+				}
 			}
 
 			echo "<td valign='top'>$laskujen_tiedot</td>";

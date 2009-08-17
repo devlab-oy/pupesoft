@@ -4225,10 +4225,6 @@ if (!function_exists("enable_ajax")) {
 
 	function livesearch_keyhandler(event, haku_id, haku_formi, dont_submit_after) {
 
-		if (navigator.appName == 'Microsoft Internet Explorer') {
-			break;
-		}
-
 		var selectOptions = document.getElementsByName('selectOptions'+haku_id);
 
 		for (var iEl = 0; iEl < selectOptions.length; iEl++) {
@@ -6459,6 +6455,11 @@ if (!function_exists("livesearch_tuotehaku")) {
 if (!function_exists("livesearch_kentta")) {
 	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '') {
 		global $kukarow;
+
+		if (strpos(strtoupper($_SERVER['HTTP_USER_AGENT']), "MSIE") !== FALSE or strpos(strtoupper($_SERVER['HTTP_USER_AGENT']), "EXPLORER") !== FALSE) {
+			echo "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'>";
+			return;
+		}
 
 		$hakuID = "haku".uniqid();
 

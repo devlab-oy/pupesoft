@@ -185,7 +185,7 @@ if (!function_exists("tsekit")) {
 	}
 }
 
-echo "<font class='head'>".t("Saapuva ostotilaus")."</font><hr>";
+echo "<font class='head'>".t("Saapuva keikka")."</font><hr>";
 
 // scripti balloonien tekemiseen
 js_popup();
@@ -417,7 +417,7 @@ if ($ytunnus != "" or $toimittajaid != "") {
 }
 
 
-if ($toiminto == "" and ($ytunnus == "" and $keikka == "")) {
+if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	echo "<table>";
 	echo "<form name='toimi' action='$PHP_SELF' method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
@@ -488,7 +488,7 @@ if ($toiminto == "" and ($ytunnus == "" and $keikka == "")) {
 				echo "<div id='$row[liitostunnus]' class='popup' style='width: 500px;'>";
 				echo $row["comments"];
 				echo "</div>";
-				echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'$row[liitostunnus]')\" onmouseover=\"popUp(event,'$row[liitostunnus]')\">$row[ytunnus]</a></td>";
+				echo "<td valign='top'><a onmouseout=\"popUp(event,'$row[liitostunnus]')\" onmouseover=\"popUp(event,'$row[liitostunnus]')\">$row[ytunnus]</a></td>";
 			}
 			else {
 				echo "<td valign='top'>$row[ytunnus]</td>";
@@ -616,7 +616,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 
 	if (mysql_num_rows($result) > 0) {
 
-		echo "<font class='head'>".t("Keskener‰iset keikat")."</font><hr>";
+		echo "<font class='head'>".t("Toimittajan keskener‰iset keikat")."</font><hr>";
 
 		if (mysql_num_rows($result) == 50 and $naytakaikki == "") {
 			echo "<table><tr><td class='back'><font class='error'>".t("HUOM: Toimittajalla on yli 50 avointa keikkaa! Vain 50 viimeisint‰ n‰ytet‰‰n.")."</font></td>";

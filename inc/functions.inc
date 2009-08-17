@@ -4225,6 +4225,10 @@ if (!function_exists("enable_ajax")) {
 
 	function livesearch_keyhandler(event, haku_id, haku_formi, dont_submit_after) {
 
+		if (navigator.appName == 'Microsoft Internet Explorer') {
+			break;
+		}
+
 		var selectOptions = document.getElementsByName('selectOptions'+haku_id);
 
 		for (var iEl = 0; iEl < selectOptions.length; iEl++) {

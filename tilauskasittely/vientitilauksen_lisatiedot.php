@@ -624,7 +624,6 @@
 				else {
 					if ($lask >= 1) {
 						$tunnukset = substr($tunnukset, 0, -1); // Vika pilkku pois
-
 						echo "<form method='post' action='$PHP_SELF'><td class='back'>
 							<input type='hidden' name='otunnus' value='$tunnukset'>
 							<input type='hidden' name='tee' value='K'>
@@ -740,14 +739,12 @@
 				$lisattava_era		= '';
 				$vahennettava_era	= '';
 
-				while ($tilrow = mysql_fetch_array($tilre))
-				{
+				while ($tilrow = mysql_fetch_array($tilre)) {
 					$query = "	SELECT sum(if(kpl>0,1,0)) veloitus, sum(if(kpl<0,1,0)) hyvitys
 								from tilausrivi
 								where yhtio='$kukarow[yhtio]' and uusiotunnus='$tilrow[tilaus]'";
 					$hyvre = mysql_query($query) or pupe_error($query);
 					$hyvrow = mysql_fetch_array($hyvre);
-
 
 					if ($ketjutus == '' and $erpcm == $tilrow["erpcm"] and $ytunnus == $tilrow["ytunnus"] and $nimi == $tilrow["nimi"] and $nimitark == $tilrow["nimitark"] and $postino == $tilrow["postino"] and $postitp == $tilrow["postitp"] and $maksuehto == $tilrow["maksuehto"] and $lisattava_era == $tilrow["lisattava_era"] and $vahennettava_era == $tilrow["vahennettava_era"]) {
 						$tunnukset .= $tilrow["tilaus"].",";
@@ -756,6 +753,7 @@
 					}
 					else {
 						if ($lask >= 1) {
+							$tunnukset = substr($tunnukset, 0, -1); // Vika pilkku pois						
 							echo "<form method='post' action='$PHP_SELF'><td class='back'>
 								<input type='hidden' name='otunnus' value='$tunnukset'>
 								<input type='hidden' name='tee' value='K'>
@@ -767,8 +765,6 @@
 						}
 						$lask = 0;
 					}
-
-
 
 					echo "\n\n<tr>";
 

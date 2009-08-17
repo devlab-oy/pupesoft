@@ -524,6 +524,19 @@
 			$otsikrow = array("value" => "", "text" => "");
 		}
 
+		if(substr($lopetus,0, 4) == "AJAX") {
+			list($lopetusTargetDiv, $lopetusRequest) = split("XXXX", substr($lopetus, 4));
+			//urlissa & merkit korvattu // merkeillä jne, parsitaan oikeanlainen urli kokoon palautusta varten
+			$lopetusRequest = str_replace('////','?',               $lopetusRequest);
+			$lopetusRequest = preg_replace('/([^:])\/\/\//','\\1#', $lopetusRequest);
+			$lopetusRequest = preg_replace('/([^:])\/\//','\\1&',   $lopetusRequest);
+			
+			echo "	<script LANGUAGE='JavaScript'>
+						sndReq('$lopetusTargetDiv', '$lopetusRequest', false, false);
+						document.body.removeChild(document.getElementById('yllapitoDivpopUP'));
+					</script>";
+		}
+
 		echo "<script LANGUAGE='JavaScript'>
 				window.parent.document.getElementById('option_".substr($laji, 7)."').value = \"".$otsikrow["value"]."\";
 				window.parent.document.getElementById('option_".substr($laji, 7)."').text = \"".$otsikrow["text"]."\";
@@ -949,6 +962,9 @@
 		if ($ajax_menu_yp!="") {
 			$ajax_post="ajaxPost('mainform', '{$palvelin2}yllapito.php?ojarj=$ojarj$ulisa#$tunnus' , 'ajax_menu_yp'); return false;";
 		}
+		elseif ($ajax_menu_yp!="" or substr($lopetus, 0, 4) == "AJAX") {
+			$ajax_post="ajaxPost('mainform', '{$palvelin2}yllapito.php?ojarj=$ojarj$ulisa#$tunnus' , 'yllapitoDivpopUP'); return false;";
+		}
 
 		if ($from == "") {
 			$ankkuri = "#$tunnus";
@@ -1188,8 +1204,7 @@
 
 		// Ylläpito.php:n formi kiinni vasta tässä
 		echo "</form>";
-
-		if ($errori == '' and $toim == "avainsana" and $from != "yllapito") {
+		if ($errori == '' and $toim == "avainsana" and $from != "yllapito" and $from != "positioselain") {
 			require ("inc/avainsanaperhe.inc");
 		}
 

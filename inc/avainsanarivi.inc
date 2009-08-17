@@ -85,6 +85,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "KERAYSLISTA") 		$ulos .= "<option value='KERAYSLISTA' {$avain_sel['KERAYSLISTA']}>				".t("Keräyslista")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TOIMTAPAKV") 		$ulos .= "<option value='TOIMTAPAKV' {$avain_sel['TOIMTAPAKV']}>				".t("Toimitustavan kieliversio")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KVERITTELY") 		$ulos .= "<option value='KVERITTELY' {$avain_sel['KVERITTELY']}>				".t("Kulunvalvonnan erittely")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "KONEENOSA") 		$ulos .= "<option value='KONEENOSA' {$avain_sel['KONEENOSA']}>					".t("Koneenosa")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Työmääräysten avainsanat")."'>";

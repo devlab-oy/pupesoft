@@ -302,17 +302,17 @@ if ($ytunnus!='') {
 				$hmyynti = $hkate = $hkatepro = 0;
 			}
 
-			$pylvaat = "<table border='0' cellpadding='0' cellspacing='0'><tr>
-			<td style='vertical-align: bottom; text-align: center;'><img src='".$palvelin2."pics/blue.png' height='$hmyynti' width='12' alt='".t("myynti")." $sumrow[myynti]'></td>
-			<td style='vertical-align: bottom; text-align: center;'><img src='".$palvelin2."pics/orange.png' height='$hkate' width='12' alt='".t("kate")." $sumrow[kate]'></td>
-			<td style='vertical-align: bottom; text-align: center;'><img src='".$palvelin2."pics/green.png' height='$hkatepro' width='12' alt='".t("katepro")." $sumrow[katepro] %'></td>
+			$pylvaat = "<table style='padding:0px;margin:0px;'><tr>
+			<td style='padding:0px;margin:0px;vertical-align:bottom;'><img src='".$palvelin2."pics/blue.png' height='$hmyynti' width='12' alt='".t("myynti")." $sumrow[myynti]'></td>
+			<td style='padding:0px;margin:0px;vertical-align:bottom;'><img src='".$palvelin2."pics/orange.png' height='$hkate' width='12' alt='".t("kate")." $sumrow[kate]'></td>
+			<td style='padding:0px;margin:0px;vertical-align:bottom;'><img src='".$palvelin2."pics/green.png' height='$hkatepro' width='12' alt='".t("katepro")." $sumrow[katepro] %'></td>
 			</tr></table>";
 
 			if ($sumrow['katepro']=='') $sumrow['katepro'] = '0.0';
 			echo "<td class='back' style='vertical-align: bottom;'>";
 
 			echo "<table width='60'>";
-			echo "<tr><td nowrap align='center' height='55' style='vertical-align: bottom;'>$pylvaat</td></tr>";
+			echo "<tr><td nowrap align='center' style='padding:0px;margin:0px;vertical-align:bottom;height:55px;'>$pylvaat</td></tr>";
 			echo "<tr><td nowrap align='right'><font class='info'>$sumrow[kausi]</font></td></tr>";
 			echo "<tr><td nowrap align='right'><font class='info'><font class='myynti'>$sumrow[myynti]</font></font></td></tr>";
 			echo "<tr><td nowrap align='right'><font class='info'><font class='kate'>$sumrow[kate]</font></font></td></tr>";

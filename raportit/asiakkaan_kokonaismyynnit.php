@@ -79,17 +79,17 @@ if ($ytunnus!='') {
 			$hmyynti = $hkate = $hkatepro = 0;
 		}
 
-		$pylvaat = "<table border='0' cellpadding='0' cellspacing='0'><tr>
-		<td valign='bottom' align='center'><img src='../pics/blue.png' height='$hmyynti' width='12' alt='myynti $sumrow[myynti] $yhtiorow[valkoodi]'></td>
-		<td valign='bottom' align='center'><img src='../pics/orange.png' height='$hkate' width='12' alt='kate $sumrow[kate] $yhtiorow[valkoodi]'></td>
-		<td valign='bottom' align='center'><img src='../pics/green.png' height='$hkatepro' width='12' alt='kateprosentti $sumrow[katepro] %'></td>
+		$pylvaat = "<table style='padding:0px;margin:0px;'><tr>
+		<td style='padding:0px;margin:0px;vertical-align:bottom;'><img src='../pics/blue.png' height='$hmyynti' width='12' alt='myynti $sumrow[myynti] $yhtiorow[valkoodi]'></td>
+		<td style='padding:0px;margin:0px;vertical-align:bottom;'><img src='../pics/orange.png' height='$hkate' width='12' alt='kate $sumrow[kate] $yhtiorow[valkoodi]'></td>
+		<td style='padding:0px;margin:0px;vertical-align:bottom;'><img src='../pics/green.png' height='$hkatepro' width='12' alt='kateprosentti $sumrow[katepro] %'></td>
 		</tr></table>";
 
 		if ($sumrow['katepro']=='') $sumrow['katepro'] = '0.0';
 		echo "<td valign='bottom' class='back'>";
 
 		echo "<table width='60'>";
-		echo "<tr><td nowrap align='center' height='55' valign='bottom'>$pylvaat</td></tr>";
+		echo "<tr><td nowrap align='center' style='padding:0px;margin:0px;vertical-align:bottom;height:55px;'>$pylvaat</td></tr>";
 		echo "<tr><td nowrap align='right'><font class='info'>$sumrow[kausi]</font></td></tr>";
 		echo "<tr><td nowrap align='right'><font class='info'><font color='$cmyynti'>$sumrow[myynti] $yhtiorow[valkoodi]</font></font></td></tr>";
 		echo "<tr><td nowrap align='right'><font class='info'><font color='$ckate'>$sumrow[kate]   $yhtiorow[valkoodi]</font></font></td></tr>";

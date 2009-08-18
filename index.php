@@ -47,7 +47,7 @@ echo "	<meta http-equiv='Pragma' content='no-cache'>
 		Your browser does not support Javascript!
 		</noscript>
 		<frameset cols='$colwidth,*' border='0' frameborder='no'>
-		<frameset rows='*,1' border='0' frameborder='no'>
+		<frameset rows='*,0' border='0' frameborder='no'>
 		<frame noresize src='indexvas.php?goso=$goso' name='menu'>
 		<frame noresize src='' name='alamenu' id='alamenuFrame'>
 		</frameset> 

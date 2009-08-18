@@ -859,15 +859,18 @@ if ($tila == '') {
 			$pvm=erottele($trow['tapvm']);
 
 			echo "<form action = '$PHP_SELF' method='post'>
-				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-				<input type = 'hidden' name='tila' value='P'>
-				<input type = 'hidden' name='tee' value='M'>
-				<input type = 'hidden' name='tunnus' value='$tunnus'>
-				<tr><th>".t("Muuta tapahtumapvm")."</th>
-				<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
-				<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
-				<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'>
-				<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
+					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+					<input type = 'hidden' name='tila' value='P'>
+					<input type = 'hidden' name='tee' value='M'>
+					<input type = 'hidden' name='tunnus' value='$tunnus'>
+					<tr>
+					<th>".t("Muuta tapahtumapvm")."</th>
+					<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
+					<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
+					<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
+					<td><input type = 'submit' value = '".t("Päivitä")."'></td>					
+					</tr>
+					</form>";
 		}
 	}
 	else {
@@ -879,11 +882,14 @@ if ($tila == '') {
 					<input type = 'hidden' name='tila' value='P'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tunnus' value='$tunnus'>
-					<tr><th>".t("Muuta tapahtumapvm")."</th>
+					<tr>
+					<th>".t("Muuta tapahtumapvm")."</th>
 					<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 					<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
-					<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'>
-					<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
+					<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
+					<td><input type = 'submit' value = '".t("Päivitä")."'></td>
+					</tr>
+					</form>";
 		}
 
 		// Lasku on maksamatta tai suoraveloitus
@@ -898,8 +904,12 @@ if ($tila == '') {
 						<input type = 'hidden' name='tila' value='Q'>
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tunnus' value='$tunnus'>
-						<tr><th>".t("Muuta summa")."</th><td><input type = 'text' name = 'summa' value='$trow[summa]'>
-						<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
+						<tr>
+						<th>".t("Muuta summa")."</th>
+						<td><input type = 'text' name = 'summa' value='$trow[summa]'></td>
+						<td><input type = 'submit' value = '".t("Päivitä")."'></td>
+						</tr>
+						</form>";
 				}
 			}
 
@@ -912,12 +922,15 @@ if ($tila == '') {
 						<input type = 'hidden' name='tila' value='C'>
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tunnus' value='$tunnus'>
-						<tr><th>".t("Muuta kassa-ale ja/tai kapvm")."</th>
+						<tr>
+						<th>".t("Muuta kassa-ale ja/tai kapvm")."</th>
 						<td><input type = 'text' name = 'summa' value='$trow[kasumma]'>
 							<input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 							<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 							<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
-						<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
+						<td><input type = 'submit' value = '".t("Päivitä")."'></td>
+						</tr>
+						</form>";
 			}
 		}
 
@@ -930,11 +943,14 @@ if ($tila == '') {
 					<input type = 'hidden' name='tila' value='R'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tunnus' value='$tunnus'>
-					<tr><th>".t("Muuta eräpvm")."</th><td>
-					<input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
+					<tr>
+					<th>".t("Muuta eräpvm")."</th>
+					<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 					<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 					<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
-					<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
+					<td><input type = 'submit' value = '".t("Päivitä")."'></td>
+					</tr>
+					</form>";
 
 			if (($trow['kapvm'] != '0000-00-00') and ($trow['tila'] == 'U')) {
 				$pvm = erottele($trow['kapvm']);
@@ -944,11 +960,14 @@ if ($tila == '') {
 						<input type = 'hidden' name='tila' value='B'>
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tunnus' value='$tunnus'>
-						<tr><th>".t("Muuta kassa-alepvm")."</th><td>
-						<input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
+						<tr>
+						<th>".t("Muuta kassa-alepvm")."</th>
+						<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 						<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 						<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
-						<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
+						<td><input type = 'submit' value = '".t("Päivitä")."'></td>
+						</tr>
+						</form>";
 			}
 
 			// voidaan vaihtaa myyntilaskun mapvm jos se ei ole vielä maksettu
@@ -959,8 +978,8 @@ if ($tila == '') {
 						<input type = 'hidden' name='tila' value='maksuehto'>
 						<input type = 'hidden' name='tee' value='M'>
 						<input type = 'hidden' name='tunnus' value='$tunnus'>
-						<tr><th>".t("Vaihda maksuehto")."</th>";
-
+						<tr>
+						<th>".t("Vaihda maksuehto")."</th>";
 						echo "<td><select name='maksuehto'>";
 
 						$query = "	SELECT *
@@ -979,7 +998,9 @@ if ($tila == '') {
 							echo "<option value='$row[tunnus]' $sel>".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</option>";
 						}
 						echo "</select></td>";
-						echo "<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
+						echo "<td><input type = 'submit' value = '".t("Päivitä")."'></td>
+						</tr>
+						</form>";
 			}
 		}
 	}
@@ -993,11 +1014,14 @@ if ($tila == '') {
 				<input type = 'hidden' name='tila' value='S'>
 				<input type = 'hidden' name='tee' value='M'>
 				<input type = 'hidden' name='tunnus' value='$tunnus'>
-				<tr><th>".t("Muuta suorituspvm")."</th><td>
-				<input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
+				<tr>
+				<th>".t("Muuta suorituspvm")."</th>
+				<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 				<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
-				<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'>
-				<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
+				<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
+				<td><input type = 'submit' value = '".t("Päivitä")."'></td>
+				</tr>
+				</form>";
 		}
 	}
 
@@ -1021,7 +1045,8 @@ if ($tila == '') {
 				<input type = 'hidden' name='tila' value='W'>
 				<input type = 'hidden' name='tee' value='M'>
 				<input type = 'hidden' name='tunnus' value='$tunnus'>
-				<tr><th>".t("Muuta laskun tyyppi")."</th>";
+				<tr>
+				<th>".t("Muuta laskun tyyppi")."</th>";
 
 		echo "
 				<td>
@@ -1041,7 +1066,10 @@ if ($tila == '') {
 						<option value='I' $vientii>".t("ei-EU vaihto-omaisuus")."</option>
 						<option value='L' $vientil>".t("ei-EU raaka-aine")."</option>
 					</select>
-				<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
+				</td>
+				<td><input type = 'submit' value = '".t("Päivitä")."'></td>
+				</tr>
+				</form>";
 	}
 
 	if (($trow['tila'] == 'M' or $trow['tila'] == 'H') and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3))  {
@@ -1050,9 +1078,12 @@ if ($tila == '') {
 				<input type = 'hidden' name='tila' value='jako'>
 				<input type = 'hidden' name='tee' value='M'>
 				<input type = 'hidden' name='tunnus' value='$tunnus'>
-				<tr><th>".t("Jaa ostolasku kahteen osaan").".<br>".t("Syötä uuden laskun summa")."</th><td>
-				<input type='text' name='syotetty_jakosumma' value=''> $trow[valkoodi]</td>
-				<td><input type = 'submit' value = '".t("Jaa")."'></td></tr></form>";
+				<tr>
+				<th>".t("Jaa ostolasku kahteen osaan").".<br>".t("Syötä uuden laskun summa")."</th>
+				<td><input type='text' name='syotetty_jakosumma' value=''> $trow[valkoodi]</td>
+				<td><input type = 'submit' value = '".t("Jaa")."'></td>
+				</tr>
+				</form>";
 	}
 
 	// jos meillä on suoraveloitus jolla ei ole maksutiliä (eli tiliöintejä ei ole tehty), se voidaan poistaa jos hyväksyttävänä, valmismaksatukseen tai odottaa suoritusta
@@ -1092,8 +1123,8 @@ if ($tila == '') {
 		echo "<input type = 'hidden' name='tee' value='M'>";
 		echo "<input type = 'hidden' name='tila' value='KK'>";
 		echo "<tr>";
-		echo "<th>".t("Alv tili")."</th><td>";
-		echo "<select name='alv_tili'>";
+		echo "<th>".t("Alv tili")."</th>";
+		echo "<td><select name='alv_tili'>";
 		echo "<option value='$yhtiorow[alv]'>$yhtiorow[alv] - $yhtiorow[nimi], $yhtiorow[kotipaikka], $yhtiorow[maa]</option>";
 
 		while ($vrow = mysql_fetch_array($alhire)) {
@@ -1114,28 +1145,39 @@ if ($tila == '') {
 	echo "<form action = '$PHP_SELF?tee=M&tila=K' method='post'>
 			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 			<input type = 'hidden' name='tunnus' value='$tunnus'>
-			<tr><th>".t("Lisää kommentti")."</th>
+			<tr>
+			<th>".t("Lisää kommentti")."</th>
 			<td><input type = 'text' name = 'komm' size='40' value = '$komm'></td>
-			<td><input type = 'submit' value = '".t("Lisää")."'></td></tr></form>";
+			<td><input type = 'submit' value = '".t("Lisää")."'></td>
+			</tr>
+			</form>";
 
 	if ($trow['tila'] == 'H' and $kukarow['kuka'] == $trow['hyvaksyja_nyt'] and $kukarow['taso'] != 1) {
 		if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
 			echo "<form action = '$PHP_SELF?tee=M&tila=T' method='post'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name='tunnus' value='$tunnus'>
-					<tr><th>".t("Muuta toimittajan pankkitiliä")."</th>
+					<tr>
+					<th>".t("Muuta toimittajan pankkitiliä")."</th>
 					<td><input type = 'text' name = 'tili' size='40' value = '".tilinumero_print($trow['tilinumero'])."'></td>
-					<td><input type = 'submit' value = '".t("Muuta")."'></td></tr></form>";
+					<td><input type = 'submit' value = '".t("Muuta")."'></td>
+					</tr>
+					</form>";
 		}
 		else {
 			echo "<form action = '$PHP_SELF?tee=M&tila=TU' method='post'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name='tunnus' value='$tunnus'>
-					<tr><th>".t('Muuta toimittajan ulkomaanmaksutiliä')."</th>
-					<td><input type = 'text' name = 'ultilno' size='40' value = '$trow[ultilno]'></td><td></td></tr>
-					<tr><th>".t('SWIFT')."</th>
+					<tr>
+					<th>".t('Muuta toimittajan ulkomaanmaksutiliä')."</th>
+					<td><input type = 'text' name = 'ultilno' size='40' value = '$trow[ultilno]'></td>
+					<td></td></tr>
+					<tr>
+					<th>".t('SWIFT')."</th>
 					<td><input type = 'text' name = 'swift' size='40' value = '$trow[swift]'></td>
-					<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
+					<td><input type = 'submit' value = '".t("Päivitä")."'></td>
+					</tr>
+					</form>";
 		}
 	}
 
@@ -1143,18 +1185,24 @@ if ($tila == '') {
 		echo "<form action = '$PHP_SELF?tee=M&tila=MVIESTI' method='post'>
 				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type = 'hidden' name='tunnus' value='$tunnus'>
-				<tr><th>".t('Muuta laskun viestiä')."</th>
+				<tr>
+				<th>".t('Muuta laskun viestiä')."</th>
 				<td><input type = 'text' name = 'viesti' size='40' value = '$trow[viesti]'></td>
-				<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
+				<td><input type = 'submit' value = '".t("Päivitä")."'></td>
+				</tr>
+				</form>";
 	}
 
 	if ($trow["tila"] == "Q" and $kukarow['taso'] !=1) {
 		echo "<form action = '$PHP_SELF?tee=M&tila=MAKSATUKSEEN' method='post'>
 				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type = 'hidden' name='tunnus' value='$tunnus'>
-				<tr><th>".t("Palauta lasku maksatukseen")."</th>
+				<tr>
+				<th>".t("Palauta lasku maksatukseen")."</th>
 				<td></td>
-				<td><input type = 'submit' value = '".t("Siirrä")."'></td></tr></form>";
+				<td><input type = 'submit' value = '".t("Siirrä")."'></td>
+				</tr>
+				</form>";
 	}
 
 	if (($trow['tila'] == 'M' or $trow['tila'] == 'H') and ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) and $trow["h1time"] != '0000-00-00 00:00:00' and $keikrow["alatila"] != "X") {
@@ -1163,9 +1211,12 @@ if ($tila == '') {
 				<input type = 'hidden' name='tee' value='M'>
 				<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 				<input type = 'hidden' name='tunnus' value='$tunnus'>
-				<tr><th>".t("Palauta lasku hyväksyntäkierrokselle")."</th>
+				<tr>
+				<th>".t("Palauta lasku hyväksyntäkierrokselle")."</th>
 				<td></td>
-				<td><input type = 'submit' value = '".t("Siirrä")."'></td></tr></form>";
+				<td><input type = 'submit' value = '".t("Siirrä")."'></td>
+				</tr>
+				</form>";
 	}
 
 	echo "</table><br><br>";

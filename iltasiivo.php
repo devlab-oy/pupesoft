@@ -14,7 +14,7 @@
 		$kukarow['yhtio'] = $argv[1];
 		$kukarow['kuka'] = "crond";
 
-		$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
+		$query    = "SELECT * from yhtio where yhtio = '$kukarow[yhtio]'";
 		$yhtiores = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($yhtiores) == 1) {
@@ -23,7 +23,7 @@
 
 			$query = "	SELECT *
 						FROM yhtion_parametrit
-						WHERE yhtio='$yhtiorow[yhtio]'";
+						WHERE yhtio = '$yhtiorow[yhtio]'";
 			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 1) {
@@ -92,10 +92,10 @@
 		}
 
 		if ($laskuri > 0) $iltasiivo .= "Poistettiin $laskuri poistetun tuotteen tuoteliitosta.\n";
-		
+
 		$laskuri = 0;
 		$laskuri2 = 0;
-		
+
 		// poistetaan kaikki JT-otsikot jolla ei ole enää rivejä ja extranet tilaukset joilla ei ole rivejä ja tietenkin myös ennakkootsikot joilla ei ole rivejä.
 		$query = "	SELECT tilausrivi.tunnus, lasku.tunnus laskutunnus, lasku.tila, lasku.tunnusnippu
 					from lasku
@@ -109,7 +109,7 @@
 			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php (1)")."<br>";
 
 			//	Jos kyseessä on tunnusnippupaketti, halutaan säilyttää linkki tästä tehtyihin tilauksiin, tilaus merkataan vain toimitetuksi
-			if($row["tunnusnippu"] > 0) {
+			if ($row["tunnusnippu"] > 0) {
 				$query = "UPDATE lasku set tila = 'L', alatila='X' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[laskutunnus]'";
 				$deler = mysql_query($query) or die($query);
 				$laskuri2 ++;
@@ -130,12 +130,12 @@
 		if ($laskuri2 > 0) $iltasiivo .= "Merkattiin toimitetuksi $laskuri2 rivitöntä tilausta.\n";
 
 		$laskuri = 0;
-		
+
 		// Merkitään laskut mitätöidyksi joilla on pelkästään mitätöityjä rivejä / pelkästään puuterivejä.
-		$query = "	SELECT lasku.tunnus laskutunnus, lasku.tila, count(*) kaikki, sum(if(tilausrivi.tyyppi='D' or tilausrivi.var='P', 1, 0)) dellatut
+		$query = "	SELECT lasku.tunnus laskutunnus, lasku.tila, count(*) kaikki, sum(if (tilausrivi.tyyppi='D' or tilausrivi.var='P', 1, 0)) dellatut
 					from lasku
 					join tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-					where lasku.yhtio = '$kukarow[yhtio]' 
+					where lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila in ('N','E','L')
 					and lasku.alatila != 'X'
 					group by 1,2
@@ -159,12 +159,12 @@
 
 
 		$laskuri = 0;
-		
+
 		// Merkitään rivit mitätöidyksi joiden otsikot on mitätöity (ei mitätöidä puuterivejä)
 		$query = "	SELECT lasku.tunnus laskutunnus
 					from lasku
 					join tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi!='D' and tilausrivi.var!='P'
-					where lasku.yhtio = '$kukarow[yhtio]' 
+					where lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'D'
 					GROUP BY 1";
 		$result = mysql_query($query) or die($query);
@@ -195,7 +195,7 @@
 						FROM tilausrivi
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'L' and laskutettuaika = '0000-00-00' and tunnus = '$row[perheid]'";
 			$result2 = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($result2) == 0) {
 				$lask++;
 				$query = "UPDATE tilausrivi SET perheid = 0 WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'L' and laskutettuaika = '0000-00-00' and perheid = '$row[perheid]' order by tunnus";
@@ -224,7 +224,7 @@
 					GROUP BY 1,2
 					HAVING countti > 1";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		while ($row = mysql_fetch_array($result)) {
 			$lasktuote++;
 			$poistetaankpl = $row['countti']-1;
@@ -243,14 +243,22 @@
 			$iltasiivo .= "Poistettiin $lasktuote tuotteelta yhteensä $laskpois duplikaatti tuotteen_toimittajaa\n";
 		}
 
-		
+		$kukaquery = "	UPDATE kuka
+						SET taso = '2'
+						WHERE taso = '3'";
+		$kukaresult = mysql_query($kukaquery) or pupe_error($kukaquery);
+
+		if (mysql_affected_rows() > 0) {
+			$iltasiivo .= "Päivitettiin ".mysql_affected_rows()." käyttäjän taso 3 --> 2\n";
+		}
+
 		if ($iltasiivo != "") {
 
 			echo "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]\n\n";
 			echo $iltasiivo;
 			echo "\n";
 
-			if($iltasiivo_email == 1) {
+			if ($iltasiivo_email == 1) {
 				$header 	= "From: <$yhtiorow[postittaja_email]>\n";
 				$header 	.= "MIME-Version: 1.0\n" ;
 				$subject 	= "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]";

@@ -416,7 +416,6 @@ if ($ytunnus != "" or $toimittajaid != "") {
 	}
 }
 
-
 if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	echo "<table>";
 	echo "<form name='toimi' action='$PHP_SELF' method='post' autocomplete='off'>";
@@ -765,13 +764,13 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 					echo "<option value='kalkyyli'>"     .t("Vie varastoon")."</option>";
 				}
 
-				// jos lisätiedot, kohdistus ja paikat on ok sekä kaikki rivit on viety varastoon, ja kaikki liitetyt laskut on hyväksytty, niin saadaan laskea virallinen varastonarvo
-				if ($lisok == 1 and $kohok == 1 and $varok == 1 and $kplyhteensa == $kplvarasto and $sarjanrook == 1 and $llrow["volasku"] == $llrow["volasku_ok"] and $llrow["kulasku"] == $llrow["kulasku_ok"]) {
+				// jos lisätiedot, kohdistus ja paikat on ok sekä kaikki rivit on viety varastoon, ja kaikki liitetyt laskut on hyväksytty (kukarow.taso 3 voi ohittaa tämän), niin saadaan laskea virallinen varastonarvo
+				if ($lisok == 1 and $kohok == 1 and $varok == 1 and $kplyhteensa == $kplvarasto and $sarjanrook == 1 and (($llrow["volasku"] == $llrow["volasku_ok"] and $llrow["kulasku"] == $llrow["kulasku_ok"]) or $kukarow["taso"] == "3")) {
 					echo "<option value='kaikkiok'>"     .t("Laske virallinen varastonarvo")."</option>";
 				}
 
 				echo "</select>";
-				echo "<input type='submit' value='".t("Tee")."'>";
+				echo " <input type='submit' value='".t("Tee")."'>";
 				echo "</td>";
 				echo "</form>";
 			}

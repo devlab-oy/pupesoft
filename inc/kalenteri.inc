@@ -2918,7 +2918,7 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 			$tapaotsikko = t("Kalenteritapahtuma");			
 		}
 
-		$vresult = t_avainsana("KALETAPA", "", $qlisa);
+		$vresult = t_avainsana("KALETAPA", "", $qlisa." ORDER BY avainsana.selitetark");
 		
 		$tavat = "<select name='tapa'>";
 		while($taparow = mysql_fetch_array($vresult)) {

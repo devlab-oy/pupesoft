@@ -2,7 +2,7 @@
 
 //tämä on huipputärkeä ominaisuus.. ;) t. joni
 
-$ketka = array('Jarmo Rosenqvist', 'Johan Tötterman', 'Marcus Weckman', 'Joni Kanerva');
+$ketka = array('Jarmo Rosenqvist', 'Johan Tötterman', 'Joni Kanerva');
 shuffle($ketka);
 for ($i=0; $i<count($ketka); $i++) $copyright .= $ketka[$i].", ";
 

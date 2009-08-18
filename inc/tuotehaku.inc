@@ -1,23 +1,26 @@
 <?php
 
-
 	if (substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and substr($tuoteno,0,1) != '?' and substr($tuoteno,0,1) != '#' and $yhtiorow["automaattinen_tuotehaku"] != '') {
 		$query = "	SELECT *
 					FROM tuote
-					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$tuoteno'
+					and status != 'P'";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($result) == 0) {
 			$query = "	SELECT *
 						FROM tuote
-						WHERE yhtio = '$kukarow[yhtio]' and tuoteno LIKE '$tuoteno%'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno LIKE '$tuoteno%'
+						and status != 'P'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($result) != 1) {
 				$tuoteno = $tuoteno . "*";
-			} 
+			}
 			else {
-				$tuotenorow = mysql_fetch_array($result); 
+				$tuotenorow = mysql_fetch_array($result);
 				$tuoteno = $tuotenorow["tuoteno"];
 			}
 		}
@@ -33,10 +36,13 @@
 
 		if (substr($tuoteno,0,1) == '?') {
 			// Toimittajan tuotenumero
-			
-			$query = "SELECT * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and toim_tuoteno='".substr($tuoteno,1)."'";
+
+			$query = "	SELECT *
+						from tuotteen_toimittajat
+						where yhtio = '$kukarow[yhtio]'
+						and toim_tuoteno = '".substr($tuoteno,1)."'";
 			$tresult = mysql_query($query) or pupe_error($query);
-			
+
 			while ($toimirivi = mysql_fetch_array($tresult)) {
 				$lisa1 .= "'$toimirivi[tuoteno]',";
 			}
@@ -61,15 +67,15 @@
 		elseif (substr($tuoteno,-1) == '*') {
 			// Jos vika merkki on tähti niin etsitään osittainen tuotenumero
 			$tuoteno = substr($tuoteno,0,-1);
-			
+
 			$lisa1 = " and tuote.tuoteno like '" . $tuoteno . "%' ";
 		}
-		
+
 		$yhtiot 	= "";
 		$konsyhtiot = array();
 
 		//Voidaan hakea myös koko konsernin tuotteista
-		if($konsernihaku != "KYLLA") {
+		if ($konsernihaku != "KYLLA") {
 			$yhtiot 	  = "yhtio = '$kukarow[yhtio]' ";
 			$konsyhtiot[] = $kukarow["yhtio"];
 		}
@@ -77,7 +83,8 @@
 			//Yhtiövalinnat
 			$query	= "	SELECT distinct yhtio, nimi
 						from yhtio
-						where konserni = '$yhtiorow[konserni]' and konserni != ''";
+						where konserni = '$yhtiorow[konserni]'
+						and konserni != ''";
 			$presult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($presult) > 0) {
@@ -94,25 +101,25 @@
 				$konsyhtiot[] = $kukarow["yhtio"];
 			}
 		}
-		
+
 		if ($kutsuja == "tuoteperhe.php") {
-			$perhelisa = ", IF((SELECT tuoteperhe.isatuoteno FROM tuoteperhe WHERE tuoteperhe.yhtio=tuote_wrapper.yhtio and tuoteperhe.isatuoteno=tuote_wrapper.tuoteno and tuoteperhe.tyyppi = '$hakutyyppi' LIMIT 1) IS NULL, 'pois', 'mukaan') rajaus";
+			$perhelisa = ", if ((SELECT tuoteperhe.isatuoteno FROM tuoteperhe WHERE tuoteperhe.yhtio=tuote_wrapper.yhtio and tuoteperhe.isatuoteno=tuote_wrapper.tuoteno and tuoteperhe.tyyppi = '$hakutyyppi' LIMIT 1) IS NULL, 'pois', 'mukaan') rajaus";
 			$perhelisa2 = "HAVING rajaus='mukaan'";
 		}
-		
+
 		if ($kaikkituhaku != "KYLLA") {
-			
+
 			$poislisa = " HAVING (tuote.status not in ('P','X') or saldo > 0) ";
-		
+
 			if ($kukarow["kesken"] > 0) {
-				$query  = "	SELECT if(toim_maa != '', toim_maa, maa) maa
+				$query  = "	SELECT if (toim_maa != '', toim_maa, maa) maa
 							FROM lasku
 							WHERE yhtio	= '$kukarow[yhtio]'
 							and tunnus  = '$kukarow[kesken]'";
 				$vieres = mysql_query($query) or pupe_error($query);
 				$vierow = mysql_fetch_array($vieres);
 			}
-			elseif($verkkokauppa != "") {
+			elseif ($verkkokauppa != "") {
 				$vierow = array();
 
 				if ($maa != "") {
@@ -122,8 +129,8 @@
 					$vierow["maa"] = $yhtiorow["maa"];
 				}
 			}
-			elseif($kukarow["extranet"] != "") {
-				$query  = "	SELECT if(toim_maa != '', toim_maa, maa) maa
+			elseif ($kukarow["extranet"] != "") {
+				$query  = "	SELECT if (toim_maa != '', toim_maa, maa) maa
 							FROM asiakas
 							WHERE yhtio	= '$kukarow[yhtio]'
 							and tunnus  = '$kukarow[oletus_asiakas]'";
@@ -137,7 +144,7 @@
 		}
 
 		// Poistettuja tuotteita ei näytetä paitsi jos niillä on saldoa
-		// Joinataan korvaavat mukaan		
+		// Joinataan korvaavat mukaan
 		$query = "	SELECT
 					tuote.yhtio,
 					ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi='P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
@@ -165,15 +172,15 @@
 					ORDER BY tuote.tuoteno
 					LIMIT 201";
 		$thresult = mysql_query($query) or pupe_error($query);
-		
+
 		$rows = array();
-		
+
 		if (mysql_num_rows($thresult) > 0) {
 
 			// Rakennetaan array ja laitetaan korvaavat mukaan
 			while ($mrow = mysql_fetch_array($thresult)) {
 				if ($mrow["korvaavat"] != $mrow["tuoteno"]) {
-					
+
 					$query = "	SELECT
 								tuote.yhtio,
 								ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi='P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
@@ -206,15 +213,15 @@
 
 					while ($krow = mysql_fetch_array($kores)) {
 						if ($ekakorva == "") $ekakorva = $krow["yhtio"].$krow["tuoteno"];
-						if(!isset($rows[$ekakorva.$krow["tuoteno"]])) $rows[$ekakorva.$krow["tuoteno"]] = $krow;
+						if (!isset($rows[$ekakorva.$krow["tuoteno"]])) $rows[$ekakorva.$krow["tuoteno"]] = $krow;
 					}
 				}
 				else {
-					$rows[$mrow["yhtio"].$mrow["tuoteno"]] = $mrow;					
+					$rows[$mrow["yhtio"].$mrow["tuoteno"]] = $mrow;
 				}
 			}
 		}
-		
+
 		if (count($rows) >  200) {
 			$kentta			= 'tuoteno';
 			$varaosavirhe 	= t("VIRHE: Hakuehdolla löytyi liikaa tuotteita!");
@@ -230,13 +237,13 @@
 		}
 		elseif (count($rows) == 1) {
 			$trow = array_pop($rows);
-			
-			if($konsernihaku == "KYLLA") {
+
+			if ($konsernihaku == "KYLLA") {
 				$tuoteno = $trow['tuoteno']."####$trow[yhtio]";
 			}
 			else {
 				$tuoteno = $trow['tuoteno'];
-			}			
+			}
 		}
 		elseif (count($rows) != 1) {
 
@@ -249,19 +256,19 @@
 			elseif ($kutsuja != "yllapito.php") {
 				$ulos = "<select name='tuoteno_array[]' multiple='TRUE' size='6'>";
 			}
-			
+
 			if ($yhtiorow["saldo_kasittely"] == "T") {
 				$saldoaikalisa = date("Y-m-d");
 			}
 			else {
 				$saldoaikalisa = "";
 			}
-			
+
 			$ulos .= "<option value=''>".t("Valitse tuote")."</option>";
 
 			// Loopataan tuotteet läpi
-			foreach ($rows as $trow) {												
-				
+			foreach ($rows as $trow) {
+
 				$lisakala1 = "";
 
 				if ($trow["yhtio"].$trow["korvaavat"] == $edtuoteno) {
@@ -269,14 +276,14 @@
 				}
 
 				$kokonaismyytavissa = 0;
-				
+
 				if ($trow["tuoteperhe"] == $trow["tuoteno"]) {
 					// Tuoteperheen isä
 					$saldot = tuoteperhe_myytavissa($trow["tuoteno"], "", "", $laskurow["varasto"], "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 
 					foreach ($saldot as $varasto => $myytavissa) {
 						$kokonaismyytavissa += $myytavissa;
-					}					
+					}
 				}
 				elseif ($trow['ei_saldoa'] != '') {
 					$kokonaismyytavissa = t("On");
@@ -285,7 +292,7 @@
 					foreach($konsyhtiot as $yhtio) {
 						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($trow["tuoteno"], '', $laskurow["varasto"], $yhtio, '', '', '', '', '', $saldoaikalisa);
 						$kokonaismyytavissa += $myytavissa;
-					}	
+					}
 				}
 
 				if ($kukarow['extranet'] != '' and $kokonaismyytavissa > 0) {
@@ -294,15 +301,15 @@
 				elseif ($kukarow['extranet'] != '') {
 					$kokonaismyytavissa = t("Ei");
 				}
-				
+
 				$lisakala2 = "";
 				$lisakala3 = "";
 
-				if($konsernihaku == "KYLLA") {
+				if ($konsernihaku == "KYLLA") {
 					$lisakala2 = " $trow[yhtio] - ";
 					$lisakala3 = "####$trow[yhtio]";
 				}
-				
+
 				// katotaan onko tällä tuotteella joku variaatiorypäs
 				$query = "	SELECT *
 							FROM tuotteen_avainsanat
@@ -344,10 +351,12 @@
 		if (substr($tuoteno,0,1) == '#') {
 
 			$lisa1 = "and eankoodi='".substr($tuoteno,1)."'";
-			
+
 			$query = "	SELECT tuoteno
 						FROM tuote
-						WHERE yhtio = '$kukarow[yhtio]' $lisa1";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and status != 'P'
+						$lisa1";
 			$tresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($tresult) > 1) {
@@ -369,7 +378,7 @@
 			}
 		}
 
-		if(strpos($tuoteno, '####') !== FALSE and $konsernihaku == "KYLLA") {
+		if (strpos($tuoteno, '####') !== FALSE and $konsernihaku == "KYLLA") {
 			$hakyhtio	= substr($tuoteno, strpos($tuoteno, '####')+4);
 			$tuoteno 	= substr($tuoteno, 0, strpos($tuoteno, '####'));
 		}
@@ -379,22 +388,24 @@
 
 		$query = "	SELECT *
 					FROM tuote
-					WHERE yhtio = '$hakyhtio' and tuoteno = '$tuoteno'";
+					WHERE yhtio = '$hakyhtio'
+					and tuoteno = '$tuoteno'
+					and status != 'P'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {
 			$kentta = 'tuoteno';
-			
+
 			if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_myynti.php") === FALSE or $kukarow['extranet'] != '') {
 				$varaosavirhe .= t("VIRHE: Tuotenumeroa")." $tuoteno ".t("ei löydy järjestelmästä")."!<br>";
 			}
-		
+
 			$tee = "Y";
 		}
 		else {
 			$trow = mysql_fetch_array($result);
 
-			if($konsernihaku == "KYLLA") {
+			if ($konsernihaku == "KYLLA") {
 				$tuoteno = $trow['tuoteno']."####".$trow["yhtio"];
 			}
 			else {

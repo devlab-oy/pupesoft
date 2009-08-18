@@ -306,7 +306,7 @@ if (!function_exists('tulosta_tarjous')) {
 						$row["hinta"] = laskuval($row["hinta"], $laskurow["vienti_kurssi"]);
 					}
 					
-					if($h < 20) {
+					if($h < 25) {
 						$pdf = alku($pdf, $laskurow,$kieli);
 						$h = 210;
 					}

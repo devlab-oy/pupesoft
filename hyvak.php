@@ -672,7 +672,6 @@
 
 		$tunnus = '';
 		$tee = '';
-
 	}
 
 	if ($tee == 'P') {
@@ -1361,7 +1360,7 @@
 			echo "<iframe src='$iframe_id' name='alaikkuna' width='100%' height='60%' align='bottom' scrolling='auto'></iframe>";
 		}
 	}
-	elseif ($kutsuja=="") {
+	elseif ($kutsuja == "") {
 
 		// Tällä ollaan, jos olemme vasta valitsemassa laskua
 		if ($nayta == '') {
@@ -1390,7 +1389,6 @@
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<b>".t("Sinulla ei ole hyväksymättömiä laskuja")."</b><br>";
-
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -1410,16 +1408,20 @@
 
 		while ($trow = mysql_fetch_array ($result)) {
 
-			$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$trow[tunnus]'";
+			$query = "	SELECT laskunro
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tila = 'K'
+						AND vanhatunnus = '$trow[tunnus]'";
 			$keikres = mysql_query($query) or pupe_error($query);
 
 			//	Onko liitetty jo keikkaan
 			if (in_array($trow["vienti"], array("B", "C", "J", "E", "F", "K", "H", "I", "L"))) {
 				if (mysql_num_rows($keikres) > 0) {
-					$liitetty = "<font style='color: #23ff14;'>ON</font>";
+					$liitetty = "<font class='ok'>ON</font>";
 				}
 				else {
-					$liitetty = "<font style='color: #fb0017;'>EI</font>";
+					$liitetty = "<font class='error'>EI</font>";
 				}
 			}
 			else {
@@ -1460,34 +1462,44 @@
 			// tehdään lasku linkki
 			echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
 
-			echo "	<form action = '$PHP_SELF' method='post'>
+			echo "<td class='back' valign='top'>
+					<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tunnus' value='$trow[tunnus]'>
-					<td class='back' valign='top'><input type='Submit' value='".t("Valitse")."'></td>
-					</form>";
+					<input type='submit' value='".t("Valitse")."'>
+					</form>
+				</td>";
 
 			// ykkös ja kakkos ja kolmos tason spessuja
 			if ($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') {
-
 				// Mahdollisuus laittaa lasku holdiin
 				if ($trow['alatila'] != 'H') {
-					echo "<form action = '$PHP_SELF' method='post'>
-						<input type='hidden' name='tee' value='Z'>
-						<input type='hidden' name='tunnus' value='$trow[tunnus]'>
-						<td class='back' valign='top'><input type='Submit' value='".t("Pysäytä")."'></td></form>";
+					echo "<td class='back' valign='top'>
+							<form action='$PHP_SELF' method='post'>
+							<input type='hidden' name='tee' value='Z'>
+							<input type='hidden' name='tunnus' value='$trow[tunnus]'>
+							<input type='submit' value='".t("Pysäytä")."'>
+							</form>
+						</td>";
 				}
 				else {
-					echo "<form action = '$PHP_SELF' method='post'>
-						<input type='hidden' name='tee' value='Z'>
-						<input type='hidden' name='tunnus' value='$trow[tunnus]'>
-						<td class='back' valign='top'><input type='Submit' value='".t("Lisää kommentti")."'></td></form>";
+					echo "<td class='back' valign='top'>
+							<form action='$PHP_SELF' method='post'>
+							<input type='hidden' name='tee' value='Z'>
+							<input type='hidden' name='tunnus' value='$trow[tunnus]'>
+							<input type='Submit' value='".t("Lisää kommentti")."'>
+							</form>
+						</td>";
 				}
 
 				if ($oikeurow['paivitys'] == '1' and mysql_num_rows($keikres) == 0 and $trow["tapvm"] >= $yhtiorow["ostoreskontrakausi_alku"]) {
-					echo "<form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
-							 <input type='hidden' name='tee' value='D'>
-							 <input type='hidden' name = 'nayta' value='$nayta'>
-							 <input type='hidden' name='tunnus' value = '$trow[tunnus]'>
-							 <td class='back' valign='top'><input type='Submit' value='".t("Poista")."'></td></form>";
+					echo "<td class='back' valign='top'>
+							<form action='$PHP_SELF' method='post' onSubmit='return verify()'>
+							<input type='hidden' name='tee' value='D'>
+							<input type='hidden' name='nayta' value='$nayta'>
+							<input type='hidden' name='tunnus' value = '$trow[tunnus]'>
+							<input type='Submit' value='".t("Poista")."'>
+							</form>
+						</td>";
 				}
 			}
 
@@ -1501,10 +1513,9 @@
 					return confirm(msg);
 				}
 				</SCRIPT>";
-
 	}
 
-	if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php")  !== FALSE) {
+	if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") !== FALSE) {
 		require ("inc/footer.inc");
 	}
 

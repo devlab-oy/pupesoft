@@ -265,7 +265,7 @@
 				if($laskurow["tunnusnippu"] == $laskurow["tunnus"]) {
 					$query = "  SELECT GROUP_CONCAT(tunnus) tunnukset
 								FROM lasku
-								WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnus]' and tila IN ('L','G','E','V','W','N','R','A')";
+								WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnus]' and tila IN ('L','G','E','N','R','A')";
 					$result = mysql_query($query) or pupe_error($query);
 					$tunnusrow = mysql_fetch_array($result);
 					$tunnukset = $tunnusrow["tunnukset"];

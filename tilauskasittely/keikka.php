@@ -709,12 +709,14 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 
 			if ($llrow["volasku"] > 0) {
 				if ($llrow["volasku"] != $llrow["volasku_ok"]) {
-					$laskujen_tiedot .= "<a onmouseout=\"popUp(event,'lasku_$row[laskunro]')\" onmouseover=\"popUp(event,'lasku_$row[laskunro]')\">$llrow[volasku] ($llrow[vosumma]) <font class='error'>*</font></a><br>";
+					$laskujen_tiedot .= "<a onmouseout=\"popUp(event,'lasku_$row[laskunro]')\" onmouseover=\"popUp(event,'lasku_$row[laskunro]')\">$llrow[volasku] ($llrow[vosumma]) <font class='error'>*</font></a>";
 				}
 				else {
-					$laskujen_tiedot .= "$llrow[volasku] ($llrow[vosumma]) <font class='ok'>*</font><br>";
+					$laskujen_tiedot .= "$llrow[volasku] ($llrow[vosumma]) <font class='ok'>*</font>";
 				}
 			}
+
+			$laskujen_tiedot .= "<br>";
 
 			if ($llrow["kulasku"] > 0) {
 				if ($llrow["kulasku"] != $llrow["kulasku_ok"]) {

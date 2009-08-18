@@ -509,7 +509,7 @@
 				$ulos .= "<tr class='aktiivi'>";
 
 				if ($vaintullinimike != "") {
-					$ulos .= "<td valign='top'><a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$row[kaikkitunnukset]&vaintullinimike=$vaintullinimike&kayttajan_valinta_maa=$kayttajan_valinta_maa&tapahtumalaji=$tapahtumalaji&lopetus=$lopetus//vaintullinimike=$vaintullinimike//kayttajan_valinta_maa=$kayttajan_valinta_maa//tapahtumalaji=$tapahtumalaji'>$row[laskunro]</a></td>";
+					$ulos .= "<td valign='top'><a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$row[kaikkitunnukset]&vaintullinimike=$vaintullinimike&kayttajan_valinta_maa=$kayttajan_valinta_maa&tapahtumalaji=$tapahtumalaji&lopetus=$lopetus//vaintullinimike=$vaintullinimike//kayttajan_valinta_maa=$kayttajan_valinta_maa//tapahtumalaji=$tapahtumalaji'>$row[laskunro]</a></td>";
 				}
 				else {
 					$ulos .= "<td valign='top'>".$row["laskunro"]."</td>";

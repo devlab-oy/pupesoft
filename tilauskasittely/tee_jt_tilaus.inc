@@ -96,7 +96,7 @@
 								and tunnus	= '$isarivirow[otunnus]'
 								and tila	in ('N', 'L') 
 								and alatila != 'X'";
-					$stresult = mysql_query($query) or pupe_error($query);				
+					$stresult = mysql_query($query) or pupe_error($query);
 				}
 				else {
 					// tila pit‰‰ olla l‰hete, tilaus, ennakko tai siirtolista
@@ -192,6 +192,14 @@
 				if (mysql_num_rows($stresult) != 0) {
 					$otsikkorivi = mysql_fetch_array ($stresult);
 					$id = $otsikkorivi['tunnus'];
+					
+					//	P‰ivitet‰‰n otsikko menem‰‰n suoraan laskutukseen!
+					if($isarivirow["suoraan_laskutukseen"] != "") {
+						$query  = "	UPDATE lasku
+									SET eilahetetta='o'
+									WHERE yhtio='$kukarow[yhtio]' and tunnus='$isarivirow[otunnus]'";
+						$apure  = mysql_query($query) or pupe_error($query);
+					}
 					
 					if ($debug==1) echo t("Lis‰‰n laskun olemassaolevaan")." $otsikkorivi[nimi] $id<br>";
 				}

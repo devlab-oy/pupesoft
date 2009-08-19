@@ -73,13 +73,13 @@
 		// jos kyseessä ei ole nouto tai noutajan nimi on annettu, voidaan merkata tilaus toimitetuksi..
 		if (($nouto != 'yes') or ($noutaja != '')) {
 			$query = "	UPDATE tilausrivi
-						SET toimitettu = '$kukarow[kuka]',
-						toimitettuaika = now()
-						WHERE otunnus = '$otunnus'
+						SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
+						WHERE otunnus 	= '$otunnus'
 						and var not in ('P','J')
-						and yhtio = '$kukarow[yhtio]'
-						and keratty != ''
-						and tyyppi = 'L'";
+						and yhtio 		= '$kukarow[yhtio]'
+						and keratty    != ''
+						and toimitettu  = ''
+						and tyyppi 		= 'L'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (isset($vaihdakateista) and $vaihdakateista == "KYLLA") {

@@ -33,11 +33,11 @@
 
 	// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si myyntihaarassa
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
-	
+
 	if(!function_exists("tuoteperhe_reku")) {
 		function tuoteperhe_reku($esiisatuoteno, $isatuoteno, $tuoteperhe, $kaikkituotteet) {
 			global $kukarow, $perhelisa, $kieltolisa, $lisaarivi_debug;
-		
+
 			//Haetaan tuoteperheen lapset ja lis‰t‰‰n ne $tuoteperhe ja $kaikkituotteet arraysiin
 			$query = "	SELECT tuoteperhe.*
 						FROM tuoteperhe, tuote
@@ -64,20 +64,20 @@
 			return array($tuoteperhe, $kaikkituotteet);
 		}
 	}
-	
+
 	if(!function_exists("tuoteperhe_reku2")) {
 		function tuoteperhe_reku2($tuoteno, $isat_array, $kaikki_array, $kerroin_array) {
 			global $kukarow, $perhelisa, $kieltolisa, $lisaarivi_debug;
-		
+
 			$perhearray = array();
 			$tuoteno 	= strtoupper($tuoteno);
-		
+
 			if (in_array($tuoteno, $isat_array)) {
 				//echo "FUULI! TEET IKUISEN LUUPIN!!!!!!!!<br>";
 			}
 			else {
 				$isat_array[] = $tuoteno;
-			
+
 				//Haetaan tuoteperheen lapset ja lis‰t‰‰n ne $isa_array arrayseen
 				$query = "	SELECT tuoteperhe.*
 							FROM tuoteperhe, tuote
@@ -90,21 +90,21 @@
 							ORDER by tuoteno";
 				$perheresult = mysql_query($query) or pupe_error($query);
 
-				while($perherow = mysql_fetch_assoc($perheresult)) {			
+				while($perherow = mysql_fetch_assoc($perheresult)) {
 					$perherow["tuoteno"] = strtoupper($perherow["tuoteno"]);
 
 					$kaikki_array[]		= $perherow["tuoteno"]; // lis‰t‰‰n tuoteno arrayseen
 					$kerroin_array[]	= $tuoteno."#!°!#".$perherow["kerroin"];
-					
+
 					$mikaisa = $perherow["tuoteno"];
 					$tmp_kaikki_array = $kaikki_array;
 					$tmp_kerroin_array = $kerroin_array;
-					
+
 					krsort($tmp_kaikki_array);
 					krsort($tmp_kerroin_array);
-					
+
 					$perherow["kerroin"] = 1;
-					
+
 					// Lasketaan kerroin rekursiivisesti taaksep‰in
 					foreach($tmp_kerroin_array as $ke_ind => $ke_kerr) {
 						list($ker_isa, $ke_ker) = explode("#!°!#", $ke_kerr);
@@ -113,12 +113,12 @@
 							$ke_ker = 1;
 						}
 
-						if ($mikaisa == $tmp_kaikki_array[$ke_ind]) {							
+						if ($mikaisa == $tmp_kaikki_array[$ke_ind]) {
 							$mikaisa = $ker_isa;
 							$perherow["kerroin"] *= $ke_ker;
-						}												
+						}
 					}
-					
+
 					$perhearray[] = $perherow;
 				}
 			}
@@ -130,7 +130,7 @@
 	if (!is_array($varasto) and (int) $varasto > 0) {
 		$varasto = array($varasto);
 	}
-	
+
 	//	Katsotaan onko t‰ll‰ tuotteella joku oletusvalinta
 	if( (int)  $rivitunnus == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TARJOUS", "PROJEKTI"))) {
 		$olquery = "SELECT *
@@ -143,7 +143,7 @@
 		$olvares = mysql_query($olquery) or pupe_error($olquery);
 		if(mysql_num_rows($olvares)>0) {
 			$olvarow = mysql_fetch_array($olvares);
-			
+
 			//	Tarkistukset ja valinta
 			if(substr($olvarow["selite"], 0, 3) == "!!!" or substr($olvarow["selite"], 0, 3) == "°°°") {
 				$olquery = "SELECT toimittaja
@@ -158,7 +158,7 @@
 				else {
 					echo "<font class='error'>".t("VIRHE:")." ".t("Oletusvalintaa ei voida toteuttaa, tuotteen toimittajaa ei lˆydy.")."</font><br>";
 				}
-				
+
 			}
 			elseif($olvarow["selite"] == "°°V") {
 				$olquery = "SELECT tunnus
@@ -188,10 +188,10 @@
 				else {
 					echo "<font class='error'>".t("VIRHE:")." ".t("Oletusvalintaa ei voida toteuttaa tuotteen rakenne puuttuu.")."</font><br>";
 				}
-			}			
+			}
 		}
-	}	
-	
+	}
+
 	//katotaan oletuspaikka ja myyd‰‰n tietenkin sielt‰ jos niin halutaan
 	if ($olpaikalta != '') {
 		$olquery = "SELECT concat_ws('#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
@@ -207,10 +207,15 @@
 	}
 
 	// P‰iv‰m‰‰rien oikeellisuustsekki
-	if (!checkdate(substr($toimaika,5,2), substr($toimaika,8,2), substr($toimaika,0,4))) {
+	list($aikatsk_v, $aikatsk_k , $aikatsk_p) = explode("-", $toimaika);
+
+	if (!checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
 		$toimaika = date("Y-m-d");
 	}
-	if (!checkdate(substr($kerayspvm,5,2), substr($kerayspvm,8,2), substr($kerayspvm,0,4))) {
+
+	list($aikatsk_v, $aikatsk_k , $aikatsk_p) = explode("-", $kerayspvm);
+
+	if (!checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
 		$kerayspvm = date("Y-m-d");
 	}
 
@@ -385,9 +390,9 @@
 	//Tutkitaan onko t‰m‰ hyvitysrivi
 	if ((float) $kpl < 0 and trim($var) == "") {
 		//Laitetaan varriksi Y jotta ei tarvitse menn‰ myyntihaaraan
-		$var = "Y";		
+		$var = "Y";
 	}
-	
+
 	//Varastosiirroissa ei siirret‰ l‰hdevarastosta l‰hdevarastoon!!!!
 	if($laskurow["tila"] == 'G' and $laskurow["clearing"] > 0) {
 		$notfromvarasto = " and varastopaikat.tunnus != $laskurow[clearing] ";
@@ -495,16 +500,16 @@
 						$isa_array 	= array_merge($isa_array, $tuoteperhe);
 						$isa_array 	= array_unique($isa_array);
 						$riikoko 	= count($isa_array);
-					}										
-				}				
-				
+					}
+				}
+
 				if(count($tuoteperhe) == 0 and $laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V' and $rivityyppi == "V") {
 					// Asiakkaallevalmistuskeissi, resepit‰ ei lˆydy joten teemme t‰st‰ myyntirivin
-					$rivityyppi = 'L'; // Myyntitilausrivi					
+					$rivityyppi = 'L'; // Myyntitilausrivi
 				}
 			}
 		}
-	
+
 		//Kaikkien arrayden indeksien ‰iti
 		$i = 0;
 
@@ -554,13 +559,13 @@
 								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 				}
 				else {
-					
+
 					$limit = "";
-					
+
 					if (!is_array($varasto) and $rivityyppi == 'E') {
 						$limit = " LIMIT 1 ";
 					}
-					
+
 					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
@@ -573,10 +578,10 @@
 								WHERE tuote.yhtio = '$kukarow[yhtio]'
 								and tuote.tuoteno = '$tuoteno'
 								$notfromvarasto
-								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta 
+								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta
 								$limit";
 				}
-								
+
 				$zres = mysql_query($query) or pupe_error($query);
 
 				//N‰hd‰‰n vaivaa jottaa saadaan paikat sortattua oletuspaikka ensin ja sitten myyt‰viss‰olevan m‰‰r‰n mukaan laskevassa j‰rjestyksess‰
@@ -592,7 +597,7 @@
 
 					// Tutkitaan myyd‰‰nkˆ tietty‰ jo varattua lis‰varustetta, silloin annetaan AINA riitt‰v‰ saldo
 					if ($perheid2 > 0 and $perheid2!=$rivitunnus and strtoupper($zrow["hyllyalue"]."#".$zrow["hyllynro"]."#".$zrow["hyllyvali"]."#".$zrow["hyllytaso"]) == strtoupper($paikka)) {
-						$myytavissa = $toimittamatta;								
+						$myytavissa = $toimittamatta;
 					}
 
 					// hoidetaan pois problematiikka jos meill‰ on orpoja (tuotepaikattomia) tuotteita varaamassa saldoa
@@ -843,12 +848,12 @@
 					}
 				}
 			}
-						
+
 			foreach ($myy_tuoteno as $i => $tuoteno) {
 				//T‰ss‰ loopataan vain is‰/normaleja tuotteita
 
 				if ($lisaarivi_debug==1) echo "Loopataan $tuoteno<br>";
-				
+
 				if ($myy_tyyppi[$i] == "NORMAALI") {
 					// jos ei olla viel‰ toimitettu kaikkea, niin lis‰t‰‰n tilausrivi
 					if ($toimittamatta > 0) {
@@ -869,7 +874,7 @@
 						$myynama[] 	= $i;
 
 						if (count($tuoteperhe) > 0) {
-							
+
 							$riikoko 		= 1;
 							$isat_array 	= array();
 							$kaikki_array 	= array($tuoteno);
@@ -877,9 +882,9 @@
 							$perhearray 	= array();
 
 							for($isa=0; $isa < $riikoko; $isa++) {
-								list($perherow, $isat_array, $kaikki_array, $kerroin_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array);								
+								list($perherow, $isat_array, $kaikki_array, $kerroin_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array);
 								$perhearray	= array_merge($perhearray, $perherow);
-								
+
 								if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y" and ($laskurow['tila'] != 'V' or $var == "W")) {
 									$riikoko = count($kaikki_array);
 								}
@@ -1025,7 +1030,7 @@
 								if ($trow["tilausrivi_kommentti"] != "" and (int) $rivitunnus == 0) {
 									$kommentti = trim($trow["tilausrivi_kommentti"]."\n".$kommentti);
 								}
-								
+
 								if ((int) $rivitunnus == 0 and ($trow["status"] == "P" or $trow["status"] == "X")) {
 									if (trim($kommentti) != "")	$kommentti .= "\n";
 
@@ -1359,7 +1364,7 @@
 		}
 
 		if ($laskurow['tila'] != 'O' and $paikka == "" and $perheid == "" and $perhekielto == "") {
-			
+
 			$riikoko 		= 1;
 			$isat_array 	= array();
 			$kaikki_array 	= ($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A' and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote) : array($alkupera_trow["tuoteno"]);
@@ -1367,9 +1372,9 @@
 			$perhearray 	= array();
 
 			for($isa=0; $isa < $riikoko; $isa++) {
-				list($perherow, $isat_array, $kaikki_array, $kerroin_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array);								
+				list($perherow, $isat_array, $kaikki_array, $kerroin_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array);
 				$perhearray	= array_merge($perhearray, $perherow);
-				
+
 				// Ollaanko rekursiivisia vai ei
 				if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y" and ($laskurow['tila'] != 'V' or $var == "W")) {
 					$riikoko = count($kaikki_array);
@@ -1497,8 +1502,8 @@
 					case 'J' : // J‰lkitoimitukseen
 					case 'R' : // Valmistetaan asiakkaalle
 					case 'U' : // Tilataan toimittajalta asiakkaalle
-					case 'S' : // Suoratoimitus-JT			
-					case 'T' : // Tilataan toimittajalta					
+					case 'S' : // Suoratoimitus-JT
+					case 'T' : // Tilataan toimittajalta
 						// Yhtiˆn parametri: varaako JT-rivi saldoja
 						if ($yhtiorow["varaako_jt_saldoa"] == "") {
 							$varattu 	= 0;
@@ -1541,7 +1546,7 @@
 								$varattu 	= $kpl;
 								$jt 		= 0;
 							}
-							
+
 							$var	= "J";
 						}
 						// Terminaalitoimitukset tai ostoskorit; var tyhj‰‰ ja varattu normisti
@@ -1555,7 +1560,7 @@
 							$varattu = $kpl;
 						}
 						// Hyvitysrivit menee normaaleina
-						elseif($kpl < 0) {														
+						elseif($kpl < 0) {
 							$var 	= "";
 							$varattu = $kpl;
 						}
@@ -1588,7 +1593,7 @@
 				$p_hyllyalue	= $paikat[0];
 				$p_hyllynro		= $paikat[1];
 				$p_hyllyvali	= $paikat[2];
-				$p_hyllytaso	= $paikat[3];							
+				$p_hyllytaso	= $paikat[3];
 			}
 			else {
 				// haetaan viel‰ tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa
@@ -1676,7 +1681,7 @@
 			// jos olemme saaneet tuotenimityksen syotarivist‰ ja sallimme nimityksen muutoksen
 			if (($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" or $toim == "HAAMU" or $trow["tuoteno"] == "99") and trim($tuotenimitys != "")) {
 				// lis‰t‰‰n saatu nimitys kaikille tuotteille
-				$trow["nimitys"] = addslashes($tuotenimitys);				
+				$trow["nimitys"] = addslashes($tuotenimitys);
 			}
 
 			// JT-rivikommentti
@@ -1687,10 +1692,10 @@
 			if ($trow["tilausrivi_kommentti"] != "" and (int) $rivitunnus == 0) {
 				$kommentti = $trow["tilausrivi_kommentti"]."\n".$kommentti;
 			}
-			
+
 			if ((int) $rivitunnus == 0 and ($trow["status"] == "P" or $trow["status"] == "X")) {
 				if (trim($kommentti) != "")	$kommentti .= "\n";
-				
+
 				$kommentti .= t("Poistunut tuote");
 			}
 
@@ -1742,7 +1747,7 @@
 			}
 			$result = mysql_query($query) or die($query);
 			$lisatty_tun = mysql_insert_id();
-						
+
 			@include("trivityyppivalinta.inc");
 
 			$query  = "	SELECT *

@@ -184,13 +184,13 @@
 		if (mysql_num_rows($result) == 0) {
 			// merkataan tässä vaiheessa toimittamattomat rivi toimitetuiksi
 			$query = "	UPDATE tilausrivi
-						SET toimitettu='$kukarow[kuka]', toimitettuaika=now()
-						WHERE otunnus in ($laskutettavat)
+						SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
+						WHERE otunnus  in ($laskutettavat)
 						and var not in ('P','J')
-						and yhtio = '$kukarow[yhtio]'
-						and keratty != ''
-						and toimitettu = ''
-						and tyyppi='L'";
+						and yhtio 		= '$kukarow[yhtio]'
+						and keratty    != ''
+						and toimitettu  = ''
+						and tyyppi      = 'L'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (isset($vaihdakateista) and $vaihdakateista == "KYLLA") {
@@ -536,7 +536,7 @@
 				if ($hyvrow["nollarivi"] > 0) {
 					echo "<td class='back'>&nbsp;<font class='error'>".t("Huom! Tilauksella on nollahintaisia rivejä!")."</font></td>";
 				}
-				
+
 				if ($row["chn"] == "010") {
 					//Varmistetaan, että meillä on verkkotunnus laskulla jos pitäisi lähettää verkkolaskuja!
 					if($row["verkkotunnus"] == "") {
@@ -554,7 +554,7 @@
 						else {
 							echo "<td class='back'>&nbsp;<font class='message'>".t("VIRHE: Verkkotunnus puuttuu asiakkaalta ja laskulta!")."</font></td>";
 						}
-					}					
+					}
 				}
 
 				echo "</tr>";
@@ -568,7 +568,7 @@
 				echo "<tr><th>".t("Valitse kassalipas")."</th><td colspan='3'>";
 				echo "<input type='hidden' name='vaihdakateista' value='KYLLA'>";
 
-				$query = "SELECT * FROM kassalipas WHERE yhtio='{$kukarow['yhtio']}'";
+				$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]'";
 				$kassares = mysql_query($query) or pupe_error($query);
 
 				echo "<select name='kassalipas'>";
@@ -584,7 +584,7 @@
 						$sel = "selected";
 					}
 
-					echo "<option value='{$kassarow['tunnus']}' $sel>{$kassarow['nimi']}</option>";
+					echo "<option value='$kassarow[tunnus]' $sel>$kassarow[nimi]</option>";
 
 					$sel = "";
 				}
@@ -766,7 +766,7 @@
 		else {
 			$ketjutus_group = "";
 		}
-		
+
 		//	Tarkistetaan voisimmeko joitain laskuja sähköisesti!
 		$query = "	SELECT lasku.tunnus, asiakas.chn
 					FROM lasku use index (tila_index)
@@ -788,9 +788,9 @@
 			 				chn				= '$asrow[chn]',
 							verkkotunnus	= ''
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$asrow[tunnus]'";
-			$upres = mysql_query($query) or pupe_error($query);			
+			$upres = mysql_query($query) or pupe_error($query);
 		}
-		
+
 		// GROUP BY pitäää olla sama kun verkkolasku.php:ssä rivillä 536
 		$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
 					lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
@@ -836,7 +836,7 @@
 
 				//tehdään selväkielinen tila/alatila
 				require "../inc/laskutyyppi.inc";
-				
+
 				$toimitusselite = "";
 				if ($tilrow["chn"] == '100') $toimitusselite = t("Paperilasku");
 				if ($tilrow["chn"] == '010') $toimitusselite = t("eInvoice");
@@ -844,7 +844,7 @@
 				if ($tilrow["chn"] == '111') $toimitusselite = t("Elma EDI-inhouse");
 				if ($tilrow["chn"] == '666') $toimitusselite = t("Sähköpostiin");
 				if ($tilrow["chn"] == '667') $toimitusselite = t("Sisäinen");
-				
+
 				echo "	<tr class='aktiivi'>
 						<td valign='top'>$tilrow[tunnukset_ruudulle]</td>
 						<td valign='top'>$tilrow[ytunnus]</td>

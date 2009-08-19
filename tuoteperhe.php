@@ -257,6 +257,7 @@
 									isatuoteno	= '$isatuoteno',
 									tuoteno 	= '$tuoteno',
 									kerroin 	= '$kerroin',
+									omasivu		= '$kpl2',
 									hintakerroin= '$hintakerroin',
 									alekerroin 	= '$alekerroin',
 									yhtio 		= '$kukarow[yhtio]',
@@ -489,7 +490,7 @@
 					echo "<th>".t("Lis‰varusteet")."</th><th>".t("Nimitys")."</th><th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><td class='back'></td></tr>";
 				}
 				else {
-					echo "<th>".t("Raaka-aineet")."</th><th>".t("Nimitys")."</th><th>".t("M‰‰r‰kerroin")."</th><th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><td class='back'></td></tr>";
+					echo "<th>".t("Raaka-aineet")."</th><th>".t("Nimitys")."</th><th>".t("M‰‰r‰kerroin")."</th><th>".t("Kehahin")."</th><th>".t("Kehahin*Kerroin")."</th><th>".t("Pituus kerroin")."</th><td class='back'></td></tr>";
 				}
 													
 				$query = "	SELECT * 
@@ -545,6 +546,14 @@
 							
 						echo "<td>$tuoterow[kehahin]</td><td>".round($lapsiyht,6)."</td>";
 						
+						if($toim == "RESEPTI") {
+							if($prow["omasivu"] != "") {
+								echo "<td>".t("Ei kerrota")."</td>";
+							}
+							else {
+								echo "<td>".("Kerrotaan")."</td>";
+							}
+						}
 																									
 						echo "<form action='$PHP_SELF' method='post'>
 								<td class='back'>
@@ -600,6 +609,25 @@
 						}
 						
 						echo "<td>$tuoterow[kehahin]</td><td>".round($lapsiyht,6)."</td>";
+						
+						if($toim == "RESEPTI") {
+							$sel1=$sel2="";
+							
+							if($prow["omasivu"] != "") {
+								$sel2 = "SELECTED";
+							}
+							else {
+								$sel1 = "SELECTED";
+							}
+							
+							echo "<td>
+										<select name='kpl2' style='width: 150px;'>
+											<option value='' $sel1>".t("M‰‰r‰‰ kerrotaan vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)")."</option>
+											<option value='X' $sel2>".t("M‰‰r‰‰ ei kerrota vaihdettaessa is‰tuotteen pituutta/m‰‰r‰‰ (kpl2)")."</option>
+										</select>
+									</td>";
+						}
+						
 						echo "<td class='back'><input type='submit' value='".t("P‰ivit‰")."'></td></form></tr>";
 					}					
 				}

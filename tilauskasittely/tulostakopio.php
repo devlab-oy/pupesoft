@@ -1379,6 +1379,7 @@
 								and tilausrivi.yhtio  = '$kukarow[yhtio]'
 								$where2
 								and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
+								HAVING kpl <> 0
 								ORDER BY tilausrivi.otunnus, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 					$result = mysql_query($query) or pupe_error($query);
 
@@ -1399,6 +1400,11 @@
 					$page[$sivu] = alku();
 
 					while ($row = mysql_fetch_assoc($result)) {
+						// Palvelutuotteiden toimitettuaika syötetään käsin
+						if ($row["keratty"] == "saldoton" and $yhtiorow["saldottomien_toimitettuaika"] == "K") {
+							$row['toimitettuaika'] = $row['toimaika'];
+						}
+						
 						rivi($page[$sivu]);
 					}
 

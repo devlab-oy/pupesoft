@@ -7346,35 +7346,38 @@ if(!function_exists("jt_toimita")) {
 		if($tee == "JATKA") {
 
 			// Meillä haluamme vain toimittaa jälkkärit valituille myyntiriveille, muuten niitä vaan toimitellaan
-			if($jtrivit != "") {
-				$asiakasno 			= "";
-				$asiakasid			= "";
-				$asiakasmaa 		= "";
-				$jarj	 			= "luontiaika";
-				$tuotenumero		= "";
-				$tilaus				= "";
-				$toimi				= "";
-				$superit			= "";
-				$tilaus_on_jo		= "";
-				$vain_rivit 		= $jtrivit;
-				$from_varastoon_inc = "varastoon.inc";
+			if($yhtiorow["automaattinen_jt_toimitus"] == "V" or $yhtiorow["automaattinen_jt_toimitus"] == "S") {
+				if($jtrivit != "") {
+					$asiakasno 			= "";
+					$asiakasid			= "";
+					$asiakasmaa 		= "";
+					$jarj	 			= "luontiaika";
+					$tuotenumero		= "";
+					$tilaus				= "";
+					$toimi				= "";
+					$superit			= "";
+					$tilaus_on_jo		= "";
+					$vain_rivit 		= $jtrivit;
+					$from_varastoon_inc = "varastoon.inc";
 
-				$query = "	SELECT group_concat(distinct otunnus) tilaukset
-			   				FROM tilausrivi
-			   				WHERE yhtio = '$kukarow[yhtio]' and tilausrivi.tunnus IN ($jtrivit)
-							GROUP BY otunnus";
-				$jttilres = mysql_query($query) or pupe_error($query);
-				if(mysql_num_rows($jttilres) > 0) {
-					$jttilrow=mysql_fetch_array($jttilres);
-					if($pakkotoimitatilaukset == "") {
-						$pakkotoimitatilaukset = $jttilrow["tilaukset"];
+					$query = "	SELECT group_concat(distinct tilausrivi.otunnus) tilaukset
+				   				FROM tilausrivi
+								JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.osatoimitus!=''
+				   				WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.tunnus IN ($jtrivit)
+								GROUP BY tilausrivi.otunnus";
+					$jttilres = mysql_query($query) or pupe_error($query);
+					if(mysql_num_rows($jttilres) > 0) {
+						$jttilrow=mysql_fetch_array($jttilres);
+						if($pakkotoimitatilaukset == "") {
+							$pakkotoimitatilaukset = $jttilrow["tilaukset"];
+						}
+						else {
+							$pakkotoimitatilaukset .= ",".$jttilrow["tilaukset"];
+						}
 					}
-					else {
-						$pakkotoimitatilaukset .= ",".$jttilrow["tilaukset"];
-					}
+
+					require('jtselaus.php');
 				}
-
-				require('jtselaus.php');
 			}
 			else {
 				$asiakasno 			= "";

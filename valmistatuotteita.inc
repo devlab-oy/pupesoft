@@ -806,11 +806,13 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 						and alanimi = ''";
 			$jtoikeudetres = mysql_query($query) or pupe_error($query);
 
-			if ($yhtiorow["automaattinen_jt_toimitus"] != "" and $yhtiorow["tee_valmistus_myyntitilaukselta"] and $yhtiorow["tee_valmistus_myyntitilaukselta"]) {
+			if ($yhtiorow["automaattinen_jt_toimitus"] != "" and $yhtiorow["tee_valmistus_myyntitilaukselta"] != "") {
 				$jtoikeudetrow = mysql_fetch_array($jtoikeudetres);
 				echo "<br>";
-
+				
 				if ($yhtiorow['automaattinen_jt_toimitus'] != "") {
+					
+					$jtrivit = "";
 					//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
 				   	$query = "	SELECT tilausrivi.tunnus
 				   				FROM tilausrivin_lisatiedot
@@ -818,15 +820,12 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 				   				WHERE tilausrivin_lisatiedot.yhtio 			 = '$kukarow[yhtio]'
 				   				and tilausrivin_lisatiedot.tilausrivilinkki  = '$tilrivirow[tunnus]'";
 					$varastoon_result = mysql_query($query) or pupe_error($query);
-
 					while ($varastoon_row = mysql_fetch_array($varastoon_result)) {
 						$jtrivit .= "$varastoon_row[tunnus],";
 					}
-
 					if (trim($jtrivit) != "") {
 						$jtrivit = substr($jtrivit, 0, -1);
 					}
-
 
 					if ($yhtiorow["automaattinen_jt_toimitus"] != "") {
 

@@ -816,8 +816,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 				   				FROM tilausrivin_lisatiedot
 				   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
 				   				WHERE tilausrivin_lisatiedot.yhtio 			 = '$kukarow[yhtio]'
-				   				and tilausrivin_lisatiedot.tilausrivilinkki  = '$tilrivirow[tunnus]'
-								AND tilausrivin_lisatiedot.suoraan_laskutukseen = 'o'";
+				   				and tilausrivin_lisatiedot.tilausrivilinkki  = '$tilrivirow[tunnus]'";
 					$varastoon_result = mysql_query($query) or pupe_error($query);
 
 					while ($varastoon_row = mysql_fetch_array($varastoon_result)) {
@@ -828,57 +827,6 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 						$jtrivit = substr($jtrivit, 0, -1);
 					}
 
-					if(!function_exists("jt_toimita")) {
-						function jt_toimita ($toimittaja, $toimittajaid, $varastosta, $jtrivit, $automaaginen, $tee) {
-							global $yhtiorow, $kukarow, $oikeurow;
-
-							// Pidet‰‰n huolta mit‰ olemme pakkotoimittamassa!
-							static $pakkotoimitatilaukset;
-
-							//	Varmistetaan, ett‰ t‰m‰ ei periydy uudelle tilaukselle!
-							if(!in_array($tee, array("TOIMITA", "PAKKOTOIMITA")) and $jtrivit != "") {
-								$query = "	SELECT otunnus, group_concat(tunnus) vain_rivit
-							   				FROM tilausrivi
-							   				WHERE yhtio = '$kukarow[yhtio]' and tilausrivi.tunnus IN ($jtrivit)
-											GROUP BY otunnus";
-								$jttoimres = mysql_query($query) or pupe_error($query);
-							   	if(mysql_num_rows($jttoimres)>0) {
-									while($jttoimrow = mysql_fetch_array($jttoimres)) {
-
-										$asiakasno 			= "";
-										$asiakasid			= "";
-										$asiakasmaa 		= "";
-										$jarj	 			= "luontiaika";
-										$tuotenumero		= "";
-										$tilaus				= "";
-										$toimi				= "";
-										$superit			= "";
-										$tilaus_on_jo		= "KYLLA";
-										$kukarow["kesken"]	= $jttoimrow["otunnus"];
-										$vain_rivit 		= $jttoimrow["vain_rivit"];
-										$from_varastoon_inc = "varastoon.inc";
-
-										require('jtselaus.php');
-
-										$pakkotoimitatilaukset = $jttoimrow["otunnus"];
-									}
-								}
-							}
-							elseif(in_array($tee, array("TOIMITA", "PAKKOTOIMITA")) and $pakkotoimitatilaukset!="") {
-								$asiakasno 			= "";
-								$asiakasid			= "";
-								$asiakasmaa 		= "";
-								$jarj	 			= "luontiaika";
-								$tuotenumero		= "";
-								$tilaus				= "";
-								$toimi				= "";
-								$superit			= "";
-								$from_varastoon_inc = "varastoon.inc";
-
-								require('jtselaus.php');
-							}
-						}
-					}
 
 					if ($yhtiorow["automaattinen_jt_toimitus"] != "") {
 
@@ -886,8 +834,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 						jt_toimita("", "", $varastosta, $jtrivit, "tosi_automaaginen", "JATKA");
 
 						//	Laitetaan tavarat liikkeelle jos sallitaan!
-						if ($jtoikeudetrow["paivitys"] == 1 and ($yhtiorow["automaattinen_jt_toimitus"] == "T" or $yhtiorow["automaattinen_jt_toimitus"] == "S")) {
-							jt_toimita("", "", "", "", "dummy", "PAKKOTOIMITA");
+						if ($jtoikeudetrow["paivitys"] == 1 and ($yhtiorow["automaattinen_jt_toimitus"] == "T" or $yhtiorow["automaattinen_jt_toimitus"] == "S"  or $yhtiorow["automaattinen_jt_toimitus"] == "V")) {
+							jt_toimita("", "", "", "", "dummy", "TOIMITA");
 						}
 					}
 				}

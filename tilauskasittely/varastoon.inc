@@ -542,24 +542,24 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 			$superirivit .= "'$tilrivirow[tunnus]',";
 		}
 
-		if ($yhtiorow['automaattinen_jt_toimitus'] == 'S') {
+		//	Kohdistetaan vain oikeille asiakkaille näissä caseissa
+		if ($yhtiorow['automaattinen_jt_toimitus'] == 'S' or $yhtiorow["automaattinen_jt_toimitus"] == "V") {
+			$suoralisa = "";
+			if($yhtiorow['automaattinen_jt_toimitus'] == 'S') {
+				$suoralisa = "AND tilausrivin_lisatiedot.suoraan_laskutukseen='o'";
+			}
+			
 			//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
 		   	$query = "	SELECT tilausrivi.tunnus
 		   				FROM tilausrivin_lisatiedot
 		   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
 		   				WHERE tilausrivin_lisatiedot.yhtio 			 = '$kukarow[yhtio]'
-		   				and tilausrivin_lisatiedot.tilausrivilinkki  = '$tilrivirow[tunnus]'
-						AND tilausrivin_lisatiedot.suoraan_laskutukseen = 'o'";
+		   				AND tilausrivin_lisatiedot.tilausrivilinkki  = '$tilrivirow[tunnus]'
+						$suoralisa";
 			$varastoon_result = mysql_query($query) or pupe_error($query);
-
 			while ($varastoon_row = mysql_fetch_array($varastoon_result)) {
 				$jtrivit .= "$varastoon_row[tunnus],";
 			}
-
-			if (trim($jtrivit) != "") {
-				$jtrivit = substr($jtrivit, 0, -1);
-			}
-
 		}
 	}
 
@@ -797,33 +797,18 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				$varastosta[$v] = $v;
 			}
 		}
-
-
-		function jt_toimita ($toimittaja, $toimittajaid, $varastosta, $jtrivit, $automaaginen, $tee) {
-			global $yhtiorow, $kukarow, $oikeurow;
-
-			$asiakasno 			= "";
-			$asiakasid			= "";
-			$asiakasmaa 		= "";
-			$jarj	 			= "luontiaika";
-			$tuotenumero		= "";
-			$tilaus				= "";
-			$toimi				= "";
-			$superit			= "";
-			$tilaus_on_jo		= "";
-			$vain_rivit 		= $jtrivit;
-			$from_varastoon_inc = "varastoon.inc";
-
-			require('jtselaus.php');
+		
+		if (trim($jtrivit) != "") {
+			$jtrivit = substr($jtrivit, 0, -1);
 		}
-
+		
 		if ($yhtiorow["automaattinen_jt_toimitus"] != "") {
 
 			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "automaaginen", "JATKA");
 			jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "tosi_automaaginen", "JATKA");
 
 			//	Laitetaan tavarat liikkeelle jos sallitaan!
-			if ($jtoikeudetrow["paivitys"] == 1 and ($yhtiorow["automaattinen_jt_toimitus"] == "T" or $yhtiorow["automaattinen_jt_toimitus"] == "S")) {
+			if ($jtoikeudetrow["paivitys"] == 1 and ($yhtiorow["automaattinen_jt_toimitus"] == "T" or $yhtiorow["automaattinen_jt_toimitus"] == "S" or $yhtiorow["automaattinen_jt_toimitus"] == "V")) {
 				jt_toimita("", "", "", "", "dummy", "TOIMITA");
 			}
 		}

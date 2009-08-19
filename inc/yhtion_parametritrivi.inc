@@ -622,6 +622,7 @@
 		$ulos .= "<option value='K' $sel[K]>".t("Jälkitoimitusrivit kohdistetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "<option value='T' $sel[T]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan suoratoimitetut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
+		$ulos .= "<option value='V' $sel[V]>".t("Vain varastoon viedyt jälkitoimitusrivit kohdistetaan asiakkaalle ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

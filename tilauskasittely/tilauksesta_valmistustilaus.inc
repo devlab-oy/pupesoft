@@ -15,6 +15,14 @@
 						and tunnus	= '$otunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$myytilrow = mysql_fetch_array($result);
+			
+			//	Halutaan kohteen nimi jos sellainen on
+			$query = "	SELECT asiakkaan_kohde.kohde
+						FROM laskun_lisatiedot 
+						JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde
+						WHERE laskun_lisatiedot.yhtio='$kukarow[yhtio]' and asiakkaan_kohde>0 and otunnus = '$otunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+			$kohderow = mysql_fetch_array($result);
 
 			//otetaan ensin vain lisävarusteettomat tuotteet tai lisävarusteperheiden isät
 			$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, jt+varattu kpl, tilausrivi.tunnus rivitunnus
@@ -32,7 +40,7 @@
 			if (mysql_num_rows($lsresult) > 0) {
 				while ($valmlisaarivi = mysql_fetch_array($lsresult)) {
 					
-					$viesti = $myytilrow["tunnusnippu"]." ".$myytilrow["toim_nimi"];
+					$viesti = trim($myytilrow["tunnusnippu"]." ".$myytilrow["toim_nimi"]." ".$kohderow["kohde"]." ".$valmlisaarivi["tuoteno"]);
 					
 					//	Tarkistetaan onko meillä jo otsikko
 					$query = "	SELECT tunnus

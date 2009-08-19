@@ -34,7 +34,7 @@
 		$kieli = $argv[2];
 		$kukarow['kuka']  = "crond";
 
-		$query    = "select * from yhtio where yhtio='$kukarow[yhtio]'";
+		$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
 		$yhtiores = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($yhtiores) == 1) {
@@ -1488,7 +1488,10 @@
 							}
 
 							// Kirjoitetaan rivitietoja tilausriveiltä
-							$query = "	SELECT tilausrivi.*, lasku.vienti_kurssi, if(date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d')) toimitettuaika, $sorttauskentta
+							$query = "	SELECT tilausrivi.*, lasku.vienti_kurssi, 
+										if(date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d')) toimitettuaika, 										
+										if(tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika) toimaika,																				
+										$sorttauskentta
 										FROM tilausrivi
 										JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
 										WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -1506,7 +1509,12 @@
 									//Käännetään nimitys
 									$tilrow['nimitys'] = t_tuotteen_avainsanat($tilrow, 'nimitys', $laskun_kieli);
 								}
-
+								
+								// Palvelutuotteiden toimitettuaika syötetään käsin
+								if ($tilrow["keratty"] == "saldoton" and $yhtiorow["saldottomien_toimitettuaika"] == "K") {
+									$tilrow['toimitettuaika'] = $tilrow['toimaika'];
+								}
+								
 								//Käytetyn tavaran myynti
 								if ($tilrow["alv"] >= 500) {
 									$tilrow["alv"] = 0;
@@ -1886,6 +1894,7 @@
 										and tilausrivi.yhtio		 = '$kukarow[yhtio]'
 										and tilausrivi.tyyppi		 = 'L'
 										and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
+										and tilausrivi.kpl <> 0
 										ORDER BY tilausrivi.otunnus, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
 							$result = mysql_query($query) or pupe_error($query);
 
@@ -1902,6 +1911,12 @@
 							$varasto = 0;
 
 							while ($row = mysql_fetch_array($result)) {
+								
+								// Palvelutuotteiden toimitettuaika syötetään käsin
+								if ($row["keratty"] == "saldoton" and $yhtiorow["saldottomien_toimitettuaika"] == "K") {
+									$row['toimitettuaika'] = $row['toimaika'];
+								}
+								
 								rivi($page[$sivu]);
 
 								//Tutkitaan mihin printteriin tämän laskun voisi tulostaa

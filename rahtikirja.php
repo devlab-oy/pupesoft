@@ -29,7 +29,7 @@
 
 		$tila = $row["tila"];
 	}
-	
+
 	if ($tee == 'NAYTATILAUS') {
 		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 		require ("raportit/naytatilaus.inc");
@@ -119,8 +119,8 @@
 				$pakres = mysql_query($query) or pupe_error($query);
 				$pakrow = mysql_fetch_array($pakres);
 
-				if($pakrow["veloitukset"]!="") {
-					$query = "DELETE from tilausrivi where yhtio='{$kukarow["yhtio"]}' and otunnus='$otsikkonro' and tuoteno IN ({$pakrow["veloitukset"]})";
+				if ($pakrow["veloitukset"]!="") {
+					$query = "DELETE from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$otsikkonro' and tuoteno IN ($pakrow[veloitukset])";
 					$delres = mysql_query($query) or pupe_error($query);
 				}
 			}
@@ -152,7 +152,7 @@
 					$toimaika			= $laskurow["toimaika"];
 					$kerayspvm			= $laskurow["kerayspvm"];
 					$jtkielto 			= $laskurow['jtkielto'];
-					
+
 					require("tilauskasittely/lisaarivi.inc");
 
 					//	Merkataan tämä rivi kerätyksi ja toimitetuksi..
@@ -167,8 +167,8 @@
 					if ($lisatty_rivitunnus != '') {
 						$query = "	UPDATE tilausrivi set
 									kerattyaika	= now(),
-									keratty		= '{$kukarow["kuka"]}'
-									where yhtio = '$kukarow[yhtio]' and tunnus='{$lisatyt_rivit1[0]}'";
+									keratty		= '$kukarow[kuka]'
+									where yhtio = '$kukarow[yhtio]' and tunnus='$lisatyt_rivit1[0]'";
 						$updres = mysql_query($query) or pupe_error($query);
 					}
 				}
@@ -360,10 +360,10 @@
 
 			//Ainostaan tulostusaluuen mukaan splittaantuneet tilaukset yhdistetään
 			if ($yhtiorow["splittauskielto"] == "" and strpos($tunnukset,',') !== false and $yhtiorow['pakkaamolokerot'] == 'K') {
-				
+
 				$otsikko_tunnarit = explode(',',$tunnukset);
 				sort($otsikko_tunnarit);
-				
+
 				$query = "	UPDATE tilausrivi SET
 							otunnus		= '$otsikko_tunnarit[0]'
 							where yhtio = '$kukarow[yhtio]' and otunnus in ($tunnukset)";
@@ -377,9 +377,9 @@
 				$updateres = mysql_query($query) or pupe_error($query);
 
 				$laskurow['tunnus'] = $otsikko_tunnarit[0];
-							
+
 			}
-			
+
 			// Katsotaan pitäisikö tämä rahtikirja tulostaa heti...
 			$query = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -449,17 +449,17 @@
 				$query = "	SELECT pakkaamo.printteri1, pakkaamo.printteri3, varastopaikat.printteri5
 							from pakkaamo
 							join varastopaikat ON pakkaamo.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '$laskurow[varasto]'
-							where pakkaamo.yhtio='$kukarow[yhtio]' 
+							where pakkaamo.yhtio='$kukarow[yhtio]'
 							and pakkaamo.tunnus='$laskurow[pakkaamo]'
 							order by pakkaamo.tunnus";
 			}
 			elseif ($laskurow['tulostusalue'] != '' and $laskurow['varasto'] != '') {
 				$query = "	SELECT varaston_tulostimet.printteri1, varaston_tulostimet.printteri3, varastopaikat.printteri5
 							FROM varaston_tulostimet
-							JOIN varastopaikat ON (varaston_tulostimet.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '{$laskurow['varasto']}')
-							WHERE varaston_tulostimet.yhtio = '{$kukarow['yhtio']}' 
-							AND varaston_tulostimet.nimi = '{$laskurow['tulostusalue']}'
-							AND varaston_tulostimet.varasto = '{$laskurow['varasto']}'
+							JOIN varastopaikat ON (varaston_tulostimet.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '$laskurow[varasto]')
+							WHERE varaston_tulostimet.yhtio = '$kukarow[yhtio]'
+							AND varaston_tulostimet.nimi = '$laskurow[tulostusalue]'
+							AND varaston_tulostimet.varasto = '$laskurow[varasto]'
 							ORDER BY varaston_tulostimet.prioriteetti, varaston_tulostimet.alkuhyllyalue";
 			}
 			elseif ($laskurow["varasto"] == '') {
@@ -476,11 +476,11 @@
 							order by alkuhyllyalue,alkuhyllynro";
 			}
 			$prires = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($prires) > 0) {
 
 				$prirow= mysql_fetch_array($prires);
-				
+
 				// käteinen muuttuja viritetään tilaus-valmis.inc:issä jos maksuehto on käteinen
 				// ja silloin pitää kaikki lähetteet tulostaa aina printteri5:lle (lasku printteri)
 				if ($kateinen == 'X') {
@@ -495,16 +495,16 @@
 				$kirres  = mysql_query($query) or pupe_error($query);
 				$kirrow  = mysql_fetch_array($kirres);
 				$komento = $kirrow['komento'];
-				
+
 				$apuprintteri = $valittu_oslapp_tulostin;
-							
+
 				//haetaan osoitelapun tulostuskomento
 				$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
 				$kirres = mysql_query($query) or pupe_error($query);
 				$kirrow = mysql_fetch_array($kirres);
 				$oslapp = $kirrow['komento'];
 			}
-						
+
 			if ($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) {
 
 				$otunnus = $laskurow["tunnus"];
@@ -535,9 +535,9 @@
 						$lahetetyyppi = $vrow["selite"];
 					}
 				}
-				
+
 				$utuotteet_mukaan = 0;
-				
+
 				if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
 					require_once ("tilauskasittely/tulosta_lahete_alalasku.inc");
 				}
@@ -547,7 +547,7 @@
 				else {
 					require_once ("tilauskasittely/tulosta_lahete.inc");
 					$utuotteet_mukaan = 1;
-				}				
+				}
 
 				//	Jos meillä on funktio tulosta_lahete meillä on suora funktio joka hoitaa koko tulostuksen
 				if(function_exists("tulosta_lahete")) {
@@ -565,9 +565,9 @@
 					// haetaan asiakkaan tietojen takaa sorttaustiedot
 					$order_sorttaus = '';
 
-					$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta 
-											FROM asiakas 
-											WHERE yhtio='$kukarow[yhtio]' 
+					$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta
+											FROM asiakas
+											WHERE yhtio='$kukarow[yhtio]'
 											and tunnus='$laskurow[liitostunnus]'";
 					$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
 
@@ -645,7 +645,7 @@
 
 						$total+= $row["rivihinta"];
 					}
-					
+
 					//Haetaan erikseen toimitettavat tuotteet
 					if ($laskurow["vanhatunnus"] != 0 and $utuotteet_mukaan == 1) {
 						$query = " 	SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
@@ -685,7 +685,7 @@
 								$row['kpl']			= "";
 								$row['jt'] 			= "";
 								$row['d_erikseen'] 	= "JOO";
-								
+
 								rivi($page[$sivu], $lah_tyyppi);
 							}
 						}
@@ -717,7 +717,7 @@
 				$tunnus = $laskurow["tunnus"];
 
 				$oslaput_email = 1;
-				
+
 				if ($oslappkpl > 0 and $oslappkpl != '' and $oslapp != 'email') {
 					$oslapp .= " -#$oslappkpl ";
 				}
@@ -732,7 +732,7 @@
 							WHERE yhtio = '$kukarow[yhtio]' AND selite = '$laskurow[toimitustapa]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$toimitustaparow = mysql_fetch_array($result);
-				
+
 				for ($i = 0; $i < $oslaput_email; $i++) {
 					if ($toimitustaparow['osoitelappu'] == 'intrade') {
 						require('tilauskasittely/osoitelappu_intrade_pdf.inc');
@@ -753,7 +753,7 @@
 						}
 					}
 				}
-				
+
 			}
 
 			echo "<br><br>";
@@ -852,7 +852,7 @@
 			if($row["selite"] == $tutoimtapa) {
 				$sel = 'selected';
 				$tutoimtapa = $row["selite"];
-			}								
+			}
 			echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
 		}
 
@@ -888,11 +888,11 @@
 			}
 
 			echo "</select></td></tr><tr>";
-		}	
-		
+		}
+
 		echo "<td>".t("Etsi tilausta").":</td><td><input type='text' name='etsi'>";
 		echo "<input type='Submit' value='".t("Etsi")."'></form></td></tr>";
-		
+
 		echo "</table>";
 
 		$haku = '';
@@ -902,17 +902,17 @@
 		}
 
 		if (is_numeric($etsi) and $etsi != '') {
-			
-			//etsitään myös splittaantuneet 		
-			$query = "	SELECT distinct vanhatunnus 
-						FROM lasku 
-						WHERE yhtio = '$kukarow[yhtio]' 
+
+			//etsitään myös splittaantuneet
+			$query = "	SELECT distinct vanhatunnus
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus = '$etsi'
 						AND tila = '$tila'
 						AND alatila = 'C'";
 			$vanhatre = mysql_query($query) or pupe_error($query);
 			$vanhatrow = mysql_fetch_array($vanhatre);
-			
+
 			if ($vanhatrow['vanhatunnus'] == 0) {
 				$haku .= "and lasku.tunnus = '$etsi'";
 			}
@@ -924,16 +924,16 @@
 							AND tila = '$tila'
 							AND alatila = 'C'";
 				$etsire = mysql_query($query) or pupe_error($query);
-				$etsirow = mysql_fetch_array($etsire);	
+				$etsirow = mysql_fetch_array($etsire);
 
 				if ($etsirow["tunnukset"] != '') {
 					$haku .= "and lasku.tunnus in($etsirow[tunnukset])";
-				}		
+				}
 				else {
 					echo "<font class='message'>".t("Sopivia tilauksia ei löytynyt")."...</font><br><br>";
 				}
-			}				
-				
+			}
+
 		}
 
 		if ($tuvarasto != '' and $tuvarasto != 'KAIKKI') {
@@ -948,9 +948,9 @@
 							AND nimi = '$kukarow[oletus_pakkaamo]'";
 				$etsire = mysql_query($query) or pupe_error($query);
 				$etsirow = mysql_fetch_array($etsire);
-				
+
 				$haku .= " and lasku.pakkaamo in($etsirow[tunnukset])";
-				
+
 			}
 			elseif ($tupakkaamo != '' and $tupakkaamo != 'KAIKKI') {
 				$query = "	SELECT group_concat(tunnus SEPARATOR ',') tunnukset
@@ -959,11 +959,11 @@
 							AND nimi = '$tupakkaamo'";
 				$etsire = mysql_query($query) or pupe_error($query);
 				$etsirow = mysql_fetch_array($etsire);
-				
+
 				$haku .= " and lasku.pakkaamo in($etsirow[tunnukset])";
 			}
 		}
-		
+
 
 		if ($tumaa != '') {
 			$query = "	SELECT group_concat(tunnus) tunnukset
@@ -991,9 +991,9 @@
 		}
 
 		//jos myyntitilaus niin halutaan maksuehto mukaan
-		if ($tila == 'L') {		
+		if ($tila == 'L') {
 			$selectmaksuehto 	= " if(maksuehto.jv='', 'OK', lasku.tunnus) jvgrouppi, ";
-			$joinmaksuehto 		= " JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus ";	
+			$joinmaksuehto 		= " JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus ";
 			$groupmaksuehto 	= " jvgrouppi, ";
 		}
 		else {
@@ -1001,7 +1001,7 @@
 		}
 
 		$lisawhere = "";
-		
+
 		if ($yhtiorow['pakkaamolokerot'] == 'K') {
 			$lisawhere = " and ((rahtikirjat.otsikkonro is null or (rahtikirjat.otsikkonro is not null and lasku.pakkaamo > 0) and (rahtikirjat.pakkaus = 'KOLLI' or rahtikirjat.pakkaus = 'Rullakko')) or rahtikirjat.poikkeava = -9) ";
 		}
@@ -1014,16 +1014,16 @@
 			$selecttoimitustapaehto = " toimitustapa.tunnus kimppakyyti, ";
 		}
 		else {
-			$selecttoimitustapaehto = " if(toimitustapa.tulostustapa='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti, "; 
+			$selecttoimitustapaehto = " if(toimitustapa.tulostustapa='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti, ";
 		}
-		
+
 		if($jarj != "") {
 			$jarjx = " ORDER BY $jarj";
 		}
 		else {
 			$jarjx = " ORDER BY laadittu";
 		}
-		
+
 		// Haetaan sopivia tilauksia
 		$query = "	SELECT
 					lasku.toimitustapa toimitustapa,
@@ -1035,25 +1035,25 @@
 					date_format(lasku.toimaika, '%Y-%m-%d') toimaika,
 					min(lasku.vanhatunnus) vanhatunnus,
 					min(lasku.pakkaamo) pakkaamo,
-					min(lasku.varasto) varasto,					
+					min(lasku.varasto) varasto,
 					min(lasku.tunnus) tunnus,
-					GROUP_CONCAT(distinct lasku.tunnus order by lasku.tunnus) tunnukset,					
+					GROUP_CONCAT(distinct lasku.tunnus order by lasku.tunnus) tunnukset,
 					GROUP_CONCAT(distinct ytunnus) ytunnus,
 					min(tilausrivi.kerattyaika) kerattyaika,
-					min(lasku.luontiaika) luontiaika,	
-					min(lasku.h1time) h1time,	
-					min(lasku.lahetepvm) lahetepvm,	
-					min(lasku.kerayspvm) kerayspvm,	
+					min(lasku.luontiaika) luontiaika,
+					min(lasku.h1time) h1time,
+					min(lasku.lahetepvm) lahetepvm,
+					min(lasku.kerayspvm) kerayspvm,
 					min(lasku.tunnus) mintunnus,
 					if(lasku.tila='L',GROUP_CONCAT(distinct concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) order by concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) SEPARATOR '<br>'), GROUP_CONCAT(distinct lasku.nimi)) nimi,
-					GROUP_CONCAT(distinct lasku.laatija order by lasku.laatija SEPARATOR '<br>') laatija,																									
+					GROUP_CONCAT(distinct lasku.laatija order by lasku.laatija SEPARATOR '<br>') laatija,
 					group_concat(DISTINCT concat_ws('\n\n', if(comments!='',concat('".t("Lähetteen lisätiedot").":\n',comments),NULL), if(sisviesti2!='',concat('".t("Keräyslistan lisätiedot").":\n',sisviesti2),NULL)) SEPARATOR '\n') ohjeet,
 					min(if(lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
-					min(if(lasku.clearing = '', 'N', if(lasku.clearing = 'JT-TILAUS', 'J', if(lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,					
+					min(if(lasku.clearing = '', 'N', if(lasku.clearing = 'JT-TILAUS', 'J', if(lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,
 					GROUP_CONCAT(DISTINCT varastopaikat.nimitys) varastonimi,
 					GROUP_CONCAT(lasku.pakkaamo order by lasku.tunnus) pakkaamot,
-					sum(rahtikirjat.kollit) kollit,					
-					count(distinct lasku.tunnus) tunnukset_lkm					
+					sum(rahtikirjat.kollit) kollit,
+					count(distinct lasku.tunnus) tunnukset_lkm
 					FROM lasku use index (tila_index)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != ''
 					$joinmaksuehto
@@ -1066,9 +1066,9 @@
 					$wherelasku
 					$haku
 					$tilaustyyppi
-					$lisawhere 
-					and ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')					
-					GROUP BY lasku.toimitustapa, toimitustapa.nouto, $groupmaksuehto kimppakyyti, lasku.vienti, laadittux, toimaika $grouplisa					
+					$lisawhere
+					and ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
+					GROUP BY lasku.toimitustapa, toimitustapa.nouto, $groupmaksuehto kimppakyyti, lasku.vienti, laadittux, toimaika $grouplisa
 					$jarjx";
 		$tilre = mysql_query($query) or pupe_error($query);
 
@@ -1078,39 +1078,39 @@
 			echo "<br><table>";
 
 			echo "<tr>";
-			
+
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='prioriteetti'; document.forms['find'].submit();\">".t("Pri")."<br>
 					  <a href='#' onclick=\"getElementById('jarj').value='varastonimi'; document.forms['find'].submit();\">".t("Varastoon")."</th>";
-			
+
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='tunnus'; document.forms['find'].submit();\">".t("Tilaus")."</th>";
-			
+
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='ytunnus'; document.forms['find'].submit();\">".t("Asiakas")."<br>
-					  <a href='#' onclick=\"getElementById('jarj').value='nimi'; document.forms['find'].submit();\">".t("Nimi")."</th>";			
-			
-			
+					  <a href='#' onclick=\"getElementById('jarj').value='nimi'; document.forms['find'].submit();\">".t("Nimi")."</th>";
+
+
 			echo "<th valign='top'>
 					<a href='#' onclick=\"getElementById('jarj').value='laadittu'; document.forms['find'].submit();\">".t("Laadittu")."<br>
 					<a href='#' onclick=\"getElementById('jarj').value='luontiaika'; document.forms['find'].submit();\">".t("Valmis")."<br>
 					<a href='#' onclick=\"getElementById('jarj').value='lasku.h1time'; document.forms['find'].submit();\">".t("Tulostettu")."<br>
 					<a href='#' onclick=\"getElementById('jarj').value='lasku.lahetepvm'; document.forms['find'].submit();\">".t("Kerätty")."</th>";
-			
+
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='kerayspvm'; document.forms['find'].submit();\">".t("Keräysaika")."<br>
 					  <a href='#' onclick=\"getElementById('jarj').value='toimaika'; document.forms['find'].submit();\">".t("Toimitusaika")."</th>";
-			
+
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">".t("Toimitustapa")."</th>";
-			
+
 			if ($yhtiorow['pakkaamolokerot'] == 'K') {
 				echo "<th valign='top'>".t("Kollit")."<br>".t("Rullakot")."</th>";
 				echo "<th valign='top'>".t("Pakkaamo")."<br>".t("Lokero")."</th>";
 			}
-			
+
 			echo "</tr></form>";
-			
-			$osittaiset = array();			
-			
+
+			$osittaiset = array();
+
 			while ($row = mysql_fetch_array($tilre)) {
 				//chekkaus että kaikki splitatut tilaukset on kerätty
-				/* ei oteta huomioon niitä mistä puuttuu tulostusalue ja millä on tietty alatila 
+				/* ei oteta huomioon niitä mistä puuttuu tulostusalue ja millä on tietty alatila
 				lisää alatila B jos käytetään keräästä rahtikirjansyöttöön halutessa */
 				if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K') {
 					$query = "	SELECT count(distinct lasku.tunnus) kpl, GROUP_CONCAT(DISTINCT if(lasku.tunnus not in ($row[tunnukset]), lasku.tunnus, null) order by lasku.tunnus) odottaa
@@ -1126,12 +1126,12 @@
 								group by lasku.vanhatunnus";
 					$vanhat_res = mysql_query($query) or pupe_error($query);
 					$vanhat_row = mysql_fetch_array($vanhat_res);
-				}	
-						
+				}
+
 				if ($vanhat_row['kpl'] == $row['tunnukset_lkm'] or $vanhat_row['kpl'] == 0 or $yhtiorow["splittauskielto"] != "" or $yhtiorow['pakkaamolokerot'] == '') {
-													
+
 					echo "<tr class='aktiivi'>";
-					
+
 					if(trim($row["ohjeet"]) != "") {
 						echo "<div id='$row[mintunnus]' class='popup' style='width: 500px;'>";
 						echo t("Tilaukset").": ".$row["tunnukset"]."<br>";
@@ -1147,17 +1147,17 @@
 
 
 					echo "<br>$row[varastonimi]</td>";
-															
-					echo "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";					
-					echo "<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>";					
-					
+
+					echo "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";
+					echo "<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>";
+
 					$laadittu_e 	= tv1dateconv($row["luontiaika"], "P", "LYHYT");
 					$h1time_e		= tv1dateconv($row["h1time"], "P", "LYHYT");
-					$lahetepvm_e	= tv1dateconv($row["lahetepvm"], "P", "LYHYT");									
-					$kerattyaika_e	= tv1dateconv($row["kerattyaika"], "P", "LYHYT");						
+					$lahetepvm_e	= tv1dateconv($row["lahetepvm"], "P", "LYHYT");
+					$kerattyaika_e	= tv1dateconv($row["kerattyaika"], "P", "LYHYT");
 					$kerattyaika_e	= str_replace(substr($lahetepvm_e, 0, strpos($lahetepvm_e, " ")), "", $kerattyaika_e);
 					$lahetepvm_e	= str_replace(substr($h1time_e, 0, strpos($h1time_e, " ")), "", $lahetepvm_e);
-					$h1time_e		= str_replace(substr($laadittu_e, 0, strpos($laadittu_e, " ")), "", $h1time_e);			
+					$h1time_e		= str_replace(substr($laadittu_e, 0, strpos($laadittu_e, " ")), "", $h1time_e);
 
 					echo "<td valign='top' nowrap align='right'>$laadittu_e<br>$h1time_e<br>$lahetepvm_e<br>$kerattyaika_e</td>";
 					echo "<td valign='top' nowrap align='right'>".tv1dateconv($row["kerayspvm"], "", "LYHYT")."<br>".tv1dateconv($row["toimaika"], "", "LYHYT")."</td>";
@@ -1167,13 +1167,13 @@
 
 						$kollit_chk = 0;
 						$rullakot_chk = 0;
-					
+
 						$query = "	SELECT pakkaus, kollit
 									FROM rahtikirjat
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND otsikkonro in ($row[tunnukset])";
 						$kollit_res = mysql_query($query) or pupe_error($query);
-					
+
 						while ($kollit_row = mysql_fetch_array($kollit_res)) {
 							if (trim(strtolower($kollit_row['pakkaus'])) == 'kolli') {
 								$kollit_chk += $kollit_row['kollit'];
@@ -1181,9 +1181,9 @@
 
 							if (trim(strtolower($kollit_row['pakkaus'])) == 'rullakko') {
 								$rullakot_chk += $kollit_row['kollit'];
-							}						
+							}
 						}
-					
+
 						if ($kollit_chk == 0) {
 							$kollit_chk = "";
 						}
@@ -1207,13 +1207,13 @@
 							echo "&nbsp;";
 						}
 						echo "</td>";
-						
-						$query = "	SELECT nimi, lokero 
+
+						$query = "	SELECT nimi, lokero
 									FROM pakkaamo
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus in($row[pakkaamot])";
 						$pakkaamoresult = mysql_query($query) or pupe_error($query);
-						
+
 						echo "<td valign='top'>";
 						if (mysql_num_rows($pakkaamoresult) > 0) {
 							while ($pakkaamo_row = mysql_fetch_array($pakkaamoresult)) {
@@ -1222,10 +1222,10 @@
 						}
 						else {
 							echo "&nbsp;";
-						}			
-						echo "</td>";			
+						}
+						echo "</td>";
 					}
-					
+
 					echo "	<form method='post' action='$PHP_SELF'>
 							<input type='hidden' name='id' value='$row[tunnus]'>
 							<input type='hidden' name='tunnukset' value='$row[tunnukset]'>
@@ -1237,11 +1237,11 @@
 					echo "</tr>";
 				}
 				else {
-					
+
 					//kesken olevat
-					$temp_osittaiset  = "";					
-					$temp_osittaiset .= "<tr class='aktiivi'>";					
-					
+					$temp_osittaiset  = "";
+					$temp_osittaiset .= "<tr class='aktiivi'>";
+
 					if(trim($row["ohjeet"]) != "") {
 						$temp_osittaiset .= "<div id='$row[mintunnus]' class='popup' style='width: 500px;'>";
 						$temp_osittaiset .= t("Tilaukset").": ".$row["tunnukset"]."<br>";
@@ -1257,27 +1257,27 @@
 
 
 					$temp_osittaiset .= "<br>$row[varastonimi]</td>";
-															
-					$temp_osittaiset .= "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";										
+
+					$temp_osittaiset .= "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";
 					$temp_osittaiset .= "<td valign='top'>";
-					
+
 					$odotamme_naita = explode(",", $vanhat_row["odottaa"]);
-					
+
 					foreach ($odotamme_naita as $odn) {
 						$temp_osittaiset .= "<a href='?toim=$toim&tee=NAYTATILAUS&tuvarasto=$tuvarasto&tumaa=$tumaa&tutyyppi=$tutyyppi&tutoimtapa=$tutoimtapa&tupakkaamo=$tupakkaamo&tunnus=$odn'>$odn</a><br>";
 					}
-					$temp_osittaiset .= "</td>";					
+					$temp_osittaiset .= "</td>";
 					$temp_osittaiset .= "<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>";
-					
+
 					$laadittu_e 	= tv1dateconv($row["luontiaika"], "P", "LYHYT");
 					$h1time_e		= tv1dateconv($row["h1time"], "P", "LYHYT");
-					$lahetepvm_e	= tv1dateconv($row["lahetepvm"], "P", "LYHYT");									
-					$kerattyaika_e	= tv1dateconv($row["kerattyaika"], "P", "LYHYT");						
+					$lahetepvm_e	= tv1dateconv($row["lahetepvm"], "P", "LYHYT");
+					$kerattyaika_e	= tv1dateconv($row["kerattyaika"], "P", "LYHYT");
 					$kerattyaika_e	= str_replace(substr($lahetepvm_e, 0, strpos($lahetepvm_e, " ")), "", $kerattyaika_e);
 					$lahetepvm_e	= str_replace(substr($h1time_e, 0, strpos($h1time_e, " ")), "", $lahetepvm_e);
-					$h1time_e		= str_replace(substr($laadittu_e, 0, strpos($laadittu_e, " ")), "", $h1time_e);			
+					$h1time_e		= str_replace(substr($laadittu_e, 0, strpos($laadittu_e, " ")), "", $h1time_e);
 
-					$temp_osittaiset .= "<td valign='top' nowrap align='right'>$laadittu_e<br>$h1time_e<br>$lahetepvm_e<br>$kerattyaika_e</td>";					
+					$temp_osittaiset .= "<td valign='top' nowrap align='right'>$laadittu_e<br>$h1time_e<br>$lahetepvm_e<br>$kerattyaika_e</td>";
 					$temp_osittaiset .= "<td valign='top' nowrap align='right'>".tv1dateconv($row["kerayspvm"], "", "LYHYT")."<br>".tv1dateconv($row["toimaika"], "", "LYHYT")."</td>";
 					$temp_osittaiset .= "<td valign='top'>$row[toimitustapa]</td>";
 
@@ -1285,13 +1285,13 @@
 
 						$kollit_chk = 0;
 						$rullakot_chk = 0;
-					
+
 						$query = "	SELECT pakkaus, kollit
 									FROM rahtikirjat
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND otsikkonro in ($row[tunnukset])";
 						$kollit_res = mysql_query($query) or pupe_error($query);
-					
+
 						while ($kollit_row = mysql_fetch_array($kollit_res)) {
 							if (trim(strtolower($kollit_row['pakkaus'])) == 'kolli') {
 								$kollit_chk += $kollit_row['kollit'];
@@ -1299,9 +1299,9 @@
 
 							if (trim(strtolower($kollit_row['pakkaus'])) == 'rullakko') {
 								$rullakot_chk += $kollit_row['kollit'];
-							}						
+							}
 						}
-					
+
 						if ($kollit_chk == 0) {
 							$kollit_chk = "";
 						}
@@ -1318,7 +1318,7 @@
 							$temp_osittaiset .= "&nbsp;";
 						}
 						$temp_osittaiset .= "<br>";
-						
+
 						if ($rullakot_chk > 0) {
 							$temp_osittaiset .= $rullakot_chk;
 						}
@@ -1326,13 +1326,13 @@
 							$temp_osittaiset .= "&nbsp;";
 						}
 						$temp_osittaiset .= "</td>";
-						
-						$query = "	SELECT nimi, lokero 
+
+						$query = "	SELECT nimi, lokero
 									FROM pakkaamo
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tunnus in($row[pakkaamot])";
 						$pakkaamoresult = mysql_query($query) or pupe_error($query);
-						
+
 						$temp_osittaiset .= "<td valign='top'>";
 						if (mysql_num_rows($pakkaamoresult) > 0) {
 							while ($pakkaamo_row = mysql_fetch_array($pakkaamoresult)) {
@@ -1341,23 +1341,23 @@
 						}
 						else {
 							$temp_osittaiset .= "&nbsp;";
-						}			
-						$temp_osittaiset .= "</td>";													
+						}
+						$temp_osittaiset .= "</td>";
 					}
 
 					$temp_osittaiset .= "<form method='post' action='$PHP_SELF'>";
 					$temp_osittaiset .= "<td valign='top'>";
-					
-					$checkit = explode(",",$row["tunnukset"]); 
-					
+
+					$checkit = explode(",",$row["tunnukset"]);
+
 					if (count($checkit) > 1) {
 						foreach ($checkit as $key => $value) {
 							$temp_osittaiset .= "<input type='checkbox' name='checktunnukset[]' value='$value'><br>";
 						}
 					}
-					
+
 					$temp_osittaiset .= "</td>";
-					
+
 					$temp_osittaiset .= "	<input type='hidden' name='id' value='$row[tunnus]'>
 											<input type='hidden' name='tunnukset' value='$row[tunnukset]'>
 											<input type='hidden' name='toim' value='$toim'>
@@ -1366,22 +1366,22 @@
 											<td class='back' valign='top'><input type='submit' name='tila' value='".t("Syötä")."'></td>
 											</form>";
 					$temp_osittaiset .= "</tr>";
-					
-					$osittaiset[] = $temp_osittaiset;					
+
+					$osittaiset[] = $temp_osittaiset;
 				}
 			}
 			echo "</table>";
-			
+
 			if (count($osittaiset) > 0) {
 				$spanni = 8;
-				
+
 				if ($yhtiorow['pakkaamolokerot'] == 'K') {
 					$spanni += 2;
 				}
-				
-				echo "<br><table>";			
+
+				echo "<br><table>";
 				echo "<tr><th colspan ='$spanni'>".t("Odottavat tilaukset")."</th></tr>";
-				
+
 				echo "<tr>";
 				echo "<th valign='top'>".t("Pri")."<br>".t("Varastoon")."</th>";
 				echo "<th valign='top'>".t("Tilaus")."</th>";
@@ -1391,19 +1391,19 @@
 				echo "<th valign='top'>".t("Keräysaika")."<br>".t("Toimitusaika")."</th>";
 				echo "<th valign='top'>".t("Toimitustapa")."</th>";
 
-				if ($yhtiorow['pakkaamolokerot'] == 'K') {				
+				if ($yhtiorow['pakkaamolokerot'] == 'K') {
 					echo "<th valign='top'>".t("Kollit")."<br>".t("Rullakot")."</th>";
 					echo "<th valign='top'>".t("Pakkaamo")."<br>".t("Lokero")."</th>";
 				}
 				echo "<th valign='top'>".t("Valitse")."</th>";
 				echo "</tr>";
-				
-				for ($i=0; $i < count($osittaiset); $i++) { 
+
+				for ($i=0; $i < count($osittaiset); $i++) {
 					echo $osittaiset[$i];
 				}
-				
+
 				echo "</table>";
-			}					
+			}
 		}
 		else {
 			echo "<font class='message'>".t("Sopivia tilauksia ei löytynyt")."...</font><br><br>";
@@ -1528,7 +1528,7 @@
 						WHERE maa != '' and yhtio = '$kukarow[yhtio]' and maa = '$tumaa'";
 			$maare = mysql_query($query) or pupe_error($query);
 			$maarow = mysql_fetch_array($maare);
-			
+
 			$haku .= " and lasku.varasto in ($maarow[tunnukset]) ";
 		}
 
@@ -1655,34 +1655,34 @@
 				$marow = mysql_fetch_array($resul);
 			}
 		}
-	
+
 		if (isset($checktunnukset) and is_array($checktunnukset)) {
 			$tunnukset = implode(',', $checktunnukset);
 		}
-		
+
 		echo "	<script language='javascript'>
 				function summaa_kollit(kollit_yht) {
-					
+
 					var currForm = kollit_yht.form;
 					var isChecked = kollit_yht.checked;
-					var nimi = 'kollit';					
+					var nimi = 'kollit';
 					var yht = 0;
-					
-					for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {											
+
+					for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
 						if (currForm.elements[elementIdx].name.substring(0,6) == nimi) {
 							yht += Math.round(currForm.elements[elementIdx].value);
 						}
 					}
-					
+
 					if (isNaN(yht)) {
 						currForm.oslappkpl.value=0;
 					}
 					else {
 						currForm.oslappkpl.value=yht;
-					}										
+					}
 				}
 			</script> ";
-		
+
 		echo "<table>";
 		echo "<form name='rahtikirjainfoa' action='$PHP_SELF' method='post' autocomplete='off'>";
 		echo "<input type='hidden' name='rahtikirjan_esisyotto' value='$rahtikirjan_esisyotto'>";
@@ -1692,12 +1692,12 @@
 		echo "<input type='hidden' name='otsikkonro' value='$otsik[tunnus]'>";
 		echo "<input type='hidden' name='tunnukset' value='$tunnukset'>";
 		echo "<input type='hidden' name='mista' value='$mista'>";
-		
+
 		echo "<tr><th align='left'>".t("Tilaus")."</th>";
-		
+
 		if ($tunnukset != "") echo "<td>$tunnukset</td>";
-		else echo "<td>$otsik[tunnus]</td>";		
-		
+		else echo "<td>$otsik[tunnus]</td>";
+
 		echo "<th align='left'>".t("Ytunnus")."</th><td>$otsik[ytunnus]</td></tr>";
 
 		echo "<tr><th align='left'>".t("Asiakas")."</th><td>$otsik[nimi] $otsik[nimitark]<br>$otsik[osoite]<br>$otsik[postino] $otsik[postitp]</td>";
@@ -1829,26 +1829,26 @@
 			if ($otsik['pakkaamo'] > 0 and $otsik['varasto'] != '' and $otsik['tulostusalue'] != '') {
 				$query = "	SELECT pakkaamo.printteri2, pakkaamo.printteri4, pakkaamo.printteri6
 							from pakkaamo
-							where pakkaamo.yhtio='$kukarow[yhtio]' 
+							where pakkaamo.yhtio='$kukarow[yhtio]'
 							and pakkaamo.tunnus='$otsik[pakkaamo]'
 							order by pakkaamo.tunnus";
 			}
 			elseif ($otsik['tulostusalue'] != '' and $otsik['varasto'] != '') {
 				$query = "	SELECT varaston_tulostimet.printteri2, varaston_tulostimet.printteri4, varaston_tulostimet.printteri6
 							FROM varaston_tulostimet
-							WHERE varaston_tulostimet.yhtio = '{$kukarow['yhtio']}' 
-							AND varaston_tulostimet.nimi = '{$otsik['tulostusalue']}'
-							AND varaston_tulostimet.varasto = '{$otsik['varasto']}'
+							WHERE varaston_tulostimet.yhtio = '$kukarow[yhtio]'
+							AND varaston_tulostimet.nimi = '$otsik[tulostusalue]'
+							AND varaston_tulostimet.varasto = '$otsik[varasto]'
 							ORDER BY varaston_tulostimet.prioriteetti, varaston_tulostimet.alkuhyllyalue";
 							echo "varaston_tulostimet";
 			}
 			else {
-				$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$tulostuspaikka'";				
+				$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$tulostuspaikka'";
 			}
-			
+
 			$pres  = mysql_query($query) or pupe_error($query);
 			$print = mysql_fetch_array($pres);
-			
+
 			// haetaan toimitustavan tiedot
 			$query    = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
 			$toitares = mysql_query($query) or pupe_error($query);
@@ -1858,7 +1858,7 @@
 			$query    = "SELECT * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'RAHTIKIRJA' and selite = '$toitarow[rahtikirja]'";
 			$avainres = mysql_query($query) or pupe_error($query);
 			$avainrow = mysql_fetch_array($avainres);
-			
+
 			if ($avainrow["selitetark_2"] == "1") {
 				$kirjoitin_tunnus = $print["printteri6"]; // Rahtikirja A4
 			}
@@ -1877,7 +1877,7 @@
 			else {
 				$kirjoitin_tunnus = $print["printteri6"]; // Rahtikirja A4
 			}
-			
+
 			$query = "	SELECT *
 						FROM kirjoittimet
 						WHERE
@@ -1885,14 +1885,14 @@
 						ORDER by kirjoitin";
 			$kirre = mysql_query($query) or pupe_error($query);
 
-			echo "<th>".t("Rahtikirjatulostin")."</th><td><select name='komento'>";		
+			echo "<th>".t("Rahtikirjatulostin")."</th><td><select name='komento'>";
 
 			while ($kirrow = mysql_fetch_array($kirre)) {
 				$sel = "";
 				if ($kirrow['tunnus'] == $kirjoitin_tunnus) {
 					$sel = "SELECTED";
 				}
-				
+
 				echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
 			}
 			echo "</select></td>";
@@ -1915,7 +1915,7 @@
 		echo "<tr><th>".t("Kuljetusohje")."</th><td><textarea name='viesti' cols='30' rows='3'>$viestirarrow[viesti]</textarea></td><th></th><td></td></tr>";
 
 		if ($otsik['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
-			if (strpos($tunnukset,',') !== false) {				
+			if (strpos($tunnukset,',') !== false) {
 				$query = "	SELECT GROUP_CONCAT(pakkaamo SEPARATOR ',') pakkaamot
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -1927,17 +1927,17 @@
 			else {
 				$pakkaamotunnukset = " AND tunnus = $otsik[pakkaamo] ";
 			}
-						
+
 			$query = "	SELECT nimi, lokero
 						FROM pakkaamo
 						WHERE yhtio = '$kukarow[yhtio]'
 						$pakkaamotunnukset";
 			$lokero_chk_res = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($lokero_chk_res) > 0) {
 				while ($lokero_chk_row = mysql_fetch_array($lokero_chk_res)) {
 					echo "<tr><th>".t("Pakkaamo")."</th><td>$lokero_chk_row[nimi]</td><th>".t("Lokero")."</th><td>$lokero_chk_row[lokero]</td></tr>";
-				}				
+				}
 			}
 		}
 
@@ -1975,7 +1975,7 @@
 			echo "</select></td></tr>";
 
 		}
-				
+
 		echo "</table>";
 
 		// erroricheckit
@@ -2079,11 +2079,11 @@
 		echo "<tr><th>".t("Kollia")."</th><th>".t("Kg")."</th><th>m&sup3;</th><th>m</th><th align='left' colspan='3'>".t("Pakkaus")."</th></tr>";
 
 		$i = 0;
-		
+
 		$result = t_avainsana("PAKKAUS");
-		
+
 		while ($row = mysql_fetch_array($result)) {
-			
+
 			if (strpos($tunnukset,',') !== false) {
 				$rahti_otsikot = " AND otsikkonro in($tunnukset) ";
 				$rahti_rahtikirjanro = " AND rahtikirjanro in($tunnukset) ";
@@ -2092,7 +2092,7 @@
 				$rahti_otsikot = " AND otsikkonro = $id ";
 				$rahti_rahtikirjanro = " AND rahtikirjanro = $id ";
 			}
-						
+
 			$query = "	SELECT sum(kollit) kollit, sum(kilot) kilot, sum(kuutiot) kuutiot, sum(lavametri) lavametri, min(pakkauskuvaustark) pakkauskuvaustark
 						from rahtikirjat use index (otsikko_index)
 						where yhtio			= '$kukarow[yhtio]'
@@ -2109,19 +2109,19 @@
 				if ($roror['kuutiot']>0)				$kuutiot[$i]			= $roror['kuutiot'];
 				if ($roror['lavametri']>0)				$lavametri[$i]			= $roror['lavametri'];
 				if ($roror['pakkauskuvaustark']!='')	$pakkauskuvaustark[$i]	= $roror['pakkauskuvaustark'];
-			}			
-			
+			}
+
 			echo "<tr>
 			<td><input type='hidden' name='pakkaus[$i]' value='$row[selite]'>
 				<input type='hidden' name='pakkauskuvaus[$i]' value='$row[selitetark]'>";
-			
+
 			if ((strtoupper($tulostustapa) == 'E' or strtoupper($tulostustapa) == 'L') and $yhtiorow['oletus_rahtikirja_oslappkpl'] != 0) {
 				echo "<input type='text' size='4' value='$kollit[$i]' name='kollit[$i]' onKeyUp='summaa_kollit(this);'></td>";
 			}
 			else {
 				echo "<input type='text' size='4' value='$kollit[$i]' name='kollit[$i]'></td>";
-			}			
-			
+			}
+
 			echo "<td><input type='text' size='7' value='$kilot[$i]' name='kilot[$i]'></td>
 			<td><input type='text' size='7' value='$kuutiot[$i]' name='kuutiot[$i]'></td>
 			<td><input type='text' size='7' value='$lavametri[$i]' name='lavametri[$i]'></td>
@@ -2213,17 +2213,17 @@
 				$query = "	SELECT pakkaamo.printteri1, pakkaamo.printteri3, varastopaikat.printteri5
 							from pakkaamo
 							join varastopaikat ON pakkaamo.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '$otsik[varasto]'
-							where pakkaamo.yhtio='$kukarow[yhtio]' 
+							where pakkaamo.yhtio='$kukarow[yhtio]'
 							and pakkaamo.tunnus='$otsik[pakkaamo]'
 							order by pakkaamo.tunnus";
 			}
 			elseif ($otsik['tulostusalue'] != '' and $otsik['varasto'] != '') {
 				$query = "	SELECT varaston_tulostimet.printteri1, varaston_tulostimet.printteri3, varastopaikat.printteri5
 							FROM varaston_tulostimet
-							JOIN varastopaikat ON (varaston_tulostimet.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '{$otsik['varasto']}')
-							WHERE varaston_tulostimet.yhtio = '{$kukarow['yhtio']}' 
-							AND varaston_tulostimet.nimi = '{$otsik['tulostusalue']}'
-							AND varaston_tulostimet.varasto = '{$otsik['varasto']}'
+							JOIN varastopaikat ON (varaston_tulostimet.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '$otsik[varasto]')
+							WHERE varaston_tulostimet.yhtio = '$kukarow[yhtio]'
+							AND varaston_tulostimet.nimi = '$otsik[tulostusalue]'
+							AND varaston_tulostimet.varasto = '$otsik[varasto]'
 							ORDER BY varaston_tulostimet.prioriteetti, varaston_tulostimet.alkuhyllyalue";
 			}
 			elseif ($otsik["varasto"] == '') {
@@ -2241,23 +2241,23 @@
 			}
 			$prires = mysql_query($query) or pupe_error($query);
 
-			
+
 			if (mysql_num_rows($prires) > 0) {
 				$prirow= mysql_fetch_array($prires);
-				
+
 				$lahete_printteri = "";
 				//lähete
 				if ($prirow['printteri1'] != '') {
 					$lahete_printteri = $prirow['printteri1'];
 				}
-				
+
 				$oslappu_printteri = "";
 				//osoitelappu
 				if ($prirow['printteri3'] != '') {
 					$oslappu_printteri = $prirow['printteri3'];
-				}				
+				}
 			}
-			
+
 			echo "<br><table>";
 			echo "<tr><th>".t("Lähete").":</th><th>";
 
@@ -2271,13 +2271,13 @@
 			echo "<select name='valittu_tulostin'>";
 
 			echo "<option value=''>".t("Ei tulosteta")."</option>";
-			
+
 			while ($kirrow = mysql_fetch_array($kirre)) {
 				$sel = "";
 				if ($kirrow['tunnus'] == $lahete_printteri) {
 					$sel = "SELECTED";
 				}
-				
+
 				echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
 			}
 
@@ -2296,23 +2296,23 @@
 
 			echo "<select name='valittu_oslapp_tulostin'>";
 			echo "<option value=''>".t("Ei tulosteta")."</option>";
-			
+
 			while ($kirrow = mysql_fetch_array($kirre)) {
 				$sel = "";
 				if ($kirrow['tunnus'] == $oslappu_printteri) {
 					$sel = "SELECTED";
 				}
-				
+
 				echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
 			}
 
 			echo "</select> ".t("Kpl").": <input type='text' size='4' name='oslappkpl' value='$oslappkpl'></th></tr>";
-			
+
 			if ($vakrow['vaktuotteet'] != '') {
 		    	echo "<tr><td class='back'><font class='info'>",t("Tulosta myös yleisrahtikirja"),"<br/>",t("VAK-postipaketille"),":</font></td>";
 			    echo "<td class='back'><input type='checkbox' name='tulosta_vak_yleisrahtikirja' id='tulosta_vak_yleisrahtikirja'></td></tr>";
 			}
-					
+
 			echo "</table>";
 		}
 

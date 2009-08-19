@@ -215,7 +215,7 @@
 		$ulos .= "<option value = ''>".t("Normaalikäsittely")."</option>";
 		$ulos .= "<option value = 'P' $sel[P]>".t("Pituus positiolta, isätuotteen hinta korjataan")."</option>";
 		$ulos .= "<option value = 'M' $sel[M]>".t("Manuaalisesti syötettävä pituus, isätuotteen määrää ei korjata")."</option>";
-		$ulos .= "<option value = 'N' $sel[N]>".t("Manuaalisesti syötettävä määrä, isätuotteen määrää korjataan")."</option>";
+		$ulos .= "<option value = 'N' $sel[N]>".t("Manuaalisesti syötettävä määrä, isän määrää korjataan")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

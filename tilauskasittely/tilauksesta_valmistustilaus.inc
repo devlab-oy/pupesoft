@@ -131,11 +131,10 @@
 					// $perheid_lisaarivi on perustetun rivin tunnus
 					require ("lisaarivi.inc");
 					 
-					
 					//	P‰ivitet‰‰n tilausrivin lisatietoihin tilausrivitunnus
 					$query = "	UPDATE tilausrivin_lisatiedot SET	
 									tilausrivilinkki 		= '$perheid_lisaarivi', 
-									suoraan_laskutukseen	= 'o',
+									suoraan_laskutukseen	= '',
 									muutospvm				= now(),
 									muuttaja				= '$kukarow[kuka]'
 								WHERE yhtio	= '$kukarow[yhtio]' and tilausrivitunnus = '$valmlisaarivi[tunnus]'";

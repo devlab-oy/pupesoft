@@ -1663,7 +1663,7 @@
 			$jtksel[$srow["jtkielto"]] = "SELECTED";
 
 			echo "<td>".t("JT-käsittely").":</td><td>
-					<select name='jtkielto'>
+					<select name='jtkielto' ".js_alasvetoMaxWidth("jtkielto", 200).">
 					<option value = ''>".t("Normaali")."</option>
 					<option value = 'Y' $jtksel[Y]>".t("Jälkitoimituksia ei yhdistetä")."</option>
 					<option value = 'o' $jtksel[o]>".t("Ei jälkitoimituksia")."</option>

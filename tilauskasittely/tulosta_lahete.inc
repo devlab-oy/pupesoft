@@ -84,14 +84,14 @@ if (!function_exists('alku')) {
 		}
 
 		unset($data);
-		if( (int) $apu_yhtiorow["lasku_logo"] > 0) {
+		if ( (int) $apu_yhtiorow["lasku_logo"] > 0) {
 			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
 			$data = $liite["data"];
 			$isizelogo[0] = $liite["image_width"];
 			$isizelogo[1] = $liite["image_height"];
 			unset($liite);
 		}
-		elseif(file_exists($apu_yhtiorow["lasku_logo"])) {
+		elseif (file_exists($apu_yhtiorow["lasku_logo"])) {
 			$filename = $apu_yhtiorow["lasku_logo"];
 
 			$fh = fopen($filename, "r");
@@ -101,10 +101,10 @@ if (!function_exists('alku')) {
 			$isizelogo = getimagesize($apu_yhtiorow["lasku_logo"]);
 		}
 
-		if($data) {
+		if ($data) {
 			$image = $pdf->jfif_embed($data);
 
-			if(!$image) {
+			if (!$image) {
 				echo t("Logokuvavirhe");
 			}
 			else {
@@ -193,12 +193,12 @@ if (!function_exists('alku')) {
 		$pdf->draw_rectangle(800, 300, 779, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(800, 420, 779, 580, $thispage, $rectparam);
 
-		if($laskurow["tunnusnippu"] > 0) {
-			if($tyyppi == "TILAUSVAHVISTUS") {
+		if ($laskurow["tunnusnippu"] > 0) {
+			if ($tyyppi == "TILAUSVAHVISTUS") {
 				$pdf->draw_text(310, 792, t("Tilausnumero", $kieli), 	$thispage, $pieni);
 				$pdf->draw_text(310, 782, $laskurow["tunnusnippu"],			$thispage, $boldi);
 			}
-			elseif($tyyppi == "YLLAPITOSOPIMUS") {
+			elseif ($tyyppi == "YLLAPITOSOPIMUS") {
 				$pdf->draw_text(310, 792, t("Tilausnumero", $kieli), 	$thispage, $pieni);
 				$pdf->draw_text(310, 782, $laskurow["tunnusnippu"],			$thispage, $boldi);
 			}
@@ -215,7 +215,8 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(430, 792, t("Toimitusaika", $kieli), 	$thispage, $pieni);
 
 		$useita = "EI";
-		if($laskurow["nippu"] > 0) {
+
+		if ($laskurow["nippu"] > 0) {
 			$query = "	SELECT count(distinct(toimaika))
 						FROM tilausrivi
 						WHERE yhtio='$kukarow[yhtio]'
@@ -223,12 +224,12 @@ if (!function_exists('alku')) {
 			$toimaikares = mysql_query($query) or pupe_error($query);
 			$toimaikarow = mysql_fetch_array($toimaikares);
 
-			if($toimaikarow[0] > 1) {
+			if ($toimaikarow[0] > 1) {
 				$useita = "JOO";
 			}
 		}
 
-		if($useita == "JOO") {
+		if ($useita == "JOO") {
 			$pdf->draw_text(430, 782, t("Useita", $kieli), 	$thispage, $norm);
 		}
 		elseif ($laskurow["toimvko"] != '') {
@@ -365,7 +366,7 @@ if (!function_exists('alku')) {
 			$maxoik = 0;
 
 			foreach($kommentit as $kommentti) {
-				if(strpos($kommentti, "###") !== FALSE) {
+				if (strpos($kommentti, "###") !== FALSE) {
 					list($o, $v) = explode("###", $kommentti);
 
 					$oikpos = $pdf->strlen($o, $boldi);
@@ -475,14 +476,14 @@ if (!function_exists('uusi_sivu')) {
 		}
 
 		unset($data);
-		if( (int) $apu_yhtiorow["lasku_logo"] > 0) {
+		if ( (int) $apu_yhtiorow["lasku_logo"] > 0) {
 			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
 			$data = $liite["data"];
 			$isizelogo[0] = $liite["image_width"];
 			$isizelogo[1] = $liite["image_height"];
 			unset($liite);
 		}
-		elseif(file_exists($apu_yhtiorow["lasku_logo"])) {
+		elseif (file_exists($apu_yhtiorow["lasku_logo"])) {
 			$filename = $apu_yhtiorow["lasku_logo"];
 
 			$fh = fopen($filename, "r");
@@ -492,10 +493,10 @@ if (!function_exists('uusi_sivu')) {
 			$isizelogo = getimagesize($apu_yhtiorow["lasku_logo"]);
 		}
 
-		if($data) {
+		if ($data) {
 			$image = $pdf->jfif_embed($data);
 
-			if(!$image) {
+			if (!$image) {
 				echo t("Logokuvavirhe");
 			}
 			else {
@@ -857,7 +858,7 @@ if (!function_exists('rivi')) {
 		$row["kommentti"] = trim($row["kommentti"]);
 
 		//hatetaan tuotteen myyntihinta
-		$query = "	SELECT round(if(isnull(hinnasto.hinta) or hinnasto.hinta='', round(tuote.myyntihinta/if('$laskurow[vienti_kurssi]'=0,1,'$laskurow[vienti_kurssi]'),'$yhtiorow[hintapyoristys]'), hinnasto.hinta) / (1+(if('$yhtiorow[alv_kasittely]'='',0,tuote.alv)/100)), '$yhtiorow[hintapyoristys]') myyntihinta,
+		$query = "	SELECT round(if (isnull(hinnasto.hinta) or hinnasto.hinta='', round(tuote.myyntihinta/if ('$laskurow[vienti_kurssi]'=0,1,'$laskurow[vienti_kurssi]'),'$yhtiorow[hintapyoristys]'), hinnasto.hinta) / (1+(if ('$yhtiorow[alv_kasittely]'='',0,tuote.alv)/100)), '$yhtiorow[hintapyoristys]') myyntihinta,
        				tuote.aleryhma,
 					tuote.sarjanumeroseuranta
                     FROM tuote
@@ -882,7 +883,7 @@ if (!function_exists('rivi')) {
 		$piilotarivi = "";
 
 		// Alennus kuntoon
-		if($row["netto"] != 'N' and $laskurow["erikoisale"] > 0) {
+		if ($row["netto"] != 'N' and $laskurow["erikoisale"] > 0) {
 			$row["ale"] = round((1-(1-($row["ale"]+$laskurow["erikoisale"]-($row["ale"]*$laskurow["erikoisale"]/100))/100))*100,2);
 		}
 
@@ -922,7 +923,7 @@ if (!function_exists('rivi')) {
 
 					// lasketaan isätuotteen riville lapsien hinnat yhteen
 					$query = "	SELECT
-								round(sum(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),'$yhtiorow[hintapyoristys]') rivihinta,
+								round(sum(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),'$yhtiorow[hintapyoristys]') rivihinta,
 								round(round(sum(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)),'$yhtiorow[hintapyoristys]') / $isahintarivikpl,'$yhtiorow[hintapyoristys]') hinta
 								FROM tilausrivi
 								JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
@@ -943,7 +944,7 @@ if (!function_exists('rivi')) {
 			}
 		}
 
-		if($useita == "JOO") {
+		if ($useita == "JOO") {
 			$row["kommentti"] .= "\n".t("Toimitusaika", $kieli).": ".tv1dateconv($row["toimaika"]);
 		}
 
@@ -1002,7 +1003,7 @@ if (!function_exists('rivi')) {
 			$row["kommentti"] .= "\n";
 		}
 		while($sarjarow = mysql_fetch_array($sarjares)) {
-			if($asrow1["sarjanumeroseuranta"] == "E" or $asrow1["sarjanumeroseuranta"] == "F" or $asrow1["sarjanumeroseuranta"] == "G") {
+			if ($asrow1["sarjanumeroseuranta"] == "E" or $asrow1["sarjanumeroseuranta"] == "F" or $asrow1["sarjanumeroseuranta"] == "G") {
 				$row["kommentti"] .= t("E:nro").": $sarjarow[sarjanumero]\n";
 			}
 			else {
@@ -1013,7 +1014,7 @@ if (!function_exists('rivi')) {
 		// Mahtuuko rivi tälle sivulle
 		$kala_nyt = $kala;
 
-		if(substr($lahetetyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
+		if (substr($lahetetyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
 			if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc") {
 				rivi_hinta_ale($devnull);
 			}
@@ -1050,7 +1051,7 @@ if (!function_exists('rivi')) {
 			$kala = $kala_nyt;
 		}
 
-		if(substr($lahetetyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
+		if (substr($lahetetyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
 			if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc") {
 				// tulosta_lahete.inc
 				if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {

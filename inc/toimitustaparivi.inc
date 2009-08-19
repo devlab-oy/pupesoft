@@ -277,4 +277,24 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "erittely") {
+
+		$ulos  = "<td><select name='$nimi'>";
+		$chk1 = '';
+		$chk2 = '';
+
+		if ($trow[$i] == "k") {
+			$chk1 = 'selected';
+		}
+		if ($trow[$i] == "") {
+			$chk2 = 'selected';
+		}
+
+		$ulos .= "<option value='' $chk2>".t("Ei")."</option>";
+		$ulos .= "<option value='k' $chk1>".t("Kyllä")."</option>";
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 ?>

@@ -1840,7 +1840,6 @@
 							AND varaston_tulostimet.nimi = '$otsik[tulostusalue]'
 							AND varaston_tulostimet.varasto = '$otsik[varasto]'
 							ORDER BY varaston_tulostimet.prioriteetti, varaston_tulostimet.alkuhyllyalue";
-							echo "varaston_tulostimet";
 			}
 			else {
 				$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$tulostuspaikka'";

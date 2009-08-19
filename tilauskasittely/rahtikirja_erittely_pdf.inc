@@ -1,0 +1,254 @@
+<?php
+
+	// nyt on kaikki tiedot rahtikirjaa varten haettu..
+	//
+	// arrayt:
+	// toitarow, lotsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
+	// $rakir_row:sta löytyy asiakkaan tiedot
+	//
+	// muuttujat:
+	// otunnukset, rahdinmaksaja, pvm, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
+	// mehto sisältää maksuehdon tiedot
+	// jv tapauksissa on myös yhteensa, summa, jvhinta, lasno ja viite muuttujat
+	//
+	// tulostetaan rahtikirja
+
+	$query = "	SELECT *
+				FROM lasku
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND tunnus in ($otunnukset)
+				ORDER BY tunnus";
+	$tempr = mysql_query($query) or pupe_error($query);
+
+	//PDF:n luonti ja defaultit
+	define (__TRACE_ENABLED__, false);
+	define (__DEBUG_ENABLED__, false);
+
+	require_once("pdflib/phppdflib.class.php");
+
+	//PDF parametrit
+	$pdf = new pdffile;
+	$pdf->set_default('margin-top', 	0);
+	$pdf->set_default('margin-bottom', 	0);
+	$pdf->set_default('margin-left', 	0);
+	$pdf->set_default('margin-right', 	0);
+	$rectparam["width"] = 0.3;
+
+	//fontit
+	$norm["height"] = 6;
+	$norm["font"] = "Times-Roman";
+
+	$kirj["height"] = 8;
+	//$kirj["font"] = "Times-Roman";
+	$kirj["font"] = "Times-Bold";
+
+	$iso["height"] = 12;
+	$iso["font"] = "Helvetica-Bold";
+
+	$huge["height"] = 22;
+	$huge["font"] = "Helvetica-Bold";
+
+	function alku ($pdf, $asiakkaan_tiedot_row, $kieli = '') {
+		global $yhtiorow, $kukarow, $firstpage, $rectparam, $norm, $kirj, $iso, $kala, $vanhakala, $asiakas;
+
+		$lahete = $asiakkaan_tiedot_row['tunnus']; //Laitetaan laheteen numero rahtikirjan alkuun
+		$asiakas = $asiakkaan_tiedot_row['ytunnus'];
+
+	   	$pdf->draw_rectangle($kala, 60, $kala-50, 300, $firstpage, $rectparam);
+	   	$pdf->draw_text(62, $kala-8, "Asiakas",	$firstpage, $norm);
+	   	$pdf->draw_text(62, $kala-18, "Ytunnus ".$asiakkaan_tiedot_row['ytunnus'],	$firstpage, $kirj);
+	   	$pdf->draw_text(62, $kala-28, $asiakkaan_tiedot_row['nimi']." ".$asiakkaan_tiedot_row['nimitark'],	$firstpage, $kirj);
+	   	$pdf->draw_text(62, $kala-38, $asiakkaan_tiedot_row['osoite'],	$firstpage, $kirj);
+	   	$pdf->draw_text(62, $kala-48, $asiakkaan_tiedot_row['postino']." ".$asiakkaan_tiedot_row['postitp'],	$firstpage, $kirj);
+
+	   	$pdf->draw_rectangle($kala, 300, $kala-50, 540, $firstpage, $rectparam);
+	   	$pdf->draw_text(302, $kala-8, "Toimitusosoite", $firstpage, $norm);
+	   	$pdf->draw_text(302, $kala-18, "Ytunnus ".$asiakkaan_tiedot_row['ytunnus'],	$firstpage, $kirj);
+	   	$pdf->draw_text(302, $kala-28, $asiakkaan_tiedot_row['nimi']." ".$asiakkaan_tiedot_row['nimitark'],	$firstpage, $kirj);
+	   	$pdf->draw_text(302, $kala-38, $asiakkaan_tiedot_row['osoite'],	$firstpage, $kirj);
+	   	$pdf->draw_text(302, $kala-48, $asiakkaan_tiedot_row['postino']." ".$asiakkaan_tiedot_row['postitp'],	$firstpage, $kirj);
+
+		$kala -= 57; // kala = 713
+		$vanhakala = $kala;
+
+		//kollitietot
+		//ylärivi
+		$pdf->draw_rectangle($kala, 60, $kala-20, 110, $firstpage, $rectparam);
+		$pdf->draw_text(62, $kala-8, "Merkki / nro", $firstpage, $norm);
+		$pdf->draw_text(62, $kala-14, "Märke / nr",	$firstpage, $norm);
+		$pdf->draw_rectangle($kala, 110, $kala-20, 242,	$firstpage, $rectparam);
+		$pdf->draw_text(113, $kala-8, "Kolliluku ja -laji",	$firstpage, $norm);
+		$pdf->draw_text(113, $kala-14, "Kolliantal och -slag", $firstpage, $norm);
+		$pdf->draw_rectangle($kala, 242, $kala-20, 415,	$firstpage, $rectparam);
+		$pdf->draw_text(244, $kala-8, "Sisältö, ulkomitat ja VAK-merkinnät", $firstpage, $norm);
+		$pdf->draw_text(244, $kala-14, "Innehåll, yttermått och ADR-anmärkningar", $firstpage, $norm);
+		$pdf->draw_rectangle($kala, 415, $kala-20, 450,	$firstpage, $rectparam);
+		$pdf->draw_text(422, $kala-8, "Brutto kg", $firstpage, $norm);
+		$pdf->draw_rectangle($kala, 450, $kala-20, 540, $firstpage, $rectparam);
+		$pdf->draw_text(453, $kala-8, "Tilavuus, m3", $firstpage, $norm);
+		$pdf->draw_text(453, $kala-14, "Tilavuus, m3", $firstpage, $norm);
+
+		$kala -= 28;
+		
+		return $pdf;
+	}
+
+	// tehdään pdf:n uusi sivu
+	$firstpage = $pdf->new_page("a4");
+
+	$lahete = '';
+	$asiakas = '';
+	$ed_tun = '';
+	$kollityht = 0;
+	$kilotyht = 0;
+
+	$kala = 810;
+
+	$rivi = 1;
+	$maxrivit = mysql_num_rows($tempr);
+
+	while ($asiakkaan_tiedot_row = mysql_fetch_assoc($tempr)) {
+
+		if ($asiakas == '' or $asiakas != $asiakkaan_tiedot_row['ytunnus'] or ($asiakas == $asiakkaan_tiedot_row['ytunnus'] and $asiakkaan_tiedot_row['tunnus'] != $ed_tun)) {
+
+			if ($kala < 80) {
+				// tehdään pdf:n uusi sivu
+				$firstpage = $pdf->new_page("a4");
+				// sitten aletaan piirtämään itse PDF sisältöä
+				$pdf->draw_text(302, 812, "RAHTIKIRJAERITTELY", $firstpage, $iso);
+				alku($pdf, $asiakkaan_tiedot_row);
+				$kala = 810;
+			}
+			elseif ($asiakas == '') {
+				$pdf->draw_text(302, 812, "RAHTIKIRJAERITTELY", $firstpage, $iso);
+				$pdf = alku($pdf, $asiakkaan_tiedot_row);
+
+				$ed_tun = $asiakkaan_tiedot_row['tunnus'];
+			}
+			elseif ($asiakas != $asiakkaan_tiedot_row['ytunnus']) {				
+				$pdf->draw_rectangle($vanhakala, 60, $kala-22, 540,	$firstpage, $rectparam);
+
+				//alarivi
+				$pdf->draw_text(113, $kala-6 , "Kollit yht. Kolliantal tot.", $firstpage, $norm);
+				$pdf->draw_text(113, $kala-20, $kollityht, $firstpage, $kirj);
+				$pdf->draw_rectangle($kala, 111, $kala-22, 242,	$firstpage, $rectparam);
+				$pdf->draw_text(365, $kala-6, "Lavametrit Flakmeter", $firstpage, $norm);
+				$pdf->draw_text(365, $kala-20, $lavametri[0], $firstpage, $norm);
+				$pdf->draw_rectangle($kala, 363, $kala-22, 420,	$firstpage, $rectparam);
+				$pdf->draw_text(422, $kala-6, "Brutto yht. total., kg Rahditysp.  Fraktvikt", $firstpage, $norm);
+				$pdf->draw_text(422, $kala-20, $kilotyht, $firstpage, $kirj);
+				//vähä vedetää viivaa
+				$pdf->draw_rectangle($kala, 60, $kala, 540,	$firstpage, $rectparam);
+				$pdf->draw_rectangle($kala-22, 60, $kala-22, 540, $firstpage, $rectparam);
+
+				$kala -= 40;
+
+				$pdf = alku($pdf, $asiakkaan_tiedot_row);
+
+				$kollityht = 0;
+				$kilotyht = 0;
+			}
+
+			//summataan kaikki painot yhteen
+			$query = "	SELECT rahtikirjat.pakkaus, 
+						rahtikirjat.pakkauskuvaus, 
+						rahtikirjat.kilot, 
+						rahtikirjat.kollit, 
+						rahtikirjat.kuutiot, 
+						rahtikirjat.lavametri,
+						tuote.vakkoodi,
+						rahtikirjat.otsikkonro
+						FROM rahtikirjat
+						LEFT JOIN tilausrivi ON (tilausrivi.yhtio = rahtikirjat.yhtio AND
+												tilausrivi.tyyppi in ('L', 'G') AND
+												tilausrivi.otunnus = '$asiakkaan_tiedot_row[tunnus]' AND
+												tilausrivi.var in ('', 'H'))
+						LEFT JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND
+											tuote.tuoteno = tilausrivi.tuoteno AND
+											tuote.vakkoodi <> '0' AND
+											tuote.vakkoodi <> ' ')
+						WHERE rahtikirjat.otsikkonro = '$asiakkaan_tiedot_row[tunnus]' 
+						and rahtikirjat.yhtio='$kukarow[yhtio]'
+						order by otsikkonro";
+			$pakka = mysql_query($query) or pupe_error($query);
+		}
+
+		$i = 0;
+		while ($pakkarow = mysql_fetch_assoc($pakka)) {
+	
+			//kollit
+			if ($i == 0) {
+				$pdf->draw_text(62, $kala, $asiakkaan_tiedot_row['tunnus'],	$firstpage, $kirj);
+			}
+			
+			$pdf->draw_text(112, $kala, $pakkarow['kollit']."  ".$pakkarow['pakkaus'],	$firstpage, $kirj);
+			$pdf->draw_text(246, $kala, $pakkarow['pakkauskuvaus'], $firstpage, $kirj);
+			$pdf->draw_text(246, $kala-10, $pakkarow['vakkoodi'], $firstpage, $kirj);
+			$pdf->draw_text(422, $kala, round($pakkarow['kilot'], 2),	$firstpage, $kirj);
+			$pdf->draw_text(486, $kala, $pakkarow['kuutiot'], $firstpage, $kirj);
+
+			$i++;
+			$kollityht += $pakkarow['kollit'];
+			$kilotyht += round($pakkarow['kilot'], 2);
+
+			$kala -= 10;
+			
+			if ($kala < 60) {
+				$pdf->draw_rectangle($vanhakala, 60, $kala-22, 540,	$firstpage, $rectparam);
+
+				// tehdään pdf:n uusi sivu
+				$firstpage = $pdf->new_page("a4");
+				// sitten aletaan piirtämään itse PDF sisältöä
+				$pdf->draw_text(302,  812,  "RAHTIKIRJAERITTELY", $firstpage, $iso);
+				$kala = 810;
+				$pdf = alku($pdf, $asiakkaan_tiedot_row);
+			}
+		}
+
+		$kala -= 10; 
+
+		if ($asiakas != $asiakkaan_tiedot_row['ytunnus'] or $rivi == $maxrivit) {
+			$pdf->draw_rectangle($vanhakala, 60, $kala-22, 540,	$firstpage, $rectparam);
+
+			//alarivi
+			$pdf->draw_text(113, $kala-6 , "Kollit yht. Kolliantal tot.", $firstpage, $norm);
+			$pdf->draw_text(113, $kala-20, $kollityht, $firstpage, $kirj);
+			$pdf->draw_rectangle($kala, 111, $kala-22, 242,	$firstpage, $rectparam);
+			$pdf->draw_text(365, $kala-6, "Lavametrit Flakmeter", $firstpage, $norm);
+			$pdf->draw_text(365, $kala-20, $lavametri[0], $firstpage, $norm);
+			$pdf->draw_rectangle($kala, 363, $kala-22, 420,	$firstpage, $rectparam);
+			$pdf->draw_text(422, $kala-6, "Brutto yht. total., kg Rahditysp.  Fraktvikt", $firstpage, $norm);
+			$pdf->draw_text(422, $kala-20, $kilotyht, $firstpage, $kirj);
+			//vähä vedetää viivaa
+			$pdf->draw_rectangle($kala, 60, $kala, 540,	$firstpage, $rectparam);
+			$pdf->draw_rectangle($kala-22, 60, $kala-22, 540, $firstpage, $rectparam);
+
+			$kala -= 40;
+		}
+
+		$asiakas = $asiakkaan_tiedot_row['ytunnus'];
+		$ed_tun = $asiakkaan_tiedot_row['tunnus'];
+		$rivi++;
+	}
+
+	//keksitään uudelle failille joku varmasti uniikki nimi:
+	$pdffilenimi = "/tmp/rahtikirjaerittely-".md5(uniqid(rand(),true)).".pdf";
+
+	//kirjoitetaan pdf faili levylle..
+	$fh = fopen($pdffilenimi, "w");
+	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+	fclose($fh);
+
+	if ($kirjoitin == "email") {
+		$liite = $pdffilenimi;
+		$kutsu = "PDF-erittely";
+		require("inc/sahkoposti.inc");
+
+	}
+	else {
+		//itse print komento...
+		$line = exec("$kirjoitin $pdffilenimi");
+	}
+
+	system("rm -f $pdffilenimi");
+?>

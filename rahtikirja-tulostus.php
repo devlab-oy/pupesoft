@@ -547,6 +547,12 @@
 					if ($tulosta_vak_yleisrahtikirja != '') {
 						require("tilauskasittely/rahtikirja_pdf.inc");
 					}
+
+					if ($toitarow['erittely'] != '') {
+						if (file_exists("tilauskasittely/rahtikirja_erittely_pdf.inc")) {
+							require("tilauskasittely/rahtikirja_erittely_pdf.inc");
+						}
+					}
 				}
 				else {
 					echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";

@@ -24,11 +24,11 @@
 	}
 
 	$query = "	SELECT count(*) riveja,
-				sum(if(tilausrivi.var = 'P' and tilausrivi.tilkpl $lis_plus_kpl > 0, 1, 0)) puutteet,
-				sum(if(tilausrivi.var in ('J','S') and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet,
-				sum(if(tilausrivi.var not in ('P','J','S') and tilausrivi.varattu $lis_plus_kpl < 0, 1, 0)) hyvitykset,
-				sum(if(tilausrivi.var not in ('P','J','S') and (('$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa = '') or '$yhtiorow[kerataanko_saldottomat]' = 'S') and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) normaalit_kerataan,
-				sum(if(tilausrivi.var not in ('P','J','S') and '$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa != '' and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) saldottomat
+				sum(if (tilausrivi.var = 'P' and tilausrivi.tilkpl $lis_plus_kpl > 0, 1, 0)) puutteet,
+				sum(if (tilausrivi.var in ('J','S') and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet,
+				sum(if (tilausrivi.var not in ('P','J','S') and tilausrivi.varattu $lis_plus_kpl < 0, 1, 0)) hyvitykset,
+				sum(if (tilausrivi.var not in ('P','J','S') and (('$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa = '') or '$yhtiorow[kerataanko_saldottomat]' = 'S') and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) normaalit_kerataan,
+				sum(if (tilausrivi.var not in ('P','J','S') and '$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa != '' and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) saldottomat
 				FROM tilausrivi
 				LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 				WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'
@@ -190,38 +190,42 @@
 				// jos on laskuettavia rivej‰ ja jos kyseess‰ on k‰teist‰, itsetulostus tai vienti‰
 				// merkataan rivit ker‰tyiksi, mutta ei toimitetuiksi ja laskulle alatila alatila C/B
 				$query  = "	UPDATE tilausrivi
-							SET kerattyaika = now(),
-							keratty = '$kukarow[kuka]'
+							SET kerattyaika = now(), keratty = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio 		= '$kukarow[yhtio]'
 							and var not in ('P','J','S')
 							and keratty 	= ''
-							and toimitettu 	= ''";
+							and toimitettu 	= ''
+							and tyyppi 	   != 'D'";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				//	Jos on vienti‰ ja vain saldottomia niin menn‰‰n suoraan toimitetuksi
-				if($laskurow["vienti"] != '' and $rivirow["riveja"] == $rivirow["saldottomat"]) {
+				if ($laskurow["vienti"] != '' and $rivirow["riveja"] == $rivirow["saldottomat"]) {
 					$alat = "D";
 					$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
+
 					$query  = "	UPDATE tilausrivi
-								SET toimitettuaika = now(),
-								toimitettu = '$kukarow[kuka]'
+								SET toimitettuaika = now(), toimitettu = '$kukarow[kuka]'
 								WHERE otunnus 	= '$laskurow[tunnus]'
 								and yhtio 		= '$kukarow[yhtio]'
 								and var not in ('P','J','S')
-								and toimitettu 	= ''";
+								and keratty    != ''
+								and toimitettu 	= ''
+								and tyyppi 	   != 'D'";
 					$result = mysql_query($query) or pupe_error($query);
 				}
-				elseif($laskurow["vienti"] != '') {
+				elseif ($laskurow["vienti"] != '') {
 					$alat = "B";
 					$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi. Viennin lis‰tiedot syˆtett‰v‰."), $laskurow["tunnus"])."</font><br><br>\n";
+
 					$query  = "	UPDATE tilausrivi
-								SET toimitettuaika = now(),
-								toimitettu = '$kukarow[kuka]'
+								SET toimitettuaika = now(), toimitettu = '$kukarow[kuka]'
 								WHERE otunnus 	= '$laskurow[tunnus]'
 								and yhtio 		= '$kukarow[yhtio]'
 								and var not in ('P','J','S')
-								and toimitettu 	= ''";
+								and keratty    != ''
+								and toimitettu 	= ''
+								and tyyppi 	   != 'D'";
 					$result = mysql_query($query) or pupe_error($query);
 				}
 				else {
@@ -237,8 +241,7 @@
 			else {
 				// Jos on laskuettavia rivej‰ ja jos kyseess‰ ei ole k‰teinen, merkataan tilaukset ker‰tyksi ja toimitetuksi ja alatila 'D'
 				$query  = "	UPDATE tilausrivi
-							SET kerattyaika = now(),
-							keratty = '$kukarow[kuka]'
+							SET kerattyaika = now(), keratty = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio		= '$kukarow[yhtio]'
 							and var not in ('P','J','S')
@@ -247,28 +250,29 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				$query  = "	UPDATE tilausrivi
-							SET toimitettuaika = now(),
-							toimitettu = '$kukarow[kuka]'
+							SET toimitettuaika = now(), toimitettu = '$kukarow[kuka]'
 							WHERE otunnus 	= '$laskurow[tunnus]'
 							and yhtio		= '$kukarow[yhtio]'
 							and var not in ('P','J','S')
-							and toimitettu	= ''";
+							and keratty    != ''
+							and toimitettu	= ''
+							and tyyppi 	   != 'D'";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				$query  = "	UPDATE lasku
 							set tila='L', alatila='D', lahetepvm=now()
 							where tunnus = '$laskurow[tunnus]'
 							and yhtio	 = '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
-			
-				$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";	
+
+				$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
 			}
 		}
 		else {
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("VIRHE: Tilausta %s ei voitu merkata valmiiksi. Aktivoi tilaus ja korjaa virheet"), $laskurow["tunnus"])."! (1)</font><br><br>\n";
 		}
 	}
-	elseif($kerattavia > 0 and $kutsuja != 'keraa.php') {
+	elseif ($kerattavia > 0 and $kutsuja != 'keraa.php') {
 		// T‰ss‰ meill‰ ON jotain ker‰tt‰v‰‰
 
 		// laitetaan l‰hete tulostusjonoon
@@ -280,11 +284,11 @@
 					and tila in ('N','L')
 					and alatila in ('','A','F','U')";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		///* T‰h‰n menn‰‰n jos l‰hete tosiaan tulostetaan *///
 		if ($yhtiorow["lahetteen_tulostustapa"] != "K") {
 			$tilausnumeroita = $laskurow["tunnus"];
-			
+
 			require("tilaus-valmis-tulostus.inc");
 		}
 		///* T‰h‰n menn‰‰n jos l‰hete vain siirret‰‰n tulostusjonoon *///
@@ -292,7 +296,7 @@
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s siirretty tulostusjonoon"), $laskurow["tunnus"])."!</font><br><br>\n";
 		}
 	}
-	elseif($kutsuja != 'keraa.php') {
+	elseif ($kutsuja != 'keraa.php') {
 		$tilaus_valmis_message .= "<font class='message'>".sprintf(t("VIRHE: Tilausta %s ei voitu merkata valmiiksi. Aktivoi tilaus ja korjaa virheet"), $laskurow["tunnus"])."! (2)</font><br><br>\n";
 	}
 

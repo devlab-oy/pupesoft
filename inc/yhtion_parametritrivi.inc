@@ -622,7 +622,24 @@
 		$ulos .= "<option value='K' $sel[K]>".t("Jälkitoimitusrivit kohdistetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "<option value='T' $sel[T]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan suoratoimitetut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
-		$ulos .= "<option value='V' $sel[V]>".t("Vain varastoon viedyt jälkitoimitusrivit kohdistetaan asiakkaalle ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
+		$ulos .= "<option value='V' $sel[V]>".t("Suoratoimitetut sekä varastoon viedyt jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "automaattinen_jt_toimitus_valmistus") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
+
+		$ulos .= "<option value=''>".t("Valmistusrivejä ei toimiteta eikä kohdisteta automaattisesti")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Jälkitoimitusrivit kohdistetaan automaattisesti valmistuksen yhteydessä")."</option>";
+		$ulos .= "<option value='T' $sel[T]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydessä")."</option>";
+		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan asiakkaalle valmistetut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydessä")."</option>";
+		$ulos .= "<option value='V' $sel[V]>".t("Asiakkaalle sekä varastoon valmistetut jälkitoimitusrivit kohdistetaan asiakkaalle ja toimitetaan automaattisesti valmistuksen yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

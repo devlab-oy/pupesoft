@@ -7335,87 +7335,23 @@ if (!function_exists('t_tuotteen_avainsanat')) {
 	}
 }
 
-if(!function_exists("jt_toimita")) {
-	function jt_toimita ($toimittaja, $toimittajaid, $varastosta, $jtrivit, $automaaginen, $tee) {
+if (!function_exists("jt_toimita")) {
+	function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $automaaginen, $tee) {
 		global $yhtiorow, $kukarow, $oikeurow;
-		
-		//echo "Koitetaan toimittaa $jtrivit<br>";
-		// Pidetään huolta mitä olemme pakkotoimittamassa!
-		static $pakkotoimitatilaukset;							
-		
-		if($tee == "JATKA") {
 
-			// Meillä haluamme vain toimittaa jälkkärit valituille myyntiriveille, muuten niitä vaan toimitellaan
-			if($yhtiorow["automaattinen_jt_toimitus"] == "V" or $yhtiorow["automaattinen_jt_toimitus"] == "S") {
-				if($jtrivit != "") {
-					$asiakasno 			= "";
-					$asiakasid			= "";
-					$asiakasmaa 		= "";
-					$jarj	 			= "luontiaika";
-					$tuotenumero		= "";
-					$tilaus				= "";
-					$toimi				= "";
-					$superit			= "";
-					$tilaus_on_jo		= "";
-					$vain_rivit 		= $jtrivit;
-					$from_varastoon_inc = "varastoon.inc";
+		$asiakasno 			= "";
+		$asiakasid			= "";
+		$asiakasmaa 		= "";
+		$jarj	 			= "luontiaika";
+		$tuotenumero		= "";
+		$tilaus				= "";
+		$toimi				= "";
+		$superit			= "";
+		$tilaus_on_jo		= "";
+		$vain_rivit 		= $jtrivit;
+		$from_varastoon_inc = "varastoon.inc";
 
-					$query = "	SELECT group_concat(distinct tilausrivi.otunnus) tilaukset
-				   				FROM tilausrivi
-								JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.osatoimitus!=''
-				   				WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.tunnus IN ($jtrivit)
-								GROUP BY tilausrivi.otunnus";
-					$jttilres = mysql_query($query) or pupe_error($query);
-					if(mysql_num_rows($jttilres) > 0) {
-						$jttilrow=mysql_fetch_array($jttilres);
-						if($pakkotoimitatilaukset == "") {
-							$pakkotoimitatilaukset = $jttilrow["tilaukset"];
-						}
-						else {
-							$pakkotoimitatilaukset .= ",".$jttilrow["tilaukset"];
-						}
-					}
-
-					require('jtselaus.php');
-				}
-			}
-			else {
-				$asiakasno 			= "";
-				$asiakasid			= "";
-				$asiakasmaa 		= "";
-				$jarj	 			= "luontiaika";
-				$tuotenumero		= "";
-				$tilaus				= "";
-				$toimi				= "";
-				$superit			= "";
-				$tilaus_on_jo		= "";
-				$vain_rivit 		= "";
-				$from_varastoon_inc = "varastoon.inc";
-
-				require('jtselaus.php');
-			}			
-		}
-		elseif($tee == "TOIMITA") {
-
-			//	Toimitetaan vaikka väkisin, laatija on ei aina ole sama, mutta nämä koitetaan aina laittaa eteenpäin.
-			if($pakkotoimitatilaukset != "") {
-				$tee			= "PAKKOTOIMITA";
-			}
-			else {
-				$tee			= "TOIMITA";
-			}
-			$asiakasno 			= "";
-			$asiakasid			= "";
-			$asiakasmaa 		= "";
-			$jarj	 			= "luontiaika";
-			$tuotenumero		= "";
-			$tilaus				= "";
-			$toimi				= "";
-			$superit			= "";
-			$from_varastoon_inc = "varastoon.inc";
-
-			require('jtselaus.php');
-		}
+		require('jtselaus.php');
 	}
 }
 

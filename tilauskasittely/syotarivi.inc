@@ -174,6 +174,7 @@
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
 			echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
+			echo "<input type='hidden' name='kpl2' value='$kpl2'>";
 		}
 
 		echo "</table></form>";
@@ -372,6 +373,7 @@
 			echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
+			echo "<input type='hidden' name='kpl2' value='$kpl2'>";
 		}
 
 		echo "<input type='hidden' name='perheid' value = '$perheid'>";
@@ -492,6 +494,7 @@
 			echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
+			echo "<input type='hidden' name='kpl2' value='$kpl2'>";
 		}
 
 		echo "<input type='hidden' name='perheid' value = '$perheid'>";

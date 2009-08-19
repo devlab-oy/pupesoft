@@ -283,7 +283,7 @@ if (!function_exists('alku')) {
 			$where = " otunnus='$laskurow[tunnus]' ";
 		}
 
-		$query = "	SELECT date_format(toimitettuaika, '%Y-%m-%d') toimitettupaiva
+		$query = "	SELECT date_format(if(keratty = 'saldoton' and '$yhtiorow[saldottomien_toimitettuaika]' = 'K', toimaika, toimitettuaika), '%Y-%m-%d') toimitettupaiva
 					FROM tilausrivi
 					WHERE yhtio='$kukarow[yhtio]'
 					and $where
@@ -291,7 +291,7 @@ if (!function_exists('alku')) {
 					GROUP BY toimitettupaiva";
 		$toimaikares = mysql_query($query) or pupe_error($query);
 
-		if(mysql_num_rows($toimaikares) > 1) {
+		if (mysql_num_rows($toimaikares) > 1) {
 			$pdf->draw_text(430, 656, t("Useita"), 											$thispage, $norm);
 		}
 		else {

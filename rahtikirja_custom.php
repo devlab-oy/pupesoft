@@ -146,6 +146,7 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 		$osoitelappurow["toim_osoite"] 	= $asiakasrow["osoite"];
 	}
 
+	$osoitelappurow["ytunnus"] 			= $asiakasrow["ytunnus"];
 	$osoitelappurow["nimi"] 			= $asiakasrow["nimi"];
 	$osoitelappurow["nimitark"] 		= $asiakasrow["nimitark"];
 	$osoitelappurow["osoite"] 			= $asiakasrow["osoite"];
@@ -158,6 +159,7 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 	$osoitelappurow["yhteyshenkilo"] 	= $kukarow["tunnus"];
 	$osoitelappurow["sisviesti1"] 		= $asiakasrow["sisviesti1"];
 	$osoitelappurow["merahti"] 			= $data['merahti'];
+	$osoitelappurow["laatija"] 			= $kukarow['kuka'];
 	
 	
 	// yhtiön tiedot

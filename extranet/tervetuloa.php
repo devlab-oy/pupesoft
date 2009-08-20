@@ -156,7 +156,7 @@ if ($tee == '') {
 	if (mysql_num_rows($result)>0) {
 
 		///* uutiset *///
-		echo "<td class='back' valign='top' width=350'>";
+		echo "<td class='back' valign='top' width='700'>";
 
 		while($uutinen = mysql_fetch_array($result)) {
 
@@ -171,23 +171,23 @@ if ($tee == '') {
 			$kuva = "";
 
 			if ($uutinen["kentta03"] != "") {
-				$kuva = "<img src='view.php?id=$uutinen[kentta03]' width='130'>";
+				$kuva = "<img src='view.php?id=$uutinen[kentta03]' width='180'>";
 			}
 
 			if((int) $yhtiorow["logo"] > 0 and $kuva == '') {
 				$liite = hae_liite($yhtiorow["logo"], "Yllapito", "array");
 								
-				$kuva = "<img src='view.php?id=$liite[tunnus]' width='130'>";
+				$kuva = "<img src='view.php?id=$liite[tunnus]' width='180'>";
 			}
 			elseif(@fopen($yhtiorow["logo"], "r") and $kuva == '') {
-				$kuva = "<img src='$yhtiorow[logo]' width='130'>";
+				$kuva = "<img src='$yhtiorow[logo]' width='180'>";
 			}
 			elseif(file_exists($yhtiorow["logo"]) and $kuva == '') {
-				$kuva = "<img src='$yhtiorow[logo]' width='130'>";
+				$kuva = "<img src='$yhtiorow[logo]' width='180'>";
 			}
 
 			if ($kuva == '') {
-				$kuva = "<img src='http://www.pupesoft.com/pupesoft.gif' width='130'>";
+				$kuva = "<img src='http://www.pupesoft.com/pupesoft.gif' width='180'>";
 			}
 
 			if ($uutinen['nimi'] == "") {
@@ -238,11 +238,11 @@ if ($tee == '') {
 			}
 
 			echo "
-			<table width='400'>
+			<table width='100%'>
 			<tr>
 			<td colspan='2' class='back'><font class='head'>$uutinen[kentta01]</font><hr></td>
 			</tr><tr>
-			<td valign='top' align='center' width='140'><br>$kuva<br><br></td>
+			<td valign='top' align='center' width='180'><br>$kuva<br><br></td>
 			<td valign='top'>$uutinen[kentta02]<br>
 			<a href='$PHP_SELF?tee=PRINTTAA&tun=$uutinen[tun]'>".t("Tulosta")."</a>
 			</font></td>

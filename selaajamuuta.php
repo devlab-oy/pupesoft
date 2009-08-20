@@ -1,72 +1,72 @@
 <?php
 	require "inc/parametrit.inc";
 
-	js_popup();	
+	js_popup();
 	
-	if($kukarow["resoluutio"] == "I") {
-		$tiliointiDivWidth = "650px";
-	}
-	else {
-		$tiliointiDivWidth = "520px";
-	}
-	
-	echo "<font class='head'>".t("Tiliöintien muutos/selailu")."</font><hr>";
+	enable_ajax();
 
-	echo "Toistaiseksi pois käytöstä!";
-	exit;
-
-	if ((($tee == 'U') or ($tee == 'P') or ($tee == 'M') or ($tee == 'J')) and ($oikeurow['paivitys'] != 1)) {
-		echo "<b>".t("Yritit päivittää vaikka simulla ei ole siihen oikeuksia")."</b>";
+	if ($livesearch_tee == "TILIHAKU") {
+		livesearch_tilihaku();
 		exit;
 	}
-	
+
+	echo "<font class='head'>".t("Tiliöinnin tarkastus")."</font><hr>";
+
+	if (($tee == 'U' or $tee == 'P' or $tee == 'M' or $tee == 'J') and $oikeurow['paivitys'] != 1) {
+		echo "<font class='errpr'>".t("Yritit päivittää vaikka sinulla ei ole siihen oikeuksia")."</font>";
+		exit;
+	}
+
 	if ($tunnus != 0) {
-		$query = "SELECT ebid, nimi, concat_ws(' ', tapvm, mapvm) laskunpvm FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-		$result = mysql_query ($query) or die ("Kysely ei onnistu $query");
+		$query = "	SELECT *, concat_ws(' ', tapvm, mapvm) laskunpvm
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
+		$result = mysql_query ($query) or pupe_error($query);
+
 		if (mysql_num_rows($result) > 0) {
-			$laskurow=mysql_fetch_array ($result);
-			$laskunpvm = $laskurow['laskunpvm'];
+			$smlaskurow = mysql_fetch_array($result);
+			$laskunpvm = $smlaskurow['laskunpvm'];
 		}
 		else {
-			echo "".t("Lasku katosi")." $tunnus";
+			echo t("Lasku katosi")." $tunnus";
 			exit;
-		}	
+		}
 	}
-	
-	if ($laji=='') $laji='O';
-	if($laji=='M') $selm='SELECTED';
-	if($laji=='O') $selo='SELECTED';
-	if($laji=='MM') $selmm='SELECTED';
-	if($laji=='OM') $selom='SELECTED';
-	if($laji=='X') $selx='SELECTED';
-	
-	if($laji=='M') $lajiv="tila = 'U'";
-	if($laji=='O') $lajiv="tila in ('H', 'Y', 'M', 'P', 'Q')";
 
-	$pvm='tapvm';
-	if($laji=='OM') {
-		$lajiv="tila = 'Y'";
-		$pvm='mapvm';
+	if ($laji == '') 	$laji  = 'O';
+	if ($laji == 'M') 	$selm  = 'SELECTED';
+	if ($laji == 'O') 	$selo  = 'SELECTED';
+	if ($laji == 'MM') 	$selmm = 'SELECTED';
+	if ($laji == 'OM') 	$selom = 'SELECTED';
+	if ($laji == 'X') 	$selx  = 'SELECTED';
+	if ($laji == 'M') 	$lajiv = "tila = 'U'";
+	if ($laji == 'O') 	$lajiv = "tila in ('H', 'Y', 'M', 'P', 'Q')";
+	if ($laji=='X') 	$lajiv = "tila = 'X'";
+
+	$pvm = 'tapvm';
+
+	if ($laji == 'OM') {
+		$lajiv = "tila = 'Y'";
+		$pvm   = 'mapvm';
 	}
 	if ($laji == 'MM') {
-		$lajiv="tila = 'U'";
-		$pvm='mapvm';
-	}	
-	if($laji=='X') $lajiv="tila = 'X'";
+		$lajiv = "tila = 'U'";
+		$pvm   = 'mapvm';
+	}
 
 	// mikä kuu/vuosi nyt on
 	$year = date("Y");
 	$kuu  = date("n");
+
 	// poimitaan erikseen edellisen kuun viimeisen päivän vv,kk,pp raportin oletuspäivämääräksi
-	if($vv=='') $vv = date("Y",mktime(0,0,0,$kuu,0,$year));
-	if($kk=='') $kk = date("n",mktime(0,0,0,$kuu,0,$year));
-	if(strlen($kk)==1) $kk = "0" . $kk; 
+	if ($vv=='') $vv = date("Y",mktime(0,0,0,$kuu,0,$year));
+	if ($kk=='') $kk = date("n",mktime(0,0,0,$kuu,0,$year));
+	if (strlen($kk)==1) $kk = "0" . $kk;
 
-
-//Ylös hakukriteerit
+	//Ylös hakukriteerit
 	if ($viivatut == 'on') $viivacheck='checked';
-	echo "<div id='ylos' style=''>
-			<form name = 'valinta' action = '$PHP_SELF' method='post'>
+
+	echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
 			<table>
 			<tr><th>".t("Anna kausi, muodossa kk-vvvv").":</th>
 			<td><input type = 'text' name = 'kk' value='$kk' size=2></td>
@@ -83,181 +83,263 @@
 			<td class='back'><input type = 'submit' value = '".t("Valitse")."'></td>
 			</tr>
 			</table>
-			</form></div>";
+			</form><br><br>";
+
 	$formi = 'valinta';
 	$kentta = 'kk';
 
-
-// Vasemmalle laskuluettelo
+	// Vasemmalle laskuluettelo
 	if ($vv < 2000) $vv += 2000;
 	$lvv=$vv;
 	$lkk=$kk;
 	$lkk++;
+
 	if ($lkk > 12) {
 		$lkk='01';
 		$lvv++;
 	}
-	
-	
-	$query = "	SELECT tunnus, nimi, $pvm, summa, comments
+
+	echo "<div style='float: left; width: 55%; padding-right: 10px;'>";
+
+	$query = "	SELECT *, $pvm pvm
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]' and $pvm >= '$vv-$kk-01' and $pvm < '$lvv-$lkk-01' and $lajiv
 				ORDER BY tapvm desc, summa desc";
-
 	$result = mysql_query($query) or pupe_error($query);
 	$loppudiv ='';
+
 	if (mysql_num_rows($result) == 0) {
 		echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font>";
-
 	}
 	else {
-		$seutunnus = 0;
-		echo "<div id='vasen' style='position: absolute; top: 100px; height: 200px; width:$tiliointiDivWidth; overflow: scroll;'><table><tr>";
-		echo "<th></th>";
-		for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
-			echo "<th>" . t(mysql_field_name($result,$i))."</th>";
-		}
-		echo "</tr>";
+
+		echo "<div id='vasen' style='height: 300px; overflow: auto; margin-bottom: 10px; width: 100%;'>";
+		echo "<table width='100%'>";
 		echo "<tr>";
-		while ($trow=mysql_fetch_array ($result)) {
-			if ($seuraava == 1) { // Tässä on seuraavan laskun tunnus. Siirretään se seuraava nappulaan (, joka tehdään inc/tiliointirivit.inc:ssä)
-				$seutunnus = $trow['tunnus'];
-				$seuraava = 0;
+		echo "<th>".t("Nimi")."</th>";
+		echo "<th>".t("Tapvm")."</th>";
+		echo "<th>".t("Summa")."</th>";
+		echo "<th>".t("Valuutta")."</th>";
+		echo "</tr>";
+
+		while ($trow = mysql_fetch_array($result)) {
+
+			echo "<tr>";
+
+			$ero = "td";
+			if ($trow['tunnus']==$tunnus) $ero = "th";
+
+			$komm = "";
+			if ($trow['comments'] != '') {
+				$loppudiv .= "<div id='id_".$trow['tunnus']."' class='popup' style='width:250px'>";
+				$loppudiv .= $trow["comments"]."<br></div>";
+
+				$komm = " <a onmouseout=\"popUp(event,'id_".$trow['tunnus']."')\" onmouseover=\"popUp(event,'id_".$trow['tunnus']."')\"><img src='pics/lullacons/alert.png'></a>";
+			}
+			
+			if ($trow["nimi"] == "") {
+				$trow["nimi"] = t("Ei nimeä");
 			}
 
-			
-			$tyylia='<td>';
-			$tyylil='</td>';
-			if ($trow['tunnus']==$tunnus) {
-				$tyylia='<th>';
-				$tyylil='</th>';
-				$seuraava = 1;
-			}
-			
-			if ($trow['comments'] != '') {
-				$loppudiv .= "<div id='".$trow['tunnus']."' class='popup' style='width:250px'>";
-				$loppudiv .= $trow["comments"]."<br></div>";
-				echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'".$trow['tunnus']."')\" onmouseover=\"popUp(event,'".$trow['tunnus']."')\"><img src='pics/lullacons/alert.png'></a></td>";
-			}
-			else 
-				echo "<td></td>";
-				
-			for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
-				if ($i==1) {
-					if (strlen($trow[$i])==0) $trow[$i]="(tyhjä)";
-					echo "$tyylia<a href name='$trow[tunnus]'><a href='$PHP_SELF?tee=E&tunnus=$trow[tunnus]&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut#$trow[tunnus]'>$trow[$i]</a></a>$tyylil";
-				}
-				else {
-						
-					echo "$tyylia$trow[$i]$tyylil";
-				}
-			}
-						
+			echo "<$ero><a name='$trow[tunnus]' href='$PHP_SELF?tee=E&tunnus=$trow[tunnus]&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut#$trow[tunnus]'>$trow[nimi]</a>$komm</$ero>";
+			echo "<$ero>".tv1dateconv($trow["pvm"])."</$ero>";
+			echo "<$ero style='text-align: right;'>$trow[summa]</$ero>";
+			echo "<$ero>$trow[valkoodi]</$ero>";
 			echo "</tr>";
 		}
-	}
-	echo "</tr></table></div>";
 
-//Oikealla laskun kuva
-	echo "<div id='oikea' style='position: absolute; top: 100px; left: 525px; height: 700px; width:$tiliointiDivWidth; overflow: scroll;'>";
-	if ($tunnus != '') {
-		// tehdään lasku linkki
-		echo "<td>".ebid($tunnus) ."</td>";
+		echo "</table>";
+		echo "</div>";
 	}
-	else {
-		echo "<font class='message'> ".t("Laskua ei ole valittu")."</font>";
-	}
-	echo "</div>";
 
-// Alas tiliöinnit
-	echo "<div id='alas' style='position: absolute; top: 300px; height: 500px; width:$tiliointiDivWidth; overflow: scroll;''>";
-	 
-	if ($tee == 'P') { // Olemassaolevaa tiliöintiä muutetaan, joten yliviivataan rivi ja annetaan perustettavaksi
-		$query = "SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm
+	echo "<div style='height: 400px; overflow: auto; width: 100%;'>";
+
+	if ($tee == 'P') {
+		// Olemassaolevaa tiliöintiä muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
+		$query = "	SELECT *
 					FROM tiliointi
-					WHERE tunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]'";
+					WHERE tunnus = '$ptunnus' and
+					yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($result) == 0) {
-			echo "".t("Tiliöintiä ei löydy")."! $query";
+			echo t("Tiliöintiä ei löydy")."! $query";
+
+			require ("inc/footer.inc");
 			exit;
 		}
-		$tiliointirow=mysql_fetch_array($result);
-		$tili = $tiliointirow[0];
-		$kustp = $tiliointirow[1];
-		$kohde = $tiliointirow[2];
-		$projekti = $tiliointirow[3];
-		$summa = $tiliointirow[4];
-		$vero = $tiliointirow[5];
-		$selite = $tiliointirow[6];
-		$tiliointipvm = $tiliointirow['tapvm'];
+
+		$tiliointirow = mysql_fetch_array($result);
+
+		$tili		= $tiliointirow['tilino'];
+		$kustp		= $tiliointirow['kustp'];
+		$kohde		= $tiliointirow['kohde'];
+		$projekti	= $tiliointirow['projekti'];
+		$summa		= $tiliointirow['summa'];
+		$vero		= $tiliointirow['vero'];
+		$selite		= $tiliointirow['selite'];
+		$tositenro  = $tiliointirow['tosite'];
+
 		$ok = 1;
 
-// Etsitään kaikki tiliöintirivit, jotka kuuluvat tähän tiliöintiin ja lasketaan niiden summa
-
-		$query = "SELECT sum(summa) FROM tiliointi
-					WHERE aputunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]' and tiliointi.korjattu='' GROUP BY aputunnus";
+		// Etsitään kaikki tiliöintirivit, jotka kuuluvat tähän tiliöintiin ja lasketaan niiden summa
+		$query = "	SELECT sum(summa)
+					FROM tiliointi
+					WHERE aputunnus = '$ptunnus' and
+					yhtio = '$kukarow[yhtio]' and
+					korjattu = ''
+					GROUP BY aputunnus";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 0) {
-			$summarow=mysql_fetch_array($result);
+			$summarow = mysql_fetch_array($result);
 			$summa += $summarow[0];
-			$query = "UPDATE tiliointi SET korjattu = '$kukarow[kuka]', korjausaika = now()
-						WHERE aputunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]' and tiliointi.korjattu=''";
+
+			$query = "	UPDATE tiliointi SET
+						korjattu = '$kukarow[kuka]',
+						korjausaika = now()
+						WHERE aputunnus = '$ptunnus' and
+						yhtio = '$kukarow[yhtio]' and
+						korjattu = ''";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 
-		$query = "UPDATE tiliointi
-					SET korjattu = '$kukarow[kuka]', korjausaika = now()
-					WHERE tunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]'";
+		$query = "	UPDATE tiliointi SET
+					korjattu = '$kukarow[kuka]',
+					korjausaika = now()
+					WHERE tunnus = '$ptunnus' and
+					yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		$tee = "E"; // Näytetään miltä tosite nyt näyttää
+		$tee = "E";
 	}
 
-	if ($tee == 'U') { // Lisätään tiliöintirivi
+	if ($tee == 'U') {
+		// Lisätään tiliöintirivi
+
 		$summa = str_replace ( ",", ".", $summa);
 		$selausnimi = 'tili'; // Minka niminen mahdollinen popup on?
-		require "inc/tarkistatiliointi.inc";
-		$tiliulos=$ulos;
-		$ulos='';
 
+		require ("inc/tarkistatiliointi.inc");
 
-		$tee = 'E';
-		if ($ok != 1) {
-			require "inc/teetiliointi.inc";
-			if ($jaksota == 'on') {
-				$tee = 'U';
-				require "inc/jaksota.inc"; // Jos jotain jaksotetaan on $tee J
+		$tiliulos = $ulos;
+
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]' and
+					tunnus = '$tunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) != 1) {
+			echo t("Laskua ei enää löydy! Systeemivirhe!");
+
+			require ("inc/footer.inc");
+			exit;
+		}
+
+		$laskurow = mysql_fetch_array($result);
+
+ 		// Tarvitaan kenties tositenro
+		if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
+
+			if ($tositenro != 0) {
+				$query = "	SELECT tosite
+							FROM tiliointi
+							WHERE yhtio = '$kukarow[yhtio]' and
+							ltunnus = '$tunnus' and
+							tosite = '$tositenro'";
+				$result = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($result) == 0) {
+					echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
+
+					require ("inc/footer.inc");
+					exit;
+				}
+			}
+			else {
+				// Tällä ei vielä ole tositenroa. Yritetään jotain
+				// Tälle saamme tositenron ostoveloista
+				if ($laskurow['tapvm'] == $tiliointipvm) {
+
+					$query = "	SELECT tosite FROM tiliointi
+								WHERE yhtio = '$kukarow[yhtio]' and
+								ltunnus = '$tunnus' and
+								tapvm = '$tiliointipvm' and
+								tilino = '$yhtiorow[ostovelat]' and
+								summa = round($laskurow[summa] * $laskurow[vienti_kurssi],2) * -1";
+					$result = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($result) == 0) {
+						echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
+
+						require ("inc/footer.inc");
+						exit;
+					}
+
+					$tositerow = mysql_fetch_array ($result);
+					$tositenro = $tositerow['tosite'];
+				}
+
+ 				// Tälle saamme tositenron ostoveloista
+				if ($laskurow['mapvm'] == $tiliointipvm) {
+
+					$query = "	SELECT tosite FROM tiliointi
+								WHERE yhtio = '$kukarow[yhtio]' and
+								ltunnus = '$tunnus' and
+								tapvm = '$tiliointipvm' and
+								tilino = '$yhtiorow[ostovelat]' and
+								summa = round($laskurow[summa] * $laskurow[vienti_kurssi],2)";
+					$result = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($result) == 0) {
+						echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
+
+						require ("inc/footer.inc");
+						exit;
+					}
+
+					$tositerow = mysql_fetch_array ($result);
+					$tositenro = $tositerow['tosite'];
+				}
 			}
 		}
+
+		if ($ok != 1) {
+			require ("inc/teetiliointi.inc");
+		}
+
+		$tee = "E";
 	}
-	if (($tee == 'E') or ($tee=='F')) { // Tositeen näyttö muokkausta varten
-		if ($tee == 'F') {
-// Laskun tilausrivit
-			require "inc/tilausrivit.inc";
-		}
-		else {
-// Tositteen tiliöintirivit...
-			require "inc/tiliointirivit.inc";
-		}
-// Tehdään nappula, jolla voidaan vaihtaa näkymäksi tilausrivit/tiliöintirivit
-		if ($tee == 'F') {
-			$ftee = 'E';
-			$fnappula = 'tiliöinnit';
-		}
-		else {
-			$ftee = 'F';
-			$fnappula = 'tilausrivit';
-		}
-		
-		echo "<a href = '$PHP_SELF?tee=$ftee&tunnus=$tunnus&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut#$tunnus'>$fnappula</a>";
+
+	if ($tee == 'E') {
+		// Tositteen tiliöintirivit...
+		require "inc/tiliointirivit.inc";
 	}
+
+	echo "</div>";
 	echo "</div>";
 	
+	echo "<div style='height: 710px; overflow: auto; width: 40%;'>";
+	//Oikealla laskun kuva
+	if ($smlaskurow["tunnus"] > 0) {
+
+		if ($smlaskurow["tila"] == "U") {
+			$url = $palvelin2."tilauskasittely/tulostakopio.php?otunnus=$smlaskurow[tunnus]&toim=LASKU&tee=NAYTATILAUS";
+		}
+		else {
+			$urlit = ebid($smlaskurow["tunnus"], TRUE);
+
+			$url = $urlit[0];
+		}
+
+		echo "<iframe src='$url' style='width:100%; height: 710px; border: 0px; display: block;'></iFrame>";
+	}
+	echo "</div>";
+
 	echo $loppudiv;
-	
-	echo "<div id='footer' style='position: absolute; top:780px;'>";
-	require "inc/footer.inc";
+
+	echo "<div style='float: bottom;'>";
+	require ("inc/footer.inc");
 	echo "</div>";
 ?>

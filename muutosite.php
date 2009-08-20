@@ -754,7 +754,7 @@ if ($tee == 'E' or $tee == 'F') {
 					echo "<form action = 'tilauskasittely/tulostakopio.php' method='post'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 						<input type='hidden' name='otunnus' value='$korkolaskurow2[tunnus]'>
-						<input type='hidden' name='TOIM' value='LASKU'>
+						<input type='hidden' name='toim' value='LASKU'>
 						<input type='hidden' name='tee' value='NAYTATILAUS'>
 						<input type='submit' value='".tv1dateconv($korkolaskurow['olmapvm'])."'></form>";
 					echo "<br>";
@@ -961,7 +961,7 @@ if ($tee == 'E' or $tee == 'F') {
 				</form>";
 	}
 
-	$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='liitetiedostot' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
+	$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='liitetiedostot' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
 	$res = mysql_query($queryoik) or pupe_error($queryoik);
 
 	if (mysql_num_rows($res) > 0) {
@@ -994,9 +994,10 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "<form action = 'tilauskasittely/tulostakopio.php' method='post'>
 			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 			<input type='hidden' name='otunnus' value='$tunnus'>
-			<input type='hidden' name='TOIM' value='LASKU'>
+			<input type='hidden' name='toim' value='LASKU'>
 			<input type='hidden' name='tee' value='NAYTATILAUS'>
 			<input type='submit' value='" . t('Näytä laskun PDF')."'></form>";
+
 		if ($trow['viesti'] == 'Korkolasku') {
 			echo "<form action = '$PHP_SELF' method='post'>
 			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -1041,6 +1042,8 @@ if ($tee == 'E' or $tee == 'F') {
 	else {
 		// Tositteen tiliöintirivit...
 		require "inc/tiliointirivit.inc";
+
+		echo "<br><br>";
 		$tee = "";
 	}
 

@@ -689,7 +689,7 @@
 			exit;
 		}
 
-		$tiliointirow=mysql_fetch_array($result);
+		$tiliointirow = mysql_fetch_array($result);
 
 		$tili		= $tiliointirow['tilino'];
 		$kustp		= $tiliointirow['kustp'];
@@ -1231,6 +1231,7 @@
 
 			// Tositteen tiliöintirivit...
 			require ("inc/tiliointirivit.inc");
+			echo "<br><br>";
 
 			if ($ok == 1) {
 				echo "<form action = '$PHP_SELF' method='post'>

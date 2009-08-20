@@ -146,7 +146,7 @@
 		}
 
 		echo "<td valign='top'>";
-		
+
 		// haetaan kaikki tiliöintien tapahtumapäivät plus unionilla tämä päivä mukaan
 		$query = "	(SELECT distinct(tapvm) pvm
 					FROM tiliointi
@@ -189,11 +189,11 @@
 		if ($virhe != "") $virhe .= "<br>";
 
 		echo "<td valign='top'><input type='Submit' value = '".t("Lisää")."'></td>";
-		
-		if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") === FALSE) {
+
+		if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") === FALSE and strpos($_SERVER['SCRIPT_NAME'], "selaajamuuta.php") === FALSE) {
 			echo "<td valign='top' class='back' nowrap><font class='error'>$virhe</font><input type='checkbox' name = 'jaksota'> ".t("Jaksota")."</td>";
 		}
-		
+
 		echo "</tr>";
 		echo "</form>";
 		$formi = 'uusi';
@@ -316,7 +316,7 @@
 	$yhtok = t("Tiliöinti kesken");
 	$class = "error";
 	$ok    = 0;
-	
+
 	if (round($yhtsum, 2) == 0) {
 		$yhtok = t("Tiliöinti ok");
 		$class = "ok";
@@ -337,14 +337,17 @@
 	echo "<td align='right'><font class='$class'>". sprintf("%.02f", $yhtsum) . "</font></td>";
 	echo "<td colspan='2'></td>";
 	echo "<td colspan='$colspan'>";
-	
+
 	echo "<form action = '$PHP_SELF#$tunnus' method='post'>
-			<input type='hidden' name = 'tee' value='E'>
+			<input type='hidden' name = 'laji' value = '$laji'>
+			<input type='hidden' name = 'vv' value = '$vv'>
+			<input type='hidden' name = 'kk' value = '$kk'>
+			<input type='hidden' name = 'tee' value = 'E'>
 			<input type='hidden' name = 'lopetus' value = '$lopetus'>
 			<input type='hidden' name = 'tunnus' value = '$tunnus'>
 			<input type='hidden' name = 'iframe' value = '$iframe'>
 			<input type='hidden' name = 'iframe_id' value = '$iframe_id'>";
-			
+
 	echo "<input type='checkbox' name='viivatut' onclick='submit();' $viivatut> ";
 	echo t('Näytä poistetut');
 	echo "</form>";
@@ -356,7 +359,7 @@
 
 	$query = "	SELECT liitostunnus, tilaustyyppi
 				FROM lasku
-				WHERE yhtio = '{$kukarow["yhtio"]}' and tunnus = '$tunnus'";
+				WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
 	$lasres = mysql_query($query) or pupe_error($query);
 	$mtklasrow = mysql_fetch_array($lasres);
 
@@ -388,14 +391,14 @@
 					<input type='hidden' name = 'tilausnumero' value='$tunnus'>
 					<input type='hidden' name = 'tee' value='ERITTELE'>
 					<input type='hidden' name = 'toim' value='$su'>";
-					
+
 		if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") !== FALSE) {
 			echo "<input type='hidden' name = 'lopetus' value='$lopetus/SPLIT/".$palvelin2."hyvak.php////tunnus=$tunnus'>";
 		}
 		else {
 			echo "<input type='hidden' name = 'lopetus' value='$lopetus/SPLIT/".$palvelin2."muutosite.php////tee=E//tunnus=$tunnus'>";
 		}
-					
+
 		echo "<input type='Submit' value='".t("Kululaskun erittely")."'></form></td>";
 	}
 
@@ -412,12 +415,12 @@
 		else {
 			echo "<input type='hidden' name = 'lopetus' value='$lopetus/SPLIT/".$palvelin2."muutosite.php////tee=E//tunnus=$tunnus'>";
 		}
-					
+
 		echo "<input type='Submit' value='".t("Tarkastele matkalaskua")."'>
 					</form></td>";
 	}
 
 	echo "</tr>";
-	echo "</table><br><br>";
+	echo "</table>";
 
 ?>

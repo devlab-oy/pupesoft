@@ -156,16 +156,40 @@
 		}
 
 		// Tulostettavat sarakkeet
-		$sarakkeet = array("tah", "abc", "saldo", "reaalisaldo", "saldo2", "haly", "til", "ennpois", "jt", "siirtojt", "ennakot", "1kk", "3kk", "6kk", "12kk", "ke", "1x2"
-							,"ostoera1", "ostoera3", "ostoera6", "ostoera12", "osthaly1", "osthaly3", "osthaly6", "osthaly12"
-							,"o_era", "m_era", "kosal", "komy", "Määrä", "kuvaus", "Try", "toimittaja", "toim_tuoteno"
-							,"nimitys", "ostohinta", "epa1pvm", "epa2pvm", "pu1", "pu3", "pu6", "pu12", "my1", "my3", "my6","my12", "enn1", "enn3", "enn6","enn12"
-							,"ed1", "ed3", "ed6", "ed12", "Kate % 1", "Kate % 3", "Kate % 6", "Kate % 12"
-							,"Kortuoteno", "Korsaldo", "Korennpois", "Kortil", "Kormy1", "Kormy2","Kormy3","Kormy4");
+		$sarakkeet = array(	"os", "try", "tme", 
+							"sta", "tah", 
+							"abc", "abc os", "abc try", "abc tme", 
+							"luontiaika", 
+							"saldo", "reaalisaldo", "saldo2", 
+							"haly", "til", "ennpois", "jt", "siirtojt", "ennakot", 
+							"1kk", "3kk", "6kk", "12kk", "ke", "1x2",
+							"ostoera1", "ostoera3", "ostoera6", "ostoera12", "osthaly1", "osthaly3", "osthaly6", "osthaly12",
+							"o_era", "m_era", "kosal", "komy", "Määrä", 
+							"kuvaus", "lyhytkuvaus", "tkorkeus", "tleveys", "tmassa", "tsyvyys",
+							"hinnastoon", "ei_var", "toimittaja", "toim_tuoteno",
+							"nimitys", "ostohinta", 
+							"epa25pvm", "epa50pvm", "epa75pvm", "epa100pvm", 
+							"osaldo", "hyllypaikka", 
+							"pu1", "pu3", "pu6", "pu12", 
+							"my1", "my3", "my6","my12", 
+							"enn1", "enn3", "enn6","enn12",
+							"ed1", "ed3", "ed6", "ed12", 
+							"Kate % 1", "Kate % 3", "Kate % 6", "Kate % 12",
+							"aleryh", "kehahin", 
+							"Kortuoteno", "Korsaldo", "Korennpois", "Kortil", 
+							"Kormy1", "Kormy2","Kormy3","Kormy4");
 
 		// sarakkeiden queryissä olevat nimet
-		$sarake_keyt = array(	"tah" 			=> "tahtituote",
+		$sarake_keyt = array(	"os"			=> "osasto",
+								"try"			=> "try",
+								"tme"			=> "tuotemerkki",
+								"sta"			=> "status",
+								"tah" 			=> "tahtituote",
 								"abc" 			=> "abcluokka",
+								"abc os"		=> "abcluokka_osasto",
+								"abc try"		=> "abcluokka_try",
+								"abc tme" 		=> "abcluokka_tuotemerkki",
+								"luontiaika"	=> "luontiaika",
 								"saldo" 		=> "saldo",
 								"saldo2" 		=> "saldo2",
 								"reaalisaldo"	=> "reaalisaldo",
@@ -195,13 +219,23 @@
 								"komy"			=> "komy",
 								"Määrä"			=> "kpl",
 								"kuvaus"		=> "kuvaus",
-								"Try"			=> "try",
+								"lyhytkuvaus"	=> "lyhytkuvaus",
+								"tkorkeus"		=> "tuotekorkeus",
+								"tleveys"		=> "tuoteleveys",
+								"tmassa"		=> "tuotemassa",
+								"tsyvyys"		=> "tuotesyvyys",
+								"hinnastoon"	=> "hinnastoon",
+								"ei_var"		=> "ei_varastoida",
 								"toimittaja"	=> "toimittaja",
 								"toim_tuoteno"	=> "toim_tuoteno",
 								"nimitys"		=> "nimitys",
 								"ostohinta"		=> "ostohinta",
-								"epa1pvm"		=> "epakurantti50pvm",
-								"epa2pvm"		=> "epakurantti100pvm",
+								"epa25pvm"		=> "epakurantti25pvm",
+								"epa50pvm"		=> "epakurantti50pvm",
+								"epa75pvm"		=> "epakurantti75pvm",
+								"epa100pvm"		=> "epakurantti100pvm",
+								"osaldo"		=> "osaldo",
+								"hyllypaikka"	=> "varastopaikka",
 								"pu1"			=> "puutekpl1",
 								"pu3"			=> "puutekpl2",
 								"pu6"			=> "puutekpl3",
@@ -222,6 +256,8 @@
 								"Kate % 3"		=> "katepros2",
 								"Kate % 6"		=> "katepros3",
 								"Kate % 12"		=> "katepros4",
+								"aleryh"		=> "aleryhma", 
+								"kehahin"		=> "kehahin", 
 								"Kortuoteno"	=> "tuoteno",
 								"Korsaldo"		=> "saldo",
 								"Korennpois"	=> "varattu",
@@ -474,7 +510,7 @@
 			}
 
 			if ($valitut['NAYTAUUDET'] != '' and $naytauudet_pp != '' and $naytauudet_kk != '' and $naytauudet_vv != '') {
-				$abcwhere .= " and tuote.luontiaika >= '$naytauudet_vv-$naytauudet_kk-$naytauudet_pp' ";
+				$abcwhere .= " or tuote.luontiaika >= '$naytauudet_vv-$naytauudet_kk-$naytauudet_pp' ";
 			}
 
 			if ($varastot != '') {
@@ -1177,7 +1213,7 @@
 							$value = '';
 
 							// jos sarake on abc (abcluokkanumero), haetaan se kauniimpi nimi (esim. A-30)
-							if ($sarake == 'abc') {
+							if ($sarake == 'abc' or $sarake == 'abc os' or $sarake == 'abc try' or $sarake == 'abc tme') {
 								$value = $ryhmanimet[$row[$sarake_keyt[$sarake]]];
 							}
 							// jos sarake on saldo, haetaan saldo toisesta muuttujasta
@@ -1186,6 +1222,9 @@
 							}
 							elseif ($sarake == 'reaalisaldo') {
 								$value = $saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['jt'];
+							}
+							elseif ($sarake == 'osaldo') {
+								$value = $osaldo[$sarake_keyt[$sarake]];
 							}
 							// jos sarake on tilattu, ennakko tai jt, haetaan ne toisesta muuttujasta
 							elseif ($sarake == 'til' or $sarake == 'ennpois' or $sarake == 'jt' or $sarake == 'ennakot') {
@@ -1223,7 +1262,7 @@
 							elseif ($sarake == 'nimitys') {
 								$value = t_tuotteen_avainsanat($row, 'nimitys');
 							}
-							elseif ($sarake == 'epa1pvm' or $sarake == 'epa2pvm') {
+							elseif ($sarake == 'epa25pvm' or $sarake == 'epa50pvm' or $sarake == 'epa75pvm' or $sarake == 'epa100pvm' or $sarake == 'luontiaika') {
 								$value = tv1dateconv($row[$sarake_keyt[$sarake]]);
 							}
 							// puute 1 tarvitaan oma taustaväri, muuten haetaan tiedot puuterow-muuttujasta

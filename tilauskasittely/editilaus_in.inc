@@ -26,8 +26,8 @@ if (trim($argv[1]) != '') {
 	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname($argv[0])).PATH_SEPARATOR.dirname($argv[0]));
 }
 
-if (!function_exists('jt_toimita')) {
-	function jt_toimita ($asiakasno, $asiakasid, $asiakasmaa) {
+if (!function_exists('jt_toimita_editilaus')) {
+	function jt_toimita_editilaus ($asiakasno, $asiakasid, $asiakasmaa) {
 		global $yhtiorow, $kukarow, $edi_ulos;
 
 		$automaaginen 			= "automaaginen";
@@ -1162,7 +1162,7 @@ while (!feof ($fd)) {
 					if ($yhtiorow['jt_automatiikka'] != '') {
 						//lis‰t‰‰n tilaukseen ne jt-rivit jotka riitt‰v‰t kaikille
 						$edi_ulos .= "\n";
-						jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $laskurow["maa"]);
+						jt_toimita_editilaus($laskurow["ytunnus"], $laskurow["liitostunnus"], $laskurow["maa"]);
 						$edi_ulos .= "\n";
 					}
 

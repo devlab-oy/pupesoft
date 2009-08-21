@@ -1218,7 +1218,7 @@ else {
 						echo t("Lähetettiin jälkivaatimus-sähköposti")."...<br><br>";
 					}
 				}
-			} #end if jt_email
+			} #end if jt_email 
 		}
 	} // end jos yksikin rivi kerätty else haara
 }

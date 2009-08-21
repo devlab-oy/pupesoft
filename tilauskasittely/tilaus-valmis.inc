@@ -1197,7 +1197,7 @@ else {
 						$jt_chk_row = mysql_fetch_assoc($jt_chk_res);
 
 						$header  = "From: <$yhtiorow[postittaja_email]>\n";
-						$kutsu = "Jälkivaatimus";
+						$kutsu = "Jälkitoimitus";
 						$subject = t("Tuotetta jätetty jälkitoimitukseen");
 						$content_body = $yhtiorow['nimi']."\n".t("Asiakas", $kieli).": $jt_chk_row[nimi] $jt_chk_row[nimitark]\n\n";
 						$content_body .= t("Ytunnus", $kieli).": $jt_chk_row[ytunnus]\n";
@@ -1215,7 +1215,7 @@ else {
 						}
 
 						mail($yhtiorow['jt_email'],  "$subject", $content_body, $header, "-f $yhtiorow[postittaja_email]");
-						echo t("Lähetettiin jälkivaatimus-sähköposti")."...<br><br>";
+						echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
 					}
 				}
 			} #end if jt_email 

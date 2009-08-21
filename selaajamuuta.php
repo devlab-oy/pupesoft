@@ -2,7 +2,7 @@
 	require "inc/parametrit.inc";
 
 	js_popup();
-	
+
 	enable_ajax();
 
 	if ($livesearch_tee == "TILIHAKU") {
@@ -33,38 +33,47 @@
 		}
 	}
 
-	if ($laji == '') 	$laji  = 'O';
-	if ($laji == 'M') 	$selm  = 'SELECTED';
-	if ($laji == 'O') 	$selo  = 'SELECTED';
-	if ($laji == 'MM') 	$selmm = 'SELECTED';
-	if ($laji == 'OM') 	$selom = 'SELECTED';
-	if ($laji == 'X') 	$selx  = 'SELECTED';
-	if ($laji == 'M') 	$lajiv = "tila = 'U'";
-	if ($laji == 'O') 	$lajiv = "tila in ('H', 'Y', 'M', 'P', 'Q')";
-	if ($laji=='X') 	$lajiv = "tila = 'X'";
+	if ($laji == '') {
+		$laji  = 'O';
+	}
 
-	$pvm = 'tapvm';
+	if ($laji == 'M') {
+		$selm  = 'SELECTED';
+		$lajiv = "tila = 'U'";
+	}
+
+	if ($laji == 'O') {
+		$selo  = 'SELECTED';
+		$lajiv = "tila in ('H', 'Y', 'M', 'P', 'Q')";
+	}
+
+	if ($laji == 'MM') {
+		$selmm = 'SELECTED';
+		$lajiv = "tila = 'U'";
+	}
 
 	if ($laji == 'OM') {
+		$selom = 'SELECTED';
 		$lajiv = "tila = 'Y'";
-		$pvm   = 'mapvm';
-	}
-	if ($laji == 'MM') {
-		$lajiv = "tila = 'U'";
-		$pvm   = 'mapvm';
 	}
 
-	// mikä kuu/vuosi nyt on
+	if ($laji == 'X') {
+		$selx  = 'SELECTED';
+		$lajiv = "tila = 'X'";
+	}
+
+	// Mikä kuu/vuosi nyt on
 	$year = date("Y");
 	$kuu  = date("n");
 
-	// poimitaan erikseen edellisen kuun viimeisen päivän vv,kk,pp raportin oletuspäivämääräksi
-	if ($vv=='') $vv = date("Y",mktime(0,0,0,$kuu,0,$year));
-	if ($kk=='') $kk = date("n",mktime(0,0,0,$kuu,0,$year));
-	if (strlen($kk)==1) $kk = "0" . $kk;
+	// Poimitaan erikseen edellisen kuun viimeisen päivän vv,kk,pp raportin oletuspäivämääräksi
+	if ($vv == '') $vv = date("Y",mktime(0,0,0,$kuu,0,$year));
+	if ($kk == '') $kk = date("n",mktime(0,0,0,$kuu,0,$year));
+	if (strlen($kk) == 1) $kk = "0" . $kk;
 
-	//Ylös hakukriteerit
-	if ($viivatut == 'on') $viivacheck='checked';
+	// Ylös hakukriteerit
+	if ($viivatut != '') $viivacheck='checked';
+	if ($iframe != '') $iframechk='checked';
 
 	echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
 			<table>
@@ -79,6 +88,7 @@
 			<option value='OM' $selom>".t("ostolaskut maksettu")."
 			<option value='X' $selx>".t("muut")."
 			</select></td>
+			<td><input type='checkbox' name = 'iframe' $iframechk> ".t("Näytä laskut")."</td>
 			<td><input type='checkbox' name='viivatut' $viivacheck> ".t("Korjatut")."</td>
 			<td class='back'><input type = 'submit' value = '".t("Valitse")."'></td>
 			</tr>
@@ -99,31 +109,37 @@
 		$lvv++;
 	}
 
-	echo "<div style='float: left; width: 55%; padding-right: 10px;'>";
+	if ($iframe != '') echo "<div style='float: left; width: 55%; padding-right: 10px;'>";
 
-	$query = "	SELECT *, $pvm pvm
+	$query = "	SELECT *
 				FROM lasku
-				WHERE yhtio = '$kukarow[yhtio]' and $pvm >= '$vv-$kk-01' and $pvm < '$lvv-$lkk-01' and $lajiv
-				ORDER BY tapvm desc, summa desc";
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tapvm >= '$vv-$kk-01'
+				and tapvm < '$lvv-$lkk-01'
+				and $lajiv
+				ORDER BY tapvm desc, nimi, summa desc";
 	$result = mysql_query($query) or pupe_error($query);
 	$loppudiv ='';
 
 	if (mysql_num_rows($result) == 0) {
-		echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font>";
+		echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font><br><br>";
 	}
 	else {
 
-		echo "<div id='vasen' style='height: 300px; overflow: auto; margin-bottom: 10px; width: 100%;'>";
-		echo "<table width='100%'>";
+		if ($iframe != '') $divwi = "width: 100%;";
+		else  $divwi = "";
+
+		echo "<div id='vasen' style='height: 300px; overflow: auto; margin-bottom: 10px; $divwi'>";
+		echo "<table style='$divwi'>";
 		echo "<tr>";
 		echo "<th>".t("Nimi")."</th>";
 		echo "<th>".t("Tapvm")."</th>";
+		echo "<th>".t("Mapvm")."</th>";
 		echo "<th>".t("Summa")."</th>";
 		echo "<th>".t("Valuutta")."</th>";
 		echo "</tr>";
 
 		while ($trow = mysql_fetch_array($result)) {
-
 			echo "<tr>";
 
 			$ero = "td";
@@ -136,13 +152,14 @@
 
 				$komm = " <a onmouseout=\"popUp(event,'id_".$trow['tunnus']."')\" onmouseover=\"popUp(event,'id_".$trow['tunnus']."')\"><img src='pics/lullacons/alert.png'></a>";
 			}
-			
+
 			if ($trow["nimi"] == "") {
 				$trow["nimi"] = t("Ei nimeä");
 			}
 
-			echo "<$ero><a name='$trow[tunnus]' href='$PHP_SELF?tee=E&tunnus=$trow[tunnus]&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut#$trow[tunnus]'>$trow[nimi]</a>$komm</$ero>";
-			echo "<$ero>".tv1dateconv($trow["pvm"])."</$ero>";
+			echo "<$ero><a name='$trow[tunnus]' href='$PHP_SELF?tee=E&tunnus=$trow[tunnus]&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut#$trow[tunnus]'>$trow[nimi]</a>$komm</$ero>";
+			echo "<$ero>".tv1dateconv($trow["tapvm"])."</$ero>";
+			echo "<$ero>".tv1dateconv($trow["mapvm"])."</$ero>";
 			echo "<$ero style='text-align: right;'>$trow[summa]</$ero>";
 			echo "<$ero>$trow[valkoodi]</$ero>";
 			echo "</tr>";
@@ -152,7 +169,7 @@
 		echo "</div>";
 	}
 
-	echo "<div style='height: 400px; overflow: auto; width: 100%;'>";
+	if ($iframe != '') echo "<div style='height: 400px; overflow: auto; width: 100%;'>";
 
 	if ($tee == 'P') {
 		// Olemassaolevaa tiliöintiä muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
@@ -317,11 +334,12 @@
 		require "inc/tiliointirivit.inc";
 	}
 
-	echo "</div>";
-	echo "</div>";
-	
-	echo "<div style='height: 710px; overflow: auto; width: 40%;'>";
+	if ($iframe != '') echo "</div>";
+	if ($iframe != '') echo "</div>";
+
+	if ($iframe != '') echo "<div style='height: 710px; overflow: auto; width: 40%;'>";
 	//Oikealla laskun kuva
+
 	if ($smlaskurow["tunnus"] > 0) {
 
 		if ($smlaskurow["tila"] == "U") {
@@ -333,9 +351,10 @@
 			$url = $urlit[0];
 		}
 
-		echo "<iframe src='$url' style='width:100%; height: 710px; border: 0px; display: block;'></iFrame>";
+		if ($iframe != '') echo "<iframe src='$url' style='width:100%; height: 710px; border: 0px; display: block;'></iFrame>";
+		else echo "<br><br><a href='$url' target='Attachment'>".t("Näytä lasku")."</a>";
 	}
-	echo "</div>";
+	if ($iframe != '') echo "</div>";
 
 	echo $loppudiv;
 

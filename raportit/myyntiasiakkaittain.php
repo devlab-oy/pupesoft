@@ -11,14 +11,14 @@
 
 	if (isset($tee)) {
 		if ($tee == "lataa_tiedosto") {
-			readfile("/tmp/".$tmpfilenimi);	
+			readfile("/tmp/".$tmpfilenimi);
 			exit;
 		}
 	}
 	else {
 		echo "<font class='head'>".t("Myynti asiakkaittain").":</font><hr>";
-	
-		//Käyttöliittymä	
+
+		//Käyttöliittymä
 		if (!isset($kka))
 			$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 		if (!isset($vva))
@@ -40,7 +40,7 @@
 
 		echo "<form method='post' action='$PHP_SELF'>";
 		echo "<input type='hidden' name='matee' value='kaikki'>";
-	
+
 		echo "<table style='display:inline;padding-right:4px;'>";
 		echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
 					<td><input type='text' name='ppa' value='$ppa' size='3'></td>
@@ -50,28 +50,28 @@
 					<td><input type='text' name='ppl' value='$ppl' size='3'></td>
 					<td><input type='text' name='kkl' value='$kkl' size='3'></td>
 					<td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
-				
-		echo "<tr><th>".t("Summaa myynnit (1 ytunnus/rivi)").":</th><td colspan='3'><input type='checkbox' name='summaa' $chk></td></tr>";			
+
+		echo "<tr><th>".t("Summaa myynnit (yksi asiakas per rivi)").":</th><td colspan='3'><input type='checkbox' name='summaa' $chk></td></tr>";
 		echo "</table>";
-	
+
 		// Monivalintalaatikot (osasto, try tuotemerkki...)
 		// Määritellään mitkä latikot halutaan mukaan
 		$monivalintalaatikot = array("OSASTO", "TRY");
 
-		require ("../tilauskasittely/monivalintalaatikot.inc");			
+		require ("../tilauskasittely/monivalintalaatikot.inc");
 
 		echo "<br><input type='submit' name='AJA' value='".t("Aja raportti")."'>";
 		echo "</form><br><br>";
 
 		if ($matee != '' and isset($AJA)) {
-		
+
 			if (include('Spreadsheet/Excel/Writer.php')) {
 
 				//keksitään failille joku varmasti uniikki nimi:
 				list($usec, $sec) = explode(' ', microtime());
 				mt_srand((float) $sec + ((float) $usec * 100000));
 				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-				
+
 				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
 				$workbook->setVersion(8);
 				$worksheet = $workbook->addWorksheet('Sheet 1');
@@ -80,9 +80,9 @@
 				$format_bold->setBold();
 
 				$excelrivi = 0;
-			
+
 				$worksheet->writeString($excelrivi, 0, t("Myynti asiakkaittain"));
-			
+
 				$excelrivi ++;
 			}
 
@@ -111,10 +111,10 @@
 						GROUP BY $group
 						ORDER BY nimi, nimitark, ytunnus";
 			$result = mysql_query($query) or pupe_error($query);
-				
+
 			if (mysql_num_rows($result) < 2000) {
 				echo "<table>";
-				echo "<tr>";		
+				echo "<tr>";
 				echo "<th>".t("Ytunnus")."</th>";
 				echo "<th>".t("Nimi")."</th>";
 				echo "<th>".t("Nimitark")."</th>";
@@ -130,7 +130,7 @@
 				echo "<br><font class='error'>".t("Hakutulos oli liian suuri")."!</font><br>";
 				echo "<font class='error'>".t("Tallenna/avaa tulos excelissä")."!</font><br><br>";
 			}
-		
+
 			if (isset($workbook)) {
 				$sarake = 0;
 				$worksheet->write($excelrivi, $sarake, t("Ytunnus"), $format_bold);
@@ -146,7 +146,7 @@
 
 				$excelrivi++;
 			}
-		
+
 			while ($lrow = mysql_fetch_array($result)) {
 				if ($summaa == '') {
 					$ale = 0;
@@ -179,13 +179,13 @@
 						}
 					}
 				}
-				
+
 				$katepros=0;
 
 				if ($lrow["summa"] != 0) {
 					$katepros = round($lrow["kate"]/$lrow["summa"]*100,2);
 				}
-				
+
 				if (mysql_num_rows($result) < 2000) {
 					echo "<tr class='aktiivi'>";
 					echo "<td>".$lrow["ytunnus"]."</td>";
@@ -200,14 +200,14 @@
 					echo "<td align='right'>".sprintf("%.2f", $katepros)."%</td>";
 					echo "</tr>";
 				}
-				
-				if (isset($workbook)) {				
-					$sarake = 0;				
+
+				if (isset($workbook)) {
+					$sarake = 0;
 					$worksheet->writeString($excelrivi, $sarake, $lrow["ytunnus"]);
 					$worksheet->write($excelrivi, $sarake++, $lrow["nimi"]);
 					$worksheet->write($excelrivi, $sarake++, $lrow["nimitark"]);
-					if ($summaa == '') $worksheet->write($excelrivi, $sarake++, $lrow["aleryhma"]);	
-					if ($summaa == '') $worksheet->write($excelrivi, $sarake++, $ale);		
+					if ($summaa == '') $worksheet->write($excelrivi, $sarake++, $lrow["aleryhma"]);
+					if ($summaa == '') $worksheet->write($excelrivi, $sarake++, $ale);
 					if ($summaa == '') $worksheet->write($excelrivi, $sarake++, $lrow["piiri"]);
 					$worksheet->write($excelrivi, $sarake++, $lrow["kpl"]);
 					$worksheet->write($excelrivi, $sarake++, $lrow["summa"]);
@@ -217,13 +217,13 @@
 					$excelrivi++;
 				}
 			}
-			
+
 			if (mysql_num_rows($result) < 2000) echo "</table>";
-				
+
 			if(isset($workbook)) {
 				// We need to explicitly close the workbook
 				$workbook->close();
-			
+
 				echo "<br><br><table>";
 				echo "<tr><th>".t("Tallenna tulos").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
@@ -231,7 +231,7 @@
 				echo "<input type='hidden' name='kaunisnimi' value='Myyntiasiakkaittain.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-				echo "</table><br>";			
+				echo "</table><br>";
 			}
 		}
 

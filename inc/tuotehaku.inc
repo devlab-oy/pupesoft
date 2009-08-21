@@ -3,17 +3,17 @@
 	if (substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and substr($tuoteno,0,1) != '?' and substr($tuoteno,0,1) != '#' and $yhtiorow["automaattinen_tuotehaku"] != '') {
 		$query = "	SELECT *
 					FROM tuote
-					WHERE yhtio = '$kukarow[yhtio]'
-					and tuoteno = '$tuoteno'
-					and status != 'P'";
+					WHERE tuote.yhtio = '$kukarow[yhtio]'
+					and tuote.tuoteno = '$tuoteno'
+					and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
 			$query = "	SELECT *
 						FROM tuote
-						WHERE yhtio = '$kukarow[yhtio]'
-						and tuoteno LIKE '$tuoteno%'
-						and status != 'P'";
+						WHERE tuote.yhtio = '$kukarow[yhtio]'
+						and tuote.tuoteno LIKE '$tuoteno%'
+						and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) != 1) {
@@ -48,7 +48,7 @@
 			}
 
 			if ($lisa1 != "") {
-				$lisa1 = "and tuoteno in (".substr($lisa1,0,-1).")"; // vika pilkku pois
+				$lisa1 = "and tuote.tuoteno in (".substr($lisa1,0,-1).")"; // vika pilkku pois
 			}
 		}
 		elseif (substr($tuoteno, -2) == '**') {
@@ -350,12 +350,12 @@
 		///* Konffaa lukija näin: prefiksiksi #-merkki ja suffiksiksi RETURN*///
 		if (substr($tuoteno,0,1) == '#') {
 
-			$lisa1 = "and eankoodi='".substr($tuoteno,1)."'";
+			$lisa1 = "and tuote.eankoodi='".substr($tuoteno,1)."'";
 
-			$query = "	SELECT tuoteno
+			$query = "	SELECT tuote.tuoteno
 						FROM tuote
-						WHERE yhtio = '$kukarow[yhtio]'
-						and status != 'P'
+						WHERE tuote.yhtio = '$kukarow[yhtio]'
+						and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
 						$lisa1";
 			$tresult = mysql_query($query) or pupe_error($query);
 
@@ -388,9 +388,9 @@
 
 		$query = "	SELECT *
 					FROM tuote
-					WHERE yhtio = '$hakyhtio'
-					and tuoteno = '$tuoteno'
-					and status != 'P'";
+					WHERE tuote.yhtio = '$hakyhtio'
+					and tuote.tuoteno = '$tuoteno'
+					and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {

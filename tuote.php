@@ -85,7 +85,8 @@
 		$tee = "Z";
 	}
 
-	if (($tee == 'N') or ($tee == 'E')) {
+	if ($tee == 'N' or $tee == 'E') {
+		
 		if ($tee == 'N') {
 			$oper='>';
 			$suun='';
@@ -95,14 +96,12 @@
 			$suun='desc';
 		}
 
-		$query = "	SELECT tuote.tuoteno, tuote.status, sum(tuotepaikat.saldo) saldo
+		$query = "	SELECT tuote.tuoteno
 					FROM tuote use index (tuoteno_index)
-					LEFT JOIN tuotepaikat ON tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.yhtio=tuote.yhtio
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
-					and tuote.tuoteno " . $oper . " '$tuoteno'
-					GROUP BY 1,2
-					HAVING tuote.status not in ('P','X') or saldo > 0
-					ORDER BY tuote.tuoteno " . $suun . "
+					and tuote.tuoteno $oper '$tuoteno'
+					and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+					ORDER BY tuote.tuoteno $suun
 					LIMIT 1";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -127,14 +126,12 @@
 	if ($tee == 'Z' and $tyyppi != '') {
 
 		if ($tyyppi == 'TOIMTUOTENO') {
-			$query = "	SELECT tuotteen_toimittajat.tuoteno, tuote.status, sum(tuotepaikat.saldo) saldo
+			$query = "	SELECT tuotteen_toimittajat.tuoteno
 						FROM tuotteen_toimittajat
 						JOIN tuote ON tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno
-						LEFT JOIN tuotepaikat ON tuotepaikat.yhtio=tuotteen_toimittajat.yhtio and tuotepaikat.tuoteno=tuotteen_toimittajat.tuoteno
 						WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 						and tuotteen_toimittajat.toim_tuoteno = '$tuoteno'
-						GROUP BY 1,2
-						HAVING tuote.status not in ('P','X') or saldo > 0
+						and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
 						ORDER BY tuote.tuoteno";
 			$result = mysql_query($query) or pupe_error($query);
 

@@ -1158,6 +1158,67 @@ else {
 					require("tilaus-valmis-valitsetila.inc");
 				}
 			}
+
+			// katsotaan onko yhtään jt-riviä tilauksella
+			// jos jt-rivejä löytyy ja yhtiön parametreissä jt_email ei ole tyhjä, lähetetään jälkitoimitus-sähköposti jt-email-kentässä olevaan sähköpostiosoitteeseen
+			if ($yhtiorow['jt_email'] != '') {
+
+				foreach ($tilausnumerot as $tilausnumero) {
+
+					$query = "	SELECT lasku.nimi, 
+								lasku.nimitark, 
+								lasku.ytunnus, 
+								asiakas.asiakasnro,
+								tilausrivi.tuoteno,
+								tuote.nimitys,
+								tuote.tuotemerkki,
+								tuote.tahtituote,
+								tuote.hinnastoon,
+								tuote.status,
+								tilausrivi.jt+tilausrivi.varattu kpl
+								FROM lasku
+								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND 
+													tilausrivi.otunnus = lasku.tunnus AND 
+													tilausrivi.var = 'J' AND
+													tilausrivi.tyyppi in ('L','G') AND
+													tilausrivi.jt+tilausrivi.varattu > 0)
+								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+								JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								AND lasku.tunnus = '$tilausnumero'";
+					$jt_chk_res = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($jt_chk_res) > 0) {
+
+						$kutsu = "";
+						$subject = "";
+						$content_body = "";
+
+						$jt_chk_row = mysql_fetch_assoc($jt_chk_res);
+
+						$header  = "From: <$yhtiorow[postittaja_email]>\n";
+						$kutsu = "Jälkivaatimus";
+						$subject = t("Tuotetta jätetty jälkitoimitukseen");
+						$content_body = $yhtiorow['nimi']."\n".t("Asiakas", $kieli).": $jt_chk_row[nimi] $jt_chk_row[nimitark]\n\n";
+						$content_body .= t("Ytunnus", $kieli).": $jt_chk_row[ytunnus]\n";
+						$content_body .= t("Asiakasnumero", $kieli).": $jt_chk_row[asiakasnro]\n\n";
+
+						mysql_data_seek($jt_chk_res, 0);
+
+						while ($jt_chk_row = mysql_fetch_assoc($jt_chk_res)) {
+							$content_body .= "$jt_chk_row[kpl] kpl ".t("jälkitoimituksen tuotenumerosta")." $jt_chk_row[tuoteno] ".t("tilauksella")." $tilausnumero\n\n";
+							$content_body .= t("Nimitys").": $jt_chk_row[nimitys]\n";
+							$content_body .= t("Tuotemerkki").": $jt_chk_row[tuotemerkki]\n";
+							$content_body .= t("Tahtituote").": $jt_chk_row[tahtituote]\n";
+							$content_body .= t("Hinnastoon").": $jt_chk_row[hinnastoon]\n";
+							$content_body .= t("Status").": $jt_chk_row[status]\n\n\n";
+						}
+
+						mail($yhtiorow['jt_email'],  "$subject", $content_body, $header, "-f $yhtiorow[postittaja_email]");
+						echo t("Lähetettiin jälkivaatimus-sähköposti")."...<br><br>";
+					}
+				}
+			} #end if jt_email
 		}
 	} // end jos yksikin rivi kerätty else haara
 }

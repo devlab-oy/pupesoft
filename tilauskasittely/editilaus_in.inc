@@ -1219,6 +1219,23 @@ while (!feof ($fd)) {
 						$result   = mysql_query($query) or die($query);
 						$laskurow = mysql_fetch_array($result);
 
+						// pit‰‰ nollata toimitettuaika riveille
+						$query = "	UPDATE tilausrivi SET
+									toimitettu = '',
+									toimitettuaika = ''
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND otunnus = '$editilaus_lasku_tunnus'";
+						$result = mysql_query($query) or die($query);
+
+						// pit‰‰ nollata kerattyaika kaikille saldollisille tuotteille
+						$query = "	UPDATE tilausrivi SET
+									keratty = '',
+									kerattyaika = ''
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND otunnus = '$editilaus_lasku_tunnus'
+									AND keratty != 'saldoton'";
+						$result = mysql_query($query) or die($query);
+
 						// ei haluta k‰sitell‰ t‰t‰ toista kertaa kassamyyntin‰, koska se est‰‰ splittauksen
 						$kukarow["kassamyyja"] = $editilaus_kassalipas = "";
 

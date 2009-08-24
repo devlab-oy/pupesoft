@@ -622,7 +622,7 @@
 		$ulos .= "<option value='K' $sel[K]>".t("Jälkitoimitusrivit kohdistetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "<option value='T' $sel[T]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan suoratoimitetut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
-		$ulos .= "<option value='V' $sel[V]>".t("Suoratoimitetut sekä varastoon viedyt jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
+		$ulos .= "<option value='V' $sel[V]>".t("Suoratoimitetut sekä myyntitilaukselta varastoon tilatut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -639,7 +639,7 @@
 		$ulos .= "<option value='K' $sel[K]>".t("Jälkitoimitusrivit kohdistetaan automaattisesti valmistuksen yhteydessä")."</option>";
 		$ulos .= "<option value='T' $sel[T]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydessä")."</option>";
 		$ulos .= "<option value='S' $sel[S]>".t("Ainoastaan asiakkaalle valmistetut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydessä")."</option>";
-		$ulos .= "<option value='V' $sel[V]>".t("Asiakkaalle sekä varastoon valmistetut jälkitoimitusrivit kohdistetaan asiakkaalle ja toimitetaan automaattisesti valmistuksen yhteydessä")."</option>";
+		$ulos .= "<option value='V' $sel[V]>".t("Asiakkaalle sekä myyntitilaukselta varastoon valmistetut jälkitoimitusrivit kohdistetaan asiakkaalle ja toimitetaan automaattisesti valmistuksen yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

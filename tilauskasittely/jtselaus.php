@@ -134,30 +134,29 @@
 		$tee = "JATKA";
 	}
 
-	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and ($tee == 'TOIMITA' or ($tee == 'PAKKOTOIMITA' and $pakkotoimitatilaukset != ""))) {
+	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'TOIMITA') {
 		if ($toim == "ENNAKKO") {
 			$query  = "	SELECT *
-						from lasku
-						where yhtio='$kukarow[yhtio]'
-						and laatija='$kukarow[kuka]'
-						and alatila='E' and tila='N'";
-		}
-		elseif ($tee == "PAKKOTOIMITA") {
-			$query  = "	SELECT *
-						from lasku
-						where yhtio='$kukarow[yhtio]' and tunnus IN ($pakkotoimitatilaukset) and tila = 'N' and alatila IN ('J', 'E', 'T', 'U')";
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND laatija = '$kukarow[kuka]'
+						AND alatila = 'E'
+						AND tila = 'N'";
 		}
 		else {
 			$query  = "	SELECT *
-						from lasku
-						where yhtio='$kukarow[yhtio]'
-						and laatija='$kukarow[kuka]'
-						and ((alatila = 'J' and tila = 'N') or (alatila = 'P' and tila = 'G'))";
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND laatija = '$kukarow[kuka]'
+						AND ((alatila = 'J' and tila = 'N') or (alatila = 'P' and tila = 'G'))";
 		}
 		$jtrest = mysql_query($query) or pupe_error($query);
 
 		while ($laskurow = mysql_fetch_array($jtrest)) {
-			$query  = "UPDATE lasku SET alatila='A' WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[tunnus]'";
+			$query  = "	UPDATE lasku
+						SET alatila = 'A'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus = '$laskurow[tunnus]'";
 			$apure  = mysql_query($query) or pupe_error($query);
 
 			if ($toim != "ENNAKKO") {
@@ -1938,7 +1937,7 @@
 			</form>";
 	}
 
-	if (strpos($_SERVER['SCRIPT_NAME'], "jtselaus.php")  !== FALSE) {
+	if (strpos($_SERVER['SCRIPT_NAME'], "jtselaus.php") !== FALSE) {
 		if (file_exists("../inc/footer.inc")) {
 			require ("../inc/footer.inc");
 		}

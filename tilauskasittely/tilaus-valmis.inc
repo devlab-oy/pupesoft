@@ -161,20 +161,23 @@ else {
 	}
 
 	// Aktivoituiko "Odottaa jt-rivejä" tilaus?
-	if (($laskurow["tila"] == 'N' or $laskurow["tila"] == 'G') and $laskurow["alatila"] == 'T') {
+	if (($laskurow["tila"] == 'N' or $laskurow["tila"] == 'G') and ($laskurow["alatila"] == 'T' or $laskurow["alatila"] == 'U')) {
 		// Onko jotain tulostettavaa?
 		$query = "	SELECT *
 					from tilausrivi
 					where yhtio = '$kukarow[yhtio]'
 					and otunnus = '$laskurow[tunnus]'
 					and keratty = ''
+					and var not in ('P','J','S')
+					and tyyppi != 'D'
 					and varattu > 0";
 		$keres = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($keres) > 0) {
 			//Muutetaan tulostettavaksi
-			$query = "UPDATE lasku SET alatila = '' where yhtio='$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]'";
+			$query = "UPDATE lasku SET alatila = '' where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
+			$laskurow["alatila"] = "";
 		}
 	}
 
@@ -205,7 +208,10 @@ else {
 	}
 
 	// otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
-	$query = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+	$query = "	SELECT * 
+				FROM maksuehto 
+				WHERE yhtio = '$kukarow[yhtio]' 
+				AND tunnus = '$laskurow[maksuehto]'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	$kateinen = "";
@@ -216,15 +222,15 @@ else {
 		$maksuehtorow = mysql_fetch_array($result);
 
 		// jos kyseessä on käteiskauppaa
-		if ($maksuehtorow['kateinen']!='') {
+		if ($maksuehtorow['kateinen'] != '') {
 			$kateinen = "X";
 		}
 		// jos kyseessä on jaksotusta
-		if ($maksuehtorow['jaksotettu']!='') {
+		if ($maksuehtorow['jaksotettu'] != '') {
 			$jaksotettu = "X";
 		}
 		//jos kyseessä on itsetulostusmaksuehto
-		if ($maksuehtorow['itsetulostus']!='') {
+		if ($maksuehtorow['itsetulostus'] != '') {
 			$itsetulostus = "X";
 		}
 	}
@@ -238,19 +244,17 @@ else {
 
 	// Katotaan, onko tämä jo kerätty...
 	$query = "	SELECT tilausrivi.*
-				from tilausrivi use index (yhtio_otunnus)
-				join tuote on tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
-				where tilausrivi.yhtio='$kukarow[yhtio]'
-				and tilausrivi.otunnus='$laskurow[tunnus]'
-				and tilausrivi.keratty!=''
+				FROM tilausrivi use index (yhtio_otunnus)
+				JOIN tuote on tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+				AND tilausrivi.otunnus = '$laskurow[tunnus]'
+				AND tilausrivi.keratty != ''
 				$lisasalker";
 	$keres = mysql_query($query) or pupe_error($query);
 
-	if (mysql_num_rows($keres) > 0 or ($laskurow["tila"] == 'L' and ($laskurow["alatila"] == 'C' or $laskurow["alatila"] == 'B' or $laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'E' or $laskurow["alatila"] == 'J'))) {
-		// tila L ja alatila C, B, D, E niin tilaus on kerätty otsikko
-		// jos otsikko sanoo, että tilaus on kerätty mutta rivit kuitenkaan ei ole kerätty niin merkataan ne kumminkin kerätyiksi
-		// tai jos yksikin rivi on kerätty (lähetettä ei tulosteta uudestaan) niin päivitetään keräämättömät rivit kerätyksi aktiiviselle käyttäjälle
-
+	// jos on yksikin kerätty rivi
+	// lisäksi tila ei saa olla N (myyntitilaus kesken), koska sitä ei ole voitu kerätä tai jos tila on L (myyntitilaus) niin alatila ei saa olla A (tulostusjonossa), koska sitä ei olla voitu kerätä
+	if (mysql_num_rows($keres) > 0 and ($laskurow["tila"] != "N" or ($laskurow["tila"] == "L" and $laskurow["alatila"] != "A"))) {
 		$query = "	UPDATE tilausrivi
 					SET keratty = '$kukarow[kuka]', kerattyaika = now()
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -264,12 +268,12 @@ else {
 		if ($laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'E' or $laskurow["alatila"] == 'J') {
 			$query = "	UPDATE tilausrivi
 						SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
-						WHERE yhtio		 = '$kukarow[yhtio]'
-						and otunnus		 = '$laskurow[tunnus]'
-						and keratty		!= ''
-						and toimitettu	 = ''
-						and var 		not in ('P','J','S')
-						and tyyppi 		!= 'D'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and otunnus = '$laskurow[tunnus]'
+						and keratty != ''
+						and toimitettu = ''
+						and var not in ('P','J','S')
+						and tyyppi != 'D'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 

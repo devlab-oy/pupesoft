@@ -1,8 +1,8 @@
 <?php
 
-	//Tarvitsemme
-	//$laskurow jossa on laskun tiedot
-	//$kutsuja jossa on skripti josta kutsutaan
+	// Tarvitsemme
+	// $laskurow jossa on laskun tiedot
+	// $kutsuja jossa on skripti josta kutsutaan
 
 	$kerattavia 	= 0;
 	$ei_kerattavia 	= 0;
@@ -28,7 +28,8 @@
 				sum(if (tilausrivi.var in ('J','S') and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet,
 				sum(if (tilausrivi.var not in ('P','J','S') and tilausrivi.varattu $lis_plus_kpl < 0, 1, 0)) hyvitykset,
 				sum(if (tilausrivi.var not in ('P','J','S') and (('$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa = '') or '$yhtiorow[kerataanko_saldottomat]' = 'S') and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) normaalit_kerataan,
-				sum(if (tilausrivi.var not in ('P','J','S') and '$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa != '' and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) saldottomat
+				sum(if (tilausrivi.var not in ('P','J','S') and '$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa != '' and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) saldottomat,
+				sum(if (tilausrivi.toimitettu != '', 1, 0)) toimitetut
 				FROM tilausrivi
 				LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 				WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'
@@ -38,9 +39,13 @@
 	$tresult = mysql_query($query) or pupe_error($query);
 	$rivirow = mysql_fetch_array($tresult);
 
-	//Ker‰tt‰v‰t ja ei ker‰tt‰v‰ rivit
+	// Ker‰tt‰v‰t ja ei ker‰tt‰v‰ rivit
 	$kerattavia = $rivirow["normaalit_kerataan"];
 	$ei_kerattavia = $rivirow["saldottomat"] + $rivirow["hyvitykset"];
+
+	// Toimitettuja rivej‰ ei ker‰t‰ ikin‰
+	$ei_kerattavia += $rivirow["toimitetut"];
+	$kerattavia -= $rivirow["toimitetut"];
 
 	/*
 	puute_jt_kerataanko
@@ -58,7 +63,7 @@
 
 	// ei lasketa ker‰tt‰vi‰/eiker‰tt‰vi‰ m‰‰ri‰ jos ollaan ker‰‰.phpssa, koska silloin kaikki on varmasti ker‰tt‰vi‰ jos ne siell‰ n‰ky
 	if (($yhtiorow["puute_jt_kerataanko"] == "P" or $yhtiorow["puute_jt_kerataanko"] == "Q") and $kutsuja != 'keraa.php') {
-		//Jos yhtio haluaa ker‰t‰ Puuterivit
+		// Jos yhtio haluaa ker‰t‰ Puuterivit
 		$kerattavia += $rivirow["puutteet"];
 	}
 	else {
@@ -76,24 +81,22 @@
 	// jos yhtiˆ haluaa ker‰t‰ puuterivej‰ niin katotaan onko meill‰ pelk‰st‰‰n tilauksella jt/puuterivej‰
 	if ($yhtiorow["puute_jt_kerataanko"] != "" and $kutsuja != 'keraa.php') {
 		if ($rivirow["puutteet"] == $kerattavia and ($yhtiorow["puute_jt_kerataanko"] == "P" or $yhtiorow["puute_jt_kerataanko"] == "Q") and ($yhtiorow["kerataanko_jos_vain_puute_jt"] == "" or $yhtiorow["kerataanko_jos_vain_puute_jt"] == "J")) {
-			//Meill‰ on pelk‰st‰‰n puutteita ker‰tt‰v‰n‰ ja niit‰ ei t‰ss‰ tapauksessa ker‰t‰
+			// Meill‰ on pelk‰st‰‰n puutteita ker‰tt‰v‰n‰ ja niit‰ ei t‰ss‰ tapauksessa ker‰t‰
 			$ei_kerattavia += $rivirow["puutteet"];
 			$kerattavia	   -= $rivirow["puutteet"];
 		}
 		elseif ($rivirow["jteet"] == $kerattavia and ($yhtiorow["puute_jt_kerataanko"] == "J" or $yhtiorow["puute_jt_kerataanko"] == "Q") and ($yhtiorow["kerataanko_jos_vain_puute_jt"] == "" or $yhtiorow["kerataanko_jos_vain_puute_jt"] == "P")) {
-			//Meill‰ on pelk‰st‰‰n JT-rivej‰ ker‰tt‰v‰n‰ ja niit‰ ei t‰ss‰ tapauksessa ker‰t‰
+			// Meill‰ on pelk‰st‰‰n JT-rivej‰ ker‰tt‰v‰n‰ ja niit‰ ei t‰ss‰ tapauksessa ker‰t‰
 			$ei_kerattavia += $rivirow["jteet"];
 			$kerattavia	   -= $rivirow["jteet"];
 		}
 		elseif ($rivirow["jteet"] + $rivirow["puutteet"] == $kerattavia and $yhtiorow["puute_jt_kerataanko"] == "Q" and $yhtiorow["kerataanko_jos_vain_puute_jt"] == "") {
-			//Meill‰ on pelk‰st‰‰n JT-rivej‰ + puutteita ker‰tt‰v‰n‰ ja niit‰ ei t‰ss‰ tapauksessa ker‰t‰
+			// Meill‰ on pelk‰st‰‰n JT-rivej‰ + puutteita ker‰tt‰v‰n‰ ja niit‰ ei t‰ss‰ tapauksessa ker‰t‰
 			$ei_kerattavia += $rivirow["jteet"] + $rivirow["puutteet"];
 			$kerattavia	   -= $rivirow["jteet"] + $rivirow["puutteet"];
 		}
 	}
 
-
-	// debug
 	/*
 	echo "puute_jt_kerataanko: $yhtiorow[puute_jt_kerataanko]<br>";
 	echo "kerataanko_jos_vain_puute_jt: $yhtiorow[kerataanko_jos_vain_puute_jt]<br>";
@@ -103,11 +106,12 @@
 	echo "H: $rivirow[hyvitykset]<br>";
 	echo "N: $rivirow[normaalit_kerataan]<br>";
 	echo "S: $rivirow[saldottomat]<br>";
+	echo "T: $rivirow[toimitetut]<br>";
 	echo "KER: $kerattavia<br>";
 	echo "EIKER: $ei_kerattavia<br>";
-	*/
+	// */
 
-	//Tutkitaan mit‰ tehd‰‰n tilaukselle
+	// Tutkitaan mit‰ tehd‰‰n tilaukselle
 	if ($rivirow["riveja"] == 0 or ($kerattavia == 0 and $ei_kerattavia == 0 and $kutsuja == 'keraa.php')) {
 		// Tilauksella ei ole mit‰‰n laskutettavaa eik‰ ker‰tt‰v‰‰
 		$query  = "	UPDATE tilausrivi
@@ -176,7 +180,7 @@
 						WHERE otunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			//p‰ivitet‰‰n tilaus tilaan 'odottaa jt-rivej‰'
+			// P‰ivitet‰‰n tilaus tilaan 'odottaa jt-rivej‰'
 			$query  = "	UPDATE lasku
 						SET tila='N', alatila='T'
 						where tunnus='$laskurow[tunnus]'
@@ -199,7 +203,7 @@
 							and tyyppi 	   != 'D'";
 				$result = mysql_query($query) or pupe_error($query);
 
-				//	Jos on vienti‰ ja vain saldottomia niin menn‰‰n suoraan toimitetuksi
+				// Jos on vienti‰ ja vain saldottomia niin menn‰‰n suoraan toimitetuksi
 				if ($laskurow["vienti"] != '' and $rivirow["riveja"] == $rivirow["saldottomat"]) {
 					$alat = "D";
 					$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yht‰‰n ker‰tt‰v‰‰ rivi‰, se merkattiin toimitetuksi."), $laskurow["tunnus"])."</font><br><br>\n";
@@ -274,7 +278,6 @@
 	}
 	elseif ($kerattavia > 0 and $kutsuja != 'keraa.php') {
 		// T‰ss‰ meill‰ ON jotain ker‰tt‰v‰‰
-
 		// laitetaan l‰hete tulostusjonoon
 		$query  = "	UPDATE lasku SET
 					tila    = 'N',

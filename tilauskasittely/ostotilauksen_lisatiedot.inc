@@ -23,7 +23,7 @@ if ($tee == "update") {
 		echo "<font class='message'>".t("Muutit eturahtia ja/tai erikoisalennusta, kohdistus pit‰‰ tarkastaa uudelleen.")."</font><br><br>";
 	}
 	else {
-		echo "<font class='message'>".t("Muutit eturahtia ja/tai erikoisalennusta, muistathan painaa kohdistus valmis jotta muutosket huomioidaan.")."</font>";
+		echo "<font class='message'>".t("Muutit eturahtia ja/tai erikoisalennusta, muistathan painaa kohdistus valmis, jotta muutokset huomioidaan.")."</font>";
 	}
 
 	// Hoidetaan pilkut pisteiksi....

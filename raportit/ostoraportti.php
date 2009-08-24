@@ -167,13 +167,18 @@
 							"o_era", "m_era", "kosal", "komy", "Määrä", 
 							"kuvaus", "lyhytkuvaus", "tkorkeus", "tleveys", "tmassa", "tsyvyys",
 							"hinnastoon", "ei_var", "toimittaja", "toim_tuoteno",
-							"nimitys", "ostohinta", 
+							"nimitys", "ostohinta", "myyntihinta", 
 							"epa25pvm", "epa50pvm", "epa75pvm", "epa100pvm", 
 							"osaldo", "hyllypaikka", 
 							"pu1", "pu3", "pu6", "pu12", 
-							"my1", "my3", "my6","my12", 
+							"my1", "my3", "my6","my12",
+							"kul1", "kul3", "kul6", "kul12",
+							"edkul1", "edkul3", "edkul6", "edkul12", 
 							"enn1", "enn3", "enn6","enn12",
-							"ed1", "ed3", "ed6", "ed12", 
+							"e_kate1", "e_kate3", "e_kate6", "e_kate12",
+							"e_kate % 1", "e_kate % 3", "e_kate % 6", "e_kate % 12",
+							"ed1", "ed3", "ed6", "ed12",
+							"kate1", "kate3", "kate6", "kate12", 
 							"Kate % 1", "Kate % 3", "Kate % 6", "Kate % 12",
 							"aleryh", "kehahin", 
 							"Kortuoteno", "Korsaldo", "Korennpois", "Kortil", 
@@ -230,6 +235,7 @@
 								"toim_tuoteno"	=> "toim_tuoteno",
 								"nimitys"		=> "nimitys",
 								"ostohinta"		=> "ostohinta",
+								"myyntihinta"	=> "myyntihinta",
 								"epa25pvm"		=> "epakurantti25pvm",
 								"epa50pvm"		=> "epakurantti50pvm",
 								"epa75pvm"		=> "epakurantti75pvm",
@@ -244,14 +250,34 @@
 								"my3"			=> "kpl2",
 								"my6"			=> "kpl3",
 								"my12"			=> "kpl4",
+								"kul1"			=> "kpl1",
+								"kul3"			=> "kpl2",
+								"kul6"			=> "kpl3",
+								"kul12"			=> "kpl4",
+								"edkul1"		=> "EDkpl1",
+								"edkul3"		=> "EDkpl2",
+								"edkul6"		=> "EDkpl3",
+								"edkul12"		=> "EDkpl4",
 								"enn1"			=> "e_kpl1",
 								"enn3"			=> "e_kpl2",
 								"enn6"			=> "e_kpl3",
 								"enn12"			=> "e_kpl4",
+								"e_kate1"		=> "e_kate1",
+								"e_kate3"		=> "e_kate2",
+								"e_kate6"		=> "e_kate3",
+								"e_kate12"		=> "e_kate4",
+								"e_kate % 1"	=> "katepros1_ennakko",
+								"e_kate % 3"	=> "katepros2_ennakko",
+								"e_kate % 6"	=> "katepros3_ennakko",
+								"e_kate % 12"	=> "katepros4_ennakko",
 								"ed1"			=> "EDkpl1",
 								"ed3"			=> "EDkpl2",
 								"ed6"			=> "EDkpl3",
 								"ed12"			=> "EDkpl4",
+								"kate1"			=> "kate1",
+								"kate3"			=> "kate2",
+								"kate6"			=> "kate3",
+								"kate12"		=> "kate4",
 								"Kate % 1"		=> "katepros1",
 								"Kate % 3"		=> "katepros2",
 								"Kate % 6"		=> "katepros3",
@@ -1103,20 +1129,19 @@
 					}
 
 					// (kulutus + myynti + ennakkopoistot + jt) / haluttu kk * varastokerroin - (saldo + tilatut + ennakkopoistot + jt)
-					${"ostettava_kausi".$i} = ($kulutrow[$indeksi] + $laskurow[$indeksi] + $ennp['ennpois'] + $ennp['jt'] + $siirtojtrow['siirtojt']) / $ero * $ehd_kausi1 - ($saldo['saldo'] + $ennp['tilattu'] + $ennp['ennpois'] + $ennp['jt'] + $siirtojtrow['siirtojt']);
+					${"ostettava_kausi".$i} = (($kulutrow[$indeksi] + $laskurow[$indeksi] + $ennp['ennpois'] + $ennp['jt'] + $siirtojtrow['siirtojt']) / $ero) * $ehd_kausi1 - ($saldo['saldo'] + $ennp['tilattu'] + $ennp['ennpois'] + $ennp['jt'] + $siirtojtrow['siirtojt']);
 					${"ostettavahaly_kausi".$i} = ($row['halytysraja'] - ($saldo['saldo'] + $ennp['tilattu'] + $ennp['ennpois'] + $ennp['jt']));
 
 					// jos tuotteella on joku ostoerä pyöristellään ylospäin, että tilataan aina toimittajan haluama määrä
 					if (${"ostettava_kausi".$i} != '') {
 						${"ostettava_kausi".$i} = ceil(${"ostettava_kausi".$i});
-						${"ostettava_era".$i} = ceil(${"ostettava_kausi".$i}) * $row['osto_era'];
+						${"ostettava_era".$i} = ceil(${"ostettava_kausi".$i}) / $row['osto_era'];
 					}
 					else {
 						${"ostettava_kausi".$i} = ${"ostettava_era".$i} = 0;
 					}
 
-					if (${"ostettavahaly_kausi".$i} != '') {
-						// * $row['osto_era']
+					if (${"ostettavahaly_kausi".$i} != '' and ${"ostettavahaly_kausi".$i} > 0 and $row['halytysraja'] > 0) {
 						${"ostettavahaly_kausi".$i} = ceil(${"ostettavahaly_kausi".$i});
 					}
 					else {
@@ -1224,7 +1249,10 @@
 								$value = $saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['jt'];
 							}
 							elseif ($sarake == 'osaldo') {
-								$value = $osaldo[$sarake_keyt[$sarake]];
+								$value = round($osaldo[$sarake_keyt[$sarake]], 2);
+							}
+							elseif ($sarake == 'ostohinta' or $sarake == 'myyntihinta') {
+								$value = round($row[$sarake_keyt[$sarake]], 2);
 							}
 							// jos sarake on tilattu, ennakko tai jt, haetaan ne toisesta muuttujasta
 							elseif ($sarake == 'til' or $sarake == 'ennpois' or $sarake == 'jt' or $sarake == 'ennakot') {
@@ -1237,7 +1265,8 @@
 							elseif ($sarake == 'ostoera1' or $sarake == 'ostoera3' or $sarake == 'ostoera6' or $sarake == 'ostoera12' or
 									$sarake == '1kk' or $sarake == '3kk' or $sarake == '6kk' or $sarake == '12kk' or
 									$sarake == 'osthaly1' or $sarake == 'osthaly3' or $sarake == 'osthaly6' or $sarake == 'osthaly12' or
-									$sarake == 'Kate % 1' or $sarake == 'Kate % 3' or $sarake == 'Kate % 6' or $sarake == 'Kate % 12') {
+									$sarake == 'Kate % 1' or $sarake == 'Kate % 3' or $sarake == 'Kate % 6' or $sarake == 'Kate % 12' or
+									$sarake == 'e_kate % 1' or $sarake == 'e_kate % 3' or $sarake == 'e_kate % 6' or $sarake == 'e_kate % 12') {
 								$value = ${$sarake_keyt[$sarake]};
 								if ($sarake == '1kk' or $sarake == '3kk' or $sarake == '6kk' or $sarake == '12kk') {
 									${"value_".$sarake} = $value;
@@ -1274,12 +1303,19 @@
 								$value = $puuterow[$sarake_keyt[$sarake]];
 							}
 							// myynneissä haetaan kaikki laskurowsta
-							elseif ($sarake == 'my1' or $sarake == 'my3' or $sarake == 'my6' or $sarake == 'my12' or $sarake == 'ed1' or $sarake == 'ed3' or $sarake == 'ed6' or $sarake == 'ed12' or
-									$sarake == 'enn1' or $sarake == 'enn3' or $sarake == 'enn6' or $sarake == 'enn12') {
+							elseif ($sarake == 'my1' or $sarake == 'my3' or $sarake == 'my6' or $sarake == 'my12' or 
+									$sarake == 'ed1' or $sarake == 'ed3' or $sarake == 'ed6' or $sarake == 'ed12' or
+									$sarake == 'enn1' or $sarake == 'enn3' or $sarake == 'enn6' or $sarake == 'enn12' or
+									$sarake == 'kate1' or $sarake == 'kate3' or $sarake == 'kate6' or $sarake == 'kate12' or
+									$sarake == 'e_kate1' or $sarake == 'e_kate3' or $sarake == 'e_kate6' or $sarake == 'e_kate12') {
 								$value = $laskurow[$sarake_keyt[$sarake]];
 								if ($sarake == 'my3' or $sarake == 'my12') {
 									$bg_color = 'yellow';
 								}
+							}
+							elseif ($sarake == 'kul1' or $sarake == 'kul3' or $sarake == 'kul6' or $sarake == 'kul12' or 
+									$sarake == 'edkul1' or $sarake == 'edkul3' or $sarake == 'edkul6' or $sarake == 'edkul12') {
+								$value = $kulutrow[$sarake_keyt[$sarake]];
 							}
 							// Korvaavat
 							elseif (substr($sarake, 0, 3) == 'Kor') {
@@ -1358,21 +1394,21 @@
 										$worksheet->writeString($excelrivi, $excelsarake, str_replace("'", "", $korvaavat_tunrot));
 									}
 									elseif ($sarake == 'Korsaldo') {
-										$worksheet->writeNumber($excelrivi, $excelsarake, $korvasaldorow[$sarake_keyt[$sarake]]);
+										$worksheet->writeNumber($excelrivi, $excelsarake, round($korvasaldorow[$sarake_keyt[$sarake]], 2));
 										$kosal_yht += $korvasaldorow[$sarake_keyt[$sarake]];
 									}
 									elseif ($sarake == 'Korennpois' or $sarake == 'Kortil') {
-										$worksheet->writeNumber($excelrivi, $excelsarake, $prow[$sarake_keyt[$sarake]]);
+										$worksheet->writeNumber($excelrivi, $excelsarake, round($prow[$sarake_keyt[$sarake]], 2));
 										if ($sarake == 'Kortil') {
 											$kosal_yht += $prow[$sarake_keyt[$sarake]];
-											$worksheet->writeNumber($column_location['kosal']['rivi'], $column_location['kosal']['sarake'], $kosal_yht, $format_bg_yellow);
+											$worksheet->writeNumber($column_location['kosal']['rivi'], $column_location['kosal']['sarake'], round($kosal_yht, 2), $format_bg_yellow);
 											$kosal_yht = 0;
 										}
 									}
 									else {
-										$worksheet->writeNumber($excelrivi, $excelsarake, $kasrow[$sarake_keyt[$sarake]]);
+										$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow[$sarake_keyt[$sarake]], 2));
 										if ($sarake == 'Kormy4') {
-											$worksheet->writeNumber($column_location['komy']['rivi'], $column_location['komy']['sarake'], $kasrow[$sarake_keyt[$sarake]], $format_bg_magenta);
+											$worksheet->writeNumber($column_location['komy']['rivi'], $column_location['komy']['sarake'], round($kasrow[$sarake_keyt[$sarake]], 2), $format_bg_magenta);
 										}
 									}
 								}
@@ -1392,12 +1428,13 @@
 								$kasrow = mysql_fetch_array($asresult);
 
 								if (isset($workbook)) {
-									$worksheet->writeNumber($excelrivi, $excelsarake, $kasrow[$sarake_keyt[$sarake]], $format_bg_green);
+									$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow[$sarake_keyt[$sarake]], 2), $format_bg_green);
 									$value = '';
 								}
 							}
 							else {
 								$value = $row[$sarake_keyt[$sarake]];
+
 								// jos tänne tullaan niin kosal-sarake pitää värjätä tyhjänä keltaiseksi
 								if (count($column_location) > 0) {
 									$worksheet->writeNumber($column_location['kosal']['rivi'], $column_location['kosal']['sarake'], '', $format_bg_yellow);
@@ -1408,8 +1445,8 @@
 							$value = trim($value);
 
 							// katsotaan onko arvo numerollinen excel writerin takia (eri funkkarit)
-							if (is_int($value)) {
-								$worksheet->writeNumber($excelrivi, $excelsarake, $value, ${"format_bg_".$bg_color});
+							if (is_numeric($value)) {
+								$worksheet->writeNumber($excelrivi, $excelsarake, round($value, 2), ${"format_bg_".$bg_color});
 							}
 							else {
 								$worksheet->writeString($excelrivi, $excelsarake, $value, ${"format_bg_".$bg_color});

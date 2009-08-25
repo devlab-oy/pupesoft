@@ -121,6 +121,7 @@ if(!function_exists("asiakashintatarkista")) {
 							FROM perusalennus
 							WHERE yhtio='$kukarow[yhtio]' and ryhma = '$t[$i]'";
 				$sresult = mysql_query($query) or pupe_error($query);
+
 				if (mysql_num_rows($sresult) != 1) {
 					$virhe[$i] = t("Aleryhmä puuttuu tai sitä ei löydy!");
 				}
@@ -177,7 +178,7 @@ if(!function_exists("asiakashintatarkista")) {
 			}
 		}
 
-		if (($chasiakas_ryhma != '' or $chytunnus != '') and ($chryhma != '' or $chtuoteno != '') and mysql_field_name($result, $i) == 'loppupvm') {
+		if (($chasiakas_ryhma != '' or $chytunnus != '') and ($chryhma != '' or $chtuoteno != '') and mysql_field_name($result, $i) == 'tunnus') {
 
 			$and = '';
 			if ($chasiakas_ryhma != '') {
@@ -192,6 +193,7 @@ if(!function_exists("asiakashintatarkista")) {
 			if ($chtuoteno != '') {
 				$and .= " and tuoteno = '$chtuoteno'";
 			}
+
 			$aquery = "	SELECT ytunnus
 						FROM asiakashinta
 						WHERE yhtio='$kukarow[yhtio]'$and and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm' and minkpl = $chminkpl and maxkpl = $chmaxkpl and tunnus != '$tunnus'";
@@ -203,6 +205,5 @@ if(!function_exists("asiakashintatarkista")) {
 		}
 	}
 }
-
 
 ?>

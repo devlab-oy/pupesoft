@@ -60,6 +60,20 @@ if(!function_exists("asiakastarkista")) {
 
 		}
 
+		if ((mysql_field_name($result, $i) == "osasto" or mysql_field_name($result, $i) == "ryhma" or mysql_field_name($result, $i) == "piiri") and trim($t[$i]) != '') {
+
+			if (mysql_field_name($result, $i) == 'osasto')  $kptyyppi = "ASIAKASOSASTO";
+			if (mysql_field_name($result, $i) == 'ryhma') 	$kptyyppi = "ASIAKASRYHMA";
+			if (mysql_field_name($result, $i) == 'piiri') 	$kptyyppi = "PIIRI";
+
+			$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '$kptyyppi' and SELITE = '$t[$i]'";
+			$tpres = mysql_query($tpque) or pupe_error($tpque);
+
+			if (mysql_num_rows($tpres) == 0) {
+				$virhe[$i] .= t("Avainsanaa ei löydy")."!";
+			}
+		}
+
 		if (mysql_field_name($result, $i) == "asiakasnro") {
 			if ($asiakasnro_select != '') {
 				// Jos selectoitu drop downista niin katotaan, että tämä on vielä vapaa

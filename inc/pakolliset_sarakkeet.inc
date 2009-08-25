@@ -14,14 +14,14 @@ if (!function_exists("pakolliset_sarakkeet")) {
 		switch ($table) {
 			case "tuote" :
 				$pakolliset = array("TUOTENO");
-				
+
 				if ($yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
 					$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM","VIHAHIN","VIHAPVM");
 				}
 				else {
-					$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM","KEHAHIN","VIHAHIN","VIHAPVM");	
+					$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM","KEHAHIN","VIHAHIN","VIHAPVM");
 				}
-				
+
 				$wherelliset = array("TUOTENO");
 				break;
 			case "tuotepaikat" :
@@ -111,9 +111,10 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 			case "tuotteen_avainsanat" :
-				$pakolliset = array("TUOTENO", "LAJI");
+				$pakolliset = array("TUOTENO", "LAJI", "KIELI");
 				$wherelliset = array("TUOTENO", "LAJI", "KIELI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				$joinattavat = array("TUOTENO" => "tuote");
 				break;
 			case "kalenteri" :
 				$pakolliset = array("KUKA","ASIAKAS","PVMALKU");
@@ -160,6 +161,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("TUOTENO","TOIMITTAJA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				$wherelliset = array("TUOTENO","TOIMITTAJA");
+				$joinattavat = array("TUOTENO" => "tuote");
 				break;
 			case "kuka" :
 				$pakolliset = array("KUKA");
@@ -170,8 +172,9 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 			case "hinnasto" :
-				$pakolliset = array("TUOTENO","HINTA","ALV");
+				$pakolliset = array("TUOTENO","HINTA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				$joinattavat = array("TUOTENO" => "tuote");
 				break;
 			case "rahtisopimukset" :
 				$pakolliset = array("YTUNNUS","RAHTISOPIMUS","TOIMITUSTAPA");
@@ -184,6 +187,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "tuotteen_alv" :
 				$pakolliset = array("TUOTENO","MAA", "ALV");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				$joinattavat = array("TUOTENO" => "tuote");
 				break;
 			case "sarjanumeron_lisatiedot" :
 				$pakolliset = array("LIITOSTUNNUS");
@@ -220,15 +224,15 @@ if (!function_exists("pakolliset_sarakkeet")) {
 					$pakolliset = array("LIITOSTUNNUS","LAJI","AVAINSANA");
 					$wherelliset = array("LIITOSTUNNUS","LAJI","AVAINSANA");
 				}
-				
+
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
-				break;				
+				break;
 			default :
 				$pakolliset = array("TUNTEMATON_TAULU");
 				$kielletyt = array();
 		}
 
-		return array($pakolliset, $kielletyt, $wherelliset, $eiyhtiota);
+		return array($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat);
 	}
 }
 

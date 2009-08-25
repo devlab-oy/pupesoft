@@ -3,9 +3,9 @@
 if(!function_exists("asiakasalennustarkista")) {
 	function asiakasalennustarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $alasveto;
-		
+
 		static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn;
-		
+
 		if (mysql_field_name($result, $i) == "tunnus") {
 			$tunnus = $t[$i];
 		}
@@ -15,7 +15,7 @@ if(!function_exists("asiakasalennustarkista")) {
 				$virhe[$i] = "".t("Tieto puuttuu!")."";
 			}
 		}
-		
+
 		if (mysql_field_name($result, $i) == "ytunnus") {
 			$chytunnus = $t[$i];
 
@@ -29,7 +29,7 @@ if(!function_exists("asiakasalennustarkista")) {
 
 					$ytunnus 		= $chytunnus;
 					$kutsuja 		= "yllapito.php";
-					$ulos 			= "";				
+					$ulos 			= "";
 					require("asiakashaku.inc");
 
 					if ($ulos != "" and $ytunnus == "") {
@@ -39,14 +39,14 @@ if(!function_exists("asiakasalennustarkista")) {
 					elseif ($ytunnus != "") {
 						$t[$i]  = $ytunnus;
 						$virhe[$i] = t("Asiakas löytyi!");
-					}	
+					}
 					else {
-						$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");	
-					}	
+						$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");
+					}
 				}
-			}	
+			}
 		}
-		
+
 		if (mysql_field_name($result, $i) == "asiakas") {
 			$chastunn = $t[$i];
 
@@ -55,12 +55,12 @@ if(!function_exists("asiakasalennustarkista")) {
 							FROM asiakas
 							WHERE yhtio='$kukarow[yhtio]' and tunnus='$chastunn'";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				if (mysql_num_rows($result) != 1) {
-				
+
 					$ytunnus 		= $chastunn;
 					$kutsuja 		= "yllapito.php";
-					$ulos2 			= "";				
+					$ulos2 			= "";
 					require("asiakashaku.inc");
 
 					if ($ulos != "" and $ytunnus == "") {
@@ -70,18 +70,18 @@ if(!function_exists("asiakasalennustarkista")) {
 					elseif ($ytunnus != "") {
 						$t[$i]  = $asiakasid;
 						$virhe[$i] = t("Asiakas löytyi!");
-					}	
+					}
 					else {
-						$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");	
+						$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");
 					}
 				}
-			}	
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "asiakas_ryhma") {
 			$chasiakas_ryhma = $t[$i];
-			
-			if ($chasiakas_ryhma != '') {	
+
+			if ($chasiakas_ryhma != '') {
 				$sresult = t_avainsana("ASIAKASRYHMA", "", "and avainsana.selite = '$chasiakas_ryhma'");
 
 				if (mysql_num_rows($sresult) == 0) {
@@ -102,13 +102,13 @@ if(!function_exists("asiakasalennustarkista")) {
 
 					if (substr($t[$i], -1) != '*') $tuoteno = $t[$i]."*";
 					else $tuoteno = $t[$i];
-					
+
 					$kutsuja 		= "yllapito.php";
 					$ulos			= "";
 
 					require ("inc/tuotehaku.inc");
 
-					if ($ulos != "") {	
+					if ($ulos != "") {
 						$alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";
 					}
 
@@ -124,6 +124,7 @@ if(!function_exists("asiakasalennustarkista")) {
 							FROM perusalennus
 							WHERE yhtio='$kukarow[yhtio]' and ryhma = '$t[$i]'";
 				$sresult = mysql_query($query) or pupe_error($query);
+
 				if (mysql_num_rows($sresult) != 1) {
 					$virhe[$i] = t("Aleryhmä puuttuu tai sitä ei löydy!");
 				}
@@ -157,7 +158,7 @@ if(!function_exists("asiakasalennustarkista")) {
 				$chminkpl = 0;
 			}
 		}
-		
+
 		if (mysql_field_name($result, $i) == "maxkpl") {
 			$chmaxkpl = $t[$i];
 			if ($chmaxkpl == '') {
@@ -179,7 +180,8 @@ if(!function_exists("asiakasalennustarkista")) {
 			}
 		}
 
-		if (($chasiakas_ryhma != '' or $chytunnus != '') and ($chryhma != '' or $chtuoteno != '') and mysql_field_name($result, $i) == 'loppupvm') {
+		if (($chasiakas_ryhma != '' or $chytunnus != '') and ($chryhma != '' or $chtuoteno != '') and mysql_field_name($result, $i) == 'tunnus') {
+
 			$and = '';
 			if ($chasiakas_ryhma != '') {
 				$and .= " and asiakas_ryhma = '$chasiakas_ryhma'";
@@ -193,6 +195,7 @@ if(!function_exists("asiakasalennustarkista")) {
 			if ($chtuoteno != '') {
 				$and .= " and tuoteno = '$chtuoteno'";
 			}
+
 			$aquery = "	SELECT ytunnus
 						FROM asiakasalennus
 						WHERE yhtio='$kukarow[yhtio]'$and and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm' and minkpl = $chminkpl and maxkpl = $chmaxkpl and tunnus != '$tunnus'";
@@ -200,10 +203,10 @@ if(!function_exists("asiakasalennustarkista")) {
 
 			if (mysql_num_rows($dsresult) > 0) {
 				$virhe[$i] = t("VIRHE: Näillä tiedoilla on jo asiakasalennus järjestelmässä!");
-			}						
+			}
 		}
-		
+
 	}
 }
-	
+
 ?>

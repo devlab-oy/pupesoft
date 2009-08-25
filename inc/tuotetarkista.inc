@@ -41,6 +41,35 @@ if(!function_exists("tuotetarkista")) {
 			$tem_tuoteno = $t[$i];
 		}
 
+		if ((mysql_field_name($result, $i) == "projekti" or mysql_field_name($result, $i) == "kohde" or mysql_field_name($result, $i) == "kustp") and trim($t[$i]) != '') {
+
+			if (mysql_field_name($result, $i) == "projekti") $kptyyppi = "P";
+			if (mysql_field_name($result, $i) == "kohde") 	 $kptyyppi = "O";
+			if (mysql_field_name($result, $i) == "kustp") 	 $kptyyppi = "K";
+
+			$tpque = "SELECT tunnus from kustannuspaikka where yhtio='$kukarow[yhtio]' and tyyppi='$kptyyppi' and tunnus='$t[$i]'";
+			$tpres = mysql_query($tpque) or pupe_error($tpque);
+
+			if (mysql_num_rows($tpres) == 0) {
+				$virhe[$i] .= t("Kustannuspaikkaa ei löydy")."!";
+			}
+		}
+
+		if ((mysql_field_name($result, $i) == "osasto" or mysql_field_name($result, $i) == "try" or mysql_field_name($result, $i) == "tuotemerkki" or mysql_field_name($result, $i) == "malli" or mysql_field_name($result, $i) == "mallitarkenne") and trim($t[$i]) != '') {
+
+			$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '".mysql_field_name($result, $i)."'";
+			$tpres = mysql_query($tpque) or pupe_error($tpque);
+
+			if (mysql_num_rows($tpres) > 0) {
+				$tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '".mysql_field_name($result, $i)."' and SELITE = '$t[$i]'";
+				$tpres = mysql_query($tpque) or pupe_error($tpque);
+
+				if (mysql_num_rows($tpres) == 0) {
+					$virhe[$i] .= t("Avainsanaa ei löydy")."!";
+				}
+			}
+		}
+
 		if (mysql_field_name($result, $i) == "kehahin" and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
 			$tem_kehahin = $t[$i];
 			$tem_kehahin_ind = $i;
@@ -195,12 +224,12 @@ if(!function_exists("tuotetarkista")) {
 			}
 
 			if (count($virhe) == 0 and $tem_eisaldoa == "" and $yhtiorow["tuotteen_oletuspaikka"] != "") {
-				
+
 				$query = "	SELECT *
 							FROM tuotepaikat
 							WHERE tuoteno = '$tem_tuoteno' and yhtio = '$kukarow[yhtio]'";
 				$sresult = mysql_query($query) or pupe_error($query);
-				
+
 				if (mysql_num_rows($sresult) == 0) {
 					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", $yhtiorow["tuotteen_oletuspaikka"]);
 
@@ -216,7 +245,7 @@ if(!function_exists("tuotetarkista")) {
 					if ($hyllytaso == "" or !isset($hyllytaso)) {
 						$hyllytaso = 0;
 					}
-					
+
 					$tuotepaikka_query = "	INSERT INTO tuotepaikat set
 					 						yhtio			= '$kukarow[yhtio]',
 								 			tuoteno     	= '$tem_tuoteno',

@@ -305,7 +305,7 @@
 			$query = "SELECT * FROM asiakas WHERE yhtio = '$yritirow[yhtio]' and nimi LIKE '%$maksaa%'";
 			$suoasiresult = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($suoasiresult) > 0) {
+			if (mysql_num_rows($suoasiresult) == 1) {
 				$suoasirow = mysql_fetch_array ($suoasiresult);
 				echo "<font class='message'><a href='".$palvelin2."myyntires/maksunsyotto.php?asiakasid=$suoasirow[tunnus]&ytunnus=$suoasirow[ytunnus]&summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z'>".t("Myyntisuoritus")." ".substr($suoasirow["nimi"], 0, 34)."</a></font><br>";
 				$boob = 1;
@@ -401,7 +401,7 @@
 				else {
 					$tililimiitti =  "<br>";
 				}
-				
+
 				echo "<td>".t("Myönnetty määrä")."<br>". $tililimiitti . "</td>";
 				echo "</tr>";
 			}
@@ -520,7 +520,7 @@
 			echo "<td>".t("Saldo")." " . pankkipvm(substr($tietue,65,6)) . "</td>";
 			echo "<td style='text-align:right;'>" . sprintf("%01.2f",((substr($tietue,71,19) / 100)-$tililimiitti)) . "</td>";
 			echo "</tr>";
-			
+
 			if($tililimiitti != "") {
 				echo "<tr><td></td><td></td><td></td><td></td>";
 				echo "<td>".t("Käyttövara")."</td>";
@@ -611,8 +611,12 @@
 						if (strlen($osa) > 0) {
 				   			$selite .= $osa . "<br>";
 				   		}
-				   		// Luottokunnan käsittelyä varten
-				   		if ($i == 1) $luottokuntatieto = $osa;
+						// Luottokunnan käsittelyä varten
+						if ($i == 1) $luottokuntatieto = $osa
+
+				   		// Luottokunnan käsittelyä varten (Samposta info tulee JOSKUS tokassa segmentissä, muilla aina ekassa. siksi tämä on kommentointuna)
+						// if (substr($pankkitilino, 0, 1) == '8' and $i == 2) $luottokuntatieto = $osa;
+				   		// if (substr($pankkitilino, 0, 1) != '8' and $i == 1) $luottokuntatieto = $osa;
 				   	}
 					break;
 				case '01' :
@@ -667,7 +671,7 @@
 		case 'T40':
 			echo "<tr><td></td><td></td><td></td><td></td><td>".t("Saldo")." " . pankkipvm(substr($tietue,6,6)) . "</td>";
 			echo "<td style='text-align:right;'>" .  sprintf("%01.2f",((substr($tietue,31,19) / 100) - $tililimiitti)) . "</td></tr>";
-			
+
 			if($tililimiitti != "") {
 				echo "<tr><td></td><td></td><td></td><td></td><td>".t("Käyttövara")."</td>";
 				echo "<td style='text-align:right;'>" . sprintf("%01.2f",substr($tietue,31,19) / 100) . "</td></tr>";

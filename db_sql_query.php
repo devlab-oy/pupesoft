@@ -37,7 +37,8 @@
 
 		if ($rtee == "AJA" and isset($ruks_pakolliset)) {
 			require("inc/pakolliset_sarakkeet.inc");
-			list($pakolliset, $kielletyt, $wherelliset) = pakolliset_sarakkeet($table);
+			
+			list($pakolliset, $kielletyt, $wherelliset, , ) = pakolliset_sarakkeet($table);
 
 			if (!is_array($wherelliset)) {
 				$ruksaa = $pakolliset;
@@ -110,7 +111,7 @@
 			}
 
 			$where = "";
-			$order = "ORDER BY yhtio";
+			$order = "ORDER BY $table.yhtio";
 
 			$oper_array = array('on' => '=', 'not' => '!=', 'in' => 'in','like' => 'like','gt' => '>','lt' => '<','gte' => '>=','lte' => '<=');
 
@@ -132,16 +133,36 @@
 
 
 			asort($jarjestys);
-
+			$jlask = 1;
 			foreach($jarjestys as $kentta => $jarj) {
 				if ($jarj != "") {
-					$order .= ", $kentta";
+					$order .= ", $jlask";				
 				}
+				
+				if (in_array($kentta, $kentat)) $jlask++;
 			}
+			
+			$selecti  = "";
+			$selecti2 = "";
+			
+			foreach ($kentat as $kentta) {				
+				if (substr($kentta, 0, strlen($table)) == $table) {
+					$selecti .= $kentta.",";
+				}
+				elseif (substr($kentta, 0, 19) == "tuotteen_avainsanat"){
+					
+					$kentta = str_replace("tuotteen_avainsanat.", "", $kentta);
+															
+					$selecti .= "(SELECT concat_ws('##', laji, selite, kieli) FROM tuotteen_avainsanat WHERE tuote.yhtio=tuotteen_avainsanat.yhtio and tuote.tuoteno=tuotteen_avainsanat.tuoteno and tuotteen_avainsanat.laji='$kentta') 'tuotteen_avainsanat.$kentta',";					
+				}				
+			} 
+			
+			$selecti = substr($selecti, 0, -1);
+			$selecti2 = substr($selecti2, 0, -1);
 
-			$sqlhaku = "SELECT $toimintosarake ".implode(",", $kentat)."
+			$sqlhaku = "SELECT $selecti
 						FROM $table
-						WHERE yhtio='$kukarow[yhtio]'
+						WHERE $table.yhtio='$kukarow[yhtio]'
 						$where
 						$order";
 			$result = mysql_query($sqlhaku) or pupe_error($sqlhaku);
@@ -155,7 +176,7 @@
 					function tee_excel ($result) {
 						global $excelrivi, $excelnimi;
 
-						//keksitään failille joku varmasti uniikki nimi:
+						// keksitään failille joku varmasti uniikki nimi:
 						list($usec, $sec) = explode(' ', microtime());
 						mt_srand((float) $sec + ((float) $usec * 100000));
 						$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
@@ -168,11 +189,24 @@
 						$format_bold->setBold();
 
 						$excelrivi = 0;
-
-						for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
-						$worksheet->write($excelrivi, $i, "TOIMINTO", $format_bold);
+						$talis = 0;
+						
+						for ($i=0; $i < mysql_num_fields($result); $i++) {
+							
+							if (strpos(mysql_field_name($result,$i), "tuotteen_avainsanat") !== FALSE) {
+								
+								$worksheet->writeString($excelrivi, $i+$talis, "tuotteen_avainsanat.laji", $format_bold);
+								$talis++;
+								$worksheet->writeString($excelrivi, $i+$talis, "tuotteen_avainsanat.selite", $format_bold);
+								$talis++;
+								$worksheet->writeString($excelrivi, $i+$talis, "tuotteen_avainsanat.kieli", $format_bold);
+							}
+							else {							
+								$worksheet->write($excelrivi, $i+$talis, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+							}							
+						}
+						$worksheet->write($excelrivi, $i+$talis, "TOIMINTO", $format_bold);
 						$excelrivi++;
-
 
 						return(array($workbook, $worksheet, $excelrivi));
 					}
@@ -210,16 +244,28 @@
 
 							list($workbook, $worksheet, $excelrivi) = tee_excel($result);
 						}
+						
+						$talis = 0;
 
-						for ($i=0; $i<mysql_num_fields($result); $i++) {
-							if (mysql_field_type($result,$i) == 'real') {
-								$worksheet->writeNumber($excelrivi, $i, $row[$i]);
+						for ($i=0; $i<mysql_num_fields($result); $i++) {																			
+							if (strpos(mysql_field_name($result,$i), "tuotteen_avainsanat") !== FALSE) {
+								list ($laji,$selite, $kieli) = explode("##", $row[$i]);
+								
+								$worksheet->writeString($excelrivi, $i+$talis, $laji);
+								$talis++;
+								$worksheet->writeString($excelrivi, $i+$talis, $selite);
+								$talis++;
+								$worksheet->writeString($excelrivi, $i+$talis, $kieli);
+							} 							
+							elseif (mysql_field_type($result,$i) == 'real') {
+								$worksheet->writeNumber($excelrivi, $i+$talis, $row[$i]);
 							}
 							else {
-								$worksheet->writeString($excelrivi, $i, $row[$i]);
+								$worksheet->writeString($excelrivi, $i+$talis, $row[$i]);
 							}
 						}
-						$worksheet->writeString($excelrivi, $i, "MUUTA");
+						
+						$worksheet->writeString($excelrivi, $i+$talis, "MUUTA");
 						$excelrivi++;
 					}
 
@@ -240,8 +286,32 @@
 		echo "</td><td class='back' valign='top'>";
 
 		if ($table!='') {
-			$query  = "show columns from $table";
-			$fields =  mysql_query($query);
+			
+			$fields = array();
+			
+			$query  = "SHOW columns from $table";
+			$fieldres =  mysql_query($query);
+			
+			while ($row = mysql_fetch_array($fieldres)) {
+				
+				$row[0] = $table.".".$row[0];
+				
+				$fields[] = $row;
+			}
+			
+			if ($table == "tuote") {
+
+				$al_res = t_avainsana("PARAMETRI", "", "ORDER BY selite");
+				
+				while ($al_row = mysql_fetch_array($al_res)) {
+										
+					$row = array();
+					$row[0] = "tuotteen_avainsanat.parametri_".$al_row["selite"];
+					
+					$fields[] = $row;
+				}
+			}
+
 
 			echo "<form name='sql' action='$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='table' value='$table'>";
@@ -289,7 +359,7 @@
 
 			$kala = array();
 
-			while ($row = mysql_fetch_array($fields)) {
+			foreach ($fields as $row) {
 
 				if ($kysely != "") {
 					$query = "	SELECT *
@@ -317,12 +387,14 @@
 						$jarjestys[$row[0]] = $srow["jarjestys"];
 					}
 				}
+				
+				list($taulu, $sarake) = explode(".", $row[0]);
 
 				//tehdään array, että saadaan sortattua nimen mukaan..
 				if ($kentat[$row[0]] == $row[0]) {
 					$chk = "CHECKED";
 				}
-				elseif (is_array($ruksaa) and count($ruksaa) > 0 and in_array(strtoupper($row[0]),$ruksaa)) {
+				elseif (is_array($ruksaa) and count($ruksaa) > 0 and in_array(strtoupper($sarake), $ruksaa)) {
 					$chk = "CHECKED";
 				}
 				else {
@@ -350,8 +422,6 @@
 									<td><input type='text' size='5'  name='jarjestys[$row[0]]' value='".$jarjestys[$row[0]]."'></td>
 									</tr>");
 			}
-
-			//sort($kala);
 
 			foreach ($kala as $rivi) {
 				echo "$rivi";

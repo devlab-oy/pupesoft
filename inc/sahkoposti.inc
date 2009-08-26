@@ -9,7 +9,7 @@
 
 	$varaposti = '';
 
-	$subject = "$yhtiorow[nimi] - $kutsu";
+	$subject = utf8_encode("$yhtiorow[nimi] - $kutsu");
 
 	if (substr($komento,0,12) == 'asiakasemail') {
 		$varaposti = $kukarow['eposti'];
@@ -53,7 +53,7 @@
 		if ($liitenimi == '') {
 			$liitenimi = basename($liite);
 		}
-	
+
 		$content .= "Content-Type: application/excel; name=\"".$liitenimi."\"\n" ;
 		$content .= "Content-Transfer-Encoding: base64\n" ;
 		$content .= "Content-Disposition: attachment; filename=\"".$liitenimi."\"\n\n";
@@ -71,7 +71,7 @@
 	$content .= chunk_split(base64_encode($sisalto));
 	$content .= "\n" ;
 
-	$boob = mail($kukarow["eposti"],  "$subject", $content, $header, "-f $yhtiorow[postittaja_email]");
+	$boob = mail($kukarow["eposti"], $subject, $content, $header, "-f $yhtiorow[postittaja_email]");
 
 	if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $kukarow[eposti]<br>";
 

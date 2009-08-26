@@ -201,14 +201,16 @@ if ($tee == "ETSILASKU") {
 	if (mysql_num_rows($result) > 0) {
 		echo "<table border='0' cellpadding='2' cellspacing='1'>";
 		echo "<tr>";
-
-		for ($i=0; $i < mysql_num_fields($result)-2; $i++) {
-			$jarj = $i+1;
-			echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
+		if ($toim != '') {
+			echo "<th>".t("Tilaus")."</th>";
 		}
-
+		echo "<th>".t("Laskunro")."</th>";
+		echo "<th>".t("Asiakas")."</th>";
+		echo "<th>".t("Ytunnus")."</th>";
+		echo "<th>".t("Summa")."</th>";
+		echo "<th>".t("Tapvm")."</th>";
+		echo "<th>".t("Laatija")."</th>";
 		echo "<th>".t("Tyyppi")."</th>";
-
 		echo "<th>".t("Monista")."</th>";
 
 		if ($toim == '') {
@@ -230,14 +232,16 @@ if ($tee == "ETSILASKU") {
 			if ($tunnus==$row['tilaus']) $ero="th";
 
 			echo "<tr class='aktiivi'>";
-			for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
-				if(mysql_field_name($result,$i) == 'tapvm')
-					echo "<$ero valign='top'>".tv1dateconv($row["$i"])."</$ero>";
-				else {
-					echo "<$ero valign='top'>$row[$i]</$ero>";
-				}
 
+			if ($toim != '') {
+				echo "<$ero>$row[tilaus]</$ero>";
 			}
+			echo "<$ero>$row[laskunro]</$ero>";
+			echo "<$ero>$row[asiakas]</$ero>";
+			echo "<$ero>$row[ytunnus]</$ero>";
+			echo "<$ero>$row[summa]</$ero>";
+			echo "<$ero>".tv1dateconv($row["$i"])."</$ero>";
+			echo "<$ero>$row[laatija]</$ero>";
 
 			$laskutyyppi = $row["tila"];
 			$alatila	 = $row["alatila"];
@@ -269,7 +273,7 @@ if ($tee == "ETSILASKU") {
 				if ($korjaaalvit[$row["tilaus"]] != '') {
 					$sel = "CHECKED";
 				}
-				echo "<$ero valign='top'>";
+				echo "<$ero valign='top' nowrap>";
 
 				echo "<input type='checkbox' name='korjaaalvit[$row[tilaus]]' value='on' $sel> ".t("Korjaa alvit")."<br>";
 

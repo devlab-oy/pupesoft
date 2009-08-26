@@ -4028,13 +4028,13 @@ if ($tee == '') {
 					else {
 
 						if ($varow['maa'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
-							echo "<td $class align='left' valign='top'><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa)</font>";
+							echo "<td $class align='left' valign='top' nowrap><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa)</font>";
 						}
 						elseif ($varow['maa'] != '' and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
-							echo "<td $class align='left' valign='top'><font class='error'>".strtoupper($varow['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa)</font>";
+							echo "<td $class align='left' valign='top' nowrap><font class='error'>".strtoupper($varow['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa)</font>";
 						}
 						else {
-							echo "<td $class align='left' valign='top'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) ";
+							echo "<td $class align='left' valign='top' nowrap> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) ";
 						}
 
 						if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and !in_array($row["var"], array('P','J','S','T','U'))) {

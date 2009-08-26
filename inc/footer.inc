@@ -47,7 +47,7 @@
 			echo " <a href='".$palvelin."sanakirja.php?hakusana=".urlencode(implode("\n", $kaannetyt_sanat))."&tarkkahaku=ON&etsi_kieli=fi&kieli[0]=en&show=all'><font class='info'>".t("Sanakirja")."</font></a>";			
 		}
 				
-		echo "</body></html>";
+		echo "<br><br></body></html>";
 	}
 
 	mysql_close();

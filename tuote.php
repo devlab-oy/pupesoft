@@ -494,7 +494,7 @@
 
 			//5
 			echo "<tr><th>".t("Tullinimike")." / %</th><th colspan='4'>".t("Tullinimikkeen kuvaus")."</th><th>".t("Toinen paljous")."</th></tr>";
-			echo "<tr><td>$tullirow1[cn] $prossat</td><td colspan='4'>".substr($tullirow3['dm'],0,20)." - ".substr($tullirow2['dm'],0,20)." - ".substr($tullirow1['dm'],0,20)."</td><td>$tullirow1[su]</td></tr>";
+			echo "<tr><td>$tullirow1[cn] $prossat</td><td colspan='4'>".wordwrap(substr($tullirow3['dm'],0,20)." - ".substr($tullirow2['dm'],0,20)." - ".substr($tullirow1['dm'],0,20), 70, "<br>")."</td><td>$tullirow1[su]</td></tr>";
 			// $prossa
 
 			//6
@@ -503,11 +503,11 @@
 
 			//7
 			echo "<tr><th colspan='6'>".t("Tuotteen kuvaus")."</th></tr>";
-			echo "<td colspan='6'>$tuoterow[kuvaus]&nbsp;</td></tr>";
+			echo "<td colspan='6'>".wordwrap($tuoterow["kuvaus"], 130, "<br>")."&nbsp;</td></tr>";
 
 			//8
 			echo "<tr><th>".t("Muuta")."</th><th colspan='5'>".t("Lyhytkuvaus")."</th></tr>";
-			echo "<tr><td>$tuoterow[muuta]&nbsp;</td><td colspan='5'>$tuoterow[lyhytkuvaus]</td></tr>";
+			echo "<tr><td>$tuoterow[muuta]&nbsp;</td><td colspan='5'>".wordwrap($tuoterow["lyhytkuvaus"], 70, "<br>")."</td></tr>";
 			echo "</table>";
 
 			echo "<table><tr>";
@@ -711,13 +711,15 @@
 						$kokonaishyllyssa += $hyllyssa;
 						$kokonaismyytavissa += $myytavissa;
 
-						echo "<tr>
+						//if ($saldo <> 0 or $hyllyssa <> 0 or $myytavissa <> 0) {
+							echo "<tr>
 								<td>$saldorow[nimitys] $saldorow[tyyppi] $saldorow[era]</td>
 								<td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td>
 								<td align='right'>".sprintf("%.2f", $saldo)."</td>
 								<td align='right'>".sprintf("%.2f", $hyllyssa)."</td>
 								<td align='right'>".sprintf("%.2f", $myytavissa)."</td>
 								</tr>";
+						//}
 					}
 				}
 

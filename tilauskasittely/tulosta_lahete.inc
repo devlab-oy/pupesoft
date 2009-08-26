@@ -1626,11 +1626,11 @@ if (!function_exists('print_pdf')) {
 				$content_body .= $yhtiorow["nimi"]."\n";
 			}
 			elseif ($tyyppi == "YLLAPITOSOPIMUS") {
-				$kutsu = "Ylläpitosopimus";
+				$kutsu = t("Ylläpitosopimus");
 				echo t("Ylläpitosopimus tulostuu")."...<br>";
 			}
 			else {
-				$kutsu = "Lahete";
+				$kutsu = t("Lähete");
 				echo t("Lähete tulostuu")."...<br>";
 			}
 

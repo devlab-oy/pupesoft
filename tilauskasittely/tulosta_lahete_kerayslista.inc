@@ -578,7 +578,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 		//viivakoodin arvo
 		$barcode  = $laskurow["tunnus"];
 
-		if (class_exists("c39object")) {		
+		if (class_exists("c39object")) {
 			//luodaan viivakoodiolio
 			$obj = "";
 			$obj = new C39Object($width, $height, $style, $barcode);
@@ -839,15 +839,15 @@ if (!function_exists('rivi_kerayslista')) {
 					$oikpos = $pdf->strlen($rivipaikkahyllyssa, $norm);
 					$pdf->draw_text(465-$oikpos, $kala, $rivipaikkahyllyssa,	$thispage, $norm);
 				}
-				
+
 				if ($tyyppi == "SIIRTOLISTA") {
-					list(, $kohde_hyllyssa, ) = saldo_myytavissa($trow["tuoteno"], '', $laskurow["clearing"]);					
+					list(, $kohde_hyllyssa, ) = saldo_myytavissa($trow["tuoteno"], '', $laskurow["clearing"]);
 				}
 			}
 
 			$oikpos = $pdf->strlen(($row["tilkpl"]*1), $boldi);
 			$pdf->draw_text(504-$oikpos, $kala, ($row["tilkpl"]*1), 	$thispage, $boldi);
-			
+
 			$pdf->draw_text(505, $kala, t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite"), 	$thispage, $pieni);
 
 			if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
@@ -872,11 +872,11 @@ if (!function_exists('rivi_kerayslista')) {
 			$kala = $kala - $rivinkorkeus + 5;
 
 			$pdf->draw_text(125, $kala, $row["nimitys"], 											$thispage, $norm);
-			
+
 			if ($tyyppi == "SIIRTOLISTA") {
 				$pdf->draw_text(465-$oikpos, $kala, $kohde_hyllyssa, 								$thispage, $norm);
 			}
-			
+
 			if($trow["tuotemassa"] > 0) {
 				$ypaino = (float) round(($row['varattu']+$row['kpl'])*$trow["tuotemassa"], 2);
 
@@ -977,7 +977,7 @@ if (!function_exists('loppu_kerayslista')) {
 				$y_email		= $alhiro['email'];
 			}
 		}
-		
+
 		//Alimmat kolme laatikkoa, yhtiötietoja
 		$pdf->draw_rectangle(70, 20, 20, 580,	$thispage, $rectparam);
 		$pdf->draw_rectangle(70, 207, 20, 580,	$thispage, $rectparam);
@@ -994,7 +994,7 @@ if (!function_exists('loppu_kerayslista')) {
 		$pdf->draw_text(257, 45, $y_fax,							$thispage, $pieni);
 		$pdf->draw_text(217, 35, t("Sähköposti", $kieli).":",		$thispage, $pieni);
 		$pdf->draw_text(257, 35, $y_email,							$thispage, $pieni);
-		
+
 		$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",			$thispage, $pieni);
 		$pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
 		$pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",		$thispage, $pieni);
@@ -1044,7 +1044,7 @@ if (!function_exists('print_pdf_kerayslista')) {
 		// itse print komento...
 		if ($komento == 'email') {
 			$liite = $pdffilenimi;
-			$kutsu = "Lahete";
+			$kutsu = t("Keräyslista");
 			echo t("Keräyslista tulostuu")."...<br>";
 
 			if ($kukarow["extranet"] == '') {

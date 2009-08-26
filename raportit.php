@@ -2,11 +2,12 @@
 
 ///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 if (isset($_POST["tee"])) {
-	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-	if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+	if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+	if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
 if ((($toim != 'hyvaksynta') or ($tee != 'T')) and ($toim !='maksuvalmius')) $useslave = 1;
+
 require ("inc/parametrit.inc");
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
@@ -14,10 +15,9 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 	exit;
 }
 
+if ($excel == "YES") {
+	if (include('Spreadsheet/Excel/Writer.php')) {
 
-if($excel == "YES") {
-	if(include('Spreadsheet/Excel/Writer.php')) {
-		
 		//keksitään failille joku varmasti uniikki nimi:
 		list($usec, $sec) = explode(' ', microtime());
 		mt_srand((float) $sec + ((float) $usec * 100000));
@@ -31,17 +31,17 @@ if($excel == "YES") {
 		$format_bold->setBold();
 
 		$excelrivi = 0;		
-	}	
+	}
 }
 
 require ("inc/".$toim.".inc");
 
-if(isset($workbook) and $excelrivi>0) {
+if (isset($workbook) and $excelrivi>0) {
 	// We need to explicitly close the workbook
 	$workbook->close();
 
-	echo "<table>";
-	echo "<tr><th>".t("Tallenna tulos").":</th>";
+	echo "<br><br><table>";
+	echo "<tr><th>".t("Tallenna Excel").":</th>";
 	echo "<form method='post' action='$PHP_SELF'>";
 	echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 	echo "<input type='hidden' name='kaunisnimi' value='".ucfirst(strtolower($toim)).".xls'>";
@@ -51,4 +51,5 @@ if(isset($workbook) and $excelrivi>0) {
 }
 
 require ("inc/footer.inc");
+
 ?>

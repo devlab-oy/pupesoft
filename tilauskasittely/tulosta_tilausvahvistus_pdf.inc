@@ -106,7 +106,7 @@
 								//  Onko nippulla projektia?
 								$query = "select tunnus from lasku where yhtio ='$kukarow[yhtio]' and tunnusnippu='$laskurow[projekti]' and tila = 'R'";
 								$abures = mysql_query($query) or pupe_error($query);
-								
+
 								if(mysql_num_rows($abures)>0) {
 									if($laskurow["projekti"] == $laskurow["tunnus"]) {
 										$kentat = array("projekti", "päiväys", "valuutta", "toimitustapa", "toimitusehto", "asiakkaan_VAT");
@@ -331,9 +331,9 @@
 							$style_rivi2 = "snadi";
 							$style_komm = "snadi";
 							//  Jos meillä on isätuote fiksataan yksikköhinta
-							
+
 							if($row["perheid"]==$row["tunnus"]) {
-								
+
 								if($row["ei_nayteta"] == "E") {
 									//	Lasketaan paketin hinta
 									$query = "	SELECT round(sum($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))), $yhtiorow[hintapyoristys]) yhteishinta
@@ -354,8 +354,8 @@
 								}
 							}
 							$rivi="isa";
-							
-							
+
+
 						}
 						//  Meillä on lapsituote
 						else{
@@ -452,9 +452,9 @@
 						$h-=$pdf->ln(5);
 					}
 				}
-				
+
 				$teksti = trim($laskurow["sisviesti1"]."\n\n".$laskurow["comments"]);
-				
+
 				if($teksti != "") {
 					//  Maksusopimus
 					$pdf->write($h, 1, 0, 0, t("LISÄTIEDOT", $kieli), "norm", "L", "B");
@@ -468,7 +468,7 @@
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]' and laji='TV_LISATIETO' and kieli = '$kieli'";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				if(mysql_num_rows($result) > 0) {
 					$lrow = mysql_fetch_array($result);
 
@@ -489,12 +489,12 @@
 					}
 					$h-=$pdf->ln(2);
 				}
-				
+
 				$query = "	SELECT round(maksupositio.osuus,0) osuus, maksupositio.kuvaus, maksupositio.lisatiedot, maksuehto.tunnus, maksuehto.teksti
 							FROM maksupositio
-							LEFT JOIN maksuehto ON maksuehto.yhtio=maksupositio.yhtio and maksuehto.tunnus=maksupositio.maksuehto					 
-							WHERE maksupositio.yhtio = '$kukarow[yhtio]' 
-							and maksupositio.otunnus = $laskurow[jaksotettu] 
+							LEFT JOIN maksuehto ON maksuehto.yhtio=maksupositio.yhtio and maksuehto.tunnus=maksupositio.maksuehto
+							WHERE maksupositio.yhtio = '$kukarow[yhtio]'
+							and maksupositio.otunnus = $laskurow[jaksotettu]
 							order by maksupositio.tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 
@@ -535,14 +535,14 @@
 
 					$query = "	SELECT *
 								FROM maksuehto
-								WHERE yhtio = '$kukarow[yhtio]' 
+								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = $laskurow[maksuehto]";
 					$result = mysql_query($query) or pupe_error($query);
 					$row = mysql_fetch_array($result);
-										
+
 					$pdf->write($h, 1, 0, 5, "1.", "norm", "L", "");
 					$pdf->write($h, 1, 5, 0, "100% ".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV", $kieli)." ".t("toimituksesta", $kieli), "norm", "L", "");
-					$h-=$pdf->ln(1.25);			
+					$h-=$pdf->ln(1.25);
 				}
 
 
@@ -736,14 +736,14 @@
 		if ($laskurow["tunnusnippu"] > 0) {
 			$query = "  SELECT group_concat(tunnus) tunnukset
 						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' 
-						and tunnusnippu = '$laskurow[tunnusnippu]' 
-						and tunnusnippu > 0 
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnusnippu = '$laskurow[tunnusnippu]'
+						and tunnusnippu > 0
 						and tila IN ('N','L','A')
 						GROUP BY tunnusnippu";
 			$abures = mysql_query($query) or pupe_error($query);
 			$aburow = mysql_fetch_array($abures);
-			
+
 			if ($aburow["tunnukset"] != "") {
 				$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
 				$laskurow["nippu"] = $aburow["tunnukset"];
@@ -751,7 +751,7 @@
 			else {
 				$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
 				$laskurow["nippu"] = $laskurow["tunnus"];
-			}		
+			}
 		}
 		else {
 			$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
@@ -834,7 +834,7 @@
 
 		if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {
 			$tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".pdf";
-						
+
 			//kirjoitetaan pdf faili levylle..
 			$apu_pdf = $pdf; // otetaan globaali käyttöön..
 			$fh_liite = fopen($tilausvahvistus_tallenna, "w");

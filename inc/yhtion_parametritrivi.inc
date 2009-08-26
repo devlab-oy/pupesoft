@@ -1138,6 +1138,25 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tilausvahvistus_tyyppi_tulostus") {
+
+		$sela = $selb = "";
+
+		if ($trow[$i] == 'K') {
+			$selb = "selected";
+		}
+		else {
+			$sela = "selected";
+		}
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
+					<option value='' $sela>".t("Tilausvahvistustyyppiä EI SAA vaihtaa tulostuksessa")."</option>
+					<option value='K' $selb>".t("Tilausvahvistustyyppiä SAA vaihtaa tulostuksessa")."</option>
+				</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "valmistusten_yhdistaminen") {
 
 		$sela = "";

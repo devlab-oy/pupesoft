@@ -822,11 +822,11 @@
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.ytunnus'>".t("Ytunnus")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.nimi'>".t("Nimi")."</a></th>";
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=pvm'>".t("Pvm")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.toimaika'>".t("Toimaika")."</a></th>";
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.laatija'>".t("Laatija")."</a></th>";
-			
+
 			if ($kukarow['hinnat'] == 0) {
 				echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=summa'>".t("Summa")."</a></th>";
 			}
-			
+
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.tila,lasku.alatila'>".t("Tyyppi")."</a></th>";
 
 			if ($tila == 'monta') {
@@ -852,11 +852,11 @@
 				echo "<$ero valign='top'>$row[ytunnus]<br>$row[nimi]<br>$row[nimitark]</$ero>";
 				echo "<$ero valign='top'>".tv1dateconv($row["pvm"])."<br>".tv1dateconv($row["toimaika"])."</$ero>";
 				echo "<$ero valign='top'>$row[laatija]</$ero>";
-				
+
 				if ($kukarow['hinnat'] == 0) {
 					echo "<$ero valign='top' align='right'>$row[summa]</$ero>";
 				}
-				
+
 				$laskutyyppi = $row["tila"];
 				$alatila     = $row["alatila"];
 
@@ -1356,7 +1356,7 @@
 
 					if ($toim == 'PROFORMA') {
 						$laskurow["tapvm"] = date("Y-m-d");
-						
+
 						if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
 							$hinta_riv = "(tilausrivi.hinta/$laskurow[vienti_kurssi])";
 						}
@@ -1404,7 +1404,7 @@
 						if ($row["keratty"] == "saldoton" and $yhtiorow["saldottomien_toimitettuaika"] == "K") {
 							$row['toimitettuaika'] = $row['toimaika'];
 						}
-						
+
 						rivi($page[$sivu]);
 					}
 
@@ -1455,8 +1455,22 @@
 			}
 
 			if ($toim == "TILAUSVAHVISTUS" or $toim == "YLLAPITOSOPIMUS") {
+
+				if ($seltvtyyppi != "") {
+					$laskurow['tilausvahvistus'] = $seltvtyyppi;
+				}
+
 				if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 					$naytatvale = "2";
+				}
+				elseif (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {
+					$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+				}
+				elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {
+					$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
+				}
+				else {
+					$naytatvale = 1; // halutaan n‰h‰ alet
 				}
 
 				require_once ("tulosta_tilausvahvistus_pdf.inc");

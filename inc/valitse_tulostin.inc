@@ -67,7 +67,8 @@
 		echo "<tr><td>".t("Tulosta nimitykset ostotilaukselle")."</td><td><input type='checkbox' name='nimitykset'></td></tr>";
 		$mista = 'toimi';
 	}
-	elseif ($toim == "LAHETE" and $yhtiorow["lahete_tyyppi_tulostus"] != '' and $otunnus != '') {
+
+	if ($toim == "LAHETE" and $yhtiorow["lahete_tyyppi_tulostus"] != '' and $otunnus != '') {
 		echo "<tr><td>".t("Tulosta")."</td><td><select name='sellahetetyyppi'>";
 
 		$query2 = "	SELECT lahetetyyppi
@@ -93,6 +94,30 @@
     else {
         $mista = 'asiakas';
     }
+
+	if ($toim == "TILAUSVAHVISTUS" and $yhtiorow["tilausvahvistus_tyyppi_tulostus"] != '' and $otunnus != '') {
+
+		$query2 = "	SELECT tilausvahvistus
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$otunnus'";
+		$vresult2 = mysql_query($query2) or pupe_error($query2);
+		$row2 = mysql_fetch_array($vresult2);
+
+		$vresult = t_avainsana("TV", "", " and avainsana.selite like '%K%'");
+
+		echo "<tr><td>".t("Tulosta")."</td><td><select name='seltvtyyppi'>";
+		echo "<option value=''>".t("Oletus")."</option>";
+
+		while($row = mysql_fetch_array($vresult)) {
+			$sel = "";
+			if ($row["selite"] == $row2["tilausvahvistus"]) $sel = 'selected';
+
+			echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
+		}
+
+		echo "</select></td></tr>";
+	}
+
 	echo "<tr><td>".t("Kpl")."</td><td><input type='text' name='kappaleet' size='3'></td></tr>";
 
 	echo "<tr><td>".t("Valitse kieli")."</td>";
@@ -150,7 +175,7 @@
 
 	while ($apurow = mysql_fetch_array($fields)) {
 		if (strlen($apurow[0]) == 2) {
-			$query = "select distinct nimi from maat where koodi='$apurow[0]'";
+			$query = "SELECT distinct nimi from maat where koodi='$apurow[0]'";
 			$maare = mysql_query($query);
 
 			$maaro = mysql_fetch_array($maare);
@@ -175,10 +200,10 @@
 			echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
 		}
 
-		$querykieli = "	select *
-					from kirjoittimet
-					where yhtio='$kukarow[yhtio]'
-					ORDER BY kirjoitin";
+		$querykieli = "	SELECT *
+						from kirjoittimet
+						where yhtio='$kukarow[yhtio]'
+						ORDER BY kirjoitin";
 		$kires = mysql_query($querykieli) or pupe_error($querykieli);
 
 		while ($kirow=mysql_fetch_array($kires)) {

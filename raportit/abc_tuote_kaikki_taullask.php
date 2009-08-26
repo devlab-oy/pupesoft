@@ -1,14 +1,21 @@
 <?php
 
 	echo "<font class='head'>".t("ABC-Analyysi‰: ABC-pitk‰listaus")."<hr></font>";
-	
+
+	if ($toim == "kulutus") {
+		$myykusana = t("Kulutus");
+	}
+	else {
+		$myykusana = t("Myynti");
+	}
+
 	//ryhm‰jako
 	$ryhmanimet   = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
 	$ryhmaprossat = array(30.00,20.00,15.00,15.00,10.00,5.00,3.00,2.00,0.00);
 
 	if (trim($saapumispp) != '' and trim($saapumiskk) != '' and trim($saapumisvv) != '') {
-		$saapumispp = $saapumispp; 
-		$saapumiskk = $saapumiskk;  
+		$saapumispp = $saapumispp;
+		$saapumiskk = $saapumiskk;
 		$saapumisvv	= $saapumisvv;
 	}
 	elseif (trim($saapumispvm) != '') {
@@ -20,7 +27,7 @@
 	echo "<input type='hidden' name='aja' value='AJA'>";
 	echo "<input type='hidden' name='tee' value='PITKALISTA'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
-	
+
 	// Monivalintalaatikot (osasto, try tuotemerkki...)
 	// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
 	$lisa  = "";
@@ -29,7 +36,7 @@
 	$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "TUOTEMYYJA", "TUOTEOSTAJA");
 
 	require ("../tilauskasittely/monivalintalaatikot.inc");
-	
+
 	echo "<br>";
 	echo "<table style='display:inline;'>";
 	echo "<tr>";
@@ -53,7 +60,7 @@
 	echo "	<td><input type='text' name='saapumispp' value='$saapumispp' size='2'>
 			<input type='text' name='saapumiskk' value='$saapumiskk' size='2'>
 			<input type='text' name='saapumisvv' value='$saapumisvv'size='4'></td></tr>";
-	
+
 	echo "<tr>";
 	echo "<th>".t("Varastopaikoittain").":</th>";
 
@@ -63,25 +70,24 @@
 	}
 
 	echo "<td><input type='checkbox' name='paikoittain' value='JOO' $sel></td></tr>";
-	
+
 	echo "<tr>";
 	echo "<th>".t("Taso").":</th>";
-	
+
 	if ($lisatiedot != '') $sel = "selected";
 	else $sel = "";
-	
+
 	echo "<td><select name='lisatiedot'>";
 	echo "<option value=''>".t("Normaalitiedot")."</option>";
 	echo "<option value='TARK' $sel>".t("N‰ytet‰‰n kaikki sarakkeet")."</option>";
 	echo "</select></td>";
 	echo "<td class='back'><input type='submit' name='ajoon' value='".t("Aja raportti")."'></td>";
 	echo "</tr>";
-	
 	echo "</form>";
 	echo "</table><br>";
 
 	if ($aja == "AJA" and isset($ajoon)) {
-		
+
 		if (@include('Spreadsheet/Excel/Writer.php')) {
 
 			//keksit‰‰n failille joku varmasti uniikki nimi:
@@ -92,12 +98,12 @@
 			$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
 			$workbook->setVersion(8);
 			$worksheet =& $workbook->addWorksheet('Sheet 1');
-			
+
 			$excelrivi = 0;
-			
-			$worksheet->write($excelrivi, 0,  t("ABC"));			
+
+			$worksheet->write($excelrivi, 0,  t("ABC"));
 			$worksheet->write($excelrivi, 1,  t("ABC osaston luokka"));
-			$worksheet->write($excelrivi, 2,  t("ABC tuoteryhm‰n luokka"));			
+			$worksheet->write($excelrivi, 2,  t("ABC tuoteryhm‰n luokka"));
 			$worksheet->write($excelrivi, 3,  t("Tuoteno"));
 			$worksheet->write($excelrivi, 4,  t("Toim_tuoteno"));
 			$worksheet->write($excelrivi, 5,  t("Nimitys"));
@@ -105,39 +111,40 @@
 			$worksheet->write($excelrivi, 7,  t("Osasto"));
 			$worksheet->write($excelrivi, 8,  t("Try"));
 			$worksheet->write($excelrivi, 9,  t("Tulopvm"));
-			$worksheet->write($excelrivi, 10,  t("Myynti$yhtiorow[valkoodi]"));
-			$worksheet->write($excelrivi, 11,  t("Kate"));
-			$worksheet->write($excelrivi, 12,  t("Kate%"));
-			$worksheet->write($excelrivi, 13,  t("Kateosuus"));
-			$worksheet->write($excelrivi, 14,  t("Vararvo"));
-			$worksheet->write($excelrivi, 15,  t("Kierto"));
-			$worksheet->write($excelrivi, 16,  t("MyyntiKpl"));
-			$worksheet->write($excelrivi, 17,  t("MyyntieraKpl"));
-			$worksheet->write($excelrivi, 18,  t("Myyntiera$yhtiorow[valkoodi]"));
-			$worksheet->write($excelrivi, 19,  t("Myyntirivit"));
-			$worksheet->write($excelrivi, 20,  t("Puuterivit"));
-			$worksheet->write($excelrivi, 21,  t("Palvelutaso"));
-			$worksheet->write($excelrivi, 22,  t("OstoeraKPL"));
-			$worksheet->write($excelrivi, 23,  t("Ostoera$yhtiorow[valkoodi]"));
-			$worksheet->write($excelrivi, 24,  t("Ostorivit"));
-			$worksheet->write($excelrivi, 25,  t("KustannusMyynti"));
-			$worksheet->write($excelrivi, 26,  t("KustannusOsto"));
-			$worksheet->write($excelrivi, 27,  t("KustannusYht"));
-			$worksheet->write($excelrivi, 28,  t("Kate-Kustannus"));
-			$worksheet->write($excelrivi, 29,  t("Tuotepaikka"));
-			$worksheet->write($excelrivi, 30,  t("Saldo"));
-			$worksheet->write($excelrivi, 31,  t("Myyj‰"));
-			$worksheet->write($excelrivi, 32,  t("Ostaja"));
-			$worksheet->write($excelrivi, 33,  t("Malli"));
-			$worksheet->write($excelrivi, 34,  t("Mallitarkenne"));
-			$worksheet->write($excelrivi, 35,  t("Saapumispvm"));
+			$worksheet->write($excelrivi, 10, $myykusana.$yhtiorow["valkoodi"]);
+			$worksheet->write($excelrivi, 11, t("Kate"));
+			$worksheet->write($excelrivi, 12, t("Kate%"));
+			$worksheet->write($excelrivi, 13, t("Kateosuus"));
+			$worksheet->write($excelrivi, 14, t("Vararvo"));
+			$worksheet->write($excelrivi, 15, t("Kierto"));
+			$worksheet->write($excelrivi, 16, $myykusana.t("m‰‰r‰"));
+			$worksheet->write($excelrivi, 17, $myykusana.t("er‰").t("m‰‰r‰"));
+			$worksheet->write($excelrivi, 18, $myykusana.t("er‰").$yhtiorow["valkoodi"]);
+			$worksheet->write($excelrivi, 19, $myykusana.t("rivit"));
+			$worksheet->write($excelrivi, 20, t("Puuterivit"));
+			$worksheet->write($excelrivi, 21, t("Palvelutaso"));
+			$worksheet->write($excelrivi, 22, t("Ostoer‰").t("m‰‰r‰"));
+			$worksheet->write($excelrivi, 23, t("Ostoer‰").$yhtiorow["valkoodi"]);
+			$worksheet->write($excelrivi, 24, t("Ostorivit"));
+			$worksheet->write($excelrivi, 25, t("KustannusMyynti"));
+			$worksheet->write($excelrivi, 26, t("KustannusOsto"));
+			$worksheet->write($excelrivi, 27, t("KustannusYht"));
+			$worksheet->write($excelrivi, 28, t("Kate-Kustannus"));
+			$worksheet->write($excelrivi, 29, t("Tuotepaikka"));
+			$worksheet->write($excelrivi, 30, t("Saldo"));
+			$worksheet->write($excelrivi, 31, t("Myyj‰"));
+			$worksheet->write($excelrivi, 32, t("Ostaja"));
+			$worksheet->write($excelrivi, 33, t("Malli"));
+			$worksheet->write($excelrivi, 34, t("Mallitarkenne"));
+			$worksheet->write($excelrivi, 35, t("Saapumispvm"));
 			$excelrivi++;
 		}
-				
+
+		/*
 		echo "<pre>";
-		echo t("ABC")."\t";		
-		echo t("ABC osaston luokka");
-		echo t("ABC tuoteryhm‰n luokka");		
+		echo t("ABC")."\t";
+		echo t("ABC osaston luokka")."\t";
+		echo t("ABC tuoteryhm‰n luokka")."\t";
 		echo t("Tuoteno")."\t";
 		echo t("Toim_tuoteno")."\t";
 		echo t("Nimitys")."\t";
@@ -145,20 +152,20 @@
 		echo t("Osasto")."\t";
 		echo t("Try")."\t";
 		echo t("Tulopvm")."\t";
-		echo t("Myynti")." $yhtiorow[valkoodi]\t";
+		echo $myykusana.$yhtiorow["valkoodi"]."\t";
 		echo t("Kate")."\t";
 		echo t("Kate%")."\t";
 		echo t("Kateosuus")."\t";
 		echo t("Vararvo")."\t";
 		echo t("Kierto")."\t";
-		echo t("MyyntiKpl")."\t";
-		echo t("MyyntieraKpl")."\t";
-		echo t("Myyntiera")." $yhtiorow[valkoodi]\t";
-		echo t("Myyntirivit")."\t";
+		echo $myykusana.t("m‰‰r‰")."\t";
+		echo $myykusana.t("er‰").t("m‰‰r‰")."\t";
+		echo $myykusana.t("er‰").$yhtiorow["valkoodi"]."\t";
+		echo $myykusana.t("rivit")."\t";
 		echo t("Puuterivit")."\t";
 		echo t("Palvelutaso")."\t";
-		echo t("OstoeraKPL")."\t";
-		echo t("Ostoera")." $yhtiorow[valkoodi]\t";
+		echo t("Ostoer‰").t("m‰‰r‰")."\t";
+		echo t("Ostoer‰").$yhtiorow["valkoodi"]."\t";
 		echo t("Ostorivit")."\t";
 		echo t("KustannusMyynti")."\t";
 		echo t("KustannusOsto")."\t";
@@ -166,12 +173,13 @@
 		echo t("Kate-Kustannus")."\t";
 		echo t("Tuotepaikka")."\t";
 		echo t("Saldo")."\t";
-		echo t("Myyja")."\t";
+		echo t("Myyj‰")."\t";
 		echo t("Ostaja")."\t";
 		echo t("Malli")."\t";
 		echo t("Mallitarkenne")."\t";
 		echo t("Saapumispvm")."\t";
 		echo "\n";
+		*/
 
 		if (count($haku) > 0) {
 			foreach ($haku as $kentta => $arvo) {
@@ -192,7 +200,7 @@
 			$saapumispvm = "$saapumisvv-$saapumiskk-$saapumispp";
 			$saapumispvmlisa = " and abc_aputaulu.saapumispvm <= '$saapumispvm' ";
 		}
-	
+
 		$query = "	SELECT
 					distinct luokka
 					FROM abc_aputaulu
@@ -209,13 +217,13 @@
 						sum(kate)  yhtkate
 						FROM abc_aputaulu
 						WHERE yhtio = '$kukarow[yhtio]'
-						and tyyppi = '$abcchar'						
+						and tyyppi = '$abcchar'
 						and luokka = '$luokkarow[luokka]'
 						$lisa
 						$saapumispvmlisa";
 			$sumres = mysql_query($query) or pupe_error($query);
 			$sumrow = mysql_fetch_array($sumres);
-			
+
 			$sumrow['yhtkate'] = (float) $sumrow['yhtkate'];
 			$sumrow['yhtmyynti'] = (float) $sumrow['yhtmyynti'];
 
@@ -275,19 +283,19 @@
 							group by tuote.tuoteno";
 				$tuoresult = mysql_query($query) or pupe_error($query);
 				$tuorow = mysql_fetch_array($tuoresult);
-				
-				$query = "	SELECT distinct myyja, nimi 
-							FROM kuka 
-							WHERE yhtio='$kukarow[yhtio]' 
+
+				$query = "	SELECT distinct myyja, nimi
+							FROM kuka
+							WHERE yhtio='$kukarow[yhtio]'
 							AND myyja = '$row[myyjanro]'
 							AND myyja != ''
 							ORDER BY myyja";
 				$myyjaresult = mysql_query($query) or pupe_error($query);
 				$myyjarow = mysql_fetch_array($myyjaresult);
 
-				$query = "	SELECT distinct myyja, nimi 
-							FROM kuka 
-							WHERE yhtio='$kukarow[yhtio]' 
+				$query = "	SELECT distinct myyja, nimi
+							FROM kuka
+							WHERE yhtio='$kukarow[yhtio]'
 							AND myyja = '$row[ostajanro]'
 							AND myyja != ''
 							ORDER BY myyja";
@@ -302,21 +310,21 @@
 								and yhtio 		= '$kukarow[yhtio]'";
 				}
 				else {
-					$query = "	SELECT sum(saldo) saldo	
+					$query = "	SELECT sum(saldo) saldo
 								from tuotepaikat
 								where tuoteno	= '$row[tuoteno]'
 								and yhtio 		= '$kukarow[yhtio]'";
-					
-				}						
+
+				}
 				$paikresult = mysql_query($query) or pupe_error($query);
 
 				while ($paikrow = mysql_fetch_array($paikresult)) {
-					
+
 					// Lis‰t‰‰n rivi exceltiedostoon
 					if(isset($workbook)) {
-						$worksheet->write($excelrivi, 0,  $ryhmanimet[$row["luokka"]]);						
+						$worksheet->write($excelrivi, 0,  $ryhmanimet[$row["luokka"]]);
 						$worksheet->write($excelrivi, 1,  $ryhmanimet[$row["luokka_osasto"]]);
-						$worksheet->write($excelrivi, 2,  $ryhmanimet[$row["luokka_try"]]);						
+						$worksheet->write($excelrivi, 2,  $ryhmanimet[$row["luokka_try"]]);
 						$worksheet->write($excelrivi, 3,  "$row[tuoteno]");
 						$worksheet->write($excelrivi, 4,  "$tuorow[toim_tuoteno]");
 						$worksheet->write($excelrivi, 5,  t_tuotteen_avainsanat($tuorow, 'nimitys'));
@@ -352,7 +360,8 @@
 						$worksheet->write($excelrivi, 35, tv1dateconv($row["saapumispvm"]));
 						$excelrivi++;
 					}
-				
+
+					/*
 					echo $ryhmanimet[$row["luokka"]]."\t";
 					echo $ryhmanimet[$row["luokka_osasto"]]."\t";
 					echo $ryhmanimet[$row["luokka_try"]]."\t";
@@ -389,18 +398,19 @@
 					echo "$row[malli]\t";
 					echo "$row[mallitarkenne]\t";
 					echo tv1dateconv($row["saapumispvm"])."\t";
-					echo "\n";					
+					echo "\n";
+					*/
 				}
 			}
 		}
 
-		echo "</pre>";
-		
+		//echo "</pre>";
+
 		if(isset($workbook)) {
 			// We need to explicitly close the workbook
 			$workbook->close();
 
-			echo "<table>";
+			echo "<br><br><table>";
 			echo "<tr><th>".t("Tallenna Excel").":</th>";
 			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<input type='hidden' name='exceltee' value='lataa_tiedosto'>";

@@ -2,6 +2,13 @@
 
 	echo "<font class='head'>".t("ABC-Analyysi‰: ABC-Luokkayhteenveto")." $yhtiorow[nimi]<hr></font>";
 
+	if ($toim == "kulutus") {
+		$myykusana = t("Kulutus");
+	}
+	else {
+		$myykusana = t("Myynti");
+	}
+
 	if (trim($saapumispp) != '' and trim($saapumiskk) != '' and trim($saapumisvv) != '') {
 		$saapumispp = $saapumispp;
 		$saapumiskk = $saapumiskk;
@@ -152,11 +159,11 @@
 			echo "<th nowrap>".t("ABC")."<br>".t("Luokka")."</th>";
 		}
 
-		echo "<th nowrap>".t("Myynti")."<br>".t("tot")."</th>";
+		echo "<th nowrap>$myykusana<br>".t("tot")."</th>";
 
 		if ($lisatiedot == "TARK") {
-			echo "<th nowrap>".t("Myynti")."<br>".t("max")."</th>";
-			echo "<th nowrap>".t("Myynti")."<br>".t("min")."</th>";
+			echo "<th nowrap>$myykusana<br>".t("max")."</th>";
+			echo "<th nowrap>$myykusana<br>".t("min")."</th>";
 		}
 
 		if ($lisatiedot != "OSTONOHJ") {
@@ -168,7 +175,7 @@
 			if ($lisatiedot == "TARK") {
 				echo "<th nowrap>".t("Osuus")." %<br>".t("kat").".</th>";
 			}
-			echo "<th nowrap>".t("Tuotteita")."<br>".t("KPL")."</th>";
+			echo "<th nowrap>".t("Tuotteita")."<br>".t("m‰‰r‰")."</th>";
 		}
 
 		echo "<th nowrap>".t("Varast").".<br>".t("arvo")."<br>".t("nyt")."</th>";
@@ -189,14 +196,14 @@
 
 		if ($lisatiedot != "OSTONOHJ") {
 			echo "<th nowrap>".t("Kate")."% x<br>".t("kiert").".</th>";
-			echo "<th nowrap>".t("Myydyt")."<br>".t("KPL")."</th>";
+			echo "<th nowrap>$myykusana<br>".t("m‰‰r‰")."</th>";
 		}
 
 		if ($lisatiedot == "TARK" or $lisatiedot == "OSTONOHJ") {
 			if ($lisatiedot == "TARK") {
-				echo "<th nowrap>".t("Myyer‰")."<br>".t("KPL")."</th>";
-				echo "<th nowrap>".t("Myyer‰")."<br>$yhtiorow[valkoodi]</th>";
-				echo "<th nowrap>".t("Myyty")."<br>".t("rivej‰")."</th>";
+				echo "<th nowrap>$myykusana".t("er‰")."<br>".t("m‰‰r‰")."</th>";
+				echo "<th nowrap>$myykusana".t("er‰")."<br>$yhtiorow[valkoodi]</th>";
+				echo "<th nowrap>$myykusana<br>".t("rivej‰")."</th>";
 			}
 			echo "<th nowrap>".t("Puute")."<br>".t("rivej‰")."<br>".t("nyt")."</th>";
 			if ($lisatiedot == "OSTONOHJ") {
@@ -219,7 +226,7 @@
 		}
 
 		if ($lisatiedot == "TARK") {
-			echo "<th nowrap>".t("Ostoer‰")."<br>".t("KPL")."</th>";
+			echo "<th nowrap>".t("Ostoer‰")."<br>".t("m‰‰r‰")."</th>";
 			echo "<th nowrap>".t("Ostoer‰")."<br>$yhtiorow[valkoodi]</th>";
 			echo "<th nowrap>".t("Ostettu")."<br>".t("rivej‰")."</th>";
 			echo "<th nowrap>".t("Myynn").".<br>".t("kustan").".</th>";
@@ -260,6 +267,7 @@
 			$groupby  .= " luokka,";
 			$orderby  .= " luokka,";
 		}
+
 		$groupby  = substr($groupby, 0, -1);
 
 		if (strlen($order) > 0) {
@@ -267,6 +275,25 @@
 		}
 		else {
 			$orderby .= " $abcwhat desc";
+		}
+
+		if (strtolower($toim) == 'myynti') {
+			$paramtyppi = "TM";
+		}
+		elseif (strtolower($toim) == 'kate') {
+			$paramtyppi = "TK";
+		}
+		elseif (strtolower($toim) == 'kpl') {
+			$paramtyppi = "TP";
+		}
+		elseif (strtolower($toim) == 'kulutus') {
+			$paramtyppi = "TV";
+		}
+		elseif (strtolower($toim) == 'rivit') {
+			$paramtyppi = "TR";
+		}
+		else {
+			$paramtyppi = "";
 		}
 
 		//haetaan luokkien arvot
@@ -322,22 +349,6 @@
 		$i = 0;
 
 		while ($row = mysql_fetch_array($res)) {
-
-			if (strtolower($toim) == 'myynti') {
-				$paramtyppi = "TM";
-			}
-			elseif (strtolower($toim) == 'kate') {
-				$paramtyppi = "TK";
-			}
-			elseif (strtolower($toim) == 'kpl') {
-				$paramtyppi = "TP";
-			}
-			elseif (strtolower($toim) == 'rivit') {
-				$paramtyppi = "TR";
-			}
-			else {
-				$paramtyppi = "";
-			}
 
 			$query = "SELECT * FROM abc_parametrit WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$paramtyppi' and luokka = '$ryhmanimet[$i]'";
 			$paramres = mysql_query($query) or pupe_error($query);

@@ -4,7 +4,7 @@
 		if($_POST["exceltee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
-	
+
 	require ("../inc/parametrit.inc");
 
 	if (isset($exceltee) and $exceltee == "lataa_tiedosto") {
@@ -26,6 +26,10 @@
 		elseif ($toim == "kpl") {
 			$abcwhat = "kpl";
 			$abcchar = "TP";
+		}
+		elseif ($toim == "kulutus") {
+			$abcwhat = "kpl";
+			$abcchar = "TV";
 		}
 		elseif ($toim == "rivia") {
 			$abcwhat = "rivia";

@@ -22,7 +22,7 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 		$saldottomatmukaan = trim($argv[3]);
 	}
 
-	$query    = "select * from yhtio where yhtio='$kukarow[yhtio]'";
+	$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
 	$yhtiores = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($yhtiores) == 1) {
@@ -64,33 +64,49 @@ if ($tee == 'YHTEENVETO') {
 		$abcwhat = "rivia";
 		$abcchar = "TR";
 	}
+	elseif ($abctyyppi == "kulutus") {
+		$abcwhat = "kpl";
+		$abcchar = "TV";
+	}
 	else {
 		$abcwhat = "summa";
 		$abcchar = "TM";
 	}
-	
+
+
+	if ($abctyyppi == "kulutus") {
+		$kpltyyppi = " tilausrivi.tyyppi='V' ";
+		$summasql  = " sum(if($kpltyyppi, (SELECT sum(-1*kpl*hinta) from tapahtuma where tapahtuma.yhtio=tilausrivi.yhtio and tapahtuma.laji='kulutus' and tapahtuma.rivitunnus=tilausrivi.tunnus), 0)) ";
+		$katesql   = " 0 ";
+	}
+	else {
+		$kpltyyppi = " tilausrivi.tyyppi='L' ";
+		$summasql  = " sum(if(tilausrivi.tyyppi='L' and tilausrivi.var in ('H',''), tilausrivi.rivihinta, 0)) ";
+		$katesql   = " sum(if(tilausrivi.tyyppi='L' and tilausrivi.var in ('H',''), tilausrivi.kate, 0)) ";
+	}
+
 	// Haetaan abc-parametrit
-	$query = "	SELECT * 
+	$query = "	SELECT *
 				FROM abc_parametrit
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tyyppi 	= '$abcchar'
 				ORDER by luokka";
 	$res = mysql_query($query) or pupe_error($query);
-	
-	$ryhmanimet   	= array();	
+
+	$ryhmanimet   	= array();
 	$ryhmaprossat	= array();
 	$sisainen_taso	= "";
-	
+
 	while ($row = mysql_fetch_array($res)) {
 		$ryhmanimet[] 	= $row["luokka"];
 		$ryhmaprossat[] = $row["osuusprosentti"];
-		
+
 		// Otetaan eka kulutaso
 		if ($sisainen_taso == "" and $row["kulujen_taso"] != "") {
-			$sisainen_taso = $row["kulujen_taso"]; 
+			$sisainen_taso = $row["kulujen_taso"];
 		}
 	}
-	
+
 	$i_luokka = count($ryhmaprossat)-1;
 
 	// siivotaan ensin aputaulu tyhj‰ksi
@@ -111,21 +127,20 @@ if ($tee == 'YHTEENVETO') {
 	$useslave = 1;
 	require ("../inc/connect.inc");
 
-	//haetaan ensin koko kauden yhteismyynti ja ostot
+	// Haetaan ensin koko kauden yhteismyynti ja ostot
 	$query = "	SELECT
-				tilausrivi.tuoteno,
-				sum(if(tyyppi='O', 1, 0))			rivia_osto,
-				sum(if(tyyppi='L', 1, 0))			rivia,
-				sum(if(tyyppi='L', kpl, 0)) 		kpl,
-				sum(if(tyyppi='L', rivihinta, 0))	summa,
-				sum(if(tyyppi='L', kate, 0)) 		kate
+				tilausrivi.tuoteno						tuoteno,
+				sum(if(tilausrivi.tyyppi='O', 1, 0))	rivia_osto,
+				sum(if($kpltyyppi, 1, 0))				rivia,
+				sum(if($kpltyyppi, tilausrivi.kpl, 0)) 	kpl,
+				$summasql								summa,
+				$katesql 								kate
 				FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 				$tuotejoin
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-				and tilausrivi.tyyppi in ('L','O')
-				and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
-				and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
-				group by tuoteno";
+				and ((tilausrivi.tyyppi in ('L','O') and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl')
+				or (tilausrivi.tyyppi = 'V' and tilausrivi.toimitettuaika >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.toimitettuaika <= '$vvl-$kkl-$ppl 23:59:59'))
+				GROUP BY 1";
 	$res = mysql_query($query) or pupe_error($query);
 
 	//kokokauden kokonaismyynti
@@ -139,8 +154,8 @@ if ($tee == 'YHTEENVETO') {
 	while ($row = mysql_fetch_array($res)) {
 
 		// onko enemm‰n ku nolla
-		if ($row["${abcwhat}"] > 0) {
-			$kausiyhteensa += $row["${abcwhat}"];
+		if ($row[$abcwhat] > 0) {
+			$kausiyhteensa += $row[$abcwhat];
 		}
 
 		$kaudenostriviyht += $row["rivia_osto"];
@@ -196,36 +211,35 @@ if ($tee == 'YHTEENVETO') {
 
 	// rakennetaan tuotekohtaiset ABC-luokat.. haetaan kaikki tilausrivit ajanjaksolta
 	$query = "	SELECT
-				tilausrivi.tuoteno,
-				ifnull(tuote.try,'#') try,
-				ifnull(tuote.osasto,'#') osasto,
-				ifnull(tuote.tuotemerkki,'#') tuotemerkki,
-				ifnull(tuote.nimitys,'#') tuotenimitys,
-				ifnull(tuote.luontiaika,'#') luontiaika,
-				ifnull(tuote.myyjanro,'0') myyjanro,
-				ifnull(tuote.ostajanro,'0') ostajanro,
-				ifnull(tuote.malli,'#') malli,
-				ifnull(tuote.mallitarkenne,'#') mallitarkenne,
-				ifnull(tuote.vihapvm,'0000-00-00') saapumispvm,
-				sum(if(tyyppi='L' and (var='H' or var=''), 1, 0))			rivia,
-				sum(if(tyyppi='L' and (var='H' or var=''), kpl, 0))			kpl,
-				sum(if(tyyppi='L' and (var='H' or var=''), rivihinta, 0))	summa,
-				sum(if(tyyppi='L' and (var='H' or var=''), kate, 0))		kate,
-				sum(if(tyyppi='L' and (var='P'), tilkpl, 0))				puutekpl,
-				sum(if(tyyppi='L' and (var='P'), 1, 0))						puuterivia,
-				sum(if(tyyppi='O', 1, 0))									osto_rivia,
-				sum(if(tyyppi='O', kpl, 0))									osto_kpl,
-				sum(if(tyyppi='O', rivihinta, 0))							osto_summa,
-				count(distinct if(tyyppi='O',tilausrivi.otunnus,0))-1 osto_kerrat,
-				count(distinct if(tyyppi='L',tilausrivi.otunnus,0))-1 kerrat,
-				(select ifnull(sum(saldo) * if(epakurantti100pvm = '0000-00-00',if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25), 0), 0) from tuote, tuotepaikat where tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno) vararvo
+				tilausrivi.tuoteno 					tuoteno,
+				ifnull(tuote.try,'#') 				try,
+				ifnull(tuote.osasto,'#') 			osasto,
+				ifnull(tuote.tuotemerkki,'#') 		tuotemerkki,
+				ifnull(tuote.nimitys,'#') 			tuotenimitys,
+				ifnull(tuote.luontiaika,'#') 		luontiaika,
+				ifnull(tuote.myyjanro,'0') 			myyjanro,
+				ifnull(tuote.ostajanro,'0') 		ostajanro,
+				ifnull(tuote.malli,'#') 			malli,
+				ifnull(tuote.mallitarkenne,'#') 	mallitarkenne,
+				ifnull(tuote.vihapvm,'0000-00-00') 	saapumispvm,
+				$summasql							summa,
+				$katesql							kate,
+				sum(if($kpltyyppi and tilausrivi.var in ('H',''), 1, 0))						rivia,
+				sum(if($kpltyyppi and tilausrivi.var in ('H',''), tilausrivi.kpl, 0)) 			kpl,
+				sum(if(tilausrivi.tyyppi='L' and (tilausrivi.var='P'), tilausrivi.tilkpl, 0))	puutekpl,
+				sum(if(tilausrivi.tyyppi='L' and (tilausrivi.var='P'), 1, 0))					puuterivia,
+				sum(if(tilausrivi.tyyppi='O', 1, 0))											osto_rivia,
+				sum(if(tilausrivi.tyyppi='O', tilausrivi.kpl, 0))								osto_kpl,
+				sum(if(tilausrivi.tyyppi='O', tilausrivi.rivihinta, 0))							osto_summa,
+				count(distinct if(tilausrivi.tyyppi='O', tilausrivi.otunnus, 0))-1 				osto_kerrat,
+				count(distinct if($kpltyyppi, tilausrivi.otunnus, 0))-1 						kerrat,
+				(SELECT ifnull(sum(tuotepaikat.saldo) * if(tuote.epakurantti100pvm = '0000-00-00',if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25), 0), 0) from tuote, tuotepaikat where tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno) vararvo
 				FROM tilausrivi USE INDEX (yhtio_tyyppi_laskutettuaika)
 				$tuotejoin
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-				and tilausrivi.tyyppi in ('L','O')
-				and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
-				and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
-				GROUP BY 1,2,3,4,5
+				and ((tilausrivi.tyyppi in ('L','O') and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl')
+				or (tilausrivi.tyyppi = 'V' and tilausrivi.toimitettuaika >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.toimitettuaika <= '$vvl-$kkl-$ppl 23:59:59'))
+				GROUP BY 1,2,3,4,5,6,7,8,9,10,11
 	   			ORDER BY $abcwhat desc";
 	$res = mysql_query($query) or pupe_error($query);
 
@@ -237,6 +251,23 @@ if ($tee == 'YHTEENVETO') {
 	require ("../inc/connect.inc");
 
 	while ($row = mysql_fetch_array($res)) {
+
+		// ensimm‰inen tulo
+		$query = "	SELECT ifnull(left(min(laadittu),10), 0) tulopvm
+					FROM tapahtuma USE INDEX (yhtio_laji_tuoteno)
+					WHERE yhtio = '$kukarow[yhtio]' and
+					tuoteno = '$row[tuoteno]' and
+					laji = 'tulo'";
+		$insres = mysql_query($query) or pupe_error($query);
+		$tulorow = mysql_fetch_array($insres);
+
+		// saldo nyt
+		$query = " 	SELECT sum(saldo) saldo
+					FROM tuotepaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND	tuoteno = '$row[tuoteno]'";
+		$saldores = mysql_query($query) or pupe_error($query);
+		$saldorow = mysql_fetch_array($saldores);
 
 		// katotaan onko kelvollinen tuote, elikk‰ luokitteluperuste pit‰‰ olla > 0
 		if ($row["${abcwhat}"] > 0) {
@@ -277,23 +308,6 @@ if ($tee == 'YHTEENVETO') {
 		if ($row["osto_rivia"] != 0) $ostoeranakpl = round ($row["osto_kpl"] / $row["osto_rivia"],2);
 		else $ostoeranakpl = 0;
 
-		// ensimm‰inen tulo
-		$query = "	SELECT ifnull(left(min(laadittu),10), 0) tulopvm
-					FROM tapahtuma USE INDEX (yhtio_laji_tuoteno) 
-					WHERE yhtio = '$kukarow[yhtio]' and 
-					tuoteno = '$row[tuoteno]' and 
-					laji = 'tulo'";
-		$insres = mysql_query($query) or pupe_error($query);
-		$tulorow = mysql_fetch_array($insres);			
-		
-		
-		$query = " 	SELECT sum(saldo) saldo
-					FROM tuotepaikat
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND	tuoteno = '$row[tuoteno]'";
-		$saldores = mysql_query($query) or pupe_error($query);
-		$saldorow = mysql_fetch_array($saldores);
-		
 		$query = "	INSERT INTO abc_aputaulu
 					SET yhtio			= '$kukarow[yhtio]',
 					tyyppi				= '$abcchar',
@@ -362,9 +376,7 @@ if ($tee == 'YHTEENVETO') {
 				sum(tuotepaikat.saldo) * if(epakurantti100pvm = '0000-00-00',if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25), 0) vararvo
 				FROM tuotepaikat USE INDEX (tuote_index)
 				JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
-				LEFT JOIN abc_aputaulu USE INDEX (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuotepaikat.yhtio
-				and abc_aputaulu.tuoteno = tuotepaikat.tuoteno
-				and tyyppi = '$abcchar')
+				LEFT JOIN abc_aputaulu USE INDEX (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuotepaikat.yhtio and abc_aputaulu.tuoteno = tuotepaikat.tuoteno and tyyppi = '$abcchar')
 				WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 				GROUP BY 1,2,3,4,5,6
 				HAVING saldo > 0 and luokka is null";
@@ -375,13 +387,13 @@ if ($tee == 'YHTEENVETO') {
 
 		// ensimm‰inen tulo
 		$query = "	SELECT ifnull(left(min(laadittu),10), 0) tulopvm
-					FROM tapahtuma USE INDEX (yhtio_laji_tuoteno) 
-					WHERE yhtio = '$kukarow[yhtio]' and 
-					tuoteno = '$row[tuoteno]' and 
+					FROM tapahtuma USE INDEX (yhtio_laji_tuoteno)
+					WHERE yhtio = '$kukarow[yhtio]' and
+					tuoteno = '$row[tuoteno]' and
 					laji = 'tulo'";
 		$insres = mysql_query($query) or pupe_error($query);
 		$tulorow = mysql_fetch_array($insres);
-		
+
 		$query = "	INSERT INTO abc_aputaulu
 					SET yhtio			= '$kukarow[yhtio]',
 					tyyppi				= '$abcchar',
@@ -661,10 +673,11 @@ if ($tee == "") {
 
 	echo "<tr><th>ABC-luokkien laskentatapa</th>";
 	echo "<td colspan='3'><select name='abctyyppi'>";
-	echo "<option value='kate'>Katteen mukaan</option>";
-	echo "<option value='myynti'>Myynnin mukaan</option>";
-	echo "<option value='kpl'>Kappaleiden mukaan</option>";
-	echo "<option value='rivia'>Rivim‰‰r‰n mukaan</option>";
+	echo "<option value='kate'>".t("Katteen mukaan")."</option>";
+	echo "<option value='myynti'>".t("Myynnin mukaan")."</option>";
+	echo "<option value='kpl'>".t("Kappaleiden mukaan")."</option>";
+	echo "<option value='rivia'>".t("Rivim‰‰r‰n mukaan")."</option>";
+	echo "<option value='kulutus'>".t("Kulutuksen mukaan")."</option>";
 	echo "</select></td></tr>";
 
 	echo "<tr><td colspan='4' class='back'><br></td></tr>";

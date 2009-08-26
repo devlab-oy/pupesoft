@@ -153,12 +153,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		}
 	}
 	else {
-		$rivi = fgets($file);
+
 		$excei = 0;
 
-		while (!feof($file)) {
+		while ($rivi = fgets($file)) {
 			// luetaan rivi tiedostosta..
-			$rivi = explode("\t", trim(str_replace(array("'", "\\"), "", $rivi)));
+			$rivi = explode("\t", str_replace(array("'", "\\"), "", $rivi));
 
 			for ($excej = 0; $excej < count($rivi); $excej++) {
 
@@ -173,12 +173,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						$taulunrivit[$taulu][$excei][] = $rivi[$excej];
 					}
 				}
-				$excej++;
 			}
 			$excei++;
-
-			// luetaan seuraava rivi failista
-			$rivi = fgets($file);
 		}
 		fclose($file);
 	}
@@ -204,6 +200,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		}
 		echo "</table><br>";
 	}
+
+	exit;
 	*/
 
 	foreach ($taulunrivit as $taulu => $rivit) {

@@ -48,67 +48,34 @@
 			}
 		}
 
-		// jos ollaan annettu uusirappari nimi, niin unohdetaan dropdowni!
-		if ($uusirappari != "") $kysely = "";
-
-		// T‰ss‰ luodaan uusi raporttiprofiili
-		if ($rtee == "AJA" and $uusirappari != '' and $kysely == "") {
-
-			$rappari = $table."##".$kukarow["kuka"]."##".$uusirappari;
-
-			foreach($sarakkeet as $val) {
-				if ($kentat[$val] != '' or $operaattori[$val] != '' or $rajaus[$val] != '') {
-
-					$valsarake = $val;
-
-					if ($kentat[$val] != '') {
-						$valsarake .= "**";
-					}
-
-					$query = "	INSERT INTO avainsana
-								set yhtio		= '$kukarow[yhtio]',
-								laji			= 'SQLDBQUERY',
-								selite			= '$rappari',
-								selitetark		= '$valsarake',
-								selitetark_2	= '$operaattori[$val]',
-								selitetark_3	= '$rajaus[$val]',
-								jarjestys		= '$jarjestys[$val]'";
-					$res = mysql_query($query) or pupe_error($query);
-				}
-			}
-		}
-
 		if ($kysely != $edkysely) {
 			$rtee = "";
 		}
 
+		list($kysely_kuka, $kysely_mika) = explode("#", $kysely);
+		
+		// jos ollaan annettu uusirappari nimi, niin unohdetaan dropdowni!
+		if ($uusirappari != "") $kysely = "";
+
+		// n‰it‰ muuttujia ei tallenneta
+		$ala_tallenna = array("kysely", "uusirappari", "edkysely", "rtee");
+
+		// tallennetaan uusi kysely
+		if ($rtee == "AJA" and $uusirappari != '' and $kysely == "") {
+			tallenna_muisti($uusirappari, $ala_tallenna);
+		}
+
+		// tallennetaan aina myˆs kysely uudestaan jos sit‰ ajetaan (jos on oma rappari)
+		if ($rtee == "AJA" and $kysely != '' and $kysely_kuka == $kukarow["kuka"]) {
+			tallenna_muisti($kysely_mika, $ala_tallenna);
+		}
+
+		// jos kysely on valittuna mutta ei olla viel‰ ajamassa niin haetaan muuttujat
+		if ($kysely != "" and $rtee != "AJA") {
+			hae_muisti($kysely_mika, $kysely_kuka);
+		}
+
 		if ($rtee == "AJA" and is_array($kentat)) {
-
-			if ($kysely != '') {
-				$query = "DELETE FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='SQLDBQUERY' and selite='$kysely'";
-				$res = mysql_query($query) or pupe_error($query);
-
-				foreach($sarakkeet as $val) {
-					if ($kentat[$val] != '' or $operaattori[$val] != '' or $rajaus[$val] != '') {
-
-						$valsarake = $val;
-
-						if ($kentat[$val] != '') {
-							$valsarake .= "**";
-						}
-
-						$query = "	INSERT INTO avainsana
-									set yhtio		= '$kukarow[yhtio]',
-									laji			= 'SQLDBQUERY',
-									selite			= '$kysely',
-									selitetark		= '$valsarake',
-									selitetark_2	= '$operaattori[$val]',
-									selitetark_3	= '$rajaus[$val]',
-									jarjestys		= '$jarjestys[$val]'";
-						$res = mysql_query($query) or pupe_error($query);
-					}
-				}
-			}
 
 			$where = "";
 			$order = "ORDER BY $table.yhtio";
@@ -131,7 +98,6 @@
 				}
 			}
 
-
 			asort($jarjestys);
 			$jlask = 1;
 			foreach($jarjestys as $kentta => $jarj) {
@@ -145,7 +111,7 @@
 			$selecti  = "";
 			$selecti2 = "";
 			
-			foreach ($kentat as $kentta) {				
+			foreach ($kentat as $kentta) {			
 				if (substr($kentta, 0, strlen($table)) == $table) {
 					$selecti .= $kentta.",";
 				}
@@ -279,7 +245,7 @@
 		$query  = "show tables from $dbkanta";
 	    $result =  mysql_query($query);
 
-		while ($row=mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_array($result)) {
 			echo "<a href='$PHP_SELF?table=$row[0]'>$row[0]</a><br>";
 		}
 
@@ -312,7 +278,6 @@
 				}
 			}
 
-
 			echo "<form name='sql' action='$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='table' value='$table'>";
 			echo "<input type='hidden' name='rtee' value='AJA'>";
@@ -324,13 +289,17 @@
 			echo "<tr><td>".t("Tallenna kysely").":</td><td><input type='text' size='20' name='uusirappari' value=''></td></tr>";
 			echo "<tr><td>".t("Valitse kysely").":</td><td>";
 
-			//Haetaan tallennetut h‰lyrapit
-			$query = "	SELECT distinct selite, concat('(',replace(selite, '##',') ')) nimi
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji 	= 'SQLDBQUERY'
-						and selite	like '".$table."##%'
-						ORDER BY selite";
+			// tehd‰‰n "serializoitua" dataa ni etsit‰‰n t‰ll‰ vain t‰m‰n tablen tallennettuja kyselyit‰...
+			$data = "\"table\";s:".strlen($table).":\"$table\"";
+
+			//Haetaan tallennetut kyselyt
+			$query = "	SELECT distinct kuka.nimi, kuka.kuka, tallennetut_parametrit.nimitys
+						FROM tallennetut_parametrit
+						JOIN kuka on (kuka.yhtio = tallennetut_parametrit.yhtio and kuka.kuka = tallennetut_parametrit.kuka)
+						WHERE tallennetut_parametrit.yhtio = '$kukarow[yhtio]'
+						and tallennetut_parametrit.sovellus = '$_SERVER[SCRIPT_NAME]'
+						and tallennetut_parametrit.data like '%$data%'
+						ORDER BY tallennetut_parametrit.nimitys";
 			$sresult = mysql_query($query) or pupe_error($query);
 
 			echo "<select name='kysely' onchange='submit()'>";
@@ -339,11 +308,11 @@
 			while ($srow = mysql_fetch_array($sresult)) {
 
 				$sel = '';
-				if ($kysely == $srow["selite"]) {
+				if ($kysely == $srow["kuka"]."#".$srow["nimitys"]) {
 					$sel = "selected";
 				}
 
-				echo "<option value='$srow[selite]' $sel>$srow[nimi]</option>";
+				echo "<option value='$srow[kuka]#$srow[nimitys]' $sel>$srow[nimitys] ($srow[nimi])</option>";
 			}
 			echo "</select>";
 
@@ -363,38 +332,11 @@
 
 				list($taulu, $sarake) = explode(".", $row[0]);
 
-				if ($kysely != "") {
-					$query = "	SELECT *
-								FROM avainsana
-								WHERE yhtio 	= '$kukarow[yhtio]'
-								and laji		= 'SQLDBQUERY'
-								and selite		= '$kysely'
-								and selitetark 	IN ('$sarake','$sarake**')";
-					$sresult = mysql_query($query) or pupe_error($query);
-					$srow = mysql_fetch_array($sresult);
-
-					if ($srow["selitetark"] != '' and substr($srow["selitetark"],-2) == "**") {
-						$kentat[$sarake] = substr($srow["selitetark"], 0, -2);
-					}
-
-					if ($srow["selitetark_2"] != '') {
-						$operaattori[$sarake] = $srow["selitetark_2"];
-					}
-
-					if ($srow["selitetark_3"] != '') {
-						$rajaus[$sarake] = $srow["selitetark_3"];
-					}
-
-					if ((int) $srow["jarjestys"] > 0) {
-						$jarjestys[$sarake] = $srow["jarjestys"];
-					}
-				}
-
 				//tehd‰‰n array, ett‰ saadaan sortattua nimen mukaan..
-				if ($kentat[$sarake] == $sarake) {
+				if ($kentat[$row[0]] == $row[0]) {
 					$chk = "CHECKED";
 				}
-				elseif (is_array($ruksaa) and count($ruksaa) > 0 and in_array(strtoupper($sarake), $ruksaa)) {
+				elseif (is_array($ruksaa) and count($ruksaa) > 0 and in_array(strtoupper($row[0]), $ruksaa)) {
 					$chk = "CHECKED";
 				}
 				else {
@@ -402,12 +344,12 @@
 				}
 
 				$sel = array();
-				$sel[$operaattori[$sarake]] = "SELECTED";
+				$sel[$operaattori[$row[0]]] = "SELECTED";
 
 				array_push($kala,"<tr>
 									<td>$row[0]</td>
-									<td><input type='hidden' name='sarakkeet[$sarake]' value='$sarake'><input type='checkbox' name='kentat[$sarake]' value='$sarake' $chk></td>
-									<td><select name='operaattori[$sarake]'>
+									<td><input type='hidden' name='sarakkeet[$row[0]]' value='$row[0]'><input type='checkbox' name='kentat[$row[0]]' value='$row[0]' $chk></td>
+									<td><select name='operaattori[$row[0]]'>
 										<option value=''></option>
 										<option value='on'	$sel[on]>=</option>
 										<option value='not'	$sel[not]>!=</option>
@@ -418,8 +360,8 @@
 										<option value='gte'	$sel[gte]>&gt;=</option>
 										<option value='lte'	$sel[lte]>&lt;=</option>
 										</select></td>
-									<td><input type='text' size='15' name='rajaus[$sarake]' value='".$rajaus[$sarake]."'></td>
-									<td><input type='text' size='5'  name='jarjestys[$sarake]' value='".$jarjestys[$sarake]."'></td>
+									<td><input type='text' size='15' name='rajaus[$row[0]]' value='".$rajaus[$row[0]]."'></td>
+									<td><input type='text' size='5'  name='jarjestys[$row[0]]' value='".$jarjestys[$row[0]]."'></td>
 									</tr>");
 			}
 

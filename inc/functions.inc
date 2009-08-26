@@ -5286,6 +5286,71 @@ if (!function_exists("decodeURI")) {
 	}
 }
 
+if (!function_exists("tallenna_muisti")) {
+	function tallenna_muisti($nimitys, $exclude = "") {
+		global $kukarow;
+
+		if ($nimitys == "") {
+			return false;
+		}
+
+		$data = $_REQUEST;
+
+		if (is_array($exclude)) {
+			foreach ($exclude as $kentta) {
+				unset($data[$kentta]);
+			}
+		}
+
+		$nimitys = mysql_real_escape_string($nimitys);
+		$sovellus = mysql_real_escape_string($sovellus);
+		$data = mysql_real_escape_string(serialize($data));
+
+		$query = "	REPLACE INTO tallennetut_parametrit SET
+					yhtio		= '$kukarow[yhtio]',
+					kuka		= '$kukarow[kuka]',
+					nimitys		= '$nimitys',
+					sovellus	= '$_SERVER[SCRIPT_NAME]',
+					data		= '$data',
+					laatija		= '$kukarow[kuka]',
+					luontiaika  = now()";
+		$result = mysql_query($query) or pupe_error($query);
+
+		return true;
+	}
+}
+
+if (!function_exists("hae_muisti")) {
+	function hae_muisti($nimitys, $kuka = '') {
+		global $kukarow;
+
+		if ($kuka == "") {
+			$kuka = $kukarow["kuka"];
+		}
+
+		$query = "	SELECT * 
+					FROM tallennetut_parametrit
+					WHERE yhtio = '$kukarow[yhtio]'
+					and nimitys = '$nimitys'
+					and kuka = '$kuka'
+					and sovellus = '$_SERVER[SCRIPT_NAME]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) == 1) {
+			$row = mysql_fetch_array($result);
+			$data = unserialize($row["data"]);
+
+			foreach ($data as $nimi => $arvo) {
+				global ${$nimi};
+				${$nimi} = $arvo;
+			}
+		}
+		else {
+			return false;
+		}
+	}
+}
+
 if (!function_exists("muistiin")) {
 	function muistiin ($muisti, $nimi, $muistettava, $exclude = "") {
 		global $kukarow;

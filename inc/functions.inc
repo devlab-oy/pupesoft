@@ -4265,7 +4265,7 @@ if (!function_exists("enable_ajax")) {
 				var selectValues = document.getElementsByName('selectValues'+haku_id);
 				document.getElementById(haku_id).value=selectValues[keyStrokeIndex].id;
 				if (dont_submit_after) {
-					document.getElementById('livesearch_'+haku_id).style.visibility = 'hidden';					
+					document.getElementById('livesearch_'+haku_id).style.visibility = 'hidden';
 				}
 				else {
 					document.haku_formi.submit();
@@ -5287,7 +5287,7 @@ if (!function_exists("decodeURI")) {
 }
 
 if (!function_exists("muistiin")) {
-	function muistiin ($muisti, $nimi, $muistettava, $exclude="") {
+	function muistiin ($muisti, $nimi, $muistettava, $exclude = "") {
 		global $kukarow;
 
 		if ($muisti == "" or $nimi == "" or !is_array($muistettava)) {
@@ -5298,35 +5298,40 @@ if (!function_exists("muistiin")) {
 			$exclude = array();
 		}
 
-		//	Poistetaan vanha kysely sekä tmpquery
+		// Poistetaan vanha kysely sekä tmpquery
 		$query = "	DELETE
 					FROM muisti
-					WHERE yhtio='$kukarow[yhtio]' and haku = '$muisti' and kuka = '$kukarow[kuka]' and nimi = '$nimi'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and haku = '$muisti'
+					and kuka = '$kukarow[kuka]'
+					and nimi = '$nimi'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		foreach($muistettava as $key => $value) {
+		foreach ($muistettava as $key => $value) {
 
 			if (!in_array($key, $exclude)) {
 
-				//	Koitetaan arpoa pari speciaalia datatyyppiä
+				// Katsotaan onko kyseessä array
 				$array = "";
 				if (is_array($value)) {
 					$value = serialize($value);
 					$array = "X";
 				}
 
+				$value = mysql_real_escape_string($value);
+
 				$query = "	INSERT INTO muisti SET
-								yhtio		= '$kukarow[yhtio]',
-								kuka		= '$kukarow[kuka]',
-								haku		= '$muisti',
-								nimi		= '$nimi',
-								var			= '$key',
-								value		= '".mysql_real_escape_string($value)."',
-								array 		= '$array',
-								luontiaika	= now(),
-								laatija		= '$kukarow[kuka]',
-								muokattu	= now(),
-								muokannut	= '$kukarow[kuka]'";
+							yhtio		= '$kukarow[yhtio]',
+							kuka		= '$kukarow[kuka]',
+							haku		= '$muisti',
+							nimi		= '$nimi',
+							var			= '$key',
+							value		= '$value',
+							array 		= '$array',
+							luontiaika	= now(),
+							laatija		= '$kukarow[kuka]',
+							muokattu	= now(),
+							muokannut	= '$kukarow[kuka]'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 		}
@@ -5341,23 +5346,28 @@ if (!function_exists("muistista")) {
 
 		$query = "	SELECT *
 					FROM muisti
-					WHERE yhtio='$kukarow[yhtio]' and haku = '$muisti' and kuka = '$kukarow[kuka]' and nimi = '$nimi'";
+					WHERE yhtio = '$kukarow[yhtio]'
+					and haku = '$muisti'
+					and kuka = '$kukarow[kuka]'
+					and nimi = '$nimi'";
 		$result = mysql_query($query) or pupe_error($query);
-		if (mysql_num_rows($result)>0) {
-			$retval = array();
-			while($row = mysql_fetch_array($result)) {
 
-				if ($row["array"] != "") {
-					$retval[$row["var"]] = unserialize($row["value"]);
-				}
-				else {
-					$retval[$row["var"]] = stripslashes($row["value"]);
-				}
-			}
-			return $retval;
+		if (mysql_num_rows($result) == 0) {
+			return false;
 		}
 
-		return false;
+		$retval = array();
+
+		while ($row = mysql_fetch_array($result)) {
+			if ($row["array"] != "") {
+				$retval[$row["var"]] = unserialize($row["value"]);
+			}
+			else {
+				$retval[$row["var"]] = stripslashes($row["value"]);
+			}
+		}
+
+		return $retval;
 	}
 }
 
@@ -6469,7 +6479,7 @@ if (!function_exists("livesearch_kentta")) {
 							sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&ohje=off&livesearch_haku='+this.value);
 							keyStrokeIndex = -1;
 					}\"
-					onblur=\"var selectOptions = document.getElementsByName('selectOptions$hakuID'); 
+					onblur=\"var selectOptions = document.getElementsByName('selectOptions$hakuID');
 					for (var iEl = 0; iEl < selectOptions.length; iEl++) {
 						if (document.getElementById(selectOptions[iEl].id).className != '') {
 							return false;

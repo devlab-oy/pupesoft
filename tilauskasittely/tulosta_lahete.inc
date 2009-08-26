@@ -1618,7 +1618,7 @@ if (!function_exists('print_pdf')) {
 
 			if ($tyyppi == "TILAUSVAHVISTUS") {
 				$kutsu = "Tilausvahvistus";
-				echo t("Tilausvahvistus tulostuu")." $laskurow[tunnus]...<br>";
+				echo t("Tilausvahvistus tulostuu")."...<br>";
 				$content_body = t("Kiitos tilauksestanne", $kieli).",\n\n";
 				$content_body .= t("Tilausnumeronne on", $kieli)." $laskurow[tunnus]\n\n";
 				$content_body .= t("Tämä on automaattinen vahvistus tilauksestanne, tähän sähköpostiin ei tarvitse vastata.", $kieli)."\n\n";

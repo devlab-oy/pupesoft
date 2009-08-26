@@ -361,37 +361,37 @@
 
 			foreach ($fields as $row) {
 
+				list($taulu, $sarake) = explode(".", $row[0]);
+
 				if ($kysely != "") {
 					$query = "	SELECT *
 								FROM avainsana
 								WHERE yhtio 	= '$kukarow[yhtio]'
 								and laji		= 'SQLDBQUERY'
 								and selite		= '$kysely'
-								and selitetark 	IN ('$row[0]','$row[0]**')";
+								and selitetark 	IN ('$sarake','$sarake**')";
 					$sresult = mysql_query($query) or pupe_error($query);
 					$srow = mysql_fetch_array($sresult);
 
-					if($srow["selitetark"] != '' and substr($srow["selitetark"],-2) == "**") {
-						$kentat[$row[0]] = substr($srow["selitetark"], 0, -2);
+					if ($srow["selitetark"] != '' and substr($srow["selitetark"],-2) == "**") {
+						$kentat[$sarake] = substr($srow["selitetark"], 0, -2);
 					}
 
 					if ($srow["selitetark_2"] != '') {
-						$operaattori[$row[0]] = $srow["selitetark_2"];
+						$operaattori[$sarake] = $srow["selitetark_2"];
 					}
 
 					if ($srow["selitetark_3"] != '') {
-						$rajaus[$row[0]] = $srow["selitetark_3"];
+						$rajaus[$sarake] = $srow["selitetark_3"];
 					}
 
 					if ((int) $srow["jarjestys"] > 0) {
-						$jarjestys[$row[0]] = $srow["jarjestys"];
+						$jarjestys[$sarake] = $srow["jarjestys"];
 					}
 				}
-				
-				list($taulu, $sarake) = explode(".", $row[0]);
 
 				//tehdään array, että saadaan sortattua nimen mukaan..
-				if ($kentat[$row[0]] == $row[0]) {
+				if ($kentat[$sarake] == $sarake) {
 					$chk = "CHECKED";
 				}
 				elseif (is_array($ruksaa) and count($ruksaa) > 0 and in_array(strtoupper($sarake), $ruksaa)) {
@@ -402,12 +402,12 @@
 				}
 
 				$sel = array();
-				$sel[$operaattori[$row[0]]] = "SELECTED";
+				$sel[$operaattori[$sarake]] = "SELECTED";
 
 				array_push($kala,"<tr>
 									<td>$row[0]</td>
-									<td><input type='hidden' name='sarakkeet[$row[0]]' value='$row[0]'><input type='checkbox' name='kentat[$row[0]]' value='$row[0]' $chk></td>
-									<td><select name='operaattori[$row[0]]'>
+									<td><input type='hidden' name='sarakkeet[$sarake]' value='$sarake'><input type='checkbox' name='kentat[$sarake]' value='$sarake' $chk></td>
+									<td><select name='operaattori[$sarake]'>
 										<option value=''></option>
 										<option value='on'	$sel[on]>=</option>
 										<option value='not'	$sel[not]>!=</option>
@@ -418,8 +418,8 @@
 										<option value='gte'	$sel[gte]>&gt;=</option>
 										<option value='lte'	$sel[lte]>&lt;=</option>
 										</select></td>
-									<td><input type='text' size='15' name='rajaus[$row[0]]' value='".$rajaus[$row[0]]."'></td>
-									<td><input type='text' size='5'  name='jarjestys[$row[0]]' value='".$jarjestys[$row[0]]."'></td>
+									<td><input type='text' size='15' name='rajaus[$sarake]' value='".$rajaus[$sarake]."'></td>
+									<td><input type='text' size='5'  name='jarjestys[$sarake]' value='".$jarjestys[$sarake]."'></td>
 									</tr>");
 			}
 

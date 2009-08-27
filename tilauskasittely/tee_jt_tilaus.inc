@@ -432,7 +432,7 @@
 						foreach ($tunnusarray as $tunnus_nyt) {
 							if ($toim == "ENNAKKO") {
 								$query = "	SELECT tilausrivi.*, tuote.ei_saldoa
-											FROM tilausrivi use index (PRIMARY), tuote
+											FROM tilausrivi
 											JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)											
 											WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 											and tilausrivi.tunnus = '$tunnus_nyt'

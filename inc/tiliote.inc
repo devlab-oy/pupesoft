@@ -612,7 +612,7 @@
 				   			$selite .= $osa . "<br>";
 				   		}
 						// Luottokunnan käsittelyä varten
-						if ($i == 1) $luottokuntatieto = $osa
+						if ($i == 1) $luottokuntatieto = $osa;
 
 				   		// Luottokunnan käsittelyä varten (Samposta info tulee JOSKUS tokassa segmentissä, muilla aina ekassa. siksi tämä on kommentointuna)
 						// if (substr($pankkitilino, 0, 1) == '8' and $i == 2) $luottokuntatieto = $osa;

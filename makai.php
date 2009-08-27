@@ -625,7 +625,7 @@
 						}
 						else {
 							$laskunimi1 	= substr(trim($laskurow["nimi"]." ".$laskurow['nimitark']), 0, 45);
-						}
+						} 
 
 						$laskunimi2 	= $laskurow["osoite"];
 						$laskunimi3 	= $laskurow["postitp"];

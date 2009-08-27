@@ -1,5 +1,7 @@
 <?php
 
+	$useslave = 1;
+
 	if (file_exists("../inc/parametrit.inc")) {
 		require ("../inc/parametrit.inc");
 	}
@@ -49,7 +51,7 @@
 	if (!isset($ppl)) $ppl = date("d");
 
 	echo "<table>";
-	echo "<form action='' method='post' autocomplete='off'>";
+	echo "<form action='' method='post' autocomplete='off' name='hakuform' id='hakuform'>";
 
 	echo "<tr><th>",t("Toimittaja"),"</th><td colspan='2' nowrap><input type='text' name='toimittajahaku' value='$toimittajahaku'></td></tr>";
 
@@ -78,13 +80,13 @@
 	}
 
 	if ($tee == 'aja') {
-
-		$ppa = (int) $ppa;
-		$kka = (int) $kka;
-		$vva = (int) $vva;
-		$ppl = (int) $ppl;
-		$kkl = (int) $kkl;
-		$vvl = (int) $vvl;
+		
+		$ppa = sprintf('%02d', (int) $ppa);
+		$kka = sprintf('%02d', (int) $kka);
+		$vva = sprintf('%04d', (int) $vva);
+		$ppl = sprintf('%02d', (int) $ppl);
+		$kkl = sprintf('%02d', (int) $kkl);
+		$vvl = sprintf('%04d', (int) $vvl);
 
 		if ($toimittajaid != '') {
 			$toimittajaid = mysql_real_escape_string($toimittajaid);
@@ -96,7 +98,7 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					$toimittajalisa";
 		$res = mysql_query($query) or pupe_error($query);
-
+		
 		echo "<table>";
 
 		$vaihtuuko_toimittaja = '';
@@ -542,9 +544,7 @@
 				echo "<td class='spec'>&nbsp;</td>";
 				echo "<td class='spec'>&nbsp;</td>";
 				echo "</tr>";
-
-			}
-
+			}	
 		}
 		echo "</table>";
 	}

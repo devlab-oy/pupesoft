@@ -118,8 +118,10 @@
 				elseif (substr($kentta, 0, 19) == "tuotteen_avainsanat"){
 					
 					$kentta = str_replace("tuotteen_avainsanat.", "", $kentta);
+					
+					list ($kentta, $kieli) = explode(":", $kentta);
 															
-					$selecti .= "(SELECT concat_ws('##', laji, selite, kieli) FROM tuotteen_avainsanat WHERE tuote.yhtio=tuotteen_avainsanat.yhtio and tuote.tuoteno=tuotteen_avainsanat.tuoteno and tuotteen_avainsanat.laji='$kentta') 'tuotteen_avainsanat.$kentta',";					
+					$selecti .= "(SELECT concat_ws('##', laji, selite, kieli) FROM tuotteen_avainsanat WHERE tuote.yhtio=tuotteen_avainsanat.yhtio and tuote.tuoteno=tuotteen_avainsanat.tuoteno and tuotteen_avainsanat.laji='$kentta' and tuotteen_avainsanat.kieli='$kieli') 'tuotteen_avainsanat.$kentta',";					
 				}				
 			} 
 			
@@ -266,13 +268,19 @@
 			}
 			
 			if ($table == "tuote") {
-
-				$al_res = t_avainsana("PARAMETRI", "", "ORDER BY selite");
+				
+				
+				$query = "	SELECT DISTINCT selite, kieli
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							and avainsana.laji = 'PARAMETRI'
+							ORDER BY selite";
+				$al_res = mysql_query($query) or pupe_error($query);
 				
 				while ($al_row = mysql_fetch_array($al_res)) {
 										
 					$row = array();
-					$row[0] = "tuotteen_avainsanat.parametri_".$al_row["selite"];
+					$row[0] = "tuotteen_avainsanat.parametri_".$al_row["selite"].":".$al_row["kieli"];
 					
 					$fields[] = $row;
 				}
@@ -336,7 +344,7 @@
 				if ($kentat[$row[0]] == $row[0]) {
 					$chk = "CHECKED";
 				}
-				elseif (is_array($ruksaa) and count($ruksaa) > 0 and in_array(strtoupper($row[0]), $ruksaa)) {
+				elseif (is_array($ruksaa) and count($ruksaa) > 0 and in_array(strtoupper($sarake), $ruksaa)) {
 					$chk = "CHECKED";
 				}
 				else {

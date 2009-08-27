@@ -45,16 +45,16 @@
 			echo "<font class='message'>";
 
 			if ($toim == "myynti") {
-				echo "ABC-luokat myynnin mukaan.";
+				echo t("ABC-luokat myynnin mukaan");
 			}
 			elseif ($toim == "kpl") {
-				echo "ABC-luokat kappaleiden mukaan.";
+				echo t("ABC-luokat kappaleiden mukaan");
 			}
 			elseif ($toim == "rivia") {
-				echo "ABC-luokat myyntirivien mukaan.";
+				echo t("ABC-luokat myyntirivien mukaan");
 			}
 			else {
-				echo "ABC-luokat katteen mukaan.";
+				echo t("ABC-luokat katteen mukaan");
 			}
 
 			echo "<br><br>".t("Valitse toiminto").":<br><br>";
@@ -62,24 +62,30 @@
 			echo "<li><a class='menu' href='$PHP_SELF?tee=YHTEENVETO&toim=$toim'         >".t("ABC-luokkayhteenveto")."</a><br>";
 			echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRY&toim=$toim'          >".t("Tuoteosaston tai tuoteryhmän luokat")."</a><br>";
 			echo "<li><a class='menu' href='$PHP_SELF?tee=LUOKKA&toim=$toim'             >".t("Luokan tuotteet")."</a><br>";
-			echo "<li><a class='menu' href='$PHP_SELF?tee=PITKALISTA&toim=$toim'         >".t("Kaikki luokat tekstinä")." / ".t("Tallenna Excel tiedosto")."</a><br>";
+			echo "<li><a class='menu' href='$PHP_SELF?tee=PITKALISTA&toim=$toim'         >".t("Kaikki tiedot Excel-tiedostoon")."</a><br>";
 		}
+
+		$asiakasanalyysi = FALSE;
+
+		//ryhmäjako
+		$ryhmanimet   = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
+		$ryhmaprossat = array(30.00,20.00,15.00,15.00,10.00,5.00,3.00,2.00,0.00);
 
 		// jos kaikki tarvittavat tiedot löytyy mennään queryyn
 		if ($tee == 'YHTEENVETO') {
-			require ("abc_tuote_yhteenveto.php");
+			require ("abc_yhteenveto.php");
 		}
 
 		if ($tee == 'OSASTOTRY') {
-			require ("abc_tuote_osastotry.php");
+			require ("abc_osastotry.php");
 		}
 
 		if ($tee == 'LUOKKA') {
-			require ("abc_tuote_luokka.php");
+			require ("abc_luokka.php");
 		}
 
 		if ($tee == 'PITKALISTA') {
-			require ("abc_tuote_kaikki_taullask.php");
+			require ("abc_kaikki_taullask.php");
 		}
 
 		require ("../inc/footer.inc");

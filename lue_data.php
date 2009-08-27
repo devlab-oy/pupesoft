@@ -138,7 +138,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
 			for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
 
-				$taulunrivit[$taulut[$excej]][$excei-1][] = $data->sheets[0]['cells'][$excei][$excej];
+				$taulunrivit[$taulut[$excej]][$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
 
 				// Pitääkö tämä sarake laittaa myös johonki toiseen tauluun?
 				foreach ($taulunotsikot as $taulu => $joinit) {
@@ -146,7 +146,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$taulucmp2 = preg_replace("/__[0-9]*$/", "", $taulut[$excej]);
 
 					if (in_array($headers[$excej], $joinit) and $taulucmp1 != $taulucmp2) {
-						$taulunrivit[$taulu][$excei-1][] = $data->sheets[0]['cells'][$excei][$excej];
+						$taulunrivit[$taulu][$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
 					}
 				}
 			}
@@ -162,7 +162,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 			for ($excej = 0; $excej < count($rivi); $excej++) {
 
-				$taulunrivit[$taulut[$excej]][$excei][] = $rivi[$excej];
+				$taulunrivit[$taulut[$excej]][$excei][] = trim($rivi[$excej]);
 
 				// Pitääkö tämä sarake laittaa myös johonki toiseen tauluun?
 				foreach ($taulunotsikot as $taulu => $joinit) {
@@ -170,7 +170,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$taulucmp2 = preg_replace("/__[0-9]*$/", "", $taulut[$excej]);
 
 					if (in_array($headers[$i], $joinit) and $taulucmp1 != $taulucmp2) {
-						$taulunrivit[$taulu][$excei][] = $rivi[$excej];
+						$taulunrivit[$taulu][$excei][] = trim($rivi[$excej]);
 					}
 				}
 			}

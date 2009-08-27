@@ -135,18 +135,24 @@ if ($kukarow['taso'] != 1) {
 
 	// Laskun maksutilintarkastus (ulkomaat)
 	if ($tila == 'TU') {
+
 		if (($ultilno == '') or ($swift == '')) {
 			echo "<font class='error'>".t("IBAN & SWIFT on annettava")."</font><br>";
 			$tee='E';
 			$tila='';
 		}
-		$ultilno = strtoupper($ultilno);
-		$swift = strtoupper($swift);
+
+		$ultilno 		= strtoupper($ultilno);
+		$swift 			= strtoupper($swift);
+		$pankki1 		= strtoupper($pankki1);
+		$pankki2 		= strtoupper($pankki2);
+		$pankki3 		= strtoupper($pankki3);
+		$pankki4 		= strtoupper($pankki4);
 	}
 
 	// Jaaha p‰ivit‰mme maksutilin! (ulkomaat)
 	if ($tila == 'TU') {
-		$query = "SELECT comments, ultilno, swift FROM lasku
+		$query = "SELECT comments, ultilno, swift, pankki_haltija, pankki1, pankki2, pankki3, pankki4 FROM lasku
 				WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -157,11 +163,20 @@ if ($kukarow['taso'] != 1) {
 
 		$trow=mysql_fetch_array ($result);
 
-		$kommentti = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ". sprintf(t('Laskun maksutili muutettiin. Vanha oli %s %s.'), $trow['ultilno'], $trow['swift']) ."<br>" . $trow['comments'];
+		$kommentti = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ". sprintf(t('Laskun maksutili muutettiin. Vanha oli %s %s %s %s %s %s %s.'), $trow['pankki_haltija'], $trow['ultilno'], $trow['swift'], $trow['pankki1'], $trow['pankki2'], $trow['pankki3'], $trow['pankki4']) ."<br>" . $trow['comments'];
 
 		//P‰ivitet‰‰n lasku
-		$query = "UPDATE lasku set ultilno='$ultilno', swift='$swift',
-						comments = '$kommentti' WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
+		$query = "UPDATE lasku SET
+		 		ultilno = '$ultilno', 
+				swift = '$swift', 
+				pankki_haltija = '$pankki_haltija', 
+				pankki1 = '$pankki1', 
+				pankki2 = '$pankki2', 
+				pankki3 = '$pankki3', 
+				pankki4 = '$pankki4',
+				comments = '$kommentti' 
+				WHERE tunnus = '$tunnus' 
+				AND yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$tee  = 'E';
 		$tila = 'X';
@@ -1169,13 +1184,37 @@ if ($tila == '') {
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name='tunnus' value='$tunnus'>
 					<tr>
+					<th>".t('Pankkihaltija')."</th>
+					<td><input type = 'text' name = 'pankki_haltija' size='40' value = '$trow[pankki_haltija]'></td>
+					<td rowspan='12'><input type = 'submit' value = '".t("P‰ivit‰")."'></td></tr>
+					<tr>
+					<tr>
+					<th>".t('Pankkitili 1')."</th>
+					<td><input type = 'text' name = 'pankki1' size='40' value = '$trow[pankki1]'></td>
+					</tr>
+					<tr>
+					<tr>
+					<th>".t('Pankkitili 2')."</th>
+					<td><input type = 'text' name = 'pankki2' size='40' value = '$trow[pankki2]'></td>
+					</tr>
+					<tr>
+					<tr>
+					<th>".t('Pankkitili 3')."</th>
+					<td><input type = 'text' name = 'pankki3' size='40' value = '$trow[pankki3]'></td>
+					</tr>
+					<tr>
+					<tr>
+					<th>".t('Pankkitili 4')."</th>
+					<td><input type = 'text' name = 'pankki4' size='40' value = '$trow[pankki4]'></td>
+					</tr>
+					<tr>
+					<tr>
 					<th>".t('Muuta toimittajan ulkomaanmaksutili‰')."</th>
 					<td><input type = 'text' name = 'ultilno' size='40' value = '$trow[ultilno]'></td>
-					<td></td></tr>
+					</tr>
 					<tr>
 					<th>".t('SWIFT')."</th>
 					<td><input type = 'text' name = 'swift' size='40' value = '$trow[swift]'></td>
-					<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 					</tr>
 					</form>";
 		}

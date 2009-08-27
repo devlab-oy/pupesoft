@@ -1219,6 +1219,7 @@ if ($tee == 'I') {
 			ebid = '$ebid',
 			tila = '$tila',
 			ultilno = '$trow[ultilno]',
+			pankki_haltija = '$trow[pankki_haltija]',
 			swift = '$trow[swift]',
 			pankki1 = '$trow[pankki1]',
 			pankki2 = '$trow[pankki2]',

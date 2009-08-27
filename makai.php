@@ -237,7 +237,7 @@
 
 					// Yritämme nyt välittää maksupointterin $laskusis1:ssä --> $laskurow[9] --> lasku.tunnus
 					$query = "	SELECT maksu_tili,
-								left(concat_ws(' ', lasku.nimi, nimitark),30) nimi,
+								lasku.nimi, lasku.nimitark, lasku.pankki_haltija, 
 								left(concat_ws(' ', osoite, osoitetark),20) osoite,
 								left(concat_ws(' ', postino, postitp),20) postitp,
 								summa, lasku.valkoodi, viite, viesti,
@@ -258,7 +258,15 @@
 					while ($laskurow = mysql_fetch_array ($result)) {
 						$laskutapahtuma	= '10';
 						$yritystilino 	= $laskurow["ytilino"];
-						$laskunimi1 	= $laskurow["nimi"];
+
+						// jos pankkihaltijan nimi on syötetty, laitetaan se nimen tilalle
+						if (trim($laskurow['pankki_haltija']) != '') {
+							$laskunimi1 	= substr(trim($laskurow["pankki_haltija"]), 0, 30);
+						}
+						else {
+							$laskunimi1 	= substr(trim($laskurow["nimi"]." ".$laskurow['nimitark']), 0, 30);
+						}
+						
 						$laskunimi2 	= $laskurow["osoite"];
 						$laskunimi3 	= $laskurow["postitp"];
 
@@ -460,7 +468,7 @@
 
 					while ($hyvitysrow = mysql_fetch_array($hyvitysresult)) {
 						$query = "	SELECT maksu_tili,
-									left(concat_ws(' ', lasku.nimi, nimitark),45) nimi,
+									lasku.nimi, lasku.nimitark, lasku.pankki_haltija,
 									left(concat_ws(' ', osoite, osoitetark),45) osoite,
 									left(concat_ws(' ', postino, postitp),45) postitp,
 									sum(if(alatila='K', summa-kasumma, summa)) summa, lasku.valkoodi,
@@ -526,7 +534,7 @@
 								$yritysnimi 	= strtoupper($yhtiorow["nimi"]);
 								$yritysosoite 	= strtoupper($yhtiorow["osoite"]);
 								$yritystilino 	= $laskurow["ytilino"];
-								$laskunimi1 	= $laskurow["nimi"];
+								$laskunimi1 	= substr(trim($laskurow["nimi"]." ".$laskurow['nimitark']), 0, 45);
 								$laskunimi2 	= $laskurow["osoite"];
 								$laskunimi3 	= $laskurow["postitp"];
 								$laskusumma 	= $laskurow["summa"];
@@ -581,7 +589,7 @@
 
 				// Yritämme nyt välittää maksupointterin $laskusis1:ssä --> $laskurow[9] --> tunnus
 				$query = "	SELECT maksu_tili,
-							left(concat_ws(' ', lasku.nimi, nimitark),45) nimi,
+							lasku.nimi, lasku.nimitark, lasku.pankki_haltija, 
 							left(concat_ws(' ', osoite, osoitetark),45) osoite,
 							left(concat_ws(' ', postino, postitp),45) postitp,
 							summa, lasku.valkoodi, viite, viesti,
@@ -610,7 +618,15 @@
 						$yritysnimi 	= strtoupper($yhtiorow["nimi"]);
 						$yritysosoite 	= strtoupper($yhtiorow["osoite"]);
 						$yritystilino 	= $laskurow["ytilino"];
-						$laskunimi1 	= $laskurow["nimi"];
+
+						// jos pankkihaltijan nimi on syötetty, laitetaan se nimen tilalle
+						if (trim($laskurow['pankki_haltija']) != '') {
+							$laskunimi1 	= substr(trim($laskurow["pankki_haltija"]), 0, 45);
+						}
+						else {
+							$laskunimi1 	= substr(trim($laskurow["nimi"]." ".$laskurow['nimitark']), 0, 45);
+						}
+
 						$laskunimi2 	= $laskurow["osoite"];
 						$laskunimi3 	= $laskurow["postitp"];
 						$maksupvm		= $laskurow["olmapvm"];

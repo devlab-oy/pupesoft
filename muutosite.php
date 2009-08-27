@@ -831,6 +831,7 @@ if ($tee == 'E' or $tee == 'F') {
 
 		//Ulkomaan ostolaskuille
 		if (strtoupper($trow["maa"]) != 'FI') {
+			if ($trow["pankki_haltija"] != "") echo "<tr><th>".t("Pankkihaltija")."</th><td>$trow[pankki_haltija]</td></tr>";
 			echo "<tr><th>".t("Tilinumero")."</th><td>$trow[ultilno]</td></tr>";
 			if ($trow["pankki1"] != "") echo "<tr><th>".t("Pankkitieto")."</th><td>$trow[pankki1]</td></tr>";
 			if ($trow["pankki2"] != "") echo "<tr><th>".t("Pankkitieto")."</th><td>$trow[pankki2]</td></tr>";

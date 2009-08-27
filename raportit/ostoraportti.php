@@ -339,10 +339,22 @@
 			$tme = '';
 			$tme2 = '';
 
+			$mul_osasto = unserialize(urldecode($mul_osasto));
+			$mul_try = unserialize(urldecode($mul_try));
+			$mul_tme = unserialize(urldecode($mul_tme));
+
 			// tallennamuisti-funkkarin takia joudutaan kaksi kertaa unserializee.
-			$mul_osasto = unserialize(unserialize(urldecode($mul_osasto)));
-			$mul_try = unserialize(unserialize(urldecode($mul_try)));
-			$mul_tme = unserialize(unserialize(urldecode($mul_tme)));
+			if ($mul_osasto != '' and !is_array($mul_osasto)) {
+				$mul_osasto = unserialize($mul_osasto);
+			}
+
+			if ($mul_try != '' and !is_array($mul_try)) {
+				$mul_try = unserialize($mul_try);
+			}
+			
+			if ($mul_tme != '' and !is_array($mul_tme)) {
+				$mul_tme = unserialize($mul_tme);
+			}
 
 			if ($mul_try != '' and count($mul_try) > 0) {
 
@@ -1307,7 +1319,7 @@
 							}
 							// keskiarvo
 							elseif ($sarake == 'ke') {
-								$value = ($value_1kk + $value_3kk + $value_6kk + $value_12kk) / 4;
+								$value = round(($value_1kk + $value_3kk + $value_6kk + $value_12kk) / 4);
 							}
 							// myydyt kappaleet yhteensä
 							elseif ($sarake == 'komy') {

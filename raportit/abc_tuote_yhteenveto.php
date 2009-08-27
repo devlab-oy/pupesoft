@@ -94,7 +94,6 @@
 	echo "</select></td>";
 	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
 	echo "</tr>";
-
 	echo "</form>";
 	echo "</table><br>";
 

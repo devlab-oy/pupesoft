@@ -52,7 +52,6 @@
 	echo "</select></td>";
 	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
 	echo "</tr>";
-
 	echo "</form>";
 	echo "</table><br>";
 
@@ -171,7 +170,7 @@
 					ORDER BY $jarjestys";
 		$res = mysql_query($query) or pupe_error($query);
 
-		echo "<table>";
+		echo "<br><table>";
 		echo "<tr>";
 
 		if ($valinta == 'luokka_osasto')	$otsikko = "Osaston";

@@ -1,5 +1,7 @@
 <?php
 
+	$useslave = 1;
+
 	if (isset($_POST["tee"])) {
 		if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
@@ -13,6 +15,37 @@
 	}
 	else {
 
+		$ala_tallenna = array("kysely", "uusirappari", "edkysely", "rtee");
+
+		if ($valitut["TALLENNAPAIVAM"] == '') {
+			array_push($ala_tallenna, "ppa1", "kka1", "vva1", "ppl1", "kkl1", "vvl1", "ppa2", "kka2", "vva2", "ppl2", "kkl2", "vvl2", "ppa3", "kka3", "vva3", "ppl3", "kkl3", "vvl3", "ppa4", "kka4", "vva4", "ppl4", "kkl4", "vvl4");
+		}
+
+		list($kysely_kuka, $kysely_mika) = explode("#", $kysely);
+
+		$kysely_warning = '';
+
+		if ($tee == "tallenna" and $kysely_kuka == $kukarow["kuka"]) {
+			tallenna_muisti($kysely_mika, $ala_tallenna);			
+			$tee = 'JATKA';		
+		}
+		elseif ($tee == 'tallenna' and $kysely_kuka != $kukarow['kuka']) {
+			$tee = 'JATKA';
+			$kysely_warning = 'yes';
+			$kysely = '';
+		}
+		
+		if ($tee == "uusiraportti") {
+			tallenna_muisti($uusirappari, $ala_tallenna);
+			$kysely = "$kukarow[kuka]#$uusirappari";
+			$tee = 'JATKA';
+		}
+		
+		if ($tee == "lataavanha") {
+			hae_muisti($kysely_mika, $kysely_kuka);
+			$tee = 'JATKA';		
+		}
+		
 		echo "<font class='head'>".t("Ostoraportti")."</font><hr>";
 
 		// ABC luokkanimet
@@ -306,9 +339,10 @@
 			$tme = '';
 			$tme2 = '';
 
-			$mul_osasto = unserialize(urldecode($mul_osasto));
-			$mul_try = unserialize(urldecode($mul_try));
-			$mul_tme = unserialize(urldecode($mul_tme));
+			// tallennamuisti-funkkarin takia joudutaan kaksi kertaa unserializee.
+			$mul_osasto = unserialize(unserialize(urldecode($mul_osasto)));
+			$mul_try = unserialize(unserialize(urldecode($mul_try)));
+			$mul_tme = unserialize(unserialize(urldecode($mul_tme)));
 
 			if ($mul_try != '' and count($mul_try) > 0) {
 
@@ -807,12 +841,9 @@
 				$format_bg_grey->setPattern(1);
 			}
 
-			$rivi 		 = "";
 			$excelrivi 	 = 0;
 			$excelsarake = 0;
 			$siirtojt	 = '';
-
-			$rivi .= t("tuoteno")."\t";
 
 			if (isset($workbook)) {
 				$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("tuoteno")), $format_bold);
@@ -820,8 +851,6 @@
 			}
 
 			if ($paikoittain != '') {
-				$rivi .= t("Varastopaikka")."\t";
-
 				if (isset($workbook)) {
 					$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("Varastopaikka")), $format_bold);
 					$excelsarake++;
@@ -829,7 +858,6 @@
 			}
 
 			foreach ($valitut as $key => $val) {
-				$rivi .= $sarakkeet[$key];
 				if (isset($workbook) and $sarakkeet[$key] != '') {
 					if ($sarakkeet[$key] == 'Siirtojt') {
 						$siirtojt = 0;
@@ -841,7 +869,6 @@
 
 			$varasto_ot = array();
 
-			$rivi .= "\r\n";
 			$excelrivi++;
 			$excelsarake = 0;
 
@@ -1134,8 +1161,13 @@
 
 					// jos tuotteella on joku ostoerä pyöristellään ylospäin, että tilataan aina toimittajan haluama määrä
 					if (${"ostettava_kausi".$i} != '') {
+						${"ostettava_era".$i} = ceil(${"ostettava_kausi".$i} / $row['osto_era']) * $row['osto_era'];
+
 						${"ostettava_kausi".$i} = ceil(${"ostettava_kausi".$i});
-						${"ostettava_era".$i} = ceil(${"ostettava_kausi".$i}) / $row['osto_era'];
+
+						if (${"ostettava_era".$i} < 0) {
+							${"ostettava_era".$i} = 0;
+						}
 					}
 					else {
 						${"ostettava_kausi".$i} = ${"ostettava_era".$i} = 0;
@@ -1203,17 +1235,12 @@
 
 				if ($valitut['EHDOTETTAVAT'] == '' or ($ostettavahaly_kausi1 > 0 or $ostettavahaly_kausi2 > 0 or $ostettavahaly_kausi3 > 0 or $ostettavahaly_kausi4 > 0) or ($ostettava_kausi1 > 0 or $ostettava_kausi2 > 0 or $ostettava_kausi3 > 0 or $ostettava_kausi4 > 0)) {
 
-					// kirjotettaan rivi
-					$rivi .= "\"$row[tuoteno]\"\t";
-
 					if (isset($workbook)) {
 						$worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"], $format_center);
 						$excelsarake++;
 					}
 
 					if ($paikoittain != '') {
-						$rivi .= "\"$row[varastopaikka]\"\t";
-
 						if (isset($workbook)) {
 							$worksheet->writeString($excelrivi, $excelsarake, $row["varastopaikka"]);
 							$excelsarake++;
@@ -1457,7 +1484,6 @@
 						}
 					}
 
-					$rivi .= "\r\n";
 					$excelrivi++;
 					$excelsarake = 0;
 				}
@@ -1507,34 +1533,6 @@
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table><br>";
 			}
-
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$txtnimi = md5(uniqid(mt_rand(), true)).".txt";
-
-			file_put_contents("/tmp/$txtnimi", $rivi);
-
-			echo "<table>";
-			echo "<tr><th>".t("Tallenna raportti (txt)").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
-			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='Ostoraportti.txt'>";
-			echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";
-			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-			echo "</table><br>";
-
-			echo "<table>";
-			echo "<tr><th>".t("Tallenna raportti (csv)").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
-			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='Ostoraportti.csv'>";
-			echo "<input type='hidden' name='tmpfilenimi' value='$txtnimi'>";
-			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-			echo "</table><br>";
-
-
-			//Nää muuttujat voi olla aika isoja joten unsetataan ne
-			unset($rivi);
 
 			foreach ($ajat as $aika) {
 				$yht+=$aika;
@@ -1731,6 +1729,89 @@
 
 		if ($tee == "JATKA" or $tee == "RAPORTOI") {
 
+			if (!isset($uusiraportti)) {
+				$uusiraportti = '';
+			}
+
+			//Haetaan tallennetut kyselyt
+			$query = "	SELECT distinct kuka.nimi, kuka.kuka, tallennetut_parametrit.nimitys
+						FROM tallennetut_parametrit
+						JOIN kuka on (kuka.yhtio = tallennetut_parametrit.yhtio and kuka.kuka = tallennetut_parametrit.kuka)
+						WHERE tallennetut_parametrit.yhtio = '$kukarow[yhtio]'
+						and tallennetut_parametrit.sovellus = '$_SERVER[SCRIPT_NAME]'
+						ORDER BY tallennetut_parametrit.nimitys";
+			$sresult = mysql_query($query) or pupe_error($query);
+
+			if ($kysely_warning != '') {
+				echo "<font class='error'>",t("Et saa tallentaa toisen käyttäjän raporttia"),"!!!";
+			}
+
+			echo "<table>";
+			echo "<form action='' method='post' autocomplete='off'>";
+			echo "<tr>";
+			echo "<th>",t("Valitse raportti"),":</th>";
+			echo "<td>";
+			echo "<select name='kysely' onchange='document.getElementById(\"tee\").value = \"lataavanha\";submit();'>";
+			echo "<option value=''>".t("Valitse")."</option>";
+			while ($srow = mysql_fetch_array($sresult)) {
+
+				$sel = '';
+				if ($kysely == $srow["kuka"]."#".$srow["nimitys"]) {
+					$sel = "selected";
+				}
+
+				echo "<option value='$srow[kuka]#$srow[nimitys]' $sel>$srow[nimitys] ($srow[nimi])</option>";
+			}
+			echo "</select>";
+			echo "</td>";
+			echo "<td>";
+			echo "<input type='button' value='",t("Tallenna"),"' onclick='document.getElementById(\"tee\").value = \"tallenna\";submit();'>";
+			echo "</td>";
+			echo "</tr>";
+			echo "<tr>";
+			echo "<th>",t("Tallenna uusi raportti"),":</th>";
+			echo "<td><input type='text' name='uusirappari' value='' onkeypress=\"document.getElementById('tee').value = 'uusiraportti'\"></td>";
+			echo "<td><input type='submit' id='tallenna_button' value='",t("Tallenna"),"'></td>";
+			echo "</tr>";
+			echo "</table>";
+			echo "<br/>";
+
+			if (!isset($mul_try)) {
+				$mul_try = array();
+			}
+
+			if (!isset($mul_osasto)) {
+				$mul_osasto = array();
+			}
+
+			if (!isset($mul_tme)) {
+				$mul_tme = array();
+			}
+
+			if (!isset($asiakasid)) {
+				$asiakasid = '';
+			}
+
+			if (!isset($edrappari)) {
+				$edrappari = '';
+			}
+
+			if (!isset($rappari)) {
+				$rappari = '';
+			}
+
+			if (!isset($osasto)) {
+				$osasto = '';
+			}
+
+			if (!isset($try)) {
+				$try = '';
+			}
+
+			if (!isset($tuotemerkki)) {
+				$tuotemerkki = '';
+			}
+
 			if (is_array($mul_try) and count($mul_try) > 0) {
 				$try = '';
 
@@ -1773,6 +1854,7 @@
 				$sresult = mysql_query($query) or pupe_error($query);
 				$trow1 = mysql_fetch_array($sresult);
 			}
+
 			if ($asiakasid != '') {
 				$query = "	SELECT nimi
 							FROM asiakas
@@ -1790,10 +1872,9 @@
 				$defaultit = "PÄÄLLE";
 			}
 
-			$abcnimi = $ryhmanimet[$abcrajaus];
+			$abcnimi = isset($ryhmanimet[$abcrajaus]) ? $ryhmanimet[$abcrajaus] : '';
 
-			echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
-					<input type='hidden' name='tee' value='RAPORTOI'>
+			echo "	<input type='hidden' name='tee' id='tee' value='RAPORTOI'>
 					<input type='hidden' name='mul_osasto' value='".urlencode(serialize($mul_osasto))."'>
 					<input type='hidden' name='mul_try' value='".urlencode(serialize($mul_try))."'>
 					<input type='hidden' name='mul_tme' value='".urlencode(serialize($mul_tme))."'>
@@ -1861,7 +1942,7 @@
 			echo "</tr>";
 
 			$chk = "";
-			// ($srow["selitetark"] == "TALLENNAPAIVAM" and $tee == "JATKA") or
+
 			if ($valitut["TALLENNAPAIVAM"] != '') {
 				$chk = "CHECKED";
 			}
@@ -1870,19 +1951,25 @@
 			echo "	<tr><td class='back'><br></td></tr>";
 
 			//Ostokausivalinnat
-			$kaudet_oletus = array("A" => 1, "B" => 3, "C" => 4);
-			$kaudet_kaikki = array(1,2,3,4,5,6,7,8,9,10,11,12,24);
-
 			echo "<tr><th>",t("Ostoehdotus")," (",t("anna varastointitarve viikoissa"),"):</th><td colspan='2'>";
 
 			foreach ($ryhmanimet as $ryhma) {
 				echo "<select name='valitut[KAUSI$ryhma]'>";
 
 				for ($i = 1; $i < 53; $i++) {
-					echo "<option value='$ryhma##$i' onchange='submit();'>$i</option>";
+					$chk = '';
+
+					if ($valitut["KAUSI$ryhma"] == "$ryhma##$i") {
+						$chk = 'selected';
+					}
+					echo "<option value='$ryhma##$i' $chk>$i</option>";
 				}
 
-				echo "<option value='$ryhma##104' onchange='submit();'>104</option>";
+				if ($valitut["KAUSI$ryhma"] == "$ryhma##104") {
+					$chk = 'selected';
+				}
+
+				echo "<option value='$ryhma##104' $chk>104</option>";
 				echo "</select> $ryhma<br/>";
 			}
 
@@ -1890,7 +1977,7 @@
 
 			echo "<tr><td class='back'><br></td></tr>";
 
-			echo "<tr><th>",t("Vuosimalliväli"),"<td colspan='2'><input type='text' name='vm1' size='10' value=''> - <input type='text' name='vm2' size='10' value=''></td></tr>";
+			echo "<tr><th>",t("Vuosimalliväli"),"<td colspan='2'><input type='text' name='vm1' id='vm1' size='10' value='$vm1'> - <input type='text' name='vm2' id='vm2' size='10' value='$vm2'></td></tr>";
 
 			echo "<tr><td class='back'><br></td></tr>";
 
@@ -2042,19 +2129,17 @@
 			while ($vrow = mysql_fetch_array($vtresult)) {
 				$chk = "";
 				$chk2 = "";
-				// or ($defaultit == "PÄÄLLE" and $vrow["yhtio"] == $kukarow["yhtio"])
-				// ("VARASTO##".$vrow["tunnus"] == $srow["selitetark"]  and $tee == "JATKA") or
+
 				if ($valitut["VARASTO##$vrow[tunnus]"] != '') {
 					$chk = " checked";
 				}
-				// ("VARASTO2##".$vrow["tunnus"] == $srow["selitetark"]  and $tee == "JATKA") or
+
 				if ($valitut["VARASTO2##$vrow[tunnus]"] != '') {
 					$chk2 = " checked";
 				}
 
 				if ($vlask == 0) {
 					echo "<tr><th rowspan='".mysql_num_rows($vtresult)."'>".t("Huomioi saldot varastossa:")."</th>";
-					$chk = ' checked';
 				}
 				else {
 					echo "<tr>";
@@ -2073,27 +2158,6 @@
 
 			echo "<table>";
 			echo "<tr><th colspan='8'>".t("Sarakkeet")."</th></tr>";
-			/*
-			echo "<tr><th colspan='3'>".t("Luo uusi oma raportti").":</th><td colspan='5'><input type='text' size='40' name='uusirappari' value='",t("Tämä on poistettu toistaiseksi käytöstä"),"!' disabled></td></tr>";
-			echo "<tr><th colspan='3'>".t("Valitse raportti").":</th><td colspan='5'>";
-
-			//Haetaan tallennetut hälyrapit
-			echo "<select name='rappari' onchange='submit()' disabled>";
-			echo "<option value=''>".t("Näytä kaikki")."</option>";
-
-			while ($srow = mysql_fetch_array($sresult)) {
-
-				$sel = '';
-//				if ($rappari == $srow["selite"]) {
-//					$sel = "selected";
-//				}
-
-				echo "<option value='$srow[selite]' $sel>$srow[nimi]</option>";
-			}
-			echo "</select>";
-
-			echo "</td></tr>";
-			*/
 
 			$lask = 0;
 			echo "<tr>";

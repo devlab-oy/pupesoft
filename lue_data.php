@@ -930,6 +930,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				$errori = "";
 				$t 		= array();
 				$virhe 	= array();
+				$poistolukko = "LUEDATA";
 
 				//	Otetaan talteen query..
 				$lue_data_query = $query;

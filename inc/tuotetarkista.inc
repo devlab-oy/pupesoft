@@ -1,6 +1,5 @@
 <?php
 
-
 if(!function_exists("tuotetarkista")) {
 	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko;
@@ -25,19 +24,21 @@ if(!function_exists("tuotetarkista")) {
 				}
 			}
 
-			// Tuotteen saa poistaa mikäli sillä ei ole yhtään tapahtumaa
-			$query = "SELECT yhtio FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$t[$i]' LIMIT 1";
-			$sdtres = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($sdtres) == 0) {
-				$query = "SELECT yhtio FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$t[$i]' and tyyppi != 'D' LIMIT 1";
+			if ($poistolukko != "LUEDATA") { 
+				// Tuotteen saa poistaa mikäli sillä ei ole yhtään tapahtumaa
+				$query = "SELECT yhtio FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$t[$i]' LIMIT 1";
 				$sdtres = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sdtres) == 0) {
-					$poistolukko = "";
+					$query = "SELECT yhtio FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$t[$i]' and tyyppi IN ('B','E','G','L','O','V','W','F','N','M','Z','0','T') and laadittu > '0000-00-00 00:00:00' LIMIT 1";
+					$sdtres = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($sdtres) == 0) {
+						$poistolukko = "";
+					}
 				}
 			}
-
+			
 			$tem_tuoteno = $t[$i];
 		}
 

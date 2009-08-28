@@ -908,10 +908,10 @@
 			foreach($rows as $row) {
 
 				if ($kukarow['extranet'] != '') {
-					$hae_ja_selaa_asiakas = $kukarow['oletus_asiakas'];
+					$hae_ja_selaa_asiakas = (int) $kukarow['oletus_asiakas'];
 				}
 				else {
-					$hae_ja_selaa_asiakas = $laskurow['liitostunnus'];
+					$hae_ja_selaa_asiakas = (int) $laskurow['liitostunnus'];
 				}
 
 				if ($hae_ja_selaa_asiakas != 0) {

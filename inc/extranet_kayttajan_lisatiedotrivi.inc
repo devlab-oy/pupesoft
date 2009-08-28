@@ -10,11 +10,13 @@
 	}
 
 	if (mysql_field_name($result, $i) == "liitostunnus") {
-		
-		$liitostunnus = $liitostunnus != '' ? $liitostunnus : ($haku[4] != '' ? $haku[4] : '');
-		
-		$ulos .= "<td><input type='text' name='$nimi' id='$nimi' value='$liitostunnus'></td>";
-		$jatko = 0;
+		if ($lukitse_avaimeen != "") {
+			$tyyppi = 4;
+			if ($lukitse_avaimeen != "") {
+				$ulos = "<input type='hidden' name='$nimi' value='$lukitse_avaimeen'>";
+				$jatko = 0;
+			}
+		}
 	}
 
 	if (mysql_field_name($result, $i) == "laji") {
@@ -34,43 +36,4 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "selite") {
-
-		$liitostunnus = $liitostunnus != '' ? $liitostunnus : ($haku[4] != '' ? $haku[4] : '');
-
-		$query = "	SELECT selite
-					FROM extranet_kayttajan_lisatiedot
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND laji = '{$trow['laji']}'
-					AND liitostunnus = '$liitostunnus'
-					AND tunnus = '{$trow['tunnus']}'
-					ORDER BY selite";
-		$vresult = mysql_query($query) or pupe_error($query);
-		
-		$vrow = mysql_fetch_array($vresult);
-
-		$ulos .= "<td><input type='text' name='$nimi' id='$nimi' value='{$vrow['selite']}'></td>";
-		
-		$jatko = 0;
-	}
-	
-	if (mysql_field_name($result, $i) == "selitetark") {
-
-		$liitostunnus = $liitostunnus != '' ? $liitostunnus : ($haku[4] != '' ? $haku[4] : '');
-
-		$query = "	SELECT selitetark
-					FROM extranet_kayttajan_lisatiedot
-					WHERE yhtio = '{$kukarow['yhtio']}'
-					AND laji = '{$trow['laji']}'
-					AND liitostunnus = '$liitostunnus'
-					AND tunnus = '{$trow['tunnus']}'
-					ORDER BY selite";
-		$vresult = mysql_query($query) or pupe_error($query);
-		
-		$vrow = mysql_fetch_array($vresult);
-
-		$ulos .= "<td><input type='text' name='$nimi' id='$nimi' value='{$vrow['selitetark']}'></td>";
-		
-		$jatko = 0;
-	}
 ?>

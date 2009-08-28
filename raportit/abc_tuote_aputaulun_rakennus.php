@@ -238,6 +238,7 @@ if ($tee == 'YHTEENVETO') {
 				$tuotejoin
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				and ((tilausrivi.tyyppi in ('L','O') and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl')
+				or (tilausrivi.tyyppi = 'L' and tilausrivi.var = 'P' and tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59')
 				or (tilausrivi.tyyppi = 'V' and tilausrivi.toimitettuaika >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.toimitettuaika <= '$vvl-$kkl-$ppl 23:59:59'))
 				GROUP BY 1,2,3,4,5,6,7,8,9,10,11
 	   			ORDER BY $abcwhat desc";

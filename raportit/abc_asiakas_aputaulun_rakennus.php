@@ -103,7 +103,7 @@ if ($tee == 'YHTEENVETO') {
 				$tuotejoin
 				JOIN lasku USE INDEX (primary) on (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-				and tilausrivi.tyyppi in ('L')
+				and tilausrivi.tyyppi = 'L'
 				and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
 				and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
 				GROUP BY liitostunnus";
@@ -122,11 +122,10 @@ if ($tee == 'YHTEENVETO') {
 		}
 
 		$kaudenmyyriviyht += $row["rivia"];
-
 	}
 
  	// tää on nyt hardcoodattu, eli miltä kirjanpidon tasolta otetaan kulut
-	$sisainen_taso		= "34";
+	$sisainen_taso = "34";
 
 	if ($kustannuksetyht == "") {
 		// etsitään kirjanpidosta mitkä on meidän kulut samalta ajanjaksolta
@@ -139,6 +138,7 @@ if ($tee == 'YHTEENVETO') {
 					tiliointi.korjattu = ''";
 		$result = mysql_query($query) or pupe_error($query);
 		$kprow  = mysql_fetch_array($result);
+
 		$kustannuksetyht = $kprow["summa"];
 	}
 
@@ -156,21 +156,20 @@ if ($tee == 'YHTEENVETO') {
 				ifnull(asiakas.osasto,'#') osasto,
 				ifnull(asiakas.ryhma,'#') ryhma,
 				ifnull(asiakas.myyjanro,'#') myyjanro,
-				sum(if(tilausrivi.tyyppi='L' and (tilausrivi.var='H' or tilausrivi.var=''), 1, 0))						rivia,
-				sum(if(tilausrivi.tyyppi='L' and (tilausrivi.var='H' or tilausrivi.var=''), tilausrivi.kpl, 0))			kpl,
-				sum(if(tilausrivi.tyyppi='L' and (tilausrivi.var='H' or tilausrivi.var=''), tilausrivi.rivihinta, 0))	summa,
-				sum(if(tilausrivi.tyyppi='L' and (tilausrivi.var='H' or tilausrivi.var=''), tilausrivi.kate, 0))		kate,
-				sum(if(tilausrivi.tyyppi='L' and (tilausrivi.var='P'), tilausrivi.tilkpl, 0))							puutekpl,
-				sum(if(tilausrivi.tyyppi='L' and (tilausrivi.var='P'), 1, 0))											puuterivia
+				sum(if(tilausrivi.tyyppi='L' and tilausrivi.var in ('H',''), 1, 0))						rivia,
+				sum(if(tilausrivi.tyyppi='L' and tilausrivi.var in ('H',''), tilausrivi.kpl, 0))		kpl,
+				sum(if(tilausrivi.tyyppi='L' and tilausrivi.var in ('H',''), tilausrivi.rivihinta, 0))	summa,
+				sum(if(tilausrivi.tyyppi='L' and tilausrivi.var in ('H',''), tilausrivi.kate, 0))		kate,
+				sum(if(tilausrivi.tyyppi='L' and tilausrivi.var = 'P', tilausrivi.tilkpl, 0))			puutekpl,
+				sum(if(tilausrivi.tyyppi='L' and tilausrivi.var = 'P', 1, 0))							puuterivia
 				FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 				JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
 				$tuotejoin
 				LEFT JOIN asiakas USE INDEX (PRIMARY) on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-				and tilausrivi.tyyppi = 'L'
-				and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
-				and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
-				GROUP BY 1,2,3
+				and ((tilausrivi.tyyppi = 'L' and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl')
+				or (tilausrivi.tyyppi = 'L' and tilausrivi.var = 'P' and tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59'))
+				GROUP BY 1,2,3,4
 	   			ORDER BY $abcwhat desc";
 	$res = mysql_query($query) or pupe_error($query);
 
@@ -213,8 +212,8 @@ if ($tee == 'YHTEENVETO') {
 		if ($row["puuterivia"] + $row["rivia"] != 0) $palvelutaso = round(100 - ($row["puuterivia"] / ($row["puuterivia"] + $row["rivia"]) * 100),2);
 		else $palvelutaso = 0;
 
-		//rivin kustannusl
-		$kustamyy = round($kustapermyyrivi * $row["rivia"],2);
+		//rivin kustannus
+		$kustamyy = round($kustapermyyrivi * $row["rivia"], 2);
 		$kustayht = $kustamyy;
 
 		$query = "	INSERT INTO abc_aputaulu

@@ -82,7 +82,7 @@ if ($kukarow["extranet"] != "") {
 
 }
 else {
-	$extralisa = " ";
+	$extralisa = " and sovellus not in ('extranet', 'Futursoft') ";
 }
 
 // mit‰ sovelluksia k‰ytt‰j‰ saa k‰ytt‰‰

@@ -784,7 +784,7 @@ if (!function_exists('rivi')) {
 
 		// Tutkitaan onko tuotteelle asiakaskommentti
 		if (str_replace("perhe_", "", $lahetetyyppi) != "tulosta_lahete_asiakviivakoodi.inc") {
-			$askomquery = "	select * from asiakaskommentti
+			$askomquery = "	SELECT * from asiakaskommentti
 							where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and ytunnus='$laskurow[ytunnus]'";
 			$askomresul = mysql_query($askomquery) or pupe_error($askomquery);
 
@@ -1114,7 +1114,9 @@ if (!function_exists('rivi_hinta_ale')) {
 		}
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],							$thispage, $pieni);
-		$pdf->draw_text(45,  $kala, $row["tuoteno"],										$thispage, $norm);
+
+		list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 140, $pdf, $norm);
+		$pdf->draw_text(45, $kala, $ff_string, $thispage, $ff_font);
 
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
@@ -1166,7 +1168,8 @@ if (!function_exists('rivi_brutto')) {
 			$kala = $pohja - $rivinkorkeus;
 		}
 
-		$pdf->draw_text(45,  $kala, $row["tuoteno"],										$thispage, $norm);
+		list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 100, $pdf, $norm);
+		$pdf->draw_text(45, $kala, $ff_string, $thispage, $ff_font);
 
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
@@ -1204,7 +1207,8 @@ if (!function_exists('rivi_ei_ale_ei_hinta')) {
 			$kala = $pohja - $rivinkorkeus;
 		}
 
-		$pdf->draw_text(45,  $kala, $row["tuoteno"],										$thispage, $norm);
+		list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 140, $pdf, $norm);
+		$pdf->draw_text(45, $kala, $ff_string, $thispage, $ff_font);
 
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
@@ -1239,7 +1243,8 @@ if (!function_exists('rivi_eialeja')) {
 			$kala = $pohja - $rivinkorkeus;
 		}
 
-		$pdf->draw_text(45,  $kala, $row["tuoteno"],										$thispage, $norm);
+		list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 140, $pdf, $norm);
+		$pdf->draw_text(45, $kala, $ff_string, $thispage, $ff_font);
 
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
@@ -1285,7 +1290,8 @@ if (!function_exists('rivi_viivakoodi')) {
 			$kala = $pohja - $rivinkorkeus;
 		}
 
-		$pdf->draw_text(45,  $kala, $row["tuoteno"],											$thispage, $norm);
+		list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 140, $pdf, $norm);
+		$pdf->draw_text(45, $kala, $ff_string, $thispage, $ff_font);
 
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
@@ -1346,7 +1352,8 @@ if (!function_exists('rivi_asiakviivakoodi')) {
 			$kala = $pohja - $rivinkorkeus;
 		}
 
-		$pdf->draw_text(45,  $kala, $row["tuoteno"],											$thispage, $norm);
+		list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 140, $pdf, $norm);
+		$pdf->draw_text(45, $kala, $ff_string, $thispage, $ff_font);
 
 		$omyks = t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
@@ -1421,9 +1428,9 @@ if (!function_exists('rivi_viivakoodi_ean13')) {
 			$kala = $pohja - $rivinkorkeus;
 		}
 
-		$pdf->draw_text(45,  $kala, $row["tuoteno"],											$thispage, $norm);
+		list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 140, $pdf, $norm);
+		$pdf->draw_text(45, $kala, $ff_string, $thispage, $ff_font);
 
-//		$as_hinta = $row["myyntihinta"] * (1-$row["ale"]/100);
 		$as_hinta = $row["hinta"] * (1 - $row["ale"] / 100);
 
 		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $as_hinta), $norm);

@@ -903,6 +903,8 @@
 				$alask++;
 			}
 
+			foreach($rows as $row) {
+
 				if ($kukarow['extranet'] != '') {
 					$hae_ja_selaa_asiakas = (int) $kukarow['oletus_asiakas'];
 				}

@@ -133,10 +133,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		}
 	}
 	
-	foreach ($taulunotsikot as $taulu => $otsikot) {
-		$unique_otsikot = array_unique($otsikot);
-		
-		if (count($otsikot) != count($unique_otsikot)) {
+	foreach ($taulunotsikot as $taulu => $otsikot) {		
+		if (count($otsikot) != count(array_unique($otsikot))) {
 			echo "<font class='error'>$taulu-".t("taulun sarakkeissa ongelmia, ei voida jatkaa")."!</font><br>";
 			
 			require ("inc/footer.inc");

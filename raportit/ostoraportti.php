@@ -493,8 +493,10 @@
 					$konsyhtiot .= "'".$prow["yhtio"]."',";
 				}
 
-				$yhtiot = substr($yhtiot,0,-1);
-				$yhtiot = " yhtio in ($yhtiot) ";
+				if ($yhtiot != '') {
+					$yhtiot = substr($yhtiot,0,-1);
+					$yhtiot = " yhtio in ($yhtiot) ";
+				}
 
 				$konsyhtiot = substr($konsyhtiot,0,-1);
 				$konsyhtiot = " yhtio in ($konsyhtiot) ";
@@ -538,7 +540,12 @@
 				exit;
 			}
 
-			if ($varastot_yhtio == "") {
+			if ($varastot == "") {
+				echo "<font class='error'>".t("VIRHE: Ajat hälytysraportin, mutta et valinnut yhtään varastoa.")."</font>";
+				exit;
+			}
+
+			if ($yhtiot == "") {
 				echo "<font class='error'>".t("VIRHE: Ajat hälytysraportin, mutta et valinnut mitään yhtiötä.")."</font>";
 				exit;
 			}
@@ -1076,7 +1083,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 				$siirtojtrow = mysql_fetch_array($result);
 
-				if ($paikoittain == '') {
+				if ($paikoittain == '' and $varastot_yhtiot != '') {
 					// Kaikkien valittujen varastojen paikkojen saldo yhteensä, mukaan tulee myös aina ne saldot jotka ei kuulu mihinkään varastoalueeseen
 					$query = "	SELECT sum(saldo) saldo, varastopaikat.tunnus
 								FROM tuotepaikat

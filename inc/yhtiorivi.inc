@@ -7,8 +7,8 @@
 	if ($i == 0) { //yhtiötä ei näytetä
 		$tyyppi = 0;
 	}
-	
-	if (mysql_field_name($result, $i) == "tilikausi_alku" or 
+
+	if (mysql_field_name($result, $i) == "tilikausi_alku" or
 		mysql_field_name($result, $i) == "tilikausi_loppu" or
 		mysql_field_name($result, $i) == "ostoreskontrakausi_alku" or
 		mysql_field_name($result, $i) == "ostoreskontrakausi_loppu" or
@@ -81,7 +81,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if ((mysql_field_name($result, $i) == "kassa") or
 		(mysql_field_name($result, $i) == "pankkikortti") or
 		(mysql_field_name($result, $i) == "luottokortti") or
@@ -115,33 +115,33 @@
 		(mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or
 		(mysql_field_name($result, $i) == "konsernisaamiset") or
 		(mysql_field_name($result, $i) == "konsernivelat") or
-		(mysql_field_name($result, $i) == "konserniostovelat") or		
+		(mysql_field_name($result, $i) == "konserniostovelat") or
 		(mysql_field_name($result, $i) == "voittotili_tulos") or
 		(mysql_field_name($result, $i) == "voittotili_tase") or
 		(mysql_field_name($result, $i) == "konsernimyyntisaamiset")) {
-		
+
 		if ($ulosarray[$i] != '') {
 			$ulos=$ulosarray[$i];
 			$jatko = 0;
 		}
 		else {
 			$ulos = "<td nowrap valign='top'><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
-			
+
 			$query = "	SELECT nimi
 						FROM tili
 						WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
 			$vresult = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($vresult) == 1) {
 				$vrow = mysql_fetch_array($vresult);
 				$ulos .= " $vrow[nimi]";
 			}
 			else {
 				$query = "	SELECT tilino, nimi
-							FROM tili 
+							FROM tili
 							WHERE yhtio='$kukarow[yhtio]'";
-				
-				
+
+
 				if (mysql_field_name($result, $i) == "kassa") 								$query .= " and nimi regexp '(kassa|k.teis)' ";
 				elseif (mysql_field_name($result, $i) == "pankkikortti") 					$query .= " and nimi regexp 'pankki.*kortti' ";
 				elseif (mysql_field_name($result, $i) == "luottokortti") 					$query .= " and nimi regexp 'luotto.*kortti' ";
@@ -153,7 +153,7 @@
 				elseif (mysql_field_name($result, $i) == "myynti_marginaali") 				$query .= " and nimi regexp '(k.ytet|taide)' and nimi regexp 'myyn' ";
 				elseif (mysql_field_name($result, $i) == "osto_eu") 						$query .= " and nimi regexp 'yhteis' and nimi regexp '(osto|hankin)' ";
 				elseif (mysql_field_name($result, $i) == "osto_marginaali") 				$query .= " and nimi regexp '(k.ytet|taide)' and nimi regexp '(osto|hankin)' ";
-				elseif (mysql_field_name($result, $i) == "myyntisaamiset") 					$query .= " and nimi regexp 'myyn' and nimi regexp 'saam' ";			
+				elseif (mysql_field_name($result, $i) == "myyntisaamiset") 					$query .= " and nimi regexp 'myyn' and nimi regexp 'saam' ";
 				elseif (mysql_field_name($result, $i) == "luottotappiot") 					$query .= " and nimi regexp 'luotto' and nimi regexp 'tapp' ";
 				elseif (mysql_field_name($result, $i) == "ostovelat") 						$query .= " and nimi regexp '(velka|velat)' and nimi regexp '(osto|hankin)' ";
 				elseif (mysql_field_name($result, $i) == "valuuttaero") 					$query .= " and nimi regexp 'valuu' and nimi regexp 'ero' ";
@@ -180,25 +180,25 @@
 				elseif (mysql_field_name($result, $i) == "voittotili_tulos") 				$query .= " and nimi regexp 'voitto' ";
 				elseif (mysql_field_name($result, $i) == "voittotili_tase") 				$query .= " and nimi regexp 'voitto' ";
 				else $query = "";
-				
+
 				if ($query != "") {
-					
+
 					$query .= " ORDER BY tilino";
-					
+
 					$vresult = mysql_query($query) or pupe_error($query);
-				
-					if (mysql_num_rows($vresult) > 990) {
-						$ulos .= "<table style='display:inline;'>";				
-						
+
+					if (mysql_num_rows($vresult) > 0) {
+						$ulos .= "<table style='display:inline;'>";
+
 						while ($vrow = mysql_fetch_array($vresult)) {
 							$ulos .= "<tr><td>$vrow[tilino]</td><td>$vrow[nimi]</td></tr>";
 						}
-						
-						$ulos .= "</table>";	
+
+						$ulos .= "</table>";
 					}
 				}
 			}
-			
+
 			$ulos .= "</td>";
 			$jatko = 0;
 		}

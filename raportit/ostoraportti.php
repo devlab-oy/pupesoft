@@ -538,6 +538,11 @@
 				exit;
 			}
 
+			if ($varastot_yhtio == "") {
+				echo "<font class='error'>".t("VIRHE: Ajat hälytysraportin, mutta et valinnut mitään yhtiötä.")."</font>";
+				exit;
+			}
+
 			$abcwhere = "";
 
 			if ($abcrajaus != "") {
@@ -2021,7 +2026,7 @@
 						echo "<tr>";
 					}
 
-					echo "<td colspan='2'><input type='checkbox' name='valitut[YHTIO##$prow[yhtio]]' value='YHTIO##$prow[yhtio]' $chk onClick='submit();'> $prow[nimi]</td></tr>";
+					echo "<td colspan='2'><input type='checkbox' name='valitut[YHTIO##$prow[yhtio]]' value='YHTIO##$prow[yhtio]' $chk> $prow[nimi]</td></tr>";
 
 					$konsyhtiot .= "'".$prow["yhtio"]."',";
 					$vlask++;

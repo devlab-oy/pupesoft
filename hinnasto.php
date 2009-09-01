@@ -30,7 +30,11 @@ if (!isset($submitnappi)) {
 
 	// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
 	$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
-	require ("tilauskasittely/monivalintalaatikot.inc");
+
+	if (!include("tilauskasittely/monivalintalaatikot.inc")) {
+		if (!include("monivalintalaatikot.inc"));
+		else exit;
+	}
 
 	echo "<br><br>";
 	echo "<table>";
@@ -91,7 +95,7 @@ if (isset($submitnappi)) {
 
 	if (isset($_POST['pp']) and isset($_POST['kk']) and isset($_POST['vv'])) {
 		if (strlen(trim($_POST['vv'])) > 0 and strlen(trim($_POST['kk'])) > 0 and strlen(trim($_POST['pp'])) > 0) {
-			$pvm = mysql_real_escape_string("{$_POST['vv']}-{$_POST['kk']}-{$_POST['pp']}");
+			$pvm = mysql_real_escape_string("$_POST[vv]-$_POST[kk]-$_POST[pp]");
 			$lisa .= " and tuote.muutospvm >= '" . $pvm . "' ";
 		}
 	}
@@ -104,17 +108,17 @@ if (isset($submitnappi)) {
 			'maa'      => $yhtiorow['maa'],
 			'ytunnus'  => $yhtiorow['ytunnus'],
 		);
-	} 
+	}
 	else {
 		// otetaan valuuttatiedot oletus asiakkaalta
-		$query = "SELECT maa, valkoodi, ytunnus from asiakas where tunnus='{$kukarow['oletus_asiakas']}' and yhtio ='{$kukarow['yhtio']}'";
+		$query = "SELECT maa, valkoodi, ytunnus from asiakas where tunnus='$kukarow[oletus_asiakas]' and yhtio ='$kukarow[yhtio]'";
 		$res = mysql_query($query) or pupe_error($query);
 
 		// k‰ytet‰‰n t‰t‰ laskurowna
 		$laskurowfake = mysql_fetch_assoc($res);
 	}
 
-	$query = "SELECT kurssi from valuu where nimi = '{$laskurowfake['valkoodi']}' and yhtio = '{$kukarow['yhtio']}'";
+	$query = "SELECT kurssi from valuu where nimi = '$laskurowfake[valkoodi]' and yhtio = '$kukarow[yhtio]'";
 	$res = mysql_query($query) or pupe_error($query);
 	$kurssi = mysql_fetch_array($res);
 
@@ -139,8 +143,8 @@ if (isset($submitnappi)) {
 				WHERE tuote.yhtio = '$kukarow[yhtio]'
 				$lisa
 				$kl_lisa
-				and ((tuote.vienti = '' or tuote.vienti like '%-{$laskurowfake['maa']}%' or tuote.vienti like '%+%')
-				and tuote.vienti not like '%+{$laskurowfake['maa']}%')
+				and ((tuote.vienti = '' or tuote.vienti like '%-$laskurowfake[maa]%' or tuote.vienti like '%+%')
+				and tuote.vienti not like '%+$laskurowfake[maa]%')
 				and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
 				ORDER BY tuote.osasto+0, tuote.try+0";
 	$result = mysql_query($query) or pupe_error($query);
@@ -186,13 +190,13 @@ if (isset($submitnappi)) {
 	fclose($fh);
 
 	// pakataan faili
-	$cmd = "/usr/bin/zip -j /tmp/{$kukarow['yhtio']}.{$kukarow['kuka']}.zip /tmp/$filenimi";
+	$cmd = "/usr/bin/zip -j /tmp/$kukarow[yhtio].$kukarow[kuka].zip /tmp/$filenimi";
 	$palautus = exec($cmd);
 
     // poistetaan tmp file
 	unlink('/tmp/' . $filenimi);
 
-	$filenimi = "/tmp/{$kukarow['yhtio']}.{$kukarow['kuka']}.zip";
+	$filenimi = "/tmp/$kukarow[yhtio].$kukarow[kuka].zip";
 
 	echo "<br><br>";
 	echo "<table>";

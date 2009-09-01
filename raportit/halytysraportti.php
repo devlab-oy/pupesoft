@@ -513,6 +513,11 @@
 				echo "<font class='error'>".t("VIRHE: Ajat h‰lytysraportin varastopaikoittain, mutta et valinnut yht‰‰n varastoa.")."</font>";
 				exit;
 			}
+
+			if ($varastot == "") {
+				echo "<font class='error'>".t("VIRHE: Ajat h‰lytysraportin, mutta et valinnut yht‰‰n varastoa.")."</font>";
+				exit;
+			}
 			
 			if ($abcrajaus != "") {
 				// katotaan JT:ss‰ olevat tuotteet

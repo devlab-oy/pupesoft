@@ -17,8 +17,10 @@ if (isset($_POST['filenimi']) and $_POST['filenimi'] != '') {
 }
 
 if (!@include('inc/parametrit.inc')) {
-	require 'parametrit.inc';
+	if (!@include('parametrit.inc'));
+	else exit;
 }
+
 
 echo "<font class='head'>".t("Hinnastoajo")."</font><hr>";
 
@@ -31,8 +33,8 @@ if (!isset($submitnappi)) {
 	// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
 	$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
 
-	if (!include("tilauskasittely/monivalintalaatikot.inc")) {
-		if (!include("monivalintalaatikot.inc"));
+	if (!@include("tilauskasittely/monivalintalaatikot.inc")) {
+		if (!@include("monivalintalaatikot.inc"));
 		else exit;
 	}
 
@@ -88,8 +90,16 @@ if (isset($submitnappi)) {
 	echo "<font class='message'>".t("Luodaan hinnastoa")."...</font>";
 
 	// katsotaan mik‰ hinnastoformaatti
-	require ('inc/hinnastorivi'.basename($_POST['hinnasto']).'.inc');
-	require ('inc/ProgressBar.class.php');
+
+	if (!@include('inc/hinnastorivi'.basename($_POST['hinnasto']).'.inc')) {
+		if (!@include('hinnastorivi'.basename($_POST['hinnasto']).'.inc'));
+		else exit;
+	}
+
+	if (!@include('inc/ProgressBar.class.php')) {
+		if (!@include('ProgressBar.class.php'));
+		else exit;
+	}
 
 	$bar = new ProgressBar();
 
@@ -212,6 +222,9 @@ if (isset($submitnappi)) {
 	echo "</table>";
 }
 
-require ('inc/footer.inc');
+if (!@include("inc/footer.inc")) {
+	if (!@include("footer.inc"));
+	else exit;
+}
 
 ?>

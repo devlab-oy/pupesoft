@@ -525,7 +525,7 @@
 		}
 
 		if(substr($lopetus,0, 4) == "AJAX") {
-			list($lopetusTargetDiv, $lopetusRequest) = split("XXXX", substr($lopetus, 4));
+			list($lopetusTargetDiv, $lopetusRequest) = explode("XXXX", substr($lopetus, 4));
 			//urlissa & merkit korvattu // merkeillä jne, parsitaan oikeanlainen urli kokoon palautusta varten
 			$lopetusRequest = str_replace('////','?',               $lopetusRequest);
 			$lopetusRequest = preg_replace('/([^:])\/\/\//','\\1#', $lopetusRequest);
@@ -546,10 +546,10 @@
 
 	// Rakennetaan hakumuuttujat kuntoon
 	if (isset($hakukentat)) {
-		$array = split(",", $hakukentat);
+		$array = explode(",", $hakukentat);
 	}
 	else {
-		$array = split(",", $kentat);
+		$array = explode(",", $kentat);
 	}
 
 	$count = count($array);

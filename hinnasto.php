@@ -16,9 +16,11 @@ if (isset($_POST['filenimi']) and $_POST['filenimi'] != '') {
 	exit;
 }
 
-if (!@include('inc/parametrit.inc')) {
-	if (!@include('parametrit.inc'));
-	else exit;
+if (file_exists("inc/parametrit.inc")) {
+	require("inc/parametrit.inc");
+}
+else {
+	require("parametrit.inc");
 }
 
 
@@ -33,9 +35,11 @@ if (!isset($submitnappi)) {
 	// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
 	$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
 
-	if (!@include("tilauskasittely/monivalintalaatikot.inc")) {
-		if (!@include("monivalintalaatikot.inc"));
-		else exit;
+	if (file_exists("tilauskasittely/monivalintalaatikot.inc")) {
+		require("tilauskasittely/monivalintalaatikot.inc");
+	}
+	else {
+		require("monivalintalaatikot.inc");
 	}
 
 	echo "<br><br>";
@@ -91,14 +95,18 @@ if (isset($submitnappi)) {
 
 	// katsotaan mik‰ hinnastoformaatti
 
-	if (!@include('inc/hinnastorivi'.basename($_POST['hinnasto']).'.inc')) {
-		if (!@include('hinnastorivi'.basename($_POST['hinnasto']).'.inc'));
-		else exit;
+	if (file_exists("inc/hinnastorivi".basename($_POST["hinnasto"]).".inc")) {
+		require("inc/hinnastorivi".basename($_POST["hinnasto"]).".inc");
+	}
+	else {
+		require("hinnastorivi".basename($_POST["hinnasto"]).".inc");
 	}
 
-	if (!@include('inc/ProgressBar.class.php')) {
-		if (!@include('ProgressBar.class.php'));
-		else exit;
+	if (file_exists("inc/ProgressBar.class.php")) {
+		require("inc/ProgressBar.class.php");
+	}
+	else {
+		require("ProgressBar.class.php");
 	}
 
 	$bar = new ProgressBar();
@@ -222,9 +230,11 @@ if (isset($submitnappi)) {
 	echo "</table>";
 }
 
-if (!@include("inc/footer.inc")) {
-	if (!@include("footer.inc"));
-	else exit;
+if (file_exists("inc/footer.inc")) {
+	require("inc/footer.inc");
+}
+else {
+	require("footer.inc");
 }
 
 ?>

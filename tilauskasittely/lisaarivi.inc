@@ -488,7 +488,7 @@
 		// Haetaan tuoteperheet, jos $paikka on erisuuri kuin tyhjä niin vaihdetaan vain jonkun tuotteen paikkaa eikä päivitetä tuoteperheitä
 		// Tai jos muokataan tuoteperheen lasta ei mennä uudestaan tähän haaraan
 		if ($paikka == "" and $perheid == "" and $perhekielto == "") {
-			foreach($kaikkituotteet as $isatuoteno) {
+			foreach ($kaikkituotteet as $isatuoteno) {
 				$riikoko = 1;
 				$isa_array[] = $isatuoteno;
 
@@ -1371,7 +1371,7 @@
 			$kerroin_array 	= ($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A' and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote."#!¡!#1") : array($alkupera_trow["tuoteno"]."#!¡!#1");
 			$perhearray 	= array();
 
-			for($isa=0; $isa < $riikoko; $isa++) {
+			for ($isa=0; $isa < $riikoko; $isa++) {
 				list($perherow, $isat_array, $kaikki_array, $kerroin_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array);
 				$perhearray	= array_merge($perhearray, $perherow);
 
@@ -1379,6 +1379,11 @@
 				if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y" and ($laskurow['tila'] != 'V' or $var == "W")) {
 					$riikoko = count($kaikki_array);
 				}
+			}
+
+			if (count($perhearray) == 0 and $laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V' and $rivityyppi == "V") {
+				// Asiakkaallevalmistuskeissi, resepitä ei löydy joten teemme tästä myyntirivin
+				$rivityyppi = 'L'; // Myyntitilausrivi
 			}
 
 			foreach ($perhearray as $perherow) {
@@ -1391,7 +1396,7 @@
 			}
 		}
 
-		foreach($puu_tuoteno as $i => $tuoteno) {
+		foreach ($puu_tuoteno as $i => $tuoteno) {
 			$kpl = $puu_kpl[$i];
 			$var = $puu_var[$i];
 

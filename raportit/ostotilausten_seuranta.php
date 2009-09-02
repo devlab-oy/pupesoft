@@ -34,7 +34,12 @@
 						AND tunnus = '$tilaus'";
 			$comm_ins_res = mysql_query($query) or pupe_error($query);
 
-			echo "<br><font class='message'>",t("Lisäsit kommentin")," $kommentti ",t("ostotilaukselle")," $tilaus</font><br>";
+			if ($kommentti == '') {
+				echo "<br><font class='message'>",t("Tyhjensit kommentin ostotilaukselta")," $tilaus</font><br>";
+			}
+			else {
+				echo "<br><font class='message'>",t("Lisäsit kommentin")," $kommentti ",t("ostotilaukselle")," $tilaus</font><br>";				
+			}
 			exit;
 		}
 	}

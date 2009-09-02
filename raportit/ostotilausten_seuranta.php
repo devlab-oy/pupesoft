@@ -6,6 +6,20 @@
 		require ("../inc/parametrit.inc");
 	}
 
+	// ajaxin kautta haetaan kommentti textareaan
+	// täytyy olla parametri no_head = yes
+	if ($_GET['tee'] == 'hae_kommentti') {
+		$tun = (int) $_GET['tun'];
+		$query = "	SELECT comments
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND tunnus = '$tun'";
+		$comm_res = mysql_query($query) or pupe_error($query);
+		$comm_row = mysql_fetch_assoc($comm_res);
+		echo $comm_row['comments'];
+		exit;
+	}
+
 	if ($tee == 'NAYTATILAUS') {
 		require ("raportit/naytatilaus.inc");
 		require ("inc/footer.inc");
@@ -79,8 +93,24 @@
 		$tee = '';
 	}
 
+	if ($tee == 'kommentti') {
+		if ($tilaus != '') {
+			$tilaus = (int) $tilaus;
+			$kommentti = mysql_real_escape_string($kommentti);
+
+			$query = "	UPDATE lasku SET
+						comments = '$kommentti'
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tunnus = '$tilaus'";
+			$comm_ins_res = mysql_query($query) or pupe_error($query);
+
+			echo "<br><font class='message'>",t("Lisäsit kommentin")," $kommentti ",t("ostotilaukselle")," $tilaus</font><br>";
+			$tee = 'aja';
+		}
+	}
+
 	if ($tee == 'aja') {
-		
+
 		$ppa = sprintf('%02d', (int) $ppa);
 		$kka = sprintf('%02d', (int) $kka);
 		$vva = sprintf('%04d', (int) $vva);
@@ -98,10 +128,11 @@
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					$toimittajalisa";
 		$res = mysql_query($query) or pupe_error($query);
-		
+
 		echo "<table>";
 
 		$vaihtuuko_toimittaja = '';
+		$tunnukset = array();
 
 		while ($toimittajarow = mysql_fetch_assoc($res)) {
 
@@ -113,7 +144,8 @@
 						lasku.tunnus ltunnus,
 						lasku.lahetepvm,
 						sum(tuote.tuotemassa*(tilausrivi.varattu+tilausrivi.kpl)) massa,
-						sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
+						sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok,
+						lasku.comments
 						FROM lasku
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
 						JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno)
@@ -227,7 +259,17 @@
 							}
 						}
 
-						echo "<a href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=OSTO&tunnus=$tilrivi_row[ltunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku'>$tilrivi_row[ltunnus]</a>";
+						if (trim($tilrivi_row['comments']) != '') {
+							echo "<div id='$tilrivi_row[ltunnus]' class='popup'>";
+							echo $tilrivi_row['comments'];
+							echo "</div>";
+							echo "<a href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=OSTO&tunnus=$tilrivi_row[ltunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku' onmouseout=\"popUp(event,'$tilrivi_row[ltunnus]')\" onmouseover=\"popUp(event,'$tilrivi_row[ltunnus]')\">$tilrivi_row[ltunnus]</a>";
+						}
+						else {
+							echo "<a href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=OSTO&tunnus=$tilrivi_row[ltunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku'>$tilrivi_row[ltunnus]</a>";
+						}
+
+						$tunnukset[] = $tilrivi_row['ltunnus'];
 					}
 					else {
 						echo "&nbsp;";
@@ -544,9 +586,68 @@
 				echo "<td class='spec'>&nbsp;</td>";
 				echo "<td class='spec'>&nbsp;</td>";
 				echo "</tr>";
-			}	
+			}
 		}
 		echo "</table>";
+
+		if (count($tunnukset) > 0) {
+			echo "<br/><br/>";
+
+			sort($tunnukset);
+
+			echo "	<script type='text/javascript'>
+						$(function(){
+							$('#message:font').addClass('ok');
+
+							$('#tilaus').change(function(){
+								if (this.value != '') {
+									$.get('$_SERVER[SCRIPT_NAME]', { tee: 'hae_kommentti', tun: this.value, no_head: 'yes', ohje: 'off' }, function(data){
+										$('#message:font').removeClass('error').addClass('ok').text('Lisää kommentti');
+										$('#kommentti').val(data);
+									});
+								}
+								else {
+									$('#kommentti').val('');
+									$('#message:font').addClass('ok').text('Valitse tilausnumero ja syötä kommentti');
+								}
+							});
+
+							$('#kommentti_form').submit(function(){
+								if ($('#tilaus').val() == '') {
+									$('#message:font').addClass('error').text('Et valinnut tilausnumeroa!');
+									return false;
+								}
+							});
+						});
+					</script>";
+
+			echo "<form method='post' action='' autocomplete='off' id='kommentti_form'>";
+			echo "<input type='hidden' name='tee' value='kommentti'>";
+			echo "<input type='hidden' name='toimittajahaku' value='$toimittajaid'>";
+			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+			echo "<input type='hidden' name='ppa' value='$ppa'>";
+			echo "<input type='hidden' name='kka' value='$kka'>";
+			echo "<input type='hidden' name='vva' value='$vva'>";
+			echo "<input type='hidden' name='ppl' value='$ppl'>";
+			echo "<input type='hidden' name='kkl' value='$kkl'>";
+			echo "<input type='hidden' name='vvl' value='$vvl'>";
+
+			echo "<table>";
+
+			echo "<tr><td colspan='3'><div id='message'><font class='ok'>",t("Valitse tilausnumero ja syötä kommentti"),"</font></div></td></tr>";
+			echo "<tr><td>";
+			echo t("Lisää kommentti"),":</td>";
+			echo "<td><select name='tilaus' id='tilaus'>";
+			echo "<option value=''>",t("Valitse tilausnumero"),"</option>";
+
+			foreach ($tunnukset as $tun) {
+				echo "<option value='$tun'>$tun</option>";
+			}
+
+			echo "</select></td><td><textarea name='kommentti' id='kommentti' rows='5' cols='50' value='$kommentti'></textarea></td></tr><tr><td class='back'><input type='submit' value='",t("Tallenna"),"'>";
+			echo "</td></tr></table>";
+			echo "</form>";
+		}
 	}
 
 	if (file_exists("../inc/footer.inc")) {

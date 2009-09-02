@@ -271,7 +271,9 @@
 							echo "<a href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=OSTO&tunnus=$tilrivi_row[ltunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku' onmouseout=\"popUp(event,'$tilrivi_row[ltunnus]')\" onmouseover=\"popUp(event,'$tilrivi_row[ltunnus]')\">$tilrivi_row[ltunnus]</a>";
 						}
 						else {
-							echo "<a href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=OSTO&tunnus=$tilrivi_row[ltunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku'>$tilrivi_row[ltunnus]</a>";
+							echo "<div id='$tilrivi_row[ltunnus]'>";
+							echo "</div>";
+							echo "<a id='a_$tilrivi_row[ltunnus]' href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=OSTO&tunnus=$tilrivi_row[ltunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku'>$tilrivi_row[ltunnus]</a>";
 						}
 
 						$tunnukset[] = $tilrivi_row['ltunnus'];
@@ -625,7 +627,24 @@
 									var komm = $('#kommentti').val();
 									$.get('$_SERVER[SCRIPT_NAME]', { tee: 'kommentti', tilaus: tilausno, kommentti: komm, no_head: 'yes', ohje: 'off' }, function(data){
 										$('#tallenna_message').html(data);
+
+										if (komm == '') {
+											$('#'+tilausno).removeClass('popup');
+										}
+										else {
+											$('#'+tilausno).addClass('popup');
+										}
+
 										$('#'+tilausno).html(komm);
+
+										$('#a_'+tilausno).mouseout(function(event){
+											popUp(event, tilausno);
+										})
+
+										$('#a_'+tilausno).mouseover(function(event){
+											popUp(event, tilausno);
+										})
+
 									});
 								}
 							});

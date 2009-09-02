@@ -111,7 +111,8 @@
 				<input type='hidden' name = 'vv' value = '$vv'>
 				<input type='hidden' name = 'kk' value = '$kk'>
 				<input type='hidden' name = 'iframe' value = '$iframe'>
-				<input type='hidden' name = 'iframe_id' value = '$iframe_id'>";
+				<input type='hidden' name = 'iframe_id' value = '$iframe_id'>
+				<input type='hidden' name = 'jarj' value = '$jarj'>";
 
 		if ($tiliulos == '') {
 			livesearch_kentta("uusi", "TILIHAKU", "tili", 170, $tili, "EISUBMIT");
@@ -282,6 +283,7 @@
 					<input type='hidden' name='ptunnus' value = '$trow[tunnus]'>
 					<input type='hidden' name = 'iframe' value = '$iframe'>
 					<input type='hidden' name = 'iframe_id' value = '$iframe_id'>
+					<input type='hidden' name = 'jarj' value = '$jarj'>
 					<input type='Submit' value = '".t("Muuta")."'>
 					</td></tr></form>"; // Tuossa tarkkana
 		}
@@ -346,7 +348,8 @@
 			<input type='hidden' name = 'lopetus' value = '$lopetus'>
 			<input type='hidden' name = 'tunnus' value = '$tunnus'>
 			<input type='hidden' name = 'iframe' value = '$iframe'>
-			<input type='hidden' name = 'iframe_id' value = '$iframe_id'>";
+			<input type='hidden' name = 'iframe_id' value = '$iframe_id'>
+			<input type='hidden' name = 'jarj' value = '$jarj'>";
 
 	echo "<input type='checkbox' name='viivatut' onclick='submit();' $viivatut> ";
 	echo t('Näytä poistetut');

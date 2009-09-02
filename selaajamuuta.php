@@ -108,16 +108,24 @@
 		$lkk='01';
 		$lvv++;
 	}
-
+	
+	if ($laji == 'MM' or $laji == 'OM') {
+		$pvmlisa = " and mapvm >= '$vv-$kk-01' and mapvm < '$lvv-$lkk-01' ";
+	}
+	else {
+		$pvmlisa = " and tapvm >= '$vv-$kk-01' and tapvm < '$lvv-$lkk-01' ";
+	}
+	
 	if ($iframe != '') echo "<div style='float: left; width: 55%; padding-right: 10px;'>";
+
+	if ($jarj == '') $jarj = "nimi";
 
 	$query = "	SELECT *
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
-				and tapvm >= '$vv-$kk-01'
-				and tapvm < '$lvv-$lkk-01'
+				$pvmlisa
 				and $lajiv
-				ORDER BY tapvm desc, nimi, summa desc";
+				ORDER BY $jarj, nimi, summa desc";
 	$result = mysql_query($query) or pupe_error($query);
 	$loppudiv ='';
 
@@ -132,11 +140,11 @@
 		echo "<div id='vasen' style='height: 300px; overflow: auto; margin-bottom: 10px; $divwi'>";
 		echo "<table style='$divwi'>";
 		echo "<tr>";
-		echo "<th>".t("Nimi")."</th>";
-		echo "<th>".t("Tapvm")."</th>";
-		echo "<th>".t("Mapvm")."</th>";
-		echo "<th>".t("Summa")."</th>";
-		echo "<th>".t("Valuutta")."</th>";
+		echo "<th><a href='$PHP_SELF?tee=$tee&tunnus=$tunnus&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut&jarj=nimi'>".t("Nimi")."</a></th>";
+		echo "<th><a href='$PHP_SELF?tee=$tee&tunnus=$tunnus&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut&jarj=tapvm'>".t("Tapvm")."</a></th>";
+		echo "<th><a href='$PHP_SELF?tee=$tee&tunnus=$tunnus&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut&jarj=mapvm'>".t("Mapvm")."</a></th>";
+		echo "<th><a href='$PHP_SELF?tee=$tee&tunnus=$tunnus&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut&jarj=summa'>".t("Summa")."</a></th>";
+		echo "<th><a href='$PHP_SELF?tee=$tee&tunnus=$tunnus&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut&jarj=mapvm'>".t("valkoodi")."</a></th>";
 		echo "</tr>";
 
 		while ($trow = mysql_fetch_array($result)) {
@@ -157,7 +165,7 @@
 				$trow["nimi"] = t("Ei nimeä");
 			}
 
-			echo "<$ero><a name='$trow[tunnus]' href='$PHP_SELF?tee=E&tunnus=$trow[tunnus]&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut#$trow[tunnus]'>$trow[nimi]</a>$komm</$ero>";
+			echo "<$ero><a name='$trow[tunnus]' href='$PHP_SELF?tee=E&tunnus=$trow[tunnus]&iframe=$iframe&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut&jarj=$jarj#$trow[tunnus]'>$trow[nimi]</a>$komm</$ero>";
 			echo "<$ero>".tv1dateconv($trow["tapvm"])."</$ero>";
 			echo "<$ero>".tv1dateconv($trow["mapvm"])."</$ero>";
 			echo "<$ero style='text-align: right;'>$trow[summa]</$ero>";

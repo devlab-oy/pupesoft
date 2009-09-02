@@ -66,7 +66,7 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X'
 				$lisa
 				GROUP BY 1,2,3,4,5
-				ORDER BY tilausrivi.toimaika $suunta, lasku.nimi, tilausrivi.tuoteno";
+				ORDER BY lasku.toimaika $suunta, lasku.nimi, lasku.tunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (($vain_excel != '' or $vain_excel_kaikki != '') and @include('Spreadsheet/Excel/Writer.php')) {

@@ -37,7 +37,7 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 	else {
 		$lisa = " ";
 	}
-	
+
 	if ($suunta == '' or $suunta == "DESC") {
 		$suunta = "ASC";
 	}
@@ -55,20 +55,20 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 	echo "<th>".t("arvo")."</th>";
 	echo "<th>".t("valuutta")."</th>";
 	echo "</tr>";
-	
-	$query = "	SELECT lasku.tunnus, lasku.nimi, tilausrivi.tuoteno, tilausrivi.toimaika, 
-				count(*) maara, sum(tilausrivi.varattu) tilattu, sum(tilausrivi.varattu * tilausrivi.hinta) arvo, lasku.valkoodi, lasku.ytunnus
-				from tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-				JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-				where tilausrivi.yhtio	= '$kukarow[yhtio]' 
-				and tilausrivi.varattu 	> 0 
-				and tilausrivi.tyyppi 	= 'L'
-				and tilausrivi.laskutettuaika = '0000-00-00' 
+
+	$query = "	SELECT lasku.tunnus, lasku.nimi, lasku.toimaika, lasku.valkoodi, lasku.ytunnus,
+				count(*) maara,
+				sum(tilausrivi.varattu+tilausrivi.jt) tilattu,
+				round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
+				round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) jt_arvo
+				FROM lasku
+				JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
+				WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X'
 				$lisa
-				group by 1,2,3,4
-				order by tilausrivi.toimaika $suunta, lasku.nimi, tilausrivi.tuoteno";
+				GROUP BY 1,2,3,4,5
+				ORDER BY tilausrivi.toimaika $suunta, lasku.nimi, tilausrivi.tuoteno";
 	$result = mysql_query($query) or pupe_error($query);
-	
+
 	if (($vain_excel != '' or $vain_excel_kaikki != '') and @include('Spreadsheet/Excel/Writer.php')) {
 		//keksitään failille joku varmasti uniikki nimi:
 		list($usec, $sec) = explode(' ', microtime());
@@ -83,7 +83,7 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 		$format_bold->setBold();
 
 		$excelrivi = 0;
-		
+
 		if(isset($workbook)) {
 			$excelsarake = 0;
 
@@ -102,16 +102,16 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 			$worksheet->write($excelrivi, $excelsarake, t("arvo"), $format_bold);
 			$excelsarake++;
 			$worksheet->write($excelrivi, $excelsarake, t("valuutta"), $format_bold);
-			
+
 			$excelsarake = 0;
 			$excelrivi++;
 		}
 	}
-	
+
 	$rivsum = 0;
 	$tilsum = 0;
 	$eursum = 0;
-	
+
 	while ($tulrow = mysql_fetch_array($result)) {
 		echo "<tr>";
 		echo "<td><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$tulrow[tunnus]&ytunnus=$ytunnus&suunta=$suunta'>$tulrow[tunnus]</a></td>";
@@ -123,11 +123,11 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 		echo "<td align='right'>".sprintf("%.2f", $tulrow["arvo"])."</td>";
 		echo "<td>$tulrow[valkoodi]</td>";
 		echo "</tr>";
-				
+
 		$rivsum += $tulrow["maara"];
 		$tilsum += $tulrow["tilattu"];
 		$eursum += $tulrow["arvo"];
-		
+
 		if(isset($workbook)) {
 			$excelsarake = 0;
 
@@ -146,12 +146,12 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 			$worksheet->writeNumber($excelrivi, $excelsarake, $tulrow["arvo"]);
 			$excelsarake++;
 			$worksheet->writeString($excelrivi, $excelsarake, $tulrow["valkoodi"]);
-			
+
 			$excelsarake = 0;
 			$excelrivi++;
 		}
 	}
-	
+
 	echo "<tr>";
 	echo "<th colspan='4'>".t("Yhteensä").":</th>";
 	echo "<td class='tumma' align='right'>$rivsum</td>";
@@ -160,7 +160,7 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 	echo "<th></th>";
 	echo "</tr>";
 	echo "</table>";
-	
+
 	if(isset($workbook)) {
 		$excelsarake = 0;
 
@@ -172,10 +172,10 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 		$excelsarake++;
 		$worksheet->writeNumber($excelrivi, $excelsarake, $tilsum, $format_bold);
 		$excelsarake++;
-		$worksheet->writeNumber($excelrivi, $excelsarake, $eursum, $format_bold);		
+		$worksheet->writeNumber($excelrivi, $excelsarake, $eursum, $format_bold);
 		$excelrivi++;
 	}
-	
+
 	if(isset($workbook)) {
 
 		// We need to explicitly close the workbook
@@ -190,7 +190,7 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
 		echo "<td valign='top' class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 		echo "</table><br>";
 	}
-	
+
 	$ytunnus = '';
 }
 

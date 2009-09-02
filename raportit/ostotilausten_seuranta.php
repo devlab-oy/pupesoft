@@ -20,6 +20,25 @@
 		exit;
 	}
 
+	if ($_GET['tee'] == 'kommentti') {
+		if ($_GET['tilaus'] != '') {
+			$useslave = '';
+			require('../inc/connect.inc');
+
+			$tilaus = (int) $_GET['tilaus'];
+			$kommentti = mysql_real_escape_string($_GET['kommentti']);
+
+			$query = "	UPDATE lasku SET
+						comments = '$kommentti'
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tunnus = '$tilaus'";
+			$comm_ins_res = mysql_query($query) or pupe_error($query);
+
+			echo "<br><font class='message'>",t("Lisäsit kommentin")," $kommentti ",t("ostotilaukselle")," $tilaus</font><br>";
+			exit;
+		}
+	}
+
 	if ($tee == 'NAYTATILAUS') {
 		require ("raportit/naytatilaus.inc");
 		require ("inc/footer.inc");
@@ -93,21 +112,7 @@
 		$tee = '';
 	}
 
-	if ($tee == 'kommentti') {
-		if ($tilaus != '') {
-			$tilaus = (int) $tilaus;
-			$kommentti = mysql_real_escape_string($kommentti);
-
-			$query = "	UPDATE lasku SET
-						comments = '$kommentti'
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND tunnus = '$tilaus'";
-			$comm_ins_res = mysql_query($query) or pupe_error($query);
-
-			echo "<br><font class='message'>",t("Lisäsit kommentin")," $kommentti ",t("ostotilaukselle")," $tilaus</font><br>";
-			$tee = 'aja';
-		}
-	}
+	echo "<div id='tallenna_message'></div>";
 
 	if ($tee == 'aja') {
 
@@ -610,10 +615,18 @@
 								}
 							});
 
-							$('#kommentti_form').submit(function(){
+							$('#tallenna_button').click(function(){
 								if ($('#tilaus').val() == '') {
 									$('#message:font').text('Et valinnut tilausnumeroa!');
 									return false;
+								}
+								else {
+									var tilausno = $('#tilaus').val();
+									var komm = $('#kommentti').val();
+									$.get('$_SERVER[SCRIPT_NAME]', { tee: 'kommentti', tilaus: tilausno, kommentti: komm, no_head: 'yes', ohje: 'off' }, function(data){
+										$('#tallenna_message').html(data);
+										$('#'+tilausno).html(komm);
+									});
 								}
 							});
 						});
@@ -641,7 +654,7 @@
 				echo "<option value='$tun'>$tun</option>";
 			}
 
-			echo "</select></td><td><textarea name='kommentti' id='kommentti' rows='5' cols='50' value='$kommentti'></textarea></td></tr><tr><td class='back'><input type='submit' value='",t("Tallenna"),"'>";
+			echo "</select></td><td><textarea name='kommentti' id='kommentti' rows='5' cols='50' value='$kommentti'></textarea></td></tr><tr><td class='back'><input type='button' id='tallenna_button' value='",t("Tallenna"),"'>";
 			echo "</td></tr></table>";
 			echo "</form>";
 		}

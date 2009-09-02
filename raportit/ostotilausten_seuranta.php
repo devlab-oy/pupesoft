@@ -597,24 +597,22 @@
 
 			echo "	<script type='text/javascript'>
 						$(function(){
-							$('#message:font').addClass('ok');
-
 							$('#tilaus').change(function(){
 								if (this.value != '') {
 									$.get('$_SERVER[SCRIPT_NAME]', { tee: 'hae_kommentti', tun: this.value, no_head: 'yes', ohje: 'off' }, function(data){
-										$('#message:font').removeClass('error').addClass('ok').text('Lisää kommentti');
+										$('#message:font').text('Lisää kommentti');
 										$('#kommentti').val(data);
 									});
 								}
 								else {
 									$('#kommentti').val('');
-									$('#message:font').addClass('ok').text('Valitse tilausnumero ja syötä kommentti');
+									$('#message:font').text('Valitse tilausnumero ja syötä kommentti');
 								}
 							});
 
 							$('#kommentti_form').submit(function(){
 								if ($('#tilaus').val() == '') {
-									$('#message:font').addClass('error').text('Et valinnut tilausnumeroa!');
+									$('#message:font').text('Et valinnut tilausnumeroa!');
 									return false;
 								}
 							});
@@ -634,9 +632,8 @@
 
 			echo "<table>";
 
-			echo "<tr><td colspan='3'><div id='message'><font class='ok'>",t("Valitse tilausnumero ja syötä kommentti"),"</font></div></td></tr>";
-			echo "<tr><td>";
-			echo t("Lisää kommentti"),":</td>";
+			echo "<tr><td colspan='2'><div id='message'>",t("Valitse tilausnumero ja syötä kommentti"),"</div></td></tr>";
+			echo "<tr>";
 			echo "<td><select name='tilaus' id='tilaus'>";
 			echo "<option value=''>",t("Valitse tilausnumero"),"</option>";
 

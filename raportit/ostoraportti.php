@@ -1,6 +1,6 @@
 <?php
 
-	$useslave = 1;
+	$useslave = ($_GET['tee'] == 'tallenna' or $_GET['tee'] == 'uusiraportti') ? '' : 1;
 
 	if (isset($_POST["tee"])) {
 		if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;

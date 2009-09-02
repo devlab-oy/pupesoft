@@ -441,6 +441,8 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 				echo "<style type='text/css'>";
 				echo $css;
 				echo "</style>";
+
+				echo "<script src='".$palvelin2."inc/jquery.min.js' type='text/javascript'></script>";
 			}
 
 			echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";

@@ -260,11 +260,11 @@
 						$yritystilino 	= $laskurow["ytilino"];
 
 						// jos pankkihaltijan nimi on syötetty, laitetaan se nimen tilalle
-						if (trim($laskurow['pankki_haltija']) != '') {
-							$laskunimi1 	= substr(trim($laskurow["pankki_haltija"]), 0, 30);
+						if ($laskurow['pankki_haltija'] != '') {
+							$laskunimi1 = $laskurow["pankki_haltija"];
 						}
 						else {
-							$laskunimi1 	= substr(trim($laskurow["nimi"]." ".$laskurow['nimitark']), 0, 30);
+							$laskunimi1 = $laskurow["nimi"]." ".$laskurow['nimitark'];
 						}
 						
 						$laskunimi2 	= $laskurow["osoite"];
@@ -534,7 +534,13 @@
 								$yritysnimi 	= strtoupper($yhtiorow["nimi"]);
 								$yritysosoite 	= strtoupper($yhtiorow["osoite"]);
 								$yritystilino 	= $laskurow["ytilino"];
-								$laskunimi1 	= substr(trim($laskurow["nimi"]." ".$laskurow['nimitark']), 0, 45);
+								// jos pankkihaltijan nimi on syötetty, laitetaan se nimen tilalle
+								if ($laskurow['pankki_haltija'] != '') {
+									$laskunimi1 = $laskurow["pankki_haltija"];
+								}
+								else {
+									$laskunimi1 = $laskurow["nimi"]." ".$laskurow['nimitark'];
+								}
 								$laskunimi2 	= $laskurow["osoite"];
 								$laskunimi3 	= $laskurow["postitp"];
 								$laskusumma 	= $laskurow["summa"];
@@ -620,11 +626,11 @@
 						$yritystilino 	= $laskurow["ytilino"];
 
 						// jos pankkihaltijan nimi on syötetty, laitetaan se nimen tilalle
-						if (trim($laskurow['pankki_haltija']) != '') {
-							$laskunimi1 	= substr(trim($laskurow["pankki_haltija"]), 0, 45);
+						if ($laskurow['pankki_haltija'] != '') {
+							$laskunimi1 = $laskurow["pankki_haltija"];
 						}
 						else {
-							$laskunimi1 	= substr(trim($laskurow["nimi"]." ".$laskurow['nimitark']), 0, 45);
+							$laskunimi1 = $laskurow["nimi"]." ".$laskurow['nimitark'];
 						} 
 
 						$laskunimi2 	= $laskurow["osoite"];

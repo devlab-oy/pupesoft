@@ -51,15 +51,7 @@
 	$ulos  = "2";
 	$ulos .= sprintf ('%-7.7s', $laskurow['ytunnus']);
 
-	// jos pankkihaltijan nimi on syötetty, laitetaan se nimen tilalle
-	if (trim($laskurow['pankki_haltija']) != '') {
-		$ulos .= sprintf ('%-30.30s', strtoupper($laskurow['pankki_haltija']));
-		$ulos .= '                                   '; // 35 tyhjää nimitarkin takia
-	}
-	else {
-		$ulos .= sprintf ('%-30.30s', strtoupper($laskurow['nimi']));
-		$ulos .= sprintf ('%-35.35s', strtoupper($laskurow['nimitark']));
-	}
+	$ulos .= sprintf ('%-65.65s', strtoupper($laskunimi1));
 	$ulos .= '       '; // 7 tyhjää
 	fputs($toot,$ulos . "\r\n");
 	

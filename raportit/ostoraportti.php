@@ -1,10 +1,10 @@
 <?php
 
-	$useslave = ($_GET['tee'] == 'tallenna' or $_GET['tee'] == 'uusiraportti') ? '' : 1;
+	$useslave = ($_REQUEST['tee'] == 'tallenna' or $_REQUEST['tee'] == 'uusiraportti') ? '' : 1;
 
-	if (isset($_POST["tee"])) {
-		if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-		if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+	if (isset($_REQUEST["tee"])) {
+		if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+		if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
 	}
 
 	require ("../inc/parametrit.inc");

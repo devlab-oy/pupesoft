@@ -18,14 +18,14 @@
 		$rajauslisa = " and liitetiedostot.tunnus = -1 ";
 	}
 	
-	if ($lukitse_laji == "tuote" and $lukitse_avaimeen > 0) {
+	if (($lukitse_laji == "tuote" or $lukitse_laji == "sarjanumeron_lisatiedot") and $lukitse_avaimeen > 0) {
 		$uusilukko = "";
 		$poistolukko   = "";
 	}
 	
 	if ($lukitse_laji == "lasku" and $lukitse_avaimeen > 0) {
 		
-		$query = "SELECT * from lasku where tunnus='$lukitse_avaimeen' and yhtio='{$kukarow['yhtio']}'";
+		$query = "SELECT * from lasku where tunnus='$lukitse_avaimeen' and yhtio='$kukarow[yhtio]'";
 		$lasres = mysql_query($query) or pupe_error($query);
 		$lasrow = mysql_fetch_array($lasres);
 		
@@ -38,16 +38,16 @@
 		$otsikko_lisatiedot =  "
 			<table>
 			<tr><th>".t('Tila')."</th><td>".t("$laskutyyppi")." ".t("$alatila")."</td></tr>
-			<tr><th>".t('Nimi')."</th><td>{$lasrow['nimi']}</td></tr>
-			<tr><th>".t('Nimitark')."</th><td>{$lasrow['nimitark']}</td></tr>
-			<tr><th>".t('Osoite')."</th><td>{$lasrow['osoite']}</td></tr>
-			<tr><th>".t('Postitp')."</th><td>{$lasrow['postitp']}</td></tr>
+			<tr><th>".t('Nimi')."</th><td>$lasrow[nimi]</td></tr>
+			<tr><th>".t('Nimitark')."</th><td>$lasrow[nimitark]</td></tr>
+			<tr><th>".t('Osoite')."</th><td>$lasrow[osoite]</td></tr>
+			<tr><th>".t('Postitp')."</th><td>$lasrow[postitp]</td></tr>
 			</table><br>";
 	
 		/*	Tarkastetaan käyttäjäoikeuksia hieman eri tavalla eri laskuilla	*/		
 		//	Ostoreskontran laskut
 		if (in_array($lasrow['tila'], array('H','Y','M','P','Q','X'))) {
-			$query = "SELECT * from oikeu where yhtio='{$kukarow['yhtio']}' and kuka='{$kukarow['kuka']}' and nimi LIKE '%ulask.php'";
+			$query = "SELECT * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi LIKE '%ulask.php'";
 			$res = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($res) > 0) {
@@ -75,7 +75,7 @@
 							hyvaksyja_nyt 	= hyvak1,
 							tila 			= if(tila='M', 'H', tila)
 							WHERE tunnus 	= $lasrow[tunnus] 
-							and yhtio		= '{$kukarow['yhtio']}'
+							and yhtio		= '$kukarow[yhtio]'
 							and tila in ('H','M')";
 				$ares = mysql_query($query) or pupe_error($query);
 			}							

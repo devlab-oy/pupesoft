@@ -530,7 +530,7 @@
 			$lopetusRequest = str_replace('////','?',               $lopetusRequest);
 			$lopetusRequest = preg_replace('/([^:])\/\/\//','\\1#', $lopetusRequest);
 			$lopetusRequest = preg_replace('/([^:])\/\//','\\1&',   $lopetusRequest);
-			
+
 			echo "	<script LANGUAGE='JavaScript'>
 						sndReq('$lopetusTargetDiv', '$lopetusRequest', false, false);
 						document.body.removeChild(document.getElementById('yllapitoDivpopUP'));
@@ -546,10 +546,10 @@
 
 	// Rakennetaan hakumuuttujat kuntoon
 	if (isset($hakukentat)) {
-		$array = explode(",", $hakukentat);
+		$array = explode(",", str_replace(" ", "", $hakukentat));
 	}
 	else {
-		$array = explode(",", $kentat);
+		$array = explode(",", str_replace(" ", "", $kentat));
 	}
 
 	$count = count($array);
@@ -557,7 +557,7 @@
 	for ($i=0; $i<=$count; $i++) {
 		if (strlen($haku[$i]) > 0) {
 
-			if ($from == "" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
+			if ($from == "" and ((($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') or ($toim == 'yhteyshenkilo' and trim($array[$i]) == 'liitostunnus'))) {
 
 				if (!is_numeric($haku[$i])) {
 					// haetaan laskutus-asiakas
@@ -636,9 +636,9 @@
 				$lisa .= " and " . $array[$i] . " = '" . substr($haku[$i], 1) . "'";
 			}
 			elseif (strpos($array[$i], "/") !== FALSE) {
-				list($a, $b) = explode("/", $array[$i]);
-
-				$lisa .= " and (".$a." like '%".$haku[$i]."%' or ".$b." like '%".$haku[$i]."%') ";
+				$lisa .= " and (";
+				foreach (explode("/", $array[$i]) as $spl) $lisa .= "$spl like '%".$haku[$i]."%' or ";
+				$lisa = substr($lisa, 0, -3).")";
 			}
 			else {
 				$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
@@ -696,21 +696,21 @@
 		else {
 			$limiitti = "";
 		}
-		
+
 		if (strlen($ojarj) > 0) {
-			
+
 			list($ojar, $osuu) = explode("_", $ojarj);
-			
+
 	    	$jarjestys = "$ojar $osuu ";
 	    }
-	
-		
+
+
 		if ($osuu == '') {
 			$osuu	= 'asc';
-			$edosuu	= 'asc';			
+			$edosuu	= 'asc';
 		}
 		elseif ($osuu == 'desc') {
-			$edosuu = 'asc';			
+			$edosuu = 'asc';
 		}
 		else {
 			$osuu 	= 'asc';
@@ -829,7 +829,7 @@
 		elseif ($from == "") {
 			for ($i = 1; $i < mysql_num_fields($result); $i++) {
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
-					
+
 					echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".($i+1)."_".$edosuu."$ulisa&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
 
 					if 	(mysql_field_len($result,$i)>10) $size='15';
@@ -1237,7 +1237,7 @@
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi = 'yhteyshenkilo' and kuka = '$kukarow[kuka]' and yhtio = '$yhtiorow[yhtio]'";
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
 
-			if (mysql_num_rows($res) > 0) echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=yhteyshenkilo&from=yllapito&laji=$laji&ohje=off&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+			if (mysql_num_rows($res) > 0) echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=yhteyshenkilo&from=yllapito&laji=$laji&ohje=off&haku[6]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
 
 			if ($toim == "asiakas") {
 				include ("inc/asiakkaan_avainsanat.inc");

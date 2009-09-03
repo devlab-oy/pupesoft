@@ -52,9 +52,9 @@
 		<input type='hidden' name='sorttauskentan_jarjestys3' value='$sorttauskentan_jarjestys3'>
 		<input type='hidden' name='sorttauskentan_jarjestys4' value='$sorttauskentan_jarjestys4'>";
 
-		if ($nappikeikalle == 'menossa') {
-			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
-		}
+	if ($nappikeikalle == 'menossa') {
+		echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
+	}
 
 	echo "<table>";
 
@@ -62,6 +62,8 @@
 		echo "<tr><td>".t("Tulosta laskusta käteiskuitti")."</td><td><input type='checkbox' name='kateiskuitti'></td></tr>";
 		echo "<tr><td>".t("Tulosta kassa-alet")."</td><td><input type='checkbox' name='kassaalet'></td></tr>";
 	}
+
+	$mista = 'asiakas';
 
 	if ($toim == "OSTO" or $tulostimet[0] == "Ostotilaus") {
 		echo "<tr><td>".t("Tulosta nimitykset ostotilaukselle")."</td><td><input type='checkbox' name='nimitykset'></td></tr>";
@@ -91,9 +93,6 @@
 
 		$mista = 'asiakas';
 	}
-    else {
-        $mista = 'asiakas';
-    }
 
 	if ($toim == "TILAUSVAHVISTUS" and $yhtiorow["tilausvahvistus_tyyppi_tulostus"] != '' and $otunnus != '') {
 
@@ -125,8 +124,9 @@
 	///* Haetaan asiakkaan kieli *///
 	if ($otunnus != '' or $laskunro != '') {
 
-		$querykieli = "	SELECT ytunnus
-						FROM lasku WHERE";
+		$querykieli = "	SELECT liitostunnus
+						FROM lasku 
+						WHERE";
 
 		if ($otunnus > 0) {
 			$querykieli .= " tunnus='$otunnus' ";
@@ -145,17 +145,16 @@
 
 		$querykieli .= " AND yhtio ='$kukarow[yhtio]'";
 		$resultkieli = mysql_query($querykieli) or pupe_error($querykieli);
-
 		$asrow = mysql_fetch_array($resultkieli);
-
+		
 		$querykieli = "	SELECT kieli, email
 						FROM $mista
 						WHERE
-						ytunnus='$asrow[ytunnus]'
+						tunnus = '$asrow[liitostunnus]'
 						AND yhtio ='$kukarow[yhtio]'";
 		$resultkieli = mysql_query($querykieli) or pupe_error($querykieli);
 		$asrow = mysql_fetch_array($resultkieli);
-
+		
 		if ($asrow["kieli"] != '') {
 			$sel[$asrow["kieli"]] = "SELECTED";
 		}

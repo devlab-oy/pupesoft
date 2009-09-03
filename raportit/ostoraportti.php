@@ -24,10 +24,12 @@
 		list($kysely_kuka, $kysely_mika) = explode("#", $kysely);
 
 		$kysely_warning = '';
+		$rappari = '';
 
 		if ($tee == "tallenna" and $kysely_kuka == $kukarow["kuka"]) {
 			tallenna_muisti($kysely_mika, $ala_tallenna);			
-			$tee = 'JATKA';		
+			$tee = 'JATKA';
+			$rappari = $kysely_kuka;
 		}
 		elseif ($tee == 'tallenna' and $kysely_kuka != $kukarow['kuka']) {
 			$tee = 'JATKA';
@@ -39,11 +41,13 @@
 			tallenna_muisti($uusirappari, $ala_tallenna);
 			$kysely = "$kukarow[kuka]#$uusirappari";
 			$tee = 'JATKA';
+			$rappari = $kysely_kuka;
 		}
 		
 		if ($tee == "lataavanha") {
 			hae_muisti($kysely_mika, $kysely_kuka);
 			$tee = 'JATKA';		
+			$rappari = $kysely_kuka;
 		}
 		
 		echo "<font class='head'>".t("Ostoraportti")."</font><hr>";
@@ -2191,8 +2195,12 @@
 			foreach ($sarakkeet as $key => $sarake) {
 
 				$sel = "";
-				if ($rappari == "") {
+				if ($valitut[$key] != "") {
 					$sel = "CHECKED";
+				}
+
+				if ($rappari == '') {
+					$sel = 'CHECKED';
 				}
 
 				if ($lask % 8 == 0 and $lask != 0) {

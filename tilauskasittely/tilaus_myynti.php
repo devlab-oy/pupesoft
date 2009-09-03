@@ -2584,7 +2584,7 @@ if ($tee == '') {
 
 			$tuoteno 	= $tilausrivi['tuoteno'];
 
-			if (in_array($row["var"], array('S','U','T','R', 'J'))) {
+			if (in_array($tilausrivi["var"], array('S','U','T','R', 'J'))) {
 				if ($yhtiorow["varaako_jt_saldoa"] == "") {
 					$kpl = $tilausrivi['jt'];
 				}
@@ -3155,7 +3155,7 @@ if ($tee == '') {
 					$ulos = "<select name='tuoteno'  multiple='TRUE' size='6' style='width: 350px;><option value=''>Valitse tuote</option>";
 
 					if (mysql_num_rows($tuoteresult) > 0) {
-						while($row=mysql_fetch_array($tuoteresult)) {
+						while($row = mysql_fetch_array($tuoteresult)) {
 							$sel='';
 							if ($tuoteno==$row['tuoteno']) $sel='SELECTED';
 							$ulos .= "<option value='$row[tuoteno]' $sel>$row[tuoteno] - ".t_tuotteen_avainsanat($row, 'nimitys')."</option>";

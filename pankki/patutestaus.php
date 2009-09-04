@@ -1,10 +1,6 @@
 <?php
-	require ("siirtoa.php");
-	require ("ekakaytto.php");
+	require ("patufunktiot.inc");
 	require ("siirto.php");
-	require ("sanoma.php");
-	require ("siirtopyynto.php");
-	require ("sala.php");
 	require ("../inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Patutestaus")."<hr></font>";

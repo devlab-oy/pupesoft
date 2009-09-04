@@ -90,7 +90,7 @@
 			$pdf->draw_text(453, $kala-14, "Tilavuus, m3", $firstpage, $norm);
 
 			$kala -= 28;
-		
+
 			return $pdf;
 		}
 	}
@@ -131,7 +131,7 @@
 
 				$ed_tun = $asiakkaan_tiedot_row['tunnus'];
 			}
-			elseif ($asiakas != $asiakkaan_tiedot_row['ytunnus']) {				
+			elseif ($asiakas != $asiakkaan_tiedot_row['ytunnus']) {
 				$pdf->draw_rectangle($vanhakala, 60, $kala-22, 540,	$firstpage, $rectparam);
 
 				//alarivi
@@ -156,14 +156,14 @@
 			}
 
 			//summataan kaikki painot yhteen
-			$query = "	SELECT rahtikirjat.pakkaus, 
-						rahtikirjat.pakkauskuvaus, 
-						rahtikirjat.kilot, 
-						rahtikirjat.kollit, 
-						rahtikirjat.kuutiot, 
+			$query = "	SELECT rahtikirjat.pakkaus,
+						rahtikirjat.pakkauskuvaus,
+						rahtikirjat.kilot,
+						rahtikirjat.kollit,
+						rahtikirjat.kuutiot,
 						rahtikirjat.lavametri,
 						rahtikirjat.otsikkonro,
-						GROUP_CONCAT(DISTINCT tuote.vakkoodi) vakkoodi
+						GROUP_CONCAT(DISTINCT tuote.vakkoodi separator ', ') vakkoodi
 						FROM rahtikirjat
 						LEFT JOIN tilausrivi ON (tilausrivi.yhtio = rahtikirjat.yhtio AND
 												tilausrivi.tyyppi in ('L', 'G') AND
@@ -173,7 +173,7 @@
 											tuote.tuoteno = tilausrivi.tuoteno AND
 											tuote.vakkoodi <> '0' AND
 											tuote.vakkoodi <> ' ')
-						WHERE rahtikirjat.otsikkonro = '$asiakkaan_tiedot_row[tunnus]' 
+						WHERE rahtikirjat.otsikkonro = '$asiakkaan_tiedot_row[tunnus]'
 						AND rahtikirjat.yhtio='$kukarow[yhtio]'
 						GROUP BY 1, 2, 3, 4, 5, 6, 7
 						ORDER BY otsikkonro";
@@ -182,12 +182,12 @@
 
 		$i = 0;
 		while ($pakkarow = mysql_fetch_assoc($pakka)) {
-	
+
 			//kollit
 			if ($i == 0) {
 				$pdf->draw_text(62, $kala, $asiakkaan_tiedot_row['tunnus'],	$firstpage, $kirj);
 			}
-			
+
 			$pdf->draw_text(112, $kala, $pakkarow['kollit']."  ".$pakkarow['pakkaus'],	$firstpage, $kirj);
 			$pdf->draw_text(246, $kala, $pakkarow['pakkauskuvaus'], $firstpage, $kirj);
 			$pdf->draw_text(246, $kala-10, $pakkarow['vakkoodi'], $firstpage, $kirj);
@@ -198,8 +198,8 @@
 			$kollityht += $pakkarow['kollit'];
 			$kilotyht += round($pakkarow['kilot'], 2);
 
-			$kala -= 10;
-			
+			$kala -= 20;
+
 			if ($kala < 60) {
 				$pdf->draw_rectangle($vanhakala, 60, $kala-22, 540,	$firstpage, $rectparam);
 
@@ -213,7 +213,7 @@
 			}
 		}
 
-		$kala -= 10; 
+		$kala -= 10;
 
 		if ($asiakas != $asiakkaan_tiedot_row['ytunnus'] or $rivi == $maxrivit) {
 			$pdf->draw_rectangle($vanhakala, 60, $kala-22, 540,	$firstpage, $rectparam);

@@ -1,28 +1,19 @@
 <?
 function siirto ($yritirow, $aineisto, $pvm) {
-	$nro = $yritirow['nro'];
-	// Tehd‰‰n numerosta kolminumeroinen esitys
-	$nroo = '';
-	if($nro < 100){
-		$nroo = "0";
-		if($nro < 10){
-			$nroo .= "0";
-		}
-	}
-	$nro=$nroo.$nro;
-	
-	// TIEDOSTONIMET
 
+	$nro = $file.=sprintf ('%03d', $yritirow['nro']);
+
+	// TIEDOSTONIMET
 	$osoite="/var/www/html/pupesoft/dataout";
 	$etiedosto="ESI.A";
 	$sptiedosto="SIIRTOPYYNTO.$nro";
 	// Alustetaan ja tehd‰‰n Siirtopyyntˆ-tiedosto
 	// Siirtopyyntˆˆn lis‰t‰‰n tilinumero, jolta tiliote haetaan
-	//$tili="195030-10";
+	// $tili="195030-10";
 	
 	echo "Tehd‰‰n siirtopyyntˆ $osoite/$sptiedosto<br>";
 	if ($pvm == '') $pvm = '000000';
-	$siirtopyynto = siirtopyynto($yritirow['tilino'], $aineisto, "DEMO", $pvm);
+	$siirtopyynto = siirtopyynto('2', $yritirow['tilino'], $aineisto, "DEMO", $pvm);
 	echo strlen($siirtopyynto). "-->" . $siirtopyynto."<br>";
 
 	echo "Alustetaan ESI-tiedoston teko<br>";
@@ -40,7 +31,7 @@ function siirto ($yritirow, $aineisto, $pvm) {
 
 	file_put_contents("$osoite/$etiedosto", $esi);
 	file_put_contents("$osoite/$sptiedosto",$siirtopyynto);
-	exit;
+
 	// Tiedostojen nimet
 	$esia= "$osoite/$etiedosto";
 	$esip= "ESI.P";
@@ -55,11 +46,11 @@ function siirto ($yritirow, $aineisto, $pvm) {
 	$ftp = ftp_connect($host);
 	if($ftp) {
 	// Jos jokin asia ep‰onnistuu, katkaistaan heti yhteys
-	  echo "Yhteys muodostettu: $host<br>";
-	  $login_ok = ftp_login($ftp,$log,$pass);
-	  ftp_pasv($ftp, true);
-	  echo "L‰hetet‰‰n Esi-sanoma: $esia<br>";
-	  if(ftp_put($ftp, "ESI.A", $esia, FTP_ASCII)) {
+	echo "Yhteys muodostettu: $host<br>";
+	$login_ok = ftp_login($ftp,$log,$pass);
+	//ftp_pasv($ftp, true);
+	echo "L‰hetet‰‰n Esi-sanoma: $esia<br>";
+	if(ftp_put($ftp, "ESI.A", $esia, FTP_ASCII)) {
 			echo "Esi-sanoman l‰hetys onnistui. Haetaan vastaus: $esip<br>";
 			if(ftp_get($ftp, "$osoite/$esip", $esip, FTP_ASCII)) {
 					echo  "Esi-sanoman vastaus saatiin.L‰hetet‰‰n siirtopyyntˆ: $siirto<br>";

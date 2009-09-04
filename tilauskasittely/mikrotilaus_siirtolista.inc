@@ -1,33 +1,69 @@
 <?php
-
 	if ($tee == "file") {
 		if (is_uploaded_file($_FILES['userfile']['tmp_name']) == TRUE) {
+			$timeparts = explode(" ",microtime());
+			$starttime = $timeparts[1].substr($timeparts[0],1);
 
 			list($name,$ext) = split("\.", $_FILES['userfile']['name']);
 
-			if (!(strtoupper($ext) == "TXT" || strtoupper($ext) == "CSV")){
-				die ("<font class='error'><br>".t("Ainoastaa .txt tai .csv tiedostot sallittuja")."!</font>");
+			if (strtoupper($ext) !="TXT" and strtoupper($ext)!="XLS" and strtoupper($ext)!="CSV") {
+				die ("<font class='error'><br>".t("Ainoastaan .xls, .txt ja .cvs tiedostot sallittuja")."!</font>");
 			}
 
-			if ($_FILES['userfile']['size']==0){
+			if ($_FILES['userfile']['size']==0) {
 				die ("<font class='error'><br>".t("Tiedosto oli tyhj‰")."!</font>");
 			}
 
-			$file=fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+			if (strtoupper($ext)=="XLS") {
+				require_once ('excel_reader/reader.php');
 
-			// luetaan tiedosto alusta loppuun...
-			$rivi = fgets($file, 4096);
-			
+				// ExcelFile
+				$data = new Spreadsheet_Excel_Reader();
+
+				// Set output Encoding.
+				$data->setOutputEncoding('CP1251');
+				$data->setRowColOffset(0);
+				$data->read($_FILES['userfile']['tmp_name']);
+			}
+			else {
+				$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+			}
+
+			// luetaan tiedosto loppuun ja tehd‰‰n array koko datasta
+			$excelrivi[][] = array();
+
+			if (strtoupper($ext) == "XLS") {
+				for ($excei = 0; $excei < $data->sheets[0]['numRows']; $excei++) {
+					for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
+						$excelrivi[$excei-1][$excej] = $data->sheets[0]['cells'][$excei][$excej];
+					}
+				}
+			}
+			else {
+				$excei = 0;
+
+				while ($rivi = fgets($file)) {
+					// luetaan rivi tiedostosta..
+					$poista	 = array("'", "\\");
+					$rivi	 = str_replace($poista,"",$rivi);
+					$rivi	 = explode("\t", trim($rivi));
+
+					$excej = 0;
+					foreach ($rivi as $riv) {
+						$excelrivi[$excei][$excej] = $riv;
+						$excej++;
+					}
+					$excei++;
+				}
+				fclose($file);
+			}
+
 			$mtrivilask = 0;
-			
-			while (!feof($file)) {
-				// luetaan rivi tiedostosta..
-				$poista	  = array("\"", "'", "\\", " ");
-				$rivi	  = str_replace($poista,"",$rivi);
-				$rivi	  = explode("\t", trim($rivi));
+
+			foreach ($excelrivi as $rivi) {
 
 				$tuoteno  	= trim($rivi[0]);
-				$kpl  		= $rivi[1];
+				$kpl  		= str_replace(",", ".", $rivi[1]);
 				$kommentti	= $rivi[2];
 				$paikka		= $rivi[3];
 
@@ -38,16 +74,16 @@
 					$varataan_saldoa = "EI";
 				}
 
-				if($tuoteno != '' and $kpl > 0) {
+				if ($tuoteno != '' and $kpl > 0) {
 					$query = "	SELECT *
 								FROM tuote
 								WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
 					$result = mysql_query($query) or pupe_error($query);
 
-					if(mysql_num_rows($result) == 1) {
-						
-						$mtrivilask++;	
-						
+					if (mysql_num_rows($result) == 1) {
+
+						$mtrivilask++;
+
 						$trow = mysql_fetch_array($result);
 
 						$tuoteno 	= $trow["tuoteno"];
@@ -55,7 +91,7 @@
 						$kerayspvm 	= $laskurow["kerayspvm"];
 						$varasto 	= $laskurow["varasto"];
 						$jtkielto 	= $laskurow['jtkielto'];
-						
+
 						require('lisaarivi.inc');
 
 						$tuoteno	= '';
@@ -75,20 +111,20 @@
 						echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei lˆydy")."!</font><br>";
 					}
 				}
-				
+
 				if ((int) $olliriveja > 0 and $mtrivilask >= (int) $olliriveja) {
-					
+
 					$query = "	UPDATE lasku
 								SET alatila = 'J'
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$laskurow[tunnus]'
 								and tila='G'";
 					$updresult = mysql_query($query) or pupe_error($query);
-					
+
 					$mtrivilask = 0;
-					
+
 					$jatka		= "kala";
-				
+
 					$query = "	UPDATE kuka SET kesken = 0 WHERE yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
 					$delresult = mysql_query($query) or pupe_error($query);
 
@@ -119,20 +155,15 @@
 						exit;
 					}
 
-					$query = "SELECT nimitys from varastopaikat where yhtio='{$kukarow["yhtio"]}' and tunnus = '$varasto'";
+					$query = "SELECT nimitys from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus = '$varasto'";
 					$varres = mysql_query($query) or pupe_error($query);
 					$varrow = mysql_fetch_array($varres);
-					
-					echo "<br><font class='message'>".t("Tehtiin uusi siirtolista!siirtolistalle otsikko %s l‰hdevarasto on %s", $kieli, $kukarow["kesken"], $varrow["nimitys"])."</font><br>";
-					
+
+					echo "<br><font class='message'>".t("Tehtiin uusi siirtolista! Siirtolistalle otsikko %s l‰hdevarasto on %s", $kieli, $kukarow["kesken"], $varrow["nimitys"])."</font><br>";
+
 					$laskurow = mysql_fetch_array($aresult);
 				}
-				
-				
-				$rivi = fgets($file, 4096);
-			} // end while eof
-
-			fclose($file);
+			}
 
 			$tuoteno	= '';
 			$kpl		= '';
@@ -165,13 +196,15 @@
 				<input type='hidden' name='taalta' value='$laskurow[varasto]'>
 				<font class='message'>".t("Tiedostomuoto").":</font><br><br>
 
-				<table border='0' cellpadding='3' cellspacing='2'>
-				<tr><th colspan='4'>".t("Tabulaattorilla eroteltu tekstitiedosto").".</th></tr>
-				<tr><td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."</td><td>".t("Kommentti")."</td><td>".t("L‰hett‰v‰ varastopaikka")."</td></tr>
+				<table>
+				<tr><th colspan='4'>".t("Sarkaineroteltu tekstitiedosto tai Excel-tiedosto").".</th></tr>
+				<tr><td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."*</td><td>".t("Kommentti")."</td><td>".t("L‰hett‰v‰ varastopaikka")."</td></tr>
 				</table>
 				<br>
+				* ".t("Siirr‰ kaikki vapaana olevat laittamalla m‰‰r‰-kentt‰‰n X")."
+				<br><br>
 				<table>";
-	
+
 		echo "<tr><th>".t("Rivej‰ per siirtolista").":</th>
 				<td>
 				<select name='olliriveja'>
@@ -182,7 +215,7 @@
 				<option value='100'>100 ".t("rivi‰ per siirtolista")."</option>
 				</select>
 				</td></tr>";
-				
+
 		echo "<tr>
 				<th>".t("Valitse tiedosto").":</th>
 				<td><input name='userfile' type='file'></td>

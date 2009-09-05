@@ -18,7 +18,7 @@ function ekakayttoavain ($tunnus) {
 
 	$tulos = pack('H*',$tulos);
 	$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
-	$iv = mcrypt_create_iv (mcrypt_enc_get_iv_size($td), pack('H*','0000000000000000'));
+	$iv = pack('H*','0000000000000000');
 	mcrypt_generic_init($td, $tulos, $iv);
 	$tulos = mdecrypt_generic($td, pack('H*','0000000000000000'));
 	mcrypt_generic_deinit($td);
@@ -30,7 +30,7 @@ function ekakayttoavain ($tunnus) {
 //Lisätään käyttöavain ja sukupolvi tietokantaan
 //echo "\nlopullinen tulos '$tulos[1]'\n";
 
-	$query = "UPDATE yriti SET kayttoavain='$kayttoavain', kasukupolvi=1 WHERE tunnus = '$tunnus'";
+	$query = "UPDATE yriti SET kayttoavain='$kayttoavain', kasukupolvi=0 WHERE tunnus = '$tunnus'";
 	$xres = mysql_query($query) or pupe_error($query);
 }
 
@@ -53,7 +53,7 @@ function uusikayttoavain ($tunnus, $salattu) {
 
 	$tulos = pack('H*',$tulos);
 	$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
-	$iv = mcrypt_create_iv (mcrypt_enc_get_iv_size($td), pack('H*','0000000000000000'));
+	$iv = pack('H*','0000000000000000');
 	mcrypt_generic_init($td, $tulos, $iv);
 
 	$tulos = mdecrypt_generic($td, pack('H*',$salattu));
@@ -64,7 +64,7 @@ function uusikayttoavain ($tunnus, $salattu) {
 
 	//lisäys tietokantaan
 
-	$query = "UPDATE yriti SET kayttoavain='$tulos[1]', kasukupolvi=if(kasukupolvi + 1 = 10,1,kasukupolvi+1) WHERE tunnus = '$tunnus'";
+	$query = "UPDATE yriti SET kayttoavain='$tulos[1]', kasukupolvi=if(kasukupolvi + 1 = 10,0,kasukupolvi+1) WHERE tunnus = '$tunnus'";
 	$xres = mysql_query($query) or pupe_error($query);
 	return "";
 }
@@ -112,7 +112,7 @@ function salaa ($jono, $arg, $kayttoavain) {
 		if($arg == "VARa"){
 			$palautus = ">>VAR" . $palautus;
 		}
-		$palautus .= $tark[1];
+		$palautus .= strtoupper($tark[1]);
 		return $palautus;
 	}
 
@@ -120,7 +120,7 @@ function salaa ($jono, $arg, $kayttoavain) {
 		$tarkiste =  $data[18];
 		$tarkiste .= $data[19];
 		echo "Tarkiste: $tarkiste<br>";
-		if ($tark[1] == $tarkiste){
+		if (strtoupper($tark[1]) == strtoupper($tarkiste)){
 			return ""; // ok!
 		}
 		else {
@@ -195,7 +195,7 @@ function tarkistapariteetti($jono) {
 	return $jono;
 }
 
-function ekasiirtoavain($osa1, $osa2, $tarkiste, $tunnus) {
+function siirtoavain($osa1, $osa2, $tarkiste, $suku, $tunnus) {
 
 	$pa1 = tarkistapariteetti($osa1);
 	$pa2 = tarkistapariteetti($osa2);
@@ -227,7 +227,7 @@ function ekasiirtoavain($osa1, $osa2, $tarkiste, $tunnus) {
 
 	$tulos = pack('H*',$tulos);
 	$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
-	$iv = mcrypt_create_iv (mcrypt_enc_get_iv_size($td), pack('H*','0000000000000000'));
+	$iv = pack('H*','0000000000000000');
 	mcrypt_generic_init($td, $tulos, $iv);
 	$tulos = mcrypt_generic($td, pack('H*','0000000000000000'));
 	mcrypt_generic_deinit($td);
@@ -242,16 +242,13 @@ function ekasiirtoavain($osa1, $osa2, $tarkiste, $tunnus) {
 		$tilires = mysql_query($query) or pupe_error($query);
 		if (mysql_num_rows($tilires) == 1) {
 			$tilirow = mysql_fetch_array($tilires);
-			$tilirow['sassukupolvi']++;
-			if($tilirow['sassukupolvi']>9) $tilirow['sassukupolvi']=1;
+			if ($suku >= $tilirow['sassukupolvi']) {
+				$query = "UPDATE yriti SET siirtoavain='$siirtoavain', sasukupolvi='$suku' WHERE tunnus = '$tunnus'";
+				$xres = mysql_query($query) or pupe_error($query);
+			}
 		}
-		if(($suku - $tilirow['sassukupolvi']) < 2) {
-			$query = "UPDATE yriti SET siirtoavain='$siirtoavain', sasukupolvi='$tilirow[sassukupolvi]' WHERE tunnus = '$tunnus'";
-			$xres = mysql_query($query) or pupe_error($query);
-		}
-
-		else{
-			return "Sukupolvi numero, $suku, ei täsmää tietokannan kanssa!";
+		else {
+			return "Sukupolvinumero, $suku, ei täsmää tietokannan kanssa!";
 			exit;
 		}
 		return "";

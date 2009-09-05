@@ -6,7 +6,7 @@
 	echo "<font class='head'>".t("Patutestaus")."<hr></font>";
 
 	if ($tunnus != '' and $ekapala != '') {
-		echo "<font class='error'>".ekasiirtoavain($ekapala,$tokapala,$tarkiste,$tunnus)."</font><br><br>";
+		echo "<font class='error'>".siirtoavain($ekapala,$tokapala,$tarkiste,$suku,$tunnus)."</font><br><br>";
 		$query = "	SELECT * 
 				FROM yriti 
 				WHERE yhtio  = '$kukarow[yhtio]'
@@ -65,6 +65,8 @@
 	echo "<td><input type='text' name = 'tokapala'></td></tr>";
 	echo "<tr><th>".t("Tarkiste")."</th>";
 	echo "<td><input type='text' name = 'tarkiste'></td></tr>";
+	echo "<tr><th>".t("Suku")."</th>";
+	echo "<td><input type='text' name = 'suku' value = '0'></td></tr>";
 	echo "<tr><th>".t("Pankki")."</th>";
 	echo "<td><input type='text' name = 'pankki'></td></tr>";
 	echo "<tr><th>".t("Asiakas")."</th>";
@@ -77,6 +79,8 @@
 	echo "<td><input type='radio' name = 'aineisto' value = 'INFO'></td></tr>";
 	echo "<tr><th>".t("Aineistojen tilakysely")."</th>";
 	echo "<td><input type='radio' name = 'aineisto' value = 'STATUS'></td></tr>";
+	echo "<tr><th>".t("Käytä testausaineistoa")."</th>";
+	echo "<td><input type='checkbox' name = 'testaus' value = '1'></td></tr>";
 	echo "<tr><th></th><td><input type='submit' name = 'Päivitä'></td></tr></table></form>";
 	
 	require ("../inc/footer.inc");

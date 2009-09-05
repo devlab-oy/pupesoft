@@ -1,6 +1,6 @@
 <?
 function siirto ($yritirow, $aineisto, $pvm) {
-
+	global $testaus;
 	$nro = $file.=sprintf ('%03d', $yritirow['nro']);
 
 	// TIEDOSTONIMET
@@ -20,9 +20,25 @@ function siirto ($yritirow, $aineisto, $pvm) {
 	$esi = sanoma($yritirow, "ESI");
 	echo strlen($esi). "-->" . $esi."<br>";
 
+
+	if ($testaus != '') {
+		$esi =">>ESI161120 0000KERMIT      3.01SMH003701234567             99910000011111111        00941015073000001                                          ";
+		echo strlen($esi). "-->" . $esi."<br>";
+		if (strtoupper($yritirow['kayttoavain']) != "AEBAE983D6406D07") echo "Käyttöavain on virheellinen $yritirow[kayttoavain]<br>";
+		else echo "Käyttöavain on oikein<br>";
+	}
+
+
 	echo "Suojataan ESI-tiedosto '$yritirow[kayttoavain]'<br>";
 	$esi = salaa($esi, "ESIa", $yritirow['kayttoavain']);
 	echo strlen($esi). "-->" . $esi."<br>";
+
+
+	if ($testaus != '') {
+		if (substr($esi,-16) != '4B69B6DD4F72C75B') echo "Suojaus ei onnistu ".substr($esi,-16)."<br>";
+			else echo "Suojaus ok<br>";
+	}
+
 
 	// Jos ei haluta avainvaihtoa, lisätään sanoman perään nolla	
 	$esi .= "0";
@@ -43,12 +59,13 @@ function siirto ($yritirow, $aineisto, $pvm) {
 	$log="anonymous";
 	$pass="SITE PASSIVE";
 	echo "Avataan FTP-yhteys $host<br>";
+	exit;
 	$ftp = ftp_connect($host);
 	if($ftp) {
 	// Jos jokin asia epäonnistuu, katkaistaan heti yhteys
 	echo "Yhteys muodostettu: $host<br>";
 	$login_ok = ftp_login($ftp,$log,$pass);
-	//ftp_pasv($ftp, true);
+	ftp_pasv($ftp, true);
 	echo "Lähetetään Esi-sanoma: $esia<br>";
 	if(ftp_put($ftp, "ESI.A", $esia, FTP_ASCII)) {
 			echo "Esi-sanoman lähetys onnistui. Haetaan vastaus: $esip<br>";

@@ -333,7 +333,7 @@ return $file;
 
 function siirtopyynto ($pankki, $tilinumero, $aineisto, $salasana ,$paivays) {
 
-	if ($pankki='2') {
+	if ($pankki=='2') {
 		$apu= sprintf ('%-17.17s', "SIIRTOPYYNTO");
 		$apu.= sprintf ('%-10.10s', "");
 		$apu.= sprintf ('%-10.10s', "$aineisto");
@@ -342,10 +342,16 @@ function siirtopyynto ($pankki, $tilinumero, $aineisto, $salasana ,$paivays) {
 		$apu.= sprintf ('%-6.6s', $paivays);
 		$apu .= " 9979 " . "999";
 	}
+	elseif ($pankki=='8') {
+		if ($aineisto == 'STATUS') {
+			$apu = "//SOVELLUS=xxxx,ERA=000000,KYS\n"
+			$apu .= "//EOF\n";
+		}
+	}
 	else
 		$apu='';
 	
-return $apu;
+	return $apu;
 }
 
 ?>

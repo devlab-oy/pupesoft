@@ -463,12 +463,12 @@
 				}
 				else {
 					if (trim($row["hyvak2"]) != "") {
-						echo "<div id='kommentti$row[0]' class='popup' style='width: 500px;'>";
+						echo "<div id='div_kommentti$row[0]' class='popup' style='width: 500px;'>";
 						echo t("Tilaus laadittu")." $row[laatija] @ ".tv1dateconv($row["luontiaika"], 'X')."<br>";
 						echo t("Tilaus valmis")." $row[hyvak1] @ ".tv1dateconv($row["h1time"], 'X')."<br>";
 						echo t("Tilaus hyväksytty")." $row[hyvak2] @ ".tv1dateconv($row["h2time"], 'X');
 						echo "</div>";
-						echo "<$ero valign='top' $classalku><a class='menu' onmouseout=\"popUp(event,'kommentti$row[0]')\" onmouseover=\"popUp(event,'kommentti$row[0]')\">$row[0]</a></$ero>";
+						echo "<$ero valign='top' $classalku class='tooltip' id='kommentti$row[0]'>$row[0]</$ero>";
 					}
 					else {
 						echo "<$ero valign='top' $classalku>$row[0]</$ero>";

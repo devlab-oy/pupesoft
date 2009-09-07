@@ -4637,288 +4637,123 @@ if (!function_exists("js_popup")) {
 	function js_popup () {
 
 ?>
-<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+<script type="text/javascript" language="JavaScript">
 
-function getMouseX(e) {
-	var x = null;
-	if (e.pageX) 	{
-		x = e.pageX;
-	}
-	else if (e.clientX) 	{
-		x = e.clientX + document.body.scrollLeft
-			+ document.documentElement.scrollLeft;
-	}
-	return x;
-}
-function getMouseY(e) {
-	var y = null;
-	if (e.pageY) 	{
-		y = e.pageY;
-	}
-	else if (e.clientY) 	{
-		y = e.clientY + document.body.scrollTop
-			+ document.documentElement.scrollTop;
-	}
+	jQuery.fn.tooltip = function(allowHtml, className){
+		jQuery.fn.tooltip.created.id = 'toolTip';
+		$('body').append(jQuery.fn.tooltip.created);
 
-	return y;
-}
+		var toolTip = $(jQuery.fn.tooltip.created);
 
-var popUp_timeout=0;
-var poUp_closeTimeOut=new Array();
+	    toolTip.css({'position':'absolute','display':'none'});
 
-function closeOnExit(event, oi) {
+	    //functions
+		function getMouseX(e) {
+			var x = null;
 
-
-	recurce=true;
-	r=event.relatedTarget;
-	r_orog = r;
-	while(recurce) {
-
-		x=r.childNodes;
-
-		if (r.id == oi) {
-			recurce = false;
-			return true;
-		}
-
-		for (i=0;i<x.length;i++) {
-
-			if (x[i].id==oi) {
-				recurce = false;
-				return true;
+			if (e.pageX) 	{
+				x = e.pageX;
 			}
-		}
-
-		r=r.parentNode;
-		if (r == null || r.tagName == "BODY") {
-
-
-			o=document.getElementById(oi);
-
-			closePopUp(oi, o.id);
-			recurce = false;
-			return false;
-		}
-	}
-}
-
-function closePopUp(oi) {
-	//poUp_closeTimeOut[oi] = setTimeout("document.body.removeChild(document.getElementById('"+oi+"'));", 400);
-	//alert(poUp_closeTimeOut[oi]);
-}
-function stopClose(oi) {
-	if (poUp_closeTimeOut[oi] > 0) {
-		clearTimeout(poUp_closeTimeOut[oi]);
-	}
-}
-
-function getEventCaller (e) {
-	if (e.target) targ = e.target;
-		else if (e.srcElement) targ = e.srcElement;
-		if (targ.nodeType == 3)
-			targ = targ.parentNode;
-
-	return targ;
-}
-
-function popUp(e, oi, offsetX, offsetY, html, styleClass, closeOnExit) {
-	oio= oi;
-	if (oi.indexOf(":")>0) {
-		c=oi.split(":");
-		appendTo = c[0];
-		oi=c[1];
-	}
-	else {
-		appendTo = false;
-	}
-
-	if (!document.getElementById(oi)) {
-		var myDiv = document.createElement('div');
-
-		if (styleClass) {
-			myDiv.setAttribute('class', styleClass);
-		}
-		else {
-			myDiv.setAttribute('class', 'popup');
-		}
-
-		myDiv.setAttribute('id', oi);
-		myDiv.setAttribute('name', 'dynamic_'+oi);
-		myDiv.style.display = 'block';
-
-		//caller = getEventCaller(e);
-
-		//	Suljetaan nää aina kun mennää pois divistä
-		if (closeOnExit) {
-			myDiv.setAttribute("onMouseOut", "closeOnExit(event, '"+oi+"');");
-			if (appendTo) {
-				myDiv.setAttribute("onMouseOver", "stopClose('"+appendTo+"'); stopClose('"+oi+"');");
+			else if (e.clientX) {
+				x = e.clientX + document.body.scrollLeft
+					+ document.documentElement.scrollLeft;
 			}
-			else {
-				myDiv.setAttribute("onMouseOver", "stopClose('"+oi+"');");
+			return x;
+		}
+		function getMouseY(e) {
+			var y = null;
+
+			if (e.pageY) 	{
+				y = e.pageY;
 			}
+			else if (e.clientY) {
+				y = e.clientY + document.body.scrollTop
+					+ document.documentElement.scrollTop;
+			}
+
+			return y;
 		}
 
-		document.body.appendChild(myDiv);
-	}
+	    function toolTipShow(e, x, y) {
+	        toolTip.css({'top':y, 'left':x}).show();
+	    }
 
-	if (e.type == "mouseout") {
+	    function toolTipHide() {
+			toolTip.hide();
+	    }
 
-		if (popUp_timeout>0) {
-			clearTimeout(popUp_timeout);
-		}
+	    //events for each element
+	    this.each(function() {
 
-		var de = document.getElementById(oi);
+	        $(this).mousemove(function(e){
+				var x = getMouseX(e) + 40;
+				var y = getMouseY(e);
 
-		//	Jos meillä oli dynaamisesti ladattu elementti poistetaan se kokonaan..
-		if (de.name=='dynamic_'+de.id) {
-			closePopUp(de);
-		}
-		else {
-			de.style.visibility='hidden';
-			de.style.display='none';
-		}
-	}
-	else {
+				// get content id from element and fetch text from the div
+				var content_id = $(this).attr('id');
+				var content = $('#div_'+content_id).html();
 
-		//	jos meillä kutsutaan htmlää tai on mouseover event tehdään timeoutin kautta, jotta html ehtii latautua tai ei turhaan räpsytetä diviä jos pikkasen hipastan tekstiä.
-		if (html || e.type=="mouseover") {
-			if (!offsetY) offsetY=-10;
-			if (!offsetX) offsetX=-10;
+				var div_height = $('#div_'+content_id).height();
+				var div_width = $('#div_'+content_id).width();
 
-			var y = getMouseY(e);
-			var x = getMouseX(e);
-			var y = y-(offsetY);
-			var x = x-(offsetX);
+				var window_width = $(window).width();
+				var window_height = $(window).height();
 
-			if (html) {
-				if (window.sndReq) {
-					if (styleClass == "liveSearch") {
-						sndReq(oi, html+'&ohje=off&sulje='+oi);
+				var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
+				var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
+
+				//	Jos saimme riittävästi tietoa voimme kalkuloida oikean position
+				if (div_height != null && div_width != null && x != null && y != null) {
+					//	Riittääkö leveys
+					if (((x - scrollX) + div_width + 30) > window_width) {
+						//	Siirretään tämä ihan oikeaan laitaan..
+						x = window_width - div_width - 30 + scrollX;
 					}
-					else {
-						sndReq(oi, html+'&ohje=off&sulje='+oi);
-						popUp_timeout = setTimeout("popUp('html', '"+oi+"', '"+x+"', '"+y+"');", 500);
-						return true;
+
+					if ((y - scrollY) + div_height > window_height) {
+						y -= (div_height);
+					}
+
+					//	Oikea laita on kuitenkin aina tärkein!
+					if (x < 10) {
+						x = 10;
+					}
+					if (y < 10) {
+						y = 10;
 					}
 				}
-				else {
-					alert('sndReq puuttuu!');
-					return true;
+
+				toolTipShow(e, x, y);
+
+	            //update the content
+	            if(allowHtml) {
+	                toolTip.html(content);
 				}
-			}
-			else {
-				popUp_timeout = setTimeout("popUp('html', '"+oi+"', '"+x+"', '"+y+"');", 100);
-				return true;
-			}
-		}
-
-		// relatiivinen sijainti
-		if (e.type=="keyup" || e.type=="change") {
-			if (!offsetY) offsetY=-10;
-			if (!offsetX) offsetX=-10;
-
-			kohde=e.target;
-			var y = 0;
-			while( kohde != null ) {
-				var l = kohde.offsetTop;
-				if (l > 0) {
-					y += l;
-				}
-				kohde = kohde.offsetParent;
-			}
-
-			kohde=e.target;
-			var x = 0;
-			while( kohde != null ) {
-				var l = kohde.offsetLeft;
-				if (l > 0) {
-					x += l;
-				}
-				kohde = kohde.offsetParent;
-			}
-		}
-		else if (e=="html"){
-			y = offsetY;
-			x = offsetX;
-			offsetX=0;
-			offsetY=0;
-		}
-		else {
-			if (!offsetY) offsetY=-10;
-			if (!offsetX) offsetX=-10;
-
-			var y = getMouseY(e);
-			var x = getMouseX(e);
-		}
-
-		var y = y-(offsetY);
-		var x = x-(offsetX);
-
-		var de = document.getElementById(oi);
-		var ds = de.style;
-
-		ds.display = "block";
-		ds.visibility = "hidden";
-
-		if (styleClass != "liveSearch") {
-			//	Detectoidaan ikkunan koko
-			var ww = window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;
-			var wh = window.innerHeight != null? window.innerHeight: document.body.clientHeight != null? document.body.clientHeight:null;
-
-			//	Detectoidaan div:n koko
-			if (de.clientHeight) eh = de.clientHeight;
-			else if (de.clip.height) eh = de.clip.height;
-			else eh = null;
-
-			if (de.clientWidth) ew = de.clientWidth;
-			else if (de.clip.width) ew = de.clip.width;
-			else ew = null;
-
-			var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
-			var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
-
-			//	Jos saimme riittävästi tietoa voimme kalkuloida oikean position
-			if (eh != null && ew != null && x != null && y != null) {
-
-				//alert('x: '+x+' y: '+y);
-
-				//	Riittääkö leveys
-				if ((x-scrollX)+ew+30>ww) {
-					//	Siirretään tämä ihan oikeaan laitaan..
-					x=ww-ew-30+scrollX;
-				}
-				else {
-					//x+=scrollX;
+	            else {
+	                toolTip.text(content);
 				}
 
+	            //remove all classes for the tipBox before add a new one and to avoid the 'append class'
+	            toolTip.removeClass();
 
-				if (y+eh+30>wh) {
-					y -= eh + 22;
+	            //set class if specified
+	            if(className) {
+					toolTip.addClass(className);
 				}
-				else if (y - scrollY + eh + 10 > wh) {
-					y -= y - scrollY + eh - wh + 22;
-				}
+			});
 
-				//	Oikea laita on kuitenkin aina tärkein!
-				if (x<10) {
-					x=10;
-				}
-				if (y<10) {
-					y=10;
-				}
-				//alert('ww:'+ww+' wh:'+wh+' eh:'+eh+' ew:'+ew+' scrollY:'+scrollY+' scrollX:'+scrollX+' y:'+y+' x:'+x);
-			}
-		}
+	        $(this).mouseout(function(){
+	            toolTipHide();
+	        });
+	    });
+	};
 
-		ds.left=x;
-		ds.top=y;
+	$(function(){
+		//create the element (avoiding create multiple divisions for the tooltip)
+		jQuery.fn.tooltip.created = document.createElement('div');
 
-		ds.visibility = "visible";
-		de.display = 'block';
-
-	}
-}
+		$('.tooltip').tooltip('yes', 'popup');
+	});
 
 </script>
 <?php

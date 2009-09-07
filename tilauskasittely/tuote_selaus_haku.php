@@ -1013,7 +1013,7 @@
 					$orgres = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($orgres)>0) {
-						$linkkilisa = "<div id='$id' class='popup' style='width: 300px'>
+						$linkkilisa = "<div id='div_$id' class='popup' style='width: 300px'>
 						<table width='300px' align='center'>
 						<caption><font class='head'>Tuotteen originaalit</font></caption>
 						<tr>
@@ -1034,10 +1034,10 @@
 						$linkkilisa .= "</table></div>";
 
 						if ($kukarow["extranet"] != "") {
-							$linkkilisa .= "&nbsp;&nbsp;<a src='#' onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\"><img src='pics/lullacons/info.png' height='13'></a>";
+							$linkkilisa .= "&nbsp;&nbsp;<a src='#' class='tooltip' id='$id'><img src='pics/lullacons/info.png' height='13'></a>";
 						}
 						else {
-							$linkkilisa .= "&nbsp;&nbsp;<a src='#' onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\"><img src='../pics/lullacons/info.png' height='13'></a>";
+							$linkkilisa .= "&nbsp;&nbsp;<a src='#' class='tooltip' id='$id'><img src='../pics/lullacons/info.png' height='13'></a>";
 						}
 					}
 				}

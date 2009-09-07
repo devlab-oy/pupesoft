@@ -430,13 +430,13 @@
 				echo "<td valign='top'><a href='$PHP_SELF?tunnus=$maksurow[tunnus]&tila=tarkenna'>x</a></td><td>$maksurow[nimi_maksaja]";
 			}
 
-			echo "<div id='$maksurow[tunnus]' class='popup' style='width: 500px;'>
+			echo "<div id='div_$maksurow[tunnus]' class='popup' style='width: 500px;'>
 					$maksurow[ytunnus]<br>
 					$maksurow[nimi] $maksurow[nimitark]<br>$maksurow[osoite] $maksurow[postitp]<br><br>
 					$maksurow[toim_nimi] $maksurow[toim_nimitark]<br>$maksurow[toim_osoite] $maksurow[toim_postitp]
 					</div>";
 
-			echo "<br><a onmouseout=\"popUp(event,'$maksurow[tunnus]')\" onmouseover=\"popUp(event,'$maksurow[tunnus]')\">$maksurow[ytunnus]</a> $maksurow[nimi] $maksurow[nimitark]</td>";
+			echo "<br><a class='tooltip' id='$maksurow[tunnus]'>$maksurow[ytunnus]</a> $maksurow[nimi] $maksurow[nimitark]</td>";
 
 			echo "<td valign='top'>".tv1dateconv($maksurow["kirjpvm"])."</td>";
 			

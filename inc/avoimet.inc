@@ -328,8 +328,8 @@
 					echo "<td>$trow[maksutieto]";
 
 					if ($trow["comments"] != "" and $naytetaankokommentit == "") {
-						echo "<a onmouseout=\"popUp(event,'$trow[tunnus]')\" onmouseover=\"popUp(event,'$trow[tunnus]')\"> ?</a></td>";
-						echo "<div id='$trow[tunnus]' class='popup' style='width:500px;'>";
+						echo "<a class='tooltip' id='$trow[tunnus]'> ?</a></td>";
+						echo "<div id='div_$trow[tunnus]' class='popup' style='width:500px;'>";
 						echo $trow["comments"];
 						echo "</div>";
 					}

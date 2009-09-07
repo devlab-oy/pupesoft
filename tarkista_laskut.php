@@ -127,9 +127,9 @@
 				while ($trow=mysql_fetch_array ($result)) {
 
 					if ($trow['comments'] != '') {
-						$loppudiv .= "<div id='".$trow['tunnus']."' class='popup' style='width:250px'>";
+						$loppudiv .= "<div id='div_".$trow['tunnus']."' class='popup' style='width:250px'>";
 						$loppudiv .= $trow["comments"]."<br></div>";
-						echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'".$trow['tunnus']."')\" onmouseover=\"popUp(event,'".$trow['tunnus']."')\"><img src='pics/lullacons/alert.png'></a></td>";
+						echo "<td valign='top' class='tooltip' id='$trow[tunnus]'><img src='pics/lullacons/alert.png'></td>";
 					}
 					else 
 						echo "<td></td>";

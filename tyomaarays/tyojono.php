@@ -176,10 +176,10 @@
 		}
 		
 		if (trim($vrow["komm1"]) != "") {
-			echo "<div id='$vrow[tunnus]' class='popup' style='width:500px;'>";
-			echo "Työmääräys: $vrow[tunnus]<br><br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"])."<br><a href='#' onclick=\"popUp(event,'$vrow[tunnus]')\">Sulje</a>";
+			echo "<div id='div_$vrow[tunnus]' class='popup' style='width:500px;'>";
+			echo t("Työmääräys"),": $vrow[tunnus]<br><br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"]);
 			echo "</div>";		
-			echo "<td valign='top'><a onmouseout=\"popUp(event,'$vrow[tunnus]')\" onmouseover=\"popUp(event,'$vrow[tunnus]')\">$vrow[tunnus]</a></td>";
+			echo "<td valign='top' class='tooltip' id='$vrow[tunnus]'>$vrow[tunnus]</td>";
 		}
 		else {
 			echo "<td valign='top'>$vrow[tunnus]<br>$vrow[viesti]</td>";

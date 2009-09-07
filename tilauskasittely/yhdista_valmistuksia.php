@@ -303,10 +303,10 @@
 			if(mysql_num_rows($faktares) > 0) {
 				$faktarow = mysql_fetch_array($faktares);
 				$id = uniqid();
-				echo "<div id='$id' class='popup' style='width: 400px'>
+				echo "<div id='div_$id' class='popup' style='width: 400px'>
 						<font class='head'>Tuotteen yhdistettävyys</font><br>
 						$faktarow[fakta2]<br></div>";						
-				$linkki = "<div style='text-align: right; float:right;'>&nbsp;&nbsp;<a href='#' onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\"><img src='../pics/lullacons/info.png' height='13'></a></div>";
+				$linkki = "<div style='text-align: right; float:right;' class='tooltip' id='$id'>&nbsp;&nbsp;<img src='../pics/lullacons/info.png' height='13'></div>";
 			}
 			
 			$kommentti = "";

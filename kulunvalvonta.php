@@ -292,8 +292,8 @@
 						$id=md5(uniqid());
 						echo "
 							<td style='color: red;'>
-							<a href='#' onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\">$tunnit:$minuutit</a>
-							<div id='$id' class='popup'>";
+							<a href='#' class='tooltip' id='$id'>$tunnit:$minuutit</a>
+							<div id='div_$id' class='popup'>";
 
 						echo "<table><tr><td colspan='4' align='center'>$hyvaksytyt[nimi] $i2.$kuukausi.$vuosi</td></tr><tr><th>".t("Projekti")."</th><th>".t("Työn laatu")."</th><th>".t("Tuntimäärä")."</th></tr>";
 						//lätkästään popupin sisältö

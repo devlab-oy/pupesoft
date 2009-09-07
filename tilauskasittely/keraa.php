@@ -1521,13 +1521,13 @@
 				echo "<tr class='aktiivi'>";
 
 				if (trim($row["ohjeet"]) != "") {
-					echo "<div id='$row[tunnus]' class='popup' style='width: 500px;'>";
+					echo "<div id='div_$row[tunnus]' class='popup' style='width: 500px;'>";
 					echo t("Tilaukset").": ".$row["tunnukset"]."<br>";
 					echo t("Laatija").": ".$row["laatija"]."<br><br>";
 					echo str_replace("\n", "<br>", $row["ohjeet"])."<br>";
 					echo "</div>";
 
-					echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'$row[tunnus]')\" onmouseover=\"popUp(event,'$row[tunnus]')\">$row[t_tyyppi] $row[prioriteetti] <IMG SRC='../pics/lullacons/alert.png'></a>";
+					echo "<td valign='top' class='tooltip' id='$row[tunnus]'>$row[t_tyyppi] $row[prioriteetti] <IMG SRC='../pics/lullacons/alert.png'>";
 				}
 				else {
 					echo "<td valign='top'>$row[t_tyyppi] $row[prioriteetti]";

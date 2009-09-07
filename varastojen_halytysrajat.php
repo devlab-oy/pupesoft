@@ -349,9 +349,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "KAIKKI", $row[tunnus]);
 		echo sprintf("%.2f",$saldo)."</td>";
 		
-
-		echo "<td align='right'><a class='menu' onmouseout=\"popUp(event,'$row[paikkatunnus]')\" onmouseover=\"popUp(event,'$row[paikkatunnus]')\">$summarow[kpl1]</a><br>";
-		echo "<a class='menu' onmouseout=\"popUp(event,'$row[paikkatunnus]')\" onmouseover=\"popUp(event,'$row[paikkatunnus]')\">$summarow[varastonkpl1]</a></td>";
+		echo "<td align='right' class='tooltip' id='$row[paikkatunnus]'>$summarow[kpl1]<br/>$summarow[varastonkpl1]</td>";
 		
 		//Haetaan mihin maahan tuote on toimitettu 
 		if ($maittain != "") {
@@ -392,7 +390,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		echo "</tr>\n";
 
 		// teh‰‰n popup divi myynneist‰
-		$divit .= "<div id='$row[paikkatunnus]' class='popup' style='width:250px;'>";
+		$divit .= "<div id='div_$row[paikkatunnus]' class='popup' style='width:250px;'>";
 		$divit .= "<table style='width:250px;'>";
 		$divit .= "<tr><th nowrap>".t("Kok.Myynti 1")."</th>";
 		$divit .= "<td align='right'>$summarow[kpl1]</td></tr>";
@@ -410,8 +408,6 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		$divit .= "<td align='right'>$summarow[kpl4]</td></tr>";
 		$divit .= "<tr><th nowrap>".t("Var.Myynti 4")."</th>";
 		$divit .= "<td align='right'>$summarow[varastonkpl4]</td></tr>";
-		$divit .= "<tr><th><a href='#' onclick=\"popUp(event,'$row[paikkatunnus]')\">X</a></th>";
-		$divit .= "<td class='back'></td></tr>";
 		$divit .= "</table>";
 		$divit .= "</div>\n";		
 

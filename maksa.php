@@ -834,12 +834,12 @@
 
 				// jos toimittajalle on maksuvalmiita hyvityksiä, niin tehdään alertti!
 				if ($hyvitysrow[0] > 0 and $trow["summa"] > 0) {
-					echo "<div id='$trow[tunnus]' class='popup'>";
+					echo "<div id='div_$trow[tunnus]' class='popup'>";
 					printf(t("Toimittajalle on %s maksuvalmista hyvitystä!"), $hyvitysrow[0]);
 					echo "<br>";
 					echo "$hyvitysrow[1]";
 					echo "</div>";
-					echo " <a onmouseout=\"popUp(event,'$trow[tunnus]')\" onmouseover=\"popUp(event,'$trow[tunnus]')\"><img src='$palvelin2/pics/lullacons/info.png'></a>";
+					echo " <a class='tooltip' id='$trow[tunnus]'><img src='$palvelin2/pics/lullacons/info.png'></a>";
 				}
 
 				echo "</td>";
@@ -893,7 +893,7 @@
 								and vanhatunnus = '$trow[vanhatunnus]'";
 					$jaetutres = mysql_query($query) or pupe_error($query);
 					
-					echo "<div id='$trow[tunnus]' class='popup'>";
+					echo "<div id='div_$trow[tunnus]' class='popup'>";
 					printf(t("Lasku on jaettu %s osaan!"), mysql_num_rows($jaetutres));
 					echo "<br>".t("Alkuperäinen summa")." $trow[arvo] $trow[valkoodi]<br>";
 					$osa = 1;
@@ -902,7 +902,7 @@
 						$osa++;
 					}
 					echo "</div>";
-					echo " <a onmouseout=\"popUp(event,'$trow[tunnus]')\" onmouseover=\"popUp(event,'$trow[tunnus]')\"><img src='$palvelin2/pics/lullacons/alert.png'></a>";
+					echo " <a class='tooltip' id='$trow[tunnus]'><img src='$palvelin2/pics/lullacons/alert.png'></a>";
 				}
 
 				echo "</td>";
@@ -1029,12 +1029,12 @@
 
 				// jos toimittajalle on maksuvalmiita hyvityksiä, niin tehdään alertti!
 				if ($hyvitysrow[0] > 0 and $trow["summa"] > 0) {
-					echo "<div id='$trow[tunnus]' class='popup'>";
+					echo "<div id='div_$trow[tunnus]' class='popup'>";
 					printf(t("Toimittajalle on %s maksuvalmista hyvitystä!"), $hyvitysrow[0]);
 					echo "<br>";
 					echo "$hyvitysrow[1]";
 					echo "</div>";
-					echo " <a onmouseout=\"popUp(event,'$trow[tunnus]')\" onmouseover=\"popUp(event,'$trow[tunnus]')\"><img src='$palvelin2/pics/lullacons/info.png'></a>";
+					echo " <a class='tooltip' id='$trow[tunnus]'><img src='$palvelin2/pics/lullacons/info.png'></a>";
 				}
 
 				echo "</td>";
@@ -1087,7 +1087,7 @@
 								and vanhatunnus = '$trow[vanhatunnus]'";
 					$jaetutres = mysql_query($query) or pupe_error($query);
 					
-					echo "<div id='$trow[tunnus]' class='popup'>";
+					echo "<div id='div_$trow[tunnus]' class='popup'>";
 					printf(t("Lasku on jaettu %s osaan!"), mysql_num_rows($jaetutres));					
 					echo "<br>".t("Alkuperäinen summa")." $trow[arvo] $trow[valkoodi]<br>";
 					$osa = 1;
@@ -1096,7 +1096,7 @@
 						$osa++;
 					}
 					echo "</div>";
-					echo " <a onmouseout=\"popUp(event,'$trow[tunnus]')\" onmouseover=\"popUp(event,'$trow[tunnus]')\"><img src='$palvelin2/pics/lullacons/alert.png'></a>";
+					echo " <a class='tooltip' id='$trow[tunnus]'><img src='$palvelin2/pics/lullacons/alert.png'></a>";
 				}
 
 				echo "</td>";

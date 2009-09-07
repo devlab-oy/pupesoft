@@ -445,7 +445,7 @@
 									if (!in_array($vrow["liitostunnus"], $div_arrayt)) {
 										$div_arrayt[] = $vrow["liitostunnus"];
 
-										echo "<div id='$vrow[liitostunnus]' class='popup'>";
+										echo "<div id='div_$vrow[liitostunnus]' class='popup'>";
 
 										if ($vrow["tyyppi"] == "asennuskalenteri") {
 											echo t("Työmääräys").": $vrow[liitostunnus]";
@@ -454,7 +454,7 @@
 											echo t("Kalenterimerkintä").": $vrow[tapa]";
 										}
 
-										echo "<br><br>$vrow[viesti]<br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"])."<br><a href='#' onclick=\"popUp(event,'$vrow[liitostunnus]')\">Sulje</a>";
+										echo "<br><br>$vrow[viesti]<br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"]);
 										echo "</div>";
 									}
 
@@ -495,7 +495,7 @@
 								$zul = $tapa;
 							}
 
-							echo "<td align='center' $varilisa width='40px'><a class='td' href='tyojono.php?myyntitilaus_haku=$tilausnumero&lopetus=$lopetus' onmouseout=\"popUp(event,'$tilausnumero')\" onmouseover=\"popUp(event,'$tilausnumero')\">$zul</a></td>";
+							echo "<td align='center' $varilisa width='40px' class='tooltip' id='$tilausnumero'><a class='td' href='tyojono.php?myyntitilaus_haku=$tilausnumero&lopetus=$lopetus'>$zul</a></td>";
 						}
 						elseif ($liitostunnus > 0 and $tyojono != "" and (float) str_replace("-", "", $laskurow["toimaika"]) < (float) $year.sprintf("%02d", $month).sprintf("%02d", $i)) {
 							echo "<td align='center' class='tumma' width='40px'>&nbsp;</td>";

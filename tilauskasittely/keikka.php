@@ -484,10 +484,10 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 			// tehd‰‰n pop-up divi jos keikalla on kommentti...
 			if ($row["comments"] != "") {
-				echo "<div id='$row[liitostunnus]' class='popup' style='width: 500px;'>";
+				echo "<div id='div_$row[liitostunnus]' class='popup' style='width: 500px;'>";
 				echo $row["comments"];
 				echo "</div>";
-				echo "<td valign='top'><a onmouseout=\"popUp(event,'$row[liitostunnus]')\" onmouseover=\"popUp(event,'$row[liitostunnus]')\">$row[ytunnus]</a></td>";
+				echo "<td valign='top' class='tooltip' id='$row[liitostunnus]'>$row[ytunnus]</td>";
 			}
 			else {
 				echo "<td valign='top'>$row[ytunnus]</td>";

@@ -773,10 +773,10 @@
 									echo "<td valign='top'>",$row['nimitys'],"</td>";
 								}
 								else {
-									echo "<div id='",$row['tunnus'],"_",$row['kayttotarkoitus'],"' class='popup' style='width: ",$row['leveys'],"px; height: ",$row['korkeus'],"px;'>";
+									echo "<div id='div_",$row['tunnus'],"_",$row['kayttotarkoitus'],"' class='popup' style='width: ",$row['leveys'],"px; height: ",$row['korkeus'],"px;'>";
 									echo "<img src='view.php?id=",$row['id'],"' height='",$row['korkeus'],"' width='",$row['leveys'],"'>";
 									echo "</div>";
-									echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'",$row['tunnus'],"_",$row['kayttotarkoitus'],"')\" onmouseover=\"popUp(event,'",$row['tunnus'],"_",$row['kayttotarkoitus'],"')\">",$row['nimitys'],"</a></td>";
+									echo "<td valign='top' class='tooltip' id='",$row['tunnus'],"_",$row['kayttotarkoitus'],"'>",$row['nimitys'],"</td>";
 								}
 							}
 							else {

@@ -269,17 +269,10 @@
 							}
 						}
 
-						if (trim($tilrivi_row['comments']) != '') {
-							echo "<div id='$tilrivi_row[ltunnus]' class='popup'>";
-							echo $tilrivi_row['comments'];
-							echo "</div>";
-							echo "<a href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=OSTO&tunnus=$tilrivi_row[ltunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku' onmouseout=\"popUp(event,'$tilrivi_row[ltunnus]')\" onmouseover=\"popUp(event,'$tilrivi_row[ltunnus]')\">$tilrivi_row[ltunnus]</a>";
-						}
-						else {
-							echo "<div id='$tilrivi_row[ltunnus]'>";
-							echo "</div>";
-							echo "<a id='a_$tilrivi_row[ltunnus]' href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=OSTO&tunnus=$tilrivi_row[ltunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku'>$tilrivi_row[ltunnus]</a>";
-						}
+						echo "<div id='div_$tilrivi_row[ltunnus]' class='popup'>";
+						echo $tilrivi_row['comments'];
+						echo "</div>";
+						echo "<a id='$tilrivi_row[ltunnus]' class='tooltip' href='asiakkaantilaukset.php?tee=NAYTATILAUS&toim=OSTO&tunnus=$tilrivi_row[ltunnus]&lopetus=".$palvelin2."raportit/ostotilausten_seuranta.php////tee=aja//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toimittajahaku=$toimittajahaku'>$tilrivi_row[ltunnus]</a>";
 
 						$tunnukset[] = $tilrivi_row['ltunnus'];
 					}
@@ -361,10 +354,10 @@
 							echo "<td style='vertical-align: top;' nowrap>";
 							while ($ostolaskurow = mysql_fetch_assoc($ostolaskures)) {
 								if (trim($ostolaskurow['numero']) != '') {
-									echo "<div id='$ostolaskurow[tunnus]' class='popup'>";
+									echo "<div id='div_$ostolaskurow[tunnus]' class='popup'>";
 									echo $ostolaskurow['numero'];
 									echo "</div>";
-									echo " <a onmouseout=\"popUp(event,'$ostolaskurow[tunnus]')\" onmouseover=\"popUp(event,'$ostolaskurow[tunnus]')\"><img src='$palvelin2/pics/lullacons/info.png'></a>";
+									echo " <a id='$ostolaskurow[tunnus]' class='tooltip'><img src='$palvelin2/pics/lullacons/info.png'></a>";
 								}
 								echo "<br>";
 							}
@@ -412,10 +405,10 @@
 
 							while ($ostolaskurow = mysql_fetch_assoc($ostolaskures)) {
 								if (trim($ostolaskurow['numero']) != '') {
-									echo "<div id='$ostolaskurow[tunnus]' class='popup'>";
+									echo "<div id='div_$ostolaskurow[tunnus]' class='popup'>";
 									echo $ostolaskurow['numero'];
 									echo "</div>";
-									echo " <a onmouseout=\"popUp(event,'$ostolaskurow[tunnus]')\" onmouseover=\"popUp(event,'$ostolaskurow[tunnus]')\"><img src='$palvelin2/pics/lullacons/info.png'></a>";
+									echo " <a id='$ostolaskurow[tunnus]' class='tooltip'><img src='$palvelin2/pics/lullacons/info.png'></a>";
 								}
 								echo "<br>";
 							}
@@ -551,10 +544,10 @@
 					$yht_tavara_summa[$ei_liitetyt_row['tunnus']] = $ei_liitetyt_row['arvo'];
 					echo "<td style='vertical-align: top;'>";
 					if (trim($ei_liitetyt_row['numero']) != '') {
-						echo "<div id='$ei_liitetyt_row[tunnus]' class='popup'>";
+						echo "<div id='div_$ei_liitetyt_row[tunnus]' class='popup'>";
 						echo $ei_liitetyt_row['numero'];
 						echo "</div>";
-						echo " <a onmouseout=\"popUp(event,'$ei_liitetyt_row[tunnus]')\" onmouseover=\"popUp(event,'$ei_liitetyt_row[tunnus]')\"><img src='$palvelin2/pics/lullacons/info.png'></a>";
+						echo " <a id='$ei_liitetyt_row[tunnus]' class='tooltip'><img src='$palvelin2/pics/lullacons/info.png'></a>";
 					}
 					echo "</td>";
 					echo "<td style='vertical-align: top;'></td>";
@@ -602,59 +595,43 @@
 		}
 		echo "</table>";
 
+		echo "	<script type='text/javascript'>
+					$(function(){
+
+						$('#tilaus').change(function(){
+							if (this.value != '') {
+								$.get('$_SERVER[SCRIPT_NAME]', { tee: 'hae_kommentti', tun: this.value, no_head: 'yes', ohje: 'off' }, function(data){
+									$('#message:font').text('Lisää kommentti');
+									$('#kommentti').val(data);
+								});
+							}
+							else {
+								$('#kommentti').val('');
+								$('#message:font').text('Valitse tilausnumero ja syötä kommentti');
+							}
+						});
+
+						$('#tallenna_button').click(function(){
+							if ($('#tilaus').val() == '') {
+								$('#message:font').text('Et valinnut tilausnumeroa!');
+								return false;
+							}
+							else {
+								var tilausno = $('#tilaus').val();
+								var komm = $('#kommentti').val();
+								$.get('$_SERVER[SCRIPT_NAME]', { tee: 'kommentti', tilaus: tilausno, kommentti: komm, no_head: 'yes', ohje: 'off' }, function(data){
+									$('#tallenna_message').html(data);
+
+									$('#div_'+tilausno).html(komm);
+								});
+							}
+						});
+					});
+				</script>";
 		if (count($tunnukset) > 0) {
 			echo "<br/><br/>";
 
 			sort($tunnukset);
-
-			echo "	<script type='text/javascript'>
-						$(function(){
-							$('#tilaus').change(function(){
-								if (this.value != '') {
-									$.get('$_SERVER[SCRIPT_NAME]', { tee: 'hae_kommentti', tun: this.value, no_head: 'yes', ohje: 'off' }, function(data){
-										$('#message:font').text('Lisää kommentti');
-										$('#kommentti').val(data);
-									});
-								}
-								else {
-									$('#kommentti').val('');
-									$('#message:font').text('Valitse tilausnumero ja syötä kommentti');
-								}
-							});
-
-							$('#tallenna_button').click(function(){
-								if ($('#tilaus').val() == '') {
-									$('#message:font').text('Et valinnut tilausnumeroa!');
-									return false;
-								}
-								else {
-									var tilausno = $('#tilaus').val();
-									var komm = $('#kommentti').val();
-									$.get('$_SERVER[SCRIPT_NAME]', { tee: 'kommentti', tilaus: tilausno, kommentti: komm, no_head: 'yes', ohje: 'off' }, function(data){
-										$('#tallenna_message').html(data);
-
-										if (komm == '') {
-											$('#'+tilausno).removeClass('popup');
-										}
-										else {
-											$('#'+tilausno).addClass('popup');
-										}
-
-										$('#'+tilausno).html(komm);
-
-										$('#a_'+tilausno).mouseout(function(event){
-											popUp(event, tilausno);
-										})
-
-										$('#a_'+tilausno).mouseover(function(event){
-											popUp(event, tilausno);
-										})
-
-									});
-								}
-							});
-						});
-					</script>";
 
 			echo "<form method='post' action='' autocomplete='off' id='kommentti_form'>";
 			echo "<input type='hidden' name='tee' value='kommentti'>";

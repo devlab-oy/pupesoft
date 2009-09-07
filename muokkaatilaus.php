@@ -1219,10 +1219,10 @@
 							$row_comments = mysql_fetch_array($result_comments);
 
 							if (trim($row_comments["comments"]) != "") {
-								echo "<div id='kommentti$row[$i]' class='popup' style='width: 500px;'>";
+								echo "<div id='div_kommentti$row[$i]' class='popup' style='width: 500px;'>";
 								echo $row_comments["comments"];
 								echo "</div>";
-								echo "<td class='$class' align='right' valign='top'><a onmouseout=\"popUp(event,'kommentti$row[$i]')\" onmouseover=\"popUp(event,'kommentti$row[$i]')\">".str_replace(",", "<br>*", $row[$i])."</a></td>";
+								echo "<td class='$class' align='right' valign='top'><a class='tooltip' id='kommentti$row[$i]'>".str_replace(",", "<br>*", $row[$i])."</a></td>";
 							}
 							else {
 								echo "<td class='$class' align='right' valign='top'>".str_replace(",", "<br>*", $row[$i])."</td>";

@@ -266,7 +266,7 @@
 					echo "<tr>";
 
 					if (trim($tilrow["sisviesti2"]) != "" or trim($tilrow['kommentit'] != '')) {
-						echo "<div id='$tilrow[tunnus]' class='popup' style='width:500px;'>";
+						echo "<div id='div_$tilrow[otunnus]' class='popup' style='width:500px;'>";
 
 						if (trim($tilrow["sisviesti2"]) != "") {
 							echo t("Lisätiedot").":<br>";
@@ -280,7 +280,7 @@
 						}
 
 						echo "</div>";
-						echo "<$ero valign='top'><a class='menu' onmouseout=\"popUp(event,'$tilrow[otunnus]')\" onmouseover=\"popUp(event,'$tilrow[otunnus]')\">$tilrow[t_tyyppi] $tilrow[prioriteetti] <IMG SRC='../pics/lullacons/alert.png'></a></$ero>";
+						echo "<$ero valign='top' class='tooltip' id='$tilrow[otunnus]'>$tilrow[t_tyyppi] $tilrow[prioriteetti] <IMG SRC='../pics/lullacons/alert.png'></$ero>";
 
 
 					}
@@ -688,6 +688,7 @@
 					min(lasku.keraysvko) keraysvko,
 					min(lasku.toimvko) toimvko,
 					GROUP_CONCAT(distinct lasku.tunnus SEPARATOR ',') otunnus,
+					GROUP_CONCAT(distinct lasku.tunnus SEPARATOR '_') div_id,
 					count(distinct otunnus) tilauksia,
 					count(*) riveja,
 					group_concat(DISTINCT concat_ws('\n\n', if (comments!='',concat('".t("Lähetteen lisätiedot").":\n',comments),NULL), if (sisviesti2!='',concat('".t("Keräyslistan lisätiedot").":\n',sisviesti2),NULL)) SEPARATOR '\n') ohjeet,
@@ -758,7 +759,7 @@
 				echo "<tr class='aktiivi'>";
 
 				if (trim($tilrow["ohjeet"]) != "" or trim($tilrow['kommentit'] != '')) {
-					echo "<div id='$tilrow[otunnus]' class='popup' style='width:500px;'>";
+					echo "<div id='div_$tilrow[div_id]' class='popup' style='width:500px;'>";
 					if (trim($tilrow["ohjeet"]) != "") {
 						echo t("Lisätiedot").":<br>";
 						echo str_replace("\n", "<br>", $tilrow["ohjeet"]);
@@ -770,7 +771,7 @@
 						echo "<br>";
 					}
 					echo "</div>";
-					echo "<$ero valign='top'><a class='menu' onmouseout=\"popUp(event,'$tilrow[otunnus]')\" onmouseover=\"popUp(event,'$tilrow[otunnus]')\">$tilrow[t_tyyppi] $tilrow[prioriteetti] <IMG SRC='../pics/lullacons/alert.png'></a>";
+					echo "<$ero valign='top' class='tooltip' id='$tilrow[div_id]'>$tilrow[t_tyyppi] $tilrow[prioriteetti] <IMG SRC='../pics/lullacons/alert.png'>";
 				}
 				else {
 					echo "<$ero valign='top'>$tilrow[t_tyyppi] $tilrow[prioriteetti]";

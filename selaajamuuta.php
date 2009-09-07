@@ -155,10 +155,10 @@
 
 			$komm = "";
 			if ($trow['comments'] != '') {
-				$loppudiv .= "<div id='id_".$trow['tunnus']."' class='popup' style='width:250px'>";
+				$loppudiv .= "<div id='div_".$trow['tunnus']."' class='popup' style='width:250px'>";
 				$loppudiv .= $trow["comments"]."<br></div>";
 
-				$komm = " <a onmouseout=\"popUp(event,'id_".$trow['tunnus']."')\" onmouseover=\"popUp(event,'id_".$trow['tunnus']."')\"><img src='pics/lullacons/alert.png'></a>";
+				$komm = " <a class='tooltip' id='$trow[tunnus]'><img src='pics/lullacons/alert.png'></a>";
 			}
 
 			if ($trow["nimi"] == "") {

@@ -281,7 +281,7 @@
 							
 				// Vanhoja kalenteritapahtumia ei saa enää muuttaa ja Hyväksyttyjä lomia ei saa ikinä muokata
 				if($krow['tunnus'] != '' and $krow["kuittaus"] == "" and $kaleloppu >= $aikanyt and ($krow['kuka'] == $kukarow["kuka"] or $krow['laatija'] == $kukarow["kuka"])) {
-					echo "<div id='$krow[tunnus]' class='popup' style='width:200px;'>";
+					echo "<div id='div_$krow[tunnus]' class='popup' style='width:200px;'>";
 	
 					if (mysql_num_rows($kresult) > 0) {
 						mysql_data_seek($kresult,0);
@@ -292,14 +292,14 @@
 					}
 					echo "</div>";
 	
-					echo "<$varitys align='center' width='35' nowrap><a class='td' href='kalenteri.php?valitut=$row[kuka]&kenelle=$row[kuka]&tee=SYOTA&kello=$krow[kello]&year=$krow[vuosi]&kuu=$krow[kuu]&paiva=$krow[paiva]&tunnus=$krow[tunnus]&konserni=XXX' onmouseout=\"popUp(event,'$krow[tunnus]')\" onmouseover=\"popUp(event,'$krow[tunnus]')\">$etufontti $krow[tapa] $takafontti</a></$varitys>";
+					echo "<$varitys align='center' width='35' nowrap class='tooltip' id='$krow[tunnus]'><a class='td' href='kalenteri.php?valitut=$row[kuka]&kenelle=$row[kuka]&tee=SYOTA&kello=$krow[kello]&year=$krow[vuosi]&kuu=$krow[kuu]&paiva=$krow[paiva]&tunnus=$krow[tunnus]&konserni=XXX'>$etufontti $krow[tapa] $takafontti</a></$varitys>";
 				}
 				else {
-					echo "	<div id='$krow[tunnus]' class='popup' style='width:200px;'>
+					echo "	<div id='div_$krow[tunnus]' class='popup' style='width:200px;'>
 							$krow[kello]-$krow[lkello] $row[nimi]<br>$krow[selitetark].<br>$krow[kentta01]
 							</div>";
 	
-					echo "<$varitys align='center' width='35' nowrap><a class='td' href='#' onmouseout=\"popUp(event,'$krow[tunnus]')\" onmouseover=\"popUp(event,'$krow[tunnus]')\">$etufontti $krow[tapa] $takafontti</a></$varitys>";
+					echo "<$varitys align='center' width='35' nowrap class='tooltip' id='$krow[tunnus]'>$etufontti $krow[tapa] $takafontti</$varitys>";
 				}
 			}
 			else {
@@ -413,7 +413,7 @@
 					$laskutyyppilisa = " ".t("TOIMITUKSET");
 				}
 				
-				echo "<div id='$id' class='popup' style=\"width: 500px\">
+				echo "<div id='div_$id' class='popup' style=\"width: 500px\">
 				<table width='500px' align='center'>
 				<caption><font class='head'>".t($laskutyyppi)." $laskutyyppilisa</font></caption>
 				<tr>
@@ -437,7 +437,7 @@
 				mysql_data_seek($kresult, 0);	
 				echo "</table></div>";					
 
-				echo "<a href='$href'><img src='../pics/lullacons/folder-open-green.png' class='edit'></a>&nbsp;<img src='../pics/lullacons/info.png' class='info' onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\"></td>";
+				echo "<a href='$href'><img src='../pics/lullacons/folder-open-green.png' class='edit'></a>&nbsp;<img src='../pics/lullacons/info.png' class='tooltip' id='$id'></td>";
 
 				while ($krow = mysql_fetch_array($kresult)) {
 					if(isset($eka)) {
@@ -487,7 +487,7 @@
 						 	require ("../inc/laskutyyppi.inc");
 							
 							$id=md5(uniqid());
-							echo "<div id='$id' class='popup' style=\"width: 500px\">
+							echo "<div id='div_$id' class='popup' style=\"width: 500px\">
 							<table width='500px' align='center'>
 							<caption><font class='head'>{$krow["tunnus"]} - ".t($laskutyyppi)." ".t($alatila)."</font></caption>
 							<tr>
@@ -542,7 +542,7 @@
 								echo "&nbsp;<a href='$href'><img src='../pics/lullacons/folder-open-green.png' class='info'></a>";
 							}
 							
-							echo "&nbsp;<img src='../pics/lullacons/info.png' class='info' onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\">";
+							echo "&nbsp;<img src='../pics/lullacons/info.png' class='tooltip' id='$id'>";
 							
 							echo "</td>";							
 						}
@@ -621,7 +621,7 @@
 					echo "<td align='center' width='35'><a class='td' href='../varauskalenteri/varauskalenteri.php?lopetus=$lopetus&tee=SYOTA&year=$year&month=$month&day=$pva&toim=$row[alanimi]'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></td>";
 				}
 				else {
-					echo "<div id='$krow[tunnus]' class='popup' style='width:200px;'>";
+					echo "<div id='div_$krow[tunnus]' class='popup' style='width:200px;'>";
 
 					if (mysql_num_rows($kresult) > 0) {
 						mysql_data_seek($kresult,0);
@@ -631,7 +631,7 @@
 						}
 					}
 					echo "</div>";
-					echo "<td align='center' width='35'><a class='td' href='../varauskalenteri/varauskalenteri.php?lopetus=$lopetus&tee=NAYTA&year=$year&month=$month&day=$pva&tunnus=$krow[tunnus]&toim=$row[alanimi]' onmouseout=\"popUp(event,'$krow[tunnus]')\" onmouseover=\"popUp(event,'$krow[tunnus]')\">$krow[nimi]</a></td>";
+					echo "<td align='center' width='35' class='tooltip' id='$krow[tunnus]'><a class='td' href='../varauskalenteri/varauskalenteri.php?lopetus=$lopetus&tee=NAYTA&year=$year&month=$month&day=$pva&tunnus=$krow[tunnus]&toim=$row[alanimi]'>$krow[nimi]</a></td>";
 				}
 
 				if (weekday_number($i, $month, $year)==6) {

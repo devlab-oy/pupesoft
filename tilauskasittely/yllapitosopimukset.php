@@ -410,10 +410,17 @@
 
 			}
 
-			echo "<td nowrap><a onmouseout=\"popUp(event,'$row[laskutunnus]')\" onmouseover=\"popUp(event,'$row[laskutunnus]')\">$laskutettu_vika</a> ";
-			echo "<div id='$row[laskutunnus]' class='popup'>";
-			echo "$laskutettu";
-			echo "</div>";
+			$classname = '';
+			if ($laskutettu != '') {
+				$classname = 'tooltip';
+			}
+
+			echo "<td nowrap class='$classname' id='$row[laskutunnus]'>$laskutettu_vika ";
+			if ($classname == 'tooltip') {
+				echo "<div id='div_$row[laskutunnus]' class='popup'>";
+				echo "$laskutettu";
+				echo "</div>";
+			}
 			echo "</td>";
 			echo "<td valign='top' nowrap>$laskuttamatta</td>";
 			echo "</tr>";

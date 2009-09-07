@@ -69,7 +69,7 @@
 			$tee = "N";
 
 			$retval = tarkasta_liite("tositefile", array("TXT", "CSV", "XLS"));
-			
+
 			if($retval === true) {
 				list($name, $ext) = split("\.", $_FILES['tositefile']['name']);
 
@@ -113,11 +113,9 @@
 					}
 				}
 				else {
-					$rivi = fgets($file);
-
 					$excei = 1;
 
-					while (!feof($file)) {
+					while ($rivi = fgets($file)) {
 						// luetaan rivi tiedostosta..
 						$poista	 = array("'", "\\");
 						$rivi	 = str_replace($poista,"",$rivi);
@@ -129,9 +127,6 @@
 							$excej++;
 						}
 						$excei++;
-
-						// luetaan seuraava rivi failista
-						$rivi = fgets($file);
 					}
 					fclose($file);
 				}
@@ -139,7 +134,54 @@
 				$maara = 0;
 				foreach ($excelrivi as $erivi) {
 					foreach ($erivi as $e => $eriv) {
-						${"i".strtolower($otsikot[$e])}[$maara] = $eriv;
+
+						if (strtolower($otsikot[$e]) == "kustp") {
+							// Kustannuspaikka
+							$ikustp_tsk  	 = trim($eriv);
+							$ikustp[$maara]  = 0;
+
+							if ($ikustp_tsk != "") {
+								$query = "	SELECT tunnus
+											FROM kustannuspaikka
+											WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa != 'E' and nimi = '$ikustp_tsk'";
+								$ikustpres = mysql_query($query) or pupe_error($query);
+
+								if (mysql_num_rows($ikustpres) == 1) {
+									$row = mysql_fetch_assoc($ikustpres);
+									$ikustp[$maara] = $row["tunnus"];
+								}
+							}
+
+							if ($ikustp_tsk != "" and $ikustp[$maara] == 0) {
+								$query = "	SELECT tunnus
+											FROM kustannuspaikka
+											WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa != 'E' and koodi = '$ikustp_tsk'";
+								$ikustpres = mysql_query($query) or pupe_error($query);
+
+								if (mysql_num_rows($ikustpres) == 1) {
+									$ikustprow = mysql_fetch_assoc($ikustpres);
+									$ikustp[$maara] = $ikustprow["tunnus"];
+								}
+							}
+
+							if (is_numeric($ikustp_tsk) and (int) $ikustp_tsk > 0 and $ikustp[$maara] == 0) {
+
+								$ikustp_tsk = (int) $ikustp_tsk;
+
+								$query = "	SELECT tunnus
+											FROM kustannuspaikka
+											WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa != 'E' and tunnus = '$ikustp_tsk'";
+								$ikustpres = mysql_query($query) or pupe_error($query);
+
+								if (mysql_num_rows($ikustpres) == 1) {
+									$ikustprow = mysql_fetch_assoc($ikustpres);
+									$ikustp[$maara] = $ikustprow["tunnus"];
+								}
+							}
+						}
+						else {
+							${"i".strtolower($otsikot[$e])}[$maara] = $eriv;
+						}
 					}
 					$maara++;
 				}
@@ -213,14 +255,14 @@
 				$totsumma += $summa;
 				$selausnimi = 'itili[' . $i .']'; // Minka niminen mahdollinen popup on?
 				$vero='';
-				
+
 				require "inc/tarkistatiliointi.inc";
-				
+
 				if ($vero!='') $ivero[$i]=$vero; //Jos meillä on hardkoodattuvero, otetaan se käyttöön
-				
+
 				$ivirhe[$i] .= $virhe;
 				$iulos[$i] = $ulos;
-				
+
 				if ($ok==0) { // Sieltä kenties tuli päivitys tilinumeroon
 					if ($itili[$i] != $tili) { // Annetaan käyttäjän päättää onko ok
 						$itili[$i] = $tili;
@@ -615,6 +657,7 @@
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa <> 'E'
 						ORDER BY nimi";
 			$vresult = mysql_query($query) or pupe_error($query);
+
 			echo "<td><select name='ikustp[$i]'>";
 			echo "<option value =' '>".t("Ei kustannuspaikkaa")."";
 
@@ -680,7 +723,7 @@
 		}
 
 		if ($gok==1) {
-			echo "<table cellpadding='2'>";
+			echo "<table>";
 			echo "<tr>";
 			echo "<th>".t("Tosite yhteensä")."</th>";
 			echo "<td>";

@@ -177,6 +177,7 @@
 
 	if (mysql_field_name($result, $i) == "siirtoavain" or
 		mysql_field_name($result, $i) == "kasukupolvi" or
+		mysql_field_name($result, $i) == "kayttoavain" or
 		mysql_field_name($result, $i) == "nro" or
 		mysql_field_name($result, $i) == "sasukupolvi" or
 		mysql_field_name($result, $i) == "kertaavain" or

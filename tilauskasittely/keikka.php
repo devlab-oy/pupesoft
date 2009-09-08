@@ -636,10 +636,12 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 		echo "<table>";
 		echo "<tr>";
 		echo "<th valign='top'>".t("keikka")."</th>";
+		echo "<th valign='top'>&nbsp;</th>";
 		echo "<th valign='top'>".t("ytunnus")." /<br>".t("nimi")."</th>";
 		echo "<th valign='top'>".t("kohdistus")." /<br>".t("lis‰tiedot")."</th>";
 		echo "<th valign='top'>".t("paikat")." /<br>".t("sarjanrot")."</th>";
 		echo "<th valign='top'>".t("kohdistettu")." /<br>".t("varastossa")."</th>";
+		echo "<th valign='top'>&nbsp;</th>";
 		echo "<th valign='top'>".t("ostolaskuja")." /<br>".t("kululaskuja")."</th>";
 		echo "<th valign='top'>".t("toiminto")."</th>";
 		echo "</tr>";
@@ -661,32 +663,34 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 
 			echo "<tr class='aktiivi'>";
 
+			echo "<td valign='top'>$row[laskunro]</td>";
+
 			// tehd‰‰n pop-up divi jos keikalla on kommentti...
 			if ($row["comments"] != "") {
-				echo "<div id='$row[laskunro]' class='popup' style='width:500px;'>";
+				echo "<div id='div_$row[laskunro]' class='popup' style='width:500px;'>";
 				echo t("Keikka").": $row[laskunro] / $row[nimi]<br><br>";
 				echo $row["comments"];
 				echo "</div>";
-				echo "<td valign='top'><a onmouseout=\"popUp(event,'$row[laskunro]')\" onmouseover=\"popUp(event,'$row[laskunro]')\">$row[laskunro]</a></td>";
+				echo "<td valign='top' class='tooltip' id='$row[laskunro]'><img src='$palvelin2/pics/lullacons/info.png'></td>";
 			}
 			else {
-				echo "<td valign='top'>$row[laskunro]</td>";
+				echo "<td>&nbsp;</td>";
 			}
 
 			echo "<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>";
 			echo "<td valign='top'>$kohdistus<br>$lisatiedot</td>";
 			echo "<td valign='top'>$varastopaikat<br>$sarjanrot</td>";
-
+			echo "<td valign='top'>$kplyhteensa<br>$kplvarasto $varastossaarvo</td>";
 
 			if (count($uusiot) > 0) {
-				echo "<div id='keikka_$row[laskunro]' class='popup' style='width:100px;'>";
+				echo "<div id='div_keikka_$row[laskunro]' class='popup' style='width:100px;'>";
 				echo t("Tilaukset").":<br><br>";
 				echo implode("<br>", $uusiot);
 				echo "</div>";
-				echo "<td valign='top'><a class='td' onmouseout=\"popUp(event,'keikka_$row[laskunro]')\" onmouseover=\"popUp(event,'keikka_$row[laskunro]')\">$kplyhteensa<br>$kplvarasto $varastossaarvo</a></td>";
+				echo "<td valign='top' class='tooltip' id='keikka_$row[laskunro]'><img src='$palvelin2/pics/lullacons/info.png'></td>";
 			}
 			else {
-				echo "<td valign='top'>$kplyhteensa<br>$kplvarasto $varastossaarvo</td>";
+				echo "<td>&nbsp;</td>";
 			}
 
 			$laskujen_tiedot = "";
@@ -702,7 +706,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 							and lasku.laskunro = '$row[laskunro]'";
 				$volasresult = mysql_query($query) or pupe_error($query);
 
-				echo "<div id='lasku_$row[laskunro]' class='popup'>";
+				echo "<div id='div_lasku_$row[laskunro]' class='popup'>";
 				while ($volasrow = mysql_fetch_array($volasresult)) {
 					echo t("Lasku")." $volasrow[nimi] ($volasrow[summa] $volasrow[valkoodi]) ".t("hyv‰ksytt‰v‰n‰ k‰ytt‰j‰ll‰")." $volasrow[kukanimi]<br>";
 				}
@@ -711,7 +715,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 
 			if ($llrow["volasku"] > 0) {
 				if ($llrow["volasku"] != $llrow["volasku_ok"]) {
-					$laskujen_tiedot .= "<a onmouseout=\"popUp(event,'lasku_$row[laskunro]')\" onmouseover=\"popUp(event,'lasku_$row[laskunro]')\">$llrow[volasku] ($llrow[vosumma]) <font class='error'>*</font></a>";
+					$laskujen_tiedot .= "$llrow[volasku] ($llrow[vosumma]) <font class='error'>*</font> <img class='tooltip' id='lasku_$row[laskunro]' src='$palvelin2/pics/lullacons/alert.png'>";
 				}
 				else {
 					$laskujen_tiedot .= "$llrow[volasku] ($llrow[vosumma]) <font class='ok'>*</font>";
@@ -722,7 +726,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikka != '') and $toimittajarow["y
 
 			if ($llrow["kulasku"] > 0) {
 				if ($llrow["kulasku"] != $llrow["kulasku_ok"]) {
-					$laskujen_tiedot .= "<a onmouseout=\"popUp(event,'lasku_$row[laskunro]')\" onmouseover=\"popUp(event,'lasku_$row[laskunro]')\">$llrow[kulasku] ($llrow[kusumma]) <font class='error'>*</font></a>";
+					$laskujen_tiedot .= "$llrow[kulasku] ($llrow[kusumma]) <font class='error'>*</font> <img class='tooltip' id='lasku_$row[laskunro]' src='$palvelin2/pics/lullacons/alert.png'>";
 				}
 				else {
 					$laskujen_tiedot .= "$llrow[kulasku] ($llrow[kusumma]) <font class='ok'>*</font>";

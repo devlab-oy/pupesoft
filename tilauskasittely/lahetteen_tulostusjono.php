@@ -771,7 +771,7 @@
 						echo "<br>";
 					}
 					echo "</div>";
-					echo "<$ero valign='top' class='tooltip' id='$tilrow[div_id]'>$tilrow[t_tyyppi] $tilrow[prioriteetti] <IMG SRC='../pics/lullacons/alert.png'>";
+					echo "<$ero valign='top' class='tooltip' id='$tilrow[div_id]'>$tilrow[t_tyyppi] $tilrow[prioriteetti] <img src='$palvelin2/pics/lullacons/info.png'>";
 				}
 				else {
 					echo "<$ero valign='top'>$tilrow[t_tyyppi] $tilrow[prioriteetti]";

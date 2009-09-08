@@ -848,11 +848,14 @@
 				$workbook->setCustomColor(12, 255, 255, 0);
 				$format_bg_yellow =& $workbook->addFormat();
 				$format_bg_yellow->setFgColor(12);
+				$workbook->setCustomColor(17, 255, 0, 0);
+				$format_bg_yellow->setColor(17);
 				$format_bg_yellow->setPattern(1);
 
 				$workbook->setCustomColor(13, 200, 100, 180);
 				$format_bg_magenta =& $workbook->addFormat();
 				$format_bg_magenta->setFgColor(13);
+				$format_bg_magenta->setColor(17);
 				$format_bg_magenta->setPattern(1);
 
 				$workbook->setCustomColor(14, 150, 255, 170);
@@ -1285,6 +1288,7 @@
 					// tähän kerätään sarakkeiden koordinaatteja, jos pitää päivittää jälkikäteen jotain tietuetta
 					$column_location = array();
 					$kosal_yht = 0;
+					$komy_yht = 0;
 
 					foreach($valitut as $key => $sarake) {
 						$bg_color = '';
@@ -1374,8 +1378,27 @@
 									$sarake == 'edkul1' or $sarake == 'edkul3' or $sarake == 'edkul6' or $sarake == 'edkul12') {
 								$value = $kulutrow[$sarake_keyt[$sarake]];
 							}
-							// Korvaavat
-							elseif (substr($sarake, 0, 3) == 'Kor') {
+							// defaulttina haetaan normaalista rowsta tiedot
+							elseif ($sarake == 'Määrä') {
+								$tuotteet = $korvaavat_tunrot != '' ? ("'".$row['tuoteno']."', ".$korvaavat_tunrot) : "'".$row['tuoteno']."'";
+
+								$query = "	SELECT count(*) kpl
+											FROM yhteensopivuus_tuote
+											JOIN yhteensopivuus_rekisteri ON (yhteensopivuus_rekisteri.yhtio = yhteensopivuus_tuote.yhtio AND yhteensopivuus_rekisteri.autoid = yhteensopivuus_tuote.atunnus)
+											$joinlisa
+											WHERE yhteensopivuus_tuote.yhtio = '$kukarow[yhtio]'
+											AND yhteensopivuus_tuote.tuoteno IN ($tuotteet)
+											AND yhteensopivuus_tuote.tyyppi IN ($tyyppilisa)";
+								$asresult = mysql_query($query) or pupe_error($query);
+								$kasrow = mysql_fetch_array($asresult);
+
+								if (isset($workbook)) {
+									$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow[$sarake_keyt[$sarake]], 2), $format_bg_green);
+									$value = '';
+								}
+							}
+							elseif ($sarake == 'Kortuoteno') {
+								// Korvaavat
 								unset($korvaresult1);
 								unset($korvaresult2);
 								unset($korvaavat_tunrot);
@@ -1397,106 +1420,113 @@
 												and yhtio		= '$row[yhtio]'";
 									$korvaresult2 = mysql_query($query) or pupe_error($query);
 
-									//tulostetaan korvaavat
-									while ($korvarow = mysql_fetch_array($korvaresult2)) {
-										$korvaavat_tunrot .= "'$korvarow[tuoteno]', ";
-									}
-								}
+									if (mysql_num_rows($korvaresult2) > 0) {
 
-								if ($korvaavat_tunrot != '') {
-									$korvaavat_tunrot = substr(trim($korvaavat_tunrot), 0, -1);
+										$i = 0;
 
-									//Korvaavien myynnnit
-									$query  = "	SELECT
-												sum(if (laskutettuaika >= '$vva1-$kka1-$ppa1' and laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,kpl,0)) kpl1,
-												sum(if (laskutettuaika >= '$vva2-$kka2-$ppa2' and laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,kpl,0)) kpl2,
-												sum(if (laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,kpl,0)) kpl3,
-												sum(if (laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,kpl,0)) kpl4
-												FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-												WHERE yhtio = '$row[yhtio]'
-												and tyyppi = 'L'
-												and tuoteno in ($korvaavat_tunrot)
-												and laskutettuaika >= '$apvm'
-												and laskutettuaika <= '$lpvm'";
-									$asresult = mysql_query($query) or pupe_error($query);
-									$kasrow = mysql_fetch_array($asresult);
+										//tulostetaan korvaavat
+										while ($korvarow = mysql_fetch_array($korvaresult2)) {
+											$korvaavat_tunrot .= "'$korvarow[tuoteno]', ";
 
-									$query = "	SELECT sum(saldo) saldo
-												FROM tuotepaikat
-												JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-												and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-												and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0')))
-												WHERE tuotepaikat.$varastot_yhtiot
-												and tuotepaikat.tuoteno in ($korvaavat_tunrot)
-												$varastolisa_korv";
-									$korvasaldoresult = mysql_query($query) or pupe_error($query);
-									$korvasaldorow = mysql_fetch_array($korvasaldoresult);
+											//Korvaavien myynnnit
+											$query  = "	SELECT
+														sum(if (laskutettuaika >= '$vva1-$kka1-$ppa1' and laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,kpl,0)) kpl1,
+														sum(if (laskutettuaika >= '$vva2-$kka2-$ppa2' and laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,kpl,0)) kpl2,
+														sum(if (laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,kpl,0)) kpl3,
+														sum(if (laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,kpl,0)) kpl4
+														FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+														WHERE yhtio = '$row[yhtio]'
+														and tyyppi = 'L'
+														and tuoteno in ('$korvarow[tuoteno]')
+														and laskutettuaika >= '$apvm'
+														and laskutettuaika <= '$lpvm'";
+											$asresult = mysql_query($query) or pupe_error($query);
+											$kasrow = mysql_fetch_array($asresult);
 
-									// Saldolaskentaa tulevaisuuteen
-									$query = "	SELECT
-												sum(if (tilausrivi.tyyppi='O', varattu, 0)) tilattu,
-												sum(if (tilausrivi.tyyppi='L' or tilausrivi.tyyppi='V', varattu, 0)) varattu
-												FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-												JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-												and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
-												and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0')))
-												WHERE tilausrivi.yhtio = '$row[yhtio]'
-												and tilausrivi.tyyppi in ('O','L','V')
-												and tilausrivi.tuoteno in ($korvaavat_tunrot)
-												and tilausrivi.varattu > 0";
-									$presult = mysql_query($query) or pupe_error($query);
-									$prow = mysql_fetch_array($presult);
+											$query = "	SELECT sum(saldo) saldo
+														FROM tuotepaikat
+														JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+														and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+														and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0')))
+														WHERE tuotepaikat.$varastot_yhtiot
+														and tuotepaikat.tuoteno in ('$korvarow[tuoteno]')
+														$varastolisa_korv";
+											$korvasaldoresult = mysql_query($query) or pupe_error($query);
+											$korvasaldorow = mysql_fetch_array($korvasaldoresult);
 
-									if ($sarake == 'Kortuoteno') {
-										$worksheet->writeString($excelrivi, $excelsarake, str_replace("'", "", $korvaavat_tunrot));
-									}
-									elseif ($sarake == 'Korsaldo') {
-										$worksheet->writeNumber($excelrivi, $excelsarake, round($korvasaldorow[$sarake_keyt[$sarake]], 2));
-										$kosal_yht += $korvasaldorow[$sarake_keyt[$sarake]];
-									}
-									elseif ($sarake == 'Korennpois' or $sarake == 'Kortil') {
-										$worksheet->writeNumber($excelrivi, $excelsarake, round($prow[$sarake_keyt[$sarake]], 2));
-										if ($sarake == 'Kortil') {
-											$kosal_yht += $prow[$sarake_keyt[$sarake]];
-											$worksheet->writeNumber($column_location['kosal']['rivi'], $column_location['kosal']['sarake'], round($kosal_yht, 2), $format_bg_yellow);
-											$kosal_yht = 0;
+											// Saldolaskentaa tulevaisuuteen
+											$query = "	SELECT
+														sum(if (tilausrivi.tyyppi='O', varattu, 0)) tilattu,
+														sum(if (tilausrivi.tyyppi='L' or tilausrivi.tyyppi='V', varattu, 0)) varattu
+														FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+														JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+														and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
+														and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0')))
+														WHERE tilausrivi.yhtio = '$row[yhtio]'
+														and tilausrivi.tyyppi in ('O','L','V')
+														and tilausrivi.tuoteno in ('$korvarow[tuoteno]')
+														and tilausrivi.varattu > 0";
+											$presult = mysql_query($query) or pupe_error($query);
+											$prow = mysql_fetch_array($presult);
+
+											if ($i > 0) {
+												$worksheet->writeString(0, $excelsarake, "Kortuoteno", $format_bold);
+												$worksheet->writeString(0, $excelsarake+1, "Korsaldo", $format_bold);
+												$worksheet->writeString(0, $excelsarake+2, "Korennpois", $format_bold);
+												$worksheet->writeString(0, $excelsarake+3, "Kortil", $format_bold);
+												$worksheet->writeString(0, $excelsarake+4, "Kormy1", $format_bold);
+												$worksheet->writeString(0, $excelsarake+5, "Kormy2", $format_bold);
+												$worksheet->writeString(0, $excelsarake+6, "Kormy3", $format_bold);
+												$worksheet->writeString(0, $excelsarake+7, "Kormy4", $format_bold);
+											}
+
+											$worksheet->writeString($excelrivi, $excelsarake, str_replace("'", "", $korvarow['tuoteno']));
+											$excelsarake++;
+											$worksheet->writeNumber($excelrivi, $excelsarake, round($korvasaldorow['saldo'], 2));
+											$excelsarake++;
+											$worksheet->writeNumber($excelrivi, $excelsarake, round($prow['varattu'], 2));
+											$excelsarake++;
+											$worksheet->writeNumber($excelrivi, $excelsarake, round($prow['tilattu'], 2));
+											$excelsarake++;
+											$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl1'], 2));
+											$excelsarake++;
+											$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl2'], 2));
+											$excelsarake++;
+											$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl3'], 2));
+											$excelsarake++;
+											$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl4'], 2));
+											$excelsarake++;
+
+											$kosal_yht += $korvasaldorow['saldo'];
+											$kosal_yht += $prow['tilattu'];
+											$komy_yht += $kasrow['kpl4'];
+											$i++;
 										}
+
+										$korvaavat_tunrot = substr(trim($korvaavat_tunrot), 0, -1);
+										$worksheet->writeNumber($column_location['kosal']['rivi'], $column_location['kosal']['sarake'], round($kosal_yht, 2), $format_bg_yellow);
+										$kosal_yht = 0;
+										$worksheet->writeNumber($column_location['komy']['rivi'], $column_location['komy']['sarake'], round($komy_yht, 2), $format_bg_magenta);
+										$komy_yht = 0;
 									}
 									else {
-										$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow[$sarake_keyt[$sarake]], 2));
-										if ($sarake == 'Kormy4') {
-											$worksheet->writeNumber($column_location['komy']['rivi'], $column_location['komy']['sarake'], round($kasrow[$sarake_keyt[$sarake]], 2), $format_bg_magenta);
+										// jos tänne tullaan niin kosal-sarake pitää värjätä tyhjänä keltaiseksi
+										if (count($column_location) > 0) {
+											$worksheet->writeNumber($column_location['kosal']['rivi'], $column_location['kosal']['sarake'], '', $format_bg_yellow);
+											$worksheet->writeNumber($column_location['komy']['rivi'], $column_location['komy']['sarake'], '', $format_bg_magenta);
 										}
 									}
 								}
-							}
-							// defaulttina haetaan normaalista rowsta tiedot
-							elseif ($sarake == 'Määrä') {
-								$tuotteet = $korvaavat_tunrot != '' ? ("'".$row['tuoteno']."', ".$korvaavat_tunrot) : "'".$row['tuoteno']."'";
-
-								$query = "	SELECT count(*) kpl
-											FROM yhteensopivuus_tuote
-											JOIN yhteensopivuus_rekisteri ON (yhteensopivuus_rekisteri.yhtio = yhteensopivuus_tuote.yhtio AND yhteensopivuus_rekisteri.autoid = yhteensopivuus_tuote.atunnus)
-											$joinlisa
-											WHERE yhteensopivuus_tuote.yhtio = '$kukarow[yhtio]'
-											AND yhteensopivuus_tuote.tuoteno IN ($tuotteet)
-											AND yhteensopivuus_tuote.tyyppi IN ($tyyppilisa)";
-								$asresult = mysql_query($query) or pupe_error($query);
-								$kasrow = mysql_fetch_array($asresult);
-
-								if (isset($workbook)) {
-									$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow[$sarake_keyt[$sarake]], 2), $format_bg_green);
-									$value = '';
+								else {
+									// jos tänne tullaan niin kosal-sarake pitää värjätä tyhjänä keltaiseksi
+									if (count($column_location) > 0) {
+										$worksheet->writeNumber($column_location['kosal']['rivi'], $column_location['kosal']['sarake'], '', $format_bg_yellow);
+										$worksheet->writeNumber($column_location['komy']['rivi'], $column_location['komy']['sarake'], '', $format_bg_magenta);
+									}
 								}
 							}
 							else {
 								$value = $row[$sarake_keyt[$sarake]];
-
-								// jos tänne tullaan niin kosal-sarake pitää värjätä tyhjänä keltaiseksi
-								if (count($column_location) > 0) {
-									$worksheet->writeNumber($column_location['kosal']['rivi'], $column_location['kosal']['sarake'], '', $format_bg_yellow);
-									$worksheet->writeNumber($column_location['komy']['rivi'], $column_location['komy']['sarake'], '', $format_bg_magenta);
-								}
 							}
 
 							$value = trim($value);

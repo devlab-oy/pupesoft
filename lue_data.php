@@ -132,14 +132,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			}
 		}
 	}
-	
-	foreach ($taulunotsikot as $taulu => $otsikot) {		
+
+	foreach ($taulunotsikot as $taulu => $otsikot) {
 		if (count($otsikot) != count(array_unique($otsikot))) {
 			echo "<font class='error'>$taulu-".t("taulun sarakkeissa ongelmia, ei voida jatkaa")."!</font><br>";
-			
+
 			require ("inc/footer.inc");
 			exit;
-		}	
+		}
 	}
 
 	// Luetaan tiedosto loppuun ja tehd‰‰n taulukohtainen array koko datasta
@@ -721,6 +721,60 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							}
 
 							$eilisataeikamuuteta = "joo";
+						}
+
+						if ($table_mysql == 'tuote' and ($otsikko == 'KUSTP' or $otsikko == 'KOHDE' or $otsikko == 'PROJEKTI') and $rivi[$r] != "") {
+							// Kustannuspaikkarumba t‰nnekin
+							$ikustp_tsk = $rivi[$r];
+							$ikustp_ok  = 0;
+
+							if ($otsikko == "PROJEKTI") $kptyyppi = "P";
+							if ($otsikko == "KOHDE")	$kptyyppi = "O";
+							if ($otsikko == "KUSTP")	$kptyyppi = "K";
+
+							if ($ikustp_tsk != "") {
+								$ikustpq = "SELECT tunnus
+											FROM kustannuspaikka
+											WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$kptyyppi' and kaytossa != 'E' and nimi = '$ikustp_tsk'";
+								$ikustpres = mysql_query($ikustpq) or pupe_error($ikustpq);
+
+								if (mysql_num_rows($ikustpres) == 1) {
+									$ikustprow = mysql_fetch_assoc($ikustpres);
+									$ikustp_ok = $ikustprow["tunnus"];
+								}
+							}
+
+							if ($ikustp_tsk != "" and $ikustp_ok == 0) {
+								$ikustpq = "SELECT tunnus
+											FROM kustannuspaikka
+											WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$kptyyppi' and kaytossa != 'E' and koodi = '$ikustp_tsk'";
+								$ikustpres = mysql_query($ikustpq) or pupe_error($ikustpq);
+
+								if (mysql_num_rows($ikustpres) == 1) {
+									$ikustprow = mysql_fetch_assoc($ikustpres);
+									$ikustp_ok = $ikustprow["tunnus"];
+								}
+							}
+
+							if (is_numeric($ikustp_tsk) and (int) $ikustp_tsk > 0 and $ikustp_ok == 0) {
+
+								$ikustp_tsk = (int) $ikustp_tsk;
+
+								$ikustpq = "SELECT tunnus
+											FROM kustannuspaikka
+											WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$kptyyppi' and kaytossa != 'E' and tunnus = '$ikustp_tsk'";
+								$ikustpres = mysql_query($ikustpq) or pupe_error($ikustpq);
+
+								if (mysql_num_rows($ikustpres) == 1) {
+									$ikustprow = mysql_fetch_assoc($ikustpres);
+									$ikustp_ok = $ikustprow["tunnus"];
+								}
+							}
+
+							if ($ikustp_ok > 0) {
+								$rivi[$r] = $ikustp_ok;
+								$rivit[$eriviindex][$r]	= $ikustp_ok;
+							}
 						}
 
 						// tehd‰‰n riville oikeellisuustsekkej‰

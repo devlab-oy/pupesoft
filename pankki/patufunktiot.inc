@@ -197,6 +197,10 @@ function tarkistapariteetti($jono) {
 
 function siirtoavain($osa1, $osa2, $tarkiste, $suku, $tunnus) {
 
+	$osa1 = strtolower(str_replace(' ','',$osa1));
+	$osa2 = strtolower(str_replace(' ','',$osa2));
+	$tarkiste = strtolower(str_replace(' ','',$tarkiste));
+
 	$pa1 = tarkistapariteetti($osa1);
 	$pa2 = tarkistapariteetti($osa2);
 
@@ -344,7 +348,11 @@ function siirtopyynto ($pankki, $tilinumero, $aineisto, $salasana ,$paivays) {
 	}
 	elseif ($pankki=='8') {
 		if ($aineisto == 'STATUS') {
-			$apu = "//SOVELLUS=xxxx,ERA=000000,KYS\n"
+			$apu = "//SOVELLUS=xxxx,ERA=000000,KYS\n";
+			$apu .= "//EOF\n";
+		}
+		if ($aineisto == 'TITO') {
+			$apu = "//SOVELLUS=KTON,ERA=000000\n";
 			$apu .= "//EOF\n";
 		}
 	}

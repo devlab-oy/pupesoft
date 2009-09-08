@@ -1139,7 +1139,7 @@
 						echo str_replace("\n", "<br>", $row["ohjeet"])."<br>";
 						echo "</div>";
 
-						echo "<td valign='top' class='tooltip' id='$row[mintunnus]'>$row[t_tyyppi] $row[prioriteetti] <IMG SRC='pics/lullacons/alert.png'>";
+						echo "<td valign='top' class='tooltip' id='$row[mintunnus]'>$row[t_tyyppi] $row[prioriteetti] <img src='$palvelin2/pics/lullacons/info.png'>";
 					}
 					else {
 						echo "<td valign='top'>$row[t_tyyppi] $row[prioriteetti]";

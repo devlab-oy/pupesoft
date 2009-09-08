@@ -147,8 +147,8 @@
 								$ikustpres = mysql_query($query) or pupe_error($query);
 
 								if (mysql_num_rows($ikustpres) == 1) {
-									$row = mysql_fetch_assoc($ikustpres);
-									$ikustp[$maara] = $row["tunnus"];
+									$ikustprow = mysql_fetch_assoc($ikustpres);
+									$ikustp[$maara] = $ikustprow["tunnus"];
 								}
 							}
 

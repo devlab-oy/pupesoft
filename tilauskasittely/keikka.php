@@ -459,7 +459,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 		echo "<br><font class='head'>".t("Keskener‰iset keikat")."</font><hr>";
 
 		echo "<table>";
-		echo "<tr><th>".t("ytunnus")."</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("swift")."</th><th>".t("keikkanumerot")."</th><th>".t("kpl")."</th><th>".t("varastonarvo")."</th><th></th></tr>";
+		echo "<tr><th>".t("ytunnus")."</th><th>&nbsp;</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("swift")."</th><th>".t("keikkanumerot")."</th><th>".t("kpl")."</th><th>".t("varastonarvo")."</th><th></th></tr>";
 
 		while ($row = mysql_fetch_array($result)) {
 
@@ -482,15 +482,17 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 
 			echo "<tr class='aktiivi'>";
 
+			echo "<td valign='top'>$row[ytunnus]</td>";
+
 			// tehd‰‰n pop-up divi jos keikalla on kommentti...
 			if ($row["comments"] != "") {
 				echo "<div id='div_$row[liitostunnus]' class='popup' style='width: 500px;'>";
 				echo $row["comments"];
 				echo "</div>";
-				echo "<td valign='top' class='tooltip' id='$row[liitostunnus]'>$row[ytunnus]</td>";
+				echo "<td valign='top' class='tooltip' id='$row[liitostunnus]'><img src='$palvelin2/pics/lullacons/info.png'></td>";
 			}
 			else {
-				echo "<td valign='top'>$row[ytunnus]</td>";
+				echo "<td>&nbsp;</td>";
 			}
 
 			if ($row["varastossaarvo"] == 0) $row["varastossaarvo"] = "";

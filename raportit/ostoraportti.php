@@ -1303,6 +1303,7 @@
 					$column_location = array();
 					$kosal_yht = 0;
 					$komy_yht = 0;
+					$korvaavat_kayty = '';
 
 					foreach($valitut as $key => $sarake) {
 						$bg_color = '';
@@ -1394,6 +1395,38 @@
 							}
 							// defaulttina haetaan normaalista rowsta tiedot
 							elseif ($sarake == 'Määrä') {
+								//korvaavat tuotteet
+								$query  = "	SELECT id
+											FROM korvaavat
+											WHERE tuoteno	= '$row[tuoteno]'
+											and yhtio		= '$row[yhtio]'";
+								$korvaresult1 = mysql_query($query) or pupe_error($query);
+
+								$korvaavat_tunrot = '';
+
+								if (mysql_num_rows($korvaresult1) > 0) {
+									$korvarow = mysql_fetch_array($korvaresult1);
+
+									$query  = "	SELECT tuoteno
+												FROM korvaavat
+												WHERE tuoteno  != '$row[tuoteno]'
+												and id			= '$korvarow[id]'
+												and yhtio		= '$row[yhtio]'";
+									$korvaresult2 = mysql_query($query) or pupe_error($query);
+
+									if (mysql_num_rows($korvaresult2) > 0) {
+
+										$i = 0;
+
+										//tulostetaan korvaavat
+										while ($korvarow = mysql_fetch_array($korvaresult2)) {
+											$korvaavat_tunrot .= "'$korvarow[tuoteno]', ";
+										}
+									}
+								}
+
+								$korvaavat_tunrot = substr($korvaavat_tunrot, 0, -2);
+
 								$tuotteet = $korvaavat_tunrot != '' ? ("'".$row['tuoteno']."', ".$korvaavat_tunrot) : "'".$row['tuoteno']."'";
 
 								$query = "	SELECT count(*) kpl
@@ -1411,7 +1444,14 @@
 									$value = '';
 								}
 							}
-							elseif ($sarake == 'Kortuoteno') {
+							elseif ($sarake == 'Kortuoteno' or $sarake == 'Korsaldo' or $sarake == 'Korennpois' or $sarake == 'Kortil' or $sarake == 'Kormy1' or $sarake == 'Kormy2' or $sarake == 'Kormy3' or $sarake == 'Kormy4') {
+								if ($korvaavat_kayty != '') {
+									continue;
+								}
+								else {
+									$korvaavat_kayty = 'joo';
+								}
+
 								// Korvaavat
 								unset($korvaresult1);
 								unset($korvaresult2);
@@ -1483,33 +1523,66 @@
 											$presult = mysql_query($query) or pupe_error($query);
 											$prow = mysql_fetch_array($presult);
 
-											if ($i > 0) {
-												$worksheet->writeString(0, $excelsarake, "Kortuoteno", $format_bold);
-												$worksheet->writeString(0, $excelsarake+1, "Korsaldo", $format_bold);
-												$worksheet->writeString(0, $excelsarake+2, "Korennpois", $format_bold);
-												$worksheet->writeString(0, $excelsarake+3, "Kortil", $format_bold);
-												$worksheet->writeString(0, $excelsarake+4, "Kormy1", $format_bold);
-												$worksheet->writeString(0, $excelsarake+5, "Kormy2", $format_bold);
-												$worksheet->writeString(0, $excelsarake+6, "Kormy3", $format_bold);
-												$worksheet->writeString(0, $excelsarake+7, "Kormy4", $format_bold);
+											foreach ($valitut as $key => $val) {
+												if (isset($workbook) and $sarakkeet[$key] != '') {
+													if ($sarakkeet[$key] == 'Kortuoteno') {
+														if ($i > 0) {
+															$worksheet->writeString(0, $excelsarake, "Kortuoteno", $format_bold);
+														}
+														$worksheet->writeString($excelrivi, $excelsarake, str_replace("'", "", $korvarow['tuoteno']));
+														$excelsarake++;
+													}
+													elseif ($sarakkeet[$key] == 'Korsaldo') {
+														if ($i > 0) {
+															$worksheet->writeString(0, $excelsarake, "Korsaldo", $format_bold);
+														}
+														$worksheet->writeNumber($excelrivi, $excelsarake, round($korvasaldorow['saldo'], 2));
+														$excelsarake++;
+													}
+													elseif ($sarakkeet[$key] == 'Korennpois') {
+														if ($i > 0) {
+															$worksheet->writeString(0, $excelsarake, "Korennpois", $format_bold);
+														}
+														$worksheet->writeNumber($excelrivi, $excelsarake, round($prow['varattu'], 2));
+														$excelsarake++;
+													}
+													elseif ($sarakkeet[$key] == 'Kortil') {
+														if ($i > 0) {
+															$worksheet->writeString(0, $excelsarake, "Kortil", $format_bold);
+														}
+														$worksheet->writeNumber($excelrivi, $excelsarake, round($prow['tilattu'], 2));
+														$excelsarake++;
+													}
+													elseif ($sarakkeet[$key] == 'Kormy1') {
+														if ($i > 0) {
+															$worksheet->writeString(0, $excelsarake, "Kormy1", $format_bold);
+														}
+														$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl1'], 2));
+														$excelsarake++;
+													}
+													elseif ($sarakkeet[$key] == 'Kormy2') {
+														if ($i > 0) {
+															$worksheet->writeString(0, $excelsarake, "Kormy2", $format_bold);
+														}
+														$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl2'], 2));
+														$excelsarake++;
+													}
+													elseif ($sarakkeet[$key] == 'Kormy3') {
+														if ($i > 0) {
+															$worksheet->writeString(0, $excelsarake, "Kormy3", $format_bold);
+														}
+														$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl3'], 2));
+														$excelsarake++;
+													}
+													elseif ($sarakkeet[$key] == 'Kormy4') {
+														if ($i > 0) {
+															$worksheet->writeString(0, $excelsarake, "Kormy4", $format_bold);
+														}
+														$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl4'], 2));
+														$excelsarake++;
+													}
+												}
 											}
-
-											$worksheet->writeString($excelrivi, $excelsarake, str_replace("'", "", $korvarow['tuoteno']));
-											$excelsarake++;
-											$worksheet->writeNumber($excelrivi, $excelsarake, round($korvasaldorow['saldo'], 2));
-											$excelsarake++;
-											$worksheet->writeNumber($excelrivi, $excelsarake, round($prow['varattu'], 2));
-											$excelsarake++;
-											$worksheet->writeNumber($excelrivi, $excelsarake, round($prow['tilattu'], 2));
-											$excelsarake++;
-											$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl1'], 2));
-											$excelsarake++;
-											$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl2'], 2));
-											$excelsarake++;
-											$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl3'], 2));
-											$excelsarake++;
-											$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl4'], 2));
-											$excelsarake++;
 
 											$kosal_yht += $korvasaldorow['saldo'];
 											$kosal_yht += $prow['tilattu'];

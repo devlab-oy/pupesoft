@@ -862,15 +862,23 @@
 				$workbook->setCustomColor(12, 255, 255, 0);
 				$format_bg_yellow =& $workbook->addFormat();
 				$format_bg_yellow->setFgColor(12);
-				$workbook->setCustomColor(17, 255, 0, 0);
-				$format_bg_yellow->setColor(17);
 				$format_bg_yellow->setPattern(1);
+
+				$format_bg_yellow_text_red =& $workbook->addFormat();
+				$format_bg_yellow_text_red->setFgColor(12);
+				$workbook->setCustomColor(17, 255, 0, 0);
+				$format_bg_yellow_text_red->setColor(17);
+				$format_bg_yellow_text_red->setPattern(1);
 
 				$workbook->setCustomColor(13, 200, 100, 180);
 				$format_bg_magenta =& $workbook->addFormat();
 				$format_bg_magenta->setFgColor(13);
-				$format_bg_magenta->setColor(17);
 				$format_bg_magenta->setPattern(1);
+
+				$format_bg_magenta_text_red =& $workbook->addFormat();
+				$format_bg_magenta_text_red->setFgColor(13);
+				$format_bg_magenta_text_red->setColor(17);
+				$format_bg_magenta_text_red->setPattern(1);
 
 				$workbook->setCustomColor(14, 150, 255, 170);
 				$format_bg_green =& $workbook->addFormat();
@@ -886,6 +894,12 @@
 				$format_bg_grey =& $workbook->addFormat();
 				$format_bg_grey->setFgColor(16);
 				$format_bg_grey->setPattern(1);
+
+				$workbook->setCustomColor(18, 255, 255, 255);
+				$format_bg_text_red =& $workbook->addFormat();
+				$format_bg_text_red->setFgColor(18);
+				$format_bg_text_red->setColor(17);
+				$format_bg_text_red->setPattern(1);
 			}
 
 			$excelrivi 	 = 0;
@@ -1343,10 +1357,16 @@
 									$sarake == 'osthaly1' or $sarake == 'osthaly3' or $sarake == 'osthaly6' or $sarake == 'osthaly12' or
 									$sarake == 'Kate % 1' or $sarake == 'Kate % 3' or $sarake == 'Kate % 6' or $sarake == 'Kate % 12' or
 									$sarake == 'e_kate % 1' or $sarake == 'e_kate % 3' or $sarake == 'e_kate % 6' or $sarake == 'e_kate % 12') {
+
 								$value = ${$sarake_keyt[$sarake]};
+
+								if ($sarake == 'Kate % 1' or $sarake == 'Kate % 3' or $sarake == 'Kate % 6' or $sarake == 'Kate % 12') {
+									$bg_color = $value < 0 ? 'text_red' : '';
+								}
+
 								if ($sarake == '1kk' or $sarake == '3kk' or $sarake == '6kk' or $sarake == '12kk') {
 									${"value_".$sarake} = $value;
-									$bg_color = 'yellow';
+									$bg_color = $value >= 0 ? 'yellow' : 'yellow_text_red';
 								}
 							}
 							// tarvitaan oma taustav‰ri (sa + ti sarakkeet yhteens‰)
@@ -1357,6 +1377,7 @@
 							// keskiarvo
 							elseif ($sarake == 'ke') {
 								$value = round(($value_1kk + $value_3kk + $value_6kk + $value_12kk) / 4);
+								$bg_color = $value < 0 ? 'text_red' : '';
 							}
 							// myydyt kappaleet yhteens‰
 							elseif ($sarake == 'komy') {
@@ -1386,7 +1407,7 @@
 									$sarake == 'e_kate1' or $sarake == 'e_kate3' or $sarake == 'e_kate6' or $sarake == 'e_kate12') {
 								$value = $laskurow[$sarake_keyt[$sarake]];
 								if ($sarake == 'my3' or $sarake == 'my12') {
-									$bg_color = 'yellow';
+									$bg_color = $value >= 0 ? $bg_color = 'yellow' : $bg_color = 'yellow_text_red';
 								}
 							}
 							elseif ($sarake == 'kul1' or $sarake == 'kul3' or $sarake == 'kul6' or $sarake == 'kul12' or 
@@ -1455,7 +1476,6 @@
 								// Korvaavat
 								unset($korvaresult1);
 								unset($korvaresult2);
-								unset($korvaavat_tunrot);
 
 								//korvaavat tuotteet
 								$query  = "	SELECT id
@@ -1480,7 +1500,6 @@
 
 										//tulostetaan korvaavat
 										while ($korvarow = mysql_fetch_array($korvaresult2)) {
-											$korvaavat_tunrot .= "'$korvarow[tuoteno]', ";
 
 											//Korvaavien myynnnit
 											$query  = "	SELECT
@@ -1590,11 +1609,15 @@
 											$i++;
 										}
 
-										$korvaavat_tunrot = substr(trim($korvaavat_tunrot), 0, -1);
-										$worksheet->writeNumber($column_location['kosal']['rivi'], $column_location['kosal']['sarake'], round($kosal_yht, 2), $format_bg_yellow);
+										$bg_color = $kosal_yht >= 0 ? 'yellow' : 'yellow_text_red';
+										$worksheet->writeNumber($column_location['kosal']['rivi'], $column_location['kosal']['sarake'], round($kosal_yht, 2), ${"format_bg_".$bg_color});
 										$kosal_yht = 0;
-										$worksheet->writeNumber($column_location['komy']['rivi'], $column_location['komy']['sarake'], round($komy_yht, 2), $format_bg_magenta);
+
+										$bg_color = $kosal_yht >= 0 ? 'magenta' : 'magenta_text_red';
+										$worksheet->writeNumber($column_location['komy']['rivi'], $column_location['komy']['sarake'], round($komy_yht, 2), ${"format_bg_".$bg_color});
 										$komy_yht = 0;
+
+										$bg_color = '';
 									}
 									else {
 										// jos t‰nne tullaan niin kosal-sarake pit‰‰ v‰rj‰t‰ tyhj‰n‰ keltaiseksi
@@ -1620,10 +1643,20 @@
 
 							// katsotaan onko arvo numerollinen excel writerin takia (eri funkkarit)
 							if (is_numeric($value)) {
-								$worksheet->writeNumber($excelrivi, $excelsarake, round($value, 2), ${"format_bg_".$bg_color});
+								if ($bg_color != '') {
+									$worksheet->writeNumber($excelrivi, $excelsarake, round($value, 2), ${"format_bg_".$bg_color});
+								}
+								else {
+									$worksheet->writeNumber($excelrivi, $excelsarake, round($value, 2));
+								}
 							}
 							else {
-								$worksheet->writeString($excelrivi, $excelsarake, $value, ${"format_bg_".$bg_color});
+								if ($bg_color != '') {
+									$worksheet->writeString($excelrivi, $excelsarake, $value, ${"format_bg_".$bg_color});
+								}
+								else {
+									$worksheet->writeString($excelrivi, $excelsarake, $value);
+								}
 							}
 
 							// siirret‰‰n saraketta eteenp‰in

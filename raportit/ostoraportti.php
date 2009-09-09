@@ -15,7 +15,21 @@
 	}
 	else {
 
-		$ala_tallenna = array("kysely", "uusirappari", "edkysely", "rtee");
+		$ala_tallenna = array(	"kysely", 
+								"uusirappari", 
+								"edkysely", 
+								"rtee", 
+								"mul_osasto", 
+								"mul_try", 
+								"mul_tme", 
+								"toimittajaid", 
+								"ytunnus", 
+								"asiakasosasto",
+								"asiakasid",
+								"asiakasno",
+								"abcrajaus",
+								"abcrajaustapa",
+								"abcrajausluokka");
 
 		if ($valitut["TALLENNAPAIVAM"] == '') {
 			array_push($ala_tallenna, "ppa1", "kka1", "vva1", "ppl1", "kkl1", "vvl1", "ppa2", "kka2", "vva2", "ppl2", "kkl2", "vvl2", "ppa3", "kka3", "vva3", "ppl3", "kkl3", "vvl3", "ppa4", "kka4", "vva4", "ppl4", "kkl4", "vvl4");
@@ -1808,6 +1822,18 @@
 
 			echo "<table>";
 			echo "<form action='' method='post' autocomplete='off'>";
+			echo "	<input type='hidden' name='mul_osasto' value='".urlencode(serialize($mul_osasto))."'>
+					<input type='hidden' name='mul_try' value='".urlencode(serialize($mul_try))."'>
+					<input type='hidden' name='mul_tme' value='".urlencode(serialize($mul_tme))."'>
+					<input type='hidden' name='ytunnus' value='$ytunnus'>
+					<input type='hidden' name='edrappari' value='$rappari'>
+					<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+					<input type='hidden' name='asiakasid' value='$asiakasid'>
+					<input type='hidden' name='asiakasno' value='$asiakasno'>
+					<input type='hidden' name='asiakasosasto' value='$asiakasosasto'>
+					<input type='hidden' name='abcrajaus' value='$abcrajaus'>
+					<input type='hidden' name='abcrajaustapa' value='$abcrajaustapa'>
+					<input type='hidden' name='abcrajausluokka' value='$abcrajausluokka'>";
 			echo "<tr>";
 			echo "<th>",t("Valitse raportti"),":</th>";
 			echo "<td>";
@@ -1872,6 +1898,18 @@
 				$tuotemerkki = '';
 			}
 
+			if ($mul_osasto != '' and !is_array($mul_osasto)) {
+				$mul_osasto = unserialize(urldecode($mul_osasto));
+			}
+
+			if ($mul_try != '' and !is_array($mul_try)) {
+				$mul_try = unserialize(urldecode($mul_try));
+			}
+			
+			if ($mul_tme != '' and !is_array($mul_tme)) {
+				$mul_tme = unserialize(urldecode($mul_tme));
+			}
+
 			if (is_array($mul_try) and count($mul_try) > 0) {
 				$try = '';
 
@@ -1884,6 +1922,7 @@
 
 				$try = substr($try, 0, -4);
 			}
+			
 			if (is_array($mul_osasto) and count($mul_osasto) > 0) {
 
 				$osasto = '';

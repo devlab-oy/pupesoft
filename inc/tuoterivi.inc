@@ -11,26 +11,30 @@
 	if (mysql_field_name($result, $i) == "tuoteno") {
 		$tuoteno = $trow[$i]; // otetaan t‰‰ talteen
 
-		if($uusi == "") {
+		if ($uusi == "") {
 			$tyyppi = 3;
+			
+			// Tuotteen saa poistaa mik‰li sill‰ ei ole yht‰‰n tapahtumaa
+			$query = "SELECT yhtio FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and laji in ('ep‰kurantti','inventointi','kulutus','laskutus','siirto','tulo','valmistus') LIMIT 1";
+			$sdtres = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($sdtres) == 0) {
+				// Ei saa olla myˆsk‰‰n yht‰‰n tilausrivi‰
+				$query = "SELECT yhtio FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and tyyppi != 'D' LIMIT 1";
+				$sdtres = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($sdtres) == 0) {
+					$poistolukko = "";
+				}
+			}
 		}
 		else {
 			$ulos = "<td><input type = 'hidden' name = 'uusi' value = '$uusi'><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";
 			$jatko=0;
-		}
-
-		// Tuotteen saa poistaa mik‰li sill‰ ei ole yht‰‰n tapahtumaa
-		$query = "SELECT yhtio FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' LIMIT 1";
-		$sdtres = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($sdtres) == 0) {
-			$query = "SELECT yhtio FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and tyyppi != 'D' LIMIT 1";
-			$sdtres = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($sdtres) == 0) {
-				$poistolukko = "";
-			}
-		}
+			
+			// Jos on uusi tuote niin kaikki lukot on auki
+			$poistolukko = "";	
+		}	
 	}
 
 	if (mysql_field_name($result, $i) == "nimitys") {
@@ -144,7 +148,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "ei_saldoa") {
-		
+
 		$sel = $sela = "";
 		if ($trow[$i] != '') {
 			$sel = "SELECTED";
@@ -152,14 +156,14 @@
 		else {
 			$sela = "SELECTED";
 		}
-		
+
 		if ($poistolukko != "") {
 			$ulos  = "<td>";
-			
+
 			if ($sela != "") $ulos .= t("Saldollinen tuote");
 			else $ulos .= t("Saldoton tuote");
-			
-			$ulos .= "<input type='hidden' name='$nimi' value='$trow[$i]'></td>";		
+
+			$ulos .= "<input type='hidden' name='$nimi' value='$trow[$i]'></td>";
 		}
 		else {
 			$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
@@ -168,7 +172,7 @@
 			$ulos .= "</select>$disablelisa</td>";
 		}
 
-		
+
 		$jatko = 0;
 	}
 
@@ -221,13 +225,13 @@
 	}
 
 	if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
-		
+
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
-		
+
 		if ($poistolukko != "") {
 			$ulos  = "<td>";
-						
+
 			if ($sel["S"] != "")		$ulos .= t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (S)";
 			elseif ($sel["T"] != "")	$ulos .= t("Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo")." (T)";
 			elseif ($sel["U"] != "")	$ulos .= t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi")." (U)";
@@ -236,10 +240,10 @@
 			elseif ($sel["F"] != "")	$ulos .= t("Er‰numeroseuranta parasta-ennen p‰iv‰ll‰. Osto-Myynti / Keskihinta-varastonarvo")." (F)";
 			elseif ($sel["G"] != "")	$ulos .= t("Er‰numeroseuranta. Osto-Myynti / In-Out varastonarvo")." (G)";
 			else						$ulos .= t("Ei seurantaa");
-			
-			$ulos .= "<input type='hidden' name='$nimi' value='$trow[$i]'></td>";		
+
+			$ulos .= "<input type='hidden' name='$nimi' value='$trow[$i]'></td>";
 		}
-		else {			
+		else {
 			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 			$ulos .= "<option value = '' $disablointi>".t("Ei seurantaa")."</option>";
 			$ulos .= "<option value = 'S' $sel[S] $disablointi>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (S)</option>";
@@ -251,7 +255,7 @@
 			$ulos .= "<option value = 'G' $sel[G] $disablointi>".t("Er‰numeroseuranta. Osto-Myynti / In-Out varastonarvo")." (G)</option>";
 			$ulos .= "</select></td>";
 		}
-		
+
 		$jatko = 0;
 	}
 

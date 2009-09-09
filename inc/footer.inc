@@ -50,6 +50,6 @@
 		echo "<br><br></body></html>";
 	}
 
-	mysql_close();
+	mysql_close($link);
 
 ?>

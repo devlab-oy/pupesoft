@@ -86,7 +86,7 @@
 	}
 
 	if ($tee == 'N' or $tee == 'E') {
-		
+
 		if ($tee == 'N') {
 			$oper='>';
 			$suun='';
@@ -122,7 +122,7 @@
 	if ($tee == 'Z' and $tyyppi == '') {
 		require "inc/tuotehaku.inc";
 	}
-	
+
 	if ($tee == 'Z' and $tyyppi != '') {
 
 		if ($tyyppi == 'TOIMTUOTENO') {
@@ -187,7 +187,7 @@
 
 	echo "<br><table>";
 
-	echo "<tr>";	
+	echo "<tr>";
 	echo "<form action='$PHP_SELF' method='post' name='formi' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='Z'>";
 	echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
@@ -711,15 +711,13 @@
 						$kokonaishyllyssa += $hyllyssa;
 						$kokonaismyytavissa += $myytavissa;
 
-						//if ($saldo <> 0 or $hyllyssa <> 0 or $myytavissa <> 0) {
-							echo "<tr>
+						echo "<tr>
 								<td>$saldorow[nimitys] $saldorow[tyyppi] $saldorow[era]</td>
 								<td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td>
 								<td align='right'>".sprintf("%.2f", $saldo)."</td>
 								<td align='right'>".sprintf("%.2f", $hyllyssa)."</td>
 								<td align='right'>".sprintf("%.2f", $myytavissa)."</td>
 								</tr>";
-						//}
 					}
 				}
 
@@ -873,13 +871,14 @@
 						</tr>";
 
 				$yhteensa 	= array();
+				$ekotettiin = 0;
 
 				while ($jtrow = mysql_fetch_array($jtresult)) {
 
-					$tyyppi 	= "";
-					$vahvistettu= "";
-					$merkki 	= "";
-					$keikka 	= "";
+					$tyyppi 	 = "";
+					$vahvistettu = "";
+					$merkki 	 = "";
+					$keikka 	 = "";
 
 					if ($jtrow["tyyppi"] == "O") {
 						$tyyppi = t("Ostotilaus");
@@ -948,6 +947,15 @@
 						$tyyppi = $tyyppi." - ".$jtrow["varasto"];
 					}
 
+
+					if ((int) str_replace("-", "", $jtrow["pvm"]) > (int) date("Ymd") and $ekotettiin == 0) {
+						echo "<tr>
+								<td colspan='5' align='right' class='spec'>".t("Myytävissä nyt").":</td>
+								<td align='right' class='spec'>".sprintf('%.2f', $myyta)."</td>
+								</tr>";
+						$ekotettiin = 1;
+					}
+
 					list(, , $myyta) = saldo_myytavissa($tuoteno, "KAIKKI", '', '', '', '', '', '', '', $jtrow["pvm"]);
 
 					echo "<tr>
@@ -958,9 +966,12 @@
 							<td align='right'>$merkki".abs($jtrow["kpl"])."</td>
 							<td align='right'>".sprintf('%.2f', $myyta)."</td>
 							</tr>";
+
+
 				}
 
 				echo "<tr><td class='back'>&nbsp;</td></tr>";
+
 				foreach($yhteensa as $type => $kappale) {
 					echo "<tr><th colspan='1'>".t("$type yhteensä")."</th><td align='right'>$kappale</td></tr>";
 				}

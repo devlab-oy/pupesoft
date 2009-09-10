@@ -11,6 +11,25 @@ $email     = "atk\@arwidson.fi"; # kenelle meilataan jos on ongelma
 $emailfrom = "atk\@arwidson.fi"; # millä osoitteella meili lähetetään
 $tmpfile   = "/tmp/##edi-tmp";   # minne tehdään lock file
 
+# jos lukkofaili löytyy, mutta se on yli 15 minsaa vanha niin dellatan se
+if (-f $tmpfile) {
+	$mode = (stat($tmpfile))[9];
+	$now = time();
+
+	$smtp = Net::SMTP->new('localhost');
+	$smtp->mail($emailfrom);
+	$smtp->to($email);
+	$smtp->data();
+	$smtp->datasend("Subject: Editilaus HUOM!\n\n");
+	$smtp->datasend("\nEditilausten sisäänluvussa saattaa olla ongelma. Lukkotiedosto oli yli 15 minuuttia vanha ja se poistettiin. Tutki asia!");
+	$smtp->dataend();
+	$smtp->quit;
+
+	if ($now - $mode > 900) {
+		system("rm -f $tmpfile");
+	}
+}
+
 if (!-f $tmpfile) {
 
 	system("touch $tmpfile");
@@ -56,9 +75,9 @@ if (!-f $tmpfile) {
 
 				close(faili);
 
-				if ($ok>0) {
-#					print "pupesoft editilaus.pl v1.1\n--------------------------\n\n";
-#					print "Edi-tilaus $file" . "\n";
+				if ($ok > 0) {
+					#print "pupesoft editilaus.pl v1.1\n--------------------------\n\n";
+					#print "Edi-tilaus $file" . "\n";
 
 					$cmd = "cd ".$pupedir.";".$komento. " ".$pupedir."editilaus_in.inc ".$nimi.$edi_tyyppi;
 					system($cmd);
@@ -71,7 +90,7 @@ if (!-f $tmpfile) {
 				}
 
 				# jos ollaan luupattu samaa failia 10 kertaa, ni siirreätän se pois...
-				if ($laskuri>10) {
+				if ($laskuri > 10) {
 					$smtp = Net::SMTP->new('localhost');
 					$smtp->mail($emailfrom);
 					$smtp->to($email);

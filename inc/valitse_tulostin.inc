@@ -1,7 +1,7 @@
 <?php
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	$useslave = 1;
-	echo "<form method='post' action='$PHP_SELF'>
+	echo "<form method='post' action='$PHP_SELF?$ulisa'>
 		<input type='hidden' name='lopetus' value='$lopetus'>
 		<input type='hidden' name='toim' value='$toim'>
 		<input type='hidden' name='tila' value='$tila'>
@@ -125,7 +125,7 @@
 	if ($otunnus != '' or $laskunro != '') {
 
 		$querykieli = "	SELECT liitostunnus
-						FROM lasku 
+						FROM lasku
 						WHERE";
 
 		if ($otunnus > 0) {
@@ -146,7 +146,7 @@
 		$querykieli .= " AND yhtio ='$kukarow[yhtio]'";
 		$resultkieli = mysql_query($querykieli) or pupe_error($querykieli);
 		$asrow = mysql_fetch_array($resultkieli);
-		
+
 		$querykieli = "	SELECT kieli, email
 						FROM $mista
 						WHERE
@@ -154,7 +154,7 @@
 						AND yhtio ='$kukarow[yhtio]'";
 		$resultkieli = mysql_query($querykieli) or pupe_error($querykieli);
 		$asrow = mysql_fetch_array($resultkieli);
-		
+
 		if ($asrow["kieli"] != '') {
 			$sel[$asrow["kieli"]] = "SELECTED";
 		}
@@ -256,7 +256,7 @@
 
 
 
-	echo "</table><br><input type='submit' value='".t("Tulosta")."'></form>";
+	echo "</table><br><input type='submit' name='tulosta' value='".t("Tulosta")."'></form>";
 
 	//lopetetaan tähän, muuten esim rivit.inc nollaa kukarow[kesken] muuttujan ja moni muukin asia toimisi kovin heikosti...
 	require("footer.inc");

@@ -4,10 +4,259 @@
 
 	echo "<font class='head'>".t("Tulosta inventointilista")."</font><hr>";
 
+
+	echo "<form name='inve' action='$PHP_SELF' method='post' enctype='multipart/form-data' autocomplete='off'>";
+	echo "<input type='hidden' name='tee' value='TULOSTA'>";
+
+
+	// Monivalintalaatikot (osasto, try tuotemerkki...)
+	// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
+	$monivalintalaatikot = array("OSASTO", "TRY");
+
+	echo "<br><table>";
+	echo "<tr><th>".t("Anna osasto ja tuoteryhm‰:")."</th><td nowrap>";
+
+	require ("tilauskasittely/monivalintalaatikot.inc");
+
+	echo "</td></tr>";
+	echo "<tr><th>".t("Ja listaa vain myydyimm‰t:")."</th>
+	<td><input type='text' size='6' name='top'> ".t("tuotetta").".
+	</td></tr>";
+
+	echo "<tr><td class='back'>".t("ja/tai")."...</td></tr>";
+
+	echo "<tr><th>".t("Anna alkuvarastopaikka:")."</th>
+	<td><input type='text' size='6' name='ahyllyalue'>
+	<input type='text' size='6' name='ahyllynro'>
+	<input type='text' size='6' name='ahyllyvali'>
+	<input type='text' size='6' name='ahyllytaso'>
+	</td></tr>";
+
+	echo "<tr><th>".t("ja loppuvarastopaikka:")."</th>
+	<td><input type='text' size='6' name='lhyllyalue'>
+	<input type='text' size='6' name='lhyllynro'>
+	<input type='text' size='6' name='lhyllyvali'>
+	<input type='text' size='6' name='lhyllytaso'>
+	</td></tr>";
+
+	echo "<tr><td class='back'>".t("ja/tai")."...</td></tr>";
+
+	echo "<tr><th>".t("Anna toimittajanumero(ytunnus):")."</th>
+	<td><input type='text' size='25' name='toimittaja'>
+	</td></tr>";
+
+	echo "<tr><td class='back'>".t("ja/tai")."...</td></tr>";
+
+	echo "<tr><th>".t("Valitse tuotemerkki:")."</th>";
+
+	$query = "	SELECT distinct tuotemerkki
+				FROM tuote use index (yhtio_tuotemerkki)
+				WHERE yhtio='$kukarow[yhtio]'
+				$poislisa
+				and tuotemerkki != ''
+				ORDER BY tuotemerkki";
+	$sresult = mysql_query($query) or pupe_error($query);
+
+	echo "<td><select name='tuotemerkki'>";
+	echo "<option value=''>".t("Ei valintaa")."</option>";
+	while($srow = mysql_fetch_array ($sresult)){
+		echo "<option value='$srow[0]'>$srow[0]</option>";
+	}
+	echo "</td></tr>";
+
+	echo "<tr><td class='back'><br></td></tr>";
+
+    echo "<tr><td class='back' colspan='2'>".t("tai inventoi raportin avulla")."...</th></tr>
+		<tr><th>".t("Valitse raportti")."</th><td><select name='raportti'>
+		<option value=''>".t("Valitse")."</option>
+		<option value='vaarat'>".t("V‰‰r‰t saldot")."</option>
+		<option value='loppuneet'>".t("Loppuneet tuotteet")."</option>
+		<option value='negatiiviset'>".t("Kaikki miinus-saldolliset")."</option>
+		</select>
+		</td></tr>";
+
+	if (!isset($kka))
+		$kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($vva))
+		$vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if (!isset($ppa))
+		$ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+
+	if (!isset($kkl))
+		$kkl = date("m");
+	if (!isset($vvl))
+		$vvl = date("Y");
+	if (!isset($ppl))
+		$ppl = date("d");
+
+
+	echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+		<td><input type='text' name='ppa' value='$ppa' size='3'>
+		<input type='text' name='kka' value='$kka' size='3'>
+		<input type='text' name='vva' value='$vva' size='5'></td>
+		</tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+		<td><input type='text' name='ppl' value='$ppl' size='3'>
+		<input type='text' name='kkl' value='$kkl' size='3'>
+		<input type='text' name='vvl' value='$vvl' size='5'>";
+
+	echo "<tr><td class='back'><br></td></tr>";
+	echo "<tr><td class='back' colspan='2'>".t("Valitse ehdoista")."...</th></tr>";
+
+
+	echo "<tr><th>".t("Listaa tuotteet:")."</th>";
+
+	$sel1 = "";
+	$sel2 = "";
+
+	if ($arvomatikka == 'S') {
+		$sel1 = "SELECTED";
+	}
+	elseif ($arvomatikka == 'N') {
+		$sel2 = "SELECTED";
+	}
+
+	echo "<td><select name='arvomatikka'>";
+	echo "<option value=''>".t("Kaikki")."</option>";
+	echo "<option value='S' $sel1>".t("Saldolliset")."</option>";
+	echo "<option value='N' $sel2>".t("Ei nolla saldollisia")."</option>";
+	echo "</td></tr>";
+
+	echo "<tr><th>".t("Tulosta hyllyss‰ oleva m‰‰r‰:")."</th>
+	<td><input type='checkbox' name='naytasaldo'></td>
+	</tr>";
+
+
+	echo "<tr><th>".t("Listaa myˆs tuotteet jotka ovat inventoitu l‰hiaikoina:")."</th>
+	<td><input type='checkbox' name='naytainvtuot'></td>
+	</tr>";
+
+	echo "<tr><th>".t("Listaa vain tuotteet joita ei ole inventoitu p‰iv‰m‰‰r‰n‰ tai sen j‰lkeen:")."</th>
+		<td><input type='text' name='ippa' value='$ippa' size='3'>
+		<input type='text' name='ikka' value='$ikka' size='3'>
+		<input type='text' name='ivva' value='$ivva' size='5'></td>
+	</tr>";
+
+	echo "<tr><th>".t("J‰rjest‰ lista:")."</th>";
+
+	$sel3 = "";
+	$sel4 = "";
+
+	if ($jarjestys == '') {
+		$sel3 = "SELECTED";
+	}
+	else {
+		$sel4 = "SELECTED";
+	}
+
+	echo "<td><select name='jarjestys'>";
+	echo "<option value=''  $sel3>".t("Osoitej‰rjestykseen")."</option>";
+	echo "<option value='tuoteno' $sel4>".t("Tuotenumeroj‰rjestykseen")."</option>";
+
+	echo "</td></tr>";
+
+	echo "<tr><th>",t("J‰rjest‰ sorttauskentt‰"),":</th>";
+
+	$selsorttaus = array();
+
+	if ($sorttauskentan_jarjestys1 == 'hyllytaso') {
+		$selsorttaus['hyllytaso'] = "SELECTED";
+	}
+	elseif ($sorttauskentan_jarjestys1 == 'hyllynro') {
+		$selsorttaus['hyllynro'] = "SELECTED";
+	}
+	elseif ($sorttauskentan_jarjestys1 == 'hyllyvali') {
+		$selsorttaus['hyllyvali'] = "SELECTED";
+	}
+	else {
+		$selsorttaus['hyllyalue'] = "SELECTED";
+	}
+
+	echo "<td><select name='sorttauskentan_jarjestys1'>";
+	echo "<option value='hyllyalue'  $selsorttaus[hyllyalue]>".t("Hyllyalue")."</option>";
+	echo "<option value='hyllynro' $selsorttaus[hyllynro]>".t("Hyllynro")."</option>";
+	echo "<option value='hyllyvali' $selsorttaus[hyllyvali]>".t("Hyllyvali")."</option>";
+	echo "<option value='hyllytaso' $selsorttaus[hyllytaso]>".t("Hyllytaso")."</option>";
+	echo "</select>";
+
+	$selsorttaus = array();
+
+	if ($sorttauskentan_jarjestys2 == 'hyllytaso') {
+		$selsorttaus['hyllytaso'] = "SELECTED";
+	}
+	elseif ($sorttauskentan_jarjestys2 == 'hyllyalue') {
+		$selsorttaus['hyllyalue'] = "SELECTED";
+	}
+	elseif ($sorttauskentan_jarjestys2 == 'hyllyvali') {
+		$selsorttaus['hyllyvali'] = "SELECTED";
+	}
+	else {
+		$selsorttaus['hyllynro'] = "SELECTED";
+	}
+
+	echo "<select name='sorttauskentan_jarjestys2'>";
+	echo "<option value='hyllyalue'  $selsorttaus[hyllyalue]>".t("Hyllyalue")."</option>";
+	echo "<option value='hyllynro' $selsorttaus[hyllynro]>".t("Hyllynro")."</option>";
+	echo "<option value='hyllyvali' $selsorttaus[hyllyvali]>".t("Hyllyvali")."</option>";
+	echo "<option value='hyllytaso' $selsorttaus[hyllytaso]>".t("Hyllytaso")."</option>";
+	echo "</select>";
+
+	$selsorttaus = array();
+
+	if ($sorttauskentan_jarjestys3 == 'hyllytaso') {
+		$selsorttaus['hyllytaso'] = "SELECTED";
+	}
+	elseif ($sorttauskentan_jarjestys3 == 'hyllynro') {
+		$selsorttaus['hyllynro'] = "SELECTED";
+	}
+	elseif ($sorttauskentan_jarjestys3 == 'hyllyalue') {
+		$selsorttaus['hyllyalue'] = "SELECTED";
+	}
+	else {
+		$selsorttaus['hyllyvali'] = "SELECTED";
+	}
+
+	echo "<select name='sorttauskentan_jarjestys3'>";
+	echo "<option value='hyllyalue'  $selsorttaus[hyllyalue]>".t("Hyllyalue")."</option>";
+	echo "<option value='hyllynro' $selsorttaus[hyllynro]>".t("Hyllynro")."</option>";
+	echo "<option value='hyllyvali' $selsorttaus[hyllyvali]>".t("Hyllyvali")."</option>";
+	echo "<option value='hyllytaso' $selsorttaus[hyllytaso]>".t("Hyllytaso")."</option>";
+	echo "</select>";
+
+	$selsorttaus = array();
+
+	if ($sorttauskentan_jarjestys4 == 'hyllyalue') {
+		$selsorttaus['hyllyalue'] = "SELECTED";
+	}
+	elseif ($sorttauskentan_jarjestys4 == 'hyllynro') {
+		$selsorttaus['hyllynro'] = "SELECTED";
+	}
+	elseif ($sorttauskentan_jarjestys4 == 'hyllyvali') {
+		$selsorttaus['hyllyvali'] = "SELECTED";
+	}
+	else {
+		$selsorttaus['hyllytaso'] = "SELECTED";
+	}
+
+	echo "<select name='sorttauskentan_jarjestys4'>";
+	echo "<option value='hyllyalue'  $selsorttaus[hyllyalue]>".t("Hyllyalue")."</option>";
+	echo "<option value='hyllynro' $selsorttaus[hyllynro]>".t("Hyllynro")."</option>";
+	echo "<option value='hyllyvali' $selsorttaus[hyllyvali]>".t("Hyllyvali")."</option>";
+	echo "<option value='hyllytaso' $selsorttaus[hyllytaso]>".t("Hyllytaso")."</option>";
+	echo "</select>";
+	echo "</td>";
+
+	echo "</tr>";
+
+	echo "</table>";
+
+	echo "<br><input type='submit' name='tulosta' value='".t("Aja")."'>";
+	echo "</form><br><br>";
+
 	// jos paat ykkˆseks niin ei koita muokata/tulostaa file‰, vaan ekottaa filen polun ja nimen
 	$debug = "0";
 
-	if ($tee == 'TULOSTA') {
+
+	if ($tee == 'TULOSTA' and isset($tulosta)) {
 
 		$tulostimet[0] = "Inventointi";
 		if (count($komento) == 0) {
@@ -78,7 +327,7 @@
 		$sorttauskentan_jarjestys sorttauskentta";
 		$groupby = " tuote.tuoteno, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, varastopaikka, inventointiaika, tuotepaikat.saldo ";
 
-		if(($try != '' and $osasto != '') or ($ahyllyalue != '' and $lhyllyalue != '') or ($toimittaja != '') or ($tuotemerkki != '')) {
+		if(($tryt != '' and $osastot != '') or ($ahyllyalue != '' and $lhyllyalue != '') or ($toimittaja != '') or ($tuotemerkki != '')) {
 			///* Inventoidaan *///
 
 			//n‰ytet‰‰n vain $top myydyint‰ tuotetta
@@ -94,8 +343,7 @@
 							JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = ''
 							WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
 							and tilausrivi.tyyppi 			= 'L'
-							and tilausrivi.osasto 			= '$osasto'
-							and tilausrivi.try 				= '$try'
+							$lisa
 							and tilausrivi.laskutettuaika	>= '$vva-$kka-$ppa'
 							GROUP BY 1
 							ORDER BY summa desc
@@ -110,28 +358,26 @@
 				$tuotenumerot = substr($tuotenumerot,0,-1);
 
 				if ($tuotenumerot != '') {
-					$lisa = " and tuote.tuoteno in ($tuotenumerot) ";
+					$tuotelisa = " and tuote.tuoteno in ($tuotenumerot) ";
 				}
 				else {
-					$lisa = "";
+					$tuotelisa = "";
 				}
 
 			}
 
 			$where = "";
 
-			if ($try != '' and $osasto != '') {
+			if ($tryt != '' and $osastot != '') {
 				///* Inventoidaan osaston tai tuoteryhm‰n perusteella *///
-				$kutsu .= " ".t("Osasto:")."$osasto ".t("Tuoteryhm‰:")."$try ";
+				$kutsu .= " ".t("Osasto:")."$osastot ".t("Tuoteryhm‰:")."$tryt ";
 
 				$yhtiotaulu = "tuote";
 				$from 		= " FROM tuote use index (osasto_try_index) ";
 				$join 		= " JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $datesubnow $invaamatta $extra ";
 				$lefttoimi 	= " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno ";
 
-				$where		= " and tuote.osasto = '$osasto'
-								and tuote.try = '$try'
-								and tuote.ei_saldoa	= '' $lisa ";
+				$where		= " $lisa and tuote.ei_saldoa = '' $tuotelisa ";
 			}
 
 			if ($tuotemerkki != '') {
@@ -157,7 +403,7 @@
 				if ($from == '') {
 					$yhtiotaulu = "tuotepaikat";
 					$from 		= " FROM tuotepaikat ";
-					$join 		= " JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = '' $lisa ";
+					$join 		= " JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = '' $tuotelisa ";
 					$lefttoimi 	= " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuotepaikat.yhtio and tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno ";
 
 						$where		= "	and concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso),5, '0')) >=
@@ -183,7 +429,7 @@
 					$yhtiotaulu = "tuotteen_toimittajat";
 					$from 		= " FROM tuotteen_toimittajat ";
 					$join 		= " JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio=tuotteen_toimittajat.yhtio and tuotepaikat.tuoteno=tuotteen_toimittajat.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $datesubnow $invaamatta $extra
-									JOIN tuote on tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno and tuote.ei_saldoa = '' $lisa ";
+									JOIN tuote on tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno and tuote.ei_saldoa = '' $tuotelisa ";
 
 					$where		= " and tuotteen_toimittajat.toimittaja = '$toimittaja'";
 				}
@@ -329,10 +575,7 @@
 		}
 	}
 
-	//echo "<pre>$query</pre><br>";
-
-
-	if ($tee == "TULOSTA") {
+	if ($tee == 'TULOSTA' and isset($tulosta)) {
 		if (mysql_num_rows($saldoresult) > 0 ) {
 			//kirjoitetaan  faili levylle..
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
@@ -559,250 +802,6 @@
 
 			$tee = "";
 		}
-	}
-
-	if ($tee == '') {
-
-		echo "<form name='inve' action='$PHP_SELF' method='post' enctype='multipart/form-data' autocomplete='off'>";
-		echo "<input type='hidden' name='tee' value='TULOSTA'>";
-
-		echo "<br><table>";
-		echo "<tr><th>".t("Anna osasto ja tuoteryhm‰:")."</th>
-		<td><input type='text' size='6' name='osasto'>
-		<input type='text' size='6' name='try'>
-		</td></tr>";
-		echo "<tr><th>".t("Ja listaa vain myydyimm‰t:")."</th>
-		<td><input type='text' size='6' name='top'> ".t("tuotetta").".
-		</td></tr>";
-
-		echo "<tr><td class='back'>".t("ja/tai")."...</td></tr>";
-
-		echo "<tr><th>".t("Anna alkuvarastopaikka:")."</th>
-		<td><input type='text' size='6' name='ahyllyalue'>
-		<input type='text' size='6' name='ahyllynro'>
-		<input type='text' size='6' name='ahyllyvali'>
-		<input type='text' size='6' name='ahyllytaso'>
-		</td></tr>";
-
-		echo "<tr><th>".t("ja loppuvarastopaikka:")."</th>
-		<td><input type='text' size='6' name='lhyllyalue'>
-		<input type='text' size='6' name='lhyllynro'>
-		<input type='text' size='6' name='lhyllyvali'>
-		<input type='text' size='6' name='lhyllytaso'>
-		</td></tr>";
-
-		echo "<tr><td class='back'>".t("ja/tai")."...</td></tr>";
-
-		echo "<tr><th>".t("Anna toimittajanumero(ytunnus):")."</th>
-		<td><input type='text' size='25' name='toimittaja'>
-		</td></tr>";
-
-		echo "<tr><td class='back'>".t("ja/tai")."...</td></tr>";
-
-		echo "<tr><th>".t("Valitse tuotemerkki:")."</th>";
-
-		$query = "	SELECT distinct tuotemerkki
-					FROM tuote use index (yhtio_tuotemerkki)
-					WHERE yhtio='$kukarow[yhtio]'
-					$poislisa
-					and tuotemerkki != ''
-					ORDER BY tuotemerkki";
-		$sresult = mysql_query($query) or pupe_error($query);
-
-		echo "<td><select name='tuotemerkki'>";
-		echo "<option value=''>".t("Ei valintaa")."</option>";
-		while($srow = mysql_fetch_array ($sresult)){
-			echo "<option value='$srow[0]'>$srow[0]</option>";
-		}
-		echo "</td></tr>";
-
-		echo "<tr><td class='back'><br></td></tr>";
-
-        echo "<tr><td class='back' colspan='2'>".t("tai inventoi raportin avulla")."...</th></tr>
-			<tr><th>".t("Valitse raportti")."</th><td><select name='raportti'>
-			<option value=''>".t("Valitse")."</option>
-			<option value='vaarat'>".t("V‰‰r‰t saldot")."</option>
-			<option value='loppuneet'>".t("Loppuneet tuotteet")."</option>
-			<option value='negatiiviset'>".t("Kaikki miinus-saldolliset")."</option>
-			</select>
-			</td></tr>";
-
-		if (!isset($kka))
-			$kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-		if (!isset($vva))
-			$vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-		if (!isset($ppa))
-			$ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-
-		if (!isset($kkl))
-			$kkl = date("m");
-		if (!isset($vvl))
-			$vvl = date("Y");
-		if (!isset($ppl))
-			$ppl = date("d");
-
-
-		echo "<tr><th>".t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
-			<td><input type='text' name='ppa' value='$ppa' size='3'>
-			<input type='text' name='kka' value='$kka' size='3'>
-			<input type='text' name='vva' value='$vva' size='5'></td>
-			</tr><tr><th>".t("Syˆt‰ loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
-			<td><input type='text' name='ppl' value='$ppl' size='3'>
-			<input type='text' name='kkl' value='$kkl' size='3'>
-			<input type='text' name='vvl' value='$vvl' size='5'>";
-
-		echo "<tr><td class='back'><br></td></tr>";
-		echo "<tr><td class='back' colspan='2'>".t("Valitse ehdoista")."...</th></tr>";
-
-
-		echo "<tr><th>".t("Listaa tuotteet:")."</th>";
-
-		$sel1 = "";
-		$sel2 = "";
-
-		if ($arvomatikka == 'S') {
-			$sel1 = "SELECTED";
-		}
-		elseif ($arvomatikka == 'N') {
-			$sel2 = "SELECTED";
-		}
-
-		echo "<td><select name='arvomatikka'>";
-		echo "<option value=''>".t("Kaikki")."</option>";
-		echo "<option value='S' $sel1>".t("Saldolliset")."</option>";
-		echo "<option value='N' $sel2>".t("Ei nolla saldollisia")."</option>";
-		echo "</td></tr>";
-
-		echo "<tr><th>".t("Tulosta hyllyss‰ oleva m‰‰r‰:")."</th>
-		<td><input type='checkbox' name='naytasaldo'></td>
-		</tr>";
-
-
-		echo "<tr><th>".t("Listaa myˆs tuotteet jotka ovat inventoitu l‰hiaikoina:")."</th>
-		<td><input type='checkbox' name='naytainvtuot'></td>
-		</tr>";
-
-		echo "<tr><th>".t("Listaa vain tuotteet joita ei ole inventoitu p‰iv‰m‰‰r‰n‰ tai sen j‰lkeen:")."</th>
-			<td><input type='text' name='ippa' value='$ippa' size='3'>
-			<input type='text' name='ikka' value='$ikka' size='3'>
-			<input type='text' name='ivva' value='$ivva' size='5'></td>
-		</tr>";
-
-		echo "<tr><th>".t("J‰rjest‰ lista:")."</th>";
-
-		$sel3 = "";
-		$sel4 = "";
-
-		if ($jarjestys == '') {
-			$sel3 = "SELECTED";
-		}
-		else {
-			$sel4 = "SELECTED";
-		}
-
-		echo "<td><select name='jarjestys'>";
-		echo "<option value=''  $sel3>".t("Osoitej‰rjestykseen")."</option>";
-		echo "<option value='tuoteno' $sel4>".t("Tuotenumeroj‰rjestykseen")."</option>";
-
-		echo "</td></tr>";
-
-		echo "<tr><th>",t("J‰rjest‰ sorttauskentt‰"),":</th>";
-
-		$selsorttaus = array();
-
-		if ($sorttauskentan_jarjestys1 == 'hyllytaso') {
-			$selsorttaus['hyllytaso'] = "SELECTED";
-		}
-		elseif ($sorttauskentan_jarjestys1 == 'hyllynro') {
-			$selsorttaus['hyllynro'] = "SELECTED";
-		}
-		elseif ($sorttauskentan_jarjestys1 == 'hyllyvali') {
-			$selsorttaus['hyllyvali'] = "SELECTED";
-		}
-		else {
-			$selsorttaus['hyllyalue'] = "SELECTED";
-		}
-
-		echo "<td><select name='sorttauskentan_jarjestys1'>";
-		echo "<option value='hyllyalue'  $selsorttaus[hyllyalue]>".t("Hyllyalue")."</option>";
-		echo "<option value='hyllynro' $selsorttaus[hyllynro]>".t("Hyllynro")."</option>";
-		echo "<option value='hyllyvali' $selsorttaus[hyllyvali]>".t("Hyllyvali")."</option>";
-		echo "<option value='hyllytaso' $selsorttaus[hyllytaso]>".t("Hyllytaso")."</option>";
-		echo "</select>";
-
-		$selsorttaus = array();
-
-		if ($sorttauskentan_jarjestys2 == 'hyllytaso') {
-			$selsorttaus['hyllytaso'] = "SELECTED";
-		}
-		elseif ($sorttauskentan_jarjestys2 == 'hyllyalue') {
-			$selsorttaus['hyllyalue'] = "SELECTED";
-		}
-		elseif ($sorttauskentan_jarjestys2 == 'hyllyvali') {
-			$selsorttaus['hyllyvali'] = "SELECTED";
-		}
-		else {
-			$selsorttaus['hyllynro'] = "SELECTED";
-		}
-
-		echo "<select name='sorttauskentan_jarjestys2'>";
-		echo "<option value='hyllyalue'  $selsorttaus[hyllyalue]>".t("Hyllyalue")."</option>";
-		echo "<option value='hyllynro' $selsorttaus[hyllynro]>".t("Hyllynro")."</option>";
-		echo "<option value='hyllyvali' $selsorttaus[hyllyvali]>".t("Hyllyvali")."</option>";
-		echo "<option value='hyllytaso' $selsorttaus[hyllytaso]>".t("Hyllytaso")."</option>";
-		echo "</select>";
-
-		$selsorttaus = array();
-
-		if ($sorttauskentan_jarjestys3 == 'hyllytaso') {
-			$selsorttaus['hyllytaso'] = "SELECTED";
-		}
-		elseif ($sorttauskentan_jarjestys3 == 'hyllynro') {
-			$selsorttaus['hyllynro'] = "SELECTED";
-		}
-		elseif ($sorttauskentan_jarjestys3 == 'hyllyalue') {
-			$selsorttaus['hyllyalue'] = "SELECTED";
-		}
-		else {
-			$selsorttaus['hyllyvali'] = "SELECTED";
-		}
-
-		echo "<select name='sorttauskentan_jarjestys3'>";
-		echo "<option value='hyllyalue'  $selsorttaus[hyllyalue]>".t("Hyllyalue")."</option>";
-		echo "<option value='hyllynro' $selsorttaus[hyllynro]>".t("Hyllynro")."</option>";
-		echo "<option value='hyllyvali' $selsorttaus[hyllyvali]>".t("Hyllyvali")."</option>";
-		echo "<option value='hyllytaso' $selsorttaus[hyllytaso]>".t("Hyllytaso")."</option>";
-		echo "</select>";
-
-		$selsorttaus = array();
-
-		if ($sorttauskentan_jarjestys4 == 'hyllyalue') {
-			$selsorttaus['hyllyalue'] = "SELECTED";
-		}
-		elseif ($sorttauskentan_jarjestys4 == 'hyllynro') {
-			$selsorttaus['hyllynro'] = "SELECTED";
-		}
-		elseif ($sorttauskentan_jarjestys4 == 'hyllyvali') {
-			$selsorttaus['hyllyvali'] = "SELECTED";
-		}
-		else {
-			$selsorttaus['hyllytaso'] = "SELECTED";
-		}
-
-		echo "<select name='sorttauskentan_jarjestys4'>";
-		echo "<option value='hyllyalue'  $selsorttaus[hyllyalue]>".t("Hyllyalue")."</option>";
-		echo "<option value='hyllynro' $selsorttaus[hyllynro]>".t("Hyllynro")."</option>";
-		echo "<option value='hyllyvali' $selsorttaus[hyllyvali]>".t("Hyllyvali")."</option>";
-		echo "<option value='hyllytaso' $selsorttaus[hyllytaso]>".t("Hyllytaso")."</option>";
-		echo "</select>";
-		echo "</td>";
-
-		echo "</tr>";
-
-		echo "</table>";
-
-		echo "<br><input type='Submit' value='".t("Aja")."'>";
-		echo "</form>";
 	}
 
 	require ("inc/footer.inc");

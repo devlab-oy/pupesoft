@@ -1,6 +1,6 @@
 <?php
 
-	if($_POST["tallennaaineisto"] == "yes") {
+	if ($_POST["tallennaaineisto"] == "yes") {
 		$lataa_tiedosto=1;
 	}
 
@@ -11,20 +11,20 @@
 		exit;
 	}
 
-	if($toim == "HYVAKSYNTA") {
-		echo "<font class='head'>".t("Tuntien hyväksyntä ja tarkastelu")."</font><hr><br<br>";
+	if ($toim == "HYVAKSYNTA") {
+		echo "<font class='head'>".t("Tuntien hyväksyntä ja tarkastelu")."</font><hr>";
 	}
-	elseif($toim == "VIENTI") {
-		echo "<font class='head'>".t("Tuntien vienti")."</font><hr><br<br>";
+	elseif ($toim == "VIENTI") {
+		echo "<font class='head'>".t("Tuntien vienti")."</font><hr>";
 	}
-	elseif($toim == "MYYNTI") {
-		echo "<font class='head'>".t("Tuntiseuranta")."</font><hr><br<br>";
+	elseif ($toim == "MYYNTI") {
+		echo "<font class='head'>".t("Tuntiseuranta")."</font><hr>";
 	}
-	elseif($toim == "KULUNVALVONTA") {
-		echo "<font class='head'>".t("Kulunvalvonta")."</font><hr><br<br>";
+	elseif ($toim == "KULUNVALVONTA") {
+		echo "<font class='head'>".t("Kulunvalvonta")."</font><hr>";
 	}
-	elseif($toim == "YHTEENVETO") {
-		echo "<font class='head'>".t("Tuntiyhteenveto")."</font><hr><br<br>";
+	elseif ($toim == "YHTEENVETO") {
+		echo "<font class='head'>".t("Tuntiyhteenveto")."</font><hr>";
 	}
 
 	/*
@@ -53,16 +53,15 @@
 
 		$tilitoimiston_email sisältää sähköpostiosoitteen, johon tuntikirjaukset viedään emailin liitetiedostona
 	*/
-
-	if(!function_exists("tarkista_erittelyn_oikeellisuus")) {
+	if (!function_exists("tarkista_erittelyn_oikeellisuus")) {
 		function tarkista_erittelyn_oikeellisuus($yhtio, $kuka="", $sisaanaika="") {
 
 			//	Arvotaan Where
 			$where = " WHERE yhtio = '$yhtio'";
-			if($kuka != "") {
+			if ($kuka != "") {
 				$where .= " and kuka='$kuka'";
 			}
-			if($sisaanaika != "") {
+			if ($sisaanaika != "") {
 				$where .= "and aika='$sisaanaika'";
 			}
 
@@ -87,7 +86,7 @@
 						$where
 						HAVING tyoaika<>erittelyt or tyoaika IS NULL or erittelyt IS NULL and tyoaika>0";
 			$kirjtark = mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($kirjtark) > 0) {
+			if (mysql_num_rows($kirjtark) > 0) {
 				return false;
 			}
 
@@ -95,17 +94,17 @@
 		}
 	}
 
-	if(!function_exists("tallennaerittely")) {
+	if (!function_exists("tallennaerittely")) {
 		function tallennaerittely($user, $ktunnus, $etunnus, $minuuttimaara, $laatu, $otunnus="",$ylityo=0) {
 			global $kukarow, $toim;
 
 			$return = TRUE;
-			if($laatu == "") {
+			if ($laatu == "") {
 				echo "<font class='error'>".t("VIRHE: Työnlaatu on aina annettava.")."</font><br>";
 				$return = FALSE;
 			}
 
-			if($minuuttimaara <= 0) {
+			if ($minuuttimaara <= 0) {
 				echo "<font class='error'>".t("VIRHE: Työaika on virheellinen.")."</font><br>";
 				$return = FALSE;
 			}
@@ -115,12 +114,12 @@
 						FROM kulunvalvonta
 						WHERE yhtio = '$user[yhtio]' and kuka='$user[kuka]' and suunta = 'I' and tunnus = '$ktunnus'";
 			$result = mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($result) == 0) {
+			if (mysql_num_rows($result) == 0) {
 				echo "<font class='error'>".t("VIRHE: Alkuperäinen kirjaus on kadoksissa.")."</font>";
 				$return = FALSE;
 			}
 
-			if($return) {
+			if ($return) {
 				$kulu   = mysql_fetch_array($result);
 
 				//jos ollaan hyvaksyjia, olleen myös muokkaajia
@@ -132,7 +131,7 @@
 				}
 				$querylisa = "";
 				//	Päivitetään vanhaa tai lisätään uusi jos meillä ei ole tunnusta
-				if($etunnus > 0) {
+				if ($etunnus > 0) {
 					$query = " UPDATE kulunvalvonta SET muokkaaja = '$muokkaaja', muokattu = now(),";
 					$query2 = " WHERE yhtio='$user[yhtio]' and tunnus = '$etunnus'";
 				}
@@ -248,7 +247,7 @@
 			echo "<br><font class='info'>Ei Erittelymerkintöjä</font>";
 		}
 		//listataan henkilöt yks kerrallaan, haetaan aina henkilö kerrallaan kuukausittaiset erittelyt
-		while($hyvaksytyt = mysql_fetch_array($result)) {
+		while ($hyvaksytyt = mysql_fetch_array($result)) {
 			if ($hyvaksytyt["kuka"] != $edkuka) {
 				echo "</tr><td NOWRAP>$hyvaksytyt[nimi]</td>";
 			}
@@ -272,7 +271,7 @@
 
 				$minuuttisummares = mysql_query($query2) or pupe_error($query2);
 
-				$query3 = "	SELECT aika, minuuttimaara, lasku.nimi nimi, tyyppi, kuka, seuranta, kulunvalvonta.otunnus, if(kulunvalvonta.otunnus >0, concat_ws(' ',kulunvalvonta.otunnus,laskun_lisatiedot.seuranta,lasku.nimi),' ') tiedot
+				$query3 = "	SELECT aika, minuuttimaara, lasku.nimi nimi, tyyppi, kuka, seuranta, kulunvalvonta.otunnus, if (kulunvalvonta.otunnus >0, concat_ws(' ',kulunvalvonta.otunnus,laskun_lisatiedot.seuranta,lasku.nimi),' ') tiedot
 							FROM kulunvalvonta
 							LEFT JOIN lasku ON lasku.tunnus=kulunvalvonta.otunnus
 							LEFT JOIN laskun_lisatiedot ON laskun_lisatiedot.otunnus=kulunvalvonta.otunnus
@@ -297,7 +296,7 @@
 
 						echo "<table><tr><td colspan='4' align='center'>$hyvaksytyt[nimi] $i2.$kuukausi.$vuosi</td></tr><tr><th>".t("Projekti")."</th><th>".t("Työn laatu")."</th><th>".t("Tuntimäärä")."</th></tr>";
 						//lätkästään popupin sisältö
-						while($lisatiedot = mysql_fetch_array($lisatiedotres)) {
+						while ($lisatiedot = mysql_fetch_array($lisatiedotres)) {
 							echo "<tr><td NOWRAP>$lisatiedot[tiedot]</td><td>$lisatiedot[tyyppi]</td><td align='center'>". sprintf("%02d",floor($lisatiedot["minuuttimaara"]/60)).":".sprintf("%02d",$lisatiedot["minuuttimaara"]%60)."</td></tr>";
 						}
 						echo "</table>
@@ -314,7 +313,6 @@
 		echo "</tr></table>";
 	}
 
-
 	/*
 		Tuntien vienti EmCe-palkanlaskentaan
 
@@ -330,10 +328,8 @@
 		vko-ylityö perusosa = 5500
 		50% vko ylityö = 5501
 		lomapäivät = ??
-
 	*/
-
-	if($toim == "VIENTI") {
+	if ($toim == "VIENTI") {
 
 		/*
 
@@ -367,7 +363,7 @@
 						<select name='vuosi' onchange='this.form.submit();'>";
 
 		for ($i=date('Y'); $i > date('Y')-10; $i--) {
-			if($i == $vuosi) {
+			if ($i == $vuosi) {
 				echo "	<option value='$i' SELECTED>$i</option>";
 			}
 			else {
@@ -423,7 +419,7 @@
 
 		$result = mysql_query($query) or pupe_error($query);
 
-		if(mysql_num_rows($result) > 0) {
+		if (mysql_num_rows($result) > 0) {
 
 			/*
 				HYVÄKSYTÄÄNKÖ YLITÖIDEN LÄHETYS TILITOIMISTOON?
@@ -443,7 +439,7 @@
 
 			$edkuka = mt_rand();
 			$ylityosumma = "";
-			while($hyvaksytyt = mysql_fetch_array($result)) {
+			while ($hyvaksytyt = mysql_fetch_array($result)) {
 
 	        	//haetaan käyttäjän henkilötunnus kannasta jos ei ole jo tiedossa
 				if ($edkuka != $hyvaksytyt["kuka"]) {
@@ -452,7 +448,7 @@
 								WHERE yhtio='$kukarow[yhtio]' and nimi='$hyvaksytyt[kuka]'
 								LIMIT 1";
 					$htunnusresult = mysql_query($query) or pupe_error($query);
-					if(mysql_num_rows($htunnusresult) == 0) {
+					if (mysql_num_rows($htunnusresult) == 0) {
 						echo "<font class='error'><br>" . t("VIRHE: Käyttäjän ") . $hyvaksytyt["nimi"] . t(" nimeä ja henkilötunnusta ei löydy toimittajista")."<br></font>";
 						$htunnusvirhe = $hyvaksytyt["kuka"]; //ei herjata samasta käyttäjästä kuin kerran
 						$virhe = TRUE;
@@ -486,10 +482,10 @@
 				if ($puolikkaat >= 0 and $puolikkaat <0.25) {
 					$tuntimaara = $tunnit;
 				}
-				elseif($puolikkaat >= 0.25 and $puolikkaat < 0.5) {
+				elseif ($puolikkaat >= 0.25 and $puolikkaat < 0.5) {
 					$tuntimaara = $tunnit + 0.5;
 				}
-				elseif($puolikkaat >= 0.5 and $puolikkaat < 1.0) {
+				elseif ($puolikkaat >= 0.5 and $puolikkaat < 1.0) {
 					$tuntimaara = $tunnit + 1;
 				}
 
@@ -544,7 +540,7 @@
 					$kustannuspaikka = $hyvaksytyt["otunnus"] . "\n";
 				}
 				//vain työn laatu määritelty, pistetään se sit...
-				elseif($hyvaksytyt["otunnus"] == "0" and $hyvaksytyt["tyyppi"] != "") {
+				elseif ($hyvaksytyt["otunnus"] == "0" and $hyvaksytyt["tyyppi"] != "") {
 					$kustannuspaikka = $hyvaksytyt["tyyppi"] . "\n";
 				}
 
@@ -635,7 +631,7 @@
 			$vrow = mysql_fetch_array($vres);
 			$viivakoodi = $vrow["avain"]; //Jokaisella myyntitykillä on omat tunnukset, joten tuon viivakoodin löydämme kätevästi suoraan kukarowsta
 		}
-		if(!isset($tee)) {
+		if (!isset($tee)) {
 			$tee = "kirjaus";
 		}
 	}
@@ -653,15 +649,13 @@
 	if (mysql_num_rows($result) == 0 and $toim == "HYVAKSYNTA") {
 		$tee = "OHITAKAIKKI";
 	}
-	elseif(	(mysql_num_rows($result) != 1 and $toim != "VIENTI" and $toim != "KULUNVALVONTA" and $toim != "YHTEENVETO") or
-			(mysql_num_rows($result) != 1 and $toim == "KULUNVALVONTA" and isset($viivakoodi))) {
+	elseif ((mysql_num_rows($result) != 1 and $toim != "VIENTI" and $toim != "KULUNVALVONTA" and $toim != "YHTEENVETO") or (mysql_num_rows($result) != 1 and $toim == "KULUNVALVONTA" and isset($viivakoodi))) {
 		echo "<font class='message'>".t("Virhe! Käyttäjää ei löytynyt!")."</font>";
 		$tee = "";
 	}
 
-
 	//	Erittelyiden ja tuntilisäysten poisto
-	if($tee == 'poista_erittely') {
+	if ($tee == 'poista_erittely') {
 		if ($tunnus > 0) {
 			$query = "	DELETE FROM kulunvalvonta
 						WHERE yhtio = '$user[yhtio]' and kuka = '$user[kuka]' and tunnus='$tunnus'";
@@ -672,7 +666,7 @@
 		}
 	}
 
-	if($tee == 'poista_kirjaus') {
+	if ($tee == 'poista_kirjaus') {
 		if ($tunnus > 0) {
 			$query = "	SELECT aika aikasisaan, (
 							SELECT aika
@@ -699,97 +693,97 @@
 	}
 
 	//	Koitetaan kirjautua sisään SQL
-	if($tee == "kirjaa") {
+	if ($tee == "kirjaa") {
 
 		//JOS $virhe on true, niin skipataan kaikki ja heitetään virhe naamalle.
 		$virhe = FALSE;
 
 		//	Suoritetaan kirjaukset kantaan
-		if($toim == "MYYNTI" or $toim == "HYVAKSYNTA") {
+		if ($toim == "MYYNTI" or $toim == "HYVAKSYNTA") {
 
-			if($sisaanaikaStr == "") {
+			if ($sisaanaikaStr == "") {
 				//	Tarkastetaan annetut luvut
 				foreach(array("myyntisisaan_tunti", "myyntisisaan_minuutti", "myyntisisaan_kuukausi", "myyntisisaan_paiva", "myyntisisaan_vuosi") as $tark) {
-					if($$tark < 0 or !is_numeric($$tark)) {
+					if ($$tark < 0 or !is_numeric($$tark)) {
 						echo "<font class='error'>" . t("VIRHE: Aika ei kelpaa!")." ".$$tark."</font><br>";
 						$virhe = TRUE;
 					}
-					if($tark == "myyntisisaan_tunti" and $$tark>=24 ) {
+					if ($tark == "myyntisisaan_tunti" and $$tark>=24 ) {
 						echo "<font class='error'>" . t("VIRHE: Tunnit pitää olla alle 24..")."</font><br>";
 						$virhe = TRUE;
 					}
-					elseif($tark == "myyntisisaan_minuutti" and $$tark>=60 ) {
+					elseif ($tark == "myyntisisaan_minuutti" and $$tark>=60 ) {
 						echo "<font class='error'>" . t("VIRHE: Minuutit pitää olla alle 60..")."</font><br>";
 						$virhe = TRUE;
 					}
-					elseif($tark == "myyntisisaan_paiva" and $$tark>31 ) {
+					elseif ($tark == "myyntisisaan_paiva" and $$tark>31 ) {
 						echo "<font class='error'>" . t("VIRHE: Kuukaudessa ei voi olla yli 31 päivää..")."</font><br>";
 						$virhe = TRUE;
 					}
-					elseif($tark == "myyntisisaan_kuukausi" and $$tark>12 ) {
+					elseif ($tark == "myyntisisaan_kuukausi" and $$tark>12 ) {
 						echo "<font class='error'>" . t("VIRHE: Vuodessa on vain 12 kuukautta..")."</font><br>";
 						$virhe = TRUE;
 					}
-					elseif($tark == "myyntisisaan_vuosi" and strlen($$tark) <> 4) {
+					elseif ($tark == "myyntisisaan_vuosi" and strlen($$tark) <> 4) {
 						echo "<font class='error'>" . t("VIRHE: Vuodessa on normaalisti 4 numeroa..")."</font><br>";
 						$virhe = TRUE;
 					}
 				}
 
-				if(!$virhe) {
+				if (!$virhe) {
 					$sisaanaikaStr = mktime($myyntisisaan_tunti, $myyntisisaan_minuutti, 0, $myyntisisaan_kuukausi, $myyntisisaan_paiva, $myyntisisaan_vuosi);
 				}
 			}
 
-			if($ulosaikaStr == "") {
+			if ($ulosaikaStr == "") {
 
 				//	Tarkastetaan annetut luvut
 				foreach(array("myyntiulos_tunti", "myyntiulos_minuutti", "myyntiulos_kuukausi", "myyntiulos_paiva", "myyntiulos_vuosi") as $tark) {
-					if($$tark < 0 or !is_numeric($$tark)) {
+					if ($$tark < 0 or !is_numeric($$tark)) {
 						echo "<font class='error'>" . t("VIRHE: Aika ei kelpaa!")." ".$$tark."</font><br>";
 						$virhe = TRUE;
 					}
-					if($tark == "myyntiulos_tunti" and $$tark>=24 ) {
+					if ($tark == "myyntiulos_tunti" and $$tark>=24 ) {
 						echo "<font class='error'>" . t("VIRHE: Tunnit pitää olla alle 24..")."</font><br>";
 						$virhe = TRUE;
 					}
-					elseif($tark == "myyntiulos_minuutti" and $$tark>=60 ) {
+					elseif ($tark == "myyntiulos_minuutti" and $$tark>=60 ) {
 						echo "<font class='error'>" . t("VIRHE: Minuutit pitää olla alle 60..")."</font><br>";
 						$virhe = TRUE;
 					}
-					elseif($tark == "myyntiulos_paiva" and $$tark>31 ) {
+					elseif ($tark == "myyntiulos_paiva" and $$tark>31 ) {
 						echo "<font class='error'>" . t("VIRHE: Kuukaudessa ei voi olla yli 31 päivää..")."</font><br>";
 						$virhe = TRUE;
 					}
-					elseif($tark == "myyntiulos_kuukausi" and $$tark>12 ) {
+					elseif ($tark == "myyntiulos_kuukausi" and $$tark>12 ) {
 						echo "<font class='error'>" . t("VIRHE: Vuodessa on vain 12 kuukautta..")."</font><br>";
 						$virhe = TRUE;
 					}
-					elseif($tark == "myyntiulos_vuosi" and strlen($$tark) <> 4) {
+					elseif ($tark == "myyntiulos_vuosi" and strlen($$tark) <> 4) {
 						echo "<font class='error'>" . t("VIRHE: Vuodessa on normaalisti 4 numeroa..")."</font><br>";
 						$virhe = TRUE;
 					}
 				}
 
-				if(!$virhe) {
+				if (!$virhe) {
 					$ulosaikaStr = mktime($myyntiulos_tunti, $myyntiulos_minuutti, 0, $myyntiulos_kuukausi, $myyntiulos_paiva, $myyntiulos_vuosi);
 				}
 			}
 
 			//	Testataan, että sisäänkirjaus on ennen uloskirjausta
-			if($sisaanaikaStr > $ulosaikaStr) {
+			if ($sisaanaikaStr > $ulosaikaStr) {
 				echo "<font class='error'>" . t("VIRHE: Kirjaudu sisään ennen uloskirjausta..")."</font><br>";
 				$virhe = TRUE;
 			}
 
 			//	Testataan, että uloskirjaus ei ole tulevaisuudessa
-			if($ulosaikaStr > time()) {
+			if ($ulosaikaStr > time()) {
 				echo "<font class='error'>" . t("VIRHE: Et voi kirjautua ulos ennakkoon..")."</font><br>";
 				$virhe = TRUE;
 			}
 
 			//	Muokataan vanhaan
-			if($tunnus_sisaan > 0 or $tunnus_ulos > 0) {
+			if ($tunnus_sisaan > 0 or $tunnus_ulos > 0) {
 
 				//	Tarkastamme päällekkäisyydet!
 				$query = "	SELECT unix_timestamp(aika) sisaan,
@@ -809,7 +803,7 @@
 									)";
 				$kirjtarkres = mysql_query($query) or pupe_error($query);
 
-				if(mysql_num_rows($kirjtarkres) == 0) {
+				if (mysql_num_rows($kirjtarkres) == 0) {
 					//jos ollaan hyväksyjiä niin ollaan muokkaajia
 					if ($toim == "HYVAKSYNTA") {
 						$muokkaaja = $kukarow["kuka"];
@@ -857,7 +851,7 @@
 				if ($toim == "HYVAKSYNTA") {
 					$querylisa = ", muokkaaja = '$kukarow[kuka]', muokattu = '".date("Y-m-d H:i:s")."'";
 				}
-				if(mysql_num_rows($kirjtarkres) == 0) {
+				if (mysql_num_rows($kirjtarkres) == 0) {
 					$query  = "INSERT INTO kulunvalvonta SET
 								yhtio 	= '$user[yhtio]',
 								laatija	= '$kukarow[kuka]',
@@ -888,7 +882,7 @@
 			}
 
 			// Ei virheitä mennään erittelyyn
-			if(!$virhe) {
+			if (!$virhe) {
 				//jos tuntien erittely on yhtiön parametreissä sallittu
 				if ($yhtiorow["tuntikirjausten_erittely"] == 'E') {
 					$tee = "erittele";
@@ -907,7 +901,7 @@
 									WHERE yhtio='$user[yhtio]' and kuka='$user[kuka]' AND aika='".date("Y-m-d H:i:s", $sisaanaikaStr)."' and tyyppi = 'RUO'";
 						$tarkres = mysql_query($query) or pupe_error($query);
 						//jos ei oo, kirjataan ja vetästään työajasta toi puol tuntia pois
-						if(mysql_num_rows($tarkres) == 0) {
+						if (mysql_num_rows($tarkres) == 0) {
 							tallennaerittely($user, $ktunnus, 0, 30, "RUO");
 							$tyominuutit = $tyominuutit - 30;
 						}
@@ -927,14 +921,14 @@
 			//	Voisi pohtia pitäisikö nämä vielä tsekata kertaalleen ennen inserttiä?
 
 			//	Kirjaudutaan sisään
-			if($sisaanaikaStr) {
+			if ($sisaanaikaStr) {
 
-				if($sisaanaikaStr > time()) {
+				if ($sisaanaikaStr > time()) {
 					echo "<font class='error'>" . t("VIRHE: Et voi kirjautua sisaan ennakkoon..")."</font><br>";
 					$virhe = TRUE;
 				}
 
-				if(!$virhe) {
+				if (!$virhe) {
 					$query  = "INSERT INTO kulunvalvonta SET
 								yhtio 	= '$user[yhtio]',
 								kuka 	= '$user[kuka]',
@@ -944,22 +938,22 @@
 								suunta 	= 'I'";
 					$result = mysql_query($query) or pupe_error($query);
 
-
+					echo "<br><font class='message'>Kirjauduitte sisään ".date("Y-m-d H:i:s", $sisaanaikaStr);
 					echo "<meta http-equiv='refresh' content='2;URL=kulunvalvonta.php?toim=$toim'><br>";
-					die("Kirjauduitte sisään ".date("Y-m-d H:i:s", $sisaanaikaStr));
+					exit;
 				}
 			}
 
 			//	Kirjaudutaan ulos
-			if($ulosaikaStr) {
+			if ($ulosaikaStr) {
 
 				//	Testataan, että kirjautua ei ole tulevaisuudessa
-				if($ulosaikaStr > time()) {
+				if ($ulosaikaStr > time()) {
 					echo "<font class='error'>" . t("VIRHE: Et voi kirjautua ulos ennakkoon..")."</font><br>";
 					$virhe = TRUE;
 				}
 
-				if(!$virhe) {
+				if (!$virhe) {
 					$query  = "INSERT INTO kulunvalvonta SET
 								yhtio 	= '$user[yhtio]',
 								kuka 	= '$user[kuka]',
@@ -999,14 +993,16 @@
 										WHERE yhtio='$user[yhtio]' and kuka='$user[kuka]' AND aika='".date("Y-m-d H:i:s", $sisaanaika)."' and tyyppi = 'RUO'";
 							$tarkres = mysql_query($query) or pupe_error($query);
 							//jos ei oo, kirjataan ja vetästään työajasta toi puol tuntia pois
-							if(mysql_num_rows($tarkres) == 0) {
+							if (mysql_num_rows($tarkres) == 0) {
 								tallennaerittely($user, $ktunnus, 0, 30, "RUO");
 								$tyominuutit = $tyominuutit - 30;
 							}
 						}
 						tallennaerittely($user, $ktunnus, 0, $tyominuutit, "TYO");
-						echo "<font class='message'>".t("Tunnit kirjattu")."</font>";
+
+						echo "<br><font class='message'>Kirjauduitte ulos ".date("Y-m-d H:i:s", $ulosaikaStr);
 						echo "<meta http-equiv='refresh' content='2;URL=kulunvalvonta.php?toim=$toim'>";
+						exit;
 						$tee = "";
 					}
 				}
@@ -1020,7 +1016,7 @@
 
 	//	Uuden erittelymerkinnan lisays tietokantaan
 	if ($tee == "tallennaerittely") {
-		if(tallennaerittely($user, $ktunnus, $etunnus, ((int) $hours*60+$minutes), $laatu, $otunnus, $ylityo)) {
+		if (tallennaerittely($user, $ktunnus, $etunnus, ((int) $hours*60+$minutes), $laatu, $otunnus, $ylityo)) {
 			$erittelysta = "";
 		}
 		$tee = "erittele";
@@ -1030,7 +1026,7 @@
 
 	if ($toim == 'HYVAKSYNTA') {
 
-		if($tee == "hyvaksy") {
+		if ($tee == "hyvaksy") {
 
 			//eli ollaan jo hyväksyjiä, ja ollaan nyt painettu hyväksytty -nappulaa jonkin tuntierittelun kohdalla. ei anneta hyväksyä, jos erittelyt ei ole kunnossa. muuten
 			//Päivitetään tietokantaan näihin kirjauksiin hyväksytty=1 ja hyväksyjän kukatunnus
@@ -1041,7 +1037,7 @@
 						WHERE yhtio = '$user[yhtio]' and kuka='$user[kuka]' and suunta = 'I' and tunnus = '$ktunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			if(mysql_num_rows($result) == 1) {
+			if (mysql_num_rows($result) == 1) {
 				$kulu = mysql_fetch_array($result);
 
 				if (tarkista_erittelyn_oikeellisuus($kukarow["yhtio"], $kulu["kuka"], $kulu["aika"])) {
@@ -1086,7 +1082,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		//	Oletuksena Virheelliset ja hyväksymättömät
-		if(!isset($rajaus)) {
+		if (!isset($rajaus)) {
 			$rajaus = "VH";
 		}
 
@@ -1096,7 +1092,7 @@
 		$tark=array();
 
 		//	Generoidaan käyttäjälista
-		if(mysql_num_rows($result) > 0) {
+		if (mysql_num_rows($result) > 0) {
 			$uselect = "<select name='viivakoodi' onchange='this.form.submit();'>
 						<option value=''>".t("Näytä lista")."</option>";
 
@@ -1116,7 +1112,7 @@
 							FROM kulunvalvonta
 							WHERE yhtio = '$erittelyita[yhtio]' and kuka='$erittelyita[kuka]' and hyvaksyja=''";
 				$htarkres = mysql_query($query) or pupe_error($query);
-				if(mysql_num_rows($htarkres)>0) {
+				if (mysql_num_rows($htarkres)>0) {
 					$tOK = FALSE;
 				}
 				else {
@@ -1125,7 +1121,7 @@
 
 				$tark[$erittelyita["kuka"]]["eOK"] = $eOK;
 				$tark[$erittelyita["kuka"]]["tOK"] = $tOK;
-				if($rajaus != "") {
+				if ($rajaus != "") {
 					if (	($rajaus == "V" and $eOK==FALSE) or
 							($rajaus == "H" and $tOK==FALSE) or
 							($rajaus == "VH" and ($tOK==FALSE or $eOK==FALSE))) {
@@ -1138,7 +1134,7 @@
 				}
 
 				//OK menuun!
-				if($tark[$erittelyita["kuka"]]["status"] == "OK") {
+				if ($tark[$erittelyita["kuka"]]["status"] == "OK") {
 					$uselect .= "<option value='$erittelyita[avain]' $selected>$erittelyita[nimi]</option>";
 				}
 			}
@@ -1172,7 +1168,7 @@
 
 			while ($erittelyita = mysql_fetch_array($result)) {
 
-				if($tark[$erittelyita["kuka"]]["status"] == "OK") {
+				if ($tark[$erittelyita["kuka"]]["status"] == "OK") {
 						echo "	<tr valign='middle'><td width='200'>$erittelyita[nimi]</td>";
 
 						if ($tark[$erittelyita["kuka"]]["eOK"] === FALSE) {
@@ -1206,22 +1202,22 @@
 	}
 
 	//	Kirjauslomake sisään/ulos
-	if($tee == "kirjaus") {
+	if ($tee == "kirjaus") {
 		if ($toim == "MYYNTI" or $toim == "HYVAKSYNTA") {
 			echo "<font class='message'>".t("Lisää työtunnit")."</font><br>";
 
 			//	Oletuksia!
-			if(!isset($myyntisisaan_paiva)) 	$myyntisisaan_paiva 	= date("d");
-			if(!isset($myyntisisaan_kuukausi))	$myyntisisaan_kuukausi	= date("m");
-			if(!isset($myyntisisaan_vuosi))		$myyntisisaan_vuosi		= date("Y");
-			if(!isset($myyntisisaan_tunti))		$myyntisisaan_tunti		= "08";
-			if(!isset($myyntisisaan_minuutti))	$myyntisisaan_minuutti	= "00";
+			if (!isset($myyntisisaan_paiva)) 	$myyntisisaan_paiva 	= date("d");
+			if (!isset($myyntisisaan_kuukausi))	$myyntisisaan_kuukausi	= date("m");
+			if (!isset($myyntisisaan_vuosi))		$myyntisisaan_vuosi		= date("Y");
+			if (!isset($myyntisisaan_tunti))		$myyntisisaan_tunti		= "08";
+			if (!isset($myyntisisaan_minuutti))	$myyntisisaan_minuutti	= "00";
 
-			if(!isset($myyntiulos_paiva))		$myyntiulos_paiva		= date("d");
-			if(!isset($myyntiulos_kuukausi))	$myyntiulos_kuukausi	= date("m");
-			if(!isset($myyntiulos_vuosi))		$myyntiulos_vuosi		= date("Y");
-			if(!isset($myyntiulos_tunti))		$myyntiulos_tunti		= "16";
-			if(!isset($myyntiulos_minuutti))	$myyntiulos_minuutti	= "00";
+			if (!isset($myyntiulos_paiva))		$myyntiulos_paiva		= date("d");
+			if (!isset($myyntiulos_kuukausi))	$myyntiulos_kuukausi	= date("m");
+			if (!isset($myyntiulos_vuosi))		$myyntiulos_vuosi		= date("Y");
+			if (!isset($myyntiulos_tunti))		$myyntiulos_tunti		= "16";
+			if (!isset($myyntiulos_minuutti))	$myyntiulos_minuutti	= "00";
 
 			echo "<table><tr><th align='center' colspan='5'>" . t("Aloitusaika")."<th>&nbsp;</th><th align='center' colspan='5'>". t("Lopetusaika")."</th></tr>
 			<tr align='center'><th>" . t("Päivä")."</th><th>" . t("Kuukausi")."</th><th>" . t("Vuosi")."</th><th>" . t("Tunti")."</th><th>" . t("Minuutti")."</th><th>&nbsp;</th>
@@ -1270,7 +1266,7 @@
 						DESC LIMIT 40";
 			$kirjautumisetres = mysql_query($query) or pupe_error($query);
 
-			if(mysql_num_rows($kirjautumisetres) > 0) {
+			if (mysql_num_rows($kirjautumisetres) > 0) {
 				//Listataan kirjautumistiedot
 				echo "<table>
 					<tr><th>".t("Sisäänkirjautumisaika")."</th><th>".t("Uloskirjautumisaika")."</th>";
@@ -1281,11 +1277,11 @@
 				echo "<th NOWRAP>".t("Erittelyt")."</th></tr>";
 				echo "<tr>";
 
-				while($kirjautumisetrow = mysql_fetch_array($kirjautumisetres)) {
+				while ($kirjautumisetrow = mysql_fetch_array($kirjautumisetres)) {
 					//	Puretaan ulosajat splitillä
 					list($ulosaika, $ulostunnus) = split("#", $kirjautumisetrow['ulos']);
 
-					if($kirjautumisetrow["tunnus"] == $muokkaa) {
+					if ($kirjautumisetrow["tunnus"] == $muokkaa) {
 						echo "
 							<tr>
 								<form action='$PHP_SELF?oletus_erittely=$oletus_erittely' method='post' name='tallenna'>
@@ -1319,7 +1315,7 @@
 					else {
 
 						// Tsekataan onko nämä ok
-						if(!tarkista_erittelyn_oikeellisuus($user["yhtio"], $user["kuka"], date("Y-m-d H:i:s", $kirjautumisetrow["sisaan"]))) {
+						if (!tarkista_erittelyn_oikeellisuus($user["yhtio"], $user["kuka"], date("Y-m-d H:i:s", $kirjautumisetrow["sisaan"]))) {
 							$class='error';
 						}
 						else {
@@ -1331,8 +1327,8 @@
 								<td><font class='$class'>".date("d.m.Y H:i", $kirjautumisetrow["sisaan"])."</font></td>
 								<td><font class='$class'>".date("d.m.Y H:i", $kirjautumisetrow["ulos"])."</font></td>";
 
-								if($toim == "HYVAKSYNTA") {
-									if($kirjautumisetrow["muokkaaja"] == 0 and $kirjautumisetrow["muokattu"] == '0000-00-00 00:00:00') {
+								if ($toim == "HYVAKSYNTA") {
+									if ($kirjautumisetrow["muokkaaja"] == 0 and $kirjautumisetrow["muokattu"] == '0000-00-00 00:00:00') {
 										$kirjautumisetrow["muokkaaja"] = "";
 										$kirjautumisetrow["muokattu"] = "";
 									}
@@ -1350,7 +1346,7 @@
 								$eTot=0;
 								echo "<td>
 											<table width='100%' align='center' colspan='0' rowspan='0'>";
-								while($eritellyt = mysql_fetch_array($result_eritellyt)) {
+								while ($eritellyt = mysql_fetch_array($result_eritellyt)) {
 									$hours = sprintf("%02d",floor(($eritellyt["minuuttimaara"]/60)));
 									$minutes = sprintf("%02d",$eritellyt["minuuttimaara"]%60);
 
@@ -1406,8 +1402,8 @@
 									</form>
 								</td>";
 						//	Jos ollaan hyväksynnässä ja kaikki on bueno saadaan hyväksyä tämä kirjaus
-						if($toim == "HYVAKSYNTA") {
-							if(tarkista_erittelyn_oikeellisuus($user["yhtio"], $user["kuka"], date("Y-m-d H:i:s", $kirjautumisetrow["sisaan"]))) {
+						if ($toim == "HYVAKSYNTA") {
+							if (tarkista_erittelyn_oikeellisuus($user["yhtio"], $user["kuka"], date("Y-m-d H:i:s", $kirjautumisetrow["sisaan"]))) {
 								echo "
 								<td class='back'>
 									<form action='$PHP_SELF?oletus_erittely=$oletus_erittely' method='post' name='muokkaa'>
@@ -1448,7 +1444,7 @@
 				<form action='$PHP_SELF?toim=$toim' method='post' name='hyvaksymiset_aika'>
 					<select name='listausaika' onChange='this.form.submit();'";
 			foreach($listausajatarr as $selite => $aika) {
-				if($listausaika == $aika) {
+				if ($listausaika == $aika) {
 					echo "<option value='$aika' SELECTED>".t("$selite") . "</option>";
 				}
 				else {
@@ -1484,10 +1480,10 @@
 			$hyvaksytytkirjautumisetres = mysql_query($query) or pupe_error($query);
 
 
-			if(mysql_num_rows($hyvaksytytkirjautumisetres)>0) {
+			if (mysql_num_rows($hyvaksytytkirjautumisetres)>0) {
 				echo "<table><tr><th>" . t("Sisäänkirjautumisaika")."</th><th>" . t("Uloskirjautumisaika")."</th><th>" . t("Työaika")."</th></tr>";
 				$viikkosumma = 0;
-				while($hyvaksytytkirjautumisetrow = mysql_fetch_array($hyvaksytytkirjautumisetres)) {
+				while ($hyvaksytytkirjautumisetrow = mysql_fetch_array($hyvaksytytkirjautumisetres)) {
 					$viikko = date('W', $hyvaksytytkirjautumisetrow["sisaan"]);
 
 					if ($viikko != $vanhaviikko and isset($vanhaviikko)) {
@@ -1532,7 +1528,7 @@
 			$kirjaukseen = true;
 
 			//tarkastetaan onko käyttäjä eritellyt edellisen uloskirjautumisen tunnit
-			if($kulu["suunta"] == "O") {
+			if ($kulu["suunta"] == "O") {
 				//	Haetaan edellinen sisäänkirjaus
 				$query  = " SELECT aika, tunnus
 							FROM kulunvalvonta
@@ -1543,7 +1539,7 @@
 				$edsisaan = mysql_fetch_array($result);
 
 				//	Jos edellisessä kirjauksessa on virheitä mennään takaisin erittelyyn
-				if(!tarkista_erittelyn_oikeellisuus($user["yhtio"], $user["kuka"], $edsisaan["aika"])) {
+				if (!tarkista_erittelyn_oikeellisuus($user["yhtio"], $user["kuka"], $edsisaan["aika"])) {
 					$kirjaukseen = FALSE;
 					$tee = "erittele";
 
@@ -1602,7 +1598,7 @@
 		  	  	// jos ollaan viimeks kirjattu sisään, niin näytetään vaan ulos nappeja
 		  	  	if ($kulu["suunta"] == "I") {
 
-			  	  	echo "<br>&nbsp;<hr><table>";
+			  	  	echo "<table>";
 			  	  	echo "<tr><td width='200' class='back' valign='top'>";
 			  	  	echo "<input type='submit' accesskey='1' name='normout' value='".t("Kirjaudu ulos")."' style='font-size: 25px;'><br>";
 					echo "<input type='hidden' name='tee' value='kirjaa'>";
@@ -1619,7 +1615,7 @@
 
 				echo "<br><br><br>";
 				if ($toim != 'MYYNTI') {
-					echo "<hr><input type='submit' name='peruuta' value='".t("Peruuta kirjaus")."'>";
+//					echo "<hr><input type='submit' name='peruuta' value='".t("Peruuta kirjaus")."'>";
 				}
 				echo "</form>";
 			}
@@ -1627,9 +1623,9 @@
 	}
 
 	//	Eritellään tunnit
-	if($tee == 'erittele') {
+	if ($tee == 'erittele') {
 
-		if($ktunnus > 0) {
+		if ($ktunnus > 0) {
 
 			//	Haetaan meidän eriteltävän kirjauksen työtunnit
 			$query = "	SELECT *,
@@ -1658,7 +1654,7 @@
 						WHERE yhtio = '$user[yhtio]' and tunnus = '$ktunnus'";
 			$kirjausres = mysql_query($query) or pupe_error($query);
 
-			if(mysql_num_rows($kirjausres) == 0) {
+			if (mysql_num_rows($kirjausres) == 0) {
 				die("Kirjaus katosi!");
 			}
 
@@ -1673,7 +1669,7 @@
 							FROM kulunvalvonta
 							WHERE yhtio='$user[yhtio]' and kuka='$user[kuka]' AND aika='$kirjausrow[aika]' and tyyppi = 'RUO'";
 				$tarkres = mysql_query($query) or pupe_error($query);
-				if(mysql_num_rows($tarkres) == 0) {
+				if (mysql_num_rows($tarkres) == 0) {
 					tallennaerittely($user, $ktunnus, 0, 30, "RUO");
 					$ruokatunti = 30;
 				}
@@ -1685,14 +1681,14 @@
 			if ($erittelematta > 0) {
 				echo  "<font class='message'>".t("Erittelemättä: ").sprintf("%02d", floor($erittelematta/60)).":".sprintf("%02d", $erittelematta%60)."<br><br></font><br>";
 			}
-			elseif($erittelematta < 0) {
+			elseif ($erittelematta < 0) {
 				echo  "<font class='error'>".t("Ylimääräistä erittelyä: ").sprintf("%02d", floor(($erittelematta*-1)/60)).":".sprintf("%02d", ($erittelematta*-1)%60)."<br><br></font><br>";
 			}
 
 			echo "
 			<table>
 			<tr><th width='280'>".t("Projekti")."</th><th>".t("Työn laatu")."</th><th>".t("Tunnit")."</th><th>".t("Minuutit")."</th>";
-			if($toim == "HYVAKSYNTA") {
+			if ($toim == "HYVAKSYNTA") {
 				echo "<th>" . t("Viimeisin muokkaaja")."</th>";
 				echo "<th>" . t("Muokkausaika")."</th>";
 			}
@@ -1700,15 +1696,15 @@
 			echo "</tr>";
 
 			//KYSELLÄÄN JO ERITELLYT RIVIT TIETOKANNASTA
-			$query = "	SELECT kulunvalvonta.*, concat(lasku.tunnus,' - ', lasku.nimi) projekti, if(avainsana.selitetark IS NULL, '".t("Ruokailu")."', avainsana.selitetark) tyon_laatu, muokkaaja, muokattu
+			$query = "	SELECT kulunvalvonta.*, concat(lasku.tunnus,' - ', lasku.nimi) projekti, if (avainsana.selitetark IS NULL, '".t("Ruokailu")."', avainsana.selitetark) tyon_laatu, muokkaaja, muokattu
 						FROM kulunvalvonta
 						LEFT JOIN lasku ON lasku.yhtio=kulunvalvonta.yhtio and lasku.tunnus=kulunvalvonta.otunnus
 						LEFT JOIN avainsana ON avainsana.yhtio=kulunvalvonta.yhtio and avainsana.laji='KVERITTELY' and avainsana.selite=kulunvalvonta.tyyppi
 						WHERE kulunvalvonta.yhtio='$user[yhtio]' and kuka='$user[kuka]' and kulunvalvonta.aika='$kirjausrow[aika]' and suunta=''";
 			$result_eritellyt = mysql_query($query) or pupe_error($query);
-			while($eritellyt = mysql_fetch_array($result_eritellyt)) {
+			while ($eritellyt = mysql_fetch_array($result_eritellyt)) {
 
-				if($eritellyt["tunnus"] == $muokkaa) {
+				if ($eritellyt["tunnus"] == $muokkaa) {
 
 					echo "
 					<tr>
@@ -1724,7 +1720,7 @@
 								WHERE yhtio = '$kukarow[yhtio]' and lasku.tila = 'R' and alatila!='X'";
 					$result = mysql_query($query) or pupe_error($query);
 					$projeSel = array($eritellyt["otunnus"] => "SELECTED");
-						while($prow = mysql_fetch_array($result)) {
+						while ($prow = mysql_fetch_array($result)) {
 							echo "<option value='$prow[tunnus]' ".$projeSel[$prow["tunnus"]].">$prow[tunnus] - $prow[nimi]</option>";
 						}
 
@@ -1737,7 +1733,7 @@
 
 					$avainSel = array($eritellyt["tyyppi"] => "SELECTED");
 
-					while($kverittelyrow = mysql_fetch_array($kverittelyres)) {
+					while ($kverittelyrow = mysql_fetch_array($kverittelyres)) {
 						echo "<option value=$kverittelyrow[selite] ".$avainSel[$kverittelyrow["selite"]].">$kverittelyrow[selitetark]</option>";
 					}
 					echo "</select></td>";
@@ -1788,7 +1784,7 @@
 						<td>$minutes</td>";
 					//Jos ollaan hyväksyjiä niin näytetään myös viimeisin muokkaaja ja muokkausaika
 					if ($toim == "HYVAKSYNTA") {
-						if($eritellyt["muokkaaja"] == 0 and $eritellyt["muokattu"] == '0000-00-00 00:00:00') {
+						if ($eritellyt["muokkaaja"] == 0 and $eritellyt["muokattu"] == '0000-00-00 00:00:00') {
 							$eritellyt["muokkaaja"] = "";
 							$eritellyt["muokattu"] = "";
 						}
@@ -1826,11 +1822,11 @@
 				//LISÄÄ ERITTELYYN
 			if (tarkista_erittelyn_oikeellisuus($user["yhtio"], $user["kuka"], $kirjausrow["aika"]))  {
 				echo "<br><font class='message'>Tunnit eritelty, voit nyt sulkea selaimen tai jatkaa työskentelyä.</font><br>";
-				if(!$toim == "HYVAKSYNTA") {
+				if (!$toim == "HYVAKSYNTA") {
 					echo "<meta http-equiv='refresh' content='10;URL=kulunvalvonta.php?toim=$toim'>";
 				}
 			}
-			elseif($erittelematta>0) {
+			elseif ($erittelematta>0) {
 				echo "<tr><td colspan='5' class='back'><br><font class='message'>".t("Lisää uusi")."</font></td></tr>
 						<tr>
 						<td>
@@ -1846,7 +1842,7 @@
 
 						$result = mysql_query($query) or pupe_error($query);
 
-						while($prow = mysql_fetch_array($result)) {
+						while ($prow = mysql_fetch_array($result)) {
 							echo "<option value='$prow[tunnus]'>$prow[tunnusnippu] $prow[nimi]</option>";
 						}
 						echo "</select></td>";
@@ -1859,17 +1855,17 @@
 						  	  	<option selected=yes value=''>".t("Valitse")."</option>";
 
 						//	Arvotaan oletus
-						if(isset($laatu)) {
+						if (isset($laatu)) {
 							$avainSel = array($laatu => "SELECTED");
 						}
 						else {
 							$avainSel = array($oletus_erittely => "SELECTED");
 						}
-						while($kvrow = mysql_fetch_array($result)) {
+						while ($kvrow = mysql_fetch_array($result)) {
 							echo "<option value=$kvrow[selite] ".$avainSel[$kvrow["selite"]].">$kvrow[selitetark]</option>";
 						}
 
-						if($erittelysta != "JOO") {
+						if ($erittelysta != "JOO") {
 							$hours = floor($erittelematta/60);
 							$minutes = $erittelematta%60;
 						}
@@ -1899,7 +1895,7 @@
 
 			echo "	</table><br><br>";
 
-			if($toim == "MYYNTI" or $toim == "HYVAKSYNTA") {
+			if ($toim == "MYYNTI" or $toim == "HYVAKSYNTA") {
 				if ($toim == "HYVAKSYNTA") {
 					echo "	<form action='$PHP_SELF?toim=$toim' method='post' name='tarkistajaform'>
 								<input type='hidden' name='viivakoodi' value='$viivakoodi'>

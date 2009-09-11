@@ -650,7 +650,9 @@
 		$tee = "OHITAKAIKKI";
 	}
 	elseif ((mysql_num_rows($result) != 1 and $toim != "VIENTI" and $toim != "KULUNVALVONTA" and $toim != "YHTEENVETO") or (mysql_num_rows($result) != 1 and $toim == "KULUNVALVONTA" and isset($viivakoodi))) {
-		echo "<font class='message'>".t("Virhe! K‰ytt‰j‰‰ ei lˆytynyt!")."</font>";
+		echo "<br><font class='message'>".t("Virhe! K‰ytt‰j‰‰ ei lˆytynyt!")."</font>";
+		echo "<meta http-equiv='refresh' content='2;URL=kulunvalvonta.php?toim=$toim'><br>";
+		exit;
 		$tee = "";
 	}
 
@@ -1569,12 +1571,12 @@
 				echo "<table>";
 				echo "<tr><th>".t("Nimi")."</th><td>$user[nimi]</td></tr>";
 				echo "<tr><th>".t("Tila")."</th><td>$suunta</td></tr>";
-				echo "<tr><th>".t("Kirjattu")."</th><td>$kulu[aika]</td></tr>";
-				echo "<tr><th>".t("Aika nyt")."</th><td>".date("Y-m-d H:i:s")."</td></tr>";
+				echo "<tr><th>".t("Kirjattu")."</th><td>".tv1dateconv($kulu["aika"], "PITKA")."</td></tr>";
+				echo "<tr><th>".t("Aika nyt")."</th><td>".tv1dateconv(date("Y-m-d H:i:s"), "PITKA")."</td></tr>";
 				echo "</table>";
 
 				// tehd‰‰n k‰yttˆliittym‰napit
-				echo "<br><font class='head'>".t("Valitse kirjaus")."</font><hr>";
+				echo "<br><br><font class='head'>".t("Valitse kirjaus")."</font><hr><br>";
 
 				echo "<form name='napit' action='$PHP_SELF?oletus_erittely=$oletus_erittely' method='post' autocomplete='off'>";
 				echo "<input type='hidden' name='toim' value='$toim'>";
@@ -1582,14 +1584,9 @@
 
 				 // jos ollaan viimeks kirjattu ulos, niin n‰ytet‰‰n vaan sis‰‰n nappeja
 				 if ($kulu["suunta"] == "O" or $kulu['suunta'] == "")  {
-					echo "<table>";
-					echo "<tr><td width='200' class='back' valign='top'>";
 					echo "<input type='submit' accesskey='1' name='normin' value='".t("Kirjaudu sis‰‰n")."' style='font-size: 25px;'><br>";
 					echo "<input type='hidden' name='tee' value='kirjaa'>";
 					echo "<input type='hidden' name='sisaanaikaStr' value='".time()."'>";
-					echo "</td><td class='back'>";
-					echo "</td></tr>";
-					echo "</table>";
 
 					$formi  = "napit";
 					$kentta = "normin";
@@ -1597,23 +1594,15 @@
 
 		  	  	// jos ollaan viimeks kirjattu sis‰‰n, niin n‰ytet‰‰n vaan ulos nappeja
 		  	  	if ($kulu["suunta"] == "I") {
-
-			  	  	echo "<table>";
-			  	  	echo "<tr><td width='200' class='back' valign='top'>";
 			  	  	echo "<input type='submit' accesskey='1' name='normout' value='".t("Kirjaudu ulos")."' style='font-size: 25px;'><br>";
 					echo "<input type='hidden' name='tee' value='kirjaa'>";
 					echo "<input type='hidden' name='ktunnus' value='$ktunnus'>";
 					echo "<input type='hidden' name='ulosaikaStr' value='".time()."'>";
-			  	  	echo "</td><td class='back'>";
-
-			  	  	echo "</td></tr>";
-			  	  	echo "</table>";
 
 			  	  	$formi  = "napit";
 			  	  	$kentta = "normout";
 		  	  	}
 
-				echo "<br><br><br>";
 				if ($toim != 'MYYNTI') {
 //					echo "<hr><input type='submit' name='peruuta' value='".t("Peruuta kirjaus")."'>";
 				}
@@ -1937,6 +1926,7 @@
 		}
 	}
 
+	$ei_kelloa = "X";
 	require ("inc/footer.inc");
 
 ?>

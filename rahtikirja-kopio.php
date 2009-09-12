@@ -8,19 +8,19 @@
 		echo "<font class='error'>Et valinnut yht‰‰n rahtikirjaa!</font><br>";
 		$tee = "";
 	}
-	
+
 	if ($tee == 'tulosta') {
 
 		// rahtikirjojen tulostus vaatii seuraavat muuttujat:
 		// $toimitustapa_varasto	toimitustavan selite!!!!varastopaikan tunnus
 		// $tee						t‰ss‰ pit‰‰ olla teksti tulosta
-		
+
 		if ($yksittainen == "ON") {
 			//T‰ss‰ on haettava tulostettavan tilauksen tiedot
 			$query = "	SELECT toimitustapa, tulostuspaikka, group_concat(otsikkonro) otsikkonro
-						FROM rahtikirjat 
-						WHERE yhtio			= '$kukarow[yhtio]' 
-						and rahtikirjanro	= '$rtunnukset[0]' 
+						FROM rahtikirjat
+						WHERE yhtio			= '$kukarow[yhtio]'
+						and rahtikirjanro	= '$rtunnukset[0]'
 						GROUP BY 1,2
 						LIMIT 1";
 			$ores  = mysql_query($query) or pupe_error($query);
@@ -32,21 +32,21 @@
 		}
 		else {
 			//T‰ss‰ on haettava tulostettavien tilausten tunnukset
-			$query = "	SELECT group_concat(otsikkonro) otsikkonro 
-						FROM rahtikirjat 
-						WHERE yhtio			= '$kukarow[yhtio]' 
-						and rahtikirjanro	in (".implode(",", $rtunnukset).")";
+			$query = "	SELECT group_concat(otsikkonro) otsikkonro
+						FROM rahtikirjat
+						WHERE yhtio			= '$kukarow[yhtio]'
+						and rahtikirjanro	in ('".implode("','", $rtunnukset)."')";
 			$ores  = mysql_query($query) or pupe_error($query);
 			$rrow  = mysql_fetch_array($ores);
-			
+
 			$sel_ltun = explode(",", $rrow["otsikkonro"]);
 		}
-				
+
 		$toimitustapa_varasto = $toimitustapa."!!!!".$varasto;
 		$tee				  = "tulosta";
 
 		require ("rahtikirja-tulostus.php");
-		
+
 		$tee = '';
 		echo "<br>";
 
@@ -157,21 +157,21 @@
 			}
 
 			echo "</select><br><br>";
-			
-			
+
+
 			echo t("Tulosta osoitelaput"),"<br>";
-			
-			
+
+
 			mysql_data_seek($kirre, 0);
-			
+
 			echo "<td>";
 			echo "<select name='valittu_rakiroslapp_tulostin'>";
 			echo "<option value=''>",t("Ei tulosteta"),"</option>";
-			
+
 			while ($kirrow = mysql_fetch_array($kirre)) {
 				echo "<option value='{$kirrow["tunnus"]}'>{$kirrow["kirjoitin"]}</option>";
 			}
-			
+
 			echo "</select><br><br>";
 
 			echo "<br><input type='submit' value='".t("Tulosta valitut")."'>";

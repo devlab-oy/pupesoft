@@ -429,74 +429,32 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "projekti" or mysql_field_name($result, $i) == "kohde" or mysql_field_name($result, $i) == "kustp") {
 
-	if (mysql_field_name($result, $i) == "kustp") {
-		$query = "	SELECT tunnus, nimi
-					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
-					ORDER BY nimi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		if (mysql_field_name($result, $i) == "projekti") $kptyyppi = "P";
+		if (mysql_field_name($result, $i) == "kohde") 	 $kptyyppi = "O";
+		if (mysql_field_name($result, $i) == "kustp") 	 $kptyyppi = "K";
 
-		$sel="";
-		if ($trow[$i] == "") {
-			$sel = "selected";
-		}
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei kustannuspaikkaa")."</option>";
-
-		while ($vrow=mysql_fetch_array($vresult)) {
-			$sel="";
-			if ($trow[$i] == $vrow[0]) {
-				$sel = "selected";
-			}
-			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
-		}
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
-	if (mysql_field_name($result, $i) == "kohde") {
-		$query = "	SELECT tunnus, nimi
-					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
-					ORDER BY nimi";
-		$vresult = mysql_query($query) or pupe_error($query);
+		$tpque = "	SELECT tunnus, nimi 
+					from kustannuspaikka 
+					where yhtio = '$kukarow[yhtio]' 
+					and tyyppi = '$kptyyppi' 
+					and kaytossa != 'E'";
+		$vresult = mysql_query($tpque) or pupe_error($tpque);
 
 		$sel="";
 		if ($trow[$i] == "") {
 			$sel = "selected";
 		}
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei kohdetta")."</option>";
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei valintaa")."</option>";
 
-		while ($vrow=mysql_fetch_array($vresult)) {
+		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow[0]) {
+			if ($trow[$i] == $vrow["tunnus"]) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
-		}
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
-	if (mysql_field_name($result, $i) == "projekti") {
-		$query = "	SELECT tunnus, nimi
-					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
-					ORDER BY nimi";
-		$vresult = mysql_query($query) or pupe_error($query);
-
-		$sel="";
-		if ($trow[$i] == "") {
-			$sel = "selected";
-		}
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value='' $sel>".t("Ei projektia")."</option>";
-
-		while ($vrow=mysql_fetch_array($vresult)) {
-			$sel="";
-			if ($trow[$i] == $vrow[0]) {
-				$sel = "selected";
-			}
-			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+			$ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
 		}
 		$ulos .= "</select></td>";
 		$jatko = 0;

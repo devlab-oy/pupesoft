@@ -203,5 +203,35 @@
 			$jatko = 0;
 		}
 	}
+	
+	if (mysql_field_name($result, $i) == "myynti_projekti" or mysql_field_name($result, $i) == "myynti_kohde" or mysql_field_name($result, $i) == "myynti_kustp") {
+
+		if (mysql_field_name($result, $i) == "myynti_projekti")	$kptyyppi = "P";
+		if (mysql_field_name($result, $i) == "myynti_kohde")	$kptyyppi = "O";
+		if (mysql_field_name($result, $i) == "myynti_kustp")	$kptyyppi = "K";
+
+		$tpque = "	SELECT tunnus, nimi 
+					from kustannuspaikka 
+					where yhtio = '$kukarow[yhtio]' 
+					and tyyppi = '$kptyyppi' 
+					and kaytossa != 'E'";
+		$vresult = mysql_query($tpque) or pupe_error($tpque);
+
+		$sel="";
+		if ($trow[$i] == "") {
+			$sel = "selected";
+		}
+		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei valintaa")."</option>";
+
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow["tunnus"]) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
+		}
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
 
 ?>

@@ -4,7 +4,7 @@
 		$query = "SELECT tunnus FROM karhukierros where pvm=current_date and yhtio='$yhtio' and tyyppi='T'";
 		$result = mysql_query($query) or pupe_error($query);
 		$array = mysql_fetch_array($result);
-		
+
 		if (!mysql_num_rows($result)) {
 			$query = "INSERT INTO karhukierros (pvm,yhtio,tyyppi) values (current_date,'$yhtio','T')";
 			$result = mysql_query($query) or pupe_error($query);
@@ -12,7 +12,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 			$array = mysql_fetch_array($result);
 		}
-		
+
 		$out = $array[0];
 		return $out;
 	}
@@ -90,7 +90,7 @@
 		else {
 			$pdf->draw_text(30, 815,  $yhtiorow["nimi"], $firstpage);
 		}
-		
+
 		//Otsikko
 		$pdf->draw_text(310, 815, t("Tratta", $kieli), $firstpage, $iso);
 		$pdf->draw_text(430, 815, t("Sivu", $kieli)." ".$sivu, 	$firstpage, $norm);
@@ -121,7 +121,7 @@
 						LIMIT 1";
 			$pvm_result = mysql_query($query) or pupe_error($query);
 			$pvm_row = mysql_fetch_array($pvm_result);
-			
+
 			$paiva = substr($pvm_row["pvm"], 8, 2);
 			$kuu   = substr($pvm_row["pvm"], 5, 2);
 			$year  = substr($pvm_row["pvm"], 0, 4);
@@ -129,7 +129,7 @@
 		else {
 			$pvm_row = array();
 			$pvm_row["pvm"] = date("Y-m-d");
-			
+
 			$paiva = date("j");
 			$kuu   = date("n");
 			$year  = date("Y");
@@ -146,7 +146,7 @@
 		$seurday   = date("d",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
 		$seurmonth = date("m",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
 		$seuryear  = date("Y",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
-		
+
 		$pdf->draw_text(310, 761, tv1dateconv($seuryear."-".$seurmonth."-".$seurday), $firstpage, $norm);
 
 		$pdf->draw_text(430, 771, t("Puhelin", $kieli), $firstpage, $pieni);
@@ -177,7 +177,7 @@
 		//toka rivi
 		if ($kaatosumma != 0 and $sivu == 1) {
 			$pdf->draw_text(30,  $kala, t("Kohdistamattomia suorituksia", $kieli),	$firstpage, $norm);
-			
+
 			$oikpos = $pdf->strlen(sprintf("%.2f", $kaatosumma), $norm);
 			$pdf->draw_text(500-$oikpos, $kala, sprintf("%.2f", $kaatosumma),		$firstpage, $norm);
 			$kala -= 13;
@@ -188,7 +188,7 @@
 	}
 
 	function rivi ($firstpage, $summa) {
-		global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $karhukertanro;
+		global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $karhukertanro, $yhtiorow, $kukarow;
 
 		if (($lask == 29 and $sivu == 1) or ($lask == 37 and $sivu > 1)) {
 			$sivu++;
@@ -197,7 +197,7 @@
 			$kala = 605;
 			$lask = 1;
 		}
-		
+
 		$pdf->draw_text(30,  $kala, $row["laskunro"]." / ".$row["viite"],	$firstpage, $norm);
 		$pdf->draw_text(180, $kala, tv1dateconv($row["tapvm"]), 			$firstpage, $norm);
 		$pdf->draw_text(240, $kala, tv1dateconv($row["erpcm"]), 			$firstpage, $norm);
@@ -223,7 +223,7 @@
 		$oikpos = $pdf->strlen($karhukertanro, $norm);
 		$pdf->draw_text(560-$oikpos, $kala, $karhukertanro, 			$firstpage, $norm);
 
-				
+
 		$kala = $kala - 13;
 
 		$lask++;
@@ -331,7 +331,7 @@
 
 	$pieni["height"] 	= 8;
 	$pieni["font"] 		= "Times-Roman";
-	
+
 	$iso["height"] 		= 14;
 	$iso["font"] 		= "Helvetica-Bold";
 
@@ -360,7 +360,7 @@
 					AND ktunnus <= $karhutunnus";
 		$karhukertares = mysql_query($query) or pupe_error($query);
 		$karhukertarow = mysql_fetch_array($karhukertares);
-		
+
 		$karhukertanro = $karhukertarow[0];
 		$ikalaskenta = " TO_DAYS(kk.pvm) - TO_DAYS(l.erpcm) as ika, ";
 	}
@@ -371,18 +371,18 @@
 	}
 
 	$query = "	SELECT l.tunnus, l.tapvm, l.liitostunnus,
-				l.summa-l.saldo_maksettu summa, 
-				l.summa_valuutassa-l.saldo_maksettu_valuutassa summa_valuutassa, 
+				l.summa-l.saldo_maksettu summa,
+				l.summa_valuutassa-l.saldo_maksettu_valuutassa summa_valuutassa,
 				l.erpcm, l.laskunro, l.viite,
 				l.yhtio_toimipaikka, l.valkoodi, l.maksuehto, l.maa,
 				$ikalaskenta
-				max(kk.pvm) as kpvm, 
+				max(kk.pvm) as kpvm,
 				count(distinct kl.ktunnus) as karhuttu
 				FROM lasku l
 				LEFT JOIN karhu_lasku kl on (l.tunnus = kl.ltunnus $kjoinlisa)
 				LEFT JOIN karhukierros kk on (kk.tunnus = kl.ktunnus and kk.tyyppi = 'T')
-				WHERE l.tunnus in ($xquery) 
-				and l.yhtio = '$kukarow[yhtio]' 
+				WHERE l.tunnus in ($xquery)
+				and l.yhtio = '$kukarow[yhtio]'
 				and l.tila = 'U'
 				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
 				ORDER BY l.erpcm";
@@ -438,7 +438,7 @@
 		if ($tee != 'tulosta_tratta') {
 			liita_lasku($karhukierros,$row['tunnus']);
 		}
-		$summa=rivi($firstpage,$summa);
+		$summa = rivi($firstpage, $summa);
 	}
 
 	$loppusumma = sprintf('%.2f', $summa+$kaatosumma);

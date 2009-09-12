@@ -4,7 +4,7 @@ if(!function_exists("asiakashintatarkista")) {
 	function asiakashintatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $alasveto;
 
-		static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn;
+		static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind;
 
 		if (mysql_field_name($result, $i) == "hinta") {
 			if (trim($t[$i]) == '') {
@@ -88,6 +88,7 @@ if(!function_exists("asiakashintatarkista")) {
 
 		if (mysql_field_name($result, $i) == "tuoteno") {
 			$chtuoteno = $t[$i];
+			$chtuoteno_ind = $i;
 
 			if ($chtuoteno != '') {
 				$query = "	SELECT tuoteno
@@ -196,11 +197,17 @@ if(!function_exists("asiakashintatarkista")) {
 
 			$aquery = "	SELECT ytunnus
 						FROM asiakashinta
-						WHERE yhtio='$kukarow[yhtio]'$and and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm' and minkpl = $chminkpl and maxkpl = $chmaxkpl and tunnus != '$tunnus'";
+						WHERE yhtio='$kukarow[yhtio]'
+						$and
+						and alkupvm = '$chalkupvm'
+						and loppupvm = '$chloppupvm'
+						and minkpl = $chminkpl
+						and maxkpl = $chmaxkpl
+						and tunnus != '$trow[$i]'";
 			$dsresult = mysql_query($aquery) or pupe_error($aquery);
 
 			if (mysql_num_rows($dsresult) > 0) {
-				$virhe[$i] = t("VIRHE: Näillä tiedoilla on jo asiakashinta järjestelmässä!");
+				$virhe[$chtuoteno_ind] = $virhe[$i] = t("VIRHE: Näillä tiedoilla on jo asiakashinta järjestelmässä!");
 			}
 		}
 	}

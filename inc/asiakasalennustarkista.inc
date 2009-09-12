@@ -4,15 +4,11 @@ if(!function_exists("asiakasalennustarkista")) {
 	function asiakasalennustarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $alasveto;
 
-		static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn;
-
-		if (mysql_field_name($result, $i) == "tunnus") {
-			$tunnus = $t[$i];
-		}
+		static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind;
 
 		if (mysql_field_name($result, $i) == "alennus") {
 			if (trim($t[$i]) == '') {
-				$virhe[$i] = "".t("Tieto puuttuu!")."";
+				$virhe[$i] = t("Tieto puuttuu!");
 			}
 		}
 
@@ -85,13 +81,15 @@ if(!function_exists("asiakasalennustarkista")) {
 				$sresult = t_avainsana("ASIAKASRYHMA", "", "and avainsana.selite = '$chasiakas_ryhma'");
 
 				if (mysql_num_rows($sresult) == 0) {
-					$virhe[$i] = "".t("Asiakasryhmä puuttuu tai sitä ei löydy!")."";
+					$virhe[$i] = t("Asiakasryhmä puuttuu tai sitä ei löydy!");
 				}
 			}
 		}
 
 		if (mysql_field_name($result, $i) == "tuoteno") {
 			$chtuoteno = $t[$i];
+			$chtuoteno_ind = $i;
+
 			if ($chtuoteno != '') {
 				$query = "	SELECT tuoteno
 							FROM tuote
@@ -198,14 +196,19 @@ if(!function_exists("asiakasalennustarkista")) {
 
 			$aquery = "	SELECT ytunnus
 						FROM asiakasalennus
-						WHERE yhtio='$kukarow[yhtio]'$and and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm' and minkpl = $chminkpl and maxkpl = $chmaxkpl and tunnus != '$tunnus'";
+						WHERE yhtio='$kukarow[yhtio]'
+						$and
+						and alkupvm = '$chalkupvm'
+						and loppupvm = '$chloppupvm'
+						and minkpl = $chminkpl
+						and maxkpl = $chmaxkpl
+						and tunnus != '$trow[$i]'";
 			$dsresult = mysql_query($aquery) or pupe_error($aquery);
 
 			if (mysql_num_rows($dsresult) > 0) {
-				$virhe[$i] = t("VIRHE: Näillä tiedoilla on jo asiakasalennus järjestelmässä!");
+				$virhe[$chtuoteno_ind] = $virhe[$i] = t("VIRHE: Näillä tiedoilla on jo asiakasalennus järjestelmässä!");
 			}
 		}
-
 	}
 }
 

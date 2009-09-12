@@ -235,7 +235,7 @@
 		echo "</select> - <select name='kustp2'><option value=' '>".t("Ei valintaa");
 
 		if (mysql_num_rows($vresult) > 0)  mysql_data_seek($vresult,0);
-		
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['tunnus'] or $kustp2 == $vrow["tunnus"]) {
@@ -247,7 +247,7 @@
 		echo "</select>";
 		echo "</td>";
 		echo "</tr>";
-		
+
 		echo "<tr><th>".t("Vain kohde")."</th>";
 	 	$query = "SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -264,7 +264,7 @@
 		}
 		echo "</select></td>";
 		echo "</tr>";
-		
+
 		echo "<tr><th>".t("Vain projekti")."</th>";
 		$query = "SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -281,14 +281,14 @@
 		}
 		echo "</select></td>";
 		echo "</tr>";
-		
+
 		echo "<tr><th>".t("Vain asiakas")."</th><td><input type='text' name='asia_ytunnus' value='$asiakasrow[ytunnus]'> $asiakasrow[nimi] <input type='hidden' name='asiakasid' value='$asiakasid'></td></tr>";
 		echo "<tr><th>".t("Vain toimittaja")."</th><td><input type='text' name='toim_ytunnus' value='$toimittajarow[ytunnus]'> $toimittajarow[nimi] <input type='hidden' name='toimittajaid' value='$toimittajaid'></td></tr>";
-		
+
 		echo "<tr><th>".t("Vain alv%")."</th>";
 
 		$vresult = t_avainsana("ALV");
-		
+
 		echo "<td><select name='alv'><option value='tyhja'>".t("Ei valintaa")."";
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -299,9 +299,9 @@
 		}
 		echo "</select></td>";
 		echo "</tr>";
-		
+
 		echo "<tr><th>".t("Vain käsin viedyt")."</th><td><input type='checkbox' name='kasin'></td></tr>";
-		
+
 		echo "<tr><th>".t("Tee Excel")."</th><td><input type='checkbox' name='excel' value = 'YES'></td></tr>";
 		echo "</table><br>
 		      <input type = 'submit' value = '".t("Näytä")."'></form>";
@@ -318,11 +318,11 @@
 	$alvk = (int) $alvk;
 	$alvp = (int) $alvp;
 	$tkausi = (int) $tkausi;
-	
+
 	$llvv = (int) $llvv;
 	$llvk = (int) $llvk;
 	$llvp = (int) $llvp;
- 
+
 	// Tutkitaan ensiksi, mille tilikaudelle pyydettävä lista löytyy, jos lista on sopiva
 	$blvk = 0;
 	$blvp = 0;
@@ -359,7 +359,7 @@
 		}
 		$tilikaudetrow=mysql_fetch_array($result);
 	}
-	
+
 	$lisa  = ''; // aineiston hakemiseen
 	$lisa2 = ''; // alkusaldon laskemiseen
 
@@ -411,7 +411,7 @@
 		$mul_kohde 	= unserialize(base64_decode($kohde));
 		$mul_proj 	= unserialize(base64_decode($proj));
 		$mul_kustp 	= unserialize(base64_decode($kustp));
-		
+
 		if (is_array($mul_kustp) and count($mul_kustp) > 0) {
 			$sel_kustp = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_kustp))."')";
 			$lisa 	.= " and tiliointi.kustp in $sel_kustp ";
@@ -476,7 +476,8 @@
 		$lisa .= " and vero='$alv' ";
 	}
 
-	$query = "	SELECT $alku , kustp.nimi kustp, kohde.nimi kohde, projekti.nimi projekti, CONCAT_WS(' ', selite, lasku.nimi) selite, tiliointi.summa, vero, tiliointi.ltunnus, tiliointi.tilino xtilino, tiliointi.summa_valuutassa, tiliointi.valkoodi
+	$query = "	SELECT $alku , kustp.nimi kustp, kohde.nimi kohde, projekti.nimi projekti, CONCAT_WS(' ', selite, lasku.nimi) selite,
+				tiliointi.summa, vero, tiliointi.ltunnus, tiliointi.tilino xtilino, tiliointi.summa_valuutassa, tiliointi.valkoodi, tiliointi.tunnus rivitunnus
 				FROM tiliointi
 				LEFT JOIN tili ON tili.tilino = tiliointi.tilino and tili.yhtio = tiliointi.yhtio
 				LEFT JOIN lasku ON lasku.tunnus = tiliointi.ltunnus
@@ -488,7 +489,7 @@
 				and $lisa
 				ORDER BY $jarj";
 	$result = mysql_query($query) or pupe_error($query);
-	
+
 	echo "<table><tr>";
 
 	for ($i = 0; $i < mysql_num_fields($result)-4; $i++) {
@@ -592,7 +593,8 @@
 
 					echo "<td valign='top' align='right' $class>";
 
-					echo "<a href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]'><font $class>";
+					echo "<a name='$trow[rivitunnus]' href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]&lopetus=".$palvelin2."raportit.php////toim=$toim//tee=$tee//alvv=$alvv//alvk=$alvk//alvp=$alvp//llvv=$llvv//llvk=$llvk//llvp=$llvp//tkausi=$tkausi//tili=$tili//tili2=$tili2//kustp=$kustp//kustp2=$kustp2//kohde=$kohde//proj=$proj//asia_ytunnus=$asia_ytunnus//asiakasid=$asiakasid//toim_ytunnus=$toim_ytunnus//toimittajaid=$toimittajaid//alv=$alv//kasin=$kasin//excel=$excel///$trow[rivitunnus]'><font $class>";
+
 					echo str_replace(".",",",sprintf("%.2f", $trow[$i]));
 					echo "</font></a>";
 					echo "</td>";
@@ -714,7 +716,7 @@
 	echo "</tr>";
 
 	echo "</table>";
-	
+
 	if ($lopetus != '') {
 		echo "<br><br>";
 		lopetus($lopetus);

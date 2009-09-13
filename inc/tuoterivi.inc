@@ -239,25 +239,25 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-		if ($poistolukko == "" or $trow[$i] == "" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("T","V","E","F")))) {
+		if ($poistolukko == "" or $trow[$i] == "" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("","T","V","E","F")))) {
 			$ulos .= "<option value = ''>".t("Ei seurantaa")."</option>";
 		}
 		if ($poistolukko == "" or $sel["S"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("S","U")))) {
 			$ulos .= "<option value = 'S' $sel[S]>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (S)</option>";
 		}
-		if ($poistolukko == "" or $sel["T"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("T","V","E","F")))) {
+		if ($poistolukko == "" or $sel["T"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("","T","V","E","F")))) {
 			$ulos .= "<option value = 'T' $sel[T]>".t("Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo")." (T)</option>";
 		}
 		if ($poistolukko == "" or $sel["U"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("S","U")))) {
 			$ulos .= "<option value = 'U' $sel[U]>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi")." (U)</option>";
 		}
-		if ($poistolukko == "" or $sel["V"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("T","V","E","F")))) {
+		if ($poistolukko == "" or $sel["V"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("","T","V","E","F")))) {
 			$ulos .= "<option value = 'V' $sel[V]>".t("Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (V)</option>";
 		}
-		if ($poistolukko == "" or $sel["E"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("T","V","E","F")))) {
+		if ($poistolukko == "" or $sel["E"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("","T","V","E","F")))) {
 			$ulos .= "<option value = 'E' $sel[E]>".t("Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (E)</option>";
 		}
-		if ($poistolukko == "" or $sel["F"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("T","V","E","F")))) {
+		if ($poistolukko == "" or $sel["F"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("","T","V","E","F")))) {
 			$ulos .= "<option value = 'F' $sel[F]>".t("Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo")." (F)</option>";
 		}
 		if ($poistolukko == "" or $sel["G"] == "selected") {

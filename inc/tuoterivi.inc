@@ -254,10 +254,10 @@
 		if ($poistolukko == "" or $sel["V"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("","T","V","E","F")))) {
 			$ulos .= "<option value = 'V' $sel[V]>".t("Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (V)</option>";
 		}
-		if ($poistolukko == "" or $sel["E"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("","T","V","E","F")))) {
+		if ($poistolukko == "" or $sel["E"] == "selected" or in_array($trow[$i], array("E","F")) or ($vrow["saldo"] == 0 and in_array($trow[$i], array("","T","V","E","F")))) {
 			$ulos .= "<option value = 'E' $sel[E]>".t("Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (E)</option>";
 		}
-		if ($poistolukko == "" or $sel["F"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("","T","V","E","F")))) {
+		if ($poistolukko == "" or $sel["F"] == "selected" or in_array($trow[$i], array("E","F")) or ($vrow["saldo"] == 0 and in_array($trow[$i], array("","T","V","E","F")))) {
 			$ulos .= "<option value = 'F' $sel[F]>".t("Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo")." (F)</option>";
 		}
 		if ($poistolukko == "" or $sel["G"] == "selected") {

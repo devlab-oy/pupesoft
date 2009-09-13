@@ -24,7 +24,7 @@ if(!function_exists("tuotetarkista")) {
 				}
 			}
 
-			if ($poistolukko != "LUEDATA") { 
+			if ($poistolukko != "LUEDATA") {
 				// Tuotteen saa poistaa mik‰li sill‰ ei ole yht‰‰n tapahtumaa
 				$query = "SELECT yhtio FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$t[$i]' LIMIT 1";
 				$sdtres = mysql_query($query) or pupe_error($query);
@@ -38,7 +38,7 @@ if(!function_exists("tuotetarkista")) {
 					}
 				}
 			}
-			
+
 			$tem_tuoteno = $t[$i];
 		}
 
@@ -143,8 +143,27 @@ if(!function_exists("tuotetarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
+
+			$query = "	SELECT count(*) saldo
+						FROM tuotepaikat
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$tem_tuoteno'
+						and saldo  != 0";
+			$vresult = mysql_query($query) or pupe_error($query);
+			$vrow = mysql_fetch_array($vresult);
+
 			if ($poistolukko != "" and $t[$i] != $trow["sarjanumeroseuranta"]) {
-				$virhe[$i] = t("Seurantatyyppi‰ ei voida muuttaa, koska tuotteella on tapahtumia")."!";
+
+				// Tietyt vaihdot sallitaan!!!, huomaa NOT iffiss‰, helpompi kirjoittaa n‰in p‰in
+				if (!(($t[$i] == "S" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("S","U")))
+				   or ($t[$i] == "U" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("S","U")))
+				   or ($t[$i] == ""  and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("","T","V","E","F")))
+				   or ($t[$i] == "T" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("","T","V","E","F")))
+				   or ($t[$i] == "V" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("","T","V","E","F")))
+				   or ($t[$i] == "E" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("","T","V","E","F")))
+				   or ($t[$i] == "F" and $vrow["saldo"] == 0 and in_array($trow["sarjanumeroseuranta"], array("","T","V","E","F"))))) {
+					$virhe[$i] = t("Seurantatyyppi‰ ei voida muuttaa, koska tuotteella on tapahtumia")."!";
+				}
 			}
 		}
 

@@ -13,7 +13,7 @@
 
 		if ($uusi == "") {
 			$tyyppi = 3;
-			
+
 			// Tuotteen saa poistaa mik‰li sill‰ ei ole yht‰‰n tapahtumaa
 			$query = "SELECT yhtio FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and laji in ('ep‰kurantti','inventointi','kulutus','laskutus','siirto','tulo','valmistus') LIMIT 1";
 			$sdtres = mysql_query($query) or pupe_error($query);
@@ -31,10 +31,10 @@
 		else {
 			$ulos = "<td><input type = 'hidden' name = 'uusi' value = '$uusi'><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";
 			$jatko=0;
-			
+
 			// Jos on uusi tuote niin kaikki lukot on auki
-			$poistolukko = "";	
-		}	
+			$poistolukko = "";
+		}
 	}
 
 	if (mysql_field_name($result, $i) == "nimitys") {
@@ -167,8 +167,8 @@
 		}
 		else {
 			$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-			$ulos .= "<option value = '' $sela $disablointi>".t("Saldollinen tuote")."</option>";
-			$ulos .= "<option value = 'o' $sel $disablointi>".t("Saldoton tuote")."</option>";
+			$ulos .= "<option value = '' $sela>".t("Saldollinen tuote")."</option>";
+			$ulos .= "<option value = 'o' $sel>".t("Saldoton tuote")."</option>";
 			$ulos .= "</select>$disablelisa</td>";
 		}
 
@@ -229,32 +229,42 @@
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
 
-		if ($poistolukko != "") {
-			$ulos  = "<td>";
+		$query = "	SELECT count(*) saldo
+					FROM tuotepaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$tuoteno'
+					and saldo  != 0";
+		$vresult = mysql_query($query) or pupe_error($query);
+		$vrow = mysql_fetch_array($vresult);
 
-			if ($sel["S"] != "")		$ulos .= t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (S)";
-			elseif ($sel["T"] != "")	$ulos .= t("Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo")." (T)";
-			elseif ($sel["U"] != "")	$ulos .= t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi")." (U)";
-			elseif ($sel["V"] != "")	$ulos .= t("Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (V)";
-			elseif ($sel["E"] != "")	$ulos .= t("Er‰numeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (E)";
-			elseif ($sel["F"] != "")	$ulos .= t("Er‰numeroseuranta parasta-ennen p‰iv‰ll‰. Osto-Myynti / Keskihinta-varastonarvo")." (F)";
-			elseif ($sel["G"] != "")	$ulos .= t("Er‰numeroseuranta. Osto-Myynti / In-Out varastonarvo")." (G)";
-			else						$ulos .= t("Ei seurantaa");
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-			$ulos .= "<input type='hidden' name='$nimi' value='$trow[$i]'></td>";
+		if ($poistolukko == "" or $trow[$i] == "" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("T","V","E","F")))) {
+			$ulos .= "<option value = ''>".t("Ei seurantaa")."</option>";
 		}
-		else {
-			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-			$ulos .= "<option value = '' $disablointi>".t("Ei seurantaa")."</option>";
-			$ulos .= "<option value = 'S' $sel[S] $disablointi>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (S)</option>";
-			$ulos .= "<option value = 'T' $sel[T] $disablointi>".t("Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo")." (T)</option>";
-			$ulos .= "<option value = 'U' $sel[U] $disablointi>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi")." (U)</option>";
-			$ulos .= "<option value = 'V' $sel[V] $disablointi>".t("Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (V)</option>";
-			$ulos .= "<option value = 'E' $sel[E] $disablointi>".t("Er‰numeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (E)</option>";
-			$ulos .= "<option value = 'F' $sel[F] $disablointi>".t("Er‰numeroseuranta parasta-ennen p‰iv‰ll‰. Osto-Myynti / Keskihinta-varastonarvo")." (F)</option>";
-			$ulos .= "<option value = 'G' $sel[G] $disablointi>".t("Er‰numeroseuranta. Osto-Myynti / In-Out varastonarvo")." (G)</option>";
-			$ulos .= "</select></td>";
+		if ($poistolukko == "" or $sel["S"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("S","U")))) {
+			$ulos .= "<option value = 'S' $sel[S]>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (S)</option>";
 		}
+		if ($poistolukko == "" or $sel["T"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("T","V","E","F")))) {
+			$ulos .= "<option value = 'T' $sel[T]>".t("Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo")." (T)</option>";
+		}
+		if ($poistolukko == "" or $sel["U"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("S","U")))) {
+			$ulos .= "<option value = 'U' $sel[U]>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi")." (U)</option>";
+		}
+		if ($poistolukko == "" or $sel["V"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("T","V","E","F")))) {
+			$ulos .= "<option value = 'V' $sel[V]>".t("Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (V)</option>";
+		}
+		if ($poistolukko == "" or $sel["E"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("T","V","E","F")))) {
+			$ulos .= "<option value = 'E' $sel[E]>".t("Er‰numeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (E)</option>";
+		}
+		if ($poistolukko == "" or $sel["F"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("T","V","E","F")))) {
+			$ulos .= "<option value = 'F' $sel[F]>".t("Er‰numeroseuranta parasta-ennen p‰iv‰ll‰. Osto-Myynti / Keskihinta-varastonarvo")." (F)</option>";
+		}
+		if ($poistolukko == "" or $sel["G"] == "selected") {
+			$ulos .= "<option value = 'G' $sel[G]>".t("Er‰numeroseuranta. Osto-Myynti / In-Out varastonarvo")." (G)</option>";
+		}
+
+		$ulos .= "</select></td>";
 
 		$jatko = 0;
 	}
@@ -429,17 +439,17 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "projekti" or mysql_field_name($result, $i) == "kohde" or mysql_field_name($result, $i) == "kustp") {
 
 		if (mysql_field_name($result, $i) == "projekti") $kptyyppi = "P";
 		if (mysql_field_name($result, $i) == "kohde") 	 $kptyyppi = "O";
 		if (mysql_field_name($result, $i) == "kustp") 	 $kptyyppi = "K";
 
-		$tpque = "	SELECT tunnus, nimi 
-					from kustannuspaikka 
-					where yhtio = '$kukarow[yhtio]' 
-					and tyyppi = '$kptyyppi' 
+		$tpque = "	SELECT tunnus, nimi
+					from kustannuspaikka
+					where yhtio = '$kukarow[yhtio]'
+					and tyyppi = '$kptyyppi'
 					and kaytossa != 'E'";
 		$vresult = mysql_query($tpque) or pupe_error($tpque);
 

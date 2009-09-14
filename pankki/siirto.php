@@ -2,18 +2,17 @@
 function siirto ($yritirow, $aineisto, $pvm) {
 	global $testaus;
 
-	$nro = $file.=sprintf ('%03d', $yritirow['nro']);
+	$nro = sprintf ('%03d', $yritirow['nro']);
 
 	$pankki = substr($yritirow['tilino'],0,1);
 	if ($pankki == '1') $pankki='2';
 
 	// TIEDOSTONIMET
-	$osoite="/var/www/html/pupesoft/dataout";
-	$etiedosto="ESI.A";
-	$sptiedosto="SIIRTOPYYNTO.$nro";
-	// Alustetaan ja tehdään Siirtopyyntö-tiedosto
-	// Siirtopyyntöön lisätään tilinumero, jolta tiliote haetaan
-	// $tili="195030-10";
+	$osoite = "/var/www/html/pupesoft/dataout";
+	$etiedosto = "esi.a";
+	$eptiedosto = "esi.p";
+	$sptiedosto = "siirtopyynto";
+	$kuittausnimi = "kuittaus";
 
 	echo "Tehdään siirtopyyntö $osoite/$sptiedosto<br>";
 
@@ -49,19 +48,19 @@ function siirto ($yritirow, $aineisto, $pvm) {
 	echo strlen($esi). "-->" . $esi."<br>";
 
 	// Tiedostojen nimet
-	$omaesia= "$osoite/$etiedosto";
-	$omaesip= "$osoite/ESI.P";
-	$omasiirto= "$osoite/$sptiedosto";
-	$omaaineisto = "$osoite/$aineisto.$nro";
-	$omakuittaus = "KUITTAUS".$nro;
+	$omaesia= $osoite . "/" . $yritirow['tunnus'] . "-" . $etiedosto;
+	$omaesip= $osoite . "/" . $yritirow['tunnus'] . "-" . $eptiedosto;
+	$omasiirto= $osoite . "/" . $yritirow['tunnus'] . "-" . $sptiedosto . "." . $nro;
+	$omaaineisto = $osoite . "/" . $yritirow['tunnus'] . "-" . strtolower($aineisto) . "." . $nro ;
+	$omakuittaus = $osoite . "/" . $yritirow['tunnus'] . "-" . $kuittausnimi . "." . $nro ;
 
 	//Nordea
 	if ($pankki == '2') {
 		$pankinesia = "ESI.A";
 		$pankinesip= "ESI.P";
 		$pankinsiirto = "SIIRTO";
-		$pankinaineisto = "$aineisto.$nro";
-		$pankinkuittaus = "KUITTAUS.$nro";
+		$pankinaineisto = $aineisto.".".$nro;
+		$pankinkuittaus = "KUITTAUS." . $nro;
 	}
 	//Sampopankki
 	if ($pankki == '8') {
@@ -71,12 +70,12 @@ function siirto ($yritirow, $aineisto, $pvm) {
 		$pankinaineisto = "aineisto";
 		$pankinkuittaus = "kuittaus";
 		$lopetus = "//SIFNOFF\n";
-		$yhteydenlopetus = $osoite ."/lopetustiedosto"; //Sampopankki
+		$yhteydenlopetus = $osoite ."/" . $yritirow['tunnus'] . "-lopetustiedosto";
 		file_put_contents($yhteydenlopetus,$lopetus);
 	}
 
-	file_put_contents($esia, $omaesi);
-	file_put_contents($siirto,$omasiirto);
+	file_put_contents($omaesia, $esi);
+	file_put_contents($omasiirto,$siirtopyynto);
 
 	// FTP-yhteydenottomuuttujat
 	if ($pankki == '2') {
@@ -85,68 +84,79 @@ function siirto ($yritirow, $aineisto, $pvm) {
 		$pass="SITE PASSIVE";
 	}
 	if ($pankki == '8') {
-		$host="192.49.51.8";
+		$host="ftplinkki.sampopankki.fi";
 		$log="anonymous";
 		$pass="pupesofttestaus";
 	}
 
 	echo "Avataan FTP-yhteys $host<br>";
-	exit;
+	//exit;
 	$ftp = ftp_connect($host);
 	if($ftp) {
-	// Jos jokin asia epäonnistuu, katkaistaan heti yhteys
-	echo "Yhteys muodostettu: $host<br>";
-	$login_ok = ftp_login($ftp,$log,$pass);
-	ftp_pasv($ftp, true);
-	echo "Lähetetään Esi-sanoma: $esia<br>";
-	if(ftp_put($ftp, $pankinesia, $omaesia, FTP_ASCII)) {
-			echo "Esi-sanoman lähetys onnistui. Haetaan vastaus: $esip<br>";
+		// Jos jokin asia epäonnistuu, katkaistaan heti yhteys
+		echo "Yhteys muodostettu: $host<br>";
+		$login_ok = ftp_login($ftp,$log,$pass);
+		ftp_pasv($ftp, true);
+		echo "Lähetetään Esi-sanoma: $omaesia<br>";
+		if(ftp_put($ftp, $pankinesia, $omaesia, FTP_ASCII)) {
+			echo "Esi-sanoman lähetys onnistui.<br>Haetaan vastaus: $omaesip<br>";
 			if(ftp_get($ftp, $omaesip, $pankinesip, FTP_ASCII)) {
-					echo  "Esi-sanoman vastaus saatiin.Lähetetään siirtopyyntö: $siirto<br>";
-					if(ftp_put($ftp, $pankinsiirto, $omasiirto, FTP_ASCII)) {
-							echo "Siirtopyyntö lähetettiin. Haetaan aineisto: $aineisto<br>";
-							if(ftp_get($ftp, $omaaineisto, $pankinaineisto, FTP_ASCII)) {
-									echo "Aineiston haku onnistui. Haetaan kuittaus: $kuittaus<br>";
-									if(ftp_get($ftp, $omakuittaus, $pankinkuittaus, FTP_ASCII)) {
-										echo "Kuittaus haettu<br>";
-										// Sampo haluaa loputustiedoston
-										if ($pankki=='8') {
-											if(ftp_put($ftp, $lopetus, "lopetus", FTP_ASCII)) {
-												echo "Pyydettiin yhteydenlopetus.<br>";
-											}
-										}
-									}
-									else {
-										echo "Kuittausta ei saatu<br>";
-									}
+				echo  "Esi-sanoman vastaus saatiin.<br>";
+				kasitteleesip($omaesip);
+				echo "Lähetetään siirtopyyntö: $omasiirto<br>";
+				if(ftp_put($ftp, $pankinsiirto, $omasiirto, FTP_ASCII)) {
+					echo "Siirtopyyntö lähetettiin.<br>Haetaan aineisto: $omaaineisto<br>";
+					if(ftp_get($ftp, $omaaineisto, $pankinaineisto, FTP_ASCII)) {
+						echo "Aineiston haku onnistui.<br>";
+						if ($pankki == "2") { //vain Nordean kanssa
+							echo "Haetaan kuittaus: $omakuittaus<br>";
+							if(ftp_get($ftp, $omakuittaus, $pankinkuittaus, FTP_ASCII)) {
+								echo "Kuittaus haettu<br>";
 							}
 							else {
-									echo "Aineiston haku ei onnistunut.<br>";
-									echo "Haetaan kuittaus: $pankinkuittaus<br>";
-						  			if(ftp_get($ftp, $omakuittaus, $pankinkuittaus, FTP_ASCII)) {
-										echo "Kuittaus saatiin<br>";
-									}
-									else {
-										echo "Kuittausta ei saatu<br>";
-									}
+								echo "Kuittausta ei saatu<br>";
 							}
+						}
 					}
 					else {
-						echo "Siirtopyyntö evättiin<br>";
+						echo "Aineiston haku ei onnistunut.<br>";
+						if ($pankki == "2") { //vain Nordean kanssa
+							echo "Haetaan kuittaus: $omakuittaus<br>";
+							if(ftp_get($ftp, $omakuittaus, $pankinkuittaus, FTP_ASCII)) {
+								echo "Kuittaus haettu<br>";
+							}
+							else {
+								echo "Kuittausta ei saatu<br>";
+							}
+						}
 					}
+				}
+				else {
+					echo "Siirtopyyntö evättiin<br>";
+				}
 			}
 			else {
 				echo "Vastausta esi-sanomaan ei saatu<br>";
 			}
-	  }
-	  else {
+		}
+		else {
 			echo "Esi-sanoman lähetys ei onnistunut<br>";
-	  }
-	  echo "<br>Lopetetaan yhteys";
-	  ftp_quit($ftp);
+		}
+		echo "Lopetetaan yhteys<br>";
+
+		// Sampo haluaa lopetustiedoston
+		if ($pankki=='8') {
+			if(ftp_put($ftp, "lopetus", $yhteydenlopetus, FTP_ASCII)) {
+				echo "Pyydettiin yhteydenlopetus.<br>";
+			}
+			else {
+				echo "Yhteydenlopetuspyyntö epäonnistui.<br>";
+			}
+		}
+		ftp_quit($ftp);
 	}
 	else {
-			echo "Ei yhteyttä!<br>";
+		echo "Ei yhteyttä!<br>";
 	}
 	return "";
 }

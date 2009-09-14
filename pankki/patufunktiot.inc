@@ -362,4 +362,14 @@ function siirtopyynto ($pankki, $tilinumero, $aineisto, $salasana ,$paivays) {
 	return $apu;
 }
 
+function kasitteleesip ($tiedostonnimi) {
+
+	$tiedot = file_get_contents($tiedostonnimi);
+	echo "Pankki vastasi --> " . substr($tiedot,177,60) . "<br>";
+
+}
+
+
+
+
 ?>

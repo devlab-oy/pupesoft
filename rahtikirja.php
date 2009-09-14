@@ -1014,7 +1014,7 @@
 			$selecttoimitustapaehto = " toimitustapa.tunnus kimppakyyti, ";
 		}
 		else {
-			$selecttoimitustapaehto = " if(toimitustapa.tulostustapa='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti, ";
+			$selecttoimitustapaehto = " if (toimitustapa.tulostustapa='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti, ";
 		}
 
 		if($jarj != "") {

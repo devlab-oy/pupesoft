@@ -68,14 +68,14 @@
 		    $query = "	SELECT rahtikirjanro
 						from rahtikirjat
 						where otsikkonro = '$otunnus'
-		            	and yhtio = '{$kukarow['yhtio']}'";
+		            	and yhtio = '$kukarow[yhtio]'";
 		    $res = mysql_query($query) or pupe_error($query);
 		    $rahtikirjanro = mysql_fetch_array($res);
 
 			$query = "	SELECT rahtikirjanro, sum(kilot) paino
 						from rahtikirjat
 						where yhtio			= '$kukarow[yhtio]'
-						and rahtikirjanro	= '{$rahtikirjanro['rahtikirjanro']}'
+						and rahtikirjanro	= '$rahtikirjanro[rahtikirjanro]'
 						and tulostettu != '0000-00-00 00:00:00'
 						GROUP BY rahtikirjanro";
 
@@ -169,7 +169,7 @@
 			echo "<option value=''>",t("Ei tulosteta"),"</option>";
 
 			while ($kirrow = mysql_fetch_array($kirre)) {
-				echo "<option value='{$kirrow["tunnus"]}'>{$kirrow["kirjoitin"]}</option>";
+				echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
 			}
 
 			echo "</select><br><br>";

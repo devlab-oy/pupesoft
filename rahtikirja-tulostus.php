@@ -310,15 +310,15 @@
 
 			}
 			else {
-			// Normaalissa keississä ainoastaan saman toimitusasiakkaan kirjat menee samalle paperille
-			$asiakaslisa = "and lasku.ytunnus			= '$rakir_row[ytunnus]'
-							and lasku.toim_maa			= '$rakir_row[toim_maa]'
-							and lasku.toim_nimi			= '$rakir_row[toim_nimi]'
-							and lasku.toim_nimitark		= '$rakir_row[toim_nimitark]'
-							and lasku.toim_osoite		= '$rakir_row[toim_osoite]'
-							and lasku.toim_ovttunnus	= '$rakir_row[toim_ovttunnus]'
-							and lasku.toim_postino		= '$rakir_row[toim_postino]'
-							and lasku.toim_postitp		= '$rakir_row[toim_postitp]' ";
+				// Normaalissa keississä ainoastaan saman toimitusasiakkaan kirjat menee samalle paperille
+				$asiakaslisa = "and lasku.ytunnus			= '$rakir_row[ytunnus]'
+								and lasku.toim_maa			= '$rakir_row[toim_maa]'
+								and lasku.toim_nimi			= '$rakir_row[toim_nimi]'
+								and lasku.toim_nimitark		= '$rakir_row[toim_nimitark]'
+								and lasku.toim_osoite		= '$rakir_row[toim_osoite]'
+								and lasku.toim_ovttunnus	= '$rakir_row[toim_ovttunnus]'
+								and lasku.toim_postino		= '$rakir_row[toim_postino]'
+								and lasku.toim_postitp		= '$rakir_row[toim_postitp]' ";
 			}
 
 			if ($rakir_row['jv'] != '') {

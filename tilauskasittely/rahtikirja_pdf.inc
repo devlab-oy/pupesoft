@@ -17,7 +17,7 @@
 	if($rakir_row["tunnusnippu"]>0) {
 		foreach ($lotsikot as &$o) {
 			if($o <> $rakir_row["tunnusnippu"]) {
-				$o = "{$rakir_row["tunnusnippu"]}/$o";
+				$o = "$rakir_row[tunnusnippu]/$o";
 			}
 		}
 	}
@@ -63,7 +63,7 @@
 		$viitelah = $lotsikot[0];
 	}
 	elseif ($osoitelappurow["toim_nimi"] != '') {
-		// tänne tullaan, jos ollaan oltu rahtikirja_custom.phpssä	
+		// tänne tullaan, jos ollaan oltu rahtikirja_custom.phpssä
 		$postirow = $osoitelappurow;
 		$rakir_row = $osoitelappurow;
 	}
@@ -72,7 +72,7 @@
 					FROM asiakas
 					JOIN rahtikirjat on rahtikirjat.yhtio = asiakas.yhtio and rahtikirjat.otsikkonro = '".($otsikkonro * -1)."'
 					WHERE asiakas.yhtio	= '$kukarow[yhtio]'
-					and asiakas.tunnus	= '{$GLOBALS['asiakasid']}'
+					and asiakas.tunnus	= '$GLOBALS[asiakasid]'
 					LIMIT 1";
 		$tempr = mysql_query($query) or pupe_error($query);
 		$rakir_row = mysql_fetch_array($tempr);
@@ -90,7 +90,7 @@
 	$query = "	SELECT yhteyshenkilo.nimi, yhteyshenkilo.puh
 				FROM laskun_lisatiedot
 				JOIN yhteyshenkilo ON yhteyshenkilo.yhtio = laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus = laskun_lisatiedot.yhteyshenkilo_tekninen
-				WHERE laskun_lisatiedot.yhtio = '{$kukarow["yhtio"]}' and laskun_lisatiedot.otunnus IN ($otunnukset)";
+				WHERE laskun_lisatiedot.yhtio = '$kukarow[yhtio]' and laskun_lisatiedot.otunnus IN ($otunnukset)";
 	$lisatiedres = mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($lisatiedres)==0) {
 		$lisatiedres = false;
@@ -254,7 +254,7 @@
 			$query = "	SELECT *
 						FROM yhtion_toimipaikat
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$postirow[yhtio_toimipaikka]' and lasku_logo != ''";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+			$result = mysql_query($query) or pupe_error("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_toimipaikkarow = mysql_fetch_array($result);
@@ -265,7 +265,7 @@
 			$query = "	SELECT *
 						FROM yhtion_parametrit
 						WHERE yhtio = '$postirow[yhtio]'";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+			$result = mysql_query($query) or pupe_error("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_parametritrow = mysql_fetch_array($result);
@@ -274,7 +274,7 @@
 		}
 
 		unset($data);
-		
+
 		if((int) $apu_yhtiorow["lasku_logo"] > 0) {
 			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
 			$data = $liite["data"];
@@ -378,31 +378,43 @@
 
 		//oikeeta
 		$pdf->draw_text(302,  803,  "Lähetyspäivämäärä Avsändningsdatum",				$firstpage, $norm);
-		$pdf->draw_text(302,  788,  date("d.m.Y"),										$firstpage, $kirj);
+		$pdf->draw_text(302,  793,  date("d.m.Y"),										$firstpage, $kirj);
 		$pdf->draw_text(302,  782,  "Lähettäjän viite Avsändarens referens",			$firstpage, $norm);
-		$pdf->draw_text(302,  767,  $viitelah,											$firstpage, $kirj);
+		$pdf->draw_text(302,  772,  $viitelah,											$firstpage, $kirj);
 		$pdf->draw_text(302,  761,  "Vastaanottajan viite Mottagarens referens",		$firstpage, $norm);
 
 		if (!isset($GLOBALS['tyhja'])) {
-			$query = "	select group_concat(viesti SEPARATOR ', ') viesti
+			$query = "	SELECT group_concat(trim(viesti) SEPARATOR ', ') viesti
 						from lasku
 						where yhtio = '$kukarow[yhtio]'
 						and tunnus in ($otunnukset)
 						order by tunnus ";
 			$viestires = mysql_query($query) or pupe_error($query);
 			$viestirow = mysql_fetch_array($viestires);
-		} else {
+		}
+		else {
 			$viestirow = array(
 				'viesti' => $viitevas,
 			);
 		}
 
-		$pdf->draw_text(302,  746,  $viestirow["viesti"],								$firstpage, $kirj);
+		// Jos rivikommentti on pitkä niin rivitämme sen
+		if ($pdf->strlen($viestirow["viesti"], $kirj) > 240) {
+			$vie1 = pdf_substr($viestirow["viesti"], 240, $pdf, $kirj);
+			$vie2 = pdf_substr(substr($viestirow["viesti"],strlen($vie1)), 240, $pdf, $kirj);
+
+			$pdf->draw_text(302,  751,  $vie1, $firstpage, $kirj);
+			$pdf->draw_text(302,  741,  $vie2, $firstpage, $kirj);
+		}
+		else {
+			$pdf->draw_text(302,  751,  $viestirow["viesti"], $firstpage, $kirj);
+		}
 
 		//oikee
 		if ($toitarow['rahdinkuljettaja'] == '') {
 			$toitarow['rahdinkuljettaja'] = $toitarow['selite'];
 		}
+
 		$pdf->draw_rectangle(733,300,667,545,												$firstpage, $rectparam);
 		$pdf->draw_text(302,  726,  "Rahdinkuljettaja ja / tai huolitsijaTransportföretag och / eller Speditör", $firstpage, $norm);
 		$pdf->draw_text(302, 670,  $toitarow['rahdinkuljettaja'],							$firstpage, $kirj);

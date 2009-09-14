@@ -51,7 +51,7 @@
 		}
 		
 		if ($ulos == '') {
-			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
+			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='30' value='$tuoteno'></td>";
 		}
 		else {
 			echo "<td valign='top'>$ulos</td>";
@@ -217,7 +217,7 @@
 		}
 
 		if ($ulos == '') {
-			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
+			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='30' value='$tuoteno'></td>";
 		}
 		else {
 			echo "<td valign='top'>$ulos</td>";
@@ -408,7 +408,7 @@
 		}
 		
 		if ($ulos == '') {
-			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
+			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='30' value='$tuoteno'></td>";
 		}
 		else {
 			echo "<td valign='top'>$ulos</td>";
@@ -545,7 +545,7 @@
 		echo "<input type='hidden' name='var' value='$var'>";
 
 		if ($ulos == '') {
-			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
+			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='30' value='$tuoteno'></td>";
 		}
 		else {
 			echo "<td valign='top'>$ulos</td>";

@@ -258,7 +258,7 @@
 	}
 	echo "<td>".tv1dateconv($laskurow["erpcm"])."</td>
 			<td>".tv1dateconv($laskurow["mapvm"])."</td>
-			<td>".tv1dateconv($laskurow["luontiaika"])."</td>
+			<td>".tv1dateconv($laskurow["luontiaika"], "P")."</td>
 			<td>".str_replace(".",",",$laskurow['alv'])." %</td>";
 
 	if ($laskurow["tila"] == "O") {

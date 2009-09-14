@@ -208,9 +208,9 @@ else {
 	}
 
 	// otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
-	$query = "	SELECT * 
-				FROM maksuehto 
-				WHERE yhtio = '$kukarow[yhtio]' 
+	$query = "	SELECT *
+				FROM maksuehto
+				WHERE yhtio = '$kukarow[yhtio]'
 				AND tunnus = '$laskurow[maksuehto]'";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -743,13 +743,12 @@ else {
 			}
 
 			//haetaan kaikkien tilausrivien varastopaikat
-			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,  tilausrivi.kerayspvm, tilausrivi.toimaika,
-						concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
+			$query = "	SELECT otunnus, tunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso,  kerayspvm, toimaika,
+						concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 						FROM tilausrivi
-						LEFT JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tilausrivi.otunnus = '$laskurow[tunnus]'
-						and tilausrivi.hyllyalue != ''
+						WHERE yhtio = '$kukarow[yhtio]'
+						and otunnus = '$laskurow[tunnus]'
+						and hyllyalue != ''
 						and varattu+kpl > 0
 						and var not in ('J','P')
 						ORDER BY $sorttaus";
@@ -1169,9 +1168,9 @@ else {
 
 				foreach ($tilausnumerot as $tilausnumero) {
 
-					$query = "	SELECT lasku.nimi, 
-								lasku.nimitark, 
-								lasku.ytunnus, 
+					$query = "	SELECT lasku.nimi,
+								lasku.nimitark,
+								lasku.ytunnus,
 								asiakas.asiakasnro,
 								tilausrivi.tuoteno,
 								tuote.nimitys,
@@ -1181,14 +1180,14 @@ else {
 								tuote.status,
 								tilausrivi.jt+tilausrivi.varattu kpl
 								FROM lasku
-								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND 
-													tilausrivi.otunnus = lasku.tunnus AND 
+								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND
+													tilausrivi.otunnus = lasku.tunnus AND
 													tilausrivi.var = 'J' AND
 													tilausrivi.tyyppi in ('L','G') AND
 													tilausrivi.jt+tilausrivi.varattu > 0)
 								JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 								JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-								WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+								WHERE lasku.yhtio = '$kukarow[yhtio]'
 								AND lasku.tunnus = '$tilausnumero'";
 					$jt_chk_res = mysql_query($query) or pupe_error($query);
 
@@ -1222,7 +1221,7 @@ else {
 						echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
 					}
 				}
-			} #end if jt_email 
+			} #end if jt_email
 		}
 	} // end jos yksikin rivi kerätty else haara
 }

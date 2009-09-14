@@ -31,17 +31,17 @@
 
 	//p‰ivitet‰‰n tilaus valmisaika, kun painetaan ekan kerran tilaus valmiiksi
 	if ($laskurow['h1time'] == "0000-00-00 00:00:00") {
-		$query = "	UPDATE lasku 
+		$query = "	UPDATE lasku
 					SET h1time = now(),
-					hyvak1 = '$kukarow[kuka]' 
+					hyvak1 = '$kukarow[kuka]'
 					WHERE yhtio = '$kukarow[yhtio]'
 					AND tunnus = '$laskurow[tunnus]'";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		$laskurow['h1time'] = date('Y-m-d H:i:s');
 		$laskurow['hyvak1'] = $kukarow["kuka"];
 	}
-	
+
 	//otetaan varmuuden vuoksi alkuper‰isen otsikon tunnus
 	$alkuplaskutunnus = $laskurow["tunnus"];
 
@@ -105,7 +105,9 @@
 			$query = "	SELECT otunnus, tunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso,
 						concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 						FROM tilausrivi
-						WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
+						WHERE otunnus 	= '$laskurow[tunnus]'
+						and yhtio		= '$kukarow[yhtio]'
+						and hyllyalue  != ''
 						ORDER BY sorttauskentta";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -181,16 +183,16 @@
 
 				//varaasto vaihtuu, splitataan tilaus, paitsi jos kyseess‰ on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
 				if ((($varasto != $edvarasto and $edvarasto != 'x') or ($tulostusalue != $edtulostusalue and $edtulostusalue != 'x' and $edtulostusalue != '' and $toim == "SIIRTOLISTA")) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" and $toim != "SIIRTOTYOMAARAYS") {
-					
-					if (!is_resource($laskusplitres)) {						
+
+					if (!is_resource($laskusplitres)) {
 						// Jotta saadaa lasku kopsattua kivasti jos se splittaantuu
 						$query = "	SELECT *
 									FROM lasku
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tunnus = '$laskurow[tunnus]'";
-						$laskusplitres = mysql_query($query) or pupe_error($query);						
-					}				
-					
+						$laskusplitres = mysql_query($query) or pupe_error($query);
+					}
+
 					$fields = "yhtio";
 					$values = "'$kukarow[yhtio]'";
 
@@ -198,19 +200,19 @@
 					for($i=1; $i < mysql_num_fields($laskusplitres)-1; $i++) {
 
 						$fieldname = mysql_field_name($laskusplitres,$i);
-						
+
 						$fields .= ", ".$fieldname;
 
-						switch ($fieldname) {	
+						switch ($fieldname) {
 							case 'vanhatunnus':
 								$values .= ", '$alkuplaskutunnus'";
-								break;	
+								break;
 							case 'varasto':
 								$values .= ", '$varasto'";
-								break;	
+								break;
 							case 'tulostusalue':
 								$values .= ", '$tulostusalue'";
-								break;	
+								break;
 							case 'ultilno':
 								$values .= ", '$ultilno'";
 								break;
@@ -219,9 +221,9 @@
 						}
 					}
 
-					$kysely  = "INSERT into lasku ($fields) VALUES ($values)";										
+					$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 					$uusires = mysql_query($kysely) or pupe_error($kysely);
-					
+
 					$laskurow['tunnus'] = (string) mysql_insert_id();
 					$tvs_tilausnumerot[] = $laskurow["tunnus"];
 				}
@@ -267,7 +269,7 @@
 
 			$query = "SELECT tunnus, sisviesti2 from lasku where yhtio = '$kukarow[yhtio]' and vanhatunnus = '$alkuplaskutunnus' and alatila = ''";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($result) > 1) {
 				$tilauksia = 1;
 				$montakotilausta = mysql_num_rows($result);
@@ -276,10 +278,10 @@
 				while ($row = mysql_fetch_array($result)) {
 
 					$upviesti = $row["sisviesti2"]." ".t("Tilaus jakaantunut")." $montakotilausta ".t("tilaukseksi").": ".$numerot." ".t("Tilaus").": ".$tilauksia."/".$montakotilausta;
-					
+
 					$query = "UPDATE lasku set sisviesti2 = '$upviesti' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[tunnus]'";
 					$upresult = mysql_query($query) or pupe_error($query);
-					
+
 					$tilauksia++;
 				}
 			}
@@ -351,7 +353,7 @@
 
 						// pakotetaan tilausvanvistus PDF muodossa omaan s‰hkˆpostiin, ilman hintoja.
 						$laskurow["tilausvahvistus"] = "3OP";
-						
+
 						if (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {
 							$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
 						}
@@ -560,9 +562,9 @@
 					// haetaan asiakkaan tietojen takaa sorttaustiedot
 					$order_sorttaus = '';
 
-					$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta 
-											FROM asiakas 
-											WHERE yhtio='$kukarow[yhtio]' 
+					$asiakas_apu_query = "	SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta
+											FROM asiakas
+											WHERE yhtio='$kukarow[yhtio]'
 											and tunnus='$laskurow[liitostunnus]'";
 					$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
 

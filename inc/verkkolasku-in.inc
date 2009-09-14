@@ -167,7 +167,10 @@
 				return ($return);
 			}
 			else {
-				// haetaan yhtiön parametrit
+
+				$return .= "Lasku yhtiölle: $yhtiorow[nimi]\n";
+
+				// Haetaan yhtiön parametrit
 				$query = "	SELECT *
 							FROM yhtion_parametrit
 							WHERE yhtio='$yhtiorow[yhtio]'";
@@ -410,8 +413,9 @@
 						FROM tiliointisaanto
 						WHERE ttunnus = '$trow[tunnus]' and yhtio = '$yhtio' and tilino = 0 and kuvaus = '$laskun_asiakastunnus'";
 			$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+
 			if (mysql_num_rows($result) != 0) {
-				$tiliointirow=mysql_fetch_array ($result);
+				$tiliointirow = mysql_fetch_array($result);
 				$oletuskust = $tiliointirow['kustp'];
 			}
 
@@ -1005,7 +1009,7 @@
 
 					$data  = addslashes($sisalto);
 
-					$selite = mysql_real_escape_string("{$kuvalaskurow['nimi']} {$kuvalaskurow['summa']} {$kuvalaskurow['valkoodi']}");
+					$selite = mysql_real_escape_string("$kuvalaskurow[nimi] $kuvalaskurow[summa] $kuvalaskurow[valkoodi]");
 
 					// lisätään kuva
 					$query = "  INSERT into liitetiedostot SET

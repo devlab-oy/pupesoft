@@ -220,7 +220,8 @@ if (!function_exists('alku')) {
 			$query = "	SELECT count(distinct(toimaika))
 						FROM tilausrivi
 						WHERE yhtio='$kukarow[yhtio]'
-						and otunnus IN ($laskurow[nippu])";
+						and otunnus IN ($laskurow[nippu])
+						and toimaika != '0000-00-00'";
 			$toimaikares = mysql_query($query) or pupe_error($query);
 			$toimaikarow = mysql_fetch_array($toimaikares);
 
@@ -445,7 +446,7 @@ if (!function_exists('alku')) {
 
 if (!function_exists('uusi_sivu')) {
 	function uusi_sivu ($tyyppi = "") {
-		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $iso, $kateistyyppi, $kieli, $boldi, $kala;
+		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $iso, $kateistyyppi, $kieli, $boldi, $kala, $useita;
 
 		$thispage = $pdf->new_page("a4");
 
@@ -561,7 +562,10 @@ if (!function_exists('uusi_sivu')) {
 		$pdf->draw_text(310, 782, $laskurow["tunnus"],			$thispage, $boldi);
 
 
-		if ($laskurow["toimvko"] != '') {
+		if ($useita == "JOO") {
+			$pdf->draw_text(430, 782, t("Useita", $kieli), 	$thispage, $norm);
+		}
+		elseif ($laskurow["toimvko"] != '') {
 			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
 
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
@@ -944,7 +948,7 @@ if (!function_exists('rivi')) {
 			}
 		}
 
-		if ($useita == "JOO") {
+		if ($useita == "JOO" and $row["toimaika"] != "0000-00-00") {
 			$row["kommentti"] .= "\n".t("Toimitusaika", $kieli).": ".tv1dateconv($row["toimaika"]);
 		}
 

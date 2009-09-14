@@ -44,7 +44,7 @@ $rivinkorkeus			= 15;
 //muutamat funktiot...
 if (!function_exists('alku_tarjous')) {
 	function alku_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous) {
-		global $tarjoustyyppi, $yhtiorow, $kukarow, $pieni, $norm, $boldi, $pieni_boldi, $iso, $rectparam;
+		global $tarjoustyyppi, $yhtiorow, $kukarow, $pieni, $norm, $boldi, $pieni_boldi, $iso, $rectparam, $useita;
 
 		$page_tarjous = $pdf_tarjous->new_page("a4");
 
@@ -170,7 +170,8 @@ if (!function_exists('alku_tarjous')) {
 			$query = "	SELECT count(distinct(toimaika))
 						FROM tilausrivi
 						WHERE yhtio='$kukarow[yhtio]'
-						and otunnus IN ($laskurow[nippu])";
+						and otunnus IN ($laskurow[nippu])
+						and toimaika != '0000-00-00'";
 			$toimaikares = mysql_query($query) or pupe_error($query);
 			$toimaikarow = mysql_fetch_array($toimaikares);
 
@@ -328,7 +329,7 @@ if (!function_exists('alku_tarjous')) {
 
 if (!function_exists('uusi_sivu_tarjous')) {
 	function uusi_sivu_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous) {
-		global $tarjoustyyppi, $yhtiorow, $kukarow, $pieni, $norm, $boldi, $pieni_boldi, $iso, $rectparam;
+		global $tarjoustyyppi, $yhtiorow, $kukarow, $pieni, $norm, $boldi, $pieni_boldi, $iso, $rectparam, $useita;
 
 		$page_tarjous = $pdf_tarjous->new_page("a4");
 
@@ -415,7 +416,10 @@ if (!function_exists('uusi_sivu_tarjous')) {
 		$pdf_tarjous->draw_text(310, 782, $laskurow["tunnus"],			$page_tarjous, $boldi);
 
 
-		if ($laskurow["toimvko"] != '') {
+		if($useita == "JOO") {
+			$pdf_tarjous->draw_text(430, 782, t("Useita", $kieli), 	$page_tarjous, $norm);
+		}
+		elseif ($laskurow["toimvko"] != '') {
 			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
 
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));

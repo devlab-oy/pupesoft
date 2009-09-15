@@ -6,7 +6,7 @@
 	require_once('pdflib/phppdflib.class.php');
 
 	// jos php-gd on installoitu niin loidataab barcode library
-	if (in_array("gd", get_loaded_extensions())) {	
+	if (in_array("gd", get_loaded_extensions())) {
 		if (@include_once("viivakoodi/Barcode.php")) {
 		}
 		else {
@@ -15,15 +15,17 @@
 	}
 
 	$pdf = new pdffile;
-	$pdf->set_default('margin', 0);
-	$pdf->set_default('margin-left', 5);
+	$pdf->set_default('margin-top', 	0);
+	$pdf->set_default('margin-bottom', 	0);
+	$pdf->set_default('margin-left', 	0);
+	$pdf->set_default('margin-right', 	0);
 	$rectparam["width"] = 0.3;
 
 	if (!function_exists('alku_purku')) {
 		function alku_purku () {
 			global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $kieli, $mista;
 
-			$firstpage = $pdf->new_page("11.5x8in");
+			$firstpage = $pdf->new_page("29.71x21.0cm");
 
 			$p["height"] 		= 10;
 			$p["font"] 			= "Times-Roman";
@@ -144,7 +146,7 @@
 
 			$pdf->draw_text(770, 520, t("Yksikkö", $kieli),				$firstpage, $pieni);
 
-			$pdf->draw_rectangle(530, 20, 10, 808, $firstpage, $rectparam);
+			$pdf->draw_rectangle(530, 20, 20, 808, $firstpage, $rectparam);
 
 			return($firstpage);
 		}
@@ -278,9 +280,9 @@
 	$firstpage = alku_purku();
 
 	while ($row = mysql_fetch_array($result)) {
-		
+
 		if ($yhtiorow['viivakoodi_purkulistaan'] == 'K' and $mista != "vastaanota") {
-			if ($kala < 75) {
+			if ($kala < 50) {
 				$sivu++;
 				$firstpage = alku_purku();
 				$kala = 500;
@@ -293,7 +295,7 @@
 				$kala = 500;
 			}
 		}
-			
+
 
 		$query = "	SELECT saldo, hyllyalue, hyllynro, hyllyvali, hyllytaso
 					FROM tuotepaikat
@@ -387,7 +389,7 @@
 			$pdf->draw_text(315, $kala, $row["trhyllyalue"]." ".$row["trhyllynro"]." ".$row["trhyllyvali"]." ".$row["trhyllytaso"],		$firstpage, $p);
 
 			if ($vainlistaus != '') {
-				
+
 				$query = "	SELECT saldo, hyllyalue, hyllynro, hyllyvali, hyllytaso
 							FROM tuotepaikat
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -398,7 +400,7 @@
 							and hyllytaso = '".$t4[$row[tunnus]]."'";
 				$olesaldoresult = mysql_query($query) or pupe_error($query);
 				$olesaldorow = mysql_fetch_array($olesaldoresult);
-				
+
 				$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 							WHERE yhtio 	= '$kukarow[yhtio]'
@@ -414,11 +416,11 @@
 				$hylrow = mysql_fetch_array($hylresult);
 
 				$hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
-				
+
 				$pdf->draw_text(475, $kala, $t1[$row[tunnus]]." ".$t2[$row[tunnus]]." ".$t3[$row[tunnus]]." ".$t4[$row[tunnus]]." (".$hyllyssa.") ",		$firstpage, $p);
 			}
 			else {
-				
+
 				$query = "	SELECT saldo, hyllyalue, hyllynro, hyllyvali, hyllytaso
 							FROM tuotepaikat
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -429,7 +431,7 @@
 							and hyllytaso = '$row[hyllytaso]'";
 				$olesaldoresult = mysql_query($query) or pupe_error($query);
 				$olesaldorow = mysql_fetch_array($olesaldoresult);
-				
+
 				$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty,	ifnull(sum(tilausrivi.varattu),0) ennpois
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 							WHERE yhtio 	= '$kukarow[yhtio]'
@@ -445,7 +447,7 @@
 				$hylrow = mysql_fetch_array($hylresult);
 
 				$hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
-				
+
 				$pdf->draw_text(475, $kala, $row["hyllyalue"]." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ",		$firstpage, $p);
 			}
 
@@ -528,7 +530,7 @@
 				$kala -= 5;
 			}
 		}
-		
+
 
 		// Trimmataan uudestaan
 		$row["kommentti"] = trim($row["kommentti"]);
@@ -551,14 +553,21 @@
 	$pdf->draw_line($x, $y, $firstpage, $rectparam);
 
 	if ($mista != "vastaanota") {
+
+		if ($kala < 50) {
+			$sivu++;
+			$firstpage = alku_purku();
+			$kala = 500;
+		}
+
 		$sumarum = sprintf('%.2f',$sumarum);
 		$pdf->draw_text(520,  $kala, t("Yhteensä", $kieli),	$firstpage, $p);
 		$pdf->draw_text(570,  $kala, $sumarum,	$firstpage, $p);
 
 
-		$pdf->draw_rectangle(40, 20,  10, 200, $firstpage, $rectparam);
-		$pdf->draw_rectangle(40, 200, 10, 808, $firstpage, $rectparam);
-		$pdf->draw_rectangle(40, 500, 10, 808, $firstpage, $rectparam);
+		$pdf->draw_rectangle(40, 20,  20, 200, $firstpage, $rectparam);
+		$pdf->draw_rectangle(40, 200, 20, 808, $firstpage, $rectparam);
+		$pdf->draw_rectangle(40, 500, 20, 808, $firstpage, $rectparam);
 		$pdf->draw_text(30,   30, t("Päivämäärä ja aika", $kieli),	$firstpage, $pieni);
 		$pdf->draw_text(210,  30, t("Allekirjoitus", $kieli),	$firstpage, $pieni);
 		$pdf->draw_text(504,  30, t("Nimenselvennys", $kieli),	$firstpage, $pieni);

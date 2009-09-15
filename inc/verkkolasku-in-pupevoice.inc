@@ -47,7 +47,7 @@ $riviviite	= array();
 $xriviaika = array();
 $riviaika	= array();
 
-if (sizeof($tuotetiedot) > 0) {
+if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
 		$xtuoteno[$i]	= $tuotetieto->xpath('LIN/@eC212.7140');
 		$tuoteno[$i]	= $xtuoteno[$i][0];
@@ -55,7 +55,7 @@ if (sizeof($tuotetiedot) > 0) {
 		$xrsumma[$i]	= $tuotetieto->xpath('Group26/MOA[@eC516.5025="203"]/@eC516.5004');
 		$rsumma[$i]		= $xrsumma[$i][0];
 		$xvat[$i]		= $tuotetieto->xpath('Group33/TAX[@eC241.5153="VAT"]/@eC243.5278');
-		if (is_array($xvat[$i])) $vat[$i] = $xvat[$i][0]; // Näin voimme pohtia oliko täällä tuo segmentti
+		if (is_array($xvat[$i])) $vat[$i] = (float) $xvat[$i][0]; // Näin voimme pohtia oliko täällä tuo segmentti
 		$xrinfo[$i] 	= $tuotetieto-> xpath('IMD/@eC273.7008.1');
 		$info[$i] 		= $xrinfo[$i][0];
 		// laskutettu määrä
@@ -130,7 +130,7 @@ $i = 0;
 
 $vattiedot = $xml->xpath('Group50');
 
-if (sizeof($vattiedot) > 0) {
+if (count($vattiedot) > 0) {
 	foreach ($vattiedot as $vattieto) {
 		$xlisavat[$i]	= $vattieto->xpath('TAX/@eC243.5278');
 		$lisavat[$i]	= $xlisavat[$i][0];

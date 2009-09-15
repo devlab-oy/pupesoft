@@ -688,7 +688,7 @@
 			$result = mysql_query($query) or die ("$query\n\n".mysql_error());
 
 			// Onko laskuriveillä useita alv-verokantoja?
-			if (sizeof($vat) > 0) {
+			if (count($vat) > 0) {
 				$ealvi = array_unique($vat);
 			}
 			else {
@@ -698,7 +698,7 @@
 			//echo "Alviarrayn koko on ". sizeof($ealvi). "\n";
 
  			// Tehdän pelkät oletustiliöinnit
-			if (mysql_num_rows($result) == 0 and sizeof($ealvi) == 1) {
+			if (mysql_num_rows($result) == 0 and count($ealvi) == 1) {
 
 				if ($oletustili > 0) {
 					$tili = $oletustili;
@@ -785,7 +785,7 @@
 				$verkkolaskuveroton = 0;
 				$vtontot = 0;
 
-				for ($i=0; $i < sizeof($tuoteno); $i++) {
+				for ($i=0; $i < count($tuoteno); $i++) {
 
 					if ((float) $rsumma[$i] != 0) {
 						$kustp = $oletuskust;

@@ -92,9 +92,9 @@
 	$resultkieli = mysql_query($querykieli) or pupe_error($querykieli);
 	$kielirow = mysql_fetch_array($resultkieli);
 
-	$query  = "	SELECT distinct toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa 
-				from lasku 
-				where yhtio = '$kukarow[yhtio]' 
+	$query  = "	SELECT distinct toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa
+				from lasku
+				where yhtio = '$kukarow[yhtio]'
 				and tunnus in ($tunnukset)";
 	$uusiuresult = mysql_query($query) or pupe_error($query);
 
@@ -173,7 +173,7 @@
 			$lisa_comments .= "VAT 0% Intra community supply. \n";
 		}
 	}
-	
+
 	if ($lasrow["vienti"] == 'K') {
 		$lisa_comments .= "VAT 0% Export of goods outside the European Union. \n";
 	}
@@ -189,22 +189,22 @@
 		$rahtiresult = mysql_query($query) or pupe_error($query);
 
 		while ($rahtirow = mysql_fetch_array($rahtiresult)) {
-			
+
 			$rahtirow_pakkaus = t_avainsana("PAKKAUS", $kielirow["kieli"], "and avainsana.selite  = '$rahtirow[pakkaus]' and avainsana.selitetark  = '$rahtirow[pakkauskuvaus]'", "", "", "selite");
-			
+
 			if ($rahtirow["pakkauskuvaus"] != "") {
 				$rahtirow_pakkauskuvaus = t_avainsana("PAKKAUS", $kielirow["kieli"], "and avainsana.selite  = '$rahtirow[pakkaus]' and avainsana.selitetark  = '$rahtirow[pakkauskuvaus]'", "", "", "selitetark");
 			}
-			
+
 			if ($rahtirow_pakkaus != $rahtirow_pakkauskuvaus) {
 				$rahtirow_pakkaus .= " ".$rahtirow_pakkauskuvaus;
 			}
-			
+
 			// Tämä on käsin syötetty, ei voida kääntää
 			if ($rahtirow["pakkauskuvaustark"] != '') {
 				$rahtirow_pakkaus .= ", ".$rahtirow["pakkauskuvaustark"];
 			}
-			
+
 			$lisa_comments .= "$rahtirow[kollit] x $rahtirow_pakkaus $rahtirow[kilot] kg. \n";
 		}
 	}
@@ -227,7 +227,7 @@
 
 	if (mysql_num_rows($vakioviesti_result) == 1) {
 		$vakioviesti_row = mysql_fetch_array($vakioviesti_result);
-	
+
 		$lisa_comments .= " $vakioviesti_row[selite]\n";
 	}
 
@@ -242,13 +242,13 @@
 	}
 
 	//Siivotaan kommenteista kaikki kummalliset merkit pois
-	$comments 				= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $comments);
-	$viestit				= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $viestit);
-	$sisviestit1			= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%§\r\n]", "", $sisviestit1);
-	$tilausyhteyshenkilo	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $tilausyhteyshenkilo);
-	$asiakkaan_tilausnumero	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $asiakkaan_tilausnumero);
-	$kohde					= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $kohde);
-	
+	$comments 				= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§", "/")."\r\n]/", "", $comments);
+	$viestit				= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§", "/")."\r\n]/", "", $viestit);
+	$sisviestit1			= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§", "/")."\r\n]/", "", $sisviestit1);
+	$tilausyhteyshenkilo	= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§", "/")."\r\n]/", "", $tilausyhteyshenkilo);
+	$asiakkaan_tilausnumero	= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§", "/")."\r\n]/", "", $asiakkaan_tilausnumero);
+	$kohde					= preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§", "/")."\r\n]/", "", $kohde);
+
 	$fields = "yhtio";
 	$values = "'$kukarow[yhtio]'";
 
@@ -256,93 +256,93 @@
 	for($teeulasku_i=1; $teeulasku_i < mysql_num_fields($laskusplitres)-1; $teeulasku_i++) {
 
 		$fieldname = mysql_field_name($laskusplitres,$teeulasku_i);
-		
+
 		$fields .= ", ".$fieldname;
 
 		switch ($fieldname) {
-			case 'arvo':								
+			case 'arvo':
 				$values .= ", '$arvo'";
 				break;
-			case 'arvo_valuutassa':						
+			case 'arvo_valuutassa':
 				$values .= ", '$arvo_valuutassa'";
-				break;	
-			case 'pyoristys':							
+				break;
+			case 'pyoristys':
 				$values .= ", '$pyoristys'";
-				break;	
-			case 'pyoristys_valuutassa':				
+				break;
+			case 'pyoristys_valuutassa':
 				$values .= ", '$pyoristys_valuutassa'";
-				break;	
-			case 'vienti_kurssi':					
+				break;
+			case 'vienti_kurssi':
 				$values .= ", '$vienti_kurssi'";
-				break;	
-			case 'asiakkaan_tilausnumero':				
+				break;
+			case 'asiakkaan_tilausnumero':
 				$values .= ", '$asiakkaan_tilausnumero'";
-				break;	
-			case 'bruttopaino':							
+				break;
+			case 'bruttopaino':
 				$values .= ", '$bruttopaino'";
-				break;	
-			case 'comments':							
+				break;
+			case 'comments':
 				$values .= ", '$comments'";
-				break;	
-			case 'kasumma':								
+				break;
+			case 'kasumma':
 				$values .= ", '$kassaale'";
-				break;	
-			case 'kasumma_valuutassa':					
+				break;
+			case 'kasumma_valuutassa':
 				$values .= ", '$kassaale_valuutassa'";
-				break;	
-			case 'kate':								
-				$values .= ", '$kate'";			
-				break;	
-			case 'kohde':								
+				break;
+			case 'kate':
+				$values .= ", '$kate'";
+				break;
+			case 'kohde':
 				$values .= ", '$kohde'";
-				break;	
-			case 'laskutettu':							
+				break;
+			case 'laskutettu':
 				$values .= ", now()";
-				break;	
-			case 'laskuttaja':							
+				break;
+			case 'laskuttaja':
 				$values .= ", '$kukarow[kuka]'";
-				break;	
-			case 'maksaja':								
+				break;
+			case 'maksaja':
 				$values .= ", '$maksaja'";
-				break;	
-			case 'mapvm':								
+				break;
+			case 'mapvm':
 				$values .= ", $maksupaiva";
-				break;	
-			case 'summa':								
+				break;
+			case 'summa':
 				$values .= ", '$summa'";
-				break;	
-			case 'summa_valuutassa':					
+				break;
+			case 'summa_valuutassa':
 				$values .= ", '$summa_valuutassa'";
-				break;	
-			case 'tilausyhteyshenkilo':					
+				break;
+			case 'tilausyhteyshenkilo':
 				$values .= ", '$tilausyhteyshenkilo'";
-				break;	
-			case 'viesti':								
+				break;
+			case 'viesti':
 				$values .= ", '$viestit'";
-				break;	
-			case 'sisviesti1':							
+				break;
+			case 'sisviesti1':
 				$values .= ", '$sisviestit1'";
-				break;	
-			case 'sisviesti2':							
+				break;
+			case 'sisviesti2':
 				$values .= ", '$sisviestit2'";
-				break;	
-			case 'alatila':								
-				$values .= ", ''";			
-				break;	
-			case 'tila':								
+				break;
+			case 'alatila':
+				$values .= ", ''";
+				break;
+			case 'tila':
 				$values .= ", 'U'";
 				break;
 			default:
 				$values .= ", '".$lasrow[$fieldname]."'";
 		}
 	}
-		
-	$kysely  = "INSERT into lasku ($fields) VALUES ($values)";					
+
+	$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 	$uusiotsikko = mysql_query($kysely) or pupe_error($kysely);
-	
+
 	// otetaan uuden otsikon tunnus talteen
 	$uusiotunnus = (string) mysql_insert_id();
-	
+
 	// haetaan nyt varmuuden vuoksi vielä insertoidut tiedot takaisin..
 	$query = "SELECT * FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$uusiotunnus'";
 	$uusiuresult = mysql_query($query) or pupe_error($query);
@@ -355,7 +355,7 @@
 	$ulasr = mysql_query($query) or pupe_error($query);
 
 	// katotaan montako tilausta ollaan käsittelemässä
-	$montakotilausta = split(",", $tunnukset);
+	$montakotilausta = explode(",", $tunnukset);
 
 	// jos meillä on enemmän kuin yksi tilaus ja kyseessä ei ole laskutyyppi PLAIN, lasketaan välisummat tilausriveillä
 	if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
@@ -364,9 +364,9 @@
 		// haetaan asiakkaan tietojen takaa sorttaustiedot
 		$order_sorttaus = '';
 
-		$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta 
-								FROM asiakas 
-								WHERE yhtio='$kukarow[yhtio]' 
+		$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta
+								FROM asiakas
+								WHERE yhtio='$kukarow[yhtio]'
 								and tunnus='$laskurow[liitostunnus]'";
 		$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
 
@@ -475,5 +475,5 @@
 	if ($tulos_ulos == "" and $silent == "") {
 		echo $tulos_ulos_ulasku;
 	}
-	
+
 ?>

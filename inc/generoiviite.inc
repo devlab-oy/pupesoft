@@ -3,7 +3,7 @@
 	// palautetaan valmis $viite
 
 	// poistetaan kaikki muut merkit paitsi numerot 0-9 sekä poistetaan etunollat
-	$viite   = ltrim(ereg_replace("[^0-9]", "", $viite),"0");
+	$viite   = ltrim(preg_replace("/[^0-9]/", "", $viite),"0");
 	$kerroin = 7;
 	$tulo    = 0;
 

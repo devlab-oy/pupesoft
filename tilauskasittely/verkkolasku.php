@@ -31,7 +31,11 @@
 
 		// hmm.. j‰nn‰‰
 		$kukarow['yhtio'] = $argv[1];
-		$kieli = $argv[2];
+
+		if (isset($argv[2])) {
+			$kieli = $argv[2];
+		}
+
 		$kukarow['kuka']  = "crond";
 
 		$query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
@@ -136,8 +140,8 @@
 				if (checkdate($laskkk, $laskpp, $laskvv)) {
 
 					//vertaillaan tilikauteen
-					list($vv1,$kk1,$pp1) = split("-",$yhtiorow["myyntireskontrakausi_alku"]);
-					list($vv2,$kk2,$pp2) = split("-",$yhtiorow["myyntireskontrakausi_loppu"]);
+					list($vv1,$kk1,$pp1) = explode("-",$yhtiorow["myyntireskontrakausi_alku"]);
+					list($vv2,$kk2,$pp2) = explode("-",$yhtiorow["myyntireskontrakausi_loppu"]);
 
 					$tilialku  = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
 					$tililoppu = (int) date('Ymd',mktime(0,0,0,$kk2,$pp2,$vv2));
@@ -1345,7 +1349,7 @@
 							}
 
 							// Laskukohtaiset kommentit kuntoon
-							// T‰m‰ merkki | eli pystyviiva on rivinvaihdon merkki elmalla
+							// T‰m‰ merkki | eli pystyviiva on rivinvaihdon merkki laskun kommentissa elmalla
 							$komm = "";
 
 							if (trim($lasrow['tilausyhteyshenkilo']) != '') {
@@ -1384,7 +1388,7 @@
 								$lasrow["ytunnus"] = strtoupper($lasrow["maa"])."-".$lasrow["ytunnus"];
 							}
 
-							if (strtolower($laskun_kieli) != strtolower($yhtiorow['kieli'])) {
+							if (strtoupper($laskun_kieli) != strtoupper($yhtiorow['kieli'])) {
 								//K‰‰nnet‰‰n maksuehto
 								$masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $laskun_kieli);
 							}
@@ -1488,9 +1492,9 @@
 							}
 
 							// Kirjoitetaan rivitietoja tilausriveilt‰
-							$query = "	SELECT tilausrivi.*, lasku.vienti_kurssi, 
-										if(date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d')) toimitettuaika, 										
-										if(tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika) toimaika,																				
+							$query = "	SELECT tilausrivi.*, lasku.vienti_kurssi,
+										if(date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d')) toimitettuaika,
+										if(tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika) toimaika,
 										$sorttauskentta
 										FROM tilausrivi
 										JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
@@ -1509,16 +1513,16 @@
 									//K‰‰nnet‰‰n nimitys
 									$tilrow['nimitys'] = t_tuotteen_avainsanat($tilrow, 'nimitys', $laskun_kieli);
 								}
-								
+
 								// Palvelutuotteiden toimitettuaika syˆtet‰‰n k‰sin
 								if ($tilrow["keratty"] == "saldoton" and $yhtiorow["saldottomien_toimitettuaika"] == "K") {
 									$tilrow['toimitettuaika'] = $tilrow['toimaika'];
 								}
-								
+
 								//K‰ytetyn tavaran myynti
 								if ($tilrow["alv"] >= 500) {
 									$tilrow["alv"] = 0;
-									$tilrow["kommentti"] .= "|Ei sis‰ll‰ v‰hennett‰v‰‰ veroa.";
+									$tilrow["kommentti"] .= " Ei sis‰ll‰ v‰hennett‰v‰‰ veroa.";
 								}
 
 								//Hetaan sarjanumeron tiedot
@@ -1537,11 +1541,11 @@
 											and sarjanumero != ''";
 								$sarjares = mysql_query($query) or pupe_error($query);
 
-								if ($tilrow["kommentti"] != '' and mysql_num_rows($sarjares) > 0){
-									$tilrow["kommentti"] .= "|";
+								if ($tilrow["kommentti"] != '' and mysql_num_rows($sarjares) > 0) {
+									$tilrow["kommentti"] .= " ";
 								}
-								while($sarjarow = mysql_fetch_array($sarjares)) {
-									$tilrow["kommentti"] .= "# $sarjarow[sarjanumero]|";
+								while ($sarjarow = mysql_fetch_array($sarjares)) {
+									$tilrow["kommentti"] .= "S:nro: $sarjarow[sarjanumero] ";
 								}
 
 								if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -1559,8 +1563,8 @@
 								$vatamount = round($tilrow['rivihinta']*$tilrow['alv']/100, 2);
 								$totalvat  = round($tilrow['rivihinta']+$vatamount, 2);
 
-								$tilrow['kommentti'] 	= ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/!|+()%#]", " ", $tilrow['kommentti']);
-								$tilrow['nimitys'] 		= ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/!|+()%#]", " ", $tilrow['nimitys']);
+								$tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â ".preg_quote(".,-/!+()%#", "/")."]/", " ", $tilrow['kommentti']);
+								$tilrow['nimitys'] 	 = preg_replace("/[^A-Za-z0-9÷ˆƒ‰≈Â ".preg_quote(".,-/!+()%#", "/")."]/", " ", $tilrow['nimitys']);
 
 								// yksikkˆhinta pit‰‰ olla veroton
 								if ($yhtiorow["alv_kasittely"] == '') {
@@ -1582,7 +1586,6 @@
 									finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat);
 								}
 								else {
-									$tilrow["kommentti"]= str_replace("|"," ",$tilrow["kommentti"]); //Poistetaan pipet. Itella ei niist‰ t‰‰ll‰ selvi‰
 									pupevoice_rivi($tootxml, $tilrow, $vatamount, $totalvat);
 								}
 							}
@@ -1911,12 +1914,12 @@
 							$varasto = 0;
 
 							while ($row = mysql_fetch_array($result)) {
-								
+
 								// Palvelutuotteiden toimitettuaika syˆtet‰‰n k‰sin
 								if ($row["keratty"] == "saldoton" and $yhtiorow["saldottomien_toimitettuaika"] == "K") {
 									$row['toimitettuaika'] = $row['toimaika'];
 								}
-								
+
 								rivi($page[$sivu]);
 
 								//Tutkitaan mihin printteriin t‰m‰n laskun voisi tulostaa
@@ -2208,8 +2211,8 @@
 		if ($tee == '' and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
 
 			//p‰iv‰m‰‰r‰n tarkistus
-			$tilalk = split("-", $yhtiorow["myyntireskontrakausi_alku"]);
-			$tillop = split("-", $yhtiorow["myyntireskontrakausi_loppu"]);
+			$tilalk = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
+			$tillop = explode("-", $yhtiorow["myyntireskontrakausi_loppu"]);
 
 			$tilalkpp = $tilalk[2];
 			$tilalkkk = $tilalk[1]-1;
@@ -2299,7 +2302,7 @@
 			$today = date("w") + 1;
 
 
-			$query = "	select
+			$query = "	SELECT
 						sum(if(lasku.laskutusvkopv='0',1,0)) normaali,
 						sum(if(lasku.laskutusvkopv='$today',1,0)) paiva,
 						sum(if(lasku.laskutusvkopv!='$today' and lasku.laskutusvkopv!='0',1,0)) muut,

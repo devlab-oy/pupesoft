@@ -237,7 +237,7 @@
 
 					// Yritämme nyt välittää maksupointterin $laskusis1:ssä --> $laskurow[9] --> lasku.tunnus
 					$query = "	SELECT maksu_tili,
-								lasku.nimi, lasku.nimitark, lasku.pankki_haltija, 
+								lasku.nimi, lasku.nimitark, lasku.pankki_haltija,
 								left(concat_ws(' ', osoite, osoitetark),20) osoite,
 								left(concat_ws(' ', postino, postitp),20) postitp,
 								summa, lasku.valkoodi, viite, viesti,
@@ -264,9 +264,12 @@
 							$laskunimi1 = $laskurow["pankki_haltija"];
 						}
 						else {
-							$laskunimi1 = $laskurow["nimi"]." ".$laskurow['nimitark'];
+							$laskunimi1 = $laskurow["nimi"];
+							if ($laskurow["nimitark"] != "") {
+								$laskunimi1 = $laskurow["nimi"]." ".$laskurow['nimitark'];
+							}
 						}
-						
+
 						$laskunimi2 	= $laskurow["osoite"];
 						$laskunimi3 	= $laskurow["postitp"];
 
@@ -539,7 +542,10 @@
 									$laskunimi1 = $laskurow["pankki_haltija"];
 								}
 								else {
-									$laskunimi1 = $laskurow["nimi"]." ".$laskurow['nimitark'];
+									$laskunimi1 = $laskurow["nimi"];
+									if ($laskurow["nimitark"] != "") {
+										$laskunimi1 = $laskurow["nimi"]." ".$laskurow['nimitark'];
+									}
 								}
 								$laskunimi2 	= $laskurow["osoite"];
 								$laskunimi3 	= $laskurow["postitp"];
@@ -595,7 +601,7 @@
 
 				// Yritämme nyt välittää maksupointterin $laskusis1:ssä --> $laskurow[9] --> tunnus
 				$query = "	SELECT maksu_tili,
-							lasku.nimi, lasku.nimitark, lasku.pankki_haltija, 
+							lasku.nimi, lasku.nimitark, lasku.pankki_haltija,
 							left(concat_ws(' ', osoite, osoitetark),45) osoite,
 							left(concat_ws(' ', postino, postitp),45) postitp,
 							summa, lasku.valkoodi, viite, viesti,
@@ -630,8 +636,12 @@
 							$laskunimi1 = $laskurow["pankki_haltija"];
 						}
 						else {
-							$laskunimi1 = $laskurow["nimi"]." ".$laskurow['nimitark'];
-						} 
+							$laskunimi1 = $laskurow["nimi"];
+							if ($laskurow["nimitark"] != "") {
+								$laskunimi1 = $laskurow["nimi"]." ".$laskurow['nimitark'];
+							}
+
+						}
 
 						$laskunimi2 	= $laskurow["osoite"];
 						$laskunimi3 	= $laskurow["postitp"];

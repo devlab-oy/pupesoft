@@ -71,15 +71,13 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) == 0) {
-					echo "<font class='message'>".t("Sopivaa maksua")." $sisviite & $kohdm $tilinvaluutta ".t("ei löytynyt")."!</font><br>";
+					echo "<font class='error'>".t("Sopivaa maksua")." $sisviite $kohdm $tilinvaluutta ".t("ei löytynyt")."!</font><br>";
 					echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>";
-
 					require "inc/teeselvittely.inc";
 				}
 				else {
 					$trow = mysql_fetch_array ($result);
-					echo "<font class='message'>".t("Maksu löytyi")." $trow[tunnus]</font><br>";
-
+					echo "<font class='ok'>".t("Maksu löytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>";
 					require "inc/teemaksutosite.inc";
 				}
 			}
@@ -99,20 +97,18 @@
 							$result = mysql_query($query) or pupe_error($query);
 
 							if (mysql_num_rows($result) == 0) {
-								echo "<font class='message'>".t("Sopivaa maksua")." $tilino & $kohdm $tilinvaluutta ".t("ei löytynyt")."!</font><br>";
+								echo "<font class='error'>".t("Sopivaa maksua")." $tilino & $kohdm $tilinvaluutta ".t("ei löytynyt")."!</font><br>";
 								echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>";
-
 								require "inc/teeselvittely.inc";
 							}
 							else {
 								$trow = mysql_fetch_array ($result);
-								echo "<font class='message'>".t("Maksu löytyi")." $trow[tunnus]</font><br>";
-
+								echo "<font class='ok'>".t("Maksu löytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>";
 								require "inc/teemaksutosite.inc";
 							}
 						}
 						else {
-							echo "<font class='message'>".t("Meillä ei ole tietoa millä tämä tapahtuma voidaan kohdistaa")."</font><br>";
+							echo "<font class='error'>".t("Meillä ei ole tietoa millä tämä tapahtuma voidaan kohdistaa")."</font><br>";
 							echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>";
 
 							require "inc/teeselvittely.inc";
@@ -121,21 +117,33 @@
 						break;
 					case '720' : // Maksumääräys maksettu jotain tililtä, etsitään nimellä ja summalla....
 						if (strlen(trim($maksaa)) > 0) {
+
 							echo "<font class='message'>".t("Maksukanditaatti nimi & määrä")."</font><br>";
 
+							// tarkka 35 merkkiä <-> 35 merkkiä nimihaku
 							$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 										FROM lasku
-										WHERE left(nimi,35) = left('$maksaa',35)
+										WHERE left(nimi, 35) = left('$maksaa', 35)
 										and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
 										and yhtio 	= '$yritirow[yhtio]'
 										and tila 	= 'Q'
 										$kohdm_valkoodilisa";
 							$result = mysql_query($query) or pupe_error($query);
 
-							if (mysql_num_rows($result) == 0) {
-								echo "<font class='message'>".t("Sopivaa maksua")." $maksaa & $kohdm $tilinvaluutta ".t("suoraan ei löytynyt")."</font><br>";
+							if (mysql_num_rows($result) != 1) {
+								// kokeillaan samalla kaavalla kun lum2 rivissä
+								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+											FROM lasku
+											WHERE replace(left(concat_ws(' ', if(pankki_haltija != '', pankki_haltija, concat_ws(' ', nimi, nimitark)), osoite, postitp), 30), '&', ' ') = left('$maksaa', 30)
+											and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
+											and yhtio	= '$yritirow[yhtio]'
+											and tila 	= 'Q'
+											$kohdm_valkoodilisa";
+								$result = mysql_query($query) or pupe_error($query);
+							}
 
-								//Poistetaan Oyt ja Abt ja katsotaan miten sitten käy....
+							if (mysql_num_rows($result) != 1) {
+								// poistetaan oy:t ja ab:t
 								$maksaa = trim(preg_replace('/\b(OY|AB)\b/i', '', strtoupper($maksaa)));
 
 								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
@@ -146,57 +154,40 @@
 											and tila 	= 'Q'
 											$kohdm_valkoodilisa";
 								$result = mysql_query($query) or pupe_error($query);
+							}
 
-								if (mysql_num_rows($result) == 0) {
+							if (mysql_num_rows($result) != 1) {
+								// konvertoidaan ääkköset
+								$maksaa = str_replace ("å", "a", $maksaa);
+								$maksaa = str_replace ("ä", "a", $maksaa);
+								$maksaa = str_replace ("ö", "o", $maksaa);
+								$maksaa = str_replace ("Å", "A", $maksaa);
+								$maksaa = str_replace ("Ä", "A", $maksaa);
+								$maksaa = str_replace ("Ö", "O", $maksaa);
 
-									echo "<font class='message'>".t("Sopivaa maksua")." $maksaa & $kohdm $tilinvaluutta ".t("vieläkään ei löytynyt")."</font><br>";
+								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+											FROM lasku
+											WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'å','a'), 'ä','a'), 'ö','o'), 'Å','A'), 'Ä','A'), 'Ö','O') LIKE '%$maksaa%'
+											and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
+											and yhtio 	= '$yritirow[yhtio]'
+											and tila 	= 'Q'
+											$kohdm_valkoodilisa";
+								$result = mysql_query($query) or pupe_error($query);
+							}
 
-									$maksaa = str_replace ("å", "a", $maksaa);
-									$maksaa = str_replace ("ä", "a", $maksaa);
-									$maksaa = str_replace ("ö", "o", $maksaa);
-									$maksaa = str_replace ("Å", "A", $maksaa);
-									$maksaa = str_replace ("Ä", "A", $maksaa);
-									$maksaa = str_replace ("Ö", "O", $maksaa);
-
-									//Konvertoidaan ääkköset ja katsotaan miten sitten käy....
-									$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
-												FROM lasku
-												WHERE replace(replace(replace(replace(replace(replace(left(nimi,35),'å','a'), 'ä','a'), 'ö','o'), 'Å','A'), 'Ä','A'), 'Ö','O') LIKE '%$maksaa%'
-												and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
-												and yhtio 	= '$yritirow[yhtio]'
-												and tila 	= 'Q'
-												$kohdm_valkoodilisa";
-									$result = mysql_query($query) or pupe_error($query);
-
-									if (mysql_num_rows($result) == 0) {
-										echo "<font class='message'>".t("Sopivaa maksua")." $maksaa & $kohdm $tilinvaluutta ".t("vieläkään ei löytynyt")."</font><br>";
-										echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>";
-
-										require "inc/teeselvittely.inc";
-									}
-									else {
-										$trow = mysql_fetch_array ($result);
-										echo "<font class='message'>".t("Maksu löytyi")." $trow[tunnus]</font><br>";
-
-										require "inc/teemaksutosite.inc";
-									}
-								}
-								else {
-									$trow = mysql_fetch_array ($result);
-									echo "<font class='message'>".t("Maksu löytyi")." $trow[tunnus]</font><br>";
-
-									require "inc/teemaksutosite.inc";
-								}
+							if (mysql_num_rows($result) == 1) {
+								$trow = mysql_fetch_array ($result);
+								echo "<font class='ok'>".t("Maksu löytyi")." $trow[nimi] $trow[summa] $trow[valkoodi]</font><br>";
+								require "inc/teemaksutosite.inc";
 							}
 							else {
-								$trow = mysql_fetch_array ($result);
-								echo "<font class='message'>".t("Maksu löytyi")." $trow[tunnus]</font><br>";
-
-								require "inc/teemaksutosite.inc";
+								echo "<font class='error'>".t("Sopivaa maksua")." $maksaa $kohdm $tilinvaluutta ".t("ei löytynyt")."</font><br>";
+								echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>";
+								require "inc/teeselvittely.inc";
 							}
 						}
 						else {
-							echo "<font class='message'>".t("Meillä ei ole tietoa millä tämä tapahtuma voidaan kohdistaa")."</font><br>";
+							echo "<font class='error'>".t("Meillä ei ole tietoa millä tämä tapahtuma voidaan kohdistaa")."</font><br>";
 							echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>";
 							require "inc/teeselvittely.inc";
 						}
@@ -205,14 +196,11 @@
 						break;
 					case '730' : // Pankin kulu
 						echo "<font class='message'>".t("Maksukanditaatti pankinkulu")."</font><br>";
-						echo "<font class='message'>".t("Rahat")." $yritirow[oletus_rahatili] ".t("kulut")." $yritirow[oletus_kulutili] ".t("summa")." $maara</font><br>";
-
+						echo "<font class='ok'>".t("Rahat")." $yritirow[oletus_rahatili] ".t("kulut")." $yritirow[oletus_kulutili] ".t("summa")." $maara</font><br>";
 						require "inc/teekulutosite.inc";
 						break;
-
 					default :
 						echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>";
-
 						require "inc/teeselvittely.inc";
 				}
 			}
@@ -251,7 +239,7 @@
 							echo "<a href='".$palvelin2."tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=3&tilino=$tiliotedatarow[tilino]'>".t("Avaa LMP-erittely")."</a><br>";
 						}
 						else {
-							echo "<font class='error'>".t("VIRHE: Erittely kateissa")."!</font><br>";
+							echo "<font class='message'>".t("VIRHE: Erittely kateissa")."!</font><br>";
 						}
 					}
 				}

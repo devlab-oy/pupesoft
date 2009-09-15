@@ -36,7 +36,7 @@
 	$ulos  = "LUM2";													// Sovellustunnus
 	$ulos .= "1";                                                       // Tietuetunnus
 	$ulos .= "0";                                                       // Hyväksymiskoodi
-	$ulos .= sprintf ('%-140.140s',	$laskunimi1." ".$laskunimi2." ".$laskunimi3." ".$laskunimi4); // Saajan nimi ja osoite
+	$ulos .= sprintf ('%-140.140s',	$laskunimi1." ".$laskunimi2." ".$laskunimi3); // Saajan nimi ja osoite
 	$ulos .= sprintf ('%-2.2s',  	strtoupper($laskumaakoodi));        // Saajan maan maakoodi
 	$ulos .= sprintf ('%-11.11s',	strtoupper($laskuswift));           // Saajan pankin SWIFT-koodi
 	$ulos .= sprintf ('%-35.35s',	$laskupankki1);                     // Saajan pankin nimi ja paikkakunta

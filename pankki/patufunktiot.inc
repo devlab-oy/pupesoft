@@ -170,7 +170,7 @@ function salattukertaavain ($tunnus) {
 		# Salataan kerta-avain siirtoavaimella
 		$sal = mcrypt_generic($td,$kerta);
 		$sal = unpack("H*",$sal);
-		echo "Salattu kerta-avain: $sal[1]";
+		echo "Salattu kerta-avain: $sal[1]<br>";
 
 		# Tallennetaan tietokantaan
 		$query = "UPDATE yriti SET kertaavain='$uusikertaavain', salattukerta='$sal[1]', siemen='$siemen[1]' WHERE tunnus='$tunnus'";
@@ -224,10 +224,7 @@ function salaa ($jono, $arg, $kayttoavain) {
 
 	// Tulostellaan arvot
 	// Tehd‰‰n tarvittavat temput tietyille tiedostotyypeille
-	if (($arg == "ESIa") or ($arg == "VARa")) {
-		if($arg == "VARa"){
-			$palautus = ">>VAR" . $palautus;
-		}
+	if (($arg == "ESIa") or ($arg == "VAR")) {
 		$palautus .= strtoupper($tark[1]);
 		return $palautus;
 	}
@@ -243,6 +240,49 @@ function salaa ($jono, $arg, $kayttoavain) {
 			return "Tarkisteet eiv‰t t‰sm‰‰!";
 		}
 	}
+	mcrypt_generic_deinit($td);
+	mcrypt_module_close($td);
+
+}
+
+function tiiviste ($jono, $kertaavain) {
+
+	//Jaetaan 8 merkin lohkoiksi ja sijoitetaan taulukkoon
+	$k=0;
+
+	while(strlen($jono) > 0) {
+		$data[$k] = substr($jono,0,8);
+		$jono = substr($jono,8);
+		$k++;
+		//echo "$jono\n";
+	}
+
+	//Jos viimeinen lohko j‰‰ vajaaksi t‰ytet‰‰n se bin‰‰ri nollilla
+	$k--;
+	if (strlen($data[$k]) != 8) $data[$k] = str_pad($data[$k], 8, "\0");
+
+
+	//Alustetaan kryptaus kertaavaimella  
+	$kertaavain = pack("H*",$kertaavain);
+	$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
+	$iv=pack('H*','0000000000000000');
+	mcrypt_generic_init($td, $kertaavain, $iv);
+	
+	$text = $data[0];
+	$text = mcrypt_generic($td, $text);
+
+	for($i=1; $i<=$k; $i++){
+		$ortext=$text ^ $data[$i];
+		$text = mcrypt_generic($td, $ortext);
+	}
+
+	//Muutetaan salattu teksti Heksoiksi
+	$tiivisteet = unpack("H*", $text);
+	$tiiviste = strtoupper($tiivisteet[1]);
+
+	echo "Tiiviste: $tiiviste<br>";
+	return $tiiviste;
+
 	mcrypt_generic_deinit($td);
 	mcrypt_module_close($td);
 
@@ -440,7 +480,7 @@ $file.= sprintf ('%-9.9s', " "); // 9
 if($tyyppi == "ESI")
 	$file.=sprintf ('%-16.16s', " "); // 16
 else
-	$file.=sprintf ('%-16.16s', $tilirow['salattukerta']);
+	$file.=sprintf ('%-16.16s', strtoupper($tilirow['salattukerta']));
 
 
 #Tiivisteen paikka
@@ -470,6 +510,16 @@ function siirtopyynto ($pankki, $tilinumero, $aineisto, $salasana ,$paivays) {
 		if ($aineisto == 'TITO') {
 			$apu = "//SOVELLUS=KTON,ERA=000000\n";
 			$apu .= "//EOF\n";
+		}
+		if ($aineisto == 'VKEUR') {
+			$apu = "//SOVELLUS=VKEN,ERA=000000\n";
+			$apu .= "//EOF\n";
+		}
+		if ($aineisto == 'xxx') {
+			$apu = "//SOVELLUS=UM2L,ERA=" . $paivays . "\n";
+		}
+		if ($aineisto == 'LMP300') {
+			$apu = "//SOVELLUS=OL2L,ERA=" . $paivays . "\n";
 		}
 	}
 	else

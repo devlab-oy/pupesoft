@@ -44,7 +44,8 @@
 			$yritirow['nro']++;
 			$query = "UPDATE yriti SET nro='$yritirow[nro]' WHERE yhtio  = '$kukarow[yhtio]' and tunnus = '$tunnus' and kayttoavain != ''";
 			$vresult = mysql_query($query) or pupe_error($query);
-			aineistonnouto($yritirow, $aineisto, $pvm);
+			if ($aineisto = 'LMP300') aineistonlahetys($yritirow, $aineisto, $pvm);
+			else aineistonnouto($yritirow, $aineisto, $pvm);
 		}
 	}
 	
@@ -78,10 +79,12 @@
 	echo "<td><input type='radio' name = 'aineisto' value = 'TITO'></td></tr>";
 	echo "<tr><th>".t("Valuuttakurssit")."</th>";
 	echo "<td><input type='radio' name = 'aineisto' value = 'VKEUR'></td></tr>";
-	echo "<tr><th>".t("Tuotantotilanneraportti")."</th>";
-	echo "<td><input type='radio' name = 'aineisto' value = 'INFO'></td></tr>";
 	echo "<tr><th>".t("Aineistojen tilakysely")."</th>";
 	echo "<td><input type='radio' name = 'aineisto' value = 'STATUS'></td></tr>";
+	echo "<tr><th>".t("LUM2-aineiston lähetys")."</th>";
+	echo "<td><input type='radio' name = 'aineisto' value = 'xxx'></td></tr>";
+	echo "<tr><th>".t("LM03-aineiston lähetys")."</th>";
+	echo "<td><input type='radio' name = 'aineisto' value = 'LMP300'></td></tr>";
 	echo "<tr><th>".t("Käytä testausaineistoa")."</th>";
 	echo "<td><input type='checkbox' name = 'testaus' value = '1'></td></tr>";
 	echo "<tr><th>".t("Testaa kertasalasanan suojausta")."</th>";

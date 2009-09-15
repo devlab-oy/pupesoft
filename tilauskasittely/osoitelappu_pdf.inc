@@ -40,10 +40,10 @@ if ($postirow_varasto["nimi"] != "") {
 $prikomento = explode('-#', $oslapp);
 
 // haetaan printterin osoitetiedot
-$query = "	SELECT * 
-			from kirjoittimet 
-			where yhtio = '$kukarow[yhtio]' 
-			and trim(komento) like concat(trim('$prikomento[0]'),'%') 
+$query = "	SELECT *
+			from kirjoittimet
+			where yhtio = '$kukarow[yhtio]'
+			and trim(komento) like concat(trim('$prikomento[0]'),'%')
 			and nimi != ''";
 $pres  = mysql_query($query) or pupe_error($query);
 $print = mysql_fetch_assoc($pres);
@@ -133,7 +133,7 @@ $tulostakolli = 1; // tulostetaan aina yksi kappale???
 for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 	// tehdään pdf:n uusi sivu
-	$firstpage = $pdf->new_page("420x590");
+	$firstpage = $pdf->new_page("a5");
 
 	//Duusataan viivakoodia
 	$output      = "png";
@@ -179,7 +179,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 			}
 			// piirretään viivakoodi paprulle
 			$pdf->image_place($image, mm_pt(80), mm_pt(30), $firstpage); // Y, X
-			$pdf->draw_text(mm_pt(4), mm_pt(75), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
+			$pdf->draw_text(mm_pt(5), mm_pt(75), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
 			unset($obj);
 
 			//dellataan tmp filet kuleksimasta
@@ -238,7 +238,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 			// piirretään viivakoodi paprulle
 			$pdf->image_place($image, mm_pt(10), mm_pt(-15), $firstpage); // Y, X
-			$pdf->draw_text(mm_pt(4), mm_pt(5), "Kolli - Item ID.: $sscc", $firstpage, $otsik);
+			$pdf->draw_text(mm_pt(5), mm_pt(5), "Kolli - Item ID.: $sscc", $firstpage, $otsik);
 			unset($obj);
 
 			//dellataan tmp filet kuleksimasta
@@ -248,10 +248,6 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 			echo "object create error 2";
 		}
 	}
-
-	// sitten aletaan piirtämään itse PDF sisältöä
-	// ensin isot viivat kohilleen
-	$pdf->draw_rectangle(585,5,5,415, $firstpage, $rectparam);
 
 	$apu_yhtiorow = array();
 
@@ -319,20 +315,20 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	}
 
 	//Mistä
-	$pdf->draw_text(mm_pt(4), mm_pt(200), "Mistä - Från - From: ",							$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(4), mm_pt(195), $laskurow['yhtio_nimi'],							$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(4), mm_pt(190), $laskurow['yhtio_nimitark'],						$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(4), mm_pt(185), $laskurow['yhtio_osoite'],						$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(4), mm_pt(180), $laskurow['yhtio_postino']." ".strtoupper($laskurow['yhtio_postitp']),	$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(5), mm_pt(200), "Mistä - Från - From: ",							$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(5), mm_pt(195), $laskurow['yhtio_nimi'],							$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(5), mm_pt(190), $laskurow['yhtio_nimitark'],						$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(5), mm_pt(185), $laskurow['yhtio_osoite'],						$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(5), mm_pt(180), $laskurow['yhtio_postino']." ".strtoupper($laskurow['yhtio_postitp']),	$firstpage, $kirj);
 
-	$pdf->draw_text(mm_pt(4), mm_pt(175), "Puh -Tel - Tel: ",								$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(4), mm_pt(170), $yhtiorow['puhelin'],								$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(5), mm_pt(175), "Puh -Tel - Tel: ",								$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(5), mm_pt(170), $yhtiorow['puhelin'],								$firstpage, $kirj);
 
 	$pdf->draw_text(mm_pt(70), mm_pt(175), "Läh.pvm. - Avs.dat. -  Desp.Date: ",			$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(70), mm_pt(170), date("d.m.Y") ,									$firstpage, $kirj);
 
-	$pdf->draw_text(mm_pt(4), mm_pt(165), "Lähettäjä - Avsändare - Sender: ",				$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(4), mm_pt(160), "$kukarow[nimi]" ,								$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(5), mm_pt(165), "Lähettäjä - Avsändare - Sender: ",				$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(5), mm_pt(160), "$kukarow[nimi]" ,								$firstpage, $kirj);
 
 	$pdf->draw_text(mm_pt(70), mm_pt(165), "Viite - Referens - Reference: ",				$firstpage, $otsik);
 
@@ -343,7 +339,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		$pdf->draw_text(mm_pt(70), mm_pt(160), "$laskurow[viesti]" ,							$firstpage, $kirj);
 	}
 
-	$pdf->draw_text(mm_pt(4), mm_pt(155), "Tilaukset - Order - Orders: ",					$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(5), mm_pt(155), "Tilaukset - Order - Orders: ",					$firstpage, $otsik);
 	if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];
 
 	if ($rahtikirja_tulostus == "yep") {
@@ -397,7 +393,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_rectangle(mm_pt(110),mm_pt(143),mm_pt(115),mm_pt(143),	$firstpage, $rectparam);
 
 	// Kuljetusohjeet = viivakoodi tulee tähän
-	$pdf->draw_text(mm_pt(4), mm_pt(60), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(5), mm_pt(60), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
 
 	// Onko tilaus jälkivaatimus
 	$apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
@@ -453,7 +449,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	}
 
 	// ylhäällä on "oikee" tapa tehdä, mutta me ei tiedetä tässä vaiheessa kollien määrää eikä painoa
-	$pdf->draw_text(mm_pt(4), mm_pt(30), "Tilaukset - Order - Orders: ",	$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(5), mm_pt(30), "Tilaukset - Order - Orders: ",	$firstpage, $otsik);
 	if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];
 
 	if ($rahtikirja_tulostus == "yep") {

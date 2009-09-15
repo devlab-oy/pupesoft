@@ -1034,10 +1034,10 @@
 						$linkkilisa .= "</table></div>";
 
 						if ($kukarow["extranet"] != "") {
-							$linkkilisa .= "&nbsp;&nbsp;<a src='#' class='tooltip' id='$id'><img src='pics/lullacons/info.png' height='13'></a>";
+							$linkkilisa .= "&nbsp;&nbsp;<img class='tooltip' id='$id' src='pics/lullacons/info.png' height='13'>";
 						}
 						else {
-							$linkkilisa .= "&nbsp;&nbsp;<a src='#' class='tooltip' id='$id'><img src='../pics/lullacons/info.png' height='13'></a>";
+							$linkkilisa .= "&nbsp;&nbsp;<img class='tooltip' id='$id' src='../pics/lullacons/info.png' height='13'>";
 						}
 					}
 				}

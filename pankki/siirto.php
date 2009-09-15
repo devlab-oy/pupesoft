@@ -1,5 +1,5 @@
 <?
-function siirto ($yritirow, $aineisto, $pvm) {
+function aineistonnouto ($yritirow, $aineisto, $pvm) {
 	global $testaus;
 
 	$nro = sprintf ('%03d', $yritirow['nro']);
@@ -102,37 +102,42 @@ function siirto ($yritirow, $aineisto, $pvm) {
 			echo "Esi-sanoman lähetys onnistui.<br>Haetaan vastaus: $omaesip<br>";
 			if(ftp_get($ftp, $omaesip, $pankinesip, FTP_ASCII)) {
 				echo  "Esi-sanoman vastaus saatiin.<br>";
-				kasitteleesip($omaesip);
-				echo "Lähetetään siirtopyyntö: $omasiirto<br>";
-				if(ftp_put($ftp, $pankinsiirto, $omasiirto, FTP_ASCII)) {
-					echo "Siirtopyyntö lähetettiin.<br>Haetaan aineisto: $omaaineisto<br>";
-					if(ftp_get($ftp, $omaaineisto, $pankinaineisto, FTP_ASCII)) {
-						echo "Aineiston haku onnistui.<br>";
-						if ($pankki == "2") { //vain Nordean kanssa
-							echo "Haetaan kuittaus: $omakuittaus<br>";
-							if(ftp_get($ftp, $omakuittaus, $pankinkuittaus, FTP_ASCII)) {
-								echo "Kuittaus haettu<br>";
+				$tulos=kasitteleesip($omaesip, $yritirow['kayttoavain']);
+				if ($tulos == '') {
+					echo "Lähetetään siirtopyyntö: $omasiirto<br>";
+					if(ftp_put($ftp, $pankinsiirto, $omasiirto, FTP_ASCII)) {
+						echo "Siirtopyyntö lähetettiin.<br>Haetaan aineisto: $omaaineisto<br>";
+						if(ftp_get($ftp, $omaaineisto, $pankinaineisto, FTP_ASCII)) {
+							echo "Aineiston haku onnistui.<br>";
+							if ($pankki == "2") { //vain Nordean kanssa
+								echo "Haetaan kuittaus: $omakuittaus<br>";
+								if(ftp_get($ftp, $omakuittaus, $pankinkuittaus, FTP_ASCII)) {
+									echo "Kuittaus haettu<br>";
+								}
+								else {
+									echo "Kuittausta ei saatu<br>";
+								}
 							}
-							else {
-								echo "Kuittausta ei saatu<br>";
+						}
+						else {
+							echo "Aineiston haku ei onnistunut.<br>";
+							if ($pankki == "2") { //vain Nordean kanssa
+								echo "Haetaan kuittaus: $omakuittaus<br>";
+								if(ftp_get($ftp, $omakuittaus, $pankinkuittaus, FTP_ASCII)) {
+									echo "Kuittaus haettu<br>";
+								}
+								else {
+									echo "Kuittausta ei saatu<br>";
+								}
 							}
 						}
 					}
 					else {
-						echo "Aineiston haku ei onnistunut.<br>";
-						if ($pankki == "2") { //vain Nordean kanssa
-							echo "Haetaan kuittaus: $omakuittaus<br>";
-							if(ftp_get($ftp, $omakuittaus, $pankinkuittaus, FTP_ASCII)) {
-								echo "Kuittaus haettu<br>";
-							}
-							else {
-								echo "Kuittausta ei saatu<br>";
-							}
-						}
+						echo "Siirtopyyntö evättiin<br>";
 					}
 				}
 				else {
-					echo "Siirtopyyntö evättiin<br>";
+					echo "Pankki vastasti ESIp-tiedostolla, mutta todennus ei onnistunut";
 				}
 			}
 			else {

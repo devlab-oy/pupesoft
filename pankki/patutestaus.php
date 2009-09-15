@@ -26,6 +26,9 @@
 		$vresult = mysql_query($query) or pupe_error($query);
 		echo "Pankkitieto päivitetty<br>";
 	}
+	if ($tunnus != '' and $kertasalasana != '') {
+		salattukertaavain($tunnus);
+	}
 	if ($tunnus != '' and $aineisto != '') {
 		$query = "	SELECT * 
 				FROM yriti 
@@ -41,7 +44,7 @@
 			$yritirow['nro']++;
 			$query = "UPDATE yriti SET nro='$yritirow[nro]' WHERE yhtio  = '$kukarow[yhtio]' and tunnus = '$tunnus' and kayttoavain != ''";
 			$vresult = mysql_query($query) or pupe_error($query);
-			siirto($yritirow, $aineisto, $pvm);
+			aineistonnouto($yritirow, $aineisto, $pvm);
 		}
 	}
 	
@@ -81,6 +84,8 @@
 	echo "<td><input type='radio' name = 'aineisto' value = 'STATUS'></td></tr>";
 	echo "<tr><th>".t("Käytä testausaineistoa")."</th>";
 	echo "<td><input type='checkbox' name = 'testaus' value = '1'></td></tr>";
+	echo "<tr><th>".t("Testaa kertasalasanan suojausta")."</th>";
+	echo "<td><input type='checkbox' name = 'kertasalasana' value = '1'></td></tr>";
 	echo "<tr><th></th><td><input type='submit' name = 'Päivitä'></td></tr></table></form>";
 	
 	require ("../inc/footer.inc");

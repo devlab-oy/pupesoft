@@ -3219,6 +3219,17 @@ if ($tee == '') {
 				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Nettohinta")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['nettohinta'])." $yhtiorow[valkoodi]</td></tr>";
 			}
 
+			if ($tuote["myymalahinta"] != 0) {
+				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Myymalahinta")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['myymalahinta'])." $yhtiorow[valkoodi]</td></tr>";
+			}
+
+			if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+				if ($kukarow["yhtio"] == "srs") {
+					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Hinta 25% katteella")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['kehahin'] / 0.75)." $yhtiorow[valkoodi]</td></tr>";
+				}
+				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Keskihankintahinta")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['kehahin'])." $yhtiorow[valkoodi]</td></tr>";
+			}
+
 			//haetaan viimeisin hinta millä asiakas on tuotetta ostanut
 			$query =	"SELECT tilausrivi.hinta, tilausrivi.ale, tilausrivi.otunnus, tilausrivi.laskutettuaika FROM tilausrivi
 					   	JOIN lasku ON lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = tilausrivi.otunnus and lasku.ytunnus = '$laskurow[ytunnus]' and lasku.ovttunnus = '$laskurow[ovttunnus]' and lasku.alatila = 'X'

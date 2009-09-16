@@ -383,8 +383,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_text(mm_pt(38),	mm_pt(112), substr($asiakasrow['puhelin'],0,15),		$firstpage, $kirj);
 
 	$pdf->draw_text(mm_pt(65), mm_pt(112), "Toimitustapa:",				$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(87), mm_pt(112), $laskurow["toimitustapa"],	$firstpage, $kirj);
-
+	$pdf->draw_text(mm_pt(87), mm_pt(112), pdf_substr($laskurow["toimitustapa"], mm_pt(55), $pdf, $kirj),	$firstpage, $kirj);
 
 	$pdf->draw_rectangle(mm_pt(110),mm_pt(5),mm_pt(110),mm_pt(10),		$firstpage, $rectparam);
 	$pdf->draw_rectangle(mm_pt(110),mm_pt(5),mm_pt(115),mm_pt(5),		$firstpage, $rectparam);
@@ -393,7 +392,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_rectangle(mm_pt(110),mm_pt(143),mm_pt(115),mm_pt(143),	$firstpage, $rectparam);
 
 	// Kuljetusohjeet = viivakoodi tulee t‰h‰n
-	$pdf->draw_text(mm_pt(5), mm_pt(60), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(5), mm_pt(70), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
 
 	// Onko tilaus j‰lkivaatimus
 	$apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
@@ -407,18 +406,23 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		$jvlisays =  "";
 	}
 
-	$pdf->draw_text(mm_pt(20), mm_pt(55), $laskurow["toimitustapa"].$jvlisays,									$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(20), mm_pt(65), $laskurow["toimitustapa"].$jvlisays,									$firstpage, $kirj);
+
+	$salakalapala = 65;
+
 	if ($rahtikirja_tulostus == "yep") {
-		$pdf->draw_text(mm_pt(20), mm_pt(50), $viestirarrow["viesti"] ,					$firstpage, $kirj);
+		$salakalapala -= 5;
+		$pdf->draw_text(mm_pt(20), mm_pt($salakalapala), $viestirarrow["viesti"] ,					$firstpage, $kirj);
 	}
 	else {
-		$pdf->draw_text(mm_pt(20), mm_pt(50), "$laskurow[viesti]" ,							$firstpage, $kirj);
+		$salakalapala -= 5;
+		$pdf->draw_text(mm_pt(20), mm_pt($salakalapala), "$laskurow[viesti]" ,							$firstpage, $kirj);
 	}
-
 
 	//kolliluku
 	if ($rahtikirja_tulostus == "yep") {
-		$pdf->draw_text(mm_pt(20), mm_pt(45), t("Kollim‰‰r‰").": ".$s." (".$kollityht.") ",								$firstpage, $kirj);
+		$salakalapala -= 5;
+		$pdf->draw_text(mm_pt(20), mm_pt($salakalapala), t("Kollim‰‰r‰").": ".$s." (".$kollityht.") ",								$firstpage, $kirj);
 	}
 	else {
 		$query = "	SELECT sum(kollit) kollit
@@ -428,12 +432,14 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		$pak = mysql_fetch_array($pakka);
 
 		if ((int) $pak["kollit"] > 0) {
-			$pdf->draw_text(mm_pt(20), mm_pt(45), t("Kollim‰‰r‰").": ".$pak["kollit"],								$firstpage, $kirj);
+			$salakalapala -= 5;
+			$pdf->draw_text(mm_pt(20), mm_pt($salakalapala), t("Kollim‰‰r‰").": ".$pak["kollit"],								$firstpage, $kirj);
 		}
 	}
 
 	if($laskurow['yhteyshenkilo'] != "") {
-		$pdf->draw_text(mm_pt(20), mm_pt(40), $laskurow['yhteyshenkilo'],										$firstpage, $kirj);
+		$salakalapala -= 5;
+		$pdf->draw_text(mm_pt(20), mm_pt($salakalapala), $laskurow['yhteyshenkilo'],										$firstpage, $kirj);
 	}
 
 	//t‰nne ohjeisiin tulee lopullisen asiakkaan tiedot jos kyseess‰ on koontikuljetus
@@ -445,7 +451,8 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$hetirow = mysql_fetch_array($hetir);
 
 	if ($hetirow['tulostustapa'] == 'K') {
-		$pdf->draw_paragraph(mm_pt(50), mm_pt(20), mm_pt(25), mm_pt(140), $laskurow['sisviesti1'], $firstpage, $kirj);
+		$salakalapala -= 5;
+		$pdf->draw_paragraph(mm_pt($salakalapala), mm_pt(20), mm_pt(25), mm_pt(140), $laskurow['sisviesti1'], $firstpage, $kirj);
 	}
 
 	// ylh‰‰ll‰ on "oikee" tapa tehd‰, mutta me ei tiedet‰ t‰ss‰ vaiheessa kollien m‰‰r‰‰ eik‰ painoa

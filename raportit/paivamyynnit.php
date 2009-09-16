@@ -1,95 +1,102 @@
 <?php
-///* Tämä skripti käyttää slave-tietokantapalvelinta *///
-$useslave = 1;
-require('../inc/parametrit.inc');
+	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+	$useslave = 1;
 
-echo "<font class='head'>".t("Myynnit päivittäin osastoittain")."</font><hr>";
+	require('../inc/parametrit.inc');
 
-if ($tee != '') {
+	echo "<font class='head'>".t("Myynnit päivittäin asiakasosastoittain")."</font><hr>";
 
-		$query 		= "select distinct osasto from asiakas where yhtio = '$kukarow[yhtio]' order by osasto";
-		$result		= mysql_query($query) or pupe_error($query);
+	if (!isset($vuosi)) $vuosi = date("Y");
+	
+	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<input type='hidden' name='tee' value='kaikki'>";
 
-		// haetaan kaikki osasto arrayseen
-		$osastot 	= array();
+	echo "<table>";	
+	echo "<tr>";
+	echo "<th>".t("Anna vuosi")."</th>";
+	echo "<td><input type='text' name='vuosi' value='$vuosi' size='5'></td>";
+	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
+	echo "</tr>";
+	echo "</table>";
+	echo "<br>";
 
-		while ($ressu = mysql_fetch_array($result)) {
+	if ($tee != '') {
+
+			$query = "SELECT DISTINCT osasto FROM asiakas WHERE yhtio = '$kukarow[yhtio]' order by osasto";
+			$result = mysql_query($query) or pupe_error($query);
+
+			// haetaan kaikki osasto arrayseen
+			$osastot = array();
+			$tapvm = array();
+			$kate = array();
+			$myynt = array();
+			$katepro = array();
+
+			while ($ressu = mysql_fetch_array($result)) {
 				$osastot[] = $ressu['osasto'];
-		}
+			}
 
+			$query = "	SELECT osasto, 
+						date_format(tapvm, '%j') pvm, 
+						tapvm, 
+						sum(kate) kate, 
+						sum(arvo) myynti,
+						sum(kate) / sum(arvo) * 100 katepro
+						FROM lasku use index (yhtio_tila_tapvm)
+						JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						AND lasku.tapvm >= '$vuosi-01-01'
+						AND lasku.tapvm <= '$vuosi-12-31'
+						AND lasku.tila = 'u'
+						AND lasku.alatila = 'x'
+						GROUP BY 1,2,3
+						ORDER BY 1,2,3";
+			$result = mysql_query($query) or pupe_error($query);
 
-		$query = "	SELECT osasto, date_format(tapvm, '%j') pvm, tapvm, replace(sum(kate), '.', ',') kate, replace(sum(arvo), '.', ',') myynti
-					from lasku use index (yhtio_tila_tapvm), asiakas
-					where lasku.yhtio = '$kukarow[yhtio]'
-					and asiakas.yhtio = lasku.yhtio
-					and asiakas.tunnus = lasku.liitostunnus
-					and lasku.tapvm >= '$vva-$kka-$ppa'
-					and lasku.tapvm <= '$vva-$kkl-$ppl'
-					and lasku.tila = 'u'
-					and lasku.alatila = 'x'
-					group by 1,2,3
-					order by 1,2,3";
-		$result = mysql_query($query) or pupe_error($query);
-
-		while ($ressu = mysql_fetch_array($result)) {
-				$apu 		= (int) $ressu['pvm'];
-				$osastoapu	= $ressu['osasto'];
+			while ($ressu = mysql_fetch_array($result)) {
+				$apu = (int) $ressu['pvm'];
+				$osastoapu = $ressu['osasto'];
+				$tapvm[$apu] = $ressu['tapvm'];
 				$kate[$osastoapu][$apu]	= $ressu['kate'];
-				$tapvm[$apu]= $ressu['tapvm'];
-				$myynt[$osastoapu][$apu]= $ressu['myynti'];
-		}
+				$myynt[$osastoapu][$apu] = $ressu['myynti'];
+				$katepro[$osastoapu][$apu] = $ressu['katepro'];				
+			}
 
+			echo "<table>";
 
-		echo "<table>";
+			echo "<tr>";
+			echo "<th>".t("pvm")."</th>";
+			foreach ($osastot as $osasto) {
+					echo "<th>$osasto ".t("Myynti")."</th>";
+					echo "<th>$osasto ".t("Kate")."</th>";
+					echo "<th>$osasto ".t("Kate%")."</th>";
+			}
+			echo "</tr>";
 
-		echo "<tr>";
-		echo "<th>".t("pvm")."</th>";
-
-		foreach ($osastot as $osasto) {
-				echo "<th>$osasto ".t("Myynti_vton")."</th><th>$osasto ".t("Kate")."</th>";
-		}
-		echo "</tr>";
-
-		for ($i=1; $i<367; $i++) {
-
-				echo "<tr>";
+			for ($i=1; $i<367; $i++) {
+				echo "<tr class='aktiivi'>";
 				echo "<td>";
-				if (strlen($tapvm[$i])==0) echo "$i"; else  echo "$tapvm[$i]";
+				if (strlen($tapvm[$i]) == 0) echo tv1dateconv(date("Y-m-d", mktime(0,0,0,1,$i,$vuosi)));
+				else echo tv1dateconv($tapvm[$i]);
 				echo "</td>";
 
 				foreach ($osastot as $osasto) {
-						echo "<td>".$myynt[$osasto][$i]."</td>";
-						echo "<td>".$kate[$osasto][$i]."</td>";
+					$apu_myynt = $apu_kate = $apu_katepro = "";
+					
+					if ($myynt[$osasto][$i] != 0) $apu_myynt = sprintf("%.02f", $myynt[$osasto][$i]);
+					if ($kate[$osasto][$i] != 0) $apu_kate = sprintf("%.02f", $kate[$osasto][$i]);
+					if ($katepro[$osasto][$i] != 0) $apu_katepro = sprintf("%.02f", $katepro[$osasto][$i]);
+					
+					echo "<td nowrap style='text-align:right'>$apu_myynt</td>";
+					echo "<td nowrap style='text-align:right'>$apu_kate</td>";
+					echo "<td nowrap style='text-align:right'>$apu_katepro</td>";
 				}
 				echo "</tr>";
-		}
+			}
 
-		echo "</table>";
-}
+			echo "</table>";
+	}
 
-	//Käyttöliittymä
-	echo "<br>";
-	echo "<table><form method='post' action='$PHP_SELF'>";
+	require ("inc/footer.inc");
 
-	if (!isset($vva))
-		$vva = date("Y");
-	$ppa = '01';
-	$kka = '01';
-
-
-	$kkl = '12';
-	$vvl = date("Y");
-	$ppl = '31';
-
-	echo "<input type='hidden' name='tee' value='kaikki'>";
-	echo "<tr><th>".t("Anna vuosi").":</th>
-			<td><input type='hidden' name='ppa' value='$ppa' size='0'>
-			<input type='hidden' name='kka' value='$kka' size='0'>
-			<input type='text' name='vva' value='$vva' size='5'></td></tr>
-			<input type='hidden' name='ppl' value='$ppl' size='0'>
-			<input type='hidden' name='kkl' value='$kkl' size='0'>
-			<input type='hidden' name='vvl' value='$vvl' size='0'>";
-	echo "<tr><td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table>";
-
-require ("../inc/footer.inc");
 ?>

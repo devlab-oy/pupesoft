@@ -6,6 +6,21 @@
 
 	echo "<font class='head'>".t("Myyjien myynnit").":</font><hr>";
 
+	//Käyttöliittymä
+	if (!isset($vv)) $vv = date("Y");
+
+	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<input type='hidden' name='tee' value='kaikki'>";
+
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>".t("Syötä vuosi (vvvv)")."</th>";
+	echo "<td><input type='text' name='vv' value='$vv' size='5'></td>";
+	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
+	echo "</tr>";
+	echo "</table>";
+	echo "<br>";
+
 	if ($tee != '') {
 
 		$vvl = $vv + 1;
@@ -21,7 +36,8 @@
 		$result3 = mysql_query($query) or pupe_error($query);
 
 		echo "<table>";
-		echo "<tr><th>".t("Nimi")."</th>";
+		echo "<tr>";
+		echo "<th>".t("Nimi")."</th>";
 		echo "<th>".t("Tammi")."</th>";
 		echo "<th>".t("Helmi")."</th>";
 		echo "<th>".t("Maalis")."</th>";
@@ -36,7 +52,7 @@
 		echo "<th>".t("Joulu")."</th>";
 		echo "<th>".t("Yhteensä")."</th></tr>";
 
-		$summa= array();
+		$summa = array();
 		$kate = array();
 		$lask = 0;
 
@@ -56,11 +72,13 @@
 
 		$lask--;
 
+		$koksumyht = $kokkatyht = '';
+
 		for ($i=1; $i<=$lask+1; $i++) {
 
 			$sumyht = $katyht = '';
 
-			echo "<tr><td>$nimi[$i]</td>";
+			echo "<tr class='aktiivi'><td>$nimi[$i]</td>";
 			for ($j=1; $j<13; $j++) {
 
 				echo "<td align='right'>";
@@ -72,24 +90,40 @@
 
 					$sumyht += $summa[$i][$j];
 					$katyht += $kate[$i][$j];
+					$koksumyht += $summa[$i][$j];
+					$kokkatyht += $kate[$i][$j];					
 				}
 				echo "</td>";
 			}
 			echo "<td align='right'>".str_replace(".",",",$sumyht)."<br>".str_replace(".",",",$katyht)."</td>";
 			echo "</tr>";
 		}
+
+		echo "<tr><th>".t("Yhteensä")."</th>";
+		
+		// yhteensärivit
+		for ($j=1; $j<13; $j++) {
+
+			$sumyht = $katyht = $kateproyht = '';
+			for ($i=1; $i<=$lask+1; $i++) {
+				if ($summa[$i][$j] != 0.00 or $kate[$i][$j] != 0.00) {
+					$sumyht += $summa[$i][$j];
+					$katyht += $kate[$i][$j];
+				}
+			}
+
+			if ($sumyht != 0) {
+				$kateproyht = round($katyht / $sumyht * 100). "%";
+			}
+
+			echo "<th style='text-align:right'>".str_replace(".",",",$sumyht)."<br>".str_replace(".",",",$katyht)."<br>".str_replace(".",",",$kateproyht)."</th>";
+		}
+
+		echo "<th style='text-align:right'>$koksumyht<br>$kokkatyht<br>".str_replace(".",",", round($kokkatyht / $koksumyht * 100))."%</th>";
+		echo "</tr>";
 	}
-	echo "</table><br>";
 
-	//Käyttöliittymä
-	echo "<br>";
-	echo "<table><form method='post' action='$PHP_SELF'>";
+	echo "</table>";
 
-	if (!isset($vv)) $vv = date("Y");
-
-	echo "<input type='hidden' name='tee' value='kaikki'>";
-	echo "<tr><th>".t("Syötä vuosi (vvvv)")."</th><td><input type='text' name='vv' value='$vv' size='5'></td>";
-	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table>";
-
-	require ("../inc/footer.inc");
+	require ("inc/footer.inc");
 ?>

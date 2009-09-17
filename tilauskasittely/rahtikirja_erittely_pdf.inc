@@ -13,11 +13,12 @@
 	//
 	// tulostetaan rahtikirja
 
-	$query = "	SELECT *
+	$query = "	SELECT lasku.*, asiakas.toim_ovttunnus, asiakas.toim_nimi, asiakas.toim_postitp
 				FROM lasku
-				WHERE yhtio = '$kukarow[yhtio]'
-				AND tunnus in ($otunnukset)
-				ORDER BY tunnus";
+				JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+				WHERE lasku.yhtio = '$kukarow[yhtio]'
+				AND lasku.tunnus in ($otunnukset)
+				ORDER BY lasku.tunnus";
 	$tempr = mysql_query($query) or pupe_error($query);
 
 	//PDF:n luonti ja defaultit
@@ -55,41 +56,33 @@
 			$lahete = $asiakkaan_tiedot_row['tunnus']; //Laitetaan laheteen numero rahtikirjan alku_erittelyun
 			$asiakas = $asiakkaan_tiedot_row['ytunnus'];
 
-		   	$pdf->draw_rectangle($kala, 60, $kala-50, 300, $firstpage, $rectparam);
+		   	$pdf->draw_rectangle($kala, 60, $kala-50, 540, $firstpage, $rectparam);
 		   	$pdf->draw_text(62, $kala-8, "Asiakas",	$firstpage, $norm);
 		   	$pdf->draw_text(62, $kala-18, "Ytunnus ".$asiakkaan_tiedot_row['ytunnus'],	$firstpage, $kirj);
 		   	$pdf->draw_text(62, $kala-28, $asiakkaan_tiedot_row['nimi']." ".$asiakkaan_tiedot_row['nimitark'],	$firstpage, $kirj);
 		   	$pdf->draw_text(62, $kala-38, $asiakkaan_tiedot_row['osoite'],	$firstpage, $kirj);
 		   	$pdf->draw_text(62, $kala-48, $asiakkaan_tiedot_row['postino']." ".$asiakkaan_tiedot_row['postitp'],	$firstpage, $kirj);
 
-		   	$pdf->draw_rectangle($kala, 300, $kala-50, 540, $firstpage, $rectparam);
-		   	$pdf->draw_text(302, $kala-8, "Toimitusosoite", $firstpage, $norm);
-		   	$pdf->draw_text(302, $kala-18, "Ytunnus ".$asiakkaan_tiedot_row['ytunnus'],	$firstpage, $kirj);
-		   	$pdf->draw_text(302, $kala-28, $asiakkaan_tiedot_row['nimi']." ".$asiakkaan_tiedot_row['nimitark'],	$firstpage, $kirj);
-		   	$pdf->draw_text(302, $kala-38, $asiakkaan_tiedot_row['osoite'],	$firstpage, $kirj);
-		   	$pdf->draw_text(302, $kala-48, $asiakkaan_tiedot_row['postino']." ".$asiakkaan_tiedot_row['postitp'],	$firstpage, $kirj);
-
 			$kala -= 57; // kala = 713
 			$vanhakala = $kala;
 
 			//kollitietot
 			//ylärivi
-			$pdf->draw_rectangle($kala, 60, $kala-20, 110, $firstpage, $rectparam);
-			$pdf->draw_text(62, $kala-8, "Merkki / nro", $firstpage, $norm);
-			$pdf->draw_text(62, $kala-14, "Märke / nr",	$firstpage, $norm);
-			$pdf->draw_rectangle($kala, 110, $kala-20, 242,	$firstpage, $rectparam);
-			$pdf->draw_text(113, $kala-8, "Kolliluku ja -laji",	$firstpage, $norm);
-			$pdf->draw_text(113, $kala-14, "Kolliantal och -slag", $firstpage, $norm);
-			$pdf->draw_rectangle($kala, 242, $kala-20, 415,	$firstpage, $rectparam);
-			$pdf->draw_text(244, $kala-8, "Sisältö, ulkomitat ja VAK-merkinnät", $firstpage, $norm);
-			$pdf->draw_text(244, $kala-14, "Innehåll, yttermått och ADR-anmärkningar", $firstpage, $norm);
-			$pdf->draw_rectangle($kala, 415, $kala-20, 450,	$firstpage, $rectparam);
+			$pdf->draw_rectangle($kala, 60, $kala-25, 110, $firstpage, $rectparam);
+			$pdf->draw_text(62, $kala-8, "Myymälänro",	$firstpage, $norm);
+			$pdf->draw_text(62, $kala-14, "Astilnro",	$firstpage, $norm);
+			$pdf->draw_rectangle($kala, 110, $kala-25, 242,	$firstpage, $rectparam);
+			$pdf->draw_text(113, $kala-8, "Myymälän nimi",	$firstpage, $norm);
+			$pdf->draw_rectangle($kala, 242, $kala-25, 415,	$firstpage, $rectparam);
+			$pdf->draw_text(244, $kala-8, "Kolliluku ja -laji", $firstpage, $norm);
+			$pdf->draw_text(244, $kala-14, "Kolliantal och -slag", $firstpage, $norm);
+			$pdf->draw_rectangle($kala, 415, $kala-25, 450,	$firstpage, $rectparam);
 			$pdf->draw_text(422, $kala-8, "Brutto kg", $firstpage, $norm);
-			$pdf->draw_rectangle($kala, 450, $kala-20, 540, $firstpage, $rectparam);
+			$pdf->draw_rectangle($kala, 450, $kala-25, 540, $firstpage, $rectparam);
 			$pdf->draw_text(453, $kala-8, "Tilavuus, m3", $firstpage, $norm);
 			$pdf->draw_text(453, $kala-14, "Tilavuus, m3", $firstpage, $norm);
 
-			$kala -= 28;
+			$kala -= 36;
 
 			return $pdf;
 		}
@@ -135,8 +128,8 @@
 				$pdf->draw_rectangle($vanhakala, 60, $kala-22, 540,	$firstpage, $rectparam);
 
 				//alarivi
-				$pdf->draw_text(113, $kala-6 , "Kollit yht. Kolliantal tot.", $firstpage, $norm);
-				$pdf->draw_text(113, $kala-20, $kollityht, $firstpage, $kirj);
+				$pdf->draw_text(246, $kala-6 , "Kollit yht. Kolliantal tot.", $firstpage, $norm);
+				$pdf->draw_text(246, $kala-20, $kollityht, $firstpage, $kirj);
 				$pdf->draw_rectangle($kala, 111, $kala-22, 242,	$firstpage, $rectparam);
 				$pdf->draw_text(365, $kala-6, "Lavametrit Flakmeter", $firstpage, $norm);
 				$pdf->draw_text(365, $kala-20, $lavametri[0], $firstpage, $norm);
@@ -162,17 +155,12 @@
 						rahtikirjat.kollit,
 						rahtikirjat.kuutiot,
 						rahtikirjat.lavametri,
-						rahtikirjat.otsikkonro,
-						GROUP_CONCAT(DISTINCT tuote.vakkoodi separator ', ') vakkoodi
+						rahtikirjat.otsikkonro
 						FROM rahtikirjat
 						LEFT JOIN tilausrivi ON (tilausrivi.yhtio = rahtikirjat.yhtio AND
 												tilausrivi.tyyppi in ('L', 'G') AND
 												tilausrivi.otunnus = '$asiakkaan_tiedot_row[tunnus]' AND
 												tilausrivi.var in ('', 'H'))
-						LEFT JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND
-											tuote.tuoteno = tilausrivi.tuoteno AND
-											tuote.vakkoodi <> '0' AND
-											tuote.vakkoodi <> ' ')
 						WHERE rahtikirjat.otsikkonro = '$asiakkaan_tiedot_row[tunnus]'
 						AND rahtikirjat.yhtio='$kukarow[yhtio]'
 						GROUP BY 1, 2, 3, 4, 5, 6, 7
@@ -185,12 +173,13 @@
 
 			//kollit
 			if ($i == 0) {
-				$pdf->draw_text(62, $kala, $asiakkaan_tiedot_row['tunnus'],	$firstpage, $kirj);
+				$pdf->draw_text(62, $kala, $asiakkaan_tiedot_row['toim_ovttunnus'],	$firstpage, $kirj);
+				$pdf->draw_text(112, $kala, $asiakkaan_tiedot_row['toim_nimi'],	$firstpage, $kirj);
+				$pdf->draw_text(112, $kala-10, $asiakkaan_tiedot_row['toim_postitp'],	$firstpage, $kirj);
+				$pdf->draw_text(62, $kala-10, $asiakkaan_tiedot_row['asiakkaan_tilausnumero'],	$firstpage, $kirj);
 			}
 
-			$pdf->draw_text(112, $kala, $pakkarow['kollit']."  ".$pakkarow['pakkaus'],	$firstpage, $kirj);
-			$pdf->draw_text(246, $kala, $pakkarow['pakkauskuvaus'], $firstpage, $kirj);
-			$pdf->draw_text(246, $kala-10, $pakkarow['vakkoodi'], $firstpage, $kirj);
+			$pdf->draw_text(246, $kala, $pakkarow['kollit']."  ".$pakkarow['pakkaus'], $firstpage, $kirj);
 			$pdf->draw_text(422, $kala, round($pakkarow['kilot'], 2),	$firstpage, $kirj);
 			$pdf->draw_text(486, $kala, $pakkarow['kuutiot'], $firstpage, $kirj);
 
@@ -219,8 +208,8 @@
 			$pdf->draw_rectangle($vanhakala, 60, $kala-22, 540,	$firstpage, $rectparam);
 
 			//alarivi
-			$pdf->draw_text(113, $kala-6 , "Kollit yht. Kolliantal tot.", $firstpage, $norm);
-			$pdf->draw_text(113, $kala-20, $kollityht, $firstpage, $kirj);
+			$pdf->draw_text(246, $kala-6 , "Kollit yht. Kolliantal tot.", $firstpage, $norm);
+			$pdf->draw_text(246, $kala-20, $kollityht, $firstpage, $kirj);
 			$pdf->draw_rectangle($kala, 111, $kala-22, 242,	$firstpage, $rectparam);
 			$pdf->draw_text(365, $kala-6, "Lavametrit Flakmeter", $firstpage, $norm);
 			$pdf->draw_text(365, $kala-20, $lavametri[0], $firstpage, $norm);

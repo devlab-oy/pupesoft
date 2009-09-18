@@ -5163,7 +5163,7 @@ if (!function_exists("hae_muisti")) {
 			$kuka = $kukarow["kuka"];
 		}
 
-		$query = "	SELECT * 
+		$query = "	SELECT *
 					FROM tallennetut_parametrit
 					WHERE yhtio = '$kukarow[yhtio]'
 					and nimitys = '$nimitys'
@@ -7129,7 +7129,30 @@ if (!function_exists("t_avainsana")) {
 		}
 
 		if (stripos($wherelisa, "ORDER BY") === FALSE) {
-			$orderlisa = " ORDER BY avainsana.jarjestys, avainsana.selite+0 ";
+			$query = "	SELECT distinct selite
+						from avainsana
+						where $yhtiolisa
+						and laji = '$laji'
+						and kieli = '$yhtiorow[kieli]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			$onko_numero = $onko_alpha = 0;
+
+			while ($row = mysql_fetch_assoc($result)) {
+				if (is_numeric($row["selite"])) {
+					$onko_numero++;
+				}
+				else {
+					$onko_alpha++;
+				}
+			}
+
+			if ($onko_numero > $onko_alpha) {
+				$orderlisa = " ORDER BY avainsana.jarjestys, avainsana.selite+0 ";
+			}
+			else {
+				$orderlisa = " ORDER BY avainsana.jarjestys, avainsana.selite ";
+			}
 		}
 		else {
 			$orderlisa = "";

@@ -53,22 +53,11 @@ function ekakayttoavain ($tunnus) {
 	$xres = mysql_query($query) or pupe_error($query);
 }
 
-function uusikayttoavain ($tunnus, $salattu) {
-
-	$query = "SELECT siirtoavain FROM yriti WHERE tunnus='$tunnus'";
-	$result = mysql_query($query) or pupe_error($query);
-	if (mysql_num_rows($result) == 1) {
-		return "Siirtoavain, $tunnus, ei löytynyt tietokannasta ";
-		exit;
-	}
-	$resultrow = mysql_fetch_array($result);
-
-	$tulos = tarkistapariteetti($tulos);
-	//echo "\n$tulos";
+function uusikayttoavain ($salattu, $yritirow) {
 
 //alustetaan salaus
 
-	$tulos = pack('H*',$tulos);
+	$tulos = pack('H*',$yritirow['siirtoavain']);
 	$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
 	$iv = pack('H*','0000000000000000');
 	mcrypt_generic_init($td, $tulos, $iv);
@@ -79,11 +68,14 @@ function uusikayttoavain ($tunnus, $salattu) {
 
 	$tulos=unpack('H*',$tulos);
 
-	//lisäys tietokantaan
-
-	$query = "UPDATE yriti SET kayttoavain='$tulos[1]', kasukupolvi=if(kasukupolvi + 1 = 10,0,kasukupolvi+1) WHERE tunnus = '$tunnus'";
-	$xres = mysql_query($query) or pupe_error($query);
-	return "";
+	$uusitulos = tarkistapariteetti($tulos);
+	if ($uusitulos == $tulos) {
+		//lisäys tietokantaan
+		$query = "UPDATE yriti SET kayttoavain='$tulos[1]', kasukupolvi=if(kasukupolvi + 1 = 10,0,kasukupolvi+1) WHERE tunnus = '$yritirow[tunnus]'";
+		$xres = mysql_query($query) or pupe_error($query);
+		return "";
+	}
+	else return "Uuden käyttöavaimen pariteetti oli virheellinen!";
 }
 
 function salattukertaavain ($tunnus) {
@@ -534,16 +526,22 @@ function siirtopyynto ($pankki, $tilinumero, $aineisto, $salasana ,$paivays) {
 	return $apu;
 }
 
-function kasitteleesip ($tiedostonnimi, $kayttoavain) {
+function kasitteleesip ($tiedostonnimi, $yritirow) {
 
 	$tiedot = file_get_contents($tiedostonnimi);
 	echo "Pankki vastasi --> " . substr($tiedot,177,60) . "<br>";
-	$tulos = salaa($tiedot, 'ESIp', $kayttoavain);
+	$tulos = salaa($tiedot, 'ESIp', $yritirow['kayttoavain']);
 	if ($tulos != '') {
 		echo $tulos . "<br>";
 	}
 	else {
 		echo "ESIp-sanoman tunnisteet ovat oikein<br>";
+	}
+	if (substr($tiedot,160,1) == 1) {
+		echo "Käyttöavaimen vaihto!<br>";
+		$tulos = uusikayttoavain(substr($tiedot,161,16), $yritirow);
+		if ($tulos != '') echo $tulos."<br>";
+		else echo "Käyttöavaimen päivitys onnistui";
 	}
 	if (substr($tiedot,11,1) == 'K') {
 		echo "ESI-aineisto hyväksyttiin<br>";

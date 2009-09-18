@@ -100,7 +100,7 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 			echo "Esi-sanoman lähetys onnistui.<br>Haetaan vastaus: $omaesip<br>";
 			if(ftp_get($ftp, $omaesip, $pankinesip, FTP_ASCII)) {
 				echo  "Esi-sanoman vastaus saatiin.<br>";
-				$tulos=kasitteleesip($omaesip, $yritirow['kayttoavain']);
+				$tulos=kasitteleesip($omaesip, $yritirow);
 				if ($tulos == '') {
 					echo "Lähetetään siirtopyyntö: $omasiirto<br>";
 					if(ftp_put($ftp, $pankinsiirto, $omasiirto, FTP_ASCII)) {
@@ -276,7 +276,7 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm) {
 			echo "Esi-sanoman lähetys onnistui.<br>Haetaan vastaus: $omaesip<br>";
 			if(ftp_get($ftp, $omaesip, $pankinesip, FTP_ASCII)) {
 				echo  "Esi-sanoman vastaus saatiin.<br>";
-				$tulos=kasitteleesip($omaesip, $yritirow['kayttoavain']);
+				$tulos=kasitteleesip($omaesip, $yritirow);
 				if ($tulos == '') {
 					echo "Lähetetään siirtopyyntö: $omasiirto<br>";
 					if(ftp_put($ftp, $pankinsiirto, $omasiirto, FTP_ASCII)) {

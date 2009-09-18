@@ -1312,7 +1312,7 @@
 				$nxt2 = t("EI SARJANUMEROA")."-1";
 			}
 
-			if ($sarjanumero == "" and $rivirow["sarjanumeroseuranta"] == "U") {
+			if ($sarjanumero == "" and $rivirow["sarjanumeroseuranta"] == "U" and $from != "PIKATILAUS" and $from != "RIVISYOTTO") {
 
 				$query = "	SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero
 							FROM sarjanumeroseuranta

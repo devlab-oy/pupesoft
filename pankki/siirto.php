@@ -5,6 +5,7 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 	$nro = sprintf ('%03d', $yritirow['nro']);
 
 	$pankki = substr($yritirow['tilino'],0,1);
+	if ($pankki == '') $pankki = '2';
 	if ($pankki == '1') $pankki='2';
 
 	// TIEDOSTONIMET
@@ -16,14 +17,11 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 
 	echo "Tehd‰‰n siirtopyyntˆ $osoite/$sptiedosto<br>";
 
-	if ($pvm == '') $pvm = '000000';
-	if ($pankki == '') $pankki = '2';
-
 	$siirtopyynto = siirtopyynto($pankki, $yritirow['tilino'], $aineisto, "DEMO", $pvm);
 	echo strlen($siirtopyynto). "-->" . $siirtopyynto."<br>";
 
 	echo "Alustetaan ESI-tiedoston teko<br>";
-	$esi = sanoma($yritirow, "ESI");
+	$esi = sanoma($yritirow, "ESI", "");
 	echo strlen($esi). "-->" . $esi."<br>";
 
 	if ($testaus != '') {
@@ -170,7 +168,11 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm) {
 
 	$nro = sprintf ('%03d', $yritirow['nro']);
 
+	//Tehd‰‰n uniikki aikaleima
+	$aikaleima = date("ymdHis") . $nro;
+
 	$pankki = substr($yritirow['tilino'],0,1);
+	if ($pankki == '') $pankki = '8';
 	if ($pankki == '1') $pankki='2';
 
 	// TIEDOSTONIMET
@@ -182,14 +184,11 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm) {
 
 	echo "Tehd‰‰n siirtopyyntˆ + aineisto $osoite/$sptiedosto<br>";
 
-	if ($pvm == '') $pvm =  date('ymd');
-	if ($pankki == '') $pankki = '2';
-
 	$siirtopyynto = siirtopyynto($pankki, $yritirow['tilino'], $aineisto, "DEMO", $pvm);
 	echo strlen($siirtopyynto). "-->" . $siirtopyynto."<br>";
 
 	echo "Alustetaan ESI-tiedoston teko<br>";
-	$esi = sanoma($yritirow, "ESI");
+	$esi = sanoma($yritirow, "ESI", $aikaleima);
 	echo strlen($esi). "-->" . $esi."<br>";
 
 	echo "Suojataan ESI-tiedosto '$yritirow[kayttoavain]'<br>";
@@ -229,7 +228,7 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm) {
 	}
 
 	//Tehd‰‰n SUO-tietue
-	$siirtopyynto .= sanoma($yritirow, "SUO") . "\n";
+	$siirtopyynto .= sanoma($yritirow, "SUO", $aikaleima) . "\n";
 
 	//Tehd‰‰n t‰lle aineistolle kertaavain
 	salattukertaavain($yritirow['tunnus']);
@@ -239,7 +238,7 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm) {
 	$tiiviste = tiiviste($lahetettava, $yritirow['kertaavain']);
 
 	//Tehd‰‰n VAR-tietue
-	$var= sanoma($yritirow, "VAR");
+	$var= sanoma($yritirow, "VAR", $aikaleima);
 
 	//Kootaan tiedosto paloistaan
 	$siirtopyynto .= $lahetettava . $var . $tiiviste;

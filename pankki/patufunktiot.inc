@@ -420,7 +420,7 @@ function siirtoavain($osa1, $osa2, $tarkiste, $suku, $tunnus) {
 	}
 }
 
-function sanoma ($tilirow, $tyyppi) {
+function sanoma ($tilirow, $tyyppi, $aikaleima) {
 
 # Sanomatunnus
 $file=">>";
@@ -463,9 +463,13 @@ $file.=sprintf ('%-25.25s', $tilirow['asiakas']);
 $file.=sprintf ('%-1.1s', $tilirow['sasukupolvi']);
 $file.=sprintf ('%-1.1s', $tilirow['kasukupolvi']);
 
-# Aikaleima ja leima numero
-$file.= date('ymdHis');
-$file.="000";
+# Aikaleima ja leimanumero
+if (strlen($aikaleima) == 15) $file.=$aikaleima;
+elseif (strlen($aikaleima) == 12) $file.=$aikaleima . "000"; 
+else {
+	$file.= date('ymdHis');
+	$file.="000";
+}
 
 # Suojausalue
 if($tyyppi == "ESI")
@@ -492,6 +496,8 @@ return $file;
 }
 
 function siirtopyynto ($pankki, $tilinumero, $aineisto, $salasana ,$paivays) {
+
+	if ($pvm == '') $pvm = '000000';
 
 	if ($pankki=='2') {
 		$apu= sprintf ('%-17.17s', "SIIRTOPYYNTO");

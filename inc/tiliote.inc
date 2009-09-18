@@ -134,7 +134,7 @@
 								// kokeillaan samalla kaavalla kun lum2 rivissä
 								$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 											FROM lasku
-											WHERE replace(left(concat_ws(' ', if(pankki_haltija != '', pankki_haltija, concat_ws(' ', nimi, nimitark)), osoite, postitp), 30), '&', ' ') = left('$maksaa', 30)
+											WHERE replace(left(concat_ws(' ', if(pankki_haltija != '', pankki_haltija, concat_ws(' ', nimi, if(nimitark!='', nimitark, NULL))), osoite, postitp), 30), '&', ' ') = left('$maksaa', 30)
 											and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
 											and yhtio	= '$yritirow[yhtio]'
 											and tila 	= 'Q'

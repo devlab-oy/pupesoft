@@ -4,9 +4,9 @@ require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Lue tuotepaikkakohtaisia hälytysrajoja ja tilausmääriä")."</font><hr>";
 
-if ($korjataan == '') $id=0;
+if ($korjataan == '') $id = 0;
 
-if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE and $korjataan == ''){
+if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $korjataan == ''){
 
 	list($name,$ext) = split("\.", $_FILES['userfile']['name']);
 
@@ -18,40 +18,63 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE and $korjataan == ''
 		die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
 	}
 
-	$file=fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
+	$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
 
 	echo "<font class='message'>".t("Tutkaillaan mitä olet lähettänyt").".<br></font>";
 
- 	while (!feof($file)) {
+ 	while ($rivi = fgets($file)) {
 		// luetaan rivi tiedostosta..
 		$poista	  = array("'", "\\","\"");
 		$rivi	  = str_replace($poista,"",$rivi);
 		$rivi	  = explode("\t", trim($rivi));
 
-		if((trim($rivi[0]) != '') and ((trim($rivi[1]) != '') or (trim($rivi[2]) != ''))) {
+		if ((trim($rivi[0]) != '') and ((trim($rivi[1]) != '') or (trim($rivi[2]) != ''))) {
 			$tuoteno[$id] = trim($rivi[0]);
 			$halytysraja[$id] = trim($rivi[1]);
 			$tilattava[$id] = trim($rivi[2]);
 			$id++;
 		}
-		$rivi = fgets($file, 4096);
-	} // end while eof
+	}
+
 	$korjataan = 'eka';
 	fclose($file);
+
 	if ($tuvarasto== '') {
 		$korjataan = '';
 		echo "<font class='error'>".t("Et ole valinnut varastoa")."!!!!!<br><br></font>";
 	}
 }
+
 if ($korjataan != '') {
+
+	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+			<!--
+
+			function fill_all(tcolumn, tfield) {
+
+				var formi = document.getElementById(tfield).form;
+
+				for (var elementIdx=0; elementIdx<formi.elements.length; elementIdx++) {
+					if (formi.elements[elementIdx].type == 'text' && formi.elements[elementIdx].name.substring(0,8) == tcolumn) {
+						formi.elements[elementIdx].value = document.getElementById(tfield).value;
+					}
+				}
+			}
+
+			//-->
+			</script>";
+
+
 	$countti = count($tuoteno);
-	$korj=0;
+	$korj = 0;
+	$paikkasyot = 0;
 
 	echo "<table><form method='post' action='$PHP_SELF'>";
 
-	for ($id=0; $id<$countti; $id++) {
-		$error ='';
-		if (($uusipaikka[$id] == 'uusi') and ($hyllyalue[$id] != '')) {
+	for ($id = 0; $id < $countti; $id++) {
+		$error = '';
+
+		if ($uusipaikka[$id] == 'uusi' and $hyllyalue[$id] != '') {
 			$hyllyalue[$id] = strtoupper($hyllyalue[$id]);
 			if ($hyllynro[$id]=='') $hyllynro[$id]='0';
 			if ($hyllyvali[$id]=='') $hyllyvali[$id]='0';
@@ -68,16 +91,18 @@ if ($korjataan != '') {
 				else {
 					$oletus = '';
 				}
-				$query	="INSERT INTO tuotepaikat SET
-							yhtio 		='$kukarow[yhtio]',
-							tuoteno 	='$tuoteno[$id]',
-							hyllyalue	='$hyllyalue[$id]',
-							hyllynro	='$hyllynro[$id]',
-							hyllyvali	='$hyllyvali[$id]',
-							hyllytaso	='$hyllytaso[$id]',
-							oletus		='$oletus',
-							halytysraja	='$halytysraja[$id]',
-							tilausmaara	='$tilattava[$id]'";
+				$query = "	INSERT INTO tuotepaikat SET
+							yhtio 		= '$kukarow[yhtio]',
+							tuoteno 	= '$tuoteno[$id]',
+							hyllyalue	= '$hyllyalue[$id]',
+							hyllynro	= '$hyllynro[$id]',
+							hyllyvali	= '$hyllyvali[$id]',
+							hyllytaso	= '$hyllytaso[$id]',
+							oletus		= '$oletus',
+							halytysraja	= '$halytysraja[$id]',
+							tilausmaara	= '$tilattava[$id]',
+							laatija 	= '$kukarow[kuka]',
+							luontiaika 	= now()";
 				$result = mysql_query($query) or pupe_error($query);
 
 				// tehdään tapahtuma
@@ -102,9 +127,8 @@ if ($korjataan != '') {
 			}
 		}
 
-
-		$query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso, concat_ws('-',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka,
-					tuote.nimitys, varastopaikat.tunnus, tuotepaikat.oletus, tuotepaikat.halytysraja, tilausmaara, tuotepaikat.tunnus,
+		$query = "	SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso, concat_ws('-',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka,
+					tuote.tuoteno, tuote.nimitys, varastopaikat.tunnus, tuotepaikat.oletus, tuotepaikat.halytysraja, tilausmaara, tuotepaikat.tunnus,
 					concat(rpad(upper(tuotepaikat.hyllyalue) ,5,' '),lpad(tuotepaikat.hyllynro ,5,' ')) ihmepaikka
 					FROM tuotepaikat, varastopaikat, tuote
 					WHERE tuotepaikat.yhtio = varastopaikat.yhtio and tuotepaikat.yhtio = tuote.yhtio
@@ -119,48 +143,67 @@ if ($korjataan != '') {
 
 		if (mysql_num_rows($result2) == 0) {
 			$korj++;
+
 			if ($korj== 1) {
 				echo "<tr><th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Hälytysraja")."</th><th>".t("Tilausmäärä")."</th><th>".t("Huomautus")."</th><th>".t("Paikka")."</th>";
 			}
-			echo "<tr><td>$tuoteno[$id]</td>";
-			$query = "SELECT nimitys FROM tuote WHERE yhtio = '$kukarow[yhtio]'and tuoteno = '$tuoteno[$id]' LIMIT 1";
+			echo "<tr><td>$id $tuoteno[$id]</td>";
+
+			$query = "SELECT tuoteno, nimitys FROM tuote WHERE yhtio = '$kukarow[yhtio]'and tuoteno = '$tuoteno[$id]'";
 			$nimresult = mysql_query($query) or pupe_error($query);
+
 			if (mysql_num_rows($nimresult) == 1) {
 				$nimrow = mysql_fetch_array($nimresult);
-				if ($error== '') {
-					$error = "".t("Paikkaa ei löytynyt tästä varastosta, anna uusi paikka")."";
+
+				if ($error == '') {
+					$error = t("Paikkaa ei löytynyt tästä varastosta, anna uusi paikka");
 				}
-				echo	"<td>".t_tuotteen_avainsanat($nimrow, 'nimitys')."</td><td>$halytysraja[$id]</td><td>$tilattava[$id]</td><td>$error</td>
-						<td><input type='text' name='hyllyalue[$id]' value='$hyllyalue[$id]' maxlength='3' size='3'>
-						<input type='text' name='hyllynro[$id]' value='$hyllynro[$id]' maxlength='2' size='2'>
-						<input type='text' name='hyllyvali[$id]' value='$hyllyvali[$id]' maxlength='2' size='2'>
-						<input type='text' name='hyllytaso[$id]' value='$hyllytaso[$id]' maxlength='2' size='2'></td>";
-				echo	"<input type='hidden' name='tuoteno[$id]' value='$tuoteno[$id]'>
+
+				echo "	<td>".t_tuotteen_avainsanat($nimrow, 'nimitys')."</td>
+						<td align='right'>$halytysraja[$id]</td>
+						<td align='right'>$tilattava[$id]</td>
+						<td>$error</td>
+						<td nowrap>
+						<input type='hidden' name='tuoteno[$id]' value='$tuoteno[$id]'>
 						<input type='hidden' name='halytysraja[$id]' value='$halytysraja[$id]'>
 						<input type='hidden' name='tilattava[$id]' value='$tilattava[$id]'>
 						<input type='hidden' name='rivipaikka[$id]' value=''>
-						<input type='hidden' name='uusipaikka[$id]' value='uusi'>";
+						<input type='hidden' name='uusipaikka[$id]' value='uusi'>
+						<input type='text' name='hyllyalue[$id]' value='$hyllyalue[$id]' maxlength='3' size='3'>
+						<input type='text' name='hyllynro[$id]' value='$hyllynro[$id]' maxlength='2' size='2'>
+						<input type='text' name='hyllyvali[$id]' value='$hyllyvali[$id]' maxlength='2' size='2'>
+						<input type='text' name='hyllytaso[$id]' value='$hyllytaso[$id]' maxlength='2' size='2'></td>";
+
+				$paikkasyot++;
 			}
 			else {
 				echo "<td></td><td></td><td></td><td>".t("TUOTENUMERO EI LÖYDY")."!!!</td><td></td>";
 			}
 			echo "</tr>";
-			//echo	"| $tuoteno[$id] | $halytysraja[$id] | $tilattava[$id] | $rivipaikka[$id] | 0 paikkaa<br>";
 		}
 		elseif (mysql_num_rows($result2) > 1) {
 			if ($rivipaikka[$id]== '') {
 				$korj++;
+
 				if ($korj== 1) {
 					echo "<tr><th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Hälytysraja")."</th><th>".t("Tilausmäärä")."</th><th>".t("Huomautus")."</th><th>".t("Paikka")."</th>";
 				}
-				echo "<tr><td>$tuoteno[$id]</td>";
-				$query = "SELECT nimitys FROM tuote WHERE yhtio = '$kukarow[yhtio]'and tuoteno = '$tuoteno[$id]' LIMIT 1";
+
+				echo "<tr><td>$id $tuoteno[$id]</td>";
+
+				$query = "SELECT tuoteno, nimitys FROM tuote WHERE yhtio = '$kukarow[yhtio]'and tuoteno = '$tuoteno[$id]' LIMIT 1";
 				$nimresult = mysql_query($query) or pupe_error($query);
+
 				if (mysql_num_rows($nimresult) == 1) {
 					$nimrow = mysql_fetch_array($nimresult);
-					echo "<td>".t_tuotteen_avainsanat($nimrow, 'nimitys')."</td><td>$halytysraja[$id]</td><td>$tilattava[$id]</td><td>".t("Valitse paikka jota haluat päivittää")."</td>";
+
+					echo "<td>".t_tuotteen_avainsanat($nimrow, 'nimitys')."</td>
+							<td align='right'>$halytysraja[$id]</td>
+							<td align='right'>$tilattava[$id]</td>
+							<td>".t("Valitse paikka jota haluat päivittää")."</td>";
 
 					echo "<td><select name='rivipaikka[$id]'><option value=''>".t("Ei Valintaa")."";
+
 					while ($varow = mysql_fetch_array($result2)) {
 						$sel='';
 						if ($varow['tunnus'] == $rivipaikka[$id]) $sel = 'selected';
@@ -174,34 +217,46 @@ if ($korjataan != '') {
 				echo "</tr>";
 			}
 			else {
-				echo	"<input type='hidden' name='rivipaikka[$id]' value='$rivipaikka[$id]'>";
+				echo "<input type='hidden' name='rivipaikka[$id]' value='$rivipaikka[$id]'>";
+
 				$query = "UPDATE tuotepaikat SET halytysraja = '$halytysraja[$id]', tilausmaara = '$tilattava[$id]' where yhtio = '$kukarow[yhtio]' and tunnus = '$rivipaikka[$id]'";
 				$updresult = mysql_query($query) or pupe_error($query);
 
 			}
-			echo	"<input type='hidden' name='tuoteno[$id]' value='$tuoteno[$id]'>
+			echo "	<input type='hidden' name='tuoteno[$id]' value='$tuoteno[$id]'>
 					<input type='hidden' name='halytysraja[$id]' value='$halytysraja[$id]'>
 					<input type='hidden' name='tilattava[$id]' value='$tilattava[$id]'>
 					<input type='hidden' name='uusipaikka[$id]' value=''>";
-			//echo	"| $tuoteno[$id] | $halytysraja[$id] | $tilattava[$id] | $rivipaikka[$id] | > 1 paikkaa<br>";
 		}
 		elseif (mysql_num_rows($result2) == 1) {
-		//else {
 			$varow = mysql_fetch_array($result2);
-			echo	"<input type='hidden' name='tuoteno[$id]' value='$tuoteno[$id]'>
+
+			echo "	<input type='hidden' name='tuoteno[$id]' value='$tuoteno[$id]'>
 					<input type='hidden' name='halytysraja[$id]' value='$halytysraja[$id]'>
 					<input type='hidden' name='tilattava[$id]' value='$tilattava[$id]'>
 					<input type='hidden' name='uusipaikka[$id]' value=''>";
-			//echo	"| $tuoteno[$id] | $halytysraja[$id] | $tilattava[$id] | $varow[tunnus] | 1 paikka<br>";
+
 			$query = "UPDATE tuotepaikat SET halytysraja = '$halytysraja[$id]', tilausmaara = '$tilattava[$id]' where yhtio = '$kukarow[yhtio]' and tunnus = '$varow[tunnus]'";
 			$updresult = mysql_query($query) or pupe_error($query);
 		}
 	}
+
 	echo "<input type='hidden' name='korjataan' value='ok'>";
 	echo "<input type='hidden' name='tuvarasto' value='$tuvarasto'>";
+
 	if ($korj > 0) {
-	echo "<tr><td class='back'><input type='submit' value='".t("Jatka")."'></td></tr>";
-	echo "</form></table><br><br><br>";
+		if ($paikkasyot > 0) {
+			echo "<tr>
+					<td colspan='5' class='spec' align='right'>".t("Syötä paikat kaikille riveille")."</td><td>
+					<input type='text' id='kpl_js' onKeyUp='fill_all(\"hyllyalu\", \"kpl_js\");' size='3'>
+					<input type='text' id='var_js' onKeyUp='fill_all(\"hyllynro\", \"var_js\");' size='2'>
+					<input type='text' id='hin_js' onKeyUp='fill_all(\"hyllyval\", \"hin_js\");' size='2'>
+					<input type='text' id='ale_js' onKeyUp='fill_all(\"hyllytas\", \"ale_js\");' size='2'></td></tr>";
+
+		}
+
+		echo "<tr><td class='back'><input type='submit' value='".t("Jatka")."'></td></tr>";
+		echo "</form></table><br><br><br>";
 	}
 	else {
 		echo "<font class='message'>".t("Valmista tuli, kaikki rivit ajettu")."<br><br></font>";
@@ -209,13 +264,13 @@ if ($korjataan != '') {
 	}
 }
 else {
-	echo	"<font class='message'>".t("Tiedostomuoto").":</font><br>
-
-			<table border='0' cellpadding='3' cellspacing='2'>
+	echo "<font class='message'>".t("Tiedostomuoto").":</font><br>
+			<table>
 			<tr><th colspan='3'>".t("Tabulaattorilla eroteltu tekstitiedosto").".</th></tr>
 			<tr><td>".t("Tuoteno")."</td><td>".t("Hälytysraja")."</td><td>".t("Tilausmäärä")."</td></tr>
 			</table>
 			<br>";
+
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'> <table>";
 			echo "<tr><td>".t("Valitse varasto:")."</td>
 				<td><select name='tuvarasto'>";

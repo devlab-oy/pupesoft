@@ -17,12 +17,12 @@
 		}
 	}
 	if ($tunnus != '' and $asiakas != '') {
-		$query = "UPDATE yriti SET asiakas='$asiakas' WHERE yhtio  = '$kukarow[yhtio]' and tunnus = '$tunnus' and kayttoavain != ''";
+		$query = "UPDATE yriti SET asiakas='$asiakas' WHERE yhtio  = '$kukarow[yhtio]' and tunnus = '$tunnus'";
 		$vresult = mysql_query($query) or pupe_error($query);
 		echo "Asiakastieto päivitetty<br>";
 	}
 	if ($tunnus != '' and $pankki != '') {
-		$query = "UPDATE yriti SET pankki='$pankki' WHERE yhtio  = '$kukarow[yhtio]' and tunnus = '$tunnus' and kayttoavain != ''";
+		$query = "UPDATE yriti SET pankki='$pankki' WHERE yhtio  = '$kukarow[yhtio]' and tunnus = '$tunnus'";
 		$vresult = mysql_query($query) or pupe_error($query);
 		echo "Pankkitieto päivitetty<br>";
 	}
@@ -44,7 +44,7 @@
 			$yritirow['nro']++;
 			$query = "UPDATE yriti SET nro='$yritirow[nro]' WHERE yhtio  = '$kukarow[yhtio]' and tunnus = '$tunnus' and kayttoavain != ''";
 			$vresult = mysql_query($query) or pupe_error($query);
-			if ($aineisto = 'LMP300') aineistonlahetys($yritirow, $aineisto, $pvm);
+			if ($aineisto == 'LMP300') aineistonlahetys($yritirow, $aineisto, $pvm);
 			else aineistonnouto($yritirow, $aineisto, $pvm);
 		}
 	}

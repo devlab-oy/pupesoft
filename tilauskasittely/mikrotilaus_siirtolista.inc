@@ -198,7 +198,7 @@
 
 				<table>
 				<tr><th colspan='4'>".t("Sarkaineroteltu tekstitiedosto tai Excel-tiedosto").".</th></tr>
-				<tr><td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."*</td><td>".t("Kommentti")."</td><td>".t("L‰hett‰v‰ varastopaikka")."</td></tr>
+				<tr><td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."*</td><td>".t("Kommentti")."</td><td>".t("L‰hett‰v‰ varastopaikka (#-eroteltu)")."</td></tr>
 				</table>
 				<br>
 				* ".t("Siirr‰ kaikki vapaana olevat laittamalla m‰‰r‰-kentt‰‰n X")."

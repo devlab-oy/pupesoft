@@ -19,6 +19,14 @@ function meidanxor ($eka, $toka) {
 	return $tulos;
 }
 
+function mikaaineisto ($aineisto) {
+
+	if (substr($aineisto,0,4) == 'LM03') return "LMP300";
+	elseif (substr($aineisto,0,4) == 'LUM2') return "xxx";
+	else return "";
+
+}
+
 function ekakayttoavain ($tunnus) {
 
 	$query = "SELECT siirtoavain FROM yriti WHERE tunnus='$tunnus'";
@@ -167,6 +175,9 @@ function salattukertaavain ($tunnus) {
 		# Tallennetaan tietokantaan
 		$query = "UPDATE yriti SET kertaavain='$uusikertaavain', salattukerta='$sal[1]', siemen='$siemen[1]' WHERE tunnus='$tunnus'";
 		$updres = mysql_query($query) or pupe_error($query);
+		$yritirow['kertaavain'] = $uusikertaavain;
+		$yritirow['salattukerta'] = $sal[1];
+		return $yritirow;
 	}
 }
 
@@ -489,7 +500,7 @@ return $file;
 
 function siirtopyynto ($pankki, $tilinumero, $aineisto, $salasana ,$paivays) {
 
-	if ($pvm == '') $pvm = '000000';
+	if ($paivays == '') $paivays = '000000';
 
 	if ($pankki=='2') {
 		$apu= sprintf ('%-17.17s', "SIIRTOPYYNTO");
@@ -501,6 +512,7 @@ function siirtopyynto ($pankki, $tilinumero, $aineisto, $salasana ,$paivays) {
 		$apu .= " 9979 " . "999";
 	}
 	elseif ($pankki=='8') {
+		if ($paivays = '000000') $paivays = date ('ymd');
 		if ($aineisto == 'STATUS') {
 			$apu = "//SOVELLUS=KTON,ERA=000000,KYS\n";
 			$apu .= "//EOF\n";

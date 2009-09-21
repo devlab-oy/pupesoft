@@ -4,7 +4,19 @@
 	require ("../inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Patutestaus")."<hr></font>";
-
+	
+	$ok = 0;
+	// katotaan onko faili uploadttu
+	if (is_uploaded_file($_FILES['userfile']['tmp_name']) and $tunnus != '') {
+		$userfile = $_FILES['userfile']['name'];
+		$filenimi = $_FILES['userfile']['tmp_name'];
+		$ok = 1;
+	}
+	if ($ok == 1) {
+		$sisalto = file_get_contents($filenimi);
+		$aineisto = mikaaineisto($sisalto);
+	}
+ 
 	if ($tunnus != '' and $ekapala != '') {
 		echo "<font class='error'>".siirtoavain($ekapala,$tokapala,$tarkiste,$suku,$tunnus)."</font><br><br>";
 		$query = "	SELECT * 
@@ -44,12 +56,12 @@
 			$yritirow['nro']++;
 			$query = "UPDATE yriti SET nro='$yritirow[nro]' WHERE yhtio  = '$kukarow[yhtio]' and tunnus = '$tunnus' and kayttoavain != ''";
 			$vresult = mysql_query($query) or pupe_error($query);
-			if ($aineisto == 'LMP300') aineistonlahetys($yritirow, $aineisto, $pvm);
+			if ($aineisto == 'LMP300') aineistonlahetys($yritirow, $aineisto, $pvm, $sisalto);
 			else aineistonnouto($yritirow, $aineisto, $pvm);
 		}
 	}
 	
-	echo "<form action = '' method='post'><table><tr><th>".t("Pankkitili");
+	echo "<form enctype='multipart/form-data' action = '' method = 'post'><table><tr><th>".t("Pankkitili");
 	$query = "	SELECT * 
 				FROM yriti 
 				WHERE yhtio  = '$kukarow[yhtio]'
@@ -81,10 +93,8 @@
 	echo "<td><input type='radio' name = 'aineisto' value = 'VKEUR'></td></tr>";
 	echo "<tr><th>".t("Aineistojen tilakysely")."</th>";
 	echo "<td><input type='radio' name = 'aineisto' value = 'STATUS'></td></tr>";
-	echo "<tr><th>".t("LUM2-aineiston lähetys")."</th>";
-	echo "<td><input type='radio' name = 'aineisto' value = 'xxx'></td></tr>";
-	echo "<tr><th>".t("LM03-aineiston lähetys")."</th>";
-	echo "<td><input type='radio' name = 'aineisto' value = 'LMP300'></td></tr>";
+	echo "<tr><th>".t("Aineiston lähetys")."</th>";
+	echo "<td><input type='file' name='userfile'></td></tr>";
 	echo "<tr><th>".t("Käytä testausaineistoa")."</th>";
 	echo "<td><input type='checkbox' name = 'testaus' value = '1'></td></tr>";
 	echo "<tr><th>".t("Testaa kertasalasanan suojausta")."</th>";

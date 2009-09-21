@@ -164,7 +164,7 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 	return "";
 }
 
-function aineistonlahetys ($yritirow, $aineisto, $pvm) {
+function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 
 	$nro = sprintf ('%03d', $yritirow['nro']);
 
@@ -231,10 +231,9 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm) {
 	$siirtopyynto .= sanoma($yritirow, "SUO", $aikaleima) . "\n";
 
 	//Tehd‰‰n t‰lle aineistolle kertaavain
-	salattukertaavain($yritirow['tunnus']);
+	$yritirow = salattukertaavain($yritirow['tunnus']);
 
 	//Lasketaan tiiviste aineistolle
-	$lahetettava=file_get_contents('');
 	$tiiviste = tiiviste($lahetettava, $yritirow['kertaavain']);
 
 	//Tehd‰‰n VAR-tietue

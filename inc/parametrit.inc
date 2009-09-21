@@ -456,7 +456,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 				echo $css;
 				echo "</style>";
 
-				if (file_exists("../inc/jquery.min.js")) {
+				if (@fopen($palvelin2."inc/jquery.min.js", "r")) {
 					echo "<script src='".$palvelin2."inc/jquery.min.js' type='text/javascript'></script>";
 				}
 				else {

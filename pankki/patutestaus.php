@@ -16,7 +16,12 @@
 		$sisalto = file_get_contents($filenimi);
 		$aineisto = mikaaineisto($sisalto);
 	}
- 
+
+	if ($tunnus != '' and $nollapolvi != '') {
+		ekakayttoavain($tunnus);
+		echo "0-sukupolven käyttöavain palautettiin<br>";
+	}
+
 	if ($tunnus != '' and $ekapala != '') {
 		echo "<font class='error'>".siirtoavain($ekapala,$tokapala,$tarkiste,$suku,$tunnus)."</font><br><br>";
 		$query = "	SELECT * 
@@ -99,6 +104,8 @@
 	echo "<td><input type='checkbox' name = 'testaus' value = '1'></td></tr>";
 	echo "<tr><th>".t("Testaa kertasalasanan suojausta")."</th>";
 	echo "<td><input type='checkbox' name = 'kertasalasana' value = '1'></td></tr>";
+	echo "<tr><th>".t("Palauta 0-sukupolven käyttöavain")."</th>";
+	echo "<td><input type='checkbox' name = 'nollapolvi' value = '1'></td></tr>";
 	echo "<tr><th></th><td><input type='submit' name = 'Päivitä'></td></tr></table></form>";
 	
 	require ("../inc/footer.inc");

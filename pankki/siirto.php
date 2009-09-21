@@ -22,7 +22,7 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 
 	echo "Alustetaan ESI-tiedoston teko<br>";
 	$esi = sanoma($yritirow, "ESI", "");
-	echo strlen($esi). "-->" . $esi."<br>";
+	//echo strlen($esi). "-->" . $esi."<br>";
 
 	if ($testaus != '') {
 		$esi =">>ESI161120 0000KERMIT      3.01SMH003701234567             99910000011111111        00941015073000001                                          ";
@@ -33,7 +33,7 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 
 	echo "Suojataan ESI-tiedosto '$yritirow[kayttoavain]'<br>";
 	$esi = salaa($esi, "ESIa", $yritirow['kayttoavain']);
-	echo strlen($esi). "-->" . $esi."<br>";
+	//echo strlen($esi). "-->" . $esi."<br>";
 
 	if ($testaus != '') {
 		if (substr($esi,-16) != '4B69B6DD4F72C75B') echo "Suojaus ei onnistu ".substr($esi,-16)."<br>";
@@ -43,7 +43,7 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 	// Jos ei haluta avainvaihtoa, lisätään sanoman perään nolla	
 	$esi .= "0";
 	echo "Ei avainvaihtoa<br>";
-	echo strlen($esi). "-->" . $esi."<br>";
+	//echo strlen($esi). "-->" . $esi."<br>";
 
 	// Tiedostojen nimet
 	$omaesia= $osoite . "/" . $yritirow['tunnus'] . "-" . $etiedosto;
@@ -79,12 +79,15 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 	if ($pankki == '2') {
 		$host="solo.nordea.fi";
 		$log="anonymous";
-		$pass="SITE PASSIVE";
+		//$pass="SITE PASSIVE";
+		$pass = "pupesoft test";
+		$passiivi = 0;
 	}
 	if ($pankki == '8') {
 		$host="ftplinkki.sampopankki.fi";
 		$log="anonymous";
 		$pass="pupesofttestaus";
+		$passiivi = 1;
 	}
 
 	echo "Avataan FTP-yhteys $host<br>";
@@ -94,7 +97,7 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 		// Jos jokin asia epäonnistuu, katkaistaan heti yhteys
 		echo "Yhteys muodostettu: $host<br>";
 		$login_ok = ftp_login($ftp,$log,$pass);
-		ftp_pasv($ftp, true);
+		if ($passiivi == 1) ftp_pasv($ftp, true);
 		echo "Lähetetään Esi-sanoma: $omaesia<br>";
 		if(ftp_put($ftp, $pankinesia, $omaesia, FTP_ASCII)) {
 			echo "Esi-sanoman lähetys onnistui.<br>Haetaan vastaus: $omaesip<br>";
@@ -107,27 +110,9 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 						echo "Siirtopyyntö lähetettiin.<br>Haetaan aineisto: $omaaineisto<br>";
 						if(ftp_get($ftp, $omaaineisto, $pankinaineisto, FTP_ASCII)) {
 							echo "Aineiston haku onnistui.<br>";
-							if ($pankki == "2") { //vain Nordean kanssa
-								echo "Haetaan kuittaus: $omakuittaus<br>";
-								if(ftp_get($ftp, $omakuittaus, $pankinkuittaus, FTP_ASCII)) {
-									echo "Kuittaus haettu<br>";
-								}
-								else {
-									echo "Kuittausta ei saatu<br>";
-								}
-							}
 						}
 						else {
 							echo "Aineiston haku ei onnistunut.<br>";
-							if ($pankki == "2") { //vain Nordean kanssa
-								echo "Haetaan kuittaus: $omakuittaus<br>";
-								if(ftp_get($ftp, $omakuittaus, $pankinkuittaus, FTP_ASCII)) {
-									echo "Kuittaus haettu<br>";
-								}
-								else {
-									echo "Kuittausta ei saatu<br>";
-								}
-							}
 						}
 					}
 					else {
@@ -180,20 +165,19 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 	$etiedosto = "esi.a";
 	$eptiedosto = "esi.p";
 	$sptiedosto = "siirtopyynto";
+	$aineistonimi = "aineisto"; // Vain Nordea
 	$kuittausnimi = "kuittaus";
 
-	echo "Tehdään siirtopyyntö + aineisto $osoite/$sptiedosto<br>";
-
 	$siirtopyynto = siirtopyynto($pankki, $yritirow['tilino'], $aineisto, "DEMO", $pvm);
-	echo strlen($siirtopyynto). "-->" . $siirtopyynto."<br>";
+	//echo strlen($siirtopyynto). "-->" . $siirtopyynto."<br>";
 
 	echo "Alustetaan ESI-tiedoston teko<br>";
 	$esi = sanoma($yritirow, "ESI", $aikaleima);
-	echo strlen($esi). "-->" . $esi."<br>";
+	//echo strlen($esi). "-->" . $esi."<br>";
 
 	echo "Suojataan ESI-tiedosto '$yritirow[kayttoavain]'<br>";
 	$esi = salaa($esi, "ESIa", $yritirow['kayttoavain']);
-	echo strlen($esi). "-->" . $esi."<br>";
+	//echo strlen($esi). "-->" . $esi."<br>";
 
 	// Jos ei haluta avainvaihtoa, lisätään sanoman perään nolla	
 	$esi .= "0";
@@ -206,13 +190,15 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 	$omasiirto= $osoite . "/" . $yritirow['tunnus'] . "-" . $sptiedosto . "." . $nro;
 	$omaaineisto = $osoite . "/" . $yritirow['tunnus'] . "-" . strtolower($aineisto) . "." . $nro ;
 	$omakuittaus = $osoite . "/" . $yritirow['tunnus'] . "-" . $kuittausnimi . "." . $nro ;
+	$omaaineistodata = $osoite . "/" . $yritirow['tunnus'] . "-" . $aineistonimi . "." . $nro ;
 
 	//Nordea
 	if ($pankki == '2') {
 		$pankinesia = "ESI.A";
 		$pankinesip= "ESI.P";
 		$pankinsiirto = "SIIRTO";
-		$pankinaineisto = $aineisto.".".$nro;
+		$pankinaineisto = $aineisto."TUN.".$nro;
+		$pankinaineistodata = $aineisto . "." . $nro;
 		$pankinkuittaus = "KUITTAUS." . $nro;
 	}
 	//Sampopankki
@@ -227,8 +213,11 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 		file_put_contents($yhteydenlopetus,$lopetus);
 	}
 
+	if ($pankki != '2') echo "Tehdään siirtopyyntö + aineisto $omasiirto<br>";
+	else echo "Tehdään siirtopyyntö $omaaineisto ja aineistotiedosto $omaaineistodata<br>";
+
 	//Tehdään SUO-tietue
-	$siirtopyynto .= sanoma($yritirow, "SUO", $aikaleima) . "\n";
+	$aineistodata = sanoma($yritirow, "SUO", $aikaleima) . "\n";
 
 	//Tehdään tälle aineistolle kertaavain
 	$yritirow = salattukertaavain($yritirow['tunnus']);
@@ -240,26 +229,39 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 	$var= sanoma($yritirow, "VAR", $aikaleima);
 
 	//Kootaan tiedosto paloistaan
-	$siirtopyynto .= $lahetettava . $var . $tiiviste;
+	$aineistodata .= $lahetettava . $var . $tiiviste;
 
 	echo "Suojataan VAR-tiedosto '$yritirow[kayttoavain]'<br>";
-	$siirtopyynto = salaa($siirtopyynto, "VAR", $yritirow['kayttoavain']) . "\n";
+	$aineistodata = salaa($aineistodata, "VAR", $yritirow['kayttoavain']) . "\n";
 
-	echo "<pre>$siirtopyynto</pre><br>";
-	
+	//echo "<pre>$aineistodata</pre><br>";
+
+	if ($pankki == '2') {
+		//echo "<pre>$siirtopyynto</pre><br>";
+		file_put_contents($omasiirto,$siirtopyynto);
+		//echo "<pre>$aineistodata</pre><br>";
+		file_put_contents($omaaineistodata,$aineistodata);
+	}
+	else {
+		$siirtopyynto .= $aineistodata;
+		//echo "<pre>$siirtopyynto</pre><br>";
+		file_put_contents($omasiirto,$siirtopyynto);
+	}
+
 	file_put_contents($omaesia, $esi);
-	file_put_contents($omasiirto,$siirtopyynto);
 
 	// FTP-yhteydenottomuuttujat
 	if ($pankki == '2') {
 		$host="solo.nordea.fi";
 		$log="anonymous";
-		$pass="SITE PASSIVE";
+		$pass="Pupesoft test";
+		$passiivi = 0;
 	}
 	if ($pankki == '8') {
 		$host="ftplinkki.sampopankki.fi";
 		$log="anonymous";
 		$pass="pupesofttestaus";
+		$passiivi = 1;
 	}
 
 	echo "Avataan FTP-yhteys $host<br>";
@@ -269,7 +271,7 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 		// Jos jokin asia epäonnistuu, katkaistaan heti yhteys
 		echo "Yhteys muodostettu: $host<br>";
 		$login_ok = ftp_login($ftp,$log,$pass);
-		ftp_pasv($ftp, true);
+		if ($passiivi == 1) ftp_pasv($ftp, true);
 		echo "Lähetetään Esi-sanoma: $omaesia<br>";
 		if(ftp_put($ftp, $pankinesia, $omaesia, FTP_ASCII)) {
 			echo "Esi-sanoman lähetys onnistui.<br>Haetaan vastaus: $omaesip<br>";
@@ -277,37 +279,38 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 				echo  "Esi-sanoman vastaus saatiin.<br>";
 				$tulos=kasitteleesip($omaesip, $yritirow);
 				if ($tulos == '') {
-					echo "Lähetetään siirtopyyntö: $omasiirto<br>";
-					if(ftp_put($ftp, $pankinsiirto, $omasiirto, FTP_ASCII)) {
-						echo "Siirtopyyntö lähetettiin.<br>Haetaan aineisto: $omaaineisto<br>";
-						if(ftp_get($ftp, $omaaineisto, $pankinaineisto, FTP_ASCII)) {
-							echo "Aineiston haku onnistui.<br>";
-							echo "<pre>".file_get_contents($omaaineisto)."</pre><br>";
-							if ($pankki == "2") { //vain Nordean kanssa
-								echo "Haetaan kuittaus: $omakuittaus<br>";
-								if(ftp_get($ftp, $omakuittaus, $pankinkuittaus, FTP_ASCII)) {
-									echo "Kuittaus haettu<br>";
-								}
-								else {
-									echo "Kuittausta ei saatu<br>";
-								}
+					if ($pankki == '2') {
+						echo "Lähetetään siirtopyyntö: $omasiirto<br>";
+						if(ftp_put($ftp, $pankinsiirto, $omasiirto, FTP_ASCII)) {
+							echo "Siirtopyyntö lähetettiin.<br>Lähetetään aineisto: $omaaineistodata<br>";
+							if(ftp_put($ftp, $pankinaineistodata, $omaaineistodata, FTP_ASCII)) {
+								echo "Aineistodata lähetettiin<br>Haetaan kuittaus: $omakuittaus<br>";
 							}
+							else {
+								echo "Aineistodata on virheellistä.<br>";
+							}
+
 						}
 						else {
-							echo "Aineiston haku ei onnistunut.<br>";
-							if ($pankki == "2") { //vain Nordean kanssa
-								echo "Haetaan kuittaus: $omakuittaus<br>";
-								if(ftp_get($ftp, $omakuittaus, $pankinkuittaus, FTP_ASCII)) {
-									echo "Kuittaus haettu<br>";
-								}
-								else {
-									echo "Kuittausta ei saatu<br>";
-								}
-							}
+							echo "Siirtopyyntö evättiin<br>";
 						}
 					}
 					else {
-						echo "Siirtopyyntö evättiin<br>";
+						echo "Lähetetään siirtopyyntö ja aineistodata: $omasiirto<br>";
+						if(ftp_put($ftp, $pankinsiirto, $omasiirto, FTP_ASCII)) {
+							echo "Lähetys onnistui<br>";
+						}
+						else {
+							echo "Siirtopyyntö evättiin<br>";
+						}
+						
+					}
+					if(ftp_get($ftp, $omakuittaus, $pankinkuittaus, FTP_ASCII)) {
+						echo "Kuittaus haettu<br>";
+						echo "Pankin vastaus --> ".substr(file_get_contents($omakuittaus),177,60)."<br>";
+					}
+					else {
+						echo "Kuittausta ei saatu<br>";
 					}
 				}
 				else {

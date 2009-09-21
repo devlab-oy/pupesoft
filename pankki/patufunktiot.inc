@@ -64,22 +64,21 @@ function ekakayttoavain ($tunnus) {
 function uusikayttoavain ($salattu, $yritirow) {
 
 //alustetaan salaus
-
+	echo "Uusi salattu avain on $salattu Siirtoavain on $yritirow[siirtoavain]<br>";
 	$tulos = pack('H*',$yritirow['siirtoavain']);
 	$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
 	$iv = pack('H*','0000000000000000');
 	mcrypt_generic_init($td, $tulos, $iv);
-
 	$tulos = mdecrypt_generic($td, pack('H*',$salattu));
 	mcrypt_generic_deinit($td);
 	mcrypt_module_close($td);
 
-	$tulos=unpack('H*',$tulos);
+	$uusiavain=unpack('H*',$tulos);
 
-	$uusitulos = tarkistapariteetti($tulos);
-	if ($uusitulos == $tulos) {
+	$uusitulos = tarkistapariteetti($uusiavain[1]);
+	if ($uusitulos == $uusiavain[1]) {
 		//lisäys tietokantaan
-		$query = "UPDATE yriti SET kayttoavain='$tulos[1]', kasukupolvi=if(kasukupolvi + 1 = 10,0,kasukupolvi+1) WHERE tunnus = '$yritirow[tunnus]'";
+		$query = "UPDATE yriti SET kayttoavain='$uusiavain[1]', kasukupolvi=if(kasukupolvi + 1 = 10,1,kasukupolvi+1) WHERE tunnus = '$yritirow[tunnus]'";
 		$xres = mysql_query($query) or pupe_error($query);
 		return "";
 	}
@@ -509,7 +508,7 @@ function siirtopyynto ($pankki, $tilinumero, $aineisto, $salasana ,$paivays) {
 		$apu.= sprintf ('%-18.18s', $tilinumero);
 		$apu.= sprintf ('%-10.10s', $salasana);
 		$apu.= sprintf ('%-6.6s', $paivays);
-		$apu .= " 9979 " . "999";
+		$apu .= " 9979 " . "999\n";
 	}
 	elseif ($pankki=='8') {
 		if ($paivays = '000000') $paivays = date ('ymd');
@@ -534,7 +533,7 @@ function siirtopyynto ($pankki, $tilinumero, $aineisto, $salasana ,$paivays) {
 	}
 	else
 		$apu='';
-	
+
 	return $apu;
 }
 
@@ -553,7 +552,7 @@ function kasitteleesip ($tiedostonnimi, $yritirow) {
 		echo "Käyttöavaimen vaihto!<br>";
 		$tulos = uusikayttoavain(substr($tiedot,161,16), $yritirow);
 		if ($tulos != '') echo $tulos."<br>";
-		else echo "Käyttöavaimen päivitys onnistui";
+		else echo "Käyttöavaimen päivitys onnistui<br>";
 	}
 	if (substr($tiedot,11,1) == 'K') {
 		echo "ESI-aineisto hyväksyttiin<br>";

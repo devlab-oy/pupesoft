@@ -2,16 +2,16 @@
 
 	require("inc/parametrit.inc");
 
+	if ($livesearch_tee == "TUOTEHAKU") {
+		livesearch_tuotehaku();
+		exit;
+	}
+
 	if (function_exists("js_popup")) {
 		echo js_popup(-100);
 	}
 
 	enable_ajax();
-
-	if ($livesearch_tee == "TUOTEHAKU") {
-		livesearch_tuotehaku();
-		exit;
-	}
 
 	echo "<SCRIPT type='text/javascript'>
 			<!--

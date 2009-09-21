@@ -32,7 +32,7 @@
 							luontiaika   	= now()";
 				$suores = mysql_query($suoque) or pupe_error($suoque);
 			}
-		}				
+		}
 	}
 
 	if (!isset($ei_kelloa)) {
@@ -41,13 +41,20 @@
 
 	if ($ei_kelloa == "") {
 		echo "<br><br>";
-		echo "<font class='info'>$aika</font> ";
-			
-		if (count($kaannetyt_sanat) > 0) {			
-			echo " <a href='".$palvelin."sanakirja.php?hakusana=".urlencode(implode("\n", $kaannetyt_sanat))."&tarkkahaku=ON&etsi_kieli=fi&kieli[0]=en&show=all'><font class='info'>".t("Sanakirja")."</font></a>";			
+		echo "<font class='info'>$aika</font>";
+
+		if (count($kaannetyt_sanat) > 0) {
+			echo " <a href='".$palvelin."sanakirja.php?hakusana=".urlencode(implode("\n", $kaannetyt_sanat))."&tarkkahaku=ON&etsi_kieli=fi&kieli[0]=en&show=all'><font class='info'>".t("Sanakirja")."</font></a>";
 		}
-				
-		echo "<br><br></body></html>";
+
+		echo "<br><br>";
+
+		if ($kukarow["extranet"] != "") {
+			echo $yhtiorow["web_seuranta"];
+		}
+
+		echo "</body>";
+		echo "</html>";
 	}
 
 	mysql_close($link);

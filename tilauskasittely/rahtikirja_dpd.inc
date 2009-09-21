@@ -144,7 +144,7 @@ if ($kollityht > 0) {
 		$sscc = $sscc.$loppu;
 
 		// tehdään pdf:n uusi sivu
-		$firstpage = $pdf->new_page("420x590");
+		$firstpage = $pdf->new_page("a5");
 
 		//DPD-LOGOGO
 		if (file_exists("pics/dpd_logo.jpg")) {

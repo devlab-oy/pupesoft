@@ -125,7 +125,7 @@ $tulostakolli = 1; // tulostetaan aina yksi kappale???
 for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 	// tehdään pdf:n uusi sivu
-	$firstpage = $pdf->new_page("420x590");
+	$firstpage = $pdf->new_page("a5");
 	
 	//Duusataan viivakoodia
 	$output      = "png";

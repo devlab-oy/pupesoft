@@ -131,7 +131,6 @@
 		$varasto = array($varasto);
 	}
 
-echo "<pre>", var_dump($varasto), "</pre>";
 	//	Katsotaan onko t‰ll‰ tuotteella joku oletusvalinta
 	if ( (int) $rivitunnus == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TARJOUS", "PROJEKTI"))) {
 		$olquery = "SELECT *
@@ -685,7 +684,7 @@ echo "<pre>", var_dump($varasto), "</pre>";
 				if (count($zzrow) > 0) {
 					// Jos tuotteella on tuotepaikkoja
 					foreach($zzrow as $zrow) {
-						if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and ($zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
+						if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and ($zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (is_array($varasto) and in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
 
 							if ($lisaarivi_debug==1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]: $zrow[myytavissa] kappaletta<br>";
 

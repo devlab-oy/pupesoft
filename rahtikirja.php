@@ -1805,7 +1805,7 @@
 				$tulostuspaikka = $roror['tulostuspaikka'];
 			}
 
-			if ($kukarow["varasto"] != "" and strpos(",", $kukarow["varasto"]) === FALSE) $tulostuspaikka = $kukarow['varasto'];
+			if ((int) $kukarow["varasto"] != 0 and strpos(",", $kukarow["varasto"]) === FALSE) $tulostuspaikka = $kukarow['varasto'];
 
 			if ($tulostuspaikka == '') $tulostuspaikka=$otsik['varasto'];
 

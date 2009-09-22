@@ -5,11 +5,14 @@
 		$apucsspieni = $_POST["css_pieni"];
 		$apucssextranet = $_POST["css_extranet"];
 		$apucssverkkokauppa = $_POST["css_verkkokauppa"];
+		$apuwebseuranta = $_POST["web_seuranta"];
 	}
 	else {
 		unset($apucss);
 		unset($apucsspieni);
 		unset($apucssextranet);
+		unset($apucssverkkokauppa);
+		unset($apuwebseuranta);
 	}
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
@@ -84,6 +87,9 @@
 	}
 	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucssverkkokauppa)) {
 		$t[$cssverkkokauppa] = $apucssverkkokauppa;
+	}
+	if ($_POST["toim"] == "yhtion_parametrit" and isset($apuwebseuranta)) {
+		$t[$webseuranta] = $apuwebseuranta;
 	}
 
 	// pikku javascripti

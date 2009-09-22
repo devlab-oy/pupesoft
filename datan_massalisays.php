@@ -1,45 +1,19 @@
 <?php
 
-if (1 == 2) {
-	/*require ("inc/connect.inc");
-	require ("inc/functions.inc");
-
-
-	$polut = array();
-
-	$polut[] = "allr/tuote/kasittele";
-	$polut[] = "allr/tuote/thumb";
-	$polut[] = "allr/tuote/normaali";
-	$polut[] = "allr/tuote/alkuperainen";
-
-	$polut[] = "allr/asiakas/kasittele";
-	$polut[] = "allr/asiakas/thumb";
-	$polut[] = "allr/asiakas/normaali";
-	$polut[] = "allr/asiakas/alkuperainen";
-
-	foreach ($polut as $polku) {
-		for ($i=0; $i < 10; $i++) {
-				$tsydeemi = "cp ".$dirri."/jlo.png ".$dirri."/".$polku."/jlo".$i.".png";
-				system($tsydeemi);
-		}
-
-	}*/
-}
-
 require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Kuvien sis‰‰nluku")."</font><hr>";
 
-$thumbkork = "65";
-$thumbleve = "96";
-$normaalikork = "480";
-$normaalileve = "640";
+$thumbkork 		= "65";
+$thumbleve 		= "96";
+$normaalikork 	= "480";
+$normaalileve 	= "640";
 
 if ($yhtiorow['kuvapankki_polku'] == '') {
 	die("Kuvapankkia ei ole m‰‰ritelty. Ei voida jatkaa!<br>");
 }
 
-Function listdir($start_dir='.') {
+function listdir($start_dir='.') {
 
 	$files = array();
 
@@ -52,6 +26,7 @@ Function listdir($start_dir='.') {
 				continue;
 			}
 			$filepath = $start_dir . '/' . $file;
+
 			if (is_dir($filepath)) {
 				$files = array_merge($files, listdir($filepath));
 			}
@@ -67,7 +42,6 @@ Function listdir($start_dir='.') {
 	}
 
 	return $files;
-
 }
 
 function konvertoi ($ykoko,$xkoko,$type,$taulu,$kuva,$dirri,$upfile1) {
@@ -87,15 +61,13 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$kuva,$dirri,$upfile1) {
 	$image = getimagesize($upfile1);	// l‰hetetty kuva
 
 	$leve = $image[0];
-
 	$kork = $image[1];
 
 	// teh‰‰n pienent‰m‰ll‰
 	$upfilesgh = strtolower("/tmp/$nimi"."1.".$ext);
 
-
     // skaalataan kuva oikenakokoiseksi
-    exec("nice -n 20 convert -resize x$ykoko -quality 80 $upfile1 $upfilesgh",$output,$error);
+    exec("nice -n 20 convert -resize x$ykoko -quality 80 $upfile1 $upfilesgh", $output, $error);
 
 	if ($error != 0) {
 		echo "Virhe kuvan muokkauksessa<br>";
@@ -142,7 +114,7 @@ if ($tee == 'GO') {
 		foreach ($files as $file) {
 			$polku = substr($file,$alkupituus);
 
-			list($taulu, $toiminto, $kuva) = split("/", $polku, 3);
+			list($taulu, $toiminto, $kuva) = explode("/", $polku, 3);
 
 			$path_parts = pathinfo($kuva);
 			$ext = $path_parts['extension'];
@@ -187,7 +159,7 @@ if ($tee == 'GO') {
 	foreach ($files as $file) {
 		$polku = substr($file,$alkupituus);
 
-		list($taulu, $toiminto, $kuva) = split("/", $polku, 3);
+		list($taulu, $toiminto, $kuva) = explode("/", $polku, 3);
 
 		$path_parts = pathinfo($kuva);
 		$ext = $path_parts['extension'];
@@ -242,11 +214,7 @@ if ($tee == 'GO') {
 			// (nro)
 			$mihin = strpos($kuva,"#");
 
-			$kuva = substr($kuva,0,"$mihin").".".$ext;
-
-			//echo "kuva: $kuva<br>";
-
-
+			$kuva = substr($kuva, 0, $mihin).".".$ext;
 		}
 
 		$apuselite = "";
@@ -300,8 +268,6 @@ if ($tee == 'GO') {
 			$apuresult = mysql_query($query) or pupe_error($query);
 		}
 
-
-
 		if (file_exists($file)) {
 			$filesize = filesize($file);
 
@@ -324,6 +290,7 @@ if ($tee == 'GO') {
 			$size = getimagesize($file);
 
 			list($mtype, $crap) = explode("/", $size["mime"]);
+
 			if($mtype == "image") {
 				$image_width 	= $size[0];
 				$image_height 	= $size[1];
@@ -375,7 +342,7 @@ if ($tee == 'GO') {
 					}
 
 					// poistetaan vanhat samat ja korvataan uusilla
-					$query =	"DELETE FROM liitetiedostot
+					$query = "	DELETE FROM liitetiedostot
 								WHERE yhtio 			= '$kukarow[yhtio]'
 								and liitos 				= '$taulu'
 								and liitostunnus 		= '$apurow[tunnus]'
@@ -383,7 +350,6 @@ if ($tee == 'GO') {
 								and filename			= '$apukuva'";
 					$delresult = mysql_query($query) or pupe_error($query);
 					$dellatut = mysql_affected_rows();
-
 
 					if ($dellatut > 0) {
 						echo "Poistettiin $dellatut $kuva kuvaa<br>";
@@ -416,21 +382,13 @@ if ($tee == 'GO') {
 					$insre = mysql_query($query) or pupe_error($query);
 
 					echo "Lis‰ttiin $toiminto $kuva tuotteelle $apurow[tuoteno]<br>";
-
-					//echo "$query<br>";
 				}
 				system("rm -f \"$file\"");
 			}
 			else {
 				echo "Tuotetta ei lˆytynyt kuvalle $kuva !!!<br>";
-
 			}
-
-
 		}
-
-		//echo "$polku || $file ... $taulu | $toiminto @ $kuva<br><br><br>";
-
 	}
 }
 
@@ -440,7 +398,7 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
 		die("Kuvapankkiin/$mitkadumpataan ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
 	}
 
-	$query =	"SELECT *
+	$query = "	SELECT *
 				FROM liitetiedostot
 				WHERE yhtio = '$kukarow[yhtio]' and liitos = '$mitkadumpataan'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -481,11 +439,12 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
 			$dellattuja ++;
 		}
 	}
+
 	echo "Vietiin $dumpattuja kuvaa kuvapankkiin<br>";
+
 	if (isset($dumppaajapoista) and $dumppaajapoista == '1') {
 		echo "Poistettiin $dellattuja kuvaa j‰rjestelm‰st‰<br>";
 	}
-
 }
 
 
@@ -499,7 +458,7 @@ $lukupainot = 0;
 foreach ($files as $file) {
 	$polku = substr($file,$alkupituus);
 
-	list($taulu, $toiminto, $kuva) = split("/", $polku, 3);
+	list($taulu, $toiminto, $kuva) = explode("/", $polku, 3);
 
 	if ($toiminto == 'thumb' and $kuva != '') {
 		$lukuthumbit ++;
@@ -551,7 +510,6 @@ echo "</form>";
 
 echo "<br><br><br>";
 
-
 if ($lukuthumbit+$lukunormit+$lukupainot == 0) {
 	echo "<table><form name='dumppi' method='post' action='$PHP_SELF'>";
 	echo "<input type='hidden' name='tee' value='DUMPPAA'>";
@@ -568,8 +526,5 @@ if ($lukuthumbit+$lukunormit+$lukupainot == 0) {
 }
 
 require ("inc/footer.inc");
-
-
-
 
 ?>

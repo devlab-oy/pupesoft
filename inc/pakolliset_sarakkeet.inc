@@ -50,7 +50,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				else {
 					$pakolliset = array("YTUNNUS");
 				}
-				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");				
 				break;
 			case "toimi" :
 				$pakolliset = array("YTUNNUS");
@@ -95,6 +95,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 					$pakolliset = array("LIITOSTUNNUS","TYYPPI","NIMI");
 				}
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				$joinattavat = array("YTUNNUS" => "asiakas");
 				break;
 			case "avainsana" :
 				$pakolliset = array("LAJI","SELITE");

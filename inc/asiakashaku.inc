@@ -53,8 +53,8 @@ if($kukarow["piirit"] != "")	 {
 if (is_numeric($asiakasid) and $asiakasid > 0) {
 	$query	= "	SELECT *
 				FROM asiakas
-				WHERE $konsyhtiot 
-				and tunnus='$asiakasid' 
+				WHERE $konsyhtiot
+				and tunnus='$asiakasid'
 				$asiakasrajaus";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
@@ -105,25 +105,25 @@ elseif ($ytunnus != '') {
 
 		if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
 	}
-	
-	
+
+
 	if ($toim == "TYOMAARAYS") {
 		$query = "	SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, lasku.yhtio
 					FROM lasku
 					JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
-					WHERE lasku.yhtio='$kukarow[yhtio]'						
+					WHERE lasku.yhtio='$kukarow[yhtio]'
 					and lasku.tila in ('A','L','N')
 					and tyomaarays.rekno = '$ytunnus'
 					group by 1,2,3,4,5 order by 1
 					LIMIT 50";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
-				
+
 		if ($monta == 0) {
 			$query = "	SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, lasku.yhtio
 						FROM lasku
 						JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
-						WHERE lasku.yhtio='$kukarow[yhtio]'						
+						WHERE lasku.yhtio='$kukarow[yhtio]'
 						and lasku.tila in ('A','L','N')
 						and tyomaarays.valmnro = '$ytunnus'
 						group by 1,2,3,4,5 order by 1
@@ -151,8 +151,8 @@ elseif ($ytunnus != '') {
 		// kokeillaan ytunnuksen alulla
 		$query	= "	SELECT *
 					FROM asiakas use index (ytunnus_index)
-					WHERE $konsyhtiot 
-					and ytunnus like '$ytunnus%' 
+					WHERE $konsyhtiot
+					and ytunnus like '$ytunnus%'
 					and ytunnus!=''
 					$lajilisa
 					$asiakasrajaus
@@ -194,8 +194,8 @@ if ($monta == 0) {
 	elseif ($asiakasnro) {
 		echo "<font class='error'>".t("Asiakas")." '$asiakasnro' ".t("ei löydy")."!</font> ";
 	}
-	
-	if (($ytunnus or $asiakasnro) and strpos($PHP_SELF, "tilaus_myynti") === FALSE and $kutsuja != "yllapito.php") {	
+
+	if (($ytunnus or $asiakasnro) and strpos($PHP_SELF, "tilaus_myynti") === FALSE and $kutsuja != "yllapito.php") {
 		echo "<form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='myos_poistetut'  value='TRUE'>";
 		echo "<input type='hidden' name='tee' 			  value='$tee'>";
@@ -216,18 +216,18 @@ if ($monta == 0) {
 		echo "<input type='hidden' name='myyjanro' 		  value='$myyjanro'>";
 		echo "<input type='hidden' name='tuoteno' 		  value='$tuoteno'>";
 		echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
-	
+
 		if (is_array($varastosta)) {
 			foreach ($varastosta as $varatunnu) {
 				echo "<input type='hidden' name='varastosta[$varatunnu]' value='$varatunnu'>";
 			}
 		}
-	
+
 		echo "<input type='submit' value='".t("Etsi myös poistettuja asiakkaita")."'>";
 		echo "</form>";
 	}
 
-	if (($ytunnus or $asiakasnro) and $kutsuja == "otsik.inc" and $toim == "TARJOUS") {	
+	if (($ytunnus or $asiakasnro) and $kutsuja == "otsik.inc" and $toim == "TARJOUS") {
 		echo "<form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='myos_prospektit' value='TRUE'>";
 		echo "<input type='hidden' name='tee' 			  value='$tee'>";
@@ -249,17 +249,17 @@ if ($monta == 0) {
 		echo "<input type='hidden' name='myyjanro' 		  value='$myyjanro'>";
 		echo "<input type='hidden' name='tuoteno' 		  value='$tuoteno'>";
 		echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
-	
+
 		if (is_array($varastosta)) {
 			foreach ($varastosta as $varatunnu) {
 				echo "<input type='hidden' name='varastosta[$varatunnu]' value='$varatunnu'>";
 			}
 		}
-	
+
 		echo "<input type='submit' value='".t("Etsi myös prospekti asiakkaita")."'>";
 		echo "</form>";
 	}
-	
+
 	echo "<br><br>";
 	$ytunnus = "";
 	$asiakasnro = "";
@@ -268,16 +268,16 @@ if ($monta == 0) {
 if ($monta == 1) {
 	$asiakasrow	= mysql_fetch_array($result);
 	$ytunnus	= $asiakasrow['ytunnus'];
-	
+
 	if ($asiakasnro != "") {
 		$asiakasnro  = $asiakasrow['asiakasnro'];
 	}
-	
+
 	$asiakasid = $asiakasrow['tunnus'];
 }
 
 if ($monta > 1 and $monta <= $limit) {
-	
+
 	if ($kutsuja != "yllapito.php") {
 		//tämä vain otsik.php:tä varten
 		echo $lause;
@@ -295,7 +295,7 @@ if ($monta > 1 and $monta <= $limit) {
 
 		echo "<td class='back'></td></tr>";
 	}
-	
+
 	while ($asiakas = mysql_fetch_array($result)) {
 
 		if     ($asiakas['ytunnus']    != '') $numero = trim($asiakas['ytunnus']);
@@ -326,7 +326,7 @@ if ($monta > 1 and $monta <= $limit) {
 				$brpostino = '<br>'.$asiakas['toim_postino'];
 				$brpostitp = '<br>'.$asiakas['toim_postitp'];
 			}
-			
+
 			echo "<tr class='aktiivi'>
 					<td>$asiakas[ytunnus]</td>
 					<td>$asiakas[asiakasnro]</td>
@@ -335,7 +335,7 @@ if ($monta > 1 and $monta <= $limit) {
 					<td>$asiakas[postino] $brpostino</td>
 					<td>$asiakas[postitp] $brpostitp</td>";
 
-		
+
 			if ($konserni != '') {
 				echo "<td>$asiakas[yhtio]</td>";
 			}
@@ -361,7 +361,7 @@ if ($monta > 1 and $monta <= $limit) {
 			echo "<input type='hidden' name='myyjanro' 		  value='$myyjanro'>";
 			echo "<input type='hidden' name='tuoteno' 		  value='$tuoteno'>";
 			echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
-			
+
 			if (is_array($varastosta)) {
 				foreach ($varastosta as $varatunnu) {
 					echo "<input type='hidden' name='varastosta[$varatunnu]' value='$varatunnu'>";
@@ -373,7 +373,7 @@ if ($monta > 1 and $monta <= $limit) {
 					echo "<input type='hidden' name='oletus[$o]' value='$a'>";
 				}
 			}
-			
+
 			echo "<input type='submit' value='".t("Valitse")."'>";
 			echo "</td>";
 			echo "</form>";
@@ -388,16 +388,16 @@ if ($monta > 1 and $monta <= $limit) {
 				$brpostino = ' '.$asiakas['toim_postino'];
 				$brpostitp = ' '.$asiakas['toim_postitp'];
 			}
-			
+
 			$ulos  .= "<option value='$asiakas[ytunnus]'>$asiakas[ytunnus] $asiakas[nimi] $asiakas[osoite] $asiakas[postino] $asiakas[postitp] $brnim $bros $brpostitp $brpostitp</option>";
 			$ulos2 .= "<option value='$asiakas[tunnus]'>$asiakas[ytunnus] $asiakas[nimi] $asiakas[nimitark] $asiakas[osoite] $asiakas[postino] $asiakas[postitp] $brnim $bros $brpostitp $brpostitp</option>";
 		}
 	}
-	
+
 	if ($kutsuja != "yllapito.php") {
 		echo "</table><br>";
-		
-		if (($ytunnus or $asiakasnro) and strpos($PHP_SELF, "tilaus_myynti") === FALSE) {	
+
+		if (($ytunnus or $asiakasnro) and strpos($PHP_SELF, "tilaus_myynti") === FALSE) {
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<input type='hidden' name='myos_poistetut'  value='TRUE'>";
 			echo "<input type='hidden' name='tee' 			  value='$tee'>";
@@ -425,12 +425,12 @@ if ($monta > 1 and $monta <= $limit) {
 				}
 			}
 
-			echo "<input type='submit' value='".t("Etsi möys poistettuja asiakkaita")."'>";
+			echo "<input type='submit' value='".t("Etsi myös poistettuja asiakkaita")."'>";
 			echo "</form><br>";
 		}
 	}
-	
-	if (($ytunnus or $asiakasnro) and $kutsuja == "otsik.inc" and $toim == "TARJOUS") {	
+
+	if (($ytunnus or $asiakasnro) and $kutsuja == "otsik.inc" and $toim == "TARJOUS") {
 		echo "<form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='myos_prospektit' value='TRUE'>";
 		echo "<input type='hidden' name='tee' 			  value='$tee'>";
@@ -452,18 +452,18 @@ if ($monta > 1 and $monta <= $limit) {
 		echo "<input type='hidden' name='myyjanro' 		  value='$myyjanro'>";
 		echo "<input type='hidden' name='tuoteno' 		  value='$tuoteno'>";
 		echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
-	
+
 		if (is_array($varastosta)) {
 			foreach ($varastosta as $varatunnu) {
 				echo "<input type='hidden' name='varastosta[$varatunnu]' value='$varatunnu'>";
 			}
 		}
-	
+
 		echo "<input type='submit' value='".t("Etsi myös prospekti asiakkaita")."'>";
 		echo "</form>";
 	}
-	
-	
+
+
 	$ytunnus = "";
 }
 
@@ -490,13 +490,13 @@ if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php") {
 				and alanimi = 'asiakas'
 				and paivitys != ''";
 	$oikeuresult2 = mysql_query($query) or pupe_error($query);
-	
+
 	if ($monta != 1 and (mysql_num_rows($oikeuresult1) > 0 or mysql_num_rows($oikeuresult2) > 0)) {
 
 		//Annetaan mahdollisuus perustaa uusi asiakas
 		echo "<table border='0'>";
 		echo "<tr><td>".t("Oikeaa asiakasta ei löytynyt. Perusta uusi asiakas")."</td>";
-	
+
 		if (mysql_num_rows($oikeuresult1) > 0) {
 			echo "<td class='back'>";
 			echo "<form action='../yllapito.php' method='post'>";
@@ -508,7 +508,7 @@ if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php") {
 			echo "</form>";
 			echo "</td>";
 		}
-	
+
 		if (mysql_num_rows($oikeuresult2) > 0) {
 			echo "<td class='back'>";
 			echo "<form action='../yllapito.php' method='post'>";
@@ -520,7 +520,7 @@ if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php") {
 			echo "</form>";
 			echo "</td>";
 		}
-	
+
 		echo "</tr>";
 		echo "</table><br>";
 	}

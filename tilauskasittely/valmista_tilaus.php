@@ -33,7 +33,7 @@
 		exit;
 	}
 
-	if(!function_exists("onkokaikkivalmistettu")) {
+	if (!function_exists("onkokaikkivalmistettu")) {
 		function onkokaikkivalmistettu ($valmkpllat) {
 			global $kukarow, $tee, $valmistettavat;
 
@@ -208,9 +208,10 @@
 		$tee = "";
 	}
 
-	if($tee == "TEEVALMISTUS" and $era_new_paikka!="") {
+	if ($tee == "TEEVALMISTUS" and $era_new_paikka != "") {
 		$paivitettiin = teeValinta("myyntirivitunnus", array("V"));
-		if($paivitettiin > 0) {
+
+		if ($paivitettiin > 0) {
 			$tee = "VALMISTA";
 		}
 	}
@@ -228,8 +229,25 @@
 			$saldot = array();
 			$saldot_valm = array();
 
+			// Tarkistetaan ettei ole orpoja raaka-aineita
+			foreach ($tuotenumerot as $rivitunnus => $tuotenumero) {
+				$query = "	SELECT tunnus
+							FROM tilausrivi
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$rivitunnus'
+							and tyyppi  = 'V'
+							and perheid = 0";
+				$roxresult = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($roxresult) > 0) {
+					echo "<font class='error'>".t("VIRHE: Raaka-aine ei kuulu mihink‰‰n reseptiin")."! $tuotenumero</font><br>";
+					$tee = "VALMISTA";
+				}
+			}
+
 			// T‰n verran on saldoilla
 			foreach ($tuotenumerot as $tuotenumero) {
+
 				list ($saldo, $hyllyssa, $myytavissa, $true) = saldo_myytavissa($tuotenumero);
 
 				$saldot[$tuotenumero] = $saldo;
@@ -258,7 +276,7 @@
 						if ($valmkpl > 0) {
 							$atil = round($valmkpl, 2);
 						}
-						elseif($valmkpl == "") {
+						elseif ($valmkpl == "") {
 							$atil =  $tilrivirow["varattu"];
 						}
 
@@ -288,7 +306,7 @@
 				$roxresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($roxresult) > 0) {
-					while($tilrivirow = mysql_fetch_array($roxresult)) {
+					while ($tilrivirow = mysql_fetch_array($roxresult)) {
 
 						if ($valmkpl < 0 or $tilrivirow["varattu"] < 0) {
 							echo "<font class='error'>".t("VIRHE: Negatiivista kappalem‰‰r‰‰ ei voi valmistaa")."!</font><br>";
@@ -306,7 +324,7 @@
 							if ($valmkpl > 0) {
 								$atil = round($valmkpl, 2);
 							}
-							elseif($valmkpl == "") {
+							elseif ($valmkpl == "") {
 								$atil =  $tilrivirow["varattu"];
 							}
 
@@ -450,7 +468,7 @@
 									WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$rivitunnus' and tunnus = perheid";
 						$result = mysql_query($query) or pupe_error($query);
 
-						if(mysql_num_rows($result) <> 1) {
+						if (mysql_num_rows($result) <> 1) {
 							$virhe[$rivitunnus] = "<font class='message'>".t("Tuote ei ole perheen is‰. Rekursiivinen p‰ivitys ei onnistu.")."!</font>";
 						}
 						else {
@@ -584,7 +602,7 @@
 							if ($valmkpl > 0) {
 								$atil = round($valmkpl, 2);
 							}
-							elseif($valmkpl == "") {
+							elseif ($valmkpl == "") {
 								$atil =  $tilrivirow["varattu"];
 							}
 
@@ -698,7 +716,7 @@
 		}
 
 		//	Voidaan hyp‰t‰ suoraan muokkaamaan tilausta
-		if($toim == "" and $tulin == "VALINNASTA" and strpos($row["Tilaus"], ",") === false and $row["Tilaustyyppi"] == "W") {
+		if ($toim == "" and $tulin == "VALINNASTA" and strpos($row["Tilaus"], ",") === false and $row["Tilaustyyppi"] == "W") {
 
 			echo "	<tr>
 						<td class='back' colspan='2'>
@@ -718,11 +736,11 @@
 		$query = "	SELECT tilausrivi.nimitys,
 					tilausrivi.tuoteno,
 					tilkpl tilattu,
-					if(tyyppi!='L', varattu, 0) valmistetaan,
-					if(tyyppi='L' or tyyppi='D', varattu, 0) valmistettu,
-					if(toimitettu!='', if(varattu!=0, varattu, kpl), 0) korjataan,
-					if(toimitettu!='', kpl, 0) valmistettu_valmiiksi,
-					if(tyyppi!='L', kpl, 0) kaytetty,
+					if (tyyppi!='L', varattu, 0) valmistetaan,
+					if (tyyppi='L' or tyyppi='D', varattu, 0) valmistettu,
+					if (toimitettu!='', if (varattu!=0, varattu, kpl), 0) korjataan,
+					if (toimitettu!='', kpl, 0) valmistettu_valmiiksi,
+					if (tyyppi!='L', kpl, 0) kaytetty,
 					toimaika,
 					kerayspvm,
 					tilausrivi.tunnus tunnus,
@@ -793,7 +811,7 @@
 				echo "<tr><td class='back' colspan='7'><br></td></tr>";
 			}
 
-			if($prow["tyyppi"] == 'W' or $prow["tyyppi"] == 'M') {
+			if ($prow["tyyppi"] == 'W' or $prow["tyyppi"] == 'M') {
 				// N‰m‰ ovat valmisteita
 				$class = "spec";
 
@@ -842,7 +860,7 @@
 
 			$sarjavalinta = "";
 
-			if($prow["tyyppi"] == "V" and $prow["toimitettuaika"] == "0000-00-00 00:00:00") {
+			if ($prow["tyyppi"] == "V" and $prow["toimitettuaika"] == "0000-00-00 00:00:00") {
 				$sarjavalinta = "<span style='float: left;'>†".naytaValinta($laskurow, $prow, "myyntirivitunnus", "myyntirivitunnus", array("D","O"), "VALMISTUS", "&otunnus=$laskurow[tunnus]&valmistettavat=$valmistettavat")."</span>";
 			}
 
@@ -874,7 +892,7 @@
 						<input type='hidden' name='edtilkpllat[$prow[tunnus]]'  value='$prow[valmistetaan]'>
 						<input type='text' size='8' name='tilkpllat[$prow[tunnus]]' value='$prow[valmistetaan]'>";
 
-				if($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") {
+				if ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") {
 					// Is‰tuotteet, p‰ivitet‰‰nkˆ valmistettavat kappaleet koko reseptille
 					echo "<br>R:<input type = 'checkbox' name = 'rekru[$prow[tunnus]]' checked>";
 				}
@@ -917,7 +935,7 @@
 			elseif ($prow["tunnus"] != $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
 				echo "<td valign='top' align='center'>UVA</td>";
 			}
-			elseif($prow["tunnus"] == $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] != "0000-00-00 00:00:00" and $toim == "KORJAA") {
+			elseif ($prow["tunnus"] == $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] != "0000-00-00 00:00:00" and $toim == "KORJAA") {
 				//tutkitaan kuinka paljon t‰t‰ nyt oli valmistettu
 				$query = "	SELECT sum(kpl) valmistetut
 							FROM tilausrivi
@@ -953,7 +971,7 @@
 
 					$voikokorjata++;
 				}
-				elseif($sumrow["valmistetut"] != 0 and $slrow["laskuja"] > 0) {
+				elseif ($sumrow["valmistetut"] != 0 and $slrow["laskuja"] > 0) {
 					echo "<td valign='top' class='back'><font class='error'>Rivi‰ ei voida perua!</font>";
 
 					if ((float) $prow["valmistetaan"] > 0) {
@@ -1025,7 +1043,6 @@
 		echo "</form>";
 	}
 
-	// meill‰ ei ole valittua tilausta
 	if ($tee == "") {
 		$formi="find";
 		$kentta="etsi";

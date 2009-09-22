@@ -13,8 +13,8 @@
 		$ok = 1;
 	}
 	if ($ok == 1) {
-		$sisalto = file_get_contents($filenimi);
-		$aineisto = mikaaineisto($sisalto);
+		$sisalto = file($filenimi);
+		$aineisto = mikaaineisto($sisalto[0]);
 	}
 
 	if ($tunnus != '' and $nollapolvi != '') {

@@ -17,7 +17,7 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 
 	echo "Tehdään siirtopyyntö $osoite/$sptiedosto<br>";
 
-	$siirtopyynto = siirtopyynto($pankki, $yritirow['tilino'], $aineisto, "DEMO", $pvm);
+	$siirtopyynto = siirtopyynto($pankki, $yritirow['tilino'], $aineisto, "DEMO", $pvm, $nro);
 	echo strlen($siirtopyynto). "-->" . $siirtopyynto."<br>";
 
 	echo "Alustetaan ESI-tiedoston teko<br>";
@@ -67,7 +67,7 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 		$pankinsiirto = "sovellus";
 		$pankinaineisto = "aineisto";
 		$pankinkuittaus = "kuittaus";
-		$lopetus = "//SIFNOFF\n";
+		$lopetus = "//SIGNOFF\n";
 		$yhteydenlopetus = $osoite ."/" . $yritirow['tunnus'] . "-lopetustiedosto";
 		file_put_contents($yhteydenlopetus,$lopetus);
 	}
@@ -120,7 +120,7 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 					}
 				}
 				else {
-					echo "Pankki vastasti ESIp-tiedostolla, mutta todennus ei onnistunut";
+					echo "Pankki vastasti ESIp-tiedostolla, mutta todennus ei onnistunut<br>";
 				}
 			}
 			else {
@@ -168,7 +168,7 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 	$aineistonimi = "aineisto"; // Vain Nordea
 	$kuittausnimi = "kuittaus";
 
-	$siirtopyynto = siirtopyynto($pankki, $yritirow['tilino'], $aineisto, "DEMO", $pvm);
+	$siirtopyynto = siirtopyynto($pankki, $yritirow['tilino'], $aineisto, "DEMO", $pvm, $nro);
 	//echo strlen($siirtopyynto). "-->" . $siirtopyynto."<br>";
 
 	echo "Alustetaan ESI-tiedoston teko<br>";
@@ -182,7 +182,7 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 	// Jos ei haluta avainvaihtoa, lisätään sanoman perään nolla	
 	$esi .= "0";
 	echo "Ei avainvaihtoa<br>";
-	echo strlen($esi). "-->" . $esi."<br>";
+	//echo strlen($esi). "-->" . $esi."<br>";
 
 	// Tiedostojen nimet
 	$omaesia= $osoite . "/" . $yritirow['tunnus'] . "-" . $etiedosto;
@@ -207,20 +207,20 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 		$pankinesip= "kuittaus";
 		$pankinsiirto = "sovellus";
 		$pankinaineisto = "aineisto";
+		$pankinaineistodata = "aineisto";
 		$pankinkuittaus = "kuittaus";
-		$lopetus = "//SIFNOFF\n";
+		$lopetus = "//SIGNOFF\n";
 		$yhteydenlopetus = $osoite ."/" . $yritirow['tunnus'] . "-lopetustiedosto";
 		file_put_contents($yhteydenlopetus,$lopetus);
 	}
 
-	if ($pankki != '2') echo "Tehdään siirtopyyntö + aineisto $omasiirto<br>";
-	else echo "Tehdään siirtopyyntö $omaaineisto ja aineistotiedosto $omaaineistodata<br>";
-
-	//Tehdään SUO-tietue
-	$aineistodata = sanoma($yritirow, "SUO", $aikaleima) . "\n";
+	echo "Tehdään siirtopyyntö $omaaineisto ja aineistotiedosto $omaaineistodata<br>";
 
 	//Tehdään tälle aineistolle kertaavain
 	$yritirow = salattukertaavain($yritirow['tunnus']);
+
+	//Tehdään SUO-tietue
+	$aineistodata = sanoma($yritirow, "SUO", $aikaleima) . "\r\n";
 
 	//Lasketaan tiiviste aineistolle
 	$tiiviste = tiiviste($lahetettava, $yritirow['kertaavain']);
@@ -229,24 +229,25 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 	$var= sanoma($yritirow, "VAR", $aikaleima);
 
 	//Kootaan tiedosto paloistaan
-	$aineistodata .= $lahetettava . $var . $tiiviste;
+	foreach ($lahetettava as $rivi) {
+		//echo "'$rivi'<br>";
+		$aineistodata .= rtrim($rivi, "\r\n") . "\r\n";
+	}
+	$aineistodata .= $var . $tiiviste;
+
+	$oikeat = array("Ä", "Ö", "Å", "ä", "ö", "å");
+	$pankin = array("[", "\\", "]", "{", "|", "}");
+	$aineistodata = str_replace($oikeat, $pankin, $aineistodata);
+	$aineistodata = strtoupper($aineistodata);
 
 	echo "Suojataan VAR-tiedosto '$yritirow[kayttoavain]'<br>";
-	$aineistodata = salaa($aineistodata, "VAR", $yritirow['kayttoavain']) . "\n";
+	$aineistodata = salaa($aineistodata, "VAR", $yritirow['kayttoavain']) . "\r\n";
 
 	//echo "<pre>$aineistodata</pre><br>";
+	//echo "<pre>$siirtopyynto</pre><br>";
 
-	if ($pankki == '2') {
-		//echo "<pre>$siirtopyynto</pre><br>";
-		file_put_contents($omasiirto,$siirtopyynto);
-		//echo "<pre>$aineistodata</pre><br>";
-		file_put_contents($omaaineistodata,$aineistodata);
-	}
-	else {
-		$siirtopyynto .= $aineistodata;
-		//echo "<pre>$siirtopyynto</pre><br>";
-		file_put_contents($omasiirto,$siirtopyynto);
-	}
+	file_put_contents($omasiirto,$siirtopyynto);
+	file_put_contents($omaaineistodata,$aineistodata);
 
 	file_put_contents($omaesia, $esi);
 
@@ -279,31 +280,19 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 				echo  "Esi-sanoman vastaus saatiin.<br>";
 				$tulos=kasitteleesip($omaesip, $yritirow);
 				if ($tulos == '') {
-					if ($pankki == '2') {
-						echo "Lähetetään siirtopyyntö: $omasiirto<br>";
-						if(ftp_put($ftp, $pankinsiirto, $omasiirto, FTP_ASCII)) {
-							echo "Siirtopyyntö lähetettiin.<br>Lähetetään aineisto: $omaaineistodata<br>";
-							if(ftp_put($ftp, $pankinaineistodata, $omaaineistodata, FTP_ASCII)) {
-								echo "Aineistodata lähetettiin<br>Haetaan kuittaus: $omakuittaus<br>";
-							}
-							else {
-								echo "Aineistodata on virheellistä.<br>";
-							}
-
+					echo "Lähetetään siirtopyyntö: $omasiirto<br>";
+					if(ftp_put($ftp, $pankinsiirto, $omasiirto, FTP_ASCII)) {
+						echo "Siirtopyyntö lähetettiin.<br>Lähetetään aineisto: $omaaineistodata<br>";
+						if(ftp_put($ftp, $pankinaineistodata, $omaaineistodata, FTP_ASCII)) {
+							echo "Aineistodata lähetettiin<br>Haetaan kuittaus: $omakuittaus<br>";
 						}
 						else {
-							echo "Siirtopyyntö evättiin<br>";
+							echo "Aineistodata on virheellistä tai se muusta syystä hylättiin.<br>";
 						}
+
 					}
 					else {
-						echo "Lähetetään siirtopyyntö ja aineistodata: $omasiirto<br>";
-						if(ftp_put($ftp, $pankinsiirto, $omasiirto, FTP_ASCII)) {
-							echo "Lähetys onnistui<br>";
-						}
-						else {
-							echo "Siirtopyyntö evättiin<br>";
-						}
-						
+						echo "Siirtopyyntö evättiin<br>";
 					}
 					if(ftp_get($ftp, $omakuittaus, $pankinkuittaus, FTP_ASCII)) {
 						echo "Kuittaus haettu<br>";
@@ -314,7 +303,7 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 					}
 				}
 				else {
-					echo "Pankki vastasti ESIp-tiedostolla, mutta todennus ei onnistunut";
+					echo "Pankki vastasti ESIp-tiedostolla, mutta todennus ei onnistunut<br>";
 				}
 			}
 			else {

@@ -20,7 +20,7 @@ function meidanxor ($eka, $toka) {
 }
 
 function mikaaineisto ($aineisto) {
-
+	//echo "Aineisto $aineisto<br>";
 	if (substr($aineisto,0,4) == 'LM03') return "LMP300";
 	elseif (substr($aineisto,0,4) == 'LUM2') return "xxx";
 	else return "";
@@ -86,16 +86,12 @@ function uusikayttoavain ($salattu, $yritirow) {
 }
 
 function salattukertaavain ($tunnus) {
-
+	global $testaus;
 	$query = "SELECT * FROM yriti WHERE tunnus='$tunnus'";
 	$tilires = mysql_query($query) or pupe_error($query);
 	if (mysql_num_rows($tilires) == 1) {
 		$yritirow = mysql_fetch_array($tilires);
-
-		echo "Siirtoavain: $yritirow[siirtoavain]<br>";
-
 		$siemen = $yritirow['siemen'];
-
 		echo "Siemen: $siemen<br>";
 		if ($siemen== '') {
 			for($i=0;$i<16;$i++){
@@ -117,7 +113,7 @@ function salattukertaavain ($tunnus) {
 				elseif($apu==12) $avain.="c";
 				elseif($apu==13) $avain.="d";
 				elseif($apu==14) $avain.="e";
-				elseif($apu==15)	$avain.="f";
+				elseif($apu==15) $avain.="f";
 			}
 		echo "Siemen: $siemen Avain: $avain<br>";
 
@@ -143,8 +139,8 @@ function salattukertaavain ($tunnus) {
 		$random = unpack("H*",$random);
 
 		# Tarkistetaan pariteetti ja saadaan kerta-avain
-		$kerta = tarkistapariteetti($random[1]);
-		$uusikertaavain = $kerta;
+		$uusikertaavain = tarkistapariteetti($random[1]);
+		if ($testaus != '') $uusikertaavain = "5208290ED9BF0B6D";
 		echo  "Kerta-avain: $uusikertaavain<br>";
 
 		# Muodostetaan uusi siemen 
@@ -153,10 +149,10 @@ function salattukertaavain ($tunnus) {
 		$siemen = mcrypt_generic($td,$siemen);
 		$siemen = unpack("H*",$siemen);
 
-		# Salataan kerta-avain 
+		# Salataan kerta-avain
 		# Muutetaan luvut oikeaan muotoon
 		$siirtoavain = pack("H*",$yritirow['siirtoavain']);
-		$kerta = pack("H*",$kerta);
+		$kerta = pack("H*",$uusikertaavain);
 
 		mcrypt_generic_deinit($td);
 		mcrypt_module_close($td);
@@ -176,6 +172,7 @@ function salattukertaavain ($tunnus) {
 		$updres = mysql_query($query) or pupe_error($query);
 		$yritirow['kertaavain'] = $uusikertaavain;
 		$yritirow['salattukerta'] = $sal[1];
+		if ($testaus != '') exit;
 		return $yritirow;
 	}
 }
@@ -249,20 +246,31 @@ function salaa ($jono, $arg, $kayttoavain) {
 
 function tiiviste ($jono, $kertaavain) {
 
+	//Poistetaan loppu whitespace
+	$uusijono='';
+	$puhdasjono = array_map('rtrim', $jono);
+	foreach ($puhdasjono as $rivi) {
+		//echo "'$rivi'<br>";
+		$uusijono .= $rivi;
+	}
+	$oikeat = array("ƒ", "÷", "≈", "‰", "ˆ", "Â");
+	$pankin = array(" ", " ", " ", " ", " ", " ");
+	$uusijono = str_replace($oikeat, $pankin, $uusijono);
+	$uusijono = strtoupper($uusijono);
+	echo "Uusijono --> $uusijono<br>";
 	//Jaetaan 8 merkin lohkoiksi ja sijoitetaan taulukkoon
 	$k=0;
 
-	while(strlen($jono) > 0) {
-		$data[$k] = substr($jono,0,8);
-		$jono = substr($jono,8);
+	while(strlen($uusijono) > 0) {
+		$data[$k] = substr($uusijono,0,8);
+		$uusijono = substr($uusijono,8);
 		$k++;
-		//echo "$jono\n";
+		//echo "$uusijono<br>";
 	}
 
 	//Jos viimeinen lohko j‰‰ vajaaksi t‰ytet‰‰n se bin‰‰ri nollilla
 	$k--;
 	if (strlen($data[$k]) != 8) $data[$k] = str_pad($data[$k], 8, "\0");
-
 
 	//Alustetaan kryptaus kertaavaimella  
 	$kertaavain = pack("H*",$kertaavain);
@@ -274,6 +282,7 @@ function tiiviste ($jono, $kertaavain) {
 	$text = mcrypt_generic($td, $text);
 
 	for($i=1; $i<=$k; $i++){
+		echo "'$data[$i]'<br>";
 		$ortext=$text ^ $data[$i];
 		$text = mcrypt_generic($td, $ortext);
 	}
@@ -282,11 +291,11 @@ function tiiviste ($jono, $kertaavain) {
 	$tiivisteet = unpack("H*", $text);
 	$tiiviste = strtoupper($tiivisteet[1]);
 
-	echo "Tiiviste: $tiiviste<br>";
-	return $tiiviste;
-
 	mcrypt_generic_deinit($td);
 	mcrypt_module_close($td);
+
+	echo "Tiiviste: $tiiviste<br>";
+	return $tiiviste;
 
 }
 
@@ -424,80 +433,85 @@ function siirtoavain($osa1, $osa2, $tarkiste, $suku, $tunnus) {
 
 function sanoma ($tilirow, $tyyppi, $aikaleima) {
 
-# Sanomatunnus
+// Sanomatunnus
 $file=">>";
 $file .= sprintf ('%-3.3s',$tyyppi);
 
-# Sanomapituus
+// Sanomapituus
 if($tyyppi == "SUO")
 	$file.="128";
 
 else
 	$file.="161";
 
-# Versio
+// Versio
 $file.="120";
 
-# Onnistumiskoodi + ilmoituskoodi
+// Onnistumiskoodi + ilmoituskoodi
 $file.=" 0000";
 
-# Ohjelmisto
-# Nimi
+// Ohjelmisto
+// Nimi
 $file.= sprintf ('%-12.12s', "PUPESOFT"); //Pituus 12
 
-# Versio
+// Versio
 $file.= sprintf ('%-4.4s', "0099"); //Pituus 4
 
-# Turvamenetelm‰
+// Turvamenetelm‰
 if($tyyppi == "SUO")
 	$file.="SKH";
 else
 	$file.="SMH";
 
-# Vastaanottaja
+// Vastaanottaja
 $file.=sprintf ('%-25.25s', $tilirow['pankki']);
 
 
-# L‰hett‰j‰
+// L‰hett‰j‰
 $file.=sprintf ('%-25.25s', $tilirow['asiakas']);
 
-# Siirto-ja k‰yttˆavainten sukupolvi numerot
+// Siirto-ja k‰yttˆavainten sukupolvi numerot
 $file.=sprintf ('%-1.1s', $tilirow['sasukupolvi']);
 $file.=sprintf ('%-1.1s', $tilirow['kasukupolvi']);
 
-# Aikaleima ja leimanumero
-if (strlen($aikaleima) == 15) $file.=$aikaleima;
-elseif (strlen($aikaleima) == 12) $file.=$aikaleima . "000"; 
-else {
-	$file.= date('ymdHis');
-	$file.="000";
+// Aikaleima ja leimanumero
+
+if ($aikaleima == '') $aikaleima = date('ymdHis')."000"; 
+
+if (substr($tilirow['tilino'],0,1) == '8') {
+	//Sampo haluaa eri aikaleiman :)
+	if (($tyyppi == 'SUO')or ($tyyppi == 'VAR')) {
+		$aikaleimaloppu = substr($aikaleima,-3);
+		$aikaleimaloppu++;
+		$aikaleima = substr($aikaleima,0,12) . sprintf ('%03d', $aikaleimaloppu);
+	}
 }
 
-# Suojausalue
-if($tyyppi == "ESI")
+$file.=$aikaleima;
+
+// Suojausalue
+	if($tyyppi == "ESI")
 	$file.=" ";
 else
 	$file.="S";
 
 $file.= sprintf ('%-9.9s', " "); // 9
 
-
-# Salattu kerta-avain
+// Salattu kerta-avain
 if($tyyppi == "ESI")
 	$file.=sprintf ('%-16.16s', " "); // 16
 else
 	$file.=sprintf ('%-16.16s', strtoupper($tilirow['salattukerta']));
 
-
-#Tiivisteen paikka
+// Tiivisteen paikka
 if($tyyppi == "ESI")
-	$file.=sprintf ('%-16.16s', " ");; // 16
+	$file.=sprintf ('%-16.16s', " "); // 16
 
 return $file;
 
 }
 
-function siirtopyynto ($pankki, $tilinumero, $aineisto, $salasana ,$paivays) {
+function siirtopyynto ($pankki, $tilinumero, $aineisto, $salasana ,$paivays, $nro) {
 
 	if ($paivays == '') $paivays = '000000';
 
@@ -511,24 +525,24 @@ function siirtopyynto ($pankki, $tilinumero, $aineisto, $salasana ,$paivays) {
 		$apu .= " 9979 " . "999\n";
 	}
 	elseif ($pankki=='8') {
-		if ($paivays = '000000') $paivays = date ('ymd');
+		if ($paivays = '000000') $paivays = date ('md') . sprintf('%02d', $nro);;
 		if ($aineisto == 'STATUS') {
-			$apu = "//SOVELLUS=KTON,ERA=000000,KYS\n";
-			$apu .= "//EOF\n";
+			$apu = "//SOVELLUS=KTON,ERA=000000,KYS\r\n";
+			$apu .= "//EOF\r\n";
 		}
 		if ($aineisto == 'TITO') {
-			$apu = "//SOVELLUS=KTON,ERA=000000\n";
-			$apu .= "//EOF\n";
+			$apu = "//SOVELLUS=KTON,ERA=000000\r\n";
+			$apu .= "//EOF\r\n";
 		}
 		if ($aineisto == 'VKEUR') {
-			$apu = "//SOVELLUS=VKEN,ERA=000000\n";
-			$apu .= "//EOF\n";
+			$apu = "//SOVELLUS=VKEN,ERA=000000\r\n";
+			$apu .= "//EOF\r\n";
 		}
 		if ($aineisto == 'xxx') {
-			$apu = "//SOVELLUS=UM2L,ERA=" . $paivays . "\n";
+			$apu = "//SOVELLUS=UM2L,ERA=" . $paivays . "\r\n";
 		}
 		if ($aineisto == 'LMP300') {
-			$apu = "//SOVELLUS=OL2L,ERA=" . $paivays . "\n";
+			$apu = ">>SOVELLUS=OL2L,ERA=" . $paivays . "\r\n";
 		}
 	}
 	else

@@ -1805,9 +1805,9 @@
 				$tulostuspaikka = $roror['tulostuspaikka'];
 			}
 
-			if ($kukarow["varasto"]!=0) $tulostuspaikka=$kukarow['varasto'];
+			if ($kukarow["varasto"] != "" and strpos(",", $kukarow["varasto"]) === FALSE) $tulostuspaikka = $kukarow['varasto'];
 
-			if ($tulostuspaikka=='') $tulostuspaikka=$otsik['varasto'];
+			if ($tulostuspaikka == '') $tulostuspaikka=$otsik['varasto'];
 
 			while ($row = mysql_fetch_array($result)) {
 				if ($tulostuspaikka==$row['tunnus'])	$select='selected';

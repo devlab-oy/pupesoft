@@ -328,6 +328,12 @@
 			require("suoratoimitusvalinta.inc");
 		}
 
+		$varastot_array = array();
+		
+		if ($kukarow["varasto"] != "") {
+			$varastot_array = explode(",", $kukarow["varasto"]);
+		}
+		
 		// Kääydään läpi oman varaston paikat
 		if ( in_array($yhtiorow["puute_jt_oletus"], array('H','O')) or
 			(in_array($row["var"], array('','H','S','T','U','J')) and mysql_num_rows($omavarastores) >= $omapaikatraja) or
@@ -344,9 +350,9 @@
 		   		$sarjarow = mysql_fetch_array($sarjares);
 			}
 
-			while($alkurow = mysql_fetch_array($omavarastores)) {
+			while ($alkurow = mysql_fetch_array($omavarastores)) {
 
-				if ($alkurow["hyllyalue"] != "!!M" and ($alkurow["varastotyyppi"] != "E" or $laskurow["varasto"] == $alkurow["varasto"] or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]))) {
+				if ($alkurow["hyllyalue"] != "!!M" and (($alkurow["varastotyyppi"] != "E" and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $alkurow["varasto"] or (in_array($alkurow["varasto"], $varastot_array) and $laskurow["varasto"] == 0) or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]))) {
 
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 

@@ -186,6 +186,10 @@
 				$salasana = $password; // jos meillä ei ole kopioitua salasanaa toisesta yrityksestä, käytetään syötettyä
 			}
 
+			if (count($varasto) > 0) {
+				$varasto = implode(",", $varasto);
+			}
+
 			$query = "	INSERT into kuka
 						SET nimi 						= '$firname',
 						kuka 							= '$ktunnus',
@@ -344,6 +348,10 @@
 				$result = mysql_query($query) or pupe_error($query);
 			}
 
+			if (count($varasto) > 0) {
+				$varasto = implode(",", $varasto);
+			}
+
 			$query = "	UPDATE kuka
 						SET nimi 		= '$firname',
 						puhno 			= '$phonenum',
@@ -464,17 +472,18 @@
 			}
 
 			echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
+
 			if ($toim == 'extranet') {
 				echo "<table>";
-				echo "<tr><td>";
+				echo "<tr><td class='back'>";
 			}
 
 			echo "<table>";
 
 			if ($selkuka != "UUSI") {
-				echo "<input type='hidden' name='tee' value='MUUTA'>
+				echo "	<input type='hidden' name='tee' value='MUUTA'>
 						<input type='hidden' name='selkuka' value='$selkukarow[tunnus]'>
-					  <input type='hidden' name='kuka' value='$selkukarow[kuka]'>";
+						<input type='hidden' name='kuka' value='$selkukarow[kuka]'>";
 				echo "<tr><th align='left'>".t("Käyttäjätunnus").":</th><td><b>$krow[kuka]</b> ".t("Lastlogin").": $krow[lastlogin]</td></tr>";
 			}
 			else {
@@ -632,19 +641,25 @@
 				echo "</select></td></tr>";
 			}
 
-			echo "<tr><th align='left'>".t("Myy varastosta").":</td>";
-			echo "<td><select name='varasto'><option value='0'>".t("Oletus")."</option>";
+			echo "<tr><th align='left'>".t("Valitse varastot, joista käyttäjä saa myydä").":</td>";
+			echo "<td>";
 
-			$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+			$query  = "	SELECT * 
+						FROM varastopaikat 
+						WHERE yhtio = '$kukarow[yhtio]'
+						order by tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);
 
+			$varastot_array = explode(",", $krow["varasto"]);
+
 			while ($varow = mysql_fetch_array($vares)) {
-				$sel='';
-				if ($varow['tunnus']==$krow["varasto"]) $sel = 'selected';
-				echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
+				$sel = $eri = '';
+				if (in_array($varow['tunnus'], $varastot_array)) $sel = 'CHECKED';
+				if ($varow["tyyppi"] == "E") $eri = "(E)";
+				echo "<input type='checkbox' name='varasto[]' value='$varow[tunnus]' $sel> $varow[nimitys] $eri<br>";
 			}
 
-			echo "</select></td></tr>";
+			echo "</td><td class='back'>Ilman rajausta saa myydä kaikista normaalivarastoista</td></tr>";
 
 			if ($toim != 'extranet' and $yhtiorow['pakkaamolokerot'] == 'K') {
 				echo "<tr><th align='left'>".t("Oletus pakkaamo").":</td>";
@@ -1003,7 +1018,7 @@
 
 				$piirit = explode(',', $krow["piirit"]);
 
-				echo "<tr><th valign='top'>".t("Valitse asiakaspiirit joihin käyttäjä saa myydä").":<br>(".t("Ilman rajausta käyttäjä voi myydä kaikkiin piireihin").")</th><td>";
+				echo "<tr><th valign='top'>".t("Valitse asiakaspiirit, joihin käyttäjä saa myydä").":</th><td>";
 
 				$pres = t_avainsana("PIIRI");
 
@@ -1016,7 +1031,7 @@
 
 					echo "<input type='checkbox' name='piiri[]' value='$prow[selite]' $chk>$prow[selite] - $prow[selitetark]<br>";
 				}
-				echo "</td></tr>";
+				echo "</td><td class='back'>".t("Ilman rajausta käyttäjä voi myydä kaikkiin piireihin")."</td></tr>";
 			}
 
 			echo "</table>";
@@ -1025,6 +1040,7 @@
 			if ($toim == 'extranet') {
 				$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='extranet_kayttajan_lisatiedot' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
 				$res = mysql_query($queryoik) or pupe_error($queryoik);
+
 				if (mysql_num_rows($res) > 0) {
 					require ("inc/extranet_kayttajan_lisatiedot.inc");
 					echo "<td class='back'>";

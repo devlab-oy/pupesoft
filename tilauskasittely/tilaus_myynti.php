@@ -2938,9 +2938,11 @@ if ($tee == '') {
 				$kerayspvm = $laskurow["kerayspvm"];
 			}
 
-
 			if ($laskurow["varasto"] != 0) {
 				$varasto = (int) $laskurow["varasto"];
+			}
+			elseif ($kukarow["varasto"] != "") {
+				$varasto = explode(",", $kukarow["varasto"]);
 			}
 
 			//Ennakkotilauksen, Tarjoukset ja Ylläpitosopimukset eivät varaa saldoa

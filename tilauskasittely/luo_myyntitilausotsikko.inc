@@ -139,7 +139,9 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 
 			$erikoisale	= $asiakasrow["erikoisale"];
 
-			$varasto = (int) $kukarow["varasto"];
+			// jos on valittuna vaan yksi varasto, p‰ss‰t‰‰n eteenp‰in
+			$varasto = 0;
+			if ($kukarow["varasto"] != "" and strpos(",", $kukarow["varasto"]) === FALSE) $varasto = $kukarow['varasto'];
 
 			if ($yhtiorow["splittauskielto"] != '') {
 				$splittauskielto = "E";
@@ -163,7 +165,10 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$alv = (float) $xwtrow["selite"];
 
 			$ytunnus = "*";
-			$varasto = (int) $kukarow["varasto"];
+
+			// jos on valittuna vaan yksi varasto, p‰ss‰t‰‰n eteenp‰in
+			$varasto = 0;
+			if ($kukarow["varasto"] != "" and strpos(",", $kukarow["varasto"]) === FALSE) $varasto = $kukarow['varasto'];
 		}
 
 		if ($valkoodi == '') {

@@ -1471,17 +1471,28 @@
 			echo "<td>".t("Myy varastosta").":</td>";
 			echo "<td><select name='varasto'><option value='0'>".t("Kaikista")."</option>";
 
+			$varastot_array = array();
+			$varastot_lisa_query = "";
+			
+			if ($kukarow["varasto"] != "") {
+				$varastot_array = explode(",", $kukarow["varasto"]);
+				$varastot_lista = mysql_real_escape_string($kukarow["varasto"]);
+				$varastot_lisa_query = " and varastopaikat.tunnus in ($varastot_lista) ";
+			}
+
 			$query  = "	SELECT *
 						FROM varastopaikat
-						WHERE yhtio='$kukarow[yhtio]'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						$varastot_lisa_query
+						order by tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);
 
 			while ($varow = mysql_fetch_array($vares)) {
 
-				if ($varow["tyyppi"] == '' or $kukarow["varasto"] == $varow["tunnus"]) {
+				if ($varow["tyyppi"] == '' or in_array($varow["tunnus"], $varastot_array)) {
 
 					$sel='';
-					if ($varow['tunnus']==$srow["varasto"] or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '')) $sel = 'selected';
+					if ($varow['tunnus'] == $srow["varasto"] or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '')) $sel = 'selected';
 
 					echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
 				}

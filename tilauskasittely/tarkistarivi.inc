@@ -95,6 +95,12 @@
 		$tilausok++;
 	}
 
+	if ($row["tyyppi"] == 'V' and $row["perheid"] == 0 and $toim == "VALMISTAVARASTOON") {
+		$varaosavirhe .= t("VIRHE: Tuote ei kuulu mihink‰‰n reseptiin!")."<br>";
+		$riviok++;
+		$tilausok++;
+	}
+
 	if ($row["var"] != '' and $toim == "SIIRTOTYOMAARAYS") {
 		$varaosavirhe .= t("VIRHE: Sis‰isell‰ tyˆm‰‰r‰yksell‰ Var pit‰‰ olla tyhj‰!")."<br>";
 		$riviok++;
@@ -414,7 +420,7 @@
 						$kotipaikatlask++;
 					}
 				}
-			
+
 			}
 		}
 		//	Jos ollaan livahdettu puutteeksi koitetaan josko t‰t‰ voitasiin myyd‰ erikokisvarastosta
@@ -594,10 +600,10 @@
 	if ($kukarow["extranet"] == "" and $trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $kpl_st > 0 and in_array($row["var"], array("J","U","T","P","R"))) {
 		$query = "	SELECT kohde.nimitys kohde, lahde.nimitys lahde, tila, alatila, sum(varattu+jt+kpl) kpl, lasku.tunnus, tilausrivi.yksikko
 					FROM lasku USE INDEX (tila_index)
-					RIGHT JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tuoteno = '{$trow["tuoteno"]}')
+					RIGHT JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tuoteno = '$trow[tuoteno]')
 					LEFT JOIN varastopaikat lahde USE INDEX (PRIMARY) ON (lahde.yhtio = lasku.yhtio and lahde.tunnus = lasku.varasto)
 					LEFT JOIN varastopaikat kohde USE INDEX (PRIMARY) ON (kohde.yhtio = lasku.yhtio and kohde.tunnus = lasku.clearing)
-					WHERE lasku.yhtio = '{$kukarow["yhtio"]}' and tila = 'G' and alatila != 'V'
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'G' and alatila != 'V'
 					GROUP BY tuoteno, lasku.tunnus";
 		$siirtores = mysql_query($query) or pupe_error($query);
 
@@ -608,7 +614,7 @@
 			//tehd‰‰n selv‰kielinen tila/alatila
 			require "inc/laskutyyppi.inc";
 
-			$varaosakommentti .= t("Siirtolistalla").": {$siirtorow["kpl"]} {".t_avainsana("Y", "", "and avainsana.selite='$siirtorow[yksikko]'", "", "", "selite")."} {$siirtorow["lahde"]} -> {$siirtorow["kohde"]} ($alatila)<br>";
+			$varaosakommentti .= t("Siirtolistalla").": $siirtorow[kpl] {".t_avainsana("Y", "", "and avainsana.selite='$siirtorow[yksikko]'", "", "", "selite")."} $siirtorow[lahde] -> $siirtorow[kohde] ($alatila)<br>";
 		}
 
 		// katotaan onko viel‰ ostotilauksella!

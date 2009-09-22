@@ -82,10 +82,10 @@
 
 		echo "<b>".t("K‰ytt‰j‰")." $selkuka ".t("poistettu")."!</b><br>";
 
-		$selkuka = $kukarow['tunnus'];		
+		$selkuka = $kukarow['tunnus'];
 		$tee = "";
 	}
-	
+
 	if ($tee == 'deloikeu') {
 		$query = "	UPDATE kuka
 					SET profiilit 	= '',
@@ -93,13 +93,13 @@
 					muutospvm		= now()
 					WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		$query = "DELETE from oikeu WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<b>".t("K‰ytt‰j‰n")." $selkuka ".t("k‰yttˆoikeudet")." ".t("poistettu")."!</b><br>";
-		
-		$selkuka = $kukarow['tunnus'];		
+
+		$selkuka = $kukarow['tunnus'];
 		$tee = "";
 	}
 
@@ -575,7 +575,7 @@
 			if ($krow["hinnat"] == -1) {
 				$sel2 = "SELECTED";
 			}
-			
+
 			echo "<tr><th align='left'>".t("Hinnat").":</th>";
 
 			echo "<td><select name='hinnat'>";
@@ -817,26 +817,29 @@
 
 			$sel=array();
 			$sel[$krow["naytetaan_asiakashinta"]] = "SELECTED";
+
 			echo "<tr><th align='left'>".t("N‰ytet‰‰n asiakashinta tuotehaussa").":</th>
 					<td><select name='naytetaan_asiakashinta'>
-					<option value=''  {$sel[""]}>".t("N‰ytet‰‰n tuotteen myyntihinta")."</option>
-					<option value='A' {$sel["A"]}>".t("N‰ytet‰‰n asiakashinta")."</option>
+					<option value=''>".t("N‰ytet‰‰n tuotteen myyntihinta")."</option>
+					<option value='A' $sel[A]>".t("N‰ytet‰‰n asiakashinta")."</option>
 					</select></td></tr>";
 
 			$sel=array();
 			$sel[$krow["naytetaan_tuotteet"]] = "SELECTED";
+
 			echo "<tr><th align='left'>".t("N‰ytett‰v‰t tuotteet tuotehaussa").":</th>
 					<td><select name='naytetaan_tuotteet'>
-					<option value=''  {$sel[""]}>".t("N‰ytet‰‰n kaikki tuotteet")."</option>
-					<option value='A' {$sel["A"]}>".t("N‰ytet‰‰n tuotteet joilla on asiakashinta tai asiakasale")."</option>
+					<option value=''>".t("N‰ytet‰‰n kaikki tuotteet")."</option>
+					<option value='A' $sel[A]>".t("N‰ytet‰‰n tuotteet joilla on asiakashinta tai asiakasale")."</option>
 					</select></td></tr>";
 
 			$sel=array();
 			$sel[$krow["naytetaan_tilaukset"]] = "SELECTED";
+
 			echo "<tr><th align='left'>".t("N‰ytett‰v‰t tilaukset verkkokaupassa").":</th>
 					<td><select name='naytetaan_tilaukset'>
-					<option value=''  {$sel[""]}>".t("N‰ytet‰‰n kaikki tilaukset")."</option>
-					<option value='O' {$sel["O"]}>".t("N‰ytet‰‰n vain omat tilaukset")."</option>
+					<option value=''>".t("N‰ytet‰‰n kaikki tilaukset")."</option>
+					<option value='O' $sel[O]>".t("N‰ytet‰‰n vain omat tilaukset")."</option>
 					</select></td></tr>";
 
 
@@ -905,7 +908,7 @@
 				echo "<td><select name='asema'><option value=''>".t("Ei asemaa")."</option>";
 
 				$vares = t_avainsana("KUKAASEMA");
-				
+
 				while ($varow = mysql_fetch_array($vares)) {
 					$sel='';
 					if ($varow['selite']==$krow["asema"]) $sel = 'selected';
@@ -1000,10 +1003,10 @@
 
 				$piirit = explode(',', $krow["piirit"]);
 
-				echo "<tr><th valign='top'>".t("Piirit").":</th><td>";
-				
+				echo "<tr><th valign='top'>".t("Rajaa asiakaspiirit joihin k‰ytt‰j‰ saa myyd‰").":<br>(".t("Ilman rajausta k‰ytt‰j‰ voi myyd‰ kaikkiin piireihin").")</th><td>";
+
 				$pres = t_avainsana("PIIRI");
-				
+
 				while ($prow = mysql_fetch_array($pres)) {
 
 					$chk = "";
@@ -1020,7 +1023,7 @@
 			echo "</td>";
 
 			if ($toim == 'extranet') {
-				$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='extranet_kayttajan_lisatiedot' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
+				$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='extranet_kayttajan_lisatiedot' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
 				$res = mysql_query($queryoik) or pupe_error($queryoik);
 				if (mysql_num_rows($res) > 0) {
 					require ("inc/extranet_kayttajan_lisatiedot.inc");
@@ -1056,12 +1059,12 @@
 					<input type='hidden' name='tee' value='deloikeu'>
 					<input type='submit' value='** ".t("Poista k‰ytt‰j‰n")." $selkukarow[nimi] ".t("k‰yttˆoikeudet")." **'>
 					</form>";
-					
+
 				echo "<form action='$PHP_SELF' method='post'>
 					<input type='hidden' name='selkuka' value='$selkukarow[kuka]'>
 					<input type='hidden' name='tee' value='deluser'>
 					<input type='submit' value='*** ".t("Poista k‰ytt‰j‰")." $selkukarow[nimi] ***'>
-					</form>";	
+					</form>";
 
 				echo "</td></tr></table>";
 			}
@@ -1085,27 +1088,27 @@
 		$query = "	SELECT kuka.nimi, kuka.kuka, kuka.tunnus, if(count(oikeu.tunnus) > 0, 0, 1) aktiivinen
 					FROM kuka
 					LEFT JOIN oikeu ON oikeu.yhtio=kuka.yhtio and oikeu.kuka=kuka.kuka
-					WHERE  kuka.yhtio = '$kukarow[yhtio]' 
+					WHERE  kuka.yhtio = '$kukarow[yhtio]'
 					and  kuka.extranet = '$extrsel'
 					GROUP BY 1,2,3
 					ORDER BY aktiivinen,  kuka.nimi";
 		$kukares = mysql_query($query) or pupe_error($query);
-		
+
 		echo "<optgroup label='".t("Aktiiviset k‰ytt‰j‰t")."'>";
 
 		$edakt = 0;
-		
+
 		while ($kurow=mysql_fetch_array($kukares)) {
 			if ($selkukarow["tunnus"] == $kurow["tunnus"]) $sel = "selected";
 			else $sel = "";
-			
+
 			if ($kurow["aktiivinen"] != $edakt) {
 				echo "</optgroup><optgroup label='".t("Poistetut k‰ytt‰j‰t")."'>";
 				$poislisa = "*";
 			}
-			
+
 			echo "<option value='$kurow[tunnus]' $sel>$poislisa $kurow[nimi] ($kurow[kuka])</option>";
-			
+
 			$edakt = $kurow["aktiivinen"];
 		}
 

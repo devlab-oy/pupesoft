@@ -1003,7 +1003,7 @@
 
 				$piirit = explode(',', $krow["piirit"]);
 
-				echo "<tr><th valign='top'>".t("Rajaa asiakaspiirit joihin käyttäjä saa myydä").":<br>(".t("Ilman rajausta käyttäjä voi myydä kaikkiin piireihin").")</th><td>";
+				echo "<tr><th valign='top'>".t("Valitse asiakaspiirit joihin käyttäjä saa myydä").":<br>(".t("Ilman rajausta käyttäjä voi myydä kaikkiin piireihin").")</th><td>";
 
 				$pres = t_avainsana("PIIRI");
 

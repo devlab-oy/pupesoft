@@ -2941,8 +2941,8 @@ if ($tee == '') {
 			if ($laskurow["varasto"] != 0) {
 				$varasto = (int) $laskurow["varasto"];
 			}
-			elseif ($kukarow["varasto"] != "") {
-//				$varasto = explode(",", $kukarow["varasto"]);
+			elseif ((int) $kukarow["varasto"] != 0) {
+				$varasto = explode(",", $kukarow["varasto"]);
 			}
 
 			//Ennakkotilauksen, Tarjoukset ja Ylläpitosopimukset eivät varaa saldoa

@@ -2942,7 +2942,7 @@ if ($tee == '') {
 				$varasto = (int) $laskurow["varasto"];
 			}
 			elseif ($kukarow["varasto"] != "") {
-				$varasto = explode(",", $kukarow["varasto"]);
+//				$varasto = explode(",", $kukarow["varasto"]);
 			}
 
 			//Ennakkotilauksen, Tarjoukset ja Ylläpitosopimukset eivät varaa saldoa

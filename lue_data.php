@@ -154,7 +154,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$taulucmp1 = preg_replace("/__[0-9]*$/", "", $taulu);
 					$taulucmp2 = preg_replace("/__[0-9]*$/", "", $taulut[$excej]);
 
-					if (in_array($headers[$excej], $joinit) and $taulucmp1 != $taulucmp2) {
+					if (in_array($headers[$excej], $joinit) and $taulucmp1 != $taulucmp2 and $taulut[$excej] == $joinattavat[$taulu][$headers[$excej]]) {
 						$taulunrivit[$taulu][$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
 					}
 				}
@@ -178,7 +178,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$taulucmp1 = preg_replace("/__[0-9]*$/", "", $taulu);
 					$taulucmp2 = preg_replace("/__[0-9]*$/", "", $taulut[$excej]);
 
-					if (in_array($headers[$i], $joinit) and $taulucmp1 != $taulucmp2) {
+					if (in_array($headers[$excej], $joinit) and $taulucmp1 != $taulucmp2 and $taulut[$excej] == $joinattavat[$taulu][$headers[$excej]]) {
 						$taulunrivit[$taulu][$excei][] = trim($rivi[$excej]);
 					}
 				}
@@ -213,7 +213,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	exit;
 	*/
 
-	foreach ($taulunrivit as $taulu => $rivit) {
+	foreach ($taulunrivit as $taulu => &$rivit) {
 
 		$vikaa			= 0;
 		$tarkea			= 0;
@@ -222,6 +222,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		$lask			= 0;
 		$postoiminto	= 'X';
 		$table_mysql 	= "";
+		$tarkyhtio		= "";
+		$tarkylisa 		= 1;
 		$indeksi		= array();
 		$indeksi_where	= array();
 		$trows			= array();
@@ -446,6 +448,70 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				}
 				elseif ($table_mysql == 'tuotepaikat' and $taulunotsikot[$taulu][$j] == "OLETUS") {
 					//ei haluta tätä tänne
+				}
+				elseif ($table_mysql == 'asiakas' and strtoupper(trim($rivi[$postoiminto])) == 'LISAA' and $taulunotsikot[$taulu][$j] == "YTUNNUS" and $rivi[$j] == "AUTOM") {
+					
+					if ($yhtiorow["asiakasnumeroinnin_aloituskohta"] != "") {
+						$apu_asiakasnumero = $yhtiorow["asiakasnumeroinnin_aloituskohta"];
+					}
+					else {
+						$apu_asiakasnumero = 0;
+					}
+
+					//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
+					if ($tarkyhtio == "") {
+						$query = "	SELECT *
+									FROM yhtio 
+									JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
+									where konserni = '$yhtiorow[konserni]' 
+									and synkronoi like '%asiakas%'";
+						$vresult = mysql_query($query) or pupe_error($query);
+
+						if (mysql_num_rows($vresult) > 0) {
+							// haetaan konsernifirmat
+							$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
+										FROM yhtio 
+										JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
+										where konserni = '$yhtiorow[konserni]' 
+										and synkronoi like '%asiakas%'";
+							$vresult = mysql_query($query) or pupe_error($query);
+							$srowapu = mysql_fetch_array($vresult);
+							$tarkyhtio = $srowapu["yhtiot"];
+						}
+						else {
+							$tarkyhtio = "'$kukarow[yhtio]'";
+						}
+					}
+								
+					$query = "	SELECT MAX(asiakasnro+0) asiakasnro
+								FROM asiakas USE INDEX (asno_index)
+								WHERE yhtio in ($tarkyhtio)
+								AND asiakasnro+0 >= $apu_asiakasnumero";
+					$vresult = mysql_query($query) or pupe_error($query);
+					$vrow = mysql_fetch_assoc($vresult);
+
+					if ($vrow['asiakasnro'] != '') {
+						$apu_ytunnus = $vrow['asiakasnro'] + $tarkylisa;
+						$tarkylisa++;
+					}
+					else {
+						$apu_ytunnus = $tarkylisa;
+						$tarkylisa++;
+					}
+										
+					// Päivitetään generoitu arvo kaikkiin muuttujiin...
+					$taulunrivit[$taulu][$eriviindex][$j] = $rivit[$eriviindex][$j] = $rivi[$j] = $apu_ytunnus;
+															
+					foreach ($taulunotsikot as $autotaulu => $autojoinit) {
+						$taulucmp1 = preg_replace("/__[0-9]*$/", "", $autotaulu);
+						$taulucmp2 = preg_replace("/__[0-9]*$/", "", $taulut[$excej]);
+
+						if (in_array("YTUNNUS", $joinit) and $taulucmp1 != $taulucmp2 and $taulu == $joinattavat[$autotaulu]["YTUNNUS"]) {
+							$taulunrivit[$autotaulu][$eriviindex][array_search("YTUNNUS", $taulunotsikot[$autotaulu])] = $apu_ytunnus;
+						}
+					}
+
+					$valinta .= " and ".$taulunotsikot[$taulu][$j]."='$apu_ytunnus'";					
 				}
 				else {
 					$valinta .= " and ".$taulunotsikot[$taulu][$j]."='".trim($rivi[$j])."'";

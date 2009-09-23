@@ -1133,8 +1133,11 @@ if (!function_exists('rivi_hinta_ale')) {
 		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"]), $norm);
 		$pdf->draw_text(465-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"]), 				$thispage, $norm);
 
-		$oikpos = $pdf->strlen(($row["ale"]*1)."%", $norm);
-		$pdf->draw_text(495-$oikpos, $kala, ($row["ale"]*1)."%", 							$thispage, $norm);
+		
+		list($ff_string, $ff_font) = pdf_fontfit(($row["ale"]*1)."%", 25, $pdf, $norm);
+		
+		$oikpos = $pdf->strlen($ff_string, $ff_font);
+		$pdf->draw_text(495-$oikpos, $kala, $ff_string, $thispage, $ff_font);
 
 		if ($yhtiorow["alv_kasittely"] != '') {
 			$row["alv"] = "0";
@@ -1146,7 +1149,7 @@ if (!function_exists('rivi_hinta_ale')) {
 		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
 		$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), 			$thispage, $norm);
 
-		if ($pdf->strlen($row["nimitys"], $norm) >= 135) {
+		if ($pdf->strlen($row["nimitys"], $norm) >= 130) {
 			$kala = $kala - $rivinkorkeus;
 		}
 

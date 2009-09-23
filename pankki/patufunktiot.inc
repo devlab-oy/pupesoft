@@ -247,12 +247,12 @@ function salaa ($jono, $arg, $kayttoavain) {
 function tiiviste ($jono, $kertaavain) {
 
 	//Poistetaan loppu whitespace
-	$uusijono='';
-	$puhdasjono = array_map('rtrim', $jono);
-	foreach ($puhdasjono as $rivi) {
+	$uusijono="";
+	foreach ($jono as $rivi) {
 		//echo "'$rivi'<br>";
-		$uusijono .= $rivi;
+		$uusijono .= rtrim($rivi);
 	}
+
 	$oikeat = array("Ä", "Ö", "Å", "ä", "ö", "å");
 	$pankin = array(" ", " ", " ", " ", " ", " ");
 	$uusijono = str_replace($oikeat, $pankin, $uusijono);

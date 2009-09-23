@@ -26,17 +26,17 @@
 	echo "<tr><td class='back'>".t("ja/tai")."...</td></tr>";
 
 	echo "<tr><th>".t("Anna alkuvarastopaikka:")."</th>
-	<td><input type='text' size='6' name='ahyllyalue'>
-	<input type='text' size='6' name='ahyllynro'>
-	<input type='text' size='6' name='ahyllyvali'>
-	<input type='text' size='6' name='ahyllytaso'>
+	<td><input type='text' size='6' maxlength='5' name='ahyllyalue'>
+	<input type='text' size='6' maxlength='5' name='ahyllynro'>
+	<input type='text' size='6' maxlength='5' name='ahyllyvali'>
+	<input type='text' size='6' maxlength='5' name='ahyllytaso'>
 	</td></tr>";
 
 	echo "<tr><th>".t("ja loppuvarastopaikka:")."</th>
-	<td><input type='text' size='6' name='lhyllyalue'>
-	<input type='text' size='6' name='lhyllynro'>
-	<input type='text' size='6' name='lhyllyvali'>
-	<input type='text' size='6' name='lhyllytaso'>
+	<td><input type='text' size='6' maxlength='5' name='lhyllyalue'>
+	<input type='text' size='6' maxlength='5' name='lhyllynro'>
+	<input type='text' size='6' maxlength='5' name='lhyllyvali'>
+	<input type='text' size='6' maxlength='5' name='lhyllytaso'>
 	</td></tr>";
 
 	echo "<tr><td class='back'>".t("ja/tai")."...</td></tr>";
@@ -327,7 +327,7 @@
 		$sorttauskentan_jarjestys sorttauskentta";
 		$groupby = " tuote.tuoteno, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, varastopaikka, inventointiaika, tuotepaikat.saldo ";
 
-		if(($tryt != '' and $osastot != '') or ($ahyllyalue != '' and $lhyllyalue != '') or ($toimittaja != '') or ($tuotemerkki != '')) {
+		if (($tryt != '' and $osastot != '') or ($ahyllyalue != '' and $lhyllyalue != '') or ($toimittaja != '') or ($tuotemerkki != '')) {
 			///* Inventoidaan *///
 
 			//n‰ytet‰‰n vain $top myydyint‰ tuotetta

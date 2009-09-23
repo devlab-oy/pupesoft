@@ -33,8 +33,17 @@ else {
 
 	// jos login ok kokeillaan uploadata
 	if ($login_result) {
-		$upload = ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
-		if($upload === TRUE and $renameftpfile!="") {
+
+		ftp_pasv($conn_id, false);
+		$upload = @ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
+
+		// kokeillaan passiivista siirtoa jos aktiivi feilaa
+		if ($upload === FALSE) {
+			ftp_pasv($conn_id, true);
+			$upload = ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
+		}
+
+		if ($upload === TRUE and $renameftpfile != "") {
 			$renameftpfile = basename($renameftpfile);
 			$rename = ftp_rename($conn_id, $ftppath.$filenimi, $ftppath.$renameftpfile);
 		}

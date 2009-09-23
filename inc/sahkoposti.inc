@@ -9,7 +9,7 @@
 
 	$varaposti = '';
 
-	$subject = utf8_encode("$yhtiorow[nimi] - $kutsu");
+	$subject = "$yhtiorow[nimi] - $kutsu";
 
 	if (substr($komento,0,12) == 'asiakasemail') {
 		$varaposti = $kukarow['eposti'];

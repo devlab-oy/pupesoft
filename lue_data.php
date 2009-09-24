@@ -187,7 +187,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		}
 		fclose($file);
 	}
-
+	
 	/*
 	foreach ($taulunrivit as $taulu => $rivit) {
 
@@ -213,8 +213,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	exit;
 	*/
 
-	foreach ($taulunrivit as $taulu => &$rivit) {
-
+	$taulunrivit_keys = array_keys($taulunrivit);
+			
+	for ($tril = 0; $tril < count($taulunrivit); $tril++) {
+		
+		$taulu = $taulunrivit_keys[$tril];
+		$rivit = $taulunrivit[$taulu];
+		
 		$vikaa			= 0;
 		$tarkea			= 0;
 		$wheretarkea	= 0;

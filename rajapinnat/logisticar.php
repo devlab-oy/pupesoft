@@ -7,20 +7,20 @@
 	if ($argv[1] == '') {
 		die("Yhtiˆ on annettava!!");
 	}
-	
+
 	$yhtio = $argv[1];
 
 	require('/var/www/html/pupesoft/inc/connect.inc');
 	require('/var/www/html/pupesoft/inc/functions.inc');
 
 	$path = "/tmp/logisticar_siirto_$yhtio/";
-	
+
 	// Sivotaan eka vanha pois
 	system("rm -rf $path");
-	
+
 	// Teh‰‰n uysi dirikka
 	system("mkdir $path");
-	
+
 	$path_nimike     = $path . 'ITEM.txt';
 	$path_asiakas    = $path . 'CUSTOMER.txt';
 	$path_toimittaja = $path . 'VENDOR.txt';
@@ -45,7 +45,7 @@
 	else {
 		$lisavarattu = " not in ('P','J','S') ";
 	}
-	
+
 	echo "Logisticar siirto: $yhtio\n";
 
 	//testausta varten limit
@@ -58,15 +58,19 @@
 	varasto($limit);
 	varastotapahtumat($limit);
 	myynti($limit);
-	
-	//Siirret‰‰n failit logisticar palvelimelle	
+
+	//Siirret‰‰n failit logisticar palvelimelle
 	siirto($path);
 
 	function siirto ($path) {
-		GLOBAL $host_logisticar, $user_logisticar, $pass_logisticar, $path_logisticar;
-		
-		$path_localdir 	= "/mnt/logisticar_siirto/";
-		
+		GLOBAL $logisticar, $yhtio;
+
+		$path_localdir 	 = "/mnt/logisticar_siirto/";
+		$user_logisticar = $logisticar[$yhtio]["user"];
+		$pass_logisticar = $logisticar[$yhtio]["pass"];
+		$host_logisticar = $logisticar[$yhtio]["host"];
+		$path_logisticar = $logisticar[$yhtio]["path"];
+
 		unset($retval);
 		system("mount -t cifs -o username=$user_logisticar,password=$pass_logisticar //$host_logisticar/$path_logisticar $path_localdir", $retval);
 
@@ -74,29 +78,31 @@
 			echo "Mount failed! $retval\n";
 		}
 		else {
-		
+
 			unset($retval);
 			system("cp -f $path/* $path_localdir", $retval);
-		
+
 			if ($retval != 0) {
 				echo "Copy failed! $retval\n";
 			}
 
 			unset($retval);
 			system("umount $path_localdir", $retval);
-		
+
 			if ($retval != 0) {
 				echo "Unmount failed! $retval\n";
 			}
 		}
 	}
-	
+
 	function nimike($limit = '') {
-		global $path_nimike, $yhtio, $where_logisticar;
+		global $path_nimike, $yhtio, $logisticar;
+
+		$where_logisticar = $logisticar[$yhtio]["where"];
 
 		echo "Tuotteet ...";
 
-		$query = "	SELECT 
+		$query = "	SELECT
 					tuote.tuoteno        	nimiketunnus,
         			tuote.nimitys           nimitys,
 			        tuote.yksikko           yksikko,
@@ -113,11 +119,11 @@
 			        FROM tuote
 			        LEFT JOIN avainsana ON avainsana.selite=tuote.try and avainsana.yhtio=tuote.yhtio
 					LEFT JOIN kuka ON kuka.myyja=tuote.ostajanro and kuka.yhtio=tuote.yhtio and kuka.myyja > 0
-					WHERE tuote.yhtio='$yhtio' 
+					WHERE tuote.yhtio='$yhtio'
 					$limit";
 		$rest = mysql_query($query) or pupe_error($query);
 		$rows = mysql_num_rows($rest);
-		
+
 		if ($rows == 0) {
 			echo "Yht‰‰n tuotetta ei lˆytynyt $query\n";
 			die();
@@ -150,8 +156,8 @@
 			// mones t‰m‰ on
 			$row++;
 
-			$query = "	SELECT 
-						liitostunnus toimittajatunnus, 
+			$query = "	SELECT
+						liitostunnus toimittajatunnus,
 						toim_tuoteno toimittajannimiketunnus
 						FROM tuotteen_toimittajat
 						WHERE tuoteno = '{$tuote['tuoteno']}'
@@ -163,16 +169,16 @@
 			if (trim($tuote['varastoimiskoodi']) != '') {
 				// tuotetta ei varastoida
 				$tuote['varastoimiskoodi'] = '0';
-			} 
+			}
 			else {
 				$tuote['varastoimiskoodi'] = '1';
 			}
 
-			$query = "	SELECT hyllyalue, hyllynro 
-						from tuotepaikat 
-						where tuoteno='{$tuote['tuoteno']}' 
-						and oletus != '' 
-						and yhtio='$yhtio' 
+			$query = "	SELECT hyllyalue, hyllynro
+						from tuotepaikat
+						where tuoteno='{$tuote['tuoteno']}'
+						and oletus != ''
+						and yhtio='$yhtio'
 						limit 1";
 			$res = mysql_query($query) or pupe_error($query);
 			$paikka = mysql_fetch_assoc($res);
@@ -181,7 +187,7 @@
 			$tuote['varastotunnus'] 			= kuuluukovarastoon($paikka['hyllyalue'], $paikka['hyllynro']);
 			$tuote['toimittajatunnus'] 			= $tuot_toim_row['toimittajatunnus'];
 			$tuote['toimittajannimiketunnus'] 	= $tuot_toim_row['toimittajannimiketunnus'];
-			
+
 			$data = array_merge($headers, $tuote);
 			$data = implode("\t", $data);
 
@@ -206,15 +212,17 @@
 	}
 
 	function asiakas($limit = '') {
-		global $path_asiakas, $yhtio, $where_logisticar;
+		global $path_asiakas, $yhtio, $logisticar;
+
+		$where_logisticar = $logisticar[$yhtio]["where"];
 
 		echo "Asiakkaat...";
 
-		$query = "	SELECT 
-					asiakas.tunnus		asiakastunnus, 
-					concat_ws(' ', asiakas.nimi, asiakas.nimitark)	asiakkaannimi, 
-					asiakas.ryhma		asiakasryhma, 
-					kuka.kuka 			myyjatunnus 
+		$query = "	SELECT
+					asiakas.tunnus		asiakastunnus,
+					concat_ws(' ', asiakas.nimi, asiakas.nimitark)	asiakkaannimi,
+					asiakas.ryhma		asiakasryhma,
+					kuka.kuka 			myyjatunnus
 					FROM asiakas
 					LEFT JOIN kuka ON kuka.myyja=asiakas.myyjanro and kuka.yhtio=asiakas.yhtio and kuka.myyja > 0
 					where asiakas.yhtio='$yhtio'
@@ -267,14 +275,16 @@
 	}
 
 	function toimittaja($limit = '') {
-		global $path_toimittaja, $yhtio, $where_logisticar;
+		global $path_toimittaja, $yhtio, $logisticar;
+
+		$where_logisticar = $logisticar[$yhtio]["where"];
 
 		echo "Toimittajat...";
-		
-		$query = "	SELECT 
-					tunnus							toimittajatunnus, 
+
+		$query = "	SELECT
+					tunnus							toimittajatunnus,
 					concat_ws(' ', nimi, nimitark)	toimittajannimi
-					from toimi 
+					from toimi
 					where yhtio='$yhtio'
 					$limit";
 		$rest = mysql_query($query) or pupe_error($query);
@@ -297,7 +307,7 @@
 
 		while ($toimittaja = mysql_fetch_assoc($rest)) {
 			$row++;
-				
+
 			$data = array_merge($headers, $toimittaja);
 			$data = implode("\t", $data);
 
@@ -322,18 +332,20 @@
 	}
 
 	function varasto($limit = '') {
-		global $path_varasto, $lisavarattu, $yhtio, $where_logisticar;
+		global $path_varasto, $lisavarattu, $yhtio, $logisticar;
+
+		$where_logisticar = $logisticar[$yhtio]["where"];
 
 		echo "Varasto... ";
-		
+
 		$fp = fopen($path_varasto, 'w+');
 
-		$query = "	SELECT 
-					tuotepaikat.tuoteno nimiketunnus, 					
+		$query = "	SELECT
+					tuotepaikat.tuoteno nimiketunnus,
 					sum(tuotepaikat.saldo) saldo,
-					tuote.kehahin keskihinta, 		
+					tuote.kehahin keskihinta,
 					'0' tilattu,
-					'0' varattu,					
+					'0' varattu,
 					varastopaikat.tunnus varastotunnus,
 					(SELECT tuotteen_toimittajat.toimitusaika FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = '$yhtio' AND tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno AND tuotteen_toimittajat.toimitusaika != '' LIMIT 1) toimitusaika
 					FROM tuotepaikat
@@ -372,7 +384,7 @@
 
 		while ($trow = mysql_fetch_assoc($res)) {
 			$row++;
-			
+
 			$query = "	SELECT
 						sum(if(tilausrivi.tyyppi='O', tilausrivi.varattu, 0)) tilattu,
 						sum(if((tilausrivi.tyyppi='L' or tilausrivi.tyyppi='V') and tilausrivi.var $lisavarattu, tilausrivi.varattu, 0)) varattu
@@ -402,8 +414,6 @@
 			for ($i=0; $i < (int) $progress; $i++) {
 				$hash .= "#";
 			}
-
-//			echo sprintf("%s  |%-40s|\r", $str, $hash);
 		}
 
 		fclose($fp);
@@ -411,14 +421,16 @@
 	}
 
 	function varastotapahtumat($limit = '') {
-		global $path_tapahtumat, $yhtio, $where_logisticar;
+		global $path_tapahtumat, $yhtio, $logisticar;
+
+		$where_logisticar = $logisticar[$yhtio]["where"];
 
 		echo "Varastotapahtumat... ";
-		
+
 		if (! $fp = fopen($path_tapahtumat, 'w+')) {
 			die("Ei voitu avata filea $path_tapahtumat");
 		}
-		
+
 		if ($where_logisticar["paiva_ajo"] != "") {
 			$pvmlisa = " and tilausrivi.laskutettuaika >= date_sub(now(), interval 30 day) ";
 		}
@@ -426,17 +438,17 @@
 			$pvmlisa = " and tilausrivi.laskutettuaika > '0000-00-00' ";
 		}
 
-	    $query = "	SELECT 
+	    $query = "	SELECT
 					tilausrivi.tuoteno 			nimiketunnus,
 					lasku.liitostunnus          asiakastunnus,
 					lasku.liitostunnus			toimitusasiakas,
 					tilausrivi.laskutettuaika   tapahtumapaiva,
 					tilausrivi.tyyppi           tapahtumalaji,
 					tilausrivi.rivihinta        myyntiarvo,
-					tilausrivi.rivihinta        ostoarvo,					
-					tilausrivi.kate             kate,					
+					tilausrivi.rivihinta        ostoarvo,
+					tilausrivi.kate             kate,
 					tilausrivi.kpl              tapahtumamaara,
-					lasku.laskunro              laskunumero,					
+					lasku.laskunro              laskunumero,
 					kuka.kuka	                myyjatunnus,
 					lasku.yhtio_toimipaikka		toimipaikka,
 					varastopaikat.tunnus        varastotunnus,
@@ -446,10 +458,10 @@
 					LEFT JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.tuoteno=tilausrivi.tuoteno and tuotepaikat.hyllyvali=tilausrivi.hyllyvali and tuotepaikat.hyllytaso=tilausrivi.hyllytaso AND tilausrivi.hyllyalue=tuotepaikat.hyllyalue and tilausrivi.hyllynro=tuotepaikat.hyllynro and tilausrivi.yhtio=tuotepaikat.yhtio
 					LEFT JOIN varastopaikat ON
 					concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
-					concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))	            
+					concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 					and varastopaikat.yhtio=tuotepaikat.yhtio
 					LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
-					WHERE tilausrivi.tyyppi IN ('L', 'O') 
+					WHERE tilausrivi.tyyppi IN ('L', 'O')
 					$pvmlisa
 					and tilausrivi.yhtio = '$yhtio'
 					ORDER BY tilausrivi.laskutettuaika
@@ -476,7 +488,7 @@
 			'myyjatunnus'     => null,
 			'toimipaikka'	  => null,
 			'varastotunnus'   => null,
-			'tapahtumatyyppi' => null			
+			'tapahtumatyyppi' => null
 		);
 
 		// tehd‰‰n otsikot
@@ -548,15 +560,17 @@
 	}
 
 	function myynti($limit = '') {
-		global $path_myynti, $yhtiorow, $yhtio, $where_logisticar;
+		global $path_myynti, $yhtiorow, $yhtio, $logisticar;
+
+		$where_logisticar = $logisticar[$yhtio]["where"];
 
 		echo "Myynnit... ";
-		
+
 		if (! $fp = fopen($path_myynti, 'w+')) {
 			die("Ei voitu avata filea $path_myynti");
 		}
 
-	    $query = "	SELECT 
+	    $query = "	SELECT
 					tilausrivi.tuoteno nimiketunnus,
 					lasku.liitostunnus asiakastunnus,
 					lasku.liitostunnus toimitusasiakas,
@@ -564,11 +578,11 @@
 					tilausrivi.tyyppi tapahtumalaji,
 					round(tilausrivi.hinta  / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)), $yhtiorow[hintapyoristys]) myyntiarvo,
 					(tilausrivi.varattu+tilausrivi.jt) * tuote.kehahin ostoarvo,
-					tilausrivi.varattu tapahtumamaara,				
+					tilausrivi.varattu tapahtumamaara,
 					lasku.tunnus tilausnro,
-					kuka.kuka myyjatunnus,					
+					kuka.kuka myyjatunnus,
 					lasku.yhtio_toimipaikka	toimipaikka,
-					varastopaikat.tunnus varastotunnus										
+					varastopaikat.tunnus varastotunnus
 					FROM tilausrivi
 					JOIN lasku USE INDEX (PRIMARY) ON lasku.tunnus=tilausrivi.otunnus and lasku.yhtio=tilausrivi.yhtio
 					JOIN tuote ON tuote.tuoteno = tilausrivi.tuoteno and tuote.yhtio = tilausrivi.yhtio
@@ -580,7 +594,7 @@
 					LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
 					WHERE tilausrivi.varattu != 0
 					AND tilausrivi.tyyppi IN ('L','O')
-					AND tilausrivi.laskutettuaika = '0000-00-00' 
+					AND tilausrivi.laskutettuaika = '0000-00-00'
 					AND tilausrivi.yhtio = '$yhtio'
 					ORDER BY tilausrivi.laadittu
 					$limit";
@@ -605,7 +619,7 @@
 			'tilausnro'       => null,
 			'myyjatunnus'     => null,
 			'toimipaikka'	  => null,
-			'varastotunnus'   => null						
+			'varastotunnus'   => null
 		);
 
 		// tehd‰‰n otsikot
@@ -623,7 +637,7 @@
 					$trow['myyntiarvo'] 	= 0;
 					break;
 			}
-			
+
 			$data = array_merge($headers, $trow);
 			$data = implode("\t", $data);
 

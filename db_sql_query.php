@@ -99,15 +99,21 @@
 			}
 
 			asort($jarjestys);
-			$jlask = 1;
-			foreach($jarjestys as $kentta => $jarj) {
+
+			foreach ($jarjestys as $kentta => $jarj) {
 				if ($jarj != "") {
-					$order .= ", $jlask";				
+					// katotaan monesko tää oli alkuperäsessä listassa
+					$looppi_apu = 1;
+					foreach ($kentat as $kala1 => $kala2) {
+						if ($kala1 == $kentta) {
+							break;
+						}
+						$looppi_apu++;
+					}
+					$order .= ", $looppi_apu";
 				}
-				
-				if (in_array($kentta, $kentat)) $jlask++;
 			}
-			
+
 			$selecti  = "";
 			$selecti2 = "";
 			

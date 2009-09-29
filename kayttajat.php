@@ -143,6 +143,7 @@
 			$phonenum 						= $monta['puhno'];
 			$email 							= $monta['eposti'];
 			$lang 							= $monta['kieli'];
+			$ip								= $monta['ip'];
 			$taso 							= $monta['taso'];
 			$hinta 							= $monta['hinnat'];
 			$saatavat 						= $monta['saatavat'];
@@ -196,6 +197,7 @@
 						puhno 							= '$phonenum',
 						eposti 							= '$email',
 						kieli 							= '$lang',
+						ip								= '$ip',
 						taso 							= '$taso',
 						hinnat							= '$hinta',
 						saatavat						= '$saatavat',
@@ -357,6 +359,7 @@
 						puhno 			= '$phonenum',
 						eposti 			= '$email',
 						kieli 			= '$lang',
+						ip				= '$ip',
 						taso 			= '$taso',
 						hinnat			= '$hinnat',
 						saatavat		= '$saatavat',
@@ -489,12 +492,13 @@
 			else {
 				echo "<input type='hidden' name='tee' value='UUSI'>";
 				echo "<tr><th align='left'>".t("Käyttäjätunnus").":</th>
-				<td><input type='text' size='50' maxlenght='10' name='ktunnus'></td></tr>";
+				<td><input type='text' size='50' maxlength='10' name='ktunnus'></td></tr>";
 			}
-			echo "<tr><th align='left'>".t("Salasana").":</th><td><input type='text' size='50' maxlenght='30' name='password' value='$generoitupass'></td><td class='back'> <a href='?generatepass=y&selkuka=$selkuka&toim=$toim'>".t("Generoi salasana")."</a></td></tr>";
-			echo "<tr><th align='left'>".t("Nimi").":</th><td><input type='text' size='50' value='$krow[nimi]' maxlenght='30' name='firname'></td></tr>";
-			echo "<tr><th align='left'>".t("Puhelinnumero").":</th><td><input type='text' size='50' value='$krow[puhno]' maxlenght='30' name='phonenum'></td></tr>";
-			echo "<tr><th align='left'>".t("Sähköposti").":&nbsp;</th><td><input type='text' size='50' value='$krow[eposti]' maxlenght='50' name='email'></td></tr>";
+			echo "<tr><th align='left'>".t("Salasana").":</th><td><input type='text' size='50' maxlength='30' name='password' value='$generoitupass'></td><td class='back'> <a href='?generatepass=y&selkuka=$selkuka&toim=$toim'>".t("Generoi salasana")."</a></td></tr>";
+			echo "<tr><th align='left'>".t("Nimi").":</th><td><input type='text' size='50' value='$krow[nimi]' maxlength='30' name='firname'></td></tr>";
+			echo "<tr><th align='left'>".t("Puhelinnumero").":</th><td><input type='text' size='50' value='$krow[puhno]' maxlength='30' name='phonenum'></td></tr>";
+			echo "<tr><th align='left'>".t("Sähköposti").":&nbsp;</th><td><input type='text' size='50' value='$krow[eposti]' maxlength='50' name='email'></td></tr>";
+			if ($toim == 'extranet') echo "<tr><th align='left'>".t("IP").":&nbsp;</th><td><input type='text' size='16' value='$krow[ip]' maxlength='15' name='ip'></td></tr>";
 			echo "<tr><th align='left'>".t("Kieli").":&nbsp;</th><td><select name='lang'>";
 
 			$query  = "show columns from sanakirja";

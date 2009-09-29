@@ -1,7 +1,11 @@
 <?php
 	require ("inc/parametrit.inc");
 
-	echo "<font class='head'>".t("K‰ytt‰j‰hallinta").":</font><hr>";
+	echo "<font class='head'>";
+	if ($toim == 'extranet') {
+		echo "Extranet-";
+	}
+	echo t("K‰ytt‰j‰hallinta"),":</font><hr>";
 
 	// t‰‰ on t‰ll‰n‰n kikka.. ‰lk‰‰ seotko.. en jaksa pyˆritt‰‰ toimia joka formista vaikka pit‰s..
 	$PHP_SELF = $PHP_SELF."?toim=$toim";
@@ -511,7 +515,7 @@
 						$sel = "selected";
 					}
 					if ($apurow[0] != "tunnus") {
-						$query = "select distinct nimi from maat where koodi='$apurow[0]'";
+						$query = "SELECT distinct nimi from maat where koodi='$apurow[0]'";
 						$maare = mysql_query($query);
 						$maaro = mysql_fetch_array($maare);
 						$maa   = strtolower($maaro["nimi"]);
@@ -663,7 +667,7 @@
 				echo "<input type='checkbox' name='varasto[]' value='$varow[tunnus]' $sel> $varow[nimitys] $eri<br>";
 			}
 
-			echo "</td><td class='back'>Ilman rajausta saa myyd‰ kaikista normaalivarastoista</td></tr>";
+			echo "</td><td class='back'>",t("Ilman rajausta saa myyd‰ kaikista normaalivarastoista"),"</td></tr>";
 
 			if ($toim != 'extranet' and $yhtiorow['pakkaamolokerot'] == 'K') {
 				echo "<tr><th align='left'>".t("Oletus pakkaamo").":</td>";

@@ -50,7 +50,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				else {
 					$pakolliset = array("YTUNNUS");
 				}
-				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");				
+				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 			case "toimi" :
 				$pakolliset = array("YTUNNUS");
@@ -99,8 +99,9 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				break;
 			case "avainsana" :
 				$pakolliset = array("LAJI","SELITE");
-				$wherelliset = array("LAJI","SELITE","SELITETARK","SELITETARK_2");
+				$wherelliset = array("LAJI","SELITE","SELITETARK","SELITETARK_2","KIELI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				$joinattavat = array("PERHE" => "avainsana");
 				break;
 			case "tuoteperhe" :
 				$pakolliset  = array("ISATUOTENO","TUOTENO","TYYPPI");

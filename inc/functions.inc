@@ -4636,8 +4636,16 @@ if (!function_exists("js_popup")) {
 	// scripti balloonien tekemiseen
 	function js_popup () {
 
+	echo "<script type='text/javascript' language='javascript'>";
+
+	if (file_exists("inc/jquery.min.js")) {
+		require("inc/jquery.min.js");
+	}
+	else {
+		require("jquery.min.js");
+	}
+
 ?>
-<script type="text/javascript" language="JavaScript">
 
 	jQuery.fn.tooltip = function(allowHtml, className){
 		jQuery.fn.tooltip.created.id = 'toolTip';

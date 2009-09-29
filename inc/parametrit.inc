@@ -455,13 +455,6 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 				echo "<style type='text/css'>";
 				echo $css;
 				echo "</style>";
-
-				if (@fopen($palvelin2."inc/jquery.min.js", "r")) {
-					echo "<script src='".$palvelin2."inc/jquery.min.js' type='text/javascript'></script>";
-				}
-				else {
-					echo "<script src='".$palvelin2."jquery.min.js' type='text/javascript'></script>";
-				}
 			}
 
 			echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";

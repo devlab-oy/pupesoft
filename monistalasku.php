@@ -485,6 +485,7 @@ if ($tee == 'MONISTA') {
 					case 'viite':
 					case 'laskunro':
 					case 'mapvm':
+					case 'clearing':
 					case 'tilausvahvistus':
 					case 'viikorkoeur':
 					case 'tullausnumero':

@@ -852,54 +852,54 @@
 				$workbook->setVersion(8);
 				$worksheet =& $workbook->addWorksheet('Sheet 1');
 
-				$format_bold =& $workbook->addFormat();
-				$format_bold->setBold();
-
-				$format_center =& $workbook->addFormat();
-				$format_center->setBold();
-				$format_center->setHAlign('left');
-
-				$workbook->setCustomColor(12, 255, 255, 0);
-				$format_bg_yellow =& $workbook->addFormat();
-				$format_bg_yellow->setFgColor(12);
-				$format_bg_yellow->setPattern(1);
-
-				$format_bg_yellow_text_red =& $workbook->addFormat();
-				$format_bg_yellow_text_red->setFgColor(12);
-				$workbook->setCustomColor(17, 255, 0, 0);
-				$format_bg_yellow_text_red->setColor(17);
-				$format_bg_yellow_text_red->setPattern(1);
-
-				$workbook->setCustomColor(13, 200, 100, 180);
-				$format_bg_magenta =& $workbook->addFormat();
-				$format_bg_magenta->setFgColor(13);
-				$format_bg_magenta->setPattern(1);
-
-				$format_bg_magenta_text_red =& $workbook->addFormat();
-				$format_bg_magenta_text_red->setFgColor(13);
-				$format_bg_magenta_text_red->setColor(17);
-				$format_bg_magenta_text_red->setPattern(1);
-
-				$workbook->setCustomColor(14, 150, 255, 170);
-				$format_bg_green =& $workbook->addFormat();
-				$format_bg_green->setFgColor(14);
-				$format_bg_green->setPattern(1);
-
-				$workbook->setCustomColor(15, 255, 170, 70);
-				$format_bg_brown =& $workbook->addFormat();
-				$format_bg_brown->setFgColor(15);
-				$format_bg_brown->setPattern(1);
-
-				$workbook->setCustomColor(16, 200, 200, 200);
-				$format_bg_grey =& $workbook->addFormat();
-				$format_bg_grey->setFgColor(16);
-				$format_bg_grey->setPattern(1);
-
-				$workbook->setCustomColor(18, 255, 255, 255);
-				$format_bg_text_red =& $workbook->addFormat();
-				$format_bg_text_red->setFgColor(18);
-				$format_bg_text_red->setColor(17);
-				$format_bg_text_red->setPattern(1);
+				// $format_bold =& $workbook->addFormat();
+				// $format_bold->setBold();
+				// 
+				// $format_center =& $workbook->addFormat();
+				// $format_center->setBold();
+				// $format_center->setHAlign('left');
+				// 
+				// $workbook->setCustomColor(12, 255, 255, 0);
+				// $format_bg_yellow =& $workbook->addFormat();
+				// $format_bg_yellow->setFgColor(12);
+				// $format_bg_yellow->setPattern(1);
+				// 
+				// $format_bg_yellow_text_red =& $workbook->addFormat();
+				// $format_bg_yellow_text_red->setFgColor(12);
+				// $workbook->setCustomColor(17, 255, 0, 0);
+				// $format_bg_yellow_text_red->setColor(17);
+				// $format_bg_yellow_text_red->setPattern(1);
+				// 
+				// $workbook->setCustomColor(13, 200, 100, 180);
+				// $format_bg_magenta =& $workbook->addFormat();
+				// $format_bg_magenta->setFgColor(13);
+				// $format_bg_magenta->setPattern(1);
+				// 
+				// $format_bg_magenta_text_red =& $workbook->addFormat();
+				// $format_bg_magenta_text_red->setFgColor(13);
+				// $format_bg_magenta_text_red->setColor(17);
+				// $format_bg_magenta_text_red->setPattern(1);
+				// 
+				// $workbook->setCustomColor(14, 150, 255, 170);
+				// $format_bg_green =& $workbook->addFormat();
+				// $format_bg_green->setFgColor(14);
+				// $format_bg_green->setPattern(1);
+				// 
+				// $workbook->setCustomColor(15, 255, 170, 70);
+				// $format_bg_brown =& $workbook->addFormat();
+				// $format_bg_brown->setFgColor(15);
+				// $format_bg_brown->setPattern(1);
+				// 
+				// $workbook->setCustomColor(16, 200, 200, 200);
+				// $format_bg_grey =& $workbook->addFormat();
+				// $format_bg_grey->setFgColor(16);
+				// $format_bg_grey->setPattern(1);
+				// 
+				// $workbook->setCustomColor(18, 255, 255, 255);
+				// $format_bg_text_red =& $workbook->addFormat();
+				// $format_bg_text_red->setFgColor(18);
+				// $format_bg_text_red->setColor(17);
+				// $format_bg_text_red->setPattern(1);
 			}
 
 			$excelrivi 	 = 0;
@@ -1218,6 +1218,7 @@
 
 					// (kulutus + myynti + ennakkopoistot + jt) / haluttu kk * varastokerroin - (saldo + tilatut + ennakkopoistot + jt)
 					${"ostettava_kausi".$i} = (($kulutrow[$indeksi] + $laskurow[$indeksi] + $ennp['ennpois'] + $ennp['jt'] + $siirtojtrow['siirtojt']) / $ero) * $ehd_kausi1 - ($saldo['saldo'] + $ennp['tilattu'] + $ennp['ennpois'] + $ennp['jt'] + $siirtojtrow['siirtojt']);
+
 					${"ostettavahaly_kausi".$i} = ($row['halytysraja'] - ($saldo['saldo'] + $ennp['tilattu'] + $ennp['ennpois'] + $ennp['jt']));
 
 					// jos tuotteella on joku ostoerä pyöristellään ylospäin, että tilataan aina toimittajan haluama määrä

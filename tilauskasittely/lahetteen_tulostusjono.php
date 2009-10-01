@@ -661,12 +661,12 @@
 
 		echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
 
-		$query = "	SELECT toimitustapa.yhtio, toimitustapa.tunnus, toimitustapa.selite, count(*) kpl
+		$query = "	SELECT toimitustapa.selite, count(*) kpl, MIN(toimitustapa.tunnus) tunnus
 					FROM toimitustapa
 					JOIN lasku ON (toimitustapa.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.toimitustapa = toimitustapa.selite)
 					WHERE toimitustapa.$logistiikka_yhtiolisa
-					GROUP BY toimitustapa.yhtio, toimitustapa.tunnus, toimitustapa.selite
-					ORDER BY toimitustapa.yhtio, toimitustapa.selite";
+					GROUP BY toimitustapa.selite
+					ORDER BY toimitustapa.selite";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";

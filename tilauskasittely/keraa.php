@@ -1342,21 +1342,21 @@
 		echo "<input type='hidden' id='jarj' name='jarj' value='$jarj'>";
 		echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
 
-		$query = "	SELECT tunnus, nimitys
+		$query = "	SELECT yhtio, tunnus, nimitys
 					FROM varastopaikat
 					WHERE $logistiikka_yhtiolisa
-					ORDER BY nimitys";
+					ORDER BY yhtio, nimitys";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
 
 		while ($row = mysql_fetch_array($result)) {
 			$sel = '';
-			if (($row[0] == $tuvarasto) or ($kukarow['varasto'] == $row[0] and $tuvarasto=='')) {
+			if (($row['tunnus'] == $tuvarasto) or ($kukarow['varasto'] == $row['tunnus'] and $tuvarasto=='')) {
 				$sel = 'selected';
-				$tuvarasto = $row[0];
+				$tuvarasto = $row['tunnus'];
 			}
-			echo "<option value='$row[0]' $sel>$row[1]</option>";
+			echo "<option value='$row[tunnus]' $sel>$row[nimitys] ($row[yhtio])</option>";
 		}
 		echo "</select>";
 
@@ -1373,11 +1373,11 @@
 
 			while ($row = mysql_fetch_array($result)){
 				$sel = '';
-				if ($row[0] == $tumaa) {
+				if ($row['maa'] == $tumaa) {
 					$sel = 'selected';
-					$tumaa = $row[0];
+					$tumaa = $row['maa'];
 				}
-				echo "<option value='$row[0]' $sel>$row[0]</option>";
+				echo "<option value='$row[maa]' $sel>$row[maa]</option>";
 			}
 			echo "</select>";
 		}
@@ -1406,7 +1406,7 @@
 
 		echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
 
-		$query = "	SELECT selite
+		$query = "	SELECT DISTINCT selite
 					FROM toimitustapa
 					WHERE $logistiikka_yhtiolisa
 					ORDER BY selite";
@@ -1416,11 +1416,11 @@
 
 		while($row = mysql_fetch_array($result)){
 			$sel = '';
-			if ($row[0] == $tutoimtapa) {
+			if ($row['selite'] == $tutoimtapa) {
 				$sel = 'selected';
-				$tutoimtapa = $row[0];
+				$tutoimtapa = $row['selite'];
 			}
-			echo "<option value='$row[0]' $sel>$row[0]</option>";
+			echo "<option value='$row[selite]' $sel>$row[selite]</option>";
 		}
 
 		echo "</select></td>";

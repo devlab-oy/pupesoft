@@ -606,12 +606,12 @@
 		}
 		echo "</select>";
 
-		$query = "	SELECT varastopaikat.yhtio, varastopaikat.maa, count(*) kpl
+		$query = "	SELECT varastopaikat.maa, count(*) kpl
 					FROM varastopaikat
-					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.maa = varastopaikat.maa)
+					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
 					WHERE varastopaikat.maa != '' and varastopaikat.$logistiikka_yhtiolisa
-					GROUP BY varastopaikat.yhtio, varastopaikat.maa
-					ORDER BY varastopaikat.yhtio, varastopaikat.maa";
+					GROUP BY varastopaikat.maa
+					ORDER BY varastopaikat.maa";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 1) {
@@ -621,7 +621,7 @@
 			$sel=array();
 			$sel[$tumaa] = "selected";
 			while ($row = mysql_fetch_array($result)){
-				echo "<option value='$row[maa]' ".$sel[$row['maa']].">$row[maa] ($row[kpl]) ($row[yhtio])</option>";
+				echo "<option value='$row[maa]' ".$sel[$row['maa']].">$row[maa] ($row[kpl])</option>";
 			}
 			echo "</select>";
 		}

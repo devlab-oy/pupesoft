@@ -4,6 +4,7 @@
 
 	$logistiikka_yhtio = '';
 	$logistiikka_yhtiolisa = '';
+	$lasku_yhtio_originaali = $kukarow['yhtio'];
 
 	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
 		$logistiikka_yhtio = $konserni_yhtiot;
@@ -108,12 +109,23 @@
 			$laskuja = $lask;
 		}
 		elseif (isset($tulostukseen_kaikki)) {
-			$tilausnumerorypas = explode(',', $tulostukseen_kaikki);
+			$tilausnumerorypas = unserialize(urldecode($tulostukseen_kaikki));
 			$tulostukseen_kaikki = "KYLLA";
 		}
 
 		if (is_array($tilausnumerorypas)) {
-			foreach ($tilausnumerorypas as $tilausnumeroita) {
+			foreach ($tilausnumerorypas as $tilausrypas_key => $tilausrypas_value) {
+
+				if ($tulostukseen_kaikki == 'KYLLA') {
+					$kukarow['yhtio'] = $tilausrypas_value;
+					$tilausnumeroita = $tilausrypas_key;
+				}
+				else {
+					$tilausnumeroita = $tilausrypas_value;
+				}
+
+				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+				
 				// katsotaan, ettei tilaus ole kenelläkään auki ruudulla
 				$query = "	SELECT *
 							FROM kuka
@@ -373,7 +385,7 @@
 					echo "<$ero valign='top'>$tilrow[riveja]</$ero>";
 					echo "<$ero valign='top'><input type='checkbox' name='tulostukseen[]' value='$tilrow[otunnus]' CHECKED></$ero>";
 
-					echo "<$ero valign='top'><a href='$PHP_SELF?toim=$toim&tilaukset=$tilaukset&vanha_tee2=VALITSE&tee2=NAYTATILAUS&tunnus=$tilrow[otunnus]'>".t("Näytä")."</a></$ero>";
+					echo "<$ero valign='top'><a href='$PHP_SELF?lasku_yhtio=$kukarow[yhtio]&toim=$toim&tilaukset=$tilaukset&vanha_tee2=VALITSE&tee2=NAYTATILAUS&tunnus=$tilrow[otunnus]'>".t("Näytä")."</a></$ero>";
 
 					echo "</tr>";
 				}
@@ -424,7 +436,7 @@
 				//haetaan keräyslistan oletustulostin
 				$query = "	SELECT *
 							from varastopaikat
-							where yhtio='$kukarow[yhtio]' and tunnus='$tul_varastoon'";
+							where yhtio = '$kukarow[yhtio]' and tunnus = '$tul_varastoon'";
 				$prires = mysql_query($query) or pupe_error($query);
 				$prirow = mysql_fetch_array($prires);
 				$kirjoitin = $prirow['printteri0'];
@@ -441,7 +453,7 @@
 				$query = "	SELECT *
 							FROM kirjoittimet
 							WHERE
-							yhtio='$kukarow[yhtio]'
+							yhtio = '$kukarow[yhtio]'
 							ORDER by kirjoitin";
 				$kirre = mysql_query($query) or pupe_error($query);
 
@@ -469,6 +481,14 @@
 
 	//valitaan keräysklöntti
 	if ($tee2 == '') {
+
+		if ($lasku_yhtio_originaali != '' and $kukarow['yhtio'] != $lasku_yhtio_originaali) {
+			$logistiikka_yhtio = $konserni_yhtiot;
+			$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
+
+			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio_originaali);
+			$kukarow['yhtio'] = $lasku_yhtio_originaali;
+		}
 
 		if ($toim == 'SIIRTOLISTA') {
 			echo "<font class='head'>".t("Tulosta siirtolista").":</font><hr>";
@@ -522,7 +542,9 @@
 		if ($tumaa != '') {
 			$query = "	SELECT group_concat(tunnus) tunnukset
 						FROM varastopaikat
-						WHERE maa != '' and yhtio = '$kukarow[yhtio]' and maa = '$tumaa'";
+						WHERE maa != '' 
+						and $logistiikka_yhtiolisa 
+						and maa = '$tumaa'";
 			$maare = mysql_query($query) or pupe_error($query);
 			$maarow = mysql_fetch_array($maare);
 			$haku .= " and lasku.varasto in ($maarow[tunnukset]) ";
@@ -562,34 +584,34 @@
 
 		echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
 
-		$query = "	SELECT varastopaikat.tunnus, varastopaikat.nimitys, count(*) kpl, lasku.tulostusalue
+		$query = "	SELECT varastopaikat.yhtio, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue, count(*) kpl
 					FROM varastopaikat
-					JOIN lasku ON varastopaikat.yhtio=lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto=varastopaikat.tunnus
-					WHERE varastopaikat.yhtio = '$kukarow[yhtio]'
-					GROUP BY varastopaikat.tunnus, lasku.tulostusalue
-					ORDER BY nimitys";
+					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
+					WHERE varastopaikat.$logistiikka_yhtiolisa
+					GROUP BY varastopaikat.yhtio, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue
+					ORDER BY varastopaikat.yhtio, varastopaikat.nimitys";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
 
-		$sel=array();
+		$sel = array();
 		$sel[$tuvarasto] = "SELECTED";
 		while ($row = mysql_fetch_array($result)){
-			if ($row[3] != '') {
-				echo "<option value='$row[0]##$row[3]' ".$sel[$row[0]."##".$row[3]].">$row[1] ({$row[kpl]}) $row[3]</option>";
+			if ($row['tulostusalue'] != '') {
+				echo "<option value='$row[tunnus]##$row[tulostusalue]' ".$sel[$row['tunnus']."##".$row['tulostusalue']].">$row[nimitys] ($row[kpl]) $row[tulostusalue] ($row[yhtio])</option>";
 			}
 			else {
-				echo "<option value='$row[0]' ".$sel[$row[0]].">$row[1] ({$row[kpl]})</option>";
+				echo "<option value='$row[tunnus]' ".$sel[$row['tunnus']].">$row[nimitys] ($row[kpl]) ($row[yhtio])</option>";
 			}
 		}
 		echo "</select>";
 
-		$query = "	SELECT distinct varastopaikat.maa, count(*) kpl
+		$query = "	SELECT varastopaikat.yhtio, varastopaikat.maa, count(*) kpl
 					FROM varastopaikat
-					JOIN lasku ON varastopaikat.yhtio=lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.maa=varastopaikat.maa
-					WHERE varastopaikat.maa != '' and varastopaikat.yhtio = '$kukarow[yhtio]'
-					GROUP by varastopaikat.maa
-					ORDER BY varastopaikat.maa";
+					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.maa = varastopaikat.maa)
+					WHERE varastopaikat.maa != '' and varastopaikat.$logistiikka_yhtiolisa
+					GROUP BY varastopaikat.yhtio, varastopaikat.maa
+					ORDER BY varastopaikat.yhtio, varastopaikat.maa";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 1) {
@@ -599,7 +621,7 @@
 			$sel=array();
 			$sel[$tumaa] = "selected";
 			while ($row = mysql_fetch_array($result)){
-				echo "<option value='$row[0]' ".$sel[$row[0]].">$row[0] ({$row[kpl]})</option>";
+				echo "<option value='$row[maa]' ".$sel[$row['maa']].">$row[maa] ($row[kpl]) ($row[yhtio])</option>";
 			}
 			echo "</select>";
 		}
@@ -610,7 +632,8 @@
 
 		$query = "	SELECT clearing, count(*) kpl
 					FROM lasku
-					WHERE yhtio='$kukarow[yhtio]' and ((tila = '$tila' and alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi
+					WHERE $logistiikka_yhtiolisa 
+					and ((tila = '$tila' and alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi
 					GROUP BY clearing
 					ORDER by clearing";
 
@@ -638,12 +661,12 @@
 
 		echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
 
-		$query = "	SELECT toimitustapa.tunnus, toimitustapa.selite, count(*) kpl
+		$query = "	SELECT toimitustapa.yhtio, toimitustapa.tunnus, toimitustapa.selite, count(*) kpl
 					FROM toimitustapa
-					JOIN lasku ON toimitustapa.yhtio=lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.toimitustapa=toimitustapa.selite
-					WHERE toimitustapa.yhtio = '$kukarow[yhtio]'
-					GROUP BY 1,2
-					ORDER BY 2";
+					JOIN lasku ON (toimitustapa.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.toimitustapa = toimitustapa.selite)
+					WHERE toimitustapa.$logistiikka_yhtiolisa
+					GROUP BY toimitustapa.yhtio, toimitustapa.tunnus, toimitustapa.selite
+					ORDER BY toimitustapa.yhtio, toimitustapa.selite";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
@@ -779,7 +802,7 @@
 			echo "<th valign='top'>".t("Näytä")."</th>";
 			echo "</tr></form>";
 
-			$tulostakaikki_tun = "";
+			$tulostakaikki_tun = array();
 			$edennakko = "";
 			$riveja_yht = 0;
 
@@ -973,7 +996,7 @@
 				}
 
 				// Kerätään tunnukset tulosta kaikki-toimintoa varten
-				$tulostakaikki_tun .= $tilrow["otunnus"].",";
+				$tulostakaikki_tun[$tilrow['otunnus']] = $tilrow["yhtio"];
 				$riveja_yht += $tilrow["riveja"];
 			}
 
@@ -998,8 +1021,8 @@
 			$query = "	SELECT *
 						FROM kirjoittimet
 						WHERE
-						yhtio='$kukarow[yhtio]'
-						ORDER by kirjoitin";
+						$logistiikka_yhtiolisa
+						ORDER by yhtio, kirjoitin";
 			$kirre = mysql_query($query) or pupe_error($query);
 
 			echo "<tr><td><select name='valittu_tulostin'>";
@@ -1012,12 +1035,12 @@
 					$sel = "SELECTED";
 				}
 
-				echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
+				echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin] ($kirrow[yhtio])</option>";
 			}
 
 			echo "</select></td>";
 
-			$tulostakaikki_tun = substr($tulostakaikki_tun,0,-1);
+			$tulostakaikki_tun = urlencode(serialize($tulostakaikki_tun));
 
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='jarj' value='$jarj'>";

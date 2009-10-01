@@ -79,15 +79,17 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 	if ($pankki == '2') {
 		$host="solo.nordea.fi";
 		$log="anonymous";
-		//$pass="SITE PASSIVE";
+		$pass="SITE PASSIVE";
 		$pass = "pupesoft test";
-		$passiivi = 0;
+		$passiivi = 1;
+		$sitekomento = 'PASSIVE';
 	}
 	if ($pankki == '8') {
 		$host="ftplinkki.sampopankki.fi";
 		$log="anonymous";
 		$pass="pupesofttestaus";
 		$passiivi = 1;
+		$sitekomento = '';
 	}
 
 	echo "Avataan FTP-yhteys $host<br>";
@@ -97,7 +99,20 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 		// Jos jokin asia ep‰onnistuu, katkaistaan heti yhteys
 		echo "Yhteys muodostettu: $host<br>";
 		$login_ok = ftp_login($ftp,$log,$pass);
-		if ($passiivi == 1) ftp_pasv($ftp, true);
+		if ($sitekomento != '') {
+			if (ftp_site($ftp, $sitekomento)) {
+				echo "Site-komento onnistui<br>";
+			} else {
+				echo 'Site-komento ep‰onnistui<br>';
+			}
+		}
+		if ($passiivi == 1) {
+			if(ftp_pasv($ftp, true)) {
+				echo "Passiivi-komento onnistui<br>";
+			} else {
+				echo "Passiivi-komento ep‰onnistui<br>";
+			}
+		}
 		echo "L‰hetet‰‰n Esi-sanoma: $omaesia<br>";
 		if(ftp_put($ftp, $pankinesia, $omaesia, FTP_ASCII)) {
 			echo "Esi-sanoman l‰hetys onnistui.<br>Haetaan vastaus: $omaesip<br>";

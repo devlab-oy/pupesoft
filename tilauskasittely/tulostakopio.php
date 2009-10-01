@@ -25,10 +25,33 @@
 		require('parametrit.inc');
 	}
 
+	$yhtio = '';
+	$yhtiolisa = '';
+
+	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '' and ($toim == "LAHETE" or $toim == "OSOITELAPPU" or $toim == "KERAYSLISTA")) {
+		$yhtio = $konserni_yhtiot;
+		$yhtiolisa = "yhtio in ($yhtio)";
+
+		if ($lasku_yhtio != '') {
+			$kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
+
+			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio);
+		}
+	}
+	else {
+		$yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+	}
+
 	if ($toim == "") $toim = "LASKU";
 
 	if ($tee == 'NAYTAHTML') {
-		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+		if ($yhtio != '' and $konserni_yhtiot != '') {
+			echo "<font class='head'>",t("Yhtiön")," $yhtiorow[nimi] ",t("tilaus")," $tunnus:</font><hr>";
+		}
+		else {
+			echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+		}
+		
 		require ("../raportit/naytatilaus.inc");
 		echo "<br><br>";
 		$tee = "ETSILASKU";
@@ -183,6 +206,9 @@
 				require ("../inc/kevyt_toimittajahaku.inc");
 			}
 			else {
+				if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '' and ($toim == "LAHETE" or $toim == "OSOITELAPPU" or $toim == "KERAYSLISTA")) {
+					$konserni = $yhtiorow['konserni'];
+				}
 				require ("../inc/asiakashaku.inc");
 			}
 
@@ -741,7 +767,7 @@
 			//katotaan löytyykö lasku ja sen kaikki tilaukset
 			$query = "  SELECT laskunro
 						FROM lasku
-						WHERE tunnus = '$otunnus' and lasku.yhtio = '$kukarow[yhtio]'";
+						WHERE tunnus = '$otunnus' and lasku.$yhtiolisa";
 			$laresult = mysql_query($query) or pupe_error($query);
 			$larow = mysql_fetch_assoc($laresult);
 
@@ -788,11 +814,13 @@
 					if (lasku.summa=0, (SELECT round(sum(hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D'), lasku.summa) summa,
 					toimaika Toimitusaika,
 					lasku.tila,
-					lasku.alatila
+					lasku.alatila,
+					lasku.yhtio,
+					lasku.yhtio_nimi
 					FROM lasku $use
 					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
 					WHERE $where1 $where2 $where3
-					and lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.$yhtiolisa
 					$where4
 					$jarj";
 		$result = mysql_query($query) or pupe_error($query);
@@ -814,10 +842,14 @@
 						<input type='hidden' name='ppl' value='$ppl'>
 						<input type='hidden' name='kkl' value='$kkl'>
 						<input type='hidden' name='vvl' value='$vvl'>
+						<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>
 						<input type='hidden' name='mista' value='tulostakopio'>
 						<input type='submit' value='".t("Tulosta useita kopioita")."'></form><br>";
 			}
 			echo "<table><tr>";
+			if ($yhtio != '') {
+				echo "<th valign='top'>",t("Yhtiö"),"</th>";
+			}
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.tunnus'>".t("Tilausnro")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.laskunro'>".t("Laskunro")."</a></th>";
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.ytunnus'>".t("Ytunnus")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.nimi'>".t("Nimi")."</a></th>";
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=pvm'>".t("Pvm")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.toimaika'>".t("Toimaika")."</a></th>";
@@ -836,6 +868,7 @@
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='mista' value='tulostakopio'>
+						<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>
 						<input type='hidden' name='tee' value='TULOSTA'>";
 			}
 
@@ -848,6 +881,7 @@
 				if ($tunnus==$row['tunnus']) $ero="th";
 
 				echo "<tr>";
+				if ($yhtio != '') echo "<$ero valign='top'>$row[yhtio_nimi]</$ero>";
 				echo "<$ero valign='top'>$row[tunnus]<br>$row[laskunro]</$ero>";
 				echo "<$ero valign='top'>$row[ytunnus]<br>$row[nimi]<br>$row[nimitark]</$ero>";
 				echo "<$ero valign='top'>".tv1dateconv($row["pvm"])."<br>".tv1dateconv($row["toimaika"])."</$ero>";
@@ -893,6 +927,7 @@
 								<input type='hidden' name='ppl' value='$ppl'>
 								<input type='hidden' name='kkl' value='$kkl'>
 								<input type='hidden' name='vvl' value='$vvl'>
+								<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
 								<input type='hidden' name='mista' value='tulostakopio'>
 								<input type='submit' value='".t("Näytä ruudulla")."'></form>
 								<br>";
@@ -901,6 +936,7 @@
 					echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='otunnus' value='$row[tunnus]'>
+						<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tee' value='NAYTATILAUS'>
 						<input type='hidden' name='mista' value='tulostakopio'>
@@ -910,6 +946,7 @@
 						echo "<br>
 							<form method='post' action='$PHP_SELF' autocomplete='off'>
 							<input type='hidden' name='otunnus' value='$row[tunnus]'>
+							<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tee' value='TULOSTA'>

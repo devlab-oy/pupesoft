@@ -7296,4 +7296,72 @@ if (!function_exists("jt_toimita")) {
 	}
 }
 
+if (!function_exists("hae_yhtion_parametrit")) {
+	function hae_yhtion_parametrit($yhtio) {
+		global $kukarow, $konserni_yhtiot;
+
+		$query = "	SELECT *
+					FROM yhtio
+					WHERE yhtio='$yhtio'";
+		$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+		if (mysql_num_rows($result) == 0) {
+			echo "<b>Käyttäjän yritys ei löydy! ($yhtio)";
+			exit;
+		}
+		$yhtiorow = mysql_fetch_array($result);
+
+		$konserni_yhtiot = "";
+
+		if ($yhtiorow['konserni'] != '') {
+			$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
+			$result = mysql_query($query) or pupe_error($query);
+
+			while ($row = mysql_fetch_array($result)) {
+				$konserni_yhtiot .= " '".$row["yhtio"]."' ,";
+			}
+			$konserni_yhtiot = substr($konserni_yhtiot, 0, -1);
+		}
+		else {
+			$konserni_yhtiot = "'".$yhtio."'";
+		}
+
+		$query = "	SELECT *
+					FROM yhtion_parametrit
+					WHERE yhtio='$yhtio'";
+		$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+		if (mysql_num_rows($result) == 1) {
+			$yhtion_parametritrow = mysql_fetch_array($result);
+
+			if ($yhtion_parametritrow['hintapyoristys'] != 2 and $yhtion_parametritrow['hintapyoristys'] != 4 and $yhtion_parametritrow['hintapyoristys'] != 6) {
+				$yhtion_parametritrow['hintapyoristys'] = 2;
+			}
+
+			// lisätään kaikki yhtiorow arrayseen
+			foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
+				$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
+			}
+		}
+
+		if (isset($kukarow["toimipaikka"]) and $kukarow["toimipaikka"] != 0) {
+			$query = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio='$yhtio' and tunnus='$kukarow[toimipaikka]'";
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+			if (mysql_num_rows($result) == 1) {
+				$yhtion_toimipaikkarow = mysql_fetch_array($result);
+
+				// lisätään kaikki yhtiorow arrayseen
+				foreach ($yhtion_toimipaikkarow as $parametrit_nimi => $parametrit_arvo) {
+					$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
+				}
+		 	}
+		}
+
+		return $yhtiorow;
+	}
+}
+
 ?>

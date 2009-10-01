@@ -1,6 +1,23 @@
 <?php
 	require ("../inc/parametrit.inc");
 
+	$yhtio = '';
+	$yhtiolisa = '';
+
+	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
+		$yhtio = $konserni_yhtiot;
+		$yhtiolisa = "yhtio in ($yhtio)";
+
+		if ($lasku_yhtio != '') {
+			$kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
+
+			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio);
+		}
+	}
+	else {
+		$yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+	}
+
 	js_popup();
 
 	if ($toim == 'SIIRTOLISTA') {
@@ -1306,7 +1323,12 @@
 		}
 	}
 
-	if ($id == '') $id = 0;
+	if ($id == '') {
+		$id = 0;
+		if ($yhtio != '' and $konserni_yhtiot != '') {
+			$yhtio = $konserni_yhtiot;
+		}
+	}
 
 	if ($id == 0) {
 
@@ -1321,7 +1343,7 @@
 
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE $yhtiolisa
 					ORDER BY nimitys";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -1339,7 +1361,7 @@
 
 		$query = "	SELECT distinct maa
 					FROM varastopaikat
-					WHERE maa != '' and yhtio = '$kukarow[yhtio]'
+					WHERE maa != '' and $yhtiolisa
 					ORDER BY maa";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -1384,7 +1406,7 @@
 
 		$query = "	SELECT selite
 					FROM toimitustapa
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE $yhtiolisa
 					ORDER BY selite";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -1423,7 +1445,7 @@
 		if ($tumaa != '') {
 			$query = "	SELECT group_concat(tunnus) tunnukset
 						FROM varastopaikat
-						WHERE maa != '' and yhtio = '$kukarow[yhtio]' and maa = '$tumaa'";
+						WHERE maa != '' and $yhtiolisa and maa = '$tumaa'";
 			$maare = mysql_query($query) or pupe_error($query);
 			$maarow = mysql_fetch_array($maare);
 			$haku .= " and lasku.varasto in ($maarow[tunnukset]) ";
@@ -1468,10 +1490,12 @@
 					min(if (lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
 					min(if (lasku.clearing = '', 'N', if (lasku.clearing = 'JT-TILAUS', 'J', if (lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,
 					#(select nimitys from varastopaikat where varastopaikat.tunnus=min(lasku.varasto)) varastonimi,
-					count(*) riveja
+					count(*) riveja,
+					lasku.yhtio yhtio,
+					lasku.yhtio_nimi yhtio_nimi
 					from lasku use index (tila_index)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-					WHERE lasku.yhtio				= '$kukarow[yhtio]'
+					WHERE lasku.$yhtiolisa
 					and lasku.tila					in ($tila)
 					and lasku.alatila				= 'A'
 					and tilausrivi.tyyppi			in ($tyyppi)
@@ -1492,6 +1516,9 @@
 			echo "<br><table>";
 
 			echo "<tr>";
+			if ($yhtio != '') {
+				echo "<th valign='top'>",t("Yhtiö"),"</th>";
+			}
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='prioriteetti'; document.forms['find'].submit();\">".t("Pri")."</a><br>";
 			//echo "<a href='#' onclick=\"getElementById('jarj').value='varastonimi'; document.forms['find'].submit();\">".t("Varastoon")."</a></th>";
 			echo "<a href='#'>".t("Varastoon")."</a></th>";
@@ -1519,6 +1546,10 @@
 
 			while ($row = mysql_fetch_array($result)) {
 				echo "<tr class='aktiivi'>";
+
+				if ($yhtio != '') {
+					echo "<td valign='top'>$row[yhtio_nimi]</td>";
+				}
 
 				if (trim($row["ohjeet"]) != "") {
 					echo "<div id='div_$row[tunnus]' class='popup' style='width: 500px;'>";
@@ -1554,11 +1585,14 @@
 						<form method='post' action='$PHP_SELF'>
 						<input type='hidden' name='id' value='$row[tunnus]'>
 						<input type='hidden' name='toim' value='$toim'>
+						<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
 						<input type='submit' name='tila' value='".t("Kerää")."'></form></td></tr>";
 			}
 
+			$spanni = $yhtio != '' ? 7 : 6;
+
 			echo "<tr>";
-			echo "<td colspan='6' style='text-align:right;' class='back'>".t("Rivejä yhteensä").":</td>";
+			echo "<td colspan='$spanni' style='text-align:right;' class='back'>".t("Rivejä yhteensä").":</td>";
 			echo "<td valign='top' class='back'>$riveja_yht</td>";
 			echo "</tr>";
 
@@ -1625,7 +1659,8 @@
 						clearing,
 						tila,
 						mapvm,
-						pakkaamo
+						pakkaamo,
+						lasku.yhtio
 						FROM lasku LEFT JOIN kuka ON lasku.myyja = kuka.tunnus
 						WHERE lasku.tunnus in ($tilausnumeroita)
 						and lasku.yhtio = '$kukarow[yhtio]'
@@ -1823,7 +1858,7 @@
 							$tunken2 = "myyntirivitunnus";
 						}
 
-						$query = "	select count(*) kpl, min(sarjanumero) sarjanumero
+						$query = "	SELECT count(*) kpl, min(sarjanumero) sarjanumero
 									from sarjanumeroseuranta
 									where yhtio  = '$kukarow[yhtio]'
 									and tuoteno  = '$row[puhdas_tuoteno]'
@@ -2131,6 +2166,7 @@
 
 
 			echo "<input type='hidden' name='tilausnumeroita' id='tilausnumeroita' value='$tilausnumeroita'>";
+			echo "<input type='hidden' name='lasku_yhtio' value='$otsik_row[yhtio]'>";
 			echo "<input type='submit' name='real_submit' id='real_submit' value='".t("Merkkaa kerätyksi")."'></form>";
 
 

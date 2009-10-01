@@ -47,6 +47,7 @@
 		<input type='hidden' name='ippa' value='$ippa'>
 		<input type='hidden' name='ikka' value='$ikka'>
 		<input type='hidden' name='ivva' value='$ivva'>
+		<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>
 		<input type='hidden' name='sorttauskentan_jarjestys1' value='$sorttauskentan_jarjestys1'>
 		<input type='hidden' name='sorttauskentan_jarjestys2' value='$sorttauskentan_jarjestys2'>
 		<input type='hidden' name='sorttauskentan_jarjestys3' value='$sorttauskentan_jarjestys3'>
@@ -249,12 +250,8 @@
 			if ($yhtiorow['viivakoodi_purkulistaan'] == 'K') {
 				echo "<tr><td><input type='radio' name='mitkarivit' value='koodittomat'> ".t("Viivakoodittomat rivit")."</td></tr>";
 			}
-
 		}
-
 	}
-
-
 
 	echo "</table><br><input type='submit' name='tulosta' value='".t("Tulosta")."'></form>";
 

@@ -2,6 +2,23 @@
 
 	require ("../inc/parametrit.inc");
 
+	$yhtio = '';
+	$yhtiolisa = '';
+
+	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
+		$yhtio = $konserni_yhtiot;
+		$yhtiolisa = "yhtio in ($yhtio)";
+
+		if ($lasku_yhtio != '') {
+			$kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
+
+			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio);
+		}
+	}
+	else {
+		$yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+	}
+
 	$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
 
 	js_popup();
@@ -44,10 +61,21 @@
 	}
 
 	if ($tee2 == 'NAYTATILAUS') {
-		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+
+		if ($yhtio != '' and $konserni_yhtiot != '') {
+			echo "<font class='head'>",t("Yhtiön")," $yhtiorow[nimi] ",t("tilaus")," $tunnus:</font><hr>";
+		}
+		else {
+			echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+		}
+
 		require ("../raportit/naytatilaus.inc");
 		echo "<hr>";
 		$tee2 = $vanha_tee2;
+
+		if ($yhtio != '' and $konserni_yhtiot != '') {
+			$yhtio = $konserni_yhtiot;
+		}
 	}
 
 	if ($tee2 == 'TULOSTA') {
@@ -183,7 +211,9 @@
 					lasku.viesti,
 					lasku.sisviesti2,
 					GROUP_CONCAT(if (kommentti='',NULL,kommentti) separator '<br>') AS kommentit,
-					count(*) riveja
+					count(*) riveja,
+					lasku.yhtio yhtio,
+					lasku.yhtio_nimi yhtio_nimi
 					FROM lasku
 					JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus
 					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
@@ -233,6 +263,9 @@
 				echo "<input type='hidden' name='tee2' value='TULOSTA'>";
 
 				echo "<tr>";
+				if ($yhtio != '') {
+					echo "<th>",t("Yhtiö"),"</th>";
+				}
 				echo "<th>".t("Pri")."</th>";
 				echo "<th>".t("Varastoon")."</th>";
 				echo "<th>".t("Tilaus")."</th>";
@@ -263,7 +296,9 @@
 					$ero="td";
 					if ($tunnus==$tilrow['otunnus']) $ero="th";
 
-					echo "<tr>";
+					if ($yhtio != '') {
+						echo "<$ero valign='top'>$tilrow[yhtio_nimi]</$ero>";
+					}
 
 					if (trim($tilrow["sisviesti2"]) != "" or trim($tilrow['kommentit'] != '')) {
 						echo "<div id='div_$tilrow[otunnus]' class='popup' style='width:500px;'>";
@@ -280,7 +315,7 @@
 						}
 
 						echo "</div>";
-						echo "<$ero valign='top' class='tooltip' id='$tilrow[otunnus]'>$tilrow[t_tyyppi] $tilrow[prioriteetti] <IMG SRC='../pics/lullacons/alert.png'></$ero>";
+						echo "<$ero valign='top' class='tooltip' id='$tilrow[otunnus]'>$tilrow[t_tyyppi] $tilrow[prioriteetti] <img src='$palvelin2/pics/lullacons/info.png'></$ero>";
 
 
 					}
@@ -388,7 +423,7 @@
 
 
 				//haetaan keräyslistan oletustulostin
-				$query = "	select *
+				$query = "	SELECT *
 							from varastopaikat
 							where yhtio='$kukarow[yhtio]' and tunnus='$tul_varastoon'";
 				$prires = mysql_query($query) or pupe_error($query);
@@ -427,6 +462,7 @@
 
 
 				echo "</table><br><br>";
+				echo "<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>";
 				echo "<input type='submit' name='tila' value='".t("Tulosta")."'></form>";
 			}
 		}
@@ -658,20 +694,20 @@
 		// Vain keräyslistat saa groupata
 		if ($yhtiorow["lahetteen_tulostustapa"] == "K" and $yhtiorow["kerayslistojen_yhdistaminen"] == "Y") {
 			//jos halutaan eritellä tulostusalueen mukaan , lasku.tulostusalue
-			$grouppi = "GROUP BY lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi, varastonimi, varastotunnus, keraysviikko, lasku.mapvm, t_tyyppi2";
+			$grouppi = "GROUP BY lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi, varastonimi, varastotunnus, keraysviikko, lasku.mapvm, t_tyyppi2";
 
 			if ($yhtiorow["pakkaamolokerot"] == "K") {
 				$grouppi .= ", lasku.tulostusalue";
 			}
 		}
 		elseif ($yhtiorow["lahetteen_tulostustapa"] == "K" and $yhtiorow["kerayslistojen_yhdistaminen"] == "T") {
-			$grouppi = "GROUP BY lasku.ytunnus";
+			$grouppi = "GROUP BY lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus";
 		}
 		else {
 			$grouppi = "GROUP BY lasku.tunnus";
 		}
 
-		$query = "	SELECT lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.varasto,
+		$query = "	SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.varasto,
 					if (tila = 'V', lasku.viesti, lasku.toimitustapa) toimitustapa,
 					if (maksuehto.jv!='', lasku.tunnus, '') jvgrouppi,
 					if (lasku.vienti!='', lasku.tunnus, '') vientigrouppi,
@@ -699,7 +735,7 @@
 					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
 					LEFT JOIN maksuehto ON maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus
 					WHERE
-					lasku.yhtio = '$kukarow[yhtio]'
+					lasku.$yhtiolisa
 					and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa)
 					$haku
 					$tilaustyyppi
@@ -714,6 +750,9 @@
 			echo "<br>";
 			echo "<table>";
 			echo "<tr>";
+			if ($yhtio != '') {
+				echo "<th valign='top'>",t("Yhtiö"),"</th>";
+			}
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='prioriteetti'; document.forms['find'].submit();\">".t("Pri")."<br>
 					  <a href='#' onclick=\"getElementById('jarj').value='varastonimi'; document.forms['find'].submit();\">".t("Varastoon")."</th>";
 
@@ -746,6 +785,9 @@
 			$riveja_yht = 0;
 
 			while ($tilrow = mysql_fetch_array($tilre)) {
+				if ($yhtio != '') {
+					$kukarow['yhtio'] = $tilrow['yhtio'];
+				}
 
 				if ($edennakko != "" and $edennakko != $tilrow["t_tyyppi"] and $tilrow["t_tyyppi"] == "E") {
 					echo "<tr><td colspan='11' class='back'><br></td></tr>";
@@ -757,6 +799,10 @@
 				if ($tunnus==$tilrow['otunnus']) $ero="th";
 
 				echo "<tr class='aktiivi'>";
+
+				if ($yhtio != '') {
+					echo "<$ero valign='top'>$tilrow[yhtio_nimi]</$ero>";
+				}
 
 				if (trim($tilrow["ohjeet"]) != "" or trim($tilrow['kommentit'] != '')) {
 					echo "<div id='div_$tilrow[div_id]' class='popup' style='width:500px;'>";
@@ -830,6 +876,7 @@
 
 					echo "<form method='post' action='$PHP_SELF'>";
 					echo "<input type='hidden' name='toim' 			value='$toim'>";
+					echo "<input type='hidden' name='lasku_yhtio' value='$tilrow[yhtio]'>";
 					echo "<input type='hidden' name='tee2' 			value='VALITSE'>
 							<input type='hidden' name='tilaukset'	value='$tilrow[otunnus]'>
 							<$ero valign='top'><input type='submit' name='tila' 	value='".t("Valitse")."'></form></$ero>";
@@ -839,7 +886,7 @@
 				}
 				else {
 					//haetaan keräyslistan oletustulostin
-					$query = "	select *
+					$query = "	SELECT *
 								from varastopaikat
 								where yhtio='$kukarow[yhtio]' and tunnus='$tilrow[varasto]'";
 					$prires = mysql_query($query) or pupe_error($query);
@@ -906,6 +953,7 @@
 					echo "<input type='hidden' name='etsi' value='$etsi'>";
 					echo "<input type='hidden' name='tee2' value='TULOSTA'>";
 					echo "<input type='hidden' name='tulostukseen[]' value='$tilrow[otunnus]'>";
+					echo "<input type='hidden' name='lasku_yhtio' value='$tilrow[yhtio]'>";
 					echo "<$ero valign='top'><input type='submit' value='".t("Tulosta")."'></form></$ero>";
 
 					echo "<form method='post' action='$PHP_SELF'>";
@@ -918,6 +966,7 @@
 					echo "<input type='hidden' name='etsi' value='$etsi'>";
 					echo "<input type='hidden' name='tee2' value='NAYTATILAUS'>";
 					echo "<input type='hidden' name='vanha_tee2' value=''>";
+					echo "<input type='hidden' name='lasku_yhtio' value='$tilrow[yhtio]'>";
 					echo "<input type='hidden' name='tunnus' value='$tilrow[otunnus]'>";
 					echo "<$ero valign='top'><input type='submit' value='".t("Näytä")."'></form></$ero>";
 
@@ -929,8 +978,10 @@
 				$riveja_yht += $tilrow["riveja"];
 			}
 
+			$spanni = $yhtio != '' ? 7 : 6; 
+
 			echo "<tr class='aktiivi'>";
-			echo "<th colspan='6'>";
+			echo "<th colspan='$spanni'>";
 
 			echo t("Rivejä yhteensä")."</th><th>".$riveja_yht."</th></tr>";
 
@@ -940,6 +991,10 @@
 			echo "<table>";
 			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<tr><th colspan='2'>".t("Tulosta kaikki keräyslistat")."</th></tr>";
+
+			if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
+				$yhtio = $konserni_yhtiot;
+			}
 
 			$query = "	SELECT *
 						FROM kirjoittimet

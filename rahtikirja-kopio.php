@@ -2,6 +2,23 @@
 
 	require("inc/parametrit.inc");
 
+	$yhtio = '';
+	$yhtiolisa = '';
+
+	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
+		$yhtio = $konserni_yhtiot;
+		$yhtiolisa = "yhtio in ($yhtio)";
+
+		if ($lasku_yhtio != '') {
+			$kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
+
+			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio);
+		}
+	}
+	else {
+		$yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+	}
+
 	echo "<font class='head'>".t("Rahtikirjakopio")."</font><hr>";
 
 	if ($tee == 'tulosta' and (!isset($rtunnukset) or count($rtunnukset) == 0)) {
@@ -42,7 +59,7 @@
 			$sel_ltun = explode(",", $rrow["otsikkonro"]);
 		}
 
-		$toimitustapa_varasto = $toimitustapa."!!!!".$varasto;
+		$toimitustapa_varasto = $toimitustapa."!!!!".$kukarow['yhtio']."!!!!".$varasto;
 		$tee				  = "tulosta";
 
 		require ("rahtikirja-tulostus.php");
@@ -54,8 +71,14 @@
 
 	if ($tee == 'valitse') {
 
+		if ($toimitustapa != '') {
+			list($toimitustapa, $yhtio) = explode("!!!!", $toimitustapa);
+
+			$kukarow['yhtio'] = $yhtio;
+		}
+
 		if ($otunnus == "") {
-			$query = "	SELECT rahtikirjanro, sum(kilot) paino
+			$query = "	SELECT yhtio, rahtikirjanro, sum(kilot) paino
 						from rahtikirjat
 						where yhtio		= '$kukarow[yhtio]' and
 						tulostuspaikka	= '$varasto' and
@@ -72,13 +95,12 @@
 		    $res = mysql_query($query) or pupe_error($query);
 		    $rahtikirjanro = mysql_fetch_array($res);
 
-			$query = "	SELECT rahtikirjanro, sum(kilot) paino
+			$query = "	SELECT rahtikirjanro, sum(kilot) paino, yhtio
 						from rahtikirjat
 						where yhtio			= '$kukarow[yhtio]'
 						and rahtikirjanro	= '$rahtikirjanro[rahtikirjanro]'
 						and tulostettu != '0000-00-00 00:00:00'
 						GROUP BY rahtikirjanro";
-
 			$toimitustapa 	= "";
 			$varasto 		= "";
 		}
@@ -91,6 +113,7 @@
 		else {
 			echo "<form action='rahtikirja-kopio.php' method='post'>";
 			echo "<input type='hidden' name='tee' value='tulosta'>";
+			echo "<input type='hidden' name='lasku_yhtio' value='$yhtio'>";
 			echo "<input type='hidden' name='pp' value='$pp'>";
 			echo "<input type='hidden' name='kk' value='$kk'>";
 			echo "<input type='hidden' name='vv' value='$vv'>";
@@ -106,6 +129,7 @@
 
 			echo "<table>";
 			echo "<tr>";
+			if ($yhtio != '') echo "<th>",t("Yhtiö"),"</th>";
 			echo "<th>".t("Rahtikirjanro")."</th>";
 			echo "<th>".t("Tilausnumero")."</th>";
 			echo "<th>".t("Tulostettu")."</th>";
@@ -127,6 +151,7 @@
 					$orow  = mysql_fetch_array($ores);
 
 					echo "<tr>";
+					if ($yhtio != '') echo "<td>$row[yhtio]</td>";
 					echo "<td>$row[rahtikirjanro]</td>";
 					echo "<td>$orow[tunnus]</td>";
 					echo "<td>$rrow[tulostettu]</td>";
@@ -204,7 +229,7 @@
 			<input type='text' name='vv' value='$vv' size='5'></td>
 			</tr>";
 
-		$query  = "SELECT * FROM toimitustapa WHERE nouto='' and yhtio='$kukarow[yhtio]' order by jarjestys, selite";
+		$query  = "SELECT * FROM toimitustapa WHERE nouto='' and $yhtiolisa order by jarjestys, selite";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<tr><th>".t("Valitse toimitustapa").":</th>";
@@ -214,13 +239,17 @@
 			if ($toimitustapa==$row['selite']) $sel=" selected ";
 			else $sel = "";
 
-			echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
+			echo "<option value='$row[selite]!!!!$row[yhtio]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
+			if ($yhtio != '') {
+				echo " ($row[yhtio])";
+			}
+			echo "</option>";
 		}
 
 		echo "</select></td></tr>";
 
 		// haetaan kaikki varastot
-		$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+		$query  = "SELECT tunnus, nimitys, yhtio FROM varastopaikat WHERE $yhtiolisa";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// jos löytyy enemmän kuin yksi, tehdään varasto popup..
@@ -232,6 +261,10 @@
 				if ($varasto==$row['tunnus']) $sel=" selected ";
 				else $sel = "";
 				echo "<option value='$row[tunnus]' $sel>$row[nimitys]";
+				if ($yhtio != '') {
+					echo " ($row[yhtio])";
+				}
+				echo "</option>";
 			}
 
 			echo "</select></td></tr>";
@@ -239,6 +272,7 @@
 		else {
 			$row = mysql_fetch_array($result);
 			echo "<input type='hidden' name='varasto' value='$row[tunnus]'>";
+			echo "<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>";
 		}
 
 		echo "</table><br>";

@@ -1,6 +1,24 @@
 <?php
 	require ("../inc/parametrit.inc");
 
+	$yhtio = '';
+	$yhtiolisa = '';
+
+	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
+		$yhtio = $konserni_yhtiot;
+		$yhtiolisa = "yhtio in ($yhtio)";
+
+		if ($lasku_yhtio != '') {
+			$kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
+
+			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio);
+		}
+	}
+	else {
+		$yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+	}
+
+
 	echo "<font class='head'>".t("Korjaa keräys").":</font><hr>";
 
 	if($tee=='KORJAA') {
@@ -11,7 +29,7 @@
 					WHERE otunnus='$tunnus' and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 		
-		$query  = "	update lasku 
+		$query  = "	UPDATE lasku 
 					set alatila='A' 
 					where yhtio='$kukarow[yhtio]' 
 					and tunnus='$tunnus' 
@@ -24,6 +42,10 @@
 		}
 		
 		$tee = '';
+
+		if ($yhtio != '' and $konserni_yhtiot != '') {
+			$yhtio = $konserni_yhtiot;
+		}
 	}
 
 	// meillä ei ole valittua tilausta
@@ -46,13 +68,13 @@
 		$vvl = date("Y");
 		$ppl = date("d");
 		
-		$query = "	select distinct otunnus 
+		$query = "	SELECT distinct otunnus 
 					from tilausrivi, lasku 
-					where tilausrivi.yhtio='$kukarow[yhtio]' 
+					where tilausrivi.$yhtiolisa
 					and var!='J' 
 					and kerattyaika>='$vva-$kka-$ppa 00:00:00'
 					and kerattyaika<='$vvl-$kkl-$ppl 23:59:59'
-					and lasku.yhtio='$kukarow[yhtio]' 
+					and lasku.$yhtiolisa
 					and lasku.tunnus=tilausrivi.otunnus 
 					and lasku.tila='L' 
 					and lasku.alatila='C'";
@@ -61,11 +83,11 @@
 		while ($tilrow = mysql_fetch_array($tilre))
 		{
 			// etsitään sopivia tilauksia
-			$query = "	SELECT tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, laatija
+			$query = "	SELECT lasku.yhtio yhtio, tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, laatija
 						FROM lasku
-						WHERE tunnus='$tilrow[0]' 
+						WHERE tunnus='$tilrow[otunnus]' 
 						and tila='L' $haku 
-						and yhtio='$kukarow[yhtio]' 
+						and $yhtiolisa
 						and alatila='C' 
 						ORDER by laadittu desc";
 			$result = mysql_query($query) or pupe_error($query);
@@ -80,19 +102,36 @@
 						$boob='kala';
 						echo "<table>";
 						echo "<tr>";
-						for ($i=0; $i<mysql_num_fields($result); $i++)
-							echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
+						for ($i=0; $i<mysql_num_fields($result); $i++) {
+							if (mysql_field_name($result, $i) == 'yhtio') {
+								if ($yhtio != '') {
+									echo "<th align='left'>",t("Yhtiö"),"</th>";
+								}
+							}
+							else {
+								echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
+							}
+						}
 						echo "</tr>";
 					}
 
 					echo "<tr>";
 
-					for ($i=0; $i<mysql_num_fields($result); $i++)
-						echo "<td>$row[$i]</td>";
+					for ($i=0; $i<mysql_num_fields($result); $i++) {
+						if (mysql_field_name($result, $i) == 'yhtio') {
+							if ($yhtio != '') {
+								echo "<td>$row[yhtio]</td>";
+							}
+						}
+						else {
+							echo "<td>$row[$i]</td>";
+						}
+					}
 
 					echo "	<form method='post' action='$PHP_SELF'><td class='back'>
 							<input type='hidden' name='tee' value='KORJAA'>	
-						  	<input type='hidden' name='tunnus' value='$row[0]'>
+							<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
+						  	<input type='hidden' name='tunnus' value='$row[tilaus]'>
 						  	<input type='submit' name='tila' value='".t("Korjaa")."'></td></tr></form>";
 				}
 			}

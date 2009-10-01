@@ -1,6 +1,23 @@
 <?php
 	require ("../inc/parametrit.inc");
 
+	$yhtio = '';
+	$yhtiolisa = '';
+
+	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
+		$yhtio = $konserni_yhtiot;
+		$yhtiolisa = "yhtio in ($yhtio)";
+
+		if ($lasku_yhtio != '') {
+			$kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
+
+			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio);
+		}
+	}
+	else {
+		$yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+	}
+
 	echo "<font class='head'>".t("Toimita tilaus").":</font><hr>";
 
 	if ($tee == 'P' and $maksutapa == 'seka') {
@@ -449,25 +466,22 @@
 		if (is_numeric($etsi)) $haku="and lasku.tunnus='$etsi'";
 
 		$query = "	SELECT distinct otunnus
-					from tilausrivi, lasku, toimitustapa
-					where tilausrivi.yhtio='$kukarow[yhtio]'
-					and lasku.yhtio='$kukarow[yhtio]'
-					and lasku.tunnus=tilausrivi.otunnus
-					and lasku.tila='L'
-					and (lasku.alatila='C' or alatila='B')
-					and toimitustapa.selite=lasku.toimitustapa
-					and toimitustapa.nouto!=''
-					and toimitettu=''
-					and keratty!=''
-					and vienti=''";
+					FROM lasku
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != '')
+					JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa and toimitustapa.nouto != '')
+					where lasku.$yhtiolisa
+					and lasku.tila = 'L'
+					and lasku.alatila in ('C', 'B')
+					and lasku.vienti = ''
+					ORDER BY lasku.toimaika";
 		$tilre = mysql_query($query) or pupe_error($query);
 
 		while ($tilrow = mysql_fetch_array($tilre)) {
 			// etsit‰‰n sopivia tilauksia
-			$query = "	SELECT lasku.tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, maksuehto.teksti maksuehto, toimitustapa, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, lasku.laatija, toimaika
+			$query = "	SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, maksuehto.teksti maksuehto, toimitustapa, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, lasku.laatija, toimaika
 						FROM lasku
 						LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto)
-						WHERE lasku.tunnus='$tilrow[0]' and tila='L' $haku and lasku.yhtio='$kukarow[yhtio]' and (alatila='C' or alatila='B') ORDER by laadittu desc";
+						WHERE lasku.tunnus='$tilrow[otunnus]' and tila='L' $haku and lasku.$yhtiolisa and (alatila='C' or alatila='B') ORDER by laadittu desc";
 			$result = mysql_query($query) or pupe_error($query);
 
 			//piirret‰‰n taulukko...
@@ -479,8 +493,19 @@
 
 						echo "<table>";
 						echo "<tr>";
-						for ($i=0; $i<mysql_num_fields($result); $i++)
-							echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
+						for ($i=0; $i<mysql_num_fields($result); $i++) {
+							if (mysql_field_name($result, $i) == 'yhtio_nimi') {
+								if ($yhtio != '') {
+									echo "<th align='left'>",t("Yhtiˆ"),"</th>";
+								}
+							}
+							elseif (mysql_field_name($result, $i) == 'yhtio') {
+								// skipataan t‰‰
+							}
+							else {
+								echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
+							}
+						}
 						echo "</tr>";
 					}
 
@@ -490,13 +515,22 @@
 						if (mysql_field_name($result,$i) == 'laadittu' or mysql_field_name($result,$i) == 'toimaika') {
 							echo "<td>".tv1dateconv($row[$i])."</td>";
 						}
+						elseif (mysql_field_name($result, $i) == 'yhtio_nimi') {
+							if ($yhtio != '') {
+								echo "<td>$row[yhtio_nimi]</td>";
+							}
+						}
+						elseif (mysql_field_name($result, $i) == 'yhtio') {
+							// skipataan t‰‰
+						}
 						else {
 							echo "<td>$row[$i]</td>";
 						}
 					}
 
 					echo "<form method='post' action='$PHP_SELF'><td class='back'>
-						  <input type='hidden' name='id' value='$row[0]'>
+						  <input type='hidden' name='id' value='$row[tilaus]'>
+						  <input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
 						  <input type='submit' name='tila' value='".t("Toimita")."'></td></tr></form>";
 				}
 			}
@@ -612,6 +646,7 @@
 
 		echo "<form name = 'rivit' method='post' action='$PHP_SELF'>
 				<input type='hidden' name='otunnus' value='$id'>
+				<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
 				<input type='hidden' name='tee' value='P'>";
 
 		echo "<table>";

@@ -2,12 +2,12 @@
 
 	require("inc/parametrit.inc");
 
-	$yhtio = '';
-	$yhtiolisa = '';
+	$logistiikka_yhtio = '';
+	$logistiikka_yhtiolisa = '';
 
 	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
-		$yhtio = $konserni_yhtiot;
-		$yhtiolisa = "yhtio in ($yhtio)";
+		$logistiikka_yhtio = $konserni_yhtiot;
+		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
 		if ($lasku_yhtio != '') {
 			$kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
@@ -16,7 +16,7 @@
 		}
 	}
 	else {
-		$yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+		$logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
 	}
 
 	echo "<font class='head'>".t("Rahtikirjakopio")."</font><hr>";
@@ -73,7 +73,6 @@
 
 		if ($toimitustapa != '') {
 			list($toimitustapa, $yhtio) = explode("!!!!", $toimitustapa);
-
 			$kukarow['yhtio'] = $yhtio;
 		}
 
@@ -113,7 +112,7 @@
 		else {
 			echo "<form action='rahtikirja-kopio.php' method='post'>";
 			echo "<input type='hidden' name='tee' value='tulosta'>";
-			echo "<input type='hidden' name='lasku_yhtio' value='$yhtio'>";
+			echo "<input type='hidden' name='lasku_yhtio' value='$logistiikka_yhtio'>";
 			echo "<input type='hidden' name='pp' value='$pp'>";
 			echo "<input type='hidden' name='kk' value='$kk'>";
 			echo "<input type='hidden' name='vv' value='$vv'>";
@@ -129,7 +128,7 @@
 
 			echo "<table>";
 			echo "<tr>";
-			if ($yhtio != '') echo "<th>",t("Yhtiö"),"</th>";
+			if ($logistiikka_yhtio != '') echo "<th>",t("Yhtiö"),"</th>";
 			echo "<th>".t("Rahtikirjanro")."</th>";
 			echo "<th>".t("Tilausnumero")."</th>";
 			echo "<th>".t("Tulostettu")."</th>";
@@ -151,7 +150,7 @@
 					$orow  = mysql_fetch_array($ores);
 
 					echo "<tr>";
-					if ($yhtio != '') echo "<td>$row[yhtio]</td>";
+					if ($logistiikka_yhtio != '') echo "<td>$row[yhtio]</td>";
 					echo "<td>$row[rahtikirjanro]</td>";
 					echo "<td>$orow[tunnus]</td>";
 					echo "<td>$rrow[tulostettu]</td>";
@@ -229,7 +228,7 @@
 			<input type='text' name='vv' value='$vv' size='5'></td>
 			</tr>";
 
-		$query  = "SELECT * FROM toimitustapa WHERE nouto='' and $yhtiolisa order by jarjestys, selite";
+		$query  = "SELECT * FROM toimitustapa WHERE nouto='' and $logistiikka_yhtiolisa order by jarjestys, selite";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<tr><th>".t("Valitse toimitustapa").":</th>";
@@ -240,7 +239,7 @@
 			else $sel = "";
 
 			echo "<option value='$row[selite]!!!!$row[yhtio]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV");
-			if ($yhtio != '') {
+			if ($logistiikka_yhtio != '') {
 				echo " ($row[yhtio])";
 			}
 			echo "</option>";
@@ -249,7 +248,7 @@
 		echo "</select></td></tr>";
 
 		// haetaan kaikki varastot
-		$query  = "SELECT tunnus, nimitys, yhtio FROM varastopaikat WHERE $yhtiolisa";
+		$query  = "SELECT tunnus, nimitys, yhtio FROM varastopaikat WHERE $logistiikka_yhtiolisa";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// jos löytyy enemmän kuin yksi, tehdään varasto popup..
@@ -261,7 +260,7 @@
 				if ($varasto==$row['tunnus']) $sel=" selected ";
 				else $sel = "";
 				echo "<option value='$row[tunnus]' $sel>$row[nimitys]";
-				if ($yhtio != '') {
+				if ($logistiikka_yhtio != '') {
 					echo " ($row[yhtio])";
 				}
 				echo "</option>";

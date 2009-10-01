@@ -1,12 +1,13 @@
 <?php
+
 	require ("../inc/parametrit.inc");
 
-	$yhtio = '';
-	$yhtiolisa = '';
+	$logistiikka_yhtio = '';
+	$logistiikka_yhtiolisa = '';
 
 	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
-		$yhtio = $konserni_yhtiot;
-		$yhtiolisa = "yhtio in ($yhtio)";
+		$logistiikka_yhtio = $konserni_yhtiot;
+		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
 		if ($lasku_yhtio != '') {
 			$kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
@@ -15,7 +16,7 @@
 		}
 	}
 	else {
-		$yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+		$logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
 	}
 
 	js_popup();
@@ -1325,8 +1326,8 @@
 
 	if ($id == '') {
 		$id = 0;
-		if ($yhtio != '' and $konserni_yhtiot != '') {
-			$yhtio = $konserni_yhtiot;
+		if ($logistiikka_yhtio != '' and $konserni_yhtiot != '') {
+			$logistiikka_yhtio = $konserni_yhtiot;
 		}
 	}
 
@@ -1343,7 +1344,7 @@
 
 		$query = "	SELECT tunnus, nimitys
 					FROM varastopaikat
-					WHERE $yhtiolisa
+					WHERE $logistiikka_yhtiolisa
 					ORDER BY nimitys";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -1361,7 +1362,8 @@
 
 		$query = "	SELECT distinct maa
 					FROM varastopaikat
-					WHERE maa != '' and $yhtiolisa
+					WHERE maa != '' 
+					and $logistiikka_yhtiolisa
 					ORDER BY maa";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -1406,7 +1408,7 @@
 
 		$query = "	SELECT selite
 					FROM toimitustapa
-					WHERE $yhtiolisa
+					WHERE $logistiikka_yhtiolisa
 					ORDER BY selite";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -1445,7 +1447,7 @@
 		if ($tumaa != '') {
 			$query = "	SELECT group_concat(tunnus) tunnukset
 						FROM varastopaikat
-						WHERE maa != '' and $yhtiolisa and maa = '$tumaa'";
+						WHERE maa != '' and $logistiikka_yhtiolisa and maa = '$tumaa'";
 			$maare = mysql_query($query) or pupe_error($query);
 			$maarow = mysql_fetch_array($maare);
 			$haku .= " and lasku.varasto in ($maarow[tunnukset]) ";
@@ -1495,7 +1497,7 @@
 					lasku.yhtio_nimi yhtio_nimi
 					from lasku use index (tila_index)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-					WHERE lasku.$yhtiolisa
+					WHERE lasku.$logistiikka_yhtiolisa
 					and lasku.tila					in ($tila)
 					and lasku.alatila				= 'A'
 					and tilausrivi.tyyppi			in ($tyyppi)
@@ -1516,7 +1518,7 @@
 			echo "<br><table>";
 
 			echo "<tr>";
-			if ($yhtio != '') {
+			if ($logistiikka_yhtio != '') {
 				echo "<th valign='top'>",t("Yhtiö"),"</th>";
 			}
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='prioriteetti'; document.forms['find'].submit();\">".t("Pri")."</a><br>";
@@ -1547,7 +1549,7 @@
 			while ($row = mysql_fetch_array($result)) {
 				echo "<tr class='aktiivi'>";
 
-				if ($yhtio != '') {
+				if ($logistiikka_yhtio != '') {
 					echo "<td valign='top'>$row[yhtio_nimi]</td>";
 				}
 
@@ -1589,7 +1591,7 @@
 						<input type='submit' name='tila' value='".t("Kerää")."'></form></td></tr>";
 			}
 
-			$spanni = $yhtio != '' ? 7 : 6;
+			$spanni = $logistiikka_yhtio != '' ? 7 : 6;
 
 			echo "<tr>";
 			echo "<td colspan='$spanni' style='text-align:right;' class='back'>".t("Rivejä yhteensä").":</td>";

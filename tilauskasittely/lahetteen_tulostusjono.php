@@ -2,21 +2,20 @@
 
 	require ("../inc/parametrit.inc");
 
-	$yhtio = '';
-	$yhtiolisa = '';
+	$logistiikka_yhtio = '';
+	$logistiikka_yhtiolisa = '';
 
 	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
-		$yhtio = $konserni_yhtiot;
-		$yhtiolisa = "yhtio in ($yhtio)";
+		$logistiikka_yhtio = $konserni_yhtiot;
+		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
 		if ($lasku_yhtio != '') {
 			$kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
-
 			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio);
 		}
 	}
 	else {
-		$yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+		$logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
 	}
 
 	$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
@@ -62,7 +61,7 @@
 
 	if ($tee2 == 'NAYTATILAUS') {
 
-		if ($yhtio != '' and $konserni_yhtiot != '') {
+		if ($logistiikka_yhtio != '' and $konserni_yhtiot != '') {
 			echo "<font class='head'>",t("Yhtiön")," $yhtiorow[nimi] ",t("tilaus")," $tunnus:</font><hr>";
 		}
 		else {
@@ -73,8 +72,8 @@
 		echo "<hr>";
 		$tee2 = $vanha_tee2;
 
-		if ($yhtio != '' and $konserni_yhtiot != '') {
-			$yhtio = $konserni_yhtiot;
+		if ($logistiikka_yhtio != '' and $konserni_yhtiot != '') {
+			$logistiikka_yhtio = $konserni_yhtiot;
 		}
 	}
 
@@ -263,7 +262,7 @@
 				echo "<input type='hidden' name='tee2' value='TULOSTA'>";
 
 				echo "<tr>";
-				if ($yhtio != '') {
+				if ($logistiikka_yhtio != '') {
 					echo "<th>",t("Yhtiö"),"</th>";
 				}
 				echo "<th>".t("Pri")."</th>";
@@ -296,7 +295,7 @@
 					$ero="td";
 					if ($tunnus==$tilrow['otunnus']) $ero="th";
 
-					if ($yhtio != '') {
+					if ($logistiikka_yhtio != '') {
 						echo "<$ero valign='top'>$tilrow[yhtio_nimi]</$ero>";
 					}
 
@@ -735,7 +734,7 @@
 					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
 					LEFT JOIN maksuehto ON maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus
 					WHERE
-					lasku.$yhtiolisa
+					lasku.$logistiikka_yhtiolisa
 					and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa)
 					$haku
 					$tilaustyyppi
@@ -750,7 +749,7 @@
 			echo "<br>";
 			echo "<table>";
 			echo "<tr>";
-			if ($yhtio != '') {
+			if ($logistiikka_yhtio != '') {
 				echo "<th valign='top'>",t("Yhtiö"),"</th>";
 			}
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='prioriteetti'; document.forms['find'].submit();\">".t("Pri")."<br>
@@ -785,7 +784,7 @@
 			$riveja_yht = 0;
 
 			while ($tilrow = mysql_fetch_array($tilre)) {
-				if ($yhtio != '') {
+				if ($logistiikka_yhtio != '') {
 					$kukarow['yhtio'] = $tilrow['yhtio'];
 				}
 
@@ -800,7 +799,7 @@
 
 				echo "<tr class='aktiivi'>";
 
-				if ($yhtio != '') {
+				if ($logistiikka_yhtio != '') {
 					echo "<$ero valign='top'>$tilrow[yhtio_nimi]</$ero>";
 				}
 
@@ -978,7 +977,7 @@
 				$riveja_yht += $tilrow["riveja"];
 			}
 
-			$spanni = $yhtio != '' ? 7 : 6; 
+			$spanni = $logistiikka_yhtio != '' ? 7 : 6; 
 
 			echo "<tr class='aktiivi'>";
 			echo "<th colspan='$spanni'>";
@@ -993,7 +992,7 @@
 			echo "<tr><th colspan='2'>".t("Tulosta kaikki keräyslistat")."</th></tr>";
 
 			if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
-				$yhtio = $konserni_yhtiot;
+				$logistiikka_yhtio = $konserni_yhtiot;
 			}
 
 			$query = "	SELECT *

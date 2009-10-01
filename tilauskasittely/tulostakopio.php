@@ -25,27 +25,26 @@
 		require('parametrit.inc');
 	}
 
-	$yhtio = '';
-	$yhtiolisa = '';
+	$logistiikka_yhtio = '';
+	$logistiikka_yhtiolisa = '';
 
 	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '' and ($toim == "LAHETE" or $toim == "OSOITELAPPU" or $toim == "KERAYSLISTA")) {
-		$yhtio = $konserni_yhtiot;
-		$yhtiolisa = "yhtio in ($yhtio)";
+		$logistiikka_yhtio = $konserni_yhtiot;
+		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
 		if ($lasku_yhtio != '') {
 			$kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
-
 			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio);
 		}
 	}
 	else {
-		$yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+		$logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
 	}
 
 	if ($toim == "") $toim = "LASKU";
 
 	if ($tee == 'NAYTAHTML') {
-		if ($yhtio != '' and $konserni_yhtiot != '') {
+		if ($logistiikka_yhtio != '' and $konserni_yhtiot != '') {
 			echo "<font class='head'>",t("Yhtiön")," $yhtiorow[nimi] ",t("tilaus")," $tunnus:</font><hr>";
 		}
 		else {
@@ -767,7 +766,7 @@
 			//katotaan löytyykö lasku ja sen kaikki tilaukset
 			$query = "  SELECT laskunro
 						FROM lasku
-						WHERE tunnus = '$otunnus' and lasku.$yhtiolisa";
+						WHERE tunnus = '$otunnus' and lasku.$logistiikka_yhtiolisa";
 			$laresult = mysql_query($query) or pupe_error($query);
 			$larow = mysql_fetch_assoc($laresult);
 
@@ -820,7 +819,7 @@
 					FROM lasku $use
 					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
 					WHERE $where1 $where2 $where3
-					and lasku.$yhtiolisa
+					and lasku.$logistiikka_yhtiolisa
 					$where4
 					$jarj";
 		$result = mysql_query($query) or pupe_error($query);
@@ -847,7 +846,7 @@
 						<input type='submit' value='".t("Tulosta useita kopioita")."'></form><br>";
 			}
 			echo "<table><tr>";
-			if ($yhtio != '') {
+			if ($logistiikka_yhtio != '') {
 				echo "<th valign='top'>",t("Yhtiö"),"</th>";
 			}
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.tunnus'>".t("Tilausnro")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.laskunro'>".t("Laskunro")."</a></th>";
@@ -881,7 +880,7 @@
 				if ($tunnus==$row['tunnus']) $ero="th";
 
 				echo "<tr>";
-				if ($yhtio != '') echo "<$ero valign='top'>$row[yhtio_nimi]</$ero>";
+				if ($logistiikka_yhtio != '') echo "<$ero valign='top'>$row[yhtio_nimi]</$ero>";
 				echo "<$ero valign='top'>$row[tunnus]<br>$row[laskunro]</$ero>";
 				echo "<$ero valign='top'>$row[ytunnus]<br>$row[nimi]<br>$row[nimitark]</$ero>";
 				echo "<$ero valign='top'>".tv1dateconv($row["pvm"])."<br>".tv1dateconv($row["toimaika"])."</$ero>";

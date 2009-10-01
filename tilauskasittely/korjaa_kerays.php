@@ -1,21 +1,21 @@
 <?php
+
 	require ("../inc/parametrit.inc");
 
-	$yhtio = '';
-	$yhtiolisa = '';
+	$logistiikka_yhtio = '';
+	$logistiikka_yhtiolisa = '';
 
 	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
-		$yhtio = $konserni_yhtiot;
-		$yhtiolisa = "yhtio in ($yhtio)";
+		$logistiikka_yhtio = $konserni_yhtiot;
+		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
 		if ($lasku_yhtio != '') {
 			$kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
-
 			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio);
 		}
 	}
 	else {
-		$yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+		$logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
 	}
 
 
@@ -43,8 +43,8 @@
 		
 		$tee = '';
 
-		if ($yhtio != '' and $konserni_yhtiot != '') {
-			$yhtio = $konserni_yhtiot;
+		if ($logistiikka_yhtio != '' and $konserni_yhtiot != '') {
+			$logistiikka_yhtio = $konserni_yhtiot;
 		}
 	}
 
@@ -70,11 +70,11 @@
 		
 		$query = "	SELECT distinct otunnus 
 					from tilausrivi, lasku 
-					where tilausrivi.$yhtiolisa
+					where tilausrivi.$logistiikka_yhtiolisa
 					and var!='J' 
 					and kerattyaika>='$vva-$kka-$ppa 00:00:00'
 					and kerattyaika<='$vvl-$kkl-$ppl 23:59:59'
-					and lasku.$yhtiolisa
+					and lasku.$logistiikka_yhtiolisa
 					and lasku.tunnus=tilausrivi.otunnus 
 					and lasku.tila='L' 
 					and lasku.alatila='C'";
@@ -87,7 +87,7 @@
 						FROM lasku
 						WHERE tunnus='$tilrow[otunnus]' 
 						and tila='L' $haku 
-						and $yhtiolisa
+						and $logistiikka_yhtiolisa
 						and alatila='C' 
 						ORDER by laadittu desc";
 			$result = mysql_query($query) or pupe_error($query);
@@ -104,7 +104,7 @@
 						echo "<tr>";
 						for ($i=0; $i<mysql_num_fields($result); $i++) {
 							if (mysql_field_name($result, $i) == 'yhtio') {
-								if ($yhtio != '') {
+								if ($logistiikka_yhtio != '') {
 									echo "<th align='left'>",t("Yhtiö"),"</th>";
 								}
 							}
@@ -119,7 +119,7 @@
 
 					for ($i=0; $i<mysql_num_fields($result); $i++) {
 						if (mysql_field_name($result, $i) == 'yhtio') {
-							if ($yhtio != '') {
+							if ($logistiikka_yhtio != '') {
 								echo "<td>$row[yhtio]</td>";
 							}
 						}

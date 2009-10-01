@@ -1,21 +1,21 @@
 <?php
+
 	require ("../inc/parametrit.inc");
 
-	$yhtio = '';
-	$yhtiolisa = '';
+	$logistiikka_yhtio = '';
+	$logistiikka_yhtiolisa = '';
 
 	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
-		$yhtio = $konserni_yhtiot;
-		$yhtiolisa = "yhtio in ($yhtio)";
+		$logistiikka_yhtio = $konserni_yhtiot;
+		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
 		if ($lasku_yhtio != '') {
 			$kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
-
 			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio);
 		}
 	}
 	else {
-		$yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+		$logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
 	}
 
 	echo "<font class='head'>".t("Toimita tilaus").":</font><hr>";
@@ -469,7 +469,7 @@
 					FROM lasku
 					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != '')
 					JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa and toimitustapa.nouto != '')
-					where lasku.$yhtiolisa
+					where lasku.$logistiikka_yhtiolisa
 					and lasku.tila = 'L'
 					and lasku.alatila in ('C', 'B')
 					and lasku.vienti = ''
@@ -481,7 +481,7 @@
 			$query = "	SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, maksuehto.teksti maksuehto, toimitustapa, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, lasku.laatija, toimaika
 						FROM lasku
 						LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto)
-						WHERE lasku.tunnus='$tilrow[otunnus]' and tila='L' $haku and lasku.$yhtiolisa and (alatila='C' or alatila='B') ORDER by laadittu desc";
+						WHERE lasku.tunnus='$tilrow[otunnus]' and tila='L' $haku and lasku.$logistiikka_yhtiolisa and (alatila='C' or alatila='B') ORDER by laadittu desc";
 			$result = mysql_query($query) or pupe_error($query);
 
 			//piirretään taulukko...
@@ -495,7 +495,7 @@
 						echo "<tr>";
 						for ($i=0; $i<mysql_num_fields($result); $i++) {
 							if (mysql_field_name($result, $i) == 'yhtio_nimi') {
-								if ($yhtio != '') {
+								if ($logistiikka_yhtio != '') {
 									echo "<th align='left'>",t("Yhtiö"),"</th>";
 								}
 							}
@@ -516,7 +516,7 @@
 							echo "<td>".tv1dateconv($row[$i])."</td>";
 						}
 						elseif (mysql_field_name($result, $i) == 'yhtio_nimi') {
-							if ($yhtio != '') {
+							if ($logistiikka_yhtio != '') {
 								echo "<td>$row[yhtio_nimi]</td>";
 							}
 						}

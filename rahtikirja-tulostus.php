@@ -4,21 +4,20 @@
 		require("inc/parametrit.inc");
 	}
 
-	$yhtio = '';
-	$yhtiolisa = '';
+	$logistiikka_yhtio = '';
+	$logistiikka_yhtiolisa = '';
 
 	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
-		$yhtio = $konserni_yhtiot;
-		$yhtiolisa = "yhtio in ($yhtio)";
+		$logistiikka_yhtio = $konserni_yhtiot;
+		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
 		if ($lasku_yhtio != '') {
 			$kukarow['yhtio'] = mysql_real_escape_string($lasku_yhtio);
-
 			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio);
 		}
 	}
 	else {
-		$yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+		$logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
 	}
 
 	echo "<font class='head'>",t("Rahtikirjojen tulostus"),"</font><hr>";
@@ -136,7 +135,7 @@
 
 		list($toimitustapa, $yhtio, $varasto, $crap) = explode("!!!!", $toimitustapa_varasto);
 
-		if ($yhtio != '') {
+		if ($logistiikka_yhtio != '') {
 			$kukarow['yhtio'] = $yhtio;
 		}
 
@@ -705,7 +704,7 @@
 					left join maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
 					left join varastopaikat on varastopaikat.yhtio=rahtikirjat.yhtio and varastopaikat.tunnus=rahtikirjat.tulostuspaikka
 					where rahtikirjat.tulostettu = '0000-00-00 00:00:00'
-					and rahtikirjat.$yhtiolisa
+					and rahtikirjat.$logistiikka_yhtiolisa
 					$wherelisa
 					GROUP BY lasku.yhtio, lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.printteri7
 					ORDER BY varastopaikat.tunnus, lasku.toimitustapa";
@@ -737,7 +736,7 @@
 						$varasto = $rakir_row["tunnus"];
 					}
 					echo "<option value='$rakir_row[toimitustapa]!!!!$rakir_row[yhtio]!!!!$rakir_row[tunnus]!!!!!$rakir_row[printteri7]' $sel>$rakir_row[nimitys] - $rakir_row[toimitustapa]";
-					if ($yhtio != '') {
+					if ($logistiikka_yhtio != '') {
 						echo " ($rakir_row[yhtio])";
 					}
 					echo "</option>";
@@ -763,7 +762,7 @@
 			echo "<td><select id='kirjoitin' name='laskukomento'>";
 			echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
 
-			$query = "SELECT printteri7 FROM varastopaikat WHERE $yhtiolisa and tunnus='$varasto'";
+			$query = "SELECT printteri7 FROM varastopaikat WHERE $logistiikka_yhtiolisa and tunnus='$varasto'";
 			$jvres = mysql_query($query) or pupe_error($query);
 			$jvrow = mysql_fetch_array($jvres);
 			$e = $jvrow["printteri7"];
@@ -772,13 +771,13 @@
 
 			$query = "	SELECT *
 						from kirjoittimet
-						where $yhtiolisa
+						where $logistiikka_yhtiolisa
 						ORDER BY kirjoitin";
 			$kires = mysql_query($query) or pupe_error($query);
 
 			while ($kirow = mysql_fetch_array($kires)) {
 				echo "<option id='K$kirow[tunnus]' value='$kirow[komento]' ".$sel[$kirow["tunnus"]].">$kirow[kirjoitin]";
-				if ($yhtio != '') {
+				if ($logistiikka_yhtio != '') {
 					echo " ($kirow[yhtio])";
 				}
 				echo "</option>";
@@ -794,7 +793,7 @@
 
 			while ($kirow = mysql_fetch_array($kires)) {
 				echo "<option id='K$kirow[tunnus]' value='$kirow[tunnus]'>$kirow[kirjoitin]";
-				if ($yhtio != '') {
+				if ($logistiikka_yhtio != '') {
 					echo " ($kirow[yhtio])";
 				}
 				echo "</option>";
@@ -813,7 +812,7 @@
 
 			while ($kirrow = mysql_fetch_array($kires)) {
 				echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]";
-				if ($yhtio != '') {
+				if ($logistiikka_yhtio != '') {
 					echo " ($kirrow[yhtio])";
 				}
 				echo "</option>";

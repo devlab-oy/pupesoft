@@ -403,11 +403,9 @@ if (!function_exists('alku_kerayslista')) {
 			fclose($fh);
 			$image = $pdf->png_embed($data);
 
-			if(!$image) {
-				echo t("Viivakoodivirhe").": ".$image.$data;
-				exit;
+			if ($image) {
+				$placement = $pdf->image_place($image, 805, 440, $thispage);
 			}
-			$placement = $pdf->image_place($image, 805, 440, $thispage);
 
 			unset($obj);
 
@@ -602,20 +600,14 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 				fclose($fh);
 				$image = $pdf->png_embed($data);
 
-				if(!$image) {
-					echo t("Viivakoodivirhe").": ".$image.$data;
-					exit;
+				if ($image) {
+					$placement = $pdf->image_place($image, 805, 440, $thispage);
 				}
-				$placement = $pdf->image_place($image, 805, 440, $thispage);
 
 				unset($obj);
 
 				//dellataan tmp filet kuleksimasta
 				system("rm -f $nimi1 $nimi2");
-			}
-			else{
-				echo t("Oliota ei voitu luoda").".";
-				exit;
 			}
 		}
 

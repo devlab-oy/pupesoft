@@ -174,19 +174,16 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 			fclose($fh);
 			$image = $pdf->png_embed($data);
 
-			if(!$image) {
-				echo "image create error";
+			if ($image) {
+				// piirretään viivakoodi paprulle
+				$pdf->image_place($image, mm_pt(80), mm_pt(30), $firstpage); // Y, X
+				$pdf->draw_text(mm_pt(5), mm_pt(75), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
 			}
-			// piirretään viivakoodi paprulle
-			$pdf->image_place($image, mm_pt(80), mm_pt(30), $firstpage); // Y, X
-			$pdf->draw_text(mm_pt(5), mm_pt(75), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
+
 			unset($obj);
 
 			//dellataan tmp filet kuleksimasta
 			system("rm -f $nimi1 $nimi2");
-		}
-		else {
-			echo "object create error";
 		}
 	}
 
@@ -229,15 +226,14 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 			fclose($fh);
 			$image = $pdf->png_embed($data);
 
-			if(!$image) {
-				echo "image create error 2";
+			if ($image) {
+				// piirretään viivakoodi paprulle
+				$pdf->image_place($image, mm_pt(10), mm_pt(-15), $firstpage); // Y, X
 			}
 
 			//tehää tästä vielä kaunis kattella
 			$sscc = substr($sscc,0,4)." ".substr($sscc,4,1)." ".substr($sscc,5,8)." ".substr($sscc,13,8)." ".substr($sscc,21,1);
 
-			// piirretään viivakoodi paprulle
-			$pdf->image_place($image, mm_pt(10), mm_pt(-15), $firstpage); // Y, X
 			$pdf->draw_text(mm_pt(5), mm_pt(5), "Kolli - Item ID.: $sscc", $firstpage, $otsik);
 			unset($obj);
 

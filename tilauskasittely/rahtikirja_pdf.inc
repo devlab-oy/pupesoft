@@ -225,22 +225,16 @@
 				fclose($fh);
 				$image = $pdf->png_embed($data);
 
-				if(!$image) {
-					echo "error";
-					exit;
+				if ($image) {
+					// piirretään viivakoodi paprulle
+					$pdf->image_place($image, 631, 300, $firstpage); // Y, X
+					$pdf->draw_text(390, 625,  $viiva, $firstpage, $norm);
 				}
-				// piirretään viivakoodi paprulle
-				$pdf->image_place($image, 631, 300, $firstpage); // Y, X
-				$pdf->draw_text(390, 625,  $viiva,							$firstpage, $norm);
 
 				unset($obj);
 
 				//dellataan tmp filet kuleksimasta
 				system("rm -f $nimi1 $nimi2");
-			}
-			else{
-				echo "error";
-				exit;
 			}
 		}
 

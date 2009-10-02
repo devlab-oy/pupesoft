@@ -158,23 +158,16 @@
 			fclose($fh);
 			$image = $pdf->png_embed($data);
 	
-			if(!$image) {
-				echo "error";
-				exit;
+			if ($image) {
+				// piirretään viivakoodi paprulle
+				$pdf->image_place($image, 635, 350, $firstpage); // Y, X
+				$pdf->draw_text(330, 625,  $viiva2,											$firstpage, $norm);
 			}
-			// piirretään viivakoodi paprulle
-			$pdf->image_place($image, 635, 350, $firstpage); // Y, X
-			$pdf->draw_text(330, 625,  $viiva2,											$firstpage, $norm);
-	
 	
 			unset($obj);
 	
 			//dellataan tmp filet kuleksimasta
 			system("rm -f $nimi1 $nimi2");
-		}
-		else {
-			echo "error";
-			exit;
 		}
 								
 		// sitten aletaan piirtämään itse PDF sisältöä	

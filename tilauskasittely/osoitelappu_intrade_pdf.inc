@@ -166,13 +166,13 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		fclose($fh);
 		$image = $pdf->png_embed($data);
 
-		if(!$image) {
-			echo "image create error";
+		if ($image) {
+			// piirretään viivakoodi paprulle
+			$pdf->image_place($image, mm_pt(70), mm_pt(30), $firstpage); // Y, X
 		}
-		// piirretään viivakoodi paprulle
-		$pdf->image_place($image, mm_pt(70), mm_pt(30), $firstpage); // Y, X
 		$pdf->draw_text(mm_pt(22), mm_pt(65), "Asiakastilaus: ",	$firstpage, $norm);
 		$pdf->draw_text(mm_pt(50), mm_pt(65), "(400) $laskurow[asiakkaan_tilausnumero]",	$firstpage, $iso);
+
 		unset($obj);
 
 		//dellataan tmp filet kuleksimasta
@@ -222,15 +222,14 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		fclose($fh);
 		$image = $pdf->png_embed($data);
 
-		if(!$image) {
-			echo "image create error 2";
+		if ($image) {
+			$pdf->image_place($image, mm_pt(38), mm_pt(-15), $firstpage); // Y, X
 		}
 
 		//tehää tästä vielä kaunis kattella
 		$sscc = substr($sscc,0,4).substr($sscc,4,1).substr($sscc,5,8).substr($sscc,13,8).substr($sscc,21,1);
 
 		// piirretään viivakoodi paprulle
-		$pdf->image_place($image, mm_pt(38), mm_pt(-15), $firstpage); // Y, X
 		$pdf->draw_text(mm_pt(22), mm_pt(33), "Kolli - Item ID.: ", $firstpage, $otsik);
 		$pdf->draw_text(mm_pt(45), mm_pt(33), "(00) $sscc", $firstpage, $iso);
 		unset($obj);

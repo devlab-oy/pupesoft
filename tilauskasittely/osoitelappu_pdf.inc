@@ -169,16 +169,18 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 
-			$fh = fopen($nimi2, "r");
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
+			if ($fh = @fopen($nimi2, "r")) {
+				$data = fread($fh, filesize($nimi2));
+				fclose($fh);
+				$image = $pdf->png_embed($data);
 
-			if ($image) {
-				// piirret‰‰n viivakoodi paprulle
-				$pdf->image_place($image, mm_pt(80), mm_pt(30), $firstpage); // Y, X
-				$pdf->draw_text(mm_pt(5), mm_pt(75), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
+				if ($image) {
+					// piirret‰‰n viivakoodi paprulle
+					$pdf->image_place($image, mm_pt(80), mm_pt(30), $firstpage); // Y, X
+				}
 			}
+
+			$pdf->draw_text(mm_pt(5), mm_pt(75), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
 
 			unset($obj);
 
@@ -221,14 +223,15 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 
-			$fh = fopen($nimi2, "r");
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
+			if ($fh = @fopen($nimi2, "r")) {
+				$data = fread($fh, filesize($nimi2));
+				fclose($fh);
+				$image = $pdf->png_embed($data);
 
-			if ($image) {
-				// piirret‰‰n viivakoodi paprulle
-				$pdf->image_place($image, mm_pt(10), mm_pt(-15), $firstpage); // Y, X
+				if ($image) {
+					// piirret‰‰n viivakoodi paprulle
+					$pdf->image_place($image, mm_pt(10), mm_pt(-15), $firstpage); // Y, X
+				}
 			}
 
 			//teh‰‰ t‰st‰ viel‰ kaunis kattella

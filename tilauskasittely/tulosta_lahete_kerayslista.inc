@@ -398,13 +398,14 @@ if (!function_exists('alku_kerayslista')) {
 
 			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 
-			$fh = fopen($nimi2, "r");
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
+			if ($fh = @fopen($nimi2, "r")) {
+				$data = fread($fh, filesize($nimi2));
+				fclose($fh);
+				$image = $pdf->png_embed($data);
 
-			if ($image) {
-				$placement = $pdf->image_place($image, 805, 440, $thispage);
+				if ($image) {
+					$placement = $pdf->image_place($image, 805, 440, $thispage);
+				}
 			}
 
 			unset($obj);
@@ -595,13 +596,14 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 
 				passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 
-				$fh = fopen($nimi2, "r");
-				$data = fread($fh, filesize($nimi2));
-				fclose($fh);
-				$image = $pdf->png_embed($data);
+				if ($fh = fopen($nimi2, "r")) {
+					$data = fread($fh, filesize($nimi2));
+					fclose($fh);
+					$image = $pdf->png_embed($data);
 
-				if ($image) {
-					$placement = $pdf->image_place($image, 805, 440, $thispage);
+					if ($image) {
+						$placement = $pdf->image_place($image, 805, 440, $thispage);
+					}
 				}
 
 				unset($obj);
@@ -1030,7 +1032,7 @@ if (!function_exists('print_pdf_kerayslista')) {
 
 		//kirjoitetaan pdf faili levylle..
 		$fh = fopen($pdffilenimi, "w");
-		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
+		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");	
 		fclose($fh);
 
 		// itse print komento...

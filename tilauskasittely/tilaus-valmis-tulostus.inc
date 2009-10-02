@@ -159,7 +159,7 @@
 			$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
 			$kirres  = mysql_query($query) or pupe_error($query);
 			$kirrow  = mysql_fetch_array($kirres);
-			
+
 			$komento = $kirrow['komento'];
 		}
 
@@ -172,9 +172,7 @@
 		}
 
 		if ($returnvalue != 0) {
-			echo "<font class='error'>Lähetteen tulostus epäonnistui! Tilaus $laskurow[tunnus] siirrettiin tulostusjonoon.
-					Käy tulostamassa lähete <a href='lahetteen_tulostusjono.php'>tulostusjonosta</a>.</font><br>";
-
+			echo "<br><font class='error'>Lähetteen tulostus epäonnistui! Tilaus $laskurow[tunnus] siirrettiin tulostusjonoon. Käy tulostamassa lähete <a href='lahetteen_tulostusjono.php'>tulostusjonosta</a>.</font><br><br>";
 			$virheellinen = "X"; //Merkataan epäonnistuneeksi
 		}
 

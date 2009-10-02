@@ -153,16 +153,18 @@
 	
 			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 	
-			$fh = fopen($nimi2, "r");
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
+			if ($fh = @fopen($nimi2, "r")) {
+				$data = fread($fh, filesize($nimi2));
+				fclose($fh);
+				$image = $pdf->png_embed($data);
 	
-			if ($image) {
-				// piirretään viivakoodi paprulle
-				$pdf->image_place($image, 635, 350, $firstpage); // Y, X
-				$pdf->draw_text(330, 625,  $viiva2,											$firstpage, $norm);
+				if ($image) {
+					// piirretään viivakoodi paprulle
+					$pdf->image_place($image, 635, 350, $firstpage); // Y, X
+				}
 			}
+
+			$pdf->draw_text(330, 625,  $viiva2,											$firstpage, $norm);
 	
 			unset($obj);
 	

@@ -376,13 +376,14 @@ if (!function_exists('alku')) {
 
 			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 
-			$fh = fopen($nimi2, "r");
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
+			if ($fh = @fopen($nimi2, "r")) {
+				$data = fread($fh, filesize($nimi2));
+				fclose($fh);
+				$image = $pdf->png_embed($data);
 
-			if ($image) {
-				$placement = $pdf->image_place($image, 805, 440, $thispage);
+				if ($image) {
+					$placement = $pdf->image_place($image, 805, 440, $thispage);
+				}
 			}
 
 			unset($obj);
@@ -547,14 +548,16 @@ if (!function_exists('uusi_sivu')) {
 
 			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 
-			$fh = fopen($nimi2, "r");
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
+			if ($fh = @fopen($nimi2, "r")) {
+				$data = fread($fh, filesize($nimi2));
+				fclose($fh);
+				$image = $pdf->png_embed($data);
 
-			if ($image) {
-				$placement = $pdf->image_place($image, 805, 440, $thispage);
+				if ($image) {
+					$placement = $pdf->image_place($image, 805, 440, $thispage);
+				}
 			}
+
 			unset($obj);
 
 			//dellataan tmp filet kuleksimasta

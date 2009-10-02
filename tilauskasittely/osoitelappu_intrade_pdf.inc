@@ -161,15 +161,17 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 		passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 
-		$fh = fopen($nimi2, "r");
-		$data = fread($fh, filesize($nimi2));
-		fclose($fh);
-		$image = $pdf->png_embed($data);
+		if ($fh = @fopen($nimi2, "r")) {
+			$data = fread($fh, filesize($nimi2));
+			fclose($fh);
+			$image = $pdf->png_embed($data);
 
-		if ($image) {
-			// piirret‰‰n viivakoodi paprulle
-			$pdf->image_place($image, mm_pt(70), mm_pt(30), $firstpage); // Y, X
+			if ($image) {
+				// piirret‰‰n viivakoodi paprulle
+				$pdf->image_place($image, mm_pt(70), mm_pt(30), $firstpage); // Y, X
+			}
 		}
+
 		$pdf->draw_text(mm_pt(22), mm_pt(65), "Asiakastilaus: ",	$firstpage, $norm);
 		$pdf->draw_text(mm_pt(50), mm_pt(65), "(400) $laskurow[asiakkaan_tilausnumero]",	$firstpage, $iso);
 
@@ -217,13 +219,14 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 		passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 
-		$fh = fopen($nimi2, "r");
-		$data = fread($fh, filesize($nimi2));
-		fclose($fh);
-		$image = $pdf->png_embed($data);
+		if ($fh = @fopen($nimi2, "r")) {
+			$data = fread($fh, filesize($nimi2));
+			fclose($fh);
+			$image = $pdf->png_embed($data);
 
-		if ($image) {
-			$pdf->image_place($image, mm_pt(38), mm_pt(-15), $firstpage); // Y, X
+			if ($image) {
+				$pdf->image_place($image, mm_pt(38), mm_pt(-15), $firstpage); // Y, X
+			}
 		}
 
 		//teh‰‰ t‰st‰ viel‰ kaunis kattella

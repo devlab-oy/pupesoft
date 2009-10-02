@@ -944,7 +944,11 @@
 					}
 
 					echo "</th>";
-					echo "<th>".t("Saldo")."</th>";
+
+					if ($kukarow["kuka"] != "www" and $verkkokauppa_saldotsk) {
+						echo "<th>".t("Saldo")."</th>";
+					}
+
 					echo "<th>".t("Osta")."</th>";
 				}
 
@@ -1262,7 +1266,7 @@
 
 				$edtuoteno = $row["korvaavat"];
 
-				if ($verkkokauppa == "" or $kukarow["kuka"] != "www") {
+				if ($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www" and $verkkokauppa_saldotsk)) {
 					if ($row["tuoteperhe"] == $row["tuoteno"] and $row["sarjanumeroseuranta"] != "S") {
 						// Tuoteperheen isä
 						if ($kukarow["extranet"] != "" or $verkkokauppa != "") {

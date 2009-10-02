@@ -1345,7 +1345,7 @@
 		$query = "	SELECT yhtio, tunnus, nimitys
 					FROM varastopaikat
 					WHERE $logistiikka_yhtiolisa
-					ORDER BY yhtio, nimitys";
+					ORDER BY yhtio, tyyppi, nimitys";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
@@ -1356,7 +1356,11 @@
 				$sel = 'selected';
 				$tuvarasto = $row['tunnus'];
 			}
-			echo "<option value='$row[tunnus]' $sel>$row[nimitys] ($row[yhtio])</option>";
+			echo "<option value='$row[tunnus]' $sel>$row[nimitys]";
+			if ($logistiikka_yhtio != '') {
+				echo " ($row[yhtio])";
+			}
+			echo "</option>";
 		}
 		echo "</select>";
 
@@ -1406,21 +1410,22 @@
 
 		echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
 
-		$query = "	SELECT DISTINCT selite
+		$query = "	SELECT selite, min(tunnus) tunnus
 					FROM toimitustapa
 					WHERE $logistiikka_yhtiolisa
+					GROUP BY selite
 					ORDER BY selite";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
 
-		while($row = mysql_fetch_array($result)){
+		while ($row = mysql_fetch_array($result)){
 			$sel = '';
 			if ($row['selite'] == $tutoimtapa) {
 				$sel = 'selected';
 				$tutoimtapa = $row['selite'];
 			}
-			echo "<option value='$row[selite]' $sel>$row[selite]</option>";
+			echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
 		}
 
 		echo "</select></td>";

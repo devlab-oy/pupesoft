@@ -808,27 +808,32 @@
 		echo "<input type='hidden' id='jarj' name='jarj' value='$jarj'>";
 		echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
 
-		$query = "	SELECT tunnus, nimitys
+		$query = "	SELECT tunnus, nimitys, yhtio
 					FROM varastopaikat
 					WHERE $logistiikka_yhtiolisa
-					ORDER BY nimitys";
+					ORDER BY yhtio, tyyppi, nimitys";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
 
 		while ($row = mysql_fetch_array($result)){
 			$sel = '';
-			if (($row[0] == $tuvarasto) or ($kukarow['varasto'] == $row[0] and $tuvarasto=='')) {
+			if (($row["tunnus"] == $tuvarasto) or ($kukarow['varasto'] == $row["tunnus"] and $tuvarasto=='')) {
 				$sel = 'selected';
-				$tuvarasto = $row[0];
+				$tuvarasto = $row["tunnus"];
 			}
-			echo "<option value='$row[0]' $sel>$row[1]</option>";
+			echo "<option value='$row[tunnus]' $sel>$row[nimitys]";
+			if ($logistiikka_yhtio != '') {
+				echo " ($row[yhtio])";
+			}			
+			echo "</option>";
 		}
 		echo "</select>";
 
 		$query = "	SELECT distinct maa
 					FROM varastopaikat
-					WHERE maa != '' and $logistiikka_yhtiolisa
+					WHERE $logistiikka_yhtiolisa
+					and maa != '' 
 					ORDER BY maa";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -871,9 +876,10 @@
 
 		echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
 
-		$query = "	SELECT *
+		$query = "	SELECT selite, min(tunnus) tunnus
 					FROM toimitustapa
 					WHERE $logistiikka_yhtiolisa
+					GROUP BY selite
 					ORDER BY selite";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -1482,7 +1488,7 @@
 		$query = "	SELECT tunnus, nimitys, yhtio
 					FROM varastopaikat
 					WHERE $logistiikka_yhtiolisa
-					ORDER BY nimitys";
+					ORDER BY tyyppi, nimitys";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
@@ -1806,9 +1812,9 @@
 		// haetaan kaikki toimitustavat
 		$query  = "	SELECT *
 					FROM toimitustapa
-					WHERE yhtio='$kukarow[yhtio]'
+					WHERE yhtio = '$kukarow[yhtio]'
 					and tulostustapa != 'X'
-					order by jarjestys,selite";
+					order by jarjestys, selite";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<th align='left'>".t("Toimitustapa")."</th><td>\n";
@@ -1882,7 +1888,10 @@
 		echo "<input value='$rahtisopimus' type='text' name='rahtisopimus' size='20'></td></tr>";
 
 		// haetaan kaikki varastot
-		$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+		$query  = "	SELECT tunnus, nimitys 
+					FROM varastopaikat 
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY tyyppi, nimitys";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// jos löytyy enemmän kuin yksi, tehdään varasto popup..
@@ -1973,7 +1982,7 @@
 			$query = "	SELECT *
 						FROM kirjoittimet
 						WHERE
-						yhtio='$kukarow[yhtio]'
+						yhtio = '$kukarow[yhtio]'
 						ORDER by kirjoitin";
 			$kirre = mysql_query($query) or pupe_error($query);
 

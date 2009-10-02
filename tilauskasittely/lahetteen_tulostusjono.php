@@ -432,7 +432,6 @@
 					echo "</tr>";
 				}
 
-
 				//haetaan keräyslistan oletustulostin
 				$query = "	SELECT *
 							from varastopaikat
@@ -589,7 +588,7 @@
 					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
 					WHERE varastopaikat.$logistiikka_yhtiolisa
 					GROUP BY varastopaikat.yhtio, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue
-					ORDER BY varastopaikat.yhtio, varastopaikat.nimitys";
+					ORDER BY varastopaikat.yhtio, varastopaikat.tyyppi, varastopaikat.nimitys";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
@@ -598,10 +597,18 @@
 		$sel[$tuvarasto] = "SELECTED";
 		while ($row = mysql_fetch_array($result)){
 			if ($row['tulostusalue'] != '') {
-				echo "<option value='$row[tunnus]##$row[tulostusalue]' ".$sel[$row['tunnus']."##".$row['tulostusalue']].">$row[nimitys] ($row[kpl]) $row[tulostusalue] ($row[yhtio])</option>";
+				echo "<option value='$row[tunnus]##$row[tulostusalue]' ".$sel[$row['tunnus']."##".$row['tulostusalue']].">$row[nimitys] ($row[kpl]) $row[tulostusalue]";
+				if ($logistiikka_yhtio != '') {
+					echo " ($row[yhtio])";
+				}
+				echo "</option>";
 			}
 			else {
-				echo "<option value='$row[tunnus]' ".$sel[$row['tunnus']].">$row[nimitys] ($row[kpl]) ($row[yhtio])</option>";
+				echo "<option value='$row[tunnus]' ".$sel[$row['tunnus']].">$row[nimitys] ($row[kpl])";
+				if ($logistiikka_yhtio != '') {
+					echo " ($row[yhtio])";
+				}
+				echo "</option>";
 			}
 		}
 		echo "</select>";
@@ -793,7 +800,7 @@
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">".t("Toimitustapa")."</th>";
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">".t("Riv")."</th>";
 
-			if ($yhtiorow["pakkaamolokerot"] == "K") {
+			if ($yhtiorow["pakkaamolokerot"] == "K" or $logistiikka_yhtio != '') {
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">".t("Ei lokeroa")."</th>";
 			}
 
@@ -809,6 +816,7 @@
 			while ($tilrow = mysql_fetch_array($tilre)) {
 				if ($logistiikka_yhtio != '') {
 					$kukarow['yhtio'] = $tilrow['yhtio'];
+					$yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
 				}
 
 				if ($edennakko != "" and $edennakko != $tilrow["t_tyyppi"] and $tilrow["t_tyyppi"] == "E") {
@@ -896,6 +904,10 @@
 				if ($tilrow["tilauksia"] > 1) {
 					echo "<$ero valign='top'></$ero>";
 
+					if ($yhtiorow["pakkaamolokerot"] == "K" or $logistiikka_yhtio != '') {
+						echo "<$ero valign='top'></$ero>";
+					}
+
 					echo "<form method='post' action='$PHP_SELF'>";
 					echo "<input type='hidden' name='toim' 			value='$toim'>";
 					echo "<input type='hidden' name='lasku_yhtio' value='$tilrow[yhtio]'>";
@@ -910,7 +922,8 @@
 					//haetaan keräyslistan oletustulostin
 					$query = "	SELECT *
 								from varastopaikat
-								where yhtio='$kukarow[yhtio]' and tunnus='$tilrow[varasto]'";
+								where yhtio = '$kukarow[yhtio]' 
+								and tunnus = '$tilrow[varasto]'";
 					$prires = mysql_query($query) or pupe_error($query);
 					$prirow = mysql_fetch_array($prires);
 					$kirjoitin = $prirow['printteri0'];
@@ -943,11 +956,13 @@
 						echo "<input type='hidden' name='ei_pakkaamoa_selected' id='ei_pakkaamoa_selected' value='$ei_pakkaamoa_sel'>";
 						echo "</$ero>";
 					}
+					elseif ($logistiikka_yhtio != '') {
+						echo "<$ero></$ero>";
+					}
 
 					$query = "	SELECT *
 								FROM kirjoittimet
-								WHERE
-								yhtio='$kukarow[yhtio]'
+								WHERE yhtio = '$kukarow[yhtio]'
 								ORDER by kirjoitin";
 					$kirre = mysql_query($query) or pupe_error($query);
 
@@ -956,7 +971,7 @@
 					while ($kirrow = mysql_fetch_array($kirre)) {
 						$sel = '';
 
-						//tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
+						// tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
 						if (($kirrow['tunnus'] == $kirjoitin and $kukarow['kirjoitin'] == 0) or ($kirrow['tunnus'] == $kukarow['kirjoitin'])) {
 							$sel = "SELECTED";
 						}
@@ -1005,7 +1020,13 @@
 			echo "<tr class='aktiivi'>";
 			echo "<th colspan='$spanni'>";
 
-			echo t("Rivejä yhteensä")."</th><th>".$riveja_yht."</th></tr>";
+			echo t("Rivejä yhteensä")."</th>";
+			echo "<th>".$riveja_yht."</th>";
+
+			$spanni = ($yhtiorow["pakkaamolokerot"] == "K" or $logistiikka_yhtio != '') ? 4 : 3; 						
+
+			echo "<th colspan='$spanni'></th>";
+			echo "</tr>";
 
 			echo "</table>";
 			echo "<br>";
@@ -1018,11 +1039,12 @@
 				$logistiikka_yhtio = $konserni_yhtiot;
 			}
 
-			$query = "	SELECT *
+			$query = "	SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
 						FROM kirjoittimet
 						WHERE
 						$logistiikka_yhtiolisa
-						ORDER by yhtio, kirjoitin";
+						GROUP BY komento
+						ORDER BY kirjoitin";
 			$kirre = mysql_query($query) or pupe_error($query);
 
 			echo "<tr><td><select name='valittu_tulostin'>";
@@ -1035,7 +1057,7 @@
 					$sel = "SELECTED";
 				}
 
-				echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin] ($kirrow[yhtio])</option>";
+				echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
 			}
 
 			echo "</select></td>";

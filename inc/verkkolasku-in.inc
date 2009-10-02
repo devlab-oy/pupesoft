@@ -299,11 +299,12 @@
 
 			if (!isset($trow) and $laskuttajan_vat != "") {
 				$intvat = preg_replace("/[^0-9]/", "", $laskuttajan_vat);
+				$intvat2 = (int) $intvat; // ilman etunollaa
 
-				// 6 etsit‰‰n toimittaja vat-numerolla
+				// 6 etsit‰‰n toimittaja vat-numerolla ilman FI-etuliitett‰
 				$query  = "	SELECT *
 							FROM toimi
-							WHERE ytunnus = '$intvat'
+							WHERE ytunnus in ('$intvat', '$intvat2')
 							and ytunnus not in ('','0')
 							and yhtio = '$yhtio'
 							and tyyppi != 'P'";

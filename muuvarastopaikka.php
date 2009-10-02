@@ -74,7 +74,7 @@
 
 		if (mysql_num_rows($paikatresult1) > 0) {
 			while ($saldorow = mysql_fetch_array ($paikatresult1)) {
-				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
 				$saldot[$saldorow["tunnus"]] 	= $saldo;
 				$hyllyalue[$saldorow["tunnus"]] = $saldorow["hyllyalue"];
@@ -333,7 +333,7 @@
 			$result = mysql_query($query) or die($query);
 
 			if (mysql_num_rows($result) == 1) {
-				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuotteet[$iii], '', '', '', $mistarow["hyllyalue"], $mistarow["hyllynro"], $mistarow["hyllyvali"], $mistarow["hyllytaso"]);
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuotteet[$iii], 'JTSPEC', '', '', $mistarow["hyllyalue"], $mistarow["hyllynro"], $mistarow["hyllyvali"], $mistarow["hyllytaso"]);
 
 				$lisavartprow = mysql_fetch_array($result);
 
@@ -563,7 +563,7 @@
 		$ahyllytaso = trim($ahyllytaso);
 
 		//Tarkistetaan onko paikka validi
-		list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', '', '', $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso);
+		list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso);
 
 		if ($saldo === FALSE) {
 			if (kuuluukovarastoon($ahyllyalue, $ahyllynro) and $ahyllyalue != '' and $ahyllynro != '' and $ahyllyvali != '' and $ahyllytaso != '') {
@@ -721,7 +721,7 @@
 
 		if (mysql_num_rows($paikatresult1) > 0) {
 			while ($saldorow = mysql_fetch_array ($paikatresult1)) {
-				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
 				if ($myytavissa > 0) {
 					echo "<option value='$saldorow[tunnus]'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($myytavissa)</option>";
@@ -746,7 +746,7 @@
 
 		if (mysql_num_rows($paikatresult2) > 0) {
 			while ($saldorow = mysql_fetch_array ($paikatresult2)) {
-				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
 				echo "<option value='$saldorow[tunnus]'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($myytavissa)</option>";
 			}
@@ -847,7 +847,7 @@
 					$checked = "";
 				}
 
-				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
 				echo "<tr><td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td><td align='right'>$saldo</td><td align='right'>$hyllyssa</td><td align='right'>$myytavissa</td>";
 

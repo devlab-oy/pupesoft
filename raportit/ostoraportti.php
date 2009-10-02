@@ -15,15 +15,20 @@
 	}
 	else {
 
-		$ala_tallenna = array(	"kysely", 
-								"uusirappari", 
-								"edkysely", 
-								"rtee", 
-								"mul_osasto", 
-								"mul_try", 
-								"mul_tme", 
-								"toimittajaid", 
-								"ytunnus", 
+		if (!@include('Spreadsheet/Excel/Writer.php')) {
+			echo "<font class='error'>".t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta.")."</font><br>";
+			exit;
+		}
+
+		$ala_tallenna = array(	"kysely",
+								"uusirappari",
+								"edkysely",
+								"rtee",
+								"mul_osasto",
+								"mul_try",
+								"mul_tme",
+								"toimittajaid",
+								"ytunnus",
 								"asiakasosasto",
 								"asiakasid",
 								"asiakasno",
@@ -41,7 +46,7 @@
 		$rappari = '';
 
 		if ($tee == "tallenna" and $kysely_kuka == $kukarow["kuka"]) {
-			tallenna_muisti($kysely_mika, $ala_tallenna);			
+			tallenna_muisti($kysely_mika, $ala_tallenna);
 			$tee = 'JATKA';
 			$rappari = $kysely_kuka;
 		}
@@ -50,20 +55,20 @@
 			$kysely_warning = 'yes';
 			$kysely = '';
 		}
-		
+
 		if ($tee == "uusiraportti") {
 			tallenna_muisti($uusirappari, $ala_tallenna);
 			$kysely = "$kukarow[kuka]#$uusirappari";
 			$tee = 'JATKA';
 			$rappari = $kysely_kuka;
 		}
-		
+
 		if ($tee == "lataavanha") {
 			hae_muisti($kysely_mika, $kysely_kuka);
-			$tee = 'JATKA';		
+			$tee = 'JATKA';
 			$rappari = $kysely_kuka;
 		}
-		
+
 		echo "<font class='head'>".t("Ostoraportti")."</font><hr>";
 
 		// ABC luokkanimet
@@ -207,32 +212,32 @@
 		}
 
 		// Tulostettavat sarakkeet
-		$sarakkeet = array(	"os", "try", "tme", 
-							"sta", "tah", 
-							"abc", "abc os", "abc try", "abc tme", 
-							"luontiaika", 
-							"saldo", "reaalisaldo", "saldo2", 
-							"haly", "til", "ennpois", "jt", "siirtojt", "ennakot", 
+		$sarakkeet = array(	"os", "try", "tme",
+							"sta", "tah",
+							"abc", "abc os", "abc try", "abc tme",
+							"luontiaika",
+							"saldo", "reaalisaldo", "saldo2",
+							"haly", "til", "ennpois", "jt", "siirtojt", "ennakot",
 							"1kk", "3kk", "6kk", "12kk", "ke", "1x2",
 							"ostoera1", "ostoera3", "ostoera6", "ostoera12", "osthaly1", "osthaly3", "osthaly6", "osthaly12",
-							"o_era", "m_era", "kosal", "komy", "M‰‰r‰", 
+							"o_era", "m_era", "kosal", "komy", "M‰‰r‰",
 							"kuvaus", "lyhytkuvaus", "tkorkeus", "tleveys", "tmassa", "tsyvyys",
 							"hinnastoon", "ei_var", "toimittaja", "toim_tuoteno",
-							"nimitys", "ostohinta", "myyntihinta", 
-							"epa25pvm", "epa50pvm", "epa75pvm", "epa100pvm", 
-							"osaldo", "hyllypaikka", 
-							"pu1", "pu3", "pu6", "pu12", 
+							"nimitys", "ostohinta", "myyntihinta",
+							"epa25pvm", "epa50pvm", "epa75pvm", "epa100pvm",
+							"osaldo", "hyllypaikka",
+							"pu1", "pu3", "pu6", "pu12",
 							"my1", "my3", "my6","my12",
 							"kul1", "kul3", "kul6", "kul12",
-							"edkul1", "edkul3", "edkul6", "edkul12", 
+							"edkul1", "edkul3", "edkul6", "edkul12",
 							"enn1", "enn3", "enn6","enn12",
 							"e_kate1", "e_kate3", "e_kate6", "e_kate12",
 							"e_kate % 1", "e_kate % 3", "e_kate % 6", "e_kate % 12",
 							"ed1", "ed3", "ed6", "ed12",
-							"kate1", "kate3", "kate6", "kate12", 
+							"kate1", "kate3", "kate6", "kate12",
 							"Kate % 1", "Kate % 3", "Kate % 6", "Kate % 12",
-							"aleryh", "kehahin", 
-							"Kortuoteno", "Korsaldo", "Korennpois", "Kortil", 
+							"aleryh", "kehahin",
+							"Kortuoteno", "Korsaldo", "Korennpois", "Kortil",
 							"Kormy1", "Kormy2","Kormy3","Kormy4");
 
 		// sarakkeiden queryiss‰ olevat nimet
@@ -333,8 +338,8 @@
 								"Kate % 3"		=> "katepros2",
 								"Kate % 6"		=> "katepros3",
 								"Kate % 12"		=> "katepros4",
-								"aleryh"		=> "aleryhma", 
-								"kehahin"		=> "kehahin", 
+								"aleryh"		=> "aleryhma",
+								"kehahin"		=> "kehahin",
 								"Kortuoteno"	=> "tuoteno",
 								"Korsaldo"		=> "saldo",
 								"Korennpois"	=> "varattu",
@@ -369,7 +374,7 @@
 			if ($mul_try != '' and !is_array($mul_try)) {
 				$mul_try = unserialize($mul_try);
 			}
-			
+
 			if ($mul_tme != '' and !is_array($mul_tme)) {
 				$mul_tme = unserialize($mul_tme);
 			}
@@ -554,17 +559,17 @@
 			$paikoittain = $valitut["paikoittain"];
 
 			if ($varastot == "" and $paikoittain != "") {
-				echo "<font class='error'>".t("VIRHE: Ajat h‰lytysraportin varastopaikoittain, mutta et valinnut yht‰‰n varastoa.")."</font>";
+				echo "<font class='error'>".t("VIRHE: Et valinnut yht‰‰n varastoa.")."</font>";
 				exit;
 			}
 
 			if ($varastot == "") {
-				echo "<font class='error'>".t("VIRHE: Ajat h‰lytysraportin, mutta et valinnut yht‰‰n varastoa.")."</font>";
+				echo "<font class='error'>".t("VIRHE: Et valinnut yht‰‰n varastoa.")."</font>";
 				exit;
 			}
 
 			if ($yhtiot == "") {
-				echo "<font class='error'>".t("VIRHE: Ajat h‰lytysraportin, mutta et valinnut mit‰‰n yhtiˆt‰.")."</font>";
+				echo "<font class='error'>".t("VIRHE: Et valinnut mit‰‰n yhtiˆt‰.")."</font>";
 				exit;
 			}
 
@@ -841,85 +846,78 @@
 
 			flush();
 
-			if (include('Spreadsheet/Excel/Writer.php')) {
+			//keksit‰‰n failille joku varmasti uniikki nimi:
+			list($usec, $sec) = explode(' ', microtime());
+			mt_srand((float) $sec + ((float) $usec * 100000));
+			$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
 
-				//keksit‰‰n failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+			$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+			$workbook->setVersion(8);
+			$worksheet =& $workbook->addWorksheet('Sheet 1');
 
-				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-				$workbook->setVersion(8);
-				$worksheet =& $workbook->addWorksheet('Sheet 1');
+			$format_bold =& $workbook->addFormat();
+			$format_bold->setBold();
 
-				// $format_bold =& $workbook->addFormat();
-				// $format_bold->setBold();
-				// 
-				// $format_center =& $workbook->addFormat();
-				// $format_center->setBold();
-				// $format_center->setHAlign('left');
-				// 
-				// $workbook->setCustomColor(12, 255, 255, 0);
-				// $format_bg_yellow =& $workbook->addFormat();
-				// $format_bg_yellow->setFgColor(12);
-				// $format_bg_yellow->setPattern(1);
-				// 
-				// $format_bg_yellow_text_red =& $workbook->addFormat();
-				// $format_bg_yellow_text_red->setFgColor(12);
-				// $workbook->setCustomColor(17, 255, 0, 0);
-				// $format_bg_yellow_text_red->setColor(17);
-				// $format_bg_yellow_text_red->setPattern(1);
-				// 
-				// $workbook->setCustomColor(13, 200, 100, 180);
-				// $format_bg_magenta =& $workbook->addFormat();
-				// $format_bg_magenta->setFgColor(13);
-				// $format_bg_magenta->setPattern(1);
-				// 
-				// $format_bg_magenta_text_red =& $workbook->addFormat();
-				// $format_bg_magenta_text_red->setFgColor(13);
-				// $format_bg_magenta_text_red->setColor(17);
-				// $format_bg_magenta_text_red->setPattern(1);
-				// 
-				// $workbook->setCustomColor(14, 150, 255, 170);
-				// $format_bg_green =& $workbook->addFormat();
-				// $format_bg_green->setFgColor(14);
-				// $format_bg_green->setPattern(1);
-				// 
-				// $workbook->setCustomColor(15, 255, 170, 70);
-				// $format_bg_brown =& $workbook->addFormat();
-				// $format_bg_brown->setFgColor(15);
-				// $format_bg_brown->setPattern(1);
-				// 
-				// $workbook->setCustomColor(16, 200, 200, 200);
-				// $format_bg_grey =& $workbook->addFormat();
-				// $format_bg_grey->setFgColor(16);
-				// $format_bg_grey->setPattern(1);
-				// 
-				// $workbook->setCustomColor(18, 255, 255, 255);
-				// $format_bg_text_red =& $workbook->addFormat();
-				// $format_bg_text_red->setFgColor(18);
-				// $format_bg_text_red->setColor(17);
-				// $format_bg_text_red->setPattern(1);
-			}
+			$format_center =& $workbook->addFormat();
+			$format_center->setBold();
+			$format_center->setHAlign('left');
+
+			$workbook->setCustomColor(12, 255, 255, 0);
+			$format_bg_yellow =& $workbook->addFormat();
+			$format_bg_yellow->setFgColor(12);
+			$format_bg_yellow->setPattern(1);
+
+			$format_bg_yellow_text_red =& $workbook->addFormat();
+			$format_bg_yellow_text_red->setFgColor(12);
+			$workbook->setCustomColor(17, 255, 0, 0);
+			$format_bg_yellow_text_red->setColor(17);
+			$format_bg_yellow_text_red->setPattern(1);
+
+			$workbook->setCustomColor(13, 200, 100, 180);
+			$format_bg_magenta =& $workbook->addFormat();
+			$format_bg_magenta->setFgColor(13);
+			$format_bg_magenta->setPattern(1);
+
+			$format_bg_magenta_text_red =& $workbook->addFormat();
+			$format_bg_magenta_text_red->setFgColor(13);
+			$format_bg_magenta_text_red->setColor(17);
+			$format_bg_magenta_text_red->setPattern(1);
+
+			$workbook->setCustomColor(14, 150, 255, 170);
+			$format_bg_green =& $workbook->addFormat();
+			$format_bg_green->setFgColor(14);
+			$format_bg_green->setPattern(1);
+
+			$workbook->setCustomColor(15, 255, 170, 70);
+			$format_bg_brown =& $workbook->addFormat();
+			$format_bg_brown->setFgColor(15);
+			$format_bg_brown->setPattern(1);
+
+			$workbook->setCustomColor(16, 200, 200, 200);
+			$format_bg_grey =& $workbook->addFormat();
+			$format_bg_grey->setFgColor(16);
+			$format_bg_grey->setPattern(1);
+
+			$workbook->setCustomColor(18, 255, 255, 255);
+			$format_bg_text_red =& $workbook->addFormat();
+			$format_bg_text_red->setFgColor(18);
+			$format_bg_text_red->setColor(17);
+			$format_bg_text_red->setPattern(1);
 
 			$excelrivi 	 = 0;
 			$excelsarake = 0;
 			$siirtojt	 = '';
 
-			if (isset($workbook)) {
-				$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("tuoteno")), $format_bold);
+			$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("tuoteno")), $format_bold);
+			$excelsarake++;
+
+			if ($paikoittain != '') {
+				$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("Varastopaikka")), $format_bold);
 				$excelsarake++;
 			}
 
-			if ($paikoittain != '') {
-				if (isset($workbook)) {
-					$worksheet->writeString($excelrivi, $excelsarake, ucfirst(t("Varastopaikka")), $format_bold);
-					$excelsarake++;
-				}
-			}
-
 			foreach ($valitut as $key => $val) {
-				if (isset($workbook) and $sarakkeet[$key] != '') {
+				if ($sarakkeet[$key] != '') {
 					if ($sarakkeet[$key] == 'Siirtojt') {
 						$siirtojt = 0;
 					}
@@ -933,18 +931,15 @@
 			$excelrivi++;
 			$excelsarake = 0;
 
-			// arvioidaan kestoa
-			$ajat      = array();
-			$arvio     = array();
-			$timeparts = explode(" ",microtime());
-			$alkuaika  = $timeparts[1].substr($timeparts[0],1);
-			$joukko    = 100; //kuinka monta rivi‰ otetaan keskiarvoon
+			$elements = mysql_num_rows($res); // total number of elements to process
+
+			if ($elements > 0) {
+				require_once ('inc/ProgressBar.class.php');
+				$bar = new ProgressBar();
+				$bar->initialize($elements); // print the empty bar
+			}
 
 			while ($row = mysql_fetch_array($res)) {
-
-				$timeparts = explode(" ",microtime());
-				$alku = $timeparts[1].substr($timeparts[0],1);
-				$lisa = "";
 
 				if ($paikoittain != '') {
 					$lisa = " and concat_ws(' ',hyllyalue, hyllynro, hyllyvali, hyllytaso)='$row[varastopaikka]' ";
@@ -1108,7 +1103,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 				$ennp   = mysql_fetch_assoc($result);
 
-				$query = "	SELECT 
+				$query = "	SELECT
 							sum(if (tilausrivi.tyyppi = 'G', tilausrivi.jt $lisavarattu, 0)) siirtojt
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 							WHERE tilausrivi.yhtio = '$row[yhtio]'
@@ -1297,16 +1292,12 @@
 
 				if ($valitut['EHDOTETTAVAT'] == '' or ($ostettavahaly_kausi1 > 0 or $ostettavahaly_kausi2 > 0 or $ostettavahaly_kausi3 > 0 or $ostettavahaly_kausi4 > 0) or ($ostettava_kausi1 > 0 or $ostettava_kausi2 > 0 or $ostettava_kausi3 > 0 or $ostettava_kausi4 > 0)) {
 
-					if (isset($workbook)) {
-						$worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"], $format_center);
-						$excelsarake++;
-					}
+					$worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"], $format_center);
+					$excelsarake++;
 
 					if ($paikoittain != '') {
-						if (isset($workbook)) {
-							$worksheet->writeString($excelrivi, $excelsarake, $row["varastopaikka"]);
-							$excelsarake++;
-						}
+						$worksheet->writeString($excelrivi, $excelsarake, $row["varastopaikka"]);
+						$excelsarake++;
 					}
 
 					$value_1kk = '';
@@ -1324,7 +1315,7 @@
 						$bg_color = '';
 						$sarake = trim($sarake);
 
-						if (isset($workbook) and $sarake_keyt[$sarake] != '') {
+						if ($sarake_keyt[$sarake] != '') {
 
 							$value = '';
 
@@ -1401,7 +1392,7 @@
 								$value = $puuterow[$sarake_keyt[$sarake]];
 							}
 							// myynneiss‰ haetaan kaikki laskurowsta
-							elseif ($sarake == 'my1' or $sarake == 'my3' or $sarake == 'my6' or $sarake == 'my12' or 
+							elseif ($sarake == 'my1' or $sarake == 'my3' or $sarake == 'my6' or $sarake == 'my12' or
 									$sarake == 'ed1' or $sarake == 'ed3' or $sarake == 'ed6' or $sarake == 'ed12' or
 									$sarake == 'enn1' or $sarake == 'enn3' or $sarake == 'enn6' or $sarake == 'enn12' or
 									$sarake == 'kate1' or $sarake == 'kate3' or $sarake == 'kate6' or $sarake == 'kate12' or
@@ -1411,7 +1402,7 @@
 									$bg_color = $value >= 0 ? $bg_color = 'yellow' : $bg_color = 'yellow_text_red';
 								}
 							}
-							elseif ($sarake == 'kul1' or $sarake == 'kul3' or $sarake == 'kul6' or $sarake == 'kul12' or 
+							elseif ($sarake == 'kul1' or $sarake == 'kul3' or $sarake == 'kul6' or $sarake == 'kul12' or
 									$sarake == 'edkul1' or $sarake == 'edkul3' or $sarake == 'edkul6' or $sarake == 'edkul12') {
 								$value = $kulutrow[$sarake_keyt[$sarake]];
 							}
@@ -1461,12 +1452,11 @@
 								$asresult = mysql_query($query) or pupe_error($query);
 								$kasrow = mysql_fetch_array($asresult);
 
-								if (isset($workbook)) {
-									$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow[$sarake_keyt[$sarake]], 2), $format_bg_green);
-									$value = '';
-								}
+								$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow[$sarake_keyt[$sarake]], 2), $format_bg_green);
+								$value = '';
 							}
 							elseif ($sarake == 'Kortuoteno' or $sarake == 'Korsaldo' or $sarake == 'Korennpois' or $sarake == 'Kortil' or $sarake == 'Kormy1' or $sarake == 'Kormy2' or $sarake == 'Kormy3' or $sarake == 'Kormy4') {
+
 								if ($korvaavat_kayty != '') {
 									continue;
 								}
@@ -1544,7 +1534,7 @@
 											$prow = mysql_fetch_array($presult);
 
 											foreach ($valitut as $key => $val) {
-												if (isset($workbook) and $sarakkeet[$key] != '') {
+												if ($sarakkeet[$key] != '') {
 													if ($sarakkeet[$key] == 'Kortuoteno') {
 														if ($i > 0) {
 															$worksheet->writeString(0, $excelsarake, "Kortuoteno", $format_bold);
@@ -1611,11 +1601,11 @@
 										}
 
 										$bg_color = $kosal_yht >= 0 ? 'yellow' : 'yellow_text_red';
-										$worksheet->writeNumber($column_location['kosal']['rivi'], $column_location['kosal']['sarake'], round($kosal_yht, 2), ${"format_bg_".$bg_color});
+										$worksheet->writeNumber((int) $column_location['kosal']['rivi'], (int) $column_location['kosal']['sarake'], round($kosal_yht, 2), ${"format_bg_".$bg_color});
 										$kosal_yht = 0;
 
 										$bg_color = $kosal_yht >= 0 ? 'magenta' : 'magenta_text_red';
-										$worksheet->writeNumber($column_location['komy']['rivi'], $column_location['komy']['sarake'], round($komy_yht, 2), ${"format_bg_".$bg_color});
+										$worksheet->writeNumber((int) $column_location['komy']['rivi'], (int) $column_location['komy']['sarake'], round($komy_yht, 2), ${"format_bg_".$bg_color});
 										$komy_yht = 0;
 
 										$bg_color = '';
@@ -1623,16 +1613,16 @@
 									else {
 										// jos t‰nne tullaan niin kosal-sarake pit‰‰ v‰rj‰t‰ tyhj‰n‰ keltaiseksi
 										if (count($column_location) > 0) {
-											$worksheet->writeNumber($column_location['kosal']['rivi'], $column_location['kosal']['sarake'], '', $format_bg_yellow);
-											$worksheet->writeNumber($column_location['komy']['rivi'], $column_location['komy']['sarake'], '', $format_bg_magenta);
+											$worksheet->writeNumber((int) $column_location['kosal']['rivi'], (int) $column_location['kosal']['sarake'], '', $format_bg_yellow);
+											$worksheet->writeNumber((int) $column_location['komy']['rivi'], (int) $column_location['komy']['sarake'], '', $format_bg_magenta);
 										}
 									}
 								}
 								else {
 									// jos t‰nne tullaan niin kosal-sarake pit‰‰ v‰rj‰t‰ tyhj‰n‰ keltaiseksi
 									if (count($column_location) > 0) {
-										$worksheet->writeNumber($column_location['kosal']['rivi'], $column_location['kosal']['sarake'], '', $format_bg_yellow);
-										$worksheet->writeNumber($column_location['komy']['rivi'], $column_location['komy']['sarake'], '', $format_bg_magenta);
+										$worksheet->writeNumber((int) $column_location['kosal']['rivi'], (int) $column_location['kosal']['sarake'], '', $format_bg_yellow);
+										$worksheet->writeNumber((int) $column_location['komy']['rivi'], (int) $column_location['komy']['sarake'], '', $format_bg_magenta);
 									}
 								}
 							}
@@ -1669,59 +1659,23 @@
 					$excelsarake = 0;
 				}
 
-				// tehd‰‰n arvio kauan t‰m‰ kest‰‰.. wau! :)
-				if (count($arvio)<=$joukko) {
-					$timeparts = explode(" ",microtime());
-					$endtime   = $timeparts[1].substr($timeparts[0],1);
-					$arvio[]   = round($endtime-$alkuaika,4);
+				$bar->increase();
 
-					if (count($arvio)==$joukko)
-					{
-						$ka   = array_sum($arvio) / count($arvio);
-						$aika = round(mysql_num_rows($res) * $ka, 0);
-						echo t("Arvioitu ajon kesto")." $aika sec.<br>";
-						flush();
-					}
-					else
-					{
-						$timeparts = explode(" ",microtime());
-						$alkuaika  = $timeparts[1].substr($timeparts[0],1);
-					}
-				}
-
-				$timeparts = explode(" ",microtime());
-				$loppu     = $timeparts[1].substr($timeparts[0],1);
-				$ajat[]    = round($loppu-$alku,4);
 			}
 
 			flush();
+			echo "<br><br>";
 
-			$timeparts = explode(" ",microtime());
-			$endtime   = $timeparts[1].substr($timeparts[0],1);
-			$total     = round($endtime-$starttime,0);
+			$workbook->close();
 
-			echo "<br>";
-
-			if (isset($workbook)) {
-				$workbook->close();
-
-				echo "<table>";
-				echo "<tr><th>".t("Tallenna raportti (xls)").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
-				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='Ostoraportti.xls'>";
-				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-				echo "</table><br>";
-			}
-
-			foreach ($ajat as $aika) {
-				$yht+=$aika;
-			}
-
-			$yht=@round($yht/count($ajat),5);
-
-			echo t("Ajo kesti")." $total sec.</font> <font class='info'>($yht ".t("sec/tuoterivi").")</font><br><br>";
+			echo "<table>";
+			echo "<tr><th>".t("Tallenna raportti (xls)").":</th>";
+			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+			echo "<input type='hidden' name='kaunisnimi' value='Ostoraportti.xls'>";
+			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+			echo "</table><br>";
 
 			$osasto		= '';
 			$tuoryh		= '';
@@ -2012,7 +1966,7 @@
 			if ($mul_try != '' and !is_array($mul_try)) {
 				$mul_try = unserialize(urldecode($mul_try));
 			}
-			
+
 			if ($mul_tme != '' and !is_array($mul_tme)) {
 				$mul_tme = unserialize(urldecode($mul_tme));
 			}
@@ -2029,7 +1983,7 @@
 
 				$try = substr($try, 0, -4);
 			}
-			
+
 			if (is_array($mul_osasto) and count($mul_osasto) > 0) {
 
 				$osasto = '';

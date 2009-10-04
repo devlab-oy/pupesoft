@@ -80,9 +80,11 @@ function aineistonnouto ($yritirow, $aineisto, $pvm) {
 		$host="solo.nordea.fi";
 		$log="anonymous";
 		$pass="SITE PASSIVE";
-		$pass = "pupesoft test";
-		$passiivi = 1;
-		$sitekomento = 'PASSIVE';
+		//$pass = "pupesoft test";
+		$passiivi = 0;
+		//$passiivi = 1;
+		$sitekomento = '';
+		//$sitekomento = 'PASSIVE';
 	}
 	if ($pankki == '8') {
 		$host="ftplinkki.sampopankki.fi";
@@ -250,11 +252,6 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 	}
 	$aineistodata .= $var . $tiiviste;
 
-	$oikeat = array("Ä", "Ö", "Å", "ä", "ö", "å");
-	$pankin = array("[", "\\", "]", "{", "|", "}");
-	$aineistodata = str_replace($oikeat, $pankin, $aineistodata);
-	$aineistodata = strtoupper($aineistodata);
-
 	echo "Suojataan VAR-tiedosto '$yritirow[kayttoavain]'<br>";
 	$aineistodata = salaa($aineistodata, "VAR", $yritirow['kayttoavain']) . "\r\n";
 
@@ -281,7 +278,7 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 	}
 
 	echo "Avataan FTP-yhteys $host<br>";
-	//exit;
+	exit;
 	$ftp = ftp_connect($host);
 	if($ftp) {
 		// Jos jokin asia epäonnistuu, katkaistaan heti yhteys

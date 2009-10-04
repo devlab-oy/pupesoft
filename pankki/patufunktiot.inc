@@ -24,7 +24,19 @@ function mikaaineisto ($aineisto) {
 	if (substr($aineisto,0,4) == 'LM03') return "LMP300";
 	elseif (substr($aineisto,0,4) == 'LUM2') return "xxx";
 	else return "";
+}
 
+function teepankkikonversio ($aineisto) {
+	//echo "Aineisto $aineisto<br>";
+	$oikeat = array("Ä", "Ö", "Å");
+	$pankin = array("[", "\\", "]");
+	foreach ($aineisto as $rivi) {
+		//echo "'$rivi'<br>";
+		$rivi = strtoupper($rivi);
+		$rivi = str_replace($oikeat, $pankin, $rivi);
+		$uusi[] = $rivi;
+	}
+	return $uusi;
 }
 
 function ekakayttoavain ($tunnus) {
@@ -154,9 +166,6 @@ function salattukertaavain ($tunnus) {
 		$siirtoavain = pack("H*",$yritirow['siirtoavain']);
 		$kerta = pack("H*",$uusikertaavain);
 
-		mcrypt_generic_deinit($td);
-		mcrypt_module_close($td);
-
 		# Alustetaan salaus
 		$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
 		$iv = pack('H*','0000000000000000');
@@ -165,14 +174,16 @@ function salattukertaavain ($tunnus) {
 		# Salataan kerta-avain siirtoavaimella
 		$sal = mcrypt_generic($td,$kerta);
 		$sal = unpack("H*",$sal);
-		echo "Salattu kerta-avain: $sal[1]<br>";
+		echo "Salattu kerta-avain: $sal[1] Uusi siemen $siemen[1]<br>";
+
+		mcrypt_generic_deinit($td);
+		mcrypt_module_close($td);
 
 		# Tallennetaan tietokantaan
 		$query = "UPDATE yriti SET kertaavain='$uusikertaavain', salattukerta='$sal[1]', siemen='$siemen[1]' WHERE tunnus='$tunnus'";
 		$updres = mysql_query($query) or pupe_error($query);
 		$yritirow['kertaavain'] = $uusikertaavain;
 		$yritirow['salattukerta'] = $sal[1];
-		if ($testaus != '') exit;
 		return $yritirow;
 	}
 }
@@ -219,7 +230,7 @@ function salaa ($jono, $arg, $kayttoavain) {
 	}
 
 	// Muutetaan salattu teksti Heksoiksi
-	$tark = unpack("H*","$text");
+	$tark = unpack("H*", $text);
 
 	// Tulostellaan arvot
 	// Tehdään tarvittavat temput tietyille tiedostotyypeille
@@ -245,22 +256,31 @@ function salaa ($jono, $arg, $kayttoavain) {
 }
 
 function tiiviste ($jono, $kertaavain) {
-
+	global $testaus;
 	//Poistetaan loppu whitespace
 	$uusijono="";
+
+	if ($testaus != '') {
+		$jono = array();
+		$jono[]="1921030 259018000000140111111116100000000121MATTI MEIKÄLÄINEN 010101001A       ";
+		$jono[]="1921030 259018000000140111111116100000000321MAIJA MEIK#L#INEN 010201001A       ";
+		$jono[]="1921030 259018000000140111111116100000000421Ä. Ö. ÅLAND       010101001A       ";
+		$jono[]="1921030 259018000000140111111116100000000521#. @. \$LAND       010101001A       ";
+		$jono[]="4921030               0111111116100000001384                  000004           ";
+	}
+	echo "<pre>";
 	foreach ($jono as $rivi) {
-		//echo "'$rivi'<br>";
+		echo "'$rivi'<br>";
 		$uusijono .= rtrim($rivi);
 	}
-
-	$oikeat = array("Ä", "Ö", "Å", "ä", "ö", "å");
-	$pankin = array(" ", " ", " ", " ", " ", " ");
+	echo "</pre>";
+	$oikeat = array("[", "\\", "]", "{", "|", "}", "Ä", "Ö", "Å", "#", "$", "@");
+	$pankin = array(" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ");
 	$uusijono = str_replace($oikeat, $pankin, $uusijono);
-	$uusijono = strtoupper($uusijono);
-	echo "Uusijono --> $uusijono<br>";
 	//Jaetaan 8 merkin lohkoiksi ja sijoitetaan taulukkoon
-	$k=0;
 
+	echo "Uusijono --> $uusijono<br>";
+	$k=0;
 	while(strlen($uusijono) > 0) {
 		$data[$k] = substr($uusijono,0,8);
 		$uusijono = substr($uusijono,8);
@@ -272,22 +292,25 @@ function tiiviste ($jono, $kertaavain) {
 	$k--;
 	if (strlen($data[$k]) != 8) $data[$k] = str_pad($data[$k], 8, "\0");
 
-	//Alustetaan kryptaus kertaavaimella  
+	//Alustetaan kryptaus kerta-avaimella
+	echo "Kerta-avain on $kertaavain<br>";
 	$kertaavain = pack("H*",$kertaavain);
 	$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
 	$iv=pack('H*','0000000000000000');
 	mcrypt_generic_init($td, $kertaavain, $iv);
-	
-	$text = $data[0];
-	$text = mcrypt_generic($td, $text);
 
-	for($i=1; $i<=$k; $i++){
-		echo "'$data[$i]'<br>";
-		$ortext=$text ^ $data[$i];
+	$text = $data[0];
+	$ups = unpack('H*',$data[0]);
+	echo "$ups[1] '$data[0]'<br>";
+	$text = mcrypt_generic($td, $text);
+	for($i=1; $i<=$k; $i++) {
+		$ups = unpack('H*',$data[$i]);
+		echo "$ups[1] '$data[$i]'<br>";
+		$ortext = $text ^ $data[$i];
 		$text = mcrypt_generic($td, $ortext);
 	}
 
-	//Muutetaan salattu teksti Heksoiksi
+	//Muutetaan tiiviste Heksoiksi
 	$tiivisteet = unpack("H*", $text);
 	$tiiviste = strtoupper($tiivisteet[1]);
 
@@ -295,6 +318,7 @@ function tiiviste ($jono, $kertaavain) {
 	mcrypt_module_close($td);
 
 	echo "Tiiviste: $tiiviste<br>";
+	if ($testaus != '' and $tiiviste != '4954F0194C2B696D') echo "Tiiviste pielessä po 4954F0194C2B696D<br>";
 	return $tiiviste;
 
 }

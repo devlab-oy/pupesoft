@@ -15,6 +15,7 @@
 	if ($ok == 1) {
 		$sisalto = file($filenimi);
 		$aineisto = mikaaineisto($sisalto[0]);
+		$sisalto = teepankkikonversio($sisalto);
 	}
 
 	if ($tunnus != '' and $nollapolvi != '') {
@@ -44,7 +45,9 @@
 		echo "Pankkitieto päivitetty<br>";
 	}
 	if ($tunnus != '' and $kertasalasana != '') {
-		salattukertaavain($tunnus);
+		$testaus = 1;
+		$yritirow = salattukertaavain($tunnus);
+		tiiviste($jono, $yritirow['kertaavain']);
 	}
 	if ($tunnus != '' and $aineisto != '') {
 		$query = "	SELECT * 
@@ -102,7 +105,7 @@
 	echo "<td><input type='file' name='userfile'></td></tr>";
 	echo "<tr><th>".t("Käytä testausaineistoa")."</th>";
 	echo "<td><input type='checkbox' name = 'testaus' value = '1'></td></tr>";
-	echo "<tr><th>".t("Testaa kertasalasanan suojausta")."</th>";
+	echo "<tr><th>".t("Testaa kertasalasanan suojausta ja tiivisteen laskentaa")."</th>";
 	echo "<td><input type='checkbox' name = 'kertasalasana' value = '1'></td></tr>";
 	echo "<tr><th>".t("Palauta 0-sukupolven käyttöavain")."</th>";
 	echo "<td><input type='checkbox' name = 'nollapolvi' value = '1'></td></tr>";

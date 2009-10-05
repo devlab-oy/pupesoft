@@ -473,7 +473,7 @@
 						FROM lasku
 						JOIN maksupositio ON maksupositio.yhtio = lasku.yhtio and maksupositio.otunnus = lasku.tunnus
 						JOIN maksuehto ON maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.jaksotettu != ''
-						LEFT JOIN lasku uusiolasku ON maksupositio.yhtio = uusiolasku.yhtio and maksupositio.uusiotunnus=uusiolasku.tunnus
+						LEFT JOIN lasku uusiolasku ON maksupositio.yhtio = uusiolasku.yhtio and maksupositio.uusiotunnus = uusiolasku.tunnus
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.jaksotettu > 0
 						and lasku.tila in ('L','N','R','A') and lasku.alatila != 'X'
@@ -493,7 +493,7 @@
 					<th>".t("Seuraava positio")."</th>";
 			echo "</tr>";
 
-			while($row = mysql_fetch_array($result)) {
+			while ($row = mysql_fetch_array($result)) {
 				// seuraava positio on tämä siis
 				$query = "	SELECT maksupositio.*, maksuehto.teksti, maksuehto.teksti
 							FROM maksupositio
@@ -546,15 +546,15 @@
 								sum(if(tilausrivi.toimitettu='',1,0)) toimittamatta,
 								count(*) toimituksia
 								FROM lasku
-								JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'P'
-								WHERE lasku.yhtio 		= '$kukarow[yhtio]'
-								and lasku.jaksotettu 	= '$row[jaksotettu]' and tila in ('L','N','R')
+								JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'P')
+								WHERE lasku.yhtio = '$kukarow[yhtio]'
+								and lasku.jaksotettu = '$row[jaksotettu]' and tila in ('L','N','R')
 								GROUP BY lasku.jaksotettu";
 					$tarkres = mysql_query($query) or pupe_error($query);
 					$tarkrow = mysql_fetch_array($tarkres);
 
-					if($tarkrow["tilaok"] <> $tarkrow["toimituksia"] or $tarkrow["toimittamatta"] > 0) {
-						echo "<td class='back'><font class=message'>Ei valmis</font></td>";
+					if ($tarkrow["tilaok"] <> $tarkrow["toimituksia"] or $tarkrow["toimittamatta"] > 0) {
+						echo "<td class='back'><font class='error'>Ei valmis</font></td>";
 					}
 					else {
 						$msg = t("Oletko varma, että haluat LOPPULASKUTTAA tilauksen")." $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: ".t_tunnus_avainsanat($posrow, "teksti", "MAKSUEHTOKV");
@@ -593,7 +593,7 @@
 					echo "</tr>";
 				}
 				else {
-					echo "<td class='back'><font class=message'>Ei valmis</font></td>";
+					echo "<td class='back'><font class='error'>Ei valmis</font></td>";
 				}
 			}
 			echo "</table>";

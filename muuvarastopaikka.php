@@ -252,21 +252,37 @@
 		}
 
 		// Tarkistetaan sarjanumeroseuranta
-		$query = "	SELECT tunnus
+		// S = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo
+		// T = Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo
+		// U = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi
+		// V = Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
+		// E = Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
+		// F = Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo
+		// G = Eränumeroseuranta. Osto-Myynti / In-Out varastonarvo
+		$query = "	SELECT sum(if(tuote.sarjanumeroseuranta in ('S','T','U','V'), 1, 0)) sarjat,
+					sum(if(tuote.sarjanumeroseuranta in ('E','F','G'), 1, 0)) erat
 					FROM tuote
-					WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and sarjanumeroseuranta!=''";
+					WHERE tuoteno = '$tuoteno' 
+					and yhtio = '$kukarow[yhtio]' 
+					and sarjanumeroseuranta != ''";
 		$sarjaresult = mysql_query($query) or pupe_error($query);
+		$sarjacheck_row = mysql_fetch_array($sarjaresult);
 
-		if (mysql_num_rows($sarjaresult) > 0 and (!is_array($sarjano_array) or count($sarjano_array) != $asaldo)) {
-			echo "<font class='error'>".t("Tarkista sarjanumerovalintasi")."!</font><br><br>";
+		if ($sarjacheck_row["sarjat"] > 0 and (!is_array($sarjano_array) or count($sarjano_array) != $asaldo)) {
+			echo "<font class='error'>".t("Tarkista sarjanumerovalintasi")."</font><br><br>";
 			$tee = $uusitee;
 		}
-		elseif (mysql_num_rows($sarjaresult) > 0) {
-			foreach($sarjano_array as $sarjatun) {
+		elseif ($sarjacheck_row["erat"] > 0) {
+			echo "<font class='error'>".t("Tarkista eränumerovalintasi")."</font><br><br>";
+			$tee = $uusitee;
+		}
+		elseif ($sarjacheck_row["sarjat"] > 0) {
+
+			foreach ($sarjano_array as $sarjatun) {
 				//Tutkitaan lisävarusteita
 				$query = "	SELECT tilausrivi_osto.perheid2
 							FROM sarjanumeroseuranta
-							JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.tunnus=tilausrivi_osto.perheid2
+							JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus = sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.tunnus = tilausrivi_osto.perheid2
 							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 							and sarjanumeroseuranta.tunnus  = '$sarjatun'";
 				$sarjares = mysql_query($query) or pupe_error($query);
@@ -275,26 +291,26 @@
 					$sarjarow = mysql_fetch_array($sarjares);
 
 					// Ostorivi
-					$query = "	SELECT if (kpl!=0, kpl, tilkpl) kpl
+					$query = "	SELECT if (kpl != 0, kpl, tilkpl) kpl
 								FROM tilausrivi
 								WHERE yhtio  = '$kukarow[yhtio]'
 								and tunnus   = '$sarjarow[perheid2]'
-								and perheid2!= 0";
+								and perheid2 != 0";
 					$sarjares = mysql_query($query) or pupe_error($query);
 					$ostorow = mysql_fetch_array($sarjares);
 
 					// Haetaan muut lisävarusteet
 					$query = "	SELECT tilausrivi.tuoteno, round(tilausrivi.kpl/$ostorow[kpl]) kpl, round(tilausrivi.tilkpl/$ostorow[kpl]) tilkpl, tilausrivi.tilkpl sistyomaarayskpl,
 								tilausrivi.var, tilausrivi.tyyppi, concat_ws('#', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
-								if (tuote.sarjanumeroseuranta='S', tilausrivin_lisatiedot.sistyomaarays_sarjatunnus, 0) sarjatunnus
+								if (tuote.sarjanumeroseuranta = 'S', tilausrivin_lisatiedot.sistyomaarays_sarjatunnus, 0) sarjatunnus
 								FROM tilausrivi
 								JOIN tuote ON tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.yhtio=tuote.yhtio
 								LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-								WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
+								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.perheid2 = '$sarjarow[perheid2]'
-								and tilausrivi.tyyppi  != 'D'
-								and tilausrivi.tunnus  != '$sarjarow[perheid2]'
-								and tilausrivi.perheid2!= 0";
+								and tilausrivi.tyyppi != 'D'
+								and tilausrivi.tunnus != '$sarjarow[perheid2]'
+								and tilausrivi.perheid2 != 0";
 					$sarjares = mysql_query($query) or pupe_error($query);
 
 					while ($lisavarrow = mysql_fetch_array($sarjares)) {
@@ -319,7 +335,7 @@
 		//koska jos meillä on kerätty siirtolista niin ne määrät myös halutaan siirtää vaikka saldo menisikin nollille tai miinukselle
 		$saldook = 0;
 
-		for($iii=0; $iii< count($tuotteet); $iii++) {
+		for ($iii=0; $iii< count($tuotteet); $iii++) {
 
 			// Tutkitaan lisävarusteiden tuotepaikkoja
 			$query = "	SELECT *
@@ -363,7 +379,8 @@
 
 		// Varmistetaan, että vastaanottavat paikat löytyy
 		if ($saldook == 0) {
-			for($iii=0; $iii< count($tuotteet); $iii++) {
+
+			for ($iii=0; $iii< count($tuotteet); $iii++) {
 				$query = "	SELECT *
 							FROM tuotepaikat
 							WHERE tuoteno 	= '$tuotteet[$iii]'
@@ -433,7 +450,7 @@
 			$uusitee = "M";
 		}
 
-		for($iii=0; $iii< count($tuotteet); $iii++) {
+		for ($iii=0; $iii< count($tuotteet); $iii++) {
 
 			if ($lisavaruste[$iii] == "LISAVARUSTE") {
 				$lisavarlisa1 = " saldo_varattu = saldo_varattu - $kappaleet[$iii], ";
@@ -512,7 +529,7 @@
 		}
 
 		//Päivitetään sarjanumerot
-		if (mysql_num_rows($sarjaresult) > 0) {
+		if (count($sarjano_array) > 0) {
 			foreach($sarjano_array as $sarjano) {
 				if ($sarjano > 0) {
 					$query = "	UPDATE sarjanumeroseuranta
@@ -523,7 +540,7 @@
 								muuttaja		= '$kukarow[kuka]',
 								muutospvm		= now()
 								WHERE yhtio = '$kukarow[yhtio]'
-								and tunnus='$sarjano'";
+								and tunnus = '$sarjano'";
 					$result = mysql_query($query) or pupe_error($query);
 				}
 			}
@@ -757,9 +774,14 @@
 		if ($trow["sarjanumeroseuranta"] != '') {
 
 			if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") {
-				$query = "	SELECT sarjanumeroseuranta.tuoteno, tilausrivi_osto.nimitys nimitys, sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus,
-							concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
+				$query = "	SELECT sarjanumeroseuranta.tuoteno, 
+							tilausrivi_osto.nimitys nimitys, 
+							sarjanumeroseuranta.sarjanumero, 
+							sarjanumeroseuranta.tunnus,
+							concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, 
+							sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
 				 			FROM tuote
+							JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
 							JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
 							and sarjanumeroseuranta.tuoteno = tuote.tuoteno
 							and sarjanumeroseuranta.hyllyalue = tuotepaikat.hyllyalue
@@ -768,10 +790,9 @@
 							and sarjanumeroseuranta.hyllytaso = tuotepaikat.hyllytaso
 							and sarjanumeroseuranta.myyntirivitunnus = 0
 							and sarjanumeroseuranta.era_kpl != 0
+							JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
-							and tuote.tuoteno = '$trow[tuoteno]'
-							GROUP BY 1,2,3,4,5
-							ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
+							and tuote.tuoteno = '$trow[tuoteno]'";
 			}
 			else {
 				$query	= "	SELECT sarjanumeroseuranta.tuoteno, tilausrivi_osto.nimitys nimitys, sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus,
@@ -782,11 +803,12 @@
 							and sarjanumeroseuranta.tuoteno = '$trow[tuoteno]'
 							and sarjanumeroseuranta.myyntirivitunnus = 0
 							and tilausrivi_osto.laskutettuaika != '0000-00-00'";
-				$sarjares = mysql_query($query) or pupe_error($query);
 			}
 
+			$sarjares = mysql_query($query) or pupe_error($query);
+
 			if (mysql_num_rows($sarjares) > 0) {
-				echo "<td valign='top' style='padding:0px;' class='back'>";
+				echo "<td valign='top' style='padding:0px;'>";
 
 				if (mysql_num_rows($sarjares) > 10) {
 					echo "<div style='height:265;overflow:auto;'>";
@@ -794,8 +816,13 @@
 
 				echo "<table width='100%'>";
 
-				while($sarjarow = mysql_fetch_array($sarjares)) {
-					echo "<tr><td nowrap>".t_tuotteen_avainsanat($sarjarow, 'nimitys')."</td><td nowrap>$sarjarow[sarjanumero]</td><td nowrap>$sarjarow[tuotepaikka]</td><td><input type='checkbox' name='sarjano_array[]' value='$sarjarow[tunnus]'></td></tr>";
+				while ($sarjarow = mysql_fetch_array($sarjares)) {
+					echo "<tr>";
+					echo "<td nowrap>".t_tuotteen_avainsanat($sarjarow, 'nimitys')."</td>";
+					echo "<td nowrap>$sarjarow[sarjanumero]</td>";
+					echo "<td nowrap>$sarjarow[tuotepaikka]</td>";
+					echo "<td><input type='checkbox' name='sarjano_array[]' value='$sarjarow[tunnus]'></td>";
+					echo "</tr>";
 				}
 				echo "</table>";
 

@@ -203,7 +203,7 @@
 		}
 
 		// haetaan printterille tulostuskomento
-		$query = "SELECT * from kirjoittimet where yhtio = '$kukarow[yhtio]' and tunnus = '$kirjoitin_tunnus'";
+		$query = "SELECT * from kirjoittimet where tunnus = '$kirjoitin_tunnus'";
 		$pres  = mysql_query($query) or pupe_error($query);
 		$print = mysql_fetch_array($pres);
 
@@ -214,7 +214,7 @@
 		if ($valittu_rakiroslapp_tulostin != '') {
 			//haetaan osoitelapun tulostuskomento
 			if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE) {
-				$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$valittu_rakiroslapp_tulostin'";
+				$query  = "SELECT * from kirjoittimet where tunnus = '$valittu_rakiroslapp_tulostin'";
 				$kirres = mysql_query($query) or pupe_error($query);
 				$kirrow = mysql_fetch_array($kirres);
 				$oslapp = $kirrow['komento'];
@@ -769,18 +769,16 @@
 			$sel = array();
 			$sel[$e] = "SELECTED";
 
-			$query = "	SELECT *
-						from kirjoittimet
-						where $logistiikka_yhtiolisa
+			$query = "	SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
+						FROM kirjoittimet
+						WHERE
+						$logistiikka_yhtiolisa
+						GROUP BY komento
 						ORDER BY kirjoitin";
 			$kires = mysql_query($query) or pupe_error($query);
 
 			while ($kirow = mysql_fetch_array($kires)) {
-				echo "<option id='K$kirow[tunnus]' value='$kirow[komento]' ".$sel[$kirow["tunnus"]].">$kirow[kirjoitin]";
-				if ($logistiikka_yhtio != '') {
-					echo " ($kirow[yhtio])";
-				}
-				echo "</option>";
+				echo "<option id='K$kirow[tunnus]' value='$kirow[komento]' ".$sel[$kirow["tunnus"]].">$kirow[kirjoitin]</option>";
 			}
 
 			echo "</select></td></tr>";
@@ -792,11 +790,7 @@
 			mysql_data_seek($kires, 0);
 
 			while ($kirow = mysql_fetch_array($kires)) {
-				echo "<option id='K$kirow[tunnus]' value='$kirow[tunnus]'>$kirow[kirjoitin]";
-				if ($logistiikka_yhtio != '') {
-					echo " ($kirow[yhtio])";
-				}
-				echo "</option>";
+				echo "<option id='K$kirow[tunnus]' value='$kirow[tunnus]'>$kirow[kirjoitin]</option>";
 			}
 
 			echo "</select></td></tr>";
@@ -811,11 +805,7 @@
 			echo "<option value=''>",t("Ei tulosteta"),"</option>";
 
 			while ($kirrow = mysql_fetch_array($kires)) {
-				echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]";
-				if ($logistiikka_yhtio != '') {
-					echo " ($kirrow[yhtio])";
-				}
-				echo "</option>";
+				echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
 			}
 
 			echo "</select></td></tr>";

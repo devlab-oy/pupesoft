@@ -1120,7 +1120,7 @@
 			echo "<tr>";
 
 			if ($logistiikka_yhtio != '') {
-				echo "<th valign='top'>",t("Yhtiö"),"</th>";
+				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='yhtio'; document.forms['find'].submit();\">".t("Yhtiö")."</a></th>";
 			}
 
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='prioriteetti'; document.forms['find'].submit();\">".t("Pri")."<br>

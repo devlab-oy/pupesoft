@@ -2175,8 +2175,8 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 }
 
 if (!function_exists("jalkilaskentafunktio")) {
-	function jalkilaskentafunktio ($tuoteno, $pvm, $uusihinta, $rivitunnus) {
-		global $yhtiorow, $kukarow, $jalkilaskenta_debug_text;
+	function jalkilaskentafunktio ($tuoteno, $pvm, $uusihinta, $rivitunnus, $tapahtumatunnus=0, $kaantopisteen_saldomuutos=0) {
+		global $yhtiorow, $kukarow, $jalkilaskenta_debug_text, $korjattavat_valmistukset, $korjattavat_valmistukset_ind;
 
 		/*
 		$tuoteno 	= korjattava tuote
@@ -2188,6 +2188,235 @@ if (!function_exists("jalkilaskentafunktio")) {
 		require("tilauskasittely/jalkilaskenta.inc");
 
 		return $uusikehahin;
+	}
+}
+
+if (!function_exists("jalkilaske_valmistus")) {
+	function jalkilaske_valmistus ($valmistettava_tilaus) {
+		global $kukarow, $yhtiorow, $korjattavat_valmistukset, $korjattavat_valmistukset_ind;
+
+		$toim 			 = "KORJAA";
+		$from_kaikkikorj = "KORJAAKAIKKI";
+		$tee 			 = "VALMISTA";
+
+		$query = "	SELECT lasku.tunnus,
+					sum(if(tilausrivi.tyyppi in ('V','W'), 1, 0)) valmistusriveja,
+					GROUP_CONCAT(DISTINCT tilausrivi.tunnus SEPARATOR ',') valmistettavat
+					from tilausrivi, lasku
+					where tilausrivi.yhtio = '$kukarow[yhtio]'
+					and lasku.yhtio = tilausrivi.yhtio
+					and lasku.tunnus = tilausrivi.otunnus
+					and lasku.tila 	in ('V', 'L')
+					and lasku.alatila  in ('V', 'K', 'X')
+					and (tilausrivi.toimitettu != '' or tilausrivi.tyyppi='D') and lasku.tilaustyyppi in ('V','W','N')
+					and lasku.tunnus = '$valmistettava_tilaus'
+					GROUP BY lasku.tunnus
+					HAVING valmistusriveja > 0";
+		$tilre = mysql_query($query) or pupe_error($query);
+		$tilrow = mysql_fetch_array($tilre);
+
+		$valmistettavat = $tilrow["valmistettavat"];
+
+		if ($tee == "VALMISTA" and $valmistettavat != "") {
+			//Haetaan otsikoiden tiedot
+			$query = "	SELECT
+						GROUP_CONCAT(DISTINCT lasku.tunnus SEPARATOR ', ') 'Tilaus',
+						GROUP_CONCAT(DISTINCT lasku.nimi SEPARATOR ', ') 'Asiakas/Nimi',
+						GROUP_CONCAT(DISTINCT lasku.ytunnus SEPARATOR ', ') 'Ytunnus',
+						GROUP_CONCAT(DISTINCT lasku.tilaustyyppi SEPARATOR ', ') 'Tilaustyyppi'
+						FROM tilausrivi, lasku
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and	tilausrivi.tunnus in ($valmistettavat)
+						and lasku.tunnus=tilausrivi.otunnus
+						and lasku.yhtio=tilausrivi.yhtio";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 0) {
+				echo "<font class='error'>Yhtään tilausta ei löytynyt</font><br>";
+				$tee = "";
+			}
+		}
+		else {
+			echo "<tr>";
+			echo "<th>$valmistettava_tilaus</th>";
+			echo "<td colspan='5'><font class='error'>Yhtään valmistusriviä ei löytynyt!</font></td>";
+			echo "</tr>";
+		}
+
+		if ($tee == "VALMISTA" and $valmistettavat != "") {
+			$row = mysql_fetch_array($result);
+
+			//Päivitetään lasku niin, että se on tilassa korjataan
+			$query = "	UPDATE lasku
+						SET alatila	= 'K'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus  in ($row[Tilaus])
+						and tila	in ('V','L')
+						and alatila in ('V','X')";
+			$chkresult4 = mysql_query($query) or pupe_error($query);
+
+			$korjataan = " and (tilausrivi.toimitettu != '' or tilausrivi.tyyppi='D') ";
+
+			//Haetaan valmistettavat valmisteet ja käytettävät raaka-aineet
+			$query = "	SELECT tilausrivi.nimitys,
+						tilausrivi.tuoteno,
+						tilkpl tilattu,
+						if (tyyppi!='L', varattu, 0) valmistetaan,
+						if (tyyppi='L' or tyyppi='D', varattu, 0) valmistettu,
+						if (toimitettu!='', if (varattu!=0, varattu, kpl), 0) korjataan,
+						if (toimitettu!='', kpl, 0) valmistettu_valmiiksi,
+						if (tyyppi!='L', kpl, 0) kaytetty,
+						toimaika,
+						kerayspvm,
+						tilausrivi.tunnus tunnus,
+						tilausrivi.perheid,
+						tilausrivi.tyyppi,
+						tilausrivi.toimitettuaika,
+						tilausrivi.otunnus otunnus,
+						tilausrivi.uusiotunnus laskutettu,
+						tilausrivi.kommentti,
+						tuote.ei_saldoa,
+						tilausrivi.kommentti,
+						tuote.sarjanumeroseuranta,
+						tuote.yksikko,
+						tilausrivi.varattu,
+						tilausrivi.var,
+						tilausrivi.hyllyalue,
+						tilausrivi.hyllyvali,
+						tilausrivi.hyllytaso,
+						tilausrivi.hyllynro
+						FROM tilausrivi, tuote
+						WHERE
+						tilausrivi.otunnus in ($row[Tilaus])
+						and tilausrivi.tunnus in ($valmistettavat)
+						and tilausrivi.yhtio = '$kukarow[yhtio]'
+						and tuote.yhtio = tilausrivi.yhtio
+						and tuote.tuoteno = tilausrivi.tuoteno
+						and tyyppi in ('V','W','M','L','D')
+						$korjataan
+						ORDER BY perheid desc, tyyppi in ('W','M','L','D','V'), tunnus";
+			$presult = mysql_query($query) or pupe_error($query);
+			$riveja = mysql_num_rows($presult);
+
+			$rivkpl = mysql_num_rows($presult);
+			$voikokorjata = 0;
+
+			$tee 			= 'TEEVALMISTUS';
+			$valmisteet_chk = array();
+			$tuotenumerot 	= array();
+			$edtilkpllat 	= array();
+			$tilkpllat 		= array();
+			$valmkpllat 	= array();
+			$rekru 			= array();
+			$virhe 			= array();
+			$perutamakorj 	= array();
+			$era_new_paikka = "";
+			unset($osatoimitus);
+
+			while ($prow = mysql_fetch_array ($presult)) {
+
+				if ($prow["tyyppi"] == 'W' or $prow["tyyppi"] == 'M') {
+					// Nämä ovat valmisteita
+					$valmisteet_chk[$prow["tunnus"]] = $prow["tuoteno"];
+				}
+				elseif ($prow["tyyppi"] == 'D') {
+					// Nämä ovat jo valmistettu
+				}
+				else {
+					// Tässä tulevat kaikki raaka-aineet
+
+					// tehdään salditsekki vain saldollisille raaka-aineille
+					if ($prow["ei_saldoa"] == "") {
+						$tuotenumerot[$prow["tunnus"]] = $prow["tuoteno"];
+					}
+				}
+
+				$tuotenumerot[$prow["tunnus"]] = $prow["tuoteno"];
+
+				if ($toim == "KORJAA" and  $prow["tyyppi"] == 'V') {
+					$edtilkpllat[$prow["tunnus"]] = $prow["korjataan"];
+					$tilkpllat[$prow["tunnus"]] = $prow["korjataan"];
+				}
+				elseif ($toim == "KORJAA" and  $prow["tyyppi"] == 'W') {
+					$edtilkpllat[$prow["tunnus"]] = $prow["valmistetaan"];
+					$tilkpllat[$prow["tunnus"]] = $prow["valmistetaan"];
+				}
+				elseif ($prow["toimitettuaika"] == "0000-00-00 00:00:00") {
+					$edtilkpllat[$prow["tunnus"]] = $prow["valmistetaan"];
+					$tilkpllat[$prow["tunnus"]] = $prow["valmistetaan"];
+				}
+
+				if ($prow["tunnus"] == $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] != "0000-00-00 00:00:00" and $toim == "KORJAA") {
+					//tutkitaan kuinka paljon tätä nyt oli valmistettu
+					$query = "	SELECT sum(kpl) valmistetut
+								FROM tilausrivi
+								WHERE yhtio	= '$kukarow[yhtio]'
+								and otunnus = '$prow[otunnus]'
+								and perheid = '$prow[perheid]'
+								and tyyppi	= 'D'
+								and toimitettuaika = '0000-00-00 00:00:00'";
+					$sumres = mysql_query($query) or pupe_error($query);
+					$sumrow = mysql_fetch_array($sumres);
+
+					$query = "	SELECT count(*) laskuja
+								FROM lasku
+								WHERE yhtio	= '$kukarow[yhtio]'
+								and tunnus 	= '$prow[laskutettu]'
+								and tila 	= 'U'
+								and alatila	= 'X'";
+					$slres = mysql_query($query) or pupe_error($query);
+					$slrow = mysql_fetch_array($slres);
+
+					if ($sumrow["valmistetut"] != 0 and $slrow["laskuja"] == 0) {
+						if ((float) $prow["valmistetaan"] > 0) {
+							$valmkpllat[$prow["tunnus"]] = $prow["valmistetaan"];
+						}
+						else {
+							$valmkpllat[$prow["tunnus"]] = $sumrow["valmistetut"];
+						}
+
+						$voikokorjata++;
+					}
+					elseif ($sumrow["valmistetut"] != 0 and $slrow["laskuja"] > 0) {
+						if ((float) $prow["valmistetaan"] > 0) {
+							$valmkpllat[$prow["tunnus"]] = $prow["valmistetaan"];
+						}
+						else {
+							$valmkpllat[$prow["tunnus"]] = $sumrow["valmistetut"];
+						}
+
+						$voikokorjata++;
+					}
+				}
+
+				#echo "<tr>";
+				#echo "<th>$valmistettava_tilaus</th>";
+				#echo "<td>".$valmisteet_chk[$prow["tunnus"]]."</td>";
+				#echo "<td>".$tuotenumerot[$prow["tunnus"]]."</td>";
+				#echo "<td>".$edtilkpllat[$prow["tunnus"]]."</td>";
+				#echo "<td>".$tilkpllat[$prow["tunnus"]]."</td>";
+				#echo "<td>".$valmkpllat[$prow["tunnus"]]."</td>";
+				#echo "</tr>";
+			}
+
+			ob_start();
+			require("tilauskasittely/valmista_tilaus.php");
+			$retval = ob_get_contents();
+			ob_end_clean();
+
+			if (count($virhe) > 0) {
+				echo "<tr>";
+				echo "<th>$valmistettava_tilaus</th>";
+				echo "<td colspan='5'><font class='error'>",var_dump($virhe),"</font></td>";
+				echo "</tr>";
+			}
+			else {
+				echo "<tr>";
+				echo "<th>$valmistettava_tilaus</th>";
+				echo "<td colspan='5'><font class='ok'>$retval</font></td>";
+				echo "</tr>";
+			}
+		}
 	}
 }
 

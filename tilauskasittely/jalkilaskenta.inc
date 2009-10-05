@@ -586,7 +586,7 @@ if ($tuoteno != '') {
 					$result = mysql_query($query) or pupe_error($query);
 
 					// Nyt lasketaan kaikki hankintahinnat uusiksi
-					$query = "	SELECT tuoteno, laadittu, laji, kpl, kplhinta, hinta, tunnus
+					$query = "	SELECT tuoteno, laadittu, laji, kpl, kplhinta, hinta, tunnus, rivitunnus
 								FROM tapahtuma
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$tuoteno'
@@ -663,7 +663,6 @@ if ($tuoteno != '') {
 								$uusisaldo += $trow['kpl'];
 
 							} // end if laji == tulo
-
 
 							// jos kyseessä on laskutus ja ollaan löydetty eka tulo, summaillaan kappaleita
 							if ($trow['laji'] == 'laskutus' and $eka == 0) {
@@ -756,6 +755,69 @@ if ($tuoteno != '') {
 								}
 							}
 
+							// jos kyseessä on inventointi ja ollaan löydetty jo eka tulo
+							if ($trow['laji'] == 'kulutus' and $eka == 0 and $trow["hinta"] != $uusikehahin) {
+
+								// HUOM: $korjattavat_valmistukset_ind, $korjattavat_valmistukset MUUTTUJAT OVAT GLOBAALEJA
+																
+								$query = "	SELECT otunnus
+											from tilausrivi
+											where yhtio	= '$kukarow[yhtio]'
+											and tunnus 	= '$trow[rivitunnus]'";
+								$invres = mysql_query($query) or pupe_error($query);
+								$invrow = mysql_fetch_array($invres);
+
+								// Alustetaan jos ei ole olemassa
+								if (!is_array($korjattavat_valmistukset)) $korjattavat_valmistukset = array();
+								if (!isset($korjattavat_valmistukset_ind)) $korjattavat_valmistukset_ind = 0;
+
+								// Globaali array johon otetaan ne valmistukset jotka pitäisi korjata
+								// koska jonkun sen valmistuksen raaka-aineen kehahinta muuttui tässä jälkilaskennassa
+								if (($invrow["otunnus"]) > 0 and !in_array($invrow["otunnus"], $korjattavat_valmistukset)) {
+
+									// Katotaan mihin väliin tämä kuuluu työntää
+									$xx_ok = FALSE;
+
+									// Insertoitavan valmistuksen valmistusaika
+									$query = "	SELECT avg(if(tilausrivi.toimitettuaika='0000-00-00 00:00:00' or tilausrivi.tyyppi not in ('V','W'), NULL, date_format(tilausrivi.toimitettuaika, '%Y%m%d%H%i%s'))) toimitettuaika
+												FROM tilausrivi
+												JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+												WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+												AND lasku.tunnus = '$invrow[otunnus]'";
+									$tilre = mysql_query($query) or pupe_error($query);
+									$insaika = mysql_fetch_assoc($tilre);
+
+									for ($xx_ind = $korjattavat_valmistukset_ind; $xx_ind < count($korjattavat_valmistukset); $xx_ind++) {
+
+										$query = "	SELECT avg(if(tilausrivi.toimitettuaika='0000-00-00 00:00:00' or tilausrivi.tyyppi not in ('V','W'), NULL, date_format(tilausrivi.toimitettuaika, '%Y%m%d%H%i%s'))) toimitettuaika
+													FROM tilausrivi
+													JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+													WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+													AND lasku.tunnus = '".$korjattavat_valmistukset[$xx_ind]."'";
+										$tilre = mysql_query($query) or pupe_error($query);
+										$thisaika = mysql_fetch_assoc($tilre);
+
+										$query = "	SELECT avg(if(tilausrivi.toimitettuaika='0000-00-00 00:00:00' or tilausrivi.tyyppi not in ('V','W'), NULL, date_format(tilausrivi.toimitettuaika, '%Y%m%d%H%i%s'))) toimitettuaika
+													FROM tilausrivi
+													JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+													WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+													AND lasku.tunnus = '".$korjattavat_valmistukset[($xx_ind+1)]."'";
+										$tilre = mysql_query($query) or pupe_error($query);
+										$nextaika = mysql_fetch_assoc($tilre);
+
+										if ($insaika["toimitettuaika"] > $thisaika["toimitettuaika"] and $insaika["toimitettuaika"] < $nextaika["toimitettuaika"]) {
+											array_splice($korjattavat_valmistukset, ($xx_ind+1), 0, $invrow["otunnus"]);
+											$xx_ok = TRUE;
+										}
+									}
+
+									if (!$xx_ok) {
+										$korjattavat_valmistukset[] = $invrow["otunnus"];
+									}
+
+									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>".t("Törmättiin kulutustapahtumaan, valmistus pitäisi laskea uudestaan").": $invrow[otunnus]!</font><br>";
+								}
+							}
 
 							// jos ollaa löydetty eka tulo voidaan aina päivitetään tapahtuma jos se on tulo, laskutus tai inventointi
 							if ($eka == 0) {

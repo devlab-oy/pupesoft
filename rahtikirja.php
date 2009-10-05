@@ -1291,7 +1291,7 @@
 					$temp_osittaiset .= "<tr class='aktiivi'>";
 
 					if ($logistiikka_yhtio != '') {
-						$temp_osittaiset .= "<td valign='top'>$row[yhtio]</td>";
+						$temp_osittaiset .= "<td valign='top'>$row[yhtio_nimi]</td>";
 					}
 
 					if(trim($row["ohjeet"]) != "") {
@@ -1382,7 +1382,7 @@
 						$query = "	SELECT nimi, lokero
 									FROM pakkaamo
 									WHERE $logistiikka_yhtiolisa
-									AND tunnus in($row[pakkaamot])";
+									AND tunnus in ($row[pakkaamot])";
 						$pakkaamoresult = mysql_query($query) or pupe_error($query);
 
 						$temp_osittaiset .= "<td valign='top'>";
@@ -1426,22 +1426,13 @@
 			echo "</table>";
 
 			if (count($osittaiset) > 0) {
-				$spanni = 8;
 
-				if ($yhtiorow['pakkaamolokerot'] == 'K') {
-					$spanni += 2;
-				}
+				echo "<br><font class='head'>".t("Odottavat tilaukset")."</font><hr>";
 
-				if ($yhtio != '') {
-					$spanni += 1;
-				}
-
-				echo "<br><table>";
-				echo "<tr><th colspan ='$spanni'>".t("Odottavat tilaukset")."</th></tr>";
-
+				echo "<table>";
 				echo "<tr>";
 				if ($logistiikka_yhtio != '') {
-					echo "<th valign='top'>",t("Yhtiö"),"</th>";
+					echo "<th valign='top'>".t("Yhtiö")."</th>";
 				}
 				echo "<th valign='top'>".t("Pri")."<br>".t("Varastoon")."</th>";
 				echo "<th valign='top'>".t("Tilaus")."</th>";
@@ -1450,17 +1441,12 @@
 				echo "<th valign='top'>".t("Laadittu")."<br>".t("Valmis")."<br>".t("Tulostettu")."<br>".t("Kerätty")."</th>";
 				echo "<th valign='top'>".t("Keräysaika")."<br>".t("Toimitusaika")."</th>";
 				echo "<th valign='top'>".t("Toimitustapa")."</th>";
-
 				if ($yhtiorow['pakkaamolokerot'] == 'K') {
 					echo "<th valign='top'>".t("Kollit")."<br>".t("Rullakot")."</th>";
 					echo "<th valign='top'>".t("Pakkaamo")."<br>".t("Lokero")."</th>";
 				}
 				echo "<th valign='top'>".t("Valitse")."</th>";
 				echo "</tr>";
-
-				if ($logistiikka_yhtio != '') {
-					echo "<td valign='top'>$row[yhtio]</td>";
-				}
 
 				for ($i=0; $i < count($osittaiset); $i++) {
 					echo $osittaiset[$i];

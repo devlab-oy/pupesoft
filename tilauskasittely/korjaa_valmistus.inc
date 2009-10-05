@@ -1,8 +1,8 @@
 <?php
 
 	//käytetään tilausriveillä olevia tuotteita
-	$query = "	SELECT tilausrivi.*, if(varattu!=0, varattu, kpl) varattu, 
-				trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, 
+	$query = "	SELECT tilausrivi.*, if(varattu!=0, varattu, kpl) varattu,
+				trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka,
 				tuote.ei_saldoa, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm,
 				tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso
 				FROM tilausrivi
@@ -31,14 +31,14 @@
 					and rivitunnus	= '$perherow[tunnus]'
 					LIMIT 1";
 		$tuoteresult = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($tuoteresult) == 0) {
 			// Raaka-aine listätty jälkikäteen tehdään tapahtuma
 			if 		($perherow['epakurantti100pvm'] != '0000-00-00') $perherow['kehahin'] = 0;
 			elseif 	($perherow['epakurantti75pvm'] != '0000-00-00')  $perherow['kehahin'] = round($perherow['kehahin'] * 0.25, 6);
 			elseif 	($perherow['epakurantti50pvm'] != '0000-00-00')  $perherow['kehahin'] = round($perherow['kehahin'] * 0.5,  6);
 			elseif 	($perherow['epakurantti25pvm'] != '0000-00-00')  $perherow['kehahin'] = round($perherow['kehahin'] * 0.75, 6);
-			
+
 			// Kpl nolla koska homma korjataan $kaantopisteen_saldomuutos-homman kautta
 			$query = "	INSERT into tapahtuma set
 						yhtio    	= '$kukarow[yhtio]',
@@ -57,7 +57,7 @@
 						laadittu 	= now()";
 			$tapahtumaresult = mysql_query($query) or pupe_error($query);
 			$tapahtumaid = mysql_insert_id();
-									
+
 			$query = "	SELECT *
 						FROM tapahtuma
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -66,7 +66,7 @@
 			$tuoteresult = mysql_query($query) or pupe_error($query);
 		}
 		$tuoterow = mysql_fetch_array($tuoteresult);
-		
+
 		$arvo = $tuoterow['hinta'] * $perherow['varattu'];
 		$uusiarvo += $arvo;
 
@@ -85,7 +85,7 @@
 
 			//Lasketaan kääntöpisteen saldomuutos joka johtuu raaka-aineen kulutuksen muutoksesta
 			$kaantopisteen_saldomuutos = round(($perherow["kpl"] - $perherow["varattu"]) / $osavalm_lukumaara, 2);
-			
+
 			while ($taparow = mysql_fetch_array($res)) {
 
 				//Etsitään kääntöpiste
@@ -103,7 +103,7 @@
 
 					echo "<font class='message'>Korjataan raaka-aineen $tuoteno tapahtumat $pvm ($rivitunnus) lähtien. Raaka-aineen kulutusmuutos: $kaantopisteen_saldomuutos.</font><br>";
 
-					require("jalkilaskenta.inc");
+					jalkilaskentafunktio($tuoteno, $pvm, $uusihinta, $rivitunnus, $tapahtumatunnus, $kaantopisteen_saldomuutos);
 				}
 				else {
 					echo "<font class='message'>Raaka-aine ei vaatinut jälkilaskentaa. Raaka-aineen kulutusmuutos: $kaantopisteen_saldomuutos.</font><br>";
@@ -146,7 +146,7 @@
 					WHERE yhtio 	= '$kukarow[yhtio]'
 					and rivitunnus 	= '$tilrivirow[tunnus]'";
 		$updresult = mysql_query($query) or pupe_error($query);
-		
+
 		$query = "	UPDATE tuotepaikat
 					SET saldo=saldo-$valmkpl
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -154,7 +154,7 @@
 					and oletus != ''
 					LIMIT 1";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		echo "<font class='message'>Valmisteen valmistusmuutos: $valmkpl.</font><br>";
 
 		$query = "	UPDATE tilausrivi
@@ -163,7 +163,7 @@
 					and otunnus = '$tilrivirow[otunnus]'
 					and tunnus  = '$tilrivirow[tunnus]'";
 		$updresult = mysql_query($query) or pupe_error($query);
-		
+
 		$query = "	UPDATE tilausrivi
 					SET kpl=0, varattu=0
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -173,16 +173,16 @@
 		$updresult = mysql_query($query) or pupe_error($query);
 	}
 	else {
-				
+
 		// Suoritetaan jälkilaskenta valmisteelle
 		$query = "	SELECT *
 					from tapahtuma
 					where yhtio='$kukarow[yhtio]' and laji='valmistus' and rivitunnus='$tilrivirow[tunnus]'
 					order by tunnus";
 		$res = mysql_query($query) or pupe_error($query);
-		
+
 		$osavalm_lukumaara = mysql_num_rows($res);
-		
+
 		$query = "	SELECT sum(kpl) valmistetut
 					FROM tilausrivi
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -191,7 +191,7 @@
 					and tilausrivi.tyyppi = 'D'";
 		$resisa = mysql_query($query) or pupe_error($query);
 		$rowisa = mysql_fetch_array($resisa);
-		
+
 		while ($taparow = mysql_fetch_array($res)) {
 
 			$uusihinta 		 = round($uusiarvo / $valmkpl,6);
@@ -199,19 +199,19 @@
 			$pvm			 = $taparow["laadittu"];
 			$rivitunnus 	 = $taparow["rivitunnus"];
 			$tapahtumatunnus = $taparow["tunnus"];
-			
+
 			// Lasketaan kääntöpisteen saldomuutos
 			$kaantopisteen_saldomuutos = round(($taparow["kpl"] * ($valmkpl/$rowisa["valmistetut"]))-$taparow["kpl"], 2);
 
-			echo "<br><font class='message'>Korjataan tuotteen $tuoteno tapahtumat $pvm ($rivitunnus) lähtien. Uusi ostohinta $uusihinta. ";
-			
+			echo "<font class='message'>Korjataan tuotteen $tuoteno tapahtumat $pvm ($rivitunnus) lähtien. Uusi ostohinta $uusihinta. ";
+
 			if ($kaantopisteen_saldomuutos != 0) echo "Valmisteen kappalemuutos: $kaantopisteen_saldomuutos.";
-			
+
 			echo "</font><br>";
-													
-			require("jalkilaskenta.inc");		
-			
-			if ($kaantopisteen_saldomuutos != 0) {			
+
+			jalkilaskentafunktio($tuoteno, $pvm, $uusihinta, $rivitunnus, $tapahtumatunnus, $kaantopisteen_saldomuutos);
+
+			if ($kaantopisteen_saldomuutos != 0) {
 				//Päivitetään myös tapahtuman kappalemäärä
 				$query = "	UPDATE tapahtuma
 							SET kpl	= kpl+$kaantopisteen_saldomuutos,
@@ -226,10 +226,10 @@
 							and tuoteno = '$taparow[tuoteno]'
 							and oletus != ''
 							LIMIT 1";
-				$result = mysql_query($query) or pupe_error($query);				
-			}	
+				$result = mysql_query($query) or pupe_error($query);
+			}
 		}
-		
+
 		if ($valmkpl != $rowisa["valmistetut"]) {
 			$query = "	UPDATE tilausrivi
 						SET varattu = 0
@@ -237,7 +237,7 @@
 						and otunnus = '$tilrivirow[otunnus]'
 						and tunnus  = '$tilrivirow[tunnus]'";
 			$updresult = mysql_query($query) or pupe_error($query);
-		
+
 			$query = "	UPDATE tilausrivi
 						SET kpl=round(kpl*($valmkpl/$rowisa[valmistetut]),2), varattu=kpl
 						WHERE yhtio = '$kukarow[yhtio]'

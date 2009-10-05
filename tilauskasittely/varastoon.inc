@@ -185,6 +185,8 @@ $superirivit = '';
 $jtrivit	 = '';
 $jtvarastot	 = array();
 $rivia 		 = 0;
+$korjattavat_valmistukset 	  = array();
+$korjattavat_valmistukset_ind = 0;
 
 if ($mobiili_keikka != "yes") {
 	require_once ('inc/ProgressBar.class.php');
@@ -350,7 +352,6 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 				$hankresxxx = mysql_query($query) or pupe_error($query);
 			}
 		}
-
 	}
 	elseif($toiminto == "kalkyyli" and $tee == "varastoon") {
 
@@ -754,8 +755,29 @@ echo "</tr>";
 
 echo "</table><br>";
 
+// Jos varastoonvienti vaikuttaa tehtyihin valmistuksiin, niin jälkilasketaan myös ne
+if ($toiminto == "kaikkiok" and $tee == "varma" and count($korjattavat_valmistukset) > 0) {
+	$rekurkoko = count($korjattavat_valmistukset);
+	
+	echo "<table>";
+	
+	echo "<tr>";
+	echo "<th colspan='6'>".t("Korjataan valmistukset joihin tämä varastoonvienti vaikuttaa")."</td>";
+	echo "</tr>";
+	
+	
+	// Tässä on rekursiivista toimintaa $korjattavat_valmistukset-array voi kasvaa matkan varrella
+	for ($korjattavat_valmistukset_ind=0; $korjattavat_valmistukset_ind < $rekurkoko; $korjattavat_valmistukset_ind++) {
+		jalkilaske_valmistus($korjattavat_valmistukset[$korjattavat_valmistukset_ind]);
+
+		$rekurkoko = count($korjattavat_valmistukset);
+	}
+	
+	echo "</table>";
+}
+
 if ($toiminto == "kaikkiok" and $tee == "varma") {
-	echo "<font class='message'>".t("Vietiin keikka")." $laskurow[laskunro] ".t("varastoon")."! ".t("Virallinen varastonarvo laskettu").": $rivia ".t("riviä").".</font><br><br>";
+	echo "<br><font class='message'>".t("Vietiin keikka")." $laskurow[laskunro] ".t("varastoon")."! ".t("Virallinen varastonarvo laskettu").": $rivia ".t("riviä").".</font><br><br>";
 }
 elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 	if ($mobiili_keikka != "yes") {

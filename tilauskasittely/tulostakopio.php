@@ -28,8 +28,8 @@
 	$logistiikka_yhtio = '';
 	$logistiikka_yhtiolisa = '';
 
-	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '' and ($toim == "LAHETE" or $toim == "OSOITELAPPU" or $toim == "KERAYSLISTA")) {
-		$logistiikka_yhtio = $konserni_yhtiot;
+	if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '' and ($toim == "LAHETE" or $toim == "OSOITELAPPU" or $toim == "KERAYSLISTA")) {
+		$logistiikka_yhtio = $konsernivarasto_yhtiot;
 		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
 		if ($lasku_yhtio != '') {
@@ -44,7 +44,7 @@
 	if ($toim == "") $toim = "LASKU";
 
 	if ($tee == 'NAYTAHTML') {
-		if ($logistiikka_yhtio != '' and $konserni_yhtiot != '') {
+		if ($logistiikka_yhtio != '' and $konsernivarasto_yhtiot != '') {
 			echo "<font class='head'>",t("Yhtiön")," $yhtiorow[nimi] ",t("tilaus")," $tunnus:</font><hr>";
 		}
 		else {
@@ -205,7 +205,7 @@
 				require ("../inc/kevyt_toimittajahaku.inc");
 			}
 			else {
-				if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '' and ($toim == "LAHETE" or $toim == "OSOITELAPPU" or $toim == "KERAYSLISTA")) {
+				if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '' and ($toim == "LAHETE" or $toim == "OSOITELAPPU" or $toim == "KERAYSLISTA")) {
 					$konserni = $yhtiorow['konserni'];
 				}
 				require ("../inc/asiakashaku.inc");

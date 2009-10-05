@@ -6,8 +6,8 @@
 	$logistiikka_yhtiolisa = '';
 	$lasku_yhtio_originaali = $kukarow['yhtio'];
 
-	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
-		$logistiikka_yhtio = $konserni_yhtiot;
+	if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+		$logistiikka_yhtio = $konsernivarasto_yhtiot;
 		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
 		if ($lasku_yhtio != '') {
@@ -49,7 +49,7 @@
 	}
 
 	if ($tee == 'NAYTATILAUS') {
-		if ($logistiikka_yhtio != '' and $konserni_yhtiot != '') {
+		if ($logistiikka_yhtio != '' and $konsernivarasto_yhtiot != '') {
 			echo "<font class='head'>",t("Yhtiön")," $yhtiorow[nimi] ",t("tilaus")," $tunnus:</font><hr>";
 		}
 		else {
@@ -788,7 +788,7 @@
 	if ($toim == 'lisaa' and $id == 0) {
 
 		if ($lasku_yhtio_originaali != '' and $kukarow['yhtio'] != $lasku_yhtio_originaali) {
-			$logistiikka_yhtio = $konserni_yhtiot;
+			$logistiikka_yhtio = $konsernivarasto_yhtiot;
 			$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
 			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio_originaali);

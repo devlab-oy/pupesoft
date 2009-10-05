@@ -7298,7 +7298,7 @@ if (!function_exists("jt_toimita")) {
 
 if (!function_exists("hae_yhtion_parametrit")) {
 	function hae_yhtion_parametrit($yhtio) {
-		global $kukarow, $konserni_yhtiot;
+		global $kukarow, $konserni_yhtiot, $konsernivarasto_yhtiot;
 
 		$query = "	SELECT *
 					FROM yhtio
@@ -7312,15 +7312,23 @@ if (!function_exists("hae_yhtion_parametrit")) {
 		$yhtiorow = mysql_fetch_array($result);
 
 		$konserni_yhtiot = "";
+		$konsernivarasto_yhtiot = "";
 
 		if ($yhtiorow['konserni'] != '') {
-			$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
+			$query = "	SELECT distinct yhtio.yhtio, konsernivarasto
+						FROM yhtio 
+						JOIN yhtion_parametrit ON (yhtion_parametrit.yhtio = yhtio.yhtio)
+						WHERE (yhtio.konserni = '$yhtiorow[konserni]' and yhtio.konserni != '') or (yhtio.yhtio = '$yhtiorow[yhtio]')";
 			$result = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_array($result)) {
-				$konserni_yhtiot .= " '".$row["yhtio"]."' ,";
+				$konserni_yhtiot .= " '".$row["yhtio"]."' ,";				
+				if ($row["konsernivarasto"] != "") {
+					$konsernivarasto_yhtiot .= " '".$row["yhtio"]."' ,";
+				}
 			}
 			$konserni_yhtiot = substr($konserni_yhtiot, 0, -1);
+			$konsernivarasto_yhtiot = substr($konsernivarasto_yhtiot, 0, -1);
 		}
 		else {
 			$konserni_yhtiot = "'".$yhtio."'";

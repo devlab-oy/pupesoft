@@ -6,8 +6,8 @@
 	$logistiikka_yhtiolisa = '';
 	$lasku_yhtio_originaali = $kukarow['yhtio'];
 
-	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
-		$logistiikka_yhtio = $konserni_yhtiot;
+	if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+		$logistiikka_yhtio = $konsernivarasto_yhtiot;
 		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
 		if ($lasku_yhtio != '') {
@@ -62,7 +62,7 @@
 
 	if ($tee2 == 'NAYTATILAUS') {
 
-		if ($logistiikka_yhtio != '' and $konserni_yhtiot != '') {
+		if ($logistiikka_yhtio != '' and $konsernivarasto_yhtiot != '') {
 			echo "<font class='head'>",t("Yhtiön")," $yhtiorow[nimi] ",t("tilaus")," $tunnus:</font><hr>";
 		}
 		else {
@@ -73,8 +73,8 @@
 		echo "<hr>";
 		$tee2 = $vanha_tee2;
 
-		if ($logistiikka_yhtio != '' and $konserni_yhtiot != '') {
-			$logistiikka_yhtio = $konserni_yhtiot;
+		if ($logistiikka_yhtio != '' and $konsernivarasto_yhtiot != '') {
+			$logistiikka_yhtio = $konsernivarasto_yhtiot;
 		}
 	}
 
@@ -482,7 +482,7 @@
 	if ($tee2 == '') {
 
 		if ($lasku_yhtio_originaali != '' and $kukarow['yhtio'] != $lasku_yhtio_originaali) {
-			$logistiikka_yhtio = $konserni_yhtiot;
+			$logistiikka_yhtio = $konsernivarasto_yhtiot;
 			$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
 			$yhtiorow = hae_yhtion_parametrit($lasku_yhtio_originaali);
@@ -1035,8 +1035,8 @@
 			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<tr><th colspan='2'>".t("Tulosta kaikki keräyslistat")."</th></tr>";
 
-			if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
-				$logistiikka_yhtio = $konserni_yhtiot;
+			if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+				$logistiikka_yhtio = $konsernivarasto_yhtiot;
 			}
 
 			$query = "	SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus

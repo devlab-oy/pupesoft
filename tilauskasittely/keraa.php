@@ -5,8 +5,8 @@
 	$logistiikka_yhtio = '';
 	$logistiikka_yhtiolisa = '';
 
-	if ($yhtiorow['konsernivarasto'] != '' and $konserni_yhtiot != '') {
-		$logistiikka_yhtio = $konserni_yhtiot;
+	if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+		$logistiikka_yhtio = $konsernivarasto_yhtiot;
 		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 
 		if ($lasku_yhtio != '') {
@@ -1326,8 +1326,8 @@
 
 	if ($id == '') {
 		$id = 0;
-		if ($logistiikka_yhtio != '' and $konserni_yhtiot != '') {
-			$logistiikka_yhtio = $konserni_yhtiot;
+		if ($logistiikka_yhtio != '' and $konsernivarasto_yhtiot != '') {
+			$logistiikka_yhtio = $konsernivarasto_yhtiot;
 		}
 	}
 

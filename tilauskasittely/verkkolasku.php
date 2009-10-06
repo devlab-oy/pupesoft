@@ -368,7 +368,7 @@
 				}
 
 				// Tsekataan v‰h‰n alveja ja sarjanumerojuttuja
-				$query = "	SELECT tuote.sarjanumeroseuranta, tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys, tilausrivi.alv
+				$query = "	SELECT tuote.sarjanumeroseuranta, tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys, tilausrivi.alv, tuote.kehahin
 							FROM tilausrivi use index (yhtio_otunnus)
 							JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
 							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
@@ -379,6 +379,33 @@
 				$sarjares1 = mysql_query($query) or pupe_error($query);
 
 				while($srow1 = mysql_fetch_array($sarjares1)) {
+
+					// Tsekataan onko tuotetta ikin‰ ostettu jos kehahinarvio_ennen_ensituloa-parametri on p‰‰ll‰
+					if ($yhtiorow["kehahinarvio_ennen_ensituloa"] != "" and $srow1["kehahin"] != 0) {
+
+						if ($poikkeava_pvm != "") {
+							$tapapvm = $laskvv."-".$laskkk."-".$laskpp. " 23:59:59";
+						}
+						else {
+							$tapapvm = date("Y-m-d H:i:s");
+						}
+
+						$query = "	SELECT tunnus
+									FROM tapahtuma
+									WHERE yhtio = '$kukarow[yhtio]'
+									and laji = 'tulo'
+									and laadittu < '$tapapvm'
+									and tuoteno = '$srow1[tuoteno]'";
+						$sarjares2 = mysql_query($query) or pupe_error($query);
+
+						if (mysql_num_rows($sarjares2) == 0) {
+							$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+
+							if ($silent == "" or $silent == "VIENTI") {
+								$tulos_ulos_sarjanumerot .= t("Tilausta ei voida laskuttaa arvioidulla keskihankintahinnalla").": $laskurow[tunnus] $srow1[tuoteno]!!!<br>\n";
+							}
+						}
+					}
 
 					// Tsekataan alvit
 					$query = "	SELECT group_concat(distinct concat_ws(',', selite, selite+500)) alvit

@@ -39,7 +39,7 @@
 
 	if (mysql_field_name($result, $i) == "nimitys") {
 
-		//	Jos meillä on jokin viranomaistuote huomautetaan että nimitystä ei venksailla
+		//	Jos meillä on jokin viranomaistuote huomautetaan että nimitystä ei venkslailla
 		$query  = "	SELECT tunnus
 	    			FROM tuote
 	    			WHERE yhtio = '$kukarow[yhtio]'
@@ -87,6 +87,10 @@
 	}
 
 	if (mysql_field_name($result, $i) == "kehahin" and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K" and ($trow["ei_saldoa"] != "" or $uusi != "")) {
+		$tyyppi = 1;
+	}
+
+	if (mysql_field_name($result, $i) == "kehahin" and $yhtiorow["kehahinarvio_ennen_ensituloa"] == "K" and $poistolukko == "") {
 		$tyyppi = 1;
 	}
 

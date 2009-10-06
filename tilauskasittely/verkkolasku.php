@@ -402,7 +402,7 @@
 							$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
 
 							if ($silent == "" or $silent == "VIENTI") {
-								$tulos_ulos_sarjanumerot .= t("Tilausta ei voida laskuttaa arvioidulla keskihankintahinnalla").": $laskurow[tunnus] $srow1[tuoteno]!!!<br>\n";
+								$tulos_ulos_sarjanumerot .= "<font class='error'>".t("Tilausta ei voida laskuttaa arvioidulla keskihankintahinnalla").": $laskurow[tunnus] $srow1[tuoteno]!!!</font><br>\n";
 							}
 						}
 					}

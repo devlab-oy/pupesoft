@@ -634,6 +634,16 @@
 					}
 				}
 
+				if (isset($tuotteet_lista) and $tuotteet_lista != '') {
+					$tuotteet = explode("\n", $tuotteet_lista);
+					$tuoterajaus = "";
+					foreach($tuotteet as $tuote) {
+						if (trim($tuote) != '') {
+							$tuoterajaus .= "'".trim($tuote)."',";
+						}
+					}
+					$lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+				}
 
 				$vvaa = $vva - '1';
 				$vvll = $vvl - '1';
@@ -2060,7 +2070,10 @@
 				<tr>
 				<td class='back'><br></td>
 				</tr>
-
+				<tr><th valign='top'>".t("Tuotelista")."<br>(".t("Rajaa näillä tuotteilla").")</th><td colspan='3'><textarea name='tuotteet_lista' rows='5' cols='35'>$tuotteet_lista</textarea></td></tr>
+				<tr>
+				<td class='back'><br></td>
+				</tr>
 				<tr>
 				<th>".t("Piilota myynti")."</th>
 				<td><input type='checkbox' name='piilota_myynti' $piilota_myynti_sel></td>

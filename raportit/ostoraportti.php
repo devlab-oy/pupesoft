@@ -1917,8 +1917,8 @@
 			echo "</tr>";
 			echo "<tr>";
 			echo "<th>",t("Tallenna uusi raportti"),":</th>";
-			echo "<td><input type='text' name='uusirappari' value='' onkeypress=\"document.getElementById('tee').value = 'uusiraportti'\"></td>";
-			echo "<td><input type='submit' id='tallenna_button' value='",t("Tallenna"),"'></td>";
+			echo "<td><input type='text' name='uusirappari' value=''></td>";
+			echo "<td><input type='submit' id='tallenna_button' value='",t("Tallenna"),"' onclick=\"document.getElementById('tee').value = 'uusiraportti'\"></td>";
 			echo "</tr>";
 			echo "</table>";
 			echo "<br/>";
@@ -2023,7 +2023,7 @@
 				$trow2 = mysql_fetch_array($sresult);
 			}
 
-			if ($rappari != $edrappari) {
+			if (($rappari != '' and $edrappari != '') and $rappari != $edrappari) {
 				unset($valitut);
 				$tee = "JATKA";
 			}

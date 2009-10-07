@@ -368,7 +368,7 @@
 				}
 
 				// Tsekataan v‰h‰n alveja ja sarjanumerojuttuja
-				$query = "	SELECT tuote.sarjanumeroseuranta, tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys, tilausrivi.alv, tuote.kehahin
+				$query = "	SELECT tuote.sarjanumeroseuranta, tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys, tilausrivi.alv, tuote.kehahin, tuote.ei_saldoa
 							FROM tilausrivi use index (yhtio_otunnus)
 							JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
 							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
@@ -381,10 +381,10 @@
 				while($srow1 = mysql_fetch_array($sarjares1)) {
 
 					// Tsekataan onko tuotetta ikin‰ ostettu jos kehahinarvio_ennen_ensituloa-parametri on p‰‰ll‰
-					if ($yhtiorow["kehahinarvio_ennen_ensituloa"] != "" and $srow1["kehahin"] != 0) {
+					if ($yhtiorow["kehahinarvio_ennen_ensituloa"] != "" and $srow1["kehahin"] != 0 and $srow1["ei_saldoa"] == "") {
 
 						if ($poikkeava_pvm != "") {
-							$tapapvm = $laskvv."-".$laskkk."-".$laskpp. " 23:59:59";
+							$tapapvm = $laskvv."-".$laskkk."-".$laskpp." 23:59:59";
 						}
 						else {
 							$tapapvm = date("Y-m-d H:i:s");

@@ -130,7 +130,7 @@ if ($kollityht > 0) {
 				$attention = $shipto->addChild('Attention', substr($yhteyshenkilo_tekninen_row['nimi'], 0, 35)); // max 35 merkkiä, R (riippuu maasta)
 			}
 			else {
-				$attention = $shipto->addChild('Attention', ''); // max 35 merkkiä, R (riippuu maasta)
+				$attention = $shipto->addChild('Attention', '.'); // max 35 merkkiä, R (riippuu maasta)
 			}
 		}
 
@@ -140,7 +140,7 @@ if ($kollityht > 0) {
 		$cityortown					= $shipto->addChild('CityOrTown', $ups_laskurow['postitp']); // max 30 merkkiä, R
 		$telephone					= $ups_laskurow['puhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['puhelin']) :
 										($ups_laskurow['gsm'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['gsm']) :
-										($ups_laskurow['tyopuhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['tyopuhelin']) : $shipto->addChild('Telephone', ''))); // max 15 merkkiä, C
+										($ups_laskurow['tyopuhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['tyopuhelin']) : $shipto->addChild('Telephone', '.'))); // max 15 merkkiä, C
 //		$stateprovincecounty 		= $shipto->addChild('StateProvinceCounty', ''); // max 5 merkkiä, C (tarvitaan vain US & CA tapauksissa)
 //		$address2					= $shipto->addChild('Address2', ''); // max 35 merkkiä, O
 //		$address3					= $shipto->addChild('Address3', ''); // max 35 merkkiä, O
@@ -254,18 +254,19 @@ if ($kollityht > 0) {
 */
 
 
-		$query ="	SELECT sum(kollit) kollit,
+		$query ="	SELECT merahti, sum(kollit) kollit,
 					sum(kilot) kilot,
 					sum(kuutiot) kuutiot,
 					sum(lavametri) lavametri,
 					min(pakkauskuvaus) pakkauskuvaus,
-					min(pakkauskuvaustark) pakkauskuvaustark,
-					merahti
+					min(pakkauskuvaustark) pakkauskuvaustark
 					from rahtikirjat use index (otsikko_index)
 					where yhtio = '$kukarow[yhtio]'
 					and otsikkonro = '$ups_laskurow[laskutunnus]'
 					and rahtikirjanro = '$rahtikirjanro'
-					and pakkaus = '$pakkaus[0]'";
+					and pakkaus = '$pakkaus[0]'
+					GROUP BY 1
+					ORDER BY 1";
 		//and pakkauskuvaus = '$row[selitetark]'";
 		$ups_rakires = mysql_query($query) or pupe_error($query);
 		$ups_rakirow = mysql_fetch_array($ups_rakires);
@@ -354,7 +355,7 @@ if ($kollityht > 0) {
 		WorldEase	WorldEase will allow all billing options except Consignee billing.
 		******************************************************************************/
 
-		$billingoption			= $shipmentinformation->addChild('BillingOption', ''); // max 3 merkkiä, R
+		$billingoption			= $shipmentinformation->addChild('BillingOption', 'PP'); // max 3 merkkiä, R
 
 		/******************************************************************************
 		Bill Transportation To

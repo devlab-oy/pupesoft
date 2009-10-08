@@ -843,15 +843,7 @@ if ($kollityht > 0) {
 
 		$xml_output = $xml->asXML();
 
-		if ($ups_path != '') {
-			if (substr($ups_path,-1) != '/') {
-				$ups_path .= '/';
-			}
-			$filenimi = $ups_path."ups_import-".md5(uniqid(rand(),true)).".xml";
-		}
-		else {
-			$filenimi = "/tmp/ups_import-".md5(uniqid(rand(),true)).".xml";
-		}
+		$filenimi = "/tmp/ups_import-".md5(uniqid(rand(),true)).".xml";
 
 		//kirjoitetaan faili levylle..
 		if (file_put_contents($filenimi, $xml_output) === FALSE) {

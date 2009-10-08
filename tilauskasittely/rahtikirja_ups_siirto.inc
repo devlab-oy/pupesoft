@@ -118,7 +118,7 @@ if ($kollityht > 0) {
 							AND tunnus = '{$ups_laskurow['yhteyshenkilo_kaupallinen']}'";
 				$yhteyshenkilo_kaupallinen_res = mysql_query($query) or pupe_error($query);
 				$yhteyshenkilo_kaupallinen_row = mysql_fetch_assoc($yhteyshenkilo_kaupallinen_res);
-				$attention = $shipto->addChild('Attention', substr($yhteyshenkilo_kaupallinen_row['nimi'], 0, 35)); // max 35 merkkiä, R (riippuu maasta)
+				$attention = $shipto->addChild('Attention', substr(utf8_encode($yhteyshenkilo_kaupallinen_row['nimi']), 0, 35)); // max 35 merkkiä, R (riippuu maasta)
 			}
 			elseif ($ups_laskurow['yhteyshenkilo_tekninen'] != '') {
 				$query = "	SELECT *
@@ -127,17 +127,17 @@ if ($kollityht > 0) {
 							AND tunnus = '{$ups_laskurow['yhteyshenkilo_tekninen']}'";
 				$yhteyshenkilo_tekninen_res = mysql_query($query) or pupe_error($query);
 				$yhteyshenkilo_tekninen_row = mysql_fetch_assoc($yhteyshenkilo_tekninen_res);
-				$attention = $shipto->addChild('Attention', substr($yhteyshenkilo_tekninen_row['nimi'], 0, 35)); // max 35 merkkiä, R (riippuu maasta)
+				$attention = $shipto->addChild('Attention', substr(utf8_encode($yhteyshenkilo_tekninen_row['nimi']), 0, 35)); // max 35 merkkiä, R (riippuu maasta)
 			}
 			else {
 				$attention = $shipto->addChild('Attention', '.'); // max 35 merkkiä, R (riippuu maasta)
 			}
 		}
 
-		$address1					= $shipto->addChild('Address1', $ups_laskurow['osoite']); // max 35 merkkiä, R
+		$address1					= $shipto->addChild('Address1', utf8_encode($ups_laskurow['osoite'])); // max 35 merkkiä, R
 		$countryterritory 			= $shipto->addChild('CountryTerritory', $ups_laskurow['maa']); // max 30 merkkiä, R
 		$postalcode					= $shipto->addChild('PostalCode', $ups_laskurow['postino']); // max 9 merkkiä, C (riippuu maasta)
-		$cityortown					= $shipto->addChild('CityOrTown', $ups_laskurow['postitp']); // max 30 merkkiä, R
+		$cityortown					= $shipto->addChild('CityOrTown', utf8_encode($ups_laskurow['postitp'])); // max 30 merkkiä, R
 		$telephone					= $ups_laskurow['puhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['puhelin']) :
 										($ups_laskurow['gsm'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['gsm']) :
 										($ups_laskurow['tyopuhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['tyopuhelin']) : $shipto->addChild('Telephone', '.'))); // max 15 merkkiä, C
@@ -154,12 +154,12 @@ if ($kollityht > 0) {
 		// SHIP FROM
 		$shipfrom					= $xml->OpenShipment->addChild('ShipFrom');
 		$customerid 				= $shipfrom->addChild('CustomerID', $yhtiorow['ytunnus']); // max 35 merkkiä, R
-		$companyorname 				= $shipfrom->addChild('CompanyOrName', $yhtiorow['nimi']); // max 35 merkkiä, R
-		$attention 					= $shipfrom->addChild('Attention', substr('', 0, 35)); // max 35 merkkiä, R (riippuu maasta)
-		$address1					= $shipfrom->addChild('Address1', $yhtiorow['osoite']); // max 35 merkkiä, R
+		$companyorname 				= $shipfrom->addChild('CompanyOrName', utf8_encode($yhtiorow['nimi'])); // max 35 merkkiä, R
+		$attention 					= $shipfrom->addChild('Attention', substr('.', 0, 35)); // max 35 merkkiä, R (riippuu maasta)
+		$address1					= $shipfrom->addChild('Address1', utf8_encode($yhtiorow['osoite'])); // max 35 merkkiä, R
 		$countryterritory 			= $shipfrom->addChild('CountryTerritory', $yhtiorow['maa']); // max 30 merkkiä, R
 		$postalcode					= $shipfrom->addChild('PostalCode', $yhtiorow['postino']); // max 9 merkkiä, C (riippuu maasta)
-		$cityortown					= $shipfrom->addChild('CityOrTown', $yhtiorow['postitp']); // max 30 merkkiä, R
+		$cityortown					= $shipfrom->addChild('CityOrTown', utf8_encode($yhtiorow['postitp'])); // max 30 merkkiä, R
 		$telephone					= $shipfrom->addChild('Telephone', $yhtiorow['puhelin']); // max 15 merkkiä, C
 //		$address2					= $shipfrom->addChild('Address2', ''); // max 35 merkkiä, O
 //		$address3					= $shipfrom->addChild('Address3', ''); // max 35 merkkiä, O

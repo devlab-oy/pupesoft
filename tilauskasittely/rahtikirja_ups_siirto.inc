@@ -315,7 +315,7 @@ if ($kollityht > 0) {
 		25				UPS 25 KG Box
 		30				Pallet (UK / PL only)
 		******************************************************************************/
-		$packagetype					= $shipmentinformation->addChild('PackageType', $rakirow['pakkauskuvaus']); // max 2 merkkiä, R
+		$packagetype					= $shipmentinformation->addChild('PackageType', $pakkaus[0]); // max 2 merkkiä, R
 		$numberofpackages				= $shipmentinformation->addChild('NumberOfPackages', $rakirow['kollit']); // max	3 merkkiä, R
 		$shipmentactualweight			= $shipmentinformation->addChild('ShipmentActualWeight', round($rakirow['kilot'], 1)); // max 12,1 merkkiä, R  // Unless it is an ENVELOP
 		$shipmentdimensionalweight 		= $shipmentinformation->addChild('ShipmentDimensionalWeight', ''); // max 12,1 merkkiä, O

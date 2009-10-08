@@ -837,11 +837,6 @@ if ($kollityht > 0) {
 		$conumberofpackagecontaininggood 			= $goods->addChild('CO-NumberOfPackageContainingGood', ''); // max 4 merkkiä
 		*/
 
-//		$ups_path = '/ups/';
-//		$ups_host = '10.10.69.10';
-//		$ups_user = 'ups';
-//		$ups_pass = 'xmlsiirto';
-
 		// Muunnetaan merkistö Windows ANSI
 		iconv("ISO-8859-1", "Windows-1252", $xml);
 

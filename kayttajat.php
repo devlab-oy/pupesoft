@@ -410,6 +410,7 @@
 			$query = "	DELETE FROM oikeu
 						WHERE yhtio='$kukarow[yhtio]' and kuka='$kuka' and lukittu=''";
 			$pres = mysql_query($query) or pupe_error($query);
+
 			if (count($profiilit) > 0 and $profiilit[0] != '') {
 				//k‰yd‰‰n uudestaan profiili l‰pi
 				foreach($profiilit as $prof) {
@@ -423,15 +424,11 @@
 						//voi olla esim jos se on lukittuna annettu
 						$query = "	SELECT yhtio
 									FROM oikeu
-									WHERE kuka		= '$kuka'
+									WHERE yhtio		= '$kukarow[yhtio]'
+									and kuka		= '$kuka'
 									and sovellus	= '$trow[sovellus]'
 									and nimi		= '$trow[nimi]'
-									and alanimi 	= '$trow[alanimi]'
-									and nimitys		= '$trow[nimitys]'
-									and jarjestys 	= '$trow[jarjestys]'
-									and jarjestys2	= '$trow[jarjestys2]'
-									and hidden		= '$trow[hidden]'
-									and yhtio		= '$kukarow[yhtio]'";
+									and alanimi 	= '$trow[alanimi]'";
 						$tarkesult = mysql_query($query) or pupe_error($query);
 
 						if (mysql_num_rows($tarkesult) == 0) {
@@ -652,8 +649,8 @@
 			echo "<tr><th align='left'>".t("Valitse varastot, joista k‰ytt‰j‰ saa myyd‰").":</td>";
 			echo "<td>";
 
-			$query  = "	SELECT * 
-						FROM varastopaikat 
+			$query  = "	SELECT *
+						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]'
 						order by tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);

@@ -20,7 +20,7 @@
 
 
 	// tehd‰‰n oikeuksien p‰ivitys
-	if ($update=='totta' and $selkukarow["kuka"] != "") {
+	if ($update == 'totta' and $selkukarow["kuka"] != "") {
 		// poistetaan ihan aluksi kaikki.. iiik.
 		$query = "	DELETE
 					FROM oikeu
@@ -42,15 +42,15 @@
 				$result = mysql_query($query) or pupe_error($query);
 				$trow = mysql_fetch_array($result);
 
-				$query = "	INSERT into oikeu 
+				$query = "	INSERT into oikeu
 							SET
-							kuka		= '$selkukarow[kuka]', 
-							sovellus	= '$trow[sovellus]', 
-							nimi		= '$trow[nimi]', 
-							alanimi 	= '$trow[alanimi]', 
+							kuka		= '$selkukarow[kuka]',
+							sovellus	= '$trow[sovellus]',
+							nimi		= '$trow[nimi]',
+							alanimi 	= '$trow[alanimi]',
 							paivitys	= '',
 							lukittu		= '',
-							nimitys		= '$trow[nimitys]', 
+							nimitys		= '$trow[nimitys]',
 							jarjestys 	= '$trow[jarjestys]',
 							jarjestys2	= '$trow[jarjestys2]',
 							hidden		= '$trow[hidden]',
@@ -76,7 +76,7 @@
 				}
 			}
 		}
-		
+
 		if (count($lukot) != 0) {
 			foreach ($lukot as $rastit) { // P‰ivitet‰‰n lukittu-kentt‰
 				list ($nimi, $alanimi, $sov) = split("#", $rastit);
@@ -106,12 +106,12 @@
 			<tr>
 				<th>".t("Valitse k‰ytt‰j‰").":</th>
 				<td><select name='selkuka' onchange='submit()'>";
-		
-	if ($toim == "" or $selkukarow["kuka"] != "") {	
+
+	if ($toim == "" or $selkukarow["kuka"] != "") {
 		echo "<option selected value='$selkukarow[tunnus]'>$selkukarow[nimi] ($selkukarow[kuka])</option>";
 	}
 	elseif ($toim == "extranet" and $selkukarow["kuka"] == "") {
-		echo "<option selected value=''>".t("Valitse k‰ytt‰j‰")."</option>";			
+		echo "<option selected value=''>".t("Valitse k‰ytt‰j‰")."</option>";
 	}
 
 	if ($toim == "extranet" and $selkukarow["tunnus"] != "") {
@@ -201,8 +201,8 @@
 			var currForm = toggleBox.form;
 			var isChecked = toggleBox.checked;
 			var nimi = toggleBox.name;
-		
-			for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {											
+
+			for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
 				if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,3) == nimi) {
 					currForm.elements[elementIdx].checked = isChecked;
 				}
@@ -211,7 +211,7 @@
 
 		//-->
 		</script>";
-		
+
 	echo "<form action='$PHP_SELF' name='suojax' method='post'>
 			<input type='hidden' name='update' value='totta'>
 			<input type='hidden' name='sovellus' value='$sovellus'>
@@ -234,7 +234,7 @@
 		$checked	= '';
 		$paivit		= '';
 		$luk		= '';
-		
+
 		if ($selkukarow["kuka"] != "") {
 			$oq = "	SELECT *
 					FROM oikeu
@@ -243,16 +243,16 @@
 
 			if (mysql_num_rows($or) != 0) {
 				$checked = "CHECKED";
-		
+
 				$oikeurow=mysql_fetch_array($or);
-		
+
 				if ($oikeurow["paivitys"] == 1) {
 					$paivit = "CHECKED";
 				}
-		
+
 				if ($oikeurow["lukittu"] == 1) {
 					$luk = "CHECKED";
-				}			
+				}
 			}
 		}
 
@@ -278,13 +278,13 @@
 			<td align='center'><input type='checkbox' name='val' onclick='toggleAll(this);'></td>
 			<td align='center'><input type='checkbox' name='pai' onclick='toggleAll(this)'></td>
 			<td align='center'><input type='checkbox' name='luk' onclick='toggleAll(this)'></td>
-			</tr>";			
-	echo "</table>";		
+			</tr>";
+	echo "</table>";
 
 	if ($toim == "" or ($toim == "extranet" and $selkukarow["kuka"] != "")) {
 		echo "<input type='submit' value='".t("P‰ivit‰ tiedot")."'></form>";
 	}
-			
+
 	require("inc/footer.inc");
 
 

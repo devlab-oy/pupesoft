@@ -122,6 +122,10 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "LASKUTUS_SAATE")	$ulos .= "<option value='LASKUTUS_SAATE' $avain_sel[LASKUTUS_SAATE]>		".t("Laskun sähköpostisaatekirje asiakkaalle")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TV_LISATIETO") 		$ulos .= "<option value='TV_LISATIETO' $avain_sel[TV_LISATIETO]>			".t("Tilausvahvistuksen lisätiedot")."</option>";
 		if ($lukitse_laji== "") $ulos .= "</optgroup>";
+		
+		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
+		if ($lukitse_laji== "" or $lukitse_laji == "VERKKOKAULINKKI") $ulos .= "<option value='VERKKOKAULINKKI' $avain_sel[VERKKOKAULINKKI]>".t("Verkkokauppalinkki")."</option>";
+		if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
 		$ulos .= "</select></td>";
 		$jatko = 0;

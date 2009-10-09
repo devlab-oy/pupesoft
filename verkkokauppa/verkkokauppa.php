@@ -6,280 +6,36 @@ require ("parametrit.inc");
 
 if ($verkkokauppa == "") die("Verkkokuapayhtiö määrittelemättä");
 
-function tilaus($tunnus, $muokkaa = "") {
-	global $yhtiorow, $kukarow;
+if (!function_exists("tilaus")) {
+	function tilaus($tunnus, $muokkaa = "") {
+		global $yhtiorow, $kukarow, $verkkokauppa;
 
-	$query = "	SELECT *
-				FROM lasku
-				WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus' and liitostunnus = '$kukarow[oletus_asiakas]'";
-	$result = mysql_query($query) or pupe_error($query);
-	$laskurow = mysql_fetch_array($result);
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus' and liitostunnus = '$kukarow[oletus_asiakas]'";
+		$result = mysql_query($query) or pupe_error($query);
+		$laskurow = mysql_fetch_array($result);
 
-	$ulos = "";
-	$query = "	SELECT tuoteno, nimitys, tilausrivi.hinta, round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta, (kpl+varattu+jt) varattu, tilausrivi.alv, tilausrivi.tunnus
-				FROM tilausrivi
-				JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and liitostunnus = '$kukarow[oletus_asiakas]'
-				WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and otunnus = '$tunnus'
-				GROUP BY tilausrivi.tunnus";
-	$riviresult = mysql_query($query) or pupe_error($query);
+		if ($muokkaa != "" and ($laskurow["tila"] != "N" or $laskurow["alatila"] != "" or $kukarow["kesken"] != $tunnus)) {
+			$ulos .= "<font class='error'>".t("Tilausta ei voi enää muokata")."!</font><br>";
+			$muokkaa = "";
+		}
 
-	if ($muokkaa != "" and ($laskurow["tila"] != "N" or $laskurow["alatila"] != "" or $kukarow["kesken"] != $tunnus)) {
-		$ulos .= "<font class='error'>".t("Tilausta ei voi enää muokata")."!</font><br>";
-		$muokkaa = "";
+		if ($muokkaa != "") {
+			$ulos .= "	<form id = 'laskutiedot' name = 'laskutiedot' method='POST' action=\"javascript:ajaxPost('laskutiedot', 'verkkokauppa.php?', 'selain', false, true);\">
+						<input type='hidden' name='tee' value = 'tallenna_osoite'>
+						<input type='hidden' name='osasto' value = '$osasto'>
+						<input type='hidden' name='tuotemerkki' value = '$tuotemerkki'>
+						<input type='hidden' name='try' value = '$try'>";
+		}				
+	
+		ob_start();
+		require("naytatilaus.inc");
+		$ulos .= ob_get_contents();
+		ob_end_clean();
+
+		return $ulos;
 	}
-
-	if (mysql_num_rows($riviresult) > 0) {
-
-		list($toimvv, $toimkk, $toimpp) = explode("-", $laskurow["toimaika"]);
-
-		$ulos .=  "	<form id = 'laskutiedot' name = 'laskutiedot' method='POST' action=\"javascript:ajaxPost('laskutiedot', 'verkkokauppa.php?', 'selain', false, true);\">
-					<input type='hidden' name='tee' value = 'tallenna_osoite'>
-					<input type='hidden' name='osasto' value = '$osasto'>
-					<input type='hidden' name='tuotemerkki' value = '$tuotemerkki'>
-					<input type='hidden' name='try' value = '$try'>
-					<table style = 'width: 500px;'>
-					<tr>
-						<th>
-							".t("Laskutusosoite")."
-						</th>
-						<th>
-							".t("Toimitusosoite")."
-						</th>
-						<td class='back'></td>
-					</tr>
-					<tr>
-						<td valign = 'top' width='250px'>
-							$laskurow[nimi]<br>
-							$laskurow[nimitark]<br>
-							$laskurow[osoite]<br>
-							$laskurow[postino] $laskurow[postitp]
-						</td>
-						<td valign = 'top' width='250px'>";
-
-		if ($muokkaa == "") {
-			$ulos .= "		$laskurow[toim_nimi]<br>
-							$laskurow[toim_nimitark]<br>
-							$laskurow[toim_osoite]<br>
-							$laskurow[toim_postino] $laskurow[toim_postitp]";
-		}
-		else {
-			$ulos .= "		<input type = 'text' name='toim_nimi' value = '$laskurow[toim_nimi]' size = '30'><br>
-							<input type = 'text' name='toim_nimitark' value = '$laskurow[toim_nimitark]' size = '30'><br>
-							<input type = 'text' name='toim_osoite' value = '$laskurow[toim_osoite]' size = '30'><br>
-							<input type = 'text' name='toim_postino' value = '$laskurow[toim_postino]' size = '6'> <input type = 'text' name='toim_postitp' value = '$laskurow[toim_postitp]' size = '20'>";
-		}
-
-		$ulos .= "	</td>
-						<td class='back'>
-						</td>
-					</tr>
-					<tr>
-						<td colspan='3' class='back'>
-							<br>
-						</td>
-					</tr>
-
-					<tr>
-						<th>
-							".t("Toimitusaika")."
-						</th>
-						<td>";
-
-			if ($muokkaa == "") {
-				$ulos .=  "	$toimpp.$toimkk. $toimvv";
-			}
-			else {
-				$ulos .=  "	<input type = 'text' name = 'toimpp' value='$toimpp' size = '3'>
-							<input type = 'text' name = 'toimkk' value='$toimkk' size = '3'>
-							<input type = 'text' name = 'toimvv' value='$toimvv' size = '5'>";
-			}
-
-			$ulos .=  "	</td>
-						<td class='back'></td>
-					</tr>
-
-					<tr>
-						<td colspan='3' class='back'>
-							<br>
-						</td>
-					</tr>
-
-					<tr>
-						<th colspan='2'>
-							".t("Tilausyhteyshenkilö")."
-						</th>
-						<td class='back'></td>
-					</tr>
-					<tr>
-						<td colspan='2'>";
-
-			if ($muokkaa == "") {
-				$ulos .=  "	$laskurow[tilausyhteyshenkilo]&nbsp;";
-			}
-			else {
-				$ulos .=  "	<input type = 'text' name='tilausyhteyshenkilo' value='$laskurow[tilausyhteyshenkilo]' size = '62'>";
-			}
-
-			$ulos .=  "	</td>
-						<td class='back'></td>
-					</tr>
-
-					<tr>
-						<th colspan='2'>
-							".t("Asiakkaan tilausnumero")."
-						</th>
-						<td class='back'></td>
-					</tr>
-					<tr>
-						<td colspan='2'>";
-
-			if ($muokkaa == "") {
-				$ulos .=  "	$laskurow[asiakkaan_tilausnumero]&nbsp;";
-			}
-			else {
-				$ulos .=  "	<input type = 'text' name='asiakkaan_tilausnumero' value='$laskurow[asiakkaan_tilausnumero]' size = '62'>";
-			}
-
-			$ulos .= "	</td>
-						<td class='back'></td>
-					</tr>
-					<tr>
-						<th colspan='2'>
-							".t("Kohde")."
-						</th>
-						<td class='back'></td>
-					</tr>
-					<tr>
-						<td colspan='2'>";
-
-			if ($muokkaa == "") {
-				$ulos .= "	$laskurow[kohde]&nbsp;";
-			}
-			else {
-				$ulos .= "	<input type = 'text' name='kohde' value='$laskurow[kohde]' size = '62'>";
-			}
-
-
-			$ulos .= "	</td>
-						<td class='back'></td>
-					</tr>
-					<tr>
-						<th colspan='2'>
-							".t("Tilausviite")."
-						</th>
-						<td class='back'></td>
-					</tr>
-					<tr>
-						<td colspan='2'>";
-
-			if ($muokkaa == "") {
-				$ulos .= "	$laskurow[viesti]&nbsp;";
-			}
-			else {
-				$ulos .= "	<input type = 'text' name='viesti' value='$laskurow[viesti]' size = '62'>";
-			}
-
-			$ulos .= "	</td>
-						<td class='back'></td>
-					</tr>
-
-					<tr>
-						<th colspan='2'>
-							".t("Lisätiedot")."
-						</th>
-						<td class='back'></td>
-					</tr>
-					<tr>
-						<td colspan='2'>";
-
-			if ($muokkaa == "") {
-				$ulos .= "	$laskurow[comments]&nbsp;
-					</td>
-					<td class='back'></td>
-					</tr>
-					</table>
-					</form>";
-			}
-			else {
-				$ulos .= "	<textarea name='comments' cols = '60' rows = '3'>$laskurow[comments]</textarea>
-					</td>
-					<td class='back'><input type = 'submit' name='tallenna' value='".t("Tallenna")."'></td>
-					</tr>
-					</table>
-					</form>";
-			}
-
-
-			$ulos .= "
-					<br>
-
-					<font class='message'>".t("Tilausrivit").":</font><hr>
-
-					<table style = 'width: 700px;'>
-					<tr>
-						<th>".t("Tuoteno")."</th>
-						<th>".t("Nimitys")."</th>
-						<th>".t("Saldo")."</th>
-						<th>".t("Määrä")."</th>
-						<th>".t("Yksikköhinta")."</th>
-						<th>".t("Rivihinta")."</th>
-						<th>".t("Verollinen")."</th>
-						<th>".t("Alv")."</th>
-						<td class='back'></td>
-					</tr>";
-
-
-		$summa = $summa_verolla = 0;
-		while ($koririvi = mysql_fetch_array($riviresult)) {
-
-			$rivihinta_verolla = $koririvi["rivihinta"] * (1+($koririvi["alv"]/100));
-			list(, , $saldo) = saldo_myytavissa($koririvi["tuoteno"], "KAIKKI");
-
-			$ulos .= "<tr>
-						<td NOWRAP>$koririvi[tuoteno]</td>
-						<td>$koririvi[nimitys]</td>
-						<td><em>".number_format($saldo, 2, ',', ' ')."</em></td>
-						<td>".number_format($koririvi["varattu"], 2, ',', ' ')."</td>
-						<td NOWRAP>".number_format($koririvi["hinta"], 2, ',', ' ')."</td>
-						<td NOWRAP>".number_format($koririvi["rivihinta"], 2, ',', ' ')."</td>
-						<td NOWRAP>".number_format($rivihinta_verolla, 2, ',', ' ')."</td>
-						<td NOWRAP>".number_format($koririvi["alv"], 2, ',', ' ')."%</td>";
-			if ($muokkaa != "") {
-				$ulos .= "	<td class='back'><a href='#' onclick = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus=$koririvi[tunnus]&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\">Poista</a></td>";
-			}
-
-			$ulos .= "</tr>";
-
-			$summa += $koririvi["rivihinta"];
-			$summa_verolla += $rivihinta_verolla;
-
-		}
-
-		$ulos .= "
-				<tr>
-					<td class = 'back' colspan = '4'></td>
-					<td class = 'tumma'>".number_format($summa, 2, ',', ' ')."</td>
-					<td class = 'tumma'>".number_format($summa_verolla, 2, ',', ' ')."</td>
-				</tr>
-				<tr>
-					<td class = 'back' colspan = '4'>";
-
-		if ($yhtiorow["alv_kasittely"] != "") {
-			$ulos .= "<font class='message'>".t("Yksikköhinnat eivät sisällä arvonlisäveroa").".</font>";
-		}
-		else {
-			$ulos .= "<font class='message'>".t("Yksikköhinnat sisältävät arvonlisäveron").".</font>";
-		}
-
-		$ulos .= "		</td>
-				</tr></table>";
-
-	}
-	else {
-		$ulos = "<font class='message'>".t("Tilauksella ei ole tavaraa").".</font><br>";
-	}
-
-	return $ulos;
 }
 
 if (!function_exists("menu")) {
@@ -337,37 +93,45 @@ if (!function_exists("menu")) {
 		}
 
 		if ($osasto == "") {
-			$val =  "<table id='rootMenu' name='rootMenu' class='menutable' style='visibility: hidden;'>
-						<tr><td class='menucell'><a class='menu' href = 'verkkokauppa.php'>".t("Etusivulle")."</a></td></tr>
-						<tr><td class='menucell'><a class='menu' href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=yhteystiedot', false, true);\">".t("Yhteystiedot")."</a></td></tr>
-						<tr><td class='back'><br><font class='info'>".t("Tuotteet").":</font><hr></td></tr>";
+			$val =  "<table id='rootMenu' name='rootMenu' class='menutable' style='visibility: hidden;'>";
 
-			$ores = t_avainsana("OSASTO", "", " and avainsana.jarjestys < 10000 ");
+			$result = t_avainsana("VERKKOKAULINKKI");
 
-			while ($orow = mysql_fetch_array($ores)) {
-				$target		= "T_".$orow["selite"];
-				$parent		= "P_".$orow["selite"];
-
-				$onclick	= "document.getElementById(\"$target\").style.display==\"none\"? sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto=$orow[selite]\", \"\", false) : \"\";";
-				$href 		= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto=$orow[selite]\", \"$parent\", false, false);";
-				$val .=  "<tr><td class='menucell'><a class = 'menu' id='$parent' onclick='$onclick' href='$href'>$orow[selitetark]</a></td></tr>
-							<tr><td class='menuspacer'><div id='$target' style='display: none'></div></td></tr>";
+			while ($orow = mysql_fetch_array($result)) {
+				if ($orow["selite"] == "ETUSIVU") $val .= "<tr><td class='menucell'><a class='menu' href = 'verkkokauppa.php'>".t("Etusivu")."</a></td></tr>";
+				else $val .= "<tr><td class='menucell'><a class='menu' href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=uutiset&sivu=$orow[selite]', false, false);\">$orow[selitetark]</a></td></tr>";
 			}
 
-			$val .= "<tr><td class='back'><br><font class='info'>".t("Tuotehaku").":</font><hr></td></tr>
-					 	<tr><td class='back'><form id = 'tuotehaku' name='tuotehaku'  action = \"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, true);\" method = 'post'>
-						<input type = 'text' size='12' name = 'tuotehaku'>
-						<tr><td class='back'>&raquo; <a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, true);\">".t("Nimityksellä")."</a></td></tr>
-						<tr><td class='back'>&raquo; <a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla', 'selain', false, true);\">".t("Tuotekoodilla")."</a></td></tr>
-						$toimlisa
-						</form>
-						</td>
-						</tr>";
+
+			if ($verkkokauppa_anon or $kukarow["kuka"] != "www") {
+				$val .=  "<tr><td class='back'><br><font class='info'>".t("Tuotteet").":</font><hr></td></tr>";
+
+				$ores = t_avainsana("OSASTO", "", " and avainsana.nakyvyys = '' ");
+
+				while ($orow = mysql_fetch_array($ores)) {
+					$target		= "T_".$orow["selite"];
+					$parent		= "P_".$orow["selite"];
+
+					$onclick	= "document.getElementById(\"$target\").style.display==\"none\"? sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto=$orow[selite]\", \"\", false) : \"\";";
+					$href 		= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto=$orow[selite]\", \"$parent\", false, false);";
+					$val .=  "<tr><td class='menucell'><a class = 'menu' id='$parent' onclick='$onclick' href='$href'>$orow[selitetark]</a></td></tr>
+								<tr><td class='menuspacer'><div id='$target' style='display: none'></div></td></tr>";
+				}
+
+				$val .= "<tr><td class='back'><br><font class='info'>".t("Tuotehaku").":</font><hr></td></tr>
+						 	<tr><td class='back'><form id = 'tuotehaku' name='tuotehaku'  action = \"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, true);\" method = 'post'>
+							<input type = 'text' size='12' name = 'tuotehaku'>
+							<tr><td class='back'>&raquo; <a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, true);\">".t("Nimityksellä")."</a></td></tr>
+							<tr><td class='back'>&raquo; <a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla', 'selain', false, true);\">".t("Tuotekoodilla")."</a></td></tr>
+							$toimlisa
+							</form>
+							</td>
+							</tr>";
+			}
 
 			$val .= "</table><script>setTimeout(\"document.getElementById('rootMenu').style.visibility='visible';\", 250)</script>";
-
 		}
-		elseif ($try == "") {
+		elseif ($try == "" and ($verkkokauppa_anon or $kukarow["kuka"] != "www")) {
 			$val = "<table class='menutable'>";
 
 			$query = "	SELECT distinct avainsana.selite try,
@@ -378,7 +142,7 @@ if (!function_exists("menu")) {
 				        and avainsana_kieli.perhe = avainsana.perhe
 				        and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selitetark) trynimi
 						FROM tuote
-						JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' and avainsana.kieli in ('$yhtiorow[kieli]', '') and avainsana.jarjestys < 10000)
+						JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' and avainsana.kieli in ('$yhtiorow[kieli]', '') and avainsana.nakyvyys = '')
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						and tuote.osasto = '$osasto'
 						$kieltolisa
@@ -442,17 +206,17 @@ if (!function_exists("menu")) {
 					$parent	= "T_".$osasto."_".$tryrow["try"];
 
 					if ($verkkokauppa_tuotemerkit) {
-						$href 	= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto=$osasto&try=$tryrow[try]\", \"$parent\", true); sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try=$tryrow[try]&tuotemerkki=\", \"\", true);";
+						$href 	= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto=$osasto&try=$tryrow[try]\", \"$parent\", false); sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try=$tryrow[try]&tuotemerkki=\", \"\", false);";
 						$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell'><a class = 'menu' id='$parent' href='$href'>$tryrow[trynimi]</a><div id=\"$target\" style='display: none'></div></td></tr>";
 					}
 					else {
-						$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell'><a class = 'menu' id='$parent' href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$tryrow[try]&tuotemerkki=', '', true);\">$tryrow[trynimi]</a></td></tr>";
+						$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell'><a class = 'menu' id='$parent' href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$tryrow[try]&tuotemerkki=', '', false);\">$tryrow[trynimi]</a></td></tr>";
 					}
 				}
 			}
 			$val .= "</table>";
 		}
-		elseif ($verkkokauppa_tuotemerkit) {
+		elseif ($verkkokauppa_tuotemerkit and ($verkkokauppa_anon or $kukarow["kuka"] != "www")) {
 			$val = "<table class='menutable'>";
 
 			$query = "	SELECT distinct avainsana.selite as tuotemerkki,
@@ -463,7 +227,7 @@ if (!function_exists("menu")) {
 	        			and avainsana_kieli.perhe = avainsana.perhe
 	        			and avainsana_kieli.kieli = '$kukarow[kieli]' LIMIT 1), avainsana.selite) selite
 						FROM tuote
-						JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' and avainsana.jarjestys < 10000)
+						JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' and avainsana.nakyvyys = '')
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						and tuote.osasto = '$osasto'
 						and tuote.try = '$try'
@@ -535,13 +299,11 @@ if (!function_exists("menu")) {
 }
 
 if (!function_exists("uutiset")) {
-	function uutiset($osasto="", $try="", $yhteystiedot="") {
+	function uutiset($osasto="", $try="", $sivu="") {
 		global $yhtiorow, $kukarow;
 
-		$linkki = "";
-
-		if ($yhteystiedot != "") {
-			$lisa = "and tyyppi = 'VERKKOKAUPAN_YHTEYSTIEDOT'";
+		if ($sivu != "") {
+			$lisa = "and tyyppi = 'VERKKOKAUPPA' and kentta09 = '$sivu' ";
 		}
 		else {
 
@@ -554,33 +316,10 @@ if (!function_exists("uutiset")) {
 			else {
 				$lisa = "and tyyppi = 'VERKKOKAUPPA' and kentta09 = '$osasto' and kentta10 = '$try'";
 			}
-
-			if ($kukarow["kesken"] > 0) {
-				$query = "	SELECT *
-							FROM lasku
-							WHERE yhtio = '$kukarow[yhtio]' and tila = 'N' and tunnus = '$kukarow[kesken]'";
-				$result = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($result) == 1) {
-					$laskurow = mysql_fetch_array($result);
-
-					$query = "	SELECT round(sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))),$yhtiorow[hintapyoristys]) summa
-								FROM tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi != 'D'";
-					$result = mysql_query($query) or pupe_error($query);
-					$row = mysql_fetch_array($result);
-
-					$linkki = "<a href='#' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilatut&osasto=$osasto&try=$try')\">".t("Tilaus %s%s, yhteensä %s %s", $kieli, $laskurow["tunnus"], $laskurow["viesti"], number_format($row["summa"], 2, ',', ' '), $laskurow["valkoodi"])."</a><br>";
-				}
-			}
 		}
 
-		if ($linkki != "") {
-			$val = "<center>$linkki</center>";
-		}
-		else {
-			$val = "";
-		}
+		// Ekotetaan avoin kori
+		$val = avoin_kori();
 
 		$query = "	SELECT *
 					FROM kalenteri
@@ -593,11 +332,16 @@ if (!function_exists("uutiset")) {
 			$val .= "<table class='uutinen'>";
 
 			while ($row = mysql_fetch_array($result)) {
-				$val .= "<tr><td class='back'>";
+				$val .= "<tr>";
 
 				if ($row["kentta03"] > 0) {
-					$val .= "<td><img class='uutinen' src='view.php?id=$row[kentta03]'></td><td>";
+					$val .= "<td class='back'><img class='uutinen' width='100px' src='view.php?id=$row[kentta03]'></td>";
 				}
+				else {
+					$val .= "<td class='back'></td>";
+				}
+
+				$val .= "<td class='back'>";
 
 				$search = "/#{2}([^#]+)#{2}(([^#]+)#{2}){0,1}/";
 				preg_match_all($search, $row["kentta02"], $matches, PREG_SET_ORDER);
@@ -633,9 +377,10 @@ if (!function_exists("uutiset")) {
 
 					$row["kentta02"] = preg_replace($search, $replace, $row["kentta02"]);
 				}
-				$val .= "<font class='head'>$row[kentta01]</font><br>";
-				$val .= "<font class='uutinen'>$row[kentta02]</font><hr>";
+
+				$val .= "<font class='head'>$row[kentta01]</font><br>$row[kentta02]</font><hr>";
 				$val .= "</td></tr>";
+
 			}
 			$val .= "</table>";
 		}
@@ -704,12 +449,8 @@ if ($tee == "keskeytatilaus") {
 	}
 }
 
-if ($tee == "yhteystiedot") {
-	die(uutiset("", "", "JOO"));
-}
-
 if ($tee == "uutiset") {
-	die(uutiset($osasto, $try));
+	die(uutiset($osasto, $try, $sivu));
 }
 
 if ($tee == "tuotteen_lisatiedot") {
@@ -957,8 +698,9 @@ if ($tee == "tilatut") {
 				WHERE yhtio = '$kukarow[yhtio]' and
 				tila = 'N' and
 				tunnus = '$kukarow[kesken]' and
-				alatila=''";
+				alatila = ''";
 	$result = mysql_query($query) or pupe_error($query);
+
 	if (mysql_num_rows($result) == 0) {
 		$tee = "selaa";
 	}
@@ -966,6 +708,7 @@ if ($tee == "tilatut") {
 		$laskurow = mysql_fetch_array($result);
 
 		$ulos = "<font class='head'>".t("Tilauksen %s tuotteet", $kieli, $kukarow["kesken"])." </font><br>";
+
 		if ($osasto != "" and $try != "") {
 			$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\">".t("Takaisin selaimelle")."</a>&nbsp;&nbsp;";
 		}
@@ -976,12 +719,13 @@ if ($tee == "tilatut") {
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
 
-		$ulos .= " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=keskeytatilaus&tilaus=$laskurow[tunnus]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat jättää tilauksen %s kesken?", $kieli, $laskurow["tunnus"])."')\">".t("Jätä kesken")."</a>&nbsp;&nbsp;";
+		$ulos .= "<br><input type='button' onclick=\"if(confirm('".t("Oletko varma, että haluat jättää tilauksen %s kesken?", $kieli, $laskurow["tunnus"])."')) { sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=keskeytatilaus&tilaus=$laskurow[tunnus]', false, true); }\" value='".t("Jätä kesken")."'>&nbsp;&nbsp;";
 
 		if ($row["rivei"] > 0) {
-			$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilaa')\"; onclick=\"return confirm('".t("Oletko varma, että haluat lähettää tilauksen eteenpäin?")."'); \">Tilaa tuotteet</a>&nbsp;&nbsp;";
+			$ulos .= "<input type='button' onclick=\"if(confirm('".t("Oletko varma, että haluat lähettää tilauksen eteenpäin?")."')) { sndReq('selain', 'verkkokauppa.php?tee=tilaa'); }\" value='".t("Tilaa tuotteet")."'>&nbsp;&nbsp;";
 		}
-		$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistakori&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\" onclick=\"return confirm('".t("Oletko varma, että haluat mitätöidä tilauksen?")."'); \">Mitätöi tilaus</a>";
+
+		$ulos .= "<input type='button' onclick=\"if(confirm('".t("Oletko varma, että haluat mitätöidä tilauksen?")."')) { sndReq('selain', 'verkkokauppa.php?tee=poistakori&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki'); }\" value='".t("Mitätöi tilaus")."'>";
 
 		$ulos .= "<br><br>";
 
@@ -993,15 +737,9 @@ if ($tee == "tilatut") {
 
 if ($tee == "asiakastiedot") {
 
-	//	Yläpalkkiin tulee vähän toimintoja
-	echo "
-	<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=asiakastiedot', false, true);\">".t("Asiakastiedot")."</a>
-	&nbsp;&nbsp;
-	<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria', false, true);\">".t("Tilaushistoria")."</a>
-	&nbsp;&nbsp;
-	<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&hakutapa=tila&tilaustila=kesken', false, true);\">".t("Keskeneräiset")."</a>
-	<br><br><br>";
-
+	// Ekotetaan avoin kori
+	echo avoin_kori();
+	
 	if ($nayta == "") $nayta = "asiakastiedot";
 
 	if ($nayta == "asiakastiedot") {
@@ -1024,7 +762,6 @@ if ($tee == "asiakastiedot") {
 	}
 	elseif ($nayta == "tilaushistoria") {
 
-		$vainoomat="";
 		if ($kukarow["naytetaan_tilaukset"] != "O") {
 			$selv = array();
 			$selv[$vainomat] = "SELECTED";
@@ -1032,232 +769,170 @@ if ($tee == "asiakastiedot") {
 			$vainoomat = "<div>
 				<form id = 'vainoma' name='tilaushaku' action = \"javascript:ajaxPost('vainoma', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&hakutapa=$hakutapa&tilaushaku=$tilaushaku&tila=$tila', 'selain', false, true);\" method = 'post'>
 					<select name='vainomat' onchange='submit();'>
-						<option value=''>Näytä kaikkien tilaukset</option>
-						<option value='x' $selv[x]>Näytä vain omat tilaukset</option>
+						<option value=''>".t("Näytä kaikkien tilaukset")."</option>
+						<option value='x' $selv[x]>".t("Näytä vain omat tilaukset")."</option>
 					</select>
 				</form>
 				</div>";
 		}
 		else {
-			$vainomat = "x";
+			$vainoomat = "";
+			$vainomat  = "x";
 		}
 
+		echo "<table>";
 
-		echo "<table width='800'>
-			<tr>
-				<td class='back' colspan='5'>
-				$vainoomat
-				<br>
-				Tilaushaku:<br>
-				<form id = 'tilaushaku' name='tilaushaku' action = \"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=viitteet', 'selain', false, true);\" method = 'post'>
+		if (!($hakutapa == "tila" and $tilaustila == "kesken")) {
+			echo "	<tr>
+					<td class='back' colspan='5'>
+					$vainoomat
+					<br>
+					".t("Tilaushaku").":<br>
+					<form id = 'tilaushaku' name='tilaushaku' action = \"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=viitteet', 'selain', false, true);\" method = 'post'>
 					<input type = 'text' size='50' name = 'tilaushaku' value='$tilaushaku'>
-				</form><br>
-				<a href=\"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=viitteet', 'selain', false, true);\">".t("Hae laskun viitteistä")."</a><br>
-				<a href=\"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=toimitusosoite', 'selain', false, true);\">".t("Hae laskun toimitusosoitteesta")."</a><br>
-				<br>
-				</td>
-			</tr>";
+					<br>
+					<input type='submit' onclick=\"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=haku&hakutapa=viitteet', 'selain', false, true);\" value='".t("Hae laskun viitteistä")."'><br>
+					<input type='submit' onclick=\"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=haku&hakutapa=toimitusosoite', 'selain', false, true);\" value='".t("Hae laskun toimitusosoitteesta")."'><br>
+					</form>
+					<br>
+					</td>
+					</tr>";
+		}
 
+		$aika 		= "";
+		$tilaukset  = array();
+		$where 		= "";
 
-		if ($hakutapa != "") {
-			if (strlen($tilaushaku)>2 or $tilaustila != "") {
-				$where = "";
+		if ($vainomat != "") $vainlisa = " and laatija = '$kukarow[kuka]'";
+		else $vainlisa = "";
+
+		if ($tila == "haku") {
+			$aika = "luontiaika";
+
+			if (strlen($tilaushaku) > 2 or $tilaustila != "") {
+				$where = " and tila in ('N','L') ";
+
 				if ($hakutapa == "viitteet") {
-					$where = "concat_ws('###', viesti, comments, sisviesti2, sisviesti1, asiakkaan_tilausnumero) like ('%".mysql_real_escape_string($tilaushaku)."%')";
+					$where .= " and concat_ws(' ', viesti, comments, sisviesti2, sisviesti1, asiakkaan_tilausnumero) like ('%".mysql_real_escape_string($tilaushaku)."%') ";
 				}
 				elseif ($hakutapa == "toimitusosoite") {
-					$where = "concat_ws('###', toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp) like ('%".mysql_real_escape_string($tilaushaku)."%')";
+					$where .= " and concat_ws(' ', toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp) like ('%".mysql_real_escape_string($tilaushaku)."%') ";
 				}
 				elseif ($hakutapa == "tila") {
 					if ($tilaustila == "kesken") {
-						$where = " lasku.tila='N'";
+						$where = " and lasku.tila = 'N' and alatila = '' ";
 					}
 					else {
 						$where = "";
 					}
 				}
-
-				if ($where != "") {
-
-					if ($vainomat != "") $where .= " and laatija = '$kukarow[kuka]'";
-
-					$query = "	SELECT lasku.*, date_format(luontiaika, '%d. %m. %Y') luontiaika, if (laskutettu>0,date_format(laskutettu, '%d. %m. %Y'), '') laskutettu,
-								(
-									SELECT sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))
-									FROM tilausrivi
-									WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi != 'D'
-								) summa
-								FROM lasku
-								WHERE yhtio='$kukarow[yhtio]' and liitostunnus = '$kukarow[oletus_asiakas]' and tila IN ('L','N') and $where
-								ORDER BY lasku.tunnus DESC";
-					$result = mysql_query($query) or pupe_error($query);
-					if (mysql_num_rows($result)>0) {
-
-						echo  "	<tr>
-									<th>".t("Tilaus")."</th>
-									<th>".t("Laadittu")."</th>
-									<th>".t("Laskutettu")."</th>
-									<th>".t("Tilausviite")."</th>
-									<th>".t("Summa")."</th>
-									<td class='back'></td>
-								<tr>";
-						while($laskurow=mysql_fetch_array($result)) {
-
-							$monista = $jatka = "";
-							if ($laskurow["laskunro"] > 0) {
-								$monista = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=monistalasku&laskunro=$laskurow[laskunro]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat monistaa tilauksen?\\n\\nOlemassaoleva tilaus poistetaan.")."')\">".t("Monista")."</a>";
-							}
-
-							if ($laskurow["tila"] == "N") {
-								if ($laskurow["tunnus"] != $kukarow["kesken"]) {
-									$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=jatkatilausta&tilaus=$laskurow[tunnus]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat jatkaa tilausta %s?", $kieli, $laskurow["tunnus"])."')\">".t("Aktivoi")."</a>";
-								}
-								else {
-									$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=tilatut', false, true);\">".t("Akviivinen")."</a>";
-								}
-							}
-
-							echo "	<tr>
-										<td>$laskurow[tunnus]</td>
-										<td>$laskurow[luontiaika]</td>
-										<td>$laskurow[laskutettu]</td>
-										<td>$laskurow[viesti]</td>
-										<td>".number_format($laskurow["summa"], 2, ',', ' ')."</td>
-										<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=$hakutapa&tilaustila=$tilaustila&tilaushaku=$tilaushaku&tilaus=$laskurow[tunnus]', false, true);\">".t("Näytä")."</a> $jatka $monista</td>
-									</tr>";
-
-							if ($tilaus == $laskurow["tunnus"]) {
-								echo  "
-									<tr>
-										<td class='back' colspan='6'><br>".tilaus($laskurow["tunnus"])."<br></td>
-									</tr>";
-							}
-						}
-					}
-					else {
-						echo "
-						<tr>
-							<td>".t("Ei tilauksia")."</td>
-						</tr>";
-					}
-				}
 			}
 			else {
-
-				echo "
-				<tr>
-					<td class='back' colspan='5'><font class='error'>".t("Haussa on oltava vähintään 3 merkkiä")."</font></td>
-				</tr>";
+				echo "<tr><td class='back' colspan='5'><font class='error'>".t("Haussa on oltava vähintään 3 merkkiä")."</font></td></tr>";
 			}
 		}
-		else {
-			$aika = "";
-			$tilaukset = array();
-			if ($tila == "kesken") {
-				$aika = "luontiaika";
-				$tilat = "tila = 'N' and alatila = ''";
-			}
-			elseif ($tila == "kasittely") {
-				$aika = "luontiaika";
-				$tilat = "tila = 'N' and alatila = 'F'";
-			}
-			elseif ($tila == "odottaa") {
-				$aika = "luontiaika";
-				$tilat = "tila = 'N' and alatila NOT IN ('', 'F')";
-			}
-			elseif ($tila == "toimituksessa") {
-				$aika = "lahetepvm";
-				$tilat = "tila = 'L' and alatila IN ('A', 'B', 'C', 'E')";
-			}
-			elseif ($tila == "toimitettu") {
-				$aika = "(select max(toimitettuaika) from tilausrivi where tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)";
-				$tilat = "tila = 'L' and alatila IN ('D', 'J', 'V', 'X')";
-			}
+		elseif ($tila == "kesken") {
+			$aika = "luontiaika";
+			$where = " and tila = 'N' and alatila = '' ";
+		}
+		elseif ($tila == "kasittely") {
+			$aika = "luontiaika";
+			$where = " and tila = 'N' and alatila = 'F' ";
+		}
+		elseif ($tila == "odottaa") {
+			$aika = "luontiaika";
+			$where = " and tila = 'N' and alatila NOT IN ('', 'F') ";
+		}
+		elseif ($tila == "toimituksessa") {
+			$aika = "lahetepvm";
+			$where = " and tila = 'L' and alatila IN ('A', 'B', 'C', 'E') ";
+		}
+		elseif ($tila == "toimitettu") {
+			$aika = "(select max(toimitettuaika) from tilausrivi where tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)";
+			$where = " and tila = 'L' and alatila IN ('D', 'J', 'V', 'X') ";
+		}
 
-			if ($aika != "") {
+		if ($where != "") {
 
-				if ($vainomat != "") $tilat .= " and laatija = '$kukarow[kuka]'";
+			$query = "	SELECT lasku.*, date_format($aika, '%d. %m. %Y') aika,
+						(	SELECT sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))
+							FROM tilausrivi
+							WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi != 'D'
+						) summa
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
+						and liitostunnus = '$kukarow[oletus_asiakas]'
+						$vainlisa
+						$where";
+			$result = mysql_query($query) or pupe_error($query);
 
-				$query = "	SELECT lasku.*, date_format($aika, '%d. %m. %Y') aika,
-							(
-								SELECT sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))
-								FROM tilausrivi
-								WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi != 'D'
-							) summa
-							FROM lasku
-							WHERE yhtio='$kukarow[yhtio]' and liitostunnus = '$kukarow[oletus_asiakas]' and $tilat";
-				$result = mysql_query($query) or pupe_error($query);
-				if (mysql_num_rows($result)>0) {
-					if ($tila == "kesken") {
-						$aika = "Avattu";
+			if (mysql_num_rows($result) > 0) {
+
+				if ($tila == "kesken") {
+					$aika = "Avattu";
+				}
+				elseif ($tila == "kasittely") {
+					$aika = "Avattu";
+				}
+				elseif ($tila == "odottaa") {
+					$aika = "Tilattu";
+				}
+				elseif ($tila == "toimituksessa") {
+					$aika = "Kerätty";
+				}
+				elseif ($tila == "toimitettu") {
+					$aika = "Toimitettu";
+				}
+
+				$tilaukset[$tila] .= "	<tr>
+										<th>".t("Tilaus")."</th>
+										<th>".t($aika)."</th>
+										<th>".t("Tilausviite")."</th>
+										<th>".t("Summa")."</th>
+										<td class='back'></td>
+										<tr>";
+
+				while ($laskurow = mysql_fetch_array($result)) {
+					$lisa = "";
+
+					if ($tilaus == $laskurow["tunnus"]) {
+						$lisa .= "	<tr><td class='back' colspan='5'><br>".tilaus($laskurow["tunnus"])."<br></td></tr>";
 					}
-					elseif ($tila == "kasittely") {
-						$aika = "Avattu";
+
+					$monista = $jatka ="";
+
+					if ($laskurow["laskunro"] > 0) {
+						$monista = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=monistalasku&laskunro=$laskurow[laskunro]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat monistaa tilauksen?")."');\">".t("Monista")."</a>";
 					}
-					elseif ($tila == "odottaa") {
-						$aika = "Tilattu";
-					}
-					elseif ($tila == "toimituksessa") {
-						$aika = "Kerätty";
-					}
-					elseif ($tila == "toimitettu") {
-						$aika = "Toimitettu";
+
+					if ($laskurow["tila"] == "N" and $laskurow["alatila"] == "") {
+						if ($laskurow["tunnus"] != $kukarow["kesken"]) {
+							$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=jatkatilausta&tilaus=$laskurow[tunnus]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat jatkaa tilausta %s?", $kieli, $laskurow["tunnus"])."');\">".t("Aktivoi")."</a>";
+						}
+						else {
+							$jatka = t("Akviivinen");
+						}
 					}
 
 					$tilaukset[$tila] .= "	<tr>
-													<th>".t("Tilaus")."</th>
-													<th>".t($aika)."</th>
-													<th>".t("Tilausviite")."</th>
-													<th>".t("Summa")."</th>
-													<td class='back'></td>
-											<tr>";
-
-					while($laskurow = mysql_fetch_array($result)) {
-						$lisa = "";
-
-						if ($tilaus == $laskurow["tunnus"]) {
-							$lisa .= "	<tr>
-											<td class='back' colspan='5'><br>".tilaus($laskurow["tunnus"])."<br></td>
-										</tr>";
-						}
-
-						$monista = $jatka ="";
-						if ($laskurow["laskunro"] > 0) {
-							$monista = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=monistalasku&laskunro=$laskurow[laskunro]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat monistaa tilauksen?")."')\">".t("Monista")."</a>";
-						}
-						if ($laskurow["tila"] == "N") {
-							if ($laskurow["tunnus"] != $kukarow["kesken"]) {
-								$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=jatkatilausta&tilaus=$laskurow[tunnus]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat jatkaa tilausta %s?", $kieli, $laskurow["tunnus"])."')\">".t("Aktivoi")."</a>";
-							}
-							else {
-								$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=tilatut', false, true);\">".t("Akviivinen")."</a>";
-							}
-						}
-
-						$tilaukset[$tila] .= "	<tr>
-													<td>$laskurow[tunnus]</td>
-													<td>$laskurow[aika]</td>
-													<td>$laskurow[viesti]</td>
-													<td>".number_format($laskurow["summa"], 2, ',', ' ')."</td>
-													<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=$tila&tilaus=$laskurow[tunnus]', false, true);\">".t("Näytä")."</a> $jatka $monista</td>
-												</tr>$lisa";
-					}
+											<td>$laskurow[tunnus]</td>
+											<td>$laskurow[aika]</td>
+											<td>$laskurow[viesti]</td>
+											<td>".number_format($laskurow["summa"], 2, ',', ' ')."</td>
+											<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=$tila&hakutapa=$hakutapa&tilaustila=$tilaustila&tilaus=$laskurow[tunnus]', false, true);\">".t("Näytä")."</a> $jatka $monista</td>
+											</tr>$lisa";
 				}
-				else {
-					$tilaukset[$tila] = "
-						<tr>
-							<td class='back' colspan='5'>".t("Ei tilauksia")."</td>
-						</tr>";
-				}
-				$tilaukset[$tila] .= "
-				<tr>
-					<td class='back' colspan='5'><br></td>
-				</tr>";
-
 			}
+			else {
+				$tilaukset[$tila] = "<tr><td class='back' colspan='5'>".t("Ei tilauksia")."</td></tr>";
+			}
+			$tilaukset[$tila] .= "<tr><td class='back' colspan='5'><br></td></tr>";
+		}
 
-			echo "
-				<tr>
+		echo $tilaukset["haku"];
+
+		if ($tilaustila != "kesken") {
+			echo "<tr>
 					<td class='back' colspan='5'>
 						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=kesken', false, true);\">".t("Keskeneräiset tilaukset")."</a>
 					</td>
@@ -1269,7 +944,7 @@ if ($tee == "asiakastiedot") {
 
 				<tr>
 					<td class='back' colspan='5'>
-						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=kasittely', false, true);\">".t("Odottaa käsittelyä")."</a>
+						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=kasittely', false, true);\">".t("Tilaukset jotka odottaa käsittelyä")."</a>
 					</td>
 				</tr>
 				<tr>
@@ -1279,7 +954,7 @@ if ($tee == "asiakastiedot") {
 
 				<tr>
 					<td class='back' colspan='5'>
-						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=odottaa', false, true);\">".t("Odottaa toimitusta")."</a>
+						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=odottaa', false, true);\">".t("Tilaukset jotka odottaa toimitusta")."</a>
 					</td>
 				</tr>
 				<tr>
@@ -1289,7 +964,7 @@ if ($tee == "asiakastiedot") {
 
 				<tr>
 					<td class='back' colspan='5'>
-						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=toimituksessa', false, true);\">".t("Tilaus toimituksessa")."</a>
+						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=toimituksessa', false, true);\">".t("Toimituksessa olevat tilaukset")."</a>
 					</td>
 				</tr>
 				<tr>
@@ -1299,7 +974,7 @@ if ($tee == "asiakastiedot") {
 
 				<tr>
 					<td class='back' colspan='5'>
-						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=toimitettu', false, true);\">".t("tilaus toimitettu")."</a>
+						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=toimitettu', false, true);\">".t("Toimitetut tilaukset")."</a>
 					</td>
 				</tr>
 				<tr>
@@ -1310,10 +985,6 @@ if ($tee == "asiakastiedot") {
 
 		echo "</table>";
 	}
-	else {
-
-	}
-
 }
 
 if ($tee == "selaa") {
@@ -1368,8 +1039,8 @@ if ($tee == "") {
 						</form>";
 	}
 	else {
-		$login_screen = "<input type='submit' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&hakutapa=tila&tilaustila=kesken', false, true);\" value='".t("Avoimet tilaukset")."'>|<input type='submit' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria', false, true);\" value='".t("Tilaushistoria")."'>|<input type='submit' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot', false, true);\" value='".t("Asiakastiedot")."'>
-			&nbsp;Tervetuloa, ".$kukarow["nimi"]."&nbsp;<input type='submit' onclick=\"javascript:document.location='".$palvelin2."logout.php?location=".$palvelin2."verkkokauppa.php';\" value='".t("Kirjaudu ulos")."'>";
+		$login_screen = "<input type='button' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=haku&hakutapa=tila&tilaustila=kesken', false, false);\" value='".t("Avoimet tilaukset")."'>|<input type='button' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria', false, false);\" value='".t("Tilaushistoria")."'>|<input type='button' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot', false, false);\" value='".t("Asiakastiedot")."'>
+			&nbsp;Tervetuloa, ".$kukarow["nimi"]."&nbsp;<input type='button' onclick=\"javascript:document.location='".$palvelin2."logout.php?location=".$palvelin2."verkkokauppa.php';\" value='".t("Kirjaudu ulos")."'>";
 	}
 
 	$verkkokauppa_ulos =  "<div class='login' id='login'>$login_screen</div>
@@ -1385,7 +1056,7 @@ if ($tee == "") {
 								</div>";
 	}
 	else {
-		$verkkokauppa_ulos .= "<div class='selain' id='selain'>".uutiset()."</div>";
+		$verkkokauppa_ulos .= "<div class='selain' id='selain'>".uutiset('','',"ETUSIVU")."</div>";
 	}
 
 	if (file_exists("verkkokauppa.template")) {

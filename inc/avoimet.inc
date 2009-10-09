@@ -40,7 +40,6 @@
 		else {
 			$tilikausirow = mysql_fetch_array($result);
 		}
-
 	}
 
 	// Valitaan asiakas, jos sitä ei tiedetä
@@ -99,10 +98,10 @@
 			<th>".t("Vain toimittaja/asiakas").":</th>
 			<td colspan='3'><input type = 'text' name = 'ytunnus' value='$ytunnus'></td>
 			</tr>";
-		
+
 	if ($naytetaankokommentit != "") $komsel = "CHECKED";
 	else $komsel = "";
-		
+
 	echo "	<tr>
 			<th>".t("Älä näytä laskujen kommentteja").":</th>
 			<td colspan='3'><input type = 'checkbox' name = 'naytetaankokommentit' $komsel></td>
@@ -184,10 +183,10 @@
 		echo "<option value='$row[tunnus]' $sel>".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</option>";
 	}
 	echo "</select></td></tr>";
-	
+
 	if ($excel != "") $exsel = "CHECKED";
 	else $exsel = "";
-	
+
 	echo "<tr><th>".t("Tee Excel")."</th><td colspan='3'><input type='checkbox' name='excel' value = 'YES' $exsel></td></tr>";
 
 	echo "</table><br>";
@@ -241,7 +240,7 @@
 		else {
 			$jarj = "lasku.ytunnus";
 		}
-		
+
 		if (substr($laji,0,1) == 'O') {
 
 			$lisa = '';
@@ -296,7 +295,7 @@
 			echo "<th>".t("Avoin saldo")."</th>";
 			echo "<th>".t("Val")."</th>";
 			echo "</tr>";
-			
+
 			if (isset($workbook)) {
 				$worksheet->write($excelrivi, 0, t("Ytunnus"), $format_bold);
 				$worksheet->write($excelrivi, 1, t("Nimi"), $format_bold);
@@ -350,21 +349,21 @@
 						echo "<td align='right'>$trow[avoinsaldo]</td>";
 						echo "<td align='right'>$yhtiorow[valkoodi]</td>";
 					}
-					
+
 					echo "</tr>";
-					
+
 					if (isset($workbook)) {
 						$worksheet->writeString($excelrivi, 0, $trow["ytunnus"]);
 						$worksheet->writeString($excelrivi, 1, $trow["nimi"]);
 						$worksheet->write($excelrivi, 2, $trow["maksutieto"]);
 						$worksheet->write($excelrivi, 3, $trow["tapvm"]);
-						
+
 						if ($trow["mapvm"] != '0000-00-00') $worksheet->write($excelrivi, 4, $trow["mapvm"]);
 						else $worksheet->write($excelrivi, 4, "");
-						
+
 						$worksheet->write($excelrivi, 5, $trow["olmapvm"]);
 						$worksheet->write($excelrivi, 6, $trow["erpcm"]);
-						
+
 						if ($valuutassako == "V") {
 							$worksheet->write($excelrivi, 7, $trow["summa"]);
 							$worksheet->write($excelrivi, 8, $trow["valkoodi"]);
@@ -373,7 +372,7 @@
 							$worksheet->write($excelrivi, 7, $trow["avoinsaldo"]);
 							$worksheet->write($excelrivi, 8, $yhtiorow["valkoodi"]);
 						}
-												
+
 						$excelrivi++;
 					}
 				}
@@ -519,7 +518,7 @@
 			echo "<td class='back'><input type='submit' value='Hae'></th>";
 			echo "</tr>";
 			echo "</form>";
-			
+
 			if (isset($workbook)) {
 				$worksheet->write($excelrivi, 0, t("Ytunnus"), $format_bold);
 				$worksheet->write($excelrivi, 1, t("Nimi"), $format_bold);
@@ -573,18 +572,18 @@
 					}
 
 					echo "</tr>";
-					
+
 					if (isset($workbook)) {
 						$worksheet->writeString($excelrivi, 0, $trow["ytunnus"]);
 						$worksheet->writeString($excelrivi, 1, $trow["nimi"]);
 						$worksheet->write($excelrivi, 2, $trow["maksutieto"]);
 						$worksheet->write($excelrivi, 3, $trow["tapvm"]);
-						
+
 						if ($trow["mapvm"] != '0000-00-00') $worksheet->write($excelrivi, 4, $trow["mapvm"]);
 						else $worksheet->write($excelrivi, 4, "");
-						
+
 						$worksheet->write($excelrivi, 5, $trow["erpcm"]);
-												
+
 						if ($valuutassako == "V") {
 							$worksheet->write($excelrivi, 6, $trow["tiliointisumma_valuutassa"]);
 							$worksheet->write($excelrivi, 7, $trow["tiliointiavoinsaldo_valuutassa"]);
@@ -595,7 +594,7 @@
 							$worksheet->write($excelrivi, 7, $trow["tiliointiavoinsaldo"]);
 							$worksheet->write($excelrivi, 8, $yhtiorow["valkoodi"]);
 						}
-												
+
 						$excelrivi++;
 					}
 				}
@@ -644,14 +643,14 @@
 						echo "<td></td>";
 						echo "<td align='right'><font class='message'>$trow[summa]</td>";
 						echo "<td align='right'>$trow[valkoodi]</font></td>";
-						
+
 						$suoritussumma[$trow["valkoodi"]] += $trow["summa"];
 					}
 					else {
 						echo "<td></td>";
 						echo "<td align='right'><font class='message'>$trow[suoritussumma]</td>";
 						echo "<td align='right'>$yhtiorow[valkoodi]</font></td>";
-						
+
 						$suoritussumma[$yhtiorow["valkoodi"]] += $trow["suoritussumma"];
 					}
 
@@ -662,7 +661,7 @@
 					if ($trow["tiliointisumma"] == NULL) echo "<td class='back' nowrap><font class='error'>VIRHE: Suoritukselle ei löydy tiliöintejä!</font></td>";
 
 					echo "</tr>";
-					
+
 					if (isset($workbook)) {
 						if ($trow["tunnus"] != NULL) $worksheet->write($excelrivi, 0, $trow["ytunnus"]);
 						else $worksheet->write($excelrivi, 0, "*".t("ei asiakasta")."*");
@@ -671,7 +670,7 @@
 						$worksheet->write($excelrivi, 3, $trow["kirjpvm"]);
 						$worksheet->write($excelrivi, 4, "");
 						$worksheet->write($excelrivi, 5, "");
-												
+
 						if ($valuutassako == "V") {
 							$worksheet->write($excelrivi, 6, "");
 							$worksheet->write($excelrivi, 7, $trow["summa"]);
@@ -682,7 +681,7 @@
 							$worksheet->write($excelrivi, 7, $trow["suoritussumma"]);
 							$worksheet->write($excelrivi, 8, $yhtiorow["valkoodi"]);
 						}
-												
+
 						$excelrivi++;
 					}
 			}

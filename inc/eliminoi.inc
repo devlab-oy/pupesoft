@@ -16,9 +16,12 @@ if (isset($tee)) {
 		$blvp = $blvk;
 		if ($blvk==0) $blvk=1;
 		if ($blvp==0) $blvp=1;
+
 		$query = "	SELECT *
 					FROM tilikaudet
-					WHERE yhtio = '$kukarow[yhtio]' and '$alvv-$blvk-$blvp' >= tilikausi_alku and '$alvv-$blvk-$blvp' <= tilikausi_loppu";
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and '$alvv-$blvk-$blvp' >= tilikausi_alku 
+					and '$alvv-$blvk-$blvp' <= tilikausi_loppu";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 	else {
@@ -33,7 +36,7 @@ if (isset($tee)) {
 		exit;
 	}
 
-	$tilikaudetrow=mysql_fetch_array($result);
+	$tilikaudetrow = mysql_fetch_array($result);
 
 	$lisa = '';
 	$lisa2 = '';
@@ -42,7 +45,7 @@ if (isset($tee)) {
 	$jarj = "tiliointi.tilino, tiliointi.tapvm, tiliointi.summa";
 
 	if ($tkausi != '0') {
-        echo "<font class='head'>$nimi ".t("tilikaudelta")." $tilikaudetrow[tilikausi_alku] - $tilikaudetrow[tilikausi_loppu]</font><hr>";
+        echo "<font class='head'>$nimi ".t("tilikaudelta")." ".tv1dateconv($tilikaudetrow["tilikausi_alku"])." - ".tv1dateconv($tilikaudetrow["tilikausi_loppu"])."</font><hr>";
 		$lisa  = "tiliointi.tapvm <= '$tilikaudetrow[tilikausi_loppu]' and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'";
 		$lisa2 = "tiliointi.tapvm < '$tilikaudetrow[tilikausi_alku]'"; //hassua hassua
 	}
@@ -132,23 +135,23 @@ if (isset($tee)) {
 			$sorttaus[$i] 	= abs($trow['summa']);
 			$i++;
 		}
-		
+
 		foreach ($tilirivi as $key => $t) {
-			
+
 			$summa = $t["summa"];
-			
+
 			//	Onko arrayssa vastasummaa?
 			$v = array_search($summa*-1, $vastis);
 			if($v > 0) {
 				$valitut[$v] = $v;
-				$valitut[$key] = $v;				
+				$valitut[$key] = $v;
 				unset($vastis[$v]);
 			}
 		}
 
 		echo sizeof($valitut) . " eliminointia tehtiin!<br><br>";
 		asort($sorttaus);
-		
+
 		foreach($sorttaus as $key => $crap) {
 
 			$class = "";
@@ -360,18 +363,21 @@ if (!isset($tee)) {
 			</tr>";
 
 	echo "<tr><th>".t("tai koko tilikausi")."</th>";
- 	$query = "SELECT *
+ 	
+	$query = "	SELECT *
 				FROM tilikaudet
 				WHERE yhtio = '$kukarow[yhtio]'
 				ORDER BY tilikausi_alku";
 	$vresult = mysql_query($query) or pupe_error($query);
+
 	echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
+
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
-		if ($trow[$i] == $vrow[tunnus]) {
+		if ($trow[$i] == $vrow["tunnus"]) {
 			$sel = "selected";
 		}
-		echo "<option value = '$vrow[tunnus]' $sel>$vrow[tilikausi_alku] - $vrow[tilikausi_loppu]";
+		echo "<option value = '$vrow[tunnus]' $sel>".tv1dateconv($vrow["tilikausi_alku"])." - ".tv1dateconv($vrow["tilikausi_loppu"]);
 	}
 	echo "</select></td>";
 	echo "</tr>";
@@ -382,12 +388,15 @@ if (!isset($tee)) {
 			</tr>";
 
 	echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
-	$query = "SELECT tunnus, nimi
+	
+	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
 				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
+	
 	echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa")."";
+	
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($trow[$i] == $vrow[0]) {
@@ -398,12 +407,15 @@ if (!isset($tee)) {
 	echo "</select></td>";
 	echo "</tr>";
 	echo "<tr><th>".t("Vain kohde")."</th>";
- 	$query = "SELECT tunnus, nimi
+ 	
+	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
 				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
+	
 	echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa")."";
+	
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($trow[$i] == $vrow[0]) {
@@ -414,12 +426,15 @@ if (!isset($tee)) {
 	echo "</select></td>";
 	echo "</tr>";
 	echo "<tr><th>".t("Vain projekti")."</th>";
-	$query = "SELECT tunnus, nimi
+	
+	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
 				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
+	
 	echo "<td><select name='proj'><option value=' '>".t("Ei valintaa")."";
+	
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($trow[$i] == $vrow[0]) {

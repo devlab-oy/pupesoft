@@ -136,8 +136,7 @@
 				<th>".t("Poikkeava loppuaika")."</th>
 				<td>
 				<select name='llvv'>
-					<option value=''>".t("")."</option>
-				";
+					<option value=''></option>";
 
 				for ($i = date("Y")+1; $i >= date("Y")-6; $i--) {
 					echo "<option value='$i' $sel>$i</option>";
@@ -197,18 +196,21 @@
 				</tr>";
 
 		echo "<tr><th>".t("tai koko tilikausi")."</th>";
-	 	$query = "SELECT *
+
+		$query = "	SELECT *
 					FROM tilikaudet
 					WHERE yhtio = '$kukarow[yhtio]'
 					ORDER BY tilikausi_alku";
 		$vresult = mysql_query($query) or pupe_error($query);
+
 		echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow["tunnus"]) {
 				$sel = "selected";
 			}
-			echo "<option value = '$vrow[tunnus]' $sel>$vrow[tilikausi_alku] - $vrow[tilikausi_loppu]";
+			echo "<option value = '$vrow[tunnus]' $sel>".tv1dateconv($vrow["tilikausi_alku"])." - ".tv1dateconv($vrow["tilikausi_loppu"]);
 		}
 		echo "</select></td>";
 		echo "</tr>";
@@ -219,12 +221,15 @@
 				</tr>";
 
 		echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
-		$query = "SELECT tunnus, nimi
+
+		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
+
 		echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa")."";
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['tunnus'] or $kustp == $vrow["tunnus"]) {
@@ -249,12 +254,15 @@
 		echo "</tr>";
 
 		echo "<tr><th>".t("Vain kohde")."</th>";
-	 	$query = "SELECT tunnus, nimi
+
+		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
+
 		echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa")."";
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['tunnus'] or $kohde == $vrow['tunnus']) {
@@ -266,12 +274,15 @@
 		echo "</tr>";
 
 		echo "<tr><th>".t("Vain projekti")."</th>";
-		$query = "SELECT tunnus, nimi
+
+		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
+
 		echo "<td><select name='proj'><option value=' '>".t("Ei valintaa")."";
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['tunnus'] or $proj == $vrow['tunnus']) {
@@ -290,6 +301,7 @@
 		$vresult = t_avainsana("ALV");
 
 		echo "<td><select name='alv'><option value='tyhja'>".t("Ei valintaa")."";
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow["selite"] == '$alv') {
@@ -327,7 +339,7 @@
 	$blvk = 0;
 	$blvp = 0;
 
-	if($llvv >0) {
+	if ($llvv >0) {
 		if($alvv == 0 or $alvk == 0 or $alvp == 0 or $llvv == 0 or $llvk == 0 or $llvp == 0) {
 			echo "<font class='error'>".t("Haettaessa aikav‰lilt‰ pit‰‰ valita tarkka alku ja loppup‰iv‰.")."</font>";
 			exit;
@@ -374,8 +386,8 @@
 		$jarj = "tiliointi.tapvm, tiliointi.laadittu, tiliointi.tilino, tiliointi.summa";
 	}
 
-	if ($tkausi != '0') {
-        echo "<font class='head'>$nimi ".t("tilikaudelta")." $tilikaudetrow[tilikausi_alku] - $tilikaudetrow[tilikausi_loppu]</font><hr>";
+	if ((int) $tkausi > 0) {
+        echo "<font class='head'>$nimi ".t("tilikaudelta")." ".tv1dateconv($tilikaudetrow["tilikausi_alku"])." - ".tv1dateconv($tilikaudetrow["tilikausi_loppu"])."</font><hr>";
 		$lisa  = "tiliointi.tapvm <= '$tilikaudetrow[tilikausi_loppu]' and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'";
 		$lisa2 = "tiliointi.tapvm < '$tilikaudetrow[tilikausi_alku]'"; //hassua hassua
 	}

@@ -1,5 +1,5 @@
 <?php
-	
+
 	if (isset($_POST["teetiedosto"])) {
 		if($_POST["teetiedosto"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
@@ -13,7 +13,7 @@
 			die("<font class='error'>ƒl‰ edes yrit‰!</font>");
 		}
 	}
-	
+
 	if (isset($teetiedosto)) {
 		if ($teetiedosto == "lataa_tiedosto") {
 			readfile("/tmp/".$tmpfilenimi);
@@ -21,15 +21,14 @@
 		}
 	}
 	else {
-		
 		// Muokataan tilikartan rakennetta
-		if (isset($tasomuutos)) {			
+		if (isset($tasomuutos)) {
 			require("../tasomuutos.inc");
 			require ('../inc/footer.inc');
 			exit;
 		}
-		
-		if($from != "PROJEKTIKALENTERI") {
+
+		if ($from != "PROJEKTIKALENTERI") {
 			echo "<font class='head'>".t("Tase/tuloslaskelma")."</font><hr>";
 		}
 
@@ -108,35 +107,51 @@
 			$summa    = array();
 			$kaudet   = array();
 
-			if((int) $tkausi > 0) {
-				$query = "	SELECT 	month(tilikausi_alku) alkukk, year(tilikausi_alku) alkuvv,
-									month(tilikausi_loppu) loppukk, year(tilikausi_loppu) loppuvv
+			if ((int) $tkausi > 0) {
+				$query = "	SELECT tilikausi_alku, tilikausi_loppu
 							FROM tilikaudet
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
 				$result = mysql_query($query) or pupe_error($query);
 				$tkrow = mysql_fetch_array($result);
 
-				$alvk = $tkrow["loppukk"];
-				$alvv = $tkrow["loppuvv"];
+				$plvv = substr($tkrow['tilikausi_alku'], 0, 4);
+				$plvk = substr($tkrow['tilikausi_alku'], 5, 2);
+				$plvp = substr($tkrow['tilikausi_alku'], 8, 2);
 
-				$plvk = $tkrow["alkukk"];
-				$plvv = $tkrow["alkuvv"];
+				$alvv = substr($tkrow['tilikausi_loppu'], 0, 4);
+				$alvk = substr($tkrow['tilikausi_loppu'], 5, 2);
+				$alvp = substr($tkrow['tilikausi_loppu'], 8, 2);
 			}
 
+			// Tarkistetaan viel‰ p‰iv‰m‰‰r‰t
+			if (!checkdate($plvk, $plvp, $plvv)) {
+				echo "<font class='error'>".t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen")."!</font><br>";
+				$tltee = "";
+			}
+
+			if (!checkdate($alvk, $alvp, $alvv)) {
+				echo "<font class='error'>".t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen")."!</font><br>";
+				$tltee = "";
+			}
+		}
+
+
+		if ($tltee == "aja") {
 			$startmonth	= date("Ymd",   mktime(0, 0, 0, $plvk, 1, $plvv));
 			$endmonth 	= date("Ymd",   mktime(0, 0, 0, $alvk, 1, $alvv));
-			$annettualk = date("Y-m-d", mktime(0, 0, 0, $plvk, 1, $plvv));
-			$totalloppu = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv));
 
-			$budjettalk = date("Ym",    mktime(0, 0, 0, $plvk, 1, $plvv));
-			$budjettlop = date("Ym", 	mktime(0, 0, 0, $alvk+1, 0, $alvv));
+			$annettualk = $plvv."-".$plvk."-".$plvp;
+			$totalloppu = $alvv."-".$alvk."-".$alvp;
+
+			$budjettalk = date("Ym", mktime(0, 0, 0, $plvk, 1, $plvv));
+			$budjettlop = date("Ym", mktime(0, 0, 0, $alvk+1, 0, $alvv));
 
 			if ($vertailued != "") {
-				$totalalku  = date("Y-m-d", mktime(0, 0, 0, $plvk, 1, $plvv-1));
-				$totalloppued = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 0, $alvv-1));
+				$totalalku  = ($plvv-1)."-".$plvk."-".$plvp;
+				$totalloppued = ($alvv-1)."-".$alvk."-".$alvp;
 			}
 			else {
-				$totalalku = date("Y-m-d", mktime(0, 0, 0, $plvk, 1, $plvv));
+				$totalalku = $plvv."-".$plvk."-".$plvp;
 			}
 
 			$alkuquery1 = "";
@@ -145,8 +160,12 @@
 
 			for ($i = $startmonth;  $i <= $endmonth;) {
 
-				$alku    = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)));
-				$loppu   = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2)+1, 0, substr($i,0,4)));
+				if ($i == $startmonth) $alku = $plvv."-".$plvk."-".$plvp;
+				else $alku = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)));
+
+				if ($i == $endmonth) $loppu = $alvv."-".$alvk."-".$alvp;
+				else $loppu = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2)+1, 0, substr($i,0,4)));
+
 				$bukausi = date("Ym",    mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)));
 				$headny  = date("Y/m",   mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
 
@@ -161,8 +180,13 @@
 				$kaudet[] = $headny;
 
 				if ($vertailued != "") {
-					$alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)-1));
-					$loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2)+1, 0, substr($i,0,4)-1));
+
+					if ($i == $startmonth) $alku_ed = ($plvv-1)."-".$plvk."-".$plvp;
+					else $alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)-1));
+
+					if ($i == $endmonth) $loppu_ed = ($alvv-1)."-".$alvk."-".$alvp;
+					else $loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2)+1, 0, substr($i,0,4)-1));
+
 					$headed   = date("Y/m",   mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)-1));
 
 					$alkuquery1 .= " ,sum(if(tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed'\n";
@@ -181,7 +205,7 @@
 					$kaudet[] = "budj $headny";
 				}
 
-				$i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1,  substr($i,0,4)));
+				$i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1, substr($i,0,4)));
 			}
 
 			$vka = date("Y/m", mktime(0, 0, 0, $plvk, 1, $plvv));
@@ -239,7 +263,6 @@
 				}
 
 				$query = "	SELECT $alkuquery1
-
 						 	FROM tili
 							LEFT JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino and tiliointi.korjattu = '' and tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm <= '$totalloppu' $lisa)
 							WHERE tili.yhtio 		 = '$kukarow[yhtio]'
@@ -322,7 +345,7 @@
 				$vaslev 			= 160;
 				$rivikork 			= 15;
 			}
-			
+
 			if(!function_exists("alku")) {
 				function alku () {
 					global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev;
@@ -413,7 +436,7 @@
 				foreach ($_REQUEST as $key => $value) {
 					$lopetus .= $key."=".$value."//";
 				}
-				
+
 				echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 
 				echo "<td class='back' colspan='3'></td>";
@@ -475,7 +498,6 @@
 										GROUP BY tilino";
 							$summares = mysql_query($query) or pupe_error($query);
 							$summarow = mysql_fetch_array($summares);
-
 							$tilirivi2 = "";
 							$tulos = 0;
 
@@ -578,14 +600,14 @@
 			}
 
 			echo "</table>";
-			
+
 			//	Projektikalenterilla ei sallita PDF tulostusta
 			if($from != "PROJEKTIKALENTERI") {
-				
+
 				if ($toim == "TASOMUUTOS") {
 					echo "<br><input type='submit' value='".t("Anna tileille taso")."'></form><br><br>";
 				}
-				
+
 				//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 				list($usec, $sec) = explode(' ', microtime());
 				mt_srand((float) $sec + ((float) $usec * 100000));
@@ -607,9 +629,9 @@
 				echo "</table><br>";
 			}
 		}
-		
+
 		//	UI vain jos sille on tarvetta
-		if($from != "PROJEKTIKALENTERI") {
+		if ($from != "PROJEKTIKALENTERI") {
 			// tehd‰‰n k‰yttˆliittym‰, n‰ytet‰‰n aina
 			$sel = array();
 			if ($tyyppi == "") $tyyppi = "4";
@@ -637,6 +659,7 @@
 
 			if (!isset($plvv)) $plvv = substr($yhtiorow['tilikausi_alku'], 0, 4);
 			if (!isset($plvk)) $plvk = substr($yhtiorow['tilikausi_alku'], 5, 2);
+			if (!isset($plvp)) $plvp = substr($yhtiorow['tilikausi_alku'], 8, 2);
 
 			echo "	<th valign='top'>".t("Alkukausi")."</th>
 					<td><select name='plvv'>";
@@ -654,19 +677,57 @@
 			$sel[$plvk] = "SELECTED";
 
 			echo "<select name='plvk'>
-					<option $sel[1] value = '1'>01</option>
-					<option $sel[2] value = '2'>02</option>
-					<option $sel[3] value = '3'>03</option>
-					<option $sel[4] value = '4'>04</option>
-					<option $sel[5] value = '5'>05</option>
-					<option $sel[6] value = '6'>06</option>
-					<option $sel[7] value = '7'>07</option>
-					<option $sel[8] value = '8'>08</option>
-					<option $sel[9] value = '9'>09</option>
+					<option $sel[01] value = '01'>01</option>
+					<option $sel[02] value = '02'>02</option>
+					<option $sel[03] value = '03'>03</option>
+					<option $sel[04] value = '04'>04</option>
+					<option $sel[05] value = '05'>05</option>
+					<option $sel[06] value = '06'>06</option>
+					<option $sel[07] value = '07'>07</option>
+					<option $sel[08] value = '08'>08</option>
+					<option $sel[09] value = '09'>09</option>
 					<option $sel[10] value = '10'>10</option>
 					<option $sel[11] value = '11'>11</option>
 					<option $sel[12] value = '12'>12</option>
-					</select></td></tr>";
+					</select>";
+
+			$sel = array();
+			$sel[$plvp] = "SELECTED";
+
+			echo "<select name='plvp'>
+					<option $sel[01] value = '01'>01</option>
+					<option $sel[02] value = '02'>02</option>
+					<option $sel[03] value = '03'>03</option>
+					<option $sel[04] value = '04'>04</option>
+					<option $sel[05] value = '05'>05</option>
+					<option $sel[06] value = '06'>06</option>
+					<option $sel[07] value = '07'>07</option>
+					<option $sel[08] value = '08'>08</option>
+					<option $sel[09] value = '09'>09</option>
+					<option $sel[10] value = '10'>10</option>
+					<option $sel[11] value = '11'>11</option>
+					<option $sel[12] value = '12'>12</option>
+					<option $sel[13] value = '13'>13</option>
+					<option $sel[14] value = '14'>14</option>
+					<option $sel[15] value = '15'>15</option>
+					<option $sel[16] value = '16'>16</option>
+					<option $sel[17] value = '17'>17</option>
+					<option $sel[18] value = '18'>18</option>
+					<option $sel[19] value = '19'>19</option>
+					<option $sel[20] value = '20'>20</option>
+					<option $sel[21] value = '21'>21</option>
+					<option $sel[22] value = '22'>22</option>
+					<option $sel[23] value = '23'>23</option>
+					<option $sel[24] value = '24'>24</option>
+					<option $sel[25] value = '25'>25</option>
+					<option $sel[26] value = '26'>26</option>
+					<option $sel[27] value = '27'>27</option>
+					<option $sel[28] value = '28'>28</option>
+					<option $sel[29] value = '29'>29</option>
+					<option $sel[30] value = '30'>30</option>
+					<option $sel[31] value = '31'>31</option>
+					</select>
+					</td></tr>";
 
 			echo "<tr>
 				<th valign='top'>".t("Loppukausi")."</th>
@@ -681,39 +742,81 @@
 			}
 
 			$sel = array();
-			if ($alvk == "") $alvk = date("n");
+			if ($alvk == "") $alvk = date("m");
 			$sel[$alvk] = "SELECTED";
 
 			echo "</select>";
 
 			echo "<select name='alvk'>
-					<option $sel[1] value = '1'>01</option>
-					<option $sel[2] value = '2'>02</option>
-					<option $sel[3] value = '3'>03</option>
-					<option $sel[4] value = '4'>04</option>
-					<option $sel[5] value = '5'>05</option>
-					<option $sel[6] value = '6'>06</option>
-					<option $sel[7] value = '7'>07</option>
-					<option $sel[8] value = '8'>08</option>
-					<option $sel[9] value = '9'>09</option>
+					<option $sel[01] value = '01'>01</option>
+					<option $sel[02] value = '02'>02</option>
+					<option $sel[03] value = '03'>03</option>
+					<option $sel[04] value = '04'>04</option>
+					<option $sel[05] value = '05'>05</option>
+					<option $sel[06] value = '06'>06</option>
+					<option $sel[07] value = '07'>07</option>
+					<option $sel[08] value = '08'>08</option>
+					<option $sel[09] value = '09'>09</option>
 					<option $sel[10] value = '10'>10</option>
 					<option $sel[11] value = '11'>11</option>
 					<option $sel[12] value = '12'>12</option>
-					</select></td></tr>";
+					</select>";
+
+			$sel = array();
+			if ($alvp == "") $alvp = date("d", mktime(0, 0, 0, (date("m")+1), 0, date("Y")));
+			$sel[$alvp] = "SELECTED";
+
+			echo "<select name='alvp'>
+					<option $sel[01] value = '01'>01</option>
+					<option $sel[02] value = '02'>02</option>
+					<option $sel[03] value = '03'>03</option>
+					<option $sel[04] value = '04'>04</option>
+					<option $sel[05] value = '05'>05</option>
+					<option $sel[06] value = '06'>06</option>
+					<option $sel[07] value = '07'>07</option>
+					<option $sel[08] value = '08'>08</option>
+					<option $sel[09] value = '09'>09</option>
+					<option $sel[10] value = '10'>10</option>
+					<option $sel[11] value = '11'>11</option>
+					<option $sel[12] value = '12'>12</option>
+					<option $sel[13] value = '13'>13</option>
+					<option $sel[14] value = '14'>14</option>
+					<option $sel[15] value = '15'>15</option>
+					<option $sel[16] value = '16'>16</option>
+					<option $sel[17] value = '17'>17</option>
+					<option $sel[18] value = '18'>18</option>
+					<option $sel[19] value = '19'>19</option>
+					<option $sel[20] value = '20'>20</option>
+					<option $sel[21] value = '21'>21</option>
+					<option $sel[22] value = '22'>22</option>
+					<option $sel[23] value = '23'>23</option>
+					<option $sel[24] value = '24'>24</option>
+					<option $sel[25] value = '25'>25</option>
+					<option $sel[26] value = '26'>26</option>
+					<option $sel[27] value = '27'>27</option>
+					<option $sel[28] value = '28'>28</option>
+					<option $sel[29] value = '29'>29</option>
+					<option $sel[30] value = '30'>30</option>
+					<option $sel[31] value = '31'>31</option>
+					</select>
+					</td></tr>";
 
 			echo "<tr><th valign='top'>".t("tai koko tilikausi")."</th>";
-		 	$query = "SELECT *
+
+			$query = "	SELECT *
 						FROM tilikaudet
 						WHERE yhtio = '$kukarow[yhtio]'
 						ORDER BY tilikausi_alku DESC";
 			$vresult = mysql_query($query) or pupe_error($query);
+
 			echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
+
 			while ($vrow=mysql_fetch_array($vresult)) {
 				$sel="";
 				if ($trow[$i] == $vrow["tunnus"]) {
 					$sel = "selected";
 				}
-				echo "<option value = '$vrow[tunnus]' $sel>$vrow[tilikausi_alku] - $vrow[tilikausi_loppu]";
+				echo "<option value = '$vrow[tunnus]' $sel>".tv1dateconv($vrow["tilikausi_alku"])." - ".tv1dateconv($vrow["tilikausi_loppu"]);
 			}
 			echo "</select></td>";
 			echo "</tr>";
@@ -775,7 +878,7 @@
 
 					while ($vrow = mysql_fetch_array($k_result)) {
 						$sel="";
-						if ($trow[$i] == $vrow['tunnus'] or in_array($vrow[tunnus],$mul_kustp)) {
+						if ($trow[$i] == $vrow['tunnus'] or in_array($vrow["tunnus"],$mul_kustp)) {
 							$sel = "selected";
 						}
 						echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]</option>";
@@ -893,10 +996,8 @@
 			echo "</td></tr>";
 			echo "</table><br>
 			      <input type = 'submit' value = '".t("N‰yt‰")."'></form>";
-			
+
 			require("../inc/footer.inc");
 		}
-		
 	}
-	
 ?>

@@ -418,7 +418,13 @@
 		$olhirow = mysql_fetch_array($olhires);
 
 		$extra_poislisa = " and tuote.hinnastoon != 'E' ";
-		$avainlisa = " and avainsana.jarjestys < 10000";
+
+		if ($verkkokauppa != "") {
+			$avainlisa = " and avainsana.nakyvyys = '' ";
+		}
+		else {
+			$avainlisa = " and avainsana.jarjestys < 10000 ";
+		}
 	}
 	else {
 		$extra_poislisa = "";
@@ -557,7 +563,7 @@
 	}
 
 	if ($verkkokauppa == "") {
-		
+
 		echo "<form action = '$PHP_SELF?toim_kutsu=$toim_kutsu' method = 'post'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 
@@ -822,7 +828,7 @@
 
 			if ($verkkokauppa != "") {
 				echo avoin_kori();
-				
+
 				echo "<form id = 'lisaa' action=\"javascript:ajaxPost('lisaa', 'tuote_selaus_haku.php?', 'selain', false, true);\" name='lisaa' method='post' autocomplete='off'>";
 
 				echo "<input type='hidden' name='submit_button' value = '1'>";

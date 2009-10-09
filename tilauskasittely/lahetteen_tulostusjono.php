@@ -462,7 +462,7 @@
 					$sel = '';
 
 					//tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
-					if (($kirrow['tunnus'] == $kirjoitin and $kukarow['kirjoitin'] == 0) or ($kirrow['tunnus'] == $kukarow['kirjoitin'])) {
+					if (($kirrow['tunnus'] == $kirjoitin and ($kukarow['kirjoitin'] == 0 or $lasku_yhtio_originaali != $kukarow["yhtio"])) or ($kirrow['tunnus'] == $kukarow['kirjoitin'])) {
 						$sel = "SELECTED";
 					}
 
@@ -971,7 +971,7 @@
 						$sel = '';
 
 						// tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
-						if (($kirrow['tunnus'] == $kirjoitin and $kukarow['kirjoitin'] == 0) or ($kirrow['tunnus'] == $kukarow['kirjoitin'])) {
+						if (($kirrow['tunnus'] == $kirjoitin and ($kukarow['kirjoitin'] == 0 or $lasku_yhtio_originaali != $kukarow["yhtio"])) or ($kirrow['tunnus'] == $kukarow['kirjoitin'])) {
 							$sel = "SELECTED";
 						}
 

@@ -556,40 +556,8 @@
 		}
 	}
 
-	if ($kukarow["kesken"] != 0 and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "N") and $verkkokauppa != "") {
-		if (!function_exists("tilaukset_linkki")) {
-			function tilaukset_linkki() {
-				global $yhtiorow, $kukarow, $haku;
-
-				if($kukarow["kuka"] == "www") {
-					return "";
-				}
-
-				if ($kukarow["kesken"] > 0) {
-					$query = "	SELECT *
-								FROM lasku
-								WHERE yhtio = '$kukarow[yhtio]' and tila = 'N' and tunnus = '$kukarow[kesken]'";
-					$result = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($result) == 1) {
-						$laskurow = mysql_fetch_array($result);
-						$query = "	SELECT round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))),$yhtiorow[hintapyoristys]) summa
-									FROM tilausrivi
-									WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi != 'D'";
-						$result = mysql_query($query) or pupe_error($query);
-						$row = mysql_fetch_array($result);
-
-						echo "<center><a href='#' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilatut&osasto=$haku[3]&try=$haku[4]')\">".t("Tilaus %s %s, yhteensä %s %s", $kieli, $laskurow["tunnus"], $laskurow["viesti"], number_format($row["summa"], 2, ',', ' '), $laskurow["valkoodi"])."</a></center>";
-
-					}
-				}
-			}
-		}
-
-	 	tilaukset_linkki();
-	}
-
 	if ($verkkokauppa == "") {
+		
 		echo "<form action = '$PHP_SELF?toim_kutsu=$toim_kutsu' method = 'post'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 
@@ -853,8 +821,9 @@
 			}
 
 			if ($verkkokauppa != "") {
-
-				echo "<form id = 'lisaa' action=\"javascript:ajaxPost('lisaa', 'tuote_selaus_haku.php?', 'selain', false, true);\" name='lisaa' method='post'>";
+				echo avoin_kori();
+				
+				echo "<form id = 'lisaa' action=\"javascript:ajaxPost('lisaa', 'tuote_selaus_haku.php?', 'selain', false, true);\" name='lisaa' method='post' autocomplete='off'>";
 
 				echo "<input type='hidden' name='submit_button' value = '1'>";
 				echo "<input type='hidden' name='sort' value = '$edsort'>";
@@ -871,7 +840,7 @@
 				}
 			}
 			else {
-				echo "<form action='?submit_button=1&sort=$edsort&ojarj=$ojarj$ulisa' name='lisaa' method='post'>";
+				echo "<form action='?submit_button=1&sort=$edsort&ojarj=$ojarj$ulisa' name='lisaa' method='post' autocomplete='off'>";
 			}
 
 			echo "<input type='hidden' name='tee' value = 'TI'>";

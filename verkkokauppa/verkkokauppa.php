@@ -210,7 +210,7 @@ if (!function_exists("menu")) {
 						$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell'><a class = 'menu' id='$parent' href='$href'>$tryrow[trynimi]</a><div id=\"$target\" style='display: none'></div></td></tr>";
 					}
 					else {
-						$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell'><a class = 'menu' id='$parent' href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$tryrow[try]&tuotemerkki=', '', false);\">$tryrow[trynimi]</a></td></tr>";
+						$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell'><a class = 'menu' name = 'menulinkki' id='$parent' onclick=\"var aEls = document.getElementsByName('menulinkki'); for (var iEl = 0; iEl < aEls.length; iEl++) { document.getElementById(aEls[iEl].id).className='menu';} this.className='menuselected'; self.scrollTo(0,0);\" href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$tryrow[try]&tuotemerkki=', '', false);\">$tryrow[trynimi]</a></td></tr>";
 					}
 				}
 			}
@@ -288,7 +288,7 @@ if (!function_exists("menu")) {
 				}
 
 				if ($ok == 1) {
-					$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell'><a class = 'menu' id='P_".$osasto."_".$try."_".$merow["selite"]."' href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=$merow[tuotemerkki]', '', true);\">$merow[tuotemerkki]</a></td></tr>";
+					$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell'><a class = 'menu' id='P_".$osasto."_".$try."_".$merow["selite"]."' name = 'menulinkki' onclick=\"var aEls = document.getElementsByName('menulinkki'); for (var iEl = 0; iEl < aEls.length; iEl++) { document.getElementById(aEls[iEl].id).className='menu';} this.className='menuselected'; self.scrollTo(0,0);\" href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=$merow[tuotemerkki]', '', true);\">$merow[tuotemerkki]</a></td></tr>";
 				}
 			}
 			$val .= "</table>";

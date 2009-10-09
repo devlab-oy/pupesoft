@@ -6,9 +6,8 @@
 				<input type = 'hidden' name = 'toim' value = 'tilitkk'>
 				<input type = 'hidden' name = 'tee' value = '1'>
 				<table><tr>
-				<td>".t("Ajalta")."</td>
-				<td><select name='alvv'>
-				";
+				<th>".t("Ajalta")."</th>
+				<td><select name='alvv'>";
 
 		for ($i = date("Y"); $i >= date("Y")-4; $i--) {
 			if ($i == date("Y")) $sel = "selected";
@@ -20,7 +19,8 @@
 		</select>
 		</td></tr>";
 
-		echo "<tr><td>".t("Vain kustannuspaikka")."</td>";
+		echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
+		
 		$query = "SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
@@ -28,6 +28,7 @@
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa")."";
+		
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow[0]) {
@@ -37,13 +38,16 @@
 		}
 		echo "</select></td>";
 		echo "</tr>";
-		echo "<tr><td>".t("Vain kohde")."</td>";
+		echo "<tr><th>".t("Vain kohde")."</th>";
+		
 		$query = "SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
+		
 		echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa")."";
+		
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow[0]) {
@@ -51,15 +55,19 @@
 			}
 			echo "<option value = '$vrow[0]' $sel>$vrow[1]";
 		}
+		
 		echo "</select></td>";
 		echo "</tr>";
-		echo "<tr><td>".t("Vain projekti")."</td>";
+		echo "<tr><th>".t("Vain projekti")."</th>";
+		
 		$query = "SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
+		
 		echo "<td><select name='proj'><option value=' '>".t("Ei valintaa")."";
+		
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow[0]) {
@@ -69,8 +77,10 @@
 		}
 		echo "</select></td>";
 		echo "</tr>";
-		echo "<tr><td></td>
-		      <td><input type = 'submit' value = '".t("Näytä")."'></form></td><tr></table>";
+		
+		echo "</table>";
+		
+		echo "<br><br><input type = 'submit' value = '".t("Näytä")."'></form>";
 		
 		require ("inc/footer.inc");
 		exit;
@@ -79,8 +89,7 @@
 	$timeparts = explode(" ",microtime());
 	$phptime = $timeparts[1].substr($timeparts[0],1);
 
-// Onko meillä lisärajoitteita??
-
+	// Onko meillä lisärajoitteita??
 	$lisa='';
 	$teksti='';
 	if (strlen(trim($kustp)) > 0) {

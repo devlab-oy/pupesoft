@@ -3,7 +3,7 @@
 	$useslave = 1;
 
 	$lis = "";
-	if ($kukarow["extranet"] != '') {
+	if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
 		$lis = " and liitostunnus = '$kukarow[oletus_asiakas]' ";
 	}
 
@@ -16,7 +16,7 @@
 	$aresult = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($aresult) == 0) {
-		echo "<b>".t("VIRHE: Tilausta ei löydy")."!</b>$query<br>";
+		echo "<strong>".t("VIRHE: Tilausta ei löydy")."!</strong>$query<br>";
 		exit;
 	}
 	$laskurow = mysql_fetch_array($aresult);
@@ -82,9 +82,10 @@
 				LEFT JOIN kuka ON laskun_lisatiedot.yhtio=kuka.yhtio and laskun_lisatiedot.projektipaallikko=kuka.kuka
 				WHERE laskun_lisatiedot.yhtio='$kukarow[yhtio]' and laskun_lisatiedot.otunnus='$laskurow[tunnus]' and seuranta!=''";
 	$lisares=mysql_query($query) or pupe_error($query);
-	if(mysql_num_rows($lisares)>0) {
-		$lisarow=mysql_fetch_array($lisares);
-		$lisarivi="	<tr>
+
+	if (mysql_num_rows($lisares) > 0) {
+		$lisarow = mysql_fetch_array($lisares);
+		$lisarivi = "<tr>
 						<th>".t("Seuranta")."</th>
 						<th colspan='2'>".t("Kohde")."</th>
 						<th colspan='2'>".t("Yhteyshenkilo")."</th>
@@ -103,9 +104,25 @@
 
 	echo "<tr>
 			<td>$laskurow[ytunnus]</td>
-			<td colspan='2'>$laskurow[nimi] $laskurow[nimitark]<br> $laskurow[osoite]<br> $laskurow[postino] $laskurow[postitp]<br>".maa($laskurow["maa"])."</td>
-			<td colspan='3'>$laskurow[toim_nimi] $laskurow[toim_nimitark]<br> $laskurow[toim_osoite]<br> $laskurow[toim_postino] $laskurow[toim_postitp]<br>".maa($laskurow["toim_maa"])."</td>
-			<td>$laskurow[toimitustapa]<br>$laskurow[toimitusehto]</td>";
+			<td colspan='2'>$laskurow[nimi] $laskurow[nimitark]<br> $laskurow[osoite]<br> $laskurow[postino] $laskurow[postitp]<br>".maa($laskurow["maa"])."</td>";
+
+	if ($verkkokauppa != "" and $muokkaa != "") {
+		echo "<td colspan='3'>
+				<input type = 'text' name='toim_nimi' value = '$laskurow[toim_nimi]' size = '30'><br> 
+				<input type = 'text' name='toim_nimitark' value = '$laskurow[toim_nimitark]' size = '30'><br>
+				<input type = 'text' name='toim_osoite' value = '$laskurow[toim_osoite]' size = '30'><br>
+				<input type = 'text' name='toim_postino' value = '$laskurow[toim_postino]' size = '6'> <input type = 'text' name='toim_postitp' value = '$laskurow[toim_postitp]' size = '20'><br>
+				".maa($laskurow["toim_maa"])."</td>";
+	}
+	else {
+		echo "<td colspan='3'>
+				$laskurow[toim_nimi] $laskurow[toim_nimitark]<br>
+				$laskurow[toim_osoite]<br>
+				$laskurow[toim_postino] $laskurow[toim_postitp]<br>
+				".maa($laskurow["toim_maa"])."</td>";
+	}
+
+	echo "<td>$laskurow[toimitustapa]<br>$laskurow[toimitusehto]</td>";
 
 	if ($laskurow["tila"] == "O") {
 		echo "<td>$laskurow[rahti_etu]</td>";
@@ -126,7 +143,6 @@
 	}
 
 	echo "</tr>";
-
 	echo "<tr>";
 
 	if ($laskurow["tila"] != "K" and $laskurow["tila"] != "U") echo "<td>$laskurow[tunnus]</td>";
@@ -164,7 +180,7 @@
 	$possi = strpos(strtoupper($laskurow['toimitustapa']),"DPD");
 
 	// postin rahtikirjat alkaa JJFI, ja tehdään niille linkki suoraan postin seurantaan
-	if (strpos($rakirrow['rahtikirjanro'],"JFI")) {
+	if (strpos($rakirrow['rahtikirjanro'],"JFI") !== FALSE) {
 		$linkurl = "";
 		$jjfi = split("<br>", trim($rakirrow['rahtikirjanro']));
 
@@ -218,14 +234,13 @@
 		$linkurl = $rakirrow['rahtikirjanro'];
 	}
 
-	echo "	<td>$linkurl</td>";
+	echo "<td>$linkurl</td>";
 
 	if ($laskurow["tila"] == "O") {
 		echo "<td>$laskurow[rahti]</td>";
 	}
 
 	echo "</tr>";
-
 	echo "<tr>";
 
 	if ($laskurow["tila"] == "O" or $laskurow["tila"] == "K") echo "<th>".t("Keikkanumero")."</th>";
@@ -247,8 +262,7 @@
 		echo "<th>".t("Huolinta")."</th>";
 	}
 
-	echo "<tr>
-			<td>$laskurow[laskunro]</td>";
+	echo "<tr><td>$laskurow[laskunro]</td>";
 
 	if ($laskurow["tila"] == "O" or $laskurow["tila"] == "K") {
 		echo "<td colspan='2'>$laskurow[valkoodi]</td>";
@@ -289,19 +303,41 @@
 		$komm .= "\n".t("Laatija").":###".$laarow['nimi'];
 	}
 
-	if (trim($laskurow['tilausyhteyshenkilo']) != '') {
+
+	if ($verkkokauppa != "" and $muokkaa != "") {
+		list($toimvv, $toimkk, $toimpp) = explode("-", $laskurow['toimaika']);
+
+		$komm .= "\n".t("Toimitusaika").":###<input type = 'text' name = 'toimpp' value='$toimpp' size = '3'> - <input type = 'text' name = 'toimkk' value='$toimkk' size = '3'> - <input type = 'text' name = 'toimvv' value='$toimvv' size = '5'>";
+	}
+	elseif ($verkkokauppa != "") {
+		$komm .= "\n".t("Toimitusaika").":###".tv1dateconv($laskurow["toimaika"]);
+	}
+
+	if ($verkkokauppa != "" and $muokkaa != "") {
+		$komm .= "\n".t("Tilaaja").":###<input type = 'text' name='tilausyhteyshenkilo' value='$laskurow[tilausyhteyshenkilo]' size = '62'>";
+	}
+	elseif (trim($laskurow['tilausyhteyshenkilo']) != '') {
 		$komm .= "\n".t("Tilaaja").":###".$laskurow['tilausyhteyshenkilo'];
 	}
 
-	if (trim($laskurow['asiakkaan_tilausnumero']) != '') {
+	if ($verkkokauppa != "" and $muokkaa != "") {
+		$komm .= "\n".t("Tilauksenne").":###<input type = 'text' name='asiakkaan_tilausnumero' value='$laskurow[asiakkaan_tilausnumero]' size = '62'>";
+	}
+	elseif (trim($laskurow['asiakkaan_tilausnumero']) != '') {
 		$komm .= "\n".t("Tilauksenne").":###".$laskurow['asiakkaan_tilausnumero'];
 	}
 
-	if (trim($laskurow['kohde']) != '') {
+	if ($verkkokauppa != "" and $muokkaa != "") {
+		$komm .= "\n".t("Kohde").":###<input type = 'text' name='kohde' value='$laskurow[kohde]' size = '62'>";
+	}
+	elseif (trim($laskurow['kohde']) != '') {
 		$komm .= "\n".t("Kohde").":###".$laskurow['kohde'];
 	}
 
-	if (trim($laskurow['viesti']) != '') {
+	if ($verkkokauppa != "" and $muokkaa != "") {
+		$komm .= "\n".t("Lisätietoja").":###<input type = 'text' name='viesti' value='$laskurow[viesti]' size = '62'>";
+	}
+	elseif (trim($laskurow['viesti']) != '') {
 		$komm .= "\n".t("Lisätietoja").":###".$laskurow['viesti'];
 	}
 
@@ -320,10 +356,12 @@
 		if (trim($reklarow['komm2']) != '') {
 			$komm .= "\n".t("Sisäiset kommentit").":###".wordwrap(str_replace("\n","\n###", $reklarow['komm2']), 90, "\n###");
 		}
-
 	}
 
-	if (trim($laskurow['comments']) != '') {
+	if ($verkkokauppa != "" and $muokkaa != "") {
+		$komm .= "\n".t("Kommentti")." 1:###<textarea name='comments' cols = '60' rows = '3'>".str_replace(array("\r\n", "\r", "\n"), " ", $laskurow["comments"])."</textarea>";
+	}
+	elseif (trim($laskurow['comments']) != '') {
 		$komm .= "\n".t("Kommentti")." 1:###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
 	}
 
@@ -406,9 +444,13 @@
 	}
 
 	echo "</table>";
+	
+	if ($verkkokauppa != "" and $muokkaa != "") {
+		echo "<br><input type = 'submit' name='tallenna' value='".t("Tallenna muutokset")."'></form><br>";
+	}
 
 	echo "<br>";
-	echo "<b>".t("Tilausrivit").":</b><hr>";
+	echo "<strong>".t("Tilausrivit").":</strong><hr>";
 
 	if ($laskurow["tila"] == 'U' or $laskurow["tila"] == 'K') {
 		$where = " tilausrivi.uusiotunnus = '$tunnus' ";
@@ -798,7 +840,7 @@
 					$tuotetyyppi = 1;
 
 					echo "<tr><td class='back' colspan='10'><br></td></tr>";
-					echo "<tr><td class='back' colspan='10'><b>".t("Työt")."</b>:</td></tr>";
+					echo "<tr><td class='back' colspan='10'><strong>".t("Työt")."</strong>:</td></tr>";
 				}
 			}
 
@@ -1208,7 +1250,11 @@
 			else {
 				echo "<td $classx align='right' valign='top' nowrap>".($row["alv"] * 1)."</td>";
 			}
-
+			
+			if ($verkkokauppa != "" and $muokkaa != "") {
+				echo "<td class='back'><input type = 'button' onclick = \"if(confirm('".t("Oletko varma, että haluat mitätöidä tilausrivin?")."')) { sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus=$row[tunnus]&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki'); }\" value='".t("Mitätöi rivi")."'></td>";
+			}
+			
 			echo "</tr>";
 
 			if ($row['kommentti'] != '') {
@@ -1262,6 +1308,9 @@
 				$colspan++;
 			}
 			if ($tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
+				$colspan++;
+			}
+			if($kukarow["extranet"] != "") {
 				$colspan++;
 			}
 			if($kukarow["extranet"] != "" and $yhtiorow['varastopaikan_lippu'] != '') {
@@ -1388,7 +1437,7 @@
 	//	Näytetään vaan tää tilaus jostain linkistä..
 	if ($tee != "NAYTA") {
 		if ($laskurow["jaksotettu"] <> 0) {
-			echo "<br><b>".t("Maksusopimus").":</b><hr>";
+			echo "<br><strong>".t("Maksusopimus").":</strong><hr>";
 
 			if ($laskurow["jaksotettu"]<0) {
 				$sopimus = (-1) * $laskurow["jaksotettu"];
@@ -1438,7 +1487,7 @@
 		}
 
 		if ($laskurow["tunnusnippu"] > 0) {
-			echo "<br><b>".t("Liitetyt tilaukset").":</b><hr>";
+			echo "<br><strong>".t("Liitetyt tilaukset").":</strong><hr>";
 
 			if ($kukarow['hinnat'] == 0) $summaselli = " summa, ";
 			else $summaselli = "";
@@ -1510,6 +1559,4 @@
 			}
 		}
 	}
-
-
 ?>

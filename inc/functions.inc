@@ -168,6 +168,35 @@ if (!function_exists("date2mysql")) {
 	}
 }
 
+if (!function_exists("avoin_kori")) {
+	function avoin_kori() {
+		global $kukarow, $yhtiorow;
+
+		// näyttää ostoskori-linkin verkkokaupassa ja tuoteselaushaussa
+		if ($kukarow["kuka"] != "www" and $kukarow["kesken"] > 0) {
+			$query = "	SELECT *
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]' and tila = 'N' and tunnus = '$kukarow[kesken]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 1) {
+				$laskurow = mysql_fetch_array($result);
+
+				$query = "	SELECT round(sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))),$yhtiorow[hintapyoristys]) summa
+							FROM tilausrivi
+							WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi != 'D'";
+				$result = mysql_query($query) or pupe_error($query);
+				$row = mysql_fetch_array($result);
+
+				$linkki = "<a href='#' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilatut&osasto=$osasto&try=$try')\"><strong>".t("Ostoskori: Tilaus %s%s, yhteensä %s %s", $kieli, $laskurow["tunnus"], " ".$laskurow["viesti"], number_format($row["summa"], 2, ',', ' '), $laskurow["valkoodi"])."</strong></a><br><br>";
+
+
+				return "<center>$linkki</center>";
+			}
+		}
+	}
+}
+
 if (!function_exists("maa")) {
 	function maa($code, $kieli="") {
 		// tarvitaan yhtiörowta, kukarowta ja tieto slaven:n käytöstä
@@ -7545,13 +7574,13 @@ if (!function_exists("hae_yhtion_parametrit")) {
 
 		if ($yhtiorow['konserni'] != '') {
 			$query = "	SELECT distinct yhtio.yhtio, konsernivarasto
-						FROM yhtio 
+						FROM yhtio
 						JOIN yhtion_parametrit ON (yhtion_parametrit.yhtio = yhtio.yhtio)
 						WHERE (yhtio.konserni = '$yhtiorow[konserni]' and yhtio.konserni != '') or (yhtio.yhtio = '$yhtiorow[yhtio]')";
 			$result = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_array($result)) {
-				$konserni_yhtiot .= " '".$row["yhtio"]."' ,";				
+				$konserni_yhtiot .= " '".$row["yhtio"]."' ,";
 				if ($row["konsernivarasto"] != "") {
 					$konsernivarasto_yhtiot .= " '".$row["yhtio"]."' ,";
 				}

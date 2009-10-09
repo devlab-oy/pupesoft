@@ -58,7 +58,6 @@ if ($tee == 'LISAA') {
 		$rivi["kentta02"]  = $uutinen;
 		$rivi["kentta08"]  = $kentta08;
 		$rivi["kentta09"]  = $kentta09;
-		$rivi["kentta10"]  = $kentta10;				
 		$rivi["konserni"]  = $konserni;
 		$rivi["kokopaiva"] = $kokopaiva;
 		$tee = "SYOTA";
@@ -68,17 +67,16 @@ if ($tee == 'LISAA') {
 		$rivi["kentta01"]  = $otsikko;
 		$rivi["kentta02"]  = $uutinen;
 		$rivi["kentta09"]  = $kentta09;
-		$rivi["kentta10"]  = $kentta10;				
 		$rivi["konserni"]  = $konserni;
 		$rivi["kokopaiva"] = $kokopaiva;
 		$tee = "SYOTA";
 	}
 	elseif (strlen($otsikko) > 0 and strlen($uutinen) > 0 and count($lang) > 0) {
-		
+
 		$liitostunnus = 0;
-		
+
 		$retval = tarkasta_liite("userfile");
-		
+
 		if($retval !== true) {
 			echo $retval;
 		}
@@ -86,8 +84,8 @@ if ($tee == 'LISAA') {
 			$kuva = tallenna_liite("userfile", "kalenteri", 0, $selite);
 		}
 
-		$uutinen = nl2br(strip_tags($uutinen, '<a>'));
 		$otsikko = nl2br(strip_tags($otsikko, '<a>'));
+		$uutinen = mysql_real_escape_string($uutinen);
 
 		// ollaanko valittu konsernitasoinen uutinen
 		if ($konserni != '') $konserni = $yhtiorow['konserni'];
@@ -107,8 +105,8 @@ if ($tee == 'LISAA') {
 			$tapa = $tyyppi;
 		}
 
-		for ($i=0; $i < count($lang); $i++) { 
-				
+		for ($i=0; $i < count($lang); $i++) {
+
 			if ($tunnus != 0) {
 				$query = "	UPDATE kalenteri SET ";
 				$postquery = " WHERE tunnus = '$tunnus' ";
@@ -119,7 +117,7 @@ if ($tee == 'LISAA') {
 							kuka 		= '$kukarow[kuka]',
 							tyyppi 		= '$tyyppi',
 							yhtio 		= '$kukarow[yhtio]',
-							pvmalku 	= now(), 
+							pvmalku 	= now(),
 							luontiaika	= now(),";
 					$postquery = "";
 			}
@@ -129,13 +127,12 @@ if ($tee == 'LISAA') {
 			if ($kuva != '') {
 				$query .= "kentta03 	= '$kuva',";
 			}
-			
+
 			if ($kentta08 == 'X') {
 				$query .= "kentta08 = '$kentta08',";
 			}
-						
+
 			$query .=  "kentta09 	= '$kentta09',
-						kentta10 	= '$kentta10',								
 						konserni 	= '$konserni',
 						kieli 		= '$lang[$i]',
 						kokopaiva	= '$kokopaiva',
@@ -147,20 +144,18 @@ if ($tee == 'LISAA') {
 
 			if ($liitostunnus != 0 && $kuva != '') {
 				// p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
-				$query = "update liitetiedostot set liitostunnus='$katunnus' where tunnus='$liitostunnus'";
+				$query = "UPDATE liitetiedostot set liitostunnus='$katunnus' where tunnus='$liitostunnus'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 		}
 		$tee = "";
 	}
 	else {
-
 		echo "<font class='error'>".t("Sek‰ otsikko ett‰ uutinen on syˆtett‰v‰!")."</font><br><br>";
 		$rivi["kentta01"]  = $otsikko;
 		$rivi["kentta02"]  = $uutinen;
 		$rivi["kentta08"]  = $kentta08;
 		$rivi["kentta09"]  = $kentta09;
-		$rivi["kentta10"]  = $kentta10;				
 		$rivi["konserni"]  = $konserni;
 		$rivi["kokopaiva"] = $kokopaiva;
 		$tee = "SYOTA";
@@ -172,7 +167,7 @@ if ($tee == "SYOTA") {
 	$rivi["pvmalku"] = date('Y-m-d');
 
 	if ($tunnus > 0) {
-		$query  = "	select *
+		$query  = "	SELECT *
 					from kalenteri
 					where tyyppi='$tyyppi' and tunnus='$tunnus' and yhtio='$kukarow[yhtio]' $kulisa";
 		$result = mysql_query($query) or pupe_error($query);
@@ -185,8 +180,6 @@ if ($tee == "SYOTA") {
 			exit;
 		}
 	}
-
-	$rivi['kentta02'] = strip_tags($rivi['kentta02'], '<a>');
 
 	echo "<form enctype='multipart/form-data' name='sendfile' action='$PHP_SELF' method='post'>
 		<input type='hidden' name='tee' value='LISAA'>
@@ -238,7 +231,6 @@ if ($tee == "SYOTA") {
 		 </tr>";
 
 	echo "<tr><th>".t("Kieli").":&nbsp;</th><td>";
-	
 
 	$query  = "show columns from sanakirja";
 	$fields =  mysql_query($query);
@@ -247,11 +239,11 @@ if ($tee == "SYOTA") {
 
 	while ($apurow = mysql_fetch_array($fields)) {
 		$sel = "";
-				
+
 		if ($tunnus == 0 and $apurow[0] != "tunnus" and $apurow[0] != "aikaleima" and $apurow[0] != "kysytty" and $apurow[0] != "laatija" and $apurow[0] != "luontiaika" and $apurow[0] != "muutospvm" and $apurow[0] != "muuttaja" and $apurow[0] != "synkronoi") {
 			if ($rivi["kieli"] == $apurow[0] or ($rivi["kieli"] == "" and $apurow[0] == $yhtiorow["kieli"]) and count($lang) == 0) $sel = "CHECKED";
 			if (in_array($apurow[0], $lang)) $sel = "CHECKED";
-					
+
 			$query = "select distinct nimi from maat where koodi='$apurow[0]'";
 			$maare = mysql_query($query);
 			$maaro = mysql_fetch_array($maare);
@@ -263,7 +255,7 @@ if ($tee == "SYOTA") {
 			if ($rivi["kieli"] == $apurow[0]) {
 				$sel = "CHECKED";
 			}
-			
+
 			$query = "select distinct nimi from maat where koodi='$apurow[0]'";
 			$maare = mysql_query($query);
 			$maaro = mysql_fetch_array($maare);
@@ -273,39 +265,47 @@ if ($tee == "SYOTA") {
 		}
 	}
 	echo "</td>";
-	
+
 	if ($toim == "VERKKOKAUPPA") {
 		echo "<tr><th>".t("Osasto")."</th><td>";
 
-		$result = t_avainsana("OSASTO", "", "and avainsana.selitetark_2 = 'verkkokauppa'");
-				
-		if (mysql_num_rows($result)>0) {
-			echo "<select name='kentta09'>
-					<option value = ''>".t("Etusivu")."</option>";
+		echo "<select name='kentta09'>";
 
-			while($orow = mysql_fetch_array($result)) {
+		$result = t_avainsana("VERKKOKAULINKKI");
+
+		if (mysql_num_rows($result) > 0) {
+			while ($orow = mysql_fetch_array($result)) {
+				if($rivi["kentta09"] == $orow["selite"]) $sel = "SELECTED";
+				else $sel = "";
+				echo "<option value='$orow[selite]' $sel>$orow[selitetark]</option>";
+			}
+		}
+
+		$result = t_avainsana("OSASTO", "", " and avainsana.jarjestys < 10000 ");
+
+		if (mysql_num_rows($result) > 0) {
+			while ($orow = mysql_fetch_array($result)) {
 				if($rivi["kentta09"] == $orow["selite"]) $sel = "SELECTED";
 				else $sel = "";
 				echo "<option value='$orow[selite]' $sel>$orow[selite] - $orow[selitetark]</option>";
 			}
-			echo "</select>";
+
 		}
-		else {
-			echo t("Yht‰‰n verkkokauppaosasto ei ole m‰‰ritetty")."!!";
-		}	
-		echo "</td></tr>";		
+
+		echo "</select>";
+		echo "</td></tr>";
 	}
-	
+
 	if ($rivi['kokopaiva'] != "") $check = "CHECKED";
 	else $check = "";
-	
+
 	echo "<tr><th>".t("Prioriteetti")."</th><td><input type='checkbox' name='kokopaiva' $check> ".t("N‰ytet‰‰nkˆ uutinen aina p‰‰llimm‰isen‰")."</td></tr>";
 
 	if ($yhtiorow['konserni'] != '') {
-		
+
 		if ($rivi['konserni'] != "") $check = "CHECKED";
 		else $check = "";
-		
+
 		echo "<tr>
 			<th>".t("Konserni")."</th>
 			<td><input type='checkbox' name='konserni' $check> ".t("N‰ytet‰‰nkˆ uutinen konsernin kaikilla yrityksill‰")."</td>
@@ -346,8 +346,8 @@ if ($tee == "SYOTA") {
 			else {
 				$check2 = "";
 			}
-		}	
-	
+		}
+
 		if ($kukarow['yhtio'] == 'artr' and ($toim == 'EXTRANET' or $toim == 'AUTOMANUAL')) {
 			echo "<tr>
 				<th>".t("Automanual")."</th>
@@ -359,12 +359,12 @@ if ($tee == "SYOTA") {
 				<th>".t("Extranet")."</th>
 				<td><input type='checkbox' name='extranet_uutinen' $check2> ".t("N‰ytet‰‰nkˆ uutinen Extranetiss‰")."</td>
 			</tr>";
-			
+
 			$check3 = "";
 			if ($rivi['kentta08'] == 'X') {
 				$check3 = "CHECKED";
 			}
-			
+
 			echo "<tr>
 				<th>".t("Extranet")."</th>
 				<td><input type='checkbox' name='kentta08' value='X' $check3> ".t("Ei n‰ytet‰ asiakkaan asiakkaille")."</td>
@@ -437,9 +437,7 @@ if ($tee == "PRINTTAA") {
 	$paivays        = $row["pvmalku"];
 	$toimittaja     = $row["kuka"];
 
-	print "
-
-		<TITLE>$otsikko - $paivays</TITLE>
+	echo "<TITLE>$otsikko - $paivays</TITLE>
 		<BODY BGCOLOR='#FFFFFF' TEXT='#000000' LINK='#336699' VLINK='#336699' ALINK='#336699' onLoad='printtaa();'>
 
 		<CENTER>
@@ -481,7 +479,6 @@ if ($tee == "PRINTTAA") {
 		";
 }
 
-
 if ($tee == '') {
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) {
@@ -512,7 +509,7 @@ if ($tee == '') {
 	}
 
 	$querylisa_tapa = "";
-	
+
 	if ($toim == 'AUTOMANUAL') {
 		$querylisa_tapa = " and tapa in ('automanual_uutinen', 'automanual_ext_uutinen') ";
 	}
@@ -546,7 +543,7 @@ if ($tee == '') {
 			$kuva = "";
 
 			if ($uutinen["kentta03"] != "") {
-												
+
 				$query  = "	SELECT *
 							from liitetiedostot
 							where tunnus = '$uutinen[kentta03]'";
@@ -554,7 +551,7 @@ if ($tee == '') {
 
 				if (mysql_num_rows($lisatietores) > 0) {
 					$lisatietorow = mysql_fetch_array($lisatietores);
-					
+
 					if ($lisatietorow["image_width"] > 130 or $lisatietorow["image_width"] == 0) {
 						// Tehd‰‰n nyt t‰h‰n t‰llanen convert juttu niin k‰ytt‰j‰ien megakokoiset kuvat eiv‰t j‰‰ niin isoina kantaan
 						$nimi1 = "/tmp/".md5(uniqid(rand(),true)).".jpg";
@@ -564,26 +561,26 @@ if ($tee == '') {
 						fclose($fh);
 
 						$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".jpg";
-																														
+
 						passthru("/usr/bin/convert -resize 130x -quality 80 +profile \"*\" ".$nimi1." ".$nimi2, $palautus);
-						
-						// Tallennetaa skeilattu kuva						
+
+						// Tallennetaa skeilattu kuva
 						$ltsc = tallenna_liite($nimi2, "kalenteri", 0, $lisatietorow["selite"], '', $lisatietorow["tunnus"]);
-						
+
 						//dellataan tmp filet kuleksimasta
 						system("rm -f $nimi1 $nimi2");
-						
+
 						$kuva = "<img src='view.php?id=$uutinen[kentta03]' width='130'>";
 					}
 					else {
 						$kuva = "<img src='view.php?id=$uutinen[kentta03]' width='130'>";
-					}																							
-				}																																				
+					}
+				}
 			}
-						
+
 			if((int) $yhtiorow["logo"] > 0 and $kuva == '') {
 				$liite = hae_liite($yhtiorow["logo"], "Yllapito", "array");
-								
+
 				$kuva = "<img src='view.php?id=$liite[tunnus]' width='130'>";
 			}
 			elseif(@fopen($yhtiorow["logo"], "r") and $kuva == '') {
@@ -600,7 +597,7 @@ if ($tee == '') {
 			if ($uutinen['nimi'] == "") {
 				$uutinen['nimi'] = $uutinen['toimittaja'];
 			}
-			
+
 			if ($toim == "EXTRANET") {
 				// ##tuoteno##
 				$search = "/#{2}(.*?)#{2}/s";
@@ -635,25 +632,18 @@ if ($tee == '') {
 					$uutinen["kentta02"] = preg_replace($search, $replace, $uutinen["kentta02"]);
 				}
 			}
-			
 
 			echo "	<tr><td colspan='2' class='back'><font class='head'>$uutinen[kentta01]</font><hr></td></tr>
 					<tr>
 					<td valign='top' align='center' width='140'><br>$kuva<br><br></td>
 					<td valign='top'>$uutinen[kentta02]</font><br><a href='$PHP_SELF?tee=PRINTTAA&toim=$toim&tun=$uutinen[tun]'>".t("Tulosta")."</a></td>
 					</tr>";
-			
+
 			echo"<tr><th colspan='2'>";
 			echo "Toimittaja: $uutinen[nimi]<br>P‰iv‰m‰‰r‰: $uutinen[pvmalku]";
-			
-			if($toim == "VERKKOKAUPPA") {
-				if($uutinen["kentta09"] == "") {
-					$uutinen["kentta09"] = "Etusivu";
-					$uutinen["kentta10"] = "";
-				}
-				elseif($uutinen["kentta10"] == "") $uutinen["kentta10"] = "Osaston etusivu";
-				
-				echo "<br>Osasto: $uutinen[kentta09]<br>Try: $uutinen[kentta10]";
+
+			if ($toim == "VERKKOKAUPPA") {
+				echo "<br>Osasto: $uutinen[kentta09]";
 			}
 
 			if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) {
@@ -689,8 +679,8 @@ if ($tee == '') {
 				}
 			}
 			echo "</th></tr>";
-			echo"<tr><td colspan='2' class='back'><br></td></tr>";	
-			
+			echo"<tr><td colspan='2' class='back'><br></td></tr>";
+
 		}
 		echo "</table>";
 
@@ -698,7 +688,6 @@ if ($tee == '') {
 		echo "<a href='$PHP_SELF?limit=50&toim=$toim'>".t("N‰yt‰ viimeiset 50 uutista")."</a><br>";
 		echo "<a href='$PHP_SELF?limit=all&toim=$toim'>".t("N‰yt‰ kaikki uutiset")."</a><br>";
 	}
-
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) {

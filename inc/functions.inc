@@ -6370,7 +6370,7 @@ if (!function_exists("tee_tuotehaku")) {
 			$query = "";
 			$harray = explode(" ", $haku);
 			$i = 0;
-			for($i=0;$i<=count(harray);$i++) {
+			for($i=0;$i<=count($harray);$i++) {
 
 				if($query != "") {
 					$query .="\nUNION\n";
@@ -6506,7 +6506,6 @@ if (!function_exists("livesearch_tilihaku")) {
 			if (mysql_num_rows($result) > 0) {
 				while ($row = mysql_fetch_array($result)) {
 					echo "	<div id='tuote_valinta_$hakuid$row[tunnus]'
-								name='selectOptions$hakuid'
 								onmouseover=\"this.className='liveSearchSelectedItem';
 									keyStrokeIndex = -1;
 									var aEls = document.getElementsByName('selectOptions$hakuid');

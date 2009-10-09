@@ -13,9 +13,9 @@ if ($tee == 'aja') {
 
 if($tee == "aja") {
 	$tkausi = (int) $tkausi;
-	
+
 	// Tutkitaan ensiksi, mille tilikaudelle pyydettävä lista löytyy, jos lista on sopiva
-	if ($tkausi > 0) { 
+	if ($tkausi > 0) {
 		$query = "SELECT *
 						FROM tilikaudet
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
@@ -23,30 +23,30 @@ if($tee == "aja") {
 		if (mysql_num_rows($result) != 1) {
 			echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei löytynyt")."</font>";
 			exit;
-		
+
 		}
 		$tilikaudetrow=mysql_fetch_array($result);
 		$alku = $tilikaudetrow["tilikausi_alku"];
-		$loppu = $tilikaudetrow["tilikausi_loppu"];		
+		$loppu = $tilikaudetrow["tilikausi_loppu"];
 	}
 	else {
 		$alku = "$alvv-$alvk-01";
 		$loppu = "$plvv-$plvk-".date("t",$plvk);
 	}
-	
+
 	if($tkausi>0) {
 		echo "<font class='message'>".t("Tililaukdella")." $alku - $loppu</font><br>";
 	}
 	else {
 		echo "<font class='message'>".t("Ajalla")." $alku - $loppu</font><br>";
 	}
-	
+
 	$lisa=array();
 	if($maa!="") {
 		$query = "select nimi from maat where koodi='$maa' and nimi!='' limit 1";
 		$result=mysql_query($query) or pupe_error($query);
 		$row=mysql_fetch_array($result);
-		
+
 		$lisa["lisatiedot"] .= " and tilausrivin_lisatiedot.kulun_kohdemaa='$maa'";
 		echo "<font class='info'>".t("Maahan")." {$row["nimi"]}</font><br>";
 	}
@@ -54,7 +54,7 @@ if($tee == "aja") {
 		$query = "select nimi from kustannuspaikka where tunnus='$kustp'";
 		$result=mysql_query($query) or pupe_error($query);
 		$row=mysql_fetch_array($result);
-		
+
 		$lisa["where"] .= " and tiliointi.kustp='$kustp'";
 		echo "<font class='info'>".t("kustannuspaikalle")." {$row["nimi"]}</font><br>";
 	}
@@ -64,7 +64,7 @@ if($tee == "aja") {
 		$row=mysql_fetch_array($result);
 
 		$lisa["where"] .= " and tiliointi.kohde='$kohde'";
-		echo "<font class='info'>".t("Kohtelle")." {$row["nimi"]}</font><br>";		
+		echo "<font class='info'>".t("Kohtelle")." {$row["nimi"]}</font><br>";
 	}
 	if($proj!="") {
 		$query = "select nimi from kustannuspaikka where tunnus='$proj'";
@@ -74,15 +74,15 @@ if($tee == "aja") {
 		$lisa["where"] .= " and tiliointi.projekti='$proj'";
 		echo "<font class='info'>".t("Projektille")." {$row["nimi"]}</font><br>";
 	}
-	
+
 	echo "<hr>";
-	
+
 	$kuluALV = "	SELECT if(tuotteen_alv.alv IS NULL, 0, tuotteen_alv.alv)
 					FROM tilausrivi
 					LEFT JOIN tuotteen_alv ON tuotteen_alv.yhtio=tilausrivi.yhtio and tuotteen_alv.tuoteno=tilausrivi.tuoteno
 					WHERE tilausrivi.yhtio=tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus=tilausrivin_lisatiedot.tilausrivitunnus
 					LIMIT 1";
-					
+
 	$query = "	SELECT tiliointi.*,
 				date_format(tiliointi.tapvm, '%d.%m.%Y') tapvm,
 				round(summa*(1-(if(kulun_kohdemaan_alv=0, ($kuluALV), kulun_kohdemaan_alv)/100)),2) veroton_osuus,
@@ -94,8 +94,8 @@ if($tee == "aja") {
 				LEFT JOIN kustannuspaikka kustp ON tiliointi.yhtio=kustp.yhtio and tiliointi.kustp=kustp.tunnus
 				LEFT JOIN kustannuspaikka projekti ON tiliointi.yhtio=projekti.yhtio and tiliointi.projekti=projekti.tunnus
 				LEFT JOIN kustannuspaikka kohde ON tiliointi.yhtio=kohde.yhtio and tiliointi.kohde=kohde.tunnus
-				
-				WHERE tiliointi.yhtio='$kukarow[yhtio]' and 
+
+				WHERE tiliointi.yhtio='$kukarow[yhtio]' and
 				tapvm>='$alku' and
 				tapvm<='$loppu'
 				{$lisa["where"]}
@@ -117,25 +117,25 @@ if($tee == "aja") {
 					<th>".t("Selite")."</th>
 				</tr>";
 		while($row=mysql_fetch_array($result)) {
-			
+
 			$vero=($row["summa"]-$row["veroton_osuus"]);
-			
+
 			echo "<tr><td>{$row["kulun_kohdemaa"]}</td>
 						<td align='right'>{$row["kulun_kohdemaan_alv"]}</td>
 						<td>{$row["tilino"]}</td>
 						<td>{$row["tapvm"]}</td>
-						<td>{$row["kustannuspaikka"]}</td>												
+						<td>{$row["kustannuspaikka"]}</td>
 						<td align='right'>{$row["summa"]}</td>
 						<td align='right'>{$row["veroton_osuus"]}</td>
 						<td align='right'>".number_format($vero ,2, '.', ' ')."</td>
 						<td>{$row["selite"]}</td>
 					</tr>";
-			//	Summataan..		
+			//	Summataan..
 			$summat[$row["kulun_kohdemaa"]]+=$vero;
 		}
-		
+
 		echo "</table><br><br>";
-		
+
 		if(is_array($summat)) {
 			echo "<font class='message'>".t("Takaisinperittävää maittain")."</font><br>";
 			echo "<table><tr><th>".t("Maa")."</th><th>".t("Summa")."</th></tr>";
@@ -194,9 +194,9 @@ if ($tee == '') {
 			<option $sel[11] value = '11'>11</option>
 			<option $sel[12] value = '12'>12</option>
 			</select>";
-	
+
 	echo "&nbsp;-&nbsp;";
-	
+
 	echo "<select name='plvv'>";
 
 	$sel = array();
@@ -239,7 +239,7 @@ if ($tee == '') {
 		echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow[tunnus]) {
+			if ($trow[$i] == $vrow["tunnus"]) {
 				$sel = "selected";
 			}
 			echo "<option value = '$vrow[tunnus]' $sel>$vrow[tilikausi_alku] - $vrow[tilikausi_loppu]";
@@ -328,7 +328,7 @@ if ($tee == '') {
 	}
 
 	echo "</select></td></tr>";
-	
+
 	echo "</table><br>
 	      <input type = 'submit' value = '".t("Näytä")."'></form>";
 }

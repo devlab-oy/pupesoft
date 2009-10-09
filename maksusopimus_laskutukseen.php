@@ -185,29 +185,29 @@
 						GROUP BY lasku.jaksotettu, alv";
 			$sresult = mysql_query($query) or pupe_error($query);
 			$tot = 0;
-			
+
 			//	Lasku voi mennä myös kaukomaille, joten haetaan tämän asiakkaan kieli..
 			$query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 			$kielires = mysql_query($query) or pupe_error($query);
 			$kielirow = mysql_fetch_array($kielires);
-			
+
 			if($kielirow["kieli"] == "") {
 				$kielirow["kieli"]="fi";
 			}
-						
+
 			$nimitys 		= t($posrow["kuvaus"], $kielirow["kieli"]);
 			$rivikommentti 	= t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"],2)."% ";
 
 			if ($posrow["lisatiedot"] != "") {
 				$rivikommentti .= "\n ".$posrow["lisatiedot"];
 			}
-			
+
 			if(mysql_num_rows($sresult) == 0) {
 				echo "<font class = 'error'>".t("VIRHE: Ennakkolaskulla ei ole yhtään jaksotettua tilausriviä!")." $tunnus</font><br>";
 				echo "<font class = 'message'>".t("Käy tekemässä ennakkolasku manuaalisesti. Ennakkolaskulle perustetun laskun tunnus on")." $id</font><br>";
 				echo "<font class = 'message'>".t("Ennakkolaskutuksen tuotenumero on")." $yhtiorow[ennakkomaksu_tuotenumero]</font><br><br>";
 
-				$query  = "	insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values  
+				$query  = "	insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values
 							('0', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now())";
 				$addtil = mysql_query($query) or pupe_error($query);
 			}
@@ -217,7 +217,7 @@
 					// $summa on verollinen tai veroton riippuen yhtiön myyntihinnoista
 					$summa = $row["summa"]/$sumrow["jaksotettavaa"] * $posrow["summa"];
 
-					$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values  
+					$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, laatija, laadittu) values
 								('$summa', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now())";
 					$addtil = mysql_query($query) or pupe_error($query);
 
@@ -270,11 +270,11 @@
 				$row = mysql_fetch_array($stresult);
 				if($row["kaikki"] - ($row["toimitus_valmis"] + $row["rojekti"]) <> 0) {
 					echo "<font class='error'>Laskutussopimuksella on kaikki tilaukset oltava toimitettuna ennen loppulaskutusta.</font><br><br>";
-					return 0;					
+					return 0;
 				}
 				$vikatunnus = $row["vikatunnus"];
 			}
-			
+
 			// tarkistetaan että meillä on jotain järkevää laskutettavaa
 			$query = "	SELECT *
 						FROM maksupositio
@@ -305,16 +305,16 @@
 				echo "<font class='error'>".t("VIRHE: Koitetaan loppulaskuttaa mutta positioita on jäljellä enemmän kuin yksi!")."</font><br><br>";
 				return 0;
 			}
-			
+
 			//	Tarkastetaan että meillä on ok maksuehto loppulaskutukseen!!!
-			$apuqu = "	SELECT * 
-						from maksuehto 
+			$apuqu = "	SELECT *
+						from maksuehto
 						where yhtio='$kukarow[yhtio]' and tunnus='$posrow[maksuehto]' and jaksotettu=''";
 			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
-			
+
 			if(mysql_num_rows($meapu) > 0) {
 				$meapurow = mysql_fetch_array($meapu);
-				
+
 				if($meapurow["erapvmkasin"] != "" and $posrow["erpcm"] == "0000-00-00") {
 					echo "<font class='error'>".t("VIRHE: Loppulaskun maksuehdon eräpäivä puuttuu")."!!!</font><br><br>";
 					return 0;
@@ -322,11 +322,11 @@
 			}
 			else {
 				$apuqu = "	SELECT erpcm
-							from lasku 
+							from lasku
 							where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 				$meapurow = mysql_fetch_array($meapu);
-								
+
 				if($meapurow["erpcm"] == "0000-00-00") {
 					echo "<font class='error'>".t("VIRHE: Loppulaskun eräpäivä puuttuu")."!!!</font><br><br>";
 					return 0;
@@ -344,16 +344,16 @@
 						and lasku.jaksotettu = '".($tunnus*-1)."'
 						GROUP BY alv";
 			$sresult = mysql_query($query) or pupe_error($query);
-			
+
 			//	Haetaan asiakkaan kieli niin hekin ymmärtävät..
 			$query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 			$kielires = mysql_query($query) or pupe_error($query);
 			$kielirow = mysql_fetch_array($kielires);
-			
+
 			if($kielirow["kieli"] == "") {
 				$kielirow["kieli"]="fi";
 			}
-			
+
 			$nimitys 		= t($posrow["kuvaus"], $kielirow["kieli"]);
 			$rivikommentti 	= t("Ennakkolaskutuksen hyvitys", $kielirow["kieli"])." $lahteva_lasku. ";
 
@@ -362,7 +362,7 @@
 			}
 
 			while($row = mysql_fetch_array($sresult)) {
-				
+
 				$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, laatija, laadittu)
 							values  ('$row[laskutettu]', 'N', '-1', '-1', '$vikatunnus', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now(), '$kukarow[kuka]', now(), '$kukarow[kuka]', now())";
 				$addtil = mysql_query($query) or pupe_error($query);
@@ -380,11 +380,11 @@
 			else {
 				$erlisa = "";
 			}
-			
+
 			// Alkuperäinen tilaus/tilaukset menee laskutukseen
 			$query = "	UPDATE lasku
-						SET maksuehto 	= '$posrow[maksuehto]', 
-						clearing 		= 'loppulasku', 
+						SET maksuehto 	= '$posrow[maksuehto]',
+						clearing 		= 'loppulasku',
 						ketjutus 		= 'o',
 						$erlisa
 						alatila 		= 'D'
@@ -392,15 +392,15 @@
 						and jaksotettu 	= '$tunnus'
 						and tila		!= 'R'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			//	Merkataan projekti valmiiksi
 			$query = "	UPDATE lasku
-						SET alatila 	= 'B' 
+						SET alatila 	= 'B'
 						WHERE yhtio 	= '$kukarow[yhtio]'
 						and jaksotettu 	= '$tunnus'
 						and tila		= 'R'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			$query = "	SELECT group_concat(distinct tunnus) tunnukset
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -478,7 +478,7 @@
 						and lasku.jaksotettu > 0
 						and lasku.tila in ('L','N','R','A') and lasku.alatila != 'X'
 						GROUP BY jaksotettu, nimi
-						HAVING yhteensa_kpl > laskutettu_kpl						
+						HAVING yhteensa_kpl > laskutettu_kpl
 						ORDER BY jaksotettu desc";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -532,10 +532,10 @@
 						<td valign='top' align='right'>$row[yhteensa]</td>
 						<td>
 						<table>
-						<tr><td>Osuus:</td><td>$posrow[osuus]%</td></tr>
-						<tr><td>Summa:</td><td>$posrow[summa] $laskurow[valkoodi]</td></tr>
-						<tr><td>Lisätiedot:</td><td>$posrow[lisatiedot]</td></tr>
-						<tr><td>Ohje:</td><td>$posrow[ohje]</td></tr>
+						<tr><td>".t("Osuus").":</td><td>$posrow[osuus]%</td></tr>
+						<tr><td>".t("Summa").":</td><td>$posrow[summa] $laskurow[valkoodi]</td></tr>
+						<tr><td>".t("Lisätiedot").":</td><td>$posrow[lisatiedot]</td></tr>
+						<tr><td>".t("Ohje").":</td><td>$posrow[ohje]</td></tr>
 						</table>";
 
 				// loppulaskutetaan maksusopimus
@@ -554,7 +554,7 @@
 					$tarkrow = mysql_fetch_array($tarkres);
 
 					if ($tarkrow["tilaok"] <> $tarkrow["toimituksia"] or $tarkrow["toimittamatta"] > 0) {
-						echo "<td class='back'><font class='error'>Ei valmis</font></td>";
+						echo "<td class='back'><font class='error'>".t("Ei valmis")."</font></td>";
 					}
 					else {
 						$msg = t("Oletko varma, että haluat LOPPULASKUTTAA tilauksen")." $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: ".t_tunnus_avainsanat($posrow, "teksti", "MAKSUEHTOKV");
@@ -593,7 +593,7 @@
 					echo "</tr>";
 				}
 				else {
-					echo "<td class='back'><font class='error'>Ei valmis</font></td>";
+					echo "<td class='back'><font class='error'>".t("Ei valmis")."</font></td>";
 				}
 			}
 			echo "</table>";

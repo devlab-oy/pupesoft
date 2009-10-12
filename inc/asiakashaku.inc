@@ -4,17 +4,27 @@
 // palautetaan $asiakasrow
 
 if (trim($konserni) != '') {
-	$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-	$result = mysql_query($query) or pupe_error($query);
-	$konsyhtiot = "";
-
-	while ($row = mysql_fetch_array($result)) {
-		$konsyhtiot .= " '".$row["yhtio"]."' ,";
+	if ($konserni == "KONSERNIVARASTO") {
+		if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+			$konsyhtiot = "yhtio in ($konsernivarasto_yhtiot) ";
+		}
+		else {
+			$konsyhtiot = "yhtio = '$kukarow[yhtio]' ";
+		}
 	}
-	$konsyhtiot = " yhtio in (".substr($konsyhtiot, 0, -1).") ";
+	else {
+		$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
+		$result = mysql_query($query) or pupe_error($query);
+		$konsyhtiot = "";
+
+		while ($row = mysql_fetch_array($result)) {
+			$konsyhtiot .= " '".$row["yhtio"]."' ,";
+		}
+		$konsyhtiot = "yhtio in (".substr($konsyhtiot, 0, -1).") ";
+	}
 }
 else {
-	$konsyhtiot = " yhtio = '$kukarow[yhtio]' ";
+	$konsyhtiot = "yhtio = '$kukarow[yhtio]' ";
 }
 
 $ytunnus	 	= addslashes(trim($ytunnus));
@@ -51,10 +61,11 @@ if($kukarow["piirit"] != "")	 {
 }
 
 if (is_numeric($asiakasid) and $asiakasid > 0) {
-	$query	= "	SELECT *
+	$query	= "	SELECT asiakas.*, yhtio.nimi yhtionimi
 				FROM asiakas
-				WHERE $konsyhtiot
-				and tunnus='$asiakasid'
+				JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+				WHERE asiakas.$konsyhtiot
+				and asiakas.tunnus='$asiakasid'
 				$asiakasrajaus";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
@@ -65,9 +76,13 @@ elseif ($ytunnus != '') {
 		// eka merkki pois alusta
 		$ytunnus = substr($ytunnus, 1);
 
-		$query  = "	SELECT *, concat('£', tunnus) tunnus, concat('£', tunnus) ytunnus, ytunnus spec_ytunnus, liitostunnus spec_tunnus
+		$query  = "	SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
+					lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
+					concat('£',lasku.tunnus) ytunnus, concat('£',lasku.tunnus) tunnus, yhtio.nimi yhtionimi
 					FROM lasku
-					WHERE $konsyhtiot and tunnus='$ytunnus'";
+					JOIN yhtio on lasku.yhtio=yhtio.yhtio
+					WHERE lasku.$konsyhtiot
+					and lasku.tunnus = '$ytunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
 	}
@@ -79,10 +94,16 @@ elseif ($ytunnus != '') {
 		$ytunnus = substr($ytunnus, 1);
 
 		// kokeillaan ihan asiakkaan nimellä laskulta
-		$query	= "	SELECT nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, concat('£',max(tunnus)) ytunnus, concat('£',max(tunnus)) tunnus, yhtio
+		$query	= "	SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
+					lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
+					concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi
 					FROM lasku use index (asiakasnimi)
-					WHERE $konsyhtiot and tila != 'D' and match (nimi) against ('$ytunnus*' IN BOOLEAN MODE)
-					group by 1,2,3,4,5 order by 1";
+					JOIN yhtio on lasku.yhtio=yhtio.yhtio
+					WHERE lasku.$konsyhtiot
+					and lasku.tila != 'D'
+					and match (lasku.nimi) against ('$ytunnus*' IN BOOLEAN MODE)
+					GROUP BY 1,2,3,4,5,6,7,8,9,10
+					ORDER BY 1";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
 
@@ -96,37 +117,50 @@ elseif ($ytunnus != '') {
 		$ytunnus = substr($ytunnus, 1);
 
 		// kokeillaan ihan asiakkaan nimellä laskulta
-		$query	= "	SELECT toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, nimi, nimitark, osoite, postino, postitp, concat('£',max(tunnus)) ytunnus, concat('£',max(tunnus)) tunnus, yhtio
+		$query	= "	SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
+					lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
+					concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi
 					FROM lasku use index (asiakastoim_nimi)
-					WHERE $konsyhtiot and tila != 'D' and match (toim_nimi) against ('$ytunnus*' IN BOOLEAN MODE)
-					group by 1,2,3,4,5 order by 1";
+					JOIN yhtio on lasku.yhtio=yhtio.yhtio
+					WHERE lasku.$konsyhtiot
+					and lasku.tila != 'D'
+					and match (lasku.toim_nimi) against ('$ytunnus*' IN BOOLEAN MODE)
+					GROUP BY 1,2,3,4,5,6,7,8,9,10
+					ORDER BY 1";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
 
 		if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
 	}
 
-
 	if ($toim == "TYOMAARAYS") {
-		$query = "	SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, lasku.yhtio
+		$query = "	SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
+					lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
+					concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi
 					FROM lasku
+					JOIN yhtio on lasku.yhtio=yhtio.yhtio
 					JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
-					WHERE lasku.yhtio='$kukarow[yhtio]'
+					WHERE lasku.$konsyhtiot
 					and lasku.tila in ('A','L','N')
 					and tyomaarays.rekno = '$ytunnus'
-					group by 1,2,3,4,5 order by 1
+					GROUP BY 1,2,3,4,5,6,7,8,9,10
+					ORDER BY 1
 					LIMIT 50";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
 
 		if ($monta == 0) {
-			$query = "	SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, lasku.yhtio
+			$query = "	SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
+						lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
+						concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi
 						FROM lasku
+						JOIN yhtio on lasku.yhtio=yhtio.yhtio
 						JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
-						WHERE lasku.yhtio='$kukarow[yhtio]'
+						WHERE lasku.$konsyhtiot
 						and lasku.tila in ('A','L','N')
 						and tyomaarays.valmnro = '$ytunnus'
-						group by 1,2,3,4,5 order by 1
+						GROUP BY 1,2,3,4,5,6,7,8,9,10
+						ORDER BY 1
 						LIMIT 50";
 			$result = mysql_query($query) or pupe_error($query);
 			$monta  = mysql_num_rows($result);
@@ -135,13 +169,37 @@ elseif ($ytunnus != '') {
 
 	if ($monta == 0) {
 		// exactihaku
-		$query	= "	(SELECT * FROM asiakas use index (ytunnus_index) WHERE $konsyhtiot and ytunnus = '$ytunnus' and ytunnus!='' $lajilisa $asiakasrajaus)
+		$query	= "	(SELECT asiakas.*, yhtio.nimi yhtionimi
+						FROM asiakas
+						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+						WHERE asiakas.$konsyhtiot
+						and asiakas.ytunnus = '$ytunnus'
+						and asiakas.ytunnus!=''
+						$lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (asno_index) WHERE $konsyhtiot and asiakasnro = '$ytunnus' and asiakasnro!=0 $lajilisa $asiakasrajaus)
+					(SELECT asiakas.*, yhtio.nimi yhtionimi
+						FROM asiakas
+						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+						WHERE asiakas.$konsyhtiot
+						and asiakas.asiakasnro = '$ytunnus'
+						and asiakas.asiakasnro!=0
+						$lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus = '$ytunnus' and ovttunnus!='' $lajilisa $asiakasrajaus)
+					(SELECT asiakas.*, yhtio.nimi yhtionimi
+						FROM asiakas
+						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+						WHERE asiakas.$konsyhtiot
+						and asiakas.ovttunnus = '$ytunnus'
+						and asiakas.ovttunnus!=''
+						$lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (toim_ovttunnus_index) WHERE $konsyhtiot and toim_ovttunnus = '$ytunnus' and toim_ovttunnus!='' $lajilisa $asiakasrajaus)
+					(SELECT asiakas.*, yhtio.nimi yhtionimi
+						FROM asiakas
+						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+						WHERE asiakas.$konsyhtiot
+						and asiakas.toim_ovttunnus = '$ytunnus'
+						and asiakas.toim_ovttunnus!=''
+						$lajilisa $asiakasrajaus)
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
@@ -149,11 +207,12 @@ elseif ($ytunnus != '') {
 
 	if ($monta == 0) {
 		// kokeillaan ytunnuksen alulla
-		$query	= "	SELECT *
-					FROM asiakas use index (ytunnus_index)
-					WHERE $konsyhtiot
-					and ytunnus like '$ytunnus%'
-					and ytunnus!=''
+		$query	= "	SELECT asiakas.*, yhtio.nimi yhtionimi
+					FROM asiakas
+					JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+					WHERE asiakas.$konsyhtiot
+					and asiakas.ytunnus like '$ytunnus%'
+					and asiakas.ytunnus!=''
 					$lajilisa
 					$asiakasrajaus
 					ORDER BY asiakas.nimi";
@@ -163,26 +222,65 @@ elseif ($ytunnus != '') {
 
 	if ($monta == 0 and is_string($ytunnus)) {
 		// arvailuhaku
-		$query	= "	(SELECT * FROM asiakas use index (asiakasnimi) WHERE $konsyhtiot and nimi like '%$ytunnus%' and nimi!='' $lajilisa $asiakasrajaus)
+		$query	= "	(SELECT asiakas.*, yhtio.nimi yhtionimi
+						FROM asiakas
+						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+						WHERE asiakas.$konsyhtiot
+						and asiakas.nimi like '%$ytunnus%'
+						and asiakas.nimi!=''
+						$lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (asiakasnimitark) WHERE $konsyhtiot and nimitark like '%$ytunnus%' and nimitark!='' $lajilisa $asiakasrajaus)
+					(SELECT asiakas.*, yhtio.nimi yhtionimi
+						FROM asiakas
+						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+						WHERE asiakas.$konsyhtiot
+						and asiakas.nimitark like '%$ytunnus%'
+						and asiakas.nimitark!=''
+						$lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (asiakastoim_nimi) WHERE $konsyhtiot and toim_nimi like '%$ytunnus%' and toim_nimi!='' $lajilisa $asiakasrajaus)
+					(SELECT asiakas.*, yhtio.nimi yhtionimi
+						FROM asiakas
+						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+						WHERE asiakas.$konsyhtiot
+						and asiakas.toim_nimi like '%$ytunnus%'
+						and asiakas.toim_nimi!=''
+						$lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (asiakastoim_nimitark) WHERE $konsyhtiot and toim_nimitark like '%$ytunnus%' and toim_nimitark!='' $lajilisa $asiakasrajaus)
+					(SELECT asiakas.*, yhtio.nimi yhtionimi
+						FROM asiakas
+						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+						WHERE asiakas.$konsyhtiot
+						and asiakas.toim_nimitark like '%$ytunnus%'
+						and asiakas.toim_nimitark!=''
+						$lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus like '%$ytunnus%' and ovttunnus!='' $lajilisa $asiakasrajaus)
+					(SELECT asiakas.*, yhtio.nimi yhtionimi
+						FROM asiakas
+						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+						WHERE asiakas.$konsyhtiot
+						and asiakas.ovttunnus like '%$ytunnus%'
+						and asiakas.ovttunnus!=''
+						$lajilisa $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas WHERE $konsyhtiot and postitp like '%$ytunnus%' and postitp!='' $lajilisa $asiakasrajaus)
+					(SELECT asiakas.*, yhtio.nimi yhtionimi
+						FROM asiakas
+						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+						WHERE asiakas.$konsyhtiot
+						and asiakas.postitp like '%$ytunnus%'
+						and asiakas.postitp!=''
+						$lajilisa $asiakasrajaus)
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
 	}
 }
 elseif ($asiakasnro != '') {
-	$query = "	SELECT *
+	$query = "	SELECT asiakas.*, yhtio.nimi yhtionimi
 				FROM asiakas
-				WHERE $konsyhtiot AND asiakasnro='$asiakasnro' $asiakasrajaus";
+				JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+				WHERE asiakas.$konsyhtiot
+		 		AND asiakas.asiakasnro='$asiakasnro'
+				$asiakasrajaus";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
 }
@@ -261,6 +359,7 @@ if ($monta == 0) {
 	}
 
 	echo "<br><br>";
+
 	$ytunnus = "";
 	$asiakasnro = "";
 }
@@ -283,17 +382,17 @@ if ($monta > 1 and $monta <= $limit) {
 		echo $lause;
 
 		echo "<table border='0'>";
-		echo "<tr class='aktiivi'>
-				<th>".t("ytunnus")."</th>
-				<th>".t("asnro")."</th>
-				<th>".t("lasknimi/toimnimi")."</th>
-				<th colspan='3'>".t("laskosoite/toimosoite")."</th>";
+		echo "<tr class='aktiivi'>";
 
 		if ($konserni != '') {
 			echo "<th>".t("yhtiö")."</th>";
 		}
 
-		echo "<td class='back'></td></tr>";
+		echo "<th>".t("ytunnus")."</th>
+				<th>".t("asnro")."</th>
+				<th>".t("lasknimi/toimnimi")."</th>
+				<th colspan='3'>".t("laskosoite/toimosoite")."</th>
+				<td class='back'></td></tr>";
 	}
 
 	while ($asiakas = mysql_fetch_array($result)) {
@@ -327,18 +426,18 @@ if ($monta > 1 and $monta <= $limit) {
 				$brpostitp = '<br>'.$asiakas['toim_postitp'];
 			}
 
-			echo "<tr class='aktiivi'>
-					<td>$asiakas[ytunnus]</td>
+			echo "<tr class='aktiivi'>";
+
+			if ($konserni != '') {
+				echo "<td>$asiakas[yhtionimi]</td>";
+			}
+
+			echo "<td>$asiakas[ytunnus]</td>
 					<td>$asiakas[asiakasnro]</td>
 					<td>$asiakas[nimi] $asiakas[nimitark] $brnim</td>
 					<td>$asiakas[osoite] $bros</td>
 					<td>$asiakas[postino] $brpostino</td>
 					<td>$asiakas[postitp] $brpostitp</td>";
-
-
-			if ($konserni != '') {
-				echo "<td>$asiakas[yhtio]</td>";
-			}
 
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<td class='back'>";

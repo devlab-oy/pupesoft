@@ -325,7 +325,7 @@ if ($kollityht > 0) {
 		$shipmentactualweight			= $shipmentinformation->addChild('ShipmentActualWeight', round($ups_rakirow['kilot'], 1)); // max 12,1 merkkiä, R  // Unless it is an ENVELOP
 		$shipmentdimensionalweight 		= $shipmentinformation->addChild('ShipmentDimensionalWeight', ''); // max 12,1 merkkiä, O
 		$descriptionofgoods				= $shipmentinformation->addChild('DescriptionOfGoods', substr($ups_rakirow['pakkauskuvaustark'], 0, 50)); // max 50 merkkiä, C
-		$reference1						= $shipmentinformation->addChild('Reference1', ''); // max 35 merkkiä, O
+		$reference1						= $shipmentinformation->addChild('Reference1', $ups_laskurow['laskutunnus']); // max 35 merkkiä, O
 		$reference2						= $shipmentinformation->addChild('Reference2', ''); // max 35 merkkiä, O
 		$reference3						= $shipmentinformation->addChild('Reference3', ''); // max 35 merkkiä, O
 		$reference4						= $shipmentinformation->addChild('Reference4', ''); // max 35 merkkiä, O

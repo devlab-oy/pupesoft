@@ -2851,79 +2851,9 @@ if ($tee == '') {
 			}
 		}
 
-		foreach($tuoteno_array as $tuoteno) {
+		foreach ($tuoteno_array as $tuoteno) {
 
 			$tuoteno = trim($tuoteno);
-
-			$query	= "	SELECT *
-						from tuote
-						where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($result) > 0) {
-				//Tuote löytyi
-				$trow = mysql_fetch_array($result);
-
-				//extranettajille ei myydä tuotteita joilla ei ole myyntihintaa
-				if ($kukarow["extranet"] != '' and $trow["myyntihinta"] == 0) {
-					$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
-					$trow 	 = "";
-					$tuoteno = "";
-					$kpl	 = 0;
-				}
-				elseif ($kukarow["extranet"] != '' and trim($trow["vienti"]) != '') {
-
-					// vientikieltokäsittely:
-					// +maa tarkoittaa että myynti on kielletty tähän maahan
-					// -maa tarkoittaa että ainoastaan tähän maahan saa myydä
-					// eli näytetään vaan tuotteet jossa vienti kentässä on tyhjää tai -maa.. ja se ei saa olla +maa
-
-					if (strpos(strtoupper($trow["vienti"]), strtoupper("+$laskurow[toim_maa]")) !== FALSE and strpos($trow["vienti"], "+") !== FALSE) {
-						//ei saa myydä tähän maahan
-						$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
-				 		$trow 	 = "";
-						$tuoteno = "";
-						$kpl	 = 0;
-						$kielletty++;
-					}
-
-					if (strpos(strtoupper($trow["vienti"]), strtoupper("-$laskurow[toim_maa]")) === FALSE and strpos($trow["vienti"], "-") !== FALSE) {
-						//ei saa myydä tähän maahan
-						$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
-				 		$trow 	 = "";
-						$tuoteno = "";
-						$kpl	 = 0;
-						$kielletty++;
-					}
-				}
-				elseif ($trow['hinnastoon'] == 'V' and $toim != "SIIRTOLISTA" and $toim != 'VALMISTAVARASTOON') {
-					//	katsotaan löytyyko asiakasalennus / asikakashinta
-					$hinnat = alehinta($laskurow, $trow, 1, '', '', '',"hintaperuste,aleperuste");
-
-					if (($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] == false) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] == false)) {
-						if ($kukarow['extranet'] != '') {
-							$varaosavirhe .= t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
-						}
-						else {
-							$varaosavirhe .= t("VIRHE: Tuotetta ei saa myydä tälle asiakkaalle!")."<br>";
-						}
-						$trow 	 = "";
-						$tuoteno = "";
-						$kpl	 = 0;
-						$kielletty++;
-					}
-				}
-			}
-			elseif ($kukarow["extranet"] != '') {
-				$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
-				$tuoteno = "";
-				$kpl	 = 0;
-			}
-			else {
-				//Tuotetta ei löydy, aravataan muutamia muuttujia
-				$trow["alv"] = $laskurow["alv"];
-			}
-
 
 			if (checkdate($toimkka,$toimppa,$toimvva)) {
 				$toimaika = $toimvva."-".$toimkka."-".$toimppa;
@@ -3013,6 +2943,78 @@ if ($tee == '') {
 
 			if (isset($kommentti_array[$tuoteno])) {
 				$kommentti = $kommentti_array[$tuoteno];
+			}
+
+			$query	= "	SELECT *
+						from tuote
+						where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) > 0) {
+				//Tuote löytyi
+				$trow = mysql_fetch_array($result);
+
+				//extranettajille ei myydä tuotteita joilla ei ole myyntihintaa
+				if ($kukarow["extranet"] != '' and $trow["myyntihinta"] == 0) {
+					$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
+					$trow 	 = "";
+					$tuoteno = "";
+					$kpl	 = 0;
+				}
+				
+				if ($kukarow["extranet"] != '' and trim($trow["vienti"]) != '') {
+
+					// vientikieltokäsittely:
+					// +maa tarkoittaa että myynti on kielletty tähän maahan
+					// -maa tarkoittaa että ainoastaan tähän maahan saa myydä
+					// eli näytetään vaan tuotteet jossa vienti kentässä on tyhjää tai -maa.. ja se ei saa olla +maa
+
+					if (strpos(strtoupper($trow["vienti"]), strtoupper("+$laskurow[toim_maa]")) !== FALSE and strpos($trow["vienti"], "+") !== FALSE) {
+						//ei saa myydä tähän maahan
+						$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
+				 		$trow 	 = "";
+						$tuoteno = "";
+						$kpl	 = 0;
+						$kielletty++;
+					}
+
+					if (strpos(strtoupper($trow["vienti"]), strtoupper("-$laskurow[toim_maa]")) === FALSE and strpos($trow["vienti"], "-") !== FALSE) {
+						//ei saa myydä tähän maahan
+						$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
+				 		$trow 	 = "";
+						$tuoteno = "";
+						$kpl	 = 0;
+						$kielletty++;
+					}
+				}
+				
+				if ($trow['hinnastoon'] == 'V' and $toim != "SIIRTOLISTA" and $toim != 'VALMISTAVARASTOON') {
+					//	katsotaan löytyyko asiakasalennus / asikakashinta
+					$hinnat = alehinta($laskurow, $trow, $kpl, '', '', '',"hintaperuste,aleperuste");
+										
+					if (($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] === FALSE)) {
+						if ($kukarow['extranet'] != '') {
+							$varaosavirhe .= t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
+						}
+						else {
+							$varaosavirhe .= t("VIRHE: Tuotetta ei saa myydä tälle asiakkaalle!")."<br>";
+						}
+						
+						$trow 	 = "";
+						$tuoteno = "";
+						$kpl	 = 0;
+						$kielletty++;
+					}
+				}
+			}
+			elseif ($kukarow["extranet"] != '') {
+				$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
+				$tuoteno = "";
+				$kpl	 = 0;
+			}
+			else {
+				//Tuotetta ei löydy, aravataan muutamia muuttujia
+				$trow["alv"] = $laskurow["alv"];
 			}
 
 			if ($tuoteno != '' and $kpl != 0) {

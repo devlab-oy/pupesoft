@@ -15,6 +15,14 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 	exit;
 }
 
+// Livesearch jutut
+enable_ajax();
+
+if ($livesearch_tee == "TILIHAKU") {
+	livesearch_tilihaku();
+	exit;
+}
+
 if ($excel == "YES") {
 	if (include('Spreadsheet/Excel/Writer.php')) {
 
@@ -30,7 +38,7 @@ if ($excel == "YES") {
 		$format_bold =& $workbook->addFormat();
 		$format_bold->setBold();
 
-		$excelrivi = 0;		
+		$excelrivi = 0;
 	}
 }
 

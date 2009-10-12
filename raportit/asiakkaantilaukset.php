@@ -333,13 +333,6 @@
 				<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr></form></table>";
 
-		if ($jarj != '') {
-			$jarj = "ORDER BY $jarj";
-		}
-		else {
-			$jarj = "ORDER BY lasku.laskunro desc, lasku.tunnus asc";
-		}
-
 		if ($cleantoim == 'OSTO') {
 			$litunn = $toimittajaid;
 		}
@@ -353,10 +346,24 @@
 		if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
 			$yhtioekolisa = "yhtio.nimi, ";
 			$yhtioekojoin = "JOIN yhtio on lasku.yhtio=yhtio.yhtio ";
+			
+			if ($jarj != '') {
+				$jarj = "ORDER BY $jarj";
+			}
+			else {
+				$jarj = "ORDER BY 3 desc, 2 asc";
+			}
 		}
 		else {
 			$yhtioekolisa = "";
 			$yhtioekojoin = "";
+			
+			if ($jarj != '') {
+				$jarj = "ORDER BY $jarj";
+			}
+			else {
+				$jarj = "ORDER BY 2 desc, 1 asc";
+			}
 		}
 
 		if ($otunnus > 0 or $laskunro > 0 or $sopimus > 0) {

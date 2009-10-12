@@ -107,7 +107,7 @@ if ($kollityht > 0) {
 
 		// SHIP TO
 		$shipto						= $xml->OpenShipment->addChild('ShipTo');
-		$customerid 				= $shipto->addChild('CustomerID', $ups_laskurow['ytunnus']); // max 35 merkkiä, R
+//		$customerid 				= $shipto->addChild('CustomerID', $ups_laskurow['ytunnus']); // max 35 merkkiä, R
 		$companyorname 				= $shipto->addChild('CompanyOrName', utf8_encode($ups_laskurow['nimi'])); // max 35 merkkiä, R
 
 		if ($ups_laskurow['vienti'] != '') {
@@ -355,7 +355,7 @@ if ($kollityht > 0) {
 		WorldEase	WorldEase will allow all billing options except Consignee billing.
 		******************************************************************************/
 
-		$billingoption			= $shipmentinformation->addChild('BillingOption', 'PP'); // max 3 merkkiä, R
+//			$billingoption			= $shipmentinformation->addChild('BillingOption', 'PP'); // max 3 merkkiä, R
 
 		/******************************************************************************
 		Bill Transportation To
@@ -368,7 +368,7 @@ if ($kollityht > 0) {
 		******************************************************************************/
 		// rahtikirjan merahti == '' --> vastaanottaja maksaa, K = lähettäjä maksaa
 		$rahdinmaksaja 			= $ups_rakirow['merahti'] == 'K' ? 'SHP' : 'REC';
-		$billtransportationto	= $shipmentinformation->addChild('BillTransportationTo', $rahdinmaksaja); // max 3 merkkiä, C
+		$billtransportationto	= $shipmentinformation->addChild('BillTransportationTo', "$rahdinmaksaja"); // max 3 merkkiä, C
 
 		/******************************************************************************
 		Bill Duty & Tax To
@@ -382,7 +382,7 @@ if ($kollityht > 0) {
 		******************************************************************************/
 		// jos vienti != '' --> vastaanottaja maksaa veron, muuten lähettäjä
 		$vienninmaksaja 	= $ups_laskurow['vienti'] == '' ? 'SHP' : 'REC';
-		$billdutytaxto		= $shipmentinformation->addChild('BillDutyTaxTo', $vienninmaksaja);
+		$billdutytaxto		= $shipmentinformation->addChild('BillDutyTaxTo', "$vienninmaksaja");
 
 		/******************************************************************************
 		Split Duty & Tax To
@@ -394,9 +394,9 @@ if ($kollityht > 0) {
 		WorldEase	When Split Duty and Tax is selected for Master Shipment, WS 10.0
 		will translate the code and print the label Bill Transportation and Duty Tax To.
 		******************************************************************************/
-		$splitdutyandtax	= $shipmentinformation->addChild('SplitDutyAndTax', ''); // 1 merkki, C
-		$saturdaydelivery	= $shipmentinformation->addChild('SaturdayDelivery', ''); // max 2 merkkiä, O    // Note: Leave out if this accessorial is not used.
-		$saturdaypickup		= $shipmentinformation->addChild('SaturdayPickUp', ''); // max 2 merkkiä, O
+//		$splitdutyandtax	= $shipmentinformation->addChild('SplitDutyAndTax', ''); // 1 merkki, C
+//		$saturdaydelivery	= $shipmentinformation->addChild('SaturdayDelivery', ''); // max 2 merkkiä, O    // Note: Leave out if this accessorial is not used.
+//		$saturdaypickup		= $shipmentinformation->addChild('SaturdayPickUp', ''); // max 2 merkkiä, O
 
 		// Declared Value
 //		$declaredvalue	= $shipmentinformation->addChild('DeclaredValue');
@@ -419,8 +419,9 @@ if ($kollityht > 0) {
 
 //		$returnofdocument = $shipmentinformation->addChild('ReturnOfDocument', ''); // 1 merkki, C  // poland only
 
+
 		// QVN Option
-		$qvnoption							= $shipmentinformation->addChild('QVNOption');
+//		$qvnoption							= $shipmentinformation->addChild('QVNOption');
 
 		/*
 		// vastaanottaja
@@ -431,7 +432,6 @@ if ($kollityht > 0) {
 		$ship								= $qvnrecipientandnotificationtypes->addChild('Ship', ''); // ??
 		$exception							= $qvnrecipientandnotificationtypes->addChild('Exception', ''); // ??
 		$delivery							= $qvnrecipientandnotificationtypes->addChild('Delivery', ''); // ??
-		*/
 
 		// lähettäjä
 		$qvnrecipientandnotificationtypes2 	= $qvnoption->addChild('QVNRecipientAndNotificationTypes');
@@ -444,6 +444,7 @@ if ($kollityht > 0) {
 
 		$shipfromcompanyorname				= $qvnoption->addChild('ShipFromCompanyOrName', $ups_laskurow['yhtio_nimi']);
 		$failedemailaddress					= $qvnoption->addChild('FailedEMailAddress', substr($yhtiorow['postittaja_email'], 0, 50));
+		*/
 
 		/******************************************************************************
 		Subject Line Options
@@ -452,8 +453,8 @@ if ($kollityht > 0) {
 		1				Reference 1
 		2				Reference 2
 		******************************************************************************/
-		$subjectline						= $qvnoption->addChild('SubjectLine', ''); // max 75 merkkiä, R
-		$memo								= $qvnoption->addChild('Memo', substr('', 0, 150));
+//		$subjectline						= $qvnoption->addChild('SubjectLine', ''); // max 75 merkkiä, R
+//		$memo								= $qvnoption->addChild('Memo', substr('', 0, 150));
 
 		/*
 		// Special Commodities (if selected, you must choose at least one element)

@@ -8,7 +8,7 @@
 		$logistiikka_yhtio = '';
 		$logistiikka_yhtiolisa = '';
 		$lasku_yhtio_originaali = $kukarow['yhtio'];
-		$konserni = "OK";
+		$konserni = "KONSERNIVARASTO";
 
 		if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
 			$logistiikka_yhtio = $konsernivarasto_yhtiot;

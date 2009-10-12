@@ -597,7 +597,7 @@
 		$sel[$tuvarasto] = "SELECTED";
 		while ($row = mysql_fetch_array($result)){
 			if ($row['tulostusalue'] != '') {
-				echo "<option value='$row[tunnus]##$row[tulostusalue]' ".$sel[$row['tunnus']."##".$row['tulostusalue']].">$row[nimitys] ($row[kpl]) $row[tulostusalue]";
+				echo "<option value='$row[tunnus]##$row[tulostusalue]' ".$sel[$row['tunnus']."##".$row['tulostusalue']].">$row[nimitys] $row[tulostusalue] ($row[kpl])";
 				if ($logistiikka_yhtio != '') {
 					echo " ($row[yhtio])";
 				}

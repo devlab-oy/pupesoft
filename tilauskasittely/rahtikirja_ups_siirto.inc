@@ -110,28 +110,32 @@ if ($kollityht > 0) {
 //		$customerid 				= $shipto->addChild('CustomerID', $ups_laskurow['ytunnus']); // max 35 merkkiä, R
 		$companyorname 				= $shipto->addChild('CompanyOrName', utf8_encode($ups_laskurow['nimi'])); // max 35 merkkiä, R
 
-		if ($ups_laskurow['vienti'] != '') {
-			if ($ups_laskurow['yhteyshenkilo_kaupallinen'] != '') {
-				$query = "	SELECT *
-							FROM yhteyshenkilo
-							WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$ups_laskurow['yhteyshenkilo_kaupallinen']}'";
-				$yhteyshenkilo_kaupallinen_res = mysql_query($query) or pupe_error($query);
-				$yhteyshenkilo_kaupallinen_row = mysql_fetch_assoc($yhteyshenkilo_kaupallinen_res);
-				$attention = $shipto->addChild('Attention', substr(utf8_encode($yhteyshenkilo_kaupallinen_row['nimi']), 0, 35)); // max 35 merkkiä, R (riippuu maasta)
+		if ($ups_laskurow['yhteyshenkilo_kaupallinen'] != '') {
+			$query = "	SELECT *
+						FROM yhteyshenkilo
+						WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$ups_laskurow['yhteyshenkilo_kaupallinen']}'";
+			$yhteyshenkilo_kaupallinen_res = mysql_query($query) or pupe_error($query);
+			$yhteyshenkilo_kaupallinen_row = mysql_fetch_assoc($yhteyshenkilo_kaupallinen_res);
+			if ($yhteyshenkilo_kaupallinen_row['nimi'] == '') {
+				$yhteyshenkilo_kaupallinen_row['nimi'] = '.';
 			}
-			elseif ($ups_laskurow['yhteyshenkilo_tekninen'] != '') {
-				$query = "	SELECT *
-							FROM yhteyshenkilo
-							WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$ups_laskurow['yhteyshenkilo_tekninen']}'";
-				$yhteyshenkilo_tekninen_res = mysql_query($query) or pupe_error($query);
-				$yhteyshenkilo_tekninen_row = mysql_fetch_assoc($yhteyshenkilo_tekninen_res);
-				$attention = $shipto->addChild('Attention', substr(utf8_encode($yhteyshenkilo_tekninen_row['nimi']), 0, 35)); // max 35 merkkiä, R (riippuu maasta)
+			$attention = $shipto->addChild('Attention', substr(utf8_encode($yhteyshenkilo_kaupallinen_row['nimi']), 0, 35)); // max 35 merkkiä, R (riippuu maasta)
+		}
+		elseif ($ups_laskurow['yhteyshenkilo_tekninen'] != '') {
+			$query = "	SELECT *
+						FROM yhteyshenkilo
+						WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$ups_laskurow['yhteyshenkilo_tekninen']}'";
+			$yhteyshenkilo_tekninen_res = mysql_query($query) or pupe_error($query);
+			$yhteyshenkilo_tekninen_row = mysql_fetch_assoc($yhteyshenkilo_tekninen_res);
+			if ($yhteyshenkilo_tekninen_row['nimi'] == '') {
+				$yhteyshenkilo_tekninen_row['nimi'] = '.';
 			}
-			else {
-				$attention = $shipto->addChild('Attention', '.'); // max 35 merkkiä, R (riippuu maasta)
-			}
+			$attention = $shipto->addChild('Attention', substr(utf8_encode($yhteyshenkilo_tekninen_row['nimi']), 0, 35)); // max 35 merkkiä, R (riippuu maasta)
+		}
+		else {
+			$attention = $shipto->addChild('Attention', '.'); // max 35 merkkiä, R (riippuu maasta)
 		}
 
 		$address1					= $shipto->addChild('Address1', utf8_encode($ups_laskurow['osoite'])); // max 35 merkkiä, R

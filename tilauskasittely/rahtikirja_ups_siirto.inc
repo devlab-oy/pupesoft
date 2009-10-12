@@ -385,7 +385,8 @@ if ($kollityht > 0) {
 		Tax of the Master Shipment.
 		******************************************************************************/
 		// jos vienti != '' --> vastaanottaja maksaa veron, muuten lähettäjä
-		$vienninmaksaja 	= $ups_laskurow['vienti'] == '' ? 'SHP' : 'REC';
+//		$vienninmaksaja 	= $ups_laskurow['vienti'] == '' ? 'SHP' : 'REC';
+		$vienninmaksaja		= 'REC'; // pakko kovakoodaa
 		$billdutytaxto		= $shipmentinformation->addChild('BillDutyTaxTo', "$vienninmaksaja");
 
 		/******************************************************************************

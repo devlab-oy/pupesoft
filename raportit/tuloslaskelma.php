@@ -39,6 +39,11 @@
 			}
 		}
 
+		// Jotta saadaan arrays lopetusmuuttujassa oikein
+		if (isset($mul_kohde_seri)) $mul_kohde = unserialize(base64_decode($mul_kohde_seri));
+		if (isset($mul_proj_seri))  $mul_proj  = unserialize(base64_decode($mul_proj_seri));
+		if (isset($mul_kustp_seri)) $mul_kustp = unserialize(base64_decode($mul_kustp_seri));
+
 		if ($tltee == "aja") {
 
 			// Desimaalit
@@ -137,6 +142,9 @@
 
 
 		if ($tltee == "aja") {
+
+			$lopelinkki = "&lopetus=$PHP_SELF////tltee=$tltee//toim=$toim//tyyppi=$tyyppi//plvv=$plvv//plvk=$plvk//plvp=$plvp//alvv=$alvv//alvk=$alvk//alvp=$alvp//tkausi=$tkausi//mul_kustp_seri=".base64_encode(serialize($mul_kustp))."//mul_kohde_seri=".base64_encode(serialize($mul_kohde))."//mul_proj_seri=".base64_encode(serialize($mul_proj))."//rtaso=$rtaso//tarkkuus=$tarkkuus//desi=$desi//kaikkikaudet=$kaikkikaudet//eiyhteensa=$eiyhteensa//vertailued=$vertailued//vertailubu=$vertailubu";
+
 			$startmonth	= date("Ymd",   mktime(0, 0, 0, $plvk, 1, $plvv));
 			$endmonth 	= date("Ymd",   mktime(0, 0, 0, $alvk, 1, $alvv));
 
@@ -518,7 +526,7 @@
 									$tilirivi .= "<td class='back' nowrap><input type='checkbox' name='tiliarray[]' value=\"'$tilirow[tilino]'\"></td>";
 								}
 								$tilirivi .= "<td nowrap>";
-								$tilirivi .= "<a href ='../raportit.php?toim=paakirja&tee=P&mista=tuloslaskelma&alvv=$alvv&alvk=$alvk&kohde=".base64_encode(serialize($mul_kohde))."&proj=".base64_encode(serialize($mul_proj))."&kustp=".base64_encode(serialize($mul_kustp))."&tili=$tilirow[tilino]'>$tilirow[tilino] - $tilirow[nimi]";
+								$tilirivi .= "<a href ='../raportit.php?toim=paakirja&tee=P&mista=tuloslaskelma&alvv=$alvv&alvk=$alvk&mul_kustp_seri=".base64_encode(serialize($mul_kustp))."&mul_kohde_seri=".base64_encode(serialize($mul_kohde))."&mul_proj_seri=".base64_encode(serialize($mul_proj))."&tili=$tilirow[tilino]$lopelinkki'>$tilirow[tilino] - $tilirow[nimi]</a>";
 								$tilirivi .= "</td>$tilirivi2</tr>";
 							}
 						}

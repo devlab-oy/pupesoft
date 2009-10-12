@@ -156,15 +156,16 @@ if ($kollityht > 0) {
 //		$residentialindicator		= $shipto->addChild('ResidentialIndicator', ''); // 1 merkki, O
 
 		// SHIP FROM
+		// laitetaan veikkolan varaston tiedot
 		$shipfrom					= $xml->OpenShipment->addChild('ShipFrom');
 		$customerid 				= $shipfrom->addChild('CustomerID', $yhtiorow['ytunnus']); // max 35 merkkiä, R
 		$companyorname 				= $shipfrom->addChild('CompanyOrName', utf8_encode($yhtiorow['nimi'])); // max 35 merkkiä, R
 		$attention 					= $shipfrom->addChild('Attention', substr('.', 0, 35)); // max 35 merkkiä, R (riippuu maasta)
-		$address1					= $shipfrom->addChild('Address1', utf8_encode($yhtiorow['osoite'])); // max 35 merkkiä, R
+		$address1					= $shipfrom->addChild('Address1', "Teollisuustie 8-10"); // max 35 merkkiä, R
 		$countryterritory 			= $shipfrom->addChild('CountryTerritory', $yhtiorow['maa']); // max 30 merkkiä, R
-		$postalcode					= $shipfrom->addChild('PostalCode', $yhtiorow['postino']); // max 9 merkkiä, C (riippuu maasta)
-		$cityortown					= $shipfrom->addChild('CityOrTown', utf8_encode($yhtiorow['postitp'])); // max 30 merkkiä, R
-		$telephone					= $shipfrom->addChild('Telephone', $yhtiorow['puhelin']); // max 15 merkkiä, C
+		$postalcode					= $shipfrom->addChild('PostalCode', "02880"); // max 9 merkkiä, C (riippuu maasta)
+		$cityortown					= $shipfrom->addChild('CityOrTown', "Veikkola"); // max 30 merkkiä, R
+		$telephone					= $shipfrom->addChild('Telephone', "020 7188 450"); // max 15 merkkiä, C
 //		$address2					= $shipfrom->addChild('Address2', ''); // max 35 merkkiä, O
 //		$address3					= $shipfrom->addChild('Address3', ''); // max 35 merkkiä, O
 //		$stateprovincecounty 		= $shipfrom->addChild('StateProvinceCounty', ''); // max 5 merkkiä, C (tarvitaan vain US & CA tapauksissa)

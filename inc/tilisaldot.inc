@@ -6,7 +6,6 @@
 		$tee = "";
 	}
 
-
 	if ($tee == '1') {
 		if ($tilino != '') {
 			$query = "	SELECT nimi
@@ -55,7 +54,7 @@
 			$wher = " and tapvm <= '$alvy-$alvm-$alvd'";
 		}
 		else {
-			$lisa	= " count(*) Vientej‰, sum(summa) Saldo";
+			$lisa = " count(*) Vientej‰, sum(summa) Saldo";
 		}
 
 		if ($tilino != '') {
@@ -131,24 +130,26 @@
 			if ($tilino == '' or $trow['Vientej‰'] > 0) {
 				echo "<tr>";
 
+				$lopelink = "&lopetus=$PHP_SELF////toim=tilisaldot//tee=$tee//tkausi=$tkausi//alvk=$alvk//tilino=$tilino//ajarappari=$ajarappari";
+
 				if ($tilino != '') {
-					echo "<td><a href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]&alvv=".substr($trow["tapvm"], 0,4)."&alvk=".substr($trow["tapvm"],5,2)."&alvp=".substr($trow["tapvm"],-2)."'>".tv1dateconv($trow["tapvm"])."</a></td>";
+					echo "<td><a href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]&alvv=".substr($trow["tapvm"], 0,4)."&alvk=".substr($trow["tapvm"],5,2)."&alvp=".substr($trow["tapvm"],-2)."$lopelink'>".tv1dateconv($trow["tapvm"])."</a></td>";
 				}
-				
-				if($alvk != "") {
-					$linkkilisa = "&alvv=".substr($alvk, 0,4)."&alvk=".substr($alvk, 4,2)."";
+
+				if ($alvk != "") {
+					$linkkilisa = "&alvv=".substr($alvk, 0,4)."&alvk=".substr($alvk, 4,2);
 				}
 				else {
-					$linkkilisa = "tkausi=$tkausi&";
+					$linkkilisa = "&tkausi=$tkausi";
 				}
-				
-				echo "<td><a href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]&$linkkilisa'>$trow[tilino]</a></td>";
+
+				echo "<td><a href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]$linkkilisa$lopelink'>$trow[tilino]</a></td>";
 				echo "<td>$trow[nimi]</td>";
 				echo "<td>$trow[Vientej‰]</td>";
 				echo "<td align='right'>$trow[Saldo]</td>";
 
 				if ($tilino != '') {
-					echo "<td align='right'>$summa</td>";
+					echo "<td align='right'>".sprintf('%.2f', $summa)."</td>";
 					$summa3 = $summa;
 				}
 				else {
@@ -176,6 +177,7 @@
 				$summa_val_result = mysql_query($query) or pupe_error($query);
 
 				echo "<td align='right'>";
+
 				while ($summa_val_row = mysql_fetch_array($summa_val_result)) {
 					echo "$summa_val_row[summa_val] $summa_val_row[valkoodi]<br/>";
 					$summa_valuutassa[$summa_val_row['valkoodi']] += $summa_val_row['summa_val'];
@@ -223,75 +225,75 @@
 			$cspan = 3;
 		}
 
-		echo "<td class='tumma' colspan='$cspan'><strong>".t("Summa").":</strong></td><td align='right' class='tumma'>".round($summa2,2)."</td><td align='right' class='tumma'>".round($summa3,2)."</td>";
+		echo "<td class='tumma' colspan='$cspan'><strong>".t("Summa").":</strong></td><td align='right' class='tumma'>".sprintf('%.2f', $summa2)."</td><td align='right' class='tumma'>".sprintf('%.2f', $summa3)."</td>";
 		echo "<td align='right' class='tumma'>";
 		foreach ($summa_valuutassa as $valuutta => $sum) {
-			echo round($sum,2)." $valuutta<br/>";
+			echo sprintf('%.2f', $sum)." $valuutta<br/>";
 		}
 		echo "</td></tr>";
-
-
-		echo "</table><br>";
+		echo "</table><br><br>";
 	}
 
-	if ($tee == '') { // N‰ytet‰‰n valikko
+	echo "<font class='head'>". t("Tilien saldot")."</font><hr>";
+	echo "<form name='valinta' action = 'raportit.php' method='post'>
+			<input type = 'hidden' name = 'toim' value = 'tilisaldot'>
+			<input type = 'hidden' name = 'tee' value = '1'>
+			<table>";
 
-		echo "<font class='head'>". t("Tilien saldot")."</font><hr>";
+	echo "<tr><th>".t("Valitse tilikausi")."</th>";
 
-		echo "<form action = 'raportit.php' method='post'>
-				<input type = 'hidden' name = 'toim' value = 'tilisaldot'>
-				<input type = 'hidden' name = 'tee' value = '1'>
-				<table>";
+ 	$query = "	SELECT *
+				FROM tilikaudet
+				WHERE yhtio = '$kukarow[yhtio]'
+				ORDER BY tilikausi_alku desc";
+	$vresult = mysql_query($query) or pupe_error($query);
 
-		echo "<tr><th>".t("Valitse tilikausi")."</th>";
+	echo "<td><select name='tkausi' onchange='submit();'>";
 
-	 	$query = "	SELECT *
-					FROM tilikaudet
-					WHERE yhtio = '$kukarow[yhtio]'
-					ORDER BY tilikausi_alku desc";
-		$vresult = mysql_query($query) or pupe_error($query);
+	while ($vrow=mysql_fetch_array($vresult)) {
+		$sel="";
 
-		echo "<td><select name='tkausi' onchange='submit();'>";
-
-		while ($vrow=mysql_fetch_array($vresult)) {
-			$sel="";
-
-			if (!isset($savrow)) {
-				$savrow	= $vrow;
-			}
-
-			if ($tkausi == $vrow["tunnus"]) {
-				$sel 	= "selected";
-				$savrow	= $vrow;
-			}
-
-			echo "<option value = '$vrow[tunnus]' $sel>".tv1dateconv($vrow["tilikausi_alku"])." - ".tv1dateconv($vrow["tilikausi_loppu"]);
-		}
-		echo "</select></td></tr>";
-
-		$alku = str_replace("-", "", substr($savrow["tilikausi_alku"], 0, 7));
-		$lopp = str_replace("-", "", substr($savrow["tilikausi_loppu"], 0, 7));
-
-		echo "<tr><th>".t("Valitse kuukausi")."</th>
-				<td><select name='alvk'>
-				<option value=''>".t("Koko tilikausi")."</option>";
-
-		for ($a=$alku; $a<=$lopp; $a++) {
-			if (substr($a, -2) == "13") {
-				$a+=88;
-			}
-
-			echo "<option value = '$a'>".substr($a, 0, 4)." - ".$MONTH_ARRAY[(int) substr($a, -2)]."</option>";
+		if (!isset($savrow)) {
+			$savrow	= $vrow;
 		}
 
+		if ($tkausi == $vrow["tunnus"]) {
+			$sel 	= "selected";
+			$savrow	= $vrow;
+		}
 
-		echo "	</select>
-				</td></tr>
-				<tr><th>".t("per p‰iv‰ tilist‰")."</th>
-				<td><input type = 'text' name = 'tilino'></td></tr>
-				<tr><th>".t("Tee Excel")."</th>
-				<td><input type = 'checkbox' name = 'excel'  value = 'YES'></td></tr>
-				<tr><th><input type = 'submit' name='ajarappari' value = '".t("N‰yt‰")."'></th><td></td></tr></table></form>";
+		echo "<option value = '$vrow[tunnus]' $sel>".tv1dateconv($vrow["tilikausi_alku"])." - ".tv1dateconv($vrow["tilikausi_loppu"])."</option>";
 	}
+	echo "</select></td></tr>";
+
+	$alku = str_replace("-", "", substr($savrow["tilikausi_alku"], 0, 7));
+	$lopp = str_replace("-", "", substr($savrow["tilikausi_loppu"], 0, 7));
+
+	echo "<tr><th>".t("Valitse kuukausi")."</th>
+			<td><select name='alvk'>
+			<option value=''>".t("Koko tilikausi")."</option>";
+
+	for ($a=$alku; $a<=$lopp; $a++) {
+		if (substr($a, -2) == "13") {
+			$a+=88;
+		}
+
+		if ($alvk == $a) $sel = "SELECTED";
+		else $sel = "";
+
+		echo "<option value = '$a' $sel>".substr($a, 0, 4)." - ".$MONTH_ARRAY[(int) substr($a, -2)]."</option>";
+	}
+
+	echo "	</select>
+			</td></tr>
+			<tr><th>".t("per p‰iv‰ tilist‰")."</th>";
+
+	echo "<td>";
+	echo livesearch_kentta("valinta", "TILIHAKU", "tilino", 120, $tilino, "EISUBMIT");
+	echo "</td></tr>";
+
+	echo "<tr><th>".t("Tee Excel")."</th>
+			<td><input type = 'checkbox' name = 'excel'  value = 'YES'></td></tr>
+			<tr><th><input type = 'submit' name='ajarappari' value = '".t("N‰yt‰")."'></th><td></td></tr></table></form>";
 
 ?>

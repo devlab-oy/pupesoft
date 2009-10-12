@@ -1022,7 +1022,7 @@
 					$hinnat = alehinta($temp_laskurowwi, $temptrow, 1, '', '', '', "hintaperuste,aleperuste");
 
 					// jos tuote saadaan näyttää vain mikäli asiakkaalla on alehinta, niin sanotaan continue jos joku hinta/ale löytyy
-					if ($temptrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] == false) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] == false)) {
+					if ($temptrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] === FALSE)) {
 						continue;
 					}
 				}

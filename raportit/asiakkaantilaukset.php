@@ -337,7 +337,7 @@
 			$jarj = "ORDER BY $jarj";
 		}
 		else {
-			$jarj = "ORDER BY 2 desc, 1 asc";
+			$jarj = "ORDER BY lasku.laskunro desc, lasku.tunnus asc";
 		}
 
 		if ($cleantoim == 'OSTO') {

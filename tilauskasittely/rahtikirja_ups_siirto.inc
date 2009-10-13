@@ -439,7 +439,7 @@ if ($kollityht > 0) {
 
 //		$returnofdocument = $shipmentinformation->addChild('ReturnOfDocument', ''); // 1 merkki, C  // poland only
 
-
+/*
 	if ($asiakkaan_sahkopostiosoite != '') {
 		// QVN Option
 		$qvnoption							= $shipmentinformation->addChild('QVNOption');
@@ -462,10 +462,11 @@ if ($kollityht > 0) {
 		$ship								= $qvnrecipientandnotificationtypes2->addChild('Ship', '');
 		$exception							= $qvnrecipientandnotificationtypes2->addChild('Exception', '');
 		$delivery							= $qvnrecipientandnotificationtypes2->addChild('Delivery', '');
-		*/
 
 		$shipfromcompanyorname				= $qvnoption->addChild('ShipFromCompanyOrName', $ups_laskurow['yhtio_nimi']);
 		$failedemailaddress					= $qvnoption->addChild('FailedEMailAddress', substr($yhtiorow['postittaja_email'], 0, 50));
+		*/
+
 
 		/******************************************************************************
 		Subject Line Options
@@ -476,7 +477,7 @@ if ($kollityht > 0) {
 		******************************************************************************/
 //		$subjectline						= $qvnoption->addChild('SubjectLine', ''); // max 75 merkkiä, R
 //		$memo								= $qvnoption->addChild('Memo', substr('', 0, 150));
-	}
+//	}
 
 		/*
 		// Special Commodities (if selected, you must choose at least one element)

@@ -447,7 +447,7 @@ if ($kollityht > 0) {
 		// vastaanottaja
 		$qvnrecipientandnotificationtypes	= $qvnoption->addChild('QVNRecipientAndNotificationTypes');
 		$companyorname						= $qvnrecipientandnotificationtypes->addChild('CompanyOrName', ''); // WS 10.0 will populate ShipTo information
-		$contactname						= $qvnrecipientandnotificationtypes->addChild('ContactName', $asiakkaan_sahkopostiosoite_nimi);
+		$contactname						= $qvnrecipientandnotificationtypes->addChild('ContactName', utf8_encode($asiakkaan_sahkopostiosoite_nimi));
 		$emailaddress						= $qvnrecipientandnotificationtypes->addChild('EMailAddress', $asiakkaan_sahkopostiosoite);
 		$ship								= $qvnrecipientandnotificationtypes->addChild('Ship', ''); // ??
 		$exception							= $qvnrecipientandnotificationtypes->addChild('Exception', ''); // ??

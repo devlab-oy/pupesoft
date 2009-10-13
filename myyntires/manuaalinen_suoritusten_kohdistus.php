@@ -394,21 +394,22 @@ if ($tila == 'tee_kohdistus') {
 			$query 	= "UNLOCK TABLES";
 			$result = mysql_query($query) or pupe_error($query);
 		}
-		else {
+
+		if ($osasuoritus != 1 and $pyoristys_virhe_ok != 1) {
 			// Jos ei osasuoriteta eikä kirjata erotusta kassa-aleen niin ei saa myöskään jäädä erotusta
 			if ($laskutunnukset != 0 or $laskutunnuksetkale != 0) {
-				$query = "	SELECT 
+				$query = "	SELECT
 							sum(summa - saldo_maksettu) AS summa,
-							sum(summa_valuutassa - saldo_maksettu_valuutassa) AS summa_valuutassa,							
+							sum(summa_valuutassa - saldo_maksettu_valuutassa) AS summa_valuutassa,
 							sum(if(tunnus IN ($laskutunnuksetkale), kasumma, 0)) AS alennus,
-							sum(if(tunnus IN ($laskutunnuksetkale), kasumma_valuutassa, 0)) AS alennus_valuutassa														
-							FROM lasku 
+							sum(if(tunnus IN ($laskutunnuksetkale), kasumma_valuutassa, 0)) AS alennus_valuutassa
+							FROM lasku
 							WHERE tunnus IN ($laskutunnukset,$laskutunnuksetkale)
 							and yhtio = '$kukarow[yhtio]'
 							and mapvm = '0000-00-00'";
 				$tskres = mysql_query($query) or pupe_error($query);
 				$tskrow = mysql_fetch_array($tskres);
-				
+
 				if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi']) and round($suoritus["summa"] - $tskrow["summa_valuutassa"] - $tskrow["alennus_valuutassa"], 2) < 0) {
 					echo "<font class='error'>".t("VIRHE: Suorituksen summa on pienempi kuin valittujen laskujen summa!")."</font><br><br>";
 
@@ -1266,14 +1267,14 @@ if ($tila == 'kohdistaminen') {
 	echo "<tr><th>".t("Kirjaa erotus kassa-aleen")."</th><td><input type='checkbox' name='pyoristys_virhe_ok' value='1' $pyocheck></td>";
 	echo "<th>".t("Osasuorita lasku")."</th><td><input type='checkbox' name='osasuoritus' value='1' $osacheck onclick='javascript:osasuo(this)'></td></tr>";
 	echo "</table>";
-	
+
 	if ($yhtiorow['myyntireskontrakausi_alku'] <= $suoritus['kirjpvm']) {
 		echo "<br><input type='submit' value='".t("Kohdista")."'>";
 	}
 	else {
 		echo "<br><font class='error'>".t("Tilikausi lukittu")."</font>";
 	}
-	
+
 	echo "</form>\n";
 
 	echo "<script language='JavaScript'><!--

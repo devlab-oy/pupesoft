@@ -105,12 +105,26 @@ if ($kollityht > 0) {
 		C = Conditional
 		*/
 
+		$query = "	SELECT * 
+					FROM yhteyshenkilo 
+					WHERE yhtio = '$kukarow[yhtio]' 
+					AND liitostunnus = '$laskurow[liitostunnus]' 
+					AND nimi = '$laskurow[tilausyhteyshenkilo]'";
+		$yhteyshenkiloresult = mysql_query($query) or pupe_error($query);
+		$yhteyshenkiloasiakas = mysql_fetch_array($yhteyshenkiloresult);
+
+		$asiakkaan_sahkopostiosoite = $yhteyshenkiloasiakas['email'] != '' ? $yhteyshenkiloasiakas['email'] : $ups_laskurow['email'];
+		$asiakkaan_sahkopostiosoite_nimi = $yhteyshenkiloasiakas['nimi'] != '' ? $yhteyshenkiloasiakas['nimi'] : $ups_laskurow['nimi'];
+	
 		// SHIP TO
 		$shipto						= $xml->OpenShipment->addChild('ShipTo');
 //		$customerid 				= $shipto->addChild('CustomerID', $ups_laskurow['ytunnus']); // max 35 merkkiä, R
 		$companyorname 				= $shipto->addChild('CompanyOrName', utf8_encode($ups_laskurow['nimi'])); // max 35 merkkiä, R
 
-		if ($ups_laskurow['yhteyshenkilo_kaupallinen'] != '') {
+		if ($yhteyshenkiloasiakas['nimi'] != '') {
+			$attention = $shipto->addChild('Attention', substr(utf8_encode($yhteyshenkiloasiakas['nimi']), 0, 35)); // max 35 merkkiä, R (riippuu maasta)
+		}
+		elseif ($ups_laskurow['yhteyshenkilo_kaupallinen'] != '') {
 			$query = "	SELECT *
 						FROM yhteyshenkilo
 						WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
@@ -426,19 +440,20 @@ if ($kollityht > 0) {
 //		$returnofdocument = $shipmentinformation->addChild('ReturnOfDocument', ''); // 1 merkki, C  // poland only
 
 
+	if ($asiakkaan_sahkopostiosoite != '') {
 		// QVN Option
-//		$qvnoption							= $shipmentinformation->addChild('QVNOption');
+		$qvnoption							= $shipmentinformation->addChild('QVNOption');
 
-		/*
 		// vastaanottaja
 		$qvnrecipientandnotificationtypes	= $qvnoption->addChild('QVNRecipientAndNotificationTypes');
 		$companyorname						= $qvnrecipientandnotificationtypes->addChild('CompanyOrName', ''); // WS 10.0 will populate ShipTo information
-		$contactname						= $qvnrecipientandnotificationtypes->addChild('ContactName', $ups_laskurow['email']);
-		$emailaddress						= $qvnrecipientandnotificationtypes->addChild('EMailAddress', $ups_laskurow['email']);
+		$contactname						= $qvnrecipientandnotificationtypes->addChild('ContactName', $asiakkaan_sahkopostiosoite_nimi);
+		$emailaddress						= $qvnrecipientandnotificationtypes->addChild('EMailAddress', $asiakkaan_sahkopostiosoite);
 		$ship								= $qvnrecipientandnotificationtypes->addChild('Ship', ''); // ??
 		$exception							= $qvnrecipientandnotificationtypes->addChild('Exception', ''); // ??
 		$delivery							= $qvnrecipientandnotificationtypes->addChild('Delivery', ''); // ??
 
+		/*
 		// lähettäjä
 		$qvnrecipientandnotificationtypes2 	= $qvnoption->addChild('QVNRecipientAndNotificationTypes');
 		$companyorname						= $qvnrecipientandnotificationtypes2->addChild('CompanyOrName', $ups_laskurow['yhtio_nimi']);
@@ -447,10 +462,10 @@ if ($kollityht > 0) {
 		$ship								= $qvnrecipientandnotificationtypes2->addChild('Ship', '');
 		$exception							= $qvnrecipientandnotificationtypes2->addChild('Exception', '');
 		$delivery							= $qvnrecipientandnotificationtypes2->addChild('Delivery', '');
+		*/
 
 		$shipfromcompanyorname				= $qvnoption->addChild('ShipFromCompanyOrName', $ups_laskurow['yhtio_nimi']);
 		$failedemailaddress					= $qvnoption->addChild('FailedEMailAddress', substr($yhtiorow['postittaja_email'], 0, 50));
-		*/
 
 		/******************************************************************************
 		Subject Line Options
@@ -461,6 +476,7 @@ if ($kollityht > 0) {
 		******************************************************************************/
 //		$subjectline						= $qvnoption->addChild('SubjectLine', ''); // max 75 merkkiä, R
 //		$memo								= $qvnoption->addChild('Memo', substr('', 0, 150));
+	}
 
 		/*
 		// Special Commodities (if selected, you must choose at least one element)

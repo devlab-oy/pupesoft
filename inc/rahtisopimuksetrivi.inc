@@ -11,7 +11,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "toimitustapa") {
-		$query = "	SELECT * 
+		$query = "	SELECT *
 					from toimitustapa
 					WHERE yhtio='$kukarow[yhtio]'";
 		$sresult = mysql_query($query) or pupe_error($query);
@@ -27,22 +27,22 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "ytunnus" and !isset($alasveto[$i]) and $ytunnus != "") {
 		$ulos = "<td><input type = 'text' name = '$nimi' value = '$ytunnus' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "ytunnus" and isset($alasveto[$i])) {
 		$ulos = "<td>".$alasveto[$i]."</td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "asiakas" and isset($alasveto[$i])) {
 		$ulos = "<td>".$alasveto[$i]."</td>";
 		$jatko = 0;
 	}
-	elseif (mysql_field_name($result, $i) == "asiakas") {	
+	elseif (mysql_field_name($result, $i) == "asiakas") {
 		if ((int) $trow[$i] > 0) {
 			$query	= "	SELECT *
 						FROM asiakas
@@ -50,13 +50,18 @@
 			$sresult = mysql_query($query) or pupe_error($query);
 			$srow = mysql_fetch_array($sresult);
 			$ssize = strlen($trow[$i])+2;
-				
-			$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$ssize' maxlength='$maxsize'> <table><tr><td>$srow[nimi] $srow[nimitark]</td></tr><tr><td>$srow[toim_nimi] $srow[toim_nimitark]</td></tr></table></td>";
-			$jatko = 0;		
+
+			$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$ssize' maxlength='$maxsize'>";
+
+			$ulos .= "<table><tr><td>$srow[nimi] $srow[nimitark] $srow[postitp]</td></tr><tr><td>$srow[toim_nimi] $srow[toim_nimitark] $srow[toim_postitp]</td></tr></table>";
+
+			$ulos .= "</td>";
+
+			$jatko = 0;
 		}
 		else {
 			$ulos = "<td nowrap><input type = 'text' name = '$nimi' value = '' size='$size' maxlength='$maxsize'></td>";
-			$jatko = 0;	
+			$jatko = 0;
 		}
 	}
 ?>

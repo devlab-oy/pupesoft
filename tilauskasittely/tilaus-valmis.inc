@@ -382,12 +382,12 @@ else {
 			// tai rahtihinnoittelu tapahtuu tilauksen painon mukaan automaattisesti niin tehd‰‰n se t‰ss‰
 
 			// t‰h‰n ker‰t‰‰n tilausnumerot, joista lasketaan rahti
-			$rahtimaksu_tunnukset = "";
+			$rahtimaksu_tunnukset = array();
 
 			// jos kyseess‰ on JT-tilaus, katsotaan pit‰‰kˆ lis‰t‰ rahtikulua usealle tilaukselle
 			if ($laskurow["clearing"] == "JT-TILAUS" and $yhtiorow["jt_rahti"] == "E") {
 				// etsit‰‰n kaikki is‰tilaukset milt‰ n‰m‰ JT-tuotteet ovat tulleet ja katsotaan onko niill‰ jo rahtikulu (lis‰t‰‰n rahtikulu niille jolla ei ole)
-				$query = "	SELECT vanha_otunnus
+				$query = "	SELECT DISTINCT vanha_otunnus
 							FROM tilausrivi
 							JOIN tilausrivin_lisatiedot USE INDEX (tilausrivitunnus) ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
 							AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
@@ -396,37 +396,34 @@ else {
 				$step1re = mysql_query($query) or pupe_error($query);
 
 				while ($step1row = mysql_fetch_array($step1re)) {
-
 					// etsit‰‰n ist‰tilausten kaikki lapset
-					$query = "	SELECT DISTINCT tilausrivi.otunnus otunnus
+					$query = "	SELECT group_concat(DISTINCT tilausrivi.otunnus) uudet_otunnukset
 								FROM tilausrivin_lisatiedot
-								JOIN tilausrivi on (tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivi.otunnus != '$laskurow[tunnus]')
-								WHERE tilausrivin_lisatiedot.yhtio = '$kukarow[yhtio]' and tilausrivin_lisatiedot.vanha_otunnus = '$step1row[vanha_otunnus]'";
+								JOIN tilausrivi on (tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+								WHERE tilausrivin_lisatiedot.yhtio = '$kukarow[yhtio]'
+								and tilausrivin_lisatiedot.vanha_otunnus = '$step1row[vanha_otunnus]'";
 					$step2re = mysql_query($query) or pupe_error($query);
+					$step2row = mysql_fetch_array($step2re);
 
-					while ($step2row = mysql_fetch_array($step2re)) {
-						// katsotaan onko lapsitilauksilla rahtikulu syˆtetty
-						$query = "	SELECT tunnus
-									FROM tilausrivi
-									WHERE yhtio = '$kukarow[yhtio]'
-									AND otunnus = '$step2row[otunnus]'
-									AND tuoteno = '$yhtiorow[rahti_tuotenumero]'";
-						$step3re = mysql_query($query) or pupe_error($query);
+					// katsotaan onko lapsitilauksilla rahtikulu syˆtetty
+					$query = "	SELECT tunnus
+								FROM tilausrivi
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND otunnus in ($step2row[uudet_otunnukset])
+								AND tuoteno = '$yhtiorow[rahti_tuotenumero]'";
+					$step3re = mysql_query($query) or pupe_error($query);
 
-						// jos ei niin pit‰‰ syˆtt‰‰!
-						if (mysql_num_rows($step3re) == 0) {
-							$rahtimaksu_tunnukset .= "$step2row[otunnus], ";
-						}
+					// jos ei niin pit‰‰ rahdittaa!
+					if (mysql_num_rows($step3re) == 0) {
+						if (!in_array($step2row["uudet_otunnukset"], $rahtimaksu_tunnukset)) $rahtimaksu_tunnukset[] = $step2row["uudet_otunnukset"];
 					}
-				}
-
-				if ($rahtimaksu_tunnukset != "") {
-					$rahtimaksu_tunnukset = substr($rahtimaksu_tunnukset, 0, -2);
 				}
 			}
 			else {
-				$rahtimaksu_tunnukset = $laskurow["tunnus"];
+				$rahtimaksu_tunnukset[] = $laskurow["tunnus"];
 			}
+
+			$rahtimaksu_tunnukset = implode(",", $rahtimaksu_tunnukset);
 
 			$query = "	SELECT tunnus
 						from tilausrivi
@@ -451,7 +448,7 @@ else {
 					// haetaan rahtimaksu
 					$rahtihinta = hae_rahtimaksu($rahtimaksu_tunnukset);
 
-					//lis‰t‰‰n rahtikulurivi vain jos rahtikulu on erisuuri kuin nolla, nollarivej‰ on ilmeisesti turha llis‰t‰
+					//lis‰t‰‰n rahtikulurivi vain jos rahtikulu on erisuuri kuin nolla, nollarivej‰ on ilmeisesti turha lis‰t‰
 					if ($rahtihinta != 0) {
 
 						// haetaan rahtituotteen tiedot

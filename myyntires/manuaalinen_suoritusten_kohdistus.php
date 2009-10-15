@@ -410,14 +410,14 @@ if ($tila == 'tee_kohdistus') {
 				$tskres = mysql_query($query) or pupe_error($query);
 				$tskrow = mysql_fetch_array($tskres);
 
-				if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi']) and round($suoritus["summa"] - $tskrow["summa_valuutassa"] - $tskrow["alennus_valuutassa"], 2) < 0) {
+				if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi']) and round($suoritus["summa"] - ($tskrow["summa_valuutassa"] - $tskrow["alennus_valuutassa"]), 2) < 0) {
 					echo "<font class='error'>".t("VIRHE: Suorituksen summa on pienempi kuin valittujen laskujen summa!")."</font><br><br>";
 
 					$tila 	= 'kohdistaminen';
 					$query 	= "UNLOCK TABLES";
 					$result = mysql_query($query) or pupe_error($query);
 				}
-				elseif (round($suoritus["summa"] - $tskrow["summa"] - $tskrow["alennus"], 2) < 0) {
+				elseif (round($suoritus["summa"] - ($tskrow["summa"] - $tskrow["alennus"]), 2) < 0) {
 					echo "<font class='error'>".t("VIRHE: Suorituksen summa on pienempi kuin valittujen laskujen summa!")."</font><br><br>";
 
 					$tila 	= 'kohdistaminen';

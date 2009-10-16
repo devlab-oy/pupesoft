@@ -13,8 +13,13 @@ echo "<html>
 	<title>$yhtiorow[nimi] ".t("Extranet")."</title>
 	<link rel='shortcut icon' href='http://www.pupesoft.com/pupeicon.gif'>
 	<meta http-equiv='Pragma' content='no-cache'>
-	<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
-	</head>
+	<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>";
+
+if ($kukarow["extranet"] != "") {
+	echo $yhtiorow["web_seuranta"];
+}
+
+echo "</head>
 
 	<noscript>
 		Your browser does not support Javascript!

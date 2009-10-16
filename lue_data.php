@@ -546,6 +546,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				}
 			}
 
+			// Käyttäjien salasanat kuntoon!
+			if ($table_mysql == 'kuka' and $taulunotsikot[$taulu][$j] == "SALASANA" and trim($rivi[$j]) != "") {
+				$taulunrivit[$taulu][$eriviindex][$j] = $rivit[$eriviindex][$j] = $rivi[$j] = md5(trim($rivi[$j]));
+			}
+
 			// jos ei ole puuttuva tieto etsitään riviä
 			if ($tila != 'ohita') {
 
@@ -1252,6 +1257,7 @@ else {
 					<option value='yhteensopivuus_mp' $sel[yhteensopivuus_mp]>".t("Yhteensopivuus mp-mallit")."</option>
 					<option value='yhteensopivuus_tuote' $sel[yhteensopivuus_tuote]>".t("Yhteensopivuus tuotteet")."</option>
 					<option value='yhteyshenkilo' $sel[yhteyshenkilo]>".t("Yhteyshenkilöt")."</option>
+					<option value='kuka' $sel[kuka]>".t("Käyttäjätietoja")."</option>
 					</select></td>
 			</tr>";
 

@@ -268,6 +268,10 @@
 						$paikka	= "";
 					}
 
+					if ($verkkokauppa != "" and $verkkokauppa_saldotsk === FALSE) {
+						$varataan_saldoa = "EI";
+					}
+
 					// jos meillä on ostoskori muuttujassa numero, niin halutaan lisätä tuotteita siihen ostoskoriin
 					if (is_numeric($ostoskori)) {
 						lisaa_ostoskoriin ($ostoskori, $laskurow["liitostunnus"], $tuoteno, $kpl);

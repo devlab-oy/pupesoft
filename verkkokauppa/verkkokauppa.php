@@ -98,7 +98,7 @@ if (!function_exists("menu")) {
 			$result = t_avainsana("VERKKOKAULINKKI");
 
 			while ($orow = mysql_fetch_array($result)) {
-				if ($orow["selite"] == "ETUSIVU") $val .= "<tr><td class='menucell'><a class='menu' href = 'verkkokauppa.php'>".t("Etusivu")."</a></td></tr>";
+				if ($orow["selite"] == "ETUSIVU") $val .= "<tr><td class='menucell'><a class='menu' href = ''>".t("Etusivu")."</a></td></tr>";
 				else $val .= "<tr><td class='menucell'><a class='menu' href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=uutiset&sivu=$orow[selite]', false, false);\">$orow[selitetark]</a></td></tr>";
 			}
 
@@ -1028,7 +1028,7 @@ if ($tee == "") {
 
 	if ($kukarow["kuka"] == "www") {
 		$login_screen = "<form name='login' id= 'loginform' action='login_extranet.php' method='post'>
-						<input type='hidden' id = 'location' name='location' value='".$palvelin."verkkokauppa.php'>
+						<input type='hidden' id = 'location' name='location' value='$palvelin'>
 						<font class='login'>".t("Käyttäjätunnus",$browkieli).":</font>
 						<input type='text' value='' name='user' size='15' maxlength='30'>
 						<font class='login'>".t("Salasana", $browkieli).":</font>

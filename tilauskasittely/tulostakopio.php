@@ -50,7 +50,7 @@
 		else {
 			echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 		}
-		
+
 		require ("../raportit/naytatilaus.inc");
 		echo "<br><br>";
 		$tee = "ETSILASKU";
@@ -668,7 +668,7 @@
 		}
 		if ($toim == "TILAUSVAHVISTUS") {
 			//myyntitilaus.
-			$where1 .= " lasku.tila in ('N','L','R','A')";
+			$where1 .= " lasku.tila in ('N','L','R','A','V')";
 
 			if ($ytunnus{0} == '£') {
 				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'

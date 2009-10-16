@@ -401,7 +401,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 				echo "</style>";
 			}
 
-			echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";
+			echo "<title>$yhtiorow[nimi]</title>";
 			echo "</head>";
 
 			echo "<body>";

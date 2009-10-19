@@ -377,7 +377,7 @@ if (!function_exists('alku')) {
 			$laskutyyppi = $yhtiorow['laskutyyppi'];
 		}
 
-		if ($laskutyyppi == 1 or $laskutyyppi == 4) {
+		if ($laskutyyppi == 1 or $laskutyyppi == 4 or $laskutyyppi == 6) {
 			$query 		= "SELECT ifnull(group_concat(distinct tunnus SEPARATOR ', '), 0) tilnot from lasku where yhtio='$kukarow[yhtio]' and laskunro='$laskurow[laskunro]' and tila = 'L' and laskunro != 0";
 			$result  	= mysql_query($query) or pupe_error($query);
 			$apulaskuro = mysql_fetch_array($result);
@@ -620,9 +620,15 @@ if (!function_exists('rivi_otsikot')) {
 			$pdf->draw_text(550, $kala, t("Alv", $kieli)."-%",			$thispage, $pieni);
 
 			//toka rivi
-			$pdf->draw_text(35,  $kala-9, t("Tilausnumero", $kieli)."/".t("Lisätietoja", $kieli),		$thispage, $pieni);
+			if ($laskutyyppi != 6) {
+				$pdf->draw_text(35,  $kala-9, t("Tilausnumero", $kieli)."/".t("Lisätietoja", $kieli),		$thispage, $pieni);
+			}
+
 			$pdf->draw_text(340, $kala-9, t("Yksikkö", $kieli),			$thispage, $pieni);
-			$pdf->draw_text(390, $kala-9, t("Toimituspvm", $kieli),		$thispage, $pieni);
+
+			if ($laskutyyppi != 6) {
+				$pdf->draw_text(390, $kala-9, t("Toimituspvm", $kieli),		$thispage, $pieni);
+			}
 
 			if ($laskutyyppi != 5) {
 				$pdf->draw_text(490, $kala-9, t("Verollinen arvo", $kieli),	$thispage, $pieni);
@@ -656,11 +662,8 @@ if (!function_exists('rivi')) {
 			rivi_plain_2($thispage);
 			return;
 		}
-		elseif ($laskutyyppi == 5) {
-			rivi_original($thispage, $laskutyyppi);
-		}
 		else {
-			rivi_original($thispage);
+			rivi_original($thispage, $laskutyyppi);
 			return;
 		}
 	}
@@ -779,7 +782,7 @@ if (!function_exists('rivi_original')) {
 		$pdf->draw_text(340, $kala, t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selitetark"),		$thispage, $pieni);
 
 		//Toimitusaika
-		if (substr($row["toimitettuaika"],0,10) != "0000-00-00") {
+		if (substr($row["toimitettuaika"],0,10) != "0000-00-00" and $laskutyyppi != 6) {
 			$pdf->draw_text(390, $kala, tv1dateconv(substr($row["toimitettuaika"],0,10)), 	$thispage, $pieni);
 		}
 
@@ -795,10 +798,10 @@ if (!function_exists('rivi_original')) {
 
 		$alkupkommentti = $row["kommentti"];
 
-		if (trim($viiterow['viesti']) != '' and trim($viiterow['viesti']) != trim($alkupkommentti)) {
+		if (trim($viiterow['viesti']) != '' and trim($viiterow['viesti']) != trim($alkupkommentti) and $laskutyyppi != 6) {
 			$row["kommentti"] = trim($viiterow["viesti"])."\n".$row["kommentti"];
 		}
-		if (trim($viiterow['asiakkaan_tilausnumero']) != '' and trim($viiterow['asiakkaan_tilausnumero']) != trim($alkupkommentti)) {
+		if (trim($viiterow['asiakkaan_tilausnumero']) != '' and trim($viiterow['asiakkaan_tilausnumero']) != trim($alkupkommentti) and $laskutyyppi != 6) {
 			$row["kommentti"] = trim($viiterow["asiakkaan_tilausnumero"])."\n".$row["kommentti"];
 		}
 
@@ -899,7 +902,7 @@ if (!function_exists('rivi_original')) {
 			}
 			$kala += 10;
 		}
-		else {
+		elseif ($laskutyyppi != 6) {
 			$pdf->draw_text(35, $kala, $row["otunnus"],	$thispage, $pieni);
 		}
 

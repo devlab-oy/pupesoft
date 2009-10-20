@@ -2961,7 +2961,7 @@ if ($tee == '') {
 					$tuoteno = "";
 					$kpl	 = 0;
 				}
-				
+
 				if ($kukarow["extranet"] != '' and trim($trow["vienti"]) != '') {
 
 					// vientikieltokäsittely:
@@ -2987,11 +2987,11 @@ if ($tee == '') {
 						$kielletty++;
 					}
 				}
-				
+
 				if ($trow['hinnastoon'] == 'V' and $toim != "SIIRTOLISTA" and $toim != 'VALMISTAVARASTOON') {
 					//	katsotaan löytyyko asiakasalennus / asikakashinta
 					$hinnat = alehinta($laskurow, $trow, $kpl, '', '', '',"hintaperuste,aleperuste");
-										
+
 					if (($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] === FALSE)) {
 						if ($kukarow['extranet'] != '') {
 							$varaosavirhe .= t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
@@ -2999,7 +2999,7 @@ if ($tee == '') {
 						else {
 							$varaosavirhe .= t("VIRHE: Tuotetta ei saa myydä tälle asiakkaalle!")."<br>";
 						}
-						
+
 						$trow 	 = "";
 						$tuoteno = "";
 						$kpl	 = 0;
@@ -5308,9 +5308,10 @@ if ($tee == '') {
 										<input type='hidden' name='lopetus' value='$lopetus'>
 										<input type='hidden' name='projektilla' value='$projektilla'>";
 
-						if ($laskurow["hinta"] != 0) {
+						if ($laskurow["hinta"] != 0 and (($yhtiorow["alv_kasittely"] == "" and abs($jysum - $summa) <= .50) or ($yhtiorow["alv_kasittely"] != "" and abs($jysum - $arvo) <= .50))) {
 							$jysum = $laskurow["hinta"];
 						}
+
 						elseif ($yhtiorow["alv_kasittely"] == "") {
 							$jysum = $summa;
 						}

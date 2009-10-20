@@ -75,10 +75,10 @@
 				$apu = array();
 
 				if (count($yhtiot) > 1) {
-					if ($group!="") $group .= ",lasku.yhtio";
-					else $group .= "lasku.yhtio";
-					$select .= "lasku.yhtio yhtio, ";
-					$order  .= "lasku.yhtio,";
+					if ($group!="") $group .= ",tuote.yhtio";
+					else $group .= "tuote.yhtio";
+					$select .= "tuote.yhtio yhtio, ";
+					$order  .= "tuote.yhtio,";
 					$gluku++;
 				}
 

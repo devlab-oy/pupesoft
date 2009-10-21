@@ -62,7 +62,7 @@ if ($_REQUEST["tee"] == "login") {
 		}
 	}
 
-	$errormsg = "<br><font class='error'>Käyttäjätunnusta ei löydy ja/tai salasana on virheellinen!</font><br>";
+	$errormsg = "<br><br><font class='error'>Käyttäjätunnusta ei löydy ja/tai salasana on virheellinen!</font><br>";
 	$tee = "";
 
 	unset($user);
@@ -118,7 +118,7 @@ if (!function_exists("menu")) {
 		$val = "";
 
 		if ($kukarow["kuka"] != "www") {
-			$toimlisa = "<tr><td class='back'>&raquo; <a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=toim_tuoteno', 'selain', false, false);\">".t("Toimittajan koodilla")."</a></td></tr>";
+			$toimlisa = "<tr><td class='back'>&raquo; <a onclick=\"self.scrollTo(0,0);\" href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=toim_tuoteno', 'selain', false, false);\">".t("Toimittajan koodilla")."</a></td></tr>";
 		}
 		else {
 			$toimlisa = "";
@@ -194,8 +194,8 @@ if (!function_exists("menu")) {
 				$val .= "<tr><td class='back'><br><font class='info'>".t("Tuotehaku").":</font><hr></td></tr>
 						 	<tr><td class='back'><form id = 'tuotehaku' name='tuotehaku'  action = \"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\" method = 'post'>
 							<input type = 'text' size='12' name = 'tuotehaku'>
-							<tr><td class='back'>&raquo; <a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\">".t("Nimityksellä")."</a></td></tr>
-							<tr><td class='back'>&raquo; <a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla', 'selain', false, false);\">".t("Tuotekoodilla")."</a></td></tr>
+							<tr><td class='back'>&raquo; <a onclick=\"self.scrollTo(0,0);\" href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\">".t("Nimityksellä")."</a></td></tr>
+							<tr><td class='back'>&raquo; <a onclick=\"self.scrollTo(0,0);\" href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla', 'selain', false, false);\">".t("Tuotekoodilla")."</a></td></tr>
 							$toimlisa
 							</form>
 							</td>

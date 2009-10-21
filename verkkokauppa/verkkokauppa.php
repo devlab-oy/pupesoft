@@ -2,6 +2,79 @@
 
 $_GET["ohje"] = "off";
 
+if ($_REQUEST["tee"] == "login") {
+
+	$login = "yes";
+	$extranet = 1;
+	$_GET["no_css"] = "yes";
+
+	require("parametrit.inc");
+//	require("functions.inc");
+
+	if (trim($user) != '') {
+
+		$session = "";
+		$user = mysql_real_escape_string(trim($user));
+
+		$query = "	SELECT kuka, session, salasana
+					FROM kuka
+					where kuka = '$user' 
+					and extranet != '' 
+					and oletus_asiakas != ''";
+		$result = mysql_query($query) or die("VIRHE: Kysely ei onnistu!");
+		$krow = mysql_fetch_array($result);
+
+		if ($salamd5 != '') {
+			$vertaa = $salamd5;
+		}
+		elseif ($salasana == '') {
+			$vertaa = $salasana;
+		}
+		else {
+			$vertaa = md5(trim($salasana));
+		}
+
+		if (mysql_num_rows ($result) == 1 and $vertaa == $krow['salasana']) {
+
+			srand ((double) microtime() * 1000000);
+
+			for ($i = 0; $i < 25; $i++) {
+				$session = $session . chr(rand(65,90)) ;
+			}
+
+			$query = "	UPDATE kuka
+						SET session = '$session',
+						lastlogin = now()
+						WHERE kuka = '$user' 
+						and extranet != '' 
+						and oletus_asiakas != ''";
+			$result = mysql_query($query) or die ("Päivitys epäonnistui kuka $query");
+
+			$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH));
+
+			if ($location != "") {
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$location'>";
+			}
+			else {
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2?go=$go'>";
+			}
+			exit;
+		}
+	}
+
+	$errormsg = "<br><font class='error'>Käyttäjätunnusta ei löydy ja/tai salasana on virheellinen!</font><br>";
+	$tee = "";
+
+	unset($user);
+	unset($session);
+	unset($login);
+	unset($extranet);
+	unset($_COOKIE);
+	unset($_REQUEST);
+	unset($_POST);
+	unset($_GET);
+}
+
 require ("parametrit.inc");
 
 if ($verkkokauppa == "") die("Verkkokuapayhtiö määrittelemättä");
@@ -22,7 +95,7 @@ if (!function_exists("tilaus")) {
 		}
 
 		if ($muokkaa != "") {
-			$ulos .= "	<form id = 'laskutiedot' name = 'laskutiedot' method='POST' action=\"javascript:ajaxPost('laskutiedot', 'verkkokauppa.php?', 'selain', false, true);\">
+			$ulos .= "	<form id = 'laskutiedot' name = 'laskutiedot' method='POST' action=\"javascript:ajaxPost('laskutiedot', 'verkkokauppa.php?', 'selain', false, false);\">
 						<input type='hidden' name='tee' value = 'tallenna_osoite'>
 						<input type='hidden' name='osasto' value = '$osasto'>
 						<input type='hidden' name='tuotemerkki' value = '$tuotemerkki'>
@@ -45,7 +118,7 @@ if (!function_exists("menu")) {
 		$val = "";
 
 		if ($kukarow["kuka"] != "www") {
-			$toimlisa = "<tr><td class='back'>&raquo; <a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=toim_tuoteno', 'selain', false, true);\">".t("Toimittajan koodilla")."</a></td></tr>";
+			$toimlisa = "<tr><td class='back'>&raquo; <a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=toim_tuoteno', 'selain', false, false);\">".t("Toimittajan koodilla")."</a></td></tr>";
 		}
 		else {
 			$toimlisa = "";
@@ -119,10 +192,10 @@ if (!function_exists("menu")) {
 				}
 
 				$val .= "<tr><td class='back'><br><font class='info'>".t("Tuotehaku").":</font><hr></td></tr>
-						 	<tr><td class='back'><form id = 'tuotehaku' name='tuotehaku'  action = \"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, true);\" method = 'post'>
+						 	<tr><td class='back'><form id = 'tuotehaku' name='tuotehaku'  action = \"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\" method = 'post'>
 							<input type = 'text' size='12' name = 'tuotehaku'>
-							<tr><td class='back'>&raquo; <a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, true);\">".t("Nimityksellä")."</a></td></tr>
-							<tr><td class='back'>&raquo; <a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla', 'selain', false, true);\">".t("Tuotekoodilla")."</a></td></tr>
+							<tr><td class='back'>&raquo; <a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\">".t("Nimityksellä")."</a></td></tr>
+							<tr><td class='back'>&raquo; <a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla', 'selain', false, false);\">".t("Tuotekoodilla")."</a></td></tr>
 							$toimlisa
 							</form>
 							</td>
@@ -288,7 +361,7 @@ if (!function_exists("menu")) {
 				}
 
 				if ($ok == 1) {
-					$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell'><a class = 'menu' id='P_".$osasto."_".$try."_".$merow["selite"]."' name = 'menulinkki' onclick=\"var aEls = document.getElementsByName('menulinkki'); for (var iEl = 0; iEl < aEls.length; iEl++) { document.getElementById(aEls[iEl].id).className='menu';} this.className='menuselected'; self.scrollTo(0,0);\" href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=$merow[tuotemerkki]', '', true);\">$merow[tuotemerkki]</a></td></tr>";
+					$val .=  "<tr><td class='menuspacer'>&nbsp;</td><td class='menucell'><a class = 'menu' id='P_".$osasto."_".$try."_".$merow["selite"]."' name = 'menulinkki' onclick=\"var aEls = document.getElementsByName('menulinkki'); for (var iEl = 0; iEl < aEls.length; iEl++) { document.getElementById(aEls[iEl].id).className='menu';} this.className='menuselected'; self.scrollTo(0,0);\" href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=$merow[tuotemerkki]', '', false);\">$merow[tuotemerkki]</a></td></tr>";
 				}
 			}
 			$val .= "</table>";
@@ -367,10 +440,10 @@ if (!function_exists("uutiset")) {
 						else {
 							$trow = mysql_fetch_array($tres);
 							if (count($m) == 4) {
-								$replace[]	= "<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla&tuotehaku=$m[1]', false, true);\">$m[3]</a>";
+								$replace[]	= "<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla&tuotehaku=$m[1]', false, false);\">$m[3]</a>";
 							}
 							else {
-								$replace[]	= "<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla&tuotehaku=$m[1]', false, true);\">$trow[nimitys]</a>";
+								$replace[]	= "<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla&tuotehaku=$m[1]', false, false);\">$trow[nimitys]</a>";
 							}
 						}
 					}
@@ -719,7 +792,7 @@ if ($tee == "tilatut") {
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
 
-		$ulos .= "<br><input type='button' onclick=\"if(confirm('".t("Oletko varma, että haluat jättää tilauksen %s kesken?", $kieli, $laskurow["tunnus"])."')) { sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=keskeytatilaus&tilaus=$laskurow[tunnus]', false, true); }\" value='".t("Jätä kesken")."'>&nbsp;&nbsp;";
+		$ulos .= "<br><input type='button' onclick=\"if(confirm('".t("Oletko varma, että haluat jättää tilauksen %s kesken?", $kieli, $laskurow["tunnus"])."')) { sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=keskeytatilaus&tilaus=$laskurow[tunnus]', false, false); }\" value='".t("Jätä kesken")."'>&nbsp;&nbsp;";
 
 		if ($row["rivei"] > 0) {
 			$ulos .= "<input type='button' onclick=\"if(confirm('".t("Oletko varma, että haluat lähettää tilauksen eteenpäin?")."')) { sndReq('selain', 'verkkokauppa.php?tee=tilaa'); }\" value='".t("Tilaa tuotteet")."'>&nbsp;&nbsp;";
@@ -767,7 +840,7 @@ if ($tee == "asiakastiedot") {
 			$selv[$vainomat] = "SELECTED";
 
 			$vainoomat = "<div>
-				<form id = 'vainoma' name='tilaushaku' action = \"javascript:ajaxPost('vainoma', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&hakutapa=$hakutapa&tilaushaku=$tilaushaku&tila=$tila', 'selain', false, true);\" method = 'post'>
+				<form id = 'vainoma' name='tilaushaku' action = \"javascript:ajaxPost('vainoma', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&hakutapa=$hakutapa&tilaushaku=$tilaushaku&tila=$tila', 'selain', false, false);\" method = 'post'>
 					<select name='vainomat' onchange='submit();'>
 						<option value=''>".t("Näytä kaikkien tilaukset")."</option>
 						<option value='x' $selv[x]>".t("Näytä vain omat tilaukset")."</option>
@@ -788,11 +861,11 @@ if ($tee == "asiakastiedot") {
 					$vainoomat
 					<br>
 					".t("Tilaushaku").":<br>
-					<form id = 'tilaushaku' name='tilaushaku' action = \"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=viitteet', 'selain', false, true);\" method = 'post'>
+					<form id = 'tilaushaku' name='tilaushaku' action = \"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=viitteet', 'selain', false, false);\" method = 'post'>
 					<input type = 'text' size='50' name = 'tilaushaku' value='$tilaushaku'>
 					<br>
-					<input type='submit' onclick=\"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=haku&hakutapa=viitteet', 'selain', false, true);\" value='".t("Hae laskun viitteistä")."'><br>
-					<input type='submit' onclick=\"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=haku&hakutapa=toimitusosoite', 'selain', false, true);\" value='".t("Hae laskun toimitusosoitteesta")."'><br>
+					<input type='submit' onclick=\"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=haku&hakutapa=viitteet', 'selain', false, false);\" value='".t("Hae laskun viitteistä")."'><br>
+					<input type='submit' onclick=\"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=haku&hakutapa=toimitusosoite', 'selain', false, false);\" value='".t("Hae laskun toimitusosoitteesta")."'><br>
 					</form>
 					<br>
 					</td>
@@ -902,12 +975,12 @@ if ($tee == "asiakastiedot") {
 					$monista = $jatka ="";
 
 					if ($laskurow["laskunro"] > 0) {
-						$monista = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=monistalasku&laskunro=$laskurow[laskunro]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat monistaa tilauksen?")."');\">".t("Monista")."</a>";
+						$monista = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=monistalasku&laskunro=$laskurow[laskunro]', false, false);\" onclick=\"return confirm('".t("Oletko varma, että haluat monistaa tilauksen?")."');\">".t("Monista")."</a>";
 					}
 
 					if ($laskurow["tila"] == "N" and $laskurow["alatila"] == "") {
 						if ($laskurow["tunnus"] != $kukarow["kesken"]) {
-							$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=jatkatilausta&tilaus=$laskurow[tunnus]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat jatkaa tilausta %s?", $kieli, $laskurow["tunnus"])."');\">".t("Aktivoi")."</a>";
+							$jatka = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=jatkatilausta&tilaus=$laskurow[tunnus]', false, false);\" onclick=\"return confirm('".t("Oletko varma, että haluat jatkaa tilausta %s?", $kieli, $laskurow["tunnus"])."');\">".t("Aktivoi")."</a>";
 						}
 						else {
 							$jatka = t("Akviivinen");
@@ -919,7 +992,7 @@ if ($tee == "asiakastiedot") {
 											<td>$laskurow[aika]</td>
 											<td>$laskurow[viesti]</td>
 											<td>".number_format($laskurow["summa"], 2, ',', ' ')."</td>
-											<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=$tila&hakutapa=$hakutapa&tilaustila=$tilaustila&tilaus=$laskurow[tunnus]', false, true);\">".t("Näytä")."</a> $jatka $monista</td>
+											<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=$tila&hakutapa=$hakutapa&tilaustila=$tilaustila&tilaus=$laskurow[tunnus]', false, false);\">".t("Näytä")."</a> $jatka $monista</td>
 											</tr>$lisa";
 				}
 			}
@@ -934,7 +1007,7 @@ if ($tee == "asiakastiedot") {
 		if ($tilaustila != "kesken") {
 			echo "<tr>
 					<td class='back' colspan='5'>
-						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=kesken', false, true);\">".t("Keskeneräiset tilaukset")."</a>
+						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=kesken', false, false);\">".t("Keskeneräiset tilaukset")."</a>
 					</td>
 				</tr>
 				<tr>
@@ -944,7 +1017,7 @@ if ($tee == "asiakastiedot") {
 
 				<tr>
 					<td class='back' colspan='5'>
-						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=kasittely', false, true);\">".t("Tilaukset jotka odottaa käsittelyä")."</a>
+						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=kasittely', false, false);\">".t("Tilaukset jotka odottaa käsittelyä")."</a>
 					</td>
 				</tr>
 				<tr>
@@ -954,7 +1027,7 @@ if ($tee == "asiakastiedot") {
 
 				<tr>
 					<td class='back' colspan='5'>
-						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=odottaa', false, true);\">".t("Tilaukset jotka odottaa toimitusta")."</a>
+						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=odottaa', false, false);\">".t("Tilaukset jotka odottaa toimitusta")."</a>
 					</td>
 				</tr>
 				<tr>
@@ -964,7 +1037,7 @@ if ($tee == "asiakastiedot") {
 
 				<tr>
 					<td class='back' colspan='5'>
-						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=toimituksessa', false, true);\">".t("Toimituksessa olevat tilaukset")."</a>
+						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=toimituksessa', false, false);\">".t("Toimituksessa olevat tilaukset")."</a>
 					</td>
 				</tr>
 				<tr>
@@ -974,7 +1047,7 @@ if ($tee == "asiakastiedot") {
 
 				<tr>
 					<td class='back' colspan='5'>
-						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=toimitettu', false, true);\">".t("Toimitetut tilaukset")."</a>
+						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=toimitettu', false, false);\">".t("Toimitetut tilaukset")."</a>
 					</td>
 				</tr>
 				<tr>
@@ -1027,20 +1100,21 @@ if ($tee == "") {
 	enable_ajax();
 
 	if ($kukarow["kuka"] == "www") {
-		$login_screen = "<form name='login' id= 'loginform' action='login_extranet.php' method='post'>
-						<input type='hidden' id = 'location' name='location' value='$palvelin'>
+		$login_screen = "<form name='login' id= 'loginform' action='' method='post'>
+						<input type='hidden' name='tee' value='login'>
+						<input type='hidden' id = 'location' name='location' value='$palvelin2'>
 						<font class='login'>".t("Käyttäjätunnus",$browkieli).":</font>
 						<input type='text' value='' name='user' size='15' maxlength='30'>
 						<font class='login'>".t("Salasana", $browkieli).":</font>
 						<input type='password' name='salasana' size='15' maxlength='30'>
 						<input type='submit' onclick='submit()' value='".t("Kirjaudu sisään", $browkieli)."'>
-						<br>
+						</form>
 						$errormsg
-						</form>";
+						";
 	}
 	else {
 		$login_screen = "<input type='button' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=haku&hakutapa=tila&tilaustila=kesken', false, false);\" value='".t("Avoimet tilaukset")."'>|<input type='button' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria', false, false);\" value='".t("Tilaushistoria")."'>|<input type='button' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot', false, false);\" value='".t("Asiakastiedot")."'>
-			&nbsp;Tervetuloa, ".$kukarow["nimi"]."&nbsp;<input type='button' onclick=\"javascript:document.location='".$palvelin2."logout.php?location=".$palvelin2."verkkokauppa.php';\" value='".t("Kirjaudu ulos")."'>";
+			&nbsp;Tervetuloa, ".$kukarow["nimi"]."&nbsp;<input type='button' onclick=\"javascript:document.location='".$palvelin2."logout.php?location=".$palvelin2."';\" value='".t("Kirjaudu ulos")."'>";
 	}
 
 	$verkkokauppa_ulos =  "<div class='login' id='login'>$login_screen</div>

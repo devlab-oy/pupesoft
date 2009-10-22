@@ -439,7 +439,6 @@ if ($kollityht > 0) {
 
 //		$returnofdocument = $shipmentinformation->addChild('ReturnOfDocument', ''); // 1 merkki, C  // poland only
 
-/*
 	if ($asiakkaan_sahkopostiosoite != '') {
 		// QVN Option
 		$qvnoption							= $shipmentinformation->addChild('QVNOption');
@@ -475,9 +474,9 @@ if ($kollityht > 0) {
 		1				Reference 1
 		2				Reference 2
 		******************************************************************************/
-//		$subjectline						= $qvnoption->addChild('SubjectLine', ''); // max 75 merkkiä, R
-//		$memo								= $qvnoption->addChild('Memo', substr('', 0, 150));
-//	}
+		$subjectline						= $qvnoption->addChild('SubjectLine', ''); // max 75 merkkiä, R
+		$memo								= $qvnoption->addChild('Memo', substr('', 0, 150));
+	}
 
 		/*
 		// Special Commodities (if selected, you must choose at least one element)

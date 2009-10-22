@@ -945,7 +945,7 @@
 
 			if (!function_exists('print_pdf')) {
 				function print_pdf () {
-					global $pdf, $kukarow, $yhtiorow, $komento, $kieli, $tee, $tulosta_ostotilaus_ulos;
+					global $pdf, $kukarow, $yhtiorow, $komento, $kieli, $tee, $tulosta_ostotilaus_ulos, $laskurow;
 
 					if ($komento["Ostotilaus"] != '' or $tee == 'NAYTATILAUS') {
 						//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
@@ -961,7 +961,7 @@
 						// itse print komento...
 						if ($komento["Ostotilaus"] == 'email') {
 							$liite = $pdffilenimi;
-							$kutsu = "Ostotilaus";
+							$kutsu = "Ostotilaus $laskurow[tunnus]";
 
 							require("../inc/sahkoposti.inc");
 							$tulosta_ostotilaus_ulos .= t("Tilaus tulostuu")."...<br>";

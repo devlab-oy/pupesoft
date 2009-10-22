@@ -289,13 +289,13 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
 	if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 		unset($boob);
-		$boob = mail($tilvahasiakas['email'], $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli), $content, $header, "-f $yhtiorow[postittaja_email]");
+		$boob = mail($tilvahasiakas['email'], $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $laskurow[tunnus]", $content, $header, "-f $yhtiorow[postittaja_email]");
 		if ($boob===FALSE) echo t("Sähköpostin lähetys epäonnistui")."!<br>";
 	}
 
 	if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 		unset($boob);
-		$boob = mail($kukarow['eposti']		, $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli), $content, $header, "-f $yhtiorow[postittaja_email]");
+		$boob = mail($kukarow['eposti']		, $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $laskurow[tunnus]", $content, $header, "-f $yhtiorow[postittaja_email]");
 		if ($boob===FALSE) echo t("Sähköpostin lähetys epäonnistui")."!<br>";
 	}
 }

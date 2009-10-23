@@ -152,10 +152,15 @@ if ($kollityht > 0) {
 			$attention = $shipto->addChild('Attention', '.'); // max 35 merkkiä, R (riippuu maasta)
 		}
 
-		$address1					= $shipto->addChild('Address1', utf8_encode($ups_laskurow['osoite'])); // max 35 merkkiä, R
-		$countryterritory 			= $shipto->addChild('CountryTerritory', $ups_laskurow['maa']); // max 30 merkkiä, R
-		$postalcode					= $shipto->addChild('PostalCode', $ups_laskurow['postino']); // max 9 merkkiä, C (riippuu maasta)
-		$cityortown					= $shipto->addChild('CityOrTown', utf8_encode($ups_laskurow['postitp'])); // max 30 merkkiä, R
+		$osoite1 	= $ups_laskurow['toim_osoite'] != '' ? $ups_laskurow['toim_osoite'] : $ups_laskurow['osoite'];
+		$maa 		= $ups_laskurow['toim_maa'] != '' ? $ups_laskurow['toim_maa'] : $ups_laskurow['maa'];
+		$postino 	= $ups_laskurow['toim_postino'] != '' ? $ups_laskurow['toim_postino'] : $ups_laskurow['postino'];
+		$postitp	= $ups_laskurow['toim_postitp'] != '' ? $ups_laskurow['toim_postitp'] : $ups_laskurow['postitp'];
+
+		$address1					= $shipto->addChild('Address1', utf8_encode($osoite1)); // max 35 merkkiä, R
+		$countryterritory 			= $shipto->addChild('CountryTerritory', $maa); // max 30 merkkiä, R
+		$postalcode					= $shipto->addChild('PostalCode', $postino); // max 9 merkkiä, C (riippuu maasta)
+		$cityortown					= $shipto->addChild('CityOrTown', utf8_encode($postitp)); // max 30 merkkiä, R
 		$telephone					= $ups_laskurow['puhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['puhelin']) :
 										($ups_laskurow['gsm'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['gsm']) :
 										($ups_laskurow['tyopuhelin'] != '' ? $shipto->addChild('Telephone', $ups_laskurow['tyopuhelin']) : $shipto->addChild('Telephone', '.'))); // max 15 merkkiä, C

@@ -218,26 +218,38 @@
 		$erpcmvv = "";
 	}
 
-	if($tila == "poista") {
-		$query = "DELETE FROM maksupositio WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$maksupositio'";
+	if ($tila == "poista") {
+		$query = "	DELETE 
+					FROM maksupositio 
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tunnus = '$maksupositio'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$query = "	SELECT *
 					FROM maksupositio
-					WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$laskurow[jaksotettu]'";
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and otunnus = '$laskurow[jaksotettu]'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		if(mysql_num_rows($result) == 0) {
-			$query = "	UPDATE lasku
+		if (mysql_num_rows($result) == 0) {
+			$query = "	SELECT group_concat(tunnus) tunnukset
+						FROM lasku USE INDEX (yhtio_jaksotettu)
+						WHERE yhtio = '$kukarow[yhtio]'
+						and jaksotettu = '$laskurow[jaksotettu]'";
+			$result = mysql_query($query) or pupe_error($query);
+			$jaksorow = mysql_fetch_array($query);
+
+			$query = "	UPDATE lasku USE INDEX (yhtio_jaksotettu)
 						SET jaksotettu = 0
-						WHERE yhtio 	= '$kukarow[yhtio]'
-						and jaksotettu  = '$laskurow[jaksotettu]'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and jaksotettu = '$laskurow[jaksotettu]'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			$query = "	UPDATE tilausrivi
+			$query = "	UPDATE tilausrivi USE INDEX (yhtio_otunnus)
 						SET jaksotettu = 0
-						WHERE yhtio 	= '$kukarow[yhtio]'
-						and jaksotettu 	= '$laskurow[jaksotettu]'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and jaksotettu = '$laskurow[jaksotettu]'
+						and otunnus in ($jaksorow[tunnukset])";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 	}

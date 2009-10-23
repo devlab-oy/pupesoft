@@ -96,13 +96,12 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 }
 $presult = mysql_query($query) or pupe_error($query);
 
-if ($laskurow["maksu_kurssi"] == 0) { // t‰m‰ olisi huonompi juttu, mut ei mik‰‰n stopperi
-	$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"];
-}
+// k‰ytet‰‰n aina VIENTI kurssia, koska ostoreskontrassa ei koskaa varasto/matkallaolevat tiliˆinnin summaa vaan se tehd‰‰n aina vientikurssilla ja vientikurssin/maksukurssin ero tulee vain valuuttakurssierot -tilille
+$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"];
 
 // jos meill‰ on valuuttakeikka, lasketaan keskikurssi kaikille vaihto-omaisuuslaskuille
 if ($laskurow["maksu_kurssi"] != 1) {
-	$query  = "	SELECT ifnull(round(sum(summa * if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)) / sum(summa), 6), 0) vientikurssi
+	$query  = "	SELECT ifnull(round(sum(summa * vienti_kurssi) / sum(summa), 6), 0) vientikurssi
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tila = 'K'

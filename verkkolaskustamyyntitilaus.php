@@ -75,7 +75,7 @@ if (isset($ebid)) {
 						$ytunnus = "*";
 						// jos on valittuna vaan yksi varasto, p‰ss‰t‰‰n eteenp‰in
 						$varasto = 0;
-						if ($kukarow["varasto"] != "" and strpos(",", $kukarow["varasto"]) === FALSE) $varasto = $kukarow['varasto'];
+						if ((int) $kukarow["oletus_varasto"] != 0) $varasto = $kukarow['oletus_varasto'];
 						$valkoodi = $yhtiorow["valkoodi"]."##";
 
 						$jatka	= "JATKA";

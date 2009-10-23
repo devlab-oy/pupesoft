@@ -1889,7 +1889,7 @@
 				$tulostuspaikka = $roror['tulostuspaikka'];
 			}
 
-			if ((int) $kukarow["varasto"] != 0 and strpos($kukarow["varasto"], ",") === FALSE) $tulostuspaikka = $kukarow['varasto'];
+			if ((int) $kukarow["oletus_varasto"] != 0) $tulostuspaikka = $kukarow['oletus_varasto'];
 
 			if ($tulostuspaikka == '') $tulostuspaikka=$otsik['varasto'];
 

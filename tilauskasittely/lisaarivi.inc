@@ -613,6 +613,13 @@
 					 	$myytavissa = 0;
 						}
 					}
+					
+					if ($zrow['varasto'] == $kukarow['oletus_varasto']) {
+						$zrow['oletus'] = 2;
+					}
+					elseif ($zrow['oletus'] != '') {
+						$zrow['oletus'] = 1;
+					}
 
 					$zzrow[$zzrowlask]["myytavissa"]	= $myytavissa;
 					$zzrow[$zzrowlask]["ei_saldoa"]		= $zrow["ei_saldoa"];

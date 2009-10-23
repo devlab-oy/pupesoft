@@ -210,6 +210,7 @@
 						keraajanro 						= '$keraajanro',
 						myyja 							= '$myyja',
 						varasto 						= '$varasto',
+						oletus_varasto					= '$oletus_varasto',
 						oletus_pakkaamo					= '$oletus_pakkaamo',
 						kirjoitin 						= '$kirjoitin',
 						kassamyyja 						= '$kassamyyja',
@@ -371,6 +372,7 @@
 						myyja 			= '$myyja',
 						osasto			= '$osasto',
 						varasto 		= '$varasto',
+						oletus_varasto 	= '$oletus_varasto',
 						oletus_pakkaamo	= '$oletus_pakkaamo',
 						kirjoitin 		= '$kirjoitin',
 						oletus_asiakas 	= '$oletus_asiakas',
@@ -645,6 +647,26 @@
 
 				echo "</select></td></tr>";
 			}
+
+			echo "<tr><th align='left'>".t("Valitse käyttäjän oletusvarasto").":</td>";
+			echo "<td>";
+
+			$query  = "	SELECT *
+						FROM varastopaikat
+						WHERE yhtio = '$kukarow[yhtio]'
+						order by tyyppi, nimitys";
+			$vares = mysql_query($query) or pupe_error($query);
+
+			echo "<select name='oletus_varasto'>";
+			echo "<option value='0'>",t("Oletusvarasto"),"</option>";
+			while ($varow = mysql_fetch_array($vares)) {
+				$sel = '';
+				if ($varow['tunnus'] == $krow['oletus_varasto']) {
+					$sel = 'selected';
+				}
+				echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
+			}
+			echo "</select>";
 
 			echo "<tr><th align='left'>".t("Valitse varastot, joista käyttäjä saa myydä").":</td>";
 			echo "<td>";

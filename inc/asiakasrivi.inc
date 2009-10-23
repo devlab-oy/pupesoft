@@ -502,6 +502,7 @@
 		$vresult = t_avainsana("LAHETETYYPPI");
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+		$ulos .= "<option value=''>".t("Oletus")."</option>";
 
 		while($row = mysql_fetch_array($vresult)) {
 			$sel = "";

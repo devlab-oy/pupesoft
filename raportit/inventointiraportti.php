@@ -62,6 +62,8 @@
 				$group  = "";
 				$order  = "";
 				$select = "";
+				$varastot_join = "";
+				$varastot_mukana = 0;
 				$gluku  = 0;
 
 				// näitä käytetään queryssä
@@ -156,6 +158,7 @@
 						else $group  .= "varastopaikat.tunnus";
 						$select .= "varastopaikat.nimitys as 'varasto', ";
 						$order  .= "varastopaikat.nimitys,";
+						$varastot_mukana++;
 						$gluku++;
 					}
 
@@ -248,9 +251,10 @@
 					$lisa .= " and tuote.kustp in $sel_kustp ";
 				}
 
-				if (is_array($mul_varasto) and count($mul_varasto) > 0) {
-					$sel_varasto = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_varasto))."')";
-					$lisa .= " and tuotepaikat.varasto in $sel_varasto ";
+				if (is_array($mul_varastot) and count($mul_varastot) > 0) {
+					$sel_varasto = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_varastot))."')";
+					$lisa .= " and varastopaikat.tunnus in $sel_varasto ";
+					$varastot_mukana++;
 				}
 
 				if (is_array($mul_invenlaji) and count($mul_invenlaji) > 0) {
@@ -276,6 +280,18 @@
 
 				$query .= " sum(tapahtuma.kpl) kpl, round(sum(tapahtuma.kpl*tapahtuma.hinta),2) varastonmuutos ";
 
+				// tarvitaan varastopaikkoja
+				if ($varastot_mukana > 0) {
+					$varastot_join = "	JOIN tuotepaikat ON	(tuotepaikat.yhtio = tapahtuma.yhtio
+											and tuotepaikat.tuoteno = tapahtuma.tuoteno
+											and tuotepaikat.hyllyalue = tapahtuma.hyllyalue
+											and tuotepaikat.hyllynro = tapahtuma.hyllynro
+											and tuotepaikat.hyllyvali = tapahtuma.hyllyvali
+											and tuotepaikat.hyllytaso = tapahtuma.hyllytaso)
+										JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+											and concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+											and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))";
+				}
 
 				// generoidaan selectit
 				$query .= "	FROM tuote
@@ -283,20 +299,8 @@
 												and tapahtuma.laji = 'inventointi'
 												and tapahtuma.tuoteno = tuote.tuoteno
 												and tapahtuma.laadittu >= '$vva-$kka-$ppa 00:00:00'
-												and tapahtuma.laadittu <= '$vvl-$kkl-$ppl 23:59:59'
-												$tapahtuma_lisa)
-							JOIN tuotepaikat ON	(tuotepaikat.yhtio = tapahtuma.yhtio
-												and tuotepaikat.tuoteno = tapahtuma.tuoteno
-												and tuotepaikat.hyllyalue = tapahtuma.hyllyalue
-												and tuotepaikat.hyllynro = tapahtuma.hyllynro
-												and tuotepaikat.hyllyvali = tapahtuma.hyllyvali
-												and tuotepaikat.hyllytaso = tapahtuma.hyllytaso
-												$tuotepaikat_lisa)
-							JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-													and concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-													and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-													$varastopaikat_lisa)
-
+												and tapahtuma.laadittu <= '$vvl-$kkl-$ppl 23:59:59')
+							$varastot_join
 							LEFT JOIN kuka ON (tapahtuma.yhtio = kuka.yhtio
 												and tapahtuma.laatija = kuka.kuka)
 							WHERE tuote.yhtio in ($yhtio)
@@ -884,7 +888,10 @@
 			echo "<tr>";
 			echo "<td valign='top'>";
 
-			$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+			$query  = "	SELECT tunnus, nimitys 
+						FROM varastopaikat 
+						WHERE yhtio = '$kukarow[yhtio]'
+						ORDER BY tyyppi, nimitys";
 			$vares = mysql_query($query) or pupe_error($query);
 
 			echo "<select name='mul_varastot[]' multiple='TRUE' size='10' style='width:100%;'>";

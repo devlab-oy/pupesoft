@@ -167,17 +167,17 @@ function loppu ($firstpage, $sendemail = '') {
 
 	$pdf->draw_text(250, $kala, "Yhteensä:", 	$firstpage, $norm);
 
-	$oikpos = $pdf->strlen(sprintf("%.0f", $sumkpled), $norm);
-	$pdf->draw_text(330-$oikpos, $kala, sprintf("%.0f", $sumkpled), 		$firstpage, $norm);
-
 	$oikpos = $pdf->strlen(sprintf("%.0f", $sumkplva), $norm);
-	$pdf->draw_text(380-$oikpos, $kala, sprintf("%.0f", $sumkplva), 		$firstpage, $norm);
+	$pdf->draw_text(330-$oikpos, $kala, sprintf("%.0f", $sumkplva), 		$firstpage, $norm);
 
-	$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $sumed), $norm);
-	$pdf->draw_text(460-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $sumed),			$firstpage, $norm);
+	$oikpos = $pdf->strlen(sprintf("%.0f", $sumkpled), $norm);
+	$pdf->draw_text(380-$oikpos, $kala, sprintf("%.0f", $sumkpled), 		$firstpage, $norm);
 
 	$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $sumva), $norm);
-	$pdf->draw_text(530-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $sumva), 		$firstpage, $norm);
+	$pdf->draw_text(460-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $sumva),			$firstpage, $norm);
+
+	$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $sumed), $norm);
+	$pdf->draw_text(530-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $sumed), 		$firstpage, $norm);
 
 	if ($sumed != 0) {
 		$sumindexi = round($sumva/$sumed,2)*100;

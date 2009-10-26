@@ -196,7 +196,6 @@
 	$formi = 'valinta';
 	$kentta = 'pp';
 
-
 	if ($tee != '') {
 
 		switch ($laji) {
@@ -289,11 +288,11 @@
 			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.nimi&excel=$excel'>".t("Nimi")."</a></th>";
 			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.viesti&excel=$excel'>".t("Maksutieto")."</a></th>";
 			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.tapvm&excel=$excel'>".t("Pvm")."</a></th>";
-			echo "<th>".t("Maksupäivä")."</th>";
-			echo "<th>".t("Oletusmaksupäivä")."</th>";
-			echo "<th>".t("Eräpäivä")."</th>";
-			echo "<th>".t("Avoin saldo")."</th>";
-			echo "<th>".t("Val")."</th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.mapvm&excel=$excel'>".t("Maksupäivä")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.olmapvm&excel=$excel'>".t("Oletusmaksupäivä")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.erpcm&excel=$excel'>".t("Eräpäivä")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=avoinsaldo&excel=$excel'>".t("Avoin saldo")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.valkoodi&excel=$excel'>".t("Val")."</a></th>";
 			echo "</tr>";
 
 			if (isset($workbook)) {
@@ -494,27 +493,15 @@
 			echo "<table>";
 			echo "<form method='post' action='?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=$ojarj&excel=$excel'>";
 			echo "<tr>";
-			echo "	<th>
-						<a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.ytunnus&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro&excel=$excel'>".t("Ytunnus")."</a>
-						<br><input type='text' name='lasku_ytunnus' value='$lasku_ytunnus'>
-					</th>";
-			echo "	<th>
-						<a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.nimi&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro&excel=$excel'>".t("Nimi")."</a>
-						<br><input type='text' name='lasku_nimi' value='$lasku_nimi'>
-					</th>";
-			echo "	<th>
-						<a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.laskunro&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro&excel=$excel'>".t("Laskunro")."</a>
-						<br><input type='text' name='lasku_laskunro' value='$lasku_laskunro'>
-					</th>";
-			echo "	<th>
-						<a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.tapvm&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro&excel=$excel'>".t("Pvm")."</a>
-
-					</th>";
-			echo "<th>".t("Maksupäivä")."</th>";
-			echo "<th>".t("Eräpäivä")."</th>";
-			echo "<th>".t("Laskun summa")."</th>";
-			echo "<th>".t("Avoin saldo")."</th>";
-			echo "<th>".t("Val")."</th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.ytunnus&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro&excel=$excel'>".t("Ytunnus")."</a><br><input type='text' name='lasku_ytunnus' value='$lasku_ytunnus'></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.nimi&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro&excel=$excel'>".t("Nimi")."</a><br><input type='text' name='lasku_nimi' value='$lasku_nimi'></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.laskunro&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro&excel=$excel'>".t("Laskunro")."</a><br><input type='text' name='lasku_laskunro' value='$lasku_laskunro'></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.tapvm&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro&excel=$excel'>".t("Pvm")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.mapvm&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro&excel=$excel'>".t("Maksupäivä")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.erpcm&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro&excel=$excel'>".t("Eräpäivä")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.summa&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro&excel=$excel'>".t("Laskun summa")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=laskuavoinsaldo&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro&excel=$excel'>".t("Avoin saldo")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.valkoodi&lasku_ytunnus=$lasku_ytunnus&lasku_nimi=$lasku_nimi&lasku_laskunro=$lasku_laskunro&excel=$excel'>".t("Val")."</a></th>";
 			echo "<td class='back'><input type='submit' value='Hae'></th>";
 			echo "</tr>";
 			echo "</form>";

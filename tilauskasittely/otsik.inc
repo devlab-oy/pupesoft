@@ -1984,6 +1984,12 @@
 					$chk[$numi] = "checked";
 				}
 
+				if ($sopapurow["sopimus_kk"] == "") {
+					for ($numi = 1; $numi < 13; $numi++) {
+						$chk[$numi] = "checked";
+					}
+				}
+
 				echo "<table>";
 				echo "<tr><th colspan='2'>".t("Valitse ylläpitosopimuksen laskutusaikataulu").":</th></tr>";
 				echo "<tr>";

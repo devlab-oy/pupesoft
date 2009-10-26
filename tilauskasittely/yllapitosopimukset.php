@@ -324,6 +324,10 @@
 
 		while ($row = mysql_fetch_array($result)) {
 
+			if ($row["nimi"] == $row["toim_nimi"]) {
+				$row["toim_nimi"] = "";
+			}
+
 			echo "<tr class='aktiivi'>";
 			echo "<td valign='top'>$row[laskutunnus]</td>";
 			echo "<td valign='top'>$row[ytunnus]</td>";

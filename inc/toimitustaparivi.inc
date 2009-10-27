@@ -15,8 +15,8 @@
 		if ($trow[$i]!='') $sel = 'SELECTED';
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''>".t("Ei noutoa")."</option>";
-		$ulos .= "<option value='o' $sel>".t("Asiakas noutaa")."</option>";
+		$ulos .= "<option value=''>".t("Tilaukset toimitetaan asiakkaalle")."</option>";
+		$ulos .= "<option value='o' $sel>".t("Asiakas noutaa tilaukset")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -28,11 +28,12 @@
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Ei lauantaijakelua")."</option>";
-		$ulos .= "<option value='o' $sel>".t("Lauantaijakelu")."</option>";
+		$ulos .= "<option value='o' $sel>".t("Itella lisäpalvelu: Lauantaijakelu")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
 
+/* ei käytössä
 	if (mysql_field_name($result, $i) == "multi_jv") {
 
 		$sel='';
@@ -44,6 +45,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+*/
 
 	if (mysql_field_name($result, $i) == "kuljyksikko") {
 
@@ -51,8 +53,8 @@
 		if ($trow[$i]!='') $sel = 'SELECTED';
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''>".t("Ei")."</option>";
-		$ulos .= "<option value='o' $sel>".t("Kyllä")."</option>";
+		$ulos .= "<option value=''>".t("Ei kuljetusyksikkökuljetusta")."</option>";
+		$ulos .= "<option value='o' $sel>".t("Itella lisäpalvelu: Kuljetusyksikkökuljetus")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -66,8 +68,8 @@
 			$sel2 = 'SELECTED';
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='K' $sel1>".t("Lähettäjä")."</option>";
-		$ulos .= "<option value=''  $sel2>".t("Vastaanottaja")."</option>";
+		$ulos .= "<option value='K' $sel1>".t("Lähettäjä maksaa rahdin")."</option>";
+		$ulos .= "<option value=''  $sel2>".t("Vastaanottaja maksaa rahdin")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -217,8 +219,8 @@
 		else $sela = 'SELECTED';
 		
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' $sela>".t("Saa toimittaa jälkivaatimuksia")."</option>";
-		$ulos .= "<option value='o' $sel>".t("Ei saa toimittaa jälkivaatimuksia")."</option>";
+		$ulos .= "<option value='' $sela>".t("Toimitustavalla saa toimittaa jälkivaatimuksia")."</option>";
+		$ulos .= "<option value='o' $sel>".t("Toimitustavalla ei saa toimittaa jälkivaatimuksia")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -234,8 +236,8 @@
 		}
 		
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' $sela>".t("Ei")."</option>";
-		$ulos .= "<option value='K' $sel>".t("Kyllä")."</option>";
+		$ulos .= "<option value='' $sela>".t("Toimitustavalla saa toimittaa VAK-tuotteita")."</option>";
+		$ulos .= "<option value='K' $sel>".t("Toimitustavalla ei saa toimittaa VAK-tuotteita")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -251,8 +253,8 @@
 		}
 		
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' $sela>".t("Ei")."</option>";
-		$ulos .= "<option value='K' $sel>".t("Kyllä")."</option>";
+		$ulos .= "<option value='' $sela>".t("Toimitustapa ei ole oletustoimitustapa VAK-kuljetuksille")."</option>";
+		$ulos .= "<option value='K' $sel>".t("Toimitustapa on oletus toimitustapa VAK-kuljetuksille")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -270,8 +272,8 @@
 			$chk2 = 'selected';
 		}
 
-		$ulos .= "<option value='0' $chk2>".t("Ei")."</option>";
-		$ulos .= "<option value='1' $chk1>".t("Kyllä")."</option>";
+		$ulos .= "<option value='0' $chk2>".t("Toimitustavan tilaukset varaavat pakkaamolokeron")."</option>";
+		$ulos .= "<option value='1' $chk1>".t("Toimitustavan tilaukaset eivät varaa pakkaamolokeroa")."</option>";
 
 		$ulos .= "</select></td>";
 		$jatko = 0;
@@ -290,8 +292,8 @@
 			$chk2 = 'selected';
 		}
 
-		$ulos .= "<option value='' $chk2>".t("Ei")."</option>";
-		$ulos .= "<option value='k' $chk1>".t("Kyllä")."</option>";
+		$ulos .= "<option value='' $chk2>".t("Toimitustavalle ei tulosteta rahtikirjaerittelyä")."</option>";
+		$ulos .= "<option value='k' $chk1>".t("Toimitustavalle tulostetaan rahtikirjaerittely")."</option>";
 
 		$ulos .= "</select></td>";
 		$jatko = 0;

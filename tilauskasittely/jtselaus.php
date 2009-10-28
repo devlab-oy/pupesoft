@@ -660,6 +660,8 @@
 			}
 			$isaresult = mysql_query($query) or pupe_error($query);
 
+			$jtseluas_rivienmaara = mysql_num_rows($isaresult);
+
 			if (mysql_num_rows($isaresult) > 0) {
 
 				$jt_rivilaskuri = 0;
@@ -1658,7 +1660,11 @@
 					}
 
 					echo "</table>";
-					echo "<br>";
+
+					if ($jtseluas_rivienmaara >= 1000) {
+						echo "<font class='error'>".t("Haun tulos liian suuri! N‰ytet‰‰n ensimm‰iset 1000 rivi‰!")."</font><br>";
+					}
+
 				}
 				elseif ($jt_rivilaskuri == 0) {
 					if ($from_varastoon_inc == "editilaus_in.inc") {

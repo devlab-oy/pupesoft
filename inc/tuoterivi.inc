@@ -110,7 +110,7 @@
 
 			while ($srow = mysql_fetch_array($sresult)) {
 				$sel = '';
-				if ($trow[$i] == $srow["selite"]) {
+				if ($trow[$i] == $srow["selite"] and $srow["selite"] != "") {
 					$sel = "selected";
 				}
 
@@ -142,7 +142,7 @@
 	        $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 	        while ($vrow=mysql_fetch_array($vresult)) {
 		        $sel="";
-		        if ($trow[$i] == $vrow[0]) {
+		        if ($trow[$i] == $vrow[0] and $vrow[0] != "") {
 		                $sel = "selected";
 		        }
 	        	$ulos .= "<option value = '$vrow[0]' $sel>$vrow[0]</option>";
@@ -285,7 +285,7 @@
 
 		while ($srow = mysql_fetch_array($vresult)) {
 			$sel = '';
-			if ($trow[$i] == $srow["ryhma"]) {
+			if ($trow[$i] == $srow["ryhma"] and $srow["ryhma"] != "") {
 				$sel = "selected";
 			}
 			$ulos .= "<option value='$srow[ryhma]' $sel>$srow[selitetark]</option>";
@@ -316,7 +316,7 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if (strtoupper($trow[$i]) == strtoupper($vrow["selite"])) {
+			if (strtoupper($trow[$i]) == strtoupper($vrow["selite"]) and $vrow["selite"] != "") {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
@@ -337,7 +337,7 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow[0]) {
+			if ($trow[$i] == $vrow[0] and $vrow[0] != "") {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
@@ -353,7 +353,7 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if (strtoupper($trow[$i]) == strtoupper($vrow["selite"])) {
+			if (strtoupper($trow[$i]) == strtoupper($vrow["selite"]) and $vrow["selite"] != "") {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
@@ -414,7 +414,7 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow['myyja']) {
+			if ($trow[$i] == $vrow['myyja'] and $vrow["myyja"] != "") {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[myyja]' $sel>$vrow[myyja] - $vrow[nimi]</option>";
@@ -434,7 +434,7 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow['myyja']) {
+			if ($trow[$i] == $vrow['myyja'] and $vrow["myyja"] != "") {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[myyja]' $sel>$vrow[myyja] - $vrow[nimi]</option>";
@@ -519,7 +519,7 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow['selitetark']) {
+			if ($trow[$i] == $vrow['selitetark'] and $vrow["selitetark"] != "") {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
@@ -536,7 +536,7 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow['selitetark']) {
+			if ($trow[$i] == $vrow['selitetark'] and $vrow["selitetark"] != "") {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
@@ -553,7 +553,7 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow['selitetark']) {
+			if ($trow[$i] == $vrow['selitetark'] and $vrow["selitetark"] != "") {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
@@ -570,7 +570,7 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow['selitetark']) {
+			if ($trow[$i] == $vrow['selitetark'] and $vrow["selitetark"] != "") {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
@@ -587,7 +587,7 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow['selitetark']) {
+			if ($trow[$i] == $vrow['selitetark'] and $vrow["selitetark"] != "") {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
@@ -604,7 +604,7 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow['selitetark']) {
+			if ($trow[$i] == $vrow['selitetark'] and $vrow["selitetark"] != "") {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
@@ -621,7 +621,7 @@
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow['selitetark']) {
+			if ($trow[$i] == $vrow['selitetark'] and $vrow["selitetark"] != "") {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";

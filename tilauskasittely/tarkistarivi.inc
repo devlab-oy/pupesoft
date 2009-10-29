@@ -352,7 +352,12 @@
 
 			while ($alkurow = mysql_fetch_array($omavarastores)) {
 
-				if ($alkurow["hyllyalue"] != "!!M" and (($alkurow["varastotyyppi"] != "E" and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $alkurow["varasto"] or (in_array($alkurow["varasto"], $varastot_array) and $laskurow["varasto"] == 0) or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]))) {
+				if ($alkurow["hyllyalue"] != "!!M" and (($alkurow["varastotyyppi"] != "E" and $laskurow["varasto"] == 0 and (in_array($alkurow["varasto"], $varastot_array) or count($varastot_array) == 0)) 
+														or $laskurow["varasto"] == $alkurow["varasto"] 
+														or (in_array($alkurow["varasto"], $varastot_array) and $laskurow["varasto"] == 0) 
+														or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"])
+														)
+					) {
 
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 

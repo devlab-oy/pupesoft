@@ -393,7 +393,7 @@
 						$query = "	SELECT tunnus
 									FROM tapahtuma
 									WHERE yhtio = '$kukarow[yhtio]'
-									and laji = 'tulo'
+									and laji in ('tulo', 'valmistus')
 									and laadittu < '$tapapvm'
 									and tuoteno = '$srow1[tuoteno]'";
 						$sarjares2 = mysql_query($query) or pupe_error($query);

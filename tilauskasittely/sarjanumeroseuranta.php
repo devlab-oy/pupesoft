@@ -939,6 +939,7 @@
 		echo "<table>";
 		echo "<tr><th>".t("Tuotenumero")."</th><td>$rivirow[tuoteno] $rivirow[nimitys]</td></tr>";
 		echo "<tr><th>".t("M‰‰r‰")."</th><td>$rivirow[varattu] ".t_avainsana("Y", "", "and avainsana.selite='$rivirow[yksikko]'", "", "", "selite")."</td></tr>";
+		echo "<tr><th>",t("Kehahinta"),"</th><td>$kehahin</td></tr>";
 		echo "</table><br>";
 	}
 
@@ -1010,6 +1011,7 @@
 	echo "<input type='hidden' name='ostotilaus_haku' 	value='$ostotilaus_haku'>";
 	echo "<input type='hidden' name='myyntitilaus_haku'	value='$myyntitilaus_haku'>";
 	echo "<input type='hidden' name='lisatieto_haku' 	value='$lisatieto_haku'>";
+	echo "<input type='hidden' name='kehahin' 			value='$kehahin'>";
 
 	$valitut_sarjat = array();
 
@@ -1242,6 +1244,7 @@
 				<input type='hidden' name='otunnus' 			value='$otunnus'>
 				<input type='hidden' name='muut_siirrettavat'	value='$muut_siirrettavat'>
 				<input type='hidden' name='toiminto' 			value='LISAA'>
+				<input type='hidden' name='kehahin'				value='$kehahin'>
 				<input type='hidden' name='valitut_sarjat' 		value='".implode(",", $valitut_sarjat)."'>";
 
 		if ($rivirow["tuoteno"] != '' and ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G")) {

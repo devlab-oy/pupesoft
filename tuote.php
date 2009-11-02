@@ -290,7 +290,7 @@
 			$sarjanumero_kpl = 0;
 
 			// Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu))
-			if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
+			if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow['sarjanumeroseuranta'] == 'G') {
 				$query	= "	SELECT sarjanumeroseuranta.tunnus
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -1305,7 +1305,7 @@
 				echo "<td class='tumma' title='$muutos'>".number_format($gt, 2, ',', ' ')."</td><tr></table><br><br>";
 			}
 
-			if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow["sarjanumeroseuranta"] == "V") {
+			if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow["sarjanumeroseuranta"] == "V" or $tuoterow['sarjanumeroseuranta'] == 'T') {
 
 				echo "<font class='message'>".t("Sarjanumerot")."</font><hr>";
 
@@ -1369,7 +1369,14 @@
 								<td>$sarjarow[nimitys]</td>
 								<td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($tuoterow["tuoteno"])."&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td>
 								<td>$sarjarow[hyllyalue] $sarjarow[hyllynro] $sarjarow[hyllyvali] $sarjarow[hyllytaso]</td>
-								<td align='right'>".sprintf('%.2f', sarjanumeron_ostohinta("tunnus", $sarjarow["sarjatunnus"]))."</td>
+								<td align='right'>";
+								if ($tuoterow['sarjanumeroseuranta'] == 'V' or $tuoterow['sarjanumeroseuranta'] == 'T') {
+									echo sprintf('%.2f', $tuoterow['kehahin']);
+								}
+								else {
+									sprintf('%.2f', sarjanumeron_ostohinta("tunnus", $sarjarow["sarjatunnus"]));
+								}
+								echo "</td>
 								<td>$sarjarow[myynimi] $fnlina1</td></tr>";
 					}
 
@@ -1381,18 +1388,24 @@
 
 				$query	= "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.parasta_ennen, sarjanumeroseuranta.lisatieto,
 							sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso,
-							sarjanumeroseuranta.era_kpl kpl
+							sarjanumeroseuranta.era_kpl kpl,
+							sarjanumeroseuranta.tunnus sarjatunnus
 							FROM sarjanumeroseuranta
+							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
 							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 							and sarjanumeroseuranta.tuoteno = '$tuoterow[tuoteno]'
 							and sarjanumeroseuranta.myyntirivitunnus = 0
-							and sarjanumeroseuranta.era_kpl != 0";
+							and sarjanumeroseuranta.era_kpl != 0
+							and tilausrivi_osto.laskutettuaika != '0000-00-00'";
 				$sarjares = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sarjares) > 0) {
 					echo "<table>";
 					if ($tuoterow["sarjanumeroseuranta"] == "F") {
 						echo "<tr><th colspan='4'>".t("Varasto").":</th></tr>";
+					}
+					elseif ($tuoterow["sarjanumeroseuranta"] == "G") {
+						echo "<tr><th colspan='5'>".t("Varasto").":</th></tr>";
 					}
 					else {
 						echo "<tr><th colspan='3'>".t("Varasto").":</th></tr>";
@@ -1404,6 +1417,9 @@
 					}
 
 					echo "<th>".t("Määrä")."</th>";
+					if ($tuoterow['sarjanumeroseuranta'] == 'G') {
+						echo "<th>",t("Ostohinta"),"</th>";
+					}
 					echo "<th>".t("Lisätieto")."</th></tr>";
 
 					while($sarjarow = mysql_fetch_array($sarjares)) {
@@ -1415,7 +1431,9 @@
 						}
 
 						echo "<td align='right'>$sarjarow[kpl]</td>";
-
+						if ($tuoterow['sarjanumeroseuranta'] == 'G') {
+							echo "<td align='right'>".sprintf('%.2f', sarjanumeron_ostohinta("tunnus", $sarjarow["sarjatunnus"]))."</td>";
+						}
 						echo "<td>$sarjarow[lisatieto]</td>";
 
 						//	Katsotaan jos meidän pitäisi liittää jotain infoa lisätiedoista
@@ -1562,7 +1580,8 @@
 						ORDER BY tapahtuma.laadittu desc $maara";
 			$qresult = mysql_query($query) or pupe_error($query);
 
-			if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
+			// jos joku in-out varastonarvo
+			if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow['sarjanumeroseuranta'] == 'G') {
 				$kokonaissaldo_tapahtumalle = $sarjanumero_kpl;
 			}
 

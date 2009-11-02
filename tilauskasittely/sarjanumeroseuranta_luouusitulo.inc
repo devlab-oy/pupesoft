@@ -11,7 +11,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$tuoterow = mysql_fetch_array($result);
 		
-		if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "G") {
+		if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "G" or $tuoterow["sarjanumeroseuranta"] == "U") {
 			// Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu)
 			$query	= "	SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
 						FROM sarjanumeroseuranta
@@ -36,20 +36,17 @@
 			
 				$kehahin = sprintf('%.2f', $ikrow["kehahin"]);
 			}
-		
-			if($tuoterow["sarjanumeroseuranta"] == "G") {
-				echo "<font class='head'>".t("Sarjanumeroseuranta")."</font><hr>";
-			}
-			else {
-				echo "<font class='head'>".t("Eränumeroseuranta In-Out")."</font><hr>";
-			}
+		}
+
+		if ($tuoterow["sarjanumeroseuranta"] == "G" or $tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F") {
+			echo "<font class='head'>",t("Eränumeroseuranta"),"</font><hr>";
 		}
 		else {
-			echo "<font class='head'>".t("Eränumeroseuranta")."</font><hr>";
+			echo "<font class='head'>".t("Sarjanumeroseuranta")."</font><hr>";
 		}
-			
+
 		echo "<table>";
-		echo "<tr><th>Inventoidaan tulotapahtuma tuotteelle:</th><td>$tuoteno</td></tr>";
+		echo "<tr><th>",t("Inventoidaan tulotapahtuma tuotteelle"),":</th><td>$tuoteno</td></tr>";
 		
 	
 		echo "<form action='$PHP_SELF' method='post'>
@@ -62,27 +59,35 @@
 				<input type='hidden' name='hyllytaso'	value='$hyllytaso'>                        
 				<input type='hidden' name='from'		value='INVENTOINTI'>                       
 				<input type='hidden' name='lopetus'		value='$lopetus'>";
-		
-		if ($tuoterow["sarjanumeroseuranta"] == "S") {
-			echo "<tr><th>Tuotteen keskimääräinen hankintahinta:</th><td>$kehahin</td></tr>";
+
+		// Lasketaan varastonarvon muutos
+		// S = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo
+		// T = Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo
+		// U = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi
+		// V = Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
+		// E = Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
+		// F = Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo
+		// G = Eränumeroseuranta. Osto-Myynti / In-Out varastonarvo
+
+		if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U") {
+			echo "<tr><th>",t("Tuotteen keskimääräinen hankintahinta"),":</th><td>$kehahin</td></tr>";
 			echo "<tr><th>".t("Inventoitavan yksilön hankintahinta").":</th><td><input type='text' name='kehahin' size='10'	value='$kehahin'></td></tr>";
 		}
 		elseif ($tuoterow["sarjanumeroseuranta"] == "G") {
-			echo "<tr><th>Tuotteen keskimääräinen hankintahinta:</th><td>$kehahin</td></tr>";
+			echo "<tr><th>".t("Tuotteen keskimääräinen hankintahinta").":</th><td>$kehahin</td></tr>";
 			echo "<tr><th>".t("Inventoitavan erän hankintahinta").":</th><td><input type='text' name='kehahin' size='10'	value='$kehahin'></td></tr>";
-			echo "<tr><th>".t("Erän suuruus").":</th><td><input type='text' name='iera_kpl' size='10'></td></tr>";			
+			echo "<tr><th>".t("Erän suuruus").":</th><td><input type='text' name='era_kpl' size='10'></td></tr>";			
 		}
-		else {
-			echo "<tr><th>".t("Erän suuruus").":</th><td><input type='text' name='iera_kpl' size='10'></td></tr>";
+		elseif ($tuoterow['sarjanumeroseuranta'] == 'E' or $tuoterow['sarjanumeroseuranta'] == 'F') {
+			echo "<tr><th>".t("Erän suuruus").":</th><td><input type='text' name='era_kpl' size='10'></td></tr>";
 		}
-		
+
 		echo "</table>";
 		
 		echo "<br><br><input type='submit' value='".t("Jatka")."'>";
-			
-		
-		
+
 		require ("../inc/footer.inc");
+
 		exit;
 	}
 	else {
@@ -135,8 +140,8 @@
 		$result  = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
 		
-		if ((int) $iera_kpl > 0) {
-			$skpl = $iera_kpl;
+		if ((int) $era_kpl > 0) {
+			$skpl = $era_kpl;
 		}
 		else {
 			$skpl = 1;
@@ -163,7 +168,7 @@
 					laadittu		= now(),
 					toimaika 		= now(),
 					laskutettu		= 'Invent',
-					laskutettuaika	= now(),
+					laskutettuaika	= '0000-00-00',
 					yhtio 			= '$kukarow[yhtio]',
 					tuoteno 		= '$tuoteno',
 					ale 			= '0',

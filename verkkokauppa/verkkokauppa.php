@@ -18,8 +18,8 @@ if ($_REQUEST["tee"] == "login") {
 
 		$query = "	SELECT kuka, session, salasana
 					FROM kuka
-					where kuka = '$user' 
-					and extranet != '' 
+					where kuka = '$user'
+					and extranet != ''
 					and oletus_asiakas != ''";
 		$result = mysql_query($query) or die("VIRHE: Kysely ei onnistu!");
 		$krow = mysql_fetch_array($result);
@@ -45,8 +45,8 @@ if ($_REQUEST["tee"] == "login") {
 			$query = "	UPDATE kuka
 						SET session = '$session',
 						lastlogin = now()
-						WHERE kuka = '$user' 
-						and extranet != '' 
+						WHERE kuka = '$user'
+						and extranet != ''
 						and oletus_asiakas != ''";
 			$result = mysql_query($query) or die ("Päivitys epäonnistui kuka $query");
 
@@ -100,8 +100,8 @@ if (!function_exists("tilaus")) {
 						<input type='hidden' name='osasto' value = '$osasto'>
 						<input type='hidden' name='tuotemerkki' value = '$tuotemerkki'>
 						<input type='hidden' name='try' value = '$try'>";
-		}				
-	
+		}
+
 		ob_start();
 		require("naytatilaus.inc");
 		$ulos .= ob_get_contents();
@@ -113,7 +113,7 @@ if (!function_exists("tilaus")) {
 
 if (!function_exists("menu")) {
 	function menu($osasto = "", $try = "") {
-		global $yhtiorow, $kukarow, $verkkokauppa, $verkkokauppa_tuotemerkit, $verkkokauppa_saldotsk, $verkkokauppa_anon;
+		global $yhtiorow, $kukarow, $verkkokauppa, $verkkokauppa_tuotemerkit, $verkkokauppa_saldotsk, $verkkokauppa_anon, $verkkokauppa_hakualkuun;
 
 		$val = "";
 
@@ -175,8 +175,22 @@ if (!function_exists("menu")) {
 				else $val .= "<tr><td class='menucell'><a class='menu' href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=uutiset&sivu=$orow[selite]', false, false);\">$orow[selitetark]</a></td></tr>";
 			}
 
+			$verkkokauppa_tuotehaku = "<tr><td class='back'><br><font class='info'>".t("Tuotehaku").":</font><br><hr></td></tr>
+					 	<tr><td class='back'><form id = 'tuotehaku' name='tuotehaku'  action = \"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\" method = 'post'>
+						<input type = 'text' size='12' name = 'tuotehaku'>
+						<tr><td class='back'>&raquo; <a onclick=\"self.scrollTo(0,0);\" href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\">".t("Nimityksellä")."</a></td></tr>
+						<tr><td class='back'>&raquo; <a onclick=\"self.scrollTo(0,0);\" href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla', 'selain', false, false);\">".t("Tuotekoodilla")."</a></td></tr>
+						$toimlisa
+						</form>
+						</td>
+						</tr>";
 
 			if ($verkkokauppa_anon or $kukarow["kuka"] != "www") {
+
+				if ($verkkokauppa_hakualkuun) {
+					$val .= $verkkokauppa_tuotehaku;
+				}
+
 				$val .=  "<tr><td class='back'><br><font class='info'>".t("Tuotteet").":</font><br><hr></td></tr>";
 
 				$ores = t_avainsana("OSASTO", "", " and avainsana.nakyvyys = '' ");
@@ -191,15 +205,10 @@ if (!function_exists("menu")) {
 								<tr><td class='menuspacer'><div id='$target' style='display: none'></div></td></tr>";
 				}
 
-				$val .= "<tr><td class='back'><br><font class='info'>".t("Tuotehaku").":</font><br><hr></td></tr>
-						 	<tr><td class='back'><form id = 'tuotehaku' name='tuotehaku'  action = \"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\" method = 'post'>
-							<input type = 'text' size='12' name = 'tuotehaku'>
-							<tr><td class='back'>&raquo; <a onclick=\"self.scrollTo(0,0);\" href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\">".t("Nimityksellä")."</a></td></tr>
-							<tr><td class='back'>&raquo; <a onclick=\"self.scrollTo(0,0);\" href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla', 'selain', false, false);\">".t("Tuotekoodilla")."</a></td></tr>
-							$toimlisa
-							</form>
-							</td>
-							</tr>";
+				if (!$verkkokauppa_hakualkuun) {
+					$val .= $verkkokauppa_tuotehaku;
+				}
+
 			}
 
 			$val .= "</table><script>setTimeout(\"document.getElementById('rootMenu').style.visibility='visible';\", 250)</script>";
@@ -759,7 +768,6 @@ if ($tee == "tilaa") {
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
-
 	die($ulos);
 }
 
@@ -791,13 +799,13 @@ if ($tee == "tilatut") {
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
 
-		$ulos .= "<br><input type='button' onclick=\"if(confirm('".t("Oletko varma, että haluat jättää tilauksen %s kesken?", $kieli, $laskurow["tunnus"])."')) { sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=keskeytatilaus&tilaus=$laskurow[tunnus]', false, false); }\" value='".t("Jätä kesken")."'>&nbsp;&nbsp;";
+		$ulos .= "<br><input type='button' onclick=\"if (confirm('".t("Oletko varma, että haluat jättää tilauksen %s kesken?", $kieli, $laskurow["tunnus"])."')) { sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=keskeytatilaus&tilaus=$laskurow[tunnus]', false, false); }\" value='".t("Jätä kesken")."'>&nbsp;&nbsp;";
 
 		if ($row["rivei"] > 0) {
-			$ulos .= "<input type='button' onclick=\"if(confirm('".t("Oletko varma, että haluat lähettää tilauksen eteenpäin?")."')) { sndReq('selain', 'verkkokauppa.php?tee=tilaa'); }\" value='".t("Tilaa tuotteet")."'>&nbsp;&nbsp;";
+			$ulos .= "<input type='button' onclick=\"if (confirm('".t("Oletko varma, että haluat lähettää tilauksen eteenpäin?")."')) { sndReq('selain', 'verkkokauppa.php?tee=tilaa'); }\" value='".t("Tilaa tuotteet")."'>&nbsp;&nbsp;";
 		}
 
-		$ulos .= "<input type='button' onclick=\"if(confirm('".t("Oletko varma, että haluat mitätöidä tilauksen?")."')) { sndReq('selain', 'verkkokauppa.php?tee=poistakori&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki'); }\" value='".t("Mitätöi tilaus")."'>";
+		$ulos .= "<input type='button' onclick=\"if (confirm('".t("Oletko varma, että haluat mitätöidä tilauksen?")."')) { sndReq('selain', 'verkkokauppa.php?tee=poistakori&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki'); }\" value='".t("Mitätöi tilaus")."'>";
 
 		$ulos .= "<br><br>";
 
@@ -811,7 +819,7 @@ if ($tee == "asiakastiedot") {
 
 	// Ekotetaan avoin kori
 	echo avoin_kori();
-	
+
 	if ($nayta == "") $nayta = "asiakastiedot";
 
 	if ($nayta == "asiakastiedot") {

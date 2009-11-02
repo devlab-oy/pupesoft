@@ -234,20 +234,19 @@ elseif ($session == '' and $login != 'yes' and $verkkokauppa == '') {
 }
 
 //	Verkkokauppamoodissa ei koskaan ohjetta!
-if($verkkokauppa != "") $_GET["ohje"] = "off";
+if ($verkkokauppa != "") $_GET["ohje"] = "off";
 
 // jos meill‰ on sessio
 if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 
 	//	Kirjataan verkkokauppak‰ytt‰j‰
-	if($verkkokauppa != "" and $session == "") {
+	if ($verkkokauppa != "" and $session == "") {
 		//	T‰‰ll‰ ei ole mit‰‰n oikeuksia
 		$oikeurow = array();
 		$kukarow["kuka"] 		= "www";
 		$kukarow["nimi"] 		= "Verkkokauppa";
 		$kukarow["extranet"] 	= "X";
 		$kukarow["yhtio"] 		= $verkkokauppa;
-
 	}
 	else {
 
@@ -387,7 +386,8 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		}
 
 		if (!isset($no_head) or (isset($no_head) and $no_head != "yes")) {
-
+			echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"
+			       \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
 			echo "<html>";
 			echo "<head>";
 			echo "<META Http-Equiv='Cache-Control' Content='no-cache'>";

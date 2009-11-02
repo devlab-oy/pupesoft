@@ -112,7 +112,7 @@ if (!function_exists("tilaus")) {
 }
 
 if (!function_exists("menu")) {
-	function menu($osasto="", $try="") {
+	function menu($osasto = "", $try = "") {
 		global $yhtiorow, $kukarow, $verkkokauppa, $verkkokauppa_tuotemerkit, $verkkokauppa_saldotsk, $verkkokauppa_anon;
 
 		$val = "";
@@ -177,7 +177,7 @@ if (!function_exists("menu")) {
 
 
 			if ($verkkokauppa_anon or $kukarow["kuka"] != "www") {
-				$val .=  "<tr><td class='back'><br><font class='info'>".t("Tuotteet").":</font><hr></td></tr>";
+				$val .=  "<tr><td class='back'><br><font class='info'>".t("Tuotteet").":</font><br><hr></td></tr>";
 
 				$ores = t_avainsana("OSASTO", "", " and avainsana.nakyvyys = '' ");
 
@@ -191,7 +191,7 @@ if (!function_exists("menu")) {
 								<tr><td class='menuspacer'><div id='$target' style='display: none'></div></td></tr>";
 				}
 
-				$val .= "<tr><td class='back'><br><font class='info'>".t("Tuotehaku").":</font><hr></td></tr>
+				$val .= "<tr><td class='back'><br><font class='info'>".t("Tuotehaku").":</font><br><hr></td></tr>
 						 	<tr><td class='back'><form id = 'tuotehaku' name='tuotehaku'  action = \"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\" method = 'post'>
 							<input type = 'text' size='12' name = 'tuotehaku'>
 							<tr><td class='back'>&raquo; <a onclick=\"self.scrollTo(0,0);\" href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\">".t("Nimityksellä")."</a></td></tr>
@@ -397,7 +397,7 @@ if (!function_exists("uutiset")) {
 		$query = "	SELECT *
 					FROM kalenteri
 					WHERE yhtio = '$kukarow[yhtio]'  $lisa
-					ORDER BY kokopaiva DESC , luontiaika DESC
+					ORDER BY kokopaiva DESC, luontiaika DESC
 					LIMIT 8";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -483,7 +483,6 @@ if ($tee == "monistalasku") {
 			$kklkm = 1;
 			$tee = "MONISTA";
 			$vain_monista = "utilaus";
-
 
 			require("monistalasku.php");
 

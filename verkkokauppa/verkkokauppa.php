@@ -81,7 +81,7 @@ if ($verkkokauppa == "") die("Verkkokuapayhtiö määrittelemättä");
 
 if (!function_exists("tilaus")) {
 	function tilaus($tunnus, $muokkaa = "") {
-		global $yhtiorow, $kukarow, $verkkokauppa;
+		global $yhtiorow, $kukarow, $verkkokauppa, $verkkokauppa_tuotemerkit, $verkkokauppa_saldotsk, $verkkokauppa_anon;
 
 		$query = "	SELECT *
 					FROM lasku
@@ -113,7 +113,7 @@ if (!function_exists("tilaus")) {
 
 if (!function_exists("menu")) {
 	function menu($osasto="", $try="") {
-		global $yhtiorow, $kukarow, $verkkokauppa_tuotemerkit;
+		global $yhtiorow, $kukarow, $verkkokauppa, $verkkokauppa_tuotemerkit, $verkkokauppa_saldotsk, $verkkokauppa_anon;
 
 		$val = "";
 
@@ -373,7 +373,7 @@ if (!function_exists("menu")) {
 
 if (!function_exists("uutiset")) {
 	function uutiset($osasto="", $try="", $sivu="") {
-		global $yhtiorow, $kukarow;
+		global $yhtiorow, $kukarow, $verkkokauppa, $verkkokauppa_tuotemerkit, $verkkokauppa_saldotsk, $verkkokauppa_anon;
 
 		if ($sivu != "") {
 			$lisa = "and tyyppi = 'VERKKOKAUPPA' and kentta09 = '$sivu' ";

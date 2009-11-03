@@ -3460,17 +3460,16 @@ if ($tee == '') {
 					}
 					else {
 						$sele["K"] = "checked";
-						$tilausrivi_alvillisuus = "";
+						$tilausrivi_alvillisuus = "K";
 					}
 
-					echo "<form action='' method='post'>
+					echo "<form action='".$palvelin2."tilauskasittely/tilaus_myynti.php' method='post'>
  					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
  					<input type='hidden' name='tee' value='$tee'>
  					<input type='hidden' name='toim' value='$toim'>
  					<input type='hidden' name='lopetus' value='$lopetus'>
  					<input type='hidden' name='projektilla' value='$projektilla'>
- 					<input type='hidden' name='tiedot_laskulta' value='$tiedot_laskulta'>
- 					<input type='hidden' name='asiakasid' value='$asiakasid'>";
+ 					<input type='hidden' name='tiedot_laskulta' value='$tiedot_laskulta'>";
 
 					echo "<input type='radio' onclick='submit()' name='tilausrivi_alvillisuus' value='K' $sele[K]> ".t("Verolliset hinnat")." ";
 					echo "<input type='radio' onclick='submit()' name='tilausrivi_alvillisuus' value='E' $sele[E]> ".t("Verottomat hinnat")." ";
@@ -5306,13 +5305,13 @@ if ($tee == '') {
 										<input type='hidden' name='tee' value='jyvita'>
 										<input type='hidden' name='toim' value='$toim'>
 										<input type='hidden' name='lopetus' value='$lopetus'>
+										<input type='hidden' name='tilausrivi_alvillisuus' value='$tilausrivi_alvillisuus'>
 										<input type='hidden' name='projektilla' value='$projektilla'>";
 
 						if ($laskurow["hinta"] != 0 and (($yhtiorow["alv_kasittely"] == "" and abs($jysum - $summa) <= .50) or ($yhtiorow["alv_kasittely"] != "" and abs($jysum - $arvo) <= .50))) {
 							$jysum = $laskurow["hinta"];
 						}
-
-						elseif ($yhtiorow["alv_kasittely"] == "") {
+						elseif ($tilausrivi_alvillisuus != 'E') {
 							$jysum = $summa;
 						}
 						else {

@@ -19,17 +19,35 @@ if(strpos($jysum, "%") !== false) {
 	$anna_ea = "TOKI";
 }
 
-$jysum = round(str_replace(",",".", $jysum),$yhtiorow['hintapyoristys']);
+$jysum = round(str_replace(",",".", $jysum), 2);
+$jyvitetaan_ristiin = "";
 
 //Lasketaan tilauksen arvot
 if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
 	$hinta_riv = "(tilausrivi.hinta/$laskurow[vienti_kurssi])";
+	$hinta_riv2 = "(tilausrivi.hinta/$laskurow[vienti_kurssi])";
 }
 else {
 	$hinta_riv = "tilausrivi.hinta";
+	$hinta_riv2 = "tilausrivi.hinta";
+}
+
+//jos radiobutton verottomat hinnat on päällä ja yhtion parametri verolliset myyntihinnat
+// eli otetaan verot pois
+if ($tilausrivi_alvillisuus == 'E' and $yhtiorow['alv_kasittely'] == '') {
+	$hinta_riv .= " / (1 + (tilausrivi.alv / 100)) ";
+	$jyvitetaan_ristiin = "X";
+}
+//jos radiobutton verolliset hinnat on päällä ja yhtion parametri verottomat myyntihinnat
+// eli lisätään verot
+elseif ($tilausrivi_alvillisuus != 'E' and $yhtiorow['alv_kasittely'] != '') {
+	$hinta_riv .= " * (1 + (tilausrivi.alv / 100)) ";
+	$jyvitetaan_ristiin = "X";
 }
 
 $query = "	SELECT
+			sum($hinta_riv * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))) koko_summa,
+			sum($hinta_riv2 * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))) koko_oma_summa,
 			sum(if(varattu+jt>0, $hinta_riv * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) plus_summa,
 			sum(if(varattu+jt<0, $hinta_riv * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) nega_summa
 			FROM tilausrivi
@@ -57,10 +75,6 @@ elseif ($jysum > 0 and $plus_summa <= 0) {
 }
 else {
 
-	//	 Nollataan otsikko ja lasketaan alet uudestaan
-	$query = "UPDATE lasku SET erikoisale = '0' WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero' and tilaustyyppi = 'N' and tila IN ('V','N','G','L') and alatila NOT IN ('V','X')";
-	$upresult = mysql_query($query) or pupe_error($query);
-
 	if ($anna_ea == "TOKI") {
 		// 	Annetaan erikoisale
 		$query = "UPDATE lasku SET erikoisale = '$jysum' WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero' and tilaustyyppi = 'N' and tila IN ('V','N','G','L') and alatila NOT IN ('V','X')";
@@ -80,19 +94,18 @@ else {
 		if (mysql_num_rows($rhire) == 1) {
 			$trow  = mysql_fetch_array($rhire);
 
-			$hinta		 = round(($plus_summa+$nega_summa - $jysum),$yhtiorow['hintapyoristys']);
+			$hinta		 = round(($plus_summa+$nega_summa - $jysum), $yhtiorow['hintapyoristys']);
 			$trow["alv"] = $laskurow["alv"];
 			$nimitys	 = $trow["nimitys"];
 
 			list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-			if($laskurow["tila"] == "T") {
+			if ($laskurow["tila"] == "T") {
 				$rivityyppi = "T";
 			}
 			else {
 				$rivityyppi = "L";
 			}
-			
 			
 			$query  = "INSERT INTO tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) VALUES (now(), '$hinta', 'N', '-1', '-1', '$tilausnumero', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', '$rivityyppi', '$alv', '')";
 			$addtil = mysql_query($query) or pupe_error($query);
@@ -106,19 +119,9 @@ else {
 		// Jyvitetään riveille uusihinta ja tallennetaan syötetty summa lasku.hinta-kenttään
 		// huomioidaan hyvitysrivit ja ei muuteta niitten hintoja
 
-		$boob_jyva = 0;		
-		
-		if (abs(($plus_summa + $nega_summa) - $jysum) <= 0.5) {
-			// jos jyvityssumma on alle 0.5 euroa loppusummasta niin ei muuteta rivien hintoja päivitetään vaan jysumma laskun hintakenttään
-			//  Päivitetään laskulle hinta-kenttään syötetty summa
-			$query	= "UPDATE lasku SET hinta = '$jysum' WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]'";
-			$result	= mysql_query($query) or pupe_error($query);
+		$boob_jyva = 0;
 
-			$laskurow["hinta"] = $jysum;
-			
-			$boob_jyva = 1;	
-		}
-		elseif ($jysum < 0 and $nega_summa != 0) {
+		if ($jysum < 0 and $nega_summa != 0) {
 			// jos jyvityssumma on miinusta ja meillä on hyvitysrivejä, kosketaan vain hyvitysriveihin
 			$halu_summa = $jysum - $plus_summa;
 			$jypro = $halu_summa / $nega_summa;
@@ -134,6 +137,7 @@ else {
 						ORDER BY hinta";
 		}
 		elseif ($jysum > 0 and $plus_summa != 0) {
+			// jos jyvityssumma on plussaa ja meillä on veloitusrivejä, kosketaan vain veloitusriveihin
 			$halu_summa = $jysum - $nega_summa;
 			$jypro = $halu_summa / $plus_summa;
 
@@ -161,11 +165,16 @@ else {
 				$upresult = mysql_query($query) or pupe_error($query);
 			}
 
-			$jysum = round($jysum,$yhtiorow['hintapyoristys']);
+			if ($jyvitetaan_ristiin == "X") {
+				$muutos_prosentti = $jysum / $tarow['koko_summa'];
+				$jysum = $tarow['koko_oma_summa'] * $muutos_prosentti;
+			}
+
+			$jysum = round($jysum, 2);
 
 			//  Päivitetään laskulle hinta-kenttään syötetty summa
-			$query	= "UPDATE lasku SET hinta = '$jysum' WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]'";
-			$result	= mysql_query($query) or pupe_error($query);
+			$query = "UPDATE lasku SET hinta = '$jysum' WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]'";
+			$result = mysql_query($query) or pupe_error($query);
 
 			$laskurow["hinta"] = $jysum;
 		}

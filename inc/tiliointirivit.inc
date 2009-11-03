@@ -213,8 +213,8 @@
 				tiliointi.laatija laatija,
 				tiliointi.laadittu laadittu,
 				tiliointi.tunnus tunnus,
-				la.nimi laatija_nimi,
-				ko.nimi korjattu_nimi
+				ifnull(la.nimi, tiliointi.laatija) laatija_nimi,
+				ifnull(ko.nimi, tiliointi.korjattu) korjattu_nimi
 				FROM tiliointi
 				LEFT JOIN tili ON tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
 				LEFT JOIN kustannuspaikka a ON a.yhtio = '$kukarow[yhtio]' and a.tunnus = tiliointi.kustp and a.tyyppi = 'K'

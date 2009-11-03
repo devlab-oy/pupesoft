@@ -168,7 +168,7 @@
 						if ($tiliointirow["vero"] != 0) {
 							#Netotetaan alvi
 							#$alv:ssa on alennuksen alv:n maara
-							$alv = sprintf('%.2f', $summa - $summa / (1 + ($tiliointirow["vero"]/100)));
+							$alv = sprintf('%.2f', $summa - $summa / (1 + ($tiliointirow["vero"] / 100)));
 							$alv_valuutassa = sprintf('%.2f', $summa_valuutassa - $summa_valuutassa / (1 + ($tiliointirow["vero"]/100)));
 
 							#$summa on alviton alennus
@@ -232,6 +232,7 @@
 										tilino 				= '$row[alennustili]',
 										summa 				= '$alennus',
 										summa_valuutassa 	= '$alennus_valuutassa',
+										vero				= '$tiliointirow[vero]',
 										valkoodi			= '$row[suoritusvaluutta]',
 										selite 				= 'Automaattikohdistettu asiakkaan suoritus (Kassa-Alennus)'";
 							$insres = mysql_query($query) or pupe_error($query);

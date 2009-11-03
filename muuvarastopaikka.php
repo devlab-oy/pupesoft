@@ -5,7 +5,7 @@
 	}
 
 	if ($tee != '') {
-		$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tilausrivin_lisatiedot WRITE, tuote READ, varastopaikat READ, tilausrivi READ, tilausrivi as tilausrivi_osto READ, sarjanumeroseuranta WRITE";
+		$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tilausrivin_lisatiedot WRITE, tuote READ, varastopaikat READ, tilausrivi READ, tilausrivi as tilausrivi_osto READ, sarjanumeroseuranta WRITE, lasku READ";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
@@ -273,8 +273,23 @@
 			$tee = $uusitee;
 		}
 		elseif ($sarjacheck_row["erat"] > 0) {
-			echo "<font class='error'>".t("Tarkista eränumerovalintasi")."</font><br><br>";
-			$tee = $uusitee;
+			
+			$query = "	SELECT *
+						FROM sarjanumeroseuranta
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND tunnus = '$sarjano_array[0]'";
+			$siirrettava_era_res = mysql_query($query) or pupe_error($query);
+			$siirrettava_era_row = mysql_fetch_assoc($siirrettava_era_res);
+					
+			if (!is_array($sarjano_array) or $sarjano_kpl_array[$sarjano_array[0]] < $asaldo) {
+				echo "<font class='error'>".t("Tarkista eränumerovalintasi")."</font><br><br>";
+				$tee = $uusitee;
+			}
+
+			if ($siirrettava_era_row['hyllyalue'] != $mistarow['hyllyalue'] or $siirrettava_era_row['hyllynro'] != $mistarow['hyllynro'] or $siirrettava_era_row['hyllyvali'] != $mistarow['hyllyvali'] or $siirrettava_era_row['hyllytaso'] != $mistarow['hyllytaso']) {
+				echo "<font class='error'>",t("Siirrettävä erä ei ole lähdevarastossa"),"!</font><br><br>";
+				$tee = $uusitee;
+			}
 		}
 		elseif ($sarjacheck_row["sarjat"] > 0) {
 
@@ -488,18 +503,31 @@
 			$minne_texti = $minnerow['hyllyalue']." ".$minnerow['hyllynro']." ".$minnerow['hyllyvali']." ".$minnerow['hyllytaso'];
 			$mista_texti = $mistarow['hyllyalue']." ".$mistarow['hyllynro']." ".$mistarow['hyllyvali']." ".$mistarow['hyllytaso'];
 
-			$kehahin_query = "	SELECT kehahin
+			$kehahin_query = "	SELECT *
 								FROM tuote
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$tuotteet[$iii]'";
 			$kehahin_result = mysql_query($kehahin_query) or pupe_error($kehahin_query);
 			$kehahin_row = mysql_fetch_array($kehahin_result);
 
+			$keskihankintahinta = $kehahin_row['kehahin'];
+
+			if ($kehahin_row['sarjanumeroseuranta'] == 'G') {
+				$keskihankintahinta = sarjanumeron_ostohinta("tunnus", $sarjano_array[0]);
+			}
+			elseif ($kehahin_row['sarjanumeroseuranta'] == 'S' or $kehahin_row['sarjanumeroseuranta'] == 'U') {
+				$keskihankintahinta = 0;
+				foreach ($sarjano_array as $sarjano) {
+					$keskihankintahinta +=	sarjanumeron_ostohinta("tunnus", $sarjano);
+				}
+				$keskihankintahinta = round($keskihankintahinta / count($sarjano_array), 6);
+			}
+
 			$query = "	INSERT into tapahtuma set
 						yhtio 		= '$kukarow[yhtio]',
 						tuoteno 	= '$tuotteet[$iii]',
 						kpl 		= $kappaleet[$iii] * -1,
-						hinta 		= '$kehahin_row[kehahin]',
+						hinta 		= '$keskihankintahinta',
 						laji 		= 'siirto',
 						hyllyalue	= '$mistarow[hyllyalue]',
 						hyllynro 	= '$mistarow[hyllynro]',
@@ -515,7 +543,7 @@
 						yhtio 		= '$kukarow[yhtio]',
 						tuoteno 	= '$tuotteet[$iii]',
 						kpl 		= '$kappaleet[$iii]',
-						hinta 		= '$kehahin_row[kehahin]',
+						hinta 		= '$keskihankintahinta',
 						laji 		= 'siirto',
 						hyllyalue	= '$minnerow[hyllyalue]',
 						hyllynro 	= '$minnerow[hyllynro]',
@@ -529,7 +557,7 @@
 		}
 
 		//Päivitetään sarjanumerot
-		if (count($sarjano_array) > 0) {
+		if ($sarjacheck_row["sarjat"] > 0 and count($sarjano_array) > 0) {
 			foreach($sarjano_array as $sarjano) {
 				if ($sarjano > 0) {
 					$query = "	UPDATE sarjanumeroseuranta
@@ -545,6 +573,79 @@
 				}
 			}
 		}
+		elseif ($sarjacheck_row["erat"] > 0 and count($sarjano_array) > 0) {
+			foreach($sarjano_array as $sarjano) {
+				if ($sarjano > 0) {
+					$query = "	SELECT *
+								FROM sarjanumeroseuranta
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus = '$sarjano'";
+					$sarrr_res = mysql_query($query) or pupe_error($query);
+					$sarrr_row = mysql_fetch_assoc($sarrr_res);
+
+					$sarjaquerylisa = '';
+
+					// jos erä loppuu, poistetaa sen näkyvyys
+					if ($sarrr_row['era_kpl'] - $asaldo == 0) {
+						$sarjaquerylisa = "myyntirivitunnus = '-1', siirtorivitunnus = '-1', ";
+					}
+
+					$query = "	UPDATE sarjanumeroseuranta
+								set era_kpl		= era_kpl - $asaldo,
+								$sarjaquerylisa
+								muuttaja		= '$kukarow[kuka]',
+								muutospvm		= now()
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus = '$sarjano'";
+					$result = mysql_query($query) or pupe_error($query);
+
+					$query = "	SELECT *
+								FROM sarjanumeroseuranta
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tuoteno = '$tuoteno'
+								AND tunnus != '$sarjano'
+								AND sarjanumero = '$sarrr_row[sarjanumero]'
+								AND hyllyalue = '$minnerow[hyllyalue]'
+								AND hyllynro = '$minnerow[hyllynro]'
+								AND hyllyvali = '$minnerow[hyllyvali]'
+								AND hyllytaso = '$minnerow[hyllytaso]'
+								AND myyntirivitunnus = 0
+								AND era_kpl != 0";
+					$sarrr_res2 = mysql_query($query) or pupe_error($query);
+					
+					if (mysql_num_rows($sarrr_res2) == 1) {
+						$sarrr_row2 = mysql_fetch_assoc($sarrr_res2);
+
+						$query = "	UPDATE sarjanumeroseuranta
+									set era_kpl		= era_kpl + $asaldo,
+									muuttaja		= '$kukarow[kuka]',
+									muutospvm		= now()
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus = '$sarrr_row2[tunnus]'";
+						$result = mysql_query($query) or pupe_error($query);
+					}
+					else {
+						$query = "	INSERT INTO sarjanumeroseuranta SET
+									yhtio 			= '$kukarow[yhtio]',
+									tuoteno			= '$tuoteno',
+									sarjanumero		= '$sarrr_row[sarjanumero]',
+									ostorivitunnus 	= '$sarrr_row[ostorivitunnus]',
+									era_kpl			= $asaldo,
+									hyllyalue		= '$minnerow[hyllyalue]',
+									hyllynro 		= '$minnerow[hyllynro]',
+									hyllyvali 		= '$minnerow[hyllyvali]',
+									hyllytaso		= '$minnerow[hyllytaso]',
+									muuttaja		= '$kukarow[kuka]',
+									muutospvm		= now(),
+									laatija 		= '$kukarow[kuka]',
+									luontiaika		= now()";
+						$result = mysql_query($query) or pupe_error($query);
+					}
+				}
+			}
+		}
+
+
 		// Päivitetään lisävausteiden sarjanumerot
 		if (count($lisavar_sarj) > 0) {
 			foreach($lisavar_sarj as $sarjano) {
@@ -778,6 +879,8 @@
 							tilausrivi_osto.nimitys nimitys, 
 							sarjanumeroseuranta.sarjanumero, 
 							sarjanumeroseuranta.tunnus,
+							sarjanumeroseuranta.era_kpl,
+							tuote.yksikko, 
 							concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, 
 							sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
 				 			FROM tuote
@@ -790,7 +893,7 @@
 							and sarjanumeroseuranta.hyllytaso = tuotepaikat.hyllytaso
 							and sarjanumeroseuranta.myyntirivitunnus = 0
 							and sarjanumeroseuranta.era_kpl != 0
-							JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+							JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON (tilausrivi_osto.yhtio = sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus = sarjanumeroseuranta.ostorivitunnus)
 							WHERE tuote.yhtio = '$kukarow[yhtio]'
 							and tuote.tuoteno = '$trow[tuoteno]'";
 			}
@@ -821,7 +924,17 @@
 					echo "<td nowrap>".t_tuotteen_avainsanat($sarjarow, 'nimitys')."</td>";
 					echo "<td nowrap>$sarjarow[sarjanumero]</td>";
 					echo "<td nowrap>$sarjarow[tuotepaikka]</td>";
-					echo "<td><input type='checkbox' name='sarjano_array[]' value='$sarjarow[tunnus]'></td>";
+					if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") {
+						echo "<td>$sarjarow[era_kpl] ".t_avainsana("Y", "", "and avainsana.selite='$sarjarow[yksikko]'", "", "", "selite")."</td>";
+						echo "<td>";
+						echo "<input type='radio' name='sarjano_array[]' value='$sarjarow[tunnus]'>";
+						echo "<input type='hidden' name='sarjano_kpl_array[$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
+						echo "<input type='hidden' name='sarjano_nimi_array[$sarjarow[tunnus]]' value='$sarjarow[sarjanumero]'>";
+						echo "</td>";
+					}
+					else {
+						echo "<td><input type='checkbox' name='sarjano_array[]' value='$sarjarow[tunnus]'></td>";
+					}
 					echo "</tr>";
 				}
 				echo "</table>";

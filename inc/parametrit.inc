@@ -386,8 +386,9 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		}
 
 		if (!isset($no_head) or (isset($no_head) and $no_head != "yes")) {
-			echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"
-			       \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
+			if ($verkkokauppa != "") {
+				echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
+			}
 			echo "<html>";
 			echo "<head>";
 			echo "<META Http-Equiv='Cache-Control' Content='no-cache'>";

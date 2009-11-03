@@ -23,9 +23,11 @@ if ($kukarow['resoluutio'] == 'P') {
 	$colwidth = '45';
 }
 
-echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"
-\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
-<html>
+if ($verkkokauppa != "") {
+	echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
+}
+
+echo "<html>
 <head>
 <title>$yhtiorow[nimi]</title>
 ";

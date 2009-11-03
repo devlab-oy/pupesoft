@@ -1374,7 +1374,7 @@
 									echo sprintf('%.2f', $tuoterow['kehahin']);
 								}
 								else {
-									sprintf('%.2f', sarjanumeron_ostohinta("tunnus", $sarjarow["sarjatunnus"]));
+									echo sprintf('%.2f', sarjanumeron_ostohinta("tunnus", $sarjarow["sarjatunnus"]));
 								}
 								echo "</td>
 								<td>$sarjarow[myynimi] $fnlina1</td></tr>";

@@ -79,7 +79,7 @@
 
 	// Haetaan tilausrivin tiedot
 	if ($from != '' and $rivitunnus != "") {
-		$query    = "	SELECT tilausrivi.*, tuote.sarjanumeroseuranta, tuote.yksikko, tilausrivin_lisatiedot.osto_vai_hyvitys
+		$query    = "	SELECT tilausrivi.*, tuote.sarjanumeroseuranta, tuote.yksikko, tilausrivin_lisatiedot.osto_vai_hyvitys, tuote.kehahin
 						FROM tilausrivi use index (PRIMARY)
 						JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
@@ -939,7 +939,19 @@
 		echo "<table>";
 		echo "<tr><th>".t("Tuotenumero")."</th><td>$rivirow[tuoteno] $rivirow[nimitys]</td></tr>";
 		echo "<tr><th>".t("M‰‰r‰")."</th><td>$rivirow[varattu] ".t_avainsana("Y", "", "and avainsana.selite='$rivirow[yksikko]'", "", "", "selite")."</td></tr>";
-		echo "<tr><th>",t("Kehahinta"),"</th><td>$kehahin</td></tr>";
+		echo "<tr><th>",t("Kehahinta"),"</th>";
+		echo "<td>";
+		if ($rivirow['sarjanumeroseuranta'] == 'T' or $rivirow['sarjanumeroseuranta'] == 'V' or $rivirow['sarjanumeroseuranta'] == 'E' or $rivirow['sarjanumeroseuranta'] == 'F') {
+			echo $rivirow['kehahin'];
+		}
+		elseif ($kehahin != '') {
+			echo $kehahin;
+		}
+		else {
+			echo "&nbsp;";
+		}
+		echo "</td>";
+		echo "</tr>";
 		echo "</table><br>";
 	}
 
@@ -1244,7 +1256,6 @@
 				<input type='hidden' name='otunnus' 			value='$otunnus'>
 				<input type='hidden' name='muut_siirrettavat'	value='$muut_siirrettavat'>
 				<input type='hidden' name='toiminto' 			value='LISAA'>
-				<input type='hidden' name='kehahin'				value='$kehahin'>
 				<input type='hidden' name='valitut_sarjat' 		value='".implode(",", $valitut_sarjat)."'>";
 
 		if ($rivirow["tuoteno"] != '' and ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G")) {
@@ -1269,12 +1280,18 @@
 
 			echo "<tr><th>".t("Er‰n suuruus")."</th><td><input type='text' size='30' name='era_kpl' value='$era_kpl'></td></tr>";
 
-
 			if ($rivirow["sarjanumeroseuranta"] == "F") {
 				echo "<tr><th>".t("Parasta ennen")."</th><td>
 				<input type='text' name='peppa' value='' size='3'>
 				<input type='text' name='pekka' value='' size='3'>
 				<input type='text' name='pevva' value='' size='5'></td>";
+			}
+
+			if ($rivirow['sarjanumeroseuranta'] == 'G') {
+				echo "<input type='hidden' name='kehahin' value='$kehahin'>";
+			}
+			else {
+				echo "<input type='hidden' name='kehahin' value='$rivirow[kehahin]'>";
 			}
 
 			echo "<tr><th>".t("Lis‰tieto")."</th><td><textarea rows='4' cols='27' name='lisatieto'>$lisatieto</textarea></td></tr>";
@@ -1283,6 +1300,7 @@
 			echo "<br><table>";
 			echo "<tr><th colspan='2'>".t("Lis‰‰ uusi sarjanumero")."</th></tr>";
 			echo "<tr><th>".t("Sarjanumero")."</th><td><input type='text' size='30' name='sarjanumero' value='$sarjanumero'></td></tr>";
+			echo "<input type='hidden' name='kehahin' value='$rivirow[kehahin]'>";
 		}
 		else {
 			$query = "	SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero
@@ -1360,6 +1378,13 @@
 				<input type='text' name='tppl' value='' size='3'>
 				<input type='text' name='tkkl' value='' size='3'>
 				<input type='text' name='tvvl' value='' size='5'></td>";
+			}
+			
+			if ($rivirow['sarjanumeroseuranta'] == 'V') {
+				echo "<input type='hidden' name='kehahin' value='$rivirow[kehahin]'>";
+			}
+			elseif ($rivirow['sarjanumeroseuranta'] == 'S' or $rivirow['sarjanumeroseuranta'] == 'U') {
+				echo "<input type='hidden' name='kehahin' value='$kehahin'>";
 			}
 		}
 

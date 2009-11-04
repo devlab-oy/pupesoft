@@ -866,7 +866,7 @@ if ($kollityht > 0) {
 
 		$xml_output = $xml->asXML();
 
-		$filenimi = "/tmp/ups_import-".md5(uniqid(rand(),true)).".xml";
+		$filenimi = "dataout/ups_import-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
 
 		//kirjoitetaan faili levylle..
 		if (file_put_contents($filenimi, $xml_output) === FALSE) {

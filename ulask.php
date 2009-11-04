@@ -1166,7 +1166,7 @@ if ($tee == 'I') {
 	$tositenro=0;
 
 	if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
-		$query = "LOCK TABLE tiliointi WRITE, lasku WRITE, sanakirja WRITE";
+		$query = "LOCK TABLE tiliointi WRITE, lasku WRITE, sanakirja WRITE, liitetiedostot WRITE";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$alaraja = 41000000;

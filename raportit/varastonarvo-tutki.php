@@ -44,12 +44,14 @@ echo "<br><br>";
 
 if ($tee == "tee") {
 
-	echo "<font class='message'>Logistiikan tapahtumat ja niiden varastonmuutos</font><br><br>";	
-	
+	echo "<font class='message'>Logistiikan tapahtumat ja niiden varastonmuutos</font><br><br>";
+
 	// haetaan halutut varastotaphtumat
 	$query  = "	SELECT laji, count(*) kpl, round(sum(if(laji='tulo', kplhinta, hinta) * kpl), 2) logistiikka
 				FROM tapahtuma
-				JOIN tuote ON tapahtuma.yhtio = tuote.yhtio and tapahtuma.tuoteno = tuote.tuoteno and tuote.ei_saldoa = ''
+				JOIN tuote ON (tapahtuma.yhtio = tuote.yhtio 
+					and tapahtuma.tuoteno = tuote.tuoteno 
+					and tuote.ei_saldoa = '')
 				WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 				and laadittu >= '$vv-$kk-$pp 00:00:00'
 				and laadittu <= '$vv1-$kk1-$pp1 23:59:59'
@@ -188,8 +190,8 @@ if ($tee == "tee") {
 	$query  = "	SELECT *
 				FROM lasku use index (yhtio_tila_luontiaika)
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
-				and lasku.luontiaika >= '$vv-$kk-$pp 00:00:00'
-				and lasku.luontiaika <= '$vv1-$kk1-$pp1 23:59:59'
+				and lasku.mapvm >= '$vv-$kk-$pp'
+				and lasku.mapvm <= '$vv1-$kk1-$pp1'
 				and lasku.tila = 'K'
 				and lasku.vanhatunnus = 0
 				GROUP BY lasku.laskunro";
@@ -199,7 +201,8 @@ if ($tee == "tee") {
 	echo "<tr>";
 	echo "<th>".t("keikka")."</th>";
 	echo "<th>".t("toimittaja")."</th>";
-	echo "<th>".t("luontiaika")."</th>";
+	echo "<th>".t("jälkilaskettu")."</th>";
+	echo "<th>".t("laskut")."</th>";
 	echo "<th>".t("keikka")."</th>";
 	echo "<th>".t("kirjanpito")."</th>";
 	echo "<th>".t("ero")."</th>";
@@ -211,7 +214,7 @@ if ($tee == "tee") {
 	while ($trow = mysql_fetch_array ($result)) {
 
 		// haetaan kaikki keikkaan liitetyt vaihto-omaisuus ja rahtilaskut
-		$query = "	SELECT ifnull(group_concat(vanhatunnus), 0) ostolaskut 
+		$query = "	SELECT ifnull(group_concat(vanhatunnus), 0) ostolaskut, group_concat(concat(lasku.ytunnus, ' ', lasku.nimi, ' ', lasku.tapvm, ' ', lasku.summa, ' ', lasku.valkoodi, ' = ', round(lasku.summa*lasku.vienti_kurssi,2), ' EUR<br>') SEPARATOR '') laskut
 					from lasku 
 					where yhtio = '$kukarow[yhtio]' 
 					and lasku.laskunro = '$trow[laskunro]' 
@@ -248,7 +251,8 @@ if ($tee == "tee") {
 		echo "<tr>";
 		echo "<td>$trow[laskunro]</td>";
 		echo "<td>$trow[nimi]</td>";
-		echo "<td>$trow[luontiaika]</td>";
+		echo "<td>$trow[mapvm]</td>";
+		echo "<td>$keekrow[laskut]</td>";
 		echo "<td align='right'>".round($lorow["logistiikkasumma"],2)."</td>";
 		echo "<td align='right'>".round($kprow["varastonmuutos"],2)."</td>";
 		echo "<td align='right'>".round($ero, 2)."</td>";
@@ -258,7 +262,7 @@ if ($tee == "tee") {
 	$ero = $lomuutos - $kpmuutos;
 
 	echo "<tr>";
-	echo "<th colspan='3'>".t('Keikat yhteensä')."</th>";
+	echo "<th colspan='4'>".t('Keikat yhteensä')."</th>";
 	echo "<th align='right'>".round($lomuutos,2)."</th>";
 	echo "<th align='right'>".round($kpmuutos,2)."</th>";
 	echo "<th align='right'>".round($ero,2)."</th>";

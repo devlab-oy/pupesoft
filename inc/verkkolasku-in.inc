@@ -41,7 +41,11 @@
 			}
 
 			// generic error messagen alku
-			$return  = "Tiedosto: $file\nLaskunro: $laskun_numero\nPäivä: $laskun_paiva\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\n";
+			$return  = "Tiedosto: $file\n";
+			$return .= "Laskunro: $laskun_numero\n";
+			$return .= "Päivä: $laskun_paiva\n";
+			$return .= "Summa: $laskun_summa_eur\n";
+			$return .= "Viite: $laskun_pankkiviite\n";
 			$komm = "";
 
 			// $yhtio:ssa on nyt laskun VASTAANOTTAJAN ovt-tunnus ja $verkkotunnus_vas:ssa on VASTAANOTTAJAN verkkolaskutunnus
@@ -85,9 +89,9 @@
 
 			if (!isset($yhtiorow) and $verkkotunnus_vas != "") {
 				// 3 etsitään vastaanottavaa yritystä ovt-tunnuksella ilman tarkenteita
-				$yyhtio = substr($verkkotunnus_vas, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
+				$oyhtio1 = substr($verkkotunnus_vas, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
 
-				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$yyhtio'";
+				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$oyhtio1'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 				if (mysql_num_rows($result) == 1) {
@@ -120,9 +124,9 @@
 
 			if (!isset($yhtiorow) and $yhtio != 0) {
 				// 6 etsitään vastaanottavaa yritystä ovt-tunnuksella ilman tarkenteita
-				$yyhtio = substr($yhtio, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
+				$oyhtio2 = substr($yhtio, 0, 12); // Poistetaan mahdolliset ovt-tunnuksen tarkenteet
 
-				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$yyhtio'";
+				$query = "SELECT * FROM yhtio WHERE ovttunnus = '$oyhtio2'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 				if (mysql_num_rows($result) == 1) {
@@ -132,10 +136,10 @@
 
 			if (!isset($yhtiorow) and $yhtio != 0) {
 				// 7 etsitään vastaanottavaa yritystä ytunnuksella..
-				$yyhtio1 = substr(str_replace("0037", "", $yhtio), 0, 8); // mahdollisella etunollalla
-				$yyhtio2 = (int) $yyhtio1; // ilman etunollaa
+				$yyhtio3 = substr(str_replace("0037", "", $yhtio), 0, 8); // mahdollisella etunollalla
+				$yyhtio4 = (int) $yyhtio3; // ilman etunollaa
 
-				$query = "SELECT * FROM yhtio WHERE ytunnus in ('$yyhtio1', '$yyhtio2')";
+				$query = "SELECT * FROM yhtio WHERE ytunnus in ('$yyhtio3', '$yyhtio4')";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 				if (mysql_num_rows($result) == 1) {
@@ -158,7 +162,11 @@
 				$query = "SELECT distinct alert_email, postittaja_email FROM yhtion_parametrit WHERE alert_email != '' and postittaja_email != ''";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
-				$return .= "\nEpäonnistumisen syy: Laskun vastaanottajaa ei löytynyt ovt-tunnuksella '$yhtio' eikä verkkotunnuksella '$verkkotunnus_vas'! $_SERVER[SERVER_ADDR]\n";
+				$return .= "\nEpäonnistumisen syy: Laskun vastaanottajaa ei löytynyt järjestelmästä $_SERVER[SERVER_ADDR]!\n\n";
+				$return .= "Etsittiin tiedoilla:\n";
+				$return .= "Verkkotunnus: $verkkotunnus_vas'\n";
+				$return .= "Ovt: $oyhtio1 $oyhtio2 $verkkotunnus_vas\n";
+				$return .= "Ytunnus: $yyhtio1 $yyhtio2 $yyhtio3 $yyhtio4\n\n";
 
 				while ($yhtiorow = mysql_fetch_array($result)) {
 					mail($yhtiorow['alert_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[alert_email]>\n", "-f $yhtiorow[postittaja_email]");
@@ -168,7 +176,7 @@
 			}
 			else {
 
-				$return .= "Lasku yhtiölle: $yhtiorow[nimi]\n";
+				$return .= "Lasku yhtiölle: $yhtiorow[nimi] ($yhtiorow[yhtio])\n";
 
 				// Haetaan yhtiön parametrit
 				$query = "	SELECT *
@@ -331,7 +339,11 @@
 			}
 
 			if (!isset($trow)) {
-				$return .= "\nEpäonnistumisen syy: Emme löytäneet toimittajaa! Etsittiin tiedoilla: Ovt/Nimi/Vat $laskuttajan_ovt/$laskuttajan_nimi/$laskuttajan_vat yhtiöltä: $yhtiorow[nimi] '$yhtio'\n\n";
+				$return .= "\nEpäonnistumisen syy: Emme löytäneet toimittajaa yhtiöltä!\n\n";
+				$return .= "Etsittiin tiedoilla:\n";
+				$return .= "Nimi: $laskuttajan_nimi\n";
+				$return .= "Ovt: $laskuttajan_ovt $yovt $yovt1 $yovt2\n";
+				$return .= "Vat: $laskuttajan_vat $intvat $intvat2\n\n";
 
 				$urlmain = "/view/ebs-2.0/$yhtiorow[verkkotunnus_vas]/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=".gmdate("YmdHis")."Z&VERSION=ebs-2.0";
 				$digest	 = md5($urlmain . "&" . $yhtiorow['verkkosala_vas']);
@@ -344,7 +356,7 @@
 				return ($return);
 			}
 			else {
-				$return  .= "Toimittaja: $trow[ytunnus]/$trow[ovttunnus] - $trow[nimi]\nEpäonnistumisen syy: ";
+				$return .= "Toimittaja: $trow[ytunnus]/$trow[ovttunnus] - $trow[nimi]\nEpäonnistumisen syy: ";
 			}
 
 			// katotaan pitääks vaihtaa oletus_vientiä

@@ -990,7 +990,7 @@
 				$alask++;
 			}
 
-			foreach($rows as &$row) {
+			foreach ($rows as &$row) {
 
 				if ($kukarow['extranet'] != '' or $verkkokauppa != "") {
 					$hae_ja_selaa_asiakas = (int) $kukarow['oletus_asiakas'];
@@ -1023,7 +1023,7 @@
 						$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
 					}
 
-					$hinnat = alehinta($temp_laskurowwi, $temptrow, 1, '', '', '', "hintaperuste,aleperuste");
+					$hinnat = alehinta($temp_laskurowwi, $temptrow, 1, '', '', '', "hinta,hintaperuste,aleperuste,ale");
 
 					// jos tuote saadaan n‰ytt‰‰ vain mik‰li asiakkaalla on alehinta, niin sanotaan continue jos joku hinta/ale lˆytyy
 					if ($temptrow["hinnastoon"] == "V" and ($hinnat["hintaperuste"] >= 13 or $hinnat["hintaperuste"] === FALSE) and ($hinnat["aleperuste"] >= 9 or $hinnat["aleperuste"] === FALSE)) {
@@ -1164,10 +1164,15 @@
 
 				if ($verkkokauppa == "" or $kukarow["kuka"] != "www") {
 					if ($kukarow['hinnat'] >= 0) {
+
 						$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["myyntihinta"]). " $yhtiorow[valkoodi]";
 
-						// jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa
-						if ($kukarow["extranet"] != "") {
+						if ($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
+							// haetaan tuotteen tiedot
+							$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $hinnat["hinta"] * (1-($hinnat["ale"]/100)))." $laskurow[valkoodi]";
+						}
+						elseif ($kukarow["extranet"] != "") {
+							// jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa
 							if ($oleasrow["valkoodi"] != $yhtiorow["valkoodi"]) {
 
 								$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["myyntihinta"])." $yhtiorow[valkoodi]";

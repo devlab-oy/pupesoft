@@ -38,10 +38,6 @@ elseif ($toim == "VERKKOKAUPPA") {
 	echo "<font class='head'>".t("Verkkokaupan Uutiset")."</font><hr>";
 	$tyyppi = $toim;
 }
-elseif ($toim == "VERKKOKAUPAN_YHTEYSTIEDOT") {
-	echo "<font class='head'>".t("Verkkokaupan Yhteystiedot")."</font><hr>";
-	$tyyppi = $toim;
-}
 
 if ($toim == "VIIKKOPALAVERI" or $toim == "ASIAKASPALVELU" or $toim == "RYJO") {
 	$kulisa = "";

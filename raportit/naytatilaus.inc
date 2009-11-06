@@ -108,7 +108,7 @@
 
 	if ($verkkokauppa != "" and $muokkaa != "") {
 		echo "<td colspan='3'>
-				<input type = 'text' name='toim_nimi' value = '$laskurow[toim_nimi]' size = '30'><br> 
+				<input type = 'text' name='toim_nimi' value = '$laskurow[toim_nimi]' size = '30'><br>
 				<input type = 'text' name='toim_nimitark' value = '$laskurow[toim_nimitark]' size = '30'><br>
 				<input type = 'text' name='toim_osoite' value = '$laskurow[toim_osoite]' size = '30'><br>
 				<input type = 'text' name='toim_postino' value = '$laskurow[toim_postino]' size = '6'> <input type = 'text' name='toim_postitp' value = '$laskurow[toim_postitp]' size = '20'><br>
@@ -444,7 +444,7 @@
 	}
 
 	echo "</table>";
-	
+
 	if ($verkkokauppa != "" and $muokkaa != "") {
 		echo "<br><input type = 'submit' name='tallenna' value='".t("Tallenna muutokset")."'></form><br>";
 	}
@@ -755,16 +755,16 @@
 						$rihin_yht += laskuval($row["rivihinta"], $laskurow["vienti_kurssi"]);
 					}
 
-					$arvo_yht  += laskuval($row["arvo"], $laskurow["vienti_kurssi"]);
-					$summa_yht += laskuval($row["summa"], $laskurow["vienti_kurssi"]);
+					$arvo_yht  += round(laskuval($row["arvo"], $laskurow["vienti_kurssi"]), 2);
+					$summa_yht += round(laskuval($row["summa"], $laskurow["vienti_kurssi"]), 2);
 				}
 				else {
 					if ($row["osto_vai_hyvitys"] != "O" and ($laskurow["tapvm"] == '0000-00-00' or ($row["var"] != "P" and $row["var"] != "J" and $row["var"] != "S"))) {
 						$rihin_yht += $row["rivihinta"];
 					}
 
-					$arvo_yht  += $row["arvo"];
-					$summa_yht += $row["summa"];
+					$arvo_yht  += round($row["arvo"], 2);
+					$summa_yht += round($row["summa"], 2);
 				}
 			}
 
@@ -1250,15 +1250,15 @@
 			else {
 				echo "<td $classx align='right' valign='top' nowrap>".($row["alv"] * 1)."</td>";
 			}
-			
+
 			if ($verkkokauppa != "" and $muokkaa != "") {
 				echo "<td class='back'><input type = 'button' onclick = \"if(confirm('".t("Oletko varma, että haluat mitätöidä tilausrivin?")."')) { sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus=$row[tunnus]&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki'); }\" value='".t("Mitätöi rivi")."'></td>";
 			}
-			
+
 			echo "</tr>";
 
 			if ($row['kommentti'] != '') {
-				$cspan = 11;
+				$cspan = 10;
 
 				if ($kukarow['hinnat'] == 1) {
 					$cspan-=2;
@@ -1266,7 +1266,10 @@
 				if ($kukarow['hinnat'] == -1) {
 					$cspan-=4;
 				}
-				if($kukarow["resoluutio"] == "I") {
+				if ($kukarow["resoluutio"] == "I") {
+					$cspan++;
+				}
+				if (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and ($kukarow['extranet'] == '' or $yhtiorow['varastopaikan_lippu'] != '')) {
 					$cspan++;
 				}
 				if ($tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
@@ -1299,12 +1302,15 @@
 		}
 
 		if ($kukarow['hinnat'] >= 0) {
-			$colspan = 7;
+			$colspan = 6;
 
 			if ($kukarow['hinnat'] == 1) {
 				$colspan = $colspan - 2;
 			}
 			if($kukarow["resoluutio"] == "I") {
+				$colspan++;
+			}
+			if (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and ($kukarow['extranet'] == '' or $yhtiorow['varastopaikan_lippu'] != '')) {
 				$colspan++;
 			}
 			if ($tyyppisarake == "OK" and ($laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
@@ -1315,9 +1321,6 @@
 			}
 			if($kukarow["extranet"] != "" and $yhtiorow['varastopaikan_lippu'] != '') {
 				$colspan++;
-			}
-			if (!(($laskurow["tila"] != 'T' or $yhtiorow['tarjouksen_tuotepaikat'] == "") and ($kukarow['extranet'] == '' or $yhtiorow['varastopaikan_lippu'] != ''))) {
-				$colspan--;
 			}
 
 			echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Veroton yhteensä").":</td><td class='spec' align='right'>".sprintf('%.2f',$arvo_yht)."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";

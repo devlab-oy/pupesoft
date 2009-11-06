@@ -792,8 +792,7 @@ if (!function_exists('loppu_tarjous')) {
 			$pdf_tarjous->draw_text(mm_pt(15),  47, $myyrow["nimi"], $page_tarjous, $boldi);
 			$pdf_tarjous->draw_text(mm_pt(100),  47, "Puh: $myyrow[puhno]  Email: $myyrow[eposti]", $page_tarjous, $boldi);
 
-			$pdf_tarjous->draw_text(mm_pt(15),  35, "$laskurow[yhtio_nimi], $laskurow[yhtio_osoite] $laskurow[yhtio_postino] $laskurow[yhtio_postitp]", $page_tarjous, $norm);
-			$pdf_tarjous->draw_text(mm_pt(100),  35, "Puh: $yhtiorow[puhelin]  Email: $yhtiorow[email]", $page_tarjous, $norm);
+			$pdf_tarjous->draw_text(mm_pt(15),  35, "$laskurow[yhtio_nimi], $laskurow[yhtio_osoite] $laskurow[yhtio_postino] $laskurow[yhtio_postitp],  Puh: $yhtiorow[puhelin],  Email: $yhtiorow[email]", $page_tarjous, $norm);
 		}
 
 		if ($tots != 1) {

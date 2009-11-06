@@ -726,11 +726,11 @@
 		// katotaan miten halutaan sortattavan
 		$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
-		if($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
+		if ($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
 			$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
 		}
 		else {
-			$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W') ";
+			$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E') ";
 		}
 
 		if ($laskurow["tunnusnippu"] > 0) {

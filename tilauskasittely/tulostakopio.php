@@ -668,7 +668,7 @@
 		}
 		if ($toim == "TILAUSVAHVISTUS") {
 			//myyntitilaus.
-			$where1 .= " lasku.tila in ('N','L','R','A','V')";
+			$where1 .= " lasku.tila in ('E','N','L','R','A','V')";
 
 			if ($ytunnus{0} == '£') {
 				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'

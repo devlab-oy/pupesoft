@@ -675,15 +675,9 @@ if (!function_exists('rivi_tarjous')) {
 			$row["kommentti"] .= t("S:nro").": $sarjarow[sarjanumero]\n";
 		}
 
-		if(substr($tarjoustyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
+		if (substr($tarjoustyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
 			if (str_replace("perhe_", "", $tarjoustyyppi) == "") {
-				// tulosta_tarjous.inc
-				if ($row["var"] != 'J' and $row["var"] != 'P') {
-					$summa += $row['rivihinta'];
-				}
-				else {
-					$row['rivihinta'] = 0;
-				}
+				$summa += $row['rivihinta'];
 
 				$kala = tarjous_rivi_hinta_ale($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous, $sarjanutunnus, $selite, $row, $hinnat, $lask, $sivu);
 			}
@@ -954,7 +948,6 @@ if (!function_exists('tulosta_tarjous')) {
 			$riresult = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_array($riresult)) {
-
 
 				if ($yhtiorow['tarjouksen_alv_kasittely'] != '') {
 					if ($yhtiorow['alv_kasittely'] == '' and $yhtiorow['tarjouksen_alv_kasittely'] == 'X') {

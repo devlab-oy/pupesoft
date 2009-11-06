@@ -528,12 +528,23 @@
 			$srow = mysql_fetch_array($sresult);
 
 			//	Ylikirjoitetaan oletusarvot otsikon tiedoilla!
-			if($otsikolta == "YES" and $from != "vaihdaasiakas") {
+			if ($otsikolta == "YES" and $from != "vaihdaasiakas") {
 				foreach($_POST as $key => $val) {
-					if(!in_array($key, array("tila", "alatila"))) {
+
+					if ($key == "toimpp") 			$srow["toimaika"] = $_POST["toimvv"]."-".$_POST["toimkk"]."-".$_POST["toimpp"];
+					elseif ($key == "kerpp") 		$srow["kerayspvm"] = $_POST["kervv"]."-".$_POST["kerkk"]."-".$_POST["kerpp"];
+					elseif ($key == "tnimi") 		$srow["toim_nimi"] = $val;
+					elseif ($key == "tnimitark") 	$srow["toim_nimitark"] = $val;
+					elseif ($key == "tosoite") 		$srow["toim_osoite"] = $val;
+					elseif ($key == "tpostino") 	$srow["toim_postino"] = $val;
+					elseif ($key == "tpostitp") 	$srow["toim_postitp"] = $val;
+					elseif ($key == "eilahe") 		$srow["eilahetetta"] = $val;
+					elseif ($key == "maksaja") 		$srow["kohdistettu"] = $val;
+					elseif ($key == "valkoodi") 	$srow["valkoodi"] = substr($val,0,strpos($val, "##"));
+					elseif (!in_array($key, array("tila", "alatila"))) {
 						$srow[$key] = $val;
 					}
-				}
+				}				
 			}
 
 			if (isset($toim_asiakasid) and $toim_asiakasid != 0) {
@@ -1473,7 +1484,7 @@
 
 			$varastot_array = array();
 			$varastot_lisa_query = "";
-			
+
 			if ($kukarow["varasto"] != "") {
 				$varastot_array = explode(",", $kukarow["varasto"]);
 				$varastot_lista = mysql_real_escape_string($kukarow["varasto"]);
@@ -2734,7 +2745,7 @@
 			$tee = "";
 		}
 
-		if(($toim == "PROJEKTI" or $yhtiorow["splittauskielto"] == "K") and $kukarow["kesken"] > 0) {
+		if (($toim == "PROJEKTI" or $yhtiorow["splittauskielto"] == "K") and $kukarow["kesken"] > 0) {
 			$abuq = "	SELECT *
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero'";

@@ -827,6 +827,26 @@
 		if (mysql_num_rows($result) > 0) {
 
 			if ($kukarow["extranet"] == "") {
+
+				echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+						<!--
+
+						function toggleAll(toggleBox) {
+
+							var currForm = toggleBox.form;
+							var isChecked = toggleBox.checked;
+							var nimi = toggleBox.name;
+
+							for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
+								if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,8) == nimi) {
+									currForm.elements[elementIdx].checked = isChecked;
+								}
+							}
+						}
+
+						//-->
+						</script>";
+
 				echo "	<form method='post' action='$PHP_SELF'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='tee' value='$tee'>
@@ -846,9 +866,11 @@
 						<input type='submit' value='".t("Tulosta useita kopioita")."'></form><br>";
 			}
 			echo "<table><tr>";
+
 			if ($logistiikka_yhtio != '') {
 				echo "<th valign='top'>",t("Yhtiö"),"</th>";
 			}
+
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.tunnus'>".t("Tilausnro")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.laskunro'>".t("Laskunro")."</a></th>";
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.ytunnus'>".t("Ytunnus")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.nimi'>".t("Nimi")."</a></th>";
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=pvm'>".t("Pvm")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.toimaika'>".t("Toimaika")."</a></th>";
@@ -863,7 +885,7 @@
 			if ($tila == 'monta') {
 				echo "<th valign='top'>".t("Tulosta")."</th>";
 
-				echo "  <form method='post' action='$PHP_SELF' autocomplete='off'>
+				echo "  <form method='post' name='tulosta' action='$PHP_SELF' autocomplete='off'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='mista' value='tulostakopio'>
@@ -964,6 +986,7 @@
 			}
 
 			if ($tila == 'monta') {
+				echo "<tr><td colspan='6' class='back' align='right'>".t("Ruksaa kaikki").":</td><td class='back'><input type='checkbox' name='tulostuk' onclick='toggleAll(this)'></td></tr>";
 				echo "<tr><td colspan='8' class='back'></td><td class='back'><input type='submit' value='".t("Tulosta")."'></form></td></tr>";
 			}
 
@@ -1140,11 +1163,7 @@
 		}
 
 		if (isset($tulostukseen)) {
-			$laskut="";
-			foreach ($tulostukseen as $tun) {
-				$laskut .= "$tun,";
-			}
-			$tilausnumero = substr($laskut,0,-1); // vika pilkku pois
+			$tilausnumero = implode(",", $tulostukseen);
 		}
 
 		if ($otunnus == '' and $laskunro == '' and $tilausnumero == '') {
@@ -1181,7 +1200,7 @@
 		$query .= " AND yhtio ='$kukarow[yhtio]'";
 		$rrrresult = mysql_query($query) or pupe_error($query);
 
-		while($laskurow = mysql_fetch_assoc($rrrresult)) {
+		while ($laskurow = mysql_fetch_assoc($rrrresult)) {
 
 			if ($toim == "OSTO") {
 				$otunnus = $laskurow["tunnus"];

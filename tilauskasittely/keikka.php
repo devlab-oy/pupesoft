@@ -533,23 +533,26 @@ if ($toiminto == "uusi" and $toimittajaid > 0) {
 
 	// meill‰ on $toimittajarow haettuna ylh‰‰ll‰
 	$query = "	INSERT into lasku set
-				yhtio        = '$kukarow[yhtio]',
-				laskunro     = '$id',
-				ytunnus	     = '$toimittajarow[ytunnus]',
-				nimi         = '$toimittajarow[nimi]',
-				valkoodi     = '$toimittajarow[oletus_valkoodi]',
-				vienti       = '$toimittajarow[oletus_vienti]',
-				vienti_kurssi= '$kurssi',
-				toimitusehto = '$toimittajarow[toimitusehto]',
-				osoite       = '$toimittajarow[osoite]',
-				postitp      = '$toimittajarow[postitp]',
-				maa			 = '$toimittajarow[maa]',
-				maa_lahetys  = '$toimittajarow[maa]',
-				swift        = '$toimittajarow[swift]',
-				liitostunnus = '$toimittajarow[tunnus]',
-				tila         = 'K',
-				luontiaika	 = now(),
-				laatija		 = '$kukarow[kuka]'";
+				yhtio        	= '$kukarow[yhtio]',
+				laskunro     	= '$id',
+				ytunnus	     	= '$toimittajarow[ytunnus]',
+				nimi         	= '$toimittajarow[nimi]',
+				valkoodi     	= '$toimittajarow[oletus_valkoodi]',
+				vienti       	= '$toimittajarow[oletus_vienti]',
+				vienti_kurssi	= '$kurssi',
+				toimitusehto 	= '$toimittajarow[toimitusehto]',
+				osoite       	= '$toimittajarow[osoite]',
+				postitp      	= '$toimittajarow[postitp]',
+				maa			 	= '$toimittajarow[maa]',
+				maa_lahetys 	= '$toimittajarow[maa_lahetys]',
+				kauppatapahtuman_luonne = '$toimittajarow[kauppatapahtuman_luonne]',
+				kuljetusmuoto 	= '$toimittajarow[kuljetusmuoto]',
+				rahti 			= '$toimittajarow[oletus_kulupros]',
+				swift        	= '$toimittajarow[swift]',
+				liitostunnus 	= '$toimittajarow[tunnus]',
+				tila         	= 'K',
+				luontiaika	 	= now(),
+				laatija		 	= '$kukarow[kuka]'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	// selaukseen

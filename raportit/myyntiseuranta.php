@@ -538,6 +538,14 @@
 							}
 						}
 					}
+
+					if ($mukaan == "laskuittain") {
+						if ($group!="") $group .= ",lasku.tunnus";
+						else $group .= "laskunumero";
+						$select .= "if(lasku.laskunro>0,concat('".t("LASKU").":',lasku.laskunro),concat('".t("TILAUS").":',lasku.tunnus)) laskunumero, ";
+						$order  .= "laskunumero,";
+						$gluku++;
+					}
 				}
 
 				if ($order != "") {
@@ -992,7 +1000,7 @@
 
 					$rivilimitti = 1000;
 
-					if($vain_excel != "") {
+					if ($vain_excel != "") {
 						echo "<font class='error'>".t("Tallenna/avaa tulos excelissä")."!</font><br><br>";
 						$rivilimitti = 0;
 					}
@@ -1901,6 +1909,7 @@
 			if ($ruksit[150] != '') 		$ruk150chk 				= "CHECKED";
 			if ($ruksit[160] != '')			$ruk160chk 				= "CHECKED";
 			if ($ruksit[170] != '')			$ruk170chk 				= "CHECKED";
+			if ($ruksit[180] != '')			$ruk180chk 				= "CHECKED";
 			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
 			if ($kateprossat != '')  		$katchk   				= "CHECKED";
 			if ($nettokateprossat != '')	$nettokatchk			= "CHECKED";
@@ -2066,6 +2075,12 @@
 				<td><input type='text' name='jarjestys[170]' size='2' value='$jarjestys[170]'></td>
 				<td><input type='checkbox' name='ruksit[170]' value='konserni' $ruk170chk></td>
 				<td><input type='text' name='rajaus[170]' value='$rajaus[170]'></td>
+				</tr>
+				<tr>
+				<th>".t("Listaa laskuittain")."</th>
+				<td><input type='text' name='jarjestys[180]' size='2' value='$jarjestys[180]'></td>
+				<td><input type='checkbox' name='ruksit[180]' value='laskuittain' $ruk180chk></td>
+				<td><input type='text' name='rajaus[180]' value='$rajaus[180]'></td>
 				</tr>
 				<tr>
 				<td class='back'><br></td>

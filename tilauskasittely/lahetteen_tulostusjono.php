@@ -511,7 +511,7 @@
 			$karajaus 	= 1;
 
 			//	Varastorajaus jos käyttäjällä on joku varasto valittuna
-			if ($kukarow['varasto'] > 0) {
+			if ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
 				$tuvarasto 	= $kukarow['varasto'];
 			}
 			else {
@@ -534,7 +534,7 @@
 				$haku .= " and lasku.varasto='$temp_tuvarasto[0]' and lasku.tulostusalue = '$temp_tuvarasto[1]'";
 			}
 			else {
-				$haku .= " and lasku.varasto='$tuvarasto' ";
+				$haku .= " and lasku.varasto in ($tuvarasto) ";
 			}
 		}
 

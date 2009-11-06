@@ -125,7 +125,7 @@
 				}
 
 				$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
-				
+
 				// katsotaan, ettei tilaus ole kenell‰k‰‰n auki ruudulla
 				$query = "	SELECT *
 							FROM kuka
@@ -541,8 +541,8 @@
 		if ($tumaa != '') {
 			$query = "	SELECT group_concat(tunnus) tunnukset
 						FROM varastopaikat
-						WHERE maa != '' 
-						and $logistiikka_yhtiolisa 
+						WHERE maa != ''
+						and $logistiikka_yhtiolisa
 						and maa = '$tumaa'";
 			$maare = mysql_query($query) or pupe_error($query);
 			$maarow = mysql_fetch_array($maare);
@@ -583,33 +583,33 @@
 
 		echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
 
-		$query = "	SELECT varastopaikat.yhtio, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue, count(*) kpl
+		$query = "	SELECT lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue, count(*) kpl
 					FROM varastopaikat
 					JOIN lasku ON (varastopaikat.yhtio = lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto = varastopaikat.tunnus)
 					WHERE varastopaikat.$logistiikka_yhtiolisa
-					GROUP BY varastopaikat.yhtio, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue
-					ORDER BY varastopaikat.yhtio, varastopaikat.tyyppi, varastopaikat.nimitys";
+					GROUP BY lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue
+					ORDER BY varastopaikat.tyyppi, varastopaikat.nimitys, lasku.tulostusalue, varastopaikat.yhtio";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
 
 		$sel = array();
 		$sel[$tuvarasto] = "SELECTED";
+
 		while ($row = mysql_fetch_array($result)){
+
 			if ($row['tulostusalue'] != '') {
 				echo "<option value='$row[tunnus]##$row[tulostusalue]' ".$sel[$row['tunnus']."##".$row['tulostusalue']].">$row[nimitys] $row[tulostusalue] ($row[kpl])";
-				if ($logistiikka_yhtio != '') {
-					echo " ($row[yhtio])";
-				}
-				echo "</option>";
 			}
 			else {
 				echo "<option value='$row[tunnus]' ".$sel[$row['tunnus']].">$row[nimitys] ($row[kpl])";
-				if ($logistiikka_yhtio != '') {
-					echo " ($row[yhtio])";
-				}
-				echo "</option>";
 			}
+
+			if ($logistiikka_yhtio != '') {
+				echo " ($row[yhtio_nimi])";
+			}
+
+			echo "</option>";
 		}
 		echo "</select>";
 
@@ -639,7 +639,7 @@
 
 		$query = "	SELECT clearing, count(*) kpl
 					FROM lasku
-					WHERE $logistiikka_yhtiolisa 
+					WHERE $logistiikka_yhtiolisa
 					and ((tila = '$tila' and alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi
 					GROUP BY clearing
 					ORDER by clearing";
@@ -648,18 +648,18 @@
 		$sel=array();
 		$sel[$tutyyppi]="selected";
 
-		echo "<option value='KAIKKI' {$seltuty["KAIKKI"]}>".t("N‰yt‰ kaikki")."</option>";
+		echo "<option value='KAIKKI' $seltuty[KAIKKI]>".t("N‰yt‰ kaikki")."</option>";
 
 		if (mysql_num_rows($result)>0) {
 			while ($row = mysql_fetch_array($result)) {
 				if ($row["clearing"] == "") {
-					echo "<option value='NORMAA' {$sel["NORMAA"]}>".t("N‰yt‰ normaalitilaukset")." ({$row["kpl"]})</option>";
+					echo "<option value='NORMAA' $sel[NORMAA]>".t("N‰yt‰ normaalitilaukset")." ($row[kpl])</option>";
 				}
  				elseif ($row["clearing"] == "ENNAKKOTILAUS") {
-					echo "<option value='ENNAKK' {$sel["ENNAKK"]}>".t("N‰yt‰ ennakkotilaukset")." ({$row["kpl"]})</option>";
+					echo "<option value='ENNAKK' $sel[ENNAKK]>".t("N‰yt‰ ennakkotilaukset")." ($row[kpl])</option>";
 				}
  				elseif ($row["clearing"] == "JT-TILAUS") {
-					echo "<option value='JTTILA' {$sel["JTTILA"]}>".t("N‰yt‰ jt-tilaukset")." ({$row["kpl"]})</option>";
+					echo "<option value='JTTILA' $sel[JTTILA]>".t("N‰yt‰ jt-tilaukset")." ($row[kpl])</option>";
 				}
 			}
 		}
@@ -681,7 +681,7 @@
 		$sel=array();
 		$sel[$tutoimtapa] = "selected";
 		while ($row = mysql_fetch_array($result)){
-			echo "<option value='$row[selite]' ".$sel[$row["selite"]].">".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")." ({$row["kpl"]})</option>";
+			echo "<option value='$row[selite]' ".$sel[$row["selite"]].">".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")." ($row[kpl])</option>";
 		}
 
 		echo "</select></td><td></td><td></td>";
@@ -692,12 +692,12 @@
 		echo "<tr><td>".t("Ker‰ysaikarajaus:")."</td>
 				<td>
 					<select name='karajaus' onchange='submit()'>
-						<option value='1' {$sel[1]}>".t("Huominen")."</option>
-						<option value='3' {$sel[3]}>".t("Seuraavat 3 p‰iv‰‰")."</option>
-						<option value='5' {$sel[5]}>".t("Seuraavat 5 p‰iv‰‰")."</option>
-						<option value='7' {$sel[7]}>".t("Seuraava viikko")."</option>
-						<option value='14' {$sel[14]}>".t("Seuraavat 2 viikkoa")."</option>
-						<option value='KAIKKI' {$sel["KAIKKI"]}>".t("N‰yt‰ kaikki")."</option>
+						<option value='1' $sel[1]>".t("Huominen")."</option>
+						<option value='3' $sel[3]>".t("Seuraavat 3 p‰iv‰‰")."</option>
+						<option value='5' $sel[5]>".t("Seuraavat 5 p‰iv‰‰")."</option>
+						<option value='7' $sel[7]>".t("Seuraava viikko")."</option>
+						<option value='14' $sel[14]>".t("Seuraavat 2 viikkoa")."</option>
+						<option value='KAIKKI' $sel[KAIKKI]>".t("N‰yt‰ kaikki")."</option>
 					</select>
 
 				</td>";
@@ -921,7 +921,7 @@
 					//haetaan ker‰yslistan oletustulostin
 					$query = "	SELECT *
 								from varastopaikat
-								where yhtio = '$kukarow[yhtio]' 
+								where yhtio = '$kukarow[yhtio]'
 								and tunnus = '$tilrow[varasto]'";
 					$prires = mysql_query($query) or pupe_error($query);
 					$prirow = mysql_fetch_array($prires);
@@ -1014,7 +1014,7 @@
 				$riveja_yht += $tilrow["riveja"];
 			}
 
-			$spanni = $logistiikka_yhtio != '' ? 7 : 6; 
+			$spanni = $logistiikka_yhtio != '' ? 7 : 6;
 
 			echo "<tr class='aktiivi'>";
 			echo "<th colspan='$spanni'>";
@@ -1022,7 +1022,7 @@
 			echo t("Rivej‰ yhteens‰")."</th>";
 			echo "<th>".$riveja_yht."</th>";
 
-			$spanni = ($yhtiorow["pakkaamolokerot"] == "K" or $logistiikka_yhtio != '') ? 4 : 3; 						
+			$spanni = ($yhtiorow["pakkaamolokerot"] == "K" or $logistiikka_yhtio != '') ? 4 : 3;
 
 			echo "<th colspan='$spanni'></th>";
 			echo "</tr>";

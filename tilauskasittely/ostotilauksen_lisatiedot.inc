@@ -18,7 +18,7 @@ if ($tee == "update") {
 	else {
 		$kohdistettu = "";
 	}
-	
+
 	if ($nappikeikalla != 'ollaan') {
 		echo "<font class='message'>".t("Muutit eturahtia ja/tai erikoisalennusta, kohdistus pit‰‰ tarkastaa uudelleen.")."</font><br><br>";
 	}
@@ -32,27 +32,26 @@ if ($tee == "update") {
 	$rahti_huolinta = str_replace ( ",", ".", $rahti_huolinta);
 	$erikoisale 	= str_replace ( ",", ".", $erikoisale);
 	$bruttopaino 	= str_replace ( ",", ".", $bruttopaino);
-	
+
 	$toimaika 		= $vv."-".$kk."-".$pp;
 	$ultilno 		= tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 
 	$query = "	UPDATE lasku
 				SET maa_lahetys = '$maa_lahetys',
-				maa_maara = '$maa_maara',
+				maa_maara 		= '$maa_maara',
 				kauppatapahtuman_luonne = '$ktapahtuman_luonne',
-				kuljetusmuoto = '$kuljetusmuoto',
-				bruttopaino = '$bruttopaino',
-				rahti_huolinta = '$rahti_huolinta',
-				rahti_etu = '$rahti_etu',
-				rahti_etu_alv = '$rahti_etu_alv',
-				rahti = '$rahti',
-				erikoisale = '$erikoisale',
-				toimaika = '$toimaika',
-				kohdistettu = '$kohdistettu',
-				comments = '$kommentti',
-				ultilno = '$ultilno'
+				kuljetusmuoto 	= '$kuljetusmuoto',
+				bruttopaino 	= '$bruttopaino',
+				rahti_huolinta 	= '$rahti_huolinta',
+				rahti_etu 		= '$rahti_etu',
+				rahti_etu_alv 	= '$rahti_etu_alv',
+				rahti 			= '$rahti',
+				erikoisale 		= '$erikoisale',
+				toimaika 		= '$toimaika',
+				kohdistettu 	= '$kohdistettu',
+				comments	 	= '$kommentti',
+				ultilno 		= '$ultilno'
 				WHERE tunnus = '$otunnus' and yhtio = '$kukarow[yhtio]'";
-
 	$result = mysql_query($query) or pupe_error($query);
 
 	$toiminto = "";
@@ -67,7 +66,7 @@ if ($tee == "") {
 	$laskurow = mysql_fetch_array ($result);
 
 	// lasketaan keikan ostolaskujen summat yhteen
-	$query = "	select sum(summa) vosumma
+	$query = "	SELECT sum(summa) vosumma
 				from lasku
 				where yhtio='$kukarow[yhtio]'
 				and tila='K'
@@ -110,11 +109,11 @@ if ($tee == "") {
 			<input type='hidden' name='otunnus' value='$otunnus'>
 			<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>
 			<input type='hidden' name='tee' value='update'>";
-	
+
 	if ($nappikeikalle == 'menossa') {
 		echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
 	}
-			
+
 	echo "<tr><td>".t("L‰hetysmaa").":</td><td colspan='3'>
 			<select name='maa_lahetys'>";
 
@@ -133,7 +132,7 @@ if ($tee == "") {
 		elseif($laskurow["maa_lahetys"] == "" and $row[0] == $toimittaja["maa_lahetys"]) {
 			$sel = "selected";
 		}
-		
+
 		echo "<option value='$row[0]' $sel>$row[1]</option>";
 	}
 	echo "</select></td>";
@@ -149,15 +148,15 @@ if ($tee == "") {
 	$result = mysql_query($query) or pupe_error($query);
 
 	if ($laskurow["maa_maara"] == "") {
-		$query = "	SELECT varastopaikat.maa, count(*) kpl 
+		$query = "	SELECT varastopaikat.maa, count(*) kpl
 					FROM lasku
-					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus) 
-					JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio 
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus)
+					JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
 						AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
 						AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')))
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					AND lasku.tunnus = '$laskurow[tunnus]'
-					GROUP BY varastopaikat.maa 
+					GROUP BY varastopaikat.maa
 					ORDER BY kpl DESC
 					LIMIT 1";
 		$maaresult = mysql_query($query) or pupe_error($query);
@@ -187,12 +186,11 @@ if ($tee == "") {
 		$laskurow["tuontipvm"] = $vv."-".$kk."-".$pp;
 	}
 
-	echo "<tr><td>".t("Kauppatapahtuman luonne").":</td><td colspan='3'>
-		<select NAME='ktapahtuman_luonne'>";
+	echo "<tr><td>".t("Kauppatapahtuman luonne").":</td><td colspan='3'><select name='ktapahtuman_luonne'>";
 	echo "<option value=''>".t("Valitse")."</option>";
 
 	$result = t_avainsana("KT");
-	
+
 	while($row = mysql_fetch_array($result)){
 		$sel = '';
 		if($row["selite"] == $laskurow["kauppatapahtuman_luonne"]) {
@@ -232,8 +230,8 @@ if ($tee == "") {
 
 	//Haetaan alvifunktio
 	require ('../inc/alvpopup.inc');
-	
-	
+
+
 	if ($laskurow["bruttopaino"] == 0) {
 		$query  = "	SELECT round(sum(tuotemassa*(varattu+kpl)),2) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 					FROM tilausrivi
@@ -248,9 +246,9 @@ if ($tee == "") {
 		else {
 			$osumapros = "N/A";
 		}
-		
+
 		$laskurow["bruttopaino"] = $painorow["massa"];
-		
+
 		$lisamassa = "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s kg, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
 	}
 

@@ -6,6 +6,17 @@
 		require ("raportit/naytatilaus.inc");
 	}
 
+	$logistiikka_yhtio = '';
+	$logistiikka_yhtiolisa = '';
+
+	if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+		$logistiikka_yhtio = $konsernivarasto_yhtiot;
+		$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
+	}
+	else {
+		$logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+	}
+
 	echo "<font class='head'>".t("Pakkaamojen selaus")."</font><hr>";
 
 	if ($tee == "nollaa") {
@@ -16,7 +27,7 @@
 		if ($tunnukset != "") {
 			$query = " 	UPDATE lasku
 						SET pakkaamo = 0
-						WHERE yhtio = '$kukarow[yhtio]'
+						WHERE $logistiikka_yhtiolisa
 						AND tunnus in($tunnukset)";
 			$nollausres = mysql_query($query) or pupe_error($query);
 
@@ -35,7 +46,7 @@
 
 	$query = "	SELECT distinct nimi
 				FROM pakkaamo
-				WHERE yhtio = '$kukarow[yhtio]'
+				WHERE $logistiikka_yhtiolisa
 				ORDER BY nimi";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -65,7 +76,7 @@
 	if ($tupakkaamo == '' and $kukarow['oletus_pakkaamo'] != '') {
 		$query = "	SELECT group_concat(tunnus SEPARATOR ',') tunnukset
 		  			FROM pakkaamo
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE $logistiikka_yhtiolisa
 					AND nimi = '$kukarow[oletus_pakkaamo]'";
 		$etsire = mysql_query($query) or pupe_error($query);
 		$etsirow = mysql_fetch_array($etsire);
@@ -76,7 +87,7 @@
 	elseif ($tupakkaamo != '' and $tupakkaamo != 'KAIKKI') {
 		$query = "	SELECT group_concat(tunnus SEPARATOR ',') tunnukset
 		  			FROM pakkaamo
-					WHERE yhtio = '$kukarow[yhtio]'
+					WHERE $logistiikka_yhtiolisa
 					AND nimi = '$tupakkaamo'";
 		$etsire = mysql_query($query) or pupe_error($query);
 		$etsirow = mysql_fetch_array($etsire);
@@ -89,15 +100,17 @@
 						lasku.ytunnus,
 						lasku.tunnus,
 						lasku.lahetepvm,
+						lasku.yhtio,
+						lasku.yhtio_nimi,
 						if(lasku.tila = 'L', concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark), lasku.nimi) asnimi
 						FROM lasku
 						JOIN pakkaamo ON (pakkaamo.yhtio = lasku.yhtio and pakkaamo.tunnus = lasku.pakkaamo)
-						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						WHERE lasku.$logistiikka_yhtiolisa
 						AND lasku.tila in ('L','G')
 						AND lasku.alatila in ('A','C')
 						AND lasku.pakkaamo > 0
 						$haku
-						GROUP BY pakkaamo.nimi, pakkaamo.lokero, lasku.ytunnus, lasku.tunnus, lasku.lahetepvm, asnimi
+						GROUP BY pakkaamo.nimi, pakkaamo.lokero, lasku.ytunnus, lasku.tunnus, lasku.lahetepvm, lasku.yhtio, lasku.yhtio_nimi, asnimi
 						ORDER BY pakkaamo.nimi, pakkaamo.lokero, lasku.ytunnus, lasku.lahetepvm, kerayspvm";
 	$pakkaamore = mysql_query($query) or pupe_error($query);
 
@@ -120,6 +133,9 @@
 			if ($lokero == "" or $lokero != $row['lokero']) {
 
 				echo "<tr>";
+				if ($yhtiorow['konsernivarasto'] != '') {
+					echo "<th valign='top'>".t("Yhtiö")."</th>";
+				}
 				echo "<th valign='top'>".t("Lokero")."</th>";
 				echo "<th valign='top'>".t("Asiakas")."</th>";
 				echo "<th valign='top'>".t("Nimi")."</th>";
@@ -128,16 +144,28 @@
 				echo "<th valign='top'>".t("Kerätty")."</th>";
 				echo "<th valign='top'><input type='submit' value='".t("Nollaa")."'></th>";
 
-				echo "<tr class='aktiivi'><td>".$row['lokero']."</td>";
+				echo "<tr class='aktiivi'>";
+				if ($yhtiorow['konsernivarasto'] != '') {
+					echo "<td>$row[yhtio_nimi]</td>";
+				}
+				echo "<td>".$row['lokero']."</td>";
 			}
 			else {
-				echo "<tr class='aktiivi'><td></td>";
+				echo "<tr class='aktiivi'>";
+				echo "<td colspan='";
+				if ($yhtiorow['konsernivarasto'] != '') {
+					echo "2'>$row[yhtio_nimi]</td>";
+				}
+				else {
+					echo "1'></td>";
+				}
+				
 			}
 
 			$query = "	SELECT min(tilausrivi.kerattyaika) kerayspvm
 						FROM tilausrivi USE INDEX (yhtio_otunnus)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio] '
+						WHERE tilausrivi.$logistiikka_yhtiolisa
 						and tilausrivi.otunnus = '$row[tunnus]'
 						and tilausrivi.kerattyaika != '0000-00-00 00:00:00'
 						and tilausrivi.var NOT IN ('P','J')";

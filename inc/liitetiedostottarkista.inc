@@ -2,33 +2,33 @@
 
 if(!function_exists("liitetiedostottarkista")) {
 	function liitetiedostottarkista (&$t, $i, $result, &$tunnus, &$virhe, $trow) {
-		global $kukarow, $errori, $_FILES;
+		global $kukarow, $errori, $_FILES, $thumb_size_x, $thumb_size_y;
 		static $liite_liitos, $liite_liitostunnus, $liite_datai, $liite_selite, $liite_kieli, $liite_kayttotarkoitus;
-				
+
 		if (mysql_field_name($result, $i) == "liitos") {
 			$liite_liitos = $t[$i];
 		}
-		
+
 		if (mysql_field_name($result, $i) == "liitostunnus") {
 			$liite_liitostunnus = $t[$i];
 		}
-		
+
 		if (mysql_field_name($result, $i) == "data") {
 			$liite_datai = $i;
 		}
-		
+
 		if (mysql_field_name($result, $i) == "selite") {
 			$liite_selite = $t[$i];
 		}
-		
+
 		if (mysql_field_name($result, $i) == "kieli") {
 			$liite_kieli = $t[$i];
 		}
-		
-		if (mysql_field_name($result, $i) == "kayttotarkoitus") {	
+
+		if (mysql_field_name($result, $i) == "kayttotarkoitus") {
 			$liite_kayttotarkoitus = $t[$i];
 		}
-		
+
 		if (mysql_field_name($result, $i) == "jarjestys") {
 
 			if ((int) $t[$i] == 0) {
@@ -42,18 +42,18 @@ if(!function_exists("liitetiedostottarkista")) {
 
 				$t[$i] = $jrow["jarjestys"]+1;
 			}
-			
+
 			$liite_jarjestys = $t[$i];
-			
+
 			if ($tunnus == "" or $_FILES["liite_data"]["size"] > 0) {
-						
+
 				$retval = tarkasta_liite("liite_data");
-			
+
 				if ($retval !== TRUE) {
 					$virhe[$liite_datai]	= $retval;
 					$errori 				= 1;
 				}
-			
+
 				//	Onko meillä jokin kuvatyyppi?
 				list($type, $crap) = explode("/", $_FILES["liite_data"]["type"]);
 
@@ -79,20 +79,20 @@ if(!function_exists("liitetiedostottarkista")) {
 							$kayttotarkoitus_lisa
 							and filename 		= '$file_name'";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				if (mysql_num_rows($result) > 0) {
 					$checkrow = mysql_fetch_array($result);
 
 					$virhe[$liite_datai] = t("VIRHE! Tiedosto %s %s löytyy jo tuotteelle", $kieli, $file_name, $checkrow['kayttotarkoitus']);
-					$errori = 1;				
+					$errori = 1;
 				}
 				else {
-								
+
 					$uusi_filu = "";
-					
+
 					if (isset($thumb_size_x) and trim($thumb_size_x) != '' and isset($thumb_size_y) and trim($thumb_size_y) != '') {
 						$thumb_size_x = (int) $thumb_size_x;
-						$thumb_size_y = (int) $thumb_size_y;					
+						$thumb_size_y = (int) $thumb_size_y;
 					}
 					else {
 						$thumb_size_x = 96;
@@ -104,7 +104,7 @@ if(!function_exists("liitetiedostottarkista")) {
 						$temp_file = $_FILES["liite_data"];
 
 						$uusi_filu = muuta_kuvan_koko($thumb_size_y, $thumb_size_x, "thumb", $liite_liitos, "liite_data");
-						
+
 						$liite_kayttotarkoitus = "TH";
 						$uusi_tunnus = tallenna_liite("liite_data", $liite_liitos, $liite_liitostunnus, $liite_selite, $liite_kayttotarkoitus, $tunnus, $liite_jarjestys, $liite_kieli);
 
@@ -120,26 +120,26 @@ if(!function_exists("liitetiedostottarkista")) {
 
 						if ($uusi_filu != "") {
 							system("rm -f \"$uusi_filu\"");
-						}																		
+						}
 					}
 					elseif ($liite_kayttotarkoitus == "TH" and $type == "image" and strtoupper($liite_liitos) == 'TUOTE') {
 						$uusi_filu = muuta_kuvan_koko($thumb_size_y, $thumb_size_x, "thumb", $liite_liitos, "liite_data");
-						
+
 						$uusi_tunnus = tallenna_liite("liite_data", $liite_liitos, $liite_liitostunnus, $liite_selite, $liite_kayttotarkoitus, $tunnus, $liite_jarjestys, $liite_kieli);
-					
+
 						if ($uusi_filu != "") {
 							system("rm -f \"$uusi_filu\"");
 						}
 					}
-					else {					
+					else {
 						$uusi_tunnus = tallenna_liite("liite_data", $liite_liitos, $liite_liitostunnus, $liite_selite, $liite_kayttotarkoitus, $tunnus, $liite_jarjestys, $liite_kieli);
 					}
-				
+
 					// palautetaan tämä ylläpito.phplle
 					$tunnus = $uusi_tunnus;
 				}
 			}
 		}
-	}	
+	}
 }
 ?>

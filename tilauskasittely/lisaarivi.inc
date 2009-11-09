@@ -1626,7 +1626,29 @@
 
 					//Yritetään löytää paikka laskurow[varasto]:sta
 					while ($olerow = mysql_fetch_array($result)) {
-						if ($olerow["varastotunnus"] == $laskurow["varasto"]) {
+						$loytyko_varasto = '';
+
+						if ($kukarow['oletus_varasto'] != '' and $kukarow['oletus_varasto'] != 0) {
+							// katsotaan onko käyttäjän oletus_varasto käyttäjän takana ruksatuissa varastoissa
+							foreach(explode(',', $kukarow['varasto']) as $kukarow_varasto_chk) {
+								if ($kukarow['oletus_varasto'] == $kukarow_varasto_chk) {
+									$loytyko_varasto = $kukarow['oletus_varasto'];
+									break;
+								}
+							}
+						}
+
+						// katsotaan onko oletuspaikka käyttäjän takana ruksatuissa varastoissa ja käyttäjän oletus_varasto ei osunut
+						if ($loytyko_varasto == '') {
+							foreach(explode(',', $kukarow['varasto']) as $kukarow_varasto_chk) {
+								if ($olerow['varastotunnus'] == $kukarow_varasto_chk) {
+									$loytyko_varasto = $kukarow_varasto_chk;
+									break;
+								}
+							}
+						}
+
+						if ($olerow["varastotunnus"] == $laskurow["varasto"] or ($loytyko_varasto == $olerow['varastotunnus'])) {
 							$p_hyllyalue	= $olerow["hyllyalue"];
 							$p_hyllynro		= $olerow["hyllynro"];
 							$p_hyllyvali	= $olerow["hyllyvali"];
@@ -1636,6 +1658,7 @@
 							break;
 						}
 					}
+
 					//Jos ei löytynyt niin myydään oletuspaikalta
 					if ($loydetytpaikat == 0) {
 

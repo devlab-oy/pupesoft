@@ -268,6 +268,18 @@ if ($tee_kululaskut == "poista") {
 	$tee_kululaskut = "";
 }
 
+if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kesken"] > 0) {	
+	$query 	= "	SELECT *
+				FROM tuote
+				WHERE tuoteno = '$yhtiorow[lisakulu_tuotenumero]' and yhtio = '$kukarow[yhtio]'";
+	$tuoteres = mysql_query($query) or pupe_error($query);
+	
+	if (mysql_num_rows($tuoteres) != 1) {
+		echo t("VIRHE: Yhtiön lisakulu_tuotenumero ei ole määritelty")."!!<br>";
+		$tee_kululaskut = "";
+	}
+}
+
 if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kesken"] > 0) {
 	
 	$laskurow_save["alv"] = $laskurow["alv"];
@@ -283,7 +295,7 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
 	$result = mysql_query($query) or pupe_error($query);
 	$myy_laskrow = mysql_fetch_array($result);
 	
-	$query  = "	SELECT distinct tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.hinta, tilausrivi.kpl, tilausrivi.kommentti
+	$query  = "	SELECT distinct tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.hinta, tilausrivi.kpl, tilausrivi.kommentti, tilausrivi.nimitys
 				FROM lasku keikka
 				JOIN lasku liitosotsikko ON keikka.yhtio=liitosotsikko.yhtio and keikka.laskunro=liitosotsikko.laskunro and keikka.tila=liitosotsikko.tila and liitosotsikko.alatila='' and liitosotsikko.vanhatunnus!=0
 				JOIN lasku matkalasku ON matkalasku.yhtio=liitosotsikko.yhtio and matkalasku.tunnus=liitosotsikko.vanhatunnus
@@ -300,7 +312,8 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
 
 	while ($keikkarow = mysql_fetch_array($keikkares)) {
 				
-		$query = "	SELECT tuoteno
+		// Tutkitaan löytääkö tämä rivi jo työmääräyksellä
+		$query = "	SELECT tilausrivi.tunnus
 					FROM tilausrivi
 					JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus
 		 			WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
@@ -308,33 +321,23 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
 					and tilausrivi.otunnus = '$kukarow[kesken]'
 					and tilausrivin_lisatiedot.tilausrivilinkki = '$keikkarow[tunnus]'";
 		$result = mysql_query($query) or pupe_error($query);
-		$kohderow = mysql_fetch_array($result);
 		
-		if ($kohderow["tuoteno"] == "") {
-		
-			$query    = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$keikkarow[tuoteno]'";
-			$tuoteres = mysql_query($query);
-
-			if (mysql_num_rows($tuoteres) == 0) {
-				echo "<font class='error'>".t("Tuotetta")." $tiltuoteno[$yht_i] ".t("ei löydy")."!</font><br>";
-			}
-			else {
-
-				// tuote löytyi ok, lisätään rivi
-				$trow = mysql_fetch_array($tuoteres);
+		if (mysql_num_rows($result) == 0) {
+			// tuote löytyi ok, lisätään rivi
+			$trow = mysql_fetch_array($tuoteres);
+						
+			$tilausrivilinkki	= $keikkarow["tunnus"];
+			$kpl             	= $keikkarow["kpl"];
+			$tuoteno         	= $trow["tuoteno"];
+			$tuotenimitys_force	= $keikkarow["nimitys"];
+			$toimaika 	     	= $myy_laskrow["toimaika"];
+			$kerayspvm	     	= $myy_laskrow["kerayspvm"];
+			$hinta 		     	= $keikkarow["hinta"];
+			$kommentti 		    = $keikkarow["kommentti"];
+			$alv 				= (float) $wtrow["selite"];
+			$laskurow["alv"] 	= $myy_laskrow["alv"];
 							
-				$tilausrivilinkki	= $keikkarow["tunnus"];
-				$kpl             	= $keikkarow["kpl"];
-				$tuoteno         	= $keikkarow["tuoteno"];
-				$toimaika 	     	= $myy_laskrow["toimaika"];
-				$kerayspvm	     	= $myy_laskrow["kerayspvm"];
-				$hinta 		     	= $keikkarow["hinta"];
-				$kommentti 		    = $keikkarow["kommentti"];
-				$alv 				= (float) $wtrow["selite"];
-				$laskurow["alv"] 	= $myy_laskrow["alv"];
-								
-				require ("lisaarivi.inc");			
-			}
+			require ("lisaarivi.inc");			
 		}
 	}
 	

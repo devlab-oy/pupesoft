@@ -320,6 +320,22 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_text(mm_pt(5), mm_pt(185), $laskurow['yhtio_osoite'],						$firstpage, $kirj);
 	$pdf->draw_text(mm_pt(5), mm_pt(180), $laskurow['yhtio_postino']." ".strtoupper($laskurow['yhtio_postitp']),	$firstpage, $kirj);
 
+	//kolliluku
+	if ($rahtikirja_tulostus == "yep" and $toimitustaparow['osoitelappu'] == 'tiivistetty') {
+		$pdf->draw_text(mm_pt(70), mm_pt(180), t("Kollimäärä").": ".$s." (".$kollityht.") ",								$firstpage, $kirj);
+	}
+	elseif ($toimitustaparow['osoitelappu'] == 'tiivistetty') {
+		$query = "	SELECT sum(kollit) kollit
+					FROM rahtikirjat
+					WHERE yhtio='$kukarow[yhtio]' and otsikkonro = '$laskurow[tunnus]'";
+		$pakka = mysql_query($query) or pupe_error($query);
+		$pak = mysql_fetch_array($pakka);
+
+		if ((int) $pak["kollit"] > 0) {
+			$pdf->draw_text(mm_pt(70), mm_pt(180), t("Kollimäärä").": ".$pak["kollit"],								$firstpage, $kirj);
+		}
+	}
+
 	$pdf->draw_text(mm_pt(5), mm_pt(175), "Puh -Tel - Tel: ",								$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(5), mm_pt(170), $yhtiorow['puhelin'],								$firstpage, $kirj);
 

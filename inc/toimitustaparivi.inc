@@ -118,16 +118,24 @@
 	}
 	
 	if (mysql_field_name($result, $i) == "osoitelappu") {
-		$sel1='';
-		$sel2='';
-		if ($trow[$i]=='')
-			$sel1 = 'SELECTED';
-		else
-			$sel2 = 'SELECTED';
+		$sel1 = '';
+		$sel2 = '';
+		$sel3 = '';
+
+		if ($trow[$i] == 'intrade') {
+			$sel2 = 'selected';
+		}
+		elseif ($trow[$i] == 'tiivistetty') {
+			$sel3 = 'selected';
+		}
+		else {
+			$sel1 = 'selected';
+		}
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value='' 		  $sel1>".t("Normaali")."</option>";
 		$ulos .= "<option value='intrade' $sel2>".t("Intrade")."</option>";
+		$ulos .= "<option value='tiivistetty' $sel3>".t("Tiivistetty")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

@@ -191,11 +191,14 @@
 		echo "<td valign='top'>";
 		
 		if ($vrow["asennuskalenteri"] != "") {
-			foreach(explode(",", $vrow["asennuskalenteri"]) as $asekale) {
-				
-				list($a, $l, $s, $t) = explode("##", $asekale);
-				
-				echo "<a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&tyotunnus=$t&tee=MUOKKAA&lopetus=$lopetus/SPLIT/$PHP_SELF////konserni=$konserni'>".tv1dateconv($a, "P")." - ".tv1dateconv($l, "P")." $s</a><br>";
+			
+			$lopetusx = $lopetus;
+			
+			if ($lopetusx == "") $lopetusx = "$PHP_SELF////konserni=$konserni";
+			
+			foreach(explode(",", $vrow["asennuskalenteri"]) as $asekale) {				
+				list($a, $l, $s, $t) = explode("##", $asekale);												
+				echo "<a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&tyotunnus=$t&tee=MUOKKAA&lopetus=$lopetusx'>".tv1dateconv($a, "P")." - ".tv1dateconv($l, "P")." $s</a><br>";
 			}
 		}
 		

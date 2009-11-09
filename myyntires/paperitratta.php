@@ -243,7 +243,7 @@
 
 		$pdf->draw_text(404, 122,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
 		$pdf->draw_text(464, 122,  $summa,						$firstpage, $norm);
-		$pdf->draw_text(550, 122,  $yhtiorow["valkoodi"],		$firstpage, $norm);
+		$pdf->draw_text(550, 122,  $valkoodi,		$firstpage, $norm);
 
 		if ($maksuehtotiedot["pankkinimi1"] != "") {
 			$yhtiorow["pankkinimi1"]	= $maksuehtotiedot["pankkinimi1"];

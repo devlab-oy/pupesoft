@@ -76,11 +76,14 @@ if (!function_exists("lopetus")) {
 		$lopetukset = explode("/SPLIT/", $lopetus);
 
 		$lask = 0;
+		$edlopetus = "";
 
 		foreach ($lopetukset as $lopetus) {
 			if ($lopetus != "") {
 
 				// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
+				$lopetus_clean = $lopetus;
+								
 				$lopetus = str_replace('////','?',               $lopetus);
 				$lopetus = preg_replace('/([^:])\/\/\//','\\1#', $lopetus);
 				$lopetus = preg_replace('/([^:])\/\//','\\1&',   $lopetus);
@@ -103,7 +106,7 @@ if (!function_exists("lopetus")) {
 
 						$nimi = "";
 
-						for($j = $i; $j<count($nimet); $j++) {
+						for ($j = $i; $j<count($nimet); $j++) {
 							$nimi .= $nimet[$j]."/";
 						}
 
@@ -132,6 +135,17 @@ if (!function_exists("lopetus")) {
 							$lopetus = $alku."&lopetus=".$lopetukset[0].$loppu;
 						}
 					}
+					
+					if ($edlopetus != "") {
+						if (strpos($lopetus, "?") === FALSE) {
+							$lopetus .= "?";
+						}
+						else {
+							$lopetus .= "&";
+						}
+						
+						$lopetus .= "lopetus=$edlopetus";
+					}
 
 					if ($nimilisa[1] != "") {
 						$nlisa = " / ".$nimilisa[1];
@@ -141,9 +155,11 @@ if (!function_exists("lopetus")) {
 					}
 
 					$row["nimitys"] = trim(str_ireplace("UUSI", "", $row["nimitys"]));
-
+										
 					if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": $row[nimitys]$nlisa</a><br>";
 					else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
+					
+					$edlopetus = $lopetus_clean;
 				}
 
 				$lask++;

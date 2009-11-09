@@ -40,7 +40,7 @@
 					$row = mysql_fetch_array($result);
 
 					// Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu))
-					if ($row["sarjanumeroseuranta"] == "S") {
+					if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "G") {
 						$query	= "	SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
 									FROM sarjanumeroseuranta
 									LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -120,7 +120,7 @@
 						$kierto = 0;
 					}
 
-					return array($muutoshinta, $kierto);
+					return array($muutoshinta, $kierto, $muutoskpl);
 				}
 			}
 
@@ -442,7 +442,7 @@
 							$select .= "group_concat(concat(tilausrivi.tunnus,'#',tilausrivi.kpl)) sarjanumero, ";
 						}
 						if ($varastonarvo != '') {
-							$select .= "0 varastonarvo, 0 kierto, ";
+							$select .= "0 varastonarvo, 0 kierto, 0 varastonkpl, ";
 						}
 
 						if ($rajaus[$i] != "") {
@@ -1314,14 +1314,18 @@
 
 								// jos kyseessa on varastonarvo
 								if (mysql_field_name($result, $i) == "varastonarvo") {
-									list($varvo, $kierto) = vararvo($row["tuoteno"], $vvl, $kkl, $ppl);
-
+									list($varvo, $kierto, $varaston_saldo) = vararvo($row["tuoteno"], $vvl, $kkl, $ppl);
 									$row[$i] = $varvo;
 								}
 
 								// jos kyseessa on varastonkierto
 								if (mysql_field_name($result, $i) == "kierto") {
 									$row[$i] = $kierto;
+								}
+
+								// jos kyseessa on varaston saldo
+								if (mysql_field_name($result, $i) == "varastonkpl") {
+									$row[$i] = $varaston_saldo;
 								}
 
 								// Jos gruupataan enemmän kuin yksi taso niin tehdään välisumma

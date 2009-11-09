@@ -363,7 +363,7 @@
 						$bottom = "535";
 					}
 					else {
-						$firstpage = $pdf->new_page("595x842");
+						$firstpage = $pdf->new_page("a4");
 						$bottom = "782";
 					}
 

@@ -13,7 +13,7 @@
 		function alku_tariffi () {
 			global $pdf, $image, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam;
 
-			$firstpage = $pdf->new_page("29.71x21.0cm");
+			$firstpage = $pdf->new_page("842x595");
 
 			$p["height"] = 10;
 			$p["font"] = "Times-Roman";

@@ -373,18 +373,20 @@ if ($toiminto == "kohdista") {
 
 if ($ytunnus == "" and $keikka != "") {
 	$keikka = (int) $keikka;
-	$query = "	SELECT ytunnus
+	$query = "	SELECT ytunnus, max(laskunro)
 				FROM lasku USE INDEX (tila_index)
+				LEFT JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
 				where lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.tila = 'K'
 				and lasku.alatila = ''
 				and lasku.vanhatunnus = 0
-				and lasku.laskunro = $keikka
+				and (lasku.laskunro = $keikka or tilausrivi.otunnus = $keikka)
+				group by lasku.ytunnus
 				order by lasku.laskunro desc";
 	$keikkahaku_res = mysql_query($query) or pupe_error($query);
-
 	$keikkahaku_row = mysql_fetch_array($keikkahaku_res);
 
+	$keikka = $keikkahaku_row["laskunro"];
 	$ytunnus = $keikkahaku_row["ytunnus"];
 }
 
@@ -425,7 +427,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
 	echo "<td><input type='text' name='ytunnus' value='$ytunnus'></td>";
 	echo "</tr>";
 	echo "<tr>";
-	echo "<th>".t("Etsi keikkanumerolla")."</th>";
+	echo "<th>".t("Etsi keikka-/tilausnumero")."</th>";
 	echo "<td><input type='text' name='keikka' value='$keikka'></td>";
 	echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
 	echo "</tr>";

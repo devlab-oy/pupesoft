@@ -27,7 +27,7 @@
 		$lis = " and (avainsana.selite = '' or avainsana.selite = '$tyojono') ";
 	}
 
-	$kires = t_avainsana("TYOM_TYOLINJA", "", $lis);
+	$kires = t_avainsana("TYOM_TYOLINJA", "", $lis." ORDER BY jarjestys, selitetark_2");
 
 	$ASENTAJA_ARRAY = array();
 	$ASENTAJA_ARRAY_TARK = array();
@@ -324,7 +324,7 @@
 				<select name='month' Onchange='submit();'>";
 
 		$i=1;
-		foreach($MONTH_ARRAY as $val) {
+		foreach ($MONTH_ARRAY as $val) {
 			if($i == $month) {
 				$sel = "selected";
 			}
@@ -363,55 +363,55 @@
 
 	if ($tee == "") {
 		echo "<table width='90%'>";
-		echo "<tr>";
 
-		echo "<td class='back'></td>";
+		if (count($ASENTAJA_ARRAY_TARK) < 5) {
+			echo "<tr>";
+			echo "<td class='back'></td>";
 
-		foreach($DAY_ARRAY as $d) {
-			echo "	<th nowrap><b>$d</b>
-					<br>
-					<table width='100%'>
-					<tr>";
+			foreach ($DAY_ARRAY as $d) {
+				echo "<th nowrap><b>$d</b><br><table width='100%'><tr>";
 
-			foreach($ASENTAJA_ARRAY_TARK as $b) {
-				echo "<td align='center' nowrap width='40px'>$b</td>";
+				foreach ($ASENTAJA_ARRAY_TARK as $b) {
+					echo "<td align='center' nowrap width='40px'>$b</td>";
+				}
+
+		        echo "</tr></table></th>";
 			}
-	        echo "	</tr>
-					</table>
-					</th>";
+
+			echo "</tr>";
 		}
 
-		echo "</tr>";
 		echo "<tr>";
+		echo "<td class='back' style='vertical-align: bottom;'><br><table width='100%'>";
 
-		echo "<td class='back'><br><table width='100%'>";
-
-		foreach($AIKA_ARRAY as $a) {
+		foreach ($AIKA_ARRAY as $a) {
 			echo "<tr><td class='back'>$a</td></tr>";
 		}
 
 		echo "</table>";
 		echo "</td>";
 
-		// Kirjotetaan alkuun tyhjiä soluja
-		if (weekday_number("1", $month, $year) < count($DAY_ARRAY)) {
-			for ($i = 0; $i < weekday_number("1", $month, $year); $i++) {
-				echo "<td class='back'>&nbsp;</td>";
+		if (count($ASENTAJA_ARRAY_TARK) < 5) {
+			// Kirjotetaan alkuun tyhjiä soluja
+			if (weekday_number("1", $month, $year) < count($DAY_ARRAY)) {
+				for ($i = 0; $i < weekday_number("1", $month, $year); $i++) {
+					echo "<td class='back'>&nbsp;</td>";
+				}
 			}
 		}
 
 		$div_arrayt = array();
 		$solu = 0;
 
-	    for($i = 1; $i <= days_in_month($month, $year); $i++) {
+	    for ($i = 1; $i <= days_in_month($month, $year); $i++) {
 
-			$pvanro = date('w', mktime(0, 0, 0, $month, $i, $year));
+			$pvanro = date('w', mktime(0, 0, 0, $month, $i, $year))-1;
 
-			if ($pvanro == 0) $pvanro = 7;
+			if ($pvanro == -1) $pvanro = 6;
 
-			if ($pvanro-1 < count($DAY_ARRAY)) {
+			if ($pvanro < count($DAY_ARRAY)) {
 
-				echo "<td class='back' align='center'>$rivi";
+				echo "<td class='back' align='center'>";
 
 				$query = "	SELECT kalenteri.kuka, kalenteri.pvmalku, kalenteri.pvmloppu, kalenteri.tapa, kalenteri.tyyppi,
 							if(kalenteri.tyyppi='asennuskalenteri', kalenteri.liitostunnus, kalenteri.tunnus) liitostunnus,
@@ -424,7 +424,6 @@
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 							WHERE kalenteri.yhtio = '$kukarow[yhtio]'
 							and kalenteri.tyyppi in ('asennuskalenteri','kalenteri')
-
 							and (	(pvmalku >= '$year-$month-$i 00:00:00' and pvmalku <= '$year-$month-$i 23:59:00') or
 									(pvmalku <  '$year-$month-$i 00:00:00' and pvmloppu > '$year-$month-$i 00:00:00') or
 									(pvmloppu >='$year-$month-$i 00:00:00' and pvmloppu<= '$year-$month-$i 23:59:00'))
@@ -434,9 +433,9 @@
 				$varaukset 	= array();
 
 				if (mysql_num_rows($vres) > 0) {
-					while($vrow = mysql_fetch_array($vres)) {
-						foreach($ASENTAJA_ARRAY as $b) {
-							foreach($AIKA_ARRAY as $a) {
+					while ($vrow = mysql_fetch_array($vres)) {
+						foreach ($ASENTAJA_ARRAY as $b) {
+							foreach ($AIKA_ARRAY as $a) {
 								$slot = str_replace(array(":","-"," "), "", $year."-".sprintf('%02d', $month)."-".sprintf('%02d', $i)." ".$a);
 								$alku = str_replace(array(":","-"," "), "", substr($vrow["pvmalku"],0,16));
 								$lopp = str_replace(array(":","-"," "), "", substr($vrow["pvmloppu"],0,16));
@@ -466,12 +465,24 @@
 				}
 
 				echo "<table width='100%'>";
-				echo "<tr><td class='tumma' align='center' colspan='".count($ASENTAJA_ARRAY)."'><b>$i</b></th></tr>";
 
-				foreach($AIKA_ARRAY as $a) {
+				if (count($ASENTAJA_ARRAY_TARK) < 5) {
+					echo "<tr><td class='tumma' align='center' colspan='".count($ASENTAJA_ARRAY)."'><b>$i</b></th></tr>";
+				}
+				else {
+					echo "<tr><th colspan='".count($ASENTAJA_ARRAY)."'>".$DAY_ARRAY[$pvanro].": $i.$month.$year</tr><tr>";
+
+					foreach ($ASENTAJA_ARRAY_TARK as $b) {
+						echo "<td align='center' nowrap width='40px'>$b</td>";
+					}
+
+			    	echo "</tr>";
+				}
+
+				foreach ($AIKA_ARRAY as $a) {
 					echo "<tr>";
 
-					foreach($ASENTAJA_ARRAY as $b) {
+					foreach ($ASENTAJA_ARRAY as $b) {
 						if (isset($varaukset[$b][$a])) {
 							list($nimi, $tilausnumero, $tapa, $tyyppi, $tyostatus) = explode("|||", $varaukset[$b][$a]);
 
@@ -516,14 +527,14 @@
 				$solu++;
 			}
 
-			if (weekday_number($i, $month, $year) == 6 and $solu > 0) {
+			if (count($ASENTAJA_ARRAY_TARK) >= 5 or (weekday_number($i, $month, $year) == 6 and $solu > 0)) {
 				// Rivinvaihto jos seuraava viikko on olemassa
 				if (days_in_month($month, $year)!=$i) {
 					echo "</tr><tr>";
 
-					echo "<td class='back'><br><table width='100%'>";
+					echo "<td class='back' style='vertical-align: bottom;'><br><table width='100%'>";
 
-					foreach($AIKA_ARRAY as $a) {
+					foreach ($AIKA_ARRAY as $a) {
 						echo "<tr><td class='back'>$a</td></tr>";
 					}
 					echo "</table>";

@@ -231,7 +231,7 @@
 	if ($tee == "VARAA") {
 		echo "<table>";
 
-		echo "<form method='POST' action='$PHP_SELF'>
+		echo "<form method='POST' action='$PHP_SELF#$year$month$day'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='tee'  			value='LISAA'>
 				<input type='hidden' name='year'  			value='$year'>
@@ -297,7 +297,7 @@
 		echo "</form>";
 
 		if ($tyotunnus > 0) {
-			echo "<br><br><br><form method='POST' action='$PHP_SELF'>
+			echo "<br><br><br><form method='POST' action='$PHP_SELF#$year$month$day'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='tee'  			value='POISTA'>
 					<input type='hidden' name='year'  			value='$year'>
@@ -512,7 +512,7 @@
 							echo "<td align='center' class='tumma' width='40px'>&nbsp;</td>";
 						}
 						elseif ($liitostunnus > 0 and $tyojono != "") {
-		                    echo "<td align='center' width='40px'><a class='td' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&asentaja=$b&aika=$a&tee=VARAA&lopetus=$lopetus'>&nbsp;</a></td>";
+		                    echo "<td align='center' width='40px'><a class='td' name='$year$month$i' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&asentaja=$b&aika=$a&tee=VARAA&lopetus=$lopetus'>&nbsp;</a></td>";
 		                }
 						else {
 							echo "<td align='center' width='40px'>&nbsp;</td>";
@@ -527,9 +527,9 @@
 				$solu++;
 			}
 
-			if (count($ASENTAJA_ARRAY_TARK) >= 5 or (weekday_number($i, $month, $year) == 6 and $solu > 0)) {
+			if ((count($ASENTAJA_ARRAY_TARK) >= 5 and $pvanro < count($DAY_ARRAY)) or (count($ASENTAJA_ARRAY_TARK) < 5 and weekday_number($i, $month, $year) == 6 and $solu > 0)) {
 				// Rivinvaihto jos seuraava viikko on olemassa
-				if (days_in_month($month, $year)!=$i) {
+				if (days_in_month($month, $year) != $i) {
 					echo "</tr><tr>";
 
 					echo "<td class='back' style='vertical-align: bottom;'><br><table width='100%'>";

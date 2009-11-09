@@ -996,29 +996,26 @@
 			echo "</table>";
 		}
 
-		// ykkös ja kakkostasolla voidaan antaa kommentti
-		if ($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') {
-			echo "<br><table>";
-			// Mahdollisuus antaa kommentti
-			echo "	<form name='kommentti' action = '$PHP_SELF' method='post'>
-					<input type='hidden' name='tee' value='V'>
-					<input type='hidden' name = 'nayta' value='$nayta'>
-					<input type='hidden' name='tunnus' value = '$tunnus'>
-					<input type='hidden' name='iframe' value = '$iframe'>
-					<input type='hidden' name='iframe_id' value = '$iframe_id'>";
+		echo "<br><table>";
+		// Mahdollisuus antaa kommentti
+		echo "	<form name='kommentti' action = '$PHP_SELF' method='post'>
+				<input type='hidden' name='tee' value='V'>
+				<input type='hidden' name = 'nayta' value='$nayta'>
+				<input type='hidden' name='tunnus' value = '$tunnus'>
+				<input type='hidden' name='iframe' value = '$iframe'>
+				<input type='hidden' name='iframe_id' value = '$iframe_id'>";
 
-			echo "	<tr>
-					<th colspan='2'>".t("Lisää kommentti")."</th>
-					</tr>";
+		echo "	<tr>
+				<th colspan='2'>".t("Lisää kommentti")."</th>
+				</tr>";
 
-			echo "	<tr>
-					<td><input type='text' name='komm' value='' size='50'></td>
-					<td><input type='Submit' value='".t("Lisää kommentti")."'></td>
-					</tr>";
+		echo "	<tr>
+				<td><input type='text' name='komm' value='' size='50'></td>
+				<td><input type='Submit' value='".t("Lisää kommentti")."'></td>
+				</tr>";
 
-			echo "</form>";
-			echo "</table>";
-		}
+		echo "</form>";
+		echo "</table>";
 
 		echo "<br><table>";
 		echo "<tr>";

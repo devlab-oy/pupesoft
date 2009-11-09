@@ -210,10 +210,12 @@
 		if ($row["valkoodi"] != $yhtiorow["valkoodi"]) {
 			$oikpos = $pdf->strlen($row["summa_valuutassa"], $norm);
 			$pdf->draw_text(500-$oikpos, $kala, $row["summa_valuutassa"]." ".$row["valkoodi"], 	$firstpage, $norm);
+			$summa+=$row["summa_valuutassa"];
 		}
 		else {
 			$oikpos = $pdf->strlen($row["summa"], $norm);
 			$pdf->draw_text(500-$oikpos, $kala, $row["summa"]." ".$row["valkoodi"], 				$firstpage, $norm);
+			$summa+=$row["summa"];			
 		}
 
 		if ($karhukertanro == "") {
@@ -223,15 +225,13 @@
 		$oikpos = $pdf->strlen($karhukertanro, $norm);
 		$pdf->draw_text(560-$oikpos, $kala, $karhukertanro, 			$firstpage, $norm);
 
-
 		$kala = $kala - 13;
 
 		$lask++;
-		$summa+=$row["summa"];
 		return($summa);
 	}
 
-	function loppu ($firstpage, $summa) {
+	function loppu ($firstpage, $summa, $valkoodi) {
 
 		global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $maksuehtotiedot;
 
@@ -443,7 +443,7 @@
 
 	$loppusumma = sprintf('%.2f', $summa+$kaatosumma);
 
-	loppu($firstpage,$loppusumma);
+	loppu($firstpage,$loppusumma, $laskutiedot["valkoodi"]);
 
 	//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 	list($usec, $sec) = explode(' ', microtime());

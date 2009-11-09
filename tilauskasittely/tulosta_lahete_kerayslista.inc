@@ -226,8 +226,8 @@ if (!function_exists('alku_kerayslista')) {
 		$pdf->draw_rectangle(758, 420, 737, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 750, t("Asiakasnumero", $kieli), 		$thispage, $pieni);
 		$pdf->draw_text(310, 740, $asrow["asiakasnro"], 			$thispage, $norm);
-		$pdf->draw_text(430, 750, t("Päiväys", $kieli),				$thispage, $pieni);
-		$pdf->draw_text(430, 740, tv1dateconv(date("Y-m-d")), 		$thispage, $norm);
+		$pdf->draw_text(430, 750, t("Käsitelty pvm", $kieli),				$thispage, $pieni);
+		$pdf->draw_text(430, 740, tv1dateconv($laskurow['h1time'], "pitka"), 		$thispage, $norm);
 
 
 		$pdf->draw_rectangle(737, 300, 716, 580, $thispage, $rectparam);

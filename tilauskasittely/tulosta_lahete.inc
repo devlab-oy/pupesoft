@@ -256,10 +256,8 @@ if (!function_exists('alku')) {
 		$pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 771, t("Asiakasnumero", $kieli), 					$thispage, $pieni);
 		$pdf->draw_text(310, 761, $asrow["asiakasnro"], 						$thispage, $norm);
-		$pdf->draw_text(430, 771, t("Päiväys", $kieli), 						$thispage, $pieni);
-		$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"]), 		$thispage, $norm);
-		$pdf->draw_text(430, 771, t("Päiväys", $kieli), 						$thispage, $pieni);
-		$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"]), 		$thispage, $norm);
+		$pdf->draw_text(430, 771, t("Käsitelty pvm", $kieli), 						$thispage, $pieni);
+		$pdf->draw_text(430, 761, tv1dateconv($laskurow['h1time'], "pitka"), 		$thispage, $norm);
 
 		$pdf->draw_rectangle(758, 300, 737, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(758, 420, 737, 580, $thispage, $rectparam);
@@ -586,8 +584,8 @@ if (!function_exists('uusi_sivu')) {
 		$pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 771, t("Asiakasnumero", $kieli), 					$thispage, $pieni);
 		$pdf->draw_text(310, 761, $asrow["asiakasnro"], 						$thispage, $norm);
-		$pdf->draw_text(430, 771, t("Päiväys", $kieli), 						$thispage, $pieni);
-		$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"]), 		$thispage, $norm);
+		$pdf->draw_text(430, 771, t("Käsitelty pvm", $kieli), 						$thispage, $pieni);
+		$pdf->draw_text(430, 761, tv1dateconv($laskurow['h1time'], "pitka"), 		$thispage, $norm);
 
 		//viivakoodi
 		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";

@@ -30,6 +30,8 @@
 	// $orvoteikiinnosta	--> Meitä ei kiinnosta orvot jos tämä ei ole tyhjä.
 	// $osatoimkielto		--> Jos saldo ei riitä koko riville niin ei lisätä riviä ollenkaan
 	// $olpaikalta			--> pakotetaan myymään oletuspaikalta
+	// $tuotenimitys		--> tuotteen nimitys jos nimityksen syötö on yhtiöllä sallittu
+	// $tuotenimitys_force	--> tuotteen nimitys muutetaan systemitasolla
 
 	// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi myyntihaarassa
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi puute-jt-osto-haarassa
@@ -613,7 +615,7 @@
 					 	$myytavissa = 0;
 						}
 					}
-					
+
 					if ($zrow['varasto'] == $kukarow['oletus_varasto']) {
 						$zrow['oletus'] = 2;
 					}
@@ -1029,7 +1031,11 @@
 								}
 
 								// jos olemme saaneet tuotenimityksen syotarivistä ja sallimme nimityksen muutoksen
-								if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and trim($tuotenimitys != "")) {
+
+								if (trim($tuotenimitys_force) != "") {
+									$trow["nimitys"] = addslashes($tuotenimitys_force);
+								}
+								elseif ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and trim($tuotenimitys) != "") {
 									// lisätään saatu nimitys kaikille tuotteille
 									$trow["nimitys"] = addslashes($tuotenimitys);
 								}
@@ -1270,9 +1276,10 @@
 									}
 								}
 
-								$rivitunnus		= "";
-								$kommentti 		= "";
-								$tuotenimitys 	= "";
+								$rivitunnus			= "";
+								$kommentti 			= "";
+								$tuotenimitys 		= "";
+								$tuotenimitys_force = "";
 
 							} // Tällä rundilla myydyt
 						} // Jos tuoteperhettä löytyi riittävästi tai myytiin pelkää isää
@@ -1714,7 +1721,10 @@
 			$trow["tuoteno"] = strtoupper($trow["tuoteno"]);
 
 			// jos olemme saaneet tuotenimityksen syotarivistä ja sallimme nimityksen muutoksen
-			if (($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" or $toim == "HAAMU" or $trow["tuoteno"] == "99") and trim($tuotenimitys != "")) {
+			if (trim($tuotenimitys_force) != "") {
+				$trow["nimitys"] = addslashes($tuotenimitys_force);
+			}
+			elseif (($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" or $toim == "HAAMU" or $trow["tuoteno"] == "99") and trim($tuotenimitys) != "") {
 				// lisätään saatu nimitys kaikille tuotteille
 				$trow["nimitys"] = addslashes($tuotenimitys);
 			}
@@ -1931,11 +1941,12 @@
 					$result = mysql_query($query) or pupe_error($query);
 				}
 			}
-			$rivitunnus		= "";
-			$kommentti 		= "";
-			$tuotenimitys 	= "";
-			$rivinumero		= "";
-			$tilrivinumero	= "";
+			$rivitunnus			= "";
+			$kommentti 			= "";
+			$tuotenimitys 		= "";
+			$tuotenimitys_force = "";
+			$rivinumero			= "";
+			$tilrivinumero		= "";
 		}
 	}
 ?>

@@ -421,12 +421,19 @@
 		$olhires = mysql_query($query) or pupe_error($query);
 		$olhirow = mysql_fetch_array($olhires);
 
-		$extra_poislisa = " and tuote.hinnastoon != 'E' ";
-
 		if ($verkkokauppa != "") {
+						
+			if ($kukarow["kuka"] == "www") {
+				$extra_poislisa = " and tuote.hinnastoon = 'W' ";
+			}
+			else {
+				$extra_poislisa = " and tuote.hinnastoon in ('W','V') ";
+			}
+						
 			$avainlisa = " and avainsana.nakyvyys = '' ";
 		}
-		else {
+		else {			
+			$extra_poislisa = " and tuote.hinnastoon != 'E' ";			
 			$avainlisa = " and avainsana.jarjestys < 10000 ";
 		}
 	}

@@ -249,6 +249,23 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "erikoispakkaus_kielto") {
+
+		$sel = $sela = '';
+		if ($trow[$i] != '') {
+			$sel = 'selected';
+		}
+		else {
+			$sela = 'selected';
+		}
+		
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value='' $sela>".t("Toimitustavalla saa toimittaa erikoispakkauksia")."</option>";
+		$ulos .= "<option value='K' $sel>".t("Toimitustavalla ei saa toimittaa erikoispakkauksia")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
 	
 	if (mysql_field_name($result, $i) == "oletus_vak") {
 

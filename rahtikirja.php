@@ -116,6 +116,27 @@
 		}
 	}
 
+	// jos ollaan lisäämässä rahtikirjaa, niin katsotaan onko valitulla toimitustavalla erikoispakkauskielto
+	if ($tee == 'add' and count($erikoispakkaus) > 0) {
+		$query = "	SELECT *
+					FROM toimitustapa
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND selite = '$toimitustapa'";
+		$toimitustapa_res = mysql_query($query) or pupe_error($query);
+		$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
+
+		if ($toimitustapa_row['erikoispakkaus_kielto'] != '') {
+			// jos toimitustavalla on erikoispakkauskielto, niin katsotaan onko jokin syötetty pakkaus erikoispakkaus
+			foreach ($erikoispakkaus as $key_chk => $erikoispakkaus_kielto_chk) {
+				if ($erikoispakkaus_kielto_chk != '' and ($kollit[$key_chk] != '' or $kilot[$key_chk] != '' or $kuutiot[$key_chk] != '' or $lavametri[$key_chk] != '')) {
+					echo "<font class='error'>",t("Toimitustavalla on erikoispakkauskielto pakkaukselle")," $erikoispakkaus_kielto_chk!</font><br/>";
+					$tee = '';
+					break;
+				}
+			}
+		}
+	}
+
 	//lisätään syötetty kama rahtikirja-tauluun
 	if ($tee == 'add') {
 		$apu=0; //apumuuttuja
@@ -2197,6 +2218,10 @@
 			echo "<tr>
 			<td><input type='hidden' name='pakkaus[$i]' value='$row[selite]'>
 				<input type='hidden' name='pakkauskuvaus[$i]' value='$row[selitetark]'>";
+
+			if (strtolower($row['selitetark_3']) == 'erikoispakkaus') {
+				echo "<input type='hidden' name='erikoispakkaus[$i]' value='$row[selite]'>";
+			}
 
 			if ((strtoupper($tulostustapa) == 'E' or strtoupper($tulostustapa) == 'L') and $yhtiorow['oletus_rahtikirja_oslappkpl'] != 0) {
 				echo "<input type='text' size='4' value='$kollit[$i]' name='kollit[$i]' onKeyUp='summaa_kollit(this);'></td>";

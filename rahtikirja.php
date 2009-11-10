@@ -62,6 +62,27 @@
 
 	if ($id == '') $id=0;
 
+	// jos ollaan lisäämässä rahtikirjaa, niin katsotaan onko valitulla toimitustavalla erikoispakkauskielto
+	if ($tee == 'add' and count($erikoispakkaus) > 0) {
+		$query = "	SELECT *
+					FROM toimitustapa
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND selite = '$toimitustapa'";
+		$toimitustapa_res = mysql_query($query) or pupe_error($query);
+		$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
+
+		if ($toimitustapa_row['erikoispakkaus_kielto'] != '') {
+			// jos toimitustavalla on erikoispakkauskielto, niin katsotaan onko jokin syötetty pakkaus erikoispakkaus
+			foreach ($erikoispakkaus as $key_chk => $erikoispakkaus_kielto_chk) {
+				if ($erikoispakkaus_kielto_chk != '' and ($kollit[$key_chk] != '' or $kilot[$key_chk] != '' or $kuutiot[$key_chk] != '' or $lavametri[$key_chk] != '')) {
+					echo "<font class='error'>",t("Toimitustavalla on erikoispakkauskielto pakkaukselle")," $erikoispakkaus_kielto_chk!</font><br/>";
+					$tee = '';
+					break;
+				}
+			}
+		}
+	}
+
 	// jos ollaan rahtikirjan esisyötössä niin tehdään lisäys vähän helpommin
 	if ($rahtikirjan_esisyotto != "" and $tee == "add" and $yhtiorow["rahtikirjojen_esisyotto"] == "M") {
 
@@ -113,27 +134,6 @@
 			$id   = 0;
 			// karsee häkki mutta pitää sanoa, että from on laskutatilaus niin päästään takasin muokkaukseen
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tilauskasittely/tilaus_myynti.php?toim=$rahtikirjan_esisyotto&aktivoinnista=true&from=LASKUTATILAUS'>";
-		}
-	}
-
-	// jos ollaan lisäämässä rahtikirjaa, niin katsotaan onko valitulla toimitustavalla erikoispakkauskielto
-	if ($tee == 'add' and count($erikoispakkaus) > 0) {
-		$query = "	SELECT *
-					FROM toimitustapa
-					WHERE yhtio = '$kukarow[yhtio]'
-					AND selite = '$toimitustapa'";
-		$toimitustapa_res = mysql_query($query) or pupe_error($query);
-		$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
-
-		if ($toimitustapa_row['erikoispakkaus_kielto'] != '') {
-			// jos toimitustavalla on erikoispakkauskielto, niin katsotaan onko jokin syötetty pakkaus erikoispakkaus
-			foreach ($erikoispakkaus as $key_chk => $erikoispakkaus_kielto_chk) {
-				if ($erikoispakkaus_kielto_chk != '' and ($kollit[$key_chk] != '' or $kilot[$key_chk] != '' or $kuutiot[$key_chk] != '' or $lavametri[$key_chk] != '')) {
-					echo "<font class='error'>",t("Toimitustavalla on erikoispakkauskielto pakkaukselle")," $erikoispakkaus_kielto_chk!</font><br/>";
-					$tee = '';
-					break;
-				}
-			}
 		}
 	}
 

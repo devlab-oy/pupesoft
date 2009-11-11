@@ -15,7 +15,13 @@ if(!function_exists("yhtion_parametrittarkista")) {
 			}
 
 		}
-		
+
+		if (mysql_field_name($result, $i) == "kuvapankki_polku") {
+			if (!is_writable($t[$i]."/".$kukarow['yhtio'])) {
+				$virhe[$i] = "<font class='error'>Kansiossa ei ole kirjoitusoikeutta!<br></font>";
+			}
+		}
+
 		if (mysql_field_name($result, $i) == "lasku_polku_http") {
 			//Tämä turvaan
 			$tmp_lasku_polku_http = $t[$i];

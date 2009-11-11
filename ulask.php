@@ -69,7 +69,7 @@ if ($tee == 'I') {
 	// koska, jos tulee virheitä tiedosto katoaa. Kun kaikki on ok, annetaan sille oikea nimi
 	if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		$kuva = false;
-		
+
 		// otetaan file extensio
 		$path_parts = pathinfo($_FILES['userfile']['name']);
 		$ext = $path_parts['extension'];
@@ -99,7 +99,7 @@ if ($tee == 'I') {
 
 		// jos ei virheitä..
 		if ($tee == "I") {
-			$kuva = tallenna_liite("userfile", "lasku", 0, "", "", 0, 0, "");					
+			$kuva = tallenna_liite("userfile", "lasku", 0, "", "", 0, 0, "");
 		}
 	}
 	elseif (isset($_FILES['userfile']['error']) and $_FILES['userfile']['error'] != 4) {
@@ -238,7 +238,7 @@ if ($tee == 'I') {
 
 	if (trim($hyvak[1]) == "") {
 		$errormsg .= "<font class='error'>".t("Laskulla on pakko olla ensimmäinen hyväksyjä")."!</font><br>";
-		$tee = 'E';		
+		$tee = 'E';
 	}
 
 	// poistetaan spacet ja tehdään uniikki
@@ -560,8 +560,8 @@ if ($tee == 'P' or $tee == 'E') {
 		}
 
 		echo "<table><tr><td valign='top' style='padding: 0px;'>";
-		
-		
+
+
 		echo "<table>";
 		echo "<tr><th colspan='2'>".t("Toimittaja")."</th></tr>";
 		echo "<tr><td colspan='2'>$trow[nimi] $trow[nimitark] ($trow[ytunnus])</td></tr>";
@@ -651,7 +651,7 @@ if ($tee == 'P' or $tee == 'E') {
 				echo "</td>";
 			}
 		}
-		
+
 		echo "</tr></table>";
 	}
 	else {
@@ -1245,7 +1245,7 @@ if ($tee == 'I') {
 
 	if ($kuva) {
 		// päivitetään kuvalle vielä linkki toiseensuuntaa
-		$query = "UPDATE liitetiedostot set liitostunnus='$tunnus', selite='{$trow['nimi']} $summa $valkoodi' where tunnus='$kuva'";
+		$query = "UPDATE liitetiedostot set liitostunnus='$tunnus', selite='$trow[nimi] $summa $valkoodi' where tunnus='$kuva'";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
@@ -1270,12 +1270,12 @@ if ($tee == 'I') {
 				yhtio				= '$kukarow[yhtio]',
 				ltunnus				= '$tunnus',
 				tilino				= '$ostovelat',
-				kustp				= '',
+				kustp				= 0,
 				tapvm				= '$tpv-$tpk-$tpp',
 				summa				= '$vassumma',
 				summa_valuutassa	= '$vassumma_valuutassa',
 				valkoodi			= '$valkoodi',
-				vero				= '',
+				vero				= 0,
 				lukko				= '1',
 				tosite				= '$tositenro',
 				laatija 			= '$kukarow[kuka]',
@@ -1344,41 +1344,41 @@ if ($tee == 'I') {
 
 		if (strlen($itili[$i]) > 0) {
 
-			$query = "INSERT INTO tiliointi SET
-					yhtio 				= '$kukarow[yhtio]',
-					ltunnus 			= '$tunnus',
-					tilino 				= '$itili[$i]',
-					kustp 				= '$ikustp[$i]',
-					kohde 				= '$ikohde[$i]',
-					projekti 			= '$iprojekti[$i]',
-					tapvm 				= '$tpv-$tpk-$tpp',
-					summa 				= '$isumma[$i]',
-					summa_valuutassa	= '$isumma_valuutassa[$i]',
-					valkoodi 			= '$valkoodi',
-					vero 				= '$ivero[$i]',
-					selite 				= '$iselite[$i]',
-					lukko 				= '',
-					tosite 				= '$tositenro',
-					laatija 			= '$kukarow[kuka]',
-					laadittu 			= now()";
+			$query = "	INSERT INTO tiliointi SET
+						yhtio 				= '$kukarow[yhtio]',
+						ltunnus 			= '$tunnus',
+						tilino 				= '$itili[$i]',
+						kustp 				= '$ikustp[$i]',
+						kohde 				= '$ikohde[$i]',
+						projekti 			= '$iprojekti[$i]',
+						tapvm 				= '$tpv-$tpk-$tpp',
+						summa 				= '$isumma[$i]',
+						summa_valuutassa	= '$isumma_valuutassa[$i]',
+						valkoodi 			= '$valkoodi',
+						vero 				= '$ivero[$i]',
+						selite 				= '$iselite[$i]',
+						lukko 				= '',
+						tosite 				= '$tositenro',
+						laatija 			= '$kukarow[kuka]',
+						laadittu 			= now()";
 			$result = mysql_query($query) or pupe_error($query);
 
  			// Tiliöidään alv
 			if ($ivero[$i] != 0) {
 				$isa = mysql_insert_id ($link); // Näin löydämme tähän liittyvät alvit....
 
-				$query = "INSERT INTO tiliointi SET
+				$query = "	INSERT INTO tiliointi SET
 							yhtio 				= '$kukarow[yhtio]',
 							ltunnus 			= '$tunnus',
 							tilino 				= '$tilino_alv',
-							kustp 				= '',
-							kohde 				= '',
-							projekti 			= '',
+							kustp 				= 0,
+							kohde 				= 0,
+							projekti 			= 0,
 							tapvm 				= '$tpv-$tpk-$tpp',
 							summa 				= '$ialv[$i]',
 							summa_valuutassa 	= '$ialv_valuutassa[$i]',
 							valkoodi 			= '$valkoodi',
-							vero 				= '',
+							vero 				= 0,
 							selite 				= '$iselite[$i]',
 							lukko 				= '1',
 							tosite 				= '$tositenro',
@@ -1398,22 +1398,22 @@ if ($tee == 'I') {
 					$varastonmuutostili = $yhtiorow["varastonmuutos"];
 				}
 
-				$query = "INSERT INTO tiliointi SET
-						yhtio 				= '$kukarow[yhtio]',
-						ltunnus 			= '$tunnus',
-						tilino 				= '$varastonmuutostili',
-						kustp 				= '$ikustp[$i]',
-						kohde 				= '$ikohde[$i]',
-						projekti 			= '$iprojekti[$i]',
-						tapvm 				= '$tpv-$tpk-$tpp',
-						summa 				= $isumma[$i] * -1,
-						summa_valuutassa	= $isumma_valuutassa[$i] * -1,
-						valkoodi 			= '$valkoodi',
-						vero 				= '',
-						lukko 				= '',
-						tosite 				= '$tositenro',
-						laatija 			= '$kukarow[kuka]',
-						laadittu			= now()";
+				$query = "	INSERT INTO tiliointi SET
+							yhtio 				= '$kukarow[yhtio]',
+							ltunnus 			= '$tunnus',
+							tilino 				= '$varastonmuutostili',
+							kustp 				= '$ikustp[$i]',
+							kohde 				= '$ikohde[$i]',
+							projekti 			= '$iprojekti[$i]',
+							tapvm 				= '$tpv-$tpk-$tpp',
+							summa 				= $isumma[$i] * -1,
+							summa_valuutassa	= $isumma_valuutassa[$i] * -1,
+							valkoodi 			= '$valkoodi',
+							vero 				= 0,
+							lukko 				= '',
+							tosite 				= '$tositenro',
+							laatija 			= '$kukarow[kuka]',
+							laadittu			= now()";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 		}
@@ -1429,16 +1429,16 @@ if ($tee == 'I') {
 			$varastotili = $yhtiorow['varasto'];
 		}
 
-		$query = "INSERT INTO tiliointi SET
+		$query = "	INSERT INTO tiliointi SET
 					yhtio 				= '$kukarow[yhtio]',
 					ltunnus 			= '$tunnus',
 					tilino 				= '$varastotili',
-					kustp				= '',
+					kustp				= 0,
 					tapvm 				= '$tpv-$tpk-$tpp',
 					summa 				= $veroton,
 					summa_valuutassa	= $veroton_valuutassa,
 					valkoodi			= '$valkoodi',
-					vero 				= '',
+					vero 				= 0,
 					lukko 				= '',
 					tosite 				= '$tositenro',
 					laatija 			= '$kukarow[kuka]',

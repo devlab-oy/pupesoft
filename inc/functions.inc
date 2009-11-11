@@ -2282,14 +2282,14 @@ if (!function_exists("jalkilaske_valmistus")) {
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) == 0) {
-				echo "<font class='error'>Yhtään tilausta ei löytynyt</font><br>";
+				echo "<font class='error'>".t("Yhtään tilausta ei löytynyt")."</font><br>";
 				$tee = "";
 			}
 		}
 		else {
 			echo "<tr>";
 			echo "<th>$valmistettava_tilaus</th>";
-			echo "<td colspan='5'><font class='error'>Yhtään valmistusriviä ei löytynyt!</font></td>";
+			echo "<td colspan='5'><font class='error'>".t("Yhtään valmistusriviä ei löytynyt")."!</font></td>";
 			echo "</tr>";
 		}
 

@@ -92,13 +92,13 @@
 // Luetaan sopivat budjettiluvut tarvittavassa järjestyksessä
 
 	if (strlen(trim($kustp)) > 0) {
-		$lisa .= " and kustp = '" . $kustp . "'";
+		$lisa .= " and kustp = '$kustp'";
 	}
 	if (strlen(trim($proj)) > 0) {
-		$lisa .= " and projekti = '" . $proj . "'";
+		$lisa .= " and projekti = '$proj'";
 	}
 	if (strlen(trim($kohde)) > 0) {
-		$lisa .= " and kohde = '" . $kohde . "'";
+		$lisa .= " and kohde = '$kohde'";
 	}
 	$query = "SELECT taso
 				FROM budjetti

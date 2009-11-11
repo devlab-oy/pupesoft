@@ -31,28 +31,28 @@
 				$kanta = (float) substr($luottokuntatieto,0,strpos($luottokuntatieto, " "));
 				$palkkio = (float) trim(substr($luottokuntatieto,-1*strpos($luottokuntatieto, " ")));
 
-				$query = "INSERT into tiliointi set
+				$query = "	INSERT into tiliointi set
 			                yhtio = '$yritirow[yhtio]',
 			                ltunnus = '$laskuid',
 			                tilino = '$tiliointisaantorow[tilino2]',
 			                kustp = '$tiliointisaantorow[kustp2]',
 			                tapvm = '$tpv-$tpk-$tpp',
 			                summa = $palkkio * -1,
-			                vero = '0',
+			                vero = 0,
 			                lukko = '',
 							selite = '$vientiselite',
 			                laatija = 'tiliote',
 			                laadittu = now()";
 				$result = mysql_query($query) or pupe_error($query);
 
-				$query = "INSERT into tiliointi set
+				$query = "	INSERT into tiliointi set
 			                yhtio = '$yritirow[yhtio]',
 			                ltunnus = '$laskuid',
 			                tilino = '$tiliointisaantorow[tilino]',
 			                kustp = '$tiliointisaantorow[kustp]',
 			                tapvm = '$tpv-$tpk-$tpp',
 			                summa = $kanta * -1,
-			                vero = '0',
+			                vero = 0,
 			                lukko = '',
 							selite = '$vientiselite',
 			                laatija = 'tiliote',
@@ -61,18 +61,18 @@
 
 			}
 			else {
-				$query = "INSERT into tiliointi set
-		                yhtio = '$yritirow[yhtio]',
-		                ltunnus = '$laskuid',
-		                tilino = '$tiliointisaantorow[tilino]',
-		                kustp = '$tiliointisaantorow[kustp]',
-		                tapvm = '$tpv-$tpk-$tpp',
-		                summa = $maara * -1,
-		                vero = '0',
-		                lukko = '',
-						selite = '$vientiselite',
-		                laatija = 'tiliote',
-		                laadittu = now()";
+				$query = "	INSERT into tiliointi set
+		                	yhtio = '$yritirow[yhtio]',
+		                	ltunnus = '$laskuid',
+		                	tilino = '$tiliointisaantorow[tilino]',
+		                	kustp = '$tiliointisaantorow[kustp]',
+		                	tapvm = '$tpv-$tpk-$tpp',
+		                	summa = $maara * -1,
+		                	vero = 0,
+		                	lukko = '',
+							selite = '$vientiselite',
+		                	laatija = 'tiliote',
+		                	laadittu = now()";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 
@@ -80,14 +80,14 @@
 			$teeselraha = mysql_insert_id ($link);
 			echo "<font class='message'>*** ".t("tiliöinti luotu")." ($tiliotesaantotilino) ***</font><br>";
 
-			$query = "INSERT into tiliointi set
+			$query = "	INSERT into tiliointi set
 		                yhtio = '$yritirow[yhtio]',
 		                ltunnus = '$laskuid',
 		                tilino = '$yritirow[oletus_rahatili]',
-		                kustp = '',
+		                kustp = 0,
 		                tapvm = '$tpv-$tpk-$tpp',
 		                summa = '$vastavienti',
-		                vero = '0',
+		                vero = 0,
 		                lukko = '',
 						selite = 'Vastavienti rahatilille',
 		                laatija = 'tiliote',
@@ -102,5 +102,4 @@
 			$dummyresult = mysql_query($query) or pupe_error($query);
 			// Merkataan käsitellyiksi & lisätään linkki
 	}
-
 ?>

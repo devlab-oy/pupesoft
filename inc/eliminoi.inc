@@ -19,8 +19,8 @@ if (isset($tee)) {
 
 		$query = "	SELECT *
 					FROM tilikaudet
-					WHERE yhtio = '$kukarow[yhtio]' 
-					and '$alvv-$blvk-$blvp' >= tilikausi_alku 
+					WHERE yhtio = '$kukarow[yhtio]'
+					and '$alvv-$blvk-$blvp' >= tilikausi_alku
 					and '$alvv-$blvk-$blvp' <= tilikausi_loppu";
 		$result = mysql_query($query) or pupe_error($query);
 	}
@@ -67,23 +67,23 @@ if (isset($tee)) {
 	}
 
 	if (strlen(trim($kohde)) > 0) {
-		$lisa .= " and tiliointi.kohde = '" . $kohde . "'";
-		$lisa2 .= " and tiliointi.kohde = '" . $kohde . "'";
+		$lisa .= " and tiliointi.kohde = '$kohde'";
+		$lisa2 .= " and tiliointi.kohde = '$kohde'";
 	}
 	if (strlen(trim($proj)) > 0) {
-		$lisa .= " and tiliointi.projekti = '" . $proj . "'";
-		$lisa2 .= " and tiliointi.projekti = '" . $proj . "'";
+		$lisa .= " and tiliointi.projekti = '$proj'";
+		$lisa2 .= " and tiliointi.projekti = '$proj'";
 	}
 	if (strlen(trim($kustp)) > 0) {
-		$lisa .= " and tiliointi.kustp = '" . $kustp . "'";
-		$lisa2 .= " and tiliointi.kustp = '" . $kustp . "'";
+		$lisa .= " and tiliointi.kustp = '$kustp'";
+		$lisa2 .= " and tiliointi.kustp = '$kustp'";
 	}
 
 	if ($tili2 == 0) $tili2 = $tili;
 
 	if (strlen(trim($tili)) > 0) {
-		$lisa .= " and tiliointi.tilino >= '" . $tili . "' and  tiliointi.tilino <= '" . $tili2 . "'";
-		$lisa2 .= " and tiliointi.tilino >= '" . $tili . "' and  tiliointi.tilino <= '" . $tili2 . "'";
+		$lisa .= " and tiliointi.tilino >= '$tili' and  tiliointi.tilino <= '$tili2'";
+		$lisa2 .= " and tiliointi.tilino >= '$tili' and  tiliointi.tilino <= '$tili2'";
 	}
 
 	//jos tili on valittu lasketaan sen alkusaldo
@@ -91,7 +91,7 @@ if (isset($tee)) {
 		$query = "	SELECT sum(summa) saldo
 					FROM tiliointi
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-					and tiliointi.korjattu=''
+					and tiliointi.korjattu = ''
 					and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'
 					and $lisa2";
 		$result   = mysql_query($query) or pupe_error($query);
@@ -363,7 +363,7 @@ if (!isset($tee)) {
 			</tr>";
 
 	echo "<tr><th>".t("tai koko tilikausi")."</th>";
- 	
+
 	$query = "	SELECT *
 				FROM tilikaudet
 				WHERE yhtio = '$kukarow[yhtio]'
@@ -388,15 +388,15 @@ if (!isset($tee)) {
 			</tr>";
 
 	echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
-	
+
 	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
 				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
-	
+
 	echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa")."";
-	
+
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($trow[$i] == $vrow[0]) {
@@ -407,15 +407,15 @@ if (!isset($tee)) {
 	echo "</select></td>";
 	echo "</tr>";
 	echo "<tr><th>".t("Vain kohde")."</th>";
- 	
+
 	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
 				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
-	
+
 	echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa")."";
-	
+
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($trow[$i] == $vrow[0]) {
@@ -426,15 +426,15 @@ if (!isset($tee)) {
 	echo "</select></td>";
 	echo "</tr>";
 	echo "<tr><th>".t("Vain projekti")."</th>";
-	
+
 	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
 				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
 				ORDER BY nimi";
 	$vresult = mysql_query($query) or pupe_error($query);
-	
+
 	echo "<td><select name='proj'><option value=' '>".t("Ei valintaa")."";
-	
+
 	while ($vrow=mysql_fetch_array($vresult)) {
 		$sel="";
 		if ($trow[$i] == $vrow[0]) {

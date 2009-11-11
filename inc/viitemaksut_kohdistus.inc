@@ -151,7 +151,7 @@
 								summa 				= '$alennus',
 								summa_valuutassa	= '$alennus_valuutassa',
 								valkoodi			= '$row[suoritusvaluutta]',
-								vero				= '0',
+								vero				= 0,
 								selite 				= 'Automaattikohdistettu asiakkaan suoritus (alv ongelma)'";
 					$insres = mysql_query($query) or pupe_error($query);
 				}
@@ -210,7 +210,7 @@
 										summa 				= '$alv',
 										summa_valuutassa 	= '$alv_valuutassa',
 										valkoodi			= '$row[suoritusvaluutta]',
-										vero 				= '',
+										vero 				= 0,
 										selite 				= 'Automaattikohdistettu asiakkaan suoritus (Kassa-alennuksen alv)',
 										lukko 				= '1',
 										laatija 			= 'automaattikohdistus',
@@ -272,7 +272,7 @@
 			$updres = mysql_query($query) or pupe_error($query);
 
 			#Ja suoritus kirjatuksi
-			$query = "UPDATE suoritus SET kohdpvm=now(), ltunnus='$row[laskutunnus]', summa='0' WHERE tunnus='$row[suoritunnus]'";
+			$query = "UPDATE suoritus SET kohdpvm=now(), ltunnus='$row[laskutunnus]', summa=0 WHERE tunnus='$row[suoritunnus]'";
 			$updres = mysql_query($query) or pupe_error($query);
 		}
 	}

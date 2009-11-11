@@ -81,14 +81,14 @@
 			foreach ($kausi as $mille) {
 
 				// mikä on jaksotuksen vastatili
-				// jos kyseessä on  myyntilasku niin 
+				// jos kyseessä on  myyntilasku niin
 				if ($laskurow["tila"] == "U") {
 					$jaksotilino = $yhtiorow['siirtovelka'];
 				}
 				else {
 					$jaksotilino = $yhtiorow['siirtosaamiset'];
 				}
-				
+
 				if ($ok == 0) { // Mitä tapahtuu alkuperäiselle tiliöinnille
 
 					$tapvm = $tiliointirow['tapvm'];
@@ -102,42 +102,40 @@
 						$asumma = 0;
 //						Tehdään tiliöinti summalla 0, jotta meille jää jokin, jolla poistaa jaksotukset
 					}
-					$query = "INSERT into tiliointi set
-						yhtio ='$kukarow[yhtio]',
-						ltunnus =  '$tiliointirow[ltunnus]',
-						tilino = '$tiliointirow[tilino]',
-						kustp = '$tiliointirow[kustp]',
-						kohde = '$tiliointirow[kohde]',
-						projekti = '$projekti',
-						tapvm = '$tapvm',
-						summa = '$asumma',
-						vero = '0',
-						selite = '". "Jaksotus" . " $tiliointirow[selite]',
-						lukko = '',
-						laatija = '$kukarow[kuka]',
-						laadittu = now()";
-//					echo "$query<br>";
+					$query = "	INSERT into tiliointi set
+								yhtio ='$kukarow[yhtio]',
+								ltunnus =  '$tiliointirow[ltunnus]',
+								tilino = '$tiliointirow[tilino]',
+								kustp = '$tiliointirow[kustp]',
+								kohde = '$tiliointirow[kohde]',
+								projekti = '$projekti',
+								tapvm = '$tapvm',
+								summa = '$asumma',
+								vero = 0,
+								selite = 'Jaksotus $tiliointirow[selite]',
+								lukko = '',
+								laatija = '$kukarow[kuka]',
+								laadittu = now()";
 					$result = mysql_query($query) or pupe_error($query);
 					$jisa = mysql_insert_id ($link); // Näin löydämme tiliöinnin, johon kiinnitämme muut
 
 					// Tehdään vastaava siirtosaaminen
 					$ssumma = $tiliointirow['summa'] - $asumma;
-					$query = "INSERT into tiliointi set
-						yhtio ='$kukarow[yhtio]',
-						ltunnus =  '$tiliointirow[ltunnus]',
-						tilino = '$jaksotilino',
-						kustp = '$tiliointirow[kustp]',
-						kohde = '$tiliointirow[kohde]',
-						projekti = '$projekti',
-						tapvm = '$tapvm',
-						summa = $ssumma,
-						vero = '0',
-						selite = '". "Jaksotus" . " $tiliointirow[selite]',
-						lukko = '1',
-						aputunnus = '$jisa',
-						laatija = '$kukarow[kuka]',
-						laadittu = now()";
-//					echo "$query<br>";
+					$query = "	INSERT into tiliointi set
+								yhtio ='$kukarow[yhtio]',
+								ltunnus =  '$tiliointirow[ltunnus]',
+								tilino = '$jaksotilino',
+								kustp = '$tiliointirow[kustp]',
+								kohde = '$tiliointirow[kohde]',
+								projekti = '$projekti',
+								tapvm = '$tapvm',
+								summa = $ssumma,
+								vero = 0,
+								selite = 'Jaksotus $tiliointirow[selite]',
+								lukko = '1',
+								aputunnus = '$jisa',
+								laatija = '$kukarow[kuka]',
+								laadittu = now()";
 					$result = mysql_query($query) or pupe_error($query);
 
 					$ok = 1; // Ensimmäinen on käsitelty
@@ -169,7 +167,7 @@
 						projekti = '$projekti',
 						tapvm = '$tapvm',
 						summa = '$summa',
-						vero = '0',
+						vero = 0,
 						selite = '". "Jaksotus" . " $tiliointirow[selite]',
 						lukko = '1',
 						aputunnus = '$jisa',
@@ -187,7 +185,7 @@
 						projekti = '$projekti',
 						tapvm = '$tapvm',
 						summa = $summa * -1,
-						vero = '0',
+						vero = 0,
 						selite = '". "Jaksotus" . " $tiliointirow[selite]',
 						lukko = '1',
 						aputunnus = '$jisa',

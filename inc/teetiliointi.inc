@@ -31,50 +31,50 @@
 		$alv_valuutassa = round($alv * $vanhasumma_kurssi, 2);
 		$valkoodi = $vanhasumma_valkoodi;
 	}
-	
+
 	// jos ollaan saatu poikkeava alvtili käytetään sitä, varmistetaan että se ei ole tyhjää ja että on numero, jos ei niin yhtion takaa
 	if (!isset($alv_tili) or $alv_tili == "" or !is_numeric($alv_tili)) {
 		$alv_tili = $yhtiorow["alv"];
 	}
 
-	$query = "INSERT into tiliointi set
-					yhtio ='$kukarow[yhtio]',
-					ltunnus = '$tunnus',
-					tilino = '$tili',
-					kustp = '$kustp',
-					kohde = '$kohde',
-					projekti = '$projekti',
-					tapvm = '$laskurow[tapvm]',
-					summa = '$summa',
-					summa_valuutassa = '$summa_valuutassa',
-					valkoodi = '$valkoodi',
-					vero = '$vero',
-					selite = '$selite',
-					lukko = '',
-					tosite = '$tositenro',
-					laatija = '$kukarow[kuka]',
-					laadittu = now()";
+	$query = "	INSERT into tiliointi set
+				yhtio ='$kukarow[yhtio]',
+				ltunnus = '$tunnus',
+				tilino = '$tili',
+				kustp = '$kustp',
+				kohde = '$kohde',
+				projekti = '$projekti',
+				tapvm = '$laskurow[tapvm]',
+				summa = '$summa',
+				summa_valuutassa = '$summa_valuutassa',
+				valkoodi = '$valkoodi',
+				vero = '$vero',
+				selite = '$selite',
+				lukko = '',
+				tosite = '$tositenro',
+				laatija = '$kukarow[kuka]',
+				laadittu = now()";
 	$result = mysql_query($query) or pupe_error($query);
 	$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
 
 	if ($vero != 0) { // Tiliöidään alv
-	        $query = "INSERT into tiliointi set
-				yhtio ='$kukarow[yhtio]',
-				ltunnus = '$tunnus',
-				tilino = '$alv_tili',
-				kustp = '',
-				kohde = '',
-				projekti = '',
-				tapvm = '$laskurow[tapvm]',
-				summa = '$alv',
-				summa_valuutassa = '$alv_valuutassa',
-				valkoodi = '$valkoodi',
-				vero = '',
-				selite = '$selite',
-				lukko = '1',
-				laatija = '$kukarow[kuka]',
-				laadittu = now(),
-				aputunnus = $isa";
+		$query = "	INSERT into tiliointi set
+					yhtio ='$kukarow[yhtio]',
+					ltunnus = '$tunnus',
+					tilino = '$alv_tili',
+					kustp = 0,
+					kohde = 0,
+					projekti = 0,
+					tapvm = '$laskurow[tapvm]',
+					summa = '$alv',
+					summa_valuutassa = '$alv_valuutassa',
+					valkoodi = '$valkoodi',
+					vero = 0,
+					selite = '$selite',
+					lukko = '1',
+					laatija = '$kukarow[kuka]',
+					laadittu = now(),
+					aputunnus = $isa";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 ?>

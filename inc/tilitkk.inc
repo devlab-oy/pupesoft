@@ -20,7 +20,7 @@
 		</td></tr>";
 
 		echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
-		
+
 		$query = "SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
@@ -28,7 +28,7 @@
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa")."";
-		
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow[0]) {
@@ -39,15 +39,15 @@
 		echo "</select></td>";
 		echo "</tr>";
 		echo "<tr><th>".t("Vain kohde")."</th>";
-		
+
 		$query = "SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
-		
+
 		echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa")."";
-		
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow[0]) {
@@ -55,19 +55,19 @@
 			}
 			echo "<option value = '$vrow[0]' $sel>$vrow[1]";
 		}
-		
+
 		echo "</select></td>";
 		echo "</tr>";
 		echo "<tr><th>".t("Vain projekti")."</th>";
-		
+
 		$query = "SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
-		
+
 		echo "<td><select name='proj'><option value=' '>".t("Ei valintaa")."";
-		
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow[0]) {
@@ -77,11 +77,11 @@
 		}
 		echo "</select></td>";
 		echo "</tr>";
-		
+
 		echo "</table>";
-		
+
 		echo "<br><br><input type = 'submit' value = '".t("Näytä")."'></form>";
-		
+
 		require ("inc/footer.inc");
 		exit;
 	}
@@ -93,15 +93,15 @@
 	$lisa='';
 	$teksti='';
 	if (strlen(trim($kustp)) > 0) {
-		$lisa .= " and tiliointi.kustp = '" . $kustp . "'";
+		$lisa .= " and tiliointi.kustp = '$kustp'";
 		$teksti.=" - Kustannuspaikka $kustp";
 	}
 	if (strlen(trim($proj)) > 0) {
-		$lisa .= " and tiliointi.projekti = '" . $proj . "'";
+		$lisa .= " and tiliointi.projekti = '$proj'";
 		$teksti.=" - Projekti $proj";
 	}
 	if (strlen(trim($kohde)) > 0) {
-		$lisa .= " and tiliointi.kohde = '" . $kohde . "'";
+		$lisa .= " and tiliointi.kohde = '$kohde'";
 		$teksti.=" - Kohde $kohde";
 	}
 

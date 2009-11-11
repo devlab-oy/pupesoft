@@ -76,18 +76,18 @@
 	if ($tee == 'U') {
 // Tarkistetaan sääntö
 		if ($tyyppi=='t') {
-		
+
 			$query = "SELECT tunnus	FROM toimi WHERE yhtio = '$kukarow[yhtio]' $lisat ORDER BY selaus";
 
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($result) == 0) {
 				echo "<font class='error'>".t("Haulla ei löytynyt yhtään toimittajaa")."</font>";
 			}
-			
+
 			if ($mintuote != '' and $maxtuote == '') $maxtuote = $mintuote;
 			if ($maxtuote != '' and $mintuote == '') $mintuote = $maxtuote;
-			
+
 			if ($mintuote != '') {
 				if ($mintuote > $maxtuote) {
 					$virhe = "<font class='error'>".t("Minimituote on pienempi kuin maksimituote")."!</font>";
@@ -95,18 +95,18 @@
 					$tee = '';
 				}
 			}
-			
+
 			$query = "SELECT tilino
 						FROM tili
 						WHERE tilino = '$tilino' and yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($result) == 0) {
 				$virhe = "<font class='error'>".t("Tiliä ei löydy")."!</font>";
 				$ok = 1;
 				$tee = '';
 			}
-			
+
 			if ($kustp != 0) {
 				$query = "SELECT tunnus
 							FROM kustannuspaikka
@@ -118,7 +118,7 @@
 					$tee = '';
 				}
 			}
-			
+
 			//Onko tälle välille jo sääntö?
 			if ($mintuote != '') {
 				$query = "SELECT mintuote, maxtuote FROM tiliointisaanto
@@ -141,7 +141,7 @@
 					$ok = 1;
 					$tee = '';
 				}
-			} 
+			}
 		}
 		else {
 			if (($mintuote!='') or ($maxtuote!='') or ($tilino != '')) {
@@ -157,7 +157,7 @@
 				}
 			}
 		}
-		//Onko tälle välille jo sääntö? 
+		//Onko tälle välille jo sääntö?
 	}
 
 	if ($tee == 'U') {
@@ -198,7 +198,7 @@
 			}
 		}
 		echo "</tr></table><br>";
-		
+
 		$sel1='checked';
 		$sel2='';
 		if ($tyyppi=='a') {
@@ -219,7 +219,7 @@
 					  LEFT JOIN tili ON tili.yhtio=tiliointisaanto.yhtio and tili.tilino = tiliointisaanto.tilino
 					  WHERE ttunnus = '$tunnus' and tiliointisaanto.yhtio = '$kukarow[yhtio]' and tiliointisaanto.tilino != 0
 					  order by mintuote";
-		else 
+		else
 			$query = "SELECT tunnus, kuvaus, kustp
 					  FROM tiliointisaanto
 					  WHERE ttunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tilino = 0";
@@ -260,9 +260,9 @@
 				</td></tr></form>";
 		}
 
-	// Annetaan mahdollisuus tehdä uusi tiliöinti
+		// Annetaan mahdollisuus tehdä uusi tiliöinti
 		if ($ok != 1) {
-	// Annetaan tyhjät tiedot, jos rivi oli virheetön
+			// Annetaan tyhjät tiedot, jos rivi oli virheetön
 			$maxtuote = '';
 			$mintuote = '';
 			$kuvaus = '';
@@ -270,15 +270,16 @@
 			$tilino = '';
 		}
 
-		$query = "SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and
 					tyyppi = 'K' and
 					kaytossa <> 'E'
 					ORDER BY nimi";
-
 		$result = mysql_query($query) or pupe_error($query);
+
 		$ulos = "<select name = 'kustp'><option value = ' '>Ei kustannuspaikkaa";
+
 		while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
 			$valittu = "";
 			if ($kustannuspaikkarow[0] == $kustp) {

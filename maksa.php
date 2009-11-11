@@ -283,7 +283,7 @@
 									tilino = '$yhtiorow[alv]',
 									tapvm = '$maksupvm',
 									summa = $alv * -1,
-									vero = '',
+									vero = 0,
 									selite = '$selite',
 									lukko = '1',
 									laatija = '$kukarow[kuka]',

@@ -89,7 +89,10 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 		if ($tee == 'Z') {
 			$query = "	SELECT ltunnus, tapvm, round(sum(summa),2) summa, 'n/a', 'n/a', 'n/a', selite
 						FROM tiliointi use index (yhtio_tapvm_tilino)
-						WHERE yhtio = '$kukarow[yhtio]' and korjattu='' and tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and korjattu=''
+						and tapvm >= '$yhtiorow[tilikausi_alku]'
+						and tapvm <= '$yhtiorow[tilikausi_loppu]'
 						GROUP BY ltunnus, tapvm
 						HAVING summa <> 0";
 		}
@@ -97,17 +100,29 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 		if ($tee == 'X') {
 			$query = "	SELECT ltunnus, tapvm, summa, 'n/a', 'n/a', 'n/a', selite
 						FROM tiliointi use index (yhtio_tilino_tapvm), tili use index (tili_index)
-						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tili.yhtio = '$kukarow[yhtio]' and
-						tiliointi.tilino = tili.tilino and
-						korjattu='' and tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]' and
-						sisainen_taso like '3%' and kustp = '' and tiliointi.tilino!='$yhtiorow[myynti]' and tiliointi.tilino!='$yhtiorow[myynti_ei_eu]' and tiliointi.tilino!='$yhtiorow[myynti_eu]' and tiliointi.tilino!='$yhtiorow[varastonmuutos]' and tiliointi.tilino!='$yhtiorow[pyoristys]'";
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						and tili.yhtio = '$kukarow[yhtio]'
+						and tiliointi.tilino = tili.tilino
+						and korjattu=''
+						and tapvm >= '$yhtiorow[tilikausi_alku]'
+						and tapvm <= '$yhtiorow[tilikausi_loppu]'
+						and sisainen_taso like '3%'
+						and kustp = 0
+						and tiliointi.tilino!='$yhtiorow[myynti]'
+						and tiliointi.tilino!='$yhtiorow[myynti_ei_eu]'
+						and tiliointi.tilino!='$yhtiorow[myynti_eu]'
+						and tiliointi.tilino!='$yhtiorow[varastonmuutos]'
+						and tiliointi.tilino!='$yhtiorow[pyoristys]'";
 		}
 
 		if ($tee == 'W') {
 			$query = "	SELECT ltunnus, count(*) maara, round(sum(summa),2) heitto, 'n/a', 'n/a', 'n/a', selite
 						FROM tiliointi use index (yhtio_tilino_tapvm)
-						WHERE yhtio='$kukarow[yhtio]' and korjattu='' and
-						tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]' and tilino = '$yhtiorow[ostovelat]'
+						WHERE yhtio='$kukarow[yhtio]'
+						and korjattu=''
+						and tapvm >= '$yhtiorow[tilikausi_alku]'
+						and tapvm <= '$yhtiorow[tilikausi_loppu]'
+						and tilino = '$yhtiorow[ostovelat]'
 						GROUP BY ltunnus
 						HAVING maara > 1 and heitto <> 0";
 		}
@@ -116,8 +131,12 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 			$query = "	SELECT ltunnus, count(*) maara, tila, 'n/a', 'n/a', 'n/a', selite
 						FROM tiliointi use index (yhtio_tilino_tapvm)
 						LEFT JOIN lasku ON  lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus
-						WHERE tiliointi.yhtio='$kukarow[yhtio]' and korjattu='' and
-						tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]' and tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]' and tilino = '$yhtiorow[ostovelat]' and tila < 'R'
+						WHERE tiliointi.yhtio='$kukarow[yhtio]'
+						and korjattu=''
+						and tiliointi.tapvm >= '$yhtiorow[tilikausi_alku]'
+						and tiliointi.tapvm <= '$yhtiorow[tilikausi_loppu]'
+						and tilino = '$yhtiorow[ostovelat]'
+						and tila < 'R'
 						GROUP BY ltunnus
 						HAVING maara > 1";
 		}

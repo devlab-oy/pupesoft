@@ -378,12 +378,12 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 							yhtio ='$kukarow[yhtio]',
 							ltunnus = '$tilausnumero',
 							tilino = '$yhtiorow[alv]',
-							kustp = '',
-							kohde = '',
-							projekti = '',
+							kustp = 0,
+							kohde = 0,
+							projekti = 0,
 							tapvm = '$laskurow[tapvm]',
 							summa = '$alv',
-							vero = '',
+							vero = 0,
 							selite = '".mysql_real_escape_string($selite)."',
 							lukko = '1',
 							laatija = '$kukarow[kuka]',
@@ -475,7 +475,7 @@ function korjaa_ostovelka($ltunnus) {
 
 		if ($debug == 1) echo "Luodaan uusi ostovelkatiliöinti<br>";
 
-		$query = "INSERT into tiliointi SET
+		$query = "	INSERT into tiliointi SET
 					yhtio ='$kukarow[yhtio]',
 					ltunnus = '$ltunnus',
 					lukko = '1',
@@ -483,10 +483,10 @@ function korjaa_ostovelka($ltunnus) {
 		$where="";
 	}
 
-	$query .= "		summa='$summarow[summa]',
-					kustp= '',
+	$query .= "		summa = '$summarow[summa]',
+					kustp = 0,
 					tapvm = '$laskurow[tapvm]',
-					vero = '',
+					vero = 0,
 					tosite = '$tositenro',
 					laatija = '$kukarow[kuka]',
 					laadittu = now()";
@@ -652,12 +652,12 @@ function erittele_rivit($tilausnumero) {
 								yhtio ='$kukarow[yhtio]',
 								ltunnus = '$tilausnumero',
 								tilino = '$yhtiorow[selvittelytili]',
-								kustp = '',
-								kohde = '',
-								projekti = '',
+								kustp = 0,
+								kohde = 0,
+								projekti = 0,
 								tapvm = '$laskurow[tapvm]',
 								summa = '$rivihinta',
-								vero = '0',
+								vero = 0,
 								selite = 'EC selvittely',
 								lukko = '1',
 								tosite = '$tositenro',

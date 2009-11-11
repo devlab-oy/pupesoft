@@ -1030,47 +1030,48 @@
 			echo "</table>";
 			echo "<br>";
 
-			echo "<table>";
-			echo "<form method='post' action='$PHP_SELF'>";
-			echo "<tr><th colspan='2'>".t("Tulosta kaikki keräyslistat")."</th></tr>";
+			if ($oikeurow['paivitys'] == 1) {
+				echo "<table>";
+				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<tr><th colspan='2'>".t("Tulosta kaikki keräyslistat")."</th></tr>";
 
-			if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
-				$logistiikka_yhtio = $konsernivarasto_yhtiot;
-			}
-
-			$query = "	SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
-						FROM kirjoittimet
-						WHERE
-						$logistiikka_yhtiolisa
-						GROUP BY komento
-						ORDER BY kirjoitin";
-			$kirre = mysql_query($query) or pupe_error($query);
-
-			echo "<tr><td><select name='valittu_tulostin'>";
-
-			while ($kirrow = mysql_fetch_array($kirre)) {
-				$sel = '';
-
-				//tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
-				if ($kirrow['tunnus'] == $kukarow['kirjoitin']) {
-					$sel = "SELECTED";
+				if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+					$logistiikka_yhtio = $konsernivarasto_yhtiot;
 				}
 
-				echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
+				$query = "	SELECT komento, min(kirjoitin) kirjoitin, min(tunnus) tunnus
+							FROM kirjoittimet
+							WHERE
+							$logistiikka_yhtiolisa
+							GROUP BY komento
+							ORDER BY kirjoitin";
+				$kirre = mysql_query($query) or pupe_error($query);
+
+				echo "<tr><td><select name='valittu_tulostin'>";
+
+				while ($kirrow = mysql_fetch_array($kirre)) {
+					$sel = '';
+
+					//tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
+					if ($kirrow['tunnus'] == $kukarow['kirjoitin']) {
+						$sel = "SELECTED";
+					}
+
+					echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
+				}
+
+				echo "</select></td>";
+
+				$tulostakaikki_tun = urlencode(serialize($tulostakaikki_tun));
+
+				echo "<input type='hidden' name='toim' value='$toim'>";
+				echo "<input type='hidden' name='jarj' value='$jarj'>";
+				echo "<input type='hidden' name='tee2' value='TULOSTA'>";
+				echo "<input type='hidden' name='tulostukseen_kaikki' value='$tulostakaikki_tun'>";
+				echo "<td><input type='submit' value='".t("Tulosta kaikki")."'></td></tr></form>";
+
+				echo "</table>";
 			}
-
-			echo "</select></td>";
-
-			$tulostakaikki_tun = urlencode(serialize($tulostakaikki_tun));
-
-			echo "<input type='hidden' name='toim' value='$toim'>";
-			echo "<input type='hidden' name='jarj' value='$jarj'>";
-			echo "<input type='hidden' name='tee2' value='TULOSTA'>";
-			echo "<input type='hidden' name='tulostukseen_kaikki' value='$tulostakaikki_tun'>";
-			echo "<td><input type='submit' value='".t("Tulosta kaikki")."'></td></tr></form>";
-
-			echo "</table>";
-
 		}
 	}
 

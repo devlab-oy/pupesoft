@@ -110,14 +110,14 @@
 				$skp		= 0;
 
 				if ($kpl != '') {
-					
+
 					$query = "	SELECT *
 								FROM tuote
 								WHERE yhtio = '$kukarow[yhtio]'
 								AND tuoteno = '$tuoteno'";
 					$tuote_res = mysql_query($query) or pupe_error($query);
 					$tuote_row = mysql_fetch_assoc($tuote_res);
-					
+
 					if (mysql_num_rows($tuote_res) != 1) {
 						echo "<font class='error'>".t("VIRHE: Tuotetta ei löydy")."!</font><br>";
 						$virhe = 1;
@@ -179,7 +179,7 @@
 
 					if (is_array($eranumero_kaikki[$i])) {
 						if (is_array($eranumero_valitut[$i])) {
-							
+
 							$erasyotetyt = 0;
 
 							foreach($eranumero_valitut[$i] as $enro => $ekpl) {
@@ -273,9 +273,9 @@
 								$query = "	INSERT into tapahtuma set
 											yhtio 		= '$kukarow[yhtio]',
 											tuoteno 	= '$tuoteno',
-											kpl 		= '0',
-											kplhinta	= '0',
-											hinta 		= '0',
+											kpl 		= 0,
+											kplhinta	= 0,
+											hinta 		= 0,
 											laji 		= 'uusipaikka',
 											hyllyalue 	= '$hyllyalue',
 											hyllynro 	= '$hyllynro',
@@ -493,7 +493,7 @@
 									}
 
 									// ruksatut on varastonmuutos
-									if ($skp < 0) {										
+									if ($skp < 0) {
 										$summa = round($varvo_muuto * -1, 6);
 									}
 									else {
@@ -623,10 +623,10 @@
 												yhtio    = '$kukarow[yhtio]',
 												ltunnus  = '$laskuid',
 												tilino   = '$yhtiorow[varasto]',
-												kustp    = '',
+												kustp    = 0,
 												tapvm    = now(),
 												summa    = '$summa',
-												vero     = '0',
+												vero     = 0,
 												lukko    = '',
 												selite   = 'Inventointi $row[tuoteno] $erotus kpl',
 												laatija  = '$kukarow[kuka]',
@@ -637,10 +637,10 @@
 												yhtio    = '$kukarow[yhtio]',
 												ltunnus  = '$laskuid',
 												tilino   = '$yhtiorow[varastonmuutos]',
-												kustp    = '',
+												kustp    = 0,
 												tapvm    = now(),
 												summa    = $summa * -1,
-												vero     = '0',
+												vero     = 0,
 												lukko    = '',
 												selite   = 'Inventointi $row[tuoteno] $erotus kpl',
 												laatija  = '$kukarow[kuka]',
@@ -750,7 +750,7 @@
 
 												$query = "	UPDATE sarjanumeroseuranta
 															SET era_kpl = '$mita_jaa',
-															$sarjaquerylisa		
+															$sarjaquerylisa
 															muuttaja = '$kukarow[kuka]',
 															muutospvm = now()
 															WHERE yhtio	= '$kukarow[yhtio]'
@@ -767,7 +767,7 @@
 											}
 											$sarjares = mysql_query($query) or pupe_error($query);
 										}
-										
+
 										// päivitetään uusille sarjanumeroille laskutettuaika
 										if ($onko_uusia > 0) {
 											foreach ($eranumero_uudet[$i] as $enro_key => $enro_val) {
@@ -788,7 +788,7 @@
 											}
 										}
 									}
-								}								
+								}
 							}
 							elseif ($tee2 == "KORJAA" and $row["sarjanumeroseuranta"] == "") {
 
@@ -924,24 +924,21 @@
 
 									if (($summa <> 0) and (mysql_affected_rows() > 0)) {
 
-
-
-
-										$query = "UPDATE tiliointi set
+										$query = "	UPDATE tiliointi set
 													korjattu 	 = '$kukarow[kuka]',
 													korjausaika  = now()
 													WHERE yhtio  = '$kukarow[yhtio]'
 													and ltunnus  = '$laskuid'";
 										$result = mysql_query($query) or pupe_error($query);
 
-										$query = "INSERT into tiliointi set
+										$query = "	INSERT into tiliointi set
 													yhtio    = '$kukarow[yhtio]',
 													ltunnus  = '$laskuid',
 													tilino   = '$yhtiorow[varasto]',
-													kustp    = '',
+													kustp    = 0,
 													tapvm    = '$tilidaterow[tapvm]',
 													summa    = '$summa',
-													vero     = '0',
+													vero     = 0,
 													lukko    = '',
 													selite   = 'Inventointi $row[tuoteno] $uuserotus kpl',
 													laatija  = '$kukarow[kuka]',
@@ -950,14 +947,14 @@
 
 										$negsumma = $summa * -1;
 
-										$query = "INSERT into tiliointi set
+										$query = "	INSERT into tiliointi set
 													yhtio    = '$kukarow[yhtio]',
 													ltunnus  = '$laskuid',
 													tilino   = '$yhtiorow[varastonmuutos]',
-													kustp    = '',
+													kustp    = 0,
 													tapvm    = '$tilidaterow[tapvm]',
 													summa    = '$negsumma',
-													vero     = '0',
+													vero     = 0,
 													lukko    = '',
 													selite   = 'Inventointi $row[tuoteno] $uuserotus kpl',
 													laatija  = '$kukarow[kuka]',
@@ -1180,7 +1177,7 @@
 							WHERE yhtio 	= '$kukarow[yhtio]'
 							and tyyppi 		in ('L','G','V')
 							and tuoteno		= '$tuoterow[tuoteno]'
-							and varattu    <> '0'
+							and varattu    <> 0
 							and laskutettu 	= ''
 							and hyllyalue	= '$tuoterow[hyllyalue]'
 							and hyllynro 	= '$tuoterow[hyllynro]'
@@ -1250,7 +1247,7 @@
 								}
 								else {
 									echo "<input type='checkbox' name='sarjanumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[tunnus]' $chk></td>";
-								}								
+								}
 								echo "</td>";
 
 								if ($sarjarow["myyntitunnus"] != 0) {
@@ -1506,7 +1503,7 @@
 				<input type='hidden' name='filusta' value='yep'>
 
 				<font class='message'>".t("Inventoi tiedostosta").":</font><br>
-				<table border='0' cellpadding='3' cellspacing='2'>
+				<table>
 				<tr><th colspan='4'>".t("Sarkaineroteltu tekstitiedosto").".</th></tr>
 				<tr>";
 

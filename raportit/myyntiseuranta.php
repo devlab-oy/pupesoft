@@ -367,7 +367,7 @@
 					if ($mukaan == "kustannuspaikka") {
 						if ($group!="") $group .= ",kustpaikka";
 						else $group  .= "kustpaikka";
-						$select .= "if(tuote.kustp != '',tuote.kustp,asiakas.kustannuspaikka) as kustpaikka, ";
+						$select .= "if(tuote.kustp > 0,tuote.kustp,asiakas.kustannuspaikka) as kustpaikka, ";
 						$order  .= "kustpaikka,";
 						$gluku++;
 					}

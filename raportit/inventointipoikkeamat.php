@@ -66,10 +66,10 @@
 						yhtio    = '$kukarow[yhtio]',
 						ltunnus  = '$kpitorow[tosite]',
 						tilino   = '$yhtiorow[varasto]',
-						kustp    = '',
+						kustp    = 0,
 						tapvm    = '$tapvm',
 						summa    = '$arvo',
-						vero     = '0',
+						vero     = 0,
 						lukko    = '',
 						selite   = 'KORJATTU: $kpitorow[sel1]',
 						laatija  = '$kukarow[kuka]',
@@ -80,10 +80,10 @@
 						yhtio    = '$kukarow[yhtio]',
 						ltunnus  = '$kpitorow[tosite]',
 						tilino   = '$yhtiorow[varastonmuutos]',
-						kustp    = '',
+						kustp    = 0,
 						tapvm    = '$tapvm',
 						summa    = $arvo * -1,
-						vero     = '0',
+						vero     = 0,
 						lukko    = '',
 						selite   = 'KORJATTU: $kpitorow[sel2]',
 						laatija  = '$kukarow[kuka]',
@@ -194,10 +194,10 @@
 				$vararvomuu		= $rajaus[7];
 				$naytanimitys	= $rajaus[8];
 			}
-			
+
 			$rajaus = array($mul_osasto, $mul_try, $mul_tmr, $varastot, $prosmuutos, $kplmuutos, $sarjat, $vararvomuu, $naytanimitys);
 			$rajaus = urlencode(serialize($rajaus));
-			
+
 			if (count($komento) == 0) {
 				require("../inc/valitse_tulostin.inc");
 			}
@@ -443,7 +443,7 @@
 
 			$rivit = 1;
 			$arvoyht = 0;
-			
+
 			while ($row = mysql_fetch_array($saldoresult)) {
 				if ($rivit >= 19) {
 					fwrite($fh, $ots);
@@ -483,12 +483,12 @@
 				fwrite($fh, $prn);
 				$rivit++;
 			}
-			
+
 			if ($naytanimitys != '') {
 				$prn .= t("Arvonmuutos yhteensä").": ".sprintf ('%-21.21s',$arvoyht);
 				fwrite($fh, $prn);
 			}
-			
+
 			fclose($fh);
 
 			//itse print komento...
@@ -666,7 +666,7 @@
 				$sel = 'checked';
 			}
 
-			echo "<input type='checkbox' name='varastot[]' value='{$varow['tunnus']}' $sel/>{$varow['nimitys']}<br />\n";
+			echo "<input type='checkbox' name='varastot[]' value='$varow[tunnus]' $sel>$varow[nimitys]<br>\n";
 		}
 		echo "</td></tr>";
 

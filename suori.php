@@ -58,19 +58,19 @@
 		else {
 			$laskurow = mysql_fetch_array($result);
 		}
-		
+
 		if ($summa != "" and $summa_valuutassa != "") {
 			echo "<font class='error'>".t("Syötä summa vain joko kotivaluutassa tai valuutassa")."!</font><br><br>";
 			$tee = "W";
 			$summa = $summa_valuutassa = "";
 		}
-		
+
 		$haettu_kurssi = "";
-		
+
 		if ($summa_valuutassa != "" and $summa == "") {
 			// koitetaan hakea maksupäivän kurssi
-			$query = "	SELECT * 
-						FROM valuu_historia 
+			$query = "	SELECT *
+						FROM valuu_historia
 						WHERE kotivaluutta = '$yhtiorow[valkoodi]'
 						AND valuutta = '$laskurow[valkoodi]'
 						AND kurssipvm <= '$mav-$mak-$map'
@@ -80,13 +80,13 @@
 
 			if (mysql_num_rows($valuures) == 1) {
 				$valuurow = mysql_fetch_array($valuures);
-				$haettu_kurssi = $valuurow["kurssi"];		
+				$haettu_kurssi = $valuurow["kurssi"];
 			}
 			else {
 				echo "<font class='message'>".t("Ei löydetty sopivaa kurssia!")."</font><br>";
 				$tee = "W";
 				$summa = $summa_valuutassa = "";
-			}			
+			}
 		}
 	}
 
@@ -104,7 +104,7 @@
 				}
 				$rahasumma_valuutassa = round($summa / $kurssi, 2);
 			}
-			
+
 			// ollaan syötetty summa valuutassa
 			if ($summa_valuutassa != "") {
 				$kurssi = $haettu_kurssi;
@@ -143,7 +143,7 @@
 		$laskurow['maksukasumma'] = round($laskurow['kasumma'] * $kurssi, 2);
 		$laskurow['maksusumma_valuutassa'] = $laskurow['summa'];
 		$laskurow['maksukasumma_valuutassa'] = $laskurow['kasumma'];
-				
+
 		// Mikä on oikea ostovelkatili
 		$query = "	SELECT tilino
 					FROM tiliointi
@@ -232,7 +232,7 @@
 								summa 				= $alv * -1,
 								summa_valuutassa	= $alv_valuutassa * -1,
 								valkoodi			= '$tiliointirow[valkoodi]',
-								vero 				= '',
+								vero 				= 0,
 								selite 				= '$selite',
 								lukko 				= '1',
 								laatija 			= '$kukarow[kuka]',
@@ -246,7 +246,7 @@
 			if ($totkasumma != $laskurow['maksukasumma']) {
 				echo "<font class='message'>".t("Joudun pyöristämään kassa-alennusta")."</font><br>";
 
-				$query = "	UPDATE tiliointi SET 
+				$query = "	UPDATE tiliointi SET
 							summa = summa - $totkasumma + $laskurow[maksukasumma],
 							summa_valuutassa = summa_valuutassa - $totkasumma_valuutassa + $laskurow[maksukasumma_valuutassa]
 							WHERE tunnus = '$isa'
@@ -425,7 +425,7 @@
 				echo "$tiliointirow[summa_valuutassa] $tiliointirow[valkoodi]";
 			}
 			echo "</td>";
-			
+
 			$kokokirjaus += $tiliointirow['summa'];
 			echo "</tr>";
 		}
@@ -492,18 +492,18 @@
 		}
 
 		if ($tiliotesumma == 0 or $summahakuok == 0) {
-			$query = "	SELECT tunnus, 
-						nimi, 
-						tapvm, 
-						round((summa - kasumma) * vienti_kurssi, 2) ka_summa, 
+			$query = "	SELECT tunnus,
+						nimi,
+						tapvm,
+						round((summa - kasumma) * vienti_kurssi, 2) ka_summa,
 						summa - kasumma ka_summa_valuutassa,
 						round(summa * vienti_kurssi, 2) summa,
 						summa summa_valuutassa,
-						ebid, 
-						valkoodi, 
-						erpcm, 
-						viite, 
-						olmapvm, 
+						ebid,
+						valkoodi,
+						erpcm,
+						viite,
+						olmapvm,
 						popvm
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]' and maksu_tili='$mtili' and tila='Q'
@@ -516,7 +516,7 @@
 		}
 
 		echo "<table>";
-		echo "<tr>";		
+		echo "<tr>";
 		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=nimi&jarj=$jarj'>",t("Nimi"),"</a></th>";
 		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=tapvm&jarj=$jarj'>",t("Tapvm"),"</a></th>";
 		echo "<th valign='top'><a href='suori.php?tee=W&tiliote=$tiliote&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=erpcm&jarj=$jarj'>",t("Erpvm"),"</a></th>";
@@ -535,11 +535,11 @@
 		while ($trow = mysql_fetch_array ($result)) {
 			echo "<tr class='aktiivi'>";
 			echo "<td valign='top'>$trow[nimi]</td>";
-			echo "<td nowrap valign='top'><a href='muutosite.php?tee=E&tunnus={$trow['tunnus']}'>".tv1dateconv($trow["tapvm"], "", "LYHYT")."</a></td>";
+			echo "<td nowrap valign='top'><a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'>".tv1dateconv($trow["tapvm"], "", "LYHYT")."</a></td>";
 			echo "<td nowrap valign='top'>".tv1dateconv($trow["erpcm"], "", "LYHYT")."</td>";
 			echo "<td nowrap valign='top'>".tv1dateconv($trow["popvm"], "", "LYHYT")."</td>";
 			echo "<td nowrap valign='top'>".tv1dateconv($trow["olmapvm"], "", "LYHYT")."</td>";
-			echo "<td valign='top'>{$trow['viite']}</td>";
+			echo "<td valign='top'>$trow[viite]</td>";
 
 			if ($trow["summa"] != $trow["summa_valuutassa"]) {
 				echo "<td nowrap valign='top' align='right'>$trow[summa] $yhtiorow[valkoodi]<br>$trow[summa_valuutassa] $trow[valkoodi]</td>";
@@ -554,7 +554,7 @@
 				}
 				else {
 					echo "<td nowrap valign='top' align='right'>$trow[ka_summa] $yhtiorow[valkoodi]<br></td>";
-				}				
+				}
 			}
 			else {
 				echo "<td nowrap valign='top' align='right'></td>";
@@ -582,7 +582,7 @@
 			}
 
 			$kmaksupvm = $mav."-".$mak."-".$map;
-			if ($yhtiorow['ostoreskontrakausi_alku'] <= $kmaksupvm) {			
+			if ($yhtiorow['ostoreskontrakausi_alku'] <= $kmaksupvm) {
 				echo "</td>
 					<td valign='top'><INPUT TYPE='checkbox' NAME='selvittely' CHECKED></td>
 					<td valign='top'>
@@ -597,7 +597,7 @@
 				echo "</td><td></td><td>";
 				echo "<font class='error'>".t("Tilikausi lukittu")."</font></td></tr></form>";
 			}
-			
+
 		}
 		echo "</table>";
 	}

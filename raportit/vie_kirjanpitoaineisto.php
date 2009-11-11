@@ -22,12 +22,12 @@ set_time_limit(0);
 $sqlhaku = $sqlapu;
 
 if ($tee == "lataa_tiedosto") {
-	readfile("/tmp/".$tmpfilenimi);	
+	readfile("/tmp/".$tmpfilenimi);
 	unlink("/tmp/".$tmpfilenimi);
 	exit;
 }
 elseif($tee == "vie") {
-		
+
 	$tkausi = (int) $tkausi;
 
 	// Tutkitaan ensiksi, mille tilikaudelle pyydettävä lista löytyy, jos lista on sopiva
@@ -46,7 +46,7 @@ elseif($tee == "vie") {
 		$tilikaudetrow=mysql_fetch_array($result);
 	}
 
-	
+
 	if ($tkausi != '0') {
         echo "<font class='message'>$nimi ".t("tilikaudelta")." $tilikaudetrow[tilikausi_alku] - $tilikaudetrow[tilikausi_loppu]</font><br><br>";
 		$lisa  = "tiliointi.tapvm <= '$tilikaudetrow[tilikausi_loppu]' and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'";
@@ -56,29 +56,29 @@ elseif($tee == "vie") {
 		$alkupvm  = "$alkuvv-$alkukk-$alkupp";
 		$loppupvm = "$loppuvv-$loppukk-$loppupp";
 		$lisa  = "tiliointi.tapvm >= '$alkupvm' AND tiliointi.tapvm <= '$loppupvm'";
-		
+
 		echo "<font class='message'>".t("Tapahtumat ajalta")." $alkupp.$alkukk.$alkuvv - $loppupp.$loppukk.$loppuvv</font><br><br>";
 	}
 
 	if (strlen(trim($kohde)) > 0) {
-		$lisa .= " and tiliointi.kohde = '" . $kohde . "'";
+		$lisa .= " and tiliointi.kohde = '$kohde'";
 	}
 
 	if (strlen(trim($proj)) > 0) {
-		$lisa .= " and tiliointi.projekti = '" . $proj . "'";
+		$lisa .= " and tiliointi.projekti = '$proj'";
 	}
 
 	if (strlen(trim($kustp)) > 0) {
 		if (strlen(trim($kustp2)) > 0) {
-			$lisa .= " and tiliointi.kustp in (" . $vrow['lista'] . ")";
+			$lisa .= " and tiliointi.kustp in ($vrow[lista])";
 		}
 		else {
-			$lisa .= " and tiliointi.kustp = '" . $kustp . "'";
+			$lisa .= " and tiliointi.kustp = '$kustp'";
 		}
 	}
-		
+
 	if($aineisto == "O") {
-		
+
 		$query = "	SELECT 	lasku.*, if(viite='', viesti, viite) laskun_viite, lasku.summa laskun_summa,
 							date_format(tiliointi.tapvm, '%d.%m.%Y') maksettu_paiva, tiliointi.summa maksettu_summa, tiliointi.tilino, tiliointi.selite tiliointi_selite,
 							tili.nimi tili_nimi
@@ -90,13 +90,13 @@ elseif($tee == "vie") {
 					ORDER BY lasku.mapvm, lasku.tunnus, tiliointi.tilino";
 		$result = mysql_query($query) or pupe_error($query);
 		if(mysql_num_rows($result)>0) {
-			
+
 			$dirrikka = "/tmp/$kukarow[yhtio]-Kirjanpitoaineisto_".md5(uniqid());
 			$dirrikka_kuvat = $dirrikka."/kuvat";
 			$excelnimi = $dirrikka."/listaus.xls";
 			exec("rm -rf $dirrikka");
 			mkdir($dirrikka);
-			mkdir($dirrikka_kuvat);			
+			mkdir($dirrikka_kuvat);
 
 			if(include('Spreadsheet/Excel/Writer.php')) {
 
@@ -113,20 +113,17 @@ elseif($tee == "vie") {
 			else {
 				die("Asennappa Spreadsheet_Excel_Writer!");
 			}
-			
+
 			$sarakkeet = array("tunnus", "ytunnus", "nimi", "laskun_summa", "laskun_viite", "maksettu_paiva", "maksettu_summa", "tilino", "tili_nimi", "tiliointi_selite");
 			$tulostetut = array();
-			
+
 			foreach($sarakkeet as $i => $s) {
 				$worksheet->write($excelrivi, $i, ucfirst($s), $format_bold);
 			}
 			$excelrivi++;
-			
-			/*
-			*/
 
 			while($row = mysql_fetch_array($result)) {
-				
+
 				foreach($sarakkeet as $i => $s) {
 					if($s == "tiliointi_selite") {
 						$worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", " ", $row[$s])));
@@ -135,17 +132,18 @@ elseif($tee == "vie") {
 						$worksheet->writeString($excelrivi, $i, $row[$s]);
 					}
 				}
-				$excelrivi++;	
-				
+				$excelrivi++;
+
 				//	Tämä lasku on uusi, tallennetaan liitteet
 				if(!in_array($row["tunnus"], $tulostetut)) {
-					
-					echo "<font class='message'>".t("Käsitellään liitteet laskulle")." {$row["tunnus"]} {$row["nimi"]} {$row["summa"]}@{$row["mapvm"]}</font><br>";
+
+					echo "<font class='message'>".t("Käsitellään liitteet laskulle")." $row[tunnus] $row[nimi] $row[summa]@$row[mapvm]</font><br>";
 					$kuvaok = 0;
 					$query = "	SELECT *
 								FROM liitetiedostot
 								WHERE liitos = 'lasku' and liitostunnus = '$row[tunnus]'";
 					$lres = mysql_query($query) or pupe_error($query);
+					
 					if(mysql_num_rows($lres)>0) {
 						echo "Tallennan liitteet laskulta<br>";
 						$y = 0;
@@ -159,9 +157,9 @@ elseif($tee == "vie") {
 							}
 						}
 					}
-					
+
 					if($row['ebid'] != "") {
-							
+
 						echo "Haen laskukuvan laskulle<br>";
 
 						$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
@@ -170,7 +168,7 @@ elseif($tee == "vie") {
 						$timestamppi = gmdate("YmdHis")."Z";
 
 						$urlhead = "http://www.verkkolasku.net";
-						$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID={$row['ebid']}&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";
+						$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$row[ebid]&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";
 
 						$digest	 = md5($urlmain . "&" . $salasana);
 						$url	 = $urlhead.$urlmain."&DIGEST=$digest";
@@ -189,28 +187,28 @@ elseif($tee == "vie") {
 							echo "<font class='error'>".t("Laskutiedostoa ei löytynyt!")."</font><br>";
 						}
 					}
-					
+
 					if($kuvaok != 1) {
 						echo "<font class='error'>".t("Laskulle ei löytynyt yhtään kuvaa!!")."</font><br>";
 					}
-					
+
 					$tulostetut[] = $row["tunnus"];
-					
+
 					echo "<br>";
 					flush();
 				}
 			}
-			
+
 			$workbook->close();
-			
+
 			$zipfile = basename($dirrikka).".zip";
-			
-			$odir = getcwd(); 
+
+			$odir = getcwd();
 			chdir("/tmp/");
 			exec("zip -r $zipfile ".basename($dirrikka));
 			exec("cd $odir");
 			exec("rm -rf $dirrikka");
-			
+
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna tiedosto").":</th>";
 			echo "<form method='post' action='$PHP_SELF'>";
@@ -219,7 +217,7 @@ elseif($tee == "vie") {
 			echo "<input type='hidden' name='tmpfilenimi' value='".$zipfile."'>";
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			echo "</table><br>";
-			
+
 		}
 	}
 }
@@ -240,7 +238,7 @@ else {
 			<tr>
 			<th>".t("Ajalta")."</th>
 			<td>
-				<input type='text' name='alkupp' size = '2'> <input type='text' name='alkukk' size = '2'> <input type='text' name='alkuvv' size = '4'> - 
+				<input type='text' name='alkupp' size = '2'> <input type='text' name='alkukk' size = '2'> <input type='text' name='alkuvv' size = '4'> -
 				<input type='text' name='loppupp' size = '2'> <input type='text' name='loppukk' size = '2'> <input type='text' name='loppuvv' size = '4'>
 			</tr>";
 

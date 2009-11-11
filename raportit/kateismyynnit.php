@@ -448,7 +448,7 @@
 					$query .= "summa = '$arvo',";
 				}
 
-				$query .= "	vero     = '0',
+				$query .= "	vero     = 0,
 							lukko    = '',
 							selite   = '$kassalipas $maksutapa";
 
@@ -479,7 +479,7 @@
 							kustp    = '$kustp',
 							tapvm    = '$vv-$kk-$pp',
 							summa    = $arvo,
-							vero     = '0',
+							vero     = 0,
 							lukko    = '',
 							selite   = '$kassalipas ".t("Käteistilitys pankkiin kassasta")."',
 							laatija  = '$kukarow[kuka]',
@@ -493,7 +493,7 @@
 							kustp    = '$kustp',
 							tapvm    = '$vv-$kk-$pp',
 							summa    = $arvo * -1,
-							vero     = '0',
+							vero     = 0,
 							lukko    = '',
 							selite   = '$kassalipas ".t("Käteistilitys pankkiin kassasta")."',
 							laatija  = '$kukarow[kuka]',
@@ -511,7 +511,7 @@
 							kustp    = '$kustp',
 							tapvm    = '$vv-$kk-$pp',
 							summa    = $arvo,
-							vero     = '0',
+							vero     = 0,
 							lukko    = '',
 							selite   = '$kassalipas ".t("Käteisotto kassasta")."',
 							laatija  = '$kukarow[kuka]',
@@ -525,7 +525,7 @@
 							kustp    = '$kustp',
 							tapvm    = '$vv-$kk-$pp',
 							summa    = $arvo * -1,
-							vero     = '0',
+							vero     = 0,
 							lukko    = '',
 							selite   = '$kassalipas ".t("Käteisotto kassasta")."',
 							laatija  = '$kukarow[kuka]',

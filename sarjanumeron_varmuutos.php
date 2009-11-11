@@ -37,17 +37,17 @@
 			foreach($tuote as $i => $tuoteno) {
 				if (count($sarjanumero_edarvo[$i]) > 0) {
 					foreach ($sarjanumero_edarvo[$i] as $snro_tun => $edarvo) {
-						
+
 						$sarjanumero_uusiarvo[$i][$snro_tun] = str_replace(",", ".", $sarjanumero_uusiarvo[$i][$snro_tun]);
-						
+
 						if($sarjanumero_uusiarvo[$i][$snro_tun] != '' and (float) $sarjanumero_uusiarvo[$i][$snro_tun] >= 0) {
 							$edarvo = (float) $edarvo;
 							$uuarvo = (float) $sarjanumero_uusiarvo[$i][$snro_tun];
-						
+
 							$ero = round($uuarvo - $edarvo, 2);
-						
+
 							if (abs($ero) != 0) {
-							
+
 								$query = "	SELECT tilausrivi_osto.tunnus, tilausrivi_osto.alv, tilausrivi_osto.tyyppi, round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, tilausrivi_osto.kpl,
 											tilausrivi_myynti.hyllyalue, tilausrivi_myynti.hyllynro, tilausrivi_myynti.hyllyvali, tilausrivi_myynti.hyllytaso
 											FROM sarjanumeroseuranta
@@ -60,38 +60,38 @@
 											and sarjanumeroseuranta.tunnus = '$snro_tun'
 											ORDER BY sarjanumero";
 								$sarjares = mysql_query($query) or pupe_error($query);
-							
+
 								if (mysql_num_rows($sarjares) == 1) {
 									$sarjarow = mysql_fetch_array($sarjares);
-								
+
 									if($sarjarow["alv"] >= 500) {
 										$sarjarow["alv"] -= 500;
 									}
-								
+
 									if ($yhtiorow["alv_kasittely"] == "" and $sarjarow["tyyppi"] == 'L' and $sarjarow["alv"] != 0) {
 										$uuhinta = round($uuarvo * (1+$sarjarow["alv"]/100));
 									}
 									else {
 										$uuhinta = $uuarvo;
 									}
-																						
+
 									$query = "	UPDATE tilausrivi as tilausrivi_upd
-												SET hinta = '$uuhinta', 
+												SET hinta = '$uuhinta',
 												rivihinta = if(tyyppi='O', $uuarvo, $uuarvo*-1)
-												where yhtio	= '$kukarow[yhtio]' 
+												where yhtio	= '$kukarow[yhtio]'
 												and tunnus	= '$sarjarow[tunnus]'";
 									$result = mysql_query($query) or pupe_error($query);
-								
+
 									if ($ero < 0) {
 										$tkpl = -1;
 										$tero = abs($ero);
 									}
-								
+
 									else {
 										$tkpl = 1;
-										$tero = abs($ero);	
+										$tero = abs($ero);
 									}
-								
+
 									$query = "	INSERT into tapahtuma set
 												yhtio   = '$kukarow[yhtio]',
 												tuoteno = '$tuoteno',
@@ -108,7 +108,7 @@
 												laadittu = now()";
 									$result = mysql_query($query) or pupe_error($query);
 									$tapahtumaid = mysql_insert_id();
-							
+
 									$query = "	INSERT into lasku set
 												yhtio      = '$kukarow[yhtio]',
 												tapvm      = now(),
@@ -123,10 +123,10 @@
 												yhtio    = '$kukarow[yhtio]',
 												ltunnus  = '$laskuid',
 												tilino   = '$yhtiorow[varasto]',
-												kustp    = '',
+												kustp    = 0,
 												tapvm    = now(),
 												summa    = '$ero',
-												vero     = '0',
+												vero     = 0,
 												lukko    = '',
 												selite   = '".t("Varastonarvon muutos").": $edarvo -> $uuarvo',
 												laatija  = '$kukarow[kuka]',
@@ -137,16 +137,16 @@
 												yhtio    = '$kukarow[yhtio]',
 												ltunnus  = '$laskuid',
 												tilino   = '$yhtiorow[varastonmuutos]',
-												kustp    = '',
+												kustp    = 0,
 												tapvm    = now(),
 												summa    = $ero * -1,
-												vero     = '0',
+												vero     = 0,
 												lukko    = '',
 												selite   = '".t("Varastonarvon muutos").": $edarvo -> $uuarvo',
 												laatija  = '$kukarow[kuka]',
 												laadittu = now()";
 									$result = mysql_query($query) or pupe_error($query);
-								
+
 									echo "<font class='message'>$tuoteno: ".t("Varastonarvon muutos").": $edarvo -> $uuarvo</font><br>";
 								}
 							}
@@ -168,7 +168,7 @@
 		if ($tuoteno != "") {
 			///* Inventoidaan tuotenumeron perusteella *///
 			$kutsu = " ".t("Tuote")." $tuoteno ";
-			
+
 			$query = "	SELECT $select
 						FROM tuote use index (tuoteno_index)
 						JOIN tuotepaikat use index (tuote_index) USING (yhtio, tuoteno)
@@ -190,7 +190,7 @@
 		}
 
 		if ($tee == 'INVENTOI') {
-			
+
 			echo "<form name='inve' action='$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='VALMIS'>";
 			echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
@@ -200,7 +200,7 @@
 			echo "</tr>";
 
 			while($tuoterow = mysql_fetch_array($saldoresult)) {
-				
+
 				$query = "	SELECT if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, '$tuoterow[nimitys]') nimitys, sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, era_kpl
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -208,13 +208,13 @@
 							WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]'
 							and sarjanumeroseuranta.tuoteno		= '$tuoterow[tuoteno]'
 							and sarjanumeroseuranta.myyntirivitunnus	!= -1
-							and (	(sarjanumeroseuranta.hyllyalue		= '$tuoterow[hyllyalue]' 
-									 and sarjanumeroseuranta.hyllynro 	= '$tuoterow[hyllynro]' 
-									 and sarjanumeroseuranta.hyllyvali 	= '$tuoterow[hyllyvali]' 
-									 and sarjanumeroseuranta.hyllytaso 	= '$tuoterow[hyllytaso]') 
-								 or ('$tuoterow[oletus]' != '' and 
-									(	SELECT tunnus 
-										FROM tuotepaikat tt 
+							and (	(sarjanumeroseuranta.hyllyalue		= '$tuoterow[hyllyalue]'
+									 and sarjanumeroseuranta.hyllynro 	= '$tuoterow[hyllynro]'
+									 and sarjanumeroseuranta.hyllyvali 	= '$tuoterow[hyllyvali]'
+									 and sarjanumeroseuranta.hyllytaso 	= '$tuoterow[hyllytaso]')
+								 or ('$tuoterow[oletus]' != '' and
+									(	SELECT tunnus
+										FROM tuotepaikat tt
 										WHERE sarjanumeroseuranta.yhtio = tt.yhtio and sarjanumeroseuranta.tuoteno = tt.tuoteno and sarjanumeroseuranta.hyllyalue = tt.hyllyalue
 										and sarjanumeroseuranta.hyllynro = tt.hyllynro and sarjanumeroseuranta.hyllyvali = tt.hyllyvali and sarjanumeroseuranta.hyllytaso = tt.hyllytaso) is null))
 							and ((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and tilausrivi_osto.laskutettuaika != '0000-00-00' and abs(tilausrivi_osto.kpl)=1)
@@ -223,23 +223,23 @@
 
 				echo "<tr>";
 				echo "<td valign='top' class='spec'>$tuoterow[tuoteno]</td><td valign='top' class='spec' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td><td class='spec' valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td><td></td><td></td></tr>";
-				
+
 				if (mysql_num_rows($sarjares) > 0) {
-					
+
 					$sarjalaskk = 1;
-					
-					while($sarjarow = mysql_fetch_array($sarjares)) {												
+
+					while($sarjarow = mysql_fetch_array($sarjares)) {
 						echo "<tr>
 								<td>$sarjalaskk.</td><td>$sarjarow[nimitys]</td><td>$sarjarow[sarjanumero]</td><td align='right'>$sarjarow[ostohinta]</td>
 								<td>
 								<input type='hidden' name='sarjanumero_edarvo[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[ostohinta]'>
 								<input type='text' size='15' name='sarjanumero_uusiarvo[$tuoterow[tptunnus]][$sarjarow[tunnus]]'>
 								</td></tr>";
-								
+
 						$sarjalaskk++;
 					}
-				}					
-				
+				}
+
 				echo "</td>";
 				echo "<input type='hidden' name='tuote[$tuoterow[tptunnus]]' value='$tuoterow[tuoteno]'>";
 				echo "</tr>";
@@ -266,7 +266,7 @@
 		echo "</table>";
 		echo "</form>";
 		echo "<br><br>";
-		
+
 	}
 
 	// lukitaan tableja

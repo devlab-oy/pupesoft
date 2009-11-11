@@ -324,28 +324,28 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 				$result = mysql_query($query) or pupe_error($query);
 				$laskuid = mysql_insert_id($link);
 
-				$query = "INSERT into tiliointi set
+				$query = "	INSERT into tiliointi set
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
 							tilino   = '$yhtiorow[varasto]',
-							kustp    = '',
+							kustp    = 0,
 							tapvm    = now(),
 							summa    = '$muutos',
-							vero     = '0',
+							vero     = 0,
 							lukko    = '',
 							selite   = 'Tuote $tuoterow[tuoteno] epäkuranttimuutos',
 							laatija  = '$kukarow[kuka]',
 							laadittu = now()";
 				$result = mysql_query($query) or pupe_error($query);
 
-				$query = "INSERT into tiliointi set
+				$query = "	INSERT into tiliointi set
 							yhtio    = '$kukarow[yhtio]',
 							ltunnus  = '$laskuid',
 							tilino   = '$yhtiorow[varastonmuutos]',
-							kustp    = '',
+							kustp    = 0,
 							tapvm    = now(),
 							summa    = $muutos * -1,
-							vero     = '0',
+							vero     = 0,
 							lukko    = '',
 							selite   = 'Tuote $tuoterow[tuoteno] epäkuranttimuutos',
 							laatija  = '$kukarow[kuka]',

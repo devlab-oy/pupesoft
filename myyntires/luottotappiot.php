@@ -18,10 +18,10 @@ if ($tila == 'K') {
 }
 
 if ($tila == 'K') {
-	//AND tiliointi.tapvm = lasku.tapvm 
+	//AND tiliointi.tapvm = lasku.tapvm
 	$query = "	SELECT lasku.*, tiliointi.ltunnus, tiliointi.tilino, tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti
 				FROM lasku
-				JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu = '' 
+				JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu = ''
 				AND tiliointi.tilino NOT IN ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[alv]'))
 				WHERE lasku.yhtio		= '$kukarow[yhtio]'
 				AND lasku.mapvm			= '0000-00-00'
@@ -32,7 +32,7 @@ if ($tila == 'K') {
 	$laskuresult = mysql_query($query) or pupe_error($query);
 
 	while ($lasku = mysql_fetch_array($laskuresult)) {
-		
+
 		if ($lasku['tilino'] != $yhtiorow['myyntisaamiset'] and $lasku['tilino'] != $yhtiorow['factoringsaamiset'] and $lasku['tilino'] != $yhtiorow['konsernimyyntisaamiset']) {
 			// Hoidetaan alv
 			$alv = round($lasku['summa'] * $lasku['vero'] / 100, 2);
@@ -57,19 +57,19 @@ if ($tila == 'K') {
 
 			// Tiliöidään alv
 			if ($lasku['vero'] != 0) {
-				
+
 				// jos yhtiön toimipaikka löytyy, otetaan alvtilinumero tämän takaa jos se löytyy
 				if ($lasku["yhtio_toimipaikka"] != '' and $yhtiorow["toim_alv"] != '') {
 					$query = "	INSERT INTO tiliointi SET
 								yhtio		= '$kukarow[yhtio]',
 								ltunnus		= '$lasku[ltunnus]',
 								tilino		= '$yhtiorow[toim_alv]',
-								kustp		= '',
-								kohde		= '',
-								projekti	= '',
+								kustp		= 0,
+								kohde		= 0,
+								projekti	= 0,
 								tapvm		= '$tpv-$tpk-$tpp',
 								summa		= $alv * -1,
-								vero		= '',
+								vero		= 0,
 								selite		= '$lasku[selite]',
 								lukko		= '1',
 								tosite		= '$lasku[tosite]',
@@ -82,13 +82,13 @@ if ($tila == 'K') {
 					$query = "	INSERT INTO tiliointi SET
 								yhtio		= '$kukarow[yhtio]',
 								ltunnus		= '$lasku[ltunnus]',
-								tilino		= '$yhtiorow[alv]', 
-								kustp		= '',
-								kohde		= '',
-								projekti	= '',
+								tilino		= '$yhtiorow[alv]',
+								kustp		= 0,
+								kohde		= 0,
+								projekti	= 0,
 								tapvm		= '$tpv-$tpk-$tpp',
 								summa		= $alv * -1,
-								vero		= '',
+								vero		= 0,
 								selite		= '$lasku[selite]',
 								lukko		= '1',
 								tosite		= '$lasku[tosite]',
@@ -109,7 +109,7 @@ if ($tila == 'K') {
 					projekti	= '$lasku[projekti]',
 					tapvm		= '$tpv-$tpk-$tpp',
 					summa		= $lasku[summa] * -1,
-					vero		= '',
+					vero		= 0,
 					selite		= '$lasku[selite]',
 					lukko		= '',
 					tosite		= '$lasku[tosite]',

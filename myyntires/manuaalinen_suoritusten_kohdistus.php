@@ -808,7 +808,7 @@ if ($tila == 'tee_kohdistus') {
 											summa 				= $alv,
 											summa_valuutassa	= $alv_valuutassa,
 											valkoodi			= '$tiliointirow[valkoodi]',
-											vero 				= '',
+											vero 				= 0,
 											selite 				= '$selite',
 											lukko 				= '1',
 											laatija 			= '$kukarow[kuka]',

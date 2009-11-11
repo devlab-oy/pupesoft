@@ -23,7 +23,7 @@ $keissit = array("Asiakas","Toimittaja","Kustannupaikka","Laskunumero","Myynti",
 mkdir("/tmp/infoglove");
 
 foreach ($keissit as $keissi) {
-	
+
 	switch ($keissi) {
 		case "Asiakas" :
 			$query =	"SELECT asiakas.tunnus, if(asiakas.selaus!='' and asiakas.selaus is not null, asiakas.selaus, asiakas.ytunnus) AS asiakasnro, asiakas.nimi, asiakas.ryhma, avainsana.selitetark, asiakas.maa, asiakas.konserni, asiakas.kustannuspaikka, kustannuspaikka.nimi
@@ -46,12 +46,12 @@ foreach ($keissit as $keissi) {
 			break;
 		case "Laskunumero" :
 			$query =	"SELECT laskunro
-						FROM lasku 
-						WHERE lasku.yhtio = '$kukarow[yhtio]' 
+						FROM lasku
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = 'U' and lasku.alatila = 'X'";
 			break;
 		case "Myynti" :
-			$query =	"SELECT lasku.tapvm, tilausrivi.kpl, tilausrivi.rivihinta, tilausrivi.kate, tuote.kehahin, tilausrivi.tuoteno, asiakas.tunnus AS asiakasnro, if(tuote.kustp != '', tuote.kustp, asiakas.kustannuspaikka) as kustp, lasku.laskunro
+			$query =	"SELECT lasku.tapvm, tilausrivi.kpl, tilausrivi.rivihinta, tilausrivi.kate, tuote.kehahin, tilausrivi.tuoteno, asiakas.tunnus AS asiakasnro, if(tuote.kustp != 0, tuote.kustp, asiakas.kustannuspaikka) as kustp, lasku.laskunro
 						FROM lasku
 						JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus
 						LEFT JOIN tuote ON lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
@@ -60,17 +60,17 @@ foreach ($keissit as $keissi) {
 						and lasku.tila = 'U' and lasku.alatila = 'X'";
 			break;
 		case "Nimike" :
-			$query =	"SELECT tuote.tuoteno, 
-						tuote.nimitys, 
-						tuote.try, 
-						avainsana.selitetark, 
-						(SELECT toim_tuoteno FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno LIMIT 1) as toim_tuoteno, 
-						tuote.tullinimike1, 
-						if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', 0, 25), 50), 75) as arvonalennus, 
-						tuote.kehahin, 
-						sum(tuotepaikat.saldo) as saldo, 
+			$query =	"SELECT tuote.tuoteno,
+						tuote.nimitys,
+						tuote.try,
+						avainsana.selitetark,
+						(SELECT toim_tuoteno FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno LIMIT 1) as toim_tuoteno,
+						tuote.tullinimike1,
+						if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', 0, 25), 50), 75) as arvonalennus,
+						tuote.kehahin,
+						sum(tuotepaikat.saldo) as saldo,
 						sum(tuotepaikat.saldo*tuote.kehahin) as varastonarvo
-						FROM tuote 
+						FROM tuote
 						LEFT JOIN avainsana ON avainsana.yhtio=tuote.yhtio and avainsana.laji = 'TRY' and avainsana.selite = tuote.try
 						LEFT JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -79,48 +79,48 @@ foreach ($keissit as $keissi) {
 		case "Monivarasto" :
 			$query =	"SELECT saldoaika, saldo, saldo*kehahin as Varastoarvo, tuotepaikat.tuoteno, LEFT(hyllyalue,1) as hyllyalue
 						FROM tuotepaikat
-						JOIN tuote ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno 
+						JOIN tuote ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno
 						WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 						ORDER BY tuotepaikat.tuoteno";
 			break;
 		case "Ostot" :
 			$query =	"SELECT tilausrivi.laskutettuaika, tilausrivi.kpl, tilausrivi.rivihinta, tilausrivi.tuoteno, lasku.ytunnus, toimi.kustannuspaikka, lasku.laskunro
 						FROM lasku
-						JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus 
+						JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus
 						LEFT JOIN toimi ON lasku.yhtio = toimi.yhtio and lasku.liitostunnus = toimi.tunnus
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and tila = 'K' 
-						and alatila = 'X' 
+						and tila = 'K'
+						and alatila = 'X'
 						and vanhatunnus = 0
 						ORDER BY lasku.tunnus";
 			break;
-		case "Ostotilausnumero" : 
+		case "Ostotilausnumero" :
 			$query =	"SELECT distinct laskunro
-						FROM lasku 
+						FROM lasku
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and tila = 'K' 
-						and alatila = 'X' 
+						and tila = 'K'
+						and alatila = 'X'
 						and vanhatunnus = 0
 						ORDER BY lasku.tunnus";
 			break;
-		case "Varastonumero" : 
-			$query =	"SELECT distinct LEFT(hyllyalue,1) as hyllyalue 
-						FROM tuotepaikat 
+		case "Varastonumero" :
+			$query =	"SELECT distinct LEFT(hyllyalue,1) as hyllyalue
+						FROM tuotepaikat
 						WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 						ORDER BY 1";
 			break;
-		case "Tapahtumalaji" : 
+		case "Tapahtumalaji" :
 			$query =	"SELECT 'Myynti' as Tapahtumalaji";
 			break;
-		case "Myyntitil" : 
-			$query =	"SELECT left(lasku.luontiaika,10) AS 'paivays', 
-						tilausrivi.tilkpl AS 'maara', 
+		case "Myyntitil" :
+			$query =	"SELECT left(lasku.luontiaika,10) AS 'paivays',
+						tilausrivi.tilkpl AS 'maara',
 						round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1),(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)),'$yhtiorow[hintapyoristys]') AS 'arvo',
 						if(tilausrivi.laskutettu!='',tilausrivi.kate,round((tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)),'$yhtiorow[hintapyoristys]')) AS 'kate',
 						if(tilausrivi.laskutettu!='',tilausrivi.rivihinta-tilausrivi.kate,round(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt),6)) AS 'keskihinta',
-						tilausrivi.tuoteno, 
+						tilausrivi.tuoteno,
 						asiakas.tunnus AS asiakasnro,
-						if(tuote.kustp != '', tuote.kustp, asiakas.kustannuspaikka) as kustp,
+						if(tuote.kustp > 0, tuote.kustp, asiakas.kustannuspaikka) as kustp,
 						lasku.tunnus
 						FROM lasku
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
@@ -131,15 +131,15 @@ foreach ($keissit as $keissi) {
 						and lasku.luontiaika != '0000-00-00 00:00:00'
 						ORDER BY lasku.tunnus, tilausrivi.tunnus";
 			break;
-		case "Avointil" : 
-			$query =	"SELECT lasku.toimaika AS 'paivays', 
-						tilausrivi.tilkpl AS 'maara', 
+		case "Avointil" :
+			$query =	"SELECT lasku.toimaika AS 'paivays',
+						tilausrivi.tilkpl AS 'maara',
 						round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1),(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)),'$yhtiorow[hintapyoristys]') AS 'arvo',
 						if(tilausrivi.laskutettu!='',tilausrivi.kate,round((tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)),'$yhtiorow[hintapyoristys]')) AS 'kate',
 						if(tilausrivi.laskutettu!='',tilausrivi.rivihinta-tilausrivi.kate,round(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt),6)) AS 'keskihinta',
-						tilausrivi.tuoteno, 
+						tilausrivi.tuoteno,
 						asiakas.tunnus AS asiakasnro,
-						if(tuote.kustp != '', tuote.kustp, asiakas.kustannuspaikka) as kustp,
+						if(tuote.kustp > 0, tuote.kustp, asiakas.kustannuspaikka) as kustp,
 						lasku.tunnus
 						FROM lasku
 						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
@@ -156,7 +156,7 @@ foreach ($keissit as $keissi) {
 		default :
 			die("$keissi luonti epäonnistui!");
 	}
-	
+
 	$filenimi = "/tmp/infoglove/$keissi.txt";
 	if (!$handle = fopen($filenimi, "w")) die("Filen $filenimi luonti epäonnistui!");
 
@@ -164,16 +164,16 @@ foreach ($keissit as $keissi) {
 
 	while ($row = mysql_fetch_array($result)) {
 		$ulos = "";
-	
+
 		for ($i=0; $i < mysql_num_fields($result); $i++) {
-			$ulos .= "$row[$i]\t"; 
+			$ulos .= "$row[$i]\t";
 		}
-	
+
 		$ulos .="\n";
-	
+
 		if (fwrite($handle, $ulos) === FALSE) die ("failin kirjoitus epäonnistui");
 	}
-	
+
 	fclose($handle);
 }
 

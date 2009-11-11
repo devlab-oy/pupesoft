@@ -45,9 +45,9 @@
 				$ok = 1;
 				$tee = '';
 			}
-			
+
 			$nimitieto=strtoupper($nimitieto);
-			
+
 			if (($nimitieto=="LUOTTOKUNTA-KREDITLAGET") or ($nimitieto=="LUOTTOKUNTA") or ($nimitieto=="LUOTTOKUNTA/VISA")) {
 				$query = "SELECT tilino
 							FROM tili
@@ -90,11 +90,11 @@
 				$tee = '';
 			}
 		}
-			
-		if ($pankkitili !='x') {	
+
+		if ($pankkitili !='x') {
 			$query = "	SELECT tilino
 						FROM yriti
-						WHERE tilino = '$pankkitili' 
+						WHERE tilino = '$pankkitili'
 						and yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($result) == 0) {
@@ -107,7 +107,7 @@
 
 	if ($tee == 'U') {
 // Lisätään sääntö
-		$query = "INSERT into tiliotesaanto 
+		$query = "INSERT into tiliotesaanto
 			(yhtio, pankkitili, koodi, koodiselite, nimitieto, selite,  tilino, tilino2, kustp, kustp2, erittely)
 						 VALUES ('$kukarow[yhtio]', '$pankkitili', '$koodi', '$koodiselite', '$nimitieto', '$selite', '$tilino', '$tilino2', '$kustp', '$kustp2', '$erittely')";
 		$result = mysql_query($query) or pupe_error($query);
@@ -118,7 +118,7 @@
 		if ($pankkitili != 'x') {
 			$query = "	SELECT nimi, tilino, tunnus
 						FROM yriti
-						WHERE tilino='$pankkitili' 
+						WHERE tilino='$pankkitili'
 						and yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -141,7 +141,7 @@
 		else {
 			echo "<font class='message'>Viiteaineistosäännöt</font><br>";
 		}
-		
+
 		if ($pvm!='') echo "<td><form action = 'tilioteselailu.php' method='post'>
 			<input type='hidden' name=mtili value='$yritirow[tunnus]'>
 			<input type='hidden' name=tee   value='Z'>
@@ -199,7 +199,7 @@
 					}
 					echo "</td>";
 				}
-				else { 
+				else {
 					echo "<td>$tiliointirow[$i]</td>";
 				}
 			}
@@ -208,7 +208,7 @@
 					<input type='hidden' name='pankkitili' value = '$pankkitili'>
 					<input type='hidden' name='tunnus' value = '$tiliointirow[0]'>
 					<input type='hidden' name='tee' value = 'P'>
-					<input type='hidden' name='pvm' value = '$pvm'>					
+					<input type='hidden' name='pvm' value = '$pvm'>
 					<input type='Submit' value = '".t("Muuta")."'>
 				</td></tr></form>";
 		}
@@ -244,7 +244,7 @@
 			$ulos .= "<option value = '$kustannuspaikkarow[0]' $valittu>$kustannuspaikkarow[1]";
 		}
 		$ulos .= "</select>";
-		
+
 		mysql_data_seek($result,0);
 		$ulos2 = "<select name = 'kustp2'><option value = ' '>Ei kustannuspaikkaa";
 		while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
@@ -273,7 +273,7 @@
 					<td><input type='text' name='tilino' size='6' value = '$tilino'></td>
 					<td>$ulos</td>
 					<td><input type='text' name='tilino2' size='6' value = '$tilino2'></td>
-					<td>$ulos2</td>				
+					<td>$ulos2</td>
 					<td>$virhe <input type='Submit' value = '".t("Lisää")."'>
 					</td>
 				</tr></form></table>";
@@ -296,15 +296,15 @@
 		$query = "	SELECT *
 					FROM yriti
 					WHERE yhtio	 = '$kukarow[yhtio]'
-					and kaytossa = '' 
+					and kaytossa = ''
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
 				<table>
 				<td>
 				<select name = 'pankkitili'><option value = 'x'>".t("Viiteaineisto")."";
-		
+
 		while ($yritirow=mysql_fetch_array ($result)) {
 			$valittu = "";
 			if ($yritirow['tilino'] == $pankkitili) {
@@ -316,6 +316,6 @@
 				<td><input type = 'submit' value = '".t("Valitse")."'></td>
 				</tr></table></form>";
 	}
-	
+
 	require "inc/footer.inc";
 ?>

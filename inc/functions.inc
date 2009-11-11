@@ -6902,308 +6902,190 @@ if (!function_exists("hae_rahtimaksu")) {
 
 if (!function_exists("pakkaamo")) {
 	function pakkaamo ($tilausnumero, $update = '', $ei_pakkaamoa = '') {
-		global $kukarow, $yhtiorow;
+		global $kukarow, $yhtiorow, $konsernivarasto_yhtiot;
 
-		if ($yhtiorow['pakkaamolokerot'] == 'K') {
+		// Pupen varaston hierarkia:
+		//
+		// 1) varastopaikat aka "YRITYKSEN VARASTOT"
+		// 2) varaston_tulostimet aka "VARASTON TULOSTUSALUEET" (varastopaikat.tunnus = varaston_tulostimet.varasto)
+		// 3) pakkaamo aka "PAKKAAMOLOKEROT" (pakkaamo.nimi = varaston_tulostimet.pakkaamo)
+		// 
+		// tiedot tallennetaan laskulle:
+		// lasku.varasto = varasto.tunnus
+		// lasku.tulostusalue = varaston_tulostimet.nimi
+		// lasku.pakkaamo = pakkaamo.tunnus
 
-			// Tässä nollataan tilausten pakkaamolokerot
-			if ($ei_pakkaamoa != '') {
+		if ($yhtiorow['pakkaamolokerot'] != 'K') {
+			return 0;
+		}
 
-				$query = "	UPDATE lasku SET
-							pakkaamo = 0
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND ((tila in('N','L') and alatila = 'A') or (tila = 'L' and alatila = 'C') or (tila = 'G' and alatila in('J','A','C')))
-							AND tunnus 		in ($tilausnumero)";
-				$ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
-
-				return 0;
-			}
-
-			$query = "	SELECT ytunnus, toim_ovttunnus, toim_nimi, toim_nimitark, nimi, nimitark, toim_osoite, toim_postitp, toim_maa, toimitustapa, varasto
-						FROM lasku
+		// Tässä nollataan tilausten pakkaamolokerot
+		if ($ei_pakkaamoa != '') {
+			$query = "	UPDATE lasku SET pakkaamo = 0
 						WHERE yhtio = '$kukarow[yhtio]'
-						AND tunnus in ($tilausnumero)
-						AND ((tila in('N','L') and alatila = 'A') or (tila = 'L' and alatila = 'C') or (tila = 'G' and alatila in('J','A','C')))
-						LIMIT 1";
-			$lasku_res = mysql_query($query) or pupe_error($query);
-			$lasku_row = mysql_fetch_array($lasku_res);
-
-			//katsotaan onko jo annettu pakkaamolokero vastaavalle SIIRTOLISTALLE, niitä saa/pitää yhdistää
-			$query = " 	SELECT pakkaamo
-						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND ytunnus = '$lasku_row[ytunnus]'
-						AND toim_ovttunnus = '$lasku_row[toim_ovttunnus]'
-						AND toim_nimi = '$lasku_row[toim_nimi]'
-						AND toim_nimitark = '$lasku_row[toim_nimitark]'
-						AND nimi = '$lasku_row[nimi]'
-						AND nimitark = '$lasku_row[nimitark]'
-						AND toim_osoite = '$lasku_row[toim_osoite]'
-						AND toim_postitp = '$lasku_row[toim_postitp]'
-						AND toim_maa = '$lasku_row[toim_maa]'
-						AND toimitustapa = '$lasku_row[toimitustapa]'
-						AND varasto = '$lasku_row[varasto]'
-						AND pakkaamo > 0
-						AND tila in ('G')
-						AND alatila in ('A','C')";
-			$vanhat_res = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($vanhat_res) > 0) {
-				$split_pakkaamo_row = mysql_fetch_assoc($vanhat_res);
-
-				if (isset($update) and $update != '') {
-					$query = "	UPDATE lasku SET
-								pakkaamo = '$split_pakkaamo_row[pakkaamo]'
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND tunnus in ($tilausnumero)";
-					$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
-				}
-
-				return $split_pakkaamo_row['pakkaamo'];
-			}
-
-
-			// Tässä setataan pakkaamolokerot
-			$query = "	SELECT varasto
-						FROM lasku
-						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						AND ((tila in('N','L') and alatila = 'A') or (tila = 'L' and alatila = 'C') or (tila = 'G' and alatila in('J','A','C')))
-						AND lasku.tunnus in ($tilausnumero)";
-			$varastotark_res = mysql_query($query) or pupe_error($query);
-			$varastotark_row = mysql_fetch_array($varastotark_res);
-
-			$query = "	SELECT lasku.tunnus
-						FROM lasku
-						JOIN varaston_tulostimet ON (varaston_tulostimet.yhtio = lasku.yhtio
-							AND varaston_tulostimet.varasto = lasku.varasto
-							AND trim(varaston_tulostimet.nimi) = lasku.tulostusalue
-							AND trim(varaston_tulostimet.nimi) != '')
-						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						AND ((lasku.tila in('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in('J','A','C')))
-						AND lasku.tunnus in ($tilausnumero)";
-			$pakkaamotark_res = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($pakkaamotark_res) > 0) {
-				$tilausnumero = "";
-				while ($pakkaamotark_row = mysql_fetch_array($pakkaamotark_res)) {
-						$tilausnumero .= $pakkaamotark_row['tunnus'].",";
-				}
-				$tilausnumero = substr($tilausnumero, 0, -1);
-			}
-			else {
-				return 0;
-			}
-
-			$query = "	SELECT distinct vanhatunnus
-						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]'
-						AND ((tila in('N','L') and alatila = 'A') or (tila = 'L' and alatila = 'C') or (tila = 'G' and alatila in('J','A','C')))
+						AND ((tila in ('N','L') and alatila = 'A') or (tila = 'L' and alatila = 'C') or (tila = 'G' and alatila in ('J','A','C')))
 						AND tunnus in ($tilausnumero)";
-			$vanhattunnukset_res = mysql_query($query) or pupe_error($query);
+			$ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
+			return 0;
+		}
 
-			$vanhatunnus = $varastotunnukset = "";
-			while ($vanhattunnukset_row = mysql_fetch_array($vanhattunnukset_res)) {
-					$vanhattunnukset .= $vanhattunnukset_row['vanhatunnus'].",";
-			}
-			$vanhattunnukset = substr($vanhattunnukset, 0, -1);
-
-			// haetaan tärkein pakkaamo
-			$query = "	SELECT distinct pakkaamo.pakkaamon_prio, lasku.varasto, lasku.tulostusalue, varaston_tulostimet.nimi, varaston_tulostimet.pakkaamo
-						FROM lasku
-						JOIN varaston_tulostimet ON (varaston_tulostimet.yhtio = lasku.yhtio AND varaston_tulostimet.varasto = lasku.varasto AND trim(varaston_tulostimet.nimi) = lasku.tulostusalue)
-						JOIN pakkaamo ON (pakkaamo.yhtio = lasku.yhtio and pakkaamo.nimi = varaston_tulostimet.pakkaamo)
-						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						AND ((lasku.tila in('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in('J','A','C')))
-						AND vanhatunnus in ($vanhattunnukset)
-						AND lasku.varasto = '$varastotark_row[varasto]'
-						ORDER BY pakkaamo.pakkaamon_prio asc
-						LIMIT 1";
-			$varasto_chk_result = mysql_query($query) or pupe_error($query);
-			$varasto_chk_row = mysql_fetch_array($varasto_chk_result);
-
-			$tulostusalue_pakkaamot = "";
-			if (mysql_num_rows($varasto_chk_result) == 1) {
-				$tulostusalue_pakkaamot = $varasto_chk_row['pakkaamo'];
-			}
-			else {
-				return 0;
-			}
-
-			$pakkaamolisa = "";
-			if ($tulostusalue_pakkaamot != '') {
-				$pakkaamolisa = " and pakkaamo.nimi = '$tulostusalue_pakkaamot' ";
-			}
-
-			$query = "	SELECT lasku.pakkaamo
-						FROM lasku
-						JOIN pakkaamo ON (pakkaamo.yhtio = lasku.yhtio and pakkaamo.tunnus = lasku.pakkaamo)
-						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
-						AND (lasku.tunnus 		in ($tilausnumero)
-							or lasku.vanhatunnus 	in ($vanhattunnukset))
-						AND ((lasku.tila in('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in('J','A','C')))
-						AND lasku.varasto = '$varastotark_row[varasto]'
-						$pakkaamolisa
-						LIMIT 1";
-			$split_pakkaamo_res = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($split_pakkaamo_res) == 1) {
-				$split_pakkaamo_row = mysql_fetch_assoc($split_pakkaamo_res);
-
-				if (isset($update) and $update != '') {
-					$query = "	UPDATE lasku SET
-								pakkaamo = '$split_pakkaamo_row[pakkaamo]'
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND tunnus in ($tilausnumero)";
-					$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
-				}
-
-				return $split_pakkaamo_row['pakkaamo'];
-			}
-			else {
-
-				// Etsitään pakkaamon tunnus, pakkaamon tunnus (laskulta) ja pakkaamotaulusta lokeron nimi
-				// Haku tehdään kaikista "tulosta keräyslista"-näkymässä olevista laskuista
-				// Hakukriteerit: pitää olla sama varasto kuin tulostettavalla keräyslistalla (laskulla)
-				// Hakukriteerit: laskun tilojen pitää olla 'L = myyntitilaus' tai 'N = Myyntitilaus kesken'
-				// Hakukriteerit: laskun alatilojen pitää olla 'C = kerätty' tai 'A = tulostusjonossa'
-				// tila G ja alatila J siirtolistoja varten
-				$query = "	SELECT pakkaamo.tunnus, lasku.pakkaamo, pakkaamo.lokero
-							FROM pakkaamo
-							LEFT JOIN lasku ON (lasku.yhtio = pakkaamo.yhtio AND lasku.pakkaamo = pakkaamo.tunnus AND lasku.varasto = pakkaamo.varasto)
-							WHERE pakkaamo.yhtio = '$kukarow[yhtio]'
-							AND ((lasku.tila in('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in('J','A','C')))
-							AND lasku.varasto = '$varastotark_row[varasto]'
-							HAVING lasku.pakkaamo IS NULL
-							ORDER BY pakkaamo.lokero, pakkaamo.varasto ASC
-							LIMIT 1";
-				$pakkaamo_result = mysql_query($query) or pupe_error($query);
-
-				// jos löydetään hakukriteereihin osuva haku, niin päivitetään laskulle tämä sama pakkaamon tunnus
-				if (mysql_num_rows($pakkaamo_result) == 1) {
-					$pakkaamo_row = mysql_fetch_array($pakkaamo_result);
-
-					if (isset($update) and $update != '') {
-						$query = "	UPDATE lasku SET
-									pakkaamo = '$pakkaamo_row[tunnus]'
-									WHERE yhtio = '$kukarow[yhtio]'
-									AND tunnus in ($tilausnumero)";
-						$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
-					}
-
-					return $pakkaamo_row['tunnus'];
-				}
-				else {
-					// Ei löydetty ylläolevalla haulla mitään
-					// Lasketaan yhteen monta laskua löytyy per pakkaamo
-					// Hakukriteerit: pakkaamo ei saa olla tyhjä laskulla
-					// Hakukriteerit: pitää olla sama varasto kuin tulostettavalla keräyslistalla (laskulla)
-					// Hakukriteerit: laskun tilojen pitää olla 'L = myyntitilaus' tai 'N = Myyntitilaus kesken'
-					// Hakukriteerit: laskun alatilojen pitää olla 'C = kerätty' tai 'A = tulostusjonossa'
-					// tila G ja alatila J siirtolistoja varten
-					// Groupataan pakkaamon mukaan
-					// Järjestellään laskurin ja pakkaamon mukaan nousevassa järjestyksessä
-					$query = "	SELECT count(lasku.tunnus) laskuri, lasku.pakkaamo, pakkaamo.prio, pakkaamo.pakkaamon_prio
-								FROM lasku
-								JOIN pakkaamo ON (pakkaamo.yhtio = lasku.yhtio and pakkaamo.tunnus = lasku.pakkaamo)
-								WHERE lasku.yhtio = '$kukarow[yhtio]'
-								AND lasku.pakkaamo > 0
-								AND lasku.varasto = '$varastotark_row[varasto]'
-								AND ((lasku.tila in('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in('J','A','C')))
-								$pakkaamolisa
-								and lasku.tulostusalue = '$varasto_chk_row[tulostusalue]'
-								GROUP BY lasku.pakkaamo
-								ORDER BY laskuri, pakkaamo.pakkaamon_prio, pakkaamo.prio, lasku.pakkaamo ASC";
-					$pakkaamo2_result = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($pakkaamo2_result) > 0) {
-
-						$pakkaamot = "";
-
-						// Löydettiin laskuja joita on pakkaamo-jonossa
-						// Loopataan kaikki löytyvät pakkaamotunnukset talteen
-						while ($pakkaamo_row = mysql_fetch_array($pakkaamo2_result, MYSQL_ASSOC)) {
-							if ($pakkaamo_row['pakkaamo'] != '') {
-								$pakkaamot .= "'$pakkaamo_row[pakkaamo]',";
-							}
-						}
-
-						// viimeinen pilkku pois
-						$pakkaamot = substr($pakkaamot, 0, -1);
-
-						if ($tulostusalue_pakkaamot != '') {
-							$varasto_chk_row['pakkaamo'] = $tulostusalue_pakkaamot;
-						}
-
-						// Etsitään pakkaamotaulusta vapaa lokero
-						// Hakukriteerit: pitää olla sama varasto kuin tulostettavalla keräyslistalla (laskulla)
-						// Hakukriteerit: loopatut pakkaamotunnukset eivät saa kuulua haun tulokseen
-						$query = "	SELECT *
-									FROM pakkaamo
-									WHERE tunnus NOT IN ($pakkaamot)
-									AND varasto = '$varastotark_row[varasto]'
-									AND nimi = '$varasto_chk_row[pakkaamo]'
-									AND yhtio = '$kukarow[yhtio]'
-									ORDER BY prio, lokero ASC
-									LIMIT 1";
-						$varasto_chk_result = mysql_query($query) or pupe_error($query);
-
-						// Jos yhtään vapaata lokeroa ei löydy pakkaamosta, laitetaan laskulle seuraava vähiten tyhjä lokero
-						if (mysql_num_rows($varasto_chk_result) == 0) {
-							mysql_data_seek($pakkaamo2_result, 0);
-
-							$pakkaamo_row = mysql_fetch_array($pakkaamo2_result, MYSQL_ASSOC);
-
-							if (isset($update) and $update != '') {
-								$query = "	UPDATE lasku SET
-											pakkaamo = '$pakkaamo_row[pakkaamo]'
-											WHERE yhtio = '$kukarow[yhtio]'
-											AND tunnus in ($tilausnumero)";
-								$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
-							}
-
-							return $pakkaamo_row['pakkaamo'];
-						}
-						else {
-							// löydettiin vapaa lokero!!!
-							$varasto_chk_row = mysql_fetch_array($varasto_chk_result);
-
-							if (isset($update) and $update != '') {
-								$query = "	UPDATE lasku SET
-											pakkaamo = '$varasto_chk_row[tunnus]'
-											WHERE yhtio = '$kukarow[yhtio]'
-											AND tunnus in ($tilausnumero)";
-								$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
-							}
-
-							return $varasto_chk_row['tunnus'];
-						}
-					}
-					else {
-						// "Tulosta keräyslista"-listauksessa ei ollut millään laskulla pakkaamotunnusta
-						// Kaikki lokerot ovat siis vapaita, laitetaan ensimmäinen lokero laskulle
-						$query = "	SELECT tunnus, lokero, prio
-									FROM pakkaamo
-									WHERE yhtio = '$kukarow[yhtio]'
-									AND varasto = '$varastotark_row[varasto]'
-									$pakkaamolisa
-									ORDER BY prio, lokero ASC";
-						$pakkaamo_chk_res = mysql_query($query) or pupe_error($query);
-						$pakkaamo_chk_row = mysql_fetch_array($pakkaamo_chk_res);
-
-						if (isset($update) and $update != '') {
-							$query = "	UPDATE lasku SET
-										pakkaamo = '$pakkaamo_chk_row[tunnus]'
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND tunnus in ($tilausnumero)";
-							$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
-						}
-
-						return $pakkaamo_chk_row['tunnus'];
-					}
-				}
-			}
+		if ($yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+			$logistiikka_yhtio = $konsernivarasto_yhtiot;
+			$logistiikka_yhtiolisa = "yhtio in ($logistiikka_yhtio)";
 		}
 		else {
+			$logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
+		}
+
+		// Tässä haetaan ekan tilauksen tiedot
+		$query = "	SELECT *
+					FROM lasku
+					WHERE $logistiikka_yhtiolisa
+					AND ((tila in ('N', 'L') and alatila = 'A') or (tila = 'L' and alatila = 'C') or (tila = 'G' and alatila in ('J','A','C')))
+					AND lasku.tunnus in ($tilausnumero)
+					ORDER BY tunnus
+					LIMIT 1";
+		$varastotark_res = mysql_query($query) or pupe_error($query);
+		$varastotark_row = mysql_fetch_array($varastotark_res);
+
+		//katsotaan onko jo annettu pakkaamolokero vastaavalle SIIRTOLISTALLE, niitä saa/pitää yhdistää
+		$query = " 	SELECT lasku.pakkaamo
+					FROM lasku
+					JOIN pakkaamo ON (pakkaamo.yhtio = lasku.yhtio and pakkaamo.tunnus = lasku.pakkaamo)
+					WHERE lasku.$logistiikka_yhtiolisa
+					AND lasku.ytunnus = '$varastotark_row[ytunnus]'
+					AND lasku.toim_ovttunnus = '$varastotark_row[toim_ovttunnus]'
+					AND lasku.toim_nimi = '$varastotark_row[toim_nimi]'
+					AND lasku.toim_nimitark = '$varastotark_row[toim_nimitark]'
+					AND lasku.nimi = '$varastotark_row[nimi]'
+					AND lasku.nimitark = '$varastotark_row[nimitark]'
+					AND lasku.toim_osoite = '$varastotark_row[toim_osoite]'
+					AND lasku.toim_postitp = '$varastotark_row[toim_postitp]'
+					AND lasku.toim_maa = '$varastotark_row[toim_maa]'
+					AND lasku.toimitustapa = '$varastotark_row[toimitustapa]'
+					AND lasku.varasto = '$varastotark_row[varasto]'
+					AND lasku.pakkaamo > 0
+					AND lasku.tila in ('G')
+					AND lasku.alatila in ('A','C')
+					ORDER BY pakkaamo.pakkaamon_prio, pakkaamo.prio
+					LIMIT 1";
+		$vanhat_res = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($vanhat_res) > 0) {
+			$split_pakkaamo_row = mysql_fetch_assoc($vanhat_res);
+
+			if (isset($update) and $update != '') {
+				$query = "	UPDATE lasku SET
+							pakkaamo = '$split_pakkaamo_row[pakkaamo]'
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus in ($tilausnumero)";
+				$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
+			}
+
+			return $split_pakkaamo_row['pakkaamo'];
+		}
+
+		// Katsotaan onko näitä tilauksia laitettu jo joku osa jonnekin lokeroon ja valitaan paras lokero
+		$query = "	SELECT vanha_lasku.pakkaamo
+					FROM lasku
+					JOIN lasku vanha_lasku on (vanha_lasku.yhtio = lasku.yhtio and vanha_lasku.vanhatunnus = lasku.vanhatunnus and vanha_lasku.tulostusalue = lasku.tulostusalue)
+					JOIN pakkaamo ON (pakkaamo.yhtio = lasku.yhtio and pakkaamo.tunnus = vanha_lasku.pakkaamo)
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					AND ((lasku.tila in ('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in ('J','A','C')))
+					AND lasku.vanhatunnus != 0
+					AND lasku.tunnus in ($tilausnumero)
+					ORDER BY pakkaamo.pakkaamon_prio, pakkaamo.prio
+					LIMIT 1";
+		$pakkaamotark_res = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($pakkaamotark_res) == 1) {
+			$split_pakkaamo_row = mysql_fetch_assoc($pakkaamotark_res);
+
+			if (isset($update) and $update != '') {
+				$query = "	UPDATE lasku SET
+							pakkaamo = '$split_pakkaamo_row[pakkaamo]'
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus in ($tilausnumero)";
+				$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
+			}
+
+			return $split_pakkaamo_row['pakkaamo'];
+		}
+		else {
+
+			// listataan kaikki pakkaamot
+			$query = "	SELECT lokero, group_concat(tunnus) tunnus, group_concat(varasto) varasto
+						FROM pakkaamo
+						WHERE $logistiikka_yhtiolisa
+						GROUP BY lokero
+						ORDER BY pakkaamon_prio, prio ASC";
+			$etsitaan_pakkaamo_res = mysql_query($query) or pupe_error($query);
+
+			$pienin_maara = 'X';
+			$pienin_maara_tunnus = 'X';
+
+			while ($etsitaan_pakkaamo_row = mysql_fetch_assoc($etsitaan_pakkaamo_res)) {
+				$loytyyko_varasto = '';
+
+				foreach (explode(',', $etsitaan_pakkaamo_row['varasto']) as $varasto) {
+					// katsotaan löytyykö tilauksella oleva varasto loopattavista varastoista
+					if ($varastotark_row['varasto'] == $varasto) {
+						$loytyyko_varasto = 'löytyi!';
+						break;
+					}
+				}
+
+				if ($loytyyko_varasto != '') {
+
+					// lasketaan montako tilausta on lokerossa
+					$query = "	SELECT count(*) kpl
+								FROM lasku 
+								WHERE lasku.$logistiikka_yhtiolisa
+								AND ((lasku.tila in ('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in ('J','A','C')))
+								AND lasku.pakkaamo in ($etsitaan_pakkaamo_row[tunnus])";
+					$paljon_laskuja_lokerossa_res = mysql_query($query) or pupe_error($query);
+					$paljon_laskuja_lokerossa_row = mysql_fetch_assoc($paljon_laskuja_lokerossa_res);
+
+					// otetaan talteen pienin kpl määrällä oleva lokero
+					if ($pienin_maara != 'X' and $paljon_laskuja_lokerossa_row['kpl'] < $pienin_maara) {
+						$pienin_maara = (int) $paljon_laskuja_lokerossa_row['kpl'];
+						$pienin_maara_tunnus = $etsitaan_pakkaamo_row['tunnus'];
+					}
+					// ollaan ekaa kertaa koko $etsitaan_pakkaamo_row loopissa
+					elseif ($pienin_maara == 'X') {
+						$pienin_maara = (int) $paljon_laskuja_lokerossa_row['kpl'];
+						$pienin_maara_tunnus = $etsitaan_pakkaamo_row['tunnus'];
+					}
+
+					// lopetetaan looppi jos löydetään tyhjä lokero
+					if ($pienin_maara == 0) {
+						break;
+					}
+				}
+			}
+
+			if ($pienin_maara != 'X' and $pienin_maara_tunnus != 'X') {
+
+				// katsotaan mikä lokerotunnuksista oli käyttäjän yrityksen oma
+				$query = "	SELECT tunnus
+							FROM pakkaamo
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND tunnus in ($pienin_maara_tunnus)";
+				$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
+				$pakkaamo_insert_row = mysql_fetch_assoc($pakkaamo_insert_res);
+
+				if (isset($update) and $update != '') {
+					// päivitetään pakkaamotunnus tilauksille
+					$query = "	UPDATE lasku SET
+								pakkaamo = '$pakkaamo_insert_row[tunnus]'
+								WHERE yhtio = '$kukarow[yhtio]'
+								AND tunnus in ($tilausnumero)";
+					$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
+				}
+				
+				return $pakkaamo_insert_row['tunnus'];
+			}
+
 			return 0;
 		}
 	}

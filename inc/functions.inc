@@ -7064,7 +7064,7 @@ if (!function_exists("pakkaamo")) {
 				}
 			}
 
-			if ($pienin_maara != 'X' and $pienin_maara_tunnus != 'X') {
+			if ($pienin_maara >= 0 and $pienin_maara_tunnus != 'X') {
 
 				// katsotaan mikä lokerotunnuksista oli käyttäjän yrityksen oma
 				$query = "	SELECT tunnus

@@ -7013,12 +7013,14 @@ if (!function_exists("pakkaamo")) {
 		}
 		else {
 
-			// listataan kaikki pakkaamot
-			$query = "	SELECT lokero, group_concat(tunnus) tunnus, group_concat(varasto) varasto
+			// listataan kaikki pakkaamot tilauksen tulostusalueelta
+			$query = "	SELECT pakkaamo.lokero, pakkaamo.nimi, group_concat(distinct pakkaamo.tunnus) tunnus, group_concat(distinct pakkaamo.varasto) varasto
 						FROM pakkaamo
-						WHERE $logistiikka_yhtiolisa
-						GROUP BY lokero
-						ORDER BY pakkaamon_prio, prio ASC";
+						JOIN varaston_tulostimet ON (varaston_tulostimet.yhtio = pakkaamo.yhtio and varaston_tulostimet.nimi = '$varastotark_row[tulostusalue]')
+						WHERE pakkaamo.$logistiikka_yhtiolisa
+						AND pakkaamo.nimi = varaston_tulostimet.pakkaamo
+						GROUP BY lokero, nimi
+						ORDER BY pakkaamon_prio ASC, prio ASC";
 			$etsitaan_pakkaamo_res = mysql_query($query) or pupe_error($query);
 
 			$pienin_maara = 'X';

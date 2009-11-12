@@ -6985,14 +6985,17 @@ if (!function_exists("pakkaamo")) {
 			return $split_pakkaamo_row['pakkaamo'];
 		}
 
-		// Katsotaan onko näitä tilauksia laitettu jo joku osa jonnekin lokeroon ja valitaan paras lokero
-		$query = "	SELECT vanha_lasku.pakkaamo
+		// Katsotaan onko näitä tilauksia laitettu jo joku osa jonnekin lokeroon samassa pakkaamossa ja valitaan paras lokero
+		$query = "	SELECT pakkaamo.tunnus
 					FROM lasku
-					JOIN lasku vanha_lasku on (vanha_lasku.yhtio = lasku.yhtio and vanha_lasku.vanhatunnus = lasku.vanhatunnus and vanha_lasku.tulostusalue = lasku.tulostusalue)
-					JOIN pakkaamo ON (pakkaamo.yhtio = lasku.yhtio and pakkaamo.tunnus = vanha_lasku.pakkaamo)
-					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					JOIN varaston_tulostimet ON (varaston_tulostimet.yhtio = lasku.yhtio and varaston_tulostimet.nimi = lasku.tulostusalue)
+					JOIN lasku vanha_lasku ON (vanha_lasku.yhtio = lasku.yhtio and vanha_lasku.vanhatunnus = lasku.vanhatunnus and vanha_lasku.tunnus not in ($tilausnumero))
+					JOIN varaston_tulostimet vanha_varaston_tulostimet ON (vanha_varaston_tulostimet.yhtio = vanha_lasku.yhtio and vanha_varaston_tulostimet.nimi = vanha_lasku.tulostusalue)
+					JOIN pakkaamo ON (pakkaamo.yhtio = vanha_lasku.yhtio and pakkaamo.tunnus = vanha_lasku.pakkaamo) 
+					WHERE lasku.$logistiikka_yhtiolisa
 					AND ((lasku.tila in ('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in ('J','A','C')))
 					AND lasku.vanhatunnus != 0
+					AND varaston_tulostimet.pakkaamo = vanha_varaston_tulostimet.pakkaamo
 					AND lasku.tunnus in ($tilausnumero)
 					ORDER BY pakkaamo.pakkaamon_prio, pakkaamo.prio
 					LIMIT 1";
@@ -7003,7 +7006,7 @@ if (!function_exists("pakkaamo")) {
 
 			if (isset($update) and $update != '') {
 				$query = "	UPDATE lasku SET
-							pakkaamo = '$split_pakkaamo_row[pakkaamo]'
+							pakkaamo = '$split_pakkaamo_row[tunnus]'
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus in ($tilausnumero)";
 				$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);

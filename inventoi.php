@@ -1576,7 +1576,7 @@
 											<input type='hidden' name='tee' value='INVENTOI'>
 											<input type='hidden' name='tee2' value='KORJAA'>
 											<input type='hidden' name='lista' value='$lrow[inventointilista]'>
-											<input type='submit' value='".t("Korjaa")."'>
+											<input type='submit' value='".t("Korjaa")."' disabled>
 											</form>
 										</td>";
 							}

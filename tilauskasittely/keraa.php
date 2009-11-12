@@ -2069,23 +2069,22 @@
 				$lahetekpl 	= $yhtiorow["oletus_lahetekpl"];
 			}
 
-			$spanni = 2;
+			$spanni = 3;
 
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {
-				$spanni = 3;
+				$spanni = 4;
 			}
 
 			if ($yhtiorow["lahete_tyyppi_tulostus"] != '') {
 				$spanni += 1;
 			}
 
-			if ($otsik_row['pakkaamo'] == 0 and $yhtiorow['pakkaamolokerot'] == '') {
+			if ($otsik_row['pakkaamo'] == 0 or $yhtiorow['pakkaamolokerot'] == '') {
 				echo "<tr><th>".t("Lähete").":</th><th colspan='$spanni'>";
 
 				$query = "	SELECT *
 							FROM kirjoittimet
-							WHERE
-							yhtio='$kukarow[yhtio]'
+							WHERE yhtio = '$kukarow[yhtio]'
 							ORDER by kirjoitin";
 				$kirre = mysql_query($query) or pupe_error($query);
 
@@ -2127,7 +2126,8 @@
 				}
 				echo "</tr>";
 			}
-			elseif ($otsik_row['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
+
+			if ($otsik_row['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
 				echo "<tr><th>".t("Kolli")."</th><th colspan='$spanni'><input type='text' name='pakkaamo_kolli' size='5'/></th>";
 
 				if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
@@ -2138,7 +2138,7 @@
 
 			echo "<tr>";
 
-			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == '' and $otsik_row['pakkaamo'] == 0 and $yhtiorow['pakkaamolokerot'] == '') {
+			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == '' and ($otsik_row['pakkaamo'] == 0 or $yhtiorow['pakkaamolokerot'] == '')) {
 				echo "<th>".t("Osoitelappu").":</th>";
 
 				echo "<th colspan='$spanni'>";
@@ -2160,7 +2160,8 @@
 				}
 				echo "</tr>";
 			}
-			elseif ($otsik_row['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
+
+			if ($otsik_row['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
 				echo "<th>".t("Rullakko")."</th><th colspan='$spanni'><input type='text' name='pakkaamo_rullakko' size='5'/></th>";
 
 				if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {

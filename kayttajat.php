@@ -6,6 +6,8 @@
 		exit;
 	}
 
+	enable_ajax();
+
 	echo "<font class='head'>";
 	if ($toim == 'extranet') {
 		echo "Extranet-";

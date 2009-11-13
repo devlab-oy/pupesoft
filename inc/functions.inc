@@ -6741,7 +6741,7 @@ if (!function_exists("livesearch_kayttajahaku")) {
 
 			if ($toim == 'extranet') {
 				$haku_join = " JOIN asiakas ON (asiakas.yhtio = kuka.yhtio AND asiakas.tunnus = kuka.oletus_asiakas) ";
-				$haku_query = " and kuka.extranet != '' and (asiakas.tunnus like ('%$haku%') or asiakas.ytunnus like ('%$haku%') or kuka.nimi like ('%$haku%') or kuka.kuka like ('%$haku%')) ";
+				$haku_query = " and kuka.extranet != '' and (asiakas.asiakasnro like ('%$haku%') or asiakas.ytunnus like ('%$haku%') or kuka.nimi like ('%$haku%') or kuka.kuka like ('%$haku%')) ";
 			}
 
 			$query = "	SELECT kuka.tunnus, kuka.nimi, kuka.kuka

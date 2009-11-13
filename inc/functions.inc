@@ -7174,8 +7174,8 @@ if (!function_exists("pakkaamo")) {
 						ORDER BY pakkaamon_prio ASC, prio ASC";
 			$etsitaan_pakkaamo_res = mysql_query($query) or pupe_error($query);
 
-			$pienin_maara = 'X';
-			$pienin_maara_tunnus = 'X';
+			$pienin_maara = 99999;
+			$pienin_maara_tunnus = '';
 
 			while ($etsitaan_pakkaamo_row = mysql_fetch_assoc($etsitaan_pakkaamo_res)) {
 				$loytyyko_varasto = '';
@@ -7200,12 +7200,7 @@ if (!function_exists("pakkaamo")) {
 					$paljon_laskuja_lokerossa_row = mysql_fetch_assoc($paljon_laskuja_lokerossa_res);
 
 					// otetaan talteen pienin kpl m‰‰r‰ll‰ oleva lokero
-					if ($pienin_maara != 'X' and $paljon_laskuja_lokerossa_row['kpl'] < $pienin_maara) {
-						$pienin_maara = (int) $paljon_laskuja_lokerossa_row['kpl'];
-						$pienin_maara_tunnus = $etsitaan_pakkaamo_row['tunnus'];
-					}
-					// ollaan ekaa kertaa koko $etsitaan_pakkaamo_row loopissa
-					elseif ($pienin_maara == 'X') {
+					if ($paljon_laskuja_lokerossa_row['kpl'] < $pienin_maara) {
 						$pienin_maara = (int) $paljon_laskuja_lokerossa_row['kpl'];
 						$pienin_maara_tunnus = $etsitaan_pakkaamo_row['tunnus'];
 					}
@@ -7217,7 +7212,7 @@ if (!function_exists("pakkaamo")) {
 				}
 			}
 
-			if ($pienin_maara >= 0 and $pienin_maara_tunnus != 'X') {
+			if ($pienin_maara < 99999) {
 
 				// katsotaan mik‰ lokerotunnuksista oli k‰ytt‰j‰n yrityksen oma
 				$query = "	SELECT tunnus

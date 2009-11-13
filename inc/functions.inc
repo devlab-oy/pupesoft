@@ -6491,6 +6491,67 @@ if (!function_exists("nayta_tuotehaku")) {
 	}
 }
 
+if (!function_exists("tee_kayttajahaku")) {
+	function tee_kayttajahaku($nimi, $formi, $lopetus="", $div="", $hakuID="", $liitosID="") {
+		global $yhtiorow, $kukarow, $palvelin2;
+
+		$nimi = trim($nimi);
+		if (strlen($nimi) >= 3) {
+
+			$query = "	SELECT kuka.nimi, kuka.tunnus, kuka.kuka
+						FROM kuka
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND nimi like '%$nimi%'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result)) {
+				while($row = mysql_fetch_array($result)) {
+					echo "	<div id='kayttaja_valinta_$row[tunnus]' name='selectOptions' onmouseover=\"this.className='liveSearchSelectedItem';\" onmouseout=\"this.className='liveSearchUnSelectedItem';\" onclick=\"eval(document.getElementById('kayttaja_toiminto_$row[tunnus]').innerHTML);\" class='unSelectedItem' style='width: 500px;'>
+							<table width = '100%' class='liveSearch'>
+								<tr>
+									<th width='100%' class='liveSearch' colspan='3'>
+										$row[nimi] ($row[kuka])
+									</th>
+								</tr>
+							</table>
+							</div>
+							<div id='kayttaja_toiminto_$row[tunnus]' name='selectValues' style='display: none;'>document.getElementById('$hakuID').value='$row[tunnus]'; document.getElementById('$hakuID').disabled='true'; tuoval=document.getElementById('kayttajahaku'); tuoval.innerHTML=''; tuoval.style.display='none';</div>";
+				}
+			}
+		}
+		else {
+			echo "<font class='info'>".t("Anna v‰hint‰‰n 3 merkki‰.")."</font>";
+		}
+	}
+}
+
+if (!function_exists("nayta_kayttajahaku")) {
+	function nayta_kayttajahaku($tunnus, $formi, $vars="") {
+		global $kukarow;
+
+		$query = "	SELECT *
+					FROM kuka
+					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) == 1) {
+			$kayttajarow = mysql_fetch_array($result);
+
+			$disabled 	= "DISABLED";
+			$nimi 		= "$kayttajarow[tunnus]";
+
+		}
+		else {
+			$disabled 	= "";
+			$nimi 		= "";
+			$id			= "";
+		}
+
+		return "<input type='text' id='haku' value='$nimi' name='haku' size='50' onkeydown=\"return keyhandler(event);\" onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) { popUp(event, 'kayttajahaku', '-6', '-30', '$_SERVER[SCRIPT_NAME]?tee=KAYTTAJAHAKU&formi=$formi&url=$_SERVER[SCRIPT_NAME]&haku='+this.value, 'liveSearch'); keyStrokeIndex = -1; }\" $disabled autocomplete='off'>&nbsp;&nbsp;<a href='#' onclick=\"document.getElementById('haku').disabled=false; document.getElementById('haku').value=''; return false;\" onblur=\"document.getElementById('liveSearch').style.display='none';\">".t("Vaihda k‰ytt‰j‰‰")."</a>
+			<script LANGUAGE='JavaScript'>window.document.$formi.haku.focus();</script>";
+	}
+}
+
 if (!function_exists("livesearch_tilihaku")) {
 	function livesearch_tilihaku() {
 		global $yhtiorow, $kukarow, $palvelin2;
@@ -6649,9 +6710,96 @@ if (!function_exists("livesearch_tuotehaku")) {
 	}
 }
 
+if (!function_exists("livesearch_kayttajahaku")) {
+	function livesearch_kayttajahaku($toim = '') {
+		global $yhtiorow, $kukarow, $palvelin2;
+
+		$tee = $_REQUEST["livesearch_tee"];
+		$nimi = $_REQUEST["livesearch_nimi"];
+		$formi = $_REQUEST["livesearch_form"];
+		$hakuid = $_REQUEST["livesearch_hakuid"];
+		$submit = $_REQUEST["livesearch_submit"];
+		$haku = trim($_REQUEST["livesearch_haku"]);
+
+		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+			</script>";
+
+			$haku_array = explode(" ", $haku);
+			$haku_query = "";
+			$haku_join = '';
+
+			foreach ($haku_array as $haku) {
+				$haku = mysql_real_escape_string($haku);
+				if ($toim != 'extranet') {
+					$haku_query .= " and kuka.extranet = '' and (kuka.nimi like ('%$haku%') or kuka.kuka like ('%$haku%')) ";
+				}
+			}
+
+			if ($toim == 'extranet') {
+				$haku_join = " JOIN asiakas ON (asiakas.yhtio = kuka.yhtio AND asiakas.tunnus = kuka.oletus_asiakas) ";
+				$haku_query = " and kuka.extranet != '' and (asiakas.tunnus like ('%$haku%') or asiakas.ytunnus like ('%$haku%') or kuka.nimi like ('%$haku%') or kuka.kuka like ('%$haku%')) ";
+			}
+
+			$query = "	SELECT kuka.tunnus, kuka.nimi, kuka.kuka
+						FROM kuka
+						$haku_join
+						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						$haku_query";
+			$result = mysql_query($query) or pupe_error($query);
+
+			$limit = 0;
+			if (mysql_num_rows($result) > 0) {
+				while ($row = mysql_fetch_array($result)) {
+					echo "	<div id='kayttaja_valinta_$row[tunnus]'
+								name='selectOptions$hakuid'
+								onmouseover=\"this.className='liveSearchSelectedItem';
+									keyStrokeIndex = -1;
+									var aEls = document.getElementsByName('selectOptions$hakuid');
+									for (var iEl = 0; iEl < aEls.length; iEl++) {
+										if (aEls[iEl].id.substring(0,14) == 'kayttaja_valinta_' && aEls[iEl].id != 'kayttaja_valinta_$row[tunnus]') {
+											document.getElementById(aEls[iEl].id).className='';
+										}
+									} \"
+								onmouseout=\"this.className='';\"
+								onclick=\"document.getElementById('$hakuid').value='$row[tunnus]';";
+								if ($submit == "") {
+									echo "document.$formi.submit();";
+								}
+								else {
+									echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+								}
+								echo "\"
+								style='padding:2px;'>
+								<font style='font-weight:bold'>$row[nimi]</font> &raquo; ($row[kuka])
+							</div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
+					$limit++;
+					if ($limit > 14) {
+						break;
+					}
+				}
+
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla lˆytyi")," ".mysql_num_rows($result). " ",t("k‰ytt‰j‰‰"),".</font></div>";
+			}
+			else {
+				echo "<div style='padding:2px'><font class='message'>".t("Ei k‰ytt‰ji‰.")."</font></div>";
+			}
+		}
+		else {
+			echo "
+			<script TYPE='text/javascript' LANGUAGE='JavaScript'>
+				document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+			</script>";
+		}
+	}
+}
+
 if (!function_exists("livesearch_kentta")) {
 	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '') {
-		global $kukarow;
+		global $kukarow, $toim;
 
 		if (strpos(strtoupper($_SERVER['HTTP_USER_AGENT']), "MSIE") !== FALSE or strpos(strtoupper($_SERVER['HTTP_USER_AGENT']), "EXPLORER") !== FALSE) {
 			echo "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'>";
@@ -6663,7 +6811,7 @@ if (!function_exists("livesearch_kentta")) {
 		echo "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
 					onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit');\"
 					onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
-							sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&ohje=off&livesearch_haku='+this.value);
+							sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&ohje=off&toim=$toim&livesearch_haku='+this.value);
 							keyStrokeIndex = -1;
 					}\"
 					onblur=\"var selectOptions = document.getElementsByName('selectOptions$hakuID');

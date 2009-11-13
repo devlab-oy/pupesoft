@@ -1,6 +1,11 @@
 <?php
 	require ("inc/parametrit.inc");
 
+	if ($livesearch_tee == "KAYTTAJAHAKU") {
+		livesearch_kayttajahaku($toim);
+		exit;
+	}
+
 	echo "<font class='head'>";
 	if ($toim == 'extranet') {
 		echo "Extranet-";
@@ -1118,12 +1123,20 @@
 
 	if ($tee == "") {
 
-		echo "<br><table>
-				<form action='$PHP_SELF' method='post'>
-				<input type='hidden' name='tee' value='MUUTA'>
-				<tr>
-					<th>".t("Valitse")." ".$toim." ".t("käyttäjä").":</th>
-					<td><select name='selkuka'>";
+		echo "<br>";
+		echo "<table>";
+		echo "<form action='$PHP_SELF' method='post' name='kayttajaformi' id='kayttajaformi'><input type='hidden' name='tee' value='MUUTA'>";
+
+		echo "<tr><th>".t("Hae")." ".$toim." ".t("käyttäjä").":</th>";
+		echo "<td>";
+		livesearch_kentta("kayttajaformi", "KAYTTAJAHAKU", "selkuka", 300);
+		echo "</td>";
+		echo "<td><input type='submit' value='".t("Muokkaa käyttäjän tietoja")."'></td></tr></form>";
+		
+
+		echo "<form action='$PHP_SELF' method='post' name='kayttajaformi2' id='kayttajaformi2'><input type='hidden' name='tee' value='MUUTA'>";
+		echo "<tr><th>".t("Valitse")." ".$toim." ".t("käyttäjä").":</th>";
+		echo "<td><select name='selkuka'>";
 
 		if ($toim == "extranet") $extrsel = "X";
 		else $extrsel = "";
@@ -1155,7 +1168,7 @@
 			$edakt = $kurow["aktiivinen"];
 		}
 
-		echo "</optgroup></select></td><td><input type='submit' value='".t("Muokkaa käyttäjän tietoja")."'></td></form>";
+		echo "</optgroup></select></td><td><input type='submit' value='".t("Muokkaa käyttäjän tietoja")."'></td></tr></form>";
 
 
 		echo "<form action='$PHP_SELF' method='post'>

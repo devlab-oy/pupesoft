@@ -504,10 +504,10 @@ if ($tee == "") {
 				$rivlla4 = $rivirow["r4"];
 			}
 
-			echo "<td><input type='text' name='t1[$rivirow[tunnus]]' value='$rivlla1' maxlength='3' size='5'></td>";
-			echo "<td><input type='text' name='t2[$rivirow[tunnus]]' value='$rivlla2' maxlength='3' size='5'></td>";
-			echo "<td><input type='text' name='t3[$rivirow[tunnus]]' value='$rivlla3' maxlength='3' size='5'></td>";
-			echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='$rivlla4' maxlength='3' size='5'></td>";
+			echo "<td><input type='text' name='t1[$rivirow[tunnus]]' value='$rivlla1' maxlength='5' size='5'></td>";
+			echo "<td><input type='text' name='t2[$rivirow[tunnus]]' value='$rivlla2' maxlength='5' size='5'></td>";
+			echo "<td><input type='text' name='t3[$rivirow[tunnus]]' value='$rivlla3' maxlength='5' size='5'></td>";
+			echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='$rivlla4' maxlength='5' size='5'></td>";
 
 		}
 		echo "</tr><tr>";
@@ -518,10 +518,10 @@ if ($tee == "") {
 		echo "</tr><tr>";
 		echo "<td colspan='3' class='back'></td>";
 		echo "<td colspan='2' align='right' class='back'>".t("Täytä kaikki kentät").":</td>";
-		echo "<td><input type='text' name='t1_kaikki' onKeyUp='WriteText(\"t1\");' value='' maxlength='3' size='5'></td>";
-		echo "<td><input type='text' name='t2_kaikki' onKeyUp='WriteText(\"t2\");' value='' maxlength='3' size='5'></td>";
-		echo "<td><input type='text' name='t3_kaikki' onKeyUp='WriteText(\"t3\");' value='' maxlength='3' size='5'></td>";
-		echo "<td><input type='text' name='t4_kaikki' onKeyUp='WriteText(\"t4\");' value='' maxlength='3' size='5'></td>";
+		echo "<td><input type='text' name='t1_kaikki' onKeyUp='WriteText(\"t1\");' value='' maxlength='5' size='5'></td>";
+		echo "<td><input type='text' name='t2_kaikki' onKeyUp='WriteText(\"t2\");' value='' maxlength='5' size='5'></td>";
+		echo "<td><input type='text' name='t3_kaikki' onKeyUp='WriteText(\"t3\");' value='' maxlength='5' size='5'></td>";
+		echo "<td><input type='text' name='t4_kaikki' onKeyUp='WriteText(\"t4\");' value='' maxlength='5' size='5'></td>";
 		echo "</tr>";
 		echo "</table>";
 		

@@ -523,7 +523,16 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 			$yhtio = $kukarow["yhtio"];
 		}
 
-		$varasto = (int) $varasto;
+		if (is_array($varasto)) {
+			$varasto_apu = '';
+			foreach ($varasto as $varasto_tunnus) {
+				$varasto_apu .= (int) $varasto_tunnus.",";
+			}
+			$varasto = substr($varasto_apu, 0, -1);
+		}
+		else {
+			$varasto = (int) $varasto;
+		}
 
 		$valinta1 = ""; // varaston tyyppi
 		$valinta3 = "";
@@ -552,7 +561,7 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 
 		// Katotaan halutaanko saldo vaan jostain tietystä varastosta (varastopaikat.tunnus), silloin unohdetaan edellä annettu tyyppi kokonaan
 		if ($varasto != 0) {
-			$valinta1 = " and varastopaikat.tunnus = '$varasto' ";
+			$valinta1 = " and varastopaikat.tunnus in ($varasto) ";
 			$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
 		}
 
@@ -705,7 +714,16 @@ if (!function_exists("saldo_myytavissa")) {
 			$tyyppi = "";
 		}
 
-		$varasto = (int) $varasto;
+		if (is_array($varasto)) {
+			$varasto_apu = '';
+			foreach ($varasto as $varasto_tunnus) {
+				$varasto_apu .= (int) $varasto_tunnus.",";
+			}
+			$varasto = substr($varasto_apu, 0, -1);
+		}
+		else {
+			$varasto = (int) $varasto;
+		}
 
 		$query  = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
 		$result = mysql_query($query) or die($query.mysql_error());
@@ -803,7 +821,7 @@ if (!function_exists("saldo_myytavissa")) {
 
 			// Katotaan halutaanko saldo vaan jostain tietystä varastosta (varastopaikat.tunnus), silloin unohdetaan edellä annettu tyyppi kokonaan
 			if ($varasto != 0) {
-				$valinta1 = " varastopaikat.tunnus = '$varasto' and ";
+				$valinta1 = " varastopaikat.tunnus in ($varasto) and ";
 				$valinta2 = "";
 				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
 			}
@@ -7160,7 +7178,7 @@ if (!function_exists("pakkaamo")) {
 				$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
 			}
 
-			return $split_pakkaamo_row['pakkaamo'];
+			return $split_pakkaamo_row['tunnus'];
 		}
 		else {
 

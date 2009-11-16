@@ -62,14 +62,14 @@ if ($user != '') {
 					or die ("Päivitys epäonnistui kuka $query");
 
 				$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH));
-				
+
 				if($location != "") {
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$location'>";
 				}
 				else {
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2?go=$go'>";
 				}
-				
+
 				exit;
 			}
 		}
@@ -86,18 +86,22 @@ echo "
 <html>
 	<head>
 	<title>Login</title>";
-	
+
 	if (file_exists("pics/pupeicon.gif")) {
 	    echo "\n<link rel='shortcut icon' href='pics/pupeicon.gif'>\n";
 	}
 	else {
 	    echo "\n<link rel='shortcut icon' href='http://www.pupesoft.com/pupeicon.gif'>\n";
 	}
-	
-	echo "
-	<meta http-equiv='Pragma' content='no-cache'>
-	<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
-	</head>
+
+	echo "<meta http-equiv='Pragma' content='no-cache'>
+	<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>";
+	if (isset($google_analytics)) {
+		if ($_REQUEST["google_analytics"] == '') {
+			echo $google_analytics;
+		}
+	}
+	echo "</head>
 
 <style type='text/css'>
 <!--
@@ -131,9 +135,7 @@ else {
 
 echo "</a></td>
 <td>
-
 <font class='head'>".t("Sisäänkirjautuminen",$browkieli)."</font><br><br>
-
 ";
 
 if ($usea == '1') {
@@ -160,7 +162,7 @@ if ($usea == '1') {
 		}
 		echo "<form action = 'login_extranet.php' method='post'>";
 		echo "<input type='hidden' name='go'       value='$go'>";
-		echo "<input type='hidden' name='location' value='$location'>";		
+		echo "<input type='hidden' name='location' value='$location'>";
 		echo "<input type='hidden' name='user'     value='$user'>";
 		echo "<input type='hidden' name='salamd5'  value='$vertaa'>";
 		echo "<input type='hidden' name='yhtio'    value='$yrow[yhtio]'>";

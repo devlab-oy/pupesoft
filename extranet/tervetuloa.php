@@ -5,7 +5,7 @@ require ("parametrit.inc");
 echo "<font class='head'>$yhtiorow[nimi] Extranet</font><hr>";
 
 if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
-	
+
 	// haetaan avoimen tilauksen otsikko
 	if ($kukarow["kesken"] != 0) {
 		$query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
@@ -30,11 +30,10 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 
 	echo "<font class='message'>Lis‰t‰‰n tuotteita tilaukselle $kukarow[kesken].</font><br>";
 
-
 	$kpl = 1;
-	
+
 	// haetaan tuotteen tiedot
-	$query    = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+	$query    = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
 	$tuoteres = mysql_query($query);
 
 	if (mysql_num_rows($tuoteres) == 0) {
@@ -61,7 +60,7 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 		$jtkielto 		 = $laskurow['jtkielto'];
 		$varataan_saldoa = "";
 		$paikka	= "";
-		
+
 
 		// jos meill‰ on ostoskori muuttujassa numero, niin halutaan lis‰t‰ tuotteita siihen ostoskoriin
 		if (file_exists("../tilauskasittely/lisaarivi.inc")) {
@@ -73,7 +72,7 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 
 		echo "<font class='message'>".t("Lis‰ttiin")." $kpl_echo ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ".t("tuotetta")." $tuoteno.</font><br>";
 
-		
+
 	} // tuote ok else
 
 	echo "<br>";
@@ -95,14 +94,12 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 	$varataan_saldoa = "";
 	$paikka			 = "";
 	$tee 			 = "";
-	
+
 }
 
 if ($tee == '') {
 
 	if ($kukarow['saatavat'] <= 1) {
-//		echo "<font class='head'>".t("Laskutilanne")."</font><hr>";
-
 		$query = "	SELECT ytunnus
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]' LIMIT 1";
@@ -113,7 +110,6 @@ if ($tee == '') {
 		$eiliittymaa = 'ON';
 
 		require ("saatanat.php");
-//		echo "<hr><br>";
 	}
 
 	echo "<table width='100%'>";
@@ -137,7 +133,7 @@ if ($tee == '') {
 	else {
 		$lisa = " and kalenteri.kieli = '$kukarow[kieli]' ";
 	}
-	
+
 	//katsotaan saako uutista n‰ytt‰‰ asiakkaan asiakkaalle
 	if ($kukarow['oletus_asiakas'] != $kukarow['oletus_asiakastiedot'] and $kukarow['oletus_asiakastiedot'] != "") {
 		$ehto .= " and kentta08 != 'X' ";
@@ -174,15 +170,15 @@ if ($tee == '') {
 				$kuva = "<img src='view.php?id=$uutinen[kentta03]' width='180'>";
 			}
 
-			if((int) $yhtiorow["logo"] > 0 and $kuva == '') {
+			if ((int) $yhtiorow["logo"] > 0 and $kuva == '') {
 				$liite = hae_liite($yhtiorow["logo"], "Yllapito", "array");
-								
+
 				$kuva = "<img src='view.php?id=$liite[tunnus]' width='180'>";
 			}
-			elseif(@fopen($yhtiorow["logo"], "r") and $kuva == '') {
+			elseif (@fopen($yhtiorow["logo"], "r") and $kuva == '') {
 				$kuva = "<img src='$yhtiorow[logo]' width='180'>";
 			}
-			elseif(file_exists($yhtiorow["logo"]) and $kuva == '') {
+			elseif (file_exists($yhtiorow["logo"]) and $kuva == '') {
 				$kuva = "<img src='$yhtiorow[logo]' width='180'>";
 			}
 
@@ -197,12 +193,12 @@ if ($tee == '') {
 			// ##tuoteno##
 			$search = "/#{2}(.*?)#{2}/s";
 			preg_match_all($search, $uutinen["kentta02"], $matches, PREG_SET_ORDER);
-			//echo "<pre>".print_r($matches, true)."</pre>";
 
-			if(count($matches) > 0) {
+			if (count($matches) > 0) {
 				$search = array();
 				$replace = array();
-				foreach($matches as $m) {
+
+				foreach ($matches as $m) {
 
 					//	Haetaan tuotenumero
 					$query = "	SELECT *
@@ -213,7 +209,7 @@ if ($tee == '') {
 					//	T‰m‰ me korvataan aina!
 					$search[] = "/$m[0]/";
 
-					if(mysql_num_rows($tres) <> 1) {
+					if (mysql_num_rows($tres) <> 1) {
 						$replace[]	= "";
 					}
 					else {
@@ -222,15 +218,59 @@ if ($tee == '') {
 						$query = "SELECT * FROM asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
 						$asiakastempres = mysql_query($query);
 						$asiakastemprow = mysql_fetch_array($asiakastempres);
-												
+
 						$temp_laskurowwi['liitostunnus']	= $asiakastemprow['tunnus'];
 						$temp_laskurowwi['ytunnus']			= $asiakastemprow['ytunnus'];
 						$temp_laskurowwi['valkoodi']		= $asiakastemprow['valkoodi'];
 						$temp_laskurowwi['maa']				= $asiakastemprow['maa'];
-						
+
 						list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($temp_laskurowwi, $trow, 1, '', '', '');
-					
-						$replace[]	= "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=".urlencode($m[1])."'>$trow[tuoteno]</a> $trow[nimitys] ".sprintf('%.2f',$hinta)." (".t("ovh").". ". sprintf('%.2f',$trow[myyntihinta]).") ";
+
+						if ($temp_laskurowwi['valkoodi'] != "" and $temp_laskurowwi['valkoodi'] != $yhtiorow["valkoodi"]) {
+							// katotaan onko tuotteelle maakohtaisia valuuttahintoja
+							$query = "	SELECT *
+										from hinnasto
+										where yhtio = '$kukarow[yhtio]'
+										and tuoteno = '$trow[tuoteno]'
+										and valkoodi = '$temp_laskurowwi[valkoodi]'
+										and maa = '$temp_laskurowwi[maa]'
+										and laji = ''
+										and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+										ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
+										LIMIT 1";
+							$hintaresult = mysql_query($query) or pupe_error($query);
+
+							if (mysql_num_rows($hintaresult) > 0) {
+								$hintarow = mysql_fetch_array($hintaresult);
+							}
+							else {
+								// katotaan onko tuotteelle valuuttahintoja
+								$query = "	SELECT *
+											from hinnasto
+											where yhtio = '$kukarow[yhtio]'
+											and tuoteno = '$trow[tuoteno]'
+											and valkoodi = '$temp_laskurowwi[valkoodi]'
+											and laji = ''
+											and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+											ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
+											LIMIT 1";
+								$hintaresult = mysql_query($query) or pupe_error($query);
+
+								if (mysql_num_rows($hintaresult) > 0) {
+									$hintarow = mysql_fetch_array($hintaresult);
+								}
+								else {
+									$hintarow["hinta"] = $trow["myyntihinta"];
+									$hintarow["valkoodi"] = $yhtiorow["valkoodi"];
+								}
+							}
+						}
+						else {
+							$hintarow["hinta"] = $trow["myyntihinta"];
+							$hintarow["valkoodi"] = $yhtiorow["valkoodi"];
+						}
+
+						$replace[]	= "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=".urlencode($m[1])."'>$trow[tuoteno]</a> $trow[nimitys] ".sprintf('%.2f',$hinta)."  (".t("ovh").". ".sprintf("%.".$yhtiorow['hintapyoristys']."f", $hintarow["hinta"])." $hintarow[valkoodi])";
 					}
 				}
 

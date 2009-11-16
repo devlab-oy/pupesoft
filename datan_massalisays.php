@@ -303,7 +303,6 @@ if ($tee == 'GO') {
 					$apuselite = t("Käyttöturvatiedote");
 					$mikakieli = "fi";
 				}
-
 			}
 			elseif (strpos($kuva,"%tko") !== FALSE) {
 				$mistakieli = strpos($kuva, "%tko" ) + 4;
@@ -316,13 +315,12 @@ if ($tee == 'GO') {
 					strpos($mikakieli, "no") !== FALSE or
 					strpos($mikakieli, "ee") !== FALSE or
 					strpos($mikakieli, "de") !== FALSE) {
-					$apuselite = t("Tuotekortti", $mikakieli);
+					$apuselite = t("Info", $mikakieli);
 				}
 				else {
-					$apuselite = t("Tuotekortti");
+					$apuselite = t("Info");
 					$mikakieli = "fi";
 				}
-
 			}
 
 			$query = "SELECT tuoteno, tunnus FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno LIKE '$kuvanalku%'";

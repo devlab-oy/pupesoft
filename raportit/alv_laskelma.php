@@ -24,8 +24,8 @@
 					$vainveroton = '';	
 				}
 								
-				$query = "	SELECT ifnull(group_concat(if(alv_taso like '%fi200%', tilino, NULL)), '') tilit200, 
-							ifnull(group_concat(if(alv_taso not like '%fi200%', tilino, NULL)), '') tilitMUU
+				$query = "	SELECT ifnull(group_concat(if(alv_taso like '%fi200%', concat(\"'\",tilino,\"'\"), NULL)), '') tilit200, 
+							ifnull(group_concat(if(alv_taso not like '%fi200%', concat(\"'\",tilino,\"'\"), NULL)), '') tilitMUU
 							FROM tili
 							WHERE yhtio = '$kukarow[yhtio]' 
 							and (alv_taso like '%$taso%' $_209lisa)";
@@ -73,7 +73,7 @@
 			$endmonth 	= date("Y-m-d", mktime(0, 0, 0, $kk+1, 0, $vv));
 
 			// 201-203 sääntö fi200
-			$query = "	SELECT group_concat(tilino) tilit
+			$query = "	SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%fi200%'";
 			$tilires = mysql_query($query) or pupe_error($query);
@@ -320,8 +320,8 @@
 				$taso = $ryhma;
 			}
 			
-			$query = "	SELECT ifnull(group_concat(if(alv_taso like '%fi200%', tilino, NULL)), '') tilit200, 
-						ifnull(group_concat(if(alv_taso not like '%fi200%', tilino, NULL)), '') tilitMUU
+			$query = "	SELECT ifnull(group_concat(if(alv_taso like '%fi200%', concat(\"'\",tilino,\"'\"), NULL)), '') tilit200, 
+						ifnull(group_concat(if(alv_taso not like '%fi200%', concat(\"'\",tilino,\"'\"), NULL)), '') tilitMUU
 						FROM tili
 						WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%$taso'";
 			$tilires = mysql_query($query) or pupe_error($query);
@@ -449,14 +449,16 @@
 				}
 				echo "<tr><td colspan='5' align='right'>".t("Yhteensä").":</td><td align = 'right'>".sprintf('%.2f', $kantasum)."</td><td align = 'right'>".sprintf('%.2f', $verosum)."</td><td colspan='2'></td><td align = 'right'>$kplsum</td></tr>";
 
-				if ($ryhma=='fi206') {
-					$query = "SELECT group_concat(tilino) tilit
-						FROM tili
-						WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%fi205%'";
+				if ($ryhma == 'fi206') {
+					$query = "	SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
+								FROM tili
+								WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%fi205%'";
 					$tilires = mysql_query($query) or pupe_error($query);
 					$tilirow = mysql_fetch_array($tilires);
+					
 					$vero = 0.0;
-					if ($tilirow['tilit']!='') {
+				
+					if ($tilirow['tilit'] != '') {
 						$query = "SELECT sum(round(summa * 0.22, 2)) veronmaara
 								FROM tiliointi
 								WHERE yhtio = '$kukarow[yhtio]'

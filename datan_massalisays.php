@@ -145,11 +145,11 @@ if ($tee == 'GO') {
 			$size = getimagesize($file);
 			list($mtype, $crap) = explode("/", $size["mime"]);
 
-			if ($toiminto == 'kasittele' and $mtype == "image") {
+			echo "<font class='message'>$kuva</font>";
+
+			if ($size !== FALSE and $toiminto == 'kasittele' and $mtype == "image") {
 
 				if (file_exists($file)) {
-
-					echo "<font class='message'>$kuva</font>";
 
 					// konvertoidaan thumb kuva ja siirretään thumb hakemistoon
 					$thumbi = konvertoi($thumb_size_y, $thumb_size_x, 'thumb', $taulu, $kuva, $dirri, $file);
@@ -173,6 +173,9 @@ if ($tee == 'GO') {
 					echo "<br>";
 
 				}
+			}
+			else {
+				echo " &raquo;  <font class='error'>Virhe! Voidaan käsitellä vain kuvia!<br>";
 			}
 
 		}
@@ -274,7 +277,7 @@ if ($tee == 'GO') {
 		}
 
 		$apuselite = "";
-		$mikakieli = "";
+		$mikakieli = "fi";
 
 		// wildcard
 		if (strpos($kuva, "%") !== FALSE) {
@@ -284,8 +287,8 @@ if ($tee == 'GO') {
 
 			//kyseessä on käyttöturvatiedot ja tuotekortti
 			if (strpos($kuva,"%ktt") !== FALSE) {
-				$mistakieli = strpos($kuva,"%ktt")+4;
-				$mikakieli = substr($kuva,$mistakieli,2);
+				$mistakieli = strpos($kuva, "%ktt") + 4;
+				$mikakieli = substr($kuva, $mistakieli, 2);
 
 				if (strpos($mikakieli, "fi") !== FALSE or
 					strpos($mikakieli, "se") !== FALSE or
@@ -303,8 +306,8 @@ if ($tee == 'GO') {
 
 			}
 			elseif (strpos($kuva,"%tko") !== FALSE) {
-				$mistakieli = strpos($kuva,"%tko")+4;
-				$mikakieli = substr($kuva,$mistakieli,2);
+				$mistakieli = strpos($kuva, "%tko" ) + 4;
+				$mikakieli = substr($kuva, $mistakieli, 2);
 
 				if (strpos($mikakieli, "fi") !== FALSE or
 					strpos($mikakieli, "se") !== FALSE or

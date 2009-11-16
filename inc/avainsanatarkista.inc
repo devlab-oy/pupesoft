@@ -2,7 +2,7 @@
 
 if(!function_exists("avainsanatarkista")) {
 	function avainsanatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-		global $kukarow, $yhtiorow, $alias_set, $ulosarray;
+		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $varastot_array;
 
 		static $seliteerrori, $laji;
 
@@ -35,6 +35,20 @@ if(!function_exists("avainsanatarkista")) {
 
 			if ($match[0][0] != $t[$i]) {
 				$virhe[$i] = t("Vain aakkoset ja alaviivat ovat sallittuja merkkejä");
+			}
+		}
+
+		if (mysql_field_name($result, $i) == 'selitetark' and $laji == "VARASTORYHMA" and !is_array($varastot_array) and count($varastot_array) == 0) {
+			$virhe[$i] = t("Et valinnut yhtään varastoa")."!";
+		}
+		elseif (mysql_field_name($result, $i) == 'selitetark' and $laji == 'VARASTORYHMA') {
+			if (is_array($varastot_array) and count($varastot_array) > 0) {
+				$varastot = '';
+				foreach($varastot_array as $varasto_apu) {
+					$varastot .= "$varasto_apu,";
+				}
+				$varastot = substr($varastot, 0, -1);
+				$t[$i] = $varastot;
 			}
 		}
 	}

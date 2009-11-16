@@ -53,6 +53,7 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "S") 				$ulos .= "<option value='S' $avain_sel[S]>									".t("Tuotteen status")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TUOTEULK") 			$ulos .= "<option value='TUOTEULK' $avain_sel[TUOTEULK]>					".t("Tuotteiden avainsanojen laji")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "VARASTOLUOKKA") 	$ulos .= "<option value='VARASTOLUOKKA' $avain_sel[VARASTOLUOKKA]>			".t("Varastoluokka")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "VARASTORYHMA") 		$ulos .= "<option value='VARASTORYHMA' $avain_sel[VARASTORYHMA]>			".t("Varastoryhmä")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "SARJANUMERON_LI") 	$ulos .= "<option value='SARJANUMERON_LI' $avain_sel[SARJANUMERON_LI]>		".t("Sarjanumeron lisätieto")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "PARAMETRI") 		$ulos .= "<option value='PARAMETRI' $avain_sel[PARAMETRI]>					".t("Tuotteen parametri")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TARRATYYPPI") 		$ulos .= "<option value='TARRATYYPPI' $avain_sel[TARRATYYPPI]>				".t("Tuotteen tarratyyppi")."</option>";
@@ -402,6 +403,25 @@
 		$ulos .= "<option value = '2' $sel[2]>".t("Tulostintyyppi")." - ".t("Laser A5")."</option>";
 		$ulos .= "<option value = '3' $sel[3]>".t("Tulostintyyppi")." - ".t("Matriisi")."</option>";
 		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if ($avain_sel['VARASTORYHMA'] == 'SELECTED' and mysql_field_name($result, $i) == "selitetark") {
+		$query = "	SELECT tunnus, nimitys
+					FROM varastopaikat
+					WHERE yhtio = '{$kukarow['yhtio']}'";
+		$varasto_res = mysql_query($query) or pupe_error($query);
+
+		$ulos .= "<td>";
+
+		$varastot = explode(",", $trow[$i]);
+
+		while ($varasto_row = mysql_fetch_assoc($varasto_res)) {
+			$chk = in_array($varasto_row['tunnus'], $varastot) ? ' checked' : '';
+			$ulos .= "<input type='checkbox' name='varastot_array[]' value='$varasto_row[tunnus]'$chk> $varasto_row[nimitys]<br/>";
+		}
+		
+		$ulos .= "</td>";
 		$jatko = 0;
 	}
 

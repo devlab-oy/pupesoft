@@ -83,7 +83,7 @@ if (!function_exists("lopetus")) {
 
 				// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
 				$lopetus_clean = $lopetus;
-								
+
 				$lopetus = str_replace('////','?',               $lopetus);
 				$lopetus = preg_replace('/([^:])\/\/\//','\\1#', $lopetus);
 				$lopetus = preg_replace('/([^:])\/\//','\\1&',   $lopetus);
@@ -135,7 +135,7 @@ if (!function_exists("lopetus")) {
 							$lopetus = $alku."&lopetus=".$lopetukset[0].$loppu;
 						}
 					}
-					
+
 					if ($edlopetus != "") {
 						if (strpos($lopetus, "?") === FALSE) {
 							$lopetus .= "?";
@@ -143,7 +143,7 @@ if (!function_exists("lopetus")) {
 						else {
 							$lopetus .= "&";
 						}
-						
+
 						$lopetus .= "lopetus=$edlopetus";
 					}
 
@@ -155,10 +155,10 @@ if (!function_exists("lopetus")) {
 					}
 
 					$row["nimitys"] = trim(str_ireplace("UUSI", "", $row["nimitys"]));
-										
+
 					if ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": $row[nimitys]$nlisa</a><br>";
 					else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
-					
+
 					$edlopetus = $lopetus_clean;
 				}
 
@@ -7075,7 +7075,7 @@ if (!function_exists("pakkaamo")) {
 		// 1) varastopaikat aka "YRITYKSEN VARASTOT"
 		// 2) varaston_tulostimet aka "VARASTON TULOSTUSALUEET" (varastopaikat.tunnus = varaston_tulostimet.varasto)
 		// 3) pakkaamo aka "PAKKAAMOLOKEROT" (pakkaamo.nimi = varaston_tulostimet.pakkaamo)
-		// 
+		//
 		// tiedot tallennetaan laskulle:
 		// lasku.varasto = varasto.tunnus
 		// lasku.tulostusalue = varaston_tulostimet.nimi
@@ -7157,7 +7157,7 @@ if (!function_exists("pakkaamo")) {
 					JOIN varaston_tulostimet ON (varaston_tulostimet.yhtio = lasku.yhtio and varaston_tulostimet.nimi = lasku.tulostusalue)
 					JOIN lasku vanha_lasku ON (vanha_lasku.yhtio = lasku.yhtio and vanha_lasku.vanhatunnus = lasku.vanhatunnus and vanha_lasku.tunnus not in ($tilausnumero))
 					JOIN varaston_tulostimet vanha_varaston_tulostimet ON (vanha_varaston_tulostimet.yhtio = vanha_lasku.yhtio and vanha_varaston_tulostimet.nimi = vanha_lasku.tulostusalue)
-					JOIN pakkaamo ON (pakkaamo.yhtio = vanha_lasku.yhtio and pakkaamo.tunnus = vanha_lasku.pakkaamo) 
+					JOIN pakkaamo ON (pakkaamo.yhtio = vanha_lasku.yhtio and pakkaamo.tunnus = vanha_lasku.pakkaamo)
 					WHERE lasku.$logistiikka_yhtiolisa
 					AND ((lasku.tila in ('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in ('J','A','C')))
 					AND lasku.vanhatunnus != 0
@@ -7210,7 +7210,7 @@ if (!function_exists("pakkaamo")) {
 
 					// lasketaan montako tilausta on lokerossa
 					$query = "	SELECT count(*) kpl
-								FROM lasku 
+								FROM lasku
 								WHERE lasku.$logistiikka_yhtiolisa
 								AND ((lasku.tila in ('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in ('J','A','C')))
 								AND lasku.pakkaamo in ($etsitaan_pakkaamo_row[tunnus])";
@@ -7248,7 +7248,7 @@ if (!function_exists("pakkaamo")) {
 								AND tunnus in ($tilausnumero)";
 					$pakkaamo_insert_res = mysql_query($query) or pupe_error($query);
 				}
-				
+
 				return $pakkaamo_insert_row['tunnus'];
 			}
 
@@ -7696,6 +7696,175 @@ if (!function_exists("hae_yhtion_parametrit")) {
 		}
 
 		return $yhtiorow;
+	}
+}
+
+if (!function_exists("liite_popup")) {
+	function liite_popup($toiminto, $tuotetunnus = 0, $width=0, $height=0) {
+		global $kukarow, $yhtiorow, $PHP_SELF, $palvelin2, $pupe_root_polku;
+
+		if ($toiminto == "JS") {
+			echo "<SCRIPT type='text/javascript'>
+					<!--
+						function liite_popup_js(tuotetunnus, maxwidth, totalheight) {
+							var myWidth = 0, myHeight = 0;
+
+							if (typeof(window.innerWidth ) == 'number') {
+								//Non-IE
+								myWidth = window.innerWidth;
+								myHeight = window.innerHeight;
+							} else if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
+								//IE 6+ in 'standards compliant mode'
+								myWidth = document.documentElement.clientWidth;
+								myHeight = document.documentElement.clientHeight;
+							} else if (document.body && (document.body.clientWidth || document.body.clientHeight)) {
+								//IE 4 compatible
+								myWidth = document.body.clientWidth;
+								myHeight = document.body.clientHeight;
+							}
+
+							if (maxwidth == '0' && totalheight == '0') {
+								window.open('$PHP_SELF?ohje=off&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+myWidth+', height='+myHeight);
+							}
+							else {
+								window.open('$PHP_SELF?ohje=off&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus+'&width='+maxwidth, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+maxwidth+', height='+totalheight);
+							}
+						}
+					//-->
+					</SCRIPT>";
+		}
+		elseif ($toiminto == "AK") {
+
+			if ($width > 0) {
+				$maxi = " width='".($width-30)."' ";
+			}
+
+			$query = "	SELECT
+						tunnus,
+						selite,
+						kieli,
+						filename,
+						filesize,
+						filetype,
+						image_width,
+						image_height,
+						kayttotarkoitus,
+						if(kayttotarkoitus='TK', 0, if(kayttotarkoitus='MU', 1, 2)) sorttaus,
+						jarjestys
+						FROM liitetiedostot
+						WHERE yhtio 		= '$kukarow[yhtio]'
+						AND liitos 			= 'tuote'
+						AND liitostunnus	= '$tuotetunnus'
+						AND kayttotarkoitus != 'TH'
+						ORDER BY sorttaus, jarjestys, filename";
+			$kuvares = mysql_query($query) or pupe_error($query);
+
+			echo "<table $maxi>";
+
+			while ($kuvarow = mysql_fetch_array($kuvares)) {
+				echo "<tr><th style='text-align: center;'>$kuvarow[selite]</th></tr>";
+				echo "<tr><td align='center'>";
+
+				if ($kuvarow["kayttotarkoitus"] == "TK" and in_array($kuvarow["filetype"], array("image/jpeg","image/jpg","image/gif","image/png","image/bmp"))) {
+
+					echo "<img $maxi src='".$palvelin2."view.php?id=$kuvarow[tunnus]'>";
+
+					if ($width > 0 and $width < $kuvarow["image_width"]) {
+						echo "<br><a href='".$palvelin2."view.php?id=$kuvarow[tunnus]' target='$kuvarow[tunnus]'>".t("N‰yt‰ t‰ysikokoinen kuva")."</a>";
+					}
+				}
+				else {
+					list($liitedata1, $liitedata2) = explode("/", $kuvarow["filetype"]);
+
+					if (file_exists($pupe_root_polku."/pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico")) {
+						echo "<a href='".$palvelin2."view.php?id=$kuvarow[tunnus]' target='$kuvarow[tunnus]'><img height='80px' src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico'></a>";
+					}
+
+					echo "<br><a href='".$palvelin2."view.php?id=$kuvarow[tunnus]' target='$kuvarow[tunnus]'>".t("Avaa tiedosto")."</a>";
+				}
+
+				if ($kuvarow["kieli"] != "" and strtoupper($kuvarow["kieli"]) != strtoupper($yhtiorow["kieli"])) {
+					echo "<br><font class='info'>".t("Kieli").": ".strtoupper($kuvarow["kieli"])."</font>";
+				}
+
+				echo "</td></tr>";
+			}
+			echo "</table>";
+
+			echo "<br><center><input type='button' value='".t("Sulje ikkuna")."' onClick=\"javascript:window.close();\"></center>";
+
+			exit;
+		}
+		elseif ($toiminto == "TN") {
+
+			unset($images_exist);
+			unset($pdf_exist);
+			unset($filetype);
+
+			$filetype_query = "	SELECT
+								yhtio,
+								selite,
+								kieli,
+								filename,
+								filesize,
+								filetype,
+								image_width,
+								image_height,
+								kayttotarkoitus,
+								if(kayttotarkoitus='TK', 0, if(kayttotarkoitus='MU', 1, 2)) sorttaus,
+								jarjestys
+								FROM liitetiedostot
+								WHERE yhtio		 = '$kukarow[yhtio]'
+								and liitos		 = 'tuote'
+								and liitostunnus = '$tuotetunnus'
+								AND kayttotarkoitus != 'TH'
+								ORDER BY sorttaus, jarjestys, filename";
+			$filetype_result = mysql_query($filetype_query) or pupe_error($filetype_query);
+
+			if (mysql_num_rows($filetype_result) > 0) {
+
+				$filetype_row = mysql_fetch_array($filetype_result);
+
+				if (in_array($filetype_row["filetype"], array("image/jpeg","image/jpg","image/gif","image/png","image/bmp"))) {
+
+					$maxwidth = $filetype_row["image_width"];
+					$totalheight = $filetype_row["image_height"];
+
+					if ($maxwidth > 640) {
+
+						$kerroin = 640/$maxwidth;
+
+						$maxwidth = $kerroin*$maxwidth;
+						$totalheight = $kerroin*$totalheight;
+					}
+
+					$maxwidth += 30;
+					$totalheight += 100;
+
+					$images_exist = 1;
+				}
+				elseif ($filetype_row["filetype"] == "application/pdf") {
+					$maxwidth 		= 0;
+					$totalheight 	= 0;
+					$pdf_exist 		= 1;
+				}
+			}
+
+			if (isset($images_exist) or isset($pdf_exist)) {
+
+				$liitteet = "<input type='button' value='";
+
+				if ($pdf_exist) {
+					$liitteet .= t("Pdf");
+				}
+				else {
+					$liitteet .= t("Kuva");
+				}
+				$liitteet .= "' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight)\">";
+
+				return $liitteet;
+			}
+		}
 	}
 }
 

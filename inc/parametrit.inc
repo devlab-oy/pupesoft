@@ -135,6 +135,9 @@ else {
 	$session = "";
 }
 
+//Pupeasennuksen root
+$pupe_root_polku = dirname(dirname(__FILE__));
+
 $palvelin2 = "http://$apunimi";
 
 //Onko sittenkin https käytössä
@@ -429,7 +432,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 				echo "<div style='text-align:right; vertical-align:top;'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
 			}
 			elseif(isset($_GET["sulje"]) and $_GET["sulje"] != "") {
-				echo "<div><a href='#' onclick=\"divi=document.getElementById('{$_GET["sulje"]}'); document.body.removeChild(divi); return false;\"><font style='color: red;'>x</font></a><br></div>";
+				echo "<div><a href='#' onclick=\"divi=document.getElementById('$_GET[sulje]'); document.body.removeChild(divi); return false;\"><font style='color: red;'>x</font></a><br></div>";
 			}
 
 			// Autetaan sanakirjan ylläpidossa
@@ -468,8 +471,8 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 					while ($message_row = mysql_fetch_array($message_result)) {
 						echo "<div id='$message_row[tunnus]'>";
 						echo "<input type='button' onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'>";
-						echo "<font class='info'> {$message_row['nimi']} @ ".tv1dateconv($message_row['luontiaika'],'yes').": ";
-						echo "<b>{$message_row['viesti']}</b></font><br>";
+						echo "<font class='info'> $message_row[nimi] @ ".tv1dateconv($message_row['luontiaika'],'yes').": ";
+						echo "<b>$message_row[viesti]</b></font><br>";
 						echo "</div>";
 					}
 				}

@@ -907,19 +907,19 @@
 
 			if ($rivirow["ei_saldoa"] != "") {
 				echo "<td colspan='6'></td>";
-				echo "<input type='hidden' name='t1[$rivirow[tunnus]]' value='$privirow[t1]' maxlength='3' size='5'>";
+				echo "<input type='hidden' name='t1[$rivirow[tunnus]]' value='$privirow[t1]' maxlength='5' size='5'>";
 			}
 			else {
 				if ($toim == "") {
-					echo "<td><input type='text' name='t1[$rivirow[tunnus]]' value='$privirow[t1]' maxlength='3' size='5'></td>";
+					echo "<td><input type='text' name='t1[$rivirow[tunnus]]' value='$privirow[t1]' maxlength='5' size='5'></td>";
 				}
 				else {
 					echo "<td align='center'><input type='hidden' name='t1[$rivirow[tunnus]]' value='!!M'>!!M</td>";
 				}
 
-				echo "<td><input type='text' name='t2[$rivirow[tunnus]]' value='$privirow[t2]' maxlength='3' size='5'></td>";
-				echo "<td><input type='text' name='t3[$rivirow[tunnus]]' value='$privirow[t3]' maxlength='3' size='5'></td>";
-				echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='$privirow[t4]' maxlength='3' size='5'></td>";
+				echo "<td><input type='text' name='t2[$rivirow[tunnus]]' value='$privirow[t2]' maxlength='5' size='5'></td>";
+				echo "<td><input type='text' name='t3[$rivirow[tunnus]]' value='$privirow[t3]' maxlength='5' size='5'></td>";
+				echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='$privirow[t4]' maxlength='5' size='5'></td>";
 
 				//Missä tuotetta on?
 				$query  = "	SELECT *
@@ -991,10 +991,10 @@
 		}
 
 		echo "<tr><td colspan='4' class='back' align='right' valign='center'>",t("Täytä kaikki kentät"),":</td>";
-		echo "<td><input type='text' name='t1_kaikki' onKeyUp='WriteText(\"t1\");' value='' maxlength='3' size='5'></td>";
-		echo "<td><input type='text' name='t2_kaikki' onKeyUp='WriteText(\"t2\");' value='' maxlength='3' size='5'></td>";
-		echo "<td><input type='text' name='t3_kaikki' onKeyUp='WriteText(\"t3\");' value='' maxlength='3' size='5'></td>";
-		echo "<td><input type='text' name='t4_kaikki' onKeyUp='WriteText(\"t4\");' value='' maxlength='3' size='5'></td>";
+		echo "<td><input type='text' name='t1_kaikki' onKeyUp='WriteText(\"t1\");' value='' maxlength='5' size='5'></td>";
+		echo "<td><input type='text' name='t2_kaikki' onKeyUp='WriteText(\"t2\");' value='' maxlength='5' size='5'></td>";
+		echo "<td><input type='text' name='t3_kaikki' onKeyUp='WriteText(\"t3\");' value='' maxlength='5' size='5'></td>";
+		echo "<td><input type='text' name='t4_kaikki' onKeyUp='WriteText(\"t4\");' value='' maxlength='5' size='5'></td>";
 		echo "</tr>";
 
 		echo "</table><br>";

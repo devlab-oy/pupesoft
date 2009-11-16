@@ -32,12 +32,17 @@
 				AND selitetark != ''";
 	$avainsana_res = mysql_query($query) or die("Virhe haettaessa varastoryhma avainsanoja!\n".mysql_error($query)."\n\n");
 
+	if (mysql_num_rows($avainsana_res) == 0) {
+		echo date("d.m.Y @ G:i:s")." - Varastoryhmia ei ole perustettu. Keskeytetaan paivitys\n";
+		exit;
+	}
+
 	$query = "	SELECT tuote.tuoteno, ifnull((SELECT isatuoteno FROM tuoteperhe WHERE tuoteperhe.yhtio = tuote.yhtio AND tuoteperhe.isatuoteno = tuote.tuoteno AND tuoteperhe.tyyppi = 'P' LIMIT 1), '') isa
 				FROM tuote
 				WHERE tuote.yhtio = '$kukarow[yhtio]'";
 	$res = mysql_query($query) or die("Virhe haettaessa tuotteita!\n".mysql_error($query)."\n\n");
 
-	echo date("d.m.Y @ G:i:s")." - Aloitetaan paivitys...\n";
+	echo date("d.m.Y @ G:i:s")." - Aloitetaan ".mysql_num_rows($res)." tuotteen paivitys. ($kukarow[yhtio])\n";
 
 	while ($row = mysql_fetch_assoc($res)) {
 

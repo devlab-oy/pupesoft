@@ -895,14 +895,20 @@
 
 						if (mysql_field_name($result,$i) == 'liitedata') {
 
-							if ($lukitse_laji == "tuote" and $lukitse_avaimeen > 0) {
+							if ($lukitse_laji == "tuote" and $lukitse_avaimeen > 0 and in_array($trow[1], array("image/jpeg","image/jpg","image/gif","image/png","image/bmp"))) {
 								echo "<img src='".$palvelin2."view.php?id=$trow[0]' height='80px'>";
 							}
 							else {
 								list($liitedata1, $liitedata2) = explode("/", $trow[1]);
-
+								
+								$path_parts = pathinfo($trow[4]);
+								$ext = $path_parts['extension'];
+								
 								if (file_exists("pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico")) {
-									echo "<img src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico'>";
+									echo "<img src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico' height='80px'>";
+								}
+								elseif (file_exists("pics/tiedostotyyppiikonit/".strtoupper($ext).".ico")) {
+									echo "<img src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($ext).".ico' height='80px'>";
 								}
 								else {
 									echo $trow[1];

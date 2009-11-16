@@ -980,9 +980,9 @@ if ($tee == "TALLENNA") {
 										liitostunnus = '$tilausnumero',
 										data     = '".addslashes(file_get_contents($_FILES['userfile']['tmp_name']))."',
 										selite   = '$kuvaselite',
-										filename = '{$_FILES["userfile"]["name"]}',
-										filesize = '{$_FILES["userfile"]["size"]}',
-										filetype = '{$_FILES["userfile"]["type"]}'";
+										filename = '$filename',
+										filesize = '$filesize',
+										filetype = '$filetype'";
 							$insre = mysql_query($query) or pupe_error($query);
 
 							$kuvaselite = "";

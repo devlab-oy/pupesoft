@@ -72,7 +72,7 @@ function konvertoi ($ykoko, $xkoko, $type, $taulu, $kuva, $dirri, $upfile1) {
     }
 	elseif ($xkoko > 0 and ($leve > $kork or $ykoko == 0)) {
 		// skaalataan kuva oikenakokoiseksi x:n mukaan
-  		exec("nice -n 20 convert -resize $xkoko -quality 80 $upfile1 $upfilesgh", $output, $error);	
+  		exec("nice -n 20 convert -resize $xkoko -quality 80 $upfile1 $upfilesgh", $output, $error);
     }
 	else {
 		$error = 0;
@@ -231,6 +231,25 @@ if ($tee == 'GO') {
 
 		$koko = getimagesize($file);
 		$filetype = $koko["mime"];
+
+		// Jos ei olla saatu filetyyppiä niin arvotaan se vaikka filen nimestä
+		if ($filetype == "") {
+			if ($ext == "jpg" or $ext == "jpeg") {
+				$filetype = "image/jpeg";
+			}
+			elseif ($ext == "pdf" ) {
+				$filetype = "application/pdf";
+			}
+			elseif (substr($ext, 0, 3) == "xls" ) {
+				$filetype = "application/vnd.ms-excel";
+			}
+			elseif (substr($ext, 0, 3) == "doc" ) {
+				$filetype = "application/msword";
+			}
+			else {
+				$filetype = "application/octet-stream";
+			}
+		}
 
 		$leve = $koko[0];
 		$kork = $koko[1];

@@ -5909,7 +5909,6 @@ if (!function_exists('tallenna_liite')) {
 			$image_height 	= $size[1];
 			$image_bits 	= $size["bits"];
 			$image_channels	= $size["channels"];
-			//echo "<pre>".print_r($size, true)."</pre>";
 
 			unset($size);
 		}
@@ -5918,6 +5917,33 @@ if (!function_exists('tallenna_liite')) {
 			$image_height 	= "";
 			$image_bits 	= "";
 			$image_channels	= "";
+		}
+
+		// Jos ei olla saatu filetyyppi‰ niin arvotaan se vaikka filen nimest‰
+		if ($filetype == "") {
+			if ($filename != "") {
+				$path_parts = pathinfo($filename);
+				$extensio = strtolower($path_parts['extension']);
+
+				if ($extensio == "jpg" or $extensio == "jpeg") {
+					$filetype = "image/jpeg";
+				}
+				elseif ($extensio == "pdf" ) {
+					$filetype = "application/pdf";
+				}
+				elseif (substr($extensio, 0, 3) == "xls" ) {
+					$filetype = "application/vnd.ms-excel";
+				}
+				elseif (substr($extensio, 0, 3) == "doc" ) {
+					$filetype = "application/msword";
+				}
+				else {
+					$filetype = "application/octet-stream";
+				}
+			}
+			else {
+				$filetype = "application/octet-stream";
+			}
 		}
 
 		// lis‰t‰‰n kuva
@@ -7776,10 +7802,15 @@ if (!function_exists("liite_popup")) {
 				else {
 					list($liitedata1, $liitedata2) = explode("/", $kuvarow["filetype"]);
 
-					if (file_exists($pupe_root_polku."/pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico")) {
-						echo "<a href='".$palvelin2."view.php?id=$kuvarow[tunnus]' target='$kuvarow[tunnus]'><img height='80px' src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico'></a>";
-					}
+					$path_parts = pathinfo($kuvarow["filename"]);
+					$ext = $path_parts['extension'];
 
+					if (file_exists($pupe_root_polku."/pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico")) {
+						echo "<a href='".$palvelin2."view.php?id=$kuvarow[tunnus]' target='$kuvarow[tunnus]'><img src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico' height='80px'></a>";
+					}
+					elseif (file_exists("pics/tiedostotyyppiikonit/".strtoupper($ext).".ico")) {
+						echo "<a href='".$palvelin2."view.php?id=$kuvarow[tunnus]' target='$kuvarow[tunnus]'><img src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($ext).".ico' height='80px'></a>";
+					}
 					echo "<br><a href='".$palvelin2."view.php?id=$kuvarow[tunnus]' target='$kuvarow[tunnus]'>".t("Avaa tiedosto")."</a>";
 				}
 

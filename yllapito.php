@@ -77,19 +77,19 @@
 
 	// pikkuh‰kki, ettei rikota css kentt‰‰
 	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucss)) {
-		$t[$cssi] = $apucss;
+		$t[$cssi] = mysql_real_escape_string($apucss);
 	}
 	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucsspieni)) {
-		$t[$csspienii] = $apucsspieni;
+		$t[$csspienii] = mysql_real_escape_string($apucsspieni);
 	}
 	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucssextranet)) {
-		$t[$cssextraneti] = $apucssextranet;
+		$t[$cssextraneti] = mysql_real_escape_string($apucssextranet);
 	}
 	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucssverkkokauppa)) {
-		$t[$cssverkkokauppa] = $apucssverkkokauppa;
+		$t[$cssverkkokauppa] = mysql_real_escape_string($apucssverkkokauppa);
 	}
 	if ($_POST["toim"] == "yhtion_parametrit" and isset($apuwebseuranta)) {
-		$t[$webseuranta] = $apuwebseuranta;
+		$t[$webseuranta] = mysql_real_escape_string($apuwebseuranta);
 	}
 
 	// pikku javascripti

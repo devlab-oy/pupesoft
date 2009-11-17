@@ -129,49 +129,49 @@ function salattukertaavain ($tunnus) {
 			}
 		echo "Siemen: $siemen Avain: $avain<br>";
 
-		# Muutetaan luvut oikeaan muotoon ja alustetaan salaus
+		// Muutetaan luvut oikeaan muotoon ja alustetaan salaus
 		$avain = pack("H*",$avain);
 		$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
 		$iv = pack('H*','0000000000000000');
 		mcrypt_generic_init($td, $avain, $iv);
 		$aika = pack("H*",$aika);
 
-		# Muodostetaan satunnaisluku
-		# Salaamalla aikaleima avaimella
+		// Muodostetaan satunnaisluku
+		// Salaamalla aikaleima avaimella
 		$aika = date('ymdHis');
 		$vali = mcrypt_generic($td,$aika);
 		$vali = unpack("H*",$vali);
 
-		# XOR:taan v‰litulos ja siemen
+		// XOR:taan v‰litulos ja siemen
 		$vali = meidanxor($vali[1],$siemen);
 		$vali = pack("H*",$vali);
 
-		# Salataan XOR avaimella
+		// Salataan XOR avaimella
 		$random = mcrypt_generic($td,$vali);
 		$random = unpack("H*",$random);
 
-		# Tarkistetaan pariteetti ja saadaan kerta-avain
+		// Tarkistetaan pariteetti ja saadaan kerta-avain
 		$uusikertaavain = tarkistapariteetti($random[1]);
 		if ($testaus != '') $uusikertaavain = "5208290ED9BF0B6D";
 		echo  "Kerta-avain: $uusikertaavain<br>";
 
-		# Muodostetaan uusi siemen 
+		// Muodostetaan uusi siemen 
 		$siemen = meidanxor($siemen,$random[1]);
 		$siemen = pack("H*",$siemen);
 		$siemen = mcrypt_generic($td,$siemen);
 		$siemen = unpack("H*",$siemen);
 
-		# Salataan kerta-avain
-		# Muutetaan luvut oikeaan muotoon
+		// Salataan kerta-avain
+		// Muutetaan luvut oikeaan muotoon
 		$siirtoavain = pack("H*",$yritirow['siirtoavain']);
 		$kerta = pack("H*",$uusikertaavain);
 
-		# Alustetaan salaus
+		// Alustetaan salaus
 		$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
 		$iv = pack('H*','0000000000000000');
 		mcrypt_generic_init($td, $siirtoavain, $iv);
 
-		# Salataan kerta-avain siirtoavaimella
+		// Salataan kerta-avain siirtoavaimella
 		$sal = mcrypt_generic($td,$kerta);
 		$sal = unpack("H*",$sal);
 		echo "Salattu kerta-avain: $sal[1] Uusi siemen $siemen[1]<br>";
@@ -179,7 +179,7 @@ function salattukertaavain ($tunnus) {
 		mcrypt_generic_deinit($td);
 		mcrypt_module_close($td);
 
-		# Tallennetaan tietokantaan
+		// Tallennetaan tietokantaan
 		$query = "UPDATE yriti SET kertaavain='$uusikertaavain', salattukerta='$sal[1]', siemen='$siemen[1]' WHERE tunnus='$tunnus'";
 		$updres = mysql_query($query) or pupe_error($query);
 		$yritirow['kertaavain'] = $uusikertaavain;
@@ -195,7 +195,6 @@ function salaa ($jono, $arg, $kayttoavain) {
 	//Alustetaan kryptaus k‰yttˆavaimella  
 	$kayttoavain = pack("H*",$kayttoavain);
 	$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
-	//$iv = mcrypt_create_iv (mcrypt_enc_get_iv_size($td), pack('H*','0000000000000000'));
 	$iv=pack('H*','0000000000000000');
 	mcrypt_generic_init($td, $kayttoavain, $iv);
 
@@ -214,9 +213,7 @@ function salaa ($jono, $arg, $kayttoavain) {
 	if (strlen($data[$k]) != 8) $data[$k] = str_pad($data[$k], 8, "\0");
 
 	// Jonosta tutkitaan osa vain tarkisteeseen saakka!
-
 	if (($arg == "ESIp") or ($arg == "PTE")) $k = 17;
-
 
 	//Salataan lohko, XOR:taan salattu lohko seuraavan lohkon kanssa ja 
 	//salataan se, ja XOR:taan seuraavan lohkon kanssa jne.
@@ -250,6 +247,11 @@ function salaa ($jono, $arg, $kayttoavain) {
 			return "Tarkisteet eiv‰t t‰sm‰‰!";
 		}
 	}
+
+	if ($arg == 'tiiviste') {
+		return $tark[1];
+	}
+
 	mcrypt_generic_deinit($td);
 	mcrypt_module_close($td);
 
@@ -257,8 +259,6 @@ function salaa ($jono, $arg, $kayttoavain) {
 
 function tiiviste ($jono, $kertaavain) {
 	global $testaus;
-	//Poistetaan loppu whitespace
-	$uusijono="";
 
 	if ($testaus != '') {
 		$jono = array();
@@ -268,59 +268,29 @@ function tiiviste ($jono, $kertaavain) {
 		$jono[]="1921030 259018000000140111111116100000000521#. @. \$LAND       010101001A       ";
 		$jono[]="4921030               0111111116100000001384                  000004           ";
 	}
+
+	//Poistetaan loppu whitespace
+	$uusijono="";
 	echo "<pre>";
 	foreach ($jono as $rivi) {
 		echo "'$rivi'<br>";
 		$uusijono .= rtrim($rivi);
 	}
 	echo "</pre>";
+
 	$oikeat = array("[", "\\", "]", "{", "|", "}", "ƒ", "÷", "≈", "#", "$", "@");
 	$pankin = array(" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ");
 	$uusijono = str_replace($oikeat, $pankin, $uusijono);
-	//Jaetaan 8 merkin lohkoiksi ja sijoitetaan taulukkoon
 
 	echo "Uusijono --> $uusijono<br>";
-	$k=0;
-	while(strlen($uusijono) > 0) {
-		$data[$k] = substr($uusijono,0,8);
-		$uusijono = substr($uusijono,8);
-		$k++;
-		//echo "$uusijono<br>";
-	}
 
-	//Jos viimeinen lohko j‰‰ vajaaksi t‰ytet‰‰n se bin‰‰ri nollilla
-	$k--;
-	if (strlen($data[$k]) != 8) $data[$k] = str_pad($data[$k], 8, "\0");
-
-	//Alustetaan kryptaus kerta-avaimella
-	echo "Kerta-avain on $kertaavain<br>";
-	$kertaavain = pack("H*",$kertaavain);
-	$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
-	$iv=pack('H*','0000000000000000');
-	mcrypt_generic_init($td, $kertaavain, $iv);
-
-	$text = $data[0];
-	$ups = unpack('H*',$data[0]);
-	echo "$ups[1] '$data[0]'<br>";
-	$text = mcrypt_generic($td, $text);
-	for($i=1; $i<=$k; $i++) {
-		$ups = unpack('H*',$data[$i]);
-		echo "$ups[1] '$data[$i]'<br>";
-		$ortext = $text ^ $data[$i];
-		$text = mcrypt_generic($td, $ortext);
-	}
-
-	//Muutetaan tiiviste Heksoiksi
-	$tiivisteet = unpack("H*", $text);
-	$tiiviste = strtoupper($tiivisteet[1]);
-
-	mcrypt_generic_deinit($td);
-	mcrypt_module_close($td);
+	$tiiviste = salaa($uusijono, 'tiiviste', $kertaavain);
 
 	echo "Tiiviste: $tiiviste<br>";
-	if ($testaus != '' and $tiiviste != '4954F0194C2B696D') echo "Tiiviste pieless‰ po 4954F0194C2B696D<br>";
-	return $tiiviste;
 
+	if ($testaus != '' and $tiiviste != '4954F0194C2B696D') echo "Tiiviste pieless‰ po 4954F0194C2B696D<br>";
+
+	return $tiiviste;
 }
 
 function tarkistapariteetti($jono) {

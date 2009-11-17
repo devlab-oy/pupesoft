@@ -4,8 +4,6 @@ if (strpos($_SERVER['SCRIPT_NAME'], "karhu.php")  !== FALSE) {
 	require ("../inc/parametrit.inc");
 }
 
-
-
 echo "<font class='head'>".t("Karhu")."</font><hr>";
 
 //vain n‰in monta p‰iv‰‰ sitten karhutut
@@ -25,7 +23,7 @@ if ($kukarow["kirjoitin"] == 0) {
 	$tee = "";
 }
 
-$query = "SELECT tunnus from avainsana where laji = 'KARHUVIESTI' and yhtio ='{$yhtiorow['yhtio']}'";
+$query = "SELECT tunnus from avainsana where laji = 'KARHUVIESTI' and yhtio ='$yhtiorow[yhtio]'";
 $res = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($res) == 0) {
@@ -36,9 +34,9 @@ if (mysql_num_rows($res) == 0) {
 if ($tee == 'LAHETA') {
 	// kirjeen l‰hetyksen status
 	$ekarhu_success = true;
-	
+
 	if (! empty($_POST['lasku_tunnus'])) {
-		
+
 		try {
 			// koitetaan l‰hett‰‰ eKirje sek‰ tulostaa
 			require ('paperikarhu.php');
@@ -51,22 +49,22 @@ if ($tee == 'LAHETA') {
 		echo "<font class='error'>Et valinnut yht‰‰n laskua.</font>";
 		$ekarhu_success = false;
 	}
-	
+
 	// poistetaan karhuttu vain jos karhun l‰hetys onnistui,
 	// muuten voidaan kokeilla samaa uudestaan!!!!!
 	if ($ekarhu_success) {
 		array_shift($karhuttavat);
 	}
-	
+
 	// jatketaan karhuamista
 	$tee = "KARHUA";
-	
+
 }
 
 // ohitetaanko asiakas?
 if ($tee == 'OHITA') {
 	array_shift($karhuttavat);
-	
+
 	$tee = "KARHUA";
 }
 
@@ -92,7 +90,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 
 			if ($maksuehdotrow["karhuttavat"] != '') {
 				$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat]) and lasku.valkoodi = '$factoringrow[valkoodi]'";
-			} 
+			}
 			else {
 				echo "Ei karhuttavaa";
 				exit;
@@ -135,7 +133,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 
 	if ($syot_ytunnus != '') {
 		$asiakaslisa = " and asiakas.ytunnus >= '$syot_ytunnus' ";
-	} 
+	}
 	elseif (isset($_POST['ytunnus_spec']) and ! empty($_POST['ytunnus_spec'])) {
 		$asiakaslisa = sprintf(" and asiakas.ytunnus = '%s' ", mysql_real_escape_string($_POST['ytunnus_spec']));
 	}
@@ -144,7 +142,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 	if ($lasku_maa != "") {
 		$maa_lisa = "and lasku.maa = '$lasku_maa'";
 	}
-	
+
 	$query = "	SELECT asiakas.ytunnus, GROUP_CONCAT(distinct lasku.tunnus) karhuttavat, sum(summa) karhuttava_summa
 				FROM lasku
 				JOIN (	SELECT lasku.tunnus,
@@ -159,11 +157,11 @@ if ($tee == "ALOITAKARHUAMINEN") {
 						and lasku.tila = 'U'
 						and lasku.mapvm	= '0000-00-00'
 						and (lasku.erpcm < date_sub(now(), interval $lpvm_aikaa day) or lasku.summa < 0)
-						and lasku.summa	!= 0						
+						and lasku.summa	!= 0
 						$maksuehtolista
 						$maa_lisa
 						group by lasku.tunnus
-						HAVING (kpvm is null or kpvm < date_sub(now(), interval $kpvm_aikaa day))) as laskut 
+						HAVING (kpvm is null or kpvm < date_sub(now(), interval $kpvm_aikaa day))) as laskut
 				JOIN asiakas ON lasku.yhtio=asiakas.yhtio and lasku.liitostunnus=asiakas.tunnus
 				WHERE lasku.tunnus = laskut.tunnus
 				$konslisa
@@ -181,7 +179,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 		}
 		if($karhuakaikki != "") {
 			$tee = "KARHUAKAIKKI";
-		} 
+		}
 		else {
 			$tee = "KARHUA";
 		}
@@ -195,7 +193,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 if($tee == "KARHUAKAIKKI") {
 
 	foreach($karhuttavat as $murr) {
-		
+
 		if(strpos(",", $murr)) {
 			$lasku_tunnus = implode(",", $murr);
 		}
@@ -211,7 +209,7 @@ if($tee == "KARHUAKAIKKI") {
 			$ekarhu_success = false;
 			echo "<font class='error'>Ei voitu l‰hett‰‰ karhua eKirjeen‰, karhuaminen peruttiin. Virhe: " . $e->getMessage() . "</font>";
 		}
-		
+
 		unset($karhuviesti);
 	}
 	unset($karhuttavat);
@@ -263,9 +261,9 @@ if ($tee == 'KARHUA')  {
 	<tr><th>".t("Nimitark")."</th><td>$asiakastiedot[nimitark]</td></tr>
 	<tr><th>".t("Osoite")."</th><td>$asiakastiedot[osoite]</td></tr>
 	<tr><th>".t("Postinumero")."</th><td>$asiakastiedot[postino] $asiakastiedot[postitp]</td></tr>";
-	
+
 	echo "<tr><th>". t('Karhuviesti') ."</th><td>";
-	
+
 	$max = 0;
 
 	while ($lasku = mysql_fetch_array($result)) {
@@ -274,40 +272,40 @@ if ($tee == 'KARHUA')  {
 		}
 	}
 	mysql_data_seek($result,0);
-	
+
 	if ($asiakastiedot["kieli"] != "" and strtoupper($asiakastiedot["kieli"]) != strtoupper($yhtiorow["maa"])) {
 		$sorttaus = $asiakastiedot["kieli"];
 	}
 	else {
 		$sorttaus = $yhtiorow["maa"];
 	}
-	
+
 	$query = "	SELECT *, if(kieli='$sorttaus', concat(1, kieli), kieli) sorttaus
-				from avainsana 
-				where laji 	= 'KARHUVIESTI' 
-				and yhtio 	= '{$yhtiorow['yhtio']}' 
+				from avainsana
+				where laji 	= 'KARHUVIESTI'
+				and yhtio 	= '$yhtiorow[yhtio]'
 				order by sorttaus, jarjestys";
 	$res = mysql_query($query) or pupe_error();
-		
+
 	echo "<form name='lahetaformi' action='$PHP_SELF' method='post'>";
 	echo "<select name='karhuviesti'>";
-	
+
 	$sel1 = $sel2 = $sel3 = '';
 	if ($max >= 2 and mysql_num_rows($res) > 2) {
 		$sel3 = 'selected';
-	} 
+	}
 	elseif ($max >= 1 and mysql_num_rows($res) > 1) {
 		$sel2 = 'selected';
-	} 
+	}
 	else {
 		$sel1 = 'selected';
 	}
-	
+
 	while ($viesti = mysql_fetch_array($res)) {
 		if ($viesti["kieli"] != $edkieli) {
 			$lask = 1;
 		}
-		
+
 		echo "<option value='$viesti[tunnus]' ${'sel'.$lask}>".maa($viesti["kieli"])." ".t("viesti")." $lask</option>";
 
 		if (${'sel'.$lask} != '') {
@@ -317,7 +315,7 @@ if ($tee == 'KARHUA')  {
 		$edkieli = $viesti["kieli"];
 		$lask++;
 	}
-	
+
 	echo "
 	</select>
 	</td>
@@ -354,7 +352,7 @@ if ($tee == 'KARHUA')  {
 
 	echo "</table>";
 	echo "</td></tr></table><br>";
-	
+
 	if (isset($ekirje_config) && is_array($ekirje_config)) {
 		$submit_text = 'L‰het‰ eKirje';
 	} else {
@@ -368,7 +366,7 @@ if ($tee == 'KARHUA')  {
 	if (isset($ekirje_config) and is_array($ekirje_config)) {
 		echo "<td class='back'><input type='button' onclick='document.lahetaformi.ekirje_laheta.click();' value='".t('L‰het‰ eKirje')."'></td>";
 	}
-	
+
 	echo "<td class='back'><input type='button' onclick='javascript:document.ohitaformi.submit();' value='".t("Ohita")."'></td>";
 	echo "</tr>";
 	echo "</table><br>";
@@ -405,10 +403,10 @@ if ($tee == 'KARHUA')  {
 		echo "</td><td>";
 		echo $lasku["karhuttu"];
 		echo "</td><td>";
-		
+
 		if ($lasku["kpvm"] != '')
 			echo tv1dateconv($lasku["kpvm"]);
-		
+
 		echo "</td>";
 
 		if ($lasku["jv"] == "") {
@@ -417,18 +415,18 @@ if ($tee == 'KARHUA')  {
 		else {
 			$chk = "";
 		}
-		
-		
+
+
 		echo "<td>";
 		echo "<input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]' $chk> $lasku[jv] ";
 		if ($lasku["tratattu"] > 0) {
 			echo t("Lasku tratattu");
 		}
 		echo "</td>";
-		
+
 		echo "<td>$lasku[comments]</td>";
 		echo "</tr>\n";
-		
+
 		$summmmma += $lasku["summa"];
 
 		// ker‰t‰‰n eri valuutat taulukkoon
@@ -458,12 +456,12 @@ if ($tee == 'KARHUA')  {
 	}
 
 	echo "<td class='back'><input name='$kentta' type='submit' value='".t('Tulosta paperille')."'>";
-	
+
 	// voiko l‰hett‰‰ eKirjeen?
 	if (isset($ekirje_config) and is_array($ekirje_config)) {
 		echo "<input type='submit' name='ekirje_laheta' value='" . t('L‰het‰ eKirje') . "'>";
 	}
-	
+
 	echo "</td></form>";
 
 	echo "<form name='ohitaformi' action='$PHP_SELF' method='post'>";

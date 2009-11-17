@@ -22,7 +22,7 @@
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.tunnus  = '$otunnus'";
 				$result = mysql_query($query) or pupe_error($query);
-				$laskurow = mysql_fetch_array($result);
+				$laskurow = mysql_fetch_assoc($result);
 
 				$ennakkolisa = "";
 				if ($yhtiorow["ennakkomaksu_tuotenumero"] != '') {
@@ -40,7 +40,7 @@
 					$querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
 					$kielresult = mysql_query($querykiel) or pupe_error($querykiel);
 					$kielnum = mysql_num_rows($kielresult);
-					$kielrow = mysql_fetch_array($kielresult);
+					$kielrow = mysql_fetch_assoc($kielresult);
 					$kieli = strtolower($kielrow['kieli']);
 				}
 
@@ -267,7 +267,7 @@
 								FROM lasku
 								WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnus]' and tila IN ('L','G','E','N','R','A')";
 					$result = mysql_query($query) or pupe_error($query);
-					$tunnusrow = mysql_fetch_array($result);
+					$tunnusrow = mysql_fetch_assoc($result);
 					$tunnukset = $tunnusrow["tunnukset"];
 				}
 				else {
@@ -309,7 +309,7 @@
 					$s=$pdf->teeSarakkeet(array(105,20,25));
 					unset($edperhe);
 
-					while ($row = mysql_fetch_array($riresult)) {
+					while ($row = mysql_fetch_assoc($riresult)) {
 
 						//  Etsitään käännöksiä
 						$row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
@@ -340,7 +340,7 @@
 												FROM tilausrivi
 												WHERE yhtio='$kukarow[yhtio]' and otunnus = '$row[otunnus]' and (perheid>0 and perheid='$row[tunnus]' or perheid2>0 and perheid2='$row[tunnus]' )";
 									$perhesummares = mysql_query($query) or pupe_error($query);
-									$perhesummarow = mysql_fetch_array($perhesummares);
+									$perhesummarow = mysql_fetch_assoc($perhesummares);
 									$row["rivihinta"] = $perhesummarow["yhteishinta"];
 									$row["hinta"] = round(($row["rivihinta"]/$row["kpl"]),$yhtiorow['hintapyoristys']);
 								}
@@ -354,11 +354,9 @@
 								}
 							}
 							$rivi="isa";
-
-
 						}
 						//  Meillä on lapsituote
-						else{
+						else {
 							$offset=5;
 							$style_rivi = "snadi";
 							$style_rivi2 = "snadi";
@@ -411,7 +409,7 @@
 						$sarjares = mysql_query($query) or pupe_error($query);
 
 						if (mysql_num_rows($sarjares) > 0){
-							while($sarjarow = mysql_fetch_array($sarjares)) {
+							while($sarjarow = mysql_fetch_assoc($sarjares)) {
 								$pdf->write($h, 1, 5+$offset, $s[0], t("sn", $kieli).": $sarjarow[sarjanumero]", $style_komm, "L", "I");
 								$h-=$pdf->ln();
 							}
@@ -470,7 +468,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				if(mysql_num_rows($result) > 0) {
-					$lrow = mysql_fetch_array($result);
+					$lrow = mysql_fetch_assoc($result);
 
 					$nb=$pdf->countParagraphHeight($lrow["selitetark"], "norm");
 					$pdf->write($h, $nb, 0, 0, $lrow["selitetark"], "norm", "L", "I");
@@ -510,7 +508,7 @@
 					$h-=$pdf->ln(1.25);
 
 					$i=0;
-					while($row = mysql_fetch_array($result)) {
+					while($row = mysql_fetch_assoc($result)) {
 						$i++;
 						$pdf->write($h, 1, 0, 5, "$i.", "norm", "L", "");
 						$pdf->write($h, 1, 5, 15, "$row[osuus]%", "norm", "L", "");
@@ -538,7 +536,7 @@
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = $laskurow[maksuehto]";
 					$result = mysql_query($query) or pupe_error($query);
-					$row = mysql_fetch_array($result);
+					$row = mysql_fetch_assoc($result);
 
 					$pdf->write($h, 1, 0, 5, "1.", "norm", "L", "");
 					$pdf->write($h, 1, 5, 0, "100% ".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV", $kieli)." ".t("toimituksesta", $kieli), "norm", "L", "");
@@ -664,7 +662,7 @@
 									where yhtio='$kukarow[yhtio]' and komento='$komento'";
 					$kires = mysql_query($querykieli) or pupe_error($querykieli);
 					if(mysql_num_rows($kires) > 0) {
-						$kirow = mysql_fetch_array($kires);
+						$kirow = mysql_fetch_assoc($kires);
 						if ($silent == "") {
 							echo t("Tilausvahvistus tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
 						}
@@ -709,7 +707,7 @@
 					FROM asiakas
 					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
-		$asrow = mysql_fetch_array($result);
+		$asrow = mysql_fetch_assoc($result);
 
 		if ($naytatvale == 2) {
 			$lahetetyyppi = "tulosta_lahete_eialeja.inc";
@@ -742,7 +740,7 @@
 						and tila IN ('N','L','A')
 						GROUP BY tunnusnippu";
 			$abures = mysql_query($query) or pupe_error($query);
-			$aburow = mysql_fetch_array($abures);
+			$aburow = mysql_fetch_assoc($abures);
 
 			if ($aburow["tunnukset"] != "") {
 				$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
@@ -801,7 +799,7 @@
 		//generoidaan rivinumerot
 		$rivinumerot = array();
 
-		while ($row = mysql_fetch_array($riresult)) {
+		while ($row = mysql_fetch_assoc($riresult)) {
 			$rivinumerot[$row["tunnus"]] = $row["tunnus"];
 		}
 
@@ -825,7 +823,7 @@
 		// Aloitellaan lähetteen teko
 		$page[$sivu] = alku($toim);
 
-		while ($row = mysql_fetch_array($riresult)) {
+		while ($row = mysql_fetch_assoc($riresult)) {
 			rivi($page[$sivu], $toim);
 			$total+= $row["rivihinta"];
 		}

@@ -8,7 +8,7 @@
 
 	$tquery	= "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
 	$tres	= mysql_query($tquery) or pupe_error($tquery);
-	$trow 	= mysql_fetch_array($tres); // haetaan tuotteen tiedot..
+	$trow 	= mysql_fetch_assoc($tres); // haetaan tuotteen tiedot..
 
 	if ($yhtiorow["korvaavat_hyvaksynta"] != "" and $alkupera_trow["tuoteno"] != $row["tuoteno"] and $row["var2"] != "OK" and $korvattiin_korvaavalla == "HIIOHEI!") {
 		$varaosavirhe .= t("HUOM: tämä on korvaava tuote, haluatko hyväksyä?")."<br>";
@@ -191,7 +191,7 @@
 					from maksuehto
 					where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 		$maksuehtoresult = mysql_query($query) or pupe_error($query);
-		$maksuehtorow = mysql_fetch_array($maksuehtoresult);
+		$maksuehtorow = mysql_fetch_assoc($maksuehtoresult);
 
 		if ($maksuehtorow["jv"] != "") {
 			$varaosavirhe .= t("VIRHE: Et voi suoratoimittaa tuotetta jos maksuehtona on jälkivaatimus!")."<br>";
@@ -224,7 +224,7 @@
 					concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$row[hyllyalue]') ,5,'0'),lpad(upper('$row[hyllynro]') ,5,'0'))
 					and yhtio = '$kukarow[yhtio]'";
 		$varesult = mysql_query($query) or pupe_error($query);
-		$varow = mysql_fetch_array($varesult);
+		$varow = mysql_fetch_assoc($varesult);
 
 		if ($varow["tyyppi"] == "V" and $laskurow["varasto"] != $varow["tunnus"] and $row["var2"] != "OK") {
 			$varaosavirhe .= "HUOM: Tuote sijaitsee erikoisvarastossa!<br>";
@@ -329,11 +329,11 @@
 		}
 
 		$varastot_array = array();
-		
+
 		if ($kukarow["varasto"] != "") {
 			$varastot_array = explode(",", $kukarow["varasto"]);
 		}
-		
+
 		// Kääydään läpi oman varaston paikat
 		if ( in_array($yhtiorow["puute_jt_oletus"], array('H','O')) or
 			(in_array($row["var"], array('','H','S','T','U','J')) and mysql_num_rows($omavarastores) >= $omapaikatraja) or
@@ -347,14 +347,14 @@
 		   					and myyntirivitunnus = '$row[tunnus]'
 		   					LIMIT 1";
 		   		$sarjares = mysql_query($query) or pupe_error($query);
-		   		$sarjarow = mysql_fetch_array($sarjares);
+		   		$sarjarow = mysql_fetch_assoc($sarjares);
 			}
 
-			while ($alkurow = mysql_fetch_array($omavarastores)) {
+			while ($alkurow = mysql_fetch_assoc($omavarastores)) {
 
-				if ($alkurow["hyllyalue"] != "!!M" and (($alkurow["varastotyyppi"] != "E" and $laskurow["varasto"] == 0 and (in_array($alkurow["varasto"], $varastot_array) or count($varastot_array) == 0)) 
-														or $laskurow["varasto"] == $alkurow["varasto"] 
-														or (in_array($alkurow["varasto"], $varastot_array) and $laskurow["varasto"] == 0) 
+				if ($alkurow["hyllyalue"] != "!!M" and (($alkurow["varastotyyppi"] != "E" and $laskurow["varasto"] == 0 and (in_array($alkurow["varasto"], $varastot_array) or count($varastot_array) == 0))
+														or $laskurow["varasto"] == $alkurow["varasto"]
+														or (in_array($alkurow["varasto"], $varastot_array) and $laskurow["varasto"] == 0)
 														or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"])
 														)
 					) {
@@ -371,7 +371,7 @@
 									and tuoteno = '$row[tuoteno]'
 									and tunnus	= '$alkurow[ostorivitunnus]'";
 						$lisa_res = mysql_query($query) or pupe_error($query);
-						$lisa_row = mysql_fetch_array($lisa_res);
+						$lisa_row = mysql_fetch_assoc($lisa_res);
 					}
 
 					if (in_array($yhtiorow["puute_jt_oletus"], array('H','O')) or
@@ -436,7 +436,7 @@
 		}
 		//	Jos ollaan livahdettu puutteeksi koitetaan josko tätä voitasiin myydä erikokisvarastosta
 		elseif($row["var"] == "P" and mysql_num_rows($omavarastores) > 0) {
-			while($alkurow = mysql_fetch_array($omavarastores)) {
+			while($alkurow = mysql_fetch_assoc($omavarastores)) {
 
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 
@@ -464,7 +464,7 @@
 		}
 		else {
 			// meillä on vaan yks paikka..
-			$alkurow = mysql_fetch_array($omavarastores);
+			$alkurow = mysql_fetch_assoc($omavarastores);
 			list(, , $selpaikkamyytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 		}
 
@@ -475,7 +475,7 @@
 				$paikatlask++;
 			}
 
-			while ($krow  = mysql_fetch_array($toimpaikres)) {
+			while ($krow  = mysql_fetch_assoc($toimpaikres)) {
 				$sel1 = "";
 				$sel2 = "";
 
@@ -537,7 +537,7 @@
 							and tuote.tuoteno = '$row[tuoteno]'";
 				$valmpaikatres = mysql_query($query) or pupe_error($query);
 
-				while ($valmpaikatrow  = mysql_fetch_array($valmpaikatres)) {
+				while ($valmpaikatrow  = mysql_fetch_assoc($valmpaikatres)) {
 					$sel = "";
 					if ($row["hyllyalue"] == $valmpaikatrow["hyllyalue"] and $row["hyllynro"] == $valmpaikatrow["hyllynro"] and $row["hyllyvali"] == $valmpaikatrow["hyllyvali"] and $row["hyllytaso"] == $valmpaikatrow["hyllytaso"] and ($row["var"] == "R" or ($row["tilausrivilinkki"] > 0))) {
 						$sel = "SELECTED";
@@ -573,7 +573,7 @@
 					and perheid = '$row[tunnus]'
 					and tunnus != '$row[tunnus]'";
 		$maksuehtoresult = mysql_query($query) or pupe_error($query);
-		$maksuehtorow = mysql_fetch_array($maksuehtoresult);
+		$maksuehtorow = mysql_fetch_assoc($maksuehtoresult);
 
 		if ($maksuehtorow["suoria"] == $maksuehtorow["lapsia"] and $maksuehtorow["toimittajia"] == 1) {
 			$query = "	update tilausrivi set
@@ -618,7 +618,7 @@
 					GROUP BY tuoteno, lasku.tunnus";
 		$siirtores = mysql_query($query) or pupe_error($query);
 
-		while($siirtorow = mysql_fetch_array($siirtores)) {
+		while($siirtorow = mysql_fetch_assoc($siirtores)) {
 			$laskutyyppi = $siirtorow["tila"];
 			$alatila	 = $siirtorow["alatila"];
 
@@ -636,7 +636,7 @@
 							AND varattu > 0
 							AND tyyppi IN ('O','W')";
 		$tulossa_result = mysql_query($tulossa_query) or pupe_error($tulossa_query);
-		$tulossa_row = mysql_fetch_array($tulossa_result);
+		$tulossa_row = mysql_fetch_assoc($tulossa_result);
 
 		if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '' and $tulossa_row["kpl"] > 0) {
 			$varaosakommentti .= "$tulossa_row[kpl] ".t_avainsana("Y", "", "and avainsana.selite='$tulossa_row[yksikko]'", "", "", "selite")." ".t("Tulossa")." ".tv1dateconv($tulossa_row['paivamaara']);
@@ -658,7 +658,7 @@
 		$siirtores = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($siirtores) > 0) {
-			$siirtorow = mysql_fetch_array($siirtores);
+			$siirtorow = mysql_fetch_assoc($siirtores);
 			if($siirtorow["tila"] == "O") {
 				$tilaustyypilla = t("Ostotilauksella");
 				$varmista_muokkaus .= t("Oletko varma, että haluat muokata riviä?\\n\\nRivistä tehty ostorivi poistetaan ja luodaan uudestaan.");
@@ -681,5 +681,4 @@
 		$saako_jalkitoimittaa++;
 		$saako_hyvaksya = 0;
 	}
-
 ?>

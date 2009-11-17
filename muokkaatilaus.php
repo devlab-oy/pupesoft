@@ -167,11 +167,11 @@
 				$query = "	SELECT lasku.*
 							FROM lasku use index (tila_index)
 							LEFT JOIN tilausrivi use index (yhtio_otunnus) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'E')
-							WHERE lasku.yhtio = '$kukarow[yhtio]' 
-							and (lasku.laatija = '$kukarow[kuka]' or lasku.tunnus = '$kukarow[kesken]') 
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							and (lasku.laatija = '$kukarow[kuka]' or lasku.tunnus = '$kukarow[kesken]')
 							and lasku.tila in ('E', 'N')
-							and lasku.alatila in ('','A','J') 
-							and lasku.tilaustyyppi = 'E' 							
+							and lasku.alatila in ('','A','J')
+							and lasku.tilaustyyppi = 'E'
 							GROUP BY lasku.tunnus";
 				$eresult = mysql_query($query) or pupe_error($query);
 			}
@@ -284,7 +284,7 @@
 							<th>".t("Kesken olevat").":</th>
 							<td><select name='tilausnumero'>";
 
-					while ($row = mysql_fetch_array($eresult)) {
+					while ($row = mysql_fetch_assoc($eresult)) {
 						$select="";
 						//valitaan keskenoleva oletukseksi..
 						if ($row['tunnus'] == $kukarow["kesken"]) {
@@ -408,7 +408,7 @@
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X'";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 5;
@@ -442,7 +442,7 @@
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X'";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 5;
@@ -451,7 +451,7 @@
 			$query = "	SELECT lasku.tunnus tilaus, concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas, lasku.luontiaika, lasku.laatija, viesti tilausviite, $toimaikalisa alatila, tila, lasku.tunnus, tilausrivi.tyyppi trivityyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN tilausrivi use index (yhtio_otunnus) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi = 'E')
-						WHERE lasku.yhtio = '$kukarow[yhtio]' 
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila in ('E','N')
 						and lasku.tilaustyyppi = 'E'
 						$haku
@@ -469,7 +469,7 @@
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi = 'E')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'E'";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 4;
@@ -510,7 +510,7 @@
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila in ('','A','B','J')";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 			$miinus = 3;
 		}
@@ -532,7 +532,7 @@
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila in ('','A','B','C','J')";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 3;
@@ -555,7 +555,7 @@
 				 				JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 				 				WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='G' and lasku.tilaustyyppi = 'M' and lasku.alatila = 'V'";
 				 $sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				 $sumrow = mysql_fetch_array($sumresult);
+				 $sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 3;
@@ -578,7 +578,7 @@
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila='N' and lasku.alatila='U'";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 3;
@@ -606,7 +606,7 @@
 								and lasku.alatila in ('','A','B','J')
 								and lasku.tilaustyyppi != 'W'";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 4;
@@ -634,7 +634,7 @@
 								and lasku.alatila in ('','A','B','C','J')
 								and lasku.tilaustyyppi != 'W'";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 4;
@@ -664,7 +664,7 @@
 								and ((tila='V' and alatila in ('','A','B','J')) or (lasku.tila in ('L','N') and lasku.alatila in ('A','')))
 								and tilaustyyppi != 'W'";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 5;
@@ -695,7 +695,7 @@
 								and alatila not in ('X','V')
 								and tilaustyyppi != 'W'";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 5;
@@ -731,7 +731,7 @@
 		    					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 		    					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('A','L','N') and lasku.tilaustyyppi='A' and lasku.alatila in ('','A','B','C','J')";
 		    	$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-		    	$sumrow = mysql_fetch_array($sumresult);
+		    	$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 4;
@@ -754,7 +754,7 @@
 						    	JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 						    	WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L','N','C') and lasku.tilaustyyppi='R' and lasku.alatila in ('','A','B','C','J','D')";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 4;
@@ -800,7 +800,7 @@
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila ='T' and lasku.tilaustyyppi='T' and lasku.alatila in ('','A')";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 5;
@@ -831,7 +831,7 @@
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila ='T' and lasku.tilaustyyppi='T' and lasku.alatila in ('','A')";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 4;
@@ -855,7 +855,7 @@
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'N' and lasku.alatila = 'F'";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 3;
@@ -878,7 +878,7 @@
 				   				JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 				   				WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('N','L') and lasku.alatila != 'X' and lasku.chn = '999'";
 				   $sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				   $sumrow = mysql_fetch_array($sumresult);
+				   $sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 3;
@@ -976,7 +976,7 @@
 								JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus and (laskun_lisatiedot.sopimus_loppupvm >= now() or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('0') and lasku.alatila != 'D'";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 5;
@@ -1006,7 +1006,7 @@
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
 								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in('L','N') and lasku.alatila in ('A','')";
 				$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
-				$sumrow = mysql_fetch_array($sumresult);
+				$sumrow = mysql_fetch_assoc($sumresult);
 			}
 
 			$miinus = 6;
@@ -1180,7 +1180,7 @@
 
 						$jtok = 0;
 
-						while($countrow = mysql_fetch_array($countres)) {
+						while ($countrow = mysql_fetch_assoc($countres)) {
 							list( , , $jtapu_myytavissa) = saldo_myytavissa($countrow["tuoteno"], "JTSPEC", 0, "");
 
 							if ($jtapu_myytavissa < $countrow["jt"]) {
@@ -1216,7 +1216,7 @@
 												AND tunnus in ($row[$i])
 												AND (comments != '' OR sisviesti2 != '')";
 							$result_comments = mysql_query($query_comments) or pupe_error($query_comments);
-							$row_comments = mysql_fetch_array($result_comments);
+							$row_comments = mysql_fetch_assoc($result_comments);
 
 							if (trim($row_comments["comments"]) != "") {
 								echo "<div id='div_kommentti$row[$i]' class='popup' style='width: 500px;'>";
@@ -1232,24 +1232,25 @@
 
 							$img = "mini-comment.png";
 							$linkkilisa = "";
-							$query_comments = "	SELECT group_concat(tunnus)
+							$query_comments = "	SELECT group_concat(tunnus) tunnukset
 												FROM lasku
 												WHERE yhtio = '$kukarow[yhtio]'
 												AND lasku.tila != 'S'
 												AND tunnusnippu = '$row[tunnusnippu]' and tunnusnippu>0";
 							$ares = mysql_query($query_comments) or pupe_error($query_comments);
-							if (mysql_num_rows($ares) > 0) {
-								$arow = mysql_fetch_array($ares);
 
-								if($arow[0] != "") {
+							if (mysql_num_rows($ares) > 0) {
+								$arow = mysql_fetch_assoc($ares);
+
+								if ($arow["tunnukset"] != "") {
 									//	Olisiko meillä kalenterissa kommentteja?
 									$query_comments = "	SELECT tunnus
 														FROM kalenteri
 														WHERE yhtio = '$kukarow[yhtio]'
 														AND tyyppi = 'Memo'
-														AND otunnus IN ($arow[0])";
+														AND otunnus IN ($arow[tunnukset])";
 									$result_comments = mysql_query($query_comments) or pupe_error($query_comments);
-									//echo "$query_comments<br>";
+
 									$nums="";
 									if (mysql_num_rows($result_comments) > 0) {
 										$img = "info.png";
@@ -1257,7 +1258,6 @@
 									}
 								}
 							}
-
 
 							echo "<td class='$class' valign='top' NOWRAP>$row[$i] <div style='float: right;'><img src='pics/lullacons/$img' class='info' $linkkilisa onclick=\"window.open('{$palvelin2}crm/asiakasmemo.php?tee=NAYTA&liitostunnus=$row[liitostunnus]&tunnusnippu=$row[tunnusnippu]&from=muokkaatilaus.php');\"> $nums</div></td>";
 						}
@@ -1268,7 +1268,7 @@
 							echo "<td class='$class' valign='top'>$row[$i]</td>";
 						}
 
-						if(isset($workbook)) {
+						if (isset($workbook)) {
 							if (mysql_field_type($result,$i) == 'real') {
 								$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
 							}
@@ -1277,7 +1277,6 @@
 							}
 						}
 					}
-
 
 					if ($row["tila"] == "N" and $row["alatila"] == "U") {
 						if ($jtok == 0) {
@@ -1517,7 +1516,7 @@
 						</form></tr></table>";
 				}
 
-				if(isset($workbook)) {
+				if (isset($workbook)) {
 
 					// We need to explicitly close the workbook
 					$workbook->close();

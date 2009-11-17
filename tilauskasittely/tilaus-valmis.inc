@@ -18,12 +18,15 @@ if ($laskurow["tilaustyyppi"] == 'E') {
 
 	//tila on E ja alatila on A kun on ennakkotilaus
 	$query  = "	UPDATE lasku
-				SET tila='E',
-				alatila='A'
+				SET tila = 'E',
+				alatila = 'A'
 				WHERE tunnus='$laskurow[tunnus]'
 				and tila in ('N','L','E')
-				and yhtio='$kukarow[yhtio]'";
+				and yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
+
+	$laskurow["tila"] = "E";
+	$laskurow["alatila"] = "A";
 
 	// ennakkotilauksissa tyyppi on E ja rivit ei ole ennakkopoistossa
 	$query = "	UPDATE tilausrivi
@@ -32,7 +35,6 @@ if ($laskurow["tilaustyyppi"] == 'E') {
 				and otunnus	= '$laskurow[tunnus]'
 				and tyyppi in ('L','E')";
 	$result = mysql_query($query) or pupe_error($query);
-
 
 	//
 	// LÄHETETÄÄN TILAUSVAHVISTUS
@@ -76,7 +78,7 @@ if ($laskurow["tilaustyyppi"] == 'E') {
 					tunnus = '$kukarow[kirjoitin]'";
 		$tilvares = mysql_query($query) or pupe_error($query);
 
-		if ($tilvakir = mysql_fetch_array($tilvares)) {
+		if ($tilvakir = mysql_fetch_assoc($tilvares)) {
 			$komento["Tilausvahvistus"] = $tilvakir["komento"];
 
 			$toim_save = $toim;
@@ -219,7 +221,7 @@ else {
 	$itsetulostus = "";
 
 	if (mysql_num_rows($result) == 1) {
-		$maksuehtorow = mysql_fetch_array($result);
+		$maksuehtorow = mysql_fetch_assoc($result);
 
 		// jos kyseessä on käteiskauppaa
 		if ($maksuehtorow['kateinen'] != '') {
@@ -355,7 +357,7 @@ else {
 		$rahtivapaa_alarajasumma = 0;
 
 		if (mysql_num_rows($as_res) == 1) {
-			$as_row = mysql_fetch_array($as_res);
+			$as_row = mysql_fetch_assoc($as_res);
 			$rahtivapaa_alarajasumma = (float) $as_row["rahtivapaa_alarajasumma"];
 		}
 		else {
@@ -395,7 +397,7 @@ else {
 							AND tilausrivi.otunnus = '$laskurow[tunnus]'";
 				$step1re = mysql_query($query) or pupe_error($query);
 
-				while ($step1row = mysql_fetch_array($step1re)) {
+				while ($step1row = mysql_fetch_assoc($step1re)) {
 					// etsitään istätilausten kaikki lapset
 					$query = "	SELECT group_concat(DISTINCT tilausrivi.otunnus) uudet_otunnukset
 								FROM tilausrivin_lisatiedot
@@ -403,7 +405,7 @@ else {
 								WHERE tilausrivin_lisatiedot.yhtio = '$kukarow[yhtio]'
 								and tilausrivin_lisatiedot.vanha_otunnus = '$step1row[vanha_otunnus]'";
 					$step2re = mysql_query($query) or pupe_error($query);
-					$step2row = mysql_fetch_array($step2re);
+					$step2row = mysql_fetch_assoc($step2re);
 
 					// katsotaan onko lapsitilauksilla rahtikulu syötetty
 					$query = "	SELECT tunnus
@@ -440,7 +442,7 @@ else {
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND selite = '$laskurow[toimitustapa]'";
 				$result = mysql_query($query) or pupe_error($query);
-				$torow = mysql_fetch_array($result);
+				$torow = mysql_fetch_assoc($result);
 
 				// jos toimitustapana on joku nouto niin ei lisätä rahtikulua
 				if ($torow["nouto"] == "") {
@@ -457,7 +459,7 @@ else {
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND tuoteno = '$yhtiorow[rahti_tuotenumero]'";
 						$rhire = mysql_query($query) or pupe_error($query);
-						$trow  = mysql_fetch_array($rhire);
+						$trow  = mysql_fetch_assoc($rhire);
 
 						$otunnus	 = $laskurow['tunnus'];
 						$hinta		 = $rahtihinta;
@@ -683,7 +685,7 @@ else {
 								tunnus = '$kukarow[kirjoitin]'";
 					$tilvares = mysql_query($query) or pupe_error($query);
 
-					if ($tilvakir = mysql_fetch_array($tilvares)) {
+					if ($tilvakir = mysql_fetch_assoc($tilvares)) {
 						$komento["Tilausvahvistus"] = $tilvakir["komento"];
 
 						$toim_save = $toim;
@@ -725,12 +727,12 @@ else {
 			//Toimitustavan hetierä tarvitaan
 			$query = "SELECT tulostustapa from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
 			$result = mysql_query($query) or pupe_error($query);
-			$totarowx = mysql_fetch_array($result);
+			$totarowx = mysql_fetch_assoc($result);
 
 			// Maksuehdon jv tieto tarvitaan
 			$query = "SELECT jv from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 			$result = mysql_query($query) or pupe_error($query);
-			$maehrowx = mysql_fetch_array($result);
+			$maehrowx = mysql_fetch_assoc($result);
 
 			if ($yhtiorow["splittauskielto"] == "K") {
 				$sorttaus = "kerayspvm, sorttauskentta";
@@ -762,14 +764,14 @@ else {
 			//jos tilaus splittaantuu, niin laitetaan muihin otsikoihin ensimmäisen tilauksen tunnus vanhaksitunnukseksi
 			$temp_laskutunnus = $laskurow['tunnus'];
 
-			while ($row = mysql_fetch_array($result)) {
+			while ($row = mysql_fetch_assoc($result)) {
 
 				$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 				$tulostusalue = onkotulostusalueita($row["hyllyalue"], $row["hyllynro"], $varasto);
 
 				$query = "SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
 				$varaston_res = mysql_query($query) or pupe_error($query);
-				$varaston_row = mysql_fetch_array($varaston_res);
+				$varaston_row = mysql_fetch_assoc($varaston_res);
 
 				$ultilno = tarvitaanko_intrastat($varaston_row["maa"], $laskurow["toim_maa"]);
 
@@ -781,7 +783,7 @@ else {
 					// katotaan onko jotain oletuksia asiakkaan takaa
 					$query  = "SELECT * from asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
 					$toiresult = mysql_query($query) or pupe_error($query);
-					$aputoimirow = mysql_fetch_array($toiresult);
+					$aputoimirow = mysql_fetch_assoc($toiresult);
 
 					$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
 					$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
@@ -802,7 +804,7 @@ else {
 					// katotaan onko jotain oletuksia toimitustavan takana
 					$query  = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
 					$toiresult = mysql_query($query) or pupe_error($query);
-					$aputoimirow = mysql_fetch_array($toiresult);
+					$aputoimirow = mysql_fetch_assoc($toiresult);
 
 					$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
 					$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
@@ -952,13 +954,13 @@ else {
 					 			from tilausrivi
 								where yhtio='$kukarow[yhtio]' and otunnus='$tilausnumero'";
 					$result = mysql_query($query) or pupe_error($query);
-					$toimaikatilrirow = mysql_fetch_array($result);
+					$toimaikatilrirow = mysql_fetch_assoc($result);
 
 					$query = "	SELECT kerayspvm, toimaika
 								from lasku
 								where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
 					$result = mysql_query($query) or pupe_error($query);
-					$toimaikalaskurow = mysql_fetch_array($result);
+					$toimaikalaskurow = mysql_fetch_assoc($result);
 
 					if ($toimaikatilrirow["kerayspvm"] != substr($toimaikalaskurow["kerayspvm"],0,10) or $toimaikatilrirow["toimaika"] != $toimaikalaskurow["toimaika"]) {
 						$query = "	UPDATE lasku
@@ -1020,7 +1022,7 @@ else {
 								tunnus = '$kukarow[kirjoitin]'";
 					$tilvares = mysql_query($query) or pupe_error($query);
 
-					if ($tilvakir = mysql_fetch_array($tilvares)) {
+					if ($tilvakir = mysql_fetch_assoc($tilvares)) {
 						$komento["Tilausvahvistus"] = $tilvakir["komento"];
 
 						$toim_save = $toim;
@@ -1060,7 +1062,7 @@ else {
 					//luetaan laskun tiedot uudestaan tässä, per splitti
 					$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
 					$result = mysql_query($query) or pupe_error($query);
-					$laskurow = mysql_fetch_array($result);
+					$laskurow = mysql_fetch_assoc($result);
 
 					$kutsuja = "tilaus-valmis.inc";
 
@@ -1072,7 +1074,7 @@ else {
 					//luetaan laskun tiedot uudestaan tässä, per splitti
 					$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
 					$result = mysql_query($query) or pupe_error($query);
-					$laskurow = mysql_fetch_array($result);
+					$laskurow = mysql_fetch_assoc($result);
 
 					if ($yhtiorow["tilausvahvistus_lahetys"] != 1) {
 						//
@@ -1117,7 +1119,7 @@ else {
 										tunnus = '$kukarow[kirjoitin]'";
 							$tilvares = mysql_query($query) or pupe_error($query);
 
-							if ($tilvakir = mysql_fetch_array($tilvares)) {
+							if ($tilvakir = mysql_fetch_assoc($tilvares)) {
 								$komento["Tilausvahvistus"] = $tilvakir["komento"];
 
 								$toim_save = $toim;

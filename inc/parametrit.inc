@@ -180,7 +180,7 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 
 	if (mysql_num_rows($result) == 1) {
 
-		$apukukarow = mysql_fetch_array($result);
+		$apukukarow = mysql_fetch_assoc($result);
 
 		// jos meill‰ on sessio niin poistetaan se tietokannasta jo aluks
 		if ($session != "") {
@@ -274,7 +274,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			}
 			exit;
 		}
-		$kukarow = mysql_fetch_array($result);
+		$kukarow = mysql_fetch_assoc($result);
 
 	 	// T‰nne p‰‰see aina!
 		if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php') {
@@ -311,7 +311,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 				echo "</td></tr></table>";
 				exit;
 			}
-			$oikeurow = mysql_fetch_array($result);
+			$oikeurow = mysql_fetch_assoc($result);
 		}
 	}
 
@@ -468,7 +468,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 
 					enable_ajax();
 
-					while ($message_row = mysql_fetch_array($message_result)) {
+					while ($message_row = mysql_fetch_assoc($message_result)) {
 						echo "<div id='$message_row[tunnus]'>";
 						echo "<input type='button' onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'>";
 						echo "<font class='info'> $message_row[nimi] @ ".tv1dateconv($message_row['luontiaika'],'yes').": ";

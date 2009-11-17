@@ -1033,7 +1033,7 @@
 					$excelrivi = 0;
 				}
 			}
-			echo "<table border='0' cellpadding='2' cellspacing='1'>";
+			echo "<table>";
 
 			// scripti balloonien tekemiseen
 			js_popup();
@@ -1054,7 +1054,7 @@
 
 			$lisattu_tunnusnippu  = array();
 
-			while ($row = mysql_fetch_array($result)) {
+			while ($row = mysql_fetch_assoc($result)) {
 
 				if ($toim == 'HYPER') {
 
@@ -1193,6 +1193,8 @@
 
 					for ($i=0; $i<mysql_num_fields($result)-$miinus; $i++) {
 
+						$fieldname = mysql_field_name($result,$i);
+
 						if ($whiletoim == "YLLAPITO" and $row["sopimus_loppupvm"] < date("Y-m-d") and $row["sopimus_loppupvm"] != '0000-00-00') {
 							$class = 'tumma';
 						}
@@ -1200,35 +1202,35 @@
 							$class = '';
 						}
 
-						if (mysql_field_name($result,$i) == 'luontiaika' or mysql_field_name($result,$i) == 'toimaika') {
-							echo "<td class='$class' valign='top'>".tv1dateconv($row[$i],"pitka")."</td>";
+						if ($fieldname == 'luontiaika' or $fieldname == 'toimaika') {
+							echo "<td class='$class' valign='top'>".tv1dateconv($row[$fieldname],"pitka")."</td>";
 						}
-						elseif (mysql_field_name($result,$i) == 'Pvm') {
-							list($aa, $bb) = explode('<br>', $row[$i]);
+						elseif ($fieldname == 'Pvm') {
+							list($aa, $bb) = explode('<br>', $row[$fieldname]);
 
 							echo "<td class='$class' valign='top'>".tv1dateconv($aa,"pitka")."<br>".tv1dateconv($bb,"pitka")."</td>";
 						}
-						elseif (mysql_field_name($result,$i) == "tilaus") {
+						elseif ($fieldname == "tilaus") {
 
 							$query_comments = "	SELECT group_concat(concat_ws('<br>', comments, sisviesti2) SEPARATOR '<br><br>') comments
 												FROM lasku use index (primary)
 												WHERE yhtio = '$kukarow[yhtio]'
-												AND tunnus in ($row[$i])
+												AND tunnus in (".$row[$fieldname].")
 												AND (comments != '' OR sisviesti2 != '')";
 							$result_comments = mysql_query($query_comments) or pupe_error($query_comments);
 							$row_comments = mysql_fetch_assoc($result_comments);
 
 							if (trim($row_comments["comments"]) != "") {
-								echo "<div id='div_kommentti$row[$i]' class='popup' style='width: 500px;'>";
+								echo "<div id='div_kommentti".$row[$fieldname]."' class='popup' style='width: 500px;'>";
 								echo $row_comments["comments"];
 								echo "</div>";
-								echo "<td class='$class' align='right' valign='top'><a class='tooltip' id='kommentti$row[$i]'>".str_replace(",", "<br>*", $row[$i])."</a></td>";
+								echo "<td class='$class' align='right' valign='top'><a class='tooltip' id='kommentti".$row[$fieldname]."'>".str_replace(",", "<br>*", $row[$fieldname])."</a></td>";
 							}
 							else {
-								echo "<td class='$class' align='right' valign='top'>".str_replace(",", "<br>*", $row[$i])."</td>";
+								echo "<td class='$class' align='right' valign='top'>".str_replace(",", "<br>*", $row[$fieldname])."</td>";
 							}
 						}
-						elseif (mysql_field_name($result,$i) == "seuranta") {
+						elseif ($fieldname == "seuranta") {
 
 							$img = "mini-comment.png";
 							$linkkilisa = "";
@@ -1254,26 +1256,26 @@
 									$nums="";
 									if (mysql_num_rows($result_comments) > 0) {
 										$img = "info.png";
-										$linkkilisa = "onmouseover=\"popUp(event, 'asiakasmemo_$row[$i]', '0', '0', '{$palvelin2}crm/asiakasmemo.php?tee=NAYTAMUISTIOT&liitostunnus=$row[liitostunnus]&tunnusnippu=$row[tunnusnippu]', false, true); return false;\" onmouseout=\"popUp(event, 'asiakasmemo_$row[$i]'); return false;\"";
+										$linkkilisa = "onmouseover=\"popUp(event, 'asiakasmemo_".$row[$fieldname]."', '0', '0', '{$palvelin2}crm/asiakasmemo.php?tee=NAYTAMUISTIOT&liitostunnus=$row[liitostunnus]&tunnusnippu=$row[tunnusnippu]', false, true); return false;\" onmouseout=\"popUp(event, 'asiakasmemo_".$row[$fieldname]."'); return false;\"";
 									}
 								}
 							}
 
-							echo "<td class='$class' valign='top' NOWRAP>$row[$i] <div style='float: right;'><img src='pics/lullacons/$img' class='info' $linkkilisa onclick=\"window.open('{$palvelin2}crm/asiakasmemo.php?tee=NAYTA&liitostunnus=$row[liitostunnus]&tunnusnippu=$row[tunnusnippu]&from=muokkaatilaus.php');\"> $nums</div></td>";
+							echo "<td class='$class' valign='top' NOWRAP>".$row[$fieldname]." <div style='float: right;'><img src='pics/lullacons/$img' class='info' $linkkilisa onclick=\"window.open('{$palvelin2}crm/asiakasmemo.php?tee=NAYTA&liitostunnus=$row[liitostunnus]&tunnusnippu=$row[tunnusnippu]&from=muokkaatilaus.php');\"> $nums</div></td>";
 						}
-						elseif (is_numeric($row[$i])) {
-							echo "<td class='$class' align='right' valign='top'>$row[$i]</td>";
+						elseif (is_numeric($row[$fieldname])) {
+							echo "<td class='$class' align='right' valign='top'>".$row[$fieldname]."</td>";
 						}
 						else {
-							echo "<td class='$class' valign='top'>$row[$i]</td>";
+							echo "<td class='$class' valign='top'>".$row[$fieldname]."</td>";
 						}
 
 						if (isset($workbook)) {
 							if (mysql_field_type($result,$i) == 'real') {
-								$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
+								$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f", $row[$fieldname]));
 							}
 							else {
-								$worksheet->writeString($excelrivi, $i, $row[$i]);
+								$worksheet->writeString($excelrivi, $i, $row[$fieldname]);
 							}
 						}
 					}

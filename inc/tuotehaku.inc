@@ -20,7 +20,7 @@
 				$tuoteno = $tuoteno . "*";
 			}
 			else {
-				$tuotenorow = mysql_fetch_array($result);
+				$tuotenorow = mysql_fetch_assoc($result);
 				$tuoteno = $tuotenorow["tuoteno"];
 			}
 		}
@@ -43,7 +43,7 @@
 						and toim_tuoteno = '".substr($tuoteno,1)."'";
 			$tresult = mysql_query($query) or pupe_error($query);
 
-			while ($toimirivi = mysql_fetch_array($tresult)) {
+			while ($toimirivi = mysql_fetch_assoc($tresult)) {
 				$lisa1 .= "'$toimirivi[tuoteno]',";
 			}
 
@@ -88,7 +88,7 @@
 			$presult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($presult) > 0) {
-				while ($prow = mysql_fetch_array($presult)) {
+				while ($prow = mysql_fetch_assoc($presult)) {
 					$yhtiot .= "'".$prow["yhtio"]."',";
 					$konsyhtiot[] = $prow["yhtio"];
 				}
@@ -117,7 +117,7 @@
 							WHERE yhtio	= '$kukarow[yhtio]'
 							and tunnus  = '$kukarow[kesken]'";
 				$vieres = mysql_query($query) or pupe_error($query);
-				$vierow = mysql_fetch_array($vieres);
+				$vierow = mysql_fetch_assoc($vieres);
 			}
 			elseif ($verkkokauppa != "") {
 				$vierow = array();
@@ -135,7 +135,7 @@
 							WHERE yhtio	= '$kukarow[yhtio]'
 							and tunnus  = '$kukarow[oletus_asiakas]'";
 				$vieres = mysql_query($query) or pupe_error($query);
-				$vierow = mysql_fetch_array($vieres);
+				$vierow = mysql_fetch_assoc($vieres);
 			}
 
 			if (isset($vierow) and $vierow["maa"] != "") {
@@ -178,13 +178,13 @@
 		if (mysql_num_rows($thresult) > 0) {
 
 			// Rakennetaan array ja laitetaan korvaavat mukaan
-			while ($mrow = mysql_fetch_array($thresult)) {
+			while ($mrow = mysql_fetch_assoc($thresult)) {
 				if ($mrow["korvaavat"] != $mrow["tuoteno"]) {
 
 					$query = "	SELECT
 								tuote.yhtio,
 								ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi='P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
-								'$mrow[tuoteno]' korvaavat,
+								korvaavat.id korvaavat,
 								tuote.tuoteno,
 								tuote.nimitys,
 								tuote.osasto,
@@ -204,16 +204,27 @@
 								JOIN tuote ON tuote.yhtio=korvaavat.yhtio and tuote.tuoteno=korvaavat.tuoteno
 								WHERE korvaavat.yhtio = '$mrow[yhtio]'
 								and korvaavat.id = '$mrow[korvaavat]'
+								and korvaavat.tuoteno != '$mrow[tuoteno]'
 								$kieltolisa
 								$poislisa
 								ORDER BY korvaavat.jarjestys, korvaavat.tuoteno";
 					$kores = mysql_query($query) or pupe_error($query);
 
-					$ekakorva = "";
+					if (mysql_num_rows($kores) > 0) {
 
-					while ($krow = mysql_fetch_array($kores)) {
-						if ($ekakorva == "") $ekakorva = $krow["yhtio"].$krow["tuoteno"];
-						if (!isset($rows[$ekakorva.$krow["tuoteno"]])) $rows[$ekakorva.$krow["tuoteno"]] = $krow;
+						$krow = mysql_fetch_assoc($kores);
+						$ekakorva = $krow["korvaavat"];
+
+						mysql_data_seek($kores, 0);
+
+						if (!isset($rows[$ekakorva.$mrow["tuoteno"]])) $rows[$ekakorva.$mrow["tuoteno"]] = $mrow;
+
+						while ($krow = mysql_fetch_assoc($kores)) {
+
+							$krow["mikakorva"] = $mrow["tuoteno"];
+
+							if (!isset($rows[$ekakorva.$krow["tuoteno"]])) $rows[$ekakorva.$krow["tuoteno"]] = $krow;
+						}
 					}
 				}
 				else {
@@ -319,7 +330,7 @@
 							AND tuoteno = '$trow[tuoteno]'
 							LIMIT 1";
 				$parametrit_res = mysql_query($query) or pupe_error($query);
-				$parametritrivi = mysql_fetch_array($parametrit_res);
+				$parametritrivi = mysql_fetch_assoc($parametrit_res);
 
 				if (trim($parametritrivi["selite"]) != "" and $parametritrivi["selite"] != $edvariaatio) {
 					$ulos .= "<option value='$parametritrivi[selite]'> ** $parametritrivi[selite] ** </option>";
@@ -373,7 +384,7 @@
 			}
 			elseif (mysql_num_rows($tresult) == 1) {
 				//Tehd‰‰n tuotenumero ja kpl
-				$trivi = mysql_fetch_array($tresult);
+				$trivi = mysql_fetch_assoc($tresult);
 				$tuoteno = $trivi['tuoteno'];
 			}
 		}
@@ -403,7 +414,7 @@
 			$tee = "Y";
 		}
 		else {
-			$trow = mysql_fetch_array($result);
+			$trow = mysql_fetch_assoc($result);
 
 			if ($konsernihaku == "KYLLA") {
 				$tuoteno = $trow['tuoteno']."####".$trow["yhtio"];

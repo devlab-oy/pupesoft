@@ -5698,7 +5698,6 @@ if ($tee == '') {
 					</form></td>";
 		}
 
-
 		echo "</tr>";
 
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {

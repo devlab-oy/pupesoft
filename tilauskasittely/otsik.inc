@@ -2786,7 +2786,7 @@
 				$aburow = mysql_fetch_assoc($abures);
 
 				//	Haetaan rivit ja kopioidaan ne uuteen tarjoukseen.. as they are..
-				$query = "select * from tilausrivi WHERE yhtio = '$kukarow[yhtio]' and otunnus='$aburow[tunnus]'";
+				$query = "SELECT * from tilausrivi WHERE yhtio = '$kukarow[yhtio]' and otunnus='$aburow[tunnus]'";
 				$monistares = mysql_query($query) or pupe_error($query);
 
 				$korjaaPerheet=array();
@@ -2794,22 +2794,25 @@
 				if (mysql_num_rows($monistares)>0) {
 					$fields = mysql_field_name($monistares,0);
 
-					for($i=1; $i < mysql_num_fields($monistares)-1; $i++) { // Ei monisteta tunnusta
+					for ($i=1; $i < mysql_num_fields($monistares)-1; $i++) { // Ei monisteta tunnusta
 						$fields .= ", ".mysql_field_name($monistares,$i);
 					}
 
-					while($monistarow = mysql_fetch_assoc($monistares)) {
+					while ($monistarow = mysql_fetch_assoc($monistares)) {
 
 						$values = "";
 
 						if ($values == "") {
-							$values = "('".$monistarow[0]."'";
+							$values = "('".$monistarow["yhtio"]."'";
 						}
 						else {
-							$values .= "), ('".$monistarow[0]."'";
+							$values .= "), ('".$monistarow["yhtio"]."'";
 						}
 
-						for($i=1; $i < mysql_num_fields($monistares)-1; $i++) { // Ei monisteta tunnusta
+						for ($i=1; $i < mysql_num_fields($monistares)-1; $i++) { // Ei monisteta tunnusta
+							
+							$fieldname = mysql_field_name($monistares,$i);
+							
 							switch (mysql_field_name($monistares,$i)) {
 								case "otunnus";
 									$values .= ", '$tilausnumero'";
@@ -2827,7 +2830,7 @@
 									$values .= ", '$toimvv-$toimkk-$toimpp'";
 									break;
 								default;
-									$values .= ", '$monistarow[$i]'";
+									$values .= ", '".$monistarow[$fieldname]."'";
 									break;
 							}
 						}
@@ -2851,22 +2854,26 @@
 						if (mysql_num_rows($monistares2)>0) {
 
 							$fields2 = mysql_field_name($monistares2,0);
-							for($i=1; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
+							
+							for ($i=1; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
 								$fields2 .= ", ".mysql_field_name($monistares2,$i);
 							}
 
 							$values2 ="";
 
-							while ($monistarow2 = mysql_fetch_row($monistares2)) {
-
+							while ($monistarow2 = mysql_fetch_assoc($monistares2)) {
+								
 								if ($values2 == "") {
-									$values2 = "('".$monistarow2[0]."'";
+									$values2 = "('".$monistarow2["yhtio"]."'";
 								}
 								else {
-									$values2 .= "), ('".$monistarow2[0]."'";
+									$values2 .= "), ('".$monistarow2["yhtio"]."'";
 								}
 
-								for($i=1; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
+								for ($i=1; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
+									
+									$fieldname = mysql_field_name($monistares2,$i);
+									
 									switch (mysql_field_name($monistares2,$i)) {
 										case "laatija";
 											$values2 .= ", '$kukarow2[kuka]'";
@@ -2878,7 +2885,7 @@
 											$values2 .= ", '$lisattyRivitunnus'";
 											break;
 										default;
-											$values2 .= ", '$monistarow2[$i]'";
+											$values2 .= ", '".$monistarow2[$fieldname]."'";
 											break;
 									}
 								}
@@ -2920,7 +2927,7 @@
 
 				if ($toim=="PROJEKTI") {
 					// avataan projekti kirjanpitoon
-					$query = " insert into kustannuspaikka set yhtio  = '$kukarow[yhtio]', nimi = '$id - $nimi', tyyppi = 'P', kaytossa = 'o', luontiaika = now(), laatija = '$kukarow[kuka]'";
+					$query = " INSERT into kustannuspaikka set yhtio  = '$kukarow[yhtio]', nimi = '$id - $nimi', tyyppi = 'P', kaytossa = 'o', luontiaika = now(), laatija = '$kukarow[kuka]'";
 					$result = mysql_query($query) or pupe_error($query);
 					$projekti = mysql_insert_id();
 

@@ -6776,16 +6776,25 @@ if (!function_exists("livesearch_kayttajahaku")) {
 			$haku_query = "";
 			$haku_join = '';
 
+			if ($toim == 'extranet') {
+				$haku_query .= " and kuka.extranet != '' ";
+			}
+			else {
+				$haku_query .= " and kuka.extranet = '' ";
+			}
+
 			foreach ($haku_array as $haku) {
 				$haku = mysql_real_escape_string($haku);
-				if ($toim != 'extranet') {
-					$haku_query .= " and kuka.extranet = '' and (kuka.nimi like ('%$haku%') or kuka.kuka like ('%$haku%')) ";
+				if ($toim == 'extranet') {
+					$haku_query .= " and (asiakas.asiakasnro like ('%$haku%') or asiakas.ytunnus like ('%$haku%') or kuka.nimi like ('%$haku%') or kuka.kuka like ('%$haku%')) ";
+				}
+				else {
+					$haku_query .= " and (kuka.nimi like ('%$haku%') or kuka.kuka like ('%$haku%')) ";
 				}
 			}
 
 			if ($toim == 'extranet') {
 				$haku_join = " LEFT JOIN asiakas ON (asiakas.yhtio = kuka.yhtio AND asiakas.tunnus = kuka.oletus_asiakas) ";
-				$haku_query = " and kuka.extranet != '' and (asiakas.asiakasnro like ('%$haku%') or asiakas.ytunnus like ('%$haku%') or kuka.nimi like ('%$haku%') or kuka.kuka like ('%$haku%')) ";
 			}
 
 			$query = "	SELECT kuka.tunnus, kuka.nimi, kuka.kuka

@@ -218,7 +218,31 @@ if (!function_exists('finvoice_otsik')) {
 			fputs($tootfinvoice, "</BuyerPostalAddressDetails>\r\n");
 
 			fputs($tootfinvoice, "</BuyerPartyDetails>\r\n");
-
+			
+			//	Onko meillä kaupallista käsittelijää, falseback on tekninen yhteyshenkilö
+			$query = "	SELECT kk.nimi kaupallinen_kasittelija, kt.nimi tekninen_yhteyshenkilo
+						FROM lasku
+						JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
+						LEFT JOIN yhteyshenkilo kk ON kk.yhtio=laskun_lisatiedot.yhtio and kk.tunnus=laskun_lisatiedot.yhteyshenkilo_kaupallinen and kk.tyyppi = 'A'
+						LEFT JOIN yhteyshenkilo kt ON kt.yhtio=laskun_lisatiedot.yhtio and kt.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen and kt.tyyppi = 'A'
+						WHERE lasku.yhtio = '$lasrow[yhtio]' and lasku.laskunro = '$lasrow[laskunro]' and lasku.tila = 'L'";
+			$tarkres = mysql_query($query) or pupe_error($query);
+			$asiakkaan_yhteyshenkilo = "";
+			while($tarkrow = mysql_fetch_array($tarkres)) {
+				if($asiakkaan_yhteyshenkilo == "") {
+					if($tarkrow["kaupallinen_kasittelija"] != "") {
+						$asiakkaan_yhteyshenkilo = $tarkrow["kaupallinen_kasittelija"];
+					}
+					elseif($tarkrow["tekninen_yhteyshenkilo"] != "") {
+						$asiakkaan_yhteyshenkilo = $tarkrow["tekninen_yhteyshenkilo"];
+					}
+				}
+			}
+			
+			if($asiakkaan_yhteyshenkilo != "") {
+				xml_add("BuyerContactPersonName",										$asiakkaan_yhteyshenkilo, 								$tootfinvoice);
+			}
+			
 			if($lasrow['ovttunnus'] != "") {
 				xml_add("BuyerOrganisationUnitNumber",                    				$lasrow['ovttunnus'],    								$tootfinvoice);
 			}

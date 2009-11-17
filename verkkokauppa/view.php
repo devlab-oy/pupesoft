@@ -17,7 +17,7 @@ $liiteres = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($liiteres) > 0) {
 
-	$liiterow = mysql_fetch_array($liiteres);
+	$liiterow = mysql_fetch_assoc($liiteres);
 
 	header("Content-type: $liiterow[filetype]");
 	header("Content-length: $liiterow[filesize]");

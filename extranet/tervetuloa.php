@@ -269,8 +269,15 @@ if ($tee == '') {
 							$hintarow["hinta"] = $trow["myyntihinta"];
 							$hintarow["valkoodi"] = $yhtiorow["valkoodi"];
 						}
+						
+						if ($hinta != $hintarow["hinta"]) {
+							$ashinta = sprintf('%.2f',$hinta);
+						}
+						else {
+							$ashinta = "";	
+						}
 
-						$replace[]	= "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=".urlencode($m[1])."'>$trow[tuoteno]</a> $trow[nimitys] ".sprintf('%.2f',$hinta)."  (".t("ovh").". ".sprintf("%.".$yhtiorow['hintapyoristys']."f", $hintarow["hinta"])." $hintarow[valkoodi])";
+						$replace[]	= "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=".urlencode($m[1])."'>$trow[tuoteno]</a> $trow[nimitys] $ashinta (".t("ovh").". ".sprintf("%.".$yhtiorow['hintapyoristys']."f", $hintarow["hinta"])." $hintarow[valkoodi])";
 					}
 				}
 

@@ -71,8 +71,15 @@
 		$nayta_select5 = 'checked';
 	}
 
-	echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='osastoittain' $nayta_select1>",t("Osastoittain"),"<br/>";
-	echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>",t("Ryhmitt‰in"),"<br/>";
+	if ($asiakasanalyysi) {
+		echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='osastoittain' $nayta_select1>",t("Asiakasosastoittain"),"<br/>";
+		echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>",t("Asiakastuoteryhmitt‰in"),"<br/>";
+	}
+	else {
+		echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='osastoittain' $nayta_select1>",t("Tuoteosastoittain"),"<br/>";
+		echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>",t("Tuoteryhmitt‰in"),"<br/>";
+	}
+	
 	if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuotemerkeittain' $nayta_select3>",t("Tuotemerkeitt‰in"),"<br/>";
 	if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuotemyyjittain' $nayta_select4>",t("Tuotemyyjitt‰in"),"<br/>";
 	if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteostajittain' $nayta_select5>",t("Tuoteostajittain");
@@ -370,7 +377,13 @@
 
 			if ($osasto == 'KAIKKI') {
 				// tehd‰‰n avainsana query
-				$keyres = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
+				if ($asiakasanalyysi) {
+					$keyres = t_avainsana("ASIAKASOSASTO", "", "and avainsana.selite ='$row[osasto]'");
+				}
+				else {
+					$keyres = t_avainsana("OSASTO", "", "and avainsana.selite ='$row[osasto]'");
+				}
+				
 				$keyosa = mysql_fetch_array($keyres);
 
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_osasto[]=$row[osasto]&lisatiedot=$lisatiedot'>$row[osasto] $keyosa[selitetark]</a></td>";
@@ -378,7 +391,13 @@
 
 			if ($try == 'KAIKKI') {
 				// tehd‰‰n avainsana query
-				$keyres = t_avainsana("TRY", $kukarow['kieli'], "and avainsana.selite ='$row[try]'");
+				if ($asiakasanalyysi) {
+					$keyres = t_avainsana("ASIAKASTRY", $kukarow['kieli'], "and avainsana.selite ='$row[try]'");
+				}
+				else {
+					$keyres = t_avainsana("TRY", $kukarow['kieli'], "and avainsana.selite ='$row[try]'");
+				}
+				
 				$keytry = mysql_fetch_array($keyres);
 
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_try[]=$row[try]&lisatiedot=$lisatiedot'>$row[try] $keytry[selitetark]</a></td>";
@@ -526,10 +545,7 @@
 
 					echo "</pre>";
 				}
-
-
-
-
+				
 				if (${'palvelutaso_input'.$i} == '') {
 					$pttvalue = str_replace(".",",",$paramrow["palvelutaso_tavoite"]);
 				}

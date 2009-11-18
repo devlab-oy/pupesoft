@@ -73,7 +73,7 @@
 
 	if ($asiakasanalyysi) {
 		echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='osastoittain' $nayta_select1>",t("Asiakasosastoittain"),"<br/>";
-		echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>",t("Asiakastuoteryhmitt‰in"),"<br/>";
+		echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>",t("Asiakasryhmitt‰in"),"<br/>";
 	}
 	else {
 		echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='osastoittain' $nayta_select1>",t("Tuoteosastoittain"),"<br/>";
@@ -392,7 +392,7 @@
 			if ($try == 'KAIKKI') {
 				// tehd‰‰n avainsana query
 				if ($asiakasanalyysi) {
-					$keyres = t_avainsana("ASIAKASTRY", $kukarow['kieli'], "and avainsana.selite ='$row[try]'");
+					$keyres = t_avainsana("ASIAKASRYHMA", $kukarow['kieli'], "and avainsana.selite ='$row[try]'");
 				}
 				else {
 					$keyres = t_avainsana("TRY", $kukarow['kieli'], "and avainsana.selite ='$row[try]'");

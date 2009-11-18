@@ -64,21 +64,25 @@
 								############### TUOTEOSASTO
 								echo "<table>";
 									echo "<tr>";
-										echo "<th colspan='2'>".t("Tuoteosasto").":</th>";
+										echo "<th colspan='2'>",t("Tuoteosasto"),":</th>";
 									echo "</tr>";
 									echo "<tr>";
-										echo "<td><input type='checkbox' name='mul_osa' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td>";
+										echo "<td><input type='checkbox' name='mul_osa' onclick='toggleAll(this);'></td><td nowrap>",t("Ruksaa kaikki"),"</td>";
 									echo "</tr>";
+
+									if (isset($osasto) and $osasto != '') {
+										$mul_osasto = explode(",", $osasto);
+									}
 
 									while ($rivi = mysql_fetch_array($res2)) {
 										$mul_check = '';
-										if ($mul_osasto!="") {
-											if (in_array($rivi['selite'],$mul_osasto)) {
+										if (count($mul_osasto) > 0) {
+											if (in_array($rivi['selite'], $mul_osasto)) {
 												$mul_check = 'CHECKED';
 											}
 										}
 
-										echo "<tr><td><input type='checkbox' name='mul_osasto[]' value='",$rivi['selite'],"' ",$mul_check,"></td><td>",$rivi['selite']," - ",$rivi['selitetark'],"</td></tr>";
+										echo "<tr><td><input type='checkbox' name='mul_osasto[]' value='{$rivi['selite']}' {$mul_check}></td><td>{$rivi['selite']} - {$rivi['selitetark']}</td></tr>";
 									}
 
 								echo "</table>";
@@ -108,21 +112,25 @@
 								############### TUOTERYHMÄ
 								echo "<table>";
 									echo "<tr>";
-										echo "<th colspan='2'>".t("Tuoterymä").":</th>";
+										echo "<th colspan='2'>",t("Tuoterymä"),":</th>";
 									echo "</tr>";
 									echo "<tr>";
-										echo "<td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td>";
+										echo "<td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td nowrap>",t("Ruksaa kaikki"),"</td>";
 									echo "</tr>";
+
+									if (isset($try) and $try != '') {
+										$mul_try = explode(",", $try);
+									}
 
 									while ($rivi = mysql_fetch_array($res2)) {
 										$mul_check = '';
-										if ($mul_try!="") {
-											if (in_array($rivi['selite'],$mul_try)) {
+										if (count($mul_try) > 0) {
+											if (in_array($rivi['selite'], $mul_try)) {
 												$mul_check = 'CHECKED';
 											}
 										}
 
-										echo "<tr><td><input type='checkbox' name='mul_try[]' value='",$rivi['selite'],"' ",$mul_check,"></td><td>",$rivi['selite']," - ",$rivi['selitetark'],"</td></tr>";
+										echo "<tr><td><input type='checkbox' name='mul_try[]' value='{$rivi['selite']}' {$mul_check}></td><td>{$rivi['selite']} - {$rivi['selitetark']}</td></tr>";
 									}
 
 								echo "</table>";
@@ -152,21 +160,25 @@
 								############### TUOTEMERKKI
 								echo "<table>";
 									echo "<tr>";
-										echo "<th colspan='2'>".t("Tuotemerkki").":</th>";
+										echo "<th colspan='2'>",t("Tuotemerkki"),":</th>";
 									echo "</tr>";
 									echo "<tr>";
-										echo "<td><input type='checkbox' name='mul_tmr' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td>";
+										echo "<td><input type='checkbox' name='mul_tmr' onclick='toggleAll(this);'></td><td nowrap>",t("Ruksaa kaikki"),"</td>";
 									echo "</tr>";
+
+									if (isset($tmr) and $tmr != '') {
+										$mul_tmr = explode(",", $tmr);
+									}
 
 									while ($rivi = mysql_fetch_array($res2)) {
 										$mul_check = '';
-										if ($mul_tmr!="") {
+										if (count($mul_tmr) > 0) {
 											if (in_array($rivi['tuotemerkki'], $mul_tmr)) {
 												$mul_check = 'CHECKED';
 											}
 										}
 
-										echo "<tr><td><input type='checkbox' name='mul_tmr[]' value='",$rivi['tuotemerkki'],"' ",$mul_check,"></td><td> ",$rivi['tuotemerkki']," </td></tr>";
+										echo "<tr><td><input type='checkbox' name='mul_tmr[]' value='{$rivi['tuotemerkki']}' {$mul_check}></td><td>{$rivi['tuotemerkki']}</td></tr>";
 									}
 
 								echo "</table>";
@@ -188,10 +200,10 @@
 								############### TUNNUS (voidaan hakea tunnusvälillä)
 								echo "<table width='100%'>";
 									echo "<tr>";
-										echo "<th colspan='3'>".t("Tuotenumerohaku").":</th>";
+										echo "<th colspan='3'>",t("Tuotenumerohaku"),":</th>";
 									echo "</tr>";
 									echo "<tr>";
-										echo "<td><input type='text' name='tuoteno' size='15' value='",$tuoteno,"'></td>";
+										echo "<td><input type='text' name='tuoteno' size='15' value='{$tuoteno}'></td>";
 									echo "</tr>";
 								echo "</table>";
 							echo "</td>";
@@ -203,47 +215,51 @@
 								############### KÄYTTÖTARKOITUS (onko thumbnail vai tuotekuva)
 								echo "<table width='100%'>";
 									echo "<tr>";
-										echo "<th colspan='2'>".t("Käyttötarkoitus").":</th>";
+										echo "<th colspan='2'>",t("Käyttötarkoitus"),":</th>";
 									echo "</tr>";
 									echo "<tr>";
-										echo "<td><input type='checkbox' name='mul_kay' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td>";
+										echo "<td><input type='checkbox' name='mul_kay' onclick='toggleAll(this);'></td><td nowrap>",t("Ruksaa kaikki"),"</td>";
 									echo "</tr>";
 
+									if (isset($kayt) and $kayt != '') {
+										$mul_kay = explode(",", $kayt);
+									}
+
 									$mul_check = '';
-									if ($mul_kay != '') {
+									if (count($mul_kay) > 0) {
 										if (in_array('th', $mul_kay)) {
 											$mul_check = 'CHECKED';
 										}
 									}
 
-									echo "<tr><td><input type='checkbox' name='mul_kay[]' value='th' ",$mul_check,"></td><td nowrap>".t("Thumbnail")."</td></tr>";
+									echo "<tr><td><input type='checkbox' name='mul_kay[]' value='th' {$mul_check}></td><td nowrap>",t("Thumbnail"),"</td></tr>";
 
 									$mul_check = '';
-									if ($mul_kay != '') {
+									if (count($mul_kay) > 0) {
 										if (in_array('tk', $mul_kay)) {
 											$mul_check = 'CHECKED';
 										}
 									}
 
-									echo "<tr><td><input type='checkbox' name='mul_kay[]' value='tk' ",$mul_check,"></td><td nowrap>".t("Tuotekuva")."</td></tr>";
+									echo "<tr><td><input type='checkbox' name='mul_kay[]' value='tk' {$mul_check}></td><td nowrap>",t("Tuotekuva"),"</td></tr>";
 									
 									$mul_check = '';
-									if ($mul_kay != '') {
+									if (count($mul_kay) > 0) {
 										if (in_array('hr', $mul_kay)) {
 											$mul_check = 'CHECKED';
 										}
 									}
 
-									echo "<tr><td><input type='checkbox' name='mul_kay[]' value='hr' ",$mul_check,"></td><td nowrap>".t("Painokuva")."</td></tr>";
+									echo "<tr><td><input type='checkbox' name='mul_kay[]' value='hr' {$mul_check}></td><td nowrap>",t("Painokuva"),"</td></tr>";
 									
 									$mul_check = '';
-									if ($mul_kay != '') {
+									if (count($mul_kay) > 0) {
 										if (in_array('mu', $mul_kay)) {
 											$mul_check = 'CHECKED';
 										}
 									}
 
-									echo "<tr><td><input type='checkbox' name='mul_kay[]' value='mu' ",$mul_check,"></td><td nowrap>".t("Muu")."</td></tr>";
+									echo "<tr><td><input type='checkbox' name='mul_kay[]' value='mu' {$mul_check}></td><td nowrap>",t("Muu"),"</td></tr>";
 
 								echo "</table>";
 
@@ -256,7 +272,7 @@
 								############### NÄYTÄ (jos halutaan näyttää myös tuotekuvien popup-kuvat)
 								echo "<table width='100%'>";
 									echo "<tr>";
-										echo "<th colspan='2'>".t("Näytä").":</th>";
+										echo "<th colspan='2'>",t("Näytä"),":</th>";
 									echo "</tr>";
 
 									$mul_check = '';
@@ -266,7 +282,7 @@
 										}
 									}
 
-									echo "<tr><td><input type='checkbox' name='nayta_tk' value='naytetaan' ",$mul_check,"></td><td nowrap>".t("Tuotekuvat")."</td></tr>";
+									echo "<tr><td><input type='checkbox' name='nayta_tk' value='naytetaan' {$mul_check}></td><td nowrap>",t("Tuotekuvat"),"</td></tr>";
 									
 									$mul_check = '';
 									if ($nayta_hr != '') {
@@ -275,7 +291,7 @@
 										}
 									}
 
-									echo "<tr><td><input type='checkbox' name='nayta_hr' value='naytetaan' ",$mul_check,"></td><td nowrap>".t("Painokuvat")."</td></tr>";
+									echo "<tr><td><input type='checkbox' name='nayta_hr' value='naytetaan' {$mul_check}></td><td nowrap>",t("Painokuvat"),"</td></tr>";
 									
 									
 									$mul_check = '';
@@ -285,7 +301,7 @@
 										}
 									}
 
-									echo "<tr><td><input type='checkbox' name='nayta_th' value='naytetaan' ",$mul_check,"></td><td nowrap>".t("Thumbnailit")."</td></tr>";
+									echo "<tr><td><input type='checkbox' name='nayta_th' value='naytetaan' {$mul_check}></td><td nowrap>",t("Thumbnailit"),"</td></tr>";
 								echo "</table>";
 
 							echo "</td>";
@@ -300,19 +316,23 @@
 										echo "<th colspan='2'>".t("Selite").":</th>";
 									echo "</tr>";
 
+									if (isset($sel) and $sel != '') {
+										$mul_sel = explode(",", $sel);
+									}
+
 									$mul_check = '';
 									if (count($mul_sel) > 0 and in_array('ei_tyhja', $mul_sel)) {
 										$mul_check = 'CHECKED';
 									}
 
-									echo "<tr><td><input type='checkbox' name='mul_sel[]' value='ei_tyhja' ",$mul_check,"></td><td nowrap>".t("Ei tyhjä")."</td></tr>";
+									echo "<tr><td><input type='checkbox' name='mul_sel[]' value='ei_tyhja' {$mul_check}></td><td nowrap>",t("Ei tyhjä"),"</td></tr>";
 
 									$mul_check = '';
 									if (count($mul_sel) > 0 and in_array('tyhja', $mul_sel)) {
 										$mul_check = 'CHECKED';
 									}
 
-									echo "<tr><td><input type='checkbox' name='mul_sel[]' value='tyhja' ",$mul_check,"></td><td nowrap>".t("Tyhjä")."</td></tr>";
+									echo "<tr><td><input type='checkbox' name='mul_sel[]' value='tyhja' {$mul_check}></td><td nowrap>",t("Tyhjä"),"</td></tr>";
 								echo "</table>";
 
 							echo "</td>";
@@ -327,19 +347,23 @@
 										echo "<th colspan='2'>",t("Status"),":</th>";
 									echo "</tr>";
 
+									if (isset($status) and $status != '') {
+										$mul_sta = explode(",", $status);
+									}
+
 									$mul_check = '';
 									if (count($mul_sta) > 0 and in_array('P', $mul_sta)) {
 										$mul_check = 'CHECKED';
 									}
 
-									echo "<tr><td><input type='checkbox' name='mul_sta[]' value='P' ",$mul_check,"></td><td nowrap>".t("Näytä myös status P")."</td></tr>";
+									echo "<tr><td><input type='checkbox' name='mul_sta[]' value='P' {$mul_check}></td><td nowrap>",t("Näytä myös status P"),"</td></tr>";
 
 									$mul_check = '';
 									if (count($mul_sta) > 0 and in_array('X', $mul_sta)) {
 										$mul_check = 'CHECKED';
 									}
 
-									echo "<tr><td><input type='checkbox' name='mul_sta[]' value='X' ",$mul_check,"></td><td nowrap>".t("Näytä myös status X")."</td></tr>";
+									echo "<tr><td><input type='checkbox' name='mul_sta[]' value='X' {$mul_check}></td><td nowrap>",t("Näytä myös status X"),"</td></tr>";
 								echo "</table>";
 
 							echo "</td>";
@@ -364,7 +388,7 @@
 										$mul_check = 'CHECKED';
 									}
 
-									echo "<tr><td><input type='checkbox' name='mul_siv' value='ei_sivutusta' ",$mul_check,"></td><td nowrap>".t("Ei sivutusta")."</td></tr>";
+									echo "<tr><td><input type='checkbox' name='mul_siv' value='ei_sivutusta' {$mul_check}></td><td nowrap>".t("Ei sivutusta")."</td></tr>";
 
 								echo "</table>";
 

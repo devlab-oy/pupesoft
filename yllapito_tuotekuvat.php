@@ -464,28 +464,36 @@
 								############### Kuvan mitat (korkeus, leveys)
 								echo "<table width='100%'>";
 									echo "<tr>";
-										echo "<th colspan='2'>".t("Kuvan mitat").":</th>";
+										echo "<th colspan='2'>",t("Kuvan mitat"),":</th>";
 									echo "</tr>";
 
-									echo "<tr><td><input type='checkbox' name='mul_siz' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
+									echo "<tr><td><input type='checkbox' name='mul_siz' onclick='toggleAll(this);'></td><td nowrap>",t("Ruksaa kaikki"),"</td></tr>";
+
+									if (isset($korkeus) and $korkeus != '') {
+										$mul_siz[] = 'korkeus';
+									}
 
 									$mul_check = '';
-									if ($mul_siz != '') {
+									if (count($mul_siz) > 0) {
 										if (in_array('korkeus', $mul_siz)) {
 											$mul_check = 'CHECKED';
 										}
 									}
 
-									echo "<tr><td><input type='checkbox' name='mul_siz[]' value='korkeus' ",$mul_check,"></td><td nowrap>".t("Korkeus")."</td></tr>";
+									echo "<tr><td><input type='checkbox' name='mul_siz[]' value='korkeus' {$mul_check}></td><td nowrap>",t("Korkeus"),"</td></tr>";
+
+									if (isset($leveys) and $leveys != '') {
+										$mul_siz[] = 'leveys';
+									}
 
 									$mul_check = '';
-									if ($mul_siz != '') {
+									if (count($mul_siz) > 0) {
 										if (in_array('leveys', $mul_siz)) {
 											$mul_check = 'CHECKED';
 										}
 									}
 
-									echo "<tr><td><input type='checkbox' name='mul_siz[]' value='leveys' ",$mul_check,"></td><td nowrap>".t("Leveys")."</td></tr>";
+									echo "<tr><td><input type='checkbox' name='mul_siz[]' value='leveys' {$mul_check}></td><td nowrap>",t("Leveys"),"</td></tr>";
 
 								echo "</table>";
 							echo "</td>";

@@ -1681,16 +1681,16 @@
 				}
 
 				// Aloitellaan lähetteen teko
-				$page[$sivu] = alku($tyyppi);
+				$page[$sivu] = alku_lahete($tyyppi);
 
 				while ($row = mysql_fetch_assoc($result)) {
-					rivi($page[$sivu], $tyyppi);
+					rivi_lahete($page[$sivu], $tyyppi);
 				}
 
-				loppu($page[$sivu], 1);
+				loppu_lahete($page[$sivu], 1);
 
 				//tulostetaan sivu
-				print_pdf($komento["Työmääräys"]);
+				print_pdf_lahete($komento["Työmääräys"]);
 				$tee = '';
 			}
 
@@ -1759,8 +1759,6 @@
 							rivi_valm($page[$sivu], "ETUSIVU");
 						}
 					}
-
-					//$page[$sivu] 	= uusi_sivu_valm($tyyppi);
 
 					mysql_data_seek($result,0);
 				}
@@ -1914,13 +1912,12 @@
 					}
 
 					// Aloitellaan lähetteen teko
-					$page[$sivu] = alku($lah_tyyppi);
+					$page[$sivu] = alku_lahete($lah_tyyppi);
 
 					while ($row = mysql_fetch_assoc($riresult)) {
-						rivi($page[$sivu], $lah_tyyppi);
+						rivi_lahete($page[$sivu], $lah_tyyppi);
 						$total+= $row["rivihinta"];
 					}
-
 
 					//Haetaan erikseen toimitettavat tuotteet
 					if ($laskurow["vanhatunnus"] != 0 and $utuotteet_mukaan == 1) {
@@ -1965,7 +1962,7 @@
 								$row['jt'] 			= "";
 								$row['d_erikseen'] 	= "JOO";
 
-								rivi($page[$sivu], $lah_tyyppi);
+								rivi_lahete($page[$sivu], $lah_tyyppi);
 							}
 						}
 					}
@@ -1976,7 +1973,7 @@
 					$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
 					$pdf->draw_line($x, $y, $page[$sivu], $rectparam);
 
-					loppu($page[$sivu], 1);
+					loppu_lahete($page[$sivu], 1);
 
 					//katotaan onko laskutus nouto
 					$query = "  SELECT toimitustapa.nouto, maksuehto.kateinen
@@ -1988,15 +1985,15 @@
 					$kures = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($kures) > 0 and $yhtiorow["lahete_nouto_allekirjoitus"] != "") {
-						kuittaus();
+						kuittaus_lahete();
 					}
 
 					if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
-						alvierittely($page[$sivu]);
+						alvierittely_lahete($page[$sivu]);
 					}
 
 					//tulostetaan sivu
-					print_pdf($komento["Lähete"]);
+					print_pdf_lahete($komento["Lähete"]);
 				}
 
 				$tee = '';

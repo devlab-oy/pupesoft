@@ -15,8 +15,8 @@ $pieni["height"] 	= 8;
 $pieni["font"] 		= "Times-Roman";
 
 // laskun alku ja loppu functiot...
-if (!function_exists('alku')) {
-	function alku () {
+if (!function_exists('alku_lahete')) {
+	function alku_lahete () {
 		global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kieli, $kala, $lask;
 
 		//PDF parametrit
@@ -151,15 +151,15 @@ if (!function_exists('alku')) {
 	}
 }
 
-if (!function_exists('rivi')) {
-	function rivi ($thispage) {
+if (!function_exists('rivi_lahete')) {
+	function rivi_lahete ($thispage) {
 		global $pdf, $page, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli;
 
 		if ($lask == 16) {
 			$sivu++;
-			loppu($thispage, 0);
+			loppu_lahete($thispage, 0);
 
-			$page[$sivu] = alku();
+			$page[$sivu] = alku_lahete();
 			$thispage    = $page[$sivu];
 		}
 
@@ -193,8 +193,8 @@ if (!function_exists('rivi')) {
 	}
 }
 
-if (!function_exists('loppu')) {
-	function loppu ($thispage, $tots) {
+if (!function_exists('loppu_lahete')) {
+	function loppu_lahete($thispage, $tots) {
 
 		global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kieli, $masrow, $total;
 
@@ -233,16 +233,16 @@ if (!function_exists('loppu')) {
 	}
 }
 
-if (!function_exists('alvierittely')) {
-	function alvierittely ($thispage) {
+if (!function_exists('alvierittely_lahete')) {
+	function alvierittely_lahete ($thispage) {
 		global $pdf, $page, $kala, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $lask, $kieli, $total;
 
 		if ($lask >= 29) {
 			$sivu++;
 
-			loppu($thispage, 0);
+			loppu_lahete($thispage, 0);
 
-			$page[$sivu] = alku();
+			$page[$sivu] = alku_lahete();
 			$thispage    = $page[$sivu];
 
 			$loppumyos = 1;
@@ -295,13 +295,13 @@ if (!function_exists('alvierittely')) {
 		$kala -= 10;
 
 		if ($loppumyos == 1) {
-			loppu($thispage, 0);
+			loppu_lahete($thispage, 0);
 		}
 	}
 }
 
-if (!function_exists('print_pdf')) {
-	function print_pdf ($komento) {
+if (!function_exists('print_pdf_lahete')) {
+	function print_pdf_lahete ($komento) {
 
 		global $tee, $pdf, $laskurow, $yhtiorow, $kukarow, $kieli;
 

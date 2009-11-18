@@ -42,8 +42,8 @@ $rectparam["width"] 	= 0.3;
 $rivinkorkeus			= 15;
 
 //muutamat funktiot...
-if (!function_exists('alku')) {
-	function alku($tyyppi = "") {
+if (!function_exists('alku_lahete')) {
+	function alku_lahete($tyyppi = "") {
 		global $pdf, $sivu, $lahetetyyppi, $laskurow, $yhtiorow, $viite, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kala, $rectparam, $kukarow, $kieli, $asrow, $useita, $extranet_tilausvahvistus;
 
 		//PDF parametrit
@@ -436,14 +436,14 @@ if (!function_exists('alku')) {
 		}
 		$pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
 
-		rivi_otsikot($thispage);
+		rivi_otsikot_lahete($thispage);
 
 		return($thispage);
 	}
 }
 
-if (!function_exists('uusi_sivu')) {
-	function uusi_sivu ($tyyppi = "") {
+if (!function_exists('uusi_sivu_lahete')) {
+	function uusi_sivu_lahete ($tyyppi = "") {
 		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $iso, $kateistyyppi, $kieli, $boldi, $kala, $useita;
 
 		$thispage = $pdf->new_page("a4");
@@ -605,14 +605,14 @@ if (!function_exists('uusi_sivu')) {
 
 		$pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
 
-		rivi_otsikot($thispage);
+		rivi_otsikot_lahete($thispage);
 
 		return($thispage);
 	}
 }
 
-if (!function_exists('rivi_otsikot')) {
-	function rivi_otsikot($thispage) {
+if (!function_exists('rivi_otsikot_lahete')) {
+	function rivi_otsikot_lahete($thispage) {
 		global $pdf, $kieli, $lahetetyyppi, $norm, $rectparam, $kala, $extranet_tilausvahvistus;
 
 		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc") {
@@ -736,8 +736,8 @@ if (!function_exists('rivi_otsikot')) {
 	}
 }
 
-if (!function_exists('rivi')) {
-	function rivi($thispage, $tyyppi="") {
+if (!function_exists('rivi_lahete')) {
+	function rivi_lahete($thispage, $tyyppi="") {
 		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $jtid, $summa, $norm, $pieni, $rivinkorkeus, $useita;
 
 		// viivat rivien väliin...
@@ -753,9 +753,9 @@ if (!function_exists('rivi')) {
 		if ($kala <= 70) {
 			$sivu++;
 
-			loppu($thispage, 0);
+			loppu_lahete($thispage, 0);
 
-			$page[$sivu] = uusi_sivu($tyyppi);
+			$page[$sivu] = uusi_sivu_lahete($tyyppi);
 			$thispage    = $page[$sivu];
 		}
 
@@ -1018,25 +1018,25 @@ if (!function_exists('rivi')) {
 
 		if (substr($lahetetyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
 			if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc") {
-				rivi_hinta_ale($devnull);
+				rivi_hinta_ale_lahete($devnull);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_brutto.inc") {
-				rivi_brutto($devnull);
+				rivi_brutto_lahete($devnull);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_eialeja.inc") {
-				rivi_eialeja($devnull);
+				rivi_eialeja_lahete($devnull);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_viivakoodi.inc") {
-				rivi_viivakoodi($devnull);
+				rivi_viivakoodi_lahete($devnull);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_asiakviivakoodi.inc") {
-				rivi_asiakviivakoodi($devnull);
+				rivi_asiakviivakoodi_lahete($devnull);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_viivakoodi_ean13.inc") {
-				rivi_viivakoodi_ean13($devnull);
+				rivi_viivakoodi_lahete_ean13($devnull);
 			}
 			else{
-				rivi_ei_ale_ei_hinta($devnull);
+				rivi_ei_ale_ei_hinta_lahete($devnull);
 			}
 		}
 
@@ -1044,9 +1044,9 @@ if (!function_exists('rivi')) {
 		if ($kala <= 70 or $kala > $kala_nyt) {
 			$sivu++;
 
-			loppu($thispage, 0);
+			loppu_lahete($thispage, 0);
 
-			$page[$sivu] = uusi_sivu($tyyppi);
+			$page[$sivu] = uusi_sivu_lahete($tyyppi);
 			$thispage    = $page[$sivu];
 		}
 		else {
@@ -1063,7 +1063,7 @@ if (!function_exists('rivi')) {
 					$row['rivihinta'] = 0;
 				}
 
-				rivi_hinta_ale($thispage);
+				rivi_hinta_ale_lahete($thispage);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_brutto.inc") {
 				// tulosta_lahete_brutto.inc
@@ -1074,7 +1074,7 @@ if (!function_exists('rivi')) {
 					$row['rivihinta'] = 0;
 				}
 
-				rivi_brutto($thispage);
+				rivi_brutto_lahete($thispage);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_eialeja.inc") {
 				//tulosta_lahete_eialeja.inc
@@ -1085,30 +1085,30 @@ if (!function_exists('rivi')) {
 					$row['rivihinta'] = 0;
 				}
 
-				rivi_eialeja($thispage);
+				rivi_eialeja_lahete($thispage);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_viivakoodi.inc") {
 				// tulosta_lahete_viivakoodi.inc
-				rivi_viivakoodi($thispage);
+				rivi_viivakoodi_lahete($thispage);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_asiakviivakoodi.inc") {
 				// tulosta_lahete_asiakviivakoodi.inc
-				rivi_asiakviivakoodi($thispage);
+				rivi_asiakviivakoodi_lahete($thispage);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_viivakoodi_ean13.inc") {
-				rivi_viivakoodi_ean13($thispage);
+				rivi_viivakoodi_lahete_ean13($thispage);
 			}
 			else {
 				//tulosta_lahete_eiale_eihinta.inc
 				//tulosta_lahete_eiale_eihinta_iso.inc
-				rivi_ei_ale_ei_hinta($thispage);
+				rivi_ei_ale_ei_hinta_lahete($thispage);
 			}
 		}
 	}
 }
 
-if (!function_exists('rivi_hinta_ale')) {
-	function rivi_hinta_ale($thispage) {
+if (!function_exists('rivi_hinta_ale_lahete')) {
+	function rivi_hinta_ale_lahete($thispage) {
 		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $yhtiorow, $extranet_tilausvahvistus, $kieli;
 
 		if (trim($row["perhe_kommentti"]) != '') {
@@ -1132,9 +1132,9 @@ if (!function_exists('rivi_hinta_ale')) {
 		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"]), $norm);
 		$pdf->draw_text(465-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"]), 				$thispage, $norm);
 
-		
+
 		list($ff_string, $ff_font) = pdf_fontfit(($row["ale"]*1)."%", 25, $pdf, $norm);
-		
+
 		$oikpos = $pdf->strlen($ff_string, $ff_font);
 		$pdf->draw_text(495-$oikpos, $kala, $ff_string, $thispage, $ff_font);
 
@@ -1163,8 +1163,8 @@ if (!function_exists('rivi_hinta_ale')) {
 	}
 }
 
-if (!function_exists('rivi_brutto')) {
-	function rivi_brutto($thispage) {
+if (!function_exists('rivi_brutto_lahete')) {
+	function rivi_brutto_lahete($thispage) {
 		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $yhtiorow, $kieli;
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],							$thispage, $pieni);
@@ -1202,8 +1202,8 @@ if (!function_exists('rivi_brutto')) {
 	}
 }
 
-if (!function_exists('rivi_ei_ale_ei_hinta')) {
-	function rivi_ei_ale_ei_hinta($thispage) {
+if (!function_exists('rivi_ei_ale_ei_hinta_lahete')) {
+	function rivi_ei_ale_ei_hinta_lahete($thispage) {
 		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $kieli, $lahetetyyppi;
 
 		$lisarivi = 0;
@@ -1248,8 +1248,8 @@ if (!function_exists('rivi_ei_ale_ei_hinta')) {
 	}
 }
 
-if (!function_exists('rivi_eialeja')) {
-	function rivi_eialeja($thispage) {
+if (!function_exists('rivi_eialeja_lahete')) {
+	function rivi_eialeja_lahete($thispage) {
 		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $yhtiorow, $extranet_tilausvahvistus, $kieli;
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],							$thispage, $pieni);
@@ -1295,8 +1295,8 @@ if (!function_exists('rivi_eialeja')) {
 	}
 }
 
-if (!function_exists('rivi_viivakoodi')) {
-	function rivi_viivakoodi($thispage) {
+if (!function_exists('rivi_viivakoodi_lahete')) {
+	function rivi_viivakoodi_lahete($thispage) {
 		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $kukarow, $kieli;
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],								$thispage, $pieni);
@@ -1357,8 +1357,8 @@ if (!function_exists('rivi_viivakoodi')) {
 	}
 }
 
-if (!function_exists('rivi_asiakviivakoodi')) {
-	function rivi_asiakviivakoodi($thispage) {
+if (!function_exists('rivi_asiakviivakoodi_lahete')) {
+	function rivi_asiakviivakoodi_lahete($thispage) {
 		global $pdf, $row, $laskurow, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $kukarow, $kieli;
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],								$thispage, $pieni);
@@ -1433,8 +1433,8 @@ if (!function_exists('rivi_asiakviivakoodi')) {
 	}
 }
 
-if (!function_exists('rivi_viivakoodi_ean13')) {
-	function rivi_viivakoodi_ean13($thispage) {
+if (!function_exists('rivi_viivakoodi_lahete_ean13')) {
+	function rivi_viivakoodi_lahete_ean13($thispage) {
 		global $pdf, $row, $kala, $rivinumerot, $norm, $pieni, $rivinkorkeus, $kukarow, $kieli;
 
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],								$thispage, $pieni);
@@ -1502,8 +1502,8 @@ if (!function_exists('rivi_viivakoodi_ean13')) {
 	}
 }
 
-if (!function_exists('loppu')) {
-	function loppu ($thispage, $tots) {
+if (!function_exists('loppu_lahete')) {
+	function loppu_lahete($thispage, $tots) {
 		global $pdf, $sivu, $laskurow, $viite, $pieni, $norm, $summa, $rectparam, $kieli, $yhtiorow, $kala, $rivinkorkeus, $page;
 
 		// yhtiötiedot
@@ -1603,13 +1603,13 @@ if (!function_exists('loppu')) {
 	}
 }
 
-if (!function_exists('kuittaus')) {
-	function kuittaus ($tyyppi="") {
+if (!function_exists('kuittaus_lahete')) {
+	function kuittaus_lahete ($tyyppi="") {
 		global $pdf, $laskurow, $viite, $p, $summa, $rectparam, $kieli, $yhtiorow;
 
 		$sivu++;
 
-		$page[$sivu] = alku($tyyppi);
+		$page[$sivu] = alku_lahete($tyyppi);
 		$thispage    = $page[$sivu];
 
 		$pdf->draw_text(50, 400, t("Allekirjoitus").": _____________________", 	$thispage, $norm);
@@ -1617,8 +1617,8 @@ if (!function_exists('kuittaus')) {
 	}
 }
 
-if (!function_exists('print_pdf')) {
-	function print_pdf ($komento, $tyyppi="") {
+if (!function_exists('print_pdf_lahete')) {
+	function print_pdf_lahete ($komento, $tyyppi="") {
 		global $pdf, $kukarow, $yhtiorow, $kateinen, $returnvalue, $kieli, $tee, $laskurow;
 
 		$oslapp='';

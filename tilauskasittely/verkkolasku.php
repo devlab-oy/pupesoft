@@ -1804,7 +1804,7 @@
 
 					if ($silent == "") $tulos_ulos .= "<br>\n".t("Tulostetaan paperilaskuja").":<br>\n";
 
-					foreach($tulostettavat as $lasku) {
+					foreach ($tulostettavat as $lasku) {
 
 						if ($silent == "") $tulos_ulos .= t("Tulostetaan lasku").": $lasku<br>\n";
 

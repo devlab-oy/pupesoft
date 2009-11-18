@@ -145,12 +145,12 @@
 		// haetaan toimitustavan tiedot
 		$query    = "SELECT * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
 		$toitares = mysql_query($query) or pupe_error($query);
-		$toitarow = mysql_fetch_array($toitares);
+		$toitarow = mysql_fetch_assoc($toitares);
 
 		// haetaan rahtikirjan tyyppi
 		$query    = "SELECT * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'RAHTIKIRJA' and selite = '$toitarow[rahtikirja]'";
 		$avainres = mysql_query($query) or pupe_error($query);
-		$avainrow = mysql_fetch_array($avainres);
+		$avainrow = mysql_fetch_assoc($avainres);
 
 		// haetaan printterin tiedot
 		if (isset($laskurow)) {
@@ -178,7 +178,7 @@
 		}
 
 		$pres  = mysql_query($query) or pupe_error($query);
-		$print = mysql_fetch_array($pres);
+		$print = mysql_fetch_assoc($pres);
 
 		if ($komento != "") {
 			$kirjoitin_tunnus = (int) $komento; // jos ollaan valittu oma printteri
@@ -205,7 +205,7 @@
 		// haetaan printterille tulostuskomento
 		$query = "SELECT * from kirjoittimet where tunnus = '$kirjoitin_tunnus'";
 		$pres  = mysql_query($query) or pupe_error($query);
-		$print = mysql_fetch_array($pres);
+		$print = mysql_fetch_assoc($pres);
 
 		$kirjoitin = $print['komento'];
 		$merkisto  = $print['merkisto'];
@@ -216,7 +216,7 @@
 			if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE) {
 				$query  = "SELECT * from kirjoittimet where tunnus = '$valittu_rakiroslapp_tulostin'";
 				$kirres = mysql_query($query) or pupe_error($query);
-				$kirrow = mysql_fetch_array($kirres);
+				$kirrow = mysql_fetch_assoc($kirres);
 				$oslapp = $kirrow['komento'];
 			}
 		}
@@ -288,7 +288,7 @@
 			echo "<font class='message'>".t("Yhtään tulostettavaa rahtikirjaa ei löytynyt").".</font><br><br>";
 		}
 
-		while ($rakir_row = mysql_fetch_array($rakir_res)) {
+		while ($rakir_row = mysql_fetch_assoc($rakir_res)) {
 			// muutama muuttuja tarvitaan
 			$pakkaus       	= array();
 			$kilot         	= array();
@@ -373,7 +373,7 @@
 						$jvehto";
 			$res   = mysql_query($query) or pupe_error($query);
 
-			while ($rivi = mysql_fetch_array($res)) {
+			while ($rivi = mysql_fetch_assoc($res)) {
 				//otetaan kaikki otsikkonumerot ja rahtikirjanumerot talteen... tarvitaan myöhemmin hauissa
 				$otunnukset   .="'$rivi[otunnus]',";
 				$tunnukset    .="'$rivi[rtunnus]',";
@@ -391,7 +391,7 @@
 			if (mysql_num_rows($res) > 0) {
 				mysql_data_seek($res,0);
 
-				$rivi = mysql_fetch_array($res);
+				$rivi = mysql_fetch_assoc($res);
 
 				//vikat pilkut pois
 				$otunnukset = substr($otunnukset,0,-1);
@@ -405,26 +405,26 @@
 				}
 
 				//summataan kaikki painot yhteen
-				$query = "	SELECT pakkaus, sum(kilot), sum(kollit), sum(kuutiot), sum(lavametri)
+				$query = "	SELECT pakkaus, sum(kilot) kilot, sum(kollit) kollit, sum(kuutiot) kuutiot, sum(lavametri) lavametri
 							FROM rahtikirjat
 							WHERE tunnus in ($tunnukset) and yhtio='$kukarow[yhtio]'
 							group by pakkaus $groupby_lisa order by pakkaus";
 				$pakka = mysql_query($query) or pupe_error($query);
 
-				while ($pak = mysql_fetch_array($pakka)) {
-					$pakkaus[]   = $pak[0];
+				while ($pak = mysql_fetch_assoc($pakka)) {
+					$pakkaus[]   = $pak["pakkaus"];
 
-					if ($pak[1] > 0 or $pak[2] > 0) {
-						$kilot[]     = $pak[1];
-						$kollit[]    = $pak[2];
+					if ($pak["kilot"] > 0 or $pak["kollit"] > 0) {
+						$kilot[]     = $pak["kilot"];
+						$kollit[]    = $pak["kollit"];
 					}
 
-					$kuutiot[]   = $pak[3];
-					$lavametri[] = $pak[4];
-					$kilotyht   += $pak[1];
-					$kollityht  += $pak[2];
-					$kuutiotyht += $pak[3];
-					$lavatyht   += $pak[4];
+					$kuutiot[]   = $pak["kuutiot"];
+					$lavametri[] = $pak["lavametri"];
+					$kilotyht   += $pak["kilot"];
+					$kollityht  += $pak["kollit"];
+					$kuutiotyht += $pak["kuutiot"];
+					$lavatyht   += $pak["lavametri"];
 				}
 
 				$tulostuskpl = $kollityht;
@@ -443,7 +443,7 @@
 				}
 
 				//haetaan rahtikirjan kaikki vakkoodit arrayseen
-				$query = "	SELECT distinct(vakkoodi)
+				$query = "	SELECT distinct(vakkoodi) vakkoodi
 							from tilausrivi,tuote
 							where otunnus in ($otunnukset)
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -455,8 +455,8 @@
 							and tilausrivi.tyyppi in ('L','G')";
 				$vres = mysql_query($query) or pupe_error($query);
 
-				while ($vak = mysql_fetch_array($vres)) {
-					$vakit[] = $vak[0];
+				while ($vak = mysql_fetch_assoc($vres)) {
+					$vakit[] = $vak["vakkoodi"];
 				}
 
 				// nyt on kaikki tiedot rahtikirjaa varten haettu..
@@ -506,8 +506,8 @@
 						$silent		 	= "KYLLA";
 						$laskutettavat 	= $otunnukset;
 
-						if ($laskutulostin != '') {
-							$valittu_tulostin = $laskutulostin;
+						if ($rakirsyotto_laskutulostin != '') {
+							$valittu_tulostin = $rakirsyotto_laskutulostin;
 							$chnlisa = ", chn = '667' ";
 						}
 						else {
@@ -631,7 +631,7 @@
 									where yhtio = '$kukarow[yhtio]'
 									and tunnus	in ($otunnukset)";
 						$viestirar = mysql_query($query) or pupe_error($query);
-						$viestirarrow = mysql_fetch_array($viestirar);
+						$viestirarrow = mysql_fetch_assoc($viestirar);
 
 						for ($s=1; $s <= $kollityht; $s++) {
 							if (($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") and $toitarow["toim_nimi"] != '') {
@@ -728,7 +728,7 @@
 
 			$toimitustapa_lask_tun = '';
 
-			while ($rakir_row = mysql_fetch_array($result)) {
+			while ($rakir_row = mysql_fetch_assoc($result)) {
 				if ($rakir_row['toimitustapa'] != '') {
 					$sel = "";
 					if($rakir_row["tunnus"] == $kukarow["varasto"] and $varasto == "") {
@@ -764,7 +764,7 @@
 
 			$query = "SELECT printteri7 FROM varastopaikat WHERE $logistiikka_yhtiolisa and tunnus='$varasto'";
 			$jvres = mysql_query($query) or pupe_error($query);
-			$jvrow = mysql_fetch_array($jvres);
+			$jvrow = mysql_fetch_assoc($jvres);
 			$e = $jvrow["printteri7"];
 			$sel = array();
 			$sel[$e] = "SELECTED";
@@ -777,7 +777,7 @@
 						ORDER BY kirjoitin";
 			$kires = mysql_query($query) or pupe_error($query);
 
-			while ($kirow = mysql_fetch_array($kires)) {
+			while ($kirow = mysql_fetch_assoc($kires)) {
 				echo "<option id='K$kirow[tunnus]' value='$kirow[komento]' ".$sel[$kirow["tunnus"]].">$kirow[kirjoitin]</option>";
 			}
 
@@ -789,7 +789,7 @@
 
 			mysql_data_seek($kires, 0);
 
-			while ($kirow = mysql_fetch_array($kires)) {
+			while ($kirow = mysql_fetch_assoc($kires)) {
 				echo "<option id='K$kirow[tunnus]' value='$kirow[tunnus]'>$kirow[kirjoitin]</option>";
 			}
 
@@ -804,7 +804,7 @@
 			echo "<select name='valittu_rakiroslapp_tulostin'>";
 			echo "<option value=''>",t("Ei tulosteta"),"</option>";
 
-			while ($kirrow = mysql_fetch_array($kires)) {
+			while ($kirrow = mysql_fetch_assoc($kires)) {
 				echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
 			}
 
@@ -844,7 +844,9 @@
 			echo "<table id='toim_table' name='toim_table'><tr><td valign='top'>",t("Etsi numerolla"),": <input type='input' name='etsi_nro' id='etsi_nro' onkeypress=\"return disableEnterKey(event);\"> <input type='button' name='etsi_button' id='etsi_button' value='",t("Etsi"),"' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumber(this);'> <input type='button' name='etsi_kaikki' id='etsi_kaikki' value='",t("Näytä kaikki"),"' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumbers(this);'></td></tr>";
 
 			mysql_data_seek($result, 0);
+
 			while ($asdf_row = mysql_fetch_assoc($result)) {
+
 				echo "<tr><td valign='top'>";
 				echo "<div id='$asdf_row[toimitustapa]' $nayta_div>";
 				echo $asdf_row['toimitustapa'];

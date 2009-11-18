@@ -615,7 +615,76 @@
 			$saldoaikalisa = "";
 		}
 
+		$summarajauslisa = '';
+		$summarajausfail = '';
+
 		if (in_array($jarj, array("ytunnus","tuoteno","luontiaika","toimaika"))) {
+
+			if (isset($summarajaus) and $summarajaus != '') {
+				$summarajaus = (float) $summarajaus;
+
+				// jos on annettuna summarajaus, niin katsotaan ylittääkö asiakkaan kaikkien tilausrivien yhteishinta tämän rajan
+				// näytetään vaan kaikkien summarajan ylittäneiden asiakkaiden rivit (summarajauslisa)
+				if ($toim == "ENNAKKO") {
+					$query = "	SELECT lasku.liitostunnus, sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * (1 - tilausrivi.ale / 100)) hintarajaus
+								FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
+								JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila='E' and lasku.alatila='A' $laskulisa)
+								JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
+								$toimittajalisa
+								WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
+								and tilausrivi.tyyppi 			= 'E'
+								and tilausrivi.laskutettuaika 	= '0000-00-00'
+								and tilausrivi.varattu 			> 0
+								and ((tilausrivi.tunnus = tilausrivi.perheid and tilausrivi.perheid2 = 0) or (tilausrivi.tunnus = tilausrivi.perheid2) or (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0))
+								$tilausrivilisa
+								GROUP BY lasku.liitostunnus
+								HAVING hintarajaus > '$summarajaus'
+								$limit";
+				}
+				else {
+					$query = "	SELECT lasku.liitostunnus, sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) * (1 - tilausrivi.ale / 100)) hintarajaus
+								FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
+								JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and ((lasku.tila = 'N' and lasku.alatila != '') or lasku.tila != 'N') $laskulisa)
+								JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
+								$toimittajalisa
+								WHERE tilausrivi.yhtio 	= '$kukarow[yhtio]'
+								and tilausrivi.tyyppi in ('L','G')
+								and tilausrivi.var 				= 'J'
+								and tilausrivi.keratty 			= ''
+								and tilausrivi.uusiotunnus 		= 0
+								and tilausrivi.kpl 				= 0
+								and tilausrivi.jt $lisavarattu	> 0
+								and ((tilausrivi.tunnus=tilausrivi.perheid and tilausrivi.perheid2=0) or (tilausrivi.tunnus=tilausrivi.perheid2) or (tilausrivi.perheid=0 and tilausrivi.perheid2=0))
+								$tilausrivilisa
+								GROUP BY lasku.liitostunnus
+								HAVING hintarajaus > '$summarajaus'
+								$limit";
+				}
+				$summarajausres = mysql_query($query) or pupe_error($query);
+
+				// loopataan asiakkaan tunnukset talteen
+				if (mysql_num_rows($summarajausres) > 0) {
+					$summarajauslisa = " and lasku.liitostunnus in (";
+
+					while ($summarajausrow = mysql_fetch_assoc($summarajausres)) {
+						$summarajauslisa .= "$summarajausrow[liitostunnus],";
+					}
+
+					$summarajauslisa = substr($summarajauslisa, 0, -1);
+					$summarajauslisa .= ")";
+				}
+				else {
+					echo "<font class='error'>",t("Hintarajauksella ei löytynyt yhtään tilausta"),"!</font><br/><br/>";
+					$tee = '';
+					$tilaus_on_jo = '';
+					$from_varastoon_inc = '';
+					$summarajausfail = 'fail';
+				}
+			}
+		}
+
+		if (in_array($jarj, array("ytunnus","tuoteno","luontiaika","toimaika")) and $summarajausfail == '') {
+
 			//haetaan vain tuoteperheiden isät tai sellaset tuotteet jotka eivät kuulu tuoteperheisiin
 			if ($toim == "ENNAKKO") {
 				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.varattu jt,
@@ -624,7 +693,7 @@
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
 							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
-							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila='E' and lasku.alatila='A' $laskulisa)
+							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila='E' and lasku.alatila='A' $laskulisa $summarajauslisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
 							$toimittajalisa
 							WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
@@ -643,7 +712,7 @@
 							tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika,
 							lasku.toimvko, lasku.osatoimitus, lasku.valkoodi, lasku.vienti_kurssi
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and ((lasku.tila = 'N' and lasku.alatila != '') or lasku.tila != 'N') $laskulisa)
+							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and ((lasku.tila = 'N' and lasku.alatila != '') or lasku.tila != 'N') $laskulisa $summarajauslisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
 							$toimittajalisa
 							WHERE tilausrivi.yhtio 	= '$kukarow[yhtio]'
@@ -1900,6 +1969,14 @@
 				<th>".t("Tilaus")."</th>
 				<td>
 				<input type='text' name='tilaus' value='$tilaus' size='10'>
+				</td>
+				</td>
+			</tr>";
+
+		echo "<tr>
+				<th>",t("Näytä vain jt-rivit jos asiakkaan jälkitoimitusten yhteissumma on yli")."</th>
+				<td>
+				<input type='text' name='summarajaus' value='$summarajaus' size='10'>
 				</td>
 				</td>
 			</tr>";

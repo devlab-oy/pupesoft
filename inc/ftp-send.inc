@@ -16,9 +16,8 @@ if ($ftphost=='' or $ftpuser=='' or $ftppass=='' or $ftppath=='' or $ftpfile==''
 	$tulos_ulos_ftp .= "<font class='error'>".t("L‰hetykseen tarvittavia tietoja puuttuu")."! (host, user, pass, path, file)</font><br>";
 }
 else {
-
+	
 	//l‰hetet‰‰n tiedosto
-
 	$conn_id = ftp_connect($ftphost);
 
 	// jos connectio ok, kokeillaan loginata
@@ -30,6 +29,8 @@ else {
 	if (substr($ftppath, -1) != "/") {
 		$ftppath .= "/";
 	}
+	
+	$cmd = "/usr/bin/ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile";	
 
 	// jos login ok kokeillaan uploadata
 	if ($login_result) {
@@ -41,6 +42,12 @@ else {
 		if ($upload === FALSE) {
 			ftp_pasv($conn_id, true);
 			$upload = ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
+		}
+		
+		if ($upload === FALSE) {
+			exec($cmd, $skit, $upload_ncftp);
+			
+			if ($upload_ncftp == 0) $upload = TRUE;
 		}
 
 		if ($upload === TRUE and $renameftpfile != "") {
@@ -87,9 +94,7 @@ else {
 			default:
 				$syy = t("Tuntematon errorkoodi")." ($palautus)!!";
 		}
-
-		$cmd = "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile";
-
+		
 		$rivi  = "$PHP_SELF\n";
 		$rivi .= "\n";
 		$rivi .= "".t("Tiedoston")." '$ftpfile' ".t("l‰hetys ep‰onnistui")."!\n";

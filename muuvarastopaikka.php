@@ -262,8 +262,8 @@
 		$query = "	SELECT sum(if(tuote.sarjanumeroseuranta in ('S','T','U','V'), 1, 0)) sarjat,
 					sum(if(tuote.sarjanumeroseuranta in ('E','F','G'), 1, 0)) erat
 					FROM tuote
-					WHERE tuoteno = '$tuoteno' 
-					and yhtio = '$kukarow[yhtio]' 
+					WHERE tuoteno = '$tuoteno'
+					and yhtio = '$kukarow[yhtio]'
 					and sarjanumeroseuranta != ''";
 		$sarjaresult = mysql_query($query) or pupe_error($query);
 		$sarjacheck_row = mysql_fetch_array($sarjaresult);
@@ -273,14 +273,14 @@
 			$tee = $uusitee;
 		}
 		elseif ($sarjacheck_row["erat"] > 0) {
-			
+
 			$query = "	SELECT *
 						FROM sarjanumeroseuranta
 						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus = '$sarjano_array[0]'";
 			$siirrettava_era_res = mysql_query($query) or pupe_error($query);
 			$siirrettava_era_row = mysql_fetch_assoc($siirrettava_era_res);
-					
+
 			if (!is_array($sarjano_array) or $sarjano_kpl_array[$sarjano_array[0]] < $asaldo) {
 				echo "<font class='error'>".t("Tarkista eränumerovalintasi")."</font><br><br>";
 				$tee = $uusitee;
@@ -612,7 +612,7 @@
 								AND myyntirivitunnus = 0
 								AND era_kpl != 0";
 					$sarrr_res2 = mysql_query($query) or pupe_error($query);
-					
+
 					if (mysql_num_rows($sarrr_res2) == 1) {
 						$sarrr_row2 = mysql_fetch_assoc($sarrr_res2);
 
@@ -841,8 +841,18 @@
 			while ($saldorow = mysql_fetch_array ($paikatresult1)) {
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
+				if ($saldorow["inventointilista_aika"] > 0) {
+					$invalisa1 = "DISABLED";
+					$invalisa2 = " (".t("Lukittu, inventointi kesken").")";
+					$saldorow["tunnus"] = "";
+				}
+				else {
+					$invalisa1 = "";
+					$invalisa2 = "";
+				}
+
 				if ($myytavissa > 0) {
-					echo "<option value='$saldorow[tunnus]'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($myytavissa)</option>";
+					echo "<option value='$saldorow[tunnus]' $invalisa1>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($myytavissa) $invalisa2</option>";
 				}
 			}
 		}
@@ -866,7 +876,17 @@
 			while ($saldorow = mysql_fetch_array ($paikatresult2)) {
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'JTSPEC', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-				echo "<option value='$saldorow[tunnus]'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($myytavissa)</option>";
+				if ($saldorow["inventointilista_aika"] > 0) {
+					$invalisa1 = "DISABLED";
+					$invalisa2 = " (".t("Lukittu, inventointi kesken").")";
+					$saldorow["tunnus"] = "";
+				}
+				else {
+					$invalisa1 = "";
+					$invalisa2 = "";
+				}
+
+				echo "<option value='$saldorow[tunnus]' $invalisa1>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso] ($myytavissa) $invalisa2</option>";
 			}
 		}
 		echo "</select></td>";
@@ -875,13 +895,13 @@
 		if ($trow["sarjanumeroseuranta"] != '') {
 
 			if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") {
-				$query = "	SELECT sarjanumeroseuranta.tuoteno, 
-							tilausrivi_osto.nimitys nimitys, 
-							sarjanumeroseuranta.sarjanumero, 
+				$query = "	SELECT sarjanumeroseuranta.tuoteno,
+							tilausrivi_osto.nimitys nimitys,
+							sarjanumeroseuranta.sarjanumero,
 							sarjanumeroseuranta.tunnus,
 							sarjanumeroseuranta.era_kpl,
-							tuote.yksikko, 
-							concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, 
+							tuote.yksikko,
+							concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro,
 							sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
 				 			FROM tuote
 							JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)

@@ -12,7 +12,7 @@
 	if ($tee == 'kommentista') {
 		if ($id != '') {
 
-			$query = "	select tunnus, kommentti
+			$query = "	SELECT tunnus, kommentti
 						from tilausrivi
 						where tyyppi='G'
 						and otunnus 	= '$id'
@@ -62,7 +62,7 @@
 
 		echo "	<font class='message'>".t("Tiedostomuoto").":</font><br><br>
 
-				<table border='0' cellpadding='3' cellspacing='2'>
+				<table>
 				<tr><th colspan='5'>".t("Tabulaattorilla eroteltu tekstitiedosto").".</th></tr>
 				<tr><td>".t("Tuoteno")."</td><td>".t("Määrä")."</td><td>".t("Kommentti")."</td><td>".t("Lähettävä varastopaikka")."</td><td>".t("Vastaanottava varastopaikka")."</td></tr>
 				</table>
@@ -126,7 +126,7 @@
 
 					$paikka = explode('#', $avarasto);
 
-					$query = "	select *
+					$query = "	SELECT *
 								from tilausrivi
 								where tyyppi='G'
 								and otunnus 	= '$id'
@@ -163,7 +163,7 @@
 		$virheita = 0;
 
 		//käydään kaikki rivit läpi ja tarkastetaan varastopaika ja perustetaan uusia jos on tarvis
-		foreach($tunnus as $tun) {
+		foreach ($tunnus as $tun) {
 
 			$t1[$tun] = trim($t1[$tun]);
 			$t2[$tun] = trim($t2[$tun]);
@@ -172,7 +172,7 @@
 
 			$t1[$tun] = strtoupper($t1[$tun]);
 
-			$query = "	SELECT tilausrivi.tuoteno, tuote.ei_saldoa, tilausrivi.tunnus
+			$query = "	SELECT tilausrivi.tuoteno, tuote.ei_saldoa, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso
 						FROM tilausrivi
 						JOIN tuote on tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 						WHERE tilausrivi.tunnus='$tun'
@@ -183,20 +183,20 @@
 			$tilausrivirow = mysql_fetch_array($result);
 
 			if (mysql_num_rows($result) != 1) {
-				echo "<font style='error'>".t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle")."!</font><br>";
+				echo "<font class='error'>".t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle")."!</font><br>";
 			}
 			elseif ($tilausrivirow["ei_saldoa"] == "") {
 
 				// Jaaha mitäs tuotepaikalle pitäisi tehdä
 				if (($rivivarasto[$tun] != 'x') and ($rivivarasto[$tun] != '')) {  //Varastopaikka vaihdettiin pop-upista, siellä on paikan tunnus
-					$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
+					$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso, inventointilista_aika
 								from tuotepaikat
 								WHERE yhtio	= '$kukarow[yhtio]'
 								and tunnus 	= '$rivivarasto[$tun]'
 								and tuoteno	= '$tilausrivirow[tuoteno]'";
 				}
 				else {
-					$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
+					$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso, inventointilista_aika
 								from tuotepaikat
 								WHERE yhtio		= '$kukarow[yhtio]'
 								and hyllyalue	= '$t1[$tun]'
@@ -239,7 +239,7 @@
 						}
 
 						if ($t1[$tun] != '' and $t2[$tun] != '' and $t3[$tun] != '' and $t4[$tun] != '') {
-							$query = "	insert into tuotepaikat (hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, saldo, saldoaika, tuoteno, yhtio, laatija, luontiaika)
+							$query = "	INSERT into tuotepaikat (hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, saldo, saldoaika, tuoteno, yhtio, laatija, luontiaika)
 										values ('$t1[$tun]','$t2[$tun]','$t3[$tun]','$t4[$tun]','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
 							$ynsre = mysql_query($query) or pupe_error($query);
 
@@ -257,12 +257,12 @@
 							echo t("Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("perustetaan uusi paikka")." $t1[$tun]-$t2[$tun]-$t3[$tun]-$t4[$tun]</font><br>";
 						}
 						else {
-							echo t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno]. ".t("ei voitu perustaa tyhjää varastopaikkaa")."!<br>";
+							echo "<font class='error'>".t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno]. ".t("ei voitu perustaa tyhjää varastopaikkaa")."!</font><br>";
 							$virheita++;
 						}
 					}
 					else {
-						echo t("VIRHE: Syöttämäsi varastopaikka ei kuulu kohdevaraston alueeseen")."!<br>";
+						echo "<font class='error'>".t("VIRHE: Syöttämäsi varastopaikka ei kuulu kohdevaraston alueeseen")."!</font><br>";
 
 						$t1[$tun] = '';
 						$t2[$tun] = '';
@@ -274,7 +274,12 @@
 				}
 				else {
 					$paikkarow = mysql_fetch_array($result);
-
+					
+					if ($paikkarow["inventointilista_aika"] > 0) {
+						echo "<font class='error'>$paikkarow[hyllyalue]-$paikkarow[hyllynro]-$paikkarow[hyllyvali]-$paikkarow[hyllytaso] ".t("VIRHE: Kohdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
+						$virheita++;	
+					}
+					
 					$t1[$tun] = $paikkarow['hyllyalue'];
 					$t2[$tun] = $paikkarow['hyllynro'];
 					$t3[$tun] = $paikkarow['hyllyvali'];
@@ -289,6 +294,23 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$tilausrivirow[tuoteno]'";
 				$resulteankoodi = mysql_query($query) or pupe_error($query);
+			}
+			
+			//haetaan antavan varastopaikan tunnus
+			$query = "	SELECT inventointilista_aika
+						FROM tuotepaikat
+						WHERE yhtio		= '$kukarow[yhtio]'
+						and hyllyalue	= '$tilausrivirow[hyllyalue]'
+						and hyllynro	= '$tilausrivirow[hyllynro]'
+						and hyllyvali	= '$tilausrivirow[hyllyvali]'
+						and hyllytaso	= '$tilausrivirow[hyllytaso]'
+						and tuoteno		= '$tilausrivirow[tuoteno]'";
+			$presult = mysql_query($query) or pupe_error($query);
+			$prow = mysql_fetch_array($presult);
+			
+			if ($prow["inventointilista_aika"] > 0) {
+				echo "<font class='error'>$tilausrivirow[hyllyalue]-$tilausrivirow[hyllynro]-$tilausrivirow[hyllyvali]-$tilausrivirow[hyllytaso] ".t("VIRHE: Lähdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
+				$virheita++;	
 			}
 		}
 
@@ -505,18 +527,17 @@
 	//Tulostetaan vastaanotetut listaus
 	if (($tee == "OK" or $tee == "paikat") and $id != '0' and $toim != "MYYNTITILI") {
 
-		$query  = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$id'";
+		$query  = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$id'";
 		$result = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
 
-		$query = "select komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$listaus'";
+		$query = "SELECT komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$listaus'";
 		$komres = mysql_query($query) or pupe_error($query);
 		$komrow = mysql_fetch_array($komres);
 		$komento["Vastaanotetut"] = $komrow['komento'];
 
 		$otunnus = $laskurow["tunnus"];
 		$mista = 'vastaanota';
-
 
 		require('tulosta_purkulista.inc');
 		$id = 0;
@@ -534,8 +555,7 @@
 		$kentta = "etsi";
 
 		// tehdään etsi valinta
-		echo "<table><form action='$PHP_SELF' name='find' method='post'><tr><th>".t("Etsi siirtolistaa").":</th>
-		<td><input type='text' name='etsi'></td>";
+		echo "<table><form action='$PHP_SELF' name='find' method='post'><tr><th>".t("Etsi siirtolistaa").":</th><td><input type='text' name='etsi'></td>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<tr><th>Varasto</th><td><select name='varasto'>";
 		echo "<option value=''>" . t('Kaikki varastot') . "</option>";
@@ -543,8 +563,7 @@
 		$query  = "SELECT tunnus, nimitys, maa FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
 		$vares = mysql_query($query) or pupe_error($query);
 
-		while ($varow = mysql_fetch_array($vares))
-		{
+		while ($varow = mysql_fetch_array($vares)) {
 			$sel='';
 			if ($varow['tunnus'] == $varasto) $sel = 'selected';
 
@@ -857,9 +876,12 @@
 				$presult = mysql_query($query) or pupe_error($query);
 				$privirow = mysql_fetch_array ($presult);
 			}
+			else {
+				$privirow = array();
+			}
 
 			// Näytetäänkö rivin vai tuotteen varastopaikka
-			$lahde="Tuote";
+			$lahde = "Tuote";
 
 			if ($rivirow["ei_saldoa"] != "") {
 				$privirow['t1'] = "SALDOTON-TUOTE";

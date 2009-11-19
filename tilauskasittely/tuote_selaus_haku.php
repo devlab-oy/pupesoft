@@ -714,6 +714,9 @@
 							if (!isset($rows[$ekakorva.$krow["tuoteno"]])) $rows[$ekakorva.$krow["tuoteno"]] = $krow;
 						}
 					}
+					else {
+						$rows[$mrow["tuoteno"]] = $mrow;
+					}
 				}
 				else {
 					$rows[$mrow["tuoteno"]] = $mrow;
@@ -769,7 +772,7 @@
 						$isat_array 	= array();
 						$kaikki_array 	= array($mrow["tuoteno"]);
 
-						for($isa=0; $isa < $riikoko; $isa++) {
+						for ($isa=0; $isa < $riikoko; $isa++) {
 							list($isat_array, $kaikki_array, $rows) = tuoteselaushaku_tuoteperhe($mrow["tuoteno"], $kaikki_array[$isa], $isat_array, $kaikki_array, $rows);
 
 							if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y") {

@@ -226,6 +226,9 @@
 							if (!isset($rows[$ekakorva.$krow["tuoteno"]])) $rows[$ekakorva.$krow["tuoteno"]] = $krow;
 						}
 					}
+					else {
+						$rows[$mrow["tuoteno"]] = $mrow;
+					}
 				}
 				else {
 					$rows[$mrow["yhtio"].$mrow["tuoteno"]] = $mrow;

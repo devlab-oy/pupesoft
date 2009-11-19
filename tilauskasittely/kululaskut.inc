@@ -67,7 +67,7 @@ if ($keikanalatila == "T") {
 				<input type='submit' value='" . t('Syötä lasku')."'>
 				</form><br><br>";
 	}
-	
+
 	$query = "SELECT * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi LIKE '%matkalasku.php'";
 	$res = mysql_query($query) or pupe_error($query);
 
@@ -268,12 +268,12 @@ if ($tee_kululaskut == "poista") {
 	$tee_kululaskut = "";
 }
 
-if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kesken"] > 0) {	
+if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kesken"] > 0) {
 	$query 	= "	SELECT *
 				FROM tuote
 				WHERE tuoteno = '$yhtiorow[lisakulu_tuotenumero]' and yhtio = '$kukarow[yhtio]'";
 	$tuoteres = mysql_query($query) or pupe_error($query);
-	
+
 	if (mysql_num_rows($tuoteres) != 1) {
 		echo t("VIRHE: Yhtiön lisakulu_tuotenumero ei ole määritelty")."!!<br>";
 		$tee_kululaskut = "";
@@ -281,20 +281,20 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
 }
 
 if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kesken"] > 0) {
-	
+
 	$laskurow_save["alv"] = $laskurow["alv"];
-	
+
 	//yhtiön oletusalvi!
 	$wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
 	$wtres  = mysql_query($wquery) or pupe_error($wquery);
 	$wtrow  = mysql_fetch_array($wtres);
-	
+
 	$query 	= "	SELECT *
 				FROM lasku
 				WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$myy_laskrow = mysql_fetch_array($result);
-	
+
 	$query  = "	SELECT distinct tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.hinta, tilausrivi.kpl, tilausrivi.kommentti, tilausrivi.nimitys
 				FROM lasku keikka
 				JOIN lasku liitosotsikko ON keikka.yhtio=liitosotsikko.yhtio and keikka.laskunro=liitosotsikko.laskunro and keikka.tila=liitosotsikko.tila and liitosotsikko.alatila='' and liitosotsikko.vanhatunnus!=0
@@ -311,21 +311,21 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
 	$keikkares = mysql_query($query) or pupe_error($query);
 
 	while ($keikkarow = mysql_fetch_array($keikkares)) {
-				
+
 		// Tutkitaan löytääkö tämä rivi jo työmääräyksellä
 		$query = "	SELECT tilausrivi.tunnus
 					FROM tilausrivi
 					JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus
-		 			WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
-					and tilausrivi.tyyppi != 'D' 
+		 			WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.tyyppi != 'D'
 					and tilausrivi.otunnus = '$kukarow[kesken]'
 					and tilausrivin_lisatiedot.tilausrivilinkki = '$keikkarow[tunnus]'";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($result) == 0) {
 			// tuote löytyi ok, lisätään rivi
 			$trow = mysql_fetch_array($tuoteres);
-						
+
 			$tilausrivilinkki	= $keikkarow["tunnus"];
 			$kpl             	= $keikkarow["kpl"];
 			$tuoteno         	= $trow["tuoteno"];
@@ -336,13 +336,13 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
 			$kommentti 		    = $keikkarow["kommentti"];
 			$alv 				= (float) $wtrow["selite"];
 			$laskurow["alv"] 	= $myy_laskrow["alv"];
-							
-			require ("lisaarivi.inc");			
+
+			require ("lisaarivi.inc");
 		}
 	}
-	
+
 	echo t("Matkalaskun rivit lisättiin tilaukselle")."!<br>";
-	
+
 	$tyhjenna		 = "OK";
 	$laskurow["alv"] = $laskurow_save["alv"];
 }
@@ -436,19 +436,19 @@ if ($silent == "") {
 						<input type='hidden' name='poistasumma' value='$llrow[summa]'>
 						<input type='submit' value='".t("Poista")."'></form>
 						</td>";
-						
-				if ($osresrow["tilaustyyppi"] == 'M' and $keikanalatila == "T") {						
-					
+
+				if ($osresrow["tilaustyyppi"] == 'M' and $keikanalatila == "T") {
+
 					$query  = "	SELECT count(distinct matkarivi.tunnus) mrivi, count(distinct tilausrivin_lisatiedot.tunnus) trivi
-								FROM lasku matkalasku								
+								FROM lasku matkalasku
 								JOIN tilausrivi matkarivi ON matkarivi.yhtio=matkalasku.yhtio and matkarivi.otunnus=matkalasku.tunnus and matkarivi.kpl > 0 and matkarivi.tyyppi  != 'D'
 								LEFT JOIN tilausrivi tilrivi ON tilrivi.yhtio=matkalasku.yhtio and tilrivi.otunnus = '$kukarow[kesken]' and tilrivi.tyyppi  != 'D'
 								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilrivi.tunnus and tilausrivin_lisatiedot.tilausrivilinkki = matkarivi.tunnus
 								WHERE matkalasku.yhtio	= '$kukarow[yhtio]'
 								and matkalasku.tunnus	= $osresrow[tunnus]";
 					$mlrivires = mysql_query($query) or pupe_error($query);
-					$mlrivirow = mysql_fetch_assoc($mlrivires);		
-					
+					$mlrivirow = mysql_fetch_assoc($mlrivires);
+
 					if ($mlrivirow["mrivi"] > 0 and $mlrivirow["mrivi"] != $mlrivirow["trivi"]) {
 						echo "<td valign='top' class='back'>
 								<form method='POST' action='$PHP_SELF'>

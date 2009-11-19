@@ -1062,7 +1062,7 @@
 			}
 
 			echo "</td>";
-			echo "<td colspan='2' valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($sarjarow["tuoteno"])."'>$sarjarow[tuoteno]</a><br>$sarjarow[nimitys]";
+			echo "<td colspan='2' valign='top'><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=".urlencode($sarjarow["tuoteno"])."'>$sarjarow[tuoteno]</a><br>$sarjarow[nimitys]";
 
 			if ($sarjarow["takuu_alku"] != '' and $sarjarow["takuu_alku"] != '0000-00-00') {
 				echo "<br>".t("Takuu").": ".tv1dateconv($sarjarow["takuu_alku"])." - ".tv1dateconv($sarjarow["takuu_loppu"]);
@@ -1103,7 +1103,7 @@
 				$echoostuns = $ostuns;
 			}
 
-			echo "<td colspan='2' valign='top'><a href='../raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$ostuns'>$echoostuns $sarjarow[osto_nimi]</a><br>";
+			echo "<td colspan='2' valign='top'><a href='".$palvelin2."raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$ostuns'>$echoostuns $sarjarow[osto_nimi]</a><br>";
 
 			$fnlina1 = "";
 			$fnlina2 = "";
@@ -1138,7 +1138,7 @@
 				if ($siirow["tyyppi"] == "O") {
 					// pultattu kiinni johonkin
 					$fnlina1 .= "";
-					$fnlina2 .= "<br><br>".t("Varattu lisävarusteena").":<br>".$siirow["tuoteno"]." <a href='sarjanumeroseuranta.php?tuoteno_haku=".urlencode($siirow["tuoteno"])."&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>";
+					$fnlina2 .= "<br><br>".t("Varattu lisävarusteena").":<br>".$siirow["tuoteno"]." <a href='".$palvelin2."tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($siirow["tuoteno"])."&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>";
 				}
 				elseif ($siirow["tyyppi"] == "G") {
 					// jos tämä on jollain siirtolistalla
@@ -1150,7 +1150,7 @@
 			}
 
 			if ($sarjarow["myynti_tunnus"] > 0) {
-				echo "$fnlina1 <a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$sarjarow[myynti_tunnus]'>$sarjarow[myynti_tunnus] $sarjarow[myynti_nimi]</a> $fnlina2</td>";
+				echo "$fnlina1 <a href='".$palvelin2."raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$sarjarow[myynti_tunnus]'>$sarjarow[myynti_tunnus] $sarjarow[myynti_nimi]</a> $fnlina2</td>";
 			}
 			else {
 				echo "$fnlina1 $sarjarow[myynti_nimi] $fnlina2</td>";

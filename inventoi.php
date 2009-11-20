@@ -42,7 +42,7 @@
 				die ("<font class='error'><br>".t("Tiedosto oli tyhjä")."!</font>");
 			}
 
-			$file=fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
+			$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
 
 			// luetaan tiedosto alusta loppuun...
 			$rivi = fgets($file, 4096);
@@ -124,18 +124,19 @@
 					}
 
 					if ($tuote_row['sarjanumeroseuranta'] != '' and !is_array($sarjanumero_kaikki[$i]) and !is_array($eranumero_kaikki[$i]) and $kpl != '') {
-						echo "<font class='error'>".t("VIRHE: Et valinnut yhtään sarja- tai eränumeroa")."!</font><br>";
+						echo "<font class='error'>".t("VIRHE: Et valinnut yhtään sarja- tai eränumeroa").": $tuoteno!</font><br>";
 						$virhe = 1;
 					}
 
 					// Jos lajit on käytössä niin myös selite on syötettävä
 					if ($inven_laji != "" and trim($lisaselite) == "") {
-						echo "<font class='error'>".t("VIRHE: Inventointiselite on syötettävä")."!</font><br>";
+						echo "<font class='error'>".t("VIRHE: Inventointiselite on syötettävä")."!: $tuoteno</font><br>";
 						$virhe = 1;
 					}
 
 					// käydään kaikki ruudulla näkyvät läpi ja katsotaan onko joku niistä uusi
 					$onko_uusia = 0;
+
 					foreach($sarjanumero_kaikki[$i] as $snro => $schk) {
 						if ($sarjanumero_uudet[$i][$snro] == '0000-00-00') {
 							$onko_uusia++;
@@ -223,6 +224,11 @@
 							echo "<font class='error'>".t("VIRHE: Eränumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
 							$virhe = 1;
 						}
+					}
+
+					if ($fileesta == "ON" and $virhe == 1) {
+						$virhe = 0;
+						continue;
 					}
 
 					//Haetaan tuotepaikan tiedot

@@ -1681,16 +1681,16 @@
 				}
 
 				// Aloitellaan lähetteen teko
-				$page[$sivu] = alku_lahete($tyyppi);
+				$page[$sivu] = alku($tyyppi);
 
 				while ($row = mysql_fetch_assoc($result)) {
-					rivi_lahete($page[$sivu], $tyyppi);
+					rivi($page[$sivu], $tyyppi);
 				}
 
-				loppu_lahete($page[$sivu], 1);
+				loppu($page[$sivu], 1);
 
 				//tulostetaan sivu
-				print_pdf_lahete($komento["Työmääräys"]);
+				print_pdf($komento["Työmääräys"]);
 				$tee = '';
 			}
 

@@ -117,16 +117,16 @@ function salattukertaavain ($tunnus) {
 				elseif($apu==15) $siemen.="f";
 			}
 		}
-			for($i=0;$i<16;$i++){
-				$apu = mt_rand(0, 16);
-				if($apu<10) $avain.=$apu;
-				elseif($apu==10) $avain.="a";
-				elseif($apu==11) $avain.="b";
-				elseif($apu==12) $avain.="c";
-				elseif($apu==13) $avain.="d";
-				elseif($apu==14) $avain.="e";
-				elseif($apu==15) $avain.="f";
-			}
+		for($i=0;$i<16;$i++){
+			$apu = mt_rand(0, 16);
+			if($apu<10) $avain.=$apu;
+			elseif($apu==10) $avain.="a";
+			elseif($apu==11) $avain.="b";
+			elseif($apu==12) $avain.="c";
+			elseif($apu==13) $avain.="d";
+			elseif($apu==14) $avain.="e";
+			elseif($apu==15) $avain.="f";
+		}
 		echo "Siemen: $siemen Avain: $avain<br>";
 
 		// Muutetaan luvut oikeaan muotoon ja alustetaan salaus
@@ -189,11 +189,11 @@ function salattukertaavain ($tunnus) {
 }
 
 
-function salaa ($jono, $arg, $kayttoavain) {
+function salaa ($jono, $arg, $avain) {
 
 	$palautus = $jono;
-	//Alustetaan kryptaus käyttöavaimella  
-	$kayttoavain = pack("H*",$kayttoavain);
+	//Alustetaan kryptaus avaimella
+	$kayttoavain = pack("H*",$avain);
 	$td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
 	$iv=pack('H*','0000000000000000');
 	mcrypt_generic_init($td, $kayttoavain, $iv);
@@ -262,11 +262,11 @@ function tiiviste ($jono, $kertaavain) {
 
 	if ($testaus != '') {
 		$jono = array();
-		$jono[]="1921030 259018000000140111111116100000000121MATTI MEIKÄLÄINEN 010101001A       ";
-		$jono[]="1921030 259018000000140111111116100000000321MAIJA MEIK#L#INEN 010201001A       ";
-		$jono[]="1921030 259018000000140111111116100000000421Ä. Ö. ÅLAND       010101001A       ";
-		$jono[]="1921030 259018000000140111111116100000000521#. @. \$LAND       010101001A       ";
-		$jono[]="4921030               0111111116100000001384                  000004           ";
+		$jono[]="1921030  259018000000140111111116100000000121MATTI MEIKÄLÄINEN  010101001A";
+		$jono[]="1921030  259018000000140111111116100000000321MAIJA MEIK#L#INEN  010201001A";
+		$jono[]="1921030  259018000000140111111116100000000421Ä. Ö. ÅLAND        010101001A";
+		$jono[]="1921030  259018000000140111111116100000000521#. @. \$LAND        010101001A";
+		$jono[]="4921030                0111111116100000001384                   000004";
 	}
 
 	//Poistetaan loppu whitespace
@@ -288,7 +288,10 @@ function tiiviste ($jono, $kertaavain) {
 
 	echo "Tiiviste: $tiiviste<br>";
 
-	if ($testaus != '' and $tiiviste != '4954F0194C2B696D') echo "Tiiviste pielessä po 4954F0194C2B696D<br>";
+	if ($testaus != '' and strtoupper($tiiviste) != '4954F0194C2B696D')
+		echo "Tiiviste pielessä po 4954F0194C2B696D<br>" ;
+	else
+		echo "Tiiviste on oikein!<br>";
 
 	return $tiiviste;
 }

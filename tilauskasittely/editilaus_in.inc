@@ -692,6 +692,11 @@ while (!feof ($fd)) {
 				if ($editilaus_maksuehto == '') {
 					$editilaus_maksuehto = $arow["maksuehto"];
 				}
+				
+				// jos ei olla pakotettu rahtivapaata, niin otetaan asiakkaan oletus
+				if ($editilaus_rahtivapaa == '') {
+					$editilaus_rahtivapaa = $arow["rahtivapaa"];
+				}
 
 				// jos tilauksella on tullut lopullisen asikkaan tiedot, laitetaan ne talteen sisviesti ykköseen
 				if ($lopnimi != "") {

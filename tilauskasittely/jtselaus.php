@@ -1181,6 +1181,19 @@
 										echo "<font class='message'>".t("Asiakkaalla on maksamattomia trattoja")."<br></font>";
 									}
 
+									// jos on jo laskutettu, huomautetaan käyttäjää tarkistamaan alennus!
+									$query = "	SELECT tapvm
+												FROM lasku
+												WHERE yhtio = '$kukarow[yhtio]'
+												AND tunnus = '$jtrow[ltunnus]'";
+									$checkaa_ale_res = mysql_query($query) or pupe_error($query);
+									$checkaa_ale_row = mysql_fetch_assoc($checkaa_ale_res);
+									
+									if ($checkaa_ale_row['tapvm'] > '0000-00-00') {
+										echo "<br/>";
+										echo "<font class='message'>",t("HUOM: Tarkista alennus"),"!<br/></font>";
+									}
+
 									echo "</td>";
 								}
 

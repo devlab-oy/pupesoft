@@ -124,16 +124,20 @@ if ($tee == "") {
 	$result = mysql_query($query) or pupe_error($query);
 	echo "<option value=''>".t("Valitse")."</option>";
 
-	while($row = mysql_fetch_array($result)){
+	while($row = mysql_fetch_array($result)) {
 		$sel = '';
-		if($row[0] == $laskurow["maa_lahetys"]) {
+
+		if ($row['koodi'] == $laskurow["maa_lahetys"]) {
 			$sel = 'selected';
 		}
-		elseif($laskurow["maa_lahetys"] == "" and $row[0] == $toimittaja["maa_lahetys"]) {
+		elseif ($laskurow["maa_lahetys"] == "" and $row['koodi'] == $toimittaja["maa_lahetys"]) {
+			$sel = "selected";
+		}
+		elseif ($laskurow["maa_lahetys"] == "" and $toimittaja['maa_lahetys'] == '' and $row['koodi'] == $toimittaja['maa']) {
 			$sel = "selected";
 		}
 
-		echo "<option value='$row[0]' $sel>$row[1]</option>";
+		echo "<option value='{$row['koodi']}' $sel>{$row['nimi']}</option>";
 	}
 	echo "</select></td>";
 	echo "</tr>";
@@ -171,10 +175,10 @@ if ($tee == "") {
 
 	while ($row = mysql_fetch_array($result)) {
 		$sel = '';
-		if($row[0] == $laskurow["maa_maara"]) {
+		if ($row['koodi'] == $laskurow["maa_maara"]) {
 			$sel = 'selected';
 		}
-		echo "<option value='$row[0]' $sel>$row[1]</option>";
+		echo "<option value='{$row['koodi']}' $sel>{$row['nimi']}</option>";
 	}
 	echo "</select></td>";
 	echo "</tr>";

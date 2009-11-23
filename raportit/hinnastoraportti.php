@@ -51,6 +51,7 @@
 		if ($kehahinnat != "") echo "<th>".t("Kehahin")."</th>";
 		echo "<th>".t("Myyntihinta")."</th>";
 		echo "<th>".t("Saldo")."</th>";
+		echo "<th>".t("Tryno")."</th>";		
 		echo "<th>".t("Try")."</th>";
 		echo "<th>".t("Ean")."</th>";
 		echo "</tr>";
@@ -70,7 +71,9 @@
 		    $i++;
 		    $worksheet->write($excelrivi, $i, t('Saldo'), $format_bold);
 		    $i++;
-		    $worksheet->write($excelrivi, $i, t('TRY'), $format_bold);
+		    $worksheet->write($excelrivi, $i, t('Tryno'), $format_bold);
+		    $i++;
+		    $worksheet->write($excelrivi, $i, t('Try'), $format_bold);
 		    $i++;
 		    $worksheet->write($excelrivi, $i, t('EAN'), $format_bold);
 		    $i=0;
@@ -82,7 +85,6 @@
 			list(,,$apu_myytavissa) = saldo_myytavissa($productrow["tuoteno"]);
 			$sresult = t_avainsana("TRY", "", "and avainsana.selite  = '$productrow[try]'");
 			$srow = mysql_fetch_array($sresult);
-
 
 			if ($myytavissao == "" or $apu_myytavissa > 0) {
 				if (isset($workbook)) {
@@ -100,6 +102,8 @@
 					$i++;
 					$worksheet->writeNumber($excelrivi, $i, $apu_myytavissa);
 					$i++;
+					$worksheet->writeString($excelrivi, $i, $productrow["try"]);
+					$i++;
 					$worksheet->writeString($excelrivi, $i, $srow["selitetark"]);
 					$i++;
 					$worksheet->writeString($excelrivi, $i, $productrow['eankoodi']);
@@ -113,6 +117,7 @@
 				if ($kehahinnat != "") echo "<td align='right'>$productrow[kehahin]</td>";
 				echo "<td align='right'>$productrow[myyntihinta]</td>";
 				echo "<td align='right'>$apu_myytavissa</td>";
+				echo "<td>$productrow[try]</td>";
 				echo "<td>$srow[selitetark]</td>";
 				echo "<td>$productrow[eankoodi]</td>";
 				echo "</tr>";

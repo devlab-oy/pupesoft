@@ -1881,7 +1881,7 @@
 			$mesel = "";
 		}
 
-		echo "<tr><th align='left'>".t("Rahti")."</th><td>";
+		echo "<tr><th align='left'>".t("Rahdinmaksaja")."</th><td>";
 		echo "<select name='merahti' onchange='submit()'>";
 		echo "<option value=''  $nesel>".t("Vastaanottaja")."</option>";
 		echo "<option value='K' $mesel>".t("Lähettäjä")."</option>";

@@ -2326,9 +2326,10 @@
 		// ollaan annettu toimitusviikko
 		$nyviikko = date("W");
 		$nypaiva  = date("N");
-		$nyvuosi  = date("Y");
 
 		if ($toimvko != '' and ($apuro["toimvko"] == "" or $toimvko >= $nyviikko or $toimvkopva != $vtoimvko)) {
+
+			$nyvuosi  = date("Y");
 
 			$toimvkopva = $toimvkopva == '' ? 7 : $toimvkopva;
 			
@@ -2350,38 +2351,21 @@
 
 		if ($keraysvko != '' and ($apuro["keraysvko"] == "" or $keraysvko >= $nyviikko or $keraysvkopva != $vkeraysvko)) {
 
+			$nyvuosi  = date("Y");
+
+			$keraysvkopva = $keraysvkopva == '' ? 7 : $keraysvkopva;
+			
 			if ($keraysvko < $nyviikko) {
-				$keraysvko = "+".(52 - $nyviikko) + $keraysvko;
-			}
-			elseif ($keraysvko == $nyviikko) {
-				$keraysvko = "this";
-			}
-			else {
-				$keraysvko = "+".$keraysvko - $nyviikko;
+				$nyvuosi += 1;
 			}
 
-			if ($keraysvkopva == "") {
-				$keraysvkopva  = 7;
-				$keraysvkopvat = 7;
-			}
-			else {
-				$keraysvkopvat = $keraysvkopva;
-			}
+			$keraysvko = strlen($keraysvko) == 1 ? "0".$keraysvko : $keraysvko;
 
-			if ($keraysvkopva < $nypaiva) {
-				$keraysvkopva = "-".($nypaiva - $keraysvkopva);
-			}
-			elseif ($keraysvkopva == $nypaiva) {
-				$keraysvkopva = "this";
-			}
-			else {
-				$keraysvkopva = "+".($keraysvkopva - $nypaiva);
-			}
+			$kervv  = date("Y",strtotime("$nyvuosi-W$keraysvko-$keraysvkopva"));
+			$kerkk	 = date("m",strtotime("$nyvuosi-W$keraysvko-$keraysvkopva"));
+			$kerpp  = date("d",strtotime("$nyvuosi-W$keraysvko-$keraysvkopva"));
 
-			$kervv  = date("Y",strtotime($keraysvko." week ".$keraysvkopva." day"));
-			$kerkk	= date("m",strtotime($keraysvko." week ".$keraysvkopva." day"));
-			$kerpp  = date("d",strtotime($keraysvko." week ".$keraysvkopva." day"));
-			$keraysvko = $keraysvkopvat;
+			$keraysvko = $keraysvkopvat = $keraysvkopva;
 		}
 		else {
 			$keraysvko = $vkeraysvko;
@@ -2583,7 +2567,7 @@
 		}
 
 		//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
-		if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv)) {
+		if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
 			$toimpp = $kerpp;
 			$toimkk = $kerkk;
 			$toimvv = $kervv;

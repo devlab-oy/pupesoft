@@ -533,6 +533,8 @@ if ($toiminto == "uusi" and $toimittajaid > 0) {
 	$row    = mysql_fetch_array($result);
 	$kurssi = $row["kurssi"];
 
+	$maa_lahetys = $toimittajarow['maa_lahetys'] != '' ? $toimittajarow['maa_lahetys'] : $toimittajarow['maa'];
+
 	// meillä on $toimittajarow haettuna ylhäällä
 	$query = "	INSERT into lasku set
 				yhtio        	= '$kukarow[yhtio]',
@@ -546,7 +548,7 @@ if ($toiminto == "uusi" and $toimittajaid > 0) {
 				osoite       	= '$toimittajarow[osoite]',
 				postitp      	= '$toimittajarow[postitp]',
 				maa			 	= '$toimittajarow[maa]',
-				maa_lahetys 	= '$toimittajarow[maa_lahetys]',
+				maa_lahetys 	= '$maa_lahetys',
 				kauppatapahtuman_luonne = '$toimittajarow[kauppatapahtuman_luonne]',
 				kuljetusmuoto 	= '$toimittajarow[kuljetusmuoto]',
 				rahti 			= '$toimittajarow[oletus_kulupros]',

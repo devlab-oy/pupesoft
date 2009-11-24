@@ -2326,41 +2326,23 @@
 		// ollaan annettu toimitusviikko
 		$nyviikko = date("W");
 		$nypaiva  = date("N");
+		$nyvuosi  = date("Y");
 
 		if ($toimvko != '' and ($apuro["toimvko"] == "" or $toimvko >= $nyviikko or $toimvkopva != $vtoimvko)) {
 
+			$toimvkopva = $toimvkopva == '' ? 7 : $toimvkopva;
+			
 			if ($toimvko < $nyviikko) {
-				$toimvko = "+".(52 - $nyviikko) + $toimvko;
-			}
-			elseif ($toimvko == $nyviikko) {
-				$toimvko = "this";
-			}
-			else {
-				$toimvko = "+".$toimvko - $nyviikko;
+				$nyvuosi += 1;
 			}
 
-			if ($toimvkopva == "") {
-				$toimvkopva  = 7;
-				$toimvkopvat = 7;
-			}
-			else {
-				$toimvkopvat = $toimvkopva;
-			}
+			$toimvko = strlen($toimvko) == 1 ? "0".$toimvko : $toimvko;
 
-			if ($toimvkopva < $nypaiva) {
-				$toimvkopva = "-".($nypaiva - $toimvkopva);
-			}
-			elseif ($toimvkopva == $nypaiva) {
-				$toimvkopva = "this";
-			}
-			else {
-				$toimvkopva = "+".($toimvkopva - $nypaiva);
-			}
+			$toimvv  = date("Y",strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
+			$toimkk	 = date("m",strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
+			$toimpp  = date("d",strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
 
-			$toimvv  = date("Y",strtotime($toimvko." week ".$toimvkopva." day"));
-			$toimkk	 = date("m",strtotime($toimvko." week ".$toimvkopva." day"));
-			$toimpp  = date("d",strtotime($toimvko." week ".$toimvkopva." day"));
-			$toimvko = $toimvkopvat;
+			$toimvko = $toimvkopvat = $toimvkopva;
 		}
 		else {
 			$toimvko = $vtoimvko;

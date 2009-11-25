@@ -154,7 +154,7 @@ echo "
 	    echo "\n<link rel='shortcut icon' href='pics/pupeicon.gif'>\n";
 	}
 	else {
-	    echo "\n<link rel='shortcut icon' href='http://www.pupesoft.com/pupeicon.gif'>\n";
+	    echo "\n<link rel='shortcut icon' href='".$palvelin2."devlab-shortcut.png'>\n";
 	}
 
 echo "

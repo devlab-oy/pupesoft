@@ -36,7 +36,7 @@ if (file_exists("pics/pupeicon.gif")) {
 	echo "<link rel='shortcut icon' href='pics/pupeicon.gif'>\n";
 }
 else {
-	echo "<link rel='shortcut icon' href='http://www.devlab.fi/devlab-shortcut.png'>\n";
+	echo "<link rel='shortcut icon' href='".$palvelin2."devlab-shortcut.png'>\n";
 }
 
 echo "<meta http-equiv='Pragma' content='no-cache'>

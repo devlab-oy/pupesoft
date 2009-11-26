@@ -142,6 +142,7 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 		$errormsg = t("Käyttäjätunnusta ei löydy ja/tai salasana on virheellinen",$browkieli)."!";
 	}
 }
+
 $formi = "login"; // Kursorin ohjaus
 $kentta = "user";
 
@@ -183,16 +184,16 @@ echo "
 <td valign='top'><br>";
 
 if (file_exists("pics/pupesoft_logo.jpg")) {
-	echo "<a target='_top' href='/'><img src='pics/pupesoft_logo.jpg' border='0'>";
+	echo "<a target='_top' href='$palvelin2'><img src='pics/pupesoft_logo.jpg' border='0'>";
 }
 elseif (file_exists("pics/pupesoft_logo.gif")) {
-	echo "<a target='_top' href='/'><img src='pics/pupesoft_logo.gif' border='0'>";
+	echo "<a target='_top' href='$palvelin2'><img src='pics/pupesoft_logo.gif' border='0'>";
 }
 else {
-	echo "<a target='_top' href='/'><img src='http://www.pupesoft.com/pupesoft.gif' border='0'>";
+	echo "<a target='_top' href='$palvelin2'><img src='http://www.pupesoft.com/pupesoft.gif' border='0'>";
 }
 
-echo "</a></td><td><font class='head'>".t("Sisäänkirjautuminen",$browkieli)."</font><br><br>";
+echo "</td><td><font class='head'>".t("Sisäänkirjautuminen",$browkieli)."</font><br><br>";
 
 if (isset($usea) and $usea == 1) {
 	$query = "	SELECT yhtio.nimi, yhtio.yhtio

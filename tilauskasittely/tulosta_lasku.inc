@@ -841,6 +841,19 @@ if (!function_exists('rivi_original')) {
 			$row["kommentti"] .= t("S:nro").": $sarjarow[sarjanumero]\n";
 		}
 
+		if ($laskutyyppi == "7") {
+			$query = "	SELECT eankoodi
+						FROM tuote
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$row[tuoteno]'";
+			$eanres = mysql_query($query) or pupe_error($query);
+			$eanrow = mysql_fetch_array($eanres);
+
+			if ($eanrow["eankoodi"] != "") {
+				$row["kommentti"] = "EAN: $eanrow[eankoodi]\n$row[kommentti]";
+			}
+		}
+
 		//Kommentti
 		if (trim($row["kommentti"]) != '') {
 			$kommentit = explode("\n", trim($row["kommentti"]));
@@ -889,7 +902,12 @@ if (!function_exists('rivi_original')) {
 				}
 
 				if (trim($kommentti) != "") {
-					$pdf->draw_text(35, $kala, $row["otunnus"].": ".$kommentti, $thispage, $pieni);
+					if (substr($kommentti, 0, 4) == "EAN:") {
+						$pdf->draw_text(35, $kala, $kommentti, $thispage, $pieni);
+					}
+					else {
+						$pdf->draw_text(35, $kala, $row["otunnus"].": ".$kommentti, $thispage, $pieni);
+					}
 					$kala = $kala - 10;
 
 					if ($kala <= 180 + $barcode_korkeus) {

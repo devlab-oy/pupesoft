@@ -433,39 +433,45 @@
 		}
 
 		if ($where_logisticar["paiva_ajo"] != "") {
-			$pvmlisa = " and tilausrivi.laskutettuaika >= date_sub(now(), interval 30 day) ";
+			$pvmlisa = " and date_format(tapahtuma.laadittu, '%Y-%m-%d') >= date_sub(now(), interval 30 day) ";
 		}
 		else {
-			$pvmlisa = " and tilausrivi.laskutettuaika > '0000-00-00' ";
+			$pvmlisa = " and date_format(tapahtuma.laadittu, '%Y-%m-%d') > '0000-00-00 00:00:00' ";
 		}
 
-	    $query = "	SELECT
-					tilausrivi.tuoteno 			nimiketunnus,
-					lasku.liitostunnus          asiakastunnus,
-					lasku.liitostunnus			toimitusasiakas,
-					tilausrivi.laskutettuaika   tapahtumapaiva,
-					tilausrivi.tyyppi           tapahtumalaji,
-					tilausrivi.rivihinta        myyntiarvo,
-					tilausrivi.rivihinta        ostoarvo,
-					tilausrivi.kate             kate,
-					tilausrivi.kpl              tapahtumamaara,
+		$query = "	SELECT
+					tapahtuma.tuoteno 			nimiketunnus,
+					if(tapahtuma.laji = 'siirto', lasku.clearing, lasku.liitostunnus) asiakastunnus,
+					if(tapahtuma.laji = 'siirto', lasku.clearing, lasku.liitostunnus) toimitusasiakas,
+					date_format(tapahtuma.laadittu, '%Y-%m-%d') tapahtumapaiva,
+					tapahtuma.laji           	tapahtumalaji,
+					(tapahtuma.kplhinta * tapahtuma.kpl * -1) myyntiarvo,
+					(tapahtuma.kplhinta * tapahtuma.kpl * -1) ostoarvo,
+					(tapahtuma.kpl * (tapahtuma.kplhinta - tapahtuma.hinta) * -1) kate,
+					tapahtuma.kpl tapahtumamaara,
 					lasku.laskunro              laskunumero,
 					kuka.kuka	                myyjatunnus,
 					lasku.yhtio_toimipaikka		toimipaikka,
 					varastopaikat.tunnus        varastotunnus,
-					tilausrivi.tyyppi  			tapahtumatyyppi
-					FROM tilausrivi
-					JOIN lasku USE INDEX (PRIMARY) ON lasku.tunnus=tilausrivi.uusiotunnus and lasku.yhtio=tilausrivi.yhtio
-					LEFT JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.tuoteno=tilausrivi.tuoteno and tuotepaikat.hyllyvali=tilausrivi.hyllyvali and tuotepaikat.hyllytaso=tilausrivi.hyllytaso AND tilausrivi.hyllyalue=tuotepaikat.hyllyalue and tilausrivi.hyllynro=tuotepaikat.hyllynro and tilausrivi.yhtio=tuotepaikat.yhtio
+					tapahtuma.laji  			tapahtumatyyppi
+					FROM tapahtuma
+					LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
+					LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+					LEFT JOIN tuotepaikat USE INDEX (yhtio_tuoteno_paikka) ON (	tuotepaikat.yhtio		= tapahtuma.yhtio and 
+																				tuotepaikat.tuoteno 	= tapahtuma.tuoteno and 
+																				tuotepaikat.hyllyvali 	= tapahtuma.hyllyvali and 
+																				tuotepaikat.hyllytaso 	= tapahtuma.hyllytaso and 
+																				tuotepaikat.hyllyalue 	= tapahtuma.hyllyalue and 
+																				tuotepaikat.hyllynro 	= tapahtuma.hyllynro)
 					LEFT JOIN varastopaikat ON
 					concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
 					concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-					and varastopaikat.yhtio=tuotepaikat.yhtio
+					and varastopaikat.yhtio = tuotepaikat.yhtio
 					LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
-					WHERE tilausrivi.tyyppi IN ('L', 'O')
+					WHERE tapahtuma.laji in ('tulo', 'laskutus', 'siirto')
+					and tapahtuma.yhtio = '$yhtio'
 					$pvmlisa
-					and tilausrivi.yhtio = '$yhtio'
-					ORDER BY tilausrivi.laskutettuaika
+					ORDER BY tapahtumapaiva, nimiketunnus ASC
 					$limit";
 	    $res = mysql_query($query) or pupe_error($query);
 
@@ -498,30 +504,33 @@
 	    while ($trow = mysql_fetch_assoc($res)) {
 			$row++;
 
-			switch(strtoupper($trow['tapahtumalaji'])) {
+			switch(strtolower($trow['tapahtumalaji'])) {
 				// ostot
-				case 'O':
+				case 'tulo':
 
 					// 1 = saapuminen tai oston palautus
 					$trow['tapahtumalaji'] = 1;
+					$trow['tapahtumatyyppi'] = 'O';
 
 					// myyntiarvo on 0
 					$trow['myyntiarvo'] = 0;
+					$trow['ostoarvo'] = (-1 * $trow['ostoarvo']);
 
 					// jos kpl alle 0 niin tämä on oston palautus
 					// jolloin hinta myös miinus
 					if ($trow['tapahtumamaara'] < 0) {
 						// tapahtumamaara on aina positiivinen logisticarissa
-						$trow['tapahtumamaara'] = -1 * $trow['tapahtumamaara'];
+						$trow['tapahtumamaara'] = (-1 * $trow['tapahtumamaara']);
 					}
 
 			        break;
 
 				// myynnit
-				case 'L':
+				case 'laskutus':
 
 					// 2 = otto tai myynninpalautus
 					$trow['tapahtumalaji'] = 2;
+					$trow['tapahtumatyyppi'] = 'L';
 
 					// ostoarvo
 					$trow['ostoarvo'] = $trow['myyntiarvo'] - $trow['kate'];
@@ -529,10 +538,28 @@
 					// tämä on myynninpalautus eli myyntiarvo on negatiivinen
 					if ($trow['tapahtumamaara'] < 0) {
 						// tapahtumamaara on aina positiivinen logisticarissa
-						$trow['tapahtumamaara'] = -1 * $trow['tapahtumamaara'];
+						$trow['tapahtumamaara'] = (-1 * $trow['tapahtumamaara']);
 					}
 
 					break;
+				
+				// varastosiirrot
+				case 'siirto':
+
+					if ($trow['tapahtumamaara'] < 0) {
+						$trow['tapahtumalaji'] = 2;
+						$trow['tapahtumatyyppi'] = 'S';
+						$trow['tapahtumamaara'] = (-1 * $trow['tapahtumamaara']);
+					}
+					else {
+						$trow['tapahtumalaji'] = 1;
+						$trow['tapahtumatyyppi'] = 'S';
+
+						$trow['toimitusasiakas'] = $trow['varastotunnus'];
+						$trow['varastotunnus'] = $trow['asiakastunnus'];
+					}
+				
+					
 			}
 
 			unset($trow['kate']);
@@ -575,6 +602,8 @@
 					tilausrivi.tuoteno nimiketunnus,
 					lasku.liitostunnus asiakastunnus,
 					lasku.liitostunnus toimitusasiakas,
+					if(tilausrivi.tyyppi = 'G', lasku.clearing, lasku.liitostunnus) asiakastunnus,
+					if(tilausrivi.tyyppi = 'G', lasku.clearing, lasku.liitostunnus) toimitusasiakas,
 					tilausrivi.toimaika toimituspaiva,
 					tilausrivi.tyyppi tapahtumalaji,
 					round(tilausrivi.hinta  / if('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)), $yhtiorow[hintapyoristys]) myyntiarvo,
@@ -583,7 +612,8 @@
 					lasku.tunnus tilausnro,
 					kuka.kuka myyjatunnus,
 					lasku.yhtio_toimipaikka	toimipaikka,
-					varastopaikat.tunnus varastotunnus
+					varastopaikat.tunnus varastotunnus,
+					tilausrivi.toimitettu
 					FROM tilausrivi
 					JOIN lasku USE INDEX (PRIMARY) ON lasku.tunnus=tilausrivi.otunnus and lasku.yhtio=tilausrivi.yhtio
 					JOIN tuote ON tuote.tuoteno = tilausrivi.tuoteno and tuote.yhtio = tilausrivi.yhtio
@@ -594,7 +624,7 @@
 					and varastopaikat.yhtio=tuotepaikat.yhtio
 					LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
 					WHERE tilausrivi.varattu != 0
-					AND tilausrivi.tyyppi IN ('L','O')
+					AND tilausrivi.tyyppi IN ('L','O','G')
 					AND tilausrivi.laskutettuaika = '0000-00-00'
 					AND tilausrivi.yhtio = '$yhtio'
 					ORDER BY tilausrivi.laadittu
@@ -629,13 +659,50 @@
 		while ($trow = mysql_fetch_assoc($res)) {
 			$row++;
 
-			switch ($trow['tapahtumalaji']) {
+			switch (strtoupper($trow['tapahtumalaji'])) {
+				case 'G':
+					// kirjoitetaan fileen vain avoimia siirtolistoja eli toimitettu pitää olla tyhjää
+					if ($trow['toimitettu'] != '') {
+						continue;
+					}
+
+					// laji 3 = saapuva tilaus
+					$trow['tapahtumalaji'] 	= '3';
+					$trow['myyntiarvo'] 	= 0;
+
+					$trow['toimitusasiakas'] = $trow['varastotunnus'];
+					$trow['varastotunnus'] = $trow['asiakastunnus'];
+
+					// ei haluta toimitettu-saraketta mukaan
+					unset($trow['toimitettu']);
+
+					$data = array_merge($headers, $trow);
+					$data = implode("\t", $data);
+
+					if (! fwrite($fp, $data . "\n")) {
+						echo "Failed writing row.\n";
+						die();
+					}
+
+					// laji 4 = varattu
+					$trow['tapahtumalaji'] = '4';
+
+					$trow['varastotunnus'] = $trow['toimitusasiakas'];
+					$trow['toimitusasiakas'] = $trow['asiakastunnus'];
+
+					break;
 				case 'L':
 					$trow['tapahtumalaji']	= '4';
+
+					// ei haluta toimitettu-saraketta mukaan
+					unset($trow['toimitettu']);
 					break;
 				case 'O':
 					$trow['tapahtumalaji'] 	= '3';
 					$trow['myyntiarvo'] 	= 0;
+
+					// ei haluta toimitettu-saraketta mukaan
+					unset($trow['toimitettu']);
 					break;
 			}
 

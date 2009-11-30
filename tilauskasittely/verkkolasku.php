@@ -875,7 +875,14 @@
 
 					}
 
-					// tehdään ketjutus (group by PITÄÄ OLLA sama kun alhaalla) rivi ~976
+					if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T') {
+						$ketjutus_group = ", toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa ";
+					}
+					else {
+						$ketjutus_group = "";
+					}
+
+					// tehdään ketjutus (group by PITÄÄ OLLA sama kun alhaalla) rivi ~1009
 					$query = "	SELECT group_concat(tunnus) tunnukset
 								FROM lasku
 								where yhtio = '$kukarow[yhtio]'
@@ -993,13 +1000,6 @@
 
 				if ($silent == "") {
 					$tulos_ulos .= t("Laskutettiin")." $laskutetttu ".t("tilausta").".";
-				}
-
-				if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T') {
-					$ketjutus_group = ", toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa ";
-				}
-				else {
-					$ketjutus_group = "";
 				}
 
 				//ketjutetaan laskut...

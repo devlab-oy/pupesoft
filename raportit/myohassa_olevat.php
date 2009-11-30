@@ -218,6 +218,10 @@
 
 			if (isset($kayta_ostotilausta) and $kayta_ostotilausta != '') {
 
+				if ($myytavissa > $tulrow['myydyt']) {
+					continue;
+				}
+
 				$ostotilaus_varattu_kpl = 0;
 
 				$query = "	SELECT *

@@ -1,5 +1,7 @@
 <?php
 
+$alkumem = memory_get_usage();
+
 // poistetaan hipsuja ja trimmataan kaikki get muuttujat!
 $serc = array("\"","'","<",">","\\", ";");
 $repl = array("", "", "", "", "", "");
@@ -128,7 +130,7 @@ $apunimi = str_replace($alut, "", $palvelin);
 $tark    = $_SERVER['SERVER_NAME'].$portti.$_SERVER['SCRIPT_NAME'];
 $phpnimi = str_replace($apunimi, "", $tark);
 
-if (isset($_COOKIE["pupesoft_session"])) {
+if (isset($_COOKIE["pupesoft_session"]) and $_COOKIE["pupesoft_session"] != "deleted") {
 	$session = $_COOKIE["pupesoft_session"];
 }
 else {

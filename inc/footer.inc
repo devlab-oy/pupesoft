@@ -39,9 +39,12 @@
 		$ei_kelloa = '';
 	}
 
-	if ($ei_kelloa == "") {
+	if ($ei_kelloa == "" and $_GET["ohje"] != "off") {
+
+		$loppumem = memory_get_usage();
+
 		echo "<br><br>";
-		echo "<font class='info'>$aika</font>";
+		echo "<font class='info'>$aika ".round((($loppumem-$alkumem)/1000000), 1)."</font>";
 
 		if (count($kaannetyt_sanat) > 0) {
 			echo " <a href='".$palvelin."sanakirja.php?hakusana=".urlencode(implode("\n", $kaannetyt_sanat))."&tarkkahaku=ON&etsi_kieli=fi&kieli[0]=en&show=all'><font class='info'>".t("Sanakirja")."</font></a>";

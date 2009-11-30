@@ -15,7 +15,11 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 	
 	if ($content != FALSE) {
 		for($i = 0; $i < count($content); $i++) {
-			
+
+			if ($content[$i] == '.' or $content[$i] == '..') {
+				continue;
+			}
+
 			if ($dir_test[$i][0] != "d") {
 				
 				if (strpos($content[$i],$nodelpict) === FALSE) {
@@ -33,6 +37,11 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 				
 				if ($content[$i] != $nodel) {
 					for ($k=0; $k < count($subcontent); $k++) {
+
+						if ($subcontent[$k] == '.' or $subcontent[$k] == '..') {
+							continue;
+						}
+
 						$subdir = "$dir/$content[$i]/$subcontent[$k]";
 						echo "subdir: $subdir\n";
 						if (!ftp_is_dir($conn_id, $subdir)) {

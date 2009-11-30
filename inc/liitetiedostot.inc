@@ -4,7 +4,7 @@
 	
 	// HUOM: ethän muuta näitä ilman, että korjaat myös iframen lukitse_avaimeen muuttujat
 	$hakukentat = "tunnus, filetype, filetype, selite, filesize, kieli, kayttotarkoitus, liitos, liitostunnus";    
-	$jarjestys  = "liitos, liitostunnus, jarjestys";
+	$jarjestys  = "liitos, liitostunnus, jarjestys, tunnus";
 	
 	$otsikko = 'Liitetiedostot';
 	$otsikko_nappi = "liite";

@@ -8,8 +8,6 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 		 $dir = substr($dir, 0, strlen($dir)-1);
 	}
 	
-	echo "dir: $dir\n";
-	
 	$content = ftp_nlist($conn_id, $dir);
 	$dir_test = ftp_rawlist($conn_id, $dir);
 	
@@ -45,7 +43,6 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 						}
 
 						$subdir = "$dir/$content[$i]/$subcontent[$k]";
-						echo "subdir: $subdir\n";
 						if (ftp_is_dir($conn_id, $subdir) === FALSE) {
 							if (ftp_delete($conn_id, $subdir) === FALSE) {
 								$poistosyy .= "Tiedoston poisto epäonnistui: ".$subcontent[$k]."\n";
@@ -81,9 +78,7 @@ function ftp_is_dir($conn_id, $dir_x) {
 	$origin = ftp_pwd($conn_id);
 
 	if (@ftp_chdir($conn_id, $dir_x) === TRUE) {
-		echo "vaihetiin kansioon $dir_x\n";
 		ftp_chdir($conn_id, $origin);
-		echo "vaihdettiin takaisin kansioon $origin\n";
 		return true;
 	} 
 	else {

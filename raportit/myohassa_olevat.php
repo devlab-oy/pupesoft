@@ -269,6 +269,7 @@
 
 						if (end($kpl_pvm[$myohastyneet_row['tuoteno']]) and $i < $myohastyneet_row['varattu']) {
 							echo "<td>".tv1dateconv($ostotoimitusaika)."</td>";
+							break;
 						}
 					}
 

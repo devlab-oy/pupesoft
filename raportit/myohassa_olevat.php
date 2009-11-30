@@ -439,7 +439,7 @@
 
 	$kayta_ostotilausta_check = isset($kayta_ostotilausta) ? " checked='checked'" : '';
 
-	echo "<tr><th>",t("Saldo ei riit‰"),"<br/>",t("N‰yt‰ ostotilauksen toimitusaika"),"</th><td><input type='checkbox' name='kayta_ostotilausta'{$kayta_ostotilausta_check}></td></tr>";
+	echo "<tr><th>",t("Vertaa ostotilauksen toimitusp‰iv‰m‰‰r‰‰n"),"</th><td><input type='checkbox' name='kayta_ostotilausta'{$kayta_ostotilausta_check}></td></tr>";
 
 	echo "<tr><th>".t("Valitse tuoteryhm‰")."</th>";
 

@@ -8,6 +8,7 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 		 $dir = substr($dir, 0, strlen($dir)-1);
 	}
 	
+	echo "dir: $dir\n";
 	
 	$content = ftp_nlist($conn_id, $dir);
 	$dir_test = ftp_rawlist($conn_id, $dir);

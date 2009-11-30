@@ -44,7 +44,7 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 
 						$subdir = "$dir/$content[$i]/$subcontent[$k]";
 						echo "subdir: $subdir\n";
-						if (ftp_is_dir($conn_id, $subdir) !== FALSE) {
+						if (ftp_is_dir($conn_id, $subdir) === FALSE) {
 							if (!ftp_delete($conn_id, $subdir)) {
 								$poistosyy .= "Tiedoston poisto epäonnistui: ".$subcontent[$k]."\n";
 							}

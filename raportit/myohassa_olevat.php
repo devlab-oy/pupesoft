@@ -66,6 +66,7 @@
 			echo "<th>".t("Ytunnus")."</th>";
 			echo "<th>".t("Asiakas")."</th>";
 			echo "<th>",t("Osto Toimitusaika"),"</th>";
+			echo "<th>",t("Tilattu"),"</th>";
 		}
 		else {
 			echo "<th>".t("Ytunnus")."</th>";
@@ -115,6 +116,8 @@
 					$worksheet->write($excelrivi, $excelsarake, t("Asiakas"), $format_bold);
 					$excelsarake++;
 					$worksheet->write($excelrivi, $excelsarake, t("Osto Toimitusaika"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Tilattu"), $format_bold);
 				}
 				else {
 					$worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
@@ -259,20 +262,6 @@
 					echo "<td>$myohastyneet_row[ytunnus]</td>";
 					echo "<td>$myohastyneet_row[nimi]</td>";
 
-					$i = 0;
-					foreach ($kpl_pvm[$myohastyneet_row['tuoteno']] as $ostotoimitusaika => $ostovarattu) {
-						$i += $ostovarattu;
-						if ($i >= $myohastyneet_row['varattu']) {
-							echo "<td>".tv1dateconv($ostotoimitusaika)."</td>";
-							break;
-						}
-
-						if (end($kpl_pvm[$myohastyneet_row['tuoteno']]) and $i < $myohastyneet_row['varattu']) {
-							echo "<td>".tv1dateconv($ostotoimitusaika)."</td>";
-							break;
-						}
-					}
-
 					if (isset($workbook)) {
 						$excelsarake = 0;
 
@@ -288,10 +277,50 @@
 						$excelsarake++;
 						$worksheet->write($excelrivi, $excelsarake, $myohastyneet_row["nimi"], $format_bold);
 						$excelsarake++;
-						$worksheet->write($excelrivi, $excelsarake, tv1dateconv($ostotoimitusaika), $format_bold);
+					}
 
+					$i = 0;
+					foreach ($kpl_pvm[$myohastyneet_row['tuoteno']] as $ostotoimitusaika => $ostovarattu) {
+						if ($i > 0) {
+							if (isset($workbook)) {
+								$excelrivi++;
+								$excelsarake = 0;
+								
+								$worksheet->write($excelrivi, $excelsarake, '', $format_bold);
+								$excelsarake++;
+								$worksheet->write($excelrivi, $excelsarake, '', $format_bold);
+								$excelsarake++;
+								$worksheet->write($excelrivi, $excelsarake, '', $format_bold);
+								$excelsarake++;
+								$worksheet->write($excelrivi, $excelsarake, '', $format_bold);
+								$excelsarake++;
+								$worksheet->write($excelrivi, $excelsarake, '', $format_bold);
+								$excelsarake++;
+								$worksheet->write($excelrivi, $excelsarake, '', $format_bold);
+								$excelsarake++;
+								
+							}
+							
+							echo "<tr class='aktiivi'><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>";
+						}
+
+						echo "<td>".tv1dateconv($ostotoimitusaika)."</td>";
+						echo "<td>$ostovarattu</td>";
+						echo "</tr>";
+
+						if (isset($workbook)) {
+							$worksheet->write($excelrivi, $excelsarake, tv1dateconv($ostotoimitusaika), $format_bold);
+							$excelsarake++;
+							$worksheet->write($excelrivi, $excelsarake, $ostovarattu, $format_bold);
+						}
+
+						$i++;
+					}
+
+					if (isset($workbook)) {
 						$excelrivi++;
 					}
+
 					echo "</tr>";
 				}
 			}

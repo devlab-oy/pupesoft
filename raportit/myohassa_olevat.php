@@ -57,18 +57,30 @@
 		
 		
 		echo "<table><tr>";
-		echo "<th>".t("Ytunnus")."</th>";
-		echo "<th>".t("Asiakas")."</th>";
-		echo "<th>".t("Postitp")."</th>";
-		echo "<th>".t("Tilaus")."</th>";
-		echo "<th>".t("Tuoteno")."</th>";
-		echo "<th>".t("Nimike")."</th>";
-		echo "<th>".t("Määrä")."</th>";
-		echo "<th>".t("Yksikkö")."</th>";
-		echo "<th>".t("Arvo")."</th>";
-		echo "<th>".t("Myytävissä")."</th>";
-		echo "<th><a href='?tee=JARJESTA&haku=toimaika&suunta=$suunta&tunnus=$tunnus&myovv=$myovv&myokk=$myokk&myopp=$myopp&se_tuoteryhma=$se_tuoteryhma&se_kustannuspaikka=$se_kustannuspaikka'>".t("Toimitusaika")."</a></th>";
-		echo "<th>".t("Tila")."</th>";
+		
+		if (isset($kayta_ostotilausta) and $kayta_ostotilausta != '') {
+			echo "<th>".t("Tuoteno")."</th>";
+			echo "<th>".t("Myynti Toimitusaika")."</th>";
+			echo "<th>".t("Myydyt")."</th>";
+			echo "<th>".t("Tilaus")."</th>";
+			echo "<th>".t("Ytunnus")."</th>";
+			echo "<th>".t("Asiakas")."</th>";
+			echo "<th>",t("Osto Toimitusaika"),"</th>";
+		}
+		else {
+			echo "<th>".t("Ytunnus")."</th>";
+			echo "<th>".t("Asiakas")."</th>";
+			echo "<th>".t("Postitp")."</th>";
+			echo "<th>".t("Tilaus")."</th>";
+			echo "<th>".t("Tuoteno")."</th>";
+			echo "<th>".t("Nimike")."</th>";
+			echo "<th>".t("Määrä")."</th>";
+			echo "<th>".t("Yksikkö")."</th>";
+			echo "<th>".t("Arvo")."</th>";
+			echo "<th>".t("Myytävissä")."</th>";
+			echo "<th><a href='?tee=JARJESTA&haku=toimaika&suunta=$suunta&tunnus=$tunnus&myovv=$myovv&myokk=$myokk&myopp=$myopp&se_tuoteryhma=$se_tuoteryhma&se_kustannuspaikka=$se_kustannuspaikka'>".t("Toimitusaika")."</a></th>";
+			echo "<th>".t("Tila")."</th>";
+		}
 		echo "</tr>";
 		
 		if ($vain_excel != '' and @include('Spreadsheet/Excel/Writer.php')) {
@@ -89,29 +101,46 @@
 			if(isset($workbook)) {
 				$excelsarake = 0;
 
-				$worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Asiakas"), $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Postitp"), $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Tilaus"), $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Tuoteno"), $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Nimike"), $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Määrä"), $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Yksikkö"), $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Arvo"), $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Myytävissä"), $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Toimitusaika"), $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Tila"), $format_bold);
+				if (isset($kayta_ostotilausta) and $kayta_ostotilausta != '') {
+					$worksheet->write($excelrivi, $excelsarake, t("Tuoteno"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Myynti Toimitusaika"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Myydyt"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Tilaus"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Asiakas"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Osto Toimitusaika"), $format_bold);
+				}
+				else {
+					$worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Asiakas"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Postitp"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Tilaus"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Tuoteno"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Nimike"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Määrä"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Yksikkö"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Arvo"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Myytävissä"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Toimitusaika"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t("Tila"), $format_bold);
+				}
 				
 				$excelsarake = 0;
 				$excelrivi++;
@@ -123,105 +152,224 @@
 			$myokk = "00";
 			$myopp = "00";
 		}		
-		
-		$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.postitp, lasku.tunnus, tilausrivi.tuoteno, tilausrivi.nimitys, sum(tilausrivi.tilkpl) myydyt, tilausrivi.yksikko,
-					sum(tilausrivi.tilkpl * tilausrivi.hinta) arvo, lasku.toimaika, lasku.tila, lasku.alatila
+
+		$selectlisa = '';
+
+		if ($kayta_ostotilausta == '') {
+			$selectlisa = ", lasku.ytunnus, 
+			lasku.nimi, 
+			lasku.postitp, 
+			lasku.tunnus, 
+			tilausrivi.nimitys, 
+			sum(tilausrivi.tilkpl) myydyt, 
+			tilausrivi.yksikko,
+			sum(tilausrivi.tilkpl * tilausrivi.hinta) arvo, 
+			lasku.tila, 
+			lasku.alatila";
+		}
+		else {
+			$selectlisa = ", group_concat(tilausrivi.tunnus) tunnukset, sum(tilausrivi.tilkpl) myydyt";
+		}
+
+		$query = "	SELECT lasku.toimaika, 
+					tilausrivi.tuoteno
+					$selectlisa
 					FROM lasku
-					JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.kpl = 0
-					JOIN tuote ON lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-					JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.kpl = 0 and tilausrivi.tyyppi != 'D')
+					JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila IN ('L','N')
-					and (lasku.alatila != 'X' or tilausrivi.var='J')
-					and lasku.toimaika <= '$myovv-$myokk-$myopp' 
+					and (lasku.alatila != 'X' or tilausrivi.var = 'J')
+					and lasku.toimaika <= '$myovv-$myokk-$myopp'
 					$lisa
-					group by 1,2,3,4,5,6,8,10,11,12 
+					group by lasku.toimaika, tilausrivi.tuoteno
 					ORDER BY lasku.toimaika $suunta";
 		$result = mysql_query($query) or pupe_error($query);
-		
-		
+
 		while ($tulrow = mysql_fetch_array($result)) {
-			
+
 			list(,, $myytavissa) = saldo_myytavissa($tulrow["tuoteno"], '', '', '', '', '', '', '', '', '');
 			
 			if ($yhtiorow['saldo_kasittely'] != '') {
 				list(,, $myytavissa_tul) = saldo_myytavissa($tulrow["tuoteno"], '', '', '', '', '', '', '', '', $myovv."-".$myokk."-".$myopp);
 			}
-			
-			if ($tulrow["alatila"] == 'X') {
-				$laskutyyppi = t("Jäkitoimitus");
-				$alatila	 = "";
-			}
-			else {
-				$laskutyyppi = $tulrow["tila"];
-				$alatila	 = $tulrow["alatila"];
-				require ("inc/laskutyyppi.inc");
-			}
-			
-			echo "<tr class='aktiivi'>";
-			echo "<td>$tulrow[ytunnus]</td>";
-			echo "<td>$tulrow[nimi]</td>";
-			echo "<td>$tulrow[postitp]</td>";
-			echo "<td><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$tulrow[tunnus]&myovv=$myovv&myokk=$myokk&myopp=$myopp&se_tuoteryhma=$se_tuoteryhma&se_kustannuspaikka=$se_kustannuspaikka'>$tulrow[tunnus]</a></td>";
-			echo "<td>$tulrow[tuoteno]</td>";
-			echo "<td>$tulrow[nimitys]</td>";
-			echo "<td>$tulrow[myydyt]</td>";
-			echo "<td>".t_avainsana("Y", "", "and avainsana.selite='$tulrow[yksikko]'", "", "", "selite")."</td>";
-			echo "<td>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tulrow["arvo"])."</td>";
-			if ($yhtiorow['saldo_kasittely'] != '') {
-				echo "<td>$myytavissa ($myytavissa_tul)</td>";
-			}
-			else {
-				echo "<td>$myytavissa</td>";
-			}
-			echo "<td>".tv1dateconv($tulrow["toimaika"])."</td>";
-			
-			if ($tulrow['tila'] == "L" and $tulrow['alatila'] == "D") {
-				echo "<td><font class='OK'>".t($laskutyyppi)."<br>".t($alatila)."</font></td>";
-			}
-			else {
-				echo "<td>".t($laskutyyppi)."<br>".t($alatila)."</td>";
-			}
-			
-			echo "</tr>";
-			
-			if(isset($workbook)) {
-				$excelsarake = 0;
 
-				$worksheet->write($excelrivi, $excelsarake, $tulrow["ytunnus"], $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, $tulrow["nimi"], $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, $tulrow["postitp"], $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, $tulrow["tunnus"], $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, $tulrow["tuoteno"], $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, $tulrow["nimitys"], $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, $tulrow["myydyt"], $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t_avainsana("Y", "", "and avainsana.selite='$tulrow[yksikko]'", "", "", "selite"), $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, sprintf("%.".$yhtiorow['hintapyoristys']."f", $tulrow["arvo"]), $format_bold);
-				$excelsarake++;
-				if ($yhtiorow['saldo_kasittely'] != '') {
-					$worksheet->write($excelrivi, $excelsarake, $myytavissa ."(".$myytavissa_tul.")", $format_bold);
-					$excelsarake++;
+			if (isset($kayta_ostotilausta) and $kayta_ostotilausta != '') {
+
+				$ostotilaus_varattu_kpl = 0;
+
+				$query = "	SELECT *
+							FROM tilausrivi
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '{$tulrow['tuoteno']}'
+							AND kpl = 0
+							AND varattu != 0
+							AND tyyppi = 'O'
+							AND toimaika <= '{$tulrow['toimaika']}'
+							ORDER BY toimaika $suunta";
+				$ostotilausres = mysql_query($query) or pupe_error($query);
+
+				while ($ostotilausrow = mysql_fetch_assoc($ostotilausres)) {
+					$ostotilaus_varattu_kpl += $ostotilausrow['varattu'];
+				}
+
+				if ($ostotilaus_varattu_kpl > $ostotilausrow['varattu']) {
+					continue;
+				}
+
+				$kpl_pvm = array();
+
+				if ($ostotilaus_varattu_kpl == 0 or $tulrow['myydyt'] > $ostotilaus_varattu_kpl) {
+					$query = "	SELECT *
+								FROM tilausrivi
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tuoteno = '{$tulrow['tuoteno']}'
+								AND kpl = 0
+								AND varattu != 0
+								AND tyyppi = 'O'
+								AND toimaika >= '{$tulrow['toimaika']}'
+								ORDER BY toimaika $suunta";
+					$ostotilausres = mysql_query($query) or pupe_error($query);
+
+					while ($ostotilausrow = mysql_fetch_assoc($ostotilausres)) {
+						$ostotilaus_varattu_kpl += $ostotilausrow['varattu'];
+						$kpl_pvm[$tulrow['tuoteno']][$ostotilausrow['toimaika']] += $ostotilausrow['varattu'];
+					}
+				}
+
+				if ($ostotilaus_varattu_kpl == 0) {
+					continue;
+				}
+
+				$query = "	SELECT *
+							FROM tilausrivi
+							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivi.tunnus in ($tulrow[tunnukset])
+							ORDER BY tilausrivi.toimaika $suunta";
+				$myohastyneet_res = mysql_query($query) or pupe_error($query);
+
+				while ($myohastyneet_row = mysql_fetch_assoc($myohastyneet_res)) {
+					echo "<tr class='aktiivi'>";
+					echo "<td>$tulrow[tuoteno]</td>";
+					echo "<td>".tv1dateconv($tulrow["toimaika"])."</td>";
+					echo "<td>$myohastyneet_row[varattu]</td>";
+					echo "<td><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$myohastyneet_row[tunnus]&myovv=$myovv&myokk=$myokk&myopp=$myopp&se_tuoteryhma=$se_tuoteryhma&se_kustannuspaikka=$se_kustannuspaikka&kayta_ostotilausta=$kayta_ostotilausta'>$myohastyneet_row[tunnus]</td></td>";
+					echo "<td>$myohastyneet_row[ytunnus]</td>";
+					echo "<td>$myohastyneet_row[nimi]</td>";
+
+					$i = 0;
+					foreach ($kpl_pvm[$myohastyneet_row['tuoteno']] as $ostotoimitusaika => $ostovarattu) {
+						$i += $ostovarattu;
+						if ($i >= $myohastyneet_row['varattu']) {
+							echo "<td>".tv1dateconv($ostotoimitusaika)."</td>";
+							break;
+						}
+
+						if (end($kpl_pvm[$myohastyneet_row['tuoteno']]) and $i < $myohastyneet_row['varattu']) {
+							echo "<td>".tv1dateconv($ostotoimitusaika)."</td>";
+						}
+					}
+
+					if (isset($workbook)) {
+						$excelsarake = 0;
+
+						$worksheet->write($excelrivi, $excelsarake, $tulrow["tuoteno"], $format_bold);
+						$excelsarake++;
+						$worksheet->write($excelrivi, $excelsarake, tv1dateconv($tulrow["toimaika"]), $format_bold);
+						$excelsarake++;
+						$worksheet->write($excelrivi, $excelsarake, $myohastyneet_row["varattu"], $format_bold);
+						$excelsarake++;
+						$worksheet->write($excelrivi, $excelsarake, $myohastyneet_row["tunnus"], $format_bold);
+						$excelsarake++;
+						$worksheet->write($excelrivi, $excelsarake, $myohastyneet_row["ytunnus"], $format_bold);
+						$excelsarake++;
+						$worksheet->write($excelrivi, $excelsarake, $myohastyneet_row["nimi"], $format_bold);
+						$excelsarake++;
+						$worksheet->write($excelrivi, $excelsarake, tv1dateconv($ostotoimitusaika), $format_bold);
+
+						$excelrivi++;
+					}
+					echo "</tr>";
+				}
+			}
+			else {
+				
+				if ($tulrow["alatila"] == 'X') {
+					$laskutyyppi = t("Jäkitoimitus");
+					$alatila	 = "";
 				}
 				else {
-					$worksheet->write($excelrivi, $excelsarake, $myytavissa, $format_bold);
-					$excelsarake++;
+					$laskutyyppi = $tulrow["tila"];
+					$alatila	 = $tulrow["alatila"];
+					require ("inc/laskutyyppi.inc");
 				}
+
+				echo "<tr class='aktiivi'>";
+				echo "<td>$tulrow[ytunnus]</td>";
+				echo "<td>$tulrow[nimi]</td>";
+				echo "<td>$tulrow[postitp]</td>";
+				echo "<td><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$tulrow[tunnus]&myovv=$myovv&myokk=$myokk&myopp=$myopp&se_tuoteryhma=$se_tuoteryhma&se_kustannuspaikka=$se_kustannuspaikka&kayta_ostotilausta=$kayta_ostotilausta'>$tulrow[tunnus]</a></td>";
+				echo "<td>$tulrow[tuoteno]</td>";
+				echo "<td>$tulrow[nimitys]</td>";
+				echo "<td>$tulrow[myydyt]</td>";
+				echo "<td>".t_avainsana("Y", "", "and avainsana.selite='$tulrow[yksikko]'", "", "", "selite")."</td>";
+				echo "<td>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tulrow["arvo"])."</td>";
+				if ($yhtiorow['saldo_kasittely'] != '') {
+					echo "<td>$myytavissa ($myytavissa_tul)</td>";
+				}
+				else {
+					echo "<td>$myytavissa</td>";
+				}
+				echo "<td>".tv1dateconv($tulrow["toimaika"])."</td>";
+			
+				if ($tulrow['tila'] == "L" and $tulrow['alatila'] == "D") {
+					echo "<td><font class='OK'>".t($laskutyyppi)."<br>".t($alatila)."</font></td>";
+				}
+				else {
+					echo "<td>".t($laskutyyppi)."<br>".t($alatila)."</td>";
+				}
+			
+				echo "</tr>";
+			
+				if(isset($workbook)) {
+					$excelsarake = 0;
+
+					$worksheet->write($excelrivi, $excelsarake, $tulrow["ytunnus"], $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, $tulrow["nimi"], $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, $tulrow["postitp"], $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, $tulrow["tunnus"], $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, $tulrow["tuoteno"], $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, $tulrow["nimitys"], $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, $tulrow["myydyt"], $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t_avainsana("Y", "", "and avainsana.selite='$tulrow[yksikko]'", "", "", "selite"), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, sprintf("%.".$yhtiorow['hintapyoristys']."f", $tulrow["arvo"]), $format_bold);
+					$excelsarake++;
+					if ($yhtiorow['saldo_kasittely'] != '') {
+						$worksheet->write($excelrivi, $excelsarake, $myytavissa ."(".$myytavissa_tul.")", $format_bold);
+						$excelsarake++;
+					}
+					else {
+						$worksheet->write($excelrivi, $excelsarake, $myytavissa, $format_bold);
+						$excelsarake++;
+					}
+
+					$worksheet->write($excelrivi, $excelsarake, tv1dateconv($tulrow["toimaika"]), $format_bold);
+					$excelsarake++;
+					$worksheet->write($excelrivi, $excelsarake, t($laskutyyppi)."\n".t($alatila), $format_bold);
 				
-				
-				$worksheet->write($excelrivi, $excelsarake, tv1dateconv($tulrow["toimaika"]), $format_bold);
-				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t($laskutyyppi)."\n".t($alatila), $format_bold);
-				
-				$excelsarake = 0;
-				$excelrivi++;
+					$excelsarake = 0;
+					$excelrivi++;
+				}
 			}
 		}
 		
@@ -258,6 +406,10 @@
 	echo "<input type='text' name='myokk' value='$myokk' size='3'>";
 	echo "<input type='text' name='myovv' value='$myovv' size='6'></td>";
 	echo "</tr>";
+
+	$kayta_ostotilausta_check = isset($kayta_ostotilausta) ? " checked='checked'" : '';
+
+	echo "<tr><th>",t("Saldo ei riitä"),"<br/>",t("Näytä ostotilauksen toimitusaika"),"</th><td><input type='checkbox' name='kayta_ostotilausta'{$kayta_ostotilausta_check}></td></tr>";
 
 	echo "<tr><th>".t("Valitse tuoteryhmä")."</th>";
 

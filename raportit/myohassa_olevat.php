@@ -61,6 +61,8 @@
 		if ($toimittajaid != '') {
 			$toimittajaid = (int) $toimittajaid;
 			$toimjoin = " JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = lasku.yhtio AND tuotteen_toimittajat.liitostunnus = '$toimittajaid' and tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno) ";
+			$mul_tuoteryhma = unserialize(base64_decode($mul_tuoteryhma));
+			$mul_kustannuspaikka = unserialize(base64_decode($mul_kustannuspaikka));
 		}
 
 		$se_tuoteryhma = base64_encode(serialize($mul_tuoteryhma));
@@ -201,6 +203,10 @@
 					group by lasku.toimaika, tilausrivi.tuoteno
 					ORDER BY lasku.toimaika $suunta";
 		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) == 0) {
+			echo "<tr><td class='back'><font class='message'>",t("Yhtään tilausta ei löytynyt"),"!</font></td></tr>";
+		}
 
 		while ($tulrow = mysql_fetch_array($result)) {
 

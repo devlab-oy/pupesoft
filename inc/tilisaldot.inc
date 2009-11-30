@@ -10,7 +10,7 @@
 		if ($tilino != '') {
 			$query = "	SELECT nimi
 						FROM tili
-						WHERE yhtio='$kukarow[yhtio]' and tilino = '$tilino'";
+						WHERE yhtio = '$kukarow[yhtio]' and tilino = '$tilino'";
 			$sresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($sresult) != 1) {
@@ -65,17 +65,31 @@
 			$tilinolisa1 = "";
 			$tilinolisa2 = "";
 		}
+		
+		if ($kustannuspaikoittain != "") {
+			$kustannuspaikoittain_select = ", kustp.nimi kustp, projekti.nimi projekti, kohde.nimi kohde";
+			$kustannuspaikoittain_group = ", kustp, projekti, kohde";
+			$kustannuspaikoittain_join = "	LEFT JOIN kustannuspaikka kustp ON (kustp.yhtio = tiliointi.yhtio and kustp.tunnus = tiliointi.kustp and kustp.tyyppi = 'K' and kustp.kaytossa != 'E') 
+											LEFT JOIN kustannuspaikka projekti ON (projekti.yhtio = tiliointi.yhtio and projekti.tunnus = tiliointi.projekti and projekti.tyyppi = 'P'  and projekti.kaytossa != 'E') 
+											LEFT JOIN kustannuspaikka kohde ON (kohde.yhtio = tiliointi.yhtio and kohde.tunnus = tiliointi.kohde and kohde.tyyppi = 'O' and kohde.kaytossa != 'E') ";
+		}
+		else {
+			$kustannuspaikoittain_select = "";
+			$kustannuspaikoittain_group = "";
+			$kustannuspaikoittain_join = "";
+		}
 
-		$query = "	SELECT $tilinolisa1 tiliointi.tilino, nimi, $lisa, sum(summa) Kumulatiivinen
+		$query = "	SELECT $tilinolisa1 tiliointi.tilino, tili.nimi, $lisa, sum(tiliointi.summa) Kumulatiivinen $kustannuspaikoittain_select
 					FROM tiliointi
 					LEFT JOIN tili ON tili.yhtio = '$kukarow[yhtio]' and tiliointi.tilino = tili.tilino
+					$kustannuspaikoittain_join
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 					and tiliointi.korjattu=''
 					and tapvm >= '$tilikausirow[tilikausi_alku]'
 					and tapvm <= '$tilikausirow[tilikausi_loppu]'
 					$wher
 					$tilinolisa2
-					GROUP BY $tilinolisa1 tiliointi.tilino
+					GROUP BY $tilinolisa1 tiliointi.tilino $kustannuspaikoittain_group
 					ORDER BY $tilinolisa1 tiliointi.tilino";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -86,6 +100,11 @@
 		}
 
 		echo "<th>".t("Tili")."</font></th>";
+		if ($kustannuspaikoittain != "") {
+			echo "<th>".t("Kustp")."</font></th>";
+			echo "<th>".t("Kohde")."</font></th>";
+			echo "<th>".t("Projekti")."</font></th>";			
+		}
 		echo "<th>".t("Nimi")."</font></th>";
 		echo "<th>".t("Vientejä")."</font></th>";
 		echo "<th>".t("Saldo")." ".$MONTH_ARRAY[($alvk*1)]."</font></th>";
@@ -102,6 +121,14 @@
 
 			$worksheet->write($excelrivi, $iiiiii, t("Tili"), $format_bold);
 			$iiiiii++;
+			if ($kustannuspaikoittain != "") {
+				$worksheet->write($excelrivi, $iiiiii, t("Kustp"), $format_bold);
+				$iiiiii++;
+				$worksheet->write($excelrivi, $iiiiii, t("Kohde"), $format_bold);
+				$iiiiii++;
+				$worksheet->write($excelrivi, $iiiiii, t("Projekti"), $format_bold);
+				$iiiiii++;			
+			}
 			$worksheet->write($excelrivi, $iiiiii, t("Nimi"), $format_bold);
 			$iiiiii++;
 			$worksheet->write($excelrivi, $iiiiii, t("Vientejä"), $format_bold);
@@ -144,6 +171,13 @@
 				}
 
 				echo "<td><a href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]$linkkilisa$lopelink'>$trow[tilino]</a></td>";
+				
+				if ($kustannuspaikoittain != "") {
+					echo "<td>$trow[kustp]</td>";
+					echo "<td>$trow[kohde]</td>";
+					echo "<td>$trow[projekti]</td>";				
+				}
+				
 				echo "<td>$trow[nimi]</td>";
 				echo "<td>$trow[Vientejä]</td>";
 				echo "<td align='right'>$trow[Saldo]</td>";
@@ -225,6 +259,10 @@
 			$cspan = 3;
 		}
 
+		if ($kustannuspaikoittain != "") {
+			$cspan += 3;
+		}
+		
 		echo "<td class='tumma' colspan='$cspan'><strong>".t("Summa").":</strong></td><td align='right' class='tumma'>".sprintf('%.2f', $summa2)."</td><td align='right' class='tumma'>".sprintf('%.2f', $summa3)."</td>";
 		echo "<td align='right' class='tumma'>";
 		foreach ($summa_valuutassa as $valuutta => $sum) {
@@ -291,6 +329,14 @@
 	echo "<td>";
 	echo livesearch_kentta("valinta", "TILIHAKU", "tilino", 120, $tilino, "EISUBMIT");
 	echo "</td></tr>";
+
+	$chk = "";
+	if ($kustannuspaikoittain != "") {
+		$chk = "CHECKED";
+	}
+
+	echo "<tr><th>".t("Kustannuspaikoittain")."</th>
+			<td><input type = 'checkbox' name = 'kustannuspaikoittain' value = 'YES' $chk></td></tr>";
 
 	echo "<tr><th>".t("Tee Excel")."</th>
 			<td><input type = 'checkbox' name = 'excel'  value = 'YES'></td></tr>

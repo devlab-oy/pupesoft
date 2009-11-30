@@ -288,11 +288,12 @@ if ($tee == 'GO') {
 
 		$path_parts = pathinfo($kuva);
 		$ext = $path_parts['extension'];
+		$jarjestys = 0;
 
-		// pit‰‰ kattoo onko nimess‰ wildkardia tai h‰shsi‰
-		if (strpos($kuva,"#") !== FALSE) {
-			$mihin = strpos($kuva,"#");
-			$kuva = substr($kuva, 0, $mihin).".".$ext;
+		// pit‰‰ kattoo onko nimess‰ h‰shsi‰
+		if (strpos($kuva, "#") !== FALSE) {
+			list($kuva, $jarjestys) = explode("#", $kuva);
+			$kuva = "$kuva.$ext";
 		}
 
 		$apuselite = "";
@@ -444,7 +445,8 @@ if ($tee == 'GO') {
 								image_bits			= '$image_bits',
 								image_channels		= '$image_channels',
 								kayttotarkoitus		= '$kayttotarkoitus',
-								laatija				= '$kukarow[kuka]',
+								jarjestys			= '$jarjestys',
+								laatija				= '$kukarow[kuka]',								
 								luontiaika			= now()";
 					$insre = mysql_query($query) or pupe_error($query);
 

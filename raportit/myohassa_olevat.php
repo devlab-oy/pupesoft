@@ -17,7 +17,11 @@
 	}
 	
 	echo "<font class='head'>".t("Myöhässä olevat myyntitilaukset")."</font><hr>";
-	
+
+	if ($ytunnus != '') {
+		require ("../inc/kevyt_toimittajahaku.inc");
+	}
+
 	if ($tee == 'NAYTATILAUS') {
 		echo "<font class='head'>Tilausnro: $tunnus</font><hr>";
 		require ("naytatilaus.inc");
@@ -51,7 +55,14 @@
 			$sel_kustannuspaikka = "('".str_replace(array('PUPEKAIKKIMUUT', ','), array('', '\',\''), implode(",", $mul_kustannuspaikka))."')";
 			$lisa .= " and (asiakas.kustannuspaikka in $sel_kustannuspaikka or tuote.kustp in $sel_kustannuspaikka) ";
 		}
-		
+
+		$toimjoin = '';
+
+		if ($toimittajaid != '') {
+			$toimittajaid = (int) $toimittajaid;
+			$toimjoin = " JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = lasku.yhtio AND tuotteen_toimittajat.liitostunnus = '$toimittajaid' and tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno) ";
+		}
+
 		$se_tuoteryhma = base64_encode(serialize($mul_tuoteryhma));
 		$se_kustannuspaikka = base64_encode(serialize($mul_kustannuspaikka));
 		
@@ -181,6 +192,7 @@
 					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.kpl = 0 and tilausrivi.tyyppi != 'D')
 					JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
 					JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+					$toimjoin
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila IN ('L','N')
 					and (lasku.alatila != 'X' or tilausrivi.var = 'J')
@@ -440,6 +452,12 @@
 	$kayta_ostotilausta_check = isset($kayta_ostotilausta) ? " checked='checked'" : '';
 
 	echo "<tr><th>",t("Vertaa ostotilauksen toimituspäivämäärään"),"</th><td><input type='checkbox' name='kayta_ostotilausta'{$kayta_ostotilausta_check}></td></tr>";
+
+	if (!isset($ytunnus)) {
+		$ytunnus = '';
+	}
+
+	echo "<tr><th>".t("Toimittajan nimi")."</th><td><input type='text' size='10' name='ytunnus' value='$ytunnus'></td></tr>";
 
 	echo "<tr><th>".t("Valitse tuoteryhmä")."</th>";
 

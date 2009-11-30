@@ -25,7 +25,7 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 				if (strpos($content[$i],$nodelpict) === FALSE) {
 					$content_dir = "$dir/$content[$i]";
 					if (ftp_is_dir($conn_id, $content_dir) === FALSE) {
-						if(!ftp_delete($conn_id, $content_dir)) {
+						if(ftp_delete($conn_id, $content_dir) === FALSE) {
 							$poistosyy .= "Tiedoston poisto epäonnistui: ".$content[$i]."\n";
 						}
 					}
@@ -47,11 +47,8 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 						$subdir = "$dir/$content[$i]/$subcontent[$k]";
 						echo "subdir: $subdir\n";
 						if (ftp_is_dir($conn_id, $subdir) === FALSE) {
-							if (!ftp_delete($conn_id, $subdir)) {
+							if (ftp_delete($conn_id, $subdir) === FALSE) {
 								$poistosyy .= "Tiedoston poisto epäonnistui: ".$subcontent[$k]."\n";
-							}
-							else {
-								echo "poistettiin tiedosto $subcontent[$k]\n";
 							}
 						}
 						else {
@@ -62,7 +59,7 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 					if ($rmdir == "") {
 						$content_dir = "$dir/$content[$i]";
 						if (ftp_is_dir($conn_id, $content_dir) === TRUE)  {
-							if (!ftp_rmdir($conn_id, $content_dir)) {
+							if (ftp_rmdir($conn_id, $content_dir) === FALSE) {
 								$poistosyy .= "Kansion poisto epäonnistui: ".$content[$i]."\n";
 							}
 						}

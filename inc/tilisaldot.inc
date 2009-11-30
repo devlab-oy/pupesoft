@@ -65,12 +65,12 @@
 			$tilinolisa1 = "";
 			$tilinolisa2 = "";
 		}
-		
+
 		if ($kustannuspaikoittain != "") {
 			$kustannuspaikoittain_select = ", kustp.nimi kustp, projekti.nimi projekti, kohde.nimi kohde";
 			$kustannuspaikoittain_group = ", kustp, projekti, kohde";
-			$kustannuspaikoittain_join = "	LEFT JOIN kustannuspaikka kustp ON (kustp.yhtio = tiliointi.yhtio and kustp.tunnus = tiliointi.kustp and kustp.tyyppi = 'K' and kustp.kaytossa != 'E') 
-											LEFT JOIN kustannuspaikka projekti ON (projekti.yhtio = tiliointi.yhtio and projekti.tunnus = tiliointi.projekti and projekti.tyyppi = 'P'  and projekti.kaytossa != 'E') 
+			$kustannuspaikoittain_join = "	LEFT JOIN kustannuspaikka kustp ON (kustp.yhtio = tiliointi.yhtio and kustp.tunnus = tiliointi.kustp and kustp.tyyppi = 'K' and kustp.kaytossa != 'E')
+											LEFT JOIN kustannuspaikka projekti ON (projekti.yhtio = tiliointi.yhtio and projekti.tunnus = tiliointi.projekti and projekti.tyyppi = 'P'  and projekti.kaytossa != 'E')
 											LEFT JOIN kustannuspaikka kohde ON (kohde.yhtio = tiliointi.yhtio and kohde.tunnus = tiliointi.kohde and kohde.tyyppi = 'O' and kohde.kaytossa != 'E') ";
 		}
 		else {
@@ -100,12 +100,12 @@
 		}
 
 		echo "<th>".t("Tili")."</font></th>";
+		echo "<th>".t("Nimi")."</font></th>";
 		if ($kustannuspaikoittain != "") {
 			echo "<th>".t("Kustp")."</font></th>";
 			echo "<th>".t("Kohde")."</font></th>";
-			echo "<th>".t("Projekti")."</font></th>";			
+			echo "<th>".t("Projekti")."</font></th>";
 		}
-		echo "<th>".t("Nimi")."</font></th>";
 		echo "<th>".t("Vientejä")."</font></th>";
 		echo "<th>".t("Saldo")." ".$MONTH_ARRAY[($alvk*1)]."</font></th>";
 		echo "<th>".t("Kumulatiivinen")."</font></th>";
@@ -121,16 +121,16 @@
 
 			$worksheet->write($excelrivi, $iiiiii, t("Tili"), $format_bold);
 			$iiiiii++;
+			$worksheet->write($excelrivi, $iiiiii, t("Nimi"), $format_bold);
+			$iiiiii++;
 			if ($kustannuspaikoittain != "") {
 				$worksheet->write($excelrivi, $iiiiii, t("Kustp"), $format_bold);
 				$iiiiii++;
 				$worksheet->write($excelrivi, $iiiiii, t("Kohde"), $format_bold);
 				$iiiiii++;
 				$worksheet->write($excelrivi, $iiiiii, t("Projekti"), $format_bold);
-				$iiiiii++;			
+				$iiiiii++;
 			}
-			$worksheet->write($excelrivi, $iiiiii, t("Nimi"), $format_bold);
-			$iiiiii++;
 			$worksheet->write($excelrivi, $iiiiii, t("Vientejä"), $format_bold);
 			$iiiiii++;
 			$worksheet->write($excelrivi, $iiiiii, t("Saldo")." ".$MONTH_ARRAY[($alvk*1)], $format_bold);
@@ -171,14 +171,14 @@
 				}
 
 				echo "<td><a href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]$linkkilisa$lopelink'>$trow[tilino]</a></td>";
-				
+				echo "<td>$trow[nimi]</td>";
+
 				if ($kustannuspaikoittain != "") {
 					echo "<td>$trow[kustp]</td>";
 					echo "<td>$trow[kohde]</td>";
-					echo "<td>$trow[projekti]</td>";				
+					echo "<td>$trow[projekti]</td>";
 				}
-				
-				echo "<td>$trow[nimi]</td>";
+
 				echo "<td>$trow[Vientejä]</td>";
 				echo "<td align='right'>$trow[Saldo]</td>";
 
@@ -262,8 +262,8 @@
 		if ($kustannuspaikoittain != "") {
 			$cspan += 3;
 		}
-		
-		echo "<td class='tumma' colspan='$cspan'><strong>".t("Summa").":</strong></td><td align='right' class='tumma'>".sprintf('%.2f', $summa2)."</td><td align='right' class='tumma'>".sprintf('%.2f', $summa3)."</td>";
+
+		echo "<td class='tumma' colspan='$cspan'>".t("Summa")."</td><td align='right' class='tumma'>".sprintf('%.2f', $summa2)."</td><td align='right' class='tumma'>".sprintf('%.2f', $summa3)."</td>";
 		echo "<td align='right' class='tumma'>";
 		foreach ($summa_valuutassa as $valuutta => $sum) {
 			echo sprintf('%.2f', $sum)." $valuutta<br/>";

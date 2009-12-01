@@ -68,48 +68,75 @@
 			else aineistonnouto($yritirow, $aineisto, $pvm);
 		}
 	}
-	
-	echo "<form enctype='multipart/form-data' action = '' method = 'post'><table><tr><th>".t("Pankkitili");
-	$query = "	SELECT * 
+	echo "<form action = '' method = 'post'>";
+	echo "<table><tr><th>".t("Ensimmäinen siirtoavain")."</th>";
+	echo "<td><input type='radio' name = 'toiminto' value = 'ekasiirtoavain'></td>";
+	echo "<th>".t("Perustiedot")."</th>";
+	echo "<td><input type='radio' name = 'toiminto' value = 'perustiedot'></td>";
+	echo "<th>".t("Hae aineisto")."</th>";
+	echo "<td><input type='radio' name = 'toiminto' value = 'haeaineisto'></td>";
+	echo "<th>".t("Lähetä aineisto")."</th>";
+	echo "<td><input type='radio' name = 'toiminto' value = 'lahetaaineisto'></td>";
+	echo "<td><input type='submit' value = 'Tee'></td></table></form><br><br>";
+
+
+	if ($toiminto != '') {
+		echo "<form enctype='multipart/form-data' action = '' method = 'post'><table><tr><th>".t("Pankkitili");
+		$query = "	SELECT * 
 				FROM yriti 
 				WHERE yhtio  = '$kukarow[yhtio]'
-				and kaytossa = '' ";
-	$vresult = mysql_query($query) or pupe_error($query);
+				and kaytossa = ''
+				and left(tilino,1) <= '9'";
+		$vresult = mysql_query($query) or pupe_error($query);
 
-	echo "</td><td><select name='tunnus'>";
+		echo "</td><td><select name='tunnus'>";
 
-	while ($vrow=mysql_fetch_array($vresult)) {
-		echo "<option value = '$vrow[tunnus]'>$vrow[nimi]";
-		if ($vrow['kayttoavain'] != '') echo " patu ok";
+		while ($vrow=mysql_fetch_array($vresult)) {
+			echo "<option value = '$vrow[tunnus]'>$vrow[nimi]";
+			if ($vrow['kayttoavain'] != '') echo " patu ok";
+		}
+		echo "</select></td></tr>";
 	}
-	echo "</select></td></tr>";
-	echo "<tr><th>".t("Avain1")."</th>";
-	echo "<td><input type='text' name = 'ekapala'></td></tr>";
-	echo "<tr><th>".t("Avain2")."</th>";
-	echo "<td><input type='text' name = 'tokapala'></td></tr>";
-	echo "<tr><th>".t("Tarkiste")."</th>";
-	echo "<td><input type='text' name = 'tarkiste'></td></tr>";
-	echo "<tr><th>".t("Suku")."</th>";
-	echo "<td><input type='text' name = 'suku' value = '0'></td></tr>";
-	echo "<tr><th>".t("Pankki")."</th>";
-	echo "<td><input type='text' name = 'pankki'></td></tr>";
-	echo "<tr><th>".t("Asiakas")."</th>";
-	echo "<td><input type='text' name = 'asiakas'></td></tr>";
-	echo "<tr><th>".t("Tiliote")."</th>";
-	echo "<td><input type='radio' name = 'aineisto' value = 'TITO'></td></tr>";
-	echo "<tr><th>".t("Valuuttakurssit")."</th>";
-	echo "<td><input type='radio' name = 'aineisto' value = 'VKEUR'></td></tr>";
-	echo "<tr><th>".t("Aineistojen tilakysely")."</th>";
-	echo "<td><input type='radio' name = 'aineisto' value = 'STATUS'></td></tr>";
-	echo "<tr><th>".t("Aineiston lähetys")."</th>";
-	echo "<td><input type='file' name='userfile'></td></tr>";
-	echo "<tr><th>".t("Käytä testausaineistoa")."</th>";
-	echo "<td><input type='checkbox' name = 'testaus' value = '1'></td></tr>";
-	echo "<tr><th>".t("Testaa kertasalasanan suojausta ja tiivisteen laskentaa")."</th>";
-	echo "<td><input type='checkbox' name = 'kertasalasana' value = '1'></td></tr>";
-	echo "<tr><th>".t("Palauta 0-sukupolven käyttöavain")."</th>";
-	echo "<td><input type='checkbox' name = 'nollapolvi' value = '1'></td></tr>";
-	echo "<tr><th></th><td><input type='submit' name = 'Päivitä'></td></tr></table></form>";
-	
+
+	if ($toiminto=='ekasiirtoavain') {
+		echo "<tr><th>".t("Avain1")."</th>";
+		echo "<td><input type='text' name = 'ekapala' maxlength = '23'></td></tr>";
+		echo "<tr><th>".t("Avain2")."</th>";
+		echo "<td><input type='text' name = 'tokapala' maxlength = '23'></td></tr>";
+		echo "<tr><th>".t("Tarkiste")."</th>";
+		echo "<td><input type='text' name = 'tarkiste' maxlength = '8'></td></tr>";
+	}
+	if ($toiminto=='perustiedot') {
+		echo "<tr><th>".t("Pankki")."</th>";
+		echo "<td><input type='text' name = 'pankki'></td></tr>";
+		echo "<tr><th>".t("Asiakas")."</th>";
+		echo "<td><input type='text' name = 'asiakas'></td></tr>";
+	}
+	if ($toiminto=='haeaineisto') {
+		echo "<tr><th>".t("Tiliote")."</th>";
+		echo "<td><input type='radio' name = 'aineisto' value = 'TITO'></td></tr>";
+		echo "<tr><th>".t("Valuuttakurssit")."</th>";
+		echo "<td><input type='radio' name = 'aineisto' value = 'VKEUR'></td></tr>";
+		echo "<tr><th>".t("Aineistojen tilakysely")."</th>";
+		echo "<td><input type='radio' name = 'aineisto' value = 'STATUS'></td></tr>";
+	}
+	if ($toiminto=='lahetaaineisto') {
+		echo "<tr><th>".t("Aineiston lähetys")."</th>";
+		echo "<td><input type='file' name='userfile'></td></tr>";
+	}
+	if ($toiminto=='testi') {
+		echo "<tr><th>".t("Käytä testausaineistoa")."</th>";
+		echo "<td><input type='checkbox' name = 'testaus' value = '1'></td></tr>";
+		echo "<tr><th>".t("Testaa kertasalasanan suojausta ja tiivisteen laskentaa")."</th>";
+		echo "<td><input type='checkbox' name = 'kertasalasana' value = '1'></td></tr>";
+		echo "<tr><th>".t("Palauta 0-sukupolven käyttöavain")."</th>";
+		echo "<td><input type='checkbox' name = 'nollapolvi' value = '1'></td></tr>";
+		echo "<tr><th>".t("Suku")."</th>";
+		echo "<td><input type='text' name = 'suku' value = '0'></td></tr>";
+	}
+	if ($toiminto != '') {
+		echo "<tr><th></th><td><input type='submit' name = 'Päivitä'></td></tr>";
+		echo "</table></form>";
+	}
 	require ("../inc/footer.inc");
 ?>

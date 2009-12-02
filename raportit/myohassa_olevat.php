@@ -19,9 +19,105 @@
 	echo "<font class='head'>".t("Myˆh‰ss‰ olevat myyntitilaukset")."</font><hr>";
 
 	if ($ytunnus != '') {
-		require ("../inc/kevyt_toimittajahaku.inc");
+		require ("inc/kevyt_toimittajahaku.inc");
 	}
 
+	if ($myovv == '') {
+		$myopp = date("j");
+		$myokk = date("n");
+		$myovv = date("Y");
+	}
+			
+	echo "<form name=asiakas action='$PHP_SELF' method='post' autocomplete='off'>";
+	echo "<input type='hidden' name='tee' value = 'HAE'>";
+	echo "<table><tr>";
+	echo "<th>".t("Anna toimitusp‰iv‰")."</th>";
+	echo "<td><input type='text' name='myopp' value='$myopp' size='3'>";
+	echo "<input type='text' name='myokk' value='$myokk' size='3'>";
+	echo "<input type='text' name='myovv' value='$myovv' size='6'></td>";
+	echo "</tr>";
+
+	$kayta_ostotilausta_check = isset($kayta_ostotilausta) ? " checked='checked'" : '';
+
+	echo "<tr><th>",t("Vertaa ostotilauksen toimitusp‰iv‰m‰‰r‰‰n"),"</th><td><input type='checkbox' name='kayta_ostotilausta'{$kayta_ostotilausta_check}></td></tr>";
+
+	if (!isset($ytunnus)) {
+		$ytunnus = '';
+	}
+
+	echo "<tr><th>".t("Toimittajan nimi")."</th><td><input type='text' size='10' name='ytunnus' value='$ytunnus'></td></tr>";
+
+	echo "<tr><th>".t("Valitse tuoteryhm‰")."</th>";
+
+	$sresult = t_avainsana("TRY");
+
+	echo "<td>";
+	
+	echo "<select name='mul_tuoteryhma[]' multiple='TRUE' size='10' style='width:100%;'>";
+
+	$mul_check = '';
+	if ($mul_tuoteryhma!="") {
+		if (in_array("PUPEKAIKKIMUUT", $mul_tuoteryhma)) {
+			$mul_check = 'SELECTED';
+		}
+	}
+	echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuoteryhm‰‰")."</option>";
+
+	while ($rivi = mysql_fetch_array($sresult)) {
+		$mul_check = '';
+		if ($mul_tuoteryhma!="") {
+			if (in_array($rivi["selite"],$mul_tuoteryhma)) {
+				$mul_check = 'SELECTED';
+			}
+		}
+
+		echo "<option value='$rivi[selite]' $mul_check>$rivi[selite] - $rivi[selitetark]</option>";
+	}
+
+	echo "</select>";
+	echo "</td></tr>";
+
+	echo "<tr><th>".t("Valitse kustannuspaikka")."</th>";
+
+	$query = "	SELECT tunnus, nimi
+				FROM kustannuspaikka
+				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+				ORDER BY nimi";
+	$vresult = mysql_query($query) or pupe_error($query);
+
+	echo "<td><select name='mul_kustannuspaikka[]' multiple='TRUE' size='10' style='width:100%;'>";
+
+	$mul_check = '';
+	if ($mul_kustannuspaikka!="") {
+		if (in_array("PUPEKAIKKIMUUT", $mul_kustannuspaikka)) {
+			$mul_check = 'SELECTED';
+		}
+	}
+	echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei kustannuspaikkaa")."</option>";
+
+	while ($rivi = mysql_fetch_array($vresult)) {
+		$mul_check = '';
+		if ($mul_kustannuspaikka!="") {
+			if (in_array($rivi[0],$mul_kustannuspaikka)) {
+				$mul_check = 'SELECTED';
+			}
+		}
+
+		echo "<option value='$rivi[0]' $mul_check>$rivi[1]</option>";
+	}
+
+	$vain_excelchk = "";
+	if ($vain_excel != '') {
+		$vain_excelchk = "CHECKED";
+	}
+
+	echo "</select></td></tr>";	
+	echo "<tr><th>".t("Raportti Exceliin")."</th>";
+	echo "<td><input type='checkbox' name='vain_excel' $vain_excelchk></td><tr>";
+	echo "<tr><td class='back'><input type='submit' value='".t("Hae")."'></td>";
+	echo "</tr>";
+	echo "</form></table><br>";
+	
 	if ($tee == 'NAYTATILAUS') {
 		echo "<font class='head'>Tilausnro: $tunnus</font><hr>";
 		require ("naytatilaus.inc");
@@ -443,105 +539,6 @@
 		}
 	}
 
-
-	if ($myovv == '') {
-		$myopp = date("j");
-		$myokk = date("n");
-		$myovv = date("Y");
-	}
-			
-	echo "<form name=asiakas action='$PHP_SELF' method='post' autocomplete='off'>";
-	echo "<input type='hidden' name='tee' value = 'HAE'>";
-	echo "<table><tr>";
-	echo "<th>".t("Anna toimitusp‰iv‰")."</th>";
-	echo "<td><input type='text' name='myopp' value='$myopp' size='3'>";
-	echo "<input type='text' name='myokk' value='$myokk' size='3'>";
-	echo "<input type='text' name='myovv' value='$myovv' size='6'></td>";
-	echo "</tr>";
-
-	$kayta_ostotilausta_check = isset($kayta_ostotilausta) ? " checked='checked'" : '';
-
-	echo "<tr><th>",t("Vertaa ostotilauksen toimitusp‰iv‰m‰‰r‰‰n"),"</th><td><input type='checkbox' name='kayta_ostotilausta'{$kayta_ostotilausta_check}></td></tr>";
-
-	if (!isset($ytunnus)) {
-		$ytunnus = '';
-	}
-
-	echo "<tr><th>".t("Toimittajan nimi")."</th><td><input type='text' size='10' name='ytunnus' value='$ytunnus'></td></tr>";
-
-	echo "<tr><th>".t("Valitse tuoteryhm‰")."</th>";
-
-	$sresult = t_avainsana("TRY");
-
-	echo "<td>";
-	
-	echo "<select name='mul_tuoteryhma[]' multiple='TRUE' size='10' style='width:100%;'>";
-
-	$mul_check = '';
-	if ($mul_tuoteryhma!="") {
-		if (in_array("PUPEKAIKKIMUUT", $mul_tuoteryhma)) {
-			$mul_check = 'SELECTED';
-		}
-	}
-	echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei kustannuspaikkaa")."</option>";
-
-	while ($rivi = mysql_fetch_array($sresult)) {
-		$mul_check = '';
-		if ($mul_tuoteryhma!="") {
-			if (in_array($rivi["selite"],$mul_tuoteryhma)) {
-				$mul_check = 'SELECTED';
-			}
-		}
-
-		echo "<option value='$rivi[selite]' $mul_check>$rivi[selite] - $rivi[selitetark]</option>";
-	}
-
-	echo "</select>";
-	echo "</td></tr>";
-
-	echo "<tr><th>".t("Valitse kustannuspaikka")."</th>";
-
-	$query = "	SELECT tunnus, nimi
-				FROM kustannuspaikka
-				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
-				ORDER BY nimi";
-	$vresult = mysql_query($query) or pupe_error($query);
-
-	echo "<td><select name='mul_kustannuspaikka[]' multiple='TRUE' size='10' style='width:100%;'>";
-
-	$mul_check = '';
-	if ($mul_kustannuspaikka!="") {
-		if (in_array("PUPEKAIKKIMUUT", $mul_kustannuspaikka)) {
-			$mul_check = 'SELECTED';
-		}
-	}
-	echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei kustannuspaikkaa")."</option>";
-
-	while ($rivi = mysql_fetch_array($vresult)) {
-		$mul_check = '';
-		if ($mul_kustannuspaikka!="") {
-			if (in_array($rivi[0],$mul_kustannuspaikka)) {
-				$mul_check = 'SELECTED';
-			}
-		}
-
-		echo "<option value='$rivi[0]' $mul_check>$rivi[1]</option>";
-	}
-
-	$vain_excelchk = "";
-	if ($vain_excel != '') {
-		$vain_excelchk = "CHECKED";
-	}
-
-	echo "</select></td></tr>";	
-	echo "<tr><th>".t("Raportti Exceliin")."</th>";
-	echo "<td><input type='checkbox' name='vain_excel' $vain_excelchk></td><tr>";
-	echo "<tr><td class='back'><input type='submit' value='".t("Hae")."'></td>";
-	echo "</tr>";
-	echo "</form></table>";
-
-	
-
-	require ("../inc/footer.inc");
+	require ("inc/footer.inc");
 
 ?>

@@ -38,8 +38,6 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 				
 				if ($content[$i] != $nodel) {
 
-					var_dump($content[$i]);
-
 					ftp_chdir($conn_id, $content[$i]);
 
 					for ($k=0; $k < count($subcontent); $k++) {

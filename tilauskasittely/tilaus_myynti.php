@@ -3348,11 +3348,18 @@ if ($tee == '') {
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
 
+		$tilauksen_jarjestys = $yhtiorow['tilauksen_jarjestys'];
+
 		if ($toim == "TYOMAARAYS") {
 			$sorttauslisa = "tuotetyyppi, ";
 		}
 		else {
-			$sorttauslisa = "";
+			if ($tilauksen_jarjestys == '0' or $tilauksen_jarjestys == '1' or $tilauksen_jarjestys == '4' or $tilauksen_jarjestys == '5') {
+				$sorttauslisa = "tilausrivi.perheid $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.perheid2 $yhtiorow[tilauksen_jarjestys_suunta],";
+			}
+			else {
+				$sorttauslisa = "";
+			}
 		}
 
 		// katotaan miten halutaan sortattavan
@@ -3532,6 +3539,8 @@ if ($tee == '') {
 			$vanhaid 		= "KALA";
 			$borderlask		= 0;
 			$pknum			= 0;
+			$erikoistuote_tuoteperhe = array();
+			$tuoteperhe_kayty = '';
 
 			$tuotekyslinkki = "";
 
@@ -3556,6 +3565,10 @@ if ($tee == '') {
 			}
 
 			while ($row = mysql_fetch_assoc($result)) {
+
+				if (strpos($row['sorttauskentta'], '÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷') !== FALSE) {
+					$erikoistuote_tuoteperhe[$row['perheid']] = $row['sorttauskentta'];
+				}
 
 				// voidaan lukita t‰m‰ tilausrivi
 				if ($row["uusiotunnus"] > 0 or $laskurow["tunnus"] != $row["otunnus"] or ($laskurow["tila"] == "V" and $row["toimitettuaika"] != '0000-00-00 00:00:00')) {
@@ -3696,7 +3709,7 @@ if ($tee == '') {
 				}
 
 				// Tuoteperheiden lapsille ei n‰ytet‰ rivinumeroa
-				if ($row["perheid"] == $row["tunnus"] or ($row["perheid2"] == $row["tunnus"] and $row["perheid"] == 0) or ($row["perheid2"] == -1 or ($row["perheid"] == 0 and $row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U")))) {
+				if ($tilauksen_jarjestys != 'M' and $tuoteperhe_kayty != $row['perheid'] and (($row['perheid'] != 0 and ($tilauksen_jarjestys == '1' or $tilauksen_jarjestys == '5' or ($tilauksen_jarjestys == '4' or $tilauksen_jarjestys == '0' and $erikoistuote_tuoteperhe[$row['perheid']] == $row['sorttauskentta']))) or $row["perheid"] == $row["tunnus"] or ($row["perheid2"] == $row["tunnus"] and $row["perheid"] == 0) or ($row["perheid2"] == -1 or ($row["perheid"] == 0 and $row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U"))))) {
 
 					if (($row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U")) or $row["perheid2"] == -1) {
 						$pklisa = " and (perheid = '$row[tunnus]' or perheid2 = '$row[tunnus]')";
@@ -3788,9 +3801,21 @@ if ($tee == '') {
 						}
 					}
 
-					echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$echorivino</td>";
+					// jos tuoteperheit‰ ei pidet‰ yhdess‰, ei tehd‰ rowspannia eik‰ bordereita
+					if ($tilauksen_jarjestys != '0' and $tilauksen_jarjestys != '1' and $tilauksen_jarjestys != '4' and $tilauksen_jarjestys != '5' and $tilauksen_jarjestys != '8') {
+						$pknum = 1;
+						$borderlask = 0;
+						echo "<td valign='top' $class>$echorivino</td>";
+					}
+					else {
+						if ($row['perheid'] != 0 and ($tilauksen_jarjestys == '1' or $tilauksen_jarjestys == '0' or $tilauksen_jarjestys == '4' or $tilauksen_jarjestys == '5')) {
+							$tuoteperhe_kayty = $row['perheid'];
+						}
+						echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$echorivino</td>";
+					}
 				}
-				elseif ($row["perheid"] == 0 and $row["perheid2"] == 0) {
+				// normirivit tai jos tuoteperheit‰ ei pidet‰ yhdess‰, n‰ytet‰‰n lapsille rivinumerot
+				elseif ($row["perheid"] == 0 and $row["perheid2"] == 0 or ($tilauksen_jarjestys != '0' and $tilauksen_jarjestys != '1' and $tilauksen_jarjestys != '4' and $tilauksen_jarjestys != '5' and $tilauksen_jarjestys != '8') or (($tilauksen_jarjestys == '0' or $tilauksen_jarjestys == '4') and $erikoistuote_tuoteperhe[$row['perheid']] == $row['sorttauskentta'] and $tuoteperhe_kayty != $row['perheid'])) {
 
 					$echorivino = $rivino;
 
@@ -3808,6 +3833,9 @@ if ($tee == '') {
 						}
 
 						echo "<td $class rowspan = '2' valign='top'>$echorivino";
+					}
+					elseif ($tilauksen_jarjestys == '1' and $row['perheid'] != 0) {
+						echo "<td $class>&nbsp;</td>";
 					}
 					else {
 						if ($jarjlisa != "") {
@@ -3887,7 +3915,7 @@ if ($tee == '') {
 
 					$borderlask--;
 				}
-				elseif ($borderlask > 0 and $borderlask < $pknum) {
+				elseif ($borderlask > 0 and $borderlask <= $pknum) {
 					$classlisa = $class." style='font-style:italic; border-right: 1px solid;' ";
 					$class    .= " style='font-style:italic;' ";
 					$borderlask--;

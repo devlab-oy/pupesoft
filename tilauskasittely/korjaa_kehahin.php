@@ -30,6 +30,8 @@
 
 				// näytetään tapahtumat uudestaan
 				$tee = "VALITSE";
+
+				echo $jalkilaskenta_debug_text;
 			}
 			else {
 				echo "<font class='error'>Ruksattu rivi katosi!</font><br><br>";
@@ -41,7 +43,6 @@
 		else {
 			echo "<font class='error'>Et valinnut kääntöpistettä!</font><br><br>";
 		}
-
 	}
 
 

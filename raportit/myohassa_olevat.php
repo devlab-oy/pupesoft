@@ -177,14 +177,14 @@
 			lasku.postitp, 
 			lasku.tunnus, 
 			tilausrivi.nimitys, 
-			sum(tilausrivi.tilkpl) myydyt, 
+			sum(tilausrivi.varattu+tilausrivi.jt) myydyt, 
 			tilausrivi.yksikko,
 			sum(tilausrivi.tilkpl * tilausrivi.hinta) arvo, 
 			lasku.tila, 
 			lasku.alatila";
 		}
 		else {
-			$selectlisa = ", group_concat(tilausrivi.tunnus) tunnukset, sum(tilausrivi.tilkpl) myydyt";
+			$selectlisa = ", group_concat(tilausrivi.tunnus) tunnukset, sum(tilausrivi.varattu+tilausrivi.jt) myydyt";
 		}
 
 		$query = "	SELECT lasku.toimaika, 
@@ -267,7 +267,7 @@
 					continue;
 				}
 
-				$query = "	SELECT *
+				$query = "	SELECT *, varattu+jt varattu
 							FROM tilausrivi
 							JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
 							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'

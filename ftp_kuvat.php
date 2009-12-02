@@ -55,7 +55,7 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 						}
 					}
 					
-					ftp_chdir($origin);
+					ftp_chdir($conn_id, $origin);
 					
 					if ($rmdir == "") {
 						if (ftp_is_dir($conn_id, $content[$i]) === TRUE)  {

@@ -84,7 +84,7 @@
 				echo "<td>$row[keikka]</td>";
 				echo "<td align='right'>$row[yksikot]</td>";
 				echo "<td align='right'>$row[rivit]</td>";
-				echo "<td>$row[laadittu]</td>";
+				echo "<td align='right'>".tv1dateconv($row["laadittu"])."</td>";
 				echo "</tr>";
 
 				$ysumma	+= $row["yksikot"];

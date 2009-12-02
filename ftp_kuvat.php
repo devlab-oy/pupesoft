@@ -27,7 +27,7 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 					$content_dir = "$content[$i]";
 					if (ftp_is_dir($conn_id, $content_dir) === FALSE) {
 						if (ftp_delete($conn_id, $content_dir) === FALSE) {
-							$poistosyy .= "Tiedoston poisto epäonnistui: ".$content[$i]."\n";
+							$poistosyy .= "Tiedoston poisto epäonnistui: $dir/$content[$i]\n";
 						}
 					}
 				}
@@ -39,28 +39,28 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 				$subcontent = ftp_nlist($conn_id, $subcontentdir);
 				
 				if ($content[$i] != $nodel) {
+
+					ftp_chdir($conn_id, $content[$i]);
+
 					for ($k=0; $k < count($subcontent); $k++) {
 
 						if ($subcontent[$k] == '.' or $subcontent[$k] == '..') {
 							continue;
 						}
 
-						$subdir = "$content[$i]/$subcontent[$k]";
-						if (ftp_is_dir($conn_id, $subdir) === FALSE) {
-							if (ftp_delete($conn_id, $subdir) === FALSE) {
-								$poistosyy .= "Tiedoston poisto epäonnistui: ".$subcontent[$k]."\n";
+						if (ftp_is_dir($conn_id, $subcontent[$k]) === FALSE) {
+							if (ftp_delete($conn_id, $subcontent[$k]) === FALSE) {
+								$poistosyy .= "Tiedoston poisto epäonnistui: $dir/$content[$i]/$subcontent[$k]\n";
 							}
-						}
-						else {
-							echo "tiedosto $subdir olikin kansio!\n";
 						}
 					}
 					
+					ftp_chdir($origin);
+					
 					if ($rmdir == "") {
-						$content_dir = "$content[$i]";
-						if (ftp_is_dir($conn_id, $content_dir) === TRUE)  {
-							if (ftp_rmdir($conn_id, $content_dir) === FALSE) {
-								$poistosyy .= "Kansion poisto epäonnistui: ".$content[$i]."\n";
+						if (ftp_is_dir($conn_id, $content[$i]) === TRUE)  {
+							if (ftp_rmdir($conn_id, $content[$i]) === FALSE) {
+								$poistosyy .= "Kansion poisto epäonnistui: $dir/$content[$i]\n";
 							}
 						}
 					}
@@ -70,7 +70,9 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 
 		}
 
-		ftp_chdir($conn_id, $origin);
+		if (@ftp_pwd($conn_id) != $origin) {
+			ftp_chdir($conn_id, $origin);
+		}
 	}
 	else {
 		$poistosyy .= "Tiedostoja ei poistettu\n";

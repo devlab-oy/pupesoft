@@ -362,7 +362,7 @@ if ($tuoteno != '') {
 	$result = mysql_query($query) or pupe_error($query);
 	$tuote = mysql_fetch_array($result);
 
-	if (mysql_num_rows($result) == 1 and ($tuote["sarjanumeroseuranta"] == "S" or $tuote["sarjanumeroseuranta"] == "U")) {
+	if (mysql_num_rows($result) == 1 and ($tuote["sarjanumeroseuranta"] == "S" or $tuote["sarjanumeroseuranta"] == "U" or $tuote["sarjanumeroseuranta"] == "G")) {
 		//Tähän haaraan mennään jos tuotteella on sarjanumeroseurantaa ja varastonarvo lasketaan suoraan osto ja myyntiriveiltä
 		if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "Tuotenumero $tuoteno on sarjanumeroseurannassa<br>";
 
@@ -669,8 +669,17 @@ if ($tuoteno != '') {
 								$laskuja++;
 								$kpl += $trow['kpl'];
 
-								// plussaillaan tätä vaan jos hinta muuttuu niin tiedetään pitääkö tehdä jälkilaskentaa
-								if ($trow["hinta"] != $uusikehahin) {
+								// haetaan myyntitilausrivi
+								$query = "	SELECT kpl, rivihinta, kate
+											from tilausrivi
+											where yhtio	= '$kukarow[yhtio]'
+											and tunnus 	= '$trow[rivitunnus]'";
+								$myyntitil_apures = mysql_query($query) or pupe_error($query);
+								$myyntitil_apurow = mysql_fetch_array($myyntitil_apures);
+								$myyntitil_uusikate = $myyntitil_apurow['rivihinta'] - $myyntitil_apurow['kpl'] * $uusikehahin;
+
+								// plussaillaan tätä vaan jos keskihankintahinta tai kate muuttuu, niin tiedetään pitääkö tehdä jälkilaskentaa
+								if ($trow["hinta"] != $uusikehahin or $myyntitil_apurow["kate"] != $myyntitil_uusikate) {
 									$korjattavia_laskuja++;
 								}
 							}

@@ -34,11 +34,11 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 				
 			}
 			else {
-
-				$subcontentdir = "$content[$i]";
-				$subcontent = ftp_nlist($conn_id, $subcontentdir);
+				$subcontent = ftp_nlist($conn_id, $content[$i]);
 				
 				if ($content[$i] != $nodel) {
+
+					var_dump($content[$i]);
 
 					ftp_chdir($conn_id, $content[$i]);
 
@@ -54,8 +54,9 @@ function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "
 							}
 						}
 					}
-					
+
 					ftp_chdir($conn_id, $origin);
+					ftp_chdir($conn_id, $dir);
 					
 					if ($rmdir == "") {
 						if (ftp_is_dir($conn_id, $content[$i]) === TRUE)  {

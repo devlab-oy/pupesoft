@@ -1966,6 +1966,17 @@
 
 							alvierittely ($page[$sivu]);
 
+							$query = "	SELECT kassa_alepros
+										FROM maksuehto
+										WHERE yhtio = '{$kukarow['yhtio']}'
+										AND tunnus = '{$laskurow['maksuehto']}'";
+							$maksuehtores = mysql_query($query) or pupe_error($query);
+							$maksuehtorow_kassa_ale = mysql_fetch_assoc($maksuehtores);
+
+							if ($maksuehtorow_kassa_ale['kassa_alepros'] > 0) {
+								alvierittely($page[$sivu], $maksuehtorow_kassa_ale['kassa_alepros']);
+							}
+
 							$kieli = $varakieli;
 
 							//keksit‰‰n uudelle failille joku varmasti uniikki nimi:

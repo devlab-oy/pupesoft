@@ -435,7 +435,7 @@ if (!function_exists('alku')) {
 }
 
 if (!function_exists('uusi_sivu')) {
-	function uusi_sivu () {
+	function uusi_sivu ($alvierittely = '') {
 		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kateistyyppi, $kieli, $boldi, $kala;
 
 		$thispage = $pdf->new_page("a4");
@@ -573,7 +573,9 @@ if (!function_exists('uusi_sivu')) {
 
 		$kala = 735;
 
-		rivi_otsikot($thispage);
+		if ($alvierittely == '') {
+			rivi_otsikot($thispage);
+		}
 
 		return($thispage);
 	}
@@ -1604,7 +1606,7 @@ if (!function_exists('loppu')) {
 }
 
 if (!function_exists('alvierittely')) {
-	function alvierittely ($thispage) {
+	function alvierittely ($thispage, $kassa_ale = '') {
 		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $summa, $arvo, $kala, $kieli, $boldi;
 
 		if ($yhtiorow["viivakoodi_laskulle"] == "K") {
@@ -1614,30 +1616,53 @@ if (!function_exists('alvierittely')) {
 			$barcode_korkeus = 0;
 		}
 
+		$sivu_vaihtui = false;
+
 		if ($kala <= 200 + $barcode_korkeus) {
 			$sivu++;
 
-			loppu($thispage);
+			if ($kassa_ale == '') {
+				loppu($thispage);
+			}
 
-			$page[$sivu] = uusi_sivu();
+			$page[$sivu] = uusi_sivu('alvierittely');
 			$thispage    = $page[$sivu];
+			
+			$sivu_vaihtui = true;
 		}
 
-		$kala -=10;
+		$kassa_ale_lisa = '';
+		$kassa_ale_lisateksti = '';
+
+		if ($kassa_ale != '') {
+			$kassa_ale = (float) $kassa_ale;
+			$kassa_ale_lisa = " * (1-$kassa_ale/100) ";
+
+			$kala -=10;
+			$pdf->draw_text(360, $kala, t("Kassa-alennuksella", $kieli), 		$thispage, $norm);
+		}
+
+		$kala -= 10;
 		//loppusummat vain vikalle sivulle
 		$pdf->draw_text(360, $kala, t("Veroton arvo yhteensä", $kieli).":", 		$thispage, $norm);
 
 		if ($toim == 'PROFORMA') {
+			$arvo = $kassa_ale != '' ? $arvo * (1-$kassa_ale/100) : $arvo;
+
 			$oikpos = $pdf->strlen(sprintf('%.2f', $arvo), $norm);
 			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $arvo), 			$thispage, $norm);
 		}
 		elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["arvo_valuutassa"]), $norm);
-			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow["arvo_valuutassa"]), $thispage, $norm);
+			$arvo_valuutassa = $kassa_ale != '' ? $laskurow["arvo_valuutassa"] * (1-$kassa_ale/100) : $laskurow["arvo_valuutassa"];
+
+			$oikpos = $pdf->strlen(sprintf('%.2f', $arvo_valuutassa), $norm);
+			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $arvo_valuutassa), $thispage, $norm);
 		}
 		else {
-			$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["arvo"]), $norm);
-			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow["arvo"]), $thispage, $norm);
+			$arvo = $kassa_ale != '' ? $laskurow["arvo"] * (1-$kassa_ale/100) : $laskurow["arvo"];
+
+			$oikpos = $pdf->strlen(sprintf('%.2f', $arvo), $norm);
+			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $arvo), $thispage, $norm);
 		}
 
 		$pdf->draw_text(550, $kala, $laskurow["valkoodi"], 							$thispage, $norm);
@@ -1666,7 +1691,7 @@ if (!function_exists('alvierittely')) {
 			if ($alvrow["alv"] >= 500 and $toim != 'PROFORMA') {
 				$aquery = "	SELECT
 							sum(0) alvrivihinta,
-							sum(round(tilausrivi.rivihinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1),2)) rivihinta
+							sum(round(tilausrivi.rivihinta $kassa_ale_lisa / if(lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1),2)) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
@@ -1674,31 +1699,31 @@ if (!function_exists('alvierittely')) {
 			elseif ($alvrow["alv"] >= 500) {
 				$aquery = "	SELECT
 							sum(0) alvrivihinta,
-							sum(round((tilausrivi.hinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1))*tilausrivi.varattu*(1-tilausrivi.ale/100),2)) rivihinta
+							sum(round((tilausrivi.hinta $kassa_ale_lisa / if(lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) * tilausrivi.varattu * (1 - tilausrivi.ale / 100),2)) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
 			}
 			elseif ($alvrow["alv"] < 500 and $toim != 'PROFORMA' and trim(strtoupper($laskurow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
 				$aquery = "	SELECT
-							round(sum(tilausrivi.rivihinta*(tilausrivi.alv/100)),2) alvrivihinta,
-							sum(tilausrivi.rivihinta) rivihinta
+							round(sum(tilausrivi.rivihinta $kassa_ale_lisa * (tilausrivi.alv / 100)),2) alvrivihinta,
+							sum(tilausrivi.rivihinta $kassa_ale_lisa) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
 			}
 			elseif ($alvrow["alv"] < 500 and $toim != 'PROFORMA' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 				$aquery = "	SELECT
-							round(sum((tilausrivi.hinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)) / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * (1-tilausrivi.ale/100) * (tilausrivi.alv/100)),2) alvrivihinta,
-							sum(round((tilausrivi.hinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)) / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * (1-tilausrivi.ale/100),2)) rivihinta
+							round(sum((tilausrivi.hinta $kassa_ale_lisa / if(lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * (1-tilausrivi.ale/100) * (tilausrivi.alv/100)),2) alvrivihinta,
+							sum(round((tilausrivi.hinta $kassa_ale_lisa / if(lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * (1-tilausrivi.ale/100),2)) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
 			}
 			else {
 				$aquery = "	SELECT
-							round(sum((tilausrivi.hinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)) / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.varattu * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) * (tilausrivi.alv/100)),2) alvrivihinta,
-							sum(round((tilausrivi.hinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)) / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.varattu * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2)) rivihinta
+							round(sum((tilausrivi.hinta $kassa_ale_lisa / if(lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.varattu * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) * (tilausrivi.alv/100)),2) alvrivihinta,
+							sum(round((tilausrivi.hinta $kassa_ale_lisa / if(lasku.vienti_kurssi > 0, lasku.vienti_kurssi, 1)) / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.varattu * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2)) rivihinta
 							FROM tilausrivi
 							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
@@ -1707,7 +1732,6 @@ if (!function_exists('alvierittely')) {
 			$arow = mysql_fetch_array($aresult);
 
 			$pdf->draw_text(360, $kala, t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."): ",	$thispage, $norm);
-
 			$oikpos = $pdf->strlen(sprintf('%.2f', $arow["alvrivihinta"]), $norm);
 			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $arow["alvrivihinta"]), 		$thispage, $norm);
 
@@ -1724,45 +1748,56 @@ if (!function_exists('alvierittely')) {
 		$pdf->draw_text(360, $kala, t("Lasku Yhteensä", $kieli).":",							$thispage, $norm);
 
 		if ($toim == 'PROFORMA') {
+			$summa = $kassa_ale != '' ? $summa * (1-$kassa_ale/100) : $summa;
+
 			$oikpos = $pdf->strlen(sprintf('%.2f', $summa), $norm);
 			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summa), 						$thispage, $norm);
 			$pdf->draw_text(550, $kala, $laskurow["valkoodi"], 									$thispage, $norm);
 		}
 		elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["summa_valuutassa"]), $norm);
-			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow["summa_valuutassa"]), 				$thispage, $norm);
+			$summa_valuutassa = $kassa_ale != '' ? $laskurow["summa_valuutassa"] * (1-$kassa_ale/100) : $laskurow["summa_valuutassa"];
+
+			$oikpos = $pdf->strlen(sprintf('%.2f', $summa_valuutassa), $norm);
+			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summa_valuutassa),				 				$thispage, $norm);
 			$pdf->draw_text(550, $kala, $laskurow["valkoodi"], 													$thispage, $norm);
 
 			if ($laskurow["pyoristys_valuutassa"] != 0) {
+
+				$pyoristys_valuutassa = $kassa_ale != '' ? $laskurow["pyoristys_valuutassa"] * (1-$kassa_ale/100) : $laskurow["pyoristys_valuutassa"];
+
 				$kala -= 10;
 				$pdf->draw_text(360, $kala, t("Pyöristys", $kieli).":",											$thispage, $norm);
-				$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["pyoristys_valuutassa"]*-1), $norm);
-				$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow["pyoristys_valuutassa"]*-1), 		$thispage, $norm);
+				$oikpos = $pdf->strlen(sprintf('%.2f', $pyoristys_valuutassa * -1), $norm);
+				$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $pyoristys_valuutassa * -1), 		$thispage, $norm);
 				$pdf->draw_text(550, $kala, $laskurow["valkoodi"], 												$thispage, $norm);
 				$kala -= 10;
 
 				$pdf->draw_text(360, $kala, t("Yhteensä", $kieli).":",											$thispage, $norm);
-				$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["summa_valuutassa"]-$laskurow["pyoristys_valuutassa"]), $norm);
-				$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow["summa_valuutassa"]-$laskurow["pyoristys_valuutassa"]), $thispage, $norm);
+				$oikpos = $pdf->strlen(sprintf('%.2f', $summa_valuutassa - $pyoristys_valuutassa), $norm);
+				$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summa_valuutassa - $pyoristys_valuutassa), $thispage, $norm);
 				$pdf->draw_text(550, $kala, $laskurow["valkoodi"], 												$thispage, $norm);
 			}
 		}
 		else {
-			$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["summa"]), $norm);
-			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow["summa"]), 							$thispage, $norm);
+			$summa = $kassa_ale != '' ? $laskurow["summa"] * (1-$kassa_ale/100) : $laskurow["summa"];
+
+			$oikpos = $pdf->strlen(sprintf('%.2f', $summa), $norm);
+			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summa), 							$thispage, $norm);
 			$pdf->draw_text(550, $kala, $laskurow["valkoodi"], 													$thispage, $norm);
 
 			if ($laskurow["pyoristys"] != 0) {
+				$pyoristys = $kassa_ale != '' ? $laskurow["pyoristys"] * (1-$kassa_ale/100) : $laskurow["pyoristys"];
+
 				$kala -= 10;
 				$pdf->draw_text(360, $kala, t("Pyöristys", $kieli).":",											$thispage, $norm);
-				$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["pyoristys"]*-1), $norm);
-				$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow["pyoristys"]*-1), 				$thispage, $norm);
+				$oikpos = $pdf->strlen(sprintf('%.2f', $pyoristys * -1), $norm);
+				$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $pyoristys * -1), 				$thispage, $norm);
 				$pdf->draw_text(550, $kala, $laskurow["valkoodi"], 												$thispage, $norm);
 				$kala -= 10;
 
 				$pdf->draw_text(360, $kala, t("Yhteensä", $kieli).":",											$thispage, $norm);
-				$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["summa"]-$laskurow["pyoristys"]), $norm);
-				$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow["summa"]-$laskurow["pyoristys"]), $thispage, $norm);
+				$oikpos = $pdf->strlen(sprintf('%.2f', $summa - $pyoristys), $norm);
+				$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summa - $pyoristys), $thispage, $norm);
 				$pdf->draw_text(550, $kala, $laskurow["valkoodi"], 												$thispage, $norm);
 			}
 		}
@@ -1770,7 +1805,9 @@ if (!function_exists('alvierittely')) {
 		$kala -= 10;
 
 		// Vikan sivun loppulaatikko
-		loppu($thispage, 1);
+		if ($kassa_ale == '' or $sivu_vaihtui === true) {
+			loppu($thispage, 1);
+		}
 	}
 }
 

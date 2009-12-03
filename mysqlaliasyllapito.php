@@ -43,6 +43,38 @@
 		}
 	}
 	
+	if ($kopsaataulu != "" and $uusisetti != "") {
+		
+		list($kopsaataulu, $alias_set) = explode("###", $kopsaataulu);
+		
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]'
+					and laji='MYSQLALIAS'
+					and selite like '$kopsaataulu.%'
+					and selitetark_2 = '$alias_set'";
+		$al_res1 = mysql_query($query) or pupe_error($query);
+		
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]'
+					and laji='MYSQLALIAS'
+					and selite like '$kopsaataulu.%'
+					and selitetark_2 = '$uusisetti'";
+		$al_res2 = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($al_res1) > 0 and mysql_num_rows($al_res2) == 0) {
+			while ($al_row = mysql_fetch_array($al_res1)) {
+				$query = "	INSERT INTO avainsana
+							SET yhtio 		= '$kukarow[yhtio]',
+							laji			= 'MYSQLALIAS',
+							selite			= '$al_row[selite]',
+							selitetark 		= '$al_row[selitetark]',
+							selitetark_2 	= '$uusisetti'";
+				$al_res3 = mysql_query($query) or pupe_error($query);
+			}
+		}
+	}
 	
 	// Nyt selataan
 	$query  = "SHOW TABLES FROM $dbkanta";
@@ -50,7 +82,8 @@
 
 	$sel[$taulu] = "SELECTED";
 	
-	echo "<form method = 'post'>";
+	echo "<form method = 'post'><table>";
+	echo "<tr><th>".t("Muokkaa aliasryhm‰‰").":</th><td>";
 	echo "<select name = 'taulu'>";
 	
 	while ($tables = mysql_fetch_array($tabresult)) {
@@ -74,10 +107,46 @@
 		}
 	}
 	
-	echo "</select>";
+	echo "</select></td><td class='back'>";
 	echo "<input type='submit' value='".t("Valitse")."'>";
-	echo "</form><br><br>";
+	echo "</td></tr></table></form><br><br>";
 	
+	if ($taulu == "") {	
+		
+		echo "<form method = 'post'><table>";
+		echo "<tr><th>".t("Kopioi aliasryhm‰").":</th><td>";		
+		echo "<select name = 'kopsaataulu'>";
+		
+		mysql_data_seek($tabresult, 0);
+		
+		while ($tables = mysql_fetch_array($tabresult)) {
+			if (file_exists("inc/".$tables[0].".inc")) {
+
+				$query = "	SELECT distinct selitetark_2
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							and laji	= 'MYSQLALIAS'
+							and selite	like '".$tables[0].".%'
+							and selitetark_2 != ''";
+				$al_res = mysql_query($query) or pupe_error($query);
+			
+				echo "<option value='$tables[0]' ".$sel[$tables[0]].">$tables[0]</option>";
+			
+				if (mysql_num_rows($al_res) > 0) {
+					while ($alrow = mysql_fetch_array($al_res)) {
+						echo "<option value='$tables[0]###$alrow[selitetark_2]' ".$sel[$tables[0]."###".$alrow["selitetark_2"]].">$tables[0] - $alrow[selitetark_2]</option>";
+					}
+				}
+			}
+		}
+	
+		echo "</select></td>";
+		
+		echo "<th>".t("Uuden aliasryhm‰n nimi").":</th><td><input type='text' size='30' name='uusisetti'>";
+		echo "</select></td><td class='back'>";
+		echo "<input type='submit' value='".t("Valitse")."'>";
+		echo "</td></tr></table></form><br><br>";
+	}
 	
 	// Nyt n‰ytet‰‰n vanha tai tehd‰‰n uusi(=tyhj‰)
 	if ($taulu != "") {	

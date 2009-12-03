@@ -167,6 +167,10 @@ else {
 
 		//Tiliöidään myynti
 		if ($tiliointisumma != 0) {
+
+			$tiliointisumma = round($tiliointisumma, 2);
+			$tiliointisumma_valuutassa = round($tiliointisumma_valuutassa, 2);
+
 			$query = "	INSERT into tiliointi set
 						yhtio 				= '$kukarow[yhtio]',
 						ltunnus				= '$tunnus',

@@ -760,9 +760,6 @@
 	if ($sarjanumero_haku != "") {
 		$lisa .= " and sarjanumeroseuranta.sarjanumero like '%$sarjanumero_haku%' ";
 	}
-	else {
-		$lisa .= " and sarjanumeroseuranta.myyntirivitunnus != -1 ";
-	}
 
 	if ($varasto_haku != "") {
 		$lisa .= " and varastopaikat.nimitys like '%$varasto_haku%' ";
@@ -780,6 +777,10 @@
 		$lisa .= " and sarjanumeroseuranta.era_kpl > 0 ";
 	}
 
+	if ($lisa == "") {
+		$lisa = " and sarjanumeroseuranta.myyntirivitunnus != -1 and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') ";
+	}
+
 	$query	= "	SELECT sarjanumeroseuranta.*,
 				if(sarjanumeroseuranta.lisatieto = '', if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), concat(if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
 				lasku_osto.tunnus									osto_tunnus,
@@ -792,6 +793,7 @@
 				tilausrivi_osto.tunnus								osto_rivitunnus,
 				tilausrivi_osto.uusiotunnus							osto_uusiotunnus,
 				tilausrivi_osto.laskutettuaika						osto_laskaika,
+				tilausrivi_osto.laatija								osto_rivilaatija,
 				tilausrivi_myynti.laskutettuaika					myynti_laskaika,
 				DATEDIFF(now(), tilausrivi_osto.laskutettuaika)		varpvm,
 				(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
@@ -1103,7 +1105,14 @@
 				$echoostuns = $ostuns;
 			}
 
-			echo "<td colspan='2' valign='top'><a href='".$palvelin2."raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$ostuns'>$echoostuns $sarjarow[osto_nimi]</a><br>";
+			if ($sarjarow["osto_rivilaatija"] == "Invent" and $sarjarow["osto_nimi"] == "") {
+				$ostoekotus = "$echoostuns ".t("Inventointi");
+			}
+			else {
+				$ostoekotus = "<a href='".$palvelin2."raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$ostuns'>$echoostuns $sarjarow[osto_nimi]</a>";
+			}
+
+			echo "<td colspan='2' valign='top'>$ostoekotus<br>";
 
 			$fnlina1 = "";
 			$fnlina2 = "";
@@ -1170,7 +1179,8 @@
 					echo "<td valign='top'>".t("Lukittu")."</td>";
 				}
 				elseif ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "REKLAMAATIO" or $from == "TYOMAARAYS" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA" or $from == "riviosto" or $from == "valmistus" or $from == "VALMISTAASIAKKAALLE" or $from == "VALMISTAVARASTOON" or $from == "kohdista" or $from == "INVENTOINTI") {
-						if (($from != "SIIRTOTYOMAARAYS" and $laskurow["tila"] != "G" and $from != "SIIRTOLISTA" and $sarjarow["siirtorivitunnus"] > 0) or (($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON" and $sarjarow["osto_laskaika"] > '0000-00-00' and ($sarjarow["siirtorivitunnus"] > 0 or $sarjarow["myyntirivitunnus"] > 0)) or ($from == "SIIRTOTYOMAARAYS" and $sarjarow["ostorivitunnus"] == 0)) {						$dis = "DISABLED";
+					if (($from != "SIIRTOTYOMAARAYS" and $laskurow["tila"] != "G" and $from != "SIIRTOLISTA" and $sarjarow["siirtorivitunnus"] > 0) or (($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON" and $sarjarow["osto_laskaika"] > '0000-00-00' and ($sarjarow["siirtorivitunnus"] > 0 or $sarjarow["myyntirivitunnus"] > 0)) or ($from == "SIIRTOTYOMAARAYS" and $sarjarow["ostorivitunnus"] == 0)) {
+						$dis = "DISABLED";
 					}
 					else {
 						$dis = "";
@@ -1379,7 +1389,7 @@
 				<input type='text' name='tkkl' value='' size='3'>
 				<input type='text' name='tvvl' value='' size='5'></td>";
 			}
-			
+
 			if ($rivirow['sarjanumeroseuranta'] == 'V') {
 				echo "<input type='hidden' name='kehahin' value='$rivirow[kehahin]'>";
 			}

@@ -1,99 +1,66 @@
 <?php
 
-function delete_dir_content($conn_id,$dir,$nodel = "",$nodelpict = "",$rmdir = "") {
-	$poistosyy = "";
-	ftp_pasv($conn_id, true);
+function ftp_rmfiles($ftp_stream, $directory, $nodel = "", $nodelpict = "") {
 
-	if (substr($dir, -1) == "/") {
-		 $dir = substr($dir, 0, strlen($dir)-1);
-	}
-	
-	$content = ftp_nlist($conn_id, $dir);
-	$dir_test = ftp_rawlist($conn_id, $dir);
+    if (!is_resource($ftp_stream) ||
+        get_resource_type($ftp_stream) !== 'FTP Buffer') {
+        return false;
+    }
 
-	if ($content != FALSE) {
-		$origin = @ftp_pwd($conn_id);
-		ftp_chdir($conn_id, $dir);
+	ftp_pasv($ftp_stream, true);
 
-		for($i = 0; $i < count($content); $i++) {
+    $i             = 0;
+    $files         = array();
+    $statusnext    = false;
+    $statusprev    = false;
+    $currentfolder = $directory;
 
-			if ($content[$i] == '.' or $content[$i] == '..') {
+    $list = ftp_rawlist($ftp_stream, $directory, true);
+
+    foreach ($list as $current) {
+
+        if (empty($current)) {
+			if ($statusprev == true) {
+				$statusprev = false;
 				continue;
 			}
+            $statusnext = true;
+            continue;
+        }
 
-			if ($dir_test[$i][0] != "d") {
+        if ($statusnext === true) {
+			$currentfolder = substr($current, 0, -1);
+            $statusnext = false;
+			$statusprev = true;
+            continue;
+        }
 
-				if (strpos($content[$i],$nodelpict) === FALSE) {
-					$content_dir = "$content[$i]";
-					if (ftp_is_dir($conn_id, $content_dir) === FALSE) {
-						if (ftp_delete($conn_id, $content_dir) === FALSE) {
-							$poistosyy .= "Tiedoston poisto epäonnistui: $dir/$content[$i]\n";
-						}
-					}
-				}
-				
+        $split = preg_split('[ ]', $current, 9, PREG_SPLIT_NO_EMPTY);
+        $entry = $split[8];
+        $isdir = ($split[0]{0} === 'd') ? true : false;
+
+        if ($entry === '.' || $entry === '..') {
+            continue;
+        }
+
+        if ($isdir !== true) {
+            $files[] = $currentfolder . '/' . $entry;
+        }
+
+    }
+
+    foreach ($files as $file) {
+		if ($nodelpict != '') {
+			if (strpos($file, $nodelpict) === FALSE) {
+	        	ftp_delete($ftp_stream, $file);
 			}
-			else {
-				$subcontent = ftp_nlist($conn_id, $content[$i]);
-				
-				if ($content[$i] != $nodel) {
-
-					ftp_chdir($conn_id, $content[$i]);
-
-					for ($k=0; $k < count($subcontent); $k++) {
-
-						var_dump($subcontent[$k]);
-
-						if ($subcontent[$k] == '.' or $subcontent[$k] == '..') {
-							continue;
-						}
-
-						if (ftp_is_dir($conn_id, $subcontent[$k]) === FALSE) {
-							if (ftp_delete($conn_id, $subcontent[$k]) === FALSE) {
-								$poistosyy .= "Tiedoston poisto epäonnistui: $dir/$content[$i]/$subcontent[$k]\n";
-							}
-						}
-					}
-
-					ftp_chdir($conn_id, $origin);
-					ftp_chdir($conn_id, $dir);
-					
-					if ($rmdir == "") {
-						if (ftp_is_dir($conn_id, $content[$i]) === TRUE)  {
-							if (ftp_rmdir($conn_id, $content[$i]) === FALSE) {
-								$poistosyy .= "Kansion poisto epäonnistui: $dir/$content[$i]\n";
-							}
-						}
-					}
-					
-				}			
-			}
-
 		}
-
-		if (@ftp_pwd($conn_id) != $origin) {
-			ftp_chdir($conn_id, $origin);
+		else {
+        	ftp_delete($ftp_stream, $file);
 		}
-	}
-	else {
-		$poistosyy .= "Tiedostoja ei poistettu\n";
-	}
-	
-	return $poistosyy;
+    }
 }
 
-function ftp_is_dir(&$conn_id, $dir_x) {
-	// rootdir = /
-	$origin_dir = @ftp_pwd($conn_id);
-
-	if (@ftp_chdir($conn_id, $dir_x) === TRUE) {
-		@ftp_chdir($conn_id, $origin_dir);
-		return true;
-	} 
-	else {
-		return false;
-	}
-}
 
 //tarvitaan yhtiö
 if (empty($argv)) {
@@ -166,9 +133,9 @@ if ($tee == "aja") {
 				die("$kokonimi ei ole määritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
 			}
 			
-			$poistosyy = delete_dir_content($conn_id,$ftpmuupath,"","","nope");
-			$poistosyy .= delete_dir_content($conn_id,$ftpkuvapath,"672x","kategoria");
-			
+			ftp_rmfiles($conn_id, $ftpmuupath);
+			ftp_rmfiles($conn_id, $ftpkuvapath, "672x", "kategoria");
+						
 			$counter = 0;
 				
 			while ($row = mysql_fetch_array($result) and $counter < 10) {

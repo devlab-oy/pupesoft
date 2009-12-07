@@ -506,7 +506,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$taulunrivit[$taulu][$eriviindex][$j] = $rivit[$eriviindex][$j] = $rivi[$j] = $apu_ytunnus;
 
 					foreach ($taulunotsikot as $autotaulu => $autojoinit) {
-						if (in_array("YTUNNUS", $joinit) and $autotaulu != $taulut[$excej] and $taulu == $joinattavat[$autotaulu]["YTUNNUS"]) {
+						if (in_array("YTUNNUS", $joinit) and $autotaulu != $taulut[$j] and $taulu == $joinattavat[$autotaulu]["YTUNNUS"]) {
 							$taulunrivit[$autotaulu][$eriviindex][array_search("YTUNNUS", $taulunotsikot[$autotaulu])] = $apu_ytunnus;
 						}
 					}
@@ -521,34 +521,6 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				if (trim($rivi[$j]) == "" and in_array($taulunotsikot[$taulu][$j], $pakolliset)) {
 					$tila = 'ohita';
 				}
-			}
-
-			// Avainsanojen perheet kuntoon!
-			if ($table_mysql == 'avainsana' and strtoupper(trim($rivi[$postoiminto])) == 'LISAA' and $rivi[array_search("PERHE", $taulunotsikot[$taulut[$excej]])] == "AUTOM") {
-
-				$query = "	SELECT max(perhe)+1 max
-							FROM avainsana";
-				$vresult = mysql_query($query) or pupe_error($query);
-				$vrow = mysql_fetch_assoc($vresult);
-
-				$apu_ytunnus = $vrow['max'] + $tarkylisa;
-				$tarkylisa++;
-
-				$j = array_search("PERHE", $taulunotsikot[$taulut[$excej]]);
-
-				// Päivitetään generoitu arvo kaikkiin muuttujiin...
-				$taulunrivit[$taulu][$eriviindex][$j] = $rivit[$eriviindex][$j] = $rivi[$j] = $apu_ytunnus;
-
-				foreach ($taulunotsikot as $autotaulu => $autojoinit) {
-					if (in_array("PERHE", $joinit) and $autotaulu != $taulut[$excej] and $taulu == $joinattavat[$autotaulu]["PERHE"]) {
-						$taulunrivit[$autotaulu][$eriviindex][array_search("PERHE", $taulunotsikot[$autotaulu])] = $apu_ytunnus;
-					}
-				}
-			}
-
-			// Käyttäjien salasanat kuntoon!
-			if ($table_mysql == 'kuka' and $taulunotsikot[$taulu][$j] == "SALASANA" and trim($rivi[$j]) != "") {
-				$taulunrivit[$taulu][$eriviindex][$j] = $rivit[$eriviindex][$j] = $rivi[$j] = md5(trim($rivi[$j]));
 			}
 
 			// jos ei ole puuttuva tieto etsitään riviä
@@ -743,6 +715,35 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					}
 
 					if ($r != $postoiminto) {
+
+						// Avainsanojen perheet kuntoon!
+						if ($table_mysql == 'avainsana' and strtoupper(trim($rivi[$postoiminto])) == 'LISAA' and $rivi[array_search("PERHE", $taulunotsikot[$taulut[$r]])] == "AUTOM") {
+
+							$mpquery = "SELECT max(perhe)+1 max
+										FROM avainsana";
+							$vresult = mysql_query($mpquery) or pupe_error($mpquery);
+							$vrow = mysql_fetch_assoc($vresult);
+
+							$apu_ytunnus = $vrow['max'] + $tarkylisa;
+							$tarkylisa++;
+
+							$j = array_search("PERHE", $taulunotsikot[$taulut[$r]]);
+
+							// Päivitetään generoitu arvo kaikkiin muuttujiin...
+							$taulunrivit[$taulu][$eriviindex][$j] = $rivit[$eriviindex][$j] = $rivi[$j] = $apu_ytunnus;
+
+							foreach ($taulunotsikot as $autotaulu => $autojoinit) {
+								if (in_array("PERHE", $joinit) and $autotaulu != $taulut[$r] and $taulu == $joinattavat[$autotaulu]["PERHE"]) {
+									$taulunrivit[$autotaulu][$eriviindex][array_search("PERHE", $taulunotsikot[$autotaulu])] = $apu_ytunnus;
+								}
+							}
+						}
+
+						// Käyttäjien salasanat kuntoon!
+						if ($table_mysql == 'kuka' and $taulunotsikot[$taulu][$r] == "SALASANA" and trim($rivi[$r]) != "") {
+							$taulunrivit[$taulu][$eriviindex][$r] = $rivit[$eriviindex][$r] = $rivi[$r] = md5(trim($rivi[$r]));
+						}
+
 						$rivi[$r] = trim(addslashes($rivi[$r]));
 
 						if (substr($trows[$otsikko],0,7) == "decimal" or substr($trows[$r],0,4) == "real") {

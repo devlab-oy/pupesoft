@@ -2,7 +2,17 @@
 
 	require ("inc/parametrit.inc");
 
-	if ($tee== 'PERUSTA') {
+	if ($tee == 'PERUSTA') {
+		//	Trimmataan tyhjät merkit
+		$uustuoteno = trim($uustuoteno);
+
+		if ($uustuoteno == '') {
+			$tee = 'AVALITTU';
+			$varaosavirhe = t("VIRHE: Uusi tuotenumero ei saa olla tyhjä")."!";
+		}
+	}
+
+	if ($tee == 'PERUSTA') {
 
 		if(strpos($tuoteno, '####') !== FALSE) {
 			$hakyhtio	= substr($tuoteno, strpos($tuoteno, '####')+4);
@@ -11,10 +21,7 @@
 		else {
 			$hakyhtio = $kukarow["yhtio"];
 		}
-		
-		//	Trimmataan tyhjät merkit
-		$uustuoteno = trim($uustuoteno);
-		
+
 		$query = "	SELECT tunnus
 					FROM tuote
 					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";

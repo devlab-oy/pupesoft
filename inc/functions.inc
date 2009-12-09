@@ -4864,7 +4864,7 @@ function show(layer_ref, type) {
 
 if (!function_exists("js_alasvetoMaxWidth")) {
 	function js_alasvetoMaxWidth($id, $leveys) {
-		return "id = \"$id\" style=\"max-width: $leveys; width: expression(if(parseInt(document.getElementById('$id').clientWidth) > $leveys) { $leveys });\" onmousedown=\"var browser = navigator.appName.toUpperCase(); var loytyyko = browser.indexOf('EXPLORER');if (loytyyko >= 0) {document.getElementById('$id').style.width = 'auto';}\" onblur=\"var browser = navigator.appName.toUpperCase(); var loytyyko = browser.indexOf('EXPLORER'); if (loytyyko >= 0 and '$leveys' > 0) {cwidth = document.getElementById('$id').clientWidth; if (cwidth > '$leveys') {document.getElementById('$id').style.width = '$leveys'+'px';} else {document.getElementById('$id').style.width = 'auto';}}\"";
+		return "id = \"$id\" style=\"max-width: $leveys; width: expression(if(parseInt(document.getElementById('$id').clientWidth) > $leveys) { $leveys });\" onmousedown=\"var browser = navigator.appName.toUpperCase(); var loytyyko = browser.indexOf('EXPLORER'); if (loytyyko >= 0) {document.getElementById('$id').style.width = 'auto';}\" onblur=\"var browser = navigator.appName.toUpperCase(); var loytyyko = browser.indexOf('EXPLORER'); if (loytyyko >= 0 && $leveys > 0) {cwidth = document.getElementById('$id').clientWidth; if (cwidth > $leveys) { document.getElementById('$id').style.width = '$leveys'+'px';} else {document.getElementById('$id').style.width = 'auto';}}\"";
 	}
 }
 

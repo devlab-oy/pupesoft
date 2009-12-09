@@ -91,10 +91,7 @@
 	if ($_POST["toim"] == "yhtion_parametrit" and isset($apuwebseuranta)) {
 		$t[$webseuranta] = mysql_real_escape_string($apuwebseuranta);
 	}
-
-	// pikku javascripti
-	js_alasvetoMuutakoko();
-
+	
 	$rajauslisa	= "";
 
 	require ("inc/$toim.inc");

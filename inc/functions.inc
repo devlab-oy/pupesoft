@@ -4862,45 +4862,11 @@ function show(layer_ref, type) {
 	}
 }
 
-if (!function_exists("js_alasvetoMuutakoko")) {
-	function js_alasvetoMuutakoko() {
-?>
-<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
-
-function alasvetoMuutakoko(alasveto, leveys) {
-
-	var browser=navigator.appName.toUpperCase();
-
-	var loytyyko = browser.indexOf("EXPLORER");
-
-	if (loytyyko >= 0) {
-		if (leveys > 0) {
-			cwidth = document.getElementById(alasveto).clientWidth;
-
-			if (cwidth > leveys) {
-				document.getElementById(alasveto).style.width=leveys+'px';
-			}
-			else {
-				document.getElementById(alasveto).style.width='auto';
-			}
-		}
-		else {
-			document.getElementById(alasveto).style.width='auto';
-		}
-	}
-}
-
-</script>
-<?php
-	}
-}
-
 if (!function_exists("js_alasvetoMaxWidth")) {
 	function js_alasvetoMaxWidth($id, $leveys) {
-		return "id = \"$id\" style=\"max-width: $leveys; width: expression(if(parseInt(document.getElementById('$id').clientWidth) > $leveys) { $leveys });\" onmousedown=\"alasvetoMuutakoko('$id', 0);\" onblur=\"alasvetoMuutakoko('$id', '$leveys');\"";
+		return "id = \"$id\" style=\"max-width: $leveys; width: expression(if(parseInt(document.getElementById('$id').clientWidth) > $leveys) { $leveys });\" onmousedown=\"var browser = navigator.appName.toUpperCase(); var loytyyko = browser.indexOf('EXPLORER');if (loytyyko >= 0) {document.getElementById('$id').style.width = 'auto';}\" onblur=\"var browser = navigator.appName.toUpperCase(); var loytyyko = browser.indexOf('EXPLORER'); if (loytyyko >= 0 and '$leveys' > 0) {cwidth = document.getElementById('$id').clientWidth; if (cwidth > '$leveys') {document.getElementById('$id').style.width = '$leveys'+'px';} else {document.getElementById('$id').style.width = 'auto';}}\"";
 	}
 }
-
 
 if (!function_exists("js_toimehtoTarkenne")) {
 	function js_toimehtoTarkenne() {

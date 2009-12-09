@@ -653,6 +653,10 @@
 					$lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
 				}
 
+				if (isset($status) and $status != '') {
+					$lisa .= " and tuote.status = '".(string) $status."' ";
+				}
+
 				$vvaa = $vva - '1';
 				$vvll = $vvl - '1';
 
@@ -1932,6 +1936,7 @@
 			if ($piilota_kappaleet != '')	$piilota_kappaleet_sel 	= "CHECKED";
 			if ($piilotanollarivit != '')	$einollachk 			= "CHECKED";
 			if ($naytaennakko != '')		$naytaennakkochk 		= "CHECKED";
+			if ($status != '')				${'status_'.$status.'_sel'} = 'SELECTED';
 
 			echo "<table>
 				<tr>
@@ -2195,6 +2200,10 @@
 				<td><input type='checkbox' name='naytaennakko' $naytaennakkochk></td>
 				<td></td>
 				<td class='back'></td>
+				</tr>
+				<tr>
+				<th>",t("Näytä myös tuotteet statuksella"),"</th>
+				<td><select name='status'><option value=''></option><option value='a' $status_a_sel>A</option><option value='x' $status_x_sel>X</option><option value='p' $status_p_sel>P</option></select></td><td></td>
 				</tr>
 				</table><br>";
 

@@ -198,6 +198,10 @@
 				$tuote_lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
 			}
 
+			if (isset($status) and $status != '') {
+				$tuote_lisa .= " and tuote.status = '".(string) $status."' ";
+			}
+
 			if (isset($tuoteryhma) and $tuoteryhma == "tyhjat" and isset($osasto) and $osasto == "tyhjat") {
 				$having_lisa .= "HAVING (try = '0' or osasto = '0') ";
 			}
@@ -1072,6 +1076,16 @@
 					</select>
 					</td>";
 			echo "</tr>";
+
+			if ($status != '') {
+				${'status_'.$status.'_sel'} = 'SELECTED';
+			}
+
+			echo "
+			<tr>
+			<th>",t("Näytä myös tuotteet statuksella"),"</th>
+			<td><select name='status'><option value=''></option><option value='a' $status_a_sel>A</option><option value='x' $status_x_sel>X</option><option value='p' $status_p_sel>P</option></select></td>
+			</tr>";
 
 			$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
 			$vares = mysql_query($query) or pupe_error($query);

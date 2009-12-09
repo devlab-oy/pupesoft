@@ -601,7 +601,7 @@
 			elseif ($from == "" and $toim == 'tuotteen_toimittajat' and trim($array[$i]) == 'nimi') {
 				if (!is_numeric($haku[$i])) {
 					// haetaan laskutus-asiakas
-					$ashak = "SELECT group_concat(ytunnus) tunnukset FROM toimi WHERE yhtio='$kukarow[yhtio]' and nimi like '%" . $haku[$i] . "%'";
+					$ashak = "SELECT group_concat(concat(\"'\",ytunnus,\"'\")) tunnukset FROM toimi WHERE yhtio='$kukarow[yhtio]' and nimi like '%" . $haku[$i] . "%'";
 					$ashakres = mysql_query($ashak) or pupe_error($ashak);
 					$ashakrow = mysql_fetch_array($ashakres);
 

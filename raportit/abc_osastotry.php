@@ -55,6 +55,15 @@
 		echo "<td><input type='text' name='saapumispp' value='$saapumispp' size='2'>
 				<input type='text' name='saapumiskk' value='$saapumiskk' size='2'>
 				<input type='text' name='saapumisvv' value='$saapumisvv'size='4'></td></tr>";
+
+		if ($status != '') {
+			${'status_'.$status.'_sel'} = 'SELECTED';
+		}
+
+		echo "<tr>";
+		echo "<th>",t("N‰yt‰ myˆs tuotteet statuksella"),"</th>";
+		echo "<td><select name='status'><option value=''></option><option value='a' $status_a_sel>A</option><option value='x' $status_x_sel>X</option><option value='p' $status_p_sel>P</option></select></td>";
+		echo "</tr>";
 	}
 
 	echo "<tr>";
@@ -122,6 +131,12 @@
 			$saapumispvmlisa = " and abc_aputaulu.saapumispvm <= '$saapumispvm' ";
 		}
 
+		if (!$asiakasanalyysi) {
+			if ($status != '') {
+				$lisa .= " and abc_aputaulu.status = '".(string) $status."' ";
+			}
+		}
+
 		//kauden yhteismyynnit ja katteet
 		$query = "	SELECT
 					sum(summa) yhtmyynti,
@@ -157,64 +172,64 @@
 		if ($valinta == 'luokka_osasto')	$otsikko = t("Osaston");
 		if ($valinta == 'luokka_try') 		$otsikko = t("Ryhm‰n");
 
-		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=$valinta&sort=asc$ulisa2'>$otsikko<br>".t("Luokka")."</a></th>";
-		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=luokka&sort=asc$ulisa2'>".t("ABC")."<br>".t("Luokka")."</th>";
-		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=tuoteno&sort=asc$ulisa2'>$astusana</a><br>&nbsp;</th>";
-		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=nimitys&sort=asc$ulisa2'>".t("Nimitys")."</a><br>&nbsp;</th>";
-		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=osasto&sort=asc$ulisa2'>".t("Osasto")."</a><br>&nbsp;</th>";
-		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=try&sort=asc$ulisa2'>".t("Ryhm‰")."</a><br>&nbsp;</th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=$valinta&status=$status&sort=asc$ulisa2'>$otsikko<br>".t("Luokka")."</a></th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=luokka&status=$status&sort=asc$ulisa2'>".t("ABC")."<br>".t("Luokka")."</th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=tuoteno&status=$status&sort=asc$ulisa2'>$astusana</a><br>&nbsp;</th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=nimitys&status=$status&sort=asc$ulisa2'>".t("Nimitys")."</a><br>&nbsp;</th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=osasto&status=$status&sort=asc$ulisa2'>".t("Osasto")."</a><br>&nbsp;</th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=try&status=$status&sort=asc$ulisa2'>".t("Ryhm‰")."</a><br>&nbsp;</th>";
 
 		if (!$asiakasanalyysi and $lisatiedot == "TARK") {
 
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=tuotemerkki&sort=asc$ulisa2'>".t("Merkki")."</a><br>&nbsp;</th>";
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=malli&sort=asc$ulisa2'>".t("Malli")."</a><br>&nbsp;</th>";
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=mallitarkenne&sort=asc$ulisa2'>".t("Mallitarkenne")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=tuotemerkki&status=$status&sort=asc$ulisa2'>".t("Merkki")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=malli&status=$status&sort=asc$ulisa2'>".t("Malli")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=mallitarkenne&status=$status&sort=asc$ulisa2'>".t("Mallitarkenne")."</a><br>&nbsp;</th>";
 
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=myyjanro&sort=asc$ulisa2'>".t("Myyj‰")."</a><br>&nbsp;</th>";
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=ostajanro&sort=asc$ulisa2'>".t("Ostaja")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=myyjanro&status=$status&sort=asc$ulisa2'>".t("Myyj‰")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=ostajanro&status=$status&sort=asc$ulisa2'>".t("Ostaja")."</a><br>&nbsp;</th>";
 
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=saapumispvm&sort=asc$ulisa2'>".t("Viimeinen")."<br>".t("Saapumispvm")."</a><br>&nbsp;</th>";
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=saldo&sort=asc$ulisa2'>".t("Saldo")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=saapumispvm&status=$status&sort=asc$ulisa2'>".t("Viimeinen")."<br>".t("Saapumispvm")."</a><br>&nbsp;</th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=saldo&status=$status&sort=asc$ulisa2'>".t("Saldo")."</a><br>&nbsp;</th>";
 		}
 
-		if (!$asiakasanalyysi and $lisatiedot == "TARK") echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=tulopvm&sort=desc$ulisa2'>".t("Tulopvm")."</a><br>&nbsp;</th>";
+		if (!$asiakasanalyysi and $lisatiedot == "TARK") echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=tulopvm&status=$status&sort=desc$ulisa2'>".t("Tulopvm")."</a><br>&nbsp;</th>";
 
-		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=summa&sort=desc$ulisa2'>$myykusana<br>".t("tot")."</a></th>";
-		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=kate&sort=desc$ulisa2'>".t("Kate")."<br>".t("tot")."</a></th>";
-		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=katepros&sort=desc$ulisa2'>".t("Kate")."<br>%</a></th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=summa&status=$status&sort=desc$ulisa2'>$myykusana<br>".t("tot")."</a></th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=kate&status=$status&sort=desc$ulisa2'>".t("Kate")."<br>".t("tot")."</a></th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=katepros&status=$status&sort=desc$ulisa2'>".t("Kate")."<br>%</a></th>";
 
-		if ($lisatiedot == "TARK") echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=kateosuus&sort=desc$ulisa2'>".t("Osuus")." %<br>".t("kat").".</a></th>";
+		if ($lisatiedot == "TARK") echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=kateosuus&status=$status&sort=desc$ulisa2'>".t("Osuus")." %<br>".t("kat").".</a></th>";
 
 		if (!$asiakasanalyysi) {
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=vararvo&sort=desc$ulisa2'>".t("Varast").".<br>".t("arvo")."</a></th>";
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=varaston_kiertonop&sort=desc$ulisa2'>".t("Varast").".<br>".t("kiert").".</a></th>";
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=kate_kertaa_kierto&sort=desc$ulisa2'>".t("Kate")."% x<br>".t("kiert").".</a></th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=vararvo&status=$status&sort=desc$ulisa2'>".t("Varast").".<br>".t("arvo")."</a></th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=varaston_kiertonop&status=$status&sort=desc$ulisa2'>".t("Varast").".<br>".t("kiert").".</a></th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=kate_kertaa_kierto&status=$status&sort=desc$ulisa2'>".t("Kate")."% x<br>".t("kiert").".</a></th>";
 		}
 
-		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=kpl&sort=desc$ulisa2'>$myykusana<br>".t("m‰‰r‰")."</a></th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=kpl&status=$status&sort=desc$ulisa2'>$myykusana<br>".t("m‰‰r‰")."</a></th>";
 
 		if ($lisatiedot == "TARK") {
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=myyntierankpl&sort=desc$ulisa2'>$myykusana".t("er‰")."<br>".t("m‰‰r‰")."</a></th>";
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=myyntieranarvo&sort=desc$ulisa2'>$myykusana".t("er‰")."<br>$yhtiorow[valkoodi]</a></th>";
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=rivia&sort=desc$ulisa2'>$myykusana<br>".t("rivej‰")."</a></th>";
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=puuterivia&sort=desc$ulisa2'>".t("Puute")."<br>".t("rivej‰")."</a></th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=myyntierankpl&status=$status&sort=desc$ulisa2'>$myykusana".t("er‰")."<br>".t("m‰‰r‰")."</a></th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=myyntieranarvo&status=$status&sort=desc$ulisa2'>$myykusana".t("er‰")."<br>$yhtiorow[valkoodi]</a></th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=rivia&status=$status&sort=desc$ulisa2'>$myykusana<br>".t("rivej‰")."</a></th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=puuterivia&status=$status&sort=desc$ulisa2'>".t("Puute")."<br>".t("rivej‰")."</a></th>";
 		}
 
-		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=palvelutaso&sort=desc$ulisa2'>".t("Palvelu")."-<br>".t("taso")." %</a></th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=palvelutaso&status=$status&sort=desc$ulisa2'>".t("Palvelu")."-<br>".t("taso")." %</a></th>";
 
 		if (!$asiakasanalyysi and $lisatiedot == "TARK") {
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=ostoerankpl&sort=desc$ulisa2'>".t("Ostoer‰")."<br>".t("m‰‰r‰")."</a></th>";
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=ostoeranarvo&sort=desc$ulisa2'>".t("Ostoer‰")."<br>$yhtiorow[valkoodi]</a></th>";
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=osto_rivia&sort=desc$ulisa2'>".t("Ostettu")."<br>".t("rivej‰")."</a></th>";
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=kustannus&sort=desc$ulisa2'>".t("Myynn").".<br>".t("kustan").".</a></th>";
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=kustannus_osto&sort=desc$ulisa2'>".t("Oston")."<br>".t("kustan").".</a></th>";
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=kustannus_yht&sort=desc$ulisa2'>".t("Kustan").".<br>".t("yht")."</a></th>";
-			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=total&sort=desc$ulisa2'>".t("Kate -")."<br>".t("Kustannus")."</a></th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=ostoerankpl&status=$status&sort=desc$ulisa2'>".t("Ostoer‰")."<br>".t("m‰‰r‰")."</a></th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=ostoeranarvo&status=$status&sort=desc$ulisa2'>".t("Ostoer‰")."<br>$yhtiorow[valkoodi]</a></th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=osto_rivia&status=$status&sort=desc$ulisa2'>".t("Ostettu")."<br>".t("rivej‰")."</a></th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=kustannus&status=$status&sort=desc$ulisa2'>".t("Myynn").".<br>".t("kustan").".</a></th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=kustannus_osto&status=$status&sort=desc$ulisa2'>".t("Oston")."<br>".t("kustan").".</a></th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=kustannus_yht&status=$status&sort=desc$ulisa2'>".t("Kustan").".<br>".t("yht")."</a></th>";
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&order=total&status=$status&sort=desc$ulisa2'>".t("Kate -")."<br>".t("Kustannus")."</a></th>";
 		}
 
 		echo "</tr>";
 
-		echo "<form action='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta' method='post'>";
+		echo "<form action='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&valinta=$valinta&status=$status' method='post'>";
 		echo "<tr>";
 		echo "<th><input type='text' name='haku[$valinta]' value='$haku[$valinta]' size='5'></th>";
 		echo "<th><input type='text' name='haku[luokka]' value='$haku[luokka]' size='5'></th>";
@@ -301,14 +316,14 @@
 
 				echo "<tr>";
 				echo "<td>".$ryhmanimet[$row[$valinta]]."</td>";
-				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&luokka=$l$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot'>".$ryhmanimet[$row["luokka"]]."</a></td>";
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&luokka=$l$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&status=$status'>".$ryhmanimet[$row["luokka"]]."</a></td>";
 
 				if (!$asiakasanalyysi) echo "<td valign='top'><a href='../tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
 				else echo "<td valign='top'><a href='../crm/asiakasmemo.php?asiakasid=$row[asiakastunnus]'>$row[tuoteno]</a></td>";
 
 				echo "<td valign='top'>$row[nimitys]</td>";
-				echo "<td valign='top' nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot'>$row[osasto] $keyosa[selitetark]</a></td>";
-				echo "<td valign='top' nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot'>$row[try] $keytry[selitetark]</a></td>";
+				echo "<td valign='top' nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&status=$status'>$row[osasto] $keyosa[selitetark]</a></td>";
+				echo "<td valign='top' nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&status=$status'>$row[try] $keytry[selitetark]</a></td>";
 
 				if (!$asiakasanalyysi and $lisatiedot == "TARK") {
 					echo "<td valign='top'>$row[tuotemerkki]</td>";

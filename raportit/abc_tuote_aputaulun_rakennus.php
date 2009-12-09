@@ -222,6 +222,7 @@ if ($tee == 'YHTEENVETO') {
 				ifnull(tuote.malli,'#') 			malli,
 				ifnull(tuote.mallitarkenne,'#') 	mallitarkenne,
 				ifnull(tuote.vihapvm,'0000-00-00') 	saapumispvm,
+				ifnull(tuote.status,'#')			status,
 				$summasql							summa,
 				$katesql							kate,
 				sum(if($kpltyyppi and tilausrivi.var in ('H',''), 1, 0))						rivia,
@@ -240,7 +241,7 @@ if ($tee == 'YHTEENVETO') {
 				and ((tilausrivi.tyyppi in ('L','O') and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl')
 				or (tilausrivi.tyyppi = 'L' and tilausrivi.var = 'P' and tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59')
 				or (tilausrivi.tyyppi = 'V' and tilausrivi.toimitettuaika >= '$vva-$kka-$ppa 00:00:00' and tilausrivi.toimitettuaika <= '$vvl-$kkl-$ppl 23:59:59'))
-				GROUP BY 1,2,3,4,5,6,7,8,9,10,11
+				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
 	   			ORDER BY $abcwhat desc";
 	$res = mysql_query($query) or pupe_error($query);
 
@@ -344,7 +345,8 @@ if ($tee == 'YHTEENVETO') {
 					malli				= '$row[malli]',
 					mallitarkenne		= '$row[mallitarkenne]',
 					saapumispvm			= '$row[saapumispvm]',
-					saldo				= '$saldorow[saldo]'";
+					saldo				= '$saldorow[saldo]',
+					status				= '$row[status]'";
 		$insres = mysql_query($query) or pupe_error($query);
 
 		// luokka vaihtuu
@@ -372,6 +374,7 @@ if ($tee == 'YHTEENVETO') {
 				tuote.malli,
 				tuote.mallitarkenne,
 				tuote.vihapvm saapumispvm,
+				tuote.status,
 				abc_aputaulu.luokka,
 				sum(tuotepaikat.saldo) saldo,
 				sum(tuotepaikat.saldo) * if(epakurantti100pvm = '0000-00-00',if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25), 0) vararvo
@@ -412,7 +415,8 @@ if ($tee == 'YHTEENVETO') {
 					malli				= '$row[malli]',
 					mallitarkenne		= '$row[mallitarkenne]',
 					saapumispvm			= '$row[saapumispvm]',
-					saldo				= '$row[saldo]'";
+					saldo				= '$row[saldo]',
+					status				= '$row[status]'";
 		$insres = mysql_query($query) or pupe_error($query);
 
 	}

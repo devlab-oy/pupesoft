@@ -1,7 +1,15 @@
 <?php
 
 	require ("inc/parametrit.inc");
+	
+	if ($livesearch_tee == "TUOTEHAKU") {
+		livesearch_tuotehaku();
+		exit;
+	}
 
+	// Enaboidaan ajax kikkare
+	enable_ajax();
+	
 	if ($mobiili != "YES") {
 		echo "<font class='head'>".t("Inventointi")."</font><hr>";
 	}
@@ -1496,7 +1504,11 @@
 		echo "<input type='hidden' name='tee2' value='$tee2'>";
 
 		echo "<br><table>";
-		echo "<tr><th>".t("Tuotenumero:")."</th><td><input type='text' size='25' name='tuoteno'></td></tr>";
+		echo "<tr><th>".t("Tuotenumero:")."</th><td>";
+		
+		livesearch_kentta("inve", "TUOTEHAKU", "tuoteno", 210);		
+		
+		echo "</td></tr>";
 		echo "<tr><th>".t("Inventointilistan numero:")."</th><td><input type='text' size='25' name='lista'></td><td class='back'><input type='Submit' value='".t("Inventoi")."'></td></tr>";
 
 		echo "</form>";

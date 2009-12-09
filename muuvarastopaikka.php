@@ -8,6 +8,16 @@
 		$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tilausrivin_lisatiedot WRITE, tuote READ, varastopaikat READ, tilausrivi READ, tilausrivi as tilausrivi_osto READ, sarjanumeroseuranta WRITE, lasku READ";
 		$result = mysql_query($query) or pupe_error($query);
 	}
+	else {
+		
+		if ($livesearch_tee == "TUOTEHAKU") {
+			livesearch_tuotehaku();
+			exit;
+		}
+		
+		// Enaboidaan ajax kikkare
+		enable_ajax();		
+	}
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "muuvarastopaikka.php")  !== FALSE) {
 		echo "<font class='head'>".t("Tuotteen varastopaikat")."</font><hr>";
@@ -1061,7 +1071,11 @@
 				<input type='hidden' name='tee' value='M'>
 				<table>
 				<tr><th>".t("Anna tuotenumero")."</th>
-				<td><input type = 'text' name = 'tuoteno' value = '$tuoteno'></td></tr>
+				<td>";
+				
+		livesearch_kentta("valinta", "TUOTEHAKU", "tuoteno", 210);
+						
+		echo "	</td></tr>
 				</table><br>
 				<input type = 'submit' value = '".t("Hae")."'>
 				</form>";

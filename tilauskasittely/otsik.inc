@@ -5,7 +5,6 @@
 
 	// toimehtoTarkenne javascript funktio
 	js_toimehtoTarkenne();
-	js_alasvetoMuutakoko();
 
 	//t‰ss‰ joko tehd‰‰n uutta otsikkoa tai muutetaan olemassa olevaa
 	if ($tee == '' or $kopioitava_otsikko != 0) {
@@ -1829,8 +1828,7 @@
 				}
 
 				echo "</select>";
-				echo "	</td>
-						</tr>";
+				echo "</td></tr>";
 			}
 
 			if ($toim == "TYOMAARAYS" or $srow["tilaustyyppi"] == "A") {

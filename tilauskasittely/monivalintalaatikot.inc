@@ -4,8 +4,8 @@
 		$orderlisa = '';
 	}
 
-	// Purkkafixi jotta saadaan kauniimmat dropdownit
-	if (isset($yhtiorow['naytetaan_kaunis_os_try']) and $yhtiorow['naytetaan_kaunis_os_try'] == "K") {
+	// Näytetäänkö osaston ja tuoteryhmän selitteet
+	if ($yhtiorow['naytetaanko_osaston_ja_tryn_selite'] == "K") {
 		$orderlisa = "ORDER BY avainsana.selitetark";
 	}
 	else {
@@ -279,7 +279,7 @@
 			            $orderlisa";
 		}
 		$sresult = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($sresult) == 0) {
 			$query = "	SELECT DISTINCT tuote.osasto selite, tuote.osasto selitetark
 						FROM tuote
@@ -317,7 +317,7 @@
 				}
 
 				echo "<option value='$sxrow[selite]' $sel>";
-				if ($yhtiorow['naytetaan_kaunis_os_try'] == '') {
+				if ($yhtiorow['naytetaanko_osaston_ja_tryn_selite'] == '') {
 					echo $sxrow['selite']." ";
 				}
 				echo "$sxrow[selitetark]</option>";
@@ -418,7 +418,7 @@
 				}
 
 				echo "<option value='$srow[selite]' $sel>";
-				if ($yhtiorow['naytetaan_kaunis_os_try'] == '') {
+				if ($yhtiorow['naytetaanko_osaston_ja_tryn_selite'] == '') {
 					echo $srow['selite']." ";
 				}
 				echo "$srow[selitetark]</option>";

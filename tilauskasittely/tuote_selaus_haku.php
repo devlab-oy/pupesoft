@@ -550,7 +550,6 @@
 		// Monivalintalaatikot (osasto, try tuotemerkki...)
 		// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
 		$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "MALLI/MALLITARK");
-		if ($kukarow['yhtio'] == 'artr') $yhtiorow['naytetaan_kaunis_os_try'] = 'K';
 
 		require ("monivalintalaatikot.inc");
 

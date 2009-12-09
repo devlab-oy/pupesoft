@@ -929,6 +929,8 @@
 			$varasto_ot = array();
 
 			$excelrivi++;
+			$korvaavien_otsikot_aloitus = $excelsarake;
+			$korvaavien_otsikot = 0;
 			$excelsarake = 0;
 
 			$elements = mysql_num_rows($res); // total number of elements to process
@@ -1452,7 +1454,9 @@
 								$asresult = mysql_query($query) or pupe_error($query);
 								$kasrow = mysql_fetch_array($asresult);
 
-								$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow[$sarake_keyt[$sarake]], 2), $format_bg_green);
+								$rek_kpl_maara = round($kasrow['kpl'], 2);
+
+								$worksheet->write($excelrivi, $excelsarake, $rek_kpl_maara, $format_bg_green);
 								$value = '';
 							}
 							elseif ($sarake == 'Kortuoteno' or $sarake == 'Korsaldo' or $sarake == 'Korennpois' or $sarake == 'Kortil' or $sarake == 'Kormy1' or $sarake == 'Kormy2' or $sarake == 'Kormy3' or $sarake == 'Kormy4') {
@@ -1536,58 +1540,34 @@
 											foreach ($valitut as $key => $val) {
 												if ($sarakkeet[$key] != '') {
 													if ($sarakkeet[$key] == 'Kortuoteno') {
-														if ($i > 0) {
-															$worksheet->writeString(0, $excelsarake, "Kortuoteno", $format_bold);
-														}
-														$worksheet->writeString($excelrivi, $excelsarake, str_replace("'", "", $korvarow['tuoteno']));
+														$worksheet->write($excelrivi, $excelsarake, str_replace("'", "", $korvarow['tuoteno']));
 														$excelsarake++;
 													}
 													elseif ($sarakkeet[$key] == 'Korsaldo') {
-														if ($i > 0) {
-															$worksheet->writeString(0, $excelsarake, "Korsaldo", $format_bold);
-														}
 														$worksheet->writeNumber($excelrivi, $excelsarake, round($korvasaldorow['saldo'], 2));
 														$excelsarake++;
 													}
 													elseif ($sarakkeet[$key] == 'Korennpois') {
-														if ($i > 0) {
-															$worksheet->writeString(0, $excelsarake, "Korennpois", $format_bold);
-														}
 														$worksheet->writeNumber($excelrivi, $excelsarake, round($prow['varattu'], 2));
 														$excelsarake++;
 													}
 													elseif ($sarakkeet[$key] == 'Kortil') {
-														if ($i > 0) {
-															$worksheet->writeString(0, $excelsarake, "Kortil", $format_bold);
-														}
 														$worksheet->writeNumber($excelrivi, $excelsarake, round($prow['tilattu'], 2));
 														$excelsarake++;
 													}
 													elseif ($sarakkeet[$key] == 'Kormy1') {
-														if ($i > 0) {
-															$worksheet->writeString(0, $excelsarake, "Kormy1", $format_bold);
-														}
 														$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl1'], 2));
 														$excelsarake++;
 													}
 													elseif ($sarakkeet[$key] == 'Kormy2') {
-														if ($i > 0) {
-															$worksheet->writeString(0, $excelsarake, "Kormy2", $format_bold);
-														}
 														$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl2'], 2));
 														$excelsarake++;
 													}
 													elseif ($sarakkeet[$key] == 'Kormy3') {
-														if ($i > 0) {
-															$worksheet->writeString(0, $excelsarake, "Kormy3", $format_bold);
-														}
 														$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl3'], 2));
 														$excelsarake++;
 													}
 													elseif ($sarakkeet[$key] == 'Kormy4') {
-														if ($i > 0) {
-															$worksheet->writeString(0, $excelsarake, "Kormy4", $format_bold);
-														}
 														$worksheet->writeNumber($excelrivi, $excelsarake, round($kasrow['kpl4'], 2));
 														$excelsarake++;
 													}
@@ -1600,12 +1580,22 @@
 											$i++;
 										}
 
+										$korvaavien_otsikot = $i > $korvaavien_otsikot ? $i : $korvaavien_otsikot;
+
 										$bg_color = $kosal_yht >= 0 ? 'yellow' : 'yellow_text_red';
-										$worksheet->writeNumber((int) $column_location['kosal']['rivi'], (int) $column_location['kosal']['sarake'], round($kosal_yht, 2), ${"format_bg_".$bg_color});
+
+										$korvaavien_rivi = (int) $column_location['kosal']['rivi'];
+										$korvaavien_sarake = (int) $column_location['kosal']['sarake'];
+
+										$worksheet->write($korvaavien_rivi, $korvaavien_sarake, round($kosal_yht, 2), ${"format_bg_".$bg_color});
 										$kosal_yht = 0;
 
 										$bg_color = $kosal_yht >= 0 ? 'magenta' : 'magenta_text_red';
-										$worksheet->writeNumber((int) $column_location['komy']['rivi'], (int) $column_location['komy']['sarake'], round($komy_yht, 2), ${"format_bg_".$bg_color});
+
+										$korvaavien_rivi = (int) $column_location['komy']['rivi'];
+										$korvaavien_sarake = (int) $column_location['komy']['sarake'];
+
+										$worksheet->write($korvaavien_rivi, $korvaavien_sarake, round($komy_yht, 2), ${"format_bg_".$bg_color});
 										$komy_yht = 0;
 
 										$bg_color = '';
@@ -1613,16 +1603,30 @@
 									else {
 										// jos tänne tullaan niin kosal-sarake pitää värjätä tyhjänä keltaiseksi
 										if (count($column_location) > 0) {
-											$worksheet->writeNumber((int) $column_location['kosal']['rivi'], (int) $column_location['kosal']['sarake'], '', $format_bg_yellow);
-											$worksheet->writeNumber((int) $column_location['komy']['rivi'], (int) $column_location['komy']['sarake'], '', $format_bg_magenta);
+											$korvaavien_rivi = (int) $column_location['kosal']['rivi'];
+											$korvaavien_sarake = (int) $column_location['kosal']['sarake'];
+
+											$worksheet->write($korvaavien_rivi, $korvaavien_sarake, '', $format_bg_yellow);
+
+											$korvaavien_rivi = (int) $column_location['komy']['rivi'];
+											$korvaavien_sarake = (int) $column_location['komy']['sarake'];
+
+											$worksheet->write($korvaavien_rivi, $korvaavien_sarake, '', $format_bg_magenta);
 										}
 									}
 								}
 								else {
 									// jos tänne tullaan niin kosal-sarake pitää värjätä tyhjänä keltaiseksi
 									if (count($column_location) > 0) {
-										$worksheet->writeNumber((int) $column_location['kosal']['rivi'], (int) $column_location['kosal']['sarake'], '', $format_bg_yellow);
-										$worksheet->writeNumber((int) $column_location['komy']['rivi'], (int) $column_location['komy']['sarake'], '', $format_bg_magenta);
+										$korvaavien_rivi = (int) $column_location['kosal']['rivi'];
+										$korvaavien_sarake = (int) $column_location['kosal']['sarake'];
+
+										$worksheet->write($korvaavien_rivi, $korvaavien_sarake, '', $format_bg_yellow);
+
+										$korvaavien_rivi = (int) $column_location['komy']['rivi'];
+										$korvaavien_sarake = (int) $column_location['komy']['sarake'];
+
+										$worksheet->write($korvaavien_rivi, $korvaavien_sarake, '', $format_bg_magenta);
 									}
 								}
 							}
@@ -1632,21 +1636,23 @@
 
 							$value = trim($value);
 
-							// katsotaan onko arvo numerollinen excel writerin takia (eri funkkarit)
-							if (is_numeric($value)) {
-								if ($bg_color != '') {
-									$worksheet->writeNumber($excelrivi, $excelsarake, round($value, 2), ${"format_bg_".$bg_color});
+							if ($value != '') {
+								// katsotaan onko arvo numerollinen excel writerin takia (eri funkkarit)
+								if (is_numeric($value)) {
+									if ($bg_color != '') {
+										$worksheet->writeNumber($excelrivi, $excelsarake, round($value, 2), ${"format_bg_".$bg_color});
+									}
+									else {
+										$worksheet->writeNumber($excelrivi, $excelsarake, round($value, 2));
+									}
 								}
 								else {
-									$worksheet->writeNumber($excelrivi, $excelsarake, round($value, 2));
-								}
-							}
-							else {
-								if ($bg_color != '') {
-									$worksheet->writeString($excelrivi, $excelsarake, $value, ${"format_bg_".$bg_color});
-								}
-								else {
-									$worksheet->writeString($excelrivi, $excelsarake, $value);
+									if ($bg_color != '') {
+										$worksheet->writeString($excelrivi, $excelsarake, $value, ${"format_bg_".$bg_color});
+									}
+									else {
+										$worksheet->writeString($excelrivi, $excelsarake, $value);
+									}
 								}
 							}
 
@@ -1661,6 +1667,47 @@
 
 				$bar->increase();
 
+			}
+
+			if ($korvaavien_otsikot > 0) {
+				for ($i = 1; $korvaavien_otsikot > $i; $i++) {
+					foreach ($valitut as $key => $val) {
+						if ($sarakkeet[$key] != '') {
+							if ($sarakkeet[$key] == 'Kortuoteno') {
+								$worksheet->write(0, $korvaavien_otsikot_aloitus, "Kortuoteno", $format_bold);
+								$korvaavien_otsikot_aloitus++;
+							}
+							elseif ($sarakkeet[$key] == 'Korsaldo') {
+								$worksheet->writeString(0, $korvaavien_otsikot_aloitus, "Korsaldo", $format_bold);
+								$korvaavien_otsikot_aloitus++;
+							}
+							elseif ($sarakkeet[$key] == 'Korennpois') {
+								$worksheet->writeString(0, $korvaavien_otsikot_aloitus, "Korennpois", $format_bold);
+								$korvaavien_otsikot_aloitus++;
+							}
+							elseif ($sarakkeet[$key] == 'Kortil') {
+								$worksheet->writeString(0, $korvaavien_otsikot_aloitus, "Kortil", $format_bold);
+								$korvaavien_otsikot_aloitus++;
+							}
+							elseif ($sarakkeet[$key] == 'Kormy1') {
+								$worksheet->writeString(0, $korvaavien_otsikot_aloitus, "Kormy1", $format_bold);
+								$korvaavien_otsikot_aloitus++;
+							}
+							elseif ($sarakkeet[$key] == 'Kormy2') {
+								$worksheet->writeString(0, $korvaavien_otsikot_aloitus, "Kormy2", $format_bold);
+								$korvaavien_otsikot_aloitus++;
+							}
+							elseif ($sarakkeet[$key] == 'Kormy3') {
+								$worksheet->writeString(0, $korvaavien_otsikot_aloitus, "Kormy3", $format_bold);
+								$korvaavien_otsikot_aloitus++;
+							}
+							elseif ($sarakkeet[$key] == 'Kormy4') {
+								$worksheet->writeString(0, $korvaavien_otsikot_aloitus, "Kormy4", $format_bold);
+								$korvaavien_otsikot_aloitus++;
+							}
+						}
+					}
+				}
 			}
 
 			flush();

@@ -2144,5 +2144,20 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "naytetaanko_osaston_ja_tryn_selite") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Tuoteosaston/tuoteryhm‰n koodi ja nimi n‰ytet‰‰n")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Tuoteosaston/tuoteryhm‰n nimi n‰ytet‰‰n")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 ?>

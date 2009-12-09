@@ -2129,5 +2129,20 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "livetuotehaku_tilauksella") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Ei käytössä")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Käytössä")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 ?>

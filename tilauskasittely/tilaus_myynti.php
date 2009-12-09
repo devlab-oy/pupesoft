@@ -8,6 +8,11 @@ else {
 	require ("parametrit.inc");
 }
 
+if ($livesearch_tee == "TUOTEHAKU") {
+	livesearch_tuotehaku();
+	exit;
+}
+
 if (file_exists("../inc/alvpopup.inc")) {
 	require ("../inc/alvpopup.inc");
 }
@@ -15,9 +20,12 @@ else {
 	require ("alvpopup.inc");
 }
 
+if ($yhtiorow["tilauksen_yhteyshenkilot"] == "K" or $yhtiorow["asiakkaan_kohde"] == "K" or $yhtiorow["livetuotehaku_tilauksella"] == "K") {
+	enable_ajax();
+}
+
 if ($yhtiorow["tilauksen_yhteyshenkilot"] == "K" or $yhtiorow["asiakkaan_kohde"] == "K") {
 	js_yllapito();
-	enable_ajax();
 	js_popup();
 	js_showhide();
 	js_liveSearch();
@@ -280,9 +288,6 @@ elseif ($toim == "YLLAPITO") {
 else {
 	$otsikko = t("Myyntitilaus");
 }
-
-// pikku javascripti
-js_alasvetoMuutakoko();
 
 //korjataan hintaa ja aleprossaa
 $hinta	= str_replace(',','.',$hinta);

@@ -5,7 +5,7 @@
 	 	if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/", "", $_REQUEST["kaunisnimi"]);
 	}
 
-	require ('inc/parametrit.inc');
+	require ('../inc/parametrit.inc');
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("/tmp/".$tmpfilenimi);
@@ -162,6 +162,6 @@
 	echo "<br><input type='submit' value='".t("Tee hinnasto")."'>";
 	echo "</form>";
 
-	require ("inc/footer.inc");
+	require ("../inc/footer.inc");
 
 ?>

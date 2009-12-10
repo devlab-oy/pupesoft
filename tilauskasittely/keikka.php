@@ -384,10 +384,20 @@ if ($ytunnus == "" and $keikka != "") {
 				group by lasku.ytunnus
 				order by lasku.laskunro desc";
 	$keikkahaku_res = mysql_query($query) or pupe_error($query);
-	$keikkahaku_row = mysql_fetch_array($keikkahaku_res);
+	$keikkahaku_row = mysql_fetch_assoc($keikkahaku_res);
+
+	if ($keikkahaku_row['laskunro'] == '' and $keikkahaku_row['ytunnus'] == '') {
+		$query = "	SELECT ytunnus
+					FROM lasku
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tila = 'O'
+					AND tunnus = '$keikka'";
+		$ytunnus_res = mysql_query($query) or pupe_error($query);
+		$ytunnus_row = mysql_fetch_assoc($ytunnus_res);
+	}
 
 	$keikka = $keikkahaku_row["laskunro"];
-	$ytunnus = $keikkahaku_row["ytunnus"];
+	$ytunnus = ($keikkahaku_row["ytunnus"] == '' and $ytunnus_row['ytunnus'] != '') ? $ytunnus_row['ytunnus'] : $keikkahaku_row['ytunnus'];
 }
 
 // jos ollaan annettu $ytunnus haetaan toimittajan tiedot arrayseen $toimittajarow

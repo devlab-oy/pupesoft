@@ -1188,7 +1188,7 @@
 												AND tunnus = '$jtrow[ltunnus]'";
 									$checkaa_ale_res = mysql_query($query) or pupe_error($query);
 									$checkaa_ale_row = mysql_fetch_assoc($checkaa_ale_res);
-									
+
 									if ($checkaa_ale_row['tapvm'] > '0000-00-00') {
 										echo "<br/>";
 										echo "<font class='message'>",t("HUOM: Tarkista alennus"),"!<br/></font>";
@@ -1286,7 +1286,7 @@
 								}
 
 								// Riittää kaikille
-								if (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "")  and $perheok==0) {
+								if (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0) {
 
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
 									if ($kukarow["extranet"] == "" and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen')) {
@@ -1364,7 +1364,7 @@
 									}
 								}
 								// Riittää tälle riville mutta ei kaikille
-								elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa >= $jtrow["jt"] and $perheok==0) {
+								elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa >= $jtrow["jt"] and $perheok == 0) {
 
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
 									if ($kukarow["extranet"] == "" and $automaaginen == 'tosi_automaaginen') {

@@ -2159,5 +2159,20 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "tilausvahvistus_jttoimituksista") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("JT-toimituksista ei l‰hetet‰ tilausvahvistusta")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("JT-toimituksista l‰hetet‰‰n tilausvahvistus")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 ?>

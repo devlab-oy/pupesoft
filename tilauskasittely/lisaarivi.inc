@@ -1128,6 +1128,7 @@
 										$jarjestys = 0;
 									}
 
+
 									$query = "	INSERT INTO tilausrivin_lisatiedot
 												SET yhtio			= '$kukarow[yhtio]',
 												positio 			= '$trivtyrow[selite]',
@@ -1841,8 +1842,13 @@
 				$result = mysql_query($query) or pupe_error($query);
 			}
 
-			$lisatyt_rivit2[] = $lisatty_tun;
-
+			if ($var == "H") {
+				$lisatyt_rivit1[] = $lisatty_tun;
+			}
+			else {
+				$lisatyt_rivit2[] = $lisatty_tun;
+			}
+			
 			if ($i == 0) {
 				// lapsille oikea perheid
 				$perheid_lisaarivi = $lisatty_tun;

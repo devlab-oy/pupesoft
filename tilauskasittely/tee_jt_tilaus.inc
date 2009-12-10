@@ -270,7 +270,6 @@
 								mysql_field_name($stresult,$i)=='laskunro' or
 								mysql_field_name($stresult,$i)=='mapvm' or
 								mysql_field_name($stresult,$i)=='kerayslista' or
-								mysql_field_name($stresult,$i)=='tilausvahvistus' or
 								mysql_field_name($stresult,$i)=='viikorkoeur' or
 								mysql_field_name($stresult,$i)=='tullausnumero' or
 								mysql_field_name($stresult,$i)=='laskutuspvm' or
@@ -288,6 +287,27 @@
 								mysql_field_name($stresult,$i)=='vanhatunnus' or
 								mysql_field_name($stresult,$i)=='poistumistoimipaikka_koodi') {
 							$query .= mysql_field_name($stresult,$i)."='',";
+						}
+						elseif (mysql_field_name($stresult,$i) == 'tilausvahvistus') {
+
+							$tv_query = "	SELECT tilausvahvistus, tilausvahvistus_jttoimituksista
+											FROM asiakas
+											where yhtio = '$yhtiorow[yhtio]'
+											and tunnus = '$otsikkorivi[liitostunnus]'";
+							$tv_res = mysql_query($tv_query) or pupe_error($tv_query);
+							$tv_row = mysql_fetch_array($tv_res);
+
+							if ($tv_row["tilausvahvistus_jttoimituksista"] == "K" or ($yhtiorow["tilausvahvistus_jttoimituksista"] == "K" and $tv_row["tilausvahvistus_jttoimituksista"] != "E")) {
+								if (trim($otsikkorivi["tilausvahvistus"]) != "") {
+									$query .= mysql_field_name($stresult,$i)."='$otsikkorivi[tilausvahvistus]',";
+								}
+								else {
+									$query .= mysql_field_name($stresult,$i)."='$tv_row[tilausvahvistus]',";
+								}
+							}
+							else {
+								$query .= mysql_field_name($stresult,$i)."='',";
+							}
 						}
 						elseif (mysql_field_name($stresult,$i)=='hyvaksyja_nyt' and $otsikkorivi['jtkielto'] == "Y") {
 							$query .= mysql_field_name($stresult,$i)."='$otsikkorivi[tunnus]',";
@@ -362,7 +382,7 @@
 												join maksuehto ON asiakas.yhtio = maksuehto.yhtio and asiakas.maksuehto = maksuehto.tunnus
 												where asiakas.yhtio = '$yhtiorow[yhtio]'
 												and asiakas.tunnus = '$otsikkorivi[liitostunnus]'";
-							$maksuehto_result = mysql_query($maksuehto_query) or pupe_error($query);
+							$maksuehto_result = mysql_query($maksuehto_query) or pupe_error($maksuehto_query);
 							$maksuehtorow = mysql_fetch_array($maksuehto_result);
 
 							if ($maksuehtorow['jv'] != '') {
@@ -433,7 +453,7 @@
 							if ($toim == "ENNAKKO") {
 								$query = "	SELECT tilausrivi.*, tuote.ei_saldoa
 											FROM tilausrivi
-											JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)											
+											JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)
 											WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 											and tilausrivi.tunnus = '$tunnus_nyt'
 											and tilausrivi.varattu > 0
@@ -567,6 +587,7 @@
 									$luodut_kpl[$tunnus_nyt] += $lisataanrow_kpl;
 								}
 							}
+
 							if (count($lisatyt_rivit2) > 0) {
 								// Puute - JT - Ostohaara
 								foreach ($lisatyt_rivit2 as $lisatty_tun) {
@@ -575,7 +596,7 @@
 							}
 
 							//Jos saldo ei riittänyt
-							if (count($lisatyt_rivit2) > 0 and $jt_vakisin !== TRUE) {
+							if (count($lisatyt_rivit2) > 0) {
 								foreach ($luodut_rivit as $poistetaan) {
 									$query = "	DELETE FROM tilausrivi
 												WHERE yhtio = '$kukarow[yhtio]'
@@ -674,7 +695,6 @@
 														AND tunnus = '$lisrow[tunnus]'";
 										$toimupdres = mysql_query($toimquery) or pupe_error($toimquery);
 									}
-
 								}
 
 								//Jos jotakin kopioitavan rivin sarjanumeroista ei saatu kopioitua niin irrotetaan se siltä riviltä

@@ -616,6 +616,7 @@
 		echo "<table>";
 		echo "<tr><th>".t("Tuoteno")."</th>";
 		echo "<th>".t("Varattu")."</th>";
+		echo "<th>".t("Tyyppi")."</th>";
 		echo "<th>".t("Varastopaikka")."</th></tr>";
 
 		echo "<form method='POST' action='$PHP_SELF'>";
@@ -633,7 +634,7 @@
 
 	 		while ($paikatrow = mysql_fetch_array($paikatres)) {
 				// etsit‰‰n varatut kaikilta paikoilla jolla on joku muu varastopaikka (NOT IN)
-				$query = "	SELECT *, concat_ws('-', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka, jt+varattu varattu
+				$query = "	SELECT *, concat_ws('-', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka, jt+varattu varattu, var
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							AND tilausrivi.tyyppi in ('L','G','V')
@@ -647,6 +648,7 @@
 					echo "<tr>";
 					echo "<td><a href='tuote.php?tee=Z&tuoteno=".urlencode($tuoterow["tuoteno"])."'>$tuoterow[tuoteno]</a></td>";
 					echo "<td>$tuoterow[varattu]</td>";
+					echo "<td>$tuoterow[var]</td>";
 					echo "<td>$tuoterow[paikka]</td>";
 					echo "</tr>";
 					$laskuri++;

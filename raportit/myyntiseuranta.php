@@ -2202,7 +2202,7 @@
 				<td class='back'></td>
 				</tr>
 				<tr>
-				<th>",t("Näytä myös tuotteet statuksella"),"</th>
+				<th>",t("Näytä tuotteet statuksella"),"</th>
 				<td><select name='status'><option value=''></option><option value='a' $status_a_sel>A</option><option value='x' $status_x_sel>X</option><option value='p' $status_p_sel>P</option></select></td><td></td>
 				</tr>
 				</table><br>";

@@ -176,7 +176,7 @@
 					$ospuutepros = 100;
 
 				echo "<tr>
-						<th class='back' colspan='2'>".t("Osasto")." $edosasto ".t("yhteensä").":</th>
+						<th colspan='2'>".t("Osasto")." $edosasto ".t("yhteensä").":</th>
 						<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$ospuutekpl))."<br>".str_replace(".",",",sprintf("%.2f",$ospuute))."</th>
 						<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$osmyynti))."</th>
 						<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$ospuutepros))."</th>
@@ -417,8 +417,7 @@
 
 			echo "<tr>
 					<th colspan='2'>".t("Osasto")." $edosasto ".t("yhteensä").":</th>
-					<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$ospuutekpl))."</th>
-					<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$ospuute))."</th>
+					<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$ospuutekpl))."<br/>".str_replace(".",",",sprintf("%.2f",$ospuute))."</th>
 					<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$osmyynti))."</th>
 					<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$ospuutepros))."</th>
 					</tr>";
@@ -443,9 +442,8 @@
 			$puuteprosyht = round($puuteyht/($puuteyht+$myyntiyht)*100,2);
 
 			echo "<tr>
-					<th class='back' colspan='2'>".t("Kaikki yhteensä").":</th>
-					<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$puutekplyht))."</th>
-					<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$puuteyht))."</th>
+					<th colspan='2'>".t("Kaikki yhteensä").":</th>
+					<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$puutekplyht))."<br/>".str_replace(".",",",sprintf("%.2f",$puuteyht))."</th>
 					<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$myyntiyht))."</th>
 					<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$puuteprosyht))."</th>
 					</tr>";

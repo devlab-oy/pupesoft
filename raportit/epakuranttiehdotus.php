@@ -159,11 +159,12 @@ if ($subnappi != '') {
 	// etsit‰‰n saldolliset tuotteet
 	$query  = "	SELECT tuote.tuoteno, tuote.osasto, tuote.try, tuote.myyntihinta, tuote.nimitys, tuote.tahtituote, tuote.status, tuote.hinnastoon,
 				round(if(epakurantti75pvm = '0000-00-00', if(epakurantti50pvm = '0000-00-00', if(epakurantti25pvm = '0000-00-00', kehahin, kehahin * 0.75), kehahin * 0.5), kehahin * 0.25), 6) kehahin,
-				tuote.vihapvm, epakurantti25pvm, epakurantti50pvm, epakurantti75pvm,
+				tuote.vihapvm, epakurantti25pvm, epakurantti50pvm, epakurantti75pvm, tuote.tuotemerkki, kuka.nimi, 
 				(SELECT group_concat(distinct tuotteen_toimittajat.toimittaja separator '/') FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno) toimittaja,
 				ifnull(sum(saldo), 0) saldo
 				FROM tuote
 				LEFT JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
+				LEFT JOIN kuka ON (kuka.yhtio = tuote.yhtio AND kuka.myyja = tuote.myyjanro)
 				WHERE tuote.yhtio = '$kukarow[yhtio]'
 				AND tuote.ei_saldoa = ''
 				$epakuranttipvm
@@ -183,7 +184,7 @@ if ($subnappi != '') {
 	}
 
 	echo "<pre>";
-	echo t("osasto")."\t".t("try")."\t".t("m‰‰r‰")."\t".t("saldo")."\t".t("kierto")."\t".t("tahtituote")."\t".t("status")."\t".t("hinnastoon")."\t".t("eka saapuminen")."\t".t("vika saapuminen")."\t".t("hinta")."\t".t("kehahin")."\t".t("tuoteno")."\t".t("nimitys")."\t".t("toimittaja").$yhtsop;
+	echo t("osasto")."\t".t("try")."\t".t("tuotemerkki")."\t".t("m‰‰r‰")."\t".t("saldo")."\t".t("kierto")."\t".t("tahtituote")."\t".t("status")."\t".t("hinnastoon")."\t".t("eka saapuminen")."\t".t("vika saapuminen")."\t".t("hinta")."\t".t("kehahin")."\t".t("tuoteno")."\t".t("nimitys")."\t".t("toimittaja")."\t".t("myyja").$yhtsop;
 
 
 	while ($row = mysql_fetch_array($result)) {
@@ -262,7 +263,7 @@ if ($subnappi != '') {
 
 			// katellaan ollaanko alle rajan
 			if ($kierto < $raja) {
-				echo "$row[osasto]\t$row[try]\t".str_replace(".",",",$myyrow['kpl']+$kulrow['kpl'])."\t".str_replace(".",",",$saldo)."\t".str_replace(".",",",$kierto)."\t$row[tahtituote]\t$row[status]\t$row[hinnastoon]\t$taprow[min]\t$taprow[max]\t".str_replace(".",",",$row['myyntihinta'])."\t".str_replace(".",",",$row['kehahin'])."\t$row[tuoteno]\t".t_tuotteen_avainsanat($row, 'nimitys')."\t$row[toimittaja]";
+				echo "$row[osasto]\t$row[try]\t$row[tuotemerkki]\t".str_replace(".",",",$myyrow['kpl']+$kulrow['kpl'])."\t".str_replace(".",",",$saldo)."\t".str_replace(".",",",$kierto)."\t$row[tahtituote]\t$row[status]\t$row[hinnastoon]\t$taprow[min]\t$taprow[max]\t".str_replace(".",",",$row['myyntihinta'])."\t".str_replace(".",",",$row['kehahin'])."\t$row[tuoteno]\t".t_tuotteen_avainsanat($row, 'nimitys')."\t$row[toimittaja]\t$row[nimi]";
 
 				if ($yhteensopivuus_row[0] != 0) {
 					echo "\t".$yhteensopivuus_row[0]."\n";

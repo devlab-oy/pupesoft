@@ -1,18 +1,12 @@
 <?php
 
-if (@include_once("pdflib/phppdflib.class.php")) {
-}
-else {
-	include_once("phppdflib.class.php");
-}
+if (@include_once("pdflib/phppdflib.class.php"));
+else include_once("phppdflib.class.php");
 
 // jos php-gd on installoitu niin loidataab barcode library
 if (in_array("gd", get_loaded_extensions())) {
-	if (@include_once("viivakoodi/Barcode.php")) {
-	}
-	else {
-		include_once("Barcode.php");
-	}
+	if (@include_once("viivakoodi/Barcode.php"));
+	else include_once("Barcode.php");
 }
 
 if ($kieli== '') {
@@ -194,11 +188,7 @@ if (!function_exists('alku_lahete')) {
 		$pdf->draw_rectangle(800, 420, 779, 580, $thispage, $rectparam);
 
 		if ($laskurow["tunnusnippu"] > 0) {
-			if ($tyyppi == "TILAUSVAHVISTUS") {
-				$pdf->draw_text(310, 792, t("Tilausnumero", $kieli), 	$thispage, $pieni);
-				$pdf->draw_text(310, 782, $laskurow["tunnusnippu"],			$thispage, $boldi);
-			}
-			elseif ($tyyppi == "YLLAPITOSOPIMUS") {
+			if ($tyyppi == "YLLAPITOSOPIMUS") {
 				$pdf->draw_text(310, 792, t("Tilausnumero", $kieli), 	$thispage, $pieni);
 				$pdf->draw_text(310, 782, $laskurow["tunnusnippu"],			$thispage, $boldi);
 			}
@@ -214,22 +204,21 @@ if (!function_exists('alku_lahete')) {
 
 		$pdf->draw_text(430, 792, t("Toimitusaika", $kieli), 	$thispage, $pieni);
 
-		$useita = "EI";
-
-		if ($laskurow["nippu"] > 0) {
-			$query = "	SELECT count(distinct(toimaika))
-						FROM tilausrivi
-						WHERE yhtio='$kukarow[yhtio]'
-						and otunnus IN ($laskurow[nippu])
-						and toimaika != '0000-00-00'";
-			$toimaikares = mysql_query($query) or pupe_error($query);
-			$toimaikarow = mysql_fetch_array($toimaikares);
-
-			if ($toimaikarow[0] > 1) {
-				$useita = "JOO";
-			}
+		$query = "	SELECT date_format(if(keratty = 'saldoton' and '$yhtiorow[saldottomien_toimitettuaika]' = 'K', toimaika, toimitettuaika), '%Y-%m-%d') toimitettupaiva
+					FROM tilausrivi
+					WHERE yhtio = '$kukarow[yhtio]'
+					and otunnus = $laskurow[tunnus]
+					and toimitettuaika != '0000-00-00'
+					GROUP BY toimitettupaiva";
+		$toimaikares = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($toimaikares) > 1) {
+			$useita = "JOO";	
 		}
-
+		else {
+			$useita = "EI";
+		}
+		
 		if ($useita == "JOO") {
 			$pdf->draw_text(430, 782, t("Useita", $kieli), 	$thispage, $norm);
 		}
@@ -760,7 +749,7 @@ if (!function_exists('rivi_lahete')) {
 		}
 
 		// JT-rivit pikkasen alaspäin omalla otsikolla
-		if ($jtid == "0" and $row["jtsort"] != "0") {
+		if ($jtid == 0 and $row["jtsort"] != 0) {
 			$kala = $kala-20;
 
 			$x[0] = 20;

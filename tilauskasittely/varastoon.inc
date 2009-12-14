@@ -66,7 +66,7 @@ if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" an
 				and tilausrivi.kpl != 0
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and	tilausrivi.tyyppi = 'O'
-				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.kpl DESC";
+				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.kpl DESC, tilausrivi.laskutettuaika";
 }
 elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 	// tavallinen laskenta.. VARATTU PITÄÄ OLLA > 0 ja netto-kenttä tyhjä!
@@ -80,7 +80,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'O'
 				and tilausrivi.netto = ''
-				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.varattu DESC";
+				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
 }
 elseif ($toiminto == "kalkyyli" and $tee == "") {
 	// Näytetään ruudulla
@@ -92,7 +92,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 				and tilausrivi.varattu <> 0
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'O'
-				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.varattu DESC";
+				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
 }
 $presult = mysql_query($query) or pupe_error($query);
 
@@ -721,7 +721,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 		}
 	}
 	else {
-		echo "<font class='error'>".t("En löytänyt keikan vaihto-omaisuuslaskua! PAHA VIRHE!")."<br><br></font>";
+		echo "<font class='error'>".t("HUOM! Keikkaan ei ole liitetty yhtään vaihto-omaisuuslaskua!")."<br><br></font>";
 	}
 }
 

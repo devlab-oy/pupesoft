@@ -385,6 +385,11 @@ if ($tee == 'GO') {
 
 			$filee = fopen($file, 'r');
 			$data = addslashes(fread($filee, $filesize));
+			
+			if ($data === FALSE) {
+				echo " &raquo; <font class='error'>Ohitetaan kuva, koska tiedoston luku epäonnistui!</font><br>";
+				continue;
+			}
 
 			if (!isset($apuresult)) {
 				$mihin = strpos($kuva, ".$ext");

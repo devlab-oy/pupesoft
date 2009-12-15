@@ -92,7 +92,7 @@ if ($tee == 'LISAA') {
 		if (!isset($muutparametrit)) {
 			$muutparametrit	= 	$valitut."#".$kenelle."#".$asyhtio."#".$kello."#".$year."#".$kuu."#".$paiva."#".$tunnus."#".$konserni."#".$lkello."#".$lyear."#".$lkuu."#".$lpaiva."#".$tapa."#".$lopetus."#".$viesti;
 		}
-		
+
 		echo "<br><font class='message'>".t("Valitse asiakas").":</font><br><br>";
 
 		$kutsuja = 'kalenteri.php';
@@ -176,7 +176,7 @@ if ($tee == 'LISAA') {
 		else {
 			$kyhtio = $kukarow["yhtio"];
 		}
-		
+
 		if ($lkello == "00:00") {
 			$lkello = "23:59:59";
 		}
@@ -240,7 +240,7 @@ if($tee == "SYOTA") {
 		$lpaiva 	= $irow["lpaiva"];
 		$asyhtio 	= $irow["yhtio"];
 		$kenelle 	= $irow["kuka"];
-				
+
 		if ($irow["lopkello"] == "23:59:59") $aikaloppu = "00:00:00";
 		else $aikaloppu = $irow["lopkello"];
 
@@ -285,23 +285,23 @@ if($tee == "SYOTA") {
 		$lopmm=substr($kello,3,2)-30;
 	}
 	else {
-		
+
 		if ($lkello == "23:59:59") {
 			$lkello = "24:00:00";
 		}
-				
+
 		$lophh=substr($lkello,0,2);
 		$lopmm=substr($lkello,3,2)-30;
 	}
-	
+
 	list($whlopt, $whlopm) = explode(":", $AIKA_ARRAY[count($AIKA_ARRAY)-1]);
 	$whileloppu = sprintf("%02d", $whlopt+1);
-	
+
 	if ($whileloppu >= 24) $whileloppu= sprintf("%02d", $whileloppu-24);
-	
+
 	$whileloppu = $whileloppu.":".$whlopm;
 	$lopdate = "";
-		
+
 	while ($lopdate != $whileloppu) {
 		$lophh   = date("H",mktime($lophh, $lopmm+30, 0));
 		$lopmm   = date("i",mktime($lophh, $lopmm+30, 0));
@@ -462,7 +462,7 @@ for ($i=1; $i <= days_in_month($kuu, $year); $i++) {
 				((left(pvmalku,10) = '$year-$kuu2-$paiv') or (left(pvmalku,10) < '$year-$kuu2-$paiv' and left(pvmloppu,10) >= '$year-$kuu2-$paiv'))
 				and kuka in ($vertaa)
 				$konsernit
-				and kalenteri.tyyppi= 'kalenteri'";
+				and tyyppi = 'kalenteri'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	//v‰ritet‰‰n t‰m‰n p‰iv‰n pvm omalla v‰rill‰...
@@ -481,7 +481,7 @@ for ($i=1; $i <= days_in_month($kuu, $year); $i++) {
 	}
 
 	if (mysql_num_rows($result) != 0) {
-		$class="spec";
+		$class = "tumma";
 	}
 
 	echo "<td align='center' style='$style' class='$class'><a href='$PHP_SELF?valitut=$valitut&year=$year&kuu=$kuu&paiva=$i&konserni=$konserni&lopetus=$lopetus'>$fn1 $i $fn2</a></td>";
@@ -646,14 +646,14 @@ if ($whlopm >= 60) {
 	$whlopm = 0;
 }
 
-if ($whlopt >= 24) { 
+if ($whlopt >= 24) {
 	$whileloppu = sprintf("%02d", $whlopt-24).":".$whlopm;
 }
 else {
 	$whileloppu = sprintf("%02d", $whlopt).":".$whlopm;
 }
 
-if ($whlopt >= 23) { 
+if ($whlopt >= 23) {
 	$vikaloppu = "23:59";
 }
 else {
@@ -700,7 +700,7 @@ while ($kello_nyt != $whileloppu) {
 	$hh    		= date("H",mktime($hh, $mm+30, 0));
 	$mm    		= date("i",mktime($hh, $mm+30, 0));
 	$kello_nyt  = date("H:i",mktime($hh, $mm+30, 0));
-	
+
 	$paiva 		= sprintf("%02d", $paiva);
 	$kuu   		= sprintf("%02d", $kuu);
 
@@ -764,7 +764,7 @@ while ($kello_nyt != $whileloppu) {
 					$asres = mysql_query($query) or pupe_error($query);
 					$asiak = mysql_fetch_array($asres);
 				}
-				
+
 				if ($kons == 1) {
 					$ko = "(".$row["yhtio"]."), ";
 				}
@@ -785,14 +785,14 @@ while ($kello_nyt != $whileloppu) {
 
 				$kaleloppu  = (int) date('Ymd',mktime(0,0,0,$rkk,$rpp,$rvv));
 				$aikanyt 	= (int) date('Ymd',mktime(0,0,0,date('m'),date('d'),date('Y')));
-				
+
 				$query = "	SELECT selitetark_2
 							FROM avainsana
 							WHERE laji = 'KALETAPA' and selitetark='$row[tapa]' ".str_ireplace("kalenteri.", "", $konsernit)."
 							ORDER BY selite+0, laji, jarjestys, selite";
 				$varires = mysql_query($query) or pupe_error($query);
 				$varirow = mysql_fetch_array($varires);
-				
+
 				if ($varirow["selitetark_2"] != "") {
 					$varilisa = "background-color: $varirow[selitetark_2];";
 				}

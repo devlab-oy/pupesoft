@@ -4,19 +4,18 @@
 
 		echo "<font class='head'>".t("Laskuja hyväksymättä")."</font><hr>";
 
-		$query = "SELECT hyvaksyja_nyt, if(kuka.nimi is not null, kuka.nimi, hyvaksyja_nyt) nimi, concat_ws('/',sum(1), sum(if(alatila='H', 1, 0))) kplpys, min(erpcm) erpcm
+		$query = "	SELECT hyvaksyja_nyt, if(kuka.nimi is not null, kuka.nimi, hyvaksyja_nyt) nimi, concat_ws('/',sum(1), sum(if(alatila='H', 1, 0))) kplpys, min(erpcm) erpcm
 					FROM lasku
 					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvaksyja_nyt
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'H' and hyvaksyja_nyt <> ''
 					GROUP BY hyvaksyja_nyt
 					ORDER BY hyvaksyja_nyt";
-
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table>";
 		echo "<tr><th>".t("Kuka")."</th><th>".t("Kpl")."/".t("pysäytetty")."</th><th>".t("Min")." ".t("eräpvm")."</th></tr>";
 
-		while ($trow=mysql_fetch_array($result)) {
+		while ($trow = mysql_fetch_array($result)) {
 			echo "<tr>";
 			echo "<td><a href = 'raportit.php?toim=hyvaksynta&tee=T&kuka=$trow[hyvaksyja_nyt]'>$trow[nimi]</a></td>";
 			echo "<td>$trow[kplpys]</td>";
@@ -27,7 +26,7 @@
 	}
 
 	// Yhden käyttäjän pöydällä olevat laskut tai sen muutos
-	if ($tee == 'T') { 
+	if ($tee == 'T') {
 
  		// Muutetaan hyväksyntää
 		if ((strlen($mika) > 0) and (strlen($nimi) > 0)) {
@@ -85,10 +84,12 @@
 		echo "<font class='head'>$trow[nimi]".t(":n pöydällä olevat laskut")."</font><hr>";
 
 		// Tehdään popup, jolla voidaan hyväksyjä myöhemmin vaihtaa
-		$query = "SELECT kuka, nimi
-				FROM kuka
-				WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja = 'o'
-				ORDER BY nimi";
+		$query = "	SELECT kuka.kuka, kuka.nimi
+					FROM kuka
+					JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%hyvak.php'
+					WHERE kuka.yhtio = '$kukarow[yhtio]'
+					and kuka.hyvaksyja = 'o'
+					ORDER BY kuka.nimi";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<select name='nimi'>";
@@ -121,35 +122,35 @@
 		echo "<th>".t("Siirrä")."</th>";
 		echo "</tr>";
 
-		while ($trow=mysql_fetch_array ($result)) {
+		while ($trow = mysql_fetch_array ($result)) {
 
 			echo "<tr>";
 
 			if ($trow['alatila'] == 'H') {
 				$erotin = 'th';
 		 	}
-			else { 
+			else {
 				$erotin = 'td';
 			}
-			
+
 			echo "<$erotin>".tv1dateconv($trow["tapvm"])."</$erotin>";
-			
+
 			if ($trow["kapvm"] != "0000-00-00") {
 				echo "<$erotin>".tv1dateconv($trow["kapvm"])."</$erotin>";
 			}
 			else {
 				echo "<$erotin></$erotin>";
 			}
-		
+
 			echo "<$erotin>".tv1dateconv($trow["erpcm"])."</$erotin>";
 			echo "<$erotin>$trow[nimi]</$erotin>";
 			echo "<$erotin>$trow[postitp]</$erotin>";
 			echo "<$erotin style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</$erotin>";
 			echo "<$erotin style='text-align: right;'>$trow[summa] $trow[valkoodi]</$erotin>";
-			
+
 			// tehdään lasku linkki
 			echo "<$erotin>". ebid($trow['tunnus']) ."</$erotin>";
-			
+
 			echo "	<form action = 'raportit.php?toim=hyvaksynta&tee=T&kuka=$kuka' method = 'post'>
 					<input type = 'hidden' name = 'mika' value = '$trow[tunnus]'>";
 			echo "	<$erotin>

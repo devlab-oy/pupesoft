@@ -381,7 +381,6 @@
 								$korvataan_pois = t("Tuote Loppu.");
 								$query .= "	, kommentti	= replace(kommentti, '$korvataan_pois', '') ";
 
-
 								// PUUTE-riville tehd‰‰n osatoimitus ja loput j‰tet‰‰n puuteriviksi
 								if ($maara[$apui] < $tilrivirow['tilkpl']) {
 									$rotunnus	= $tilrivirow['otunnus'];
@@ -535,15 +534,7 @@
 											// Mit‰tˆid‰‰n nollarivi koska poikkeamalle kuitenkin tehd‰‰n jotain fiksua
 											$query .= ", tyyppi = 'D', kommentti=trim(concat(kommentti, ' Mit‰tˆitiin koska ker‰yspoikkeamasta tehtiin: ".$poikkeama_kasittely[$apui]."'))";
 										}
-
-										$abuq = "SELECT sarjanumeroseuranta FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno = '$tilrivirow[tuoteno]'";
-										$abuqresult = mysql_query($abuq) or pupe_error($abuq);
-										$abuqrow = mysql_fetch_array($abuqresult);
-
-										if ($poikkeama_kasittely[$apui] != "MI" and ($abuqrow['sarjanumeroseruanta'] == 'E' or $abuqrow['sarjanumeroseruanta'] == 'F')) {
-											$query .= ", tilkpl = '".$maara[$apui]."'";
-										}
-
+										
 										$rotunnus	= $tilrivirow['otunnus'];
 										$rtyyppi	= $tilrivirow['tyyppi'];
 										$rtilkpl 	= round($tilrivirow['varattu']-$maara[$apui],2);
@@ -677,6 +668,10 @@
 
 							// T‰ss‰ tehd‰‰n uusi rivi
 							if ($rotunnus != 0) {
+								
+								// Aina jos rivi splitataan niin p‰ivitet‰‰n alkuper‰isen rivin tilkpl
+								$query .= ", tilkpl = '".$maara[$apui]."'";
+																
 								$querys = "	INSERT into tilausrivi set
 											hyllyalue   = '$tilrivirow[hyllyalue]',
 											hyllynro    = '$tilrivirow[hyllynro]',

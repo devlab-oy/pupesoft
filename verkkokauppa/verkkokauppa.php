@@ -646,20 +646,18 @@ if ($tee == "poistakori") {
 		//$ostoskori = mysql_fetch_array($result);
 		$kalakori = mysql_fetch_array($result);
 
-		$query = "	delete from tilausrivi
+		$query = "	UPDATE tilausrivi SET
+					tyyppi = 'D',
+					kommentti = trim(concat(kommentti, ' Käyttäjä $kukarow[kuka] mitätöi tilausrivin laskulta $kalakori[tunnus].'))
 					where yhtio = '$kukarow[yhtio]' and
 					tyyppi = 'L' and
 					otunnus = '$kalakori[tunnus]'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		$query = "	DELETE FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and
-					tila = 'N' and
-					tunnus = '$kukarow[kesken]' and
-					alatila=''";
-		$result = mysql_query($query) or pupe_error($query);
-
-		$query = "	delete from lasku
+		$query = "	UPDATE lasku SET
+					alatila = tila,
+					tila = 'D',
+					comments = trim(concat(comments, ' Käyttäjä $kukarow[kuka] mitätöi laskun $kalakori[tunnus].'))
 					where yhtio = '$kukarow[yhtio]' and
 					tila = 'N' and
 					tunnus = '$kalakori[tunnus]'";
@@ -687,7 +685,9 @@ if ($tee == "poistarivi") {
 		//$ostoskori = mysql_fetch_array($result);
 		$kalakori = mysql_fetch_array($result);
 
-		$query = "	DELETE FROM tilausrivi
+		$query = "	UPDATE tilausrivi SET
+					tyyppi = 'D',
+					kommentti = trim(concat(kommentti, ' Käyttäjä $kukarow[kuka] mitätöi tilausrivin laskulta $kukarow[kesken].'))
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'L' and tunnus = '$rivitunnus' LIMIT 1";
 		$result = mysql_query($query) or pupe_error($query);
 	}

@@ -505,6 +505,25 @@
 		}
 	}
 
+	if ($errori != '' and $_POST["toim"] == "yhtion_parametrit") {
+		// jos tuli virhe, niin laitetaan takaisin css:t ilman mysql_real_escape_stringiä
+		if (isset($apucss)) {
+			$t[$cssi] = $apucss;
+		}
+		if (isset($apucsspieni)) {
+			$t[$csspienii] = $apucsspieni;
+		}
+		if (isset($apucssextranet)) {
+			$t[$cssextraneti] = $apucssextranet;
+		}
+		if (isset($apucssverkkokauppa)) {
+			$t[$cssverkkokauppa] = $apucssverkkokauppa;
+		}
+		if (isset($apuwebseuranta)) {
+			$t[$webseuranta] = $apuwebseuranta;
+		}
+	}
+
 	if ($errori == "" and ($del == 1 or $del == 2 or $upd == 1) and substr($laji, 0, 7) == "iframe_") {
 
 		if ($toim == "perusalennus") {

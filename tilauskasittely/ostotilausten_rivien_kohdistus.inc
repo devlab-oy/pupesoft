@@ -253,7 +253,7 @@ if ($tee == 'TI' and isset($tyhjenna)) {
 if ($tee == 'TI' or $tee == "Y") {
 	// Parametreja joita tarkistarivi tarvitsee
 	$laskurow["tila"] 	= "O";
-	$toim_tarkistus 	= "KYLLA!";
+	$toim_tarkistus 	= "EI";
 	$prow["tuoteno"] 	= $tuoteno;
 	$prow["var"]		= $rivinvar;
 	$kukarow["kesken"]	= $rivinotunnus;

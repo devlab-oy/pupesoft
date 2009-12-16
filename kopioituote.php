@@ -2,6 +2,19 @@
 
 	require ("inc/parametrit.inc");
 
+	if ($tee != 'PERUSTA') {
+
+		if ($livesearch_tee == "TUOTEHAKU") {
+			livesearch_tuotehaku();
+			exit;
+		}
+
+		// Enaboidaan ajax kikkare
+		enable_ajax();
+
+		echo "<font class='head'>".t("Kopioi tuote")."</font><hr>";
+	}
+
 	if ($tee == 'PERUSTA') {
 		//	Trimmataan tyhjät merkit
 		$uustuoteno = trim($uustuoteno);
@@ -43,12 +56,12 @@
 			}
 			else {
 				$otsikkorivi = mysql_fetch_array($stresult);
-				
+
 				$tuotepaikat_query = "	SELECT *
 										FROM tuotepaikat
 										WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
 				$tuotepaikat_result = mysql_query($tuotepaikat_query) or pupe_error($tuotepaikat_query);
-				
+
 				if ($yhtiorow["tuotteen_oletuspaikka"] != "" and mysql_num_rows($tuotepaikat_result) == 0 and $otsikkorivi["ei_saldoa"] == "") {
 					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", $yhtiorow["tuotteen_oletuspaikka"]);
 
@@ -106,7 +119,7 @@
 					elseif (mysql_field_name($stresult,$i)=='muutospvm') {
 						$query .= mysql_field_name($stresult,$i)."=now(),";
 					}
-					
+
 					// nämä kentät tyhjennetään
 					elseif (mysql_field_name($stresult,$i)=='kehahin' or
 							mysql_field_name($stresult,$i)=='vihahin' or
@@ -153,7 +166,7 @@
 						$id2 = mysql_insert_id();
 					}
 				}
-				
+
 				$query = "	SELECT tunnus
 							FROM tuote
 							WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
@@ -164,44 +177,51 @@
 				if($yhtiorow["tuotekopio_email"] != "") {
 					$header  = "From: <$yhtiorow[postittaja_email]>\n";
 					$header .= "MIME-Version: 1.0\n" ;
-					
+
 					$query = "select * from yhtio where yhtio='$hakyhtio'";
 					$yres = mysql_query($query) or pupe_error($query);
 					$yrow = mysql_fetch_array($yres);
-					
+
 					$content = $kukarow["nimi"]." ".t("kopioi yhtiön")." $yrow[nimi] ".t("tuotteen")." '$tuoteno' ".t("yhtiön")." $yhtiorow[nimi] ".t("tuotteeksi")." '$uustuoteno'\n\n";
-										
+
 					mail($yhtiorow["tuotekopio_email"], t("Tuotteita kopioitu"), $content, $header, "-f $yhtiorow[postittaja_email]");
 				}
-				
+
 				$toim 	= 'tuote';
 				$tunnus = $rivi['tunnus'];
 				$tee 	= '';
 
 				require ("yllapito.php");
-				
+
 				exit;
 			}
 		}
 	}
 
-	if ($tee != 'PERUSTA') {
-		echo "<font class='head'>".t("Kopioi tuote")."</font><hr>";
-	}
-
 	if ($tee == 'HAKU') {
-		$konsernihaku = "KYLLA";
-		$kaikkituhaku = "KYLLA";
-		
-		if (strpos($tuoteno, '*') === FALSE) {
-			$tuoteno = $tuoteno."*";
-		}
-		
-		require("inc/tuotehaku.inc");
-		
-		//on vaan löytynyt 1 muuten tulis virhettä ja ulosta
-		if ($tee == 'HAKU' and $ulos == '' and $varaosavirhe == '' and $tuoteno != '') {
+
+		$query = "	SELECT tunnus
+					FROM tuote
+					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) == 1) {
 			$tee = 'AVALITTU';
+		}
+		else {
+			$konsernihaku = "KYLLA";
+			$kaikkituhaku = "KYLLA";
+
+			if (strpos($tuoteno, '*') === FALSE) {
+				$tuoteno = $tuoteno."*";
+			}
+
+			require("inc/tuotehaku.inc");
+
+			//on vaan löytynyt 1 muuten tulis virhettä ja ulosta
+			if ($tee == 'HAKU' and $ulos == '' and $varaosavirhe == '' and $tuoteno != '') {
+				$tee = 'AVALITTU';
+			}
 		}
 	}
 
@@ -245,7 +265,7 @@
 			$varaosavirhe = "";
 	}
 
-	if($tee == '' or $tee == "Y") {
+	if ($tee == '' or $tee == "Y") {
 		$formi  = 'formi';
 		$kentta = 'tuoteno';
 
@@ -254,7 +274,11 @@
 
 		echo "<tr><form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='HAKU'>";
-		echo "<td><input type='text' name='tuoteno' size='22' maxlength='20' value=''></td>";
+		echo "<td>";
+
+		livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 210);
+
+		echo "</td>";
 		echo "<td class='back'><input type='Submit' value='".t("Jatka")."'></td>";
 		echo "<td class='back'><font class='error'>$varaosavirhe</font></td>";
 		echo "</form></tr></table>";

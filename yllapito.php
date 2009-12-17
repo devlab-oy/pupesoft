@@ -1329,6 +1329,7 @@
 			$toim == "tuotteen_avainsanat" or
 			$toim == "varaston_tulostimet" or
 			$toim == "pakkaamo" or
+			$toim == "asiakaskommentti" or
 			$toim == "yhteyshenkilo" or
 			$toim == "autodata_tuote" or
 			$toim == "tuotteen_toimittajat" or

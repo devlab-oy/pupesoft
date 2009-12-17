@@ -7,7 +7,23 @@
 //jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if ($kollityht > 0) {
 
-	if (($ups_host != "" and $ups_user != "" and $ups_pass != "" and $ups_path != "") or $ups_path != "") {
+	// katsotaan varaston tulostusalueista mihin pakkaamoon kyseinen tulostusalue kuuluu (pakkaamo ylä tai pakkaamo ala)
+	// tämä tarkistus ohjaa ups-muuttujia
+	$query = "	SELECT pakkaamo
+				FROM varaston_tulostimet
+				WHERE yhtio = '{$kukarow['yhtio']}'
+				AND varasto = '{$laskurow['varasto']}'
+				AND nimi = '{$laskurow['tulostusalue']}'
+				LIMIT 1";
+	$tulostusalue_check_res = mysql_query($query) or pupe_error($query);
+	$tulostusalue_check_row = mysql_fetch_assoc($tulostusalue_check_res);
+
+	$ups_host_x = !isset($ups_host[strtolower($tulostusalue_check_row['pakkaamo'])]) ? $ups_host['oletus'] : $ups_host[strtolower($tulostusalue_check_row['pakkaamo'])];
+	$ups_user_x = !isset($ups_user[strtolower($tulostusalue_check_row['pakkaamo'])]) ? $ups_user['oletus'] : $ups_user[strtolower($tulostusalue_check_row['pakkaamo'])];
+	$ups_pass_x = !isset($ups_pass[strtolower($tulostusalue_check_row['pakkaamo'])]) ? $ups_pass['oletus'] : $ups_pass[strtolower($tulostusalue_check_row['pakkaamo'])];
+	$ups_path_x = !isset($ups_path[strtolower($tulostusalue_check_row['pakkaamo'])]) ? $ups_path['oletus'] : $ups_path[strtolower($tulostusalue_check_row['pakkaamo'])];
+
+	if ($ups_host_x != "" and $ups_user_x != "" and $ups_pass_x != "" and $ups_path_x != "") {
 
 		// tarvitaan tilauksien tunnukset muuttujassa $otunnukset
 		// tarvitaan tilauksen tunnus muuttujassa $tunnus
@@ -873,19 +889,17 @@ if ($kollityht > 0) {
 			echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")." ($filenimi)</font><br>";
 		}
 
-		if ($ups_host != "" and $ups_user != "" and $ups_pass != "" and $ups_path != "") {
-			// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
-			// palautetaan $palautus ja $syy
-			$ftphost = $ups_host;
-			$ftpuser = $ups_user;
-			$ftppass = $ups_pass;
-			$ftppath = $ups_path;
-			$ftpfile = realpath($filenimi);
-			require ("inc/ftp-send.inc");
-		}
+		// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
+		// palautetaan $palautus ja $syy
+		$ftphost = $ups_host_x;
+		$ftpuser = $ups_user_x;
+		$ftppass = $ups_pass_x;
+		$ftppath = $ups_path_x;
+		$ftpfile = realpath($filenimi);
+		require ("inc/ftp-send.inc");
 	}
 	else {
-		echo "<br><font class='error'>".t("UPS aineiston luotiin tarvittavia parametrejä puuttuu!")."</font><br>";
+		echo "<br><font class='error'>".t("UPS aineiston luontiin tarvittavia parametrejä puuttuu!")."</font><br>";
 	}
 
 }

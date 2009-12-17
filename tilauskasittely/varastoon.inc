@@ -60,13 +60,13 @@ if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" an
 	$query = "	SELECT tilausrivi.*, tilausrivi.kpl varattu
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
-				JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
+				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
 				WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
 				and tilausrivi.varattu = 0
 				and tilausrivi.kpl != 0
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and	tilausrivi.tyyppi = 'O'
-				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.kpl DESC, tilausrivi.laskutettuaika";
+				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno, tilausrivi.kpl DESC, tilausrivi.laskutettuaika";
 }
 elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 	// tavallinen laskenta.. VARATTU PITƒƒ OLLA > 0 ja netto-kentt‰ tyhj‰!
@@ -74,25 +74,25 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 	$query = "	SELECT tilausrivi.*
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
-				JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
+				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
 				WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
 				and tilausrivi.varattu <> 0
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'O'
 				and tilausrivi.netto = ''
-				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
+				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
 }
 elseif ($toiminto == "kalkyyli" and $tee == "") {
 	// N‰ytet‰‰n ruudulla
 	$query = "	SELECT tilausrivi.*
 				FROM tilausrivi
 				JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
-				JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
+				LEFT JOIN tuotteen_toimittajat ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
 				WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
 				and tilausrivi.varattu <> 0
 				and tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'O'
-				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
+				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno, tilausrivi.varattu DESC, tilausrivi.laskutettuaika";
 }
 $presult = mysql_query($query) or pupe_error($query);
 
@@ -148,9 +148,9 @@ else {
 	}
 
 	// lasketaan nyt varastoon viet‰vien rivien summa yhteens‰
-	$query    = "	SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if(tuotekerroin<=0,1,tuotekerroin) * tilausrivi.hinta * $erikoisale) summa
+	$query    = "	SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * $erikoisale) summa
 					FROM tilausrivi use index (uusiotunnus_index)
-					JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]' and tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno)
+					LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]' and tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno)
 					WHERE tilausrivi.uusiotunnus = '$otunnus'
 					and tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.netto = ''
@@ -219,15 +219,15 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	$salres = mysql_query($query) or pupe_error($query);
 	$salrow = mysql_fetch_array($salres);
 
-	$query  = "	SELECT *
+	$query  = "	SELECT tuote.*, if(tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) tuotekerroin
 				from tuote
-				JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]' and tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+				LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]' and tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
 				where tuote.yhtio	= '$kukarow[yhtio]'
 				and tuote.tuoteno	= '$tilrivirow[tuoteno]'";
 	$tuores = mysql_query($query) or pupe_error($query);
 	$tuorow = mysql_fetch_array($tuores);
 
-	if ($tuorow['tuotekerroin'] <= 0) $tuorow['tuotekerroin'] = 1;
+	if ((float) $tuorow['tuotekerroin'] <= 0) $tuorow['tuotekerroin'] = 1;
 
 	// jos kysess‰ on kotimainen vaihto-omaisuuslasku, pit‰‰ lis‰t‰ tuotteen hintaan alvi
 	if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {

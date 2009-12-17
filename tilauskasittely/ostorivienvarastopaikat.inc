@@ -335,19 +335,20 @@ if ($tee == "") {
 	// otsikko valmis
 
 	//haetaan ostorivit
-	$query = "	SELECT tilausrivi.tuoteno, tilausrivi.tunnus, tilausrivi.perheid2, tilausrivi.hyllyalue r1, tilausrivi.hyllynro r2, tilausrivi.hyllyvali r3, tilausrivi.hyllytaso r4,
-				group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tilausrivi.varattu, (select kpl from tilausrivi t2 where t2.yhtio=tilausrivi.yhtio and t2.tunnus=tilausrivi.perheid2 and t2.uusiotunnus='$otunnus') isakpl
+	$query = "	SELECT tilausrivi.tuoteno, tilausrivi.tunnus, tilausrivi.perheid2, 
+				tilausrivi.hyllyalue r1, tilausrivi.hyllynro r2, tilausrivi.hyllyvali r3, tilausrivi.hyllytaso r4,
+				group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tilausrivi.varattu, 
+				(select kpl from tilausrivi t2 where t2.yhtio=tilausrivi.yhtio and t2.tunnus=tilausrivi.perheid2 and t2.uusiotunnus='$otunnus') isakpl
 				FROM tilausrivi
-				JOIN tuote USING (yhtio, tuoteno)
-				JOIN tuotteen_toimittajat USING (yhtio, tuoteno)
+				JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno)
+				LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]' and tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
 				WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 				and tilausrivi.uusiotunnus='$otunnus'
 				and tilausrivi.tyyppi = 'O'
 				and tilausrivi.varattu <> 0
-				and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 				group by tilausrivi.tunnus
 				having (tilausrivi.perheid2=0 or tilausrivi.perheid2=tilausrivi.tunnus) or (isakpl != 0 and tilausrivi.perheid2 > 0 and (tilausrivi.hyllyalue='' or tilausrivi.hyllynro='' or tilausrivi.hyllyvali='' or tilausrivi.hyllytaso=''))
-				ORDER BY tuotteen_toimittajat.toim_tuoteno";
+				ORDER BY tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno";
 	$result = mysql_query($query) or pupe_error($query);
 
 	//kahtsotaan löytyikö yhtään tilausriviä

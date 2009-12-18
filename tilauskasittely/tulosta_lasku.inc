@@ -854,6 +854,20 @@ if (!function_exists('rivi_original')) {
 			if ($eanrow["eankoodi"] != "") {
 				$row["kommentti"] = "EAN: $eanrow[eankoodi]\n$row[kommentti]";
 			}
+
+			$query = "	SELECT kommentti
+						FROM asiakaskommentti
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tuoteno = '{$row['tuoteno']}'
+						AND ytunnus = '{$laskurow['ytunnus']}'
+						ORDER BY tunnus";
+			$asiakaskommentti_res = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($asiakaskommentti_res) > 0) {
+				while ($asiakaskommentti_row = mysql_fetch_assoc($asiakaskommentti_res)) {
+					$row["kommentti"] .= "\n".$asiakaskommentti_row['kommentti'];
+				}
+			}
 		}
 
 		//Kommentti

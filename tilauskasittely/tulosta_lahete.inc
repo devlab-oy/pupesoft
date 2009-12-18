@@ -779,10 +779,10 @@ if (!function_exists('rivi_lahete')) {
 							where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and ytunnus='$laskurow[ytunnus]'";
 			$askomresul = mysql_query($askomquery) or pupe_error($askomquery);
 
-			if (mysql_num_rows($askomresul) == 1) {
-				$askomrow = mysql_fetch_array($askomresul);
-
-				$row["kommentti"] .= "\n".$askomrow["kommentti"];
+			if (mysql_num_rows($askomresul) > 0) {
+				while ($askomrow = mysql_fetch_array($askomresul)) {
+					$row["kommentti"] .= "\n".$askomrow["kommentti"];
+				}
 			}
 		}
 

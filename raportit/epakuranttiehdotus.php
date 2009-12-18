@@ -106,13 +106,13 @@ if ($subnappi != '') {
 
 	if ($osasto != '') {
 		$osasto = (int) $osasto;
-		$lisa  .= "and osasto='$osasto' ";
+		$lisa  .= "and tuote.osasto='$osasto' ";
 		$msg   .= ", osasto $osasto";
 	}
 
 	if ($try != '') {
 		$try   = (int) $try;
-		$lisa .= "and try='$try' ";
+		$lisa .= "and tuote.try='$try' ";
 		$msg  .= ", tuoteryhmä $try";
 	}
 

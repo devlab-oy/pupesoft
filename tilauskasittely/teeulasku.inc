@@ -53,7 +53,7 @@
 		$bruttopaino			= round($sumrow["bruttopaino"], 2);
 
 		// generoidaan vientikurssi
-		if ($arvo_valuutassa == 0) {
+		if ($sumrow["arvo_valuutassa_matikka"] == 0) {
 			$vienti_kurssi = 1;
 		}
 		else {

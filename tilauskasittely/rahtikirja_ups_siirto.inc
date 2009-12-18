@@ -18,10 +18,10 @@ if ($kollityht > 0) {
 	$tulostusalue_check_res = mysql_query($query) or pupe_error($query);
 	$tulostusalue_check_row = mysql_fetch_assoc($tulostusalue_check_res);
 
-	$ups_host_x = !isset($ups_host[strtolower($tulostusalue_check_row['pakkaamo'])]) ? $ups_host['oletus'] : $ups_host[strtolower($tulostusalue_check_row['pakkaamo'])];
-	$ups_user_x = !isset($ups_user[strtolower($tulostusalue_check_row['pakkaamo'])]) ? $ups_user['oletus'] : $ups_user[strtolower($tulostusalue_check_row['pakkaamo'])];
-	$ups_pass_x = !isset($ups_pass[strtolower($tulostusalue_check_row['pakkaamo'])]) ? $ups_pass['oletus'] : $ups_pass[strtolower($tulostusalue_check_row['pakkaamo'])];
-	$ups_path_x = !isset($ups_path[strtolower($tulostusalue_check_row['pakkaamo'])]) ? $ups_path['oletus'] : $ups_path[strtolower($tulostusalue_check_row['pakkaamo'])];
+	$ups_host_x = ($laskurow['pakkaamo'] == 0 or !isset($ups_host[strtolower($tulostusalue_check_row['pakkaamo'])])) ? $ups_host['oletus'] : $ups_host[strtolower($tulostusalue_check_row['pakkaamo'])];
+	$ups_user_x = ($laskurow['pakkaamo'] == 0 or !isset($ups_user[strtolower($tulostusalue_check_row['pakkaamo'])])) ? $ups_user['oletus'] : $ups_user[strtolower($tulostusalue_check_row['pakkaamo'])];
+	$ups_pass_x = ($laskurow['pakkaamo'] == 0 or !isset($ups_pass[strtolower($tulostusalue_check_row['pakkaamo'])])) ? $ups_pass['oletus'] : $ups_pass[strtolower($tulostusalue_check_row['pakkaamo'])];
+	$ups_path_x = ($laskurow['pakkaamo'] == 0 or !isset($ups_path[strtolower($tulostusalue_check_row['pakkaamo'])])) ? $ups_path['oletus'] : $ups_path[strtolower($tulostusalue_check_row['pakkaamo'])];
 
 	if ($ups_host_x != "" and $ups_user_x != "" and $ups_pass_x != "" and $ups_path_x != "") {
 

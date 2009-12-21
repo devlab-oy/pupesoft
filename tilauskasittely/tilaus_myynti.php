@@ -203,6 +203,34 @@ if ($kukarow["extranet"] != '') {
 				$kukarow["kesken"] = "";
 			}
 		}
+		else {
+			// jos asiakkaalla jostakin syyst‰ kesken oleva tilausnumero on kadonnut, niin haetaan "Myyntitilaus kesken" oleva tilaus aktiiviseksi
+			$query = "	SELECT *
+						FROM lasku
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND liitostunnus = '$asiakasid'
+						AND tila = 'N'
+						AND alatila = ''
+						AND laatija = '{$kukarow['kuka']}'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) > 0) {
+				$kesken_row = mysql_fetch_assoc($result);
+				$tilausnumero = $kukarow['kesken'] = $kesken_row["tunnus"];
+
+				$query = "	UPDATE kuka SET
+							kesken = '$tilausnumero'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND kuka = '{$kukarow['kuka']}'
+							AND extranet != ''";
+				$result = mysql_query($query) or pupe_error($query);
+
+			}
+			else {
+				$tilausnumero = "";
+				$kukarow["kesken"] = "";
+			}
+		}
 	}
 	else {
 		echo t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."<br><br>";

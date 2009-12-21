@@ -803,31 +803,21 @@ if ($tee == 'MONISTA') {
 							break;
 						case 'varattu':
 							if ($kumpi == 'HYVITA') {
-								$rvalues .= ", $rivirow[kpl] * -1";
-								$uusikpl = $rivirow["kpl"] * -1;
+								$uusikpl = ($rivirow["kpl"]+$rivirow["jt"]+$rivirow["varattu"]) * -1;
+								$rvalues .= ", '$uusikpl'";
+								
 							}
 							else {
-								if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS') {
-									$rvalues .= ", '$rivirow[varattu]'";
-									$uusikpl = $rivirow["varattu"];
-								}
-								else {
-									$rvalues .= ", '$rivirow[kpl]'";
-									$uusikpl = $rivirow["kpl"];
-								}
+								$uusikpl = ($rivirow["kpl"]+$rivirow["jt"]+$rivirow["varattu"]);
+								$rvalues .= ", '$uusikpl'";
 							}
 							break;
 						case 'tilkpl':
 							if ($kumpi == 'HYVITA') {
-								$rvalues .= ", $rivirow[kpl] * -1";
+								$rvalues .= ", '".(($rivirow["kpl"]+$rivirow["jt"]+$rivirow["varattu"]) * -1)."'";								
 							}
 							else {
-								if ($toim == 'SOPIMUS' or $toim == 'TARJOUS' or $toim == 'TYOMAARAYS' or $toim == 'TILAUS') {
-									$rvalues .= ", '$rivirow[tilkpl]'";
-								}
-								else {
-									$rvalues .= ", '$rivirow[kpl]'";
-								}
+								$rvalues .= ", '".($rivirow["kpl"]+$rivirow["jt"]+$rivirow["varattu"])."'";
 							}
 							break;
 						case 'hyllyalue':

@@ -413,6 +413,7 @@
 		echo "<form method='post' action='$PHP_SELF' autocomplete='off' name='paaformi' enctype='multipart/form-data'>";
 		echo "<input type='hidden' name='tee' value='OTSIK'>";
 		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+		echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='projektilla' value='$projektilla'>";
 		echo "<input type='hidden' name='from' value='$from'>";
@@ -2192,6 +2193,7 @@
 				echo "<form method='post' action='$PHP_SELF' autocomplete='off'>";
 				echo "<input type='hidden' name='tee' value='OTSIK'>";
 				echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+				echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
 				echo "<input type='hidden' name='toim' value='$toim'>";
 				echo "<input type='hidden' name='projektilla' value='$projektilla'>";
 				echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
@@ -2330,7 +2332,7 @@
 			$nyvuosi  = date("Y");
 
 			$toimvkopva = $toimvkopva == '' ? 7 : $toimvkopva;
-			
+
 			if ($toimvko < $nyviikko) {
 				$nyvuosi += 1;
 			}
@@ -2352,7 +2354,7 @@
 			$nyvuosi  = date("Y");
 
 			$keraysvkopva = $keraysvkopva == '' ? 7 : $keraysvkopva;
-			
+
 			if ($keraysvko < $nyviikko) {
 				$nyvuosi += 1;
 			}
@@ -2774,9 +2776,9 @@
 						}
 
 						for ($i=1; $i < mysql_num_fields($monistares)-1; $i++) { // Ei monisteta tunnusta
-							
+
 							$fieldname = mysql_field_name($monistares,$i);
-							
+
 							switch (mysql_field_name($monistares,$i)) {
 								case "otunnus";
 									$values .= ", '$tilausnumero'";
@@ -2818,7 +2820,7 @@
 						if (mysql_num_rows($monistares2)>0) {
 
 							$fields2 = mysql_field_name($monistares2,0);
-							
+
 							for ($i=1; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
 								$fields2 .= ", ".mysql_field_name($monistares2,$i);
 							}
@@ -2826,7 +2828,7 @@
 							$values2 ="";
 
 							while ($monistarow2 = mysql_fetch_assoc($monistares2)) {
-								
+
 								if ($values2 == "") {
 									$values2 = "('".$monistarow2["yhtio"]."'";
 								}
@@ -2835,9 +2837,9 @@
 								}
 
 								for ($i=1; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
-									
+
 									$fieldname = mysql_field_name($monistares2,$i);
-									
+
 									switch (mysql_field_name($monistares2,$i)) {
 										case "laatija";
 											$values2 .= ", '$kukarow2[kuka]'";

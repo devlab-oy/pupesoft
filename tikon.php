@@ -252,7 +252,7 @@
 	$query  = "	SELECT tapvm, nimi, summa, tunnus
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
-				and tila IN ('H','M','P','Q''Y','U')
+				and tila IN ('H','M','P','Q','Y','U')
 				and mapvm = tapvm
 				and mapvm != '0000-00-00'
 				and ((left(lasku.tapvm, 7) = '$kausi') or (left(lasku.tapvm, 7) = '$kausi'))";
@@ -289,7 +289,7 @@
 				LEFT JOIN tiliointi ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tapvm = lasku.tapvm and korjattu = '')
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and ((left(lasku.tapvm, 7) = '$kausi') or (left(lasku.tapvm, 7) = '$kausi'))
-				and lasku.tila IN ('H','M','P','Q''Y','U')
+				and lasku.tila IN ('H','M','P','Q','Y','U')
 				GROUP BY 1,2,3,4
 				HAVING kpl < 2";
 	$result = mysql_query($query) or pupe_error($query);
@@ -326,7 +326,7 @@
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and ((left(lasku.tapvm, 7) = '$kausi') or (left(lasku.tapvm, 7) = '$kausi'))
 				and lasku.mapvm != '0000-00-00'
-				and lasku.tila IN ('H','M','P','Q''Y','U')
+				and lasku.tila IN ('H','M','P','Q','Y','U')
 				GROUP BY 1,2,3,4
 				HAVING kpl < 2";
 	$result = mysql_query($query) or pupe_error($query);
@@ -403,7 +403,7 @@
 				tiliointi.tilino, tiliointi.kustp, tiliointi.projekti, tiliointi.summa,
 				tiliointi.selite, lasku.ytunnus, tiliointi.ltunnus, lasku.mapvm, tiliointi.tunnus, lasku.laskunro, lasku.nimi, tiliointi.tapvm tapvmclean
 				FROM tiliointi
-				JOIN lasku ON tiliointi.yhtio = lasku.yhtio and lasku.tunnus = tiliointi.ltunnus  and lasku.tila not in ('X','U','D') and lasku.tapvm = tiliointi.tapvm and left(lasku.tapvm, 7) = '$kausi'
+				JOIN lasku ON tiliointi.yhtio = lasku.yhtio and lasku.tunnus = tiliointi.ltunnus  and lasku.tila in ('H','M','P','Q','Y') and lasku.tapvm = tiliointi.tapvm and left(lasku.tapvm, 7) = '$kausi'
 				WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 				and tiliointi.tosite = ''
 				and tiliointi.korjattu = ''
@@ -420,7 +420,7 @@
 				tiliointi.tilino, tiliointi.kustp, tiliointi.projekti, tiliointi.summa,
 				tiliointi.selite, lasku.ytunnus, tiliointi.ltunnus, lasku.mapvm, tiliointi.tunnus, lasku.laskunro, lasku.nimi, tiliointi.tapvm tapvmclean
 				FROM tiliointi
-				JOIN lasku ON tiliointi.yhtio = lasku.yhtio and lasku.tunnus = tiliointi.ltunnus and ((lasku.tila not in ('X','D') and lasku.tapvm != tiliointi.tapvm and left(tiliointi.tapvm, 7) = '$kausi') or (lasku.tila = 'X' and left(tiliointi.tapvm, 7) = '$kausi'))
+				JOIN lasku ON tiliointi.yhtio = lasku.yhtio and lasku.tunnus = tiliointi.ltunnus and ((lasku.tila in ('H','M','P','Q','Y','U') and lasku.tapvm != tiliointi.tapvm and left(tiliointi.tapvm, 7) = '$kausi') or (lasku.tila = 'X' and left(tiliointi.tapvm, 7) = '$kausi'))
 				WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 				and tiliointi.tosite = ''
 				and tiliointi.korjattu = ''

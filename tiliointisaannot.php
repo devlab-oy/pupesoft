@@ -4,8 +4,9 @@
 	echo "<font class='head'>".t("Toimittajan tiliöintisäännöt")."</font><hr>";
 
 	if (($tee == 'S') or ($tee == 'N') or ($tee == 'Y')) {
+
 		if ($tee == 'S') { // S = selaussanahaku
-		$lisat = "and selaus like '%" . $nimi . "%'";
+			$lisat = "and selaus like '%" . $nimi . "%'";
 		}
 
 		if ($tee == 'N') { // N = nimihaku
@@ -13,7 +14,7 @@
 		}
 
 		if ($tee == 'Y') { // Y = yritystunnushaku
-			$lisat = "and ytunnus = $nimi";
+			$lisat = "and ytunnus = '$nimi'";
 		}
 
 		$query = "SELECT tunnus, ytunnus, nimi, postitp

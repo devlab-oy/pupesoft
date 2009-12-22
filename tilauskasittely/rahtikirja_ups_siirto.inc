@@ -7,18 +7,6 @@
 //jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if ($kollityht > 0) {
 
-	// ups siirto ala-pakkaamo:
-	$ups_path['pakkaamo ala'] = "ups/";
-	$ups_user['pakkaamo ala'] = "ups";
-	$ups_pass['pakkaamo ala'] = "xmlsiirto";
-	$ups_host['pakkaamo ala'] = "10.10.69.10";
-
-	// ups siirto kaikki muut
-	$ups_path['oletus'] = "ups2/";
-	$ups_user['oletus'] = "ups";
-	$ups_pass['oletus'] = "xmlsiirto";
-	$ups_host['oletus'] = "10.10.69.10";
-
 	// katsotaan varaston tulostusalueista mihin pakkaamoon kyseinen tulostusalue kuuluu (pakkaamo ylä tai pakkaamo ala)
 	// tämä tarkistus ohjaa ups-muuttujia
 	$query = "	SELECT pakkaamo

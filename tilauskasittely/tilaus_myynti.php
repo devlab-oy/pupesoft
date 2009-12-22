@@ -3423,10 +3423,11 @@ if ($tee == '') {
 
 		$query  = "	SELECT $sorttauskentta
 					FROM tilausrivi use index (yhtio_otunnus)
-					WHERE yhtio='$kukarow[yhtio]'
+					LEFT JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno)
+					WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 					$tunnuslisa
-					and tyyppi in ($tilrivity)
-					ORDER BY $sorttauslisa sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tunnus";
+					and tilausrivi.tyyppi in ($tilrivity)
+					ORDER BY $sorttauslisa sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
 		$ruuturesult = mysql_query($query) or pupe_error($query);
 		$rivilaskuri = mysql_num_rows($ruuturesult);
 

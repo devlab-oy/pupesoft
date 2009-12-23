@@ -2842,8 +2842,12 @@ if (!function_exists("alehinta")) {
 
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
-						$netto = $hrow["laji"];
-						$ale = 0;
+						$netto 	= $hrow["laji"];
+						$ale 	= 0;
+					}
+					elseif ($hrow["laji"] == "B") {
+						$netto	= '';
+						$ale	= '';
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
@@ -2905,8 +2909,12 @@ if (!function_exists("alehinta")) {
 					$hrow = mysql_fetch_assoc ($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
-						$netto = $hrow["laji"];
-						$ale = 0;
+						$netto 	= $hrow["laji"];
+						$ale 	= 0;
+					}
+					elseif ($hrow["laji"] == "B") {
+						$netto	= '';
+						$ale	= '';
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
@@ -2967,8 +2975,12 @@ if (!function_exists("alehinta")) {
 					$hrow = mysql_fetch_assoc ($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
-						$netto = $hrow["laji"];
-						$ale = 0;
+						$netto 	= $hrow["laji"];
+						$ale 	= 0;
+					}
+					elseif ($hrow["laji"] == "B") {
+						$netto	= '';
+						$ale	= '';
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
@@ -3030,8 +3042,12 @@ if (!function_exists("alehinta")) {
 					$hrow = mysql_fetch_assoc ($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
-						$netto = $hrow["laji"];
-						$ale = 0;
+						$netto 	= $hrow["laji"];
+						$ale 	= 0;
+					}
+					elseif ($hrow["laji"] == "B") {
+						$netto	= '';
+						$ale	= '';
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
@@ -3080,8 +3096,12 @@ if (!function_exists("alehinta")) {
 					$hrow = mysql_fetch_assoc ($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
-						$netto = $hrow["laji"];
-						$ale = 0;
+						$netto 	= $hrow["laji"];
+						$ale 	= 0;
+					}
+					elseif ($hrow["laji"] == "B") {
+						$netto	= '';
+						$ale	= '';
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
@@ -3131,8 +3151,12 @@ if (!function_exists("alehinta")) {
 					$hrow = mysql_fetch_assoc ($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
-						$netto = $hrow["laji"];
-						$ale = 0;
+						$netto 	= $hrow["laji"];
+						$ale 	= 0;
+					}
+					elseif ($hrow["laji"] == "B") {
+						$netto	= '';
+						$ale	= '';
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
@@ -3181,8 +3205,12 @@ if (!function_exists("alehinta")) {
 					$hrow = mysql_fetch_assoc ($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
-						$netto = $hrow["laji"];
-						$ale = 0;
+						$netto 	= $hrow["laji"];
+						$ale 	= 0;
+					}
+					elseif ($hrow["laji"] == "B") {
+						$netto	= '';
+						$ale	= '';
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
@@ -3232,8 +3260,12 @@ if (!function_exists("alehinta")) {
 					$hrow = mysql_fetch_assoc ($hresult);
 
 					if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
-						$netto = $hrow["laji"];
-						$ale = 0;
+						$netto 	= $hrow["laji"];
+						$ale 	= 0;
+					}
+					elseif ($hrow["laji"] == "B") {
+						$netto	= '';
+						$ale	= '';
 					}
 					else {
 						//Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta

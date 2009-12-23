@@ -85,20 +85,13 @@
 	if (mysql_field_name($result, $i) == "laji") {
 
 		$chkn = array();
-		if ($trow[$i] == 'N') {
-			$chkn[0] = 'SELECTED';
-		}
-		elseif($trow[$i] == "E") {
-			$chke[1] = 'SELECTED';
-		}
-		elseif($trow[$i] == "") {
-			$chke[2] = 'SELECTED';
-		}
+		$chkn[$trow[$i]] = "SELECTED";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='N' $chkn[0]>".t("N-Nettohinta")."</option>";
-		$ulos .= "<option value='E' $chke[1]>".t("E-Nettohinta")."</option>";
-		$ulos .= "<option value='' $chke[2]>".t("Yhtiön oletus")."</option>";
+		$ulos .= "<option value=''>".t("Yhtiön oletus")."</option>";
+		$ulos .= "<option value='N' $chkn[N]>".t("N-Nettohinta")."</option>";
+		$ulos .= "<option value='E' $chkn[E]>".t("E-Nettohinta")."</option>";
+		$ulos .= "<option value='B' $chkn[B]>".t("Bruttohinta")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

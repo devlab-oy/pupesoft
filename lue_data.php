@@ -421,6 +421,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				$rivi[] = "LISAA";
 			}
 
+			//Sallitaan myös MUOKKAA ja LISÄÄ toiminnot
+			if (strtoupper(trim($rivi[$postoiminto])) == "LISÄÄ") $rivi[$postoiminto] = "LISAA";
+			if (strtoupper(trim($rivi[$postoiminto])) == "MUOKKAA") $rivi[$postoiminto] = "MUUTA";
+
 			//Jos eri where-ehto array on määritelty
 			if (is_array($wherelliset)) {
 				$indeksi = array_merge($indeksi, $indeksi_where);

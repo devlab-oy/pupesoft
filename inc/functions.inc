@@ -7114,7 +7114,7 @@ if (!function_exists("pakkaamo")) {
 		// lasku.tulostusalue = varaston_tulostimet.nimi
 		// lasku.pakkaamo = pakkaamo.tunnus
 
-		if ($yhtiorow['pakkaamolokerot'] != 'K') {
+		if ($yhtiorow['pakkaamolokerot'] == '') {
 			return 0;
 		}
 
@@ -7186,7 +7186,7 @@ if (!function_exists("pakkaamo")) {
 
 		$pakkaamotark_wherelisa = '';
 
-		if ($yhtiorow['pakkaamojako'] == '') {
+		if ($yhtiorow['pakkaamolokerot'] == 'K') {
 			$pakkaamotark_wherelisa = ' AND varaston_tulostimet.pakkaamo = vanha_varaston_tulostimet.pakkaamo ';
 		}
 

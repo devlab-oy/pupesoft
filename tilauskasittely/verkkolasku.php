@@ -378,7 +378,7 @@
 							and tilausrivi.var not in ('P','J','S')";
 				$sarjares1 = mysql_query($query) or pupe_error($query);
 
-				while($srow1 = mysql_fetch_array($sarjares1)) {
+				while ($srow1 = mysql_fetch_array($sarjares1)) {
 
 					// Tsekataan onko tuotetta ikin‰ ostettu jos kehahinarvio_ennen_ensituloa-parametri on p‰‰ll‰
 					if ($yhtiorow["kehahinarvio_ennen_ensituloa"] != "" and $srow1["kehahin"] != 0 and $srow1["ei_saldoa"] == "") {
@@ -2079,65 +2079,6 @@
 
 							unset($pdf);
 							unset($page);
-						}
-
-						if ($laskurow["vienti"] == "K" and $hyvitys == "EI") {
-
-							$uusiotunnus = $laskurow["tunnus"];
-
-							if ($yhtiorow["sad_lomake_tyyppi"] == "T") {
-								// Tulostetaan Teksti-versio SAD-lomakkeeesta
-								require('tulosta_sadvientiilmo_teksti.inc');
-
-								if ($paalomake != '') {
-									lpr($paalomake, $valittu_sadtulostin);
-
-									if ($silent == "") $tulos_ulos .=  t("SAD-lomake tulostuu")."...<br>\n";
-
-									if ($lisalomake != "") {
-										lpr($lisalomake, $valittu_sadlitulostin);
-
-										if ($silent == "") $tulos_ulos .=  t("SAD-lomakkeen lis‰sivu tulostuu")."...<br>\n";
-									}
-								}
-							}
-							else {
-								// Tulostetaan PDF-versio SAD-lomakkeeesta
-								require('tulosta_sadvientiilmo.inc');
-
-								//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-								list($usec, $sec) = explode(' ', microtime());
-								mt_srand((float) $sec + ((float) $usec * 100000));
-								$pdffilenimi = "/tmp/SAD_Lomake_Kopio-".md5(uniqid(mt_rand(), true)).".pdf";
-
-								//kirjoitetaan pdf faili levylle..
-								$fh = fopen($pdffilenimi, "w");
-								if (fwrite($fh, $pdf2->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
-								fclose($fh);
-
-								if ($kirow["komento"] != "email") {
-									// itse print komento...
-									$line = exec("$kirow[komento] $pdffilenimi");
-								}
-								elseif ($kukarow["eposti"] != '') {
-									// l‰hetet‰‰n meili
-									$komento = "";
-									$kutsu = "lasku $lasku SAD-lomake";
-									$liite = $pdffilenimi;
-									$sahkoposti_cc = "";
-									$content_subject = "";
-									$content_body = "";
-									include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
-								}
-
-								//poistetaan tmp file samantien kuleksimasta...
-								system("rm -f $pdffilenimi");
-
-								unset($pdf2);
-								unset($sadilmo);
-
-								if ($silent == "") $tulos_ulos .= t("SAD-lomake tulostuu")."...<br>\n";
-							}
 						}
 
 						if ($laskurow["vienti"] == "E" and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {

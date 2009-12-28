@@ -230,7 +230,7 @@
 
 			$having = "";
 
-			if ($yhtiorow['pakkaamolokerot'] == 'K') {
+			if ($yhtiorow['pakkaamolokerot'] != '') {
 				$having = " HAVING ((rahtikirjat.otsikkonro is null or (rahtikirjat.otsikkonro is not null and lasku.pakkaamo > 0) and (rahtikirjat.pakkaus = 'KOLLI' or rahtikirjat.pakkaus = 'Rullakko')) or rahtikirjat.poikkeava = -9) and ";
 			}
 			else {
@@ -413,7 +413,7 @@
 			$updateres = mysql_query($query) or pupe_error($query);
 
 			//Ainostaan tulostusaluuen mukaan splittaantuneet tilaukset yhdistetään
-			if ($yhtiorow["splittauskielto"] == "" and strpos($tunnukset,',') !== false and $yhtiorow['pakkaamolokerot'] == 'K') {
+			if ($yhtiorow["splittauskielto"] == "" and strpos($tunnukset,',') !== false and $yhtiorow['pakkaamolokerot'] != '') {
 
 				$otsikko_tunnarit = explode(',',$tunnukset);
 				sort($otsikko_tunnarit);
@@ -933,7 +933,7 @@
 
 		echo "</select></td>";
 
-		if ($yhtiorow['pakkaamolokerot'] == 'K') {
+		if ($yhtiorow['pakkaamolokerot'] != '') {
 			echo "<td>".t("Valitse pakkaamo:")."</td><td><select name='tupakkaamo' onchange='submit()'>";
 
 			$query = "	SELECT distinct nimi
@@ -1015,7 +1015,7 @@
 			$haku .= " and lasku.varasto='$tuvarasto' ";
 		}
 
-		if ($yhtiorow['pakkaamolokerot'] == 'K') {
+		if ($yhtiorow['pakkaamolokerot'] != '') {
 			if ($tupakkaamo == '' and $kukarow['oletus_pakkaamo'] != '') {
 				$query = "	SELECT group_concat(tunnus SEPARATOR ',') tunnukset
 				  			FROM pakkaamo
@@ -1077,14 +1077,14 @@
 
 		$lisawhere = "";
 
-		if ($yhtiorow['pakkaamolokerot'] == 'K') {
+		if ($yhtiorow['pakkaamolokerot'] != '') {
 			$lisawhere = " and ((rahtikirjat.otsikkonro is null or (rahtikirjat.otsikkonro is not null and lasku.pakkaamo > 0) and (rahtikirjat.pakkaus = 'KOLLI' or rahtikirjat.pakkaus = 'Rullakko')) or rahtikirjat.poikkeava = -9) ";
 		}
 		else {
 			$lisawhere = " and (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) ";
 		}
 
-		if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K') {
+		if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] != '') {
 			$grouplisa = ", lasku.vanhatunnus, lasku.varasto, lasku.pakkaamo ";
 			$selecttoimitustapaehto = " toimitustapa.tunnus kimppakyyti, ";
 		}
@@ -1180,7 +1180,7 @@
 
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">".t("Toimitustapa")."</th>";
 
-			if ($yhtiorow['pakkaamolokerot'] == 'K') {
+			if ($yhtiorow['pakkaamolokerot'] != '') {
 				echo "<th valign='top'>".t("Kollit")."<br>".t("Rullakot")."</th>";
 				echo "<th valign='top'>".t("Pakkaamo")."<br>".t("Lokero")."</th>";
 			}
@@ -1193,7 +1193,7 @@
 				//chekkaus että kaikki splitatut tilaukset on kerätty
 				/* ei oteta huomioon niitä mistä puuttuu tulostusalue ja millä on tietty alatila
 				lisää alatila B jos käytetään keräästä rahtikirjansyöttöön halutessa */
-				if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] == 'K') {
+				if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] != '') {
 					$query = "	SELECT count(distinct lasku.tunnus) kpl, GROUP_CONCAT(DISTINCT if(lasku.tunnus not in ($row[tunnukset]), lasku.tunnus, null) order by lasku.tunnus) odottaa
 								FROM lasku
 								JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = ''
@@ -1247,7 +1247,7 @@
 					echo "<td valign='top' nowrap align='right'>".tv1dateconv($row["kerayspvm"], "", "LYHYT")."<br>".tv1dateconv($row["toimaika"], "", "LYHYT")."</td>";
 					echo "<td valign='top'>$row[toimitustapa]</td>";
 
-					if ($yhtiorow['pakkaamolokerot'] == 'K') {
+					if ($yhtiorow['pakkaamolokerot'] != '') {
 
 						$kollit_chk = 0;
 						$rullakot_chk = 0;
@@ -1370,7 +1370,7 @@
 					$temp_osittaiset .= "<td valign='top' nowrap align='right'>".tv1dateconv($row["kerayspvm"], "", "LYHYT")."<br>".tv1dateconv($row["toimaika"], "", "LYHYT")."</td>";
 					$temp_osittaiset .= "<td valign='top'>$row[toimitustapa]</td>";
 
-					if ($yhtiorow['pakkaamolokerot'] == 'K') {
+					if ($yhtiorow['pakkaamolokerot'] != '') {
 
 						$kollit_chk = 0;
 						$rullakot_chk = 0;
@@ -1478,7 +1478,7 @@
 				echo "<th valign='top'>".t("Laadittu")."<br>".t("Valmis")."<br>".t("Tulostettu")."<br>".t("Kerätty")."</th>";
 				echo "<th valign='top'>".t("Keräysaika")."<br>".t("Toimitusaika")."</th>";
 				echo "<th valign='top'>".t("Toimitustapa")."</th>";
-				if ($yhtiorow['pakkaamolokerot'] == 'K') {
+				if ($yhtiorow['pakkaamolokerot'] != '') {
 					echo "<th valign='top'>".t("Kollit")."<br>".t("Rullakot")."</th>";
 					echo "<th valign='top'>".t("Pakkaamo")."<br>".t("Lokero")."</th>";
 				}
@@ -2041,7 +2041,7 @@
 
 		echo "<tr><th>".t("Kuljetusohje")."</th><td><textarea name='viesti' cols='30' rows='3'>$viestirarrow[viesti]</textarea></td><th></th><td></td></tr>";
 
-		if ($otsik['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
+		if ($otsik['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
 			if (strpos($tunnukset,',') !== false) {
 				$query = "	SELECT GROUP_CONCAT(pakkaamo SEPARATOR ',') pakkaamot
 							FROM lasku

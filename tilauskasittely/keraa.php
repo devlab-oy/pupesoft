@@ -915,7 +915,7 @@
 
 					// jos meillä on pakkaamolokerot käytössä (eli pakkaamotsydeema), niin esisyötetään rahtikirjat jos käyttäjä on antanut kollien/rullakkojen määrät
 					// ei kuiteskaan tehdä tästä virallisesti esisyötettyä rahtikirjaa!
-					if ($yhtiorow['pakkaamolokerot'] == 'K') {
+					if ($yhtiorow['pakkaamolokerot'] != '') {
 						if ($pakkaamo_kolli != '') {
 							$pakkaamo_kolli = (int)$pakkaamo_kolli;
 
@@ -1742,7 +1742,7 @@
 			}
 			echo "</select></td>";
 
-			if ($otsik_row['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
+			if ($otsik_row['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
 				$query = "	SELECT nimi, lokero
 							FROM pakkaamo
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -2122,7 +2122,7 @@
 				echo "</tr>";
 			}
 
-			if ($otsik_row['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
+			if ($otsik_row['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
 				echo "<tr><th>".t("Kolli")."</th><th colspan='$spanni'><input type='text' name='pakkaamo_kolli' size='5'/></th>";
 
 				if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
@@ -2156,7 +2156,7 @@
 				echo "</tr>";
 			}
 
-			if ($otsik_row['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
+			if ($otsik_row['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
 				echo "<th>".t("Rullakko")."</th><th colspan='$spanni'><input type='text' name='pakkaamo_rullakko' size='5'/></th>";
 
 				if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {

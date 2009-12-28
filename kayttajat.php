@@ -695,7 +695,7 @@
 
 			echo "</td><td class='back'>",t("Ilman rajausta saa myydä kaikista normaalivarastoista"),"</td></tr>";
 
-			if ($toim != 'extranet' and $yhtiorow['pakkaamolokerot'] == 'K') {
+			if ($toim != 'extranet' and $yhtiorow['pakkaamolokerot'] != '') {
 				echo "<tr><th align='left'>".t("Oletus pakkaamo").":</td>";
 				echo "<td><select name='oletus_pakkaamo'><option value=''>".t("Ei pakkaamoa")."</option>";
 

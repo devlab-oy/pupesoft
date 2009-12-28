@@ -400,7 +400,7 @@
 				echo "</table><br>";
 				echo "<table>";
 
-				if ($yhtiorow["pakkaamolokerot"] == "K") {
+				if ($yhtiorow["pakkaamolokerot"] != "") {
 
 					echo "<tr>";
 					echo "<th>",t("Ei lokeroa"),"</th>";
@@ -732,7 +732,7 @@
 			$grouppi = "GROUP BY lasku.tunnus";
 		}
 
-		if ($yhtiorow["pakkaamolokerot"] == "K") {
+		if ($yhtiorow["pakkaamolokerot"] != "") {
 			$grouppi .= ", lasku.varasto, lasku.tulostusalue";
 		}
 
@@ -799,7 +799,7 @@
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">".t("Toimitustapa")."</a></th>";
 			echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">".t("Riv")."</a></th>";
 
-			if ($yhtiorow["pakkaamolokerot"] == "K" or $logistiikka_yhtio != '') {
+			if ($yhtiorow["pakkaamolokerot"] != "" or $logistiikka_yhtio != '') {
 				echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">".t("Ei lokeroa")."</a></th>";
 			}
 
@@ -903,7 +903,7 @@
 				if ($tilrow["tilauksia"] > 1) {
 					echo "<$ero valign='top'></$ero>";
 
-					if ($yhtiorow["pakkaamolokerot"] == "K" or $logistiikka_yhtio != '') {
+					if ($yhtiorow["pakkaamolokerot"] != "" or $logistiikka_yhtio != '') {
 						echo "<$ero valign='top'></$ero>";
 					}
 
@@ -934,7 +934,7 @@
 
 					echo "<form method='post' action='$PHP_SELF'>";
 
-					if ($yhtiorow["pakkaamolokerot"] == "K") {
+					if ($yhtiorow["pakkaamolokerot"] != "") {
 
 						$ei_pakkaamoa_sel = '';
 
@@ -1022,7 +1022,7 @@
 			echo t("Rivejä yhteensä")."</th>";
 			echo "<th>".$riveja_yht."</th>";
 
-			$spanni = ($yhtiorow["pakkaamolokerot"] == "K" or $logistiikka_yhtio != '') ? 4 : 3;
+			$spanni = ($yhtiorow["pakkaamolokerot"] != "" or $logistiikka_yhtio != '') ? 4 : 3;
 
 			echo "<th colspan='$spanni'></th>";
 			echo "</tr>";

@@ -284,7 +284,7 @@ if (!function_exists('alku_kerayslista')) {
 		}
 
 
-		if ($laskurow['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] == 'K') {
+		if ($laskurow['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
 			$keraaja_teksti = "";
 
 			$query = "	SELECT nimi, lokero

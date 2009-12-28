@@ -52,13 +52,12 @@ if ($tee == "SYNK") {
 		$kohderes = mysql_query($query) or pupe_error($query);
 		$kohderow = mysql_fetch_array($kohderes);
 
-
 		$group = " group by ";
 
 		$indeksi = array_merge($wherelliset, $pakolliset);
 		$indeksi = array_unique($indeksi);
 
-		foreach($indeksi as $pakollinen) {
+		foreach ($indeksi as $pakollinen) {
 			$group .= strtolower($pakollinen).",";
 		}
 
@@ -71,7 +70,7 @@ if ($tee == "SYNK") {
 					$group";
 		$abures = mysql_query($query) or pupe_error($query);
 
-		while ($aburow = mysql_fetch_array($abures)) {
+		while ($aburow = mysql_fetch_assoc($abures)) {
 			$query = "	SELECT *
 						FROM $table
 						WHERE tunnus in ($aburow[tunnukset])
@@ -79,7 +78,7 @@ if ($tee == "SYNK") {
 						LIMIT 1";
 			$abures1 = mysql_query($query) or pupe_error($query);
 
-			while ($aburow1 = mysql_fetch_array($abures1)) {
+			while ($aburow1 = mysql_fetch_assoc($abures1)) {
 				synkronoi($aburow1["yhtio"], $table, $aburow1["tunnus"], $aburow1, "F");
 			}
 		}

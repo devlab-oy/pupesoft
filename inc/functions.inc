@@ -1667,7 +1667,7 @@ if (!function_exists("synkronoi")) {
 					}
 				}
 				else {
-					$synclog = "\nVIRHE: Originaali ei t‰sm‰‰ masteriin!!!\n";
+					$synclog .= "\nVIRHE: Originaali ei t‰sm‰‰ masteriin!!!\n";
 
 					synclog($yhtio, $table, $synclog, $tunnus);
 					return false;
@@ -1723,7 +1723,7 @@ if (!function_exists("synkronoi")) {
 					from yhtio
 					JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
 					where yhtio.konserni	 		= '$yhtiorow[konserni]'
-					and yhtion_parametrit.synkronoi like '%$toim%'
+					and yhtion_parametrit.synkronoi like '%$table%'
 					and yhtio.yhtio					!= '$yhtio'";
 		$kohderes = mysql_query($query) or pupe_error($query);
 
@@ -2043,14 +2043,14 @@ if (!function_exists("synkronoi")) {
 					if ($ok == 1) {
 						//	Duunataan itse p‰ivitys/insert kysely!!!
 						for ($i=1; $i < mysql_num_fields($masterres); $i++) {
-							if (isset($masterrow[$i]) and !in_array(mysql_field_name($masterres, $i), array("yhtio","tunnus","muuttaja","muutospvm","laatija","luontiaika"))) {
+							if (isset($masterrow[mysql_field_name($masterres, $i)]) and !in_array(mysql_field_name($masterres, $i), array("yhtio","tunnus","muuttaja","muutospvm","laatija","luontiaika"))) {
 								if (isset($override[mysql_field_name($masterres, $i)])) {
 									if ($override[mysql_field_name($masterres, $i)] != "") {
 										$query .= ", ". mysql_field_name($masterres,$i)."='".$override[mysql_field_name($masterres, $i)]."' ";
 									}
 								}
 								else {
-									$query .= ", ". mysql_field_name($masterres,$i)."='".$masterrow[$i]."' ";
+									$query .= ", ". mysql_field_name($masterres,$i)."='".$masterrow[mysql_field_name($masterres, $i)]."' ";
 								}
 							}
 						}

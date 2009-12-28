@@ -159,24 +159,24 @@ if (!function_exists('alku_tarjous')) {
 		}
 		else {
 			$pdf_tarjous->draw_text(310, 792, t("Tarjous", $kieli), 	$page_tarjous, $pieni);
-			$pdf_tarjous->draw_text(310, 782, $laskurow["tunnus"],			$page_tarjous, $boldi);
+			$pdf_tarjous->draw_text(310, 782, $laskurow["tunnus"],		$page_tarjous, $boldi);
 		}
 
 		$pdf_tarjous->draw_text(430, 792, t("Toimitusaika", $kieli), 	$page_tarjous, $pieni);
 
-		$query = "	SELECT date_format(if(keratty = 'saldoton' and '$yhtiorow[saldottomien_toimitettuaika]' = 'K', toimaika, toimitettuaika), '%Y-%m-%d') toimitettupaiva
-					FROM tilausrivi
-					WHERE yhtio = '$kukarow[yhtio]'
-					and otunnus = $laskurow[tunnus]
-					and toimitettuaika != '0000-00-00'
-					GROUP BY toimitettupaiva";
-		$toimaikares = mysql_query($query) or pupe_error($query);
-		
-		if (mysql_num_rows($toimaikares) > 1) {
-			$useita = "JOO";	
-		}
-		else {
-			$useita = "EI";
+		$useita = "EI";
+
+		if ($laskurow["nippu"] > 0) {
+			$query = "	SELECT distinct(toimaika)
+						FROM tilausrivi
+						WHERE yhtio = '$kukarow[yhtio]'
+						and otunnus IN ($laskurow[nippu])
+						and toimaika != '0000-00-00'";
+			$toimaikares = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($toimaikares) > 1) {
+				$useita = "JOO";	
+			}
 		}
 
 		if ($useita == "JOO") {

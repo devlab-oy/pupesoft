@@ -14,13 +14,54 @@ if (!file_exists($tilvahvfilenimi)) {
 
 	if (!$toot = fopen($tilvahvfilenimi, "w")) die("TILAUSVAHVISTUS: Tiedoston luonti ei onnistu!");
 
-	$query = "	SELECT tilausrivi.tunnus, eankoodi,
-				tilausrivi.tuoteno, if(var='j',0,varattu) varattu, if(var='j',jt+varattu,0) jt, toimaika, kommentti, tilkpl, tilausrivi.alv,
+	if ($yhtiorow["tilausvahvistus_lahetys"] == 1 and $laskurow["vanhatunnus"] > 0) {
+		$query = " 	SELECT group_concat(tunnus) tunnukset
+					FROM lasku use index (yhtio_vanhatunnus)
+					WHERE yhtio		= '$kukarow[yhtio]'
+					and vanhatunnus = '$laskurow[vanhatunnus]'
+					and tila IN ('N','L','A')";
+		$abures = mysql_query($query) or pupe_error($query);
+		$aburow = mysql_fetch_assoc($abures);
+
+		if ($aburow["tunnukset"] != "") {
+			$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
+		}
+		else {
+			$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+		}
+	}
+	elseif ($laskurow["tunnusnippu"] > 0) {
+		$query = "  SELECT group_concat(tunnus) tunnukset
+					FROM lasku
+					WHERE yhtio 	= '$kukarow[yhtio]'
+					and tunnusnippu = '$laskurow[tunnusnippu]'
+					and tila IN ('N','L','A')";
+		$abures = mysql_query($query) or pupe_error($query);
+		$aburow = mysql_fetch_assoc($abures);
+
+		if ($aburow["tunnukset"] != "") {
+			$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
+			$laskurow["nippu"] = $aburow["tunnukset"];
+		}
+		else {
+			$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+			$laskurow["nippu"] = $laskurow["tunnus"];
+		}
+	}
+	else {
+		$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+	}
+
+	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi, tilausrivi.tuoteno,
+				if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0) varattu,
+				if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
+				tilausrivi.toimaika, tilausrivi.tilkpl, tilausrivi.alv,
 				tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro
 				FROM tilausrivi
 				LEFT JOIN tuote USING (yhtio, tuoteno)
-				WHERE otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]'
-				ORDER BY tunnus";
+				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+				and $wherelisa
+				ORDER BY tilausrivi.tunnus";
 	$tilvahresult = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($tilvahresult) > 0) {

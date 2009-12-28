@@ -3,9 +3,9 @@
 // tarvitaan $laskurow array
 // tarvitaan $yhtiorow array
 
-$query = "	SELECT * 
-			FROM asiakas 
-			WHERE yhtio = '$kukarow[yhtio]' 
+$query = "	SELECT *
+			FROM asiakas
+			WHERE yhtio = '$kukarow[yhtio]'
 			AND tunnus = '$laskurow[liitostunnus]'";
 $tilvahresult = mysql_query($query) or pupe_error($query);
 $tilvahasiakas = mysql_fetch_array($tilvahresult);
@@ -18,10 +18,10 @@ $komento = array();
 // asiakkaan sähköpostiin
 if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 
-	$query = "	SELECT * 
-				FROM yhteyshenkilo 
-				WHERE yhtio = '$kukarow[yhtio]' 
-				AND liitostunnus = '$laskurow[liitostunnus]' 
+	$query = "	SELECT *
+				FROM yhteyshenkilo
+				WHERE yhtio = '$kukarow[yhtio]'
+				AND liitostunnus = '$laskurow[liitostunnus]'
 				AND nimi = '$laskurow[tilausyhteyshenkilo]'";
 	$yhteyshenkiloresult = mysql_query($query) or pupe_error($query);
 	$yhteyshenkiloasiakas = mysql_fetch_array($yhteyshenkiloresult);
@@ -65,7 +65,7 @@ if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
 	$toim_save = $toim;
 	if ($toim != "YLLAPITOSOPIMUS") $toim = "TILAUSVAHVISTUS";
-	
+
 	require("tulosta_tilausvahvistus_pdf.inc");
 	$toim = $toim_save;
 }
@@ -73,22 +73,53 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
 // lähetetään textimuotoinen tilausvahvistusmeili jos miellä _EI OLE_ P kirjainta vahvistuksessa
 if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
-	if ($yhtiorow["varaako_jt_saldoa"] != "") {
-		$lisavarattu = " + tilausrivi.varattu";
+	if ($yhtiorow["tilausvahvistus_lahetys"] == 1 and $laskurow["vanhatunnus"] > 0) {
+		$query = " 	SELECT group_concat(tunnus) tunnukset
+					FROM lasku use index (yhtio_vanhatunnus)
+					WHERE yhtio		= '$kukarow[yhtio]'
+					and vanhatunnus = '$laskurow[vanhatunnus]'
+					and tila IN ('N','L','A')";
+		$abures = mysql_query($query) or pupe_error($query);
+		$aburow = mysql_fetch_assoc($abures);
+
+		if ($aburow["tunnukset"] != "") {
+			$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
+		}
+		else {
+			$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+		}
+	}
+	elseif ($laskurow["tunnusnippu"] > 0) {
+		$query = "  SELECT group_concat(tunnus) tunnukset
+					FROM lasku
+					WHERE yhtio 	= '$kukarow[yhtio]'
+					and tunnusnippu = '$laskurow[tunnusnippu]'
+					and tila IN ('N','L','A')";
+		$abures = mysql_query($query) or pupe_error($query);
+		$aburow = mysql_fetch_assoc($abures);
+
+		if ($aburow["tunnukset"] != "") {
+			$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
+			$laskurow["nippu"] = $aburow["tunnukset"];
+		}
+		else {
+			$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+			$laskurow["nippu"] = $laskurow["tunnus"];
+		}
 	}
 	else {
-		$lisavarattu = "";
+		$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
 	}
 
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi, tuote.myyntihinta, tuote.aleryhma, tilausrivi.tuoteno,
 				if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0) varattu,
-				if(tilausrivi.var in ('J','S'), tilausrivi.jt $lisavarattu, 0) jt,
+				if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
 				tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv,
 				tilausrivi.nimitys,	tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.var
 				FROM tilausrivi
 				LEFT JOIN tuote USING (yhtio, tuoteno)
-				WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
-				and tilausrivi.yhtio	 = '$kukarow[yhtio]'
+				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+				and $wherelisa
 				ORDER BY tilausrivi.tunnus";
 	$tilvahresult = mysql_query($query) or pupe_error($query);
 
@@ -121,8 +152,37 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 		$ulos .= sprintf("%-50.s",$laskurow['maa'])									.$laskurow['toim_maa']."\n";
 		$ulos .= "\n";
 
-		if ($laskurow['toimvko'] == 'V') {
-			$laskurow["toimaika"] = t("Viikko")." ".date("W", strtotime($laskurow["toimaika"]));
+		$useita = "EI";
+
+		if ($laskurow["nippu"] > 0) {
+			$query = "	SELECT distinct(toimaika)
+						FROM tilausrivi
+						WHERE yhtio = '$kukarow[yhtio]'
+						and otunnus IN ($laskurow[nippu])
+						and toimaika != '0000-00-00'";
+			$toimaikares = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($toimaikares) > 1) {
+				$useita = "JOO";
+			}
+		}
+
+		if ($useita == "JOO") {
+			$laskurow["toimaika"] = t("Useita");
+		}
+		elseif ($laskurow["toimvko"] != '') {
+			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
+
+			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
+
+			if ($laskurow['toimvko'] != '7') {
+				$taika .= "/".$DAY_ARRAY[$laskurow["toimvko"]];
+			}
+
+			$laskurow["toimaika"] = $taika;
+		}
+		else {
+			$laskurow["toimaika"] = tv1dateconv($laskurow["toimaika"]);
 		}
 
 		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".$laskurow['toimitustapa'])		.t("Toimitusaika", $kieli).": ".$laskurow['toimaika']."\n";
@@ -169,9 +229,9 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
 		while ($tvtilausrivirow=mysql_fetch_array($tilvahresult)) {
 			$rivino++;
-			
+
 			$tvtilausrivirow['nimitys'] = t_tuotteen_avainsanat($tvtilausrivirow, 'nimitys', $kieli);
-			
+
 			if (strlen($tvtilausrivirow['nimitys']) > 29) {
 				$nimitysloput = substr($tvtilausrivirow['nimitys'], 29);
 				$tvtilausrivirow['nimitys'] = substr($tvtilausrivirow['nimitys'], 0, 29);

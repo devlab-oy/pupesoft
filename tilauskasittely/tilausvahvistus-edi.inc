@@ -14,13 +14,52 @@ if (!file_exists($tilvahvfilenimi)) {
 
 	if (!$toot = fopen($tilvahvfilenimi, "w")) die("TILAUSVAHVISTUS: Tiedoston luonti ei onnistu!");
 
-	$query = "	SELECT tilausrivi.tunnus, eankoodi,
-				tilausrivi.tuoteno, varattu, toimaika, kommentti, tilkpl, tilausrivi.alv, tilausrivi.nimitys,
+	if ($yhtiorow["tilausvahvistus_lahetys"] == 1 and $laskurow["vanhatunnus"] > 0) {
+		$query = " 	SELECT group_concat(tunnus) tunnukset
+					FROM lasku use index (yhtio_vanhatunnus)
+					WHERE yhtio		= '$kukarow[yhtio]'
+					and vanhatunnus = '$laskurow[vanhatunnus]'
+					and tila IN ('N','L','A')";
+		$abures = mysql_query($query) or pupe_error($query);
+		$aburow = mysql_fetch_assoc($abures);
+
+		if ($aburow["tunnukset"] != "") {
+			$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
+		}
+		else {
+			$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+		}
+	}
+	elseif ($laskurow["tunnusnippu"] > 0) {
+		$query = "  SELECT group_concat(tunnus) tunnukset
+					FROM lasku
+					WHERE yhtio 	= '$kukarow[yhtio]'
+					and tunnusnippu = '$laskurow[tunnusnippu]'
+					and tila IN ('N','L','A')";
+		$abures = mysql_query($query) or pupe_error($query);
+		$aburow = mysql_fetch_assoc($abures);
+
+		if ($aburow["tunnukset"] != "") {
+			$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
+			$laskurow["nippu"] = $aburow["tunnukset"];
+		}
+		else {
+			$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+			$laskurow["nippu"] = $laskurow["tunnus"];
+		}
+	}
+	else {
+		$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+	}
+
+	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi,
+				tilausrivi.tuoteno, tilausrivi.varattu, tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv, tilausrivi.nimitys,
 				tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro
 				FROM tilausrivi
 				LEFT JOIN tuote USING (yhtio, tuoteno)
-				WHERE otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]'
-				ORDER BY tunnus";
+				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+				and $wherelisa
+				ORDER BY tilausrivi.tunnus";
 	$tilvahresult = mysql_query($query) or pupe_error($query);
 
 	//Myyj‰n email
@@ -36,7 +75,7 @@ if (!file_exists($tilvahvfilenimi)) {
 		echo "TILAUSVAHVISTUS: Maksuehto on kateissa!<br><br>";
 	}
 	else {
-		$mehtorow=mysql_fetch_array($xresult);
+		$mehtorow = mysql_fetch_array($xresult);
 	}
 
 	if (mysql_num_rows($tilvahresult) > 0) {
@@ -65,7 +104,7 @@ if (!file_exists($tilvahvfilenimi)) {
 		$ulos .= "RNADBY_DO:E\n"; // mimmosen tilausvahvistuksen asiakas haluaa... aina edi ni ei tule ongelmia
 		$ulos .= "RNADDP_RF:" . "ZZ /" . $laskurow['ytunnus'] . "\n";
 		// jos tyhj‰‰ ni ei saa l‰hett‰‰‰.. weird.
-		if (trim($laskurow['toim_ovttunnus'])!='') {
+		if (trim($laskurow['toim_ovttunnus']) != '') {
 			$ulos .= "RNADDP_PC:" . sprintf ("%-18.18s", $laskurow['toim_ovttunnus']) . "100 91". "\n";
 		}
 		$ulos .= "RNADDP_NA:" . $laskurow['toim_nimi'] . "\n";
@@ -95,9 +134,9 @@ if (!file_exists($tilvahvfilenimi)) {
 		$ulos .= "RHDR__END:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
 		fputs($toot,$ulos);
 
-		$rivino=1; // dummy rivino, kun elma ei handlaa pitki‰
+		$rivino = 1; // dummy rivino, kun elma ei handlaa pitki‰
 
-		while ($tvtilausrivirow=mysql_fetch_array ($tilvahresult)) {
+		while ($tvtilausrivirow = mysql_fetch_array($tilvahresult)) {
 			if ($tvtilausrivirow['yksikko'] == '') $tvtilausrivirow['yksikko'] = "PCE";
 			if ($tvtilausrivirow['eankoodi'] == 0) $tvtilausrivirow['eankoodi'] = '';
 
@@ -116,7 +155,7 @@ if (!file_exists($tilvahvfilenimi)) {
 			$ulos .= "RLIN2__DT:" . tv2dateconv($tvtilausrivirow['toimaika']) . "\n";
 			$ulos .= "RLINVATTX:" . $tvtilausrivirow['alv'] . " S" . "\n";
 			$ulos .= "RLINLINFC:" . str_replace("\n", " ", $tvtilausrivirow['kommentti']) . "\n";
-		//		$ulos .= "RLINLINFC:" . $tvtilausrivirow['kommentti'] . "\n"; // J‰lkitoimitusrivitiedot
+			//$ulos .= "RLINLINFC:" . $tvtilausrivirow['kommentti'] . "\n"; // J‰lkitoimitusrivitiedot
 			$ulos .= "RLIN__END:" . $rivino . "\n";
 			fputs($toot,$ulos);
 			$rivino++;
@@ -141,19 +180,7 @@ if (!file_exists($tilvahvfilenimi)) {
 		else {
 			require ("ftp-send.inc");
 		}
-
-	#	// n‰ytet‰‰n faili ruudulla...
-	#	$toot = fopen(tilvahvfilenimi,"r");
-	#
-	#	$contents = "";
-	#	while (!feof ($toot)) {
-	#		$buffer = fgets($toot, 4096);
-	#		$contents .= $buffer;
-	#	}
-	#	fclose ($toot);
-	#	echo "<pre>".htmlentities($contents)."</pre><br><br>";
-
-	} // end rivej‰ lˆytyi
+	}
 }
 
 if ($yhtiorow['tilausvahvistus_tallenna'] == 'K') {

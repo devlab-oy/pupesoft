@@ -732,6 +732,44 @@
 			$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W','E') ";
 		}
 
+		if ($yhtiorow["tilausvahvistus_lahetys"] == 1 and $laskurow["vanhatunnus"] > 0) {
+			$query = " 	SELECT group_concat(tunnus) tunnukset
+						FROM lasku use index (yhtio_vanhatunnus)
+						WHERE yhtio		= '$kukarow[yhtio]'
+						and vanhatunnus = '$laskurow[vanhatunnus]'
+						and tila IN ('N','L','A')";
+			$abures = mysql_query($query) or pupe_error($query);
+			$aburow = mysql_fetch_assoc($abures);
+
+			if ($aburow["tunnukset"] != "") {
+				$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
+			}
+			else {
+				$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+			}
+		}
+		elseif ($laskurow["tunnusnippu"] > 0) {
+			$query = "  SELECT group_concat(tunnus) tunnukset
+						FROM lasku
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						and tunnusnippu = '$laskurow[tunnusnippu]'
+						and tila IN ('N','L','A')";
+			$abures = mysql_query($query) or pupe_error($query);
+			$aburow = mysql_fetch_assoc($abures);
+
+			if ($aburow["tunnukset"] != "") {
+				$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
+				$laskurow["nippu"] = $aburow["tunnukset"];
+			}
+			else {
+				$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+				$laskurow["nippu"] = $laskurow["tunnus"];
+			}
+		}
+		else {
+			$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+		}
+
 		// generoidaan lähetteelle ja keräyslistalle rivinumerot
 		// Rivit groupataan tilausvahvistukselle
 		if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
@@ -751,8 +789,8 @@
 						JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 						JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 						LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-						WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
-						and tilausrivi.yhtio = '$kukarow[yhtio]'
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and $wherelisa
 						$tyyppilisa
 						and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
@@ -768,8 +806,8 @@
 						JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 						JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
 						LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-						WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
-						and tilausrivi.yhtio = '$kukarow[yhtio]'
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and $wherelisa
 						$tyyppilisa
 						and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 						ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
@@ -826,6 +864,5 @@
 
 		//tulostetaan sivu
 		print_pdf_lahete($komento["Tilausvahvistus"], $toim);
-
 	}
 ?>

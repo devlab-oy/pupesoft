@@ -2175,4 +2175,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "pakkaamojako") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Tilaukselle jaetaan lokero per pakkaamo")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Tilaukselle jaetaan vain yksi lokero")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 ?>

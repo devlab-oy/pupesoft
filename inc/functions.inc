@@ -7184,6 +7184,12 @@ if (!function_exists("pakkaamo")) {
 			return $split_pakkaamo_row['pakkaamo'];
 		}
 
+		$pakkaamotark_wherelisa = '';
+
+		if ($yhtiorow['pakkaamojako'] == '') {
+			$pakkaamotark_wherelisa = ' AND varaston_tulostimet.pakkaamo = vanha_varaston_tulostimet.pakkaamo ';
+		}
+
 		// Katsotaan onko näitä tilauksia laitettu jo joku osa jonnekin lokeroon samassa pakkaamossa ja valitaan paras lokero
 		$query = "	SELECT pakkaamo.tunnus
 					FROM lasku
@@ -7194,8 +7200,8 @@ if (!function_exists("pakkaamo")) {
 					WHERE lasku.$logistiikka_yhtiolisa
 					AND ((lasku.tila in ('N','L') and lasku.alatila = 'A') or (lasku.tila = 'L' and lasku.alatila = 'C') or (lasku.tila = 'G' and lasku.alatila in ('J','A','C')))
 					AND lasku.vanhatunnus != 0
-					AND varaston_tulostimet.pakkaamo = vanha_varaston_tulostimet.pakkaamo
 					AND lasku.tunnus in ($tilausnumero)
+					$pakkaamotark_wherelisa
 					ORDER BY pakkaamo.pakkaamon_prio, pakkaamo.prio
 					LIMIT 1";
 		$pakkaamotark_res = mysql_query($query) or pupe_error($query);

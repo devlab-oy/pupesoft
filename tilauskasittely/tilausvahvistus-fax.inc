@@ -47,7 +47,7 @@ else {
 			$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
 		}
 	}
-	elseif ($laskurow["tunnusnippu"] > 0) {
+	elseif ($laskurow["tunnusnippu"] > 0 and $laskurow["clearing"] != "JT-TILAUS") {
 		$query = "  SELECT group_concat(tunnus) tunnukset
 					FROM lasku
 					WHERE yhtio 	= '$kukarow[yhtio]'

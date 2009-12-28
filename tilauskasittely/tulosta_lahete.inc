@@ -188,7 +188,7 @@ if (!function_exists('alku_lahete')) {
 		$pdf->draw_rectangle(800, 420, 779, 580, $thispage, $rectparam);
 
 		if ($laskurow["tunnusnippu"] > 0) {
-			if ($tyyppi == "YLLAPITOSOPIMUS") {
+			if ($tyyppi == "YLLAPITOSOPIMUS" or $laskurow["nippu"] > 0) {
 				$pdf->draw_text(310, 792, t("Tilausnumero", $kieli), 						$thispage, $pieni);
 				$pdf->draw_text(310, 782, $laskurow["tunnusnippu"],							$thispage, $boldi);
 			}

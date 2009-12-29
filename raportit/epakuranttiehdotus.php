@@ -17,6 +17,9 @@ else {
 
 	echo "<font class='head'>".t("Epäkuranttiehdotus")."</font><hr>";
 
+	echo "<font class='message'>",t("Raportti on toistaiseksi pois käytöstä"),"!</font>";
+	exit;
+
 	// nollataan muuttujat
 	$epakuranttipvm = "";
 	$chk1 = "";

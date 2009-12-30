@@ -43,7 +43,7 @@ $rivinkorkeus			= 15;
 
 //muutamat funktiot...
 if (!function_exists('alku_tarjous')) {
-	function alku_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous) {
+	function alku_tarjous ($laskurow, $asiakasrow, $kieli, $pdf_tarjous) {
 		global $tarjoustyyppi, $yhtiorow, $kukarow, $pieni, $norm, $boldi, $pieni_boldi, $iso, $rectparam, $useita;
 
 		$page_tarjous = $pdf_tarjous->new_page("a4");
@@ -173,9 +173,9 @@ if (!function_exists('alku_tarjous')) {
 						and otunnus IN ($laskurow[nippu])
 						and toimaika != '0000-00-00'";
 			$toimaikares = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($toimaikares) > 1) {
-				$useita = "JOO";	
+				$useita = "JOO";
 			}
 		}
 
@@ -327,7 +327,7 @@ if (!function_exists('alku_tarjous')) {
 }
 
 if (!function_exists('uusi_sivu_tarjous')) {
-	function uusi_sivu_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous) {
+	function uusi_sivu_tarjous ($laskurow, $asiakasrow, $kieli, $pdf_tarjous) {
 		global $tarjoustyyppi, $yhtiorow, $kukarow, $pieni, $norm, $boldi, $pieni_boldi, $iso, $rectparam, $useita;
 
 		$page_tarjous = $pdf_tarjous->new_page("a4");
@@ -433,12 +433,11 @@ if (!function_exists('uusi_sivu_tarjous')) {
 			$pdf_tarjous->draw_text(430, 782, tv1dateconv($laskurow["toimaika"]), 	$page_tarjous, $norm);
 		}
 
-		if ($asiakasrow["asiakasnro"] == "" and $laskurow["ytunnus"] != "") $asiakasrow["asiakasnro"] = $laskurow["ytunnus"];
-
 		$pdf_tarjous->draw_rectangle(779, 300, 758, 580, $page_tarjous, $rectparam);
 		$pdf_tarjous->draw_rectangle(779, 420, 758, 580, $page_tarjous, $rectparam);
-		$pdf_tarjous->draw_text(310, 771, t("Asiakasnumero", $kieli), 					$page_tarjous, $pieni);
-		$pdf_tarjous->draw_text(310, 761, $asiakasrow["asiakasnro"], 					$page_tarjous, $norm);
+		$pdf_tarjous->draw_text(310, 771, t("Asiakkaan Y-tunnus", $kieli), 					$page_tarjous, $pieni);
+		$pdf_tarjous->draw_text(310, 761, tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]),	$page_tarjous, $norm);
+		
 		$pdf_tarjous->draw_text(430, 771, t("P‰iv‰ys", $kieli), 						$page_tarjous, $pieni);
 		$pdf_tarjous->draw_text(430, 761, tv1dateconv($laskurow["muutospvm"]),	 		$page_tarjous, $norm);
 
@@ -480,7 +479,7 @@ if (!function_exists('tarjous_rivi_otsikot')) {
 }
 
 if (!function_exists('rivi_tarjous')) {
-	function rivi_tarjous($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous, $sarjanutunnus, $selite, $row, $hinnat, $lask, $sivu) {
+	function rivi_tarjous($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous, $sarjanutunnus, $selite, $row, $hinnat) {
 		global $yhtiorow, $kukarow, $norm, $pieni;
 
 		$rivinkorkeus = 15;
@@ -642,7 +641,7 @@ if (!function_exists('rivi_tarjous')) {
 			}
 		}
 
-		if($useita == "JOO") {
+		if ($useita == "JOO") {
 			$row["kommentti"] .= "\n".t("Toimitusaika", $kieli).": ".tv1dateconv($row["toimaika"]);
 		}
 
@@ -678,16 +677,16 @@ if (!function_exists('rivi_tarjous')) {
 			if (str_replace("perhe_", "", $tarjoustyyppi) == "") {
 				$summa += $row['rivihinta'];
 
-				$kala = tarjous_rivi_hinta_ale($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous, $sarjanutunnus, $selite, $row, $hinnat, $lask, $sivu);
+				$kala = tarjous_rivi_hinta_ale($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous, $sarjanutunnus, $selite, $row, $hinnat);
 			}
 		}
 
-		return array ($page_tarjous, $kala, $lask);
+		return $kala;
 	}
 }
 
 if (!function_exists('tarjous_rivi_hinta_ale')) {
-	function tarjous_rivi_hinta_ale($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous, $sarjanutunnus, $selite, $row, $hinnat, $lask, $sivu) {
+	function tarjous_rivi_hinta_ale($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous, $sarjanutunnus, $selite, $row, $hinnat) {
 		global $yhtiorow, $kukarow, $norm, $pieni;
 
 		$rivinkorkeus = 12;
@@ -724,7 +723,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 
 		$kala = $kala - 10;
 
-		return($kala);
+		return $kala;
 	}
 }
 
@@ -913,102 +912,86 @@ if (!function_exists('tulosta_tarjous')) {
 
 		}
 
-
-		function printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $lask, $kala, $kieli, $sivu, $page_tarjous, $sarjanutunnus, $osasto, $selite, $total, $hinnat) {
-			global $yhtiorow, $kukarow, $norm, $pieni;
-
-			//Teh‰‰n t‰st‰ taas array t‰n funktion si‰iseen k‰yttˆˆn jotta saamme sivunvaihdot toimimaan
-			$page_tarjous2[$sivu] = $page_tarjous;
-
-			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-				$hinta_riv = "round(tilausrivi.hinta/$laskurow[vienti_kurssi], 2)";
-			}
-			else {
-				$hinta_riv = "tilausrivi.hinta";
-			}
-
-			$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
-
-			$query = "	SELECT tilausrivi.*,
-						round($hinta_riv * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2) rivihinta,
-						round($hinta_riv * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl),2) bruttorivihinta,
-						tilausrivin_lisatiedot.positio,
-						$sorttauskentta
-						FROM tilausrivi
-						JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-						LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-						WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
-						and tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tilausrivi.tyyppi in  ('L','T','U')
-						$ennakkolisa
-						$osasto
-						ORDER BY sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
-			$riresult = mysql_query($query) or pupe_error($query);
-
-			while ($row = mysql_fetch_array($riresult)) {
-
-				if ($yhtiorow['tarjouksen_alv_kasittely'] != '') {
-					if ($yhtiorow['alv_kasittely'] == '' and $yhtiorow['tarjouksen_alv_kasittely'] == 'X') {
-			        	$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
-					}
-					elseif ($yhtiorow['alv_kasittely'] != '' and $yhtiorow['tarjouksen_alv_kasittely'] == 'S') {
-						$row["rivihinta"] = $row["rivihinta"] * (1+$row["alv"]/100);
-					}
-				}
-
-				// Mahtuuko rivi t‰lle sivulle
-				$kala_nyt = $kala;
-
-				if(substr($tarjoustyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
-					if (str_replace("perhe_", "", $tarjoustyyppi) == "") {
-						$kala = tarjous_rivi_hinta_ale($pdf_tarjous, $laskurow, $kala, $kieli, $devnull, $sarjanutunnus, $selite, $row, $hinnat, $lask, $sivu);
-					}
-				}
-
-				// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
-				if ($kala <= 50) {
-					loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous2[$sivu], 0);
-
-					list($page_tarjous2[$sivu], $kala) = uusi_sivu_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous);
-				}
-				else {
-					$kala = $kala_nyt;
-				}
-
-				list($page_tarjous2[$sivu], $kala, $lask, $sivu) = rivi_tarjous($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous2[$sivu], $sarjanutunnus, $selite, $row, $hinnat, $lask, $sivu);
-
-				$lask++;
-
-				if ($row["hinta"] != 0 and $hinnat == "BR" and (strpos($selite, 'Vene') !== FALSE or strpos($selite, 'Vaihtovene') !== FALSE)) {
-					$total += $row["bruttorivihinta"];
-				}
-				else {
-					$total += $row["rivihinta"];
-				}
-			}
-			return array ($page_tarjous2[$sivu], $lask, $kala, $sivu, $total);
-		}
-
-
 		//oletuksia
-		$lask 			= 0;
 		$total 			= 0;
 		$sivu 			= 1;
 
-		//Myyntisopimuksen pohja
 		$pdf_tarjous = new pdffile;
 
-		$pdf_tarjous->set_default('margin-top', 20);
+		$pdf_tarjous->set_default('margin-top',   20);
 		$pdf_tarjous->set_default('margin-bottom', 0);
-		$pdf_tarjous->set_default('margin-left', 0);
-		$pdf_tarjous->set_default('margin-right', 0);
+		$pdf_tarjous->set_default('margin-left',   0);
+		$pdf_tarjous->set_default('margin-right',  0);
 
-		$pdf_tarjous->enable('import');
-
-		list($page_tarjous[$sivu], $kala) = alku_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous);
+		list($page_tarjous[$sivu], $kala) = alku_tarjous($laskurow, $asiakasrow, $kieli, $pdf_tarjous);
 
 		// Rivit
-		list ($page_tarjous[$sivu], $lask, $kala, $sivu, $total) = printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $lask, $kala, $kieli, $sivu, $page_tarjous[$sivu], "", "", "", $total, $hinnat);
+		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
+			$hinta_riv = "round(tilausrivi.hinta/$laskurow[vienti_kurssi], 2)";
+		}
+		else {
+			$hinta_riv = "tilausrivi.hinta";
+		}
+
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
+
+		$query = "	SELECT tilausrivi.*,
+					round($hinta_riv * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2) rivihinta,
+					round($hinta_riv * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl),2) bruttorivihinta,
+					tilausrivin_lisatiedot.positio,
+					$sorttauskentta
+					FROM tilausrivi
+					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+					WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
+					and tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.tyyppi in  ('L','T','U')
+					$ennakkolisa
+					$osasto
+					ORDER BY sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
+		$riresult = mysql_query($query) or pupe_error($query);
+
+		while ($row = mysql_fetch_array($riresult)) {
+
+			if ($yhtiorow['tarjouksen_alv_kasittely'] != '') {
+				if ($yhtiorow['alv_kasittely'] == '' and $yhtiorow['tarjouksen_alv_kasittely'] == 'X') {
+		        	$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
+				}
+				elseif ($yhtiorow['alv_kasittely'] != '' and $yhtiorow['tarjouksen_alv_kasittely'] == 'S') {
+					$row["rivihinta"] = $row["rivihinta"] * (1+$row["alv"]/100);
+				}
+			}
+
+			// Mahtuuko rivi t‰lle sivulle
+			$kala_nyt = $kala;
+
+			if (substr($tarjoustyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
+				if (str_replace("perhe_", "", $tarjoustyyppi) == "") {
+					$kala = tarjous_rivi_hinta_ale($pdf_tarjous, $laskurow, $kala, $kieli, $devnull, $sarjanutunnus, $selite, $row, $hinnat);
+				}
+			}
+
+			// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+			if ($kala <= 50) {
+				loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous[$sivu], 0);
+
+				$sivu++;
+
+				list($page_tarjous[$sivu], $kala) = uusi_sivu_tarjous($laskurow, $asiakasrow, $kieli, $pdf_tarjous);
+			}
+			else {
+				$kala = $kala_nyt;
+			}
+
+			$kala = rivi_tarjous($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous[$sivu], $sarjanutunnus, $selite, $row, $hinnat);
+
+			if ($row["hinta"] != 0 and $hinnat == "BR") {
+				$total += $row["bruttorivihinta"];
+			}
+			else {
+				$total += $row["rivihinta"];
+			}
+		}
 
 		$total_uudet  = $total;
 		$total_vanhat = $total - $total_uudet;
@@ -1020,7 +1003,7 @@ if (!function_exists('tulosta_tarjous')) {
 		if ($kala <= 150) {
 			loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous[$sivu], 0);
 
-			list($page_tarjous[$sivu], $kala) = uusi_sivu_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous);
+			list($page_tarjous[$sivu], $kala) = uusi_sivu_tarjous($laskurow, $asiakasrow, $kieli, $pdf_tarjous);
 		}
 
 		// Lopputekstit

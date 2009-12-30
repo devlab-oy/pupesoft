@@ -121,25 +121,17 @@ if(!function_exists("tuotetarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "tuotetyyppi") {
-			// Tyyppiä ei saa vaihtaa, jos tuotteella on saldoa
-			$query  = "	SELECT tuotetyyppi
-		    			FROM tuote
-		    			WHERE yhtio = '$kukarow[yhtio]'
-		    			and tuoteno = '$tem_tuoteno'";
-		    $sresult = mysql_query($query) or pupe_error($query);
-		    $srow = mysql_fetch_array($sresult);
+			// Tyyppiä ei saa vaihtaa, jos tuotteella on yksikin tapahtuma
+			$query = "	SELECT tunnus
+						FROM tapahtuma
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tuoteno = '$tem_tuoteno'
+						LIMIT 1";
+			$tapahtuma_chk_res = mysql_query($query) or pupe_error($query);
 
-		    if (trim(strtoupper($srow["tuotetyyppi"])) != trim(strtoupper($t[$i]))) {
-		    	$query = "	SELECT count(*) kpl
-		    				FROM tuotepaikat
-		    				WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tem_tuoteno' and saldo != 0";
-		    	$sresult = mysql_query($query) or pupe_error($query);
-		    	$srow = mysql_fetch_array($sresult);
-
-		    	if ($srow["kpl"] > 0) {
-					$virhe[$i] = t("Tuotetyyppiä ei voida muuttaa, koska tuotteella on saldoa")."!";
-				}
-		    }
+			if (mysql_num_rows($tapahtuma_chk_res) == 1) {
+				$virhe[$i] = t("Tuotetyyppiä ei voida muuttaa, koska tuotteella on tapahtumia")."!";
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {

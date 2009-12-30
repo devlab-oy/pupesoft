@@ -23,6 +23,7 @@ require ("inc/functions.inc");
 if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 
 	$login="yes";
+
 	require("inc/parametrit.inc");
 
 	$session = "";
@@ -30,21 +31,18 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 
 	$query = "	SELECT kuka.kuka, kuka.session, kuka.salasana, kuka.yhtio
 				FROM kuka
-				JOIN oikeu ON oikeu.yhtio=kuka.yhtio and oikeu.kuka=kuka.kuka 
+				JOIN oikeu ON oikeu.yhtio=kuka.yhtio and oikeu.kuka=kuka.kuka
 				where kuka.kuka		= '$user'
 				and kuka.extranet 	= ''
 				GROUP BY 1,2,3,4";
 	$result = mysql_query($query) or die("Kysely ep‰onnistui");
-	$krow = mysql_fetch_array ($result);
+	$krow = mysql_fetch_array($result);
 
-	if($salamd5!='')
-		$vertaa=$salamd5;
-	elseif($salasana == '')
-		$vertaa=$salasana;
-	else
-		$vertaa = md5(trim($salasana));
+	if ($salamd5!='') $vertaa = $salamd5;
+	elseif ($salasana == '') $vertaa = $salasana;
+	else $vertaa = md5(trim($salasana));
 
-	if ((mysql_num_rows ($result) > 0) and ($vertaa == $krow['salasana'])) {
+	if (mysql_num_rows($result) > 0 and $vertaa == $krow['salasana']) {
 
 		// jos meill‰ on vaan kaks yhtiot‰ ja ollaan tulossa firman vaihdosta, vaihdetaan suoraan toiseen
 		if (mysql_num_rows($result) == 2 and $mikayhtio != "") {
@@ -71,25 +69,26 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 				$errormsg = t("Uudet salasanasi olivat erilaiset")."! ".t("Salasanaasi ei vaihdettu")."!";
 				$err = 1;
 				$usea = 0;
-			} else if (strlen(trim($uusi1)) < 6) {
+			}
+			elseif (strlen(trim($uusi1)) < 6) {
 				$errormsg = t("Uusi salasanasi on liian lyhyt").". ".t("Salasanan pit‰‰ olla v‰hint‰‰n 6 merkki‰ pitk‰").". ".t("Salasanaasi ei vaihdettu")."! ";
 				$err = 1;
 				$usea = 0;
-			} else if (stristr($uusi1, $krow["kuka"])) {
+			}
+			elseif (stristr($uusi1, $krow["kuka"])) {
 				$errormsg = t("Salasanasi ei saa sis‰lt‰‰ k‰ytt‰j‰tunnustasi").". ".t("Salasanaasi ei vaihdettu")."!";
 				$err = 1;
 				$usea = 0;
 			}
 			else {
-				$uusi1=md5(trim($uusi1));
+				$uusi1 = md5(trim($uusi1));
 				$query = "	UPDATE kuka
 							SET salasana = '$uusi1'
 							WHERE kuka = '$user'";
-				$result = mysql_query($query)
-					or die ("Salasanap‰ivitys ep‰onnistui kuka");
+				$result = mysql_query($query) or die ("Salasanap‰ivitys ep‰onnistui kuka");
 
-				$vertaa=trim($uusi1);
-				$salasana=trim($uusi2);
+				$vertaa = trim($uusi1);
+				$salasana = trim($uusi2);
 				$errormsg = t("Salasanasi vaihdettiin onnistuneesti")."!";
 			}
 		}
@@ -105,9 +104,10 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 							SET session = '$session',
 							lastlogin = now()
 							WHERE kuka = '$user'";
-				if (strlen($yhtio) > 0) {
-					$query .= " and yhtio = '$yhtio'";
-				}
+
+				if (strlen($yhtio) > 0) $query .= " and yhtio = '$yhtio'";
+				else $query .= " and yhtio = '$krow[yhtio]'";
+
 				$result = mysql_query($query) or die ("P‰ivitys ep‰onnistui kuka $query");
 
 				$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH)); // 12 tuntia voimassa
@@ -122,14 +122,14 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 					$row = mysql_fetch_array($result);
 
 					if ($row["oletus_ohjelma"] != "") {
-						
+
 						$oletus_ohjelman_osat = explode("##", $row["oletus_ohjelma"]);
-												
+
 						$palvelin2 .= "?goso=$oletus_ohjelman_osat[0]&go=$oletus_ohjelman_osat[1]";
-						
+
 						if ($oletus_ohjelman_osat[2] != "") {
 							$palvelin2 .= "?toim=$oletus_ohjelman_osat[2]";
-						}											
+						}
 					}
 
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";
@@ -198,8 +198,8 @@ echo "</td><td><font class='head'>".t("Sis‰‰nkirjautuminen",$browkieli)."</font>
 if (isset($usea) and $usea == 1) {
 	$query = "	SELECT yhtio.nimi, yhtio.yhtio
 				FROM kuka, yhtio
-				WHERE kuka.kuka		= '$user' 
-				and yhtio.yhtio		= kuka.yhtio 
+				WHERE kuka.kuka		= '$user'
+				and yhtio.yhtio		= kuka.yhtio
 				and kuka.extranet	= ''
 				ORDER BY nimi";
 	$result = mysql_query($query) or pupe_error($query);;
@@ -218,11 +218,11 @@ if (isset($usea) and $usea == 1) {
 			echo "<td><font class='menu'>$yrow[$i]</font></td>";
 		}
 		echo "<form action = 'login.php' method='post'>";
-		
+
 		if (isset($errormsg)) {
 			echo "<input type='hidden' name='errormsg' value='$errormsg'>";
 		}
-		
+
 		echo "<input type='hidden' name='user'     value='$user'>";
 		echo "<input type='hidden' name='salamd5' value='$vertaa'>";
 		echo "<input type='hidden' name='yhtio'    value='$yrow[yhtio]'>";
@@ -248,16 +248,16 @@ else {
 			<tr><td><font class='menu'>".t("Uusi salasana",$browkieli).":</font></td><td><input type='password' name='uusi1' size='15' maxlength='30'></td></tr>
 			<tr><td><font class='menu'>".t("ja uudestaan",$browkieli).":</font></td><td><input type='password' name='uusi2' size='15' maxlength='30'></td></tr>
 		</table>";
-	
+
 	if (isset($errormsg) and $errormsg != "") {
 			echo "<br><font class='error'>$errormsg</font><br>";
 	}
-	
+
 	echo "	<br><input type='submit' value='".t("Sis‰‰n",$browkieli)."'>
 			<br><br>
 			<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.pupesoft.com/'>pupesoft.com</a> - <a href='license.php'>Licence Agreement</a></font>
 			</form>";
-				
+
 	echo "<script LANGUAGE='JavaScript'>window.document.$formi.$kentta.focus();</script>";
 }
 

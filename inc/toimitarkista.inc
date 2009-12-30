@@ -4,7 +4,7 @@ if(!function_exists("toimitarkista")) {
 	function toimitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $toimtyyppi;
 		
-		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi;
+		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift;
 		
 		if ((mysql_field_name($result, $i) == "nimi") or (mysql_field_name($result, $i) == "maa") or (mysql_field_name($result, $i) == "ytunnus") or (mysql_field_name($result, $i) == "oletus_hyvak1")) {
 			if (trim($t[$i]) == '') {
@@ -52,7 +52,6 @@ if(!function_exists("toimitarkista")) {
 
 		if (mysql_field_name($result, $i) == "tilinumero") {
 			$t[$i] = trim($t[$i]);
-			
 			if ($tmp_maakoodi == strtoupper($yhtiorow['maa'])) {
 				if ((int)trim($t[$i]) != 0) {
 					$pankkitili = $t[$i];
@@ -63,6 +62,10 @@ if(!function_exists("toimitarkista")) {
 						}
 						else {
 							$t[$i]=$pankkitili;
+							require "luoiban.inc";
+							$vastaus = luoiban($t[$i]);
+							$tmp_iban = $vastaus['iban'];
+							$tmp_swift = $vastaus['swift'];
 						}
 					}
 				}
@@ -79,11 +82,13 @@ if(!function_exists("toimitarkista")) {
 					$virhe[$i] = "".t("Tieto puuttuu")."";
 				}
 			}
+			if ($t[$i] == '') $t[$i] = $tmp_iban;
 			//Vaaditaan isot kirjaimet
 			$t[$i] = strtoupper($t[$i]);
 		}
 
 		if (mysql_field_name($result, $i) == "swift") {
+			if ($t[$i] == '') $t[$i] = $tmp_swift;
 			//Vaaditaan isot kirjaimet
 			$t[$i] = strtoupper($t[$i]);
 		}

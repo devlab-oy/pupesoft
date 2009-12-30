@@ -6,16 +6,16 @@
 
 		if ($toim != "REKLAMAATIO") {
 			$tulostimet[0] = "Työmääräys";
-			require_once ("tulosta_tyomaarays.inc");
+			require_once ("tyomaarays/tulosta_tyomaarays.inc");
 		}
 		else {
 			$tulostimet[0] = "Keräyslista";
-			require_once ("tulosta_lahete_kerayslista.inc");
+			require_once ("tilauskasittely/tulosta_lahete_kerayslista.inc");
 		}
 
 		if (count($komento) == 0) {
 			echo "<font class='head'>$tulostimet[0]:</font><hr>";
-			require("../inc/valitse_tulostin.inc");
+			require("inc/valitse_tulostin.inc");
 		}
 
 		if ($laskurow["tila"] == 'U') {
@@ -169,7 +169,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 		}
 		else {
-			require("tilaus-valmis.inc");
+			require("tilauskasittely/tilaus-valmis.inc");
 		}
 		$tee = "";
 	}
@@ -196,7 +196,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 		}
 		else {
-			require("tilaus-valmis.inc");
+			require("tilauskasittely/tilaus-valmis.inc");
 		}
 		$tee = "";
 	}
@@ -223,7 +223,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 		}
 		else {
-			require("tilaus-valmis-siirtolista.inc");
+			require("tilauskasittely/tilaus-valmis-siirtolista.inc");
 		}
 
 		$tee = "";

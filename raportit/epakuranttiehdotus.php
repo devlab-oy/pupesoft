@@ -272,6 +272,17 @@ else {
 
 			$bar->increase();
 
+			$query = "	SELECT sum(saldo) saldo 
+						FROM tuotepaikat 
+						WHERE tuotepaikat.yhtio = '$kukarow[yhtio]' 
+						and tuotepaikat.tuoteno = '$row[tuoteno]'";
+			$saldores = mysql_query($query) or pupe_error($query);
+			$saldorow = mysql_fetch_assoc($saldores);
+
+			if ($saldorow['saldo'] == 0) {
+				continue;
+			}
+
 			if ($row["epakurantti75pvm"] != "0000-00-00") {
 				$epispvm = $row["epakurantti75pvm"];
 			}
@@ -306,17 +317,6 @@ else {
 
 			// tätä tuotetta on saapunut ennen myyntirajauksen alarajaa, joten otetaan käsittelyyn
 			if (($saapunut < $alaraja) and (($tyyppi != '25' and $epaku1pv < $epa2raja) or ($tyyppi == '25'))) {
-
-				$query = "	SELECT sum(saldo) saldo 
-							FROM tuotepaikat 
-							WHERE tuotepaikat.yhtio = '$kukarow[yhtio]' 
-							and tuotepaikat.tuoteno = '$row[tuoteno]'";
-				$saldores = mysql_query($query) or pupe_error($query);
-				$saldorow = mysql_fetch_assoc($saldores);
-
-				if ($saldorow['saldo'] == 0) {
-					continue;
-				}
 
 				$query = "	SELECT group_concat(distinct tuotteen_toimittajat.toimittaja separator '/') toimittaja
 							FROM tuotteen_toimittajat 

@@ -122,15 +122,17 @@ if(!function_exists("tuotetarkista")) {
 
 		if (mysql_field_name($result, $i) == "tuotetyyppi") {
 			// Tyyppiä ei saa vaihtaa, jos tuotteella on yksikin tapahtuma
-			$query = "	SELECT tunnus
-						FROM tapahtuma
-						WHERE yhtio = '{$kukarow['yhtio']}'
-						AND tuoteno = '$tem_tuoteno'
-						LIMIT 1";
-			$tapahtuma_chk_res = mysql_query($query) or pupe_error($query);
+		    if (trim(strtoupper($trow["tuotetyyppi"])) != trim(strtoupper($t[$i]))) {
+				$query = "	SELECT tunnus
+							FROM tapahtuma
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tuoteno = '$tem_tuoteno'
+							LIMIT 1";
+				$tapahtuma_chk_res = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($tapahtuma_chk_res) == 1) {
-				$virhe[$i] = t("Tuotetyyppiä ei voida muuttaa, koska tuotteella on tapahtumia")."!";
+				if (mysql_num_rows($tapahtuma_chk_res) == 1) {
+					$virhe[$i] = t("Tuotetyyppiä ei voida muuttaa, koska tuotteella on tapahtumia")."!";
+				}
 			}
 		}
 

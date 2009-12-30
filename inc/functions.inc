@@ -4188,6 +4188,36 @@ if (!function_exists("ostolaskun_vienti")) {
 	}
 }
 
+if (!function_exists("verkkolasku_luo_keikkafile")) {
+	function verkkolasku_luo_keikkafile ($tunnus, $trow, $tuoteno) {
+		global $yhtiorow, $kukarow;	
+		
+		// Tarvitaan $tunnus jossa on ostoreskontralaskun tunnus
+		// Tarvitaan $trow jossa on toimittajan tiedot
+		// Tarvitaan $tuoteno jossa on array kaikista ostoreskontralaskun tuotteista
+		
+		require("inc/verkkolasku-in-luo-keikkafile.inc");
+	}
+}
+
+if (!function_exists("verkkolasku_luo_liitosotsikko")) {
+	function verkkolasku_luo_liitosotsikko ($laskutunnus, $otunnus) {
+		global $yhtiorow, $kukarow;	
+		
+		// Tarvitaan $laskutunnus jossa on ostoreskontralaskun tunnus
+		// Tarvitaan $otunnus jossa on keikan tunnus
+		// Tarvitaan $tuoteno jossa on array kaikista ostoreskontralaskun tuotteista
+		
+		$tee_kululaskut = "liita";
+		$silent 		= "SILENT";
+		$keikanalatila 	= "";
+		
+		require("tilauskasittely/kululaskut.inc");
+	}
+}
+
+
+
 if (!function_exists("paivita_toimitukset")) {
 	function paivita_toimitukset($otunnus, $originaali) {
 		global $kukarow, $yhtiorow;

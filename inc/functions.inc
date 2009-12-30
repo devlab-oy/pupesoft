@@ -3894,8 +3894,7 @@ if (!function_exists('ebid')) {
 		$res = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_assoc($res);
 
-		if ($laskurow['ebid'] != "") {
-
+		if ($laskurow['ebid'] != "" and $laskurow['ebid'] != "FINVOICEXML") {
 			if (substr($laskurow['ebid'], 0, 1) == '/') {
 
 				// otetaan palvelin muuttujasta mahdolliset turhat alut pois
@@ -3921,7 +3920,7 @@ if (!function_exists('ebid')) {
 			$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
 			$salasana		   = $yhtiorow['verkkosala_vas'];
 
-			$timestamppi=gmdate("YmdHis")."Z";
+			$timestamppi = gmdate("YmdHis")."Z";
 
 			$urlhead = "http://www.verkkolasku.net";
 			$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";

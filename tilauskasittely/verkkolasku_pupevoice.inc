@@ -80,7 +80,7 @@ if (!function_exists('pupevoice_otsik')) {
 			$y_vatnumero	= $yhtiorow["ovttunnus"];
 		}
 
-		// haetaan toimipaikan tiedot
+		// haetaan asiakkaan tiedot
 		$asquery = "SELECT * from asiakas where yhtio='$lasrow[yhtio]' and tunnus='$lasrow[liitostunnus]'";
 		$asiakasre = mysql_query($asquery) or pupe_error($asquery);
 		$asiakasrow = mysql_fetch_array($asiakasre);
@@ -115,7 +115,7 @@ if (!function_exists('pupevoice_otsik')) {
 		xml_add("InvoicedPartyOVT",						$lasrow['ovttunnus'],								$tootxml);
 		xml_add("InvoicedPartyEBA",						$lasrow['verkkotunnus'], 							$tootxml);
 		xml_add("InvoicedCustNumber",					$asiakasrow['asiakasnro'], 							$tootxml);
-		xml_add("InvoicedOrganisationName",				$lasrow['nimi']." ".$lasrow['nimitark'], 			$tootxml);
+		xml_add("InvoicedOrganisationName",				trim($lasrow['nimi']." ".$lasrow['nimitark']), 		$tootxml);
 		xml_add("InvoicedStreetName",					$lasrow['osoite'], 									$tootxml);
 		xml_add("InvoicedPostCode",						$lasrow['postino'],									$tootxml);
 		xml_add("InvoicedTownName",						$lasrow['postitp'],									$tootxml);
@@ -125,7 +125,7 @@ if (!function_exists('pupevoice_otsik')) {
 		xml_add("InvoicePaymentReference",				$lasrow['viite'], 									$tootxml);
 		xml_add("InvoiceDate",							vlas_dateconv($lasrow['tapvm']), 					$tootxml);
 		xml_add("OrderIdentifier",						substr($lasrow['asiakkaan_tilausnumero'], 0, 35),	$tootxml);
-		xml_add("DeliveredPartyName",					$lasrow['toim_nimi']." ".$lasrow['toim_nimitark'],	$tootxml);
+		xml_add("DeliveredPartyName",					trim($lasrow['toim_nimi']." ".$lasrow['toim_nimitark']),	$tootxml);
 		xml_add("DeliveredPartyStreetName",				$lasrow['toim_osoite'], 							$tootxml);
 		xml_add("DeliveredPartyPostCode",				$lasrow['toim_postino'], 							$tootxml);
 		xml_add("DeliveredPartyTownName",				$lasrow['toim_postitp'], 							$tootxml);

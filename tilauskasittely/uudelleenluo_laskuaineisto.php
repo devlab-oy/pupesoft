@@ -39,7 +39,7 @@
 					$pos = strpos($joukko, " ");
 		            if ($pos === false) {
 						//	Jos tehd‰‰n finvoicea rivilopu on \r\n
-						if($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
+						if ($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
 							$ulos .= "</$joukko>\r\n";
 						}
 						else {
@@ -48,7 +48,7 @@
 
 		            }
 		            else {
-						if($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
+						if ($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
 							$ulos .= "</".substr($joukko,0,$pos).">\r\n";
 						}
 						else {
@@ -93,16 +93,6 @@
 				}
 			}
 
-			if (!function_exists("ymuuta")) {
-				function ymuuta ($ytunnus) {
-					// stripataan kaikki - merkit
-					$ytunnus = str_replace("-","", $ytunnus);
-
-					$ytunnus = sprintf("%08.8s",$ytunnus);
-					return substr($ytunnus,0,7)."-".substr($ytunnus,-1);
-				}
-			}
-
 			$today = date("w") + 1; // mik‰ viikonp‰iv‰ t‰n‰‰n on 1-7.. 1=sunnuntai, 2=maanantai, jne...
 
 			//Tiedostojen polut ja nimet
@@ -133,7 +123,7 @@
 			if (!$tootedi = fopen($nimiedi, "w")) die("Filen $nimiedi luonti ep‰onnistui!");
 
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, tilausrivin_lisatiedot as tl2 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, avainsana as avainsana_kieli READ";
+			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, tilausrivin_lisatiedot as tl2 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ";
 			$locre = mysql_query($query) or pupe_error($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -252,7 +242,7 @@
 					// $masrow array maksuehdon tiedot
 
 					// Etsit‰‰n myyj‰n nimi
-					$mquery  = "SELECT nimi
+					$mquery  = "SELECT nimi, puhno, eposti
 								from kuka
 								where tunnus='$lasrow[myyja]' and yhtio='$kukarow[yhtio]'";
 					$myyresult = mysql_query($mquery) or pupe_error($mquery);
@@ -363,7 +353,7 @@
 						elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow);
 					}
 					elseif($yhtiorow["verkkolasku_lah"] != "") {
-						finvoice_otsik($tootfinvoice, $lasrow, $pankkitiedot, $masrow, $silent, $tulos_ulos, $toimaikarow, $myyrow);
+						finvoice_otsik($tootfinvoice, $lasrow, $laskun_kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
 					}
 					else {
 						pupevoice_otsik($tootxml, $lasrow, $laskun_kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow);

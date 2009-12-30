@@ -1,54 +1,61 @@
 <?php
 
-//echo "käsitellään saapuva Finvoice BuyerPartyDetails\n".print_r($xml->xpath('BuyerPartyDetails'));
-$xyhtio = $xml->xpath('BuyerPartyDetails/BuyerOrganisationUnitNumber');	// Tätä kovin harvoin täällä aineistossa välitetään yritetään nyt kuitenkin..
-if($xyhtio[0] == "") { 	// tehdään oletus ovttunnus ytunnuksen pohjalta
-	$xyhtio	= $xml->xpath('BuyerPartyDetails/BuyerPartyIdentifier'); // ytynnus väliviivalla
-	if($xyhtio[0] == "") $xml->xpath('BuyerPartyDetails/BuyerOrganisationTaxCode'); // tämä voisi löytyö myös täältä
-	$ytunnus = str_replace("-","",$xyhtio[0]);
-	$xyhtio[0] = "0037".$ytunnus;
-	unset($ytunnus);
+$xyhtio = $xml->xpath('BuyerPartyDetails/BuyerOrganisationUnitNumber');
+
+if (!is_array($xyhtio) or $xyhtio[0] == "") {
+	$xyhtio	= $xml->xpath('BuyerPartyDetails/BuyerPartyIdentifier');
+}
+if (!is_array($xyhtio) or $xyhtio[0] == "") {
+	$xyhtio	= $xml->xpath('BuyerPartyDetails/BuyerOrganisationTaxCode');
 }
 
-$xverkkotunnus_vas = array("");	//	Tätä ei oikein tartteta finvoicessa, toivottavasti löytyy oikea yhtio ilmankin..
-$xlaskun_tyyppi = $xml->xpath('InvoiceDetails/InvoiceTypeCode');
-
-if($xlaskun_tyyppi[0] == "INV02") $xlaskun_tyyppi[0] = "381"; // Hyvityslaskut pitää merkata hyvitykseksi jotta ne osataan käsitellä oikein
-
-$xlaskunro 			= $xml->xpath('InvoiceDetails/InvoiceNumber');	
-$xlaskun_ebid[0] 		= "/".basename($file); // Nämä tallennetaan levylle joten tämä on tiedoston nimi
+$xverkkotunnus_vas		= array("");
+$xlaskun_tyyppi 		= $xml->xpath('InvoiceDetails/InvoiceTypeCode');
+$xlaskunro 				= $xml->xpath('InvoiceDetails/InvoiceNumber');
+$xlaskun_ebid 			= array("");
 $xlaskun_paiva			= $xml->xpath('EpiDetails/EpiIdentificationDetails/EpiDate');
 $xlaskun_erapaiva		= $xml->xpath('EpiDetails/EpiPaymentInstructionDetails/EpiDateOptionDate');
 
-if($xlaskun_erapaiva[0] == "")	{//	Tämä voi löytyä myös maksatustiedoista
-	$xlaskun_erapaiva	= $xml->xpath('PaymentTermsDetails/InvoiceDueDate');
+if (!is_array($xlaskun_erapaiva) or $xlaskun_erapaiva[0] == "") {
+	$xlaskun_erapaiva 	= $xml->xpath('PaymentTermsDetails/InvoiceDueDate');
 }
 
 $xlaskuttajan_ovt		= $xml->xpath('SellerPartyDetails/SellerOrganisationUnitNumber');
-
-if($xlaskuttajan_ovt[0] == "") { // tehdään oletus ovttunnus ytunnuksen pohjalta */
-	$xlaskuttajan_ovt	= $xml->xpath('SellerPartyDetails/SellerPartyIdentifier'); // ytynnus väliviivalla
-	if($xlaskuttajan_ovt[0] == "") $xlaskuttajan_ovt = $xml->xpath('SellerPartyDetails/SellerOrganisationTaxCode'); // tämä voisi löytyö myös täältä
-	$ytunnus = $xlaskuttajan_ovt[0];	
-	$xlaskuttajan_ovt[0] = "0037".str_replace("-","",$ytunnus)."00001";
-	unset($ytunnus);
-}
-
 $xlaskuttaja			= $xml->xpath('SellerPartyDetails/SellerOrganisationName');
-$xlaskun_pankkiviite		= $xml->xpath('EpiDetails/EpiIdentificationDetails/EpiReference');
+$xlaskuttajan_vat		= $xml->xpath('SellerPartyDetails/SellerOrganisationTaxCode');
+$xlaskun_pankkiviite	= $xml->xpath('EpiDetails/EpiIdentificationDetails/EpiReference');
 
-if($xlaskun_pankkiviite[0] == "") {//	Vaihtoehtoinen paikka mistä tieto voidaan löytää
-	$xlaskun_pankkiviite	= $xml->xpath('InvoiceDetails/SellerReferenceIdentifier');
+if (!is_array($xlaskun_pankkiviite) or $xlaskun_pankkiviite[0] == "") {
+	$xlaskun_pankkiviite = $xml->xpath('InvoiceDetails/SellerReferenceIdentifier');
 }
 
-$xlaskun_summa_eur		= str_replace(",",".",$xml->xpath('EpiDetails/EpiPaymentInstructionDetails/EpiInstructedAmount'));
 $xlaskun_asiakastunnus	= $xyhtio [0]; // tämä taitaa olla sama kuin tuo ytunnus?
+$xlaskun_summa_eur		= $xml->xpath('EpiDetails/EpiPaymentInstructionDetails/EpiInstructedAmount');
 
-//echo "käsitellään saapuva Finvoice BuyerPartyDetails\n".print_r($xml->xpath('InvoiceRow'));
+if (!is_array($xlaskun_summa_eur) or $xlaskun_summa_eur[0] == "") {
+	$xlaskun_summa_eur	= $xml->xpath('InvoiceDetails/InvoiceTotalVatIncludedAmount');
+}
+
+// Varmistetaan, että tunnus on ovtunnus muodossa
+$xyhtio[0] = preg_replace("/[^0-9]/", "", $xyhtio[0]);
+
+if (strpos($xyhtio[0], "0037") === FALSE) {
+	$xyhtio[0] = "0037".$xyhtio[0];
+}
+
+if ($xlaskun_tyyppi[0] == "INV02") {
+	// Hyvityslaskut pitää merkata hyvitykseksi jotta ne osataan käsitellä oikein
+	$xlaskun_tyyppi[0] = "381";
+}
+
+// Nämä tallennetaan levylle joten tämä on tiedoston nimi
+$xlaskun_ebid[0] = "FINVOICEXML";
+
+// Käsitellään tuoterivit
 $tuotetiedot = $xml->xpath('InvoiceRow');
 
 //echo "Tuotetiedot löydetty! Niitä on " . sizeof($tuotetiedot) . "\n";
-$i = 0;
+$i 			= 0;
 $xtuoteno	= array();
 $tuoteno	= array();
 $xrsumma	= array();
@@ -61,35 +68,45 @@ $xrkpl 		= array();
 $rkpl 		= array();
 $xrivino 	= array();
 $rrivino	= array();
+$xriviviite = array();
+$riviviite	= array();
+$xriviaika 	= array();
+$riviaika	= array();
 
-
-if (sizeof($tuotetiedot) > 0) {
+if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
+		// tuotekoodi
 		$xtuoteno[$i]	= $tuotetieto->xpath('ArticleIdentifier');
 		$tuoteno[$i]	= $xtuoteno[$i][0];
-		if($tuoteno[$i] != "") {// Meillä voi olla pelkkä "kommenttirivi", näitä on turha käsitellä */
+		
+		if ($tuoteno[$i] != "") {
 			// veroton rivihinta
 			$xrsumma[$i]	= $tuotetieto->xpath('RowAmount');
-			$rsumma[$i]	= $xrsumma[$i][0];
-			$xvat[$i]	= $tuotetieto->xpath('RowVatRatePercent');
-			
-			if (is_array($xvat[$i])) $vat[$i] = $xvat[$i][0]; // Näin voimme pohtia oliko täällä tuo segmentti
+			$rsumma[$i]		= (float) $xrsumma[$i][0];
 
+			$xvat[$i]		= $tuotetieto->xpath('RowVatRatePercent');
+			$vat[$i] 		= (float) $xvat[$i][0];
+
+			// rivikommentti
 			$xrinfo[$i] 	= $tuotetieto-> xpath('RowFreeText');
 
-			if(is_array($xrinfo[$i])) { // Meillä on MONTA selitettä niputetaan yhteen..
+			if (is_array($xrinfo[$i])) {
 				foreach($xrinfo[$i] as $xln) {
-					$rinfo[$i] .= " / $xln";
+					$rinfo[$i] .= $xln."\n";
 				}
 			}
 			else {
 				$rinfo[$i] = $xrinfo[$i][0];
-			}		
+			}
+
+			$rinfo[$i] 		= trim($rinfo[$i]);
+
 			// laskutettu määrä
-			$xrkpl[$i] 	= $tuotetieto-> xpath('DeliveredQuantity');
-			$rkpl[$i] 	= $xrkpl[$i][0];
-			$xrivino[$i] 	= array("");
-			$rrivino[$i]	= $xrivino[$i][0];			
+			$xrkpl[$i] 		= $tuotetieto->xpath('DeliveredQuantity');
+			$rkpl[$i] 		= (float) $xrkpl[$i][0];
+
+			$xrivino[$i] 	= $tuotetieto->xpath('RowIdentifier');
+			$rrivino[$i]	= $xrivino[$i][0];
 		}
 		else {
 			//	Poistetaan tämä tietue
@@ -100,7 +117,7 @@ if (sizeof($tuotetiedot) > 0) {
 	}
 }
 
-$yhtio 				= $xyhtio[0];
+$yhtio 					= $xyhtio[0];
 $verkkotunnus_vas 		= $xverkkotunnus_vas[0];
 $laskun_tyyppi 			= $xlaskun_tyyppi[0];
 $laskun_numero 			= $xlaskunro[0];
@@ -109,8 +126,10 @@ $laskun_paiva			= $xlaskun_paiva[0];
 $laskun_erapaiva		= $xlaskun_erapaiva[0];
 $laskuttajan_ovt		= $xlaskuttajan_ovt[0];
 $laskuttajan_nimi		= $xlaskuttaja[0];
+$laskuttajan_vat		= $xlaskuttajan_vat[0];
 $laskun_pankkiviite		= $xlaskun_pankkiviite[0];
 $laskun_summa_eur		= (float) $xlaskun_summa_eur[0];
+$laskun_pankkiviite 	= $xlaskun_pankkiviite[0];
 $laskun_asiakastunnus	= $xlaskun_asiakastunnus[0];
 
 $lisavat = array();
@@ -127,5 +146,5 @@ if (sizeof($vattiedot) > 0) {
 		$i++;
 	}
 }
-echo "Finvoice parseroitu $yhtio, $laskuttajan_ovt, $laskuttajan_nimi\n";
+
 ?>

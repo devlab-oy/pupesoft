@@ -202,7 +202,7 @@
 					$pos = strpos($joukko, " ");
 		            if ($pos === false) {
 						//	Jos tehd‰‰n finvoicea rivilopu on \r\n
-						if($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
+						if ($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
 							$ulos .= "</$joukko>\r\n";
 						}
 						else {
@@ -211,7 +211,7 @@
 
 		            }
 		            else {
-						if($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
+						if ($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
 							$ulos .= "</".substr($joukko,0,$pos).">\r\n";
 						}
 						else {
@@ -254,16 +254,6 @@
 					else {
 						return $muuttuja = str_replace(".",",",$muuttuja);
 					}
-				}
-			}
-
-			if (!function_exists("ymuuta")) {
-				function ymuuta ($ytunnus) {
-					// stripataan kaikki - merkit
-					$ytunnus = str_replace("-","", $ytunnus);
-
-					$ytunnus = sprintf("%08.8s",$ytunnus);
-					return substr($ytunnus,0,7)."-".substr($ytunnus,-1);
 				}
 			}
 
@@ -1352,7 +1342,7 @@
 							// $masrow array maksuehdon tiedot
 
 							// Etsit‰‰n myyj‰n nimi
-							$mquery  = "SELECT nimi
+							$mquery  = "SELECT nimi, puhno, eposti
 										FROM kuka
 										WHERE tunnus='$lasrow[myyja]' and yhtio='$kukarow[yhtio]'";
 							$myyresult = mysql_query($mquery) or pupe_error($mquery);
@@ -1440,7 +1430,7 @@
 								elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow);
 							}
 							elseif($yhtiorow["verkkolasku_lah"] != "") {
-								finvoice_otsik($tootfinvoice, $lasrow, $pankkitiedot, $masrow, $silent, $tulos_ulos, $toimaikarow, $myyrow);
+								finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
 							}
 							else {
 								pupevoice_otsik($tootxml, $lasrow, $laskun_kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow);
@@ -1504,8 +1494,8 @@
 
 							$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta
 													FROM asiakas
-													WHERE yhtio='$kukarow[yhtio]'
-													and tunnus='$lasrow[liitostunnus]'";
+													WHERE yhtio = '$kukarow[yhtio]'
+													and tunnus = '$lasrow[liitostunnus]'";
 							$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
 
 							if (mysql_num_rows($asiakas_apu_res) == 1) {

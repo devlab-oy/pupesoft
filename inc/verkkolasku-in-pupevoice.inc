@@ -29,7 +29,7 @@ if ((float) $xlaskun_summa_eur[0] == 0) {
 $tuotetiedot = $xml->xpath('Group25');
 
 //echo "Tuotetiedot löydetty! Niitä on " . sizeof($tuotetiedot) . "\n";
-$i = 0;
+$i 			= 0;
 $xtuoteno	= array();
 $tuoteno	= array();
 $xrsumma	= array();
@@ -44,23 +44,29 @@ $xrivino 	= array();
 $rrivino	= array();
 $xriviviite = array();
 $riviviite	= array();
-$xriviaika = array();
+$xriviaika 	= array();
 $riviaika	= array();
 
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
+		// tuotekoodi
 		$xtuoteno[$i]	= $tuotetieto->xpath('LIN/@eC212.7140');
 		$tuoteno[$i]	= $xtuoteno[$i][0];
+		
 		// veroton rivihinta
 		$xrsumma[$i]	= $tuotetieto->xpath('Group26/MOA[@eC516.5025="203"]/@eC516.5004');
 		$rsumma[$i]		= $xrsumma[$i][0];
+		
 		$xvat[$i]		= $tuotetieto->xpath('Group33/TAX[@eC241.5153="VAT"]/@eC243.5278');
 		if (is_array($xvat[$i])) $vat[$i] = (float) $xvat[$i][0]; // Näin voimme pohtia oliko täällä tuo segmentti
+		
 		$xrinfo[$i] 	= $tuotetieto-> xpath('IMD/@eC273.7008.1');
 		$info[$i] 		= $xrinfo[$i][0];
+		
 		// laskutettu määrä
 		$xrkpl[$i] 		= $tuotetieto-> xpath('QTY[@eC186.6063="12"]/@eC186.6060');
 		$rkpl[$i] 		= $xrkpl[$i][0];
+		
 		$xrivino[$i] 	= $tuotetieto->xpath('Group29/RFF[@eC506.1153="CR"]/@eC506.1154');
 		$rrivino[$i]	= $xrivino[$i][0];
 
@@ -77,8 +83,7 @@ if (count($tuotetiedot) > 0) {
 			$xrkpl[$i] = $tuotetieto-> xpath('QTY[@eC186.6063="47"]/@eC186.6060');
 			$rkpl[$i]  = $xrkpl[$i][0];
 		}
-		//echo "Tuoteno: $tuoteno[$i] '$info[$i]' Kpl: $rkpl[$i] ";
-		//echo "Summa: $rsumma[$i] ($vat[$i])\n";
+		
 		$i++;
 
 		// Ei oteta vielä käyttöön

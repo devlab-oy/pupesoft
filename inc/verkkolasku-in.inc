@@ -33,7 +33,7 @@
 			require ("inc/functions.inc");
 
 			// Katsotaan mit‰ aineistoa k‰pistell‰‰n
-			if (strpos($file,"finvoice-") !== false) {
+			if (strpos($file, "finvoice-") !== false) {
 				require("inc/verkkolasku-in-finvoice.inc");
 			}
 			else {
@@ -371,11 +371,11 @@
 
 					// ei tehd‰ turhaa hakua jos meill‰ ei ole tullu rivitunnusta
 					if ($ostotunnus != 0) {
-						$chkquery = "SELECT *
-									FROM tilausrivi
-									where yhtio = '$yhtio' and
-									tunnus = '$ostotunnus' and
-									tyyppi = 'O'";
+						$chkquery = "	SELECT *
+										FROM tilausrivi
+										where yhtio = '$yhtio' and
+										tunnus = '$ostotunnus' and
+										tyyppi = 'O'";
 						$checkostot = mysql_query($chkquery) or die ("$chkquery<br><br>".mysql_error());
 
 						if (mysql_num_rows($checkostot) == 1) {
@@ -391,7 +391,7 @@
 						$trow['oletus_vienti'] = 'C';
 					}
 					else {
-						$chkquery = "select * from maat where koodi = '$trow[maa]' and eu != ''";
+						$chkquery = "SELECT * from maat where koodi = '$trow[maa]' and eu != ''";
 						$checkostot = mysql_query($chkquery) or die ("$chkquery<br><br>".mysql_error());
 
 						if (mysql_num_rows($checkostot) != 0) {
@@ -468,7 +468,7 @@
 
 			if ($trow['oletus_vienti'] == "A" or $trow['oletus_vienti'] == "B" or $trow['oletus_vienti'] == "C" or $trow['oletus_vienti'] == "J") {
 
-				$query = "SELECT selite
+				$query = "	SELECT selite
 							FROM avainsana
 							WHERE yhtio = '$yhtio' and laji = 'alv' and selitetark != ''
 							ORDER BY jarjestys,selite";
@@ -664,7 +664,6 @@
 						hyvaksynnanmuutos='$trow[oletus_hyvaksynnanmuutos]',
 						comments='$komm',
 						asiakkaan_tilausnumero='$laskun_numero'";
-
 			$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 			$tunnus = mysql_insert_id();
 			$omasumma = round($summa * $vrow['kurssi'], 2);
@@ -787,7 +786,7 @@
 
 					// Jos t‰m‰ lasku menee varastoon, tehd‰‰n valmiiksi keikka
 					if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
-						require ("inc/verkkolasku-in-luo-keikkafile.inc");
+						verkkolasku_luo_keikkafile($tunnus, $trow, $tuoteno);
 					}
 				}
 			}
@@ -926,7 +925,7 @@
 
 					// Jos t‰m‰ lasku menee varastoon, tehd‰‰n valmiiksi keikka
 					if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
-						require ("inc/verkkolasku-in-luo-keikkafile.inc");
+						verkkolasku_luo_keikkafile($tunnus, $trow, $tuoteno);
 					}
 				}
 			}
@@ -985,60 +984,85 @@
 				}
 			}
 
-
 			$query = "SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
 			$kuvalaskures = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($kuvalaskures) > 0) {
+								
 				$kuvalaskurow = mysql_fetch_array($kuvalaskures);
 
-				$ebid=$kuvalaskurow['ebid'];
+				$ebid 	= $kuvalaskurow['ebid'];
+				$selite = mysql_real_escape_string("$kuvalaskurow[nimi] $kuvalaskurow[summa] $kuvalaskurow[valkoodi]");
 
-				$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
-				$salasana		   = $yhtiorow['verkkosala_vas'];
-
-				$timestamppi = gmdate("YmdHis")."Z";
-
-				$urlhead = "http://www.verkkolasku.net";
-				$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";
-
-				$digest	 = md5($urlmain . "&" . $salasana);
-				$url	 = $urlhead.$urlmain."&DIGEST=$digest";
-
-				$sisalto = file_get_contents($url);
-
-				if (substr($sisalto,0,4) == "%PDF") {
-					// tallennetaan kuva
-					$filename = $ebid.".pdf";
-
-					//filesize functio ei toimi koska ei ole oikea file.
-					$filesize = strlen($sisalto);
-
-					//echo "Ebid: $ebid\n";
-
-					//echo "Filesize: $filesize\n";
-
-
-					$mime = 'application/pdf';
-
-					$data  = addslashes($sisalto);
-
-					$selite = mysql_real_escape_string("$kuvalaskurow[nimi] $kuvalaskurow[summa] $kuvalaskurow[valkoodi]");
-
-					// lis‰t‰‰n kuva
-					$query = "  INSERT into liitetiedostot SET
-								liitos       = 'lasku',
-								liitostunnus = '$tunnus',
-								luontiaika   = now(),
-								selite       = '$selite',
-								data         = '$data',
-								laatija      = '$kukarow[kuka]',
-								filename 	 = '$filename',
-								filetype 	 = '$mime',
-								filesize 	 = '$filesize',
-								yhtio    	 = '$kukarow[yhtio]'";
-
+				if ($ebid == "FINVOICEXML") {
+					
+					$filesize = strlen($xmlstr);
+					$filename = array_pop(explode("/", $file));
+										
+					$query = "	INSERT INTO liitetiedostot SET
+								yhtio    			= '$kukarow[yhtio]',
+								liitos   			= 'lasku',
+								liitostunnus 		= '$tunnus',
+								data     			= '$xmlstr',
+								selite   			= '$selite',
+								kieli				= '$yhtiorow[kieli]',
+								filename 			= '$filename',
+								filesize 			= '$filesize',
+								filetype 			= 'text/xml',
+								image_width			= '',
+								image_height		= '',
+								image_bits			= '',
+								image_channels		= '',
+								kayttotarkoitus		= '',
+								jarjestys			= '1',
+								laatija				= '$kukarow[kuka]',								
+								luontiaika			= now()";
 					$Xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
+
+				}
+				else {						
+					$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
+					$salasana		   = $yhtiorow['verkkosala_vas'];
+
+					$timestamppi = gmdate("YmdHis")."Z";
+
+					$urlhead = "http://www.verkkolasku.net";
+					$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";
+
+					$digest	 = md5($urlmain . "&" . $salasana);
+					$url	 = $urlhead.$urlmain."&DIGEST=$digest";
+
+					$sisalto = file_get_contents($url);
+
+					if (substr($sisalto,0,4) == "%PDF") {
+						// tallennetaan kuva
+						$filename = $ebid.".pdf";
+
+						//filesize functio ei toimi koska ei ole oikea file.
+						$filesize = strlen($sisalto);
+						$data  = mysql_real_escape_string($sisalto);
+
+						// lis‰t‰‰n kuva
+						$query = "	INSERT INTO liitetiedostot SET
+									yhtio    			= '$kukarow[yhtio]',
+									liitos   			= 'lasku',
+									liitostunnus 		= '$tunnus',
+									data     			= '$data',
+									selite   			= '$selite',
+									kieli				= '$yhtiorow[kieli]',
+									filename 			= '$file',
+									filesize 			= '$filesize',
+									filetype 			= 'application/pdf',
+									image_width			= '',
+									image_height		= '',
+									image_bits			= '',
+									image_channels		= '',
+									kayttotarkoitus		= '',
+									jarjestys			= '1',
+									laatija				= '$kukarow[kuka]',								
+									luontiaika			= now()";
+						$Xresult = mysql_query($query) or die ("$query\n\n".mysql_error());												
+					}
 				}
 			}
 
@@ -1051,5 +1075,4 @@
 			return 0;
 		}
 	}
-
 ?>

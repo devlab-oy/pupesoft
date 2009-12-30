@@ -4,13 +4,13 @@
 	if ($argc == 0) die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
 
 	// pit‰‰ siirty‰ www roottiin
-	chdir("/var/www/html/pupesoft");
+	chdir("/Users/juppe/Sites/Devlab/pupesoft");
 
 	// m‰‰ritell‰‰n polut
-    $laskut     = "/home/verkkolaskut";
-    $oklaskut   = "/home/verkkolaskut/ok";
-    $origlaskut = "/home/verkkolaskut/orig";
-    $errlaskut  = "/home/verkkolaskut/error";
+    $laskut     = "/Users/juppe/Desktop/verkkolaskut";
+    $oklaskut   = "/Users/juppe/Desktop/verkkolaskut/ok";
+    $origlaskut = "/Users/juppe/Desktop/verkkolaskut/orig";
+    $errlaskut  = "/Users/juppe/Desktop/verkkolaskut/error";
 
 	require ("inc/connect.inc"); // otetaan tietokantayhteys
     require ("inc/verkkolasku-in.inc"); // t‰‰ll‰ on itse koodi
@@ -33,7 +33,7 @@
 			}
 		}
 	}
-
+	
 	if ($handle = opendir($laskut)) {
 
 		while (($file = readdir($handle)) !== FALSE) {
@@ -44,10 +44,6 @@
 				$laskuvirhe = verkkolasku_in($nimi);
 
 			    if ($laskuvirhe == "") {
-					// Heitet‰‰n koppi myˆs tuonne laskukansioon finvoicella. T‰m‰ tehd‰‰n toisin jahka pupe alkaa pureskelemaan myˆs blobbia
-					if (strpos($file,"finvoice-") !== false) {
-						system("cp -f $nimi datain/$file\n");
-					}
 			    	system("mv -f $nimi $oklaskut/$file");
 			    }
 			    else {

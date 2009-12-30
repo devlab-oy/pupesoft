@@ -9,8 +9,12 @@ if ($tee == "lataa_tiedosto") {
 
 echo "<font class='head'>".t("Viranomaisilmoitukset")."</font><hr><br><br>";
 
-if ($tee == "VSRALVKK") {
+if ($tee == "VSRALVKK_VANHA") {
 	include ('raportit/alv_laskelma.php');
+	alvlaskelma($kk,$vv);
+}
+elseif ($tee == "VSRALVKK_UUSI") {
+	include ('raportit/alv_laskelma_uusi.php');
 	alvlaskelma($kk,$vv);
 }
 
@@ -277,12 +281,25 @@ if ($tee == "VSRALVYV") {
 }
 
 if ($tee == "") {
+	echo "<table>";
+	echo "<tr><th>",t("Vanha arvonlisäveroilmoitus"),"</th>";
+	echo "<td>";
 	echo "<form action='viranomaisilmoitukset.php' method='post'>
-			<select name='tee' onchange='submit();'>
-				<option value = ''>".t('Valitse viranomaisilmoitus')."</option>
-				<option value = 'VSRALVYV'>".t("Arvonlisäveron yhteenvetoilmoitus")."</option>
-				<option value = 'VSRALVKK'>".t("Arvonlisäveroilmoitus")."</option>
-			</select></form>";
+			<input type='hidden' name='tee' value='VSRALVKK_VANHA'>
+			<input type='submit' value='",t("Valitse"),"'></form>";
+	echo "</td></tr>";
+	echo "<tr><th>",t("Uusi arvonlisäveroilmoitus"),"</th>";
+	echo "<td>";
+	echo "<form action='viranomaisilmoitukset.php' method='post'>
+			<input type='hidden' name='tee' value='VSRALVKK_UUSI'>
+			<input type='submit' value='",t("Valitse"),"'></form>";
+	echo "</td></tr>";
+	echo "<tr><th>",t("Arvonlisäveron yhteenvetoilmoitus"),"</th>";
+	echo "<td>";
+	echo "<form action='viranomaisilmoitukset.php' method='post'>
+			<input type='hidden' name='tee' value='VSRALVYV'>
+			<input type='submit' value='",t("Valitse"),"'></form>";
+	echo "</td></tr></table>";
 }
 
 require ("inc/footer.inc");

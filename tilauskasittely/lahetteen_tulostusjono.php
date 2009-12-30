@@ -986,7 +986,6 @@
 					echo "<input type='hidden' name='tumaa' 	value='$tumaa'>";
 					echo "<input type='hidden' name='tutyyppi' value='$tutyyppi'>";
 					echo "<input type='hidden' name='tutoimtapa' value='$tutoimtapa'>";
-					echo "<input type='hidden' name='etsi' value='$etsi'>";
 					echo "<input type='hidden' name='tee2' value='TULOSTA'>";
 					echo "<input type='hidden' name='tulostukseen[]' value='$tilrow[otunnus]'>";
 					echo "<input type='hidden' name='lasku_yhtio' value='$tilrow[yhtio]'>";

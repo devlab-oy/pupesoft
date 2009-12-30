@@ -14,6 +14,7 @@
 	$pankki["rahalaitos"]	= "Pankin rahalaitostunnus"
 	$lmp_st_4kentt			= LM03 summatietueen kenttä 4
 	$lmp_mt_4kentt			= LM03 maksutietueen kenttä 4
+	$swift					= Pankin swift-koodi
 
 */
 
@@ -44,11 +45,13 @@ function pankkitiedot($tilino, $asiakastunnus) {
 			$pankki["rahalaitos"]		= '1 ';
 			$pankki["pankkilaitos"] 	= "Nordea";
 			$pankki["tiedostonimi"] 	= "SOLOLMP.DAT";
+			$pankki["swift"]			= "NDEAFIHH";
 			break;
 		case (2) : //Nordea
 			$pankki["rahalaitos"]		= '2 ';
 			$pankki["pankkilaitos"] 	= "Nordea";
 			$pankki["tiedostonimi"] 	= "SOLOLMP.DAT";
+			$pankki["swift"]			= "NDEAFIHH";
 			break;
 		case (3) :
 			$tmp_tilino = substr($tilino, 1, 1);
@@ -56,22 +59,27 @@ function pankkitiedot($tilino, $asiakastunnus) {
 				case (1) : //Handelsbanken
 					$pankki["rahalaitos"] 		= '  ';
 					$pankki["pankkilaitos"] 	= "Handelsbanken";
+					$pankki["swift"]			= "HANDFIHH";
 					break;
 				case (3) : //Skandinaviska Enskilda Banken
 					$pankki["rahalaitos"]		= '  ';
 					$pankki["pankkilaitos"] 	= "Skandinaviska Enskilda Banken";
+					$pankki["swift"]			= "ESSEFIHX";
 					break;
 				case (4) : //Danske Bank
 					$pankki["rahalaitos"]		= '  ';
 					$pankki["pankkilaitos"]	 	= "Danske Bank";
+					$pankki["swift"]			= "DABAFIHX	";
 					break;
 				case (6) : //Tapiola Pankki
 					$pankki["rahalaitos"]		= '  ';
 					$pankki["pankkilaitos"] 	= "Tapiolapankki";
+					$pankki["swift"]			= "TAPIFI22";
 					break;
 				case (7) : //DnB NOR Bank ASA
 					$pankki["rahalaitos"]		= '  ';
 					$pankki["pankkilaitos"] 	= "DnB NOR Bank ASA";
+					$pankki["swift"]			= "DNBAFIHX";
 					break;
 			}
 			break;
@@ -80,6 +88,7 @@ function pankkitiedot($tilino, $asiakastunnus) {
 			$pankki["pankkilaitos"] 	= "Nooa";
 			$pankki["tiedostonimilum2"]	= "XXXXLUM2.DAT";
 			$pankki["ytunnus"]			= sprintf("%010.10s",$yhtiorow["ytunnus"])." ";
+			$pankki["swift"]			= "HELSFIHH";
 			break;
 		case (5) : //osuuspankit (Op), OKO ja Okopankki
 			$pankki["rahalaitos"]		= '5 ';
@@ -91,17 +100,19 @@ function pankkitiedot($tilino, $asiakastunnus) {
 			$pankki["lmp_mt_4kentta"]	= "$tilino";
 			$pankki["lmp_st_4kentta"]	= "$tilino";
 			$pankki["tiedostonimi"] 	= "OKOMP.DAT";
-
+			$pankki["swift"]			= "OKOYFIHH";
 			break;
 		case (6) : //Ålandsbanken
 			$pankki["rahalaitos"]		= '  ';
 			$pankki["pankkilaitos"] 	= "Ålandsbanken";
+			$pankki["swift"]			= "AABAFI22";
 			break;
 		case (8) : //Sampo Pankki
 			$pankki["rahalaitos"]		= '8 ';
 			$pankki["pankkilaitos"] 	= "Sampo";
 			$pankki["tiedostonimi"] 	= "LEOL2L.DAT";
 			$pankki["tiedostonimilum2"]	= "LEUM2L.DAT";
+			$pankki["swift"]			= "DABAFIHH";
 			break;
 		default :		
 			if (trim($tmp_tilino) != "" and !is_numeric($tmp_tilino)) { //Maksetaan kassasta tai selvittelytililtä
@@ -109,7 +120,7 @@ function pankkitiedot($tilino, $asiakastunnus) {
 				$pankki["pankkilaitos"] 	= "Kassa_Selivittely";
 				$pankki["tiedostonimi"] 	= "Kassa_Selivittely.DAT";
 				$pankki["tiedostonimilum2"] = "Kassa_Selivittely_ulk.DAT";
-			}		
+			}
 		break;
 	}
 

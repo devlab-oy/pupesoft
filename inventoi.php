@@ -74,7 +74,7 @@
 
 				if ($tuo != '' and $hyl != '' and $maa != '') {
 
-					$hylp = split("-", $hyl);
+					$hylp = explode("-", $hyl);
 
 					$tuote[] = $tuo."#".$hylp[0]."#".$hylp[1]."#".$hylp[2]."#".$hylp[3];
 					$maara[] = $maa;
@@ -105,7 +105,7 @@
 		if (count($tuote) > 0) {
 			foreach($tuote as $i => $tuotteet) {
 
-				$tuotetiedot = split("#", $tuotteet);
+				$tuotetiedot = explode("#", $tuotteet);
 
 				//näitä muuttujia me tarvitaan
 				$tuoteno 	= $tuotetiedot[0];

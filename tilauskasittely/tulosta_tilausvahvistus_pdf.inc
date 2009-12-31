@@ -716,6 +716,9 @@
 		elseif ($naytatvale == 3) {
 			$lahetetyyppi = "tulosta_lahete_eiale_eihinta.inc";
 		}
+		elseif ($naytatvale == 4) {
+			$lahetetyyppi = "tulosta_lahete_eialehintoja.inc";
+		}
 		else {
 			$lahetetyyppi = "tulosta_lahete.inc";
 		}

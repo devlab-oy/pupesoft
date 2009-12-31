@@ -152,7 +152,10 @@ else {
 		$ulos .= t("Nro", $kieli)." ".t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."              ".t("Kpl", $kieli);
 
 		if ($naytatvale != 3) {
-			$ulos .= "   ".t("Hinta", $kieli)." ".t("Val", $kieli)."   ".t("Ale", $kieli);
+			$ulos .= "   ".t("Hinta", $kieli)." ".t("Val", $kieli);
+			if ($naytatvale != 4) {
+				$ulos .= " ".t("Ale", $kieli);
+			}
 		}
 
 		$ulos .= "\n";
@@ -198,7 +201,7 @@ else {
 				$ulos .= sprintf("%3.s"  ,$laskurow['valkoodi'])." ";
 			}
 
-			if ($naytatvale==3) {
+			if ($naytatvale == 3 or $naytatvale == 4) {
 				// menn‰‰n ohi koska ei haluta n‰ytt‰‰ alea
 			}
 			else if ($naytatvale==2) {

@@ -191,7 +191,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 		$ulos .= sprintf("%-50.s",t("Kohde", $kieli).": ".$laskurow['kohde'])					.t("Myyj‰", $kieli).": ".$krow['nimi']."\n";
 		$ulos .= sprintf("%-50.s",t("Toimitusehto", $kieli).": ".$laskurow['toimitusehto'])."\n";
 
-		if ($naytatvale != 3 and $laskurow['erikoisale'] > 0) {
+		if (($naytatvale != 3 or $naytatvale != 4) and $laskurow['erikoisale'] > 0) {
 			$ulos .= sprintf("%-50.s",t("Erikoisalennus", $kieli).": ".$laskurow['erikoisale']."%\n");
 		}
 
@@ -211,7 +211,9 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 			$hinta_pituus = (8 + $yhtiorow['hintapyoristys'] - 2);
 			$ulos .= sprintf("%".$hinta_pituus.".".$hinta_pituus."s", t("Hinta", $kieli));
 			$ulos .= sprintf("%4.4s", t("Val", $kieli));
-			$ulos .= sprintf("%7.7s", t("Ale", $kieli));
+			if ($naytatvale != 4) {
+				$ulos .= sprintf("%7.7s", t("Ale", $kieli));
+			}
 		}
 
 		$ulos .= "\n";
@@ -222,7 +224,10 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
 		// kaikilla muilla paitsi kolmosella n‰ytet‰‰n n‰m‰
 		if ($naytatvale != 3) {
-			$liite .= "\t".t("Hinta", $kieli)."\t".t("Ale", $kieli);
+			$liite .= "\t".t("Hinta", $kieli);
+			if ($naytatvale != 4) {
+				$liite .= "\t".t("Ale", $kieli);
+			}
 		}
 
 		$liite .= "\n";
@@ -267,7 +272,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 				$ulos .= sprintf("%3.s"  	,$laskurow['valkoodi'])." ";
 			}
 
-			if ($naytatvale==3) {
+			if ($naytatvale == 3 or $naytatvale == 4) {
 				// kolmosella ei haluta n‰ytt‰‰ myˆsk‰‰n ale:a
 			}
 			else if ($naytatvale==2) {
@@ -300,7 +305,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 				$liite .= round(laskuval($tvtilausrivirow['hinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys'])."\t";
 			}
 
-			if ($naytatvale==3) {
+			if ($naytatvale == 3 or $naytatvale == 4) {
 				// kolmosella ei haluta n‰ytt‰‰ myˆsk‰‰n ale:a
 			}
 			else if ($naytatvale==2) {

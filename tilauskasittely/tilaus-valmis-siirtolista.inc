@@ -354,7 +354,10 @@
 						// pakotetaan tilausvanvistus PDF muodossa omaan s‰hkˆpostiin, ilman hintoja.
 						$laskurow["tilausvahvistus"] = "3OP";
 
-						if (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {
+						if (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {
+							$naytatvale = 4; // jos mell‰ on tilausvahvistuksessa nelonen, ei haluta n‰hd‰ alennuksia, n‰ytet‰‰n tilausrivin hinta ja rivihinta
+						}
+						elseif (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {
 							$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
 						}
 						elseif (strpos($laskurow['tilausvahvistus'], '2') !== FALSE) {

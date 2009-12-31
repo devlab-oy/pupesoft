@@ -127,7 +127,7 @@
 					$tuote_row = mysql_fetch_assoc($tuote_res);
 
 					if (mysql_num_rows($tuote_res) != 1) {
-						echo "<font class='error'>".t("VIRHE: Tuotetta ei löydy")."!</font><br>";
+						echo "<font class='error'>".t("VIRHE: Tuotetta ei löydy")."! ($tuoteno)</font><br>";
 						$virhe = 1;
 					}
 
@@ -254,7 +254,7 @@
 
 					if (mysql_num_rows($result) == 0 and $virhe == 0) {
 
-						if ($lisaselite == "PERUSTA") {
+						if ($lisaselite == "PERUSTA" or $fileesta == "ON") {
 							// PERUSTETAAN tuotepaikka
 
 							// katotaa löytyykö tuote

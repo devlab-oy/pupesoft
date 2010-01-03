@@ -204,6 +204,8 @@ while (!feof ($fd)) {
 				if ($tieto == 0) $tieto = "07495288";
 				// Arwidson häkki Arwidson Automotivea varten
 				if ($tieto == 1066781) $tieto = "07495288";
+				// Arwidson häkki Örumia varten
+				if ((int) $tieto == 7495288) $tieto = "20428100";
 
 				$query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
 				$result = mysql_query($query) or die($query);

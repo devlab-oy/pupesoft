@@ -529,7 +529,7 @@
 								$kommentti .= trim($lisataanrow['kommentti']);
 							}
 
-							if (trim($orig_laskurow['tunnus']) != "" and $otsikkorivi["osatoimitus"] == "") {
+							if (trim($orig_laskurow['tunnus']) != "" and $otsikkorivi["osatoimitus"] == "" and strstr($kommentti, t("Tilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE) {
 								if (trim($kommentti) != "") $kommentti .= " / ";
 								$kommentti .= t("Tilaus").": ".trim($orig_laskurow['tunnus']);
 							}
@@ -672,6 +672,14 @@
 												case 'luontiaika':
 												case 'laatija':
 													$values .= "";
+													break;
+												case 'positio':
+													if ($kukarow['extranet'] != '' and $tilaus_on_jo == "KYLLA") {
+														$kysely .= "positio='JT',";
+													}
+													else {
+														$kysely .= mysql_field_name($monistares2,$i)."='".$monistarow2[$i]."',";
+													}
 													break;
 												default:
 													$kysely .= mysql_field_name($monistares2,$i)."='".$monistarow2[$i]."',";

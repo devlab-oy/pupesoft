@@ -615,6 +615,29 @@ if (in_array($jarjesta, array("moveUp", "moveDown")) and $rivitunnus > 0) {
 // Poistetaan tilaus
 if ($tee == 'POISTA' and $muokkauslukko == "") {
 
+	// extranet-tilausta mit‰tˆidess‰ laitetaan kaikki poimitut jt-rivit takaisin omille tilauksille
+	if ($kukarow['extranet'] != '' and $kukarow['kesken'] != 0) {
+		$query = "	SELECT tilausrivi.tunnus, tilausrivin_lisatiedot.vanha_otunnus
+					FROM tilausrivi
+					JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.positio = 'JT')
+					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+					AND tilausrivi.otunnus = '{$kukarow['kesken']}'";
+		$jt_rivien_muisti_res = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($jt_rivien_muisti_res) > 0) {
+			while ($jt_rivien_muisti_row = mysql_fetch_assoc($jt_rivien_muisti_res)) {
+				$query = "	UPDATE tilausrivi SET
+							otunnus = '{$jt_rivien_muisti_row['vanha_otunnus']}',
+							var = 'J'
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$jt_rivien_muisti_row['tunnus']}'";
+				$jt_rivi_res = mysql_query($query) or pupe_error($query);
+
+				echo "<font class='message'>",t("J‰lkitoimitus palautettiin tilaukselle")," $jt_rivien_muisti_row[vanha_otunnus], ",t("ota yhteys asiakaspalveluun"),".</font><br><br>";
+			}
+		}
+	}
+
 	// poistetaan tilausrivit, mutta j‰tet‰‰n PUUTE rivit analyysej‰ varten...
 	$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var<>'P'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -1716,12 +1739,14 @@ if ($tee == '') {
 					</form>";
 		}
 
+		$jt_oikeu_check = $kukarow['extranet'] != '' ? 'jtselaus.php' : 'tilauskasittely/jtselaus.php';
+
 		// JT-rivit n‰ytet‰‰n vain jos siihen on oikeus!
 		$query = "	SELECT yhtio
 					FROM oikeu
 					WHERE yhtio	= '$kukarow[yhtio]'
 					and kuka	= '$kukarow[kuka]'
-					and nimi	= 'tilauskasittely/jtselaus.php'
+					and nimi	= '$jt_oikeu_check'
 					and alanimi = ''";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -1755,6 +1780,10 @@ if ($tee == '') {
 						<input type='hidden' name='projektilla' value='$projektilla'>
 						<input type='hidden' name='aktivoinnista' value='true'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+
+				if (!isset($jt_kayttoliittyma) and $kukarow['extranet'] != '') {
+					$jt_kayttoliittyma = 'kylla';
+				}
 
 				if ($jt_kayttoliittyma == "kylla") {
 					echo "	<input type='hidden' name='jt_kayttoliittyma' value=''>
@@ -4633,36 +4662,38 @@ if ($tee == '') {
 				$varaosakommentti = "";
 
 				if ((((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $kukarow['extranet'] != '') or $kukarow['extranet'] == '') and ($muokkauslukko == "" and $muokkauslukko_rivi == "") or $toim == "YLLAPITO") {
-					echo "<form action='$PHP_SELF' method='post' name='muokkaa'>
-							<input type='hidden' name='toim' 			value = '$toim'>
-							<input type='hidden' name='lopetus' 		value = '$lopetus'>
-							<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
-							<input type='hidden' name='projektilla' 	value = '$projektilla'>
-							<input type='hidden' name='tilausnumero'	value = '$tilausnumero'>
-							<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
-							<input type='hidden' name='rivilaadittu'	value = '$row[laadittu]'>
-							<input type='hidden' name='menutila' 		value = '$menutila'>
-							<input type='hidden' name='tuotenimitys' 	value = '$row[nimitys]'>
-							<input type='hidden' name='tila' 			value = 'MUUTA'>
-							<input type='hidden' name='tapa' 			value = 'MUOKKAA'>
-							<input type='hidden' name='takaisin'		value = '$takaisin'>
-							<input type='Submit' value='".t("Muokkaa")."'>
-							</form> ";
+					if ($kukarow['extranet'] == '') {
+						echo "<form action='$PHP_SELF' method='post' name='muokkaa'>
+								<input type='hidden' name='toim' 			value = '$toim'>
+								<input type='hidden' name='lopetus' 		value = '$lopetus'>
+								<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
+								<input type='hidden' name='projektilla' 	value = '$projektilla'>
+								<input type='hidden' name='tilausnumero'	value = '$tilausnumero'>
+								<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+								<input type='hidden' name='rivilaadittu'	value = '$row[laadittu]'>
+								<input type='hidden' name='menutila' 		value = '$menutila'>
+								<input type='hidden' name='tuotenimitys' 	value = '$row[nimitys]'>
+								<input type='hidden' name='tila' 			value = 'MUUTA'>
+								<input type='hidden' name='tapa' 			value = 'MUOKKAA'>
+								<input type='hidden' name='takaisin'		value = '$takaisin'>
+								<input type='Submit' value='".t("Muokkaa")."'>
+								</form> ";
 
-					echo "<form action='$PHP_SELF' method='post' name='poista'>
-							<input type='hidden' name='toim' 			value = '$toim'>
-							<input type='hidden' name='lopetus' 		value = '$lopetus'>
-							<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
-							<input type='hidden' name='projektilla' 	value = '$projektilla'>
-							<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
-							<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
-							<input type='hidden' name='rivilaadittu'	value = '$row[laadittu]'>
-							<input type='hidden' name='menutila'	 	value = '$menutila'>
-							<input type='hidden' name='tila' 			value = 'MUUTA'>
-							<input type='hidden' name='tapa' 			value = 'POISTA'>
-							<input type='hidden' name='takaisin'		value = '$takaisin'>
-							<input type='Submit' value='".t("Poista")."'>
-							</form> ";
+						echo "<form action='$PHP_SELF' method='post' name='poista'>
+								<input type='hidden' name='toim' 			value = '$toim'>
+								<input type='hidden' name='lopetus' 		value = '$lopetus'>
+								<input type='hidden' name='ruutulimit' 		value = '$ruutulimit'>
+								<input type='hidden' name='projektilla' 	value = '$projektilla'>
+								<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+								<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+								<input type='hidden' name='rivilaadittu'	value = '$row[laadittu]'>
+								<input type='hidden' name='menutila'	 	value = '$menutila'>
+								<input type='hidden' name='tila' 			value = 'MUUTA'>
+								<input type='hidden' name='tapa' 			value = 'POISTA'>
+								<input type='hidden' name='takaisin'		value = '$takaisin'>
+								<input type='Submit' value='".t("Poista")."'>
+								</form> ";
+					}
 
 					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $toim == 'VALMISTAVARASTOON' and $kukarow['extranet'] == '') {
 

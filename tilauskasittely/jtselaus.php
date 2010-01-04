@@ -131,7 +131,7 @@
 			}
 		}
 
-		$tee = "JATKA";
+		$tee = ($kukarow['extranet'] != '' and $tee == 'JT_TILAUKSELLE') ? 'JT_TILAUKSELLE' : "JATKA";
 	}
 
 	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'TOIMITA') {

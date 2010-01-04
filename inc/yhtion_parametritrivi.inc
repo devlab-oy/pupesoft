@@ -600,6 +600,7 @@
 		$ulos .= "<option value='V' $sel[V]>".t("Myyntitilaukselta voi luoda ostorivej‰ varastoon, jos se on tuotteen takana sallittu")."</option>";
 		$ulos .= "<option value='W' $sel[W]>".t("Myyntitilaukselta voi luoda ostorivej‰ asiakkaalle ja varastoon, jos se on tuotteen takana sallittu")."</option>";
 		$ulos .= "<option value='Z' $sel[Z]>".t("Myyntitilauksen voi siirt‰‰ varaston ostotilaukseksi")."</option>";
+		$ulos .= "<option value='Q' $sel[Q]>".t("Myyntitilauksen voi siirt‰‰ ostotilaukseksi, joka toimitetaan suoraan asiakkaalle")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

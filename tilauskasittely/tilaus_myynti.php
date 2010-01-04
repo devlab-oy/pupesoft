@@ -5817,7 +5817,7 @@ if ($tee == '') {
 
 				echo "<input type='submit' ACCESSKEY='V' value='$otsikko ".t("valmis")."$laskelisa'>";
 
-				if ($kukarow["extranet"] == "" and $yhtiorow["tee_osto_myyntitilaukselta"] == "Z" and in_array($toim, array("PROJEKTI","RIVISYOTTO", "PIKATILAUS"))) {
+				if ($kukarow["extranet"] == "" and ($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Q") and in_array($toim, array("PROJEKTI","RIVISYOTTO", "PIKATILAUS"))) {
 					echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." & ".t("Tee tilauksesta ostotilaus")."'> ";
 				}
 

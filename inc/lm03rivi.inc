@@ -13,7 +13,7 @@
 	$ulos .= $laskutyyppi;
 	$ulos .= sprintf ('%-70.70s', $laskuviesti);
 	$ulos .= "  ";
-	$ulos .= sprintf ('%02d', substr($luonti['year'],3,2));
+	$ulos .= sprintf ('%02d', substr($luonti['year'], 2, 2));
 	$ulos .= sprintf ('%02d', $luonti['mon']);
 	$ulos .= sprintf ('%02d', $luonti['mday']);
 	$ulos .= sprintf ('%012d', round($laskusumma * 100, 0));

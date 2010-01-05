@@ -5,7 +5,7 @@
 	$ulos = "LM0390";
   	$ulos .= sprintf ('%-14.14s', $lmp_st_4kentta);
   	$ulos .= sprintf ('%09d', $yrityytunnus);
-	$ulos .= sprintf ('%02d', substr($luonti['year'],3,2));
+	$ulos .= sprintf ('%02d', substr($luonti['year'], 2, 2));
 	$ulos .= sprintf ('%02d', $luonti['mon']);
 	$ulos .= sprintf ('%02d',  $luonti['mday']);
 	$ulos .= sprintf ('%06d', $makskpl);

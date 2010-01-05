@@ -529,7 +529,7 @@
 								$kommentti .= trim($lisataanrow['kommentti']);
 							}
 
-							if (trim($orig_laskurow['tunnus']) != "" and $otsikkorivi["osatoimitus"] == "" and strstr($kommentti, t("Tilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE) {
+							if (trim($orig_laskurow['tunnus']) != "" and $otsikkorivi["osatoimitus"] == "" and strpos($kommentti, t("Tilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE) {
 								if (trim($kommentti) != "") $kommentti .= " / ";
 								$kommentti .= t("Tilaus").": ".trim($orig_laskurow['tunnus']);
 							}

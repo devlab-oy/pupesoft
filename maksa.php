@@ -293,7 +293,7 @@
 					}
 				}
 				//Hoidetaan mahdolliset pyöristykset
-				if ($totkasumma != $laskurow[maksukasumma]) {
+				if ($totkasumma != $laskurow["maksukasumma"]) {
 					$query = "UPDATE tiliointi SET summa = summa - $totkasumma + $laskurow[maksukasumma]
 							WHERE tunnus = '$isa' and yhtio='$kukarow[yhtio]'";
 					$xresult = mysql_query($query) or pupe_error($query);
@@ -895,7 +895,7 @@
 								and tila in ('H','Y','M','P','Q')
 								and vanhatunnus = '$trow[vanhatunnus]'";
 					$jaetutres = mysql_query($query) or pupe_error($query);
-					
+
 					echo "<div id='div_$trow[tunnus]' class='popup'>";
 					printf(t("Lasku on jaettu %s osaan!"), mysql_num_rows($jaetutres));
 					echo "<br>".t("Alkuperäinen summa")." $trow[arvo] $trow[valkoodi]<br>";
@@ -1089,9 +1089,9 @@
 								and tila in ('H','Y','M','P','Q')
 								and vanhatunnus = '$trow[vanhatunnus]'";
 					$jaetutres = mysql_query($query) or pupe_error($query);
-					
+
 					echo "<div id='div_$trow[tunnus]' class='popup'>";
-					printf(t("Lasku on jaettu %s osaan!"), mysql_num_rows($jaetutres));					
+					printf(t("Lasku on jaettu %s osaan!"), mysql_num_rows($jaetutres));
 					echo "<br>".t("Alkuperäinen summa")." $trow[arvo] $trow[valkoodi]<br>";
 					$osa = 1;
 					while ($jaetutrow = mysql_fetch_array ($jaetutres)) {
@@ -1258,9 +1258,9 @@
 				$kaikaval += $valuurow[1];
 			}
 		}
-		
+
 		echo "<option value=''>".t("Kaikki valuutat")." ($kaikaval)";
-		
+
 		if (mysql_num_rows($result) > 0) {
 			mysql_data_seek($result, 0);
 
@@ -1275,7 +1275,7 @@
 				echo "<option value='$valuurow[0]' $sel>$valuurow[0] ($valuurow[1])";
 			}
 		}
-	
+
 		echo "</select></td>";
 		echo "<td></td>";
 		echo "</tr>";
@@ -1291,7 +1291,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<td><select name='erapvm'>";
-		
+
 		if (mysql_num_rows($result) > 0) {
 			$kaikaval = 0;
 			while ($laskurow = mysql_fetch_array ($result)) {
@@ -1311,11 +1311,11 @@
 				else{
 					$sel = "";
 				}
-				
+
 				echo "<option value = '$laskurow[0]' $sel>".tv1dateconv($laskurow[0])." ($laskurow[1])";
 			}
 		}
-		
+
 		echo "</select></td>";
 
 		if ($kaikki != "") {

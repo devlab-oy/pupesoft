@@ -36,10 +36,9 @@
 			die ("Yhtiö $kukarow[yhtio] ei löydy!");
 		}
 		
-		
 		$query = "	SELECT lasku.laatija, kuka.eposti, tilausrivi.otunnus, lasku.nimi, lasku.ytunnus, count(*) kpl
 					FROM tilausrivi
-					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.alatila != '')
+					JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'O' and lasku.alatila != '')
 					JOIN kuka ON (kuka.yhtio = tilausrivi.yhtio and kuka.kuka = lasku.laatija)
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					AND tilausrivi.toimitettu = ''
@@ -53,7 +52,7 @@
 					ORDER BY lasku.laatija";
 		$result = mysql_query($query) or pupe_error($query);
 
-		while ($trow=mysql_fetch_array($result)) {
+		while ($trow = mysql_fetch_array($result)) {
 			
 			if ($trow['eposti'] != $veposti) {
 				if ($veposti != '') {

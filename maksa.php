@@ -648,7 +648,7 @@
 		echo "<font class='message'>".t("Valitse maksutili")."</font><hr>";
 
 		$query = "	SELECT tunnus, concat(nimi, ' (', tilino, ')') tili, maksulimitti, valkoodi
-	               	FROM yriti.yriti
+	               	FROM yriti
 					WHERE yriti.yhtio = '$kukarow[yhtio]'
 					and yriti.maksulimitti > 0
 					and yriti.factoring = ''

@@ -625,10 +625,13 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 		$jt_rivien_muisti_res = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($jt_rivien_muisti_res) > 0) {
+			$jt_saldo_lisa = $yhtiorow["varaako_jt_saldoa"] == "" ? ", jt = varattu, varattu = 0 " : '';
+
 			while ($jt_rivien_muisti_row = mysql_fetch_assoc($jt_rivien_muisti_res)) {
 				$query = "	UPDATE tilausrivi SET
 							otunnus = '{$jt_rivien_muisti_row['vanha_otunnus']}',
 							var = 'J'
+							$jt_saldo_lisa
 							WHERE yhtio = '{$kukarow['yhtio']}'
 							AND tunnus = '{$jt_rivien_muisti_row['tunnus']}'";
 				$jt_rivi_res = mysql_query($query) or pupe_error($query);

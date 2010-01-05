@@ -59,6 +59,15 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
 			$headers[] = strtoupper(trim($data->sheets[0]['cells'][0][$excej]));
 		}
+
+		for ($excej = 0; $excej = (count($headers)-1); $excej--) {
+			if ($headers[$excej] != "") {
+				break;
+			}
+			else {
+				unset($headers[$excej]);
+			}
+		}
 	}
 	else {
 		$file	 = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
@@ -148,7 +157,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	// Luetaan tiedosto loppuun ja tehd‰‰n taulukohtainen array koko datasta
 	if (strtoupper($ext) == "XLS") {
 		for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
-			for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
+			for ($excej = 0; $excej < count($headers); $excej++) {
 
 				$taulunrivit[$taulut[$excej]][$excei-1][] = trim($data->sheets[0]['cells'][$excei][$excej]);
 

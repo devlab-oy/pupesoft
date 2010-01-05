@@ -129,7 +129,7 @@
 				// Toimitetaan jtrivit
 				tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka, $tilaus_on_jo, $varastosta);
 
-				if ($kukarow['extranet'] != '') {
+				if ($kukarow['extranet'] != '' and $tee == "JT_TILAUKSELLE") {
 					unset($jarj);
 				}
 			}

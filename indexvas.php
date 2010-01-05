@@ -55,8 +55,8 @@ if (is_array($isizelogo)) {
 	$yhtio_nimi = "";
 }
 else {
-	$logo = "http://www.devlab.fi/src/devlab_logo.png";
-	$koko = "height='70'";
+	$logo = "http://www.devlab.fi/src/devlab-orange.png";
+	$koko = "width='150'";
 	$yhtio_nimi = "<font class='info'>$yhtiorow[nimi]</font><br>";
 }
 

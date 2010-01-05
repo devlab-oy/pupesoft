@@ -737,7 +737,7 @@
 
 			if (mysql_num_rows($isaresult) > 0) {
 
-				$jt_rivilaskuri = 0;
+				$jt_rivilaskuri = 1;
 
 				while ($jtrow = mysql_fetch_array($isaresult)) {
 
@@ -912,7 +912,7 @@
 						if ($kokonaismyytavissa > 0 or $toimi == '' or $paikatlask > 0) {
 
 							//Tulostetaan otsikot
-							if ($automaaginen == '' and $jt_rivilaskuri == 0) {
+							if ($automaaginen == '' and $jt_rivilaskuri == 1) {
 
 								echo "<table>";
 								echo "<tr>";
@@ -978,6 +978,27 @@
 												}
 											-->
 											</script>";
+
+
+									echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+										<!--
+
+										function toggleAll(toggleBox) {
+
+											var currForm = toggleBox.form;
+											var isChecked = toggleBox.checked;
+											var nimi = toggleBox.name;
+
+											for (var elementIdx=1; elementIdx<currForm.elements.length; elementIdx++) {
+												if (currForm.elements[elementIdx].type == 'radio' && currForm.elements[elementIdx].name.substring(0,5) == 'loput' && currForm.elements[elementIdx].value == nimi) {
+													currForm.elements[elementIdx].checked = isChecked;
+												}
+											}
+										}
+
+										//-->
+										</script>";
+
 
 									echo "<form action='$PHP_SELF' method='post'>";
 									echo "<input type='hidden' name='maa' value='$maa'>";
@@ -1125,7 +1146,7 @@
 								}
 
 								if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
-									echo "<br>$jtrow[nimitys]</td>";
+									echo "<br>$jtrow[nimitys]";
 								}
 								echo "</td>";
 
@@ -1738,9 +1759,37 @@
 					}
 				}
 
-				if ($automaaginen == '' and $jt_rivilaskuri > 0) {
+				if ($automaaginen == '' and $jt_rivilaskuri > 1) {
 
 					if ($oikeurow['paivitys'] == '1') {
+
+						if ($kukarow["extranet"] == "" and $automaaginen == '') {
+
+							echo "<tr class='aktiivi'>";
+
+							$colspan = 3;
+
+							if ($tilaus_on_jo == "") {
+								$colspan++;
+							}
+
+							if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
+								$colspan++;
+							}
+
+							if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "") {
+								$colspan++;
+							}
+
+							echo "<td colspan='$colspan'>".t("Ruksaa kaikki")."</td>";
+							echo "<td align='center'><input type='checkbox' name='KAIKKI' onclick='toggleAll(this);'></td>";
+							echo "<td></td>";
+							echo "<td align='center'><input type='checkbox' name='POISTA' onclick='toggleAll(this);'></td>";
+							echo "<td align='center'><input type='checkbox' name='JATA' onclick='toggleAll(this);'></td>";
+							echo "<td align='center'><input type='checkbox' name='MITA' onclick='toggleAll(this);'></td>";
+							echo "<td align='center'><input type='checkbox' name='VAKISIN' onclick='toggleAll(this);'></td></tr>";
+						}
+
 						echo "<tr><td colspan='8' class='back'></td><td colspan='3' class='back' align='right'><input type='submit' value='".t("Poimi")."'></td></tr>";
 						echo "</form>";
 					}
@@ -1750,9 +1799,8 @@
 					if ($jtseluas_rivienmaara >= 1000) {
 						echo "<font class='error'>".t("Haun tulos liian suuri! Näytetään ensimmäiset 1000 riviä!")."</font><br>";
 					}
-
 				}
-				elseif ($jt_rivilaskuri == 0) {
+				elseif ($jt_rivilaskuri == 1) {
 					if ($from_varastoon_inc == "editilaus_in.inc") {
 						$edi_ulos .= "\n".t("Yhtään JT-riviä ei löytynyt")."!";
 					}

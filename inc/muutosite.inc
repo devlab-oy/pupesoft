@@ -95,7 +95,7 @@ if ($tila == 'A') {
 if ($kukarow['taso'] != 1) {
 
 	// Laskun maksutilintarkastus
-	if ($tila == 'T') {
+	if ($tila == 'T' and strtoupper($trow['maa']) == "FI") {
 		$pankkitili = $tili;
 
 		require ("inc/pankkitilinoikeellisuus.php");
@@ -112,22 +112,15 @@ if ($kukarow['taso'] != 1) {
 
 	// Jaaha p‰ivit‰mme maksutilin!
 	if ($tila == 'T') {
-		$query = "SELECT comments, tilinumero FROM lasku
-				WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
-		$result = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($result) !=1) {
-			echo t('lasku kateissa') . "$tunnus</font>";
-			exit;
-		}
-
-		$trow=mysql_fetch_array ($result);
 
 		$kommentti = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ". sprintf(t('Laskun maksutili muutettiin. Vanha oli %s.'), tilinumero_print($trow['tilinumero'])) ."<br>" . $trow['comments'];
 
 		//P‰ivitet‰‰n lasku
-		$query = "UPDATE lasku set tilinumero='$tili',
-						comments = '$kommentti' WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
+		$query = "	UPDATE lasku
+					SET tilinumero = '$tili',
+					comments = '$kommentti'
+					WHERE tunnus = '$tunnus'
+					and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$tee='E';
 		$tila='X';
@@ -167,15 +160,15 @@ if ($kukarow['taso'] != 1) {
 
 		//P‰ivitet‰‰n lasku
 		$query = "UPDATE lasku SET
-		 		ultilno = '$ultilno', 
-				swift = '$swift', 
-				pankki_haltija = '$pankki_haltija', 
-				pankki1 = '$pankki1', 
-				pankki2 = '$pankki2', 
-				pankki3 = '$pankki3', 
+		 		ultilno = '$ultilno',
+				swift = '$swift',
+				pankki_haltija = '$pankki_haltija',
+				pankki1 = '$pankki1',
+				pankki2 = '$pankki2',
+				pankki3 = '$pankki3',
 				pankki4 = '$pankki4',
-				comments = '$kommentti' 
-				WHERE tunnus = '$tunnus' 
+				comments = '$kommentti'
+				WHERE tunnus = '$tunnus'
 				AND yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$tee  = 'E';
@@ -857,10 +850,10 @@ if ($tila == '') {
 
 	// katotaan onko lasku liitetty keikkaan
 	$query = "	SELECT lasku.laskunro, keikka.alatila
-				FROM lasku 
+				FROM lasku
 				JOIN lasku keikka ON (keikka.yhtio = lasku.yhtio and keikka.laskunro = lasku.laskunro and keikka.tila = 'K' and keikka.vanhatunnus = 0)
-				WHERE lasku.yhtio = '$kukarow[yhtio]' 
-				AND lasku.tila = 'K' 
+				WHERE lasku.yhtio = '$kukarow[yhtio]'
+				AND lasku.tila = 'K'
 				AND lasku.vanhatunnus = '$trow[tunnus]'";
 	$keikres = mysql_query($query) or pupe_error($query);
 	$keikrow = mysql_fetch_array($keikres);
@@ -883,7 +876,7 @@ if ($tila == '') {
 					<td><input type = 'text' name = 'pp' maxlength='2' size='2' value = '$pvm[pp]'>
 					<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 					<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
-					<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>					
+					<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td>
 					</tr>
 					</form>";
 		}

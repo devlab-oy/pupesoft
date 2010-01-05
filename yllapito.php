@@ -392,7 +392,7 @@
 										OR
 										(tila = 'T' AND alatila in ('','A'))
 										OR
-										(tila = '0')
+										(tila IN ('A','0'))
 									)
 								and liitostunnus = '$otsikrow[tunnus]'
 								and tapvm = '0000-00-00'";

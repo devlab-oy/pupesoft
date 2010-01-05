@@ -14,31 +14,8 @@
 		$kukarow['yhtio'] = $argv[1];
 		$kukarow['kuka'] = "crond";
 
-		$query    = "SELECT * from yhtio where yhtio = '$kukarow[yhtio]'";
-		$yhtiores = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($yhtiores) == 1) {
-			$yhtiorow = mysql_fetch_array($yhtiores);
-			$aja = 'run';
-
-			$query = "	SELECT *
-						FROM yhtion_parametrit
-						WHERE yhtio = '$yhtiorow[yhtio]'";
-			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
-
-			if (mysql_num_rows($result) == 1) {
-				$yhtion_parametritrow = mysql_fetch_array($result);
-
-				// lisätään kaikki yhtiorow arrayseen
-				foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
-					$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
-				}
-			}
-
-		}
-		else {
-			die ("Yhtiö $kukarow[yhtio] ei löydy!");
-		}
+		$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+		$aja = 'run';
 	}
 	else {
 		require ("inc/parametrit.inc");
@@ -106,7 +83,7 @@
 		$result = mysql_query($query) or die($query);
 
 		while ($row = mysql_fetch_array($result)) {
-			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php (1)")."<br>";
+			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php")." (1)<br>";
 
 			//	Jos kyseessä on tunnusnippupaketti, halutaan säilyttää linkki tästä tehtyihin tilauksiin, tilaus merkataan vain toimitetuksi
 			if ($row["tunnusnippu"] > 0) {
@@ -143,7 +120,7 @@
 		$result = mysql_query($query) or die($query);
 
 		while ($row = mysql_fetch_array($result)) {
-			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php (1.5)")."<br>";
+			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php")." (2)<br>";
 
 			$query = "UPDATE lasku set alatila='$row[tila]', tila='D',  comments = '$komm' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[laskutunnus]'";
 			$deler = mysql_query($query) or die($query);
@@ -170,7 +147,7 @@
 		$result = mysql_query($query) or die($query);
 
 		while ($row = mysql_fetch_array($result)) {
-			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php (1.5)")."<br>";
+			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php")." (3)<br>";
 
 			$query = "UPDATE tilausrivi set tyyppi='D' where yhtio = '$kukarow[yhtio]' and otunnus = '$row[laskutunnus]' and var != 'P'";
 			$deler = mysql_query($query) or die($query);
@@ -250,6 +227,63 @@
 
 		if (mysql_affected_rows() > 0) {
 			$iltasiivo .= "Päivitettiin ".mysql_affected_rows()." käyttäjän taso 3 --> 2\n";
+		}
+
+		// mitätöidään keskenolevia extranet-tilauksia, jos ne on liian vanhoja ja yhtiön parametri on päällä
+		if ($yhtiorow['iltasiivo_mitatoi_ext_tilauksia'] != '') {
+
+			$laskuri = 0;
+			$aikaraja = (int) $yhtiorow['iltasiivo_mitatoi_ext_tilauksia'];
+
+			$query = "	SELECT lasku.tunnus laskutunnus
+						FROM lasku
+						JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.laatija AND kuka.extranet != '')
+						WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+						AND lasku.tila = 'N'
+						AND lasku.alatila = ''
+						AND lasku.luontiaika < DATE_SUB(now(), INTERVAL $aikaraja HOUR)";
+			$result = mysql_query($query) or die($query);
+
+			while ($row = mysql_fetch_assoc($result)) {
+				$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php")." (4)<br>";
+
+				$query = "	UPDATE lasku SET 
+							alatila = 'N', 
+							tila = 'D',  
+							comments = '$komm' 
+							WHERE yhtio = '{$kukarow['yhtio']}' 
+							and tunnus = '{$row['laskutunnus']}'";
+				$deler = mysql_query($query) or die($query);
+
+				$query = "	UPDATE tilausrivi SET 
+							tyyppi = 'D' 
+							WHERE yhtio = '{$kukarow['yhtio']}' 
+							AND otunnus = '{$row['laskutunnus']}' 
+							and var != 'P'";
+				$deler = mysql_query($query) or die($query);
+
+				//poistetaan TIETENKIN kukarow[kesken] ettei voi syöttää extranetissä rivejä tälle
+				$query = "	UPDATE kuka SET 
+							kesken = '' 
+							WHERE yhtio = '{$kukarow['yhtio']}' 
+							AND kesken = '{$row['laskutunnus']}'";
+				$deler = mysql_query($query) or die($query);
+
+				$laskuri++;
+			}
+			
+			if ($laskuri > 0) $iltasiivo .= "Mitätöitiin $laskuri extranet-tilausta, jotka olivat $aikaraja tuntia vanhoja.\n";
+		}
+
+		if (table_exists('suorituskykyloki')) {
+			$query = "	DELETE FROM suorituskykyloki
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND luontiaika < date_sub(now(), INTERVAL 1 YEAR)";
+			$deler = mysql_query($query) or die($query);
+			
+			if (mysql_affected_rows() > 0) {
+				$iltasiivo .= "Poistettiin ".mysql_affected_rows()." riviä suorituskykylokista.\n";
+			}
 		}
 
 		if ($iltasiivo != "") {

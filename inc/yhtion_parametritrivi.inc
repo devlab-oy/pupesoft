@@ -2177,4 +2177,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "iltasiivo_mitatoi_ext_tilauksia") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Iltasiivo ei mitätöi kesken olevia extranet-tilauksia")."</option>";
+		$ulos .= "<option value = '12' $sel[12]>".t("Iltasiivo mitätöi 12 tuntia vanhoja kesken olevia extranet-tilauksia")."</option>";
+		$ulos .= "<option value = '24' $sel[24]>".t("Iltasiivo mitätöi 1 päivän vanhoja kesken olevia extranet-tilauksia")."</option>";
+		$ulos .= "<option value = '48' $sel[48]>".t("Iltasiivo mitätöi 2 päivää vanhoja kesken olevia extranet-tilauksia")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 ?>

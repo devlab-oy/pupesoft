@@ -89,7 +89,8 @@ if ($tee == "SYOTTO") {
 				FROM yriti
 				JOIN valuu ON (valuu.yhtio = yriti.yhtio and yriti.valkoodi = valuu.nimi)				
 				WHERE yriti.yhtio = '$kukarow[yhtio]'
-				AND yriti.tunnus = '$tilino'";
+				AND yriti.tunnus = '$tilino'
+				and yriti.kaytossa = ''";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if ($row = mysql_fetch_array($result)) {

@@ -344,8 +344,9 @@ if ($tila == 'tee_kohdistus') {
 
 		$query = "	SELECT *
 					FROM yriti
-					WHERE yhtio = '$errorrow[yhtio]' and
-					tilino = '$errorrow[tilino]'";
+					WHERE yhtio = '$errorrow[yhtio]' 
+					and tilino = '$errorrow[tilino]'
+					and yriti.kaytossa = ''";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {

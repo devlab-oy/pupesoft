@@ -40,7 +40,8 @@
 			$query = "	SELECT tilino, nimi, tunnus, asiakastunnus
 					  	FROM yriti
 					  	WHERE yhtio ='$kukarow[yhtio]'
-					  	and tilino != ''";
+					  	and tilino != ''
+						and yriti.kaytossa = ''";
 			$result = mysql_query($query) or pupe_error($query);
 
 			//Haetaan funktio joka tuo pankin tietoja
@@ -181,6 +182,7 @@
 						and maa		 		= '$kotimaa'
 						and yriti.tunnus 	= maksu_tili
 						and yriti.yhtio 	= lasku.yhtio
+						and yriti.kaytossa  = ''
 						and maksaja 		= '$kukarow[kuka]'
 						and olmapvm 		= '$pvmrow[olmapvm]'
 						GROUP BY yriti.tilino";
@@ -249,6 +251,7 @@
 								and maa		 		= '$kotimaa'
 								and yriti.tunnus 	= maksu_tili
 								and yriti.yhtio 	= lasku.yhtio
+								and yriti.kaytossa  = ''
 								and maksaja 		= '$kukarow[kuka]'
 								and maksu_tili 		= $yritirow[tunnus]
 								and olmapvm 		= '$pvmrow[olmapvm]'
@@ -419,6 +422,7 @@
 					and maksaja = '$kukarow[kuka]'
 					and yriti.tunnus = maksu_tili
 					and yriti.yhtio = lasku.yhtio
+					and yriti.kaytossa = ''
 					GROUP BY maksu_tili, lasku.valkoodi";
 		$pvmresult = mysql_query($query) or pupe_error($query);
 
@@ -615,6 +619,7 @@
 							and maa <> '$kotimaa'
 							and yriti.tunnus = maksu_tili
 							and yriti.yhtio = lasku.yhtio
+							and yriti.kaytossa = ''
 							and valuu.nimi = lasku.valkoodi
 							and valuu.yhtio = lasku.yhtio
 							and maksaja = '$kukarow[kuka]'

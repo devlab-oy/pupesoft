@@ -31,7 +31,7 @@
 	// Etsit‰‰n aluksi yrityksen oletustili
 	$query = "	SELECT oletustili, yriti.tunnus
 				FROM kuka
-				JOIN yriti ON (yriti.yhtio = kuka.yhtio and yriti.tunnus = kuka.oletustili)
+				JOIN yriti ON (yriti.yhtio = kuka.yhtio and yriti.tunnus = kuka.oletustili and yriti.kaytossa = '')
 				WHERE kuka.yhtio = '$kukarow[yhtio]' and
 				kuka.kuka = '$kukarow[kuka]'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -550,7 +550,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		while ($tiliointirow=mysql_fetch_array ($result)) {
-			$query = "SELECT maksulimitti FROM yriti WHERE yhtio='$kukarow[yhtio]' and tunnus='$oltilrow[tunnus]'";
+			$query = "SELECT maksulimitti FROM yriti WHERE yhtio='$kukarow[yhtio]' and tunnus='$oltilrow[tunnus]' and yriti.kaytossa = ''";
 			$yrires = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($yrires) != 1) {
@@ -648,10 +648,11 @@
 		echo "<font class='message'>".t("Valitse maksutili")."</font><hr>";
 
 		$query = "	SELECT tunnus, concat(nimi, ' (', tilino, ')') tili, maksulimitti, valkoodi
-	               	FROM yriti
-					WHERE yhtio='$kukarow[yhtio]'
-					and maksulimitti > 0
-					and factoring = ''";
+	               	FROM yriti.yriti
+					WHERE yriti.yhtio = '$kukarow[yhtio]'
+					and yriti.maksulimitti > 0
+					and yriti.factoring = ''
+					and yriti.kaytossa = ''";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -694,7 +695,8 @@
 					JOIN valuu ON (valuu.yhtio = yriti.yhtio and valuu.nimi = yriti.valkoodi)
 				 	WHERE yriti.yhtio = '$kukarow[yhtio]'
 					and yriti.tunnus = '$oltilrow[tunnus]'
-					and yriti.factoring = ''";
+					and yriti.factoring = ''
+					and yriti.kaytossa = ''";
 		$result = mysql_query($query) or pupe_error($query);
 		$yritirow = mysql_fetch_array($result);
 
@@ -792,6 +794,7 @@
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and valuu.yhtio = lasku.yhtio
 					and valuu.yhtio = yriti.yhtio
+					and yriti.kaytossa = ''
 					and lasku.maksu_tili = yriti.tunnus
 					and lasku.tila = 'P'
 					and lasku.valkoodi = valuu.nimi
@@ -1339,6 +1342,7 @@
 					and valuu.yhtio 		= lasku.yhtio
 					and valuu.yhtio 		= yriti.yhtio
 					and lasku.maksu_tili 	= yriti.tunnus
+					and yriti.kaytossa		= ''
 					and lasku.tila	 		= 'P'
 					and lasku.valkoodi 		= valuu.nimi
 					and lasku.maksaja 		= '$kukarow[kuka]'";

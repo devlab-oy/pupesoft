@@ -41,7 +41,7 @@
 		$entry_date	  = "20".dateconv(substr($tietue,15,6));
 		$payment_date = "20".dateconv(substr($tietue,21,6));
 
-		$query = "SELECT * FROM yriti WHERE tilino = '$account'";
+		$query = "SELECT * FROM yriti WHERE tilino = '$account' and kaytossa = ''";
 		$result = mysql_query($query) or pupe_error($query);
 		$yritirow = mysql_fetch_array($result);
 

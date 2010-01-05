@@ -396,7 +396,8 @@
 
 			$query = "	SELECT *
 						FROM yriti
-						WHERE tilino = '$pankkitilino'";
+						WHERE yriti.tilino = '$pankkitilino'
+						and yriti.kaytossa = ''";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if ($silent == "") {

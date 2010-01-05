@@ -95,7 +95,8 @@
 			$query = "	SELECT tilino
 						FROM yriti
 						WHERE tilino = '$pankkitili'
-						and yhtio = '$kukarow[yhtio]'";
+						and yhtio = '$kukarow[yhtio]'
+						and yriti.kaytossa = ''";
 			$result = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($result) == 0) {
 				$virhe.= t("Pankkitiliä ei enää löydy")."<br>";
@@ -119,7 +120,8 @@
 			$query = "	SELECT nimi, tilino, tunnus
 						FROM yriti
 						WHERE tilino='$pankkitili'
-						and yhtio = '$kukarow[yhtio]'";
+						and yhtio = '$kukarow[yhtio]'
+						and yriti.kaytossa = ''";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) != 1) {

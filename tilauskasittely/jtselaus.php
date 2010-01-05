@@ -128,10 +128,14 @@
 
 				// Toimitetaan jtrivit
 				tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka, $tilaus_on_jo, $varastosta);
+
+				if ($kukarow['extranet'] != '') {
+					unset($jarj);
+				}
 			}
 		}
 
-		$tee = ($kukarow['extranet'] != '' and $tee == 'JT_TILAUKSELLE') ? 'JT_TILAUKSELLE' : "JATKA";
+		$tee = "JATKA";
 	}
 
 	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $tee == 'TOIMITA') {

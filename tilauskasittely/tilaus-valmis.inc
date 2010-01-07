@@ -1010,6 +1010,9 @@ else {
 					$result = mysql_query($query) or pupe_error($query);
 					$laskurow = mysql_fetch_assoc($result);
 
+					// Tilausvahvistukset muuttavat tätä niin otetaan talteen
+					$laskurow_tvorig = $laskurow;
+
 					//
 					// LÄHETETÄÄN TILAUSVAHVISTUS
 					//
@@ -1088,6 +1091,9 @@ else {
 						//poistetaan tmp file samantien kuleksimasta...
 						system("rm -f ".basename($tilausvahvistus_tallenna));
 					}
+
+					// takaisin käyttöön
+					$laskurow = $laskurow_tvorig;
 
 					///* Tässä katotaan onko lähetteellä tosiaan mitään kerättävää *///
 					$kutsuja = "tilaus-valmis.inc";

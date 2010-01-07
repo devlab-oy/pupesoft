@@ -245,6 +245,7 @@
 			$result = mysql_query($query) or die($query);
 
 			while ($row = mysql_fetch_assoc($result)) {
+				// laitetaan kaikki poimitut extranet jt-rivit takaisin omille vanhoille tilauksille
 				$query = "	SELECT tilausrivi.tunnus, tilausrivin_lisatiedot.vanha_otunnus
 							FROM tilausrivi
 							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.positio = 'JT')

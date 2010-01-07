@@ -46,11 +46,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == "file
 			$vantuoteno = strtoupper(trim($rivi[0]));
 			$uustuoteno = strtoupper(trim($rivi[1]));
 			
-			$query  = "select tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$vantuoteno'";
+			$query  = "SELECT tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$vantuoteno'";
 			$tuoteresult = mysql_query($query) or pupe_error($query);
 			
 			if (mysql_num_rows($tuoteresult) != '0') {
-				$query  = "select tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
+				$query  = "SELECT tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
 				$tuoteuresult = mysql_query($query) or pupe_error($query);
 				
 				if (mysql_num_rows($tuoteuresult) != '0') {
@@ -81,13 +81,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == "file
 }
 elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "file") {
 	//Tuotenumerot tulevat käyttöliittymästä
-	$query  = "select tunnus, kehahin from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$vantuoteno'";
+	$query  = "SELECT tunnus, kehahin from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$vantuoteno'";
 	$tuoteresult = mysql_query($query) or pupe_error($query);
 	
 	if (mysql_num_rows($tuoteresult) != 0) {
 		$vantuoterow = mysql_fetch_array($tuoteresult);
 		
-		$query  = "select tunnus, kehahin from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
+		$query  = "SELECT tunnus, kehahin from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
 		$tuoteuresult = mysql_query($query) or pupe_error($query);
 		
 		if (mysql_num_rows($tuoteuresult) != 0) {
@@ -95,26 +95,32 @@ elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "
 			
 			echo "<font class='message'>".t("UUSI TUOTENUMERO LÖYTYY JO").": $uustuoteno</font><br>";
 			
-			//Jos molempien tuotteiden varastonarvo on nolla niin ei haittaa vaikka uusi tuote löytyy jo
-			$query = "	SELECT sum(saldo) saldo
-						FROM tuotepaikat
-						WHERE yhtio = '$kukarow[yhtio]' 
-						and tuoteno = '$vantuoteno'";
-			$result = mysql_query($query) or pupe_error($query);
-			$vansaldorow = mysql_fetch_array($result);
-			
-			$query = "	SELECT sum(saldo) saldo
-						FROM tuotepaikat
-						WHERE yhtio = '$kukarow[yhtio]' 
-						and tuoteno = '$uustuoteno'";
-			$result = mysql_query($query) or pupe_error($query);
-			$uussaldorow = mysql_fetch_array($result);
-
-			if (($uustuoterow["kehahin"] == 0 and $vantuoterow["kehahin"] == 0) or ($vansaldorow["saldo"] == 0 and $uussaldorow["saldo"] == 0) or strtoupper(trim($vantuoteno)) == strtoupper(trim($uustuoteno))) {
-				$uusi_on_jo = "OK";
+			if (strtoupper(trim($vantuoterow["tuoteno"])) == strtoupper(trim($uustuoterow["tuoteno"]))) {
+				//sallitaan myös se, että uusi tuote ja vanhatuote ovat samat (silloin vain strtoupperataan tuoteno)
+				$uusi_on_jo = "SAMA";
 			}
 			else {
-				$error++;
+				//Jos molempien tuotteiden varastonarvo on nolla niin ei haittaa vaikka uusi tuote löytyy jo
+				$query = "	SELECT sum(saldo) saldo
+							FROM tuotepaikat
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tuoteno = '$vantuoteno'";
+				$result = mysql_query($query) or pupe_error($query);
+				$vansaldorow = mysql_fetch_array($result);
+
+				$query = "	SELECT sum(saldo) saldo
+							FROM tuotepaikat
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tuoteno = '$uustuoteno'";
+				$result = mysql_query($query) or pupe_error($query);
+				$uussaldorow = mysql_fetch_array($result);
+
+				if (($uustuoterow["kehahin"] == 0 and $vantuoterow["kehahin"] == 0) or ($vansaldorow["saldo"] == 0 and $uussaldorow["saldo"] == 0)) {
+					$uusi_on_jo = "OK";
+				}
+				else {
+					$error++;
+				}	
 			}
 		}
 	}
@@ -166,7 +172,7 @@ if ($error == 0 and $tee == "file") {
 	
 	$tyyppi = "(";
 
-	$query  = "select distinct tyyppi from tilausrivi where yhtio = '$kukarow[yhtio]' and tuoteno != ''";
+	$query  = "SELECT distinct tyyppi from tilausrivi where yhtio = '$kukarow[yhtio]' and tuoteno != ''";
 	$tyypitresult = mysql_query($query) or pupe_error($query);
 	
 	while ($tyypitrow = mysql_fetch_array($tyypitresult)) {
@@ -203,15 +209,15 @@ if ($error == 0 and $tee == "file") {
 			$vantuoteno = strtoupper(trim($rivi[0]));
 			$uustuoteno = strtoupper(trim($rivi[1]));
 			
-			$query  = "select tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$vantuoteno'";
+			$query  = "SELECT tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$vantuoteno'";
 			$tuoteresult = mysql_query($query) or pupe_error($query);
 			
 			if (mysql_num_rows($tuoteresult) == 1) {
 				
-				$query  = "select tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
+				$query  = "SELECT tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
 				$tuoteuresult = mysql_query($query) or pupe_error($query);
 				
-				if (mysql_num_rows($tuoteuresult) == 0 or $uusi_on_jo == "OK") {
+				if (mysql_num_rows($tuoteuresult) == 0 or $uusi_on_jo == "OK" or $uusi_on_jo == "SAMA") {
 				
 					$query = "	INSERT INTO tuote_muutokset
 								SET 
@@ -256,7 +262,7 @@ if ($error == 0 and $tee == "file") {
 										ORDER BY yhtio";
 							$result2 = mysql_query($query) or pupe_error($query);
 						}
-						elseif ($tulos2 == 'tuotepaikat') {
+						elseif ($tulos2 == 'tuotepaikat' and $uusi_on_jo != "SAMA") {
 							// Tuotepaikat käsitellään hieman eri lailla
 							$query = "	SELECT * 
 										FROM tuotepaikat 
@@ -264,7 +270,7 @@ if ($error == 0 and $tee == "file") {
 										and tuoteno	= '$vantuoteno'";
 							$paires = mysql_query($query) or pupe_error($query);
 							
-							while($pairow = mysql_fetch_array($paires)) {
+							while ($pairow = mysql_fetch_array($paires)) {
 								
 								// Tutkitaan löytyykö vanhan tuotteen paikka uudella tuoteella
 								$query = "	SELECT * 
@@ -339,15 +345,18 @@ if ($error == 0 and $tee == "file") {
 								$result2 = mysql_query($query) or pupe_error($query);
 							}
 						}
-						elseif($uusi_on_jo == "" or ($uusi_on_jo == "OK" and $tulos2 != 'tuote')) {
-							if ($tulos2 == 'tuotteen_toimittajat') {
-								$query = "	SELECT * FROM $tulos2
+						elseif ($uusi_on_jo == "" or ($uusi_on_jo == "OK" and $tulos2 != 'tuote') or $uusi_on_jo == "SAMA") {
+							if ($tulos2 == 'tuotteen_toimittajat' and $uusi_on_jo != "SAMA") {
+								$query = "	SELECT * 
+											FROM $tulos2
 											WHERE yhtio = '$kukarow[yhtio]'
 											and tuoteno	= '$uustuoteno'
 											ORDER BY yhtio";
 								$result2 = mysql_query($query) or pupe_error($query);
+								
 								if (mysql_num_rows($result2) > 0) {
-									$query = "	DELETE FROM $tulos2
+									$query = "	DELETE 
+												FROM $tulos2
 												WHERE yhtio = '$kukarow[yhtio]'
 												and tuoteno	= '$vantuoteno'
 												ORDER BY yhtio";
@@ -364,9 +373,8 @@ if ($error == 0 and $tee == "file") {
 						}						
 					}
 					
-					if ($jatavanha != '' and $vantuoteno != $uustuoteno) {
-						if($uusi_on_jo == "") {
-							
+					if ($jatavanha != '' and $uusi_on_jo != "SAMA") {
+						if ($uusi_on_jo == "") {							
 							$query = "SELECT * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'alv' and selitetark = 'o' LIMIT 1";
 							$alvresult = mysql_query($query) or pupe_error($query);
 							$alv = '0.00';
@@ -389,13 +397,13 @@ if ($error == 0 and $tee == "file") {
 							$result3 = mysql_query($query) or pupe_error($query);
 						}
 						
-						$querykorv = "select max(id)+1 maxi from korvaavat where yhtio = '$kukarow[yhtio]'";
+						$querykorv = "SELECT max(id)+1 maxi from korvaavat where yhtio = '$kukarow[yhtio]'";
 						$korvresult = mysql_query($querykorv) or pupe_error($querykorv);
 						$korvid = mysql_fetch_array($korvresult);
 
 						$loytyikorv = '';
 
-						$querykorvv  = "select id maxi from korvaavat where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
+						$querykorvv  = "SELECT id maxi from korvaavat where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
 						$korvvresult = mysql_query($querykorvv) or pupe_error($querykorvv);
 					
 						if (mysql_num_rows($korvvresult) != '0') {

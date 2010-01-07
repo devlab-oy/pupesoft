@@ -109,8 +109,8 @@ elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "
 						and tuoteno = '$uustuoteno'";
 			$result = mysql_query($query) or pupe_error($query);
 			$uussaldorow = mysql_fetch_array($result);
-			
-			if (($uustuoterow["kehahin"] == 0 and $vantuoterow["kehahin"] == 0) or ($vansaldorow["saldo"] == 0 and $uussaldorow["saldo"] == 0)) {
+
+			if (($uustuoterow["kehahin"] == 0 and $vantuoterow["kehahin"] == 0) or ($vansaldorow["saldo"] == 0 and $uussaldorow["saldo"] == 0) or strtoupper(trim($vantuoteno)) == strtoupper(trim($uustuoteno))) {
 				$uusi_on_jo = "OK";
 			}
 			else {
@@ -364,7 +364,7 @@ if ($error == 0 and $tee == "file") {
 						}						
 					}
 					
-					if ($jatavanha != '') {
+					if ($jatavanha != '' and $vantuoteno != $uustuoteno) {
 						if($uusi_on_jo == "") {
 							
 							$query = "SELECT * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'alv' and selitetark = 'o' LIMIT 1";

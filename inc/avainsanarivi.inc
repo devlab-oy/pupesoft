@@ -37,7 +37,7 @@
 
 	if (mysql_field_name($result, $i) == "laji") {
 
-		$al_laji 				= $trow[$i];
+		$al_laji 				= trim(strtoupper($trow[$i]));
 		$lukitse_laji 			= trim(strtoupper($lukitse_laji));
 		$avain_sel[$trow[$i]] 	= "SELECTED";
 

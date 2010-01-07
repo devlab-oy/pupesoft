@@ -245,6 +245,27 @@
 			$result = mysql_query($query) or die($query);
 
 			while ($row = mysql_fetch_assoc($result)) {
+				$query = "	SELECT tilausrivi.tunnus, tilausrivin_lisatiedot.vanha_otunnus
+							FROM tilausrivi
+							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.positio = 'JT')
+							WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+							AND tilausrivi.otunnus = '{$row['laskutunnus']}'";
+				$jt_rivien_muisti_res = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($jt_rivien_muisti_res) > 0) {
+					$jt_saldo_lisa = $yhtiorow["varaako_jt_saldoa"] == "" ? ", jt = varattu, varattu = 0 " : '';
+
+					while ($jt_rivien_muisti_row = mysql_fetch_assoc($jt_rivien_muisti_res)) {
+						$query = "	UPDATE tilausrivi SET
+									otunnus = '{$jt_rivien_muisti_row['vanha_otunnus']}',
+									var = 'J'
+									$jt_saldo_lisa
+									WHERE yhtio = '{$kukarow['yhtio']}'
+									AND tunnus = '{$jt_rivien_muisti_row['tunnus']}'";
+						$jt_rivi_res = mysql_query($query) or pupe_error($query);
+					}
+				}
+
 				$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa iltasiivo.php")." (4)<br>";
 
 				$query = "	UPDATE lasku SET 

@@ -61,21 +61,14 @@
 			while (!feof($file)) {
 
 				// luetaan rivi tiedostosta..
-				$poista	  = array("'", "\\", " ","\"");
-				$rivi	  = str_replace($poista,"",$rivi);
-				$rivi	  = str_replace(",",".",$rivi);
-				$rivi	  = explode("\t", trim($rivi));
-
-				$tuo 		= $rivi[0];
-				$hyl 		= $rivi[1];
-				$maa 		= $rivi[2];
-				$lisaselite = $rivi[3];
-
+				$rivi		= explode("\t", trim($rivi));
+				$tuo		= mysql_real_escape_string(trim($rivi[0]));
+				$hyl		= mysql_real_escape_string(trim($rivi[1]));
+				$maa		= mysql_real_escape_string(str_replace(",", ".", trim($rivi[2])));
+				$lisaselite	= mysql_real_escape_string(trim($rivi[3]));
 
 				if ($tuo != '' and $hyl != '' and $maa != '') {
-
 					$hylp = explode("-", $hyl);
-
 					$tuote[] = $tuo."#".$hylp[0]."#".$hylp[1]."#".$hylp[2]."#".$hylp[3];
 					$maara[] = $maa;
 				}

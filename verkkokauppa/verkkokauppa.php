@@ -437,7 +437,7 @@ if (!function_exists("uutiset")) {
 						//	Haetaan tuotenumero
 						$query = "	SELECT tuoteno, nimitys
 						 			FROM tuote
-									WHERE yhtio = '$kukarow[yhtio]' and tuoteno like ('$m[1]%')";
+									WHERE yhtio = '$kukarow[yhtio]' and tuoteno like ('$m[1]%') and status != 'P'";
 						$tres = mysql_query($query) or pupe_error($query);
 
 						//	Tämä me korvataan aina!
@@ -538,7 +538,7 @@ if ($tee == "tuotteen_lisatiedot") {
 
 	$query = "	SELECT kuvaus, lyhytkuvaus
 				FROM tuote
-				WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and hinnastoon in ('W','V')";
+				WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and hinnastoon in ('W','V') and status != 'P'";
 	$result = mysql_query($query) or pupe_error($query);
 	$row = mysql_fetch_array($result);
 
@@ -594,6 +594,7 @@ if ($tee == "tuotteen_lisatiedot") {
 				WHERE tuote.yhtio = '$kukarow[yhtio]'
 				and tuote.tuoteno = '$tuoteno'
 				and tuote.hinnastoon in ('W','V')
+				and tuote.status != 'P'
 				ORDER BY liitetiedostot.kayttotarkoitus IN ('TK') DESC, liitetiedostot.selite";
 	$result = mysql_query($query) or pupe_error($query);
 

@@ -430,10 +430,13 @@
 
 	echo "<tr><th>".t("Ajalta")."</th><td colspan='3'><select name='alvv'>";
 
-	for ($i = date("Y")+1; $i >= date("Y")-6; $i--) {
-		if ($i == date("Y")) $sel = "selected";
-		else $sel = "";
-		echo "<option value='$i' $sel>$i</option>";
+	if (!isset($alvv)) $alvv = date("Y");
+
+	$sel = array();
+	$sel[$alvv] = "SELECTED";
+
+	for ($i = date("Y") + 1; $i >= date("Y") - 6; $i--) {
+		echo "<option value='$i' $sel[$i]>$i</option>";
 	}
 
 	echo "</select>";

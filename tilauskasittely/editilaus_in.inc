@@ -694,7 +694,7 @@ while (!feof ($fd)) {
 				if ($editilaus_maksuehto == '') {
 					$editilaus_maksuehto = $arow["maksuehto"];
 				}
-				
+
 				// jos ei olla pakotettu rahtivapaata, niin otetaan asiakkaan oletus
 				if ($editilaus_rahtivapaa == '') {
 					$editilaus_rahtivapaa = $arow["rahtivapaa"];
@@ -824,8 +824,10 @@ while (!feof ($fd)) {
 					}
 				}
 
-				//Poistetaan spacet
-				$tieto = str_replace(" ", "", $tieto);
+				// Poistetaan spacet
+				if (in_array($yhtiorow["yhtio"], array("artr","allr","mast"))) {
+					$tieto = str_replace(" ", "", $tieto);
+				}
 
 				$query = "SELECT * FROM tuote WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tieto' $kieltolisa";
 				$result = mysql_query($query) or die($query);

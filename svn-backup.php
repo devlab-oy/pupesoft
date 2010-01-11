@@ -2,8 +2,8 @@
 <?php
 
 	// tässä scp komennon host ja host dir muuttujat, muuta nämä sopiviksi muuhun ei tarvitse koskea
-	$scp_host = "root@d90.arwidson.fi";
-	$scp_dir  = "/backup/mysql-backup";
+	$scp_host = "joni@d90.arwidson.fi";
+	$scp_dir  = "/backup/arwidson-backup";
 
 	if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 
@@ -15,7 +15,7 @@
 	chdir("/var/svn");
 
 	// pakataan failit
-	system("/bin/tar -cjf $filename *");
+	system("/bin/tar -cf $filename --use-compress-prog=pbzip2 *");
 
 	echo date("d.m.Y @ G:i:s")." - Bzip2 done.\n";
 

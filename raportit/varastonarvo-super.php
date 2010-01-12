@@ -432,7 +432,7 @@
 				}
 			}
 
-			while ($row = mysql_fetch_array($result)) {
+			while ($row = mysql_fetch_assoc($result)) {
 
 				$kpl = 0;
 				$varaston_arvo = 0;
@@ -568,7 +568,7 @@
 				 			and tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'
 							$summaus_lisa";
 				$muutosres = mysql_query($query) or pupe_error($query);
-				$muutosrow = mysql_fetch_array($muutosres);
+				$muutosrow = mysql_fetch_assoc($muutosres);
 
 				// saldo historiassa: lasketaan nykyiset kpl - muutoskpl
 				$muutoskpl = $kpl - $muutosrow["muutoskpl"];
@@ -576,6 +576,20 @@
 				// arvo historiassa: lasketaan nykyinen arvo - muutosarvo
 				$muutoshinta = $varaston_arvo - $muutosrow["muutoshinta"];
 				$bmuutoshinta = $bruttovaraston_arvo - $muutosrow["muutoshinta"];
+
+				// Epäkurantit haetaan tapahtumista erikseen, koska niillä on hyllyalue, hyllynro, hyllytaso ja hyllyvali tyhjää
+				$query = "	SELECT sum(kpl * hinta) muutoshinta, sum(kpl) muutoskpl, tapahtuma.laji
+				 			FROM tapahtuma use index (yhtio_tuote_laadittu)
+				 			WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
+				 			and tapahtuma.tuoteno = '$row[tuoteno]'
+				 			and tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'
+							and tapahtuma.laji = 'Epäkurantti'";
+				$epares = mysql_query($query) or pupe_error($query);
+				$eparow = mysql_fetch_assoc($epares);
+
+				// Epäkuranteissa saldo ei muutu!!! eli ei vähennetä $muutoskpl
+				$muutoshinta -= $eparow['muutoshinta'];
+				$bmuutoshinta -= $eparow['muutoshinta'];
 
 				if($tyyppi == "C") {
 					$ok = "GO";

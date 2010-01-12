@@ -173,7 +173,7 @@ if(!function_exists("tuotetarkista")) {
 				}
 			}
 
-			if ($poistolukko != "" and $t[$i] != $trow["ei_saldoa"]) {
+			if ($poistolukko != "" and trim($trow['ei_saldoa']) != '' and $t[$i] != $trow["ei_saldoa"]) {
 				$virhe[$i] = t("Tuotteella on tapahtumia. Saldottomuutta ei voi vaihtaa")."!";
 			}
 

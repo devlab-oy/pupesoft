@@ -92,7 +92,7 @@ if (!function_exists("lopetus")) {
 				$lopetus = preg_replace('/\/NIMILISA=(.*?)\//','',   $lopetus);
 
 				if ($meta != "") {
-					echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$lopetus'>";
+					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
 					exit;
 				}
 				else {

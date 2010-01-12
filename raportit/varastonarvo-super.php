@@ -340,6 +340,8 @@
 			$varvo  = 0; // tähän summaillaan
 			$bvarvo = 0; // bruttovarastonarvo
 
+			$piilotetaan_bruttovarastonarvo = ("$vv-$kk-$pp" != date("Y-m-d")) ? 'piilotetaan' : '';
+
 			if(@include('Spreadsheet/Excel/Writer.php')) {
 				//keksitään failille joku varmasti uniikki nimi:
 				list($usec, $sec) = explode(' ', microtime());
@@ -400,8 +402,10 @@
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Varastonarvo"), 		$format_bold);
 				$excelsarake++;
-				$worksheet->writeString($excelrivi, $excelsarake, t("Bruttovarastonarvo"), 	$format_bold);
-				$excelsarake++;
+				if ($piilotetaan_bruttovarastonarvo == '') {
+					$worksheet->writeString($excelrivi, $excelsarake, t("Bruttovarastonarvo"), 	$format_bold);
+					$excelsarake++;
+				}
 				$worksheet->writeString($excelrivi, $excelsarake, t("Kiertonopeus 12kk"), 	$format_bold);
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Viimeisin laskutus"), 	$format_bold);
@@ -557,7 +561,16 @@
 				}
 
 				// tuotteen muutos varastossa annetun päivän jälkeen
-				$query = "	SELECT sum(kpl * if(laji in ('tulo', 'valmistus'), kplhinta, hinta)) muutoshinta, sum(kpl) muutoskpl
+				// jos samalle päivälle on epäkuranttitapahtumia ja muita tapahtumia (esim. inventointi), niin bruttovarastonarvo heittää, koska epäkuranttitapahtuma on tällöin päivän eka tapahtuma (huom. 00:00:00)
+				$query = "	SELECT 
+							sum(kpl * if(laji in ('tulo', 'valmistus'), kplhinta, hinta)) muutoshinta,							
+							sum(kpl * if(laji in ('tulo', 'valmistus'), kplhinta, 
+							if(tapahtuma.laadittu <= '$row[epakurantti100pvm] 00:00:00' or '$row[epakurantti100pvm]' = '0000-00-00', 
+								if(tapahtuma.laadittu <= '$row[epakurantti75pvm] 00:00:00' or '$row[epakurantti75pvm]' = '0000-00-00', 
+									if(tapahtuma.laadittu <= '$row[epakurantti50pvm] 00:00:00' or '$row[epakurantti50pvm]' = '0000-00-00', 
+										if(tapahtuma.laadittu <= '$row[epakurantti25pvm] 00:00:00' or '$row[epakurantti25pvm]' = '0000-00-00', hinta, hinta / 0.75), hinta / 0.5), hinta / 0.25), 0))) bmuutoshinta, 
+							sum(kpl) muutoskpl, 
+							tapahtuma.laadittu
 				 			FROM tapahtuma use index (yhtio_tuote_laadittu)
 							JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio
 													and concat(rpad(upper(alkuhyllyalue),  5, '0'), lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'), lpad(upper(tapahtuma.hyllynro), 5, '0'))
@@ -566,30 +579,75 @@
 				 			WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 				 			and tapahtuma.tuoteno = '$row[tuoteno]'
 				 			and tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'
-							$summaus_lisa";
+							$summaus_lisa
+							GROUP BY tapahtuma.laadittu
+							ORDER BY tapahtuma.laadittu DESC";
 				$muutosres = mysql_query($query) or pupe_error($query);
-				$muutosrow = mysql_fetch_assoc($muutosres);
 
-				// saldo historiassa: lasketaan nykyiset kpl - muutoskpl
-				$muutoskpl = $kpl - $muutosrow["muutoskpl"];
+				$muutoskpl 		= $kpl;
+				$muutoshinta 	= $varaston_arvo;
+				$bmuutoshinta 	= $bruttovaraston_arvo;
+				$edlaadittu 	= '';
 
-				// arvo historiassa: lasketaan nykyinen arvo - muutosarvo
-				$muutoshinta = $varaston_arvo - $muutosrow["muutoshinta"];
-				$bmuutoshinta = $bruttovaraston_arvo - $muutosrow["muutoshinta"];
-
+				if (mysql_num_rows($muutosres) == 0) {
+					$uusintapahtuma = "$vv-$kk-$pp 23:59:59";
+				}
+				else {
+					$muutosrow = mysql_fetch_assoc($muutosres);
+										
+					$uusintapahtuma = $muutosrow["laadittu"];	
+					
+					mysql_data_seek($muutosres, 0);
+				}
+				
 				// Epäkurantit haetaan tapahtumista erikseen, koska niillä on hyllyalue, hyllynro, hyllytaso ja hyllyvali tyhjää
-				$query = "	SELECT sum(kpl * hinta) muutoshinta, sum(kpl) muutoskpl
+				$query = "	SELECT sum($muutoskpl * hinta) muutoshinta
 				 			FROM tapahtuma use index (yhtio_tuote_laadittu)
 				 			WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 				 			and tapahtuma.tuoteno = '$row[tuoteno]'
-				 			and tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'
+				 			and tapahtuma.laadittu >= '$uusintapahtuma'
 							and tapahtuma.laji = 'Epäkurantti'";
 				$epares = mysql_query($query) or pupe_error($query);
-				$eparow = mysql_fetch_assoc($epares);
+			
+				if (mysql_num_rows($epares) > 0) {
+					$eparow = mysql_fetch_assoc($epares);
+			
+					// Epäkuranteissa saldo ei muutu!!! eli ei vähennetä $muutoskpl
+					$muutoshinta += $eparow['muutoshinta'];
+				}
+				
+				if (mysql_num_rows($muutosres) > 0) {
+					while ($muutosrow = mysql_fetch_assoc($muutosres)) {
 
-				// Epäkuranteissa saldo ei muutu!!! eli ei vähennetä $muutoskpl
-				$muutoshinta -= $eparow['muutoshinta'];
-				$bmuutoshinta -= $eparow['muutoshinta'];
+						if ($edlaadittu != '') {
+							// Epäkurantit haetaan tapahtumista erikseen, koska niillä on hyllyalue, hyllynro, hyllytaso ja hyllyvali tyhjää
+							$query = "	SELECT sum($muutoskpl * hinta) muutoshinta
+							 			FROM tapahtuma use index (yhtio_tuote_laadittu)
+							 			WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
+							 			and tapahtuma.tuoteno = '$row[tuoteno]'
+							 			and tapahtuma.laadittu >= '$muutosrow[laadittu]'
+										and tapahtuma.laadittu < '$edlaadittu'
+										and tapahtuma.laji = 'Epäkurantti'";
+							$epares = mysql_query($query) or pupe_error($query);
+					
+							if (mysql_num_rows($epares) > 0) {
+								$eparow = mysql_fetch_assoc($epares);
+
+								// Epäkuranteissa saldo ei muutu!!! eli ei vähennetä $muutoskpl
+								$muutoshinta += $eparow['muutoshinta'];								
+							}
+						}
+
+						// saldo historiassa: lasketaan nykyiset kpl - muutoskpl
+						$muutoskpl -= $muutosrow["muutoskpl"];
+
+						// arvo historiassa: lasketaan nykyinen arvo - muutosarvo
+						$muutoshinta -= $muutosrow["muutoshinta"];
+						$bmuutoshinta -= $muutosrow["bmuutoshinta"];
+						
+						$edlaadittu = $muutosrow['laadittu'];
+					}
+				}
 
 				if($tyyppi == "C") {
 					$ok = "GO";
@@ -775,8 +833,10 @@
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$muutoshinta));
 						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$bmuutoshinta));
-						$excelsarake++;
+						if ($piilotetaan_bruttovarastonarvo == '') {
+							$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$bmuutoshinta));
+							$excelsarake++;
+						}
 
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kierto));
 						$excelsarake++;
@@ -817,7 +877,10 @@
 			if (count($argv) == 0) {
 				echo "<br>";
 				echo "<table>";
-				echo "<tr><th>".t("Varasto")."</th><th>".t("Varastonarvo")."</th><th>".t("Bruttovarastonarvo")."</th></tr>";
+				echo "<tr><th>".t("Varasto")."</th><th>".t("Varastonarvo")."</th>";
+				if ($piilotetaan_bruttovarastonarvo == '') {
+					echo "<th>".t("Bruttovarastonarvo")."</th></tr>";
+				}
 				
 				ksort($varastot2);
 
@@ -827,6 +890,10 @@
 					}
 					else {
 						echo "<tr><td>$varasto</td>";
+					}
+
+					if ($piilotetaan_bruttovarastonarvo != '') {
+						unset($arvot['brutto']);
 					}
 
 					foreach ($arvot AS $arvo) {
@@ -842,7 +909,9 @@
 
 				echo "<tr><th>".t("Pvm")."</th><th colspan='2'>".t("Yhteensä")."</th></tr>";
 				echo "<tr><td>$vv-$kk-$pp</td><td align='right'>".sprintf("%.2f",$varvo)."</td>";
-				echo "<td align='right'>".sprintf("%.2f",$bvarvo)."</td></tr>";
+				if ($piilotetaan_bruttovarastonarvo == '') {
+					echo "<td align='right'>".sprintf("%.2f",$bvarvo)."</td></tr>";
+				}
 				echo "</table><br>";
 			}
 		}

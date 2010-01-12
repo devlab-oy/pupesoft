@@ -89,7 +89,7 @@ if ($kollityht > 0) {
 		for($i=0;$i<mysql_num_fields($rakir_res);$i++) {
 
 			$r = mysql_field_name($rakir_res, $i);
-			$v = $rakir_row[$i];
+			$v = $rakir_row[$r];
 
 			//	Korvaavuksia ja näppäilyä
 			if($r=="jv" and $v != "") {
@@ -210,7 +210,7 @@ if ($kollityht > 0) {
 											"yhteyshenkilo_nimi",
 											"puh",
 											"fax",
-											"emai",
+											"email",
 											"comments",
 										);
 

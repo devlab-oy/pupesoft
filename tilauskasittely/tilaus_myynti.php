@@ -329,6 +329,11 @@ if (isset($liitaasiakasnappi) and $kukarow["extranet"] == "") {
 	$tila = "vaihdaasiakas";
 }
 
+//Jos yll‰pidossa on luotu uusi asiakas
+if (isset($from) and $from == "ASIAKASYLLAPITO" and $yllapidossa == "asiakas" and $yllapidontunnus != '') {
+	$asiakasid 	= $yllapidontunnus;
+}
+
 // asiakasnumero on annettu, etsit‰‰n tietokannasta...
 if (($tee == "" or ($myos_prospektit=="TRUE" and $toim == "TARJOUS")) and (($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0) or ($kukarow["extranet"] == "" and ($syotetty_ytunnus != '' or $asiakasid != '')))) {
 
@@ -340,6 +345,7 @@ if (($tee == "" or ($myos_prospektit=="TRUE" and $toim == "TARJOUS")) and (($kuk
 	}
 
 	$kutsuja    = "otsik.inc";
+	$ahlopetus 	= "tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO";
 
 	if (file_exists("../inc/asiakashaku.inc")) {
 		require ("../inc/asiakashaku.inc");

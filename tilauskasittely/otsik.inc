@@ -71,11 +71,6 @@
 		$from 		= 'vaihdaasiakas';
 	}
 
-	//Jos yll‰pidossa on luotu uusi asiakas
-	if ($yllapidossa == "asiakas" and $yllapidontunnus != '') {
-		$asiakasid 	= $yllapidontunnus;
-	}
-
 	// Etsit‰‰n asiakasta
 	if (($nimi != '' and !isset($jatka) and $asiakasid == 0 and !isset($vaihdatoim_asiakas)) or ($tnimi != '' and !isset($jatka) and isset($vaihdatoim_asiakas))) {
 
@@ -674,7 +669,7 @@
 			echo "<tr><td valign='top'> ".t("Maa").": </td>
 					<td><select name='maa' onChange='submit();' ".js_alasvetoMaxWidth("maa", 200).">";
 
-			while ($vrow=mysql_fetch_assoc($vresult)) {
+			while ($vrow = mysql_fetch_assoc($vresult)) {
 				$sel="";
 				if (strtoupper($srow["maa"]) == strtoupper($vrow["koodi"])) {
 					$sel = "selected";
@@ -700,7 +695,7 @@
 				$ealisa = "asiakas";
 			}
 
-			echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
+			echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO//asiakasid=$asiakasid'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
 		}
 
 		if ($templ > 0 and $asiakasid == '') {

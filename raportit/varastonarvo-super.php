@@ -578,7 +578,7 @@
 				$bmuutoshinta = $bruttovaraston_arvo - $muutosrow["muutoshinta"];
 
 				// Ep‰kurantit haetaan tapahtumista erikseen, koska niill‰ on hyllyalue, hyllynro, hyllytaso ja hyllyvali tyhj‰‰
-				$query = "	SELECT sum(kpl * hinta) muutoshinta, sum(kpl) muutoskpl, tapahtuma.laji
+				$query = "	SELECT sum(kpl * hinta) muutoshinta, sum(kpl) muutoskpl
 				 			FROM tapahtuma use index (yhtio_tuote_laadittu)
 				 			WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 				 			and tapahtuma.tuoteno = '$row[tuoteno]'

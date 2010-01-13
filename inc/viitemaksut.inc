@@ -47,8 +47,8 @@
 
 		if ($yritirow["yhtio"] == "") {
 			echo "<font class='error'>Tilille $account ei löytynyt yritystä.</font><br>";
-			next;
-		}
+			continue;
+		} 
 
 		if ($yritirow["valkoodi"] != "") {
 			$query = "	SELECT *
@@ -59,7 +59,7 @@
 
 			if (mysql_num_rows($valresult) != 1) {
 				echo "<font class='error'> Valuuttaa '$yritirow[valkoodi]' ei löytynyt!</font><br>";
-				next;
+				continue;
 			}
 			else {
 				$valrow = mysql_fetch_array ($valresult);
@@ -75,7 +75,7 @@
 
 			if ($valrow["valkoodi"] == '') {
 				echo "<font class='error'> Yhtiöllä ei ole valuuttaa!</font><br>";
-				next;
+				continue;
 			}
 			else {
 				$valkoodi	= $valrow["valkoodi"];

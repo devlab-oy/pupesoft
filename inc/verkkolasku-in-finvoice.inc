@@ -78,14 +78,14 @@ if (count($tuotetiedot) > 0) {
 		// tuotekoodi
 		$xtuoteno[$i]	= $tuotetieto->xpath('ArticleIdentifier');
 		$tuoteno[$i]	= $xtuoteno[$i][0];
-		
+
 		if ($tuoteno[$i] != "") {
 			// veroton rivihinta
 			$xrsumma[$i]	= $tuotetieto->xpath('RowAmount');
-			$rsumma[$i]		= (float) $xrsumma[$i][0];
+			$rsumma[$i]		= (float) str_replace(",", ".", $xrsumma[$i][0]);
 
 			$xvat[$i]		= $tuotetieto->xpath('RowVatRatePercent');
-			$vat[$i] 		= (float) $xvat[$i][0];
+			$vat[$i] 		= (float) str_replace(",", ".", $xvat[$i][0]);
 
 			// rivikommentti
 			$xrinfo[$i] 	= $tuotetieto-> xpath('RowFreeText');
@@ -103,7 +103,7 @@ if (count($tuotetiedot) > 0) {
 
 			// laskutettu määrä
 			$xrkpl[$i] 		= $tuotetieto->xpath('DeliveredQuantity');
-			$rkpl[$i] 		= (float) $xrkpl[$i][0];
+			$rkpl[$i] 		= (float) str_replace(",", ".", $xrkpl[$i][0]);
 
 			$xrivino[$i] 	= $tuotetieto->xpath('RowIdentifier');
 			$rrivino[$i]	= $xrivino[$i][0];
@@ -128,7 +128,7 @@ $laskuttajan_ovt		= $xlaskuttajan_ovt[0];
 $laskuttajan_nimi		= $xlaskuttaja[0];
 $laskuttajan_vat		= $xlaskuttajan_vat[0];
 $laskun_pankkiviite		= $xlaskun_pankkiviite[0];
-$laskun_summa_eur		= (float) $xlaskun_summa_eur[0];
+$laskun_summa_eur		= (float) str_replace(",", ".", $xlaskun_summa_eur[0]);
 $laskun_pankkiviite 	= $xlaskun_pankkiviite[0];
 $laskun_asiakastunnus	= $xlaskun_asiakastunnus[0];
 

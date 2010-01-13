@@ -100,7 +100,7 @@
 			}
 
 			# Myyntisaamiset
-			$query = "INSERT INTO tiliointi (yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite) values ('$row[suoriyhtio]', 'automaattikohdistus', now(), '$row[kirjpvm]', '$row[laskutunnus]', '$row[myyntisaamiset]', -$row[laskutettu], -$row[laskutettu_valuutassa], '$row[laskuvaluutta]', 'Automaattikohdistettu asiakkaan suoritus')";
+			$query = "INSERT INTO tiliointi (yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite) values ('$row[suoriyhtio]', 'automaatti', now(), '$row[kirjpvm]', '$row[laskutunnus]', '$row[myyntisaamiset]', -$row[laskutettu], -$row[laskutettu_valuutassa], '$row[laskuvaluutta]', 'Automaattikohdistettu asiakkaan suoritus')";
 			$insres = mysql_query($query) or pupe_error($query);
 
 			if (strtoupper($row["suoritusvaluutta"]) != strtoupper($row['yhtiovaluutta'])) {
@@ -113,7 +113,7 @@
 			}
 
 			# Kassatili
-			$query = "INSERT INTO tiliointi (yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite) values ('$row[suoriyhtio]', 'automaattikohdistus', now(), '$row[kirjpvm]', '$row[laskutunnus]', '$row[kassatili]', $suoritettu_kassaan, '$suoritettu_kassaan_valuutassa', '$row[suoritusvaluutta]', 'Automaattikohdistettu asiakkaan suoritus')";
+			$query = "INSERT INTO tiliointi (yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, summa_valuutassa, valkoodi, selite) values ('$row[suoriyhtio]', 'automaatti', now(), '$row[kirjpvm]', '$row[laskutunnus]', '$row[kassatili]', $suoritettu_kassaan, '$suoritettu_kassaan_valuutassa', '$row[suoritusvaluutta]', 'Automaattikohdistettu asiakkaan suoritus')";
 			$insres = mysql_query($query) or pupe_error($query);
 
 			// Mahdollinen kassa-alennus
@@ -143,7 +143,7 @@
 				if (mysql_num_rows($tilres) == 0) {
 					$query = "	INSERT INTO tiliointi
 								SET yhtio			= '$row[suoriyhtio]',
-								laatija 			= 'automaattikohdistus',
+								laatija 			= 'automaatti',
 								laadittu 			= now(),
 								tapvm 				= '$row[kirjpvm]',
 								ltunnus 			= '$row[laskutunnus]',
@@ -159,7 +159,7 @@
 
 					$aputunnus = 0;
 
-					while ($tiliointirow = mysql_fetch_array($tilres)) {
+					while ($tiliointirow = mysql_fetch_assoc($tilres)) {
 						$alv 	= 0;
 						$alv_valuutassa = 0;
 						$summa 	= sprintf('%.2f', $tiliointirow["summa"] * -1 * (1+$tiliointirow["vero"]/100) / $row["laskusumma"] * $alennus);
@@ -185,7 +185,7 @@
 							#Lisätään myynnin kassa-alennuskirjaus ilman veroa
 							$query = "	INSERT INTO tiliointi
 										SET yhtio			= '$row[suoriyhtio]',
-										laatija 			= 'automaattikohdistus',
+										laatija 			= 'automaatti',
 										laadittu 			= now(),
 										kustp				= '$tiliointirow[kustp]',
 										kohde				= '$tiliointirow[kohde]',
@@ -213,7 +213,7 @@
 										vero 				= 0,
 										selite 				= 'Automaattikohdistettu asiakkaan suoritus (Kassa-alennuksen alv)',
 										lukko 				= '1',
-										laatija 			= 'automaattikohdistus',
+										laatija 			= 'automaatti',
 										laadittu 			= now(),
 										aputunnus 			= '$aputunnus'";
 							$insres = mysql_query($query) or pupe_error($query);
@@ -222,7 +222,7 @@
 							#Lisätään verottoman myynnin kassa-alennuskirjaus
 							$query = "	INSERT INTO tiliointi
 										SET yhtio			= '$row[suoriyhtio]',
-										laatija 			= 'automaattikohdistus',
+										laatija 			= 'automaatti',
 										laadittu 			= now(),
 										kustp				= '$tiliointirow[kustp]',
 										kohde				= '$tiliointirow[kohde]',
@@ -230,8 +230,8 @@
 										tapvm 				= '$row[kirjpvm]',
 										ltunnus 			= '$row[laskutunnus]',
 										tilino 				= '$row[alennustili]',
-										summa 				= '$alennus',
-										summa_valuutassa 	= '$alennus_valuutassa',
+										summa 				= '$summa',
+										summa_valuutassa 	= '$summa_valuutassa',
 										vero				= '$tiliointirow[vero]',
 										valkoodi			= '$row[suoritusvaluutta]',
 										selite 				= 'Automaattikohdistettu asiakkaan suoritus (Kassa-Alennus)'";
@@ -262,7 +262,7 @@
 
 				if (abs($valero) >= 0.01) {
 					$query = "	INSERT INTO tiliointi (yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite)
-			            		VALUES ('$row[suoriyhtio]','automaattikohdistus',now(), '$row[kirjpvm]', '$row[laskutunnus]', '$row[valuuttaerotili]', $valero, 'Automaattikohdistettu asiakkaan suoritus')";
+			            		VALUES ('$row[suoriyhtio]','automaatti',now(), '$row[kirjpvm]', '$row[laskutunnus]', '$row[valuuttaerotili]', $valero, 'Automaattikohdistettu asiakkaan suoritus')";
 					$result = mysql_query($query) or pupe_error($query);
 				}
 			}

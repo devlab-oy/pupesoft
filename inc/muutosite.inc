@@ -152,7 +152,7 @@
 						AND tunnus = '$tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($result) !=1) {
+			if (mysql_num_rows($result) != 1) {
 				echo t('lasku kateissa') . "$tunnus</font>";
 				exit;
 			}
@@ -778,7 +778,7 @@
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($result) !=1) {
+			if (mysql_num_rows($result) != 1) {
 				echo t('lasku kateissa') . "$tunnus</font>";
 				exit;
 			}
@@ -886,7 +886,7 @@
 			}
 		}
 		else {
-			if (($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) and ($kukarow['taso'] !=1 )) {
+			if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku'] and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
 				$pvm = erottele($trow['tapvm']);
 
 				echo "<form action = '$PHP_SELF' method='post'>
@@ -1166,7 +1166,7 @@
 				</tr>
 				</form>";
 
-		if ($trow['tila'] == 'H' and $kukarow['taso'] != 1 and $keikrow["alatila"] != "X") {
+		if ($trow['tila'] == 'H' and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3) and $keikrow["alatila"] != "X") {
 
 			if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
 				echo "<form action = '$PHP_SELF' method='post'>
@@ -1222,7 +1222,7 @@
 			}
 		}
 
-		if ($trow['tila'] == 'H' and $kukarow['taso'] != 1) {
+		if ($trow['tila'] == 'H' and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
 			echo "<form action = '$PHP_SELF' method='post'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tila' value='MVIESTI'>
@@ -1236,7 +1236,7 @@
 					</form>";
 		}
 
-		if ($trow["tila"] == "Q" and $kukarow['taso'] !=1) {
+		if ($trow["tila"] == "Q" and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
 			echo "<form action = '$PHP_SELF' method='post'>
 					<input type = 'hidden' name='tee' value='M'>
 					<input type = 'hidden' name='tila' value='MAKSATUKSEEN'>

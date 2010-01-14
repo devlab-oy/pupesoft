@@ -343,7 +343,7 @@
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]'
 								and uusiotunnus = '$lasrow[tunnus]'
-								and toimitettuaika != '0000-00-00'";
+								and toimitettuaika != '0000-00-00 00:00:00'";
 					$toimaikares = mysql_query($query) or pupe_error($query);
 					$toimaikarow = mysql_fetch_array($toimaikares);
 

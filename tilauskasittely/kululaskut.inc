@@ -196,7 +196,7 @@ if ($tee_kululaskut == "liita") {
 					tila         = 'K'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<font class='message'>".t("Lasku")." ($oslasrow[nimi] $oslasrow[summa] $oslasrow[valkoodi]) ".t("liitettiin keikkaan")." $laskurow[laskunro].</font><br><br>";
+		if ($silent == "") echo "<font class='message'>".t("Lasku")." ($oslasrow[nimi] $oslasrow[summa] $oslasrow[valkoodi]) ".t("liitettiin keikkaan")." $laskurow[laskunro].</font><br><br>";
 
 		// jos kyseessä on vaihto-omaisuuslasku, niin päivitetään laskun tapvm keikalla ja vientikentän info keikan otsikolle (jos jostain syystä toimittajan oletus onkin väärin)
 		if ($oslasrow["vienti"] == "C" or $oslasrow["vienti"] == "F" or $oslasrow["vienti"] == "I" or $oslasrow["vienti"] == "J" or $oslasrow["vienti"] == "K" or $oslasrow["vienti"] == "L") {
@@ -559,7 +559,7 @@ if ($silent == "") {
 		$aikalisa = "";
 		if (!isset($listaustapa)) {
 			$listaustapa = "liittamattomat";
-			$aikalisa = " AND tapvm > date_sub(now(), INTERVAL 1 YEAR)";
+			$aikalisa = " AND lasku.tapvm > date_sub(now(), INTERVAL 1 YEAR)";
 		}
 
 		$lisa = ""; // no hacking
@@ -572,14 +572,14 @@ if ($silent == "") {
 		//	Haetaan oletuksena nimen alulla!!
 		if ($hakutapa == "S") {
 			$haku = (float) str_replace(",",".",$haku); // pilkut pisteiksi
-			$lisa = " and summa = '$haku'";
+			$lisa = " and lasku.summa = '$haku'";
 		}
 
-		if ($hakutapa == "N") $lisa = " and nimi like '%$haku%'";
-		if ($hakutapa == "V") $lisa = " and viite = '$haku'";
+		if ($hakutapa == "N") $lisa = " and lasku.nimi like '%$haku%'";
+		if ($hakutapa == "V") $lisa = " and lasku.viite = '$haku'";
 
 //		if ($hakutapa == "" or $hakutapa != "N") {
-//			$lisa .= " and ytunnus = '$laskurow[ytunnus]'";
+//			$lisa .= " and lasku.ytunnus = '$laskurow[ytunnus]'";
 //		}
 
 		// katsotaan aluksi, ollaanko tähän keikkaan liitetty jo vaihto-omaisuuslasku
@@ -602,21 +602,22 @@ if ($silent == "") {
 
 
 		if ($keikanalatila == "T") {
-			$vientitilat = " and vienti in ('A','D','G') ";
+			$vientitilat = " and lasku.vienti in ('A','D','G') ";
 		}
 		else {
-			$vientitilat = " and vienti in ('B','C','J','E','F','K','H','I','L') ";
+			$vientitilat = " and lasku.vienti in ('B','C','J','E','F','K','H','I','L') ";
 		}
 
 		// haetaan vaihto-omaisuus, rahti ja raaka-aine laskuja (kotimaa, ei-eu, eu) HUOMAA LIMIT!
-		$query = "	SELECT *
+		$query = "	SELECT lasku.*, (select min(tunnus) from tiliointi where lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and tiliointi.korjattu='') tiliointi
 					FROM lasku use index (kohdistus_index)
-					WHERE yhtio='$kukarow[yhtio]'
-					and tila in ('H','Y','M','P','Q')
+					WHERE lasku.yhtio='$kukarow[yhtio]'
+					and lasku.tila in ('H','Y','M','P','Q')
 					$vientitilat
 					$lisa
 					$aikalisa
-					order by tapvm desc";
+					HAVING tiliointi is not null
+					order by lasku.tapvm desc";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {

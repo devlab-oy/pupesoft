@@ -102,6 +102,8 @@
 						WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%fi300%'";
 			$tilires = mysql_query($query) or pupe_error($query);
 
+			$fi3xx = array();
+
 			$fi301 = 0.0;
 			$fi302 = 0.0;
 			$fi303 = 0.0;
@@ -117,11 +119,12 @@
 							AND tapvm >= '$startmonth'
 							AND tapvm <= '$endmonth'
 							AND vero > 0
-							GROUP BY vero";
+							GROUP BY vero
+							ORDER BY vero DESC";
 				$verores = mysql_query($query) or pupe_error($query);
 
 				while ($verorow = mysql_fetch_array ($verores)) {
-	//				echo "$verorow[vero] $verorow[kpl] / ";
+
 					switch ($verorow['vero']) {
 						case 22 :
 							$fi301 += $verorow['veronmaara'];
@@ -131,6 +134,9 @@
 							break;
 						case 8 :
 							$fi303 += $verorow['veronmaara'];
+							break;
+						default:
+							$fi3xx[$verorow['vero']] += $verorow['veronmaara'];
 							break;
 					}
 				}
@@ -196,6 +202,11 @@
 				echo "<tr><td><a href = '?tee=erittele&ryhma=fi301&vv=$vv&kk=$kk'>301</a> ",t("22% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi301)."</td></tr>";
 				echo "<tr><td><a href = '?tee=erittele&ryhma=fi302&vv=$vv&kk=$kk'>302</a> ",t("12% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi302)."</td></tr>";
 				echo "<tr><td><a href = '?tee=erittele&ryhma=fi303&vv=$vv&kk=$kk'>303</a> ",t("8% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fi303)."</td></tr>";
+
+				foreach ($fi3xx as $fikey => $fival) {
+					echo "<tr><td>xxx ".($fikey * 1).t("% :n vero"),"</td><td align='right'>".sprintf('%.2f',$fival)."</td></tr>";	
+				}
+
 				echo "<tr><th colspan='2'></th></tr>";
 				echo "<tr><td><a href = '?tee=erittele&ryhma=fi305&vv=$vv&kk=$kk'>305</a> ",t("Vero tavaraostoista muista EU-maista"),"</td><td align='right'>".sprintf('%.2f',$fi305)."</td></tr>";
 				echo "<tr><td><a href = '?tee=erittele&ryhma=fi306&vv=$vv&kk=$kk'>306</a> ",t("Vero palveluostoista muista EU-maista"),"</td><td align='right'>".sprintf('%.2f',$fi306)."</td></tr>";

@@ -2,5 +2,74 @@
 	$otsikko = "Toimitustavat";
 	$kentat = "tunnus, selite, tulostustapa, sopimusnro, nouto, ei_pakkaamoa, extranet, rahtikirja, jarjestys";
 	$jarjestys = "jarjestys, selite";
-?>
 
+	if ($tunnus != '' and $upd != 1) {
+		// Toimitustavan saa poistaa mikäli millään asiakkaalla ei ole sitä käytössä (tsekataan tuoterivi.inc)
+		$poistolukko = "ON";
+
+		$query = "	SELECT selite
+					FROM toimitustapa
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$tunnus}'";
+		$toimitustapa_check_res = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($toimitustapa_check_res) == 1) {
+			$toimitustapa_check_row = mysql_fetch_assoc($toimitustapa_check_res);
+
+			$toita = $toimitustapa_check_row['selite'];
+
+			$query = "	SELECT tunnus 
+						FROM asiakas 
+						WHERE toimitustapa = '{$toita}' 
+						AND yhtio = '{$kukarow['yhtio']}' 
+						AND laji NOT IN ('P', 'R')";
+			$chkres1 = mysql_query($query) or pupe_error($query);
+
+			$query = "	SELECT tunnus
+			 			FROM lasku 
+						WHERE toimitustapa = '{$toita}' 
+						AND yhtio = '{$kukarow['yhtio']}' 
+						AND ((tila = 'L' AND alatila IN ('A','C')) OR tila = 'N')";
+			$chkres2 = mysql_query($query) or pupe_error($query);
+
+			$query = "	SELECT tunnus 
+						FROM rahtimaksut
+						WHERE toimitustapa = '{$toita}' 
+						AND yhtio = '{$kukarow['yhtio']}'";
+			$chkres3 = mysql_query($query) or pupe_error($query);
+
+			$query = "	SELECT tunnus
+						FROM rahtisopimukset 
+						WHERE toimitustapa = '{$toita}' 
+						AND yhtio = '{$kukarow['yhtio']}'";
+			$chkres4 = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($chkres1) == 0 and mysql_num_rows($chkres2) == 0 and mysql_num_rows($chkres3) == 0 and mysql_num_rows($chkres4) == 0) {
+				$poistolukko = '';
+			}
+			else {
+				$otsikko_lisatiedot .= "<font class='message'>".t("Huom! Toimitustapaa ei voi poistaa, koska se on käytössä").":";
+
+				$otsikko_lisatiedot .= "<ul>";
+				if (mysql_num_rows($chkres1) > 0) {
+					$otsikko_lisatiedot .= "<li>".mysql_num_rows($chkres1)." ".t("asiakkaalla")."</li>";
+				}
+
+				if (mysql_num_rows($chkres2) > 0) {
+					$otsikko_lisatiedot .= "<li>".mysql_num_rows($chkres2)." ".t("toimittamattomalla tai kesken olevalla myyntitilauksella")."</li>";
+				}
+
+				if (mysql_num_rows($chkres3) > 0) {
+					$otsikko_lisatiedot .= "<li>".mysql_num_rows($chkres3)." ".t("rahtimaksulla")."</li>";
+				}
+				
+				if (mysql_num_rows($chkres4) > 0) {
+					$otsikko_lisatiedot .= "<li>".mysql_num_rows($chkres4)." ".t("rahtisopimuksella")."</li>";
+				}
+				
+				$otsikko_lisatiedot .= "</ul></font>";
+			}
+		}
+	}
+
+?>

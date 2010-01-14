@@ -40,8 +40,6 @@
 	
 	if (mysql_field_name($result, $i) == "kaytossa") {
 
-		$ulos  = "<td><select name='$nimi'>";
-		
 		$chk1 = '';
 		$chk2 = '';
 
@@ -52,10 +50,24 @@
 			$chk2 = 'selected';
 		}
 
-		$ulos .= "<option value=''  $chk1>".t("Käytössä")."</option>";
-		$ulos .= "<option value='E' $chk2>".t("Poistettu / Ei käytössä")."</option>";
+		if ($kaytossa_disabled != "") {
+			$ulos  = "<td>";
+
+			if ($chk1 != "") $ulos .= t("Käytössä");
+			else $ulos .= t("Poistettu / Ei käytössä");
+
+			$ulos .= "<input type='hidden' name='$nimi' value='$trow[$i]'></td>";
+		}
+		else {
+
+			$ulos  = "<td><select name='$nimi' $kaytossa_disabled>";
+
+			$ulos .= "<option value=''  $chk1>".t("Käytössä")."</option>";
+			$ulos .= "<option value='E' $chk2>".t("Poistettu / Ei käytössä")."</option>";
 		
-		$ulos .= "</select></td>";
+			$ulos .= "</select></td>";
+		}
+
 		$jatko = 0;
 	}
 

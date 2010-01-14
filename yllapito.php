@@ -1331,7 +1331,7 @@
 			$toim == "asiakashinta" or
 			$toim == "perusalennus" or
 			$toim == "yhteensopivuus_tuote" or
-			$toim == "toimitustapa" or
+			($toim == "toimitustapa" and $poistolukko == "") or
 			$toim == "kirjoittimet" or
 			$toim == "hinnasto" or
 			$toim == "rahtimaksut" or

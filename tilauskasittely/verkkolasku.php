@@ -24,10 +24,15 @@
 	if (isset($argv[1]) and trim($argv[1]) != '') {
 
 		if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
-
+		
+		// otetaan includepath aina rootista
+		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+		ini_set("display_errors", 0);
+		
 		// otetaan tietokanta connect (HUOM: ../ koska komentorivillä puperoot ei välttämättä ole include pathissa)
-		require ("../inc/connect.inc");
-		require ("../inc/functions.inc");
+		require("inc/connect.inc");
+		require("inc/functions.inc");
 
 		// hmm.. jännää
 		$kukarow['yhtio'] = $argv[1];
@@ -90,12 +95,12 @@
 			$file = file_get_contents($_POST["file"]);
 			unset($_POST["file"]);
 
-			if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
+			if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
 				$_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 			}
 		}
 
-		require ("../inc/parametrit.inc");
+		require("../inc/parametrit.inc");
 	}
 
 	if ($tee == "lataa_tiedosto") {
@@ -979,7 +984,7 @@
 					// laskutus tarttee kukarow[kesken]
 					$kukarow['kesken']=$row['tunnus'];
 
-					require ("laskutus.inc");
+					require("laskutus.inc");
 					$laskutetttu++;
 
 					//otetaan laskutuksen viestit talteen
@@ -1733,7 +1738,7 @@
 					// tätä ei ajata eikä käytetä, mutta jos tulee ftp errori niin echotaan tää meiliin, niin ei tartte käsin kirjotella resendiä
 					$cmd = "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile";
 
-					require ("inc/ftp-send.inc");
+					require("inc/ftp-send.inc");
 
 					if ($silent == "") {
 						$tulos_ulos .= $tulos_ulos_ftp;
@@ -1755,7 +1760,7 @@
 					// tätä ei ajata eikä käytetä, mutta jos tulee ftp errori niin echotaan tää meiliin, niin ei tartte käsin kirjotella resendiä
 					$cmd = "mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile);
 
-					require ("inc/ftp-send.inc");
+					require("inc/ftp-send.inc");
 
 					if ($silent == "" or $silent == "VIENTI") {
 						$tulos_ulos .= $tulos_ulos_ftp;
@@ -1777,7 +1782,7 @@
 					$ftppath = $edi_ftppath;
 					$ftpfile = realpath($nimiedi);
 
-					require ("inc/ftp-send.inc");
+					require("inc/ftp-send.inc");
 
 					if ($silent == "") {
 						$tulos_ulos .= $tulos_ulos_ftp;
@@ -1851,7 +1856,7 @@
 
 						if ($yhtiorow['laskutyyppi'] == 3) {
 
-							require_once ("tulosta_lasku_simppeli.inc");
+							require_once("tulosta_lasku_simppeli.inc");
 
 							if (in_array($laskurow["laskunro"], $tulostettavat_email) and $valittu_tulostin == "") {
 								include_once("inc/generoi_laskun_saate.inc");
@@ -1992,7 +1997,7 @@
 								// lähetetään cc aina postittaja osoitteeseen
 								$sahkoposti_cc = $yhtiorow["postittaja_email"];
 
-								include ("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
+								include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
 							}
 							else {
 								//haetaan varaston tiedot
@@ -2035,7 +2040,7 @@
 									$sahkoposti_cc = "";
 									$content_subject = "";
 									$content_body = "";
-									include ("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
+									include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
 								}
 
 								if ($valittu_kopio_tulostin != '') {
@@ -2059,7 +2064,7 @@
 										$sahkoposti_cc = "";
 										$content_subject = "";
 										$content_body = "";
-										include ("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
+										include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
 									}
 								}
 							}
@@ -2098,7 +2103,7 @@
 								$sahkoposti_cc = "";
 								$content_subject = "";
 								$content_body = "";
-								include ("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
+								include("inc/sahkoposti.inc"); // sanotaan include eikä require niin ei kuolla
 							}
 
 							//poistetaan tmp file samantien kuleksimasta...
@@ -2314,7 +2319,7 @@
 	}
 
 	if ($komentorivilta != "ON" and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
-		require ("inc/footer.inc");
+		require("inc/footer.inc");
 	}
 
 ?>

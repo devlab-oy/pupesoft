@@ -25,9 +25,9 @@
 
 		if ($argc == 0) die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
 
-		// otetaan tietokanta connect
-		require ("inc/connect.inc");
-		require ("inc/functions.inc");
+		// otetaan tietokanta connect (HUOM: ../ koska komentorivill‰ puperoot ei v‰ltt‰m‰tt‰ ole include pathissa)
+		require ("../inc/connect.inc");
+		require ("../inc/functions.inc");
 
 		// hmm.. j‰nn‰‰
 		$kukarow['yhtio'] = $argv[1];
@@ -1414,7 +1414,7 @@
 										FROM tilausrivi
 										WHERE yhtio = '$kukarow[yhtio]'
 										and otunnus in ($tunnukset)
-										and toimitettuaika != '0000-00-00'";
+										and toimitettuaika != '0000-00-00 00:00:00'";
 							$toimaikares = mysql_query($query) or pupe_error($query);
 							$toimaikarow = mysql_fetch_array($toimaikares);
 

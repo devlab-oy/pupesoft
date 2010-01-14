@@ -155,16 +155,16 @@
 			while ($lasrow = mysql_fetch_array($res)) {
 				// Haetaan maksuehdon tiedot
 				$query  = "	SELECT pankkiyhteystiedot.*, maksuehto.*
-							from maksuehto
-							left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
-							where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$lasrow[maksuehto]'";
+							FROM maksuehto
+							LEFT JOIN pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
+							WHERE maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$lasrow[maksuehto]'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) == 0) {
 					$masrow = array();
 
 					if ($lasrow["erpcm"] == "0000-00-00") {
-						$tulos_ulos .= "<font class='message'><br>\n".t("Maksuehtoa")." $lasrow[maksuehto] ".t("ei löydy!")." Tunnus $lasrow[tunnus] ".t("Laskunumero")." $lasrow[laskunro] ".t("epäonnistui pahasti")."!</font><br>\n<br>\n";
+						echo "<font class='message'><br>\n".t("Maksuehtoa")." $lasrow[maksuehto] ".t("ei löydy!")." Tunnus $lasrow[tunnus] ".t("Laskunumero")." $lasrow[laskunro] ".t("epäonnistui pahasti")."!</font><br>\n<br>\n";
 					}
 				}
 				else {
@@ -232,9 +232,38 @@
 					$pankkitiedot["pankkiswift3"] =	$yhtiorow["pankkiswift3"];
 				}
 
+				$asiakas_apu_query = "	SELECT *
+										FROM asiakas
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND tunnus = '$lasrow[liitostunnus]'";
+				$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
+
+				if (mysql_num_rows($asiakas_apu_res) == 1) {
+					$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
+				}
+				else {
+					$asiakas_apu_row = array();
+				}
+
+				if (strtoupper(trim($asiakas_apu_row["kieli"])) == "SE") {
+					$laskun_kieli = "SE";
+				}
+				elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "EE") {
+					$laskun_kieli = "EE";
+				}
+				elseif (strtoupper(trim($asiakas_apu_row["kieli"])) == "FI") {
+					$laskun_kieli = "FI";
+				}
+				else {
+					$laskun_kieli = trim(strtoupper($yhtiorow["kieli"]));
+				}
+
+				if ($kieli != "") {
+					$laskun_kieli = trim(strtoupper($kieli));
+				}
 
 				// tässä pohditaan laitetaanko verkkolaskuputkeen
-				if (($lasrow["vienti"] == "" or ($lasrow["vienti"] == "E" and $lasrow["chn"] == "020")) and $masrow["itsetulostus"] == "" and $lasrow["sisainen"] == "" and $masrow["kateinen"] == "" and abs($lasrow["summa"]) != 0) {
+				if (($lasrow["vienti"] == "" or ($lasrow["vienti"] == "E" and $lasrow["chn"] == "020")) and $masrow["itsetulostus"] == "" and $lasrow["sisainen"] == "" and $masrow["kateinen"] == ""  and $lasrow["chn"] != '666' and $lasrow["chn"] != '667' and abs($lasrow["summa"]) != 0) {
 
 					// Nyt meillä on:
 					// $lasrow array on U-laskun tiedot
@@ -243,8 +272,8 @@
 
 					// Etsitään myyjän nimi
 					$mquery  = "SELECT nimi, puhno, eposti
-								from kuka
-								where tunnus='$lasrow[myyja]' and yhtio='$kukarow[yhtio]'";
+								FROM kuka
+								WHERE tunnus='$lasrow[myyja]' and yhtio='$kukarow[yhtio]'";
 					$myyresult = mysql_query($mquery) or pupe_error($mquery);
 					$myyrow = mysql_fetch_array($myyresult);
 
@@ -265,32 +294,8 @@
 						$tyyppi='381';
 					}
 
-					$asiakas_apu_query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$lasrow[liitostunnus]'";
-					$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
-
-					if (mysql_num_rows($asiakas_apu_res) == 1) {
-						$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
-					}
-					else {
-						$asiakas_apu_row = array();
-					}
-
-					if (strtoupper($asiakas_apu_row["kieli"]) == "SE") {
-						$laskun_kieli = "SE";
-					}
-					elseif ($kieli != "") {
-						$laskun_kieli = $kieli;
-					}
-					else {
-						$laskun_kieli = "";
-					}
-
-					//maksuehto tekstinä
-					$maksuehto = $masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $laskun_kieli);
-					$kateistyyppi = $masrow["kateinen"];
-
 					// Laskukohtaiset kommentit kuntoon
-					// Tämä merkki | eli pystyviiva on rivinvaihdon merkki elmalla
+					// Tämä merkki | eli pystyviiva on rivinvaihdon merkki laskun kommentissa elmalla
 					$komm = "";
 
 					if (trim($lasrow['tilausyhteyshenkilo']) != '') {
@@ -310,17 +315,18 @@
 					}
 
 					if (trim($komm) != '') {
-						// Vanhojen virheiden takia tehdään sama preg_replace kuin teeulasku.php:ssä uudestaan.
-						$komm = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!|+()%#§", "/")."\r\n]/", "", $komm);
-
 						$lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", trim($komm));
 					}
 
-					///* Jos tämä on valuuttalasku *///
+					// Hoidetaan pyöristys sekä valuuttakäsittely
 					if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-						$lasrow["kasumma"] 	= $lasrow["kasumma_valuutassa"];
-						$lasrow["summa"] 	= $lasrow["summa_valuutassa"];
-						$lasrow["arvo"]		= $lasrow["arvo_valuutassa"];
+						$lasrow["kasumma"] 	 = $lasrow["kasumma_valuutassa"];
+						$lasrow["summa"] 	 = sprintf("%.2f", $lasrow["summa_valuutassa"] - $lasrow["pyoristys_valuutassa"]);
+						$lasrow["arvo"]		 = $lasrow["arvo_valuutassa"];
+						$lasrow["pyoristys"] = $lasrow["pyoristys_valuutassa"];
+					}
+					else {
+						$lasrow["summa"] 	= sprintf("%.2f", $lasrow["summa"] - $lasrow["pyoristys"]);
 					}
 
 					// Ulkomaisen ytunnuksen korjaus
@@ -328,7 +334,7 @@
 						$lasrow["ytunnus"] = strtoupper($lasrow["maa"])."-".$lasrow["ytunnus"];
 					}
 
-					if (strtolower($laskun_kieli) != strtolower($yhtiorow['kieli'])) {
+					if (strtoupper($laskun_kieli) != strtoupper($yhtiorow['kieli'])) {
 						//Käännetään maksuehto
 						$masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $laskun_kieli);
 					}
@@ -353,7 +359,7 @@
 						elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow);
 					}
 					elseif($yhtiorow["verkkolasku_lah"] != "") {
-						finvoice_otsik($tootfinvoice, $lasrow, $laskun_kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
+						finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
 					}
 					else {
 						pupevoice_otsik($tootxml, $lasrow, $laskun_kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow);
@@ -403,7 +409,6 @@
 						}
 					}
 
-
 					//Kirjoitetaan otsikkojen lopputiedot
 					if ($lasrow["chn"] == "111") {
 						elmaedi_otsikko_loput($tootedi, $lasrow);
@@ -418,8 +423,8 @@
 
 					$asiakas_apu_query = "	SELECT laskun_jarjestys, laskun_jarjestys_suunta
 											FROM asiakas
-											WHERE yhtio='$kukarow[yhtio]'
-											and tunnus='$lasrow[liitostunnus]'";
+											WHERE yhtio = '$kukarow[yhtio]'
+											and tunnus = '$lasrow[liitostunnus]'";
 					$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
 
 					if (mysql_num_rows($asiakas_apu_res) == 1) {
@@ -433,7 +438,10 @@
 					}
 
 					// Kirjoitetaan rivitietoja tilausriveiltä
-					$query = "	SELECT tilausrivi.*, lasku.vienti_kurssi, if(date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d')) toimitettuaika, $sorttauskentta
+					$query = "	SELECT tilausrivi.*, lasku.vienti_kurssi,
+								if(date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d')) toimitettuaika,
+								if(tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika) toimaika,
+								$sorttauskentta
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -452,6 +460,11 @@
 							$tilrow['nimitys'] = t_tuotteen_avainsanat($tilrow, 'nimitys', $laskun_kieli);
 						}
 
+						// Palvelutuotteiden toimitettuaika syötetään käsin
+						if ($tilrow["keratty"] == "saldoton" and $yhtiorow["saldottomien_toimitettuaika"] == "K") {
+							$tilrow['toimitettuaika'] = $tilrow['toimaika'];
+						}
+
 						//Käytetyn tavaran myynti
 						if ($tilrow["alv"] >= 500) {
 							$tilrow["alv"] = 0;
@@ -459,7 +472,7 @@
 						}
 
 						//Hetaan sarjanumeron tiedot
-						if ($tilrow["kpl"] > 0){
+						if ($tilrow["kpl"] > 0) {
 							$sarjanutunnus = "myyntirivitunnus";
 						}
 						else {
@@ -467,30 +480,30 @@
 						}
 
 						$query = "	SELECT *
-									from sarjanumeroseuranta
-									where yhtio = '$kukarow[yhtio]'
+									FROM sarjanumeroseuranta
+									WHERE yhtio = '$kukarow[yhtio]'
 									and tuoteno = '$tilrow[tuoteno]'
 									and $sarjanutunnus='$tilrow[tunnus]'
 									and sarjanumero != ''";
 						$sarjares = mysql_query($query) or pupe_error($query);
 
-						if ($tilrow["kommentti"] != '' and mysql_num_rows($sarjares) > 0){
+						if ($tilrow["kommentti"] != '' and mysql_num_rows($sarjares) > 0) {
 							$tilrow["kommentti"] .= " ";
 						}
-						while($sarjarow = mysql_fetch_array($sarjares)) {
+						while ($sarjarow = mysql_fetch_array($sarjares)) {
 							$tilrow["kommentti"] .= "S:nro: $sarjarow[sarjanumero] ";
 						}
 
 						if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 							// Rivihinta
 							if ($yhtiorow["alv_kasittely"] == '') {
-								$tilrow["rivihinta"] = round(laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"])*$tilrow["kpl"]*(1-$tilrow["ale"]/100) / (1+$tilrow["alv"]/100), $yhtiorow['hintapyoristys']);
+								$tilrow["rivihinta"] = round(laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"])*$tilrow["kpl"]*(1-$tilrow["ale"]/100) / (1+$tilrow["alv"]/100), 2);
 							}
 							else {
-								$tilrow["rivihinta"] = round(laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"])*$tilrow["kpl"]*(1-$tilrow["ale"]/100), $yhtiorow['hintapyoristys']);
+								$tilrow["rivihinta"] = round(laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"])*$tilrow["kpl"]*(1-$tilrow["ale"]/100), 2);
 							}
 							// Yksikköhinta
-							$tilrow["hinta"] = round(laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
+							$tilrow["hinta"] = round(laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"]), 2);
 						}
 
 						$vatamount = round($tilrow['rivihinta']*$tilrow['alv']/100, 2);
@@ -498,6 +511,11 @@
 
 						$tilrow['kommentti'] = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#", "/")."]/", " ", $tilrow['kommentti']);
 						$tilrow['nimitys'] 	 = preg_replace("/[^A-Za-z0-9ÖöÄäÅå ".preg_quote(".,-/!+()%#", "/")."]/", " ", $tilrow['nimitys']);
+
+						// yksikköhinta pitää olla veroton
+						if ($yhtiorow["alv_kasittely"] == '') {
+							$tilrow["hinta"] = round($tilrow["hinta"] / (1 + $tilrow["alv"] / 100), 2);
+						}
 
 						if ($lasrow["chn"] == "111") {
 
@@ -524,7 +542,7 @@
 
 						$edilask++;
 					}
-					elseif($yhtiorow["verkkolasku_lah"] != "") {
+					elseif ($yhtiorow["verkkolasku_lah"] != "") {
 						finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow);
 					}
 					else {
@@ -535,35 +553,8 @@
 					$tulostettavat[] = $lasrow["laskunro"];
 					$lask++;
 				}
-				elseif ($lasrow["sisainen"] != '') {
-					if ($silent == "") $tulos_ulos .= "<br>\n".t("Tehtiin sisäinen lasku")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
-
-					// Sisäisiä laskuja ei normaaalisti tuloseta paitski jos meillä on valittu_tulostin
-					if ($valittu_tulostin != '') {
-						$tulostettavat[] = $lasrow["laskunro"];
-						$lask++;
-					}
-				}
-				elseif ($masrow["kateinen"] != '') {
-					if ($silent == "") {
-						$tulos_ulos .= "<br>\n".t("Käteislaskua ei lähetetty")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
-					}
-
-					// Käteislaskuja ei lähetetä ulos mutta ne halutaan kuitenkin tulostaa itse
-					$tulostettavat[] = $lasrow["laskunro"];
-					$lask++;
-				}
-				elseif ($lasrow["vienti"] != '' or $masrow["itsetulostus"] != '') {
-					if ($silent == "" or $silent == "VIENTI") {
-						$tulos_ulos .= "<br>\n".t("Tämä lasku tulostetaan omalle tulostimelle")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
-					}
-
-					// Halutaan tulostaa itse
-					$tulostettavat[] = $lasrow["laskunro"];
-					$lask++;
-				}
-				elseif($silent == "") {
-					$tulos_ulos .= "\n".t("Nollasummaista laskua ei lähetetty")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
+				else {
+					echo "\n".t("Tämä lasku ei mene verkkolaskuoperaattorille")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
 				}
 			}
 

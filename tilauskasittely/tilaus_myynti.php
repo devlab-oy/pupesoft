@@ -3284,7 +3284,10 @@ if ($tee == '') {
 			$tuoteno_lisa = $tuoteno;
 		}
 
-		$query	= "SELECT * from tuote where tuoteno = '$tuoteno_lisa' and yhtio = '$kukarow[yhtio]'";
+		$query	= "	SELECT *
+					from tuote
+					where tuoteno = '$tuoteno_lisa'
+					and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 0) {
@@ -3312,10 +3315,31 @@ if ($tee == '') {
 			}
 
 			if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+
+				$epakurpantti = "";
+
+				if ($tuote['epakurantti100pvm'] != '0000-00-00') {
+					$tuote['kehahin'] = 0;
+					$epakurpantti = "(".t("Täysepäkurantti").")";
+				}
+				elseif ($tuote['epakurantti75pvm'] != '0000-00-00') {
+					$tuote['kehahin'] = round($tuote['kehahin'] * 0.25, 6);
+					$epakurpantti = "(".t("75% Epäkurantti").")";
+				}
+				elseif ($tuote['epakurantti50pvm'] != '0000-00-00') {
+					$tuote['kehahin'] = round($tuote['kehahin'] * 0.5,  6);
+					$epakurpantti = "(".t("Puoliepäkurantti").")";
+				}
+				elseif ($tuote['epakurantti25pvm'] != '0000-00-00') {
+					$tuote['kehahin'] = round($tuote['kehahin'] * 0.75, 6);
+					$epakurpantti = "(".t("25% Epäkurantti").")";
+				}
+
 				if ($kukarow["yhtio"] == "srs") {
 					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Hinta 25% katteella")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['kehahin'] / 0.75)." $yhtiorow[valkoodi]</td></tr>";
 				}
-				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Keskihankintahinta")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['kehahin'])." $yhtiorow[valkoodi]</td></tr>";
+				
+				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Keskihankintahinta")." $epakurpantti</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['kehahin'])." $yhtiorow[valkoodi]</td></tr>";
 			}
 
 			//haetaan viimeisin hinta millä asiakas on tuotetta ostanut

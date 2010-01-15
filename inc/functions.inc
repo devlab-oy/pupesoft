@@ -2708,7 +2708,7 @@ if (!function_exists("alv")) {
 }
 
 if (!function_exists("alehinta")) {
-	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="") {
+	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="", $yhtio="") {
 		global $yhtiorow, $kukarow;
 
 		// Tämä rutiini määrittelee riville hinnan ja alennuksen
@@ -2736,6 +2736,25 @@ if (!function_exists("alehinta")) {
 		$alehinta_alv 	= 0;
 		$hintaperuste	= false;
 		$aleperuste		= false;
+		$vanha_yhtio	= "";
+		$vanha_liitostunnus = 0;
+
+		if ($yhtio != '') {
+			$vanha_yhtio = $kukarow['yhtio'];
+			$yhtiorow = hae_yhtion_parametrit($yhtio);
+			$kukarow['yhtio'] = $yhtio;
+
+			$query = "	SELECT tunnus
+						FROM asiakas
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND ytunnus = '{$laskurow['ytunnus']}'
+						AND toim_ovttunnus = '{$laskurow['toim_ovttunnus']}'";
+			$asiakas_tunnus_res = mysql_query($query) or pupe_error($query);
+			$asiakas_tunnus_row = mysql_fetch_assoc($asiakas_tunnus_res);
+
+			$vanha_liitostunnus = $laskurow['liitostunnus'];
+			$laskurow['liitostunnus'] = $asiakas_tunnus_row['tunnus'];
+		}
 
 		// oletetaan yhtiön valuutta jos sitä ei tiedetä
 		if ($laskurow["valkoodi"] == "") $laskurow["valkoodi"] = $yhtiorow["valkoodi"];
@@ -3827,6 +3846,12 @@ if (!function_exists("alehinta")) {
 
 		//$debug = 1;
 		if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: $ale ".t("% HINTA")." $hinta $yhtiorow[valkoodi] KPL:$kpl<br><br>";
+
+		if ($yhtio != '') {
+			$yhtiorow = hae_yhtion_parametrit($vanha_yhtio);
+			$kukarow['yhtio'] = $vanha_yhtio;
+			$laskurow['liitostunnus'] = $vanha_liitostunnus;
+		}
 
 		if ($palautus != "") {
 			$ret=array();

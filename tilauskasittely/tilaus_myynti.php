@@ -1900,12 +1900,16 @@ if ($tee == '') {
 	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] > 0) {
 
-		$query = "	SELECT fakta, round(luottoraja, 0) luottoraja, luokka, asiakasnro
+		$query = "	SELECT fakta, round(luottoraja, 0) luottoraja, luokka, asiakasnro, osasto
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$laskurow[liitostunnus]'";
 		$faktaresult = mysql_query($query) or pupe_error($query);
 		$faktarow = mysql_fetch_assoc($faktaresult);
+
+		if ($GLOBALS['eta_yhtio'] != '' and $faktarow['osasto'] != '6') {
+			unset($GLOBALS['eta_yhtio']);
+		}
 
 		echo "<input type='hidden' name='pikaotsikko' value='TRUE'>";
 
@@ -3898,7 +3902,7 @@ if ($tee == '') {
 						$pklisa = " and (perheid = '$row[perheid]' or perheid2 = '$row[perheid]')";
 					}
 
-					$query = "	SELECT sum(if (kommentti != '',1,0)), count(*)
+					$query = "	SELECT sum(if (kommentti != '' or '$GLOBALS[eta_yhtio]' != '',1,0)), count(*)
 								FROM tilausrivi use index (yhtio_otunnus)
 								WHERE yhtio = '$kukarow[yhtio]'
 								$tunnuslisa
@@ -4005,7 +4009,7 @@ if ($tee == '') {
 
 					echo "<tr>";
 
-					if ($row["kommentti"] != "") {
+					if ($row["kommentti"] != "" or $GLOBALS['eta_yhtio'] != '') {
 						if ($jarjlisa != "") {
 							echo "<td rowspan = '2' width='15' class='back'>$buttonit</td>";
 						}
@@ -4948,6 +4952,24 @@ if ($tee == '') {
 				}
 
 				echo "</td></tr>";
+
+				if ($GLOBALS['eta_yhtio'] != '') {
+					$query = "	SELECT *
+								FROM tuote
+								WHERE yhtio = '{$GLOBALS['eta_yhtio']}'
+								AND tuoteno = '{$row['tuoteno']}'";
+					$tres_eta = mysql_query($query) or pupe_error($query);
+					$trow_eta = mysql_fetch_assoc($tres_eta);
+
+					list($lis_hinta_eta, $lis_netto_eta, $lis_ale_eta, $alehinta_alv_eta, $alehinta_val_eta) = alehinta($laskurow, $trow_eta, $kpl_ruudulle, '', '', '', '', $GLOBALS['eta_yhtio']);
+
+					// 31OC264
+
+					$row['kommentti'] .= "\n".t("Hinta").": ".sprintf("%.".$yhtiorow['hintapyoristys']."f", $lis_hinta_eta);
+					$row['kommentti'] .= "\n".t("Ale").": ".($lis_ale_eta*1)."%";
+					$row['kommentti'] .= "\n".t("Alv").": ".($row['alv']*1)."%";
+					$row['kommentti'] .= "\n".t("Rivihinta").": ".sprintf("%.".$yhtiorow['hintapyoristys']."f", ($lis_hinta_eta * (1-($lis_ale_eta/100)) * $kpl_ruudulle));
+				}
 
 				if ($row['kommentti'] != '') {
 					$cspan = 10;

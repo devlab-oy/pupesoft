@@ -79,12 +79,11 @@ if (!function_exists('alku_lahete')) {
 				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
 			}
 
-			$yhtion_parametritrow = hae_yhtion_parametrit($GLOBALS['eta_yhtio']);
-			$laskurow["yhtio_nimi"] 	= $yhtion_parametritrow['nimi'];
-			$laskurow["yhtio_osoite"] 	= $yhtion_parametritrow['osoite'];
-			$laskurow["yhtio_postino"] 	= $yhtion_parametritrow['postino'];
-			$laskurow["yhtio_postitp"] 	= $yhtion_parametritrow['postitp'];
-			$laskurow["yhtio_maa"] 		= $yhtion_parametritrow['maa'];
+			$laskurow["yhtio_nimi"] 	= $GLOBALS['eta_yhtio_nimi'];
+			$laskurow["yhtio_osoite"] 	= $GLOBALS['eta_yhtio_osoite'];
+			$laskurow["yhtio_postino"] 	= $GLOBALS['eta_yhtio_postino'];
+			$laskurow["yhtio_postitp"] 	= $GLOBALS['eta_yhtio_postitp'];
+			$laskurow["yhtio_maa"] 		= $GLOBALS['eta_yhtio_maa'];
 		}
 		// varmistetaan, että kopiossakin tulee oikean toimipaikan logo
 		elseif ((int) $laskurow["yhtio_toimipaikka"] != 0) {
@@ -493,12 +492,11 @@ if (!function_exists('uusi_sivu_lahete')) {
 				$apu_yhtiorow["lasku_logo"] = $yhtion_parametritrow["lasku_logo"];
 			}
 
-			$yhtion_parametritrow = hae_yhtion_parametrit($GLOBALS['eta_yhtio']);
-			$laskurow["yhtio_nimi"] = $yhtion_parametritrow['nimi'];
-			$laskurow["yhtio_osoite"] = $yhtion_parametritrow['osoite'];
-			$laskurow["yhtio_postino"] = $yhtion_parametritrow['postino'];
-			$laskurow["yhtio_postitp"] = $yhtion_parametritrow['postitp'];
-			$laskurow["yhtio_maa"] = $yhtion_parametritrow['maa'];
+			$laskurow["yhtio_nimi"] 	= $GLOBALS['eta_yhtio_nimi'];
+			$laskurow["yhtio_osoite"] 	= $GLOBALS['eta_yhtio_osoite'];
+			$laskurow["yhtio_postino"] 	= $GLOBALS['eta_yhtio_postino'];
+			$laskurow["yhtio_postitp"] 	= $GLOBALS['eta_yhtio_postitp'];
+			$laskurow["yhtio_maa"] 		= $GLOBALS['eta_yhtio_maa'];
 		}
 		// varmistetaan, että kopiossakin tulee oikean toimipaikan logo
 		elseif ((int) $laskurow["yhtio_toimipaikka"] != 0) {
@@ -1047,7 +1045,7 @@ if (!function_exists('rivi_lahete')) {
 		$row["kpl"] 	= ($row["kpl"]*1);
 		$kpl_rivilla = (($row["kpl"]+$row["varattu"]+$row["jt"])*1);
 
-		$row['varattu_orig'] = $row['varattu'];
+		$row['varattu_orig'] = $kpl_rivilla;
 
 		// Erikseen toimitetuille riveille ei näytetä toimitettu-saraketta
 		if ($row["d_erikseen"] == "") {
@@ -1490,7 +1488,7 @@ if (!function_exists('rivi_hae_hinnat_lahete')) {
 		$oikpos = $pdf->strlen(($row["alv"]*1)."%", $norm);
 		$pdf->draw_text(520-$oikpos, $kala, ($row["alv"]*1)."%", 							$thispage, $norm);
 
-		$rivihinta = $lis_hinta * (1-($lis_ale/100)) * $row["varattu_orig"];
+		$rivihinta = $lis_hinta * (1-($lis_ale/100)) * $row['varattu_orig'];
 
 		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $rivihinta), $norm);
 		$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $rivihinta), 			$thispage, $norm);
@@ -1719,7 +1717,7 @@ if (!function_exists('rivi_viivakoodi_lahete_ean13')) {
 
 if (!function_exists('loppu_lahete')) {
 	function loppu_lahete($thispage, $tots) {
-		global $pdf, $sivu, $laskurow, $viite, $pieni, $norm, $summa, $rectparam, $kieli, $yhtiorow, $kala, $rivinkorkeus, $page;
+		global $pdf, $sivu, $laskurow, $viite, $pieni, $norm, $summa, $rectparam, $kieli, $yhtiorow, $kala, $rivinkorkeus, $page, $lahetetyyppi;
 
 		// yhtiötiedot
 		$y_puhelin		= $yhtiorow['puhelin'];
@@ -1760,6 +1758,20 @@ if (!function_exists('loppu_lahete')) {
 				$y_fax			= $alhiro['fax'];
 				$y_email		= $alhiro['email'];
 			}
+		}
+
+		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_hae_hinnat.inc" and $GLOBALS['eta_yhtio'] != '') {
+			// etäyhtiön yhtiötiedot
+			$y_puhelin		= $GLOBALS['eta_yhtio_puhelin'];
+			$y_fax			= $GLOBALS['eta_yhtio_fax'];
+			$y_email		= $GLOBALS['eta_yhtio_email'];
+			$y_nimi 		= $GLOBALS['eta_yhtio_nimi'];
+			$y_osoite 		= $GLOBALS['eta_yhtio_osoite'];
+			$y_postino	 	= $GLOBALS['eta_yhtio_postino'];
+			$y_postitp	 	= $GLOBALS['eta_yhtio_postitp'];
+			$y_maa 			= $GLOBALS['eta_yhtio_maa'];
+			$y_kotipaikka	= $GLOBALS['eta_yhtio_kotipaikka'];
+			$y_vatnumero	= str_replace("0037", "", $GLOBALS['eta_yhtio_ovttunnus']);
 		}
 
 		//Alimmat kolme laatikkoa, yhtiötietoja

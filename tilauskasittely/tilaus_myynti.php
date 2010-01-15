@@ -3713,7 +3713,6 @@ if ($tee == '') {
 						</tr>";
 			}
 
-			$bruttoyhteensa	= 0;
 			$tuotetyyppi	= "";
 			$varaosatyyppi	= "";
 			$vanhaid 		= "KALA";
@@ -4564,8 +4563,7 @@ if ($tee == '') {
 						$summa    		= round($summa * $alvillisuus_kerto, $yhtiorow['hintapyoristys']);
 						$myyntihinta	= round(tuotteen_myyntihinta($laskurow, $trow, 1) * $alvillisuus_kerto, $yhtiorow['hintapyoristys']);
 					}
-
-					$brutto   = $hinta * ($row["varattu"] + $row["jt"]);
+	
 					$kplhinta = $hinta * (1 - $row["ale"] / 100);
 
 					if ($kukarow['hinnat'] == 1) {
@@ -4582,7 +4580,7 @@ if ($tee == '') {
 					}
 
 					if ($kukarow['hinnat'] == 1) {
-						echo "<td $class align='right' valign='top'>".sprintf("%.".$yhtiorow['hintapyoristys']."f",$brutto)."</td>";
+						echo "<td $class align='right' valign='top'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", ($myyntihinta * ($row["varattu"] + $row["jt"])))."</td>";
 					}
 					elseif ($kukarow['hinnat'] == 0) {
 						echo "<td $class align='right' valign='top'>".sprintf("%.".$yhtiorow['hintapyoristys']."f",$summa)."</td>";

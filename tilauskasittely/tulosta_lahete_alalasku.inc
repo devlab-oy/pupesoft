@@ -325,7 +325,7 @@ if (!function_exists('print_pdf_lahete')) {
 			echo t("Lasku tulostuu")."...<br>";
 
 			if ($kukarow["extranet"] == '') {
-				require("../inc/sahkoposti.inc");
+				require("inc/sahkoposti.inc");
 			}
 			else {
 				require("sahkoposti.inc");

@@ -25,7 +25,7 @@
 			$ups_lisattuja = 0;
 
 			// avataan yhteys
-			$conn_id = ftp_connect($ups_host_temp) or die("Connection failed @ $ups_host!\n");
+			$conn_id = ftp_connect($ups_host_temp) or die("Connection failed @ $ups_host_temp!\n");
 
 			// kokeillaan login
 			if ($conn_id) {

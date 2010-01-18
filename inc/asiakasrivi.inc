@@ -126,6 +126,8 @@
 		$ulos .= "<option value='111' $sel[111]>".t("Elma EDI-inhouse")."</option>";
 		$ulos .= "<option value='666' $sel[666]>".t("Sähköposti")."</option>";
 		$ulos .= "<option value='667' $sel[667]>".t("Sisäinen, käsitellään manuaalisesti")."</option>";
+		
+		$ulos .= "<option value='999' $sel[999]>".t("Laskutuskielto, laskutusta ei tehdä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -229,18 +231,18 @@
 
 			//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
 			$query = "	SELECT *
-						FROM yhtio 
+						FROM yhtio
 						JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
-						where konserni = '$yhtiorow[konserni]' 
+						where konserni = '$yhtiorow[konserni]'
 						and synkronoi like '%$toim%'";
 			$vresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($vresult) > 0) {
 				// haetaan konsernifirmat
 				$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
-							FROM yhtio 
+							FROM yhtio
 							JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
-							where konserni = '$yhtiorow[konserni]' 
+							where konserni = '$yhtiorow[konserni]'
 							and synkronoi like '%$toim%'";
 				$vresult = mysql_query($query) or pupe_error($query);
 				$srowapu = mysql_fetch_array($vresult);
@@ -528,7 +530,7 @@
 			$ulos .= "</select></td>";
 			$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "tilausvahvistus_jttoimituksista") {
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

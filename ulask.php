@@ -1015,9 +1015,12 @@ if ($tee == 'P' or $tee == 'E') {
 			echo "<tr><td valign='top'>";
 
  			// Tehaan kentta tai naytetaan popup
-			if ($iulos[$i] == '') {
+			if ($iulos[$i] == '' and $maara == 1) {
 				livesearch_kentta("lasku", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT");
 			}
+			elseif ($iulos[$i] == '') {
+				echo "<input type='text' name='itili[$i]' value='$itili[$i]'>";
+			}						
 			else {
 				echo "$iulos[$i]";
 			}

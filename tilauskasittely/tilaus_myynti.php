@@ -3901,7 +3901,7 @@ if ($tee == '') {
 						$pklisa = " and (perheid = '$row[perheid]' or perheid2 = '$row[perheid]')";
 					}
 
-					$query = "	SELECT sum(if (kommentti != '' or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' == '$kukarow[yhtio]'),1,0)), count(*)
+					$query = "	SELECT sum(if (kommentti != '' or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]'),1,0)), count(*)
 								FROM tilausrivi use index (yhtio_otunnus)
 								WHERE yhtio = '$kukarow[yhtio]'
 								$tunnuslisa

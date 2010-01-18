@@ -13,7 +13,7 @@
 	}
 
 	// haetaan eka keikan kaikki rivit (ostotilauksen verkkotunnus kentässä on alkuperäisen myyntitilauksen lasku.liitostunnus)
-	$query = "	select tilausrivi.*, verkkotunnus from
+	$query = "	SELECT tilausrivi.*, verkkotunnus from
 				tilausrivi use index (uusiotunnus_index)
 				join lasku on lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 				where tilausrivi.yhtio='$kukarow[yhtio]' and
@@ -26,7 +26,7 @@
 	$varastosta = array(); // mistä varastoista saa myydä
 
 	// haetaan kaikki varastot jotka ei ole myyntikiellossa
-	$query = "select tunnus from varastopaikat where yhtio='$kukarow[yhtio]' and tyyppi=''";
+	$query = "SELECT tunnus from varastopaikat where yhtio='$kukarow[yhtio]' and tyyppi=''";
 	$vares = mysql_query($query) or pupe_error($query);
 
 	while ($varow = mysql_fetch_array($vares)) {
@@ -36,7 +36,7 @@
 	while ($rivi = mysql_fetch_array($superres)) {
 
 		// katsotaan onko tuotetta super-jt:ssä tälle samalle asiakkaalle samaa määrää
-		$query = "	select tilausrivi.*, lasku.nimi, lasku.ytunnus
+		$query = "	SELECT tilausrivi.*, lasku.nimi, lasku.ytunnus
 					from tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 					join lasku on lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.liitostunnus='$rivi[verkkotunnus]'
 					where tilausrivi.yhtio = '$kukarow[yhtio]' and
@@ -51,9 +51,9 @@
 
 		// jos löyty oikea rivi
 		if (mysql_num_rows($jtres) == 1) {
-			
+
 			$jtrivit = mysql_fetch_array($jtres);
-			
+
 			$laskuvirhe .= "$jtrivit[nimi] ($jtrivit[ytunnus]): ".t("Täysin oikea rivi löytyi").". $jtrivit[tuoteno] ".t("toimitetaan")." $jtrivit[jt] ".t("kpl")." ($jtrivit[tunnus])\n";
 
 			$tunnukset 			= $jtrivit["tunnus"];
@@ -66,11 +66,11 @@
 
 			require ("tee_jt_tilaus.inc");
 			tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka, $tilaus_on_jo, $varastosta, $olpaikalta, $varataan_saldoa, $alv);
-			
+
 			if ($paikka != '') {
 				$laskuvirhe .= "Toimitetaan paikalta $paikka\n";
 			}
-			
+
 			//jt-tilausten laskutunnukset talteen, nämä pitää sitten merkata valmiiksi lopussa
 			if (!in_array($id, $jt_otsikot)) $jt_otsikot[] = $id;
 		}
@@ -78,7 +78,7 @@
 		else {
 
 			// katsotaan onko tuotetta super-jt:ssä tälle samalle asiakkaalle
-			$query = "	select tilausrivi.*, lasku.nimi, lasku.ytunnus
+			$query = "	SELECT tilausrivi.*, lasku.nimi, lasku.ytunnus
 						from tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 						join lasku on lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.liitostunnus='$rivi[verkkotunnus]'
 						where tilausrivi.yhtio = '$kukarow[yhtio]' and
@@ -126,11 +126,11 @@
 		foreach ($jt_otsikot as $apukala) {
 
 			// laitetaan laskulle ei-lähetettä flägi ja oikea alatila, niin menee suoraan laskutukseen
-			$query = "update lasku set eilahetetta='o', alatila='A' where yhtio='$kukarow[yhtio]' and tunnus='$apukala'";
+			$query = "UPDATE lasku set eilahetetta='o', alatila='A' where yhtio='$kukarow[yhtio]' and tunnus='$apukala'";
 			$jtres = mysql_query($query) or pupe_error($query);
 
 			// haetaan laskurow
-			$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$apukala'";
+			$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$apukala'";
 			$jtres = mysql_query($query) or pupe_error($query);
 			$laskurow = mysql_fetch_array($jtres);
 

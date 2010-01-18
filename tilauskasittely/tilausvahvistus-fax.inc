@@ -141,9 +141,22 @@ else {
 			$laskurow["toimaika"] = tv1dateconv($laskurow["toimaika"]);
 		}
 
-		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".$laskurow['toimitustapa'])	.t("Toimitusaika", $kieli).": ".$laskurow['toimaika']."\n";
-		$ulos .= sprintf("%-50.s",t("Tilausnumero", $kieli).": ".$laskurow['tunnus'])		.t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
-		$ulos .= sprintf("%-50.s",t("Myyjä", $kieli).": ".$krow['nimi'])."\n";
+		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".$laskurow['toimitustapa'])		.t("Toimitusaika", $kieli).": ".$laskurow['toimaika']."\n";
+		$ulos .= sprintf("%-50.s",t("Tilausnumero", $kieli).": ".$laskurow['tunnus'])			.t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
+		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).": ".$laskurow['tilausyhteyshenkilo'])	.t("Tilaajan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero']."\n";
+		$ulos .= sprintf("%-50.s",t("Kohde", $kieli).": ".$laskurow['kohde'])					.t("Myyjä", $kieli).": ".$krow['nimi']."\n";
+		$ulos .= sprintf("%-50.s",t("Toimitusehto", $kieli).": ".$laskurow['toimitusehto'])."\n";
+
+		if (($naytatvale != 3 or $naytatvale != 4) and $laskurow['erikoisale'] > 0) {
+			$ulos .= sprintf("%-50.s",t("Erikoisalennus", $kieli).": ".$laskurow['erikoisale']."%\n");
+		}
+		
+		if ($yhtiorow['alv_kasittely'] != '') {
+			$ulos .= sprintf("%-50.s",t("Hinnat ovat verottomia.", $kieli)."\n");
+		}
+		else {
+			$ulos .= sprintf("%-50.s",t("Hinnat sisältävät arvonlisäveron.", $kieli)."\n");
+		}
 
 		if ($laskurow['comments']!='')
 			$ulos .= t("Kommentti", $kieli).": ".$laskurow['comments']."\n";

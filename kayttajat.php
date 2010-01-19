@@ -146,7 +146,7 @@
 
 		$salasana = "";
 
-		if (mysql_num_rows($reskuka) > 0 and $jatka != 1) {
+		if (mysql_num_rows($reskuka) > 0 and $jatka != 1 and $kopsaakuka == "JOO") {
 			$monta = mysql_fetch_array($reskuka);
 
 			$firname 						= $monta['nimi'];
@@ -314,9 +314,16 @@
 			}
 		}
 		else {
-			echo "<font class='error'>".t("Uutta käyttäjää ei luotu")."!</font><br>";
+			echo "<font class='error'>".t("Uutta käyttäjää ei luotu")."!</font><br><br>";
 			$tee     = "MUUTA";
-			$selkuka = "UUSI";
+			
+			if ($kopsaakuka == "JOO") {
+				$selkuka = "KOPSAAUUSI";
+			}
+			else {
+				$selkuka = "UUSI";	
+			}
+			
 			$firname = "";
 		}
 	}
@@ -463,7 +470,7 @@
 		}
 		else {
 			//tama siis vain jos muutetaan jonkun tietoja
-			if ($selkuka != "UUSI") {
+			if ($selkuka != "UUSI" and $selkuka != "KOPSAAUUSI") {
 
 				$query = "SELECT * FROM kuka";
 
@@ -493,581 +500,590 @@
 
 			echo "<table>";
 
-			if ($selkuka != "UUSI") {
+			if ($selkuka != "UUSI" and $selkuka != "KOPSAAUUSI") {
 				echo "	<input type='hidden' name='tee' value='MUUTA'>
 						<input type='hidden' name='selkuka' value='$selkukarow[tunnus]'>
 						<input type='hidden' name='kuka' value='$selkukarow[kuka]'>";
 				echo "<tr><th align='left'>".t("Käyttäjätunnus").":</th><td><b>$krow[kuka]</b> ".t("Lastlogin").": $krow[lastlogin]</td></tr>";
 			}
 			else {
+				
+				if ($selkuka == "KOPSAAUUSI") {
+					echo "<input type='hidden' name='kopsaakuka' value='JOO'>";
+				}
+				
 				echo "<input type='hidden' name='tee' value='UUSI'>";
 				echo "<tr><th align='left'>".t("Käyttäjätunnus").":</th>
 				<td><input type='text' size='50' maxlength='10' name='ktunnus'></td></tr>";
 			}
-			echo "<tr><th align='left'>".t("Salasana").":</th><td><input type='text' size='50' maxlength='30' name='password' value='$generoitupass'></td><td class='back'> <a href='?generatepass=y&selkuka=$selkuka&toim=$toim'>".t("Generoi salasana")."</a></td></tr>";
-			echo "<tr><th align='left'>".t("Nimi").":</th><td><input type='text' size='50' value='$krow[nimi]' maxlength='30' name='firname'></td></tr>";
-			echo "<tr><th align='left'>".t("Puhelinnumero").":</th><td><input type='text' size='50' value='$krow[puhno]' maxlength='30' name='phonenum'></td></tr>";
-			echo "<tr><th align='left'>".t("Sähköposti").":&nbsp;</th><td><input type='text' size='50' value='$krow[eposti]' maxlength='50' name='email'></td></tr>";
-			if ($toim == 'extranet') echo "<tr><th align='left'>".t("IP").":&nbsp;</th><td><input type='text' size='16' value='$krow[ip]' maxlength='15' name='ip'></td></tr>";
-			echo "<tr><th align='left'>".t("Kieli").":&nbsp;</th><td><select name='lang'>";
+			
+			if ($selkuka != "KOPSAAUUSI") {
+			
+				echo "<tr><th align='left'>".t("Salasana").":</th><td><input type='text' size='50' maxlength='30' name='password' value='$generoitupass'></td><td class='back'> <a href='?generatepass=y&selkuka=$selkuka&toim=$toim'>".t("Generoi salasana")."</a></td></tr>";
+				echo "<tr><th align='left'>".t("Nimi").":</th><td><input type='text' size='50' value='$krow[nimi]' maxlength='30' name='firname'></td></tr>";
+				echo "<tr><th align='left'>".t("Puhelinnumero").":</th><td><input type='text' size='50' value='$krow[puhno]' maxlength='30' name='phonenum'></td></tr>";
+				echo "<tr><th align='left'>".t("Sähköposti").":&nbsp;</th><td><input type='text' size='50' value='$krow[eposti]' maxlength='50' name='email'></td></tr>";
+				if ($toim == 'extranet') echo "<tr><th align='left'>".t("IP").":&nbsp;</th><td><input type='text' size='16' value='$krow[ip]' maxlength='15' name='ip'></td></tr>";
+				echo "<tr><th align='left'>".t("Kieli").":&nbsp;</th><td><select name='lang'>";
 
-			$query  = "show columns from sanakirja";
-			$fields =  mysql_query($query);
+				$query  = "show columns from sanakirja";
+				$fields =  mysql_query($query);
 
-			while ($apurow = mysql_fetch_array($fields)) {
-				if (strlen($apurow[0]) == 2) {
-					$sel = "";
-					if ($krow["kieli"] == $apurow[0] or ($krow["kieli"] == "" and $apurow[0] == $yhtiorow["kieli"])) {
-						$sel = "selected";
-					}
-					if ($apurow[0] != "tunnus") {
-						$query = "SELECT distinct nimi from maat where koodi='$apurow[0]'";
-						$maare = mysql_query($query);
-						$maaro = mysql_fetch_array($maare);
-						$maa   = strtolower($maaro["nimi"]);
-						if ($maa=="") $maa = $apurow[0];
-						echo "<option value='$apurow[0]' $sel>".t($maa)."</option>";
-					}
-				}
-			}
-
-			if ($toim != 'extranet') {
-				echo "</select></td></tr>";
-
-				$sel9 = $sel3 = $sel2 = $sel1 = "";
-
-				if ($krow["taso"] == "1") {
-					$sel1 = "SELECTED";
-				}
-				if ($krow["taso"] == "2") {
-					$sel2 = "SELECTED";
-				}
-				if ($krow["taso"] == "3") {
-					$sel3 = "SELECTED";
-				}
-				if ($krow["taso"] == "9") {
-					$sel9 = "SELECTED";
-				}
-
-				echo "<tr><th align='left'>".t("Taso").":</th>";
-				echo "<td><select name='taso'>";
-				echo "<option value='9' $sel9>".t("Taso 9 Aloittelijahyväksyjä, tiliöintejä ei näytetä")."</option>";
-				echo "<option value='1' $sel1>".t("Taso 1 Perushyväksyjä, tiliöntejä ei voi muuttaa")."</option>";
-				echo "<option value='2' $sel2>".t("Taso 2 Tehohyväksyjä, tiliöntejä voi muuttaa")."</option>";
-				echo "<option value='3' $sel3>".t("Taso 3 Tehohyväksyjä, lukittujakin tiliöintejä voi muuttaa")."</option>";
-				echo "</select></td></tr>";
-			}
-			else {
-				$sel2 = $sel1 = "";
-
-				if ($krow["taso"] == "1") {
-					$sel1 = "SELECTED";
-				}
-				if ($krow["taso"] == "2") {
-					$sel2 = "SELECTED";
-				}
-				if ($krow["taso"] == "3") {
-					$sel3 = "SELECTED";
-				}
-				if ($krow["taso"] == "9") {
-					$sel9 = "SELECTED";
-				}
-				echo "<tr><th align='left'>".t("Taso").":</th>";
-
-				echo "<td><select name='taso'>";
-				echo "<option value='1' $sel1>".t("Taso 1 Tehotilaaja, tilaukset menee suoraan tomitukseen")."</option>";
-				echo "<option value='2' $sel2>".t("Taso 2 Aloittelijatilaaja, tilaukset hyväksytetään ennen toimitusta")."</option>";
-				echo "<option value='3' $sel3>".t("Taso 3 Tehotilaaja, tilaukset menee suoraan toimitukseen MAISTA RIIPPUMATTA")."</option>";
-				if ($kukarow['yhtio'] == 'artr') {
-					echo "<option value='9' $sel9>".t("Taso 9 Tehotilaaja, hyväksytyt työmääräykset tilataan automaattisesti")."</option>";
-				}
-				echo "</select></td></tr>";
-			}
-
-			$sel0 = $sel1 = $sel2 = "";
-
-			if (!isset($krow["hinnat"]) and $toim == 'extranet') {
-				$sel1 = "SELECTED";
-			}
-			if ($krow["hinnat"] == 0) {
-				$sel0 = "SELECTED";
-			}
-			if ($krow["hinnat"] == 1) {
-				$sel1 = "SELECTED";
-			}
-			if ($krow["hinnat"] == -1) {
-				$sel2 = "SELECTED";
-			}
-
-			echo "<tr><th align='left'>".t("Hinnat").":</th>";
-
-			echo "<td><select name='hinnat'>";
-			echo "<option value='0'  $sel0>".t("Normaali")."</option>";
-			echo "<option value='1'  $sel1>".t("Näytetään vain tuotteen myyntihinta")."</option>";
-			echo "<option value='-1' $sel2>".t("Hintoja ei näytetä")."</option>";
-			echo "</select></td></tr>";
-
-			if ($toim == 'extranet') {
-				$sel0 = $sel1 = $sel2 = $sel3 = "";
-
-				if (!isset($krow["saatavat"])) {
-					$sel2 = "SELECTED";
-				}
-
-				if ($krow["saatavat"] == "0") {
-					$sel0 = "SELECTED";
-				}
-				if ($krow["saatavat"] == "1") {
-					$sel1 = "SELECTED";
-				}
-				if ($krow["saatavat"] == "2") {
-					$sel2 = "SELECTED";
-				}
-				if ($krow["saatavat"] == "3") {
-					$sel3 = "SELECTED";
-				}
-
-				echo "<tr><th align='left'>".t("Saatavat").":</th>";
-
-				echo "<td><select name='saatavat'>";
-				echo "<option value='0' $sel0>".t("Näytetään saatavat, jätetään kesken jos maksamattomia laskuja")."</option>";
-				echo "<option value='1' $sel1>".t("Näytetään saatavat, siirretään aina tulostusjonoon")."</option>";
-				echo "<option value='2' $sel2>".t("Ei naytetä saatavia, jätetään kesken jos maksamattomia laskuja")."</option>";
-				echo "<option value='3' $sel3>".t("Ei naytetä saatavia, siirretään aina tulostusjonoon")."</option>";
-				echo "</select></td></tr>";
-			}
-
-			if ($toim != 'extranet') {
-				echo "<tr><th align='left'>".t("Myyjänro").":</th><td><input type='text' name='myyja' value='$krow[myyja]' size='5'></td></tr>";
-				echo "<tr><th align='left'>".t("Kerääjänro").":</th><td><input type='text' name='keraajanro' value='$krow[keraajanro]' size='5'></td></tr>";
-
-				echo "<tr><th align='left'>".t("Osasto").":</td>";
-				echo "<td><select name='osasto'><option value=''>".t("Ei osastoa")."</option>";
-
-				$vares = t_avainsana("HENKILO_OSASTO");
-
-				while ($varow = mysql_fetch_array($vares)) {
-					$sel='';
-					if ($varow['selite']==$krow["osasto"]) $sel = 'selected';
-					echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
-				}
-
-				echo "</select></td></tr>";
-			}
-
-			echo "<tr><th align='left'>".t("Valitse käyttäjän oletusvarasto").":</td>";
-			echo "<td>";
-
-			$query  = "	SELECT *
-						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
-						order by tyyppi, nimitys";
-			$vares = mysql_query($query) or pupe_error($query);
-
-			echo "<select name='oletus_varasto'>";
-			echo "<option value='0'>",t("Oletusvarasto"),"</option>";
-			while ($varow = mysql_fetch_array($vares)) {
-				$sel = '';
-				if ($varow['tunnus'] == $krow['oletus_varasto']) {
-					$sel = 'selected';
-				}
-				echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
-			}
-			echo "</select>";
-
-			echo "<tr><th align='left'>".t("Valitse varastot, joista käyttäjä saa myydä").":</td>";
-			echo "<td>";
-
-			$query  = "	SELECT *
-						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]'
-						order by tyyppi, nimitys";
-			$vares = mysql_query($query) or pupe_error($query);
-
-			$varastot_array = explode(",", $krow["varasto"]);
-
-			while ($varow = mysql_fetch_array($vares)) {
-				$sel = $eri = '';
-				if (in_array($varow['tunnus'], $varastot_array)) $sel = 'CHECKED';
-				if ($varow["tyyppi"] == "E") $eri = "(E)";
-				echo "<input type='checkbox' name='varasto[]' value='$varow[tunnus]' $sel> $varow[nimitys] $eri<br>";
-			}
-
-			echo "</td><td class='back'>",t("Ilman rajausta saa myydä kaikista normaalivarastoista"),"</td></tr>";
-
-			if ($toim != 'extranet' and $yhtiorow['pakkaamolokerot'] != '') {
-				echo "<tr><th align='left'>".t("Oletus pakkaamo").":</td>";
-				echo "<td><select name='oletus_pakkaamo'><option value=''>".t("Ei pakkaamoa")."</option>";
-
-				$query  = "SELECT distinct nimi FROM pakkaamo WHERE yhtio='$kukarow[yhtio]'";
-				$pakkaamores = mysql_query($query) or pupe_error($query);
-
-				while ($pakkaamorow = mysql_fetch_array($pakkaamores)) {
-					$sel='';
-					if ($pakkaamorow['nimi']==$krow["oletus_pakkaamo"]) $sel = 'selected';
-					echo "<option value='$pakkaamorow[nimi]' $sel>$pakkaamorow[nimi]</option>";
-				}
-
-				echo "</select></td></tr>";
-			}
-
-
-			if ($toim != 'extranet') {
-				echo "<tr><th align='left'>".t("Henkilökohtainen tulostin:")."</td>";
-				echo "<td><select name='kirjoitin'><option value=''>".t("Ei oletuskirjoitinta")."</option>";
-
-				$query  = "SELECT tunnus, kirjoitin FROM kirjoittimet WHERE yhtio='$kukarow[yhtio]'";
-				$vares = mysql_query($query) or pupe_error($query);
-
-				while ($varow = mysql_fetch_array($vares)) {
-					$sel='';
-					if ($varow['tunnus']==$krow["kirjoitin"]) $sel = 'selected';
-					echo "<option value='$varow[tunnus]' $sel>$varow[kirjoitin]</option>";
-				}
-
-				echo "</select></td></tr>";
-
-
-				echo "<tr><th align='left'>".t("Kassamyyjä").":</td>";
-				echo "<td><select name='kassamyyja'><option value=''>".t("Ei kassamyyjä")."</option>";
-
-				$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' ORDER BY nimi";
-				$vares = mysql_query($query) or pupe_error($query);
-
-				while ($varow = mysql_fetch_array($vares)) {
-					$sel='';
-					if ($varow['tunnus']==$krow["kassamyyja"]) $sel = 'selected';
-					echo "<option value='$varow[tunnus]' $sel>$varow[nimi]</option>";
-				}
-
-				echo "</select></td></tr>";
-
-				echo "<tr><th align='left'>".t("Dynaaminen kassamyyjä").":</td>";
-
-				$sel1="";
-				$sel2="";
-
-				if ($krow["dynaaminen_kassamyynti"] == "") {
-					$sel1 = "selected";
-				}
-				else {
-					$sel2 = "selected";
-				}
-				echo "<td><select name='dynaaminen_kassamyynti'>";
-				echo "<option value='' $sel1>".t("Normaalimyyjä ei toimi kassamyyjänä")."</option>";
-				echo "<option value='o' $sel2>".t("Normaalimyyjä voi toimia tarpeen mukaan kassamyyjänä")."</option>";
-				echo "</select></td>";
-
-				$sel0 = $sel1 = "";
-
-				if ($krow["saatavat"] == "0") {
-					$sel0 = "SELECTED";
-				}
-				if ($krow["saatavat"] == "1") {
-					$sel1 = "SELECTED";
-				}
-
-				echo "<tr><th align='left'>".t("Saatavat").":</th>";
-
-				echo "<td><select name='saatavat'>";
-				echo "<option value='0' $sel0>".t("Ei näytetä saatavia kassakäyttäjänä")."</option>";
-				echo "<option value='1' $sel1>".t("Näytetään saatavat kassakäyttäjänä")."</option>";
-				echo "</select></td></tr>";
-
-				echo "<tr><th align='left'>".t("Hyväksyjä").":</td>";
-
-				if ($krow["hyvaksyja"] != '') {
-					$chk = "CHECKED";
-				}
-				else {
-					$chk = "";
-				}
-				echo "<td><input type='checkbox' name='hyvaksyja' $chk></td></tr>";
-			}
-			else {
-				echo "<tr><th align='left'>".t("Tilaukset suoraan laskutukseen").":</td>";
-
-				if ($krow["hyvaksyja"] != '') {
-					$chk = "CHECKED";
-				}
-				else {
-					$chk = "";
-				}
-				echo "<td><input type='checkbox' name='hyvaksyja' $chk></td></tr>";
-			}
-
-			if ($selkuka != "UUSI") {
-
-				echo "<tr><th align='left'>".t("Oletusasiakas").":</th><td>";
-				echo "<input type='text' name='ytunnus'>";
-
-				if ($kumpi == "1" and $asiakasid != "") $krow["oletus_asiakas"] = $asiakasid;
-
-				if ($krow["oletus_asiakas"] != "") {
-
-					$query = "select * from asiakas where tunnus='$krow[oletus_asiakas]'";
-					$vares = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($vares) == 1) {
-						$varow = mysql_fetch_array($vares);
-
-						echo " $varow[ytunnus] $varow[nimi]";
-
-						if ($varow["toim_ovttunnus"] != "") {
-							echo " / $varow[toim_ovttunnus] $varow[toim_nimi]";
+				while ($apurow = mysql_fetch_array($fields)) {
+					if (strlen($apurow[0]) == 2) {
+						$sel = "";
+						if ($krow["kieli"] == $apurow[0] or ($krow["kieli"] == "" and $apurow[0] == $yhtiorow["kieli"])) {
+							$sel = "selected";
 						}
-
-						echo "<input type='hidden' name='oletus_asiakas' value='$krow[oletus_asiakas]'>";
-					}
-					else {
-						echo " ".t("Asiakas ei löydy")."!";
-					}
-
-				}
-				else {
-					echo " ".t("Oletusasiakasta ei ole syötetty")."!";
-				}
-
-				echo "</td></tr>";
-
-				echo "<tr><th align='left'>".t("Oletusasiakastiedot").":</th><td>";
-				echo "<input type='text' name='ytunnus2'>";
-
-				if ($kumpi == "2" and $asiakasid != "") $krow["oletus_asiakastiedot"] = $asiakasid;
-
-				if ($krow["oletus_asiakastiedot"] != "") {
-
-					$query = "select * from asiakas where tunnus='$krow[oletus_asiakastiedot]'";
-					$vares = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($vares) == 1) {
-						$varow = mysql_fetch_array($vares);
-
-						echo " $varow[ytunnus] $varow[nimi]";
-
-						if ($varow["toim_ovttunnus"] != "") {
-							echo " / $varow[toim_ovttunnus] $varow[toim_nimi]";
+						if ($apurow[0] != "tunnus") {
+							$query = "SELECT distinct nimi from maat where koodi='$apurow[0]'";
+							$maare = mysql_query($query);
+							$maaro = mysql_fetch_array($maare);
+							$maa   = strtolower($maaro["nimi"]);
+							if ($maa=="") $maa = $apurow[0];
+							echo "<option value='$apurow[0]' $sel>".t($maa)."</option>";
 						}
-
-						echo "<input type='hidden' name='oletus_asiakastiedot' value='$krow[oletus_asiakastiedot]'>";
-
-					}
-					else {
-						echo " ".t("Asiakas ei löydy")."!";
 					}
 				}
-				else {
-					echo " ".t("Asiakastietoasiakasta ei ole syötetty")."!";
-				}
 
-				echo "</td></tr>";
+				if ($toim != 'extranet') {
+					echo "</select></td></tr>";
 
-			}
+					$sel9 = $sel3 = $sel2 = $sel1 = "";
 
-			$sel=array();
-			$sel[$krow["naytetaan_asiakashinta"]] = "SELECTED";
-
-			echo "<tr><th align='left'>".t("Näytetään asiakashinta tuotehaussa").":</th>
-					<td><select name='naytetaan_asiakashinta'>
-					<option value=''>".t("Näytetään tuotteen myyntihinta")."</option>
-					<option value='A' $sel[A]>".t("Näytetään asiakashinta")."</option>
-					</select></td></tr>";
-
-			$sel=array();
-			$sel[$krow["naytetaan_tuotteet"]] = "SELECTED";
-
-			echo "<tr><th align='left'>".t("Näytettävät tuotteet tuotehaussa").":</th>
-					<td><select name='naytetaan_tuotteet'>
-					<option value=''>".t("Näytetään kaikki tuotteet")."</option>
-					<option value='A' $sel[A]>".t("Näytetään tuotteet joilla on asiakashinta tai asiakasale")."</option>
-					</select></td></tr>";
-
-			$sel=array();
-			$sel[$krow["naytetaan_tilaukset"]] = "SELECTED";
-
-			echo "<tr><th align='left'>".t("Näytettävät tilaukset verkkokaupassa").":</th>
-					<td><select name='naytetaan_tilaukset'>
-					<option value=''>".t("Näytetään kaikki tilaukset")."</option>
-					<option value='O' $sel[O]>".t("Näytetään vain omat tilaukset")."</option>
-					</select></td></tr>";
-
-
-			if ($toim != 'extranet') {
-				echo "<tr><th align='left'>".t("Oletusohjelma").":</th><td><select name='oletus_ohjelma'>";
-				echo "<option value=''>".t("Ei oletusta")."</option>";
-
-				$query  = "SELECT distinct concat_ws('##',sovellus,nimi,alanimi) nimi, nimitys, sovellus FROM oikeu WHERE yhtio='$kukarow[yhtio]' and kuka='$krow[kuka]' ORDER by sovellus, nimitys";
-				$vares = mysql_query($query) or pupe_error($query);
-
-				while ($varow = mysql_fetch_array($vares)) {
-					$sel='';
-					if ($varow['nimi'] == $krow["oletus_ohjelma"]) $sel = 'selected';
-
-					echo "<option value='$varow[nimi]' $sel>".t($varow["sovellus"])." - ".t($varow["nimitys"])."</option>";
-				}
-				echo "</select></td></tr>";
-
-
-				$sel1 = $sel2 = $sel3 = "";
-
-				if ($krow['resoluutio'] == "N") {
-					$sel1 = "SELECTED";
-				}
-				if (!isset($krow["resoluutio"]) or $krow['resoluutio'] == "I") {
-					$sel2 = "SELECTED";
-				}
-				if ($krow['resoluutio'] == "P") {
-					$sel3 = "SELECTED";
-				}
-
-				echo "<tr><th align='left'>".t("Näytön koko").":</th>
-						<td><select name='resoluutio'>
-						<option value='P' $sel3>".t("Pieni")."</option>
-						<option value='N' $sel1>".t("Normaali")."</option>
-						<option value='I' $sel2>".t("Iso")."</option>
-						</select></td></tr>";
-
-				if ($krow['naytetaan_katteet_tilauksella'] == "") {
-					$sel1 = "SELECTED";
-					$sel2 = "";
-					$sel3 = "";
-				}
-				if ($krow['naytetaan_katteet_tilauksella'] == "Y") {
-					$sel1 = "";
-					$sel2 = "SELECTED";
-					$sel3 = "";
-				}
-				if ($krow['naytetaan_katteet_tilauksella'] == "N") {
-					$sel1 = "";
-					$sel2 = "";
-					$sel3 = "SELECTED";
-				}
-
-				echo "<tr><th align='left'>".t("Katteet näytetään tilauksentekovaiheessa").":</th>
-						<td><select name='naytetaan_katteet_tilauksella'>
-						<option value=''  $sel1>".t("Oletus")."</option>
-						<option value='Y' $sel2>".t("Kate näytetään")."</option>
-						<option value='N' $sel3>".t("Katetta ei näytetä")."</option>
-						</select></td></tr>";
-
-				echo "<tr><th align='left'>".t("Lomaoikeus").":</th>
-						<td><input type='text' name='lomaoikeus' size='3' value='$krow[lomaoikeus]'></td></tr>";
-
-				echo "<tr><th align='left'>".t("Asema").":</td>";
-				echo "<td><select name='asema'><option value=''>".t("Ei asemaa")."</option>";
-
-				$vares = t_avainsana("KUKAASEMA");
-
-				while ($varow = mysql_fetch_array($vares)) {
-					$sel='';
-					if ($varow['selite']==$krow["asema"]) $sel = 'selected';
-					echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
-				}
-
-				echo "</select></td></tr>";
-
-
-				echo "<tr><th align='left'>".t("Toimipaikka").":</td>";
-				echo "<td><select name='toimipaikka'><option value=''>".t("Oletustoimipaikka")."</option>";
-
-				$query  = "SELECT * FROM yhtion_toimipaikat WHERE yhtio='$kukarow[yhtio]' and vat_numero = '' order by nimi";
-				$vares = mysql_query($query) or pupe_error($query);
-
-				while ($varow = mysql_fetch_array($vares)) {
-					$sel='';
-					if ($varow['tunnus']==$krow["toimipaikka"]) $sel = 'selected';
-					echo "<option value='$varow[tunnus]' $sel>$varow[ovtlisa] $varow[nimi]</option>";
-				}
-
-				echo "</select></td></tr>";
-
-				//	Jos vain valitut henkilöt saa jyvitellä hintoja näytetään tämän valinta
-				if($yhtiorow["salli_jyvitys_myynnissa"] == "V") {
-
-					if ($krow['jyvitys'] == "") {
+					if ($krow["taso"] == "1") {
 						$sel1 = "SELECTED";
-						$sel2 = "";
 					}
-					else {
-						$sel1 = "";
+					if ($krow["taso"] == "2") {
+						$sel2 = "SELECTED";
+					}
+					if ($krow["taso"] == "3") {
+						$sel3 = "SELECTED";
+					}
+					if ($krow["taso"] == "9") {
+						$sel9 = "SELECTED";
+					}
+
+					echo "<tr><th align='left'>".t("Taso").":</th>";
+					echo "<td><select name='taso'>";
+					echo "<option value='9' $sel9>".t("Taso 9 Aloittelijahyväksyjä, tiliöintejä ei näytetä")."</option>";
+					echo "<option value='1' $sel1>".t("Taso 1 Perushyväksyjä, tiliöntejä ei voi muuttaa")."</option>";
+					echo "<option value='2' $sel2>".t("Taso 2 Tehohyväksyjä, tiliöntejä voi muuttaa")."</option>";
+					echo "<option value='3' $sel3>".t("Taso 3 Tehohyväksyjä, lukittujakin tiliöintejä voi muuttaa")."</option>";
+					echo "</select></td></tr>";
+				}
+				else {
+					$sel2 = $sel1 = "";
+
+					if ($krow["taso"] == "1") {
+						$sel1 = "SELECTED";
+					}
+					if ($krow["taso"] == "2") {
+						$sel2 = "SELECTED";
+					}
+					if ($krow["taso"] == "3") {
+						$sel3 = "SELECTED";
+					}
+					if ($krow["taso"] == "9") {
+						$sel9 = "SELECTED";
+					}
+					echo "<tr><th align='left'>".t("Taso").":</th>";
+
+					echo "<td><select name='taso'>";
+					echo "<option value='1' $sel1>".t("Taso 1 Tehotilaaja, tilaukset menee suoraan tomitukseen")."</option>";
+					echo "<option value='2' $sel2>".t("Taso 2 Aloittelijatilaaja, tilaukset hyväksytetään ennen toimitusta")."</option>";
+					echo "<option value='3' $sel3>".t("Taso 3 Tehotilaaja, tilaukset menee suoraan toimitukseen MAISTA RIIPPUMATTA")."</option>";
+					if ($kukarow['yhtio'] == 'artr') {
+						echo "<option value='9' $sel9>".t("Taso 9 Tehotilaaja, hyväksytyt työmääräykset tilataan automaattisesti")."</option>";
+					}
+					echo "</select></td></tr>";
+				}
+
+				$sel0 = $sel1 = $sel2 = "";
+
+				if (!isset($krow["hinnat"]) and $toim == 'extranet') {
+					$sel1 = "SELECTED";
+				}
+				if ($krow["hinnat"] == 0) {
+					$sel0 = "SELECTED";
+				}
+				if ($krow["hinnat"] == 1) {
+					$sel1 = "SELECTED";
+				}
+				if ($krow["hinnat"] == -1) {
+					$sel2 = "SELECTED";
+				}
+
+				echo "<tr><th align='left'>".t("Hinnat").":</th>";
+
+				echo "<td><select name='hinnat'>";
+				echo "<option value='0'  $sel0>".t("Normaali")."</option>";
+				echo "<option value='1'  $sel1>".t("Näytetään vain tuotteen myyntihinta")."</option>";
+				echo "<option value='-1' $sel2>".t("Hintoja ei näytetä")."</option>";
+				echo "</select></td></tr>";
+
+				if ($toim == 'extranet') {
+					$sel0 = $sel1 = $sel2 = $sel3 = "";
+
+					if (!isset($krow["saatavat"])) {
 						$sel2 = "SELECTED";
 					}
 
-					echo "<tr><th align='left'>".t("Jyvitys").":</td>";
-					echo "<td><select name='jyvitys'>
-							<option value='' $sel1>".t("Ei saa jyvittää myyntitilauksella")."</option>
-							<option value='X' $sel2>".t("Saa jyvittää myyntitilauksella")."</option>";
+					if ($krow["saatavat"] == "0") {
+						$sel0 = "SELECTED";
+					}
+					if ($krow["saatavat"] == "1") {
+						$sel1 = "SELECTED";
+					}
+					if ($krow["saatavat"] == "2") {
+						$sel2 = "SELECTED";
+					}
+					if ($krow["saatavat"] == "3") {
+						$sel3 = "SELECTED";
+					}
+
+					echo "<tr><th align='left'>".t("Saatavat").":</th>";
+
+					echo "<td><select name='saatavat'>";
+					echo "<option value='0' $sel0>".t("Näytetään saatavat, jätetään kesken jos maksamattomia laskuja")."</option>";
+					echo "<option value='1' $sel1>".t("Näytetään saatavat, siirretään aina tulostusjonoon")."</option>";
+					echo "<option value='2' $sel2>".t("Ei naytetä saatavia, jätetään kesken jos maksamattomia laskuja")."</option>";
+					echo "<option value='3' $sel3>".t("Ei naytetä saatavia, siirretään aina tulostusjonoon")."</option>";
 					echo "</select></td></tr>";
 				}
-			}
-			$andextra = "";
 
-			if ($krow['extranet'] == "") {
-				$sel1 = "SELECTED";
-				$sel2 = "";
-			}
-			if ($krow['extranet'] != "" or $toim == "extranet") {
-				$sel2 = "SELECTED";
-				$sel1 = "";
-				$andextra = " and profiili like 'extranet%' ";
-			}
+				if ($toim != 'extranet') {
+					echo "<tr><th align='left'>".t("Myyjänro").":</th><td><input type='text' name='myyja' value='$krow[myyja]' size='5'></td></tr>";
+					echo "<tr><th align='left'>".t("Kerääjänro").":</th><td><input type='text' name='keraajanro' value='$krow[keraajanro]' size='5'></td></tr>";
 
-			// Onko tämä extranetkäyttäjä
-			if ($toim == "extranet") {
-				echo "<input type='hidden' name='extranet' value='X'>";
-			}
-			else {
-				echo "<input type='hidden' name='extranet' value=''>";
-			}
+					echo "<tr><th align='left'>".t("Osasto").":</td>";
+					echo "<td><select name='osasto'><option value=''>".t("Ei osastoa")."</option>";
 
+					$vares = t_avainsana("HENKILO_OSASTO");
 
-			$query = "	SELECT distinct profiili
-						FROM oikeu
-						WHERE yhtio='$kukarow[yhtio]' and profiili!='' $andextra
-						ORDER BY profiili";
-			$pres = mysql_query($query) or pupe_error($query);
-
-			$profiilit = explode(',', $krow["profiilit"]);
-
-			echo "<tr><th valign='top'>".t("Profiilit").":</th><td>";
-
-			while ($prow = mysql_fetch_array($pres)) {
-
-				$chk = "";
-
-				if (count($profiilit) > 0) {
-					foreach($profiilit as $prof) {
-						if ($prow["profiili"] == $prof) {
-							$chk = "CHECKED";
-						}
+					while ($varow = mysql_fetch_array($vares)) {
+						$sel='';
+						if ($varow['selite']==$krow["osasto"]) $sel = 'selected';
+						echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
 					}
+
+					echo "</select></td></tr>";
 				}
 
-				echo "<input type='checkbox' name='profiili[]' value='$prow[profiili]' $chk> $prow[profiili]<br>";
-			}
-			echo "</td></tr>";
+				echo "<tr><th align='left'>".t("Valitse käyttäjän oletusvarasto").":</td>";
+				echo "<td>";
+
+				$query  = "	SELECT *
+							FROM varastopaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							order by tyyppi, nimitys";
+				$vares = mysql_query($query) or pupe_error($query);
+
+				echo "<select name='oletus_varasto'>";
+				echo "<option value='0'>",t("Oletusvarasto"),"</option>";
+				while ($varow = mysql_fetch_array($vares)) {
+					$sel = '';
+					if ($varow['tunnus'] == $krow['oletus_varasto']) {
+						$sel = 'selected';
+					}
+					echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
+				}
+				echo "</select>";
+
+				echo "<tr><th align='left'>".t("Valitse varastot, joista käyttäjä saa myydä").":</td>";
+				echo "<td>";
+
+				$query  = "	SELECT *
+							FROM varastopaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							order by tyyppi, nimitys";
+				$vares = mysql_query($query) or pupe_error($query);
+
+				$varastot_array = explode(",", $krow["varasto"]);
+
+				while ($varow = mysql_fetch_array($vares)) {
+					$sel = $eri = '';
+					if (in_array($varow['tunnus'], $varastot_array)) $sel = 'CHECKED';
+					if ($varow["tyyppi"] == "E") $eri = "(E)";
+					echo "<input type='checkbox' name='varasto[]' value='$varow[tunnus]' $sel> $varow[nimitys] $eri<br>";
+				}
+
+				echo "</td><td class='back'>",t("Ilman rajausta saa myydä kaikista normaalivarastoista"),"</td></tr>";
+
+				if ($toim != 'extranet' and $yhtiorow['pakkaamolokerot'] != '') {
+					echo "<tr><th align='left'>".t("Oletus pakkaamo").":</td>";
+					echo "<td><select name='oletus_pakkaamo'><option value=''>".t("Ei pakkaamoa")."</option>";
+
+					$query  = "SELECT distinct nimi FROM pakkaamo WHERE yhtio='$kukarow[yhtio]'";
+					$pakkaamores = mysql_query($query) or pupe_error($query);
+
+					while ($pakkaamorow = mysql_fetch_array($pakkaamores)) {
+						$sel='';
+						if ($pakkaamorow['nimi']==$krow["oletus_pakkaamo"]) $sel = 'selected';
+						echo "<option value='$pakkaamorow[nimi]' $sel>$pakkaamorow[nimi]</option>";
+					}
+
+					echo "</select></td></tr>";
+				}
 
 
-			if ($toim != 'extranet') {
+				if ($toim != 'extranet') {
+					echo "<tr><th align='left'>".t("Henkilökohtainen tulostin:")."</td>";
+					echo "<td><select name='kirjoitin'><option value=''>".t("Ei oletuskirjoitinta")."</option>";
 
-				$piirit = explode(',', $krow["piirit"]);
+					$query  = "SELECT tunnus, kirjoitin FROM kirjoittimet WHERE yhtio='$kukarow[yhtio]'";
+					$vares = mysql_query($query) or pupe_error($query);
 
-				echo "<tr><th valign='top'>".t("Valitse asiakaspiirit, joihin käyttäjä saa myydä").":</th><td>";
+					while ($varow = mysql_fetch_array($vares)) {
+						$sel='';
+						if ($varow['tunnus']==$krow["kirjoitin"]) $sel = 'selected';
+						echo "<option value='$varow[tunnus]' $sel>$varow[kirjoitin]</option>";
+					}
 
-				$pres = t_avainsana("PIIRI");
+					echo "</select></td></tr>";
+
+
+					echo "<tr><th align='left'>".t("Kassamyyjä").":</td>";
+					echo "<td><select name='kassamyyja'><option value=''>".t("Ei kassamyyjä")."</option>";
+
+					$query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]' ORDER BY nimi";
+					$vares = mysql_query($query) or pupe_error($query);
+
+					while ($varow = mysql_fetch_array($vares)) {
+						$sel='';
+						if ($varow['tunnus']==$krow["kassamyyja"]) $sel = 'selected';
+						echo "<option value='$varow[tunnus]' $sel>$varow[nimi]</option>";
+					}
+
+					echo "</select></td></tr>";
+
+					echo "<tr><th align='left'>".t("Dynaaminen kassamyyjä").":</td>";
+
+					$sel1="";
+					$sel2="";
+
+					if ($krow["dynaaminen_kassamyynti"] == "") {
+						$sel1 = "selected";
+					}
+					else {
+						$sel2 = "selected";
+					}
+					echo "<td><select name='dynaaminen_kassamyynti'>";
+					echo "<option value='' $sel1>".t("Normaalimyyjä ei toimi kassamyyjänä")."</option>";
+					echo "<option value='o' $sel2>".t("Normaalimyyjä voi toimia tarpeen mukaan kassamyyjänä")."</option>";
+					echo "</select></td>";
+
+					$sel0 = $sel1 = "";
+
+					if ($krow["saatavat"] == "0") {
+						$sel0 = "SELECTED";
+					}
+					if ($krow["saatavat"] == "1") {
+						$sel1 = "SELECTED";
+					}
+
+					echo "<tr><th align='left'>".t("Saatavat").":</th>";
+
+					echo "<td><select name='saatavat'>";
+					echo "<option value='0' $sel0>".t("Ei näytetä saatavia kassakäyttäjänä")."</option>";
+					echo "<option value='1' $sel1>".t("Näytetään saatavat kassakäyttäjänä")."</option>";
+					echo "</select></td></tr>";
+
+					echo "<tr><th align='left'>".t("Hyväksyjä").":</td>";
+
+					if ($krow["hyvaksyja"] != '') {
+						$chk = "CHECKED";
+					}
+					else {
+						$chk = "";
+					}
+					echo "<td><input type='checkbox' name='hyvaksyja' $chk></td></tr>";
+				}
+				else {
+					echo "<tr><th align='left'>".t("Tilaukset suoraan laskutukseen").":</td>";
+
+					if ($krow["hyvaksyja"] != '') {
+						$chk = "CHECKED";
+					}
+					else {
+						$chk = "";
+					}
+					echo "<td><input type='checkbox' name='hyvaksyja' $chk></td></tr>";
+				}
+
+				if ($selkuka != "UUSI") {
+
+					echo "<tr><th align='left'>".t("Oletusasiakas").":</th><td>";
+					echo "<input type='text' name='ytunnus'>";
+
+					if ($kumpi == "1" and $asiakasid != "") $krow["oletus_asiakas"] = $asiakasid;
+
+					if ($krow["oletus_asiakas"] != "") {
+
+						$query = "select * from asiakas where tunnus='$krow[oletus_asiakas]'";
+						$vares = mysql_query($query) or pupe_error($query);
+
+						if (mysql_num_rows($vares) == 1) {
+							$varow = mysql_fetch_array($vares);
+
+							echo " $varow[ytunnus] $varow[nimi]";
+
+							if ($varow["toim_ovttunnus"] != "") {
+								echo " / $varow[toim_ovttunnus] $varow[toim_nimi]";
+							}
+
+							echo "<input type='hidden' name='oletus_asiakas' value='$krow[oletus_asiakas]'>";
+						}
+						else {
+							echo " ".t("Asiakas ei löydy")."!";
+						}
+
+					}
+					else {
+						echo " ".t("Oletusasiakasta ei ole syötetty")."!";
+					}
+
+					echo "</td></tr>";
+
+					echo "<tr><th align='left'>".t("Oletusasiakastiedot").":</th><td>";
+					echo "<input type='text' name='ytunnus2'>";
+
+					if ($kumpi == "2" and $asiakasid != "") $krow["oletus_asiakastiedot"] = $asiakasid;
+
+					if ($krow["oletus_asiakastiedot"] != "") {
+
+						$query = "select * from asiakas where tunnus='$krow[oletus_asiakastiedot]'";
+						$vares = mysql_query($query) or pupe_error($query);
+
+						if (mysql_num_rows($vares) == 1) {
+							$varow = mysql_fetch_array($vares);
+
+							echo " $varow[ytunnus] $varow[nimi]";
+
+							if ($varow["toim_ovttunnus"] != "") {
+								echo " / $varow[toim_ovttunnus] $varow[toim_nimi]";
+							}
+
+							echo "<input type='hidden' name='oletus_asiakastiedot' value='$krow[oletus_asiakastiedot]'>";
+
+						}
+						else {
+							echo " ".t("Asiakas ei löydy")."!";
+						}
+					}
+					else {
+						echo " ".t("Asiakastietoasiakasta ei ole syötetty")."!";
+					}
+
+					echo "</td></tr>";
+
+				}
+
+				$sel=array();
+				$sel[$krow["naytetaan_asiakashinta"]] = "SELECTED";
+
+				echo "<tr><th align='left'>".t("Näytetään asiakashinta tuotehaussa").":</th>
+						<td><select name='naytetaan_asiakashinta'>
+						<option value=''>".t("Näytetään tuotteen myyntihinta")."</option>
+						<option value='A' $sel[A]>".t("Näytetään asiakashinta")."</option>
+						</select></td></tr>";
+
+				$sel=array();
+				$sel[$krow["naytetaan_tuotteet"]] = "SELECTED";
+
+				echo "<tr><th align='left'>".t("Näytettävät tuotteet tuotehaussa").":</th>
+						<td><select name='naytetaan_tuotteet'>
+						<option value=''>".t("Näytetään kaikki tuotteet")."</option>
+						<option value='A' $sel[A]>".t("Näytetään tuotteet joilla on asiakashinta tai asiakasale")."</option>
+						</select></td></tr>";
+
+				$sel=array();
+				$sel[$krow["naytetaan_tilaukset"]] = "SELECTED";
+
+				echo "<tr><th align='left'>".t("Näytettävät tilaukset verkkokaupassa").":</th>
+						<td><select name='naytetaan_tilaukset'>
+						<option value=''>".t("Näytetään kaikki tilaukset")."</option>
+						<option value='O' $sel[O]>".t("Näytetään vain omat tilaukset")."</option>
+						</select></td></tr>";
+
+
+				if ($toim != 'extranet') {
+					echo "<tr><th align='left'>".t("Oletusohjelma").":</th><td><select name='oletus_ohjelma'>";
+					echo "<option value=''>".t("Ei oletusta")."</option>";
+
+					$query  = "SELECT distinct concat_ws('##',sovellus,nimi,alanimi) nimi, nimitys, sovellus FROM oikeu WHERE yhtio='$kukarow[yhtio]' and kuka='$krow[kuka]' ORDER by sovellus, nimitys";
+					$vares = mysql_query($query) or pupe_error($query);
+
+					while ($varow = mysql_fetch_array($vares)) {
+						$sel='';
+						if ($varow['nimi'] == $krow["oletus_ohjelma"]) $sel = 'selected';
+
+						echo "<option value='$varow[nimi]' $sel>".t($varow["sovellus"])." - ".t($varow["nimitys"])."</option>";
+					}
+					echo "</select></td></tr>";
+
+
+					$sel1 = $sel2 = $sel3 = "";
+
+					if ($krow['resoluutio'] == "N") {
+						$sel1 = "SELECTED";
+					}
+					if (!isset($krow["resoluutio"]) or $krow['resoluutio'] == "I") {
+						$sel2 = "SELECTED";
+					}
+					if ($krow['resoluutio'] == "P") {
+						$sel3 = "SELECTED";
+					}
+
+					echo "<tr><th align='left'>".t("Näytön koko").":</th>
+							<td><select name='resoluutio'>
+							<option value='P' $sel3>".t("Pieni")."</option>
+							<option value='N' $sel1>".t("Normaali")."</option>
+							<option value='I' $sel2>".t("Iso")."</option>
+							</select></td></tr>";
+
+					if ($krow['naytetaan_katteet_tilauksella'] == "") {
+						$sel1 = "SELECTED";
+						$sel2 = "";
+						$sel3 = "";
+					}
+					if ($krow['naytetaan_katteet_tilauksella'] == "Y") {
+						$sel1 = "";
+						$sel2 = "SELECTED";
+						$sel3 = "";
+					}
+					if ($krow['naytetaan_katteet_tilauksella'] == "N") {
+						$sel1 = "";
+						$sel2 = "";
+						$sel3 = "SELECTED";
+					}
+
+					echo "<tr><th align='left'>".t("Katteet näytetään tilauksentekovaiheessa").":</th>
+							<td><select name='naytetaan_katteet_tilauksella'>
+							<option value=''  $sel1>".t("Oletus")."</option>
+							<option value='Y' $sel2>".t("Kate näytetään")."</option>
+							<option value='N' $sel3>".t("Katetta ei näytetä")."</option>
+							</select></td></tr>";
+
+					echo "<tr><th align='left'>".t("Lomaoikeus").":</th>
+							<td><input type='text' name='lomaoikeus' size='3' value='$krow[lomaoikeus]'></td></tr>";
+
+					echo "<tr><th align='left'>".t("Asema").":</td>";
+					echo "<td><select name='asema'><option value=''>".t("Ei asemaa")."</option>";
+
+					$vares = t_avainsana("KUKAASEMA");
+
+					while ($varow = mysql_fetch_array($vares)) {
+						$sel='';
+						if ($varow['selite']==$krow["asema"]) $sel = 'selected';
+						echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
+					}
+
+					echo "</select></td></tr>";
+
+
+					echo "<tr><th align='left'>".t("Toimipaikka").":</td>";
+					echo "<td><select name='toimipaikka'><option value=''>".t("Oletustoimipaikka")."</option>";
+
+					$query  = "SELECT * FROM yhtion_toimipaikat WHERE yhtio='$kukarow[yhtio]' and vat_numero = '' order by nimi";
+					$vares = mysql_query($query) or pupe_error($query);
+
+					while ($varow = mysql_fetch_array($vares)) {
+						$sel='';
+						if ($varow['tunnus']==$krow["toimipaikka"]) $sel = 'selected';
+						echo "<option value='$varow[tunnus]' $sel>$varow[ovtlisa] $varow[nimi]</option>";
+					}
+
+					echo "</select></td></tr>";
+
+					//	Jos vain valitut henkilöt saa jyvitellä hintoja näytetään tämän valinta
+					if($yhtiorow["salli_jyvitys_myynnissa"] == "V") {
+
+						if ($krow['jyvitys'] == "") {
+							$sel1 = "SELECTED";
+							$sel2 = "";
+						}
+						else {
+							$sel1 = "";
+							$sel2 = "SELECTED";
+						}
+
+						echo "<tr><th align='left'>".t("Jyvitys").":</td>";
+						echo "<td><select name='jyvitys'>
+								<option value='' $sel1>".t("Ei saa jyvittää myyntitilauksella")."</option>
+								<option value='X' $sel2>".t("Saa jyvittää myyntitilauksella")."</option>";
+						echo "</select></td></tr>";
+					}
+				}
+				$andextra = "";
+
+				if ($krow['extranet'] == "") {
+					$sel1 = "SELECTED";
+					$sel2 = "";
+				}
+				if ($krow['extranet'] != "" or $toim == "extranet") {
+					$sel2 = "SELECTED";
+					$sel1 = "";
+					$andextra = " and profiili like 'extranet%' ";
+				}
+
+				// Onko tämä extranetkäyttäjä
+				if ($toim == "extranet") {
+					echo "<input type='hidden' name='extranet' value='X'>";
+				}
+				else {
+					echo "<input type='hidden' name='extranet' value=''>";
+				}
+
+
+				$query = "	SELECT distinct profiili
+							FROM oikeu
+							WHERE yhtio='$kukarow[yhtio]' and profiili!='' $andextra
+							ORDER BY profiili";
+				$pres = mysql_query($query) or pupe_error($query);
+
+				$profiilit = explode(',', $krow["profiilit"]);
+
+				echo "<tr><th valign='top'>".t("Profiilit").":</th><td>";
 
 				while ($prow = mysql_fetch_array($pres)) {
 
 					$chk = "";
-					if(in_array($prow["selite"], $piirit)) {
-						$chk = "CHECKED";
+
+					if (count($profiilit) > 0) {
+						foreach($profiilit as $prof) {
+							if ($prow["profiili"] == $prof) {
+								$chk = "CHECKED";
+							}
+						}
 					}
 
-					echo "<input type='checkbox' name='piiri[]' value='$prow[selite]' $chk>$prow[selite] - $prow[selitetark]<br>";
+					echo "<input type='checkbox' name='profiili[]' value='$prow[profiili]' $chk> $prow[profiili]<br>";
 				}
-				echo "</td><td class='back'>".t("Ilman rajausta käyttäjä voi myydä kaikkiin piireihin")."</td></tr>";
-			}
+				echo "</td></tr>";
 
+
+				if ($toim != 'extranet') {
+
+					$piirit = explode(',', $krow["piirit"]);
+
+					echo "<tr><th valign='top'>".t("Valitse asiakaspiirit, joihin käyttäjä saa myydä").":</th><td>";
+
+					$pres = t_avainsana("PIIRI");
+
+					while ($prow = mysql_fetch_array($pres)) {
+
+						$chk = "";
+						if(in_array($prow["selite"], $piirit)) {
+							$chk = "CHECKED";
+						}
+
+						echo "<input type='checkbox' name='piiri[]' value='$prow[selite]' $chk>$prow[selite] - $prow[selitetark]<br>";
+					}
+					echo "</td><td class='back'>".t("Ilman rajausta käyttäjä voi myydä kaikkiin piireihin")."</td></tr>";
+				}
+			}
+			
 			echo "</table>";
 			echo "</td>";
 
@@ -1084,8 +1100,8 @@
 				echo "</tr>";
 				echo "</table>";
 			}
-
-			if ($selkuka == "UUSI") {
+			
+			if ($selkuka == "UUSI" or $selkuka == "KOPSAAUUSI") {
 				echo "<br><input type='submit' value='".t("Perusta uusi käyttäjä")."'></form>";
 			}
 			else {
@@ -1118,7 +1134,6 @@
 
 				echo "</td></tr></table>";
 			}
-			exit;
 		}
 	}
 
@@ -1176,7 +1191,12 @@
 		echo "<form action='$PHP_SELF' method='post'>
 				<input type='hidden' name='tee' value='MUUTA'>
 				<input type='hidden' name='selkuka' value='UUSI'>";
-		echo "<tr><th>".t("Perusta uusi käyttäjä").":</th><td></td><td><input type='submit' value='".t("Luo uusi käyttäjä")."'></td></tr>";
+		echo "<tr><th>".t("Perusta uusi käyttäjä").":</th><td></td><td><input type='submit' value='".t("Luo uusi käyttäjä")."'></td></tr></form>";
+		
+		echo "<form action='$PHP_SELF' method='post'>
+				<input type='hidden' name='tee' value='MUUTA'>
+				<input type='hidden' name='selkuka' value='KOPSAAUUSI'>";
+		echo "<tr><th>".t("Kopioi käyttäjä toisesta yrityksestä").":</th><td></td><td><input type='submit' value='".t("Luo uusi käyttäjä")."'></td></tr></form>";
 
 
 		echo "</table>";

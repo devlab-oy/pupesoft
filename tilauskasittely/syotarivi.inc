@@ -157,8 +157,8 @@
 				$nrospanni--;
 			}
 
-			echo "<tr>$jarjlisa<th colspan='$nrospanni' align='left'>".t("Rivikommentti").":</tg></tr>";
-			echo "<tr>$jarjlisa<td valign='top' colspan='$nrospanni'><textarea name='kommentti' cols='50' rows='2' wrap='soft'>$kommentti</textarea>";
+			echo "<tr>$jarjlisa<th colspan='$nrospanni' align='left'>".t("Rivikommentti").":</th></tr>";
+			echo "<tr>$jarjlisa<td valign='top' colspan='$nrospanni'><textarea name='kommentti' cols='50' rows='2' wrap='soft'>$kommentti</textarea></td></tr>";
 		}
 
 		if ($rivitunnus!='') {
@@ -578,7 +578,7 @@
 			</tr>";
 
 		echo "<tr>$jarjlisa<th colspan='2'>".t("Rivikommentti").":</th></tr>";
-		echo "<tr>$jarjlisa<td valign='top' class='back' colspan='2'><textarea name='kommentti' cols='30' rows='2' wrap='soft'>$kommentti</textarea>";
+		echo "<tr>$jarjlisa<td valign='top' colspan='2'><textarea name='kommentti' cols='30' rows='2' wrap='soft'>$kommentti</textarea>";
 		echo "</td></tr></table></form>";
 	}
 

@@ -925,6 +925,45 @@ if ($tee == "VALMIS" and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") and $k
 	}
 }
 
+if ($tee == 'PALAUTA_SIIVOTUT' and $kukarow['extranet'] != '') {
+	$query = "	SELECT tilausrivi.tuoteno, tilausrivi.tilkpl, tilausrivi.kommentti, tilausrivi.tunnus
+				FROM tilausrivi
+				JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.positio = 'Ei varaa saldoa')
+				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivi.otunnus = '$tilausnumero'
+				AND tilausrivi.tyyppi != 'D'";
+	$palauta_siivotut_res = mysql_query($query) or pupe_error($query);
+
+	while ($palauta_siivotut_row = mysql_fetch_assoc($palauta_siivotut_res)) {
+		$tuoteno_array[] = $palauta_siivotut_row['tuoteno'];
+		$kpl_array[$palauta_siivotut_row['tuoteno']] = $palauta_siivotut_row['tilkpl'];
+		$kommentti_array[$palauta_siivotut_row['tuoteno']] = $palauta_siivotut_row['kommentti'];
+
+		$query = "	UPDATE tilausrivi SET
+					tyyppi = 'D'
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND tunnus = '{$palauta_siivotut_row['tunnus']}'";
+		$palauta_res = mysql_query($query) or pupe_error($query);
+	}
+
+	$tee = '';
+}
+
+if ($tee == 'VALMIS' and $kukarow['extranet'] != '') {
+	$query = "	SELECT tilausrivi.varattu
+				FROM tilausrivi
+				JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.positio = 'Ei varaa saldoa')
+				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivi.otunnus = '$tilausnumero'
+				AND tilausrivi.tyyppi != 'D'";
+	$varattu_check_res = mysql_query($query) or pupe_error($query);
+	$varattu_nollana = false;
+	while ($varattu_check_row = mysql_fetch_assoc($varattu_check_res)) {
+		if ($varattu_check_row['varattu'] == 0) $varattu_nollana = true;
+	}
+	if ($varattu_nollana) $tee = '';
+}
+
 if ($tee == "VALMIS" and $kassamyyja_kesken == 'ei' and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kukarow['extranet'] == '' and $kateisohitus == "") {
 
 	if ($kertakassa == "") $kertakassa = $kukarow["kassamyyja"];
@@ -3466,6 +3505,9 @@ if ($tee == '') {
 		if ($toim == "TYOMAARAYS") {
 			$sorttauslisa = "tuotetyyppi, ";
 		}
+		elseif ($toim == 'EXTRANET') {
+			$sorttauslisa = "tilausrivin_lisatiedot.positio, ";
+		}
 		else {
 			if ($tilauksen_jarjestys == '0' or $tilauksen_jarjestys == '1' or $tilauksen_jarjestys == '4' or $tilauksen_jarjestys == '5') {
 				$sorttauslisa = "tilausrivi.perheid $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.perheid2 $yhtiorow[tilauksen_jarjestys_suunta],";
@@ -3490,6 +3532,7 @@ if ($tee == '') {
 		$query  = "	SELECT $sorttauskentta
 					FROM tilausrivi use index (yhtio_otunnus)
 					LEFT JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno)
+					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 					$tunnuslisa
 					and tilausrivi.tyyppi in ($tilrivity)
@@ -3583,7 +3626,7 @@ if ($tee == '') {
 			}
 			else {
 				// jos meillä on yhtiön myyntihinnoissa alvit mukana ja meillä on alvillinen tilaus, annetaan mahdollisuus switchata listaus alvittomaksi
-				if ($laskurow["alv"] != 0 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
+				if ($laskurow["alv"] != 0 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON" and $kukarow['extranet'] == '') {
 					echo "<tr>$jarjlisa<td class='back' colspan='10' nowrap>";
 					echo "<font class='head'>".t("Tilausrivit").":</font>";
 
@@ -3714,6 +3757,7 @@ if ($tee == '') {
 			}
 
 			$tuotetyyppi	= "";
+			$positio_varattu = "";
 			$varaosatyyppi	= "";
 			$vanhaid 		= "KALA";
 			$borderlask		= 0;
@@ -3739,6 +3783,28 @@ if ($tee == '') {
 					}
 					else {
 						$tuotekyslinkki = "";
+					}
+				}
+			}
+
+			if ($toim == 'EXTRANET' and $kukarow['extranet'] != '') {
+				$query = "	SELECT extranet_tilaus_varaa_saldoa
+							FROM asiakas
+							WHERE yhtio = '{$kukarow['yhtio']}'
+							AND tunnus = '{$laskurow['liitostunnus']}'";
+				$ext_tilaus_var_chk = mysql_query($query) or pupe_error($query);
+				$ext_tilaus_var_row = mysql_fetch_assoc($ext_tilaus_var_chk);
+
+				$ei_saldoa_varausaika = '';
+
+				if ($ext_tilaus_var_row['extranet_tilaus_varaa_saldoa'] != 'X') {
+					if ($ext_tilaus_var_row['extranet_tilaus_varaa_saldoa'] == '') {
+						if ($yhtiorow['extranet_tilaus_varaa_saldoa'] != '') {
+							$ei_saldoa_varausaika = $yhtiorow['extranet_tilaus_varaa_saldoa'];
+						}
+					}
+					else {
+						$ei_saldoa_varausaika = $ext_tilaus_var_row['extranet_tilaus_varaa_saldoa'];
 					}
 				}
 			}
@@ -3770,6 +3836,21 @@ if ($tee == '') {
 
 						echo "<tr>$jarjlisa<td class='back' colspan='10'><br></td></tr>";
 						echo "<tr>$jarjlisa<td class='back' colspan='10'><font class='head'>".t("Työt")."</font>:</td></tr>";
+					}
+				}
+				elseif ($toim == 'EXTRANET' and $kukarow['extranet'] != '') {
+					if ($positio_varattu == '' and $row['positio'] == 'Ei varaa saldoa') {
+						$positio_varattu = 1;
+
+						echo "<tr>$jarjlisa<td class='back' colspan='10'><br></td></tr>";
+						echo "<tr>$jarjlisa<td class='back' colspan='10'><font class='head'>",t("Umpeutuneet tilausrivit"),"</font>:</td></tr>";
+						echo "<tr>$jarjlisa<td class='back' colspan='10'><font class='message'>",t("Pahoittelumme! Alla olevien tilausrivien varausajat ovat umpeutuneet");
+
+						if ($ei_saldoa_varausaika != '') {
+							echo " (",t("varausaika")," $ei_saldoa_varausaika ",t("tuntia"),")";
+						}
+
+						echo "</font></td></tr>";
 					}
 				}
 
@@ -4422,7 +4503,7 @@ if ($tee == '') {
 							$kpl_ruudulle = ($row['jt']+$row['varattu']) * 1;
 						}
 					}
-					elseif ($row["var"] == 'P') {
+					elseif ($row["var"] == 'P' or ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa')) {
 						$kpl_ruudulle = $row['tilkpl'] * 1;
 					}
 					else {
@@ -4990,7 +5071,7 @@ if ($tee == '') {
 					}
 
 
-					if ($kukarow["resoluutio"] == "I") {
+					if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
 						$cspan++;
 					}
 					if ($trivityyulos != "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
@@ -5256,7 +5337,7 @@ if ($tee == '') {
 				if ($jarjlisa != "") {
 					$ycspan--;
 				}
-				if ($kukarow["resoluutio"] == "I") {
+				if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
 					$ycspan++;
 				}
 				if ($trivityyulos != "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {
@@ -5919,6 +6000,36 @@ if ($tee == '') {
 			echo "<font class='error'>".t("VIRHE: Tilaukselta puuttuu sarjanumeroita!")."</font>";
 		}
 
+		if ($kukarow['extranet'] != '' and $laskurow["liitostunnus"] > 0 and $tilausok != 0 and $rivilaskuri > 0) {
+			$query = "	SELECT tilausrivi.varattu
+						FROM tilausrivi
+						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.positio = 'Ei varaa saldoa')
+						WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+						AND tilausrivi.otunnus = '$tilausnumero'";
+			$varattu_check_res = mysql_query($query) or pupe_error($query);
+
+			$varattu_nollana = false;
+
+			while ($varattu_check_row = mysql_fetch_assoc($varattu_check_res)) {
+				if ($varattu_check_row['varattu'] == 0) $varattu_nollana = true;
+			}
+
+			if ($varattu_nollana) {
+				echo "<td class='back' valign='top'>";
+				echo "
+					<form action='$PHP_SELF' method='post'>
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+					<input type='hidden' name='tee' value='PALAUTA_SIIVOTUT'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='hidden' name='takaisin' value = '$takaisin'>";
+				echo "<input type='submit' value='",t("Palauta tilaukselle"),"'>";
+				echo "</form>";
+				echo "</td>";
+			}
+			
+		}
 
 		//	Projekti voidaan poistaa vain jos meillä ei ole sillä mitään toimituksia
 		if ($laskurow["tunnusnippu"] > 0 and $toim == "PROJEKTI") {

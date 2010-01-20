@@ -2189,6 +2189,7 @@
 		$ulos .= "<option value = '12' $sel[12]>".t("Iltasiivo mitätöi 12 tuntia vanhoja kesken olevia extranet-tilauksia")."</option>";
 		$ulos .= "<option value = '24' $sel[24]>".t("Iltasiivo mitätöi 1 päivän vanhoja kesken olevia extranet-tilauksia")."</option>";
 		$ulos .= "<option value = '48' $sel[48]>".t("Iltasiivo mitätöi 2 päivää vanhoja kesken olevia extranet-tilauksia")."</option>";
+		$ulos .= "<option value = '168' $sel[168]>".t("Iltasiivo mitätöi 7 päivää vanhoja kesken olevia extranet-tilauksia")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

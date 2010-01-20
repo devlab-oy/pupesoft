@@ -359,7 +359,7 @@
 		// Etsit‰‰n muutettavaa tilausta
 		if ($toim == 'HYPER') {
 
-			$query = "	SELECT lasku.tunnus tilaus, concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas, lasku.luontiaika, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija, ";
+			$query = "	SELECT lasku.tunnus tilaus, concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, ";
 
 			if ($kukarow['hinnat'] == 0) $query .= " round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo, round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa, ";
 
@@ -415,7 +415,7 @@
 		}
 		elseif ($toim == 'SUPER') {
 
-			$query = "	SELECT lasku.tunnus tilaus, concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas, lasku.luontiaika, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija, ";
+			$query = "	SELECT lasku.tunnus tilaus, concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, ";
 
 			if ($kukarow['hinnat'] == 0) $query .= " round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo, round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa, ";
 
@@ -711,7 +711,7 @@
 
 			$query = "	SELECT lasku.tunnus tilaus,
 						concat_ws('<br>', lasku.ytunnus, lasku.nimi, if (lasku.tilausyhteyshenkilo='', NULL, lasku.tilausyhteyshenkilo), if (lasku.viesti='', NULL, lasku.viesti), concat_ws(' ', ifnull((SELECT selitetark_2 FROM avainsana WHERE avainsana.yhtio=tyomaarays.yhtio and avainsana.laji = 'sarjanumeron_li' and avainsana.selite = 'MERKKI' and avainsana.selitetark=tyomaarays.merkki LIMIT 1), tyomaarays.merkki), tyomaarays.mallivari)) asiakas, lasku.luontiaika,
-						if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija, $toimaikalisa alatila, lasku.tila, lasku.tunnus, lasku.tilaustyyppi
+						if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa alatila, lasku.tila, lasku.tunnus, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
@@ -763,7 +763,7 @@
 			$query = "	SELECT lasku.tunnus tilaus,
 						concat_ws('<br>',lasku.nimi,lasku.tilausyhteyshenkilo,lasku.viesti, concat_ws(' ', ifnull((SELECT selitetark_2 FROM avainsana WHERE avainsana.yhtio=tyomaarays.yhtio and avainsana.laji = 'sarjanumeron_li' and avainsana.selite = 'MERKKI' and avainsana.selitetark=tyomaarays.merkki LIMIT 1), tyomaarays.merkki), tyomaarays.mallivari)) asiakas,
 						lasku.ytunnus, lasku.luontiaika,
-						if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija, $toimaikalisa alatila, lasku.tila, lasku.tunnus
+						if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa alatila, lasku.tila, lasku.tunnus
 						FROM lasku use index (tila_index)
 						LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
@@ -778,7 +778,7 @@
 			$query = "	SELECT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas, $seuranta $kohde concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
 						if(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, interval $yhtiorow[tarjouksen_voimaika] day)) >= now(), '<font class=\"green\">Voimassa</font>', '<font class=\"red\">Er‰‰ntynyt</font>') voimassa,
 						DATEDIFF(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, INTERVAL $yhtiorow[tarjouksen_voimaika] day)), now()) pva,
-						if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija,
+						if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
 						$toimaikalisa alatila, tila, lasku.tunnus, tunnusnippu, lasku.liitostunnus
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
@@ -809,7 +809,7 @@
 			$query = "	SELECT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas, $seuranta $kohde concat_ws('<br>', lasku.luontiaika, lasku.muutospvm) Pvm,
 						if(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, interval $yhtiorow[tarjouksen_voimaika] day)) >= now(), '<font class=\"green\">Voimassa</font>', '<font class=\"red\">Er‰‰ntynyt</font>') voimassa,
 						DATEDIFF(if(lasku.olmapvm != '0000-00-00', lasku.olmapvm, date_add(lasku.muutospvm, INTERVAL $yhtiorow[tarjouksen_voimaika] day)), now()) pva,
-						if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija,
+						if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
 						$toimaikalisa alatila, tila, lasku.tunnus, tunnusnippu
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
@@ -982,10 +982,12 @@
 			$miinus = 5;
 		}
 		else {
-			$query = "	SELECT lasku.tunnus tilaus, concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas, lasku.luontiaika, kuka.nimi laatija,
-						$seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka.extranet extra, lasku.mapvm, lasku.tilaustyyppi
+			$query = "	SELECT lasku.tunnus tilaus, concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas, lasku.luontiaika, 
+						if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
+						$seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka1.extranet extra, lasku.mapvm, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
-						LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
+						LEFT JOIN kuka as kuka1 ON (kuka1.yhtio=lasku.yhtio and kuka1.kuka=lasku.laatija)
+						LEFT JOIN kuka as kuka2 ON (kuka2.yhtio=lasku.yhtio and kuka2.tunnus=lasku.myyja)
 						$seurantalisa
 						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]'

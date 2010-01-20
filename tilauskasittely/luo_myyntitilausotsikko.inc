@@ -232,8 +232,13 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 		$override_ytunnus_check = "YES";
 
 		require ("otsik.inc");
-
-		return $tilausnumero;
+		
+		if ($session == "") {
+			return $id;
+		}
+		else {
+			return $tilausnumero;
+		}
 	}
 }
 

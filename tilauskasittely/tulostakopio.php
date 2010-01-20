@@ -1527,7 +1527,10 @@
 				}
 
 				if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
-					$naytatvale = "2";
+					$naytatvale = 2;
+				}
+				elseif (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
+					$naytatvale = 5; // jos mellä on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
 				}
 				elseif (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {
 					$naytatvale = 4; // jos mellä on tilausvahvistuksessa nelonen, ei haluta nähdä alennuksia, näytetään tilausrivin hinta ja rivihinta
@@ -1799,6 +1802,7 @@
 				$asrow = mysql_fetch_assoc($result);
 
 				$lahetetyyppi = "";
+				
 				if ($sellahetetyyppi != '') {
 					$lahetetyyppi = $sellahetetyyppi;
 				}
@@ -1904,7 +1908,7 @@
 
 					$kal = 1;
 
-					foreach($rivinumerot as $rivino) {
+					foreach ($rivinumerot as $rivino) {
 						$rivinumerot[$rivino] = $kal;
 						$kal++;
 					}
@@ -1931,6 +1935,54 @@
 					while ($row = mysql_fetch_assoc($riresult)) {
 						rivi_lahete($page[$sivu], $lah_tyyppi);
 						$total+= $row["rivihinta"];
+					}
+					
+					// Haetaan vielä jälkkärissä olevat tuotteet EI VIELÄ KÄYTÖSSÄ
+					if (1 == 2 and $laskurow["clearing"] == "JT-TILAUS") {
+						$query = "  SELECT group_concat(distinct vanha_otunnus) alkuptilaukset
+									FROM tilausrivi
+									JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+									WHERE tilausrivi.otunnus = '$otunnus'
+									and tilausrivi.yhtio = '$kukarow[yhtio]'
+									$tyyppilisa";
+						$rires = mysql_query($query) or pupe_error($query);
+						$rirow = mysql_fetch_assoc($rires);
+						
+						//generoidaan lähetteelle ja keräyslistalle rivinumerot
+						if ($rirow["alkuptilaukset"] != "") {
+							$query = "  SELECT tilausrivi.*,
+										round(if (tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
+										round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if (tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
+										$sorttauskentta,
+										if (tilausrivi.var='J', 1, 0) jtsort,
+										tilausrivin_lisatiedot.vanha_otunnus
+										FROM tilausrivi
+										JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+										JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+										LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+										WHERE tilausrivi.otunnus in ($rirow[alkuptilaukset])
+										and tilausrivi.yhtio = '$kukarow[yhtio]'
+										and tilausrivi.varattu + tilausrivi.jt != 0
+										and tilausrivi.var = 'J'
+										and tilausrivi.toimitettu = ''
+										$tyyppilisa
+										and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
+										ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+							$riresult = mysql_query($query) or pupe_error($query);
+
+							while ($row = mysql_fetch_assoc($riresult)) {
+
+								$row['kommentti'] .= "\n******* ".t("Tilaukselta", $kieli).": $row[vanha_otunnus] ".t("vielä jälkitoimituksessa", $kieli).". *******";
+
+								$row['rivihinta'] 	= "";
+								$row['varattu'] 	= "";
+								$row['kpl']			= "";
+								$row['jt'] 			= "";
+								$row['d_erikseen'] 	= "JOO";
+
+								rivi_lahete($page[$sivu], $lah_tyyppi);
+							}
+						}
 					}
 
 					//Haetaan erikseen toimitettavat tuotteet
@@ -1964,10 +2016,10 @@
 							while ($row = mysql_fetch_assoc($riresult)) {
 
 								if ($row['toimitettu'] == '') {
-									$row['kommentti'] .= "\n*******".t("Toimitetaan erikseen",$kieli).".*******";
+									$row['kommentti'] .= "\n******* ".t("Toimitetaan erikseen",$kieli).". *******";
 								}
 								else {
-									$row['kommentti'] .= "\n*******".t("Toimitettu erikseen tilauksella",$kieli)." ".$row['otunnus'].".*******";
+									$row['kommentti'] .= "\n******* ".t("Toimitettu erikseen tilauksella",$kieli)." ".$row['otunnus'].". *******";
 								}
 
 								$row['rivihinta'] 	= "";

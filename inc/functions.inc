@@ -4213,12 +4213,12 @@ if (!function_exists("ostolaskun_vienti")) {
 }
 
 if (!function_exists("verkkolasku_luo_keikkafile")) {
-	function verkkolasku_luo_keikkafile ($tunnus, $trow, $tuoteno) {
+	function verkkolasku_luo_keikkafile ($tunnus, $trow, $rtuoteno) {
 		global $yhtiorow, $kukarow;	
 		
 		// Tarvitaan $tunnus jossa on ostoreskontralaskun tunnus
 		// Tarvitaan $trow jossa on toimittajan tiedot
-		// Tarvitaan $tuoteno jossa on array kaikista ostoreskontralaskun tuotteista
+		// Tarvitaan $rtuoteno jossa on array kaikista ostoreskontralaskun tuotteista
 		
 		require("inc/verkkolasku-in-luo-keikkafile.inc");
 	}
@@ -7357,7 +7357,10 @@ if (!function_exists("laheta_tilausvahvistus")) {
 		global $asrow, $boldi, $iso, $jtid, $kala, $kala, $kateinen, $kateistyyppi, $kieli, $kukarow, $kukarow, $lahetetyyppi, $laskurow, $norm, $p, $page, $page, $pdf, $perheid, $pieni, $pieni_boldi, $rectparam, $returnvalue, $rivinkorkeus, $rivinkorkeus, $rivinumerot, $row, $sivu, $summa, $tee, $toim, $useita, $viite, $yhtiorow, $yhtiorow, $futurtilvahhost, $futurtilvahuser, $futurtilvahpass, $tilvahhost, $tilvahuser, $tilvahpass, $tilvahpath, $faxhost, $faxuser, $faxpass, $faxpath;
 
 		// LÄHETETÄÄN TILAUSVAHVISTUS
-		if (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {
+		if (strpos($laskurow['tilausvahvistus'], '5') !== FALSE) {
+			$naytatvale = 5; // jos mellä on tilausvahvistuksessa vitonen, niin haetaan hinnat toisesta pupesta
+		}
+		elseif (strpos($laskurow['tilausvahvistus'], '4') !== FALSE) {
 			$naytatvale = 4; // jos mellä on tilausvahvistuksessa nelonen, ei haluta nähdä alennuksia, näytetään tilausrivin hinta ja rivihinta
 		}
 		elseif (strpos($laskurow['tilausvahvistus'], '3') !== FALSE) {

@@ -46,7 +46,7 @@ if (!function_exists('finvoice_otsik')) {
 		}
 
 		//	Aloitellaan aineiston luontia
-		if ($senderpartyid != "" and $senderintermediator != "" and $tulostuspalvelu != "") {
+		if (($senderpartyid != "" and $senderintermediator != "" and $tulostuspalvelu != "") or $lasrow["chn"] == "112") {
 
 			list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
 
@@ -55,7 +55,7 @@ if (!function_exists('finvoice_otsik')) {
 				$receiverpartyid 		= $tulostuspalvelu;
 				$receiverintermediator 	= $senderintermediator;
 
-				if ($lasrow["chn"] != "100" and $silent == "") {
+				if ($lasrow["chn"] != "100" and $lasrow["chn"] != "112" and $silent == "") {
 					$tulos_ulos .= "<font class='error'>".t("Asiakkaalta puuttuu verkkotunnus, lasku menee tulostuspalveluun.")." $lasrow[nimi] $lasrow[laskunro]</font><br>\r\n<br>\r\n";
 				}
 			}

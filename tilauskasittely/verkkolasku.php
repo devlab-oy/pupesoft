@@ -24,12 +24,12 @@
 	if (isset($argv[1]) and trim($argv[1]) != '') {
 
 		if ($argc == 0) die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
-		
+
 		// otetaan includepath aina rootista
 		ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
 		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 		ini_set("display_errors", 0);
-		
+
 		// otetaan tietokanta connect (HUOM: ../ koska komentorivill‰ puperoot ei v‰ltt‰m‰tt‰ ole include pathissa)
 		require("inc/connect.inc");
 		require("inc/functions.inc");
@@ -200,29 +200,25 @@
 						$repl = array("&amp;", "&gt;", "&lt;", "&apos;", "&quot;", " ", " ");
 						$tieto = str_replace($serc, $repl, $tieto);
 
-						$ulos .= $tieto;
-
+						$ulos .= trim($tieto);
 					}
 
 					$pos = strpos($joukko, " ");
-		            if ($pos === false) {
-						//	Jos tehd‰‰n finvoicea rivilopu on \r\n
-						if ($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
-							$ulos .= "</$joukko>\r\n";
-						}
-						else {
-							$ulos .= "</$joukko>\n";
-						}
 
+					if ($pos === FALSE) {
+						$ulos .= "</$joukko>";
 		            }
 		            else {
-						if ($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
-							$ulos .= "</".substr($joukko,0,$pos).">\r\n";
-						}
-						else {
-							$ulos .= "</".substr($joukko,0,$pos).">\n";
-						}
+						$ulos .= "</".substr($joukko,0,$pos).">";
 		            }
+
+					if ($lasrow["chn"] == "112" or $yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
+						//	Jos tehd‰‰n finvoicea rivinvaihto on \r\n
+						$ulos .= "\r\n";
+					}
+					else {
+						$ulos .= "\n";
+					}
 
 					fputs($handle, $ulos);
 				}
@@ -246,18 +242,18 @@
 			if (!function_exists("pp")) {
 				function pp ($muuttuja, $round="", $rmax="", $rmin="") {
 
-					if(strlen($round)>0) {
-						if(strlen($rmax)>0 and $rmax<$round) {
+					if (strlen($round)>0) {
+						if (strlen($rmax)>0 and $rmax<$round) {
 							$round = $rmax;
 						}
-						if(strlen($rmin)>0 and $rmin>$round) {
+						if (strlen($rmin)>0 and $rmin>$round) {
 							$round = $rmin;
 						}
 
 						return $muuttuja = number_format($muuttuja, $round, ",", "");
 					}
 					else {
-						return $muuttuja = str_replace(".",",",$muuttuja);
+						return $muuttuja = str_replace(".",",", $muuttuja);
 					}
 				}
 			}
@@ -267,21 +263,20 @@
 			//Tiedostojen polut ja nimet
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 			$nimixml = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
-			$nimi_filexml = "laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
 
 			//	Itellan iPost vaatii siirtoon v‰h‰n oman nimen..
-			if($yhtiorow["verkkolasku_lah"] == "iPost") {
-				$nimifinvoice = "../dataout/TRANSFER_IPOST-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
-				$nimi_filefinvoice = "TRANSFER_IPOST-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
-				$nimi_filefinvoice_siirto_valmis = "DELIVERED_IPOST-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+			if ($yhtiorow["verkkolasku_lah"] == "iPost") {
+				$nimiipost = "-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+				$nimifinvoice = "../dataout/TRANSFER_IPOST".$nimiipost;
+				$nimifinvoice_delivered = "DELIVERED_IPOST".$nimiipost;
 			}
 			else {
 				$nimifinvoice = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
-				$nimi_filefinvoice = "laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
 			}
-
+			
+			$nimisisainenfinvoice = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_sisainenfinvoice.xml";
+			
 			$nimiedi = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".edi";
-			$nimi_fileedi = "laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".edi";
 
 			//Pupevoice xml-dataa
 			if (!$tootxml = fopen($nimixml, "w")) die("Filen $nimixml luonti ep‰onnistui!");
@@ -291,6 +286,9 @@
 
 			//Elma-EDI-inhouse dataa (EIH-1.4.0)
 			if (!$tootedi = fopen($nimiedi, "w")) die("Filen $nimiedi luonti ep‰onnistui!");
+			
+			//Sis‰inenfinvoice xml-dataa
+			if (!$tootsisainenfinvoice = fopen($nimisisainenfinvoice, "w")) die("Filen $nimisisainenfinvoice luonti ep‰onnistui!");
 
 			// lock tables
 			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, tilausrivin_lisatiedot as tl2 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ";
@@ -344,7 +342,7 @@
 					$lisavarattu = "";
 				}
 
-				$query = "	SELECT sum(if(tilausrivi.var in ('J','S') and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet
+				$query = "	SELECT sum(if (tilausrivi.var in ('J','S') and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet
 							FROM tilausrivi
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.otunnus = '$laskurow[tunnus]'
@@ -531,7 +529,7 @@
 
 						// ollaan tekem‰ss‰ myynti‰
 						if ($tunken == "myyntirivitunnus") {
-							$query = "	SELECT sum(if(ifnull(tilausrivi.rivihinta, 0) = 0, 1, 0)) ei_ostohintaa
+							$query = "	SELECT sum(if (ifnull(tilausrivi.rivihinta, 0) = 0, 1, 0)) ei_ostohintaa
 										FROM sarjanumeroseuranta
 										LEFT JOIN tilausrivi use index (PRIMARY) ON (tilausrivi.yhtio = sarjanumeroseuranta.yhtio and tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus)
 										WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
@@ -937,7 +935,7 @@
 						if (mysql_num_rows($otsre) == 1 and mysql_num_rows($rhire) == 1 and $aslisakulrow['lisakulu'] == '') {
 							// lasketaan laskun loppusumma (HUOM ei tarvitse huomioida veroa!)
 							$query = "	SELECT sum(tilausrivi.hinta * (tilausrivi.varattu + tilausrivi.jt) *
-													if(tilausrivi.netto = 'N', (1 - tilausrivi.ale / 100), (1 - (tilausrivi.ale + lasku.erikoisale - (tilausrivi.ale * lasku.erikoisale / 100)) / 100))
+													if (tilausrivi.netto = 'N', (1 - tilausrivi.ale / 100), (1 - (tilausrivi.ale + lasku.erikoisale - (tilausrivi.ale * lasku.erikoisale / 100)) / 100))
 												) laskun_loppusumma
 										FROM tilausrivi
 										JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
@@ -1123,7 +1121,7 @@
 
 						$seviite = "";
 
-						if(mysql_num_rows($pankres) > 0) {
+						if (mysql_num_rows($pankres) > 0) {
 							$seviite = "SE";
 						}
 
@@ -1353,15 +1351,17 @@
 							$myyresult = mysql_query($mquery) or pupe_error($mquery);
 							$myyrow = mysql_fetch_array($myyresult);
 
-							if ($lasrow['chn'] == '') {
+							//HUOM: T‰ss‰ kaikki sallitut verkkopuolen chn:‰t
+							if (!in_array($lasrow['chn'], array("100", "010", "001", "020", "111", "112"))) {
 								//Paperi by default
 								$lasrow['chn'] = "100";
 							}
+
 							if ($lasrow['chn'] == "020") {
 								$lasrow['chn'] = "010";
 							}
 
-							if ($lasrow['arvo']>=0) {
+							 if ($lasrow['arvo'] >= 0) {
 								//Veloituslasku
 								$tyyppi='380';
 							}
@@ -1434,7 +1434,10 @@
 							if ($lasrow["chn"] == "111") {
 								elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow);
 							}
-							elseif($yhtiorow["verkkolasku_lah"] != "") {
+							elseif ($lasrow["chn"] == "112") {
+								finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
+							}
+							elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
 								finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
 							}
 							else {
@@ -1454,7 +1457,7 @@
 
 								if ($alvrow1["alv"] >= 500) {
 									$aquery = "	SELECT tilausrivi.alv,
-												round(sum(tilausrivi.rivihinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta,
+												round(sum(tilausrivi.rivihinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta,
 												round(sum(0),2) alvrivihinta
 												FROM tilausrivi
 												JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
@@ -1463,8 +1466,8 @@
 								}
 								else {
 									$aquery = "	SELECT tilausrivi.alv,
-												round(sum(tilausrivi.rivihinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta,
-												round(sum((tilausrivi.rivihinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1))*(tilausrivi.alv/100)),2) alvrivihinta
+												round(sum(tilausrivi.rivihinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta,
+												round(sum((tilausrivi.rivihinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1))*(tilausrivi.alv/100)),2) alvrivihinta
 												FROM tilausrivi
 												JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
 												WHERE tilausrivi.uusiotunnus = '$lasrow[tunnus]' and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.alv = '$alvrow1[alv]' and tilausrivi.tyyppi = 'L'
@@ -1477,7 +1480,10 @@
 								if ($lasrow["chn"] == "111") {
 									elmaedi_alvierittely($tootedi, $alvrow);
 								}
-								elseif($yhtiorow["verkkolasku_lah"] != "") {
+								elseif ($lasrow["chn"] == "112") {
+									finvoice_alvierittely($tootsisainenfinvoice, $lasrow, $alvrow);
+								}
+								elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
 									finvoice_alvierittely($tootfinvoice, $lasrow, $alvrow);
 								}
 								else {
@@ -1489,7 +1495,10 @@
 							if ($lasrow["chn"] == "111") {
 								elmaedi_otsikko_loput($tootedi, $lasrow);
 							}
-							elseif($yhtiorow["verkkolasku_lah"] != "") {
+							elseif ($lasrow["chn"] == "112") {
+								finvoice_otsikko_loput($tootsisainenfinvoice, $lasrow, $masrow);
+							}
+							elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
 								finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow);
 							}
 
@@ -1515,8 +1524,8 @@
 
 							// Kirjoitetaan rivitietoja tilausriveilt‰
 							$query = "	SELECT tilausrivi.*, lasku.vienti_kurssi,
-										if(date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d')) toimitettuaika,
-										if(tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika) toimaika,
+										if (date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d')) toimitettuaika,
+										if (tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika) toimaika,
 										$sorttauskentta
 										FROM tilausrivi
 										JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
@@ -1604,7 +1613,10 @@
 
 									elmaedi_rivi($tootedi, $tilrow, $rivinumero);
 								}
-								elseif($yhtiorow["verkkolasku_lah"] != "") {
+								elseif ($lasrow["chn"] == "112") {
+									finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $totalvat);
+								}
+								elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
 									finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat);
 								}
 								else {
@@ -1618,7 +1630,10 @@
 
 								$edilask++;
 							}
-							elseif ($yhtiorow["verkkolasku_lah"] != "") {
+							elseif ($lasrow["chn"] == "112") {
+								finvoice_lasku_loppu($tootsisainenfinvoice, $lasrow, $pankkitiedot, $masrow);
+							}
+							elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
 								finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow);
 							}
 							else {
@@ -1671,7 +1686,7 @@
 							$tulostettavat[] = $lasrow["laskunro"];
 							$lask++;
 						}
-						elseif($silent == "") {
+						elseif ($silent == "") {
 							$tulos_ulos .= "\n".t("Nollasummaista laskua ei l‰hetetty")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
 						}
 
@@ -1698,16 +1713,20 @@
 			fclose($tootxml);
 			fclose($tootedi);
 			fclose($tootfinvoice);
+			fclose($tootsisainenfinvoice);
 
 			//dellataan failit jos ne on tyhji‰
-			if(filesize($nimixml) == 0) {
+			if (filesize($nimixml) == 0) {
 				unlink($nimixml);
 			}
-			if(filesize($nimifinvoice) == 0) {
+			if (filesize($nimifinvoice) == 0) {
 				unlink($nimifinvoice);
 			}
-			if(filesize($nimiedi) == 0) {
+			if (filesize($nimiedi) == 0) {
 				unlink($nimiedi);
+			}
+			if (filesize($nimisisainenfinvoice) == 0) {
+				unlink($nimisisainenfinvoice);
 			}
 
 			// poistetaan lukot
@@ -1744,7 +1763,7 @@
 						$tulos_ulos .= $tulos_ulos_ftp;
 					}
 				}
-				elseif($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {
+				elseif ($yhtiorow["verkkolasku_lah"] == "iPost" and file_exists(realpath($nimifinvoice))) {
 					if ($silent == "" or $silent == "VIENTI") {
 						$tulos_ulos .= "<br><br>\n".t("FTP-siirto iPost Finvoice:")."<br>\n";
 					}
@@ -1755,7 +1774,7 @@
 					$ftppass = $yhtiorow['verkkosala_lah'];
 					$ftppath = "out/finvoice/data/";
 					$ftpfile = realpath($nimifinvoice);
-					$renameftpfile = $nimi_filefinvoice_siirto_valmis;
+					$renameftpfile = $nimifinvoice_delivered;
 
 					// t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
 					$cmd = "mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile);
@@ -1766,7 +1785,7 @@
 						$tulos_ulos .= $tulos_ulos_ftp;
 					}
 				}
-				elseif($silent == "" and !file_exists($nimifinvoice)) {
+				elseif ($silent == "" and !file_exists($nimifinvoice)) {
 					$tulos_ulos .= t("Verkkolaskutus ei ole k‰ytˆss‰")."!<br>\n";
 				}
 
@@ -1788,7 +1807,26 @@
 						$tulos_ulos .= $tulos_ulos_ftp;
 					}
 				}
+				
+				if ($sisainenfoinvoice_ftphost != '' and file_exists(realpath($nimisisainenfinvoice))) {
+					if ($silent == "") {
+						$tulos_ulos .= "<br><br>\n".t("FTP-siirto Pupesoft-Finvoice:")."<br>\n";
+					}
 
+					//siirretaan laskutiedosto operaattorille, EDI-inhouse muoto
+					$ftphost = $sisainenfoinvoice_ftphost;
+					$ftpuser = $sisainenfoinvoice_ftpuser;
+					$ftppass = $sisainenfoinvoice_ftppass;
+					$ftppath = $sisainenfoinvoice_ftppath;
+					$ftpfile = realpath($nimiedi);
+
+					require("inc/ftp-send.inc");
+
+					if ($silent == "") {
+						$tulos_ulos .= $tulos_ulos_ftp;
+					}
+				}
+				
 				// jos yhtiˆll‰ on laskuprintteri on m‰‰ritelty tai halutaan jostain muusta syyst‰ tulostella laskuja paperille
 				if ($yhtiorow['lasku_tulostin'] != 0 or (isset($valittu_tulostin) and $valittu_tulostin != "") or count($tulostettavat_email) > 0) {
 
@@ -1863,7 +1901,7 @@
 								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $laskun_kieli);
 
 								//	Falseback oma maili
-								if($komento == "") $komento = "email";
+								if ($komento == "") $komento = "email";
 
 								//	Kaapataan output..
 								ob_start();
@@ -2138,7 +2176,7 @@
 					}
 				}
 			}
-			elseif($silent == "") {
+			elseif ($silent == "") {
 				$tulos_ulos .= t("Yht‰‰n laskua ei siirretty/tulostettu!")."<br>\n";
 			}
 
@@ -2277,10 +2315,10 @@
 
 
 			$query = "	SELECT
-						sum(if(lasku.laskutusvkopv='0',1,0)) normaali,
-						sum(if(lasku.laskutusvkopv='$today',1,0)) paiva,
-						sum(if(lasku.laskutusvkopv!='$today' and lasku.laskutusvkopv!='0',1,0)) muut,
-						sum(if(maksuehto.factoring!='',1,0)) factoroitavat,
+						sum(if (lasku.laskutusvkopv='0',1,0)) normaali,
+						sum(if (lasku.laskutusvkopv='$today',1,0)) paiva,
+						sum(if (lasku.laskutusvkopv!='$today' and lasku.laskutusvkopv!='0',1,0)) muut,
+						sum(if (maksuehto.factoring!='',1,0)) factoroitavat,
 						count(lasku.tunnus) kaikki
 						from lasku
 						LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus

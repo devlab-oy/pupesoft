@@ -32,29 +32,25 @@
 						$repl = array("&amp;", "&gt;", "&lt;", "&apos;", "&quot;", " ", " ");
 						$tieto = str_replace($serc, $repl, $tieto);
 
-						$ulos .= $tieto;
-
+						$ulos .= trim($tieto);
 					}
 
 					$pos = strpos($joukko, " ");
-		            if ($pos === false) {
-						//	Jos tehd‰‰n finvoicea rivilopu on \r\n
-						if ($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
-							$ulos .= "</$joukko>\r\n";
-						}
-						else {
-							$ulos .= "</$joukko>\n";
-						}
 
+					if ($pos === FALSE) {
+						$ulos .= "</$joukko>";
 		            }
 		            else {
-						if ($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
-							$ulos .= "</".substr($joukko,0,$pos).">\r\n";
-						}
-						else {
-							$ulos .= "</".substr($joukko,0,$pos).">\n";
-						}
+						$ulos .= "</".substr($joukko,0,$pos).">";
 		            }
+
+					if ($lasrow["chn"] == "112" or $yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
+						//	Jos tehd‰‰n finvoicea rivinvaihto on \r\n
+						$ulos .= "\r\n";
+					}
+					else {
+						$ulos .= "\n";
+					}
 
 					fputs($handle, $ulos);
 				}
@@ -277,15 +273,17 @@
 					$myyresult = mysql_query($mquery) or pupe_error($mquery);
 					$myyrow = mysql_fetch_array($myyresult);
 
-					if ($lasrow['chn'] == '') {
+					//HUOM: T‰ss‰ kaikki sallitut verkkopuolen chn:‰t
+					if (!in_array($lasrow['chn'], array("100", "010", "001", "020", "111", "112"))) {
 						//Paperi by default
 						$lasrow['chn'] = "100";
 					}
+
 					if ($lasrow['chn'] == "020") {
 						$lasrow['chn'] = "010";
 					}
 
-					if ($lasrow['arvo']>=0) {
+					 if ($lasrow['arvo'] >= 0) {
 						//Veloituslasku
 						$tyyppi='380';
 					}
@@ -358,7 +356,10 @@
 					if ($lasrow["chn"] == "111") {
 						elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow);
 					}
-					elseif($yhtiorow["verkkolasku_lah"] != "") {
+					elseif ($lasrow["chn"] == "112") {
+						finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
+					}
+					elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
 						finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
 					}
 					else {
@@ -378,7 +379,7 @@
 
 						if ($alvrow1["alv"] >= 500) {
 							$aquery = "	SELECT tilausrivi.alv,
-										round(sum(tilausrivi.rivihinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta,
+										round(sum(tilausrivi.rivihinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta,
 										round(sum(0),2) alvrivihinta
 										FROM tilausrivi
 										JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
@@ -387,8 +388,8 @@
 						}
 						else {
 							$aquery = "	SELECT tilausrivi.alv,
-										round(sum(tilausrivi.rivihinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta,
-										round(sum((tilausrivi.rivihinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1))*(tilausrivi.alv/100)),2) alvrivihinta
+										round(sum(tilausrivi.rivihinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta,
+										round(sum((tilausrivi.rivihinta/if (lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1))*(tilausrivi.alv/100)),2) alvrivihinta
 										FROM tilausrivi
 										JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
 										WHERE tilausrivi.uusiotunnus = '$lasrow[tunnus]' and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.alv = '$alvrow1[alv]' and tilausrivi.tyyppi = 'L'
@@ -401,7 +402,10 @@
 						if ($lasrow["chn"] == "111") {
 							elmaedi_alvierittely($tootedi, $alvrow);
 						}
-						elseif($yhtiorow["verkkolasku_lah"] != "") {
+						elseif ($lasrow["chn"] == "112") {
+							finvoice_alvierittely($tootsisainenfinvoice, $lasrow, $alvrow);
+						}
+						elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
 							finvoice_alvierittely($tootfinvoice, $lasrow, $alvrow);
 						}
 						else {
@@ -413,7 +417,10 @@
 					if ($lasrow["chn"] == "111") {
 						elmaedi_otsikko_loput($tootedi, $lasrow);
 					}
-					elseif($yhtiorow["verkkolasku_lah"] != "") {
+					elseif ($lasrow["chn"] == "112") {
+						finvoice_otsikko_loput($tootsisainenfinvoice, $lasrow, $masrow);
+					}
+					elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
 						finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow);
 					}
 
@@ -439,8 +446,8 @@
 
 					// Kirjoitetaan rivitietoja tilausriveilt‰
 					$query = "	SELECT tilausrivi.*, lasku.vienti_kurssi,
-								if(date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d')) toimitettuaika,
-								if(tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika) toimaika,
+								if (date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d')) toimitettuaika,
+								if (tilausrivi.toimaika = '0000-00-00', date_format(now(), '%Y-%m-%d'), tilausrivi.toimaika) toimaika,
 								$sorttauskentta
 								FROM tilausrivi
 								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
@@ -528,7 +535,10 @@
 
 							elmaedi_rivi($tootedi, $tilrow, $rivinumero);
 						}
-						elseif($yhtiorow["verkkolasku_lah"] != "") {
+						elseif ($lasrow["chn"] == "112") {
+							finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $totalvat);
+						}
+						elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
 							finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat);
 						}
 						else {
@@ -542,7 +552,10 @@
 
 						$edilask++;
 					}
-					elseif ($yhtiorow["verkkolasku_lah"] != "") {
+					elseif ($lasrow["chn"] == "112") {
+						finvoice_lasku_loppu($tootsisainenfinvoice, $lasrow, $pankkitiedot, $masrow);
+					}
+					elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
 						finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow);
 					}
 					else {

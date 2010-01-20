@@ -66,7 +66,7 @@ function konvertoi ($ykoko, $xkoko, $type, $taulu, $kuva, $dirri, $upfile1) {
 	$upfilesgh = strtolower("/tmp/$nimi"."1.".$ext);
 	$uusnimi = $dirri."/".$taulu."/".$type."/".$kuva;
 
-	if ($ykoko > 0 and ($kork > $leve or $xkoko == 0)) {
+	if ($ykoko > 0 and ($kork >= $leve or $xkoko == 0)) {
 		// skaalataan kuva oikenakokoiseksi y:n mukaan
     	exec("nice -n 20 convert -resize x$ykoko -quality 80 $upfile1 $upfilesgh", $output, $error);
     }

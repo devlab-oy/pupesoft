@@ -28,62 +28,47 @@ if ((float) $xlaskun_summa_eur[0] == 0) {
 //echo "Laskun perustiedot parseroitu!\n";
 $tuotetiedot = $xml->xpath('Group25');
 
-//echo "Tuotetiedot löydetty! Niitä on " . sizeof($tuotetiedot) . "\n";
+//Tuotetiedot
 $i 			= 0;
-$xtuoteno	= array();
-$tuoteno	= array();
-$xrsumma	= array();
-$rsumma		= array();
-$xvat		= array();
-$vat 		= array();
-$xrinfo 	= array();
-$info 		= array();
-$xrkpl 		= array();
-$rkpl 		= array();
-$xrivino 	= array();
-$rrivino	= array();
-$xriviviite = array();
-$riviviite	= array();
-$xriviaika 	= array();
-$riviaika	= array();
+$rtuoteno	= array();
 
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
 		// tuotekoodi
-		$xtuoteno[$i]	= $tuotetieto->xpath('LIN/@eC212.7140');
-		$tuoteno[$i]	= $xtuoteno[$i][0];
-		
+		$xtuoteno[$i] = $tuotetieto->xpath('LIN/@eC212.7140');
+		$rtuoteno[$i]["tuoteno"] = $xtuoteno[$i][0];
+
 		// veroton rivihinta
-		$xrsumma[$i]	= $tuotetieto->xpath('Group26/MOA[@eC516.5025="203"]/@eC516.5004');
-		$rsumma[$i]		= $xrsumma[$i][0];
-		
-		$xvat[$i]		= $tuotetieto->xpath('Group33/TAX[@eC241.5153="VAT"]/@eC243.5278');
-		if (is_array($xvat[$i])) $vat[$i] = (float) $xvat[$i][0]; // Näin voimme pohtia oliko täällä tuo segmentti
-		
-		$xrinfo[$i] 	= $tuotetieto-> xpath('IMD/@eC273.7008.1');
-		$info[$i] 		= $xrinfo[$i][0];
-		
+		$xrsumma[$i] = $tuotetieto->xpath('Group26/MOA[@eC516.5025="203"]/@eC516.5004');
+		$rtuoteno[$i]["rivihinta"] = $xrsumma[$i][0];
+
+		$xvat[$i] = $tuotetieto->xpath('Group33/TAX[@eC241.5153="VAT"]/@eC243.5278');
+		if (is_array($xvat[$i])) $rtuoteno[$i]["alv"] = (float) $xvat[$i][0]; // Näin voimme pohtia oliko täällä tuo segmentti
+
+		$xrinfo[$i] = $tuotetieto-> xpath('IMD/@eC273.7008.1');
+		$rtuoteno[$i]["riviinfo"] = $xrinfo[$i][0];
+
 		// laskutettu määrä
-		$xrkpl[$i] 		= $tuotetieto-> xpath('QTY[@eC186.6063="12"]/@eC186.6060');
-		$rkpl[$i] 		= $xrkpl[$i][0];
-		
-		$xrivino[$i] 	= $tuotetieto->xpath('Group29/RFF[@eC506.1153="CR"]/@eC506.1154');
-		$rrivino[$i]	= $xrivino[$i][0];
+		$xrkpl[$i] = $tuotetieto-> xpath('QTY[@eC186.6063="12"]/@eC186.6060');
+		$rtuoteno[$i]["kpl"] = $xrkpl[$i][0];
+
+		$xrivino[$i] = $tuotetieto->xpath('Group29/RFF[@eC506.1153="CR"]/@eC506.1154');
+		$rtuoteno[$i]["tilaajanrivinro"] = $xrivino[$i][0];
 
 		//	viite (EuroCard)
 		$xriviviite[$i] = $tuotetieto->xpath('Group29/RFF[@eC506.1153="VN"]/@eC506.1154');
-		$riviviite[$i]	= $xriviviite[$i][0];
-		
+		$rtuoteno[$i]["riviviite"] = $xriviviite[$i][0];
+
 		//	Tapahtumapäivä
 		$xriviaika[$i] = $tuotetieto->xpath('DTM[@eC507.2005="11"]/@eC507.2380');
-		$riviaika[$i]	= $xriviaika[$i][0];
+		$rtuoteno[$i]["laskutettuaika"]	= $xriviaika[$i][0];
 
-		// jotkut toimittajat lähettää laskutetun summan 47 segmentissä eikä 12 niinku kuuluis
-		if ((float) $rkpl[$i] == 0) {
+		// jotkut toimittajat lähettää laskutetun määrän 47 segmentissä eikä 12 niinku kuuluis
+		if ((float) $rtuoteno[$i]["kpl"] == 0) {
 			$xrkpl[$i] = $tuotetieto-> xpath('QTY[@eC186.6063="47"]/@eC186.6060');
-			$rkpl[$i]  = $xrkpl[$i][0];
+			$rtuoteno[$i]["kpl"] = $xrkpl[$i][0];
 		}
-		
+
 		$i++;
 
 		// Ei oteta vielä käyttöön
@@ -93,7 +78,7 @@ if (count($tuotetiedot) > 0) {
 		// if (sizeof($tarkennetiedot) > 0) {
 		// 	foreach ($tarkennetiedot as $tarkennetieto) {
 		// 		$xtuoteno[$i]	= $tarkennetieto->xpath('ALC/@eC214.7161');
-		// 		$tuoteno[$i]	= $xtuoteno[$i][0];
+		// 		$rtuoteno[$i]	= $xtuoteno[$i][0];
 		// 		// veroton rivihinta
 		// 		$xrsumma[$i]	= $tarkennetieto->xpath('Group41/MOA/@eC516.5004');
 		// 		$rsumma[$i]		= $xrsumma[$i][0];
@@ -105,7 +90,7 @@ if (count($tuotetiedot) > 0) {
 		// 		// laskutettu määrä
 		// 		$xrivino[$i] 	= $tarkennetieto->xpath('Group29/RFF[@eC506.1153="CR"]/@eC506.1154');
 		// 		$rrivino[$i]	= $xrivino[$i][0];
-		// 		echo "Tarkenne: $tuoteno[$i] '$info[$i]' Kpl: $rkpl[$i] ";
+		// 		echo "Tarkenne: $rtuoteno[$i] '$info[$i]' Kpl: $rkpl[$i] ";
 		// 		echo "Summa: $rsumma[$i] ($vat[$i])\n";
 		// 		$i++;
 		// 	}
@@ -139,7 +124,6 @@ if (count($vattiedot) > 0) {
 	foreach ($vattiedot as $vattieto) {
 		$xlisavat[$i]	= $vattieto->xpath('TAX/@eC243.5278');
 		$lisavat[$i]	= $xlisavat[$i][0];
-		//echo "ALV on $lisavat[$i]!\n";
 		$i++;
 	}
 }

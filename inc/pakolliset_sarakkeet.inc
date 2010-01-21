@@ -73,7 +73,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "asiakashinta" :
 				$pakolliset = array("HINTA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
-				$wherelliset = array("YTUNNUS", "ASIAKAS_RYHMA", "TUOTENO", "RYHMA");
+				$wherelliset = array("YTUNNUS", "ASIAKAS_RYHMA", "TUOTENO", "RYHMA", "ASIAKAS");
 				break;
 			case "asiakaskommentti" :
 				$pakolliset = array("YTUNNUS", "TUOTENO");
@@ -82,11 +82,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "asiakasalennus" :
 				$pakolliset = array("ALENNUS");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
-				$wherelliset = array("YTUNNUS", "ASIAKAS_RYHMA", "TUOTENO", "RYHMA");
+				$wherelliset = array("YTUNNUS", "ASIAKAS_RYHMA", "TUOTENO", "RYHMA", "ASIAKAS");
 				break;
 			case "perusalennus" :
 				$pakolliset = array("RYHMA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$wherelliset = array("RYHMA");
 				break;
 			case "yhteyshenkilo" :
 				if (in_array("YTUNNUS", $otsikot) and !in_array("LIITOSTUNNUS", $otsikot)) {

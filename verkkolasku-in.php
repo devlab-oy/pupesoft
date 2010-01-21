@@ -1,4 +1,4 @@
-#!/usr/bin/php 
+#!/usr/bin/php
 <?php
 
 	if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
@@ -11,6 +11,11 @@
     $oklaskut   = "/home/verkkolaskut/ok";
     $origlaskut = "/home/verkkolaskut/orig";
     $errlaskut  = "/home/verkkolaskut/error";
+
+	// otetaan includepath aina rootista
+	ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+	error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+	ini_set("display_errors", 0);
 
 	require ("inc/connect.inc"); // otetaan tietokantayhteys
     require ("inc/verkkolasku-in.inc"); // täällä on itse koodi
@@ -33,12 +38,16 @@
 			}
 		}
 	}
-	
+
 	if ($handle = opendir($laskut)) {
 
 		while (($file = readdir($handle)) !== FALSE) {
 
 			if (is_file($laskut."/".$file)) {
+
+				// $yhtiorow ja $xmlstr
+				unset($yhtiorow);
+				unset($xmlstr);
 
 				$nimi = $laskut."/".$file;
 				$laskuvirhe = verkkolasku_in($nimi);

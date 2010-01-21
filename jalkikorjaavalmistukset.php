@@ -6,8 +6,18 @@
 
 	if ($tee == "JALKILASKE" and checkdate($kka, $ppa, $vva)) {
 
+		if ($raakaaine != "") {
+			$selilisa = " sum(if(tilausrivi.tuoteno = '$raakaaine', 1, 0)) valriveja, ";
+			$havlisa  = " and valriveja > 0 ";
+		}
+		else {
+			$selilisa = "";
+			$havlisa  = "";
+		}
+
 		$query = "	SELECT lasku.tunnus,
 					sum(if(tilausrivi.tyyppi in ('V','W'), 1, 0)) valmistusriveja,
+					$selilisa
 					avg(if(tilausrivi.toimitettuaika='0000-00-00 00:00:00' or tilausrivi.tyyppi not in ('V','W'), NULL, date_format(tilausrivi.toimitettuaika, '%Y%m%d%H%i%s'))) toimitettuaikax
 					FROM tilausrivi
 					JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
@@ -18,6 +28,7 @@
 					AND lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00'
 					GROUP BY lasku.tunnus
 					HAVING valmistusriveja > 0
+					$havlisa
 					ORDER BY toimitettuaikax";
 		$tilre = mysql_query($query) or pupe_error($query);
 

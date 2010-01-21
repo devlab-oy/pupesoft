@@ -571,16 +571,16 @@ function erittele_rivit($tilausnumero) {
 			for($i=0; $i<count($tuotetiedot); $i++) {
 
 				//	Näyttäisikö tämä korkoriviltä, otetaan se talteen ja laitetaan myös riville?
-				if(preg_match("/KORKO\s+[0-9]{2}\.[0-9]{2}\.\s+-\s+[0-9]{2}\.[0-9]{2}\./", $info[$i])) {
-					$korkosumma = (float) $rsumma[$i];
+				if (preg_match("/KORKO\s+[0-9]{2}\.[0-9]{2}\.\s+-\s+[0-9]{2}\.[0-9]{2}\./", $rtuoteno[$i]["riviinfo"])) {
+					$korkosumma = (float) $rtuoteno[$i]["rivihinta"];
 				}
 
-				if($rkpl[$i] > 0) {
+				if($rtuoteno[$i]["kpl"] > 0) {
 
-					$kpl = (float) $rkpl[$i];
-					$hinta = (float) $rsumma[$i];
+					$kpl = (float) $rtuoteno[$i]["kpl"];
+					$hinta = (float) $rtuoteno[$i]["rivihinta"];
 
-					if($hinta < 0) {
+					if ($hinta < 0) {
 						$kpl = $kpl * -1;
 						$hinta = $hinta * -1;
 					}
@@ -589,24 +589,18 @@ function erittele_rivit($tilausnumero) {
 
 					$rivihinta = (float) $kpl * (float) $hinta;
 
-					if($riviaika[$i] != "") {
-						$kommentti .= "Tapahtuma-aika: ".preg_replace("/([0-9]{4})([0-9]{2})([0-9]{2})/", "\$3.\$2. \$1", $riviaika[$i]);
+					if ($rtuoteno[$i]["laskutettuaika"] != "") {
+						$kommentti .= "Tapahtuma-aika: ".preg_replace("/([0-9]{4})([0-9]{2})([0-9]{2})/", "\$3.\$2. \$1", $rtuoteno[$i]["laskutettuaika"]);
 					}
 
-					if($riviaika[$i] != "") {
-						$kommentti .= "Tapahtuma-aika: ".preg_replace("/([0-9]{4})([0-9]{2})([0-9]{2})/", "\$3.\$2. \$1", $riviaika[$i]);
-					}
+					$kommentti .= "<br>Tapahtuman selite: ".$rtuoteno[$i]["riviinfo"];
 
-					$kommentti .= "<br>Tapahtuman selite: $info[$i]";
-					if(preg_match("/([A-Z]{3})\s*([0-9\.,]*)/", $riviviite[$i], $match)) {
+					if (preg_match("/([A-Z]{3})\s*([0-9\.,]*)/", $rtuoteno[$i]["riviviite"], $match)) {
 						$kommentti .= "<br>Alkupeärinen summa: $match[2] $match[1] ($hinta $yhtiorow[valkoodi])";
 					}
 
 					$kommentti = preg_replace("/\.{2,}/", "", $kommentti);
 
-					//echo "$kpl | $hinta | $kommentti\n";
-
-					//echo print_r($rkpl[$i][0], true);
 					//	Laitetaan tilausrivi kantaan
 					$query = "	INSERT into tilausrivi set
 								hyllyalue   = '0',

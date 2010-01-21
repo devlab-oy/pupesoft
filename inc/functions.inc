@@ -1609,7 +1609,7 @@ if (!function_exists("synkronoi")) {
 				}
 			}
 		}
-
+	
 		$synclog = "\nAktivoidaan synkronointi konserniyrityksiin\n";
 
 		if (!is_numeric($tunnus)) {
@@ -1628,9 +1628,15 @@ if (!function_exists("synkronoi")) {
 
 		if (mysql_num_rows($masterres) == 1) {
 			$masterrow = mysql_fetch_assoc($masterres) or pupe_error($query);
-
+			
+			//	Näillä tarttetaan vähän lisätietoo
+			if ($table == "asiakasalennus" and $masterrow["alennus"] < 0) {				
+				synclog($yhtio, $table, "Negatiivisia alennuksia ei synkata!", $tunnus);
+				return false;
+			}
+								
 			$synclog .= "Masteri on tunnus ($tunnus)\n";
-
+			
 			//	Tarkastetaan että originaali on varmasti samasta taulusta!
 			if (is_array($orig) and count($orig) > 0) {
 
@@ -1718,7 +1724,7 @@ if (!function_exists("synkronoi")) {
 			Aloitetaan itse synkronointii
 		*/
 
-		//	haetaan konserniyhtiöt joita voidaan synkronisoida
+		//	haetaan konserniyhtiöt joita voidaan synkronoida
 		$query = "	SELECT yhtio.yhtio
 					from yhtio
 					JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
@@ -1933,7 +1939,7 @@ if (!function_exists("synkronoi")) {
 						}
 						*/
 
-						// Tarkastetaan että hinnat eivät mene aivan päin vittuja..
+						// Tarkastetaan että hinnat eivät mene aivan päin metsää..
 						$query = "select tunnus from yhtion_parametrit where yhtio='$kohderow[yhtio]' and alv_kasittely!='$yhtion_parametrit[alv_kasittely]'";
 						$abures = mysql_query($query) or pupe_error($query);
 
@@ -4214,28 +4220,27 @@ if (!function_exists("ostolaskun_vienti")) {
 
 if (!function_exists("verkkolasku_luo_keikkafile")) {
 	function verkkolasku_luo_keikkafile ($tunnus, $trow, $rtuoteno) {
-		global $yhtiorow, $kukarow;	
-		
+		global $yhtiorow, $kukarow;
+
 		// Tarvitaan $tunnus jossa on ostoreskontralaskun tunnus
 		// Tarvitaan $trow jossa on toimittajan tiedot
 		// Tarvitaan $rtuoteno jossa on array kaikista ostoreskontralaskun tuotteista
-		
+
 		require("inc/verkkolasku-in-luo-keikkafile.inc");
 	}
 }
 
 if (!function_exists("verkkolasku_luo_liitosotsikko")) {
 	function verkkolasku_luo_liitosotsikko ($laskutunnus, $otunnus) {
-		global $yhtiorow, $kukarow;	
-		
+		global $yhtiorow, $kukarow;
+
 		// Tarvitaan $laskutunnus jossa on ostoreskontralaskun tunnus
 		// Tarvitaan $otunnus jossa on keikan tunnus
-		// Tarvitaan $tuoteno jossa on array kaikista ostoreskontralaskun tuotteista
-		
+
 		$tee_kululaskut = "liita";
 		$silent 		= "SILENT";
 		$keikanalatila 	= "";
-		
+
 		require("tilauskasittely/kululaskut.inc");
 	}
 }
@@ -4348,7 +4353,7 @@ if (!function_exists("tulosta_ytunnus")) {
 		//jos on suomalainen yritys tehdään ytunnus nätiks
 		if (strtoupper($maa) == 'FI') {
 
-			$ytunnus = str_replace("-", "", $ytunnus); // poistetaan väliviivat jos niitä oli jo
+			$ytunnus = preg_replace("/[^0-9]/", "", $ytunnus); // poistetaan kaikki paitsi numerot
 
 			//muutetaan ytunnus takas oikean näköseks
 			$ytunpit = 8-strlen($ytunnus);

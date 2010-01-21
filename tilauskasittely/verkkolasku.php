@@ -1818,7 +1818,7 @@
 					$ftpuser = $sisainenfoinvoice_ftpuser;
 					$ftppass = $sisainenfoinvoice_ftppass;
 					$ftppath = $sisainenfoinvoice_ftppath;
-					$ftpfile = realpath($nimiedi);
+					$ftpfile = realpath($nimisisainenfinvoice);
 
 					require("inc/ftp-send.inc");
 

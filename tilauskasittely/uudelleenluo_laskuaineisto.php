@@ -94,20 +94,20 @@
 			//Tiedostojen polut ja nimet
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 			$nimixml = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
-			$nimi_filexml = "laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
 
-			if($yhtiorow["verkkolasku_lah"] == "iPost") {
-				$nimifinvoice = "../dataout/TRANSFER_IPOST-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
-				$nimi_filefinvoice = "TRANSFER_IPOST-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
-				$nimi_filefinvoice_siirto_valmis = "DELIVERED_IPOST-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+			//	Itellan iPost vaatii siirtoon v‰h‰n oman nimen..
+			if ($yhtiorow["verkkolasku_lah"] == "iPost") {
+				$nimiipost = "-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+				$nimifinvoice = "../dataout/TRANSFER_IPOST".$nimiipost;
+				$nimifinvoice_delivered = "DELIVERED_IPOST".$nimiipost;
 			}
 			else {
 				$nimifinvoice = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
-				$nimi_filefinvoice = "laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
 			}
 
+			$nimisisainenfinvoice = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_sisainenfinvoice.xml";
+
 			$nimiedi = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".edi";
-			$nimi_fileedi = "laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".edi";
 
 			//Pupevoice xml-dataa
 			if (!$tootxml = fopen($nimixml, "w")) die("Filen $nimixml luonti ep‰onnistui!");
@@ -117,6 +117,9 @@
 
 			//Elma-EDI-inhouse dataa (EIH-1.4.0)
 			if (!$tootedi = fopen($nimiedi, "w")) die("Filen $nimiedi luonti ep‰onnistui!");
+
+			//Sis‰inenfinvoice xml-dataa
+			if (!$tootsisainenfinvoice = fopen($nimisisainenfinvoice, "w")) die("Filen $nimisisainenfinvoice luonti ep‰onnistui!");
 
 			// lock tables
 			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, tilausrivin_lisatiedot as tl2 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ";
@@ -579,12 +582,28 @@
 			fclose($tootxml);
 			fclose($tootedi);
 			fclose($tootfinvoice);
+			fclose($tootsisainenfinvoice);
 
 			//dellataan failit jos ne on tyhji‰
-			if(filesize($nimixml) == 0) {
+			if (filesize($nimixml) == 0) {
 				unlink($nimixml);
 			}
-			else {
+			if (filesize($nimifinvoice) == 0) {
+				unlink($nimifinvoice);
+			}
+			if (filesize($nimiedi) == 0) {
+				unlink($nimiedi);
+			}
+			if (filesize($nimisisainenfinvoice) == 0) {
+				unlink($nimisisainenfinvoice);
+			}
+
+			// poistetaan lukot
+			$query = "UNLOCK TABLES";
+			$locre = mysql_query($query) or pupe_error($query);
+
+
+			if (file_exists(realpath($nimixml))) {
 				//siirretaan laskutiedosto operaattorille
 				$ftphost = "ftp.verkkolasku.net";
 				$ftpuser = $yhtiorow['verkkotunnus_lah'];
@@ -606,24 +625,20 @@
 			}
 
 
-			if(filesize($nimifinvoice) == 0) {
-				unlink($nimifinvoice);
-			}
-			else {
-
+			if (file_exists(realpath($nimifinvoice))) {
 				//siirretaan laskutiedosto operaattorille
 				$ftphost = "ftp.itella.net";
 				$ftpuser = $yhtiorow['verkkotunnus_lah'];
 				$ftppass = $yhtiorow['verkkosala_lah'];
 				$ftppath = "out/finvoice/data/";
 				$ftpfile = realpath($nimifinvoice);
-				$renameftpfile = $nimi_filefinvoice_siirto_valmis;
+				$renameftpfile = $nimifinvoice_delivered;
 
 				// t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
 				echo "<pre>mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."</pre>";
 
 				echo "<table>";
-				echo "<tr><th>".t("Tallenna finnvoice-aineisto").":</th>";
+				echo "<tr><th>".t("Tallenna finvoice-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='".str_replace('../dataout/', '', $nimifinvoice)."'>";
@@ -632,16 +647,24 @@
 				echo "</table>";
 			}
 
-			if(filesize($nimiedi) == 0) {
-				unlink($nimiedi);
-			}
-			else{
+			if (file_exists(realpath($nimiedi))) {
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna Elmaedi-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='".str_replace('../dataout/', '', $nimiedi)."'>";
 				echo "<input type='hidden' name='file' value='$nimiedi'>";
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table>";
+			}
+
+			if (file_exists(realpath($nimisisainenfinvoice))) {
+				echo "<table>";
+				echo "<tr><th>".t("Tallenna Pupesoft-Finvoice-aineisto").":</th>";
+				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+				echo "<input type='hidden' name='kaunisnimi' value='".str_replace('../dataout/', '', $nimisisainenfinvoice)."'>";
+				echo "<input type='hidden' name='file' value='$nimisisainenfinvoice'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table>";
 			}

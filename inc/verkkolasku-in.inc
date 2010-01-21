@@ -6,8 +6,7 @@
 	if (!function_exists("verkkolasku_in")) {
 
 		function verkkolasku_in ($file) {
-
-			global $kukarow;
+			global $kukarow, $yhtiorow, $xasiakkaantiedot, $xmlstr;
 
 			if (!is_file($file)) {
 				echo ("Tiedostoa $file ei löydy!\n");
@@ -164,7 +163,7 @@
 
 				$return .= "\nEpäonnistumisen syy: Laskun vastaanottajaa ei löytynyt järjestelmästä $_SERVER[SERVER_ADDR]!\n\n";
 				$return .= "Etsittiin tiedoilla:\n";
-				$return .= "Verkkotunnus: $verkkotunnus_vas'\n";
+				$return .= "Verkkotunnus: $verkkotunnus_vas\n";
 				$return .= "Ovt: $oyhtio1 $oyhtio2 $verkkotunnus_vas\n";
 				$return .= "Ytunnus: $yyhtio1 $yyhtio2 $yyhtio3 $yyhtio4\n\n";
 
@@ -365,9 +364,9 @@
 				// katotaan löydettäskö tälle vähän ostorivejä
 				$chkriviok = 0;
 
-				for ($i=0; $i<count($tuoteno); $i++) {
+				for ($i=0; $i<count($rtuoteno); $i++) {
 
-					$ostotunnus = (int) $rrivino[$i];
+					$ostotunnus = (int) $rtuoteno[$i]["tilaajanrivinro"];
 
 					// ei tehdä turhaa hakua jos meillä ei ole tullu rivitunnusta
 					if ($ostotunnus != 0) {
@@ -786,7 +785,7 @@
 
 					// Jos tämä lasku menee varastoon, tehdään valmiiksi keikka
 					if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
-						verkkolasku_luo_keikkafile($tunnus, $trow, $tuoteno);
+						verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
 					}
 				}
 			}
@@ -797,12 +796,14 @@
 				$verkkolaskuveroton = 0;
 				$vtontot = 0;
 
-				for ($i=0; $i < count($tuoteno); $i++) {
+				for ($i=0; $i < count($rtuoteno); $i++) {
 
-					if ((float) $rsumma[$i] != 0) {
+					if ((float) $rtuoteno[$i]["rivihinta"] != 0) {
+
 						$kustp = $oletuskust;
-						$selite = utf8_decode(str_replace ("'", " ", $info[$i])); // Poistaa SQL-virheen mahdollisuuden
-						$tuote = utf8_decode(str_replace ("'", " ", $tuoteno[$i])); // Poistaa SQL-virheen mahdollisuuden
+
+						$selite = utf8_decode(str_replace ("'", " ", $rtuoteno[$i]["riviinfo"])); // Poistaa SQL-virheen mahdollisuuden
+						$tuote = utf8_decode(str_replace ("'", " ", $rtuoteno[$i]["tuoteno"])); // Poistaa SQL-virheen mahdollisuuden
 
 						$query = "	SELECT tilino, kustp FROM tiliointisaanto
 									WHERE ttunnus = '$trow[tunnus]' and yhtio = '$yhtio' and
@@ -841,15 +842,14 @@
 							if ($tiliointirow['kustp'] > 0) $kustp = $tiliointirow['kustp'];
 						}
 
-						$summa = (float) $rsumma[$i];
+						$summa = (float) $rtuoteno[$i]["rivihinta"];
 
  						//Hyvityslasku tai summa alle nolla
 						if ($laskun_tyyppi == "381" or $omasumma < 0) {
 							$summa = $summa * -1;
 						}
 
-						//if (strlen($vat[$i]) == 0) $vat[$i]=$oletusalvi;
-						$vero = (float) $vat[$i];
+						$vero = (float) $rtuoteno[$i]["alv"];
 
 						$verkkolaskuveroton += $summa;
 						$vtonsumma = $summa;
@@ -925,7 +925,7 @@
 
 					// Jos tämä lasku menee varastoon, tehdään valmiiksi keikka
 					if ($trow['oletus_vienti'] == 'C' or $trow['oletus_vienti'] == 'F' or $trow['oletus_vienti'] == 'I') {
-						verkkolasku_luo_keikkafile($tunnus, $trow, $tuoteno);
+						verkkolasku_luo_keikkafile($tunnus, $trow, $rtuoteno);
 					}
 				}
 			}
@@ -988,17 +988,17 @@
 			$kuvalaskures = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($kuvalaskures) > 0) {
-								
+
 				$kuvalaskurow = mysql_fetch_array($kuvalaskures);
 
 				$ebid 	= $kuvalaskurow['ebid'];
 				$selite = mysql_real_escape_string("$kuvalaskurow[nimi] $kuvalaskurow[summa] $kuvalaskurow[valkoodi]");
 
 				if ($ebid == "FINVOICEXML") {
-					
+
 					$filesize = strlen($xmlstr);
 					$filename = array_pop(explode("/", $file));
-										
+
 					$query = "	INSERT INTO liitetiedostot SET
 								yhtio    			= '$kukarow[yhtio]',
 								liitos   			= 'lasku',
@@ -1015,12 +1015,12 @@
 								image_channels		= '',
 								kayttotarkoitus		= '',
 								jarjestys			= '1',
-								laatija				= '$kukarow[kuka]',								
+								laatija				= '$kukarow[kuka]',
 								luontiaika			= now()";
 					$Xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
 
 				}
-				else {						
+				else {
 					$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
 					$salasana		   = $yhtiorow['verkkosala_vas'];
 
@@ -1059,9 +1059,9 @@
 									image_channels		= '',
 									kayttotarkoitus		= '',
 									jarjestys			= '1',
-									laatija				= '$kukarow[kuka]',								
+									laatija				= '$kukarow[kuka]',
 									luontiaika			= now()";
-						$Xresult = mysql_query($query) or die ("$query\n\n".mysql_error());												
+						$Xresult = mysql_query($query) or die ("$query\n\n".mysql_error());
 					}
 				}
 			}

@@ -1937,7 +1937,7 @@ if ($tee == '') {
 	echo "<table>";
 
 	// jos asiakasnumero on annettu
-	if ($laskurow["liitostunnus"] > 0) {
+	if ($laskurow["liitostunnus"] > 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
 		$query = "	SELECT fakta, round(luottoraja, 0) luottoraja, luokka, asiakasnro, osasto
 					FROM asiakas
@@ -1964,7 +1964,16 @@ if ($tee == '') {
 		}
 		else {
 
-			echo "<th>".t("Ytunnus").":</th><td>$laskurow[ytunnus] </td><th>".t("Asiakasnro").":</th><td>$faktarow[asiakasnro]</td>";
+			echo "<th>".t("Ytunnus").":</th><td>";
+			
+			if ($laskurow["liitostunnus"] == 0) {
+				echo "<input type='submit' name='liitaasiakasnappi' value='".t("Liitä asiakas")."'></td>";
+			}
+			else {
+				echo "$laskurow[ytunnus] </td>";	
+			}
+			
+			echo "<th>".t("Asiakasnro").":</th><td>$faktarow[asiakasnro]</td>";
 
 			echo "</tr>";
 
@@ -2234,6 +2243,25 @@ if ($tee == '') {
 
 				echo "<strong>".wordwrap($faktarow["fakta"], 110, "<br>")."</strong>&nbsp;</td></tr>\n";
 			}
+			
+			// Katsotaan onko liitetiedostoja
+			$liitequery = "	SELECT tunnus
+							FROM liitetiedostot USE INDEX (yhtio_liitos_liitostunnus)
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND liitos = 'lasku'
+							AND liitostunnus = '$laskurow[tunnus]'";
+			$liiteres = mysql_query($liitequery) or pupe_error($liitequery);
+
+			if (mysql_num_rows($liiteres) > 0) {
+				$liitemaara = 1;
+				
+				echo "<tr>$jarjlisa<th>".t("Liitetiedostot").":</th><td colspan='3'>";
+				while ($liiterow = mysql_fetch_array($liiteres)) {
+					echo "<a href='".$palvelin2."view.php?id=$liiterow[tunnus]' target='Attachment'>".t("Liite")." $liitemaara</a> ";
+					$liitemaara++;
+				}
+				echo "</td></tr>";
+			}
 
 			if ($toim == 'TARJOUS') {
 				$kalequery = "	SELECT yhteyshenkilo.nimi yhteyshenkilo, kuka1.nimi nimi1, kuka2.nimi nimi2, kalenteri.*
@@ -2301,9 +2329,6 @@ if ($tee == '') {
 				<th align='left'>".t("Myyjänro")."</th>
 				<td><input type='text' size='10' maxlength='10' name='myyjanro' value='$my'></td>
 				</tr>";
-		}
-		else {
-			echo "<td class='back'><input type='submit' name='liitaasiakasnappi' value='".t("Liitä asiakas")."'></td></tr>";
 		}
 	}
 

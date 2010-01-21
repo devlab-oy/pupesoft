@@ -344,7 +344,11 @@ if (!function_exists('finvoice_otsik')) {
 			fputs($tootfinvoice, "</DeliveryPeriodDetails>\r\n");
 			xml_add("DeliveryMethodText",                                   $lasrow['toimitustapa'],          		$tootfinvoice);
 			xml_add("DeliveryTermsText",									$lasrow['toimitusehto'],          		$tootfinvoice);
-			#xml_add("TerminalAddressText",									"",					     				$tootfinvoice);
+						
+			if ($lasrow["chn"] == "112") {
+				xml_add("TerminalAddressText",								"KAUTTALASKUTUS",	     				$tootfinvoice);
+			}
+						
 			#xml_add("WaybillIdentifier",									"",					     				$tootfinvoice);
 			#xml_add("WaybillTypeCode",										"",					     				$tootfinvoice);
 			#xml_add("DelivererIdentifier",									"",					     				$tootfinvoice);

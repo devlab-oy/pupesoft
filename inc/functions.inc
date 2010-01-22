@@ -4435,6 +4435,7 @@ if (!function_exists("enable_ajax")) {
 		function handleResponse() {
 			if (http.readyState == 4) {
 				var response = http.responseText;
+								
 				if (response.substr(0, 10) == "TABLE-ROW:") {
 					//	Meidän rivi ja sen solut
 					response=response.substr(9);
@@ -4494,13 +4495,13 @@ if (!function_exists("enable_ajax")) {
 		}
 
 		this.doPost = function() {
-			http.open('post', urli + '&ohje=off', true);
+			http.open('post', urli + '&ohje=off&no_css=yes&no_head=yes', true);
 			http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 			http.send(data);
 		}
 
 		this.doGet = function() {
-			http.open('get', urli + '&' + data + '&ohje=off');
+			http.open('get', urli + '&' + data + '&ohje=off&no_css=yes&no_head=yes');
 			http.send(null);
 		}
 
@@ -4556,7 +4557,7 @@ if (!function_exists("enable_ajax")) {
 			document.getElementById(id).style.display = 'none';
 		}
 		else {
-			document.getElementById(id).style.display = 'block';
+			document.getElementById(id).style.display = '';
 		}
 	}
 

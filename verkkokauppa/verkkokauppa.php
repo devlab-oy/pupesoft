@@ -9,7 +9,6 @@ if ($_REQUEST["tee"] == "login") {
 	$_GET["no_css"] = "yes";
 
 	require("parametrit.inc");
-//	require("functions.inc");
 
 	if (trim($user) != '') {
 
@@ -630,7 +629,7 @@ if ($tee == "tuotteen_lisatiedot") {
 	}
 
 	//	Vasemmalla meillä on kaikki tekstit
-	echo "<table width='100%'><tr><td class='back' style='width:50px;'></td><td class='back'>$tekstit</td><td class='back' style='text-align:right;'>$liitetiedostot</td></tr><tr><td class='back'><br></td></tr></table>";
+	echo "<td class='back'>&nbsp;</td><td><table width='100%'><tr><td class='back' style='padding-left:10px;'>$tekstit</td><td class='back' style='text-align:right;'>$liitetiedostot</td></tr></table></td>";
 }
 
 if ($tee == "poistakori") {

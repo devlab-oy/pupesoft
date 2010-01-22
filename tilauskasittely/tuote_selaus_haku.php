@@ -1456,7 +1456,7 @@
 				echo "</tr>";
 
 				if ($verkkokauppa != "") {
-					echo "<tr><td colspan='6' class='back' style='padding:0px; margin:0px;height:0px;'><div id='T_$row[tuoteno]'></div></td></tr>";
+					echo "<tr id='T_$row[tuoteno]'></tr>";
 				}
 
 				if ($row["sarjatunnus"] > 0 and $kukarow["extranet"] == "" and $verkkokauppa == "" and function_exists("sarjanumeronlisatiedot_popup")) {

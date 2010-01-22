@@ -7978,4 +7978,75 @@ if (!function_exists("liite_popup")) {
 	}
 }
 
+if (!function_exists("lue_kurssit")) {
+	function lue_kurssit($file, $handle, $tyyppi = '') {
+		global $yhtiorow, $kukarow;
+
+		ini_set("auto_detect_line_endings", 1);
+		
+		// luetaan koko file arrayhyn
+		$rivit = file($file);
+
+		if ($tyyppi == 2) {
+			// eka rivi pois
+			array_shift($rivit);
+		}
+		else {
+			// 2 ekaa rivi‰ pois
+			array_shift($rivit);
+			array_shift($rivit);
+		}
+
+		$valuutat = array();
+
+		foreach ($rivit as $rivi) {
+
+			if ($tyyppi == 2) {
+				$valuutta      = substr($rivi, 25, 3);																// valuutan nimi
+				$vastavaluutta = substr($rivi, 28, 3);																// vastavaluutta
+				$kurssipvm_vv  = substr($rivi, 7, 4);
+				$kurssipvm_kk  = substr($rivi, 11, 2);
+				$kurssipvm_pp  = substr($rivi, 13, 2);
+				$kurssipvm     = "$kurssipvm_vv-$kurssipvm_kk-$kurssipvm_pp";
+				$kurssi        = (float) substr($rivi, 31, 13) / 10000000;											// kurssi
+			}
+			else {
+				$valuutta      = substr($rivi, 0, 3);																// valuutan nimi
+				$vastavaluutta = "EUR";																				// vastavaluutta
+				$kurssipvm_vv  = substr($rivi, 86, 4);
+				$kurssipvm_kk  = substr($rivi, 83, 2);
+				$kurssipvm_pp  = substr($rivi, 80, 2);
+				$kurssipvm     = "$kurssipvm_vv-$kurssipvm_kk-$kurssipvm_pp";
+				$kurssi        = (float) str_replace(array(',', ' '), array('.',''), trim(substr($rivi, 5, 20)));	// kurssi
+			}
+
+			// ei p‰ivitet‰ jos ollaan jo p‰ivitetty tai v‰‰r‰ vastavaluutta
+			if (in_array($valuutta, $valuutat) or $vastavaluutta != $yhtiorow["valkoodi"]) {
+				continue;
+			}
+
+			$query = "	UPDATE valuu SET
+						kurssi = round(1 / $kurssi, 9),
+						muutospvm = now(),
+						muuttaja = '{$kukarow['kuka']}'
+						WHERE yhtio = '{$kukarow['yhtio']}' AND
+						nimi = '$valuutta'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			// t‰m‰ valuutta on nyt p‰ivitetty!
+			$valuutat[] = $valuutta;
+
+			if (mysql_affected_rows() != 0) {
+				echo "<font class='message'>P‰ivitettiin kurssi valuutalle $valuutta: ".round(1/$kurssi, 9)."</font><br>";
+			}
+
+			$query = "	INSERT INTO valuu_historia (kotivaluutta, valuutta, kurssi, kurssipvm)
+						VALUES ('$vastavaluutta', '$valuutta', round(1 / $kurssi, 9), '$kurssipvm')
+			  			ON DUPLICATE KEY UPDATE kurssi = round(1 / $kurssi, 9)";
+			$result = mysql_query($query) or pupe_error($query);
+
+		}
+	}
+}
+
 ?>

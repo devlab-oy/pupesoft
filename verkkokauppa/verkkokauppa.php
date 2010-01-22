@@ -630,7 +630,7 @@ if ($tee == "tuotteen_lisatiedot") {
 	}
 
 	//	Vasemmalla meillä on kaikki tekstit
-	echo "<table width='100%'><tr><td class='back' style='width:50px;'></td><td class='back'>$tekstit</td><td class='back'>$liitetiedostot</td></tr><tr><td class='back'><br></td></tr></table>";
+	echo "<table width='100%'><tr><td class='back' style='width:50px;'></td><td class='back'>$tekstit</td><td class='back' align='right'>$liitetiedostot</td></tr><tr><td class='back'><br></td></tr></table>";
 }
 
 if ($tee == "poistakori") {

@@ -1730,6 +1730,8 @@ if (!function_exists('loppu_lahete')) {
 		$y_maa 			= $laskurow["yhtio_maa"];
 		$y_kotipaikka	= $laskurow["yhtio_kotipaikka"];
 		$y_vatnumero	= str_replace("0037", "", $laskurow["yhtio_ovttunnus"]);
+		$y_iban 		= $yhtiorow['pankkiiban1'];
+		$y_swift 		= $yhtiorow['pankkiswift1'];
 
 		if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
 			// haetaan toimipaikan tiedot
@@ -1772,6 +1774,9 @@ if (!function_exists('loppu_lahete')) {
 			$y_maa 			= $GLOBALS['eta_yhtio_maa'];
 			$y_kotipaikka	= $GLOBALS['eta_yhtio_kotipaikka'];
 			$y_vatnumero	= str_replace("0037", "", $GLOBALS['eta_yhtio_ovttunnus']);
+			$y_kotipaikka	= $GLOBALS['eta_yhtio_kotipaikka'];
+			$y_iban 		= "";
+			$y_swift 		= "";
 		}
 
 		//Alimmat kolme laatikkoa, yhtiötietoja
@@ -1794,9 +1799,9 @@ if (!function_exists('loppu_lahete')) {
 		$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",			$thispage, $pieni);
 		$pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
 		$pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",		$thispage, $pieni);
-		$pdf->draw_text(444, 45, $y_kotipaikka,		$thispage, $pieni);
-		$pdf->draw_text(404, 35, t("Enn.per.rek", $kieli),			$thispage, $pieni);
-		$pdf->draw_text(404, 25, t("Alv.rek", $kieli),				$thispage, $pieni);
+		$pdf->draw_text(444, 45, $y_kotipaikka,						$thispage, $pieni);
+		$pdf->draw_text(404, 35, t("Alv.rek", $kieli),				$thispage, $pieni);
+		$pdf->draw_text(404, 25, $y_iban." / ".$y_swift,			$thispage, $pieni);
 
 		if ($tots == 1 and $summa != 0) {
 

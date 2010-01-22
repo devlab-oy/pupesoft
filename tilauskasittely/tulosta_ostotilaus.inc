@@ -916,7 +916,8 @@
 					$pdf->draw_text(454, 45, $yhtiorow["kotipaikka"],									$thispage, $pieni);
 					$pdf->draw_text(404, 35,  t("Pankkiyhteys", $kieli).":",							$thispage, $pieni);
 					$pdf->draw_text(454, 35,  $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"],	$thispage, $pieni);
-
+					$pdf->draw_text(404, 25, $yhtiorow["pankkiiban1"]." / ".$yhtiorow["pankkiswift1"],	$thispage, $pieni);
+					
 					if ($laitetaanko_yhteensarivi == 1 and $total != 0) {
 						$pdf->draw_text(430, 82, t("Yhteensä", $kieli).":", 							$thispage, $norm);
 

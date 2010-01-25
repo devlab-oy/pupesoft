@@ -116,9 +116,9 @@
 			$where = "(". $where1." and ".$where2.")  and ";
 		}
 
-		$query  = "	SELECT if(toim_maa != '', toim_maa, maa) sallitut_maat
+		$query  = "	SELECT if(toim_maa != '', toim_maa, maa) sallitut_maat, osasto
 					FROM asiakas
-					WHERE yhtio='$kukarow[yhtio]' and tunnus='$asiakas'";
+					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$asiakas'";
 		$maa_result = mysql_query($query) or pupe_error($query);
 		$asiakas_maa_row = mysql_fetch_array($maa_result);
 
@@ -169,17 +169,33 @@
 
 			$kala = 0;
 
-			while ($rrow = mysql_fetch_array($rresult)) {
+			if ($GLOBALS['eta_yhtio'] != '' and ($GLOBALS['koti_yhtio'] != $kukarow['yhtio'] or $asiakas_maa_row['osasto'] != '6')) {
+				unset($GLOBALS['eta_yhtio']);
+			}
+
+			while ($rrow = mysql_fetch_assoc($rresult)) {
 
 				$kala++;
 
-				//haetaan asiakkaan oma hinta
-				$laskurow["ytunnus"] = $ytunnus;
-				$laskurow["liitostunnus"] = $asiakas;
-				$laskurow["vienti"] = '';
-				$laskurow["alv"] = '';
+				if (isset($GLOBALS['eta_yhtio']) and $GLOBALS['koti_yhtio'] == $kukarow['yhtio']) {
+					$query = "	SELECT *
+								FROM tuote
+								WHERE yhtio = '{$GLOBALS['eta_yhtio']}'
+								AND tuoteno = '{$row['tuoteno']}'";
+					$tres_eta = mysql_query($query) or pupe_error($query);
+					$alehinrrow = mysql_fetch_assoc($tres_eta);
+				}
+				else {
+					$alehinrrow = $rrow;
+				}
 
-				$hinnat = alehinta($laskurow, $rrow, 1, '', '', '', "hinta,netto,ale,alehinta_alv,alehinta_val,hintaperuste,aleperuste");
+				//haetaan asiakkaan oma hinta
+				$laskurow["ytunnus"] 		= $ytunnus;
+				$laskurow["liitostunnus"] 	= $asiakas;
+				$laskurow["vienti"] 		= '';
+				$laskurow["alv"] 			= '';
+
+				$hinnat = alehinta($laskurow, $alehinrrow, 1, '', '', '', "hinta,netto,ale,alehinta_alv,alehinta_val,hintaperuste,aleperuste", $GLOBALS['eta_yhtio']);
 
 				$hinta = $hinnat["hinta"];
 				$netto = $hinnat["netto"];

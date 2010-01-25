@@ -181,7 +181,7 @@
 					$query = "	SELECT *
 								FROM tuote
 								WHERE yhtio = '{$GLOBALS['eta_yhtio']}'
-								AND tuoteno = '{$row['tuoteno']}'";
+								AND tuoteno = '{$rrow['tuoteno']}'";
 					$tres_eta = mysql_query($query) or pupe_error($query);
 					$alehinrrow = mysql_fetch_assoc($tres_eta);
 				}

@@ -668,21 +668,22 @@ else {
 			$maehrowx = mysql_fetch_assoc($result);
 
 			if ($yhtiorow["splittauskielto"] == "K") {
-				$sorttaus = "kerayspvm, sorttauskentta";
+				$sorttaus = "tilausrivi.kerayspvm, sorttauskentta";
 			}
 			else {
 				$sorttaus = "sorttauskentta";
 			}
 
 			//haetaan kaikkien tilausrivien varastopaikat
-			$query = "	SELECT otunnus, tunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso,  kerayspvm, toimaika,
-						concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,  tilausrivi.kerayspvm, tilausrivi.toimaika, tilausrivin_lisatiedot.erikoistoimitus_myynti,
+						concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 						FROM tilausrivi
-						WHERE yhtio = '$kukarow[yhtio]'
-						and otunnus = '$laskurow[tunnus]'
-						and hyllyalue != ''
-						and varattu+kpl > 0
-						and var not in ('J','P')
+						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and tilausrivi.otunnus = '$laskurow[tunnus]'
+						and tilausrivi.hyllyalue != ''
+						and tilausrivi.varattu+tilausrivi.kpl > 0
+						and tilausrivi.var not in ('J','P')
 						ORDER BY $sorttaus";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -806,6 +807,16 @@ else {
 							case 'ultilno':
 								$values .= ", '$ultilno'";
 								break;
+							case 'rahtivapaa':
+								if ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') {
+									$values .= ", 'o'";
+									break;
+								}
+							case 'toimitustapa':
+								if ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') {
+									$values .= ", '$varaston_row[erikoistoimitus_toimitustapa]'";
+									break;
+								}
 							default:
 								$values .= ", '".$laskurow[$fieldname]."'";
 						}
@@ -819,6 +830,8 @@ else {
 
 				}
 				else {
+					$toimitustapalisa = ($row['erikoistoimitus_myynti'] == 1 and $varaston_row['erikoistoimitus_toimitustapa'] != '') ? ", toimitustapa = '$varaston_row[erikoistoimitus_toimitustapa]', rahtivapaa = 'o' " : '';
+
 					//p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu
 					$query = "	UPDATE lasku set
 								varasto 							= '$varasto',
@@ -839,6 +852,7 @@ else {
 								bruttopaino 						= '$laskurow[bruttopaino]',
 								lisattava_era 						= '$laskurow[lisattava_era]',
 								vahennettava_era 					= '$laskurow[vahennettava_era]'
+								$toimitustapalisa
 								where yhtio ='$kukarow[yhtio]'
 								and tunnus = '$laskurow[tunnus]'";
 					$varresult = mysql_query($query) or pupe_error($query);

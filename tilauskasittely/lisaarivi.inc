@@ -257,6 +257,7 @@
 	$myy_hyllytaso = array();
 	$myy_hyllyvali = array();
 	$myy_varasto = array();
+	$myy_erikoistoimitus = array();
 	$myy_kpl_myyty = array();
 	$myy_hintakerr = array();
 	$myy_alekerroi = array();
@@ -571,7 +572,7 @@
 					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
-								varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
+								varastopaikat.nimitys, if (varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma
 					 			FROM tuote
 								JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -634,6 +635,7 @@
 					$zzrow[$zzrowlask]["hyllynro"]		= $zrow["hyllynro"];
 					$zzrow[$zzrowlask]["hyllyvali"]		= $zrow["hyllyvali"];
 					$zzrow[$zzrowlask]["hyllytaso"]		= $zrow["hyllytaso"];
+					$zzrow[$zzrowlask]['erikoistoimitus_alarajasumma']  = $zrow['erikoistoimitus_alarajasumma'];
 
 					if ($lisaarivi_debug==1) echo "Myyt‰viss‰ $tuoteno paikalta $zrow[hyllyalue]: $myytavissa kappaletta<br>";
 
@@ -693,7 +695,8 @@
 				if (count($zzrow) > 0) {
 					// Jos tuotteella on tuotepaikkoja
 					foreach($zzrow as $zrow) {
-						if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and ($zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (is_array($varasto) and in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
+
+						if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and (($zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) or $zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (is_array($varasto) and in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
 
 							if ($lisaarivi_debug==1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]: $zrow[myytavissa] kappaletta<br>";
 
@@ -715,6 +718,15 @@
 								$myy_tyyppi[$i] = "LAPSITUOTE";
 								$lapsiyhteensa += $zrow["myytavissa"]; // summaillaan kaikkien lapsien saldoa yhteens‰.
 							}
+
+							// jos halutaan myyd‰ erikoisvarastosta ja alarajasumma on syˆtetty ja tuotteen myyntihinta ylitt‰‰ alarajasumman
+							if ($zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) {
+								$myy_erikoistoimitus[$i] = true;
+							}
+							else {
+								$myy_erikoistoimitus[$i] = false;
+							}
+
 							//Kasvatetaan indeksi‰
 							$i++;
 						}
@@ -837,6 +849,11 @@
 
 				foreach ($myy_tuoteno as $i => $tuoteno) {
 					if (!in_array($myy_varasto[$i], $varasto) and $myy_varasto[$i] != "") {
+
+						// jos halutaan myyd‰ erikoisvarastosta (josta ei myyd‰ automaattisesti eli tyyppi E), niin ei poisteta sit‰ arraysta
+						if ($myy_erikoistoimitus[$i]) {
+							continue;
+						}
 
 						if ($myy_tyyppi[$i] == "NORMAALI") {
 							$saldoyhteensa -= $myy_kpl[$i];
@@ -1115,7 +1132,8 @@
 												tilausrivilinkki	= '$tilausrivilinkki',
 												toimittajan_tunnus	= '$toimittajan_tunnus',
 												muutospvm			= now(),
-												muuttaja			= '$kukarow[kuka]'
+												muuttaja			= '$kukarow[kuka]',
+												erikoistoimitus_myynti = '$myy_erikoistoimitus[$indeksi]'
 												WHERE yhtio			 = '$kukarow[yhtio]'
 												and tilausrivitunnus = '$lisatty_tun'";
 									$result = mysql_query($query) or pupe_error($query);
@@ -1136,6 +1154,7 @@
 												toimittajan_tunnus	= '$toimittajan_tunnus',
 												ei_nayteta 			= '$myy_lapsi_ein[$indeksi]',
 												tilausrivitunnus	= '$lisatty_tun',
+												erikoistoimitus_myynti = '$myy_erikoistoimitus[$indeksi]',
 												vanha_otunnus		= '$kukarow[kesken]',
 												jarjestys			= '$jarjestys',
 												luontiaika			= now(),

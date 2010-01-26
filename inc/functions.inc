@@ -5038,11 +5038,11 @@ if (!function_exists("js_popup")) {
 		}
 
 	    function toolTipShow(e, x, y) {
-	        toolTip.css({'top':y, 'left':x}).show();
+	        toolTip.css({'top':y, 'left':x}).delay(2000).show('fast');
 	    }
 
 	    function toolTipHide() {
-			toolTip.hide();
+			toolTip.hide().clearQueue();
 	    }
 
 	    //events for each element
@@ -7038,9 +7038,12 @@ if (!function_exists("hae_rahtimaksu")) {
 		}
 
 		// jos meillä on automaattinen tuoteella tallennettuihin painoihin perustuva hinnoittelu
+		// rahtimaksujen hinnoitteluun otetaan vain tuotteet joita ei myydä erikoisvarastoista (etävarastot joista ei myydä automaattisesti eli tyyppi = E). Tällöin on täpätty erikoistoimitus_myynti on 0 eli false. 
+		// erikoisvarastoista myydyt tuotteet ovat aina rahtivapaita ja lähettäjä maksaa rahdin.
 		if ($yhtiorow["rahti_hinnoittelu"] == 'P') {
 			$query  = "	SELECT sum(tuotemassa * (varattu + kpl + jt)) massa
 						FROM tilausrivi
+						JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.erikoistoimitus_myynti = 0)
 						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
 							AND tuote.tuoteno = tilausrivi.tuoteno
 							AND tuote.ei_saldoa = '')
@@ -7055,18 +7058,20 @@ if (!function_exists("hae_rahtimaksu")) {
 		elseif ($yhtiorow["rahti_hinnoittelu"] == "o") {
 			// alvittomat hinnat
 			if ($yhtiorow["alv_kasittely"] == '') {
-				$query = "	SELECT round(((varattu + kpl + jt) * hinta * (1 - (ale / 100))) / (1 + alv / 100), '$yhtiorow[hintapyoristys]') rivihinta, netto
+				$query = "	SELECT round(((tilausrivi.varattu + tilausrivi.kpl + tilausrivi.jt) * tilausrivi.hinta * (1 - (tilausrivi.ale / 100))) / (1 + tilausrivi.alv / 100), '$yhtiorow[hintapyoristys]') rivihinta, tilausrivi.netto
 							FROM tilausrivi
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND tyyppi in ('L', 'E')
-							AND otunnus in ($otsikot)";
+							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.erikoistoimitus_myynti = 0)
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							AND tilausrivi.tyyppi in ('L', 'E')
+							AND tilausrivi.otunnus in ($otsikot)";
 			}
 			else {
-				$query = "	SELECT round(((varattu + kpl + jt) * hinta * (1 - (ale / 100))), '$yhtiorow[hintapyoristys]') rivihinta, netto
+				$query = "	SELECT round(((tilausrivi.varattu + tilausrivi.kpl + tilausrivi.jt) * tilausrivi.hinta * (1 - (tilausrivi.ale / 100))), '$yhtiorow[hintapyoristys]') rivihinta, tilausrivi.netto
 							FROM tilausrivi
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND tyyppi in ('L', 'E')
-							AND otunnus in ($otsikot)";
+							JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.erikoistoimitus_myynti = 0)
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							AND tilausrivi.tyyppi in ('L', 'E')
+							AND tilausrivi.otunnus in ($otsikot)";
 			}
 			$presult = mysql_query($query) or pupe_error($query);
 

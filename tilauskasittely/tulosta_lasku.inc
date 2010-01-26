@@ -292,7 +292,7 @@ if (!function_exists('alku')) {
 		$toimaikares = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($toimaikares) > 1) {
-			$pdf->draw_text(430, 656, t("Useita"), 											$thispage, $norm);
+			$pdf->draw_text(430, 656, t("Useita", $kieli), 											$thispage, $norm);
 		}
 		else {
 			$toimaikarow = mysql_fetch_array($toimaikares);

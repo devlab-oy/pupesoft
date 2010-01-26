@@ -13,7 +13,8 @@ if ($xyhtio == "") {
 	$xyhtio	= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
 }
 
-$xverkkotunnus_vas		= "";
+$xverkkotunnus_vas	= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
+
 $xlaskun_tyyppi 		= $xml->InvoiceDetails->InvoiceTypeCode;
 $xlaskunro 				= $xml->InvoiceDetails->InvoiceNumber;
 $xlaskun_ebid 			= "";
@@ -42,6 +43,9 @@ if ($xlaskun_summa_eur == "") {
 
 // Varmistetaan, ett‰ tunnus on ovtunnus muodossa
 $xyhtio = preg_replace("/[^0-9]/", "", $xyhtio);
+
+// Varmistetaan, ett‰ tunnus on ytunnus muodossa (Finvoicessa t‰‰ll‰ tulee siis vastanottajan ytunnus FI etuliitteell‰)
+$xverkkotunnus_vas = preg_replace("/[^0-9]/", "", $xverkkotunnus_vas);
 
 if (strpos($xyhtio, "0037") === FALSE) {
 	$xyhtio = "0037".$xyhtio;

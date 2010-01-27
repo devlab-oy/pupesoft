@@ -674,7 +674,7 @@ while ($date != $whileloppu) {
 				LEFT JOIN kuka ON kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio
 				WHERE kalenteri.kuka in ($vertaa)
 				$konsernit
-				and kalenteri.tyyppi= 'kalenteri'
+				and kalenteri.tyyppi in ('kalenteri', 'asennuskalenteri')
 				and pvmalku  <= '$year-$kuu-$paiva $date:00'
 				and pvmloppu >= '$year-$kuu-$paiva $date:00'
 				and kokopaiva = ''";
@@ -711,11 +711,12 @@ while ($kello_nyt != $whileloppu) {
 				kalenteri.yhtio yhtio,
 				kalenteri.kuka kuka,
 				kalenteri.laatija laatija,
-				kalenteri.kuittaus
+				kalenteri.kuittaus,
+				kalenteri.tyyppi
 				FROM kalenteri
 				LEFT JOIN kuka ON kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio
 				WHERE kalenteri.kuka in ($vertaa)
-				and kalenteri.tyyppi= 'kalenteri'
+				and kalenteri.tyyppi in ('kalenteri', 'asennuskalenteri')
 				and kokopaiva = ''
 				$konsernit
 				HAVING pvmalku  = '$year-$kuu-$paiva $kello_nyt:00'
@@ -730,7 +731,7 @@ while ($kello_nyt != $whileloppu) {
 				LEFT JOIN kuka ON kalenteri.kuka = kuka.kuka and kalenteri.yhtio = kuka.yhtio
 				WHERE kalenteri.kuka in ($vertaa)
 				$konsernit
-				and kalenteri.tyyppi= 'kalenteri'
+				and kalenteri.tyyppi in ('kalenteri', 'asennuskalenteri')
 				and kokopaiva = ''
 				HAVING
 				pvmalku  <= '$year-$kuu-$paiva $kello_nyt:00'
@@ -757,7 +758,7 @@ while ($kello_nyt != $whileloppu) {
 				$kesto=round(($row['kesto']/60)/30); //kuinka monta solua tämä itemi kestää
 
 				//haetaan asiakkaan tiedot
-				if ($row["liitostunnus"] > 0) {
+				if ($row["liitostunnus"] > 0 and $row['tyyppi'] == 'kalenteri') {
 					$query = "	SELECT *
 								from asiakas
 								where tunnus = '$row[liitostunnus]' ".str_ireplace("kalenteri.", "", $konsernit);
@@ -786,29 +787,33 @@ while ($kello_nyt != $whileloppu) {
 				$kaleloppu  = (int) date('Ymd',mktime(0,0,0,$rkk,$rpp,$rvv));
 				$aikanyt 	= (int) date('Ymd',mktime(0,0,0,date('m'),date('d'),date('Y')));
 
-				$query = "	SELECT selitetark_2
-							FROM avainsana
-							WHERE laji = 'KALETAPA' and selitetark='$row[tapa]' ".str_ireplace("kalenteri.", "", $konsernit)."
-							ORDER BY selite+0, laji, jarjestys, selite";
-				$varires = mysql_query($query) or pupe_error($query);
-				$varirow = mysql_fetch_array($varires);
+				$varilisa = "";
 
-				if ($varirow["selitetark_2"] != "") {
-					$varilisa = "background-color: $varirow[selitetark_2];";
-				}
-				else {
-					$varilisa = "";
+				if ($row['tyyppi'] == 'kalenteri') {
+					$query = "	SELECT selitetark_2
+								FROM avainsana
+								WHERE laji = 'KALETAPA' and selitetark='$row[tapa]' ".str_ireplace("kalenteri.", "", $konsernit)."
+								ORDER BY selite+0, laji, jarjestys, selite";
+					$varires = mysql_query($query) or pupe_error($query);
+					$varirow = mysql_fetch_array($varires);
+
+					if ($varirow["selitetark_2"] != "") {
+						$varilisa = "background-color: $varirow[selitetark_2];";
+					}
 				}
 
 				// Vanhoja kalenteritapahtumia ei saa enää muuttaa ja Hyväksyttyjä lomia ei saa ikinä muokata
-				if (($kukarow["kuka"] == $row["kuka"] or $kukarow["kuka"] == $row["laatija"]) and $row["kuittaus"] == "") {
+				if (($kukarow["kuka"] == $row["kuka"] or $kukarow["kuka"] == $row["laatija"]) and $row["kuittaus"] == "" and $row['tyyppi'] == 'kalenteri') {
 					echo "<td class='tumma'  rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi<a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&lopetus=$lopetus'>$row[tapa]</a>";
+				}
+				elseif ($row['tyyppi'] == 'asennuskalenteri') {
+					echo "<td class='tumma' rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>",t("Asennustyö")," $row[liitostunnus]";
 				}
 				else {
 					echo "<td class='tumma' rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi $row[tapa]";
 				}
 
-				if ($row["liitostunnus"] != 0) {
+				if ($row['tyyppi'] == 'kalenteri' and $row["liitostunnus"] != 0) {
 					if ($kukarow["yhtio"] == $row["yhtio"]) {
 						echo "<a href='asiakasmemo.php?ytunnus=$row[asiakas]&asiakasid=$row[liitostunnus]'>$asiak[nimi]</a>";
 					}

@@ -457,7 +457,7 @@
 										echo "</div>";
 									}
 
-									$varaukset[$b][$a] = $vrow["nimi"]."|||".$vrow["liitostunnus"]."|||".$vrow["tapa"]."|||".$vrow["tyyppi"]."|||".$vrow["tyostatus"];
+									$varaukset[$b][$a][] = $vrow["nimi"]."|||".$vrow["liitostunnus"]."|||".$vrow["tapa"]."|||".$vrow["tyyppi"]."|||".$vrow["tyostatus"];
 								}
 							}
 						}
@@ -484,29 +484,40 @@
 
 					foreach ($ASENTAJA_ARRAY as $b) {
 						if (isset($varaukset[$b][$a])) {
-							list($nimi, $tilausnumero, $tapa, $tyyppi, $tyostatus) = explode("|||", $varaukset[$b][$a]);
+							echo "<td align='center' $varilisa width='40px'>";
+							foreach ($varaukset[$b][$a] as $varaus) {
+								list($nimi, $tilausnumero, $tapa, $tyyppi, $tyostatus) = explode("|||", $varaus);
 
-							if ($tyyppi == "asennuskalenteri") {
-								$zul = $tilausnumero;
+								if ($tyyppi == "asennuskalenteri") {
+									$zul = $tilausnumero;
 
-								$query = "	SELECT selitetark_2
-											FROM avainsana
-											WHERE laji = 'TYOM_TYOSTATUS' and selite='$tyostatus' and yhtio = '$kukarow[yhtio]'";
-								$varires = mysql_query($query) or pupe_error($query);
-								$varirow = mysql_fetch_array($varires);
+									$query = "	SELECT selitetark_2
+												FROM avainsana
+												WHERE laji = 'TYOM_TYOSTATUS' and selite='$tyostatus' and yhtio = '$kukarow[yhtio]'";
+									$varires = mysql_query($query) or pupe_error($query);
+									$varirow = mysql_fetch_array($varires);
 
-								if ($varirow["selitetark_2"] != "") {
-									$varilisa = "style='background-color: $varirow[selitetark_2];'";
+									if ($varirow["selitetark_2"] != "") {
+										$varilisa = "style='background-color: $varirow[selitetark_2];'";
+									}
+									else {
+										$varilisa = "";
+									}
 								}
 								else {
-									$varilisa = "";
+									$zul = $tapa;
 								}
-							}
-							else {
-								$zul = $tapa;
-							}
 
-							echo "<td align='center' $varilisa width='40px' class='tooltip' id='$tilausnumero'><a class='td' href='tyojono.php?myyntitilaus_haku=$tilausnumero&lopetus=$lopetus'>$zul</a></td>";
+								if ($tyyppi == 'asennuskalenteri') {
+									echo "<a class='tooltip' id='$tilausnumero' href='tyojono.php?myyntitilaus_haku=$tilausnumero&lopetus=$lopetus'>$zul</a>";
+								}
+								else {
+									echo "$zul";
+								}
+
+								echo "&nbsp;&nbsp;";
+							}
+							echo "</td>";
 						}
 						elseif ($liitostunnus > 0 and $tyojono != "" and (float) str_replace("-", "", $laskurow["toimaika"]) < (float) $year.sprintf("%02d", $month).sprintf("%02d", $i)) {
 							echo "<td align='center' class='tumma' width='40px'>&nbsp;</td>";

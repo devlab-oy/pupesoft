@@ -17,113 +17,127 @@ if ($tila == 'K') {
 	}
 }
 
-if ($tila == 'K') {
+if ($tila == 'K' and is_array($luottotappio)) {
 	//AND tiliointi.tapvm = lasku.tapvm
-	$query = "	SELECT lasku.*, tiliointi.ltunnus, tiliointi.tilino, tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti
-				FROM lasku
-				JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu = ''
-				AND tiliointi.tilino NOT IN ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[alv]'))
-				WHERE lasku.yhtio		= '$kukarow[yhtio]'
-				AND lasku.mapvm			= '0000-00-00'
-				AND lasku.tila			= 'U'
-				AND lasku.alatila		= 'X'
-				AND lasku.liitostunnus	= '$liitostunnus'
-				ORDER BY 1";
-	$laskuresult = mysql_query($query) or pupe_error($query);
+	
+	$laskunrot = implode(",", $luottotappio);
+	
+	if ($laskunrot != "") {
+		$query = "	SELECT lasku.*, tiliointi.ltunnus, tiliointi.tilino, tiliointi.summa, tiliointi.vero, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti
+					FROM lasku
+					JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu = ''
+					AND tiliointi.tilino NOT IN ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[alv]'))
+					WHERE lasku.yhtio		= '$kukarow[yhtio]'
+					AND lasku.mapvm			= '0000-00-00'
+					AND lasku.tila			= 'U'
+					AND lasku.alatila		= 'X'
+					AND lasku.liitostunnus	= '$liitostunnus'
+					and lasku.laskunro in ($laskunrot)
+					ORDER BY 1";
+		$laskuresult = mysql_query($query) or pupe_error($query);
+				
+		while ($lasku = mysql_fetch_array($laskuresult)) {
 
-	while ($lasku = mysql_fetch_array($laskuresult)) {
+			if ($lasku['tilino'] != $yhtiorow['myyntisaamiset'] and $lasku['tilino'] != $yhtiorow['factoringsaamiset'] and $lasku['tilino'] != $yhtiorow['konsernimyyntisaamiset']) {
+				// Hoidetaan alv
+				$alv = round($lasku['summa'] * $lasku['vero'] / 100, 2);
 
-		if ($lasku['tilino'] != $yhtiorow['myyntisaamiset'] and $lasku['tilino'] != $yhtiorow['factoringsaamiset'] and $lasku['tilino'] != $yhtiorow['konsernimyyntisaamiset']) {
-			// Hoidetaan alv
-			$alv = round($lasku['summa'] * $lasku['vero'] / 100, 2);
+				$query = "	INSERT INTO tiliointi SET
+							yhtio		= '$kukarow[yhtio]',
+							ltunnus		= '$lasku[ltunnus]',
+							tilino		= '$yhtiorow[luottotappiot]',
+							kustp		= '$lasku[kustp]',
+							kohde		= '$lasku[kohde]',
+							projekti	= '$lasku[projekti]',
+							tapvm 		= '$tpv-$tpk-$tpp',
+							summa		= $lasku[summa] * -1,
+							vero		= '$lasku[vero]',
+							selite		= '$lasku[selite]',
+							lukko		= '',
+							tosite		= '$lasku[tosite]',
+							laatija		= '$kukarow[kuka]',
+							laadittu	= now()";
+				$result = mysql_query($query) or pupe_error($query);
+				$isa = mysql_insert_id ($link);
 
-			$query = "	INSERT INTO tiliointi SET
-						yhtio		= '$kukarow[yhtio]',
+				// Tiliöidään alv
+				if ($lasku['vero'] != 0) {
+
+					// jos yhtiön toimipaikka löytyy, otetaan alvtilinumero tämän takaa jos se löytyy
+					if ($lasku["yhtio_toimipaikka"] != '' and $yhtiorow["toim_alv"] != '') {
+						$query = "	INSERT INTO tiliointi SET
+									yhtio		= '$kukarow[yhtio]',
+									ltunnus		= '$lasku[ltunnus]',
+									tilino		= '$yhtiorow[toim_alv]',
+									kustp		= 0,
+									kohde		= 0,
+									projekti	= 0,
+									tapvm		= '$tpv-$tpk-$tpp',
+									summa		= $alv * -1,
+									vero		= 0,
+									selite		= '$lasku[selite]',
+									lukko		= '1',
+									tosite		= '$lasku[tosite]',
+									laatija		= '$kukarow[kuka]',
+									laadittu	= now(),
+									aputunnus	= '$isa'";
+						$result = mysql_query($query) or pupe_error($query);
+					}
+					else {
+						$query = "	INSERT INTO tiliointi SET
+									yhtio		= '$kukarow[yhtio]',
+									ltunnus		= '$lasku[ltunnus]',
+									tilino		= '$yhtiorow[alv]',
+									kustp		= 0,
+									kohde		= 0,
+									projekti	= 0,
+									tapvm		= '$tpv-$tpk-$tpp',
+									summa		= $alv * -1,
+									vero		= 0,
+									selite		= '$lasku[selite]',
+									lukko		= '1',
+									tosite		= '$lasku[tosite]',
+									laatija		= '$kukarow[kuka]',
+									laadittu	= now(),
+									aputunnus	= '$isa'";
+						$result = mysql_query($query) or pupe_error($query);
+					}
+				}
+			}
+			else {
+				$query = "INSERT INTO tiliointi SET
+						yhtio 		= '$kukarow[yhtio]',
 						ltunnus		= '$lasku[ltunnus]',
-						tilino		= '$yhtiorow[luottotappiot]',
+						tilino		= '$lasku[tilino]',
 						kustp		= '$lasku[kustp]',
 						kohde		= '$lasku[kohde]',
 						projekti	= '$lasku[projekti]',
-						tapvm 		= '$tpv-$tpk-$tpp',
+						tapvm		= '$tpv-$tpk-$tpp',
 						summa		= $lasku[summa] * -1,
-						vero		= '$lasku[vero]',
+						vero		= 0,
 						selite		= '$lasku[selite]',
 						lukko		= '',
 						tosite		= '$lasku[tosite]',
 						laatija		= '$kukarow[kuka]',
 						laadittu	= now()";
-			$result = mysql_query($query) or pupe_error($query);
-			$isa = mysql_insert_id ($link);
-
-			// Tiliöidään alv
-			if ($lasku['vero'] != 0) {
-
-				// jos yhtiön toimipaikka löytyy, otetaan alvtilinumero tämän takaa jos se löytyy
-				if ($lasku["yhtio_toimipaikka"] != '' and $yhtiorow["toim_alv"] != '') {
-					$query = "	INSERT INTO tiliointi SET
-								yhtio		= '$kukarow[yhtio]',
-								ltunnus		= '$lasku[ltunnus]',
-								tilino		= '$yhtiorow[toim_alv]',
-								kustp		= 0,
-								kohde		= 0,
-								projekti	= 0,
-								tapvm		= '$tpv-$tpk-$tpp',
-								summa		= $alv * -1,
-								vero		= 0,
-								selite		= '$lasku[selite]',
-								lukko		= '1',
-								tosite		= '$lasku[tosite]',
-								laatija		= '$kukarow[kuka]',
-								laadittu	= now(),
-								aputunnus	= '$isa'";
-					$result = mysql_query($query) or pupe_error($query);
-				}
-				else {
-					$query = "	INSERT INTO tiliointi SET
-								yhtio		= '$kukarow[yhtio]',
-								ltunnus		= '$lasku[ltunnus]',
-								tilino		= '$yhtiorow[alv]',
-								kustp		= 0,
-								kohde		= 0,
-								projekti	= 0,
-								tapvm		= '$tpv-$tpk-$tpp',
-								summa		= $alv * -1,
-								vero		= 0,
-								selite		= '$lasku[selite]',
-								lukko		= '1',
-								tosite		= '$lasku[tosite]',
-								laatija		= '$kukarow[kuka]',
-								laadittu	= now(),
-								aputunnus	= '$isa'";
-					$result = mysql_query($query) or pupe_error($query);
-				}
+				$result = mysql_query($query) or pupe_error($query);
 			}
-		}
-		else {
-			$query = "INSERT INTO tiliointi SET
-					yhtio 		= '$kukarow[yhtio]',
-					ltunnus		= '$lasku[ltunnus]',
-					tilino		= '$lasku[tilino]',
-					kustp		= '$lasku[kustp]',
-					kohde		= '$lasku[kohde]',
-					projekti	= '$lasku[projekti]',
-					tapvm		= '$tpv-$tpk-$tpp',
-					summa		= $lasku[summa] * -1,
-					vero		= 0,
-					selite		= '$lasku[selite]',
-					lukko		= '',
-					tosite		= '$lasku[tosite]',
-					laatija		= '$kukarow[kuka]',
-					laadittu	= now()";
+
+			$query = "UPDATE lasku set mapvm = '$tpv-$tpk-$tpp' where yhtio ='$kukarow[yhtio]' and tunnus = '$lasku[ltunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 
-		$query = "UPDATE lasku set mapvm = '$tpv-$tpk-$tpp' where yhtio ='$kukarow[yhtio]' and tunnus = '$lasku[ltunnus]'";
-		$result = mysql_query($query) or pupe_error($query);
+		echo "<font class='message'>".t("Laskut on tiliöity luottotappioksi")."!</font><br><br>";
+		$tila = "";
 	}
-
-	echo "<font class='message'>".t("Laskut on tiliöity luottotappioksi")."!</font><br><br>";
-	$tila = "";
+	else {
+		echo "<font class='message'>".t("VIRHE: Et valinnut yhtään laskua")."!</font><br><br>";
+		$tila = "N";
+	}
+}
+elseif ($tila == 'K') {
+	echo "<font class='message'>".t("VIRHE: Et valinnut yhtään laskua")."!</font><br><br>";
+	$tila = "N";
 }
 
 if ($tila == 'N') {
@@ -159,6 +173,10 @@ if ($tila == 'N') {
 	echo "</table>";
 
 	echo "<br><font class='message'>".t("Erittely:")."</font><br>";
+	
+	echo "<form action = '$PHP_SELF' method = 'post' name='pvm'>";
+	echo "<input type='hidden' name='tila' value='K'>";
+	echo "<input type='hidden' name='liitostunnus' value='$liitostunnus'>";	
 	echo "<table><tr>";
 
 	$query = "	SELECT laskunro, tapvm, erpcm, summa-saldo_maksettu summa
@@ -176,6 +194,7 @@ if ($tila == 'N') {
 	echo "<th>".t("Tapvm")."</th>";
 	echo "<th>".t("Eräpvm")."</th>";
 	echo "<th>".t("Summa")."</th>";
+	echo "<th>".t("Luottotappio")."</th>";
 	echo "</tr>";
 
 	while ($lasku = mysql_fetch_array ($result)) {
@@ -184,14 +203,13 @@ if ($tila == 'N') {
 		echo "<td>".tv1dateconv($lasku["tapvm"])."</td>";
 		echo "<td>".tv1dateconv($lasku["erpcm"])."</td>";
 		echo "<td align='right'>$lasku[summa]</td>";
+		echo "<td align='center'><input type='checkbox' name='luottotappio[]' value='$lasku[laskunro]' CHECKED></td>";
 		echo "</tr>";
 	}
 
 	echo "</table><br>";
 
-	echo "<form action = '$PHP_SELF' method = 'post' name='pvm'>";
-	echo "<input type='hidden' name='tila' value='K'>";
-	echo "<input type='hidden' name='liitostunnus' value='$liitostunnus'>";
+	
 
 
 	if (!isset($tpk)) $tpk = date("m");

@@ -173,6 +173,8 @@
 								$talis++;
 								$worksheet->writeString($excelrivi, $i+$talis, "tuotteen_avainsanat.selite", $format_bold);
 								$talis++;
+								$worksheet->writeString($excelrivi, $i+$talis, "tuotteen_avainsanat.jarjestys", $format_bold);
+								$talis++;
 								$worksheet->writeString($excelrivi, $i+$talis, "tuotteen_avainsanat.kieli", $format_bold);
 							}
 							else {

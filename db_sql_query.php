@@ -37,7 +37,7 @@
 
 		if ($rtee == "AJA" and isset($ruks_pakolliset)) {
 			require("inc/pakolliset_sarakkeet.inc");
-			
+
 			list($pakolliset, $kielletyt, $wherelliset, , ) = pakolliset_sarakkeet($table);
 
 			if (!is_array($wherelliset)) {
@@ -53,7 +53,7 @@
 		}
 
 		list($kysely_kuka, $kysely_mika) = explode("#", $kysely);
-		
+
 		// jos ollaan annettu uusirappari nimi, niin unohdetaan dropdowni!
 		if ($uusirappari != "") $kysely = "";
 
@@ -116,21 +116,21 @@
 
 			$selecti  = "";
 			$selecti2 = "";
-			
-			foreach ($kentat as $kentta) {			
+
+			foreach ($kentat as $kentta) {
 				if (substr($kentta, 0, strlen($table)) == $table) {
 					$selecti .= $kentta.",";
 				}
 				elseif (substr($kentta, 0, 19) == "tuotteen_avainsanat"){
-					
+
 					$kentta = str_replace("tuotteen_avainsanat.", "", $kentta);
-					
+
 					list ($kentta, $kieli) = explode(":", $kentta);
-															
-					$selecti .= "(SELECT concat_ws('##', laji, selite, kieli) FROM tuotteen_avainsanat WHERE tuote.yhtio=tuotteen_avainsanat.yhtio and tuote.tuoteno=tuotteen_avainsanat.tuoteno and tuotteen_avainsanat.laji='$kentta' and tuotteen_avainsanat.kieli='$kieli') 'tuotteen_avainsanat.$kentta',";					
-				}				
-			} 
-			
+
+					$selecti .= "(SELECT concat_ws('##', laji, selite, jarjestys, kieli) FROM tuotteen_avainsanat WHERE tuote.yhtio=tuotteen_avainsanat.yhtio and tuote.tuoteno=tuotteen_avainsanat.tuoteno and tuotteen_avainsanat.laji='$kentta' and tuotteen_avainsanat.kieli='$kieli') 'tuotteen_avainsanat.$kentta',";
+				}
+			}
+
 			$selecti = substr($selecti, 0, -1);
 			$selecti2 = substr($selecti2, 0, -1);
 
@@ -164,20 +164,20 @@
 
 						$excelrivi = 0;
 						$talis = 0;
-						
+
 						for ($i=0; $i < mysql_num_fields($result); $i++) {
-							
+
 							if (strpos(mysql_field_name($result,$i), "tuotteen_avainsanat") !== FALSE) {
-								
+
 								$worksheet->writeString($excelrivi, $i+$talis, "tuotteen_avainsanat.laji", $format_bold);
 								$talis++;
 								$worksheet->writeString($excelrivi, $i+$talis, "tuotteen_avainsanat.selite", $format_bold);
 								$talis++;
 								$worksheet->writeString($excelrivi, $i+$talis, "tuotteen_avainsanat.kieli", $format_bold);
 							}
-							else {							
+							else {
 								$worksheet->write($excelrivi, $i+$talis, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
-							}							
+							}
 						}
 						$worksheet->write($excelrivi, $i+$talis, "TOIMINTO", $format_bold);
 						$excelrivi++;
@@ -218,19 +218,21 @@
 
 							list($workbook, $worksheet, $excelrivi) = tee_excel($result);
 						}
-						
+
 						$talis = 0;
 
-						for ($i=0; $i<mysql_num_fields($result); $i++) {																			
+						for ($i=0; $i<mysql_num_fields($result); $i++) {
 							if (strpos(mysql_field_name($result,$i), "tuotteen_avainsanat") !== FALSE) {
-								list ($laji,$selite, $kieli) = explode("##", $row[$i]);
-								
+								list ($laji, $selite, $tajarj, $kieli) = explode("##", $row[$i]);
+
 								$worksheet->writeString($excelrivi, $i+$talis, $laji);
 								$talis++;
 								$worksheet->writeString($excelrivi, $i+$talis, $selite);
 								$talis++;
+								$worksheet->writeString($excelrivi, $i+$talis, $tajarj);
+								$talis++;
 								$worksheet->writeString($excelrivi, $i+$talis, $kieli);
-							} 							
+							}
 							elseif (mysql_field_type($result,$i) == 'real') {
 								$worksheet->writeNumber($excelrivi, $i+$talis, $row[$i]);
 							}
@@ -238,7 +240,7 @@
 								$worksheet->writeString($excelrivi, $i+$talis, $row[$i]);
 							}
 						}
-						
+
 						$worksheet->writeString($excelrivi, $i+$talis, "MUUTA");
 						$excelrivi++;
 					}
@@ -260,34 +262,34 @@
 		echo "</td><td class='back' valign='top'>";
 
 		if ($table!='') {
-			
+
 			$fields = array();
-			
+
 			$query  = "SHOW columns from $table";
 			$fieldres =  mysql_query($query);
-			
+
 			while ($row = mysql_fetch_array($fieldres)) {
-				
+
 				$row[0] = $table.".".$row[0];
-				
+
 				$fields[] = $row;
 			}
-			
+
 			if ($table == "tuote") {
-				
-				
+
+
 				$query = "	SELECT DISTINCT selite, kieli
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]'
 							and avainsana.laji = 'PARAMETRI'
 							ORDER BY selite";
 				$al_res = mysql_query($query) or pupe_error($query);
-				
+
 				while ($al_row = mysql_fetch_array($al_res)) {
-										
+
 					$row = array();
 					$row[0] = "tuotteen_avainsanat.parametri_".$al_row["selite"].":".$al_row["kieli"];
-					
+
 					$fields[] = $row;
 				}
 			}

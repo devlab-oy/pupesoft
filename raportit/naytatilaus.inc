@@ -190,6 +190,23 @@
 
 		$linkurl = substr($linkurl,0,-4); // vika br pois
 	}
+	//luodaan ups seurantalinkki
+	elseif (strpos($rakirrow['rahtikirjanro'], 'UPS') !== FALSE) {
+		$linkurl = "";
+		$upsi = explode("<br>", trim($rakirrow['rahtikirjanro']));
+
+		foreach ($upsi as $nro) {
+			
+			if (substr($nro, 0, 3) == 'UPS') {
+				$linkurl .= "<a target=newikkuna href='http://www.ups.fi/hptrack/trackDlgRequest?HTMLVersion=5.0&loc=fi_FI&Requester=UPSHome&track.x=Track&trackNums=".substr($nro, 4)."&WBPM_lid=homepage/ct1.html_pnl_trk&modal=true&'>$nro</a><br>";
+			}
+			else {
+				$linkurl .= "$nro<br>";
+			}
+		}
+
+		$linkurl = substr($linkurl,0,-4); // vika br pois
+	}
 	//luodaan dpd seurantalinkk
 	elseif ($possi !== FALSE and $rakirrow['rahtikirjanro'] != '' and $dpdtun != '' and $dpdss != '') {
 		$linkurl = "";

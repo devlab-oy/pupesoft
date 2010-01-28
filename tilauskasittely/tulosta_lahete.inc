@@ -964,9 +964,16 @@ if (!function_exists('rivi_lahete')) {
 		$row["aleryhma"] 			= $asrow1["aleryhma"];
 
 		if ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
+			if ($row["netto"] == 'N') {
+				$row["rivihinta"] = $row["hinta"] * ($row["kpl"]+$row["varattu"]+$row["jt"]) * (1-$row["ale"]/100);
+			}
+			else {
+				$row["rivihinta"] = $row["hinta"] * ($row["kpl"]+$row["varattu"]+$row["jt"]) * (1-($row["ale"]+$laskurow["erikoisale"]-($row["ale"]*$laskurow["erikoisale"]/100))/100);
+			}
+
+			$row["rivihinta"] = round(laskuval($row["rivihinta"], $laskurow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
 			$row["hinta"] 	  = round(laskuval($row["hinta"], $laskurow["vienti_kurssi"]),$yhtiorow['hintapyoristys']);
-			$row["rivihinta"] = round(laskuval($row["rivihinta"], $laskurow["vienti_kurssi"]),$yhtiorow['hintapyoristys']);
-			$row["ovhhinta"]  = round(laskuval($row["ovhhinta"], $laskurow["vienti_kurssi"]),$yhtiorow['hintapyoristys']);
+			$row["ovhhinta"]  = round(laskuval($row["ovhhinta"], $laskurow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
 		}
 
 		$perheid 	 = $row["perheid"];

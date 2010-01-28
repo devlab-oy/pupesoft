@@ -81,6 +81,11 @@ if(!function_exists("pankkitiedot")) {
 						$pankki["pankkilaitos"] 	= "DnB NOR Bank ASA";
 						$pankki["swift"]			= "DNBAFIHX";
 						break;
+					case (8) : //Swedbank
+						$pankki["rahalaitos"]		= '  ';
+						$pankki["pankkilaitos"] 	= "Swedbank";
+						$pankki["swift"]		= "SWEDFIHH";
+						break;
 					case (9) : //S-Pankki
 						$pankki["rahalaitos"]		= '  ';
 						$pankki["pankkilaitos"] 	= "S-Pankki";

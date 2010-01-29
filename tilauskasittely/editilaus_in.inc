@@ -375,7 +375,8 @@ while (!feof ($fd)) {
 							FROM asiakas
 							WHERE yhtio = '$kukarow[yhtio]'
 							and toim_ovttunnus = '$tieto'
-							and toim_ovttunnus not in ('','0')";
+							and toim_ovttunnus not in ('','0')
+							and laji not in ('R','P')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -397,7 +398,8 @@ while (!feof ($fd)) {
 							FROM asiakas
 							WHERE yhtio = '$kukarow[yhtio]'
 							and toim_ovttunnus = '$tieto'
-							and toim_ovttunnus not in ('','0')";
+							and toim_ovttunnus not in ('','0')
+							and laji not in ('R','P')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -412,7 +414,8 @@ while (!feof ($fd)) {
 							FROM asiakas
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ovttunnus = '$tieto'
-							and ovttunnus not in ('','0')";
+							and ovttunnus not in ('','0')
+							and laji not in ('R','P')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -427,7 +430,8 @@ while (!feof ($fd)) {
 							FROM asiakas
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakasnro = '$tieto'
-							and asiakasnro not in ('','0')";
+							and asiakasnro not in ('','0')
+							and laji not in ('R','P')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -456,7 +460,8 @@ while (!feof ($fd)) {
 							FROM asiakas
 							WHERE yhtio = '$kukarow[yhtio]'
 							and toim_ovttunnus = '$tieto'
-							and toim_ovttunnus not in ('','0')";
+							and toim_ovttunnus not in ('','0')
+							and laji not in ('R','P')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -471,7 +476,8 @@ while (!feof ($fd)) {
 							FROM asiakas
 							WHERE yhtio = '$kukarow[yhtio]'
 							and ovttunnus = '$tieto'
-							and ovttunnus not in ('','0')";
+							and ovttunnus not in ('','0')
+							and laji not in ('R','P')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -486,7 +492,8 @@ while (!feof ($fd)) {
 							FROM asiakas
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakasnro = '$tieto'
-							and asiakasnro not in ('','0')";
+							and asiakasnro not in ('','0')
+							and laji not in ('R','P')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -529,7 +536,8 @@ while (!feof ($fd)) {
 							FROM asiakas
 							WHERE yhtio = '$kukarow[yhtio]'
 							and toim_ovttunnus = '$tieto'
-							and toim_ovttunnus not in ('','0')";
+							and toim_ovttunnus not in ('','0')
+							and laji not in ('R','P')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {

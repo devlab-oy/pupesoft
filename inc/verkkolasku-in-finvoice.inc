@@ -28,7 +28,12 @@ if ($xlaskun_erapaiva == "") {
 $xlaskuttajan_ovt		= $xml->SellerPartyDetails->SellerOrganisationUnitNumber;
 $xlaskuttaja			= $xml->SellerPartyDetails->SellerOrganisationName;
 $xlaskuttajan_vat		= $xml->SellerPartyDetails->SellerOrganisationTaxCode;
-$xlaskun_pankkiviite	= $xml->EpiDetails->EpiIdentificationDetails->EpiReference;
+
+$xlaskun_pankkiviite = $xml->EpiDetails->EpiPaymentInstructionDetails->EpiRemittanceInfoIdentifier;
+
+if ($xlaskun_pankkiviite == "") {
+	$xlaskun_pankkiviite = $xml->EpiDetails->EpiIdentificationDetails->EpiReference;
+}
 
 if ($xlaskun_pankkiviite == "") {
 	$xlaskun_pankkiviite = $xml->InvoiceDetails->SellerReferenceIdentifier;
@@ -128,10 +133,9 @@ $laskuttajan_nimi		= $xlaskuttaja;
 $laskuttajan_vat		= $xlaskuttajan_vat;
 $laskun_pankkiviite		= $xlaskun_pankkiviite;
 $laskun_summa_eur		= (float) str_replace(",", ".", $xlaskun_summa_eur);
-$laskun_pankkiviite 	= $xlaskun_pankkiviite;
 $laskun_asiakastunnus	= $xlaskun_asiakastunnus;
 
-$lisavat = array();
+$lisavat  = array();
 $xlisavat = array();
 $i = 0;
 

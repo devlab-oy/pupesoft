@@ -618,7 +618,7 @@
 			}
 
 			// Kirjoitetaan lasku
-			$query = "INSERT into lasku set
+			$query = "	INSERT into lasku set
 						yhtio = '$yhtio',
 						summa = '$summa',
 						kasumma = '$kassaale',
@@ -661,8 +661,9 @@
 						swift='$trow[swift]',
 						suoraveloitus='$trow[oletus_suoraveloitus]',
 						hyvaksynnanmuutos='$trow[oletus_hyvaksynnanmuutos]',
-						comments='$komm',
-						asiakkaan_tilausnumero='$laskun_numero'";
+						comments = '$komm',
+						laskunro = '$laskun_numero',
+						asiakkaan_tilausnumero = '$laskun_numero'";
 			$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 			$tunnus = mysql_insert_id();
 			$omasumma = round($summa * $vrow['kurssi'], 2);

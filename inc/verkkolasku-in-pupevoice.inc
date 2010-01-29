@@ -111,7 +111,6 @@ $laskuttajan_nimi		= $xlaskuttaja[0];
 $laskuttajan_vat		= $xlaskuttajan_vat[0];
 $laskun_pankkiviite		= $xlaskun_pankkiviite[0];
 $laskun_summa_eur		= (float) $xlaskun_summa_eur[0];
-$laskun_pankkiviite 	= $xlaskun_pankkiviite[0];
 $laskun_asiakastunnus	= $xlaskun_asiakastunnus[0];
 
 $lisavat = array();

@@ -18,7 +18,7 @@ if(!function_exists("asiakastarkista")) {
 							FROM yhtio
 							JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
 							where konserni	 = '$yhtiorow[konserni]'
-							and synkronoi like '%$toim%'";
+							and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
 				$sresult = mysql_query($query) or pupe_error($query);
 				$srowapu = mysql_fetch_array($sresult);
 
@@ -82,7 +82,7 @@ if(!function_exists("asiakastarkista")) {
 							FROM yhtio
 							JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
 							where konserni	 = '$yhtiorow[konserni]'
-							and synkronoi like '%$toim%'";
+							and (synkronoi = '$toim' or synkronoi like '$toim,%' or synkronoi like '%,$toim,%' or synkronoi like '%,$toim')";
 				$sresult = mysql_query($query) or pupe_error($query);
 				$srowapu = mysql_fetch_array($sresult);
 

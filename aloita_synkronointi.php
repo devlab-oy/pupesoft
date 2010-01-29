@@ -48,7 +48,7 @@ if ($tee == "SYNK") {
 					FROM yhtio
 					JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
 					where konserni	 = '$yhtiorow[konserni]'
-					and synkronoi like '%$table%'";
+					and (synkronoi = '$table' or synkronoi like '$table,%' or synkronoi like '%,$table,%' or synkronoi like '%,$table')";
 		$kohderes = mysql_query($query) or pupe_error($query);
 		$kohderow = mysql_fetch_array($kohderes);
 

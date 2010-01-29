@@ -480,7 +480,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 									FROM yhtio
 									JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
 									where konserni = '$yhtiorow[konserni]'
-									and synkronoi like '%asiakas%'";
+									and (synkronoi = 'asiakas' or synkronoi like 'asiakas,%' or synkronoi like '%,asiakas,%' or synkronoi like '%,asiakas')";
 						$vresult = mysql_query($query) or pupe_error($query);
 
 						if (mysql_num_rows($vresult) > 0) {
@@ -489,7 +489,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 										FROM yhtio
 										JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
 										where konserni = '$yhtiorow[konserni]'
-										and synkronoi like '%asiakas%'";
+										and (synkronoi = 'asiakas' or synkronoi like 'asiakas,%' or synkronoi like '%,asiakas,%' or synkronoi like '%,asiakas')";
 							$vresult = mysql_query($query) or pupe_error($query);
 							$srowapu = mysql_fetch_array($vresult);
 							$tarkyhtio = $srowapu["yhtiot"];

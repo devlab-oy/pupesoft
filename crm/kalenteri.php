@@ -166,7 +166,6 @@ if ($tee == 'LISAA') {
 			$kenelle = $kukarow["kuka"];
 		}
 
-
 		if ($asiakasyhtio!='') {
 			$kyhtio = $asiakasyhtio;
 		}
@@ -329,6 +328,29 @@ if($tee == "SYOTA") {
 		$lisays .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark]</option>";
 	}
 	$lisays .= "</select></td></tr>";
+
+	if ($yhtiorow["monikayttajakalenteri"] == "" or $kukarow["asema"] == "MP") {
+
+		$lisays .= "<tr><td>".t("Kalenteri")."</td><td><select name='kenelle'>";
+		$lisays .= "<option value='$kukarow[kuka]'>".t("Oma")."</option>";
+
+		$query = "	SELECT distinct kuka.nimi, kuka.kuka
+					FROM kuka, oikeu
+					WHERE kuka.yhtio	= '$kukarow[yhtio]'
+					and oikeu.yhtio		= kuka.yhtio
+					and oikeu.kuka		= kuka.kuka
+					and oikeu.nimi		= 'crm/kalenteri.php'
+					and kuka.tunnus <> '$kukarow[tunnus]'
+					ORDER BY kuka.nimi";
+		$result = mysql_query($query) or pupe_error($query);
+
+		while ($row = mysql_fetch_array($result)) {
+			$sel = $kenelle == $row['kuka'] ? ' selected' : '';
+			$lisays .= "<option value='$row[kuka]'$sel>$row[nimi]</option>";
+		}
+
+		$lisays .= "</select></td></tr>";
+	}
 
 	$lisays .= "<tr><td>".t("Asiakas").":</td><td><input type text name='ytunnus' value='$ytunnus'>";
 	$lisays .= "</td></tr>";

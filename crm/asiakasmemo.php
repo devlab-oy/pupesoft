@@ -35,7 +35,7 @@
 		if ($ytunnus != '' or $asiakasid > 0) {
 		
 			$kutsuja 	= "asiakasemo.php";
-			$ahlopetus 	= $palvelin2."crm/asiakasmemo.php";
+			$ahlopetus 	= $palvelin2."crm/asiakasmemo.php////";
 		
 			require ("../inc/asiakashaku.inc");
 		}

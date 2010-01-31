@@ -21,6 +21,8 @@
 		$ulos .= "<option value='tarratyyppi' $sel[tarratyyppi]>".t("Tuotteen tarratyyppi")."</option>";
 		$ulos .= "<option value='sistoimittaja' $sel[sistoimittaja]>".t("Tuotteen sisäinen toimittaja")."</option>";
 		$ulos .= "<option value='oletusvalinta' $sel[oletusvalinta]>".t("Tuotteen tilauksen oletusvalinta")."</option>";
+		$ulos .= "<option value='osasto' $sel[osasto]>".t("Tuotteen osasto")."</option>";
+		#$ulos .= "<option value='try' $sel[try]>".t("Tuotteen tuoteryhmä")."</option>";
 
 		$sresult = t_avainsana("TUOTEULK");
 		

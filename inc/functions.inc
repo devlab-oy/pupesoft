@@ -1729,7 +1729,7 @@ if (!function_exists("synkronoi")) {
 					from yhtio
 					JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
 					where yhtio.konserni	 		= '$yhtiorow[konserni]'
-					and yhtion_parametrit.synkronoi like '%$table%'
+					and (yhtion_parametrit.synkronoi = '$table' or yhtion_parametrit.synkronoi like '$table,%' or yhtion_parametrit.synkronoi like '%,$table,%' or yhtion_parametrit.synkronoi like '%,$table')
 					and yhtio.yhtio					!= '$yhtio'";
 		$kohderes = mysql_query($query) or pupe_error($query);
 

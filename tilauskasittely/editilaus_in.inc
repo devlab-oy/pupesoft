@@ -614,7 +614,7 @@ while (!feof ($fd)) {
 			$tpostitp = $tieto;
 			break;
 		case 'OSTOTIL.OT_MAKSETTU' :
-		// jos Magenton tilaus on jo maksettu luottokortilla niin p‰ivitet‰‰n maksuehto
+			// jos Magenton tilaus on jo maksettu luottokortilla niin p‰ivitet‰‰n maksuehto
 			if ($edi_tyyppi == "magento" and $tieto == 'processing') {
 				$kukarow["kassamyyja"] = $editilaus_kassalipas = "";
 
@@ -930,7 +930,7 @@ while (!feof ($fd)) {
 			break;
 		case 'OSTOTILRIV.OTR_RIVISUMMA' :
 			// jos tullaan magentosta ja meill‰ on rahtikulu, niin otetaan se hinta talteeen
-			if ($edi_tyyppi == "magento" and strtolower($tuoteno) == '100' and $tieto != '') {
+			if ($edi_tyyppi == "magento" and strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) and $tieto != '') {
 				$editilaus_rahtikulu_hinta = $tieto;
 			}
 			break;
@@ -986,7 +986,7 @@ while (!feof ($fd)) {
 					}
 
 					// jos tullaan magentosta ja hinta on tiedossa ja kyseess‰ on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
-					if ($edi_tyyppi == "magento" and strtolower($tuoteno) == '100' and $editilaus_rahtikulu_hinta != '') {
+					if ($edi_tyyppi == "magento" and strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) and $editilaus_rahtikulu_hinta != '') {
 						$hinta = $editilaus_rahtikulu_hinta;
 					}
 

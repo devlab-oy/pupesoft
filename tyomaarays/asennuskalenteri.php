@@ -417,7 +417,7 @@
 							if(kalenteri.tyyppi='asennuskalenteri', kalenteri.liitostunnus, kalenteri.tunnus) liitostunnus,
 							if(lasku.nimi='', kalenteri.kuka, lasku.nimi) nimi,
 							if(tyomaarays.komm1='' or tyomaarays.komm1 is null, kalenteri.kentta01, tyomaarays.komm1) komm1,
-							tyomaarays.komm2, lasku.viesti, tyomaarays.tyostatus
+							tyomaarays.komm2, lasku.viesti, tyomaarays.tyostatus, kalenteri.konserni
 							FROM kalenteri
 							LEFT JOIN avainsana ON kalenteri.yhtio = avainsana.yhtio and avainsana.laji = 'KALETAPA' and avainsana.selitetark = kalenteri.tapa
 							LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and lasku.tunnus=kalenteri.liitostunnus
@@ -457,7 +457,7 @@
 										echo "</div>";
 									}
 
-									$varaukset[$b][$a][] = $vrow["nimi"]."|||".$vrow["liitostunnus"]."|||".$vrow["tapa"]."|||".$vrow["tyyppi"]."|||".$vrow["tyostatus"];
+									$varaukset[$b][$a][] = $vrow["nimi"]."|||".$vrow["liitostunnus"]."|||".$vrow["tapa"]."|||".$vrow["tyyppi"]."|||".$vrow["tyostatus"]."|||".$vrow['kuka']."|||".$vrow['konserni']."|||".$vrow['pvmalku'];
 								}
 							}
 						}
@@ -486,7 +486,7 @@
 						if (isset($varaukset[$b][$a])) {
 							echo "<td align='center' $varilisa width='40px'>";
 							foreach ($varaukset[$b][$a] as $varaus) {
-								list($nimi, $tilausnumero, $tapa, $tyyppi, $tyostatus) = explode("|||", $varaus);
+								list($nimi, $tilausnumero, $tapa, $tyyppi, $tyostatus, $kuka, $konserni, $pvmalku) = explode("|||", $varaus);
 
 								if ($tyyppi == "asennuskalenteri") {
 									$zul = $tilausnumero;
@@ -512,7 +512,7 @@
 									echo "<a class='tooltip' id='$tilausnumero' href='tyojono.php?myyntitilaus_haku=$tilausnumero&lopetus=$lopetus'>$zul</a>";
 								}
 								else {
-									echo "$zul";
+									echo "<a class='tooltip' id='$tilausnumero' href='".$palvelin2."crm/kalenteri.php?valitut=$kuka&kenelle=$kuka&tee=SYOTA&kello=".substr($pvmalku, 11, 5)."&year=$year&kuu=$month&paiva=$i&tunnus=$tilausnumero&konserni=$konserni&lopetus=$lopetus'>$zul</a>";
 								}
 
 								echo "&nbsp;&nbsp;";

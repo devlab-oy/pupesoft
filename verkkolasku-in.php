@@ -23,27 +23,27 @@
 	elseif (strpos($_SERVER['SCRIPT_NAME'], "tiliote.php") !== FALSE and $verkkolaskut_in != "" and $verkkolaskut_ok != "" and $verkkolaskut_orig != "" and $verkkolaskut_error != "") {
 		//Pupesoftista
 		echo "Aloitetaan verkkolaskun sis‰‰nluku...<br><br>";
-		
+
 		$laskut     = $verkkolaskut_in;
 		$oklaskut   = $verkkolaskut_ok;
 		$origlaskut = $verkkolaskut_orig;
-		$errlaskut  = $verkkolaskut_error;	
-		
+		$errlaskut  = $verkkolaskut_error;
+
 		$komentorivilta = FALSE;
-		
+
 		// Kopsataan uploadatta faili verkkoalskudirikkaan
 		$copy_boob = copy($filenimi, $laskut."/".$userfile);
-		
+
 		if ($copy_boob === FALSE) {
 		    echo "Kopiointi ep‰onnistui $filenimi $laskut/$userfile<br>";
 			exit;
-		}		
+		}
 	}
 	else {
 		echo "N‰ill‰ ehdoilla emme voi ajaa verkkolaskujen sis‰‰nlukua!";
 		exit;
 	}
-	
+
     require ("inc/verkkolasku-in.inc"); // t‰‰ll‰ on itse koodi
     require ("inc/verkkolasku-in-erittele-laskut.inc"); // t‰‰ll‰ pilkotaan Finvoiceaineiston laskut omiksi tiedostoikseen
 
@@ -51,7 +51,6 @@
 	if ($handle = opendir($laskut)) {
 
 		while (($file = readdir($handle)) !== FALSE) {
-
 			if (is_file($laskut."/".$file)) {
 
 				$nimi = $laskut."/".$file;
@@ -59,7 +58,10 @@
 
 				// Jos tiedostosta luotiin laskuja siirret‰‰n se tielt‰ pois
 				if ($luotiinlaskuja > 0) {
-					system("mv ".$laskut."/".$file." ".$origlaskut."/".$file);
+
+					$cleanfile = escapeshellarg($file);
+
+					system("mv $laskut/$cleanfile $origlaskut/$cleanfile");
 				}
 			}
 		}
@@ -81,16 +83,20 @@
 			    if ($laskuvirhe == "") {
 					if (!$komentorivilta)  {
 						echo "Verkkolasku vastaanotettu onnistuneesti!<br><br>";
-					}				
-				
-			    	system("mv -f $nimi $oklaskut/$file");
+					}
+
+					$cleanfile = escapeshellarg($file);
+
+			    	system("mv -f $nimi $oklaskut/$cleanfile");
 			    }
 			    else {
 					if (!$komentorivilta)  {
 						echo "<font class='error'>Verkkolaskun vastaanotossa virhe:</font><br><pre>$laskuvirhe</pre><br>";
 					}
-					
-			    	system("mv -f $nimi $errlaskut/$file");
+
+					$cleanfile = escapeshellarg($file);
+
+			    	system("mv -f $nimi $errlaskut/$cleanfile");
 				}
 			}
 		}

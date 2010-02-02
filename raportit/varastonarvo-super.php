@@ -340,8 +340,6 @@
 			$varvo  = 0; // tähän summaillaan
 			$bvarvo = 0; // bruttovarastonarvo
 
-			$piilotetaan_bruttovarastonarvo = ("$vv-$kk-$pp" != date("Y-m-d")) ? 'piilotetaan' : '';
-
 			if(@include('Spreadsheet/Excel/Writer.php')) {
 				//keksitään failille joku varmasti uniikki nimi:
 				list($usec, $sec) = explode(' ', microtime());
@@ -402,10 +400,13 @@
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Varastonarvo"), 		$format_bold);
 				$excelsarake++;
-				if ($piilotetaan_bruttovarastonarvo == '') {
-					$worksheet->writeString($excelrivi, $excelsarake, t("Bruttovarastonarvo"), 	$format_bold);
-					$excelsarake++;
+				if ("$vv-$kk-$pp" != date("Y-m-d")) {
+					$worksheet->writeString($excelrivi, $excelsarake, t("Bruttovarastonarvo")." ".t("Arvio"), $format_bold);
 				}
+				else {
+					$worksheet->writeString($excelrivi, $excelsarake, t("Bruttovarastonarvo"), 	$format_bold);
+				}
+				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Kiertonopeus 12kk"), 	$format_bold);
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Viimeisin laskutus"), 	$format_bold);
@@ -833,10 +834,8 @@
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$muutoshinta));
 						$excelsarake++;
-						if ($piilotetaan_bruttovarastonarvo == '') {
-							$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$bmuutoshinta));
-							$excelsarake++;
-						}
+						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$bmuutoshinta));
+						$excelsarake++;
 
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kierto));
 						$excelsarake++;
@@ -878,9 +877,7 @@
 				echo "<br>";
 				echo "<table>";
 				echo "<tr><th>".t("Varasto")."</th><th>".t("Varastonarvo")."</th>";
-				if ($piilotetaan_bruttovarastonarvo == '') {
-					echo "<th>".t("Bruttovarastonarvo")."</th></tr>";
-				}
+				echo "<th>".t("Bruttovarastonarvo")."</th></tr>";
 				
 				ksort($varastot2);
 
@@ -890,10 +887,6 @@
 					}
 					else {
 						echo "<tr><td>$varasto</td>";
-					}
-
-					if ($piilotetaan_bruttovarastonarvo != '') {
-						unset($arvot['brutto']);
 					}
 
 					foreach ($arvot AS $arvo) {
@@ -909,10 +902,12 @@
 
 				echo "<tr><th>".t("Pvm")."</th><th colspan='2'>".t("Yhteensä")."</th></tr>";
 				echo "<tr><td>$vv-$kk-$pp</td><td align='right'>".sprintf("%.2f",$varvo)."</td>";
-				if ($piilotetaan_bruttovarastonarvo == '') {
-					echo "<td align='right'>".sprintf("%.2f",$bvarvo)."</td></tr>";
-				}
+				echo "<td align='right'>".sprintf("%.2f",$bvarvo)."</td></tr>";
 				echo "</table><br>";
+
+				if ("$vv-$kk-$pp" != date("Y-m-d")) {
+					echo "<font class='error'>",t("Huom. Bruttovarastonarvo on arvio"),"!</font><br/><br/>";
+				}
 			}
 		}
 

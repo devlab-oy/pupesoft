@@ -64,6 +64,7 @@
 	$query = "	UPDATE lasku SET
 				eilahetetta	= 'o',
 				ketjutus	= 'o',
+				viesti		= '$osrow[sisviesti1]',
 				rahtivapaa  = 'o'
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tunnus = '$tilausnumero'";
@@ -167,6 +168,12 @@
 			}
 		}
 
+		$tilausrivin_kommentti = $rtuoteno[$i]["kommentti"];
+
+		if (strpos(strtolower($tilausrivin_kommentti), "yhteens") !== FALSE) {
+			$tilausrivin_kommentti = substr($tilausrivin_kommentti, 0, strpos(strtolower($tilausrivin_kommentti), "yhteens"));
+		}
+
 		$query = "	INSERT into tilausrivi set
 					hyllyalue 		= '$olparow[hyllyalue]',
 					hyllynro 		= '$olparow[hyllynro]',
@@ -193,7 +200,7 @@
 					uusiotunnus 	= '',
 					tyyppi 			= 'L',
 					toimaika 		= now(),
-					kommentti 		= '".$rtuoteno[$i]["kommentti"]."',
+					kommentti 		= '".$tilausrivin_kommentti."',
 					var 			= '',
 					try				= '$rivirow[try]',
 					osasto			= '$rivirow[osasto]',

@@ -643,7 +643,7 @@
 						maa =  '$trow[maa]',
 						viite = '$viite',
 						viesti = '$viesti',
-						sisviesti1 = '$sis1',
+						sisviesti1 = '$laskun_tilausviite',
 						sisviesti2 = '$sis2',
 						tapvm = '$tpv-$tpk-$tpp',
 						vienti = '$trow[oletus_vienti]',

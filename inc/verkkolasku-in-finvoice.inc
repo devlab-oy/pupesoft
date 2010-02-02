@@ -46,6 +46,8 @@ if ($xlaskun_summa_eur == "") {
 	$xlaskun_summa_eur	= $xml->InvoiceDetails->InvoiceTotalVatIncludedAmount;
 }
 
+$xlaskun_tilausviite = $xml->InvoiceDetails->AgreementIdentifier;
+
 // Varmistetaan, että tunnus on ovtunnus muodossa
 $xyhtio = preg_replace("/[^0-9]/", "", $xyhtio);
 
@@ -92,21 +94,20 @@ if (count($tuotetiedot) > 0) {
 			$rtuoteno[$i]["ale"] = (float) str_replace(",", ".", $tuotetieto->RowDiscountPercent);
 			$rtuoteno[$i]["hinta"] = (float) str_replace(",", ".", $tuotetieto->UnitPriceAmount);
 
-			if ($xkauttalaskutus != "KAUTTALASKUTUS") {
-				// rivikommentti
-				$xrinfo = $tuotetieto->RowFreeText;
+			// rivikommentti
+			$xrinfo = $tuotetieto->RowFreeText;
 
-				if (is_array($xrinfo)) {
-					foreach ($xrinfo as $xln) {
-						$rtuoteno[$i]["kommentti"] .= $xln."\n";
-					}
+			if (is_array($xrinfo)) {
+				foreach ($xrinfo as $xln) {
+					$rtuoteno[$i]["kommentti"] .= $xln."\n";
 				}
-				else {
-					$rtuoteno[$i]["kommentti"] = $xrinfo;
-				}
-
-				$rtuoteno[$i]["kommentti"] = trim($rtuoteno[$i]["kommentti"]);
 			}
+			else {
+				$rtuoteno[$i]["kommentti"] = $xrinfo;
+			}
+
+			$rtuoteno[$i]["kommentti"] = "Tilausnumero: ".$tuotetieto->RowIdentifierUrlText."\n".$rtuoteno[$i]["kommentti"]; // alkuperäinen tilausnumero rivikommenttiin mukaan
+			$rtuoteno[$i]["kommentti"] = trim($rtuoteno[$i]["kommentti"]);
 
 			$rtuoteno[$i]["kpl"] = (float) str_replace(",", ".", $tuotetieto->DeliveredQuantity);
 			$rtuoteno[$i]["yksikko"] = $tuotetieto->DeliveredQuantity->attributes()->QuantityUnitCode;
@@ -134,6 +135,7 @@ $laskuttajan_vat		= $xlaskuttajan_vat;
 $laskun_pankkiviite		= $xlaskun_pankkiviite;
 $laskun_summa_eur		= (float) str_replace(",", ".", $xlaskun_summa_eur);
 $laskun_asiakastunnus	= $xlaskun_asiakastunnus;
+$laskun_tilausviite		= $xlaskun_tilausviite;
 
 $lisavat  = array();
 $xlisavat = array();

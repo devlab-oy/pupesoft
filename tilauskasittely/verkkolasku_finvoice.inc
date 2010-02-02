@@ -489,7 +489,7 @@ if (!function_exists('finvoice_rivi')) {
 			#xml_add("EndDate Format=\"CCYYMMDD\"", 											"", 							$tootfinvoice);
 			xml_add("UnitPriceAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($tilrow['hinta'], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);
 			xml_add("RowIdentifier",                                    						$tilrow['tilaajanrivinro'], 	$tootfinvoice);
-			#xml_add("RowIdentifierUrlText", 													"", 							$tootfinvoice);
+			xml_add("RowIdentifierUrlText", 													$tilrow['otunnus'],				$tootfinvoice);
 			xml_add("RowIdentifierDate Format=\"CCYYMMDD\"", 						vlas_dateconv($tilrow['laadittu']), 		$tootfinvoice);
 			#xml_add("OriginalInvoiceNumber", 													"", 							$tootfinvoice);
 			#xml_add("RowDeliveryIdentifier", 													"", 							$tootfinvoice);

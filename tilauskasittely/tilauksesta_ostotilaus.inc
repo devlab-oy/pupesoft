@@ -153,6 +153,7 @@
 										alv 				= '$tiltoi[alv]',
 										comments 			= '$tiltoi[comments]',
 										viesti 				= '$myytilrow[viesti]',
+										sisviesti1			= '$myytilrow[sisviesti1]',
 										kuljetus 			= '$tiltoi[kuljetus]',
 										huolitsija 			= '$tiltoi[huolitsija]',
 										maksuteksti 		= '$tiltoi[maksuteksti]',

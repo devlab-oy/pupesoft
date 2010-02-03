@@ -2222,7 +2222,11 @@
 
 			// Nyt alennukset ja hinnat ja alvi lasketaan automaattisesti uudestaan
 			// Netotettuja rivejä ei päivitetä
-			$query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
+			$query = "	SELECT * 
+						from tilausrivi 
+						where yhtio = '$kukarow[yhtio]' 
+						and otunnus = '$kukarow[kesken]'
+						and tuoteno != '$yhtiorow[lisakulu_tuotenumero]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_assoc($result)) {

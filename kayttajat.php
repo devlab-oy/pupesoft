@@ -316,14 +316,14 @@
 		else {
 			echo "<font class='error'>".t("Uutta k‰ytt‰j‰‰ ei luotu")."!</font><br><br>";
 			$tee     = "MUUTA";
-			
+
 			if ($kopsaakuka == "JOO") {
 				$selkuka = "KOPSAAUUSI";
 			}
 			else {
-				$selkuka = "UUSI";	
+				$selkuka = "UUSI";
 			}
-			
+
 			$firname = "";
 		}
 	}
@@ -507,18 +507,18 @@
 				echo "<tr><th align='left'>".t("K‰ytt‰j‰tunnus").":</th><td><b>$krow[kuka]</b> ".t("Lastlogin").": $krow[lastlogin]</td></tr>";
 			}
 			else {
-				
+
 				if ($selkuka == "KOPSAAUUSI") {
 					echo "<input type='hidden' name='kopsaakuka' value='JOO'>";
 				}
-				
+
 				echo "<input type='hidden' name='tee' value='UUSI'>";
 				echo "<tr><th align='left'>".t("K‰ytt‰j‰tunnus").":</th>
 				<td><input type='text' size='50' maxlength='10' name='ktunnus'></td></tr>";
 			}
-			
+
 			if ($selkuka != "KOPSAAUUSI") {
-			
+
 				echo "<tr><th align='left'>".t("Salasana").":</th><td><input type='text' size='50' maxlength='30' name='password' value='$generoitupass'></td><td class='back'> <a href='?generatepass=y&selkuka=$selkuka&toim=$toim'>".t("Generoi salasana")."</a></td></tr>";
 				echo "<tr><th align='left'>".t("Nimi").":</th><td><input type='text' size='50' value='$krow[nimi]' maxlength='30' name='firname'></td></tr>";
 				echo "<tr><th align='left'>".t("Puhelinnumero").":</th><td><input type='text' size='50' value='$krow[puhno]' maxlength='30' name='phonenum'></td></tr>";
@@ -1083,7 +1083,7 @@
 					echo "</td><td class='back'>".t("Ilman rajausta k‰ytt‰j‰ voi myyd‰ kaikkiin piireihin")."</td></tr>";
 				}
 			}
-			
+
 			echo "</table>";
 			echo "</td>";
 
@@ -1100,7 +1100,7 @@
 				echo "</tr>";
 				echo "</table>";
 			}
-			
+
 			if ($selkuka == "UUSI" or $selkuka == "KOPSAAUUSI") {
 				echo "<br><input type='submit' value='".t("Perusta uusi k‰ytt‰j‰")."'></form>";
 			}
@@ -1145,11 +1145,9 @@
 		echo "<form action='$PHP_SELF' method='post' name='kayttajaformi' id='kayttajaformi'><input type='hidden' name='tee' value='MUUTA'>";
 
 		echo "<tr><th>".t("Hae")." ".$toim." ".t("k‰ytt‰j‰").":</th>";
-		echo "<td>";
-		livesearch_kentta("kayttajaformi", "KAYTTAJAHAKU", "selkuka", 300);
-		echo "</td>";
+		echo "<td>".livesearch_kentta("kayttajaformi", "KAYTTAJAHAKU", "selkuka", 300)."</td>";
 		echo "<td><input type='submit' value='".t("Muokkaa k‰ytt‰j‰n tietoja")."'></td></tr></form>";
-		
+
 
 		echo "<form action='$PHP_SELF' method='post' name='kayttajaformi2' id='kayttajaformi2'><input type='hidden' name='tee' value='MUUTA'>";
 		echo "<tr><th>".t("Valitse")." ".$toim." ".t("k‰ytt‰j‰").":</th>";
@@ -1192,7 +1190,7 @@
 				<input type='hidden' name='tee' value='MUUTA'>
 				<input type='hidden' name='selkuka' value='UUSI'>";
 		echo "<tr><th>".t("Perusta uusi k‰ytt‰j‰").":</th><td></td><td><input type='submit' value='".t("Luo uusi k‰ytt‰j‰")."'></td></tr></form>";
-		
+
 		echo "<form action='$PHP_SELF' method='post'>
 				<input type='hidden' name='tee' value='MUUTA'>
 				<input type='hidden' name='selkuka' value='KOPSAAUUSI'>";

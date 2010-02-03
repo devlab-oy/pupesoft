@@ -136,9 +136,7 @@
 	echo "<input type='hidden' name='tee' value='Z'>";
 	echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 	echo "<th style='vertical-align:middle;'>".t("Tuotehaku")."</th>";
-	echo "<td>";
-	livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 300);
-	echo "</td>";
+	echo "<td>".livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 300)."</td>";
 	echo "<td class='back'>";
 	echo "<input type='Submit' value='".t("Hae")."'></form></td>";
 	echo "</tr>";

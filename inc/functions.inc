@@ -6735,7 +6735,7 @@ if (!function_exists("livesearch_tilihaku")) {
 
 if (!function_exists("livesearch_tuotehaku")) {
 	function livesearch_tuotehaku() {
-		global $yhtiorow, $kukarow, $palvelin2;
+		global $yhtiorow, $kukarow, $palvelin2, $verkkokauppa;
 
 		$tee = $_REQUEST["livesearch_tee"];
 		$nimi = $_REQUEST["livesearch_nimi"];
@@ -6758,11 +6758,47 @@ if (!function_exists("livesearch_tuotehaku")) {
 				$haku = mysql_real_escape_string($haku);
 				$haku_query .= " and (tuote.tuoteno like ('%$haku%') or tuote.nimitys like ('%$haku%')) ";
 			}
+			
+			
+			// vientikieltokäsittely:
+			// +maa tarkoittaa että myynti on kielletty tähän maahan ja sallittu kaikkiin muihin
+			// -maa tarkoittaa että ainoastaan tähän maahan saa myydä
+			// eli näytetään vaan tuotteet jossa vienti kentässä on tyhjää tai -maa.. ja se ei saa olla +maa
+			$kieltolisa = "";
+			unset($vierow);
 
+			if ($kukarow["kesken"] > 0) {
+				$query  = "	SELECT if (toim_maa != '', toim_maa, maa) maa
+							FROM lasku
+							WHERE yhtio	= '$kukarow[yhtio]'
+							and tunnus  = '$kukarow[kesken]'";
+				$vieres = mysql_query($query) or pupe_error($query);
+				$vierow = mysql_fetch_array($vieres);
+			}
+			elseif ($verkkokauppa != "") {
+				$vierow = array();
+
+				if ($maa != "") {
+					$vierow["maa"] = $maa;
+				}
+				else {
+					$vierow["maa"] = $yhtiorow["maa"];
+				}
+			}
+
+			if (isset($vierow) and $vierow["maa"] != "") {
+				$kieltolisa .= " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
+			}
+			
+			if ($verkkokauppa != "") {
+				$kieltolisa .= " and tuote.hinnastoon IN ('W', 'V') ";
+			}
+			
 			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						and tuote.status != 'P'
+						$kieltolisa
 						$haku_query";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -6913,13 +6949,12 @@ if (!function_exists("livesearch_kentta")) {
 		global $kukarow, $toim;
 
 		if (strpos(strtoupper($_SERVER['HTTP_USER_AGENT']), "MSIE") !== FALSE or strpos(strtoupper($_SERVER['HTTP_USER_AGENT']), "EXPLORER") !== FALSE) {
-			echo "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'>";
-			return;
+			return "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'>";
 		}
 
 		$hakuID = "haku".uniqid();
 
-		echo "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
+		return "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
 					onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit');\"
 					onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
 							sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&ohje=off&toim=$toim&livesearch_haku='+this.value);

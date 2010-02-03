@@ -76,6 +76,11 @@ if ($_REQUEST["tee"] == "login") {
 
 require ("parametrit.inc");
 
+if ($livesearch_tee == "TUOTEHAKU") {
+	livesearch_tuotehaku();
+	exit;
+}
+
 if ($verkkokauppa == "") die("Verkkokuapayhtiö määrittelemättä");
 
 if (!function_exists("tilaus")) {
@@ -112,7 +117,7 @@ if (!function_exists("tilaus")) {
 
 if (!function_exists("menu")) {
 	function menu($osasto = "", $try = "") {
-		global $yhtiorow, $kukarow, $verkkokauppa, $verkkokauppa_tuotemerkit, $verkkokauppa_saldotsk, $verkkokauppa_anon, $verkkokauppa_hakualkuun;
+		global $yhtiorow, $kukarow, $verkkokauppa, $verkkokauppa_tuotemerkit, $verkkokauppa_saldotsk, $verkkokauppa_anon, $verkkokauppa_hakualkuun, $palvelin2;
 
 		$val = "";
 
@@ -170,19 +175,17 @@ if (!function_exists("menu")) {
 			$result = t_avainsana("VERKKOKAULINKKI");
 
 			while ($orow = mysql_fetch_array($result)) {
-				if ($orow["selite"] == "ETUSIVU") $val .= "<tr><td class='menucell'><a class='menu' href = ''>".t("Etusivu")."</a></td></tr>";
+				if ($orow["selite"] == "ETUSIVU") $val .= "<tr><td class='menucell'><a class='menu' href = '$palvelin2'>".t("Etusivu")."</a></td></tr>";
 				else $val .= "<tr><td class='menucell'><a class='menu' href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=uutiset&sivu=$orow[selite]', false, false);\">$orow[selitetark]</a></td></tr>";
 			}
 
 			$verkkokauppa_tuotehaku = "<tr><td class='back'><br><font class='info'>".t("Tuotehaku").":</font><br><hr></td></tr>
-					 	<tr><td class='back'><form id = 'tuotehaku' name='tuotehaku'  action = \"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\" method = 'post'>
-						<input type = 'text' size='12' name = 'tuotehaku'>
+					 	<form id = 'tuotehaku' name='tuotehaku'  action = \"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\" method = 'post'>
+						<tr><td class='back'><input type = 'text' size='12' name = 'tuotehaku'></td></tr>
 						<tr><td class='back'>&raquo; <a onclick=\"self.scrollTo(0,0);\" href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, false);\">".t("Nimityksellä")."</a></td></tr>
 						<tr><td class='back'>&raquo; <a onclick=\"self.scrollTo(0,0);\" href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla', 'selain', false, false);\">".t("Tuotekoodilla")."</a></td></tr>
 						$toimlisa
-						</form>
-						</td>
-						</tr>";
+						</form>";
 
 			if ($verkkokauppa_anon or $kukarow["kuka"] != "www") {
 
@@ -1098,7 +1101,9 @@ if ($tee == "selaa") {
 	}
 
 	$submit_button = 1;
-
+	
+	echo "<div class='livehaku' id='livehaku'>".t("Tuotehaku").": <form action='verkkokauppa.php?tee=selaa&hakutapa=koodilla' name='liveformi' id= 'liveformi'>".livesearch_kentta("liveformi", "TUOTEHAKU", "tuotenumero", 300)."</form></div>";
+	
 	require("tuote_selaus_haku.php");
 }
 
@@ -1129,15 +1134,21 @@ if ($tee == "") {
 
 	$tuotenumero = mysql_real_escape_string(trim($_GET["tuotenumero"]));
 
+	$verkko = "<div class='livehaku' id='livehaku'>".t("Tuotehaku").": <form action='verkkokauppa.php?tee=selaa&hakutapa=koodilla' name='liveformi' id= 'liveformi'>".livesearch_kentta("liveformi", "TUOTEHAKU", "tuotenumero", 300)."</form></div>";
+
 	if ($tuotenumero != "") {
 		$verkkokauppa_ulos .= "	<div class='selain' id='selain'>
+								$verkko
 								<script TYPE=\"text/javascript\" language=\"JavaScript\">
 								sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla&tuotehaku=$tuotenumero');
 								</script>
 								</div>";
 	}
 	else {
-		$verkkokauppa_ulos .= "<div class='selain' id='selain'>".uutiset('','',"ETUSIVU")."</div>";
+		$verkkokauppa_ulos .= "<div class='selain' id='selain'>
+								$verkko
+								".uutiset('','',"ETUSIVU")."
+								</div>";
 	}
 
 	if (file_exists("verkkokauppa.template")) {

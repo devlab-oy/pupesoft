@@ -520,6 +520,9 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 
 				if ((float) $kaikenkaikkiaan_arvot > 0) {
 					//jyvitetään $uusiarvo valmisteille kappaleiden ja kehahintojen mukaan
+					
+					echo "round($uusiarvo * (($isavarattu * $isarow[kehahin])/$kaikenkaikkiaan_arvot), 6);<br>";
+					
 					$uusiarvo = round($uusiarvo * (($isavarattu * $isarow["kehahin"])/$kaikenkaikkiaan_arvot), 6);
 				}
 				else {

@@ -985,12 +985,11 @@ if ($tee == 'P' or $tee == 'E') {
 		// Jos toimittajalla ei ollut oletustiliä, haetaan se yritykseltä
 		if ($itili[1] == '' or $itili[1] == 0) $itili[1] = $yhtiorow['muutkulut'];
 
-		echo "
-		<input type='hidden' value='$itili[1]'		name='itili[1]'>
-		<input type='hidden' value='$ikohde[1]'		name='ikohde[1]'>
-		<input type='hidden' value='$iprojekti[1]'	name='iprojekti[1]'>
-		<input type='hidden' value='$ikustp[1]'		name='ikustp[1]'>
-		<input type='hidden' value='$ivero[1]'		name='ivero[1]'>";
+		echo "<input type='hidden' value='$itili[1]'		name='itili[1]'>
+				<input type='hidden' value='$ikohde[1]'		name='ikohde[1]'>
+				<input type='hidden' value='$iprojekti[1]'	name='iprojekti[1]'>
+				<input type='hidden' value='$ikustp[1]'		name='ikustp[1]'>
+				<input type='hidden' value='$ivero[1]'		name='ivero[1]'>";
 	}
 	else {
 
@@ -1016,7 +1015,7 @@ if ($tee == 'P' or $tee == 'E') {
 
  			// Tehaan kentta tai naytetaan popup
 			if ($iulos[$i] == '') {
-				livesearch_kentta("lasku", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT");
+				echo livesearch_kentta("lasku", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT");
 			}						
 			else {
 				echo "$iulos[$i]";

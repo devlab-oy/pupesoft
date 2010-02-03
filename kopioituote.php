@@ -274,11 +274,7 @@
 
 		echo "<tr><form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='HAKU'>";
-		echo "<td>";
-
-		livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 210);
-
-		echo "</td>";
+		echo "<td>".livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 210)."</td>";
 		echo "<td class='back'><input type='Submit' value='".t("Jatka")."'></td>";
 		echo "<td class='back'><font class='error'>$varaosavirhe</font></td>";
 		echo "</form></tr></table>";

@@ -52,9 +52,7 @@
 
 		if ($ulos == '') {
 			if ($yhtiorow["livetuotehaku_tilauksella"] == "K" and $tuoteno == "") {
-				echo "<td valign='top'>";
-				livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200);
-				echo "</td>";
+				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200)."</td>";
 			}
 			else {
 				echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='30' value='$tuoteno'></td>";
@@ -225,9 +223,7 @@
 
 		if ($ulos == '') {
 			if ($yhtiorow["livetuotehaku_tilauksella"] == "K" and $tuoteno == "") {
-				echo "<td valign='top'>";
-				livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200);
-				echo "</td>";
+				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200)."</td>";
 			}
 			else {
 				echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='30' value='$tuoteno'></td>";
@@ -423,9 +419,7 @@
 
 		if ($ulos == '') {
 			if ($yhtiorow["livetuotehaku_tilauksella"] == "K" and $tuoteno == "") {
-				echo "<td valign='top'>";
-				livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200);
-				echo "</td>";
+				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200)."</td>";
 			}
 			else {
 				echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='30' value='$tuoteno'></td>";

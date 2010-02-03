@@ -62,10 +62,7 @@
 					echo t("Syötä valmiste jolle resepti kopioidaan");
 				}
 
-				echo ": </th><td>";
-
-				livesearch_kentta("valinta", "TUOTEHAKU", "kop_isatuo", 140, '', 'X');
-
+				echo ": </th><td>".livesearch_kentta("valinta", "TUOTEHAKU", "kop_isatuo", 140, '', 'X');
 				echo "<input type='text' name='kop_isatuo' value='$kop_isatuo' size='20'></td>";
 
 				foreach($kop_tuoteno as $tuoteno) {

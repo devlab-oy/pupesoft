@@ -1070,12 +1070,7 @@
 		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
 				<input type='hidden' name='tee' value='M'>
 				<table>
-				<tr><th>".t("Anna tuotenumero")."</th>
-				<td>";
-				
-		livesearch_kentta("valinta", "TUOTEHAKU", "tuoteno", 210);
-						
-		echo "	</td></tr>
+				<tr><th>".t("Anna tuotenumero")."</th><td>".livesearch_kentta("valinta", "TUOTEHAKU", "tuoteno", 210)."</td></tr>
 				</table><br>
 				<input type = 'submit' value = '".t("Hae")."'>
 				</form>";

@@ -1521,7 +1521,7 @@
 		echo "<br><table>";
 		echo "<tr><th>".t("Tuotenumero:")."</th><td>";
 
-		livesearch_kentta("inve", "TUOTEHAKU", "tuoteno", 210);
+		echo livesearch_kentta("inve", "TUOTEHAKU", "tuoteno", 210);
 
 		echo "</td></tr>";
 		echo "<tr><th>".t("Inventointilistan numero:")."</th><td><input type='text' size='25' name='lista'></td><td class='back'><input type='Submit' value='".t("Inventoi")."'></td></tr>";

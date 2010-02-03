@@ -23,7 +23,17 @@
 					$_309lisa	 = "";
 					$vainveroton = '';	
 				}
-								
+
+				$tuotetyyppilisa = '';
+
+				if ($taso == 'fi312') {
+					$tuotetyyppilisa = " AND tuote.tuotetyyppi = 'K' ";
+					$taso = 'fi311';
+				}
+				elseif ($taso == 'fi311') {
+					$tuotetyyppilisa = " AND tuote.tuotetyyppi != 'K' ";
+				}
+			
 				$query = "	SELECT ifnull(group_concat(if(alv_taso like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilit300, 
 							ifnull(group_concat(if(alv_taso not like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilitMUU
 							FROM tili
@@ -35,15 +45,6 @@
 				$vero = 0.0;
 								
 				if ($tilirow['tilit300'] != '' or $tilirow['tilitMUU'] != '') {
-
-					$tuotetyyppilisa = '';
-
-					if ($taso == 'fi312') {
-						$tuotetyyppilisa = " AND tuote.tuotetyyppi = 'K' ";
-					}
-					elseif ($taso == 'fi311') {
-						$tuotetyyppilisa = " AND tuote.tuotetyyppi != 'K' ";
-					}
 
 					if ($tuotetyyppilisa != '') {
 						$query = "	SELECT round(sum(rivihinta),2) summa
@@ -175,10 +176,10 @@
 			$fi310 = laskeveroja('fi310','summa') * -1;
 
 			// 311 sääntö fi311
-			$fi311 = laskeveroja('fi311','summa') * -1;
+			$fi311 = laskeveroja('fi311','summa');
 
 			// 312 sääntö fi312
-			$fi312 = laskeveroja('fi312','summa') * -1;
+			$fi312 = laskeveroja('fi312','summa');
 
 			// 313 sääntö fi313
 			$fi313 = laskeveroja('fi305','summa');
@@ -397,7 +398,7 @@
 				$taso = 'fi300';
 			}
 			elseif ($ryhma == 'fi309' or $ryhma == 'fi310') {
-				$taso = "fi309%' or alv_taso like '%fi310%' or alv_taso like '%fi200";
+				$taso = "fi309%' or alv_taso like '%fi310%' or alv_taso like '%fi300";
 				$vainveroton = " and tiliointi.vero = 0 ";
 			}
 			else {

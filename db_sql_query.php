@@ -278,8 +278,6 @@
 			}
 
 			if ($table == "tuote") {
-
-
 				$query = "	SELECT DISTINCT selite, kieli
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -294,6 +292,12 @@
 
 					$fields[] = $row;
 				}
+				
+				$row[0] = "tuotteen_avainsanat.osasto:FI";
+				$fields[] = $row;
+				
+				$row[0] = "tuotteen_avainsanat.try:FI";
+				$fields[] = $row;
 			}
 
 			echo "<form name='sql' action='$PHP_SELF' method='post' autocomplete='off'>";

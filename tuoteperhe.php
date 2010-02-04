@@ -62,8 +62,7 @@
 					echo t("Syötä valmiste jolle resepti kopioidaan");
 				}
 
-				echo ": </th><td>".livesearch_kentta("valinta", "TUOTEHAKU", "kop_isatuo", 140, '', 'X');
-				echo "<input type='text' name='kop_isatuo' value='$kop_isatuo' size='20'></td>";
+				echo ": </th><td>".livesearch_kentta("valinta", "TUOTEHAKU", "kop_isatuo", 140, $kop_isatuo, 'X')."</td>";
 
 				foreach($kop_tuoteno as $tuoteno) {
 
@@ -167,11 +166,7 @@
 			echo "<th>".t("Etsi tuotereseptiä").": </th>";
 		}
 
-		echo "<td>";
-
-		livesearch_kentta($formi, "TUOTEHAKU", "hakutuoteno", 210);
-
-		echo "</td>";
+		echo "<td>".livesearch_kentta($formi, "TUOTEHAKU", "hakutuoteno", 210)."</td>";
 
 		//	Haetaan tuotetta jos sellainen on annettu
 		if ($hakutuoteno == "JUPPE") {
@@ -360,16 +355,11 @@
 
 				echo "<tr>";
 
-				echo "<tr><td>";
-
-				livesearch_kentta("lisaa", "TUOTEHAKU", "tuoteno", 140, '', 'X');
-
-				echo "</td>
-					<td><input type='text' name='kerroin' size='20'></td>
-					<td><input type='text' name='hintakerroin' size='20'></td>
-					<td><input type='text' name='alekerroin' size='20'></td>
-
-					<td class='back'><input type='submit' value='".t("Lisää rivi")."'></td></form></tr>";
+				echo "<tr><td>".livesearch_kentta("lisaa", "TUOTEHAKU", "tuoteno", 140, '', 'X')."</td>
+						<td><input type='text' name='kerroin' size='20'></td>
+						<td><input type='text' name='hintakerroin' size='20'></td>
+						<td><input type='text' name='alekerroin' size='20'></td>
+						<td class='back'><input type='submit' value='".t("Lisää rivi")."'></td></form></tr>";
 				echo "</table>";
 			}
 			elseif (mysql_num_rows($result) == 1) {
@@ -537,11 +527,7 @@
 							<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
 
 
-					echo "<tr><td>";
-
-					livesearch_kentta("lisaa", "TUOTEHAKU", "tuoteno", 140, '', 'X');
-
-					echo "</td><td></td>";
+					echo "<tr><td>".livesearch_kentta("lisaa", "TUOTEHAKU", "tuoteno", 140, '', 'X')."</td><td></td>";
 
 					if ($toim != "LISAVARUSTE") {
 						echo "<td><input type='text' name='kerroin' size='10'></td>";

@@ -6,7 +6,7 @@ if(!function_exists("toimitarkista")) {
 		
 		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift;
 		
-		if ((mysql_field_name($result, $i) == "nimi") or (mysql_field_name($result, $i) == "maa") or (mysql_field_name($result, $i) == "ytunnus") or (mysql_field_name($result, $i) == "oletus_hyvak1")) {
+		if ((mysql_field_name($result, $i) == "nimi") or (mysql_field_name($result, $i) == "maa") or (mysql_field_name($result, $i) == "ytunnus") or (mysql_field_name($result, $i) == "oletus_hyvak1") or (mysql_field_name($result, $i) == "oletus_valkoodi")) {
 			if (trim($t[$i]) == '') {
 				$virhe[$i] = t("Tieto puuttuu");
 			}

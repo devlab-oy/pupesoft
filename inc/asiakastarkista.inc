@@ -6,6 +6,12 @@ if(!function_exists("asiakastarkista")) {
 
 		static $ytunnus_tunnus, $ytunnus, $ovttunnus, $apuverkkotunnus, $apuverkkotunnusi, $apulasku_email, $apulasku_emaili, $apu_maa, $apu_toim_maa;
 
+		if (mysql_field_name($result, $i) == "valkoodi") {
+			if (trim($t[$i]) == '') {
+				$virhe[$i] = t("Tieto puuttuu");
+			}
+		}
+
 		if (mysql_field_name($result, $i) == "laji") {
 			$asiak_laji = $t[$i];
 		}

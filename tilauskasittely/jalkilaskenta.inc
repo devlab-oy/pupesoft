@@ -111,8 +111,8 @@ if (!function_exists("korjaalaskut")) {
 
 				// katotaan saadaanko tehdä tiliöintejä
 				// tehdään tilikausi_alku ja korjauksen_alku muuttujista PHP:ssä vertailukelpoisia
-				list($tkvv,$tkkk,$tkpp) = split("-",$yhtiorow["tilikausi_alku"]);
-				list($klvv,$klkk,$klpp) = split("-",$tilausrivi["laskutettuaika"]);
+				list($tkvv,$tkkk,$tkpp) = explode("-",$yhtiorow["tilikausi_alku"]);
+				list($klvv,$klkk,$klpp) = explode("-",$tilausrivi["laskutettuaika"]);
 
 				$tilikausi_alku = (int) date('Ymd',mktime(0,0,0,$tkkk,$tkpp,$tkvv));
 				$korjaus_alku   = (int) date('Ymd',mktime(0,0,0,$klkk,$klpp,$klvv));
@@ -494,8 +494,8 @@ if ($tuoteno != '') {
 			$pvm = $tapahtuma["laadittu"]; // kääntöpisteen tarkka aika talteen
 
 			// verrataan vähän aikoja
-			list($tkvv,$tkkk,$tkpp) = split("-",$yhtiorow["tilikausi_alku"]);
-			list($klvv,$klkk,$klpp) = split("-",$tapahtuma["laadittu"]);
+			list($tkvv,$tkkk,$tkpp) = explode("-",$yhtiorow["tilikausi_alku"]);
+			list($klvv,$klkk,$klpp) = explode("-",$tapahtuma["laadittu"]);
 
 			$tilikausi_alku = (int) date('Ymd',mktime(0,0,0,$tkkk,$tkpp,$tkvv));
 			$korjaus_alku   = (int) date('Ymd',mktime(0,0,0,$klkk,$klpp,$klvv));
@@ -636,7 +636,7 @@ if ($tuoteno != '') {
 								if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Tulo. $trow[kpl] kappaletta. Saldo ennen tuloa: $uusisaldo Kehahin ennen tuloa: $uusikehahin Sort: Asc</font><br>";
 
 								// kehahin matikka. lasketaan uusi kehahin jos jakolaskun molemmat puolet on plussalla, sekä saldo ENNEN tapahtumaa on plussalla
-								if ($uusisaldo > 0 and $uusisaldo + $trow['kpl'] > 0 and $uusikehahin * $uusisaldo + $trow['kplhinta'] * $trow['kpl'] > 0) {
+								if ($uusisaldo != 0 and $uusisaldo + $trow['kpl'] != 0 and $uusikehahin * $uusisaldo + $trow['kplhinta'] * $trow['kpl'] != 0) {
 
 									if ($jalkilaskenta_debug >= 1) {
 										$jalkilaskenta_debug_text .= "<font class='message'>JÄLKILASKENTA: Uusi kehahin (Matikka): ($uusikehahin * $uusisaldo + $trow[kplhinta] * $trow[kpl]) / ($uusisaldo + $trow[kpl])";
@@ -650,13 +650,9 @@ if ($tuoteno != '') {
 
 								}
 								else {
-									// jos meillä on tulo ja kappaleet on miinusta niin silloin keharikin pitää olla miinusta!
-									if ($trow["kpl"] < 0) {
-										$uusikehahin = $trow['kplhinta'] * -1;
-									}
-									else {
-										$uusikehahin = $trow['kplhinta'];
-									}
+									// jos saldo on nolla ennen tuloa tai tulon jälkeen niin kehari on ostari
+									$uusikehahin = $trow['kplhinta'];
+									
 									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>JÄLKILASKENTA: Uusi kehahin (Ei matikkaa): uusikehahin = ostohinta = $uusikehahin</font><br>";
 								}
 
@@ -713,8 +709,8 @@ if ($tuoteno != '') {
 
 									// katotaan saadaanko tehdä tiliöintejä
 									// tehdään tilikausi_alku ja korjauksen_alku muuttujista PHP:ssä vertailukelpoisia
-									list($tkvv,$tkkk,$tkpp) = split("-",$yhtiorow["tilikausi_alku"]);
-									list($klvv,$klkk,$klpp) = split("-",$trow["laadittu"]);
+									list($tkvv,$tkkk,$tkpp) = explode("-",$yhtiorow["tilikausi_alku"]);
+									list($klvv,$klkk,$klpp) = explode("-",$trow["laadittu"]);
 
 									$tilikausi_alku = (int) date('Ymd',mktime(0,0,0,$tkkk,$tkpp,$tkvv));
 									$korjaus_alku   = (int) date('Ymd',mktime(0,0,0,$klkk,$klpp,$klvv));

@@ -295,6 +295,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	$hankintakulut .= "#$tilrivirow[kate]";
 
 	$rivihin = round($ohinta, $yhtiorow['hintapyoristys']);	// tilausrivin rivihinta talteen
+	
 	// t‰m‰ muuttaa hinnan plussaksi hyvityskeikalla (jolloin kehahin matikka menee oikein)
 	$ohinta  = round($ohinta / $tilrivirow['varattu'], 6); // yhden tuotteen hinta kaikkine kuluineen
 
@@ -304,22 +305,18 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$kehahin = $ohinta;
 	}
 	else {
-		if ($salrow['saldo'] + $tilrivirow['varattu'] > 0 and $salrow['saldo'] > 0 and $salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu'] > 0) {
+		if ($salrow['saldo'] + $tilrivirow['varattu'] != 0 and $salrow['saldo'] != 0 and $salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu'] != 0) {
 			// kehahin matikka, tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen ett‰ edes tehd‰‰n matikkaa, sek‰ jakolaskun osoittaja pit‰‰ olla positiivinen
 			$kehahin = round(($salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu']) / ($salrow['saldo'] + $tilrivirow['varattu']), 6);
+			
 			if ($debug >= 1) {
 				$varastoon_msg .= "<font class='message'>Tuote: $tuorow[tuoteno] Matikka: ($salrow[saldo] * $tuorow[kehahin] + $ohinta * $tilrivirow[varattu]) / ($salrow[saldo] + $tilrivirow[varattu]) = $kehahin</font><br>";
 			}
 		}
 		else {
 			// Jos j‰‰d‰‰n saldossa t‰m‰nkin tulon j‰lkeen miinukselle tai nollille, laitetaan kehahin suoraan t‰m‰n keikan hinnasta
-			// Jos kappaleet on miinusta niin silloin keharikin pit‰‰ olla miinusta!
-			if ($tilrivirow['varattu'] < 0) {
-				$kehahin = round($ohinta * -1, 6);
-			}
-			else {
-				$kehahin = round($ohinta, 6);
-			}
+			$kehahin = round($ohinta, 6);
+
 			if ($debug >= 1) {
 				$varastoon_msg .= "<font class='message'>Tuote: $tuorow[tuoteno] Saldo j‰i nollaan tai miinukselle. Kehahin = ostohinta = $kehahin</font><br>";
 			}
@@ -327,7 +324,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	}
 
 	$summa += round($ohinta*$tilrivirow['varattu'],2);
-
+	
 	if ($toiminto == "kaikkiok" and $tee == "varma") {
 		// tarvitaan
 		// $tuoteno =	korjattava tuote

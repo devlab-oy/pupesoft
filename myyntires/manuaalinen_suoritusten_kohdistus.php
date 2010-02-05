@@ -1105,7 +1105,7 @@ if ($tila == 'kohdistaminen') {
 	if ($suoritus["oletus_selvittelytili"] != "") {
 		echo "<option value='$suoritus[oletus_selvittelytili]' $sel4>".t("Pankkitilin selvittelytili")." ($suoritus[oletus_selvittelytili])</option>";
 	}
-	if ($suoritus['konserniyhtio'] != "") {
+	if ($yhtiorow["konsernimyyntisaamiset"] != $yhtiorow["myyntisaamiset"]) {
 		echo "<option value='$yhtiorow[konsernimyyntisaamiset]' $sel5>".t("Konsernimyyntisaamiset")." ($yhtiorow[konsernimyyntisaamiset])</option>";
 	}
 	echo "</select></td>";

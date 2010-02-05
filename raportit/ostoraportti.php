@@ -1444,17 +1444,21 @@
 
 								$tuotteet = $korvaavat_tunrot != '' ? ("'".$row['tuoteno']."', ".$korvaavat_tunrot) : "'".$row['tuoteno']."'";
 
-								$query = "	SELECT count(*) kpl
-											FROM yhteensopivuus_tuote
-											JOIN yhteensopivuus_rekisteri ON (yhteensopivuus_rekisteri.yhtio = yhteensopivuus_tuote.yhtio AND yhteensopivuus_rekisteri.autoid = yhteensopivuus_tuote.atunnus)
-											$joinlisa
-											WHERE yhteensopivuus_tuote.yhtio = '$kukarow[yhtio]'
-											AND yhteensopivuus_tuote.tuoteno IN ($tuotteet)
-											AND yhteensopivuus_tuote.tyyppi IN ($tyyppilisa)";
-								$asresult = mysql_query($query) or pupe_error($query);
-								$kasrow = mysql_fetch_array($asresult);
-
-								$rek_kpl_maara = round($kasrow['kpl'], 2);
+								if ($tyyppilisa != "") {
+									$query = "	SELECT count(*) kpl
+												FROM yhteensopivuus_tuote
+												JOIN yhteensopivuus_rekisteri ON (yhteensopivuus_rekisteri.yhtio = yhteensopivuus_tuote.yhtio AND yhteensopivuus_rekisteri.autoid = yhteensopivuus_tuote.atunnus)
+												$joinlisa
+												WHERE yhteensopivuus_tuote.yhtio = '$kukarow[yhtio]'
+												AND yhteensopivuus_tuote.tuoteno IN ($tuotteet)
+												AND yhteensopivuus_tuote.tyyppi IN ($tyyppilisa)";
+									$asresult = mysql_query($query) or pupe_error($query);
+									$kasrow = mysql_fetch_array($asresult);
+									$rek_kpl_maara = round($kasrow['kpl'], 2);
+								}
+								else {
+									$rek_kpl_maara = "";
+								}
 
 								$worksheet->write($excelrivi, $excelsarake, $rek_kpl_maara, $format_bg_green);
 								$value = '';

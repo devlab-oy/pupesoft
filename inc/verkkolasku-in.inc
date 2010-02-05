@@ -256,26 +256,8 @@
 				}
 			}
 
-			if (!isset($trow) and $laskuttajan_ovt != "") {
-				// 3 etsit‰‰n toimittaja ytunnuksella
-				$yovt1 = substr(str_replace("0037", "", $laskuttajan_ovt), 0, 8); // mahdollisella etunollalla
-				$yovt2 = (int) $yovt1; // ilman etunollaa
-
-				$query  = "	SELECT *
-							FROM toimi
-							WHERE ytunnus in ('$yovt1', '$yovt2')
-							and ytunnus not in ('','0')
-							and yhtio = '$yhtio'
-							and tyyppi != 'P'";
-				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
-
-				if (mysql_num_rows($result) == 1) {
-					$trow = mysql_fetch_array($result);
-				}
-			}
-
 			if (!isset($trow) and $laskuttajan_vat != "") {
-				// 4 etsit‰‰n toimittaja vat-numerolla
+				// 3 etsit‰‰n toimittaja vat-numerolla
 				$query  = "	SELECT *
 							FROM toimi
 							WHERE ovttunnus = '$laskuttajan_vat'
@@ -290,10 +272,28 @@
 			}
 
 			if (!isset($trow) and $laskuttajan_vat != "") {
-				// 5 etsit‰‰n toimittaja vat-numerolla
+				// 4 etsit‰‰n toimittaja vat-numerolla
 				$query  = "	SELECT *
 							FROM toimi
 							WHERE ytunnus = '$laskuttajan_vat'
+							and ytunnus not in ('','0')
+							and yhtio = '$yhtio'
+							and tyyppi != 'P'";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+
+				if (mysql_num_rows($result) == 1) {
+					$trow = mysql_fetch_array($result);
+				}
+			}
+
+			if (!isset($trow) and $laskuttajan_ovt != "") {
+				// 5 etsit‰‰n toimittaja ytunnuksella
+				$yovt1 = substr(str_replace("0037", "", $laskuttajan_ovt), 0, 8); // mahdollisella etunollalla
+				$yovt2 = (int) $yovt1; // ilman etunollaa
+
+				$query  = "	SELECT *
+							FROM toimi
+							WHERE ytunnus in ('$yovt1', '$yovt2')
 							and ytunnus not in ('','0')
 							and yhtio = '$yhtio'
 							and tyyppi != 'P'";

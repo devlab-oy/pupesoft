@@ -13,6 +13,11 @@
 
 	require("../inc/parametrit.inc");
 
+	if (in_array($kukarow["yhtio"], array("allr","arja","arse","artr","arwi","atarv","bamb","demo","edil","hsr","katj","kolo","mast","rose","savt","yama"))) {
+		echo "<font class='error'>SQL-haku poistettu käytöstä</font><br>";
+		exit;
+	}
+
 	//Ja tässä laitetaan ne takas
 	$sqlhaku = $sqlapu;
 

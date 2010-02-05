@@ -1675,7 +1675,7 @@
 							yht_katot += Number(obj.elements[i].value.replace(\",\",\".\"));
 
 							loppukas -= Number(obj.elements[i].value.replace(\",\",\".\"));
-							if (document.getElementById('kassalippaan_loppukassa'+pointer2)) {
+							if (document.getElementById('kassalippaan_loppukassa'+pointer)) {
 								document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
 							}
 						}
@@ -1717,7 +1717,7 @@
 								temp += kassa;
 
 								loppukas += Number(obj.elements[i].value.replace(\",\",\".\"));
-								if (document.getElementById('kassalippaan_loppukassa'+pointer2)) {
+								if (document.getElementById('kassalippaan_loppukassa'+pointer)) {
 									document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
 								}
 

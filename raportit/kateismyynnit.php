@@ -1636,7 +1636,13 @@
 								}
 
 								loppukas += Number(obj.elements[i].value.replace(\",\",\".\"));
-								document.getElementById('kassalippaan_loppukassa'+pointer2).value = loppukas.toFixed(2);
+
+								if (document.getElementById('kassalippaan_loppukassa'+pointer2)) {
+									document.getElementById('kassalippaan_loppukassa'+pointer2).value = loppukas.toFixed(2);									
+								}
+								else {
+									yht_loppu += Number(obj.elements[i].value.replace(\",\",\".\"));
+								}
 
 								summa += Number(obj.elements[i].value.replace(\",\",\".\"));
 								temp += Number(obj.elements[i].value.replace(\",\",\".\"));
@@ -1655,7 +1661,9 @@
 								yht_kattil += Number(obj.elements[i].value.replace(\",\",\".\"));
 
 								loppukas -= Number(obj.elements[i].value.replace(\",\",\".\"));
-								document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
+								if (document.getElementById('kassalippaan_loppukassa'+pointer2)) {
+									document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
+								}
 							}
 						}
 						else if (obj.elements[i].value != '' && obj.elements[i].id == 'kaikkiyhteensa') {
@@ -1667,7 +1675,9 @@
 							yht_katot += Number(obj.elements[i].value.replace(\",\",\".\"));
 
 							loppukas -= Number(obj.elements[i].value.replace(\",\",\".\"));
-							document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
+							if (document.getElementById('kassalippaan_loppukassa'+pointer2)) {
+								document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
+							}
 						}
 						else if (obj.elements[i].value != '' && obj.elements[i].id.substring(0,19) == ('kateinen soluerotus')) {
 							temp_kasero = Number(obj.elements[i].value.replace(\",\",\".\"));
@@ -1707,7 +1717,9 @@
 								temp += kassa;
 
 								loppukas += Number(obj.elements[i].value.replace(\",\",\".\"));
-								document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
+								if (document.getElementById('kassalippaan_loppukassa'+pointer2)) {
+									document.getElementById('kassalippaan_loppukassa'+pointer).value = loppukas.toFixed(2);
+								}
 
 								document.getElementById('kateinen soluerotus'+pointer).value = solusumma.toFixed(2);
 

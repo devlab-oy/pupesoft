@@ -17,6 +17,11 @@
 			$error = 1;
 		}
 
+		if ($valuutta == '') {
+			echo "<font class='error'>".t("Valuutta on annettava")."</font><br>";
+			$error = 1;
+		}
+
 		$query = "SELECT nimi from yhtio where yhtio='$yhtio'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -28,6 +33,9 @@
 
 		if ($error == 0) {
 			$query = "INSERT into yhtio SET yhtio='$yhtio', nimi='$nimi'";
+			$result = mysql_query($query) or pupe_error($query);
+			// Tehdään haluttu valuutta
+			$query = "INSERT into valuu SET yhtio='$yhtio', nimi='$valuutta', kurssi=1, jarjestys=1";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 		else  {
@@ -295,7 +303,7 @@
 							kalenterimerkinnat = '$row[kalenterimerkinnat]',
 							variaatiomyynti = '$row[variaatiomyynti]',
 							luontiaika = now()";
-							$result = mysql_query($query) or pupe_error($query);
+				$result = mysql_query($query) or pupe_error($query);
 			}
 		}
 		else {
@@ -331,12 +339,12 @@
 							css_pieni = '$uusiyhtiorow[css_pieni]'
 							WHERE tunnus = '$yht_row[tunnus]'
 							AND yhtio = '$yhtio'";
-				$result = mysql_query($query) or pupe_error($query);
+				//$result = mysql_query($query) or pupe_error($query);
 			}
 		}
 		else {
 				$query = "INSERT into yhtion_parametrit SET yhtio='$yhtio'";
-				$result = mysql_query($query) or pupe_error($query);
+				//$result = mysql_query($query) or pupe_error($query);
 		}
 
 	}
@@ -398,10 +406,20 @@
 				}
 			}
 
+			$query = "SELECT salasana, nimi FROM kuka WHERE kuka='$kuka' limit 1";
+			$pres = mysql_query($query) or pupe_error($query);
+			if (mysql_num_rows($pres) > 0) {
+				$krow = mysql_fetch_array($pres);
+				$salasana = $krow['salasana'];
+				$nimi = $krow['nimi'];
+				echo "<font class='message'>$krow[nimi] ".t("Käyttäjä löytyi muistakin yrityksistä. Tietoja kopioitiin!"),"<br></font>";
+			}
+			else $salasana = md5($salasana);
+
 			$query = "INSERT into kuka SET
 				yhtio = '$yhtio',
 				nimi = '$nimi',
-				salasana = '" . md5(trim($salasana)) . "',
+				salasana = '$salasana',
 				kuka  = '$kuka',
 				profiilit = '$profile'
 			";
@@ -479,13 +497,12 @@
 	}
 
 	if ($tila == 'avainsana') {
-		if (is_array($avainsanat)){
+		if (is_array($avainsanat) and $eimitaan=='') {
 			foreach($avainsanat as $avain) {
 				$query = "	SELECT *
 							FROM avainsana
 							WHERE yhtio='$fromyhtio' and laji='$avain'";
 				$pres = mysql_query($query) or pupe_error($query);
-
 				while ($trow = mysql_fetch_array($pres)) {
 					$query = "	INSERT into avainsana
 									SET
@@ -663,10 +680,11 @@
 		unset($tila);
 		unset($yhtio);
 		unset($nimi);
+		unset($valuutta);
 	}
 
 
-//// Käyttöliittymä
+// Käyttöliittymä
 
 	if (isset($tila)) {
 		$query = "SELECT nimi from yhtio where yhtio='$yhtio'";
@@ -763,6 +781,11 @@
 		$query = "SELECT distinct profiili FROM oikeu WHERE yhtio = '$yhtio' and profiili != ''";
 		$result = mysql_query($query) or pupe_error($query);
 
+		if (!isset($kuka)) {
+				$kuka = $kukarow['kuka'];
+				$nimi = $kukarow['nimi'];
+		}
+
 		echo "<form action = '$PHP_SELF' method='post'><input type='hidden' name = 'tila' value='kayttaja'>
 		<input type='hidden' name = 'yhtio' value='$yhtio'>
 		<table>
@@ -805,70 +828,70 @@
 		echo "<form action = '$PHP_SELF' method='post'><input type='hidden' name = 'tila' value='avainsana'>
 		<input type='hidden' name = 'yhtio' value='$yhtio'>
 		<table>
-		<tr><th>".t("Miltä yritykseltä kopioidaan avainsanat?").":</th><td><select name='fromyhtio'>
-		<option value=''>".t("Ei kopioida")."</option>";
+		<tr><th>".t("Miltä yritykseltä kopioidaan avainsanat?").":</th><td><select name='fromyhtio'>";
 
 		while ($uusiyhtiorow=mysql_fetch_array($result)) {
 			echo "<option value='$uusiyhtiorow[yhtio]'>$uusiyhtiorow[nimi] ($uusiyhtiorow[yhtio])</option>";
 		}
 
 		echo "</select></td></tr>";
-		echo "<tr>".t("Mitkä avainsanatyypit kopioidaan")."</td><td></td></tr>";
-		echo "	<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='Y'>".t("Yksikko")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='TRY'>".t("Tuoteryhmä")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='OSASTO'>".t("Tuoteosasto")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='TUOTEMERKKI'>".t("Tuotemerkki")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='S'>".t("Tuotteen status")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='TUOTEULK'>".t("Tuotteiden avainsanojen laji")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='VARASTOLUOKKA'>".t("Varastoluokka")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='SARJANUMERON_LI'>".t("Sarjanumeron lisätieto")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='PARAMETRI'>".t("Tuotteen parametri")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='TARRATYYPPI'>".t("Tuotteen tarratyyppi")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='ASIAKASLUOKKA'>".t("Asiakasluokka")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='ASIAKASOSASTO'>".t("Asiakasosasto")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='ASIAKASRYHMA'>".t("Asiakasryhma")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='ASIAKASTILA'>".t("Asiakastila")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='PIIRI'>".t("Asiakkaan piiri")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='LASKT_EMAIL'>".t("Laskutustiedot autom. sähköpostitukseen")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='LASKT_EMAIL_SOP'>".t("Laskutustiedot autom. sähköpostitukseen (Sopimus)")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='ASAVAINSANA'>".t("Asiakkaan avainsanojen laji")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='EXTASAVAINSANA'>".t("Extranet-asiakkaan avainsanojen laji")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='TV'>".t("Tilausvahvistus")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='LAHETETYYPPI'>".t("Lähetetyyppi")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='KALETAPA'>".t("CRM yhteydenottotapa")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='MYSQLALIAS'>".t("Tietokantasarakkeen nimialias")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='TOIMITUSTAPA_OS'>".t("Toimitustapa ostolle (kuljetus)")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='KUKAASEMA'>".t("Käytäjän asema")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='ALVULK'>".t("Ulkomaan ALV%")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='ALV'>".t("ALV%")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='SEURANTA'>".t("Tilauksen seurantaluokka")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='pakkaus'>".t("Pakkaus")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='TOIMEHTO'>".t("Toimitusehto")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='HENKILO_OSASTO'>".t("Henkilöosasto")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='RAHTIKIRJA'>".t("Rahtikirjatyyppi")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='KERAYSLISTA'>".t("Keräyslista")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='TOIMTAPAKV'>".t("Toimitustavan kieliversio")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='KVERITTELY'>".t("Kulunvalvonnan erittely")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='TYOM_TYOJONO'>".t("Työmääräysten työjono")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='TYOM_TYOSTATUS'>".t("Työmääräysten työstatus")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='TYOM_TYOLINJA'>".t("Työmääräysten työlinja")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='KT'>".t("Kauppatapahtuman luonne")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='TULLI'>".t("Poistumistoimipaikka")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='KM'>".t("Kuljetusmuoto")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='C'>".t("CHN tietue")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='LASKUKUVAUS'>".t("Maksuposition kuvaus")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='KARHUVIESTI'>".t("Karhuviesti")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='MAKSUEHTOKV'>".t("Maksuehdon kieliversio")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='CRM_ROOLI'>".t("Yhteyshenkilön rooli")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='CRM_SUORAMARKKI'>".t("Yhteyshenkilön suoramarkkinointitiedot")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='VAKIOVIESTI'>".t("Vakioviesti")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='LITETY'>".t("Liitetiedostotyyppi")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='TIL-LITETY'>".t("Tilauksen liitetiedostotyyppi")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='JAKELULISTA'>".t("Email jakelulista")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='LUETTELO'>".t("Luettelotyyppi")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='TRIVITYYPPI'>".t("Tilausrivin tyyppi")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='LASKUTUS_SAATE'>".t("Laskun sähköpostisaatekirje asiakkaalle")."</td></tr>
-				<tr><td><INPUT type='checkbox'  name='avainsanat[]'  value='TV_LISATIETO'>".t("Tilausvahvistuksen lisätiedot")."</td></tr>";
+		echo "<tr><td><INPUT type='checkbox' name='eimitaan' value='x'>".t("Avainsanoja ei kopioida")."</td><td></td</tr>";
+		echo "<tr><td>".t("Mitkä avainsanatyypit kopioidaan")."</td><td></td></tr>";
+		echo "	<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='Y'>".t("Yksikko")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TRY'>".t("Tuoteryhmä")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='OSASTO'>".t("Tuoteosasto")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TUOTEMERKKI'>".t("Tuotemerkki")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='S' >".t("Tuotteen status")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TUOTEULK'>".t("Tuotteiden avainsanojen laji")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='VARASTOLUOKKA'>".t("Varastoluokka")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='SARJANUMERON_LI'>".t("Sarjanumeron lisätieto")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='PARAMETRI'>".t("Tuotteen parametri")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TARRATYYPPI'>".t("Tuotteen tarratyyppi")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='ASIAKASLUOKKA'>".t("Asiakasluokka")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='ASIAKASOSASTO'>".t("Asiakasosasto")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='ASIAKASRYHMA'>".t("Asiakasryhma")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='ASIAKASTILA'>".t("Asiakastila")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='PIIRI'>".t("Asiakkaan piiri")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='LASKT_EMAIL'>".t("Laskutustiedot autom. sähköpostitukseen")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='LASKT_EMAIL_SOP'>".t("Laskutustiedot autom. sähköpostitukseen (Sopimus)")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='ASAVAINSANA'>".t("Asiakkaan avainsanojen laji")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='EXTASAVAINSANA'>".t("Extranet-asiakkaan avainsanojen laji")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='TV'>".t("Tilausvahvistus")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='LAHETETYYPPI'>".t("Lähetetyyppi")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='KALETAPA'>".t("CRM yhteydenottotapa")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='MYSQLALIAS'>".t("Tietokantasarakkeen nimialias")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TOIMITUSTAPA_OS'>".t("Toimitustapa ostolle (kuljetus)")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='KUKAASEMA'>".t("Käytäjän asema")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='ALVULK'>".t("Ulkomaan ALV%")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='ALV'>".t("ALV%")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='SEURANTA'>".t("Tilauksen seurantaluokka")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='pakkaus'>".t("Pakkaus")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='TOIMEHTO'>".t("Toimitusehto")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='HENKILO_OSASTO'>".t("Henkilöosasto")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='RAHTIKIRJA'>".t("Rahtikirjatyyppi")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='KERAYSLISTA'>".t("Keräyslista")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TOIMTAPAKV'>".t("Toimitustavan kieliversio")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='KVERITTELY'>".t("Kulunvalvonnan erittely")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TYOM_TYOJONO'>".t("Työmääräysten työjono")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TYOM_TYOSTATUS'>".t("Työmääräysten työstatus")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TYOM_TYOLINJA'>".t("Työmääräysten työlinja")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='KT'>".t("Kauppatapahtuman luonne")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='TULLI'>".t("Poistumistoimipaikka")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='KM'>".t("Kuljetusmuoto")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='C'>".t("CHN tietue")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='LASKUKUVAUS'>".t("Maksuposition kuvaus")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='KARHUVIESTI'>".t("Karhuviesti")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='MAKSUEHTOKV'>".t("Maksuehdon kieliversio")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='CRM_ROOLI'>".t("Yhteyshenkilön rooli")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='CRM_SUORAMARKKI'>".t("Yhteyshenkilön suoramarkkinointitiedot")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='VAKIOVIESTI'>".t("Vakioviesti")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='LITETY'>".t("Liitetiedostotyyppi")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TIL-LITETY'>".t("Tilauksen liitetiedostotyyppi")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='JAKELULISTA'>".t("Email jakelulista")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='LUETTELO'>".t("Luettelotyyppi")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TRIVITYYPPI'>".t("Tilausrivin tyyppi")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox' CHECKED name='avainsanat[]'  value='LASKUTUS_SAATE'>".t("Laskun sähköpostisaatekirje asiakkaalle")."</td></tr>
+				<tr><td></td><td><INPUT type='checkbox'  name='avainsanat[]'  value='TV_LISATIETO'>".t("Tilausvahvistuksen lisätiedot")."</td></tr>";
 		echo "<tr><th></th><td><input type='submit' value='".t('Kopioi')."'></td></tr></table></form>";
 	}
 
@@ -939,9 +962,11 @@
 	}
 
 	if (!isset($tila)) {
+		if (!isset($valuutta)) $valuutta = 'EUR';
 		echo "<form action = '$PHP_SELF' method='post'><input type='hidden' name = 'tila' value='parametrit'><table>
 		<tr><th>Anna uuden yrityksen tunnus</th><td><input type='text' name = 'yhtio' value='$yhtio' size='10' maxlength='5'></td></tr>
 		<tr><th>Anna uuden yrityksen nimi</th><td><input type='text' name = 'nimi' value='$nimi'></td></tr>
+		<tr><th>Anna uuden yrityksen oletusvaluutta</th><td><input type='text' name = 'valuutta' value='$valuutta' maxlength='3'></td></tr>
 		<tr><th></th><td><input type='submit' value='".t('Perusta')."'></td></tr>
 		</table></form>";
 	}

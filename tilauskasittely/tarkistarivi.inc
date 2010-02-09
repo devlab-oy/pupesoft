@@ -290,7 +290,7 @@
 						sarjanumeroseuranta.ostorivitunnus,
 						$pepvmlisa1
 						concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
-						varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
+						varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma
 			 			FROM tuote
 						JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 						JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -306,14 +306,14 @@
 						and sarjanumeroseuranta.era_kpl != 0
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						and tuote.tuoteno = '$row[tuoteno]'
-						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 $pepvmlisa2
+						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 $pepvmlisa2
 						ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 		}
 		else {
 			$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 						tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 						concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
-						varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
+						varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma
 			 			FROM tuote
 						JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 						JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -357,7 +357,8 @@
 
 			while ($alkurow = mysql_fetch_assoc($omavarastores)) {
 
-				if ($alkurow["hyllyalue"] != "!!M" and (($alkurow["varastotyyppi"] != "E" and $laskurow["varasto"] == 0 and (in_array($alkurow["varasto"], $varastot_array) or count($varastot_array) == 0))
+				if ($alkurow["hyllyalue"] != "!!M" and (($alkurow['varastotyyppi'] == 'E' and $alkurow['erikoistoimitus_alarajasumma'] > 0 and (float) $row['myyntihinta'] >= (float) $alkurow['erikoistoimitus_alarajasumma'])
+														or ($alkurow["varastotyyppi"] != "E" and $laskurow["varasto"] == 0 and (in_array($alkurow["varasto"], $varastot_array) or count($varastot_array) == 0))
 														or $laskurow["varasto"] == $alkurow["varasto"]
 														or (in_array($alkurow["varasto"], $varastot_array) and $laskurow["varasto"] == 0)
 														or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"])
@@ -431,6 +432,12 @@
 						}
 
 						$paikat .= "' $sel title='$title'>$title</option>";
+
+						// jos toimitetaan erikoisvarastosta, niin käyttäjän pitää hyväksyä se
+						if ($sel != '' and $row['var2'] != 'OK' and $kukarow['kassamyyja'] == '' and $row['varattu'] > 0 and $alkurow['varastotyyppi'] == 'E' and $alkurow['erikoistoimitus_alarajasumma'] > 0 and (float) $row['myyntihinta'] >= (float) $alkurow['erikoistoimitus_alarajasumma']) {
+							$varaosavirhe .= t("HUOM: toimitetaan erikoisvarastosta, haluatko hyväksyä")."?<br>";
+							$saako_hyvaksya++;
+						}
 
 						$paikatlask++;
 						$kotipaikatlask++;

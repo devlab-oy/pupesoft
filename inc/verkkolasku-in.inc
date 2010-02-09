@@ -224,6 +224,20 @@
 			$laskuttajan_vat  = trim($laskuttajan_vat);
 			$laskuttajan_nimi = trim($laskuttajan_nimi);
 
+			if (!isset($trow) and $laskuttajan_nimi == "÷rum Oy Ab / Arwidson Automotive") {
+				// 0 eleganttia
+				$query = "	SELECT *
+							FROM toimi
+							WHERE yhtio = '$yhtio'
+							and nimi = '$laskuttajan_nimi'
+							and tyyppi != 'P'";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+
+				if (mysql_num_rows($result) == 1) {
+					$trow = mysql_fetch_array($result);
+				}
+			}
+
 			if ($laskuttajan_ovt != "") {
 				// 1 etsit‰‰n toimittaja ovttunnuksella
 				$query  = "	SELECT *

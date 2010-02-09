@@ -20,7 +20,8 @@ elseif ($tee == "VSRALVKK_UUSI") {
 
 if ($tee == "VSRALVYV") {
 
-	echo "<font class='message'></font>".t("Arvonlisäveron yhteenvetoilmoitus kaudelta").":";
+	echo "<table>";
+	echo "<tr><th>".t("Arvonlisäveron yhteenvetoilmoitus kaudelta").":</th>";
 
 	//	Haetaan alkupiste
 	$query = "SELECT ((year(now())-year(min(tilikausi_alku)))*4), quarter(now()) from tilikaudet where tilikausi_alku != '0000-00-00' and yhtio='$kukarow[yhtio]'";
@@ -34,8 +35,10 @@ if ($tee == "VSRALVYV") {
 	//	Ei näytetä ihan kaikeka
 	if ($kausia > 10) $kausia = 10;
 
+	echo "<td>";
 	echo "<form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
 			<input type='hidden' name='tee' value='$tee'>
+			<input type='hidden' name='tyyppi' value='kausi'>
 			<select name='kohdekausi' onchange='submit();'>
 				<option value = ''>".t('Valitse kohdekausi')."</option>";
 
@@ -47,7 +50,9 @@ if ($tee == "VSRALVYV") {
 		else {
 			$sel = "";
 		}
-		
+
+		if ($kohdekuukausi != '') $sel = '';
+
 		echo "<option value='$kvarttaali/$vuosi' $sel>$kvarttaali/$vuosi</option>";
 
 		if ($kvarttaali == 1) {
@@ -59,8 +64,58 @@ if ($tee == "VSRALVYV") {
 		}
 
 	}
-	echo "</select></form>";
-	
+	echo "</select></form></td></tr>";
+
+	echo "<tr><th>".t("Arvonlisäveron yhteenvetoilmoitus kuukaudelta").":</th>";
+
+	//	Haetaan alkupiste
+	$query = "SELECT ((month(now())-month(min(tilikausi_alku)))*12), month(now()) from tilikaudet where tilikausi_alku != '0000-00-00' and yhtio='$kukarow[yhtio]'";
+	$result = mysql_query($query) or pupe_error($query);
+	$row = mysql_fetch_array($result);
+
+	// $ytunnus = 'P'.str_pad((int)$users_row['id'], 6, "0", STR_PAD_LEFT);
+
+	$kausia = $row[0] + $row[1] + 1;
+	$kuukausi = str_pad((int)$row[1], 2, 0, STR_PAD_LEFT);
+	$vuosi = date("Y");
+
+	//	Ei näytetä ihan kaikeka
+	if ($kausia > 24) $kausia = 24;
+
+	echo "<td>";
+	echo "	<form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
+				<input type='hidden' name='tee' value='$tee'>
+				<input type='hidden' name='tyyppi' value='kuukausi'>
+				<select name='kohdekuukausi' onchange='submit();'>
+				<option value = ''>".t('Valitse kohdekuukausi')."</option>";
+
+	for ($i=1; $i<$kausia; $i++) {
+		
+		$kuukausi = str_pad((int)$kuukausi, 2, 0, STR_PAD_LEFT);
+
+		if ($kohdekuukausi == $kuukausi."/".$vuosi) {
+			$sel = "SELECTED";
+		}
+		else {
+			$sel = "";
+		}
+
+		if ($kohdekausi != '') {
+			$sel = '';
+		}
+
+		echo "<option value='$kuukausi/$vuosi' $sel>$kuukausi/$vuosi</option>";
+
+		if ($kuukausi == 01) {
+			$kuukausi = 12;
+			$vuosi--;
+		}
+		else {
+			$kuukausi--;
+		}
+
+	}
+	echo "</select></form></td></tr></table>";
 	
 	if (strtoupper($yhtiorow["maa"])== 'FI') {
 		//muutetaan ytunnus takas oikean näköseks
@@ -82,32 +137,43 @@ if ($tee == "VSRALVYV") {
 		$uytunnus = $yhtiorow["ytunnus"];
 	}
 
-	if ($kohdekausi != "") {
+	if ($kohdekausi != "" or $kohdekuukausi != "") {
 
-		list($kvarttaali,$vuosi) = explode("/", $kohdekausi);
+		if ($kohdekausi != '' and $tyyppi == 'kausi') {
+			list($kvarttaali, $vuosi) = explode("/", $kohdekausi);
+		}
+		else {
+			list($kuukausi, $vuosi) = explode("/", $kohdekuukausi);
+		}
 
-		switch ($kvarttaali) {
-			case 1:
-				$alkupvm = "$vuosi-01-01";
-				$loppupvm = "$vuosi-04-01";
-				break;
-			case 2:
-				$alkupvm = "$vuosi-04-01";
-				$loppupvm = "$vuosi-07-01";
-				break;
-			case 3:
-				$alkupvm = "$vuosi-07-01";
-				$loppupvm = "$vuosi-10-01";
-				break;
-			case 4:
-				$alkupvm = "$vuosi-10-01";
-				$loppupvm = ($vuosi+1)."-01-01";
-				break;
-			default:
-				die("Kohdekausi on väärä!!!");
+		if ($kvarttaali != '' and $tyyppi == 'kausi') {
+			switch ($kvarttaali) {
+				case 1:
+					$alkupvm = "$vuosi-01-01";
+					$loppupvm = "$vuosi-04-01";
+					break;
+				case 2:
+					$alkupvm = "$vuosi-04-01";
+					$loppupvm = "$vuosi-07-01";
+					break;
+				case 3:
+					$alkupvm = "$vuosi-07-01";
+					$loppupvm = "$vuosi-10-01";
+					break;
+				case 4:
+					$alkupvm = "$vuosi-10-01";
+					$loppupvm = ($vuosi+1)."-01-01";
+					break;
+				default:
+					die("Kohdekausi on väärä!!!");
+			}
+		}
+		elseif ($kuukausi != '') {
+			$alkupvm = "$vuosi-$kuukausi-01";
+			$loppupvm = date("Y-m-d", mktime(0, 0, 0, $kuukausi+1, 1, $vuosi));
 		}
 		
-		echo "</font><br><hr>";
+		echo "<br><hr>";
 
 		if ($ytunnus != "") {
 			//	Onko syötetty maa oikea
@@ -244,6 +310,9 @@ if ($tee == "VSRALVYV") {
 			echo "</table>";
 
 			if ($ok == 0) {
+
+				$kohdekausi = $kohdekuukausi != '' ? $kohdekuukausi : $kohdekausi;
+				$kvarttaali = $kuukausi != '' ? $kuukausi : $kvarttaali;
 
 				$file = "000:$tee\n";
 				$file .= "100:".date("dmY")."\n";

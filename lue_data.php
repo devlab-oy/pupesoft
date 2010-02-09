@@ -256,7 +256,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 		while ($row = mysql_fetch_array($fres)) {
 			// Pushataan arrayseen kaikki sarakenimet ja tietuetyypit
-			$trows[strtoupper($row[0])] = $row[1];
+			$trows[$table_mysql.".".strtoupper($row[0])] = $row[1];
 
 			$tlengthpit = ereg_replace("[^0-9,]", "", $row[1]);
 
@@ -264,9 +264,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				$tlengthpit = substr($tlengthpit, 0, strpos($tlengthpit, ",")+1)+1;
 			}
 
-			$tlength[strtoupper($row[0])] = trim($tlengthpit);
+			$tlength[$table_mysql.".".strtoupper($row[0])] = trim($tlengthpit);
 		}
-
+		
 		// Nämä ovat pakollisia dummysarakkeita jotka ohitetaan lopussa automaattisesti!
 		if (in_array($table_mysql, array("yhteyshenkilo", "asiakkaan_avainsanat"))) {
 			$apu_sarakkeet = array("YTUNNUS");
@@ -274,7 +274,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 		if (count($apu_sarakkeet) > 0) {
 			foreach($apu_sarakkeet as $s) {
-				$trows[strtoupper($s)] = "";
+				$trows[$table_mysql.".".strtoupper($s)] = "";
 			}
 		}
 
@@ -292,7 +292,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			}
 		}
 
-		// Ottetaan pakolliset, kieletyt, wherelliset ja eiyhtiota tiedot
+		// Ottetaan pakolliset, kielletyt, wherelliset ja eiyhtiota tiedot
 		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, ) = pakolliset_sarakkeet($table_mysql, $taulunotsikot[$taulu]);
 
 		// $trows sisältää kaikki taulun sarakkeet ja tyypit tietokannasta
@@ -305,7 +305,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$postoiminto = (string) array_search($column, $taulunotsikot[$taulu]);
 				}
 				else {
-					if (!isset($trows[$column])) {
+					if (!isset($trows[$table_mysql.".".$column])) {
 						echo "<font class='error'>".t("Saraketta")." \"$column\" ".t("ei löydy")." $table_mysql-".t("taulusta")."!</font><br>";
 						$vikaa++;
 					}
@@ -759,13 +759,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 						$rivi[$r] = trim(addslashes($rivi[$r]));
 
-						if (substr($trows[$otsikko],0,7) == "decimal" or substr($trows[$r],0,4) == "real") {
+						if (substr($trows[$table_mysql.".".$otsikko],0,7) == "decimal" or substr($trows[$table_mysql.".".$otsikko],0,4) == "real") {
 							//korvataan decimal kenttien pilkut pisteillä...
-							$rivi[$r] = str_replace(",", ".", $rivi[$r]);
+							$rivi[$r] = str_replace(",", ".", $rivi[$r]);							
 						}
 
-						if ((int) $tlength[$otsikko] > 0 and strlen($rivi[$r]) > $tlength[$otsikko] and ($table_mysql != "tuotepaikat" and $otsikko != "OLETUS" and $rivi[$r] != 'XVAIHDA')) {
-							echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("VIRHE").": $otsikko ".t("kentässä on liian pitkä tieto")."!</font> $rivi[$r]: ".strlen($rivi[$r])." > ".$tlength[$otsikko]."!<br>";
+						if ((int) $tlength[$table_mysql.".".$otsikko] > 0 and strlen($rivi[$r]) > $tlength[$table_mysql.".".$otsikko] and ($table_mysql != "tuotepaikat" and $otsikko != "OLETUS" and $rivi[$r] != 'XVAIHDA')) {
+							echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("VIRHE").": $otsikko ".t("kentässä on liian pitkä tieto")."!</font> $rivi[$r]: ".strlen($rivi[$r])." > ".$tlength[$table_mysql.".".$otsikko]."!<br>";
 							$hylkaa++; // ei päivitetä tätä riviä
 						}
 

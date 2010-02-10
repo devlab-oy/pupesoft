@@ -169,6 +169,8 @@
 		// Käydään läpi formin kaikki rivit
 		foreach ($tilkpl as $yht_i => $kpl) {
 
+			$kpl = str_replace(',', '.', $kpl);
+
 			if ((float) $kpl > 0 or ($kukarow["extranet"] == "" and (float) $kpl < 0)) {
 
 				// haetaan tuotteen tiedot

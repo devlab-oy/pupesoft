@@ -185,7 +185,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 					break;
 			case "toimitustapa" :
-				$pakolliset = array("SELITE", "tulostustapa");
+				$pakolliset = array("SELITE", "TULOSTUSTAPA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "tuotteen_alv" :

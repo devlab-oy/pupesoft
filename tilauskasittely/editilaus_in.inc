@@ -924,13 +924,19 @@ while (!feof ($fd)) {
 		case 'OSTOTILRIV.OTR_TILATTUMAARA' :
 			//Tilattava m‰‰r‰
 			$tieto = str_replace ( ",", ".", $tieto);
-			$kpl = (float) abs(substr($tieto,0,16)); // abs() ettei asiakkaat pysty tekem‰‰n hyvityksi‰!
-
+			
+			if ($edi_tyyppi == "magento" and (strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $tieto != '') {
+				$kpl = (float) substr($tieto,0,16);
+			}
+			else {
+				$kpl = (float) abs(substr($tieto,0,16)); // abs() ettei asiakkaat pysty tekem‰‰n hyvityksi‰!
+			}
+			
 			$edi_ulos .= t("tilattiin")." $kpl ".t("kpl").".\n";
 			break;
 		case 'OSTOTILRIV.OTR_RIVISUMMA' :
 			// jos tullaan magentosta ja meill‰ on rahtikulu, niin otetaan se hinta talteeen
-			if ($edi_tyyppi == "magento" and strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) and $tieto != '') {
+			if ($edi_tyyppi == "magento" and (strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $tieto != '') {
 				$editilaus_rahtikulu_hinta = $tieto;
 			}
 			break;
@@ -986,7 +992,7 @@ while (!feof ($fd)) {
 					}
 
 					// jos tullaan magentosta ja hinta on tiedossa ja kyseess‰ on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
-					if ($edi_tyyppi == "magento" and strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) and $editilaus_rahtikulu_hinta != '') {
+					if ($edi_tyyppi == "magento" and (strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $editilaus_rahtikulu_hinta != '') {
 						$hinta = $editilaus_rahtikulu_hinta;
 					}
 

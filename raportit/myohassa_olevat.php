@@ -446,7 +446,7 @@
 			else {
 
 				if ($tulrow["alatila"] == 'X') {
-					$laskutyyppi = t("Jäkitoimitus");
+					$laskutyyppi = t("Jälkitoimitus");
 					$alatila	 = "";
 				}
 				else {

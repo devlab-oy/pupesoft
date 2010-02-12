@@ -14,6 +14,11 @@ if(!function_exists("avainsanatarkista")) {
 			$laji = trim($t[$i]);
 		}
 
+		if (mysql_field_name($result, $i) == "selite" and strtoupper($laji) == "ALVULK") {
+			//	ALV pitää olla pisteellä, ei pilkulla
+			$t[$i] = round((float) str_replace(",", ".", $t[$i]), 2);
+		}
+
 		if (mysql_field_name($result, $i) == "selite" and strlen($t[$i]) > 3 and $laji == 'Y') {
 			$virhe[$i] = t("Selite on liian pitkä, maksimiputuus on kolme merkkiä")."!";
 		}

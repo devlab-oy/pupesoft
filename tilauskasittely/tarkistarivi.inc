@@ -437,6 +437,8 @@
 						if ($sel != '' and $row['var2'] != 'OK' and $kukarow['kassamyyja'] == '' and $row['varattu'] > 0 and $alkurow['varastotyyppi'] == 'E' and $alkurow['erikoistoimitus_alarajasumma'] > 0 and (float) $row['myyntihinta'] >= (float) $alkurow['erikoistoimitus_alarajasumma']) {
 							$varaosavirhe .= t("HUOM: toimitetaan erikoisvarastosta, haluatko hyväksyä")."?<br>";
 							$saako_hyvaksya++;
+							$riviok++;
+							$tilausok++;
 						}
 
 						$paikatlask++;

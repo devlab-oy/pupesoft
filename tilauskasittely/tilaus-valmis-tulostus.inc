@@ -7,9 +7,10 @@
 	$prires= mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($prires) != 0) {
-		$prirow= mysql_fetch_array($prires);
-		$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$prirow[printteri1]'";
-		$kirres= mysql_query($query) or pupe_error($query);
+		$prirow = mysql_fetch_array($prires);
+		
+		$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$prirow[printteri1]'";
+		$kirres = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($kirres)==0)
 			die ("<font class='error'>VIRHE: Varaston $prirow[nimitys] tulostinta ei löydy. Lähetteitä ei voida tulostaa...</font>");
@@ -19,7 +20,9 @@
 	}
 
 	// tarkistetan tulostuksessa syntyviä virheitä
-	$virheellinen = '';
+	$virheellinen	= "";
+	$returnvalue	= 0;
+	$komento		= "";
 
 	// emuloidaan transactioita mysql LOCK komennolla
 	$query = "LOCK TABLES liitetiedostot READ, tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivin_lisatiedot AS tlt2 READ, tilausrivi AS tilausrivi_osto READ, tilausrivi AS tilausrivi_myynti READ, sarjanumeroseuranta READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana READ, avainsana as a READ, avainsana as b READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ, tuotteen_avainsanat READ, pankkiyhteystiedot READ, toimitustapa READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, rahtisopimukset READ, rahtisopimukset AS rahtisopimukset2 READ, pakkaamo WRITE, avainsana as avainsana_kieli READ, lasku as vanha_lasku READ, varaston_tulostimet as vanha_varaston_tulostimet READ";
@@ -133,7 +136,7 @@
 						where yhtio='$kukarow[yhtio]' 
 						and tunnus='$laskurow[varasto]'";
 		}
-		$prires= mysql_query($query) or pupe_error($query);
+		$prires = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($prires) > 0) {
 			$prirow = mysql_fetch_array($prires);
@@ -156,16 +159,20 @@
 			}
 
 			//haetaan lähetteen tulostuskomento
-			$query   = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
-			$kirres  = mysql_query($query) or pupe_error($query);
-			$kirrow  = mysql_fetch_array($kirres);
-
+			$query = "	SELECT komento 
+						FROM kirjoittimet 
+						WHERE yhtio = '$kukarow[yhtio]' 
+						AND tunnus  = '$apuprintteri'";
+			$kirres = mysql_query($query) or pupe_error($query);
+			$kirrow = mysql_fetch_assoc($kirres);
+			
 			$komento = $kirrow['komento'];
 		}
 
 		if ($komento != "") {
 			//tulostetaan sivu
 			print_pdf_kerayslista($komento);
+			$returnvalue = 0;
 		}
 		else {
 			$returnvalue = 1;

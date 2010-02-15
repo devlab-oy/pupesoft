@@ -22,15 +22,9 @@
 	chdir("/tmp/$dbkanta");
 
 	// pakataan failit
-	system("/bin/tar -cf $filename --use-compress-prog=pbzip2 *");
+	system("/bin/tar -cf $cp_dir/$filename --use-compress-prog=pbzip2 *");
 
 	echo date("d.m.Y @ G:i:s")." - Bzip2 done.\n";
-
-	// kopsataan faili
-	$scpma = "cp $filename $cp_dir";
-	system($scpma);
-
-	echo date("d.m.Y @ G:i:s")." - Copy done.\n";
 
 	// dellataan pois tempit
 	system("rm -rf /tmp/$dbkanta");

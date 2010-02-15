@@ -350,6 +350,7 @@ function tarkistapariteetti($jono) {
 		//echo " --> $apu\n";;
 	}
 
+
 	// Yhdistet‰‰n lohkot takaisin luvuksi
 	for($i = 0; $i <= sizeof($data); $i++) {
 		$jono .= $data[$i];
@@ -515,9 +516,9 @@ function siirtopyynto ($pankki, $tilinumero, $aineisto, $salasana ,$paivays, $nr
 	if ($pankki=='2') {
 		$apu= sprintf ('%-17.17s', "SIIRTOPYYNTO");
 		$apu.= sprintf ('%-10.10s', "");
-		$apu.= sprintf ('%-10.10s', "$aineisto");
-		$apu.= sprintf ('%-18.18s', $tilinumero);
-		$apu.= sprintf ('%-10.10s', $salasana);
+		$apu.= sprintf ('%-10.10s', $aineisto);
+		$apu.= sprintf ('%-18.18s', "");  // T‰ss‰ voisi olla tilinumero
+		$apu.= sprintf ('%-10.10s', "");  // T‰ss‰ voisi olla salasana
 		$apu.= sprintf ('%-6.6s', $paivays);
 		$apu .= " 9979 " . "999\n";
 	}

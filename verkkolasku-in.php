@@ -87,7 +87,7 @@
 
 					$cleanfile = escapeshellarg($file);
 
-			    	system("mv -f $nimi $oklaskut/$cleanfile");
+			    	system("mv -f $cleanfile $oklaskut/$cleanfile");
 			    }
 			    else {
 					if (!$komentorivilta)  {
@@ -96,7 +96,7 @@
 
 					$cleanfile = escapeshellarg($file);
 
-			    	system("mv -f $nimi $errlaskut/$cleanfile");
+			    	system("mv -f $cleanfile $errlaskut/$cleanfile");
 				}
 			}
 		}

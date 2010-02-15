@@ -41,6 +41,7 @@
 
 			// generic error messagen alku
 			$return  = "Tiedosto: $file\n";
+			$return .= "Lähettäjä: $laskuttajan_nimi\n";
 			$return .= "Laskunro: $laskun_numero\n";
 			$return .= "Päivä: $laskun_paiva\n";
 			$return .= "Summa: $laskun_summa_eur\n";
@@ -1083,7 +1084,7 @@
 
 			// päästiin onnillisesti loppuun
 	    	$sub = "$yhtiorow[nimi] vastaanotti laskun $verkapunimi:lta";
-	    	$meili = "Verkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLaskunro: $laskun_numero\nPäivä: $laskun_paiva\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
+	    	$meili = "Verkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLähettäjä: $laskuttajan_nimi\nLaskunro: $laskun_numero\nPäivä: $laskun_paiva\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
 		    $tulos = mail($yhtiorow['alert_email'], $sub, $meili, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
 			if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[alert_email]<br>";

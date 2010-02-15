@@ -982,7 +982,7 @@
 					h3time,
 					h4time,
 					h5time,
-					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus, lasku.viesti, lasku.comments, lasku.viite, lasku.vanhatunnus, lasku.arvo
+					lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus, lasku.viesti, lasku.comments, lasku.viite, lasku.vanhatunnus, lasku.arvo, lasku.maa
 					FROM lasku use index (yhtio_tila_mapvm)
 					JOIN valuu ON lasku.yhtio=valuu.yhtio and lasku.valkoodi = valuu.nimi
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -1176,8 +1176,14 @@
 						echo "<br>";
 					}
 
-					if ($trow['olmapvm'] >= date("Y-m-d")) {
+					if ($trow['olmapvm'] >= date("Y-m-d") and strtoupper($trow['maa']) == 'FI') {
 						echo "<input type='checkbox' name='poikkeus'> ";
+						echo t("Maksetaan heti");
+						echo "<br>";
+					}
+					elseif (strtoupper($trow['maa']) != 'FI') {
+						echo "<input type='checkbox' DISABLED CHECKED> ";
+						echo "<input type='hidden' name='poikkeus' value='on'>";
 						echo t("Maksetaan heti");
 						echo "<br>";
 					}

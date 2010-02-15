@@ -185,7 +185,7 @@ function aineistonlahetys ($yritirow, $aineisto, $pvm, $lahetettava) {
 	$aineistonimi = "aineisto"; // Vain Nordea
 	$kuittausnimi = "kuittaus";
 
-	$siirtopyynto = siirtopyynto($pankki, $yritirow['tilino'], $aineisto, "DEMO", $pvm, $nro);
+	$siirtopyynto = siirtopyynto($pankki, $yritirow['tilino'], $aineisto, "", $pvm, $nro); //4s parametri voi olla DEMO
 	//echo strlen($siirtopyynto). "-->" . $siirtopyynto."<br>";
 
 	echo "Alustetaan ESI-tiedoston teko<br>";

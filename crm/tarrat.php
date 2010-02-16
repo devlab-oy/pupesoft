@@ -60,7 +60,8 @@
 		$query = "	SELECT asiakas.* $selectilisa
 					FROM asiakas
 					$joinilisa
-					WHERE asiakas.yhtio = '$kukarow[yhtio]' and asiakas.tunnus in ($otunnus)";
+					WHERE asiakas.yhtio = '$kukarow[yhtio]' 
+					and asiakas.tunnus in ($otunnus)";
 		$res = mysql_query($query) or pupe_error($query);
 	    
 		$laskuri = 1;
@@ -190,10 +191,11 @@
 		// itse print komento...
 		if ($komento["Tarrat"] == 'email') {
 			$liite = "/tmp/CRM-Osoitetarrat-".md5(uniqid(mt_rand(), true)).".pdf";
-			$kutsu = "Tarrat.pdf";
+			$kutsu = "Tarrat";
 			$ctype = "pdf";
 
 			system("ps2pdf ".$filenimi.".ps $liite");
+			
 			require("../inc/sahkoposti.inc");
 		}
 		else {

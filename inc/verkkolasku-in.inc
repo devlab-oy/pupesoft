@@ -225,12 +225,12 @@
 			$laskuttajan_vat  = trim($laskuttajan_vat);
 			$laskuttajan_nimi = trim($laskuttajan_nimi);
 
-			if (!isset($trow) and $laskuttajan_nimi == "Örum Oy Ab / Arwidson Automotive") {
+			if (!isset($trow) and stripos($laskuttajan_nimi, "rum Oy Ab / Arwidson Automotive") !== FALSE) {
 				// 0 eleganttia
 				$query = "	SELECT *
 							FROM toimi
 							WHERE yhtio = '$yhtio'
-							and nimi = '$laskuttajan_nimi'
+							and nimi = 'Örum Oy Ab / Arwidson Automotive'
 							and tyyppi != 'P'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 

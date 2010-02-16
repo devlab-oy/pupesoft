@@ -211,13 +211,13 @@
 	// Päivämäärien oikeellisuustsekki
 	list($aikatsk_v, $aikatsk_k , $aikatsk_p) = explode("-", $toimaika);
 
-	if (!checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
+	if ((int) $aikatsk_k == 0 or (int) $aikatsk_p == 0 or (int) $aikatsk_v == 0 or !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
 		$toimaika = date("Y-m-d");
 	}
 
 	list($aikatsk_v, $aikatsk_k , $aikatsk_p) = explode("-", $kerayspvm);
 
-	if (!checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
+	if ((int) $aikatsk_k == 0 or (int) $aikatsk_p == 0 or (int) $aikatsk_v == 0 or !checkdate($aikatsk_k, $aikatsk_p, $aikatsk_v)) {
 		$kerayspvm = date("Y-m-d");
 	}
 
@@ -1146,7 +1146,6 @@
 										$jarjestys = 0;
 									}
 
-
 									$query = "	INSERT INTO tilausrivin_lisatiedot
 												SET yhtio			= '$kukarow[yhtio]',
 												positio 			= '$trivtyrow[selite]',
@@ -1655,7 +1654,7 @@
 					while ($olerow = mysql_fetch_array($result)) {
 						$loytyko_varasto = '';
 
-						if ($kukarow['oletus_varasto'] != '' and $kukarow['oletus_varasto'] != 0) {
+						if (isset($kukarow["oletus_varasto"]) and $kukarow['oletus_varasto'] != '' and $kukarow['oletus_varasto'] != 0) {
 							// katsotaan onko käyttäjän oletus_varasto käyttäjän takana ruksatuissa varastoissa
 							foreach(explode(',', $kukarow['varasto']) as $kukarow_varasto_chk) {
 								if ($kukarow['oletus_varasto'] == $kukarow_varasto_chk) {
@@ -1666,7 +1665,7 @@
 						}
 
 						// katsotaan onko oletuspaikka käyttäjän takana ruksatuissa varastoissa ja käyttäjän oletus_varasto ei osunut
-						if ($loytyko_varasto == '') {
+						if (isset($kukarow["varasto"]) and $loytyko_varasto == '') {
 							foreach(explode(',', $kukarow['varasto']) as $kukarow_varasto_chk) {
 								if ($olerow['varastotunnus'] == $kukarow_varasto_chk) {
 									$loytyko_varasto = $kukarow_varasto_chk;

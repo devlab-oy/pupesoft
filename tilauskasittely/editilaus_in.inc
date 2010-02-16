@@ -130,7 +130,7 @@ if (!$fd = fopen($filename, "r")) die("Filen '$filename' ".t("avaus ep‰onnistui"
 //jotta filenimi ei varmasti katoaisi matkalla
 $mailfile = $filename;
 
-$toimpvm 	 = date("Y-n-j");
+$toimpvm 	 = date("Y-m-d");
 $vastaustapa = "";
 
 if ($edi_tyyppi == "futursoft") {
@@ -157,10 +157,11 @@ while (!feof ($fd)) {
 	if ($edi_tyyppi == "futursoft" or $edi_tyyppi == "magento") {
 
 		if (substr($tietue,0,1) != '*') {
-			list($tunnus,$tieto)  = explode(':',$tietue);
+			list($tunnus, $tieto)  = explode(':',$tietue);
 		}
 		else {
-			$tunnus=$tietue;
+			$tunnus = $tietue;
+			$tieto	= "";
 		}
 
 		$tunnus = trim($tunnus);
@@ -1291,7 +1292,7 @@ while (!feof ($fd)) {
 
 			// nollataan kaikki laskun muuttujat (kaikki n‰m‰ samat pit‰‰ nollata filen alussa)
 			unset($arow);
-			$toimpvm				= date("Y-n-j");
+			$toimpvm				= date("Y-m-d");
 			$editilaus_tila       	= "N"; // laskun tila
 			$editilaus_alatila		= "";
 			$editilaus_tyyppi     	= "L"; // tilausrivi tyyppi

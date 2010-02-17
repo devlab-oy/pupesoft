@@ -129,6 +129,11 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				$wherelliset = array("MERKKI", "MALLI", "MALLITARKENNE", "KORITYYPPI", "CC", "MOOTTORITYYPPI", "POLTTOAINE", "SYLINTERIMAARA", "SYLINTERINHALKAISIJA", "TEHO_KW", "TEHO_HV", "ALKUKK", "ALKUVUOSI", "LOPPUKK", "LOPPUVUOSI", "LISATIEDOT", "AUTODATA");
 				break;
+			case "yhteensopivuus_auto_2" : //TARKISTETAAN NÄÄ MYÖHEMMIN
+				$pakolliset = array("AUMERKKI","AUTUN");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				$wherelliset = array("AUMERKKI","AUTUN");
+				break;
 			case "yhteensopivuus_mp" :
 				$pakolliset  = array("TYYPPI", "MERKKI", "CC", "MALLI", "VM");
 				$kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
@@ -169,6 +174,10 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				break;
 			case "kuka" :
 				$pakolliset = array("KUKA");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+				break;
+			case "kustannuspaikka" :
+				$pakolliset = array("TYYPPI","NIMI","KAYTOSSA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
 				break;
 			case "todo" :

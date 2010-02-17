@@ -780,7 +780,7 @@
 
 				if ($komento["Inventointi"] == 'email') {
 
-					system("ps2pdf ".$filenimi.".ps ".$filenimi.".pdf");
+					system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
 
 					$liite = $filenimi.".pdf";
 					$kutsu = "Inventointilista";

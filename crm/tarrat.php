@@ -194,7 +194,7 @@
 			$kutsu = "Tarrat";
 			$ctype = "pdf";
 
-			system("ps2pdf ".$filenimi.".ps $liite");
+			system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps $liite");
 			
 			require("../inc/sahkoposti.inc");
 		}

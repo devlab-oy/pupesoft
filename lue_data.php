@@ -1246,6 +1246,7 @@ else {
 					<option value='etaisyydet' $sel[etaisyydet]>".t("Etäisyydet varastosta")."</option>
 					<option value='hinnasto' $sel[hinnasto]>".t("Hinnasto")."</option>
 					<option value='kalenteri' $sel[kalenteri]>".t("Kalenteritietoja")."</option>
+					<option value='kustannuspaikka' $sel[kustannuspaikka]>".t("Kustannuspaikat")."</option>
 					<option value='liitetiedostot' $sel[liitetiedostot]>".t("Liitetiedostot")."</option>
 					<option value='maksuehto' $sel[maksuehto]>".t("Maksuehto")."</option>
 					<option value='perusalennus' $sel[perusalennus]>".t("Perusalennukset")."</option>
@@ -1268,6 +1269,7 @@ else {
 					<option value='tuotteen_orginaalit' $sel[tuotteen_orginaalit]>".t("Tuotteiden originaalit")."</option>
 					<option value='tuotteen_toimittajat' $sel[tuotteen_toimittajat]>".t("Tuotteen toimittajat")."</option>
 					<option value='yhteensopivuus_auto' $sel[yhteensopivuus_auto]>".t("Yhteensopivuus automallit")."</option>
+					<option value='yhteensopivuus_auto_2' $sel[yhteensopivuus_auto_2]>".t("Yhteensopivuus automallit 2")."</option>
 					<option value='yhteensopivuus_mp' $sel[yhteensopivuus_mp]>".t("Yhteensopivuus mp-mallit")."</option>
 					<option value='yhteensopivuus_tuote' $sel[yhteensopivuus_tuote]>".t("Yhteensopivuus tuotteet")."</option>
 					<option value='yhteyshenkilo' $sel[yhteyshenkilo]>".t("Yhteyshenkilöt")."</option>

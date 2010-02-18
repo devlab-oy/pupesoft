@@ -6759,7 +6759,6 @@ if (!function_exists("livesearch_tuotehaku")) {
 				$haku_query .= " and (tuote.tuoteno like ('%$haku%') or tuote.nimitys like ('%$haku%')) ";
 			}
 			
-			
 			// vientikieltokäsittely:
 			// +maa tarkoittaa että myynti on kielletty tähän maahan ja sallittu kaikkiin muihin
 			// -maa tarkoittaa että ainoastaan tähän maahan saa myydä
@@ -6790,8 +6789,18 @@ if (!function_exists("livesearch_tuotehaku")) {
 				$kieltolisa .= " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
 			}
 			
-			if ($verkkokauppa != "") {
-				$kieltolisa .= " and tuote.hinnastoon IN ('W', 'V') ";
+			if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
+				if ($verkkokauppa != "") {
+					if ($kukarow["kuka"] == "www") {
+						$kieltolisa .= " and tuote.hinnastoon = 'W' ";
+					}
+					else {
+						$kieltolisa .= " and tuote.hinnastoon in ('W','V') ";
+					}
+				}
+				else {
+					$kieltolisa .= " and tuote.hinnastoon != 'E' ";
+				}
 			}
 			
 			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try
@@ -6833,7 +6842,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 					}
 				}
 
-				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>Haulla löytyi ".mysql_num_rows($result). " tuotetta.</font></div>";
+				echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>Haulla löytyi ".mysql_num_rows($result). " tuotetta, näytetään 15 tarkinta osumaa.</font></div>";
 			}
 			else {
 				echo "<div style='padding:2px'><font class='message'>".t("Ei tuotteita.")."</font></div>";

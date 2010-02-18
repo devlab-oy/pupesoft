@@ -1,8 +1,8 @@
 <?php
 
-print "<font class='head'>".t("Uudelleenlähetä tilausvahvistus")."</font><hr>";
-
 require ("inc/parametrit.inc");
+
+echo "<font class='head'>".t("Uudelleenlähetä tilausvahvistus")."</font><hr>";
 
 if ($tee == "laheta" and $tunnukset != "") {
 

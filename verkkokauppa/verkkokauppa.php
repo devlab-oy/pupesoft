@@ -589,7 +589,7 @@ if ($tee == "tuotteen_lisatiedot") {
 
 	//	Haetaan kaikki liitetiedostot
 	$query = "	SELECT liitetiedostot.tunnus, liitetiedostot.selite, liitetiedostot.kayttotarkoitus, avainsana.selitetark, avainsana.selitetark_2,
-				(select tunnus from liitetiedostot l where l.yhtio=liitetiedostot.yhtio and l.liitos=liitetiedostot.liitos and l.liitostunnus=liitetiedostot.liitostunnus and l.kayttotarkoitus='TH' ORDER BY l.tunnus DESC LIMIT 1) peukalokuva
+				(select tunnus from liitetiedostot l where l.yhtio=liitetiedostot.yhtio and l.liitos=liitetiedostot.liitos and l.liitostunnus=liitetiedostot.liitostunnus and l.kayttotarkoitus='TH' and l.filename=liitetiedostot.filename ORDER BY l.tunnus DESC LIMIT 1) peukalokuva
 				FROM tuote
 				JOIN liitetiedostot ON liitetiedostot.yhtio = tuote.yhtio and liitos = 'TUOTE' and liitetiedostot.liitostunnus=tuote.tunnus
 				JOIN avainsana ON avainsana.yhtio = liitetiedostot.yhtio and avainsana.laji = 'LITETY' and avainsana.selite!='TH' and avainsana.selite=liitetiedostot.kayttotarkoitus

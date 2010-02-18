@@ -255,8 +255,8 @@
 					if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
 						require_once ("tulosta_lahete_alalasku.inc");
 					}
-					elseif (strpos($lahetetyyppi,'simppeli') !== FALSE) {
-						require_once ("$lahetetyyppi");
+					elseif (substr($lahetetyyppi, 0, 23) == 'tulosta_lahete_simppeli') {
+						require_once ($lahetetyyppi);
 					}
 					else {
 						require_once ("tulosta_lahete.inc");

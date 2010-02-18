@@ -251,7 +251,7 @@ if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $
 		}
 
 		if (strlen($summa) > 0) {
-			$summa += 0; // tehd‰‰n siit‰ numero
+			$summa = abs($summa); // tehd‰‰n siit‰ positiivinen numero
 			$lisa .= " and abs(tiliointi.summa) = $summa";
 		}
 

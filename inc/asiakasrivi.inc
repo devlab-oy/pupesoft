@@ -1026,18 +1026,19 @@
 
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
-
-		$ulos .= "<option value = '0' $sel[0]>".t("Varastopaikkaj‰rjestys, tuoteperheet pidet‰‰n yhdess‰, erikoistuotteet loppuun");
-		$ulos .= "<option value = '1' $sel[1]>".t("Varastopaikkaj‰rjestys, tuoteperheet pidet‰‰n yhdess‰");
-		$ulos .= "<option value = '2' $sel[2]>".t("Varastopaikkaj‰rjestys, erikoistuotteet loppuun");
-		$ulos .= "<option value = '3' $sel[3]>".t("Varastopaikkaj‰rjestys");
-		$ulos .= "<option value = '4' $sel[4]>".t("Tuotenumeroj‰rjestys, tuoteperheet pidet‰‰n yhdess‰, erikoistuotteet loppuun");
-		$ulos .= "<option value = '5' $sel[5]>".t("Tuotenumeroj‰rjestys, tuoteperheet pidet‰‰n yhdess‰");
-		$ulos .= "<option value = '6' $sel[6]>".t("Tuotenumeroj‰rjestys, erikoistuotteet loppuun");
-		$ulos .= "<option value = '7' $sel[7]>".t("Tuotenumeroj‰rjestys");
-		$ulos .= "<option value = '8' $sel[8]>".t("Tilausj‰rjestys, tuoteperheet pidet‰‰n yhdess‰");
-		$ulos .= "<option value = '9' $sel[9]>".t("Tilausj‰rjestys");
-		$ulos .= "<option value = 'M' $sel[M]>".t("K‰ytt‰j‰n asettama j‰rjestys");
+		
+		$ulos .= "<option value = ''>".t("Yhtiˆn oletus")."</option>";
+		$ulos .= "<option value = '0' $sel[0]>".t("Varastopaikkaj‰rjestys, tuoteperheet pidet‰‰n yhdess‰, erikoistuotteet loppuun")."</option>";
+		$ulos .= "<option value = '1' $sel[1]>".t("Varastopaikkaj‰rjestys, tuoteperheet pidet‰‰n yhdess‰")."</option>";
+		$ulos .= "<option value = '2' $sel[2]>".t("Varastopaikkaj‰rjestys, erikoistuotteet loppuun")."</option>";
+		$ulos .= "<option value = '3' $sel[3]>".t("Varastopaikkaj‰rjestys")."</option>";
+		$ulos .= "<option value = '4' $sel[4]>".t("Tuotenumeroj‰rjestys, tuoteperheet pidet‰‰n yhdess‰, erikoistuotteet loppuun")."</option>";
+		$ulos .= "<option value = '5' $sel[5]>".t("Tuotenumeroj‰rjestys, tuoteperheet pidet‰‰n yhdess‰")."</option>";
+		$ulos .= "<option value = '6' $sel[6]>".t("Tuotenumeroj‰rjestys, erikoistuotteet loppuun")."</option>";
+		$ulos .= "<option value = '7' $sel[7]>".t("Tuotenumeroj‰rjestys")."</option>";
+		$ulos .= "<option value = '8' $sel[8]>".t("Tilausj‰rjestys, tuoteperheet pidet‰‰n yhdess‰")."</option>";
+		$ulos .= "<option value = '9' $sel[9]>".t("Tilausj‰rjestys")."</option>";
+		$ulos .= "<option value = 'M' $sel[M]>".t("K‰ytt‰j‰n asettama j‰rjestys")."</option>";
 
 		if(	mysql_field_name($result, $i) == "valmistus_kerayslistan_jarjestys" or
 			mysql_field_name($result, $i) == "kerayslistan_jarjestys") {
@@ -1051,14 +1052,14 @@
 	if (mysql_field_name($result, $i) == "lahetteen_jarjestys_suunta" or
 		mysql_field_name($result, $i) == "laskun_jarjestys_suunta") {
 
-
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
-
-		$ulos .= "<option value = 'ASC'  $sel[ASC]>".t("Nouseva");
-		$ulos .= "<option value = 'DESC' $sel[DESC]>".t("Laskeva");
+		
+		$ulos .= "<option value = ''>".t("Yhtiˆn oletus")."</option>";
+		$ulos .= "<option value = 'ASC'  $sel[ASC]>".t("Nouseva")."</option>";
+		$ulos .= "<option value = 'DESC' $sel[DESC]>".t("Laskeva")."</option>";
 
 		$ulos .= "</select></td>";
 

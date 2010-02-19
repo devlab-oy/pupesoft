@@ -248,11 +248,7 @@
 										AND tuote.ei_saldoa = ''
 										$tuote_lisa)
 						WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
-						AND tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'
-						AND tapahtuma.hyllyalue != ''
-						AND tapahtuma.hyllynro != ''
-						AND tapahtuma.hyllyvali != ''
-						AND tapahtuma.hyllytaso != '')
+						AND tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59')
 						UNION
 						(SELECT DISTINCT
 						tuotepaikat.yhtio,

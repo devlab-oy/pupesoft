@@ -463,7 +463,7 @@ if ($kollityht > 0) {
 		$qvnrecipientandnotificationtypes	= $qvnoption->addChild('QVNRecipientAndNotificationTypes');
 		$companyorname						= $qvnrecipientandnotificationtypes->addChild('CompanyOrName', ''); // WS 10.0 will populate ShipTo information
 		$contactname						= $qvnrecipientandnotificationtypes->addChild('ContactName', utf8_encode($asiakkaan_sahkopostiosoite_nimi));
-		$emailaddress						= $qvnrecipientandnotificationtypes->addChild('EMailAddress', $asiakkaan_sahkopostiosoite);
+		$emailaddress						= $qvnrecipientandnotificationtypes->addChild('EMailAddress', utf8_encode($asiakkaan_sahkopostiosoite));
 		$ship								= $qvnrecipientandnotificationtypes->addChild('Ship', 'Y'); // lähetetään meili kun paketti lähtee
 		$exception							= $qvnrecipientandnotificationtypes->addChild('Exception', 'N'); // ??
 		$delivery							= $qvnrecipientandnotificationtypes->addChild('Delivery', 'N'); // ??

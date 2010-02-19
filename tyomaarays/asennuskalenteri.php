@@ -413,7 +413,11 @@
 
 				echo "<td class='back' align='center'>";
 
-				$query = "	SELECT kalenteri.kuka, kalenteri.pvmalku, kalenteri.pvmloppu, kalenteri.tapa, kalenteri.tyyppi,
+				$query = "	SELECT kalenteri.kuka, 
+							kalenteri.pvmalku, 
+							kalenteri.pvmloppu, 
+							kalenteri.tapa, 
+							kalenteri.tyyppi,
 							if(kalenteri.tyyppi='asennuskalenteri', kalenteri.liitostunnus, kalenteri.tunnus) liitostunnus,
 							if(lasku.nimi='', kalenteri.kuka, lasku.nimi) nimi,
 							if(tyomaarays.komm1='' or tyomaarays.komm1 is null, kalenteri.kentta01, tyomaarays.komm1) komm1,
@@ -437,7 +441,10 @@
 						foreach ($ASENTAJA_ARRAY as $b) {
 							foreach ($AIKA_ARRAY as $a) {
 								$slot = str_replace(array(":","-"," "), "", $year."-".sprintf('%02d', $month)."-".sprintf('%02d', $i)." ".$a);
-								$alku = str_replace(array(":","-"," "), "", substr($vrow["pvmalku"],0,16));
+								
+								// Koska kale on tuntitarkuudella työ alkaa aina "00" minuuttina
+								$alku = str_replace(array(":","-"," "), "", substr($vrow["pvmalku"],0,14)."00");
+																								
 								$lopp = str_replace(array(":","-"," "), "", substr($vrow["pvmloppu"],0,16));
 
 								if ($alku <= $slot and $lopp > $slot and $vrow["kuka"] == $b) {

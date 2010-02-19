@@ -4477,10 +4477,10 @@ if (!function_exists("enable_ajax")) {
 				if (c>0) {
 					for (x=0;x<=c;x++) {
 						if (allNewScripts[x]) {
-							eval(allNewScripts[x].innerHTML);
+								eval(allNewScripts[x].innerHTML);
+							}
 						}
 					}
-				}
 
 				//	Jos päivitetään togglegrouppaus
 				if (href) {
@@ -8020,6 +8020,77 @@ if (!function_exists("liite_popup")) {
 					$liitteet .= t("Kuva");
 				}
 				$liitteet .= "' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight)\">";
+
+				return $liitteet;
+			}
+		}
+		elseif ($toiminto == "TH") {
+
+			unset($images_exist);
+			unset($pdf_exist);
+			unset($filetype);
+
+			$filetype_query = "	SELECT
+								yhtio,
+								selite,
+								kieli,
+								filename,
+								filesize,
+								filetype,
+								image_width,
+								image_height,
+								kayttotarkoitus,
+								if(kayttotarkoitus='TK', 0, if(kayttotarkoitus='MU', 1, 2)) sorttaus,
+								jarjestys,
+								(	select tunnus 
+									from liitetiedostot l 
+									where l.yhtio=liitetiedostot.yhtio 
+									and l.liitos=liitetiedostot.liitos 
+									and l.liitostunnus=liitetiedostot.liitostunnus 
+									and l.kayttotarkoitus='TH' 
+									and l.filename=liitetiedostot.filename 
+									ORDER BY l.tunnus DESC 
+									LIMIT 1) peukalokuva
+								FROM liitetiedostot
+								WHERE yhtio		 = '$kukarow[yhtio]'
+								and liitos		 = 'tuote'
+								and liitostunnus = '$tuotetunnus'
+								AND kayttotarkoitus != 'TH'
+								ORDER BY sorttaus, jarjestys, filename";
+			$filetype_result = mysql_query($filetype_query) or pupe_error($filetype_query);
+
+			if (mysql_num_rows($filetype_result) > 0) {
+
+				$filetype_row = mysql_fetch_assoc($filetype_result);
+
+				if (in_array($filetype_row["filetype"], array("image/jpeg","image/jpg","image/gif","image/png","image/bmp"))) {
+
+					$maxwidth = $filetype_row["image_width"];
+					$totalheight = $filetype_row["image_height"];
+
+					if ($maxwidth > 640) {
+
+						$kerroin = 640/$maxwidth;
+
+						$maxwidth = $kerroin*$maxwidth;
+						$totalheight = $kerroin*$totalheight;
+					}
+
+					$maxwidth += 30;
+					$totalheight += 100;
+
+					$images_exist = 1;
+				}
+				elseif ($filetype_row["filetype"] == "application/pdf") {
+					$maxwidth 		= 0;
+					$totalheight 	= 0;
+					$pdf_exist 		= 1;
+				}
+			}
+
+			if (isset($images_exist) or isset($pdf_exist)) {
+
+				$liitteet = "<img src='view.php?id=$row[peukalokuva]' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight)\">";
 
 				return $liitteet;
 			}

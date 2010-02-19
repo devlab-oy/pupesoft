@@ -112,12 +112,7 @@ if ($tee_kululaskut == "liita") {
 	$alvisumma = $alvirow["summa"];
 
 	if (strtoupper($oslasrow["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
-		if ($oslasrow["maksu_kurssi"] != 0) {
-			$alvisumma = $alvirow["summa"] / $oslasrow["maksu_kurssi"];
-		}
-		else {
-			$alvisumma = $alvirow["summa"] / $oslasrow["vienti_kurssi"];
-		}
+		$alvisumma = $alvirow["summa"] / $oslasrow["vienti_kurssi"];
 	}
 
 	$oslasrow["arvo"] = round((float) $oslasrow["summa"] - (float) $alvisumma, 2);
@@ -668,12 +663,7 @@ if ($silent == "") {
 				$alvisumma = $alvirow["summa"];
 
 				if (strtoupper($oslasrow["valkoodi"]) != strtoupper($yhtiorow["valkoodi"])) {
-					if ($llrow["maksu_kurssi"] != 0) {
-						$alvisumma = $alvirow["summa"] / $llrow["maksu_kurssi"];
-					}
-					else {
-						$alvisumma = $alvirow["summa"] / $llrow["vienti_kurssi"];
-					}
+					$alvisumma = $alvirow["summa"] / $llrow["vienti_kurssi"];
 				}
 
 				//Ja lopuksi vielä veroton summa

@@ -100,11 +100,8 @@ elseif ($toiminto == "kalkyyli" and $tee == "") {
 }
 $presult = mysql_query($query) or pupe_error($query);
 
-// k‰ytet‰‰n aina VIENTI kurssia, koska ostoreskontrassa ei koskaa varasto/matkallaolevat tiliˆinnin summaa vaan se tehd‰‰n aina vientikurssilla ja vientikurssin/maksukurssin ero tulee vain valuuttakurssierot -tilille
-$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"];
-
 // jos meill‰ on valuuttakeikka, lasketaan keskikurssi kaikille vaihto-omaisuuslaskuille
-if ($laskurow["maksu_kurssi"] != 1) {
+if ($laskurow["vienti_kurssi"] != 1) {
 	$query  = "	SELECT ifnull(round(sum(summa * vienti_kurssi) / sum(summa), 6), 0) vientikurssi
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
@@ -117,12 +114,12 @@ if ($laskurow["maksu_kurssi"] != 1) {
 	$kurssirow = mysql_fetch_array($result);
 
 	if ($kurssirow["vientikurssi"] != 0) {
-		$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"] = $kurssirow["vientikurssi"];
+		$laskurow["vienti_kurssi"] = $kurssirow["vientikurssi"];
 	}
 }
 
 // tsekataan viel‰
-if ($laskurow["maksu_kurssi"] == 0) {
+if ($laskurow["vienti_kurssi"] == 0) {
 	echo t("Kurssi uupuu! Jossain on iso ongelma ,8,1");
 	
 	if ($suoratoimitus == '' and $kauttalaskutus == '') {
@@ -140,7 +137,7 @@ else {
 
 if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) {
 	// jos lasketaan virallista varastonarvoa, otetaan keikan summa huomioon (kululaskujen yhteenlaskettu summa OLETUSVALUUTASSA on laskurow.saldo_maksettu)
-	$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['maksu_kurssi'], 2);
+	$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'], 2);
 	$rahtitapa  = t("Virallinen");
 }
 else {
@@ -168,7 +165,7 @@ else {
 	$laskurow['summa'] = $hintarow['summa'];
 
 	// lasketaan itse rahtikulut
-	$rahtikulut = round($laskurow['summa'] * $laskurow['maksu_kurssi'] * ($laskurow['rahti'] / 100), 2);
+	$rahtikulut = round($laskurow['summa'] * $laskurow['vienti_kurssi'] * ($laskurow['rahti'] / 100), 2);
 	$rahtitapa  = t("Kuluprosentti") ." ". $laskurow['rahti']. "%";
 
 	// jos ollaan annettu t‰lle batchille kulusumma, k‰ytet‰‰nkin vaan sit‰!
@@ -261,10 +258,10 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	}
 
 	// t‰m‰ on miinusta hyvitysrivill‰
-	$ohinta = round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['maksu_kurssi']*$tilrivirow['varattu']+$rahtios, 6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
+	$ohinta = round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['vienti_kurssi']*$tilrivirow['varattu']+$rahtios, 6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
 
 	// Osuus kululaskuista # Osuus eturahdista
-	$hankintakulut .= round($laskurow["saldo_maksettu"] * $osuus, 2)."#".round($laskurow['rahti_etu'] * $laskurow['maksu_kurssi'] * $osuus, 2);
+	$hankintakulut .= round($laskurow["saldo_maksettu"] * $osuus, 2)."#".round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'] * $osuus, 2);
 
 	$tulliprossa = "";
 	$tv_nimrow	 = "";

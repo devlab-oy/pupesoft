@@ -91,7 +91,7 @@
 	echo "<br><font class='head'>".t("Laskut joita ei ole liitetty keikkoihin")."</font><hr>";
 
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
-				round(lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)),2) 'summaeur'
+				round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur'
 				FROM lasku
 				LEFT JOIN lasku AS lasku2 on (lasku2.yhtio = lasku.yhtio and lasku2.vanhatunnus = lasku.tunnus and lasku2.tila = 'K')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -190,8 +190,8 @@
 
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
 				sum(tiliointi.summa) 'varastossa',
-				round(lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)),2) 'summaeur',
-				round(sum(lasku2.summa*(if(lasku2.maksu_kurssi=0, lasku2.vienti_kurssi, lasku2.maksu_kurssi))),2) 'kohdistettu'
+				round(lasku.summa*lasku.vienti_kurssi,2) 'summaeur',
+				round(sum(lasku2.summa*lasku2.vienti_kurssi),2) 'kohdistettu'
 				FROM lasku
 				LEFT JOIN lasku AS lasku2 on (lasku2.yhtio = lasku.yhtio and lasku2.vanhatunnus = lasku.tunnus and lasku2.tila = 'K')
 				LEFT JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio and
@@ -340,7 +340,7 @@
 
 	echo "<font class='head'>".t("Varastonarvoon vaikuttavat laskut joilla ei ole varastokirjauksia")."</font><hr>";
 
-	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)) 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus, tiliointi1.ltunnus, tiliointi2.ltunnus
+	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*lasku.vienti_kurssi 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus, tiliointi1.ltunnus, tiliointi2.ltunnus
 				FROM lasku
 				LEFT JOIN tiliointi AS tiliointi1 ON (tiliointi1.yhtio = lasku.yhtio and
 									tiliointi1.ltunnus = lasku.tunnus and
@@ -415,7 +415,7 @@
 
 	echo "<font class='head'>".t("Normaalit kululaskut joilla on varastokirjauksia")."</font><hr>";
 
-	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)) 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus, tiliointi1.ltunnus
+	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*lasku.vienti_kurssi 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus, tiliointi1.ltunnus
 				FROM lasku
 				JOIN tiliointi AS tiliointi1 ON (tiliointi1.yhtio = lasku.yhtio and
 									tiliointi1.ltunnus = lasku.tunnus and
@@ -480,7 +480,7 @@
 
 	echo "<font class='head'>".t("Laskut joiden varastokirjaukset eiv‰t t‰sm‰‰")."</font><hr>";
 
-	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)) 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus,
+	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*lasku.vienti_kurssi 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus,
 					(SELECT sum(summa)
 						FROM tiliointi AS tiliointi1
 						WHERE tiliointi1.yhtio = lasku.yhtio and tiliointi1.ltunnus = lasku.tunnus and tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]') and tiliointi1.korjattu = ''
@@ -559,7 +559,7 @@
 
 	echo "<font class='head'>".t("Keikkojen eturahdit")."</font><hr>";
 
-	$query = "	SELECT *, lasku.rahti_etu*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)) rahti
+	$query = "	SELECT *, lasku.rahti_etu*lasku.vienti_kurssi rahti
 				FROM lasku
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
 				lasku.tila = 'K' and

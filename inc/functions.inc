@@ -2153,7 +2153,6 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 			else {
 				// Tavara on ostettu sis‰‰n keikalla
 
-
 				// Virallinen laskenta, haetaan ihan kaikki rivit uudestaan (varattu=0) kaikki pit‰‰ olla viety varastoon jo ennen t‰t‰..
 				$query = "	SELECT tilausrivi.*, tilausrivi.kpl varattu
 							FROM tilausrivi
@@ -2166,14 +2165,9 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 							and tilausrivi.tunnus = $rivitunnus";
 				$presult = mysql_query($query) or pupe_error($query);
 
-				// Laskun valuttakurssi
-				if ($laskurow["maksu_kurssi"] == 0) {	//t‰m‰ olisi huonompi juttu, mut ei mik‰‰n stopperi
-					$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"];
-				}
-
-				// Tsekataan viel‰
-				if ($laskurow["maksu_kurssi"] == 0) {	//t‰m‰ olisi huonompi juttu, mut ei mik‰‰n stopperi
-					$laskurow["maksu_kurssi"] = 1;
+				// Tsekataan viel‰ laskun valuttakurssi
+				if ($laskurow["vienti_kurssi"] == 0) {	//t‰m‰ olisi huonompi juttu, mut ei mik‰‰n stopperi
+					$laskurow["vienti_kurssi"] = 1;
 				}
 
 				// jos erikoisale niin otetaan sit‰ kanssa huomioon
@@ -2185,7 +2179,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 				}
 
 				// Jos lasketaan virallista varastonarvoa, otetaan keikan summa huomioon (kululaskujen yhteenlaskettu summa OLETUSVALUUTASSA on laskurow.saldo_maksettu)
-				$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['maksu_kurssi'], 2);
+				$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['vienti_kurssi'], 2);
 
 				while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
@@ -2219,7 +2213,7 @@ if (!function_exists("jalkilaskentafunktiolle_ostohinta")) {
 						$rahtios = $rahtios * -1;
 					}
 
-					$ohinta  = round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['maksu_kurssi']*$tilrivirow['varattu']+$rahtios,6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
+					$ohinta  = round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['vienti_kurssi']*$tilrivirow['varattu']+$rahtios,6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
 
 					$tulliprossa = "";
 
@@ -4084,7 +4078,7 @@ if (!function_exists("sarjanumeron_ostohinta")) {
 
 				while($kulukeikkarow = mysql_fetch_assoc($keikkares)) {
 					// Haetaan kaikki keikkaan liitettyjen laskujen summa
-					$query = "	SELECT sum(arvo*if (maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)) kulusumma
+					$query = "	SELECT sum(arvo*vienti_kurssi) kulusumma
 								FROM lasku
 								WHERE yhtio		= '$kukarow[yhtio]'
 								and tila 		IN ('K','X')
@@ -4119,7 +4113,7 @@ if (!function_exists("liitettyjen_kululaskujen_summa")) {
 
 		while($kulukeikkarow = mysql_fetch_assoc($keikkares)) {
 			// Haetaan kaikki keikkaan liitettyjen laskujen summa
-			$query = "	SELECT sum(arvo*if (maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)) kulusumma
+			$query = "	SELECT sum(arvo*vienti_kurssi) kulusumma
 						FROM lasku
 						WHERE yhtio		= '$kukarow[yhtio]'
 						and tila 		IN ('K','X')

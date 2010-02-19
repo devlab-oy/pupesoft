@@ -73,19 +73,14 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 
 			while($llrow = mysql_fetch_array($result)) {
 
-				// arvotaan illan 7 oikein, eli kurssi
-				if ($llrow["maksu_kurssi"] == 0) {	//t‰m‰ olisi huonompi juttu, mut ei mik‰‰n stopperi
-					$llrow["maksu_kurssi"] = $llrow["vienti_kurssi"];
-				}
-
 				// tsekataan viel‰
-				if ($llrow["maksu_kurssi"] == 0) {
+				if ($llrow["vienti_kurssi"] == 0) {
 					echo t("Kurssi uupuu! Jossain on iso ongelma ,8,1");
 					exit;
 				}
 
-				$apusumma = round($llrow["arvo"] * $llrow["maksu_kurssi"],2);
-				$summa += $llrow["arvo"] * $llrow["maksu_kurssi"];
+				$apusumma = round($llrow["arvo"] * $llrow["vienti_kurssi"],2);
+				$summa += $llrow["arvo"] * $llrow["vienti_kurssi"];
 
 				echo "<tr>
 						<td>$llrow[nimi]</td>

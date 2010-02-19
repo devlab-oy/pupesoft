@@ -573,7 +573,7 @@ if ($monta > $limit) {
 	$ytunnus = "";
 }
 
-if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php") {
+if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php" or $kutsuja == "kalenteri.php") {
 	$query = "	SELECT yhtio
 				FROM oikeu
 				WHERE yhtio	= '$kukarow[yhtio]'

@@ -8044,11 +8044,11 @@ if (!function_exists("liite_popup")) {
 								jarjestys,
 								(	select tunnus 
 									from liitetiedostot l 
-									where l.yhtio=liitetiedostot.yhtio 
-									and l.liitos=liitetiedostot.liitos 
-									and l.liitostunnus=liitetiedostot.liitostunnus 
-									and l.kayttotarkoitus='TH' 
-									and l.filename=liitetiedostot.filename 
+									where l.yhtio = liitetiedostot.yhtio 
+									and l.liitos = liitetiedostot.liitos 
+									and l.liitostunnus = liitetiedostot.liitostunnus 
+									and l.kayttotarkoitus = 'TH' 
+									and l.filename = liitetiedostot.filename 
 									ORDER BY l.tunnus DESC 
 									LIMIT 1) peukalokuva
 								FROM liitetiedostot
@@ -8090,7 +8090,20 @@ if (!function_exists("liite_popup")) {
 
 			if (isset($images_exist) or isset($pdf_exist)) {
 
-				$liitteet = "<img src='view.php?id=$row[peukalokuva]' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight)\">";
+				if ($filetype_row["peukalokuva"] > 0) {
+					$liitteet = "<img src='view.php?id=$filetype_row[peukalokuva]' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight)\">";
+				}
+				else {
+					$liitteet = "<input type='button' value='";
+
+					if ($pdf_exist) {
+						$liitteet .= t("Pdf");
+					}
+					else {
+						$liitteet .= t("Kuva");
+					}
+					$liitteet .= "' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight)\">";
+				}
 
 				return $liitteet;
 			}

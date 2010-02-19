@@ -40,7 +40,7 @@ function weekday_number($paiva, $kuu, $year) {
 
 //jos muutparametrit os setattu niin otetaan siitä ulos ruksatut kalenterit
 if (isset($muutparametrit)) {
-	$valx = explode('#',$muutparametrit);
+	$valx = explode('!¡!',$muutparametrit);
 	$valitut = $valx[0];
 }
 
@@ -90,23 +90,24 @@ if ($tee == 'LISAA') {
 
 	if ($ytunnus != '') {
 		if (!isset($muutparametrit)) {
-			$muutparametrit	= 	$valitut."#".$kenelle."#".$asyhtio."#".$kello."#".$year."#".$kuu."#".$paiva."#".$tunnus."#".$konserni."#".$lkello."#".$lyear."#".$lkuu."#".$lpaiva."#".$tapa."#".$lopetus."#".$viesti;
+			$muutparametrit	= 	$valitut."!¡!".$kenelle."!¡!".$asyhtio."!¡!".$kello."!¡!".$year."!¡!".$kuu."!¡!".$paiva."!¡!".$tunnus."!¡!".$konserni."!¡!".$lkello."!¡!".$lyear."!¡!".$lkuu."!¡!".$lpaiva."!¡!".$tapa."!¡!".$lopetus."!¡!".$viesti;
 		}
-
+				
 		echo "<br><font class='message'>".t("Valitse asiakas").":</font><br><br>";
 
 		$kutsuja = 'kalenteri.php';
-		require ("../inc/asiakashaku.inc");
-
+		$ahlopetus 	= $palvelin2."crm/kalenteri.php////tee=LISAA//ytunnus=$ytunnus//muutparametrit=$muutparametrit";
+			
+		require ("inc/asiakashaku.inc");
+		
 		if ($ytunnus == '') {
 			exit;
 		}
 	}
 
 	if ($ytunnus != '') {
-
-		$muut = explode('#',$muutparametrit);
-
+		$muut = explode('!¡!', $muutparametrit);
+				
 		$valitut 	= $muut[0];
 		$kenelle 	= $muut[1];
 		$asyhtio	= $muut[2];
@@ -128,7 +129,7 @@ if ($tee == 'LISAA') {
 	}
 	elseif (isset($muutparametrit)) {
 		$tee 	 = "SYOTA";
-		$muut 	 = explode('#',$muutparametrit);
+		$muut 	 = explode('!¡!', $muutparametrit);
 
 		$valitut 	= $muut[0];
 		$kenelle 	= $muut[1];
@@ -616,16 +617,16 @@ if (mysql_num_rows($result) > 0) {
 		echo "<td>$prow[tapa]</td>";
 
 		if ($kukarow["yhtio"] == $prow["yhtio"]) {
-		echo "<td><a href='asiakasmemo.php?ytunnus=$prow[asiakas]&asiakasid=$prow[liitostunnus]'>$asiak[nimi]</a></td>";
+			echo "<td><a href='asiakasmemo.php?ytunnus=$prow[asiakas]&asiakasid=$prow[liitostunnus]'>$asiak[nimi]</a></td>";
 		}
 		else {
-		echo "<td>$asiak[nimi]</td>";
+			echo "<td>$asiak[nimi]</td>";
 		}
 
 		echo "<td>$prow[kentta01]</td>";
 
 		if ($kons == 1) {
-		$ko = "(".$prow["yhtio"]."), ";
+			$ko = "(".$prow["yhtio"]."), ";
 		}
 
 		echo "<td>$ko $prow[nimi]</td>";
@@ -826,21 +827,21 @@ while ($kello_nyt != $whileloppu) {
 
 				// Vanhoja kalenteritapahtumia ei saa enää muuttaa ja Hyväksyttyjä lomia ei saa ikinä muokata
 				if (($kukarow["kuka"] == $row["kuka"] or $kukarow["kuka"] == $row["laatija"]) and $row["kuittaus"] == "" and $row['tyyppi'] == 'kalenteri') {
-					echo "<td class='tumma'  rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi<a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&lopetus=$lopetus'>$row[tapa]</a>";
+					echo "<td class='tumma'  rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi<a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&lopetus=$lopetus'>$row[tapa]</a> ";
 				}
 				elseif ($row['tyyppi'] == 'asennuskalenteri') {
-					echo "<td class='tumma' rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>",t("Asennustyö")," $row[liitostunnus]";
+					echo "<td class='tumma' rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>",t("Asennustyö")," $row[liitostunnus] ";
 				}
 				else {
-					echo "<td class='tumma' rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi $row[tapa]";
+					echo "<td class='tumma' rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi $row[tapa] ";
 				}
 
 				if ($row['tyyppi'] == 'kalenteri' and $row["liitostunnus"] != 0) {
 					if ($kukarow["yhtio"] == $row["yhtio"]) {
-						echo "<a href='asiakasmemo.php?ytunnus=$row[asiakas]&asiakasid=$row[liitostunnus]'>$asiak[nimi]</a>";
+						echo " - <a href='asiakasmemo.php?ytunnus=$row[asiakas]&asiakasid=$row[liitostunnus]'>$asiak[nimi]</a>";
 					}
 					else {
-						echo "$asiak[nimi]";
+						echo " - $asiak[nimi]";
 					}
 				}
 

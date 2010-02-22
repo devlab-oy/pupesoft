@@ -1167,7 +1167,10 @@
 								if (mysql_field_name($result, $i) == "tuotemyyja" or mysql_field_name($result, $i) == "asiakasmyyja") {
 									$query = "	SELECT nimi
 												FROM kuka
-												WHERE yhtio in ($yhtio) and myyja='$row[$i]' and myyja!='0' limit 1";
+												WHERE yhtio in ($yhtio) 
+												and myyja = '$row[$i]' 
+												AND myyja > 0
+												limit 1";
 									$osre = mysql_query($query) or pupe_error($query);
 
 									if (mysql_num_rows($osre) == 1) {
@@ -1196,7 +1199,10 @@
 								if (mysql_field_name($result, $i) == "tuoteostaja") {
 									$query = "	SELECT nimi
 												FROM kuka
-												WHERE yhtio in ($yhtio) and myyja='$row[$i]' and myyja!='0' limit 1";
+												WHERE yhtio in ($yhtio) 
+												and myyja = '$row[$i]' 
+												AND myyja > 0
+												limit 1";
 									$osre = mysql_query($query) or pupe_error($query);
 									if (mysql_num_rows($osre) == 1) {
 										$osrow = mysql_fetch_array($osre);

@@ -826,7 +826,9 @@
 			$kukamyyja = '';
 			$query = "	SELECT myyja
 						FROM kuka
-						WHERE yhtio='$kukarow[yhtio]' and kuka = '$kukarow[kuka]' and myyja != 0";
+						WHERE yhtio='$kukarow[yhtio]' 
+						and kuka = '$kukarow[kuka]' 
+						and myyja > 0";
 			$myyjaresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($myyjaresult) > 0) {

@@ -227,7 +227,7 @@
 								FROM kuka
 								WHERE yhtio='$kukarow[yhtio]'
 								AND myyja = '$row[myyjanro]'
-								AND myyja != ''
+								AND myyja > 0
 								ORDER BY myyja";
 					$myyjaresult = mysql_query($query) or pupe_error($query);
 					$myyjarow = mysql_fetch_array($myyjaresult);
@@ -236,7 +236,7 @@
 								FROM kuka
 								WHERE yhtio='$kukarow[yhtio]'
 								AND myyja = '$row[ostajanro]'
-								AND myyja != ''
+								AND myyja > 0
 								ORDER BY myyja";
 					$ostajaresult = mysql_query($query) or pupe_error($query);
 					$ostajarow = mysql_fetch_array($ostajaresult);

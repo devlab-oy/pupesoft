@@ -74,7 +74,9 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			if ($myyjanro != "") {
 				$apuqu = "	SELECT *
 							from kuka use index (yhtio_myyja)
-							where yhtio='$kukarow[yhtio]' and myyja='$myyjanro'";
+							where yhtio = '$kukarow[yhtio]' 
+							and myyja = '$myyjanro'
+							AND myyja > 0";
 				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 
 				if (mysql_num_rows($meapu)==1) {

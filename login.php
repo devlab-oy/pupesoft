@@ -1,29 +1,16 @@
 <?php
 
-if(isset($_POST['user'])) 		$user		= $_POST['user'];
-else 							$user		= "";
-if(isset($_POST['yhtio'])) 		$yhtio		= $_POST['yhtio'];
-else 							$yhtio		= "";
-if(isset($_POST['salamd5'])) 	$salamd5	= $_POST['salamd5'];
-else 							$salamd5	= "";
-if(isset($_POST['salasana'])) 	$salasana	= $_POST['salasana'];
-else 							$salasana	= "";
-if(isset($_POST['uusi1'])) 		$uusi1		= $_POST['uusi1'];
-else 							$uusi1		= "";
-if(isset($_POST['uusi2'])) 		$uusi2		= $_POST['uusi2'];
-else 							$uusi2		= "";
-
 //	Laitetaan loginiinkin aina oikea charset
-if(!headers_sent()) {
+if (!headers_sent()) {
 	header("Content-Type: text/html; charset=iso-8859-1");
 }
 
 require ("inc/functions.inc");
 
-if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
+//kayttaja on syottanyt tietonsa login formiin
+if ($_REQUEST["user"] != '') {	
 
-	$login="yes";
-
+	$login = "yes";
 	require("inc/parametrit.inc");
 
 	$session = "";
@@ -35,7 +22,7 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 				where kuka.kuka		= '$user'
 				and kuka.extranet 	= ''
 				GROUP BY 1,2,3,4";
-	$result = mysql_query($query) or die("Kysely ep‰onnistui");
+	$result = mysql_query($query) or pupe_error($query);
 	$krow = mysql_fetch_array($result);
 
 	if ($salamd5!='') $vertaa = $salamd5;
@@ -85,7 +72,7 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 				$query = "	UPDATE kuka
 							SET salasana = '$uusi1'
 							WHERE kuka = '$user'";
-				$result = mysql_query($query) or die ("Salasanap‰ivitys ep‰onnistui kuka");
+				$result = mysql_query($query) or pupe_error($query);
 
 				$vertaa = trim($uusi1);
 				$salasana = trim($uusi2);
@@ -108,7 +95,7 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 				if (strlen($yhtio) > 0) $query .= " and yhtio = '$yhtio'";
 				else $query .= " and yhtio = '$krow[yhtio]'";
 
-				$result = mysql_query($query) or die ("P‰ivitys ep‰onnistui kuka $query");
+				$result = mysql_query($query) or pupe_error($query);
 
 				$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH)); // 12 tuntia voimassa
 
@@ -118,7 +105,7 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 				else {
 					// katsotaan onko k‰ytt‰j‰ll‰ oletus_ohjelma.. jos on menn‰‰n suoraan siihen.
 					$query = "SELECT oletus_ohjelma from kuka where session = '$session'";
-					$result = mysql_query($query) or die ("P‰ivitys ep‰onnistui kuka $query");
+					$result = mysql_query($query) or pupe_error($query);
 					$row = mysql_fetch_array($result);
 
 					if ($row["oletus_ohjelma"] != "") {
@@ -193,7 +180,7 @@ else {
 	echo "<a target='_top' href='$palvelin2'><img src='http://www.pupesoft.com/pupesoft.gif' border='0'>";
 }
 
-echo "</td><td><font class='head'>".t("Sis‰‰nkirjautuminen",$browkieli)."</font><br><br>";
+echo "</td><td><font class='head'>".t("Sis‰‰nkirjautuminen", $browkieli)."</font><br><br>";
 
 if (isset($usea) and $usea == 1) {
 	$query = "	SELECT yhtio.nimi, yhtio.yhtio
@@ -202,7 +189,7 @@ if (isset($usea) and $usea == 1) {
 				and yhtio.yhtio		= kuka.yhtio
 				and kuka.extranet	= ''
 				ORDER BY nimi";
-	$result = mysql_query($query) or pupe_error($query);;
+	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {
 		echo t("Sinulle lˆytyi monta k‰ytt‰j‰tunnusta, muttei yht‰‰n yrityst‰",$browkieli)."!";

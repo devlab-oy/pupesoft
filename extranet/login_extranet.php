@@ -1,22 +1,16 @@
 <?php
 
-$user     = $_POST['user'];
-$yhtio    = $_POST['yhtio'];
-$salamd5  = $_POST['salamd5'];
-$salasana = $_POST['salasana'];
-$uusi1    = $_POST['uusi1'];
-$uusi2    = $_POST['uusi2'];
-
 require ("functions.inc");
 
 if (file_exists(basename($_SERVER["SCRIPT_URI"]))) $go = basename($_SERVER["SCRIPT_URI"]);
 
 //kayttaja on syottanyt tietonsa login formiin
-if ($user != '') {
+if ($_REQUEST["user"] != '') {
 
 	$login    = "yes";
 	$extranet = 1;
 	$_GET["no_css"] = "yes";
+	
 	require("parametrit.inc");
 
 	$session = "";
@@ -25,12 +19,12 @@ if ($user != '') {
 	$query = "	SELECT kuka, session, salasana
 				FROM kuka
 				where kuka = '$user' and extranet != '' and oletus_asiakas != ''";
-	$result = mysql_query($query) or die("VIRHE: Kysely ei onnistu!");
-	$krow = mysql_fetch_array ($result);
+	$result = mysql_query($query) or pupe_error($query);
+	$krow = mysql_fetch_array($result);
 
-	if($salamd5!='')
+	if ($salamd5!='')
 		$vertaa=$salamd5;
-	elseif($salasana == '')
+	elseif ($salasana == '')
 		$vertaa=$salasana;
 	else
 		$vertaa = md5(trim($salasana));
@@ -43,14 +37,13 @@ if ($user != '') {
 		}
 
 		// Kaikki ok!
-		if ($err != 1)
-		{
+		if ($err != 1) {
 			// Pit‰‰kˆ viel‰ kysy‰ yrityst‰???
-			if (($usea != 1) or (strlen($yhtio) > 0))
-			{
+			if (($usea != 1) or (strlen($yhtio) > 0)) {
 				for ($i=0; $i<25; $i++) {
 					$session = $session . chr(rand(65,90)) ;
 				}
+				
 				$query = "	UPDATE kuka
 							SET session = '$session',
 							lastlogin = now()
@@ -58,12 +51,11 @@ if ($user != '') {
 				if (strlen($yhtio) > 0) {
 					$query .= " and yhtio = '$yhtio'";
 				}
-				$result = mysql_query($query)
-					or die ("P‰ivitys ep‰onnistui kuka $query");
+				$result = mysql_query($query) or pupe_error($query);
 
 				$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH));
 
-				if($location != "") {
+				if ($location != "") {
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$location'>";
 				}
 				else {
@@ -138,12 +130,12 @@ echo "</a></td>
 <font class='head'>".t("Sis‰‰nkirjautuminen",$browkieli)."</font><br><br>
 ";
 
-if ($usea == '1') {
+if (isset($usea) and $usea == 1) {
 	$query = "	SELECT yhtio.nimi, yhtio.yhtio
 				FROM kuka, yhtio
-				WHERE kuka='$user' and yhtio.yhtio=kuka.yhtio";
-	$result = mysql_query($query)
-		or die ("Kysely ei onnistu $query");
+				WHERE kuka='$user' 
+				and yhtio.yhtio=kuka.yhtio";
+	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {
 		echo "".t("Sinulle lˆytyi monta k‰ytt‰j‰tunnusta, muttei yht‰‰n yrityst‰")."!";
@@ -154,10 +146,8 @@ if ($usea == '1') {
 	echo "<tr><td colspan='2'><font class='menu'>".t("Valitse yritys").":</font></td></tr>";
 	echo "<tr>";
 
-	while ($yrow=mysql_fetch_array ($result))
-	{
-		for ($i=0; $i<mysql_num_fields($result)-1; $i++)
-		{
+	while ($yrow=mysql_fetch_array ($result)) {
+		for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
 			echo "<td><font class='menu'>$yrow[$i]</font></td>";
 		}
 		echo "<form action = 'login_extranet.php' method='post'>";
@@ -176,12 +166,13 @@ if ($usea == '1') {
 else {
 
 	//	Ei tehd‰ framesetti‰ jos hyp‰t‰‰n suoraan muualle
-	if($location != "") {
+	if ($location != "") {
 		$target = "login_extranet.php";
 	}
 	else {
 		$target = "index.php";
 	}
+	
 	echo "
 			<table class='login'>
 				<form name='login' target='_top' action='$target' method='post'>
@@ -197,12 +188,7 @@ else {
 			</form>
 	";
 }
-echo "
-
-</td>
-</tr>
-</table>
-";
+echo "</td></tr></table>";
 
 echo "<script LANGUAGE='JavaScript'>
 window.document.$formi.$kentta.focus();

@@ -49,7 +49,11 @@ echo "--------------------------------------------\n";
 
 while ($myyjarow = mysql_fetch_array ($myyre)) {
 
-	$query = "select tunnus, ytunnus, nimi from asiakas where yhtio='$kukarow[yhtio]' and myyjanro='$myyjarow[myyjanro]'";
+	$query = "	SELECT tunnus, ytunnus, nimi 
+				from asiakas 
+				where yhtio = '$kukarow[yhtio]' 
+				and myyjanro = '$myyjarow[myyjanro]'
+				AND myyjanro > 0";
 	$asire = mysql_query($query) or die($query);
 
 	// merkit kelataan kalkuun
@@ -113,7 +117,11 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
 		$sivu .= "\n";
 	}
 
-	$query = "select eposti, nimi from kuka where yhtio='$kukarow[yhtio]' and myyja='$myyjarow[myyjanro]'";
+	$query = "	SELECT eposti, nimi 
+				from kuka 
+				where yhtio = '$kukarow[yhtio]' 
+				and myyja = '$myyjarow[myyjanro]'
+				AND myyja > 0";
 	$kukre = mysql_query($query) or die($query);
 	$kukro = mysql_fetch_array ($kukre);
 

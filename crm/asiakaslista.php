@@ -322,8 +322,10 @@
 					
 	$query = "	SELECT distinct asiakas.myyjanro, kuka.nimi
 				FROM asiakas
-				LEFT JOIN kuka ON kuka.yhtio = asiakas.yhtio and kuka.myyja=asiakas.myyjanro
-				WHERE asiakas.yhtio='$kukarow[yhtio]' and asiakas.myyjanro!=0  order by myyjanro";
+				LEFT JOIN kuka ON kuka.yhtio = asiakas.yhtio and kuka.myyja=asiakas.myyjanro and kuka.myyja > 0
+				WHERE asiakas.yhtio = '$kukarow[yhtio]' 
+				and asiakas.myyjanro > 0
+				order by myyjanro";
 	$asosresult = mysql_query($query) or pupe_error($query);
 	
 	echo "<tr>";

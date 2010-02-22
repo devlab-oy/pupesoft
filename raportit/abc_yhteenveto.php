@@ -429,7 +429,11 @@
 			}
 
 			if ($tuotemyyja == 'KAIKKI') {
-				$keymyyja = "	SELECT nimi FROM kuka WHERE yhtio = '$kukarow[yhtio]' and myyja = '$row[myyjanro]'";
+				$keymyyja = "	SELECT nimi 
+								FROM kuka 
+								WHERE yhtio = '$kukarow[yhtio]' 
+								and myyja = '$row[myyjanro]'
+								AND myyja > 0";
 				$myyjares = mysql_query($keymyyja) or pupe_error($keymyyja);
 				$keytuotemyyja = mysql_fetch_array($myyjares);
 
@@ -437,7 +441,11 @@
 			}
 
 			if ($tuoteostaja == 'KAIKKI') {
-				$keyostaja = "	SELECT nimi FROM kuka WHERE yhtio = '$kukarow[yhtio]' and myyja = '$row[ostajanro]'";
+				$keyostaja = "	SELECT nimi 
+								FROM kuka 
+								WHERE yhtio = '$kukarow[yhtio]' 
+								and myyja = '$row[ostajanro]'
+								AND myyja > 0";
 				$ostajares = mysql_query($keyostaja) or pupe_error($keymyyja);
 				$keytuoteostaja = mysql_fetch_array($ostajares);
 

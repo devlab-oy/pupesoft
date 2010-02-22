@@ -53,7 +53,7 @@ if ($tee == "muokkaa") {
 				FROM kuka
 				LEFT JOIN todo on (todo.yhtio = kuka.yhtio and todo.tekija = kuka.tunnus and todo.kuittaus = '')
 				WHERE kuka.yhtio = '$kukarow[yhtio]'
-				and kuka.myyja != 0
+				and kuka.myyja > 0
 				GROUP BY kuka.tunnus
 				ORDER BY aika desc";
 	$result = mysql_query($query) or pupe_error($query);
@@ -201,7 +201,7 @@ if ($tee == "") {
 					FROM kuka
 					LEFT JOIN todo on (todo.yhtio = kuka.yhtio and todo.tekija = kuka.tunnus and todo.kuittaus = '')
 					WHERE kuka.yhtio = '$kukarow[yhtio]'
-					and kuka.myyja != 0
+					and kuka.myyja > 0
 					GROUP BY kuka.tunnus
 					ORDER BY aika desc";
 		$result = mysql_query($query) or pupe_error($query);
@@ -304,7 +304,7 @@ if ($tee == "") {
 				FROM kuka
 				LEFT JOIN todo on (todo.yhtio = kuka.yhtio and todo.tekija = kuka.tunnus and todo.kuittaus = '')
 				WHERE kuka.yhtio = '$kukarow[yhtio]'
-				and kuka.myyja != 0
+				and kuka.myyja > 0
 				GROUP BY kuka.tunnus
 				ORDER BY aika desc";
 	$result = mysql_query($query) or pupe_error($query);

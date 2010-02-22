@@ -591,7 +591,8 @@
 			$query = "	SELECT tunnus
 						FROM kuka
 						WHERE yhtio	= '$kukarow[yhtio]'
-						and myyja 	= '$myyjanro'";
+						and myyja 	= '$myyjanro'
+						AND myyja > 0";
 			$result = mysql_query($query) or pupe_error($query);
 			$row = mysql_fetch_array($result);
 

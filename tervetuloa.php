@@ -96,7 +96,7 @@ if (!isset($tee) or $tee == '') {
 		$query = "	SELECT tunnus, nimi, luontiaika
 					FROM lasku use index (tila_index)
 					WHERE yhtio = '$kukrow[yhtio]'
-					and myyja='$kukarow[tunnus]'
+					and myyja = '$kukarow[tunnus]'
 					and tila in ('N','L')
 					and alatila != 'X'
 					and chn = '999'";

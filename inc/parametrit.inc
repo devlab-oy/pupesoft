@@ -330,7 +330,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			echo "<head>";
 			echo "<META Http-Equiv='Cache-Control' Content='no-cache'>";
 			echo "<META Http-Equiv='Pragma' Content='no-cache'>";
-			echo "<META Http-Equiv='Expires' Content='0'>";
+			echo "<META Http-Equiv='Expires' Content='-1'>";
 			echo "<meta http-equiv='Content-Type' content='text/html; charset=$charset'>";
 
 			if ($_GET["no_css"] != "yes") {

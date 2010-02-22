@@ -1138,9 +1138,14 @@ if ($tee == "") {
 					<div class='menu' id='menu'>".menu()."</div>";
 
 	$tuotenumero = mysql_real_escape_string(trim($_GET["tuotenumero"]));
-
-	$verkko = "<div class='livehaku' id='livehaku'>".t("Tuotehaku").": <form action='verkkokauppa.php?tee=selaa&hakutapa=koodilla' name='liveformi' id= 'liveformi'>".livesearch_kentta("liveformi", "TUOTEHAKU", "tuotenumero", 300)."</form></div>";
-
+	
+	if ($verkkokauppa_anon or $kukarow["kuka"] != "www") {
+		$verkko = "<div class='livehaku' id='livehaku'>".t("Tuotehaku").": <form action='verkkokauppa.php?tee=selaa&hakutapa=koodilla' name='liveformi' id= 'liveformi'>".livesearch_kentta("liveformi", "TUOTEHAKU", "tuotenumero", 300)."</form></div>";
+	}
+	else {
+		$verkko = "";
+	}
+	
 	if ($tuotenumero != "") {
 		$verkkokauppa_ulos .= "	<div class='selain' id='selain'>
 								$verkko

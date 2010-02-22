@@ -29,7 +29,7 @@ if (!function_exists("pupe_register_globals")) {
 					$param_clean[$key] = iconv("UTF-8", "latin1//TRANSLIT", $param_clean[$key]);
 				}
 			}
-			
+
 			$param_clean[$key] = $GLOBALS[$key] = str_replace(array("\"","'","<",">","\\", ";"), "", $param_clean[$key]);
 		}
 
@@ -310,7 +310,6 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			$css = $yhtiorow['css'];
 		}
 
-
 		if ($kukarow["kieli"] == "ru") {
 			$charset = "utf-8";
 		}
@@ -320,12 +319,20 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 
 		if (!headers_sent()) {
 			header("Content-Type: text/html; charset=$charset");
+			header("Pragma: public");
+			header("Expires: 0");
+			header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
+			header("Cache-Control: no-store, no-cache, must-revalidate");
+			header("Cache-Control: post-check=0, pre-check=0", false);
+			header("Pragma: no-cache");
 		}
 
 		if (!isset($no_head) or (isset($no_head) and $no_head != "yes")) {
-			if ($verkkokauppa != "") {
+
+			if (isset($verkkokauppa) and $verkkokauppa != "") {
 				echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
 			}
+
 			echo "<html>";
 			echo "<head>";
 			echo "<META Http-Equiv='Cache-Control' Content='no-cache'>";

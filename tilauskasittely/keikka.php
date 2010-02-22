@@ -12,8 +12,9 @@ if (!function_exists("tsekit")) {
 		$tsekit = array();
 
 		// tutkitaan onko kaikilla tuotteilla on joku varastopaikka
-		$query  = "	SELECT tilausrivi.*
+		$query  = "	SELECT tilausrivi.*, ifnull(tapahtuma.kplhinta * tapahtuma.hinta, rivihinta) rivihinta
 					FROM tilausrivi USE INDEX (uusiotunnus_index)
+					LEFT JOIN tapahtuma ON (tapahtuma.yhtio = tilausrivi.yhtio and tapahtuma.rivitunnus = tilausrivi.tunnus)
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
 					tilausrivi.uusiotunnus = '$row[tunnus]' and
 					tilausrivi.tyyppi = 'O'";

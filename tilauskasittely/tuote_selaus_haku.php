@@ -1458,7 +1458,13 @@
 				echo "</tr>";
 
 				if ($verkkokauppa != "") {
-					echo "<tr id='T_$row[tuoteno]'></tr>";
+					
+					if (stripos($_SERVER["HTTP_USER_AGENT"], "MSIE") !== FALSE) {
+						echo "<tr><td colspan='6' class='back' style='padding:0px; margin:0px;height:0px;'><div id='T_$row[tuoteno]'></div></td></tr>";
+					}
+					else {
+						echo "<tr id='T_$row[tuoteno]'></tr>";
+					}
 				}
 
 				if ($row["sarjatunnus"] > 0 and $kukarow["extranet"] == "" and $verkkokauppa == "" and function_exists("sarjanumeronlisatiedot_popup")) {

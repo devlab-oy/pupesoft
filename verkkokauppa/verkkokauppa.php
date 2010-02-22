@@ -632,7 +632,12 @@ if ($tee == "tuotteen_lisatiedot") {
 	}
 
 	//	Vasemmalla meillä on kaikki tekstit
-	echo "<td class='back'>&nbsp;</td><td><table width='100%'><tr><td class='back' style='padding-left:10px;'>$tekstit</td><td class='back' style='text-align:right;'>$liitetiedostot</td></tr></table></td>";
+	if (stripos($_SERVER["HTTP_USER_AGENT"], "MSIE") !== FALSE) {
+		echo "<table width='100%'><tr><td class='back' style='width:50px;'></td><td class='back'>$tekstit</td><td class='back' style='text-align:right;'>$liitetiedostot</td></tr><tr><td class='back'><br></td></tr></table>";
+	}
+	else {
+		echo "<td class='back'>&nbsp;</td><td><table width='100%'><tr><td class='back' style='padding-left:10px;'>$tekstit</td><td class='back' style='text-align:right;'>$liitetiedostot</td></tr></table></td>";
+	}
 }
 
 if ($tee == "poistakori") {

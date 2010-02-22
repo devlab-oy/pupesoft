@@ -1609,7 +1609,7 @@ if (!function_exists("synkronoi")) {
 				}
 			}
 		}
-	
+
 		$synclog = "\nAktivoidaan synkronointi konserniyrityksiin\n";
 
 		if (!is_numeric($tunnus)) {
@@ -1628,15 +1628,15 @@ if (!function_exists("synkronoi")) {
 
 		if (mysql_num_rows($masterres) == 1) {
 			$masterrow = mysql_fetch_assoc($masterres) or pupe_error($query);
-			
+
 			//	Näillä tarttetaan vähän lisätietoo
-			if ($table == "asiakasalennus" and $masterrow["alennus"] < 0) {				
+			if ($table == "asiakasalennus" and $masterrow["alennus"] < 0) {
 				synclog($yhtio, $table, "Negatiivisia alennuksia ei synkata!", $tunnus);
 				return false;
 			}
-								
+
 			$synclog .= "Masteri on tunnus ($tunnus)\n";
-			
+
 			//	Tarkastetaan että originaali on varmasti samasta taulusta!
 			if (is_array($orig) and count($orig) > 0) {
 
@@ -4429,52 +4429,8 @@ if (!function_exists("enable_ajax")) {
 		function handleResponse() {
 			if (http.readyState == 4) {
 				var response = http.responseText;
-								
-				if (response.substr(0, 10) == "TABLE-ROW:") {
-					//	Meidän rivi ja sen solut
-					response=response.substr(9);
-					var patt=/(<td[^>]*>.*?<\/td>)|(<tr[^>]*>)/gm;
-					newRowElements=response.match(patt);
 
-					var row='';
-					for (var x = 0; x < newRowElements.length; x++) {
-
-						//	Vaihdellaan riviä
-						if (newRowElements[x].match(/<tr[^>]*>/)) {
-							y=0;
-							if (row=='') {
-								row=document.getElementById(id);
-								rowElements=row.cells;
-							}
-							else {
-								row=row.parentNode.rows[(row.rowIndex+1)];
-								rowElements=row.cells;
-							}
-						}
-						else if (newRowElements[x].match(/<td[^>]*>/)){
-							element=newRowElements[x].substr(newRowElements[x].indexOf(">")+1);
-							element=element.substr(0, (element.length-5));
-
-							rowElements[y].innerHTML=element;
-
-							y++;
-						}
-					}
-				}
-				else {
-					document.getElementById(id).innerHTML = response;
-				}
-
-				var container = document.getElementById(id);
-				var allNewScripts = container.getElementsByTagName('script');
-				c=allNewScripts.length;
-				if (c>0) {
-					for (x=0;x<=c;x++) {
-						if (allNewScripts[x]) {
-								eval(allNewScripts[x].innerHTML);
-							}
-						}
-					}
+				document.getElementById(id).innerHTML = response;
 
 				//	Jos päivitetään togglegrouppaus
 				if (href) {
@@ -6752,7 +6708,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 				$haku = mysql_real_escape_string($haku);
 				$haku_query .= " and (tuote.tuoteno like ('%$haku%') or tuote.nimitys like ('%$haku%')) ";
 			}
-			
+
 			// vientikieltokäsittely:
 			// +maa tarkoittaa että myynti on kielletty tähän maahan ja sallittu kaikkiin muihin
 			// -maa tarkoittaa että ainoastaan tähän maahan saa myydä
@@ -6782,7 +6738,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 			if (isset($vierow) and $vierow["maa"] != "") {
 				$kieltolisa .= " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
 			}
-			
+
 			if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
 				if ($verkkokauppa != "") {
 					if ($kukarow["kuka"] == "www") {
@@ -6796,7 +6752,7 @@ if (!function_exists("livesearch_tuotehaku")) {
 					$kieltolisa .= " and tuote.hinnastoon != 'E' ";
 				}
 			}
-			
+
 			$query = "	SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.kuvaus, tuote.osasto, tuote.try
 						FROM tuote
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -7076,7 +7032,7 @@ if (!function_exists("hae_rahtimaksu")) {
 		}
 
 		// jos meillä on automaattinen tuoteella tallennettuihin painoihin perustuva hinnoittelu
-		// rahtimaksujen hinnoitteluun otetaan vain tuotteet joita ei myydä erikoisvarastoista (etävarastot joista ei myydä automaattisesti eli tyyppi = E). Tällöin on täpätty erikoistoimitus_myynti on 0 eli false. 
+		// rahtimaksujen hinnoitteluun otetaan vain tuotteet joita ei myydä erikoisvarastoista (etävarastot joista ei myydä automaattisesti eli tyyppi = E). Tällöin on täpätty erikoistoimitus_myynti on 0 eli false.
 		// erikoisvarastoista myydyt tuotteet ovat aina rahtivapaita ja lähettäjä maksaa rahdin.
 		if ($yhtiorow["rahti_hinnoittelu"] == 'P') {
 			$query  = "	SELECT sum(tuotemassa * (varattu + kpl + jt)) massa
@@ -8036,14 +7992,14 @@ if (!function_exists("liite_popup")) {
 								kayttotarkoitus,
 								if(kayttotarkoitus='TK', 0, if(kayttotarkoitus='MU', 1, 2)) sorttaus,
 								jarjestys,
-								(	select tunnus 
-									from liitetiedostot l 
-									where l.yhtio = liitetiedostot.yhtio 
-									and l.liitos = liitetiedostot.liitos 
-									and l.liitostunnus = liitetiedostot.liitostunnus 
-									and l.kayttotarkoitus = 'TH' 
-									and l.filename = liitetiedostot.filename 
-									ORDER BY l.tunnus DESC 
+								(	select tunnus
+									from liitetiedostot l
+									where l.yhtio = liitetiedostot.yhtio
+									and l.liitos = liitetiedostot.liitos
+									and l.liitostunnus = liitetiedostot.liitostunnus
+									and l.kayttotarkoitus = 'TH'
+									and l.filename = liitetiedostot.filename
+									ORDER BY l.tunnus DESC
 									LIMIT 1) peukalokuva
 								FROM liitetiedostot
 								WHERE yhtio		 = '$kukarow[yhtio]'
@@ -8110,7 +8066,7 @@ if (!function_exists("lue_kurssit")) {
 		global $yhtiorow, $kukarow;
 
 		ini_set("auto_detect_line_endings", 1);
-		
+
 		// luetaan koko file arrayhyn
 		$rivit = file($file);
 

@@ -127,13 +127,13 @@ if (!function_exists("korjaalaskut")) {
 					$query = "	SELECT *
 								FROM tiliointi
 				 				WHERE yhtio 	= '$kukarow[yhtio]'
-				 				and ltunnus		= '$tilausrivi[ltunnus]'
-				 				and tilino 		= '$yhtiorow[varastonmuutos]'
-				 				and kustp 		= '$tuote[kustp]'
-				 				and kohde 		= '$tuote[kohde]'
-				 				and projekti 	= '$tuote[projekti]'
-								and korjattu 	= ''
-								ORDER BY summa desc
+				 				AND ltunnus		= '$tilausrivi[ltunnus]'
+				 				AND tilino 		= '$yhtiorow[varastonmuutos]'
+				 				AND kustp 		= '$tuote[kustp]'
+				 				AND kohde 		= '$tuote[kohde]'
+				 				AND projekti 	= '$tuote[projekti]'
+								AND korjattu 	= ''
+								ORDER BY summa DESC
 								LIMIT 1";
 					$result = mysql_query($query) or pupe_error($query);
 
@@ -536,7 +536,7 @@ if ($tuoteno != '') {
 				}
 
 				$seliselilisa = "";
-				$uusisaldo    = $saldo["saldo"];
+				$uusisaldo = $saldo["saldo"];
 
 				if ($trow["saldomuutos"] != 0) {
 					$uusisaldo -= $trow["saldomuutos"];
@@ -603,9 +603,7 @@ if ($tuoteno != '') {
 					if (mysql_num_rows($result) > 0) {
 						$jlerror = 0;
 						$eka = 1;
-						$laskuja = 0;
 						$korjattavia_laskuja = 0;
-						$kpl = 0;
 						$vlaadittu = '3000-01-01'; // varmuuden vuoks ettei korjailla nollasta lähtien jos käy jotain todellaa weird...
 
 						if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Lasketaan uudet hinnat tuotteelle: $tuote[tuoteno] Sort: Asc</font><br><br>";
@@ -623,14 +621,9 @@ if ($tuoteno != '') {
 
 								// jos ollaan käsitelty jo jotain laskuja, niin nyt on sitte alkamassa uusi tulo ni korjataan laskut ja nollataan laskurit
 								if ($korjattavia_laskuja != 0) {
-									// korjaus
-									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Korjataan! Laskuja ($laskuja) Kpl: $kpl Saldo: $uusisaldo Keskihinta: $uusikehahin Alku: $vlaadittu Loppu: $trow[laadittu] Case: 1</font><br>";
+									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Korjataan! Saldo: $uusisaldo Keskihinta: $uusikehahin Alku: $vlaadittu Loppu: $trow[laadittu] Case: 1</font><br>";
 									$mitenkavi = korjaalaskut($tuoteno, $uusikehahin, $vlaadittu, $trow['laadittu'], 0);
-									$uusisaldo += $kpl;
-									// nollaillaan
-									$laskuja = 0;
 									$korjattavia_laskuja = 0;
-									$kpl = 0;
 								}
 
 								if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Tulo. $trow[kpl] kappaletta. Saldo ennen tuloa: $uusisaldo Kehahin ennen tuloa: $uusikehahin Sort: Asc</font><br>";
@@ -652,7 +645,7 @@ if ($tuoteno != '') {
 								else {
 									// jos saldo on nolla ennen tuloa tai tulon jälkeen niin kehari on ostari
 									$uusikehahin = $trow['kplhinta'];
-									
+
 									if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>JÄLKILASKENTA: Uusi kehahin (Ei matikkaa): uusikehahin = ostohinta = $uusikehahin</font><br>";
 								}
 
@@ -666,9 +659,6 @@ if ($tuoteno != '') {
 
 							// jos kyseessä on laskutus ja ollaan löydetty eka tulo, summaillaan kappaleita
 							if ($trow['laji'] == 'laskutus' and $eka == 0) {
-								$laskuja++;
-								$kpl += $trow['kpl'];
-
 								// haetaan myyntitilausrivi
 								$query = "	SELECT kpl, rivihinta, kate
 											from tilausrivi
@@ -682,6 +672,9 @@ if ($tuoteno != '') {
 								if ($trow["hinta"] != $uusikehahin or $myyntitil_apurow["kate"] != $myyntitil_uusikate) {
 									$korjattavia_laskuja++;
 								}
+
+								// summaillaan uutta saldoa
+								$uusisaldo += $trow['kpl'];
 							}
 
 							// jos kyseessä on inventointi ja ollaan löydetty jo eka tulo
@@ -764,7 +757,7 @@ if ($tuoteno != '') {
 								}
 							}
 
-							// jos kyseessä on inventointi ja ollaan löydetty jo eka tulo
+							// jos kyseessä on kulutus ja ollaan löydetty jo eka tulo
 							if ($trow['laji'] == 'kulutus' and $eka == 0 and $trow["hinta"] != $uusikehahin) {
 
 								// HUOM: $korjattavat_valmistukset_ind, $korjattavat_valmistukset MUUTTUJAT OVAT GLOBAALEJA
@@ -828,7 +821,7 @@ if ($tuoteno != '') {
 								}
 							}
 
-							// jos ollaa löydetty eka tulo voidaan aina päivitetään tapahtuma jos se on tulo, laskutus tai inventointi
+							// jos ollaa löydetty eka tulo voidaan aina päivitetään tapahtuma jos se on tulo, valmistus, laskutus, inventointi, kulutus tai siirto
 							if ($eka == 0) {
 
 								if ($trow["laji"] == "kulutus") {
@@ -850,8 +843,7 @@ if ($tuoteno != '') {
 
 						// jos meillä on jotain korjattavia laskuja, jota ei korjattu whilen sisällä ni korjataan ne ny
 						if ($korjattavia_laskuja != 0 and $eka == 0) {
-							$uusisaldo += $kpl;
-							if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Korjataan! Laskuja ($laskuja) Kpl: $kpl Saldo: $uusisaldo Keskihinta: $uusikehahin Alku: $vlaadittu Loppu: 3000-01-01 Case: 2</font><br>";
+							if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Korjataan! Saldo: $uusisaldo Keskihinta: $uusikehahin Alku: $vlaadittu Loppu: 3000-01-01 Case: 2</font><br>";
 							$mitenkavi = korjaalaskut($tuoteno, $uusikehahin, $vlaadittu, '3000-01-01', 0);
 						}
 

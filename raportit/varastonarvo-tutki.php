@@ -49,8 +49,8 @@ if ($tee == "tee") {
 	// haetaan halutut varastotaphtumat
 	$query  = "	SELECT laji, count(*) kpl, round(sum(if(laji='tulo', kplhinta, hinta) * kpl), 2) logistiikka
 				FROM tapahtuma
-				JOIN tuote ON (tapahtuma.yhtio = tuote.yhtio 
-					and tapahtuma.tuoteno = tuote.tuoteno 
+				JOIN tuote ON (tapahtuma.yhtio = tuote.yhtio
+					and tapahtuma.tuoteno = tuote.tuoteno
 					and tuote.ei_saldoa = '')
 				WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 				and laadittu >= '$vv-$kk-$pp 00:00:00'
@@ -71,7 +71,7 @@ if ($tee == "tee") {
 
 	while ($trow = mysql_fetch_array ($result)) {
 
-		echo "<tr>";
+		echo "<tr class='aktiivi'>";
 		echo "<td>$trow[laji]</td>";
 		echo "<td align='right'>$trow[kpl]</td>";
 		echo "<td align='right'>$trow[logistiikka]</td>";
@@ -85,17 +85,17 @@ if ($tee == "tee") {
 		if ($trow['laji'] == 'tulo') 		$lvalinta = " ((tila in ('H', 'M', 'P', 'Q', 'Y') and vienti in ('B', 'C', 'E', 'F', 'H', 'I')) or (tila = 'U' and alatila = 'X' and selite like 'Varastoontulo%'))";
 
 		if ($lvalinta != '') {
-			$query  = "	SELECT sum(tiliointi.summa) summa 
+			$query  = "	SELECT sum(tiliointi.summa) summa
 						FROM tiliointi use index (yhtio_tilino_tapvm), lasku
-						WHERE tiliointi.yhtio = '$kukarow[yhtio]' 
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 						and tiliointi.tapvm >= '$vv-$kk-$pp'
 						and tiliointi.tapvm <= '$vv1-$kk1-$pp1'
 						and tiliointi.yhtio = lasku. yhtio
 						and tiliointi.ltunnus = lasku.tunnus
 						and tiliointi.tilino in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]')
-						and tiliointi.korjattu = '' 
+						and tiliointi.korjattu = ''
 						and $lvalinta";
-			$lresult = mysql_query($query) or pupe_error($query);			
+			$lresult = mysql_query($query) or pupe_error($query);
 			$lrow = mysql_fetch_array ($lresult);
 
 			echo "<td align='right'>$lrow[summa]</td>";
@@ -111,7 +111,7 @@ if ($tee == "tee") {
 	}
 	echo "</table>";
 
-	$query  = "	SELECT sum(tiliointi.summa) summa 
+	$query  = "	SELECT sum(tiliointi.summa) summa
 				FROM tiliointi
 				WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 				and tiliointi.tapvm >= '$vv-$kk-$pp'
@@ -130,7 +130,7 @@ if ($tee == "tee") {
 	echo "<br><br><hr>";
 
 	echo "<font class='message'>Myyntilaskut ja niiden varastonmuutos</font><br><br>";
-	
+
 	// haetaan myyntilaskut ja niiden varastonmuutos
 	$query  = "	SELECT lasku.tunnus, sum(tiliointi.summa) varastonmuutos
 				FROM lasku, tiliointi
@@ -141,7 +141,7 @@ if ($tee == "tee") {
 				and lasku.alatila = 'X'
 				and tiliointi.ltunnus = lasku.tunnus
 				and tiliointi.tilino in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]')
-				and tiliointi.korjattu = '' 
+				and tiliointi.korjattu = ''
 				GROUP BY lasku.tunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -158,15 +158,15 @@ if ($tee == "tee") {
 	$maara = mysql_num_rows($result);
 
 	while ($trow = mysql_fetch_array ($result)) {
-		
-		$query  = "	SELECT sum(tapahtuma.hinta * tapahtuma.kpl) logistiikkasumma 
+
+		$query  = "	SELECT sum(tapahtuma.hinta * tapahtuma.kpl) logistiikkasumma
 					FROM tilausrivi, tapahtuma
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.uusiotunnus = '$trow[tunnus]'
 					and tapahtuma.yhtio = tilausrivi.yhtio
 					and tapahtuma.rivitunnus = tilausrivi.tunnus
 					and tapahtuma.laji = 'laskutus'";
-		$lresult = mysql_query($query) or pupe_error($query);			
+		$lresult = mysql_query($query) or pupe_error($query);
 		$lrow = mysql_fetch_array ($lresult);
 
 		$lomuutos += $lrow["logistiikkasumma"];
@@ -175,7 +175,7 @@ if ($tee == "tee") {
 
 	$ero = $lomuutos - $kpmuutos;
 
-	echo "<tr>";
+	echo "<tr class='aktiivi'>";
 	echo "<td>$maara</td>";
 	echo "<td>".round($lomuutos,2)."</td>";
 	echo "<td>".round($kpmuutos,2)."</td>";
@@ -193,6 +193,7 @@ if ($tee == "tee") {
 				and lasku.mapvm >= '$vv-$kk-$pp'
 				and lasku.mapvm <= '$vv1-$kk1-$pp1'
 				and lasku.tila = 'K'
+				and lasku.alatila = 'X'
 				and lasku.vanhatunnus = 0
 				GROUP BY lasku.laskunro";
 	$result = mysql_query($query) or pupe_error($query);
@@ -203,22 +204,24 @@ if ($tee == "tee") {
 	echo "<th>".t("toimittaja")."</th>";
 	echo "<th>".t("jälkilaskettu")."</th>";
 	echo "<th>".t("laskut")."</th>";
-	echo "<th>".t("keikka")."</th>";
+	echo "<th>".t("tilausrivit")."</th>";
+	echo "<th>".t("tapahtumat")."</th>";
 	echo "<th>".t("kirjanpito")."</th>";
 	echo "<th>".t("ero")."</th>";
 	echo "</tr>";
 
 	$lomuutos = 0.0;
+	$timuutos = 0.0;
 	$kpmuutos = 0.0;
 
 	while ($trow = mysql_fetch_array ($result)) {
 
 		// haetaan kaikki keikkaan liitetyt vaihto-omaisuus ja rahtilaskut
 		$query = "	SELECT ifnull(group_concat(vanhatunnus), 0) ostolaskut, group_concat(concat(lasku.ytunnus, ' ', lasku.nimi, ' ', lasku.tapvm, ' ', lasku.summa, ' ', lasku.valkoodi, ' = ', round(lasku.summa*lasku.vienti_kurssi,2), ' EUR<br>') SEPARATOR '') laskut
-					from lasku 
-					where yhtio = '$kukarow[yhtio]' 
-					and lasku.laskunro = '$trow[laskunro]' 
-					and lasku.tila = 'K' 
+					from lasku
+					where yhtio = '$kukarow[yhtio]'
+					and lasku.laskunro = '$trow[laskunro]'
+					and lasku.tila = 'K'
 					and lasku.vanhatunnus != 0";
 		$keikres = mysql_query($query) or pupe_error($query);
 		$keekrow = mysql_fetch_array($keikres);
@@ -226,7 +229,7 @@ if ($tee == "tee") {
 		// haetaan liitettyjen laskujen laskujen varastonmuutos kirjanpidosta
 		$query = "	SELECT sum(tiliointi.summa) varastonmuutos
 					FROM tiliointi
-					WHERE tiliointi.yhtio = '$kukarow[yhtio]' 
+					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
 					and tiliointi.ltunnus in ($keekrow[ostolaskut])
 					and tiliointi.tilino in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]')
 					and tiliointi.korjattu = ''";
@@ -235,34 +238,39 @@ if ($tee == "tee") {
 		$kpmuutos += $kprow["varastonmuutos"];
 
 		// haetaan keikan arvo tapahtumilta
-		$query  = "	SELECT sum(tapahtuma.kplhinta * tapahtuma.kpl) logistiikkasumma
+		$query  = "	SELECT sum(tapahtuma.kplhinta * tapahtuma.kpl) logistiikkasumma, sum(tilausrivi.rivihinta) tilausrivisumma
 					FROM tilausrivi, tapahtuma
-					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.uusiotunnus = '$trow[tunnus]'
 					and tapahtuma.yhtio = tilausrivi.yhtio
 					and tapahtuma.rivitunnus = tilausrivi.tunnus
 					and tapahtuma.laji = 'tulo'";
-		$lores = mysql_query($query) or pupe_error($query);			
+		$lores = mysql_query($query) or pupe_error($query);
 		$lorow = mysql_fetch_array ($lores);
 		$lomuutos += $lorow["logistiikkasumma"];
+		$timuutos += $lorow["tilausrivisumma"];
 
 		$ero = $lorow["logistiikkasumma"] - $kprow["varastonmuutos"];
 
-		echo "<tr>";
-		echo "<td>$trow[laskunro]</td>";
-		echo "<td>$trow[nimi]</td>";
-		echo "<td>$trow[mapvm]</td>";
-		echo "<td>$keekrow[laskut]</td>";
-		echo "<td align='right'>".round($lorow["logistiikkasumma"],2)."</td>";
-		echo "<td align='right'>".round($kprow["varastonmuutos"],2)."</td>";
-		echo "<td align='right'>".round($ero, 2)."</td>";
-		echo "</tr>";
+//		if (round($ero, 0) != 0) {
+			echo "<tr class='aktiivi'>";
+			echo "<td>$trow[laskunro]</td>";
+			echo "<td>$trow[nimi]</td>";
+			echo "<td>$trow[mapvm]</td>";
+			echo "<td>$keekrow[laskut]</td>";
+			echo "<td align='right'>".round($lorow["tilausrivisumma"],2)."</td>";
+			echo "<td align='right'>".round($lorow["logistiikkasumma"],2)."</td>";
+			echo "<td align='right'>".round($kprow["varastonmuutos"],2)."</td>";
+			echo "<td align='right'>".round($ero, 2)."</td>";
+			echo "</tr>";
+//		}
 	}
 
 	$ero = $lomuutos - $kpmuutos;
 
 	echo "<tr>";
 	echo "<th colspan='4'>".t('Keikat yhteensä')."</th>";
+	echo "<th align='right'>".round($timuutos,2)."</th>";
 	echo "<th align='right'>".round($lomuutos,2)."</th>";
 	echo "<th align='right'>".round($kpmuutos,2)."</th>";
 	echo "<th align='right'>".round($ero,2)."</th>";

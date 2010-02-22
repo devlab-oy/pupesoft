@@ -1107,7 +1107,7 @@ if ($tee == "selaa") {
 
 	$submit_button = 1;
 
-	if (stripos($_SERVER["HTTP_USER_AGENT"], "MSIE") !== FALSE) {
+	if (stripos($_SERVER["HTTP_USER_AGENT"], "MSIE") === FALSE) {
 		echo "<div class='livehaku' id='livehaku'>".t("Tuotehaku").": <form action='verkkokauppa.php?tee=selaa&hakutapa=koodilla' name='liveformi' id= 'liveformi'>".livesearch_kentta("liveformi", "TUOTEHAKU", "tuotenumero", 300)."</form></div>";
 	}
 
@@ -1141,7 +1141,7 @@ if ($tee == "") {
 
 	$tuotenumero = mysql_real_escape_string(trim($_GET["tuotenumero"]));
 
-	if (stripos($_SERVER["HTTP_USER_AGENT"], "MSIE") !== FALSE and ($verkkokauppa_anon or $kukarow["kuka"] != "www")) {
+	if (stripos($_SERVER["HTTP_USER_AGENT"], "MSIE") === FALSE and ($verkkokauppa_anon or $kukarow["kuka"] != "www")) {
 		$verkko = "<div class='livehaku' id='livehaku'>".t("Tuotehaku").": <form action='verkkokauppa.php?tee=selaa&hakutapa=koodilla' name='liveformi' id= 'liveformi'>".livesearch_kentta("liveformi", "TUOTEHAKU", "tuotenumero", 300)."</form></div>";
 	}
 	else {

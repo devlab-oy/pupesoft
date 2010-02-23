@@ -200,6 +200,15 @@ elseif ($ytunnus != '') {
 						and asiakas.toim_ovttunnus = '$ytunnus'
 						and asiakas.toim_ovttunnus!=''
 						$lajilisa $asiakasrajaus)
+					UNION
+					(SELECT asiakas.*, yhtio.nimi yhtionimi
+						FROM asiakas
+						JOIN asiakkaan_avainsanat ON (asiakas.yhtio=asiakkaan_avainsanat.yhtio and asiakas.tunnus=asiakkaan_avainsanat.liitostunnus and asiakkaan_avainsanat.laji='kantaasiakastunnus')
+						JOIN yhtio on asiakas.yhtio=yhtio.yhtio
+						WHERE asiakas.$konsyhtiot
+						and asiakkaan_avainsanat.avainsana = '$ytunnus'
+						and asiakkaan_avainsanat.avainsana!=''
+						$lajilisa $asiakasrajaus)
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);

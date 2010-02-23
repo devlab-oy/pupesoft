@@ -4431,12 +4431,12 @@ if (!function_exists("enable_ajax")) {
 				var response = http.responseText;
 
 				document.getElementById(id).innerHTML = response;
-
-				<?php if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE) { ?>
+								
+				<?php if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") === FALSE and stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") === FALSE) { ?>					
 					var container = document.getElementById(id);
-					var allNewScripts = container.getElementsByTagName('script');
+					var allNewScripts = container.getElementsByTagName('script');				
 					c = allNewScripts.length;
-
+			
 					if (c>0) {
 						for (x=0;x<=c;x++) {
 							if (allNewScripts[x]) {
@@ -4445,7 +4445,7 @@ if (!function_exists("enable_ajax")) {
 						}
 					}
 				<?php }	?>
-
+				
 				//	Jos p‰ivitet‰‰n togglegrouppaus
 				if (href) {
 					document.getElementById(href).href = 'javascript:toggleGroup("' + id + '");';

@@ -214,12 +214,10 @@
 			while ($row = mysql_fetch_array($res)) {
 
 				if (!$asiakasanalyysi) {
-					$query = "	SELECT tuote.tuoteno, tuote.nimitys, tuote.tuotemerkki, group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno
+					$query = "	SELECT group_concat(distinct toim_tuoteno) toim_tuoteno
 								FROM tuotteen_toimittajat
-								JOIN tuote ON tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno
-								WHERE tuotteen_toimittajat.tuoteno='$row[tuoteno]'
-								and tuotteen_toimittajat.yhtio='$kukarow[yhtio]'
-								group by tuote.tuoteno";
+								WHERE tuoteno = '$row[tuoteno]'
+								and yhtio = '$kukarow[yhtio]'";
 					$tuoresult = mysql_query($query) or pupe_error($query);
 					$tuorow = mysql_fetch_array($tuoresult);
 
@@ -241,7 +239,6 @@
 					$ostajaresult = mysql_query($query) or pupe_error($query);
 					$ostajarow = mysql_fetch_array($ostajaresult);
 				}
-
 
 				//haetaan varastopaikat ja saldot
 				if ($asiakasanalyysi) {
@@ -272,7 +269,7 @@
 						$row["nimitys"] = $paikrow["nimi"];
 					}
 					else {
-						$row["nimitys"] = t_tuotteen_avainsanat($tuorow, 'nimitys');
+						$row["nimitys"] = t_tuotteen_avainsanat($row, 'nimitys');
 					}
 
 					// Lisätään rivi exceltiedostoon
@@ -287,7 +284,7 @@
 						$worksheet->writeString($excelrivi, $excelsarake++,  $row["nimitys"]);
 						$worksheet->writeString($excelrivi, $excelsarake++,  $row["osasto"]);
 						$worksheet->writeString($excelrivi, $excelsarake++,  $row["try"]);
-						if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++,  $tuorow["tuotemerkki"]);
+						if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++,  $row["tuotemerkki"]);
 						if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, $row["malli"]);
 						if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, $row["mallitarkenne"]);
 						if (!$asiakasanalyysi) $worksheet->writeString($excelrivi, $excelsarake++, $myyjarow["nimi"]);

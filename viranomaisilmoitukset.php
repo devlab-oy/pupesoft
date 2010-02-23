@@ -3,7 +3,7 @@
 require('inc/parametrit.inc');
 
 if ($tee == "lataa_tiedosto") {
-	echo file_get_contents("/tmp/".$tmpfilenimi);
+	echo file_get_contents("dataout/".$filenimi);
 	exit;
 }
 

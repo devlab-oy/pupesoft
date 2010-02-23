@@ -348,9 +348,7 @@ if ($varaosavirhe == '' and ($tee == "TI" or $tee == "Y") and $tuoteno != '') {
 			$kerayspvm = $laskurow["kerayspvm"];
 		}
 
-		if ($laskurow["varasto"] != 0) {
-			$varasto = (int) $laskurow["varasto"];
-		}
+		$varasto = $laskurow["varasto"];
 
 		//Tehd‰‰n muuttujaswitchit
 		if (is_array($hinta_array)) {

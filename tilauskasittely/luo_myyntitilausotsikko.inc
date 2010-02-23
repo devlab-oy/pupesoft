@@ -28,7 +28,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$toim_maa 		   	   	   			= $asiakasrow["toim_maa"];
 			$verkkotunnus 	   	   	   			= $asiakasrow["verkkotunnus"];
 			$piiri 								= $asiakasrow["piiri"];
-			
+
 			if ($kukarow['extranet'] != '' and $kukarow['hyvaksyja'] != "") {
 				$eilahe = "o";
 			}
@@ -50,9 +50,9 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$kervv = date("Y");
 			$kerkk = date("m");
 			$kerpp = date("d");
-			
-			
-			if ($toim == "TARJOUS" or $asiakasrow["vienti"] =='K') {			
+
+
+			if ($toim == "TARJOUS" or $asiakasrow["vienti"] =='K') {
 				$kolm_nimi 		= $asiakasrow["kolm_nimi"];
 				$kolm_nimitark 	= $asiakasrow["kolm_nimitark"];
 				$kolm_osoite 	= $asiakasrow["kolm_osoite"];
@@ -74,7 +74,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			if ($myyjanro != "") {
 				$apuqu = "	SELECT *
 							from kuka use index (yhtio_myyja)
-							where yhtio = '$kukarow[yhtio]' 
+							where yhtio = '$kukarow[yhtio]'
 							and myyja = '$myyjanro'
 							AND myyja > 0";
 				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
@@ -96,7 +96,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			if ((int) $myyja == 0) {
 				$myyja = $kukarow["tunnus"];
 			}
-			
+
 			$alv 				= $asiakasrow["alv"];
 			$ovttunnus 			= $asiakasrow["ovttunnus"];
 			$toim_ovttunnus 	= $asiakasrow["toim_ovttunnus"];
@@ -108,10 +108,10 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$ketjutus 			= $asiakasrow["ketjutus"];
 			$valkoodi 			= $asiakasrow["valkoodi"];
 			$sisviesti1			= $asiakasrow["sisviesti1"];
-			
+
 			if ($toim == "PIKATILAUS") {
 				$myynti_kommentti	= $asiakasrow["myynti_kommentti1"];
-			}			
+			}
 
 			if (trim($asiakasrow["toimitusehto"]) != "") {
 				$yhtiorow['oletus_toimitusehto'] = $asiakasrow["toimitusehto"];
@@ -141,9 +141,12 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 
 			$erikoisale	= $asiakasrow["erikoisale"];
 
-			// jos on oletus_varasto setattuna, pässätään eteenpäin
+			// Jos on varasto setattuna, pässätään eteenpäin
 			$varasto = 0;
-			if ((int) $kukarow["oletus_varasto"] != 0) $varasto = $kukarow['oletus_varasto'];
+
+			if (strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
+				$varasto = $kukarow['varasto'];
+			}
 
 			if ($yhtiorow["splittauskielto"] != '') {
 				$splittauskielto = "E";
@@ -151,12 +154,12 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			else {
 				$splittauskielto = "";
 			}
-			
+
 			$jtkielto = $asiakasrow['jtkielto'];
-			
+
 			if ($asiakasrow['rahtivapaa'] != '') $rahtivapaa = 'ON';
 			if ($asiakasrow['osatoimitus'] != '') $osatoimitus = 'ON';
-			
+
 		}
 		else {
 			//yhtiön oletusalvi!
@@ -168,9 +171,12 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 
 			$ytunnus = "*";
 
-			// jos on oletus_varasto setattuna, pässätään eteenpäin
+			// Jos on varasto setattuna, pässätään eteenpäin
 			$varasto = 0;
-			if ((int) $kukarow["oletus_varasto"] != 0) $varasto = $kukarow['oletus_varasto'];
+
+			if (strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
+				$varasto = $kukarow['varasto'];
+			}
 		}
 
 		if ($valkoodi == '') {
@@ -224,7 +230,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				}
 			}
 		}
-		
+
 		if ($toim == "TARJOUS") {
 			$tilaustyyppi = 'T';
 		}
@@ -234,7 +240,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 		$override_ytunnus_check = "YES";
 
 		require ("otsik.inc");
-		
+
 		if ($session == "") {
 			return $id;
 		}

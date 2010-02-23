@@ -454,9 +454,7 @@
 					$kerayspvm = $laskurow["kerayspvm"];
 				}
 
-				if ($laskurow["varasto"] != 0) {
-					$varasto = (int) $laskurow["varasto"];
-				}
+				$varasto = $laskurow["varasto"];
 
 				//Tehdään muuttujaswitchit
 				if (is_array($hinta_array)) {

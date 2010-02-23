@@ -74,18 +74,13 @@
 				$var				= "";
 				$alv				= "";
 				$paikka				= "";
-				$varasto			= "";
+				$varasto 			= $laskurow["varasto"];
 				$rivitunnus			= "";
 				$korvaavakielto		= "";
 				$varataan_saldoa	= "";
 				$var				= "";
 				$perhekielto		= "";
 				$jtkielto 		 	= $laskurow['jtkielto'];
-
-				//Myyd‰‰n vain tietyst‰ varastosta
-				if ($laskurow["varasto"] != 0) {
-					$varasto = (int) $laskurow["varasto"];
-				}
 
 				if ($kukarow["extranet"] == "") {
 					$toimaika 	= $rivi[2];

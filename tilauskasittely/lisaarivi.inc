@@ -128,13 +128,22 @@
 		}
 	}
 
-	//Jos saamme vain yksi valittu varasto, niin tehdään siitä yhteensopiva array
-	if (!is_array($varasto) and (int) $varasto > 0) {
-		$varasto = array($varasto);
+	//Onko päässätty varasto josta myydään
+	if (isset($varasto) and (int) $varasto > 0) {
+		$varasto = array((int) $varasto);
+	}
+	elseif (isset($laskurow["varasto"]) and (int) $laskurow["varasto"] > 0) {
+		$varasto = array((int) $laskurow["varasto"]);
+	}
+	elseif (isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0) {
+		$varasto = explode(",", $kukarow["varasto"]);
+	}
+	else {
+		unset($varasto);
 	}
 
 	//	Katsotaan onko tällä tuotteella joku oletusvalinta
-	if ( (int) $rivitunnus == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TARJOUS", "PROJEKTI"))) {
+	if ((int) $rivitunnus == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TARJOUS", "PROJEKTI"))) {
 		$olquery = "SELECT *
 					FROM tuotteen_avainsanat
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -143,6 +152,7 @@
 					AND selite != ''
 					LIMIT 1";
 		$olvares = mysql_query($olquery) or pupe_error($olquery);
+		
 		if (mysql_num_rows($olvares)>0) {
 			$olvarow = mysql_fetch_array($olvares);
 
@@ -154,13 +164,13 @@
 							AND tuoteno = '$trow[tuoteno]'
 							AND liitostunnus = '".substr($olvarow["selite"],3)."'";
 				$oltarkres = mysql_query($olquery) or pupe_error($olquery);
+				
 				if (mysql_num_rows($oltarkres) > 0) {
 					$paikka = $olvarow["selite"];
 				}
 				else {
 					echo "<font class='error'>".t("VIRHE:")." ".t("Oletusvalintaa ei voida toteuttaa, tuotteen toimittajaa ei löydy.")."</font><br>";
 				}
-
 			}
 			elseif ($olvarow["selite"] == "¡¡V") {
 				$olquery = "SELECT tunnus
@@ -170,6 +180,7 @@
 							AND tyyppi = 'R'
 							LIMIT 1";
 				$oltarkres = mysql_query($olquery) or pupe_error($olquery);
+				
 				if (mysql_num_rows($oltarkres) > 0) {
 					//	Myydään aina oletuspaikalta!
 					$olquery = "SELECT concat_ws('#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
@@ -179,6 +190,7 @@
 								AND oletus != ''
 								LIMIT 1";
 					$olpares = mysql_query($olquery) or pupe_error($olquery);
+					
 					if (mysql_num_rows($olpares) > 0) {
 						$olparow = mysql_fetch_array($olpares);
 						$paikka	= substr($olvarow["selite"], 0, 3).$olparow["olpaikka"];
@@ -1866,7 +1878,7 @@
 			else {
 				$lisatyt_rivit2[] = $lisatty_tun;
 			}
-			
+
 			if ($i == 0) {
 				// lapsille oikea perheid
 				$perheid_lisaarivi = $lisatty_tun;

@@ -2924,7 +2924,7 @@ if ($tee == '') {
 			require ("tuotehaku.inc");
 		}
 	}
-
+	
 	//Lis‰t‰‰n rivi
 	if ((trim($tuoteno) != '' or is_array($tuoteno_array)) and ($kpl != '' or is_array($kpl_array)) and $tila != "MUUTA" and $ulos == '' and ($variaatio_tuoteno == "" or (is_array($kpl_array) and array_sum($kpl_array) != 0))) {
 
@@ -3012,24 +3012,22 @@ if ($tee == '') {
 			if (checkdate($toimkka,$toimppa,$toimvva)) {
 				$toimaika = $toimvva."-".$toimkka."-".$toimppa;
 			}
+			
 			if (checkdate($kerayskka,$keraysppa,$keraysvva)) {
 				$kerayspvm = $keraysvva."-".$kerayskka."-".$keraysppa;
 			}
+			
 			if ($toimaika == "" or $toimaika == "0000-00-00") {
 				$toimaika = $laskurow["toimaika"];
 			}
+			
 			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
 				$kerayspvm = $laskurow["kerayspvm"];
 			}
 
-			if ($laskurow["varasto"] != 0) {
-				$varasto = (int) $laskurow["varasto"];
-			}
-			elseif ((int) $kukarow["varasto"] != 0) {
-				$varasto = explode(",", $kukarow["varasto"]);
-			}
-
-			//Ennakkotilauksen, Tarjoukset ja Yll‰pitosopimukset eiv‰t varaa saldoa
+			$varasto = $laskurow["varasto"];
+			
+			// Ennakkotilauksen, Tarjoukset ja Yll‰pitosopimukset eiv‰t varaa saldoa
 			if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
 				$varataan_saldoa = "EI";
 			}

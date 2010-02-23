@@ -1414,7 +1414,7 @@ if ($tee == '') {
 		if ((int) $myyjanro > 0) {
 			$apuqu = "	SELECT *
 						from kuka use index (yhtio_myyja)
-						where yhtio = '$kukarow[yhtio]' 
+						where yhtio = '$kukarow[yhtio]'
 						and myyja = '$myyjanro'
 						AND myyja > 0";
 			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
@@ -1967,14 +1967,14 @@ if ($tee == '') {
 		else {
 
 			echo "<th>".t("Ytunnus").":</th><td>";
-			
+
 			if ($laskurow["liitostunnus"] == 0) {
 				echo "<input type='submit' name='liitaasiakasnappi' value='".t("Liit‰ asiakas")."'></td>";
 			}
 			else {
-				echo "$laskurow[ytunnus] </td>";	
+				echo "$laskurow[ytunnus] </td>";
 			}
-			
+
 			echo "<th>".t("Asiakasnro").":</th><td>$faktarow[asiakasnro]</td>";
 
 			echo "</tr>";
@@ -2245,7 +2245,7 @@ if ($tee == '') {
 
 				echo "<strong>".wordwrap($faktarow["fakta"], 110, "<br>")."</strong>&nbsp;</td></tr>\n";
 			}
-			
+
 			// Katsotaan onko liitetiedostoja
 			$liitequery = "	SELECT tunnus
 							FROM liitetiedostot USE INDEX (yhtio_liitos_liitostunnus)
@@ -2256,7 +2256,7 @@ if ($tee == '') {
 
 			if (mysql_num_rows($liiteres) > 0) {
 				$liitemaara = 1;
-				
+
 				echo "<tr>$jarjlisa<th>".t("Liitetiedostot").":</th><td colspan='3'>";
 				while ($liiterow = mysql_fetch_array($liiteres)) {
 					echo "<a href='".$palvelin2."view.php?id=$liiterow[tunnus]' target='Attachment'>".t("Liite")." $liitemaara</a> ";
@@ -2325,11 +2325,11 @@ if ($tee == '') {
 		if ($toim == "PIKATILAUS") {
 			echo "<tr>$jarjlisa
 				<th align='left'>".t("Asiakas")."</th>
-				<td><input type='text' size='10' maxlength='10' name='syotetty_ytunnus' value='$yt'></td>
+				<td><input type='text' size='10' name='syotetty_ytunnus' value='$yt'></td>
 				</tr>";
 			echo "<tr>$jarjlisa
 				<th align='left'>".t("Myyj‰nro")."</th>
-				<td><input type='text' size='10' maxlength='10' name='myyjanro' value='$my'></td>
+				<td><input type='text' size='10' name='myyjanro' value='$my'></td>
 				</tr>";
 		}
 	}
@@ -2924,7 +2924,7 @@ if ($tee == '') {
 			require ("tuotehaku.inc");
 		}
 	}
-	
+
 	//Lis‰t‰‰n rivi
 	if ((trim($tuoteno) != '' or is_array($tuoteno_array)) and ($kpl != '' or is_array($kpl_array)) and $tila != "MUUTA" and $ulos == '' and ($variaatio_tuoteno == "" or (is_array($kpl_array) and array_sum($kpl_array) != 0))) {
 
@@ -3012,21 +3012,21 @@ if ($tee == '') {
 			if (checkdate($toimkka,$toimppa,$toimvva)) {
 				$toimaika = $toimvva."-".$toimkka."-".$toimppa;
 			}
-			
+
 			if (checkdate($kerayskka,$keraysppa,$keraysvva)) {
 				$kerayspvm = $keraysvva."-".$kerayskka."-".$keraysppa;
 			}
-			
+
 			if ($toimaika == "" or $toimaika == "0000-00-00") {
 				$toimaika = $laskurow["toimaika"];
 			}
-			
+
 			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
 				$kerayspvm = $laskurow["kerayspvm"];
 			}
 
 			$varasto = $laskurow["varasto"];
-			
+
 			// Ennakkotilauksen, Tarjoukset ja Yll‰pitosopimukset eiv‰t varaa saldoa
 			if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
 				$varataan_saldoa = "EI";
@@ -3406,7 +3406,7 @@ if ($tee == '') {
 				if ($kukarow["yhtio"] == "srs") {
 					echo "<tr class='aktiivi'>$jarjlisa<th>".t("Hinta 25% katteella")."</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['kehahin'] / 0.75)." $yhtiorow[valkoodi]</td></tr>";
 				}
-				
+
 				echo "<tr class='aktiivi'>$jarjlisa<th>".t("Keskihankintahinta")." $epakurpantti</th><td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuote['kehahin'])." $yhtiorow[valkoodi]</td></tr>";
 			}
 
@@ -4669,7 +4669,7 @@ if ($tee == '') {
 						$summa    		= round($summa * $alvillisuus_kerto, $yhtiorow['hintapyoristys']);
 						$myyntihinta	= round(tuotteen_myyntihinta($laskurow, $trow, 1) * $alvillisuus_kerto, $yhtiorow['hintapyoristys']);
 					}
-	
+
 					$kplhinta = $hinta * (1 - $row["ale"] / 100);
 
 					if ($kukarow['hinnat'] == 1) {
@@ -6053,7 +6053,7 @@ if ($tee == '') {
 				echo "</form>";
 				echo "</td>";
 			}
-			
+
 		}
 
 		//	Projekti voidaan poistaa vain jos meill‰ ei ole sill‰ mit‰‰n toimituksia

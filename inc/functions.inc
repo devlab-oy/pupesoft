@@ -4432,6 +4432,20 @@ if (!function_exists("enable_ajax")) {
 
 				document.getElementById(id).innerHTML = response;
 
+				<?php if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE) { ?>
+					var container = document.getElementById(id);
+					var allNewScripts = container.getElementsByTagName('script');
+					c = allNewScripts.length;
+
+					if (c>0) {
+						for (x=0;x<=c;x++) {
+							if (allNewScripts[x]) {
+								eval(allNewScripts[x].innerHTML);
+							}
+						}
+					}
+				<?php }	?>
+
 				//	Jos p‰ivitet‰‰n togglegrouppaus
 				if (href) {
 					document.getElementById(href).href = 'javascript:toggleGroup("' + id + '");';
@@ -6907,7 +6921,7 @@ if (!function_exists("livesearch_kentta")) {
 	function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '') {
 		global $kukarow, $toim;
 
-		if (strpos(strtoupper($_SERVER['HTTP_USER_AGENT']), "MSIE") !== FALSE or strpos(strtoupper($_SERVER['HTTP_USER_AGENT']), "EXPLORER") !== FALSE) {
+		if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE) {
 			return "<input type='text' id='$hakuID' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'>";
 		}
 

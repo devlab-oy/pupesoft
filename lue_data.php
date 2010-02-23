@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require ("inc/parametrit.inc"); 
 
 echo "<font class='head'>".t("Datan sis‰‰nluku")."</font><hr>";
 
@@ -292,7 +292,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			}
 		}
 
-		// Ottetaan pakolliset, kielletyt, wherelliset ja eiyhtiota tiedot
+		// Otetaan pakolliset, kielletyt, wherelliset ja eiyhtiota tiedot
 		list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, ) = pakolliset_sarakkeet($table_mysql, $taulunotsikot[$taulu]);
 
 		// $trows sis‰lt‰‰ kaikki taulun sarakkeet ja tyypit tietokannasta
@@ -397,6 +397,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$chytunnus 			= '';
 			$chryhma 			= '';
 			$chtuoteno 			= '';
+			$chasiakas			= '';
 			$chalkupvm 			= '0000-00-00';
 			$chloppupvm 		= '0000-00-00';
 			$and 				= '';
@@ -533,9 +534,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				// jos pakollinen tieto puuttuu kokonaan
 				if (trim($rivi[$j]) == "" and in_array($taulunotsikot[$taulu][$j], $pakolliset)) {
 					$tila = 'ohita';
-				}
+				}						
 			}
-
+			
 			// jos ei ole puuttuva tieto etsit‰‰n rivi‰
 			if ($tila != 'ohita') {
 
@@ -943,6 +944,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							if ($otsikko == 'RYHMA' and $rivi[$r] != '') {
 								$chryhma = $rivi[$r];
 							}
+							
+							if ($otsikko == 'ASIAKAS' and $rivi[$r] != '') {
+								$chasiakas = $rivi[$r];
+							}
 
 							if ($otsikko == 'TUOTENO' and $rivi[$r] != '') {
 								$chtuoteno = $rivi[$r];
@@ -1065,9 +1070,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						}
 					}
 				}
-
-				//tarkistetaan asiakasalennus ja asiakashinta keisseiss‰ onko t‰llanen rivi jo olemassa
-				if ($hylkaa == 0 and ($chasiakas_ryhma != '' or $chytunnus != '') and ($chryhma != '' or $chtuoteno != '') and ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta')) {
+				
+				//tarkistetaan asiakasalennus ja asiakashinta keisseiss‰ onko t‰llanen rivi jo olemassa				
+				if ($hylkaa == 0 and ($chasiakas != '' or $chasiakas_ryhma != '' or $chytunnus != '') and ($chryhma != '' or $chtuoteno != '') and ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta')) {
 					if ($chasiakas_ryhma != '') {
 						$and .= " and asiakas_ryhma = '$chasiakas_ryhma'";
 					}
@@ -1077,15 +1082,18 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					if ($chryhma != '') {
 						$and .= " and ryhma = '$chryhma'";
 					}
+					if ($chasiakas != '') {
+						$and .= " and asiakas = '$chasiakas'";
+					}
 					if ($chtuoteno != '') {
 						$and .= " and tuoteno = '$chtuoteno'";
 					}
 
 					$and .= " and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm'";
 				}
-
+				
 				if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
-					if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') {
+					if (($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') and $and != "") {
 						$query .= " WHERE yhtio = '$kukarow[yhtio]'";
 						$query .= $and;
 					}
@@ -1105,7 +1113,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 				//	Otetaan talteen query..
 				$lue_data_query = $query;
-
+								
 				$tarq = "	SELECT *
 							FROM $table_mysql";
 				if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') {

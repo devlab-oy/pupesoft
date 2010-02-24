@@ -9,11 +9,11 @@ if ($tee == "lataa_tiedosto") {
 
 echo "<font class='head'>".t("Viranomaisilmoitukset")."</font><hr><br><br>";
 
-if ($tee == "VSRALVKK_VANHA") {
+if ($tee == "VSRALVKK_VANHA" or $tee == 'VSRALVKK_VANHA_erittele') {
 	include ('raportit/alv_laskelma.php');
 	alvlaskelma($kk,$vv);
 }
-elseif ($tee == "VSRALVKK_UUSI") {
+elseif ($tee == "VSRALVKK_UUSI" or $tee == 'VSRALVKK_UUSI_erittele') {
 	include ('raportit/alv_laskelma_uusi.php');
 	alvlaskelma($kk,$vv);
 }

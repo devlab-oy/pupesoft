@@ -129,7 +129,10 @@
 	}
 
 	//Onko p‰‰ss‰tty varasto josta myyd‰‰n
-	if (isset($varasto) and (int) $varasto > 0) {
+	if (isset($varasto) and is_array($varasto) and count($varasto) > 0) {
+		$varasto = $varasto;
+	}
+	elseif (isset($varasto) and (int) $varasto > 0) {
 		$varasto = array((int) $varasto);
 	}
 	elseif (isset($laskurow["varasto"]) and (int) $laskurow["varasto"] > 0) {
@@ -141,6 +144,8 @@
 	else {
 		unset($varasto);
 	}
+	
+	if (isset($varasto) and $lisaarivi_debug == 1) echo "Myyd‰‰n varastoista: ".var_dump($varasto)."<br>";
 
 	//	Katsotaan onko t‰ll‰ tuotteella joku oletusvalinta
 	if ((int) $rivitunnus == 0 and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TARJOUS", "PROJEKTI"))) {

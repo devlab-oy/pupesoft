@@ -30,50 +30,60 @@
 			}
 
 			// Näin tunnistamme ensimmäisen maksun
-			$yritystilino='';
+			$yritystilino = '';
 
 			while ($laskurow = mysql_fetch_array ($xresult)) {
 				// Muutamme hieman ensimmäisen maksun tietoja
 				if ($yritystilino == '') {
-					$laskurow["viite"] 		= '';		//Viitenroa ei sallita
-					$laskutapahtuma 		= '10';		//Maksutapahtuma
-					$laskurow["alatila"] 	= ''; 		//Ei käteisalennusta
-					$laskurow["summa"]		= $summaarray[$yritirow['tunnus']][$laskurow['tilinumero']];
-					mysql_data_seek($xresult,0);
+					$laskutapahtuma = '10';			// Maksutapahtuma (netotettu)
+					$laskurow["viite"] = '';		// Viitenroa ei sallita netotetulla tapahtumalla
+					$laskurow["alatila"] = '';		// Ei käteisalennusta netotetulla tapahtumalla
+					$laskurow["summa"] = $summaarray[$yritirow['tunnus']][$laskurow['tilinumero']];
+					mysql_data_seek($xresult, 0);
 				}
 				else {
-					$laskutapahtuma = '20'; //Erittely
+					$laskutapahtuma = '20';	// Erittelytapahtuman lasku
 
-					if ($laskurow["summa"] < 0) { //Se on nyt hyvitystä!
-						$laskurow["summa"] 		= $laskurow["summa"] * -1;
-						$laskurow["kasumma"] 	= $laskurow["kasumma"] * -1;
-						$laskutapahtuma 		= '22'; //Hyvityserittely
+					// Lasku on hyvitystä
+					if ($laskurow["summa"] < 0) {
+						$laskurow["summa"] = $laskurow["summa"] * -1;
+						$laskurow["kasumma"] = $laskurow["kasumma"] * -1;
+						$laskutapahtuma = '22'; // Erittelytapahtuman hyvityslasku
 					}
 				}
-				$yritystilino 	= $laskurow["ytilino"];
-				$laskunimi1 	= $laskurow["nimi"];
-				$laskunimi2 	= $laskurow["osoite"];
-				$laskunimi3 	= $laskurow["postitp"];
 
-				if ($laskurow["alatila"] == 'K') { // maksetaan käteisalennuksella
+				$yritystilino = $laskurow["ytilino"];
+				$laskunimi1 = $laskurow["nimi"];
+				$laskunimi2 = $laskurow["osoite"];
+				$laskunimi3 = $laskurow["postitp"];
+
+				// Maksetaan käteisalennuksella
+				if ($laskurow["alatila"] == 'K') {
 					$laskusumma = $laskurow["summa"] - $laskurow["kasumma"];
 				}
 				else {
 					$laskusumma = $laskurow["summa"];
 				}
 
-				$laskutilno = $laskurow["tilinumero"];
-				$laskusis1  = $laskurow["tunnus"];
-				$laskusis2  = $laskurow["sisviesti2"];
+				$laskutilno    = $laskurow["tilinumero"];
+				$laskusis1     = $laskurow["tunnus"];
+				$laskusis2     = $laskurow["sisviesti2"];
+			 	$laskuviesti   = $laskurow["viesti"];
 				$laskuvaluutta = 1;
-				$laskutyyppi = 5;
-			 	$laskuviesti = $laskurow["viesti"];
+				$laskutyyppi   = 5; // Laskuviesti
+
+				// Laskuviesti:
+				// 1 = viitenumero
+				// 2 = laskun tiedot
+				// 5 = 70 merkin pituinen vapaa viesti
+				// 6 = pitkä viesti (oma tietue)
+				// 7 = veroviesti (max. 70 merkkiä)
 
 				//Sampo/Danske haluaa viestiin ainakin yhden merkin
 				if (substr($laskurow['ytilino'], 0, 1) == '8' and strlen(trim($laskuviesti)) == 0) $laskuviesti = ';';
 
 				if (strlen($laskurow["viite"]) > 0) {
-					$laskuviesti = sprintf ('%020s',$laskurow["viite"]); //Etunollatäyttö
+					$laskuviesti = sprintf ('%020s', $laskurow["viite"]); // Etunollatäyttö
 					$laskutyyppi = 1;
 				}
 
@@ -82,6 +92,17 @@
 				if ($laskutapahtuma == '10') {
 					$makskpl += 1;
 					$makssumma += $laskusumma;
+				}
+
+				// jos halutaan "pitkä viesti" (tänne ei toistaiseksi voi joutua mitenkään)
+				if ($laskutyyppi == 6) {
+					$viestitietue_viesti_1 = $laskutilno;			// Sampon speksissä pakollista laittaa tähän saajan tilinumero
+					$viestitietue_viesti_2 = $laskurow["viite"];	// Viitenumero
+					$viestitietue_viesti_3 = $laskurow["viesti"];	// Viesti
+					$viestitietue_viesti_4 = "";
+					$viestitietue_viesti_5 = "";
+
+					require ("inc/lm03viesti.inc");
 				}
 
 				$query = "	UPDATE lasku

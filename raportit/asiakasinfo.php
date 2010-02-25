@@ -4,8 +4,8 @@
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
-	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-	if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+	if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+	if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
 if (file_exists("../inc/parametrit.inc")) {
@@ -20,9 +20,31 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 	exit;
 }
 
+//	Haardkoodataan exranetrajaus vain alennukseen
+if ($kukarow["extranet"] != "") {
+	
+	$rajaus = "ALENNUKSET";
+
+	//Haetaan asiakkaan tunnuksella
+	$query  = "	SELECT *
+				FROM asiakas
+				WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+	$result = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($result) == 1) {
+		$asiakasrow = mysql_fetch_array($result);
+		$ytunnus = $asiakasrow["ytunnus"];
+		$asiakasid = $asiakasrow["tunnus"];
+	}
+	else {
+		echo t("<font class='error'>VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."</font><br><br>";
+		exit;
+	}
+}
+
 if ($tee == 'eposti') {
 
-	if($kukarow["extranet"] == "") {
+	if ($kukarow["extranet"] == "") {
 		if ($komento == '') {
 			$tulostimet[] = "Alennustaulukko";
 			$toimas = $ytunnus;
@@ -38,12 +60,12 @@ if ($tee == 'eposti') {
 	require('pdflib/phppdflib.class.php');
 
 	function alku () {
-		global $yhtiorow, $firstpage, $pdf, $rectparam, $norm, $norm_bold, $pieni, $ytunnus, $kukarow, $kala, $tid, $otsikkotid;
+		global $yhtiorow, $firstpage, $pdf, $rectparam, $norm, $norm_bold, $pieni, $ytunnus, $asiakasid, $kukarow, $kala, $tid, $otsikkotid;
 
 		static $sivu;
 		$sivu++;
 
-		if(!isset($pdf)) {
+		if (!isset($pdf)) {
 
 			//PDF parametrit
 			$pdf = new pdffile;
@@ -66,7 +88,8 @@ if ($tee == 'eposti') {
 
 			$query =  "	SELECT *
 						FROM asiakas
-						WHERE yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus  = '$asiakasid'";
 			$assresult = mysql_query($query) or pupe_error($query);
 			$assrow = mysql_fetch_array($assresult);
 
@@ -121,7 +144,7 @@ if ($tee == 'eposti') {
 		}
 
 		//	Vaihdetaan osastoa
-		if($osasto != $edosasto) {
+		if ($osasto != $edosasto) {
 			$kala -= 15;
 			$pdf->draw_text(30,  $kala, $osasto, 									$firstpage, $norm_bold);
 			$kala -= 25;
@@ -129,7 +152,7 @@ if ($tee == 'eposti') {
 
 		$edosasto = $osasto;
 
-		if($tuote == " - ") {
+		if ($tuote == " - ") {
 			$pdf->draw_text(30,  $kala, $try, 										$firstpage, $norm);
 		}
 		else {
@@ -147,53 +170,26 @@ if ($tee == 'eposti') {
 
 echo "<font class='head'>".t("Asiakkaan perustiedot")."</font><hr><br><br>";
 
-//	Haardkoodataan exranetrajaus vain alennukseen
-if($kukarow["extranet"]  != "") {
-	$rajaus = "ALENNUKSET";
-
-	//Haetaan asiakkaan tunnuksella
-	$query  = "	SELECT *
-				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
-	$result = mysql_query($query) or pupe_error($query);
-
-	if (mysql_num_rows($result) == 1) {
-		$asiakas = mysql_fetch_array($result);
-		$ytunnus = $asiakas["ytunnus"];
-	}
-	else {
-		echo t("<font class='error'>VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."</font><br><br>";
-		exit;
-	}
-}
-else {
+if ($kukarow["extranet"] == "" and $lopetus == "") {
 	//	Jos tullaan muualta ei anneta valita uutta asiakasta
-	if($lopetus == "") {
-		echo "<form name=asiakas action='asiakasinfo.php' method='post' autocomplete='off'>";
-		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
-		echo "<table><tr>";
-		echo "<th>".t("Anna asiakasnumero tai osa nimest‰")."</th>";
-		echo "<td><input type='text' name='ytunnus'></td>";
-		echo "<td class='back'><input type='submit' value='".t("Hae")."'>";
-		echo "</tr></table>";
-		echo "</form><br><br>";
-	}
+	echo "<form name=asiakas action='asiakasinfo.php' method='post' autocomplete='off'>";
+	echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
+	echo "<table><tr>";
+	echo "<th>".t("Anna asiakasnumero tai osa nimest‰")."</th>";
+	echo "<td><input type='text' name='ytunnus'></td>";
+	echo "<td class='back'><input type='submit' value='".t("Hae")."'>";
+	echo "</tr></table>";
+	echo "</form><br><br>";
 }
 
-if ($ytunnus!='') {
-	if($kukarow["extranet"] != "") {
-		require ("asiakashaku.inc");
-	}
-	else {
-		require ("inc/asiakashaku.inc");
-	}
+if ($kukarow["extranet"] == "" and $ytunnus != '') {
+	require ("inc/asiakashaku.inc");
 }
-
 
 // jos meill‰ on onnistuneesti valittu asiakas
-if ($ytunnus!='') {
-	if($tee != "eposti") {
-		if(@include('Spreadsheet/Excel/Writer.php')) {
+if ($asiakasid > 0) {
+	if ($tee != "eposti") {
+		if (@include('Spreadsheet/Excel/Writer.php')) {
 			//keksit‰‰n failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
 			mt_srand((float) $sec + ((float) $usec * 100000));
@@ -237,9 +233,9 @@ if ($ytunnus!='') {
 	//$ckatepr = "#00dd00";
 	$maxcol  = 12; // montako columnia n‰yttˆ on
 
-	if($lopetus == "" and $kukarow["extranet"] == "") {
-		if($rajaus=="MYYNTI") $sel["M"] = "checked";
-		elseif($rajaus=="ALENNUKSET") $sel["A"] = "checked";
+	if ($lopetus == "" and $kukarow["extranet"] == "") {
+		if ($rajaus=="MYYNTI") $sel["M"] = "checked";
+		elseif ($rajaus=="ALENNUKSET") $sel["A"] = "checked";
 		else $sel["K"] = "checked";
 
 		echo "<form name=asiakas action='asiakasinfo.php' method='post' autocomplete='off'>";
@@ -252,7 +248,7 @@ if ($ytunnus!='') {
 		echo "</form>";
 	}
 
-	if($rajaus=="" or $rajaus=="MYYNTI") {
+	if ($rajaus == "" or $rajaus == "MYYNTI") {
 		// tehd‰‰n asiakkaan ostot kausittain, sek‰ pylv‰‰t niihin...
 		echo "<br><font class='message'>".t("Myynti kausittain viimeiset 24 kk")." (<font class='myynti'>".t("myynti")."</font>/<font class='kate'>".t("kate")."</font>/<font class='katepros'>".t("kateprosentti")."</font>)</font>";
 		echo "<hr>";
@@ -470,11 +466,11 @@ if ($ytunnus!='') {
 			$ppl 			= date("d");
 
 			//	Huijataan myyntiseurantaa
-			if($lopetus == "") $lopetus = "block";
+			if ($lopetus == "") $lopetus = "block";
 
 			require("myyntiseuranta.php");
 
-			if($lopetus == "block") $lopetus = "";
+			if ($lopetus == "block") $lopetus = "";
 
 			//	Korjataan ytunnus ja tee
 			$ytunnus 	= $asiakas;
@@ -485,17 +481,18 @@ if ($ytunnus!='') {
 	}
 
 	$yhdistetty_array = array();
-	if($rajaus == "" or $rajaus == "ALENNUKSET") {
+	
+	if ($rajaus == "" or $rajaus == "ALENNUKSET") {
 
-		if($rajaus == "") {
+		if ($rajaus == "") {
 			echo "<a href='#' name='alennukset'></a>";
 		}
 
 		echo "<br><font class='message'>".t("Asiakkaan alennusryhm‰t, alennustaulukko ja alennushinnat")."</font><hr>";
 
-		if($kukarow["extranet"] == "") {
+		if ($kukarow["extranet"] == "") {
 			$sela = $selb = "";
-			if($rajattunakyma != "JOO") {
+			if ($rajattunakyma != "JOO") {
 				$sela = "checked";
 			}
 			else {
@@ -546,8 +543,8 @@ if ($ytunnus!='') {
 								'' asiakasryhm‰_nimi,
 								asiakasalennus.ryhma alennusryhm‰,
 								perusalennus.selite alennusryhm‰_nimi,
-								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
-								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
 								'asiakasale' tyyppi $tuotecols
 							FROM asiakasalennus
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
@@ -559,7 +556,7 @@ if ($ytunnus!='') {
 							and asiakasalennus.tuoteno!=''
 							and asiakasalennus.alennus >= 0
 							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
-							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						)
 						UNION
 						/*	Asiakasalennus ytunnuksella	 ryhma*/
@@ -572,8 +569,8 @@ if ($ytunnus!='') {
 								'' asiakasryhm‰_nimi,
 								asiakasalennus.ryhma alennusryhm‰,
 								perusalennus.selite alennusryhm‰_nimi,
-								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
-								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
 								'asiakasale' tyyppi $tuotecols
 							FROM asiakasalennus
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
@@ -585,7 +582,7 @@ if ($ytunnus!='') {
 							and asiakasalennus.tuoteno=''
 							and asiakasalennus.alennus >= 0
 							$tuotewhere
-							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							$tuotegroup
 						)
 						UNION
@@ -601,8 +598,8 @@ if ($ytunnus!='') {
 								avainsana.selitetark asiakasryhm‰_nimi,
 								asiakasalennus.ryhma alennusryhm‰,
 								perusalennus.selite alennusryhm‰_nimi,
-								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
-								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
 								'asiakasryhm‰ale' tyyppi $tuotecols
 							FROM asiakasalennus
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
@@ -615,7 +612,7 @@ if ($ytunnus!='') {
 							and asiakasalennus.tuoteno!=''
 							and asiakasalennus.alennus >= 0
 							and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
-							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						)
 						UNION
 						/*	Asiakasalennus Ryhm‰ll‰	ryhma */
@@ -629,8 +626,8 @@ if ($ytunnus!='') {
 								avainsana.selitetark asiakasryhm‰_nimi,
 								asiakasalennus.ryhma alennusryhm‰,
 								perusalennus.selite alennusryhm‰_nimi,
-								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
-								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
 								'asiakasryhm‰ale' tyyppi $tuotecols
 							FROM asiakasalennus
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma
@@ -643,7 +640,7 @@ if ($ytunnus!='') {
 							and asiakasalennus.tuoteno = ''
 							and asiakasalennus.alennus >= 0
 							$tuotewhere
-							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+							and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 							$tuotegroup
 						)
 							UNION
@@ -672,7 +669,7 @@ if ($ytunnus!='') {
 
 			if ($aletaulu != "" or $tee == "eposti") {
 				$ulos  = "<table><caption><font class='message'>".t("Alennustaulukot")."</font></caption>";
-				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
+				if ($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
 					$otsik = array("osasto", "try", "alennusryhm‰", "tuoteno", "alennus", "alkupvm", "loppupvm");
 					$otsik_spread = array("osasto", "osasto_nimi", "try",  "try_nimi", "alennusryhm‰", "alennusryhm‰_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "alkupvm", "loppupvm");
 				}
@@ -683,7 +680,7 @@ if ($ytunnus!='') {
 			}
 			elseif ($yhdistetty != "") {
 				$ulos  = "<table><caption><font class='message'>".t("Alennustaulukot")."</font></caption>";
-				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
+				if ($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
 					$otsik = array("alennusryhm‰", "alennusryhm‰_nimi",  "tuoteno", "tuoteno_nimi", "osasto", "try", "alennus", "alkupvm", "loppupvm");
 				}
 				else {
@@ -692,7 +689,7 @@ if ($ytunnus!='') {
 			}
 			else {
 				$ulos  = "<table><caption><font class='message'>".t("Aletaulukko")."</font></caption>";
-				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
+				if ($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
 					$otsik = array("alennusryhm‰", "tuoteno", "alennus", "alkupvm", "loppupvm");
 					$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi", "tuoteno", "tuoteno_nimi", "alennus", "alkupvm", "loppupvm");
 				}
@@ -703,7 +700,7 @@ if ($ytunnus!='') {
 			}
 
 			// Duusataan otsikot
-			if($yhdistetty == "") {
+			if ($yhdistetty == "") {
 				$ulos  .= "<tr>";
 				foreach($otsik as $o) {
 					$ulos .= "<th>".t(ucfirst($o))."</th>";
@@ -711,7 +708,7 @@ if ($ytunnus!='') {
 				$ulos  .= "</tr>";
 			}
 
-			if(isset($workbook_ale) and $yhdistetty == "") {
+			if (isset($workbook_ale) and $yhdistetty == "") {
 				foreach($otsik_spread as $key => $value) {
 					$worksheet->write($excelrivi, $key, t(ucfirst($value)), $format_bold);
 				}
@@ -742,7 +739,7 @@ if ($ytunnus!='') {
 
 				$tyhja = 0;
 				//	Onko perusalessa tyhj‰ ryhm‰?
-				if($asrow["prio"] == 5) {
+				if ($asrow["prio"] == 5) {
 					$query = "	SELECT tuote.tunnus
 								FROM tuote
 								WHERE tuote.yhtio='$kukarow[yhtio]'
@@ -754,24 +751,24 @@ if ($ytunnus!='') {
 								LIMIT 1";
 					$testres = mysql_query($query) or pupe_error($query);
 
-					if(mysql_num_rows($testres) == 0) {
+					if (mysql_num_rows($testres) == 0) {
 						$tyhja = 1;
 					}
 				}
 
 				//	Suodatetaan extranetk‰ytt‰jilta muut aleprossat
-				if((((($kukarow["extranet"] != "" or $tee == "eposti"  or $yhdistetty != "" or $rajattunakyma == "JOO") and ($edtry != $asrow["try"] or $edryhma != $asrow["alennusryhm‰"] or $edtuoteno != $asrow["tuoteno"])) or ($kukarow["extranet"] == "" and $tee != "eposti" and $yhdistetty == ""  and $rajattunakyma != "JOO"))) and $tyhja == 0) {
+				if ((((($kukarow["extranet"] != "" or $tee == "eposti"  or $yhdistetty != "" or $rajattunakyma == "JOO") and ($edtry != $asrow["try"] or $edryhma != $asrow["alennusryhm‰"] or $edtuoteno != $asrow["tuoteno"])) or ($kukarow["extranet"] == "" and $tee != "eposti" and $yhdistetty == ""  and $rajattunakyma != "JOO"))) and $tyhja == 0) {
 
 					$edryhma 	= $asrow["alennusryhm‰"];
 					$edtry 		= $asrow["try"];
 					$edtuoteno 	= $asrow["tuoteno"];
 
-					if(isset($workbook_ale) and $yhdistetty == "") {
+					if (isset($workbook_ale) and $yhdistetty == "") {
 						foreach($otsik_spread as $key => $value) {
-							if($value == "osasto_nimi") {
+							if ($value == "osasto_nimi") {
 								$worksheet->write($excelrivi, $key, $osastot[$asrow["osasto"]]);
 							}
-							elseif($value == "try_nimi") {
+							elseif ($value == "try_nimi") {
 								$worksheet->write($excelrivi, $key, $tryt[$asrow["try"]]);
 							}
 							else {
@@ -786,19 +783,19 @@ if ($ytunnus!='') {
 
 					foreach($otsik as $o) {
 
-						if($yhdistetty != "") {
+						if ($yhdistetty != "") {
 							$dada[$o] = $asrow[$o];
 						}
 						else {
 							//	Kaunistetaan ulostusta..
-							if($asrow[$o."_nimi"] != "") {
+							if ($asrow[$o."_nimi"] != "") {
 								$arvo = $asrow[$o]." - ".$asrow[$o."_nimi"];
 							}
-							elseif($o == "osasto" and $osastot[$asrow[$o]]) {
+							elseif ($o == "osasto" and $osastot[$asrow[$o]]) {
 								$arvo = $asrow[$o]." - ".$osastot[$asrow[$o]];
 								$osasto = $arvo;
 							}
-							elseif($o == "try" and $tryt[$asrow[$o]] != "") {
+							elseif ($o == "try" and $tryt[$asrow[$o]] != "") {
 								$arvo = $asrow[$o]." - ".$tryt[$asrow[$o]];
 								$try = $arvo;
 							}
@@ -811,7 +808,7 @@ if ($ytunnus!='') {
 					}
 					$ulos .= "</tr>";
 
-					if($yhdistetty != "") {
+					if ($yhdistetty != "") {
 						$yhdistetty_array[] = $dada;
 					}
 
@@ -824,11 +821,11 @@ if ($ytunnus!='') {
 			$ulos .= "</table>";
 
 			//	Liitet‰‰n ulostus oikeaan muuttujaan
-			if($aletaulu != "") {
+			if ($aletaulu != "") {
 				$aletaulu = $ulos;
 				$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("N‰yt‰ alennukset")."</a>";
 			}
-			elseif($asale != "") {
+			elseif ($asale != "") {
 				$asale = $ulos;
 				$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("N‰yt‰ alennustaulukot")."</a>";
 			}
@@ -847,8 +844,8 @@ if ($ytunnus!='') {
 		if ($ashin!='' or $yhdistetty != "") {
 			// haetaan asiakashintoja
 			$ashin  = "<table><caption><font class='message'>".t("Asiakashinnat")."</font></caption>";
-			if($yhdistetty != "") {
-				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
+			if ($yhdistetty != "") {
+				if ($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
 					$otsik = array("alennusryhm‰", "alennusryhm‰_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppupvm");
 				}
 				else {
@@ -856,7 +853,7 @@ if ($ytunnus!='') {
 				}
 			}
 			else {
-				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
+				if ($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
 					$otsik = array("alennusryhm‰", "tuoteno", "hinta", "alkupvm", "loppupvm");
 					$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppupvm");
 				}
@@ -867,14 +864,14 @@ if ($ytunnus!='') {
 			}
 
 			// Duusataan otsikot
-			if(isset($workbook_ale) and $yhdistetty == "") {
+			if (isset($workbook_ale) and $yhdistetty == "") {
 				foreach($otsik_spread as $key => $value) {
 					$worksheet->write($excelrivi, $key, t(ucfirst($value)), $format_bold);
 				}
 				$excelrivi++;
 			}
 
-			if($hdistetty == "") {
+			if ($hdistetty == "") {
 				$ashin  .= "<tr>";
 				foreach($otsik as $o) {
 					$ashin .= "<th>".t(ucfirst($o))."</th>";
@@ -892,15 +889,15 @@ if ($ytunnus!='') {
 								avainsana.selitetark asiakasryhm‰_nimi,
 								asiakashinta.ryhma alennusryhm‰,
 								perusalennus.selite alennusryhm‰_nimi,
-								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
-								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
 								'ytunnus tuote' tyyppi
 							FROM asiakashinta
 							JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakashinta.ytunnus = '$asiakasrow[ytunnus]' and asiakashinta.ytunnus!='' and asiakashinta.tuoteno!=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+								and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						)
 						UNION
 						(
@@ -912,14 +909,14 @@ if ($ytunnus!='') {
 								avainsana.selitetark asiakasryhm‰_nimi,
 								asiakashinta.ryhma alennusryhm‰,
 								perusalennus.selite alennusryhm‰_nimi,
-								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
-								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
 								'ytunnus aleryhm‰' tyyppi
 							FROM asiakashinta
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakashinta.ytunnus = '$asiakasrow[ytunnus]' and asiakashinta.ytunnus!='' and asiakashinta.ryhma!=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+								and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						)
 						UNION
 						(
@@ -931,15 +928,15 @@ if ($ytunnus!='') {
 								avainsana.selitetark asiakasryhm‰_nimi,
 								asiakashinta.ryhma alennusryhm‰,
 								perusalennus.selite alennusryhm‰_nimi,
-								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
-								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
 								'asiakasryhm‰ tuote' tyyppi
 							FROM asiakashinta
 							JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakashinta.asiakas_ryhma = '$asiakasrow[ryhma]' and asiakashinta.asiakas_ryhma!='' and asiakashinta.tuoteno!=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+								and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						)
 						UNION
 						(
@@ -951,14 +948,14 @@ if ($ytunnus!='') {
 								avainsana.selitetark asiakasryhm‰_nimi,
 								asiakashinta.ryhma alennusryhm‰,
 								perusalennus.selite alennusryhm‰_nimi,
-								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
-								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
+								if (alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if (loppupvm='0000-00-00','',loppupvm) loppupvm,
 								'asiakasryhm‰ aleryhm‰' tyyppi
 							FROM asiakashinta
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
 							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakashinta.asiakas_ryhma = '$asiakasrow[ryhma]' and asiakashinta.asiakas_ryhma!='' and asiakashinta.ryhma!=''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+								and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						)
 						ORDER BY alennusryhm‰, tuoteno, prio, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)";
 			$asres = mysql_query($query) or pupe_error($query);
@@ -966,13 +963,13 @@ if ($ytunnus!='') {
 			while ($asrow = mysql_fetch_array($asres)) {
 
 				//	Suodatetaan extranetk‰ytt‰jilta muut hinnat
-				if(($kukarow["extranet"] != "" or $tee == "eposti" or $yhdistetty != "" or $rajattunakyma == "JOO") or ($kukarow["extranet"] == "" and $tee != "eposti" and $yhdistetty == "" or $rajattunakyma != "JOO") ) {
+				if (($kukarow["extranet"] != "" or $tee == "eposti" or $yhdistetty != "" or $rajattunakyma == "JOO") or ($kukarow["extranet"] == "" and $tee != "eposti" and $yhdistetty == "" or $rajattunakyma != "JOO") ) {
 					if ($edryhma != $asrow["alennusryhm‰"] or $edtuoteno != $asrow["tuoteno"] or $edasryhma != $asrow["asiakasryhm‰"]) {
 						$edryhma 	= $asrow["alennusryhm‰"];
 						$edtuoteno 	= $asrow["tuoteno"];
 						$edasryhma  = $asrow["asiakasryhm‰"];
 
-						if(isset($workbook_ale) and $yhdistetty == "") {
+						if (isset($workbook_ale) and $yhdistetty == "") {
 							foreach($otsik_spread as $key => $value) {
 								$worksheet->write($excelrivi, $key, $asrow[$value]);
 							}
@@ -983,12 +980,12 @@ if ($ytunnus!='') {
 						$ashin .= "<tr>";
 						foreach($otsik as $o) {
 
-							if($yhdistetty != "") {
+							if ($yhdistetty != "") {
 								$dada[$o] = $asrow[$o];
 							}
 							else {
 								//	Kaunistetaan ulostusta..
-								if($asrow[$o."_nimi"] != "") {
+								if ($asrow[$o."_nimi"] != "") {
 									$arvo = $asrow[$o]." - ".$asrow[$o."_nimi"];
 								}
 								else {
@@ -1000,7 +997,7 @@ if ($ytunnus!='') {
 						}
 						$ashin .= "</tr>";
 
-						if($yhdistetty != "") {
+						if ($yhdistetty != "") {
 							$yhdistetty_array[] = $dada;
 						}
 					}
@@ -1009,7 +1006,7 @@ if ($ytunnus!='') {
 
 			$ashin .= "</table>";
 
-			if($yhdistetty != "") {
+			if ($yhdistetty != "") {
 				$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("N‰yt‰ asikashinnat")."</a>";
 			}
 		}
@@ -1022,7 +1019,7 @@ if ($ytunnus!='') {
 			// tehd‰‰n yhdistetty alennustaulukko...
 			$yhdistetty  = "<table><caption><font class='message'>".t("Yhdistetty alennustaulukko")."</font></caption>";
 
-			if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
+			if ($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
 				$otsik = array("alennusryhm‰",  "tuoteno", "alennus", "hinta", "alkupvm", "loppupvm");
 				$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "hinta", "alkupvm", "loppupvm");
 			}
@@ -1032,7 +1029,7 @@ if ($ytunnus!='') {
 			}
 
 			// Duusataan otsikot
-			if(isset($workbook_ale)) {
+			if (isset($workbook_ale)) {
 				foreach($otsik_spread as $key => $value) {
 					$worksheet->write($excelrivi, $key, t(ucfirst($value)), $format_bold);
 				}
@@ -1047,7 +1044,7 @@ if ($ytunnus!='') {
 
 			foreach($yhdistetty_array as $key => $value) {
 
-				if(isset($workbook_ale)) {
+				if (isset($workbook_ale)) {
 					foreach($otsik_spread as $key => $xvalue) {
 						$worksheet->write($excelrivi, $key, $value[$xvalue]);
 					}
@@ -1057,7 +1054,7 @@ if ($ytunnus!='') {
 				$yhdistetty .= "<tr>";
 				foreach($otsik as $o) {
 					//	Kaunistetaan ulostusta..
-					if($value[$o."_nimi"] != "") {
+					if ($value[$o."_nimi"] != "") {
 						$arvo = $value[$o]." - ".$value[$o."_nimi"];
 					}
 					else {
@@ -1086,7 +1083,7 @@ if ($ytunnus!='') {
 				<td valign='top' class='back'>$yhdistetty</td>
 			</tr></table><br>";
 
-		if(isset($workbook_ale) and $excelrivi>1) {
+		if (isset($workbook_ale) and $excelrivi>1) {
 			$workbook_ale->close();
 
 			echo "<table>";
@@ -1116,7 +1113,7 @@ if ($ytunnus!='') {
 				$liite = $pdffilenimi;
 				$kutsu = "Alennustaulukko - ".trim($asiakasrow["nimi"]." ".$asiakasrow["nimitark"]);
 
-				if($kukarow["extranet"] != "") {
+				if ($kukarow["extranet"] != "") {
 					require("sahkoposti.inc");
 				}
 				else {
@@ -1146,13 +1143,11 @@ if ($lopetus != '') {
 $formi  = "asiakas";
 $kentta = "ytunnus";
 
-if($kukarow["extranet"] != "") {
+if ($kukarow["extranet"] != "") {
 	require ("footer.inc");
 }
 else {
 	require ("inc/footer.inc");
 }
-
-
 
 ?>

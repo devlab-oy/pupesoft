@@ -404,6 +404,10 @@
 		<option $sel[17] value='17'>16</option>
 		<option $sel[33] value='33'>32</option>
 		<option $sel[151] value='151'>150</option>
+		<option $sel[201] value='201'>200</option>
+		<option $sel[301] value='301'>300</option>
+		<option $sel[401] value='401'>400</option>
+		<option $sel[501] value='501'>500</option>
 		</select>
 		</td><td class='back'><input type = 'submit' value = '".t("Perusta")."'></td>
 		</tr>

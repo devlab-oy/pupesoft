@@ -433,7 +433,7 @@
 				if ($trow['kpl'] > 1000)
 					echo "<td valign='top'>$trow[tilino]</td>";
 				else
-					echo "<td valign='top'><a href='../raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk'>$trow[tilino]</a></td>";
+					echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&lopetus=$PHP_SELF////tee=VSRALVKK_VANHA_erittele//ryhma=$ryhma//vv=$vv//kk=$kk'>$trow[tilino]</a></td>";
 
 				echo "<td valign='top'>$trow[nimi]</td>";
 				echo "<td valign='top' align='right' nowrap>$trow[bruttosumma]</td>";

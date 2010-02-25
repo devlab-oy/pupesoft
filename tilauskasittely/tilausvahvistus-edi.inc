@@ -79,6 +79,7 @@ if (!file_exists($tilvahvfilenimi)) {
 	}
 
 	if (mysql_num_rows($tilvahresult) > 0) {
+
 		$ulos  = "ICHGSTART:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
 		$ulos .= "ICHG_TYPE:POS\n";
 		$ulos .= "RMSGSTART:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
@@ -92,8 +93,8 @@ if (!file_exists($tilvahvfilenimi)) {
 		$ulos .= "RRFFCO_NU:" . $laskurow['asiakkaan_tilausnumero'] . "\n";
 		$ulos .= "RFTXGENTX:" . $laskurow['viesti'] . "\n";
 		$ulos .= "RFTXGENTX:" . $laskurow['comments'] . "\n";
-		$ulos .= "RNADBY_PC:" . sprintf ("%-18.18s", $laskurow['ovttunnus']) . "100 91". "\n";
-		$ulos .= "RNADBY_RF:" . "IT /" . $laskurow['ytunnus'] . "\n";
+		$ulos .= "RNADBY_PC:" . sprintf ("%-18.18s", $laskurow['ovttunnus']) . "100 91"."\n";
+		$ulos .= "RNADBY_RF:" . "IT /".preg_replace("/[^0-9]/", "", $laskurow['ytunnus'])."\n";
 		$ulos .= "RNADBY_NA:" . $laskurow['nimi'] . "\n";
 		$ulos .= "RNADBY_NX:" . $laskurow['nimitark'] . "\n";
 		$ulos .= "RNADBY_SA:" . $laskurow['osoite'] . "\n";
@@ -102,10 +103,10 @@ if (!file_exists($tilvahvfilenimi)) {
 		$ulos .= "RNADBY_CN:" . $laskurow['maa'] . "\n";
 		#$ulos .= "RNADBY_DO:" . $laskurow['tilausvahvistus'] . "\n"; // mimmosen tilausvahvistuksen asiakas haluaa... F = fax, E = edi
 		$ulos .= "RNADBY_DO:E\n"; // mimmosen tilausvahvistuksen asiakas haluaa... aina edi ni ei tule ongelmia
-		$ulos .= "RNADDP_RF:" . "ZZ /" . $laskurow['ytunnus'] . "\n";
+		$ulos .= "RNADDP_RF:" . "ZZ /".preg_replace("/[^0-9]/", "", $laskurow['ytunnus'])."\n";
 		// jos tyhj‰‰ ni ei saa l‰hett‰‰‰.. weird.
 		if (trim($laskurow['toim_ovttunnus']) != '') {
-			$ulos .= "RNADDP_PC:" . sprintf ("%-18.18s", $laskurow['toim_ovttunnus']) . "100 91". "\n";
+			$ulos .= "RNADDP_PC:".sprintf ("%-18.18s", $laskurow['toim_ovttunnus']) . "100 91". "\n";
 		}
 		$ulos .= "RNADDP_NA:" . $laskurow['toim_nimi'] . "\n";
 		$ulos .= "RNADDP_NX:" . $laskurow['toim_nimitark'] . "\n";
@@ -114,7 +115,7 @@ if (!file_exists($tilvahvfilenimi)) {
 		$ulos .= "RNADDP_CI:" . $laskurow['toim_postitp'] . "\n";
 		$ulos .= "RNADDP_CN:" . $laskurow['toim_maa'] . "\n";
 
-		$ulos .= "RNADSE_RF:" . "VA  " . $yhtiorow['maa'] . "-" . $yhtiorow['ytunnus'] . "\n";
+		$ulos .= "RNADSE_RF:" . "VA  ".$yhtiorow['maa'] . "-" . preg_replace("/[^0-9]/", "", $yhtiorow['ytunnus'])."\n";
 		$ulos .= "RNADSE_PC:" . sprintf ("%-18.18s", $yhtiorow['ovttunnus']) . "100 91". "\n";
 		$ulos .= "RNADSE_NA:" . $yhtiorow['nimi'] . "\n";
 		$ulos .= "RNADSE_SA:" . $yhtiorow['osoite'] . "\n";

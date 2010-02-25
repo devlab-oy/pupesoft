@@ -23,7 +23,7 @@
 	$ulos .= sprintf('%17.17s', '');										// 12 OVT-tunnus (ei käytössä)
 	$ulos .= "1";															// 13 Rahayksikön koodi (1 = EUR)
 	$ulos .= sprintf('%88.88s', '');										// 14 Varalla
-	$ulos .= " "															// 15 Nordealla pakollinen Aineiston luonne (0 = maksut) / Sampolla "tyhjää"
+	$ulos .= " ";															// 15 Nordealla pakollinen Aineiston luonne (0 = maksut) / Sampolla "tyhjää"
 	$ulos .= sprintf('%10.10s', '');										// 16 Nordealla Palvelutunnus / Sampolla "tyhjää"
 	$ulos .= sprintf('%66.66s', '');										// 17 Varalla
 

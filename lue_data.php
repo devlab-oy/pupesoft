@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc"); 
+require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Datan sisäänluku")."</font><hr>";
 
@@ -266,7 +266,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 			$tlength[$table_mysql.".".strtoupper($row[0])] = trim($tlengthpit);
 		}
-		
+
 		// Nämä ovat pakollisia dummysarakkeita jotka ohitetaan lopussa automaattisesti!
 		if (in_array($table_mysql, array("yhteyshenkilo", "asiakkaan_avainsanat"))) {
 			$apu_sarakkeet = array("YTUNNUS");
@@ -534,9 +534,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				// jos pakollinen tieto puuttuu kokonaan
 				if (trim($rivi[$j]) == "" and in_array($taulunotsikot[$taulu][$j], $pakolliset)) {
 					$tila = 'ohita';
-				}						
+				}
 			}
-			
+
 			// jos ei ole puuttuva tieto etsitään riviä
 			if ($tila != 'ohita') {
 
@@ -762,7 +762,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 						if (substr($trows[$table_mysql.".".$otsikko],0,7) == "decimal" or substr($trows[$table_mysql.".".$otsikko],0,4) == "real") {
 							//korvataan decimal kenttien pilkut pisteillä...
-							$rivi[$r] = str_replace(",", ".", $rivi[$r]);							
+							$rivi[$r] = str_replace(",", ".", $rivi[$r]);
 						}
 
 						if ((int) $tlength[$table_mysql.".".$otsikko] > 0 and strlen($rivi[$r]) > $tlength[$table_mysql.".".$otsikko] and ($table_mysql != "tuotepaikat" and $otsikko != "OLETUS" and $rivi[$r] != 'XVAIHDA')) {
@@ -944,7 +944,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							if ($otsikko == 'RYHMA' and $rivi[$r] != '') {
 								$chryhma = $rivi[$r];
 							}
-							
+
 							if ($otsikko == 'ASIAKAS' and $rivi[$r] != '') {
 								$chasiakas = $rivi[$r];
 							}
@@ -1070,8 +1070,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						}
 					}
 				}
-				
-				//tarkistetaan asiakasalennus ja asiakashinta keisseissä onko tällanen rivi jo olemassa				
+
+				//tarkistetaan asiakasalennus ja asiakashinta keisseissä onko tällanen rivi jo olemassa
 				if ($hylkaa == 0 and ($chasiakas != '' or $chasiakas_ryhma != '' or $chytunnus != '') and ($chryhma != '' or $chtuoteno != '') and ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta')) {
 					if ($chasiakas_ryhma != '') {
 						$and .= " and asiakas_ryhma = '$chasiakas_ryhma'";
@@ -1091,7 +1091,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 					$and .= " and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm'";
 				}
-				
+
 				if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
 					if (($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') and $and != "") {
 						$query .= " WHERE yhtio = '$kukarow[yhtio]'";
@@ -1113,7 +1113,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 				//	Otetaan talteen query..
 				$lue_data_query = $query;
-								
+
 				$tarq = "	SELECT *
 							FROM $table_mysql";
 				if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') {
@@ -1124,7 +1124,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$tarq .= " WHERE ".$valinta;
 				}
 				$result = mysql_query($tarq) or pupe_error($tarq);
-				
+
 				if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA' and mysql_num_rows($result) != 1) {
 					echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Päivitettävää riviä ei löytynyt")."!</font><br>";
 				}

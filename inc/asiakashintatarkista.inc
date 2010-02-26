@@ -170,15 +170,35 @@ if(!function_exists("asiakashintatarkista")) {
 
 		if (mysql_field_name($result, $i) == "alkupvm") {
 			$chalkupvm = $t[$i];
+
 			if ($chalkupvm == '') {
 				$chalkupvm = '0000-00-00';
+			}
+			elseif ($chalkupvm != '0000-00-00') {
+				$pp = substr($chalkupvm, 8, 2);
+				$kk = substr($chalkupvm, 5, 2);
+				$vv = substr($chalkupvm, 0, 4);
+
+				if (!checkdate($pp, $kk, $vv)) {
+					$virhe[$i] = t("Alkupvm virheellinen!");
+				}
 			}
 		}
 
 		if (mysql_field_name($result, $i) == "loppupvm") {
 			$chloppupvm = $t[$i];
+
 			if ($chloppupvm == '') {
 				$chloppupvm = '0000-00-00';
+			}
+			elseif ($chloppupvm != '0000-00-00') {
+				$pp = substr($chloppupvm, 8, 2);
+				$kk = substr($chloppupvm, 5, 2);
+				$vv = substr($chloppupvm, 0, 4);
+
+				if (!checkdate($pp, $kk, $vv)) {
+					$virhe[$i] = t("Loppupvm virheellinen!");
+				}
 			}
 		}
 

@@ -122,12 +122,12 @@
 		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 		$ulos .= "<option value='100' $sel[100]>".t("Paperilasku, tulostuspalvelu")."</option>";
 		$ulos .= "<option value='010' $sel[010]>".t("Verkkolasku")."</option>";
-		#$ulos .= "<option value='001' $sel[001]>".t("Itella Pupevoice: EDI, sähköinen lasku")."</option>";		
+		#$ulos .= "<option value='001' $sel[001]>".t("Itella Pupevoice: EDI, sähköinen lasku")."</option>";
 		$ulos .= "<option value='020' $sel[020]>".t("Itella Pupevoice: Vienti-Verkkolasku")."</option>";
 		$ulos .= "<option value='111' $sel[111]>".t("Itella EDI: EIH-1.4 sähköinen lasku")."</option>";
 		$ulos .= "<option value='112' $sel[112]>".t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin")."</option>";
 		$ulos .= "<option value='666' $sel[666]>".t("Sähköposti")."</option>";
-		$ulos .= "<option value='667' $sel[667]>".t("Sisäinen, käsitellään manuaalisesti")."</option>";		
+		$ulos .= "<option value='667' $sel[667]>".t("Sisäinen, käsitellään manuaalisesti")."</option>";
 		$ulos .= "<option value='999' $sel[999]>".t("Laskutuskielto, laskutusta ei tehdä")."</option>";
 		$ulos .= "</select></td>";
 
@@ -175,19 +175,24 @@
 
 	if (mysql_field_name($result, $i) == "konserniyhtio") {
 
-		$sela = $selb = '';
-		if ($trow[$i] != '') {
-			$selb = "SELECTED";
+		if($yhtiorow["konserni"] != "") {
+			$sela = $selb = '';
+			if ($trow[$i] != '') {
+				$selb = "SELECTED";
+			}
+			else {
+				$sela = "SELECTED";
+			}
+
+			$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+			$ulos .= "<option value = '' $sela>".t("Ei")."</option>";
+		$ulos .= "<option value = 'o' $selb>".t("Kyllä")."</option>";
+			$ulos .= "</select></td>";
+			$jatko = 0;
 		}
 		else {
-			$sela = "SELECTED";
+			$tyyppi = 0;
 		}
-
-		$ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-		$ulos .= "<option value = '' $sela>".t("Ei")."</option>";
-		$ulos .= "<option value = 'o' $selb>".t("Kyllä")."</option>";
-		$ulos .= "</select></td>";
-		$jatko = 0;
 	}
 
 	if (mysql_field_name($result, $i) == "maksuehto") {
@@ -294,142 +299,34 @@
 	}
 
 
-	if (mysql_field_name($result, $i) == "maa") {
-		$query = "	SELECT distinct koodi, nimi
-					FROM maat
-					WHERE nimi != ''
-					ORDER BY koodi";
-		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-
-		$ulos .= "<option value = '' ></option>";
-
-		while ($vrow=mysql_fetch_array($vresult)) {
-			$sel="";
-			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
-				$sel = "selected";
-			}
-			elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
-				$sel = "selected";
-			}
-			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
-		}
-
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
-	if (mysql_field_name($result, $i) == "kansalaisuus") {
-		$query = "	SELECT distinct koodi, nimi
-					FROM maat
-					WHERE nimi != ''
-					ORDER BY koodi";
-		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-
-		$ulos .= "<option value = '' ></option>";
-
-		while ($vrow=mysql_fetch_array($vresult)) {
-			$sel="";
-			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
-				$sel = "selected";
-			}
-			elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
-				$sel = "selected";
-			}
-			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
-		}
-
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
-	if (mysql_field_name($result, $i) == "kolm_maa") {
-		$query = "	SELECT distinct koodi, nimi
-					FROM maat
-					WHERE nimi != ''
-					ORDER BY koodi";
-		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-
-		$ulos .= "<option value = '' ></option>";
-
-		while ($vrow=mysql_fetch_array($vresult)) {
-			$sel="";
-			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
-				$sel = "selected";
-			}
-			elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
-				$sel = "selected";
-			}
-			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
-		}
-
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
-	if (mysql_field_name($result, $i) == "toim_maa") {
-		$query = "	SELECT distinct koodi, nimi
-					FROM maat
-					WHERE nimi != ''
-					ORDER BY koodi";
-		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-
-		$ulos .= "<option value = '' ></option>";
-
-		while ($vrow=mysql_fetch_array($vresult)) {
-			$sel="";
-			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
-				$sel = "selected";
-			}
-			elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
-				$sel = "selected";
-			}
-			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
-		}
-
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
-	if(	mysql_field_name($result, $i) == "laskutus_nimi" or
-		mysql_field_name($result, $i) == "laskutus_nimitark" or
-		mysql_field_name($result, $i) == "laskutus_osoite" or
-		mysql_field_name($result, $i) == "laskutus_postino" or
-		mysql_field_name($result, $i) == "laskutus_postitp" or
+	if (mysql_field_name($result, $i) == "maa" or
+		mysql_field_name($result, $i) == "kansalaisuus" or
+		mysql_field_name($result, $i) == "kolm_maa" or
+		mysql_field_name($result, $i) == "toim_maa" or
 		mysql_field_name($result, $i) == "laskutus_maa") {
 
-		if($yhtiorow['laskutyyppi'] == 3) {
-			if (mysql_field_name($result, $i) == "laskutus_maa") {
-				$query = "	SELECT distinct koodi, nimi
-							FROM maat
-							WHERE nimi != ''
-							ORDER BY koodi";
-				$vresult = mysql_query($query) or pupe_error($query);
-				$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+		$query = "	SELECT distinct koodi, nimi
+					FROM maat
+					WHERE nimi != ''
+					ORDER BY koodi";
+		$vresult = mysql_query($query) or pupe_error($query);
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-				$ulos .= "<option value = '' ></option>";
+		$ulos .= "<option value = '' ></option>";
 
-				while ($vrow=mysql_fetch_array($vresult)) {
-					$sel="";
-					if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
-						$sel = "selected";
-					}
-					elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["laskutus_maa"])) {
-						$sel = "selected";
-					}
-					$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
-				}
-
-				$ulos .= "</select></td>";
-				$jatko = 0;
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
+				$sel = "selected";
 			}
+			elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
 		}
-		else {
-			$tyyppi = 0;
-		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
 	}
 
 	if (mysql_field_name($result, $i) == "toimitustapa") {
@@ -826,8 +723,8 @@
 			$kukamyyja = '';
 			$query = "	SELECT myyja
 						FROM kuka
-						WHERE yhtio='$kukarow[yhtio]' 
-						and kuka = '$kukarow[kuka]' 
+						WHERE yhtio='$kukarow[yhtio]'
+						and kuka = '$kukarow[kuka]'
 						and myyja > 0";
 			$myyjaresult = mysql_query($query) or pupe_error($query);
 
@@ -1028,7 +925,7 @@
 
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
-		
+
 		$ulos .= "<option value = ''>".t("Yhtiön oletus")."</option>";
 		$ulos .= "<option value = '0' $sel[0]>".t("Varastopaikkajärjestys, tuoteperheet pidetään yhdessä, erikoistuotteet loppuun")."</option>";
 		$ulos .= "<option value = '1' $sel[1]>".t("Varastopaikkajärjestys, tuoteperheet pidetään yhdessä")."</option>";
@@ -1058,7 +955,7 @@
 
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
-		
+
 		$ulos .= "<option value = ''>".t("Yhtiön oletus")."</option>";
 		$ulos .= "<option value = 'ASC'  $sel[ASC]>".t("Nouseva")."</option>";
 		$ulos .= "<option value = 'DESC' $sel[DESC]>".t("Laskeva")."</option>";

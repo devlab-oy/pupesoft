@@ -1125,8 +1125,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				}
 				$result = mysql_query($tarq) or pupe_error($tarq);
 				
-				if (mysql_num_rows($result) != 1) {
-					echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Päivitettävää riviä ei löytynyt")."!</font> $tarq <br>";
+				if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA' and mysql_num_rows($result) != 1) {
+					echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Päivitettävää riviä ei löytynyt")."!</font><br>";
+				}
+				elseif (strtoupper(trim($rivi[$postoiminto])) == 'LISAA' and mysql_num_rows($result) != 0) {
+					echo t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei lisätty, koska se löytyi jo järjestelmästä")."!</font><br>";
 				}
 				else {
 					$tarkrow = mysql_fetch_array($result);

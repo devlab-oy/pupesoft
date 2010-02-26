@@ -36,7 +36,7 @@ if(!function_exists("asiakashintatarkista")) {
 					}
 					elseif ($ytunnus != "") {
 						$t[$i]  = $ytunnus;
-						$virhe[$i] = t("Asiakas löytyi!");
+						if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") === FALSE) $virhe[$i] = t("Asiakas löytyi!");
 					}
 					else {
 						$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");
@@ -69,7 +69,7 @@ if(!function_exists("asiakashintatarkista")) {
 					}
 					elseif ($ytunnus != "") {
 						$t[$i]  = $asiakasid;
-						$virhe[$i] = t("Asiakas löytyi!");
+						if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") === FALSE) $virhe[$i] = t("Asiakas löytyi!");
 					}
 					else {
 						$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");

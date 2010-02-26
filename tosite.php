@@ -24,13 +24,17 @@
 		$tpv += 0;
 		if ($tpv < 1000) $tpv += 2000;
 
-		$val = checkdate($tpk, $tpp, $tpv);
-		if (!$val) {
+		if (isset($gokfrom) and $gokfrom == "palkkatosite") {
+			$gok = 1;
+		}
+
+		if (!checkdate($tpk, $tpp, $tpv)) {
 			echo "<b>".t("Virheellinen tapahtumapvm")."</b><br>";
-			$gok = 1; //  Tositetta ei kirjoiteta kantaan vielä
+			$gok = 1;
 		}
 
 		if ($valkoodi != $yhtiorow["valkoodi"] and $gok == 0) {
+
 			// koitetaan hakea maksupäivän kurssi
 			$query = "	SELECT *
 						FROM valuu_historia
@@ -47,7 +51,7 @@
 			}
 			else {
 				echo "<font class='error'>".t("Ei löydetty sopivaa kurssia!")."</font><br>";
-				$gok = 1; //  Tositetta ei kirjoiteta kantaan vielä
+				$gok = 1;
 			}
 		}
 
@@ -55,7 +59,8 @@
 		// koska, jos tulee virheitä tiedosto katoaa. Kun kaikki on ok, annetaan sille oikea nimi
 		if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 			$retval = tarkasta_liite("userfile", array("PNG", "JPG", "GIF", "PDF"));
-			if($retval === true) {
+
+			if ($retval === true) {
 				$kuva = tallenna_liite("userfile", "lasku", 0, "");
 			}
 			else {
@@ -70,7 +75,7 @@
 
 			$retval = tarkasta_liite("tositefile", array("TXT", "CSV", "XLS"));
 
-			if($retval === true) {
+			if ($retval === true) {
 				list($name, $ext) = split("\.", $_FILES['tositefile']['name']);
 
 				if (strtoupper($ext)=="XLS") {

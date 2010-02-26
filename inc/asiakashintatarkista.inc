@@ -18,7 +18,9 @@ if(!function_exists("asiakashintatarkista")) {
 			if ($chytunnus != '') {
 				$query = "	SELECT ytunnus
 							FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$t[$i]'";
+							WHERE yhtio='$kukarow[yhtio]'
+							and laji != 'P'
+							and ytunnus = '$t[$i]'";
 				$sresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sresult) == 0) {
@@ -49,7 +51,9 @@ if(!function_exists("asiakashintatarkista")) {
 			if ($chastunn != '' and $chastunn != 0) {
 				$query	= "	SELECT *
 							FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]' and tunnus='$chastunn'";
+							WHERE yhtio='$kukarow[yhtio]'
+							and laji != 'P'
+							and tunnus='$chastunn'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) != 1) {
@@ -129,11 +133,10 @@ if(!function_exists("asiakashintatarkista")) {
 			}
 		}
 
-
 		$rajlask = 0;
 		if ($chasiakas_ryhma != '') $rajlask++;
 		if ($chytunnus != '') $rajlask++;
-		if ($chastunn != 0) $rajlask++;
+		if ((int) $chastunn > 0) $rajlask++;
 
 		if ($rajlask > 1 and $chasiakas_ryhma != "" and mysql_field_name($result, $i) == 'asiakas_ryhma') {
 			$virhe[$i] = t("Et voi syöttää sekä asiakasta että asiakkaan ryhmää!");

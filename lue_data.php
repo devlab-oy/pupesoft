@@ -1124,106 +1124,112 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$tarq .= " WHERE ".$valinta;
 				}
 				$result = mysql_query($tarq) or pupe_error($tarq);
-				$tarkrow = mysql_fetch_array($result);
-				$tunnus = $tarkrow["tunnus"];
+				
+				if (mysql_num_rows($result) != 1) {
+					echo t("Virhe rivill‰").": $rivilaskuri <font class='error'>".t("P‰ivitett‰v‰‰ rivi‰ ei lˆytynyt")."!</font> $tarq <br>";
+				}
+				else {
+					$tarkrow = mysql_fetch_array($result);
+					$tunnus = $tarkrow["tunnus"];
 
-				// Tehd‰‰n oikeellisuustsekit
-				for ($i=1; $i < mysql_num_fields($result); $i++) {
+					// Tehd‰‰n oikeellisuustsekit
+					for ($i=1; $i < mysql_num_fields($result); $i++) {
 
-					// Tarkistetaan saako k‰ytt‰j‰ p‰ivitt‰‰ t‰t‰ kentt‰‰
-					$Lindexi = array_search(strtoupper(mysql_field_name($result, $i)), $taulunotsikot[$taulu]);
+						// Tarkistetaan saako k‰ytt‰j‰ p‰ivitt‰‰ t‰t‰ kentt‰‰
+						$Lindexi = array_search(strtoupper(mysql_field_name($result, $i)), $taulunotsikot[$taulu]);
 
-					if (strtoupper(mysql_field_name($result, $i)) == 'TUNNUS') {
-						$tassafailissa = TRUE;
-					}
-					elseif ($Lindexi !== FALSE and array_key_exists($Lindexi, $rivit[$eriviindex])) {
-						$t[$i] = $rivit[$eriviindex][$Lindexi];
-
-						// T‰m‰ rivi on exceliss‰
-						$tassafailissa = TRUE;
-					}
-					else {
-						$t[$i] = $tarkrow[mysql_field_name($result, $i)];
-
-						// T‰m‰ rivi ei oo exceliss‰
-						$tassafailissa = FALSE;
-					}
-
-					$funktio = $table_mysql."tarkista";
-
-					if (!function_exists($funktio)) {
-						@include("inc/$funktio.inc");
-					}
-
-					unset($virhe);
-
-					if (function_exists($funktio)) {
-						$funktio($t, $i, $result, $tunnus, &$virhe, $tarkrow);
-					}
-
-					// Ignoorataan virhe jos se ei koske t‰ss‰ failissa olutta saraketta
-					if ($tassafailissa and $virhe[$i] != "") {
-						switch ($table_mysql) {
-							case "tuote":
-								$virheApu = t("Tuote")." ".$tarkrow["tuoteno"].": ";
-								break;
-							default:
-								$virheApu = "";
+						if (strtoupper(mysql_field_name($result, $i)) == 'TUNNUS') {
+							$tassafailissa = TRUE;
 						}
-						echo t("Virhe rivill‰").": $rivilaskuri <font class='error'>$virheApu".mysql_field_name($result, $i).": ".$virhe[$i]." (".$t[$i].")</font><br>";
-						$errori = 1;
-					}
-				}
+						elseif ($Lindexi !== FALSE and array_key_exists($Lindexi, $rivit[$eriviindex])) {
+							$t[$i] = $rivit[$eriviindex][$Lindexi];
 
-				if ($errori != "") {
-					$hylkaa++;
-				}
+							// T‰m‰ rivi on exceliss‰
+							$tassafailissa = TRUE;
+						}
+						else {
+							$t[$i] = $tarkrow[mysql_field_name($result, $i)];
 
-				//	Palautetaan vanha query..
-				$query = $lue_data_query;
+							// T‰m‰ rivi ei oo exceliss‰
+							$tassafailissa = FALSE;
+						}
 
-				if ($hylkaa == 0) {
+						$funktio = $table_mysql."tarkista";
 
-					// Haetaan rivi niin kuin se oli ennen muutosta
-					$syncquery = "	SELECT *
-									FROM $table_mysql";
+						if (!function_exists($funktio)) {
+							@include("inc/$funktio.inc");
+						}
 
-					if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') {
-						$syncquery .= " WHERE yhtio = '$kukarow[yhtio]'";
-						$syncquery .= $and;
-					}
-					else {
-						$syncquery .= " WHERE ".$valinta;
-					}
-					$syncres = mysql_query($syncquery) or pupe_error($syncquery);
-					$syncrow = mysql_fetch_array($syncres);
+						unset($virhe);
 
-					// tuotepaikkojen oletustyhjennysquery uskalletaan ajaa vasta t‰ss‰
-					if ($tpupque != '') {
-						$tpupres = mysql_query($tpupque) or pupe_error($tpupque);
-					}
+						if (function_exists($funktio)) {
+							$funktio($t, $i, $result, $tunnus, &$virhe, $tarkrow);
+						}
 
-					$tpupque = "";
-
-					// Itse lue_datan p‰ivitysquery
-					$iresult = mysql_query($query) or pupe_error($query);
-
-					// Synkronoidaan
-					if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
-						$tunnus = mysql_insert_id();
-					}
-					else {
-						$tunnus = $syncrow["tunnus"];
+						// Ignoorataan virhe jos se ei koske t‰ss‰ failissa olutta saraketta
+						if ($tassafailissa and $virhe[$i] != "") {
+							switch ($table_mysql) {
+								case "tuote":
+									$virheApu = t("Tuote")." ".$tarkrow["tuoteno"].": ";
+									break;
+								default:
+									$virheApu = "";
+							}
+							echo t("Virhe rivill‰").": $rivilaskuri <font class='error'>$virheApu".mysql_field_name($result, $i).": ".$virhe[$i]." (".$t[$i].")</font><br>";
+							$errori = 1;
+						}
 					}
 
-					synkronoi($kukarow["yhtio"], $table_mysql, $tunnus, $syncrow, "");
-
-					// tehd‰‰n ep‰kunrattijutut
-					if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois") {
-						require("epakurantti.inc");
+					if ($errori != "") {
+						$hylkaa++;
 					}
 
-					$lask++;
+					//	Palautetaan vanha query..
+					$query = $lue_data_query;
+
+					if ($hylkaa == 0) {
+
+						// Haetaan rivi niin kuin se oli ennen muutosta
+						$syncquery = "	SELECT *
+										FROM $table_mysql";
+
+						if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta') {
+							$syncquery .= " WHERE yhtio = '$kukarow[yhtio]'";
+							$syncquery .= $and;
+						}
+						else {
+							$syncquery .= " WHERE ".$valinta;
+						}
+						$syncres = mysql_query($syncquery) or pupe_error($syncquery);
+						$syncrow = mysql_fetch_array($syncres);
+
+						// tuotepaikkojen oletustyhjennysquery uskalletaan ajaa vasta t‰ss‰
+						if ($tpupque != '') {
+							$tpupres = mysql_query($tpupque) or pupe_error($tpupque);
+						}
+
+						$tpupque = "";
+
+						// Itse lue_datan p‰ivitysquery
+						$iresult = mysql_query($query) or pupe_error($query);
+
+						// Synkronoidaan
+						if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
+							$tunnus = mysql_insert_id();
+						}
+						else {
+							$tunnus = $syncrow["tunnus"];
+						}
+
+						synkronoi($kukarow["yhtio"], $table_mysql, $tunnus, $syncrow, "");
+
+						// tehd‰‰n ep‰kunrattijutut
+						if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois") {
+							require("epakurantti.inc");
+						}
+
+						$lask++;
+					}
 				}
 			}
 		}

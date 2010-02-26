@@ -1120,28 +1120,6 @@
 
 					echo "<td valign='top' nowrap>";
 
-					//Tutkitaan voidaanko lasku poistaa
-					$query = "	SELECT tunnus
-								from lasku use index (yhtio_vanhatunnus)
-								where yhtio		= '$kukarow[yhtio]'
-								and tila		= 'K'
-								and vanhatunnus	= '$trow[tunnus]'";
-					$delres2 = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($delres2) == 0 and $trow['h1time'] == '0000-00-00 00:00:00' and $trow['h2time'] == '0000-00-00 00:00:00' and $trow['h3time'] == '0000-00-00 00:00:00' and $trow['h4time'] == '0000-00-00 00:00:00' and $trow['h5time'] == '0000-00-00 00:00:00') {
-						echo "	<form action = 'maksa.php' method='post' onSubmit = 'return confirm(\"".t("Haluatko todella poistaa tämän laskun ja sen kaikki tiliöinnit? Tämä voi olla kirjanpitorikos!")."\");'>
-								<input type='hidden' name = 'tee' value='D'>
-								<input type='hidden' name = 'tunnus' value='$trow[tunnus]'>
-								<input type='hidden' name = 'valuu' value='$valuu'>
-								<input type='hidden' name = 'tapa' value='$tapa'>
-								<input type='hidden' name = 'erapvm' value='$erapvm'>
-								<input type='hidden' name = 'kaikki' value='$kaikki'>
-								<input type='hidden' name = 'nimihaku' value='$nimihaku'>
-								<input type='hidden' name = 'tapa' value='$tapa'>
-								<input type='Submit' value='".t("Poista lasku")."'>
-								</form>";
-					}
-
 					//Kikkaillaan jotta saadda seuraavan laskun tunnus
 					if ($dataseek < mysql_num_rows($result)-1) {
 						$kikkarow = mysql_fetch_array($result);
@@ -1195,6 +1173,32 @@
 					}
 					echo "</form>";
 					echo "</td>";
+					
+					
+					//Tutkitaan voidaanko lasku poistaa
+					$query = "	SELECT tunnus
+								from lasku use index (yhtio_vanhatunnus)
+								where yhtio		= '$kukarow[yhtio]'
+								and tila		= 'K'
+								and vanhatunnus	= '$trow[tunnus]'";
+					$delres2 = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($delres2) == 0 and $trow['h1time'] == '0000-00-00 00:00:00' and $trow['h2time'] == '0000-00-00 00:00:00' and $trow['h3time'] == '0000-00-00 00:00:00' and $trow['h4time'] == '0000-00-00 00:00:00' and $trow['h5time'] == '0000-00-00 00:00:00') {
+						echo "	<td class='back'>
+								<form action = 'maksa.php' method='post' onSubmit = 'return confirm(\"".t("Haluatko todella poistaa tämän laskun ja sen kaikki tiliöinnit? Tämä voi olla kirjanpitorikos!")."\");'>
+								<input type='hidden' name = 'tee' value='D'>
+								<input type='hidden' name = 'tunnus' value='$trow[tunnus]'>
+								<input type='hidden' name = 'valuu' value='$valuu'>
+								<input type='hidden' name = 'tapa' value='$tapa'>
+								<input type='hidden' name = 'erapvm' value='$erapvm'>
+								<input type='hidden' name = 'kaikki' value='$kaikki'>
+								<input type='hidden' name = 'nimihaku' value='$nimihaku'>
+								<input type='hidden' name = 'tapa' value='$tapa'>
+								<input type='Submit' value='".t("Poista lasku")."'>
+								</form>
+								</td>";
+					}
+					
 				}
 				else {
 					// ei ollutkaan varaa!!

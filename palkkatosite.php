@@ -192,7 +192,7 @@
 		unset($_FILES['userfile']['tmp_name']);
 		unset($_FILES['userfile']['error']);
 
-		$gok = 1; // Pakotetaan virhe
+		$gokfrom = "palkkatosite"; // Pakotetaan virhe
 		$tee = 'I';
 
 		require ('tosite.php');

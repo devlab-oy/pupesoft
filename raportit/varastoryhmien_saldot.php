@@ -33,7 +33,7 @@
 	$avainsana_res = mysql_query($query) or die("Virhe haettaessa varastoryhma avainsanoja!\n".mysql_error($query)."\n\n");
 
 	if (mysql_num_rows($avainsana_res) == 0) {
-		echo date("d.m.Y @ G:i:s")." - Varastoryhmia ei ole perustettu. Keskeytetaan paivitys\n";
+		// echo date("d.m.Y @ G:i:s")." - Varastoryhmia ei ole perustettu. Keskeytetaan paivitys\n";
 		exit;
 	}
 

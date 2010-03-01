@@ -17,6 +17,7 @@
 		$tila_result = mysql_query($tila_query) or pupe_error($tila_query);
 
 		if (mysql_num_rows($tila_result) == 1) {
+			$tila_row = mysql_fetch_assoc($tila_result);
 			
 			// lock tables
 			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, rahtikirjat WRITE, tuote WRITE, sarjanumeroseuranta WRITE, avainsana as avainsana_kieli READ";
@@ -34,9 +35,15 @@
 							var            = ''
 							where yhtio='$kukarow[yhtio]' and otunnus='$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
-
+				
+				if($tila_row["tilaustyyppi"] = "A") {
+					$uustila = "A";
+				}
+				else {
+					$uustila = "N";
+				}
 				$query = "	UPDATE lasku set
-							tila    = 'N',
+							tila    = '$uustila',
 							alatila = '',
 							viite 	= ''
 							where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
@@ -177,7 +184,7 @@
 		$tila_query  = "	SELECT * 
 							FROM lasku 
 							WHERE yhtio = '$kukarow[yhtio]' 
-							AND tila in ('L','N')
+							AND tila in ('L','N', 'A')
 							AND tunnus = '$tunnus'";
 		$tila_result = mysql_query($tila_query) or pupe_error($tila_query);
 

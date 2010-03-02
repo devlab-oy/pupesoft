@@ -1,5 +1,10 @@
 <?php
 
+//	Laitetaan loginiinkin aina oikea charset
+if (!headers_sent()) {
+	header("Content-Type: text/html; charset=iso-8859-1");
+}
+
 require ("functions.inc");
 
 if (file_exists(basename($_SERVER["SCRIPT_URI"]))) $go = basename($_SERVER["SCRIPT_URI"]);

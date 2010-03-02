@@ -449,7 +449,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$valinta .= " and TUOTENO='$tuoteno'";
 				}
 				elseif ($table_mysql == 'tullinimike' and strtoupper($taulunotsikot[$taulu][$j]) == "CN") {
-					$rivi[$j] = str_replace(' ','',$rivi[$j]);
+										
+					$taulunrivit[$taulu][$eriviindex][$j] = $rivit[$eriviindex][$j] = $rivi[$j] = str_replace(' ','',$rivi[$j]);			
+															
+					$valinta .= " and cn='".$rivi[$j]."'";
 
 					if (trim($rivi[$j]) == '') {
 						$tila = 'ohita';

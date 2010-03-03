@@ -120,13 +120,13 @@ if (!function_exists("menu")) {
 		global $yhtiorow, $kukarow, $verkkokauppa, $verkkokauppa_tuotemerkit, $verkkokauppa_saldotsk, $verkkokauppa_anon, $verkkokauppa_hakualkuun, $palvelin2;
 
 		
-		#if (isset($osasto) and mb_detect_encoding($osasto, mb_detect_order(), TRUE) == "UTF-8") {
-		#	$osasto = iconv("UTF-8", "latin1//TRANSLIT", $osasto);
-		#}
+		if (isset($osasto) and mb_detect_encoding($osasto, mb_detect_order(), TRUE) == "UTF-8") {
+			$osasto = iconv("UTF-8", "latin1//TRANSLIT", $osasto);
+		}
 
-		#if (isset($try) and mb_detect_encoding($try, mb_detect_order(), TRUE) == "UTF-8") {
-		#	$try = iconv("UTF-8", "latin1//TRANSLIT", $try);
-		#}
+		if (isset($try) and mb_detect_encoding($try, mb_detect_order(), TRUE) == "UTF-8") {
+			$try = iconv("UTF-8", "latin1//TRANSLIT", $try);
+		}
 
 		$val = "";
 
@@ -1088,21 +1088,21 @@ if ($tee == "selaa") {
 
 	$tuoteno = $toim_tuoteno = $nimitys = "";
 	
-	#if (isset($tuotehaku) and mb_detect_encoding($tuotehaku, mb_detect_order(), TRUE) == "UTF-8") {
-	#	$tuotehaku = iconv("UTF-8", "latin1//TRANSLIT", $tuotehaku);
-	#	
-	#	$_GET["tuotehaku"]		= $tuotehaku;
-	#	$_POST["tuotehaku"]		= $tuotehaku;
-	#	$_REQUEST["tuotehaku"]	= $tuotehaku;
-	#}
+	if (isset($tuotehaku) and mb_detect_encoding($tuotehaku, mb_detect_order(), TRUE) == "UTF-8") {
+		$tuotehaku = iconv("UTF-8", "latin1//TRANSLIT", $tuotehaku);
 		
-	#if (isset($tuotemerkki) and mb_detect_encoding($tuotemerkki, mb_detect_order(), TRUE) == "UTF-8") {
-	#	$tuotemerkki = iconv("UTF-8", "latin1//TRANSLIT", $tuotemerkki);
-	#	
-	#	$_GET["tuotemerkki"]		= $tuotemerkki;
-	#	$_POST["tuotemerkki"]		= $tuotemerkki;
-	#	$_REQUEST["tuotemerkki"]	= $tuotemerkki;
-	#}
+		$_GET["tuotehaku"]		= $tuotehaku;
+		$_POST["tuotehaku"]		= $tuotehaku;
+		$_REQUEST["tuotehaku"]	= $tuotehaku;
+	}
+		
+	if (isset($tuotemerkki) and mb_detect_encoding($tuotemerkki, mb_detect_order(), TRUE) == "UTF-8") {
+		$tuotemerkki = iconv("UTF-8", "latin1//TRANSLIT", $tuotemerkki);
+		
+		$_GET["tuotemerkki"]		= $tuotemerkki;
+		$_POST["tuotemerkki"]		= $tuotemerkki;
+		$_REQUEST["tuotemerkki"]	= $tuotemerkki;
+	}
 	
 	if ($hakutapa != "" and $tuotehaku == "") {
 		die ("<font class='error'>".t("Anna jokin hakukriteeri")."</font>");

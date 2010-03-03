@@ -6708,9 +6708,9 @@ if (!function_exists("livesearch_tuotehaku")) {
 		$submit = $_REQUEST["livesearch_submit"];
 		$haku = trim($_REQUEST["livesearch_haku"]);
 		
-		#if (mb_detect_encoding($haku, mb_detect_order(), TRUE) == "UTF-8") {
-		#	$haku = iconv("UTF-8", "latin1//TRANSLIT", $haku);
-		#}
+		if (mb_detect_encoding($haku, mb_detect_order(), TRUE) == "UTF-8") {
+			$haku = iconv("UTF-8", "latin1//TRANSLIT", $haku);
+		}
 	
 		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
 

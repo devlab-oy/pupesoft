@@ -1,5 +1,5 @@
 <?php
-	
+
 require("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Tullinimikkeet")."</font><hr>";
@@ -35,7 +35,7 @@ if ($tee == "muuta") {
 	$ok = 0;
 	$uusitullinimike1 = trim($uusitullinimike1);
 	$uusitullinimike2 = trim($uusitullinimike2);
-	
+
 	// katotaan, ett‰ tullinimike1 lˆytyy
 	$query = "SELECT cn FROM tullinimike WHERE cn = '$uusitullinimike1' and kieli = '$yhtiorow[kieli]'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -51,18 +51,18 @@ if ($tee == "muuta") {
 		echo "<font class='error'>Tullinimike 2 tulee olla 2 merkki‰ pitk‰!</font><br>";
 	}
 
-	// t‰‰ on aika fiinisliippausta 
+	// t‰‰ on aika fiinisliippausta
 	if ($ok == 1) echo "<br>";
-	
+
 	// jos kaikki meni ok, nii p‰ivitet‰‰n
 	if ($ok == 0) {
 
 		if ($tullinimike2 != "") $lisa = " and tullinimike2='$tullinimike2'";
 		else $lisa = "";
-		
+
 		$query = "update tuote set tullinimike1='$uusitullinimike1', tullinimike2='$uusitullinimike2' where yhtio='$kukarow[yhtio]' and tullinimike1='$tullinimike1' $lisa";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		echo sprintf("<font class='message'>P‰ivitettiin %s tuotetta.</font><br><br>", mysql_affected_rows());
 
 		$tullinimike1 = $uusitullinimike1;
@@ -73,16 +73,29 @@ if ($tee == "muuta") {
 }
 
 if ($tee == "synkronoi") {
-	
-	$file = fopen("http://www.devlab.fi/softa/referenssitullinimikkeet.sql","r") or die (t("Tiedoston avaus ep‰onnistui")."!");
-	
+
+	$ok = FALSE;
+
+	if ($file = fopen("http://www.devlab.fi/softa/referenssitullinimikkeet.sql","r")) {
+		$ok = TRUE;
+	}
+	elseif ($file = fopen("http://10.1.1.1/referenssitullinimikkeet.sql","r")) {
+		$ok = TRUE;
+	}
+
+	if (!$ok) {
+		echo t("Tiedoston avaus ep‰onnistui")."!";
+		require ("inc/footer.inc");
+		exit;
+	}
+
 	echo "<br><br>";
 	echo t("Poistetaan vanhat tullinimikkeet")."...<br>";
-	
+
 	// Poistetaan nykyiset nimikkeet....
 	$query  = "	DELETE FROM tullinimike";
 	$result = mysql_query($query) or pupe_error($query);
-	
+
 	// P‰ivitet‰‰n tuotteet 2009 - 2010
 	$muunnosavaimet = array(
 	"03026590"=>"03026560",
@@ -465,43 +478,43 @@ if ($tee == "synkronoi") {
 	"84832090"=>"84832000",
 	"85158091"=>"85158090",
 	"85158099"=>"85158090");
-	
+
 	echo t("P‰ivitet‰‰n muuttuneet tullinimikkeet tuotteille")."...<br>";
-	
+
 	foreach ($muunnosavaimet as $vanha => $uusi) {
-		$query  = "	UPDATE tuote set 
-					tullinimike1 = '$uusi' 
+		$query  = "	UPDATE tuote set
+					tullinimike1 = '$uusi'
 					where yhtio			= '$kukarow[yhtio]'
-					and tullinimike1	= '$vanha'"; 
-		$result = mysql_query($query) or pupe_error($query);		
+					and tullinimike1	= '$vanha'";
+		$result = mysql_query($query) or pupe_error($query);
 	}
-	
+
 	// Eka rivi roskikseen
 	$rivi = fgets($file);
-	
+
 	echo t("Lis‰t‰‰n uudet tullinimikkeet tietokantaan")."...<br>";
-	
+
 	while ($rivi = fgets($file)) {
 		list($cnkey, $cn, $dashes, $dm, $su, $su_vientiilmo, $kieli) = explode("\t", trim($rivi));
-				
+
 		$dm = preg_replace("/([^A-Z0-9ˆ‰Â≈ƒ÷ \.,\-_\:\/\!\|\?\+\(\)%#]|È)/i", "", $dm);
-			
+
 		$query  = "	INSERT INTO tullinimike SET
 					yhtio			= '$kukarow[yhtio]',
 					cnkey			= '$cnkey',
-					cn				= '$cn', 
-					dashes			= '$dashes', 
-					dm				= '$dm', 
-					su				= '$su', 
-					su_vientiilmo	= '$su_vientiilmo', 
-					kieli			= '$kieli', 
-					laatija			= '$kukarow[kuka]', 
-					luontiaika		= now()";									
+					cn				= '$cn',
+					dashes			= '$dashes',
+					dm				= '$dm',
+					su				= '$su',
+					su_vientiilmo	= '$su_vientiilmo',
+					kieli			= '$kieli',
+					laatija			= '$kukarow[kuka]',
+					luontiaika		= now()";
 		$result = mysql_query($query) or pupe_error($query);
 	}
-	
+
 	fclose($file);
-	
+
 	echo t("P‰ivitys valmis")."...<br><br><hr>";
 }
 
@@ -530,14 +543,14 @@ echo "</form>";
 
 
 if ($tullinimike1 != "") {
-	
+
 	if ($tullinimike2 != "") $lisa = " and tullinimike2='$tullinimike2'";
 	else $lisa = "";
-	
-	$query = "	SELECT * 
-				from tuote use index (yhtio_tullinimike) 
-				where yhtio = '$kukarow[yhtio]' 
-				and tullinimike1 = '$tullinimike1' $lisa 
+
+	$query = "	SELECT *
+				from tuote use index (yhtio_tullinimike)
+				where yhtio = '$kukarow[yhtio]'
+				and tullinimike1 = '$tullinimike1' $lisa
 				order by tuoteno";
 	$resul = mysql_query($query) or pupe_error($query);
 
@@ -562,7 +575,7 @@ if ($tullinimike1 != "") {
 		echo "<td><input type='text' name='uusitullinimike2' value='$uusitullinimike2'></td>";
 		echo "<td class='back'><input type='submit' value='".t("P‰ivit‰")."'></td>";
 		echo "</tr></table>";
-		echo "</form><br>";		
+		echo "</form><br>";
 
 		echo "<table>";
 		echo "<tr>";
@@ -576,20 +589,20 @@ if ($tullinimike1 != "") {
 		echo "</tr>";
 
 		while ($rivi = mysql_fetch_array($resul)) {
-			
+
 			// tehd‰‰n avainsana query
 			$oresult = t_avainsana("OSASTO", "", "and avainsana.selite ='$rivi[osasto]'");
 			$os = mysql_fetch_array($oresult);
-			
+
 			// tehd‰‰n avainsana query
 			$tresult = t_avainsana("TRY", "", "and avainsana.selite ='$rivi[try]'");
 			$try = mysql_fetch_array($tresult);
-			
+
 			echo "<tr>";
 			echo "<td><a href='yllapito.php?toim=tuote&tunnus=$rivi[tunnus]&lopetus=tullinimikkeet.php'>$rivi[tuoteno]</a></td>";
 			echo "<td>$rivi[osasto] $os[selitetark]</td>";
 			echo "<td>$rivi[try] $try[selitetark]</td>";
-			echo "<td>$rivi[tuotemerkki]</td>";			
+			echo "<td>$rivi[tuotemerkki]</td>";
 			echo "<td>".t_tuotteen_avainsanat($rivi, 'nimitys')."</td>";
 			echo "<td>$rivi[tullinimike1]</td>";
 			echo "<td>$rivi[tullinimike2]</td>";

@@ -280,7 +280,8 @@
 				$order  = "";
 				$select = "";
 				$gluku  = 0;
-
+				$varastojoin = "";
+				
 				// näitä käytetään queryssä
 				$sel_osasto = "";
 				$sel_tuoteryhma = "";
@@ -545,6 +546,25 @@
 						$select .= "if(lasku.laskunro>0,concat('".t("LASKU").":',lasku.laskunro),concat('".t("TILAUS").":',lasku.tunnus)) laskunumero, ";
 						$order  .= "laskunumero,";
 						$gluku++;
+						
+						if ($rajaus[$i] != "") {
+							$lisa .= " and lasku.laskunumero = '$rajaus[$i]' ";
+						}
+					}
+					
+					if ($mukaan == "varastoittain") {
+						if ($group!="") $group .= ",varastopaikat.nimitys";
+						else $group  .= "varastopaikat.nimitys";
+						$select .= "varastopaikat.nimitys Varasto, ";
+						$gluku++;
+						
+						if ($rajaus[$i] != "") {
+							$lisa .= " and varastopaikat.nimitys = '$rajaus[$i]' ";
+						}
+
+						$varastojoin = "LEFT JOIN varastopaikat ON varastopaikat.yhtio = tilausrivi.yhtio
+										and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+										and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))";
 					}
 				}
 
@@ -924,9 +944,10 @@
 
 				$query .= $tilauslisa3;
 				$query .= "	FROM lasku use index (yhtio_tila_tapvm)
+							JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
 							JOIN tilausrivi use index ($index) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.$ouusio=lasku.tunnus and tilausrivi.tyyppi=$tyyppi
 							$trlisatiedot
-							JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
+							$varastojoin
 							LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							LEFT JOIN asiakas use index (PRIMARY) ON asiakas.yhtio=lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
 							LEFT JOIN toimitustapa ON lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite
@@ -1167,8 +1188,8 @@
 								if (mysql_field_name($result, $i) == "tuotemyyja" or mysql_field_name($result, $i) == "asiakasmyyja") {
 									$query = "	SELECT nimi
 												FROM kuka
-												WHERE yhtio in ($yhtio) 
-												and myyja = '$row[$i]' 
+												WHERE yhtio in ($yhtio)
+												and myyja = '$row[$i]'
 												AND myyja > 0
 												limit 1";
 									$osre = mysql_query($query) or pupe_error($query);
@@ -1199,8 +1220,8 @@
 								if (mysql_field_name($result, $i) == "tuoteostaja") {
 									$query = "	SELECT nimi
 												FROM kuka
-												WHERE yhtio in ($yhtio) 
-												and myyja = '$row[$i]' 
+												WHERE yhtio in ($yhtio)
+												and myyja = '$row[$i]'
 												AND myyja > 0
 												limit 1";
 									$osre = mysql_query($query) or pupe_error($query);
@@ -1924,6 +1945,7 @@
 			if ($ruksit[160] != '')			$ruk160chk 				= "CHECKED";
 			if ($ruksit[170] != '')			$ruk170chk 				= "CHECKED";
 			if ($ruksit[180] != '')			$ruk180chk 				= "CHECKED";
+			if ($ruksit[190] != '')			$ruk190chk 				= "CHECKED";
 			if ($nimitykset != '')   		$nimchk   				= "CHECKED";
 			if ($kateprossat != '')  		$katchk   				= "CHECKED";
 			if ($nettokateprossat != '')	$nettokatchk			= "CHECKED";
@@ -1943,6 +1965,7 @@
 			if ($piilotanollarivit != '')	$einollachk 			= "CHECKED";
 			if ($naytaennakko != '')		$naytaennakkochk 		= "CHECKED";
 			if ($status != '')				${'status_'.$status.'_sel'} = 'SELECTED';
+			
 
 			echo "<table>
 				<tr>
@@ -2096,6 +2119,12 @@
 				<td><input type='text' name='jarjestys[180]' size='2' value='$jarjestys[180]'></td>
 				<td><input type='checkbox' name='ruksit[180]' value='laskuittain' $ruk180chk></td>
 				<td><input type='text' name='rajaus[180]' value='$rajaus[180]'></td>
+				</tr>
+				<tr>
+				<th>".t("Listaa varastoittain")."</th>
+				<td><input type='text' name='jarjestys[190]' size='2' value='$jarjestys[190]'></td>
+				<td><input type='checkbox' name='ruksit[190]' value='varastoittain' $ruk190chk></td>
+				<td><input type='text' name='rajaus[190]' value='$rajaus[190]'></td>
 				</tr>
 				<tr>
 				<td class='back'><br></td>

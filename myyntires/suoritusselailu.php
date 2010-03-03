@@ -14,9 +14,21 @@
 				msg = '".t("Haluatko todella poistaa suorituksen? Käsinsyötetyn suorituksen summa poistetaan kirjanpidosta").".';
 				return confirm(msg);
 			}
+			function verify3() {
+				msg = 'Haluatko todella poistaa kaikki suoritukset';
+				return confirm(msg);
+			}
 			</script>";
 
 	if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or ($kukarow["yhtio"] == "atarv" and $tila == "siirrasuoritus1702tilille")) {
+
+		if ($tila == "siirrasuoritus1702tilille" and isset($suoritustunnukset_kaikki) and $suoritustunnukset_kaikki != "") {
+			$suoritustunnukset = $suoritustunnukset_kaikki;
+		}
+
+		if ($suoritustunnukset == "") {
+			$suoritustunnukset = 0;
+		}
 
 		if ($tila == 'poistasuoritus') {
 			$suorilisa = " and viite = '' ";
@@ -24,79 +36,81 @@
 		else {
 			$suorilisa = " ";
 		}
-		
+
 		// Haetaan itse suoritus
 		$query = "	SELECT *
 					FROM suoritus
 					WHERE yhtio	= '$kukarow[yhtio]'
-					AND tunnus	= '$suoritustunnukset'
+					AND tunnus in ($suoritustunnukset)
 					and kohdpvm	= '0000-00-00'
 					$suorilisa";
 		$suoritus_res = mysql_query($query) or pupe_error($query);
-		$suoritus_row = mysql_fetch_assoc($suoritus_res);
+				
+		while ($suoritus_row = mysql_fetch_assoc($suoritus_res)) {
 
-		// Haetaan suorituksen pankkitili
-		$query = "	SELECT oletus_rahatili
-					FROM yriti
-					WHERE yhtio 	= '$kukarow[yhtio]'
-					AND kaytossa   != 'E'
-					and tilino		= '$suoritus_row[tilino]'";
-		$yriti_res = mysql_query($query) or pupe_error($query);
-		$yriti_row = mysql_fetch_assoc($yriti_res);
+			// Haetaan suorituksen pankkitili
+			$query = "	SELECT oletus_rahatili
+						FROM yriti
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						AND kaytossa   != 'E'
+						and tilino		= '$suoritus_row[tilino]'";
+			$yriti_res = mysql_query($query) or pupe_error($query);
+			$yriti_row = mysql_fetch_assoc($yriti_res);
 
-		// Haetaan suorituksen saamiset-tiliöinti
-		$query = "	SELECT *
-					FROM tiliointi
-					WHERE yhtio 	= '$kukarow[yhtio]'
-					AND tunnus 		= '$suoritus_row[ltunnus]'
-					AND korjattu 	= ''";
-		$tiliointi1_res = mysql_query($query) or pupe_error($query);
-		$tiliointi1_row = mysql_fetch_assoc($tiliointi1_res);
+			// Haetaan suorituksen saamiset-tiliöinti
+			$query = "	SELECT *
+						FROM tiliointi
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						AND tunnus 		= '$suoritus_row[ltunnus]'
+						AND korjattu 	= ''";
+			$tiliointi1_res = mysql_query($query) or pupe_error($query);
+			$tiliointi1_row = mysql_fetch_assoc($tiliointi1_res);
 
-		// Haetaan suorituksen pankkitili-tiliöinti
-		$query = "	SELECT tilino
-					FROM tiliointi
-					WHERE yhtio 	= '$kukarow[yhtio]'
-					and ltunnus 	= '$tiliointi1_row[ltunnus]'
-					and tilino 		= '$yriti_row[oletus_rahatili]'
-					and summa 		=  $tiliointi1_row[summa] * -1
-					and korjattu 	= ''
-					LIMIT 1";
-		$tiliointi2_res = mysql_query($query) or pupe_error($query);
-		$tiliointi2_row = mysql_fetch_assoc($tiliointi2_res);
+			// Haetaan suorituksen pankkitili-tiliöinti
+			$query = "	SELECT tilino
+						FROM tiliointi
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						and ltunnus 	= '$tiliointi1_row[ltunnus]'
+						and tilino 		= '$yriti_row[oletus_rahatili]'
+						and summa 		=  $tiliointi1_row[summa] * -1
+						and korjattu 	= ''
+						LIMIT 1";
+			$tiliointi2_res = mysql_query($query) or pupe_error($query);
+			$tiliointi2_row = mysql_fetch_assoc($tiliointi2_res);
 
-		// Jos kaikki löytyy, niin ok. Else majorkäk
-		if (mysql_num_rows($suoritus_res) == 1 and mysql_num_rows($yriti_res) == 1 and mysql_num_rows($tiliointi1_res) == 1 and mysql_num_rows($tiliointi2_res) == 1 and $tiliointi2_row["tilino"] != "" and (int) $tiliointi1_row["ltunnus"] > 0 and $yhtiorow["selvittelytili"] != "") {
+			// Jos kaikki löytyy, niin ok. Else majorkäk
+			if (mysql_num_rows($yriti_res) == 1 and mysql_num_rows($tiliointi1_res) == 1 and mysql_num_rows($tiliointi2_res) == 1 and $tiliointi2_row["tilino"] != "" and (int) $tiliointi1_row["ltunnus"] > 0 and $yhtiorow["selvittelytili"] != "") {
 
-			if ($kukarow["yhtio"] == "atarv" and $tila == 'siirrasuoritus1702tilille') {
-				$stili  = "1702";
-				$tapvm  = $tiliointi1_row["tapvm"];
-				$selite = 'Suoritus siirretty tilille 1702';
-			}			
-			elseif ($tila == 'siirrasuoritus') {
-				$stili  = $yhtiorow["selvittelytili"];
-				$tapvm  = $tiliointi1_row["tapvm"];
-				$selite = t('Suoritus siirretty selvittelytilille');
+				if ($kukarow["yhtio"] == "atarv" and $tila == 'siirrasuoritus1702tilille') {
+					$stili  = "1702";
+					$tapvm  = $tiliointi1_row["tapvm"];
+					$selite = 'Suoritus siirretty tilille 1702';
+				}
+				elseif ($tila == 'siirrasuoritus') {
+					$stili  = $yhtiorow["selvittelytili"];
+					$tapvm  = $tiliointi1_row["tapvm"];
+					$selite = t('Suoritus siirretty selvittelytilille');
+				}
+				else {
+					$stili  = $tiliointi2_row["tilino"];
+					$tapvm  = date("Y-m-d");
+					$selite = t('Suoritus poistettu');
+				}
+
+				$query = "INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu)
+							values ('$kukarow[yhtio]', '$tiliointi1_row[ltunnus]', '$tapvm', $tiliointi1_row[summa], '$stili', '$selite', 0, '$kukarow[kuka]', now())";
+				$result = mysql_query($query) or pupe_error($query);
+
+				$query = "INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu)
+							values ('$kukarow[yhtio]', '$tiliointi1_row[ltunnus]', '$tapvm', $tiliointi1_row[summa] * -1, '$tiliointi1_row[tilino]', '$selite', 1, '$kukarow[kuka]', now())";
+				$result = mysql_query($query) or pupe_error($query);
+
+				$query = "UPDATE suoritus set kohdpvm = '$tapvm', summa=0 where tunnus='$suoritus_row[tunnus]'";
+				$result = mysql_query($query) or pupe_error($query);
+
 			}
-			else {
-				$stili  = $tiliointi2_row["tilino"];
-				$tapvm  = date("Y-m-d");
-				$selite = t('Suoritus poistettu');
-			}
-
-			$query = "INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu)
-						values ('$kukarow[yhtio]', '$tiliointi1_row[ltunnus]', '$tapvm', $tiliointi1_row[summa], '$stili', '$selite', 0, '$kukarow[kuka]', now())";
-			$result = mysql_query($query) or pupe_error($query);
-
-			$query = "INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu)
-						values ('$kukarow[yhtio]', '$tiliointi1_row[ltunnus]', '$tapvm', $tiliointi1_row[summa] * -1, '$tiliointi1_row[tilino]', '$selite', 1, '$kukarow[kuka]', now())";
-			$result = mysql_query($query) or pupe_error($query);
-
-			$query = "UPDATE suoritus set kohdpvm = '$tapvm', summa=0 where tunnus='$suoritus_row[tunnus]'";
-			$result = mysql_query($query) or pupe_error($query);
-
 		}
-
+		
 		$tila = '';
 	}
 
@@ -511,6 +525,8 @@
 		// scripti balloonien tekemiseen
 		js_popup();
 
+		$suoritustunnukset_kaikki = array();
+
 	    while ($maksurow = mysql_fetch_array($result)) {
 
 			echo "<tr class='aktiivi'>";
@@ -556,11 +572,14 @@
 			if ($kukarow['taso'] == 2 or $kukarow['taso'] == 3) {
 				// tehdään nappi suorituksen poistamiseen
 				echo "<td valign='top' class='back'>";
-				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<form method='post' action='$PHP_SELF?$ulisa'>";
 
 
 				if (trim($maksurow["viite"]) != "") {
 					if ($kukarow["yhtio"] == "atarv") {
+						// ARWI special
+						$suoritustunnukset_kaikki[] = $maksurow["tunnus"];
+
 						echo "<input type='hidden' name='tila' value='siirrasuoritus1702tilille'>";
 						echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
 						echo "<input type='submit' value='Siirrä 1702-tilille'>";
@@ -580,7 +599,7 @@
 				echo "</form>";
 				echo "</td>";
 			}
-			
+
 			echo "</tr>";
 
 			$row++;
@@ -588,6 +607,14 @@
 
 		echo "</table>";
 
+		if (($kukarow['taso'] == 2 or $kukarow['taso'] == 3) and $kukarow["yhtio"] == "atarv" and count($suoritustunnukset_kaikki) > 0) {
+			// ARWI special
+			echo "<br><br><form method='post' action='$PHP_SELF?$ulisa'>";
+			echo "<input type='hidden' name='tila' value='siirrasuoritus1702tilille'>";
+			echo "<input type='hidden' name='suoritustunnukset_kaikki' value='".implode(",", $suoritustunnukset_kaikki)."'>";
+			echo "<input type='submit' value='Siirrä kaikki suoritukset 1702-tilille' onClick='return verify3();'>";
+			echo "</form>";
+		}
 	}
 
 	require ("inc/footer.inc");

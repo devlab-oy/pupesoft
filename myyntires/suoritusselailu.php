@@ -5,6 +5,101 @@
 
 	$lisa = "";
 
+	echo "	<script language=javascript>
+			function verify1() {
+				msg = '".t("Haluatko todella poistaa suorituksen? Suorituksen summa siirretään yhtiön selvittelytilille").".';
+				return confirm(msg);
+			}
+			function verify2() {
+				msg = '".t("Haluatko todella poistaa suorituksen? Käsinsyötetyn suorituksen summa poistetaan kirjanpidosta").".';
+				return confirm(msg);
+			}
+			</script>";
+
+	if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or ($kukarow["yhtio"] == "atarv" and $tila == "siirrasuoritus1702tilille")) {
+
+		if ($tila == 'poistasuoritus') {
+			$suorilisa = " and viite = '' ";
+		}
+		else {
+			$suorilisa = " ";
+		}
+		
+		// Haetaan itse suoritus
+		$query = "	SELECT *
+					FROM suoritus
+					WHERE yhtio	= '$kukarow[yhtio]'
+					AND tunnus	= '$suoritustunnukset'
+					and kohdpvm	= '0000-00-00'
+					$suorilisa";
+		$suoritus_res = mysql_query($query) or pupe_error($query);
+		$suoritus_row = mysql_fetch_assoc($suoritus_res);
+
+		// Haetaan suorituksen pankkitili
+		$query = "	SELECT oletus_rahatili
+					FROM yriti
+					WHERE yhtio 	= '$kukarow[yhtio]'
+					AND kaytossa   != 'E'
+					and tilino		= '$suoritus_row[tilino]'";
+		$yriti_res = mysql_query($query) or pupe_error($query);
+		$yriti_row = mysql_fetch_assoc($yriti_res);
+
+		// Haetaan suorituksen saamiset-tiliöinti
+		$query = "	SELECT *
+					FROM tiliointi
+					WHERE yhtio 	= '$kukarow[yhtio]'
+					AND tunnus 		= '$suoritus_row[ltunnus]'
+					AND korjattu 	= ''";
+		$tiliointi1_res = mysql_query($query) or pupe_error($query);
+		$tiliointi1_row = mysql_fetch_assoc($tiliointi1_res);
+
+		// Haetaan suorituksen pankkitili-tiliöinti
+		$query = "	SELECT tilino
+					FROM tiliointi
+					WHERE yhtio 	= '$kukarow[yhtio]'
+					and ltunnus 	= '$tiliointi1_row[ltunnus]'
+					and tilino 		= '$yriti_row[oletus_rahatili]'
+					and summa 		=  $tiliointi1_row[summa] * -1
+					and korjattu 	= ''
+					LIMIT 1";
+		$tiliointi2_res = mysql_query($query) or pupe_error($query);
+		$tiliointi2_row = mysql_fetch_assoc($tiliointi2_res);
+
+		// Jos kaikki löytyy, niin ok. Else majorkäk
+		if (mysql_num_rows($suoritus_res) == 1 and mysql_num_rows($yriti_res) == 1 and mysql_num_rows($tiliointi1_res) == 1 and mysql_num_rows($tiliointi2_res) == 1 and $tiliointi2_row["tilino"] != "" and (int) $tiliointi1_row["ltunnus"] > 0 and $yhtiorow["selvittelytili"] != "") {
+
+			if ($kukarow["yhtio"] == "atarv" and $tila == 'siirrasuoritus1702tilille') {
+				$stili  = "1702";
+				$tapvm  = $tiliointi1_row["tapvm"];
+				$selite = 'Suoritus siirretty tilille 1702';
+			}			
+			elseif ($tila == 'siirrasuoritus') {
+				$stili  = $yhtiorow["selvittelytili"];
+				$tapvm  = $tiliointi1_row["tapvm"];
+				$selite = t('Suoritus siirretty selvittelytilille');
+			}
+			else {
+				$stili  = $tiliointi2_row["tilino"];
+				$tapvm  = date("Y-m-d");
+				$selite = t('Suoritus poistettu');
+			}
+
+			$query = "INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu)
+						values ('$kukarow[yhtio]', '$tiliointi1_row[ltunnus]', '$tapvm', $tiliointi1_row[summa], '$stili', '$selite', 0, '$kukarow[kuka]', now())";
+			$result = mysql_query($query) or pupe_error($query);
+
+			$query = "INSERT INTO tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu)
+						values ('$kukarow[yhtio]', '$tiliointi1_row[ltunnus]', '$tapvm', $tiliointi1_row[summa] * -1, '$tiliointi1_row[tilino]', '$selite', 1, '$kukarow[kuka]', now())";
+			$result = mysql_query($query) or pupe_error($query);
+
+			$query = "UPDATE suoritus set kohdpvm = '$tapvm', summa=0 where tunnus='$suoritus_row[tunnus]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+		}
+
+		$tila = '';
+	}
+
 	if ($tila == 'suoritus_asiakaskohdistus_kaikki') {
 		//kohdistetaan tästä kaikki helpot
 		require ("suoritus_asiakaskohdistus_kaikki.php");
@@ -141,7 +236,7 @@
 		echo "<th>".t("maksupvm")."</th>";
 		echo "<th>".t("kirjpvm")."</th>";
 		echo "</tr>";
-		
+
 		if (mysql_num_rows($result) > 0) {
 			$suoritus = mysql_fetch_array ($result);
 
@@ -162,12 +257,12 @@
 			echo "<td valign='top'>".tv1dateconv($suoritus["maksupvm"])."</td>";
 			echo "<td valign='top'>".tv1dateconv($suoritus["kirjpvm"])."</td>";
 			echo "</tr>";
-			
+
 			echo "<tr>";
 			echo "<th>".t("viite")."</th>";
 			echo "<th colspan='4'>".t("viesti")."</th>";
 			echo "</tr>";
-			
+
 			echo "<tr>";
 			echo "<td valign='top'>$suoritus[viite]</td>";
 			echo "<td valign='top' colspan='4'>$suoritus[viesti]</td>";
@@ -368,26 +463,24 @@
 			$lisa .= " and suoritus.valkoodi = '$valuutta' ";
 		}
 
-		$maxrows = 500;
-		
-		$query = "	SELECT suoritus.nimi_maksaja, suoritus.kirjpvm, suoritus.summa, suoritus.valkoodi, 
+		$query = "	SELECT suoritus.nimi_maksaja, suoritus.kirjpvm, suoritus.summa, suoritus.valkoodi,
 					suoritus.tilino, suoritus.viite, suoritus.viesti, suoritus.tunnus, suoritus.asiakas_tunnus,
 					asiakas.ytunnus,
-					asiakas.nimi, 
-					asiakas.nimitark,					
+					asiakas.nimi,
+					asiakas.nimitark,
 					asiakas.osoite,
 					asiakas.postitp,
-					asiakas.toim_nimi, 
+					asiakas.toim_nimi,
 					asiakas.toim_nimitark,
 					asiakas.toim_osoite,
-					asiakas.toim_postitp,	
+					asiakas.toim_postitp,
 					tiliointi.tilino ttilino,
-					tiliointi.ltunnus tltunnus	
+					tiliointi.ltunnus tltunnus
 					FROM suoritus
 					LEFT JOIN asiakas ON (asiakas.yhtio = suoritus.yhtio AND asiakas.tunnus = suoritus.asiakas_tunnus)
 					LEFT JOIN tiliointi ON (tiliointi.yhtio = suoritus.yhtio and tiliointi.tunnus = suoritus.ltunnus)
-					WHERE suoritus.yhtio = '$kukarow[yhtio]' 
-					AND suoritus.kohdpvm = '0000-00-00'  
+					WHERE suoritus.yhtio = '$kukarow[yhtio]'
+					AND suoritus.kohdpvm = '0000-00-00'
 					$lisa
 				 	ORDER BY $jarjestys";
 		$result = mysql_query($query) or pupe_error($query);
@@ -400,8 +493,8 @@
 		echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=tilino".$ulisa."'>".t("Tilino")."</a></th>";
 		echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=viite".$ulisa."'>".t("Viite")."<br>".t("Viesti")."</a></th>";
 		echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=ttilino".$ulisa."'>".t("Tili")."</a></th>";
-		echo "<th></th></tr>";
-		
+		echo "</tr>";
+
 		echo "<tr><td></td>";
 		echo "<td valign='top'><input type='text' size='10' name='haku[suoritus.nimi_maksaja]' value='".$haku["suoritus.nimi_maksaja"]."'><br><input type='text' size='10' name='haku[asiakas.nimi]' value='".$haku["asiakas.nimi"]."'></td>";
 		echo "<td valign='top'><input type='text' size='10' name='haku[suoritus.kirjpvm]' value='".$haku["suoritus.kirjpvm"]."'></td>";
@@ -410,16 +503,15 @@
 		echo "<td valign='top'><input type='text' size='5'  name='haku[suoritus.tilino]' value='".$haku["suoritus.tilino"]."'></td>";
 		echo "<td valign='top'><input type='text' size='15' name='haku[suoritus.viite]' value='".$haku["suoritus.viite"]."'><br><input type='text' size='15' name='haku[suoritus.viesti]' value='".$haku["suoritus.viesti"]."'></td>";
 		echo "<td valign='top'><input type='text' size='5'  name='haku[tiliointi.tilino]' value='".$haku["tiliointi.tilino"]."'></td>";
-		echo "<td valign='top'></td>";
-		echo "<td valign='top'><input type='submit' value='".t("Etsi")."'></td></tr>";
+		echo "<td valign='top' class='back'><input type='submit' value='".t("Etsi")."'></td></tr>";
 		echo "</form>";
 
 		$row = 0;
-		
+
 		// scripti balloonien tekemiseen
 		js_popup();
 
-	    while($maksurow = mysql_fetch_array ($result)) {
+	    while ($maksurow = mysql_fetch_array($result)) {
 
 			echo "<tr class='aktiivi'>";
 
@@ -439,33 +531,63 @@
 			echo "<br><a class='tooltip' id='$maksurow[tunnus]'>$maksurow[ytunnus]</a> $maksurow[nimi] $maksurow[nimitark]</td>";
 
 			echo "<td valign='top'>".tv1dateconv($maksurow["kirjpvm"])."</td>";
-			
+
 			echo "<td valign='top' align='right'>$maksurow[summa]</td>";
 			echo "<td valign='top'>$maksurow[valkoodi]</td>";
-			
+
 			echo "<td valign='top'>".tilinumero_print($maksurow["tilino"])."</td>";
 
 			echo "<td valign='top'>$maksurow[viite]<br>$maksurow[viesti]</td>";
 			echo "<td valign='top'><a href='../muutosite.php?tee=E&tunnus=$maksurow[tltunnus]'>$maksurow[ttilino]</a></td>";
 
-			
+
 
 			// tehdään nappi kuitin tulostukseen
+			echo "<td valign='top' class='back'>";
 			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<input type='hidden' name='tila' value='tulostakuitti'>";
 			echo "<input type='hidden' name='asiakas_tunnus' value='$maksurow[asiakas_tunnus]'>";
 			echo "<input type='hidden' name='summa' value='$maksurow[summa]'>";
 			echo "<input type='hidden' name='selite' value='$maksurow[viesti]'>";
-			echo "<td valign='top'><input type='submit' value='".t("Tulosta kuitti")."'></td></tr>";
+			echo "<input type='submit' value='".t("Tulosta kuitti")."'>";
 			echo "</form>";
+			echo "</td>";
+
+			if ($kukarow['taso'] == 2 or $kukarow['taso'] == 3) {
+				// tehdään nappi suorituksen poistamiseen
+				echo "<td valign='top' class='back'>";
+				echo "<form method='post' action='$PHP_SELF'>";
+
+
+				if (trim($maksurow["viite"]) != "") {
+					if ($kukarow["yhtio"] == "atarv") {
+						echo "<input type='hidden' name='tila' value='siirrasuoritus1702tilille'>";
+						echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
+						echo "<input type='submit' value='Siirrä 1702-tilille'>";
+					}
+					else {
+						echo "<input type='hidden' name='tila' value='siirrasuoritus'>";
+						echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
+						echo "<input type='submit' value='".t("Siirrä selvittelytilille")."' onClick='return verify1();'>";
+					}
+				}
+				else {
+					echo "<input type='hidden' name='tila' value='poistasuoritus'>";
+					echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
+					echo "<input type='submit' value='".t("Poista suoritus")."' onClick='return verify2();'>";
+				}
+
+				echo "</form>";
+				echo "</td>";
+			}
+			
+			echo "</tr>";
 
 			$row++;
 		}
 
 		echo "</table>";
-		if($row >= $maxrows) {
-			echo "<br>".t("Kysely on liian iso esitettäväksi, ainoastaan ensimmäiset")." $maxrows ".t("riviä on näkyvillä. Ole hyvä, ja rajaa hakuehtoja").".";
-		}
+
 	}
 
 	require ("inc/footer.inc");

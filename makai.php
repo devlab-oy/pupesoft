@@ -263,8 +263,8 @@
 						$yritystilino 	= $laskurow["ytilino"];
 
 						// jos pankkihaltijan nimi on syötetty, laitetaan se nimen tilalle
-						if ($laskurow['pankki_haltija'] != '') {
-							$laskunimi1 = $laskurow["pankki_haltija"];
+						if (trim($laskurow['pankki_haltija']) != '') {
+							$laskunimi1 = trim($laskurow["pankki_haltija"]);
 						}
 						else {
 							$laskunimi1 = $laskurow["nimi"];

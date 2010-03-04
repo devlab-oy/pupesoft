@@ -24,7 +24,10 @@
 	else {
 		require('parametrit.inc');
 	}
-
+	
+	// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
+	js_openFormInNewWindow();
+	
 	$logistiikka_yhtio = '';
 	$logistiikka_yhtiolisa = '';
 
@@ -916,16 +919,16 @@
 								<input type='hidden' name='mista' value='tulostakopio'>
 								<input type='submit' value='".t("Näytä ruudulla")."'></form>
 								<br>";
-						}
+					}
 
-					echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
+					echo "<form id='tulostakopioform_$row[tunnus]' name='tulostakopioform_$row[tunnus]' method='post' action='$PHP_SELF' autocomplete='off'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='otunnus' value='$row[tunnus]'>
 						<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tee' value='NAYTATILAUS'>
 						<input type='hidden' name='mista' value='tulostakopio'>
-						<input type='submit' value='".t("Näytä pdf")."'></form>";
+						<input type='submit' value='".t("Näytä pdf")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$row[tunnus]', 'tulostakopio_$row[tunnus]'); return false;\"></form>";
 
 					if ($kukarow["extranet"] == "") {
 						echo "<br>
@@ -2172,5 +2175,5 @@
 	else {
 		require ('footer.inc');
 	}
-
+	
 ?>

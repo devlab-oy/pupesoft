@@ -258,9 +258,9 @@ if ((int) $valitsetoimitus_vaihdarivi > 0 and $tilausnumero == $kukarow["kesken"
 					WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$edtilausnumero' and perheid>0 and perheid='$rivitunnus' and uusiotunnus = 0 and toimitettuaika = '0000-00-00 00:00:00'
 				)";
 	$result = mysql_query($query) or pupe_error($query);
-	if (mysql_num_rows($result) > 0) {
 
-		while($aburow = mysql_fetch_assoc($result)) {
+	if (mysql_num_rows($result) > 0) {
+		while ($aburow = mysql_fetch_assoc($result)) {
 			// Vaihdetaan rivin otunnus
 			$query = "	UPDATE tilausrivi
 						SET otunnus = '$valitsetoimitus_vaihdarivi'
@@ -406,6 +406,7 @@ if ((int) $kukarow["kesken"] != 0) {
 	}
 
 	$laskurow = mysql_fetch_assoc($result);
+
 	if ($yhtiorow["tilauksen_kohteet"] == "K") {
 		$query 	= "	SELECT *
 					from laskun_lisatiedot
@@ -419,6 +420,12 @@ if ((int) $kukarow["kesken"] != 0) {
 	}
 
 	if ($laskurow["toim_maa"] == "") $laskurow["toim_maa"] = $yhtiorow['maa'];
+}
+
+
+if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
+	// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
+	js_openFormInNewWindow();
 }
 
 //tietyissä keisseissä tilaus lukitaan (ei syöttöriviä eikä muota muokkaa/poista-nappuloita)
@@ -4983,7 +4990,7 @@ if ($tee == '') {
 					if (mysql_num_rows($lisaresult) > 0 and ($row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U")) or $row["perheid2"] == -1) {
 						echo "</tr>";
 
-						echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off' name='lisavarusteet'>
+						echo "	<form action='$PHP_SELF' method='post' autocomplete='off' name='lisavarusteet'>
 								<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 								<input type='hidden' name='toim' 			value = '$toim'>
 								<input type='hidden' name='lopetus' 		value = '$lopetus'>
@@ -5035,7 +5042,7 @@ if ($tee == '') {
 						}
 					}
 					elseif ($kukarow["extranet"] == "" and mysql_num_rows($lisaresult) > 0) {
-						echo "<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off' name='lisaalisav'>
+						echo "<form action='$PHP_SELF' method='post' autocomplete='off' name='lisaalisav'>
 								<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='lopetus' value='$lopetus'>
@@ -5563,7 +5570,7 @@ if ($tee == '') {
 					if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
 						echo "	<th colspan='2' nowrap>".t("Näytä").":</th>
 								<td colspan='2' nowrap>
-								<form name='valmis' action='tulostakopio.php' method='post' name='tulostakopio'>
+								<form action='tulostakopio.php' method='post' name='tulostaform_tmyynti' id='tulostaform_tmyynti'>
 									<input type='hidden' name='otunnus' value='$tilausnumero'>
 									<input type='hidden' name='projektilla' value='$projektilla'>
 									<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//lopetus=$lopetus//tee='>";
@@ -5626,9 +5633,8 @@ if ($tee == '') {
 							echo "<option value='TILAUSVAHVISTUS'>".t("Tilausvahvistus")."</option>";
 						}
 
-						echo "		</select>
-								<input type='submit' name='NAYTATILAUS' value='".t("Näytä")."'>
-								<input type='submit' name='TULOSTA' value='".t("Tulosta")."'>
+						echo "</select>
+							<input type='submit' name='NAYTATILAUS' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'tulosta_myynti'); return false;\">
 							</form>
 							</td>";
 
@@ -6076,7 +6082,7 @@ if ($tee == '') {
 				</SCRIPT>";
 
 			echo "<td align='right' class='back' valign='top'>
-					<form name='mitatoikokonaan' action='$PHP_SELF' method='post' onSubmit = 'return verify()'>
+					<form name='mitatoikokonaan' action='$PHP_SELF' method='post' onSubmit = 'return verify();'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='ruutulimit' value = '$ruutulimit'>
@@ -6091,8 +6097,8 @@ if ($tee == '') {
 
 		if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
 			echo "	<tr>
-						<td align='laft' class='back' valign='top'>
-						<form name='valmis' action='tulostakopio.php' method='post' name='tulostakopio'>
+						<td align='left' class='back' valign='top'>
+						<form action='tulostakopio.php' method='post' name='tulostakopio'>
 						<input type='hidden' name='otunnus' value='$tilausnumero'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 						<input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>

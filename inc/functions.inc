@@ -4673,6 +4673,35 @@ if (!function_exists("js_selectAllCheckboxesByName")) {
 	}
 }
 
+if (!function_exists("js_openFormInNewWindow")) {
+	function js_openFormInNewWindow() {
+		?>
+		<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+			function js_openFormInNewWindow(formID, name) {
+				
+				if(!name) {
+					name='Pupesoft'+Math.floor(Math.random()*1001);
+				}
+				
+				formi=document.getElementById(formID);
+
+				var myField = document.createElement('input');
+
+				myField.setAttribute('name', 'NAYTATILAUS');
+				myField.setAttribute('value', 'SET');
+				myField.setAttribute('type', 'hidden');
+				formi.appendChild(myField);
+
+				window.open('', name, 'top=100,left=100,resizable=yes');
+
+				formi.target=name;
+				formi.submit();
+			}
+		</SCRIPT>
+		<?php
+	}
+}
+
 if (!function_exists("js_yllapito")) {
 	function js_yllapito() {
 ?>

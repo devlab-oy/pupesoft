@@ -2,6 +2,10 @@
 
 require('inc/parametrit.inc');
 
+if (!isset($tee)) $tee = '';
+if (!isset($kk)) $kk = '';
+if (!isset($vv)) $vv = '';
+
 if ($tee == "lataa_tiedosto") {
 	echo file_get_contents("dataout/".$filenimi);
 	exit;
@@ -19,6 +23,11 @@ elseif ($tee == "VSRALVKK_UUSI" or $tee == 'VSRALVKK_UUSI_erittele') {
 }
 
 if ($tee == "VSRALVYV") {
+
+	if (!isset($kohdekausi)) $kohdekausi = '';
+	if (!isset($kohdekuukausi)) $kohdekuukausi = '';
+	if (!isset($ytunnus)) $ytunnus = '';
+	if (!isset($kausi)) $kausi = '';
 
 	echo "<table>";
 	echo "<tr><th>".t("Arvonlisäveron yhteenvetoilmoitus kaudelta").":</th>";

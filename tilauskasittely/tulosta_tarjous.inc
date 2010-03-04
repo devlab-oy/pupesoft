@@ -578,7 +578,6 @@ if (!function_exists('rivi_tarjous')) {
 		}
 
 		$perheid 	 = $row["perheid"];
-		$jtid		 = $row["jtsort"];
 		$piilotarivi = "";
 
 		// Alennus kuntoon

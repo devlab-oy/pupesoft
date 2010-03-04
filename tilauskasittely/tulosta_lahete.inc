@@ -849,8 +849,9 @@ if (!function_exists('rivi_lahete')) {
 		}
 
 		// JT-rivit pikkasen alaspäin omalla otsikolla
-		if ($jtid == 0 and $row["jtsort"] != 0) {
-			$kala = $kala-20;
+		if ((!isset($jtid) or $jtid == 0) and $row["jtsort"] == 1) {
+			
+			if (isset($jtid)) $kala = $kala-10;
 
 			$x[0] = 20;
 			$x[1] = 580;
@@ -859,6 +860,21 @@ if (!function_exists('rivi_lahete')) {
 
 			$pdf->draw_text(25,  $kala, "#",									$thispage, $norm);
 			$pdf->draw_text(45,  $kala, t("Jälkitoimitukseen", $kieli).":",		$thispage, $norm);
+			$kala = $kala-$rivinkorkeus;
+		}
+		
+		// Rahtituote pikkasen alaspäin omalla otsikolla
+		if (isset($jtid) and$jtid != 2 and $row["jtsort"] == 2) {
+			
+			$kala = $kala-10;
+
+			$x[0] = 20;
+			$x[1] = 580;
+			$y[0] = $y[1] = $kala - 4;
+			$pdf->draw_line($x, $y, $page[$sivu], $rectparam);
+			
+			$pdf->draw_text(25,  $kala, "#",									$thispage, $norm);
+			$pdf->draw_text(45,  $kala, t("Toimituskulut", $kieli).":",		$thispage, $norm);
 			$kala = $kala-$rivinkorkeus;
 		}
 

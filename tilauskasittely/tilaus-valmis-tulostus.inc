@@ -3,12 +3,12 @@
 	//jos tilauksia on useita $laskurow muuttujassa on jonkun tilauksen tiedot
 
 	// katotaan ihan aluksi, että meillä on edellytykset tulostukselle...
-	$query = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]'";
-	$prires= mysql_query($query) or pupe_error($query);
+	$query  = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]'";
+	$prires = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($prires) != 0) {
 		$prirow = mysql_fetch_array($prires);
-		
+
 		$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$prirow[printteri1]'";
 		$kirres = mysql_query($query) or pupe_error($query);
 
@@ -25,7 +25,7 @@
 	$komento		= "";
 
 	// emuloidaan transactioita mysql LOCK komennolla
-	$query = "LOCK TABLES liitetiedostot READ, tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivin_lisatiedot AS tlt2 READ, tilausrivi AS tilausrivi_osto READ, tilausrivi AS tilausrivi_myynti READ, sarjanumeroseuranta READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana READ, avainsana as a READ, avainsana as b READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ, tuotteen_avainsanat READ, pankkiyhteystiedot READ, toimitustapa READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, rahtisopimukset READ, rahtisopimukset AS rahtisopimukset2 READ, pakkaamo WRITE, avainsana as avainsana_kieli READ, lasku as vanha_lasku READ, varaston_tulostimet as vanha_varaston_tulostimet READ";
+	$query = "LOCK TABLES suorituskykyloki WRITE, liitetiedostot READ, tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivin_lisatiedot AS tlt2 READ, tilausrivi AS tilausrivi_osto READ, tilausrivi AS tilausrivi_myynti READ, sarjanumeroseuranta READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana READ, avainsana as a READ, avainsana as b READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ, tuotteen_avainsanat READ, pankkiyhteystiedot READ, toimitustapa READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, rahtisopimukset READ, rahtisopimukset AS rahtisopimukset2 READ, pakkaamo WRITE, avainsana as avainsana_kieli READ, lasku as vanha_lasku READ, varaston_tulostimet as vanha_varaston_tulostimet READ";
 	$res   = mysql_query($query) or pupe_error($query);
 
 	$queryc = "	SELECT sum(if(tila='N' and alatila='A', 1, 0)) ok, count(*) kaikki
@@ -36,7 +36,7 @@
 	$chk_row = mysql_fetch_array($chk_result);
 
 	// Katsotaan, että tämä keräyslista ei ole jo tulostettu
-	if ($chk_row["ok"] == $chk_row["kaikki"] and $chk_row["ok"] != 0) {
+	if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] != 0) {
 
 		$laskurow['pakkaamo'] = pakkaamo($tilausnumeroita, "yes", $ei_pakkaamoa);
 
@@ -58,7 +58,7 @@
 			$lisa1 = " ";
 		}
 
-		if($laskurow["tila"] == "V") {
+		if ($laskurow["tila"] == "V") {
 			$sorttaus = "valmistus_kerayslistan_jarjestys";
 			$sorttaussuunta = "valmistus_kerayslistan_jarjestys_suunta";
 		}
@@ -72,7 +72,7 @@
 		$select_lisa = $where_lisa = "";
 
 		//	 Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
-		if($yhtiorow[$sorttaus] == "S") {
+		if ($yhtiorow[$sorttaus] == "S") {
 			$select_lisa = "sum(kpl) kpl, sum(tilkpl) tilkpl, sum(varattu) varattu, sum(jt) jt, '' perheid, '' perheid2, ";
 			$where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
 		}
@@ -120,7 +120,6 @@
 
 		loppu_kerayslista($page[$sivu], 1);
 
-
 		//tulostetaan faili ja valitaan sopivat printterit
 		if ($laskurow["varasto"] == 0) {
 			$query = "	SELECT *
@@ -130,10 +129,9 @@
 						limit 1";
 		}
 		else {
-			
 			$query = "	SELECT *
 						from varastopaikat
-						where yhtio='$kukarow[yhtio]' 
+						where yhtio='$kukarow[yhtio]'
 						and tunnus='$laskurow[varasto]'";
 		}
 		$prires = mysql_query($query) or pupe_error($query);
@@ -159,13 +157,13 @@
 			}
 
 			//haetaan lähetteen tulostuskomento
-			$query = "	SELECT komento 
-						FROM kirjoittimet 
-						WHERE yhtio = '$kukarow[yhtio]' 
+			$query = "	SELECT komento
+						FROM kirjoittimet
+						WHERE yhtio = '$kukarow[yhtio]'
 						AND tunnus  = '$apuprintteri'";
 			$kirres = mysql_query($query) or pupe_error($query);
 			$kirrow = mysql_fetch_assoc($kirres);
-			
+
 			$komento = $kirrow['komento'];
 		}
 
@@ -173,6 +171,17 @@
 			//tulostetaan sivu
 			print_pdf_kerayslista($komento);
 			$returnvalue = 0;
+
+			$suoque = "	INSERT INTO suorituskykyloki
+						SET yhtio	 	= '$kukarow[yhtio]',
+						skripti      	= '".$_SERVER['SCRIPT_NAME']."',
+						request			= 'Keräyslista: $tilausnumeroita tulostetaan. print_pdf_kerayslista(".mysql_real_escape_string($komento).")',
+						suoritusalku	= '',
+						suoritusloppu	= '',
+						suoritusaika 	= '',
+						laatija      	= '$kukarow[kuka]',
+						luontiaika   	= now()";
+			$suores = mysql_query($suoque) or pupe_error($suoque);
 		}
 		else {
 			$returnvalue = 1;
@@ -209,6 +218,29 @@
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus in ($tilausnumeroita)";
 			$result = mysql_query($query) or pupe_error($query);
+
+			$suoque = "	INSERT INTO suorituskykyloki
+						SET yhtio	 	= '$kukarow[yhtio]',
+						skripti      	= '".$_SERVER['SCRIPT_NAME']."',
+						request			= 'Keräyslista: $tilausnumeroita päivitettiin tulostetuksi! ".mysql_real_escape_string(str_replace(array("\n","\t"), " ", $query))."',
+						suoritusalku	= '',
+						suoritusloppu	= '',
+						suoritusaika 	= '',
+						laatija      	= '$kukarow[kuka]',
+						luontiaika   	= now()";
+			$suores = mysql_query($suoque) or pupe_error($suoque);
+		}
+		else {
+			$suoque = "	INSERT INTO suorituskykyloki
+						SET yhtio	 	= '$kukarow[yhtio]',
+						skripti      	= '".$_SERVER['SCRIPT_NAME']."',
+						request			= 'Keräyslista: $tilausnumeroita EI päivitetty tulostetuksi.',
+						suoritusalku	= '',
+						suoritusloppu	= '',
+						suoritusaika 	= '',
+						laatija      	= '$kukarow[kuka]',
+						luontiaika   	= now()";
+			$suores = mysql_query($suoque) or pupe_error($suoque);
 		}
 	}
 	else {

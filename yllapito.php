@@ -455,6 +455,92 @@
 				}
 			}
 
+			if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "yhtio") {
+
+				$query = "	SELECT *
+							FROM yhtio
+							WHERE tunnus = '$tunnus'
+							and yhtio 	 = '$kukarow[yhtio]'";
+				$otsikres = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($otsikres) == 1) {
+					$otsikrow = mysql_fetch_array($otsikres);
+
+					$query = "	SELECT *
+								FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+								WHERE yhtio = '$kukarow[yhtio]'
+								and (
+										(tila IN ('L','N','R','V','E') AND alatila != 'X')
+										OR
+										(tila = 'T' AND alatila in ('','A'))
+										OR
+										(tila IN ('A','0'))
+									)
+								and tapvm = '0000-00-00'";
+					$laskuores = mysql_query($query) or pupe_error($query);
+
+					while ($laskuorow = mysql_fetch_array($laskuores)) {
+
+						$upda_yhtionimi 		= $otsikrow["nimi"];
+						$upda_yhtioosoite 		= $otsikrow["osoite"];
+						$upda_yhtiopostino		= $otsikrow["postino"];
+						$upda_yhtiopostitp		= $otsikrow["postitp"];
+						$upda_yhtiomaa 			= $otsikrow["maa"];
+						$upda_yhtioovttunnus 	= $otsikrow["ovttunnus"];
+						$upda_yhtiokotipaikka	= $otsikrow["kotipaikka"];
+						$upda_yhtioalv_tilino	= $otsikrow["alv"];
+
+						if ($laskuorow["maa"] != "" and $laskuorow["maa"] != $otsikrow["maa"]) {
+							// tutkitaan ollaanko siellä alv-rekisteröity
+							$alhqur = "SELECT vat_numero from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskuorow[maa]' and vat_numero != ''";
+							$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+							// ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista
+							if (mysql_num_rows($alhire) == 1) {
+								$alhiro = mysql_fetch_assoc($alhire);
+
+								// haetaan maan oletusalvi
+								$query = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark='o' and selitetark_2='$laskuorow[maa]'";
+								$alhire = mysql_query($query) or pupe_error($query);
+
+								if (mysql_num_rows($alhire) == 1) {
+
+									// haetaan sen yhteystiedot
+									$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$maa' and vat_numero = '$alhiro[vat_numero]'";
+									$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+									if (mysql_num_rows($alhire) == 1) {
+										$apualvrow  = mysql_fetch_assoc($alhire);
+
+										$upda_yhtionimi 		= $apualvrow["nimi"];
+										$upda_yhtioosoite 	    = $apualvrow["osoite"];
+										$upda_yhtiopostino	    = $apualvrow["postino"];
+										$upda_yhtiopostitp	    = $apualvrow["postitp"];
+										$upda_yhtiomaa 		    = $apualvrow["maa"];
+										$upda_yhtioovttunnus  	= $apualvrow["vat_numero"];
+										$upda_yhtiokotipaikka 	= $apualvrow["kotipaikka"];
+										$upda_yhtioalv_tilino	= $apualvrow["toim_alv"];
+									}
+								}
+							}
+						}
+
+						$query = "	UPDATE lasku
+									SET	yhtio_nimi		= '$upda_yhtionimi',
+									yhtio_osoite		= '$upda_yhtioosoite',
+									yhtio_postino		= '$upda_yhtiopostino',
+									yhtio_postitp		= '$upda_yhtiopostitp',
+									yhtio_maa			= '$upda_yhtiomaa',
+									yhtio_ovttunnus		= '$upda_yhtioovttunnus',
+									yhtio_kotipaikka	= '$upda_yhtiokotipaikka',
+									alv_tili			= '$upda_yhtioalv_tilino'
+									WHERE yhtio 		= '$kukarow[yhtio]'
+									and tunnus			= '$laskuorow[tunnus]'";
+						$updaresult = mysql_query($query) or pupe_error($query);
+					}
+				}
+			}
+
 			//	Tämä funktio tekee myös oikeustarkistukset!
 			synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
 
@@ -1220,7 +1306,7 @@
 			echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
 		}
 
-		if ($toim == "asiakas" and $uusi != 1) {
+		if (($toim == "asiakas" or $toim == "yhtio") and $uusi != 1) {
 			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille tilauksille")."'>";
 		}
 

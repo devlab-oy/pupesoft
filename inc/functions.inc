@@ -8088,7 +8088,7 @@ if (!function_exists("liite_popup")) {
 			if (isset($images_exist) or isset($pdf_exist)) {
 
 				if ($filetype_row["peukalokuva"] > 0) {
-					$liitteet = "<img src='view.php?id=$filetype_row[peukalokuva]' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight)\">";
+					$liitteet = "<img src='".$palvelin2."view.php?id=$filetype_row[peukalokuva]' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight)\">";
 				}
 				else {
 					$liitteet = "<input type='button' value='";

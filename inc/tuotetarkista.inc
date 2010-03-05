@@ -121,17 +121,19 @@ if(!function_exists("tuotetarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "tuotetyyppi") {
-			// Tyyppiä ei saa vaihtaa, jos tuotteella on yksikin tapahtuma
-		    if (trim(strtoupper($trow["tuotetyyppi"])) != trim(strtoupper($t[$i]))) {
-				$query = "	SELECT tunnus
-							FROM tapahtuma
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tuoteno = '$tem_tuoteno'
-							LIMIT 1";
-				$tapahtuma_chk_res = mysql_query($query) or pupe_error($query);
+			if (isset($t[$i])) {
+				// Tyyppiä ei saa vaihtaa, jos tuotteella on yksikin tapahtuma
+			    if (trim(strtoupper($trow["tuotetyyppi"])) != trim(strtoupper($t[$i]))) {
+					$query = "	SELECT tunnus
+								FROM tapahtuma
+								WHERE yhtio = '{$kukarow['yhtio']}'
+								AND tuoteno = '$tem_tuoteno'
+								LIMIT 1";
+					$tapahtuma_chk_res = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($tapahtuma_chk_res) == 1) {
-					$virhe[$i] = t("Tuotetyyppiä ei voida muuttaa, koska tuotteella on tapahtumia")."!";
+					if (mysql_num_rows($tapahtuma_chk_res) == 1) {
+						$virhe[$i] = t("Tuotetyyppiä ei voida muuttaa, koska tuotteella on tapahtumia")."!";
+					}
 				}
 			}
 		}
@@ -162,22 +164,24 @@ if(!function_exists("tuotetarkista")) {
 		}
 
 		if (mysql_field_name($result, $i) == "ei_saldoa") {
-			$query = "	SELECT *
-						FROM tuotepaikat
-						WHERE tuoteno = '$tem_tuoteno' and yhtio = '$kukarow[yhtio]'";
-			$sresult = mysql_query($query) or pupe_error($query);
+			if (isset($t[$i])) {
+				$query = "	SELECT *
+							FROM tuotepaikat
+							WHERE tuoteno = '$tem_tuoteno' and yhtio = '$kukarow[yhtio]'";
+				$sresult = mysql_query($query) or pupe_error($query);
 
-			if ($t[$i] != '') {
-				if (mysql_num_rows($sresult) != 0) {
-					$virhe[$i] = t("Tuotteella on varastopaikkoja. Poista ne ensin!");
+				if ($t[$i] != '') {
+					if (mysql_num_rows($sresult) != 0) {
+						$virhe[$i] = t("Tuotteella on varastopaikkoja. Poista ne ensin!");
+					}
 				}
-			}
 
-			if ($poistolukko != "" and isset($trow['ei_saldoa']) and $t[$i] != $trow["ei_saldoa"]) {
-				$virhe[$i] = t("Tuotteella on tapahtumia. Saldottomuutta ei voi vaihtaa")."!";
-			}
+				if ($poistolukko != "" and isset($trow['ei_saldoa']) and $t[$i] != $trow["ei_saldoa"]) {
+					$virhe[$i] = t("Tuotteella on tapahtumia. Saldottomuutta ei voi vaihtaa")."!";
+				}
 
-			$tem_eisaldoa = $t[$i];
+				$tem_eisaldoa = $t[$i];
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "vienti") {

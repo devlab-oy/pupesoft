@@ -27,10 +27,10 @@
 
 	if ($row["hinta"] == 0 and $row["var2"] != "OK" and $row["tyyppi"] != "V" and strtoupper($trow["tuotetyyppi"]) != 'R' and strtoupper($trow["tuotetyyppi"]) != 'M' and $toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA" and $toim != "SIIRTOTYOMAARAYS") {
 		$varaosavirhe .= t("HUOM: Hinta puuttuu!")."<br>";
-		$riviok++;
-		$tilausok++;
-		$saako_hyvaksya++;
-	}
+			$riviok++;
+			$tilausok++;
+			$saako_hyvaksya++;
+		}
 
 	if ($row["varattu"] == 0 and in_array($row["var"], array('','H')) and $row["tyyppi"] != "E" and $row["tyyppi"] != "G") {
 		if ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') {
@@ -290,7 +290,7 @@
 						sarjanumeroseuranta.ostorivitunnus,
 						$pepvmlisa1
 						concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
-						varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma
+						varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, tuote.vakkoodi
 			 			FROM tuote
 						JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 						JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -313,7 +313,7 @@
 			$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 						tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 						concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
-						varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma
+						varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi, varastopaikat.erikoistoimitus_alarajasumma, tuote.vakkoodi
 			 			FROM tuote
 						JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 						JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -435,8 +435,15 @@
 
 						// jos toimitetaan erikoisvarastosta, niin k‰ytt‰j‰n pit‰‰ hyv‰ksy‰ se
 						if ($sel != '' and $row['var2'] != 'OK' and $kukarow['kassamyyja'] == '' and $row['varattu'] > 0 and $alkurow['varastotyyppi'] == 'E' and $alkurow['erikoistoimitus_alarajasumma'] > 0 and (float) $row['myyntihinta'] >= (float) $alkurow['erikoistoimitus_alarajasumma']) {
-							$varaosavirhe .= t("HUOM: toimitetaan erikoisvarastosta, haluatko hyv‰ksy‰")."?<br>";
-							$saako_hyvaksya++;
+
+							if ($alkurow['vakkoodi'] != '') {
+								$varaosavirhe .= t("HUOM: VAK-tuotteita ei toimiteta erikoisvarastosta")."!<br/>";
+							}
+							else {
+								$varaosavirhe .= t("HUOM: toimitetaan erikoisvarastosta, toimitusaika 2pv. Haluatko hyv‰ksy‰")."?<br/>";
+								$saako_hyvaksya++;
+							}
+
 							$riviok++;
 							$tilausok++;
 						}
@@ -459,7 +466,7 @@
 					if($kukarow["extranet"] != "") {
 						if ($laskurow["toim_maa"] == $alkurow["varastomaa"]) {
 							if ($yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] != 0 and $yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] < $row["hinta"]*$row["tilkpl"]*(1-$row["ale"]/100)) {
-								$varaosakommentti .= t("Tuote saatavissa asiakaspalvelun kautta")."!<br>";
+								// j‰tet‰‰n puutteeksi
 							}
 						}
 

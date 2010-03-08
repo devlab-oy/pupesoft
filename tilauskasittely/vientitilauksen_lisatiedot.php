@@ -271,7 +271,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus = '$otun'
 							and tila = 'L'
-							and alatila != 'X'";
+							and alatila NOT IN ('X', 'J')";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 
@@ -606,10 +606,10 @@
 
 			$haku = '';
 			if (is_string($etsi))  $haku = "and lasku.nimi LIKE '%$etsi%'";
-			if (is_numeric($etsi)) $haku = "and lasku.laskunro='$etsi'";
+			if (is_numeric($etsi)) $haku = "and lasku.laskunro='$etsi' or lasku.tunnus='$etsi'";
 
 			if ($tapa == "tuonti") $tila = " and lasku.tila='K' and lasku.vanhatunnus=0 ";
-			else $tila = " and lasku.tila in ('L','U') and lasku.alatila='X' ";
+			else $tila = " and lasku.tila in ('L','U') and lasku.alatila IN ('X', 'J') ";
 
 			$query = "	SELECT lasku.laskunro, lasku.nimi, lasku.luontiaika, kuka.nimi laatija, lasku.vienti, lasku.tapvm, group_concat(lasku.tunnus) tunnus
 						FROM lasku 

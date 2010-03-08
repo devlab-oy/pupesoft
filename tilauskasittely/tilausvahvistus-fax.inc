@@ -124,12 +124,12 @@ else {
 		}
 
 		if ($useita == "JOO") {
-			$laskurow["toimaika"] = t("Useita");
+			$laskurow["toimaika"] = t("Useita", $kieli);
 		}
 		elseif ($laskurow["toimvko"] != '') {
 			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
-			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
+			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
 				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];

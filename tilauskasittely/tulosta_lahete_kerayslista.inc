@@ -185,11 +185,11 @@ if (!function_exists('alku_kerayslista')) {
 		$pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 771, t("Keräysaika", $kieli), 					$thispage, $pieni);
+		
+		$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
-		if ($laskurow["keraysvko"] != '') {
-			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
-
-			$taika = t("Vko")." ".date("W", strtotime($laskurow["kerayspvm"]));
+		if ($laskurow["keraysvko"] != '') {			
+			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["kerayspvm"]));
 
 			if ($laskurow['keraysvko'] != '7') {
 				$taika .= "/".$DAY_ARRAY[$laskurow["keraysvko"]];
@@ -204,9 +204,7 @@ if (!function_exists('alku_kerayslista')) {
 		$pdf->draw_text(430, 771, t("Toimitusaika", $kieli), 				$thispage, $pieni);
 
 		if ($laskurow["toimvko"] != '') {
-			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
-
-			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
+			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
 				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
@@ -545,7 +543,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 		if ($laskurow["keraysvko"] != '') {
 			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
-			$taika = t("Vko")." ".date("W", strtotime($laskurow["kerayspvm"]));
+			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["kerayspvm"]));
 
 			if ($laskurow['keraysvko'] != '7') {
 				$taika .= "/".$DAY_ARRAY[$laskurow["keraysvko"]];
@@ -562,7 +560,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 		if ($laskurow["toimvko"] != '') {
 			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
-			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
+			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
 				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
@@ -901,13 +899,13 @@ if (!function_exists('rivi_kerayslista')) {
 				while ($sarjarow = mysql_fetch_array($sarjares)) {
 
 					if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "G") {
-						$row["kommentti"] .= " \n".t("Erä").": ".$sarjarow["sarjanumero"];
+						$row["kommentti"] .= " \n".t("Erä", $kieli).": ".$sarjarow["sarjanumero"];
 					}
 					elseif ($row["sarjanumeroseuranta"] == "F") {
-						$row["kommentti"] .= " \n".t("Erä").": ".$sarjarow["sarjanumero"]." ".t("Parasta ennen").": ".tv1dateconv($sarjarow["parasta_ennen"]);
+						$row["kommentti"] .= " \n".t("Erä", $kieli).": ".$sarjarow["sarjanumero"]." ".t("Parasta ennen", $kieli).": ".tv1dateconv($sarjarow["parasta_ennen"]);
 					}
 					else {
-						$row["kommentti"] .= " \n".t("S:nro").": ".$sarjarow["sarjanumero"];
+						$row["kommentti"] .= " \n".t("S:nro", $kieli).": ".$sarjarow["sarjanumero"];
 					}
 				}
 			}
@@ -1038,7 +1036,7 @@ if (!function_exists('print_pdf_kerayslista')) {
 		// itse print komento...
 		if ($komento == 'email') {
 			$liite = $pdffilenimi;
-			$kutsu = t("Keräyslista");
+			$kutsu = t("Keräyslista", $kieli);
 			echo t("Keräyslista tulostuu")."...<br>";
 
 			if ($kukarow["extranet"] == '') {

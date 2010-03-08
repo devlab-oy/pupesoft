@@ -185,7 +185,7 @@ if (!function_exists('alku_tarjous')) {
 		elseif ($laskurow["toimvko"] != '') {
 			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
-			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
+			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
 				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
@@ -421,7 +421,7 @@ if (!function_exists('uusi_sivu_tarjous')) {
 		elseif ($laskurow["toimvko"] != '') {
 			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
-			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
+			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
 				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
@@ -669,7 +669,7 @@ if (!function_exists('rivi_tarjous')) {
 			$row["kommentti"] .= "\n";
 		}
 		while($sarjarow = mysql_fetch_array($sarjares)) {
-			$row["kommentti"] .= t("S:nro").": $sarjarow[sarjanumero]\n";
+			$row["kommentti"] .= t("S:nro", $kieli).": $sarjarow[sarjanumero]\n";
 		}
 
 		if (substr($tarjoustyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
@@ -821,7 +821,7 @@ if (!function_exists('print_pdf_tarjous')) {
 		}
 		elseif ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
 			$liite = $pdf_tarjousfilenimi;
-			$kutsu = "Tarjous";
+			$kutsu = t("Tarjous", $kieli);
 
 			echo t("Tarjous tulostuu")."...<br>";
 

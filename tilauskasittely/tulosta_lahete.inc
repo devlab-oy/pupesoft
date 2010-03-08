@@ -267,7 +267,7 @@ if (!function_exists('alku_lahete')) {
 		elseif ($laskurow["toimvko"] != '') {
 			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
-			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
+			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
 				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
@@ -614,7 +614,7 @@ if (!function_exists('uusi_sivu_lahete')) {
 		elseif ($laskurow["toimvko"] != '') {
 			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
-			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
+			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
 				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
@@ -1120,10 +1120,10 @@ if (!function_exists('rivi_lahete')) {
 		}
 		while($sarjarow = mysql_fetch_array($sarjares)) {
 			if ($asrow1["sarjanumeroseuranta"] == "E" or $asrow1["sarjanumeroseuranta"] == "F" or $asrow1["sarjanumeroseuranta"] == "G") {
-				$row["kommentti"] .= t("E:nro").": $sarjarow[sarjanumero]\n";
+				$row["kommentti"] .= t("E:nro", $kieli).": $sarjarow[sarjanumero]\n";
 			}
 			else {
-				$row["kommentti"] .= t("S:nro").": $sarjarow[sarjanumero]\n";
+				$row["kommentti"] .= t("S:nro", $kieli).": $sarjarow[sarjanumero]\n";
 			}
 		}
 
@@ -1867,8 +1867,8 @@ if (!function_exists('kuittaus_lahete')) {
 		$page[$sivu] = alku_lahete($tyyppi);
 		$thispage    = $page[$sivu];
 
-		$pdf->draw_text(50, 400, t("Allekirjoitus").": _____________________", 	$thispage, $norm);
-		$pdf->draw_text(300, 400, t("Nimenselvennys").": _____________________", 	$thispage, $norm);
+		$pdf->draw_text(50, 400, t("Allekirjoitus", $kieli).": _____________________", 	$thispage, $norm);
+		$pdf->draw_text(300, 400, t("Nimenselvennys", $kieli).": _____________________", 	$thispage, $norm);
 	}
 }
 
@@ -1895,7 +1895,7 @@ if (!function_exists('print_pdf_lahete')) {
 			$content_body = "";
 
 			if ($tyyppi == "TILAUSVAHVISTUS") {
-				$kutsu = "Tilausvahvistus";
+				$kutsu = t("Tilausvahvistus", $kieli);
 				echo t("Tilausvahvistus tulostuu")."...<br>";
 				$content_body = t("Kiitos tilauksestanne", $kieli).",\n\n";
 				$content_body .= t("Tilausnumeronne on", $kieli)." $laskurow[tunnus]\n\n";
@@ -1904,11 +1904,11 @@ if (!function_exists('print_pdf_lahete')) {
 				$content_body .= $yhtiorow["nimi"]."\n";
 			}
 			elseif ($tyyppi == "YLLAPITOSOPIMUS") {
-				$kutsu = t("Ylläpitosopimus");
+				$kutsu = t("Ylläpitosopimus", $kieli);
 				echo t("Ylläpitosopimus tulostuu")."...<br>";
 			}
 			else {
-				$kutsu = t("Lähete");
+				$kutsu = t("Lähete", $kieli);
 				echo t("Lähete tulostuu")."...<br>";
 			}
 

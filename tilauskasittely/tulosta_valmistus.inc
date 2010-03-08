@@ -136,7 +136,7 @@ if (!function_exists('alku_valm')) {
 			$pdf->draw_text(310, 771, t("Keräysaika", $kieli), 					$thispage, $pieni);
 
 			if ($laskurow["keraysvko"] != '') {
-				$taika = t("Vko")." ".date("W", strtotime($laskurow["kerayspvm"]));
+				$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["kerayspvm"]));
 
 				if ($laskurow['keraysvko'] != '7') {
 					$taika .= "/".$DAY_ARRAY[$laskurow["keraysvko"]];
@@ -151,7 +151,7 @@ if (!function_exists('alku_valm')) {
 			$pdf->draw_text(430, 771, t("Toimitusaika", $kieli), 				$thispage, $pieni);
 
 			if ($laskurow["toimvko"] != '') {
-				$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
+				$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["toimaika"]));
 
 				if ($laskurow['toimvko'] != '7') {
 					$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
@@ -376,7 +376,7 @@ if (!function_exists('uusi_sivu_valm')) {
 		$pdf->draw_text(310, 771, t("Keräysaika", $kieli), 					$thispage, $pieni);
 
 		if ($laskurow["keraysvko"] != '') {
-			$taika = t("Vko")." ".date("W", strtotime($laskurow["kerayspvm"]));
+			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["kerayspvm"]));
 
 			if ($laskurow['keraysvko'] != '7') {
 				$taika .= "/".$DAY_ARRAY[$laskurow["keraysvko"]];
@@ -391,7 +391,7 @@ if (!function_exists('uusi_sivu_valm')) {
 		$pdf->draw_text(430, 771, t("Toimitusaika", $kieli), 				$thispage, $pieni);
 
 		if ($laskurow["toimvko"] != '') {
-			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
+			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
 				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
@@ -624,7 +624,7 @@ if (!function_exists('rivi_valmistus')) {
 
 		if (trim($row["kommentti"]) != '') {
 
-			$komm = t("Kommentti").":\n".$row["kommentti"];
+			$komm = t("Kommentti", $kieli).":\n".$row["kommentti"];
 
 			foreach(explode("\n", wordwrap(trim($komm), 90, "\n")) as $kommentti) {
 				$kala = $kala - $rivinkorkeus;
@@ -650,7 +650,7 @@ if (!function_exists('rivi_valmistus')) {
 
 				$kala -= $rivinkorkeus;
 
-				$faktarow["fakta"] = t("Työohje:")."\n".$faktarow["fakta"];
+				$faktarow["fakta"] = t("Työohje:", $kieli)."\n".$faktarow["fakta"];
 
 
 				foreach(explode("\n", wordwrap($faktarow["fakta"], 90, "\n")) as $kommentti) {
@@ -774,7 +774,7 @@ if (!function_exists('print_pdf_valm')) {
 		// itse print komento...
 		if ($komento == 'email') {
 			$liite = $pdffilenimi;
-			$kutsu = t("Valmistuslista");
+			$kutsu = t("Valmistuslista", $kieli);
 			echo t("Valmistuslista tulostuu")."...<br>";
 
 			if ($kukarow["extranet"] == '') {

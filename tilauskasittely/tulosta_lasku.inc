@@ -1,4 +1,4 @@
-<?php
+, $kieli<?php
 if(@!include_once('pdflib/phppdflib.class.php')) {
 	include_once('phppdflib.class.php');
 }
@@ -186,7 +186,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(430, 792, t("Eräpäivä", $kieli), 	$thispage, $pieni);
 
 		if ($kateistyyppi != '') {
-			$erapaiva = t('MAKSETTU');
+			$erapaiva = t('MAKSETTU', $kieli);
 		}
 		else {
 			$erapaiva = tv1dateconv($laskurow["erpcm"]);
@@ -556,7 +556,7 @@ if (!function_exists('uusi_sivu')) {
 		$pdf->draw_text(430, 792, t("Eräpäivä", $kieli), 			$thispage, $pieni);
 
 		if ($kateistyyppi != '') {
-			$erapaiva = t('MAKSETTU');
+			$erapaiva = t('MAKSETTU', $kieli);
 		}
 		else {
 			$erapaiva = tv1dateconv($laskurow["erpcm"]);
@@ -771,7 +771,7 @@ if (!function_exists('rivi_original')) {
 
 		//Arvonlisävero
 		if ($row["alv"] >= 500) {
-			$pdf->draw_text(550, $kala, t("M.V."),	 									$thispage, $norm);
+			$pdf->draw_text(550, $kala, t("M.V.", $kieli),								$thispage, $norm);
 		}
 		else {
 			$pdf->draw_text(550, $kala, ($row["alv"]*1)."%",							$thispage, $norm);
@@ -840,7 +840,7 @@ if (!function_exists('rivi_original')) {
 			$row["kommentti"] .= "\n";
 		}
 		while($sarjarow = mysql_fetch_array($sarjares)) {
-			$row["kommentti"] .= t("S:nro").": $sarjarow[sarjanumero]\n";
+			$row["kommentti"] .= t("S:nro", $kieli).": $sarjarow[sarjanumero]\n";
 		}
 
 		if ($laskutyyppi == "7") {
@@ -1750,7 +1750,7 @@ if (!function_exists('alvierittely')) {
 			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $arow["alvrivihinta"]), 		$thispage, $norm);
 
 			if ($alvrow["alv"] >= 500) {
-				$pdf->draw_text(550, $kala, t("M.V."), 											$thispage, $norm);
+				$pdf->draw_text(550, $kala, t("M.V.", $kieli), 											$thispage, $norm);
 			}
 			else {
 				$pdf->draw_text(550, $kala, ($alvrow["alv"]*1)."%", 							$thispage, $norm);

@@ -1,9 +1,5 @@
 <?php
 
-	if (!isset($sakkl)) $sakkl = date("m");
-	if (!isset($savvl)) $savvl = date("Y");
-	if (!isset($sappl)) $sappl = date("d");
-
 	if ($eiliittymaa != 'ON') {
 
 		if (isset($_POST["supertee"])) {
@@ -54,7 +50,6 @@
 		echo "<option value = 'nimi'    $sel[nimi]>".t("Nimi")."</option>";
 		echo "</select></td><td class='back'>".t("Kaatotilin saldo voidaan n‰ytt‰‰ vain jos summaustaso on Asiakas.")."</td></tr>";
 
-
 		$query = "	SELECT nimi, tunnus
 	                FROM valuu
 	             	WHERE yhtio = '$kukarow[yhtio]'
@@ -93,6 +88,10 @@
 		echo "</form>";
 		echo "</table><br>";
 	}
+
+	if (!isset($sakkl)) $sakkl = date("m");
+	if (!isset($savvl)) $savvl = date("Y");
+	if (!isset($sappl)) $sappl = date("d");
 
 	if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 
@@ -186,7 +185,7 @@
 		$kky 		= 0;
 		$lly 		= 0;
 		$ylikolkyt 	= 0;
-		$rivilask 	= 0;				
+		$rivilask 	= 0;
 
 		if (mysql_num_rows($result) > 0) {
 
@@ -293,7 +292,7 @@
 				if (($ylilimiitin == '') or ($ylilimiitin == 'ON' and $row["ll"] > $asrow["luottoraja"] and $asrow["luottoraja"] != '')) {
 
 					if ($row["nimi"] != $row["toim_nimi"]) $row["nimi"] .= "<br>$row[toim_nimi]";
-										
+
 					echo "<tr class='aktiivi'>$jarjlisa";
 					echo "<td valign='top'><a name='$row[latunnari]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?tunnus=$row[litu]&tila=tee_raportti&lopetus=$PHP_SELF////tee=$tee//sytunnus=$sytunnus//sanimi=$sanimi//yli=$yli//grouppaus=$grouppaus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//ylilimiitin=$ylilimiitin///$row[latunnari]'>$row[ytunnus]</a></td>";
 					echo "<td valign='top'>$row[nimi]</td>";
@@ -446,9 +445,9 @@
 				}
 
 				//katsotaan onko asiakkaalla maksamattomia trattoja, jos on niin ei anneta tehd‰ tilausta
-				$query = " 	SELECT count(lasku.tunnus) kpl 
-							FROM karhu_lasku 
-							JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.yhtio = '$kukarow[yhtio]' and lasku.mapvm = '0000-00-00' and lasku.ytunnus = '$sytunnus') 
+				$query = " 	SELECT count(lasku.tunnus) kpl
+							FROM karhu_lasku
+							JOIN lasku ON (lasku.tunnus = karhu_lasku.ltunnus and lasku.yhtio = '$kukarow[yhtio]' and lasku.mapvm = '0000-00-00' and lasku.ytunnus = '$sytunnus')
 							JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus and karhukierros.yhtio = lasku.yhtio and karhukierros.tyyppi = 'T')";
 				$trattares = mysql_query($query) or pupe_error($query);
 				$tratat = mysql_fetch_array($trattares);

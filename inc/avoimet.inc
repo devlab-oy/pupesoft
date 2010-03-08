@@ -3,7 +3,7 @@
 	if ($muutparametrit != '') list($tee,$vv,$kk,$pp,$laji,$naytetaankokommentit,$savalkoodi,$valuutassako,$maa,$maksuehto,$excel) = split("/",$muutparametrit);
 
 	echo "<font class=head>".t("Avoimet laskut")."</font><hr>";
-
+	
 	// scripti balloonien tekemiseen
 	js_popup();
 
@@ -321,7 +321,7 @@
 					$summa2+= $trow['summa'];
 
 					echo "<tr class='aktiivi'>";
-					echo "<td><a href='$palvelin2","raportit.php?toim=toimittajahaku&tee=A&ytunnus=$trow[ytunnus]&alku=0&laji=M'>$trow[ytunnus]</a></td>";
+					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."raportit.php?toim=toimittajahaku&tee=A&ytunnus=$trow[ytunnus]&alku=0&laji=M&lopetus=toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=$ytunnus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>$trow[ytunnus]</a></td>";
 					echo "<td>$trow[nimi]</td>";
 					echo "<td>$trow[maksutieto]";
 
@@ -527,7 +527,7 @@
 				if ($trow['tiliointiavoinsaldo'] != 0) {
 
 					echo "<tr class='aktiivi'>";
-					echo "<td><a href='myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[liitostunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
+					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[liitostunnus]&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=$ytunnus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///$trow[tunnus]'>$trow[ytunnus]</a></td>";
 					echo "<td>$trow[nimi]</td>";
 					echo "<td>$trow[maksutieto]</td>";
 					echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
@@ -614,7 +614,7 @@
 
 					$suoritussummatotal += $trow["suoritussumma"];
 
-					if ($trow["tunnus"] != NULL) echo "<td><a href='myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[tunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
+					if ($trow["tunnus"] != NULL) echo "<td><a name='a_$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[tunnus]&tila=tee_raportti&lopetus=$PHP_SELF////toim=$toim//tee=$tee//pp=$pp//kk=$kk//vv=$vv//laji=$laji//ytunnus=$ytunnus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//maa=$maa//maksuehto=$maksuehto//toimittajaid=$toimittajaid//asiakasid=$asiakasid///a_$trow[tunnus]'>$trow[ytunnus]</a></td>";
 					else echo "<td>*".t("ei asiakasta")."*</td>";
 
 					echo "<td>$trow[nimi_maksaja]</td>";

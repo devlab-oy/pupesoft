@@ -162,7 +162,8 @@
 		$query = "	SELECT
 					$selecti,
 					$summalisa,
-					min(liitostunnus) litu
+					min(liitostunnus) litu,
+					min(tunnus) latunnari
 					FROM lasku use index (yhtio_tila_mapvm)
 					WHERE tila	= 'U'
 					and alatila	= 'X'
@@ -185,7 +186,7 @@
 		$kky 		= 0;
 		$lly 		= 0;
 		$ylikolkyt 	= 0;
-		$rivilask 	= 0;
+		$rivilask 	= 0;				
 
 		if (mysql_num_rows($result) > 0) {
 
@@ -292,9 +293,9 @@
 				if (($ylilimiitin == '') or ($ylilimiitin == 'ON' and $row["ll"] > $asrow["luottoraja"] and $asrow["luottoraja"] != '')) {
 
 					if ($row["nimi"] != $row["toim_nimi"]) $row["nimi"] .= "<br>$row[toim_nimi]";
-
+										
 					echo "<tr class='aktiivi'>$jarjlisa";
-					echo "<td valign='top'><a href='../myyntires/myyntilaskut_asiakasraportti.php?tunnus=$row[litu]&tila=tee_raportti'>$row[ytunnus]</a></td>";
+					echo "<td valign='top'><a name='$row[latunnari]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?tunnus=$row[litu]&tila=tee_raportti&lopetus=$PHP_SELF////tee=$tee//sytunnus=$sytunnus//sanimi=$sanimi//yli=$yli//grouppaus=$grouppaus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//ylilimiitin=$ylilimiitin///$row[latunnari]'>$row[ytunnus]</a></td>";
 					echo "<td valign='top'>$row[nimi]</td>";
 					echo "<td valign='top' align='right'>".str_replace(".",",",$row["aa"])."</td>";
 					echo "<td valign='top' align='right'>".str_replace(".",",",$row["aabb"])."</td>";
@@ -386,7 +387,7 @@
 					$summa += $trow["avoinsaldo"];
 
 					echo "<tr>$jarjlisa";
-					echo "<td><a href='myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[tunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
+					echo "<td><a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[tunnus]&tila=tee_raportti&lopetus=$PHP_SELF////tee=$tee//sytunnus=$sytunnus//sanimi=$sanimi//yli=$yli//grouppaus=$grouppaus//savalkoodi=$savalkoodi//valuutassako=$valuutassako//ylilimiitin=$ylilimiitin///$trow[tunnus]'>$trow[ytunnus]</a></td>";
 					echo "<td>$trow[nimi_maksaja]</td>";
 					echo "<td>$trow[viite]</td>";
 					echo "<td>".tv1dateconv($trow["kirjpvm"])."</td>";

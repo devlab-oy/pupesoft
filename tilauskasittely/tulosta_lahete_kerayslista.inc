@@ -187,7 +187,7 @@ if (!function_exists('alku_kerayslista')) {
 		$pdf->draw_text(310, 771, t("Keräysaika", $kieli), 					$thispage, $pieni);
 
 		if ($laskurow["keraysvko"] != '') {
-			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
+			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["kerayspvm"]));
 
@@ -204,12 +204,12 @@ if (!function_exists('alku_kerayslista')) {
 		$pdf->draw_text(430, 771, t("Toimitusaika", $kieli), 				$thispage, $pieni);
 
 		if ($laskurow["toimvko"] != '') {
-			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
+			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
-				$taika .= "/".$DAY_ARRAY[$laskurow["toimvko"]];
+				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
 			}
 
 			$pdf->draw_text(430, 761, $taika, 								$thispage, $boldi);
@@ -543,7 +543,7 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 		$pdf->draw_text(310, 771, t("Keräysaika", $kieli), 					$thispage, $pieni);
 
 		if ($laskurow["keraysvko"] != '') {
-			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
+			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["kerayspvm"]));
 
@@ -560,12 +560,12 @@ if (!function_exists('uusi_sivu_kerayslista')) {
 		$pdf->draw_text(430, 771, t("Toimitusaika", $kieli), 				$thispage, $pieni);
 
 		if ($laskurow["toimvko"] != '') {
-			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
+			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
-				$taika .= "/".$DAY_ARRAY[$laskurow["toimvko"]];
+				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
 			}
 
 			$pdf->draw_text(430, 761, $taika, 								$thispage, $boldi);
@@ -1032,7 +1032,7 @@ if (!function_exists('print_pdf_kerayslista')) {
 
 		//kirjoitetaan pdf faili levylle..
 		$fh = fopen($pdffilenimi, "w");
-		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");	
+		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
 		fclose($fh);
 
 		// itse print komento...

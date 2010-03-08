@@ -93,7 +93,7 @@ if (!function_exists('alku_tarjous')) {
 			$isizelogo = getimagesize($apu_yhtiorow["lasku_logo"]);
 		}
 
-		if($data) {
+		if ($data) {
 			$image = $pdf_tarjous->jfif_embed($data);
 
 			if(!$image) {
@@ -183,12 +183,12 @@ if (!function_exists('alku_tarjous')) {
 			$pdf_tarjous->draw_text(430, 782, t("Useita", $kieli), 	$page_tarjous, $norm);
 		}
 		elseif ($laskurow["toimvko"] != '') {
-			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
+			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
-				$taika .= "/".$DAY_ARRAY[$laskurow["toimvko"]];
+				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
 			}
 
 			$pdf_tarjous->draw_text(430, 782, $taika, 								$page_tarjous, $norm);
@@ -415,16 +415,16 @@ if (!function_exists('uusi_sivu_tarjous')) {
 		$pdf_tarjous->draw_text(310, 782, $laskurow["tunnus"],			$page_tarjous, $boldi);
 
 
-		if($useita == "JOO") {
+		if ($useita == "JOO") {
 			$pdf_tarjous->draw_text(430, 782, t("Useita", $kieli), 	$page_tarjous, $norm);
 		}
 		elseif ($laskurow["toimvko"] != '') {
-			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
+			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
-				$taika .= "/".$DAY_ARRAY[$laskurow["toimvko"]];
+				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
 			}
 
 			$pdf_tarjous->draw_text(430, 782, $taika, 								$page_tarjous, $norm);
@@ -437,7 +437,7 @@ if (!function_exists('uusi_sivu_tarjous')) {
 		$pdf_tarjous->draw_rectangle(779, 420, 758, 580, $page_tarjous, $rectparam);
 		$pdf_tarjous->draw_text(310, 771, t("Asiakkaan Y-tunnus", $kieli), 					$page_tarjous, $pieni);
 		$pdf_tarjous->draw_text(310, 761, tulosta_ytunnus($laskurow["ytunnus"], $laskurow["maa"], $laskurow["vienti"]),	$page_tarjous, $norm);
-		
+
 		$pdf_tarjous->draw_text(430, 771, t("Päiväys", $kieli), 						$page_tarjous, $pieni);
 		$pdf_tarjous->draw_text(430, 761, tv1dateconv($laskurow["muutospvm"]),	 		$page_tarjous, $norm);
 

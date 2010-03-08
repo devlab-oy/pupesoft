@@ -19,7 +19,7 @@
 		$logistiikka_yhtiolisa = "yhtio = '$kukarow[yhtio]'";
 	}
 
-	$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
+	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
 	js_popup();
 

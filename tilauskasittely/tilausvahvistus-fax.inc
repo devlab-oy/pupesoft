@@ -127,12 +127,12 @@ else {
 			$laskurow["toimaika"] = t("Useita");
 		}
 		elseif ($laskurow["toimvko"] != '') {
-			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
+			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
-				$taika .= "/".$DAY_ARRAY[$laskurow["toimvko"]];
+				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
 			}
 
 			$laskurow["toimaika"] = $taika;
@@ -150,7 +150,7 @@ else {
 		if (($naytatvale != 3 or $naytatvale != 4) and $laskurow['erikoisale'] > 0) {
 			$ulos .= sprintf("%-50.s",t("Erikoisalennus", $kieli).": ".$laskurow['erikoisale']."%\n");
 		}
-		
+
 		if ($yhtiorow['alv_kasittely'] != '') {
 			$ulos .= sprintf("%-50.s",t("Hinnat ovat verottomia.", $kieli)."\n");
 		}

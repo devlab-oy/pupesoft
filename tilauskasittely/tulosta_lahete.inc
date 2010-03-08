@@ -265,12 +265,12 @@ if (!function_exists('alku_lahete')) {
 			$pdf->draw_text(430, 782, t("Useita", $kieli), 	$thispage, $norm);
 		}
 		elseif ($laskurow["toimvko"] != '') {
-			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
+			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
-				$taika .= "/".$DAY_ARRAY[$laskurow["toimvko"]];
+				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
 			}
 
 			$pdf->draw_text(430, 782, $taika, 								$thispage, $norm);
@@ -612,12 +612,12 @@ if (!function_exists('uusi_sivu_lahete')) {
 			$pdf->draw_text(430, 782, t("Useita", $kieli), 	$thispage, $norm);
 		}
 		elseif ($laskurow["toimvko"] != '') {
-			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
+			$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
 
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
-				$taika .= "/".$DAY_ARRAY[$laskurow["toimvko"]];
+				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
 			}
 
 			$pdf->draw_text(430, 782, $taika, 								$thispage, $norm);
@@ -850,7 +850,7 @@ if (!function_exists('rivi_lahete')) {
 
 		// JT-rivit pikkasen alaspäin omalla otsikolla
 		if ((!isset($jtid) or $jtid == 0) and $row["jtsort"] == 1) {
-			
+
 			if (isset($jtid)) $kala = $kala-10;
 
 			$x[0] = 20;
@@ -862,17 +862,17 @@ if (!function_exists('rivi_lahete')) {
 			$pdf->draw_text(45,  $kala, t("Jälkitoimitukseen", $kieli).":",		$thispage, $norm);
 			$kala = $kala-$rivinkorkeus;
 		}
-		
+
 		// Rahtituote pikkasen alaspäin omalla otsikolla
 		if (isset($jtid) and$jtid != 2 and $row["jtsort"] == 2) {
-			
+
 			$kala = $kala-10;
 
 			$x[0] = 20;
 			$x[1] = 580;
 			$y[0] = $y[1] = $kala - 4;
 			$pdf->draw_line($x, $y, $page[$sivu], $rectparam);
-			
+
 			$pdf->draw_text(25,  $kala, "#",									$thispage, $norm);
 			$pdf->draw_text(45,  $kala, t("Toimituskulut", $kieli).":",		$thispage, $norm);
 			$kala = $kala-$rivinkorkeus;

@@ -57,7 +57,10 @@ if (!function_exists('alku')) {
 		$style |= ($stretchtext== "on" ) ? BCS_STRETCH_TEXT  : 0;
 		$style |= ($negative== "on"  ) ? BCS_REVERSE_COLOR  : 0;
 
+		$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
+
 		unset($data);
+
 		if( (int) $yhtiorow["lasku_logo"] > 0) {
 			$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
 			$data = $liite["data"];
@@ -151,8 +154,6 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 771, t("Keräysaika", $kieli), 					$thispage, $pieni);
 
 		if ($laskurow["keraysvko"] != '') {
-			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
-
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["kerayspvm"]));
 
 			if ($laskurow['keraysvko'] != '7') {
@@ -168,12 +169,10 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(430, 771, t("Toimitusaika", $kieli), 				$thispage, $pieni);
 
 		if ($laskurow["toimvko"] != '') {
-			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
-
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
-				$taika .= "/".$DAY_ARRAY[$laskurow["toimvko"]];
+				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
 			}
 
 			$pdf->draw_text(430, 761, $taika, 								$thispage, $boldi);
@@ -421,7 +420,10 @@ if (!function_exists('uusi_sivu')) {
 		$style |= ($stretchtext== "on" ) ? BCS_STRETCH_TEXT  : 0;
 		$style |= ($negative== "on"  ) ? BCS_REVERSE_COLOR  : 0;
 
+		$DAY_ARRAY = array(1 => t("Ma", $kieli), t("Ti", $kieli), t("Ke", $kieli), t("To", $kieli), t("Pe", $kieli), t("La", $kieli), t("Su", $kieli));
+
 		unset($data);
+
 		if( (int) $yhtiorow["lasku_logo"] > 0) {
 			$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
 			$data = $liite["data"];
@@ -496,8 +498,6 @@ if (!function_exists('uusi_sivu')) {
 		$pdf->draw_text(310, 771, t("Keräysaika", $kieli), 					$thispage, $pieni);
 
 		if ($laskurow["keraysvko"] != '') {
-			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
-
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["kerayspvm"]));
 
 			if ($laskurow['keraysvko'] != '7') {
@@ -513,12 +513,10 @@ if (!function_exists('uusi_sivu')) {
 		$pdf->draw_text(430, 771, t("Toimitusaika", $kieli), 				$thispage, $pieni);
 
 		if ($laskurow["toimvko"] != '') {
-			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
-
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
-				$taika .= "/".$DAY_ARRAY[$laskurow["toimvko"]];
+				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
 			}
 
 			$pdf->draw_text(430, 761, $taika, 								$thispage, $boldi);

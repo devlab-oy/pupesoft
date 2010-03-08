@@ -27,7 +27,7 @@
 		$_POST['korvataanko'] = '';
 	}
 
-	$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
+	$DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
 	if ($tee != "JT_TILAUKSELLE" and $vainvarastosta != "") {
 		$varastosta = array();
@@ -1344,6 +1344,7 @@
 											}
 											elseif ($toimvko > 0 and isset($toimpva)) {
 												echo t("Viikko")." $toimvko";
+
 												if (isset($toimpva)) {
 													echo " ($DAY_ARRAY[$toimpva])";
 												}
@@ -1419,6 +1420,7 @@
 										}
 										else if ($toimvko > 0 and isset($toimpva)) {
 											echo t("Viikko")." $toimvko";
+
 											if (isset($toimpva)) {
 												echo " ($DAY_ARRAY[$toimpva])";
 											}
@@ -1489,6 +1491,7 @@
 										}
 										else if ($toimvko > 0 and isset($toimpva)) {
 											echo t("Viikko")." $toimvko";
+
 											if (isset($toimpva)) {
 												echo " ($DAY_ARRAY[$toimpva])";
 											}
@@ -1527,6 +1530,7 @@
 										}
 										else if ($toimvko > 0 and isset($toimpva)) {
 											echo t("Viikko")." $toimvko";
+
 											if (isset($toimpva)) {
 												echo " ($DAY_ARRAY[$toimpva])";
 											}
@@ -1669,6 +1673,7 @@
 										}
 										else if ($toimvko > 0 and isset($toimpva)) {
 											echo t("Viikko")." $toimvko";
+
 											if (isset($toimpva)) {
 												echo " ($DAY_ARRAY[$toimpva])";
 											}

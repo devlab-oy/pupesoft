@@ -218,7 +218,7 @@
 
 		while ($trow = mysql_fetch_array ($result)) {
 
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 
 			for ($i=0; $i<mysql_num_fields($result)-5; $i++) {
 
@@ -235,7 +235,7 @@
 							if (strlen(trim($tili)) > 0) {
 								echo "<td></td>";
 							}
-							echo "</tr><tr>";
+							echo "</tr><tr class='aktiivi'>";
 
 							$summa = 0;
 						}
@@ -261,7 +261,7 @@
 						//tilin alkusaldo
 						echo "<td valign='top' colspan='".(mysql_num_fields($result)-5)."'></td>";
 						echo "<td valign='top' align='right' nowrap>".sprintf("%.2f",$kumsumma)."</td></tr>";
-						echo "<tr>";
+						echo "<tr class='aktiivi'>";
 
 						if(isset($workbook)) {
 							for ($a=0; $a<mysql_num_fields($result)-5; $a++) {
@@ -353,7 +353,7 @@
 			$edtili = $trow["xtilino"];
 		}
 
-		echo "<tr><td></td><td></td><td></td><td></td><td></td><td></td><td align = 'right' nowrap>";
+		echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td></td><td align = 'right' nowrap>";
 		printf("%.2f", $summa);
 		echo "</td><td>*</td>";
 
@@ -363,7 +363,7 @@
 
 		echo "</tr>";
 
-		echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Negatiiviset yhteensä")."</td>";
+		echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Negatiiviset yhteensä")."</td>";
 		echo "<td align = 'right' nowrap>";
 		printf("%.2f", $summamiinus);
 		echo "</td><td>*</td>";
@@ -374,7 +374,7 @@
 
 		echo "</tr>";
 
-		echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Positiiviset yhteensä")."</td>";
+		echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Positiiviset yhteensä")."</td>";
 		echo "<td align = 'right' nowrap>";
 		printf("%.2f", $summaplus);
 		echo "</td><td>*</td>";
@@ -387,7 +387,7 @@
 
 		if (count($summa_valuutassa) > 0) {
 			foreach ($summa_valuutassa as $valuutta => $summ) {
-				echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteensä")." $valuutta</td>";
+				echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteensä")." $valuutta</td>";
 				echo "<td align = 'right' nowrap>";
 				printf("%.2f", $summ);
 				echo "</td><td>*</td>";
@@ -400,7 +400,7 @@
 		}
 
 		$summa = $summaplus + $summamiinus;
-		echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteensä")."</td>";
+		echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteensä")."</td>";
 		echo "<td align = 'right' nowrap>";
 		printf("%.2f", $summa);
 		echo "</td><td>*</td>";

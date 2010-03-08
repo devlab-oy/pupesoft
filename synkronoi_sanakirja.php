@@ -117,7 +117,6 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 								$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
 							}
 
-
 							$e = "<font class='error'>";
 							$t = "</font>";
 						}
@@ -140,10 +139,10 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 
 						echo "<tr>
 								<td>".$rivi[$sync_otsikot["kysytty"]]."</td>
-								<td><font class='error'>".t("Sanaa puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["fi"]]."</td>
-								<td><font class='error'>".t("Sanaa puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["se"]]."</td>
-								<td><font class='error'>".t("Sanaa puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["en"]]."</td>
-								<td><font class='error'>".t("Sanaa puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["de"]]."</td>
+								<td><font class='error'>".t("Sana puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["fi"]]."</td>
+								<td><font class='error'>".t("Sana puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["se"]]."</td>
+								<td><font class='error'>".t("Sana puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["en"]]."</td>
+								<td><font class='error'>".t("Sana puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["de"]]."</td>
 								</tr>";
 					}
 				}

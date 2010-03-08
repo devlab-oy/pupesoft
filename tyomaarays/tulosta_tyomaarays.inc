@@ -154,7 +154,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 771, t("Keräysaika", $kieli), 					$thispage, $pieni);
 
 		if ($laskurow["keraysvko"] != '') {
-			$taika = t("Vko")." ".date("W", strtotime($laskurow["kerayspvm"]));
+			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["kerayspvm"]));
 
 			if ($laskurow['keraysvko'] != '7') {
 				$taika .= "/".$DAY_ARRAY[$laskurow["keraysvko"]];
@@ -169,7 +169,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(430, 771, t("Toimitusaika", $kieli), 				$thispage, $pieni);
 
 		if ($laskurow["toimvko"] != '') {
-			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
+			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
 				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
@@ -390,10 +390,7 @@ if (!function_exists('alku')) {
 			//dellataan tmp filet kuleksimasta
 			system("rm -f $nimi1 $nimi2");
 		}
-		else {
-			echo t("Oliota ei voitu luoda").".";
-		}
-
+		
 		return($thispage);
 	}
 }
@@ -498,7 +495,7 @@ if (!function_exists('uusi_sivu')) {
 		$pdf->draw_text(310, 771, t("Keräysaika", $kieli), 					$thispage, $pieni);
 
 		if ($laskurow["keraysvko"] != '') {
-			$taika = t("Vko")." ".date("W", strtotime($laskurow["kerayspvm"]));
+			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["kerayspvm"]));
 
 			if ($laskurow['keraysvko'] != '7') {
 				$taika .= "/".$DAY_ARRAY[$laskurow["keraysvko"]];
@@ -513,7 +510,7 @@ if (!function_exists('uusi_sivu')) {
 		$pdf->draw_text(430, 771, t("Toimitusaika", $kieli), 				$thispage, $pieni);
 
 		if ($laskurow["toimvko"] != '') {
-			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
+			$taika = t("Vko", $kieli)." ".date("W", strtotime($laskurow["toimaika"]));
 
 			if ($laskurow['toimvko'] != '7') {
 				$taika .= "/" .$DAY_ARRAY[$laskurow["toimvko"]];
@@ -560,9 +557,6 @@ if (!function_exists('uusi_sivu')) {
 
 			//dellataan tmp filet kuleksimasta
 			system("rm -f $nimi1 $nimi2");
-		}
-		else {
-			echo t("Oliota ei voitu luoda").".";
 		}
 
 		$kala = 740;
@@ -800,13 +794,13 @@ if (!function_exists('rivi')) {
 
 			while ($sarjarow = mysql_fetch_array($sarjares)) {
 				if ($row["sarjanumeroseuranta"] == "S") {
-					$row["kommentti"] .= " \n".t("S:nro").": ".$sarjarow["sarjanumero"];
+					$row["kommentti"] .= " \n".t("S:nro", $kieli).": ".$sarjarow["sarjanumero"];
 				}
 				elseif ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "G") {
-					$row["kommentti"] .= " \n".t("Erä").": ".$sarjarow["sarjanumero"];
+					$row["kommentti"] .= " \n".t("Erä", $kieli).": ".$sarjarow["sarjanumero"];
 				}
 				elseif ($row["sarjanumeroseuranta"] == "F") {
-					$row["kommentti"] .= " \n".t("Erä").": ".$sarjarow["sarjanumero"]." ".t("Parasta ennen").": ".tv1dateconv($sarjarow["parasta_ennen"]);
+					$row["kommentti"] .= " \n".t("Erä", $kieli).": ".$sarjarow["sarjanumero"]." ".t("Parasta ennen", $kieli).": ".tv1dateconv($sarjarow["parasta_ennen"]);
 				}
 			}
 		}
@@ -933,7 +927,7 @@ if (!function_exists('print_pdf')) {
 		// itse print komento...
 		if ($komento == 'email') {
 			$liite = $pdffilenimi;
-			$kutsu = t("Työmääräys");
+			$kutsu = t("Työmääräys", $kieli);
 			echo t("Työmääräys tulostuu")."...<br>";
 
 			if ($kukarow["extranet"] == '') {

@@ -16,8 +16,8 @@ $r = 0;
 // k‰yd‰‰n l‰pi mahdolliset kielet
 foreach ($sanakirja_kielet as $sanakirja_kieli) {
 
-	$query = "select distinct nimi from maat where koodi='$sanakirja_kieli'";
-	$maare = mysql_query($query);
+	$query = "SELECT distinct nimi from maat where koodi='$sanakirja_kieli' and nimi != ''";
+	$maare = mysql_query($query) or pupe_error($query);
 	$maaro = mysql_fetch_array($maare);
 	$maa   = strtolower($maaro["nimi"]);
 
@@ -64,8 +64,8 @@ if ($etsi_kieli == "fi") $sel = "selected";
 echo "<option value='fi' $sel>".t("fi - suomi")."</option>";
 
 foreach ($sanakirja_kielet as $sanakirja_kieli) {
-	$query = "select distinct nimi from maat where koodi='$sanakirja_kieli'";
-	$maare = mysql_query($query);
+	$query = "SELECT distinct nimi from maat where koodi='$sanakirja_kieli' and nimi != ''";
+	$maare = mysql_query($query) or pupe_error($query);
 	$maaro = mysql_fetch_array($maare);
 	$maa   = strtolower($maaro["nimi"]);
 	if ($maa=="") $maa = $sanakirja_kieli;

@@ -179,8 +179,8 @@ if(!function_exists("asiakasalennustarkista")) {
 				$kk = substr($chalkupvm, 5, 2);
 				$vv = substr($chalkupvm, 0, 4);
 
-				if (!checkdate($pp, $kk, $vv)) {
-					$virhe[$i] = t("Alkupvm virheellinen!");
+				if (!checkdate($kk, $pp, $vv)) {
+					$virhe[$i] = t("Alkup‰iv‰m‰‰r‰ virheellinen!");
 				}
 			}
 		}
@@ -196,8 +196,8 @@ if(!function_exists("asiakasalennustarkista")) {
 				$kk = substr($chloppupvm, 5, 2);
 				$vv = substr($chloppupvm, 0, 4);
 
-				if (!checkdate($pp, $kk, $vv)) {
-					$virhe[$i] = t("Loppupvm virheellinen!");
+				if (!checkdate($kk, $pp, $vv)) {
+					$virhe[$i] = t("Loppup‰iv‰m‰‰r‰ virheellinen!");
 				}
 			}
 		}

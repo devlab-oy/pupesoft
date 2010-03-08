@@ -436,7 +436,7 @@
 
 				echo "<table>
 					<tr>
-					<th rowspan='$riveja'><a href='../crm/asiakasmemo.php?ytunnus=$ytunnus'>$asiakasrow[nimi]</a></td>
+					<th rowspan='$riveja'><a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$ytunnus'>$asiakasrow[nimi]</a></td>
 					<td rowspan='$riveja'>".t("Kaatotilillä")."</td>";
 
 				if (mysql_num_rows($kaatoresult) > 1) { // Valuuttasummia
@@ -527,7 +527,7 @@
 					<th>$asiakasrow[postino] $asiakasrow[postitp]</td>
 					<td colspan='2'></td></tr>";
 				echo "<tr>
-					<th></th><td colspan='2'><a href='../raportit/asiakasinfo.php?ytunnus=$ytunnus'>".t("Asiakkaan myyntitiedot")."</a></td>
+					<th></th><td colspan='2'><a href='".$palvelin2."raportit/asiakasinfo.php?ytunnus=$ytunnus'>".t("Asiakkaan myyntitiedot")."</a></td>
 					</tr>";
 
 				echo "<table><tr><td class='back'>";
@@ -700,17 +700,17 @@
 
 				echo "<table cellpadding='2'>";
 				echo "<tr>";
-				echo "<form action = '$PHP_SELF?tila=$tila&tunnus=$tunnus&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi' method = 'post'>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=0".$ulisa."'>".t("Laskunro")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=1".$ulisa."'>".t("Pvm")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=2".$ulisa."'>".t("Eräpäivä")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=3".$ulisa."'>".t("Summa")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=4".$ulisa."'>".t("Kassa-ale")."<br>".t("pvm")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=5".$ulisa."'>".t("Kassa-ale")."<br>".t("summa")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=6".$ulisa."'>".t("Maksu")."<br>".t("pvm")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=7".$ulisa."'>".t("Ikä")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=8".$ulisa."'>".t("Korko")."</a></th>";
-				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=9".$ulisa."'>".t("Korkolasku")."<br>".t("pvm")."</a></th>";
+				echo "<form action = '$PHP_SELF?tila=$tila&tunnus=$tunnus&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&lopetus=$lopetus' method = 'post'>";
+				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=0".$ulisa."&lopetus=$lopetus'>".t("Laskunro")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=1".$ulisa."&lopetus=$lopetus'>".t("Pvm")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=2".$ulisa."&lopetus=$lopetus'>".t("Eräpäivä")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=3".$ulisa."&lopetus=$lopetus'>".t("Summa")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=4".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("pvm")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=5".$ulisa."&lopetus=$lopetus'>".t("Kassa-ale")."<br>".t("summa")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=6".$ulisa."&lopetus=$lopetus'>".t("Maksu")."<br>".t("pvm")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=7".$ulisa."&lopetus=$lopetus'>".t("Ikä")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=8".$ulisa."&lopetus=$lopetus'>".t("Korko")."</a></th>";
+				echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=9".$ulisa."&lopetus=$lopetus'>".t("Korkolasku")."<br>".t("pvm")."</a></th>";
 				echo "<th valign='top'>".t("Osasuoritukset")."</th>";
 
 				echo "<td class='back'></td></tr>";
@@ -736,7 +736,7 @@
 				while ($maksurow = mysql_fetch_array ($result)) {
 
 					echo "<tr class='aktiivi'>";
-					echo "<td><a href='../muutosite.php?tee=E&tunnus=$maksurow[tunnus]'>$maksurow[laskunro]</a></td>";
+					echo "<td><a href='".$palvelin2."muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tunnus=$tunnus//tila=tee_raportti'>$maksurow[laskunro]</a></td>";
 
 					echo "<td align='right'>".tv1dateconv($maksurow["tapvm"])."</td>";
 					echo "<td align='right'>".tv1dateconv($maksurow["erpcm"])."</td>";

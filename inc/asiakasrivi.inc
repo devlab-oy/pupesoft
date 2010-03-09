@@ -489,7 +489,7 @@
 			if ($kirow["selite"] == $trow[$i]) $select = 'SELECTED';
 			else $select = '';
 
-			$ulos .= "<option value='$kirow[selite]' $select>$kirow[selite] - $kirow[selitetark]</option>";
+			$ulos .= "<option value='$kirow[selite] $kirow[selitetark]' $select>$kirow[selite] - $kirow[selitetark]</option>";
 		}
 
 		$ulos .= "</select></td>";

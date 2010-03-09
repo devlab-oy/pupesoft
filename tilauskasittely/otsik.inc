@@ -1563,41 +1563,59 @@
 
 			echo "<select name='toimitusehto' onchange='toimehtoTarkenne(\"toimitusehto\");' ".js_alasvetoMaxWidth("toimitusehto", 60).">";
 
-			$kasisel = "";
+			$toimehtosel  = "";
+			$toimehtosel1 = "";
+			$toimehtosel2 = "";
+			$toimehtosel3 = "";
+			$toimehtoseltark  = "";
+			$toimehtoseltark1 = "";
+			$toimehtoseltark2 = "";
+			$toimehtoseltark3 = "";
 
-			while($row = mysql_fetch_assoc($tresult)) {
+			// Valitaan sopivin toimitusehto
+			while ($row = mysql_fetch_assoc($tresult)) {
+
+				// Tarkka mätsi
+				if ($srow["toimitusehto"] != "" and strtoupper($srow["toimitusehto"]) == strtoupper($row["selite"]." ".$row["selitetark"])) {
+					$toimehtosel1 = $row["tunnus"];
+					$toimehtoseltark1 = $row["selitetark"];
+				}
+
+				// Alku mätsää
+				if ($srow["toimitusehto"] != "" and strtoupper(substr($srow["toimitusehto"], 0, 3)) == strtoupper($row["selite"])) {
+					$toimehtosel2 = $row["tunnus"];
+					$toimehtoseltark2 = substr($srow["toimitusehto"], 4);				
+				}
+
+				// Otetaan yhtiön oletus
+				if ($srow["toimitusehto"] == "" and strtoupper($yhtiorow['oletus_toimitusehto']) == strtoupper($row["selite"]." ".$row["selitetark"])) {
+					$toimehtosel3 = $row["tunnus"];
+					$toimehtoseltark3 = $row["selitetark"];
+				}
+			}
+
+			if ($toimehtosel1 != "") $toimehtosel = $toimehtosel1;
+			elseif ($toimehtosel2 != "") $toimehtosel = $toimehtosel2;
+			elseif ($toimehtosel3 != "") $toimehtosel = $toimehtosel3;
+
+			mysql_data_seek($tresult, 0);
+
+			echo "<option value=''></option>";
+
+			while ($row = mysql_fetch_assoc($tresult)) {
 				$sel = "";
-
-				if (stripos(substr($srow["toimitusehto"],0,4), $row["selite"]." ") !== false) {
-					$sel = 'selected';
-					$kasitoimehto = substr($srow["toimitusehto"],4);
-					$kasisel = 's';
-				}
-				elseif ($row["selite"] == $srow["toimitusehto"] or ($srow["toimitusehto"] == '' and $yhtiorow['oletus_toimitusehto'] == $row["selite"])) {
-					$sel = 'selected';
-					$kasisel = 's';
-				}
+				if ($toimehtosel == $row["tunnus"]) $sel = "SELECTED";
 
 				echo "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark] $row[selitetark_2]</option>";
 			}
 
-			if ($kasisel == '' and $srow["toimitusehto"] != "") {
-				$kasisel = 'selected';
-			}
+			echo "</select>";
 
-			echo "<option value='' $kasisel></option></select>";
+			if ($toimehtoseltark1 != "") $toimehtoseltark = $toimehtoseltark1;
+			elseif ($toimehtoseltark2 != "") $toimehtoseltark = $toimehtoseltark2;
+			elseif ($toimehtoseltark3 != "") $toimehtoseltark = $toimehtoseltark3;
 
-			$tresult = t_avainsana("TOIMEHTO","", "and avainsana.selite='$srow[toimitusehto]'");
-
-			if (mysql_num_rows($tresult) == 0 and $kasitoimehto == "") {
-				$kasitoimehto = $srow["toimitusehto"];
-			}
-			if (mysql_num_rows($tresult) == 1 and $kasitoimehto == "") {
-				$row = mysql_fetch_assoc($tresult);
-				$kasitoimehto = $row["selitetark"];
-			}
-
-			echo " <input type='text' id='toimitusehtoLisa' name='kasitoimehto' value='$kasitoimehto' size='20'>";
+			echo " <input type='text' id='toimitusehtoLisa' name='kasitoimehto' value='$toimehtoseltark' size='20'>";
 			echo "</td>";
 
 			echo "<td>".t("Tilauksesta oma lasku").":</td><td><input type='checkbox' name='ketjutus' $eiket></td>";
@@ -1611,44 +1629,60 @@
 				$tresult = t_avainsana("TOIMEHTO");
 
 				echo "<select name='toimitusehto2' onchange='toimehtoTarkenne(\"toimitusehto2\");' ".js_alasvetoMaxWidth("toimitusehto2", 60).">";
+				
+				$toimehtosel  = "";
+				$toimehtosel1 = "";
+				$toimehtosel2 = "";
+				$toimehtosel3 = "";
+				$toimehtoseltark  = "";
+				$toimehtoseltark1 = "";
+				$toimehtoseltark2 = "";
+				$toimehtoseltark3 = "";
 
-				$kasisel = "";
+				// Valitaan sopivin toimitusehto
+				while ($row = mysql_fetch_assoc($tresult)) {
 
-				while($row = mysql_fetch_assoc($tresult)) {
+					// Tarkka mätsi
+					if ($srow["toimitusehto2"] != "" and strtoupper($srow["toimitusehto2"]) == strtoupper($row["selite"]." ".$row["selitetark"])) {
+						$toimehtosel1 = $row["tunnus"];
+						$toimehtoseltark1 = $row["selitetark"];
+					}
+
+					// Alku mätsää
+					if ($srow["toimitusehto2"] != "" and strtoupper(substr($srow["toimitusehto2"], 0, 3)) == strtoupper($row["selite"])) {
+						$toimehtosel2 = $row["tunnus"];
+						$toimehtoseltark2 = substr($srow["toimitusehto2"], 4);
+					}
+
+					// Otetaan yhtiön oletus
+					if ($srow["toimitusehto2"] == "" and strtoupper($yhtiorow['oletus_toimitusehto2']) == strtoupper($row["selite"]." ".$row["selitetark"])) {
+						$toimehtosel3 = $row["tunnus"];
+						$toimehtoseltark3 = $row["selitetark"];
+					}
+				}
+
+				if ($toimehtosel1 != "") $toimehtosel = $toimehtosel1;
+				elseif ($toimehtosel2 != "") $toimehtosel = $toimehtosel2;
+				elseif ($toimehtosel3 != "") $toimehtosel = $toimehtosel3;
+
+				mysql_data_seek($tresult, 0);
+
+				echo "<option value=''></option>";
+
+				while ($row = mysql_fetch_assoc($tresult)) {
 					$sel = "";
-
-					if (stripos(substr($srow["toimitusehto2"],0,4), $row["selite"]." ") !== false) {
-						$sel = 'selected';
-						$kasitoimehto2 = substr($srow["toimitusehto2"],4);
-						$kasisel = 's';
-
-					}
-					elseif ($row["selite"] == $srow["toimitusehto2"] or ($srow["toimitusehto2"] == '' and $yhtiorow['oletus_toimitusehto2'] == $row["selite"])) {
-						$sel = 'selected';
-						$kasisel = 's';
-					}
+					if ($toimehtosel == $row["tunnus"]) $sel = "SELECTED";
 
 					echo "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark] $row[selitetark_2]</option>";
 				}
 
-				if ($kasisel == '' and $srow["toimitusehto"] != "") {
-					$kasisel = 'selected';
-				}
+				echo "</select>";
 
-				echo "<option value='' $kasisel></option></select>";
+				if ($toimehtoseltark1 != "") $toimehtoseltark = $toimehtoseltark1;
+				elseif ($toimehtoseltark2 != "") $toimehtoseltark = $toimehtoseltark2;
+				elseif ($toimehtoseltark3 != "") $toimehtoseltark = $toimehtoseltark3;
 
-				$tresult = t_avainsana("TOIMEHTO","", "and avainsana.selite='$srow[toimitusehto2]'");
-
-				if (mysql_num_rows($tresult) == 0 and $kasitoimehto2 == "") {
-					$kasitoimehto2 = $srow["toimitusehto2"];
-				}
-				if (mysql_num_rows($tresult) == 1 and $kasitoimehto2 == "") {
-					$row = mysql_fetch_assoc($tresult);
-					$kasitoimehto2 = $row["selitetark"];
-				}
-
-				echo " <input type='text' id='toimitusehto2Lisa' name='kasitoimehto2' value='$kasitoimehto2' size='20'>";
-
+				echo " <input type='text' id='toimitusehto2Lisa' name='kasitoimehto2' value='$toimehtoseltark' size='20'>";
 				echo "</td>";
 			}
 			else {

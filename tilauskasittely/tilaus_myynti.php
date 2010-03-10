@@ -98,7 +98,7 @@ if ($tee == 'AKTIVOI') {
 	unset($row);
 
 	if (mysql_num_rows($result) != 0) {
-		$row=mysql_fetch_assoc($result);
+		$row = mysql_fetch_assoc($result);
 	}
 
 	if (isset($row) and $row['kuka'] != $kukarow['kuka']) {
@@ -5573,6 +5573,7 @@ if ($tee == '') {
 								<form action='tulostakopio.php' method='post' name='tulostaform_tmyynti' id='tulostaform_tmyynti'>
 									<input type='hidden' name='otunnus' value='$tilausnumero'>
 									<input type='hidden' name='projektilla' value='$projektilla'>
+									<input type='hidden' name='tee' value='TULOSTA'>
 									<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//lopetus=$lopetus//tee='>";
 
 						echo "<select name='toim'>";
@@ -5634,7 +5635,8 @@ if ($tee == '') {
 						}
 
 						echo "</select>
-							<input type='submit' name='NAYTATILAUS' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'tulosta_myynti'); return false;\">
+							<input type='submit' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'tulosta_myynti'); return false;\">
+							<input type='submit' value='".t("Tulosta")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'samewindow'); return false;\">							
 							</form>
 							</td>";
 

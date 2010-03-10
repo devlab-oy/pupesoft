@@ -190,7 +190,9 @@
 
 		echo "<font class='message'>".t("Tuotetiedot")."</font><hr>";
 
-		$query = "	SELECT tuote.*, date_format(tuote.muutospvm, '%Y-%m-%d') muutos, date_format(tuote.luontiaika, '%Y-%m-%d') luonti,
+		$query = "	SELECT tuote.*, 
+					if(tuote.status = '', 'A', tuote.status) status,
+					date_format(tuote.muutospvm, '%Y-%m-%d') muutos, date_format(tuote.luontiaika, '%Y-%m-%d') luonti,
 					group_concat(distinct concat(tuotteen_toimittajat.toimittaja, ' ', toimi.nimi) order by tuotteen_toimittajat.tunnus separator '<br>') toimittaja,
 					group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '<br>') osto_era,
 					group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
@@ -286,13 +288,13 @@
 			$cn2 = substr($tuoterow["tullinimike1"],0,6);
 			$cn3 = substr($tuoterow["tullinimike1"],0,4);
 
-			$query = "select cn, dm, su from tullinimike where cn='$cn1' and kieli = '$yhtiorow[kieli]'";
+			$query = "SELECT cn, dm, su from tullinimike where cn='$cn1' and kieli = '$yhtiorow[kieli]'";
 			$tulliresult1 = mysql_query($query) or pupe_error($query);
 
-			$query = "select cn, dm, su from tullinimike where cn='$cn2' and kieli = '$yhtiorow[kieli]'";
+			$query = "SELECT cn, dm, su from tullinimike where cn='$cn2' and kieli = '$yhtiorow[kieli]'";
 			$tulliresult2 = mysql_query($query) or pupe_error($query);
 
-			$query = "select cn, dm, su from tullinimike where cn='$cn3' and kieli = '$yhtiorow[kieli]'";
+			$query = "SELECT cn, dm, su from tullinimike where cn='$cn3' and kieli = '$yhtiorow[kieli]'";
 			$tulliresult3 = mysql_query($query) or pupe_error($query);
 
 			$tullirow1 = mysql_fetch_array($tulliresult1);
@@ -300,11 +302,11 @@
 			$tullirow3 = mysql_fetch_array($tulliresult3);
 
 			//perusalennus
-			$query  = "select alennus from perusalennus where ryhma='$tuoterow[aleryhma]' and yhtio='$kukarow[yhtio]'";
+			$query  = "SELECT alennus from perusalennus where ryhma='$tuoterow[aleryhma]' and yhtio='$kukarow[yhtio]'";
 			$peralresult = mysql_query($query) or pupe_error($query);
 			$peralrow = mysql_fetch_array($peralresult);
 
-			$query = "	select distinct valkoodi, maa from hinnasto
+			$query = "	SELECT distinct valkoodi, maa from hinnasto
 						where yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tuoterow[tuoteno]'
 						and laji = ''
@@ -333,7 +335,6 @@
 				}
 
 			}
-
 
 			if ($tullirow1['cn'] != '') {
 				$alkuperamaat = array();
@@ -364,7 +365,7 @@
 			echo "<table>";
 
 			//1
-			echo "<tr><th>".t("Tuotenumero")."<br>".t("Tuotemerkki")."</th><th>".t("Yksikkö")."</th><th>".t("Eankoodi")."</th><th colspan='2'>".t("Nimitys")."</th><th>".t("Hinnastoon")."</th>";
+			echo "<tr><th>".t("Tuotenumero")."<br>".t("Tuotemerkki")."</th><th>".t("Yksikkö")."</th><th>".t("Eankoodi")."</th><th colspan='2'>".t("Nimitys")."</th><th>".t("Hinnastoon")."<br>".t("Status")."</th>";
 
 			echo "<tr><td>$tuoterow[tuoteno]";
 			//haetaan orginaalit
@@ -402,7 +403,7 @@
 
 				}
 			}
-			echo "<br>".t_avainsana("TUOTEMERKKI", "", " and avainsana.selite='$tuoterow[tuotemerkki]'", "", "", "selite")."</td><td>".t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."</td><td>$tuoterow[eankoodi]</td><td colspan='2'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td><td>$tuoterow[hinnastoon]</td></tr>";
+			echo "<br>".t_avainsana("TUOTEMERKKI", "", " and avainsana.selite='$tuoterow[tuotemerkki]'", "", "", "selite")."</td><td>".t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")."</td><td>$tuoterow[eankoodi]</td><td colspan='2'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td><td>$tuoterow[hinnastoon]<br>".t_avainsana("S", $kieli, "and avainsana.selite='$tuoterow[status]'", "", "", "selitetark")."</td></tr>";
 
 			//2
 			echo "<tr><th>".t("Osasto/try")."</th><th>".t("Toimittaja")."</th><th>".t("Aleryhmä")."</th><th>".t("Tähti")."</th><th>".t("Perusalennus")."</th><th>".t("VAK")."</th></tr>";

@@ -230,7 +230,7 @@
 						if ($eka != 0) {
 							echo "<td></td><td></td><td></td><td></td><td></td><td></td><td valign='top' align = 'right' nowrap>";
 							printf("%.2f", $summa);
-							echo "</td><td>*</td>";
+							echo "</td><td align='right'>*</td>";
 
 							if (strlen(trim($tili)) > 0) {
 								echo "<td></td>";
@@ -282,17 +282,18 @@
 					if ($i == 6) {
 
 						if ($trow[$i] < 0) {
-							$class = " class='error' ";
+							$class = "error";
 						}
 						else {
-							$class = " class='message' ";
+							$class = "ok";
 						}
 
-						echo "<td valign='top' align='right' $class>";
-						echo "<a name='$trow[rivitunnus]' href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]&lopetus=$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=$tee//alvv=$alvv//alvk=$alvk//alvp=$alvp//llvv=$llvv//llvk=$llvk//llvp=$llvp//tkausi=$tkausi//tili=$tili//tili2=$tili2//mul_kustp_seri=".base64_encode(serialize($mul_kustp))."//mul_kohde_seri=".base64_encode(serialize($mul_kohde))."//mul_proj_seri=".base64_encode(serialize($mul_proj))."//asia_ytunnus=$asia_ytunnus//asiakasid=$asiakasid//toim_ytunnus=$toim_ytunnus//toimittajaid=$toimittajaid//alv=$alv//kasin=$kasin//excel=$excel///$trow[rivitunnus]'><font $class>";
-
+						echo "<td valign='top' align='right'";
+						echo "<a name='$trow[rivitunnus]' href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]&lopetus=$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=$tee//alvv=$alvv//alvk=$alvk//alvp=$alvp//llvv=$llvv//llvk=$llvk//llvp=$llvp//tkausi=$tkausi//tili=$tili//tili2=$tili2//mul_kustp_seri=".base64_encode(serialize($mul_kustp))."//mul_kohde_seri=".base64_encode(serialize($mul_kohde))."//mul_proj_seri=".base64_encode(serialize($mul_proj))."//asia_ytunnus=$asia_ytunnus//asiakasid=$asiakasid//toim_ytunnus=$toim_ytunnus//toimittajaid=$toimittajaid//alv=$alv//kasin=$kasin//excel=$excel///$trow[rivitunnus]'>";
+						echo "<span class='$class'>";
 						echo str_replace(".",",",sprintf("%.2f", $trow[$i]));
-						echo "</font></a>";
+						echo "</span>";
+						echo "</a>";
 						echo "</td>";
 
 						if ($trow[$i] < 0 )
@@ -355,7 +356,7 @@
 
 		echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td></td><td align = 'right' nowrap>";
 		printf("%.2f", $summa);
-		echo "</td><td>*</td>";
+		echo "</td><td align='right'>*</td>";
 
 		if (strlen(trim($tili)) > 0) {
 			echo "<td></td>";
@@ -366,7 +367,7 @@
 		echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Negatiiviset yhteensä")."</td>";
 		echo "<td align = 'right' nowrap>";
 		printf("%.2f", $summamiinus);
-		echo "</td><td>*</td>";
+		echo "</td><td align='right'>*</td>";
 
 		if (strlen(trim($tili)) > 0) {
 			echo "<td></td>";
@@ -377,7 +378,7 @@
 		echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Positiiviset yhteensä")."</td>";
 		echo "<td align = 'right' nowrap>";
 		printf("%.2f", $summaplus);
-		echo "</td><td>*</td>";
+		echo "</td><td align='right'>*</td>";
 
 		if (strlen(trim($tili)) > 0) {
 			echo "<td></td>";
@@ -390,7 +391,7 @@
 				echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteensä")." $valuutta</td>";
 				echo "<td align = 'right' nowrap>";
 				printf("%.2f", $summ);
-				echo "</td><td>*</td>";
+				echo "</td><td align='right'>*</td>";
 
 				if (strlen(trim($tili)) > 0) {
 					echo "<td></td>";
@@ -403,7 +404,7 @@
 		echo "<tr class='aktiivi'><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteensä")."</td>";
 		echo "<td align = 'right' nowrap>";
 		printf("%.2f", $summa);
-		echo "</td><td>*</td>";
+		echo "</td><td align='right'>*</td>";
 
 		if (strlen(trim($tili)) > 0) {
 			echo "<td></td>";

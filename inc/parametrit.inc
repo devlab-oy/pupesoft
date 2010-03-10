@@ -277,7 +277,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		header("Content-Type: application/force-download");
 
 		if ($kaunisnimi != '') {
-			header('Content-Disposition: attachment; filename='.$kaunisnimi);
+			header('Content-Disposition: attachment; filename='.basename($kaunisnimi));
 		}
 		else {
 			header('Content-Disposition: attachment; filename=pupesoft.txt');
@@ -286,10 +286,10 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		header("Content-Transfer-Encoding: binary");
 
 		if (isset($filenimi) and $filenimi != '') {
-			header("Content-Length: ".filesize("dataout/".$filenimi));
+			header("Content-Length: ".filesize("dataout/".basename($filenimi)));
 		}
 		elseif (isset($tmpfilenimi) and $tmpfilenimi != '') {
-			header("Content-Length: ".filesize("/tmp/".$tmpfilenimi));
+			header("Content-Length: ".filesize("/tmp/".basename($tmpfilenimi)));
 		}
 		else {
 			header("Content-Length: ".strlen($file));

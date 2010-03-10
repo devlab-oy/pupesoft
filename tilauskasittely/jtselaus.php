@@ -1061,7 +1061,7 @@
 												echo "<option value=''>".t("Kaikki varastot")."</option>";
 
 												while ($vrow = mysql_fetch_array($vtresult)) {
-													if ($vrow["tyyppi"] != 'E' or $kukarow["varasto"] == $vrow["tunnus"]) {
+													if ($vrow["tyyppi"] != 'E' or (isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0 and in_array($vrow["tunnus"], explode(",", $kukarow['varasto'])))) {
 
 														$sel = "";
 														if ($vainvarastosta == $vrow["tunnus"]) {
@@ -1314,7 +1314,7 @@
 								if (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0) {
 
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
-									if ($kukarow["extranet"] == "" and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen')) {
+									if (($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen')) {
 
 										if ($from_varastoon_inc == "editilaus_in.inc") {
 											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";
@@ -1379,7 +1379,7 @@
 												echo "<td valign='top' $class>".t("Avaa uusi tilaus jotta voit toimittaa rivin").".</td>";
 											}
 
-											if ($yhtiorow["Jt_rivien_kasittely"] != 'E') {
+											if ($yhtiorow["jt_rivien_kasittely"] != 'E') {
 												echo "<td valign='top' align='center' $class>".t("Mitätöi")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
 											}
 											echo "<td valign='top' align='center' $classlisa>".t("Älä tee mitään")."<input type='radio' name='loput[$tunnukset]' value=''></td>";

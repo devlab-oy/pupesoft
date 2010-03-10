@@ -1150,17 +1150,16 @@ while (!feof ($fd)) {
 					$result = mysql_query($query) or die($query);
 					$toimtapatmp = mysql_fetch_array($result);
 
-					if ($toimtapatmp['vak_kielto'] != '') {
-						$query = "	SELECT *
-									from toimitustapa
-									where yhtio = '$kukarow[yhtio]'
-									and oletus_vak != ''";
-						$result = mysql_query($query) or die($query);
+					if ($toimtapatmp['vak_kielto'] != '' and $toimtapatmp['vak_kielto'] != 'K') {
+						$query = "	SELECT selite
+									FROM toimitustapa
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND selite = '$toimtapatmp[vak_kielto]'
+									AND vak_kielto = ''";
+						$result = mysql_query($query) or pupe_error($query);
 
-						if (mysql_num_rows($result) > 0) {
-							$oletustoim = mysql_fetch_array($result);
-
-							$query = "UPDATE lasku SET toimitustapa = '$oletustoim[selite]' where yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
+						if (mysql_num_rows($result) == 1) {
+							$query = "UPDATE lasku SET toimitustapa = '$toimtapatmp[vak_kielto]' where yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
 							$result = mysql_query($query) or die($query);
 						}
 					}
@@ -1183,7 +1182,7 @@ while (!feof ($fd)) {
 				// jos terminaalitoimitus niin EI tehd‰ tilaus-valmista...
 				if ($editilaus_tila != "Z") {
 
-					if ($yhtiorow['jt_automatiikka'] != '') {
+					if ($yhtiorow['jt_automatiikka'] == 'Y' or $yhtiorow['jt_automatiikka'] == 'W') {
 						//lis‰t‰‰n tilaukseen ne jt-rivit jotka riitt‰v‰t kaikille
 						$edi_ulos .= "\n";
 						jt_toimita_editilaus($laskurow["ytunnus"], $laskurow["liitostunnus"], $laskurow["maa"]);

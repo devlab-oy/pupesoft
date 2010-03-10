@@ -600,7 +600,6 @@
 							jvkielto = '$row[jvkielto]',
 							vak_kielto = '$row[vak_kielto]',
 							nouto = '$row[nouto]',
-							oletus_vak = '$row[oletus_vak]',
 							lauantai = '$row[lauantai]',
 							kuljyksikko = '$row[kuljyksikko]',
 							merahti = '$row[merahti]',

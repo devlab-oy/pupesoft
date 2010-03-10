@@ -235,17 +235,24 @@
 
 	if (mysql_field_name($result, $i) == "vak_kielto") {
 
-		$sel = $sela = '';
-		if ($trow[$i] != '') {
-			$sel = 'selected';
-		}
-		else {
-			$sela = 'selected';
-		}
+		$sel			= array();
+		$sel[$trow[$i]]	= " selected";
 		
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' $sela>".t("Toimitustavalla saa toimittaa VAK-tuotteita")."</option>";
-		$ulos .= "<option value='K' $sel>".t("Toimitustavalla ei saa toimittaa VAK-tuotteita")."</option>";
+		$ulos .= "<option value=''>".t("Toimitustavalla saa toimittaa VAK-tuotteita")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Toimitustavalla ei saa toimittaa VAK-tuotteita")."</option>";
+
+		$query = "	SELECT DISTINCT selite
+					FROM toimitustapa
+					WHERE yhtio = '{$kukarow['yhtio']}'
+					AND vak_kielto = ''
+					AND nouto = ''";
+		$alt_toimitustapa_res = mysql_query($query) or pupe_error($query);
+
+		while ($alt_toimitustapa_row = mysql_fetch_assoc($alt_toimitustapa_res)) {
+			$ulos .= "<option value='$alt_toimitustapa_row[selite]' ".$sel[$alt_toimitustapa_row['selite']].">".t("VAK-tuotteet toimitetaan toimitustavalla")." $alt_toimitustapa_row[selite]</option>";
+		}
+
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -267,23 +274,6 @@
 		$jatko = 0;
 	}
 	
-	if (mysql_field_name($result, $i) == "oletus_vak") {
-
-		$sel = $sela = '';
-		if ($trow[$i] != '') {
-			$sel = 'selected';
-		}
-		else {
-			$sela = 'selected';
-		}
-		
-		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' $sela>".t("Toimitustapa ei ole oletustoimitustapa VAK-kuljetuksille")."</option>";
-		$ulos .= "<option value='K' $sel>".t("Toimitustapa on oletus toimitustapa VAK-kuljetuksille")."</option>";
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
 	if (mysql_field_name($result, $i) == "ei_pakkaamoa") {
 
 		$ulos  = "<td><select name='$nimi'>";

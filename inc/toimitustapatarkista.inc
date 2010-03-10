@@ -75,17 +75,6 @@ if(!function_exists("toimitustapatarkista")) {
 			$apuvakkielto  = $t[$i];
 		}
 	
-		if ((mysql_field_name($result, $i)=="oletus_vak") and ($t[$i]!='')) {
-			$query = "SELECT oletus_vak FROM toimitustapa where yhtio = '$kukarow[yhtio]' and oletus_vak != '' and tunnus != '$tunnus'";
-			$vakki_result = mysql_query($query) or pupe_error($query);
-			
-			if (mysql_num_rows($vakki_result) > 0) {
-				$virhe[$i] = "".t("Oletus vak on jo asetettu")."!";
-			}
-			elseif ($apuvakkielto != '') {
-				$virhe[$i] = "".t("Toimitustavalla on vak kielto")."!";
-			}
-		}
 	}
 }
 

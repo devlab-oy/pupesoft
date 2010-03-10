@@ -660,8 +660,7 @@
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
 		$sel = array();
-		$apu = $trow[$i];
-		$sel[$apu] = "SELECTED";
+		$sel[$trow[$i]] = "SELECTED";
 
 		$ulos .= "<option value = ''>".t("Tilausta EI ker‰t‰ jos listalla on vain Puuterivej‰ JA/TAI JT-rivej‰")."</option>";
 		$ulos .= "<option value = 'P' $sel[P]>".t("Tilaus ker‰t‰‰n jos listalla on vain Puuterivej‰")."</option>";
@@ -676,18 +675,13 @@
 
 		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-		$sel1 = "";
-		$sel2 = "";
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
 
-		if ($trow[$i] == "") {
-			$sel1 = "selected";
-		}
-		elseif ($trow[$i] == "Y") {
-			$sel2 = "selected";
-		}
-
-		$ulos .= "<option value=''  $sel1>".t("Asiakkaan JT-rivej‰ ei kohdisteta automaattisesti sis‰‰ntulevalle EDI-tilaukselle")."</option>";
-		$ulos .= "<option value='Y' $sel2>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti sis‰‰ntulevalle EDI-tilaukselle")."</option>";
+		$ulos .= "<option value=''>".t("Asiakkaan JT-rivej‰ ei kohdisteta automaattisesti")."</option>";
+		$ulos .= "<option value='Y' $sel[Y]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti sis‰‰ntulevalle EDI-tilaukselle")."</option>";
+		$ulos .= "<option value='X' $sel[X]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti myyntitilaukselle")."</option>";
+		$ulos .= "<option value='W' $sel[W]>".t("Asiakkaan JT-rivej‰ kohdistetaan automaattisesti myyntitilaukselle ja sis‰‰ntulevalle EDI-tilaukselle")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

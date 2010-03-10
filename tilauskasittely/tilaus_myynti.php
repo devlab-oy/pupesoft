@@ -628,29 +628,27 @@ if (in_array($jarjesta, array("moveUp", "moveDown")) and $rivitunnus > 0) {
 // Poistetaan tilaus
 if ($tee == 'POISTA' and $muokkauslukko == "") {
 
-	// extranet-tilausta mitätöidessä laitetaan kaikki poimitut jt-rivit takaisin omille tilauksille
-	if ($kukarow['extranet'] != '' and $kukarow['kesken'] != 0) {
-		$query = "	SELECT tilausrivi.tunnus, tilausrivin_lisatiedot.vanha_otunnus
-					FROM tilausrivi
-					JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.positio = 'JT')
-					WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-					AND tilausrivi.otunnus = '{$kukarow['kesken']}'";
-		$jt_rivien_muisti_res = mysql_query($query) or pupe_error($query);
+	// tilausta mitätöidessä laitetaan kaikki poimitut jt-rivit takaisin omille tilauksille
+	$query = "	SELECT tilausrivi.tunnus, tilausrivin_lisatiedot.vanha_otunnus
+				FROM tilausrivi
+				JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.positio = 'JT')
+				WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+				AND tilausrivi.otunnus = '{$kukarow['kesken']}'";
+	$jt_rivien_muisti_res = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($jt_rivien_muisti_res) > 0) {
-			$jt_saldo_lisa = $yhtiorow["varaako_jt_saldoa"] == "" ? ", jt = varattu, varattu = 0 " : '';
+	if (mysql_num_rows($jt_rivien_muisti_res) > 0) {
+		$jt_saldo_lisa = $yhtiorow["varaako_jt_saldoa"] == "" ? ", jt = varattu, varattu = 0 " : '';
 
-			while ($jt_rivien_muisti_row = mysql_fetch_assoc($jt_rivien_muisti_res)) {
-				$query = "	UPDATE tilausrivi SET
-							otunnus = '{$jt_rivien_muisti_row['vanha_otunnus']}',
-							var = 'J'
-							$jt_saldo_lisa
-							WHERE yhtio = '{$kukarow['yhtio']}'
-							AND tunnus = '{$jt_rivien_muisti_row['tunnus']}'";
-				$jt_rivi_res = mysql_query($query) or pupe_error($query);
+		while ($jt_rivien_muisti_row = mysql_fetch_assoc($jt_rivien_muisti_res)) {
+			$query = "	UPDATE tilausrivi SET
+						otunnus = '{$jt_rivien_muisti_row['vanha_otunnus']}',
+						var = 'J'
+						$jt_saldo_lisa
+						WHERE yhtio = '{$kukarow['yhtio']}'
+						AND tunnus = '{$jt_rivien_muisti_row['tunnus']}'";
+			$jt_rivi_res = mysql_query($query) or pupe_error($query);
 
-				echo "<font class='message'>",t("Jälkitoimitus palautettiin tilaukselle")," $jt_rivien_muisti_row[vanha_otunnus], ",t("ota yhteys asiakaspalveluun"),".</font><br><br>";
-			}
+			echo "<font class='message'>",t("Jälkitoimitus palautettiin tilaukselle")," $jt_rivien_muisti_row[vanha_otunnus], ",t("ota yhteys asiakaspalveluun"),".</font><br><br>";
 		}
 	}
 
@@ -751,15 +749,6 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 	}
 }
 
-//Lisätään tän asiakkaan valitut JT-rivit tälle tilaukselle
-if ($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == "") {
-	$tilaus_on_jo 	= "KYLLA";
-
-	require("jtselaus.php");
-
-	$tyhjenna 	= "JOO";
-	$tee 		= "";
-}
 
 //Tyhjenntään syöttökentät
 if (isset($tyhjenna)) {
@@ -1399,6 +1388,46 @@ if ($tee == "tuotteetasiakashinnastoon") {
 if ($kukarow["extranet"] == "" and $tee == 'jyvita') {
 	require("jyvita_riveille.inc");
 }
+
+//Lisätään tän asiakkaan valitut JT-rivit tälle tilaukselle
+if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == "") or (($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and (int) $kukarow['kesken'] != 0 and $kaytiin_otsikolla == "NOJOO!" and ($tee == '' or $tee == 'OTSIK') and ($toim == 'EXTRANET' or $toim == 'RIVISYOTTO' or ($toim == 'PIKATILAUS' and ($asiakasid != '' or $laskurow['liitostunnus'] != ''))))) {
+	$tilaus_on_jo 	= "KYLLA";
+
+	// Halutaan poimia heti kaikki jt-rivit extranet-tilauksille ensimmäisellä kerralla
+	if (($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and (int) $kukarow['kesken'] != 0 and $kaytiin_otsikolla == "NOJOO!" and ($tee == '' or $tee == 'OTSIK') and ($toim == 'EXTRANET' or $toim == 'RIVISYOTTO' or ($toim == 'PIKATILAUS' and ($asiakasid != '' or $laskurow['liitostunnus'] != '')))) {
+
+		if (isset($laskurow["varasto"]) and (int) $laskurow["varasto"] > 0) {
+			$varasto = array((int) $laskurow["varasto"]);
+		}
+		elseif (isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0) {
+			$varasto = explode(",", $kukarow["varasto"]);
+		}
+		else {
+			$asiakasmaa = $laskurow["toim_nimi"] == "" ? $laskurow["maa"] : $laskurow["toim_maa"];
+
+			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
+						FROM varastopaikat
+						WHERE yhtio = '$kukarow[yhtio]' 
+						AND (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
+			$vtresult = mysql_query($query) or pupe_error($query);
+			$vtrow = mysql_fetch_assoc($vtresult);
+
+			$varasto = $vtrow['tunnukset'];
+		}
+
+		jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varasto, '', "tosi_automaaginen", "JATKA", "automaattinen_poiminta");
+		
+		$tyhjenna 	= "JOO";
+		$tee 		= "";
+	}
+	else {
+		require("jtselaus.php");
+
+		$tyhjenna 	= "JOO";
+		$tee 		= "";
+	}
+}
+
 
 // näytetään tilaus-ruutu...
 if ($tee == '') {
@@ -2863,6 +2892,23 @@ if ($tee == '') {
 				$paikka		= "";
 			}
 			elseif ($tapa == "POISTA") {
+
+				if ($yhtiorow['jt_email'] != '' and $tilausrivi['positio'] == 'JT') {
+					$kutsu = "";
+					$subject = "";
+					$content_body = "";
+
+					$header  = "From: <$yhtiorow[postittaja_email]>\n";
+					$kutsu = "Jälkitoimitus";
+					$subject = t("Jälkitoimitustuote poistettu");
+					$content_body = $yhtiorow['nimi']."\n\n";
+
+					$content_body .= "$kpl ".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")." ".t("poistettu jälkitoimituksesta tuotetta")." $tilausrivi[tuoteno] ".t("tilauksella")." $kukarow[kesken]\n\n\n";
+
+					mail($yhtiorow['jt_email'],  "$subject", $content_body, $header, "-f $yhtiorow[postittaja_email]");
+					echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
+				}
+
 				$tuoteno	= '';
 				$kpl		= '';
 				$var		= '';
@@ -3623,27 +3669,68 @@ if ($tee == '') {
 				$saldoaikalisa = "";
 			}
 
-			$vakquery = "	SELECT group_concat(DISTINCT tuote.tuoteno) vaktuotteet
+			$vakquery = "	SELECT ifnull(group_concat(DISTINCT tuote.tuoteno), '') vaktuotteet
 							FROM tilausrivi
 							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi != '')
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							AND tilausrivi.otunnus = '$laskurow[tunnus]'
 							AND tilausrivi.tyyppi = 'L'
-							AND tilausrivi.var NOT IN ('P', 'J')
-							LIMIT 1";
+							AND tilausrivi.var NOT IN ('P', 'J')";
 			$vakresult = mysql_query($vakquery) or pupe_error($vakquery);
 			$vakrow = mysql_fetch_assoc($vakresult);
 
-			if ($vakrow["vaktuotteet"] != "") {
-				$vak_toim_query = "	SELECT tunnus
+			if ($vakrow['vaktuotteet'] != '') {
+				if ($kukarow['extranet'] == '') {
+					
+					$vak_toim_query = "	SELECT vak_kielto
+										FROM toimitustapa
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND selite = '$laskurow[toimitustapa]'";
+					$vak_toim_result = mysql_query($vak_toim_query) or pupe_error($vak_toim_query);
+					$vak_toim_row = mysql_fetch_assoc($vak_toim_result);
+
+					// jos vak-toimituksissa halutaan käyttää vaihtoehtoista toimitustapaa
+					if ($vak_toim_row['vak_kielto'] != '' and $vak_toim_row['vak_kielto'] != 'K') {
+
+						$query = "	SELECT tunnus
 									FROM toimitustapa
 									WHERE yhtio = '$kukarow[yhtio]'
-									AND selite = '$laskurow[toimitustapa]'
-									AND vak_kielto != ''
-									AND vak_kielto != 'Erilliskäsiteltävä'";
-				$vak_toim_result = mysql_query($vak_toim_query) or pupe_error($vak_toim_query);
+									AND selite = '$vak_toim_row[vak_kielto]'
+									AND vak_kielto = ''";
+						$vak_check_res = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($vak_toim_result) > 0) {
+						// CHECK! vaihtoehtoisen toimitustavan täytyy sallia vak-tuotteiden toimitus
+						if (mysql_num_rows($vak_check_res) == 1) {
+							$query = "	UPDATE lasku SET
+										toimitustapa = '$vak_toim_row[vak_kielto]'
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND tunnus = '$laskurow[tunnus]'";
+							$toimtapa_update_res = mysql_query($query) or pupe_error($query);
+
+							echo "<br><font class='error'>".t("HUOM: Tämä toimitustapa ei salli VAK-tuotteita")."! ($laskurow[toimitustapa])</font><br>";
+							echo "<font class='error'>$laskurow[toimitustapa] ".t("toimitustavan VAK-tuotteet toimitetaan vaihtoehtoisella toimitustavalla")." $vak_toim_row[vak_kielto].</font> ";
+							echo "<form name='tilaus' method='post'>";
+							echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+							echo "<input type='hidden' name='toim' value='$toim'>";
+							echo "<input type='hidden' name='tee' value='$tee'>";
+
+							echo "<input type='submit' name='tyhjenna' value='".t("OK")."'>";
+							echo "</form>";
+							echo "<br/><br/>";
+						}
+						else {
+							echo "<font class='error'>".t("VIRHE: Tämä toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br>";
+							echo "<font class='error'>".t("Valitse uusi toimitustapa")."!</font><br><br>";
+						}
+						$tilausok++;
+					}
+					elseif ($vak_toim_row['vak_kielto'] == 'K') {
+						echo "<font class='error'>".t("VIRHE: Tämä toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br>";
+						echo "<font class='error'>".t("Valitse uusi toimitustapa")."!</font><br><br>";
+						$tilausok++;
+					}
+				}
+				else {
 					echo "<font class='error'>".t("VIRHE: Tämä toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br>";
 					echo "<font class='error'>".t("Valitse uusi toimitustapa")."!</font><br><br>";
 					$tilausok++;
@@ -5369,7 +5456,7 @@ if ($tee == '') {
 				if ($jarjlisa != "") {
 					$ycspan--;
 				}
-				if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
+				if ($kukarow["resoluutio"] == 'I' ) {
 					$ycspan++;
 				}
 				if ($trivityyulos != "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {

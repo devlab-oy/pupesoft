@@ -7,7 +7,7 @@
 		// Toimitustavan saa poistaa mik‰li mill‰‰n asiakkaalla ei ole sit‰ k‰ytˆss‰ (tsekataan tuoterivi.inc)
 		$poistolukko = "ON";
 
-		$query = "	SELECT selite
+		$query = "	SELECT selite, vak_kielto
 					FROM toimitustapa
 					WHERE yhtio = '{$kukarow['yhtio']}'
 					AND tunnus = '{$tunnus}'";
@@ -44,7 +44,7 @@
 						AND yhtio = '{$kukarow['yhtio']}'";
 			$chkres4 = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($chkres1) == 0 and mysql_num_rows($chkres2) == 0 and mysql_num_rows($chkres3) == 0 and mysql_num_rows($chkres4) == 0) {
+			if (mysql_num_rows($chkres1) == 0 and mysql_num_rows($chkres2) == 0 and mysql_num_rows($chkres3) == 0 and mysql_num_rows($chkres4) == 0 and $toimitustapa_check_row['vak_kielto'] == '') {
 				$poistolukko = '';
 			}
 			else {
@@ -65,6 +65,10 @@
 				
 				if (mysql_num_rows($chkres4) > 0) {
 					$otsikko_lisatiedot .= "<li>".mysql_num_rows($chkres4)." ".t("rahtisopimuksella")."</li>";
+				}
+
+				if ($toimitustapa_check_row['vak_kielto'] != '' and $toimitustapa_check_row['vak_kielto'] != 'K') {
+					$otsikko_lisatiedot .= "<li>".t("VAK-tuotteiden toimituksessa k‰ytet‰‰n muuta toimitustapaa")."</li>";
 				}
 				
 				$otsikko_lisatiedot .= "</ul></font>";

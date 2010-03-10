@@ -63,7 +63,7 @@
 	if ($id == '') $id=0;
 
 	// jos ollaan lisäämässä rahtikirjaa, niin katsotaan onko valitulla toimitustavalla erikoispakkauskielto
-	if ($tee == 'add' and count($erikoispakkaus) > 0) {
+	if (count($erikoispakkaus) > 0) {
 		$query = "	SELECT *
 					FROM toimitustapa
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -81,6 +81,48 @@
 				}
 			}
 		}
+	}
+
+	$vakquery = "	SELECT ifnull(group_concat(DISTINCT tuote.tuoteno), '') vaktuotteet
+					FROM tilausrivi
+					JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi != '')
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					AND tilausrivi.otunnus = '$otsikkonro'
+					AND tilausrivi.tyyppi = 'L'
+					AND tilausrivi.var NOT IN ('P', 'J')";
+	$vakresult = mysql_query($vakquery) or pupe_error($vakquery);
+	$vakrow = mysql_fetch_assoc($vakresult);
+
+	if ($vakrow['vaktuotteet'] != '') {
+		$query = "	SELECT *
+					FROM toimitustapa
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND selite = '$toimitustapa'";
+		$toimitustapa_res = mysql_query($query) or pupe_error($query);
+		$toimitustapa_row = mysql_fetch_assoc($toimitustapa_res);
+
+		if ($toimitustapa_row['vak_kielto'] != '' and $toimitustapa_row['vak_kielto'] != 'K') {
+			echo "<font class='message'>",t("Toimituksella on VAK-tuotteita ja toimitustavalla")," $toimitustapa ",t("on VAK-kielto"),"</font><br/>";
+			echo "<font class='message'>$toimitustapa ",t("VAK-tuotteet toimitetaan toimitustavalla")," $toimitustapa_row[vak_kielto]</font><br/>";
+			$toimitustapa = mysql_real_escape_string($toimitustapa_row['vak_kielto']);
+			$tee = '';
+		}
+		elseif ($toimitustapa_row['vak_kielto'] == 'K') {
+			echo "<br><font class='error'>".t("VIRHE: Tämä toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br>";
+			$tee = '';
+		}
+	}
+
+	$vak_toim_query = "	SELECT tunnus
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						AND selite = '$toimitustapa'
+						AND jvkielto != ''";
+	$vak_toim_result = mysql_query($vak_toim_query) or pupe_error($vak_toim_query);
+
+	if (mysql_num_rows($vak_toim_result) > 0 and $marow["jv"] != "") {
+		echo "<br><font class='error'>".t("VIRHE: Tämä toimitustapa ei salli jälkivaatimuksia")."!</font><br>";
+		$tee = '';
 	}
 
 	// jos ollaan rahtikirjan esisyötössä niin tehdään lisäys vähän helpommin
@@ -855,7 +897,7 @@
 
 		while ($row = mysql_fetch_assoc($result)){
 			$sel = '';
-			if (($row["tunnus"] == $tuvarasto) or ($kukarow['varasto'] == $row["tunnus"] and $tuvarasto=='')) {
+			if (($row["tunnus"] == $tuvarasto) or ((isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0 and in_array($row["tunnus"], explode(",", $kukarow['varasto']))) and $tuvarasto=='')) {
 				$sel = 'selected';
 				$tuvarasto = $row["tunnus"];
 			}
@@ -1518,7 +1560,7 @@
 
 		while ($row = mysql_fetch_assoc($result)){
 			$sel = '';
-			if (($row['tunnus'] == $tuvarasto) or ($kukarow['varasto'] == $row['tunnus'] and $tuvarasto=='')) {
+			if (($row['tunnus'] == $tuvarasto) or ((isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0 and in_array($row["tunnus"], explode(",", $kukarow['varasto']))) and $tuvarasto=='')) {
 				$sel = 'selected';
 				$tuvarasto = $row['tunnus'];
 			}
@@ -2105,48 +2147,6 @@
 
 		echo "</table>";
 
-		// erroricheckit
-		unset($errori);
-
-		$vakquery = "	SELECT group_concat(DISTINCT tuote.tuoteno) vaktuotteet
-						FROM tilausrivi
-						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.vakkoodi != '')
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						AND tilausrivi.otunnus = '$otsik[tunnus]'
-						AND tilausrivi.tyyppi = 'L'
-						AND tilausrivi.var NOT IN ('P', 'J')
-						LIMIT 1";
-		$vakresult = mysql_query($vakquery) or pupe_error($vakquery);
-		$vakrow = mysql_fetch_assoc($vakresult);
-
-
-		if ($vakrow["vaktuotteet"] != "") {
-			$vak_toim_query = "	SELECT tunnus
-								FROM toimitustapa
-								WHERE yhtio = '$kukarow[yhtio]'
-								AND selite = '$toimitustapa'
-								AND vak_kielto != ''
-								AND vak_kielto != 'Erilliskäsiteltävä'";
-			$vak_toim_result = mysql_query($vak_toim_query) or pupe_error($vak_toim_query);
-
-			if (mysql_num_rows($vak_toim_result) > 0) {
-				echo "<br><font class='error'>".t("VIRHE: Tämä toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br>";
-				$errori = "virhe";
-			}
-		}
-
-		$vak_toim_query = "	SELECT tunnus
-							FROM toimitustapa
-							WHERE yhtio = '$kukarow[yhtio]'
-							AND selite = '$toimitustapa'
-							AND jvkielto != ''";
-		$vak_toim_result = mysql_query($vak_toim_query) or pupe_error($vak_toim_query);
-
-		if (mysql_num_rows($vak_toim_result) > 0 and $marow["jv"] != "") {
-			echo "<br><font class='error'>".t("VIRHE: Tämä toimitustapa ei salli jälkivaatimuksia")."!</font><br>";
-			$errori = "virhe";
-		}
-
 		//sitten tehdään pakkaustietojen syöttö...
 		echo "<br><font class='message'>".t("Syötä tilauksen pakkaustiedot")."</font><hr>";
 
@@ -2441,9 +2441,7 @@
 
 		echo "<br><input type='hidden' name='id' value='$id'>";
 
-		if (!isset($errori) and $errori == "") {
-			echo "<input name='subnappi' type='submit' value='".t("Valmis")."'>";
-		}
+		echo "<input name='subnappi' type='submit' value='".t("Valmis")."'>";
 
 		echo "</form>";
 

@@ -544,6 +544,11 @@
 								$kommentti .= t("Tilausviite").": ".trim($orig_laskurow['viesti']);
 							}
 
+							if ($tilaus_on_jo == "KYLLA" and strpos($kommentti, t("Toimitettavissa oleva JT-rivi")."!") === FALSE) {
+								if (trim($kommentti) != "") $kommentti .= " / ";
+								$kommentti .= t("Toimitettavissa oleva JT-rivi")."!";
+							}
+
 							$jtspec = "JTSPEC";
 
 							// Tutkitaan onko tämä myyty ulkomaan alvilla
@@ -674,7 +679,7 @@
 													$values .= "";
 													break;
 												case 'positio':
-													if ($kukarow['extranet'] != '' and $tilaus_on_jo == "KYLLA") {
+													if ($tilaus_on_jo == "KYLLA") {
 														$kysely .= "positio='JT',";
 													}
 													else {

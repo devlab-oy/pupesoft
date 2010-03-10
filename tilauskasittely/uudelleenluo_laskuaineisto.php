@@ -1,19 +1,15 @@
 <?php
 
-	if (isset($_POST["tee"]) and $_POST["tee"] == 'lataa_tiedosto') {
-		$lataa_tiedosto = 1;
-		$file = file_get_contents($_POST["file"]);
-		unset($_POST["file"]);
-
-		if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
-			$_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
-		}
+	if (isset($_POST["tee"])) {
+		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
 	require("../inc/parametrit.inc");
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
-		echo "$file";
+		readfile("../dataout/".basename($filenimi));
+		exit;
 	}
 	else {
 
@@ -618,8 +614,8 @@
 				echo "<tr><th>".t("Tallenna pupevoice-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='".str_replace('../dataout/', '', $nimixml)."'>";
-				echo "<input type='hidden' name='file' value='$nimixml'>";
+				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimixml)."'>";
+				echo "<input type='hidden' name='filenimi' value='".basename($nimixml)."'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table>";
 			}
@@ -641,8 +637,8 @@
 				echo "<tr><th>".t("Tallenna finvoice-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='".str_replace('../dataout/', '', $nimifinvoice)."'>";
-				echo "<input type='hidden' name='file' value='$nimifinvoice'>";
+				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimifinvoice)."'>";
+				echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table>";
 			}
@@ -652,8 +648,8 @@
 				echo "<tr><th>".t("Tallenna Elmaedi-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='".str_replace('../dataout/', '', $nimiedi)."'>";
-				echo "<input type='hidden' name='file' value='$nimiedi'>";
+				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimiedi)."'>";
+				echo "<input type='hidden' name='filenimi' value='".basename($nimiedi)."'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table>";
 			}
@@ -663,8 +659,8 @@
 				echo "<tr><th>".t("Tallenna Pupesoft-Finvoice-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='".str_replace('../dataout/', '', $nimisisainenfinvoice)."'>";
-				echo "<input type='hidden' name='file' value='$nimisisainenfinvoice'>";
+				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimisisainenfinvoice)."'>";
+				echo "<input type='hidden' name='filenimi' value='".basename($nimisisainenfinvoice)."'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table>";
 			}

@@ -90,21 +90,16 @@
 	}
 	elseif (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
 
-		if (isset($_POST["tee"]) and $_POST["tee"] == 'lataa_tiedosto') {
-			$lataa_tiedosto = 1;
-			$file = file_get_contents($_POST["file"]);
-			unset($_POST["file"]);
-
-			if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
-				$_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
-			}
+		if (isset($_POST["tee"])) {
+			if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+			if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 		}
 
 		require("../inc/parametrit.inc");
 	}
 
-	if ($tee == "lataa_tiedosto") {
-		echo $file;
+	if (isset($tee) and $tee == "lataa_tiedosto") {
+		readfile("../dataout/".basename($filenimi));
 		exit;
 	}
 	else {
@@ -2057,7 +2052,7 @@
 									$yhtiorow["lasku_tulostin"] = $valittu_tulostin;
 								}
 
-								$querykieli = "	select *
+								$querykieli = "	SELECT *
 												from kirjoittimet
 												where yhtio='$kukarow[yhtio]' and tunnus='$yhtiorow[lasku_tulostin]'";
 								$kires = mysql_query($querykieli) or pupe_error($querykieli);
@@ -2082,7 +2077,7 @@
 								}
 
 								if ($valittu_kopio_tulostin != '') {
-									$querykieli = "	select *
+									$querykieli = "	SELECT *
 													from kirjoittimet
 													where yhtio='$kukarow[yhtio]' and tunnus='$valittu_kopio_tulostin'";
 									$kires = mysql_query($querykieli) or pupe_error($querykieli);
@@ -2213,9 +2208,9 @@
 				(strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) and $yhtiorow["verkkolasku_lah"] == "finvoice") {
 				echo "<br><table><tr><th>".t("Tallenna finvoice-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
-				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='file' value='$nimifinvoice'>";
-				echo "<input type='hidden' name='kaunisnimi' value=".str_replace("../dataout/", "" ,$nimifinvoice)."'>";
+				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";			
+				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimifinvoice)."'>";
+				echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
 				echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr></form></table>";
 			}
 		}

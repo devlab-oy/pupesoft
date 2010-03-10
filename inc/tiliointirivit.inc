@@ -41,9 +41,11 @@
 			$selite = '';
 		}
 
-		$query = "	SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa != 'E'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi = 'K'
+					and kaytossa != 'E'
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -55,12 +57,12 @@
 				if ($kustannuspaikkarow["tunnus"] == $kustp) {
 					$valittu = "selected";
 				}
-				$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
+				$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[koodi] $kustannuspaikkarow[nimi]";
 			}
 			$ulos .= "</select><br>";
 		}
 
-		$query = "	SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O' and kaytossa != 'E'
 					ORDER BY nimi";
@@ -74,12 +76,12 @@
 				if ($kustannuspaikkarow["tunnus"] == $kohde) {
 					$valittu = "selected";
 				}
-				$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
+				$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[koodi] $kustannuspaikkarow[nimi]";
 			}
 			$ulos .= "</select><br>";
 		}
 
-		$query = "	SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi = 'P' and kaytossa != 'E'
@@ -94,7 +96,7 @@
 				if ($kustannuspaikkarow["tunnus"] == $projekti) {
 					$valittu = "selected";
 				}
-				$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
+				$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[koodi] $kustannuspaikkarow[nimi]";
 			}
 			$ulos .= "</select>";
 		}

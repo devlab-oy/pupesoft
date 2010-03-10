@@ -130,12 +130,14 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "nimi" and $alias_set == "KAYTTAJA") {
 
 		$query = "	SELECT kuka, nimi
 					FROM kuka
 					WHERE yhtio = '$kukarow[yhtio]'
+					AND extranet = ''
+					AND hyvaksyja = 'o'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
@@ -264,7 +266,7 @@
 
 	if (mysql_field_name($result, $i) == "kauppatapahtuman_luonne") {
 		$vresult = t_avainsana("KT");
-		
+
 		$ulos = "<td><select name='$nimi'>";
 
 		$sel="";
@@ -287,7 +289,7 @@
 
 	if (mysql_field_name($result, $i) == "kuljetusmuoto") {
 		$vresult = t_avainsana("KM");
-			
+
 		$ulos = "<td><select name='$nimi'>";
 
 		$sel="";
@@ -408,10 +410,10 @@
 			$ulos = "<input type='hidden' name='$nimi' value='$laji'>";
 			$tyyppi = 4;
 		}
-		else {		
+		else {
 			$sel = array();
-			$sel[$trow[$i]] = "selected";		
-			
+			$sel[$trow[$i]] = "selected";
+
 			$ulos  = "<td><select name='$nimi'>";
 			$ulos .= "<option value=''>".t("Normaali toimittaja")."</option>";
 			$ulos .= "<option value='O'  $sel[O] >".t("Online toimittaja")."</option>";
@@ -422,7 +424,7 @@
 			$ulos .= "<option value='PP' $sel[PP]>".t("Poistettu / Ei käytössä (Poistetaan myös kaikki Tuotteen toimittajatiedot)")."</option>";
 			$ulos .= "</select></td>";
 		}
-		
+
 		$jatko = 0;
 	}
 

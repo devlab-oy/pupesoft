@@ -1016,7 +1016,7 @@ if ($tee == 'P' or $tee == 'E') {
  			// Tehaan kentta tai naytetaan popup
 			if ($iulos[$i] == '') {
 				echo livesearch_kentta("lasku", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT");
-			}						
+			}
 			else {
 				echo "$iulos[$i]";
 			}
@@ -1035,63 +1035,73 @@ if ($tee == 'P' or $tee == 'E') {
 			echo "</td>";
 
 			// Tehd‰‰n kustannuspaikkapopup
-			$query = "SELECT tunnus, nimi
+			$query = "	SELECT tunnus, nimi, koodi
 						FROM kustannuspaikka
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa <> 'E'
 						ORDER BY nimi";
 			$vresult = mysql_query($query) or pupe_error($query);
 
-			echo "<td valign='top'><select name='ikustp[$i]'>";
-			echo "<option value =' '>".t("Ei kustannuspaikkaa")."";
+			echo "<td valign='top'>";
 
-			while ($vrow = mysql_fetch_array($vresult)) {
-				$sel = "";
-				if ($ikustp[$i] == $vrow['tunnus']) {
-					$sel = "selected";
+			if (mysql_num_rows($vresult) > 0) {
+				echo "<select name='ikustp[$i]'>";
+				echo "<option value =' '>".t("Ei kustannuspaikkaa")."";
+
+				while ($vrow = mysql_fetch_array($vresult)) {
+					$sel = "";
+					if ($ikustp[$i] == $vrow['tunnus']) {
+						$sel = "selected";
+					}
+					echo "<option value ='$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 				}
-				echo "<option value ='$vrow[tunnus]' $sel>$vrow[nimi]";
+
+				echo "</select><br>";
 			}
 
-			echo "</select><br>";
-
 			// Tehd‰‰n kohdepopup
-			$query = "SELECT tunnus, nimi
+			$query = "	SELECT tunnus, nimi, koodi
 						FROM kustannuspaikka
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O' and kaytossa <> 'E'
 						ORDER BY nimi";
 			$vresult = mysql_query($query) or pupe_error($query);
 
-			echo "<select name='ikohde[$i]'>";
-			echo "<option value =' '>".t("Ei kohdetta")."";
+			if (mysql_num_rows($vresult) > 0) {
+				echo "<select name='ikohde[$i]'>";
+				echo "<option value =' '>".t("Ei kohdetta")."";
 
-			while ($vrow = mysql_fetch_array($vresult)) {
-				$sel = "";
-				if ($ikohde[$i] == $vrow['tunnus']) {
-					$sel = "selected";
+				while ($vrow = mysql_fetch_array($vresult)) {
+					$sel = "";
+					if ($ikohde[$i] == $vrow['tunnus']) {
+						$sel = "selected";
+					}
+					echo "<option value ='$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 				}
-				echo "<option value ='$vrow[tunnus]' $sel>$vrow[nimi]";
+				echo "</select><br>";
 			}
-			echo "</select><br>";
 
 			// Tehd‰‰n projektipopup
 
-			$query = "SELECT tunnus, nimi
-						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P' and kaytossa <> 'E'
-						ORDER BY nimi";
-			$vresult = mysql_query($query) or pupe_error($query);
+			if (mysql_num_rows($vresult) > 0) {
+				$query = "	SELECT tunnus, nimi, koodi
+							FROM kustannuspaikka
+							WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P' and kaytossa <> 'E'
+							ORDER BY nimi";
+				$vresult = mysql_query($query) or pupe_error($query);
 
-			echo "<select name='iprojekti[$i]'>";
-			echo "<option value =' '>".t("Ei projektia")."";
+				echo "<select name='iprojekti[$i]'>";
+				echo "<option value =' '>".t("Ei projektia")."";
 
-			while ($vrow = mysql_fetch_array($vresult)) {
-				$sel = "";
-				if ($iprojekti[$i] == $vrow[0]) {
-					$sel = "selected";
+				while ($vrow = mysql_fetch_array($vresult)) {
+					$sel = "";
+					if ($iprojekti[$i] == $vrow[0]) {
+						$sel = "selected";
+					}
+					echo "<option value ='$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 				}
-				echo "<option value ='$vrow[tunnus]' $sel>$vrow[nimi]";
+				echo "</select>";
 			}
-			echo "</select></td>";
+
+			echo "</td>";
 
 			echo "<td valign='top'><input type='text' name='isumma[$i]' value='$isumma[$i]'></td>";
 			echo "<td valign='top'>" . alv_popup('ivero['.$i.']', $ivero[$i]);

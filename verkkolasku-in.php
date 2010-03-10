@@ -3,13 +3,13 @@
 	if (isset($argc) and $argc > 0) {
 		//Komentorivilt‰
 		// pit‰‰ siirty‰ www roottiin
-	chdir("/var/www/html/pupesoft");
-
-	// m‰‰ritell‰‰n polut
-    $laskut     = "/home/verkkolaskut";
-    $oklaskut   = "/home/verkkolaskut/ok";
-    $origlaskut = "/home/verkkolaskut/orig";
-    $errlaskut  = "/home/verkkolaskut/error";
+		chdir("/var/www/html/pupesoft");
+		
+		// m‰‰ritell‰‰n polut
+		$laskut     = "/home/verkkolaskut";
+		$oklaskut   = "/home/verkkolaskut/ok";
+		$origlaskut = "/home/verkkolaskut/orig";
+		$errlaskut  = "/home/verkkolaskut/error";
 
 		$komentorivilta = TRUE;
 

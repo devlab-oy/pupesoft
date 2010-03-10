@@ -4431,12 +4431,12 @@ if (!function_exists("enable_ajax")) {
 				var response = http.responseText;
 
 				document.getElementById(id).innerHTML = response;
-								
-				<?php if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") === FALSE and stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") === FALSE) { ?>					
+
+				<?php if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") === FALSE and stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") === FALSE) { ?>
 					var container = document.getElementById(id);
-					var allNewScripts = container.getElementsByTagName('script');				
+					var allNewScripts = container.getElementsByTagName('script');
 					c = allNewScripts.length;
-			
+
 					if (c>0) {
 						for (x=0;x<=c;x++) {
 							if (allNewScripts[x]) {
@@ -4445,7 +4445,7 @@ if (!function_exists("enable_ajax")) {
 						}
 					}
 				<?php }	?>
-				
+
 				//	Jos päivitetään togglegrouppaus
 				if (href) {
 					document.getElementById(href).href = 'javascript:toggleGroup("' + id + '");';
@@ -4678,23 +4678,33 @@ if (!function_exists("js_openFormInNewWindow")) {
 		?>
 		<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
 			function js_openFormInNewWindow(formID, name) {
-				
-				if(!name) {
+
+				if (!name) {
 					name='Pupesoft'+Math.floor(Math.random()*1001);
 				}
-				
+
 				formi=document.getElementById(formID);
 
-				var myField = document.createElement('input');
+				if (name == "samewindow") {
+					destroy = formi.elements["NAYTATILAUS"];					
+					formi.removeChild(destroy);
+					formi.target='';
+				}
+				else {					
+					if (!formi.elements["NAYTATILAUS"]) { 
+						var myField = document.createElement('input');
+						myField.setAttribute('name', 'NAYTATILAUS');
+						myField.setAttribute('id', 'NAYTATILAUS');
+						myField.setAttribute('value', 'SET');
+						myField.setAttribute('type', 'hidden');
+						formi.appendChild(myField);
+					}
+					
+					window.open('', name, 'top=100,left=100,resizable=yes');
 
-				myField.setAttribute('name', 'NAYTATILAUS');
-				myField.setAttribute('value', 'SET');
-				myField.setAttribute('type', 'hidden');
-				formi.appendChild(myField);
+					formi.target=name;
+				}
 
-				window.open('', name, 'top=100,left=100,resizable=yes');
-
-				formi.target=name;
 				formi.submit();
 			}
 		</SCRIPT>
@@ -4967,7 +4977,7 @@ function toimehtoTarkenne(toimehto) {
 
 	i=teksti.indexOf("-");
 	if (i>0) {
-		tarkenne=teksti.substr((i+1));
+		tarkenne=teksti.substr((i+2));
 		tehtoLisa.value=tarkenne;
 	}
 	else {
@@ -6736,11 +6746,11 @@ if (!function_exists("livesearch_tuotehaku")) {
 		$hakuid = $_REQUEST["livesearch_hakuid"];
 		$submit = $_REQUEST["livesearch_submit"];
 		$haku = trim($_REQUEST["livesearch_haku"]);
-		
+
 		if (mb_detect_encoding($haku, mb_detect_order(), TRUE) == "UTF-8") {
 			$haku = iconv("UTF-8", "latin1//TRANSLIT", $haku);
 		}
-	
+
 		if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
 
 			echo "

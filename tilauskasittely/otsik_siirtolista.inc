@@ -153,8 +153,9 @@
 
 			while ($varow = mysql_fetch_array($vares)) {
 
-				$sel='';
-				if ($varow['tunnus']==$srow["clearing"] or ((int)$kukarow["kesken"]==0 and $varow['tunnus'] == $kukarow["varasto"])) {
+				$sel = '';
+				// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
+				if ($varow['tunnus'] == $srow["clearing"] or ((int) $kukarow["kesken"] == 0 and $varow['tunnus'] == $kukarow["varasto"])) {
 					$sel = 'selected';
 				}
 

@@ -285,7 +285,7 @@ else {
 
 			while($varselrow = mysql_fetch_array($result)){
 				$sel = '';
-				if(($varselrow[0] == $tuvarasto) or ($kukarow['varasto'] == $varselrow[0] and $tuvarasto=='')) {
+				if (($varselrow[0] == $tuvarasto) or ((isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0 and in_array($varselrow[0], explode(",", $kukarow['varasto']))) and $tuvarasto=='')) {
 					$sel = 'selected';
 					$tuvarasto = $varselrow[0];
 				}

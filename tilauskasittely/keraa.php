@@ -1347,7 +1347,7 @@
 
 		while ($row = mysql_fetch_array($result)) {
 			$sel = '';
-			if (($row['tunnus'] == $tuvarasto) or ($kukarow['varasto'] == $row['tunnus'] and $tuvarasto=='')) {
+			if (($row['tunnus'] == $tuvarasto) or ((isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0 and in_array($row['tunnus'], explode(",", $kukarow['varasto']))) and $tuvarasto=='')) {
 				$sel = 'selected';
 				$tuvarasto = $row['tunnus'];
 			}

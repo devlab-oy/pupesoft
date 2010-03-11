@@ -1496,7 +1496,9 @@
 
 				if ($varow["tyyppi"] == '' or in_array($varow["tunnus"], $varastot_array)) {
 
-					$sel='';
+					$sel = '';
+
+					// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
 					if ($varow['tunnus'] == $srow["varasto"] or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '')) $sel = 'selected';
 
 					echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";

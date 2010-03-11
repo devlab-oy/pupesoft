@@ -9,20 +9,20 @@
 
 	if ($tunnus != "" and $tee == "vaihda") {
 
-		$tila_query  = "	SELECT * 
-							FROM lasku 
-							WHERE yhtio = '$kukarow[yhtio]' 
+		$tila_query  = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
 							AND tila in ('L','N')
 							AND tunnus = '$tunnus'";
 		$tila_result = mysql_query($tila_query) or pupe_error($tila_query);
 
 		if (mysql_num_rows($tila_result) == 1) {
 			$tila_row = mysql_fetch_assoc($tila_result);
-			
+
 			// lock tables
 			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, rahtikirjat WRITE, tuote WRITE, sarjanumeroseuranta WRITE, avainsana as avainsana_kieli READ";
 			$locre = mysql_query($query) or pupe_error($query);
-			
+
 			// tilaus kesken
 			if ($tila == "1") {
 				$query = "	UPDATE tilausrivi set
@@ -35,13 +35,14 @@
 							var            = ''
 							where yhtio='$kukarow[yhtio]' and otunnus='$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
-				
-				if($tila_row["tilaustyyppi"] = "A") {
+
+				if ($tila_row["tilaustyyppi"] == "A") {
 					$uustila = "A";
 				}
 				else {
 					$uustila = "N";
 				}
+
 				$query = "	UPDATE lasku set
 							tila    = '$uustila',
 							alatila = '',
@@ -135,7 +136,7 @@
 			if ($tila == "999") {
 				$query = "	UPDATE tilausrivi set
 							tyyppi = 'D'
-							where yhtio = '$kukarow[yhtio]' 
+							where yhtio = '$kukarow[yhtio]'
 							and otunnus = '$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
 
@@ -148,7 +149,7 @@
 
 				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
-				
+
 				//Nollataan sarjanumerolinkit
 			   $query    = "	SELECT tilausrivi.tunnus, (tilausrivi.varattu+tilausrivi.jt) varattu
 								FROM tilausrivi
@@ -169,7 +170,7 @@
 			       $sarjares = mysql_query($query) or pupe_error($query);
 				}
 			}
-			
+
 			// poistetaan lukot
 			$query = "UNLOCK TABLES";
 			$locre = mysql_query($query) or pupe_error($query);
@@ -181,9 +182,9 @@
 
 	if ($tunnus != "" and $tee == "valitse") {
 
-		$tila_query  = "	SELECT * 
-							FROM lasku 
-							WHERE yhtio = '$kukarow[yhtio]' 
+		$tila_query  = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
 							AND tila in ('L','N', 'A')
 							AND tunnus = '$tunnus'";
 		$tila_result = mysql_query($tila_query) or pupe_error($tila_query);

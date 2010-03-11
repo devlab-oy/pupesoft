@@ -9,6 +9,9 @@ $hetuok = 0; // kaikki ok
 
 if (strlen($hetu) == 11) {
 
+	// muutetaan kaikki kirjamet kapitaaleiksi
+	$hetu = strtoupper($hetu);
+
 	// konkatenoidaan pvm ja yksilönumero tarkistuslaskua varten
 	$hetutarkista1 = substr($hetu, 0, 6).substr($hetu, 7, 3);
 

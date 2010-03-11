@@ -286,7 +286,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		header("Content-Transfer-Encoding: binary");
 
 		if (isset($filenimi) and $filenimi != '') {
-			header("Content-Length: ".filesize("dataout/".basename($filenimi)));
+			header("Content-Length: ".filesize("$pupe_root_polku/dataout/".basename($filenimi)));
 		}
 		elseif (isset($tmpfilenimi) and $tmpfilenimi != '') {
 			header("Content-Length: ".filesize("/tmp/".basename($tmpfilenimi)));

@@ -8,7 +8,7 @@
 	require("../inc/parametrit.inc");
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
-		readfile("../dataout/".basename($filenimi));
+		readfile("$pupe_root_polku/dataout/".basename($filenimi));
 		exit;
 	}
 	else {
@@ -89,21 +89,21 @@
 
 			//Tiedostojen polut ja nimet
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-			$nimixml = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
+			$nimixml = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".xml";
 
 			//	Itellan iPost vaatii siirtoon v‰h‰n oman nimen..
 			if ($yhtiorow["verkkolasku_lah"] == "iPost") {
 				$nimiipost = "-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
-				$nimifinvoice = "../dataout/TRANSFER_IPOST".$nimiipost;
+				$nimifinvoice = "$pupe_root_polku/dataout/TRANSFER_IPOST".$nimiipost;
 				$nimifinvoice_delivered = "DELIVERED_IPOST".$nimiipost;
 			}
 			else {
-				$nimifinvoice = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
+				$nimifinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
 			}
 
-			$nimisisainenfinvoice = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_sisainenfinvoice.xml";
+			$nimisisainenfinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_sisainenfinvoice.xml";
 
-			$nimiedi = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".edi";
+			$nimiedi = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".edi";
 
 			//Pupevoice xml-dataa
 			if (!$tootxml = fopen($nimixml, "w")) die("Filen $nimixml luonti ep‰onnistui!");
@@ -597,7 +597,6 @@
 			// poistetaan lukot
 			$query = "UNLOCK TABLES";
 			$locre = mysql_query($query) or pupe_error($query);
-
 
 			if (file_exists(realpath($nimixml))) {
 				//siirretaan laskutiedosto operaattorille

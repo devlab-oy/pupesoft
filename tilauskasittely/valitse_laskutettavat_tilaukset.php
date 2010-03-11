@@ -1,19 +1,14 @@
 <?php
 
-	if (isset($_POST["tee"]) and $_POST["tee"] == 'lataa_tiedosto') {
-		$lataa_tiedosto = 1;
-		$file = file_get_contents($_POST["file"]);
-		unset($_POST["file"]);
-
-		if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
-			$_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
-		}
+	if (isset($_POST["tee"])) {
+		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
 	require ("../inc/parametrit.inc");
 
 	if ($tee == "lataa_tiedosto") {
-		echo $file;
+		readfile("$pupe_root_polku/dataout/".basename($filenimi));
 		exit;
 	}
 

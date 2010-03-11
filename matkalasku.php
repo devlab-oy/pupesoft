@@ -140,10 +140,15 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 			elseif ((($ylitunnit > 6 and $paivat == 0) or ($ylitunnit > 2 and $paivat > 0)) and $trow["vienti"] == "FI") {
 
 				//	Tarkastetaan että päivärahalle on puolipäiväraha
-				$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuotetyyppi='$tyyppi' and tuoteno='P$tuoteno'";
-				$tres2=mysql_query($query) or pupe_error($query);
+				$query = "	SELECT *
+							from tuote
+							where yhtio = '$kukarow[yhtio]'
+							and tuotetyyppi = '$tyyppi'
+							and tuoteno = 'P$tuoteno'
+							and status != 'P'";
+				$tres2 = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($tres2)<>1) {
+				if (mysql_num_rows($tres2) != 1) {
 					$errori .= t("<font class='error'>".t("VIRHE!!! Viranomaistuote puuttuu (2). Puolipäivärahaa ei voitu lisätä!")."</font><br>");
 				}
 				else {

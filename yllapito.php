@@ -997,16 +997,16 @@
 				if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 					if ($i == 1) {
 						if (trim($trow[1]) == '' or (is_numeric($trow[1]) and $trow[1] == 0)) $trow[1] = t("*tyhjä*");
-						
+
 						echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&laji=$laji";
-						
+
 						if ($lopetus == "") {
-							echo "&lopetus=".$palvelin2."yllapito.php////ojarj=$ojarj".str_replace("&", "//", $ulisa)."//toim=$toim//limit=$limit//nayta_poistetut=$nayta_poistetut//laji=$laji///$trow[0]";
+							echo "&lopetus=".$palvelin2."yllapito.php////ojarj=$ojarj".str_replace("&", "//", $ulisa)."//toim=$aputoim//limit=$limit//nayta_poistetut=$nayta_poistetut//laji=$laji///$trow[0]";
 						}
 						else {
 							echo "&lopetus=$lopetus";
 						}
-						
+
 						echo "'>";
 
 						if (mysql_field_name($result,$i) == 'liitedata') {

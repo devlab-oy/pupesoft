@@ -267,7 +267,8 @@
 			while ($varow = mysql_fetch_array($vares)) {
 				if (($varow["tyyppi"] == '') or ($kukarow["varasto"] == $varow["tunnus"])) {
 
-					$sel='';
+					$sel = '';
+					// Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
 					if ($varow['tunnus']==$srow["varasto"] or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '')) $sel = 'selected';
 
 					echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";

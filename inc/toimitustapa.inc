@@ -29,7 +29,7 @@
 			 			FROM lasku 
 						WHERE toimitustapa = '{$toita}' 
 						AND yhtio = '{$kukarow['yhtio']}' 
-						AND ((tila = 'L' AND alatila IN ('A','C')) OR tila = 'N')";
+						AND ((tila = 'L' AND alatila IN ('A','B','C')) OR tila = 'N')";
 			$chkres2 = mysql_query($query) or pupe_error($query);
 
 			$query = "	SELECT tunnus 

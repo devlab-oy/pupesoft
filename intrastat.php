@@ -12,32 +12,6 @@
 		exit;
 	}
 
-/*
-	// n‰m‰ pit‰‰ ajaa jos p‰ivitt‰‰ uudet tullinimikkeet:
-
-	update tullinimike set su=trim(su);
-	update tullinimike set su='' where su='-';
-	update tullinimike set su_vientiilmo='NAR' where su='p/st';
-	update tullinimike set su_vientiilmo='MIL' where su='1 000 p/st';
-	update tullinimike set su_vientiilmo='MIL' where su='1000 p/st';
-	update tullinimike set su_vientiilmo='LPA' where su='l alc. 100';
-	update tullinimike set su_vientiilmo='LTR' where su='l';
-	update tullinimike set su_vientiilmo='KLT' where su='1 000 l';
-	update tullinimike set su_vientiilmo='KLT' where su='1000 l';
-	update tullinimike set su_vientiilmo='TJO' where su='TJ';
-	update tullinimike set su_vientiilmo='MWH' where su='1 000 kWh';
-	update tullinimike set su_vientiilmo='MWH' where su='1000 kWh';
-	update tullinimike set su_vientiilmo='MTQ' where su='m≥';
-	update tullinimike set su_vientiilmo='MTQ' where su='m3';
-	update tullinimike set su_vientiilmo='GRM' where su='g';
-	update tullinimike set su_vientiilmo='MTK' where su='m≤';
-	update tullinimike set su_vientiilmo='MTK' where su='m2';
-	update tullinimike set su_vientiilmo='MTR' where su='m';
-	update tullinimike set su_vientiilmo='NPR' where su='pa';
-	update tullinimike set su_vientiilmo='CEN' where su='100 p/st';
-
-*/
-
 	// tuonti vai vienti
 	if ($tapa == "tuonti") {
 		$laji = "A";

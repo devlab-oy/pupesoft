@@ -665,9 +665,20 @@
 			echo "</td>
 					</tr>";
 
-			if (!isset($plvv)) $plvv = substr($yhtiorow['tilikausi_alku'], 0, 4);
-			if (!isset($plvk)) $plvk = substr($yhtiorow['tilikausi_alku'], 5, 2);
-			if (!isset($plvp)) $plvp = substr($yhtiorow['tilikausi_alku'], 8, 2);
+				
+			if (!isset($plvv)) {
+				$query = "	SELECT * 
+							FROM tilikaudet
+							WHERE yhtio = '$kukarow[yhtio]'
+							and '".date("Y-m-d")."' >= tilikausi_alku
+							and '".date("Y-m-d")."' <= tilikausi_loppu";
+				$result = mysql_query($query) or pupe_error($query);
+				$tilikausirow = mysql_fetch_array($result);
+				
+				$plvv = substr($tilikausirow['tilikausi_alku'], 0, 4);
+				$plvk = substr($tilikausirow['tilikausi_alku'], 5, 2);
+				$plvp = substr($tilikausirow['tilikausi_alku'], 8, 2);			
+			}
 
 			echo "	<th valign='top'>".t("Alkukausi")."</th>
 					<td><select name='plvv'>";

@@ -87,7 +87,7 @@
 			$rivit = explode("\n", trim($result));
 			
 			foreach ($rivit as $rivi) {
-				echo " echo \"$rivi\" | mysql -u $dbuser --password=$dbpass $dbkanta\n";
+				echo "echo \"$rivi\" | mysql -u $dbuser --password=$dbpass $dbkanta;\n";
 			}						
 		}
 						

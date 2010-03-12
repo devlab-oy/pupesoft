@@ -245,7 +245,7 @@
 		echo "<tr><form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='PERUSTA'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
-		echo "<td><input type='text' name='uustuoteno' size='22' maxlength='20' value=''></td>";
+		echo "<td><input type='text' name='uustuoteno' size='22' maxlength='30' value=''></td>";
 		echo "<td class='back'><input type='Submit' value='".t("Kopioi")."'></td>";
 		echo "<td class='back'><font class='error'>$varaosavirhe</font></td>";
 		echo "</form></tr></table>";

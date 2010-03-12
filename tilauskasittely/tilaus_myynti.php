@@ -1390,11 +1390,11 @@ if ($kukarow["extranet"] == "" and $tee == 'jyvita') {
 }
 
 //Lisätään tän asiakkaan valitut JT-rivit tälle tilaukselle
-if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == "") or (($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and (int) $kukarow['kesken'] != 0 and $kaytiin_otsikolla == "NOJOO!" and ($tee == '' or $tee == 'OTSIK') and ($toim == 'EXTRANET' or $toim == 'RIVISYOTTO' or ($toim == 'PIKATILAUS' and ($asiakasid != '' or $laskurow['liitostunnus'] != ''))))) {
+if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == "") or (($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and (int) $kukarow['kesken'] != 0 and $kaytiin_otsikolla == "NOJOO!" and ($tee == '' or $tee == 'OTSIK') and $toim == 'EXTRANET')) {
 	$tilaus_on_jo 	= "KYLLA";
 
 	// Halutaan poimia heti kaikki jt-rivit extranet-tilauksille ensimmäisellä kerralla
-	if (($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and (int) $kukarow['kesken'] != 0 and $kaytiin_otsikolla == "NOJOO!" and ($tee == '' or $tee == 'OTSIK') and ($toim == 'EXTRANET' or $toim == 'RIVISYOTTO' or ($toim == 'PIKATILAUS' and ($asiakasid != '' or $laskurow['liitostunnus'] != '')))) {
+	if (($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and (int) $kukarow['kesken'] != 0 and $kaytiin_otsikolla == "NOJOO!" and ($tee == '' or $tee == 'OTSIK') and $toim == 'EXTRANET') {
 
 		if (isset($laskurow["varasto"]) and (int) $laskurow["varasto"] > 0) {
 			$varasto = array((int) $laskurow["varasto"]);

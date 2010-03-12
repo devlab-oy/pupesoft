@@ -679,7 +679,7 @@
 													$values .= "";
 													break;
 												case 'positio':
-													if ($tilaus_on_jo == "KYLLA") {
+													if ($kukarow['extranet'] != '' and $tilaus_on_jo == "KYLLA") {
 														$kysely .= "positio='JT',";
 													}
 													else {

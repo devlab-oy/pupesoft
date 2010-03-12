@@ -1,6 +1,9 @@
 <?php
 
-include '../inc/parametrit.inc';
+require ('../inc/parametrit.inc');
+
+// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
+js_openFormInNewWindow();
 
 if ($toim == "TRATTA") {
 	echo "<font class='head'>".t("Selaa trattoja")."</font><hr />";
@@ -34,7 +37,7 @@ if (isset($_POST['poista_tratta'])) {
 						AND ltunnus = $row[ltunnus]";
 			$kres = mysql_query($query) or pupe_error($query);
 
-			echo "<font class='message'>",t("Tratta poistettu laskulta")," {$row['ltunnus']} (",t("kierros")," $poista_tratta_tunnus)</font><br/>";
+			echo "<font class='message'>",t("Tratta poistettu laskulta")," $row[ltunnus] (",t("kierros")," $poista_tratta_tunnus)</font><br/>";
 		}
 	}
 }
@@ -100,7 +103,13 @@ if (isset($_POST['tee1']) or isset($_POST['tee2'])) {
 			echo "<th>".t('Karhuamis pvm')."<br>".t('Eräpäivä')."</th>";
 			echo "<th>".t('Karhukertoja')."</th>";
 		}
-
+		
+		echo "<th></th>";
+		
+		if ($toim == "TRATTA") {
+			echo "<th></th>";
+		}
+		
 		echo "</tr>";
 
 		$query = "	SELECT lasku.laskunro, lasku.summa, lasku.saldo_maksettu, lasku.liitostunnus, karhu_lasku.ktunnus,
@@ -113,13 +122,17 @@ if (isset($_POST['tee1']) or isset($_POST['tee2'])) {
 					$malisa
 					ORDER BY ytunnus, pvm, laskunro";
 		$res = mysql_query($query) or pupe_error($query);
+		
+		$laskuri = 0;
 
 		while ($row = mysql_fetch_array($res)) {
+			
+			$laskuri++;
 
 			$query = "	SELECT count(distinct ktunnus) as kertoja
 						FROM karhu_lasku
 						JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '$tyyppi')
-						WHERE ltunnus={$row['ltunnus']}";					
+						WHERE ltunnus=$row[ltunnus]";
 			$ka_res = mysql_query($query);
 			$karhuttu = mysql_fetch_array($ka_res);
 
@@ -139,7 +152,7 @@ if (isset($_POST['tee1']) or isset($_POST['tee2'])) {
 				$paiva = substr($row["pvm"], 8, 2);
 				$kuu   = substr($row["pvm"], 5, 2);
 				$year  = substr($row["pvm"], 0, 4);
-				
+
 				$erapaiva = tv1dateconv(date("Y-m-d",mktime(0, 0, 0, $kuu, $paiva+$yhtiorow['karhuerapvm'], $year)));
 			}
 			else {
@@ -147,39 +160,51 @@ if (isset($_POST['tee1']) or isset($_POST['tee2'])) {
 			}
 
 			echo "<tr>
-					<td valign='top'>$row[ktunnus]</td>	
+					<td valign='top'>$row[ktunnus]</td>
 					<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>
-					<td valign='top'><a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=$row[laskunro]'>$row[laskunro]</a></td>
+					<td valign='top'><a href = '".$palvelin2."tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=$row[laskunro]'>$row[laskunro]</a></td>
 					<td valign='top' style='text-align: right;'>$row[summa]</td>";
-					
-					
+
+
 			if ($row["mapvm"] != "0000-00-00") {
 				echo "	<td valign='top'>".tv1dateconv($row["mapvm"])."</td>";
 			}
-			else {			
+			else {
 				echo "	<td valign='top' style='text-align: right;'>$row[saldo_maksettu]</td>";
 			}
-			
-			
+
+
 			echo "	<td valign='top'>".tv1dateconv($row['erpcm'])."</td>
 					<td valign='top'>".tv1dateconv($row['pvm'])."<br>$erapaiva</td>
-					<td valign='top' style='text-align: right;'>$karhuttu[kertoja]<br>";
-
-				if ($toim == "TRATTA") {
-					echo " <a href='".$palvelin2."muutosite.php?karhutunnus=$row[ktunnus]&lasku_tunnus[]=$tunnukset[laskutunnukset]&tee=tulosta_tratta&nayta_pdf=1'>Näytä tratta</a><br>";
-				}
-				else {
-					echo " <a href='".$palvelin2."muutosite.php?karhutunnus=$row[ktunnus]&lasku_tunnus[]=$tunnukset[laskutunnukset]&tee=tulosta_karhu&nayta_pdf=1'>Näytä karhu</a><br>";
-				}
-					
-			echo "</td>";
+					<td valign='top' style='text-align: right;'>$karhuttu[kertoja]</td>";
 
 			if ($toim == "TRATTA") {
-				echo "<form action='' method='post'>";
-				echo "<td class='back'><input type='submit' name='poista_tratta' id='poista_tratta' value='",t("Poista"),"'></td>";
-				echo "<input type='hidden' name='poista_tratta_tunnus' id='poista_tratta_tunnus' value='{$row['ktunnus']}'>";
-				echo "<input type='hidden' name='ltunnus' id='ltunnus' value='{$row['ltunnus']}'>";
-				echo "</form>";
+
+				echo "<td><form id='tulostakopioform_$laskuri' name='tulostakopioform_$laskuri' method='post' action='".$palvelin2."muutosite.php'>
+						<input type='hidden' name='karhutunnus' value='$row[ktunnus]'>
+						<input type='hidden' name='lasku_tunnus[]' value='$tunnukset[laskutunnukset]'>
+						<input type='hidden' name='tee' value='NAYTATILAUS'>
+						<input type='hidden' name='tee_pdf' value='tulosta_tratta'>
+						<input type='submit' value='".t("Näytä pdf")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$laskuri', ''); return false;\">
+						</form></td>";
+			}
+			else {
+
+				echo "<td><form id='tulostakopioform_$laskuri' name='tulostakopioform_$laskuri' method='post' action='".$palvelin2."muutosite.php'>
+						<input type='hidden' name='karhutunnus' value='$row[ktunnus]'>
+						<input type='hidden' name='lasku_tunnus[]' value='$tunnukset[laskutunnukset]'>
+						<input type='hidden' name='tee' value='NAYTATILAUS'>
+						<input type='hidden' name='tee_pdf' value='tulosta_karhu'>
+						<input type='submit' value='".t("Näytä pdf")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$laskuri', ''); return false;\">
+						</form></td>";
+			}
+
+			if ($toim == "TRATTA") {
+				echo "<td><form action='' method='post'>";
+				echo "<input type='submit' name='poista_tratta' id='poista_tratta' value='",t("Poista"),"'>";
+				echo "<input type='hidden' name='poista_tratta_tunnus' id='poista_tratta_tunnus' value='$row[ktunnus]'>";
+				echo "<input type='hidden' name='ltunnus' id='ltunnus' value='$row[ltunnus]'>";
+				echo "</form></td>";
 			}
 
 			echo "</tr>";
@@ -193,6 +218,6 @@ if (isset($_POST['tee1']) or isset($_POST['tee2'])) {
 	}
 }
 
-include '../inc/footer.inc';
+require ("../inc/footer.inc");
 
 ?>

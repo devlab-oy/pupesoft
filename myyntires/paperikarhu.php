@@ -208,9 +208,10 @@
 	            $rivit = explode("\n", $viesti);
 				$rivit[] = '';
 				$rivit[] = t("Yhteyshenkilˆmme", $kieli) . ": $yrow[nimi] / $yrow[eposti] / $yrow[puhno]";
-	            foreach ($rivit as $rivi) {
+	            
+				foreach ($rivit as $rivi) {
 					// laitetaan
-	                $pdf->draw_text(80, $kala, t($rivi, $kieli), $firstpage, $norm);
+	                $pdf->draw_text(80, $kala, $rivi, $firstpage, $norm);
 
 					// seuraava rivi tulee 10 pistett‰ alemmas kuin t‰m‰ rivi
 					$kala -= 10;
@@ -568,14 +569,14 @@
 	if (!$kaatosumma) $kaatosumma='0.00';
 
     //	Arvotaan oikea karhuviesti
-	if(!isset($karhuviesti)) {
+	if (!isset($karhuviesti)) {
 
 		//	Lasketaan kuinka vanhoja laskuja t‰ss‰ karhutaan
-		$query 	 = "	SELECT count(*)
-						FROM karhu_lasku
-						WHERE ltunnus IN (".implode(",", $lasku_tunnus).")
-						GROUP BY ltunnus;";
-		$res 	 = mysql_query($query) or pupe_error();
+		$query = "	SELECT count(*)
+					FROM karhu_lasku
+					WHERE ltunnus IN (".implode(",", $lasku_tunnus).")
+					GROUP BY ltunnus;";
+		$res = mysql_query($query) or pupe_error();
 		$r = 0;
 		
 		while ($a = mysql_fetch_array($res)) {
@@ -585,6 +586,7 @@
 		//	T‰m‰ on mik‰ on karhujen keskim‰‰r‰inen kierroskerta
 		$avg = floor(($r/mysql_num_rows($res))+1);
 
+		// Etsit‰‰n asiakkaan kielell‰:
 		$query = "	SELECT tunnus
 					FROM avainsana
 					WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$avg' and kieli = '$kieli'";
@@ -609,8 +611,36 @@
 				$res = mysql_query($query) or pupe_error();
 			}
 		}
+		
+		// Etsit‰‰n yhtiˆn kielell‰:
+		if (mysql_num_rows($res) == 0) {
+			$query = "	SELECT tunnus
+						FROM avainsana
+						WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$avg' and kieli = '$yhtiorow[kieli]'";
+			$res = mysql_query($query) or pupe_error();
 
-		$kv = mysql_fetch_array($res);
+			if (mysql_num_rows($res) == 0) {
+
+				$query = "	SELECT tunnus
+							FROM avainsana
+							WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$avg' and kieli = '$yhtiorow[kieli]'
+							ORDER BY jarjestys DESC
+							LIMIT 1";
+				$res = mysql_query($query) or pupe_error();
+
+				if (mysql_num_rows($res) == 0) {
+
+					$query = "	SELECT tunnus
+								FROM avainsana
+								WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$avg' and kieli = '$yhtiorow[kieli]'
+								ORDER BY jarjestys ASC
+								LIMIT 1";
+					$res = mysql_query($query) or pupe_error();
+				}
+			}
+		}
+
+		$kv = mysql_fetch_assoc($res);
 		$karhuviesti = $kv["tunnus"];
 	}
 
@@ -621,9 +651,7 @@
 	$viestit = mysql_fetch_array($res);
 
     $karhuviesti = $viestit["selitetark"];
-	if(trim($karhuviesti) == "") {
-			die($query);
-	}
+	
 	$firstpage = alku($karhuviesti, $karhutunnus);
 
 	$summa=0.0;
@@ -704,7 +732,7 @@
 	// nyt kirjoitetaan tiedot vasta kantaan kun tiedet‰‰n ett‰ kirje
 	// on l‰htenyt Itellaan tai tulostetaan kirje ainoastaan
 
-	if ($tee != 'tulosta_karhu') {
+	if ($tee_pdf != 'tulosta_karhu') {
 		$karhukierros = uusi_karhukierros($kukarow['yhtio']);
 
 		foreach ($rivit as $row) {
@@ -713,7 +741,7 @@
 	}
 
 	// tulostetaan jos ei l‰hetet‰ ekirjett‰
-	if (isset($_POST['ekirje_laheta']) === false and $tee != 'tulosta_karhu') {
+	if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu') {
 		// itse print komento...
 		$query = "	select komento
 					from kirjoittimet

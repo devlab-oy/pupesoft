@@ -1,13 +1,15 @@
 <?php
 
-require "inc/parametrit.inc";
+if ($_REQUEST["tee"] == 'NAYTATILAUS' or $_POST["tee"] == 'NAYTATILAUS' or $_GET["tee"] == 'NAYTATILAUS') $nayta_pdf = 1; //Generoidaan .pdf-file
 
-if ($tee == 'tulosta_karhu') {
+require ("inc/parametrit.inc");
+
+if ($tee_pdf == 'tulosta_karhu') {
 	require ('myyntires/paperikarhu.php');
 	exit;
 }
 
-if ($tee == 'tulosta_tratta') {
+if ($tee_pdf == 'tulosta_tratta') {
 	require ('myyntires/paperitratta.php');
 	exit;
 }
@@ -30,6 +32,9 @@ if ($livesearch_tee == "TILIHAKU") {
 	livesearch_tilihaku();
 	exit;
 }
+
+// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
+js_openFormInNewWindow();
 
 echo "<font class='head'>".t("Tiliöintien muutos/selailu")."</font><hr>";
 
@@ -564,7 +569,7 @@ if ($tee == 'U') {
 					}
 			}
 		}
-		echo "<font class='message'>Tiliöintirivi liitettiin tositteeseen $tositenro</font><br>";
+		echo "<font class='message'>".t("Tiliöintirivi liitettiin tositteeseen")." $tositenro</font><br>";
 	}
 
 	$tee = 'E';
@@ -723,13 +728,30 @@ if ($tee == 'E' or $tee == 'F') {
 
 			if (mysql_num_rows($karhu_result) > 0) {
 				echo "<tr><th>",t('Karhu / Tratta'),":</th><td>";
-
+				
+				$laskuri = 0;
+				
 				while ($karhu_row = mysql_fetch_array($karhu_result)) {
+					
+					$laskuri++;
+					
 					if ($karhu_row["tyyppi"] == 'T') {
-						echo "<a href='".$palvelin2."muutosite.php?karhutunnus=$karhu_row[ktunnus]&lasku_tunnus[]=$karhu_row[laskutunnukset]&tee=tulosta_tratta&nayta_pdf=1'>".tv1dateconv($karhu_row["pvm"])."</a> (Tratta)";
+						echo "<form id='tulostakopioform_$laskuri' name='tulostakopioform_$laskuri' method='post' action='".$palvelin2."muutosite.php'>
+								<input type='hidden' name='karhutunnus' value='$karhu_row[ktunnus]'>
+								<input type='hidden' name='lasku_tunnus[]' value='$karhu_row[laskutunnukset]'>
+								<input type='hidden' name='tee' value='NAYTATILAUS'>
+								<input type='hidden' name='tee_pdf' value='tulosta_tratta'>
+								<input type='submit' value='".t("Tratta")." - ".tv1dateconv($karhu_row["pvm"])."' onClick=\"js_openFormInNewWindow('tulostakopioform_$laskuri', ''); return false;\">
+								</form>";
 					}
 					else {
-						echo "<a href='".$palvelin2."muutosite.php?karhutunnus=$karhu_row[ktunnus]&lasku_tunnus[]=$karhu_row[laskutunnukset]&tee=tulosta_karhu&nayta_pdf=1'>".tv1dateconv($karhu_row["pvm"])."</a> (Karhu)";
+						echo "<form id='tulostakopioform_$laskuri' name='tulostakopioform_$laskuri' method='post' action='".$palvelin2."muutosite.php'>
+								<input type='hidden' name='karhutunnus' value='$karhu_row[ktunnus]'>
+								<input type='hidden' name='lasku_tunnus[]' value='$karhu_row[laskutunnukset]'>
+								<input type='hidden' name='tee' value='NAYTATILAUS'>
+								<input type='hidden' name='tee_pdf' value='tulosta_karhu'>
+								<input type='submit' value='".t("Maksukehotus")." - ".tv1dateconv($karhu_row["pvm"])."' onClick=\"js_openFormInNewWindow('tulostakopioform_$laskuri', ''); return false;\">
+								</form>";
 					}
 					echo "<br>";
 				}
@@ -738,7 +760,6 @@ if ($tee == 'E' or $tee == 'F') {
 		}
 
 		echo "<tr><th>".t("Maksutieto")."</th><td>".wordwrap($trow["viite"]." ".$trow["viesti"]." ".$trow["sisviesti1"], 45, "<br>")."</td></tr>";
-
 
 		// katsotaan onko tästä laskusta tehty korkolasku
 		$korko_query = "	SELECT olmapvm, liitostunnus
@@ -769,14 +790,12 @@ if ($tee == 'E' or $tee == 'F') {
 				echo "<tr><th>",t('Korkolaskut'),":</th><td>";
 
 				while ($korkolaskurow2 = mysql_fetch_array($korko2_result)) {
-
-					echo "<form action = 'tilauskasittely/tulostakopio.php' method='post'>
-						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-						<input type='hidden' name='otunnus' value='$korkolaskurow2[tunnus]'>
-						<input type='hidden' name='toim' value='LASKU'>
-						<input type='hidden' name='tee' value='NAYTATILAUS'>
-						<input type='submit' value='".tv1dateconv($korkolaskurow['olmapvm'])."'></form>";
-					echo "<br>";
+					echo "<form id='tulostakopioform_$korkolaskurow2[tunnus]' name='tulostakopioform_$korkolaskurow2[tunnus]' method='post' action='".$palvelin2."tilauskasittely/tulostakopio.php'>
+							<input type='hidden' name='otunnus' value='$korkolaskurow2[tunnus]'>
+							<input type='hidden' name='toim' value='LASKU'>
+							<input type='hidden' name='tee' value='NAYTATILAUS'>
+							<input type='submit' value='".tv1dateconv($korkolaskurow['olmapvm'])."' onClick=\"js_openFormInNewWindow('tulostakopioform_$korkolaskurow2[tunnus]', ''); return false;\">
+							</form>";
 				}
 
 				echo "</td></tr>";
@@ -1011,12 +1030,11 @@ if ($tee == 'E' or $tee == 'F') {
 	}
 
 	if ($trow['tila'] == 'U') {
-		echo "<form action = 'tilauskasittely/tulostakopio.php' method='post'>
-			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-			<input type='hidden' name='otunnus' value='$tunnus'>
-			<input type='hidden' name='toim' value='LASKU'>
-			<input type='hidden' name='tee' value='NAYTATILAUS'>
-			<input type='submit' value='" . t('Näytä laskun PDF')."'></form>";
+		echo "<form id='tulostakopioform_$tunnus' name='tulostakopioform_$tunnus' method='post' action='".$palvelin2."tilauskasittely/tulostakopio.php' autocomplete='off'>
+				<input type='hidden' name='otunnus' value='$tunnus'>
+				<input type='hidden' name='toim' value='LASKU'>
+				<input type='hidden' name='tee' value='NAYTATILAUS'>
+				<input type='submit' value='".t("Näytä laskun PDF")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$tunnus', ''); return false;\"></form>";
 
 		if ($trow['viesti'] == 'Korkolasku') {
 			echo "<form action = '$PHP_SELF' method='post'>

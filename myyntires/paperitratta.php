@@ -427,7 +427,7 @@
 	$kaatosumma=$kaato["summa"] * -1;
 	if (!$kaatosumma) $kaatosumma='0.00';
 
-	if ($tee != 'tulosta_tratta') {
+	if ($tee_pdf != 'tulosta_tratta') {
 		$karhukierros=uusi_karhukierros($kukarow['yhtio']);
 	}
 
@@ -435,7 +435,7 @@
 
 	$summa=0.0;
 	while ($row = mysql_fetch_array($result)) {
-		if ($tee != 'tulosta_tratta') {
+		if ($tee_pdf != 'tulosta_tratta') {
 			liita_lasku($karhukierros,$row['tunnus']);
 		}
 		$summa = rivi($firstpage, $summa);
@@ -459,7 +459,7 @@
 		echo file_get_contents($pdffilenimi);
 	}
 
-	if ($nayta_pdf != 1 and $tee != 'tulosta_tratta') {
+	if ($nayta_pdf != 1 and $tee_pdf != 'tulosta_tratta') {
 		// itse print komento...
 		$query = "	SELECT komento
 					from kirjoittimet

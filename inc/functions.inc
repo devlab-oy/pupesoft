@@ -4683,29 +4683,25 @@ if (!function_exists("js_openFormInNewWindow")) {
 					name='Pupesoft'+Math.floor(Math.random()*1001);
 				}
 
-				formi=document.getElementById(formID);
+				formi = document.getElementById(formID);
 
 				if (name == "samewindow") {
-					destroy = formi.elements["NAYTATILAUS"];					
-					formi.removeChild(destroy);
 					formi.target='';
+
+					formi.submit();
 				}
-				else {					
-					if (!formi.elements["NAYTATILAUS"]) { 
-						var myField = document.createElement('input');
-						myField.setAttribute('name', 'NAYTATILAUS');
-						myField.setAttribute('id', 'NAYTATILAUS');
-						myField.setAttribute('value', 'SET');
-						myField.setAttribute('type', 'hidden');
-						formi.appendChild(myField);
-					}
-					
+				else {
+					thistee = formi.elements["tee"].value;
+					formi.elements["tee"].value = "NAYTATILAUS";
+
 					window.open('', name, 'top=100,left=100,resizable=yes');
 
 					formi.target=name;
-				}
 
-				formi.submit();
+					formi.submit();
+
+					formi.elements["tee"].value = thistee;
+				}
 			}
 		</SCRIPT>
 		<?php

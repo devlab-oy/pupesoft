@@ -6,11 +6,6 @@
 	}
 
 	require("inc/parametrit.inc");
-/*
-	if (in_array($kukarow["yhtio"], array("allr","arja","arse","artr","arwi","atarv","bamb","demo","edil","hsr","katj","kolo","mast","rose","savt","yama"))) {
-		echo "<font class='error'>SQL-haku poistettu käytöstä</font><br>";
-		exit;
-	} */
 
 	//Ja tässä laitetaan ne takas
 	$sqlhaku = $sqlapu;
@@ -283,26 +278,34 @@
 			}
 
 			if ($table == "tuote") {
-				$query = "	SELECT DISTINCT selite, kieli
+				
+				$kielet = array("FI", "SE", "NO", "EN", "DE", "DK", "RU", "EE");
+
+				$query = "	SELECT DISTINCT selite
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]'
 							and avainsana.laji = 'PARAMETRI'
 							ORDER BY selite";
 				$al_res = mysql_query($query) or pupe_error($query);
 
-				while ($al_row = mysql_fetch_array($al_res)) {
+				foreach ($kielet as $kieli) {
+				
+					while ($al_row = mysql_fetch_array($al_res)) {
+						$fields[] = array("tuotteen_avainsanat.parametri_".$al_row["selite"].":".$kieli);
+					}
 
-					$row = array();
-					$row[0] = "tuotteen_avainsanat.parametri_".$al_row["selite"].":".$al_row["kieli"];
-
-					$fields[] = $row;
+					$fields[] = array("tuotteen_avainsanat.nimitys:$kieli");
+					$fields[] = array("tuotteen_avainsanat.lyhytkuvaus:$kieli");
+					$fields[] = array("tuotteen_avainsanat.kuvaus:$kieli");
+					$fields[] = array("tuotteen_avainsanat.mainosteksti:$kieli");
+					$fields[] = array("tuotteen_avainsanat.tarratyyppi:$kieli");
+					$fields[] = array("tuotteen_avainsanat.sistoimittaja:$kieli");
+					$fields[] = array("tuotteen_avainsanat.oletusvalinta:$kieli");
+					$fields[] = array("tuotteen_avainsanat.osasto:$kieli");
+					$fields[] = array("tuotteen_avainsanat.try:$kieli");
+					
+					mysql_data_seek($al_res, 0);
 				}
-				
-				$row[0] = "tuotteen_avainsanat.osasto:FI";
-				$fields[] = $row;
-				
-				$row[0] = "tuotteen_avainsanat.try:FI";
-				$fields[] = $row;
 			}
 
 			echo "<form name='sql' action='$PHP_SELF' method='post' autocomplete='off'>";

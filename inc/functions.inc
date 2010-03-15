@@ -4239,8 +4239,6 @@ if (!function_exists("verkkolasku_luo_liitosotsikko")) {
 	}
 }
 
-
-
 if (!function_exists("paivita_toimitukset")) {
 	function paivita_toimitukset($otunnus, $originaali) {
 		global $kukarow, $yhtiorow;
@@ -7717,7 +7715,6 @@ if (!function_exists('t_tunnus_avainsanat')) {
 	}
 }
 
-
 // T‰m‰ funktio k‰‰nt‰‰ tuotteen_avainsanoja.
 if (!function_exists('t_tuotteen_avainsanat')) {
 	function t_tuotteen_avainsanat($tuoterow, $laji, $kieli = '') {
@@ -8201,6 +8198,13 @@ if (!function_exists("lue_kurssit")) {
 			$result = mysql_query($query) or pupe_error($query);
 
 		}
+	}
+}
+
+// textmode progress palkki
+if (!function_exists("progress_bar")) {
+	function progress_bar($current_item, $total_items, $bar_length = 60) {
+		printf("|%-60s| [$current_item/$total_items]\r", sprintf("%'#".round($current_item / $total_items * $bar_length)."s", ''));
 	}
 }
 

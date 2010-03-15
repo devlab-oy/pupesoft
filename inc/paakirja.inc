@@ -288,11 +288,11 @@
 							$class = "ok";
 						}
 
-						echo "<td valign='top' align='right'";
+						echo "<td valign='top' align='right'>";
 						echo "<a name='$trow[rivitunnus]' href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]&lopetus=$lopetus/SPLIT/$PHP_SELF////toim=$toim//tee=$tee//alvv=$alvv//alvk=$alvk//alvp=$alvp//llvv=$llvv//llvk=$llvk//llvp=$llvp//tkausi=$tkausi//tili=$tili//tili2=$tili2//mul_kustp_seri=".base64_encode(serialize($mul_kustp))."//mul_kohde_seri=".base64_encode(serialize($mul_kohde))."//mul_proj_seri=".base64_encode(serialize($mul_proj))."//asia_ytunnus=$asia_ytunnus//asiakasid=$asiakasid//toim_ytunnus=$toim_ytunnus//toimittajaid=$toimittajaid//alv=$alv//kasin=$kasin//excel=$excel///$trow[rivitunnus]'>";
-						echo "<span class='$class'>";
+						echo "<font class='$class'>";
 						echo str_replace(".",",",sprintf("%.2f", $trow[$i]));
-						echo "</span>";
+						echo "</font>";
 						echo "</a>";
 						echo "</td>";
 

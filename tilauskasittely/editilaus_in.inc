@@ -99,6 +99,9 @@ $ketjutus             	= "";
 $editilaus_maksuehto	= "";
 $tilaus_hyvaksyntaan	= "";
 $editilaus_rahtivapaa	= "";
+$editilaus_tilaustyyppi = "";
+$editilaus_eilahetetta	= "";
+$editilaus_sisainen		= "";
 $editilaus_kassalipas	= "";
 $editilaus_rahtikulu_hinta = "";
 
@@ -254,6 +257,11 @@ while (!feof ($fd)) {
 			}
 			break;
 
+		case 'OSTOTIL.OT_TILAUSTYYPPI' :
+		//Tilaustyyppi
+			$editilaus_tilaustyyppi = trim($tieto);
+			break;
+
 		case 'OBGMIACKR' :
 		//Edivastaus
 			if ($tieto == "AB") {
@@ -341,7 +349,7 @@ while (!feof ($fd)) {
 		case 'OSTOTIL.OT_NRO' :
 		//Asiakkkaan tilausnumero
 			$asiakkaan_tilausnumero = $tieto;
-			$viite    				= $tieto. ' '; // laitetaan asiakkaan tilausnumero talteen myös tilausviite-kenttään
+			$viite = $tieto. ' '; // laitetaan asiakkaan tilausnumero talteen myös tilausviite-kenttään
 			break;
 
 		case 'ORFFZZ1NU'  :
@@ -652,6 +660,27 @@ while (!feof ($fd)) {
 					$edi_ulos .= t("Tilaus on maksettu, mutta jäi avoimeksi")."!\n";
 				}
 			}
+
+			if ($edi_tyyppi == "magento" and $tieto == 'pending_cashondelivery_asp') {
+				// tämä on jälkivaatimus
+				$kukarow["kassamyyja"] = $editilaus_kassalipas = "";
+
+				$query = "	SELECT tunnus
+							FROM maksuehto
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND jv = 'o'
+							LIMIT 1";
+				$editilaus_kateinen_res = mysql_query($query) or pupe_error($query);
+				$editilaus_kateinen_row = mysql_fetch_array($editilaus_kateinen_res);
+
+				if (mysql_num_rows($editilaus_kateinen_res) == 1) {
+					$editilaus_maksuehto = $editilaus_kateinen_row["tunnus"];
+				}
+				else {
+					$editilaus_maksuehto = "";
+					$edi_ulos .= t("Jälkivaatimus-maksuehtoa ei löytynyt")."!\n";
+				}
+			}
 			break;
 		//Tilaus päättyy. Aika tehdä se kantaan
 		case 'OHDR__END' :
@@ -709,6 +738,15 @@ while (!feof ($fd)) {
 					$editilaus_rahtivapaa = $arow["rahtivapaa"];
 				}
 
+				// katsotaan magentotilauksilta tilaustyyppi
+				if ($edi_tyyppi == "magento" AND $editilaus_tilaustyyppi != "") {
+					// tyyppi 9, ohitetaan aina varastoprosessi ja aina sisäinen
+					if ($editilaus_tilaustyyppi == "9") {
+						$editilaus_eilahetetta = "o";
+						$editilaus_sisainen = "o";
+					}
+				}
+				
 				// jos tilauksella on tullut lopullisen asikkaan tiedot, laitetaan ne talteen sisviesti ykköseen
 				if ($lopnimi != "") {
 					$arow["sisviesti1"] = "$lopnumero\n$lopnimi\n$loposoite\n$loppostino\n$loppostitp";
@@ -791,7 +829,9 @@ while (!feof ($fd)) {
 							maa_maara							= '$arow[maa_maara]',
 							piiri								= '$arow[piiri]',
 							rahtivapaa							= '$editilaus_rahtivapaa',
-							kassalipas							= '$editilaus_kassalipas'";
+							kassalipas							= '$editilaus_kassalipas',
+							eilahetetta							= '$editilaus_eilahetetta',
+							sisainen							= '$editilaus_sisainen'";
 				$result = mysql_query($query) or die($query);
 				$id = mysql_insert_id();
 				$edi_ulos .= t("Tilausnumero")." $id\n\n";
@@ -1044,12 +1084,11 @@ while (!feof ($fd)) {
 
 								$varasto = $erikoisvarastojen_saldot[0]["varasto"]; // ekassa varastossa on pienin prioriteetti
 								$laskurow["varasto"] = $varasto; // joudutaan spooffaamaan laskurow varasto
+								$kommentti = t("Huom: Tuote toimitetaan erikoisvarastosta!");								
 							}
 							else {
 								$var = "H";
 							}
-
-							$kommentti = t("Huom: Tuote toimitetaan erikoisvarastosta!");
 						}
 					}
 
@@ -1201,13 +1240,13 @@ while (!feof ($fd)) {
 					$silent = "SILENT";
 					require ("tilaus-valmis.inc");
 
-					// jos magentosta tullut tilaus on jo maksettu, merkataan se maksetuksi
-					if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "") {
+					// jos magentosta tullut tilaus on jo maksettu, päivitetään se takaisin keräysjonoon (paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi ja laskuttaa kaikki)
+					if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "" and $editilaus_tilaustyyppi != "9") {
 						// Haetaan yrityksen ensimmäinen normivarasto. Tallennetaan tilaus tähän varastoon
 						$varasto_query = "	SELECT tunnus
 											from varastopaikat
-											where yhtio='$kukarow[yhtio]'
-											and tyyppi=''
+											where yhtio = '$kukarow[yhtio]'
+											and tyyppi = ''
 											order by alkuhyllyalue
 											limit 1";
 						$varasto_res = mysql_query($varasto_query) or pupe_error($varasto_query);
@@ -1329,6 +1368,9 @@ while (!feof ($fd)) {
 			$tilaus_hyvaksyntaan	= "";
 			$editilaus_rahtivapaa	= "";
 			$editilaus_kassalipas	= "";
+			$editilaus_tilaustyyppi = "";
+			$editilaus_eilahetetta	= "";
+			$editilaus_sisainen		= "";
 			$editilaus_rahtikulu_hinta = "";
 
 			break;

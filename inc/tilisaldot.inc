@@ -160,7 +160,7 @@
 				$lopelink = "&lopetus=$PHP_SELF////toim=tilisaldot//tee=$tee//tkausi=$tkausi//alvk=$alvk//tilino=$tilino//ajarappari=$ajarappari";
 
 				if ($tilino != '') {
-					echo "<td><a href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]&alvv=".substr($trow["tapvm"], 0,4)."&alvk=".substr($trow["tapvm"],5,2)."&alvp=".substr($trow["tapvm"],-2)."$lopelink'>".tv1dateconv($trow["tapvm"])."</a></td>";
+					echo "<td><a name='tili1_$trow[tilino]' href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]&alvv=".substr($trow["tapvm"], 0,4)."&alvk=".substr($trow["tapvm"],5,2)."&alvp=".substr($trow["tapvm"],-2)."$lopelink///tili1_$trow[tilino]'>".tv1dateconv($trow["tapvm"])."</a></td>";
 				}
 
 				if ($alvk != "") {
@@ -170,7 +170,7 @@
 					$linkkilisa = "&tkausi=$tkausi";
 				}
 
-				echo "<td><a href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]$linkkilisa$lopelink'>$trow[tilino]</a></td>";
+				echo "<td><a name='tili2_$trow[tilino]' href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]$linkkilisa$lopelink///tili2_$trow[tilino]'>$trow[tilino]</a></td>";
 				echo "<td>$trow[nimi]</td>";
 
 				if ($kustannuspaikoittain != "") {

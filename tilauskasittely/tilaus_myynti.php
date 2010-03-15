@@ -5456,7 +5456,7 @@ if ($tee == '') {
 				if ($jarjlisa != "") {
 					$ycspan--;
 				}
-				if ($kukarow["resoluutio"] == 'I' ) {
+				if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
 					$ycspan++;
 				}
 				if ($trivityyulos != "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K')) {

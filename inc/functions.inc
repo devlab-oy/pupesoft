@@ -8208,4 +8208,10 @@ if (!function_exists("progress_bar")) {
 	}
 }
 
+if (!function_exists("pupesoft_cleanstring")) {
+	function pupesoft_cleanstring($string) {
+		return mysql_real_escape_string(str_replace(array("\"","'","<",">","\\", ";"), "", trim($string)));
+	}
+}
+
 ?>

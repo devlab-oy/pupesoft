@@ -13,7 +13,7 @@ if ($phpnimi != "rahtikirja_custom.php") {
 				LEFT JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen
 				WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnus='$tunnus'";
 	$tempr = mysql_query($query) or pupe_error($query);
-	$laskurow = mysql_fetch_array($tempr);
+	$laskurow = mysql_fetch_assoc($tempr);
 }
 else {
 	$laskurow = $osoitelappurow;
@@ -26,7 +26,7 @@ $query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and trim(kome
 $pres  = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($pres) > 0) {
-	$print = mysql_fetch_array($pres);
+	$print = mysql_fetch_assoc($pres);
 
 	$yhtiorow["nimi"]    = $print["nimi"];
 	$yhtiorow["osoite"]  = $print["osoite"];
@@ -300,11 +300,15 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	
 	$pdf->draw_text(mm_pt(100), mm_pt(175), "L‰hetyspvm",									$firstpage, $norm);
 	$pdf->draw_text(mm_pt(100), mm_pt(170), date("d.m.Y") ,									$firstpage, $norm);
-	
+
+	$query = "SELECT * FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
+	$toitares = mysql_query($query) or pupe_error($query);
+	$toitarow = mysql_fetch_assoc($toitares);
+
 	$pdf->draw_text(mm_pt(22), mm_pt(157), "Terminaalitoimitus" ,							$firstpage, $norm);
-	$pdf->draw_text(mm_pt(22), mm_pt(152), "INEX PARTNERS OY" ,								$firstpage, $norm);
-	$pdf->draw_text(mm_pt(22), mm_pt(149), "Logistiikkakeskus Hakkila ovet 69 - 73" ,		$firstpage, $piennorm);
-	$pdf->draw_text(mm_pt(22), mm_pt(145), "Kanervantie 6, 01380 Vantaa" ,					$firstpage, $norm);
+	$pdf->draw_text(mm_pt(22), mm_pt(152), "$toitarow[toim_nimi]",							$firstpage, $norm);
+	$pdf->draw_text(mm_pt(22), mm_pt(149), "$toitarow[toim_nimitark]",						$firstpage, $piennorm);
+	$pdf->draw_text(mm_pt(22), mm_pt(145), "$toitarow[toim_osoite], $toitarow[toim_postino] $toitarow[toim_postitp]", $firstpage, $norm);
 
 	$pdf->draw_text(mm_pt(22),	mm_pt(140), "Minne - Till - To: " ,							$firstpage, $otsik);
 
@@ -326,8 +330,20 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_text(mm_pt(105), mm_pt(97),  "Kolli - Item",									$firstpage, $otsik);
 
 	//kolliluku
-	$pdf->draw_text(mm_pt(105), mm_pt(92), $tulostuskpl."/".$tulostakolli,							$firstpage, $norm);	
-	
+	if ($rahtikirja_tulostus == "yep") {
+		$pdf->draw_text(mm_pt(105), mm_pt(92), $kollityht, $firstpage, $norm);	
+	}
+	else {
+		$query = "	SELECT sum(kollit) kollit
+					FROM rahtikirjat
+					WHERE yhtio='$kukarow[yhtio]' and otsikkonro = '$laskurow[tunnus]'";
+		$pakka = mysql_query($query) or pupe_error($query);
+		$pak = mysql_fetch_assoc($pakka);
+
+		if ((int) $pak["kollit"] > 0) {
+			$pdf->draw_text(mm_pt(105), mm_pt(92), $pak["kollit"], $firstpage, $norm);
+		}
+	}
 }
 
 //keksit‰‰n uudelle failille joku varmasti uniikki nimi:

@@ -349,7 +349,7 @@
 	// Jos kyseessä on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
 	if (substr($paikka,0,3) == "¡¡V") {
 		$var 		 		= "R";
-		$paikka		 		= substr($paikka, 3);;
+		$paikka		 		= substr($paikka, 3);
 	}
 	elseif ($var == "R" and substr($paikka,0,3) != "¡¡V" and substr($paikka,0,3) != "¡¡V") {
 		$var 				= "";

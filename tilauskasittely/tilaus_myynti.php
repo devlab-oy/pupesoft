@@ -1156,8 +1156,10 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 				}
 
 				if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
-
-				//	Voimme myös tehdä tilaukselta suoraanv valmistuksia!
+			}
+			
+			if ($kukarow["extranet"] == "" and $yhtiorow["tee_valmistus_myyntitilaukselta"] != '') {
+				//	Voimme myös tehdä tilaukselta suoraan valmistuksia!
 				require("tilauksesta_valmistustilaus.inc");
 				$tilauksesta_valmistustilaus = tilauksesta_valmistustilaus($kukarow["kesken"]);
 

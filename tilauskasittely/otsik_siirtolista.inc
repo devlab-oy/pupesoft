@@ -13,11 +13,11 @@
 	//	Tehd‰‰n hieman oikeellisuustarkistuksia valmistuksesta.. "ei viel‰ hanskaa k‰yt‰ kaikista valintaa"
 	if ($toim == "VALMISTAVARASTOON" and isset($jatka) and $clearing != "" and $varasto != "") {
 		//	Valmistuksia voi tehd‰ vain saman maan sis‰ll‰!
-		$query  = "select maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$clearing'";
+		$query  = "SELECT maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$clearing'";
 		$abures = mysql_query($query) or pupe_error($query);
 		$kohdev = mysql_fetch_array($abures);
 
-		$query  = "select maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
+		$query  = "SELECT maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
 		$abures = mysql_query($query) or pupe_error($query);
 		$lahdev = mysql_fetch_array($abures);
 
@@ -27,7 +27,6 @@
 			unset($jatka);
 		}
 	}
-
 
 	if ($tila == 'Muuta' and !isset($jatka)) {
 
@@ -53,7 +52,7 @@
 							LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 							WHERE lasku.tunnus = '$kopioitava_otsikko'";
-							
+
 				//	T‰m‰ on teht‰v‰, jottemme vain p‰ivit‰ vanhaa!
 				$query = "	UPDATE kuka
 							SET kesken = 0
@@ -76,7 +75,7 @@
 			// jos meill‰ on jo alatila ja tila ei muokkailla niit‰!
 			$alatila="";
 			$ylatila="";
-			
+
 			//	Jos meill‰ on kopioitu otsikko, ei kopioida alatilaa!
 			if($kopioitava_otsikko == 0 and $srow['alatila'] != '') {
 				$alatila=$srow['alatila'];
@@ -178,9 +177,9 @@
 		}
 
 		if ($kukarow['kesken'] == 0) {
-			$toimpp = $kerpp = date(j);
-			$toimkk = $kerkk = date(n);
-			$toimvv = $kervv = date(Y);
+			$toimpp = $kerpp = date("j");
+			$toimkk = $kerkk = date("n");
+			$toimvv = $kervv = date("Y");
 		}
 		else {
 			list($toimvv, $toimkk, $toimpp) = split('-', $srow["toimaika"]);
@@ -232,7 +231,7 @@
 
 		//	Olisiko erikseen varastoluokkia?
 		$tresult = t_avainsana("VARASTOLUOKKA");
-		
+
 		if(mysql_num_rows($tresult) == 0) {
 			$tresult = t_avainsana("ASIAKASLUOKKA");
 		}
@@ -267,7 +266,7 @@
 			while($row = mysql_fetch_array($tresult)) {
 				$sel = "";
 				if ($row["selite"] == $srow["toimitustapa"]) $sel = 'selected';
-				
+
 				echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
 			}
 			echo "</select>";
@@ -361,8 +360,6 @@
 		echo "<br><input type='submit' name='jatka' value='".t("Jatka")."'></form>";
 	}
 
-
-
 	if (isset($jatka)) {
 
 		if ($kukarow["kesken"] == 0) {
@@ -375,12 +372,12 @@
 		else {
 			// Pidet‰‰n huolta tilausrivien toimitusp‰ivist‰ ja kerayspaivasta
 			$query = "	UPDATE tilausrivi
-						SET kerayspvm = '".$kervv."-".$kerkk."-".$kerpp."'
+						SET kerayspvm = '$kervv-$kerkk-$kerpp'
 						WHERE otunnus = '$kukarow[kesken]' and kerayspvm='$vkerayspvm' and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$query = "	UPDATE tilausrivi
-						SET toimaika = '".$toimvv."-".$toimkk."-".$toimpp."'
+						SET toimaika = '$toimvv-$toimkk-$toimpp'
 						WHERE otunnus = '$kukarow[kesken]' and toimaika='$vtoimaika' and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -467,10 +464,10 @@
 		elseif ($toim == "SIIRTOLISTA") {
 			$query .= ",tilaustyyppi = 'G', tila='G', ytunnus='SIIRTO', liitostunnus='9999999999'";
 			$query .= ",kohdistettu = 'K'";
+			
 			if (isset($chn) and $chn == 'GEN') {
 				$query .= ",chn = 'GEN'"; // t‰ll‰ erotellaan "tulosta siirtolista"-kohdassa generoidut ja k‰sin tehdyt siirtolistat
 			}
-
 
 			$tee = "";
 		}
@@ -484,7 +481,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$id = mysql_insert_id();
 
-		if ((int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
+		if (!isset($nokeskupdate) and (int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
 			$query = "	UPDATE kuka
 						SET kesken = '$id'
 						WHERE yhtio = '$kukarow[yhtio]' AND

@@ -539,7 +539,7 @@
 		}
 
 		//	Tarkistetaan vielä voisimmeko kenties ehkä mahdollisesti valmistaa tätä asiakkaalle?
-		if (($kukarow["extranet"] == "" and $yhtiorow["tee_valmistus_myyntitilaukselta"] != '') and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
+		if ( ($kukarow["extranet"] == "" and $yhtiorow["tee_valmistus_myyntitilaukselta"] != '') and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS')) {
 
 			$query = "	SELECT *
 						FROM tuoteperhe

@@ -245,12 +245,17 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 					//	Haetaan tuotteen oletusalv jos ollaan ulkomailla, tälläin myös kotimaan alv on aina zero
 					if ($maa != "" and $maa != $yhtiorow["maa"]) {
 						if ($alvulk == "") {
-							$query = "select * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$maa' and tuoteno='$tuoteno' limit 1";
+							$query = "	SELECT * 
+										FROM tuotteen_alv 
+										WHERE yhtio = '$kukarow[yhtio]' 
+										AND maa = '$maa' 
+										AND tuoteno = '$tuoteno' 
+										LIMIT 1";
 							$alhire = mysql_query($query) or pupe_error($query);
-							$alvrow=mysql_fetch_array($alhire);
-							$alvulk=$alvrow["alv"];
+							$alvrow = mysql_fetch_array($alhire);
+							$alvulk = $alvrow["alv"];
 						}
-						$vero=0;
+						$vero = 0;
 					}
 				}
 				else {
@@ -939,7 +944,6 @@ if ($tee == "UUSI") {
 	}
 }
 
-//	Joitain asioita kai pitää muutella..
 if ($tee == "TALLENNA") {
 	if ((int) $tilausnumero == 0) {
 		echo "<font class='error'>".t("Matkalaskun numero puuttuu")."</font>";
@@ -1038,7 +1042,7 @@ if ($tee == "MUOKKAA") {
 		}
 
 		if ($poistakuva > 0) {
-			$query = " DELETE from liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and liitos='lasku' and liitostunnus='$tilausnumero' and tunnus = '$poistakuva'";
+			$query = "DELETE from liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and liitos='lasku' and liitostunnus='$tilausnumero' and tunnus = '$poistakuva'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_affected_rows() == 0) {
@@ -1046,9 +1050,13 @@ if ($tee == "MUOKKAA") {
 			}
 		}
 
-		$query = "	SELECT *
-					from lasku
-					where tunnus = '$tilausnumero' and yhtio = '$kukarow[yhtio]' and tilaustyyppi IN ('M', '') and tila IN ('H','Y','M','P','Q')";
+		$query = "	SELECT lasku.*, toimi.kustannuspaikka, toimi.kohde, toimi.projekti
+					FROM lasku
+					JOIN toimi on (toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus)
+					WHERE lasku.tunnus = '$tilausnumero' 
+					AND lasku.yhtio = '$kukarow[yhtio]' 
+					AND lasku.tilaustyyppi IN ('M', '') 
+					AND lasku.tila IN ('H','Y','M','P','Q')";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -1059,7 +1067,7 @@ if ($tee == "MUOKKAA") {
 		}
 
 		if ($kuivat != "JOO") {
-			if ($perheid2> 0) {
+			if ($perheid2 > 0) {
 
 				$query	= "	SELECT tilausrivi.*, tuote.tuotetyyppi, tuote.tilino,
 							tilausrivin_lisatiedot.tiliointirivitunnus,
@@ -1474,59 +1482,65 @@ if ($tee == "MUOKKAA") {
 			}
 
 			//	Tehdään kustannuspaikkamenut
-			$query = "	SELECT tunnus, nimi
+			$query = "	SELECT tunnus, nimi, koodi
 						FROM kustannuspaikka
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
-						ORDER BY nimi";
+						ORDER BY koodi+0, nimi";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
-				$kustannuspaikka = "<select name = 'kustp' style=\"width: 100px\"><option value = ' '>".t("Ei kustannuspaikkaa");
+				$kustannuspaikka = "<select name = 'kustp' style=\"width: 100px\"><option value = ' '>".t("Ei kustannuspaikkaa")." '$trow[kustannuspaikka]'</option>";
+
+				if (!isset($kustp)) $kustp = $laskurow["kustannuspaikka"];
 
 				while ($kustannuspaikkarow = mysql_fetch_array ($result)) {
 					$valittu = "";
 					if ($kustannuspaikkarow[0] == $kustp) {
 						$valittu = "selected";
 					}
-					$kustannuspaikka .= "<option value = '$kustannuspaikkarow[0]' $valittu>$kustannuspaikkarow[1]";
+					$kustannuspaikka .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[koodi] $kustannuspaikkarow[nimi]</option>";
 				}
 				$kustannuspaikka .= "</select>";
 			}
 
-			$query = "	SELECT tunnus, nimi
+			$query = "	SELECT tunnus, nimi, koodi
 						FROM kustannuspaikka
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
-						ORDER BY nimi";
+						ORDER BY koodi+0, nimi";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
 				$kustannuspaikka .= " <select name = 'kohde' style=\"width: 100px\"><option value = ' '>".t("Ei kohdetta");
+
+				if (!isset($kohde)) $kohde = $laskurow["kohde"];
 
 				while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
 					$valittu = "";
 					if ($kustannuspaikkarow[0] == $kohde) {
 						$valittu = "selected";
 					}
-					$kustannuspaikka .= "<option value = '$kustannuspaikkarow[0]' $valittu>$kustannuspaikkarow[1]";
+					$kustannuspaikka .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[koodi] $kustannuspaikkarow[nimi]</option>";
 				}
 				$kustannuspaikka .= "</select>";
 			}
 
-			$query = "	SELECT tunnus, nimi
+			$query = "	SELECT tunnus, nimi, koodi
 						FROM kustannuspaikka
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
-						ORDER BY nimi";
+						ORDER BY koodi+0, nimi";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
 				$kustannuspaikka .= " <select name = 'projekti' style=\"width: 100px\"><option value = ' '>".t("Ei projektia");
+
+				if (!isset($projekti)) $projekti = $laskurow["projekti"];
 
 				while ($kustannuspaikkarow = mysql_fetch_array ($result)) {
 					$valittu = "";
 					if ($kustannuspaikkarow[0] == $projekti) {
 						$valittu = "selected";
 					}
-					$kustannuspaikka .= "<option value = '$kustannuspaikkarow[0]' $valittu>$kustannuspaikkarow[1]";
+					$kustannuspaikka .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[koodi] $kustannuspaikkarow[nimi]</option>";
 				}
 				$kustannuspaikka .= "</select>";
 			}
@@ -1623,10 +1637,7 @@ if ($tee == "MUOKKAA") {
 					echo "<td><input type='hidden' name='vero' value='0'>".alv_popup_oletus("alvulk", $alvulk, $maa, 'lista')."</td>";
 				}
 				else {
-					if (!isset($vero)) {
-						$vero = $trow["alv"];
-					}
-					echo "<td>".alv_popup_oletus("vero", $vero, $maa, 'lista')."</td>";
+					echo "<td><input type='hidden' name='vero' value='$trow[alv]'> $trow[alv] %</td>";
 				}
 
 				$leveys = 50;

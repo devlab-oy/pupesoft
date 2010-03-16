@@ -1,19 +1,10 @@
 <?php
 
-	//Pari muutujakorjausta ettei tilausmyynnissä tarttis tehdä niin pirun rumia nappuloita
-	if (isset($_REQUEST["NAYTATILAUS"])) {
-		$_REQUEST["tee"] = $_POST["tee"] = $_GET["tee"] = "NAYTATILAUS";
-	}
-
-	if (isset($_REQUEST["TULOSTA"])) {
-		$_REQUEST["tee"] = $_POST["tee"] = $_GET["tee"] = "TULOSTA";
-	}
-
 	if (isset($_REQUEST["komento"]) and in_array("PDF_RUUDULLE", $_REQUEST["komento"])) {
 		$_REQUEST["tee"] = $_POST["tee"] = $_GET["tee"] = "NAYTATILAUS";
 	}
 
-	if ($_REQUEST["tee"] == 'NAYTATILAUS') $nayta_pdf = 1; //Generoidaan .pdf-file
+	if ($_REQUEST["tee"] == 'NAYTATILAUS' or $_POST["tee"] == 'NAYTATILAUS' or $_GET["tee"] == 'NAYTATILAUS') $nayta_pdf = 1; //Generoidaan .pdf-file
 
 	if (file_exists("../inc/parametrit.inc")) {
 		require('../inc/parametrit.inc');
@@ -922,13 +913,13 @@
 					}
 
 					echo "<form id='tulostakopioform_$row[tunnus]' name='tulostakopioform_$row[tunnus]' method='post' action='$PHP_SELF' autocomplete='off'>
-						<input type='hidden' name='lopetus' value='$lopetus'>
-						<input type='hidden' name='otunnus' value='$row[tunnus]'>
-						<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
-						<input type='hidden' name='toim' value='$toim'>
-						<input type='hidden' name='tee' value='NAYTATILAUS'>
-						<input type='hidden' name='mista' value='tulostakopio'>
-						<input type='submit' value='".t("Näytä pdf")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$row[tunnus]', 'tulostakopio_$row[tunnus]'); return false;\"></form>";
+							<input type='hidden' name='lopetus' value='$lopetus'>
+							<input type='hidden' name='otunnus' value='$row[tunnus]'>
+							<input type='hidden' name='lasku_yhtio' value='$row[yhtio]'>
+							<input type='hidden' name='toim' value='$toim'>
+							<input type='hidden' name='tee' value='NAYTATILAUS'>
+							<input type='hidden' name='mista' value='tulostakopio'>
+							<input type='submit' value='".t("Näytä pdf")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$row[tunnus]', 'tulostakopio_$row[tunnus]'); return false;\"></form>";
 
 					if ($kukarow["extranet"] == "") {
 						echo "<br>

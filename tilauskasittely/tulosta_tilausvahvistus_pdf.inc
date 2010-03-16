@@ -749,9 +749,11 @@
 
 			if ($aburow["tunnukset"] != "") {
 				$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
+				$laskurow["nippu"] = $aburow["tunnukset"];
 			}
 			else {
 				$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+				$laskurow["nippu"] = $laskurow["tunnus"];
 			}
 		}
 		elseif ($laskurow["tunnusnippu"] > 0 and $laskurow["clearing"] != "JT-TILAUS") {

@@ -223,6 +223,9 @@
 						$sarjares2 = mysql_query($query) or pupe_error($query);
 
 						if ($era_new_paikka[$toimrow["tunnus"]] != "") {
+							
+							$oslisa = "";
+							
 							if ($toimrow["varattu"] > 0) {
 								$query = "	SELECT *
 											FROM sarjanumeroseuranta
@@ -237,7 +240,7 @@
 											and ostorivitunnus > 0
 											LIMIT 1";
 								$lisa_res = mysql_query($query) or pupe_error($query);
-
+																
 								if (mysql_num_rows($lisa_res) > 0) {
 									$lisa_row = mysql_fetch_array($lisa_res);
 									$oslisa = " ostorivitunnus ='$lisa_row[ostorivitunnus]', ";
@@ -245,11 +248,6 @@
 								else {
 									$oslisa = " ostorivitunnus ='', ";
 								}
-
-							}
-							else {
-								$tunken = "ostorivitunnus";
-								$oslisa = "";
 							}
 
 							$query = "	INSERT into sarjanumeroseuranta
@@ -288,7 +286,7 @@
 									FROM sarjanumeroseuranta
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tuoteno = '$toimrow[tuoteno]'
-									and myyntirivitunnus = '$toimrow[tunnus]'";
+									and $tunken = '$toimrow[tunnus]'";
 						$sarjares2 = mysql_query($query) or pupe_error($query);
 						$sarjarow = mysql_fetch_array($sarjares2);
 
@@ -710,7 +708,7 @@
 								$erarow = mysql_fetch_array($sarjares2);
 
 								if ($erarow['sarjanumeroseuranta'] == 'E' or $erarow['sarjanumeroseuranta'] == 'F') {
-										echo "<font class='error'>".t("Eränumeroseurannassa oleville tuotteille on liitettävä eränumero ennen keräystä")."! ".t("Tuote").": $tilrivirow[tuoteno].</font><br>";
+									echo "<font class='error'>".t("Eränumeroseurannassa oleville tuotteille on liitettävä eränumero ennen keräystä")."! ".t("Tuote").": $tilrivirow[tuoteno].</font><br>";
 								}
 							}
 
@@ -1844,22 +1842,22 @@
 						echo "<input type='text' size='4' name='maara[$row[tunnus]]' value='$maara[$i]' $poikkeava_maara_disabled> $puute";
 						echo "<input type='hidden' name='kerivi[]' value='$row[tunnus]'>";
 					}
+					
+					if ($toim == 'SIIRTOTYOMAARAYS' or $toim == 'SIIRTOLISTA') {
+						$tunken1 = "siirtorivitunnus";
+						$tunken2 = "siirtorivitunnus";
+					}
+					elseif ($row["varattu"] < 0) {
+						$tunken1 = "ostorivitunnus";
+						$tunken2 = "myyntirivitunnus";
+					}
+					else {
+						$tunken1 = "myyntirivitunnus";
+						$tunken2 = "myyntirivitunnus";
+					}
 
 					if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V") {
-
-						if ($toim == 'SIIRTOTYOMAARAYS' or $toim == 'SIIRTOLISTA') {
-							$tunken1 = "siirtorivitunnus";
-							$tunken2 = "siirtorivitunnus";
-						}
-						elseif ($row["varattu"] < 0) {
-							$tunken1 = "ostorivitunnus";
-							$tunken2 = "myyntirivitunnus";
-						}
-						else {
-							$tunken1 = "myyntirivitunnus";
-							$tunken2 = "myyntirivitunnus";
-						}
-
+						
 						$query = "	SELECT count(*) kpl, min(sarjanumero) sarjanumero
 									from sarjanumeroseuranta
 									where yhtio  = '$kukarow[yhtio]'
@@ -1915,24 +1913,11 @@
 						$paikat 	= "<option value=''>".t("Valitse erä")."</option>";
 						$selpaikka 	= "";
 
-						if ($toim == 'SIIRTOTYOMAARAYS' or $toim == 'SIIRTOLISTA') {
-							$tunken1 = "siirtorivitunnus";
-							$tunken2 = "siirtorivitunnus";
-						}
-						elseif ($row["varattu"] < 0) {
-							$tunken1 = "ostorivitunnus";
-							$tunken2 = "myyntirivitunnus";
-						}
-						else {
-							$tunken1 = "myyntirivitunnus";
-							$tunken2 = "myyntirivitunnus";
-						}
-
 						$query	= "	SELECT sarjanumeroseuranta.sarjanumero era, sarjanumeroseuranta.parasta_ennen
 				   					FROM sarjanumeroseuranta
 				   					WHERE yhtio = '$kukarow[yhtio]'
 									and tuoteno = '$row[puhdas_tuoteno]'
-				   					and myyntirivitunnus = '$row[tunnus]'
+				   					and $tunken1 = '$row[tunnus]'
 				   					LIMIT 1";
 				   		$sarjares = mysql_query($query) or pupe_error($query);
 				   		$sarjarow = mysql_fetch_array($sarjares);

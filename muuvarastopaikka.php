@@ -290,7 +290,7 @@
 						AND tunnus = '$sarjano_array[0]'";
 			$siirrettava_era_res = mysql_query($query) or pupe_error($query);
 			$siirrettava_era_row = mysql_fetch_assoc($siirrettava_era_res);
-
+			
 			if (!is_array($sarjano_array) or $sarjano_kpl_array[$sarjano_array[0]] < $asaldo) {
 				echo "<font class='error'>".t("Tarkista eränumerovalintasi")."</font><br><br>";
 				$tee = $uusitee;
@@ -640,7 +640,10 @@
 									tuoteno			= '$tuoteno',
 									sarjanumero		= '$sarrr_row[sarjanumero]',
 									ostorivitunnus 	= '$sarrr_row[ostorivitunnus]',
-									era_kpl			= $asaldo,
+									era_kpl			= $asaldo,									
+									takuu_alku 		= '$sarrr_row[takuu_alku]',
+									takuu_loppu		= '$sarrr_row[takuu_loppu]',
+									parasta_ennen	= '$sarrr_row[parasta_ennen]',									
 									hyllyalue		= '$minnerow[hyllyalue]',
 									hyllynro 		= '$minnerow[hyllynro]',
 									hyllyvali 		= '$minnerow[hyllyvali]',
@@ -954,6 +957,7 @@
 					echo "<td nowrap>".t_tuotteen_avainsanat($sarjarow, 'nimitys')."</td>";
 					echo "<td nowrap>$sarjarow[sarjanumero]</td>";
 					echo "<td nowrap>$sarjarow[tuotepaikka]</td>";
+					
 					if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") {
 						echo "<td>$sarjarow[era_kpl] ".t_avainsana("Y", "", "and avainsana.selite='$sarjarow[yksikko]'", "", "", "selite")."</td>";
 						echo "<td>";
@@ -965,6 +969,7 @@
 					else {
 						echo "<td><input type='checkbox' name='sarjano_array[]' value='$sarjarow[tunnus]'></td>";
 					}
+					
 					echo "</tr>";
 				}
 				echo "</table>";

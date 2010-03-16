@@ -406,16 +406,48 @@
 
 					//laitetaan sarjanumerot kuntoon
 					if ($tilausrivirow["sarjanumeroseuranta"] != "") {
-						$query = "	SELECT tunnus
+						$query = "	SELECT tunnus, era_kpl, sarjanumero
 									FROM sarjanumeroseuranta
-									WHERE siirtorivitunnus		= '$tun'
-									and yhtio					= '$kukarow[yhtio]'";
+									WHERE siirtorivitunnus	= '$tun'
+									and yhtio = '$kukarow[yhtio]'";
 						$sarjares = mysql_query($query) or pupe_error($query);
 
 						$sarjano_array = array();
 
-						while($sarjarow = mysql_fetch_array($sarjares)) {
-							$sarjano_array[] = $sarjarow["tunnus"];
+						while ($sarjarow = mysql_fetch_array($sarjares)) {														
+							if ($tilausrivirow["sarjanumeroseuranta"] == "E" or $tilausrivirow["sarjanumeroseuranta"] == "F" or $tilausrivirow["sarjanumeroseuranta"] == "G") {
+								// eränumeroseurannassa pitää etsiä ostotunnuksella erä josta kappaleeet otetaan
+								
+								// koitetaan löytää vapaita ostettuja eriä mitä myydä
+								$query =   "SELECT era_kpl, tunnus, ostorivitunnus
+											FROM sarjanumeroseuranta
+											WHERE yhtio 			= '$kukarow[yhtio]'
+											and tuoteno				= '$tilausrivirow[tuoteno]'
+											and ostorivitunnus 		> 0
+											and myyntirivitunnus 	= 0
+											and sarjanumero 		= '$sarjarow[sarjanumero]'
+											and era_kpl 			> 0
+											and hyllyalue   		= '$tilausrivirow[hyllyalue]'
+											and hyllynro    		= '$tilausrivirow[hyllynro]'
+											and hyllyvali   		= '$tilausrivirow[hyllyvali]'
+											and hyllytaso   		= '$tilausrivirow[hyllytaso]'
+											ORDER BY era_kpl DESC, tunnus 
+											LIMIT 1";
+								$erajaljella_res = mysql_query($query) or pupe_error($query);
+																
+								// jos löytyy ostettuja eriä myytäväks niin mennään tänne
+								if (mysql_num_rows($erajaljella_res) == 1) {
+									$erajaljella_row = mysql_fetch_array($erajaljella_res);
+									
+									
+									
+									$sarjano_array[] = $erajaljella_row["tunnus"];
+									$sarjano_kpl_array[$erajaljella_row["tunnus"]] = $erajaljella_row["era_kpl"];									
+								}																								
+							}
+							else {
+								$sarjano_array[] = $sarjarow["tunnus"];
+							}
 						}
 					}
 
@@ -423,7 +455,7 @@
 					$tee = "N";
 					$kutsuja = "vastaanota.php";
 
-					require("../muuvarastopaikka.php");
+					require("muuvarastopaikka.php");
 
 
 					if ($eancheck[$tun]!='' and $kirjoitin!='') {

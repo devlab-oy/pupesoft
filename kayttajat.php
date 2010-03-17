@@ -545,9 +545,19 @@
 						}
 					}
 				}
+				echo "</select></td></tr>";
 
 				if ($toim != 'extranet') {
-					echo "</select></td></tr>";
+
+					echo "<tr><th align='left'>".t("Hyv‰ksyj‰").":</td>";
+
+					if ($krow["hyvaksyja"] != '') {
+						$chk = "CHECKED";
+					}
+					else {
+						$chk = "";
+					}
+					echo "<td><input type='checkbox' name='hyvaksyja' $chk></td></tr>";
 
 					$sel9 = $sel3 = $sel2 = $sel1 = "";
 
@@ -564,7 +574,7 @@
 						$sel9 = "SELECTED";
 					}
 
-					echo "<tr><th align='left'>".t("Taso").":</th>";
+					echo "<tr><th align='left'>".t("Hyv‰ksyj‰taso").":</th>";
 					echo "<td><select name='taso'>";
 					echo "<option value='9' $sel9>".t("Taso 9 Aloittelijahyv‰ksyj‰, tiliˆintej‰ ei n‰ytet‰")."</option>";
 					echo "<option value='1' $sel1>".t("Taso 1 Perushyv‰ksyj‰, tiliˆntej‰ ei voi muuttaa")."</option>";
@@ -788,16 +798,6 @@
 					echo "<option value='0' $sel0>".t("Ei n‰ytet‰ saatavia kassak‰ytt‰j‰n‰")."</option>";
 					echo "<option value='1' $sel1>".t("N‰ytet‰‰n saatavat kassak‰ytt‰j‰n‰")."</option>";
 					echo "</select></td></tr>";
-
-					echo "<tr><th align='left'>".t("Hyv‰ksyj‰").":</td>";
-
-					if ($krow["hyvaksyja"] != '') {
-						$chk = "CHECKED";
-					}
-					else {
-						$chk = "";
-					}
-					echo "<td><input type='checkbox' name='hyvaksyja' $chk></td></tr>";
 				}
 				else {
 					echo "<tr><th align='left'>".t("Tilaukset suoraan laskutukseen").":</td>";
@@ -845,67 +845,71 @@
 
 					echo "</td></tr>";
 
-					echo "<tr><th align='left'>".t("Oletusasiakastiedot").":</th><td>";
-					echo "<input type='text' name='ytunnus2'>";
 
-					if ($kumpi == "2" and $asiakasid != "") $krow["oletus_asiakastiedot"] = $asiakasid;
+					if ($toim == 'extranet') {
+						echo "<tr><th align='left'>".t("Oletusasiakastiedot").":</th><td>";
+						echo "<input type='text' name='ytunnus2'>";
 
-					if ($krow["oletus_asiakastiedot"] != "") {
+						if ($kumpi == "2" and $asiakasid != "") $krow["oletus_asiakastiedot"] = $asiakasid;
 
-						$query = "select * from asiakas where tunnus='$krow[oletus_asiakastiedot]'";
-						$vares = mysql_query($query) or pupe_error($query);
+						if ($krow["oletus_asiakastiedot"] != "") {
 
-						if (mysql_num_rows($vares) == 1) {
-							$varow = mysql_fetch_array($vares);
+							$query = "select * from asiakas where tunnus='$krow[oletus_asiakastiedot]'";
+							$vares = mysql_query($query) or pupe_error($query);
 
-							echo " $varow[ytunnus] $varow[nimi]";
+							if (mysql_num_rows($vares) == 1) {
+								$varow = mysql_fetch_array($vares);
 
-							if ($varow["toim_ovttunnus"] != "") {
-								echo " / $varow[toim_ovttunnus] $varow[toim_nimi]";
+								echo " $varow[ytunnus] $varow[nimi]";
+
+								if ($varow["toim_ovttunnus"] != "") {
+									echo " / $varow[toim_ovttunnus] $varow[toim_nimi]";
+								}
+
+								echo "<input type='hidden' name='oletus_asiakastiedot' value='$krow[oletus_asiakastiedot]'>";
+
 							}
-
-							echo "<input type='hidden' name='oletus_asiakastiedot' value='$krow[oletus_asiakastiedot]'>";
-
+							else {
+								echo " ".t("Asiakas ei lˆydy")."!";
+							}
 						}
 						else {
-							echo " ".t("Asiakas ei lˆydy")."!";
+							echo " ".t("Asiakastietoasiakasta ei ole syˆtetty")."!";
 						}
-					}
-					else {
-						echo " ".t("Asiakastietoasiakasta ei ole syˆtetty")."!";
 					}
 
 					echo "</td></tr>";
-
 				}
 
-				$sel=array();
-				$sel[$krow["naytetaan_asiakashinta"]] = "SELECTED";
+				if ($toim == 'extranet') {
+					$sel=array();
+					$sel[$krow["naytetaan_asiakashinta"]] = "SELECTED";
 
-				echo "<tr><th align='left'>".t("N‰ytet‰‰n asiakashinta tuotehaussa").":</th>
-						<td><select name='naytetaan_asiakashinta'>
-						<option value=''>".t("N‰ytet‰‰n tuotteen myyntihinta")."</option>
-						<option value='A' $sel[A]>".t("N‰ytet‰‰n asiakashinta")."</option>
-						</select></td></tr>";
+					echo "<tr><th align='left'>".t("N‰ytet‰‰n asiakashinta tuotehaussa").":</th>
+							<td><select name='naytetaan_asiakashinta'>
+							<option value=''>".t("N‰ytet‰‰n tuotteen myyntihinta")."</option>
+							<option value='A' $sel[A]>".t("N‰ytet‰‰n asiakashinta")."</option>
+							</select></td></tr>";
 
-				$sel=array();
-				$sel[$krow["naytetaan_tuotteet"]] = "SELECTED";
 
-				echo "<tr><th align='left'>".t("N‰ytett‰v‰t tuotteet tuotehaussa").":</th>
-						<td><select name='naytetaan_tuotteet'>
-						<option value=''>".t("N‰ytet‰‰n kaikki tuotteet")."</option>
-						<option value='A' $sel[A]>".t("N‰ytet‰‰n tuotteet joilla on asiakashinta tai asiakasale")."</option>
-						</select></td></tr>";
+					$sel=array();
+					$sel[$krow["naytetaan_tuotteet"]] = "SELECTED";
 
-				$sel=array();
-				$sel[$krow["naytetaan_tilaukset"]] = "SELECTED";
+					echo "<tr><th align='left'>".t("N‰ytett‰v‰t tuotteet verkkokaupan tuotehaussa").":</th>
+							<td><select name='naytetaan_tuotteet'>
+							<option value=''>".t("N‰ytet‰‰n kaikki tuotteet")."</option>
+							<option value='A' $sel[A]>".t("N‰ytet‰‰n tuotteet joilla on asiakashinta tai asiakasale")."</option>
+							</select></td></tr>";
 
-				echo "<tr><th align='left'>".t("N‰ytett‰v‰t tilaukset verkkokaupassa").":</th>
-						<td><select name='naytetaan_tilaukset'>
-						<option value=''>".t("N‰ytet‰‰n kaikki tilaukset")."</option>
-						<option value='O' $sel[O]>".t("N‰ytet‰‰n vain omat tilaukset")."</option>
-						</select></td></tr>";
+					$sel=array();
+					$sel[$krow["naytetaan_tilaukset"]] = "SELECTED";
 
+					echo "<tr><th align='left'>".t("N‰ytett‰v‰t tilaukset verkkokaupassa").":</th>
+							<td><select name='naytetaan_tilaukset'>
+							<option value=''>".t("N‰ytet‰‰n kaikki tilaukset")."</option>
+							<option value='O' $sel[O]>".t("N‰ytet‰‰n vain omat tilaukset")."</option>
+							</select></td></tr>";
+				}
 
 				if ($toim != 'extranet') {
 					echo "<tr><th align='left'>".t("Oletusohjelma").":</th><td><select name='oletus_ohjelma'>";
@@ -1136,7 +1140,6 @@
 			}
 		}
 	}
-
 
 	if ($tee == "") {
 

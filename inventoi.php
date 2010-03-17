@@ -50,33 +50,60 @@
 				die ("<font class='error'><br>".t("Tiedosto oli tyhj‰")."!</font>");
 			}
 
-			$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
 
-			// luetaan tiedosto alusta loppuun...
-			$rivi = fgets($file, 4096);
+			if (strtoupper($ext)=="XLS") {
+				require_once ('excel_reader/reader.php');
+
+				// ExcelFile
+				$data = new Spreadsheet_Excel_Reader();
+
+				// Set output Encoding.
+				$data->setOutputEncoding('CP1251');
+				$data->setRowColOffset(0);
+				$data->read($_FILES['userfile']['tmp_name']);
+			}
+			else {
+				$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+			}
 
 			$tuote = array();
 			$maara = array();
 
-			while (!feof($file)) {
+			if (strtoupper($ext) == "XLS") {
+				for ($excei = 0; $excei < $data->sheets[0]['numRows']; $excei++) {				
+					// luetaan rivi tiedostosta..					
+					$tuo		= mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][0]));
+					$hyl		= mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][1]));
+					$maa		= mysql_real_escape_string(str_replace(",", ".", trim($data->sheets[0]['cells'][$excei][2])));
+					$lisaselite	= mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][3]));
+					
+					if ($tuo != '' and $hyl != '' and $maa != '') {
+						$hylp = explode("-", $hyl);
+						$tuote[] = $tuo."#".$hylp[0]."#".$hylp[1]."#".$hylp[2]."#".$hylp[3];
+						$maara[] = $maa;
+					}										
+				}
+			}
+			else {
+				// luetaan tiedosto alusta loppuun...
+				while ($rivi = fgets($file)) {
 
-				// luetaan rivi tiedostosta..
-				$rivi		= explode("\t", trim($rivi));
-				$tuo		= mysql_real_escape_string(trim($rivi[0]));
-				$hyl		= mysql_real_escape_string(trim($rivi[1]));
-				$maa		= mysql_real_escape_string(str_replace(",", ".", trim($rivi[2])));
-				$lisaselite	= mysql_real_escape_string(trim($rivi[3]));
+					// luetaan rivi tiedostosta..
+					$rivi		= explode("\t", trim($rivi));
+					$tuo		= mysql_real_escape_string(trim($rivi[0]));
+					$hyl		= mysql_real_escape_string(trim($rivi[1]));
+					$maa		= mysql_real_escape_string(str_replace(",", ".", trim($rivi[2])));
+					$lisaselite	= mysql_real_escape_string(trim($rivi[3]));
 
-				if ($tuo != '' and $hyl != '' and $maa != '') {
-					$hylp = explode("-", $hyl);
-					$tuote[] = $tuo."#".$hylp[0]."#".$hylp[1]."#".$hylp[2]."#".$hylp[3];
-					$maara[] = $maa;
+					if ($tuo != '' and $hyl != '' and $maa != '') {
+						$hylp = explode("-", $hyl);
+						$tuote[] = $tuo."#".$hylp[0]."#".$hylp[1]."#".$hylp[2]."#".$hylp[3];
+						$maara[] = $maa;
+					}
 				}
 
-				$rivi = fgets($file, 4096);
+				fclose($file);
 			}
-
-			fclose($file);
 
 			if (count($tuote) > 0) {
 				$tee 		= "VALMIS";
@@ -156,7 +183,7 @@
 						echo "<font class='error'>".t("VIRHE: Voit lis‰t‰ / poistaa vain uuden sarjanumeron")."!</font><br>";
 						$virhe = 1;
 					}
-					
+
 					//Sarjanumerot
 					if (in_array($tuote_row["sarjanumeroseuranta"], array("S","U")) and is_array($sarjanumero_kaikki[$i]) and substr($kpl,0,1) != '+' and substr($kpl,0,1) != '-' and (int) $kpl!=count($sarjanumero_kaikki[$i]) and ($onko_uusia > 0 or $hyllyssa[$i] < $kpl)) {
 						echo "<font class='error'>".t("VIRHE: Sarjanumeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
@@ -468,7 +495,7 @@
 										}
 									}
 
-									$summa = round($varvo_jalke - $varvo_ennen, 6);									
+									$summa = round($varvo_jalke - $varvo_ennen, 6);
 								}
 								// ollaan syˆtetty relatiivinen m‰‰r‰
 								elseif ((float) $skp != 0) {
@@ -1537,7 +1564,7 @@
 
 				<font class='message'>".t("Inventoi tiedostosta").":</font><br>
 				<table>
-				<tr><th colspan='4'>".t("Sarkaineroteltu tekstitiedosto").".</th></tr>
+				<tr><th colspan='4'>".t("Sarkaineroteltu tekstitiedosto tai Excel-tiedosto").".</th></tr>
 				<tr>";
 
 		echo "	<td>".t("Tuoteno")."</td><td>".t("Hyllyalue-Hyllynro-Hyllyv‰li-Hyllytaso")."</td><td>".t("M‰‰r‰")."</td><td>".t("Selite")."</td>";

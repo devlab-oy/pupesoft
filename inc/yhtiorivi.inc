@@ -91,7 +91,6 @@
 		(mysql_field_name($result, $i) == "myynti_eu") or
 		(mysql_field_name($result, $i) == "myynti_ei_eu") or
 		(mysql_field_name($result, $i) == "myynti_marginaali") or
-		(mysql_field_name($result, $i) == "osto_eu") or
 		(mysql_field_name($result, $i) == "osto_marginaali") or
 		(mysql_field_name($result, $i) == "myyntisaamiset") or
 		(mysql_field_name($result, $i) == "luottotappiot") or
@@ -116,8 +115,6 @@
 		(mysql_field_name($result, $i) == "konsernisaamiset") or
 		(mysql_field_name($result, $i) == "konsernivelat") or
 		(mysql_field_name($result, $i) == "konserniostovelat") or
-		(mysql_field_name($result, $i) == "voittotili_tulos") or
-		(mysql_field_name($result, $i) == "voittotili_tase") or
 		(mysql_field_name($result, $i) == "konsernimyyntisaamiset")) {
 
 		if ($ulosarray[$i] != '') {
@@ -151,7 +148,6 @@
 				elseif (mysql_field_name($result, $i) == "myynti_eu") 						$query .= " and nimi regexp 'yhteis' and nimi regexp 'myyn' ";
 				elseif (mysql_field_name($result, $i) == "myynti_ei_eu") 					$query .= " and nimi regexp 'yhteis' and nimi regexp 'myyn' ";
 				elseif (mysql_field_name($result, $i) == "myynti_marginaali") 				$query .= " and nimi regexp '(k.ytet|taide)' and nimi regexp 'myyn' ";
-				elseif (mysql_field_name($result, $i) == "osto_eu") 						$query .= " and nimi regexp 'yhteis' and nimi regexp '(osto|hankin)' ";
 				elseif (mysql_field_name($result, $i) == "osto_marginaali") 				$query .= " and nimi regexp '(k.ytet|taide)' and nimi regexp '(osto|hankin)' ";
 				elseif (mysql_field_name($result, $i) == "myyntisaamiset") 					$query .= " and nimi regexp 'myyn' and nimi regexp 'saam' ";
 				elseif (mysql_field_name($result, $i) == "luottotappiot") 					$query .= " and nimi regexp 'luotto' and nimi regexp 'tapp' ";
@@ -177,8 +173,6 @@
 				elseif (mysql_field_name($result, $i) == "konsernivelat") 					$query .= " and nimi regexp 'kons' and nimi regexp '(velka|velat)'  ";
 				elseif (mysql_field_name($result, $i) == "konserniostovelat") 				$query .= " and nimi regexp 'kons' and nimi regexp '(osto|hankin)' and nimi regexp '(velka|velat)'  ";
 				elseif (mysql_field_name($result, $i) == "konsernimyyntisaamiset") 			$query .= " and nimi regexp 'kons' and nimi regexp 'saam' ";
-				elseif (mysql_field_name($result, $i) == "voittotili_tulos") 				$query .= " and nimi regexp 'voitto' ";
-				elseif (mysql_field_name($result, $i) == "voittotili_tase") 				$query .= " and nimi regexp 'voitto' ";
 				else $query = "";
 
 				if ($query != "") {

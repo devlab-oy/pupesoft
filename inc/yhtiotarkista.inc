@@ -28,7 +28,6 @@ if(!function_exists("yhtiotarkista")) {
 			(mysql_field_name($result, $i) == "myynti_eu") or
 			(mysql_field_name($result, $i) == "myynti_ei_eu") or
 			(mysql_field_name($result, $i) == "myynti_marginaali") or
-			(mysql_field_name($result, $i) == "osto_eu") or
 			(mysql_field_name($result, $i) == "osto_marginaali") or
 			(mysql_field_name($result, $i) == "myyntisaamiset") or
 			(mysql_field_name($result, $i) == "luottotappiot") or
@@ -66,7 +65,6 @@ if(!function_exists("yhtiotarkista")) {
 			(mysql_field_name($result, $i) == "myynti_eu") or
 			(mysql_field_name($result, $i) == "myynti_ei_eu") or
 			(mysql_field_name($result, $i) == "myynti_marginaali") or
-			(mysql_field_name($result, $i) == "osto_eu") or
 			(mysql_field_name($result, $i) == "osto_marginaali") or
 			(mysql_field_name($result, $i) == "myyntisaamiset") or
 			(mysql_field_name($result, $i) == "luottotappiot") or
@@ -91,8 +89,6 @@ if(!function_exists("yhtiotarkista")) {
 			(mysql_field_name($result, $i) == "konsernisaamiset") or
 			(mysql_field_name($result, $i) == "konsernivelat") or
 			(mysql_field_name($result, $i) == "konserniostovelat") or		
-			(mysql_field_name($result, $i) == "voittotili_tulos") or
-			(mysql_field_name($result, $i) == "voittotili_tase") or
 			(mysql_field_name($result, $i) == "konsernimyyntisaamiset")) and trim($t[$i]) != '') {
 		
 			$query = "	SELECT nimi

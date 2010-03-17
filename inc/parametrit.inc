@@ -254,16 +254,10 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 
 	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
-	if (isset($nayta_pdf) and $nayta_pdf == 1) {
-		header("Content-Type: application/pdf");
-		header('Content-Disposition: inline; filename="pupesoft.pdf"');
-	}
-	elseif(isset($lataa_tiedosto) and $lataa_tiedosto == 1) {
-		// Kerrotaan selaimelle, että käyttäjän kuuluu downloadata tämä tiedosto
-		// Hardcoodattu polku dataout/
-
-		if(ini_get('zlib.output_compression')) {
-		  ini_set('zlib.output_compression', 'Off');
+	if ((isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {
+		// Kerrotaan selaimelle, että tämä on tiedosto
+		if (ini_get('zlib.output_compression')) {
+			ini_set('zlib.output_compression', 'Off');
 		}
 
 		header("Pragma: public");
@@ -274,25 +268,31 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		header("Content-Description: File Transfer");
 		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 		header("Cache-Control: private", false);
-		header("Content-Type: application/force-download");
-
-		if ($kaunisnimi != '') {
-			header('Content-Disposition: attachment; filename='.basename($kaunisnimi));
-		}
-		else {
-			header('Content-Disposition: attachment; filename=pupesoft.txt');
-		}
-
 		header("Content-Transfer-Encoding: binary");
-
-		if (isset($filenimi) and $filenimi != '') {
-			header("Content-Length: ".filesize("$pupe_root_polku/dataout/".basename($filenimi)));
-		}
-		elseif (isset($tmpfilenimi) and $tmpfilenimi != '') {
-			header("Content-Length: ".filesize("/tmp/".basename($tmpfilenimi)));
+		
+		if (isset($nayta_pdf) and $nayta_pdf == 1) {
+			header("Content-Type: application/pdf");
+			header('Content-Disposition: inline; filename="pupesoft.pdf"');
 		}
 		else {
-			header("Content-Length: ".strlen($file));
+			header("Content-Type: application/force-download");
+
+			if ($kaunisnimi != '') {
+				header('Content-Disposition: attachment; filename='.basename($kaunisnimi));
+			}
+			else {
+				header('Content-Disposition: attachment; filename=pupesoft.txt');
+			}
+
+			if (isset($filenimi) and $filenimi != '') {
+				header("Content-Length: ".filesize("$pupe_root_polku/dataout/".basename($filenimi)));
+			}
+			elseif (isset($tmpfilenimi) and $tmpfilenimi != '') {
+				header("Content-Length: ".filesize("/tmp/".basename($tmpfilenimi)));
+			}
+			else {
+				header("Content-Length: ".strlen($file));
+			}
 		}
 	}
 	elseif (($phpnimi != 'index.php' and $phpnimi != 'futursoft.php') or (isset($futuvanha) and $futuvanha == '1')) {

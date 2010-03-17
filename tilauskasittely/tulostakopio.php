@@ -464,7 +464,7 @@
 		}
 		if ($toim == "TUOTETARRA") {
 			//Ostolasku, tuotetarrat. Tälle oliolle voidaan tulostaa tuotetarroja
-			$where1 .= " lasku.tila in ('H','Y','M','P','Q') and lasku.kohdistettu in ('K','X') ";
+			$where1 .= " lasku.tila = 'K' and lasku.kohdistettu in ('K','X') ";
 
 			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
 

@@ -67,15 +67,23 @@
 						echo "File $file\n";
 					}
 
+					if (substr($orders_dest, -1) != "/") {
+						$orders_dest .= "/";
+					}
+
 					$fileget = ftp_get($conn_id, $orders_dest.$file, $file, FTP_ASCII);
 
-					if ($debug != '') {
-						if ($fileget) {
-							echo "File $file was successfully downloaded!\n";
+					if ($fileget) {
+						echo "File $file was successfully downloaded!\n";
+						if (ftp_delete($conn_id, $file)) {
+							echo "File $file was deleted succesfully.\n";
 						}
 						else {
-							echo "Failed to download file $file!\n";
+							echo "Failed to delete file $file.\n";
 						}
+					}
+					else {
+						echo "Failed to download file $file!\n";
 					}
 				}
 			}

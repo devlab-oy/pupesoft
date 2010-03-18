@@ -71,6 +71,7 @@
 
 		if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Yhtiˆn avainsanat")."'>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TV") 				$ulos .= "<option value='TV' $avain_sel[TV]>								".t("Tilausvahvistus")."</option>";
+		if ($lukitse_laji== "" or $lukitse_laji == "TOIMVAHVISTUS")		$ulos .= "<option value='TOIMVAHVISTUS' $avain_sel[TOIMVAHVISTUS]>			".t("Toimitusvahvistus")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LAHETETYYPPI") 		$ulos .= "<option value='LAHETETYYPPI' $avain_sel[LAHETETYYPPI]>			".t("L‰hetetyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "KALETAPA") 			$ulos .= "<option value='KALETAPA' $avain_sel[KALETAPA]>					".t("CRM yhteydenottotapa")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "MYSQLALIAS") 		$ulos .= "<option value='MYSQLALIAS' $avain_sel[MYSQLALIAS]>				".t("Tietokantasarakkeen nimialias")."</option>";
@@ -289,6 +290,19 @@
 		}
 
 		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if ($avain_sel["PARAMETRI"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_2") {
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
+
+		$ulos = "<td><select name = '$nimi'>";
+		$ulos .= "<option value = ''>".t("Ei k‰ytet‰ tuotehaussa")."</option>";
+		$ulos .= "<option value = 'A' $sel[A]>".t("K‰ytet‰‰n tuotehaussa alasvetovalikkona")."</option>";
+		$ulos .= "<option value = 'B' $sel[B]>".t("K‰ytet‰‰n tuotehaussa monivalintalaatikkona")."</option>";
+		$ulos .= "</select></td>";
+
 		$jatko = 0;
 	}
 

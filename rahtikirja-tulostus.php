@@ -260,7 +260,7 @@
 		// haetaan kaikki distinct rahtikirjat..
 		$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
-					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja
+					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja, asiakas.toimitusvahvistus
 					FROM rahtikirjat
 					JOIN lasku on (rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') ";
 
@@ -270,6 +270,7 @@
 
 		$query .= " $ltun_querylisa)
 					$vainvakilliset
+					LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
 					LEFT JOIN maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
 					LEFT JOIN rahtisopimukset on lasku.ytunnus = rahtisopimukset.ytunnus and rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa and rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus
 					WHERE rahtikirjat.yhtio	= '$kukarow[yhtio]' ";
@@ -573,6 +574,12 @@
 							require("tilauskasittely/rahtikirja_erittely_pdf.inc");
 						}
 					}
+
+					if ($rakir_row['toimitusvahvistus'] != '') {
+						if (file_exists("tilauskasittely/$rakir_row[toimitusvahvistus]")) {
+							require("tilauskasittely/$rakir_row[toimitusvahvistus]");
+						}
+					}
 				}
 				else {
 					echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";
@@ -731,7 +738,8 @@
 			while ($rakir_row = mysql_fetch_assoc($result)) {
 				if ($rakir_row['toimitustapa'] != '') {
 					$sel = "";
-					if($rakir_row["tunnus"] == $kukarow["varasto"] and $varasto == "") {
+
+					if ((isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0 and in_array($rakir_row["tunnus"], explode(",", $kukarow['varasto']))) and $varasto == "") {
 						$sel = "selected";
 						$varasto = $rakir_row["tunnus"];
 					}

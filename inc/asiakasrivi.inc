@@ -445,6 +445,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "toimitusvahvistus") {
+			$vresult = t_avainsana("TOIMVAHVISTUS");
+
+			$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."><option value=''>".t("Ei lähetetä")."</option>";
+
+			while($row = mysql_fetch_array($vresult)) {
+				$sel = "";
+				if ($row["selite"] == $trow[$i]) $sel = 'selected';
+				$ulos .= "<option value='$row[selite]' $sel>$row[selitetark]</option>";
+			}
+
+			$ulos .= "</select></td>";
+			$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "tilausvahvistus_yhteyshenkilolle") {
 
 

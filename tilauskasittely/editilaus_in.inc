@@ -878,6 +878,11 @@ while (!feof ($fd)) {
 					$tieto = str_replace(" ", "", $tieto);
 				}
 
+				if (strpos($tieto, "@") !== FALSE) {
+					list($tieto) = explode("@", $tieto);
+					$tieto = trim($tieto);
+				}
+
 				$query = "SELECT * FROM tuote WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tieto' $kieltolisa";
 				$result = mysql_query($query) or die($query);
 

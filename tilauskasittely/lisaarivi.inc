@@ -1201,11 +1201,15 @@
 										$tunken = "ostorivitunnus";
 									}
 
-									$query = "	SELECT tunnus, kaytetty
-												FROM sarjanumeroseuranta
-												WHERE tunnus	IN ($myy_sarjatunnus)
-												and tuoteno		= '$myy_tuoteno[$indeksi]'
-												ORDER BY tunnus
+									$query = "	SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.kaytetty
+												FROM sarjanumeroseuranta												
+												LEFT JOIN tilausrivi ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.$tunken
+												LEFT JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.tunnus=tilausrivi.otunnus
+												WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+												and sarjanumeroseuranta.tunnus	IN ($myy_sarjatunnus)
+												and sarjanumeroseuranta.tuoteno = '$myy_tuoteno[$indeksi]'
+												and (sarjanumeroseuranta.myyntirivitunnus = 0 or lasku.tila='T')
+												ORDER BY sarjanumeroseuranta.tunnus
 												LIMIT ". (int) abs($varattu);
 									$sres = mysql_query($query) or pupe_error($query);
 
@@ -1214,10 +1218,9 @@
 													SET $tunken 		 = '$lisatty_tun'
 													WHERE yhtio			 = '$kukarow[yhtio]'
 													and tunnus			 = '$srow[tunnus]'
-													and tuoteno			 = '$myy_tuoteno[$indeksi]'
-													and $tunken 		 = 0";
+													and tuoteno			 = '$myy_tuoteno[$indeksi]'";
 										$sarjares = mysql_query($query) or pupe_error($query);
-
+										
 										if ($srow["kaytetty"] == 'K') {
 											$query = "	UPDATE tilausrivi
 														SET alv=alv+500

@@ -323,7 +323,9 @@
 			//Siirret‰‰n tilausrivit
 			$kukarowkesken 		= $kukarow["kesken"];
 			$kukarow["kesken"]	= $utunnus;
-
+			$varataan_sa_revert = FALSE;
+			$isaok				= array();
+			
 			if ($perusta == "TYOMAARAYS") {
 				$tymlisa = t("tyˆm‰‰r‰ykselle");
 			}
@@ -333,22 +335,23 @@
 
 			$tilauksesta_myyntitilaus .= "<font class='message'>".t("Lis‰t‰‰n valitut rivit")." $tymlisa: $utunnus</font><br>";
 
-			$query    = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$utunnus'";
+			$query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$utunnus'";
 			$laskures = mysql_query($query);
 			$laskurow = mysql_fetch_array($laskures);
 
-			$query = "	SELECT *
+			$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.positio
 						FROM tilausrivi
-						WHERE yhtio = '$kukarow[yhtio]'
-						and otunnus = '$otunnus'
-						and tyyppi != 'D'
+						LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and tilausrivi.otunnus = '$otunnus'
+						and tilausrivi.tyyppi != 'D'
 						$tilrivilisa
-						ORDER by perheid, tunnus";
+						ORDER by tilausrivi.perheid2, tilausrivi.perheid, tilausrivi.tunnus";
 			$copresult = mysql_query($query) or pupe_error($query);
 
 			while ($coprivirow = mysql_fetch_array($copresult)) {
 
-				$tuoteno	= $coprivirow['tuoteno'];
+				$tuoteno = $coprivirow['tuoteno'];
 
 				if ($coprivirow["var"] == "J" or $coprivirow["var"] == "S" or $coprivirow["var"] == "T" or $coprivirow["var"] == "U") {
 					if ($yhtiorow["varaako_jt_saldoa"] == "") {
@@ -382,7 +385,7 @@
 				$perheid	= $coprivirow['perheid'];
 				$perheid2	= $coprivirow['perheid2'];
 
-				if($coprivirow['jaksotettu'] != 0) {
+				if ($coprivirow['jaksotettu'] != 0) {
 					$jaksotettu = $mtunnus;
 				}
 				else {
@@ -408,8 +411,13 @@
 					$varasto = "";
 				}
 
+				if ($isaok[$coprivirow['perheid2']] and $varataan_saldoa == "" and $coprivirow['perheid2'] != $coprivirow['tunnus'] and $coprivirow['perheid2'] > 0 and stripos($coprivirow["positio"], "TEHDAS") !== FALSE) {
+					// Jos kyseess‰ on tehdaslis‰varuste niin myyd‰‰n saldoa varaamatta
+					$varataan_saldoa = "EI";
+					$varataan_sa_revert = TRUE;
+				}
 
-				if($kopioi_paikat != "") {
+				if ($kopioi_paikat != "") {
 					$paikka	= $coprivirow['hyllyalue']."#".$coprivirow['hyllynro']."#".$coprivirow['hyllyvali']."#".$coprivirow['hyllytaso'];
 				}
 				else {
@@ -426,8 +434,17 @@
 				$tilauksesta_myyntitilaus .= "<font class='message'>Lis‰t‰‰n rivi $tuoteno $kpl kpl tilaukselle $utunnus</font><br>";
 
 				require('lisaarivi.inc');
-
+				
+				// Jos is‰tuote meni ok ja sill‰ on tehdaslis‰varusteita niin lis‰t‰‰n ne saldosta piittaamatta
+				if (count($lisatyt_rivit1) == 1 and $coprivirow['perheid2'] == $coprivirow['tunnus']) {
+					$isaok[$coprivirow['tunnus']] = TRUE;
+				}
+				
 				$lisatyt_rivit = array_merge($lisatyt_rivit1, $lisatyt_rivit2);
+
+				if ($varataan_sa_revert) {
+					$varataan_saldoa = "";
+				}
 
 				// Korjataan sarjanumero-oliot, eli siirret‰‰n ne tarjousrivilt‰ tilausriville, jos kopioitava tilaus on tarjous
 				if ($monistarow["tila"] == "T" and count($lisatyt_rivit) > 0) {

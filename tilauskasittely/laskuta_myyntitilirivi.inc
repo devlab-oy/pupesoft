@@ -153,7 +153,7 @@
 		
 		$syot_varasto 	= $row["tunnus"];
 		$syot_var 		= "H";
-		$tilrivilisa	= " and var='A' and kpl != 0 ";
+		$tilrivilisa	= " and tilausrivi.var='A' and tilausrivi.kpl != 0 ";
 		
 		// Kopsataan valitut rivit uudelle myyntitilaukselle
 		require("tilauksesta_myyntitilaus.inc");

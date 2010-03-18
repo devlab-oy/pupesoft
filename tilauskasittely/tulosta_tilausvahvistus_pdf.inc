@@ -776,6 +776,7 @@
 		}
 		else {
 			$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+			$laskurow["nippu"] = $laskurow["tunnus"];
 		}
 
 		// generoidaan lähetteelle ja keräyslistalle rivinumerot

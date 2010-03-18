@@ -84,9 +84,11 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
 		if ($aburow["tunnukset"] != "") {
 			$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
+			$laskurow["nippu"] = $aburow["tunnukset"];
 		}
 		else {
 			$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+			$laskurow["nippu"] = $laskurow["tunnus"];
 		}
 	}
 	elseif ($laskurow["tunnusnippu"] > 0 and $laskurow["clearing"] != "JT-TILAUS") {
@@ -109,6 +111,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 	}
 	else {
 		$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+		$laskurow["nippu"] = $laskurow["tunnus"];
 	}
 
 	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi, tuote.myyntihinta, tuote.aleryhma, tilausrivi.tuoteno,

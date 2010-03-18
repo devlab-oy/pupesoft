@@ -1314,7 +1314,7 @@
 								if (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "") and $perheok == 0) {
 
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
-									if (($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen')) {
+									if (($yhtiorow['jt_automatiikka'] == 'X' or $yhtiorow['jt_automatiikka'] == 'W') or ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen')) {
 
 										if ($from_varastoon_inc == "editilaus_in.inc") {
 											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";

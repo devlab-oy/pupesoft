@@ -5,15 +5,28 @@
 	require ("inc/salasanat.php");
 	require ("inc/functions.inc");
 
-	$syy = "";
-	$debug = '';
+	$tmpfile = "/tmp/orders-tmp.txt";   # minne tehd‰‰n lock file
+	$email     = ""; # kenelle meilataan jos on ongelma
+	$emailfrom = ""; # mill‰ osoitteella meili l‰hetet‰‰n
+
+	# jos lukkofaili lˆytyy, mutta se on yli 15 minsaa vanha niin dellatan se
+	if (@fopen($tmpfile, "r") !== FALSE) {
+		$mode = stat($tmpfile);
+		$now = mktime(date("H"), date("i"), date("s"), date("m"), date("d"), date("Y"));
+
+		if ($now - $mode[9] > 900) {
+			mail($email,  "FTP-get ORDERS HUOM!", "Tilausten sis‰‰nluvussa saattaa olla ongelma. Lukkotiedosto oli yli 15 minuuttia vanha ja se poistettiin. Tutki asia!", "From: <$emailfrom>\n", "-f $emailfrom");
+
+			system("rm -f $tmpfile");
+		}
+	}
 
 	// tarvitaan $orders_host $orders_user $orders_pass $orders_path
 	// palautetaan $syy
-	if ($orders_host != '' and $orders_user != '' and $orders_pass != '' and $orders_path != '' and $orders_dest != '') {
+	if (@fopen($tmpfile, "r") === FALSE and $orders_host != '' and $orders_user != '' and $orders_pass != '' and $orders_path != '' and $orders_dest != '') {
 
-		if ($debug != '') {
-			echo "All variables are set!\n";
+		if (fopen($tmpfile, "w")) {
+			fwrite($tmpfile, "All variables are set!\n");
 		}
 
 		//l‰hetet‰‰n tiedosto
@@ -21,9 +34,7 @@
 
 		// jos connectio ok, kokeillaan loginata
 		if ($conn_id) {
-			if ($debug != '') {
-				echo "FTP-connect was successful, trying to login with $orders_user...\n";
-			}
+			fwrite($tmpfile, "FTP-connect was successful, trying to login with $orders_user...\n");
 			$login_result = ftp_login($conn_id, $orders_user, $orders_pass);
 		}
 
@@ -33,9 +44,7 @@
 		}
 
 		if ($login_result) {
-			if ($debug != '') {
-				echo "Login was successful! Trying to change directory to $orders_path...\n";
-			}
+			fwrite($tmpfile, "Login was successful! Trying to change directory to $orders_path...\n");
 			$changedir = ftp_chdir($conn_id, $orders_path);
 		}
 
@@ -43,29 +52,23 @@
 		if ($changedir) {
 
 			if ($debug != '') {
-				echo "Successfully changed working directory to $orders_path!\n";
-				echo "Changing to passive mode.\n";
+				fwrite($tmpfile, "Successfully changed working directory to $orders_path!\n");
+				fwrite($tmpfile, "Changing to passive mode.\n");
 			}
 
 			ftp_pasv($conn_id, true);
 
-			if ($debug != '') {
-				echo "Trying to get the file listing...\n";
-			}
+			fwrite($tmpfile, "Trying to get the file listing...\n");
 
 			$files = ftp_nlist($conn_id, "*.txt");
 
 			if ($files) {
 
-				if ($debug != '') {
-					echo "We got some files! Lets loop 'em...\n";
-				}
+				fwrite($tmpfile, "We got some files! Lets loop 'em...\n");
 
 				foreach ($files as $file) {
 
-					if ($debug != '') {
-						echo "File $file\n";
-					}
+					fwrite($tmpfile, "File $file\n");
 
 					if (substr($orders_dest, -1) != "/") {
 						$orders_dest .= "/";
@@ -74,16 +77,17 @@
 					$fileget = ftp_get($conn_id, $orders_dest.$file, $file, FTP_ASCII);
 
 					if ($fileget) {
-						echo "File $file was successfully downloaded!\n";
+						fwrite($tmpfile, "File $file was successfully downloaded!\n");
+
 						if (ftp_delete($conn_id, $file)) {
-							echo "File $file was deleted succesfully.\n";
+							fwrite($tmpfile, "File $file was deleted succesfully.\n");
 						}
 						else {
-							echo "Failed to delete file $file.\n";
+							fwrite($tmpfile, "Failed to delete file $file.\n");
 						}
 					}
 					else {
-						echo "Failed to download file $file!\n";
+						fwrite($tmpfile, "Failed to download file $file!\n");
 					}
 				}
 			}
@@ -91,9 +95,7 @@
 		}
 
 		if ($conn_id) {
-			if ($debug != '') {
-				echo "Closing ftp-connection...\n";
-			}
+			fwrite($tmpfile, "Closing ftp-connection...\n");
 
 			ftp_close($conn_id);
 		}
@@ -133,8 +135,10 @@
 					$syy = t("Tuntematon errorkoodi")." ($palautus)!!";
 			}
 		
-			echo "Error message: $syy\n";
+			fwrite($tmpfile, "Error message: $syy\n");
 		}
+
+		system("rm -f $tmpfile");
 	}
 
 ?>

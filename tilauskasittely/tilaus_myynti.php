@@ -3682,15 +3682,14 @@ if ($tee == '') {
 			$vakrow = mysql_fetch_assoc($vakresult);
 
 			if ($vakrow['vaktuotteet'] != '') {
-				if ($kukarow['extranet'] == '') {
-					
-					$vak_toim_query = "	SELECT vak_kielto
-										FROM toimitustapa
-										WHERE yhtio = '$kukarow[yhtio]'
-										AND selite = '$laskurow[toimitustapa]'";
-					$vak_toim_result = mysql_query($vak_toim_query) or pupe_error($vak_toim_query);
-					$vak_toim_row = mysql_fetch_assoc($vak_toim_result);
+				$vak_toim_query = "	SELECT vak_kielto, nouto
+									FROM toimitustapa
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND selite = '$laskurow[toimitustapa]'";
+				$vak_toim_result = mysql_query($vak_toim_query) or pupe_error($vak_toim_query);
+				$vak_toim_row = mysql_fetch_assoc($vak_toim_result);
 
+				if ($kukarow['extranet'] == '') {
 					// jos vak-toimituksissa halutaan k‰ytt‰‰ vaihtoehtoista toimitustapaa
 					if ($vak_toim_row['vak_kielto'] != '' and $vak_toim_row['vak_kielto'] != 'K') {
 
@@ -3733,9 +3732,11 @@ if ($tee == '') {
 					}
 				}
 				else {
-					echo "<font class='error'>".t("VIRHE: T‰m‰ toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br>";
-					echo "<font class='error'>".t("Valitse uusi toimitustapa")."!</font><br><br>";
-					$tilausok++;
+					if ($vak_toim_row['vak_kielto'] == 'K' or ($vak_toim_row['vak_kielto'] != '' and $vak_toim_row['nouto'] == '')) {
+						echo "<font class='error'>".t("VIRHE: T‰m‰ toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br>";
+						echo "<font class='error'>".t("Valitse uusi toimitustapa")."!</font><br><br>";
+						$tilausok++;
+					}
 				}
 			}
 

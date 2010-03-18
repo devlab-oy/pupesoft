@@ -25,8 +25,8 @@
 	// palautetaan $syy
 	if (@fopen($tmpfile, "r") === FALSE and $orders_host != '' and $orders_user != '' and $orders_pass != '' and $orders_path != '' and $orders_dest != '') {
 
-		if (fopen($tmpfile, "w")) {
-			fwrite($tmpfile, "All variables are set!\n");
+		if ($filehandle = fopen($tmpfile, "w")) {
+			fwrite($filehandle, "All variables are set!\n");
 		}
 
 		//l‰hetet‰‰n tiedosto
@@ -34,7 +34,7 @@
 
 		// jos connectio ok, kokeillaan loginata
 		if ($conn_id) {
-			fwrite($tmpfile, "FTP-connect was successful, trying to login with $orders_user...\n");
+			fwrite($filehandle, "FTP-connect was successful, trying to login with $orders_user...\n");
 			$login_result = ftp_login($conn_id, $orders_user, $orders_pass);
 		}
 
@@ -44,7 +44,7 @@
 		}
 
 		if ($login_result) {
-			fwrite($tmpfile, "Login was successful! Trying to change directory to $orders_path...\n");
+			fwrite($filehandle, "Login was successful! Trying to change directory to $orders_path...\n");
 			$changedir = ftp_chdir($conn_id, $orders_path);
 		}
 
@@ -52,23 +52,23 @@
 		if ($changedir) {
 
 			if ($debug != '') {
-				fwrite($tmpfile, "Successfully changed working directory to $orders_path!\n");
-				fwrite($tmpfile, "Changing to passive mode.\n");
+				fwrite($filehandle, "Successfully changed working directory to $orders_path!\n");
+				fwrite($filehandle, "Changing to passive mode.\n");
 			}
 
 			ftp_pasv($conn_id, true);
 
-			fwrite($tmpfile, "Trying to get the file listing...\n");
+			fwrite($filehandle, "Trying to get the file listing...\n");
 
 			$files = ftp_nlist($conn_id, "*.txt");
 
 			if ($files) {
 
-				fwrite($tmpfile, "We got some files! Lets loop 'em...\n");
+				fwrite($filehandle, "We got some files! Lets loop 'em...\n");
 
 				foreach ($files as $file) {
 
-					fwrite($tmpfile, "File $file\n");
+					fwrite($filehandle, "File $file\n");
 
 					if (substr($orders_dest, -1) != "/") {
 						$orders_dest .= "/";
@@ -77,17 +77,17 @@
 					$fileget = ftp_get($conn_id, $orders_dest.$file, $file, FTP_ASCII);
 
 					if ($fileget) {
-						fwrite($tmpfile, "File $file was successfully downloaded!\n");
+						fwrite($filehandle, "File $file was successfully downloaded!\n");
 
 						if (ftp_delete($conn_id, $file)) {
-							fwrite($tmpfile, "File $file was deleted succesfully.\n");
+							fwrite($filehandle, "File $file was deleted succesfully.\n");
 						}
 						else {
-							fwrite($tmpfile, "Failed to delete file $file.\n");
+							fwrite($filehandle, "Failed to delete file $file.\n");
 						}
 					}
 					else {
-						fwrite($tmpfile, "Failed to download file $file!\n");
+						fwrite($filehandle, "Failed to download file $file!\n");
 					}
 				}
 			}
@@ -95,7 +95,7 @@
 		}
 
 		if ($conn_id) {
-			fwrite($tmpfile, "Closing ftp-connection...\n");
+			fwrite($filehandle, "Closing ftp-connection...\n");
 
 			ftp_close($conn_id);
 		}
@@ -135,7 +135,7 @@
 					$syy = t("Tuntematon errorkoodi")." ($palautus)!!";
 			}
 		
-			fwrite($tmpfile, "Error message: $syy\n");
+			fwrite($filehandle, "Error message: $syy\n");
 		}
 
 		system("rm -f $tmpfile");

@@ -22,7 +22,7 @@
 		$suores = mysql_query($suoque) or pupe_error($suoque);
 	}
 
-	if ((!isset($ei_kelloa) or $ei_kelloa == "") and (!isset($ohje) or $ohje != "off")) {
+	if ((!isset($nayta_pdf)) and (!isset($ei_kelloa) or $ei_kelloa == "") and (!isset($ohje) or $ohje != "off")) {
 
 		$loppumem = memory_get_usage();
 

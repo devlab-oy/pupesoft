@@ -16,9 +16,6 @@
 		require('parametrit.inc');
 	}
 	
-	// ekotetaan javascripti‰ jotta saadaan pdf:‰t uuteen ikkunaan
-	js_openFormInNewWindow();
-	
 	$logistiikka_yhtio = '';
 	$logistiikka_yhtiolisa = '';
 
@@ -388,6 +385,10 @@
 	}
 
 	if ($tee == "ETSILASKU") {
+		
+		// ekotetaan javascripti‰ jotta saadaan pdf:‰t uuteen ikkunaan
+		js_openFormInNewWindow();
+		
 		$where1 = "";
 		$where2 = "";
 		$where3 = "";
@@ -2151,7 +2152,7 @@
 			}
 
 			// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
-			if ($lopetus != '') {
+			if ($lopetus != '' and !isset($nayta_pdf)) {
 				lopetus($lopetus, "META");
 			}
 		}

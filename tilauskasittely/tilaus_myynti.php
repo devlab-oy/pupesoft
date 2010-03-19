@@ -5856,6 +5856,9 @@ if ($tee == '') {
 				}
 
 				if (mysql_num_rows($vtresult) != 0 and count($varastosta) != 0) {
+					if ($kukarow['extranet'] != '') {
+						echo "<font class='head'>",t("Sinun jälkitoimitusrivisi"),":</font><br/>";
+					}
 					require ('jtselaus.php');
 				}
 				else {

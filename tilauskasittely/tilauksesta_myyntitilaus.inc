@@ -325,7 +325,7 @@
 			$kukarow["kesken"]	= $utunnus;
 			$varataan_sa_revert = FALSE;
 			$isaok				= array();
-			
+
 			if ($perusta == "TYOMAARAYS") {
 				$tymlisa = t("tyˆm‰‰r‰ykselle");
 			}
@@ -351,6 +351,13 @@
 
 			while ($coprivirow = mysql_fetch_array($copresult)) {
 
+				$query = "	SELECT *
+							FROM tuote
+							WHERE yhtio  = '$kukarow[yhtio]'
+							and  tuoteno = '$coprivirow[tuoteno]'";
+				$aresult = mysql_query($query) or pupe_error($query);
+				$tuoterow = mysql_fetch_assoc($aresult);
+
 				$tuoteno = $coprivirow['tuoteno'];
 
 				if ($coprivirow["var"] == "J" or $coprivirow["var"] == "S" or $coprivirow["var"] == "T" or $coprivirow["var"] == "U") {
@@ -363,7 +370,7 @@
 
 					$var	= "J";
 				}
-				elseif ($tilausrivi["var"] == "P") {
+				elseif ($coprivirow["var"] == "P") {
 					$kpl	= $coprivirow['tilkpl'];
 					$var	= "";
 				}
@@ -372,7 +379,13 @@
 					$var	= "";
 				}
 
-				$hinta		= $coprivirow['hinta'];
+				if ($tuoterow["alv"] != $coprivirow["alv"] and $yhtiorow["alv_kasittely"] == "" and $coprivirow["alv"] < 500) {
+					$hinta	= sprintf("%.".$yhtiorow['hintapyoristys']."f", $coprivirow["hinta"] / (1+$coprivirow['alv']/100) * (1+$tuoterow["alv"]/100));
+				}
+				else {
+					$hinta 	= $coprivirow['hinta'];
+				}
+
 				$netto		= $coprivirow['netto'];
 				$ale		= $coprivirow['ale'];
 				$kommentti	= $coprivirow['kommentti'];
@@ -411,17 +424,29 @@
 					$varasto = "";
 				}
 
-				if ($isaok[$coprivirow['perheid2']] and $varataan_saldoa == "" and $coprivirow['perheid2'] != $coprivirow['tunnus'] and $coprivirow['perheid2'] > 0 and stripos($coprivirow["positio"], "TEHDAS") !== FALSE) {
-					// Jos kyseess‰ on tehdaslis‰varuste niin myyd‰‰n saldoa varaamatta
-					$varataan_saldoa = "EI";
-					$varataan_sa_revert = TRUE;
-				}
-
 				if ($kopioi_paikat != "") {
 					$paikka	= $coprivirow['hyllyalue']."#".$coprivirow['hyllynro']."#".$coprivirow['hyllyvali']."#".$coprivirow['hyllytaso'];
 				}
 				else {
 					$paikka	= "";
+				}
+
+				if (isset($isaok[$coprivirow['perheid2']]) and $isaok[$coprivirow['perheid2']] > 0 and $varataan_saldoa == "" and $coprivirow['perheid2'] != $coprivirow['tunnus'] and $coprivirow['perheid2'] > 0 and stripos($coprivirow["positio"], "TEHDAS") !== FALSE) {
+					// Jos kyseess‰ on tehdaslis‰varuste niin myyd‰‰n saldoa varaamatta
+					$varataan_saldoa = "EI";
+					$varataan_sa_revert = TRUE;
+				}
+
+				if (isset($isaok[$coprivirow['perheid2']]) and $isaok[$coprivirow['perheid2']] > 0 and $coprivirow['perheid2'] != $coprivirow['tunnus'] and $coprivirow['perheid2'] > 0 and stripos($coprivirow["positio"], "TEHDAS") !== FALSE) {
+					// Otetaan paikka is‰lt‰ aina kun on tehdaslis‰varuste!
+					$query = "	SELECT concat_ws('#', hyllyalue,hyllynro,hyllyvali,hyllytaso) paikka
+								FROM tilausrivi
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus = '".$isaok[$coprivirow['perheid2']]."'";
+					$aresult = mysql_query($query) or pupe_error($query);
+					$paikkarow = mysql_fetch_assoc($aresult);
+					
+					$paikka = $paikkarow["paikka"];
 				}
 
 				$korvaavakielto		= "";
@@ -434,12 +459,12 @@
 				$tilauksesta_myyntitilaus .= "<font class='message'>Lis‰t‰‰n rivi $tuoteno $kpl kpl tilaukselle $utunnus</font><br>";
 
 				require('lisaarivi.inc');
-				
+
 				// Jos is‰tuote meni ok ja sill‰ on tehdaslis‰varusteita niin lis‰t‰‰n ne saldosta piittaamatta
 				if (count($lisatyt_rivit1) == 1 and $coprivirow['perheid2'] == $coprivirow['tunnus']) {
-					$isaok[$coprivirow['tunnus']] = TRUE;
+					$isaok[$coprivirow['tunnus']] = $lisatyt_rivit1[0];
 				}
-				
+
 				$lisatyt_rivit = array_merge($lisatyt_rivit1, $lisatyt_rivit2);
 
 				if ($varataan_sa_revert) {

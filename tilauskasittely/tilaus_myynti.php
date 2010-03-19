@@ -1666,7 +1666,7 @@ if ($tee == '') {
 				</form>";
 
 		// aivan karseeta, mutta joskus pit‰‰ olla n‰in asiakasyst‰v‰llinen... toivottavasti ei h‰iritse ket‰‰n
-		if ($kukarow["extranet"] == "" and $kukarow["yhtio"] == "artr") {
+		if ($kukarow["extranet"] == "" and ($kukarow["yhtio"] == "artr" or $kukarow['yhtio'] == 'orum')) {
 			echo "<form action='../yhteensopivuus.php' method='post'>
 					<input type='hidden' name='toim_kutsu' value='$toim'>
 					<input type='submit' value='".t("Malliselain")."'>

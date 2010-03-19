@@ -4,7 +4,16 @@
 
 	// scripti balloonien tekemiseen
 	js_popup();
-	
+
+	if ($livesearch_tee == "TUOTEHAKU") {
+		livesearch_tuotehaku();
+		exit;
+	}
+
+	if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
+		enable_ajax();
+	}
+
 	// jos ei olla postattu mit‰‰n, niin halutaan varmaan tehd‰ kokonaan uusi tilaus..
 	if (count($_POST) == 0 and $from == "") {
 		$tila				= '';

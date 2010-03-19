@@ -41,12 +41,17 @@
 				<td class='back'></td>
 				</tr>";
 
-		if($ulos != '') { // Nyt me selataan
+		if ($ulos != '') { // Nyt me selataan
 			// Meilla on kaikki valmiina $ulos:ssa
 			echo "<td>$ulos</td>";
 		}
 		else {
-			echo "<td><input type='text' size='18' name='tuoteno' value = '$tuoteno'></td>";
+			if ($yhtiorow["livetuotehaku_tilauksella"] == "K" and $tuoteno == "") {
+				echo "<td valign='top'>".livesearch_kentta("tilaus", "TUOTEHAKU", "tuoteno", 200)."</td>";
+			}
+			else {
+				echo "<td><input type='text' size='18' name='tuoteno' value = '$tuoteno'></td>";
+			}
 		}
 
 		echo "<td>$kpl</td>

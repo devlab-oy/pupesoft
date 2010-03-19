@@ -78,12 +78,9 @@ if ($tee == 'LISAA') {
 		}
 		else {
 			$kuva = tallenna_liite("userfile", "kalenteri", 0, $selite);
-		}
+		} 
 
-		if ($toim != "VERKKOKAUPPA") {
-			$uutinen = nl2br(strip_tags($uutinen, '<a>'));
-		}
-
+		$uutinen = nl2br(strip_tags($uutinen, '<a>'));
 		$otsikko = nl2br(strip_tags($otsikko, '<a>'));
 		$uutinen = mysql_real_escape_string($uutinen);
 

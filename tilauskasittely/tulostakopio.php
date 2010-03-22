@@ -313,6 +313,9 @@
 				else {
 					echo "<th>".t("Asiakkaan nimi")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='15'></td></tr>";
 				}
+				
+				$formi  = 'hakuformi';
+				$kentta = 'ytunnus';
 			}
 
 			echo "<tr><th>".t("Tilausnumero")."</th><td colspan='3'><input type='text' size='15' name='otunnus'></td></tr>";
@@ -379,9 +382,6 @@
 				<td class='back'><input type='submit' value='".t("Etsi")."'></td>";
 		echo "</table>";
 	    echo "</form><br>";
-
-		$formi  = 'hakuformi';
-		$kentta = 'ytunnus';
 	}
 
 	if ($tee == "ETSILASKU") {

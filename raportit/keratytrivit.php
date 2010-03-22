@@ -67,7 +67,7 @@
 
 			$lask		= 0;
 			$edkeraaja	= 'EKADUUD';
-	        $psummayht	= 0;
+			$psummayht	= 0;
 			$ksummayht	= 0;
 			$ssummayht	= 0;
 			$summayht	= 0;
@@ -154,7 +154,7 @@
 			echo "</table><br>";
 		}
 
-		if ($tapa == 'kerpvm') {
+		if (($tapa == 'kerpvm') or ($tapa == 'kerkk')) {
 
 			if (!isset($vva)) {
 				$vvaa = date("Y");
@@ -162,7 +162,10 @@
 			else {
 				$vvaa = $vva;
 			}
-
+			
+			$grp = 'pvm';
+                        if ($tapa == 'kerkk') $grp = 'left(kerattyaika, 7)';
+                        
 			$query = "	SELECT date_format(left(tilausrivi.kerattyaika,10), '%j') pvm,
 						left(tilausrivi.kerattyaika,10) kerattyaika,
 						sum(if(tilausrivi.var  = 'P', 1, 0)) puutteet,
@@ -180,7 +183,7 @@
 						and tilausrivi.var in ('','H','P')
 						and tilausrivi.tyyppi in ('L','G')
 						$lisa
-						GROUP BY pvm
+						GROUP BY $grp
 						ORDER BY 1";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -199,60 +202,74 @@
 			$ssummayht	= 0;
 			$summayht	= 0;
 
-			$puutteet	= array();
-			$kerattyaik	= array();
-			$kappalee	= array();
-			$siirrot	= array();
-			$yht		= array();
-
-			while ($ressu = mysql_fetch_array($result)) {
-
-				$apu				= (int) $ressu['pvm'];
-				$puutteet[$apu]		= $ressu['puutteet'];
-				$kerattyaika[$apu]	= $ressu['kerattyaika'];
-				$kappaleet[$apu]	= $ressu['kappaleet'];
-				$siirrot[$apu]		= $ressu['siirrot'];
-				$yht[$apu]			= $ressu['yht'];
-
-				// yhteensä
-				$psummayht	+= $ressu["puutteet"];
-				$ksummayht	+= $ressu["kappaleet"];
-				$ssummayht	+= $ressu["siirrot"];
-				$summayht	+= $ressu["yht"];
-
-			}
-
-			for ($i=1; $i<367; $i++) {
-
-				echo "<tr>";
-				
-				if (strlen($kerattyaika[$i]) == 0) {
-					echo "<td>$i</td>";
+			if ($tapa == 'kerkk') {
+				while ($ressu = mysql_fetch_array($result)) {
+					echo "<tr>";
+					echo "<td align='right'>".substr($ressu[kerattyaika],0,7)."</td>";
+					echo "<td align='right'>$ressu[puutteet]</td>";
+					echo "<td align='right'>$ressu[siirrot]</td>";
+					echo "<td align='right'>$ressu[kappaleet]</td>";
+					echo "<td align='right'>$ressu[yht]</td>";
+					echo "</tr>";
+					// yhteensä
+					$psummayht	+= $ressu["puutteet"];
+					$ksummayht	+= $ressu["kappaleet"];
+					$ssummayht	+= $ressu["siirrot"];
+					$summayht	+= $ressu["yht"];
 				}
-				else {
-					echo "<td>".tv1dateconv($kerattyaika[$i],"P")."</td>";
-				}
-								
-				echo "<td align='right'>$puutteet[$i]</td>";
-				echo "<td align='right'>$siirrot[$i]</td>";
-				echo "<td align='right'>$kappaleet[$i]</td>";
-				echo "<td align='right'>$yht[$i]</td>";
-				echo "</tr>";
-
 			}
+			else {
+				$puutteet	= array();
+				$kerattyaik= array();
+				$kappalee	= array();
+				$siirrot	= array();
+				$yht	= array();
 
-			echo "<tr>";
-			echo "<th>".t("Yhteensä")."</th>";
-			echo "<td class='tumma' align='right'>$psummayht</td>";
-			echo "<td class='tumma' align='right'>$ssummayht</td>";
-			echo "<td class='tumma' align='right'>$ksummayht</td>";
-			echo "<td class='tumma' align='right'>$summayht</td>";
-			echo "</tr>";
+				while ($ressu = mysql_fetch_array($result)) {
 
-			echo "</table><br>";
+					$apu		= (int) $ressu['pvm'];
+					$puutteet[$apu]	= $ressu['puutteet'];
+					$kerattyaika[$apu]	= $ressu['kerattyaika'];
+					$kappaleet[$apu]	= $ressu['kappaleet'];
+					$siirrot[$apu]	= $ressu['siirrot'];
+					$yht[$apu]		= $ressu['yht'];
 
+					// yhteensä
+					$psummayht	+= $ressu["puutteet"];
+					$ksummayht	+= $ressu["kappaleet"];
+					$ssummayht	+= $ressu["siirrot"];
+					$summayht	+= $ressu["yht"];
+
+				}
+
+				for ($i=1; $i<367; $i++) {
+
+					echo "<tr>";
+
+					if (strlen($kerattyaika[$i]) == 0) {
+						echo "<td>$i</td>";
+					}
+					else {
+						echo "<td>".tv1dateconv($kerattyaika[$i],"P")."</td>";
+					}
+
+					echo "<td align='right'>$puutteet[$i]</td>";
+					echo "<td align='right'>$siirrot[$i]</td>";
+					echo "<td align='right'>$kappaleet[$i]</td>";
+					echo "<td align='right'>$yht[$i]</td>";
+					echo "</tr>";
+
+				}
+			}
 		}
-
+		echo "<tr>";
+		echo "<th>".t("Yhteensä")."</th>";
+		echo "<td class='tumma' align='right'>$psummayht</td>";
+		echo "<td class='tumma' align='right'>$ssummayht</td>";
+		echo "<td class='tumma' align='right'>$ksummayht</td>";
+		echo "<td class='tumma' align='right'>$summayht</td>";
+		echo "</tr>";
+		echo "</table><br>";
 	}
 
 	//Käyttöliittymä
@@ -275,6 +292,7 @@
 				<select name='tapa'>
 					<option value='keraaja'>".t("Kerääjittäin")."</option>
 					<option value='kerpvm'>".t("Päivittäin")."</option>
+					<option value='kerkk'>".t("Kuukausittain")."</option>
 				</select>
 			</td>
 		</tr>";
@@ -306,7 +324,7 @@
 			<th>".t("Syötä päivämäärä (pp-kk-vvvv)")."</th>
 			<td><input type='text' name='ppa' value='$ppa' size='3'></td>
 			<td><input type='text' name='kka' value='$kka' size='3'></td>
-			<td><input type='text' name='vva' value='$vva' size='5'></td><td class='back'><-- ".t("Jos valitset *Päivittäin* niin ajetaan tämän vuoden tiedot")."</td>
+			<td><input type='text' name='vva' value='$vva' size='5'></td><td class='back'><-- ".t("Jos valitset *Päivittäin tai Kuukausittain*, niin ajetaan tämän vuoden tiedot")."</td>
 		</tr>
 		<tr>
 			<th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>

@@ -269,7 +269,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 		header("Cache-Control: private", false);
 		header("Content-Transfer-Encoding: binary");
-		
+
 		if (isset($nayta_pdf) and $nayta_pdf == 1) {
 			header("Content-Type: application/pdf");
 			header('Content-Disposition: inline; filename="pupesoft.pdf"');
@@ -330,26 +330,30 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		if (!isset($no_head) or (isset($no_head) and $no_head != "yes")) {
 
 			if (isset($verkkokauppa) and $verkkokauppa != "") {
-				echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
+				echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
+			}
+			else {
+				echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\n\"http://www.w3.org/TR/html4/loose.dtd\">\n";
 			}
 
-			echo "<html>";
-			echo "<head>";
-			echo "<META Http-Equiv='Cache-Control' Content='no-cache'>";
-			echo "<META Http-Equiv='Pragma' Content='no-cache'>";
-			echo "<META Http-Equiv='Expires' Content='-1'>";
-			echo "<meta http-equiv='Content-Type' content='text/html; charset=$charset'>";
+			echo "<html>\n";
+			echo "<head>\n";
+			echo "<META Http-Equiv='Cache-Control' Content='no-cache'>\n";
+			echo "<META Http-Equiv='Pragma' Content='no-cache'>\n";
+			echo "<META Http-Equiv='Expires' Content='-1'>\n";
+			echo "<meta http-equiv='Content-Type' content='text/html; charset=$charset'>\n";
 
 			if ($_GET["no_css"] != "yes") {
-				echo "<style type='text/css'>";
+				echo "<style type='text/css'>\n";
 				echo $css;
-				echo "</style>";
+				echo "</style>\n";
 			}
 
-			echo "<title>$yhtiorow[nimi]</title>";
-			echo "</head>";
+			echo "<title>\n$yhtiorow[nimi]</title>\n";
+			echo "</head>\n";
 
-			echo "<body>";
+			echo "<body>\n";
+			echo "<noscript>Your browser does not support Javascript!</noscript>\n";
 
 			if (basename($phpnimi) != 'indexvas.php' and $_GET["ohje"] != "off") {
 				if (isset($toim) and $toim != '') {

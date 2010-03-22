@@ -19,40 +19,52 @@ if ($go == '') {
 
 $colwidth = '175';
 
-if ($kukarow['resoluutio'] == 'P') {
+if (isset($kukarow['resoluutio']) and $kukarow['resoluutio'] == 'P') {
 	$colwidth = '45';
 }
 
-if ($verkkokauppa != "") {
-	echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
+if (!headers_sent()) {
+	header("Content-Type: text/html; charset=iso-8859-1");
+	header("Pragma: public");
+	header("Expires: 0");
+	header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
+	header("Cache-Control: no-store, no-cache, must-revalidate");
+	header("Cache-Control: post-check=0, pre-check=0", false);
+	header("Pragma: no-cache");
 }
 
-echo "<html>
-<head>
-<title>$yhtiorow[nimi]</title>
-";
+echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\"\n\"http://www.w3.org/TR/html4/frameset.dtd\">
+<html>
+	<head>
+    	<title>$yhtiorow[nimi]</title>\n
+		<meta http-equiv=\"Cache-Control\" Content=\"no-cache\">\n
+		<meta http-equiv=\"Pragma\" Content=\"no-cache\">\n
+		<meta http-equiv=\"Expires\" Content=\"-1\">\n
+		<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n";
 
 if (file_exists("pics/pupeicon.gif")) {
-	echo "<link rel='shortcut icon' href='pics/pupeicon.gif'>\n";
+	echo "	<link rel='shortcut icon' href='pics/pupeicon.gif'>\n";
 }
 else {
-	echo "<link rel='shortcut icon' href='".$palvelin2."devlab-shortcut.png'>\n";
+	echo "	<link rel='shortcut icon' href='".$palvelin2."devlab-shortcut.png'>\n";
 }
 
-echo "<meta http-equiv='Pragma' content='no-cache'>
-<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
-</head>
-<noscript>
-Your browser does not support Javascript!
-</noscript>
-<frameset cols='$colwidth,*' border='0' frameborder='no'>
-<frameset rows='*,0' border='0' frameborder='no'>
-<frame noresize src='indexvas.php?goso=$goso' name='menu'>
-<frame noresize src='' name='alamenu' id='alamenuFrame'>
-</frameset>
-<frame src='$go' name='main'>
-<noframes>Your browser does not support frames!</noframes>
-</frameset>
+
+echo "</head>
+	<frameset cols='$colwidth,*' border='0'>
+		<frameset rows='*,0' border='0'>
+			<frame noresize src='indexvas.php?goso=$goso' name='menu' frameborder='0' marginwidth='0' marginheight='0'>
+			<frame noresize src='' name='alamenu' id='alamenuFrame' frameborder='0' marginwidth='0' marginheight='0'>
+		</frameset>
+		<frame noresize src='$go' name='main' frameborder='0' marginwidth='0' marginheight='0'>
+		<noframes>
+			<body>
+            	<p>
+                	This page uses frames, but your browser does not support them.
+            	</p>
+        	</body>
+		</noframes>
+	</frameset>
 </html>";
 
 ?>

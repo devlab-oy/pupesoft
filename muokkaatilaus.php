@@ -21,6 +21,10 @@
 	}
 	else {
 
+		// scripti balloonien tekemiseen
+		js_popup();
+		enable_ajax();
+
 		echo "	<script type='text/javascript' language='JavaScript'>
 				<!--
 					function verify() {
@@ -982,7 +986,7 @@
 			$miinus = 5;
 		}
 		else {
-			$query = "	SELECT lasku.tunnus tilaus, concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas, lasku.luontiaika, 
+			$query = "	SELECT lasku.tunnus tilaus, concat(lasku.ytunnus, '<br>', lasku.nimi) asiakas, lasku.luontiaika,
 						if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
 						$seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka1.extranet extra, lasku.mapvm, lasku.tilaustyyppi
 						FROM lasku use index (tila_index)
@@ -1035,12 +1039,8 @@
 					$excelrivi = 0;
 				}
 			}
+
 			echo "<table>";
-
-			// scripti balloonien tekemiseen
-			js_popup();
-			enable_ajax();
-
 			echo "<tr>";
 
 			for ($i=0; $i < mysql_num_fields($result)-$miinus; $i++) {
@@ -1052,7 +1052,7 @@
 			}
 			$excelrivi++;
 
-			echo "<th align='left'>".t("tyyppi")."</th></tr>";
+			echo "<th align='left'>".t("tyyppi")."</th><td class='back'></td></tr>";
 
 			$lisattu_tunnusnippu  = array();
 
@@ -1223,10 +1223,12 @@
 							$row_comments = mysql_fetch_assoc($result_comments);
 
 							if (trim($row_comments["comments"]) != "") {
+
+								echo "<td class='$class' align='right' valign='top'>";
 								echo "<div id='div_kommentti".$row[$fieldname]."' class='popup' style='width: 500px;'>";
 								echo $row_comments["comments"];
 								echo "</div>";
-								echo "<td class='$class' align='right' valign='top'><a class='tooltip' id='kommentti".$row[$fieldname]."'>".str_replace(",", "<br>*", $row[$fieldname])."</a></td>";
+								echo "<a class='tooltip' id='kommentti".$row[$fieldname]."'>".str_replace(",", "<br>*", $row[$fieldname])."</a></td>";
 							}
 							else {
 								echo "<td class='$class' align='right' valign='top'>".str_replace(",", "<br>*", $row[$fieldname])."</td>";
@@ -1444,6 +1446,8 @@
 						$javalisa = "onSubmit = 'return lahetys_verify()'";
 					}
 
+					echo "<td class='back' nowrap>";
+
 					if ($whiletoim == "OSTO" or $whiletoim == "OSTOSUPER" or $whiletoim == "HAAMU") {
 						echo "<form method='post' action='tilauskasittely/tilaus_osto.php' $javalisa>";
 					}
@@ -1460,19 +1464,19 @@
 							<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
 
 					if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "EXTRANET" or $whiletoim == "ENNAKKO" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO"or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
-						echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2' $button_disabled></td>";
+						echo "<input type='submit' name='$aputoim2' value='$lisa2' $button_disabled>";
 					}
 
-					echo "<td class='back'><input type='submit' name='$aputoim1' value='$lisa1' $button_disabled></td>";
-					echo "</form>";
+					echo "<input type='submit' name='$aputoim1' value='$lisa1' $button_disabled>";
+					echo "</form></td>";
 
 					if ($whiletoim == "TARJOUS" or $whiletoim == "TARJOUSSUPER" and $kukarow["kesken"] != 0) {
-						echo "<form method='post' action='muokkaatilaus.php' onSubmit='return verify();'>";
+						echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return verify();'>";
 						echo "<input type='hidden' name='toim' value='$whiletoim'>";
 						echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS'>";
 						echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
-						echo "<td class='back'><input type='submit' name='$aputoim1' value='".t("Mit‰tˆi")."'></td>";
-						echo "</form>";
+						echo "<input type='submit' name='$aputoim1' value='".t("Mit‰tˆi")."'>";
+						echo "</form></td>";
 					}
 
 					echo "</tr>";
@@ -1509,15 +1513,16 @@
 
 				if (mysql_num_rows($result) == 50) {
 					// N‰ytet‰‰n muuten vaan sopivia tilauksia
-					echo "<br><table>";
-
-					echo "<tr><th>".t("Listauksessa n‰kyy 50 ensimm‰ist‰")." $otsikko.</th>
-						<form action='$PHP_SELF' method='post'>
-						<input type='hidden' name='toim' value='$toim'>
-						<input type='hidden' name='etsi' value='$etsi'>
-						<input type='hidden' name='limit' value='NO'>
-						<td class='back'><input type='Submit' value = '".t("N‰yt‰ kaikki")."'></td>
-						</form></tr></table>";
+					echo "<br>
+							<form action='$PHP_SELF' method='post'>
+							<input type='hidden' name='toim' value='$toim'>
+							<input type='hidden' name='etsi' value='$etsi'>
+							<input type='hidden' name='limit' value='NO'>
+							<table>
+							<tr><th>".t("Listauksessa n‰kyy 50 ensimm‰ist‰")." $otsikko.</th>
+							<td class='back'><input type='Submit' value = '".t("N‰yt‰ kaikki")."'></td></tr>
+							</table>
+							</form>";
 				}
 
 				if (isset($workbook)) {
@@ -1525,14 +1530,14 @@
 					// We need to explicitly close the workbook
 					$workbook->close();
 
-					echo "<br><table>";
-					echo "<tr><th>".t("Tallenna lista").":</th>";
 					echo "<form method='post' action='$PHP_SELF'>";
 					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 					echo "<input type='hidden' name='kaunisnimi' value='Tilauslista.xls'>";
 					echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-					echo "</table><br>";
+					echo "<br><table>";
+					echo "<tr><th>".t("Tallenna lista").":</th>";
+					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
+					echo "</table></form><br>";
 				}
 			}
 		}

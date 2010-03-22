@@ -33,7 +33,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "kustannuspaikka") { //kustannuspaikat
-		$query = "	SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and
 					tyyppi = 'K'
@@ -52,7 +52,7 @@
 			if ($trow[$i] == $vrow['tunnus']) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]";
+			$ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 		}
 
 		$ulos .= "</select></td>";
@@ -60,7 +60,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "kohde") { //kohteet
-		$query = "	SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi, koodi
 						FROM kustannuspaikka
 						WHERE yhtio = '$kukarow[yhtio]' and
 						tyyppi = 'O'
@@ -78,7 +78,7 @@
 			if ($trow[$i] == $vrow['tunnus']) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[tunnus]  - $vrow[nimi]</option>";
+			$ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 		}
 
 		$ulos .= "</select></td>";
@@ -87,7 +87,7 @@
 
 	if (mysql_field_name($result, $i) == "projekti") { //projektit
 
-		$query = "	SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and
 					tyyppi = 'P'
@@ -105,7 +105,7 @@
 			if ($trow[$i] == $vrow['tunnus']) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[tunnus] - $vrow[nimi]</option>";
+			$ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 		}
 
 		$ulos .= "</select></td>";

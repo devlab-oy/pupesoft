@@ -260,8 +260,9 @@
 		
 
 		echo "<tr><th>".t("Kustannuspaikka")."</th><td>";
-		echo "<select name='toim_kustp'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";	
-		$query = "	SELECT tunnus, nimi
+		echo "<select name='toim_kustp'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";
+
+		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
 					ORDER BY nimi";
@@ -272,14 +273,14 @@
 			if ($trow[$i] == $vrow[0]) {
 				$sel = "selected";
 			}
-			echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+			echo "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 		}
 		echo "</select>";
 		echo "</td></tr>";	
 		echo "<tr><th>".t("Kohde")."</th><td>";
 
 		echo "<select name='toim_kohde'><option value=' '>".t("Ei kohdetta")."</option>";	
-		$query = "	SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
 					ORDER BY nimi";
@@ -290,14 +291,14 @@
 			if ($trow[$i] == $vrow[0]) {
 				$sel = "selected";
 			}
-			echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+			echo "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 		}
 		echo "</select>";
 		echo "</td></tr>";
 		echo "<tr><th>".t("Projekti")."</th><td>";
 
 		echo "<select name='toim_projekti'><option value=' '>".t("Ei projektia")."</option>";	
-		$query = "	SELECT tunnus, nimi
+		$query = "	SELECT tunnus, nimi, koodi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
 					ORDER BY nimi";
@@ -308,7 +309,7 @@
 			if ($trow[$i] == $vrow[0]) {
 				$sel = "selected";
 			}
-			echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+			echo "<option value = '$vrow[tunnus]' $sel>$vrow[koodi] $vrow[nimi]</option>";
 		}
 		echo "</select>";	
 		echo "</td></tr>";

@@ -248,7 +248,9 @@
 	}
 
 	// n‰ytet‰‰n sopparit
-	$query = "	SELECT *, lasku.tunnus laskutunnus,
+	$query = "	SELECT *, 
+				concat_ws('<br>', lasku.ytunnus, concat_ws(' ',lasku.nimi,lasku.nimitark), if(lasku.nimi!=lasku.toim_nimi, concat_ws(' ',lasku.toim_nimi,lasku.toim_nimitark), NULL), if(lasku.postitp!=lasku.toim_postitp, lasku.toim_postitp, NULL)) nimi,
+				lasku.tunnus laskutunnus,
 				round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
 				round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa
 				FROM lasku
@@ -324,14 +326,10 @@
 
 		while ($row = mysql_fetch_array($result)) {
 
-			if ($row["nimi"] == $row["toim_nimi"]) {
-				$row["toim_nimi"] = "";
-			}
-
 			echo "<tr class='aktiivi'>";
 			echo "<td valign='top'>$row[laskutunnus]</td>";
 			echo "<td valign='top'>$row[ytunnus]</td>";
-			echo "<td valign='top'>$row[nimi] $row[toim_nimi]</td>";
+			echo "<td valign='top'>$row[nimi]</td>";
 			echo "<td valign='top'>".tv1dateconv($row["sopimus_alkupvm"])."</td>";
 			echo "<td valign='top'>";
 			// kaunistelua

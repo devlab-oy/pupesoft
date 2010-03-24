@@ -1355,7 +1355,7 @@
 
 					if ($row["tila"] == "N" and $row["alatila"] == "U") {
 						if ($jtok == 0) {
-							echo "<td class='$class' valign='top'><font style='color:00FF00;'>".t("Voidaan toimittaa")."</font></td>";
+							echo "<td class='$class' valign='top'><font style='color:#00FF00;'>".t("Voidaan toimittaa")."</font></td>";
 
 							if(isset($workbook)) {
 								$worksheet->writeString($excelrivi, $i, "Voidaan toimittaa");
@@ -1363,7 +1363,7 @@
 							}
 						}
 						else {
-							echo "<td class='$class' valign='top'><font style='color:FF0000;'>".t("Ei voida toimittaa")."</font></td>";
+							echo "<td class='$class' valign='top'><font style='color:#FF0000;'>".t("Ei voida toimittaa")."</font></td>";
 
 							if(isset($workbook)) {
 								$worksheet->writeString($excelrivi, $i, t("Ei voida toimittaa"));

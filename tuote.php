@@ -269,18 +269,18 @@
 
 			// Hinnastoon
 			if (strtoupper($tuoterow['hinnastoon']) == 'E') {
-			 	$tuoterow['hinnastoon'] = "<font style='color:FF0000'>".t("Ei")."</font>";
+			 	$tuoterow['hinnastoon'] = "<font style='color:#FF0000'>".t("Ei")."</font>";
 			}
 			else {
-				$tuoterow['hinnastoon'] = "<font style='color:00FF00'>".t("Kyllä")."</font>";
+				$tuoterow['hinnastoon'] = "<font style='color:#00FF00'>".t("Kyllä")."</font>";
 			}
 
 			// Varastoon
 			if (strtoupper($tuoterow['ei_varastoida']) == 'O') {
-			 	$tuoterow['ei_varastoida'] = "<font style='color:FF0000'>".t("Ei")."</font>";
+			 	$tuoterow['ei_varastoida'] = "<font style='color:#FF0000'>".t("Ei")."</font>";
 			}
 			else {
-				$tuoterow['ei_varastoida'] = "<font style='color:00FF00'>".t("Kyllä")."</font>";
+				$tuoterow['ei_varastoida'] = "<font style='color:#00FF00'>".t("Kyllä")."</font>";
 			}
 
 			//tullinimike

@@ -3,12 +3,9 @@
 	///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 	$useslave = 1;
 
-	if (file_exists('parametrit.inc')) {
-		require('parametrit.inc');
-	}
-	else {
-		require('../inc/parametrit.inc');
-	}
+	if (@include("../inc/parametrit.inc"));
+	elseif (@include("parametrit.inc"));
+	else exit;
 
 	echo "<font class='head'>".t("Hinnasto asiakashinnoin")."</font><hr>";
 
@@ -337,10 +334,7 @@
 		echo "</form>";
 	}
 
-	if (file_exists('parametrit.inc')) {
-		require ("footer.inc");
-	}
-	else {
-		require ("../inc/footer.inc");
-	}
+	if (@include("inc/footer.inc"));
+	elseif (@include("footer.inc"));
+	else exit;
 ?>

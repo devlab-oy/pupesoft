@@ -475,7 +475,14 @@
 							$virhe[$rivitunnus] = "<font class='message'>".t("Tuote ei ole perheen isä. Rekursiivinen päivitys ei onnistu.")."!</font>";
 						}
 						else {
-							$perhekerroin = $tilkpl/$edtilkpllat[$rivitunnus];
+							
+							if ((float) $edtilkpllat[$rivitunnus] != 0) {
+								$perhekerroin = $tilkpl/$edtilkpllat[$rivitunnus];	
+							}
+							else {
+								$perhekerroin = 1;
+							}
+																															
 							$query = "	UPDATE tilausrivi
 										SET varattu = (varattu * $perhekerroin)
 										WHERE yhtio = '$kukarow[yhtio]'
@@ -509,6 +516,9 @@
 		// Jatketaan valmistusta
 		if ($tee == "TEEVALMISTUS") {
 			if ($toim == "KORJAA") {
+				
+				$peruttiinko = FALSE;
+				
 				foreach ($valmkpllat as $rivitunnus => $valmkpl) {
 
 					$valmkpl = str_replace(',','.',$valmkpl);
@@ -529,6 +539,7 @@
 
 						if ($perutamakorj[$rivitunnus] != "") {
 							$perutaan = "JOO";
+							$peruttiinko = TRUE;
 						}
 						else {
 							$perutaan = "";
@@ -552,7 +563,12 @@
 						$kalatila = "X";
 					}
 					else {
-						$kalatila = "V";
+						if ($peruttiinko) {
+							$kalatila = "C";	
+						}
+						else {
+							$kalatila = "V";
+						}
 					}
 
 					$query = "	UPDATE lasku
@@ -850,7 +866,7 @@
 					$sarjarow = mysql_fetch_array($sarjares);
 
 					if ($sarjarow["kpl"] == abs($prow["varattu"]+$prow["jt"])) {
-						$sarjalinkkilisa = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&return=valmistus&from=valmistus#".urlencode($sarjarow["sarjanumero"])."' style='color:00FF00'>".t("S:nro ok")."</font></a>)";
+						$sarjalinkkilisa = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&return=valmistus&from=valmistus#".urlencode($sarjarow["sarjanumero"])."' style='color:#00FF00'>".t("S:nro ok")."</font></a>)";
 					}
 					else {
 						$sarjalinkkilisa = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&return=valmistus&from=valmistus'>".t("S:nro")."</a>)";

@@ -880,7 +880,7 @@
 					echo t("Projekti")."<br>";
 				}
 
-				echo "</th><td>";
+				echo "</th><td valign='top'>";
 
 				// piirretään kustannuspaikat
 				if (mysql_num_rows($k_result) > 0) {

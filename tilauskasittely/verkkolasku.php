@@ -30,7 +30,7 @@
 		error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 		ini_set("display_errors", 0);
 
-		// otetaan tietokanta connect (HUOM: ../ koska komentorivillä puperoot ei välttämättä ole include pathissa)
+		// otetaan tietokanta connect
 		require("inc/connect.inc");
 		require("inc/functions.inc");
 
@@ -268,9 +268,9 @@
 			else {
 				$nimifinvoice = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_finvoice.xml";
 			}
-			
+
 			$nimisisainenfinvoice = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true))."_sisainenfinvoice.xml";
-			
+
 			$nimiedi = "../dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".edi";
 
 			//Pupevoice xml-dataa
@@ -281,7 +281,7 @@
 
 			//Elma-EDI-inhouse dataa (EIH-1.4.0)
 			if (!$tootedi = fopen($nimiedi, "w")) die("Filen $nimiedi luonti epäonnistui!");
-			
+
 			//Sisäinenfinvoice xml-dataa
 			if (!$tootsisainenfinvoice = fopen($nimisisainenfinvoice, "w")) die("Filen $nimisisainenfinvoice luonti epäonnistui!");
 
@@ -1802,7 +1802,7 @@
 						$tulos_ulos .= $tulos_ulos_ftp;
 					}
 				}
-				
+
 				if ($sisainenfoinvoice_ftphost != '' and file_exists(realpath($nimisisainenfinvoice))) {
 					if ($silent == "") {
 						$tulos_ulos .= "<br><br>\n".t("FTP-siirto Pupesoft-Finvoice:")."<br>\n";
@@ -1821,7 +1821,7 @@
 						$tulos_ulos .= $tulos_ulos_ftp;
 					}
 				}
-				
+
 				// jos yhtiöllä on laskuprintteri on määritelty tai halutaan jostain muusta syystä tulostella laskuja paperille
 				if ($yhtiorow['lasku_tulostin'] != 0 or (isset($valittu_tulostin) and $valittu_tulostin != "") or count($tulostettavat_email) > 0) {
 
@@ -2207,7 +2207,7 @@
 			if (file_exists($nimifinvoice) and (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) and $yhtiorow["verkkolasku_lah"] == "finvoice") {
 				echo "<br><table><tr><th>".t("Tallenna finvoice-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
-				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";			
+				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='".basename($nimifinvoice)."'>";
 				echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
 				echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr></form></table>";

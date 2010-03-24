@@ -250,7 +250,9 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 	}
 
 	// haetaan jotain tarpeellisia funktioita mukaan..
-	require ("functions.inc");
+	if (@include("inc/functions.inc"));
+	elseif (@include("functions.inc"));
+	else exit;
 
 	$yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
@@ -408,7 +410,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 								FROM messenger USE INDEX (yhtio_vastaanottaja_status)
 								JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = messenger.yhtio AND kuka.kuka = messenger.kuka)
 								WHERE messenger.yhtio in ($konserni_yhtiot) AND messenger.vastaanottaja = '$kukarow[kuka]' AND extranet='' AND messenger.status = 'X'";
-			if($message_result = mysql_query($message_query)) {
+			if ($message_result = mysql_query($message_query)) {
 				if (mysql_num_rows($message_result) > 0) {
 
 					enable_ajax();
@@ -433,15 +435,13 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
 	require("connect.inc");
 
-	if($yhtiorow["dokumentaatiohallinta"] != "") {
+	if ($yhtiorow["dokumentaatiohallinta"] != "") {
 		/*
 			tehdään linkki dokumentaationhallintaan!
-
 			Funktiot voi kutsua suoraan koodista jos dokumentaationhallinta ei ole käytössä mitään ei ko funktioilla tapahdu
 		*/
 
 		@(include_once("inc/dokumentinhallinta.inc")) or $yhtiorow["dokumentaatiohallinta"] = "";
-
 	}
 }
 

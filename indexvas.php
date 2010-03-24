@@ -1,14 +1,14 @@
 <?php
 
+// haetaan jotain tarpeellisia funktioita mukaan..
+if (@include("inc/parametrit.inc"));
+elseif (@include("parametrit.inc"));
+else exit;
 
-if (file_exists("inc/parametrit.inc")) {
-	require ("inc/parametrit.inc");
-	require ("inc/functions.inc");
-}
-else {
-	require ("parametrit.inc");
-	require ("functions.inc");
-}
+// haetaan jotain tarpeellisia funktioita mukaan..
+if (@include("inc/functions.inc"));
+elseif (@include("functions.inc"));
+else exit;
 
 echo "<style type='text/css'>
 body {

@@ -984,7 +984,7 @@
 						$sarjarow = mysql_fetch_array($sarjares);
 
 						if ($sarjarow["kpl"] == abs($prow["varattukpl"])) {
-							echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto' style='color:00FF00'>".t("S:nro ok")."</font></a>)";
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto' style='color:#00FF00'>".t("S:nro ok")."</font></a>)";
 						}
 						else {
 							echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto'>".t("S:nro")."</a>)";

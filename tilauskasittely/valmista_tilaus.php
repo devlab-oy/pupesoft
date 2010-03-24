@@ -866,7 +866,7 @@
 					$sarjarow = mysql_fetch_array($sarjares);
 
 					if ($sarjarow["kpl"] == abs($prow["varattu"]+$prow["jt"])) {
-						$sarjalinkkilisa = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&return=valmistus&from=valmistus#".urlencode($sarjarow["sarjanumero"])."' style='color:#00FF00'>".t("S:nro ok")."</font></a>)";
+						$sarjalinkkilisa = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&return=valmistus&from=valmistus#".urlencode($sarjarow["sarjanumero"])."' style='color:#00FF00;'>".t("S:nro ok")."</font></a>)";
 					}
 					else {
 						$sarjalinkkilisa = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&return=valmistus&from=valmistus'>".t("S:nro")."</a>)";

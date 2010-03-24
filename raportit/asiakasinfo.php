@@ -8,12 +8,9 @@ if (isset($_POST["tee"])) {
 	if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-if (file_exists("../inc/parametrit.inc")) {
-	require ("../inc/parametrit.inc");
-}
-else {
-	require ("parametrit.inc");
-}
+if (@include("../inc/parametrit.inc"));
+elseif (@include("parametrit.inc"));
+else exit;
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
 	readfile("/tmp/".$tmpfilenimi);
@@ -1143,11 +1140,8 @@ if ($lopetus != '') {
 $formi  = "asiakas";
 $kentta = "ytunnus";
 
-if ($kukarow["extranet"] != "") {
-	require ("footer.inc");
-}
-else {
-	require ("inc/footer.inc");
-}
+if (@include("inc/footer.inc"));
+elseif (@include("footer.inc"));
+else exit;
 
 ?>

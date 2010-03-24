@@ -1,12 +1,9 @@
 <?php
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "jtselaus.php") !== FALSE) {
-		if (file_exists("../inc/parametrit.inc")) {
-			require ("../inc/parametrit.inc");
-		}
-		else {
-			require ("parametrit.inc");
-		}
+		if (@include("../inc/parametrit.inc"));
+		elseif (@include("parametrit.inc"));
+		else exit;
 
 		if ($toim == "ENNAKKO") {
 			echo "<font class='head'>".t("Ennakkotilausrivit")."</font><hr>";
@@ -2091,12 +2088,9 @@
 	}
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "jtselaus.php") !== FALSE) {
-		if (file_exists("../inc/footer.inc")) {
-			require ("../inc/footer.inc");
-		}
-		else {
-			require ("footer.inc");
-		}
+		if (@include("inc/footer.inc"));
+		elseif (@include("footer.inc"));
+		else exit;
 	}
 
 ?>

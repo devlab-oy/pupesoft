@@ -3,12 +3,9 @@
 ///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 $useslave = 1;
 
-if (file_exists("../inc/parametrit.inc")) {
-	require ("../inc/parametrit.inc");
-}
-else {
-	require ("parametrit.inc");
-}
+if (@include("../inc/parametrit.inc"));
+elseif (@include("parametrit.inc"));
+else exit;
 
 echo "<font class='head'>".t("Osastoseuranta tuotemerkeitt‰in")."</font><hr>";
 echo "<p>".t("T‰ss‰ ajetaan annettu kausi ja verrataan sit‰ edellisen vuoden vastaavaan kauteen").".<br>";
@@ -453,11 +450,8 @@ echo "<br>";
 echo "<input type='submit' value='".t("Aja raportti")."'>";
 echo "</form>";
 
-if (file_exists("../inc/footer.inc")) {
-	require ("../inc/footer.inc");
-}
-else {
-	require ("footer.inc");
-}
+if (@include("inc/footer.inc"));
+elseif (@include("footer.inc"));
+else exit;
 
 ?>

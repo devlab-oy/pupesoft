@@ -14,13 +14,12 @@ else {
 	$eipaluuta = "YES";
 }
 
-if (file_exists("inc/parametrit.inc")) {
-	require ("inc/parametrit.inc");
+
+if (@include("inc/parametrit.inc")) {
 	$post_myynti = $pyytajadir.$pyytaja;
 	$pyytaja = substr($pyytaja,0,-4);
 }
-else {
-	require ("parametrit.inc");
+elseif (@include("parametrit.inc")) {
 	$post_myynti = $pyytaja;
 		
 	if ($tultiin == "futur") {
@@ -29,6 +28,7 @@ else {
 	
 	$pyytaja = substr($pyytaja,0,-4);
 }
+else exit;
 
 if ($tee == 'tarjous') {
 	$query = "	SELECT lasku.tunnus laskutunnus, asiakas.* 
@@ -278,11 +278,8 @@ if ($tee == "") {
 	}
 }
 
-if (file_exists("inc/footer.inc")) {
-	require("inc/footer.inc");
-}
-else {
-	require("footer.inc");
-}
+if (@include("inc/footer.inc"));
+elseif (@include("footer.inc"));
+else exit;
 
 ?>

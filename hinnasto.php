@@ -16,13 +16,9 @@ if (isset($_POST['filenimi']) and $_POST['filenimi'] != '') {
 	exit;
 }
 
-if (file_exists("inc/parametrit.inc")) {
-	require("inc/parametrit.inc");
-}
-else {
-	require("parametrit.inc");
-}
-
+if (@include("inc/parametrit.inc"));
+elseif (@include("parametrit.inc"));
+else exit;
 
 echo "<font class='head'>".t("Hinnastoajo")."</font><hr>";
 
@@ -230,11 +226,8 @@ if (isset($submitnappi)) {
 	echo "</table>";
 }
 
-if (file_exists("inc/footer.inc")) {
-	require("inc/footer.inc");
-}
-else {
-	require("footer.inc");
-}
+if (@include("inc/footer.inc"));
+elseif (@include("footer.inc"));
+else exit;
 
 ?>

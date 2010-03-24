@@ -1,24 +1,17 @@
 <?php
 
-//	Ladataan javahelpperit
-if (file_exists("../inc/parametrit.inc")) {
-	require ("../inc/parametrit.inc");
-}
-else {
-	require ("parametrit.inc");
-}
+if (@include("../inc/parametrit.inc"));
+elseif (@include("parametrit.inc"));
+else exit;
 
 if ($livesearch_tee == "TUOTEHAKU") {
 	livesearch_tuotehaku();
 	exit;
 }
 
-if (file_exists("../inc/alvpopup.inc")) {
-	require ("../inc/alvpopup.inc");
-}
-else {
-	require ("alvpopup.inc");
-}
+if (@include("inc/alvpopup.inc"));
+elseif (@include("alvpopup.inc"));
+else exit;
 
 if ($yhtiorow["tilauksen_yhteyshenkilot"] == "K" or $yhtiorow["asiakkaan_kohde"] == "K" or $yhtiorow["livetuotehaku_tilauksella"] == "K") {
 	enable_ajax();
@@ -347,12 +340,9 @@ if (($tee == "" or ($myos_prospektit=="TRUE" and $toim == "TARJOUS")) and (($kuk
 	$kutsuja    = "otsik.inc";
 	$ahlopetus 	= "tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO";
 
-	if (file_exists("../inc/asiakashaku.inc")) {
-		require ("../inc/asiakashaku.inc");
-	}
-	else {
-		require ("asiakashaku.inc");
-	}
+	if (@include("inc/asiakashaku.inc"));
+	elseif (@include("asiakashaku.inc"));
+	else exit;
 
 	// Ei näytetä tilausta jos meillä on asiakaslista ruudulla
 	if ($monta != 1) {
@@ -362,13 +352,10 @@ if (($tee == "" or ($myos_prospektit=="TRUE" and $toim == "TARJOUS")) and (($kuk
 
 //Luodaan otsikko
 if (($tee == "" and (($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and ($tuoteno != '' or $asiakasid != '')) or ((int) $kukarow["kesken"] != 0 and $asiakasid != '' and $kukarow["extranet"] == "")) or ($from == "CRM" and $asiakasid != ''))) or ($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0)) {
-	// Luodaan uusi myyntitilausotsikko
-	if ($kukarow["extranet"] == "") {
-		require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
-	}
-	else {
-		require_once("luo_myyntitilausotsikko.inc");
-	}
+
+	if (@include("tilauskasittely/luo_myyntitilausotsikko.inc"));
+	elseif (@include("luo_myyntitilausotsikko.inc"));
+	else exit;
 
 	$tilausnumero = luo_myyntitilausotsikko($asiakasid, $tilausnumero, $myyjanro);
 	$kukarow["kesken"] = $tilausnumero;
@@ -1029,7 +1016,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
 			$otunnus = $tilausnumero;
 			$tulostimet[0] = "Tarjous";
-			require("../inc/valitse_tulostin.inc");
+			require("inc/valitse_tulostin.inc");
 		}
 
 		require_once ('tulosta_tarjous.inc');
@@ -1075,11 +1062,11 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 	}
 	// Sisäinen työmääräys valmis
 	elseif ($kukarow["extranet"] == "" and $toim == "SIIRTOTYOMAARAYS") {
-		require("../tyomaarays/tyomaarays.inc");
+		require("tyomaarays/tyomaarays.inc");
 	}
 	// Työmääräys valmis
 	elseif ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO")) {
-		require("../tyomaarays/tyomaarays.inc");
+		require("tyomaarays/tyomaarays.inc");
 	}
 
 	// Siirtolista, myyntitili, valmistus valmis
@@ -1157,7 +1144,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
 				if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
 			}
-			
+
 			if ($kukarow["extranet"] == "" and $yhtiorow["tee_valmistus_myyntitilaukselta"] != '') {
 				//	Voimme myös tehdä tilaukselta suoraan valmistuksia!
 				require("tilauksesta_valmistustilaus.inc");
@@ -1268,7 +1255,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 }
 
 if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO") and ($tee == "VAHINKO" or $tee == "LEPAA")) {
-	require("../tyomaarays/tyomaarays.inc");
+	require("tyomaarays/tyomaarays.inc");
 }
 
 //Voidaan tietyissä tapauksissa kopsata tästä suoraan uusi tilaus
@@ -1307,7 +1294,7 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
 		require("otsik_siirtolista.inc");
 	}
 	else {
-		require ('otsik.inc');
+		require('otsik.inc');
 	}
 
 	//Tässä halutaan jo hakea uuden tilauksen tiedot
@@ -1409,7 +1396,7 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
 						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]' 
+						WHERE yhtio = '$kukarow[yhtio]'
 						AND (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
 			$vtresult = mysql_query($query) or pupe_error($query);
 			$vtrow = mysql_fetch_assoc($vtresult);
@@ -1418,7 +1405,7 @@ if (($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == 
 		}
 
 		jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varasto, '', "tosi_automaaginen", "JATKA", "automaattinen_poiminta");
-		
+
 		$tyhjenna 	= "JOO";
 		$tee 		= "";
 	}
@@ -2147,7 +2134,7 @@ if ($tee == '') {
 
 					$laskutyyppi = $row["tila"];
 					$alatila 	 = $row["alatila"];
-				 	require ("../inc/laskutyyppi.inc");
+				 	require ("inc/laskutyyppi.inc");
 
 					if ($row["varasto"] == "") $row["varasto"] = "oletus";
 
@@ -2391,7 +2378,7 @@ if ($tee == '') {
 		$trattavirhe = '';
 
 		ob_start();
-		require ("../raportit/saatanat.php");
+		require ("raportit/saatanat.php");
 		$retval = ob_get_contents();
 		ob_end_clean();
 
@@ -2427,7 +2414,7 @@ if ($tee == '') {
 			echo "<br>";
 			$ytunnus	= $laskurow['ytunnus'];
 			$asiakasid  = $laskurow['liitostunnus'];
-			require ("../crm/asiakasmemo.php");
+			require ("crm/asiakasmemo.php");
 		}
 	}
 
@@ -2509,7 +2496,7 @@ if ($tee == '') {
 
 	if ($kukarow["extranet"] == "" and $toim == "TYOMAARAYS") {
 		$tee_tyomaarays = "MAARAAIKAISHUOLLOT";
-		//require('../tyomaarays/tyomaarays.inc');
+		//require('tyomaarays/tyomaarays.inc');
 	}
 
 	//Kuitataan OK-var riville
@@ -2972,12 +2959,9 @@ if ($tee == '') {
 	if ($tuoteno != '') {
 		$multi = "TRUE";
 
-		if (file_exists("../inc/tuotehaku.inc")) {
-			require ("../inc/tuotehaku.inc");
-		}
-		else {
-			require ("tuotehaku.inc");
-		}
+		if (@include("inc/tuotehaku.inc"));
+		elseif (@include("tuotehaku.inc"));
+		else exit;
 	}
 
 	//Lisätään rivi
@@ -4594,7 +4578,7 @@ if ($tee == '') {
 					$sarjarow = mysql_fetch_assoc($sarjares);
 
 					if ($muokkauslukko_rivi == "" and $sarjarow["kpl"] == abs($row["varattu"]+$row["jt"])) {
-						echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($row["tuoteno"])."&$tunken2=$row[tunnus]&from=$toim#".urlencode($sarjarow["sarjanumero"])."' style='color:00FF00'>$snro_ok</font></a>)";
+						echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($row["tuoteno"])."&$tunken2=$row[tunnus]&from=$toim#".urlencode($sarjarow["sarjanumero"])."' style='color:#00FF00;'>$snro_ok</font></a>)";
 					}
 					elseif ($muokkauslukko_rivi == "") {
 						echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($row["tuoteno"])."&$tunken2=$row[tunnus]&from=$toim'>$snro</a>)";
@@ -5726,7 +5710,7 @@ if ($tee == '') {
 
 						echo "</select>
 							<input type='submit' value='".t("Näytä")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'tulosta_myynti'); return false;\">
-							<input type='submit' value='".t("Tulosta")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'samewindow'); return false;\">							
+							<input type='submit' value='".t("Tulosta")."' onClick=\"js_openFormInNewWindow('tulostaform_tmyynti', 'samewindow'); return false;\">
 							</form>
 							</td>";
 
@@ -6217,11 +6201,8 @@ if ($takaisin == "LASKUTATILAUS" and $takaisin_valmis == "YES") {
 			</form>";
 }
 
-if (file_exists("../inc/footer.inc")) {
-	require ("../inc/footer.inc");
-}
-else {
-	require ("footer.inc");
-}
+if (@include("inc/footer.inc"));
+elseif (@include("footer.inc"));
+else exit;
 
 ?>

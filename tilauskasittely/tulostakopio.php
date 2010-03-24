@@ -6,15 +6,9 @@
 
 	if ($_REQUEST["tee"] == 'NAYTATILAUS' or $_POST["tee"] == 'NAYTATILAUS' or $_GET["tee"] == 'NAYTATILAUS') $nayta_pdf = 1; //Generoidaan .pdf-file
 
-	if (file_exists("../inc/parametrit.inc")) {
-		require('../inc/parametrit.inc');
-	}
-	elseif (file_exists("inc/parametrit.inc")) {
-		require('inc/parametrit.inc');
-	}
-	else {
-		require('parametrit.inc');
-	}
+	if (@include("../inc/parametrit.inc"));
+	elseif (@include("parametrit.inc"));
+	else exit;
 	
 	$logistiikka_yhtio = '';
 	$logistiikka_yhtiolisa = '';
@@ -2158,14 +2152,7 @@
 		}
 	}
 
-	if (file_exists("../inc/footer.inc")) {
-		require ('../inc/footer.inc');
-	}
-	elseif (file_exists("inc/footer.inc")) {
-		require ('inc/footer.inc');
-	}
-	else {
-		require ('footer.inc');
-	}
-	
+	if (@include("inc/footer.inc"));
+	elseif (@include("footer.inc"));
+	else exit;
 ?>

@@ -1,20 +1,20 @@
 <?php
 
-	if (file_exists("../inc/parametrit.inc")) {
-		require ("../inc/parametrit.inc");
-		require ("../verkkokauppa/ostoskori.inc");
+	if (@include("../inc/parametrit.inc"));
+	elseif (@include("parametrit.inc"));
+	else exit;
+	
+	if (@include("verkkokauppa/ostoskori.inc")) {
 		$kori_polku = "../verkkokauppa/ostoskori.php";
 	}
-	else {
-		require ("parametrit.inc");
-		require ("ostoskori.inc");
-
+	elseif (@include("ostoskori.inc")) {
 		$kori_polku = "ostoskori.php";
 
 		if ($tultiin == "futur") {
 			$kori_polku .= "?ostoskori=".$ostoskori."&tultiin=".$tultiin;
 		}
 	}
+	else exit;
 
 	// Liitetiedostot popup
 	if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
@@ -1492,11 +1492,8 @@
 	}
 
 	if ($verkkokauppa == "") {
-		if (file_exists("../inc/footer.inc")) {
-			require ("../inc/footer.inc");
-		}
-		else {
-			require ("footer.inc");
-		}
+		if (@include("inc/footer.inc"));
+		elseif (@include("footer.inc"));
+		else exit;
 	}
 ?>

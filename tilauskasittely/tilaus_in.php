@@ -9,7 +9,7 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 
 	$path_parts = pathinfo($filename);
 
-	if (strtoupper($path_parts["extension"])!="TXT") {
+	if ($path_parts["extension"] != "" and strtoupper($path_parts["extension"]) != "TXT") {
 		echo "<font class='error'>".t("Tiedosto")." $filename ".t("ei tunnu aineistolta")."!<br>".t("Pit‰‰ olla .txt (nyt")." $path_parts[extension]).<br>".t("Tarkista tiedosto")."!<br></font>";
 		exit;
 	}

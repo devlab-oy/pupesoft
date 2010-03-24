@@ -434,7 +434,7 @@
 
 				if ($yhtiorow['pankkitiedostot'] != '' or !(is_resource($toot))) {
 					if ($kotimaa == "FI") {
-						$kaunisnimi = "lum3-$kukarow[yhtio]-".date("d.m.y.H.i.s")."-".$generaatio.".txt";
+						$kaunisnimi = "lum2-$kukarow[yhtio]-".date("d.m.y.H.i.s")."-".$generaatio.".txt";
 					}
 					else {
 						$kaunisnimi = "bgut-$kukarow[yhtio]-".date("d.m.y.H.i.s")."-".$generaatio.".txt";

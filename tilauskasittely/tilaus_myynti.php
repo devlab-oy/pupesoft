@@ -2022,12 +2022,12 @@ if ($tee == '') {
 
 			if ($kukarow["extranet"] != "") {
 				$query = "	SELECT * FROM (
-								(SELECT toimitustapa.tunnus, toimitustapa.selite, toimitustapa.jarjestys
+								(SELECT toimitustapa.*
 								FROM toimitustapa
 								WHERE toimitustapa.yhtio = '$kukarow[yhtio]' and (toimitustapa.extranet in ('K','M') or toimitustapa.selite = '$extra_asiakas[toimitustapa]')
 								and (toimitustapa.sallitut_maat = '' or toimitustapa.sallitut_maat like '%$laskurow[toim_maa]%'))
 								UNION
-								(SELECT toimitustapa.tunnus, toimitustapa.selite, toimitustapa.jarjestys
+								(SELECT toimitustapa.*
 								FROM toimitustapa
 								JOIN asiakkaan_avainsanat ON toimitustapa.yhtio = asiakkaan_avainsanat.yhtio and toimitustapa.selite = asiakkaan_avainsanat.avainsana and asiakkaan_avainsanat.laji = 'toimitustapa' and asiakkaan_avainsanat.liitostunnus = '$laskurow[liitostunnus]'
 								WHERE toimitustapa.yhtio = '$kukarow[yhtio]'
@@ -2037,7 +2037,7 @@ if ($tee == '') {
 							ORDER BY 3,2";
 			}
 			else {
-				$query = "	SELECT tunnus, selite
+				$query = "	SELECT toimitustapa.*
 							FROM toimitustapa
 							WHERE yhtio = '$kukarow[yhtio]' and (extranet in ('','M') or selite = '$laskurow[toimitustapa]')
 							and (sallitut_maat = '' or sallitut_maat like '%$laskurow[toim_maa]%')
@@ -2052,11 +2052,17 @@ if ($tee == '') {
 			}
 
 			echo "<td><select name='toimitustapa' onchange='submit()' $state>";
+			
+			// Otetaan toimitustavan tiedot ja k‰ytet‰‰n niit‰ l‰pi tilausmyynnin!
+			$tm_toimitustaparow = mysql_fetch_assoc($tresult);
+			mysql_data_seek($tresult, 0);
 
-			while($row = mysql_fetch_assoc($tresult)) {
+			while ($row = mysql_fetch_assoc($tresult)) {
+				
 				$sel = "";
 				if ($row["selite"] == $laskurow["toimitustapa"]) {
 					$sel = 'selected';
+					$tm_toimitustaparow = $row;
 				}
 
 				echo "<option value='$row[selite]' $sel>".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")."</option>";
@@ -3666,34 +3672,27 @@ if ($tee == '') {
 			$vakrow = mysql_fetch_assoc($vakresult);
 
 			if ($vakrow['vaktuotteet'] != '') {
-				$vak_toim_query = "	SELECT vak_kielto, nouto
-									FROM toimitustapa
-									WHERE yhtio = '$kukarow[yhtio]'
-									AND selite = '$laskurow[toimitustapa]'";
-				$vak_toim_result = mysql_query($vak_toim_query) or pupe_error($vak_toim_query);
-				$vak_toim_row = mysql_fetch_assoc($vak_toim_result);
-
 				if ($kukarow['extranet'] == '') {
 					// jos vak-toimituksissa halutaan k‰ytt‰‰ vaihtoehtoista toimitustapaa
-					if ($vak_toim_row['vak_kielto'] != '' and $vak_toim_row['vak_kielto'] != 'K') {
+					if ($tm_toimitustaparow['vak_kielto'] != '' and $tm_toimitustaparow['vak_kielto'] != 'K') {
 
 						$query = "	SELECT tunnus
 									FROM toimitustapa
 									WHERE yhtio = '$kukarow[yhtio]'
-									AND selite = '$vak_toim_row[vak_kielto]'
+									AND selite = '$tm_toimitustaparow[vak_kielto]'
 									AND vak_kielto = ''";
 						$vak_check_res = mysql_query($query) or pupe_error($query);
 
 						// CHECK! vaihtoehtoisen toimitustavan t‰ytyy sallia vak-tuotteiden toimitus
 						if (mysql_num_rows($vak_check_res) == 1) {
 							$query = "	UPDATE lasku SET
-										toimitustapa = '$vak_toim_row[vak_kielto]'
+										toimitustapa = '$tm_toimitustaparow[vak_kielto]'
 										WHERE yhtio = '$kukarow[yhtio]'
 										AND tunnus = '$laskurow[tunnus]'";
 							$toimtapa_update_res = mysql_query($query) or pupe_error($query);
 
 							echo "<br><font class='error'>".t("HUOM: T‰m‰ toimitustapa ei salli VAK-tuotteita")."! ($laskurow[toimitustapa])</font><br>";
-							echo "<font class='error'>$laskurow[toimitustapa] ".t("toimitustavan VAK-tuotteet toimitetaan vaihtoehtoisella toimitustavalla")." $vak_toim_row[vak_kielto].</font> ";
+							echo "<font class='error'>$laskurow[toimitustapa] ".t("toimitustavan VAK-tuotteet toimitetaan vaihtoehtoisella toimitustavalla")." $tm_toimitustaparow[vak_kielto].</font> ";
 							echo "<form name='tilaus' method='post'>";
 							echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 							echo "<input type='hidden' name='toim' value='$toim'>";
@@ -3709,14 +3708,14 @@ if ($tee == '') {
 						}
 						$tilausok++;
 					}
-					elseif ($vak_toim_row['vak_kielto'] == 'K') {
+					elseif ($tm_toimitustaparow['vak_kielto'] == 'K') {
 						echo "<font class='error'>".t("VIRHE: T‰m‰ toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br>";
 						echo "<font class='error'>".t("Valitse uusi toimitustapa")."!</font><br><br>";
 						$tilausok++;
 					}
 				}
 				else {
-					if ($vak_toim_row['vak_kielto'] == 'K' or ($vak_toim_row['vak_kielto'] != '' and $vak_toim_row['nouto'] == '')) {
+					if ($tm_toimitustaparow['vak_kielto'] == 'K' or ($tm_toimitustaparow['vak_kielto'] != '' and $tm_toimitustaparow['nouto'] == '')) {
 						echo "<font class='error'>".t("VIRHE: T‰m‰ toimitustapa ei salli VAK-tuotteita")."! ($vakrow[vaktuotteet])</font><br>";
 						echo "<font class='error'>".t("Valitse uusi toimitustapa")."!</font><br><br>";
 						$tilausok++;
@@ -5415,24 +5414,19 @@ if ($tee == '') {
 				if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0 and $arvo_ulkomaa <= $yhtiorow["suoratoim_ulkomaan_alarajasumma"]) {
 					$ulkom_huom = "<font class='error'>".t("HUOM! Summa on liian pieni ulkomaantoimitukselle. Raja on").": $yhtiorow[suoratoim_ulkomaan_alarajasumma] $laskurow[valkoodi]</font>";
 				}
-				elseif ($kukarow["extranet"] != "" and $arvo_ulkomaa != 0 and $arvo_ulkomaa <= $yhtiorow["suoratoim_ulkomaan_alarajasumma"]) {
-
-					$query = "SELECT ulkomaanlisa FROM toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
-					$ulklisres = mysql_query($query) or pupe_error($query);
-					$ulklisrow = mysql_fetch_assoc($ulklisres);
-					if ($ulklisrow['ulkomaanlisa'] > 0) {
-						$ulkom_huom = "<font class='message'>".t("Olet tilaamassa ulkomaanvarastosta, rahtikulut nousevat")." ".round(laskuval($ulklisrow["ulkomaanlisa"],$laskurow["vienti_kurssi"]),0)." $laskurow[valkoodi] ".t("verran")." </font><br>";
+				elseif ($kukarow["extranet"] != "" and $arvo_ulkomaa != 0 and $arvo_ulkomaa <= $yhtiorow["suoratoim_ulkomaan_alarajasumma"]) {					
+					if ($tm_toimitustaparow['ulkomaanlisa'] > 0) {
+						$ulkom_huom = "<font class='message'>".t("Olet tilaamassa ulkomaanvarastosta, rahtikulut nousevat")." ".round(laskuval($tm_toimitustaparow["ulkomaanlisa"],$laskurow["vienti_kurssi"]),0)." $laskurow[valkoodi] ".t("verran")." </font><br>";
 					}
 					else {
 						$ulkom_huom = "";
 					}
-
 				}
 				else {
 					$ulkom_huom = "";
 				}
 
-				$ycspan=4;
+				$ycspan = 4;
 
 				if ($laskurow["liitostunnus"] > 0 and $yhtiorow["tilauksen_jarjestys"] == "M" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
 					$ycspan++;

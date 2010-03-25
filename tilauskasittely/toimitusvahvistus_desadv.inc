@@ -28,6 +28,8 @@
 	//jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 	if ($kollityht > 0 and $desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv_path != '') {
 
+		$error = '';
+
 		$rahtikirjanro = $lotsikot[0];
 
 		//	Haetaan otsikkotiedot pohjalle
@@ -112,6 +114,9 @@
 		if ($desadv_laskurow['asiakkaan_tilausnumero'] != '') {
 			$desadv_message .= "RFF+CR:$desadv_laskurow[asiakkaan_tilausnumero]'";
 			$x++;
+		}
+		else {
+			$error .= "Asiakkaan tilausnumero puuttui!<br>";
 		}
 
 		// RFF - waybill number
@@ -199,9 +204,12 @@
 		}
 
 		// NAD - identification of buyer
-		if ($desadv_laskurow['asiakasovttunnus'] != '') {
+		if ($desadv_laskurow['asiakasovttunnus'] != '' and $desadv_laskurow['asiakasnimi'] != '') {
 			$desadv_message .= "NAD+BY+$desadv_laskurow[asiakasovttunnus]:100++$desadv_laskurow[asiakasnimi] $desadv_laskurow[asiakasnimitark]+$desadv_laskurow[asiakasosoite]+$desadv_laskurow[asiakaspostitp]++$desadv_laskurow[asiakaspostino]+$desadv_laskurow[asiakasmaa]'";
 			$x++;
+		}
+		else {
+			$error .= "Asiakkaan ovt-tunnus / nimi puuttui!<br>";
 		}
 
 		// NAD - identification of the delivery party
@@ -212,11 +220,17 @@
 			$desadv_message .= "LOC+11+:::$desadv_laskurow[asiakastoim_postitp]'";
 			$x++;
 		}
+		else {
+			$error .= "Asiakkaan toim_ovt-tunnus / toim_nimi puuttui!<br>";
+		}
 
 		// NAD - identification of consignee
 		if ($toitarow['toim_nimi'] != '' and $toitarow['toim_ovttunnus'] != '') {
 			$desadv_message .= "NAD+CN+$toitarow[toim_ovttunnus]:100++$toitarow[toim_nimi] $toitarow[toim_nimitark]+$toitarow[toim_osoite]+$toitarow[toim_postitp]++$toitarow[toim_postino]+$toitarow[toim_maa]'";
 			$x++;
+		}
+		else {
+			$error .= "Toimitustavan toim_ovt-tunnus / toim_nimi puuttui!<br>";
 		}
 
 
@@ -299,20 +313,25 @@
 		$desadv_message .= "UNT+$x+$desadv_laskurow[laskutunnus]'";
 
 		$filenimi = "dataout/desadv_import-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
-		
+
 		//kirjoitetaan faili levylle..
 		if (file_put_contents($filenimi, $desadv_message) === FALSE) {
-			echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")." ($filenimi)</font><br>";
+			echo "<br/><font class='error'>",t("tiedoston kirjoitus EPÄONNISTUI")," ($filenimi)</font><br/>";
 		}
-		
-		// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
-		// palautetaan $palautus ja $syy
-		$ftphost = $desadv_host;
-		$ftpuser = $desadv_user;
-		$ftppass = $desadv_pass;
-		$ftppath = $desadv_path;
-		$ftpfile = realpath($filenimi);
-		require ("inc/ftp-send.inc");
+
+		if ($error == '') {
+			// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
+			// palautetaan $palautus ja $syy
+			$ftphost = $desadv_host;
+			$ftpuser = $desadv_user;
+			$ftppass = $desadv_pass;
+			$ftppath = $desadv_path;
+			$ftpfile = realpath($filenimi);
+			require ("inc/ftp-send.inc");
+		}
+		else {
+			echo "<br/><font class='error'>",t("Tapahtui virhe"),":<br>$error</font><br>";
+		}
 	}
 
 ?>

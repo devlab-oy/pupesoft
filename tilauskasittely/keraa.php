@@ -171,13 +171,13 @@
 					}
 				}
 				else {
+					
+					//Siivotaan hieman käyttäjän syöttämää kappalemäärää
+					$eratsekkpl = (float) str_replace( ",", ".", $maara[$toimrow["tunnus"]]);
+					
 					// Muutetaanko eräseurattavan tuotteen kappalemäärää
-					if (trim($maara[$toimrow["tunnus"]]) != '') {
-
-						//Siivotaan hieman käyttäjän syöttämää kappalemäärää
-						$tsekkpl = (float) str_replace ( ",", ".", $maara[$toimrow["tunnus"]]);
-
-						if ($tsekkpl < $toimrow["varattu"]) {
+					if (trim($maara[$toimrow["tunnus"]]) != '' and $eratsekkpl >= 0) {					
+						if ($eratsekkpl < $toimrow["varattu"]) {
 							//Jos erä on keksitty käsin täältä keräyksestä
 							$query = "	SELECT *
 										FROM sarjanumeroseuranta
@@ -191,7 +191,7 @@
 								$lisa_row = mysql_fetch_array($lisa_res);
 
 								$query = "	UPDATE sarjanumeroseuranta
-											SET era_kpl	= '$tsekkpl'
+											SET era_kpl	= '$eratsekkpl'
 											WHERE yhtio 		 = '$kukarow[yhtio]'
 											and tuoteno 		 = '$toimrow[tuoteno]'
 											and ostorivitunnus 	 = '$lisa_row[myyntirivitunnus]'
@@ -201,7 +201,7 @@
 
 							$keraysvirhe++;
 						}
-						elseif ($tsekkpl < $toimrow["varattu"]) {
+						elseif ($eratsekkpl < $toimrow["varattu"]) {
 							$query = "	DELETE FROM sarjanumeroseuranta
 										WHERE yhtio = '$kukarow[yhtio]'
 										and tuoteno = '$toimrow[tuoteno]'
@@ -209,6 +209,9 @@
 							$sarjares2 = mysql_query($query) or pupe_error($query);
 							$keraysvirhe++;
 						}
+					}
+					else {
+						$eratsekkpl = $toimrow["varattu"];
 					}
 
 					// Päivitetään erä
@@ -281,7 +284,7 @@
 						}
 					}
 
-					if ($toimrow["varattu"] != 0) {
+					if ($eratsekkpl != 0) {
 						$query = "	SELECT count(*) kpl
 									FROM sarjanumeroseuranta
 									WHERE yhtio = '$kukarow[yhtio]'
@@ -2011,7 +2014,7 @@
 					if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
 
 						if ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F" or $row["sarjanumeroseuranta"] == "G") {
-							$kasittely = "RU";
+							$kasittely = "UR";
 						}
 						elseif ($yhtiorow["kerayspoikkeama_kasittely"] == 'J') {
 							$kasittely = "JT";

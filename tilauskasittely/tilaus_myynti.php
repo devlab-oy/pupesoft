@@ -2021,20 +2021,17 @@ if ($tee == '') {
 			echo "<th align='left'>".t("Toimitustapa").":</th>";
 
 			if ($kukarow["extranet"] != "") {
-				$query = "	SELECT * FROM (
-								(SELECT toimitustapa.*
-								FROM toimitustapa
-								WHERE toimitustapa.yhtio = '$kukarow[yhtio]' and (toimitustapa.extranet in ('K','M') or toimitustapa.selite = '$extra_asiakas[toimitustapa]')
-								and (toimitustapa.sallitut_maat = '' or toimitustapa.sallitut_maat like '%$laskurow[toim_maa]%'))
-								UNION
-								(SELECT toimitustapa.*
-								FROM toimitustapa
-								JOIN asiakkaan_avainsanat ON toimitustapa.yhtio = asiakkaan_avainsanat.yhtio and toimitustapa.selite = asiakkaan_avainsanat.avainsana and asiakkaan_avainsanat.laji = 'toimitustapa' and asiakkaan_avainsanat.liitostunnus = '$laskurow[liitostunnus]'
-								WHERE toimitustapa.yhtio = '$kukarow[yhtio]'
-								and (toimitustapa.sallitut_maat = '' or toimitustapa.sallitut_maat like '%$laskurow[toim_maa]%'))
-							) AS yhd_tt
-							GROUP BY 1
-							ORDER BY 3,2";
+				$query = "	(SELECT toimitustapa.*
+							FROM toimitustapa
+							WHERE toimitustapa.yhtio = '$kukarow[yhtio]' and (toimitustapa.extranet in ('K','M') or toimitustapa.selite = '$extra_asiakas[toimitustapa]')
+							and (toimitustapa.sallitut_maat = '' or toimitustapa.sallitut_maat like '%$laskurow[toim_maa]%'))
+							UNION
+							(SELECT toimitustapa.*
+							FROM toimitustapa
+							JOIN asiakkaan_avainsanat ON toimitustapa.yhtio = asiakkaan_avainsanat.yhtio and toimitustapa.selite = asiakkaan_avainsanat.avainsana and asiakkaan_avainsanat.laji = 'toimitustapa' and asiakkaan_avainsanat.liitostunnus = '$laskurow[liitostunnus]'
+							WHERE toimitustapa.yhtio = '$kukarow[yhtio]'
+							and (toimitustapa.sallitut_maat = '' or toimitustapa.sallitut_maat like '%$laskurow[toim_maa]%'))
+							ORDER BY jarjestys,selite";
 			}
 			else {
 				$query = "	SELECT toimitustapa.*

@@ -5,9 +5,9 @@
 	require ("inc/salasanat.php");
 	require ("inc/functions.inc");
 
-	$tmpfile = "/tmp/orders-tmp.txt";   # minne tehd‰‰n lock file
-	$email     = ""; # kenelle meilataan jos on ongelma
-	$emailfrom = ""; # mill‰ osoitteella meili l‰hetet‰‰n
+	$tmpfile = "/tmp/ftpget-tmp.txt";										# minne tehd‰‰n lock file
+	if (!isset($ftpget_email)) $ftpget_email = "devlab@devlab.fi"; 			# kenelle meilataan jos on ongelma
+	if (!isset($ftpget_emailfrom)) $ftpget_emailfrom = "devlab@devlab.fi"; 	# mill‰ osoitteella meili l‰hetet‰‰n
 
 	# jos lukkofaili lˆytyy, mutta se on yli 15 minsaa vanha niin dellatan se
 	if (@fopen($tmpfile, "r") !== FALSE) {
@@ -15,44 +15,44 @@
 		$now = mktime(date("H"), date("i"), date("s"), date("m"), date("d"), date("Y"));
 
 		if ($now - $mode[9] > 900) {
-			mail($email,  "FTP-get ORDERS HUOM!", "Tilausten sis‰‰nluvussa saattaa olla ongelma. Lukkotiedosto oli yli 15 minuuttia vanha ja se poistettiin. Tutki asia!", "From: <$emailfrom>\n", "-f $emailfrom");
+			mail($ftpget_email,  "VIRHE: FTP-get!", "Tilausten sis‰‰nluvussa saattaa olla ongelma. Lukkotiedosto oli yli 15 minuuttia vanha ja se poistettiin. Tutki asia!", "From: <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
 
 			system("rm -f $tmpfile");
 		}
 	}
 
-	// tarvitaan $orders_host $orders_user $orders_pass $orders_path
+	// tarvitaan $ftpget_host $ftpget_user $ftpget_pass $ftpget_path
 	// palautetaan $syy
-	if (@fopen($tmpfile, "r") === FALSE and $orders_host != '' and $orders_user != '' and $orders_pass != '' and $orders_path != '' and $orders_dest != '') {
+	if (@fopen($tmpfile, "r") === FALSE and $ftpget_host != '' and $ftpget_user != '' and $ftpget_pass != '' and $ftpget_path != '' and $ftpget_dest != '') {
 
 		if ($filehandle = fopen($tmpfile, "w")) {
 			fwrite($filehandle, "All variables are set!\n");
 		}
 
 		//l‰hetet‰‰n tiedosto
-		$conn_id = ftp_connect($orders_host);
+		$conn_id = ftp_connect($ftpget_host);
 
 		// jos connectio ok, kokeillaan loginata
 		if ($conn_id) {
-			fwrite($filehandle, "FTP-connect was successful, trying to login with $orders_user...\n");
-			$login_result = ftp_login($conn_id, $orders_user, $orders_pass);
+			fwrite($filehandle, "FTP-connect was successful, trying to login with $ftpget_user...\n");
+			$login_result = ftp_login($conn_id, $ftpget_user, $ftpget_pass);
 		}
 
 		// jos viimeinen merkki pathiss‰ ei ole kauttaviiva lis‰t‰‰n kauttaviiva...
-		if (substr($orders_path, -1) != "/") {
-			$orders_path .= "/";
+		if (substr($ftpget_path, -1) != "/") {
+			$ftpget_path .= "/";
 		}
 
 		if ($login_result) {
-			fwrite($filehandle, "Login was successful! Trying to change directory to $orders_path...\n");
-			$changedir = ftp_chdir($conn_id, $orders_path);
+			fwrite($filehandle, "Login was successful! Trying to change directory to $ftpget_path...\n");
+			$changedir = ftp_chdir($conn_id, $ftpget_path);
 		}
 
 		// haetaan filet active modella
 		if ($changedir) {
 
 			if ($debug != '') {
-				fwrite($filehandle, "Successfully changed working directory to $orders_path!\n");
+				fwrite($filehandle, "Successfully changed working directory to $ftpget_path!\n");
 				fwrite($filehandle, "Changing to passive mode.\n");
 			}
 
@@ -60,21 +60,21 @@
 
 			fwrite($filehandle, "Trying to get the file listing...\n");
 
-			$files = ftp_nlist($conn_id, "*.txt");
+			$files = ftp_nlist($conn_id, ".");
 
 			if ($files) {
 
-				fwrite($filehandle, "We got some files! Lets loop 'em...\n");
+				fwrite($filehandle, "We got some files! Lets loop em...\n");
 
 				foreach ($files as $file) {
 
 					fwrite($filehandle, "File $file\n");
 
-					if (substr($orders_dest, -1) != "/") {
-						$orders_dest .= "/";
+					if (substr($ftpget_dest, -1) != "/") {
+						$ftpget_dest .= "/";
 					}
 
-					$fileget = ftp_get($conn_id, $orders_dest.$file, $file, FTP_ASCII);
+					$fileget = ftp_get($conn_id, $ftpget_dest.$file, $file, FTP_ASCII);
 
 					if ($fileget) {
 						fwrite($filehandle, "File $file was successfully downloaded!\n");
@@ -120,25 +120,24 @@
 			// ncftpput:in exit valuet
 			switch ($palautus) {
 				case  1:
-					$syy = "Could not connect to remote host. ($orders_host)";
+					$syy = "Could not connect to remote host. ($ftpget_host)";
 					break;
 				case  2:
-					$syy = "Could not login to remote host ($conn_id, $orders_user, $orders_pass)";
+					$syy = "Could not login to remote host ($conn_id, $ftpget_user, $ftpget_pass)";
 					break;
 				case  3:
-					$syy = "Changedir failed ($conn_id, $orders_path, ".realpath($orders_path).")";
+					$syy = "Changedir failed ($conn_id, $ftpget_path, ".realpath($ftpget_path).")";
 					break;
 				case  4:
-					$syy = "Getting files failed ($conn_id, $orders_path)";
+					$syy = "Getting files failed ($conn_id, $ftpget_path)";
 					break;
 				default:
 					$syy = t("Tuntematon errorkoodi")." ($palautus)!!";
 			}
-		
+
 			fwrite($filehandle, "Error message: $syy\n");
 		}
 
 		system("rm -f $tmpfile");
 	}
-
 ?>

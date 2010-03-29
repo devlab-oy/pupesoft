@@ -3,8 +3,8 @@
 	$useslave = 1;
 
 	if (isset($_POST["tee"])) {
-		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+		if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+		if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
 	require('../inc/parametrit.inc');
@@ -14,15 +14,47 @@
 		exit;
 	}
 
+
+	if (isset($muutparametrit) and $muutparametrit != '') {
+		$muut = explode('/',$muutparametrit);
+
+		$vva 		= $muut[0];
+		$kka 		= $muut[1];
+		$ppa 		= $muut[2];
+		$vvl 		= $muut[3];
+		$kkl		= $muut[4];
+		$ppl 		= $muut[5];
+	}
+
+	if ($ytunnus != '' or (int) $asiakasid > 0) {
+
+		$muutparametrit = $vva."/".$kka."/".$ppa."/".$vvl."/".$kkl."/".$ppl;
+
+		require ("inc/asiakashaku.inc");
+
+		if ($ytunnus == '') {
+			$tee = "";
+		}
+	}
+
 	echo "<font class='head'>".t("Puutelistaus")."</font><hr>";
 
 	if ($tee != '') {
 
+		if ((int) $asiakasid > 0) {
+			echo "<table><tr><th>".t("Asiakas")."</th><td colspan='3'>$asiakasrow[nimi] $asiakasrow[nimitark]<input type='hidden' name='asiakasid' value='$asiakasid'></td></tr></table><br>";
+
+			$lisaasiakas = " and lasku.liitostunnus='$asiakasid' ";
+		}
+		else {
+			$lisaasiakas = "";
+		}
+		
 		if ($try != '') {
 			$query = "	SELECT
-						round(sum(if(tilausrivi.var='P', tilausrivi.tilkpl*tilausrivi.hinta*(1-(tilausrivi.ale/100))/(1+(tilausrivi.alv/100)), 0)),2) puuteeur,
-						sum(if(tilausrivi.var='P', tilausrivi.tilkpl, 0)) puutekpl,
-						round(sum(if((tilausrivi.var='' or tilausrivi.var='H'), tilausrivi.tilkpl*tilausrivi.hinta*(1-(tilausrivi.ale/100))/(1+(tilausrivi.alv/100)), 0)),2) myyeur,
+						round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl*tilausrivi.hinta*(1-(tilausrivi.ale/100))/(1+(tilausrivi.alv/100)), 0)),2) puuteeur,
+						sum(if (tilausrivi.var='P', tilausrivi.tilkpl, 0)) puutekpl,
+						round(sum(if ((tilausrivi.var='' or tilausrivi.var='H'), tilausrivi.tilkpl*tilausrivi.hinta*(1-(tilausrivi.ale/100))/(1+(tilausrivi.alv/100)), 0)),2) myyeur,
 						tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus, asiakas.asiakasnro
 						FROM tilausrivi
 						LEFT JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
@@ -35,6 +67,7 @@
 						and tilausrivi.osasto 	= '$osasto'
 						and tilausrivi.try		= '$try'
 						and tilausrivi.tyyppi	='L'
+						$lisaasiakas
 						and tuote.status NOT IN ('P','X')
 						GROUP BY tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus
 						HAVING puuteeur <> 0
@@ -42,16 +75,18 @@
 		}
 		else {
 			$query = "	SELECT tilausrivi.osasto, tilausrivi.try,
-						round(sum(if(tilausrivi.var='P', tilausrivi.tilkpl*tilausrivi.hinta*(1-(tilausrivi.ale/100))/(1+(tilausrivi.alv/100)), 0)),2) puuteeur,
-						sum(if(tilausrivi.var='P', tilausrivi.tilkpl, 0)) puutekpl,
-						round(sum(if(tilausrivi.var='' or tilausrivi.var='H', tilausrivi.tilkpl*tilausrivi.hinta*(1-(tilausrivi.ale/100))/(1+(tilausrivi.alv/100)), 0)),2) myyeur
+						round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl*tilausrivi.hinta*(1-(tilausrivi.ale/100))/(1+(tilausrivi.alv/100)), 0)),2) puuteeur,
+						sum(if (tilausrivi.var='P', tilausrivi.tilkpl, 0)) puutekpl,
+						round(sum(if (tilausrivi.var='' or tilausrivi.var='H', tilausrivi.tilkpl*tilausrivi.hinta*(1-(tilausrivi.ale/100))/(1+(tilausrivi.alv/100)), 0)),2) myyeur
 						FROM tilausrivi
+						LEFT JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 						LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 						WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 						and tilausrivi.tyyppi='L'
 						and tilausrivi.laadittu >='$vva-$kka-$ppa 00:00:00'
 						and tilausrivi.laadittu <='$vvl-$kkl-$ppl 23:59:59'
 						and tilausrivi.var in ('P','H','')
+						$lisaasiakas
 						and tuote.status NOT IN ('P','X')
 						GROUP BY tilausrivi.osasto, tilausrivi.try
 						ORDER BY tilausrivi.osasto, tilausrivi.try";
@@ -61,7 +96,7 @@
 		$excelrivi = "";
 		$excelsarake = "";
 
-		if(include('Spreadsheet/Excel/Writer.php')) {
+		if (include('Spreadsheet/Excel/Writer.php')) {
 
 			//keksitään failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
@@ -77,14 +112,14 @@
 
 			$excelrivi = 0;
 
-			$pvm = date(Ymd);
+			$pvm = date("Ymd");
 
 			$worksheet->writeString($excelrivi, 0, t("Puutelistaus"));
 			$worksheet->writeString($excelrivi, 1, $pvm);
 
 			$excelrivi++;
 
-			if(isset($workbook)) {
+			if (isset($workbook)) {
 				$worksheet->writeString($excelrivi, 0, t("Osasto"));
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, 1, t("Tuoteryhmä"));
@@ -182,7 +217,7 @@
 						<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$ospuutepros))."</th>
 						</tr>";
 
-				if(isset($workbook)) {
+				if (isset($workbook)) {
 					$worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteensä").":");
 					$excelsarake++;
 					$excelsarake++;
@@ -209,8 +244,9 @@
 
 			if ($row["myyeur"] > 0)
 				$puutepros = round($row["puuteeur"]/($row["puuteeur"]+$row["myyeur"])*100,2);
-			else
+			else {
 				$puutepros = 100;
+			}
 
 			if ($puutepros == 0) {
 				$vari = "spec";
@@ -219,29 +255,36 @@
 				$vari = "";
 			}
 
-			echo "<tr>
-				<td class='$vari' style='vertical-align:top'>$row[osasto]</td>";
+			echo "<tr><td class='$vari' style='vertical-align:top'>$row[osasto]</td>";
 
-			if(isset($workbook)) {
+			if (isset($workbook)) {
 				$worksheet->writeString($excelrivi, $excelsarake, $row["osasto"]);
 				$excelsarake++;
 			}
 
-			if ($try=='') {
-				echo "<td class='$vari' style='vertical-align:top'><a href='$PHP_SELF?tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&osasto=$row[osasto]&try=$row[try]'>$row[try]</a></td>";
+			if ($try == '') {
+				echo "<td class='$vari' style='vertical-align:top'>";
 
-				if(isset($workbook)) {
+				if ($row["puutekpl"] != 0) {
+					echo "<a name='N_$lask' href='$PHP_SELF?tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&osasto=$row[osasto]&try=$row[try]&asiakasid=$asiakasid&lopetus=$PHP_SELF////tee=$tee//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//asiakasid=$asiakasid///N_$lask'>$row[try]</a>";
+				}
+				else {
+					echo "$row[try]";
+				}
+
+				echo "</td>";
+
+				if (isset($workbook)) {
 					$worksheet->writeString($excelrivi, $excelsarake, $row["try"]);
 					$excelsarake++;
 				}
 			}
 			else {
 				echo "<td class='$vari' style='vertical-align:top'>$row[try]</td>";
-				echo "<td class='$vari' style='vertical-align:top'><a href='asiakasinfo.php?ytunnus=$row[ytunnus]'>$row[ytunnus]</a><br>$row[asiakasnro]</td>";
-				echo "<td class='$vari' style='vertical-align:top'><a href='../tuote.php?tuoteno=".urlencode($row["tuoteno"])."&tee=Z'>$row[tuoteno]</a><br>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
+				echo "<td class='$vari' name='A_$lask' style='vertical-align:top'><a href='asiakasinfo.php?ytunnus=$row[ytunnus]&lopetus=$PHP_SELF////tee=$tee//try=$try//ppa=$ppa//kka=$kka//osasto=$osasto//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//asiakasid=$asiakasid///A_$lask'>$row[ytunnus]</a><br>$row[asiakasnro]</td>";
+				echo "<td class='$vari' name='T_$lask' style='vertical-align:top'><a href='../tuote.php?tuoteno=".urlencode($row["tuoteno"])."&tee=Z&lopetus=$PHP_SELF////tee=$tee//try=$try//osasto=$osasto//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//asiakasid=$asiakasid///T_$lask'>$row[tuoteno]</a><br>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
 
-
-				if(isset($workbook)) {
+				if (isset($workbook)) {
 					$worksheet->writeString($excelrivi, $excelsarake, $row["try"]);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, $row["ytunnus"]);
@@ -258,7 +301,7 @@
 				<td style='text-align:right; vertical-align:top' class='$vari'>".str_replace(".",",",$row['myyeur'])."</td>
 				<td style='text-align:right; vertical-align:top' class='$vari'>".str_replace(".",",",sprintf("%.2f",$puutepros))."</td>";
 
-			if(isset($workbook)) {
+			if (isset($workbook)) {
 				$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",(float)$row['puutekpl']));
 				$excelsarake++;
 				$worksheet->writeString($excelrivi, $excelsarake, str_replace(".",",",$row['puuteeur']));
@@ -278,7 +321,7 @@
 				$tulrow = mysql_fetch_array($tulresult);
 				echo "<td class='$vari' style='vertical-align:top'>". (float)$tulrow['tilattu'] ."</td>";
 
-				if(isset($workbook)) {
+				if (isset($workbook)) {
 					$worksheet->writeString($excelrivi, $excelsarake, (float)$tulrow['tilattu']);
 					$excelsarake++;
 				}
@@ -307,7 +350,7 @@
 
 					echo "<td class='$vari' style='vertical-align:top'>$rekrow[0]</td>";
 
-					if(isset($workbook)) {
+					if (isset($workbook)) {
 						$worksheet->writeString($excelrivi, $excelsarake, $rekrow[0]);
 						$excelsarake++;
 					}
@@ -354,7 +397,7 @@
 
 					$korvaavat_temp = substr($korvaavat_temp, 0, -2);
 
-					if(isset($workbook)) {
+					if (isset($workbook)) {
 						$worksheet->writeString($excelrivi, $excelsarake, $korvaavat_temp);
 					}
 
@@ -364,7 +407,7 @@
 				else {
 					echo "<td class='$vari' style='vertical-align:top'>".t("Ei korvaavia")."!</td>";
 
-					if(isset($workbook)) {
+					if (isset($workbook)) {
 						$worksheet->writeString($excelrivi, $excelsarake, t("Ei korvaavia")."!");
 						$excelsarake++;
 					}
@@ -379,7 +422,7 @@
 						echo "</td>";
 					}
 
-				if(isset($workbook)) {
+				if (isset($workbook)) {
 					$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["tahtituote"]);
 					$excelsarake++;
 					$worksheet->writeString($excelrivi, $excelsarake, $tuoterow["hinnastoon"]);
@@ -422,7 +465,7 @@
 					<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$ospuutepros))."</th>
 					</tr>";
 
-			if(isset($workbook)) {
+			if (isset($workbook)) {
 				$excelsarake = 0;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteensä").":");
 				$excelsarake++;
@@ -448,7 +491,7 @@
 					<th style='text-align:right'>".str_replace(".",",",sprintf("%.2f",$puuteprosyht))."</th>
 					</tr>";
 
-			if(isset($workbook)) {
+			if (isset($workbook)) {
 				$excelsarake = 0;
 				$worksheet->writeString($excelrivi, $excelsarake, t("Kaikki yhteensä").":");
 				$excelsarake++;
@@ -467,14 +510,14 @@
 
 		echo "</table>";
 
-		if(isset($workbook)) {
+		if (isset($workbook)) {
 
 			// We need to explicitly close the workbook
 			$workbook->close();
 
 			$niminimi = date("Ymd")."-".t("Puutelistaus").".xls";
 
-			echo "<br><font class='message'>".t("Luotiin aineisto")." ($niminimi) ".t("joka sisältää")." $excelrivi ".t("riviä")."</font><br>";
+			echo "<br><font class='message'>".t("Luotiin aineisto")." ($niminimi) ".t("joka sisältää")." ".($excelrivi-2)." ".t("riviä")."</font><br>";
 
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna tiedosto koneellesi").":</th>";
@@ -488,8 +531,8 @@
 	}
 
 	//Käyttöliittymä
-	echo "<br>";
-	echo "<table><form method='post' action='$PHP_SELF'>";
+	echo "<br><form method='post' action='$PHP_SELF'>";
+	echo "<table>";
 
 	// ehdotetaan 7 päivää taaksepäin
 	if (!isset($kka))
@@ -514,8 +557,18 @@
 			</tr><tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
 			<td><input type='text' name='ppl' value='$ppl' size='3'></td>
 			<td><input type='text' name='kkl' value='$kkl' size='3'></td>
-			<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
-	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table>";
+			<td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
+
+	if ((int) $asiakasid > 0) {
+		echo "<th>".t("Asiakas")."</th><td colspan='3'>$asiakasrow[nimi] $asiakasrow[nimitark]<input type='hidden' name='asiakasid' value='$asiakasid'></td></tr>";
+	}
+	else {
+		echo "<th>".t("Valitse asiakas")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='20'></td></tr>";
+	}
+
+	echo "</table>";
+	echo "<br><input type='submit' value='".t("Aja raportti")."'>";
+	echo "</form>";
 
 	require ("../inc/footer.inc");
 

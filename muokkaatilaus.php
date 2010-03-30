@@ -936,7 +936,7 @@
 			$miinus = 3;
 		}
 		elseif ($toim == 'OSTO') {
-			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus,
+			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, if(kuka1.extranet is null, 0, if(kuka1.extranet != '', 1, 0)) kuka_ext, 
 							(SELECT count(*)
 							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)
 							WHERE aputilausrivi.yhtio = lasku.yhtio
@@ -952,12 +952,12 @@
 						and lasku.alatila	= ''
 						and lasku.tilaustyyppi	= ''
 						$haku
-						ORDER by lasku.luontiaika desc
+						ORDER by kuka_ext, lasku.luontiaika desc
 						$rajaus";
 			$miinus = 4;
 		}
 		elseif ($toim == 'OSTOSUPER') {
-			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus,
+			$query = "	SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, 
 							(SELECT count(*)
 							FROM tilausrivi AS aputilausrivi use index (yhtio_otunnus)
 							WHERE aputilausrivi.yhtio = tilausrivi.yhtio
@@ -1096,6 +1096,23 @@
 				}
 			}
 
+			if ($toim == 'OSTO') {
+				$ext_chk = '';
+				$temp_row = mysql_fetch_assoc($result);
+
+				if ($temp_row['kuka_ext'] != '' and $temp_row['kuka_ext'] == 0) {
+					echo "<br/><br/><font class='head'>",t("Myyjien ostotilaukset"),"</font><br/>";
+					$ext_chk = $temp_row['kuka_ext'];
+				}
+				elseif ($temp_row['kuka_ext'] != '' and $temp_row['kuka_ext'] == 1) {
+					echo "<br/><br/><font class='head'>",t("Extranet-käyttäjien ostotilaukset"),"</font><br/>";
+					$ext_chk = $temp_row['kuka_ext'];
+				}
+
+				unset($temp_row);
+				mysql_data_seek($result, 0);
+			}
+
 			echo "<table>";
 			echo "<tr>";
 
@@ -1113,6 +1130,29 @@
 			$lisattu_tunnusnippu  = array();
 
 			while ($row = mysql_fetch_assoc($result)) {
+
+				if ($toim == 'OSTO' and $row['kuka_ext'] != '' and $ext_chk != '' and (int) $ext_chk != (int) $row['kuka_ext']) {
+					echo "</table>";
+					echo "<br/><br/><font class='head'>";
+
+					if ((int) $row['kuka_ext'] == 1) {
+						echo t("Extranet-käyttäjien ostotilaukset");
+					}
+					else {
+						echo t("Myyjien ostotilaukset");
+					}
+
+					$ext_chk = '';
+					echo "</font><br/>";
+
+					echo "<table>";
+
+					for ($i=0; $i < mysql_num_fields($result)-$miinus; $i++) {
+						echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
+					}
+
+					echo "<th align='left'>".t("tyyppi")."</th><td class='back'></td></tr>";
+				}
 
 				if ($toim == 'HYPER') {
 

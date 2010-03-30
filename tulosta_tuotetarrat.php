@@ -1,6 +1,10 @@
 <?php
 	//$toim='YKS' tarkottaa yksinkertainen ja silloin ei v‰litet‰ onko tuotteella eankoodia vaan tulostetaan suoraan tuoteno viivakoodiin
 
+	if ($_REQUEST['malli'] == 'PDF') {
+		$_REQUEST['nayta_pdf'] = 1;
+	}
+
 	require("inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Tulosta tuotetarroja")."</font><hr>";
@@ -90,6 +94,9 @@
 					elseif ($malli == 'Intermec') {
 						require("inc/tulosta_tuotetarrat_intermec.inc");
 					}
+					elseif ($malli == 'PDF') {
+						require("inc/tulosta_tuotetarrat_pdf.inc");
+					}
 				}
 			}
 			else {
@@ -143,9 +150,10 @@
 
 	//t‰h‰n arrayhin pit‰‰ lis‰t‰ uusia malleja jos tehd‰‰n uusia inccej‰ ja ylemp‰n‰ tehd‰ iffej‰.
 	$pohjat = array();
-	$pohjat[]='Tec';
-	$pohjat[]='Intermec';
-	$pohjat[]='Zebra';
+	$pohjat[] = 'Tec';
+	$pohjat[] = 'Intermec';
+	$pohjat[] = 'Zebra';
+	$pohjat[] = 'PDF';
 
 	echo "<td><select name='malli'>";
 	echo "<option value='$kirow[tunnus]'>".t("Ei mallia")."</option>";

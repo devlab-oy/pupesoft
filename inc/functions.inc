@@ -8214,4 +8214,52 @@ if (!function_exists("pupesoft_cleanstring")) {
 	}
 }
 
+if (!function_exists("viivakoodi")) {
+	function viivakoodi($viivakoodi, $encoding = "ean", $leveys = 180, $korkeus = 40, $teksti = "") {
+
+		if (trim($viivakoodi) == '') return FALSE;
+
+		$leveys = (int) $leveys;
+		$korkeus = (int) $korkeus;
+
+		if ($leveys <= 0 or $korkeus <= 0) {
+			return FALSE;
+		}
+
+		$encoding = trim(strtolower($encoding));
+
+		switch ($encoding) {
+			case 'ean':
+			case 'upc':
+			case 'isbn':
+			case 'code 128-b':
+			case 'code 128-c':
+			case 'code 128 raw':
+			case 'code 39':
+			case 'interleaved 2 of 5':
+			case 'code 128':
+			case 'codabar':
+			case 'plessey':
+			case 'msi':
+			case 'code 93':
+				break;
+			default:
+				return FALSE;
+		}
+
+		$lisa = $teksti != "" ? "" : "-n";
+
+		ob_start();
+		passthru("barcode -b $viivakoodi -e $encoding -u mm -g $leveys".x."$korkeus -E $lisa | convert -fill white ps:- jpg:-", $return);
+		$barcode = ob_get_contents();
+		ob_end_clean();
+
+		if ($return === FALSE) {
+			return FALSE;
+		}
+
+		return $barcode;
+	}
+}
+
 ?>

@@ -182,10 +182,21 @@
 
 					echo "$rivirow[tuoteno]: Poistetaan tapahtuma!<br>";
 
+					// onko tämä tehdaslisävaruste
+					if ($rivirow["perheid2"] != 0 and $rivirow["perheid2"] != $rivirow["tunnus"]) {
+						$tehdaslisavaruste_lisa1 = ", saldo_varattu = saldo_varattu - $rivirow[kpl] ";
+						$tehdaslisavaruste_lisa2 = ", saldo_varattu = $rivirow[kpl] ";
+					}
+					else {
+						$tehdaslisavaruste_lisa1 = "";
+						$tehdaslisavaruste_lisa2 = "";
+					}
+					
 					// Laitetaan takas saldoille
 					$query = "	UPDATE tuotepaikat
 								set saldo = saldo - $rivirow[kpl],
 								saldoaika   = now()
+								$tehdaslisavaruste_lisa1
 								where yhtio	  	  = '$kukarow[yhtio]'
 								and tuoteno	  	  = '$rivirow[tuoteno]'
 								and hyllyalue 	  = '$rivirow[hyllyalue]'
@@ -200,6 +211,7 @@
 						$query = "	UPDATE tuotepaikat
 									set saldo = saldo - $rivirow[kpl],
 									saldoaika   = now()
+									$tehdaslisavaruste_lisa1
 									where yhtio = '$kukarow[yhtio]' and
 									tuoteno     = '$rivirow[tuoteno]' and
 									oletus     != ''
@@ -223,6 +235,7 @@
 										tuoteno     = '$rivirow[tuoteno]',
 										oletus      = 'X',
 										saldo       = '$rivirow[kpl]',
+										$tehdaslisavaruste_lisa2
 										saldoaika   = now(),
 										hyllyalue   = '$hyllyrow[alkuhyllyalue]',
 										hyllynro    = '$hyllyrow[alkuhyllynro]',

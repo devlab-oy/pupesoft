@@ -57,10 +57,10 @@
 		}
 
 		if ($koodi == 'eankoodi') {
-			$data = viivakoodi($eankoodirow['eankoodi'], "ean", 450, 145, "zz");
+			$data = viivakoodi($eankoodirow['eankoodi'], "ean", 450, 130, "zz");
 		}
 		else {
-			$data = viivakoodi($eankoodirow["$koodi"], "codabar", 450, 145, "zz");
+			$data = viivakoodi($eankoodirow["$koodi"], "codabar", 450, 130, "zz");
 		}
 
 		$image = $pdf->jfif_embed($data);
@@ -69,7 +69,7 @@
 			$logoparam['scale'] = 0.1;
 
 			// piirretään viivakoodi paprulle
-			$pdf->image_place($image, mm_pt($y - 24), mm_pt($x), $firstpage, $logoparam); // Y, X
+			$pdf->image_place($image, mm_pt($y - 22.5), mm_pt($x), $firstpage, $logoparam); // Y, X
 		}
 
 		$x += 68; // orig. 61

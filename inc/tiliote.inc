@@ -295,7 +295,7 @@
 
 			if (mysql_num_rows($suoasiresult) == 1) {
 				$suoasirow = mysql_fetch_array ($suoasiresult);
-				echo "<font class='message'><a href='".$palvelin2."myyntires/maksunsyotto.php?asiakasid=$suoasirow[tunnus]&ytunnus=$suoasirow[ytunnus]&summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z'>".t("Myyntisuoritus")." ".substr($suoasirow["nimi"], 0, 34)."</a></font><br>";
+				echo "<font class='message'><a href='".$palvelin2."myyntires/maksunsyotto.php?asiakasid=$suoasirow[tunnus]&ytunnus=$suoasirow[ytunnus]&summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten'>".t("Myyntisuoritus")." ".substr($suoasirow["nimi"], 0, 34)."</a></font><br>";
 				$boob = 1;
 			}
 
@@ -304,7 +304,7 @@
 			}
 
 			//	Annetaan Muu aina
-			echo "<font class='message'><a href='".$palvelin2."myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z'>".t("Myyntisuoritus muu")." </a></font>";
+			echo "<font class='message'><a href='".$palvelin2."myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten'>".t("Myyntisuoritus muu")." </a></font>";
 
 		}
 		echo "</td><td>";
@@ -593,12 +593,13 @@
 				case '00' :
 				   	$selite = "";
 				   	$luottokuntatieto = "";
+					$selite_maksuavarten = htmlspecialchars(strip_tags($arvo));
 
 					for ($i = 0; $i < 13; $i++) {
 				   		$osa = trim(substr($arvo, $i*35, 35));
 
 						if (strlen($osa) > 0) {
-				   			$selite .= $osa . "<br>";
+				   			$selite .= $osa . "<br>";							
 				   		}
 						// Luottokunnan käsittelyä varten
 						if ($i == 1) $luottokuntatieto = $osa;

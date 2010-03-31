@@ -261,7 +261,7 @@ if ($ytunnus != '' and $tee == "ETSI") {
 	}
 
 	// otetaan muutparametrit takas
-	list ($tiliote,$summa,$ppa,$kka,$vva,$mtili) = explode("#", $muutparametrit);
+	list ($tiliote,$summa,$ppa,$kka,$vva,$mtili, $selite) = explode("#", $muutparametrit);
 }
 
 
@@ -523,7 +523,7 @@ if ($tee == "" and $ytunnus == "") {
 	echo "<br><form action = '$PHP_SELF' method='post' name='maksaja'>
 			".t("Maksaja").":
 			<input type='text' name='ytunnus'>
-			<input type='hidden' name='muutparametrit' value='$tiliote#$summa#$ppa#$kka#$vva#$mtili'>
+			<input type='hidden' name='muutparametrit' value='$tiliote#$summa#$ppa#$kka#$vva#$mtili#$selite'>
 			<input type='hidden' name='tee' value='ETSI'>
 			<input type='submit' value='".t("Etsi")."'></form>";
 

@@ -116,11 +116,6 @@
 				</form><br><br>";
 	}
 	elseif ($kukarow["kuka"] != "" and $laskurow["tila"] != "" and $toim_kutsu != "") {
-
-		if ($kukarow["extranet"] != "") {
-			$toim_kutsu = "EXTRANET";
-		}
-
 		echo "	<form method='post' action='".$palvelin2."tilauskasittely/tilaus_myynti.php'>
 				<input type='hidden' name='toim' value='$toim_kutsu'>
 				<input type='hidden' name='aktivoinnista' value='true'>
@@ -190,7 +185,7 @@
 
 		echo "<font class='message'>".t("Tuotetiedot")."</font><hr>";
 
-		$query = "	SELECT tuote.*, 
+		$query = "	SELECT tuote.*,
 					if(tuote.status = '', 'A', tuote.status) status,
 					date_format(tuote.muutospvm, '%Y-%m-%d') muutos, date_format(tuote.luontiaika, '%Y-%m-%d') luonti,
 					group_concat(distinct concat(tuotteen_toimittajat.toimittaja, ' ', toimi.nimi) order by tuotteen_toimittajat.tunnus separator '<br>') toimittaja,

@@ -192,7 +192,9 @@ if ($tee == 'TRATTAA')  {
 	<tr><th>".t("Nimi")."</th><td>$asiakastiedot[nimi]</td></tr>
 	<tr><th>".t("Nimitark")."</th><td>$asiakastiedot[nimitark]</td></tr>
 	<tr><th>".t("Osoite")."</th><td>$asiakastiedot[osoite]</td></tr>
-	<tr><th>".t("Postinumero")."</th><td>$asiakastiedot[postino] $asiakastiedot[postitp]</td></tr>";
+	<tr><th>".t("Postinumero")."</th><td>$asiakastiedot[postino] $asiakastiedot[postitp]</td></tr>
+	<tr><th>".t("Fakta")."</th><td>$asiakastiedot[fakta]</td></tr>";
+
 	echo "</table>";
 
 	echo "</td><td valign='top' class='back'>";

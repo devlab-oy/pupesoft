@@ -311,7 +311,7 @@
 
 		if ($kuittikoodi==' ') {
 			if ($eiselitetta==1) $selite='';
-			echo "<font class='message'><a href='".$palvelin2."tiliotesaannot.php?tee=U&pankkitili=$yritirow[tilino]&koodi=$koodi&koodiselite=$koodiselite&nimitieto=$maksaa&selite=$selite&pvm=$pvm'>".t("Tee tiliointisääntö")."</a></font>";
+			echo "<font class='message'><a href='".$palvelin2."tiliotesaannot.php?tee=U&pankkitili=$yritirow[tilino]&koodi=$koodi&koodiselite=$koodiselite&nimitieto=$maksaa&selite=$selite&pvm=$pvm'>".t("Tee tiliotesääntö")."</a></font>";
 		}
 
 		echo "</td></tr>";

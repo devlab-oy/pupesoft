@@ -28,6 +28,8 @@
 	$x = 15; // orig. 23
 	$y = 285;
 
+	$koodi = $toim == 'YKS' ? 'tuoteno' : 'eankoodi';
+
 	for ($i = 1; $i < 25; $i++) {
 
 		$nimitys1 = $nimitys2 = '';
@@ -46,17 +48,20 @@
 			}
 
 			$pdf->draw_text(mm_pt($x), mm_pt($y - 4), $nimitys2, $firstpage, $ff_font);
-			$pdf->draw_text(mm_pt($x), mm_pt($y - 8), t("Tuotenumero"), $firstpage, $norm);
-			$pdf->draw_text(mm_pt($x), mm_pt($y - 12), $eankoodirow['tuoteno'], $firstpage, $norm);
+			$pdf->draw_text(mm_pt($x), mm_pt($y - 8), t("Tuotenumero")." $eankoodirow[tuoteno]", $firstpage, $norm);
 		}
 		else {
 			list($ff_string, $ff_font) = pdf_fontfit($eankoodirow['nimitys'], mm_pt(50), $pdf, $norm);
 			$pdf->draw_text(mm_pt($x), mm_pt($y), $ff_string, $firstpage, $ff_font);		
-			$pdf->draw_text(mm_pt($x), mm_pt($y - 4), t("Tuotenumero"), $firstpage, $norm);
-			$pdf->draw_text(mm_pt($x), mm_pt($y - 8), $eankoodirow['tuoteno'], $firstpage, $norm);
+			$pdf->draw_text(mm_pt($x), mm_pt($y - 4), t("Tuotenumero")." $eankoodirow[tuoteno]", $firstpage, $norm);
 		}
 
-		$data = viivakoodi($eankoodirow['eankoodi'], "ean", 300, 100, "zz");
+		if ($koodi == 'eankoodi') {
+			$data = viivakoodi($eankoodirow['eankoodi'], "ean", 450, 155, "zz");
+		}
+		else {
+			$data = viivakoodi($eankoodirow["$koodi"], "codabar", 450, 160, "zz");
+		}
 
 		$image = $pdf->jfif_embed($data);
 
@@ -64,7 +69,7 @@
 			$logoparam['scale'] = 0.1;
 
 			// piirretään viivakoodi paprulle
-			$pdf->image_place($image, mm_pt($y - 24), mm_pt($x), $firstpage, $logoparam); // Y, X
+			$pdf->image_place($image, mm_pt($y - 25), mm_pt($x), $firstpage, $logoparam); // Y, X
 		}
 
 		$x += 68; // orig. 61

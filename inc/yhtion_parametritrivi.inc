@@ -934,9 +934,9 @@
 
 		$sel = array($trow[$i] => "SELECTED");
 
-		$ulos .= "<option value = ''>".t("Tilaukset splitataan varastoittain")."";
-		$ulos .= "<option value = 'E' $sel[E]>".t("Tilauksia ei oletuksena splitata varastoittain")."";
-		$ulos .= "<option value = 'K' $sel[K]>".t("Tilaukset splitataan keräyspäivien mukaan toimituksiin")."";
+		$ulos .= "<option value = ''>".t("Tilaukset jaetaan osiin varastoittain")."</option>";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Tilauksia ei jaeta osiin")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Tilaukset jaetaan osiin keräyspäivän mukaan")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

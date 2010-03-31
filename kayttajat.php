@@ -88,7 +88,7 @@
 		$query = "DELETE from kuka WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		$query = "DELETE from oikeu WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
+		$query = "DELETE from oikeu WHERE kuka = '$selkuka' and kuka != '' and profiili = '' and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<b>".t("Käyttäjä")." $selkuka ".t("poistettu")."!</b><br>";
@@ -105,7 +105,7 @@
 					WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		$query = "DELETE from oikeu WHERE kuka='$selkuka' and yhtio='$kukarow[yhtio]'";
+		$query = "DELETE from oikeu WHERE kuka = '$selkuka' and kuka != '' and profiili = '' and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<b>".t("Käyttäjän")." $selkuka ".t("käyttöoikeudet")." ".t("poistettu")."!</b><br>";
@@ -257,7 +257,7 @@
 
 			//poistetaan käyttäjän vanhat profiilioikeudet
 			$query = "	DELETE FROM oikeu
-						WHERE yhtio='$yhtio' and kuka='$ktunnus' and lukittu=''";
+						WHERE yhtio='$yhtio' and kuka='$ktunnus' and kuka!='' and profiili='' and lukittu=''";
 			$pres = mysql_query($query) or pupe_error($query);
 
 			if (count($profiilit) > 0 and $profiilit[0] !='') {
@@ -424,7 +424,11 @@
 
 			//poistetaan käyttäjän vanhat profiilioikeudet
 			$query = "	DELETE FROM oikeu
-						WHERE yhtio='$kukarow[yhtio]' and kuka='$kuka' and lukittu=''";
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and kuka = '$kuka' 
+						and kuka != '' 
+						and profiili = '' 
+						and lukittu = ''";
 			$pres = mysql_query($query) or pupe_error($query);
 
 			if (count($profiilit) > 0 and $profiilit[0] != '') {
@@ -432,7 +436,9 @@
 				foreach($profiilit as $prof) {
 					$query = "	SELECT *
 								FROM oikeu
-								WHERE yhtio='$kukarow[yhtio]' and kuka='$prof' and profiili='$prof'";
+								WHERE yhtio = '$kukarow[yhtio]' 
+								and kuka = '$prof' 
+								and profiili = '$prof'";
 					$pres = mysql_query($query) or pupe_error($query);
 
 					while ($trow = mysql_fetch_array($pres)) {
@@ -915,7 +921,11 @@
 					echo "<tr><th align='left'>".t("Oletusohjelma").":</th><td><select name='oletus_ohjelma'>";
 					echo "<option value=''>".t("Ei oletusta")."</option>";
 
-					$query  = "SELECT distinct concat_ws('##',sovellus,nimi,alanimi) nimi, nimitys, sovellus FROM oikeu WHERE yhtio='$kukarow[yhtio]' and kuka='$krow[kuka]' ORDER by sovellus, nimitys";
+					$query  = "	SELECT distinct concat_ws('##',sovellus,nimi,alanimi) nimi, nimitys, sovellus 
+								FROM oikeu 
+								WHERE yhtio = '$kukarow[yhtio]' 
+								and kuka = '$krow[kuka]' 
+								ORDER by sovellus, nimitys";
 					$vares = mysql_query($query) or pupe_error($query);
 
 					while ($varow = mysql_fetch_array($vares)) {
@@ -1042,7 +1052,9 @@
 
 				$query = "	SELECT distinct profiili
 							FROM oikeu
-							WHERE yhtio='$kukarow[yhtio]' and profiili!='' $andextra
+							WHERE yhtio='$kukarow[yhtio]' 
+							and profiili!='' 
+							$andextra
 							ORDER BY profiili";
 				$pres = mysql_query($query) or pupe_error($query);
 
@@ -1092,7 +1104,12 @@
 			echo "</td>";
 
 			if ($toim == 'extranet') {
-				$queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='extranet_kayttajan_lisatiedot' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
+				$queryoik = "	SELECT tunnus 
+								from oikeu 
+								where nimi like '%yllapito.php' 
+								and alanimi = 'extranet_kayttajan_lisatiedot' 
+								and kuka = '$kukarow[kuka]' 
+								and yhtio = '$yhtiorow[yhtio]'";
 				$res = mysql_query($queryoik) or pupe_error($queryoik);
 
 				if (mysql_num_rows($res) > 0) {

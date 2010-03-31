@@ -3,7 +3,6 @@
 
 	echo "<font class='head'>".t("K‰ytt‰j‰profiilit").":</font><hr>";
 
-
 	//tehd‰‰n tsekki, ett‰ ei tehd‰ profiilia samannimiseksi kuin joku k‰ytt‰j‰
 	if ($profiili != '') {
 		$query = "	SELECT nimi
@@ -18,35 +17,37 @@
 		}
 	}
 
+	if ($tee == 'POISTA' and $profiili != "") {
+		$query = "	DELETE
+					FROM oikeu
+					WHERE yhtio  = '$kukarow[yhtio]'
+					and kuka     = '$profiili'  
+					and profiili = '$profiili' 
+					and lukittu  = ''";
+		$result = mysql_query($query) or pupe_error($query);
 
-	if ($tee=='POISTA') {
-		if ($profiili != '') {
-			$query = "	DELETE
-						FROM oikeu
-						WHERE yhtio='$kukarow[yhtio]' and profiili='$profiili' and lukittu = ''";
-			$result = mysql_query($query) or pupe_error($query);
+		$maara = mysql_affected_rows();
 
-			$maara = mysql_affected_rows();
+		echo "<font class='message'>".t("Poistettiin")." $maara ".t("rivi‰")."</font><br>";
 
-			echo "<font class='message'>".t("Poistettiin")." $maara ".t("rivi‰")."</font><br>";
-
-			$profiili = "";
-		}
-
+		$profiili = "";
 		$tee = '';
 	}
 
-
 	// tehd‰‰n oikeuksien p‰ivitys
-	if ($tee == 'PAIVITA') {
+	if ($tee == 'PAIVITA' and $profiili != "") {
 
-		// poistetaan ihan aluksi kaikki.. iiik.
+		// poistetaan ihan aluksi kaikki.
 		$query = "	DELETE
 					FROM oikeu
-					WHERE yhtio='$kukarow[yhtio]' and kuka = '$profiili' and profiili='$profiili'";
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and kuka = '$profiili' 
+					and profiili = '$profiili'";
+		
 		if ($sovellus != '') {
 			$query .= " and sovellus='$sovellus'";
 		}
+		
 		$result = mysql_query($query) or pupe_error($query);
 
 		// sitten tutkaillaan onko jotain ruksattu...
@@ -112,7 +113,8 @@
 		//p‰ivitet‰‰n k‰ytt‰jien profiilit (joilla on k‰ytˆss‰ t‰m‰ profiili)
 		$query = "	SELECT *
 					FROM kuka
-			 		WHERE yhtio='$kukarow[yhtio]' and profiilit like '%$profiili%'";
+			 		WHERE yhtio = '$kukarow[yhtio]' 
+					and profiilit like '%$profiili%'";
 		$kres = mysql_query($query) or pupe_error($query);
 
 		while ($krow = mysql_fetch_array($kres)) {
@@ -131,7 +133,11 @@
 				if ($triggeri == "HAPPY") {
 					//poistetaan k‰ytt‰j‰n vanhat
 					$query = "	DELETE FROM oikeu
-								WHERE yhtio='$kukarow[yhtio]' and kuka='$krow[kuka]' and lukittu=''";
+								WHERE yhtio = '$kukarow[yhtio]' 
+								and kuka = '$krow[kuka]' 
+								and kuka != ''
+								and profiili = ''
+								and lukittu = ''";
 					$pres = mysql_query($query) or pupe_error($query);
 
 					//k‰yd‰‰n uudestaan profiili l‰pi

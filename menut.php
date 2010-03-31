@@ -10,13 +10,13 @@
 	// Synkronoidaan kahden firman menut
 	if (isset($synkronoi) and count($syncyhtiot) > 1) {
 		
-		foreach($syncyhtiot as $yhtio) {
+		foreach ($syncyhtiot as $yhtio) {
 			$yht .= "'$yhtio',";
 		}
 		$yht = substr($yht,0,-1);
 	
 		if ($sovellus != '') {
-			$lisa = " and sovellus	= '$sovellus' ";
+			$lisa = " and sovellus = '$sovellus' ";
 		}
 		else {
 			$lisa = "";
@@ -24,7 +24,7 @@
 
 		$query = "	SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys) jarjestys, min(jarjestys2) jarjestys2, max(hidden) hidden
 					FROM oikeu
-					WHERE oikeu.yhtio in ($yht)
+					WHERE yhtio in ($yht)
 					and kuka = ''
 					$lisa
 					GROUP BY sovellus, nimi, alanimi
@@ -34,8 +34,8 @@
 		//poistetaan molemilta yhtiöiltä tämä menu
 		$query = "	DELETE
 					FROM oikeu
-					WHERE oikeu.yhtio in ($yht)
-					and kuka		= ''
+					WHERE yhtio in ($yht)
+					and kuka = ''
 					$lisa";
 		$deleteresult = mysql_query($query) or pupe_error($query);
 
@@ -62,7 +62,7 @@
 				$jarj2 += 10;
 			}
 
-			foreach($syncyhtiot as $uusiyhtio) {
+			foreach ($syncyhtiot as $uusiyhtio) {
 				$query = "	INSERT into oikeu
 							SET
 							kuka		= '',
@@ -140,7 +140,7 @@
 		
 		$query = "	SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys)-1 jarjestys, min(jarjestys2) jarjestys2, max(hidden) hidden
 					FROM oikeu
-					WHERE oikeu.yhtio in ($yht)
+					WHERE yhtio in ($yht)
 					and kuka = ''
 					$lisa
 					GROUP BY sovellus, nimi, alanimi
@@ -306,7 +306,9 @@
 		echo "<input type='hidden' name='tunnus' value='$tunnus'>";
 
 		if ($tunnus > 0) {
-			$query  = "select * from oikeu where tunnus='$tunnus'";
+			$query  = "	SELECT * 
+						from oikeu 
+						where tunnus='$tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$row = mysql_fetch_array($result);
 
@@ -364,7 +366,9 @@
 
 	if ($tee == 'POISTA') {
 		// haetaan poistettavan rivin alkuperäiset tiedot
-		$query  = "select * from oikeu where tunnus='$tunnus'";
+		$query  = "	SELECT * 
+					from oikeu 
+					where tunnus='$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 1) {
@@ -522,7 +526,8 @@
 				else {
 					$query	= "	SELECT sovellus, nimi, alanimi, nimitys, jarjestys, jarjestys2, hidden, tunnus
 								from oikeu
-								where kuka='' and yhtio='$yhtio'";
+								where kuka = '' 
+								and yhtio = '$yhtio'";
 
 					if ($sovellus != '') {
 						$query .= " and sovellus='$sovellus'";

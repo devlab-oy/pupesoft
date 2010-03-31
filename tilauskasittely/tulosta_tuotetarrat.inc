@@ -3,12 +3,13 @@
 	//Ohjelma vatii muuttujan $otunnus joka viittaa ostolaskuun johon rivit on kohdistettu.
 
 	$query = "	SELECT tuote.tuoteno, tuote.yksikko, if(tuote.tarrakpl>0,tuote.tarrakpl,1) tarrakpl, tilausrivi.varattu+tilausrivi.kpl varattu, tuote.tarrakerroin
-				FROM tilausrivi, tuote
-				WHERE tilausrivi.uusiotunnus = '$otunnus' and tilausrivi.tuoteno=tuote.tuoteno
-				and tuote.yhtio='$kukarow[yhtio]' and tilausrivi.yhtio='$kukarow[yhtio]'
+				FROM tilausrivi
+				JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
+				WHERE tilausrivi.uusiotunnus = '$otunnus' 
+				and tilausrivi.yhtio='$kukarow[yhtio]'
 				ORDER BY tuote.tuoteno";
 	$res= mysql_query($query) or pupe_error($query);
-	//echo "$query<br>";
+	
 	list($usec, $sec) = explode(' ', microtime());
 	mt_srand((float) $sec + ((float) $usec * 100000));
 	$filenimi = "/tmp/Tuotetarrat-".md5(uniqid(mt_rand(), true)).".txt";
@@ -68,18 +69,28 @@
 		$ctype = "TEXT";
 		$kutsu = "tuotetarrat-".date("Y-m-d").".txt";
 		require("inc/sahkoposti.inc");
+		
+		//p‰‰dyt‰‰n taas selailemaan toimittajia
+		echo t("Tuotetarrat tulostuu")."...<br>";
 	}
 	else {
 		//paperilista pit‰‰ saada kauniiksi
 		$line = exec("a2ps -o ".$filenimi.".ps --no-header --columns=1 -R --medium=a4 --chars-per-line=75 --margin=0 --borders=0 $filenimi");
-		//itse print komento tulee valitse_tulosin.incilt‰...
-		$line = exec("$komento[Tuotetarrat] ".$filenimi.".ps");
+		
+		if ($tee == 'NAYTATILAUS') {
+			//Tyˆnnet‰‰n tuo pdf vaan putkeen!
+			echo file_get_contents($filenimi.".ps");
+		}
+		else {				
+			//itse print komento tulee valitse_tulosin.incilt‰...
+			$line = exec("$komento[Tuotetarrat] ".$filenimi.".ps");
+			
+			//p‰‰dyt‰‰n taas selailemaan toimittajia
+			echo t("Tuotetarrat tulostuu")."...<br>";
+		}
 		system("rm -f ".$filenimi.".ps");
 	}
 
 	system("rm -f $filenimi");
-
-	//p‰‰dyt‰‰n taas selailemaan toimittajia
-	echo t("Tuotetarrat tulostuu")."...<br>";
-
+	
 ?>

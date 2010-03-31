@@ -54,10 +54,6 @@
 
 		exit;
 	}
-	elseif ($toim == "OKO") {
-		echo "<font class='head'>".t("OKO Saatavarahoitus siirtotiedosto").":</font><hr><br>";
-		$factoringyhtio = "OKO";
-	}
 	else {
 		echo "<font class='head'>".t("Svea Factoring siirtotiedosto").":</font><hr><br>";
 		$factoringyhtio = "SVEA";

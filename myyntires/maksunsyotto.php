@@ -3,6 +3,13 @@
 require ("../inc/parametrit.inc");
 require_once ("inc/tilinumero.inc");
 
+if ($livesearch_tee == "ASIAKASHAKU") {
+	livesearch_asiakashaku();
+	exit;
+}
+
+enable_ajax();
+
 if ($tee != "CHECK" or $tiliote != 'Z') {
 	echo "<font class='head'>".t("Suorituksen käsinsyöttö")."</font><hr>";
 }
@@ -236,13 +243,23 @@ if ($tee == "SYOTTO") {
 
 }
 
-if ($ytunnus != '' and $tee == "ETSI") {
+if (($ytunnus != "" or $asiakasid != "") and $tee == "ETSI") {
 
 	$laskunro = $ytunnus; // haku talteen
 
+	if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE) {
+		$ytunnus = $asiakasid;
+		$asiakasid = "";
+	}
+
+	if ($ytunnus == "" and $asiakasid != "" and !is_numeric($asiakasid)) {
+		$ytunnus = $asiakasid;
+		$asiakasid = "";
+	}
+
 	require ("inc/asiakashaku.inc");
 	$tee = "";
-
+	
 	// jos ei löytynyt ytunnuksella kokeillaan laskunumerolla
 	if ($ytunnus == "" and is_numeric($laskunro)) {
 		$query = "	SELECT liitostunnus
@@ -520,15 +537,19 @@ if ($ytunnus != '' and $tee == "") {
 
 if ($tee == "" and $ytunnus == "") {
 	echo "<font class='message'>Voit etsiä maksajaa nimen, ytunnuksen tai laskunumeron perusteella.</font><br>";
-	echo "<br><form action = '$PHP_SELF' method='post' name='maksaja'>
-			".t("Maksaja").":
-			<input type='text' name='ytunnus'>
-			<input type='hidden' name='muutparametrit' value='$tiliote#$summa#$ppa#$kka#$vva#$mtili#$selite'>
-			<input type='hidden' name='tee' value='ETSI'>
-			<input type='submit' value='".t("Etsi")."'></form>";
+	echo "<br>";
+	echo t("Maksaja").": ";
+	echo "<form action = '$PHP_SELF' method='post' name='maksaja'>";
+	echo livesearch_kentta("maksaja", "ASIAKASHAKU", "asiakasid", 300);
+	echo "<input type='hidden' name='ytunnus' value=''>";
+	echo "<input type='hidden' name='tee' value='ETSI'>";
+	echo "<input type='hidden' name='muutparametrit' value='$tiliote#$summa#$ppa#$kka#$vva#$mtili#$selite'>";
+	echo "<br>";
+	echo "<input type='submit' value='".t("Etsi")."'>";
+	echo "</form>";
 
 	$formi = "maksaja";
-	$kentta = "ytunnus";
+	$kentta = "asiakasid";
 }
 
 require ("inc/footer.inc");

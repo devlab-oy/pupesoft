@@ -33,12 +33,25 @@ if ($kuka_check_row['yhtio'] != $liiterow['yhtio'] and $liiterow['liitos'] != 'k
 
 if (mysql_num_rows($liiteres) > 0) {
 
+	// Kerrotaan selaimelle, että tämä on tiedosto
+	if (ini_get('zlib.output_compression')) {
+		ini_set('zlib.output_compression', 'Off');
+	}
 
+	header("Pragma: public");
+	header("Expires: 0");
+	header("HTTP/1.1 200 OK");
+	header("Status: 200 OK");
+	header("Accept-Ranges: bytes");
+	header("Content-Description: File Transfer");
+	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+	header("Cache-Control: private", false);
+	header("Content-Transfer-Encoding: binary");
+	
 	header("Content-type: $liiterow[filetype]");
 	header("Content-length: $liiterow[filesize]");
 	header("Content-Disposition: inline; filename=$liiterow[filename]");
-	header("Content-Description: $liiterow[selite]");
-
+    
 	echo $liiterow["data"];
 
 }

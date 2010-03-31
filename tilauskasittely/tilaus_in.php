@@ -3,7 +3,7 @@
 require ("../inc/parametrit.inc");
 
 // tehd‰‰n tiedostolle uniikki nimi
-$filename = "../datain/$tyyppi-order-".md5(uniqid(rand(),true))."-".$_FILES['userfile']['name'];
+$filename = "../datain/$tyyppi-order-".md5(uniqid(rand(),true)).".txt";
 
 if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 

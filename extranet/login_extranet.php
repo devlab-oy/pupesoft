@@ -1,21 +1,12 @@
 <?php
 
-//	Laitetaan loginiinkin aina oikea charset
-if (!headers_sent()) {
-	header("Content-Type: text/html; charset=iso-8859-1");
-}
-
-require ("functions.inc");
-
-if (file_exists(basename($_SERVER["SCRIPT_URI"]))) $go = basename($_SERVER["SCRIPT_URI"]);
-
 //kayttaja on syottanyt tietonsa login formiin
-if ($_REQUEST["user"] != '') {
+if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
 
 	$login    = "yes";
 	$extranet = 1;
 	$_GET["no_css"] = "yes";
-	
+
 	require("parametrit.inc");
 
 	$session = "";
@@ -48,7 +39,7 @@ if ($_REQUEST["user"] != '') {
 				for ($i=0; $i<25; $i++) {
 					$session = $session . chr(rand(65,90)) ;
 				}
-				
+
 				$query = "	UPDATE kuka
 							SET session = '$session',
 							lastlogin = now()
@@ -63,8 +54,11 @@ if ($_REQUEST["user"] != '') {
 				if ($location != "") {
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$location'>";
 				}
+				elseif (file_exists(basename($_SERVER["SCRIPT_URI"]))) {
+					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2?go=".basename($_SERVER["SCRIPT_URI"])."'>";
+				}
 				else {
-					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2?go=$go'>";
+					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";
 				}
 
 				exit;
@@ -75,9 +69,24 @@ if ($_REQUEST["user"] != '') {
 		$errormsg = "<br><font class='error'>".t("Käyttäjätunnusta ei löydy ja/tai",$browkieli)."<br>".t("Salasana on virheellinen",$browkieli)."!</font><br>";
 	}
 }
+else {
+	require_once("parametrit.inc");
+}
 
 $formi = "login"; // Kursorin ohjaus
 $kentta = "user";
+
+if (!headers_sent()) {
+	header("Content-Type: text/html; charset=iso-8859-1");
+	header("Pragma: public");
+	header("Expires: 0");
+	header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
+	header("Cache-Control: no-store, no-cache, must-revalidate");
+	header("Cache-Control: post-check=0, pre-check=0", false);
+	header("Pragma: no-cache");
+
+	echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\"\n\"http://www.w3.org/TR/html4/frameset.dtd\">";
+}
 
 echo "
 <html>
@@ -138,7 +147,7 @@ echo "</a></td>
 if (isset($usea) and $usea == 1) {
 	$query = "	SELECT yhtio.nimi, yhtio.yhtio
 				FROM kuka, yhtio
-				WHERE kuka='$user' 
+				WHERE kuka='$user'
 				and yhtio.yhtio=kuka.yhtio";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -177,7 +186,7 @@ else {
 	else {
 		$target = "index.php";
 	}
-	
+
 	echo "
 			<table class='login'>
 				<form name='login' target='_top' action='$target' method='post'>

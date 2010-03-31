@@ -8,7 +8,6 @@ ini_set("display_errors", 0);
 $alkumem		= memory_get_usage();
 $timeparts		= explode(" ",microtime());
 $starttime		= $timeparts[1].substr($timeparts[0],1);
-$verkkokauppa	= "";
 unset($_GET["param_clean"], $_POST["param_clean"], $_REQUEST["param_clean"]);
 
 if (!function_exists("pupe_iconv")) {
@@ -40,6 +39,8 @@ if (!function_exists("pupe_register_globals")) {
 $_GET		= pupe_register_globals($_GET);
 $_POST		= pupe_register_globals($_POST);
 $_REQUEST	= pupe_register_globals($_REQUEST);
+
+$verkkokauppa = "";
 
 require("salasanat.php");
 
@@ -77,19 +78,6 @@ $palvelin2 = "http://$apunimi";
 //Onko sittenkin https käytössä
 if (isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on') {
 	$palvelin2 = "https://$apunimi";
-}
-
-//haetaan browserin oletuskieli
-$browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"],0,2);
-
-if ($browkieli == 'sv') {
-	$browkieli = 'se';
-}
-elseif (isset($kieli) and $kieli == 'fi') {
-	$browkieli = 'fi';
-}
-else {
-	$browkieli = 'en';
 }
 
 //Initioidaan pari muuttujaa
@@ -160,13 +148,35 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 
 }
 // jos sessionia ei ole ja ei olla loginissa, mennään login ruutuun ja exit...
-elseif ($session == '' and $login != 'yes' and $extranet == '' and file_exists("login.php") and $verkkokauppa == '') {
-	require("login.php");
-	exit;
-}
-// jos sessionia ei ole ja ei olla extranet loginissa, mennään extranet login ruutuun ja exit...
 elseif ($session == '' and $login != 'yes' and $verkkokauppa == '') {
-	require("login_extranet.php");
+
+	if ($phpnimi != 'index.php') {
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";
+	}
+	else {
+
+		//haetaan browserin oletuskieli
+		$browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"],0,2);
+
+		if ($browkieli == 'sv') {
+			$browkieli = 'se';
+		}
+		elseif (isset($kieli) and $kieli == 'fi') {
+			$browkieli = 'fi';
+		}
+		else {
+			$browkieli = 'en';
+		}
+
+		// haetaan jotain tarpeellisia funktioita mukaan..
+		if (@include_once("inc/functions.inc"));
+		elseif (@include_once("functions.inc"));
+		else exit;
+
+		if (@include_once("login.php"));
+		elseif (@include_once("login_extranet.php"));
+	}
+
 	exit;
 }
 

@@ -1,14 +1,7 @@
 <?php
 
-//	Laitetaan loginiinkin aina oikea charset
-if (!headers_sent()) {
-	header("Content-Type: text/html; charset=iso-8859-1");
-}
-
-require ("inc/functions.inc");
-
 //kayttaja on syottanyt tietonsa login formiin
-if ($_REQUEST["user"] != '') {	
+if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {	
 
 	$login = "yes";
 	require("inc/parametrit.inc");
@@ -126,12 +119,27 @@ if ($_REQUEST["user"] != '') {
 		}
 	}
 	else {
-		$errormsg = t("Käyttäjätunnusta ei löydy ja/tai salasana on virheellinen",$browkieli)."!";
+		$errormsg = t("Käyttäjätunnusta ei löydy ja/tai salasana on virheellinen", $browkieli)."!";
 	}
+}
+else {
+	require_once("inc/parametrit.inc");
 }
 
 $formi = "login"; // Kursorin ohjaus
 $kentta = "user";
+
+if (!headers_sent()) {
+	header("Content-Type: text/html; charset=iso-8859-1");
+	header("Pragma: public");
+	header("Expires: 0");
+	header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
+	header("Cache-Control: no-store, no-cache, must-revalidate");
+	header("Cache-Control: post-check=0, pre-check=0", false);
+	header("Pragma: no-cache");
+
+	echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\"\n\"http://www.w3.org/TR/html4/frameset.dtd\">";
+}
 
 echo "
 <html>

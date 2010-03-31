@@ -19,7 +19,7 @@
 		</head>
 		<body>";
 
-	if ($toim == 'change') {
+	if (isset($toim) and $toim == 'change') {
 		echo "<form name='change' target='_top' action='$palvelin2' method='post'>";
 		echo "<input type='hidden' name='user' value='$kukarow[kuka]'>";
 		echo "<input type='hidden' name='salamd5' value='$kukarow[salasana]'>";
@@ -28,7 +28,7 @@
 		echo "<script>change.submit();</script>";
 	}
 	else {
-		if ($location != "") {
+		if (isset($location) and $location != "") {
 			echo "<script>setTimeout(\"parent.location.href='$location'\",0);</script>";
 		}
 		else {

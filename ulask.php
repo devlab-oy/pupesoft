@@ -132,19 +132,37 @@ if ($tee == 'I') {
 		}
 
 		if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
-			$query = "update toimi set tilinumero='$toitilinumero' where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
+			$query = "UPDATE toimi set tilinumero='$toitilinumero' where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 		else {
-			$query = "update toimi set ultilno='$toitilinumero', swift='$toiswift' where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
+			$query = "UPDATE toimi set ultilno='$toitilinumero', swift='$toiswift' where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
 			$trow['ultilno']=$toitilinumero;
 			$trow['swift']=$toiswift;
 			$result = mysql_query($query) or pupe_error($query);
 		}
 	}
 	// Hoidetaan pilkut pisteiksi....
-	$kassaale = str_replace ( ",", ".", $kassaale);
-	$summa    = str_replace ( ",", ".", $summa);
+	$kassaale = str_replace (",", ".", $kassaale);
+	$summa    = str_replace (",", ".", $summa);
+	
+	if ($summa != "" and !is_numeric($summa)) {
+		$errormsg .= "<font class='error'>".t("Summa ei ole numeerinen")."!</font><br>";
+		$tee = 'E';
+	}
+
+	if ($kassaale != "" and !is_numeric($kassaale)) {
+		$errormsg .= "<font class='error'>".t("Kassa-ale ei ole numeerinen")."!</font><br>";
+		$tee = 'E';	
+	}
+	
+	for ($i=1; $i<$maara; $i++) {
+		if ($isumma[$i] != "" and !is_numeric($isumma[$i])) {
+			$errormsg .= "<font class='error'>".t("Jokin tiliöinneistä ei ole numeerinen")."!</font><br>";
+			$tee = 'E';
+			break;
+		}
+	}
 
 	// muutetaan numeroiksi
 	$tpk += 0;
@@ -230,12 +248,6 @@ if ($tee == 'I') {
 		}
 	}
 
-	// tämä poistuu nyt, pitää pystyä syöttämään nollalasku. its the laaawwww!
-	/*if ($summa == 0) {
-		$errormsg .= "<font class='error'>".t("Laskulta puuttuu summa")."</font><br>";
-		$tee = 'E';
-	}*/
-
 	if (trim($hyvak[1]) == "") {
 		$errormsg .= "<font class='error'>".t("Laskulla on pakko olla ensimmäinen hyväksyjä")."!</font><br>";
 		$tee = 'E';
@@ -243,6 +255,7 @@ if ($tee == 'I') {
 
 	// poistetaan spacet ja tehdään uniikki
 	$apu_hyvak = array();
+	
 	foreach (array_unique($hyvak) as $apu_hyvakrivi) {
 		if ($apu_hyvakrivi != " ") {
 			$apu_hyvak[] = $apu_hyvakrivi;
@@ -276,6 +289,7 @@ if ($tee == 'I') {
 		$errormsg .= "<font class='error'>".t("Viitettä ja viestiä ei voi antaa yhtaikaa")."</font><br>";
 		$tee = 'E';
 	}
+	
 
 	// Tällöin ei tarvitse erikseen syöttää summaa
 	if ($maara == 2 and strlen($isumma[1]) == 0) {
@@ -317,21 +331,21 @@ if ($tee == 'I') {
 			$tee = 'E';
 		}
 	}
-
+	
  	// Käydään tiliöinnit läpi
 	for ($i=1; $i<$maara; $i++) {
 
  		// Käsitelläänkö rivi??
 		if (strlen($itili[$i]) > 0) {
-			$isumma[$i] = str_replace ( ",", ".", $isumma[$i]);
-			$turvasumma = $summa;
-
-			$virhe = '';
-			$tili = $itili[$i];
-			$summa = $isumma[$i];
-			$selausnimi = 'itili[' . $i .']'; // Minka niminen mahdollinen popup on?
-			$mistatullaan = 'ulask.php'; // koska nykyään on sallittua syöttää nollalasku, eli tässä tapauksessa ei sallita että kaadutaan tilioinnin summan puuttumiseen
-			$ulos=''; // Mahdollinen popup tyhjennetaan
+			$isumma[$i] 	= str_replace ( ",", ".", $isumma[$i]);
+			$turvasumma 	= $summa;
+			$virhe 			= '';
+			$tili 			= $itili[$i];
+			$summa 			= $isumma[$i];
+			$selausnimi		= 'itili[' . $i .']'; // Minka niminen mahdollinen popup on?
+			$mistatullaan	= 'ulask.php'; // koska nykyään on sallittua syöttää nollalasku, eli tässä tapauksessa ei sallita että kaadutaan tilioinnin summan puuttumiseen
+			$ulos			=''; // Mahdollinen popup tyhjennetaan
+			
 			require "inc/tarkistatiliointi.inc";
 
  			// Sieltä kenties tuli päivitys tilinumeroon
@@ -346,19 +360,19 @@ if ($tee == 'I') {
 				$gok = $ok; // Nostetaan virhe ylemmälle tasolle
 			}
 
-			$ivirhe[$i] = $virhe;
-			$iulos[$i] = $ulos;
+			$ivirhe[$i]  = $virhe;
+			$iulos[$i] 	 = $ulos;
 			$yleissumma += $isumma[$i];
-			$summa = $turvasumma;
+			$summa 		 = $turvasumma;
 		}
 	}
-
+	
 	// Jossain tapahtui virhe
 	if ($gok == 1) {
 		$errormsg .= "<font class='error'>".t("Jossain tiliöinnissä oli virheitä tai muutoksia")."!</font><br>";
 		$tee = 'E';
 	}
-
+	
 	if (abs($yleissumma - $summa) >= 0.01 ) {
 		$errormsg .= "<font class='error'>".t("Tiliöinti heittää")." $summa != $yleissumma</font><br>";
 		$tee = 'E';
@@ -430,7 +444,6 @@ if ($tee == 'Y') {
 		$trow 	= $toimittajarow;
 	}
 }
-
 
 // Annetaan käyttäjälle esitäytetty formi, jos toimittaja on tai sitten täytettävät kentät
 if ($tee == 'P' or $tee == 'E') {
@@ -1126,7 +1139,6 @@ if ($tee == 'P' or $tee == 'E') {
 
 } // end if tee = 'P'
 
-
 if ($tee == 'I') {
 
 	$query = "SELECT kurssi FROM valuu WHERE nimi = '$valkoodi' and yhtio = '$kukarow[yhtio]'";
@@ -1166,7 +1178,9 @@ if ($tee == 'I') {
 		$hyvaksyja_nyt=$hyvak[1];
 		$tila = "H";
 	}
+	
 	$olmapvm = $erv . "-" . $erk . "-" . $erp;
+	
 	if (strlen(trim($kap)) > 0) {
 		$olmapvm = $kav . "-" . $kak . "-" . $kap;
 	}

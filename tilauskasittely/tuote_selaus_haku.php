@@ -903,7 +903,14 @@
 				foreach ($rows as $ind => $row) {
 					// Sarjanumerollisille tuotteille haetaan nimitys ostopuolen tilausriviltä
 					if ($row["sarjanumeroseuranta"] == "S" and ($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"])) {
-						$query	= "	SELECT sarjanumeroseuranta.*, tilausrivi_osto.nimitys nimitys, tilausrivi_myynti.tyyppi, lasku_myynti.nimi myynimi, lasku_myynti.tunnus myytunnus
+						$query	= "	SELECT sarjanumeroseuranta.*, 
+									sarjanumeroseuranta.tunnus sarjatunnus,
+									tilausrivi_osto.tunnus osto_rivitunnus,
+									tilausrivi_osto.perheid2 osto_perheid2,
+									tilausrivi_osto.nimitys nimitys,
+									lasku_myynti.nimi myynimi,
+									tilausrivi_myynti.tyyppi, 
+									lasku_myynti.tunnus myytunnus
 									FROM sarjanumeroseuranta
 									LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 									LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -922,8 +929,42 @@
 						if (mysql_num_rows($sarjares) > 0) {
 
 							while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+								$fnlina1 = "";
+								
+								if (($sarjarow["siirtorivitunnus"] > 0) or ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"])) {
+
+									if ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"] != $sarjarow["osto_rivitunnus"]) {
+										$ztun = $sarjarow["osto_perheid2"];
+									}
+									else {
+										$ztun = $sarjarow["siirtorivitunnus"];
+									}
+
+									$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, sarjanumeroseuranta.sarjanumero, tyyppi, otunnus
+												FROM tilausrivi
+												LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
+												WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.tunnus='$ztun'";
+									$siires = mysql_query($query) or pupe_error($query);
+									$siirow = mysql_fetch_array($siires);
+
+									if ($siirow["tyyppi"] == "O") {
+										// pultattu kiinni johonkin
+										$fnlina1 = " <font class='message'>(".t("Varattu lisävarusteena").": $siirow[tuoteno] <a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=".urlencode($siirow["tuoteno"])."&sarjanumero_haku=".urlencode($siirow["sarjanumero"])."'>$siirow[sarjanumero]</a>)</font>";
+									}
+									elseif ($siirow["tyyppi"] == "G") {
+										// jos tämä on jollain siirtolistalla
+										$fnlina1 = " <font class='message'>(".t("Kesken siirtolistalla").": $siirow[otunnus])</font>";
+									}
+								}
+								
 								if ($sarjarow["nimitys"] != "") {
 									$row["nimitys"] = $sarjarow["nimitys"];
+								}
+								
+								if ($fnlina1 != "") {
+									$row["nimitys"] = $sarjarow["nimitys"]."<br>".$fnlina1;
+									// Sarjanumero on varattu, ei voi liittä tilaukselle
+									$row["sarjadisabled"] = TRUE;
 								}
 
 								if ($sarjarow["yhtio"] != $kukarow["yhtio"]) {
@@ -1266,7 +1307,7 @@
 							echo "<td valign='top' class='$vari' $classrigh><a onClick=\"javascript:sarjanumeronlisatiedot_popup('$row[sarjatunnus]')\">$row[sarjanumero]</a> ";
 						}
 
-						if ($row["sarjayhtio"] == $kukarow["yhtio"] and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
+						if (!isset($row["sarjadisabled"]) and $row["sarjayhtio"] == $kukarow["yhtio"] and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
 							echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
 							echo "<input type='hidden' name='tilsarjatunnus[$yht_i]' value = '$row[sarjatunnus]'>";
 							echo "<input type='checkbox' name='tilkpl[$yht_i]' value='1'> ";

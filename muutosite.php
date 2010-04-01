@@ -651,6 +651,9 @@ if ($tee == 'E' or $tee == 'F') {
 		}
 	}
 
+	$kurssi = $trow["maksu_kurssi"];
+	if ((float) $kurssi == 0) $kurssi = $trow["vienti_kurssi"];
+
 	// Myyntilaskut
 	if ($trow['tila'] == 'U' or $trow['tila'] == 'L') {
 
@@ -684,10 +687,12 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "<tr><th>".t("Tapvm")."</th><td>".tv1dateconv($trow["tapvm"])."</td></tr>";
 		echo "<tr><th>".t("Eräpvm")."</th><td>".tv1dateconv($trow["erpcm"])."</td></tr>";
 		echo "<tr><th>".t("Mapvm")."</th><td>".tv1dateconv($trow["mapvm"])."</td></tr>";
-		echo "<tr><th nowrap>".t("Summa")." $trow[valkoodi]</th><td align='right'>$trow[summa]</td></tr>";
+		echo "<tr><th nowrap>".t("Summa")." $trow[valkoodi]</th><td align='right'>$trow[summa_valuutassa]</td></tr>";
+
 		if ($trow["kasumma"] != 0) echo "<tr><th nowrap>".t("Kassa-ale")." $trow[valkoodi]</th><td align='right'>$trow[kasumma]</td></tr>";
+
 		if ($trow["valkoodi"] != $yhtiorow["valkoodi"]) {
-			echo "<tr><th nowrap>".t("Summa")." $yhtiorow[valkoodi]</th><td align='right'>".sprintf("%.02f", $trow["summa"] * $kurssi)."</td></tr>";
+			echo "<tr><th nowrap>".t("Summa")." $yhtiorow[valkoodi]</th><td align='right'>".sprintf("%.02f", $trow["summa_valuutassa"] * $kurssi)."</td></tr>";
 			if ($trow["kasumma"] != 0) echo "<tr><th nowrap>".t("Kassa-ale")." $yhtiorow[valkoodi]</th><td align='right'>".sprintf("%.02f", $trow["kasumma"] * $kurssi)."</td></tr>";
 		}
 		echo "</table>";
@@ -888,9 +893,6 @@ if ($tee == 'E' or $tee == 'F') {
 		echo "</td><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
 
 		if ($tee2 != 1) {
-
-			$kurssi = $trow["maksu_kurssi"];
-			if ($kurssi == 0) $kurssi = $trow["vienti_kurssi"];
 
 			echo "<table>";
 			echo "<tr><th>".t("Tapvm")."</th><td align='right'>".tv1dateconv($trow["tapvm"])."</td></tr>";

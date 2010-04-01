@@ -94,7 +94,7 @@ if ($tee == "SYOTTO") {
 
 	$query = "	SELECT yriti.*, valuu.kurssi
 				FROM yriti
-				JOIN valuu ON (valuu.yhtio = yriti.yhtio and yriti.valkoodi = valuu.nimi)				
+				JOIN valuu ON (valuu.yhtio = yriti.yhtio and yriti.valkoodi = valuu.nimi)
 				WHERE yriti.yhtio = '$kukarow[yhtio]'
 				AND yriti.tunnus = '$tilino'
 				and yriti.kaytossa = ''";
@@ -106,11 +106,11 @@ if ($tee == "SYOTTO") {
 		$kassatili      = $row["oletus_rahatili"];
 		$tilivaluutta	= $row["valkoodi"];
 		$tilikurssi		= $row["kurssi"];
-		
+
 		if ($row["valkoodi"] != $yhtiorow['valkoodi']) {
 			// koitetaan hakea maksupäivän kurssi
-			$query = "	SELECT * 
-						FROM valuu_historia 
+			$query = "	SELECT *
+						FROM valuu_historia
 						WHERE kotivaluutta = '$yhtiorow[valkoodi]'
 						AND valuutta = '$row[valkoodi]'
 						AND kurssipvm <= '$vva-$kka-$ppa'
@@ -120,14 +120,14 @@ if ($tee == "SYOTTO") {
 
 			if (mysql_num_rows($result) == 1) {
 				$row = mysql_fetch_array($result);
-				$tilikurssi = $row["kurssi"];			
+				$tilikurssi = $row["kurssi"];
 				echo "<font class='message'>".t("Käytettiin kurssia")." $row[kurssipvm] = $tilikurssi</font><br>";
 			}
 			else {
 				echo "<font class='message'>".t("Ei löydetty maksupäivän kurssia, käyttään tämänhetkistä kurssia")." $tilikurssi</font><br>";
 			}
 		}
-		
+
 		//suorituksen summa kotivaluutassa
 		$omasumma = round($pistesumma * $tilikurssi, 2);
 	}
@@ -243,23 +243,19 @@ if ($tee == "SYOTTO") {
 
 }
 
-if (($ytunnus != "" or $asiakasid != "") and $tee == "ETSI") {
+if ($asiakasid != "" and $tee == "ETSI") {
 
-	$laskunro = $ytunnus; // haku talteen
+	$laskunro = $asiakasid; // haku talteen
 
-	if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE) {
-		$ytunnus = $asiakasid;
-		$asiakasid = "";
-	}
-
-	if ($ytunnus == "" and $asiakasid != "" and !is_numeric($asiakasid)) {
+	// jos meillä on IE käytössä (eli ei livesearchia) tai ollaan submitattu jotain tekstiä, niin tehdään YTUNNUS haku, muuten asiakasid haku
+	if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE or !is_numeric($asiakasid)) {
 		$ytunnus = $asiakasid;
 		$asiakasid = "";
 	}
 
 	require ("inc/asiakashaku.inc");
 	$tee = "";
-	
+
 	// jos ei löytynyt ytunnuksella kokeillaan laskunumerolla
 	if ($ytunnus == "" and is_numeric($laskunro)) {
 		$query = "	SELECT liitostunnus
@@ -271,7 +267,7 @@ if (($ytunnus != "" or $asiakasid != "") and $tee == "ETSI") {
 		$result  = mysql_query($query) or pupe_error($query);
 
 		if ($asiakas = mysql_fetch_array($result)) {
-			echo "<font class='message'>".t("Maksaja löytyi laskunumerolla")." $laskunro:</font><br>";
+			echo "<font class='message'>".t("Maksaja löytyi laskunumerolla")." $laskunro:</font><br><br>";
 			$asiakasid = $asiakas["liitostunnus"];
 			require ("inc/asiakashaku.inc");
 		}
@@ -359,12 +355,12 @@ if ($ytunnus != '' and $tee == "") {
 					var msg = '".t("Oletko varma, että haluat päivätä laskun yli 14pv tulevaisuuteen")."?';
 					return confirm(msg);
 				}
-				
+
 				if (vv < dateTallaHet.getFullYear()) {
 					if (5 < dateTallaHet.getDate()) {
 						var msg = '".t("Oletko varma, että haluat päivätä laskun menneisyyteen")."?';
 						return confirm(msg);
-					}												
+					}
 				}
 				else if (vv == dateTallaHet.getFullYear()) {
 					if (kk < dateTallaHet.getMonth() && 5 < dateTallaHet.getDate()) {
@@ -408,8 +404,8 @@ if ($ytunnus != '' and $tee == "") {
 
 	$haluttuselvittely = 0;
 	if (isset($mtili)) {
-		$query  = "	SELECT * 
-					FROM yriti 
+		$query  = "	SELECT *
+					FROM yriti
 					WHERE yhtio  = '$kukarow[yhtio]'
 					and kaytossa = ''
 					and tunnus = '$mtili'
@@ -422,8 +418,8 @@ if ($ytunnus != '' and $tee == "") {
 	}
 	if ($haluttuselvittely == 0) $haluttuselvittely = $yhtiorow['selvittelytili'];
 
-	$query  = "	SELECT * 
-				FROM yriti 
+	$query  = "	SELECT *
+				FROM yriti
 				WHERE yhtio  = '$kukarow[yhtio]'
 				and kaytossa = ''
 				order by tilino";
@@ -541,7 +537,6 @@ if ($tee == "" and $ytunnus == "") {
 	echo t("Maksaja").": ";
 	echo "<form action = '$PHP_SELF' method='post' name='maksaja'>";
 	echo livesearch_kentta("maksaja", "ASIAKASHAKU", "asiakasid", 300);
-	echo "<input type='hidden' name='ytunnus' value=''>";
 	echo "<input type='hidden' name='tee' value='ETSI'>";
 	echo "<input type='hidden' name='muutparametrit' value='$tiliote#$summa#$ppa#$kka#$vva#$mtili#$selite'>";
 	echo "<br>";

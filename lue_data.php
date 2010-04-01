@@ -756,11 +756,6 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							}
 						}
 
-						// Käyttäjien salasanat kuntoon!
-						if ($table_mysql == 'kuka' and $taulunotsikot[$taulu][$r] == "SALASANA" and trim($rivi[$r]) != "") {
-							$taulunrivit[$taulu][$eriviindex][$r] = $rivit[$eriviindex][$r] = $rivi[$r] = md5(trim($rivi[$r]));
-						}
-
 						$rivi[$r] = trim(addslashes($rivi[$r]));
 
 						if (substr($trows[$table_mysql.".".$otsikko],0,7) == "decimal" or substr($trows[$table_mysql.".".$otsikko],0,4) == "real") {

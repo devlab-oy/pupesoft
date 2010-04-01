@@ -547,7 +547,7 @@
 		}
 
 		echo "<tr><th>".t("Lis‰tiedot")."</th><td><input type='checkbox' name='lisatiedot' id='lisatiedot' $lisacheck></td></tr>";
-		echo "</table>";
+		echo "</table><br>";
 
 		// Monivalintalaatikot (osasto, try tuotemerkki...)
 		// M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan

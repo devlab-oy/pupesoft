@@ -550,7 +550,7 @@
 		$res2 = t_avainsana("OSASTO");
 
 		if (mysql_num_rows($res2) > 11) {
-			echo "<div style='height:265;overflow:auto;'>";
+			echo "<div style='height:265px;overflow:auto;'>";
 		}
 
 		echo "<table>";
@@ -584,7 +584,7 @@
 		$res2 = t_avainsana("TRY");
 
 		if (mysql_num_rows($res2) > 11) {
-			echo "<div style='height:265;overflow:auto;'>";
+			echo "<div style='height:265px;overflow:auto;'>";
 		}
 
 		echo "<table>";
@@ -618,7 +618,7 @@
 		$res2  = mysql_query($query) or die($query);
 
 		if (mysql_num_rows($res2) > 11) {
-			echo "<div style='height:265;overflow:auto;'>";
+			echo "<div style='height:265px;overflow:auto;'>";
 		}
 
 		echo "<table>";

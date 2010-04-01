@@ -58,7 +58,7 @@
 								$res2 = t_avainsana("OSASTO");
 
 								if (mysql_num_rows($res2) > 11) {
-									echo "<div style='height:320;overflow:auto;'>";
+									echo "<div style='height:320px;overflow:auto;'>";
 								}
 
 								############### TUOTEOSASTO
@@ -106,7 +106,7 @@
 								$res2 = t_avainsana("TRY");
 
 								if (mysql_num_rows($res2) > 11) {
-									echo "<div style='height:320;overflow:auto;'>";
+									echo "<div style='height:320px;overflow:auto;'>";
 								}
 
 								############### TUOTERYHMÄ
@@ -154,7 +154,7 @@
 								$res2  = mysql_query($query) or die($query);
 
 								if (mysql_num_rows($res2) > 11) {
-									echo "<div style='height:320;overflow:auto;'>";
+									echo "<div style='height:320px;overflow:auto;'>";
 								}
 
 								############### TUOTEMERKKI

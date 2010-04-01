@@ -552,7 +552,7 @@ if ($yhtiorow["monikayttajakalenteri"] == "" or $kukarow["asema"] == "MP") {
 			<input type='hidden' name='lopetus' value='$lopetus'>";
 
 	echo t("Näytä kalenterit").":
-			<div style='width:250;height:275;overflow:auto;'>
+			<div style='width:250px;height:275px;overflow:auto;'>
 			<table width='100%'>
 			<tr><td width='1%'><input type='checkbox' name='kalen[]' value = '$kukarow[kuka]' $checked onclick='submit()'></td><td>".t("Oma")."</td></tr>";
 

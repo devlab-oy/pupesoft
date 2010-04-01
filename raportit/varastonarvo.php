@@ -117,7 +117,7 @@ else {
 		$res2 = t_avainsana("OSASTO");
 
 		if (mysql_num_rows($res2) > 11) {
-			echo "<div style='height:265;overflow:auto;'>";
+			echo "<div style='height:265px;overflow:auto;'>";
 		}
 
 		echo "<table>";
@@ -148,7 +148,7 @@ else {
 		echo "<table><tr><td valign='top' class='back'>";
 
 		if (count($mul_osasto) > 11) {
-			echo "<div style='height:265;overflow:auto;'>";
+			echo "<div style='height:265px;overflow:auto;'>";
 		}
 
 		echo "<table>";
@@ -180,7 +180,7 @@ else {
 		$res2 = t_avainsana("TRY");
 
 		if (mysql_num_rows($res2) > 11) {
-			echo "<div style='height:265;overflow:auto;'>";
+			echo "<div style='height:265px;overflow:auto;'>";
 		}
 
 		echo "<table>";
@@ -211,7 +211,7 @@ else {
 		echo "<table><tr><td valign='top' class='back'>";
 
 		if (count($mul_osasto) > 11) {
-			echo "<div style='height:265;overflow:auto;'>";
+			echo "<div style='height:265px;overflow:auto;'>";
 		}
 
 		echo "<table>";
@@ -245,7 +245,7 @@ else {
 		echo "</td><td valign='top' class='back'>";
 
 		if (count($mul_try) > 11) {
-			echo "<div style='height:265;overflow:auto;'>";
+			echo "<div style='height:265px;overflow:auto;'>";
 		}
 
 		echo "<table>";

@@ -170,7 +170,7 @@ if ($tee == '') {
 	echo "<tr>
 			<th>".t("Listaa edustajat")."</th>";
 			
-	echo "	<td colspan='3'><div style='width:280;height:265;overflow:auto;'>
+	echo "	<td colspan='3'><div style='width:280px;height:265px;overflow:auto;'>
 			
 			<table width='100%'><tr>
 			<td><input type='checkbox' name='kalen[]' value = '$kukarow[kuka]' $checked></td>

@@ -947,7 +947,7 @@
 				echo "<td valign='top' style='padding:0px;'>";
 
 				if (mysql_num_rows($sarjares) > 10) {
-					echo "<div style='height:265;overflow:auto;'>";
+					echo "<div style='height:265px;overflow:auto;'>";
 				}
 
 				echo "<table width='100%'>";

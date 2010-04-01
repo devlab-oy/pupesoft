@@ -294,9 +294,9 @@
 
 		if (mysql_num_rows($sresult) > 0) {
 
-			echo "<table style='display:inline;padding-right:4px;' valign='top'>";
+			echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' valign='top'>";
 			echo "<tr><th>",t("Osasto"),"</th></tr>";
-			echo "<tr><td nowrap style='padding:0px'><select name='mul_osasto[]' multiple size='7' onchange='submit();'>";
+			echo "<tr><td nowrap style='padding:0px'><select name='mul_osasto[]' multiple='multiple' size='7' onchange='submit();'>";
 			$mul_check = "";
 			if ($mul_try != "") {
 				if (in_array("PUPEKAIKKIMUUT", $mul_osasto)) {
@@ -399,8 +399,8 @@
 
 		if (mysql_num_rows($sresult) > 0) {
 
-			echo "<table style='display:inline;padding-right:4px;' valign='top'><tr><th>",t("Tuoteryhm‰"),"</th></tr>";
-			echo "<tr><td nowrap style='padding:0px'><select name='mul_try[]' onchange='submit();' multiple='TRUE' size='7'>";
+			echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' valign='top'><tr><th>",t("Tuoteryhm‰"),"</th></tr>";
+			echo "<tr><td nowrap style='padding:0px'><select name='mul_try[]' onchange='submit();' multiple='multiple' size='7'>";
 			$mul_check = '';
 			if ($mul_try != "") {
 				if (in_array("PUPEKAIKKIMUUT", $mul_try)) {
@@ -501,9 +501,9 @@
 		}
 
 		if (is_resource($tmsresult) and mysql_num_rows($tmsresult) > 0) {
-			echo "<table style='display:inline;padding-right:4px;' valign='top'><tr><th>",t("Tuotemerkki"),"</th></tr>";
+			echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' valign='top'><tr><th>",t("Tuotemerkki"),"</th></tr>";
 			echo "<tr><td nowrap style='padding:0px'>";
-			echo "<select name='mul_tme[]' multiple='TRUE' size='7' onchange='submit();'>";
+			echo "<select name='mul_tme[]' multiple='multiple' size='7' onchange='submit();'>";
 			$mul_check = '';
 			if ($mul_tme != "") {
 				if (in_array("PUPEKAIKKIMUUT", $mul_tme)) {
@@ -611,9 +611,9 @@
 
 					echo "<br>".t("Lis‰valinnat").":* ".t("Mik‰li haluat t‰sment‰‰ hakua, k‰yt‰ lis‰ksi alla olevia ryhmi‰")."<br>";
 
-					echo "<table style='display:inline;padding-right:4px;' valign='top'><tr><th>",t("Malli"),"</th></tr>";
+					echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' valign='top'><tr><th>",t("Malli"),"</th></tr>";
 					echo "<tr><td nowrap style='padding:0px'>";
-					echo "<select name='mul_malli[]' multiple='TRUE' size='7' onchange='submit();'>";
+					echo "<select name='mul_malli[]' multiple='multiple' size='7' onchange='submit();'>";
 					$mul_check = '';
 					if ($mul_malli != "") {
 						if (in_array("PUPEKAIKKIMUUT", $mul_malli)) {
@@ -719,9 +719,9 @@
 				}
 
 				if (is_resource($sxresult) and mysql_num_rows($sxresult) > 0) {
-					echo "<table style='display:inline;padding-right:4px;' valign='top'><tr><th>",t("Mallitarkenne"),"</th></tr>";
+					echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' valign='top'><tr><th>",t("Mallitarkenne"),"</th></tr>";
 					echo "<tr><td nowrap style='padding:0px'>";
-					echo "<select name='mul_mallitarkenne[]' multiple='TRUE' size='7' onchange='submit();'>";
+					echo "<select name='mul_mallitarkenne[]' multiple='multiple' size='7' onchange='submit();'>";
 					$mul_check = '';
 					if ($mul_mallitarkenne != "") {
 						if (in_array("PUPEKAIKKIMUUT", $mul_mallitarkenne)) {
@@ -750,7 +750,7 @@
 	}
 
 	if (in_array("TUOTEMYYJA", $monivalintalaatikot)) {
-		echo "<table style='display:inline;padding-right:4px;' valign='top'>";
+		echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' valign='top'>";
 		echo "<tr><th>",t("Tuotemyyj‰"),"</th></tr>";
 		echo "<tr>";
 
@@ -762,7 +762,7 @@
 					ORDER BY myyja";
 		$sresult = mysql_query($query) or pupe_error($query);
 
-		echo "<td nowrap style='padding:0px'><select name='mul_tuotemyyja[]' multiple size='7' onchange='submit();'>";
+		echo "<td nowrap style='padding:0px'><select name='mul_tuotemyyja[]' multiple='multiple' size='7' onchange='submit();'>";
 		echo "<option value=''>".t("Ei valintaa")."</option>";
 
 		while($sxrow = mysql_fetch_array ($sresult)){
@@ -781,7 +781,7 @@
 	}
 
 	if (in_array("TUOTEOSTAJA", $monivalintalaatikot)) {
-		echo "<table style='display:inline;padding-right:4px;' valign='top'>";
+		echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' valign='top'>";
 		echo "<tr><th>",t("Tuoteostaja"),"</th></tr>";
 		echo "<tr>";
 
@@ -792,7 +792,7 @@
 					ORDER BY myyja";
 		$sresult = mysql_query($query) or pupe_error($query);
 
-		echo "<td nowrap style='padding:0px'><select name='mul_tuoteostaja[]' multiple size='7' onchange='submit();'>";
+		echo "<td nowrap style='padding:0px'><select name='mul_tuoteostaja[]' multiple='multiple' size='7' onchange='submit();'>";
 		echo "<option value=''>".t("Ei valintaa")."</option>";
 
 		while($sxrow = mysql_fetch_array ($sresult)){
@@ -811,13 +811,13 @@
 	}
 
 	if (in_array("ASIAKASOSASTO", $monivalintalaatikot)) {
-		echo "<table style='display:inline;padding-right:4px;' valign='top'>";
+		echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' valign='top'>";
 		echo "<tr><th>",t("Asiakasosasto"),"</th></tr>";
 		echo "<tr>";
 
 		$sresult = t_avainsana("ASIAKASOSASTO");
 
-		echo "<td nowrap style='padding:0px'><select name='mul_asiakasosasto[]' multiple size='7' onchange='submit();'>";
+		echo "<td nowrap style='padding:0px'><select name='mul_asiakasosasto[]' multiple='multiple' size='7' onchange='submit();'>";
 		echo "<option value=''>".t("Ei valintaa")."</option>";
 
 		while($sxrow = mysql_fetch_array ($sresult)){
@@ -836,13 +836,13 @@
 	}
 
 	if (in_array("ASIAKASRYHMA", $monivalintalaatikot)) {
-		echo "<table style='display:inline;padding-right:4px;' valign='top'>";
+		echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' valign='top'>";
 		echo "<tr><th>",t("Asiakasryhm‰"),"</th></tr>";
 		echo "<tr>";
 
 		$sresult = t_avainsana("ASIAKASRYHMA");
 
-		echo "<td nowrap style='padding:0px'><select name='mul_asiakasryhma[]' multiple size='7' onchange='submit();'>";
+		echo "<td nowrap style='padding:0px'><select name='mul_asiakasryhma[]' multiple='multiple' size='7' onchange='submit();'>";
 		echo "<option value=''>".t("Ei valintaa")."</option>";
 
 		while($sxrow = mysql_fetch_array ($sresult)){

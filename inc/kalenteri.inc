@@ -1557,10 +1557,10 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 									$poppari="";
 									$lisatiedot = hae_lisatiedot($row, 0);	
 									
-									$ulos[$tpos[$row["tunnus"]]] .= "<div style='height: 15; width; 100%; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";'>{$lisatiedot["viesti"]}</div>";
+									$ulos[$tpos[$row["tunnus"]]] .= "<div style='height: 15px; width; 100%; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";'>{$lisatiedot["viesti"]}</div>";
 								}
 								else {
-									$ulos[$tpos[$row["tunnus"]]] .= " <div style='height: 15; width; 100%; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";'></div>";
+									$ulos[$tpos[$row["tunnus"]]] .= " <div style='height: 15px; width; 100%; text-align: left; background-color: ".$tcolor[$row["tunnus"]].";'></div>";
 								}
 							}
 						}
@@ -1586,7 +1586,7 @@ $kale .= "<caption style='margin-bottom: 5px;'><div style='text-align: left; flo
 					
 					//	Tarkastetaan vielä että kaikki slotit on täynnä
 					foreach($tpos as $t) {
-						if($ulos[$t] == "") $ulos[$t] = "<div style='height: 15; width; 100%; text-align: left; background-color: inherit;'>&nbsp;</div>";
+						if($ulos[$t] == "") $ulos[$t] = "<div style='height: 15px; width; 100%; text-align: left; background-color: inherit;'>&nbsp;</div>";
 					}
 					ksort($ulos);					
 					$menu = array();

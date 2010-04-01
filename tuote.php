@@ -1440,8 +1440,8 @@
 			}
 
 			$query = "	SELECT tapahtuma.tuoteno, tapahtuma.laatija, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
-						if(tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo,
-						tapahtuma.selite, lasku.tunnus laskutunnus,
+						if(tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus,
+						concat_ws(' ', tapahtuma.hyllyalue, tapahtuma.hyllynro, tapahtuma.hyllyvali, tapahtuma.hyllytaso) tapapaikka,
 						concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 						round(100*tilausrivi.kate/tilausrivi.rivihinta, 2) katepros,
 						tilausrivi.tunnus trivitunn,
@@ -1531,9 +1531,8 @@
 						echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]'>".t("Näytä keikka")."</a>";
 					}
 
-
-					if (trim($prow["paikka"]) != "") echo "<br>".t("Varastopaikka").": $prow[paikka]";
-
+					if (trim($prow["tapapaikka"]) != "") echo "<br>".t("Varastopaikka").": $prow[tapapaikka]";
+					elseif (trim($prow["paikka"]) != "") echo "<br>".t("Varastopaikka").": $prow[paikka]";
 
 					if ($tuoterow["sarjanumeroseuranta"] != "" and ($prow["laji"] == "tulo" or $prow["laji"] == "laskutus")) {
 

@@ -42,7 +42,7 @@ if(!function_exists("tuotetarkista")) {
 			$tem_tuoteno = $t[$i];
 		}
 
-		if ((mysql_field_name($result, $i) == "projekti" or mysql_field_name($result, $i) == "kohde" or mysql_field_name($result, $i) == "kustp") and trim($t[$i]) != '') {
+		if ((mysql_field_name($result, $i) == "projekti" or mysql_field_name($result, $i) == "kohde" or mysql_field_name($result, $i) == "kustp") and (int) trim($t[$i]) != 0) {
 
 			if (mysql_field_name($result, $i) == "projekti") $kptyyppi = "P";
 			if (mysql_field_name($result, $i) == "kohde") 	 $kptyyppi = "O";

@@ -827,6 +827,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 								$tee = "pois";
 							}
 
+							// ei yritetä laittaa uusia tuotteita kurantiksi vaikka kentät olisikin excelissä
+							if ($rivi[$postoiminto] == 'LISAA' and $tee == 'pois') {
+								$tee = "";
+							}
+							
 							$eilisataeikamuuteta = "joo";
 						}
 

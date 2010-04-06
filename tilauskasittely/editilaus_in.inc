@@ -394,6 +394,42 @@ while (!feof ($fd)) {
 					$edi_ulos .= "$arow[nimi]\n";
 				}
 			}
+
+			if (!is_array($arow)) {
+				$query = "	SELECT *
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]'
+							and ovttunnus = '$tieto'
+							and ovttunnus not in ('','0')
+							and laji not in ('R','P')";
+				$result = mysql_query($query) or die($query);
+
+				if (mysql_num_rows($result) == 1) {
+					$arow = mysql_fetch_array($result);
+					$vastaustapa .= $arow['tilausvahvistus'];
+					$edi_ulos .= "$arow[nimi]\n";
+				}
+			}
+
+			if (!is_array($arow)) {
+				$query = "	SELECT *
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]'
+							and asiakasnro = '$tieto'
+							and asiakasnro not in ('','0')
+							and laji not in ('R','P')";
+				$result = mysql_query($query) or die($query);
+
+				if (mysql_num_rows($result) == 1) {
+					$arow = mysql_fetch_array($result);
+					$vastaustapa .= $arow['tilausvahvistus'];
+					$edi_ulos .= "$arow[nimi]\n";
+				}
+				else {
+					$edi_ulos .= t("Asiakas ei löydy tunnuksella")." '$tieto'\n";
+				}
+			}
+
 			break;
 
 		case 'ONADBY_PC' :
@@ -719,8 +755,8 @@ while (!feof ($fd)) {
 					$arow['toim_maa']		= $arow['maa'];
 				}
 
-				// jos tilauksessa on tullut poikkeava nimi, postino ja postitp otetaan kaikki tiedot tilaukselta
-				if ($tnimi != "" and $tpostino != "" and $tpostitp != "") {
+				// jos tilauksessa on tullut poikkeava nimi, postino ja postitp otetaan kaikki tiedot tilaukselta (PAITSI JO KYSESSÄ ON KOONTIKULJETUSKEISSI)
+				if ($tnimi != "" and $tpostino != "" and $tpostitp != "" and $apuro["tulostustapa"] != "K" and $apuro["tulostustapa"] != "L") {
 					$arow['toim_nimi']		= $tnimi;
 					$arow['toim_nimitark']	= $tnimitark;
 					$arow['toim_osoite']	= $tosoite;
@@ -746,7 +782,7 @@ while (!feof ($fd)) {
 						$editilaus_sisainen = "o";
 					}
 				}
-				
+
 				// jos tilauksella on tullut lopullisen asikkaan tiedot, laitetaan ne talteen sisviesti ykköseen
 				if ($lopnimi != "") {
 					$arow["sisviesti1"] = "$lopnumero\n$lopnimi\n$loposoite\n$loppostino\n$loppostitp";
@@ -970,14 +1006,14 @@ while (!feof ($fd)) {
 		case 'OSTOTILRIV.OTR_TILATTUMAARA' :
 			//Tilattava määrä
 			$tieto = str_replace ( ",", ".", $tieto);
-			
+
 			if ($edi_tyyppi == "magento" and (strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $tieto != '') {
 				$kpl = (float) substr($tieto,0,16);
 			}
 			else {
 				$kpl = (float) abs(substr($tieto,0,16)); // abs() ettei asiakkaat pysty tekemään hyvityksiä!
 			}
-			
+
 			$edi_ulos .= t("tilattiin")." $kpl ".t("kpl").".\n";
 			break;
 		case 'OSTOTILRIV.OTR_RIVISUMMA' :
@@ -1089,7 +1125,7 @@ while (!feof ($fd)) {
 
 								$varasto = $erikoisvarastojen_saldot[0]["varasto"]; // ekassa varastossa on pienin prioriteetti
 								$laskurow["varasto"] = $varasto; // joudutaan spooffaamaan laskurow varasto
-								$kommentti = t("Huom: Tuote toimitetaan erikoisvarastosta!");								
+								$kommentti = t("Huom: Tuote toimitetaan erikoisvarastosta!");
 							}
 							else {
 								$var = "H";

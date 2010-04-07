@@ -288,7 +288,7 @@
 	// debuggia varten, laita 1 jos haluut messuja
 	$lisaarivi_debug = 0;
 
-	if ($laskurow['tila'] == 'O') {
+	if ($laskurow['tila'] == 'O' or $laskurow['tila'] == 'K') {
 		$rivityyppi = 'O';	// Ostotilausrivi
 	}
 	elseif ($laskurow["tilaustyyppi"] == 'E') {
@@ -476,7 +476,7 @@
 							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])");
 						}
 					}
-					elseif ($yhtiorow["korvaavan_hinta_ylaraja"] != '' and (($korva_hinta*(1-($korva_ale/100))) / ($korva_isa_hinta*(1-($korva_isa_ale/100)))) > (1+($yhtiorow["korvaavan_hinta_ylaraja"]/100))) {
+					elseif ($yhtiorow["korvaavan_hinta_ylaraja"] != '' and ($korva_isa_hinta*(1-($korva_isa_ale/100))) != 0 and (($korva_hinta*(1-($korva_ale/100))) / ($korva_isa_hinta*(1-($korva_isa_ale/100)))) > (1+($yhtiorow["korvaavan_hinta_ylaraja"]/100))) {
 						//Korvaavien myynti kielletty koska korvaava tuote on liian kallis
 						if ($krmyytavissa > 0) {
 							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])");

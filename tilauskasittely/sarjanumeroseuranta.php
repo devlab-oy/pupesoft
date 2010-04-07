@@ -1248,7 +1248,7 @@
 	}
 
 	//Kursorinohjaus
-	if($rivirow["sarjanumeroseuranta"] == "T") {
+	if ($rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V") {
 		$formi	= "sarjaformi";
 		$kentta = "sarjanumero";
 	}

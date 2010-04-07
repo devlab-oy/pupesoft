@@ -4,8 +4,8 @@ YHTIO=$1
 POLKU=$2
 
 # Katsotaan, että parametrit on annettu
-if [ -z $YHTIO ] || [ -z $POLKU ]; then
-	echo 
+if [ -z $YHTIO ] || [ -z $POLKU ]; then
+	echo
 	echo "ERROR! Pakollisia parametreja ei annettu!"
 	echo
 	echo "Ohje: pupe-cron.sh yhtio pupesoft-polku"

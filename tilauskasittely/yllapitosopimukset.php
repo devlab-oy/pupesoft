@@ -380,13 +380,13 @@
 					// katotaan ollaanko tämä lasku laskutettu
 					$query = "	SELECT *
 								FROM lasku
-								WHERE yhtio  = '$kukarow[yhtio]' and
-								liitostunnus = '$row[liitostunnus]' and
-								tila         = 'L' and
-								alatila      = 'X' and
-								luontiaika   = '$pvmloop_vv-$pvmloop_kk-$pvmloop_pp' and
-								clearing     = 'sopimus' and
-								swift        = '$row[laskutunnus]'";
+								WHERE yhtio  	 = '$kukarow[yhtio]' 
+								and liitostunnus = '$row[liitostunnus]'
+								and tila         = 'L'
+								and alatila      in ('X','D')
+								and luontiaika   = '$pvmloop_vv-$pvmloop_kk-$pvmloop_pp'
+								and clearing     = 'sopimus'
+								and swift        = '$row[laskutunnus]'";
 					$chkres = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($chkres) == 0) {

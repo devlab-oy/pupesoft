@@ -2021,16 +2021,13 @@ if ($tee == "") {
 	echo "</td>";
 	echo "<td class='back'><input type='Submit' name='EI_ASIAKASTA_X' value='".t("Perusta")."'></td>";
 	echo "</tr>";
-	echo "</form>";
-
 	echo "<tr>";
 	echo "<th>".t("Perusta uusi matkalasku asiakkaalle")."</th>";
 	echo "<td><input type='text' size='20' name='ytunnus'></td>";
 	echo "<td class='back'><input type='Submit' value='".t("Perusta")."'></td>";
 	echo "</tr>";
-
-	echo "</form>";
 	echo "</table>";
+	echo "</form>";
 
 	$query = "	SELECT lasku.*, kuka.nimi kayttajanimi
 				FROM lasku

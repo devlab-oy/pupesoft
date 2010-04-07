@@ -1,13 +1,13 @@
 <?php
 
 // haetaan jotain tarpeellisia funktioita mukaan..
-if (@include("inc/parametrit.inc"));
-elseif (@include("parametrit.inc"));
+if (@include_once("inc/parametrit.inc"));
+elseif (@include_once("parametrit.inc"));
 else exit;
 
 // haetaan jotain tarpeellisia funktioita mukaan..
-if (@include("inc/functions.inc"));
-elseif (@include("functions.inc"));
+if (@include_once("inc/functions.inc"));
+elseif (@include_once("functions.inc"));
 else exit;
 
 echo "<style type='text/css'>

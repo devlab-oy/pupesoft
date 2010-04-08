@@ -137,12 +137,13 @@
 
 		$laskuri = 0;
 
-		// Merkitään rivit mitätöidyksi joiden otsikot on mitätöity (ei mitätöidä puuterivejä)
+		// Merkitään rivit mitätöidyksi joiden otsikot on mitätöity (ei mitätöidä puuterivejä, eikä suoraan keikkaan lisättyjä ostorivejä lasku.alatila!='K')
 		$query = "	SELECT lasku.tunnus laskutunnus
 					from lasku
-					join tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi!='D' and tilausrivi.var!='P'
+					join tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'P'
 					where lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'D'
+					and lasku.alatila != 'K'
 					GROUP BY 1";
 		$result = mysql_query($query) or die($query);
 

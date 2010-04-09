@@ -266,7 +266,7 @@
 	$toimtuotteet 		= "";
 	$origtuotteet 		= "";
 	$poislisa_mulsel 	= "";
-
+		
 	if (!isset($ojarj)) {
 		$ojarj = '';
 	}
@@ -305,7 +305,7 @@
 			$jarjestys = 'tuote.tuoteno';
 		}
 	}
-
+	
 	if (!isset($poistetut)) {
 		$poistetut = '';
 	}
@@ -1141,7 +1141,7 @@
 					echo "<td valign='top' class='$vari' $classleft>$row[tuoteno] $linkkilisa ";
 				}
 				else {
-					echo "<td valign='top' class='$vari' $classleft><a href='../$tuotekyslinkki?tuoteno=".urlencode($row["tuoteno"])."&tee=Z&lopetus=$PHP_SELF////submit_button=1//toim_kutsu=$toim_kutsu//url=y//sort=$sort//ojarj=$ojarj".str_replace("&","//",$ulisa)."'>$row[tuoteno]</a>$linkkilisa ";
+					echo "<td valign='top' class='$vari' $classleft><a href='../$tuotekyslinkki?tuoteno=".urlencode($row["tuoteno"])."&tee=Z&lopetus=$PHP_SELF////submit_button=1//toim_kutsu=$toim_kutsu//url=y//sort=$edsort//ojarj=$ojarj".str_replace("&","//",$ulisa)."'>$row[tuoteno]</a>$linkkilisa ";
 				}
 
 				if ($lisatiedot != "" and $verkkokauppa == "") {

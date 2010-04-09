@@ -292,12 +292,12 @@
 			$sresult = mysql_query($query) or pupe_error($query);
 		}
 
-		if (mysql_num_rows($sresult) > 0) {
+		if (mysql_num_rows($sresult) > 1) {
 
 			echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 			echo "<tr><th>",t("Osasto"),"</th></tr>";
 			echo "<tr><td nowrap style='padding:0px'><select name='mul_osasto[]' multiple='multiple' size='7' onchange='submit();'>";
-			
+
 			$mul_check = "";
 			if ($mul_try != "") {
 				if (in_array("PUPEKAIKKIMUUT", $mul_osasto)) {
@@ -403,7 +403,7 @@
 			echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
 			echo "<tr><th>",t("Tuoteryhmä"),"</th></tr>";
 			echo "<tr><td nowrap style='padding:0px'><select name='mul_try[]' onchange='submit();' multiple='multiple' size='7'>";
-			
+
 			$mul_check = '';
 			if ($mul_try != "") {
 				if (in_array("PUPEKAIKKIMUUT", $mul_try)) {
@@ -508,7 +508,7 @@
 			echo "<tr><th>",t("Tuotemerkki"),"</th></tr>";
 			echo "<tr><td nowrap style='padding:0px'>";
 			echo "<select name='mul_tme[]' multiple='multiple' size='7' onchange='submit();'>";
-			
+
 			$mul_check = '';
 			if ($mul_tme != "") {
 				if (in_array("PUPEKAIKKIMUUT", $mul_tme)) {
@@ -620,7 +620,7 @@
 					echo "<tr><th>",t("Malli"),"</th></tr>";
 					echo "<tr><td nowrap style='padding:0px'>";
 					echo "<select name='mul_malli[]' multiple='multiple' size='7' onchange='submit();'>";
-					
+
 					$mul_check = '';
 					if ($mul_malli != "") {
 						if (in_array("PUPEKAIKKIMUUT", $mul_malli)) {

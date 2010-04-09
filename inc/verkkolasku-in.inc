@@ -1014,7 +1014,8 @@
 
 					$filesize = strlen($xmlstr);
 					$filename = array_pop(explode("/", $file));
-
+					$xmlstr   = mysql_real_escape_string($xmlstr);
+					
 					$query = "	INSERT INTO liitetiedostot SET
 								yhtio    			= '$kukarow[yhtio]',
 								liitos   			= 'lasku',

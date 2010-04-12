@@ -248,7 +248,7 @@ if ($asiakasid != "" and $tee == "ETSI") {
 	$laskunro = $asiakasid; // haku talteen
 
 	// jos meillä on IE käytössä (eli ei livesearchia) tai ollaan submitattu jotain tekstiä, niin tehdään YTUNNUS haku, muuten asiakasid haku
-	if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE or !is_numeric($asiakasid)) {
+	if ($ytunnus == "" and stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE or !is_numeric($asiakasid)) {
 		$ytunnus = $asiakasid;
 		$asiakasid = "";
 	}

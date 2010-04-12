@@ -107,10 +107,11 @@
 			}
 
 			// edellinen taso
-			$taso     = array();
-			$tasonimi = array();
-			$summa    = array();
-			$kaudet   = array();
+			$taso     			= array();
+			$tasonimi 			= array();
+			$summattavattasot	= array();
+			$summa    			= array();
+			$kaudet   			= array();
 
 			if ((int) $tkausi > 0) {
 				$query = "	SELECT tilikausi_alku, tilikausi_loppu
@@ -263,6 +264,10 @@
 				// tasonimi talteen (rightp‰dd‰t‰‰n ÷:ll‰, niin saadaan oikeaan j‰rjestykseen)
 				$apusort = str_pad($tasorow["taso"], 20, "÷");
 				$tasonimi[$apusort] = $tasorow["nimi"];
+				
+				if ($toim == "TASOMUUTOS") {
+					$summattavattasot[$apusort] = $tasorow["summattava_taso"];
+				}
 
 				// pilkotaan taso osiin
 				$taso = array();
@@ -339,7 +344,7 @@
 	        $b["height"]	= 8;
 			$b["font"] 		= "Times-Bold";
 
-			if(count($kaudet) > 10 and $kaikkikaudet != "") {
+			if (count($kaudet) > 10 and $kaikkikaudet != "") {
 				$p["height"]--;
 				$b["height"]--;
 				$saraklev 			= 49;
@@ -462,9 +467,9 @@
 			ksort($tasonimi);
 
 			// loopataan tasot l‰pi
-			foreach ($tasonimi as $key => $value) {
+			foreach ($tasonimi as $key_c => $value) {
 
-				$key = str_replace("÷", "", $key); // ÷-kirjaimet pois
+				$key = str_replace("÷", "", $key_c); // ÷-kirjaimet pois
 
 				// tulostaan rivi vain jos se kuuluu rajaukseen
 				if (strlen($key) <= $rtaso or $rtaso == "TILI") {
@@ -482,7 +487,7 @@
 
 					if ($toim == "TASOMUUTOS") {
 						$rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&tee=muuta&lopetus=$lopetus'>$key</a></td>";
-						$rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&edtaso=$edkey&tee=lisaa&lopetus=$lopetus'>Lis‰‰ taso tasoon $key</a></td>";
+						$rivi .= "<td class='back' nowrap><a href='?tasomuutos=TRUE&taso=$key&kirjain=$kirjain&edtaso=$edkey&tee=lisaa&lopetus=$lopetus'>".t("Lis‰‰ taso tasoon")." $key</a></td>";
 					}
 
 					$tilirivi = "";
@@ -564,6 +569,10 @@
 						}
 
 						$rivi .= "<td class='$class' align='right' nowrap>".number_format($apu, $desi,  ',', ' ')."</td>";
+					}
+					
+					if ($toim == "TASOMUUTOS" and $summattavattasot[$key_c] != "") {
+						$rivi .= "<td class='back' nowrap>".t("Summattava taso").": ".$summattavattasot[$key_c]."</td>";					
 					}
 
 					$rivi .= "</tr>\n";

@@ -438,6 +438,7 @@
 				$kpl = 0;
 				$varaston_arvo = 0;
 				$bruttovaraston_arvo = 0;
+				
 				if (count($argv) == 0) {
 					$bar->increase();
 				}
@@ -463,7 +464,7 @@
 						$summaus_lisa = "";
 					}
 					
-					if($row["sarjanumeroseuranta"] == "G") {
+					if ($row["sarjanumeroseuranta"] == "G") {
 						/*	
 							Haetaan vapaat erät varastosta ja lasketaan niiden saldot
 						*/
@@ -540,10 +541,10 @@
 								$summaus_lisa";
 					$vararvores = mysql_query($query) or pupe_error($query);
 					$vararvorow = mysql_fetch_array($vararvores);
-
-					$kpl = $vararvorow["saldo"];
-					$varaston_arvo = $vararvorow["varasto"];
-					$bruttovaraston_arvo = $vararvorow["bruttovarasto"];
+										
+					$kpl = (float) $vararvorow["saldo"];
+					$varaston_arvo = (float) $vararvorow["varasto"];
+					$bruttovaraston_arvo = (float) $vararvorow["bruttovarasto"];
 				}
 
 				// jos summaustaso on per paikka, otetaan varastonmuutos vain siltä paikalta
@@ -580,7 +581,7 @@
 							GROUP BY tapahtuma.laadittu
 							ORDER BY tapahtuma.laadittu DESC";
 				$muutosres = mysql_query($query) or pupe_error($query);
-
+								
 				$muutoskpl 		= $kpl;
 				$muutoshinta 	= $varaston_arvo;
 				$bmuutoshinta 	= $bruttovaraston_arvo;

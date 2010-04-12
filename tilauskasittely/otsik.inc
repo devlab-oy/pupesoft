@@ -18,7 +18,7 @@
 			$tilausnumero 		= 0;
 		}
 	}
-
+	
 	//katsotaan ett‰ kukarow kesken ja $tilausnumero stemmaavat kesken‰‰n
 	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
 		echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
@@ -499,7 +499,6 @@
 					$puhlisa = "";
 				}
 
-
 				$squery = "	SELECT asiakas.*, $puhlisa asiakas.tunnus liitostunnus, 'O' kohdistettu, '' kohde
 							FROM asiakas
 							WHERE tunnus = '$asiakasid'";
@@ -694,7 +693,7 @@
 				$ealisa = "asiakas";
 			}
 
-			echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO//asiakasid=$asiakasid'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
+			echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
 		}
 
 		if ($templ > 0 and $asiakasid == '') {

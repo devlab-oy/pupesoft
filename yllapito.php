@@ -549,7 +549,7 @@
 			}
 
 			if ($lopetus != '' and (isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset))) {
-				$lopetus .= "//yllapidossa=$toim//yllapidontunnus=$tunnus";
+				$lopetus .= "//yllapidossa=$toim//yllapidontunnus=$tunnus//yllapidonupdate=$wanha";
 
 				lopetus($lopetus, "META");
 			}

@@ -14,7 +14,7 @@
 	$monivalintalaatikot = array("OSASTO", "TRY");
 
 	echo "<br><table>";
-	echo "<tr><th>".t("Anna osasto ja tuoteryhm‰:")."</th><td nowrap>";
+	echo "<tr><th>".t("Anna osasto")." ".t("ja/tai")." ".t("tuoteryhm‰").":</th><td nowrap>";
 
 	require ("tilauskasittely/monivalintalaatikot.inc");
 
@@ -327,7 +327,7 @@
 		$sorttauskentan_jarjestys sorttauskentta";
 		$groupby = " tuote.tuoteno, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, varastopaikka, inventointiaika, tuotepaikat.saldo ";
 
-		if (($tryt != '' and $osastot != '') or ($ahyllyalue != '' and $lhyllyalue != '') or ($toimittaja != '') or ($tuotemerkki != '')) {
+		if (($tryt != '' or $osastot != '') or ($ahyllyalue != '' and $lhyllyalue != '') or ($toimittaja != '') or ($tuotemerkki != '')) {
 			///* Inventoidaan *///
 
 			//n‰ytet‰‰n vain $top myydyint‰ tuotetta
@@ -368,7 +368,7 @@
 
 			$where = "";
 
-			if ($tryt != '' and $osastot != '') {
+			if ($tryt != '' or $osastot != '') {
 				///* Inventoidaan osaston tai tuoteryhm‰n perusteella *///
 				$kutsu .= " ".t("Osasto:")."$osastot ".t("Tuoteryhm‰:")."$tryt ";
 

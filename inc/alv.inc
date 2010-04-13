@@ -9,6 +9,7 @@
 	echo "<br><table>";
 	echo "<tr>";
 	echo "<th>".t("Valitse kausi").":</th>";
+	
 	echo "<td><select name='alvv'>";
 
 	for ($i = date("Y"); $i >= date("Y")-4; $i--) {
@@ -26,6 +27,7 @@
 
 	echo "</select></td>";
 
+	if (!isset($alvk)) $alvk = date("m");
 	$alvk_sel = array();
 	$alvk_sel[$alvk] = "selected";
 

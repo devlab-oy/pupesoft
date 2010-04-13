@@ -156,7 +156,8 @@ elseif ($session == '' and $login != 'yes' and $verkkokauppa == '') {
 	else {
 
 		//haetaan browserin oletuskieli
-		$browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"],0,2);
+		#$browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"],0,2);
+		$browkieli = 'fi';
 
 		if ($browkieli == 'sv') {
 			$browkieli = 'se';

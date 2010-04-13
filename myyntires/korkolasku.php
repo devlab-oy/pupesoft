@@ -294,6 +294,7 @@ if ($tee == "") {
 	$query = "	SELECT *
 				FROM maksuehto
 				WHERE yhtio = '$kukarow[yhtio]'
+				and kaytossa = ''
 				ORDER BY jarjestys, teksti";
 	$vresult = mysql_query($query) or pupe_error($query);
 
@@ -302,7 +303,7 @@ if ($tee == "") {
 	while ($vrow = mysql_fetch_array($vresult)) {
 		$sel = "";
 		if ($vmehto == $vrow["tunnus"]) $sel = "SELECTED";
-		
+
 		$ulos .= "<option value = '$vrow[tunnus]' $sel>".t_tunnus_avainsanat($vrow, "teksti", "MAKSUEHTOKV", $kieli)."</option>";
 	}
 	$ulos .= "</select>";

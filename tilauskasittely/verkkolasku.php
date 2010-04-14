@@ -1836,6 +1836,8 @@
 
 						if ($silent == "") $tulos_ulos .= t("Tulostetaan lasku").": $lasku<br>\n";
 
+						$vientierittelymail = "";
+
 						$query = "	SELECT *
 									FROM lasku
 									WHERE tila='U' and alatila='X' and laskunro='$lasku' and yhtio='$kukarow[yhtio]'";
@@ -2021,7 +2023,11 @@
 							if (in_array($laskurow["laskunro"], $tulostettavat_email)) {
 								// generoidaan laskun saatekirje, joka haetaan avainsanoista
 								include_once("inc/generoi_laskun_saate.inc");
+
 								list($komento, $content_subject, $content_body) = generoi_laskun_saate($laskurow, $saatekirje, $laskun_kieli);
+
+								// otetaan t‰m‰ talteen jotta saadaan vientierittely
+								$vientierittelymail = $komento;
 
 								// l‰hetet‰‰n meili
 								$kutsu = t("lasku", $kieli)." $lasku";
@@ -2036,10 +2042,10 @@
 								//haetaan varaston tiedot
 								if ($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA") {
 									if ($varasto != 0) {
-										$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto' order by alkuhyllyalue,alkuhyllynro";
+										$query = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto' order by alkuhyllyalue,alkuhyllynro";
 									}
 									else {
-										$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]' order by alkuhyllyalue,alkuhyllynro limit 1";
+										$query = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]' order by alkuhyllyalue,alkuhyllynro limit 1";
 									}
 									$prires= mysql_query($query) or pupe_error($query);
 									$prirow= mysql_fetch_array($prires);
@@ -2067,12 +2073,12 @@
 								}
 								elseif ($kukarow["eposti"] != '') {
 									// l‰hetet‰‰n meili
-									$komento = "";
-									$kutsu = t("lasku", $kieli)." $lasku";
-									$liite = $pdffilenimi;
-									$sahkoposti_cc = "";
-									$content_subject = "";
-									$content_body = "";
+									$komento 			= "";
+									$kutsu 				= t("Lasku", $kieli)." $lasku";
+									$liite 				= $pdffilenimi;
+									$sahkoposti_cc 		= "";
+									$content_subject 	= "";
+									$content_body 		= "";
 									include("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
 								}
 
@@ -2091,12 +2097,12 @@
 									}
 									elseif ($kukarow["eposti"] != '') {
 										// l‰hetet‰‰n meili
-										$komento = "";
-										$kutsu = t("lasku", $kieli)." $lasku";
-										$liite = $pdffilenimi;
-										$sahkoposti_cc = "";
-										$content_subject = "";
-										$content_body = "";
+										$komento 			= "";
+										$kutsu 				= t("Lasku", $kieli)." $lasku";
+										$liite 				= $pdffilenimi;
+										$sahkoposti_cc 		= "";
+										$content_subject 	= "";
+										$content_body 		= "";
 										include("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
 									}
 								}
@@ -2124,19 +2130,25 @@
 							if (fwrite($fh, $Xpdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
 							fclose($fh);
 
-							if ($kirow["komento"] != "email") {
+							if ($kirow["komento"] == 'email' or $vientierittelymail != '') {
+								// l‰hetet‰‰n meili
+								if ($vientierittelymail != "") {
+									$komento = $vientierittelymail;
+								}
+								else {
+									$komento = "";
+								}
+
+								$kutsu 				= t("Lasku", $kieli)." $lasku ".t("Vientierittely", $kieli);
+								$liite 				= $pdffilenimi;
+								$sahkoposti_cc 		= "";
+								$content_subject 	= "";
+								$content_body 		= "";
+								include("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
+							}
+							elseif ($kirow["komento"] != '' and $kirow["komento"] != 'edi') {
 								// itse print komento...
 								$line = exec("$kirow[komento] $pdffilenimi");
-							}
-							elseif ($kukarow["eposti"] != '') {
-								// l‰hetet‰‰n meili
-								$komento = "";
-								$kutsu = "lasku $lasku Vientierittely";
-								$liite = $pdffilenimi;
-								$sahkoposti_cc = "";
-								$content_subject = "";
-								$content_body = "";
-								include("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
 							}
 
 							//poistetaan tmp file samantien kuleksimasta...

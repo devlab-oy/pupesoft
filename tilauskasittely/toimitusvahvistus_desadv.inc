@@ -255,7 +255,7 @@
 		}
 
 		// PAC - number and type of packages
-		$query ="	SELECT pakkaus, sum(kollit) kollit,
+		$query ="	SELECT sum(kollit) kollit,
 					sum(kilot) kilot,
 					sum(kuutiot) kuutiot,
 					sum(lavametri) lavametri,
@@ -269,10 +269,9 @@
 					ORDER BY 1";
 		$desadv_kollitres = mysql_query($query) or pupe_error($query);
 
-		while ($desadv_kollitrow = mysql_fetch_array($desadv_kollitres)) {
-			$desadv_message .= "PAC+$desadv_kollitrow[kollit]++$desadv_kollitrow[pakkaus]:6'";
-			$x++;
-		}
+		$desadv_kollitrow = mysql_fetch_assoc($desadv_kollitres);
+		$desadv_message .= "PAC+$desadv_kollitrow[kollit]++PK:6'";
+		$x++;
 
 		// LIN - line item
 		$query = "	SELECT *

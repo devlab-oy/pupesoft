@@ -169,6 +169,7 @@ if (!function_exists('pupevoice_rivi')) {
 		xml_add("OrderIdentifier",					$tilrow['otunnus'], 						$tootxml); // tämä on tilauksen numero meillä, ei kuulu standardiin mutta se on pakko lisätä
 		xml_add("RowDeliveryIdentifier",			$tilrow['otunnus'], 						$tootxml); // tämä on tilauksen numero meillä, tämä taas kuuluu standardiin
 		xml_add("ArticleIdentifier",				$tilrow['tuoteno'], 						$tootxml);
+		xml_add("ArticleEANIdentifier",				$tilrow['eankoodi'], 						$tootxml);
 		xml_add("ArticleName",						$tilrow['nimitys'], 						$tootxml);
 		xml_add("DeliveredQuantity",				$tilrow['kpl'], 							$tootxml);
 		xml_add("DeliveredQuantityUnitCode",		$tilrow['yksikko'],							$tootxml);

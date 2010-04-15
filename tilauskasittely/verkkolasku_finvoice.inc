@@ -203,25 +203,25 @@ if (!function_exists('finvoice_otsik')) {
 			#xml_add("SellerFreeText",   		                     	  	"",									$tootfinvoice);
 
 			fputs($tootfinvoice, "<SellerAccountDetails>\r\n");
-			xml_add("SellerAccountID IdentificationSchemeName=\"IBAN\"",	$pankkitiedot['pankkiiban1'],		$tootfinvoice);
+			xml_add("SellerAccountID IdentificationSchemeName=\"IBAN\"",	str_replace(" ", "", $pankkitiedot['pankkiiban1']),		$tootfinvoice);
 			xml_add("SellerBic IdentificationSchemeName=\"BIC\"",			$pankkitiedot['pankkiswift1'],		$tootfinvoice);
 			fputs($tootfinvoice, "</SellerAccountDetails>\r\n");
 
 			if ($pankkitiedot['pankkiiban2']!='') {
 				fputs($tootfinvoice, "<SellerAccountDetails>\r\n");
-				xml_add("SellerAccountID IdentificationSchemeName=\"IBAN\"",$pankkitiedot['pankkiiban2'],      	$tootfinvoice);
+				xml_add("SellerAccountID IdentificationSchemeName=\"IBAN\"",str_replace(" ", "", $pankkitiedot['pankkiiban2']),      	$tootfinvoice);
 				xml_add("SellerBic IdentificationSchemeName=\"BIC\"",		$pankkitiedot['pankkiswift2'],     	$tootfinvoice);
 				fputs($tootfinvoice, "</SellerAccountDetails>\r\n");
 			}
 			if ($pankkitiedot['pankkiiban3']!='') {
 				fputs($tootfinvoice, "<SellerAccountDetails>\r\n");
-				xml_add("SellerAccountID IdentificationSchemeName=\"IBAN\"",$pankkitiedot['pankkiiban3'],      	$tootfinvoice);
+				xml_add("SellerAccountID IdentificationSchemeName=\"IBAN\"",str_replace(" ", "", $pankkitiedot['pankkiiban3']),      	$tootfinvoice);
 				xml_add("SellerBic IdentificationSchemeName=\"BIC\"",	  	$pankkitiedot['pankkiswift3'],     	$tootfinvoice);
 				fputs($tootfinvoice, "</SellerAccountDetails>\r\n");
 			}
 
 			fputs($tootfinvoice, "<InvoiceRecipientDetails>\r\n");
-			xml_add("InvoiceRecipientAddress",							  	$yhtiorow['pankkiiban1'],		   	$tootfinvoice);
+			xml_add("InvoiceRecipientAddress",							  	str_replace(" ", "", $yhtiorow['pankkiiban1']),		   	$tootfinvoice);
 			xml_add("InvoiceRecipientIntermediatorAddress",				  	$yhtiorow['pankkiswift1'],         	$tootfinvoice);
 			fputs($tootfinvoice, "</InvoiceRecipientDetails>\r\n");
 			fputs($tootfinvoice, "</SellerInformationDetails>\r\n");
@@ -574,7 +574,7 @@ if (!function_exists('finvoice_lasku_loppu')) {
 				xml_add("EpiBei",                         		tulosta_ytunnus($yhtiorow['ytunnus'], $yhtiorow['maa']),		$tootfinvoice);
 			}
 
-			xml_add("EpiAccountID IdentificationSchemeName=\"IBAN\"",						$pankkitiedot["pankkiiban1"],		$tootfinvoice);
+			xml_add("EpiAccountID IdentificationSchemeName=\"IBAN\"",						str_replace(" ", "", $pankkitiedot["pankkiiban1"]),		$tootfinvoice);
 			fputs($tootfinvoice, "</EpiBeneficiaryPartyDetails>\r\n");
 
 			fputs($tootfinvoice, "</EpiPartyDetails>\r\n");

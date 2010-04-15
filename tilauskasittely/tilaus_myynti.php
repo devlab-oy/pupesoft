@@ -3602,7 +3602,7 @@ if ($tee == '') {
 		$ruuturesult = mysql_query($query) or pupe_error($query);
 		$ruuturow = mysql_fetch_assoc($ruuturesult);
 		$rivilaskuri = $ruuturow["rivit"];
-		
+
 		// Tilausrivit
 		$query  = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*,
 					if (tilausrivi.laskutettuaika!='0000-00-00', kpl, varattu) varattu,
@@ -3623,7 +3623,7 @@ if ($tee == '') {
 					ORDER BY tilausrivi.otunnus, $sorttauslisa sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus
 					$limitlisa";
 		$result = mysql_query($query) or pupe_error($query);
-				
+
 		if ($rivilaskuri > 0) {
 			if ($yhtiorow["tilauksen_jarjestys_suunta"] == "ASC") {
 				if (isset($ruutulimit) and $ruutulimit > 0) {
@@ -3928,13 +3928,13 @@ if ($tee == '') {
 
 					//tarkistarivi.inc:stä saadaan $trow jossa on select * from tuote
 				}
-				
-				if ($edotunnus == 0 or $edotunnus != $row["otunnus"]) {					
+
+				if ($edotunnus == 0 or $edotunnus != $row["otunnus"]) {
 					if ($edotunnus > 0) echo "<tr>$jarjlisa<td class='back' colspan='10'><br></td></tr>";
-					if ($ruuturow["otunnukset"] > 1) echo "<tr>$jarjlisa<td class='back' colspan='10'>Toimitus: $row[otunnus]</td></tr>";										
+					if ($ruuturow["otunnukset"] > 1) echo "<tr>$jarjlisa<td class='back' colspan='10'>".t("Toimitus").": $row[otunnus]</td></tr>";
 					echo $headerit;
 				}
-				
+
 				$edotunnus = $row["otunnus"];
 
 				if ($toim == "TYOMAARAYS") {

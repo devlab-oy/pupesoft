@@ -727,9 +727,10 @@
 
 				// haetaan kaikki yrityksen rahatilit mysql muodossa
 				$query  = "	SELECT concat(group_concat(distinct concat('\'',oletus_rahatili) SEPARATOR '\', '),'\'') rahatilit
-							FROM yriti
-							WHERE yhtio = '$kukarow[yhtio]' and
-							oletus_rahatili != ''";
+							FROM yriti							
+							WHERE yhtio = '$kukarow[yhtio]' 							
+							and kaytossa = '' 
+							and oletus_rahatili != ''";
 				$ratire = mysql_query($query) or pupe_error($query);
 				$ratiro = mysql_fetch_array($ratire);
 

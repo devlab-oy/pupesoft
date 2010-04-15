@@ -265,7 +265,6 @@
 					where yhtio = '$kukarow[yhtio]'
 					and otsikkonro = '$desadv_laskurow[laskutunnus]'
 					and rahtikirjanro = '$rahtikirjanro'
-					GROUP BY 1
 					ORDER BY 1";
 		$desadv_kollitres = mysql_query($query) or pupe_error($query);
 

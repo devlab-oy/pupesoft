@@ -281,7 +281,7 @@
 				$select = "";
 				$gluku  = 0;
 				$varastojoin = "";
-				
+
 				// näitä käytetään queryssä
 				$sel_osasto = "";
 				$sel_tuoteryhma = "";
@@ -546,18 +546,18 @@
 						$select .= "if(lasku.laskunro>0,concat('".t("LASKU").":',lasku.laskunro),concat('".t("TILAUS").":',lasku.tunnus)) laskunumero, ";
 						$order  .= "laskunumero,";
 						$gluku++;
-						
+
 						if ($rajaus[$i] != "") {
-							$lisa .= " and lasku.laskunumero = '$rajaus[$i]' ";
+							$lisa .= " and lasku.laskunro = '$rajaus[$i]' ";
 						}
 					}
-					
+
 					if ($mukaan == "varastoittain") {
 						if ($group!="") $group .= ",varastopaikat.nimitys";
 						else $group  .= "varastopaikat.nimitys";
 						$select .= "varastopaikat.nimitys Varasto, ";
 						$gluku++;
-						
+
 						if ($rajaus[$i] != "") {
 							$lisa .= " and varastopaikat.nimitys = '$rajaus[$i]' ";
 						}
@@ -1965,7 +1965,7 @@
 			if ($piilotanollarivit != '')	$einollachk 			= "CHECKED";
 			if ($naytaennakko != '')		$naytaennakkochk 		= "CHECKED";
 			if ($status != '')				${'status_'.$status.'_sel'} = 'SELECTED';
-			
+
 
 			echo "<table>
 				<tr>

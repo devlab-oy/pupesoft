@@ -160,10 +160,10 @@
 					}
 
 					if ($mukaan == "invenlaji") {
-						if ($group!="") $group .= ",tapahtuma.selite";
-						else $group  .= "tapahtuma.selite";
-						$select .= "tapahtuma.selite as 'laji', ";
-						$order  .= "tapahtuma.selite,";
+						if ($group!="") $group .= ",inventointilaji";
+						else $group  .= "inventointilaji";
+						$select .= "substring(tapahtuma.selite,(length(tapahtuma.selite)-locate('>rb<',reverse(tapahtuma.selite)))+2) as 'inventointilaji', ";
+						$order  .= "inventointilaji,";
 						$gluku++;
 					}
 
@@ -520,7 +520,7 @@
 
 							for ($i=0; $i < mysql_num_fields($result); $i++) {
 
-								if($i < substr_count($select, ", ")) {
+								if ($i < substr_count($select, ", ")) {
 									$valisummat[mysql_field_name($result, $i)] = "";
 									$totsummat[mysql_field_name($result, $i)]  = "";
 								}

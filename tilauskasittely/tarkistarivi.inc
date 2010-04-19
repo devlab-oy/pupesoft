@@ -221,8 +221,8 @@
 
 	$paikat	= "";
 
-	//Tässä on kaikki saldoihin ja varastopaikkoihin liittyvät tsekit, eli EI tehdä saldottomille tuotteille
-	if ($trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $row["tyyppi"] != "W") {
+	//Tässä on kaikki saldoihin ja varastopaikkoihin liittyvät tsekit, eli EI tehdä saldottomille tuotteille, eikä tuoteperheen saldollisille lapsille jos koko perhe suoratoimitetaan
+	if ($trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $row["tyyppi"] != "W" and (($row["var"] != 'T' and $row["var"] != 'U') or $yhtiorow['tuoteperhe_suoratoimitus'] == '' or $row["perheid"] == 0 or $row["perheid"] == $row["tunnus"])) {
 		// tarkistetaan varaston tyyppi
 		$query = "	SELECT *
 					FROM varastopaikat
@@ -255,7 +255,7 @@
 		$selpaikkamyytavissa = 0;
 
 		// Katsotaan onko tälle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
-		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $row["var"] != 'V' and $toim != "SIIRTOTYOMAARAYS") {
+		if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $row["var"] != 'V' and $toim != "SIIRTOTYOMAARAYS") {
 			$query = "	SELECT tyyppi_tieto, liitostunnus, toimi.nimi
 						FROM tuotteen_toimittajat use index (yhtio_tuoteno)
 						JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
@@ -492,7 +492,7 @@
 		}
 
 		// Kääydään läpi tuotteen toimittajat
-		if ($kukarow["extranet"] == "" and in_array($row["var"], array('','H','S','T','U','J','P')) and ($toim == "TARJOUS" or ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and $yhtiorow["tee_osto_myyntitilaukselta"] != 'Z')) and $kpl_st > 0 and $toim != "SIIRTOTYOMAARAYS") {
+		if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and in_array($row["var"], array('','H','S','T','U','J','P')) and ($toim == "TARJOUS" or ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and $yhtiorow["tee_osto_myyntitilaukselta"] != 'Z')) and $kpl_st > 0 and $toim != "SIIRTOTYOMAARAYS") {
 			if ($kotipaikatlask == 0 and $trow["sarjanumeroseuranta"] != "E" and $trow["sarjanumeroseuranta"] != "F" and $trow["sarjanumeroseuranta"] != "G") {
 				$paikat = "<option value=''>".t("Jätä puutteeksi")."</option>".$paikat;
 				$paikatlask++;
@@ -502,8 +502,8 @@
 				$sel1 = "";
 				$sel2 = "";
 
-				// katsotaan onko tuote suoratoimituskelpoinen
-				if ($yhtiorow["tee_osto_myyntitilaukselta"] == "X" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Y" or ($yhtiorow["tee_osto_myyntitilaukselta"] == "V" and $trow["suoratoimitus"] != '') or ($yhtiorow["tee_osto_myyntitilaukselta"] == "W" and $trow["suoratoimitus"] != '')) {
+				// katsotaan onko tuote suoratoimituskelpoinen (vain ei tuoteperheet, tai tuoteoperheiden saldolliset isät tai jos yhtiöllä suoratoimitetaan perheet per tuote)
+				if (($yhtiorow['tuoteperhe_suoratoimitus'] == '' or $row["perheid"] == 0 or $row["perheid"] == $row["tunnus"]) and ($yhtiorow["tee_osto_myyntitilaukselta"] == "X" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Y" or ($yhtiorow["tee_osto_myyntitilaukselta"] == "V" and $trow["suoratoimitus"] != '') or ($yhtiorow["tee_osto_myyntitilaukselta"] == "W" and $trow["suoratoimitus"] != ''))) {
 
 					if ($row["toimittajan_tunnus"] == $krow["liitostunnus"] and $row["hyllyalue"] == "" and $row["hyllynro"] == "") {
 						if ($row["var"] == 'T' or ($row["var"] == "J" and $row["suoraan_laskutukseen"] == "")) {
@@ -583,6 +583,47 @@
 		else {
 			$paikat = "";
 		}
+	}
+	// jos kyseessä on tuoteperheen suoratoimitus suoraan asiakkaalle, niin tehdään isädropdown (dropdownin sisältö haetaan lapsilta).
+	elseif ((($kukarow['extranet'] == '' and ($yhtiorow['tuoteperhe_suoratoimitus'] == 'M' or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and ($yhtiorow["tee_osto_myyntitilaukselta"] == "W" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Y") and $trow["ei_saldoa"] != "" and $row["tyyppi"] == "L" and $kpl_st > 0 and $row["tunnus"] == $row["perheid"] and in_array($row["var"], array('P','J','U','T'))) {
+
+
+		$query = "	SELECT tuoteno
+					FROM tilausrivi
+					WHERE yhtio = '$kukarow[yhtio]'
+					AND perheid = '$row[tunnus]'
+					AND otunnus = '$row[otunnus]'";
+		$perhe_tuoteno_res = mysql_query($query) or pupe_error($query);
+
+		$perheen_tuotteet = '';
+
+		while ($perhe_tuoteno_row = mysql_fetch_assoc($perhe_tuoteno_res)) {
+			$perheen_tuotteet .= "'$perhe_tuoteno_row[tuoteno]',";
+		}
+
+		$perheen_tuotteet = substr($perheen_tuotteet, 0, -1);
+
+		$query = "	SELECT DISTINCT liitostunnus, tyyppi_tieto, toimi.nimi
+					FROM tuotteen_toimittajat use index (yhtio_tuoteno)
+					JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+					WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+					and tuotteen_toimittajat.tuoteno in ($perheen_tuotteet)";
+		$toimpaikres  = mysql_query($query) or pupe_error($query);
+
+		$paikat = "<option value=''>".t("Jätä jälkitoimitukseen")."</option>".$paikat;
+
+		while ($krow  = mysql_fetch_assoc($toimpaikres)) {
+			$sel1 = "";
+
+			if ($row["toimittajan_tunnus"] == $krow["liitostunnus"] and $row["hyllyalue"] == "" and $row["hyllynro"] == "") {
+				$sel1 = 'SELECTED';
+			}
+
+			$title = "$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle");
+			$paikat .= "<option value='!!!$krow[liitostunnus]' title='$title' $sel1>$title</option>";
+		}
+
+		$paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
 	}
 
 	/*

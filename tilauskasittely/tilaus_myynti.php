@@ -1121,7 +1121,6 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 						and alatila = ''";
 			$result = mysql_query($query) or pupe_error($query);
 
-
 			// tilaus ei enää kesken...
 			$query	= "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -1130,7 +1129,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		else {
 
 			//Luodaan valituista riveistä suoraan normaali ostotilaus
-			if ($kukarow["extranet"] == "" and $yhtiorow["tee_osto_myyntitilaukselta"] != '') {
+			if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and $yhtiorow["tee_osto_myyntitilaukselta"] != '') {
 				require("tilauksesta_ostotilaus.inc");
 
 				//	Jos halutaan tehdä tilauksesta ostotilauksia, niin tehdään kaikista ostotilaus
@@ -2750,15 +2749,15 @@ if ($tee == '') {
 			$result = mysql_query($query) or pupe_error($query);
 
 			// Jos muokkaamme tilausrivin paikkaa ja se on speciaalikeissi, S,T,V niin laitetaan $paikka-muuttuja kuntoon
-			if ($tapa != "VAIHDA" and $tilausrivi["var"] == "S" and substr($paikka,0,3) != "@@@") {
+			if (substr($tapa, 0, 6) != "VAIHDA" and $tilausrivi["var"] == "S" and substr($paikka,0,3) != "@@@") {
 				$paikka = "@@@".$tilausrivi["toimittajan_tunnus"]."#".$tilausrivi["hyllyalue"]."#".$tilausrivi["hyllynro"]."#".$tilausrivi["hyllyvali"]."#".$tilausrivi["hyllytaso"];
 			}
 
-			if ($tapa != "VAIHDA" and $tilausrivi["var"] == "T" and substr($paikka,0,3) != "¡¡¡") {
+			if (substr($tapa, 0, 6) != "VAIHDA" and $tilausrivi["var"] == "T" and substr($paikka,0,3) != "¡¡¡") {
 				$paikka = "¡¡¡".$tilausrivi["toimittajan_tunnus"];
 			}
 
-			if ($tapa != "VAIHDA" and $tilausrivi["var"] == "U" and substr($paikka,0,3) != "!!!") {
+			if (substr($tapa, 0, 6) != "VAIHDA" and $tilausrivi["var"] == "U" and substr($paikka,0,3) != "!!!") {
 				$paikka = "!!!".$tilausrivi["toimittajan_tunnus"];
 			}
 
@@ -2879,7 +2878,7 @@ if ($tee == '') {
 			elseif ($tapa == "VAIHDAJAPOISTA") {
 				$perheid	= "";
 				$tila		= "";
-				$paikka		= "";
+				if (substr($paikka,0,3) != "!!!" and substr($paikka,0,3) != "°°°" and substr($paikka,0,3) != "@@@") $paikka = "";
 			}
 			elseif ($tapa == "POISTA") {
 
@@ -3147,7 +3146,7 @@ if ($tee == '') {
 				$trow = mysql_fetch_assoc($result);
 
 				//extranettajille ei myydä tuotteita joilla ei ole myyntihintaa
-				if ($kukarow["extranet"] != '' and $trow["myyntihinta"] == 0) {
+				if ($kukarow["extranet"] != '' and $trow["myyntihinta"] == 0 and $trow['ei_saldoa'] == '') {
 					$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
 					$trow 	 = "";
 					$tuoteno = "";
@@ -3828,7 +3827,7 @@ if ($tee == '') {
 				$headerit .= "<th>".t("Nimitys")."</th>";
 			}
 
-			if (($toim != "TARJOUS" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and ($kukarow['extranet'] == '' or $yhtiorow['varastopaikan_lippu'] != '')) {
+			if (($toim != "TARJOUS" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and (($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) or $yhtiorow['varastopaikan_lippu'] != '')) {
 				$headerit .= "<th>".t("Paikka")."</th>";
 			}
 
@@ -4096,7 +4095,7 @@ if ($tee == '') {
 					$pkres = mysql_query($query) or pupe_error($query);
 					$pkrow = mysql_fetch_row($pkres);
 
-					if (($row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U")) or $row["perheid2"] == -1) {
+					if ($row["perheid2"] == -1) {
 						$query  = "	SELECT tuoteperhe.tunnus
 									FROM tuoteperhe
 									WHERE tuoteperhe.yhtio 		= '$kukarow[yhtio]'
@@ -4414,7 +4413,7 @@ if ($tee == '') {
 						echo "<td $class align='left' valign='top'>&nbsp;</td>";
 					}
 				}
-				elseif (($toim != "TARJOUS" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $muokkauslukko_rivi == "" and $kukarow['extranet'] == '' and $trow["ei_saldoa"] == "") {
+				elseif (($toim != "TARJOUS" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $muokkauslukko_rivi == "" and ($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and $trow["ei_saldoa"] == "") {
 					if ($paikat != '') {
 
 						echo "	<td $class align='left' valign='top' nowrap>";
@@ -4442,13 +4441,19 @@ if ($tee == '') {
 					else {
 
 						if ($varow['maa'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
-							echo "<td $class align='left' valign='top' nowrap><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa)</font>";
+							echo "<td $class align='left' valign='top' nowrap><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) </font>";
 						}
 						elseif ($varow['maa'] != '' and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
-							echo "<td $class align='left' valign='top' nowrap><font class='error'>".strtoupper($varow['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa)</font>";
+							echo "<td $class align='left' valign='top' nowrap><font class='error'>".strtoupper($varow['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) </font>";
 						}
 						else {
-							echo "<td $class align='left' valign='top' nowrap> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) ";
+							if (trim($row['hyllyalue']) == '' and trim($row['hyllynro']) == '' and trim($row['hyllyvali']) == '' and trim($row['hyllytaso']) == '' and trim($selpaikkamyytavissa) == '') {
+								echo "<td $class align='left' valign='top' nowrap> ";
+								if ($row['var'] == 'U' or $row['var'] == 'T') echo t("Suoratoimitus");
+							}
+							else {
+								echo "<td $class align='left' valign='top' nowrap> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) ";
+							}
 						}
 
 						if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and !in_array($row["var"], array('P','J','S','T','U'))) {
@@ -4477,7 +4482,7 @@ if ($tee == '') {
 
 					echo "</td>";
 				}
-				elseif (($toim != "TARJOUS" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $muokkauslukko_rivi == "" and $kukarow['extranet'] == '') {
+				elseif (($toim != "TARJOUS" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $muokkauslukko_rivi == "" and ($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E'))) {
 					if ($paikat != '') {
 						echo "	<td $class align='left' valign='top'>
 									<form action='$PHP_SELF' method='post'name='paikat'>
@@ -4522,8 +4527,6 @@ if ($tee == '') {
 					else {
 						echo "<td $class align='left' valign='top'></td>";
 					}
-
-
 				}
 
 				if ($kukarow['extranet'] == '' and $tuotekyslinkki != "") {

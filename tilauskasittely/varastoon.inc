@@ -572,7 +572,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 			}
 
 			//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
-		   	$query = "	SELECT ifnull(group_concat(tilausrivi.tunnus), 0) jtrivit
+		   	$query = "	SELECT ifnull(if((tilausrivi.perheid != 0 and tilausrivi.tunnus != tilausrivi.perheid), tilausrivi.perheid, group_concat(tilausrivi.tunnus)), 0) jtrivit
 		   				FROM tilausrivin_lisatiedot
 		   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
 		   				WHERE tilausrivin_lisatiedot.yhtio 			 = '$kukarow[yhtio]'
@@ -846,7 +846,6 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon" and $suoratoimitus == ''
 			$jtrivit = substr($jtrivit, 0, -1);
 		}
 
-		jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "automaaginen", "JATKA");
 		jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "tosi_automaaginen", "JATKA");
 
 		//	Laitetaan tavarat liikkeelle jos sallitaan!

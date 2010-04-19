@@ -339,7 +339,7 @@
 	if (substr($paikka,0,3) == "!!!") {
 		$var 		 		= "U";
 		$toimittajan_tunnus	= substr($paikka, 3);
-		$paikka		 		= "#";
+		$paikka		 		= "";
 	}
 	elseif ($var == "U" and substr($paikka,0,3) != "!!!") {
 		$var 				= "";
@@ -1789,6 +1789,13 @@
 			}
 			else {
 				$vanharivilaadittu = "now()";
+			}
+
+			if ($var == "U" or $var == "T") {
+				$p_hyllyalue	= "";
+				$p_hyllynro		= "";
+				$p_hyllynro		= "";
+				$p_hyllytaso	= "";
 			}
 
 			// lisätään puuterivi

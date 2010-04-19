@@ -2207,4 +2207,20 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tuoteperhe_suoratoimitus") {
+
+		$ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Tuoteperheen lapsituotteet voidaan suoratoimittaa erikseen")."</option>";
+		$ulos .= "<option value = 'M' $sel[M]>".t("Tuoteperheen lapsituotteet suoratoimitetaan yhdessä ja on sallittu vain myyntitilauksella")."</option>";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Tuoteperheen lapsituotteet suoratoimitetaan yhdessä ja on sallittu myyntitilauksella ja extranetissa")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 ?>

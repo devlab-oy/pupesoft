@@ -31,9 +31,10 @@
 			$myytilrow = mysql_fetch_assoc($result);
 
 			//otetaan ensin vain lisävarusteettomat tuotteet tai lisävarusteperheiden isät
-			$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tilausrivi.tunnus rivitunnus
+			$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tilausrivi.tunnus rivitunnus, tuote.ei_saldoa
 						FROM tilausrivi
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.otunnus	='$otunnus'
 						and tilausrivi.tyyppi != 'D'
@@ -45,7 +46,17 @@
 			if (mysql_num_rows($result) > 0) {
 
 				while ($rivi = mysql_fetch_assoc($result)) {
-					
+
+					// saldottomat tuotteet laitetaan jälkkäriin ja skipataan loopissa
+					if ($rivi['ei_saldoa'] != '') {
+						$query = "	UPDATE tilausrivi SET
+									var = 'J'
+									WHERE yhtio = '$kukarow[yhtio]'
+									AND tunnus = '$rivi[rivitunnus]'";
+						$ei_saldoa_res = mysql_query($query) or pupe_error($query);
+						continue;
+					}
+
 					//	Jos tehdään vaan tämä tilaus niin haetaan tämän oletustoimittaja, by default
 					if ($tyyppi == "KAIKKI" and $rivi["toimittajan_tunnus"] == 0) {
 						
@@ -81,7 +92,7 @@
 					$erres = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($erres) != 1) {
-						$tilauksesta_ostotilaus .= "<font class='error'>Toimittajan tietoja ei löytynyt!<br>";
+						$tilauksesta_ostotilaus .= "<font class='error'>Toimittajan tietoja ei löytynyt tuotteelta $rivi[tuoteno]!<br>";
 					}
 					else {
 						// toimittaja löytyi, tehdään tästä ostotilaus

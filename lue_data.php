@@ -24,17 +24,18 @@ if ($oikeurow['paivitys'] != '1') { // Saako päivittää
 
 flush();
 
-if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
+if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
 	require ("inc/pakolliset_sarakkeet.inc");
 
-	list($name,$ext) = split("\.", $_FILES['userfile']['name']);
+	$path_parts = pathinfo($_FILES['userfile']['name']);
+	$ext = strtolower($path_parts['extension']);
 
-	if (strtoupper($ext) !="TXT" and strtoupper($ext)!="XLS" and strtoupper($ext)!="CSV") {
+	if (strtoupper($ext) != "TXT" and strtoupper($ext) != "XLS" and strtoupper($ext) != "CSV") {
 		die ("<font class='error'><br>".t("Ainoastaan .txt ja .cvs tiedostot sallittuja")."!</font>");
 	}
 
-	if ($_FILES['userfile']['size']==0) {
+	if ($_FILES['userfile']['size'] == 0) {
 		die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
 	}
 
@@ -434,6 +435,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			//Sallitaan myös MUOKKAA ja LISÄÄ toiminnot
 			if (strtoupper(trim($rivi[$postoiminto])) == "LISÄÄ") $rivi[$postoiminto] = "LISAA";
 			if (strtoupper(trim($rivi[$postoiminto])) == "MUOKKAA") $rivi[$postoiminto] = "MUUTA";
+			if (strtoupper(trim($rivi[$postoiminto])) == "MUOKKAA/LISÄÄ") $rivi[$postoiminto] = "MUUTA/LISAA";
+			if (strtoupper(trim($rivi[$postoiminto])) == "MUOKKAA/LISAA") $rivi[$postoiminto] = "MUUTA/LISAA";
+			if (strtoupper(trim($rivi[$postoiminto])) == "MUUTA/LISÄÄ") $rivi[$postoiminto] = "MUUTA/LISAA";
 
 			//Jos eri where-ehto array on määritelty
 			if (is_array($wherelliset)) {
@@ -449,9 +453,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$valinta .= " and TUOTENO='$tuoteno'";
 				}
 				elseif ($table_mysql == 'tullinimike' and strtoupper($taulunotsikot[$taulu][$j]) == "CN") {
-										
-					$taulunrivit[$taulu][$eriviindex][$j] = $rivit[$eriviindex][$j] = $rivi[$j] = str_replace(' ','',$rivi[$j]);			
-															
+
+					$taulunrivit[$taulu][$eriviindex][$j] = $rivit[$eriviindex][$j] = $rivi[$j] = str_replace(' ','',$rivi[$j]);
+
 					$valinta .= " and cn='".$rivi[$j]."'";
 
 					if (trim($rivi[$j]) == '') {
@@ -469,7 +473,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				elseif ($table_mysql == 'tuotepaikat' and $taulunotsikot[$taulu][$j] == "OLETUS") {
 					//ei haluta tätä tänne
 				}
-				elseif ($table_mysql == 'asiakas' and strtoupper(trim($rivi[$postoiminto])) == 'LISAA' and $taulunotsikot[$taulu][$j] == "YTUNNUS" and $rivi[$j] == "AUTOM") {
+				elseif ($table_mysql == 'asiakas' and stripos($rivi[$postoiminto], 'LISAA') !== FALSE and $taulunotsikot[$taulu][$j] == "YTUNNUS" and $rivi[$j] == "AUTOM") {
 
 					if ($yhtiorow["asiakasnumeroinnin_aloituskohta"] != "") {
 						$apu_asiakasnumero = $yhtiorow["asiakasnumeroinnin_aloituskohta"];
@@ -675,7 +679,16 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							WHERE $valinta";
 				$fresult = mysql_query($query) or pupe_error($query);
 
-				if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA' and $table_mysql != $table and mysql_num_rows($fresult) != 0) {
+				if (strtoupper(trim($rivi[$postoiminto])) == "MUUTA/LISAA") {
+					// Muutetaan jos löytyy muuten lisätään!
+					if (mysql_num_rows($fresult) == 0) {
+						$rivi[$postoiminto] = "LISAA";
+					}
+					else {
+						$rivi[$postoiminto] = "MUUTA";
+					}
+				}
+				elseif (strtoupper(trim($rivi[$postoiminto])) == 'LISAA' and $table_mysql != $table and mysql_num_rows($fresult) != 0) {
 					// joinattaviin tauluhin tehdään muuta-operaatio jos rivi löytyy
 					$rivi[$postoiminto] = "MUUTA";
 				}
@@ -831,7 +844,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							if ($rivi[$postoiminto] == 'LISAA' and $tee == 'pois') {
 								$tee = "";
 							}
-							
+
 							$eilisataeikamuuteta = "joo";
 						}
 

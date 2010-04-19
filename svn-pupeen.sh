@@ -9,7 +9,7 @@ echo
 
 pupedir=`dirname $0`
 
-php ${pupedir}dumppaa_mysqlkuvaus.php komentorivilta
+php ${pupedir}/dumppaa_mysqlkuvaus.php komentorivilta
 
 echo
 echo "HUOM: Tee tarvittavat tietokantamuutoket ennen kuin jatkat!"

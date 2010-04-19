@@ -144,7 +144,7 @@
 	else {
 		unset($varasto);
 	}
-	
+
 	if (isset($varasto) and $lisaarivi_debug == 1) echo "Myydään varastoista: ".var_dump($varasto)."<br>";
 
 	//	Katsotaan onko tällä tuotteella joku oletusvalinta
@@ -157,7 +157,7 @@
 					AND selite != ''
 					LIMIT 1";
 		$olvares = mysql_query($olquery) or pupe_error($olquery);
-		
+
 		if (mysql_num_rows($olvares)>0) {
 			$olvarow = mysql_fetch_array($olvares);
 
@@ -169,7 +169,7 @@
 							AND tuoteno = '$trow[tuoteno]'
 							AND liitostunnus = '".substr($olvarow["selite"],3)."'";
 				$oltarkres = mysql_query($olquery) or pupe_error($olquery);
-				
+
 				if (mysql_num_rows($oltarkres) > 0) {
 					$paikka = $olvarow["selite"];
 				}
@@ -185,7 +185,7 @@
 							AND tyyppi = 'R'
 							LIMIT 1";
 				$oltarkres = mysql_query($olquery) or pupe_error($olquery);
-				
+
 				if (mysql_num_rows($oltarkres) > 0) {
 					//	Myydään aina oletuspaikalta!
 					$olquery = "SELECT concat_ws('#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
@@ -195,7 +195,7 @@
 								AND oletus != ''
 								LIMIT 1";
 					$olpares = mysql_query($olquery) or pupe_error($olquery);
-					
+
 					if (mysql_num_rows($olpares) > 0) {
 						$olparow = mysql_fetch_array($olpares);
 						$paikka	= substr($olvarow["selite"], 0, 3).$olparow["olpaikka"];
@@ -1202,7 +1202,7 @@
 									}
 
 									$query = "	SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.kaytetty
-												FROM sarjanumeroseuranta												
+												FROM sarjanumeroseuranta
 												LEFT JOIN tilausrivi ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.$tunken
 												LEFT JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.tunnus=tilausrivi.otunnus
 												WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
@@ -1220,7 +1220,7 @@
 													and tunnus			 = '$srow[tunnus]'
 													and tuoteno			 = '$myy_tuoteno[$indeksi]'";
 										$sarjares = mysql_query($query) or pupe_error($query);
-										
+
 										if ($srow["kaytetty"] == 'K') {
 											$query = "	UPDATE tilausrivi
 														SET alv=alv+500
@@ -1380,7 +1380,7 @@
 			if ($lisaarivi_debug==1) echo "Laitetaan loput rivit jtksi tai puutteeksi (".substr($var,0,4).") (".substr($lop,0,4).")<br>";
 
 			//Lisätään syötetyt ja laitetaan loput JT:seen tai puutteiksi
-			$puu_tuoteno[] 	= ($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A' and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
+			$puu_tuoteno[] 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
 			$puu_kpl[] 		= $toimittamatta;
 			$puu_hintake[]	= "X";
 			$puu_alekerr[]	= "X";
@@ -1388,7 +1388,7 @@
 			$puu_var[]		= $var;
 
 			if (substr($var,0,4) == "LOJ#") {
-				$puu_tuoteno[] 	= ($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A' and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
+				$puu_tuoteno[] 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
 				$puu_kpl[] 		= substr($var,4) - $toimittamatta;
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
@@ -1396,7 +1396,7 @@
 				$puu_var[]		= "";
 			}
 			elseif (substr($lop,0,4) == "LOP#") {
-				$puu_tuoteno[] 	= ($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A' and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
+				$puu_tuoteno[] 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
 				$puu_kpl[] 		= substr($lop,4) - $toimittamatta;
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
@@ -1408,7 +1408,7 @@
 
 			if ($lisaarivi_debug==1) echo "Kaikki puutteeksi var $var<br>";
 
-			$puu_tuoteno[] 	= ($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A' and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
+			$puu_tuoteno[] 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? $uusin_korvaava_tuote : $alkupera_trow['tuoteno'];
 			$puu_kpl[]	 	= $toimittamatta;
 			$puu_hintake[]	= "X";
 			$puu_alekerr[]	= "X";
@@ -1420,8 +1420,8 @@
 
 			$riikoko 		= 1;
 			$isat_array 	= array();
-			$kaikki_array 	= ($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A' and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote) : array($alkupera_trow["tuoteno"]);
-			$kerroin_array 	= ($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A' and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote."#!¡!#1") : array($alkupera_trow["tuoteno"]."#!¡!#1");
+			$kaikki_array 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote) : array($alkupera_trow["tuoteno"]);
+			$kerroin_array 	= (($yhtiorow['puute_jt_oletus'] == 'B' or $yhtiorow['puute_jt_oletus'] == 'A') and $uusin_korvaava_tuote != '') ? array($uusin_korvaava_tuote."#!¡!#1") : array($alkupera_trow["tuoteno"]."#!¡!#1");
 			$perhearray 	= array();
 
 			for ($isa=0; $isa < $riikoko; $isa++) {
@@ -1800,10 +1800,10 @@
 
 			// lisätään puuterivi
 			$query = "	INSERT into tilausrivi set
-						hyllyalue = '$p_hyllyalue',
-						hyllynro = '$p_hyllynro',
-						hyllyvali = '$p_hyllyvali',
-						hyllytaso = '$p_hyllytaso',
+						hyllyalue 	= '$p_hyllyalue',
+						hyllynro 	= '$p_hyllynro',
+						hyllyvali 	= '$p_hyllyvali',
+						hyllytaso 	= '$p_hyllytaso',
 						tilaajanrivinro = '$rivinumero',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= $vanharivilaadittu,

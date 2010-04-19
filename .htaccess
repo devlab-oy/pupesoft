@@ -1,0 +1,14 @@
+<IfModule mod_php5.c>
+
+php_flag display_errors off
+php_flag log_errors on
+php_flag magic_quotes_gpc off
+
+php_value date.timezone "Europe/Helsinki"
+php_value error_reporting E_ALL & ~E_NOTICE
+php_value max_execution_time 300
+php_value memory_limit 320M
+php_value post_max_size 80M
+php_value upload_max_filesize 80M
+
+</IfModule>

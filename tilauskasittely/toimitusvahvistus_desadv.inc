@@ -286,7 +286,7 @@
 			$x++;
 
 			// PIA - additional product identification
-			$desadv_message .= "PIA+5+$tuotteet_row[tuoteno]:SA'";
+			$desadv_message .= "PIA+5+".substr(str_replace(array("+",":","'"), " ", $tuotteet_row['tuoteno']), 0, 35).":SA'";
 			$x++;
 
 			// IMD - additional information of the article

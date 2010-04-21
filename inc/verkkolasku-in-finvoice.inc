@@ -1,80 +1,74 @@
 <?php
 
-$xyhtio = $xml->BuyerOrganisationUnitNumber;
+// parseroidaan xml
+$yhtio 					= $xml->BuyerOrganisationUnitNumber;
+$verkkotunnus_vas		= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
+$laskun_tyyppi 			= $xml->InvoiceDetails->InvoiceTypeCode;
+$laskun_numero 			= $xml->InvoiceDetails->InvoiceNumber;
+$laskun_ebid 			= "FINVOICEXML";
+$laskun_paiva			= $xml->EpiDetails->EpiIdentificationDetails->EpiDate;
+$laskun_erapaiva		= $xml->EpiDetails->EpiPaymentInstructionDetails->EpiDateOptionDate;
+$laskuttajan_ovt		= $xml->SellerOrganisationUnitNumber;
+$laskuttajan_nimi		= utf8_decode($xml->SellerPartyDetails->SellerOrganisationName);
+$laskuttajan_vat		= $xml->SellerPartyDetails->SellerOrganisationTaxCode;
+$laskun_pankkiviite 	= $xml->EpiDetails->EpiPaymentInstructionDetails->EpiRemittanceInfoIdentifier;
+$laskun_asiakastunnus	= $xml->BuyerPartyDetails->BuyerPartyIdentifier;
+$laskun_summa_eur		= (float) str_replace(",", ".", $xml->EpiDetails->EpiPaymentInstructionDetails->EpiInstructedAmount);
+$laskun_tilausviite 	= utf8_decode($xml->InvoiceDetails->AgreementIdentifier);
+$kauttalaskutus 		= utf8_decode($xml->DeliveryDetails->TerminalAddressText);
 
-$xasiakkaantiedot = array();
-$xasiakkaantiedot["toim_ovttunnus"] = $xml->DeliveryOrganisationUnitNumber;
-$xasiakkaantiedot["ytunnus"] = $xml->DeliveryPartyDetails->DeliveryPartyIdentifier;
+$toim_asiakkaantiedot = array();
+$toim_asiakkaantiedot["toim_ovttunnus"] = $xml->DeliveryOrganisationUnitNumber;
+$toim_asiakkaantiedot["ytunnus"] 		= $xml->DeliveryPartyDetails->DeliveryPartyIdentifier;
+$toim_asiakkaantiedot["nimi"] 			= utf8_decode($xml->DeliveryPartyDetails->DeliveryOrganisationName);
+$toim_asiakkaantiedot["osoite"] 		= utf8_decode($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryStreetName);
+$toim_asiakkaantiedot["postino"] 		= utf8_decode($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryPostCodeIdentifier);
+$toim_asiakkaantiedot["postitp"] 		= utf8_decode($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryTownName);
 
-if ($xyhtio == "") {
-	$xyhtio	= $xml->BuyerPartyDetails->BuyerPartyIdentifier;
-}
-if ($xyhtio == "") {
-	$xyhtio	= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
-}
-
-$xverkkotunnus_vas	= $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
-
-$xlaskun_tyyppi 		= $xml->InvoiceDetails->InvoiceTypeCode;
-$xlaskunro 				= $xml->InvoiceDetails->InvoiceNumber;
-$xlaskun_ebid 			= "";
-$xlaskun_paiva			= $xml->EpiDetails->EpiIdentificationDetails->EpiDate;
-$xlaskun_erapaiva		= $xml->EpiDetails->EpiPaymentInstructionDetails->EpiDateOptionDate;
-
-if ($xlaskun_erapaiva == "") {
-	$xlaskun_erapaiva 	= $xml->PaymentTermsDetails->InvoiceDueDate;
-}
-
-$xlaskuttajan_ovt		= $xml->SellerPartyDetails->SellerOrganisationUnitNumber;
-$xlaskuttaja			= $xml->SellerPartyDetails->SellerOrganisationName;
-$xlaskuttajan_vat		= $xml->SellerPartyDetails->SellerOrganisationTaxCode;
-
-$xlaskun_pankkiviite = $xml->EpiDetails->EpiPaymentInstructionDetails->EpiRemittanceInfoIdentifier;
-
-if ($xlaskun_pankkiviite == "") {
-	$xlaskun_pankkiviite = $xml->EpiDetails->EpiIdentificationDetails->EpiReference;
+if ($yhtio == "") {
+	$yhtio = $xml->BuyerPartyDetails->BuyerPartyIdentifier;
 }
 
-if ($xlaskun_pankkiviite == "") {
-	$xlaskun_pankkiviite = $xml->InvoiceDetails->SellerReferenceIdentifier;
+if ($yhtio == "") {
+	$yhtio = $xml->BuyerPartyDetails->BuyerOrganisationTaxCode;
 }
-
-$xlaskun_asiakastunnus	= $xyhtio; // tämä taitaa olla sama kuin tuo ytunnus?
-$xlaskun_summa_eur		= $xml->EpiDetails->EpiPaymentInstructionDetails->EpiInstructedAmount;
-
-if ($xlaskun_summa_eur == "") {
-	$xlaskun_summa_eur	= $xml->InvoiceDetails->InvoiceTotalVatIncludedAmount;
-}
-
-$xlaskun_tilausviite = $xml->InvoiceDetails->AgreementIdentifier;
 
 // Varmistetaan, että tunnus on ovtunnus muodossa
-$xyhtio = preg_replace("/[^0-9]/", "", $xyhtio);
+$yhtio = preg_replace("/[^0-9]/", "", $yhtio);
+
+if (strpos($yhtio, "0037") === FALSE) {
+	$yhtio = "0037".$yhtio;
+}
+
+if ($laskun_erapaiva == "") {
+	$laskun_erapaiva = $xml->PaymentTermsDetails->InvoiceDueDate;
+}
+
+if ($laskun_pankkiviite == "") {
+	$laskun_pankkiviite = $xml->EpiDetails->EpiIdentificationDetails->EpiReference;
+}
+
+if ($laskun_pankkiviite == "") {
+	$laskun_pankkiviite = $xml->InvoiceDetails->SellerReferenceIdentifier;
+}
+
+if ($laskun_summa_eur == 0) {
+	$laskun_summa_eur = (float) str_replace(",", ".", $xml->InvoiceDetails->InvoiceTotalVatIncludedAmount);
+}
 
 // Varmistetaan, että tunnus on ytunnus muodossa (Finvoicessa täällä tulee siis vastanottajan ytunnus FI etuliitteellä)
-$xverkkotunnus_vas = preg_replace("/[^0-9]/", "", $xverkkotunnus_vas);
+$verkkotunnus_vas = preg_replace("/[^0-9]/", "", $verkkotunnus_vas);
 
-if (strpos($xyhtio, "0037") === FALSE) {
-	$xyhtio = "0037".$xyhtio;
-}
-
-if ($xlaskun_tyyppi == "INV02") {
+if ($laskun_tyyppi == "INV02") {
 	// Hyvityslaskut pitää merkata hyvitykseksi jotta ne osataan käsitellä oikein
-	$xlaskun_tyyppi = "381";
+	$laskun_tyyppi = "381";
 }
-
-// Nämä tallennetaan levylle joten tämä on tiedoston nimi
-$xlaskun_ebid = "FINVOICEXML";
-
-// Onko tämä kauttalaskutusta?
-$xkauttalaskutus = $xml->DeliveryDetails->TerminalAddressText;
 
 // Käsitellään tuoterivit
-$tuotetiedot = $xml->InvoiceRow;
-
-//echo "Tuotetiedot löydetty! Niitä on " . sizeof($tuotetiedot) . "\n";
-$i 			= 0;
-$rtuoteno	= array();
+$tuotetiedot	= $xml->InvoiceRow;
+$i				= 0;
+$rtuoteno		= array();
+$ealvi		 	= array();
 
 if (count($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
@@ -84,18 +78,23 @@ if (count($tuotetiedot) > 0) {
 		if ($rtuoteno[$i]["tuoteno"] != "") {
 
 			// Tallennetaan riville jos tämä on kauttalaskutusta
-			if ($xkauttalaskutus == "KAUTTALASKUTUS") {
+			if ($kauttalaskutus == "KAUTTALASKUTUS") {
 				$rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
 			}
 
 			$rtuoteno[$i]["nimitys"] = utf8_decode($tuotetieto->ArticleName);
 			$rtuoteno[$i]["rivihinta"] = (float) str_replace(",", ".", $tuotetieto->RowVatExcludedAmount);
-			$rtuoteno[$i]["alv"] = (float) str_replace(",", ".", $tuotetieto->RowVatRatePercent);
+
+			$xvati = (float) str_replace(",", ".", $tuotetieto->RowVatRatePercent);
+
+			$rtuoteno[$i]["alv"] = $xvati;
+			$ealvi[] = $xvati;
+
 			$rtuoteno[$i]["ale"] = (float) str_replace(",", ".", $tuotetieto->RowDiscountPercent);
 			$rtuoteno[$i]["hinta"] = (float) str_replace(",", ".", $tuotetieto->UnitPriceAmount);
 
 			// rivikommentti
-			$xrinfo = $tuotetieto->RowFreeText;
+			$xrinfo = utf8_decode($tuotetieto->RowFreeText);
 
 			if (is_array($xrinfo)) {
 				foreach ($xrinfo as $xln) {
@@ -122,31 +121,14 @@ if (count($tuotetiedot) > 0) {
 	}
 }
 
-$yhtio 					= $xyhtio;
-$verkkotunnus_vas 		= $xverkkotunnus_vas;
-$laskun_tyyppi 			= $xlaskun_tyyppi;
-$laskun_numero 			= $xlaskunro;
-$laskun_ebid 			= $xlaskun_ebid;
-$laskun_paiva			= $xlaskun_paiva;
-$laskun_erapaiva		= $xlaskun_erapaiva;
-$laskuttajan_ovt		= $xlaskuttajan_ovt;
-$laskuttajan_nimi		= $xlaskuttaja;
-$laskuttajan_vat		= $xlaskuttajan_vat;
-$laskun_pankkiviite		= $xlaskun_pankkiviite;
-$laskun_summa_eur		= (float) str_replace(",", ".", $xlaskun_summa_eur);
-$laskun_asiakastunnus	= $xlaskun_asiakastunnus;
-$laskun_tilausviite		= $xlaskun_tilausviite;
+// Verotiedot
+$vattiedot	= $xml->InvoiceDetails->VatSpecificationDetails;
+$lisavat	= array();
+$i 			= 0;
 
-$lisavat  = array();
-$xlisavat = array();
-$i = 0;
-
-$vattiedot = $xml->InvoiceDetails->VatSpecificationDetails;
-
-if (sizeof($vattiedot) > 0) {
+if (count($vattiedot) > 0) {
 	foreach ($vattiedot as $vattieto) {
-		$xlisavat[$i]	= $vattieto->VatRatePercent;
-		$lisavat[$i]	= $xlisavat[$i];
+		$lisavat[$i] = str_replace(",", ".", $vattieto->VatRatePercent);
 		$i++;
 	}
 }

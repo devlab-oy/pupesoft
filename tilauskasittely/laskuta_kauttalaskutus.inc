@@ -9,16 +9,16 @@
 
 	require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
 
-	$asiytunnus1 = $GLOBALS["xasiakkaantiedot"]["ytunnus"];
-	$asiytunnus2 = preg_replace("/[^0-9]/", "", $GLOBALS["xasiakkaantiedot"]["ytunnus"]);
+	$asiytunnus1 = $GLOBALS["toim_asiakkaantiedot"]["ytunnus"];
+	$asiytunnus2 = preg_replace("/[^0-9]/", "", $GLOBALS["toim_asiakkaantiedot"]["ytunnus"]);
 	$asiytunnus3 = (int) $asiytunnus2;
-	$asiytunnus4 = str_replace("-", "", $GLOBALS["xasiakkaantiedot"]["ytunnus"]);
+	$asiytunnus4 = str_replace("-", "", $GLOBALS["toim_asiakkaantiedot"]["ytunnus"]);
 
 	$asquery = "SELECT tunnus
 				FROM asiakas
 				where yhtio = '$kukarow[yhtio]'
 				and ytunnus in ('$asiytunnus1','$asiytunnus2', '$asiytunnus3','$asiytunnus4','$osrow[maa]$asiytunnus1','$osrow[maa]$asiytunnus2', '$osrow[maa]$asiytunnus3','$osrow[maa]$asiytunnus4')
-				and toim_ovttunnus = '".$GLOBALS["xasiakkaantiedot"]["toim_ovttunnus"]."'";
+				and toim_ovttunnus = '".$GLOBALS["toim_asiakkaantiedot"]["toim_ovttunnus"]."'";
 	$result = mysql_query($asquery) or pupe_error($asquery);
 	$asirow = mysql_fetch_assoc($result);
 

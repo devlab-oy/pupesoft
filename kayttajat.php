@@ -820,41 +820,39 @@
 				if ($selkuka != "UUSI") {
 
 					echo "<tr><th align='left'>".t("Oletusasiakas").":</th><td>";
-					echo "<input type='text' name='ytunnus'>";
+					echo "<table><tr>";
+					echo "<td><input type='text' name='ytunnus'></td>";
 
 					if ($kumpi == "1" and $asiakasid != "") $krow["oletus_asiakas"] = $asiakasid;
 
 					if ($krow["oletus_asiakas"] != "") {
 
-						$query = "select * from asiakas where tunnus='$krow[oletus_asiakas]'";
+						$query = "SELECT * from asiakas where tunnus='$krow[oletus_asiakas]'";
 						$vares = mysql_query($query) or pupe_error($query);
 
 						if (mysql_num_rows($vares) == 1) {
 							$varow = mysql_fetch_array($vares);
 
-							echo " $varow[ytunnus] $varow[nimi]";
-
-							if ($varow["toim_ovttunnus"] != "") {
-								echo " / $varow[toim_ovttunnus] $varow[toim_nimi]";
-							}
-
-							echo "<input type='hidden' name='oletus_asiakas' value='$krow[oletus_asiakas]'>";
+							echo "<td>$varow[ytunnus] $varow[nimi] $varow[nimitark]<br>$varow[toim_ovttunnus] $varow[toim_nimi] $varow[toim_nimitark] $varow[toim_postitp] 
+									<input type='hidden' name='oletus_asiakas' value='$krow[oletus_asiakas]'></td>";
 						}
 						else {
-							echo " ".t("Asiakas ei löydy")."!";
+							echo "<td>".t("Asiakas ei löydy")."!</td>";
 						}
 
 					}
 					else {
-						echo " ".t("Oletusasiakasta ei ole syötetty")."!";
+						echo "<td>".t("Oletusasiakasta ei ole syötetty")."!</td>";
 					}
-
+					
+					echo "</tr></table>";
 					echo "</td></tr>";
 
 
 					if ($toim == 'extranet') {
 						echo "<tr><th align='left'>".t("Oletusasiakastiedot").":</th><td>";
-						echo "<input type='text' name='ytunnus2'>";
+						echo "<table><tr>";
+						echo "<td><input type='text' name='ytunnus2'></td>";
 
 						if ($kumpi == "2" and $asiakasid != "") $krow["oletus_asiakastiedot"] = $asiakasid;
 
@@ -866,24 +864,20 @@
 							if (mysql_num_rows($vares) == 1) {
 								$varow = mysql_fetch_array($vares);
 
-								echo " $varow[ytunnus] $varow[nimi]";
-
-								if ($varow["toim_ovttunnus"] != "") {
-									echo " / $varow[toim_ovttunnus] $varow[toim_nimi]";
-								}
-
-								echo "<input type='hidden' name='oletus_asiakastiedot' value='$krow[oletus_asiakastiedot]'>";
+								echo "<td>$varow[ytunnus] $varow[nimi] $varow[nimitark]<br>$varow[toim_ovttunnus] $varow[toim_nimi] $varow[toim_nimitark] $varow[toim_postitp]
+										<input type='hidden' name='oletus_asiakastiedot' value='$krow[oletus_asiakastiedot]'></td>";
 
 							}
 							else {
-								echo " ".t("Asiakas ei löydy")."!";
+								echo "<td>".t("Asiakas ei löydy")."!</td>";
 							}
 						}
 						else {
-							echo " ".t("Asiakastietoasiakasta ei ole syötetty")."!";
+							echo "<td>".t("Asiakastietoasiakasta ei ole syötetty")."!</td>";
 						}
 					}
-
+					
+					echo "</tr></table>";
 					echo "</td></tr>";
 				}
 
